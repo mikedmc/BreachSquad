@@ -55,26 +55,26 @@ public:
 	class CAICommands
 	{
 	public:
-		bool	bRunning;	//daca alearga
-		bool	bThrustX, bThrustY;	//daca se deplaseaza sau nu
-		bool	bCrouched;	//daca este crouch sau nu
-		bool	bJump;		//comanda de jump
-		bool	bClimb;		//comanda sa se catere
-		int		nInteractKeyState;  //stare buton interact (just pressed, not pressed etc)
-		int		nMoveDirX;	//directia de miscare ca si flaguri (-1,0,1)
-		int		nMoveDirY;	//directia de miscare ca si flaguri (-1,0,1)
-		int		nLookDirX;	//directia in care se uita -1/0/1
-		D3DXVECTOR2		vAimDir;		//comanda de aiming pentru arma	(0.0f, 0.0f - for no aiming)
-		EActorAnims		eOverrideAnim;	//if not empty, overrides actor animation
+		bool				bRunning;	//daca alearga
+		bool				bThrustX, bThrustY;	//daca se deplaseaza sau nu
+		bool				bCrouched;	//daca este crouch sau nu
+		bool				bJump;		//comanda de jump
+		bool				bClimb;		//comanda sa se catere
+		int					nInteractKeyState;  //stare buton interact (just pressed, not pressed etc)
+		int					nMoveDirX;	//directia de miscare ca si flaguri (-1,0,1)
+		int					nMoveDirY;	//directia de miscare ca si flaguri (-1,0,1)
+		int					nLookDirX;	//directia in care se uita -1/0/1
+		D3DXVECTOR2			vAimDir;		//comanda de aiming pentru arma	(0.0f, 0.0f - for no aiming)
+		EActorAnims			eOverrideAnim;	//if not empty, overrides actor animation
 
-		EActorDeathCommand nDeathCommand; //0-not dead, 1-dead, 2-splat, 3-splat+explode
-		EActorAttackState eAttackCommand;
-		EActorAttackState eAttackCommand_last; //last attack command
+		EActorDeathCommand	nDeathCommand; //0-not dead, 1-dead, 2-splat, 3-splat+explode
+		EActorAttackState	eAttackCommand;
+		EActorAttackState	eAttackCommand_last; //last attack command
 		//set icon commands
 		EActorIconTypes		nIconType;
-		float	fIconDuration;	//daca setez
-		//color command
-		DWORD	nColor; //daca e diferit de 0 inseamna ca e comanda de culoare
+		float				fIconDuration;	//daca setez
+		//color command: !=0 means color command is active
+		DWORD				nColor; 
 
 		CAICommands() :
 			bRunning(false), bThrustX(false), bThrustY(false), nMoveDirX(0), nMoveDirY(0), bJump(false),

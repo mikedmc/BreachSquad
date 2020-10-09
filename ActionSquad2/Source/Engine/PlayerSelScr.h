@@ -1,5 +1,8 @@
 #pragma once
 
+// declare 
+enum eStrategicAbility;
+
 //fixed coords
 #define K_PSS_PLAYER_WINDOW_WIDTH 132
 #define K_PSS_PLAYER_WINDOW_HEIGHT 216

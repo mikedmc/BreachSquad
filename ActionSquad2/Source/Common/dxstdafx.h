@@ -426,7 +426,6 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "UTAppClass.h"
 ///--- game specific classes ---
 #include "Shop.h"
-#include "LevelTypes.h"
 #include "PlayerSelScr.h"
 #include "Level.h"
 #include "InfiniteVerticalMode.h"

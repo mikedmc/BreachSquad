@@ -7667,33 +7667,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//------------------------------------------------------------------------------------------
 	//	INTEGRATOR - physics
 	//------------------------------------------------------------------------------------------
-	///--- add gravity ---
-	/*
-	if ((actor->bHasGravity) && (!actor->bOnLadder))
-	{
-		//#HACK: daca are coliziune ii adaug o viteza mica ca sa nu intre prea mult in jos si sa se impiedice de colturile platformelor care vin una in continuarea celeilalte
-		if ((actor->collisionFlags & K_DIRFLAG_DOWN) == 0)
-			actor->speed.y += K_LVL_GRAVITY * dTime;
-		else
-			actor->speed.y += 32.0f * dTime; //when contacting still push the actor down a little
-	}
-	*/
 	//check speed limits
 	CLAMP(actor->speed.y, -K_LVL_ACTOR_MAX_FALL_SPEED_Y, K_LVL_ACTOR_MAX_FALL_SPEED_Y);
 	CLAMP(actor->speed.x, -K_LVL_ACTOR_MAX_LATERAL_SPEED_X, K_LVL_ACTOR_MAX_LATERAL_SPEED_X);
 	//update impulse
-	D3DXVECTOR2 impFriction(K_LVL_AIR_DEFAULT_FRICTION, K_LVL_AIR_DEFAULT_FRICTION);
-	//standing on box?
-	if (actor->standOnBox != NULL)
-	{
-		impFriction.x = K_LVL_GROUND_DEFAULT_FRICTION;
-		//reset airborn time
-		actor->fTimeAirborn = 0.0f;
-	}
-	else
-	{
-		actor->fTimeAirborn += dTime;
-	}
+	D3DXVECTOR2 impFriction(K_LVL_GROUND_DEFAULT_FRICTION, K_LVL_GROUND_DEFAULT_FRICTION);
 	//limit impulse
 	CLAMP(actor->vSpeedImpulse.y, -K_LVL_ACTOR_MAX_FALL_SPEED_Y, K_LVL_ACTOR_MAX_FALL_SPEED_Y);
 	CLAMP(actor->vSpeedImpulse.x, -K_LVL_ACTOR_MAX_LATERAL_IMPULSE_X, K_LVL_ACTOR_MAX_LATERAL_IMPULSE_X);

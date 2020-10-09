@@ -3,6 +3,8 @@
 #include "gameplay/GameConstants.h"
 #include "gameplay/GameStructs.h"
 
+#include "gameplay/LevelTypes.h"
+
 #include "gameplay/ActiveInterface.h"
 #include "gameplay/CollisionShape.h"
 #include "gameplay/Light.h"
