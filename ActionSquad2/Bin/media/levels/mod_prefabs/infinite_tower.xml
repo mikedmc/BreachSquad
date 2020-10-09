@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+
+<!--
+nFloorWidthTL - total playable floor width (should be multiple of 8, external walls outside)
+nLastFloorDoorAlign - -1 left/1 right - extermity of last floor door (from mod starting level)
+nGenOrig - position of floor generation cursor (RIGHT TO LEFT) in tiles
+-->
+<VerticalMode sBaseLevelPath="media/levels/mod_prefabs/vertical_lobby48.dkas" nFloorWidthTL="48" nLastFloorDoorAlign="-1" nGenOrigX="0" nGenOrigY="-15" >
+ <!--
+- List of prefabs to be used when randomly generating the levels
+
+nWidthTL - prefab size in tiles (only allow 4,6,8,10,(12),16)
+nAlign - -1 left ending/0 middle room/1 right ending
+-->
+  <Prefabs>
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L4_1.dkas_prefab" nWidthTL="4" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L4_2.dkas_prefab" nWidthTL="4" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L4_3.dkas_prefab" nWidthTL="4" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L4_4.dkas_prefab" nWidthTL="4" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L4_5.dkas_prefab" nWidthTL="4" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L4_6.dkas_prefab" nWidthTL="4" nAlign="-1" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_L4_7.dkas_prefab" nWidthTL="4" nAlign="-1" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_L4_8.dkas_prefab" nWidthTL="4" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L6_1.dkas_prefab" nWidthTL="6" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L6_2.dkas_prefab" nWidthTL="6" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L6_3.dkas_prefab" nWidthTL="6" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L6_4.dkas_prefab" nWidthTL="6" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L6_5.dkas_prefab" nWidthTL="6" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L6_6.dkas_prefab" nWidthTL="6" nAlign="-1" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_L6_7.dkas_prefab" nWidthTL="6" nAlign="-1" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_L6_8.dkas_prefab" nWidthTL="6" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L8_1.dkas_prefab" nWidthTL="8" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L8_2.dkas_prefab" nWidthTL="8" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L8_3.dkas_prefab" nWidthTL="8" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L8_4.dkas_prefab" nWidthTL="8" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L8_5.dkas_prefab" nWidthTL="8" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_L8_6.dkas_prefab" nWidthTL="8" nAlign="-1" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_L8_7.dkas_prefab" nWidthTL="8" nAlign="-1" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_L8_8.dkas_prefab" nWidthTL="8" nAlign="-1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M10_1.dkas_prefab" nWidthTL="10" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M10_2.dkas_prefab" nWidthTL="10" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M10_3.dkas_prefab" nWidthTL="10" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M10_4.dkas_prefab" nWidthTL="10" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M10_5.dkas_prefab" nWidthTL="10" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M10_6.dkas_prefab" nWidthTL="10" nAlign="0" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_M10_7.dkas_prefab" nWidthTL="10" nAlign="0" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_M10_8.dkas_prefab" nWidthTL="10" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M16_1.dkas_prefab" nWidthTL="16" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M16_2.dkas_prefab" nWidthTL="16" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M16_3.dkas_prefab" nWidthTL="16" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M16_4.dkas_prefab" nWidthTL="16" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M16_5.dkas_prefab" nWidthTL="16" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M16_6.dkas_prefab" nWidthTL="16" nAlign="0" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_M16_7.dkas_prefab" nWidthTL="16" nAlign="0" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_M16_8.dkas_prefab" nWidthTL="16" nAlign="0" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_M16_9.dkas_prefab" nWidthTL="16" nAlign="0" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_M16_10.dkas_prefab" nWidthTL="16" nAlign="0" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_M16_11.dkas_prefab" nWidthTL="16" nAlign="0" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_M16_12.dkas_prefab" nWidthTL="16" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M6_1.dkas_prefab" nWidthTL="6" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M6_2.dkas_prefab" nWidthTL="6" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M6_3.dkas_prefab" nWidthTL="6" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M6_4.dkas_prefab" nWidthTL="6" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M6_5.dkas_prefab" nWidthTL="6" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M6_6.dkas_prefab" nWidthTL="6" nAlign="0" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_M6_7.dkas_prefab" nWidthTL="6" nAlign="0" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_M6_8.dkas_prefab" nWidthTL="6" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M8_1.dkas_prefab" nWidthTL="8" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M8_2.dkas_prefab" nWidthTL="8" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M8_3.dkas_prefab" nWidthTL="8" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M8_4.dkas_prefab" nWidthTL="8" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M8_5.dkas_prefab" nWidthTL="8" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_M8_6.dkas_prefab" nWidthTL="8" nAlign="0" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_M8_7.dkas_prefab" nWidthTL="8" nAlign="0" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_M8_8.dkas_prefab" nWidthTL="8" nAlign="0" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R4_1.dkas_prefab" nWidthTL="4" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R4_2.dkas_prefab" nWidthTL="4" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R4_3.dkas_prefab" nWidthTL="4" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R4_4.dkas_prefab" nWidthTL="4" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R4_5.dkas_prefab" nWidthTL="4" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R4_6.dkas_prefab" nWidthTL="4" nAlign="1" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_R4_7.dkas_prefab" nWidthTL="4" nAlign="1" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_R4_8.dkas_prefab" nWidthTL="4" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R6_1.dkas_prefab" nWidthTL="6" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R6_2.dkas_prefab" nWidthTL="6" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R6_3.dkas_prefab" nWidthTL="6" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R6_4.dkas_prefab" nWidthTL="6" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R6_5.dkas_prefab" nWidthTL="6" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R6_6.dkas_prefab" nWidthTL="6" nAlign="1" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_R6_7.dkas_prefab" nWidthTL="6" nAlign="1" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_R6_8.dkas_prefab" nWidthTL="6" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R8_1.dkas_prefab" nWidthTL="8" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R8_2.dkas_prefab" nWidthTL="8" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R8_3.dkas_prefab" nWidthTL="8" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R8_4.dkas_prefab" nWidthTL="8" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R8_5.dkas_prefab" nWidthTL="8" nAlign="1" />
+    <Prefab sFilename="media/levels/mod_prefabs/inf_R8_6.dkas_prefab" nWidthTL="8" nAlign="1" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_R8_7.dkas_prefab" nWidthTL="8" nAlign="1" />
+	<Prefab sFilename="media/levels/mod_prefabs/inf_R8_8.dkas_prefab" nWidthTL="8" nAlign="1" />
+  </Prefabs>
+
+<!--
+- List of actors that can be spawned.
+
+nStartFloor - actor only gets generated after this floor
+nEndFloor - if specified or bigger than nStartFloor then the actor doesn't get spawned after specified floor
+fProbability - probability scalar (the larger the more probable to be spawned)
+-->  
+  <Actors>
+    <Actor sTemplate="ACTOR_MACIVIL"          nStartFloor="0" nEndFloor="20" fProbability="4.0f" />
+    <Actor sTemplate="ACTOR_JUNKIE_HARRY"     nStartFloor="0" nEndFloor="10" fProbability="12.0f" />
+    <Actor sTemplate="ACTOR_MACHETTE"         nStartFloor="0" nEndFloor="0" fProbability="12.0f" />
+    <Actor sTemplate="ACTOR_DOUBLE_DAVE"      nStartFloor="3" nEndFloor="20" fProbability="7.0f" />
+    <Actor sTemplate="ACTOR_TACKDIVER"        nStartFloor="4" nEndFloor="20" fProbability="2.0f" />
+    <Actor sTemplate="ACTOR_LEADER_LEMMY"     nStartFloor="6" nEndFloor="0" fProbability="2.0f" />
+    <Actor sTemplate="ACTOR_BARREL_EXPLODING" nStartFloor="0" nEndFloor="0" fProbability="2.0f" />
+    <Actor sTemplate="ACTOR_WOUNDED_COP"      nStartFloor="2" nEndFloor="0" fProbability="1.0f" />
+    <Actor sTemplate="ACTOR_BLOWUPBART"       nStartFloor="5" nEndFloor="0" fProbability="4.0f" />
+    <Actor sTemplate="ACTOR_TINY_TROUBLE"     nStartFloor="3" nEndFloor="0" fProbability="0.5f" />
+
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="0" nEndFloor="0" fProbability="1.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="5" nEndFloor="5" fProbability="20.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="10" nEndFloor="10" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="15" nEndFloor="15" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="20" nEndFloor="20" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="25" nEndFloor="25" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="30" nEndFloor="30" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="35" nEndFloor="35" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="45" nEndFloor="45" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="50" nEndFloor="50" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="56" nEndFloor="56" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="63" nEndFloor="63" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="71" nEndFloor="71" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="80" nEndFloor="80" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="101" nEndFloor="101" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="113" nEndFloor="113" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="126" nEndFloor="126" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="140" nEndFloor="140" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="171" nEndFloor="171" fProbability="20.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="188" nEndFloor="188" fProbability="20.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="200" nEndFloor="200" fProbability="10.0f" />
+
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="20" nEndFloor="0" fProbability="1.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="20" nEndFloor="20" fProbability="20.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="25" nEndFloor="25" fProbability="20.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="30" nEndFloor="30" fProbability="20.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="35" nEndFloor="35" fProbability="20.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="40" nEndFloor="40" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="45" nEndFloor="45" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="56" nEndFloor="56" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="63" nEndFloor="63" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="71" nEndFloor="71" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="90" nEndFloor="90" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="101" nEndFloor="101" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="113" nEndFloor="113" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="126" nEndFloor="126" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="140" nEndFloor="140" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="155" nEndFloor="155" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="171" nEndFloor="171" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="188" nEndFloor="188" fProbability="30.0f" />
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="200" nEndFloor="200" fProbability="30.0f" />
+
+    <Actor sTemplate="ACTOR_MADMACHETE"       nStartFloor="11" nEndFloor="0" fProbability="8.0f" />
+    <Actor sTemplate="ACTOR_MOLOTOV_MANNY"    nStartFloor="11" nEndFloor="0" fProbability="4.0f" />
+    <Actor sTemplate="ACTOR_FANATIC_FRANKIE"  nStartFloor="10" nEndFloor="0" fProbability="10.0f" />
+    <Actor sTemplate="ACTOR_GRIEFER_GARY"     nStartFloor="15" nEndFloor="0" fProbability="5.0f" />
+    <Actor sTemplate="ACTOR_KURZFELT_KURT"    nStartFloor="8" nEndFloor="0" fProbability="1.0f" />
+    <Actor sTemplate="ACTOR_KURZFELT_KURT"    nStartFloor="15" nEndFloor="0" fProbability="4.0f" />
+
+    <Actor sTemplate="ACTOR_DETONATOR_DICK"   nStartFloor="20" nEndFloor="0" fProbability="7.0f" />
+    <Actor sTemplate="ACTOR_BARREL_REMOTE"    nStartFloor="24" nEndFloor="0" fProbability="2.0f" />
+
+    <Actor sTemplate="ACTOR_OLDIE"            nStartFloor="31" nEndFloor="0" fProbability="2.0f" />
+
+    <Actor sTemplate="ACTOR_GRENADIER_GHENADY" nStartFloor="10" nEndFloor="0" fProbability="10.0f" />
+    <Actor sTemplate="ACTOR_OPERATOR_ORVILLE" nStartFloor="20" nEndFloor="0" fProbability="10.0f" />
+    <Actor sTemplate="ACTOR_JUGGERNAUT_JIM"   nStartFloor="30" nEndFloor="0" fProbability="10.0f" />
+    <Actor sTemplate="ACTOR_MG_BEN"           nStartFloor="35" nEndFloor="0" fProbability="10.0f" />
+    <Actor sTemplate="ACTOR_CARTEL_DOG"       nStartFloor="15" nEndFloor="0" fProbability="10.0f" />
+    <Actor sTemplate="ACTOR_BOSS_FLAMER_FINN" nStartFloor="20" nEndFloor="0" fProbability="2.0f" />
+    <Actor sTemplate="ACTOR_BOSS_SHIELD"      nStartFloor="20" nEndFloor="0" fProbability="2.0f" />
+    <Actor sTemplate="ACTOR_BOSS_JACKED_UP_JONES" nStartFloor="40" nEndFloor="0" fProbability="2.0f" />
+
+    <Actor sTemplate="ACTOR_MACHETTE"         nStartFloor="66" nEndFloor="66" fProbability="200.0f" />
+    <Actor sTemplate="ACTOR_MADMACHETE"       nStartFloor="66" nEndFloor="66" fProbability="100.0f" />
+
+    <Actor sTemplate="ACTOR_HOSTAGE_VEST_CROUCHED" nStartFloor="43" nEndFloor="43" fProbability="100.0f" />
+    <Actor sTemplate="ACTOR_DETONATOR_DICK"   nStartFloor="43" nEndFloor="43" fProbability="100.0f" />
+    <Actor sTemplate="ACTOR_BARREL_REMOTE"    nStartFloor="43" nEndFloor="43" fProbability="100.0f" />
+
+    <Actor sTemplate="ACTOR_BLOWUPBART"       nStartFloor="13" nEndFloor="13" fProbability="200.0f" />
+    <Actor sTemplate="ACTOR_BLOWUPBART"       nStartFloor="33" nEndFloor="33" fProbability="200.0f" />
+
+    <Actor sTemplate="ACTOR_HOSTAGE_CROUCHED" nStartFloor="28" nEndFloor="28" fProbability="50.0f" />
+    <Actor sTemplate="ACTOR_LEADER_LEMMY"   nStartFloor="28" nEndFloor="28" fProbability="100.0f" />
+
+  </Actors>
+
+</VerticalMode>

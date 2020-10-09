@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+
+<ActorTemplates>
+  
+	<ACTOR_PLAYER1>
+		<ANIMS>
+			<IDLE name="HERO_IDLE_R" />
+      <WALK name="HERO_RUN_R" />
+      <JUMP name="HERO_JUMP1_R" />
+      <JUMP_STILL name="HERO_JUMP2_R" />
+      <FALL name="HERO_JUMP3_R" />
+      <SHOOT name="HERO_SHOOT_R" />
+      <SHOOT_ALT name="HERO_SHOOT_R" />
+      <DIE1 name="HERO_IDLE_R" />
+      <DIE2 name="HERO_IDLE_R" />
+    </ANIMS>
+    <CONSTANTS jumpSpeed="-400.0" moveAccel="100.0" maxMoveSpeed="100.0" weapon="WPN_SHOTGUN" />
+	</ACTOR_PLAYER1>
+
+  <ACTOR_ZOMBIE1>
+    <ANIMS>
+      <IDLE name="HERO_IDLE_R" />
+      <WALK name="HERO_RUN_R" />
+      <FALL name="HERO_IDLE_R" />
+      <SHOOT name="HERO_SHOOT_R" />
+      <DIE1 name="HERO_IDLE_R" />
+    </ANIMS>
+    <CONSTANTS moveAccel="30.0" maxMoveSpeed="30.0" weapon="WPN_ZOMBIE_FIST" />
+  </ACTOR_ZOMBIE1>
+
+</ActorTemplates>
+
+<!-- fastShootPos (0.0f-1.0f) represents the small area on the weapon cooldown bar where you can shoot faster; fastShootSize is the size of that area -->
+<WeaponTemplates>
+  <WPN_ZOMBIE_FIST rangePX="16.0" damage="1.0" clipSize="-1" fireRateBPS="4.0" />
+  <WPN_SHOTGUN rangePX="128.0" damage="1.0" clipSize="8" fireRateBPS="1.0" reloadSpeedBPS="0.5" fastShootPos="0.8" fastShootSize="0.05" />
+</WeaponTemplates>

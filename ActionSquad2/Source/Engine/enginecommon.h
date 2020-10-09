@@ -1,0 +1,1019 @@
+#pragma once
+
+#include <string>
+#include <vector>
+#include <sstream>
+#include <stddef.h>
+
+#define null NULL
+//modifica variabila pana la o limita
+#define inc_limit(var, step, limit) {if(var < (limit)) {var += step; if((var) > (limit)) var = limit;}}
+#define dec_limit(var, step, limit) {if(var > (limit)) {var -= step; if((var) < (limit)) var = limit;}}
+#define SIGN(var) (((var) < 0) ? -1:1)
+//inverseaza un float intre 0 si 1
+#define INV_UNIT(var) (1.0f - var)
+//vede daca 2 floaturi sunt egale, intr-o oarecare marja (threshold)
+#define FLOATS_EQUAL(a, b, threshold) ((fabs((a) - (b)) < threshold)?true:false)
+//gaseste partea fractionala a unui float
+#define FLOAT_FRAC(a) (a - floor(a))
+//face modulo la float intre limite
+#define FLOAT_MOD(a, nModuloValue) ( (((int)floor(a)) % (int)(nModuloValue)) + (a - floor(a)) )
+//rotunjeste float in alt float folosind floor()
+#define ROUND_FLOAT(x) (floor((x) + 0.5f))
+
+#define D3DCOLOR_FFFA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0xffffff)
+#define D3DCOLOR_XXXA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0x000000)
+#define D3DCOLOR_COLORALPHA(hexColor, fAlpha) (DWORD)(((int((fAlpha) * 255.0f)&0xff)<<24) | (hexColor & 0xffffff))
+#define D3DCOLOR_GETFALPHA(hexColor) ((float)((hexColor & 0xff000000) >> 24) / 255.0f)
+
+#define QUARTER_PI 0.7853981633f
+#define HALF_PI 1.57079632f
+#define DOUBLE_PI 6.283185307f
+#define PI 3.1415926536f
+//float minimum
+#define EPS 0.00001f
+//value not set/touched
+#define K_DEAD_BEEF		0xDEADBEEF
+#define K_NOT_SET		0xDEADBEEF
+
+#define DEG_TO_RAD(a) ((a / 360.0f) * DOUBLE_PI)
+#define RAD_TO_DEG(a) ((a / DOUBLE_PI) * 360.0f)
+
+struct VERT_TL1TC
+{
+	D3DXVECTOR4 pos;
+	DWORD color;
+
+	static const DWORD FVF;
+};
+
+struct VERT_TL1T
+{
+	D3DXVECTOR4 pos;
+	DWORD color;
+	float tu, tv;
+
+	static const DWORD FVF;
+};
+
+struct VERT_TL1TS
+{
+	D3DXVECTOR3 pos;
+	DWORD color;
+	float tu, tv;
+
+	static const DWORD FVF;
+};
+
+struct VERT_TL2T
+{
+	D3DXVECTOR3 pos;
+	float tu, tv;
+	float lu, lv;
+
+	static const DWORD FVF;
+};
+
+struct POINTXY_INT {
+	int x, y;
+	POINTXY_INT() :x(0), y(0) {}
+	POINTXY_INT(int nx, int ny) :x(nx), y(ny) {}
+	POINTXY_INT(const POINTXY_INT& point) { x = point.x; y = point.y; }
+	bool operator==(const POINTXY_INT &other) const { return ((other.x == x) && (other.y == y)); }
+	bool operator!=(const POINTXY_INT &other) const { return ((other.x != x) || (other.y != y)); }
+	operator D3DXVECTOR2() { return D3DXVECTOR2((float)x, (float)y); }
+};
+
+struct POINTXYZ_INT {
+	int x, y, z;
+	POINTXYZ_INT() :x(0), y(0), z(0) {}
+	POINTXYZ_INT(int nx, int ny, int nz) { x = nx; y = ny; z = nz; }
+	POINTXYZ_INT(const POINTXYZ_INT& point) { x = point.x; y = point.y; z = point.z; }
+	bool operator==(const POINTXYZ_INT &other) const { return ((other.x == x) && (other.y == y) && (other.z == z)); }
+	bool operator!=(const POINTXYZ_INT &other) const { return ((other.x != x) || (other.y != y) || (other.z != z)); }
+	operator D3DXVECTOR2() { return D3DXVECTOR2((float)x, (float)y); }
+	operator D3DXVECTOR3() { return D3DXVECTOR3((float)x, (float)y, (float)z); }
+};
+
+class SIZEWH {
+public:
+	int w, h;
+	SIZEWH();
+	SIZEWH(int nw, int nh);
+	SIZEWH(const SIZEWH& szsrc);
+	bool operator==(const SIZEWH &other) const { return ((other.w == w) && (other.h == h)); }
+	void Init(int nw, int nh) {
+		w = nw; h = nh;
+	}
+};
+
+class SIZEWH_F {
+public:
+	float w, h;
+	SIZEWH_F();
+	SIZEWH_F(float nw, float nh);
+	SIZEWH_F(const SIZEWH_F& szsrc);
+	bool operator==(const SIZEWH_F &other) const { return (FLOATS_EQUAL(other.w, w, EPS) && FLOATS_EQUAL(other.h, h, EPS)); }
+};
+
+
+class RECTXYWH {
+public:
+	int x, y, w, h;
+	RECTXYWH():
+		x(0), y(0), w(0), h(0) 
+	{}
+	RECTXYWH(int nx, int ny, int nw, int nh):
+		x(nx), y(ny), w(nw), h(nh) 
+	{}
+	RECTXYWH(const RECTXYWH& rectsrc):
+		x(rectsrc.x), y(rectsrc.y), w(rectsrc.w), h(rectsrc.h)
+	{}
+	RECTXYWH(const RECT& rectsrc) :
+		x(rectsrc.left), y(rectsrc.top), w(rectsrc.right - rectsrc.left), h(rectsrc.bottom - rectsrc.top)
+	{}
+	void Inflate(int dx, int dy)
+	{
+		x -= dx; w += 2 * dx;
+		y -= dy; h += 2 * dy;
+	}
+	void Move(int movex, int movey)
+	{
+		x += movex;
+		y += movey;
+	}
+	void Set(int nx, int ny, int nw, int nh)
+	{
+		x = nx; y = ny; w = nw; h = nh;
+	}
+	inline const int Bottom() const {
+		return y + h;
+	}
+	inline const int  Right() const {
+		return x + w;
+	}
+	inline const int CenterX() const {
+		return x + w / 2;
+	}
+	inline const int CenterY() const {
+		return y + h / 2;
+	}
+	inline const POINTXY_INT Center() const {
+		return POINTXY_INT(x + w / 2, y + h / 2);
+	}
+
+	inline bool operator==(const RECTXYWH& rhs) 
+	{ 
+		return ((x == rhs.x) && (y == rhs.y) && (w == rhs.w) && (h == rhs.h));
+	}
+
+	inline bool operator!=(const RECTXYWH& rhs)
+	{
+		return ((x != rhs.x) || (y != rhs.y) || (w != rhs.w) || (h != rhs.h));
+	}
+};
+
+class RECTXYWH_F {
+public:
+	float x, y, w, h;
+	RECTXYWH_F():
+	x(0.0f), y(0.0f), w(0.0f), h(0.0f) 
+	{}
+	RECTXYWH_F(float nx, float ny, float nw, float nh):
+	x(nx), y(ny), w(nw), h(nh) 
+	{}
+	RECTXYWH_F(const RECTXYWH_F& rectsrc):
+	x(rectsrc.x), y(rectsrc.y), w(rectsrc.w), h(rectsrc.h)
+	{}
+	RECTXYWH_F(const RECTXYWH rectsrc) :
+		x((float)rectsrc.x), y((float)rectsrc.y), w((float)rectsrc.w), h((float)rectsrc.h)
+	{}
+	void Set(float nx, float ny, float nw, float nh)
+	{
+		x = nx; y = ny; w = nw; h = nh;
+	}
+	void Move(float movex, float movey)
+	{
+		x += movex;
+		y += movey;
+	}
+	void Inflate(float scalar)
+	{
+		x -= scalar;
+		y -= scalar;
+		w += 2.0f * scalar;
+		h += 2.0f * scalar;
+	}
+	inline const float Bottom() const {
+		return y + h;
+	}
+	inline const float Right() const {
+		return x + w;
+	}
+	inline const float CenterX() const {
+		return x + w / 2.0f;
+	}
+	inline const float CenterY() const {
+		return y + h / 2.0f;
+	}
+	inline const D3DXVECTOR2 Center() const {
+		return D3DXVECTOR2(x + w / 2.0f, y + h / 2.0f);
+	}
+};
+
+class RECTLTRB_F {
+public:
+	float left, top, right, bottom;
+	RECTLTRB_F() :
+		left(0.0f), top(0.0f), right(0.0f), bottom(0.0f)
+	{}
+	RECTLTRB_F(RECT& rectSrc) :
+		left((float)rectSrc.left), top((float)rectSrc.top), right((float)rectSrc.right), bottom((float)rectSrc.bottom)
+	{}
+	RECTLTRB_F(float nleft, float ntop, float nright, float nbottom) :
+		left(nleft), top(ntop), right(nright), bottom(nbottom)
+	{}
+	RECTLTRB_F(const RECTLTRB_F& rectsrc) :
+		left (rectsrc.left), right(rectsrc.right), top(rectsrc.top), bottom(rectsrc.bottom)
+	{}
+	RECTLTRB_F(const RECTXYWH_F rectsrc) :
+		left(rectsrc.x), top(rectsrc.y), right(rectsrc.x + rectsrc.w), bottom(rectsrc.y + rectsrc.h)
+	{}
+};
+
+class RECTXYXY_F {
+public:
+	float x1, y1, x2, y2;
+	RECTXYXY_F() :
+		x1(0.0f), y1(0.0f), x2(0.0f), y2(0.0f)
+	{}
+	RECTXYXY_F(RECT& rectSrc) :
+		x1((float)rectSrc.left), y1((float)rectSrc.top), x2((float)rectSrc.right), y2((float)rectSrc.bottom)
+	{}
+	RECTXYXY_F(float nx1, float ny1, float nx2, float ny2) :
+		x1(nx1), y1(ny1), x2(nx2), y2(ny2)
+	{}
+	RECTXYXY_F(const RECTXYXY_F& rectsrc) :
+		x1(rectsrc.x1), x2(rectsrc.x2), y1(rectsrc.y1), y2(rectsrc.y2)
+	{}
+	RECTXYXY_F(const RECTXYWH_F rectsrc) :
+		x1(rectsrc.x), y1(rectsrc.y), x2(rectsrc.x + rectsrc.w), y2(rectsrc.y + rectsrc.h)
+	{}
+};
+
+//trece un punct din coordonatele primului dreptunghi in al doilea (un fel de barycentric).
+inline D3DXVECTOR2 FromRectToRect(D3DXVECTOR2 & point, RECTXYWH_F & src, RECTXYWH_F & dest)
+{
+	return D3DXVECTOR2(((point.x - src.x) / src.w) * dest.w + dest.x, ((point.y - src.y) / src.h) * dest.h + dest.y);
+}
+inline D3DXVECTOR2 FromRectToRect(D3DXVECTOR2 & point, RECTXYXY_F & src, RECTXYXY_F & dest)
+{
+	return D3DXVECTOR2(((point.x - src.x1) / (src.x2 - src.x1)) * (dest.x2 - dest.x1) + dest.x1, ((point.y - src.y1) / (src.y2- src.y1)) * (dest.y2 - dest.y1) + dest.y1);
+}
+inline D3DXVECTOR2 FromRectToRect(D3DXVECTOR2 & point, RECTLTRB_F& src, RECTLTRB_F& dest)
+{
+	return D3DXVECTOR2(((point.x - src.left) / (src.right - src.left)) * (dest.right - dest.left) + dest.left, ((point.y - src.top) / (src.bottom - src.top)) * (dest.bottom - dest.top) + dest.top);
+}
+
+//--------------------------------------------------------------------------------------
+// Mouse handling class
+//--------------------------------------------------------------------------------------
+//mouse buttons status
+enum EMouseButtonState {
+	K_MOUSE_BUTT_NOTPRESSED,
+	K_MOUSE_BUTT_JUSTPRESSED,
+	K_MOUSE_BUTT_DRAG,
+	K_MOUSE_BUTT_JUSTRELEASED,
+};
+//mouse delta smooth
+//#define K_MOUSE_SMOOTH_DELTA  true
+#define K_MOUSE_FRAMES_TO_SMOOTH_DELTA 5.0f
+
+class CMouseData {
+public:
+	bool	bLbut; //daca e apasat sau nu
+	bool	bRbut; //daca e apasat sau nu
+public:
+	D3DXVECTOR2 pos; //in coordonate transformate prin camera transform
+	D3DXVECTOR2	lastPos; //last mouse position in coord reale de viewport
+	D3DXVECTOR2 delta; //delta movement
+	EMouseButtonState Lbut; 
+	EMouseButtonState Rbut; 
+	int     wheelDelta; //delta rotita scroll
+
+	bool	bCursorOutsideWindow;	//setat cand iese cursorul din fereastra
+	float	fTimeSinceInput;		//time since last input received
+
+	CMouseData() : pos(0.0f, 0.0f), lastPos(0.0f, 0.0f), delta(0.0f, 0.0f),
+		bLbut(false), bRbut(false), Lbut(K_MOUSE_BUTT_NOTPRESSED), Rbut(K_MOUSE_BUTT_NOTPRESSED), bCursorOutsideWindow(false),
+		fTimeSinceInput(0.0f)
+	{};
+	void	Update(float dTime);
+};
+
+
+//--------------------------------------------------------------------------------------
+// Controller handling class
+//--------------------------------------------------------------------------------------
+//buttons status
+enum EKeyState {
+	K_KEYSTATE_NOTPRESSED,
+	K_KEYSTATE_JUSTPRESSED,
+	K_KEYSTATE_PRESSING,
+	K_KEYSTATE_JUSTRELEASED,
+};
+//buttons
+enum EControllerKeys {
+	//player 1
+	K_KEY_LEFT = 0,
+	K_KEY_RIGHT = 1,
+	K_KEY_UP,
+	K_KEY_DOWN,
+	K_KEY_JUMP,
+	K_KEY_FIRE1,
+	K_KEY_FIRE2,
+	K_KEY_RELOAD,
+	K_KEY_USE_GEAR,
+	//count
+	K_KEYS_COUNT
+};
+
+//structura asta a fost inlocuita de controllersManager dar o mai las poate va mai fi necesara
+class CControllerData {
+public:
+	bool		bKeyDown[K_KEYS_COUNT]; //daca e apasat sau nu
+	EKeyState	keyState[K_KEYS_COUNT]; ////0-not pressed, 1-just pressed, 2-drag, 3-just released
+	float		fKeyPressedTime[K_KEYS_COUNT]; //de cat timp e apasata o tasta anume
+
+	UINT	keyMappings[K_KEYS_COUNT]; //ce caracter corespunde fiecarei directii
+
+	CControllerData()
+	{
+		for (int kk = 0; kk < K_KEYS_COUNT; kk++)
+		{
+			bKeyDown[kk] = false;
+			keyState[kk] = K_KEYSTATE_NOTPRESSED;
+			fKeyPressedTime[kk] = 0.0f;
+			keyMappings[kk] = 0;
+		}
+	};
+
+	void MapKeys(UINT nLeftKey, UINT nRightKey, UINT nUpKey, UINT nDownKey, UINT nJumpKey, UINT nFire1Key, UINT nFireAltKey, UINT nReloadKey, UINT nUseGearKey);
+	void MapKey(EControllerKeys nKeyType, UINT nKey);
+	//Reseteaza apasarile de taste pe NOT PRESSED
+	void ResetKeypresses();
+	void ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAltDown);
+	void Update(float dTime);
+};
+
+
+// changes saturation (rgb->hsl->h(s*S)l->rgb)
+DWORD SetSaturation(DWORD c, float S);
+
+__inline DWORD FtoDW(float f)
+{
+	return *((DWORD*)(&f));
+}
+
+template <class anyType>
+__inline void CLAMP(anyType &var, anyType min, anyType max) 
+{
+	var = ((var<min)?min:((var>max)?max:var));
+}
+
+// var changes into targetVar with specified fSpeed (must be called in loop)
+void REACH_VALUE_LINEAR(float &var, float targetVar, float fSpeed);
+/*
+Limits "var" between "min" and "max" without changing the actual value of "var".
+RETURNS: clamped value
+*/
+template <class anyType>
+__inline anyType LIMIT(anyType var, anyType min, anyType max) 
+{
+	return ((var < min) ? min : ((var > max) ? max : var));
+}
+
+template <class T>
+void SWAP(T& x,T& y)
+{
+     T temp;
+     temp=x;
+     x=y;
+     y=temp;
+}
+
+///--- structura care poate contine mai multe tipuri de date ---
+struct CVariant 
+{
+	enum Type 
+	{
+		K_VTYPE_INT32,
+		K_VTYPE_FLOAT,
+		K_VTYPE_BOOL,
+		K_VTYPE_UINT32,
+		K_VTYPE_VOIDP,
+
+		K_VTYPE_COUNT
+	};
+	Type m_type;
+
+	union 
+	{
+		INT32	m_asINT32;
+		FLOAT	m_asFloat;
+		bool	m_asBool;
+		UINT32  m_asUINT32;
+		VOID*	m_asVoid;
+	};
+
+	//--- functii conversie ---
+	int asString(WCHAR *destStr, int maxLen)
+	{
+		switch (m_type)
+		{
+			case K_VTYPE_INT32:
+				StringCchPrintf(destStr, maxLen, L"%d", m_asINT32);
+				break;
+			case K_VTYPE_FLOAT:
+				StringCchPrintf(destStr, maxLen, L"%.2f", m_asFloat);
+				break;
+			default:
+				StringCchPrintf(destStr, maxLen, L"%d", m_asUINT32);
+				break;
+		}
+	}
+
+	INT32 asInt32()
+	{
+		switch (m_type)
+		{
+			case K_VTYPE_FLOAT:
+				return (int)m_asFloat;
+			default:
+				return m_asINT32;
+		}
+	};
+
+	float asFloat() 
+	{
+		switch (m_type)
+		{
+			case K_VTYPE_FLOAT:
+				return (int)m_asFloat;
+			case K_VTYPE_UINT32:
+				return (float)m_asUINT32;
+			default:
+				return (float)m_asINT32;
+		}
+	};
+};
+
+
+//--- helper functions to read from files
+INT8				OS_freadByte(FILE *fl);
+UINT8				OS_freadUByte(FILE *fl);
+INT16				OS_freadInt16(FILE* fl);
+UINT16				OS_freadUInt16(FILE* fl);
+UINT32				OS_freadUInt32(FILE* fl);
+INT32				OS_freadInt32(FILE *fl);
+bool				OS_freadBool(FILE *fl);
+float				OS_freadFloat32(FILE *fl);
+void				OS_freadString(FILE* fl, CHAR* outBuffer);
+void				OS_freadWString(FILE* fl, WCHAR* outBuffer);
+void				OS_fwriteWString(FILE* fl, WCHAR* inBuffer);
+
+//read from buffer
+//returns cursor position
+long				buff_gets(CHAR* _out, int _maxcount, long &_cursor, void* buff);
+char				buff_readByte(void* buff, long &_cursor);
+unsigned char		buff_readUByte(void* buff, long &_cursor);
+short				buff_readShort(void* buff, long &_cursor);
+unsigned short		buff_readUShort(void* buff, long &_cursor);
+unsigned int		buff_readUInt(void* buff, long &_cursor);
+
+
+bool				PointInRect(D3DXVECTOR2 pt, RECTXYWH_F rct);
+bool				PointInRect(int x, int y, int rx, int ry, int rw, int rh);
+bool				PointInRect(int x, int y, RECTXYWH *r);
+bool				PointInRect(float x, float y, RECTXYWH_F *r);
+bool				PointInRect(POINT *pt, RECTXYWH *r);
+
+// Formats time in human readable form
+void				OS_FormatTime(WCHAR* dest, int destSize, float timeInSecs);
+
+void DrawRectUP_TL1T(LPDIRECT3DDEVICE9 pDevice, RECT scrRect, D3DXVECTOR2 texUL, D3DXVECTOR2 texDR, DWORD color = 0xffffffff);
+void DrawLineUP_TL1T(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR2 start, D3DXVECTOR2 end, DWORD color = 0xffffffff);
+void DrawFullscreenVignette(LPDIRECT3DDEVICE9 pDevice, float alpha);
+
+//gets time by spline (0..1)
+float TimeEasing(float t);
+float EasingOutBackCubic(float t);
+// Sets clip area on renderer (so you can't paint outside)
+HRESULT SetScissorClip(LPDIRECT3DDEVICE9 pDevice, int clipX, int clipY, int clipW, int clipH);
+// Removes clip from renderer
+HRESULT RemoveScissorClip(LPDIRECT3DDEVICE9 pDevice);
+// Splits string into tokens
+std::vector<std::wstring> TokenizeString(const std::wstring& str, const std::wstring& delim);
+// Splits version string into major, minor, patch. Expects "1.6.12"
+bool	GetVersionFromString(WCHAR * inStr, int & outMajor, int & outMinor, int & outPatch);
+
+///--- HASH FUNCTIONS ---
+unsigned __int32 FastHash (const char *data, int len);	//case insensitive Fast Hash
+unsigned __int32 FastHash (const WCHAR *data, int len);	//case insensitive Fast Hash
+unsigned __int32 FastHash (const char *data);	//case insensitive Fast Hash
+unsigned __int32 FastHash (const WCHAR *data);	//case insensitive Fast Hash
+//case sensitive versions
+unsigned __int32 FastHashCS(const char *str, int len); //case sensitive Fast Hash
+unsigned __int32 FastHashCS(const WCHAR *str, int len); //case sensitive Fast Hash
+unsigned __int32 FastHashCS(const char *str); //case sensitive Fast Hash
+unsigned __int32 FastHashCS(const WCHAR *str); //case sensitive Fast Hash
+#define GET_FAST_HASH(x) FastHash(x, strlen(x))
+#define GET_FAST_WHASH(x) FastHash(x, wcslen(x))
+//calculeaza hash pt un fisier
+unsigned __int32 GetFileHash(WCHAR *filename);
+//cauta un fisier cu acelasi nume (filename.ext.hash), citeste uint32 din el si verifica sa corespunda cu cel al fisierului
+HRESULT CheckFileSignatureHash(WCHAR *filename);
+//replaces a string with a substring
+void str_replace(char * o_string, char * s_string, char * r_string);
+void wcs_replace(WCHAR* o_string, WCHAR* s_string, WCHAR* r_string);
+
+UINT32 GenerateUID(void); //generates a UID based on timestamp and 3 random floats
+
+///--- string and hash pair ---
+#define K_MAX_STRINGHASH_LEN 256
+class CStringHash //string-hash pair
+{
+public:
+	WCHAR text[K_MAX_STRINGHASH_LEN];
+	UINT32 textHash;  //hash-ul numelui
+
+	FORCEINLINE const UINT32 getHash() const {return textHash;}
+
+	CStringHash() {text[0] = 0; textHash = 0;}
+	CStringHash(WCHAR const * const strText)
+	{
+		int len = wcslen(strText);
+		if(len == 0)
+		{
+			text[0] = 0;
+			textHash = 0;
+			return;
+		}
+
+		StringCchCopy(text, K_MAX_STRINGHASH_LEN, strText);
+		textHash = FastHash(text, wcslen(text));
+	}
+
+	CStringHash(char const * const strText)
+	{
+		int len = strlen(strText);
+		if (len == 0)
+		{
+			text[0] = 0;
+			textHash = 0;
+			return;
+		}
+
+		mbstowcs(text, strText, K_MAX_STRINGHASH_LEN);
+		textHash = FastHash(text, wcslen(text));
+	}
+	//copy constructor	
+	CStringHash( const CStringHash &o)
+	{
+		Init(o.text);
+	}
+
+	const bool IsEmpty() const {
+		return (textHash == 0);
+	}
+
+	const bool IsSet() const {
+		return (textHash != 0);
+	}
+
+	const bool IsEqual(WCHAR* text) const {
+		return (textHash == FastHash(text, wcslen(text)));
+	}
+
+	void Init(WCHAR const * const strText)
+	{
+		if(strText == null)
+		{
+			text[0] = 0;
+			textHash = 0;
+			return;
+		}
+
+		int len = wcslen(strText);
+		if(len == 0)
+		{
+			text[0] = 0;
+			textHash = 0;
+			return;
+		}
+
+		StringCchCopy(text, K_MAX_STRINGHASH_LEN, strText);
+		textHash = FastHash(text, wcslen(text));
+	}
+
+	void Init(CHAR const * const strText)
+	{
+		if (strText == null)
+		{
+			text[0] = 0;
+			textHash = 0;
+			return;
+		}
+
+		int len = strlen(strText);
+		if(len == 0)
+		{
+			text[0] = 0;
+			textHash = 0;
+			return;
+		}
+
+		WCHAR tempstr[MAX_PATH];
+		size_t cntConv;
+		mbstowcs_s(&cntConv, tempstr, strText, K_MAX_STRINGHASH_LEN);
+		StringCchCopy(text, K_MAX_STRINGHASH_LEN, tempstr);
+		textHash = FastHash(text, wcslen(text));
+	}
+
+	void Reset()
+	{
+		text[0] = 0;
+		textHash = 0;
+	}
+
+	bool operator== (CStringHash const & o) const
+	{
+		return (textHash == o.textHash);
+	}
+	bool operator!= (CStringHash const & o) const
+	{
+		return (textHash != o.textHash);
+	}
+};
+
+
+enum eVarTypes {
+	K_RETTYPE_EMPTY = -1,
+	K_RETTYPE_INT = 0,
+	K_RETTYPE_FLOAT = 1,
+	K_RETTYPE_STRING = 2,
+};
+//RETURNS: type specified by *str: int, float or string
+eVarTypes GetTypeFromString(const WCHAR *str);
+
+//clasa care primeste orice tip de date (Variant + string)
+class CVariantComplex 
+{
+public:
+	enum ArgumentType 
+	{
+		K_ARGTYPE_INT32,
+		K_ARGTYPE_FLOAT,
+		K_ARGTYPE_BOOL,
+		K_ARGTYPE_UINT32,
+		K_ARGTYPE_VOIDP,
+
+		K_ARGTYPE_STRING,
+
+		K_ARGTYPE_NONE,
+		K_ARGTYPE_COUNT
+	};
+	ArgumentType	m_type; //tipul argumentului
+	CStringHash		m_name; //numele argumentului (nu este obligatoriu. argumentul se poate trata si in functie de numarul de ordine)
+
+	union 
+	{
+		INT32	m_asINT32;
+		FLOAT	m_asFloat;
+		bool	m_asBool;
+		UINT32  m_asUINT32;
+		VOID*	m_asVoid;
+	};
+	CStringHash		m_strArg; //argument string
+	//exemplu tipuri speciale: 
+	//D3DXVECTOR3	m_argVec3; //argument vector, daca va fi nevoie de el
+
+	CVariantComplex( const CVariantComplex &o):
+		m_type(o.m_type),
+		m_asUINT32(o.m_asUINT32)
+	{
+		m_name.Init(o.m_name.text);
+		m_strArg.Init(o.m_strArg.text);
+	}
+
+	void Serialize(FILE *f);
+	static CVariantComplex* Deserialize(FILE *f);
+
+	//constructors
+	CVariantComplex():
+	m_type(K_ARGTYPE_NONE),
+	m_asUINT32(0)
+	{
+		m_strArg.Reset();
+	}
+
+	bool operator== (CVariantComplex const & o) const
+	{
+		if(m_type == K_ARGTYPE_STRING)
+			return (m_strArg.textHash == o.m_strArg.textHash);
+		if(m_type == K_ARGTYPE_FLOAT)
+			return (m_asFloat == o.m_asFloat);
+		//defaults on UINT32 valabil pentru toate celelalte
+		return (m_asUINT32 == o.m_asUINT32);
+	}
+
+	void CopyValueFrom(CVariantComplex *cv)
+	{
+		m_type = cv->m_type;
+		if (cv->m_type == K_ARGTYPE_STRING)
+		{
+			m_asUINT32 = 0;
+			m_strArg = cv->m_strArg;
+		}
+		else if (m_type == K_ARGTYPE_FLOAT)
+		{
+			m_asFloat = cv->m_asFloat;
+			m_strArg.Reset();
+		}
+		//defaults on UINT32 valabil pentru toate celelalte
+		else
+		{
+			m_asUINT32 = cv->m_asUINT32;
+			m_strArg.Reset();
+		}
+	}
+
+	void Set_INT32(const WCHAR* argName, INT32 int32Val) { m_name.Init(argName); m_asINT32 = int32Val; m_type = K_ARGTYPE_INT32;}
+	void Set_UINT32(const WCHAR* argName, UINT32 uint32Val) { m_name.Init(argName); m_asUINT32 = uint32Val; m_type = K_ARGTYPE_UINT32;}
+	void Set_BOOL(const WCHAR* argName, bool boolVal) { m_name.Init(argName); m_asBool = boolVal; m_type = K_ARGTYPE_BOOL;}
+	void Set_FLOAT(const WCHAR* argName, float floatVal) { m_name.Init(argName); m_asFloat = floatVal; m_type = K_ARGTYPE_FLOAT;}
+	void Set_STRING(const WCHAR* argName, WCHAR* strVal) { m_name.Init(argName); m_strArg.Init(strVal); m_asUINT32 = 0.0f; m_type = K_ARGTYPE_STRING;}
+	void Set_STRING(const WCHAR* argName, CHAR* strVal) { m_name.Init(argName); m_strArg.Init(strVal); m_asUINT32 = 0.0f; m_type = K_ARGTYPE_STRING; }
+	void Set_VOIDP(const WCHAR* argName, void* voidP) { m_name.Init(argName); m_asVoid = voidP; m_type = K_ARGTYPE_VOIDP; }
+
+	void Set_AUTO(const WCHAR* argName, WCHAR* strVal)
+	{
+		int rettype = GetTypeFromString(strVal);
+		switch (rettype)
+		{
+			case K_RETTYPE_INT:
+			{
+				WCHAR *stopstr;
+				INT32 val = (INT32)wcstol(strVal, &stopstr, 10);
+				Set_INT32(argName, val);
+			}
+			break;
+			case K_RETTYPE_FLOAT:
+			{
+				WCHAR *stopstr;
+				float val = (float)wcstod(strVal, &stopstr);
+				Set_FLOAT(argName, val);
+			}
+			break;
+			default:
+			case K_RETTYPE_EMPTY:
+			case K_RETTYPE_STRING:
+			{
+				Set_STRING(argName, strVal);
+			}
+			break;
+		}
+	}
+	//--- functii conversie ---
+
+	int asString(WCHAR *destStr, int maxLen)
+	{
+		switch (m_type)
+		{
+			case K_ARGTYPE_STRING:
+				StringCchCopy(destStr, maxLen, m_strArg.text);
+				break;
+			case K_ARGTYPE_INT32:
+				StringCchPrintf(destStr, maxLen, L"%d", m_asINT32);
+				break;
+			case K_ARGTYPE_FLOAT:
+				StringCchPrintf(destStr, maxLen, L"%.2f", m_asFloat);
+				break;
+			default:
+			case K_ARGTYPE_UINT32:
+				StringCchPrintf(destStr, maxLen, L"%d", m_asUINT32);
+				break;
+		}
+		return 0;
+	}
+
+	INT32 asInt32() 
+	{
+		switch (m_type)
+		{
+			case K_ARGTYPE_STRING:
+				return _wtoi(m_strArg.text);
+			case K_ARGTYPE_FLOAT:
+				return (int)m_asFloat;
+			default:
+				return m_asINT32;
+		}
+	};
+
+	float asFloat() {
+		switch (m_type)
+		{
+			case K_ARGTYPE_STRING:
+				return _wtof(m_strArg.text);
+			case K_ARGTYPE_FLOAT:
+				return (float)m_asFloat;
+			case K_ARGTYPE_UINT32:
+				return (float)m_asUINT32;
+			default:
+				return (float)m_asINT32;
+		}
+	};
+};
+
+///--- TIMERS CLASS ---
+/// se face un array de marimea max_period / min_period
+class CTimersArray {
+private:
+	float fMinPeriod;
+	int nMinPeriod_ms;
+
+	int timersCnt;
+	float* timers;
+	bool* timerTicks;
+public:
+	CTimersArray(int maxPeriod_ms = 2000, int minPeriod_ms = 10);
+	~CTimersArray();
+
+	void Update(float dTime);
+	
+	//intoarce true pe un singur frame, atunci cand a trecut timpul respectiv
+	inline bool Tick(int period_ms) { return (true == timerTicks[period_ms / nMinPeriod_ms]); }
+	//intoarce cat timp s-a scurs in timer, pana la limita lui de period_ms
+	inline float GetTimerValue(int period_ms) {return timers[period_ms / nMinPeriod_ms];};
+	//resets all timers
+	void ResetTimers();
+};
+
+
+
+///--- CComplexVariant NAMED COLLECTION ---
+//colectie cu nume de variants nume+valoare
+//TODO: oare ar fi bine sa folosesc Boost::CAny pt lista de variants ?
+class CVariantCollection 
+{
+private:
+	CVariantComplex defaultVariant;
+public:
+	CStringHash		m_collectionName; //numele colectiei
+	//script arguments
+	CGrowableArray<CVariantComplex*> m_variants;
+	//ctor
+	CVariantCollection(const WCHAR* strCollectionName);
+	CVariantCollection(CVariantCollection&);
+	CVariantCollection();
+	~CVariantCollection();
+
+	inline int GetVariantCount() { return m_variants.GetSize(); }
+
+	const CVariantComplex* operator[] (const int varIdx) const
+	{
+		assert(varIdx < m_variants.GetSize());
+		return m_variants[varIdx];
+	}
+	CVariantComplex* operator[] (const int varIdx)
+	{
+		assert(varIdx < m_variants.GetSize());
+		return m_variants[varIdx];
+	}
+
+	CVariantCollection& operator=(const CVariantCollection& other) // copy assignment
+	{
+		if (this != &other) // self-assignment check expected
+		{ 
+			DeleteAll();
+			m_collectionName.Init(other.m_collectionName.text);
+			for (int ii = 0; ii < other.m_variants.Count(); ii++)
+			{
+				m_variants.Add(new CVariantComplex(*other.m_variants[ii]));
+			}
+		}
+		return *this;
+	}
+
+	void AppendCollection(const CVariantCollection& sourceCollection)
+	{
+		if (this != &sourceCollection) // self-assignment check expected
+		{
+			for (int ii = 0; ii < sourceCollection.m_variants.Count(); ii++)
+			{
+				m_variants.Add(new CVariantComplex(*sourceCollection.m_variants[ii]));
+			}
+		}
+	}
+
+	//HACK: doesn't compile on older compilers - not always necessary:
+	//CVariantCollection& operator=(CVariantCollection&& other) // move assignment
+	//{
+	//	assert(this != &other); // self-assignment check not required
+	//	DeleteAll();
+	//	//"move" everything
+	//	m_collectionName.Init(other.m_collectionName.text);
+	//	for (int ii = 0; ii < other.m_variants.Count(); ii++)
+	//	{
+	//		m_variants.Add(new CVariantComplex(*other.m_variants[ii]));
+	//	}
+
+	//	SAFE_DELETE_GROWABLE_ARRAY(other.m_variants); // leave moved-from in valid state
+	//	return *this;
+	//}
+
+	//set params - verifica daca exista deja si suprascrie daca exista cu acelasi nume
+	int AddVarUINT32(UINT32 val);
+	int AddVarINT32(INT32 val);
+	int AddVarFloat(float val);
+	int AddVarBool(bool val);
+	int AddVarVoidP(void* val);
+	int AddVarString(WCHAR* strVal);
+
+	int AddVariant(CVariantComplex variant);
+	int AddVariant(CVariantComplex * variant);
+
+	int SetNamedVarUINT32(const WCHAR* varName, UINT32 val);
+	int SetNamedVarINT32(const WCHAR* varName, INT32 val);
+	int SetNamedVarFloat(const WCHAR* varName, float val);
+	int SetNamedVarBool(const WCHAR* varName, bool val);
+	int SetNamedVarVoidP(const WCHAR* varName, void* val);
+	int SetNamedVarString(const WCHAR* varName, WCHAR* strVal);
+	int SetNamedVarAUTO(const WCHAR* varName, WCHAR* strVal);
+
+	void Serialize(FILE *f);
+	static void Deserialize(CVariantCollection* cv, FILE *f);
+
+	void DeleteVar(const UINT32 varHash);
+	void DeleteVar(const WCHAR* varName);
+	void DeleteAll();
+
+#if defined(_DEBUG) || defined(DEBUG)
+	//Scrie in fereastra de output toti params
+	void DumpDataToOutputWindow();
+#endif
+	//returneaza pointer la param default daca nu gasesc ce cauti
+	CVariantComplex* GetVariantByName(const WCHAR* varName);
+	CVariantComplex* GetVariantByNameHash(const UINT32 varNameHash);
+};
+
+//enum/name list index finder
+int GetListIndexByName(const WCHAR* strName, const CStringHash *arrNamesList, int arrNamesListSize);
+int GetListIndexByNameHash(const UINT32 nameHash, const CStringHash *arrNamesList, int arrNamesListSize);
+
+///--- ADDITIVE BLENDING ---
+inline void AdditiveBlendingON(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite)
+{
+	if(pSprite)
+		pSprite->Flush();
+
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+}
+inline void AdditiveBlendingOFF(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite)
+{
+	//activates blending
+	if(pSprite)
+		pSprite->Flush();
+
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+}
+
+unsigned int			OS_GetTimeMS();
+
+FORCEINLINE	FILE*		OS_fopen(const CHAR* szPath, const CHAR* szMode) { return fopen(szPath, szMode); }
+FORCEINLINE FILE*		OS_wfopen(const WCHAR* wszPath, const WCHAR* wszMode) { return _wfopen(wszPath, wszMode); }
+FORCEINLINE int			OS_wfopen_s(FILE** fl, const WCHAR* wszPath, const WCHAR* wszMode) { return _wfopen_s(fl, wszPath, wszMode); }
+FORCEINLINE int			OS_fclose(FILE * fl) { return fclose(fl); }
+FORCEINLINE size_t		OS_fread(void * _DstBuf, size_t _ElementSize, size_t _Count, FILE * _File) {
+	return fread(_DstBuf, _ElementSize, _Count, _File);
+}
+FORCEINLINE size_t		OS_fwrite(const void * _Str, size_t _Size, size_t _Count, FILE * _File) {
+	return fwrite(_Str, _Size, _Count, _File);
+}
+
+///--- FILE FUNCTIONS ---
+long					OS_GetFileSize(WCHAR *path);
+bool					OS_CreateFolder(const char* szPath);
+bool					OS_DeleteFolder(const char* szPath); // folder must be empty and you must have permission to delete it. For recursively deleting a folder hierarchy, use FileManager::DeleteFolder()
+void					OS_GetFolderFiles(const char *directory, const char *extension, List<char*>& list, bool bFullPath); // Use "/" as the extension to get folders instead of files
+// Copies a folder recursively - only windows (not needed elsewere)
+bool					OS_CopyRecursive(WCHAR r_szSrcPath[1024], WCHAR r_szDesPath[1024]);
+// Deletes a folder and contents
+bool					OS_DeleteRecursive(WCHAR r_szPath[1024]);
+// Copies already opened files
+void					OS_FileCopy(FILE *dest, FILE *src);
+
+
+std::wstring RemoveQuotationMarks(const std::wstring& initialString);
+std::vector<std::string>& split(const std::string &s, char delim, std::vector<std::string> &elems);

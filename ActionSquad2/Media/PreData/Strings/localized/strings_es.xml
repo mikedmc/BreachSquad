@@ -1,0 +1,853 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PSTexts Version="1.0">
+  <Alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/?¡¢£¥§©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº\</Alphabet>
+  <Texts Lang="EN" Count="670">
+    <Text ID="TITLE">Door Kickers: Action Squad</Text>
+    <Text ID="VERSION_NUMBER">empty</Text>
+    <Text ID="MSGBOX">empty</Text>
+    <Text ID="TEMP1">empty</Text>
+    <Text ID="TEMP2">empty</Text>
+    <Text ID="TEMP3">empty</Text>
+    <Text ID="TEMP4">empty</Text>
+    <Text ID="TEMP5">empty</Text>
+    <Text ID="TEMP6">empty</Text>
+    <Text ID="TEMP7">empty</Text>
+    <Text ID="TEMP8">empty</Text>
+    <Text ID="TEMP9">empty</Text>
+    <Text ID="TEMP10">empty</Text>
+    <Text ID="TEMP11">empty</Text>
+    <Text ID="TEMP12">empty</Text>
+    <Text ID="TEMP13">empty</Text>
+    <Text ID="TEMP14">empty</Text>
+    <Text ID="TEMP15">empty</Text>
+    <Text ID="PLAYER_CLASS_ASSAULTER">Asalto</Text>
+    <Text ID="PLAYER_CLASS_BREACHER">Derribo</Text>
+    <Text ID="PLAYER_CLASS_SHIELD">Escudo</Text>
+    <Text ID="PLAYER_CLASS_FBI_AGENT">Agente Fergie</Text>
+    <Text ID="PLAYER_CLASS_RECON">Rastreo</Text>
+    <Text ID="PLAYER_CLASS_OFFDUTYGUY">Poli de paisano</Text>
+    <Text ID="CLASS_ASSAULTER_DESC">Potencia de fuego continua y precisión de largo alcance. Cuidado con el retroceso.</Text>
+    <Text ID="CLASS_BREACHER_DESC">Fuego indiscriminado a corta distancia. Puede reventar puertas.</Text>
+    <Text ID="CLASS_SHIELD_DESC">Protege de las explosiones y los disparos frontales. Vulnerable en el cuerpo a cuerpo.</Text>
+    <Text ID="CLASS_FBI_AGENT_DESC">Armas y potente cuerpo a cuerpo. Puede rodar para reducir el daño. Cuidado con el retroceso.</Text>
+    <Text ID="CLASS_RECON_DESC">Tiene velocidad y sigilo. Marca a los enemigos y potencia el daño del equipo.</Text>
+    <Text ID="CLASS_OFFDUTYGUY_DESC">Una mezcla de sobras de comida, ropa deportiva y comentarios malhumorados.</Text>
+    <Text ID="LOADING">Cargando...</Text>
+    <Text ID="MAIN_MENU">Menú principal</Text>
+    <Text ID="DIFFICULTY_COLON">Dificultad:</Text>
+    <Text ID="EASY">Fácil</Text>
+    <Text ID="MEDIUM">Normal</Text>
+    <Text ID="HARD">Difícil</Text>
+    <Text ID="LEADERBOARDS">Puntuaciones</Text>
+    <Text ID="COOP">Cooperativo online</Text>
+    <Text ID="LOCAL_GAME">Partida local</Text>
+    <Text ID="QUICK_MATCH">Partida rápida</Text>
+    <Text ID="HOST_PUBLIC">Crear partida pública</Text>
+    <Text ID="HOST_PRIVATE">Crear partida privada</Text>
+    <Text ID="WAITING_PEER">Esperando al jugador...</Text>
+    <Text ID="CONNECTING_PEER_X">¡Jugador encontrado! Conectando...
+{%1}</Text>
+    <Text ID="CONNECTION_MSG">empty</Text>
+    <Text ID="PLAY">Jugar</Text>
+    <Text ID="ENTER_TO_CHAT">Pulsa INTRO para hablar</Text>
+    <Text ID="SEND_FEEDBACK">Enviar comentarios</Text>
+    <Text ID="OPTIONS">Opciones</Text>
+    <Text ID="MORE_OPTIONS">Más opciones</Text>
+    <Text ID="GFX_OPTIONS">Opciones de gráficos</Text>
+    <Text ID="RESET_PROGRESS">Reiniciar progreso</Text>
+    <Text ID="RESET_PROGRESS_SURE">¿Seguro que quieres reiniciar tu progreso? ¡Las partidas guardadas se borrarán y tendrás que empezar desde cero!</Text>
+    <Text ID="SCREEN_SHAKE">Temblor de pantalla</Text>
+    <Text ID="GORE_ENABLED">Gore activado</Text>
+    <Text ID="ANTIALIAS_OPTION">Antialiasing</Text>
+    <Text ID="SELECT_MODE">Seleccionar modo</Text>
+    <Text ID="ANTIALIAS_JOKE1">MSAA
+CSAA
+CFAA
+FXAA
+MLAA
+SMAA
+TXAA
+MFAA
+SSAA</Text>
+    <Text ID="SELECT_DETAIL_LEVEL">Seleccionar nivel de detalle</Text>
+    <Text ID="ANTIALIAS_JOKE2">1x
+2x
+4x
+8x
+16x
+32x
+64x</Text>
+    <Text ID="ANTIALIAS_JOKE3">Sinceramente, esto no sirve para nada.</Text>
+    <Text ID="ANTIALIAS_JOKE4">Vale, bien. Oye, que era una broma.</Text>
+    <Text ID="ANTIALIAS_JOKE5">Buf, ¡a ver si pillas alguna!</Text>
+    <Text ID="HIGH">Alto</Text>
+    <Text ID="ULTRA">Ultra</Text>
+    <Text ID="JOKEA">HDR</Text>
+    <Text ID="JOKEB">XHDR</Text>
+    <Text ID="CONTINUE">Continuar</Text>
+    <Text ID="PRESS_CONTINUE">Pulsa cualquier tecla para continuar</Text>
+    <Text ID="LOSE_PROGRESS">¿Seguro que quieres salir?
+¡Se perderán todo el progreso
+en este nivel!</Text>
+    <Text ID="LOSE_PROGRESS_NET">¿Salir del juego y volver al menú principal?
+¡Se desconectarán todos los jugadores y se perderá el progreso!</Text>
+    <Text ID="QUIT_GAME">¿Seguro que quieres salir?</Text>
+    <Text ID="QUIT_LEVEL_NET">¿Salir de la partida en red?</Text>
+    <Text ID="QUIT_LEVEL">¿Salir del nivel?</Text>
+    <Text ID="NETWORK_ERROR_GENERIC">El otro jugador se acaba de desconectar, aunque puede que seas tú el que tiene un problema con los ajustes de Internet.</Text>
+    <Text ID="NETWORK_ERROR_WRONG_VERSION">¡El otro jugador y tú tenéis versiones diferentes de este juego! ¡Actualizadlo!</Text>
+    <Text ID="NETWORK_ERROR_PLAYER_LEFT">El otro jugador ha abandonado la partida.</Text>
+    <Text ID="NETWORK_HOST_NAME">empty</Text>
+    <Text ID="NETWORK_PEER_NAME">empty</Text>
+    <Text ID="QUIT_GENERIC">¿Seguro que quieres salir?</Text>
+    <Text ID="LEVEL_N_FINISHED">¡Nivel {%1} completado!</Text>
+    <Text ID="HIGHSCORES">Récords</Text>
+    <Text ID="QUIT">Salir</Text>
+    <Text ID="EXIT">Salir</Text>
+    <Text ID="NEXT_MISSION">Próxima misión</Text>
+    <Text ID="CREDITS">Créditos</Text>
+    <Text ID="EXIT_GAME">¿Salir del juego?</Text>
+    <Text ID="SOUND_VOL">Volumen de los efectos</Text>
+    <Text ID="BACK">Atrás</Text>
+    <Text ID="OOPS">¡Ups!</Text>
+    <Text ID="AVAILABLE">Disponible</Text>
+    <Text ID="NOT_AVAILABLE">ND</Text>
+    <Text ID="BORDERLESS_WND">Ventana sin bordes</Text>
+    <Text ID="FULLSCREEN">Pantalla completa</Text>
+    <Text ID="COOP_ONLINE">Coop. online</Text>
+    <Text ID="SINGLE_PLAYER">Un jugador</Text>
+    <Text ID="OK">Aceptar</Text>
+    <Text ID="COMMIT">Aplicar</Text>
+    <Text ID="ACCEPT">Aceptar</Text>
+    <Text ID="CLOSE">Cerrar</Text>
+    <Text ID="DONE">Listo</Text>
+    <Text ID="SELECT">Seleccionar</Text>
+    <Text ID="SELECT_ABILITY">Elegir habilidad</Text>
+    <Text ID="APPLY">Aplicar</Text>
+    <Text ID="CANCEL">Cancelar</Text>
+    <Text ID="RESET">Reiniciar</Text>
+    <Text ID="SET_DEFAULT">Por defecto</Text>
+    <Text ID="SET_DEFAULT_KEYS_SURE">¿Seguro que quieres usar la configuración predeterminada del teclado?</Text>
+    <Text ID="MUSIC_VOL">Volumen de la música</Text>
+    <Text ID="NEW">Nuevo</Text>
+    <Text ID="DELETE">Borrar</Text>
+    <Text ID="START">Empezar</Text>
+    <Text ID="RESOLUTIONS_LIST">640x480
+800x600
+1024x768
+1280x1024
+1600x1200</Text>
+    <Text ID="RESOLUTION">Resolución de pantalla</Text>
+    <Text ID="RESTART">Reiniciar</Text>
+    <Text ID="LANGUAGE">Idioma</Text>
+    <Text ID="RESTART_LEVEL">Reiniciar nivel</Text>
+    <Text ID="MAX_LEVEL">Nivel máximo</Text>
+    <Text ID="PAUSED">En pausa</Text>
+    <Text ID="SAVE">Guardar y salir</Text>
+    <Text ID="RESUME">Continuar</Text>
+    <Text ID="BOMB_DEFUSED">¡Bomba desactivada!</Text>
+    <Text ID="YOU_DIED">¡Has muerto!</Text>
+    <Text ID="WARNING">Aviso</Text>
+    <Text ID="LOCKED">Bloqueada</Text>
+    <Text ID="KEYCARD_NEEDED">Se necesita una tarjeta</Text>
+    <Text ID="PLAYER1">Jugador 1</Text>
+    <Text ID="PLAYER2">Jugador 2</Text>
+    <Text ID="KEYBOARD1">Teclado 1</Text>
+    <Text ID="KEYBOARD2">Teclado 2</Text>
+    <Text ID="NETWORK1">Red</Text>
+    <Text ID="SYS_CONTROLLER_ADDED">¡Mando conectado!</Text>
+    <Text ID="SYS_CONTROLLER_REMOVED">¡Mando desconectado!</Text>
+    <Text ID="PRESS_FIRE_TO_JOIN">¡Pulsa DISPARO para unirte!</Text>
+    <Text ID="RESPAWNING_IN_N">Reaparición en {%1}</Text>
+    <Text ID="FIRE_TO_RESPAWN">Pulsa el botón de disparo para reaparecer</Text>
+    <Text ID="PLAYER_N">Jugador {%1}</Text>
+    <Text ID="PRIMARY_WEAPON">Arma principal</Text>
+    <Text ID="SECONDARY_WEAPON">Arma secundaria</Text>
+    <Text ID="FULL_HEALTH">¡Salud al máximo!</Text>
+    <Text ID="FULL_AMMO">¡Munición al máximo!</Text>
+    <Text ID="INTERACT">Interactuar</Text>
+    <Text ID="OBJECTIVE_FAILED">Objetivo no cumplido</Text>
+    <Text ID="TARGET_ARRESTED">Objetivo principal arrestado</Text>
+    <Text ID="TARGET_KILLED">Objetivo principal eliminado</Text>
+    <Text ID="LEADERBOARDS_NAMES_VAL">...</Text>
+    <Text ID="LEADERBOARDS_SCORES_VAL">...</Text>
+    <Text ID="MELEE_LEADERBOARDS">Cuerpo a cuerpo = Puntuaciones</Text>
+    <Text ID="MOVE">Moverse</Text>
+    <Text ID="POWER_NEEDED">No hay electricidad.</Text>
+    <Text ID="BREACH_RELOAD">Recargando</Text>
+    <Text ID="BREACH_RECOIL">Retroceso</Text>
+    <Text ID="SHIELD_HANDGUN">Pistola</Text>
+    <Text ID="SHIELD_SHIELD">Uso del escudo</Text>
+    <Text ID="FERGIE_HANDGUN">Pistola</Text>
+    <Text ID="FERGIE_MELEE">Cuerpo a cuerpo</Text>
+    <Text ID="FERGIE_BUREAUCRACY">Burocracia</Text>
+    <Text ID="RECON">Reconocimiento</Text>
+    <Text ID="TAP">toca</Text>
+    <Text ID="HOLD">mantén</Text>
+    <Text ID="SECRETS_COLLECTED_NN">Secretos obtenidos: {%1} / {%2}</Text>
+    <Text ID="SECRETS_COLLECTED_VAL">...</Text>
+    <Text ID="GEAR">Equipo</Text>
+    <Text ID="SKILLS">Habilidades</Text>
+    <Text ID="ULTIMATE">Definitiva</Text>
+    <Text ID="READY">¡Listo!</Text>
+    <Text ID="NONE">Nada</Text>
+    <Text ID="PRICE">Precio</Text>
+    <Text ID="STARS">Estrellas</Text>
+    <Text ID="CRITICAL_HIT">¡Crítico!</Text>
+    <Text ID="CRIPPLED">¡Incapacitado!</Text>
+    <Text ID="TOTAL_STARS">Total de estrellas</Text>
+    <Text ID="TOTAL_STARS_VAL">empty</Text>
+    <Text ID="PEER_STARS_VAL">empty</Text>
+    <Text ID="SELECTED_PERK_DESC_VAL">empty</Text>
+    <Text ID="CONFIRM">Confirmar</Text>
+    <Text ID="UNLOCK">Desbloquear</Text>
+    <Text ID="UNUSED_POINTS">Sin usar</Text>
+    <Text ID="UNUSED_POINTS_VAL">-1</Text>
+    <Text ID="COMING_SOON">Próximamente</Text>
+    <Text ID="COMPLETE_N_TO_UNLOCK_N">Completa {%1} misiones para desbloquearla ({%2} / {%3})</Text>
+    <Text ID="MISSIONS_COMPLETED_N">Misiones completadas: {%1}/{%2}</Text>
+    <Text ID="CURRENT_MISSION_VAL">empty</Text>
+    <Text ID="UNLOCK_ITEM">Desbloquear objeto</Text>
+    <Text ID="NOT_ENOUGH_STARS">¡No tienes estrellas suficientes!
+Completa más misiones para conseguir más estrellas</Text>
+    <Text ID="CANT_ACTIVATE_HERE">¡No se puede activar aquí!</Text>
+    <Text ID="STRATEGIC1">Chaleco antibalas</Text>
+    <Text ID="STRATEGIC2">Recargar equipamiento</Text>
+    <Text ID="STRATEGIC3">Botiquín</Text>
+    <Text ID="STRATEGIC4">Refuerzos</Text>
+    <Text ID="STRATEGIC5">Vida extra</Text>
+    <Text ID="ACCURACY">Precisión</Text>
+    <Text ID="RESISTANCE">Resistencia</Text>
+    <Text ID="RELOAD_TIME">Tiempo de recarga</Text>
+    <Text ID="RELOAD">Recarga</Text>
+    <Text ID="DAMAGE">Daño</Text>
+    <Text ID="RECOIL">Retroceso</Text>
+    <Text ID="SPREAD">Dispersión</Text>
+    <Text ID="APDAMAGE">Daño perfo.</Text>
+    <Text ID="ROF">Cadencia</Text>
+    <Text ID="AMMO">Munición</Text>
+    <Text ID="ARMOR">Blindaje</Text>
+    <Text ID="KILLS">Eliminaciones</Text>
+    <Text ID="LOGISTICS">Logística</Text>
+    <Text ID="PHYSICAL">Físico</Text>
+    <Text ID="TACTICS">Tácticas</Text>
+    <Text ID="PERKS">Mejoras</Text>
+    <Text ID="DEATHS">Muertes</Text>
+    <Text ID="TEAM_UPC">EQUIPO</Text>
+    <Text ID="CLASS_UPC">CLASE</Text>
+    <Text ID="HOSTAGES_SAVED">Rehenes salvados</Text>
+    <Text ID="HOSTAGES_SAVED_TOTAL">Rehenes salvados</Text>
+    <Text ID="TIME_SPENT">Tiempo</Text>
+    <Text ID="TOTAL_SCORE">Puntuación de la misión</Text>
+    <Text ID="SWAT_CASUALTIES">Bajas SWAT</Text>
+    <Text ID="GUNPLAY">Uso de armas</Text>
+    <Text ID="WPN_SMG_MP5A3">Metralleta
+ Mp5A3</Text>
+    <Text ID="WPN_SMG_UMP45">Metralleta
+ UMP45</Text>
+    <Text ID="WPN_CARBINE_M4A1">Carabina
+ M4A1</Text>
+    <Text ID="WPN_CARBINE_MCX300">Carabina
+ MCX300</Text>
+    <Text ID="WPN_SMG_P90">P90 PDW</Text>
+    <Text ID="WPN_SHOTGUN_M590">Escopeta de
+ acción de bombeo</Text>
+    <Text ID="WPN_SHOTGUN_JCOMBAT">Escopeta
+ semiautomática</Text>
+    <Text ID="WPN_SHOTGUN_S12K">Escopeta
+ táctica S12K</Text>
+    <Text ID="WPN_SHOTGUN_KSG">Escopeta
+ doble KSG</Text>
+    <Text ID="WPN_SHOTGUN_HK512">Escopeta
+ HK512</Text>
+    <Text ID="WPN_SHOTGUN_M870">Limpiahabitaciones
+ M870</Text>
+    <Text ID="WPN_PISTOL_G17">Pistola G17</Text>
+    <Text ID="WPN_PISTOL_MP40">Pistola
+ M&amp;P .40</Text>
+    <Text ID="WPN_PISTOL_1911">Pistola 1911</Text>
+    <Text ID="WPN_PISTOL_G19M">Pistola G19M</Text>
+    <Text ID="WPN_PISTOL_FIVESEVEN">Pistola F7AP</Text>
+    <Text ID="WPN_PISTOL_P226">Pistola P226</Text>
+    <Text ID="WPN_PISTOL_MODEL1076">Pistola M1076</Text>
+    <Text ID="WPN_SHIELD_TACTICAL">Escudo táctico</Text>
+    <Text ID="WPN_SHIELD_ASSAULT">Escudo de asalto</Text>
+    <Text ID="WPN_SHIELD_IRONMAN">Escudo
+ resistente a rifles</Text>
+    <Text ID="WPN_SMG_UZI">Metralleta Uzi</Text>
+    <Text ID="WPN_SMG_MP9SD">MP9
+ silenciada</Text>
+    <Text ID="WPN_SMG_MP7">MP7 PDW</Text>
+    <Text ID="WPN_SMG_MP7SD">MP7
+ silenciada</Text>
+    <Text ID="WPN_SMG_CBJ">Metralleta
+ CBJ-65</Text>
+    <Text ID="WPN_SMG_MP5SD">MP5
+ silenciada</Text>
+    <Text ID="GEAR_EMPTY_DESC">Una ranura vacía. No parece muy útil, ¿verdad?</Text>
+    <Text ID="GEAR_EMPTY_BOTTOM">-</Text>
+    <Text ID="EQUIP_NOEQUIPMENT">Sin equipo</Text>
+    <Text ID="EQUIP_SPEED_POUCHES">Bolsillos rápidos</Text>
+    <Text ID="EQUIP_BODY_ARMOR">Chaleco antibalas</Text>
+    <Text ID="EQUIP_ADRENALINE_SHOT">Chute de adrenalina</Text>
+    <Text ID="EQUIP_EXTRA_GEAR">Equipo extra</Text>
+    <Text ID="EQUIP_BETTER_ARMOR">Chaleco mejorado</Text>
+    <Text ID="EQUIP_ANTISTAB_ARMOR">Chaleco antipuñaladas</Text>
+    <Text ID="EQUIP_RECON_ARMOR">Chaleco de asalto</Text>
+    <Text ID="EQUIP_SPEED_POUCHES_RIGHT">-30 % al tiempo de recarga</Text>
+    <Text ID="EQUIP_BODY_ARMOR_RIGHT">+75 de blindaje
+-No detiene los disparos de rifles</Text>
+    <Text ID="EQUIP_ADRENALINE_SHOT_RIGHT">+1 resurrección</Text>
+    <Text ID="EQUIP_EXTRA_GEAR_RIGHT">+1 pieza de equipo al inicio de la misión</Text>
+    <Text ID="EQUIP_BETTER_ARMOR_RIGHT">+75 de blindaje
+-15 de velocidad</Text>
+    <Text ID="EQUIP_ANTISTAB_ARMOR_RIGHT">+95 de blindaje cuerpo a cuerpo</Text>
+    <Text ID="EQUIP_RECON_ARMOR_RIGHT">+75 de blindaje (solo por delante)
+-Sin protección para la espalda</Text>
+    <Text ID="EQUIP_SPEED_POUCHES_BOTTOM">Reduce el tiempo de recarga</Text>
+    <Text ID="EQUIP_BODY_ARMOR_BOTTOM">Empieza con blindaje</Text>
+    <Text ID="EQUIP_ADRENALINE_SHOT_BOTTOM">Empieza con una resurrección extra</Text>
+    <Text ID="EQUIP_EXTRA_GEAR_BOTTOM">Una carga consumible adicional</Text>
+    <Text ID="EQUIP_BETTER_ARMOR_BOTTOM">Evita el daño de los rifles</Text>
+    <Text ID="EQUIP_ANTISTAB_ARMOR_BOTTOM">Solo protege cuerpo a cuerpo</Text>
+    <Text ID="EQUIP_RECON_ARMOR_BOTTOM">Evita el daño de los rifles</Text>
+    <Text ID="GEAR_NOGEAR">Sin equipo</Text>
+    <Text ID="GEAR_GRENADE">Granada de fragmentación</Text>
+    <Text ID="GEAR_FLASHBANG">Granada aturdidora</Text>
+    <Text ID="GEAR_BREACHING_CHARGE">Carga de ruptura</Text>
+    <Text ID="GEAR_SPEED_LOADER">Recarga rápida</Text>
+    <Text ID="GEAR_SMOKE_GRENADE">Granada de humo</Text>
+    <Text ID="GEAR_MAG_READY">Cargador preparado</Text>
+    <Text ID="GEAR_CAM_BALL">Cámara bola</Text>
+    <Text ID="GEAR_SPY_CAMERA">Cámara espía</Text>
+    <Text ID="GEAR_GRENADE_DESC">- Mata indiscriminadamente
+- Pero ¡¿no somos la policía?!</Text>
+    <Text ID="GEAR_FLASHBANG_DESC">- Ciega y aturde a los enemigos
+- Podría prender fuego a las cosas</Text>
+    <Text ID="GEAR_BREACHING_CHARGE_DESC">- Se pega a las superficies
+- Revienta puertas y personas</Text>
+    <Text ID="GEAR_SPEED_LOADER_DESC">Carga al instante 4 cartuchos</Text>
+    <Text ID="GEAR_SMOKE_GRENADE_DESC">- Mucho humo para esconderse
+- Rompe la línea de visión de los enemigos</Text>
+    <Text ID="GEAR_MAG_READY_DESC">Recarga el arma al instante</Text>
+    <Text ID="GEAR_CAM_BALL_DESC">- Marca a los enemigos cercanos
+- Daño extra a los objetivos</Text>
+    <Text ID="GEAR_SPY_CAMERA_DESC">- Echa un ojo detrás de puertas cerradas
+- Daño extra a los objetivos</Text>
+    <Text ID="SPECIAL_AIMED_SHOT">Tiro de precisión</Text>
+    <Text ID="SPECIAL_SLUG_FIRE">Balazo</Text>
+    <Text ID="SPECIAL_SHIELD_FLASH">Destello cegador</Text>
+    <Text ID="SPECIAL_SHIELD_BASH">Carga con el escudo</Text>
+    <Text ID="SPECIAL_TWO_MAGAZINES">Cambiar munición</Text>
+    <Text ID="SPECIAL_FIRE_MODE_CHANGE">Cambiar modo de disparo</Text>
+    <Text ID="SPECIAL_DOUBLE_TAP">Disparo doble</Text>
+    <Text ID="SPECIAL_RECON_BURST">Fuego rápido</Text>
+    <Text ID="SPECPASS_ARMOR_PIERCING">Perforación de blindaje</Text>
+    <Text ID="SPECPASS_SEMI_AUTO">Semiautomático</Text>
+    <Text ID="SPECPASS_RESIST_RIFLE">Resiste los disparos de rifles</Text>
+    <Text ID="ULTIMATE_SNIPER_SUPPORT">Apoyo de francotirador</Text>
+    <Text ID="ULTIMATE_DRAGON_BREATH">Aliento de dragón</Text>
+    <Text ID="ULTIMATE_SUBMACHINEGUN">Asalto con metralleta</Text>
+    <Text ID="ULTIMATE_SAW">Sierra rompedora</Text>
+    <Text ID="ULTIMATE_AKIMBO">Pistolas Akimbo</Text>
+    <Text ID="ULTIMATE_MP5K">Metralleta MP5K</Text>
+    <Text ID="ULTIMATE_MK48MOD1">Ametralladora ligera</Text>
+    <Text ID="ULTIMATE_RECON_MARKSMAN">Rifle de tirador</Text>
+    <Text ID="ULTIMATE_SNIPER_SUPPORT_DESC">Avisa a los francotiradores para que acaben con 3 enemigos visibles en pantalla.</Text>
+    <Text ID="ULTIMATE_DRAGON_BREATH_DESC">Saca una escopeta Protecta cargada con munición incendiaria.</Text>
+    <Text ID="ULTIMATE_SUBMACHINEGUN_DESC">Saca una 9 mm, la pistola ideal para esos días especiales.</Text>
+    <Text ID="ULTIMATE_SAW_DESC">Atraviesa cualquier puerta del juego... y a los idiotas que estén justo detrás de ella.</Text>
+    <Text ID="ULTIMATE_AKIMBO_DESC">Dos armas, 16 proyectiles de .40 cada una y dos modos de disparo geniales.</Text>
+    <Text ID="ULTIMATE_MP5K_DESC">Saca la Kurz a pasear para infligir daño extra a corta y media distancia.</Text>
+    <Text ID="ULTIMATE_MK48MOD1_DESC">Una ametralladora ligera Mk46, 50 proyectiles y licencia para usarlos.</Text>
+    <Text ID="ULTIMATE_RECON_MARKSMAN_DESC">Te permite seleccionar a un objetivo entre la multitud y eliminarlo con un rifle de francotirador.</Text>
+    <Text ID="MISSION_ACCOMPLISHED">Misión cumplida</Text>
+    <Text ID="MISSION_FAILED">Misión fallida</Text>
+    <Text ID="HOSTAGES_KILLED">¡Todos los rehenes han muerto!</Text>
+    <Text ID="TEAM_KILLED">¡Equipo SWAT eliminado!</Text>
+    <Text ID="BOMB_EXPLODED">¡La bomba ha explotado!</Text>
+    <Text ID="MISSION0">La tierra de las bandas</Text>
+    <Text ID="MISSION1">Los radicales</Text>
+    <Text ID="MISSION2">Alerta roja</Text>
+    <Text ID="MISSION3">La Gran Manzana</Text>
+    <Text ID="MISSION4">Territorio cártel</Text>
+    <Text ID="MISSION5">Desafíos Vol. 1</Text>
+    <Text ID="MISSION6">Rey de los suburbios</Text>
+    <Text ID="MISSION_TIME">empty</Text>
+    <Text ID="MISSION_SCORE">empty</Text>
+    <Text ID="MISSION_CASUALTIES">empty</Text>
+    <Text ID="MISSION_HOSTAGES">empty</Text>
+    <Text ID="MISSION_P1_KILLS">empty</Text>
+    <Text ID="MISSION_P1_ACCURACY">empty</Text>
+    <Text ID="MISSION_P1_HOSTAGES">empty</Text>
+    <Text ID="MISSION_P1_DEATHS">empty</Text>
+    <Text ID="MISSION_P2_KILLS">empty</Text>
+    <Text ID="MISSION_P2_ACCURACY">empty</Text>
+    <Text ID="MISSION_P2_HOSTAGES">empty</Text>
+    <Text ID="MISSION_P2_DEATHS">empty</Text>
+    <Text ID="CHAPTER_N">Capítulo {%1}</Text>
+    <Text ID="SELECT_EPISODE">Elegir episodio</Text>
+    <Text ID="SELECT_MISSION">Elegir misión</Text>
+    <Text ID="MISSION_TYPE1">Acaba con los enemigos</Text>
+    <Text ID="MISSION_TYPE2">Rescate de rehenes</Text>
+    <Text ID="MISSION_TYPE3">Desactivación de bombas</Text>
+    <Text ID="MISSION_TYPE4">Orden de arresto</Text>
+    <Text ID="GRAPHICS">Gráficos</Text>
+    <Text ID="PROGRAMMING">Programación</Text>
+    <Text ID="MUSIC_SFX">Música y efectos</Text>
+    <Text ID="LEVEL_DESIGN">Diseño de niveles</Text>
+    <Text ID="GAME_DESIGN">Diseño del juego</Text>
+    <Text ID="CREDITS_GFX">Andy Bogaciev
+Adrian Cruceanu
+Elias Frost
+Christian Nordgren</Text>
+    <Text ID="CREDITS_DESIGN">Dan Dimitrescu</Text>
+    <Text ID="CREDITS_SOUNDS">Gavin Harrison
+George Vlad</Text>
+    <Text ID="ADDITIONAL_WORK">Marketing y programación de red</Text>
+    <Text ID="CREDITS_ADDITIONAL">Mihai Gosa
+Catalin Saitan</Text>
+    <Text ID="CREDITS_LEVEL_DESIGN">Adrian Maraloiu
+Mihai Raiciu
+Tavi Petre</Text>
+    <Text ID="CREDITS_PROGRAMMING">Mihai Dragomir</Text>
+    <Text ID="KEY_COMMANDS">Izquierda
+Derecha
+Arriba / Interactuar
+Abajo / Agacharse
+Saltar
+Disparar
+Disparo secundario
+Recargar
+Usar equipo
+Cuerpo a cuerpo
+Habilidad estratégica</Text>
+    <Text ID="KEY_LEFT">Izquierda</Text>
+    <Text ID="KEY_RIGHT">Derecha</Text>
+    <Text ID="KEY_UP">Arriba / Interactuar</Text>
+    <Text ID="KEY_DOWN">Abajo / Agacharse</Text>
+    <Text ID="KEY_JUMP">Saltar</Text>
+    <Text ID="KEY_FIRE">Disparar</Text>
+    <Text ID="KEY_ALT_FIRE">Disparo secundario</Text>
+    <Text ID="KEY_RELOAD">Recarga</Text>
+    <Text ID="KEY_USE_GEAR">Usar equipo</Text>
+    <Text ID="KEY_MELEE">Cuerpo a cuerpo</Text>
+    <Text ID="KEY_STRATEGIC_ABILITY">Habilidad estratégica</Text>
+    <Text ID="KEYS1_VAL">Teclas de Teclado1</Text>
+    <Text ID="KEYS2_VAL">Teclas de Teclado2</Text>
+    <Text ID="CONTROLLER_LAYOUT">Controles del mando</Text>
+    <Text ID="KEYBOARD_LAYOUT">Controles del teclado</Text>
+    <Text ID="KEY_DEFINE">Elige una tecla para</Text>
+    <Text ID="KEY_INVALID">¡Tecla no válida! Elige otra.</Text>
+    <Text ID="REDEFINE_KEYS">Cambiar teclas</Text>
+    <Text ID="INFO_KEY_MAP">F1: Muestra consejos durante el juego
+Alt+F1: Muestra/Oculta esta ventana</Text>
+    <Text ID="TUTORIAL_ARREST_TEXT">Encuentra a Big Benny y detenlo.
+¡Con vida, por favor!</Text>
+    <Text ID="TUTORIAL_BOMB_TEXT">Han puesto una bomba en este lugar.
+Encuéntrala y desactívala. ¡El tiempo vuela!</Text>
+    <Text ID="TUTORIAL_HOSTAGE_TEXT">Rescata a los rehenes para conseguir puntos estratégicos.
+¡Si los matas, perderás salud!</Text>
+    <Text ID="TUTORIAL_XPPOINTS_TEAM_REMOVE">Tras asignar puntos a la barra de mejoras del equipo, no podrás quitarlos.</Text>
+    <Text ID="TUTORIAL_XPPOINTS_TEAM_ADD">¡Elige sabiamente! Los puntos de mejora usados en las barras de equipo no se podrán quitar una vez asignados.</Text>
+    <Text ID="TUTORIAL_INTERFACE_STRATEGIC">¡Pide habilidades estratégicas!</Text>
+    <Text ID="TUTORIAL_INTERFACE_MAIN1">¡No olvides usar también tu disparo secundario!
+¿Has olvidado la configuración del mando? Pues pulsa F1 o Alt+F1.
+¡Prueba a hacerlo!</Text>
+    <Text ID="LEVELNAME0">Paso a paso</Text>
+    <Text ID="LEVELNAME1">Toc, toc</Text>
+    <Text ID="LEVELNAME2">La vieja embajada</Text>
+    <Text ID="LEVELNAME3">Ronda nocturna</Text>
+    <Text ID="LEVELNAME4">Con mucho cuidado</Text>
+    <Text ID="LEVELNAME5">Distrito 255</Text>
+    <Text ID="LEVELNAME6">Marea alta</Text>
+    <Text ID="LEVELNAME7">El almacén</Text>
+    <Text ID="LEVELNAME8">Día en la oficina</Text>
+    <Text ID="LEVELNAME9">Cruce cegador</Text>
+    <Text ID="LEVELNAME10">Limpieza</Text>
+    <Text ID="LEVELNAME11">Encuentro con el gran jefe</Text>
+    <Text ID="LEVELNAME12">Encuentro con Bart</Text>
+    <Text ID="LEVELNAME13">Motel volátil</Text>
+    <Text ID="LEVELNAME14">Caída</Text>
+    <Text ID="LEVELNAME15">El búnker</Text>
+    <Text ID="LEVELNAME16">Locura a medianoche</Text>
+    <Text ID="LEVELNAME17">Refugio en las montañas</Text>
+    <Text ID="LEVELNAME18">Puesto de avanzada</Text>
+    <Text ID="LEVELNAME19">¡Bombas van!</Text>
+    <Text ID="LEVELNAME20">La manzana</Text>
+    <Text ID="LEVELNAME21">Atrapado en el laberinto</Text>
+    <Text ID="LEVELNAME22">El museo</Text>
+    <Text ID="LEVELNAME23">El patio</Text>
+    <Text ID="LEVELNAME24">Frankie el fanático</Text>
+    <Text ID="LEVELNAME25">Crisis en el McDonuts</Text>
+    <Text ID="LEVELNAME26">Locura en el metro</Text>
+    <Text ID="LEVELNAME27">Entrega de molotovs</Text>
+    <Text ID="LEVELNAME28">Vértigo</Text>
+    <Text ID="LEVELNAME29">Planta depuradora S.A.</Text>
+    <Text ID="LEVELNAME30">Expuestos al frío</Text>
+    <Text ID="LEVELNAME31">Fábrica de cerveza hípster</Text>
+    <Text ID="LEVELNAME32">Subiendo por el poste</Text>
+    <Text ID="LEVELNAME33">Crisis en el laboratorio</Text>
+    <Text ID="LEVELNAME34">Asalto en la plaza</Text>
+    <Text ID="LEVELNAME35">Tren del Apocalipsis</Text>
+    <Text ID="LEVELNAME36">Golpe al banco</Text>
+    <Text ID="LEVELNAME37">Cruce de la reina</Text>
+    <Text ID="LEVELNAME38">Fibonacci</Text>
+    <Text ID="LEVELNAME39">En el yunque</Text>
+    <Text ID="LEVELNAME40">Fortaleza secreta</Text>
+    <Text ID="LEVELNAME41">Caneville</Text>
+    <Text ID="LEVELNAME42">De vacaciones</Text>
+    <Text ID="LEVELNAME43">Llora y mama</Text>
+    <Text ID="LEVELNAME44">Luces fuera</Text>
+    <Text ID="LEVELNAME45">Al aeropuerto</Text>
+    <Text ID="LEVELNAME46">Día y noche</Text>
+    <Text ID="LEVELNAME47">El gran Batsby</Text>
+    <Text ID="LEVELNAME48">Ahora soy el capitán</Text>
+    <Text ID="LEVELNAME49">Muelles de presa</Text>
+    <Text ID="LEVELNAME50">Vecinos polvorientos</Text>
+    <Text ID="LEVELNAME51">El resplandior</Text>
+    <Text ID="LEVELNAME52">El Quarantino</Text>
+    <Text ID="LEVELNAME53">Manzana clave</Text>
+    <Text ID="LEVELNAME54">Rascacielos</Text>
+    <Text ID="LEVELNAME55">El hogar de NCtv</Text>
+    <Text ID="LEVELNAME56">Titaniminuto</Text>
+    <Text ID="LEVELNAME57">Vuela alto</Text>
+    <Text ID="LEVELNAME58">El rumor de las calles</Text>
+    <Text ID="LEVELNAME59">El hogar</Text>
+    <Text ID="LEVELNAME60">Remodelación</Text>
+    <Text ID="LEVELNAME61">Chivatos a mansalva</Text>
+    <Text ID="LEVELNAME62">Sorpresa en el cementerio</Text>
+    <Text ID="LEVELNAME63">Una larga caída</Text>
+    <Text ID="LEVELNAME64">Terror desde la terraza</Text>
+    <Text ID="LEVELNAME65">El núcleo duro</Text>
+    <Text ID="LEVELNAME66">It's Raining Men</Text>
+    <Text ID="LEVELNAME67">Fiesta en la piscina</Text>
+    <Text ID="LEVELNAME68">Jaula en el piso de abajo</Text>
+    <Text ID="LEVELNAME69">Cajas y bombas</Text>
+    <Text ID="LEVELNAME70">El Expreso</Text>
+    <Text ID="LEVELNAME71">Crisis consular</Text>
+    <Text ID="LEVELNAME72">El paraíso de los drogadictos</Text>
+    <Text ID="LEVELNAME73">Paz y tranquilidad</Text>
+    <Text ID="LEVELNAME74">Puestos hasta arriba</Text>
+    <Text ID="LEVELNAME75">Viviendo al límite</Text>
+    <Text ID="LEVELNAME76">En el filo</Text>
+    <Text ID="LEVELNAME77">Earthworm Ben</Text>
+    <Text ID="LEVELNAME78">Switch and Destroy</Text>
+    <Text ID="LEVELNAME79">Home Box Office</Text>
+    <Text ID="LEVELNAME80">Salto de fe</Text>
+    <Text ID="LEVELNAME81">Bajo presión</Text>
+    <Text ID="LEVELNAME82">Monty Hall</Text>
+    <Text ID="LEVELNAME83">Sin excusa</Text>
+    <Text ID="LEVELNAME84">Próximamente</Text>
+    <Text ID="LEVELNAME85">Próximamente</Text>
+    <Text ID="LEVELNAME86">Próximamente</Text>
+    <Text ID="LEVELNAME87">Próximamente</Text>
+    <Text ID="LEVELNAME88">Próximamente</Text>
+    <Text ID="LEVELNAME89">Próximamente</Text>
+    <Text ID="LEVELNAME90">Próximamente</Text>
+    <Text ID="LEVELNAME91">Próximamente</Text>
+    <Text ID="LEVELNAME92">Próximamente</Text>
+    <Text ID="LEVELNAME93">Próximamente</Text>
+    <Text ID="LEVELNAME94">Próximamente</Text>
+    <Text ID="LEVELNAME95">Próximamente</Text>
+    <Text ID="BAR_NO_IMPROVEMENT">Sin mejoras graduales</Text>
+    <Text ID="BAR_S1_LOGISTICS">Aumenta la tasa de obtención de puntos estratégicos</Text>
+    <Text ID="BAR_S2_PHYSICAL">Aumenta la salud del jugador</Text>
+    <Text ID="BAR_A1_ACCURACY">Aumenta la precisión de los disparos básicos</Text>
+    <Text ID="BAR_A2_RECOIL">Reduce el retroceso</Text>
+    <Text ID="BAR_B1_RECOIL">Aumenta la cadencia de disparo de las escopetas de acción de bombeo</Text>
+    <Text ID="BAR_B2_RELOAD">Aumenta la velocidad de recarga</Text>
+    <Text ID="BAR_S1_HANDGUN">Aumenta la precisión de los disparos básicos</Text>
+    <Text ID="BAR_S2_SHIELD_USE">Aumenta la resistencia de los escudos</Text>
+    <Text ID="BAR_R1_GUNPLAY">Aumenta la precisión de los disparos básicos</Text>
+    <Text ID="BAR_R2_RECON">Aumenta la bonificación de daño infligido a los enemigos marcados</Text>
+    <Text ID="BAR_F1_HANDGUN">Aumenta la precisión de los disparos básicos</Text>
+    <Text ID="BAR_F2_MELEE">Aumenta el daño cuerpo a cuerpo</Text>
+    <Text ID="PERK_DOUBLE_GEAR">Equipo doble
+Ahora, las cajas de equipo incluyen el doble de suministros.</Text>
+    <Text ID="PERK_EXTRA_SP_SLOTS">Reserva estratégica
+La barra estratégica obtiene 2 puntos extra.</Text>
+    <Text ID="PERK_NOMEX_SUITS">Traje Nomex
+Recibe menos daño del fuego y de las armas de llamas.</Text>
+    <Text ID="PERK_DOUBLE_MEDIKITS">Botiquines dobles
+Ahora, cada botiquín se podrá usar dos veces.</Text>
+    <Text ID="PERK_MELEE_DEFENSE">Defensa cuerpo a cuerpo
+Se reduce un 20 % el daño de los ataques cuerpo a cuerpo recibidos por delante.</Text>
+    <Text ID="PERK_SPEED_IS_LIFE">La velocidad es la vida
+Aumenta un 20 % la velocidad de movimiento.</Text>
+    <Text ID="PERK_MULE">Mula
+Recibes 1 pieza extra del equipo seleccionado al inicio de la misión.</Text>
+    <Text ID="PERK_DIE_HARD">Duro de matar
+Cuando estás cerca de morir, recibes menos daño.</Text>
+    <Text ID="PERK_QUICK_AIM">Apunta rápido
+La habilidad Tiro de precisión dispara más rápido.</Text>
+    <Text ID="PERK_CRITICAL_SHOTS">Disparos críticos
+El ataque normal tiene una probabilidad del 5 % de infligir un 33 % de daño adicional.</Text>
+    <Text ID="PERK_SUREFOOTED">Pisar sobre seguro
+La habilidad Tiro de precisión ya no te detiene.</Text>
+    <Text ID="PERK_BARRICADE_SHOOTING">Tiro de barricada
+Aprovechas las coberturas para reducir el retroceso en un 20 %.</Text>
+    <Text ID="PERK_STRONG_STANCE">Postura férrea
+Al inclinarte hacia adelante, reduces un 70% el retroceso del primer disparo.</Text>
+    <Text ID="PERK_C_CLAMP">Agarre de sargento
+La velocidad básica de recuperación del retroceso aumenta un 35 %.</Text>
+    <Text ID="PERK_INTIMIDATING">Intimidación
+Los enemigos a los que sorprendas perderán la compostura e infligirán menos daño durante 2 segundos.</Text>
+    <Text ID="PERK_DOUBLE_BANGERS">Explosiones dobles
+Las granadas aturdidoras explotan dos veces y aplican el efecto de aturdimiento más rápido.</Text>
+    <Text ID="PERK_ASSAULT_JUMP">Salto de ataque
+Ahora, le infligirás 15 de daño al enemigo al caerle encima.</Text>
+    <Text ID="PERK_TWIN_SHOT">Barrido rápido
+Tras lograr una muerte, cargas un poco más rápido el disparo siguiente.</Text>
+    <Text ID="PERK_9_PELLET">Disparo de 9 perdigones
+Cambias las cargas de perdigones e infliges más daño.</Text>
+    <Text ID="PERK_KILLING_SPREE">Racha de muertes
+Tras una muerte, obtienes un 25 % de daño adicional en el siguiente disparo.</Text>
+    <Text ID="PERK_EXTENSION_TUBES">Tubos de extensión
+Añade 1 de munición a todas las escopetas de tubo.</Text>
+    <Text ID="PERK_RIFLED_SLUGS">Bala estriada
+Los balazos vuelan más rectos y son más predecibles.</Text>
+    <Text ID="PERK_IMPROVED_SLUGS">Balazo mejorado
+Cambia a balas más pesadas que, literalmente, atraviesan a más enemigos de un disparo.</Text>
+    <Text ID="PERK_GORE_DEALER">Sembrador de gore
+Los enemigos normales tienen un 50 % más de probabilidad de huir cuando destrozas a alguien con la escopeta.</Text>
+    <Text ID="PERK_POINTMAN_ARMOR">Blindaje de líder
+Aumenta el blindaje un 50 %, para ayudarte a sobrevivir a esas malditas puertas hacia lo desconocido.</Text>
+    <Text ID="PERK_WEAK_SPOTTER">Puntos débiles
+Aprendes a enfrentarte a los enemigos blindados para que reciban plomo en sus zonas vulnerables.</Text>
+    <Text ID="PERK_EXTENDED_MAGS">Cargadores ampliados
+Añade 2 proyectiles más a todos los cargadores de pistola.</Text>
+    <Text ID="PERK_SHIELD_BRACE">Apoyo en el escudo
+Apoya el arma sobre la parte superior del escudo y reduce un 40% el retroceso.</Text>
+    <Text ID="PERK_LADY_JUSTICE">Dama Justicia
+Aprovechas cuando tus enemigos están sorprendidos y siempre les asestas impactos críticos.</Text>
+    <Text ID="PERK_FORTIFIED">Fortificación
+El escudo sufre la mitad del daño al agacharte.</Text>
+    <Text ID="PERK_ARMORED_RABBIT">Conejito blindado
+Te pones en forma y consigues un aumento de velocidad del 15 %.</Text>
+    <Text ID="PERK_FIELD_FIXER">Reparación de campo
+Al pedir blindaje usando puntos estratégicos se recupera una mayor cantidad de escudo.</Text>
+    <Text ID="PERK_DEVASTATOR">Devastación
+Ahora, la metralleta tiene un 20 % de probabilidades de provocar impactos críticos.</Text>
+    <Text ID="PERK_CADDYSHACK">Carrito de caddie
+Se duplica la capacidad de carga y transporte de equipo.</Text>
+    <Text ID="PERK_IRON_MAN">Dama de hierro
+Cuanto más daño bloquees con el escudo, más asustarás a los pobres diablos que estén delante de él.</Text>
+    <Text ID="PERK_CRIPPLING_SHOTS">Tiros incapacitantes
+Tus disparos tienen un 5 % de probabilidad de ralentizar a los enemigos durante un par de segundos.</Text>
+    <Text ID="PERK_SURGEON_PRECISION">Precisión quirúrgica
+Todos tus disparos provocan críticos a los enemigos marcados.</Text>
+    <Text ID="PERK_VULTURE">Buitre
+Al impactar a los enemigos por la espalda, tienes un 10 % de lograr un crítico.</Text>
+    <Text ID="PERK_RESCUE_PLAN">Plan de rescate
+Ahora, las herramientas de reconocimiento también marcan a los rehenes y te ayudan a evitar hacerles daño.</Text>
+    <Text ID="PERK_DURACELLS">Pilas a tope
+Ahora, las marcas duran un 50 % más.</Text>
+    <Text ID="PERK_DOUBLE_TOOLS">El doble de herramientas
+Se duplica la cantidad de herramientas de reconocimiento que puedes llevar.</Text>
+    <Text ID="PERK_CAUGHT_IN_THE_ACT">Con las manos en la masa
+Te ocultas al estar a cubierto y sin que te detecten.</Text>
+    <Text ID="PERK_STEADY_HAND">Mano firme
+Aumenta el control del retroceso al estar agachado.</Text>
+    <Text ID="PERK_WEAVER_STANCE">Posición Weaver
+Aumenta el control del retroceso en todas las posturas.</Text>
+    <Text ID="PERK_HOLLOW_POINTS">Puntas huecas
+Cambia a balas de expansión y obtén un 25 % más de daño en todas las armas de fuego.</Text>
+    <Text ID="PERK_COMBATIVES">Combativo
+Aprende a bloquear y recibe un 40 % menos de daño cuerpo a cuerpo.</Text>
+    <Text ID="PERK_LEG_DAY">Tren inferior
+Tira abajo las puertas como los mayores: de 3 golpes.</Text>
+    <Text ID="PERK_FEDERAL_JUSTICE">Justicia federal
+Aprendes a golpear los puntos débiles e infliges daño extra con el cuchillo al atacar por detrás.</Text>
+    <Text ID="PERK_EVASION">Maniobras evasivas
+Al rodar, se evita un 65 % del daño recibido.</Text>
+    <Text ID="PERK_BIG_BANGER">Explosionaza
+Hazte con cargas rompedoras y granadas del depósito del departamento y consigue un 50 % más de alcance de la explosión.</Text>
+    <Text ID="PERK_CHERRY_DARLING">Cherry Darling
+Reduce el retroceso de la MP5 Kurz.</Text>
+    <Text ID="PERK_HANDYMAN">Manitas
+Los cambios de cargador tardan medio segundo menos.</Text>
+    <Text ID="PERK_INVISIBLE">Invisible
+Todos los enemigos reaccionan medio segundo más lento al detectarte.</Text>
+    <Text ID="PERK_EXTENDED_MAGS_RECON">Cargadores ampliados
+Aumenta la capacidad del cargador en 5 proyectiles.</Text>
+    <Text ID="PERK_CLEAR_TO_ENGAGE">Tiro limpio
+Los enemigos marcados sufren más daño, siempre y cuando no haya rehenes cerca.</Text>
+    <Text ID="PERK_DISORIENTED">Desorientación
+Ahora, la habilidad Fuego rápido desorienta a los enemigos y les echa más para atrás.</Text>
+    <Text ID="STATUE_DMC">Mike D
+"una entidad divina todopoderosa
+... pero con defectillos"</Text>
+    <Text ID="STATUE_BLIND">Adrian
+"un artista ciego (en realidad, no)"</Text>
+    <Text ID="STATUE_ELIAS">Elias, Dios del Frío
+"invoca a súbditos pixelados"</Text>
+    <Text ID="STATUE_TOMCAT">Dan the Man
+"no debería beber al presentar proyectos"</Text>
+    <Text ID="STATUE_PINTEA">Pintea
+"está trabajando en Door Kickers 2 (en serio)"</Text>
+    <Text ID="STATUE_SICK">Sick
+"trabaja como un enano creando mundos"</Text>
+    <Text ID="STATUE_GAVIN">Gavin Proudsynth
+"proviene de los 80"</Text>
+    <Text ID="STATUE_ANDI">Andy Bee
+"juega al GO y entrena píxeles"</Text>
+    <Text ID="LOL">LOL</Text>
+    <Text ID="MOBILITY">Mobilidad</Text>
+    <Text ID="STATUE_GEORGE">George
+"Makes lotsa noise"
+    </Text>
+    <Text ID="MORE">Más...</Text>
+    <Text ID="VOICE_ACTING">Doblaje</Text>
+    <Text ID="CREDITS_VOICE">Zachary Pill
+Stephanos Rex
+Tamara Ryan
+Samantha Vega
+Micah Blakeslee
+Fletcher Armstrong
+Elaine Cashmore
+    </Text>
+    <Text ID="CREDITS_VOICE2">Kelloggs VA
+Walter Mack
+George Vlad
+Jenn Henry
+Andy Mack
+Josef Gagnier
+    </Text>
+    <Text ID="EA_RESET_PROGRESS">Thank you for supporting us during Early Access!
+We recommend starting with a new profile. Using your old profile may lead to profile conflicts and unforeseen issues.
+Reset your profile now?
+    </Text>
+    <Text ID="MOD_ENABLED">MOD ACTIVADO</Text>
+    <Text ID="MOD_ENABLED_WARNING">Tan solo podrás jugar partidas cooperativas online con jugadores que tengan el mismo mod.</Text>
+    <Text ID="ABORT_MISSION">Abortar misión</Text>
+    <Text ID="MISSION_ABORTED">¡Misión abortada!</Text>
+    <Text ID="ABORT_MISSION_REQ_MSG">El jugador {%1} ha pedido ABORTAR LA MISIÓN</Text>
+    <Text ID="SELECT_GAME_MODE">Seleccionar modo de juego</Text>
+    <Text ID="CLASSIC_MODE">Modo Clásico</Text>
+    <Text ID="CLASSIC_MODE_DESC">Trabajo policial básico</Text>
+    <Text ID="WEEKLY_CHALLENGE">Desafío semanal</Text>
+    <Text ID="WEEKLY_CHALLENGE_DESC">Misiones diseñadas para poner a prueba tus habilidades.</Text>
+    <Text ID="ZOMBIE_INVASION">Modo Invasión zombi</Text>
+    <Text ID="ZOMBIE_INVASION_DESC">Tiempos extraños en Nowhere City</Text>
+    <Text ID="WEEK1_TASK">Acaba en 3 min</Text>
+    <Text ID="WEEK2_TASK1">Acaba en 4 min</Text>
+    <Text ID="WEEK2_TASK2">Sin francotiradores</Text>
+    <Text ID="WEEK4_TASK1">Sin curación</Text>
+    <Text ID="WEEK4_TASK2">Gana como Escudo</Text>
+    <Text ID="WEEK5_TASK1">Gana como Derribo</Text>
+    <Text ID="WEEK6_TASK1">Gana como Fergie</Text>
+    <Text ID="WEEK7_TASK1">Gana como Asalto</Text>
+    <Text ID="WORKSHOP">Workshop</Text>
+    <Text ID="AVAILABLE_MODS">Mods disponibles</Text>
+    <Text ID="UPDATING_MODS">Actualizando Mods...</Text>
+    <Text ID="ON">ACTIVADO</Text>
+    <Text ID="OFF">DESACTIVADO</Text>
+    <Text ID="ENABLED">Activado</Text>
+    <Text ID="PLEASE_HANG">Espera un segundo...</Text>
+    <Text ID="MOD_CONFLICTING_MSG">¡No se ha podido activar el mod porque afecta a los mismos archivos que otro mod activado!</Text>
+    <Text ID="DOWNLOADED_LEVELS">Niveles descargados</Text>
+    <Text ID="CHANGE_DETECTED">MOD DETECTADO</Text>
+    <Text ID="CHANGE_DETECTED_WARNING">Solo puedes jugar partidas online cooperativas con jugadores que tengan los mismos mods</Text>
+    <Text ID="NO_DOWNLOADED_LEVELS">No tienes contenido descargado.
+Obtén más niveles en el Steam Workshop suscribiéndote a los artículos que quieras.</Text>
+    <Text ID="NO_MODS_SUBSCRIBED">No tienes artículos del Workshop.
+Obtén niveles y mods en el Steam Workshop suscribiéndote a los artículos que quieras.</Text>
+    <Text ID="FLOOR_X">Piso {%1}</Text>
+    <Text ID="FLOOR_X_VALUE">-</Text>
+    <Text ID="VINFINITE_MODE">Torre Infinita</Text>
+    <Text ID="VINFINITE_MODE_DESC">Caos generado aleatoriamente</Text>
+    <Text ID="TUTORIAL_VINFINITE_TEXT">Esta es una Zona de Bajos Suministros.
+Solo los Rescates proporcionan Puntos Estratégicos.</Text>
+    <Text ID="WEEK10_TASK1">Gana como Recon</Text>
+    <Text ID="WPN_SWAT_REVOLVER">Revólver
+ del SWAT</Text>
+    <Text ID="WPN_G18C_AUTO_PISTOL">Pistola
+ automática G18C</Text>
+    <Text ID="WPN_FBI_REVOLVER">Revólver
+ del FBI</Text>
+    <Text ID="WPN_MP7_PDW">MP7 PDW</Text>
+    <Text ID="WPN_SIX12_REVO">Escopeta
+ Six-12</Text>
+    <Text ID="WPN_TRAPPER_RIFLE">Rifle
+ Trapper</Text>
+    <Text ID="WPN_TRICKED_OUT_AK">AK modificada</Text>
+    <Text ID="WPN_HOME_DEFENSE_SHOTGUN">Escopeta
+ de caza</Text>
+    <Text ID="WPN_TRUNK_CARBINE">Carabina
+ de maletero</Text>
+    <Text ID="ULTIMATE_M1_GARAND">El Garand del abuelo</Text>
+    <Text ID="ULTIMATE_M1_GARAND_DESC">Desempolva la herencia familiar con un cargador de munición perforante vintage.</Text>
+    <Text ID="ULTIMATE_RECON_SIX12SD">Escopeta silenciada</Text>
+    <Text ID="ULTIMATE_RECON_SIX12SD_DESC">Acaba las fiestas con una escopeta silenciosa cargada de perdigones.</Text>
+    <Text ID="ULTIMATE_HOMEMADE_PIE">Tarta casera</Text>
+    <Text ID="ULTIMATE_HOMEMADE_PIE_DESC">Hecha por la parienta. Restablece salud para todo el equipo... o no.</Text>
+    <Text ID="GEAR_PISTOL1911_DESC">-7 cartuchos del fiable calibre .45ACP
+-ideal para limitar el daño colateral</Text>
+    <Text ID="GEAR_TWINKIE">Twinkie de hace un año</Text>
+    <Text ID="GEAR_TWINKIE_DESC">- 5 segundos de invulnerabilidad
+- No le afectan las mejoras de equipo.</Text>
+    <Text ID="FITNESS">Forma física</Text>
+    <Text ID="GEAR_BAG">Bolsa deportiva</Text>
+    <Text ID="BAR_O1_ACCURACY">Aumenta la precisión de disparo</Text>
+    <Text ID="BAR_O2_MELEE">Reduce el daño cuerpo a cuerpo recibido</Text>
+    <Text ID="PERK_SOFT_POINTS">Puntos débiles
+20% más de daño con todos los rifles.</Text>
+    <Text ID="PERK_PLUSP_AMMO">Munición +P
+Un extra de pólvora le da a las balas de tu rifle mayor penetración. </Text>
+    <Text ID="PERK_OPEN_SEASON">Se abre la veda
+Todos los disparos normales (sin apuntar) tienen un 30 % de probabilidades de ser un impacto crítico</Text>
+    <Text ID="PERK_REDHEAD">Once fought off a redhead
+Aumenta el empuje y el aturdimiento infligido en cuerpo a cuerpo</Text>
+    <Text ID="PERK_GRIZZLY">Un día escapé de un oso
+Velocidad de movimiento aumentada un 10 %</Text>
+    <Text ID="PERK_LOCKED_OUT">Un día quedé atrapado en invierno
+Ahora puedes romper puertas en dos patadas. </Text>
+    <Text ID="PERK_TWIXIE">Twixie
+Usa el pastelito Twinkie dos veces en una misión.</Text>
+    <Text ID="PERK_PLATES_UPGRADE">Placas mejoradas
+El blindaje recibe +1 nivel de protección</Text>
+    <Text ID="PERK_GARAND_AP_AMMO">Munición perforante
+El Garand recibe +1 de penetración de blindaje</Text>
+    <Text ID="INVITE_FRIEND">Invitar amigo</Text>
+    <Text ID="JOIN_GAME">Unirse a partida</Text>
+    <Text ID="LOBBIES_LIST">Salas activas</Text>
+    <Text ID="NO_LOBBIES">No se han encontrado salas.</Text>
+    <Text ID="LOBBIES_LIST_VAL">...</Text>
+    <Text ID="REFRESH">Refrescar</Text>
+    <Text ID="YOUR_BEST_SCORE">Tu mejor puntuación:</Text>
+    <Text ID="LEADERBOARDS_PLAYERSCORE_VAL">...</Text>
+    <Text ID="PRESS_FIRE_TO_JOIN_NX">¡Pulsa L+R para unirte!</Text>
+    <Text ID="CONSOLE_PRESS_A">Pulsa A para continuar</Text>
+    <Text ID="CONSOLE_PRESS_CONTINUE">Pulsa {%1} para continuar</Text>
+    <Text ID="CONSOLE_TUTORIAL_INTERFACE_MAIN1">¡Acuérdate de usar también tu ataque alternativo!
+¿Se te olvidó la configuración del mando? Abre el menú de opciones y selecciona Controles del Mando.
+¡Pruébalo ahora!</Text>
+    <Text ID="NX_NETWORK_CONNECTING">Conectando a la red</Text>
+    <Text ID="NX_NETWORK_CONNECTING_TTL">Iniciando red</Text>
+    <Text ID="NX_COOP_LOCAL">Cooperativo local</Text>
+    <Text ID="NX_COOP_ONLINE">Cooperativo online</Text>
+    <Text ID="NX_HOST_FRIENDS">Crear partida para amigos</Text>
+    <Text ID="NX_JOIN_FRIENDS">Unirse a partida de amigos</Text>
+    <Text ID="NX_NEEDS_ACCOUNT">Se necesita una cuenta de Nintendo Switch Online para jugar en línea y ver los ránkings de puntuaciones.</Text>
+    <Text ID="NX_NETWORK_ERROR">Hubo un error de comunicación con los servicios en línea.</Text>
+    <Text ID="XB1_CHANGE_PROFILE">Cambiar perfil</Text>
+    <Text ID="XB1_USERNAME">Nombre de usuario</Text>
+    <Text ID="PS4_PRESS_X">Pulsa X para continuar</Text>
+    <Text ID="NX_JUMP_LEADERBOARDS">Salto = Puntuaciones</Text>
+    <Text ID="XB1_SIGN_OUT_MESSAGE">Ha habido un cambio de inicio de sesión. Vuelve a iniciar sesión o sal a la pantalla de título.</Text>
+    <Text ID="XB1_SIGN_IN">Iniciar sesión</Text>
+    <Text ID="CONSOLE_PORTING">Adaptación a consolas</Text>
+    <Text ID="CREDITS_CONSOLE">Sickhead Games</Text>
+    <Text ID="MOBILE_PORTING">Adaptación a móviles</Text>
+    <Text ID="CREDITS_MOBILE">...</Text>
+    <Text ID="QA">Control de calidad</Text>
+    <Text ID="CREDITS_QA">Whyttest</Text>
+    <Text ID="BUSINESS">Negocios</Text>
+    <Text ID="CREDITS_BUSINESS">Andreea-Medvedovici Per</Text>
+    <Text ID="SPECIAL_THANKS">Agradecimientos</Text>
+    <Text ID="CREDITS_SPECIAL_THANKS">Oreste "Axi0s" Gamba</Text>
+    <Text ID="LOBBY_WAS_FULL">La sesión está llena</Text>
+    <Text ID="MOD_INCOMPATIBLE_MSG">Warning! Incompatible mod, needs to be updated by the author! You can but it may crash the game!</Text>
+  </Texts>
+</PSTexts>

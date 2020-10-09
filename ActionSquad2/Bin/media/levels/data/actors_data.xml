@@ -1,0 +1,4648 @@
+<?xml version="1.0"?>
+
+<!-- 
+ANIMATIONS 
+==========
+format: <ANIM_NAME set0="BSX_ANIM_NAME" set1="BSX_ANIM_NAME" />
+-->
+<!-- 
+REF_POSE - has 3 frames: idle, crouched, dead - we read bbox, hitpoints from this animation
+-->
+<!-- * means mandatory-->
+<!-- classes: PASSIVE, PLAYER, TRAP, HUMAN-->
+<!-- *moveMaxSpeed, moveMinSpeed, moveBackSpeed -->
+<!-- anims: REF_POSE (for editor loading), *IDLE, *MOVE, *FALL, *SHOOT, JUMP, JUMP_STILL, SHOOT_ALT, DIE others are only mandatory for some classes:
+  IDLE	MOVE	MOVE_FAST	MOVE_BK	JUMP	JUMP_STILL	FALL	SHOOT	SHOOT_ALT	USE_GEAR	MELEE WALK_IN WALK_OUT TAUNT
+	DIE	DIE_ALT	IDLE_GUN	MOVE_GUN	MOVE_FAST_GUN	MOVE_BK_GUN	CLIMB_LADDER	RELOAD	MOVE_SHOOTING	MOVE_BK_SHOOTING	CROUCH	CROUCH_SHOOT	GET_UP	STUNNED	BREACH_DOOR	INTERACT
+  FEET_STILL FEET_IDLE FEET_MOVE FEET_MOVE_FAST FEET_CROUCH FEET_JUMP -->
+<!-- mass (default:1.0, infinite:0.0) - actor mass -->
+<!--
+fFOVpercent - between 0.0 and 1.0 which means between 0 and 180 degrees. Defaults on 0.7f
+
+fDexterity="1.0" - influences reload speed
+fRecoilModifier="1.0f" - influences aiming (lower is better)
+
+Armor = "10.0" - armor quantity
+nArmorDir = "1" - armor direction (0 all around, 1 front, -1 back)
+nArmorRating = "0" - armor AP class. Linked to weapons Armor Piercing property; -1 means shield takes all damage until it gets consumed. The rest of the damage gets inflicted upon the actor.
+sMaterial = "FLESH" - actor material FLESH/METAL/WALL
+nHUDPortraitFrame - frame index of player portrait painted on HUD (from PORTRAITS animation in igm_interface.bsx)
+fDexterity - percentage that influences reload speed (1.0 is default in percent)
+
+ACTION SCRIPTS:
+sScript_OnSpawn="SCRIPT_NAME" - if set it gets executed after spawning the actor (used mainly to add perks to weapons)
+
+EDITOR:
+The editor only loads tempaltes that have REF_POSE animation and that don't have bEditorEnable="false" attribute set
+-->
+
+
+
+<!-- AI -->
+<!--
+BEHAVIORS - they get executed one after another, looping.
+
+Behavior FLAGS and default values: 
+bCanInterrupt="true" - can it be interrupted?
+bDetectPlatforms="true" - does the AI detect platform ends?
+bIgnoreEvents="false" - usually used for PLAYER class and passive elements that don't interact much based on AI events (DEATH event always passes through) eg:security cameras, barrels, etc
+fBehaviorDuration="0.0f" - optional. sets the duration of the current behavior
+
+PREDEFINED BEHAVIORS:
+	AI_BEHAVIOR_IDLE (no params)
+  AI_BEHAVIOR_IDLE_CROUCHED - same as IDLE but starts crouched
+  params: fFadeOutDuration - fades out when behavior duration is set
+  
+  AI_BEHAVIOR_SET_ANIMSET - sets current animation set. WARNING: nAnimSet selection persists across STATES
+  params: nSet="0" - selected animation set (-1 for random)
+
+  AI_BEHAVIOR_SET_CAPS - sets actor caps
+  params: nNotATarget="0" - if not 0 then actor can't be killed or targeted
+  params: nHasExplosiveVest="0" - add or remove explosive vest
+  params: nCanBeDetonated="0" - add or remove remote detonation flag
+
+	AI_BEHAVIOR_PATROL - patrols between level limits (platform ends or walls)
+  params: fWaitTimer="1.0" - how much it waits after hitting wall, before changing direction
+  params: nRun="0" - patrols at higher speed
+  params: nOpenUnlockedDoors="0" - opens unlocked section doors and turns around after opening it. (needs canInteract="true")
+  
+  AI_BEHAVIOR_PATROL_BREAK_DOORS - patrol between level limits and attacks doors if weapon permits it
+  params: nRun="0" - patrols at higher speed
+  params: fWaitTimer="1.0" - how much it waits after hitting wall, before changing direction
+  params: fBreakProb="0.5" - probability to attack door
+  
+  AI_BEHAVIOR_RUN_AWAY - runs away from triggering events until obstacle encountered
+  params: nOpenUnlockedDoors="0" - opens unlocked section doors (needs canInteract="true")
+
+  AI_BEHAVIOR_ESCAPE_ARREST- runs away from players
+  params: nOpenUnlockedDoors="0" - opens unlocked section doors (needs canInteract="true")
+
+	AI_BEHAVIOR_SURPRISED - actor surprised (holds still, shows "!" symbol)
+  params: fWaitTimer="0.5" - how much it waits before changing behavior
+  
+	AI_BEHAVIOR_ATTACK - attacks target and keeps itself between attackMin and attackMax limits. Finishes when loses/kills target
+
+	AI_BEHAVIOR_ATTACK_COVER - attacks target and keeps itself between attackMin and attackMax limits. Finishes when loses/kills target
+
+  AI_BEHAVIOR_HUMAN_SHIELD_ATTACK - looks for a hostage and it takes it as human shield
+
+  AI_BEHAVIOR_WAIT_FOR_ACTION - waits for a door breach or for any other event that gives away the player. Positions itself correctly.
+  params: [fShootPeriod = "0.0"] - tells if the AI can shoot too in the direction of the event. doesn't shoot if not specified.
+  ! to exit the behavior just put fBehaviorDuration !
+
+	AI_BEHAVIOR_WAIT
+  params: (no params)
+  ! to exit the behavior just put fBehaviorDuration !
+
+  AI_BEHAVIOR_CHANGE_COLOR
+  params: [fTotalDuration = "0.0"] - instantaneous change
+  params: [fAlpha="1.0"] - destination alpha
+
+  AI_BEHAVIOR_FIND_CLOSEST_PLAYER - walks towards the closest player using teleporting doors to find him. Exits on direct line of sight and platform ending
+
+	AI_BEHAVIOR_BARREL_EXPLODING - Explosive barrel AI state
+  params: [nCanBurn="1"] - burns with flame and auto subtracts damage?
+
+  AI_BEHAVIOR_SHOW_ENEMY - adds a SEE_ENEMY event to nearby foes (no anim plays)
+  params: sVerseName="TAUNT" - sound verse to be played
+  params: sAnimIdentifier="TAUNT" - if missing no animation gets played and action is done instantly
+
+  AI_BEHAVIOR_PLAY_ANIM - plays animation for specified command
+  params: sAnimIdentifier="IDLE/MOVE/etc"
+  params: [fDestAlpha="1.0"] - commands final alpha. !!Works only with fBehaviorDuration!!
+
+  AI_BEHAVIOR_RUN_SCRIPT - runs script set in editor(self script). Actually does a Touch action on itself.
+  params: bTouchTarget="0" - does it touch target too (runs it's script)?
+  params: sScriptOverride="SCRIPT_NAME" - runs selected script
+  params: bWaitScriptEnd="0" - waits for the script to end before ending behavior
+  
+  AI_BEHAVIOR_GENERATE_EFFECT - generates graphics effect at actor's heart position
+  params: fSize="1.0" - optional, effect size
+  params: sEffectType - EFFECT_ELECTRIC_BREAK_SPARKS, tbc...
+
+  AI_BEHAVIOR_PLAY_VERSE - plays a verse and finishes immediately
+  params: sVerseName: TAUNT, RELOADING, DIE, KILL_MADE, etc (see actors definitions below)
+
+  AI_BEHAVIOR_DETONATE_NEARBY - detonates a nearby target when animation ends, reaches action flag or instantly if animation identifier not specified
+  params: sAnimIdentifier="IDLE/MOVE/etc"
+  
+  AI_BEHAVIOR_HOSTAGE - special hostage behavior
+  params: fRunProbability="0.0" - between 0 and 1 - specifies probabiolity to run towards the player
+
+  AI_BEHAVIOR_PLAYER_CONTROL - Player AI state
+  params: mandatory: bCanInterrupt="false" bDetectPlatforms="false"
+
+  AI_BEHAVIOR_PLAYER_TEAM_TELEPORT - used for multiplayer door teleport (with timer)
+  params: none
+  
+	AI_BEHAVIOR_SET_STATE - sets a state
+  params: sState="STATE_NAME from actor states"
+  
+  AI_BEHAVIOR_FLEE - runs away from target actor or event
+  params: fFleeDistance="128.0" - distance to put between actor and event. If missing fDist=template.distHear
+  
+  AI_BEHAVIOR_BLIND_RUN - runs blindly, turns on collisions or platform ends
+  params: [fFadeOutDuration="0.0"] - commands fade out on actor. !!Works only with fBehaviorDuration!!
+  
+  AI_BEHAVIOR_SUICIDE - it commits suicide
+  params: [sDeathCommand="ACT_DEATHCMD_NONE"] - it commands the death effect (ACT_DEATHCMD_NONE,ACT_DEATHCMD_RESET_TO_ZERO,ACT_DEATHCMD_RUNSCRIPT,ACT_DEATHCMD_SPLAT,ACT_DEATHCMD_DEALLOCATE)
+
+  AI_BEHAVIOR_DEAD - generic dead state. Handles exploding bodies and such.
+  params: [sDeathCommand="ACT_DEATHCMD_NONE"] - it commands the death effect (ACT_DEATHCMD_NONE,ACT_DEATHCMD_RESET_TO_ZERO,ACT_DEATHCMD_RUNSCRIPT,ACT_DEATHCMD_SPLAT,ACT_DEATHCMD_DEALLOCATE)
+  params: [sDeathScript="SCRIPT_NAME"] - it runs the script when animation finishes. !Doesn't run if sDeathCommand is set!
+  params: [fSplatTimer="0.0"] - if set, body splats after a while
+-->
+
+
+<ActorTemplates>
+
+  <ACTOR_PLAYER_ASSAULTER bEditorEnabled="false" AIstate="DEFAULT" Life="100.0" Armor="0.0" jumpSpeed="-270.0" climbSpeed="30.0" moveMaxSpeed="75.0" moveMinSpeed="75.0" moveBackSpeed="50.0" fDexterity="1.0" distSee="400.0" 
+                          fMass="10.0" class="PLAYER" sMaterial="FLESH"
+                          weapon="WPN_SMG_MP5A3" weaponAlt="WPN_SUBMACHINE_STEADY" weaponMelee="WPN_PLAYER_MELEE" weaponBreach="WPN_PLAYER_BREACH_MELEE"
+                          canJump="true" canCrouch="true" canCover="true" canClimb="true" canInteract="true" bComposedAnimation="true" nHUDPortraitFrame="0" >
+    <ANIMS>
+      <REF_POSE set0="ASSAULTER_REF_POSE" />
+
+      <IDLE set0="ASSAULTER_IDLE" />
+      <MOVE set0="ASSAULTER_RUN" />
+      <MOVE_FAST set0="ASSAULTER_RUN" />
+      <JUMP set0="ASSAULTER_JUMP" />
+      <SHOOT set0="ASSAULTER_SHOOT_STILL" />
+      <SHOOT_ALT set0="ASSAULTER_AIMED_SHOT" />
+      <USE_GEAR set0="ASSAULTER_GRENADE" />
+      <MELEE set0="ASSAULTER_MELEE" />
+      <RELOAD set0="ASSAULTER_RELOAD" />
+      <DIE set0="ASSAULTER_DIE1" />
+      <CLIMB_LADDER set0="ASSAULTER_CLIMB_LADDER" />
+      <BREACH_DOOR set0="ASSAULTER_MELEE" />
+      <INTERACT set0="ASSAULTER_FIDDLE" />
+      <WALK_IN set0="ASSAULTER_WALK_IN" />
+      <WALK_OUT set0="ASSAULTER_WALK_OUT" />
+      <TELEPORT_IN set0="ASSAULTER_TELEPORT_IN1" set1="ASSAULTER_TELEPORT_IN2" />
+      <!-- feet anim -->
+      <FEET_STILL set0="ASSAULTER_FEET_STILL" />
+      <FEET_IDLE set0="ASSAULTER_FEET_IDLE" />
+      <FEET_MOVE set0="ASSAULTER_FEET_WALK" />
+      <FEET_MOVE_FAST set0="ASSAULTER_FEET_WALK" />
+      <FEET_CROUCH set0="ASSAULTER_FEET_CROUCH" />
+      <FEET_JUMP set0="ASSAULTER_FEET_JUMP" />
+    </ANIMS>
+
+    <!-- sound mapping for different actions -->
+    <VERSES>
+      <START_GAME set0="VOICE_ASSAULTER_LOCKNLOAD" />
+      <JOIN_GAME set0="VOICE_ASSAULTER_LETSDOTHIS" />
+      <DIE set0="VOICE_ASSAULTER_DYING" set1="VOICE_ASSAULTER_DYING2" />
+      <USE_GRENADE set0="VOICE_ASSAULTER_FRAGOUT" set1="VOICE_ASSAULTER_POPPINGFRAG" />
+      <USE_BREACHING_CHARGE set0="VOICE_ASSAULTER_CHARGEREADY" set1="VOICE_ASSAULTER_CHARGEUP" />
+      <USE_FLASHBANG set0="VOICE_ASSAULTER_FLASHBANG" set1="VOICE_ASSAULTER_FLASHING" />
+      <USE_SMOKE set0="VOICE_ASSAULTER_SMOKEOUT" set1="VOICE_ASSAULTER_POPPINGSMOKE" />
+      <RELOADING set0="VOICE_ASSAULTER_RELOADING" />
+      <BOMB_LOCATED set0="VOICE_ASSAULTER_BOMBLOCATED" />
+      <BOMB_DEFUSING set0="VOICE_ASSAULTER_DEFUSING" />
+      <BOMB_DEFUSED set0="VOICE_ASSAULTER_BOMBDEFUSED" />
+      <TAKING_DAMAGE set0="VOICE_ASSAULTER_WOUNDED" set1="VOICE_ASSAULTER_WOUNDED2" />
+    </VERSES>
+
+    <AI>
+      <STATE name="DEFAULT">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAYER_CONTROL" bCanInterrupt="false" bDetectPlatforms="false" bIgnoreEvents="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- This state "TEAM_TELEPORT" is hardcoded into the game. Used in DoorKickers when entering doors -->
+      <STATE name="TEAM_TELEPORT" nPriority="8">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_IN" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAYER_TEAM_TELEPORT" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_OUT" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- This state "SOLO_TELEPORT" is hardcoded into the game. Used in DoorKickers when entering doors -->
+      <STATE name="SOLO_TELEPORT" nPriority="8">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_IN" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_TELEPORT_TO_TOUCHABLE_TARGET" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_OUT" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+
+      <!-- this state is used for players that missed entering doors and is hardcoded into the game -->
+      <STATE name="IN_LIMBO" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_IN_LIMBO" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="JOIN_GAME" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TELEPORT_IN" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+      
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+    
+  </ACTOR_PLAYER_ASSAULTER>
+
+  <ACTOR_PLAYER_BREACHER bEditorEnabled="false" AIstate="DEFAULT" Life="100.0" Armor="0.0" jumpSpeed="-270.0" climbSpeed="30.0" moveMaxSpeed="75.0" moveMinSpeed="75.0" moveBackSpeed="50.0" fDexterity="1.0" distSee="400.0" 
+                         fMass="10.0" weapon="WPN_SHOTGUN_M590" weaponMelee="WPN_PLAYER_MELEE" weaponBreach="WPN_PLAYER_BREACH_MELEE"
+                         class="PLAYER" sMaterial="FLESH"
+                         canJump="true" canCrouch="true" canCover="true" canClimb="true" canInteract="true" bComposedAnimation="true" nHUDPortraitFrame="1" >
+    <ANIMS>
+      <REF_POSE set0="BREACHER_REF_POSE" />
+      <IDLE set0="BREACHER_IDLE" />
+      <MOVE set0="BREACHER_WALK" />
+      <MOVE_FAST set0="BREACHER_WALK" />
+      <JUMP set0="BREACHER_JUMP" />
+      <SHOOT set0="BREACHER_SHOOT" />
+      <SHOOT_ALT set0="BREACHER_SHOOT_ALT" />
+      <USE_GEAR set0="BREACHER_GRENADE" />
+      <MELEE set0="BREACHER_MELEE" />
+      <RELOAD set0="BREACHER_RELOAD" />
+      <DIE set0="BREACHER_DIE1" />
+      <CLIMB_LADDER set0="BREACHER_CLIMB" />
+      <BREACH_DOOR set0="BREACHER_MELEE" />
+      <INTERACT set0="BREACHER_FIDDLE" />
+      <WALK_IN set0="BREACHER_WALK_IN" />
+      <WALK_OUT set0="BREACHER_WALK_OUT" />
+      <TELEPORT_IN set0="BREACHER_TELEPORT_IN1" set1="BREACHER_TELEPORT_IN2" />
+      <!-- feet anim -->
+      <FEET_STILL set0="BREACHER_FEET_STILL" />
+      <FEET_IDLE set0="BREACHER_FEET_IDLE" />
+      <FEET_MOVE set0="BREACHER_FEET_WALK" />
+      <FEET_MOVE_FAST set0="BREACHER_FEET_WALK" />
+      <FEET_CROUCH set0="BREACHER_FEET_CROUCH" />
+      <FEET_JUMP set0="BREACHER_FEET_JUMP" />
+    </ANIMS>
+  
+    <!-- sound mapping for different actions -->
+    <VERSES>
+      <START_GAME set0="VOICE_BREACHER_BROUGHTTHEGUN" />
+      <JOIN_GAME set0="VOICE_BREACHER_YOURANG" />
+      <DIE set0="VOICE_BREACHER_DYING" set1="VOICE_BREACHER_DYING2" />
+      <USE_GRENADE set0="VOICE_BREACHER_FRAGOUT" set1="VOICE_BREACHER_POPPINGFRAG" />
+      <USE_BREACHING_CHARGE set0="VOICE_BREACHER_CHARGEUP" set1="VOICE_BREACHER_CHARGEREADY" />
+      <USE_FLASHBANG set0="VOICE_BREACHER_FLASHOUT" set1="VOICE_BREACHER_POPPINGFLASH" />
+      <USE_SMOKE set0="VOICE_BREACHER_SMOKEOUT" set1="VOICE_BREACHER_POPPINGSMOKE" />
+      <RELOADING set0="VOICE_BREACHER_RELOADING" />
+      <BOMB_LOCATED set0="VOICE_BREACHER_BOMBONSCREEN" />
+      <BOMB_DEFUSING set0="VOICE_BREACHER_DEFUSING" />
+      <BOMB_DEFUSED set0="VOICE_BREACHER_BOMBNEUTRALIZED" />
+      <TAKING_DAMAGE set0="VOICE_BREACHER_WOUNDED" set1="VOICE_BREACHER_WOUNDED2" />
+    </VERSES>
+      
+    <AI>
+      <STATE name="DEFAULT">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAYER_CONTROL" bCanInterrupt="false" bDetectPlatforms="false" bIgnoreEvents="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- State used for TEAM doors with slots -->
+      <STATE name="TEAM_TELEPORT" nPriority="8">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_IN" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAYER_TEAM_TELEPORT" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_OUT" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+      <!-- This state "SOLO_TELEPORT" is hardcoded into the game. Used in DoorKickers when entering doors -->
+      <STATE name="SOLO_TELEPORT" nPriority="8">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_IN" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_TELEPORT_TO_TOUCHABLE_TARGET" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_OUT" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- this state is used for players that missed entering doors and is hardcoded into the game -->
+      <STATE name="IN_LIMBO" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_IN_LIMBO" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="JOIN_GAME" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TELEPORT_IN" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+
+  </ACTOR_PLAYER_BREACHER>
+
+
+  <!-- SHIELD player class -->
+  <ACTOR_PLAYER_SHIELD bEditorEnabled="false" AIstate="DEFAULT" Life="100.0" Armor="300.0" nArmorDir="1" nArmorRating="2" jumpSpeed="-270.0" climbSpeed="30.0" moveMaxSpeed="75.0" moveMinSpeed="75.0" moveBackSpeed="50.0" fDexterity="1.0" distSee="400.0"
+                       fMass="15.0" weapon="WPN_PISTOL_G17" weaponMelee="WPN_PLAYER_MELEE" weaponBreach="WPN_PLAYER_BREACH_MELEE"
+                       class="PLAYER" sMaterial="FLESH"
+                       canJump="true" canCrouch="true" canCover="true" canClimb="true" canInteract="true" bComposedAnimation="true" nHUDPortraitFrame="2" >
+    <ANIMS>
+      <REF_POSE set0="SHIELDGUN_REF_POSE" />
+
+      <IDLE set0="SHIELDGUN_IDLE" />
+      <MOVE set0="SHIELDGUN_RUN" />
+      <MOVE_FAST set0="SHIELDGUN_RUN" />
+      <JUMP set0="SHIELDGUN_JUMP" />
+      <SHOOT set0="SHIELDGUN_SHOOT" />
+      <SHOOT_ALT set0="SHIELDGUN_BASH" />
+      <USE_GEAR set0="SHIELDGUN_GRENADE" />
+      <MELEE set0="SHIELDGUN_MELEE" />
+      <RELOAD set0="SHIELDGUN_RELOAD" />
+      <DIE set0="SHIELDGUN_DIE1" />
+      <CLIMB_LADDER set0="SHIELDGUN_CLIMB" />
+      <BREACH_DOOR set0="SHIELDGUN_MELEE" />
+      <INTERACT set0="SHIELDGUN_FIDDLE" />
+      <WALK_IN set0="SHIELD_WALK_IN" />
+      <WALK_OUT set0="SHIELD_WALK_OUT" />
+      <TELEPORT_IN set0="SHIELD_TELEPORT_IN1" set1="SHIELD_TELEPORT_IN2" />
+      <!-- feet anim -->
+      <FEET_STILL set0="ASSAULTER_FEET_STILL" />
+      <FEET_IDLE set0="ASSAULTER_FEET_IDLE" />
+      <FEET_MOVE set0="ASSAULTER_FEET_WALK" />
+      <FEET_MOVE_FAST set0="ASSAULTER_FEET_WALK" />
+      <FEET_CROUCH set0="ASSAULTER_FEET_CROUCH" />
+      <FEET_JUMP set0="ASSAULTER_FEET_JUMP" />
+    </ANIMS>
+
+    <!-- sound mapping for different actions -->
+    <VERSES>
+      <START_GAME set0="VOICE_SHIELD_COMEONCREEPS" />
+      <JOIN_GAME set0="VOICE_SHIELD_STAYBEHINDME" />
+      <DIE set0="VOICE_SHIELD_DYING" set1="VOICE_SHIELD_DYING2" />
+      <USE_GRENADE set0="VOICE_SHIELD_FRAG" set1="VOICE_SHIELD_FRAGOUT" />
+      <USE_BREACHING_CHARGE set0="VOICE_SHIELD_CHARGEON" set1="VOICE_SHIELD_READYTOBLOW" />
+      <USE_FLASHBANG set0="VOICE_SHIELD_FLASHOUT" set1="VOICE_SHIELD_FLASH" />
+      <USE_SMOKE set0="VOICE_SHIELD_SMOKEOUT" set1="VOICE_SHIELD_POPPINGSMOKE" />
+      <RELOADING set0="VOICE_SHIELD_RELOADING" />
+      <BOMB_LOCATED set0="VOICE_SHIELD_THATSTHEBOMB" />
+      <BOMB_DEFUSING set0="VOICE_SHIELD_DEFUSING" />
+      <BOMB_DEFUSED set0="VOICE_SHIELD_BOMBDEFUSED" />
+      <TAKING_DAMAGE set0="VOICE_SHIELD_WOUNDED" set1="VOICE_SHIELD_WOUNDED2" />
+    </VERSES>
+      
+    <AI>
+      <STATE name="DEFAULT">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAYER_CONTROL" bCanInterrupt="false" bDetectPlatforms="false" bIgnoreEvents="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- State used for TEAM doors with slots -->
+      <STATE name="TEAM_TELEPORT" nPriority="8">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_IN" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAYER_TEAM_TELEPORT" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_OUT" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+      <!-- This state "SOLO_TELEPORT" is hardcoded into the game. Used in DoorKickers when entering doors -->
+      <STATE name="SOLO_TELEPORT" nPriority="8">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_IN" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_TELEPORT_TO_TOUCHABLE_TARGET" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_OUT" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- this state is used for players that missed entering doors and is hardcoded into the game -->
+      <STATE name="IN_LIMBO" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_IN_LIMBO" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="JOIN_GAME" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TELEPORT_IN" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+  </ACTOR_PLAYER_SHIELD>
+
+  <!-- FBI AGENT player class -->
+  <ACTOR_PLAYER_FBI_AGENT bEditorEnabled="false" AIstate="DEFAULT" Life="100.0" Armor="60.0" nArmorDir="0" nArmorRating="1" jumpSpeed="-270.0" climbSpeed="30.0" moveMaxSpeed="95.0" moveMinSpeed="90.0" moveBackSpeed="50.0" fDexterity="1.0" distSee="400.0"
+                       fMass="15.0" weapon="WPN_PISTOL_G17" weaponMelee="WPN_FBI_KNIFE" weaponBreach="WPN_PLAYER_BREACH_MELEE_FBI"
+                          class="PLAYER" sMaterial="FLESH"
+                       canJump="true" canCrouch="true" canCover="true" canClimb="true" canInteract="true" canRoll="true" bComposedAnimation="true" nHUDPortraitFrame="3" >
+    <ANIMS>
+      <REF_POSE set0="FBI_REF_POSE" />
+
+      <IDLE set0="FBI_WALK_GUN" />
+      <MOVE set0="FBI_WALK_GUN" />
+      <MOVE_FAST set0="FBI_WALK_GUN" />
+      <JUMP set0="FBI_JUMP" />
+      <SHOOT set0="FBI_SHOOT" />
+      <SHOOT_ALT set0="FBI_DOUBLE_TAP" />
+      <USE_GEAR set0="FBI_GRENADE" />
+      <MELEE set0="FBI_MELEE1" set1="FBI_MELEE2" />
+      <RELOAD set0="FBI_RELOAD" />
+      <DIE set0="FBI_DIE1" />
+      <CLIMB_LADDER set0="FBI_CLIMB" />
+      <BREACH_DOOR set0="FBI_KICK" />
+      <INTERACT set0="FBI_FIDDLE" />
+      <WALK_IN set0="FBI_WALK_IN" />
+      <WALK_OUT set0="FBI_WALK_OUT" />
+      <TELEPORT_IN set0="FBI_TELEPORT_IN1" set1="FBI_TELEPORT_IN2" />
+      <ROLL set0="FBI_ROLL" />
+      <!-- feet anim -->
+      <FEET_STILL set0="FBI_FEET_STILL" />
+      <FEET_IDLE set0="FBI_FEET_IDLE" />
+      <FEET_MOVE set0="FBI_FEET_WALK" />
+      <FEET_MOVE_FAST set0="FBI_FEET_WALK" />
+      <FEET_CROUCH set0="FBI_FEET_CROUCH" />
+      <FEET_JUMP set0="FBI_FEET_JUMP" />
+    </ANIMS>
+
+    <!-- sound mapping for different actions -->
+    <VERSES>
+      <START_GAME set0="VOICE_FBI_AGENTS" />
+      <JOIN_GAME set0="VOICE_FBI_EASYNOW" />
+      <DIE set0="VOICE_FBI_DYING" set1="VOICE_FBI_DYING2" />
+      <USE_GRENADE set0="VOICE_FBI_FRAGOUT" set1="VOICE_FBI_GRENADEOUT" />
+      <USE_BREACHING_CHARGE set0="VOICE_FBI_BREACHUP" set1="VOICE_FBI_CHARGEREADY" />
+      <USE_FLASHBANG set0="VOICE_FBI_FLASHBANG" set1="VOICE_FBI_FLASHOUT" />
+      <USE_SMOKE set0="VOICE_FBI_SMOKEOUT" set1="VOICE_FBI_YOUGOTSMOKE" />
+      <RELOADING set0="VOICE_FBI_LOADING" set1="VOICE_FBI_RELOADING" />
+      <BOMB_LOCATED set0="VOICE_FBI_BOMBLOCATED" />
+      <BOMB_DEFUSING set0="VOICE_FBI_DEFUSING" />
+      <BOMB_DEFUSED set0="VOICE_FBI_BOMBDEFUSED" />
+      <TAKING_DAMAGE set0="VOICE_FBI_WOUNDED" set1="VOICE_FBI_WOUNDED2" />
+    </VERSES>
+
+    <AI>
+      <STATE name="DEFAULT">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAYER_CONTROL" bCanInterrupt="false" bDetectPlatforms="false" bIgnoreEvents="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- State used for TEAM doors with slots -->
+      <STATE name="TEAM_TELEPORT" nPriority="8">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_IN" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAYER_TEAM_TELEPORT" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_OUT" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+      <!-- This state "SOLO_TELEPORT" is hardcoded into the game. Used in DoorKickers when entering doors -->
+      <STATE name="SOLO_TELEPORT" nPriority="8">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_IN" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_TELEPORT_TO_TOUCHABLE_TARGET" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_OUT" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- this state is used for players that missed entering doors and is hardcoded into the game -->
+      <STATE name="IN_LIMBO" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_IN_LIMBO" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="JOIN_GAME" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TELEPORT_IN" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+  </ACTOR_PLAYER_FBI_AGENT>
+
+  
+  <ACTOR_PLAYER_RECON bEditorEnabled="false" AIstate="DEFAULT" Life="100.0" Armor="0.0" jumpSpeed="-270.0" climbSpeed="30.0" moveMaxSpeed="81.0" moveMinSpeed="81.0" moveBackSpeed="50.0" fDexterity="1.0" distSee="400.0" 
+                      fMass="10.0" class="PLAYER" sMaterial="FLESH"
+                      weapon="WPN_SMG_MP5A3" weaponAlt="WPN_SUBMACHINE_STEADY" weaponMelee="WPN_PLAYER_MELEE" weaponBreach="WPN_PLAYER_BREACH_MELEE"
+                      canJump="true" canCrouch="true" canCover="true" canClimb="true" canInteract="true" bComposedAnimation="true" nHUDPortraitFrame="4" >
+    <ANIMS>
+      <REF_POSE set0="RECON_REF_POSE" />
+
+      <IDLE set0="RECON_IDLE" />
+      <MOVE set0="RECON_WALK" />
+      <MOVE_FAST set0="RECON_WALK" />
+      <JUMP set0="RECON_JUMP" />
+      <SHOOT set0="RECON_SHOOT" />
+      <SHOOT_ALT set0="RECON_SHOOT" />
+      <USE_GEAR set0="RECON_GRENADE" />
+      <MELEE set0="RECON_MELEE" />
+      <RELOAD set0="RECON_RELOAD" />
+      <DIE set0="RECON_DIE" />
+      <CLIMB_LADDER set0="RECON_CLIMB" />
+      <BREACH_DOOR set0="RECON_MELEE" />
+      <INTERACT set0="RECON_FIDDLE" />
+      <LOCKPICK set0="RECON_LOCKPICK" />
+      <WALK_IN set0="RECON_WALK_IN" />
+      <WALK_OUT set0="RECON_WALK_OUT" />
+      <TELEPORT_IN set0="RECON_TELEPORT_IN1" set1="RECON_TELEPORT_IN2" />
+      <!-- feet anim -->
+      <FEET_STILL set0="RECON_FEET_STILL" />
+      <FEET_IDLE set0="RECON_FEET_IDLE" />
+      <FEET_MOVE set0="RECON_FEET_WALK" />
+      <FEET_MOVE_FAST set0="RECON_FEET_WALK" />
+      <FEET_CROUCH set0="RECON_FEET_CROUCH" />
+      <FEET_JUMP set0="RECON_FEET_JUMP" />
+    </ANIMS>
+
+    <!-- sound mapping for different actions -->
+    <VERSES>
+      <START_GAME set0="VOICE_RECON_FIRSTIN" />
+      <JOIN_GAME set0="VOICE_RECON_TAKEFIVE" />
+      <DIE set0="VOICE_RECON_DYING" set1="VOICE_RECON_DYING2" />
+      <USE_GRENADE set0="VOICE_RECON_FRAGOUT" set1="VOICE_RECON_NADEOUT" />
+      <USE_BREACHING_CHARGE set0="VOICE_RECON_CHARGEREADY" set1="VOICE_RECON_CHARGEUP" />
+      <USE_FLASHBANG set0="VOICE_RECON_FLASHOUT" set1="VOICE_RECON_HITTHEM" />
+      <USE_SMOKE set0="VOICE_RECON_SMOKEOUT" set1="VOICE_RECON_POPPINGSMOKE" />
+      <RELOADING set0="VOICE_RECON_RELOADING" set1="VOICE_RECON_CHANGINGMAG" />
+      <BOMB_LOCATED set0="VOICE_RECON_BOMBLOCATED" />
+      <BOMB_DEFUSING set0="VOICE_RECON_DEFUSING" />
+      <BOMB_DEFUSED set0="VOICE_RECON_BOMBDEFUSED" />
+      <TAKING_DAMAGE set0="VOICE_RECON_WOUNDED" set1="VOICE_RECON_WOUNDED2" />
+      <LOCKPICK_START set0="VOICE_RECON_UNLOCKING" />
+    </VERSES>
+
+    <AI>
+      <STATE name="DEFAULT">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAYER_CONTROL" bCanInterrupt="false" bDetectPlatforms="false" bIgnoreEvents="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- This state "TEAM_TELEPORT" is hardcoded into the game. Used in DoorKickers when entering doors -->
+      <STATE name="TEAM_TELEPORT" nPriority="8">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_IN" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAYER_TEAM_TELEPORT" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_OUT" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- This state "SOLO_TELEPORT" is hardcoded into the game. Used in DoorKickers when entering doors -->
+      <STATE name="SOLO_TELEPORT" nPriority="8">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_IN" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_TELEPORT_TO_TOUCHABLE_TARGET" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_OUT" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+
+      <!-- this state is used for players that missed entering doors and is hardcoded into the game -->
+      <STATE name="IN_LIMBO" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_IN_LIMBO" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="JOIN_GAME" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TELEPORT_IN" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+      
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+    
+  </ACTOR_PLAYER_RECON>
+
+
+  <ACTOR_PLAYER_OFFDUTYGUY bEditorEnabled="false" AIstate="DEFAULT" Life="100.0" Armor="0.0" jumpSpeed="-270.0" climbSpeed="30.0" moveMaxSpeed="75.0" moveMinSpeed="75.0" moveBackSpeed="50.0" fDexterity="1.0" distSee="400.0" 
+                          fMass="10.0" class="PLAYER" sMaterial="FLESH"
+                          weapon="WPN_CARABINE_M4A1" weaponAlt="WPN_SUBMACHINE_STEADY" weaponMelee="WPN_PLAYER_MELEE" weaponBreach="WPN_PLAYER_BREACH_MELEE"
+                          canJump="true" canCrouch="true" canCover="true" canClimb="true" canInteract="true" bComposedAnimation="true" nHUDPortraitFrame="5" >
+    <ANIMS>
+      <REF_POSE set0="OFFG_REF_POSE" />
+
+      <IDLE set0="OFFG_IDLE" />
+      <MOVE set0="OFFG_WALK" />
+      <MOVE_FAST set0="OFFG_WALK" />
+      <JUMP set0="OFFG_JUMP" />
+      <SHOOT set0="OFFG_SHOOT" />
+      <SHOOT_ALT set0="OFFG_SHOOT_AIMED" />
+      <USE_GEAR set0="OFFG_GRENADE" />
+      <MELEE set0="OFFG_MELEE" />
+      <RELOAD set0="OFFG_RELOAD" />
+      <DIE set0="OFFG_DIE" />
+      <CLIMB_LADDER set0="OFFG_CLIMB" />
+      <BREACH_DOOR set0="OFFG_MELEE" />
+      <INTERACT set0="OFFG_FIDDLE" />
+      <WALK_IN set0="OFFG_WALK_IN" />
+      <WALK_OUT set0="OFFG_WALK_OUT" />
+      <TELEPORT_IN set0="OFFG_TELEPORT_IN1" set1="OFFG_TELEPORT_IN2" />
+      <!-- feet anim -->
+      <FEET_STILL set0="OFFG_FEET_STILL" />
+      <FEET_IDLE set0="OFFG_FEET_IDLE" />
+      <FEET_MOVE set0="OFFG_FEET_WALK" />
+      <FEET_MOVE_FAST set0="OFFG_FEET_WALK" />
+      <FEET_CROUCH set0="OFFG_FEET_CROUCH" />
+      <FEET_JUMP set0="OFFG_FEET_JUMP" />
+    </ANIMS>
+
+    <!-- sound mapping for different actions -->
+    <VERSES>
+      <START_GAME set0="VOICE_OFFDUTY_IMPORTANT" />
+      <JOIN_GAME set0="VOICE_OFFDUTY_MYOWNTIME" />
+      <DIE set0="VOICE_OFFDUTY_DYING" set1="VOICE_OFFDUTY_DYING2" />
+      <USE_GRENADE set0="VOICE_OFFDUTY_FRAG" set1="VOICE_OFFDUTY_LIGHTSOUT" />
+      <USE_BREACHING_CHARGE set0="VOICE_OFFDUTY_CHARGEREADY" set1="VOICE_OFFDUTY_CHARGEUP" />
+      <USE_FLASHBANG set0="VOICE_OFFDUTY_STUN" set1="VOICE_OFFDUTY_FLASH" />
+      <USE_SMOKE set0="VOICE_OFFDUTY_HAZE" set1="VOICE_OFFDUTY_SCREENING" />
+      <RELOADING set0="VOICE_OFFDUTY_RELOADING" />
+      <BOMB_LOCATED set0="VOICE_OFFDUTY_BOMBLOCATED" />
+      <BOMB_DEFUSING set0="VOICE_OFFDUTY_FUSE" />
+      <BOMB_DEFUSED set0="VOICE_OFFDUTY_BOMBDEFUSED" />
+      <TAKING_DAMAGE set0="VOICE_OFFDUTY_WOUNDED" set1="VOICE_OFFDUTY_WOUNDED2" />
+    </VERSES>
+
+    <AI>
+      <STATE name="DEFAULT">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAYER_CONTROL" bCanInterrupt="false" bDetectPlatforms="false" bIgnoreEvents="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- This state "TEAM_TELEPORT" is hardcoded into the game. Used in DoorKickers when entering doors -->
+      <STATE name="TEAM_TELEPORT" nPriority="8">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_IN" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAYER_TEAM_TELEPORT" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_OUT" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- This state "SOLO_TELEPORT" is hardcoded into the game. Used in DoorKickers when entering doors -->
+      <STATE name="SOLO_TELEPORT" nPriority="8">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_IN" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_TELEPORT_TO_TOUCHABLE_TARGET" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="WALK_OUT" bCanInterrupt="false" fBehaviorDuration="0.5" fDestAlpha="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+
+      <!-- this state is used for players that missed entering doors and is hardcoded into the game -->
+      <STATE name="IN_LIMBO" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_IN_LIMBO" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="JOIN_GAME" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TELEPORT_IN" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEFAULT" />
+        </BEHAVIORS>
+      </STATE>
+      
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+    
+  </ACTOR_PLAYER_OFFDUTYGUY>
+  
+  
+  <!-- ENEMIES -->
+
+  <ACTOR_MACHETTE AIstate="IDLE" Life="100.0" Armor="0.0" moveMinSpeed="24.0" moveMaxSpeed="170.0" moveBackSpeed="50.0" jumpSpeed="-150.0" fDexterity="1.0" weapon="WPN_MELEE_MACHETTE"
+                  canJump="true" fMass="10.0" distSee="260.0" distHear="64.0" distAttackMax="28.0" distAttackMin="12.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25" >
+    <ANIMS>
+      <REF_POSE set0="MACHETTE_REF_POSE" />
+      
+      <IDLE set0="MACHETTE_IDLE" />
+      <MOVE set0="MACHETTE_WALK" />
+      <MOVE_FAST set0="MACHETTE_RUN" />
+      <SHOOT set0="MACHETTE_ATTACK1" set1="MACHETTE_ATTACK2" />
+      <DIE set0="MACHETTE_DIE1" />
+      <STUNNED set0="MACHETTE_IDLE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_MACHETE_KILLED" set1="VOICE_MACHETE_KILLED2" />
+      <KILL_MADE set0="VOICE_MACHETE_VICTORIOUS" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+    
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="-1" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" fWaitTimer="1.0" bDetectPlatforms="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.25" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- this state is used to find a player through a door/teleporter -->
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+  </ACTOR_MACHETTE>
+
+  
+  <ACTOR_MADMACHETE AIstate="IDLE" Life="100.0" Armor="0.0" moveMinSpeed="24.0" moveMaxSpeed="150.0" moveBackSpeed="50.0" jumpSpeed="-150.0" fDexterity="1.0" weapon="WPN_MADMACHETE_MELEE" weaponAlt="WPN_MADMACHETE_EXECUTE"
+                  canJump="true" fMass="10.0" distSee="260.0" distHear="64.0" distAttackMax="28.0" distAttackMin="12.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25" >
+    <ANIMS>
+      <REF_POSE set0="MADMACHETE_REF_POSE" />
+
+      <IDLE set0="MADMACHETE_IDLE" />
+      <MOVE set0="MADMACHETE_WALK" />
+      <MOVE_FAST set0="MADMACHETE_RUN" />
+      <SHOOT set0="MADMACHETE_ATTACK" />
+      <SHOOT_ALT set0="MADMACHETE_EXECUTE" />
+      <DIE set0="MADMACHETE_DIE" />
+      <STUNNED set0="MADMACHETE_IDLE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_MADMACHETE_KILLED" set1="VOICE_MADMACHETE_KILLED2" />
+      <KILL_MADE set0="VOICE_MADMACHETE_VICTORIOUS" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" fWaitTimer="1.0" bDetectPlatforms="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.25" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK_BACKSTAB" bCanInterrupt="false" bDetectPlatforms="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- this state is used to find a player through a door/teleporter -->
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+  </ACTOR_MADMACHETE>
+
+
+  <ACTOR_BLOWUPBART AIstate="IDLE" Life="100.0" Armor="0.0" moveMinSpeed="40.0" moveMaxSpeed="150.0" distSee="240.0" distHear="64.0" distAttackMax="30.0" fDexterity="1.0" weapon="WPN_INSTANT_EXPLO"
+                    hasExplosiveVest="true"
+                    fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25">
+    <ANIMS>
+      <REF_POSE set0="BLOWUP_REF_POSE" />
+      
+      <IDLE set0="BLOWUP_IDLE" />
+      <MOVE set0="BLOWUP_WALK" />
+      <MOVE_FAST set0="BLOWUP_RUN" />
+      <DIE set0="BLOWUP_DIE1" />
+      <SHOOT set0="BLOWUP_DIE2_EXPLO" />
+      <STUNNED set0="BLOWUP_IDLE" />
+    </ANIMS>
+
+    <VERSES>
+      <TAUNT set0="VOICE_BLOWUPBART_THREATEN" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" fWaitTimer="1.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" /> 
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bDetectPlatforms="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+  </ACTOR_BLOWUPBART>
+
+  <ACTOR_MACIVIL AIstate="IDLE" Life="100.0" Armor="0.0" moveMaxSpeed="50.0" moveMinSpeed="40.0" moveBackSpeed="40.0" fDexterity="1.0" distSee="200.0" distHear="48.0" distAttackMax="150.0" distAttackMin="50.0" 
+                 weapon="WPN_UZZI_MACIVIL" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25" >
+    <ANIMS>
+      <REF_POSE set0="MACIVIL_REF_POSE" />
+      
+      <IDLE set0="MACIVIL_IDLE" />
+      <MOVE set0="MACIVIL_WALK" />
+      <MOVE_FAST set0="MACIVIL_WALK" />
+      <MOVE_BK set0="MACIVIL_WALK_BK" />
+      <FALL set0="MACIVIL_IDLE" />
+      <SHOOT set0="MACIVIL_SHOOT_STILL" />
+      <DIE set0="MACIVIL_DIE1" />
+      <RELOAD set0="MACIVIL_RELOAD" />
+      <MOVE_SHOOTING set0="MACIVIL_SHOOT_WALK" />
+      <MOVE_BK_SHOOTING set0="MACIVIL_SHOOT_WALK_BK" />
+      <STUNNED set0="MACIVIL_IDLE" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+    
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <!-- TRIGGERING_EVENTS sunt eventurile care pornesc starea asta, daca se implineste una din ele -->
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" /> <!-- type="any" inseamna orice tip de event-->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+      <!-- cand sunt mai multe states activabile se ia dupa prioritate in activarea lor. De exemplu aici ar fi si AWARE si AGGRESSIVE cand vede inamic -->
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.35" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+
+  </ACTOR_MACIVIL>
+
+  <ACTOR_TACKDIVER AIstate="IDLE" Life="100.0" Armor="0.0" moveMaxSpeed="60.0" moveMinSpeed="40.0" moveBackSpeed="40.0" fDexterity="1.0" distSee="250.0" distHear="48.0" distAttackMax="170.0" distAttackMin="50.0"
+                   weapon="WPN_TACKDIVER" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25" >
+    <ANIMS>
+      <REF_POSE set0="TACKDIVER_REF_POSE" />
+
+      <IDLE set0="TACKDIVER_IDLE" />
+      <MOVE set0="TACKDIVER_WALK" />
+      <MOVE_FAST set0="TACKDIVER_WALK" />
+      <MOVE_BK set0="TACKDIVER_WALK_BK" />
+      <FALL set0="TACKDIVER_IDLE" />
+      <SHOOT set0="TACKDIVER_SHOOT_STILL" />
+      <DIE set0="TACKDIVER_DIE" />
+      <RELOAD set0="TACKDIVER_RELOAD" />
+      <MOVE_SHOOTING set0="TACKDIVER_SHOOT_STILL" />
+      <MOVE_BK_SHOOTING set0="TACKDIVER_SHOOT_STILL" />
+      <STUNNED set0="TACKDIVER_IDLE" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <!-- TRIGGERING_EVENTS sunt eventurile care pornesc starea asta, daca se implineste una din ele -->
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+          <!-- type="any" inseamna orice tip de event-->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+      <!-- cand sunt mai multe states activabile se ia dupa prioritate in activarea lor. De exemplu aici ar fi si AWARE si AGGRESSIVE cand vede inamic -->
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.05" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+
+  </ACTOR_TACKDIVER>
+
+
+  <ACTOR_JUNKIE_HARRY AIstate="IDLE" Life="100.0" Armor="0.0" moveMaxSpeed="40.0" moveMinSpeed="40.0" moveBackSpeed="40.0" fDexterity="1.0" distSee="200.0" distHear="48.0" distAttackMax="125.0" distAttackMin="50.0" 
+                      weapon="WPN_JUNKIE_REVOLVER" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25" >
+    <ANIMS>
+      <REF_POSE set0="JUNKIE_REF_POSE" />
+
+      <IDLE set0="JUNKIE_IDLE" />
+      <MOVE set0="JUNKIE_WALK" />
+      <MOVE_FAST set0="JUNKIE_WALK" />
+      <MOVE_BK set0="JUNKIE_WALK_BK" />
+      <FALL set0="JUNKIE_IDLE" />
+      <SHOOT set0="JUNKIE_SHOOT" />
+      <DIE set0="JUNKIE_DIE1" />
+      <RELOAD set0="JUNKIE_RELOAD" />
+      <STUNNED set0="JUNKIE_IDLE" />
+      <MOVE_GUN set0="JUNKIE_WALK" />
+      <MOVE_BK_GUN set0="JUNKIE_WALK_BK" />
+      <IDLE_GUN set0="JUNKIE_IDLE" />
+      <MOVE_FAST_GUN set0="JUNKIE_WALK" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+    
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="4.0" fWaitTimer="0.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+
+  </ACTOR_JUNKIE_HARRY>
+
+
+  <ACTOR_DOUBLE_DAVE AIstate="IDLE" Life="100.0" Armor="0.0" moveMaxSpeed="40.0" moveMinSpeed="40.0" moveBackSpeed="35.0" fDexterity="1.0" distSee="200.0" distHear="48.0" distAttackMax="80.0" distAttackMin="40.0"
+                      weapon="WPN_DDAVE_SHOTGUN" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25" >
+    <ANIMS>
+      <REF_POSE set0="DDAVE_REF_POSE" />
+
+      <IDLE set0="DDAVE_IDLE" />
+      <MOVE set0="DDAVE_WALK" />
+      <MOVE_FAST set0="DDAVE_WALK" />
+      <MOVE_BK set0="DDAVE_WALK_BK" />
+      <FALL set0="DDAVE_IDLE" />
+      <SHOOT set0="DDAVE_SHOOT" />
+      <DIE set0="DDAVE_DIE" />
+      <RELOAD set0="DDAVE_RELOAD" />
+      <STUNNED set0="DDAVE_IDLE" />
+      <MOVE_GUN set0="DDAVE_WALK" />
+      <MOVE_BK_GUN set0="DDAVE_WALK_BK" />
+      <IDLE_GUN set0="DDAVE_IDLE" />
+      <MOVE_FAST_GUN set0="DDAVE_WALK" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+    
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="4.0" fWaitTimer="0.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+
+  </ACTOR_DOUBLE_DAVE>
+
+
+  <ACTOR_LEADER_LEMMY AIstate="IDLE" Life="100.0" Armor="0.0" nArmorDir="1" nArmorRating="-1" moveMaxSpeed="50.0" moveMinSpeed="50.0" moveBackSpeed="40.0" fDexterity="1.0" distSee="200.0" distHear="48.0" distAttackMax="100.0" distAttackMin="50.0" 
+                      weapon="WPN_LEMMY_PISTOL" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25" >
+    <ANIMS>
+      <REF_POSE set0="LEMMY_REF_POSE" />
+
+      <IDLE set0="LEMMY_IDLE" set1="LEMMY_HOSTAGE_IDLE" />
+      <MOVE set0="LEMMY_WALK" />
+      <MOVE_FAST set0="LEMMY_WALK" />
+      <MOVE_BK set0="LEMMY_WALK_BK" />
+      <FALL set0="LEMMY_IDLE" />
+      <SHOOT set0="LEMMY_SHOOT" set1="LEMMY_HOSTAGE_SHOOT" />
+      <DIE set0="LEMMY_DIE" />
+      <RELOAD set0="LEMMY_RELOAD" />
+      <STUNNED set0="LEMMY_IDLE" />
+      <TAUNT set0="LEMMY_TAUNT" />
+      <MOVE_GUN set0="LEMMY_WALK_GUN" />
+      <MOVE_BK_GUN set0="LEMMY_WALK_BK_GUN" />
+      <IDLE_GUN set0="LEMMY_IDLE_GUN" set1="LEMMY_HOSTAGE_IDLE" />
+      <MOVE_FAST_GUN set0="LEMMY_WALK_GUN" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+    
+    <VERSES>
+      <DIE set0="VOICE_LEADERLEMMY_KILLED" set1="VOICE_LEADERLEMMY_KILLED2" />
+      <KILL_MADE set0="VOICE_LEADERLEMMY_KILLSPLAYER" />
+      <TAUNT set0="VOICE_LEADERLEMMY_GETHIM" />
+    </VERSES>
+
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="0.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="1.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.1" />
+          <BEHAVIOR name="AI_BEHAVIOR_SHOW_ENEMY" sVerseName="TAUNT" sAnimIdentifier="TAUNT" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_RUN_SCRIPT" bTouchTarget="false" bCanInterrupt="false" bWaitScriptEnd="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_HUMAN_SHIELD_ATTACK" bDetectPlatforms="true" bCanInterrupt="false" />
+          <!-- gives time for state changes -->
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="1.0" />
+          <!-- changes to AWARE when lost enemy from sight -->
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="WAIT_BREACH" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_HUMAN_SHIELD_ATTACK" bDetectPlatforms="true" bCanInterrupt="false" fBehaviorDuration="60.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_WAIT_FOR_ACTION" fShootPeriod="2.0" bDetectPlatforms="true" fBehaviorDuration="3.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="9">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+
+  </ACTOR_LEADER_LEMMY>
+
+
+  <!-- The barrel has such a large life because after it gets under 90% of its life it starts burning and it explodes really fast -->
+  <ACTOR_BARREL_EXPLODING AIstate="DEFAULT" Life="750.0" class="PASSIVE" fMass="20.0" moveMinSpeed="20.0" moveBackSpeed="20.0" sMaterial="METAL" fStrategicPoints="0.0" >
+    <ANIMS>
+      <REF_POSE set0="BARRELS" />
+      <IDLE set0="BARRELS" />
+    </ANIMS>
+
+    <AI>
+      <STATE name="DEFAULT" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_BARREL_EXPLODING" nCanBurn="1" bCanInterrupt="false" bDetectPlatforms="false" bIgnoreEvents="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" sDeathCommand="ACT_DEATHCMD_DEALLOCATE" />
+        </BEHAVIORS>
+      </STATE>
+      
+    </AI>    
+  </ACTOR_BARREL_EXPLODING>
+
+  <!-- The barrel has such a large life because after he gets under 90% of its life it starts burning and it explodes really fast -->
+  <ACTOR_BARREL_REMOTE AIstate="DEFAULT" Life="100.0" class="PASSIVE" fMass="20.0" moveMinSpeed="20.0" moveBackSpeed="20.0" sMaterial="METAL" fStrategicPoints="0.0" 
+                       canBeDetonated="true" >
+    <ANIMS>
+      <REF_POSE set0="BARREL_REMOTE_IDLE" />
+      <IDLE set0="BARREL_REMOTE_IDLE" />
+    </ANIMS>
+
+    <AI>
+      <STATE name="DEFAULT" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_BARREL_EXPLODING" nCanBurn="0" bCanInterrupt="false" bDetectPlatforms="false" bIgnoreEvents="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" sDeathCommand="ACT_DEATHCMD_DEALLOCATE" />
+        </BEHAVIORS>
+      </STATE>
+      
+    </AI>    
+  </ACTOR_BARREL_REMOTE>
+  
+  
+  <!-- Don't change the hostage class name -->
+  <!-- foeClassFilter1 set on PLAYER so he only sees the player as enemy -->
+  <ACTOR_HOSTAGE_CROUCHED AIstate="IDLE" Life="100.0" class="HOSTAGE" foeClassFilter1="PLAYER" moveMinSpeed="55.0" moveMaxSpeed="55.0" distSee="128.0" distHear="64.0" distAttackMin="32.0" distAttackMax="64.0"
+                          fMass="40.0" fFOVpercent="1.0" sMaterial="FLESH" canCrouch="true" fStrategicPoints="0.5" >
+    <ANIMS>
+      <REF_POSE set0="HOSTAGE_REF_POSE" />
+      <IDLE set0="HOSTAGE_RUN2" />
+      <CROUCH set0="HOSTAGE_IDLE" set1="HOSTAGE_IDLE2" />
+      <MOVE_FAST set0="HOSTAGE_RUN" set1="HOSTAGE_RUN2" />
+      <GET_UP set0="HOSTAGE_GETUP" />
+      <DIE set0="HOSTAGE_DIE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_HOSTAGE_KILLED_01" set1="VOICE_HOSTAGE_KILLED_02" />
+      <TAKING_DAMAGE set0="VOICE_HOSTAGE_DAMAGE_01" set1="VOICE_HOSTAGE_DAMAGE_02" />
+      <THANK_YOU set0="VOICE_HOSTAGE_YES" set1="VOICE_HOSTAGE_THANKYOU2" />
+    </VERSES>
+
+    <AI>
+      <STATE name="IDLE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="-1" />
+          <BEHAVIOR name="AI_BEHAVIOR_HOSTAGE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="HOSTAGE_SAVED" nPriority="5">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <!-- All behaviors ignore events so that lastInteractingActorUID remains set on the saviour -->
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="GET_UP" bCanInterrupt ="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="THANK_YOU" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_BLIND_RUN" bDetectPlatforms="false" fBehaviorDuration="1.5" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_BLIND_RUN" bDetectPlatforms="false" fBehaviorDuration="0.5" bCanInterrupt="false" fFadeOutDuration="0.5" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="HOSTAGE_SAVED_RELEASE"  bCanInterrupt ="false" />
+          <!--
+          <BEHAVIOR name="AI_BEHAVIOR_SUICIDE" bCanInterrupt ="false" sDeathCommand="ACT_DEATHCMD_DEALLOCATE" bIgnoreEvents="true" />
+          -->
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="HOSTAGE_SAVED_RELEASE" nPriority="6">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" sDeathCommand="ACT_DEATHCMD_DEALLOCATE" bIgnoreEvents="true" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_HOSTAGE_CROUCHED>
+
+  <ACTOR_HOSTAGE_VEST_CROUCHED AIstate="IDLE" Life="100.0" class="HOSTAGE" foeClassFilter1="PLAYER" moveMinSpeed="60.0" moveMaxSpeed="60.0" distSee="128.0" distHear="64.0" distAttackMin="32.0"
+                    hasExplosiveVest="true" canBeDetonated="true" canCrouch="true"
+                    fMass="40.0" fFOVpercent="1.0" sMaterial="FLESH" fStrategicPoints="0.5" >
+    <ANIMS>
+      <REF_POSE set0="HOSTAGE_VEST_REF_POSE" />
+      <IDLE set0="HOSTAGE_VEST_IDLE" set1="HOSTAGE_RUN2" />
+      <CROUCH set0="HOSTAGE_VEST_IDLE" />
+      <MOVE set0="HOSTAGE_VEST_RUN" set1="HOSTAGE_RUN2" />
+      <MOVE_FAST set0="HOSTAGE_VEST_RUN" set1="HOSTAGE_RUN2" />
+      <GET_UP set0="HOSTAGE_VEST_GETUP" set1="HOSTAGE_VEST_GETUP" />
+      <DIE set0="HOSTAGE_VEST_DIE_CROUCHED" set1="HOSTAGE_DIE" />
+      <TAUNT set0="HOSTAGE_VEST_REMOVEV" set1="HOSTAGE_VEST_REMOVEV" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_HOSTAGE_KILLED_01" set1="VOICE_HOSTAGE_KILLED_02" />
+      <TAKING_DAMAGE set0="VOICE_HOSTAGE_DAMAGE_01" set1="VOICE_HOSTAGE_DAMAGE_02" />
+      <THANK_YOU set0="VOICE_HOSTAGE_YES" set1="VOICE_HOSTAGE_THANKYOU2" />
+      <TAUNT set0="VOICE_HOSTAGE_TAKETHISOFF" set1="VOICE_HOSTAGE_HELPME" />
+    </VERSES>
+
+    <AI>
+      <STATE name="IDLE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="0" />
+          <BEHAVIOR name="AI_BEHAVIOR_HOSTAGE" fRunProbability="0.25" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="HOSTAGE_SAVED" nPriority="5">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <!-- All behaviors ignore events so that lastInteractingActorUID remains set on the saviour -->
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="GET_UP" bCanInterrupt ="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="1" bCanInterrupt ="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TAUNT" bCanInterrupt ="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nCanBeDetonated="0" nHasExplosiveVest="0" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="THANK_YOU" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_BLIND_RUN" bDetectPlatforms="false" fBehaviorDuration="1.5" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_BLIND_RUN" bDetectPlatforms="false" fBehaviorDuration="0.5" bCanInterrupt="false" fFadeOutDuration="0.5" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="HOSTAGE_SAVED_RELEASE"  bCanInterrupt ="false" />
+          <!--
+          <BEHAVIOR name="AI_BEHAVIOR_SUICIDE" bCanInterrupt ="false" sDeathCommand="ACT_DEATHCMD_DEALLOCATE" bIgnoreEvents="true" />
+          -->
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="HOSTAGE_SAVED_RELEASE" nPriority="6">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" sDeathCommand="ACT_DEATHCMD_DEALLOCATE" bIgnoreEvents="true" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_HOSTAGE_VEST_CROUCHED>
+
+
+  <ACTOR_CAMERA_TOUCH AIstate="IDLE" Life="5.0" class="TRAP" fMass="0.0" foeClassFilter1="PLAYER" distSee="64.0" distHear="0.0" 
+                      canRotateView="true" fFOVpercent="0.2" sMaterial="METAL" fStrategicPoints="0.0" >
+    <ANIMS>
+      <REF_POSE set0="CAMERA_L1" />
+      <IDLE set0="CAMERA_L2" />
+      <SHOOT set0="CAMERA_L1" />
+      <SHOOT_ALT set0="CAMERA_L3" />
+      <DIE set0="CAMERA_DEAD" />
+    </ANIMS>
+    <AI>
+      <STATE name="IDLE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_IDLE_TICK" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="RUN_SCRIPT" nPriority="9">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="SHOOT_ALT" fBehaviorDuration="2.0f" bCanInterrupt="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_RUN_SCRIPT" bTouchTarget="false" bCanInterrupt="false" bWaitScriptEnd="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="SHOOT" bCanInterrupt="false" fBehaviorDuration="5.0f" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <state name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_GENERATE_EFFECT" sEffectType="EFFECT_ELECTRIC_BREAK_SPARKS" fSize="5.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </state>
+    </AI>
+  </ACTOR_CAMERA_TOUCH>
+                                                           
+  <ACTOR_WOUNDED_COP AIstate="IDLE" Life="80.0" class="PASSIVE" foeClassFilter1="PASSIVE" moveMinSpeed="0.0" moveMaxSpeed="0.0" distSee="300.0" distHear="48.0" fMass="40.0" fFOVpercent="1.0" sMaterial="FLESH" >
+    <ANIMS>
+      <REF_POSE set0="WCOP_REF_POSE" />
+      <IDLE set0="WCOP_IDLE_WOUNDED" />
+      <CROUCH set0="WCOP_IDLE_WOUNDED" />
+      <TAUNT set0="WCOP_CALLYOU_WOUNDED" />
+      <DIE set0="WCOP_DIE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_POLICEMAN_KILLED" set1="VOICE_POLICEMAN_KILLED2" />
+      <TAKING_DAMAGE set0="VOICE_POLICEMAN_WOUNDED" set1="VOICE_POLICEMAN_WOUNDED2" />
+      <TAUNT set0="VOICE_POLICEMAN_ILLWATCH" set1="VOICE_POLICEMAN_SAVED" />
+    </VERSES>
+
+    <AI>
+      <STATE name="IDLE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE_CROUCHED" fBehaviorDuration="5.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <!-- TODO: add see player and wave to him -->
+      
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_WOUNDED_COP>
+
+
+  <ACTOR_WOUNDED_COP_HELPED AIstate="IDLE" Life="80.0" class="FRIENDLY" foeClassFilter1="HUMAN" foeClassFilter2="ZOMBIE" moveMinSpeed="0.0" moveMaxSpeed="0.0" distSee="300.0" distHear="48.0" fMass="40.0"
+                            weapon="WPN_COP_PISTOL" fDexterity="1.0" distAttackMax="150.0f" fFOVpercent="1.0" sMaterial="FLESH" >
+    <ANIMS>
+      <REF_POSE set0="WCOP_REF_POSE" />
+      <IDLE set0="WCOP_IDLE" />
+      <CROUCH set0="WCOP_IDLE" />
+      <SHOOT set0="WCOP_SHOOT" />
+      <RELOAD set0="WCOP_RELOAD" />
+      <DIE set0="WCOP_DIE" />
+      <GET_UP set0="WCOP_GETUP_WOUNDED" />
+      <STUNNED set0="WCOP_IDLE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_POLICEMAN_KILLED" set1="VOICE_POLICEMAN_KILLED2" />
+      <TAKING_DAMAGE set0="VOICE_POLICEMAN_WOUNDED" set1="VOICE_POLICEMAN_WOUNDED2" />
+      <TAUNT set0="VOICE_POLICEMAN_ILLWATCH" set1="VOICE_POLICEMAN_SAVED" />
+    </VERSES>
+
+    <AI>
+      <STATE name="GET_UP" nPriority="1">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="GET_UP" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="IDLE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE_CROUCHED" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" /> 
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.25" />
+          <BEHAVIOR name="AI_BEHAVIOR_HOLD_POSITION" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_WOUNDED_COP_HELPED>
+
+
+  <ACTOR_MOLOTOV_MANNY AIstate="IDLE" Life="80.0" Armor="0.0" moveMaxSpeed="80.0" moveMinSpeed="50.0" moveBackSpeed="50.0" fDexterity="1.0" distSee="250.0" distHear="48.0" distAttackMax="190.0" distAttackMin="90.0"
+                 canRotateView="true" canCrouch="true" canCover="true" weapon="WPN_MOLOTOV_BOTTLE" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25" >
+    <ANIMS>
+      <REF_POSE set0="MOLOTOV_REF_POSE" />
+
+      <IDLE set0="MOLOTOV_IDLE" />
+      <MOVE set0="MOLOTOV_WALK" />
+      <MOVE_FAST set0="MOLOTOV_RUN" />
+      <MOVE_BK set0="MOLOTOV_WALK_BK" />
+      <FALL set0="MOLOTOV_IDLE" />
+      <SHOOT set0="MOLOTOV_SHOOT" />
+      <DIE set0="MOLOTOV_DIE" />
+      <RELOAD set0="MOLOTOV_RELOAD" />
+      <STUNNED set0="MOLOTOV_IDLE" />
+
+      <CROUCH set0="MOLOTOV_IDLE_CROUCH" />
+      <CROUCH_SHOOT set0="MOLOTOV_SHOOT_CROUCH" />
+      <CROUCH_RELOAD set0="MOLOTOV_RELOAD_CROUCH" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+    
+    <VERSES>
+      <DIE set0="VOICE_MMANNIE_KILLED" set1="VOICE_MMANNIE_KILLED2" />
+      <KILL_MADE set0="VOICE_MMANNIE_LAUGH" set1="VOICE_MMANNIE_LOOKATTHEM" />
+    </VERSES>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <!-- TRIGGERING_EVENTS sunt eventurile care pornesc starea asta, daca se implineste una din ele -->
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+          <!-- type="any" means any kind of message-->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+      <!-- cand sunt mai multe states activabile se ia dupa prioritate in activarea lor. De exemplu aici ar fi si AWARE si AGGRESSIVE cand vede inamic -->
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.35" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK_COVER" bCanInterrupt="false" bDetectPlatforms="true" />
+          <!-- because the attack seq is so long she might miss the LOST_ENEMY event and could remain in the AGGRESSIVE loop -->
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+
+  </ACTOR_MOLOTOV_MANNY>
+
+
+  <ACTOR_FANATIC_FRANKIE AIstate="IDLE" Life="100.0" Armor="0.0" moveMaxSpeed="55.0" moveMinSpeed="40.0" moveBackSpeed="40.0" fDexterity="1.0" distSee="180.0" distHear="48.0" distAttackMax="150.0" distAttackMin="48.0"
+                 canCrouch="true" canCover="true" weapon="WPN_PISTOL_FANATIC" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25" >
+    <ANIMS>
+      <REF_POSE set0="FANATIC_REF_POSE" />
+
+      <IDLE set0="FANATIC_IDLE" />
+      <MOVE set0="FANATIC_WALK" />
+      <MOVE_FAST set0="FANATIC_WALK" />
+      <MOVE_BK set0="FANATIC_WALK_BK" />
+      <FALL set0="FANATIC_IDLE" />
+      <SHOOT set0="FANATIC_SHOOT" />
+      <DIE set0="FANATIC_DIE" />
+      <RELOAD set0="FANATIC_RELOAD" />
+      <STUNNED set0="FANATIC_IDLE" />
+      <TAUNT set0="FANATIC_TAUNT" />
+      
+      <GUNPOINT_DRAW_GUN set0="FANATIC_HOSTAGE_PULLGUN" />
+      <GUNPOINT_IDLE_GUN set0="FANATIC_HOSTAGE_IDLEGUN" />
+      <GUNPOINT_SHOOT set0="FANATIC_HOSTAGE_EXECUTE" />
+      
+      <CROUCH set0="FANATIC_IDLE_CROUCH" />
+      <CROUCH_SHOOT set0="FANATIC_SHOOT_CROUCH" />
+      <CROUCH_RELOAD set0="FANATIC_RELOAD_CROUCH" />
+    </ANIMS>
+
+    <VERSES>
+      <TAKE_HOSTAGE set0="VOICE_FFRANKIE_DONTTESTME" set1="VOICE_FFRANKIE_IMWARNINGYOU" />
+      <KILL_HOSTAGE set0="VOICE_FFRANKIE_ITOLDYOU" />
+      <DIE set0="VOICE_FFRANKIE_KILLED" set1="VOICE_FFRANKIE_KILLED2" />
+      <TAUNT set0="VOICE_FFRANKIE_ILLBLOW" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+    
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <!-- TRIGGERING_EVENTS sunt eventurile care pornesc starea asta, daca se implineste una din ele -->
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+          <!-- type="any" inseamna orice tip de event-->
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="GUNPOINT_HOSTAGE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_THREAT" />
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TAUNT" />
+          <BEHAVIOR name="AI_BEHAVIOR_GUNPOINT_HOSTAGE" bCanInterrupt="false" bDetectPlatforms="true" fExecuteDelay="0.6" />
+          <BEHAVIOR name="AI_BEHAVIOR_GET_IN_COVER" bDetectPlatforms="true" fBehaviorDuration="5.0" />
+          <!-- force to aware state (maybe we didn't find a hostage nearby so we don't need to loop -->
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="4">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK_COVER" bCanInterrupt="false" bDetectPlatforms="true" fBehaviorDuration="8.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_GUNPOINT_HOSTAGE" bCanInterrupt="false" bDetectPlatforms="true" fExecuteDelay="1.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+
+  </ACTOR_FANATIC_FRANKIE>
+
+
+  <ACTOR_GRENADIER_GHENADY  AIstate="IDLE" Life="100.0" Armor="80.0" nArmorDir="1" nArmorRating="2" moveMaxSpeed="80.0" moveMinSpeed="60.0" moveBackSpeed="40.0" fDexterity="1.0" 
+                            distSee="200.0" distHear="48.0" distAttackMax="150.0" distAttackMin="50.0"
+                            weapon="WPN_GRENADIER_SMG" weaponGear="WPN_GRENADIER_GRENADE" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25"
+                            bComposedAnimation="true" canCrouch="true" canCover="true" canRotateView="true">
+    <ANIMS>
+      <REF_POSE set0="GRENADIER_REF_POSE" />
+
+      <IDLE set0="GRENADIER_IDLE" />
+      <MOVE set0="GRENADIER_WALK" />
+      <MOVE_FAST set0="GRENADIER_WALK" />
+      <SHOOT set0="GRENADIER_SHOOT" />
+      <SHOOT_ALT set0="GRENADIER_SHOOT" />
+      <USE_GEAR set0="GRENADIER_GRENADE" />
+      <RELOAD set0="GRENADIER_RELOAD" />
+      <DIE set0="GRENADIER_DIE" />
+      <!-- feet anim -->
+      <FEET_STILL set0="GRENADIER_FEET_STILL" />
+      <FEET_IDLE set0="GRENADIER_FEET_IDLE" />
+      <FEET_MOVE set0="GRENADIER_FEET_WALK" />
+      <FEET_MOVE_FAST set0="GRENADIER_FEET_WALK" />
+      <FEET_MOVE_BACK set0="GRENADIER_FEET_WALK_BK" />
+      <FEET_CROUCH set0="GRENADIER_FEET_CROUCH" />
+      <!-- jump 3 frames necessary for teleporters -->
+      <FEET_JUMP set0="GRENADIER_FEET_IDLE" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+      
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+      
+      <STATE name="WAIT_BREACH" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_GET_IN_COVER" bDetectPlatforms="true" fBehaviorDuration="8.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_WAIT_FOR_ACTION" fShootPeriod="3.0" bDetectPlatforms="true" fBehaviorDuration="10.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.35" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK_COVER" bCanInterrupt="false" bDetectPlatforms="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="9">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_LOST_ENEMY" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_GRENADIER_GHENADY>
+
+
+  <ACTOR_OPERATOR_ORVILLE  AIstate="IDLE" Life="100.0" Armor="100.0" nArmorDir="0" nArmorRating="3" moveMaxSpeed="80.0" moveMinSpeed="80.0" moveBackSpeed="40.0" fDexterity="1.0" distSee="250.0" distHear="48.0" distAttackMax="185.0" distAttackMin="100.0"
+                    weapon="WPN_OPERATOR_ORVILLE_SMG" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25"
+                    bComposedAnimation="true" canCrouch="true" canCover="true" >
+    <ANIMS>
+      <REF_POSE set0="OPERATOR_REF_POSE" />
+
+      <IDLE set0="OPERATOR_IDLE" />
+      <MOVE set0="OPERATOR_WALK" />
+      <MOVE_FAST set0="OPERATOR_RUN" />
+      <SHOOT set0="OPERATOR_SHOOT" />
+      <SHOOT_ALT set0="OPERATOR_SHOOT" />
+      <RELOAD set0="OPERATOR_RELOAD" />
+      <DIE set0="OPERATOR_DIE" />
+      <INTERACT set0="OPERATOR_INTERACT" />
+      <!-- feet anim -->
+      <FEET_STILL set0="OPERATOR_FEET_STILL" />
+      <FEET_IDLE set0="OPERATOR_FEET_IDLE" />
+      <FEET_MOVE set0="OPERATOR_FEET_WALK" />
+      <FEET_MOVE_FAST set0="OPERATOR_FEET_RUN" />
+      <FEET_MOVE_BACK set0="OPERATOR_FEET_WALK_BK" />
+      <FEET_CROUCH set0="OPERATOR_FEET_CROUCH" />
+      <!-- jump 3 frames necessary for teleporters -->
+      <FEET_JUMP set0="OPERATOR_FEET_IDLE" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+      
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="WAIT_BREACH" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_GET_IN_COVER" bDetectPlatforms="true" fBehaviorDuration="8.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_WAIT_FOR_ACTION" fShootPeriod="3.0" bDetectPlatforms="true" fBehaviorDuration="10.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      
+      <STATE name="AGGRESSIVE" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.15" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK_COVER" bCanInterrupt="false" bDetectPlatforms="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="9">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_LOST_ENEMY" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_OPERATOR_ORVILLE>
+
+  <ACTOR_KURZFELT_KURT AIstate="IDLE" Life="100.0" Armor="100.0" nArmorDir="1" nArmorRating="1" moveMaxSpeed="90.0" moveMinSpeed="50.0" moveBackSpeed="40.0" fDexterity="1.0" distSee="250.0" distHear="48.0" distAttackMax="75.0" distAttackMin="30.0"
+                    weapon="WPN_KURZFELT_KURT_SMG" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25"
+                    bComposedAnimation="true" canCrouch="true" canCover="true" canInteract="true" >
+    <ANIMS>
+      <REF_POSE set0="KURT_REF_POSE" />
+
+      <IDLE set0="KURT_IDLE" />
+      <MOVE set0="KURT_WALK" />
+      <MOVE_FAST set0="KURT_RUN" />
+      <SHOOT set0="KURT_SHOOT" />
+      <SHOOT_ALT set0="KURT_SHOOT" />
+      <RELOAD set0="KURT_RELOAD" />
+      <DIE set0="KURT_DIE" />
+      <INTERACT set0="KURT_INTERACT" />
+      <!-- feet anim -->
+      <FEET_STILL set0="KURT_FEET_STILL" />
+      <FEET_IDLE set0="KURT_FEET_IDLE" />
+      <FEET_MOVE set0="KURT_FEET_WALK" />
+      <FEET_MOVE_FAST set0="KURT_FEET_RUN" />
+      <FEET_MOVE_BACK set0="KURT_FEET_WALK_BK" />
+      <FEET_CROUCH set0="KURT_FEET_CROUCH" />
+      <!-- jump 3 frames necessary for teleporters -->
+      <FEET_JUMP set0="KURT_FEET_IDLE" />
+    </ANIMS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="WAIT_BREACH" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_GET_IN_COVER" bDetectPlatforms="true" fBehaviorDuration="8.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_WAIT_FOR_ACTION" fShootPeriod="3.0" bDetectPlatforms="true" fBehaviorDuration="10.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="OPEN_DOOR" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" nRun="1" nOpenUnlockedDoors="1" fWaitTimer="1.0" bDetectPlatforms="true" fBehaviorDuration="3.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="6">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.15" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK_COVER" bCanInterrupt="false" bDetectPlatforms="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="9">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_LOST_ENEMY" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_KURZFELT_KURT>
+
+
+  <ACTOR_TINY_TROUBLE AIstate="IDLE" Life="100.0" Armor="0.0" nArmorDir="0" nArmorRating="0" moveMaxSpeed="80.0" moveMinSpeed="40.0" moveBackSpeed="0.0" fDexterity="1.0" distSee="180.0" distHear="64.0" distAttackMax="96.0" distAttackMin="64.0"
+                    fMass="15.0" class="HUMAN" sMaterial="FLESH"
+                    bComposedAnimation="true" canCrouch="true" canCover="false" canInteract="true" >
+    <ANIMS>
+      <REF_POSE set0="TINY_REF_POSE" />
+
+      <IDLE set0="TINY_IDLE" />
+      <MOVE set0="TINY_WALK" />
+      <MOVE_FAST set0="TINY_RUN" />
+      <DIE set0="TINY_DIE" />
+      <INTERACT set0="TINY_INTERACT" />
+      
+      <SURRENDER set0="TINY_SURRENDER" />
+      <ARRESTED set0="TINY_ARRESTED" />
+      <!-- feet anim -->
+      <FEET_STILL set0="TINY_FEET_STILL" />
+      <FEET_IDLE set0="TINY_FEET_IDLE" />
+      <FEET_MOVE set0="TINY_FEET_WALK" />
+      <FEET_MOVE_FAST set0="TINY_FEET_RUN" />
+      <FEET_CROUCH set0="TINY_FEET_CROUCH" />
+      <!-- jump 3 frames necessary for teleporters -->
+      <FEET_JUMP set0="KURT_FEET_IDLE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_TINYTROUBLE_DYING_01" set1="VOICE_TINYTROUBLE_DYING_02" />
+      <TAKING_DAMAGE set0="VOICE_TINYTROUBLE_WOUNDED_01" set1="VOICE_TINYTROUBLE_WOUNDED_02" />
+      <SURRENDER set0="VOICE_TINYTROUBLE_DONTSHOOT" set1="VOICE_TINYTROUBLE_ISURRENDER" />
+      <RUN_AWAY set0="VOICE_TINYTROUBLE_VAMONOS" set1="VOICE_TINYTROUBLE_LETSRUNAWAY" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="6">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.15" />
+          <BEHAVIOR name="AI_BEHAVIOR_ESCAPE_ARREST" nOpenUnlockedDoors="1" bCanInterrupt="false" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="ARRESTED" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="ARRESTED" bCanInterrupt="false" fBehaviorDuration="1.0" fDestAlpha="0.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" sDeathCommand="ACT_DEATHCMD_DEALLOCATE" bIgnoreEvents="true" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+        
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_TINY_TROUBLE>
+
+  
+  <ACTOR_GRIEFER_GARY AIstate="IDLE" Life="100.0" Armor="0.0" nArmorDir="0" nArmorRating="0" moveMaxSpeed="95.0" moveMinSpeed="60.0" moveBackSpeed="60.0" fDexterity="1.0" distSee="250.0" distHear="48.0" distAttackMax="120.0" distAttackMin="64.0"
+                    weapon="WPN_PISTOL_GRIEFER" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25"
+                    bComposedAnimation="true" canCrouch="true" canCover="true" canInteract="true" >
+    <ANIMS>
+      <REF_POSE set0="GRIEFER_REF_POSE" />
+
+      <IDLE set0="GRIEFER_IDLE" />
+      <MOVE set0="GRIEFER_WALK" />
+      <MOVE_FAST set0="GRIEFER_RUN" />
+      <SHOOT set0="GRIEFER_SHOOT" />
+      <SHOOT_ALT set0="GRIEFER_DETONATE" />
+      <RELOAD set0="GRIEFER_RELOAD" />
+      <DIE set0="GRIEFER_DIE" />
+      <!-- feet anim -->
+      <FEET_STILL set0="GRIEFER_FEET_STILL" />
+      <FEET_IDLE set0="GRIEFER_FEET_IDLE" />
+      <FEET_MOVE set0="GRIEFER_FEET_WALK" />
+      <FEET_MOVE_FAST set0="GRIEFER_FEET_RUN" />
+      <FEET_MOVE_BACK set0="GRIEFER_FEET_WALK_BK" />
+      <FEET_CROUCH set0="GRIEFER_FEET_CROUCH" />
+      <!-- jump 3 frames necessary for teleporters -->
+      <FEET_JUMP set0="GRIEFER_FEET_IDLE" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+      
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="WAIT_BREACH" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_RUN_AWAY" nOpenUnlockedDoors="2" bCanInterrupt="false" bDetectPlatforms="true" fBehaviorDuration="6.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="6">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.15" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK_COVER" bCanInterrupt="true" bDetectPlatforms="true" fBehaviorDuration="4.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_RUN_AWAY" nOpenUnlockedDoors="2" bCanInterrupt="false" bDetectPlatforms="true" fBehaviorDuration="6.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="9">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_LOST_ENEMY" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AGGRESSIVE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_GRIEFER_GARY>
+
+  <ACTOR_JUGGERNAUT_JIM  AIstate="IDLE" Life="100.0" Armor="160.0" nArmorDir="0" nArmorRating="3" moveMaxSpeed="30.0" moveMinSpeed="30.0" moveBackSpeed="22.0" fDexterity="1.0" distSee="250.0" distHear="48.0" distAttackMax="185.0" distAttackMin="100.0"
+                    weapon="WPN_JUGGERNAUT_JIM" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25"
+                    bComposedAnimation="true" canCrouch="true" canCover="true" >
+    <ANIMS>
+      <REF_POSE set0="JUGGERNAUT_REF_POSE" />
+
+      <IDLE set0="JUGGERNAUT_IDLE" />
+      <MOVE set0="JUGGERNAUT_WALK" />
+      <MOVE_FAST set0="JUGGERNAUT_WALK" />
+      <SHOOT set0="JUGGERNAUT_SHOOT" />
+      <SHOOT_ALT set0="JUGGERNAUT_SHOOT" />
+      <RELOAD set0="JUGGERNAUT_RELOAD" />
+      <DIE set0="JUGGERNAUT_DIE" />
+      <!-- feet anim -->
+      <FEET_STILL set0="JUGGERNAUT_FEET_STILL" />
+      <FEET_IDLE set0="JUGGERNAUT_FEET_IDLE" />
+      <FEET_MOVE set0="JUGGERNAUT_FEET_WALK" />
+      <FEET_MOVE_FAST set0="JUGGERNAUT_FEET_WALK" />
+      <FEET_MOVE_BACK set0="JUGGERNAUT_FEET_WALK_BK" />
+      <FEET_CROUCH set0="JUGGERNAUT_FEET_CROUCH" />
+      <!-- jump 3 frames necessary for teleporters -->
+      <FEET_JUMP set0="JUGGERNAUT_FEET_IDLE" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="WAIT_BREACH" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_GET_IN_COVER" bDetectPlatforms="true" fBehaviorDuration="8.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_WAIT_FOR_ACTION" fShootPeriod="3.0" bDetectPlatforms="true" fBehaviorDuration="10.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+
+      <STATE name="AGGRESSIVE" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.15" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK_COVER" bCanInterrupt="false" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="9">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_LOST_ENEMY" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_JUGGERNAUT_JIM>
+
+  <ACTOR_MG_BEN  AIstate="IDLE" Life="120.0" Armor="100.0" nArmorDir="1" nArmorRating="3" moveMaxSpeed="40.0" moveMinSpeed="40.0" moveBackSpeed="20.0" fDexterity="1.0" distSee="300.0" distHear="48.0" distAttackMax="250.0" distAttackMin="48.0"
+                    weapon="WPN_MG_BEN" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25"
+                    bComposedAnimation="true" canCrouch="true" canCover="true" >
+    <ANIMS>
+      <REF_POSE set0="MGB_REF_POSE" />
+
+      <IDLE set0="MGB_IDLE" />
+      <MOVE set0="MGB_WALK" />
+      <MOVE_FAST set0="MGB_WALK" />
+      <SHOOT set0="MGB_SHOOT" />
+      <SHOOT_ALT set0="MGB_SHOOT" />
+      <RELOAD set0="MGB_RELOAD" />
+      <DIE set0="MGB_DIE" />
+      <!-- feet anim -->
+      <FEET_STILL set0="MGB_FEET_STILL" />
+      <FEET_IDLE set0="MGB_FEET_IDLE" />
+      <FEET_MOVE set0="MGB_FEET_WALK" />
+      <FEET_MOVE_FAST set0="MGB_FEET_WALK" />
+      <FEET_MOVE_BACK set0="MGB_FEET_WALK_BK" />
+      <FEET_CROUCH set0="MGB_FEET_CROUCH" />
+      <!-- jump 3 frames necessary for teleporters -->
+      <FEET_JUMP set0="MGB_FEET_IDLE" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+    
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="WAIT_BREACH" nPriority="2" fProbability="50.0">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_GET_IN_COVER" bDetectPlatforms="true" fBehaviorDuration="8.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_WAIT_FOR_ACTION" fShootPeriod="3.0" bDetectPlatforms="true" fBehaviorDuration="10.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="WAIT_BREACH_PATROL" nPriority="2" fProbability="50.0">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.15" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK_COVER" bCanInterrupt="false" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="9">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_LOST_ENEMY" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_MG_BEN>
+
+
+  <ACTOR_CARTEL_DOG AIstate="IDLE" Life="80.0" class="HUMAN" moveMinSpeed="60.0" moveMaxSpeed="190.0" distSee="256.0" jumpSpeed="-150.0" distHear="256.0" fMass="10.0" fFOVpercent="0.7" sMaterial="FLESH" 
+                    distAttackMax="32.0" distAttackMin="8.0" weapon="WPN_CARTEL_DOG_BITE" fStrategicPoints="0.25">
+    <ANIMS>
+      <REF_POSE set0="DOG_REF_POSE" />
+      <IDLE set0="DOG_IDLE1" />
+      <JUMP set0="DOG_IDLE1" />
+      <MOVE set0="DOG_WALK" />
+      <MOVE_FAST set0="DOG_RUN" />
+      <DIE set0="DOG_DIE" />
+      <STUNNED set0="DOG_IDLE1" />
+      <SHOOT set0="DOG_ATTACK_JUMP" />
+      <SHOOT_ALT set0="DOG_ATTACK_JUMP" />
+      <TAUNT set0="DOG_SMELL_LOOK" />
+      <TEASE set0="DOG_BARK_BITESTILL" />
+    </ANIMS>
+
+    <VERSES>
+      <TAUNT set0="VOICE_DOG_BARK" />
+      <TEASE set0="VOICE_DOG_SNARL" />
+      <DIE set0="VOICE_DOG_WOUNDED_01" set1="VOICE_DOG_WOUNDED_02" />
+    </VERSES>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="5.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="WAIT_BREACH" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+          <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_SHOW_ENEMY" sVerseName="TAUNT" sAnimIdentifier="TEASE" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="10.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TEASE" /> 
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK_HITNRUN" bCanInterrupt="false" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.5" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_CARTEL_DOG>
+
+  <ACTOR_BIGSHOT AIstate="IDLE" Life="350.0" Armor="0.0" moveMaxSpeed="48.0" moveMinSpeed="48.0" moveBackSpeed="0.0" fDexterity="1.0" distSee="180.0" distHear="64.0" distAttackMax="120.0" distAttackMin="32.0"
+                      weapon="WPN_BIGSHOT_CANE" fMass="25.0" class="HUMAN" sMaterial="FLESH" >
+    <ANIMS>
+      <REF_POSE set0="BIGSHOT_REF_POSE" />
+
+      <IDLE set0="BIGSHOT_IDLE" />
+      <MOVE set0="BIGSHOT_WALK" />
+      <MOVE_FAST set0="BIGSHOT_WALK" />
+      <MOVE_BK set0="BIGSHOT_WALK_BK" />
+      <FALL set0="BIGSHOT_IDLE" />
+      <SHOOT set0="BIGSHOT_SHOOT" />
+      <DIE set0="BIGSHOT_DIE" />
+      <STUNNED set0="BIGSHOT_IDLE" />
+      <MOVE_GUN set0="BIGSHOT_WALK" />
+      <MOVE_BK_GUN set0="BIGSHOT_WALK_BK" />
+      <IDLE_GUN set0="BIGSHOT_IDLE" />
+      <MOVE_FAST_GUN set0="BIGSHOT_WALK" />
+      <SURRENDER set0="BIGSHOT_GIVE_UP" />
+      <CROUCH set0="BIGSHOT_ARRESTED" />
+      <TAUNT set0="BIGSHOT_POINT_TO" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+      
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="4.0" fWaitTimer="0.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="WAIT_BREACH" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_FLEE" fFleeDistance="128.0" bDetectPlatforms="true" bCanInterrupt="true" fBehaviorDuration="6.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.1" />
+          <BEHAVIOR name="AI_BEHAVIOR_SHOW_ENEMY" sVerseName="TAUNT" sAnimIdentifier="TAUNT" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_BIGSHOT_ATTACK" bDetectPlatforms="true" bCanInterrupt="false" />
+          <!-- gives time for state changes -->
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="1.0" />
+          <!-- changes to AWARE when lost enemy from sight -->
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+      
+
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="ARRESTED" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE_CROUCHED" bCanInterrupt="false" bIgnoreEvents="true" fBehaviorDuration="4.0" fFadeOutDuration="0.6" />
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" sDeathCommand="ACT_DEATHCMD_DEALLOCATE" bIgnoreEvents="true" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+
+  </ACTOR_BIGSHOT>
+
+
+  <ACTOR_DETONATOR_DICK AIstate="IDLE" Life="100.0" Armor="0.0" moveMaxSpeed="100.0" moveMinSpeed="40.0" moveBackSpeed="40.0" fDexterity="1.0" distSee="180.0" distHear="48.0" distAttackMax="120.0" distAttackMin="64.0"
+                      weapon="WPN_DICK_SMG" fMass="15.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="0.25" 
+                      bComposedAnimation="true" >
+    <ANIMS>
+      <REF_POSE set0="DICK_REF_POSE" />
+
+      <IDLE set0="DICK_IDLE" />
+      <MOVE set0="DICK_WALK" />
+      <MOVE_FAST set0="DICK_RUN" />
+      <FALL set0="DICK_IDLE" />
+      <SHOOT set0="DICK_SHOOT" />
+      <SHOOT_ALT set0="DICK_DETONATE" />
+      <RELOAD set0="DICK_RELOAD" />
+      <DIE set0="DICK_DIE" />
+      <TAUNT set0="DICK_TAUNT" />
+      <STUNNED set0="DICK_IDLE" />
+      <!-- feet anim -->
+      <FEET_STILL set0="DICK_FEET_STILL" />
+      <FEET_IDLE set0="DICK_FEET_IDLE" />
+      <FEET_MOVE set0="DICK_FEET_WALK" />
+      <FEET_MOVE_FAST set0="DICK_FEET_RUN" />
+      <FEET_MOVE_BACK set0="DICK_FEET_WALK_BK" />
+      <FEET_CROUCH set0="DICK_FEET_CROUCH" />
+      <!-- jump 3 frames necessary for teleporters -->
+      <FEET_JUMP set0="DICK_FEET_IDLE" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+      
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="4.0" fWaitTimer="0.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="WAIT_BREACH" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TAUNT" />
+          <BEHAVIOR name="AI_BEHAVIOR_WAIT_FOR_ACTION" fShootPeriod="3.0" bDetectPlatforms="true" fBehaviorDuration="10.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+        
+      <STATE name="AGGRESSIVE" nPriority="4">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_DETONATE_NEARBY" sAnimIdentifier="SHOOT_ALT" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" sDeathCommand="ACT_DEATHCMD_RUNSCRIPT" sDeathScript="DICK_FALLS_DOWN" />
+        </BEHAVIORS>
+      </STATE>
+    
+    </AI>
+
+  </ACTOR_DETONATOR_DICK>
+
+  <ACTOR_DETONATOR_DICK_HURT bEditorEnabled="true" AIstate="IDLE" Life="10.0" class="HUMAN" foeClassFilter1="PLAYER" moveMinSpeed="0.0" moveMaxSpeed="0.0" distSee="128.0" distHear="64.0" fMass="15.0" fFOVpercent="1.0" sMaterial="FLESH" 
+                    fStrategicPoints="0.0">
+    <ANIMS>
+      <REF_POSE set0="DICK_DOWN_REF_POSE" />
+      <IDLE set0="DICK_DOWN_IDLE" />
+      <JUMP set0="DICK_DOWN_IDLE" />
+      <MOVE set0="DICK_DOWN_IDLE" />
+      <MOVE_FAST set0="DICK_DOWN_IDLE" />
+      <DIE set0="DICK_DOWN_DIE" />
+      <SHOOT set0="DICK_DOWN_SHOOT" />
+      <SHOOT_ALT set0="DICK_DOWN_SHOOT" />
+      <TAUNT set0="DICK_DOWN_FAKEDEAD" />
+      <STUNNED set0="DICK_DOWN_IDLE" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+    
+    <AI>
+      <STATE name="IDLE" nPriority="1">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TAUNT" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="5.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DETONATE_NEARBY" sAnimIdentifier="SHOOT_ALT" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SUICIDE" bCanInterrupt ="false" bIgnoreEvents="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_DETONATOR_DICK_HURT>
+  
+  
+
+  <ACTOR_OLDIE AIstate="IDLE" Life="100.0" Armor="0.0" moveMinSpeed="16.0" moveMaxSpeed="16.0" moveBackSpeed="0.0" fDexterity="1.0" 
+               weapon="WPN_OLDIE_CANE" foeClassFilter1="PLAYER" foeClassFilter2="ZOMBIE"
+               fMass="12.0" distSee="32.0" distHear="16.0" distAttackMax="24.0" distAttackMin="10.0" class="PASSIVE" sMaterial="FLESH" >
+    <ANIMS>
+      <REF_POSE set0="OLDIE_REF_POSE" />
+
+      <IDLE set0="OLDIE_IDLE" />
+      <MOVE set0="OLDIE_WALK" />
+      <MOVE_FAST set0="OLDIE_WALK" />
+      <SHOOT set0="OLDIE_ATTACK" />
+      <DIE set0="OLDIE_DIE" />
+      <STUNNED set0="OLDIE_IDLE" />
+      <FALL set0="OLDIE_IDLE" />
+      <TAUNT set0="OLDIE_TAUNT" />
+      <CROUCH set0="OLDIE_ARRESTED" />
+    </ANIMS>
+
+    <VERSES>
+      <TEASE set0="VOICE_OLLIVE_SONNY" set1="VOICE_OLLIVE_DAMNPOLICE" />
+      <TAUNT set0="VOICE_OLLIVE_TRESSPASSERS" />
+    </VERSES>
+      
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+    
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="4.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="4.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" fBehaviorDuration="2.0" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" /> 
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_HOLD_POSITION" fBehaviorDuration="4.0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" /> 
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TAUNT" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="ARRESTED" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TEASE" /> 
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE_CROUCHED" bCanInterrupt="false" bIgnoreEvents="true" fBehaviorDuration="4.0" fFadeOutDuration="0.6" />
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" sDeathCommand="ACT_DEATHCMD_DEALLOCATE" bIgnoreEvents="true" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+  </ACTOR_OLDIE>
+
+
+
+
+  <ACTOR_RAT1 AIstate="IDLE" Life="5.0" class="PASSIVE" foeClassFilter1="PLAYER" foeClassFilter2="ZOMBIE" moveMinSpeed="50.0" moveMaxSpeed="50.0" distSee="32.0" distHear="16.0" fMass="4.0" fFOVpercent="1.0" sMaterial="FLESH" fStrategicPoints="0.0" >
+    <ANIMS>
+      <REF_POSE set0="RAT_REF_POSE" />
+      <IDLE set0="RAT_IDLE" />
+      <MOVE set0="RAT_RUN" />
+      <MOVE_FAST set0="RAT_RUN" />
+    </ANIMS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="1">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="5">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+         </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_BLIND_RUN" bDetectPlatforms="false" fBehaviorDuration="3.0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="6">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_BLIND_RUN" bDetectPlatforms="false" fBehaviorDuration="3.0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_RAT1>
+
+  <ACTOR_CROW1 AIstate="IDLE" Life="5.0" class="PASSIVE" foeClassFilter1="PLAYER" foeClassFilter2="ZOMBIE" moveMinSpeed="60.0" moveMaxSpeed="60.0" climbSpeed="60.0" distSee="48.0" distHear="32.0" fMass="4.0" fFOVpercent="1.0" sMaterial="FLESH" >
+    <ANIMS>
+      <REF_POSE set0="CROW_REF_POSE" />
+      <IDLE set0="CROW_IDLE" />
+      <MOVE set0="CROW_WALK" />
+      <MOVE_FAST set0="CROW_WALK" />
+      <FLY set0="CROW_FLY" />
+    </ANIMS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="1">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="5">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FLY_AWAY" fBehaviorDuration="5.0" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="DEAD_DEALLOCATE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD_DEALLOCATE" nPriority="9">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" sDeathCommand="ACT_DEATHCMD_DEALLOCATE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_CROW1>
+
+<!-- bosses -->
+  <ACTOR_BOSS_FLAMER_FINN  AIstate="IDLE" Life="200.0" Armor="360.0" nArmorDir="1" nArmorRating="3" moveMaxSpeed="30.0" moveMinSpeed="30.0" moveBackSpeed="20.0" fDexterity="1.0" distSee="250.0" distHear="48.0" distAttackMax="185.0" distAttackMin="100.0"
+                    weapon="WPN_BOSS_FLAMER_FINN" fMass="100.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="1.0"
+                    bComposedAnimation="true" canCrouch="false" canCover="false" >
+    <ANIMS>
+      <REF_POSE set0="BOSS_FIRE_REF_POSE" />
+
+      <IDLE set0="BOSS_FIRE_IDLE" />
+      <MOVE set0="BOSS_FIRE_WALK" />
+      <MOVE_FAST set0="BOSS_FIRE_WALK" />
+      <SHOOT set0="BOSS_FIRE_SHOOT" />
+      <SHOOT_ALT set0="BOSS_FIRE_SHOOT" />
+      <DIE set0="BOSS_FIRE_DIE" set1="BOSS_FIRE_DIE_WARNING" />
+      <!-- feet anim -->
+      <FEET_STILL set0="BOSS_FIRE_FEET_STILL" />
+      <FEET_IDLE set0="BOSS_FIRE_FEET_IDLE" />
+      <FEET_MOVE set0="BOSS_FIRE_FEET_WALK" />
+      <FEET_MOVE_FAST set0="BOSS_FIRE_FEET_WALK" />
+      <FEET_MOVE_BACK set0="BOSS_FIRE_FEET_WALK_BK" />
+      <FEET_CROUCH set0="BOSS_FIRE_FEET_CROUCH" />
+      <!-- jump 3 frames necessary for teleporters -->
+      <FEET_JUMP set0="BOSS_FIRE_FEET_IDLE" />
+    </ANIMS>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="WAIT_BREACH" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.2" />
+          <BEHAVIOR name="AI_BEHAVIOR_GET_IN_COVER" bDetectPlatforms="true" fBehaviorDuration="8.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_WAIT_FOR_ACTION" fShootPeriod="3.0" bDetectPlatforms="true" fBehaviorDuration="10.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.15" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="1" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="DIE" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="0" />
+          <BEHAVIOR name="AI_BEHAVIOR_GENERATE_EFFECT" sEffectType="EFFECT_EXPLO_LARGE" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" bIgnoreEvents="true" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="9">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_LOST_ENEMY" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_BOSS_FLAMER_FINN>
+
+
+  <ACTOR_BOSS_SHIELD AIstate="IDLE" Life="400.0" Armor="500.0" nArmorDir="1" nArmorRating="5" fArmorMeleeProtectionPercent="1.0" moveMaxSpeed="120.0" moveMinSpeed="50.0" moveBackSpeed="30.0" fDexterity="1.0" distSee="256.0" distHear="256.0" distAttackMax="128.0" distAttackMin="32.0"
+                 canCrouch="false" canCover="false" weapon="WPN_BOSS_SHIELD_CLUB" weaponAlt="WPN_MOLOTOV_BOTTLE_SHIELDBOSS" weaponMelee="WPN_BOSS_SHIELD_CHARGE" fMass="150.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="1.0" >
+    <ANIMS>
+      <REF_POSE set0="BOSS_SHIELD_REF_POSE" />
+
+      <IDLE set0="BOSS_SHIELD_IDLE" />
+      <MOVE set0="BOSS_SHIELD_WALK" />
+      <MOVE_FAST set0="BOSS_SHIELD_RUN" />
+      <MOVE_BK set0="BOSS_SHIELD_WALK_BK" />
+      <FALL set0="BOSS_SHIELD_IDLE" />
+      <SHOOT set0="BOSS_SHIELD_MELEE" />
+      <MELEE set0="BOSS_SHIELD_RUN" />
+      <SHOOT_ALT set0="BOSS_SHIELD_MOLOTOV" />
+      <DIE set0="BOSS_SHIELD_DIE" />
+      <STUNNED set0="BOSS_SHIELD_STUNNED" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_SHIELDBOSS_DYING_01" set1="VOICE_SHIELDBOSS_DYING_01" />
+      <KILL_MADE set0="VOICE_SHIELDBOSS_YOUSHALL" />
+      <TAUNT set0="VOICE_SHIELDBOSS_CHARGE_01" set1="VOICE_SHIELDBOSS_CHARGE_02" />
+    </VERSES>
+    
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <!-- TRIGGERING_EVENTS sunt eventurile care pornesc starea asta, daca se implineste una din ele -->
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+          <!-- type="any" means any kind of message-->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+      <!-- cand sunt mai multe states activabile se ia dupa prioritate in activarea lor. De exemplu aici ar fi si AWARE si AGGRESSIVE cand vede inamic -->
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SHIELDBOSS_ATTACK" bCanInterrupt="false" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_BOSS_SHIELD>
+
+
+  <!-- his AI only changes to pistol when low on health. The pistol puts it's own animations through a template upgrade. -->
+  <ACTOR_BOSS_JACKED_UP_JONES  AIstate="IDLE" Life="500.0" Armor="500.0" nArmorDir="0" nArmorRating="8" moveMaxSpeed="40.0" moveMinSpeed="40.0" moveBackSpeed="30.0" fDexterity="1.0" distSee="250.0" distHear="128.0" distAttackMax="200.0" distAttackMin="32.0"
+                    weapon="WPN_BOSS_JACKED_UP_JONES_RIFLE" weaponAlt="WPN_BOSS_JACKED_UP_JONES_PISTOL" fMass="100.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="2.0"
+                    bComposedAnimation="true" canCrouch="true" canCover="true" >
+    <ANIMS>
+      <REF_POSE set0="BOSS_JUJ_REF_POSE" />
+
+      <IDLE set0="BOSS_JUJ_IDLE" />
+      <MOVE set0="BOSS_JUJ_WALK" />
+      <MOVE_FAST set0="BOSS_JUJ_WALK" />
+      <SHOOT set0="BOSS_JUJ_SHOOT" />
+      <SHOOT_ALT set0="BOSS_JUJ_SHOOT" />
+      <RELOAD set0="BOSS_JUJ_RELOAD" />
+      <DIE set0="BOSS_JUJ_DIE" />
+      <!-- feet anim -->
+      <FEET_STILL set0="BOSS_JUJ_FEET_STILL" />
+      <FEET_IDLE set0="BOSS_JUJ_FEET_IDLE" />
+      <FEET_MOVE set0="BOSS_JUJ_FEET_WALK" />
+      <FEET_MOVE_FAST set0="BOSS_JUJ_FEET_WALK" />
+      <FEET_MOVE_BACK set0="BOSS_JUJ_FEET_WALK_BK" />
+      <FEET_CROUCH set0="BOSS_JUJ_FEET_CROUCH" />
+      <!-- jump 3 frames necessary for teleporters -->
+      <FEET_JUMP set0="BOSS_JUJ_FEET_IDLE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_JONES_DYING_01" />
+      <KILL_MADE set0="VOICE_JONES_YOUWANTAPIECEOFME" />
+      <TAKING_DAMAGE set0="VOICE_JONES_WOUNDED_01" set1="VOICE_JONES_WOUNDED_02" />
+      <TAUNT set0="VOICE_JONES_THREATENING" set1="VOICE_JONES_COMEATME" />
+      <RELOADING set0="VOICE_JONES_ANNOYED" />
+    </VERSES>
+      
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="5.0" fWaitTimer="1.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" /> 
+          <BEHAVIOR name="AI_BEHAVIOR_JACKEDJONES_ATTACK" bCanInterrupt="false" bDetectPlatforms="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_BOSS_JACKED_UP_JONES>
+
+  <!-- different AI when hurt, changed from AI_BEHAVIOR_JACKEDJONES_ATTACK -->
+  <ACTOR_BOSS_JACKED_UP_JONES_HURT bEditorEnabled="false" AIstate="AWARE" Life="500.0" Armor="0.0" nArmorDir="0" nArmorRating="8" moveMaxSpeed="0.0" moveMinSpeed="0.0" moveBackSpeed="0.0" fDexterity="1.0" distSee="250.0" distHear="128.0" distAttackMax="200.0" distAttackMin="0.0"
+                    weapon="WPN_BOSS_JACKED_UP_JONES_PISTOL_HURT" fMass="100.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="2.0"
+                    bComposedAnimation="true" canCrouch="true" canCover="false" >
+    <ANIMS>
+      <REF_POSE set0="BOSS_JUJ_HURT_REF_POSE" />
+
+      <IDLE set0="BOSS_JUJ_HURT_IDLE" />
+      <MOVE set0="BOSS_JUJ_HURT_IDLE" />
+      <MOVE_FAST set0="BOSS_JUJ_HURT_IDLE" />
+      <SHOOT set0="BOSS_JUJ_HURT_SHOOT" />
+      <SHOOT_ALT set0="BOSS_JUJ_HURT_SHOOT" />
+      <DIE set0="BOSS_JUJ_DIE" />
+      <!-- feet anim -->
+      <FEET_STILL set0="BOSS_JUJ_FEET_CROUCH" />
+      <FEET_IDLE set0="BOSS_JUJ_FEET_CROUCH" />
+      <FEET_MOVE set0="BOSS_JUJ_FEET_WALK" />
+      <FEET_MOVE_FAST set0="BOSS_JUJ_FEET_WALK" />
+      <FEET_MOVE_BACK set0="BOSS_JUJ_FEET_WALK_BK" />
+      <FEET_CROUCH set0="BOSS_JUJ_FEET_CROUCH" />
+      <!-- jump 3 frames necessary for teleporters -->
+      <FEET_JUMP set0="BOSS_JUJ_FEET_IDLE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_JONES_DYING_01" />
+      <KILL_MADE set0="VOICE_JONES_YOUWANTAPIECEOFME" />
+      <TAKING_DAMAGE set0="VOICE_JONES_WOUNDED_01" set1="VOICE_JONES_WOUNDED_02" />
+      <TAUNT set0="VOICE_JONES_THREATENING" set1="VOICE_JONES_COMEATME" />
+      <RELOADING set0="VOICE_JONES_ANNOYED" />
+    </VERSES>
+      
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+    </AI_IGNORE_EVENTS>
+    
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_BOSS_JACKED_UP_JONES_HURT>
+
+  <ACTOR_BOSS_TATTOO AIstate="IDLE" Life="1200.0" Armor="0.0" nArmorDir="0" nArmorRating="0" fArmorMeleeProtectionPercent="1.0" moveMaxSpeed="165.0" moveMinSpeed="60.0" moveBackSpeed="30.0" 
+                     fDexterity="1.0" distSee="256.0" distHear="360.0" jumpSpeed="-50.0" distAttackMax="148.0" distAttackMin="32.0"
+                     canCrouch="false" canCover="false" weapon="WPN_BOSS_TATTOO_KNIFE" weaponAlt="WPN_BOSS_TATTOO_PISTOL" weaponMelee="WPN_BOSS_TATTOO_KNIFE" fMass="150.0" class="HUMAN" sMaterial="FLESH" fStrategicPoints="1.0" 
+                     canInteract="true" >
+    <ANIMS>
+      <REF_POSE set0="BOSS_TATTOO_REF_POSE" />
+
+      <IDLE set0="BOSS_TATTOO_IDLE" />
+      <MOVE set0="BOSS_TATTOO_WALK" />
+      <MOVE_FAST set0="BOSS_TATTOO_RUN" />
+      <MOVE_BK set0="BOSS_TATTOO_WALK_BK" />
+      <FALL set0="BOSS_TATTOO_IDLE" />
+      <SHOOT set0="BOSS_TATTOO_MELEE" />
+      <MELEE set0="BOSS_TATTOO_MELEE" />
+      <SHOOT_ALT set0="BOSS_TATTOO_SHOOT" />
+      <DIE set0="BOSS_TATTOO_DIE" />
+      <STUNNED set0="BOSS_TATTOO_IDLE" />
+      <TAUNT set0="BOSS_TATTOO_DRINK" />
+      <TEASE set0="BOSS_TATTOO_GETMAD" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_ENFORCER_DYING_01" set1="VOICE_ENFORCER_DYING_02" />
+      <KILL_MADE set0="VOICE_ENFORCER_YOULOOKEDFOR" />
+      <TAKING_DAMAGE set0="VOICE_ENFORCER_WOUNDED_01" set1="VOICE_ENFORCER_WOUNDED_02" />
+      <TAUNT set0="VOICE_ENFORCER_DRUNKPOTION" />
+      <TEASE set0="VOICE_ENFORCER_ENRAGED" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <!-- TRIGGERING_EVENTS sunt eventurile care pornesc starea asta, daca se implineste una din ele -->
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+          <!-- type="any" means any kind of message-->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL_BREAK_DOORS" fBreakProb="1.0" bDetectPlatforms="true" fBehaviorDuration="8.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+      <!-- cand sunt mai multe states activabile se ia dupa prioritate in activarea lor. De exemplu aici ar fi si AWARE si AGGRESSIVE cand vede inamic -->
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_TATTOOBOSS_ATTACK" bCanInterrupt="false" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="FIND_PLAYER" nPriority="0">
+        <TRIGGERING_EVENTS>
+          <!-- nu am triggering events inseamna ca nu poate sa intre in starea respectiva -->
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_FIND_CLOSEST_PLAYER" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_BOSS_TATTOO>
+
+
+  <!-- ZOMBIES -->
+  <ACTOR_ZOMBIE_SLOW1 AIstate="IDLE" Life="150.0" Armor="0.0" moveMinSpeed="20.0" moveMaxSpeed="20.0" moveBackSpeed="0.0" jumpSpeed="0.0" fDexterity="1.0" weapon="WPN_MELEE_ZOMBIE_SLOW"
+                  fMass="10.0" distSee="260.0" distHear="64.0" distAttackMax="24.0" distAttackMin="4.0" class="ZOMBIE" sMaterial="FLESH" fStrategicPoints="0.05" 
+                  canInteract="true" >
+    <ANIMS>
+      <REF_POSE set0="ZOMBIE_SLOW1_REF_POSE" />
+
+      <IDLE set0="ZOMBIE_SLOW1_IDLE" />
+      <FALL set0="ZOMBIE_SLOW1_IDLE" />
+      <MOVE set0="ZOMBIE_SLOW1_WALK" />
+      <MOVE_FAST set0="ZOMBIE_SLOW1_WALK" />
+      <SHOOT set0="ZOMBIE_SLOW1_ATTACK" />
+      <DIE set0="ZOMBIE_SLOW1_DIE1" set1="ZOMBIE_SLOW1_DIE_FEET" />
+      <STUNNED set0="ZOMBIE_SLOW1_IDLE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_ZOMBIE_GENERIC_DIE1" set1="VOICE_ZOMBIE_GENERIC_DIE2" />
+      <TAKING_DAMAGE set0="VOICE_ZOMBIE_GENERIC_NEUTRAL1" set1="VOICE_ZOMBIE_GENERIC_NEUTRAL2" />
+      <TAUNT set0="VOICE_ZOMBIE_GENERIC_NEUTRAL1" set1="VOICE_ZOMBIE_GENERIC_NEUTRAL2" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+      <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="8.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL_BREAK_DOORS" fBreakProb="0.5" fWaitTimer="1.0" bDetectPlatforms="true" fBehaviorDuration="8.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10" fProbability="75.0">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD_CUT_HALF" nPriority="10" fProbability="25.0">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="1" />
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" sDeathCommand="ACT_DEATHCMD_RUNSCRIPT" sDeathScript="ZOMBIE_SPAWN_TORSO1" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_ZOMBIE_SLOW1>
+
+  <ACTOR_ZOMBIE_TORSO1 AIstate="IDLE" Life="80.0" class="ZOMBIE" moveMinSpeed="18.0" moveMaxSpeed="30.0" distSee="256.0" jumpSpeed="-150.0" distHear="256.0" fMass="6.0" fFOVpercent="0.7" sMaterial="FLESH"
+                    distAttackMax="24.0" distAttackMin="4.0" weapon="WPN_MELEE_ZOMBIE_SLOW">
+    <ANIMS>
+      <REF_POSE set0="ZOMBIE_SLOW1HALF_REF_POSE" />
+      <IDLE set0="ZOMBIE_SLOW1HALF_IDLE" />
+      <FALL set0="ZOMBIE_SLOW1HALF_IDLE" />
+      <JUMP set0="ZOMBIE_SLOW1HALF_IDLE" />
+      <MOVE set0="ZOMBIE_SLOW1HALF_WALK" />
+      <MOVE_FAST set0="ZOMBIE_SLOW1HALF_WALK" />
+      <DIE set0="ZOMBIE_SLOW1HALF_DIE" />
+      <STUNNED set0="ZOMBIE_SLOW1HALF_IDLE" />
+      <SHOOT set0="ZOMBIE_SLOW1HALF_ATTACK" />
+      <SHOOT_ALT set0="ZOMBIE_SLOW1HALF_ATTACK" />
+      <TAUNT set0="ZOMBIE_SLOW1HALF_FALL" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_ZOMBIE_GENERIC_DIE1" set1="VOICE_ZOMBIE_GENERIC_DIE2" />
+      <TAKING_DAMAGE set0="VOICE_ZOMBIE_GENERIC_NEUTRAL1" set1="VOICE_ZOMBIE_GENERIC_NEUTRAL2" />
+      <TAUNT set0="VOICE_ZOMBIE_GENERIC_NEUTRAL1" set1="VOICE_ZOMBIE_GENERIC_NEUTRAL2" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+      <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="TAUNT" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="7.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="3">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK_HITNRUN" bCanInterrupt="false" bDetectPlatforms="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_ZOMBIE_TORSO1>
+  
+
+  <ACTOR_ZOMBIE_FAST1 AIstate="IDLE" Life="150.0" Armor="0.0" moveMinSpeed="20.0" moveMaxSpeed="140.0" moveBackSpeed="0.0" jumpSpeed="0.0" fDexterity="1.0" weapon="WPN_MELEE_ZOMBIE_FAST"
+                  fMass="12.0" distSee="280.0" distHear="124.0" distAttackMax="20.0" distAttackMin="8.0" class="ZOMBIE" sMaterial="FLESH" fStrategicPoints="0.05" 
+                  canInteract="true" >
+    <ANIMS>
+      <REF_POSE set0="ZOMBIE_FAST1_REF_POSE" />
+
+      <IDLE set0="ZOMBIE_FAST1_IDLE" />
+      <FALL set0="ZOMBIE_FAST1_IDLE" />
+      <MOVE set0="ZOMBIE_FAST1_WALK" />
+      <MOVE_FAST set0="ZOMBIE_FAST1_RUN" />
+      <SHOOT set0="ZOMBIE_FAST1_ATTACK" />
+      <DIE set0="ZOMBIE_FAST1_DIE" />
+      <STUNNED set0="ZOMBIE_FAST1_IDLE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_ZOMBIE_FAST1_DIE" />
+      <TAKING_DAMAGE set0="VOICE_ZOMBIE_FAST1_NEUTRAL1" set1="VOICE_ZOMBIE_FAST1_NEUTRAL2" />
+      <TAUNT set0="VOICE_ZOMBIE_FAST1_NEUTRAL1" set1="VOICE_ZOMBIE_FAST1_NEUTRAL2" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+      <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="9.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL_BREAK_DOORS" fBreakProb="0.5" fWaitTimer="1.0" bDetectPlatforms="true" fBehaviorDuration="9.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+  </ACTOR_ZOMBIE_FAST1>
+
+
+  <ACTOR_ZOMBIE_RANGED1 AIstate="IDLE" Life="400.0" Armor="0.0" moveMaxSpeed="30.0" moveMinSpeed="30.0" moveBackSpeed="0.0" fDexterity="1.0" distSee="250.0" distHear="48.0" distAttackMax="180.0" distAttackMin="48.0"
+                 canRotateView="true" canCrouch="false" canCover="false" weapon="WPN_GREEN_GOO" fMass="40.0" class="ZOMBIE" sMaterial="FLESH" fStrategicPoints="1.0" >
+    <ANIMS>
+      <REF_POSE set0="ZOMBIE_RANGED_REF_POSE" />
+
+      <IDLE set0="ZOMBIE_RANGED_IDLE" />
+      <MOVE set0="ZOMBIE_RANGED_WALK" />
+      <MOVE_FAST set0="ZOMBIE_RANGED_WALK" />
+      <FALL set0="ZOMBIE_RANGED_IDLE" />
+      <SHOOT set0="ZOMBIE_RANGED_SHOOT" />
+      <DIE set0="ZOMBIE_RANGED_DIE" />
+      <STUNNED set0="ZOMBIE_RANGED_IDLE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_ZOMBIE_RANGED1_DIE" />
+      <TAKING_DAMAGE set0="VOICE_ZOMBIE_RANGED1_DAMAGE" />
+      <TAUNT set0="VOICE_ZOMBIE_RANGED1_SEE_ENEMY" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+      <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="11.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAKING_DAMAGE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAKING_DAMAGE" />
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" bDetectPlatforms="true" fBehaviorDuration="11.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="2.0" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_ZOMBIE_RANGED1>
+
+
+  <ACTOR_ZOMBIE_EXPLODING AIstate="IDLE" Life="200.0" Armor="0.0" moveMinSpeed="30.0" moveMaxSpeed="80.0" distSee="240.0" distHear="64.0" distAttackMax="30.0" fDexterity="1.0" weapon="WPN_INSTANT_SUICIDE"
+                    fMass="15.0" class="ZOMBIE" sMaterial="FLESH" fStrategicPoints="0.5">
+    <ANIMS>
+      <REF_POSE set0="ZOMBIE_EXPLO_REF_POSE" />
+
+      <IDLE set0="ZOMBIE_EXPLO_IDLE" />
+      <FALL set0="ZOMBIE_EXPLO_IDLE" />
+      <MOVE set0="ZOMBIE_EXPLO_WALK" />
+      <MOVE_FAST set0="ZOMBIE_EXPLO_RUN" />
+      <DIE set0="ZOMBIE_EXPLO_EXPLODE" />
+      <SHOOT set0="ZOMBIE_EXPLO_EXPLODE" />
+      <STUNNED set0="ZOMBIE_EXPLO_IDLE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_ZOMBIE_EXPLO_EXPLODE" />
+      <TAKING_DAMAGE set0="VOICE_ZOMBIE_EXPLO_TAKE_DMG" />
+      <TAUNT set0="VOICE_ZOMBIE_EXPLO_AWARE" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+      <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" fWaitTimer="1.0" fBehaviorDuration="8.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bDetectPlatforms="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="DIE" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_CAPS" nNotATarget="1" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="DIE" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_GENERATE_EFFECT" sEffectType="EFFECT_EXPLODING_ZOMBIE_DIE" bCanInterrupt="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" sDeathCommand="ACT_DEATHCMD_DEALLOCATE" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+  </ACTOR_ZOMBIE_EXPLODING>
+  
+
+  <ACTOR_ZOMBIE_HOSTAGE AIstate="IDLE" Life="80.0" Armor="0.0" moveMinSpeed="30.0" moveMaxSpeed="40.0" moveBackSpeed="0.0" jumpSpeed="0.0" fDexterity="1.0" weapon="WPN_MELEE_ZOMBIE_HOSTAGE"
+                  fMass="12.0" distSee="260.0" distHear="64.0" distAttackMax="20.0" distAttackMin="8.0" class="ZOMBIE" sMaterial="FLESH" fStrategicPoints="0.25" >
+    <ANIMS>
+      <REF_POSE set0="ZOMBIE_HOSTAGE_REF_POSE" />
+
+      <IDLE set0="ZOMBIE_HOSTAGE_IDLE" />
+      <FALL set0="ZOMBIE_HOSTAGE_IDLE" />
+      <MOVE set0="ZOMBIE_HOSTAGE_WALK" />
+      <MOVE_FAST set0="ZOMBIE_HOSTAGE_WALK" />
+      <SHOOT set0="ZOMBIE_HOSTAGE_ATTACK" />
+      <DIE set0="ZOMBIE_HOSTAGE_DIE" />
+      <STUNNED set0="ZOMBIE_HOSTAGE_IDLE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_ZOMBIE_GENERIC_DIE1" set1="VOICE_ZOMBIE_GENERIC_DIE2" />
+      <TAKING_DAMAGE set0="VOICE_ZOMBIE_GENERIC_NEUTRAL1" set1="VOICE_ZOMBIE_GENERIC_NEUTRAL2" />
+      <TAUNT set0="VOICE_ZOMBIE_GENERIC_NEUTRAL1" set1="VOICE_ZOMBIE_GENERIC_NEUTRAL2" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+      <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL" fWaitTimer="1.0" bDetectPlatforms="true" fBehaviorDuration="10.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="false" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+    </AI>
+  </ACTOR_ZOMBIE_HOSTAGE>
+
+  <ACTOR_ZOMBIE_HOSTAGE_CROUCHED AIstate="IDLE" Life="100.0" class="HOSTAGE" foeClassFilter1="PLAYER" moveMinSpeed="55.0" moveMaxSpeed="55.0" distSee="128.0" distHear="64.0" distAttackMin="32.0" distAttackMax="64.0"
+                          fMass="40.0" fFOVpercent="1.0" sMaterial="FLESH" canCrouch="true" fStrategicPoints="0.5" >
+    <ANIMS>
+      <REF_POSE set0="HOSTAGE_REF_POSE" />
+      <IDLE set0="HOSTAGE_RUN2" />
+      <CROUCH set0="HOSTAGE_IDLE" />
+      <GET_UP set0="ZOMBIE_HOSTAGE_GET_UP" />
+      <DIE set0="HOSTAGE_DIE" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_HOSTAGE_KILLED_01" set1="VOICE_HOSTAGE_KILLED_02" />
+      <TAKING_DAMAGE set0="VOICE_HOSTAGE_DAMAGE_01" set1="VOICE_HOSTAGE_DAMAGE_02" />
+    </VERSES>
+
+    <AI>
+      <STATE name="IDLE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_HOSTAGE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="HOSTAGE_SAVED" nPriority="5">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_ANIM" sAnimIdentifier="GET_UP" bCanInterrupt ="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_RUN_SCRIPT" bTouchTarget="false" bCanInterrupt="false" bWaitScriptEnd="false" sScriptOverride="HOSTAGE_TO_ZOMBIE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_ZOMBIE_HOSTAGE_CROUCHED>
+
+  <ACTOR_ZOMBIE_TELEPORT1 AIstate="IDLE" Life="200.0" Armor="0.0" moveMinSpeed="40.0" moveMaxSpeed="55.0" moveBackSpeed="0.0" jumpSpeed="0.0" fDexterity="1.0" weapon="WPN_MELEE_ZOMBIE_TELEPORT"
+                  fMass="10.0" distSee="280.0" distHear="64.0" distAttackMax="24.0" distAttackMin="4.0" class="ZOMBIE" sMaterial="FLESH" fStrategicPoints="0.05"
+                  canInteract="true" >
+    <ANIMS>
+      <REF_POSE set0="ZOMBIE_TELEPORT_REF_POSE" />
+
+      <IDLE set0="ZOMBIE_TELEPORT_IDLE" />
+      <FALL set0="ZOMBIE_TELEPORT_IDLE" />
+      <MOVE set0="ZOMBIE_TELEPORT_WALK" />
+      <MOVE_FAST set0="ZOMBIE_TELEPORT_WALK" />
+      <SHOOT set0="ZOMBIE_TELEPORT_ATTACK" />
+      <DIE set0="ZOMBIE_TELEPORT_DIE" />
+      <STUNNED set0="ZOMBIE_TELEPORT_IDLE" />
+      <TELEPORT_IN set0="ZOMBIE_TELEPORTIN" />
+      <TELEPORT_OUT set0="ZOMBIE_TELEPORTOUT" />
+    </ANIMS>
+
+    <VERSES>
+      <DIE set0="VOICE_ZOMBIE_GENERIC_DIE1" set1="VOICE_ZOMBIE_GENERIC_DIE2" />
+      <TAKING_DAMAGE set0="VOICE_ZOMBIE_GENERIC_NEUTRAL1" set1="VOICE_ZOMBIE_GENERIC_NEUTRAL2" />
+      <TAUNT set0="VOICE_ZOMBIE_GENERIC_NEUTRAL1" set1="VOICE_ZOMBIE_GENERIC_NEUTRAL2" />
+    </VERSES>
+
+    <AI_IGNORE_EVENTS>
+      <AI_EVENT type="AI_EVENT_SOUND_BEHIND_DOOR" />
+      <AI_EVENT type="AI_EVENT_SOUND_DOOR_BREACHING" />
+    </AI_IGNORE_EVENTS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="0">
+        <TRIGGERING_EVENTS>
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" fBehaviorDuration="8.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AWARE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PATROL_BREAK_DOORS" fBreakProb="0.5" fWaitTimer="1.0" bDetectPlatforms="true" fBehaviorDuration="8.5" />
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="AGGRESSIVE" nPriority="2">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+          <AI_EVENT type="AI_EVENT_GOT_HIT" />
+        </TRIGGERING_EVENTS>
+
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_PLAY_VERSE" sVerseName="TAUNT" />
+          <BEHAVIOR name="AI_BEHAVIOR_TELEPORT_NEAR_ENEMY" nTargetMaxDist="64" bCanInterrupt="false" bIgnoreEvents="true" />
+          <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" bDetectPlatforms="false" fBehaviorDuration="5.0" />
+          <BEHAVIOR name="AI_BEHAVIOR_SET_STATE" sState="AWARE" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD" nPriority="10" fProbability="75.0">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" />
+        </BEHAVIORS>
+      </STATE>
+
+      <STATE name="DEAD_CUT_HALF" nPriority="10" fProbability="5.0">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="AI_EVENT_DEAD" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="1" />
+          <BEHAVIOR name="AI_BEHAVIOR_DEAD" bCanInterrupt="false" sDeathCommand="ACT_DEATHCMD_RUNSCRIPT" sDeathScript="ZOMBIE_SPAWN_TORSO1" />
+        </BEHAVIORS>
+      </STATE>
+
+    </AI>
+  </ACTOR_ZOMBIE_TELEPORT1>
+
+
+  <!-- Don't change the name of this one. Used in the editor to place random spawners. -->
+  <ACTOR_RANDOM_ENEMY AIstate="IDLE">
+    <ANIMS>
+      <REF_POSE set0="RANDOM_ENEMY_REF_POSE" />
+      <IDLE set0="RANDOM_ENEMY_REF_POSE" />
+    </ANIMS>
+
+    <AI>
+      <STATE name="IDLE" nPriority="1">
+        <TRIGGERING_EVENTS>
+          <AI_EVENT type="any" />
+        </TRIGGERING_EVENTS>
+        <BEHAVIORS>
+          <BEHAVIOR name="AI_BEHAVIOR_IDLE" />
+        </BEHAVIORS>
+      </STATE>
+      <STATE name="AWARE" nPriority="1">
+      </STATE>
+      <STATE name="AGGRESSIVE" nPriority="4">
+      </STATE>
+      <STATE name="FIND_PLAYER" nPriority="4">
+      </STATE>
+      <STATE name="DEAD" nPriority="9">
+      </STATE>
+
+    </AI>
+  </ACTOR_RANDOM_ENEMY>
+
+
+
+  <!-- 
+  UPGRADE TEMPLATES - gets set by the current weapon (specified in "sTemplateOverwrite" property from actors_data.xml)
+  Numeric properties get ADDED, non-empty string properties replace the original template properties with the same name
+  ORDER: actor default template + equipment template + gear template + current weapon template = final template
+  -->
+  <UPGRADE_SAW_BREACHER bEditorEnabled="false" weaponAlt="WPN_DROP_SAW" >
+    <ANIMS>
+      <JUMP set0="BREACHER_SAW_IDLE" />
+      <IDLE set0="BREACHER_SAW_IDLE" />
+      <MOVE set0="BREACHER_SAW_IDLE" />
+      <MOVE_FAST set0="BREACHER_SAW_IDLE" />
+      <SHOOT set0="BREACHER_SAW_FIRE" />
+    </ANIMS>
+  </UPGRADE_SAW_BREACHER>
+
+  <UPGRADE_PISTOL_BREACHER_GEAR bEditorEnabled="false" >
+    <ANIMS>
+      <USE_GEAR set0="BREACHER_RELOAD_GUN" />
+    </ANIMS>
+  </UPGRADE_PISTOL_BREACHER_GEAR>
+  
+  <UPGRADE_PISTOL_BREACHER bEditorEnabled="false" >
+    <ANIMS>
+      <REF_POSE set0="BREACHER_REF_POSE_GUN" />
+      <JUMP set0="BREACHER_RUN_GUN" />
+      <IDLE set0="BREACHER_RUN_GUN" />
+      <MOVE set0="BREACHER_RUN_GUN" />
+      <MOVE_FAST set0="BREACHER_RUN_GUN" />
+      <SHOOT set0="BREACHER_SHOOT_GUN" />
+      <USE_GEAR set0="BREACHER_RELOAD_GUN" />
+    </ANIMS>
+  </UPGRADE_PISTOL_BREACHER>
+    
+  <UPGRADE_BREACHER_KSG bEditorEnabled="false">
+    <ANIMS>
+      <SHOOT set0="BREACHER_SHOOT" />
+      <RELOAD set0="BREACHER_RELOAD" />
+    </ANIMS>
+  </UPGRADE_BREACHER_KSG>
+
+  <UPGRADE_BREACHER_SIX12 bEditorEnabled="false">
+    <ANIMS>
+      <SHOOT set0="BREACHER_SHOOT_AUTO" />
+      <RELOAD set0="BREACHER_RELOAD_AUTO" />
+      <SHOOT_ALT set0="BREACHER_COCK_SIX12" />
+    </ANIMS>
+  </UPGRADE_BREACHER_SIX12>
+
+  <UPGRADE_OFFDUTY_TRAPPER bEditorEnabled="false" >
+    <ANIMS>
+      <JUMP set0="OFFG_TRAPPER_JUMP" />
+      <IDLE set0="OFFG_TRAPPER_IDLE" />
+      <MOVE set0="OFFG_TRAPPER_IDLE" />
+      <CLIMB_LADDER set0="OFFG_TRAPPER_CLIMB" />
+      <INTERACT set0="OFFG_TRAPPER_FIDDLE" />
+      <WALK_IN set0="OFFG_TRAPPER_WALK_IN" />
+      <MOVE_FAST set0="OFFG_TRAPPER_IDLE" />
+      <SHOOT set0="OFFG_TRAPPER_SHOOT" />
+      <RELOAD set0="OFFG_TRAPPER_RELOAD" />
+      <USE_GEAR set0="OFFG_TRAPPER_GRENADE" />
+      <DIR set0="OFFG_TRAPPER_DIE" />
+      <MELEE set0="OFFG_TRAPPER_MELEE" />
+      <BREACH_DOOR set0="OFFG_TRAPPER_MELEE" />
+    </ANIMS>
+  </UPGRADE_OFFDUTY_TRAPPER>
+
+  <UPGRADE_RECON_SIX12 bEditorEnabled="false">
+    <ANIMS>
+      <JUMP set0="RECON_SHOTGUN_IDLE" />
+      <IDLE set0="RECON_SHOTGUN_IDLE" />
+      <MOVE set0="RECON_SHOTGUN_IDLE" />
+      <MOVE_FAST set0="RECON_SHOTGUN_IDLE" />
+      <SHOOT set0="RECON_SHOTGUN_SHOOT" />
+    </ANIMS>
+  </UPGRADE_RECON_SIX12>
+
+  <UPGRADE_OFFDUTY_GARAND bEditorEnabled="false">
+    <ANIMS>
+      <REF_POSE set0="OFFG_RIFLE_REF_POSE" />
+      
+      <JUMP set0="OFFG_RIFLE_IDLE" />
+      <IDLE set0="OFFG_RIFLE_IDLE" />
+      <MOVE set0="OFFG_RIFLE_IDLE" />
+      <MOVE_FAST set0="OFFG_RIFLE_IDLE" />
+      <SHOOT set0="OFFG_RIFLE_SHOOT" />
+    </ANIMS>
+  </UPGRADE_OFFDUTY_GARAND>
+
+  <UPGRADE_BREACHER_HK512 bEditorEnabled="false">
+    <ANIMS>
+      <SHOOT set0="BREACHER_SHOOT_AUTO" />
+      <RELOAD set0="BREACHER_RELOAD" />
+    </ANIMS>
+  </UPGRADE_BREACHER_HK512>
+
+  <UPGRADE_BREACHER_INCENDIARY bEditorEnabled="false" >
+    <ANIMS>
+      <SHOOT set0="BREACHER_DRAGON_SHOOT" />
+      <RELOAD set0="BREACHER_RELOAD_AUTO" />
+      <IDLE set0="BREACHER_DRAGON_IDLE" />
+      <MOVE set0="BREACHER_DRAGON_WALK" />
+      <MOVE_FAST set0="BREACHER_DRAGON_WALK" />
+      <JUMP set0="BREACHER_DRAGON_IDLE" />
+    </ANIMS>
+  </UPGRADE_BREACHER_INCENDIARY>
+
+  <UPGRADE_SHOTGUN_SEMIAUTO bEditorEnabled="false" >
+    <ANIMS>
+      <SHOOT set0="BREACHER_SHOOT_AUTO" />
+      <RELOAD set0="BREACHER_RELOAD_AUTO" />
+    </ANIMS>
+  </UPGRADE_SHOTGUN_SEMIAUTO>
+
+  <UPGRADE_SHOTGUN_AUTOSHOOT bEditorEnabled="false" >
+    <ANIMS>
+      <SHOOT set0="BREACHER_SHOOT_AUTO" />
+      <RELOAD set0="BREACHER_RELOAD" />
+    </ANIMS>
+  </UPGRADE_SHOTGUN_AUTOSHOOT>
+
+  <!-- shotgun slug, single, load before shooting -->
+  <UPGRADE_SHOTGUN_ALT_SLUG bEditorEnabled="false">
+    <ANIMS>
+      <SHOOT set0="BREACHER_SHOOT_SLUG" />
+    </ANIMS>    
+  </UPGRADE_SHOTGUN_ALT_SLUG>
+
+  <UPGRADE_RECON_AIMED bEditorEnabled="false">
+    <ANIMS>
+      <SHOOT_ALT set0="RECON_SHOOT_AIMED" />
+    </ANIMS>
+  </UPGRADE_RECON_AIMED>
+
+  <UPGRADE_SHIELD_TACTICAL bEditorEnabled="false">
+    <ANIMS>
+      <SHOOT_ALT set0="SHIELDGUN_BASH" />
+    </ANIMS>
+  </UPGRADE_SHIELD_TACTICAL>
+
+  <UPGRADE_SHIELD_ASSAULT bEditorEnabled="false" Armor="-70.0" fDexterity="-0.1">
+    <ANIMS>
+      <SHOOT_ALT set0="SHIELDGUN_FLASH" />
+    </ANIMS>
+  </UPGRADE_SHIELD_ASSAULT>
+
+  <UPGRADE_SHIELD_IRONMAN bEditorEnabled="false" nArmorRating="2" moveMaxSpeed="-10.0" fDexterity="-0.25" fMass="5.0">
+    <ANIMS>
+      <SHOOT_ALT set0="SHIELDGUN_BASH" />
+    </ANIMS>
+  </UPGRADE_SHIELD_IRONMAN>
+
+  <UPGRADE_SHIELD_SUBMACHINEGUN bEditorEnabled="false">
+  <ANIMS>
+    <IDLE set0="SHIELD_SMG_IDLE" />
+    <MOVE set0="SHIELD_SMG_IDLE" />
+    <MOVE_FAST set0="SHIELD_SMG_IDLE" />
+    <JUMP set0="SHIELD_SMG_IDLE" />
+    <SHOOT set0="SHIELD_SMG_SHOOT" />
+  </ANIMS>
+  </UPGRADE_SHIELD_SUBMACHINEGUN>
+
+  <UPGRADE_FBI_AKIMBO bEditorEnabled="false" weaponAlt="WPN_SA_FBI_AKIMBO_ALT">
+    <ANIMS>
+      <IDLE set0="FBI_AKIMBO_IDLE" />
+      <MOVE set0="FBI_AKIMBO_IDLE" />
+      <MOVE_FAST set0="FBI_AKIMBO_IDLE" />
+      <JUMP set0="FBI_AKIMBO_IDLE" />
+      <SHOOT set0="FBI_AKIMBO_FIRE" />
+    </ANIMS>
+  </UPGRADE_FBI_AKIMBO>
+
+  <UPGRADE_FBI_AKIMBO_ALT bEditorEnabled="false" >
+    <ANIMS>
+      <SHOOT_ALT set0="FBI_AKIMBO_DUAL_FIRE" />
+    </ANIMS>
+  </UPGRADE_FBI_AKIMBO_ALT>
+
+  <UPGRADE_FBI_MP5K bEditorEnabled="false">
+    <ANIMS>
+      <IDLE set0="FBI_MP5K_IDLE" />
+      <MOVE set0="FBI_MP5K_IDLE" />
+      <MOVE_FAST set0="FBI_MP5K_IDLE" />
+      <JUMP set0="FBI_MP5K_IDLE" />
+      <SHOOT set0="FBI_MP5K_FIRE" />
+    </ANIMS>
+  </UPGRADE_FBI_MP5K>
+
+  <UPGRADE_RECON_MARKSMAN bEditorEnabled="false">
+    <ANIMS>
+      <REF_POSE set0="RECON_MARKSMAN_REF_POSE" />
+      
+      <IDLE set0="RECON_MARKSMAN_IDLE" />
+      <MOVE set0="RECON_MARKSMAN_WALK" />
+      <MOVE_FAST set0="RECON_MARKSMAN_WALK" />
+      <JUMP set0="RECON_MARKSMAN_IDLE" />
+      <SHOOT set0="RECON_MARKSMAN_SHOOT" />
+      <SHOOT_ALT set0="RECON_MARKSMAN_SHOOT_ALT" />
+    </ANIMS>
+  </UPGRADE_RECON_MARKSMAN>
+
+  <UPGRADE_ASSAULTER_MK48 bEditorEnabled="false">
+    <ANIMS>
+      <IDLE set0="ASSAULTER_MK48_IDLE" />
+      <MOVE set0="ASSAULTER_MK48_WALK" />
+      <MOVE_FAST set0="ASSAULTER_MK48_WALK" />
+      <JUMP set0="ASSAULTER_MK48_IDLE" />
+      <SHOOT set0="ASSAULTER_MK48_SHOOT" />
+    </ANIMS>
+  </UPGRADE_ASSAULTER_MK48>
+
+  <!-- Jacked up Jones' pistol anims (when not hurt) -->
+  <UPGRADE_BOSS_JUJ_PISTOL>
+    <ANIMS>
+      <IDLE set0="BOSS_JUJ_PISTOL_IDLE" />
+      <MOVE set0="BOSS_JUJ_PISTOL_IDLE" />
+      <MOVE_FAST set0="BOSS_JUJ_PISTOL_IDLE" />
+      <JUMP set0="BOSS_JUJ_PISTOL_IDLE" />
+      <SHOOT set0="BOSS_JUJ_PISTOL_SHOOT" />
+    </ANIMS>
+  </UPGRADE_BOSS_JUJ_PISTOL>
+
+  <!-- shorter aimed shot aiming QUICK AIM perk -->
+  <UPGRADE_ASSAULTER_AIMED_SHORTER bEditorEnabled="false">
+    <ANIMS>
+      <SHOOT_ALT set0="ASSAULTER_AIMED_SHOT_SHORT" />
+    </ANIMS>
+  </UPGRADE_ASSAULTER_AIMED_SHORTER>
+
+  <UPGRADE_FBI_REVOLVER_AIMED bEditorEnabled="false">
+    <ANIMS>
+      <SHOOT_ALT set0="FBI_SHOOT_AIMED" />
+    </ANIMS>
+  </UPGRADE_FBI_REVOLVER_AIMED>
+
+
+  <!-- Equipment upgrades -->
+  <UPGRADE_EQUIP_BODY_ARMOR bEditorEnabled="false" Armor="75.0" nArmorDir="0" nArmorRating="1" />
+  <UPGRADE_EQUIP_IMPROVED_ARMOR bEditorEnabled="false" moveMaxSpeed="-10.0" Armor="75.0" nArmorDir="0" nArmorRating="3" />
+  <UPGRADE_EQUIP_RECON_ARMOR bEditorEnabled="false" Armor="75.0" nArmorDir="1" nArmorRating="3" />
+  <UPGRADE_EQUIP_ANTISTAB bEditorEnabled="false" fArmorMeleeProtectionPercent="1.0" Armor="95.0" nArmorDir="0" nArmorRating="-1"  />
+  <UPGRADE_EQUIP_EXTRA_GEAR bEditorEnabled="false" sScript_OnSpawn="EQUIP_SCRIPT_EXTRA_GEAR" />
+  <UPGRADE_EQUIP_SPEED_POUCHES bEditorEnabled="false" fDexterity="0.3" />
+  <UPGRADE_EQUIP_FBI_ARMOR bEditorEnabled="false" Armor="75.0" moveMaxSpeed="-15.0" nArmorDir="0" nArmorRating="2" />
+
+  <UPGRADE_GEAR_SPEED_LOADER bEditorEnabled="false" >
+    <ANIMS>
+      <USE_GEAR set0="BREACHER_COCK" />
+    </ANIMS>
+  </UPGRADE_GEAR_SPEED_LOADER>
+
+  <UPGRADE_GEAR_SPY_CAMERA bEditorEnabled="false" >
+    <ANIMS>
+      <USE_GEAR set0="RECON_GRENADE" />
+    </ANIMS>
+  </UPGRADE_GEAR_SPY_CAMERA>
+
+  <UPGRADE_GEAR_MAG_READY bEditorEnabled="false" />
+
+</ActorTemplates>

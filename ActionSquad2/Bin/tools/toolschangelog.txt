@@ -1,0 +1,16 @@
+Door Kickers: Action Squad - Modding Tools
+
+tools v1.0.3 from 20-Nov-2018
+-----------------------------
++ Unlocked GAME_CHANGER mods
++ Added upload_mod.bat file so you can easily upload your changes
+
+tools v1.0.2 from 18-Nov-2018
+-----------------------------
++ Fixed small issues with the autosave 
+
+tools v1.0.1 from 16-Nov-2018
+-----------------------------
++ Fixed creation of temp folder when uploading mod
++ Added option to show grid on front layer
+

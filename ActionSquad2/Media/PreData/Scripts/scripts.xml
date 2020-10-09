@@ -1,0 +1,348 @@
+<?xml version="1.0"?>
+
+<!--
+- If you want to run object's script ater finishing current script use this <SET_LOCAL_VAR nRunTargetScript="1" /> in your script. By default it doesn't run it.
+-->
+
+<script name="SPAWN_MACHETTE_FINDER">
+  <ACTOR_SPAWN where="target" template="ACTOR_MACHETTE" AIstate="FIND_PLAYER" direction="player" />
+</script>
+
+<script name="SPAWN_LEMMY_FINDER">
+  <ACTOR_SPAWN where="target" template="ACTOR_LEADER_LEMMY" AIstate="FIND_PLAYER" direction="player" />
+</script>
+
+<!-- spawns one AWARE enemy. Template name is set from the editor (AI params scriptmem_sTemplate)-->
+<script name="SPAWN_1AWARE_PARAM_ONCE">
+  <IACTIVE_TOGGLE_HIDDEN />
+  <ACTOR_SPAWN where="self" template="*scriptmem_sTemplate" AIstate="AWARE" />
+  <SET_LOCAL_VAR nRunTargetScript="1" />
+</script>
+
+<script name="SPAWN_2AWARE_PARAM_ONCE">
+  <IACTIVE_TOGGLE_HIDDEN />
+  <ACTOR_SPAWN where="self" template="*scriptmem_sTemplate1" AIstate="AWARE" direction="player" />
+  <SLEEP_ASYNC duration="1.5" />
+  <ACTOR_SPAWN where="self" template="*scriptmem_sTemplate2" AIstate="AWARE" direction="player" />
+  <SET_LOCAL_VAR nRunTargetScript="1" />
+</script>
+
+
+<script name="SPAWN_ONCE_WITH_DELAY">
+  <IACTIVE_TOGGLE_HIDDEN />
+  <SLEEP_ASYNC duration="*scriptmem_fDelay" />
+  <ACTIVE_INC_FRAME target="target" step="1" loop="0" />
+  <SLEEP_ASYNC duration="0.3" />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate" AIstate="AWARE" direction="player" />
+  <SLEEP_ASYNC duration="0.5" />
+  <ACTIVE_INC_FRAME target="target" step="-1" loop="0" />
+</script>
+
+
+<!-- spawns one FINDER enemy. Template name is set from the editor (AI params scriptmem_sTemplate)-->
+<script name="SPAWN_1FINDER_PARAM_ONCE">
+  <IACTIVE_TOGGLE_HIDDEN />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate" AIstate="FIND_PLAYER" direction="player" />
+</script>
+
+<script name="SPAWN_2FINDERS_PARAM_ONCE">
+  <IACTIVE_TOGGLE_HIDDEN />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate1" AIstate="FIND_PLAYER" direction="player" />
+  <SLEEP_ASYNC duration="2.0" />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate2" AIstate="FIND_PLAYER" direction="player" />
+</script>
+
+<script name="SPAWN_2FINDERS_PARAM_TIMED">
+  <IACTIVE_TOGGLE_HIDDEN />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate1" AIstate="FIND_PLAYER" direction="player" />
+  <SLEEP_ASYNC duration="*scriptmem_fWait" />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate2" AIstate="FIND_PLAYER" direction="player" />
+</script>
+
+<script name="PICK_RED_KEY">
+  <SET_GLOBAL_VAR inventory_redKey="1" />
+  <IACTIVE_TOGGLE_HIDDEN />
+  <SET_LOCAL_VAR nRunTargetScript="1" />
+</script>
+
+<script name="SLIDING_DOOR_REDKEY">
+  <IF_EQUAL_GLOBAL var_name="inventory_redKey" check_value="1" goto="GO_UNLOCKED" />
+  
+  <PLAY_SOUND ID="CLICK" />
+  <IACTIVE_ADD_NOTIFICATION sStringID="LOCKED" fDuration="2.0" />
+  <GOTO label="GO_END" />
+  
+  <LABEL name="GO_UNLOCKED" />
+  <!-- animate opening door -->
+  <ACTIVE_SET_ANIM anim="DOOR_SLIDING_OPEN" animated="1" />
+  <IACTIVE_SET_CAN_INTERACT bCanInteract="0" />
+  <!-- remove door interaction-->
+  <IACTIVE_SET_CAN_INTERACT bCanInteract="0" />
+  <!-- hide door's target collision box -->
+  <IACTIVE_TOGGLE_HIDDEN target="target" />
+
+  <LABEL name="GO_END" />
+</script>
+
+<script name="DOOR_SPAWN_3_MACHETTE">
+  <ACTIVE_DOORFACE_SET_OPEN_TIMER target="target" fDuration="1.0" />
+  <SLEEP_ASYNC duration="0.5" />
+  <ACTOR_SPAWN where="target" template="ACTOR_MACHETTE" AIstate="AWARE" direction="player" />
+  <SLEEP_ASYNC duration="2.0" />
+  <ACTIVE_DOORFACE_SET_OPEN_TIMER target="target" fDuration="0.5" />
+  <ACTOR_SPAWN where="target" template="ACTOR_MACHETTE" AIstate="AWARE" direction="player" />
+</script>
+
+<script name="DOOR_SPAWN_2_HARRY">
+  <ACTIVE_DOORFACE_SET_OPEN_TIMER target="target" fDuration="1.0" />
+  <SLEEP_ASYNC duration="0.5" />
+  <ACTOR_SPAWN where="target" template="ACTOR_JUNKIE_HARRY" AIstate="AWARE" direction="player" />
+  <SLEEP_ASYNC duration="2.0" />
+  <ACTIVE_DOORFACE_SET_OPEN_TIMER target="target" fDuration="0.5" />
+  <ACTOR_SPAWN where="target" template="ACTOR_JUNKIE_HARRY" AIstate="AWARE" direction="player" />
+</script>
+
+<script name="TRIGGER_DOOR_SPAWN_3_MACHETTE_ONCE">
+  <ACTIVE_DOORFACE_SET_OPEN_TIMER target="target" fDuration="1.0" />
+  <SLEEP_ASYNC duration="0.5" />
+  <ACTOR_SPAWN where="target" template="ACTOR_MACHETTE" AIstate="AWARE" direction="player" />
+  <SLEEP_ASYNC duration="2.0" />
+  <ACTOR_SPAWN where="target" template="ACTOR_MACHETTE" AIstate="AWARE" direction="player" />
+  <ACTIVE_DOORFACE_SET_OPEN_TIMER target="target" fDuration="0.5" />
+  <IACTIVE_TOGGLE_HIDDEN />
+</script>
+
+<script name="TRIGGER_DOOR_SPAWN_2_PARAM_ONCE">
+  <ACTIVE_DOORFACE_SET_OPEN_TIMER target="target" fDuration="1.0" />
+  <SLEEP_ASYNC duration="0.5" />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate1" AIstate="AWARE" direction="player" />
+  <SLEEP_ASYNC duration="1.5" />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate2" AIstate="FIND_PLAYER" direction="player" />
+  <ACTIVE_DOORFACE_SET_OPEN_TIMER target="target" fDuration="0.5" />
+  <IACTIVE_TOGGLE_HIDDEN />
+</script>
+
+<script name="TRIGGER_DOOR_SPAWN_2_PARAM">
+  <ACTIVE_DOORFACE_SET_OPEN_TIMER target="target" fDuration="1.0" />
+  <SLEEP_ASYNC duration="0.5" />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate1" AIstate="AWARE" direction="player" />
+  <SLEEP_ASYNC duration="1.5" />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate2" AIstate="FIND_PLAYER" direction="player" />
+  <ACTIVE_DOORFACE_SET_OPEN_TIMER target="target" fDuration="0.5" />
+</script>
+
+<script name="TRIGGER_DOOR_SPAWN_3_PARAM_ONCE">
+  <ACTIVE_DOORFACE_SET_OPEN_TIMER target="target" fDuration="1.0" />
+  <SLEEP_ASYNC duration="0.5" />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate1" AIstate="AWARE" direction="player" />
+  <SLEEP_ASYNC duration="1.5" />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate2" AIstate="AWARE" direction="player" />
+  <SLEEP_ASYNC duration="1.5" />
+  <ACTOR_SPAWN where="target" template="*scriptmem_sTemplate3" AIstate="AWARE" direction="player" />
+  <ACTIVE_DOORFACE_SET_OPEN_TIMER target="target" fDuration="0.5" />
+  <IACTIVE_TOGGLE_HIDDEN />
+</script>
+
+<script name="TOUCH_CHECKPOINT">
+  <ACTIVE_SET_ANIM animated="1" />
+  <!-- clear AI so it doesn't activate more than once -->
+  <IACTIVE_SET_AI target="self" />
+  <SLEEP_ASYNC duration="0.5" />
+  <ACTIVE_SET_ANIM anim="CHECKPOINT_ON" animated="1" />
+</script>
+
+<script name="TOGGLE_HIDDEN_FLAG">
+  <IACTIVE_TOGGLE_HIDDEN />
+</script>
+
+<script name="TOGGLE_HIDDEN_FLAG_TOUCH_TARGET">
+  <IACTIVE_TOGGLE_HIDDEN />
+  <SET_LOCAL_VAR nRunTargetScript="1" />
+</script>
+
+<script name="LEVEL_START_RAIN">
+  <PLAY_SOUND ID="RAINFALL" looping="1" />
+  <LEVEL_ENABLE_LIGHTNING />
+</script>
+
+<!-- used to secure level targets (like drugs and such) -->
+<script name="SECURE_TARGET_2FRAMES">
+  <PLAY_SOUND ID="CLICK" />
+  <IACTIVE_SET_CAN_INTERACT bCanInteract="0" />
+  <ACTIVE_INC_FRAME step="1" loop="0" />
+</script>
+
+<!--- the object that's being toggled makes noise and alerts enemies -->
+<script name="TOGGLE_HIDDEN_FLAG_NOISY">
+  <IACTIVE_TOGGLE_HIDDEN />
+  <IACTIVE_ADD_AI_EVENT sEventType="AI_EVENT_STRANGE" fRange="128.0" fDuration="2.0" />
+</script>
+
+<!-- 
+script always used with AI_ACTIVE_TEAM_TELEPORTER_2FRAMES active objects.
+the nToucherUID var name is hardcoded into the AI so better not change it.
+-->
+<script name="ACTIVE_TEAM_TELEPORTER_2FRAMES">
+  <IACTIVE_SAVE_TOUCHER_UID sAIvarName="nToucherUID" />
+</script>
+
+<script name="PLAYER_SOLO_TELEPORT">
+  <ACTOR_TOUCHER_TELEPORT where="SELF" />
+  <ACTOR_SET_AI_STATE who="toucher" AIstate="SOLO_TELEPORT" />
+</script>
+
+<script name="DEFUSE_BOMB">
+  <ACTIVE_SET_ANIM anim="BOMB_DISABLED" />
+  <IACTIVE_SET_CAN_INTERACT bCanInteract="0" />
+  <PLAY_SOUND ID="VOICE_BOMB_DEFUSED" />
+  <!-- clear AI so it doesn't activate more than once -->
+  <IACTIVE_SET_AI target="self" />
+  <!-- the variable names in LEVEL_NOTIFY_ENGINE are hardcoded -->
+  <LEVEL_NOTIFY_ENGINE nBombDefused="1" />
+</script>
+
+<script name="ENTER_SECRET_ROOM">
+  <LEVEL_HIDE_BACKGROUND />
+  <IACTIVE_CAMERA_SET_TARGET target="self" teleport="1" />
+</script>
+
+<script name="ENTER_SECRET_ROOM_REM_TARGET_SCRIPT">
+  <LEVEL_HIDE_BACKGROUND />
+  <IACTIVE_CAMERA_SET_TARGET target="self" teleport="1" />
+  <IACTIVE_SET_SCRIPT target="target" />
+  <IACTIVE_SET_TARGETPTR target="target" targetID="-1" />
+</script>
+
+<script name="EXIT_SECRET_ROOM">
+  <LEVEL_SHOW_BACKGROUND />
+  <LEVEL_CAMERA_RESTORE_LAST_TARGET teleport="1" />
+  <COLL_CHECK_HIDDEN_ROOM_CLEARED />
+</script>
+
+<script name="TOUCH_TARGET">
+  <SET_LOCAL_VAR nRunTargetScript="1" />
+</script>
+
+<script name="TOUCH_TARGET_HIDE">
+  <IACTIVE_TOGGLE_HIDDEN />
+  <SET_LOCAL_VAR nRunTargetScript="1" />
+</script>
+
+<script name="SAVE_HOSTAGE">
+  <ACTOR_SET_AI_STATE AIstate="HOSTAGE_SAVED" />
+  <!-- it is important to save toucher UID so we can keep track of who saved who -->
+  <IACTIVE_SAVE_TOUCHER_UID sAIvarName="nToucherUID" />
+  <IACTIVE_SET_CAN_INTERACT bCanInteract="0" />
+  <PLAY_SOUND ID="VOICE_LETSGO" />
+</script>
+
+<script name="OPEN_TARGET_SLIDING_DOOR">
+  <!-- animate opening door -->
+  <ACTIVE_SET_ANIM target="target" anim="DOOR_SLIDING_OPEN" animated="1" />
+  <IACTIVE_SET_CAN_INTERACT bCanInteract="0" />
+  <!-- remove door interaction-->
+  <IACTIVE_SET_CAN_INTERACT target="target" bCanInteract="0" />
+  <!-- hide door's target collision box -->
+  <IACTIVE_TOGGLE_HIDDEN target="targets_target" />
+</script>
+
+<script name="OPEN_TARGET_SLIDING_DOOR_LOOKAT">
+  <IACTIVE_CAMERA_SET_TARGET target="target" teleport="0" />
+  <SLEEP_ASYNC duration="1.5" />
+  <!-- animate opening door -->
+  <ACTIVE_SET_ANIM target="target" anim="DOOR_SLIDING_OPEN" animated="1" />
+  <IACTIVE_SET_CAN_INTERACT bCanInteract="0" />
+  <!-- remove door interaction-->
+  <IACTIVE_SET_CAN_INTERACT target="target" bCanInteract="0" />
+  <!-- hide door's target collision box -->
+  <IACTIVE_TOGGLE_HIDDEN target="targets_target" />
+
+  <SLEEP_ASYNC duration="1.5" />
+  <LEVEL_CAMERA_RESTORE_LAST_TARGET teleport="0" />
+</script>
+
+
+<script name="ACTIVE_TOGGLE_SWITCH">
+  <ACTIVE_INC_FRAME step="1" loop="1" />
+  <PLAY_SOUND ID="CLICK" />
+  <SET_LOCAL_VAR nRunTargetScript="1" />
+</script>
+
+<!-- used with ammo boxes -->
+<script name="GIVE_AMMO">
+  <ACTIVE_AMMOBOX_GIVE_AMMO />
+</script>
+
+<!-- used with health boxes -->
+<script name="GIVE_HEALTH">
+  <ACTIVE_HEALTHBOX_GIVE_HEALTH/>
+</script>
+
+<!-- shows a message. The string ID is taken from the script's local memory var named scriptmem_sStrID passed automatically from the object's AI params -->
+<script name="SHOW_MESSAGE">
+  <PLAY_SOUND ID="CLICK" />
+  <IACTIVE_ADD_NOTIFICATION sStringID="*scriptmem_sStrID" fDuration="2.0" />
+</script>
+
+<script name="REMOVE_MESSAGE">
+  <PLAY_SOUND ID="CLICK" />
+  <IACTIVE_REMOVE_NOTIFICATION />
+</script>
+
+<script name="ACTIVE_LOCKED_DOOR">
+  <PLAY_SOUND ID="CLICK" />
+  <IACTIVE_ADD_NOTIFICATION sStringID="LOCKED" fDuration="2.0" />  
+</script>
+
+<script name="TOGGLE_SWITCH">
+  <ACTIVE_INC_FRAME step="1" loop="1" />
+  <PLAY_SOUND ID="CLICK" />
+  <SET_LOCAL_VAR nRunTargetScript="1" />
+</script>
+
+<script name="ACTIVE_OPEN_DOOR">
+  <ACTIVE_INC_FRAME step="1" loop="0" />
+  <IACTIVE_SET_SCRIPT scriptName="ACTIVE_CLOSE_DOOR" />
+  <SET_LOCAL_VAR nRunTargetScript="1" />
+</script>
+
+<script name="ACTIVE_OPEN_DOOR_NO_CLOSE">
+  <ACTIVE_INC_FRAME step="1" loop="0" />
+  <IACTIVE_SET_CAN_INTERACT bCanInteract="0" />
+  <IACTIVE_SET_SCRIPT />
+  <SET_LOCAL_VAR nRunTargetScript="1" />
+</script>
+
+<script name="ACTIVE_CLOSE_DOOR">
+  <ACTIVE_INC_FRAME step="-1" loop="0" />
+  <IACTIVE_SET_SCRIPT scriptName="ACTIVE_OPEN_DOOR" />
+  <SET_LOCAL_VAR nRunTargetScript="1" />
+</script>
+
+<script name="ACTIVE_TELEPORT_TO_TARGET">
+  <ACTOR_TOUCHER_TELEPORT where="target" />
+</script>
+
+<script name="IACTIVE_TOGGLE_ELEVATOR_DIR">
+  <IACTIVE_RAIL_CHANGEDIR target="SELF" />
+</script>
+
+<script name="IACTIVE_TOGGLE_TARGET_ELEVATOR_DIR">
+  <IACTIVE_RAIL_CHANGEDIR target="target" />
+</script>
+
+<script name="LEVEL_BUNKER1_ACTIVATE_TRAPS">
+  <!-- activeaza triggerele la usi -->
+  <IACTIVE_TOGGLE_HIDDEN target="164" />
+  <IACTIVE_TOGGLE_HIDDEN target="165" />
+  <IACTIVE_TOGGLE_HIDDEN target="166" />
+  <IACTIVE_TOGGLE_HIDDEN target="167" />
+  <IACTIVE_TOGGLE_HIDDEN target="168" />
+  <!-- aprinde luminile de avarii -->
+  <IACTIVE_TOGGLE_HIDDEN target="200" />
+  <IACTIVE_TOGGLE_HIDDEN target="201" />
+  <IACTIVE_TOGGLE_HIDDEN target="202" />
+  <IACTIVE_TOGGLE_HIDDEN target="203" />
+  <IACTIVE_TOGGLE_HIDDEN target="204" />
+  <IACTIVE_TOGGLE_HIDDEN target="205" />
+</script>

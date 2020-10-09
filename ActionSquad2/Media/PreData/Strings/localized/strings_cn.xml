@@ -1,0 +1,834 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PSTexts Version="1.0">
+  <Alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/?¡¢£¥§©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº\</Alphabet>
+  <Texts Lang="EN" Count="670">
+    <Text ID="TITLE">破门而入：行动小队</Text>
+    <Text ID="VERSION_NUMBER">empty</Text>
+    <Text ID="MSGBOX">empty</Text>
+    <Text ID="TEMP1">empty</Text>
+    <Text ID="TEMP2">empty</Text>
+    <Text ID="TEMP3">empty</Text>
+    <Text ID="TEMP4">empty</Text>
+    <Text ID="TEMP5">empty</Text>
+    <Text ID="TEMP6">empty</Text>
+    <Text ID="TEMP7">empty</Text>
+    <Text ID="TEMP8">empty</Text>
+    <Text ID="TEMP9">empty</Text>
+    <Text ID="TEMP10">empty</Text>
+    <Text ID="TEMP11">empty</Text>
+    <Text ID="TEMP12">empty</Text>
+    <Text ID="TEMP13">empty</Text>
+    <Text ID="TEMP14">empty</Text>
+    <Text ID="TEMP15">empty</Text>
+    <Text ID="PLAYER_CLASS_ASSAULTER">攻击手</Text>
+    <Text ID="PLAYER_CLASS_BREACHER">破门手</Text>
+    <Text ID="PLAYER_CLASS_SHIELD">盾牌手</Text>
+    <Text ID="PLAYER_CLASS_FBI_AGENT">菲姬探员</Text>
+    <Text ID="PLAYER_CLASS_RECON">侦察员</Text>
+    <Text ID="PLAYER_CLASS_OFFDUTYGUY">下班警员</Text>
+    <Text ID="CLASS_ASSAULTER_DESC">拥有持续火力和远程精度；当心后坐力。</Text>
+    <Text ID="CLASS_BREACHER_DESC">无差别近距离火力；可以爆破门。</Text>
+    <Text ID="CLASS_SHIELD_DESC">可防御正面枪火和爆炸；易受近战攻击。</Text>
+    <Text ID="CLASS_FBI_AGENT_DESC">强大的近战和枪械；可滚动以减少伤害。</Text>
+    <Text ID="CLASS_RECON_DESC">沉默而迅速；突出显示敌人，增强团队的伤害。</Text>
+    <Text ID="CLASS_OFFDUTYGUY_DESC">乱七八糟的剩菜袋子，酷炫的猎人装备，以及坏脾气的毒舌家伙。</Text>
+    <Text ID="LOADING">加载中...</Text>
+    <Text ID="MAIN_MENU">主菜单</Text>
+    <Text ID="DIFFICULTY_COLON">难度：</Text>
+    <Text ID="EASY">容易</Text>
+    <Text ID="MEDIUM">中等</Text>
+    <Text ID="HARD">困难</Text>
+    <Text ID="LEADERBOARDS">排行榜</Text>
+    <Text ID="COOP">在线合作</Text>
+    <Text ID="LOCAL_GAME">本地游戏</Text>
+    <Text ID="QUICK_MATCH">快速匹配</Text>
+    <Text ID="HOST_PUBLIC">公开主机</Text>
+    <Text ID="HOST_PRIVATE">私密主机</Text>
+    <Text ID="WAITING_PEER">正在等待玩家...</Text>
+    <Text ID="CONNECTING_PEER_X">玩家已找到！连接中…{%1}</Text>
+    <Text ID="CONNECTION_MSG">empty</Text>
+    <Text ID="PLAY">开始</Text>
+    <Text ID="ENTER_TO_CHAT">按回车键聊天</Text>
+    <Text ID="SEND_FEEDBACK">发送反馈</Text>
+    <Text ID="OPTIONS">选项</Text>
+    <Text ID="MORE_OPTIONS">更多选项</Text>
+    <Text ID="GFX_OPTIONS">画面选项</Text>
+    <Text ID="RESET_PROGRESS">重置进度</Text>
+    <Text ID="RESET_PROGRESS_SURE">是否确定要重置进度？本地存档将被删除，你将会从头开始！</Text>
+    <Text ID="SCREEN_SHAKE">屏幕震动</Text>
+    <Text ID="GORE_ENABLED">启用流血</Text>
+    <Text ID="ANTIALIAS_OPTION">抗锯齿</Text>
+    <Text ID="SELECT_MODE">选择模式</Text>
+    <Text ID="ANTIALIAS_JOKE1">MSAA
+CSAA
+CFAA
+FXAA
+MLAA
+SMAA
+TXAA
+MFAA
+SSAA</Text>
+    <Text ID="SELECT_DETAIL_LEVEL">选择细节等级</Text>
+    <Text ID="ANTIALIAS_JOKE2">1x
+2x
+4x
+8x
+16x
+32x
+64x</Text>
+    <Text ID="ANTIALIAS_JOKE3">说实话其实这些都没用。</Text>
+    <Text ID="ANTIALIAS_JOKE4">好啦，你看，这是个玩笑。</Text>
+    <Text ID="ANTIALIAS_JOKE5">天，你这都信啊！</Text>
+    <Text ID="HIGH">高</Text>
+    <Text ID="ULTRA">超高</Text>
+    <Text ID="JOKEA">HDR</Text>
+    <Text ID="JOKEB">XHDR</Text>
+    <Text ID="CONTINUE">继续</Text>
+    <Text ID="PRESS_CONTINUE">按任意键继续</Text>
+    <Text ID="LOSE_PROGRESS">真的要退出？
+当前关卡的进度
+将会丢失！</Text>
+    <Text ID="LOSE_PROGRESS_NET">是否退出游戏并返回主菜单？
+所有玩家都将断开连接，进度将会丢失！</Text>
+    <Text ID="QUIT_GAME">是否确定退出？</Text>
+    <Text ID="QUIT_LEVEL_NET">是否退出联网游戏？</Text>
+    <Text ID="QUIT_LEVEL">是否退出关卡？</Text>
+    <Text ID="NETWORK_ERROR_GENERIC">另一个玩家刚刚下线，或者你的网络设置有问题。</Text>
+    <Text ID="NETWORK_ERROR_WRONG_VERSION">你和其他玩家的游戏版本不同！</Text>
+    <Text ID="NETWORK_ERROR_PLAYER_LEFT">另一个玩家离开了游戏。</Text>
+    <Text ID="NETWORK_HOST_NAME">empty</Text>
+    <Text ID="NETWORK_PEER_NAME">empty</Text>
+    <Text ID="QUIT_GENERIC">是否确定退出？</Text>
+    <Text ID="LEVEL_N_FINISHED">关卡 {%1} 已完成！</Text>
+    <Text ID="HIGHSCORES">最高得分</Text>
+    <Text ID="QUIT">退出</Text>
+    <Text ID="EXIT">退出</Text>
+    <Text ID="NEXT_MISSION">下一任务</Text>
+    <Text ID="CREDITS">制作团队</Text>
+    <Text ID="EXIT_GAME">是否退出游戏？</Text>
+    <Text ID="SOUND_VOL">音量</Text>
+    <Text ID="BACK">返回</Text>
+    <Text ID="OOPS">哎呀！</Text>
+    <Text ID="AVAILABLE">可用</Text>
+    <Text ID="NOT_AVAILABLE">不可用</Text>
+    <Text ID="BORDERLESS_WND">无边框窗口</Text>
+    <Text ID="FULLSCREEN">全屏</Text>
+    <Text ID="COOP_ONLINE">合作/在线游戏</Text>
+    <Text ID="SINGLE_PLAYER">单人游戏</Text>
+    <Text ID="OK">确定</Text>
+    <Text ID="COMMIT">提交</Text>
+    <Text ID="ACCEPT">接受</Text>
+    <Text ID="CLOSE">关闭</Text>
+    <Text ID="DONE">完成</Text>
+    <Text ID="SELECT">选择</Text>
+    <Text ID="SELECT_ABILITY">选择能力</Text>
+    <Text ID="APPLY">应用</Text>
+    <Text ID="CANCEL">取消</Text>
+    <Text ID="RESET">重置</Text>
+    <Text ID="SET_DEFAULT">重置按键</Text>
+    <Text ID="SET_DEFAULT_KEYS_SURE">确实要将键盘重置为默认配置吗？</Text>
+    <Text ID="MUSIC_VOL">音乐音量</Text>
+    <Text ID="NEW">新增</Text>
+    <Text ID="DELETE">删除</Text>
+    <Text ID="START">开始</Text>
+    <Text ID="RESOLUTIONS_LIST">640x480
+800x600
+1024x768
+1280x1024
+1600x1200</Text>
+    <Text ID="RESOLUTION">屏幕分辨率</Text>
+    <Text ID="RESTART">重新开始</Text>
+    <Text ID="LANGUAGE">语言</Text>
+    <Text ID="RESTART_LEVEL">重新开始关卡</Text>
+    <Text ID="MAX_LEVEL">最高等级</Text>
+    <Text ID="PAUSED">暂停</Text>
+    <Text ID="SAVE">保存并退出</Text>
+    <Text ID="RESUME">继续</Text>
+    <Text ID="BOMB_DEFUSED">炸弹已拆除！</Text>
+    <Text ID="YOU_DIED">你死了！</Text>
+    <Text ID="WARNING">警告</Text>
+    <Text ID="LOCKED">未解锁</Text>
+    <Text ID="KEYCARD_NEEDED">需要钥匙卡</Text>
+    <Text ID="PLAYER1">玩家 1</Text>
+    <Text ID="PLAYER2">玩家 2</Text>
+    <Text ID="KEYBOARD1">键盘 1</Text>
+    <Text ID="KEYBOARD2">键盘 2</Text>
+    <Text ID="NETWORK1">网络</Text>
+    <Text ID="SYS_CONTROLLER_ADDED">手柄已连接！</Text>
+    <Text ID="SYS_CONTROLLER_REMOVED">手柄已断开连接！</Text>
+    <Text ID="PRESS_FIRE_TO_JOIN">按射击加入！</Text>
+    <Text ID="RESPAWNING_IN_N">重生倒计时 {%1}</Text>
+    <Text ID="FIRE_TO_RESPAWN">射击以重生</Text>
+    <Text ID="PLAYER_N">玩家 {%1}</Text>
+    <Text ID="PRIMARY_WEAPON">主武器</Text>
+    <Text ID="SECONDARY_WEAPON">副武器</Text>
+    <Text ID="FULL_HEALTH">生命值已满！</Text>
+    <Text ID="FULL_AMMO">弹药已满！</Text>
+    <Text ID="INTERACT">互动</Text>
+    <Text ID="OBJECTIVE_FAILED">任务目标失败</Text>
+    <Text ID="TARGET_ARRESTED">主要目标被捕</Text>
+    <Text ID="TARGET_KILLED">主要目标被杀</Text>
+    <Text ID="LEADERBOARDS_NAMES_VAL">...</Text>
+    <Text ID="LEADERBOARDS_SCORES_VAL">...</Text>
+    <Text ID="MELEE_LEADERBOARDS">近战 = 排行榜</Text>
+    <Text ID="MOVE">移动</Text>
+    <Text ID="POWER_NEEDED">需要电力。</Text>
+    <Text ID="BREACH_RELOAD">装弹中</Text>
+    <Text ID="BREACH_RECOIL">后坐力</Text>
+    <Text ID="SHIELD_HANDGUN">手枪</Text>
+    <Text ID="SHIELD_SHIELD">盾牌使用</Text>
+    <Text ID="FERGIE_HANDGUN">手枪</Text>
+    <Text ID="FERGIE_MELEE">近战</Text>
+    <Text ID="FERGIE_BUREAUCRACY">官僚主义</Text>
+    <Text ID="RECON">侦察员</Text>
+    <Text ID="TAP">轻按</Text>
+    <Text ID="HOLD">按住</Text>
+    <Text ID="SECRETS_COLLECTED_NN">收集的机密 {%1}/{%2}</Text>
+    <Text ID="SECRETS_COLLECTED_VAL">...</Text>
+    <Text ID="GEAR">道具</Text>
+    <Text ID="SKILLS">技能</Text>
+    <Text ID="ULTIMATE">终极</Text>
+    <Text ID="READY">就绪！</Text>
+    <Text ID="NONE">无</Text>
+    <Text ID="PRICE">价格</Text>
+    <Text ID="STARS">星星</Text>
+    <Text ID="CRITICAL_HIT">危急！</Text>
+    <Text ID="CRIPPLED">致残！</Text>
+    <Text ID="TOTAL_STARS">总星星数</Text>
+    <Text ID="TOTAL_STARS_VAL">empty</Text>
+    <Text ID="PEER_STARS_VAL">empty</Text>
+    <Text ID="SELECTED_PERK_DESC_VAL">empty</Text>
+    <Text ID="CONFIRM">确认</Text>
+    <Text ID="UNLOCK">解锁</Text>
+    <Text ID="UNUSED_POINTS">未使用点数</Text>
+    <Text ID="UNUSED_POINTS_VAL">-1</Text>
+    <Text ID="COMING_SOON">即将推出</Text>
+    <Text ID="COMPLETE_N_TO_UNLOCK_N">完成 {%1} 个任务以解锁（{%2} / {%3}）</Text>
+    <Text ID="MISSIONS_COMPLETED_N">完成的任务：{%1}/{%2}</Text>
+    <Text ID="CURRENT_MISSION_VAL">empty</Text>
+    <Text ID="UNLOCK_ITEM">解锁物品</Text>
+    <Text ID="NOT_ENOUGH_STARS">星星不足！
+赢得更多任务以获得更多星星</Text>
+    <Text ID="CANT_ACTIVATE_HERE">无法在此激活！</Text>
+    <Text ID="STRATEGIC1">防弹衣</Text>
+    <Text ID="STRATEGIC2">道具补充</Text>
+    <Text ID="STRATEGIC3">医药箱</Text>
+    <Text ID="STRATEGIC4">玩家重生</Text>
+    <Text ID="STRATEGIC5">额外生命</Text>
+    <Text ID="ACCURACY">准确性</Text>
+    <Text ID="RESISTANCE">抗性</Text>
+    <Text ID="RELOAD_TIME">装弹时间</Text>
+    <Text ID="RELOAD">装弹</Text>
+    <Text ID="DAMAGE">伤害</Text>
+    <Text ID="RECOIL">后坐力</Text>
+    <Text ID="SPREAD">散布</Text>
+    <Text ID="APDAMAGE">穿甲伤害</Text>
+    <Text ID="ROF">射速</Text>
+    <Text ID="AMMO">弹药</Text>
+    <Text ID="ARMOR">护具</Text>
+    <Text ID="KILLS">杀敌人数</Text>
+    <Text ID="LOGISTICS">后勤</Text>
+    <Text ID="PHYSICAL">体能</Text>
+    <Text ID="TACTICS">策略</Text>
+    <Text ID="PERKS">特殊技</Text>
+    <Text ID="DEATHS">死亡次数</Text>
+    <Text ID="TEAM_UPC">团队</Text>
+    <Text ID="CLASS_UPC">兵种</Text>
+    <Text ID="HOSTAGES_SAVED">获救的人质</Text>
+    <Text ID="HOSTAGES_SAVED_TOTAL">获救的人质</Text>
+    <Text ID="TIME_SPENT">花费的时间</Text>
+    <Text ID="TOTAL_SCORE">任务得分</Text>
+    <Text ID="SWAT_CASUALTIES">SWAT 伤亡</Text>
+    <Text ID="GUNPLAY">枪法</Text>
+    <Text ID="WPN_SMG_MP5A3">Mp5A3 冲锋枪</Text>
+    <Text ID="WPN_SMG_UMP45">UMP45 冲锋枪</Text>
+    <Text ID="WPN_CARBINE_M4A1">M4A1 卡宾枪</Text>
+    <Text ID="WPN_CARBINE_MCX300">MCX300 卡宾枪</Text>
+    <Text ID="WPN_SMG_P90">P90 PDW</Text>
+    <Text ID="WPN_SHOTGUN_M590">泵动散弹枪</Text>
+    <Text ID="WPN_SHOTGUN_JCOMBAT">半自动散弹枪</Text>
+    <Text ID="WPN_SHOTGUN_S12K">S12K 战术散弹枪</Text>
+    <Text ID="WPN_SHOTGUN_KSG">KSG 双管散弹枪</Text>
+    <Text ID="WPN_SHOTGUN_HK512">HK512 散弹枪</Text>
+    <Text ID="WPN_SHOTGUN_M870">M870 清屋散弹枪</Text>
+    <Text ID="WPN_PISTOL_G17">G17 手枪</Text>
+    <Text ID="WPN_PISTOL_MP40">M&amp;P .40 手枪</Text>
+    <Text ID="WPN_PISTOL_1911">1911 手枪</Text>
+    <Text ID="WPN_PISTOL_G19M">G19M 手枪</Text>
+    <Text ID="WPN_PISTOL_FIVESEVEN">F7AP 手枪</Text>
+    <Text ID="WPN_PISTOL_P226">P226 手枪</Text>
+    <Text ID="WPN_PISTOL_MODEL1076">M1076 手枪</Text>
+    <Text ID="WPN_SHIELD_TACTICAL">战术盾牌</Text>
+    <Text ID="WPN_SHIELD_ASSAULT">突击盾牌</Text>
+    <Text ID="WPN_SHIELD_IRONMAN">抗步枪盾牌</Text>
+    <Text ID="WPN_SMG_UZI">UZI 冲锋枪</Text>
+    <Text ID="WPN_SMG_MP9SD">消声 MP9</Text>
+    <Text ID="WPN_SMG_MP7">MP7 PDW</Text>
+    <Text ID="WPN_SMG_MP7SD">消声 MP7</Text>
+    <Text ID="WPN_SMG_CBJ">CBJ-65 冲锋枪</Text>
+    <Text ID="WPN_SMG_MP5SD">消声 MP5</Text>
+    <Text ID="GEAR_EMPTY_DESC">只是一个空插槽。看起来不大有用对吧？</Text>
+    <Text ID="GEAR_EMPTY_BOTTOM">-</Text>
+    <Text ID="EQUIP_NOEQUIPMENT">无装备</Text>
+    <Text ID="EQUIP_SPEED_POUCHES">快速弹药包</Text>
+    <Text ID="EQUIP_BODY_ARMOR">防弹衣</Text>
+    <Text ID="EQUIP_ADRENALINE_SHOT">肾上腺素注射器</Text>
+    <Text ID="EQUIP_EXTRA_GEAR">额外道具</Text>
+    <Text ID="EQUIP_BETTER_ARMOR">改进的护具</Text>
+    <Text ID="EQUIP_ANTISTAB_ARMOR">防刺护具</Text>
+    <Text ID="EQUIP_RECON_ARMOR">突袭护具</Text>
+    <Text ID="EQUIP_SPEED_POUCHES_RIGHT">-30% 装弹时间</Text>
+    <Text ID="EQUIP_BODY_ARMOR_RIGHT">+75 护具
+-不能阻止步枪弹</Text>
+    <Text ID="EQUIP_ADRENALINE_SHOT_RIGHT">+1 复活</Text>
+    <Text ID="EQUIP_EXTRA_GEAR_RIGHT">任务开始时道具+1</Text>
+    <Text ID="EQUIP_BETTER_ARMOR_RIGHT">+75 护具
+-15 速度</Text>
+    <Text ID="EQUIP_ANTISTAB_ARMOR_RIGHT">+95 近战护具</Text>
+    <Text ID="EQUIP_RECON_ARMOR_RIGHT">+75 护具（仅前方）
+-后方无防护</Text>
+    <Text ID="EQUIP_SPEED_POUCHES_BOTTOM">减少装弹时间</Text>
+    <Text ID="EQUIP_BODY_ARMOR_BOTTOM">开始时有护具防护</Text>
+    <Text ID="EQUIP_ADRENALINE_SHOT_BOTTOM">开始时有额外复活</Text>
+    <Text ID="EQUIP_EXTRA_GEAR_BOTTOM">一个额外的消耗性手雷</Text>
+    <Text ID="EQUIP_BETTER_ARMOR_BOTTOM">防止步枪伤害</Text>
+    <Text ID="EQUIP_ANTISTAB_ARMOR_BOTTOM">只防止近战伤害</Text>
+    <Text ID="EQUIP_RECON_ARMOR_BOTTOM">防止步枪伤害</Text>
+    <Text ID="GEAR_NOGEAR">无道具</Text>
+    <Text ID="GEAR_GRENADE">破片手榴弹</Text>
+    <Text ID="GEAR_FLASHBANG">闪光弹</Text>
+    <Text ID="GEAR_BREACHING_CHARGE">破门雷</Text>
+    <Text ID="GEAR_SPEED_LOADER">快速装弹</Text>
+    <Text ID="GEAR_SMOKE_GRENADE">烟雾弹</Text>
+    <Text ID="GEAR_MAG_READY">弹夹包</Text>
+    <Text ID="GEAR_CAM_BALL">球形摄像机</Text>
+    <Text ID="GEAR_SPY_CAMERA">间谍摄像机</Text>
+    <Text ID="GEAR_GRENADE_DESC">- 无差别杀伤
+- 我们不是警察吗？！</Text>
+    <Text ID="GEAR_FLASHBANG_DESC">- 致盲并令敌人眩晕
+- 可能会引起火灾</Text>
+    <Text ID="GEAR_BREACHING_CHARGE_DESC">- 粘在物件表面
+- 炸毁门和人</Text>
+    <Text ID="GEAR_SPEED_LOADER_DESC">立即装填 4 个弹夹</Text>
+    <Text ID="GEAR_SMOKE_GRENADE_DESC">- 大量的烟雾供隐藏
+- 遮断敌人的视线</Text>
+    <Text ID="GEAR_MAG_READY_DESC">立即为你的武器装弹</Text>
+    <Text ID="GEAR_CAM_BALL_DESC">- 突出显示附近的敌人
+- 对目标造成额外伤害</Text>
+    <Text ID="GEAR_SPY_CAMERA_DESC">-窥探关闭的门内
+- 对目标造成额外伤害</Text>
+    <Text ID="SPECIAL_AIMED_SHOT">瞄准射击</Text>
+    <Text ID="SPECIAL_SLUG_FIRE">弹头射击</Text>
+    <Text ID="SPECIAL_SHIELD_FLASH">致盲闪光</Text>
+    <Text ID="SPECIAL_SHIELD_BASH">盾牌重击</Text>
+    <Text ID="SPECIAL_TWO_MAGAZINES">切换弹药</Text>
+    <Text ID="SPECIAL_FIRE_MODE_CHANGE">更改射击模式</Text>
+    <Text ID="SPECIAL_DOUBLE_TAP">双重击打</Text>
+    <Text ID="SPECIAL_RECON_BURST">快速射击</Text>
+    <Text ID="SPECPASS_ARMOR_PIERCING">穿甲</Text>
+    <Text ID="SPECPASS_SEMI_AUTO">半自动</Text>
+    <Text ID="SPECPASS_RESIST_RIFLE">抗步枪射击</Text>
+    <Text ID="ULTIMATE_SNIPER_SUPPORT">狙击手支援</Text>
+    <Text ID="ULTIMATE_DRAGON_BREATH">龙息</Text>
+    <Text ID="ULTIMATE_SUBMACHINEGUN">冲锋枪攻击</Text>
+    <Text ID="ULTIMATE_SAW">破门锯</Text>
+    <Text ID="ULTIMATE_AKIMBO">Akimbo 手枪</Text>
+    <Text ID="ULTIMATE_MP5K">MP5K 冲锋枪</Text>
+    <Text ID="ULTIMATE_MK48MOD1">轻机枪</Text>
+    <Text ID="ULTIMATE_RECON_MARKSMAN">射手步枪</Text>
+    <Text ID="ULTIMATE_SNIPER_SUPPORT_DESC">召唤狙击手消灭 3 个在屏幕上可见的敌人。</Text>
+    <Text ID="ULTIMATE_DRAGON_BREATH_DESC">拿出一支装着燃烧弹的 Protecta 散弹枪。</Text>
+    <Text ID="ULTIMATE_SUBMACHINEGUN_DESC">带上你自己的 9mm 全自动手枪以备不测。</Text>
+    <Text ID="ULTIMATE_SAW_DESC">切开游戏中的任何门，以及站在门后的傻瓜。</Text>
+    <Text ID="ULTIMATE_AKIMBO_DESC">两支枪，各有 16 发 .40 子弹，两种非常酷的射击模式。</Text>
+    <Text ID="ULTIMATE_MP5K_DESC">部署 Kurz，在短到中程范围内造成额外伤害。</Text>
+    <Text ID="ULTIMATE_MK48MOD1_DESC">一支 Mk46 轻机枪，50 发子弹，以及使用它们的途径。</Text>
+    <Text ID="ULTIMATE_RECON_MARKSMAN_DESC">允许你从众人中选择并狙击目标。</Text>
+    <Text ID="MISSION_ACCOMPLISHED">任务成功</Text>
+    <Text ID="MISSION_FAILED">任务失败</Text>
+    <Text ID="HOSTAGES_KILLED">所有人质均已死亡！</Text>
+    <Text ID="TEAM_KILLED">S.W.A.T. 小队全灭！</Text>
+    <Text ID="BOMB_EXPLODED">炸弹爆炸了！</Text>
+    <Text ID="MISSION0">帮会之地</Text>
+    <Text ID="MISSION1">激进分子</Text>
+    <Text ID="MISSION2">红色警报</Text>
+    <Text ID="MISSION3">纽约</Text>
+    <Text ID="MISSION4">卡特尔领地</Text>
+    <Text ID="MISSION5">挑战第一卷</Text>
+    <Text ID="MISSION6">贫民窟之王</Text>
+    <Text ID="MISSION_TIME">empty</Text>
+    <Text ID="MISSION_SCORE">empty</Text>
+    <Text ID="MISSION_CASUALTIES">empty</Text>
+    <Text ID="MISSION_HOSTAGES">empty</Text>
+    <Text ID="MISSION_P1_KILLS">empty</Text>
+    <Text ID="MISSION_P1_ACCURACY">empty</Text>
+    <Text ID="MISSION_P1_HOSTAGES">empty</Text>
+    <Text ID="MISSION_P1_DEATHS">empty</Text>
+    <Text ID="MISSION_P2_KILLS">empty</Text>
+    <Text ID="MISSION_P2_ACCURACY">empty</Text>
+    <Text ID="MISSION_P2_HOSTAGES">empty</Text>
+    <Text ID="MISSION_P2_DEATHS">empty</Text>
+    <Text ID="CHAPTER_N">第 {%1} 章</Text>
+    <Text ID="SELECT_EPISODE">选择章节</Text>
+    <Text ID="SELECT_MISSION">选择任务</Text>
+    <Text ID="MISSION_TYPE1">消灭敌人</Text>
+    <Text ID="MISSION_TYPE2">拯救人质</Text>
+    <Text ID="MISSION_TYPE3">解除炸弹</Text>
+    <Text ID="MISSION_TYPE4">逮捕嫌犯</Text>
+    <Text ID="GRAPHICS">美术</Text>
+    <Text ID="PROGRAMMING">编程</Text>
+    <Text ID="MUSIC_SFX">音乐与音效</Text>
+    <Text ID="LEVEL_DESIGN">关卡设计</Text>
+    <Text ID="GAME_DESIGN">游戏设计</Text>
+    <Text ID="CREDITS_GFX">Andy Bogaciev
+Adrian Cruceanu
+Elias Frost
+Christian Nordgren</Text>
+    <Text ID="CREDITS_DESIGN">Dan Dimitrescu</Text>
+    <Text ID="CREDITS_SOUNDS">Gavin Harrison
+George Vlad</Text>
+    <Text ID="ADDITIONAL_WORK">网络编程与市场营销</Text>
+    <Text ID="CREDITS_ADDITIONAL">Mihai Gosa
+Catalin Saitan</Text>
+    <Text ID="CREDITS_LEVEL_DESIGN">Adrian Maraloiu
+Mihai Raiciu
+Tavi Petre</Text>
+    <Text ID="CREDITS_PROGRAMMING">Mihai Dragomir</Text>
+    <Text ID="KEY_COMMANDS">左
+右
+上/互动
+下/蹲伏
+跳跃
+射击
+特殊攻击
+装弹
+使用道具
+近战
+战略能力</Text>
+    <Text ID="KEY_LEFT">左</Text>
+    <Text ID="KEY_RIGHT">右</Text>
+    <Text ID="KEY_UP">上/互动</Text>
+    <Text ID="KEY_DOWN">下/蹲伏</Text>
+    <Text ID="KEY_JUMP">跳跃</Text>
+    <Text ID="KEY_FIRE">射击</Text>
+    <Text ID="KEY_ALT_FIRE">特殊攻击</Text>
+    <Text ID="KEY_RELOAD">装弹</Text>
+    <Text ID="KEY_USE_GEAR">使用道具</Text>
+    <Text ID="KEY_MELEE">近战</Text>
+    <Text ID="KEY_STRATEGIC_ABILITY">战略能力</Text>
+    <Text ID="KEYS1_VAL">键盘1 按键</Text>
+    <Text ID="KEYS2_VAL">键盘2 按键</Text>
+    <Text ID="CONTROLLER_LAYOUT">無線控制器</Text>
+    <Text ID="KEYBOARD_LAYOUT">键盘布局</Text>
+    <Text ID="KEY_DEFINE">选择一个按键用以</Text>
+    <Text ID="KEY_INVALID">按键无效！请另行选择。</Text>
+    <Text ID="REDEFINE_KEYS">重定义按键</Text>
+    <Text ID="INFO_KEY_MAP">F1 - 显示游戏内提示
+Alt+F1 - 显示/隐藏此窗口</Text>
+    <Text ID="TUTORIAL_ARREST_TEXT">找到大班尼并逮捕他。
+要活的！</Text>
+    <Text ID="TUTORIAL_BOMB_TEXT">这个地方安放了炸弹。
+找到并解除它 - 时间正在流逝！</Text>
+    <Text ID="TUTORIAL_HOSTAGE_TEXT">营救人质以赢得战略点数
+不要杀死他们，否则你会减少生命值！</Text>
+    <Text ID="TUTORIAL_XPPOINTS_TEAM_REMOVE">如果点数已提交，则无法将其从团队升级栏中移除。</Text>
+    <Text ID="TUTORIAL_XPPOINTS_TEAM_ADD">在提交后，已用于团队栏的升级点数不能移除。</Text>
+    <Text ID="TUTORIAL_INTERFACE_STRATEGIC">呼叫战略能力！</Text>
+    <Text ID="TUTORIAL_INTERFACE_MAIN1">记住还要使用你的特殊攻击！
+忘记了手柄设置吗？只要按 F1 或 Alt+F1。
+现在就试试看！</Text>
+    <Text ID="LEVELNAME0">缓慢起步</Text>
+    <Text ID="LEVELNAME1">敲敲门</Text>
+    <Text ID="LEVELNAME2">旧使馆</Text>
+    <Text ID="LEVELNAME3">深夜电话</Text>
+    <Text ID="LEVELNAME4">小心谨慎</Text>
+    <Text ID="LEVELNAME5">255 分局</Text>
+    <Text ID="LEVELNAME6">高楼大厦</Text>
+    <Text ID="LEVELNAME7">仓库</Text>
+    <Text ID="LEVELNAME8">办公日</Text>
+    <Text ID="LEVELNAME9">闪光路口</Text>
+    <Text ID="LEVELNAME10">大清扫</Text>
+    <Text ID="LEVELNAME11">见到大老板</Text>
+    <Text ID="LEVELNAME12">与巴特见面</Text>
+    <Text ID="LEVELNAME13">多变的汽车旅馆</Text>
+    <Text ID="LEVELNAME14">潜入地下</Text>
+    <Text ID="LEVELNAME15">地堡</Text>
+    <Text ID="LEVELNAME16">午夜疯狂</Text>
+    <Text ID="LEVELNAME17">山中藏身处</Text>
+    <Text ID="LEVELNAME18">前哨</Text>
+    <Text ID="LEVELNAME19">投下炸弹</Text>
+    <Text ID="LEVELNAME20">障碍</Text>
+    <Text ID="LEVELNAME21">陷入迷宫</Text>
+    <Text ID="LEVELNAME22">博物馆</Text>
+    <Text ID="LEVELNAME23">场院</Text>
+    <Text ID="LEVELNAME24">狂热弗兰基</Text>
+    <Text ID="LEVELNAME25">甜甜圈店危机</Text>
+    <Text ID="LEVELNAME26">疯狂地铁</Text>
+    <Text ID="LEVELNAME27">投下燃烧弹</Text>
+    <Text ID="LEVELNAME28">眩晕</Text>
+    <Text ID="LEVELNAME29">自来水厂</Text>
+    <Text ID="LEVELNAME30">寒冷暴露</Text>
+    <Text ID="LEVELNAME31">潮人啤酒厂</Text>
+    <Text ID="LEVELNAME32">爬杆</Text>
+    <Text ID="LEVELNAME33">实验室危机</Text>
+    <Text ID="LEVELNAME34">广场突袭</Text>
+    <Text ID="LEVELNAME35">末日列车</Text>
+    <Text ID="LEVELNAME36">银行劫案</Text>
+    <Text ID="LEVELNAME37">皇后十字</Text>
+    <Text ID="LEVELNAME38">斐波那契</Text>
+    <Text ID="LEVELNAME39">尚在准备</Text>
+    <Text ID="LEVELNAME40">秘密据点</Text>
+    <Text ID="LEVELNAME41">卡尼韦尔</Text>
+    <Text ID="LEVELNAME42">度假</Text>
+    <Text ID="LEVELNAME43">抱怨与招待</Text>
+    <Text ID="LEVELNAME44">熄灯</Text>
+    <Text ID="LEVELNAME45">前往机场</Text>
+    <Text ID="LEVELNAME46">全天候</Text>
+    <Text ID="LEVELNAME47">了不起的贝茨比</Text>
+    <Text ID="LEVELNAME48">现在由我说了算</Text>
+    <Text ID="LEVELNAME49">水库码头</Text>
+    <Text ID="LEVELNAME50">尘土飞扬的邻里</Text>
+    <Text ID="LEVELNAME51">闪亮</Text>
+    <Text ID="LEVELNAME52">检疫</Text>
+    <Text ID="LEVELNAME53">连接之处</Text>
+    <Text ID="LEVELNAME54">摩天楼</Text>
+    <Text ID="LEVELNAME55">NCtv 公寓</Text>
+    <Text ID="LEVELNAME56">小小铁达尼</Text>
+    <Text ID="LEVELNAME57">高高飞翔</Text>
+    <Text ID="LEVELNAME58">街头传闻</Text>
+    <Text ID="LEVELNAME59">公寓</Text>
+    <Text ID="LEVELNAME60">修复高手</Text>
+    <Text ID="LEVELNAME61">大举告密</Text>
+    <Text ID="LEVELNAME62">墓地惊喜</Text>
+    <Text ID="LEVELNAME63">一路向下</Text>
+    <Text ID="LEVELNAME64">露台恐怖</Text>
+    <Text ID="LEVELNAME65">硬核</Text>
+    <Text ID="LEVELNAME66">人坠如雨</Text>
+    <Text ID="LEVELNAME67">泳池派对破坏者</Text>
+    <Text ID="LEVELNAME68">楼下的笼子</Text>
+    <Text ID="LEVELNAME69">箱子和炸弹</Text>
+    <Text ID="LEVELNAME70">快车</Text>
+    <Text ID="LEVELNAME71">领事馆危机</Text>
+    <Text ID="LEVELNAME72">药物天堂</Text>
+    <Text ID="LEVELNAME73">安静祥和</Text>
+    <Text ID="LEVELNAME74">高高在上</Text>
+    <Text ID="LEVELNAME75">冒险人生</Text>
+    <Text ID="LEVELNAME76">前沿</Text>
+    <Text ID="LEVELNAME77">蚯蚓阿本</Text>
+    <Text ID="LEVELNAME78">交换与破坏</Text>
+    <Text ID="LEVELNAME79">家庭影院</Text>
+    <Text ID="LEVELNAME80">信仰之跃</Text>
+    <Text ID="LEVELNAME81">压力十足</Text>
+    <Text ID="LEVELNAME82">三门问题</Text>
+    <Text ID="LEVELNAME83">没有借口</Text>
+    <Text ID="LEVELNAME84">即将推出</Text>
+    <Text ID="LEVELNAME85">即将推出</Text>
+    <Text ID="LEVELNAME86">即将推出</Text>
+    <Text ID="LEVELNAME87">即将推出</Text>
+    <Text ID="LEVELNAME88">即将推出</Text>
+    <Text ID="LEVELNAME89">即将推出</Text>
+    <Text ID="LEVELNAME90">即将推出</Text>
+    <Text ID="LEVELNAME91">即将推出</Text>
+    <Text ID="LEVELNAME92">即将推出</Text>
+    <Text ID="LEVELNAME93">即将推出</Text>
+    <Text ID="LEVELNAME94">即将推出</Text>
+    <Text ID="LEVELNAME95">即将推出</Text>
+    <Text ID="BAR_NO_IMPROVEMENT">没有逐步的改善</Text>
+    <Text ID="BAR_S1_LOGISTICS">提高战略点数获得速度</Text>
+    <Text ID="BAR_S2_PHYSICAL">增加玩家生命值</Text>
+    <Text ID="BAR_A1_ACCURACY">提高基本射击准确性</Text>
+    <Text ID="BAR_A2_RECOIL">减少后坐力</Text>
+    <Text ID="BAR_B1_RECOIL">提高泵动散弹枪的射速</Text>
+    <Text ID="BAR_B2_RELOAD">提高装弹速度</Text>
+    <Text ID="BAR_S1_HANDGUN">提高基本射击准确性</Text>
+    <Text ID="BAR_S2_SHIELD_USE">提高盾牌耐久度</Text>
+    <Text ID="BAR_R1_GUNPLAY">提高基本射击准确性</Text>
+    <Text ID="BAR_R2_RECON">增加对突出显示敌人的额外伤害</Text>
+    <Text ID="BAR_F1_HANDGUN">提高基本射击准确性</Text>
+    <Text ID="BAR_F2_MELEE">增加近战伤害</Text>
+    <Text ID="PERK_DOUBLE_GEAR">双道具
+可部署的道具箱现在装有两件武器。</Text>
+    <Text ID="PERK_EXTRA_SP_SLOTS">战略储备
+你的战略条获得 2 点额外点数。</Text>
+    <Text ID="PERK_NOMEX_SUITS">防火服
+减少因火焰武器和火焰而受到的伤害。</Text>
+    <Text ID="PERK_DOUBLE_MEDIKITS">双医药箱
+每个医药箱现在可使用两次。</Text>
+    <Text ID="PERK_MELEE_DEFENSE">近战防御
+减少来自前方的近战防御 20%。</Text>
+    <Text ID="PERK_SPEED_IS_LIFE">速度就是生命
+增加你的移动速度 20%。</Text>
+    <Text ID="PERK_MULE">骡子
+任务开始时你额外获得 1 件所选道具。</Text>
+    <Text ID="PERK_DIE_HARD">顽强不屈
+濒临死亡时，你受到的伤害会降低。</Text>
+    <Text ID="PERK_QUICK_AIM">快速瞄准
+你的瞄准射击能力现在射击速度更快</Text>
+    <Text ID="PERK_CRITICAL_SHOTS">致命射击
+你的常规攻击有 5% 的几率造成 33% 的额外伤害。</Text>
+    <Text ID="PERK_SUREFOOTED">步伐坚定
+你的瞄准射击能力不再会让你停在当场。</Text>
+    <Text ID="PERK_BARRICADE_SHOOTING">障碍射击
+你利用掩护位置减少后坐力 20%。</Text>
+    <Text ID="PERK_STRONG_STANCE">稳定姿态
+通过前倾，减少你首次射击的后坐力 70%。</Text>
+    <Text ID="PERK_C_CLAMP">老虎钳
+你的基本后坐力恢复速度增加 35%。</Text>
+    <Text ID="PERK_INTIMIDATING">恐吓
+敌人受到惊吓，惊慌失措，减少施加的伤害持续 2 秒。</Text>
+    <Text ID="PERK_DOUBLE_BANGERS">双闪
+你的闪光弹现在会爆炸两次，并更快地产生眩晕效果。</Text>
+    <Text ID="PERK_ASSAULT_JUMP">攻击跳跃
+现在落在敌人头上会对其造成 15 点伤害。</Text>
+    <Text ID="PERK_TWIN_SHOT">快速扫荡
+杀死任何人之后，你下次装弹都会更快一点。</Text>
+    <Text ID="PERK_9_PELLET">九丸猎弹
+你切换到猎枪弹，造成的伤害增加。</Text>
+    <Text ID="PERK_KILLING_SPREE">纵情杀戮
+杀人之后你的下一次射击增加 25% 的伤害。</Text>
+    <Text ID="PERK_EXTENSION_TUBES">延长枪管
+你所有的由枪管装填的散弹枪弹药 +1。</Text>
+    <Text ID="PERK_RIFLED_SLUGS">步枪弹头
+让你的弹头射击更弹道更直，更容易预测。</Text>
+    <Text ID="PERK_IMPROVED_SLUGS">改进弹头
+切换到更重的弹头，一发即可击穿更多的敌人。</Text>
+    <Text ID="PERK_GORE_DEALER">血腥商人
+当你轰爆某人时，非精英敌人有 50% 的几率挣脱并逃走。</Text>
+    <Text ID="PERK_POINTMAN_ARMOR">侦察兵护具
+增加你的护具 50%，帮助你在面对棘手的未知门时生存。</Text>
+    <Text ID="PERK_WEAK_SPOTTER">薄弱之处
+你学会对付带甲敌人并用你的猎枪子弹射击其薄弱部位。</Text>
+    <Text ID="PERK_EXTENDED_MAGS">扩展弹夹
+所有手枪弹夹 +2 轮容量。</Text>
+    <Text ID="PERK_SHIELD_BRACE">盾牌支架
+将你的武器架在盾牌上，减少后坐力 40%。</Text>
+    <Text ID="PERK_LADY_JUSTICE">正义女神
+你利用受惊的敌人，总是对他们加以暴击。</Text>
+    <Text ID="PERK_FORTIFIED">设防
+当你蹲下时，你的盾牌所受的伤害减半。</Text>
+    <Text ID="PERK_ARMORED_RABBIT">装甲兔子
+适应护具，使移动速度提高 15%。</Text>
+    <Text ID="PERK_FIELD_FIXER">现场修复
+通过战略点数请求的护具现在可以更大程度地修复你的盾牌。</Text>
+    <Text ID="PERK_DEVASTATOR">毁灭者
+你的冲锋枪现在有 20% 的几率产生暴击。</Text>
+    <Text ID="PERK_CADDYSHACK">小小球童
+让你装载和携带道具的能力加倍。</Text>
+    <Text ID="PERK_IRON_MAN">铁娘子
+你用盾牌阻挡的伤害越多，它恐吓前方敌人的效果越强看起来就越可怕了。</Text>
+    <Text ID="PERK_CRIPPLING_SHOTS">致残射击
+你的射击有 5% 的几率使敌人减速几秒钟。</Text>
+    <Text ID="PERK_SURGEON_PRECISION">外科医生的精确
+你的所有射击都会自动对突出显示的敌人产生暴击。</Text>
+    <Text ID="PERK_VULTURE">秃鹰
+当从后方命中敌人时，你有 10% 的几率进行一次暴击。</Text>
+    <Text ID="PERK_RESCUE_PLAN">救援计划
+侦察工具现在也会突出显示人质，帮助你避免伤害他们。</Text>
+    <Text ID="PERK_DURACELLS">持久电池
+突出显示的持续时间现在长 50%。</Text>
+    <Text ID="PERK_DOUBLE_TOOLS">双倍工具
+你携带的侦察员工具数量增加一倍。</Text>
+    <Text ID="PERK_CAUGHT_IN_THE_ACT">现行犯
+当你处于掩护位置且未被发现时，你会成为隐藏状态。</Text>
+    <Text ID="PERK_STEADY_HAND">稳定的手
+蹲伏时提升后坐力控制。</Text>
+    <Text ID="PERK_WEAVER_STANCE">韦弗姿态
+对所有姿势均提升后坐力控制。</Text>
+    <Text ID="PERK_HOLLOW_POINTS">空尖弹
+切换到扩张型子弹，让所有枪支造成的伤害增加 25%。</Text>
+    <Text ID="PERK_COMBATIVES">格斗术
+学会格挡并减少 40% 的近战伤害。</Text>
+    <Text ID="PERK_LEG_DAY">踢腿之日
+像个厉害角色一样在三下之内把门踢开。</Text>
+    <Text ID="PERK_FEDERAL_JUSTICE">联邦司法
+你学会击中薄弱之处并从背后施加额外的刀伤。</Text>
+    <Text ID="PERK_EVASION">闪避演习
+你的滚动现在可以避免 65% 的伤害。</Text>
+    <Text ID="PERK_BIG_BANGER">大声爆炸
+从局里的仓库获得破门弹和手雷，爆炸范围扩大 50%。</Text>
+    <Text ID="PERK_CHERRY_DARLING">机枪宝贝
+使用 MP5 Kurz Ultimate 减少后坐力</Text>
+    <Text ID="PERK_HANDYMAN">能手
+你的弹夹装弹时间减少半秒。</Text>
+    <Text ID="PERK_INVISIBLE">隐形
+所有敌人在探测你时的反应都会慢半秒。</Text>
+    <Text ID="PERK_EXTENDED_MAGS_RECON">扩展弹夹
+增加你的弹夹容量 5 发。</Text>
+    <Text ID="PERK_CLEAR_TO_ENGAGE">可以突入
+如果没有人质在场，则对突出显示的敌人造成的伤害会增加。</Text>
+    <Text ID="PERK_DISORIENTED">晕头转向
+你的快速射击能力现在会使敌人迷失方向，并增加击退效果。</Text>
+    <Text ID="STATUE_DMC">Mike D
+"有如万能的神
+... 但却有着bug"</Text>
+    <Text ID="STATUE_BLIND">Adrian
+"（并不是）盲人艺术家"</Text>
+    <Text ID="STATUE_ELIAS">Elias，冰霜之神
+"召唤像素喽罗"</Text>
+    <Text ID="STATUE_TOMCAT">大佬 Dan
+"处理项目时不应喝酒"</Text>
+    <Text ID="STATUE_PINTEA">Pintea
+"正在开发《破门而入2》，不骗你"</Text>
+    <Text ID="STATUE_SICK">Sick
+"矮人级的世界建造技能"</Text>
+    <Text ID="STATUE_GAVIN">Gavin Proudsynth
+"他来自八十年代"</Text>
+    <Text ID="STATUE_ANDI">Andy Bee
+"下围棋并训练像素"</Text>
+    <Text ID="LOL">LOL</Text>
+    <Text ID="MOBILITY">移动性</Text>
+    <Text ID="STATUE_GEORGE">George
+"Makes lotsa noise"</Text>
+    <Text ID="MORE">更多…</Text>
+    <Text ID="VOICE_ACTING">配音</Text>
+    <Text ID="CREDITS_VOICE">Zachary Pill
+Stephanos Rex
+Tamara Ryan
+Samantha Vega
+Micah Blakeslee
+Fletcher Armstrong
+Elaine Cashmore
+    </Text>
+    <Text ID="CREDITS_VOICE2">Kelloggs VA
+Walter Mack
+George Vlad
+Jenn Henry
+Andy Mack
+Josef Gagnier
+    </Text>
+    <Text ID="EA_RESET_PROGRESS">Thank you for supporting us during Early Access!
+We recommend starting with a new profile. Using your old profile may lead to profile conflicts and unforeseen issues.
+Reset your profile now?
+    </Text>
+    <Text ID="MOD_ENABLED">MOD 已启用</Text>
+    <Text ID="MOD_ENABLED_WARNING">你只能与拥有相同 MOD 的玩家一起玩在线合作游戏</Text>
+    <Text ID="ABORT_MISSION">中止任务</Text>
+    <Text ID="MISSION_ABORTED">任务已中止！</Text>
+    <Text ID="ABORT_MISSION_REQ_MSG">玩家 {%1} 请求中止任务</Text>
+    <Text ID="SELECT_GAME_MODE">选择游戏模式</Text>
+    <Text ID="CLASSIC_MODE">经典模式</Text>
+    <Text ID="CLASSIC_MODE_DESC">标准警察工作</Text>
+    <Text ID="WEEKLY_CHALLENGE">每周挑战</Text>
+    <Text ID="WEEKLY_CHALLENGE_DESC">旨在测试你技能的任务</Text>
+    <Text ID="ZOMBIE_INVASION">僵尸入侵模式</Text>
+    <Text ID="ZOMBIE_INVASION_DESC">在永无市的奇怪时光</Text>
+    <Text ID="WEEK1_TASK">在 3 分钟内完成</Text>
+    <Text ID="WEEK2_TASK1">在 4 分钟内完成</Text>
+    <Text ID="WEEK2_TASK2">没有狙击手</Text>
+    <Text ID="WEEK4_TASK1">没有治疗</Text>
+    <Text ID="WEEK4_TASK2">作为盾牌手获胜</Text>
+    <Text ID="WEEK5_TASK1">作为破门手获胜</Text>
+    <Text ID="WEEK6_TASK1">作为菲姬获胜</Text>
+    <Text ID="WEEK7_TASK1">作为攻击手获胜</Text>
+    <Text ID="WORKSHOP">创意工坊</Text>
+    <Text ID="AVAILABLE_MODS">可用模组</Text>
+    <Text ID="UPDATING_MODS">模组更新中…</Text>
+    <Text ID="ON">开启</Text>
+    <Text ID="OFF">关闭</Text>
+    <Text ID="ENABLED">启用</Text>
+    <Text ID="PLEASE_HANG">请稍等一下…</Text>
+    <Text ID="MOD_CONFLICTING_MSG">无法激活模组，因为它与另一个已激活的模组影响相同的文件！</Text>
+    <Text ID="DOWNLOADED_LEVELS">已下载关卡</Text>
+    <Text ID="CHANGE_DETECTED">检测到更改</Text>
+    <Text ID="CHANGE_DETECTED_WARNING">你只能与具有相同更改的玩家进行在线合作游戏</Text>
+    <Text ID="NO_DOWNLOADED_LEVELS">你没有已下载的内容。
+请通过订阅所需物品，从 Steam 创意工坊获取更多关卡。</Text>
+    <Text ID="NO_MODS_SUBSCRIBED">你没有创意工坊物品。
+请通过订阅所需物品，从 Steam 创意工坊获取更多关卡和模组。</Text>
+    <Text ID="FLOOR_X">楼层 {%1}</Text>
+    <Text ID="FLOOR_X_VALUE">-</Text>
+    <Text ID="VINFINITE_MODE">无限高塔</Text>
+    <Text ID="VINFINITE_MODE_DESC">随机混乱生成</Text>
+    <Text ID="TUTORIAL_VINFINITE_TEXT">这是一个低补给区。
+只有进行营救才能获得战略点数。</Text>
+    <Text ID="WEEK10_TASK1">作为侦察员获胜</Text>
+    <Text ID="WPN_SWAT_REVOLVER">特警
+左轮手枪</Text>
+    <Text ID="WPN_G18C_AUTO_PISTOL">G18C
+自动手枪</Text>
+    <Text ID="WPN_FBI_REVOLVER">FBI
+左轮手枪</Text>
+    <Text ID="WPN_MP7_PDW">MP7 PDW</Text>
+    <Text ID="WPN_SIX12_REVO">Six-12
+散弹枪</Text>
+    <Text ID="WPN_TRAPPER_RIFLE">捕手
+步枪</Text>
+    <Text ID="WPN_TRICKED_OUT_AK">改装 AK</Text>
+    <Text ID="WPN_HOME_DEFENSE_SHOTGUN">狩猎
+散弹枪</Text>
+    <Text ID="WPN_TRUNK_CARBINE">后备箱
+卡宾枪</Text>
+    <Text ID="ULTIMATE_M1_GARAND">老式加兰德步枪</Text>
+    <Text ID="ULTIMATE_M1_GARAND_DESC">用这件旧传家宝射出满满一弹夹的老式穿甲弹。</Text>
+    <Text ID="ULTIMATE_RECON_SIX12SD">压制散弹枪</Text>
+    <Text ID="ULTIMATE_RECON_SIX12SD_DESC">用一次子弹横飞的消音射击结束派对。</Text>
+    <Text ID="ULTIMATE_HOMEMADE_PIE">自制馅饼</Text>
+    <Text ID="ULTIMATE_HOMEMADE_PIE_DESC">我老婆做的。能恢复整个团队的生命值。或者不能？</Text>
+    <Text ID="GEAR_PISTOL1911_DESC">-7 发可靠的 .45ACP 备用弹药
+-适合限制附带损害。</Text>
+    <Text ID="GEAR_TWINKIE">过期夹心蛋糕</Text>
+    <Text ID="GEAR_TWINKIE_DESC">- 5 秒无敌
+- 不受团队特殊技的影响。</Text>
+    <Text ID="FITNESS">健身</Text>
+    <Text ID="GEAR_BAG">道具包</Text>
+    <Text ID="BAR_O1_ACCURACY">提高射击准确性</Text>
+    <Text ID="BAR_O2_MELEE">减少受到的近战伤害</Text>
+    <Text ID="PERK_SOFT_POINTS">薄弱之处
+增加所有步枪的伤害 20%。</Text>
+    <Text ID="PERK_PLUSP_AMMO">+P 弹药
+额外装药，让你的步枪子弹有过度的穿透力。</Text>
+    <Text ID="PERK_OPEN_SEASON">狩猎季节
+所有常规（非目标）射击有 30% 的机会产生暴击</Text>
+    <Text ID="PERK_REDHEAD">击退红发女
+增加自己的近战击退和眩晕</Text>
+    <Text ID="PERK_GRIZZLY">奔跑超过灰熊\\n移动速度可增加 10%</Text>
+    <Text ID="PERK_LOCKED_OUT">冬天被锁在门外
+你现在可以踢两次来破门。</Text>
+    <Text ID="PERK_TWIXIE">夹心蛋糕
+在一个任务里使用两次夹心蛋糕。</Text>
+    <Text ID="PERK_PLATES_UPGRADE">板甲
+升级护具使防护等级 +1</Text>
+    <Text ID="PERK_GARAND_AP_AMMO">穿甲弹
+加兰德的护具穿透力 +1</Text>
+    <Text ID="INVITE_FRIEND">邀请朋友</Text>
+    <Text ID="JOIN_GAME">加入游戏</Text>
+    <Text ID="LOBBIES_LIST">活动的大厅</Text>
+    <Text ID="NO_LOBBIES">未找到大厅。</Text>
+    <Text ID="LOBBIES_LIST_VAL">...</Text>
+    <Text ID="REFRESH">刷新</Text>
+    <Text ID="YOUR_BEST_SCORE">你的最佳得分：</Text>
+    <Text ID="LEADERBOARDS_PLAYERSCORE_VAL">...</Text>
+    <Text ID="PRESS_FIRE_TO_JOIN_NX">按 L+R 加入！</Text>
+    <Text ID="CONSOLE_PRESS_A">按 A 继续</Text>
+    <Text ID="CONSOLE_PRESS_CONTINUE">按 {%1} 继续</Text>
+    <Text ID="CONSOLE_TUTORIAL_INTERFACE_MAIN1">记住还要使用你的特殊攻击！
+忘记了手柄设置吗？只需打开选项菜单，选择手柄布局就可以了。
+现在就试试看！</Text>
+    <Text ID="NX_NETWORK_CONNECTING">连接到网络</Text>
+    <Text ID="NX_NETWORK_CONNECTING_TTL">启动网络</Text>
+    <Text ID="NX_COOP_LOCAL">本地合作</Text>
+    <Text ID="NX_COOP_ONLINE">在线合作</Text>
+    <Text ID="NX_HOST_FRIENDS">主持好友游戏</Text>
+    <Text ID="NX_JOIN_FRIENDS">加入好友游戏</Text>
+    <Text ID="NX_NEEDS_ACCOUNT">需要 Nintendo Switch Online 帐户才能在线游戏和查看排行榜。</Text>
+    <Text ID="NX_NETWORK_ERROR">与在线服务通信时出错。</Text>
+    <Text ID="XB1_CHANGE_PROFILE">更改资料</Text>
+    <Text ID="XB1_USERNAME">用户名</Text>
+    <Text ID="PS4_PRESS_X">按 X 继续</Text>
+    <Text ID="NX_JUMP_LEADERBOARDS">跳跃 = 排行榜</Text>
+    <Text ID="XB1_SIGN_OUT_MESSAGE">已发生登录变更。请重新登录或退回到标题画面。</Text>
+    <Text ID="XB1_SIGN_IN">登录</Text>
+    <Text ID="CONSOLE_PORTING">主机移植</Text>
+    <Text ID="CREDITS_CONSOLE">Sickhead Games</Text>
+    <Text ID="MOBILE_PORTING">手机移植</Text>
+    <Text ID="CREDITS_MOBILE">...</Text>
+    <Text ID="QA">测试</Text>
+    <Text ID="CREDITS_QA">Whyttest</Text>
+    <Text ID="BUSINESS">商务</Text>
+    <Text ID="CREDITS_BUSINESS">Andreea-Medvedovici Per</Text>
+    <Text ID="SPECIAL_THANKS">特别感谢</Text>
+    <Text ID="CREDITS_SPECIAL_THANKS">Oreste "Axi0s" Gamba</Text>
+    <Text ID="LOBBY_WAS_FULL">会话已满</Text>
+    <Text ID="MOD_INCOMPATIBLE_MSG">Warning! Incompatible mod, needs to be updated by the author! You can but it may crash the game!</Text>
+  </Texts>
+</PSTexts>

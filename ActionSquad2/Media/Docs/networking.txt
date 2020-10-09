@@ -1,0 +1,23 @@
+Modelul “standard” de client/server, folosit in quake/counter strike/dota2 etc.
+
+https://developer.valvesoftware.com/wiki/Source_Multiplayer_Networking
+
+ 
+
+Tipul asta are niste tutoriale/articole foarte ok despre tot ce inseamna game networking (client-server, p2p, optimizari etc):
+
+http://gafferongames.com/networking-for-game-programmers/
+
+ 
+
+Un articol despre peer-to-peer synchronized:
+
+http://www.gamasutra.com/view/feature/131503/1500_archers_on_a_288_network_.php
+
+Despre floating point determinism, de pe siteul de mai sus: http://gafferongames.com/networking-for-game-programmers/floating-point-determinism/
+
+ 
+
+ 
+
+Cand ajungi acolo mai vorbim, iti pot da cod pentru mai multe chestii, gen clasa de bit packing, codul nostru de mutiplayer din DK1/DK2 etc.

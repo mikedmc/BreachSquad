@@ -1,0 +1,122 @@
+Spotlight shaders - used to render all lights except the environment light. 
+
+
+///------------ VERTEX SHADER ------------
+float4x4 matViewProjection;
+float4 RTTxywh;
+float4 RTTtex_xywh;
+
+struct VS_INPUT 
+{
+   float4 Position : POSITION0;
+   float3 Normal : NORMAL;       //vector catre lumina  
+   float4 Color : COLOR0;
+   float2 Tex0 : TEXCOORD0;      //textura spotului
+   float2 Tex1 : TEXCOORD1;      //textura din RTarget
+   
+};
+
+struct VS_OUTPUT 
+{
+   float4 Position :        POSITION0;
+   float4 Color :           COLOR0;
+   float2 Tex0 :            TEXCOORD0;
+   float2 Tex1:             TEXCOORD1;
+   float3 dirToLight :      TEXCOORD2;
+};
+
+VS_OUTPUT vs_main( VS_INPUT Input )
+{
+   VS_OUTPUT Output;
+
+   Output.Position         = mul( Input.Position, matViewProjection );
+   Output.dirToLight       = Input.Normal;
+
+   Output.Color = Input.Color; //light color
+   Output.Tex0 = Input.Tex0; //spotlight texture (shape of the light)
+   //compute tex coords in Render Target depending on vert coord. 
+   //RT is a 1024x1024 texture divided in 4 quadrants (top left - color, top right - normals)
+   float2 RTTxy, RTTwh;
+   float2 RTTtex_xy, RTTtex_wh;
+   RTTxy = RTTxywh.xy; RTTwh = RTTxywh.zw;
+   RTTtex_xy = RTTtex_xywh.xy; RTTtex_wh = RTTtex_xywh.zw;
+   Output.Tex1 = ((Input.Position.xy - RTTxy) / RTTwh) * RTTtex_wh + RTTtex_xy;
+
+   return( Output );
+   
+}
+
+
+///----------- PIXEL SHADER SPOTLIGHT ------------
+
+float4 fSpecularData; //x=spec power, y=spec intens, z=light intensity
+float4 fAtmosphericData; //x=diffuse multiplier, y=spot color dodge layer opacity, z=spot linear dodge opacity
+
+sampler2D texAll;  //tex render target (ul-diffuse, ur-normal+height, dl-specular power?)
+sampler2D texSpot;
+
+struct PS_INPUT 
+{
+   float4 VertColor:       COLOR0;    //light color
+   float2 Tex0:            TEXCOORD0; //tex spot
+   float2 Tex1:            TEXCOORD1; //tex render target
+   float3 dirToLight :     TEXCOORD2; //direction to light
+};
+
+float4 ps_main( PS_INPUT Input ) : COLOR0
+{
+   //XY normals, Z self illum. W is alpha
+   float4 normal_selfIllum = tex2D(texAll, float2(Input.Tex1.x + 0.5f, Input.Tex1.y));
+
+   float3 fvLightDirection = normalize(Input.dirToLight);
+   float3 fvNormal         = float3(normal_selfIllum.xy, 1.0f);
+   fvNormal                = normalize((fvNormal.xyz * 2.0f) - 1.0f);
+   
+   float3 fvReflection      = reflect(fvLightDirection, fvNormal);
+   float  fRDotV           = max(0.0f, -fvReflection.z);
+   float4 fvBaseColor      = tex2D(texAll, Input.Tex1);
+
+   //get spot color and intensity (fSpecularData.z is light intensity)
+   float4 spotColor = tex2D(texSpot, Input.Tex0) * fSpecularData.z * Input.VertColor;
+   
+   float4 fvRealColor = (fvBaseColor * spotColor);
+   //spotColor already contains the dotProduct attenuation
+   float4 fvTotalDiffuse   = fvRealColor;
+                              //intensity                     //power
+   float4 fvTotalSpecular  = fSpecularData.y * pow( fRDotV, fSpecularData.x ) * fvRealColor;
+   //save final color
+   float4 fvFinalColor = fvTotalDiffuse * fAtmosphericData.x + fvTotalSpecular;
+   //--- bonus for artistic impression:
+   //color dodge
+   fvFinalColor /= (1.0f - spotColor * fAtmosphericData.y);
+   //linear dodge
+   fvFinalColor += spotColor * fAtmosphericData.z;
+   
+   return( fvFinalColor );
+}
+
+///--- PIXEL SHADER AMBIENTAL LIGHT ---
+
+float4 fSpecularData; //x=spec power, y=spec intens, z=light intensity
+float4 fAtmosphericData; //x=diffuse multiplier, y=spot color dodge layer opacity, z=spot linear dodge opacity
+
+sampler2D texAll;  //tex render target (ul-diffuse, ur-normal+height, dl-specular power?)
+sampler2D texSpot;
+
+struct PS_INPUT 
+{
+   float4 VertColor:       COLOR0;    //light color
+   float2 Tex0:            TEXCOORD0; //tex spot
+   float2 Tex1:            TEXCOORD1; //tex render target
+   float3 dirToLight :     TEXCOORD2; //direction to light
+};
+
+float4 ps_main( PS_INPUT Input ) : COLOR0
+{
+   float selfIllum          = tex2D(texAll, float2(Input.Tex1.x + 0.5f, Input.Tex1.y)).z;
+   float4 fvBaseColor       = tex2D(texAll, Input.Tex1);
+
+   float4 fvRealColor = (fvBaseColor * Input.VertColor) + (fvBaseColor * selfIllum);
+   
+   return( saturate(fvRealColor) );
+}

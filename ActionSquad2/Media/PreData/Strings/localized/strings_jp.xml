@@ -1,0 +1,853 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PSTexts Version="1.0">
+  <Alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/?¡¢£¥§©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº\</Alphabet>
+  <Texts Lang="EN" Count="670">
+    <Text ID="TITLE">ドアキッカーズ: アクションスカッド</Text>
+    <Text ID="VERSION_NUMBER">empty</Text>
+    <Text ID="MSGBOX">empty</Text>
+    <Text ID="TEMP1">empty</Text>
+    <Text ID="TEMP2">empty</Text>
+    <Text ID="TEMP3">empty</Text>
+    <Text ID="TEMP4">empty</Text>
+    <Text ID="TEMP5">empty</Text>
+    <Text ID="TEMP6">empty</Text>
+    <Text ID="TEMP7">empty</Text>
+    <Text ID="TEMP8">empty</Text>
+    <Text ID="TEMP9">empty</Text>
+    <Text ID="TEMP10">empty</Text>
+    <Text ID="TEMP11">empty</Text>
+    <Text ID="TEMP12">empty</Text>
+    <Text ID="TEMP13">empty</Text>
+    <Text ID="TEMP14">empty</Text>
+    <Text ID="TEMP15">empty</Text>
+    <Text ID="PLAYER_CLASS_ASSAULTER">アサルター</Text>
+    <Text ID="PLAYER_CLASS_BREACHER">ブリーチャー</Text>
+    <Text ID="PLAYER_CLASS_SHIELD">シールド</Text>
+    <Text ID="PLAYER_CLASS_FBI_AGENT">エージェント ファーギー</Text>
+    <Text ID="PLAYER_CLASS_RECON">レコン</Text>
+    <Text ID="PLAYER_CLASS_OFFDUTYGUY">オフデューティーガイ</Text>
+    <Text ID="CLASS_ASSAULTER_DESC">弾数多め、長距離射撃の精度高。銃撃の反動大なので注意</Text>
+    <Text ID="CLASS_BREACHER_DESC">圧倒的な近距離での火力をほこる。ドアをぶち開けることができる</Text>
+    <Text ID="CLASS_SHIELD_DESC">前方からの射撃と爆発を防ぐことができる。近接攻撃に弱い</Text>
+    <Text ID="CLASS_FBI_AGENT_DESC">近接攻撃も銃撃も強力。ロールで被ダメージ軽減。</Text>
+    <Text ID="CLASS_RECON_DESC">静かで機敏。敵をハイライトし、チームダメージをブーストする</Text>
+    <Text ID="CLASS_OFFDUTYGUY_DESC">食べ残しの袋の数々、イケてる狩り道具、イラついた一言台詞群</Text>
+    <Text ID="LOADING">Loading...</Text>
+    <Text ID="MAIN_MENU">メインメニュー</Text>
+    <Text ID="DIFFICULTY_COLON">難易度:</Text>
+    <Text ID="EASY">イージー</Text>
+    <Text ID="MEDIUM">ノーマル</Text>
+    <Text ID="HARD">ハード</Text>
+    <Text ID="LEADERBOARDS">ランキング</Text>
+    <Text ID="COOP">オンライン協力</Text>
+    <Text ID="LOCAL_GAME">ローカルゲーム</Text>
+    <Text ID="QUICK_MATCH">クイックマッチ</Text>
+    <Text ID="HOST_PUBLIC">パブリックをホスト</Text>
+    <Text ID="HOST_PRIVATE">プライベートをホスト</Text>
+    <Text ID="WAITING_PEER">プレイヤーを待っています…</Text>
+    <Text ID="CONNECTING_PEER_X">プレイヤー発見！接続中…
+{%1}</Text>
+    <Text ID="CONNECTION_MSG">empty</Text>
+    <Text ID="PLAY">Play</Text>
+    <Text ID="ENTER_TO_CHAT">ENTERでチャット開始</Text>
+    <Text ID="SEND_FEEDBACK">フィードバックを送る</Text>
+    <Text ID="OPTIONS">オプション</Text>
+    <Text ID="MORE_OPTIONS">その他オプション</Text>
+    <Text ID="GFX_OPTIONS">グラフィックオプション</Text>
+    <Text ID="RESET_PROGRESS">進行をリセット</Text>
+    <Text ID="RESET_PROGRESS_SURE">本当に進行をリセットしますか？セーブデータは削除され、いちからやり直しとなります！</Text>
+    <Text ID="SCREEN_SHAKE">画面振動</Text>
+    <Text ID="GORE_ENABLED">流血表現</Text>
+    <Text ID="ANTIALIAS_OPTION">アンチエイリアス</Text>
+    <Text ID="SELECT_MODE">モード選択</Text>
+    <Text ID="ANTIALIAS_JOKE1">MSAA
+CSAA
+CFAA
+FXAA
+MLAA
+SMAA
+TXAA
+MFAA
+SSAA</Text>
+    <Text ID="SELECT_DETAIL_LEVEL">解像度レベルを選択</Text>
+    <Text ID="ANTIALIAS_JOKE2">1x
+2x
+4x
+8x
+16x
+32x
+64x</Text>
+    <Text ID="ANTIALIAS_JOKE3">これを変えても特に変化はないです。</Text>
+    <Text ID="ANTIALIAS_JOKE4">まあ、冗談ですけどね。</Text>
+    <Text ID="ANTIALIAS_JOKE5">ちょっ、ジョークだってばよ！</Text>
+    <Text ID="HIGH">ハイ</Text>
+    <Text ID="ULTRA">ウルトラ</Text>
+    <Text ID="JOKEA">HDR</Text>
+    <Text ID="JOKEB">XHDR</Text>
+    <Text ID="CONTINUE">次へ</Text>
+    <Text ID="PRESS_CONTINUE">Press any key to continue</Text>
+    <Text ID="LOSE_PROGRESS">終了しますか？
+ここまでの進行は
+消えてしまいます！</Text>
+    <Text ID="LOSE_PROGRESS_NET">ゲームを終了してメインメニューに戻りますか？
+全プレイヤーが離脱し、進行は消えてしまいます！</Text>
+    <Text ID="QUIT_GAME">本当に終了しますか？</Text>
+    <Text ID="QUIT_LEVEL_NET">ネットワークゲームを終了？</Text>
+    <Text ID="QUIT_LEVEL">ステージを終了？</Text>
+    <Text ID="NETWORK_ERROR_GENERIC">他プレイヤーがオフライン、またはネット接続に問題が発生しました。</Text>
+    <Text ID="NETWORK_ERROR_WRONG_VERSION">こちらと他プレイヤーのゲームのバージョンが違うようです！</Text>
+    <Text ID="NETWORK_ERROR_PLAYER_LEFT">他プレイヤーがゲームを離脱</Text>
+    <Text ID="NETWORK_HOST_NAME">empty</Text>
+    <Text ID="NETWORK_PEER_NAME">empty</Text>
+    <Text ID="QUIT_GENERIC">本当に終了しますか？</Text>
+    <Text ID="LEVEL_N_FINISHED">ステージ {%1} クリア！</Text>
+    <Text ID="HIGHSCORES">ハイスコア</Text>
+    <Text ID="QUIT">終了</Text>
+    <Text ID="EXIT">終了</Text>
+    <Text ID="NEXT_MISSION">次のミッション</Text>
+    <Text ID="CREDITS">クレジット</Text>
+    <Text ID="EXIT_GAME">ゲームを終了？</Text>
+    <Text ID="SOUND_VOL">サウンド音量</Text>
+    <Text ID="BACK">戻る</Text>
+    <Text ID="OOPS">おっと！</Text>
+    <Text ID="AVAILABLE">使用可能</Text>
+    <Text ID="NOT_AVAILABLE">N/A</Text>
+    <Text ID="BORDERLESS_WND">ボーダーレスウィンドウ</Text>
+    <Text ID="FULLSCREEN">フルスクリーン</Text>
+    <Text ID="COOP_ONLINE">協力 / オンライン</Text>
+    <Text ID="SINGLE_PLAYER">シングルプレイ</Text>
+    <Text ID="OK">OK</Text>
+    <Text ID="COMMIT">確定</Text>
+    <Text ID="ACCEPT">同意</Text>
+    <Text ID="CLOSE">閉じる</Text>
+    <Text ID="DONE">完了</Text>
+    <Text ID="SELECT">選択</Text>
+    <Text ID="SELECT_ABILITY">アビリティ選択</Text>
+    <Text ID="APPLY">適用</Text>
+    <Text ID="CANCEL">キャンセル</Text>
+    <Text ID="RESET">リセット</Text>
+    <Text ID="SET_DEFAULT">キーをリセット</Text>
+    <Text ID="SET_DEFAULT_KEYS_SURE">キーボードをリセットして初期設定の状態に戻しますか？</Text>
+    <Text ID="MUSIC_VOL">音楽ボリューム</Text>
+    <Text ID="NEW">New</Text>
+    <Text ID="DELETE">削除</Text>
+    <Text ID="START">スタート</Text>
+    <Text ID="RESOLUTIONS_LIST">640x480
+800x600
+1024x768
+1280x1024
+1600x1200</Text>
+    <Text ID="RESOLUTION">画面解像度</Text>
+    <Text ID="RESTART">リスタート</Text>
+    <Text ID="LANGUAGE">言語</Text>
+    <Text ID="RESTART_LEVEL">ステージをリスタート</Text>
+    <Text ID="MAX_LEVEL">MAXレベル</Text>
+    <Text ID="PAUSED">PAUSE</Text>
+    <Text ID="SAVE">セーブ＆終了</Text>
+    <Text ID="RESUME">再開</Text>
+    <Text ID="BOMB_DEFUSED">爆弾 解除！</Text>
+    <Text ID="YOU_DIED">You died!</Text>
+    <Text ID="WARNING">警告</Text>
+    <Text ID="LOCKED">未解放</Text>
+    <Text ID="KEYCARD_NEEDED">キーカード必要</Text>
+    <Text ID="PLAYER1">Player 1</Text>
+    <Text ID="PLAYER2">Player 2</Text>
+    <Text ID="KEYBOARD1">キーボード 1</Text>
+    <Text ID="KEYBOARD2">キーボード 2</Text>
+    <Text ID="NETWORK1">ネットワーク</Text>
+    <Text ID="SYS_CONTROLLER_ADDED">コントローラー接続！</Text>
+    <Text ID="SYS_CONTROLLER_REMOVED">コントローラー接続解除！</Text>
+    <Text ID="PRESS_FIRE_TO_JOIN">FIREを押して参戦！</Text>
+    <Text ID="RESPAWNING_IN_N">再出現まで: {%1}</Text>
+    <Text ID="FIRE_TO_RESPAWN">FIREを押して再出現</Text>
+    <Text ID="PLAYER_N">Player {%1}</Text>
+    <Text ID="PRIMARY_WEAPON">メイン武器</Text>
+    <Text ID="SECONDARY_WEAPON">サブ武器</Text>
+    <Text ID="FULL_HEALTH">ライフ 満タン！</Text>
+    <Text ID="FULL_AMMO">弾丸 満タン！</Text>
+    <Text ID="INTERACT">アクション</Text>
+    <Text ID="OBJECTIVE_FAILED">目標達成 失敗</Text>
+    <Text ID="TARGET_ARRESTED">メインターゲット 逮捕</Text>
+    <Text ID="TARGET_KILLED">メインターゲット 死亡</Text>
+    <Text ID="LEADERBOARDS_NAMES_VAL">...</Text>
+    <Text ID="LEADERBOARDS_SCORES_VAL">...</Text>
+    <Text ID="MELEE_LEADERBOARDS">打撃 = ランキング表示</Text>
+    <Text ID="MOVE">移動</Text>
+    <Text ID="POWER_NEEDED">電力が必要</Text>
+    <Text ID="BREACH_RELOAD">リロード</Text>
+    <Text ID="BREACH_RECOIL">反動</Text>
+    <Text ID="SHIELD_HANDGUN">ハンドガン</Text>
+    <Text ID="SHIELD_SHIELD">シールド使用</Text>
+    <Text ID="FERGIE_HANDGUN">ハンドガン</Text>
+    <Text ID="FERGIE_MELEE">打撃</Text>
+    <Text ID="FERGIE_BUREAUCRACY">お役所特典</Text>
+    <Text ID="RECON">レコン</Text>
+    <Text ID="TAP">タップ</Text>
+    <Text ID="HOLD">ホールド</Text>
+    <Text ID="SECRETS_COLLECTED_NN">秘密 回収 {%1} / {%2}</Text>
+    <Text ID="SECRETS_COLLECTED_VAL">...</Text>
+    <Text ID="GEAR">ギア</Text>
+    <Text ID="SKILLS">スキル</Text>
+    <Text ID="ULTIMATE">アルティメット</Text>
+    <Text ID="READY">Ready!</Text>
+    <Text ID="NONE">なし</Text>
+    <Text ID="PRICE">価格</Text>
+    <Text ID="STARS">スター</Text>
+    <Text ID="CRITICAL_HIT">Critical!</Text>
+    <Text ID="CRIPPLED">Crippled!</Text>
+    <Text ID="TOTAL_STARS">合計スター</Text>
+    <Text ID="TOTAL_STARS_VAL">empty</Text>
+    <Text ID="PEER_STARS_VAL">empty</Text>
+    <Text ID="SELECTED_PERK_DESC_VAL">empty</Text>
+    <Text ID="CONFIRM">確認</Text>
+    <Text ID="UNLOCK">アンロック</Text>
+    <Text ID="UNUSED_POINTS">未使用
+ポイント</Text>
+    <Text ID="UNUSED_POINTS_VAL">-1</Text>
+    <Text ID="COMING_SOON">Coming Soon</Text>
+    <Text ID="COMPLETE_N_TO_UNLOCK_N">ミッション {%1} をクリアでアンロック ({%2} / {%3})</Text>
+    <Text ID="MISSIONS_COMPLETED_N">クリア済ミッション: {%1}/{%2}</Text>
+    <Text ID="CURRENT_MISSION_VAL">empty</Text>
+    <Text ID="UNLOCK_ITEM">アイテムをアンロック</Text>
+    <Text ID="NOT_ENOUGH_STARS">スターが足りない！
+ミッションをこなしてスターを集めよう</Text>
+    <Text ID="CANT_ACTIVATE_HERE">ここでは使えない！</Text>
+    <Text ID="STRATEGIC1">ボディアーマー</Text>
+    <Text ID="STRATEGIC2">ギア補充</Text>
+    <Text ID="STRATEGIC3">医療キット</Text>
+    <Text ID="STRATEGIC4">プレイヤーをリスポーン</Text>
+    <Text ID="STRATEGIC5">ボーナスライフ</Text>
+    <Text ID="ACCURACY">命中率</Text>
+    <Text ID="RESISTANCE">抵抗力</Text>
+    <Text ID="RELOAD_TIME">リロード時間</Text>
+    <Text ID="RELOAD">リロード</Text>
+    <Text ID="DAMAGE">ダメージ</Text>
+    <Text ID="RECOIL">反動</Text>
+    <Text ID="SPREAD">スプレッド</Text>
+    <Text ID="APDAMAGE">APダメージ</Text>
+    <Text ID="ROF">発射速度</Text>
+    <Text ID="AMMO">弾丸</Text>
+    <Text ID="ARMOR">アーマー</Text>
+    <Text ID="KILLS">キル</Text>
+    <Text ID="LOGISTICS">兵站</Text>
+    <Text ID="PHYSICAL">フィジカル</Text>
+    <Text ID="TACTICS">戦術</Text>
+    <Text ID="PERKS">スペシャル</Text>
+    <Text ID="DEATHS">死亡</Text>
+    <Text ID="TEAM_UPC">チーム</Text>
+    <Text ID="CLASS_UPC">クラス</Text>
+    <Text ID="HOSTAGES_SAVED">救った人質</Text>
+    <Text ID="HOSTAGES_SAVED_TOTAL">救った人質</Text>
+    <Text ID="TIME_SPENT">プレイタイム</Text>
+    <Text ID="TOTAL_SCORE">ミッションスコア</Text>
+    <Text ID="SWAT_CASUALTIES">SWAT の死傷者</Text>
+    <Text ID="GUNPLAY">銃の技術</Text>
+    <Text ID="WPN_SMG_MP5A3">Mp5A3
+ SMG</Text>
+    <Text ID="WPN_SMG_UMP45">UMP45
+ SMG</Text>
+    <Text ID="WPN_CARBINE_M4A1">M4A1
+ カービン</Text>
+    <Text ID="WPN_CARBINE_MCX300">MCX300
+ カービン</Text>
+    <Text ID="WPN_SMG_P90">P90 PDW</Text>
+    <Text ID="WPN_SHOTGUN_M590">ポンプアクション
+ ショットガン</Text>
+    <Text ID="WPN_SHOTGUN_JCOMBAT">セミオート
+ ショットガン</Text>
+    <Text ID="WPN_SHOTGUN_S12K">S12K タクティカル
+ ショットガン</Text>
+    <Text ID="WPN_SHOTGUN_KSG">KSG ツイン
+ ショットガン</Text>
+    <Text ID="WPN_SHOTGUN_HK512">HK512
+ ショットガン</Text>
+    <Text ID="WPN_SHOTGUN_M870">M870
+ ルームクリーナー</Text>
+    <Text ID="WPN_PISTOL_G17">G17 ピストル</Text>
+    <Text ID="WPN_PISTOL_MP40">M&amp;P
+ .40 ピストル</Text>
+    <Text ID="WPN_PISTOL_1911">1911 ピストル</Text>
+    <Text ID="WPN_PISTOL_G19M">G19M ピストル</Text>
+    <Text ID="WPN_PISTOL_FIVESEVEN">F7AP ピストル</Text>
+    <Text ID="WPN_PISTOL_P226">P226 ピストル</Text>
+    <Text ID="WPN_PISTOL_MODEL1076">M1076 ピストル</Text>
+    <Text ID="WPN_SHIELD_TACTICAL">タクティカルシールド</Text>
+    <Text ID="WPN_SHIELD_ASSAULT">アサルトシールド</Text>
+    <Text ID="WPN_SHIELD_IRONMAN">アンチライフル
+ シールド</Text>
+    <Text ID="WPN_SMG_UZI">UZI SMG</Text>
+    <Text ID="WPN_SMG_MP9SD">MP9
+ サプレッサー</Text>
+    <Text ID="WPN_SMG_MP7">MP7 PDW</Text>
+    <Text ID="WPN_SMG_MP7SD">MP7
+ サプレッサー</Text>
+    <Text ID="WPN_SMG_CBJ">CBJ-65
+ SMG</Text>
+    <Text ID="WPN_SMG_MP5SD">MP5
+ サプレッサー</Text>
+    <Text ID="GEAR_EMPTY_DESC">ただの空きスロット。このままじゃ意味ナシだよなあ？</Text>
+    <Text ID="GEAR_EMPTY_BOTTOM">-</Text>
+    <Text ID="EQUIP_NOEQUIPMENT">装備なし</Text>
+    <Text ID="EQUIP_SPEED_POUCHES">スピードポーチ</Text>
+    <Text ID="EQUIP_BODY_ARMOR">ボディアーマー</Text>
+    <Text ID="EQUIP_ADRENALINE_SHOT">アドレナリン ショット</Text>
+    <Text ID="EQUIP_EXTRA_GEAR">追加ギア</Text>
+    <Text ID="EQUIP_BETTER_ARMOR">アーマー改</Text>
+    <Text ID="EQUIP_ANTISTAB_ARMOR">アンチナイフ アーマー</Text>
+    <Text ID="EQUIP_RECON_ARMOR">レイダーアーマー</Text>
+    <Text ID="EQUIP_SPEED_POUCHES_RIGHT">リロード時間 -30%</Text>
+    <Text ID="EQUIP_BODY_ARMOR_RIGHT">アーマー +75 
+- ライフルの弾には無力</Text>
+    <Text ID="EQUIP_ADRENALINE_SHOT_RIGHT">復活 +1</Text>
+    <Text ID="EQUIP_EXTRA_GEAR_RIGHT">ミッション開始時 ギア +1</Text>
+    <Text ID="EQUIP_BETTER_ARMOR_RIGHT">アーマー +75 
+スピード -15</Text>
+    <Text ID="EQUIP_ANTISTAB_ARMOR_RIGHT">打撃アーマー +95</Text>
+    <Text ID="EQUIP_RECON_ARMOR_RIGHT">アーマー +75（前方のみ） 
+- 後方防御なし</Text>
+    <Text ID="EQUIP_SPEED_POUCHES_BOTTOM">リロード時間短縮</Text>
+    <Text ID="EQUIP_BODY_ARMOR_BOTTOM">アーマー保護ありで開始</Text>
+    <Text ID="EQUIP_ADRENALINE_SHOT_BOTTOM">復活 +1 で開始</Text>
+    <Text ID="EQUIP_EXTRA_GEAR_BOTTOM">消耗アイテム +1増量</Text>
+    <Text ID="EQUIP_BETTER_ARMOR_BOTTOM">ライフルによる被ダメージを無効にする</Text>
+    <Text ID="EQUIP_ANTISTAB_ARMOR_BOTTOM">打撃による被ダメージだけ無効にする</Text>
+    <Text ID="EQUIP_RECON_ARMOR_BOTTOM">ライフルによる被ダメージを無効にする</Text>
+    <Text ID="GEAR_NOGEAR">ギアなし</Text>
+    <Text ID="GEAR_GRENADE">フラググレネード</Text>
+    <Text ID="GEAR_FLASHBANG">フラッシュバング</Text>
+    <Text ID="GEAR_BREACHING_CHARGE">ブリーチチャージ</Text>
+    <Text ID="GEAR_SPEED_LOADER">スピードリローダー</Text>
+    <Text ID="GEAR_SMOKE_GRENADE">スモークグレネード</Text>
+    <Text ID="GEAR_MAG_READY">マガジンレディ</Text>
+    <Text ID="GEAR_CAM_BALL">カメラボール</Text>
+    <Text ID="GEAR_SPY_CAMERA">スパイカメラ</Text>
+    <Text ID="GEAR_GRENADE_DESC">- 無差別に殺す 
+- 警察がこんなの使っていいの！？</Text>
+    <Text ID="GEAR_FLASHBANG_DESC">- 敵をブラインド＆スタン状態にする 
+- 着火剤として使えることも</Text>
+    <Text ID="GEAR_BREACHING_CHARGE_DESC">- 接着できる 
+- ドアや敵を吹っ飛ばす</Text>
+    <Text ID="GEAR_SPEED_LOADER_DESC">弾4発を一瞬でリロードできる</Text>
+    <Text ID="GEAR_SMOKE_GRENADE_DESC">- 煙もくもく、身を隠せる 
+- 敵の視線を外せる</Text>
+    <Text ID="GEAR_MAG_READY_DESC">武器のリロードを一瞬でできる</Text>
+    <Text ID="GEAR_CAM_BALL_DESC">- 近くの敵をハイライト 
+- ターゲットに追加ダメージ</Text>
+    <Text ID="GEAR_SPY_CAMERA_DESC">- ドアの向こう側をのぞける 
+- ターゲットに追加ダメージ</Text>
+    <Text ID="SPECIAL_AIMED_SHOT">狙い撃ちショット</Text>
+    <Text ID="SPECIAL_SLUG_FIRE">スラッグファイア</Text>
+    <Text ID="SPECIAL_SHIELD_FLASH">ブラインドフラッシュ</Text>
+    <Text ID="SPECIAL_SHIELD_BASH">シールドバッシュ</Text>
+    <Text ID="SPECIAL_TWO_MAGAZINES">弾薬スイッチ</Text>
+    <Text ID="SPECIAL_FIRE_MODE_CHANGE">射撃モード変更可能</Text>
+    <Text ID="SPECIAL_DOUBLE_TAP">ダブルタップ</Text>
+    <Text ID="SPECIAL_RECON_BURST">ラピッドファイア</Text>
+    <Text ID="SPECPASS_ARMOR_PIERCING">アーマーカンツウ</Text>
+    <Text ID="SPECPASS_SEMI_AUTO">セミオート</Text>
+    <Text ID="SPECPASS_RESIST_RIFLE">耐ライフル弾</Text>
+    <Text ID="ULTIMATE_SNIPER_SUPPORT">スナイパーサポート</Text>
+    <Text ID="ULTIMATE_DRAGON_BREATH">ドラゴンブレス</Text>
+    <Text ID="ULTIMATE_SUBMACHINEGUN">SMG アサルト</Text>
+    <Text ID="ULTIMATE_SAW">ブリーチャー SAW</Text>
+    <Text ID="ULTIMATE_AKIMBO">アキンボピストル</Text>
+    <Text ID="ULTIMATE_MP5K">MP5K SMG</Text>
+    <Text ID="ULTIMATE_MK48MOD1">ライト マシンガン</Text>
+    <Text ID="ULTIMATE_RECON_MARKSMAN">マークスマン ライフル</Text>
+    <Text ID="ULTIMATE_SNIPER_SUPPORT_DESC">スナイパーを呼び、画面内に見える敵を3人排除</Text>
+    <Text ID="ULTIMATE_DRAGON_BREATH_DESC">火炎弾の詰まったプロテクタ ショットガンを持ちだす</Text>
+    <Text ID="ULTIMATE_SUBMACHINEGUN_DESC">とっておきの9mmマシンピストルを持ちだす</Text>
+    <Text ID="ULTIMATE_SAW_DESC">どんな扉も、ついでにその後ろに突っ立ってるバカも切り刻む</Text>
+    <Text ID="ULTIMATE_AKIMBO_DESC">二丁拳銃、それぞれ.40が16発。超クールな銃撃モード2種類</Text>
+    <Text ID="ULTIMATE_MP5K_DESC">短～中距離の破壊力が凄まじいクルツをお楽しみあれ</Text>
+    <Text ID="ULTIMATE_MK48MOD1_DESC">Mk46 LMG、弾丸50発、君にはその権利があるから</Text>
+    <Text ID="ULTIMATE_RECON_MARKSMAN_DESC">数多くの中から1人を選び、狙撃する自由</Text>
+    <Text ID="MISSION_ACCOMPLISHED">Mission Success</Text>
+    <Text ID="MISSION_FAILED">Mission Failed</Text>
+    <Text ID="HOSTAGES_KILLED">人質は全員死亡！</Text>
+    <Text ID="TEAM_KILLED">S.W.A.T. チーム 全滅！</Text>
+    <Text ID="BOMB_EXPLODED">爆弾 爆発！</Text>
+    <Text ID="MISSION0">ギャングランド</Text>
+    <Text ID="MISSION1">ザ ラディカルズ</Text>
+    <Text ID="MISSION2">レッドアラート</Text>
+    <Text ID="MISSION3">ザ ビッグアップル</Text>
+    <Text ID="MISSION4">カルテルのナワバリ</Text>
+    <Text ID="MISSION5">チャレンジ Vol. 1</Text>
+    <Text ID="MISSION6">キング・オブ・ザ・スラム</Text>
+    <Text ID="MISSION_TIME">empty</Text>
+    <Text ID="MISSION_SCORE">empty</Text>
+    <Text ID="MISSION_CASUALTIES">empty</Text>
+    <Text ID="MISSION_HOSTAGES">empty</Text>
+    <Text ID="MISSION_P1_KILLS">empty</Text>
+    <Text ID="MISSION_P1_ACCURACY">empty</Text>
+    <Text ID="MISSION_P1_HOSTAGES">empty</Text>
+    <Text ID="MISSION_P1_DEATHS">empty</Text>
+    <Text ID="MISSION_P2_KILLS">empty</Text>
+    <Text ID="MISSION_P2_ACCURACY">empty</Text>
+    <Text ID="MISSION_P2_HOSTAGES">empty</Text>
+    <Text ID="MISSION_P2_DEATHS">empty</Text>
+    <Text ID="CHAPTER_N">チャプター {%1}</Text>
+    <Text ID="SELECT_EPISODE">エピソード選択</Text>
+    <Text ID="SELECT_MISSION">ミッション選択</Text>
+    <Text ID="MISSION_TYPE1">敵の排除</Text>
+    <Text ID="MISSION_TYPE2">人質の救出</Text>
+    <Text ID="MISSION_TYPE3">爆弾の解除</Text>
+    <Text ID="MISSION_TYPE4">逮捕令状</Text>
+    <Text ID="GRAPHICS">グラフィック</Text>
+    <Text ID="PROGRAMMING">プログラム</Text>
+    <Text ID="MUSIC_SFX">音楽＆SFX</Text>
+    <Text ID="LEVEL_DESIGN">ステージデザイン</Text>
+    <Text ID="GAME_DESIGN">ゲームデザイン</Text>
+    <Text ID="CREDITS_GFX">Andy Bogaciev
+Adrian Cruceanu
+Elias Frost
+Christian Nordgren</Text>
+    <Text ID="CREDITS_DESIGN">Dan Dimitrescu</Text>
+    <Text ID="CREDITS_SOUNDS">Gavin Harrison
+George Vlad</Text>
+    <Text ID="ADDITIONAL_WORK">ネットプログラム＆マーケティング</Text>
+    <Text ID="CREDITS_ADDITIONAL">Mihai Gosa
+Catalin Saitan</Text>
+    <Text ID="CREDITS_LEVEL_DESIGN">Adrian Maraloiu
+Mihai Raiciu
+Tavi Petre</Text>
+    <Text ID="CREDITS_PROGRAMMING">Mihai Dragomir</Text>
+    <Text ID="KEY_COMMANDS">左
+右
+上 / アクション
+ダウン / しゃがむ
+ジャンプ
+攻撃
+Alt攻撃
+リロード
+ギア使用
+打撃
+戦略アビリティ</Text>
+    <Text ID="KEY_LEFT">左</Text>
+    <Text ID="KEY_RIGHT">右</Text>
+    <Text ID="KEY_UP">上 / アクション</Text>
+    <Text ID="KEY_DOWN">下 / しゃがむ</Text>
+    <Text ID="KEY_JUMP">ジャンプ</Text>
+    <Text ID="KEY_FIRE">攻撃</Text>
+    <Text ID="KEY_ALT_FIRE">Alt攻撃</Text>
+    <Text ID="KEY_RELOAD">リロード</Text>
+    <Text ID="KEY_USE_GEAR">ギア使用</Text>
+    <Text ID="KEY_MELEE">打撃</Text>
+    <Text ID="KEY_STRATEGIC_ABILITY">戦略アビリティ</Text>
+    <Text ID="KEYS1_VAL">キーボード1 キー</Text>
+    <Text ID="KEYS2_VAL">キーボード2 キー</Text>
+    <Text ID="CONTROLLER_LAYOUT">コントローラー配置</Text>
+    <Text ID="KEYBOARD_LAYOUT">キーボード配置</Text>
+    <Text ID="KEY_DEFINE">キーを選択: </Text>
+    <Text ID="KEY_INVALID">無効なキー！他を選んでください</Text>
+    <Text ID="REDEFINE_KEYS">キーの再割り当て</Text>
+    <Text ID="INFO_KEY_MAP">F1 - ゲーム内ヒントの表示 Alt+F1 
+- このウィンドウの表示/非表示</Text>
+    <Text ID="TUTORIAL_ARREST_TEXT">ビッグベニーを見つけて捕まえろ
+生かしてだぞ！</Text>
+    <Text ID="TUTORIAL_BOMB_TEXT">この場所に爆弾が仕掛けられた
+見つけて解除せよ。時間がないぞ！</Text>
+    <Text ID="TUTORIAL_HOSTAGE_TEXT">人質を救出して戦略ポイントを稼ごう
+人質を殺してしまうとライフが減るぞ！</Text>
+    <Text ID="TUTORIAL_XPPOINTS_TEAM_REMOVE">チームのアップグレードバーは確定後、もうポイントをリセットできません</Text>
+    <Text ID="TUTORIAL_XPPOINTS_TEAM_ADD">利用は計画的に！チームバーでのアップグレードポイント使用は、確定後はふり直しができません</Text>
+    <Text ID="TUTORIAL_INTERFACE_STRATEGIC">戦略アビリティを使うんだ！</Text>
+    <Text ID="TUTORIAL_INTERFACE_MAIN1">Alt攻撃を使えることも忘れるな！
+ボタン配置を忘れた？F1またはAlt+F1を押してみろ
+ほら、試してみろ！</Text>
+    <Text ID="LEVELNAME0">スロースターター</Text>
+    <Text ID="LEVELNAME1">ノック ノック ノック</Text>
+    <Text ID="LEVELNAME2">古い大使館</Text>
+    <Text ID="LEVELNAME3">ナイトコール</Text>
+    <Text ID="LEVELNAME4">慎重に進め</Text>
+    <Text ID="LEVELNAME5">第255地区</Text>
+    <Text ID="LEVELNAME6">ハイライズ</Text>
+    <Text ID="LEVELNAME7">ウェアハウス</Text>
+    <Text ID="LEVELNAME8">オフィスデー</Text>
+    <Text ID="LEVELNAME9">フラッシュバング ジャンクション</Text>
+    <Text ID="LEVELNAME10">クリーンアップ</Text>
+    <Text ID="LEVELNAME11">ビッグボスとの出会い</Text>
+    <Text ID="LEVELNAME12">ミーティング バート</Text>
+    <Text ID="LEVELNAME13">一触即発モーテル</Text>
+    <Text ID="LEVELNAME14">ゴーイングアンダー</Text>
+    <Text ID="LEVELNAME15">ザ バンカー</Text>
+    <Text ID="LEVELNAME16">深夜のミッション</Text>
+    <Text ID="LEVELNAME17">山頂のアジト</Text>
+    <Text ID="LEVELNAME18">アウトポスト</Text>
+    <Text ID="LEVELNAME19">ボムアウェイ</Text>
+    <Text ID="LEVELNAME20">ザ ブロック</Text>
+    <Text ID="LEVELNAME21">迷路にとらわれて</Text>
+    <Text ID="LEVELNAME22">ザ ミュージアム</Text>
+    <Text ID="LEVELNAME23">ザ ヤード</Text>
+    <Text ID="LEVELNAME24">キョウキのフランキー</Text>
+    <Text ID="LEVELNAME25">マクドーナツ危機一髪</Text>
+    <Text ID="LEVELNAME26">メトロ マッドネス</Text>
+    <Text ID="LEVELNAME27">モロトフおとどけ</Text>
+    <Text ID="LEVELNAME28">めまい</Text>
+    <Text ID="LEVELNAME29">ウォーターワークス Inc.</Text>
+    <Text ID="LEVELNAME30">コールドエクスポージャー</Text>
+    <Text ID="LEVELNAME31">ヒップスタービール工場</Text>
+    <Text ID="LEVELNAME32">シャフトを登って</Text>
+    <Text ID="LEVELNAME33">ラボの危機</Text>
+    <Text ID="LEVELNAME34">プラザ襲撃</Text>
+    <Text ID="LEVELNAME35">最終列車 終末行き</Text>
+    <Text ID="LEVELNAME36">銀行強盗</Text>
+    <Text ID="LEVELNAME37">クイーンズクロス</Text>
+    <Text ID="LEVELNAME38">フィボナッチ</Text>
+    <Text ID="LEVELNAME39">オン ザ アンビル</Text>
+    <Text ID="LEVELNAME40">秘密要塞</Text>
+    <Text ID="LEVELNAME41">ケインヴィル</Text>
+    <Text ID="LEVELNAME42">休暇中に</Text>
+    <Text ID="LEVELNAME43">ワイン＆ダイン</Text>
+    <Text ID="LEVELNAME44">ライツアウト</Text>
+    <Text ID="LEVELNAME45">空港へ</Text>
+    <Text ID="LEVELNAME46">アラウンド ザ クロック</Text>
+    <Text ID="LEVELNAME47">グレートバッツバイ</Text>
+    <Text ID="LEVELNAME48">オレがキャプテンだ</Text>
+    <Text ID="LEVELNAME49">レザボアドッグ</Text>
+    <Text ID="LEVELNAME50">ホコリまみれの隣人たち</Text>
+    <Text ID="LEVELNAME51">ザ シャイニー</Text>
+    <Text ID="LEVELNAME52">エル クアランティーノ</Text>
+    <Text ID="LEVELNAME53">ジョイントブロック</Text>
+    <Text ID="LEVELNAME54">スカイスクラッチャー</Text>
+    <Text ID="LEVELNAME55">NCtv クリブ</Text>
+    <Text ID="LEVELNAME56">タイニータニック</Text>
+    <Text ID="LEVELNAME57">フライング ハイ</Text>
+    <Text ID="LEVELNAME58">ワード オン ザ ストリート</Text>
+    <Text ID="LEVELNAME59">ザ クリブ</Text>
+    <Text ID="LEVELNAME60">フィクサーアッパー</Text>
+    <Text ID="LEVELNAME61">スニッチ ガロール</Text>
+    <Text ID="LEVELNAME62">墓場のサプライズ</Text>
+    <Text ID="LEVELNAME63">長い道のり</Text>
+    <Text ID="LEVELNAME64">テラスからの脅威</Text>
+    <Text ID="LEVELNAME65">ハードコア</Text>
+    <Text ID="LEVELNAME66">あめあめヤレヤレ</Text>
+    <Text ID="LEVELNAME67">プールパーティー クラッシャー</Text>
+    <Text ID="LEVELNAME68">下階のケージ</Text>
+    <Text ID="LEVELNAME69">クレート＆ボム</Text>
+    <Text ID="LEVELNAME70">ザ・エクスプレス</Text>
+    <Text ID="LEVELNAME71">危機の領事館</Text>
+    <Text ID="LEVELNAME72">ストーナーパラダイス</Text>
+    <Text ID="LEVELNAME73">ピース＆クワイエット</Text>
+    <Text ID="LEVELNAME74">凧のように高く</Text>
+    <Text ID="LEVELNAME75">ギリギリに生きる</Text>
+    <Text ID="LEVELNAME76">カッティングエッジ</Text>
+    <Text ID="LEVELNAME77">ミミズのベン</Text>
+    <Text ID="LEVELNAME78">スイッチ＆デストロイ</Text>
+    <Text ID="LEVELNAME79">ホームボックスオフィス</Text>
+    <Text ID="LEVELNAME80">イーグルダイブ</Text>
+    <Text ID="LEVELNAME81">アンダープレッシャー</Text>
+    <Text ID="LEVELNAME82">モンティホール</Text>
+    <Text ID="LEVELNAME83">ノーエクスキューズ</Text>
+    <Text ID="LEVELNAME84">Coming Soon</Text>
+    <Text ID="LEVELNAME85">Coming Soon</Text>
+    <Text ID="LEVELNAME86">Coming Soon</Text>
+    <Text ID="LEVELNAME87">Coming Soon</Text>
+    <Text ID="LEVELNAME88">Coming Soon</Text>
+    <Text ID="LEVELNAME89">Coming Soon</Text>
+    <Text ID="LEVELNAME90">Coming Soon</Text>
+    <Text ID="LEVELNAME91">Coming Soon</Text>
+    <Text ID="LEVELNAME92">Coming Soon</Text>
+    <Text ID="LEVELNAME93">Coming Soon</Text>
+    <Text ID="LEVELNAME94">Coming Soon</Text>
+    <Text ID="LEVELNAME95">Coming Soon</Text>
+    <Text ID="BAR_NO_IMPROVEMENT">特に変化なし</Text>
+    <Text ID="BAR_S1_LOGISTICS">戦略ポイント増加率アップ</Text>
+    <Text ID="BAR_S2_PHYSICAL">プレイヤーのライフアップ</Text>
+    <Text ID="BAR_A1_ACCURACY">基本命中精度アップ</Text>
+    <Text ID="BAR_A2_RECOIL">反動が少なくなる</Text>
+    <Text ID="BAR_B1_RECOIL">ポンプショットガンの発射速度アップ</Text>
+    <Text ID="BAR_B2_RELOAD">リロード速度アップ</Text>
+    <Text ID="BAR_S1_HANDGUN">基本命中精度アップ</Text>
+    <Text ID="BAR_S2_SHIELD_USE">シールド耐久力アップ</Text>
+    <Text ID="BAR_R1_GUNPLAY">基本命中精度アップ</Text>
+    <Text ID="BAR_R2_RECON">ハイライト状態の敵への与ダメージアップ</Text>
+    <Text ID="BAR_F1_HANDGUN">基本命中精度アップ</Text>
+    <Text ID="BAR_F2_MELEE">打撃ダメージアップ</Text>
+    <Text ID="PERK_DOUBLE_GEAR">ダブルギア
+ギアボックス内に入っているアイテム数が2倍になる</Text>
+    <Text ID="PERK_EXTRA_SP_SLOTS">戦略的余裕
+戦略メーターが2ポイント増える</Text>
+    <Text ID="PERK_NOMEX_SUITS">ノーメックス スーツ
+炎系武器や炎からの被ダメージが少なくなる</Text>
+    <Text ID="PERK_DOUBLE_MEDIKITS">ダブル医療キット
+1つの医療キットが2回使えるようになる</Text>
+    <Text ID="PERK_MELEE_DEFENSE">打撃防御
+前方からの打撃ダメージを20%軽減</Text>
+    <Text ID="PERK_SPEED_IS_LIFE">スピード命
+移動速度が20%アップ</Text>
+    <Text ID="PERK_MULE">運び屋
+ミッション開始時に、手元にあるギアが1つ増える</Text>
+    <Text ID="PERK_DIE_HARD">ダイハード
+ライフが少なくなっている時、被ダメージ量が少なくなる</Text>
+    <Text ID="PERK_QUICK_AIM">クイック狙撃
+アビリティ「狙い撃ちショット」の発射速度アップ</Text>
+    <Text ID="PERK_CRITICAL_SHOTS">クリティカルショット
+通常攻撃が5%の確率で、33%ダメージアップ</Text>
+    <Text ID="PERK_SUREFOOTED">足元タシカ
+「狙い撃ちショット」を動きながらでも撃てるようになる</Text>
+    <Text ID="PERK_BARRICADE_SHOOTING">バリケードシュート
+カバーポジションを利用して反動を20%少なくする</Text>
+    <Text ID="PERK_STRONG_STANCE">耐ショウゲキ姿勢
+前かがみになることで、射撃の反動を70%少なくする</Text>
+    <Text ID="PERK_C_CLAMP">Cクランプ グリップ
+反動からの基本回復速度が35%アップする</Text>
+    <Text ID="PERK_INTIMIDATING">サプライズ
+驚いた敵が冷静さを失い、2秒間攻撃力が落ちる</Text>
+    <Text ID="PERK_DOUBLE_BANGERS">ツインバンガー
+フラッシュバングが2回爆発する。敵がスタン状態になるのも早くなる</Text>
+    <Text ID="PERK_ASSAULT_JUMP">アサルトジャンプ
+敵の上にのしかかることで15ダメージを与える</Text>
+    <Text ID="PERK_TWIN_SHOT">ファストスイープ
+敵を倒したあとの次の一発のリロードが少し早くなる</Text>
+    <Text ID="PERK_9_PELLET">9ペレット バック
+バックショット装填に切り替えることで与ダメージアップ</Text>
+    <Text ID="PERK_KILLING_SPREE">キリングフェスティバル
+敵を倒したあとの次の一発の与ダメージが25%アップ</Text>
+    <Text ID="PERK_EXTENSION_TUBES">エクステンション チューブ
+チューブ装填型のショットガンの弾丸数 +1</Text>
+    <Text ID="PERK_RIFLED_SLUGS">ライフルスラッグ
+スラッグショットが比較的安定してまっすぐ飛ぶようになる</Text>
+    <Text ID="PERK_IMPROVED_SLUGS">スラッグ改
+重量のあるスラッグ弾に切り替える。一発で複数の敵を文字通り切り裂く</Text>
+    <Text ID="PERK_GORE_DEALER">流血さわぎ
+雑魚系の敵に大ダメージを与えたとき、50%の確率でそいつが逃げる</Text>
+    <Text ID="PERK_POINTMAN_ARMOR">ポイントマンアーマー
+アーマーが50%アップ。未知の危険が裏に潜むドアを開ける場合の生存確率を上げてくれるだろう</Text>
+    <Text ID="PERK_WEAK_SPOTTER">ウィークスポッター
+アーマーをまとった敵にタックルし、弱い部分にバックショットをぶち込めるようになる</Text>
+    <Text ID="PERK_EXTENDED_MAGS">マガジン拡張
+全ピストルのマガジンに装填可能な弾数 +2</Text>
+    <Text ID="PERK_SHIELD_BRACE">シールドブレイス
+シールドの上に武器を置くことで反動を40%少なくする</Text>
+    <Text ID="PERK_LADY_JUSTICE">正義の女神
+驚いている敵に、確実にクリティカルヒットを叩き込めるようになる</Text>
+    <Text ID="PERK_FORTIFIED">強化
+しゃがんでいると、シールドが受けるダメージが半分になる</Text>
+    <Text ID="PERK_ARMORED_RABBIT">アーマーラビット
+コンディションが上がり、移動速度が15%アップ</Text>
+    <Text ID="PERK_FIELD_FIXER">フィールドフィクサー
+戦略ポイントを使ってアーマーをリクエストすることで、シールドを修復できる</Text>
+    <Text ID="PERK_DEVASTATOR">デバステイター
+SMGで攻撃したとき、20%の確率でクリティカルヒット発生</Text>
+    <Text ID="PERK_CADDYSHACK">キャディバック
+持ち運べるギアの数が2倍になる</Text>
+    <Text ID="PERK_IRON_MAN">アイアンメイド
+シールドで受け止めるダメージ量が多くなるにつれ、敵はその耐性に恐れおののくようになる</Text>
+    <Text ID="PERK_CRIPPLING_SHOTS">クリッピングショット
+5%の確率で、攻撃が敵の動きを数秒間遅くする</Text>
+    <Text ID="PERK_SURGEON_PRECISION">ミリの精度
+ハイライト状態の敵への銃撃が全てクリティカルヒットになる</Text>
+    <Text ID="PERK_VULTURE">ヴァルチャー
+敵を後ろから攻撃すると、10%の確率でクリティカルヒットになる </Text>
+    <Text ID="PERK_RESCUE_PLAN">レスキュープラン
+レコンのツールが人質もハイライトする。負傷させるリスクが少なくなる</Text>
+    <Text ID="PERK_DURACELLS">デュラセル
+ハイライト状態が50%長く続く</Text>
+    <Text ID="PERK_DOUBLE_TOOLS">ダブルツール
+持ち運べるレコンツールの数が2倍になる</Text>
+    <Text ID="PERK_CAUGHT_IN_THE_ACT">不可視の現行犯
+カバーポジションに入ると敵から見えない状態になり、発見されない</Text>
+    <Text ID="PERK_STEADY_HAND">ステディハンド
+しゃがんでいるときの反動抑制力アップ</Text>
+    <Text ID="PERK_WEAVER_STANCE">ウイーバースタンス
+あらゆる姿勢での反動抑制力アップ</Text>
+    <Text ID="PERK_HOLLOW_POINTS">ホローポイント
+強化弾に切り替えることで、全銃火器の与ダメージ25%アップ</Text>
+    <Text ID="PERK_COMBATIVES">格闘技術
+ブロックや受け流しのテクニックを習得、打撃ダメージが40%少なくなる</Text>
+    <Text ID="PERK_LEG_DAY">レッグデイ
+デカい男のようにドアをキック、3ヒットでぶち破れるようになる</Text>
+    <Text ID="PERK_FEDERAL_JUSTICE">正義の執行
+敵の急所を突くことを習得、後方からのナイフ攻撃の与ダメージアップ</Text>
+    <Text ID="PERK_EVASION">回避パターン
+ロールすることで被ダメージを65%軽減</Text>
+    <Text ID="PERK_BIG_BANGER">ビッグバンガー
+グレネードやその他爆発物を局の倉庫から調達。爆破範囲が50%拡大</Text>
+    <Text ID="PERK_CHERRY_DARLING">チェリー ダーリン
+MP5 クルツ アルティメットの反動を軽減</Text>
+    <Text ID="PERK_HANDYMAN">ハンディマン
+リロードが0.5秒以下でできるようになる</Text>
+    <Text ID="PERK_INVISIBLE">トウメイニンゲン
+こちらに気づいた敵のリアクションが0.5秒遅くなる</Text>
+    <Text ID="PERK_EXTENDED_MAGS_RECON">マガジン拡張
+マガジンに装填可能な弾数 +5</Text>
+    <Text ID="PERK_CLEAR_TO_ENGAGE">テッテイ抗戦
+ハイライト状態の敵への与ダメージアップ（ただし、人質がいない場合に限る）</Text>
+    <Text ID="PERK_DISORIENTED">ディスオリエント
+アビリティ「ラピッドファイア」が敵の方向感覚をくるわせる＆ノックバック力アップ</Text>
+    <Text ID="STATUE_DMC">Mike D
+"まさに全能の神のような存在
+…バグもたまに"</Text>
+    <Text ID="STATUE_BLIND">Adrian
+"盲目（的な）アーティスト"</Text>
+    <Text ID="STATUE_ELIAS">Elias、氷の神
+"ピクセルなミニオンどもを召喚できる"</Text>
+    <Text ID="STATUE_TOMCAT">Dan the Man
+"飲んじゃダメ、プレゼンもシちゃダメ"</Text>
+    <Text ID="STATUE_PINTEA">Pintea
+"ドアキッカーズ2に取り組み中、これホント"</Text>
+    <Text ID="STATUE_SICK">Sick
+"世界構築にかけてはドワーフレベルのスキル持ち"</Text>
+    <Text ID="STATUE_GAVIN">Gavin Proudsynth
+"80年代からやって来た"</Text>
+    <Text ID="STATUE_ANDI">Andy Bee
+"GOをプレイしてピクセルを習得"</Text>
+    <Text ID="LOL">LOL</Text>
+    <Text ID="MOBILITY">流動性</Text>
+    <Text ID="STATUE_GEORGE">George
+"Makes lotsa noise"</Text>
+    <Text ID="MORE">さらに表示…</Text>
+    <Text ID="VOICE_ACTING">Voice Acting</Text>
+    <Text ID="CREDITS_VOICE">Zachary Pill
+Stephanos Rex
+Tamara Ryan
+Samantha Vega
+Micah Blakeslee
+Fletcher Armstrong
+Elaine Cashmore
+    </Text>
+    <Text ID="CREDITS_VOICE2">Kelloggs VA
+Walter Mack
+George Vlad
+Jenn Henry
+Andy Mack
+Josef Gagnier
+    </Text>
+    <Text ID="EA_RESET_PROGRESS">Thank you for supporting us during Early Access!
+We recommend starting with a new profile. Using your old profile may lead to profile conflicts and unforeseen issues.
+Reset your profile now?
+    </Text>
+    <Text ID="MOD_ENABLED">MOD 有効</Text>
+    <Text ID="MOD_ENABLED_WARNING">同一のMODを所有しているプレイヤーとだけ協力プレイが可能</Text>
+    <Text ID="ABORT_MISSION">ミッション放棄</Text>
+    <Text ID="MISSION_ABORTED">ミッション 放棄！</Text>
+    <Text ID="ABORT_MISSION_REQ_MSG">プレイヤー {%1} が ミッション放棄 をリクエスト</Text>
+    <Text ID="SELECT_GAME_MODE">ゲームモード選択</Text>
+    <Text ID="CLASSIC_MODE">クラシックモード</Text>
+    <Text ID="CLASSIC_MODE_DESC">通常の警察仕事</Text>
+    <Text ID="WEEKLY_CHALLENGE">ウィークリーチャレンジ</Text>
+    <Text ID="WEEKLY_CHALLENGE_DESC">相応のスキルが求められるミッションの数々</Text>
+    <Text ID="ZOMBIE_INVASION">ゾンビ侵攻モード</Text>
+    <Text ID="ZOMBIE_INVASION_DESC">どこでもない街での奇妙なひととき</Text>
+    <Text ID="WEEK1_TASK">3分以内にクリア</Text>
+    <Text ID="WEEK2_TASK1">4分以内にクリア</Text>
+    <Text ID="WEEK2_TASK2">スナイパーなし</Text>
+    <Text ID="WEEK4_TASK1">回復なし</Text>
+    <Text ID="WEEK4_TASK2">シールドで勝利</Text>
+    <Text ID="WEEK5_TASK1">ブリーチャーで勝利</Text>
+    <Text ID="WEEK6_TASK1">ファーギーで勝利</Text>
+    <Text ID="WEEK7_TASK1">アサルターで勝利</Text>
+    <Text ID="WORKSHOP">ワークショップ</Text>
+    <Text ID="AVAILABLE_MODS">利用可能なMOD</Text>
+    <Text ID="UPDATING_MODS">MODをアップデート中…</Text>
+    <Text ID="ON">オン</Text>
+    <Text ID="OFF">オフ</Text>
+    <Text ID="ENABLED">有効</Text>
+    <Text ID="PLEASE_HANG">少しお待ちください…</Text>
+    <Text ID="MOD_CONFLICTING_MSG">MODを起動できません。インストール済の別のMODと干渉しています！</Text>
+    <Text ID="DOWNLOADED_LEVELS">ダウンロード済ステージ</Text>
+    <Text ID="CHANGE_DETECTED">変更を検知</Text>
+    <Text ID="CHANGE_DETECTED_WARNING">同じMODをインストールしているプレイヤーとしか、オンライン協力プレイはできません</Text>
+    <Text ID="NO_DOWNLOADED_LEVELS">ダウンロード済コンテンツがありません。
+Steam ワークショップで欲しいアイテムを登録し、各種ステージをダウンロードしましょう</Text>
+    <Text ID="NO_MODS_SUBSCRIBED">ワークショップ アイテムがありません。
+Steam ワークショップで欲しいアイテムを登録し、各種ステージやMODをダウンロードしましょう</Text>
+    <Text ID="FLOOR_X">フロア {%1}</Text>
+    <Text ID="FLOOR_X_VALUE">-</Text>
+    <Text ID="VINFINITE_MODE">インフィニティタワー</Text>
+    <Text ID="VINFINITE_MODE_DESC">ランダム生成の圧倒的暴力</Text>
+    <Text ID="TUTORIAL_VINFINITE_TEXT">ここは低供給エリアだ。
+人質救出でしか戦略ポイントを獲得できないぞ</Text>
+    <Text ID="WEEK10_TASK1">レコンで勝利</Text>
+    <Text ID="WPN_SWAT_REVOLVER">SWAT
+リボルバー</Text>
+    <Text ID="WPN_G18C_AUTO_PISTOL">G18C
+オートピストル</Text>
+    <Text ID="WPN_FBI_REVOLVER">FBI
+リボルバー</Text>
+    <Text ID="WPN_MP7_PDW">MP7 PDW</Text>
+    <Text ID="WPN_SIX12_REVO">Six-12
+ショットガン</Text>
+    <Text ID="WPN_TRAPPER_RIFLE">トラッパー
+ライフル</Text>
+    <Text ID="WPN_TRICKED_OUT_AK">トリックアウト AK</Text>
+    <Text ID="WPN_HOME_DEFENSE_SHOTGUN">ハンティング
+ショットガン</Text>
+    <Text ID="WPN_TRUNK_CARBINE">トランク
+カービン</Text>
+    <Text ID="ULTIMATE_M1_GARAND">祖父のガーランド</Text>
+    <Text ID="ULTIMATE_M1_GARAND_DESC">家宝レベルの銃をぶっ放せ、ビンテージなAP弾フル装填</Text>
+    <Text ID="ULTIMATE_RECON_SIX12SD">サイレンサーショットガン</Text>
+    <Text ID="ULTIMATE_RECON_SIX12SD_DESC">サイレントな銃撃ができるブツでパーティーを強制終了だ</Text>
+    <Text ID="ULTIMATE_HOMEMADE_PIE">自家製パイ</Text>
+    <Text ID="ULTIMATE_HOMEMADE_PIE_DESC">ワイフが作った。チーム全員のライフを回復。できるのか？</Text>
+    <Text ID="GEAR_PISTOL1911_DESC">-信頼の7発。45ACPバックアップ
+-コラテラルダメージを抑えるに良し</Text>
+    <Text ID="GEAR_TWINKIE">1年前のトゥインキー</Text>
+    <Text ID="GEAR_TWINKIE_DESC">-5秒間の無敵状態
+- チームのスペシャルには影響なし</Text>
+    <Text ID="FITNESS">フィットネス</Text>
+    <Text ID="GEAR_BAG">ギアバッグ</Text>
+    <Text ID="BAR_O1_ACCURACY">命中精度アップ</Text>
+    <Text ID="BAR_O2_MELEE">打撃ダメージダウン</Text>
+    <Text ID="PERK_SOFT_POINTS">ソフトポイント
+全ライフルの攻撃ダメージ20%アップ</Text>
+    <Text ID="PERK_PLUSP_AMMO">弾丸貫通付与
+火薬を増し増しで、ライフル弾が貫通するようになる</Text>
+    <Text ID="PERK_OPEN_SEASON">猟解禁シーズン
+全ての通常攻撃（狙いなし）が30%の確率でクリティカルヒットする</Text>
+    <Text ID="PERK_REDHEAD">レッドヘッドを撃退すると…
+近接プッシュバック＆スタンがパワーアップ</Text>
+    <Text ID="PERK_GRIZZLY">グリズリーを追い抜くと…
+移動速度が10%アップ</Text>
+    <Text ID="PERK_LOCKED_OUT">冬の時期に屋外に締め出されると…
+ドアを二蹴りでぶち破れるようになる</Text>
+    <Text ID="PERK_TWIXIE">トゥイクシー
+1回のミッションでトゥインキーを2回使用可能</Text>
+    <Text ID="PERK_PLATES_UPGRADE">プレート改良
+アーマーの防御力 +1</Text>
+    <Text ID="PERK_GARAND_AP_AMMO">AP弾
+ガーランドのアーマー貫通 +1</Text>
+    <Text ID="INVITE_FRIEND">フレンド招待</Text>
+    <Text ID="JOIN_GAME">セッション参戦</Text>
+    <Text ID="LOBBIES_LIST">アクティブなロビー</Text>
+    <Text ID="NO_LOBBIES">ロビーが見つかりません</Text>
+    <Text ID="LOBBIES_LIST_VAL">...</Text>
+    <Text ID="REFRESH">更新</Text>
+    <Text ID="YOUR_BEST_SCORE">ベストスコア（自分）:</Text>
+    <Text ID="LEADERBOARDS_PLAYERSCORE_VAL">...</Text>
+    <Text ID="PRESS_FIRE_TO_JOIN_NX">L+R を押して参戦！</Text>
+    <Text ID="CONSOLE_PRESS_A">A を押して次へ</Text>
+    <Text ID="CONSOLE_PRESS_CONTINUE">{%1} を押して次へ</Text>
+    <Text ID="CONSOLE_TUTORIAL_INTERFACE_MAIN1">Alt攻撃を使えることも忘れるな！
+ボタン配置を忘れた？オプションメニューを開いて「コントローラー配置」だ。
+ほら、試してみろ！</Text>
+    <Text ID="NX_NETWORK_CONNECTING">ネットワークに接続中</Text>
+    <Text ID="NX_NETWORK_CONNECTING_TTL">ネットワークを開始中</Text>
+    <Text ID="NX_COOP_LOCAL">ローカル協力モード</Text>
+    <Text ID="NX_COOP_ONLINE">オンライン協力</Text>
+    <Text ID="NX_HOST_FRIENDS">フレンドをホスト</Text>
+    <Text ID="NX_JOIN_FRIENDS">フレンドに参戦</Text>
+    <Text ID="NX_NEEDS_ACCOUNT">オンラインでプレイしたり、ランキングを見るには、Nintendo Switch Onlineのアカウントが必要です</Text>
+    <Text ID="NX_NETWORK_ERROR">オンラインサービスと通信中にエラーが発生しました</Text>
+    <Text ID="XB1_CHANGE_PROFILE">プロフィール変更</Text>
+    <Text ID="XB1_USERNAME">ユーザー名</Text>
+    <Text ID="PS4_PRESS_X">X を押して次へ</Text>
+    <Text ID="NX_JUMP_LEADERBOARDS">ジャンプ = ランキング表示</Text>
+    <Text ID="XB1_SIGN_OUT_MESSAGE">サインインの変更が発生しました。サインインし直してください、もしくはタイトル画面に戻ります</Text>
+    <Text ID="XB1_SIGN_IN">サインイン</Text>
+    <Text ID="CONSOLE_PORTING">コンソール移植</Text>
+    <Text ID="CREDITS_CONSOLE">Sickhead Games</Text>
+    <Text ID="MOBILE_PORTING">モバイル移植</Text>
+    <Text ID="CREDITS_MOBILE">...</Text>
+    <Text ID="QA">QA</Text>
+    <Text ID="CREDITS_QA">Whyttest</Text>
+    <Text ID="BUSINESS">ビジネス</Text>
+    <Text ID="CREDITS_BUSINESS">Andreea-Medvedovici Per</Text>
+    <Text ID="SPECIAL_THANKS">謝辞</Text>
+    <Text ID="CREDITS_SPECIAL_THANKS">Oreste "Axi0s" Gamba</Text>
+    <Text ID="LOBBY_WAS_FULL">セッションは満員でした</Text>
+    <Text ID="MOD_INCOMPATIBLE_MSG">Warning! Incompatible mod, needs to be updated by the author! You can but it may crash the game!</Text>
+  </Texts>
+</PSTexts>

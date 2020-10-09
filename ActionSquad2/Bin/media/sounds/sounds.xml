@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<Sounds Version="1.0">
+  <Sound ID="THEME_MENU1" path="theme_mm1.ogg" group="music" buffers="1" bOnlyLoadWhilePlaying="true" />
+
+  <Sound ID="STINGER_LOSE" path="stinger_lose.ogg" group="sounds" buffers="1" />
+  <Sound ID="STINGER_WIN" path="stinger_win.ogg" group="sounds" buffers="1" />
+  <Sound ID="TIME_SLOW" path="time_slow.ogg" group="sounds" />
+  <Sound ID="HEARTBEAT" path="heartbeat.ogg" group="sounds" />
+  <Sound ID="STARHIT" path="starhit.ogg" group="sounds" />
+  <Sound ID="DENIED" path="denied.ogg" group="sounds" />
+  <Sound ID="CLICK" path="gui_click.ogg" group="sounds" />
+  
+</Sounds>

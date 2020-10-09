@@ -1,0 +1,23 @@
+//optimizari: lungimea segmentului si versorul lui sa fie precaluclate si primite ca params
+bool SegmentCircleIntersects(D3DXVECTOR2 p1, D3DXVECTOR2 p2, D3DXVECTOR2 cCenter, float cRadius)
+{
+	float radiusSq = cRadius * cRadius;
+	D3DXVECTOR2 cp1 = cCenter - p1;
+	if (D3DXVec2LengthSq(&cp1) <= radiusSq)
+		return true;
+	if (D3DXVec2LengthSq(&(p2 - cCenter)) <= radiusSq)
+		return true;
+	//proiectia centrului pe segment sa fie intre cele doua puncte
+	D3DXVECTOR2 seg = p2 - p1;
+	D3DXVECTOR2 segDir;
+	float segLen = D3DXVec2Length(&seg);
+	segDir = seg / segLen;
+	//daca proiectia pica in afara segmentului iese
+	float dot = D3DXVec2Dot(&cp1, &segDir);
+	if ((dot < 0.0f) || (dot > segLen))
+		return false;
+	//daca distanta pana la dreapta suport e mai mare decat raza nu intersecteaza
+	if (D3DXVec2LengthSq(&(p1 + segDir * dot - cCenter)) > radiusSq)
+		return false;
+	return true;
+}

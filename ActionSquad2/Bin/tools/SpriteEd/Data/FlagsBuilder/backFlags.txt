@@ -1,0 +1,18 @@
+NUMAR TOTAL DE OCTETI [1, 2, 3 sau 4]
+4
+repeat X
+1
+repeat Y
+1
+X move mul (N/255)
+8
+Y move mul (N/255)
+8
+move X by time (px/sec)
+6
+negative X by time
+1
+move Y by time (px/sec)
+6
+negative X by time
+1

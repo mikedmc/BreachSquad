@@ -1,0 +1,184 @@
+---------------------------------------
+Door Kickers: Action Squad uses libcurl.
+---------------------------------------
+
+COPYRIGHT AND PERMISSION NOTICE
+
+Copyright (c) 1996 - 2017, Daniel Stenberg, daniel@haxx.se, 
+and many contributors, see the THANKS file.
+
+All rights reserved.
+
+Permission to use, copy, modify, and distribute this software for any 
+purpose with or without fee is hereby granted, provided that the above 
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder shall not be used 
+in advertising or otherwise to promote the sale, use or other dealings in this Software 
+without prior written authorization of the copyright holder.
+
+---------------------------------------
+Door Kickers: Action Squad uses SDL 2.0.
+---------------------------------------
+
+SDL 2.0 and newer are available under the zlib license :
+This software is provided 'as-is', without any express or implied
+warranty.  In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+SDL 1.2 and older are available under the GNU LGPL license .
+
+
+---------------------------------------
+DOOR KICKERS: ACTION SQUAD
+End-User License Agreement
+---------------------------------------
+
+PLEASE READ THIS AGREEMENT (“AGREEMENT”) CAREFULLY BEFORE PROCEEDING. 
+THIS AGREEMENT LICENSES SOFTWARE TO YOU FROM PIXEL SHARD LABS (“LICENSOR”) AND KILLHOUSE GAMES ("PUBLISHER") AND CONTAINS WARRANTY AND LIABILITY DISCLAIMERS. BY SELECTING THE “ACCEPT” OR “AGREE” BUTTON, YOU ARE CONFIRMING THAT YOU HAVE READ AND UNDERSTAND THIS AGREEMENT, AND AGREE TO BE BOUND BY THE TERMS OF THIS AGREEMENT. IF YOU DO NOT AGREE WITH THE TERMS OF THIS AGREEMENT, YOU SHOULD EXIT THIS PAGE WITHOUT SELECTING THE “ACCEPT” OR “AGREE” BUTTON.  IN THE SOLE EVENT YOU WERE ONLY PRESENTED WITH THE AGREEMENT FOR REVIEW AFTER YOU HAVE MADE A PAYMENT FOR THE LICENSOR SOFTWARE AND YOU DID NOT CLICK THE “ACCEPT” OR “AGREE” BUTTON, YOU MAY SEEK A REFUND OF THE AMOUNT YOU PAID FOR THE LICENSOR SOFTWARE (IF ANY). 
+1.	Definitions 
+(a) “Licensor Software“ means the software program known as Door Kickers: Action Squad™ (including any and all musical content contained therein or provided in association therewith) and all related updates supplied by Licensor which is owned by Licensor and/or its licensors; 
+
+2.	License
+This Agreement allows you, subject to the below restrictions, to: (a) use the Licensor Software for your own non-commercial, personal enjoyment on a single computer solely in connection with User Content; (b) make one copy of the Licensor Software in machine-readable form solely for backup purposes; and (c) distribute the installer for the trial (free) version of the Licensor Software without modification to third parties at no charge to such third parties on a non-commercial basis. You must reproduce on any such copy all copyright notices and any other proprietary legends found on the original.  All rights not expressly granted are reserved.  
+
+3.	Restrictions 
+(a)	You may not make or distribute copies of the Licensor Software, or electronically transfer the Licensor Software from one computer to another or over a network, other than as permitted in Section 2(c), above. You may not decompile, reverse engineer, disassemble, or otherwise reduce the Licensor Software to a human-perceivable form. You may not modify, sell, rent, transfer, resell, distribute the Licensor Software or access keys relating thereto or create derivative works based upon the Licensor Software or any part thereof. You may not export or re-export, directly or indirectly, the Licensor Software into any country prohibited by the United States Export Administration Act and the regulations thereunder. You may not alter or circumvent any digital rights management.
+
+(b)	You understand and agree that the Licensor Software may transmit certain information to Licensor electronically and automatically. For example, it may transmit diagnostic and related information regarding the performance of the Licensor Software and the software and hardware configuration that it is being run on to Licensor. Any information received by Licensor from this transmission will be used by Licensor for the purposes of digital rights management, diagnosing, improving, or correcting errors, or notifying you of updates regarding the Licensor Software, which may include, for example, providing the Licensor Software with a URL for update information and/or files. The Licensor Software contains digital rights management systems (“DRMS”) of Atom Entertainment Corp. (“Atom Entertainment”) which may transmit the following pieces of information, along with other information to Atom Entertainment’s servers, when you either enter a purchase key or sign in with your subscription service user name and password: Operating System, CPU Version Information (including serial number from a serial-number-enabled Pentium III), BIOS Version Information, NetBIOS Computer Name, DOS HD Serial Number, Hard Drive Size / Geometry, S.M.A.R.T. IDE HD Serial Number, Network Card MAC Address, IP Address and Size of Physical Memory.  Your use of the Licensor Software is your consent to the DRMS.  Atom Entertainment or Licensor may disable or terminate your access to the Licensor Software in the event it has a reasonable basis to determine there has been unauthorized or illegal use, and you hereby indemnify and hold Licensor and Atom Entertainment and their respective affiliates harmless from any such action.  In the event your access to the Licensor Software is mistakenly disabled or terminated your sole remedy shall be to have the Licensor Software re-activated.
+
+ 
+(c)	You may not use the Licensor Software to: (i) save on any media, transmit, distribute, publish or display (other than on the single computer where the Licensor Software is resident) or copy any material owned by Licensor (except in connection with your use of a download and playback technology or service as may be offered by Licensor), or any third party authorized by Licensor, except as stated in Section 2(d) above; (ii) create derivative works; (iii) infringe upon or violate the intellectual property, privacy, publicity or other rights of third parties, including without limitation the rights of any third parties in any sound recordings, musical compositions, photographs, artwork, literary creations and/or other copyrightable works of any kind or nature; (iv) use the Software for pornographic or obscene uses, or (v) engage in any defamatory or slanderous conduct.  All use of the Licensor Software shall be for your personal, non-commercial enjoyment.  You hereby represent that you own or have the right to use all User Content in connection with the Licensor Software.  You hereby agree to defend, indemnify and hold harmless Licensor and its parents, subsidiaries, affiliates, successors, licensees, agents, attorneys, heirs and assigns, and the officers, directors and employees of the foregoing, from and against any and all third-party claims, liabilities, costs and expenses (including attorneys' and accountants' fees reasonably incurred) in connection with any breach or alleged breach by you of any covenant, representation or other provision of this Agreement, or any of your obligations hereunder.
+
+4.	Ownership 
+The foregoing license gives you limited rights to use the Licensor Software. You do not become the owner of, and Licensor and its suppliers retain title to, the Licensor Software, and all copies thereof. All rights not specifically granted in this Agreement, including federal and international Copyrights, are reserved by Licensor and its suppliers.
+
+5.	Disclaimer of warranties and of technical support 
+THE LICENSOR SOFTWARE IS PROVIDED TO YOU ON AN "AS IS" BASIS, WITHOUT ANY TECHNICAL SUPPORT OR WARRANTY OF ANY KIND FROM LICENSOR INCLUDING, WITHOUT LIMITATION, A WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. SOME STATES DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES, SO THE ABOVE EXCLUSION MAY NOT APPLY TO YOU. YOU MAY ALSO HAVE OTHER LEGAL RIGHTS WHICH VARY FROM STATE TO STATE. Your sole and exclusive remedy in the event the Licensor Software fails to function, or in the event of any other breach of this agreement by Licensor, is to terminate this agreement and cease all use of the Licensor Software and obtain a refund of fees you have paid (if any).
+
+6.	Limitation of damages 
+(a) NEITHER LICENSOR NOR ITS AFFILIATES OR SUPPLIERS (INCLUDING ATOM ENTERTAINMENT) SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOSS (INCLUDING DAMAGES FOR LOSS OF BUSINESS, LOSS OF PROFITS, OR THE LIKE), WHETHER BASED ON BREACH OF CONTRACT, TORT (INCLUDING NEGLIGENCE), PRODUCT LIABILITY OR OTHERWISE, EVEN IF LICENSOR OR ITS REPRESENTATIVES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. SOME STATES DO NOT ALLOW THE LIMITATION OR EXCLUSION OF LIABILITY FOR INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THIS LIMITATION OR EXCLUSION MAY NOT APPLY TO YOU. 
+(b) The warranty disclaimer, exclusive remedies and limitation of liability set forth in this Agreement are fundamental elements of the basis of the bargain between Licensor and you. You agree that Licensor would not be able to provide the Licensor Software on an economic basis without such limitations.   
+
+7.	Government end users (USA only)
+RESTRICTED RIGHTS LEGEND The Licensor Software is "Restricted Computer Software." Use, duplication, or disclosure by the U.S. Government is subject to restrictions as set forth in this agreement and as provided in DFARS 227.7202-1(a) and 227.7202-3(a) (1995), DFARS 252.227-7013 (OCT 1988), FAR 12.212(a)(1995), FAR 52.227-19, or FAR 52.227-14, as applicable.  Manufacturer: Pixel Shard Labs Publisher: KillHouse Games
+
+8.	Termination
+Without prejudice to any other rights, Licensor may terminate this Agreement if you fail to comply with the terms and conditions of this Agreement.  In such event, you must destroy all copies of the Licensor Software.
+
+9.	General 
+This Agreement shall be governed by the internal laws of the State of California without regard to its conflict of law provisions.  Any disputes arising under or related in any way to this Agreement  shall be heard exclusively in San Francisco, California.  The parties hereby consent to jurisdiction over them in any state or federal court located in San Francisco, California and waive any claim or defense that such forum is not convenient or proper. This agreement contains the complete agreement between the parties with respect to the subject matter hereof, and supersedes all prior or contemporaneous agreements or understandings, whether oral or written. If any part of this Agreement is held invalid or unenforceable by a court of competent jurisdiction, the remainder of the Agreement shall be interpreted so as to reasonably effect the intention of the parties.  All questions concerning this agreement shall be directed to: actionsquad@killhousegames.com
+
+Copyright ©2016  Pixel Shard Labs.  All Rights Reserved.
+PixelShard, Yummy Dreams are trademarks and service marks of Pixel Shard Labs or its licensors.
+
+
+-----------------------------------------------------------
+SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+-----------------------------------------------------------
+(This Font Software is licensed under the SIL Open Font License,
+Version 1.1.)
+
+This license is copied below, and is also available with a FAQ at:
+http://scripts.sil.org/OFL
+
+PREAMBLE
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font
+creation efforts of academic and linguistic communities, and to
+provide a free and open framework in which fonts may be shared and
+improved in partnership with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded,
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply to
+any document created using the fonts or their derivatives.
+
+DEFINITIONS
+"Font Software" refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+"Reserved Font Name" refers to any names specified as such after the
+copyright statement(s).
+
+"Original Version" refers to the collection of Font Software
+components as distributed by the Copyright Holder(s).
+
+"Modified Version" refers to any derivative made by adding to,
+deleting, or substituting -- in part or in whole -- any of the
+components of the Original Version, by changing formats or by porting
+the Font Software to a new environment.
+
+"Author" refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+
+PERMISSION & CONDITIONS
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed,
+modify, redistribute, and sell modified and unmodified copies of the
+Font Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components, in
+Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled,
+redistributed and/or sold with any software, provided that each copy
+contains the above copyright notice and this license. These can be
+included either as stand-alone text files, human-readable headers or
+in the appropriate machine-readable metadata fields within text or
+binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font
+Name(s) unless explicit written permission is granted by the
+corresponding Copyright Holder. This restriction only applies to the
+primary font name as presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+Software shall not be used to promote, endorse or advertise any
+Modified Version, except to acknowledge the contribution(s) of the
+Copyright Holder(s) and the Author(s) or with their explicit written
+permission.
+
+5) The Font Software, modified or unmodified, in part or in whole,
+must be distributed entirely under this license, and must not be
+distributed under any other license. The requirement for fonts to
+remain under this license does not apply to any document created using
+the Font Software.
+
+TERMINATION
+This license becomes null and void if any of the above conditions are
+not met.
+
+DISCLAIMER
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.

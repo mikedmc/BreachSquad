@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+<SpriteCollection Version="2.0">
+  <Image>bk_miami1.png</Image>
+  <Image>bk_miami2.png</Image>
+  <Image>waters.png</Image>
+  <Modules>
+    <Module ImageIdx="0" X="0" Y="857" W="1024" H="167" />
+    <Module ImageIdx="0" X="1" Y="757" W="168" H="99" />
+    <Module ImageIdx="0" X="170" Y="746" W="161" H="110" />
+    <Module ImageIdx="0" X="332" Y="772" W="148" H="84" />
+    <Module ImageIdx="0" X="481" Y="756" W="217" H="100" />
+    <Module ImageIdx="0" X="699" Y="757" W="177" H="99" />
+    <Module ImageIdx="0" X="877" Y="746" W="146" H="110" />
+    <Module ImageIdx="0" X="0" Y="545" W="1024" H="200" />
+    <Module ImageIdx="0" X="0" Y="286" W="1024" H="258" />
+    <Module ImageIdx="0" X="393" Y="237" W="232" H="48" />
+    <Module ImageIdx="0" X="626" Y="229" W="217" H="56" />
+    <Module ImageIdx="0" X="844" Y="250" W="179" H="35" />
+    <Module ImageIdx="0" X="276" Y="137" W="221" H="90" />
+    <Module ImageIdx="0" X="498" Y="170" W="186" H="58" />
+    <Module ImageIdx="0" X="685" Y="141" W="338" H="87" />
+    <Module ImageIdx="1" X="3" Y="3" W="128" H="508" />
+    <Module ImageIdx="1" X="140" Y="3" W="69" H="131" />
+    <Module ImageIdx="1" X="139" Y="141" W="71" H="101" />
+    <Module ImageIdx="1" X="218" Y="8" W="78" H="116" />
+    <Module ImageIdx="1" X="221" Y="131" W="72" H="109" />
+    <Module ImageIdx="1" X="137" Y="370" W="70" H="138" />
+    <Module ImageIdx="1" X="212" Y="380" W="66" H="125" />
+    <Module ImageIdx="1" X="284" Y="379" W="69" H="123" />
+    <Module ImageIdx="1" X="360" Y="451" W="18" H="55" />
+    <Module ImageIdx="2" X="209" Y="1" W="46" H="46" />
+    <Module ImageIdx="2" X="111" Y="1" W="96" H="1" />
+    <Module ImageIdx="2" X="111" Y="3" W="96" H="23" />
+  </Modules>
+  <FrameModules>
+    <FrameModule ModuleIdx="24" OX="0" OY="0" Flags="0" />
+    <FrameModule ModuleIdx="25" OX="0" OY="0" Flags="0" />
+    <FrameModule ModuleIdx="26" OX="0" OY="0" Flags="0" />
+    <FrameModule ModuleIdx="20" OX="-29" OY="-137" Flags="0" />
+    <FrameModule ModuleIdx="21" OX="-21" OY="-124" Flags="0" />
+    <FrameModule ModuleIdx="22" OX="-35" OY="-121" Flags="0" />
+    <FrameModule ModuleIdx="23" OX="-9" OY="-53" Flags="0" />
+    <FrameModule ModuleIdx="15" OX="0" OY="-508" Flags="0" />
+    <FrameModule ModuleIdx="14" OX="3" OY="-387" Flags="0" />
+    <FrameModule ModuleIdx="12" OX="397" OY="-429" Flags="0" />
+    <FrameModule ModuleIdx="13" OX="879" OY="-360" Flags="0" />
+    <FrameModule ModuleIdx="14" OX="619" OY="-386" Flags="0" />
+    <FrameModule ModuleIdx="12" OX="1068" OY="-417" Flags="0" />
+    <FrameModule ModuleIdx="9" OX="56" OY="-311" Flags="0" />
+    <FrameModule ModuleIdx="10" OX="320" OY="-319" Flags="0" />
+    <FrameModule ModuleIdx="11" OX="704" OY="-312" Flags="0" />
+    <FrameModule ModuleIdx="9" OX="514" OY="-313" Flags="0" />
+    <FrameModule ModuleIdx="10" OX="865" OY="-319" Flags="0" />
+    <FrameModule ModuleIdx="11" OX="998" OY="-297" Flags="0" />
+    <FrameModule ModuleIdx="8" OX="0" OY="-248" Flags="0" />
+    <FrameModule ModuleIdx="7" OX="0" OY="-200" Flags="0" />
+    <FrameModule ModuleIdx="6" OX="861" OY="-119" Flags="0" />
+    <FrameModule ModuleIdx="5" OX="686" OY="-108" Flags="0" />
+    <FrameModule ModuleIdx="4" OX="468" OY="-109" Flags="0" />
+    <FrameModule ModuleIdx="3" OX="328" OY="-93" Flags="0" />
+    <FrameModule ModuleIdx="2" OX="169" OY="-119" Flags="0" />
+    <FrameModule ModuleIdx="1" OX="0" OY="-108" Flags="0" />
+    <FrameModule ModuleIdx="0" OX="0" OY="-147" Flags="0" />
+  </FrameModules>
+  <Frames>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="46" BBoxH="46">
+      <FModules>
+        <FModule Idx="0" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="96" BBoxH="1">
+      <FModules>
+        <FModule Idx="1" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="96" BBoxH="23">
+      <FModules>
+        <FModule Idx="2" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-29" BBoxY="-137" BBoxW="70" BBoxH="138">
+      <FModules>
+        <FModule Idx="3" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-21" BBoxY="-124" BBoxW="66" BBoxH="125">
+      <FModules>
+        <FModule Idx="4" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-35" BBoxY="-121" BBoxW="69" BBoxH="123">
+      <FModules>
+        <FModule Idx="5" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-9" BBoxY="-53" BBoxW="18" BBoxH="55">
+      <FModules>
+        <FModule Idx="6" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="-508" BBoxW="128" BBoxH="508">
+      <FModules>
+        <FModule Idx="7" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="-392" BBoxW="1300" BBoxH="93">
+      <FModules>
+        <FModule Idx="8" />
+        <FModule Idx="9" />
+        <FModule Idx="10" />
+        <FModule Idx="11" />
+        <FModule Idx="12" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="-319" BBoxW="1199" BBoxH="57">
+      <FModules>
+        <FModule Idx="13" />
+        <FModule Idx="14" />
+        <FModule Idx="15" />
+        <FModule Idx="16" />
+        <FModule Idx="17" />
+        <FModule Idx="18" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="-248" BBoxW="1024" BBoxH="258">
+      <FModules>
+        <FModule Idx="19" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="-200" BBoxW="1024" BBoxH="200">
+      <FModules>
+        <FModule Idx="20" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="-119" BBoxW="1007" BBoxH="110">
+      <FModules>
+        <FModule Idx="21" />
+        <FModule Idx="22" />
+        <FModule Idx="23" />
+        <FModule Idx="24" />
+        <FModule Idx="25" />
+        <FModule Idx="26" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="-147" BBoxW="1024" BBoxH="167">
+      <FModules>
+        <FModule Idx="27" />
+      </FModules>
+      <Points />
+    </Frame>
+  </Frames>
+  <AnimationFrames>
+    <AnimationFrame FrameIdx="0" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="1" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="2" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="3" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="4" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="5" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="6" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="7" Duration="1" DX="0" DY="0" Flags="1" />
+    <AnimationFrame FrameIdx="8" Duration="1" DX="0" DY="0" Flags="123041" />
+    <AnimationFrame FrameIdx="10" Duration="1" DX="0" DY="0" Flags="143681" />
+    <AnimationFrame FrameIdx="9" Duration="1" DX="0" DY="0" Flags="143721" />
+    <AnimationFrame FrameIdx="11" Duration="1" DX="0" DY="0" Flags="205281" />
+    <AnimationFrame FrameIdx="12" Duration="1" DX="0" DY="0" Flags="225841" />
+    <AnimationFrame FrameIdx="13" Duration="1" DX="0" DY="0" Flags="253569" />
+  </AnimationFrames>
+  <Animations>
+    <Animation ID="WATER1" Flags="0">
+      <AFrame Idx="0" />
+      <AFrame Idx="1" />
+      <AFrame Idx="2" />
+    </Animation>
+    <Animation ID="NEARCAMERA" Flags="0">
+      <AFrame Idx="3" />
+      <AFrame Idx="4" />
+      <AFrame Idx="5" />
+      <AFrame Idx="6" />
+    </Animation>
+    <Animation ID="DAY" Flags="0">
+      <AFrame Idx="7" />
+      <AFrame Idx="8" />
+      <AFrame Idx="9" />
+      <AFrame Idx="10" />
+      <AFrame Idx="11" />
+      <AFrame Idx="12" />
+      <AFrame Idx="13" />
+    </Animation>
+  </Animations>
+</SpriteCollection>

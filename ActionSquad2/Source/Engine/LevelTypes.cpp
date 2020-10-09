@@ -1,0 +1,195 @@
+#include "dxstdafx.h"
+
+
+///--------------------------------------------------------------------------
+///--- ACTORS AI ---
+///--------------------------------------------------------------------------
+
+CAIState::CAIState()
+{
+	nPriority = 0;
+	fProbability = 100.0f;
+}
+
+CAIState::~CAIState()
+{
+}
+
+///--- AI TEMPLATE ---
+CAITemplate::~CAITemplate()
+{
+	SAFE_DELETE_GROWABLE_ARRAY(m_arrStates);
+}
+
+CAIState * CAITemplate::GetHighestPriorityState(EAIEventType evtType, CRandom* pRandomGen)
+{
+	if (pRandomGen == null)
+		return null;
+
+	CFixedArray<CAIState*, 16> arrSelStates;
+
+	int nRetPriority = -1;
+	for (int kk = 0; kk < m_arrStates.GetSize(); kk++)
+	{
+		CAIState* pState = m_arrStates[kk];
+		//daca am event de tipul curent sau event any (nu se refera si la IDLE_TICK)
+		if( (pState->m_arrTriggeringEventTypes.Contains(evtType)) || 
+			((evtType > K_LVL_AI_EVENT_IDLE_TICK) && (pState->m_arrTriggeringEventTypes.Contains(K_LVL_AI_EVENT_ANY))) )
+		{
+			if (pState->nPriority > nRetPriority)
+			{
+				arrSelStates.Clear();
+				arrSelStates.Add(pState);
+				nRetPriority = pState->nPriority;
+			}
+			else if(pState->nPriority == nRetPriority)
+			{
+				arrSelStates.Add(pState);
+			}
+		}
+	}
+
+	//return selected state
+	if (arrSelStates.Count() == 0)
+		return null;
+	if (arrSelStates.Count() == 1)
+		return arrSelStates.m_pData[0];
+	
+	//get state based on probability when we have more probabilities with same priority
+	float arrProbs[16] = { 0.0f };
+	for (int kk = 0; kk < arrSelStates.Count(); kk++)
+	{
+		arrProbs[kk] = arrSelStates.m_pData[kk]->fProbability;
+	}
+	int nRetIdx = pRandomGen->GetProbabilityFromDomain(arrProbs, arrSelStates.Count());
+	if (nRetIdx < 0)
+	{
+		ErrorBox(K_ERR_WARNING, L"[WARNING] GetHighestPriorityState returned -1! count:%d", arrSelStates.Count());
+		return null;
+	}
+
+	return arrSelStates.m_pData[nRetIdx];
+}
+
+CAIState * CAITemplate::GetAIStateByName(CStringHash strName)
+{
+	for (int kk = 0; kk < m_arrStates.GetSize(); kk++)
+	{
+		CAIState* pState = m_arrStates[kk];
+		if (pState->name.textHash == strName.textHash)
+			return pState;
+	}
+
+#if defined(_DEBUG) || defined(DEBUG)
+	ErrorBox(K_ERR_WARNING, L"CAITemplate::GetAIStateByName - state not found [%s]", strName.text);
+#endif
+
+	return null;
+}
+
+
+///--------------------------------------------------------------------------
+///--- Physics Points ---
+///--------------------------------------------------------------------------
+void CPhysicsPoint2D::Init()
+{
+	eCollType = K_COLLTYPE_NONE;
+	bContacting = false;
+	bIsStatic = false;
+	nFlagsCollision = 0;
+	bFlagRotationEnabled = false;
+	fAngle = 0.0f;
+	fAngularSpeed = 0.0f;
+	fAngularAccel = 0.0f;
+	bFlagPhysicsEnabled = false;
+	fBounceF = 0.5f;
+	fFrictionF = 10.0f;
+	pos = D3DXVECTOR2(0.0f, 0.0f);
+	speed = D3DXVECTOR2(0.0f, 0.0f);
+	accel = D3DXVECTOR2(0.0f, 0.0f);
+	bIsDead = false;
+}
+
+void CPhysicsPoint2D::SetPosForced(D3DXVECTOR2 vecPos)
+{
+	pos = vecPos;
+}
+
+///--------------------------------------------------------------------------
+/// MISC OBJECTS - diverse obiecte speciale exportate din editor (RAILS, etc)
+///--------------------------------------------------------------------------
+
+D3DXVECTOR2 CMiscObjectRail::GetPosNormalized(float fCursorNormalized, D3DXVECTOR2 * retDir)
+{
+	return GetPos(fLength * fCursorNormalized, retDir);
+}
+
+D3DXVECTOR2 CMiscObjectRail::GetPos(float fDistFromStart, D3DXVECTOR2 * retDir)
+{
+	if (fDistFromStart < 0.0f)
+		return arrPoints[0];
+	if (fDistFromStart > fLength)
+		return arrPoints[arrPoints.nCount - 1];
+
+	int selidx = 0;
+	for (int kk = 1; kk < arrLenghts.nCount; kk++)
+	{
+		if (arrLenghts.m_pData[kk] >= fDistFromStart)
+		{
+			selidx = kk;
+			break;
+		}
+	}
+	//nu ar trebui sa nu gaseasca nod	
+	assert(selidx > 0);
+	//daca nu am gasit nod mai mare inseamna ca e in afara
+	float percent = (fDistFromStart - arrLenghts.m_pData[selidx - 1]) / (arrLenghts.m_pData[selidx] - arrLenghts.m_pData[selidx - 1]);
+	//directia
+	if (retDir != NULL)
+	{
+		D3DXVec2Normalize(retDir, &(arrPoints.m_pData[selidx] - arrPoints.m_pData[selidx - 1]));
+	}
+	//interpolare liniara
+	return arrPoints.m_pData[selidx] * percent + arrPoints.m_pData[selidx - 1] * (1.0f - percent);
+}
+
+
+///--------------------------------------------------------------------------
+///--- WEAPONS ---
+///--------------------------------------------------------------------------
+void CWeapon::Init()
+{
+	status = K_LVL_WPN_STATUS_UNKNOWN; //not initialized yet
+	fAimErrorFOV = 0.0f;
+	fireRateTimer = 0.0f;
+	m_nBurstBulletsShot = 0;
+	reloadTimer = 0.0f;
+	ammoLeft = -1;
+	fJammedTimer = 0.0f;
+	bPaintLaserSight = false;
+	m_sprMuzzleFlash.animationIdx = -1; //not set
+	fTimeSinceShot = 0.0f;
+	
+	bTriggerDown = bTriggerDownOld = false;
+	bReloadDown = false;
+	pOwner = null;
+
+	m_activePerk.Reset();
+}
+
+void CWeapon::SetTriggerStates(bool bTriggerPushed, bool bReloadPushed)
+{
+	//save old state - In Update se egaleaza din nou ca sa apara mesajul doar odata
+	bTriggerDownOld = bTriggerDown;
+	//set new state
+	bTriggerDown = bTriggerPushed;
+	//set reload trigger
+	bReloadDown = bReloadPushed;
+
+	//can reset jam timer
+	if ((nCanResetJamCount > 0) && (fJammedTimer > 0.0f) && (bTriggerDown == false) && (bTriggerDownOld == false))
+	{
+		fJammedTimer = 0.0f;
+		nCanResetJamCount--;
+	}
+}

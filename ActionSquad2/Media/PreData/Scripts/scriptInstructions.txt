@@ -1,0 +1,216 @@
++ parametrii de evitat bool cu valori true sau false !
+- poate ar trebui sa poti rula scripturi cu params
+- sa poata trimite mesaje globale, dar sa aiba filtru sa trimita doar pe cele permise(sunet, level, etc) fara cele de sistem
+- sterge o variabila globala
+[ ] means optional parameter
+
+GENERALE
+--------
+* - if first character of a value is * then the value is replaced with the value of the local variable with that name
+eg: var1="*local_var1" where local_var1 was set to 16 translates to var1="16"
+
++ Generates a random number in the global var "varName"
+<RAND_INT_GLOBAL var_name="varName" nMin="0" nMax="100" />
+
++if global var_name equals check_value jumps to goto label named LABEL_NAME
+<IF_EQUAL_GLOBAL var_name="varName" check_value="10" goto="LABEL_NAME" />
+
++if global var_name is lower than check_value jumps to goto label named LABEL_NAME
+<IF_LOWER_GLOBAL var_name="varName" check_value="10" goto="LABEL_NAME" />
+
++ jumps to the first label with that name
+<GOTO label="LABEL_NAME" />
+
++defines a label for GOTO instructions
+<LABEL name="LABEL_NAME" />
+
++ face print in debug window (si cu timestamp?)
+<DEBUG_PRINT log="Log value in debug window" />
+
++ pune scriptul pe pauza pana cand variabila locala a scriptului "waitflag1" ajunge la valoarea respectiva "wait-value"
+<WAIT_LOCAL_VAR waitflag1="wait-value" />
+
++ pune scriptul pe pauza pana cand variabila globala din virtual machine "waitflag1" ajunge la valoarea respectiva "wait-value"
+<WAIT_GLOBAL_VAR waitflag1="wait-value" />
+
++ seteaza variabila locala "var-name" pe valoarea "var-value"
+<SET_LOCAL_VAR var-name="var-value" />
+
++ seteaza variabila globala "var-name" pe valoarea "var-value"
+<SET_GLOBAL_VAR var-name="var-value" />
+
++inmulteste o variabila locala cu un factor si salveaza tot in cea locala (float by default)
+<MATH_LOCAL_VAR_MUL var-name="numeVarLocala" factor="3.0" />
+
++ play sound
+<PLAY_SOUND ID="SOUND_NAME" [looping="0/1"] />
+
++ stop sound
+<STOP_SOUND ID="SOUND_NAME" [fadeOut="0/1"] />
+
+<SLEEP_ASYNC duration="5.0" />
+Sta in script asincron pe durata data de duration.
+
+LEVEL - generics
+----------------
+- seteaza camera target pe un id din editor
+<LEVEL_CAMERA_SET_TARGET activeId="12" [teleport="0/1"] />
+
+- seteaza camera pe targetul anterior
+<LEVEL_CAMERA_RESTORE_LAST_TARGET [teleport="0/1"] />
+
++ seteaza flag daca sa deseneze sau nu fundalul. Folosit de obicei la camerele secrete
+<LEVEL_HIDE_BACKGROUND />
+<LEVEL_SHOW_BACKGROUND />
++ face toggle la flag
+<LEVEL_TOGGLE_BACKGROUND />
++ modifica multiplicator timp pe fValue pentru o durata de fDuration secunde
+<LEVEL_SET_TIME_MULTIPLIER fValue="1.0" fDuration="5.0" />
+
+<LEVEL_NOTIFY_ENGINE varName1="val1" varName2="val2" ... />
+- TODO: ar trbeui o functie mai generica care sa cheme un OnNotificationReceived(params)
++ trimite o lista de variabile in engine, variabile dupa care pot face un case (de exemplu cand s-a dezamorsat bomba)
+
+<LEVEL_ENABLE_LIGHTNING />
++ activates level lightning effects
+
+<LEVEL_GIVE_STRATEGIC_POINTS [target="SELF/target/targets_target/toucher/id"] [fPoints="1.0"] />
++ gives strategic points, defaults to 1 point if not specified fPoints
+
+LEVEL - IACTIVEINTERFACE
+------------------------
+<IACTIVE_CAMERA_SET_TARGET [target="SELF/target/targets_target/toucher/id"] [teleport="0/1"] />
+Seteaza camera target pe IActive-ul curent. teleport - pozitia se muta instantaneu (default 0)
+
+<IACTIVE_GET_AI_PARAM [target="SELF/target/targets_target/toucher/id"] paramName="numeParametruAI" destLocalVarName="varLocalaScript" />
+Salveaza un parametru din AI intr-o variabila locala a scriptului
+
+<IACTIVE_SET_AI_PARAMS [target="SELF/target/targets_target/toucher/id"] paramName1="paramValue1" paramName2="paramValue2" ... />
+Seteaza params unui IActive AI (self pt el insusi, target pt targetID din editor sau id pt id din editor) cu nr variabil de params
+
+<IACTIVE_TOGGLE_HIDDEN [target="SELF/target/targets_target/toucher/id"] /> - reflexiva
+Toggles bHidden flag
+
+!!todo: <IACTIVE_SET_HIDDEN [target="SELF/target/targets_target/toucher/id"] hidden="0/1" />
+Seteaza flagul de hidden la valoarea indicata. 
+SELF e valoarea default si se refera la obj curent, target inseamna id target din editor, id e numeric si inseamna id din script
+
+<IACTIVE_SET_AI [target="SELF/target/targets_target/toucher/id"] aiName="AI_FN_NAME" aiparam1="val1" aiparam2="val2" ... />
+Seteaza ai-ul unui IActive (self pt el insusi, target pt targetID din editor sau id pt id din editor) cu nr variabil de params
+target defaults on SELF
+
+<IACTIVE_SET_SCRIPT [target="SELF/target/targets_target/toucher/id"] [scriptName="SCRIPT_NAME"] />
+Seteaza scriptul unui activ sau sterge scriptul daca nu specific scriptName
+
+<IACTIVE_RAIL_CHANGEDIR [target="SELF/target/targets_target/toucher/id"] />
+Se foloseste pe obiectele cu AI de FOLLOW RAIL (orice fel de follow). Schimba directia de miscare ca sa se comporte ca un lift.
+
+<IACTIVE_SET_CAN_INTERACT [target="SELF/target/targets_target/toucher/id"] bCanInteract="0/1" />
+seteaza flagul de "CanInteract"
+
+<IACTIVE_ADD_AI_EVENT [target="SELF/target/targets_target/toucher/id"] sEventType="AI_EVENT_STRANGE" [sEventClass="PASSIVE/trap/player/human/explosion"] [fRange="128.0"] [fDuration="1.0"] />
+adauga un event AI la pozitia si cu UId-ul elementului targetat
+
+<IACTIVE_ADD_NOTIFICATION [target="SELF/target/targets_target/toucher/id"] sStringID="STR_ID" />
+afiseaza text ca si notificare data de un IActive (implementarea efectiva depinde de joc)
+
+<IACTIVE_ADD_NOTIFICATION_LOCKED_DOOR [target = "SELF/target/targets_target/toucher/id"] fDuration="0.0f" />
+shows a special tutorial for the unbreakable doors
+
+<IACTIVE_REMOVE_NOTIFICATION />
+removes the current onscreen notification
+
+<IACTIVE_SAVE_TOUCHER_UID sAIvarName="varName" />
+salveaza UID-ul toucherului in colectia de variabile ale IActivului sub numele "varName"
+
+<IACTIVE_GENERATE_EFFECT [target="SELF/target/id"] sEffectType="EFFECT_TYPE_NAME" />
+generates the specified effect at target's position
+
+ACTIVES  
+-------
+<ACTIVE_INC_FRAME [target="SELF/target/targets_target/toucher/id"] [step="-n/n"] [loop="0/1"] /> - reflexiva
+creste frame-ul curent cu step si face loop pe nr de frames sau CLAMP daca nu specific loop
+
+<ACTIVE_SET_ANIM [anim="ANIM_NAME_FROM_BSX"] [frame="0"] [animated="0/1"] />
+seteaza animatia activului curent. Daca lipseste animatia ramane aceeasi, daca lipseste frame seteaza 0, lipseste banimated ramane cum era
+! daca va fi nevoie de set_anim si la actori si la altele pot face o metoda generica in iactiveInterface si sa o chem pe aia din script (sa nu fie implementata unde nu e cazul)
+
+<ACTIVE_DOORFACE_SET_OPEN_TIMER [target="SELF/target/targets_target/toucher/id"] fDuration="0.5" />
+pentru AI-ul de usi care se inchid automat seteaza AItimer1=fDuration. Usa sta deschisa (frame +1 cat timp AItimer1 > 0.0f)
+
+<ACTIVE_AMMOBOX_GIVE_AMMO />
+<ACTIVE_HEALTHBOX_GIVE_HEALTH />
++ gives ammo/health to toucher
+
+ACTORS
+------
+<ACTOR_HIT who="SELF/target/targets_target/toucher/id" fDamage="10.0" />
+Hits the actor taking fDamage from health.
+TODO: should specify attacker class and AP status
+
+<ACTOR_TOUCHER_TELEPORT where="SELF/target/targets_target/toucher/id" [offX="10"] [offY="10"] /> 
+Teleporteaza activul care a facut touching-ul la pozitia data de param "where", cu offset
+
+<ACTOR_SET_COMMAND who="..." sCommand="COMMAND_MELEE" [nCommandModifier="0"] />
+Sets a controller command on target actor. 
+nCommandModifier - int param specific to each command (eg. COMMAND_MELEE modifier: 0-melee, 1-breach door)
+TODO: implement command duration and remain on script instruction until executed
+
+<ACTOR_SPAWN where="SELF/target/targets_target/toucher/id" template="TEMPLATE_NAME" [AIstate="DEFAULT_STATE"] [direction="-1/0/1/player"] [offX="10"] [offY="10"] />
+Spawns an actor with predefined direction 
+direction - if missing or 0 means random; "player" means towards closest player
+AIstate - if not set, gets the default state set in the actor template
+offX, offY - get added to the spawn position
+
+<ACTOR_SET_AI_STATE who="SELF/target/targets_target/toucher/id" [AIstate="DEFAULT_STATE"] />
+Seteaza o stare anume pe actorul specificat in "who"
+
+<ACTOR_SET_TEMPLATE who="SELF/target/targets_target/toucher/id" sTemplateName="ACTOR_TEMPLATE" />
+Sets a template from actors_data.xml on destination actor
+
+<ACTOR_SET_TEMPLATE_RANDOM sTemplateName1="ACTOR_OLDIE" sTemplateName2="NO_TEMPLATE" fProbability1="20.0" fProbability2="80.0" />
+Sets a random template (NETWORK SYNCED) between 2 options. If one of the options is missing but should get set then it just doesn't set it and exits normally.
+
+<ACTOR_PERK_MODIFIER who="SELF/target/targets_target/toucher/id" sPerkName="" fQtyAdded="+/-F" />
+Adds fQtyAdded to certain perks. 
+Allowed perks: 
+"RELOAD_SPEED" - quantity should be a percentage (0.0f-1.0f)
+"GEAR_CAPACITY" - qty should be an integer
+"SPEED_LOADER" - qty should be an integer that gets added to the primary selected weapon
+
+<ACTOR_SWITCH_WEAPONS who="SELF/target/targets_target/toucher/id" nWpnIdx_src="X" nWpnIdx_dest="Y" [nKeepAmmoFromSrc="0/1"] />
+Switches SELECTED actor weapons.
+nKeepAmmoFromSrc - if set it overwrites the ammo qty from "src" idx to "dest" idx
+Collection Indexes: PRIMARY=0, SECONDARY=1, GEAR=2, MELEE=3, TEMPORARY=4, TEMPORARY_ALT=5, NO_WEAPON=6
+
+<ACTOR_SET_WEAPON who="SELF/target/targets_target/toucher/id" nWpnIdx="X" sWpnTemplate="WPN_TEMPLATE" />
+Does a Weapon Init with a template on specific weapon (from collection).
+Leave sWpnTemplate parameter out to do a simple Reset() on weapon to set it to empty.
+Collection Indexes: PRIMARY=0, SECONDARY=1, GEAR=2, MELEE=3, TEMPORARY=4, TEMPORARY_ALT=5, NO_WEAPON=6
+
+<ACTOR_EQUIP_WEAPONS who="SELF/target/targets_target/toucher/id" nPrimaryIdx="X" nSecondaryIdx="Y" nGearIdx="Z" />
+Equips weapons from the weapons collection by index, on primary, secondary (ALT), gear slots. 
+Use -1 if you want to just clear/empty a weapon
+Collection Indexes: PRIMARY=0, SECONDARY=1, GEAR=2, MELEE=3, TEMPORARY=4, TEMPORARY_ALT=5, NO_WEAPON=6
+
+<ACTOR_SHOOT_WEAPON who="..." [nWeaponIdx="X"] />
+!!! not like ACTOR_SET_COMMAND !!!
+Calls ShootWeapon directly on specified weapon Idx or on pCurrentWeapon if idx not specified.
+X: Collection Indexes: PRIMARY=0, SECONDARY=1, GEAR=2, MELEE=3, TEMPORARY=4, TEMPORARY_ALT=5, NO_WEAPON=6
+
+<ACTOR_JAM_WEAPON who="..." [nWeaponIdx="X"] fJamTimer="Y.Y" [nCanResetJam="Z"] />
+Jams weapon idx "X" or the currently equipped on if missing nWeaponIdx. 
+nCanResetJam != 0 tells that you can unjam it by releaseing the trigger.
+
+<ACTOR_SET_DOT who="..." sDoT="DoT_INVINCIBLE" [fDuration="1.0"] />
+Sets a Damage over Time effect on specified actor
+
+COLLISION SHAPES/TRIGGERS
+-------------------------
+<COLL_CHECK_HIDDEN_ROOM_CLEARED [target="SELF/target/targets_target/toucher/id"] />
+Verifica daca in trigger-ul "script target" mai sunt inamici. Daca nu mai sunt seteaza animatia usii (target-ul collisionului setat din editor) pe usa deschisa si spawneaza un chem light verde ca sa stii ca este clear
+
+<COLL_ENTER_HIDDEN_ROOM [target="SELF/target/targets_target/toucher/id"] [lockCamera="0/1"] [hideOutside="0/1"] />
+Se seteaza pe collision box-ul care defineste hiiden room-ul si pozitioneaza camera celor care intra in hidden room pe centrul coll box-ului
+lockCamera - tells if camera should be locked on the center of the box
+

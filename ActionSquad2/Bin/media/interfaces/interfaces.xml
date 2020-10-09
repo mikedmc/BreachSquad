@@ -1,0 +1,653 @@
+<?xml version="1.0"?>
+<Interfaces Version="1.0" SpriteCollection="controls.bsx">
+	<Layer ID="LAYER_ID_CTRLR_CONNECTED" X="0" Y="0" isBlocking="false" getsInput="false" anchorX="center" anchorY="min" fTimer="3">
+		<Control Type="Frame" animID="FRAME1" Color="0xffffffff" inflate="0" X="-85" Y="8" W="170" H="32" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="TEMP10" wrapText="0" align="center" valign="vcenter" X="-77" Y="23" W="153" H="14" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="SYS_CONTROLLER_ADDED" wrapText="0" align="center" valign="vcenter" X="-85" Y="10" W="170" H="11" />
+	</Layer>
+	<Layer ID="LAYER_ID_CTRLR_DISCONNECTED" X="0" Y="0" isBlocking="false" getsInput="false" anchorX="center" anchorY="min" fTimer="3">
+		<Control Type="Frame" animID="FRAME1" Color="0xffffffff" inflate="0" X="-85" Y="8" W="170" H="32" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="TEMP10" wrapText="0" align="center" valign="vcenter" X="-77" Y="23" W="153" H="14" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="SYS_CONTROLLER_REMOVED" wrapText="0" align="center" valign="vcenter" X="-85" Y="10" W="170" H="11" />
+	</Layer>
+	<Layer ID="LAYER_ID_MAINMENU" X="0" Y="0" isBlocking="false" getsInput="true" anchorX="min" anchorY="max">
+		<Control Type="ScrollMenu" ID="CTRL_SCROLL_MAINMENU" animID="SCROLLMENU_CURSOR" FontID="FONT_12_WOW" FontColor="0xffaaaaaa" align="left" Vspacing="18" DisabledFlags="0" StringID0="PLAY" StringID1="COOP" StringID2="WORKSHOP" StringID3="OPTIONS" StringID4="LEADERBOARDS" StringID5="EXIT" StringID6="" StringID7="" X="15" Y="-107" W="166" H="107" />
+	</Layer>
+	<Layer ID="LAYER_ID_MAINMENU_NOWORKSHOP" X="0" Y="0" isBlocking="false" getsInput="true" anchorX="min" anchorY="max">
+		<Control Type="ScrollMenu" ID="CTRL_SCROLL_MAINMENU" animID="SCROLLMENU_CURSOR" FontID="FONT_12_WOW" FontColor="0xffaaaaaa" align="left" Vspacing="18" DisabledFlags="0" StringID0="PLAY" StringID1="COOP" StringID2="OPTIONS" StringID3="LEADERBOARDS" StringID4="EXIT" StringID5="" StringID6="" StringID7="" X="15" Y="-90" W="166" H="88" />
+	</Layer>
+	<Layer ID="LAYER_ID_IGM_MENU" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
+		<Control Type="Widebar" animID="WIDEBAR2" Color="0xffffffff" X="-111" Y="-40" W="217" H="95" />
+		<Control Type="ScrollMenu" ID="CTRL_SCROLL_IGMMENU" animID="ANM_" FontID="FONT_12_WOW" FontColor="0xff5a8dba" align="center" Vspacing="18" DisabledFlags="0" StringID0="RESUME" StringID1="RESTART_LEVEL" StringID2="OPTIONS" StringID3="QUIT" StringID4="" StringID5="" StringID6="" StringID7="" X="-114" Y="-22" W="228" H="69" />
+		<Control Type="Animation" animID="LOGO" Animated="0" setFrame="0" scaleImage="0" X="-84" Y="-98" W="169" H="74" />
+	</Layer>
+	<Layer ID="LAYER_ID_LEVELWIN_1P" X="0" Y="0" isBlocking="false" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_LEVEL_WIN">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
+		<Control Type="Label" ID="LABEL_MISSION_NAME" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CURRENT_MISSION_VAL" wrapText="0" align="center" valign="vcenter" X="-99" Y="-117" W="199" H="16" />
+		<Control Type="Widebar" animID="WIDEBAR2" Color="0xffffffff" X="-50" Y="-56" W="100" H="51" />
+		<Control Type="FillingStars" ID="CTRL_STARS" animID="STARS_2F_XL" nStars="3" X="-39" Y="-89" W="78" H="23" />
+		<Control Type="Label" ID="LABEL_WIN_TITLE" FontID="FONT_12_WOW" FontColor="0xffffffff" stringID="MISSION_ACCOMPLISHED" wrapText="0" align="center" valign="vcenter" X="-128" Y="-58" W="256" H="20" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="SWAT_CASUALTIES" wrapText="0" align="right" valign="vcenter" X="-95" Y="-24" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_CASUALTIES" wrapText="0" align="left" valign="vcenter" X="3" Y="-24" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED_TOTAL" wrapText="0" align="right" valign="vcenter" X="-95" Y="-33" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="3" Y="-33" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="TIME_SPENT" wrapText="0" align="right" valign="vcenter" X="-95" Y="-42" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_TIME" wrapText="0" align="left" valign="vcenter" X="3" Y="-42" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="TOTAL_SCORE" wrapText="0" align="right" valign="vcenter" X="-95" Y="-15" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_SCORE" wrapText="0" align="left" valign="vcenter" X="3" Y="-15" W="93" H="10" />
+		<Control Type="Window" ID="CTRL_WND_PL1" animID="WINDOW1" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="PLAYER1" inflate="0" X="-67" Y="17" W="133" H="45" />
+		<Control Type="Animation" ID="CTRL_ANIM_PORTRAIT_PL1" animID="PLAYER_PORTRAITS" Animated="0" setFrame="0" scaleImage="0" X="-69" Y="19" W="37" H="36" />
+		<Control Type="Frame" animID="FRAME4" Color="0xffffffff" inflate="0" X="-67" Y="56" W="133" H="6" />
+		<Control Type="XPBar" ID="CTRL_XPBAR_PL1" animID="PROGRESS_XP_UPGRADE" FontID="FONT_6_NC1" FontColor="0xfff0c022" nOldValue="10" nNewValue="50" X="-55" Y="54" W="110" H="11" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="KILLS" wrapText="0" align="left" valign="vcenter" X="-32" Y="17" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="ACCURACY" wrapText="0" align="left" valign="vcenter" X="-32" Y="26" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED" wrapText="0" align="left" valign="vcenter" X="-32" Y="35" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="DEATHS" wrapText="0" align="left" valign="vcenter" X="-32" Y="44" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_DEATHS" wrapText="0" align="left" valign="vcenter" X="39" Y="44" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_KILLS" wrapText="0" align="left" valign="vcenter" X="39" Y="17" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_ACCURACY" wrapText="0" align="left" valign="vcenter" X="39" Y="26" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="39" Y="35" W="30" H="10" />
+		<Control Type="Button" ID="BUT_LEVEL_WIN" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CONTINUE" X="-50" Y="76" W="100" H="16" />
+		<Control Type="Button" ID="BUT_LEVEL_RESTART" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESTART" X="-50" Y="95" W="100" H="16" />
+		<Control Type="Label" ID="LABEL_LEADERBOARDS" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MELEE_LEADERBOARDS" wrapText="0" align="left" valign="vcenter" X="62" Y="-69" W="110" H="10" />
+		<Control Type="TasksList" ID="CTRL_TASKLIST_WEEKLY" animID="MEDAL1" FontID="FONT_6_NS1" FontColor="0xffffffff" nIconFrame1="-1" stringID1="" nIconFrame2="-1" stringID2="" X="45" Y="-37" W="100" H="29" />
+	</Layer>
+	<Layer ID="LAYER_ID_LEVELWIN_2P" X="0" Y="0" isBlocking="false" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_LEVEL_WIN">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
+		<Control Type="Label" ID="LABEL_MISSION_NAME" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CURRENT_MISSION_VAL" wrapText="0" align="center" valign="vcenter" X="-99" Y="-117" W="199" H="16" />
+		<Control Type="Widebar" animID="WIDEBAR2" Color="0xffffffff" X="-50" Y="-56" W="100" H="51" />
+		<Control Type="FillingStars" ID="CTRL_STARS" animID="STARS_2F_XL" nStars="3" X="-39" Y="-89" W="78" H="23" />
+		<Control Type="Label" ID="LABEL_WIN_TITLE" FontID="FONT_12_WOW" FontColor="0xffffffff" stringID="MISSION_ACCOMPLISHED" wrapText="0" align="center" valign="vcenter" X="-128" Y="-58" W="256" H="20" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="TOTAL_SCORE" wrapText="0" align="right" valign="vcenter" X="-95" Y="-15" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_CASUALTIES" wrapText="0" align="left" valign="vcenter" X="3" Y="-24" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED_TOTAL" wrapText="0" align="right" valign="vcenter" X="-95" Y="-33" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="TIME_SPENT" wrapText="0" align="right" valign="vcenter" X="-95" Y="-42" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_TIME" wrapText="0" align="left" valign="vcenter" X="3" Y="-42" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="3" Y="-33" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_SCORE" wrapText="0" align="left" valign="vcenter" X="3" Y="-15" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="SWAT_CASUALTIES" wrapText="0" align="right" valign="vcenter" X="-95" Y="-24" W="93" H="10" />
+		<Control Type="Window" ID="CTRL_WND_PL1" animID="WINDOW1" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="PLAYER1" inflate="0" X="-138" Y="17" W="133" H="45" />
+		<Control Type="Animation" ID="CTRL_ANIM_PORTRAIT_PL1" animID="PLAYER_PORTRAITS" Animated="0" setFrame="0" scaleImage="0" X="-140" Y="19" W="37" H="36" />
+		<Control Type="Frame" animID="FRAME4" Color="0xffffffff" inflate="0" X="-138" Y="56" W="133" H="6" />
+		<Control Type="XPBar" ID="CTRL_XPBAR_PL1" animID="PROGRESS_XP_UPGRADE" FontID="FONT_6_NC1" FontColor="0xfff0c022" nOldValue="10" nNewValue="50" X="-126" Y="54" W="110" H="11" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_DEATHS" wrapText="0" align="left" valign="vcenter" X="-34" Y="44" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="KILLS" wrapText="0" align="left" valign="vcenter" X="-103" Y="17" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="ACCURACY" wrapText="0" align="left" valign="vcenter" X="-103" Y="26" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED" wrapText="0" align="left" valign="vcenter" X="-103" Y="35" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="DEATHS" wrapText="0" align="left" valign="vcenter" X="-103" Y="44" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_KILLS" wrapText="0" align="left" valign="vcenter" X="-34" Y="17" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_ACCURACY" wrapText="0" align="left" valign="vcenter" X="-34" Y="26" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="-34" Y="35" W="30" H="10" />
+		<Control Type="Window" ID="CTRL_WND_PL2" animID="WINDOW1" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="PLAYER2" inflate="0" X="5" Y="17" W="133" H="45" />
+		<Control Type="Animation" ID="CTRL_ANIM_PORTRAIT_PL2" animID="PLAYER_PORTRAITS_R" Animated="0" setFrame="1" scaleImage="0" X="3" Y="19" W="37" H="36" />
+		<Control Type="Frame" animID="FRAME4" Color="0xffffffff" inflate="0" X="5" Y="56" W="133" H="6" />
+		<Control Type="XPBar" ID="CTRL_XPBAR_PL2" animID="PROGRESS_XP_UPGRADE" FontID="FONT_6_NC1" FontColor="0xfff0c022" nOldValue="10" nNewValue="50" X="17" Y="54" W="110" H="11" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_DEATHS" wrapText="0" align="left" valign="vcenter" X="109" Y="44" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="KILLS" wrapText="0" align="left" valign="vcenter" X="40" Y="17" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="ACCURACY" wrapText="0" align="left" valign="vcenter" X="40" Y="26" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED" wrapText="0" align="left" valign="vcenter" X="40" Y="35" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="DEATHS" wrapText="0" align="left" valign="vcenter" X="40" Y="44" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_KILLS" wrapText="0" align="left" valign="vcenter" X="109" Y="17" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_ACCURACY" wrapText="0" align="left" valign="vcenter" X="109" Y="26" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="109" Y="35" W="30" H="10" />
+		<Control Type="Button" ID="BUT_LEVEL_WIN" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CONTINUE" X="-50" Y="76" W="100" H="16" />
+		<Control Type="Button" ID="BUT_LEVEL_RESTART" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESTART" X="-50" Y="95" W="100" H="16" />
+		<Control Type="Label" ID="LABEL_LEADERBOARDS" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MELEE_LEADERBOARDS" wrapText="0" align="left" valign="vcenter" X="62" Y="-69" W="110" H="10" />
+		<Control Type="TasksList" ID="CTRL_TASKLIST_WEEKLY" animID="MEDAL1" FontID="FONT_6_NS1" FontColor="0xffffffff" nIconFrame1="-1" stringID1="" nIconFrame2="-1" stringID2="" X="45" Y="-37" W="100" H="29" />
+	</Layer>
+	<Layer ID="LAYER_ID_LEVELWIN_2P_COOP" X="0" Y="0" isBlocking="false" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_LEVEL_WIN">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
+		<Control Type="Label" ID="LABEL_MISSION_NAME" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CURRENT_MISSION_VAL" wrapText="0" align="center" valign="vcenter" X="-99" Y="-117" W="199" H="16" />
+		<Control Type="Widebar" animID="WIDEBAR2" Color="0xffffffff" X="-50" Y="-63" W="100" H="51" />
+		<Control Type="FillingStars" ID="CTRL_STARS" animID="STARS_2F_XL" nStars="3" X="-39" Y="-96" W="78" H="23" />
+		<Control Type="Label" ID="LABEL_WIN_TITLE" FontID="FONT_12_WOW" FontColor="0xffffffff" stringID="MISSION_ACCOMPLISHED" wrapText="0" align="center" valign="vcenter" X="-128" Y="-65" W="256" H="20" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="TOTAL_SCORE" wrapText="0" align="right" valign="vcenter" X="-95" Y="-22" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_CASUALTIES" wrapText="0" align="left" valign="vcenter" X="3" Y="-31" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED_TOTAL" wrapText="0" align="right" valign="vcenter" X="-95" Y="-40" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="TIME_SPENT" wrapText="0" align="right" valign="vcenter" X="-95" Y="-49" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_TIME" wrapText="0" align="left" valign="vcenter" X="3" Y="-49" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_SCORE" wrapText="0" align="left" valign="vcenter" X="3" Y="-22" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="SWAT_CASUALTIES" wrapText="0" align="right" valign="vcenter" X="-95" Y="-31" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="3" Y="-40" W="93" H="10" />
+		<Control Type="Window" ID="CTRL_WND_PL1" animID="WINDOW1" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="PLAYER1" inflate="0" X="-138" Y="10" W="133" H="45" />
+		<Control Type="Animation" ID="CTRL_ANIM_PORTRAIT_PL1" animID="PLAYER_PORTRAITS" Animated="0" setFrame="0" scaleImage="0" X="-140" Y="12" W="37" H="36" />
+		<Control Type="Frame" animID="FRAME4" Color="0xffffffff" inflate="0" X="-138" Y="49" W="133" H="6" />
+		<Control Type="XPBar" ID="CTRL_XPBAR_PL1" animID="PROGRESS_XP_UPGRADE" FontID="FONT_6_NC1" FontColor="0xfff0c022" nOldValue="10" nNewValue="50" X="-126" Y="47" W="110" H="11" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_DEATHS" wrapText="0" align="left" valign="vcenter" X="-34" Y="37" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="KILLS" wrapText="0" align="left" valign="vcenter" X="-103" Y="10" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="ACCURACY" wrapText="0" align="left" valign="vcenter" X="-103" Y="19" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED" wrapText="0" align="left" valign="vcenter" X="-103" Y="28" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="DEATHS" wrapText="0" align="left" valign="vcenter" X="-103" Y="37" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_KILLS" wrapText="0" align="left" valign="vcenter" X="-34" Y="10" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_ACCURACY" wrapText="0" align="left" valign="vcenter" X="-34" Y="19" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="-34" Y="28" W="30" H="10" />
+		<Control Type="Window" ID="CTRL_WND_PL2" animID="WINDOW1" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="PLAYER2" inflate="0" X="5" Y="10" W="133" H="45" />
+		<Control Type="Animation" ID="CTRL_ANIM_PORTRAIT_PL2" animID="PLAYER_PORTRAITS_R" Animated="0" setFrame="1" scaleImage="0" X="3" Y="12" W="37" H="36" />
+		<Control Type="Frame" animID="FRAME4" Color="0xffffffff" inflate="0" X="5" Y="49" W="133" H="6" />
+		<Control Type="XPBar" ID="CTRL_XPBAR_PL2" animID="PROGRESS_XP_UPGRADE" FontID="FONT_6_NC1" FontColor="0xfff0c022" nOldValue="10" nNewValue="50" X="17" Y="47" W="110" H="11" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_DEATHS" wrapText="0" align="left" valign="vcenter" X="109" Y="37" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="KILLS" wrapText="0" align="left" valign="vcenter" X="40" Y="10" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="ACCURACY" wrapText="0" align="left" valign="vcenter" X="40" Y="19" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED" wrapText="0" align="left" valign="vcenter" X="40" Y="28" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="DEATHS" wrapText="0" align="left" valign="vcenter" X="40" Y="37" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_KILLS" wrapText="0" align="left" valign="vcenter" X="109" Y="10" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_ACCURACY" wrapText="0" align="left" valign="vcenter" X="109" Y="19" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="109" Y="28" W="30" H="10" />
+		<Control Type="Button" ID="BUT_LEVEL_WIN" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="NEXT_MISSION" X="-55" Y="63" W="110" H="16" />
+		<Control Type="Button" ID="BUT_LEVEL_RESTART" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESTART" X="-55" Y="82" W="110" H="16" />
+		<Control Type="Button" ID="BUT_LEVEL_BACK" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="EXIT" X="-55" Y="101" W="110" H="16" />
+		<Control Type="NetVote" ID="CTRL_NETVOTE_CONTINUE" animID="NET_VOTE" leftVote="0" rightVote="0" X="58" Y="63" W="20" H="16" />
+		<Control Type="NetVote" ID="CTRL_NETVOTE_RESTART" animID="NET_VOTE" leftVote="0" rightVote="0" X="58" Y="82" W="20" H="16" />
+		<Control Type="Label" ID="LABEL_LEADERBOARDS" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MELEE_LEADERBOARDS" wrapText="0" align="left" valign="vcenter" X="62" Y="-76" W="110" H="10" />
+		<Control Type="TasksList" ID="CTRL_TASKLIST_WEEKLY" animID="MEDAL1" FontID="FONT_6_NS1" FontColor="0xffffffff" nIconFrame1="-1" stringID1="" nIconFrame2="-1" stringID2="" X="45" Y="-44" W="100" H="29" />
+	</Layer>
+	<Layer ID="LAYER_ID_OPTIONS_MM" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE_SETTINGS">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="OPTIONS" inflate="0" X="-88" Y="-79" W="177" H="171" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-81" Y="-69" W="163" H="57" />
+		<Control Type="Slider" ID="CTRL_SLIDER_SOUNDVOL" animID="SLIDER_BLACK1" Steps="0" HasArrows="1" X="-61" Y="-54" W="122" H="6" />
+		<Control Type="Slider" ID="CTRL_SLIDER_MUSICVOL" animID="SLIDER_BLACK1" Steps="0" HasArrows="1" X="-61" Y="-29" W="122" H="6" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="MUSIC_VOL" wrapText="0" align="center" valign="vcenter" X="-65" Y="-43" W="131" H="13" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="SOUND_VOL" wrapText="0" align="center" valign="vcenter" X="-65" Y="-68" W="131" H="13" />
+		<Control Type="Button" ID="BUT_GFX_OPTIONS" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="GFX_OPTIONS" X="-65" Y="-6" W="130" H="16" />
+		<Control Type="Button" ID="BUT_REDEFINE_KEYS" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="REDEFINE_KEYS" X="-65" Y="13" W="130" H="16" />
+		<Control Type="Button" ID="BUT_CREDITS" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CREDITS" X="-59" Y="32" W="118" H="16" />
+		<Control Type="Button" ID="BUT_MORE_OPTIONS" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="MORE_OPTIONS" X="-59" Y="51" W="118" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE_SETTINGS" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="OK" X="-37" Y="72" W="75" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_LEVELFAIL_1P" X="0" Y="0" isBlocking="false" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_LEVEL_RESTART">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
+		<Control Type="Label" ID="LABEL_MISSION_NAME" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CURRENT_MISSION_VAL" wrapText="0" align="center" valign="vcenter" X="-99" Y="-117" W="199" H="14" />
+		<Control Type="Widebar" animID="WIDEBAR2" Color="0xffffffff" X="-50" Y="-48" W="100" H="44" />
+		<Control Type="FillingStars" ID="CTRL_STARS" animID="STARS_2F_XL" nStars="3" X="-39" Y="-81" W="78" H="23" />
+		<Control Type="Label" ID="LABEL_TITLE" FontID="FONT_12_WOW" FontColor="0xffffffff" stringID="MISSION_FAILED" wrapText="0" align="center" valign="vcenter" X="-96" Y="-49" W="192" H="20" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="TIME_SPENT" wrapText="0" align="right" valign="vcenter" X="-95" Y="-14" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_TIME" wrapText="0" align="left" valign="vcenter" X="3" Y="-14" W="93" H="10" />
+		<Control Type="BlinkingLabel" ID="BLINKER_REASON" FontID="FONT_8_BS1" FontColor="0xffffffff" BlinkColor="0xffff6666" TimerLoop="1.00" TimerBlink="0.50" stringID="BOMB_EXPLODED" wrapText="0" align="center" valign="vcenter" X="-93" Y="-29" W="187" H="13" />
+		<Control Type="Window" ID="CTRL_WND_PL1" animID="WINDOW1" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="PLAYER1" inflate="0" X="-67" Y="17" W="133" H="45" />
+		<Control Type="Animation" ID="CTRL_ANIM_PORTRAIT_PL1" animID="PLAYER_PORTRAITS" Animated="0" setFrame="0" scaleImage="0" X="-69" Y="19" W="37" H="36" />
+		<Control Type="Frame" animID="FRAME4" Color="0xffffffff" inflate="0" X="-67" Y="56" W="133" H="6" />
+		<Control Type="XPBar" ID="CTRL_XPBAR_PL1" animID="PROGRESS_XP_UPGRADE" FontID="FONT_6_NC1" FontColor="0xfff0c022" nOldValue="10" nNewValue="50" X="-55" Y="54" W="110" H="11" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_DEATHS" wrapText="0" align="left" valign="vcenter" X="39" Y="44" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="KILLS" wrapText="0" align="left" valign="vcenter" X="-32" Y="17" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="ACCURACY" wrapText="0" align="left" valign="vcenter" X="-32" Y="26" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED" wrapText="0" align="left" valign="vcenter" X="-32" Y="35" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="DEATHS" wrapText="0" align="left" valign="vcenter" X="-32" Y="44" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_KILLS" wrapText="0" align="left" valign="vcenter" X="39" Y="17" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_ACCURACY" wrapText="0" align="left" valign="vcenter" X="39" Y="26" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="39" Y="35" W="30" H="10" />
+		<Control Type="Label" ID="LABEL_LEADERBOARDS" FontID="FONT_6_NS1" FontColor="0x00000000" stringID="MELEE_LEADERBOARDS" wrapText="0" align="left" valign="vcenter" X="62" Y="-61" W="110" H="10" />
+		<Control Type="Button" ID="BUT_LEVEL_RESTART" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESTART" X="-50" Y="75" W="100" H="16" />
+		<Control Type="Button" ID="BUT_LEVEL_BACK" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="EXIT" X="-50" Y="94" W="100" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_LEVELFAIL_2P" X="0" Y="0" isBlocking="false" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_LEVEL_RESTART">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
+		<Control Type="Label" ID="LABEL_MISSION_NAME" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CURRENT_MISSION_VAL" wrapText="0" align="center" valign="vcenter" X="-99" Y="-117" W="199" H="14" />
+		<Control Type="Widebar" animID="WIDEBAR2" Color="0xffffffff" X="-50" Y="-48" W="100" H="44" />
+		<Control Type="FillingStars" ID="CTRL_STARS" animID="STARS_2F_XL" nStars="3" X="-39" Y="-81" W="78" H="23" />
+		<Control Type="Label" ID="LABEL_TITLE" FontID="FONT_12_WOW" FontColor="0xffffffff" stringID="MISSION_FAILED" wrapText="0" align="center" valign="vcenter" X="-96" Y="-49" W="192" H="20" />
+		<Control Type="BlinkingLabel" ID="BLINKER_REASON" FontID="FONT_8_BS1" FontColor="0xffffffff" BlinkColor="0xffff6666" TimerLoop="1.00" TimerBlink="0.50" stringID="BOMB_EXPLODED" wrapText="0" align="center" valign="vcenter" X="-93" Y="-29" W="187" H="13" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="TIME_SPENT" wrapText="0" align="right" valign="vcenter" X="-95" Y="-14" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_TIME" wrapText="0" align="left" valign="vcenter" X="3" Y="-14" W="93" H="10" />
+		<Control Type="Window" ID="CTRL_WND_PL1" animID="WINDOW1" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="PLAYER1" inflate="0" X="-138" Y="17" W="133" H="45" />
+		<Control Type="Animation" ID="CTRL_ANIM_PORTRAIT_PL1" animID="PLAYER_PORTRAITS" Animated="0" setFrame="0" scaleImage="0" X="-140" Y="19" W="37" H="36" />
+		<Control Type="Frame" animID="FRAME4" Color="0xffffffff" inflate="0" X="-138" Y="56" W="133" H="6" />
+		<Control Type="XPBar" ID="CTRL_XPBAR_PL1" animID="PROGRESS_XP_UPGRADE" FontID="FONT_6_NC1" FontColor="0xfff0c022" nOldValue="10" nNewValue="50" X="-126" Y="54" W="110" H="11" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_DEATHS" wrapText="0" align="left" valign="vcenter" X="-34" Y="44" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="KILLS" wrapText="0" align="left" valign="vcenter" X="-103" Y="17" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="ACCURACY" wrapText="0" align="left" valign="vcenter" X="-103" Y="26" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED" wrapText="0" align="left" valign="vcenter" X="-103" Y="35" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="DEATHS" wrapText="0" align="left" valign="vcenter" X="-103" Y="44" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_KILLS" wrapText="0" align="left" valign="vcenter" X="-34" Y="17" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_ACCURACY" wrapText="0" align="left" valign="vcenter" X="-34" Y="26" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="-34" Y="35" W="30" H="10" />
+		<Control Type="Window" ID="CTRL_WND_PL2" animID="WINDOW1" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="PLAYER2" inflate="0" X="5" Y="17" W="133" H="45" />
+		<Control Type="Animation" ID="CTRL_ANIM_PORTRAIT_PL2" animID="PLAYER_PORTRAITS_R" Animated="0" setFrame="1" scaleImage="0" X="3" Y="19" W="37" H="36" />
+		<Control Type="Frame" animID="FRAME4" Color="0xffffffff" inflate="0" X="5" Y="56" W="133" H="6" />
+		<Control Type="XPBar" ID="CTRL_XPBAR_PL2" animID="PROGRESS_XP_UPGRADE" FontID="FONT_6_NC1" FontColor="0xfff0c022" nOldValue="10" nNewValue="50" X="17" Y="54" W="110" H="11" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_DEATHS" wrapText="0" align="left" valign="vcenter" X="109" Y="44" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="KILLS" wrapText="0" align="left" valign="vcenter" X="40" Y="17" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="ACCURACY" wrapText="0" align="left" valign="vcenter" X="40" Y="26" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED" wrapText="0" align="left" valign="vcenter" X="40" Y="35" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="DEATHS" wrapText="0" align="left" valign="vcenter" X="40" Y="44" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_KILLS" wrapText="0" align="left" valign="vcenter" X="109" Y="17" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_ACCURACY" wrapText="0" align="left" valign="vcenter" X="109" Y="26" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="109" Y="35" W="30" H="10" />
+		<Control Type="Label" ID="LABEL_LEADERBOARDS" FontID="FONT_6_NS1" FontColor="0x00000000" stringID="MELEE_LEADERBOARDS" wrapText="0" align="left" valign="vcenter" X="62" Y="-61" W="110" H="10" />
+		<Control Type="Button" ID="BUT_LEVEL_RESTART" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESTART" X="-50" Y="75" W="100" H="16" />
+		<Control Type="Button" ID="BUT_LEVEL_BACK" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="EXIT" X="-50" Y="94" W="100" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_LEVELFAIL_2P_COOP" X="0" Y="0" isBlocking="false" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_LEVEL_RESTART">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
+		<Control Type="Label" ID="LABEL_MISSION_NAME" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CURRENT_MISSION_VAL" wrapText="0" align="center" valign="vcenter" X="-99" Y="-117" W="199" H="14" />
+		<Control Type="Widebar" animID="WIDEBAR2" Color="0xffffffff" X="-50" Y="-58" W="100" H="44" />
+		<Control Type="FillingStars" ID="CTRL_STARS" animID="STARS_2F_XL" nStars="3" X="-39" Y="-91" W="78" H="23" />
+		<Control Type="Label" ID="LABEL_TITLE" FontID="FONT_12_WOW" FontColor="0xffffffff" stringID="MISSION_FAILED" wrapText="0" align="center" valign="vcenter" X="-96" Y="-59" W="192" H="20" />
+		<Control Type="BlinkingLabel" ID="BLINKER_REASON" FontID="FONT_8_BS1" FontColor="0xffffffff" BlinkColor="0xffff6666" TimerLoop="1.00" TimerBlink="0.50" stringID="BOMB_EXPLODED" wrapText="0" align="center" valign="vcenter" X="-93" Y="-39" W="187" H="13" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="TIME_SPENT" wrapText="0" align="right" valign="vcenter" X="-95" Y="-24" W="93" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_TIME" wrapText="0" align="left" valign="vcenter" X="3" Y="-24" W="93" H="10" />
+		<Control Type="Window" ID="CTRL_WND_PL1" animID="WINDOW1" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="PLAYER1" inflate="0" X="-138" Y="7" W="133" H="45" />
+		<Control Type="Animation" ID="CTRL_ANIM_PORTRAIT_PL1" animID="PLAYER_PORTRAITS" Animated="0" setFrame="0" scaleImage="0" X="-140" Y="9" W="37" H="36" />
+		<Control Type="Frame" animID="FRAME4" Color="0xffffffff" inflate="0" X="-138" Y="46" W="133" H="6" />
+		<Control Type="XPBar" ID="CTRL_XPBAR_PL1" animID="PROGRESS_XP_UPGRADE" FontID="FONT_6_NC1" FontColor="0xfff0c022" nOldValue="10" nNewValue="50" X="-126" Y="44" W="110" H="11" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_DEATHS" wrapText="0" align="left" valign="vcenter" X="-34" Y="34" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="KILLS" wrapText="0" align="left" valign="vcenter" X="-103" Y="7" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="ACCURACY" wrapText="0" align="left" valign="vcenter" X="-103" Y="16" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED" wrapText="0" align="left" valign="vcenter" X="-103" Y="25" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="DEATHS" wrapText="0" align="left" valign="vcenter" X="-103" Y="34" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_KILLS" wrapText="0" align="left" valign="vcenter" X="-34" Y="7" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_ACCURACY" wrapText="0" align="left" valign="vcenter" X="-34" Y="16" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P1_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="-34" Y="25" W="30" H="10" />
+		<Control Type="Window" ID="CTRL_WND_PL2" animID="WINDOW1" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="PLAYER2" inflate="0" X="5" Y="7" W="133" H="45" />
+		<Control Type="Animation" ID="CTRL_ANIM_PORTRAIT_PL2" animID="PLAYER_PORTRAITS_R" Animated="0" setFrame="1" scaleImage="0" X="3" Y="9" W="37" H="36" />
+		<Control Type="Frame" animID="FRAME4" Color="0xffffffff" inflate="0" X="5" Y="46" W="133" H="6" />
+		<Control Type="XPBar" ID="CTRL_XPBAR_PL2" animID="PROGRESS_XP_UPGRADE" FontID="FONT_6_NC1" FontColor="0xfff0c022" nOldValue="10" nNewValue="50" X="17" Y="44" W="110" H="11" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_DEATHS" wrapText="0" align="left" valign="vcenter" X="109" Y="34" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="KILLS" wrapText="0" align="left" valign="vcenter" X="40" Y="7" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="ACCURACY" wrapText="0" align="left" valign="vcenter" X="40" Y="16" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="HOSTAGES_SAVED" wrapText="0" align="left" valign="vcenter" X="40" Y="25" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="DEATHS" wrapText="0" align="left" valign="vcenter" X="40" Y="34" W="69" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_KILLS" wrapText="0" align="left" valign="vcenter" X="109" Y="7" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_ACCURACY" wrapText="0" align="left" valign="vcenter" X="109" Y="16" W="30" H="10" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="MISSION_P2_HOSTAGES" wrapText="0" align="left" valign="vcenter" X="109" Y="25" W="30" H="10" />
+		<Control Type="Label" ID="LABEL_LEADERBOARDS" FontID="FONT_6_NS1" FontColor="0x00000000" stringID="MELEE_LEADERBOARDS" wrapText="0" align="left" valign="vcenter" X="62" Y="-71" W="110" H="10" />
+		<Control Type="Button" ID="BUT_LEVEL_RESTART" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESTART" X="-55" Y="61" W="110" H="16" />
+		<Control Type="Button" ID="BUT_COOPFAIL_CONTINUE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="NEXT_MISSION" X="-55" Y="80" W="110" H="16" />
+		<Control Type="Button" ID="BUT_LEVEL_BACK" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="EXIT" X="-55" Y="99" W="110" H="16" />
+		<Control Type="NetVote" ID="CTRL_NETVOTE_RESTART" animID="NET_VOTE" leftVote="0" rightVote="0" X="58" Y="61" W="20" H="16" />
+		<Control Type="NetVote" ID="CTRL_NETVOTE_CONTINUE" animID="NET_VOTE" leftVote="0" rightVote="0" X="58" Y="80" W="20" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_BUY_WEAPON" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WND_BUY_WEAPON" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="UNLOCK_ITEM" inflate="0" X="-83" Y="-52" W="166" H="105" />
+		<Control Type="Frame" animID="FRAME_WHITE2" Color="0xff2a3946" inflate="0" X="-38" Y="-29" W="76" H="35" />
+		<Control Type="Frame" animID="FRAME_WHITE1" Color="0xff1c252e" inflate="0" X="-37" Y="-28" W="74" H="18" />
+		<Control Type="CustomPaint" subType="ST_MENUS_BSX_FRAME" ID="CP_WEAPON_ICON" inflate="0" X="-24" Y="-28" W="49" H="18" />
+		<Control Type="Animation" animID="ICONS_MISC" Animated="0" setFrame="1" scaleImage="0" X="26" Y="2" W="25" H="15" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CANCEL" X="-40" Y="34" W="81" H="16" />
+		<Control Type="Button" ID="BUT_UNLOCK_WEAPON" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CONFIRM" X="-47" Y="14" W="94" H="16" />
+		<Control Type="Label" ID="LABEL_WPN_NAME" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="SPECIAL_THANKS" wrapText="0" align="center" valign="vcenter" X="-82" Y="-48" W="164" H="16" />
+		<Control Type="Label" FontID="FONT_6_N1" FontColor="0xff5a8dba" stringID="PRICE" wrapText="0" align="left" valign="vcenter" X="-37" Y="-5" W="45" H="11" />
+		<Control Type="Label" ID="CTRL_LABEL_PRICE" FontID="FONT_6_N1" FontColor="0xff5a8dba" stringID="TEMP2" wrapText="0" align="left" valign="vcenter" X="28" Y="-5" W="33" H="11" />
+	</Layer>
+	<Layer ID="LAYER_ID_OPTIONS_IGM" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE_SETTINGS">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="OPTIONS" inflate="0" X="-88" Y="-66" W="177" H="133" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-81" Y="-56" W="163" H="54" />
+		<Control Type="Slider" ID="CTRL_SLIDER_SOUNDVOL" animID="SLIDER_BLACK1" Steps="0" HasArrows="1" X="-61" Y="-41" W="122" H="6" />
+		<Control Type="Slider" ID="CTRL_SLIDER_MUSICVOL" animID="SLIDER_BLACK1" Steps="0" HasArrows="1" X="-61" Y="-16" W="122" H="6" />
+		<Control Type="Button" ID="BUT_KEYS_LAYOUT" animID="BUTTON2" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="KEYBOARD_LAYOUT" X="-62" Y="6" W="124" H="16" />
+		<Control Type="Button" ID="BUT_CTRLR_LAYOUT" animID="BUTTON2" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="CONTROLLER_LAYOUT" X="-62" Y="25" W="124" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE_SETTINGS" animID="BUTTON1" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="OK" X="-37" Y="46" W="75" H="16" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="MUSIC_VOL" wrapText="0" align="center" valign="vcenter" X="-65" Y="-30" W="131" H="13" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="SOUND_VOL" wrapText="0" align="center" valign="vcenter" X="-65" Y="-55" W="131" H="13" />
+	</Layer>
+	<Layer ID="LAYER_ID_CREDITS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xff000000" />
+		<Control Type="Widebar" animID="WIDEBAR2" Color="0xffffffff" X="-51" Y="-64" W="100" H="132" />
+		<Control Type="Button" ID="BUT_CREDITS_MORE" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="MORE" X="-50" Y="78" W="100" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="OK" X="-50" Y="98" W="100" H="16" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="CREDITS_LEVEL_DESIGN" wrapText="1" align="center" valign="top" X="6" Y="-35" W="142" H="30" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="MUSIC_SFX" wrapText="0" align="center" valign="vcenter" X="6" Y="29" W="142" H="13" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="ADDITIONAL_WORK" wrapText="0" align="center" valign="vcenter" X="-2" Y="-6" W="157" H="13" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="PROGRAMMING" wrapText="0" align="center" valign="vcenter" X="-146" Y="-49" W="142" H="13" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="CREDITS_DESIGN" wrapText="1" align="center" valign="top" X="-146" Y="-8" W="142" H="13" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="CREDITS_ADDITIONAL" wrapText="1" align="center" valign="top" X="6" Y="8" W="142" H="25" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="LEVEL_DESIGN" wrapText="0" align="center" valign="vcenter" X="6" Y="-49" W="142" H="13" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="CREDITS_SOUNDS" wrapText="1" align="center" valign="top" X="6" Y="43" W="142" H="24" />
+		<Control Type="Animation" animID="LOGO" Animated="0" setFrame="0" scaleImage="0" X="-84" Y="-110" W="169" H="76" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="GAME_DESIGN" wrapText="0" align="center" valign="vcenter" X="-146" Y="-22" W="142" H="13" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="CREDITS_GFX" wrapText="1" align="center" valign="top" X="-146" Y="19" W="142" H="48" />
+		<Control Type="Label" FontID="FONT_6_NC1" FontColor="0x445a8dba" stringID="VERSION_NUMBER" wrapText="0" align="center" valign="vcenter" X="-49" Y="60" W="100" H="10" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="GRAPHICS" wrapText="0" align="center" valign="vcenter" X="-146" Y="5" W="142" H="13" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="CREDITS_PROGRAMMING" wrapText="1" align="center" valign="top" X="-146" Y="-35" W="142" H="13" />
+	</Layer>
+	<Layer ID="LAYER_ID_QUITGAME" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_EXIT_GAME">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffff8888" stringID="EXIT_GAME" inflate="0" X="-100" Y="-44" W="200" H="111" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-96" Y="-35" W="192" H="34" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xff5a8dba" stringID="QUIT_GAME" wrapText="1" align="center" valign="vcenter" X="-96" Y="-35" W="192" H="34" />
+		<Control Type="Button" ID="BUT_SEND_FEEDBACK" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="SEND_FEEDBACK" X="-60" Y="8" W="122" H="16" />
+		<Control Type="Button" ID="BUT_EXIT_GAME" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="QUIT" X="-42" Y="29" W="85" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CANCEL" X="-42" Y="48" W="85" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_QUITLEVEL" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_LEVEL_BACK_IGM">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffff8888" stringID="QUIT_LEVEL" inflate="0" X="-100" Y="-43" W="200" H="98" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-96" Y="-35" W="192" H="46" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xff5a8dba" stringID="LOSE_PROGRESS" wrapText="1" align="center" valign="vcenter" X="-96" Y="-35" W="192" H="46" />
+		<Control Type="Button" ID="BUT_LEVEL_BACK_IGM" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="QUIT" X="-45" Y="17" W="90" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CANCEL" X="-45" Y="36" W="90" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_KEYMAP" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="KEYBOARD_LAYOUT" inflate="0" X="-122" Y="-77" W="245" H="146" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="KEYBOARD2" wrapText="0" align="center" valign="vcenter" X="4" Y="-74" W="115" H="15" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="KEYBOARD1" wrapText="0" align="center" valign="vcenter" X="-118" Y="-74" W="115" H="15" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="OK" X="-38" Y="48" W="76" H="16" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="INFO_KEY_MAP" wrapText="1" align="center" valign="vcenter" X="-104" Y="83" W="208" H="22" />
+		<Control Type="ListSelector" ID="LS_KEYS1" FontID="FONT_6_NS1" FontColor="0xff5a8dba" FontColor_right="0xffffffff" stringID="KEY_COMMANDS" stringID_right="KEYS1_VAL" nBaseIndex="0" inflate="0" X="-118" Y="-56" W="114" H="98" />
+		<Control Type="ListSelector" ID="LS_KEYS2" FontID="FONT_6_NS1" FontColor="0xff5a8dba" FontColor_right="0xffffffff" stringID="KEY_COMMANDS" stringID_right="KEYS2_VAL" nBaseIndex="0" inflate="0" X="5" Y="-56" W="114" H="98" />
+	</Layer>
+	<Layer ID="LAYER_ID_KEYGRAB" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Widebar" animID="WIDEBAR3" Color="0xffffffff" X="-50" Y="-24" W="100" H="49" />
+		<Control Type="SDL_KeyReader" ID="CTRL_KEYGRABBER" FontID="FONT_10_BS1" FontColor="0xffffffff" nSDLscancode="-1" X="-22" Y="4" W="45" H="20" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="KEY_DEFINE" wrapText="0" align="center" valign="vcenter" X="-58" Y="-22" W="117" H="13" />
+		<Control Type="Label" ID="LABEL_COMMAND" FontID="FONT_6_NS1" FontColor="0xffffffff" stringID="TEMP10" wrapText="0" align="center" valign="vcenter" X="-52" Y="-9" W="105" H="11" />
+	</Layer>
+	<Layer ID="LAYER_ID_MSGBOX_OK" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="EXIT_GAME" inflate="0" X="-107" Y="-42" W="214" H="80" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-104" Y="-35" W="207" H="46" />
+		<Control Type="Label" ID="TEXT_LABEL" FontID="FONT_8_B1" FontColor="0xff5a8dba" stringID="QUIT_GAME" wrapText="1" align="center" valign="vcenter" X="-104" Y="-35" W="207" H="46" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="OK" X="-39" Y="18" W="78" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_KEYDEFINE" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE_KEYDEF">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW_REDEFINE" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="KEYBOARD1" inflate="0" X="-81" Y="-76" W="163" H="153" />
+		<Control Type="Button" ID="BUT_CLOSE_KEYDEF" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="OK" X="-38" Y="58" W="78" H="16" />
+		<Control Type="ListSelector" ID="CTRL_KEYS_SELECTOR" FontID="FONT_6_NS1" FontColor="0xff5a8dba" FontColor_right="0xffffffff" stringID="KEY_COMMANDS" stringID_right="KEYS1_VAL" nBaseIndex="0" inflate="3" X="-77" Y="-69" W="156" H="103" />
+		<Control Type="Button" ID="BUT_RESET_KEYS_SURE" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="SET_DEFAULT" X="-48" Y="38" W="97" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_REDEFINE_KEYS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW1" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="REDEFINE_KEYS" inflate="0" X="-73" Y="-43" W="147" H="93" />
+		<Control Type="Button" ID="BUT_REDEFINE_KEY1" animID="BUTTON2" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="KEYBOARD1" X="-65" Y="-34" W="130" H="16" />
+		<Control Type="Button" ID="BUT_REDEFINE_KEY2" animID="BUTTON2" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="KEYBOARD2" X="-65" Y="-15" W="130" H="16" />
+		<Control Type="Button" ID="BUT_CTRLR_LAYOUT" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CONTROLLER_LAYOUT" X="-65" Y="4" W="130" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="CANCEL" X="-42" Y="27" W="85" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_RESET_KEYS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="SET_DEFAULT" inflate="0" X="-101" Y="-43" W="202" H="100" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-96" Y="-35" W="192" H="46" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xff5a8dba" stringID="SET_DEFAULT_KEYS_SURE" wrapText="1" align="center" valign="vcenter" X="-96" Y="-35" W="192" H="46" />
+		<Control Type="Button" ID="BUT_RESET_KEYS" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="SET_DEFAULT" X="-55" Y="17" W="110" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CANCEL" X="-55" Y="37" W="110" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_GFX_OPTIONS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="GFX_OPTIONS" inflate="0" X="-90" Y="-86" W="180" H="172" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-83" Y="-78" W="167" H="33" />
+		<Control Type="Frame" animID="FRAME2" Color="0xffffffff" inflate="0" X="-73" Y="-38" W="146" H="29" />
+		<Control Type="Frame" animID="FRAME2" Color="0xffffffff" inflate="0" X="-73" Y="-3" W="146" H="45" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESOLUTION" wrapText="0" align="center" valign="vcenter" X="-80" Y="-77" W="161" H="16" />
+		<Control Type="DropDown" ID="CTRL_DROP_RES" FontID="FONT_8_BS1" stringID="RESOLUTIONS_LIST" FontColor="0xffffffff" animID="DROPDOWN1" X="-58" Y="-61" W="117" H="15" />
+		<Control Type="Checkbox" ID="CTRL_CHECK_FULLSCREEN" animID="CHECKBOX_BLACK" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="FULLSCREEN" X="-69" Y="-38" W="13" H="13" />
+		<Control Type="Checkbox" ID="CTRL_CHECK_BORDERLESS" animID="CHECKBOX_BLACK" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="BORDERLESS_WND" X="-69" Y="-22" W="13" H="13" />
+		<Control Type="Checkbox" ID="CTRL_CHECK_SHAKES" animID="CHECKBOX_BLACK" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="SCREEN_SHAKE" X="-69" Y="-3" W="14" H="13" />
+		<Control Type="Checkbox" ID="CTRL_CHECK_GORE" animID="CHECKBOX_BLACK" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="GORE_ENABLED" X="-69" Y="13" W="13" H="13" />
+		<Control Type="Checkbox" ID="CTRL_CHECK_ANTIALIAS" animID="CHECKBOX_BLACK" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="ANTIALIAS_OPTION" X="-69" Y="29" W="13" H="13" />
+		<Control Type="Button" ID="BUT_GFX_APPLY" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="APPLY" X="-45" Y="48" W="90" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CANCEL" X="-45" Y="67" W="90" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_COOP_WND" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_QUICK_MATCH">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW1" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="COOP" inflate="0" X="-73" Y="-55" W="147" H="111" />
+		<Control Type="Frame" animID="FRAME1" Color="0xffffffff" inflate="0" X="-67" Y="-46" W="135" H="77" />
+		<Control Type="Button" ID="BUT_QUICK_MATCH" animID="BUTTON2" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="QUICK_MATCH" X="-66" Y="-44" W="133" H="16" />
+		<Control Type="Button" ID="BUT_HOST_PUBLIC" animID="BUTTON2" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="HOST_PUBLIC" X="-66" Y="-25" W="133" H="16" />
+		<Control Type="Button" ID="BUT_HOST_PRIVATE" animID="BUTTON2" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="HOST_PRIVATE" X="-66" Y="-6" W="133" H="16" />
+		<Control Type="Button" ID="BUT_JOIN_GAME" animID="BUTTON2" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="JOIN_GAME" X="-66" Y="13" W="133" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="CANCEL" X="-37" Y="37" W="75" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_QUICK_MATCH" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CANCEL_LOBBY">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW1" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="COOP" inflate="0" X="-98" Y="-43" W="196" H="81" />
+		<Control Type="Button" ID="BUT_CANCEL_LOBBY" animID="BUTTON1" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="CANCEL" X="-45" Y="17" W="90" H="16" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-94" Y="-35" W="188" H="44" />
+		<Control Type="Label" ID="LABEL_PEERMSG" FontID="FONT_8_B1" FontColor="0xff5a8dba" stringID="CONNECTION_MSG" wrapText="1" align="center" valign="vcenter" X="-93" Y="-34" W="185" H="42" />
+	</Layer>
+	<Layer ID="LAYER_ID_QUIT_PLAYERSEL" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_QUIT_PLAYERSEL">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW1" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="QUIT" inflate="0" X="-104" Y="-43" W="209" H="91" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-101" Y="-35" W="203" H="35" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xff5a8dba" stringID="QUIT_GENERIC" wrapText="1" align="center" valign="vcenter" X="-101" Y="-35" W="203" H="35" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON2" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="CANCEL" X="-50" Y="28" W="100" H="16" />
+		<Control Type="Button" ID="BUT_QUIT_PLAYERSEL" animID="BUTTON1" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="QUIT" X="-50" Y="8" W="100" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_IGM_MENU_NET" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
+		<Control Type="Widebar" animID="WIDEBAR2" Color="0xffffffff" X="-111" Y="-40" W="217" H="95" />
+		<Control Type="ScrollMenu" ID="CTRL_SCROLL_IGMMENU_NET" animID="ANM_" FontID="FONT_12_WOW" FontColor="0xff5a8dba" align="center" Vspacing="18" DisabledFlags="0" StringID0="RESUME" StringID1="OPTIONS" StringID2="ABORT_MISSION" StringID3="QUIT" StringID4="" StringID5="" StringID6="" StringID7="" X="-81" Y="-24" W="164" H="77" />
+		<Control Type="Animation" animID="LOGO" Animated="0" setFrame="0" scaleImage="0" X="-84" Y="-98" W="169" H="74" />
+	</Layer>
+	<Layer ID="LAYER_ID_QUITLEVEL_NET" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_LEVEL_BACK_IGM">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffff8888" stringID="QUIT_LEVEL_NET" inflate="0" X="-100" Y="-43" W="200" H="112" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-96" Y="-35" W="192" H="59" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xff5a8dba" stringID="LOSE_PROGRESS_NET" wrapText="1" align="center" valign="vcenter" X="-96" Y="-35" W="192" H="59" />
+		<Control Type="Button" ID="BUT_LEVEL_BACK_IGM" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="QUIT" X="-50" Y="31" W="100" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CANCEL" X="-50" Y="50" W="100" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_CONTROLLER_MAP" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
+		<Control Type="Window" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CONTROLLER_LAYOUT" inflate="0" X="-106" Y="-57" W="213" H="130" />
+		<Control Type="Animation" animID="CONTROLLER_MAPS" Animated="0" setFrame="0" scaleImage="0" X="-84" Y="-45" W="168" H="91" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_FIRE" wrapText="0" align="left" valign="top" X="33" Y="-50" W="49" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_ALT_FIRE" wrapText="0" align="right" valign="top" X="-86" Y="-50" W="53" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_RELOAD" wrapText="0" align="right" valign="top" X="45" Y="-20" W="38" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_USE_GEAR" wrapText="0" align="right" valign="top" X="-31" Y="-40" W="53" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_MELEE" wrapText="0" align="left" valign="top" X="50" Y="-36" W="53" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_STRATEGIC_ABILITY" wrapText="0" align="right" valign="top" X="-107" Y="-36" W="67" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_JUMP" wrapText="0" align="right" valign="top" X="41" Y="7" W="42" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_FIRE" wrapText="0" align="left" valign="top" X="-13" Y="-20" W="38" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="MOVE" wrapText="0" align="left" valign="top" X="-82" Y="7" W="59" H="8" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="OK" X="-35" Y="51" W="71" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_JOKE1" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_JOKE1_OK">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="ANTIALIAS_OPTION" inflate="0" X="-90" Y="-34" W="180" H="68" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-83" Y="-26" W="167" H="30" />
+		<Control Type="DropDown" ID="CTRL_DROP_RES" FontID="FONT_8_BS1" stringID="ANTIALIAS_JOKE1" FontColor="0xffffffff" animID="DROPDOWN1" X="-58" Y="-13" W="117" H="15" />
+		<Control Type="Button" ID="BUT_JOKE1_OK" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="APPLY" X="-42" Y="14" W="86" H="16" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="SELECT_MODE" wrapText="0" align="center" valign="vcenter" X="-81" Y="-26" W="162" H="13" />
+	</Layer>
+	<Layer ID="LAYER_ID_JOKE2" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_JOKE2_OK">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="ANTIALIAS_OPTION" inflate="0" X="-90" Y="-34" W="180" H="68" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-83" Y="-26" W="167" H="30" />
+		<Control Type="DropDown" ID="CTRL_DROP_RES" FontID="FONT_8_BS1" stringID="ANTIALIAS_JOKE2" FontColor="0xffffffff" animID="DROPDOWN1" X="-58" Y="-13" W="117" H="15" />
+		<Control Type="Button" ID="BUT_JOKE2_OK" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="APPLY" X="-42" Y="14" W="86" H="16" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="SELECT_DETAIL_LEVEL" wrapText="0" align="center" valign="vcenter" X="-82" Y="-26" W="165" H="13" />
+	</Layer>
+	<Layer ID="LAYER_ID_JOKE3" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="ANTIALIAS_OPTION" inflate="0" X="-90" Y="-34" W="180" H="86" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-87" Y="-26" W="174" H="30" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="ANTIALIAS_JOKE3" wrapText="1" align="center" valign="vcenter" X="-83" Y="-26" W="167" H="30" />
+		<Control Type="Button" ID="BUT_JOKE3_OK" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="HIGH" X="-42" Y="13" W="86" H="16" />
+		<Control Type="Button" ID="BUT_JOKE3_OK" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="ULTRA" X="-42" Y="32" W="86" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_JOKE4" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="ANTIALIAS_OPTION" inflate="0" X="-90" Y="-34" W="180" H="86" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-87" Y="-26" W="174" H="30" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="ANTIALIAS_JOKE4" wrapText="1" align="center" valign="vcenter" X="-83" Y="-26" W="167" H="30" />
+		<Control Type="Button" ID="BUT_JOKE4_OK" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="JOKEA" X="-42" Y="13" W="86" H="16" />
+		<Control Type="Button" ID="BUT_JOKE4_OK" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="JOKEB" X="-42" Y="32" W="86" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_JOKE5" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="ANTIALIAS_OPTION" inflate="0" X="-90" Y="-34" W="180" H="67" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-87" Y="-26" W="174" H="30" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="ANTIALIAS_JOKE5" wrapText="1" align="center" valign="vcenter" X="-83" Y="-26" W="167" H="30" />
+		<Control Type="Button" ID="BUT_JOKE5_OK" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="OK" X="-42" Y="13" W="86" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_LEADERBOARDS_MM" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="LEADERBOARDS" inflate="0" X="-100" Y="-80" W="201" H="169" />
+		<Control Type="Button" ID="BUT_BOARDS_SINGLE" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="SINGLE_PLAYER" X="-97" Y="-75" W="97" H="16" />
+		<Control Type="Button" ID="BUT_BOARDS_COOP" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="COOP_ONLINE" X="1" Y="-75" W="97" H="16" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-94" Y="-54" W="189" H="102" />
+		<Control Type="ListSelectorTT" ID="CTRL_SCORESLIST_TT" FontColor="0xff5a8dba" FontColor_right="0xffffffff" stringID="LEADERBOARDS_NAMES_VAL" stringID_right="LEADERBOARDS_SCORES_VAL" nMinPage="0" nMaxPage="100" nBaseIndex="0" inflate="3" X="-97" Y="-57" W="195" H="108" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CLOSE" X="-38" Y="70" W="76" H="16" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-94" Y="55" W="189" H="9" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="YOUR_BEST_SCORE" wrapText="0" align="left" valign="vcenter" X="-93" Y="54" W="123" H="11" />
+		<Control Type="Label" ID="LABEL_YOUR_SCORE" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="TEMP15" wrapText="0" align="right" valign="vcenter" X="21" Y="54" W="74" H="11" />
+	</Layer>
+	<Layer ID="LAYER_ID_LEADERBOARDS_IGM" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WND_IGM_LEADERBOARD" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="LEADERBOARDS" inflate="0" X="-100" Y="-81" W="201" H="171" />
+		<Control Type="ListSelectorTT" ID="CTRL_SCORESLIST_TT" FontColor="0xff5a8dba" FontColor_right="0xffffffff" stringID="LEADERBOARDS_NAMES_VAL" stringID_right="LEADERBOARDS_SCORES_VAL" nMinPage="0" nMaxPage="0" nBaseIndex="0" inflate="3" X="-99" Y="-57" W="199" H="108" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CLOSE" X="-38" Y="71" W="76" H="16" />
+		<Control Type="Label" ID="LABEL_LBTYPE" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="SINGLE_PLAYER" wrapText="0" align="center" valign="vcenter" X="-96" Y="-69" W="193" H="15" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="TEMP10" wrapText="0" align="center" valign="vcenter" X="-96" Y="-80" W="193" H="15" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-96" Y="56" W="193" H="9" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="YOUR_BEST_SCORE" wrapText="0" align="left" valign="vcenter" X="-93" Y="55" W="123" H="11" />
+		<Control Type="Label" ID="LABEL_YOUR_SCORE" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="LEADERBOARDS_PLAYERSCORE_VAL" wrapText="0" align="right" valign="vcenter" X="21" Y="55" W="74" H="11" />
+	</Layer>
+	<Layer ID="LAYER_ID_LEADERBOARDS_LVL" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="LEADERBOARDS" inflate="0" X="-100" Y="-87" W="201" H="180" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="TEMP10" wrapText="0" align="center" valign="vcenter" X="-96" Y="-84" W="193" H="15" />
+		<Control Type="Button" ID="BUT_BOARDS_SINGLE_LVL" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="SINGLE_PLAYER" X="-97" Y="-68" W="97" H="16" />
+		<Control Type="Button" ID="BUT_BOARDS_COOP_LVL" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="COOP_ONLINE" X="1" Y="-68" W="97" H="16" />
+		<Control Type="ListSelectorTT" ID="CTRL_SCORESLIST_TT" FontColor="0xff5a8dba" FontColor_right="0xffffffff" stringID="LEADERBOARDS_NAMES_VAL" stringID_right="LEADERBOARDS_SCORES_VAL" nMinPage="0" nMaxPage="0" nBaseIndex="0" inflate="3" X="-99" Y="-50" W="199" H="106" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CLOSE" X="-38" Y="75" W="76" H="16" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-96" Y="61" W="193" H="9" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="YOUR_BEST_SCORE" wrapText="0" align="left" valign="vcenter" X="-93" Y="60" W="123" H="11" />
+		<Control Type="Label" ID="LABEL_YOUR_SCORE" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="LEADERBOARDS_PLAYERSCORE_VAL" wrapText="0" align="right" valign="vcenter" X="21" Y="60" W="74" H="11" />
+	</Layer>
+	<Layer ID="LAYER_ID_MORE_OPTIONS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="MORE_OPTIONS" inflate="0" X="-90" Y="-35" W="180" H="70" />
+		<Control Type="Button" ID="BUT_RESET_PROGRESS" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESET_PROGRESS" X="-84" Y="-28" W="169" H="16" />
+		<Control Type="Button" ID="BUT_LANGUAGE" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="LANGUAGE" X="-84" Y="-8" W="169" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CLOSE" X="-42" Y="13" W="86" H="16" />
+		<Control Type="Animation" animID="ICONS_MISC" Animated="0" setFrame="3" scaleImage="0" X="60" Y="-6" W="25" H="15" />
+	</Layer>
+	<Layer ID="LAYER_ID_RESET_PROGRESS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESET_PROGRESS" inflate="0" X="-113" Y="-55" W="227" H="114" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-110" Y="-48" W="221" H="62" />
+		<Control Type="Label" FontID="FONT_8_BS1" FontColor="0xff5a8dba" stringID="RESET_PROGRESS_SURE" wrapText="1" align="center" valign="vcenter" X="-109" Y="-48" W="219" H="62" />
+		<Control Type="Button" ID="BUT_RESET_PROGRESS_SURE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESET_PROGRESS" X="-62" Y="20" W="124" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CANCEL" X="-62" Y="39" W="124" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_PLAYER_UPGRADE" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-120" Y="-106" W="241" H="213" />
+		<Control Type="Frame" animID="FRAME_WHITE1" Color="0xff1C252E" inflate="0" X="-105" Y="-101" W="102" H="30" />
+		<Control Type="Frame" animID="FRAME_WHITE1" Color="0xff1C252E" inflate="0" X="4" Y="-101" W="100" H="44" />
+		<Control Type="Animation" ID="CTRL_ANIM_PORTRAIT" animID="PLAYER_PORTRAITS" Animated="0" setFrame="0" scaleImage="1" X="-106" Y="-102" W="32" H="32" />
+		<Control Type="Button" ID="BUT_RESET_UPGRADES" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESET" X="16" Y="-74" W="77" H="16" />
+		<Control Type="PlayerUpgradeControl" ID="CTRLID_UPGRADE_PLAYER" animID="UPGRADE_CONTROL" inflate="2" FontID="FONT_6_N1" nPlayerClass="0" X="-119" Y="-52" W="239" H="88" />
+		<Control Type="Button" ID="BUT_ACCEPT_UPGRADE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="COMMIT" X="-43" Y="68" W="86" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CANCEL" X="-43" Y="87" W="86" H="16" />
+		<Control Type="XPBar" ID="CTRL_XPBAR_XP" animID="PROGRESS_XP_UPGRADE" FontID="FONT_6_NC1" FontColor="0xffffffff" nOldValue="30" nNewValue="80" X="-89" Y="-68" W="75" H="13" />
+		<Control Type="Frame" animID="FRAME_WHITE1" Color="0xff1C252E" inflate="0" X="-115" Y="40" W="231" H="23" />
+		<Control Type="Label" ID="CTRL_LABEL_ABOUT" FontID="FONT_6_N1" FontColor="0xff5a8dba" stringID="SELECTED_PERK_DESC_VAL" wrapText="1" align="center" valign="vcenter" X="-114" Y="40" W="229" H="23" />
+		<Control Type="Label" ID="CTRL_LABEL_CLASS" FontID="FONT_8_B1" FontColor="0xff5a8dba" stringID="PLAYER_CLASS_ASSAULTER" wrapText="0" align="left" valign="vcenter" X="-72" Y="-96" W="71" H="11" />
+		<Control Type="Label" FontID="FONT_6_N1" FontColor="0xff5a8dba" stringID="PERKS" wrapText="0" align="left" valign="vcenter" X="-72" Y="-85" W="71" H="9" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xff5a8dba" stringID="UNUSED_POINTS" wrapText="0" align="right" valign="center" X="2" Y="-96" W="59" H="15" />
+		<Control Type="Animation" animID="ANIM_FAKEINPUT" Animated="0" setFrame="0" scaleImage="0" X="63" Y="-100" W="36" H="24" />
+		<Control Type="Label" ID="CTRL_LABEL_POINTS" FontID="FONT_8_B1" FontColor="0xff5a8dba" stringID="UNUSED_POINTS_VAL" wrapText="0" align="center" valign="vcenter" X="64" Y="-96" W="34" H="15" />
+	</Layer>
+	<Layer ID="LAYER_ID_TUT_PIC" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="NOT_AVAILABLE" inflate="0" X="-108" Y="-70" W="216" H="141" />
+		<Control Type="Frame" animID="FRAME1" Color="0xffffffff" inflate="2" X="-102" Y="17" W="205" H="26" />
+		<Control Type="Label" ID="TEXT_LABEL" FontID="FONT_6_N1" FontColor="0xff5a8dba" stringID="TUTORIAL_BOMB_TEXT" wrapText="1" align="center" valign="vcenter" X="-102" Y="17" W="205" H="26" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CLOSE" X="-39" Y="50" W="78" H="16" />
+		<Control Type="Animation" ID="ANIMATION" animID="TUTORIAL_PICS" Animated="0" setFrame="0" scaleImage="1" X="-85" Y="-64" W="170" H="75" />
+	</Layer>
+	<Layer ID="LAYER_ID_TUT_IGM" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="min" anchorY="max">
+		<Control Type="Frame" animID="FRAME_BLACK1" Color="0xffffffff" inflate="0" X="60" Y="-133" W="220" H="71" />
+		<Control Type="Frame" animID="FRAME1" Color="0xffffffff" inflate="2" X="63" Y="-130" W="215" H="41" />
+		<Control Type="Label" ID="TEXT_LABEL" FontID="FONT_6_N1" FontColor="0xff5a8dba" stringID="TUTORIAL_INTERFACE_MAIN1" wrapText="1" align="center" valign="vcenter" X="63" Y="-130" W="215" H="41" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CLOSE" X="131" Y="-83" W="78" H="16" />
+		<Control Type="Animation" ID="ANIMATION" animID="TUTORIAL_L_ARR" Animated="1" setFrame="0" scaleImage="0" X="135" Y="-29" W="29" H="23" />
+	</Layer>
+	<Layer ID="LAYER_ID_LANGUAGE" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WND_LANGUAGE" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="LANGUAGE" inflate="0" X="-79" Y="-80" W="159" H="174" />
+		<Control Type="ListSelectorTT" ID="CTRL_LANGLIST_TT" FontColor="0xffffffff" FontColor_right="0xffffffff" stringID="TEMP15" stringID_right="" nMinPage="0" nMaxPage="0" nBaseIndex="0" inflate="3" X="-77" Y="-75" W="155" H="126" />
+		<Control Type="Button" ID="BUT_SELECT_LANGUAGE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="OK" X="-44" Y="55" W="89" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CANCEL" X="-44" Y="74" W="89" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_CREDITS_MORE" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xff000000" />
+		<Control Type="Widebar" animID="WIDEBAR2" Color="0xffffffff" X="-51" Y="-68" W="100" H="136" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CLOSE" X="-50" Y="78" W="100" H="16" />
+		<Control Type="Animation" animID="LOGO" Animated="0" setFrame="0" scaleImage="0" X="-84" Y="-114" W="169" H="76" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="CREDITS_VOICE" wrapText="1" align="left" valign="top" X="-137" Y="-30" W="130" H="65" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="VOICE_ACTING" wrapText="0" align="center" valign="vcenter" X="-137" Y="-44" W="130" H="13" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="CREDITS_VOICE2" wrapText="1" align="right" valign="top" X="-137" Y="-30" W="130" H="65" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="CONSOLE_PORTING" wrapText="0" align="center" valign="vcenter" X="9" Y="-39" W="130" H="13" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="CREDITS_CONSOLE" wrapText="0" align="center" valign="top" X="9" Y="-25" W="130" H="13" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="QA" wrapText="0" align="center" valign="vcenter" X="9" Y="-11" W="130" H="13" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="CREDITS_QA" wrapText="0" align="center" valign="top" X="9" Y="3" W="130" H="13" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="BUSINESS" wrapText="0" align="center" valign="vcenter" X="9" Y="17" W="130" H="13" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="CREDITS_BUSINESS" wrapText="0" align="center" valign="top" X="9" Y="31" W="130" H="13" />
+		<Control Type="Label" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="SPECIAL_THANKS" wrapText="0" align="center" valign="vcenter" X="-137" Y="35" W="130" H="13" />
+		<Control Type="Label" FontID="FONT_6_NS1" FontColor="0xff5a8dba" stringID="CREDITS_SPECIAL_THANKS" wrapText="0" align="center" valign="top" X="-137" Y="49" W="130" H="13" />
+	</Layer>
+	<Layer ID="LAYER_ID_RESET_PROGRESS_EA" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_RESET_PROGRESS_SURE_EA">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESET_PROGRESS" inflate="0" X="-113" Y="-49" W="227" H="104" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-110" Y="-42" W="221" H="53" />
+		<Control Type="Label" FontID="FONT_6_N1" FontColor="0xff5a8dba" stringID="EA_RESET_PROGRESS" wrapText="1" align="center" valign="top" X="-109" Y="-41" W="219" H="51" />
+		<Control Type="Button" ID="BUT_RESET_PROGRESS_SURE_EA" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="RESET_PROGRESS" X="-62" Y="17" W="124" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CANCEL" X="-62" Y="36" W="124" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_QUICK_MATCH_INVITE" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_INVITE_TO_LOBBY">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW1" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="COOP" inflate="0" X="-98" Y="-43" W="196" H="98" />
+		<Control Type="Frame" animID="FRAME_BLACK3" Color="0xffffffff" inflate="0" X="-94" Y="-35" W="188" H="44" />
+		<Control Type="Label" ID="LABEL_PEERMSG" FontID="FONT_8_B1" FontColor="0xff5a8dba" stringID="CONNECTION_MSG" wrapText="1" align="center" valign="vcenter" X="-93" Y="-34" W="185" H="42" />
+		<Control Type="Button" ID="BUT_INVITE_TO_LOBBY" animID="BUTTON2" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="INVITE_FRIEND" X="-56" Y="17" W="112" H="16" />
+		<Control Type="Button" ID="BUT_CANCEL_LOBBY" animID="BUTTON1" FontID="FONT_8_B1" FontColor="0xffffffff" stringID="CANCEL" X="-45" Y="36" W="90" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_LOBBIES_LIST" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_REFRESH_LOBBIES">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
+		<Control Type="Window" ID="WINDOW_LOBBIES_LIST" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="LOBBIES_LIST" inflate="0" X="-81" Y="-74" W="163" H="162" />
+		<Control Type="ListSelectorTT" ID="CTRL_LOBBIES_SELECTOR" FontColor="0xff5a8dba" FontColor_right="0xffffffff" stringID="LOBBIES_LIST_VAL" stringID_right="" nMinPage="0" nMaxPage="0" nBaseIndex="0" inflate="3" X="-78" Y="-67" W="156" H="93" />
+    <Control Type="Button" ID="BUT_REFRESH_LOBBIES" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="REFRESH" X="-48" Y="30" W="97" H="16" />
+		<Control Type="Button" ID="BUT_JOIN_LOBBY" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="JOIN_GAME" X="-48" Y="49" W="97" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE_LOBBIES_LIST" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CANCEL" X="-39" Y="68" W="78" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_CONTROLLER_MAP_PS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
+		<Control Type="Window" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CONTROLLER_LAYOUT" inflate="0" X="-106" Y="-57" W="213" H="130" />
+		<Control Type="Animation" animID="CONTROLLER_MAPS" Animated="0" setFrame="1" scaleImage="0" X="-88" Y="-43" W="168" H="91" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_FIRE" wrapText="0" align="left" valign="top" X="30" Y="-49" W="49" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_ALT_FIRE" wrapText="0" align="right" valign="top" X="-85" Y="-49" W="53" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_RELOAD" wrapText="0" align="right" valign="top" X="37" Y="-20" W="45" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_USE_GEAR" wrapText="0" align="right" valign="top" X="-31" Y="-40" W="53" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_MELEE" wrapText="0" align="left" valign="top" X="50" Y="-35" W="53" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_STRATEGIC_ABILITY" wrapText="0" align="right" valign="top" X="-107" Y="-36" W="67" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_JUMP" wrapText="0" align="right" valign="top" X="41" Y="4" W="42" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="INTERACT" wrapText="0" align="l1ft" valign="top" X="-84" Y="-22" W="51" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_FIRE" wrapText="0" align="left" valign="top" X="-11" Y="-20" W="38" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="MOVE" wrapText="0" align="left" valign="top" X="-87" Y="6" W="59" H="8" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="OK" X="-35" Y="51" W="71" H="16" />
+	</Layer>
+	<Layer ID="LAYER_ID_CONTROLLER_MAP_NSWITCH" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_CLOSE">
+		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
+		<Control Type="Window" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CONTROLLER_LAYOUT" inflate="0" X="-107" Y="-99" W="213" H="203" />
+		<Control Type="Animation" animID="CONTROLLER_MAPS" Animated="0" setFrame="2" scaleImage="0" X="-92" Y="-88" W="179" H="103" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_FIRE" wrapText="0" align="right" valign="top" X="-31" Y="-94" W="49" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_ALT_FIRE" wrapText="0" align="right" valign="top" X="-102" Y="-84" W="53" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_RELOAD" wrapText="0" align="right" valign="top" X="37" Y="-71" W="45" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_USE_GEAR" wrapText="0" align="left" valign="top" X="34" Y="-93" W="53" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_MELEE" wrapText="0" align="right" valign="top" X="31" Y="-46" W="53" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_STRATEGIC_ABILITY" wrapText="0" align="right" valign="top" X="-98" Y="-93" W="67" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="INTERACT" wrapText="0" align="right" valign="top" X="-38" Y="-56" W="51" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_FIRE" wrapText="0" align="left" valign="top" X="-10" Y="-70" W="38" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="MOVE" wrapText="0" align="left" valign="top" X="-89" Y="-61" W="59" H="8" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="OK" X="-35" Y="85" W="71" H="16" />
+		<Control Type="Animation" animID="CONTROLLER_MAPS" Animated="0" setFrame="3" scaleImage="0" X="-60" Y="20" W="129" H="60" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_JUMP" wrapText="0" align="right" valign="top" X="25" Y="26" W="42" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_ALT_FIRE" wrapText="0" align="right" valign="top" X="-67" Y="17" W="53" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_USE_GEAR" wrapText="0" align="left" valign="top" X="20" Y="17" W="53" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_JUMP" wrapText="0" align="right" valign="top" X="38" Y="-83" W="42" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_FIRE" wrapText="0" align="left" valign="top" X="-38" Y="35" W="38" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_RELOAD" wrapText="0" align="right" valign="top" X="22" Y="57" W="45" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_MELEE" wrapText="0" align="right" valign="top" X="14" Y="71" W="53" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="MOVE" wrapText="0" align="left" valign="top" X="-58" Y="59" W="59" H="8" />
+		<Control Type="Label" FontID="FONT_5_NS2" FontColor="0xffffffff" stringID="KEY_STRATEGIC_ABILITY" wrapText="0" align="right" valign="top" X="-82" Y="71" W="75" H="8" />
+	</Layer>
+</Interfaces>

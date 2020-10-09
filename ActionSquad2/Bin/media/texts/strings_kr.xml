@@ -1,0 +1,832 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PSTexts Version="1.0">
+  <Alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/?¡¢£¥§©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº\</Alphabet>
+  <Texts Lang="EN" Count="670">
+    <Text ID="TITLE">도어 키커스: 액션 스쿼드</Text>
+    <Text ID="VERSION_NUMBER">empty</Text>
+    <Text ID="MSGBOX">empty</Text>
+    <Text ID="TEMP1">empty</Text>
+    <Text ID="TEMP2">empty</Text>
+    <Text ID="TEMP3">empty</Text>
+    <Text ID="TEMP4">empty</Text>
+    <Text ID="TEMP5">empty</Text>
+    <Text ID="TEMP6">empty</Text>
+    <Text ID="TEMP7">empty</Text>
+    <Text ID="TEMP8">empty</Text>
+    <Text ID="TEMP9">empty</Text>
+    <Text ID="TEMP10">empty</Text>
+    <Text ID="TEMP11">empty</Text>
+    <Text ID="TEMP12">empty</Text>
+    <Text ID="TEMP13">empty</Text>
+    <Text ID="TEMP14">empty</Text>
+    <Text ID="TEMP15">empty</Text>
+    <Text ID="PLAYER_CLASS_ASSAULTER">돌격병</Text>
+    <Text ID="PLAYER_CLASS_BREACHER">돌파병</Text>
+    <Text ID="PLAYER_CLASS_SHIELD">방패병</Text>
+    <Text ID="PLAYER_CLASS_FBI_AGENT">퍼기 요원</Text>
+    <Text ID="PLAYER_CLASS_RECON">정찰병</Text>
+    <Text ID="PLAYER_CLASS_OFFDUTYGUY">비번근무자</Text>
+    <Text ID="CLASS_ASSAULTER_DESC">안정적인 화력 및 원거리 정확도. 반동을 조심하세요.</Text>
+    <Text ID="CLASS_BREACHER_DESC">무차별적인 근거리 화력. 문을 총으로 쏴서 열 수 있습니다.</Text>
+    <Text ID="CLASS_SHIELD_DESC">정면 총격 및 폭발로부터 보호. 근접 공격에 취약합니다.</Text>
+    <Text ID="CLASS_FBI_AGENT_DESC">강력한 근접 및 총 공격. 구르기로 받는 데미지를 감소시킵니다.</Text>
+    <Text ID="CLASS_RECON_DESC">조용하고 빠릅니다. 적들을 표시해서 팀 데미지를 높입니다.</Text>
+    <Text ID="CLASS_OFFDUTYGUY_DESC">먹다 남은 음식를 들고, 멋진 사냥꾼 장비를 착용하고, 괴팍한 농담을 던지는 인물.</Text>
+    <Text ID="LOADING">불러오는 중...</Text>
+    <Text ID="MAIN_MENU">메인 메뉴</Text>
+    <Text ID="DIFFICULTY_COLON">난이도:</Text>
+    <Text ID="EASY">쉬움</Text>
+    <Text ID="MEDIUM">보통</Text>
+    <Text ID="HARD">어려움</Text>
+    <Text ID="LEADERBOARDS">순위표</Text>
+    <Text ID="COOP">온라인 협동</Text>
+    <Text ID="LOCAL_GAME">로컬 게임</Text>
+    <Text ID="QUICK_MATCH">빠른 매치</Text>
+    <Text ID="HOST_PUBLIC">공개 호스트</Text>
+    <Text ID="HOST_PRIVATE">비공개 호스트</Text>
+    <Text ID="WAITING_PEER">플레이어 기다리는 중...</Text>
+    <Text ID="CONNECTING_PEER_X">플레이어 발견! 연결 중...
+{%1}</Text>
+    <Text ID="CONNECTION_MSG">empty</Text>
+    <Text ID="PLAY">플레이</Text>
+    <Text ID="ENTER_TO_CHAT">ENTER 눌러서 채팅하기</Text>
+    <Text ID="SEND_FEEDBACK">의견 보내기</Text>
+    <Text ID="OPTIONS">옵션</Text>
+    <Text ID="MORE_OPTIONS">기타 옵션</Text>
+    <Text ID="GFX_OPTIONS">그래픽 옵션</Text>
+    <Text ID="RESET_PROGRESS">진행상황 초기화</Text>
+    <Text ID="RESET_PROGRESS_SURE">정말 진행상황을 초기화하시겠습니까? 로컬 저장 파일이 삭제되며 게임을 처음부터 다시 시작해야 합니다!</Text>
+    <Text ID="SCREEN_SHAKE">화면 흔들림</Text>
+    <Text ID="GORE_ENABLED">유혈 활성화</Text>
+    <Text ID="ANTIALIAS_OPTION">안티앨리어싱</Text>
+    <Text ID="SELECT_MODE">모드 선택</Text>
+    <Text ID="ANTIALIAS_JOKE1">MSAA
+CSAA
+CFAA
+FXAA
+MLAA
+SMAA
+TXAA
+MFAA
+SSAA</Text>
+    <Text ID="SELECT_DETAIL_LEVEL">정밀도 선택</Text>
+    <Text ID="ANTIALIAS_JOKE2">1x
+2x
+4x
+8x
+16x
+32x
+64x</Text>
+    <Text ID="ANTIALIAS_JOKE3">뭘 선택하든 달라지는 건 없어요.</Text>
+    <Text ID="ANTIALIAS_JOKE4">알겠어요. 그냥 농담이었어요.</Text>
+    <Text ID="ANTIALIAS_JOKE5">그렇게 눈치가 없어서야!</Text>
+    <Text ID="HIGH">높음</Text>
+    <Text ID="ULTRA">울트라</Text>
+    <Text ID="JOKEA">HDR</Text>
+    <Text ID="JOKEB">XHDR</Text>
+    <Text ID="CONTINUE">계속하기</Text>
+    <Text ID="PRESS_CONTINUE">아무 키나 눌러서 계속하기</Text>
+    <Text ID="LOSE_PROGRESS">정말 종료하시겠습니까?
+현재 레벨의 진행상황이
+사라집니다!</Text>
+    <Text ID="LOSE_PROGRESS_NET">게임을 종료하고 메인 메뉴로 돌아가시겠습니까?
+모든 플레이어들의 연결이 해제되며 진행상황은 사라집니다!</Text>
+    <Text ID="QUIT_GAME">정말 나가시겠습니까?</Text>
+    <Text ID="QUIT_LEVEL_NET">네트워크 게임 종료?</Text>
+    <Text ID="QUIT_LEVEL">레벨 종료?</Text>
+    <Text ID="NETWORK_ERROR_GENERIC">다른 플레이어가 오프라인 상태로 전환했거나 당신의 인터넷 설정에 문제가 발생했습니다.</Text>
+    <Text ID="NETWORK_ERROR_WRONG_VERSION">당신과 다른 플레이어의 게임 버전이 다릅니다! 업데이트해주세요!</Text>
+    <Text ID="NETWORK_ERROR_PLAYER_LEFT">다른 플레이어가 게임에서 나갔습니다.</Text>
+    <Text ID="NETWORK_HOST_NAME">empty</Text>
+    <Text ID="NETWORK_PEER_NAME">empty</Text>
+    <Text ID="QUIT_GENERIC">정말 나가시겠습니까?</Text>
+    <Text ID="LEVEL_N_FINISHED">레벨 {%1} 완료!</Text>
+    <Text ID="HIGHSCORES">최고 점수</Text>
+    <Text ID="QUIT">종료</Text>
+    <Text ID="EXIT">종료</Text>
+    <Text ID="NEXT_MISSION">다음 미션</Text>
+    <Text ID="CREDITS">크레딧</Text>
+    <Text ID="EXIT_GAME">게임에서 나가시겠습니까?</Text>
+    <Text ID="SOUND_VOL">사운드 볼륨</Text>
+    <Text ID="BACK">뒤로</Text>
+    <Text ID="OOPS">저런!</Text>
+    <Text ID="AVAILABLE">이용 가능</Text>
+    <Text ID="NOT_AVAILABLE">N/A</Text>
+    <Text ID="BORDERLESS_WND">테두리 없는 창 모드</Text>
+    <Text ID="FULLSCREEN">전체 화면</Text>
+    <Text ID="COOP_ONLINE">협동 / 온라인</Text>
+    <Text ID="SINGLE_PLAYER">싱글플레이어</Text>
+    <Text ID="OK">확인</Text>
+    <Text ID="COMMIT">확정</Text>
+    <Text ID="ACCEPT">수락</Text>
+    <Text ID="CLOSE">닫기</Text>
+    <Text ID="DONE">확인</Text>
+    <Text ID="SELECT">선택</Text>
+    <Text ID="SELECT_ABILITY">능력 선택</Text>
+    <Text ID="APPLY">적용</Text>
+    <Text ID="CANCEL">취소</Text>
+    <Text ID="RESET">초기화</Text>
+    <Text ID="SET_DEFAULT">키 초기화</Text>
+    <Text ID="SET_DEFAULT_KEYS_SURE">키보드 설정을 기본 설정으로 초기화하시겠습니까?</Text>
+    <Text ID="MUSIC_VOL">음악 볼륨</Text>
+    <Text ID="NEW">신규</Text>
+    <Text ID="DELETE">삭제</Text>
+    <Text ID="START">시작</Text>
+    <Text ID="RESOLUTIONS_LIST">640x480
+800x600
+1024x768
+1280x1024
+1600x1200</Text>
+    <Text ID="RESOLUTION">화면 해상도</Text>
+    <Text ID="RESTART">다시 시작</Text>
+    <Text ID="LANGUAGE">언어</Text>
+    <Text ID="RESTART_LEVEL">레벨 다시 시작</Text>
+    <Text ID="MAX_LEVEL">최대 레벨</Text>
+    <Text ID="PAUSED">일시 정지</Text>
+    <Text ID="SAVE">저장하고 나가기</Text>
+    <Text ID="RESUME">계속하기</Text>
+    <Text ID="BOMB_DEFUSED">폭탄 해체!</Text>
+    <Text ID="YOU_DIED">사망했습니다!</Text>
+    <Text ID="WARNING">경고</Text>
+    <Text ID="LOCKED">잠김</Text>
+    <Text ID="KEYCARD_NEEDED">키카드 필요</Text>
+    <Text ID="PLAYER1">플레이어 1</Text>
+    <Text ID="PLAYER2">플레이어 2</Text>
+    <Text ID="KEYBOARD1">키보드 1</Text>
+    <Text ID="KEYBOARD2">키보드 2</Text>
+    <Text ID="NETWORK1">네트워크</Text>
+    <Text ID="SYS_CONTROLLER_ADDED">컨트롤러 연결!</Text>
+    <Text ID="SYS_CONTROLLER_REMOVED">컨트롤러 연결 해제!</Text>
+    <Text ID="PRESS_FIRE_TO_JOIN">사격 버튼을 눌러서 참여하세요!</Text>
+    <Text ID="RESPAWNING_IN_N">{%1} 후 재소환</Text>
+    <Text ID="FIRE_TO_RESPAWN">사격 버튼 눌러서 재소환</Text>
+    <Text ID="PLAYER_N">플레이어 {%1}</Text>
+    <Text ID="PRIMARY_WEAPON">주무기</Text>
+    <Text ID="SECONDARY_WEAPON">보조무기</Text>
+    <Text ID="FULL_HEALTH">체력 가득 참!</Text>
+    <Text ID="FULL_AMMO">탄약 가득 참!</Text>
+    <Text ID="INTERACT">상호작용</Text>
+    <Text ID="OBJECTIVE_FAILED">목표 실패</Text>
+    <Text ID="TARGET_ARRESTED">주요 타깃 체포</Text>
+    <Text ID="TARGET_KILLED">주요 타깃 사망</Text>
+    <Text ID="LEADERBOARDS_NAMES_VAL">...</Text>
+    <Text ID="LEADERBOARDS_SCORES_VAL">...</Text>
+    <Text ID="MELEE_LEADERBOARDS">근접 공격 = 순위표</Text>
+    <Text ID="MOVE">이동</Text>
+    <Text ID="POWER_NEEDED">전력 필요.</Text>
+    <Text ID="BREACH_RELOAD">재장전 중</Text>
+    <Text ID="BREACH_RECOIL">반동</Text>
+    <Text ID="SHIELD_HANDGUN">권총</Text>
+    <Text ID="SHIELD_SHIELD">방패 사용</Text>
+    <Text ID="FERGIE_HANDGUN">권총</Text>
+    <Text ID="FERGIE_MELEE">근접 공격</Text>
+    <Text ID="FERGIE_BUREAUCRACY">조직</Text>
+    <Text ID="RECON">정찰병</Text>
+    <Text ID="TAP">탭</Text>
+    <Text ID="HOLD">길게 누르기</Text>
+    <Text ID="SECRETS_COLLECTED_NN">비밀 획득 {%1} / {%2}</Text>
+    <Text ID="SECRETS_COLLECTED_VAL">...</Text>
+    <Text ID="GEAR">장비</Text>
+    <Text ID="SKILLS">스킬</Text>
+    <Text ID="ULTIMATE">궁극기</Text>
+    <Text ID="READY">준비!</Text>
+    <Text ID="NONE">없음</Text>
+    <Text ID="PRICE">가격</Text>
+    <Text ID="STARS">별</Text>
+    <Text ID="CRITICAL_HIT">치명타!</Text>
+    <Text ID="CRIPPLED">부상!</Text>
+    <Text ID="TOTAL_STARS">별 합계</Text>
+    <Text ID="TOTAL_STARS_VAL">empty</Text>
+    <Text ID="PEER_STARS_VAL">empty</Text>
+    <Text ID="SELECTED_PERK_DESC_VAL">empty</Text>
+    <Text ID="CONFIRM">확인</Text>
+    <Text ID="UNLOCK">잠금 해제</Text>
+    <Text ID="UNUSED_POINTS">미사용 포인트</Text>
+    <Text ID="UNUSED_POINTS_VAL">-1</Text>
+    <Text ID="COMING_SOON">곧 제공</Text>
+    <Text ID="COMPLETE_N_TO_UNLOCK_N">미션 {%1}개를 완료해서 잠금 해제하세요 ({%2} / {%3})</Text>
+    <Text ID="MISSIONS_COMPLETED_N">미션 완료: {%1}/{%2}</Text>
+    <Text ID="CURRENT_MISSION_VAL">empty</Text>
+    <Text ID="UNLOCK_ITEM">아이템 잠금 해제</Text>
+    <Text ID="NOT_ENOUGH_STARS">별이 부족합니다!
+미션을 더 완료해서 더 많은 별을 획득하세요</Text>
+    <Text ID="CANT_ACTIVATE_HERE">여기서는 사용할 수 없습니다!</Text>
+    <Text ID="STRATEGIC1">방탄복</Text>
+    <Text ID="STRATEGIC2">장비 재보급</Text>
+    <Text ID="STRATEGIC3">구급상자</Text>
+    <Text ID="STRATEGIC4">플레이어 재소환</Text>
+    <Text ID="STRATEGIC5">추가 라이프</Text>
+    <Text ID="ACCURACY">명중률</Text>
+    <Text ID="RESISTANCE">저항</Text>
+    <Text ID="RELOAD_TIME">재장전 시간</Text>
+    <Text ID="RELOAD">재장전</Text>
+    <Text ID="DAMAGE">데미지</Text>
+    <Text ID="RECOIL">반동</Text>
+    <Text ID="SPREAD">탄 퍼짐</Text>
+    <Text ID="APDAMAGE">AP 데미지</Text>
+    <Text ID="ROF">발사 속도</Text>
+    <Text ID="AMMO">탄약</Text>
+    <Text ID="ARMOR">방어구</Text>
+    <Text ID="KILLS">킬</Text>
+    <Text ID="LOGISTICS">보급품</Text>
+    <Text ID="PHYSICAL">물리</Text>
+    <Text ID="TACTICS">전술</Text>
+    <Text ID="PERKS">퍼크</Text>
+    <Text ID="DEATHS">사망</Text>
+    <Text ID="TEAM_UPC">팀</Text>
+    <Text ID="CLASS_UPC">클래스</Text>
+    <Text ID="HOSTAGES_SAVED">구출한 인질</Text>
+    <Text ID="HOSTAGES_SAVED_TOTAL">구출한 인질</Text>
+    <Text ID="TIME_SPENT">임무 수행 시간</Text>
+    <Text ID="TOTAL_SCORE">미션 점수</Text>
+    <Text ID="SWAT_CASUALTIES">SWAT 사상자</Text>
+    <Text ID="GUNPLAY">사격술</Text>
+    <Text ID="WPN_SMG_MP5A3">Mp5A3
+ SMG</Text>
+    <Text ID="WPN_SMG_UMP45">UMP45
+ SMG</Text>
+    <Text ID="WPN_CARBINE_M4A1">M4A1
+ 카빈</Text>
+    <Text ID="WPN_CARBINE_MCX300">MCX300
+ 카빈</Text>
+    <Text ID="WPN_SMG_P90">P90 PDW</Text>
+    <Text ID="WPN_SHOTGUN_M590">펌프액션
+ 샷건</Text>
+    <Text ID="WPN_SHOTGUN_JCOMBAT">반자동
+ 샷건</Text>
+    <Text ID="WPN_SHOTGUN_S12K">S12K 택티컬
+ 샷건</Text>
+    <Text ID="WPN_SHOTGUN_KSG">KSG 트윈
+ 샷건</Text>
+    <Text ID="WPN_SHOTGUN_HK512">HK512
+ 샷건</Text>
+    <Text ID="WPN_SHOTGUN_M870">M870
+ 룸 클리너</Text>
+    <Text ID="WPN_PISTOL_G17">G17 권총</Text>
+    <Text ID="WPN_PISTOL_MP40">M&amp;P .40
+ 권총</Text>
+    <Text ID="WPN_PISTOL_1911">1911 권총</Text>
+    <Text ID="WPN_PISTOL_G19M">G19M 권총</Text>
+    <Text ID="WPN_PISTOL_FIVESEVEN">F7AP 권총</Text>
+    <Text ID="WPN_PISTOL_P226">P226 권총</Text>
+    <Text ID="WPN_PISTOL_MODEL1076">M1076 권총</Text>
+    <Text ID="WPN_SHIELD_TACTICAL">택티컬 방패</Text>
+    <Text ID="WPN_SHIELD_ASSAULT">돌격 방패</Text>
+    <Text ID="WPN_SHIELD_IRONMAN">소총 저항
+ 방패</Text>
+    <Text ID="WPN_SMG_UZI">UZI SMG</Text>
+    <Text ID="WPN_SMG_MP9SD">MP9
+ 무소음</Text>
+    <Text ID="WPN_SMG_MP7">MP7 PDW</Text>
+    <Text ID="WPN_SMG_MP7SD">MP7
+ 무소음</Text>
+    <Text ID="WPN_SMG_CBJ">CBJ-65
+ SMG</Text>
+    <Text ID="WPN_SMG_MP5SD">MP5
+ 무소음</Text>
+    <Text ID="GEAR_EMPTY_DESC">그냥 빈 슬롯입니다. 별로 쓸모 없어 보이죠?</Text>
+    <Text ID="GEAR_EMPTY_BOTTOM">-</Text>
+    <Text ID="EQUIP_NOEQUIPMENT">장비 없음</Text>
+    <Text ID="EQUIP_SPEED_POUCHES">신속 주머니</Text>
+    <Text ID="EQUIP_BODY_ARMOR">방탄복</Text>
+    <Text ID="EQUIP_ADRENALINE_SHOT">아드레날린 샷</Text>
+    <Text ID="EQUIP_EXTRA_GEAR">추가 장비</Text>
+    <Text ID="EQUIP_BETTER_ARMOR">강화 방탄복</Text>
+    <Text ID="EQUIP_ANTISTAB_ARMOR">칼 방어 방탄복</Text>
+    <Text ID="EQUIP_RECON_ARMOR">돌격 방탄복</Text>
+    <Text ID="EQUIP_SPEED_POUCHES_RIGHT">-30% 재장전 시간</Text>
+    <Text ID="EQUIP_BODY_ARMOR_RIGHT">+75 방어구
+-소총 사격 방어 불가</Text>
+    <Text ID="EQUIP_ADRENALINE_SHOT_RIGHT">+1 부활</Text>
+    <Text ID="EQUIP_EXTRA_GEAR_RIGHT">미션 시작 때 장비 +1</Text>
+    <Text ID="EQUIP_BETTER_ARMOR_RIGHT">+75 방어구
+-15 속도</Text>
+    <Text ID="EQUIP_ANTISTAB_ARMOR_RIGHT">+95 근접무기 방어구</Text>
+    <Text ID="EQUIP_RECON_ARMOR_RIGHT">+75 방어구 (전면 전용)
+-후면 보호 없음</Text>
+    <Text ID="EQUIP_SPEED_POUCHES_BOTTOM">재장전 시간이 감소합니다</Text>
+    <Text ID="EQUIP_BODY_ARMOR_BOTTOM">방어구 보호를 갖고 시작합니다</Text>
+    <Text ID="EQUIP_ADRENALINE_SHOT_BOTTOM">추가 부활을 갖고 시작합니다</Text>
+    <Text ID="EQUIP_EXTRA_GEAR_BOTTOM">소모품 방어구 추가 보유</Text>
+    <Text ID="EQUIP_BETTER_ARMOR_BOTTOM">소총 데미지를 막아줍니다</Text>
+    <Text ID="EQUIP_ANTISTAB_ARMOR_BOTTOM">근접 공격 데미지만 막아줍니다</Text>
+    <Text ID="EQUIP_RECON_ARMOR_BOTTOM">소총 데미지를 막아줍니다</Text>
+    <Text ID="GEAR_NOGEAR">장비 없음</Text>
+    <Text ID="GEAR_GRENADE">수류탄</Text>
+    <Text ID="GEAR_FLASHBANG">섬광탄</Text>
+    <Text ID="GEAR_BREACHING_CHARGE">접착폭약</Text>
+    <Text ID="GEAR_SPEED_LOADER">신속 장전기</Text>
+    <Text ID="GEAR_SMOKE_GRENADE">연막탄</Text>
+    <Text ID="GEAR_MAG_READY">긴급 탄창 </Text>
+    <Text ID="GEAR_CAM_BALL">캠 볼</Text>
+    <Text ID="GEAR_SPY_CAMERA">스파이 카메라</Text>
+    <Text ID="GEAR_GRENADE_DESC">- 무차별적으로 사살합니다
+- 우리 경찰 아니었나요?</Text>
+    <Text ID="GEAR_FLASHBANG_DESC">- 적의 눈을 멀게 해서 스턴 상태로 만듭니다
+- 불이 붙을 수도 있습니다</Text>
+    <Text ID="GEAR_BREACHING_CHARGE_DESC">- 표면에 부착할 수 있습니다
+- 문과 사람을 파괴합니다</Text>
+    <Text ID="GEAR_SPEED_LOADER_DESC">탄약 4개를 즉시 재장전합니다</Text>
+    <Text ID="GEAR_SMOKE_GRENADE_DESC">- 몸을 숨길 수 있는 연막
+- 적의 시야에서 벗어날 수 있습니다</Text>
+    <Text ID="GEAR_MAG_READY_DESC">무기 탄약을 즉시 재장전합니다.</Text>
+    <Text ID="GEAR_CAM_BALL_DESC">- 주변 적들을 표시합니다
+- 대상에 추가 데미지를 입힙니다</Text>
+    <Text ID="GEAR_SPY_CAMERA_DESC">- 닫힌 문 안쪽을 볼 수 있습니다
+- 대상에 추가 데미지를 입힙니다</Text>
+    <Text ID="SPECIAL_AIMED_SHOT">조준 사격</Text>
+    <Text ID="SPECIAL_SLUG_FIRE">산탄 사격</Text>
+    <Text ID="SPECIAL_SHIELD_FLASH">블라인딩 플래시</Text>
+    <Text ID="SPECIAL_SHIELD_BASH">방패 강타</Text>
+    <Text ID="SPECIAL_TWO_MAGAZINES">탄약 교환</Text>
+    <Text ID="SPECIAL_FIRE_MODE_CHANGE">사격 모드 전환</Text>
+    <Text ID="SPECIAL_DOUBLE_TAP">더블 탭</Text>
+    <Text ID="SPECIAL_RECON_BURST">속사</Text>
+    <Text ID="SPECPASS_ARMOR_PIERCING">철갑탄</Text>
+    <Text ID="SPECPASS_SEMI_AUTO">반자동</Text>
+    <Text ID="SPECPASS_RESIST_RIFLE">소총 사격 저항</Text>
+    <Text ID="ULTIMATE_SNIPER_SUPPORT">저격수 지원</Text>
+    <Text ID="ULTIMATE_DRAGON_BREATH">드래곤 브레스</Text>
+    <Text ID="ULTIMATE_SUBMACHINEGUN">SMG 공격</Text>
+    <Text ID="ULTIMATE_SAW">돌파병 톱</Text>
+    <Text ID="ULTIMATE_AKIMBO">쌍권총</Text>
+    <Text ID="ULTIMATE_MP5K">MP5K SMG</Text>
+    <Text ID="ULTIMATE_MK48MOD1">경기관총</Text>
+    <Text ID="ULTIMATE_RECON_MARKSMAN">지정사수 소총</Text>
+    <Text ID="ULTIMATE_SNIPER_SUPPORT_DESC">저격수를 호출해서 화면 상에 보이는 적 3명을 제거합니다.</Text>
+    <Text ID="ULTIMATE_DRAGON_BREATH_DESC">소이탄을 장전한 프로텍타 샷건을 사용합니다.</Text>
+    <Text ID="ULTIMATE_SUBMACHINEGUN_DESC">특별한 날을 위해서 9mm 기관단총을 챙기세요.</Text>
+    <Text ID="ULTIMATE_SAW_DESC">게임 내의 모든 문과 그 뒤에 서 있는 적들을 모두 박살내세요.</Text>
+    <Text ID="ULTIMATE_AKIMBO_DESC">.40 구경 16발이 장전된 권총 두 개로 멋지게 싸우세요.</Text>
+    <Text ID="ULTIMATE_MP5K_DESC">Kurz로 근거리부터 중간 거리에서 추가 데미지를 입히세요.</Text>
+    <Text ID="ULTIMATE_MK48MOD1_DESC">탄약 50발이 장전된 Mk46 LMG로 적들을 쓸어버리세요.</Text>
+    <Text ID="ULTIMATE_RECON_MARKSMAN_DESC">모여 있는 사람들 중에서 대상을 선택해서 저격할 수 있습니다.</Text>
+    <Text ID="MISSION_ACCOMPLISHED">미션 성공</Text>
+    <Text ID="MISSION_FAILED">미션 실패</Text>
+    <Text ID="HOSTAGES_KILLED">인질 전원 사망!</Text>
+    <Text ID="TEAM_KILLED">S.W.A.T. 팀 전멸!</Text>
+    <Text ID="BOMB_EXPLODED">폭탄 폭발!</Text>
+    <Text ID="MISSION0">암흑가</Text>
+    <Text ID="MISSION1">과격파</Text>
+    <Text ID="MISSION2">적색 경보</Text>
+    <Text ID="MISSION3">빅 애플</Text>
+    <Text ID="MISSION4">카르텔 구역</Text>
+    <Text ID="MISSION5">챌린지 Vol. 1</Text>
+    <Text ID="MISSION6">빈민가의 왕</Text>
+    <Text ID="MISSION_TIME">empty</Text>
+    <Text ID="MISSION_SCORE">empty</Text>
+    <Text ID="MISSION_CASUALTIES">empty</Text>
+    <Text ID="MISSION_HOSTAGES">empty</Text>
+    <Text ID="MISSION_P1_KILLS">empty</Text>
+    <Text ID="MISSION_P1_ACCURACY">empty</Text>
+    <Text ID="MISSION_P1_HOSTAGES">empty</Text>
+    <Text ID="MISSION_P1_DEATHS">empty</Text>
+    <Text ID="MISSION_P2_KILLS">empty</Text>
+    <Text ID="MISSION_P2_ACCURACY">empty</Text>
+    <Text ID="MISSION_P2_HOSTAGES">empty</Text>
+    <Text ID="MISSION_P2_DEATHS">empty</Text>
+    <Text ID="CHAPTER_N">챕터 {%1}</Text>
+    <Text ID="SELECT_EPISODE">에피소드 선택</Text>
+    <Text ID="SELECT_MISSION">미션 선택</Text>
+    <Text ID="MISSION_TYPE1">적 제거</Text>
+    <Text ID="MISSION_TYPE2">인질 구출</Text>
+    <Text ID="MISSION_TYPE3">폭탄 해체</Text>
+    <Text ID="MISSION_TYPE4">체포 영장</Text>
+    <Text ID="GRAPHICS">그래픽</Text>
+    <Text ID="PROGRAMMING">프로그래밍</Text>
+    <Text ID="MUSIC_SFX">음악 및 SFX</Text>
+    <Text ID="LEVEL_DESIGN">레벨 디자인</Text>
+    <Text ID="GAME_DESIGN">게임 디자인</Text>
+    <Text ID="CREDITS_GFX">Andy Bogaciev
+Adrian Cruceanu
+Elias Frost
+Christian Nordgren</Text>
+    <Text ID="CREDITS_DESIGN">Dan Dimitrescu</Text>
+    <Text ID="CREDITS_SOUNDS">Gavin Harrison
+George Vlad</Text>
+    <Text ID="ADDITIONAL_WORK">넷 프로그래밍 &amp; 마케팅</Text>
+    <Text ID="CREDITS_ADDITIONAL">Mihai Gosa
+Catalin Saitan</Text>
+    <Text ID="CREDITS_LEVEL_DESIGN">Adrian Maraloiu
+Mihai Raiciu
+Tavi Petre</Text>
+    <Text ID="CREDITS_PROGRAMMING">Mihai Dragomir</Text>
+    <Text ID="KEY_COMMANDS">왼쪽
+오른쪽
+위 / 상호작용
+아래 / 앉기
+점프
+사격
+보조무기
+재장전
+장비 사용
+근접 공격
+전략 능력</Text>
+    <Text ID="KEY_LEFT">왼쪽</Text>
+    <Text ID="KEY_RIGHT">오른쪽</Text>
+    <Text ID="KEY_UP">위 / 상호작용</Text>
+    <Text ID="KEY_DOWN">아래 / 앉기</Text>
+    <Text ID="KEY_JUMP">점프</Text>
+    <Text ID="KEY_FIRE">사격</Text>
+    <Text ID="KEY_ALT_FIRE">보조무기</Text>
+    <Text ID="KEY_RELOAD">재장전</Text>
+    <Text ID="KEY_USE_GEAR">장비 사용</Text>
+    <Text ID="KEY_MELEE">근접 공격</Text>
+    <Text ID="KEY_STRATEGIC_ABILITY">전략 능력</Text>
+    <Text ID="KEYS1_VAL">키보드1 키 구성</Text>
+    <Text ID="KEYS2_VAL">키보드2 키 구성</Text>
+    <Text ID="CONTROLLER_LAYOUT">컨트롤러 설정</Text>
+    <Text ID="KEYBOARD_LAYOUT">키보드 설정</Text>
+    <Text ID="KEY_DEFINE">키 선택:</Text>
+    <Text ID="KEY_INVALID">유효하지 않은 키입니다! 다른 키를 선택하세요.</Text>
+    <Text ID="REDEFINE_KEYS">키 재설정</Text>
+    <Text ID="INFO_KEY_MAP">F1 - 게임 내 툴팁 보기
+Alt+F1 - 이 창 보기/닫기</Text>
+    <Text ID="TUTORIAL_ARREST_TEXT">빅 베니를 찾아서 데리고 오세요.
+죽으면 안 됩니다!</Text>
+    <Text ID="TUTORIAL_BOMB_TEXT">이 장소에 폭탄이 설치되었습니다.
+찾아서 해체하세요. 시간이 얼마 없어요!</Text>
+    <Text ID="TUTORIAL_HOSTAGE_TEXT">인질을 구출해서 전략 포인트를 획득하세요.
+인질을 죽이면 체력을 잃습니다!</Text>
+    <Text ID="TUTORIAL_XPPOINTS_TEAM_REMOVE">이미 확정된 업그레이드 포인트는 팀 업그레이드 바에서 제거할 수 없습니다.</Text>
+    <Text ID="TUTORIAL_XPPOINTS_TEAM_ADD">신중하게 선택하세요! 팀 바에 사용된 업그레이드 포인트는 확정한 후에는 제거할 수 없습니다.</Text>
+    <Text ID="TUTORIAL_INTERFACE_STRATEGIC">전략 능력을 사용하세요!</Text>
+    <Text ID="TUTORIAL_INTERFACE_MAIN1">보조무기 공격도 잊지 말고 사용하세요!
+컨트롤러 설정을 잊었나요? F1 또는 Alt+F1을 누르세요.
+지금 해보세요!</Text>
+    <Text ID="LEVELNAME0">슬로우 스타터</Text>
+    <Text ID="LEVELNAME1">똑똑똑</Text>
+    <Text ID="LEVELNAME2">옛 대사관 건물</Text>
+    <Text ID="LEVELNAME3">한밤중의 출동</Text>
+    <Text ID="LEVELNAME4">조심스러운 발걸음</Text>
+    <Text ID="LEVELNAME5">255번가 경찰서</Text>
+    <Text ID="LEVELNAME6">고층 건물</Text>
+    <Text ID="LEVELNAME7">창고</Text>
+    <Text ID="LEVELNAME8">사무실 출근</Text>
+    <Text ID="LEVELNAME9">섬광탄 교차로</Text>
+    <Text ID="LEVELNAME10">대청소</Text>
+    <Text ID="LEVELNAME11">빅 보스 대면</Text>
+    <Text ID="LEVELNAME12">바트 접선</Text>
+    <Text ID="LEVELNAME13">위험한 모텔</Text>
+    <Text ID="LEVELNAME14">지하 탐험</Text>
+    <Text ID="LEVELNAME15">벙커</Text>
+    <Text ID="LEVELNAME16">한밤의 소동</Text>
+    <Text ID="LEVELNAME17">산 속의 아지트</Text>
+    <Text ID="LEVELNAME18">전초기지</Text>
+    <Text ID="LEVELNAME19">폭탄 제거</Text>
+    <Text ID="LEVELNAME20">조직</Text>
+    <Text ID="LEVELNAME21">미로 속 방황</Text>
+    <Text ID="LEVELNAME22">박물관</Text>
+    <Text ID="LEVELNAME23">마당</Text>
+    <Text ID="LEVELNAME24">미치광이 프랭키</Text>
+    <Text ID="LEVELNAME25">맥도넛에서의 위기일발</Text>
+    <Text ID="LEVELNAME26">메트로의 광기</Text>
+    <Text ID="LEVELNAME27">화염병 배달</Text>
+    <Text ID="LEVELNAME28">현기증</Text>
+    <Text ID="LEVELNAME29">수도 공사</Text>
+    <Text ID="LEVELNAME30">저온 노출</Text>
+    <Text ID="LEVELNAME31">힙스터 맥주 공장</Text>
+    <Text ID="LEVELNAME32">승강기 통로 오르기</Text>
+    <Text ID="LEVELNAME33">위기의 실험실</Text>
+    <Text ID="LEVELNAME34">광장 습격</Text>
+    <Text ID="LEVELNAME35">멸망의 기차</Text>
+    <Text ID="LEVELNAME36">은행 강도</Text>
+    <Text ID="LEVELNAME37">여왕의 십자가</Text>
+    <Text ID="LEVELNAME38">피보나치</Text>
+    <Text ID="LEVELNAME39">모루</Text>
+    <Text ID="LEVELNAME40">비밀 요새</Text>
+    <Text ID="LEVELNAME41">캐인빌</Text>
+    <Text ID="LEVELNAME42">휴가 중</Text>
+    <Text ID="LEVELNAME43">눈물의 식사</Text>
+    <Text ID="LEVELNAME44">암전</Text>
+    <Text ID="LEVELNAME45">공항으로</Text>
+    <Text ID="LEVELNAME46">주야장천</Text>
+    <Text ID="LEVELNAME47">위대한 뱃츠비</Text>
+    <Text ID="LEVELNAME48">선장은 나</Text>
+    <Text ID="LEVELNAME49">저수지 선창</Text>
+    <Text ID="LEVELNAME50">오래된 이웃</Text>
+    <Text ID="LEVELNAME51">반짝반짝</Text>
+    <Text ID="LEVELNAME52">엘 쿼랜티노</Text>
+    <Text ID="LEVELNAME53">합동 차단</Text>
+    <Text ID="LEVELNAME54">스카이 스크래처</Text>
+    <Text ID="LEVELNAME55">NCtv 소굴</Text>
+    <Text ID="LEVELNAME56">타이니타닉</Text>
+    <Text ID="LEVELNAME57">고공비행</Text>
+    <Text ID="LEVELNAME58">뜬소문</Text>
+    <Text ID="LEVELNAME59">아지트</Text>
+    <Text ID="LEVELNAME60">해결사</Text>
+    <Text ID="LEVELNAME61">밀고자 풍년</Text>
+    <Text ID="LEVELNAME62">묘지 습격</Text>
+    <Text ID="LEVELNAME63">깊고 깊은 곳</Text>
+    <Text ID="LEVELNAME64">테라스의 공포</Text>
+    <Text ID="LEVELNAME65">하드코어</Text>
+    <Text ID="LEVELNAME66">총알 세례</Text>
+    <Text ID="LEVELNAME67">수영장 파티 방해꾼</Text>
+    <Text ID="LEVELNAME68">아래층 철장</Text>
+    <Text ID="LEVELNAME69">상자와 폭탄</Text>
+    <Text ID="LEVELNAME70">익스프레스</Text>
+    <Text ID="LEVELNAME71">영사관의 위기</Text>
+    <Text ID="LEVELNAME72">중독자의 파라다이스</Text>
+    <Text ID="LEVELNAME73">평화와 고요</Text>
+    <Text ID="LEVELNAME74">고주망태</Text>
+    <Text ID="LEVELNAME75">절벽 위의 삶</Text>
+    <Text ID="LEVELNAME76">최첨단</Text>
+    <Text ID="LEVELNAME77">어스웜 벤</Text>
+    <Text ID="LEVELNAME78">변화와 파괴</Text>
+    <Text ID="LEVELNAME79">홈 박스오피스</Text>
+    <Text ID="LEVELNAME80">믿음의 도약</Text>
+    <Text ID="LEVELNAME81">압박</Text>
+    <Text ID="LEVELNAME82">몬티 홀</Text>
+    <Text ID="LEVELNAME83">변명 불가</Text>
+    <Text ID="LEVELNAME84">곧 제공</Text>
+    <Text ID="LEVELNAME85">곧 제공</Text>
+    <Text ID="LEVELNAME86">곧 제공</Text>
+    <Text ID="LEVELNAME87">곧 제공</Text>
+    <Text ID="LEVELNAME88">곧 제공</Text>
+    <Text ID="LEVELNAME89">곧 제공</Text>
+    <Text ID="LEVELNAME90">곧 제공</Text>
+    <Text ID="LEVELNAME91">곧 제공</Text>
+    <Text ID="LEVELNAME92">곧 제공</Text>
+    <Text ID="LEVELNAME93">곧 제공</Text>
+    <Text ID="LEVELNAME94">곧 제공</Text>
+    <Text ID="LEVELNAME95">곧 제공</Text>
+    <Text ID="BAR_NO_IMPROVEMENT">점진적인 변화 없음</Text>
+    <Text ID="BAR_S1_LOGISTICS">전략 포인트 획득량 증가</Text>
+    <Text ID="BAR_S2_PHYSICAL">플레이어 체력 증가</Text>
+    <Text ID="BAR_A1_ACCURACY">기본 사격 명중률 상승</Text>
+    <Text ID="BAR_A2_RECOIL">반동 감소</Text>
+    <Text ID="BAR_B1_RECOIL">펌프 샷건 발사속도 상승</Text>
+    <Text ID="BAR_B2_RELOAD">재장전 속도 상승</Text>
+    <Text ID="BAR_S1_HANDGUN">기본 사격 명중률 상승</Text>
+    <Text ID="BAR_S2_SHIELD_USE">방패 내구도 증가</Text>
+    <Text ID="BAR_R1_GUNPLAY">기본 사격 명중률 상승</Text>
+    <Text ID="BAR_R2_RECON">표시된 적들 상대로 한 데미지 보너스 상승</Text>
+    <Text ID="BAR_F1_HANDGUN">기본 사격 명중률 상승</Text>
+    <Text ID="BAR_F2_MELEE">근접 공격 데미지 상승</Text>
+    <Text ID="PERK_DOUBLE_GEAR">이중 장비
+보급품이 두 배 들어있는 배치 가능한 장비 상자.</Text>
+    <Text ID="PERK_EXTRA_SP_SLOTS">전략 비축
+전략 바가 2 포인트를 추가로 획득합니다.</Text>
+    <Text ID="PERK_NOMEX_SUITS">노멕스 수트
+화염 무기 및 화재로부터 받는 데미지가 감소됩니다.</Text>
+    <Text ID="PERK_DOUBLE_MEDIKITS">이중 구급상자
+이제 구급상자를 두 번씩 쓸 수 있습니다.</Text>
+    <Text ID="PERK_MELEE_DEFENSE">근접 공격 방어
+정면으로 받는 근접 공격 데미지가 20%만큼 감소합니다.</Text>
+    <Text ID="PERK_SPEED_IS_LIFE">속도는 생명
+이동 속도가 20%만큼 증가합니다.</Text>
+    <Text ID="PERK_MULE">노새
+미션을 시작할 때 장비 1개를 추가로 선택할 수 있습니다.</Text>
+    <Text ID="PERK_DIE_HARD">다이하드
+죽음이 가까워졌을 때, 받는 데미지가 감소합니다.</Text>
+    <Text ID="PERK_QUICK_AIM">신속 조준
+조준 사격의 발사속도가 더 빨라집니다.</Text>
+    <Text ID="PERK_CRITICAL_SHOTS">치명타 사격
+일반 공격이 5%의 확률로 30% 추가 데미지를 입힙니다.</Text>
+    <Text ID="PERK_SUREFOOTED">튼튼한 하체
+이동하면서 조준 사격 능력을 사용할 수 있습니다.</Text>
+    <Text ID="PERK_BARRICADE_SHOOTING">방책 사격
+엄폐물을 활용해서 반동이 20%만큼 감소합니다.</Text>
+    <Text ID="PERK_STRONG_STANCE">견고한 자세
+앞으로 자세를 기울여서, 첫 번째 사격 반동이 70%만큼 감소합니다.</Text>
+    <Text ID="PERK_C_CLAMP">C-클램프 그립
+기본 반동 회복 속도가 35%만큼 증가합니다.</Text>
+    <Text ID="PERK_INTIMIDATING">위협
+당신에게 놀란 적들이 평정심을 잃으며, 2초 동안 적들의 공격 데미지가 감소합니다.</Text>
+    <Text ID="PERK_DOUBLE_BANGERS">이중 폭발
+섬광탄이 두 번 폭발하며 적을 더 빨리 스턴 상태로 만듭니다.</Text>
+    <Text ID="PERK_ASSAULT_JUMP">돌격 점프
+이제 적 위에 떨어지면 15 데미지를 입힙니다.</Text>
+    <Text ID="PERK_TWIN_SHOT">신속한 청소
+적을 처치하고 난 뒤에 재장전 속도가 조금 빨라집니다.</Text>
+    <Text ID="PERK_9_PELLET">9개의 펠릿
+산탄에 펠릿을 추가해서 데미지가 증가합니다.</Text>
+    <Text ID="PERK_KILLING_SPREE">무차별 사격
+적을 처치하고 난 뒤에 다음 사격의 데미지가 25%만큼 증가합니다.</Text>
+    <Text ID="PERK_EXTENSION_TUBES">연장 튜브
+튜브로 직접 장전하는 샷건에 탄환이 1개 추가됩니다.</Text>
+    <Text ID="PERK_RIFLED_SLUGS">소총 산탄
+산탄 사격이 더욱 직선으로, 예측 가능한 방향으로 날아갑니다.</Text>
+    <Text ID="PERK_IMPROVED_SLUGS">강화 산탄
+한 번에 더 많은 적들을 쓰러뜨릴 수 있는 더 무거운 산탄을 사용하세요.</Text>
+    <Text ID="PERK_GORE_DEALER">유혈의 사신
+아무나 유혈이 낭자하도록 살해하면, 50%의 확률로 일반 적들이 도망칩니다.</Text>
+    <Text ID="PERK_POINTMAN_ARMOR">포인트맨 방어구
+방어구의 강도가 반 정도 증가해서, 갑작스런 적의 공격에도 살아남을 수 있습니다.</Text>
+    <Text ID="PERK_WEAK_SPOTTER">약점 포착
+방탄복을 입은 적들의 약점을 공략할 수 있게 됩니다.</Text>
+    <Text ID="PERK_EXTENDED_MAGS">확장 탄창
+모든 권총 탄창에 탄약 2발이 추가됩니다.</Text>
+    <Text ID="PERK_SHIELD_BRACE">방패 고정
+무기를 방패 위에 고정시켜서 반동이 40%만큼 감소합니다.</Text>
+    <Text ID="PERK_LADY_JUSTICE">정의의 여신
+놀란 적들에게 항상 치명타를 날립니다.</Text>
+    <Text ID="PERK_FORTIFIED">요새화
+앉은 상태에서는 방패가 입는 데미지가 절반으로 감소합니다.</Text>
+    <Text ID="PERK_ARMORED_RABBIT">장갑 토끼
+장비의 무게를 줄여서 이동 속도가 15% 증가합니다.</Text>
+    <Text ID="PERK_FIELD_FIXER">야전 수리병
+전략 포인트를 통해 방어구를 요청하면 이제 방패를 수리합니다.</Text>
+    <Text ID="PERK_DEVASTATOR">파괴의 여신
+SMG가 20%의 확률로 치명타를 날립니다.</Text>
+    <Text ID="PERK_CADDYSHACK">캐디쉑
+장비 휴대 용량을 두 배로 늘립니다.</Text>
+    <Text ID="PERK_IRON_MAN">아이언 메이드
+방패로 데미지를 많이 막아낼 수록, 그 앞에 있는 적은 더 크게 겁을 먹습니다.</Text>
+    <Text ID="PERK_CRIPPLING_SHOTS">다리 사격
+5%의 확률로 몇 초 동안 적의 이동 속도를 감소시킵니다.</Text>
+    <Text ID="PERK_SURGEON_PRECISION">초정밀 사격
+표시된 적에게 가하는 모든 사격이 자동으로 치명타가 됩니다.</Text>
+    <Text ID="PERK_VULTURE">솔개
+뒤에서 적을 공격하면, 10%의 확률로 치명타가 됩니다. </Text>
+    <Text ID="PERK_RESCUE_PLAN">구출 계획
+정찰병 도구는 이제 인질도 표시하기 때문에, 인질을 무사히 구출하기가 더욱 쉬워집니다.</Text>
+    <Text ID="PERK_DURACELLS">보조 배터리
+적과 인질이 50% 더 길게 표시됩니다.</Text>
+    <Text ID="PERK_DOUBLE_TOOLS">이중 도구
+휴대하는 정찰병 도구의 양이 두 배가 됩니다.</Text>
+    <Text ID="PERK_CAUGHT_IN_THE_ACT">현행범
+엄폐하고 있으면 적에게 들키지 않습니다.</Text>
+    <Text ID="PERK_STEADY_HAND">차분한 손
+앉아 있을 땐 반동 제어 능력이 상승합니다.</Text>
+    <Text ID="PERK_WEAVER_STANCE">위버 자세
+모든 사격 자세에서 반동 제어 능력이 상승합니다.</Text>
+    <Text ID="PERK_HOLLOW_POINTS">할로우 포인트
+확장 탄약으로 바꿔서 모든 무기로 25% 증가한 데미지를 주세요.</Text>
+    <Text ID="PERK_COMBATIVES">투지
+방어 기술을 배워서 근접 공격으로부터 받는 데미지가 40%만큼 감소합니다.</Text>
+    <Text ID="PERK_LEG_DAY">다리 운동
+화끈하게 문을 걷어차세요. 3번 차면 열립니다.</Text>
+    <Text ID="PERK_FEDERAL_JUSTICE">연방 정의
+약점 공략법을 터득해서 뒤에서 칼로 공격할 때 추가로 데미지를 입힙니다.</Text>
+    <Text ID="PERK_EVASION">회피 훈련
+이제 구르기로 받는 데미지의 65%를 피할 수 있습니다.</Text>
+    <Text ID="PERK_BIG_BANGER">대폭발
+보급창고에서 접착폭약과 수류탄을 챙기세요. 폭발 사거리가 50% 늘어납니다.</Text>
+    <Text ID="PERK_CHERRY_DARLING">체리 달링
+MP5 Kurz 궁극기의 반동이 감소합니다.</Text>
+    <Text ID="PERK_HANDYMAN">손재주
+탄창 재장전 시간이 0.5초 감소합니다.</Text>
+    <Text ID="PERK_INVISIBLE">투명인간
+모든 적들이 당신을 발견할 때 0.5초 늦게 반응합니다.</Text>
+    <Text ID="PERK_EXTENDED_MAGS_RECON">확장 탄창
+탄창 용량이 5발 늘어납니다.</Text>
+    <Text ID="PERK_CLEAR_TO_ENGAGE">사격 개시
+인질이 없는 경우, 표시된 적들에게 더 큰 데미지를 입힙니다.</Text>
+    <Text ID="PERK_DISORIENTED">방향 상실
+속사 능력은 이제 적들을 혼란에 빠뜨리고 뒤로 더 멀리 밀어버립니다.</Text>
+    <Text ID="STATUE_DMC">마이크 D "전능한 신과 같은 존재지만... 버그가 존재하지"</Text>
+    <Text ID="STATUE_BLIND">에이드리언 "눈이 보이지 않는 예술가 (사실은 아님)"</Text>
+    <Text ID="STATUE_ELIAS">서리의 신, 엘리아스 "픽셀 부하들을 소환한다"</Text>
+    <Text ID="STATUE_TOMCAT">인간 댄 "술 마시고 프로젝트를 제안하면 안 되지"</Text>
+    <Text ID="STATUE_PINTEA">핀티아 "도어 키커 2에선 될 거야"</Text>
+    <Text ID="STATUE_SICK">식 "가상의 세계에서 발휘하는 드워프 수준의 능력"</Text>
+    <Text ID="STATUE_GAVIN">개빈 프라우드신스 "그 녀석은 80년대 사람이야야"</Text>
+    <Text ID="STATUE_ANDI">앤디 비 "바둑을 두고 픽셀들을 훈련시키지"</Text>
+    <Text ID="LOL">LOL</Text>
+    <Text ID="MOBILITY">기동력</Text>
+    <Text ID="STATUE_GEORGE">George
+"Makes lotsa noise"</Text>
+    <Text ID="MORE">더 보기…</Text>
+    <Text ID="VOICE_ACTING">목소리 연기</Text>
+    <Text ID="CREDITS_VOICE">Zachary Pill
+Stephanos Rex
+Tamara Ryan
+Samantha Vega
+Micah Blakeslee
+Fletcher Armstrong
+Elaine Cashmore
+    </Text>
+    <Text ID="CREDITS_VOICE2">Kelloggs VA
+Walter Mack
+George Vlad
+Jenn Henry
+Andy Mack
+Josef Gagnier
+    </Text>
+    <Text ID="EA_RESET_PROGRESS">Thank you for supporting us during Early Access!
+We recommend starting with a new profile. Using your old profile may lead to profile conflicts and unforeseen issues.
+Reset your profile now?
+    </Text>
+    <Text ID="MOD_ENABLED">모드 활성화</Text>
+    <Text ID="MOD_ENABLED_WARNING">같은 모드를 가진 플레이어들끼리만 온라인 협동 게임을 플레이할 수 있습니다.</Text>
+    <Text ID="ABORT_MISSION">미션 중단</Text>
+    <Text ID="MISSION_ABORTED">미션 중단 완료!</Text>
+    <Text ID="ABORT_MISSION_REQ_MSG">플레이어 {%1} 이(가) 미션 중단을 요청합니다.</Text>
+    <Text ID="SELECT_GAME_MODE">게임 모드 선택</Text>
+    <Text ID="CLASSIC_MODE">클래식 모드</Text>
+    <Text ID="CLASSIC_MODE_DESC">일반 경찰 업무</Text>
+    <Text ID="WEEKLY_CHALLENGE">주간 챌린지</Text>
+    <Text ID="WEEKLY_CHALLENGE_DESC">당신의 스킬을 테스트하기 위해 설계된 미션</Text>
+    <Text ID="ZOMBIE_INVASION">좀비 침략 모드</Text>
+    <Text ID="ZOMBIE_INVASION_DESC">노웨어 시티에서의 기이한 시간</Text>
+    <Text ID="WEEK1_TASK">3분 안에 끝내기</Text>
+    <Text ID="WEEK2_TASK1">4분 안에 끝내기</Text>
+    <Text ID="WEEK2_TASK2">저격수 없음</Text>
+    <Text ID="WEEK4_TASK1">치유 없음</Text>
+    <Text ID="WEEK4_TASK2">방패병으로 승리하기</Text>
+    <Text ID="WEEK5_TASK1">돌파병으로 승리하기</Text>
+    <Text ID="WEEK6_TASK1">퍼기로 승리하기</Text>
+    <Text ID="WEEK7_TASK1">돌격병으로 승리하기</Text>
+    <Text ID="WORKSHOP">창작마당</Text>
+    <Text ID="AVAILABLE_MODS">이용 가능한 모드</Text>
+    <Text ID="UPDATING_MODS">모드 업데이트 중...</Text>
+    <Text ID="ON">켬</Text>
+    <Text ID="OFF">끔</Text>
+    <Text ID="ENABLED">활성화</Text>
+    <Text ID="PLEASE_HANG">잠시 기다려주세요...</Text>
+    <Text ID="MOD_CONFLICTING_MSG">활성화된 다른 모드의 같은 파일에 영향을 주기 때문에 모드를 활성화하지 못했습니다!</Text>
+    <Text ID="DOWNLOADED_LEVELS">다운로드한 레벨</Text>
+    <Text ID="CHANGE_DETECTED">변경사항 감지</Text>
+    <Text ID="CHANGE_DETECTED_WARNING">같은 변경사항을 적용한 플레이어만 함께 온라인 협동 모드를 플레이할 수 있습니다.</Text>
+    <Text ID="NO_DOWNLOADED_LEVELS">다운로드 받은 콘텐츠가 없습니다. 
+원하는 아이템을 구독해서 Steam 창작마당에서 더 높은 레벨을 획득하세요.</Text>
+    <Text ID="NO_MODS_SUBSCRIBED">창작마당 아이템이 없습니다. 
+원하는 아이템을 구독해서 Steam 창작마당에서 더 높은 레벨을 획득하세요.</Text>
+    <Text ID="FLOOR_X">{%1}층</Text>
+    <Text ID="FLOOR_X_VALUE">-</Text>
+    <Text ID="VINFINITE_MODE">무한의 탑</Text>
+    <Text ID="VINFINITE_MODE_DESC">무작위로 생성되는 대혼란</Text>
+    <Text ID="TUTORIAL_VINFINITE_TEXT">이곳은 보급품 부족 지역입니다. 
+구출할 때만 전략 포인트를 획득합니다.</Text>
+    <Text ID="WEEK10_TASK1">정찰병으로 승리하기</Text>
+    <Text ID="WPN_SWAT_REVOLVER">SWAT 리볼버</Text>
+    <Text ID="WPN_G18C_AUTO_PISTOL">G18C 자동 권총</Text>
+    <Text ID="WPN_FBI_REVOLVER">FBI 리볼버</Text>
+    <Text ID="WPN_MP7_PDW">MP7 PDW</Text>
+    <Text ID="WPN_SIX12_REVO">Six-12 샷건</Text>
+    <Text ID="WPN_TRAPPER_RIFLE">트래퍼 소총</Text>
+    <Text ID="WPN_TRICKED_OUT_AK">개조 AK</Text>
+    <Text ID="WPN_HOME_DEFENSE_SHOTGUN">사냥 샷건</Text>
+    <Text ID="WPN_TRUNK_CARBINE">기본 트렁크 카빈</Text>
+    <Text ID="ULTIMATE_M1_GARAND">할아버지의 개런드 총</Text>
+    <Text ID="ULTIMATE_M1_GARAND_DESC">오래된 유물에 빈티지 AP 탄약을 넣어 다시 사용해보세요.</Text>
+    <Text ID="ULTIMATE_RECON_SIX12SD">무소음 샷건</Text>
+    <Text ID="ULTIMATE_RECON_SIX12SD_DESC">벅샷이 장전된 무소음 샷건으로 적을 제압하세요.</Text>
+    <Text ID="ULTIMATE_HOMEMADE_PIE">수제 파이</Text>
+    <Text ID="ULTIMATE_HOMEMADE_PIE_DESC">아내가 만들어준 파이. 전체 팀의 체력을 회복시켜줍니다. 정말 그럴까요?</Text>
+    <Text ID="GEAR_PISTOL1911_DESC">- 믿음직한 .45ACP 예비탄 7발 - 부수적인 피해 최소화</Text>
+    <Text ID="GEAR_TWINKIE">일 년 지난 트윙키</Text>
+    <Text ID="GEAR_TWINKIE_DESC">- 5초 동안 무적 - 팀 퍼크의 영향 받지 않음</Text>
+    <Text ID="FITNESS">피트니스</Text>
+    <Text ID="GEAR_BAG">장비 가방</Text>
+    <Text ID="BAR_O1_ACCURACY">사격 명중률 상승</Text>
+    <Text ID="BAR_O2_MELEE">받는 근접 데미지 감소</Text>
+    <Text ID="PERK_SOFT_POINTS">소프트 포인트
+모든 소총 데미지가 20% 증가합니다.</Text>
+    <Text ID="PERK_PLUSP_AMMO">+P 탄약
+추가 화력으로 소총 탄환이 추가 관통을 획득합니다. </Text>
+    <Text ID="PERK_OPEN_SEASON">사냥 시즌
+모든 일반 (비조준) 사격은 30%의 확률로 치명타를 유발합니다.</Text>
+    <Text ID="PERK_REDHEAD">빨강머리와의 전투
+자신의 근접 밀어내기 및 스턴이 강화됩니다.</Text>
+    <Text ID="PERK_GRIZZLY">회색곰 추월
+이동 속도가 10% 증가합니다.</Text>
+    <Text ID="PERK_LOCKED_OUT">한겨울의 야외 취침
+이제 두 번 발로 차면 문을 박살낼 수 있습니다. </Text>
+    <Text ID="PERK_TWIXIE">트윅시
+한 미션에서 트윙키 바를 두 번 사용할 수 있습니다.</Text>
+    <Text ID="PERK_PLATES_UPGRADE">판금 업그레이드
+방어구 보호 레벨이 +1 됩니다.</Text>
+    <Text ID="PERK_GARAND_AP_AMMO">AP 탄약
+개런드 총의 방어구 관통이 +1 됩니다.</Text>
+    <Text ID="INVITE_FRIEND">친구 초대</Text>
+    <Text ID="JOIN_GAME">게임 참여</Text>
+    <Text ID="LOBBIES_LIST">활성화된 로비</Text>
+    <Text ID="NO_LOBBIES">로비를 찾지 못했습니다.</Text>
+    <Text ID="LOBBIES_LIST_VAL">...</Text>
+    <Text ID="REFRESH">새로 고침</Text>
+    <Text ID="YOUR_BEST_SCORE">최고 점수:</Text>
+    <Text ID="LEADERBOARDS_PLAYERSCORE_VAL">...</Text>
+    <Text ID="PRESS_FIRE_TO_JOIN_NX">L+R을 눌러서 참여하세요!</Text>
+    <Text ID="CONSOLE_PRESS_A">A를 눌러서 계속하기</Text>
+    <Text ID="CONSOLE_PRESS_CONTINUE">{%1}을(를) 눌러서 계속하기</Text>
+    <Text ID="CONSOLE_TUTORIAL_INTERFACE_MAIN1">보조무기 공격도 잊지 말고 사용하세요! 컨트롤러 설정을 잊어먹었다고요? 옵션 메뉴를 열어서 컨트롤러 레이아웃을 확인하세요. 지금 해보세요!</Text>
+    <Text ID="NX_NETWORK_CONNECTING">네트워크에 연결 중</Text>
+    <Text ID="NX_NETWORK_CONNECTING_TTL">네트워크 시작 중</Text>
+    <Text ID="NX_COOP_LOCAL">로컬 모드 협동</Text>
+    <Text ID="NX_COOP_ONLINE">온라인 협동</Text>
+    <Text ID="NX_HOST_FRIENDS">친구 호스트하기</Text>
+    <Text ID="NX_JOIN_FRIENDS">친구 참여하기</Text>
+    <Text ID="NX_NEEDS_ACCOUNT">온라인으로 플레이하고 순위표를 확인하려면 Nintendo Switch Online 계정이 필요합니다.</Text>
+    <Text ID="NX_NETWORK_ERROR">온라인 서비스와 연결 중에 오류가 발생했습니다.</Text>
+    <Text ID="XB1_CHANGE_PROFILE">프로필 변경</Text>
+    <Text ID="XB1_USERNAME">사용자 이름</Text>
+    <Text ID="PS4_PRESS_X">X를 눌러서 계속하기</Text>
+    <Text ID="NX_JUMP_LEADERBOARDS">점프 = 순위표</Text>
+    <Text ID="XB1_SIGN_OUT_MESSAGE">로그인 정보가 변경됐습니다. 다시 로그인하거나 타이틀 화면으로 나가세요.</Text>
+    <Text ID="XB1_SIGN_IN">로그인</Text>
+    <Text ID="CONSOLE_PORTING">콘솔 포팅</Text>
+    <Text ID="CREDITS_CONSOLE">Sickhead Games</Text>
+    <Text ID="MOBILE_PORTING">모바일 포팅</Text>
+    <Text ID="CREDITS_MOBILE">...</Text>
+    <Text ID="QA">QA</Text>
+    <Text ID="CREDITS_QA">Whyttest</Text>
+    <Text ID="BUSINESS">비즈니스</Text>
+    <Text ID="CREDITS_BUSINESS">Andreea-Medvedovici Per</Text>
+    <Text ID="SPECIAL_THANKS">특별 감사</Text>
+    <Text ID="CREDITS_SPECIAL_THANKS">Oreste "Axi0s" Gamba</Text>
+    <Text ID="LOBBY_WAS_FULL">세션 정원이 가득 찼습니다</Text>
+    <Text ID="MOD_INCOMPATIBLE_MSG">Warning! Incompatible mod, needs to be updated by the author! You can but it may crash the game!</Text>
+  </Texts>
+</PSTexts>

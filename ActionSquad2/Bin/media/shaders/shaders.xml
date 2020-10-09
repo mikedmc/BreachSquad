@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- shader files path is relative to this xml file -->
+<Shaders>
+  <VertexShaders>
+    <VextexShader name="VS_TEXspot" path="texSpot.vso" />
+    <VertexShader name="VS_WATER" path="water.vso" />
+    <VertexShader name="VS_FOW" path="fow.vso" />
+  </VertexShaders>
+  <PixelShaders>
+    <PixelShader name="PS_TEXspot" path="texSpot.pso" />
+    <PixelShader name="PS_AMBIENT_SI" path="texAmbientSelfIllum.pso" />
+    <PixelShader name="PS_WATER" path="water.pso" />
+    <PixelShader name="PS_FOW" path="fow.pso" />
+  </PixelShaders>
+</Shaders>

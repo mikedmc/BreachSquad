@@ -1,0 +1,13 @@
+*.tlog
+ActionSquad2/Bin/*.exe
+*.opendb
+*.db
+*.dkas_auto
+*.manifest
+.vs/
+*.ilk
+*.pdb
+*.user
+*.suo
+*.sdf
+ActionSquad2/Obj/

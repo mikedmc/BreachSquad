@@ -1,0 +1,433 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{97105727-EDAB-4B2C-AB1E-4ACFD3BA5187}</ProjectGuid>
+    <RootNamespace>ActionSquad</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <ProjectName>ActionSquad</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.51106.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>Bin\</OutDir>
+    <IntDir>Obj\Debug\</IntDir>
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)_d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>Bin\</OutDir>
+    <IntDir>Obj\Release\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PreBuildEvent>
+      <Command />
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Command />
+    </CustomBuildStep>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>Libs\release\GogSDK-1.133.6\Include;Libs\release\steam\public\steam;Libs\release\curl\include\curl;Libs\release\SDL\include;Libs\release\DXdec2014\Include;Source;Source\Common;Source\Engine;Libs\release\VLD\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Strict</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>dxstdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CallingConvention>Cdecl</CallingConvention>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>/nod:kernel32.lib;/nod:advapi32.lib;/nod:user32.lib;/nod:gdi32.lib;/nod:shell32.lib;/nod:comdlg32.lib;/nod:version.lib;/nod:mpr.lib;/nod:rasapi32.lib;/nod:winmm.lib;/nod:winspool.lib;/nod:vfw32.lib;/nod:secur32.lib;/nod:oleacc.lib;/nod:oledlg.lib;/nod:sensapi.lib;/nod:shfolder.lib;unicows.lib;Kernel32.lib;Advapi32.lib;User32.lib;Shell32.lib;Gdi32.lib;Comdlg32.lib;Version.lib;Mpr.lib;Rasapi32.lib;Winmm.lib;Winspool.lib;Vfw32.lib;Secur32.lib;Oleacc.lib;Oledlg.lib;Sensapi.lib;dxerr9.lib;dxguid.lib;d3d9.lib;d3dx9.lib;dsound.lib;comctl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(ProjectDir)\Bin\$(ProjectName)_d.exe</OutputFile>
+      <AdditionalLibraryDirectories>Libs\release\GogSDK-1.133.6\Libraries;Libs\release\steam\redistributable_bin;Libs\release\curl\lib;Libs\release\DXdec2014\Lib\x86;Libs\release\SDL\lib\x86;Libs\release\VLD\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libcp.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AssemblyDebug>true</AssemblyDebug>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>Source/dpiaware.manifest</AdditionalManifestFiles>
+      <EnableDpiAwareness>true</EnableDpiAwareness>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>Libs\release\GogSDK-1.133.6\Include;Libs\release\curl\include\curl;Libs\release\steam\public\steam;Libs\release\SDL\include;Source;Source\Common;Source\Engine;Libs\release\DXdec2014\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Strict</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>dxstdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat />
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>/nod:kernel32.lib;/nod:advapi32.lib;/nod:user32.lib;/nod:gdi32.lib;/nod:shell32.lib;/nod:comdlg32.lib;/nod:version.lib;/nod:mpr.lib;/nod:rasapi32.lib;/nod:winmm.lib;/nod:winspool.lib;/nod:vfw32.lib;/nod:secur32.lib;/nod:oleacc.lib;/nod:oledlg.lib;/nod:sensapi.lib;/nod:shfolder.lib;unicows.lib;Kernel32.lib;Advapi32.lib;User32.lib;Shell32.lib;Gdi32.lib;Comdlg32.lib;Version.lib;Mpr.lib;Rasapi32.lib;Winmm.lib;Winspool.lib;Vfw32.lib;Secur32.lib;Oleacc.lib;Oledlg.lib;Sensapi.lib;dxerr9.lib;dxguid.lib;d3d9.lib;d3dx9.lib;dsound.lib;comctl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>LinkVerboseLib</ShowProgress>
+      <OutputFile>$(ProjectDir)\Bin\$(ProjectName).exe</OutputFile>
+      <AdditionalLibraryDirectories>Libs\release\GogSDK-1.133.6\Libraries;Libs\release\curl\lib;Libs\release\steam\public\steam\lib\win32;Libs\release\steam\redistributable_bin;Libs\release\SDL\lib\x86;Libs\release\DXdec2014\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <UACExecutionLevel>AsInvoker</UACExecutionLevel>
+      <IgnoreSpecificDefaultLibraries>libcp.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>false</GenerateMapFile>
+      <MapFileName />
+      <MapExports>false</MapExports>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>Source/dpiaware.manifest</AdditionalManifestFiles>
+      <EnableDpiAwareness>true</EnableDpiAwareness>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Common\DXUTgui.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="Source\Common\DXUTSettingsDlg.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="Source\ControlsEd\ControlsEditor.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Achievement.h" />
+    <ClInclude Include="Source\Engine\AchievementManager.h" />
+    <ClInclude Include="Source\Engine\Analytics.h" />
+    <ClInclude Include="Source\Engine\AppGlobals.h" />
+    <ClInclude Include="Source\Engine\BitPacker.h" />
+    <ClInclude Include="Source\Engine\BufferedPainter.h" />
+    <ClInclude Include="Source\Engine\CameraTransform.h" />
+    <ClInclude Include="Source\Engine\Chapters.h" />
+    <ClInclude Include="Source\Engine\ChatWnd.h" />
+    <ClInclude Include="Source\Engine\Constants\actives_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\back1_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\back2_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\back3_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\back4_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\back5_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\back6_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\bk_city_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\igm_interface_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\igm_int_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\lights_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\loading_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\map0_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\map1_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\mapall_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\map_interface_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\menus_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\tiles_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\title_screen_SPR.h" />
+    <ClInclude Include="Source\Engine\ConstEvents.h" />
+    <ClInclude Include="Source\Engine\Constants\controls_SPR.h" />
+    <ClInclude Include="Source\Engine\ControllersManager.h" />
+    <ClInclude Include="Source\Engine\ControlsManager.h" />
+    <ClInclude Include="Source\Engine\CustomInterfaces.h" />
+    <ClInclude Include="Source\Engine\DataTypes.h" />
+    <ClInclude Include="Source\Engine\dbgutil.h" />
+    <ClInclude Include="Source\Common\dxstdafx.h" />
+    <ClInclude Include="Source\Common\DXUT.h" />
+    <ClInclude Include="Source\Common\DXUTenum.h" />
+    <ClInclude Include="Source\Common\DXUTmisc.h" />
+    <ClInclude Include="Source\Engine\enginecommon.h" />
+    <ClInclude Include="Source\Engine\EventManager.h" />
+    <ClInclude Include="Source\Engine\Constants\font_ids.h" />
+    <ClInclude Include="Source\Engine\FileManager.h" />
+    <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyLeaderboards.h" />
+    <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.h" />
+    <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.h" />
+    <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyUtils.h" />
+    <ClInclude Include="Source\Engine\gameplay\ActiveInterface.h" />
+    <ClInclude Include="Source\Engine\gameplay\CollisionShape.h" />
+    <ClInclude Include="Source\Engine\gameplay\GameConstants.h" />
+    <ClInclude Include="Source\Engine\gameplay\Light.h" />
+    <ClInclude Include="Source\Engine\GetDXVer.h" />
+    <ClInclude Include="Source\Engine\Constants\igminterface_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\interface_mg_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\interlevel_SPR.h" />
+    <ClInclude Include="Source\Engine\InfiniteVerticalMode.h" />
+    <ClInclude Include="Source\Engine\Level.h" />
+    <ClInclude Include="Source\Engine\LevelTypes.h" />
+    <ClInclude Include="Source\Engine\LibraryManager.h" />
+    <ClInclude Include="Source\Engine\List.h" />
+    <ClInclude Include="Source\Engine\Log.h" />
+    <ClInclude Include="Source\Engine\MainMenu.h" />
+    <ClInclude Include="Source\Engine\mathutil.h" />
+    <ClInclude Include="Source\Engine\MiniDump.h" />
+    <ClInclude Include="Source\Engine\Mods.h" />
+    <ClInclude Include="Source\Engine\Netlock.h" />
+    <ClInclude Include="Source\Engine\Network.h" />
+    <ClInclude Include="Source\Engine\NetworkBase.h" />
+    <ClInclude Include="Source\Engine\NetworkDummy.h" />
+    <ClInclude Include="Source\Engine\PlayerSelScr.h" />
+    <ClInclude Include="Source\Engine\PolyFOV.h" />
+    <ClInclude Include="Source\Engine\Queue.h" />
+    <ClInclude Include="Source\Engine\ShaderManager.h" />
+    <ClInclude Include="Source\Engine\Shop.h" />
+    <ClInclude Include="Source\Engine\Steam.h" />
+    <ClInclude Include="Source\Engine\Steam\SteamAchievements.h" />
+    <ClInclude Include="Source\Engine\Steam\SteamLeaderboards.h" />
+    <ClInclude Include="Source\Engine\Steam\SteamMultiplayerMessages.h" />
+    <ClInclude Include="Source\Engine\Steam\SteamMultiplayerSteamClientP2P.h" />
+    <ClInclude Include="Source\Engine\Steam\SteamPublish.h" />
+    <ClInclude Include="Source\Engine\Steam\SteamSubscriptions.h" />
+    <ClInclude Include="Source\Engine\Steam\SteamUpdatePublished.h" />
+    <ClInclude Include="Source\Engine\Steam\SteamUtils.h" />
+    <ClInclude Include="Source\Engine\TTFont.h" />
+    <ClInclude Include="Source\Engine\UTAppClass.h" />
+    <ClInclude Include="Source\Engine\ogg.h" />
+    <ClInclude Include="Source\Engine\Constants\particles_SPR.h" />
+    <ClInclude Include="Source\Engine\ParticlesManager.h" />
+    <ClInclude Include="Source\Engine\pugiconfig.hpp" />
+    <ClInclude Include="Source\Engine\pugixml.hpp" />
+    <ClInclude Include="Source\Engine\Randoms.h" />
+    <ClInclude Include="Source\resource.h" />
+    <ClInclude Include="Source\resource1.h" />
+    <ClInclude Include="Source\Engine\ScriptManager.h" />
+    <ClInclude Include="Source\Engine\SoundManager.h" />
+    <ClInclude Include="Source\Engine\Constants\sounds.h" />
+    <ClInclude Include="Source\Engine\Sprite.h" />
+    <ClInclude Include="Source\Engine\SpriteCollection.h" />
+    <ClInclude Include="Source\Engine\Constants\strings.h" />
+    <ClInclude Include="Source\Engine\StringsManager.h" />
+    <ClInclude Include="Source\Engine\TexturedFont.h" />
+    <ClInclude Include="Source\Engine\TextureManager.h" />
+    <ClInclude Include="Source\Engine\Constants\tiles1_SPR.h" />
+    <ClInclude Include="Source\Versioning\versioning.h" />
+    <ClInclude Include="Versioning\versioning.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Source\ActionSquad.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Common\DXUTgui.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Source\Common\DXUTSettingsDlg.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Source\ControlsEd\ControlsEditor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\AchievementManager.cpp" />
+    <ClCompile Include="Source\Engine\Analytics.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\AppGlobals.cpp" />
+    <ClCompile Include="Source\Engine\BitPacker.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\BufferedPainter.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\CameraTransform.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Chapters.cpp" />
+    <ClCompile Include="Source\Engine\ChatWnd.cpp" />
+    <ClCompile Include="Source\Engine\ConstEvents.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\ControllersManager.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\ControlsManager.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\CustomInterfaces.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\DataTypes.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\dbgutil.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Common\dxstdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Source\Common\DXUT.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Common\DXUTenum.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Common\DXUTmisc.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\enginecommon.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\EventManager.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\FileManager.cpp" />
+    <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyLeaderboards.cpp" />
+    <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.cpp" />
+    <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\ActiveInterface.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\CollisionShape.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\Light.cpp" />
+    <ClCompile Include="Source\Engine\GetDXVer.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\InfiniteVerticalMode.cpp" />
+    <ClCompile Include="Source\Engine\Level.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\LevelTypes.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\LibraryManager.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Log.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\MainMenu.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\mathutil.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\MiniDump.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\miniz.cpp" />
+    <ClCompile Include="Source\Engine\Mods.cpp" />
+    <ClCompile Include="Source\Engine\Netlock.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\NetworkBase.cpp" />
+    <ClCompile Include="Source\Engine\NetworkDummy.cpp" />
+    <ClCompile Include="Source\Engine\PlayerSelScr.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\PolyFOV.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\ShaderManager.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Shop.cpp" />
+    <ClCompile Include="Source\Engine\Steam.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Steam\SteamAchievements.cpp" />
+    <ClCompile Include="Source\Engine\Steam\SteamLeaderboards.cpp" />
+    <ClCompile Include="Source\Engine\Steam\SteamMultiplayerSteamClientP2P.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Steam\SteamPublish.cpp" />
+    <ClCompile Include="Source\Engine\Steam\SteamSubscriptions.cpp" />
+    <ClCompile Include="Source\Engine\Steam\SteamUpdatePublished.cpp" />
+    <ClCompile Include="Source\Engine\Steam\SteamUtils.cpp" />
+    <ClCompile Include="Source\Engine\TTFont.cpp" />
+    <ClCompile Include="Source\Engine\UTAppClass.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\UTAppClassStates.cpp" />
+    <ClCompile Include="Source\Main.cpp" />
+    <ClCompile Include="Source\Engine\ogg.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\ParticlesManager.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\pugixml.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Randoms.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\ScriptManager.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\SoundManager.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Sprite.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\SpriteCollection.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\StringsManager.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\TexturedFont.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</MinimalRebuild>
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\TextureManager.cpp">
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Versioning\versions.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Source\DKAS.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="Source\dpiaware.manifest" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

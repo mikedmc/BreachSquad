@@ -1,0 +1,33 @@
+#define   FONTS__COUNT   2
+
+#define FONTID_12_WOW_S L"FONT_12_WOW"
+#define FONTID_10_B1_S L"FONT_10_B1"
+#define FONTID_10_BS1_S L"FONT_10_BS1"
+#define FONTID_9_B1_S L"FONT_9_B1"
+#define FONTID_8_B1_S L"FONT_8_B1"
+#define FONTID_8_BS1_S L"FONT_8_BS1"
+#define FONTID_6_N1_S L"FONT_6_N1"
+#define FONTID_6_NS1_S L"FONT_6_NS1"
+#define FONTID_6_NC1_S L"FONT_6_NC1"
+#define FONTID_5_N1_S L"FONT_5_N1"
+#define FONTID_5_N2_S L"FONT_5_N2"
+#define FONTID_5_NS2_S L"FONT_5_NS2"
+
+//manually set font ids depending on loading order
+enum eFontID {
+	FONTIDX_12_WOW = 0,
+	FONTIDX_10_B1 = 1,
+	FONTIDX_10_BS1,
+	FONTIDX_9_B1,
+	FONTIDX_8_B1,
+	FONTIDX_8_BS1,
+	FONTIDX_6_N1,
+	FONTIDX_6_NS1,
+	FONTIDX_6_NC1,
+	FONTIDX_5_N1,
+	FONTIDX_5_N2,
+	FONTIDX_5_NS1,
+
+	FONTIDX_COUNT
+};
+

@@ -1,0 +1,503 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<GEAR_DATA>
+  <!-- SHOP PRICES. Any change will break the game! ;) -->
+  <SHOP>
+    <WPN_PISTOL_P226 nPrice="2" />
+    <WPN_PISTOL_MP40 nPrice="2" />
+    <WPN_PISTOL_1911 nPrice="5" />
+    <WPN_PISTOL_FIVESEVEN nPrice="5" />
+    <WPN_PISTOL_G18C nPrice="10" />
+    <WPN_SWAT_REVOLVER nPrice="6" />
+
+
+    <WPN_PISTOL_MP40_FBI nPrice="2" />
+    <WPN_PISTOL_MODEL1076_FBI nPrice="6" />
+    <WPN_PISTOL_1911_FBI nPrice="4" />
+    <WPN_PISTOL_FIVESEVEN_FBI nPrice="4" />
+    <WPN_FBI_REVOLVER nPrice="6" /> 
+    <WPN_PISTOL_G18C_FBI nPrice="10" />
+
+    <WPN_SMG_UMP45 nPrice="6" />
+    <WPN_CARABINE_M4A1 nPrice="8" />
+    <WPN_SMG_P90 nPrice="8" />
+    <WPN_SMG_MP7 nPrice="8" />
+    <WPN_MCX300_CARBINE nPrice="10" />
+
+    <WPN_SHOTGUN_JCOMBAT nPrice="6" />
+    <WPN_SHOTGUN_M870 nPrice="4" />
+    <WPN_SHOTGUN_S12K nPrice="6" />
+    <WPN_SHOTGUN_KSG nPrice="10" />
+    <WPN_SHOTGUN_HK512 nPrice="10" />
+    <WPN_SHOTGUN_SIX12REVO nPrice="10" />
+
+    <WPN_SMG_MP5SD nPrice="4" />
+    <WPN_SMG_MP7SD nPrice="8" />
+    <WPN_SMG_UZI nPrice="4" />
+    <WPN_SMG_CBJ nPrice="10" />
+
+    <WPN_TRAPPER_RIFLE nPrice="6" />
+    <WPN_TRICKED_OUT_AK nPrice="10" />
+
+    <EQUIP_SHIELD_ASSAULT nPrice="10" />
+    <EQUIP_SHIELD_IRONMAN nPrice="8" />
+    <!-- EQUIPMENT -->
+    <EQUIP_SPEED_POUCHES nPrice="2" />
+    <EQUIP_EXTRA_GEAR nPrice="2" />
+    <EQUIP_BODY_ARMOR nPrice="2" />
+    <EQUIP_BETTER_ARMOR nPrice="4" />
+    <EQUIP_ANTISTAB_ARMOR nPrice="2" />
+    <EQUIP_RECON_ARMOR nPrice="4" />
+    <!-- GEAR -->
+    <WPN_BREACHING_CHARGE nPrice="2" />
+    <WPN_GRENADE nPrice="4" />
+    <WPN_SMOKE_GRENADE nPrice="2" />
+    <WPN_FLASHBANG nPrice="2" />
+    <WPN_SPEED_LOADER nPrice="3" />
+    <WPN_MAG_READY nPrice="3" />
+    <WPN_CAM_BALL nPrice="2" />
+    <WPN_SPY_CAMERA nPrice="3" />
+    <WPN_BREACHER_PISTOL_GEAR nPrice="4" />
+  </SHOP>
+
+  <!-- 
+  ! "EMPTY" is a special node name that gets replaced with the empty string.
+  ! Items order IS important
+  
+  UPGRADES:
+  ========
+  ! nIconIdx is from controls.bsx UPGRADE_ICONS
+  <UPGRADE_PERK_... are preconfigured (aka hardcoded)
+  
+  ULTIMATE: 
+  ========
+  ! All animation indices used below reside in menus.bsx
+  nIconIdx is the icon frame index from ICONS_ULTIMATE animation
+  
+  WEAPONS:
+  =======
+  ! All animation indices used below reside in menus.bsx
+  nIconIdx - icon frame index from ICONS_WEAPON animation
+  nIconIdxALT - icon frame index from ICONS_SPECIALS animation
+  
+  SPECIAL ABILITIES:
+  =================
+  SA_BODY_ARMOR
+	SA_GEAR_REFILL
+	SA_MEDIKIT
+	SA_REINFORCEMENT
+	SA_EXTRA_LIFE
+	SA_SNIPER_SUPPORT
+	SA_ACTIVE_SNIPER_FIRE
+	SA_DRAGON_BREATH
+	SA_SUBMACHINEGUN
+	SA_BREACHER_SAW
+  SA_FBI_AKIMBO,
+	SA_FBI_MP5K,
+  SA_MK48MOD1,
+  SA_RECON_MARKSMAN,
+  SA_OFFDUTY_GARAND
+  -->
+
+  <UPGRADE_BARS>
+    <!-- TEAM BARS - shared by all classes -->
+    <UPGRADE_BAR strUID="TEAM_LOGISTICS" nTotalPoints="12" nMemorySlot="0" strID_name="LOGISTICS" strID_desc="BAR_S1_LOGISTICS">
+      <UPGRADE_PERK_DOUBLE_GEAR nPointsPrice="3" nIconIdx="1" strID_desc="PERK_DOUBLE_GEAR" />
+      <UPGRADE_PERK_NOMEX_SUIT nPointsPrice="6" nIconIdx="2" strID_desc="PERK_NOMEX_SUITS" />
+      <UPGRADE_PERK_DOUBLE_MEDIKITS nPointsPrice="9" nIconIdx="3" strID_desc="PERK_DOUBLE_MEDIKITS" />
+      <UPGRADE_PERK_EXTRA_SP_SLOTS nPointsPrice="12" nIconIdx="70" strID_desc="PERK_EXTRA_SP_SLOTS" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="TEAM_PHYSICAL" nTotalPoints="12" nMemorySlot="1" strID_name="PHYSICAL" strID_desc="BAR_S2_PHYSICAL">
+      <UPGRADE_PERK_MELEE_DEFENSE nPointsPrice="2" nIconIdx="4" strID_desc="PERK_MELEE_DEFENSE" />
+      <UPGRADE_PERK_SPEED_INCREASE nPointsPrice="5" nIconIdx="5" strID_desc="PERK_SPEED_IS_LIFE" />
+      <UPGRADE_PERK_MULE nPointsPrice="7" nIconIdx="6" strID_desc="PERK_MULE" />
+      <UPGRADE_PERK_DIE_HARD nPointsPrice="12" nIconIdx="7" strID_desc="PERK_DIE_HARD" />
+    </UPGRADE_BAR>
+    <!-- CLASS BARS - SPECIFIC TO ASSAULTER -->
+    <UPGRADE_BAR strUID="A1_ACCURACY" nTotalPoints="12" nMemorySlot="2" strID_name="ACCURACY" strID_desc="BAR_A1_ACCURACY">
+      <UPGRADE_PERK_QUICK_AIM nPointsPrice="3" nIconIdx="8" strID_desc="PERK_QUICK_AIM" />
+      <UPGRADE_PERK_CRITICAL_SHOTS nPointsPrice="7" nIconIdx="9" strID_desc="PERK_CRITICAL_SHOTS" />
+      <UPGRADE_PERK_SUREFOOTED nPointsPrice="12" nIconIdx="10" strID_desc="PERK_SUREFOOTED" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="A2_RECOIL" nTotalPoints="12" nMemorySlot="3" strID_name="RECOIL" strID_desc="BAR_A2_RECOIL">
+      <UPGRADE_PERK_BARRICADE nPointsPrice="2" nIconIdx="12" strID_desc="PERK_BARRICADE_SHOOTING" />
+      <UPGRADE_PERK_STRONG_STANCE nPointsPrice="8" nIconIdx="14" strID_desc="PERK_STRONG_STANCE" />
+      <UPGRADE_PERK_C_CLAMP nPointsPrice="12" nIconIdx="15" strID_desc="PERK_C_CLAMP" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="A3_TACTICS" nTotalPoints="12" nMemorySlot="4" strID_name="TACTICS" strID_desc="BAR_NO_IMPROVEMENT">
+      <UPGRADE_PERK_DOUBLE_BANGERS nPointsPrice="4" nIconIdx="16" strID_desc="PERK_DOUBLE_BANGERS" />
+      <UPGRADE_PERK_INTIMIDATING nPointsPrice="7" nIconIdx="17" strID_desc="PERK_INTIMIDATING" />
+      <UPGRADE_PERK_ASSAULT_JUMP nPointsPrice="12" nIconIdx="52" strID_desc="PERK_ASSAULT_JUMP" />
+    </UPGRADE_BAR>
+    <!-- CLASS BARS - SPECIFIC TO BREACHER -->
+    <UPGRADE_BAR strUID="B1_RECOIL" nTotalPoints="12" nMemorySlot="5" strID_name="BREACH_RECOIL" strID_desc="BAR_B1_RECOIL">
+      <UPGRADE_PERK_TWIN_SHOT nPointsPrice="4" nIconIdx="20" strID_desc="PERK_TWIN_SHOT" />
+      <UPGRADE_PERK_9PELLET_BUCK nPointsPrice="7" nIconIdx="21" strID_desc="PERK_9_PELLET" />
+      <UPGRADE_PERK_KILLING_SPREE nPointsPrice="12" nIconIdx="22" strID_desc="PERK_KILLING_SPREE" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="B2_RELOAD" nTotalPoints="12" nMemorySlot="6" strID_name="BREACH_RELOAD" strID_desc="BAR_B2_RELOAD">
+      <UPGRADE_PERK_EXTENSION_TUBES nPointsPrice="4" nIconIdx="56" strID_desc="PERK_EXTENSION_TUBES" />
+      <UPGRADE_PERK_RIFLED_SLUGS nPointsPrice="8" nIconIdx="25" strID_desc="PERK_RIFLED_SLUGS" />
+      <UPGRADE_PERK_IMPROVED_SLUGS nPointsPrice="12" nIconIdx="26" strID_desc="PERK_IMPROVED_SLUGS" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="B3_TACTICS" nTotalPoints="12" nMemorySlot="7" strID_name="TACTICS" strID_desc="BAR_NO_IMPROVEMENT">
+      <UPGRADE_PERK_GORE_DEALER nPointsPrice="3" nIconIdx="28" strID_desc="PERK_GORE_DEALER" />
+      <UPGRADE_PERK_POINTMAN_ARMOR nPointsPrice="7" nIconIdx="29" strID_desc="PERK_POINTMAN_ARMOR" />
+      <UPGRADE_PERK_WEAK_SPOTTER nPointsPrice="12" nIconIdx="30" strID_desc="PERK_WEAK_SPOTTER" />
+    </UPGRADE_BAR>
+    <!-- CLASS BARS - SPECIFIC TO SHIELD -->
+    <UPGRADE_BAR strUID="S1_HANDGUN" nTotalPoints="12" nMemorySlot="8" strID_name="SHIELD_HANDGUN" strID_desc="BAR_S1_HANDGUN">
+      <UPGRADE_PERK_EXTENDED_MAGS nPointsPrice="2" nIconIdx="63" strID_desc="PERK_EXTENDED_MAGS" />
+      <UPGRADE_PERK_SHIELD_BRACE nPointsPrice="6" nIconIdx="40" strID_desc="PERK_SHIELD_BRACE" />
+      <UPGRADE_PERK_LADY_JUSTICE nPointsPrice="12" nIconIdx="49" strID_desc="PERK_LADY_JUSTICE" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="S2_SHIELD" nTotalPoints="12" nMemorySlot="9" strID_name="SHIELD_SHIELD" strID_desc="BAR_S2_SHIELD_USE">
+      <UPGRADE_PERK_FORTIFIED nPointsPrice="3" nIconIdx="45" strID_desc="PERK_FORTIFIED" />
+      <UPGRADE_PERK_ARMORED_RABBIT nPointsPrice="6" nIconIdx="41" strID_desc="PERK_ARMORED_RABBIT" />
+      <UPGRADE_PERK_FIELD_FIXER nPointsPrice="12" nIconIdx="64" strID_desc="PERK_FIELD_FIXER" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="S3_TACTICS" nTotalPoints="12" nMemorySlot="10" strID_name="TACTICS" strID_desc="BAR_NO_IMPROVEMENT">
+      <UPGRADE_PERK_DEVASTATOR nPointsPrice="4" nIconIdx="65" strID_desc="PERK_DEVASTATOR" />
+      <UPGRADE_PERK_CADDYSHACK nPointsPrice="8" nIconIdx="58" strID_desc="PERK_CADDYSHACK" />
+      <UPGRADE_PERK_IRON_MAN nPointsPrice="12" nIconIdx="51" strID_desc="PERK_IRON_MAN" />
+    </UPGRADE_BAR>
+    <!-- CLASS BARS - SPECIFIC TO RECON -->
+    <UPGRADE_BAR strUID="R1_GUNPLAY" nTotalPoints="12" nMemorySlot="11" strID_name="ACCURACY" strID_desc="BAR_R1_GUNPLAY">
+      <UPGRADE_PERK_HANDYMAN nPointsPrice="2" nIconIdx="67" strID_desc="PERK_HANDYMAN" />
+      <UPGRADE_PERK_DISORIENTED nPointsPrice="6" nIconIdx="68" strID_desc="PERK_DISORIENTED" />
+      <UPGRADE_PERK_CRIPPLING_SHOTS nPointsPrice="9" nIconIdx="55" strID_desc="PERK_CRIPPLING_SHOTS" />
+      <UPGRADE_PERK_SURGEON_PRECISION nPointsPrice="12" nIconIdx="57" strID_desc="PERK_SURGEON_PRECISION" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="R2_RECON" nTotalPoints="12" nMemorySlot="12" strID_name="RECON" strID_desc="BAR_R2_RECON">
+      <UPGRADE_PERK_INVISIBLE nPointsPrice="4" nIconIdx="62" strID_desc="PERK_INVISIBLE" />
+      <UPGRADE_PERK_DURACELLS nPointsPrice="7" nIconIdx="50" strID_desc="PERK_DURACELLS" />
+      <UPGRADE_PERK_RESCUE_PLAN nPointsPrice="12" nIconIdx="54" strID_desc="PERK_RESCUE_PLAN" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="R3_TACTICS" nTotalPoints="12" nMemorySlot="13" strID_name="TACTICS" strID_desc="BAR_NO_IMPROVEMENT">
+      <UPGRADE_PERK_EXTENDED_MAGS_RECON nPointsPrice="3" nIconIdx="63" strID_desc="PERK_EXTENDED_MAGS_RECON" />
+      <UPGRADE_PERK_VULTURE nPointsPrice="6" nIconIdx="59" strID_desc="PERK_VULTURE" />
+      <UPGRADE_PERK_DOUBLE_TOOLS nPointsPrice="9" nIconIdx="60" strID_desc="PERK_DOUBLE_TOOLS" />
+      <UPGRADE_PERK_CAUGHT_IN_THE_ACT nPointsPrice="12" nIconIdx="48" strID_desc="PERK_CAUGHT_IN_THE_ACT" />
+    </UPGRADE_BAR>
+    <!-- CLASS BARS - SPECIFIC TO FERGIE -->
+    <UPGRADE_BAR strUID="F1_HANDGUN" nTotalPoints="12" nMemorySlot="14" strID_name="FERGIE_HANDGUN" strID_desc="BAR_F1_HANDGUN">
+      <UPGRADE_PERK_STEADY_HAND nPointsPrice="3" nIconIdx="32" strID_desc="PERK_STEADY_HAND" />
+      <UPGRADE_PERK_WEAVER_STANCE nPointsPrice="6" nIconIdx="31" strID_desc="PERK_WEAVER_STANCE" />
+      <UPGRADE_PERK_EXTENDED_MAGS nPointsPrice="9" nIconIdx="63" strID_desc="PERK_EXTENDED_MAGS" />
+      <UPGRADE_PERK_HOLLOW_POINTS nPointsPrice="12" nIconIdx="66" strID_desc="PERK_HOLLOW_POINTS" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="F2_MELEE" nTotalPoints="12" nMemorySlot="15" strID_name="FERGIE_MELEE" strID_desc="BAR_F2_MELEE">
+      <UPGRADE_PERK_COMBATIVES nPointsPrice="3" nIconIdx="35" strID_desc="PERK_COMBATIVES" />
+      <UPGRADE_PERK_LEG_DAY nPointsPrice="7" nIconIdx="36" strID_desc="PERK_LEG_DAY" />
+      <UPGRADE_PERK_FEDERAL_JUSTICE nPointsPrice="12" nIconIdx="38" strID_desc="PERK_FEDERAL_JUSTICE" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="F3_BUREAUCRACY" nTotalPoints="12" nMemorySlot="16" strID_name="FERGIE_BUREAUCRACY" strID_desc="BAR_NO_IMPROVEMENT">
+      <UPGRADE_PERK_EVASION nPointsPrice="5" nIconIdx="39" strID_desc="PERK_EVASION" />
+      <UPGRADE_PERK_BIG_BANGER nPointsPrice="9" nIconIdx="53" strID_desc="PERK_BIG_BANGER" />
+      <UPGRADE_PERK_CHERRY_DARLING nPointsPrice="12" nIconIdx="61" strID_desc="PERK_CHERRY_DARLING" />
+    </UPGRADE_BAR>
+    <!-- CLASS BARS - SPECIFIC TO OFF-DUTY GUY-->
+    <UPGRADE_BAR strUID="O1_SHOOTING" nTotalPoints="12" nMemorySlot="17" strID_name="ACCURACY" strID_desc="BAR_O1_ACCURACY">
+      <UPGRADE_PERK_SOFT_POINTS nPointsPrice="2" nIconIdx="71" strID_desc="PERK_SOFT_POINTS" />
+      <UPGRADE_PERK_P_AMMO nPointsPrice="7" nIconIdx="72" strID_desc="PERK_PLUSP_AMMO" />
+      <UPGRADE_PERK_OPEN_SEASON nPointsPrice="12" nIconIdx="73" strID_desc="PERK_OPEN_SEASON" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="O2_FITNESS" nTotalPoints="12" nMemorySlot="18" strID_name="FITNESS" strID_desc="BAR_O2_MELEE">
+      <UPGRADE_PERK_REDHEAD nPointsPrice="4" nIconIdx="74" strID_desc="PERK_REDHEAD" />
+      <UPGRADE_PERK_GRIZZLY nPointsPrice="8" nIconIdx="75" strID_desc="PERK_GRIZZLY" />
+      <UPGRADE_PERK_LOCKED_OUT nPointsPrice="12" nIconIdx="76" strID_desc="PERK_LOCKED_OUT" />
+    </UPGRADE_BAR>
+    <UPGRADE_BAR strUID="O3_GEAR_BAG" nTotalPoints="12" nMemorySlot="19" strID_name="GEAR_BAG" strID_desc="BAR_NO_IMPROVEMENT">
+      <UPGRADE_PERK_TWIXIE nPointsPrice="6" nIconIdx="77" strID_desc="PERK_TWIXIE" />
+      <UPGRADE_PERK_PLATES_UPGRADE nPointsPrice="9" nIconIdx="78" strID_desc="PERK_PLATES_UPGRADE" />
+      <UPGRADE_PERK_GARAND_AP_AMMO nPointsPrice="12" nIconIdx="79" strID_desc="PERK_GARAND_AP_AMMO" />
+    </UPGRADE_BAR>
+
+  </UPGRADE_BARS>
+  
+  
+  <ITEMS>
+  <!-- ASSAULTER CLASS OPTIONS -->
+    <CLASS type="ASSAULTER" strID_desc="CLASS_ASSAULTER_DESC" strID_difficulty="EASY"
+           strXPBarTeam1="TEAM_LOGISTICS" strXPBarTeam2="TEAM_PHYSICAL" strXPBarClass1="A1_ACCURACY" strXPBarClass2="A2_RECOIL" strXPBarClass3="A3_TACTICS">
+      
+      <ULTIMATE>
+        <SA_SNIPER_SUPPORT    strID_name="ULTIMATE_SNIPER_SUPPORT" strID_longDesc="ULTIMATE_SNIPER_SUPPORT_DESC" nIconIdx="0" />
+        <SA_MK48MOD1          strID_name="ULTIMATE_MK48MOD1" strID_longDesc="ULTIMATE_MK48MOD1_DESC" nIconIdx="7" />
+      </ULTIMATE>
+
+      <WEAPONS>
+        <WPN_SMG_MP5A3        strID_name="WPN_SMG_MP5A3" nIconIdx="6" strALTFireWeaponTemplate="WPN_SUBMACHINE_STEADY" strID_ALTname="SPECIAL_AIMED_SHOT" nIconIdxALT="2"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.2"  strID_stat2="ROF" fPercent_stat2="0.59" strID_stat3="ACCURACY" fPercent_stat3="0.6" strID_stat4="RECOIL" fPercent_stat4="0.25"/>
+        <WPN_SMG_UMP45        strID_name="WPN_SMG_UMP45" nIconIdx="7" strALTFireWeaponTemplate="WPN_SUBMACHINE_STEADY" strID_ALTname="SPECIAL_AIMED_SHOT" nIconIdxALT="2"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.4" strID_stat2="ROF" fPercent_stat2="0.455" strID_stat3="ACCURACY" fPercent_stat3="0.6" strID_stat4="RECOIL" fPercent_stat4="0.5"/>
+        <WPN_SMG_MP7          strID_name="WPN_MP7_PDW" nIconIdx="25" strALTFireWeaponTemplate="WPN_SUBMACHINE_STEADY" strID_ALTname="SPECIAL_AIMED_SHOT" nIconIdxALT="2"
+                              strID_stat1="APDAMAGE" fPercent_stat1="0.185"  strID_stat2="ROF" fPercent_stat2="0.704" strID_stat3="ACCURACY" fPercent_stat3="0.672" strID_stat4="RECOIL" fPercent_stat4="0.2"/>
+        <WPN_SMG_P90          strID_name="WPN_SMG_P90" nIconIdx="12" strALTFireWeaponTemplate="WPN_SUBMACHINE_STEADY" strID_ALTname="SPECIAL_AIMED_SHOT" nIconIdxALT="2"
+                              strID_stat1="APDAMAGE" fPercent_stat1="0.17" strID_stat2="ROF" fPercent_stat2="0.682" strID_stat3="ACCURACY" fPercent_stat3="0.33" strID_stat4="RECOIL" fPercent_stat4="0.2"/>
+        <WPN_CARABINE_M4A1    strID_name="WPN_CARBINE_M4A1" nIconIdx="8" strALTFireWeaponTemplate="WPN_SUBMACHINE_STEADY" strID_ALTname="SPECIAL_AIMED_SHOT" nIconIdxALT="2"
+                              strID_stat1="APDAMAGE" fPercent_stat1="0.55" strID_stat2="ROF" fPercent_stat2="0.5" strID_stat3="ACCURACY" fPercent_stat3="1.0" strID_stat4="RECOIL" fPercent_stat4="0.75"/>
+        <WPN_MCX300_CARBINE   strID_name="WPN_CARBINE_MCX300" nIconIdx="16" strALTFireWeaponTemplate="WPN_SUBMACHINE_STEADY" strID_ALTname="SPECIAL_AIMED_SHOT" nIconIdxALT="2"
+                              strID_stat1="APDAMAGE" fPercent_stat1="0.55" strID_stat2="ROF" fPercent_stat2="0.455" strID_stat3="ACCURACY" fPercent_stat3="0.95" strID_stat4="RECOIL" fPercent_stat4="0.9"/>
+      </WEAPONS>
+
+      <EQUIPMENT>
+        <EMPTY                strID_name="EQUIP_NOEQUIPMENT" nIconIdx="0" nIconIdxALT="1" strID_longDesc="GEAR_EMPTY_DESC"/>
+        <EQUIP_BODY_ARMOR     strID_name="EQUIP_BODY_ARMOR" nIconIdx="5" nIconIdxALT="1" strID_ALTname="EQUIP_BODY_ARMOR_BOTTOM" 
+                              strID_longDesc="EQUIP_BODY_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_BODY_ARMOR" />
+        <EQUIP_BETTER_ARMOR   strID_name="EQUIP_BETTER_ARMOR" nIconIdx="8" nIconIdxALT="1" strID_ALTname="EQUIP_BETTER_ARMOR_BOTTOM"
+                              strID_longDesc="EQUIP_BETTER_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_IMPROVED_ARMOR" />
+        <EQUIP_ANTISTAB_ARMOR strID_name="EQUIP_ANTISTAB_ARMOR" nIconIdx="9" nIconIdxALT="1" strID_ALTname="EQUIP_ANTISTAB_ARMOR_BOTTOM"
+                              strID_longDesc="EQUIP_ANTISTAB_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_ANTISTAB" />
+        <EQUIP_SPEED_POUCHES  strID_name="EQUIP_SPEED_POUCHES" nIconIdx="4" nIconIdxALT="1" strID_ALTname="EQUIP_SPEED_POUCHES_BOTTOM" 
+                              strID_longDesc="EQUIP_SPEED_POUCHES_RIGHT" strTemplateModifier="UPGRADE_EQUIP_SPEED_POUCHES" />
+        <EQUIP_EXTRA_GEAR     strID_name="EQUIP_EXTRA_GEAR" nIconIdx="7" nIconIdxALT="1" strID_ALTname="EQUIP_EXTRA_GEAR_BOTTOM" 
+                              strID_longDesc="EQUIP_EXTRA_GEAR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_EXTRA_GEAR" />
+
+      </EQUIPMENT>
+
+      <GEAR>
+        <EMPTY                strID_name="GEAR_NOGEAR" nIconIdx="0" nIconIdxALT="1" strID_longDesc="GEAR_EMPTY_DESC"/>
+        <WPN_FLASHBANG        strID_name="GEAR_FLASHBANG" nIconIdx="3" strID_longDesc="GEAR_FLASHBANG_DESC" />
+        <WPN_GRENADE          strID_name="GEAR_GRENADE" nIconIdx="2" strID_longDesc="GEAR_GRENADE_DESC" />
+        <WPN_SMOKE_GRENADE    strID_name="GEAR_SMOKE_GRENADE" nIconIdx="6" strID_longDesc="GEAR_SMOKE_GRENADE_DESC" />
+        <WPN_BREACHING_CHARGE strID_name="GEAR_BREACHING_CHARGE" nIconIdx="1" strID_longDesc="GEAR_BREACHING_CHARGE_DESC" />
+        <WPN_MAG_READY        strID_name="GEAR_MAG_READY" nIconIdx="5" strID_longDesc="GEAR_MAG_READY_DESC" />
+      </GEAR>
+    </CLASS>
+
+  <!-- BREACHER CLASS OPTIONS -->
+    <CLASS type="BREACHER" strID_desc="CLASS_BREACHER_DESC" strID_difficulty="LOL" 
+           strXPBarTeam1="TEAM_LOGISTICS" strXPBarTeam2="TEAM_PHYSICAL" strXPBarClass1="B1_RECOIL" strXPBarClass2="B2_RELOAD" strXPBarClass3="B3_TACTICS">
+      <ULTIMATE>
+        <SA_SNIPER_SUPPORT    strID_name="ULTIMATE_SNIPER_SUPPORT" strID_longDesc="ULTIMATE_SNIPER_SUPPORT_DESC" nIconIdx="0" />
+        <SA_DRAGON_BREATH     strID_name="ULTIMATE_DRAGON_BREATH" strID_longDesc="ULTIMATE_DRAGON_BREATH_DESC" nIconIdx="3" />
+        <SA_BREACHER_SAW      strID_name="ULTIMATE_SAW" strID_longDesc="ULTIMATE_SAW_DESC" nIconIdx="4" />
+      </ULTIMATE>
+
+      <WEAPONS>
+        <WPN_SHOTGUN_M590     strID_name="WPN_SHOTGUN_M590" nIconIdx="3" strALTFireWeaponTemplate="WPN_SHOTGUN_SLUG_M590" strID_ALTname="SPECIAL_SLUG_FIRE" nIconIdxALT="3"
+                              strID_stat1="SPREAD" fPercent_stat1="0.6" strID_stat2="AMMO" fPercent_stat2="0.8" strID_stat3="RELOAD" fPercent_stat3="0.32" strID_stat4="ROF" fPercent_stat4="0.6"/>
+        <WPN_SHOTGUN_M870     strID_name="WPN_SHOTGUN_M870" nIconIdx="9" strALTFireWeaponTemplate="WPN_SHOTGUN_SLUG_M870" strID_ALTname="SPECIAL_SLUG_FIRE" nIconIdxALT="3"
+                              strID_stat1="SPREAD" fPercent_stat1="0.81" strID_stat2="AMMO" fPercent_stat2="0.4" strID_stat3="RELOAD" fPercent_stat3="0.96" strID_stat4="ROF" fPercent_stat4="0.6"/>
+        <WPN_SHOTGUN_JCOMBAT  strID_name="WPN_SHOTGUN_JCOMBAT" nIconIdx="4" strALTFireWeaponTemplate="WPN_SHOTGUN_SLUG_JCOMBAT" strID_ALTname="SPECIAL_SLUG_FIRE" nIconIdxALT="3"
+                              strID_stat1="SPREAD" fPercent_stat1="0.72" strID_stat2="AMMO" fPercent_stat2="0.5" strID_stat3="RELOAD" fPercent_stat3="0.8" strID_stat4="ROF" fPercent_stat4="1.0"/>
+        <WPN_SHOTGUN_S12K     strID_name="WPN_SHOTGUN_S12K" nIconIdx="5" strID_ALTname="NONE" nIconIdxALT="0"
+                              strID_stat1="SPREAD" fPercent_stat1="0.9" strID_stat2="AMMO" fPercent_stat2="0.8" strID_stat3="RELOAD" fPercent_stat3="0.94" strID_stat4="ROF" fPercent_stat4="0.93"/>
+        <WPN_SHOTGUN_KSG      strID_name="WPN_SHOTGUN_KSG" nIconIdx="11" strALTFireWeaponTemplate="WPN_SHOTGUN_KSG_SLUGS" strID_ALTname="SPECIAL_TWO_MAGAZINES" nIconIdxALT="7"
+                              strID_stat1="SPREAD" fPercent_stat1="0.84" strID_stat2="AMMO" fPercent_stat2="0.5" strID_stat3="RELOAD" fPercent_stat3="0.1" strID_stat4="ROF" fPercent_stat4="0.66"/>
+        <WPN_SHOTGUN_HK512    strID_name="WPN_SHOTGUN_HK512" nIconIdx="10" strALTFireWeaponTemplate="WPN_SHOTGUN_HK512_HORIZONTAL" strID_ALTname="SPECIAL_FIRE_MODE_CHANGE" nIconIdxALT="6"
+                              strID_stat1="SPREAD" fPercent_stat1="0.4" strID_stat2="AMMO" fPercent_stat2="0.7" strID_stat3="RELOAD" fPercent_stat3="0.34" strID_stat4="ROF" fPercent_stat4="0.9"/>
+        <WPN_SHOTGUN_SIX12REVO strID_name="WPN_SIX12_REVO" nIconIdx="28" strALTFireWeaponTemplate="WPN_SHOTGUN_SIX12REVO_SLUG" strID_ALTname="SPECIAL_TWO_MAGAZINES" nIconIdxALT="7"
+                              strID_stat1="SPREAD" fPercent_stat1="0.55" strID_stat2="AMMO" fPercent_stat2="0.6" strID_stat3="RELOAD" fPercent_stat3="0.65" strID_stat4="ROF" fPercent_stat4="0.73"/>
+      </WEAPONS>
+
+      <EQUIPMENT>
+        <EMPTY                    strID_name="EQUIP_NOEQUIPMENT" nIconIdx="0" nIconIdxALT="1" strID_longDesc="GEAR_EMPTY_DESC"/>
+        <EQUIP_SPEED_POUCHES      strID_name="EQUIP_SPEED_POUCHES" nIconIdx="4" nIconIdxALT="1" strID_ALTname="EQUIP_SPEED_POUCHES_BOTTOM" 
+                                  strID_longDesc="EQUIP_SPEED_POUCHES_RIGHT" strTemplateModifier="UPGRADE_EQUIP_SPEED_POUCHES" />
+        <EQUIP_BODY_ARMOR         strID_name="EQUIP_BODY_ARMOR" nIconIdx="5" nIconIdxALT="1" strID_ALTname="EQUIP_BODY_ARMOR_BOTTOM" 
+                                  strID_longDesc="EQUIP_BODY_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_BODY_ARMOR" />
+        <EQUIP_BETTER_ARMOR       strID_name="EQUIP_BETTER_ARMOR" nIconIdx="8" nIconIdxALT="1" strID_ALTname="EQUIP_BETTER_ARMOR_BOTTOM"
+                                  strID_longDesc="EQUIP_BETTER_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_IMPROVED_ARMOR" />
+        <EQUIP_ANTISTAB_ARMOR     strID_name="EQUIP_ANTISTAB_ARMOR" nIconIdx="9" nIconIdxALT="1" strID_ALTname="EQUIP_ANTISTAB_ARMOR_BOTTOM"
+                                  strID_longDesc="EQUIP_ANTISTAB_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_ANTISTAB" />
+        <EQUIP_EXTRA_GEAR         strID_name="EQUIP_EXTRA_GEAR" nIconIdx="7" nIconIdxALT="1" strID_ALTname="EQUIP_EXTRA_GEAR_BOTTOM" 
+                                  strID_longDesc="EQUIP_EXTRA_GEAR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_EXTRA_GEAR" />
+      </EQUIPMENT>
+
+      <GEAR>
+        <EMPTY                    strID_name="GEAR_NOGEAR" nIconIdx="0" nIconIdxALT="1" strID_longDesc="GEAR_EMPTY_DESC"/>
+        <WPN_FLASHBANG            strID_name="GEAR_FLASHBANG" nIconIdx="3" strID_longDesc="GEAR_FLASHBANG_DESC" />
+        <WPN_GRENADE              strID_name="GEAR_GRENADE" nIconIdx="2" strID_longDesc="GEAR_GRENADE_DESC" />
+        <WPN_SMOKE_GRENADE        strID_name="GEAR_SMOKE_GRENADE" nIconIdx="6" strID_longDesc="GEAR_SMOKE_GRENADE_DESC" />
+        <WPN_BREACHING_CHARGE     strID_name="GEAR_BREACHING_CHARGE" nIconIdx="1" strID_longDesc="GEAR_BREACHING_CHARGE_DESC" />
+        <WPN_SPEED_LOADER         strID_name="GEAR_SPEED_LOADER" nIconIdx="4" strID_longDesc="GEAR_SPEED_LOADER_DESC" />
+        <WPN_BREACHER_PISTOL_GEAR strID_name="WPN_PISTOL_1911" nIconIdx="9" strID_longDesc="GEAR_PISTOL1911_DESC" />
+      </GEAR>
+    </CLASS>
+  
+  <!-- SHIELD CLASS OPTIONS -->
+    <CLASS type="SHIELD" strID_desc="CLASS_SHIELD_DESC" strID_difficulty="MEDIUM" 
+           strXPBarTeam1="TEAM_LOGISTICS" strXPBarTeam2="TEAM_PHYSICAL" strXPBarClass1="S1_HANDGUN" strXPBarClass2="S2_SHIELD" strXPBarClass3="S3_TACTICS">
+      <ULTIMATE>
+        <SA_SNIPER_SUPPORT    strID_name="ULTIMATE_SNIPER_SUPPORT" strID_longDesc="ULTIMATE_SNIPER_SUPPORT_DESC" nIconIdx="0"/>
+        <SA_SUBMACHINEGUN     strID_name="ULTIMATE_SUBMACHINEGUN" strID_longDesc="ULTIMATE_SUBMACHINEGUN_DESC" nIconIdx="2" />
+      </ULTIMATE>
+
+      <WEAPONS>
+        <WPN_PISTOL_G17       strID_name="WPN_PISTOL_G17" nIconIdx="0" strID_ALTname="NONE" nIconIdxALT="0"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.33" strID_stat2="RECOIL" fPercent_stat2="0.35" strID_stat3="AMMO" fPercent_stat3="0.857" strID_stat4="RELOAD" fPercent_stat4="0.5"/>
+        <WPN_PISTOL_P226      strID_name="WPN_PISTOL_P226" nIconIdx="14" strID_ALTname="NONE" nIconIdxALT="0"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.35" strID_stat2="RECOIL" fPercent_stat2="0.41" strID_stat3="AMMO" fPercent_stat3="0.762" strID_stat4="RELOAD" fPercent_stat4="0.65"/>
+        <WPN_PISTOL_MP40      strID_name="WPN_PISTOL_MP40" nIconIdx="1" strID_ALTname="NONE" nIconIdxALT="0"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.4" strID_stat2="RECOIL" fPercent_stat2="0.5" strID_stat3="AMMO" fPercent_stat3="0.762" strID_stat4="RELOAD" fPercent_stat4="0.5"/>
+        <WPN_PISTOL_1911      strID_name="WPN_PISTOL_1911" nIconIdx="2" strID_ALTname="NONE" nIconIdxALT="0"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.51" strID_stat2="RECOIL" fPercent_stat2="0.75" strID_stat3="AMMO" fPercent_stat3="0.381" strID_stat4="RELOAD" fPercent_stat4="0.7"/>
+        <WPN_PISTOL_FIVESEVEN strID_name="WPN_PISTOL_FIVESEVEN" nIconIdx="13" strID_ALTname="NONE" nIconIdxALT="0"
+                              strID_stat1="APDAMAGE" fPercent_stat1="0.26" strID_stat2="RECOIL" fPercent_stat2="0.2" strID_stat3="AMMO" fPercent_stat3="1.0" strID_stat4="RELOAD" fPercent_stat4="0.2"/>
+        <WPN_SWAT_REVOLVER    strID_name="WPN_SWAT_REVOLVER" nIconIdx="22" strID_ALTname="NONE" nIconIdxALT="0"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.45" strID_stat2="RECOIL" fPercent_stat2="0.38" strID_stat3="AMMO" fPercent_stat3="0.381" strID_stat4="RELOAD" fPercent_stat4="0.15"/>
+        <WPN_PISTOL_G18C      strID_name="WPN_G18C_AUTO_PISTOL" nIconIdx="23" strID_ALTname="NONE" nIconIdxALT="0"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.3" strID_stat2="RECOIL" fPercent_stat2="0.3" strID_stat3="AMMO" fPercent_stat3="0.94" strID_stat4="RELOAD" fPercent_stat4="0.2"/>
+      </WEAPONS>
+
+      <EQUIPMENT>
+        <EQUIP_SHIELD_TACTICAL  strID_name="WPN_SHIELD_TACTICAL" nIconIdx="2" strALTFireWeaponTemplate="WPN_SHIELD_MELEE" nIconIdxALT="4" strID_ALTname="SPECIAL_SHIELD_BASH" 
+                                strID_stat1="ARMOR" fPercent_stat1="1.0" strID_stat2="MOBILITY" fPercent_stat2="1.0"
+                                strTemplateModifier="UPGRADE_SHIELD_TACTICAL" />
+        <EQUIP_SHIELD_ASSAULT   strID_name="WPN_SHIELD_ASSAULT" nIconIdx="3" strALTFireWeaponTemplate="WPN_SHIELD_FLASH" nIconIdxALT="5" strID_ALTname="SPECIAL_SHIELD_FLASH" 
+                                strID_stat1="ARMOR" fPercent_stat1="0.75" strID_stat2="MOBILITY" fPercent_stat2="0.9"
+                                strTemplateModifier="UPGRADE_SHIELD_ASSAULT" />
+        <EQUIP_SHIELD_IRONMAN   strID_name="WPN_SHIELD_IRONMAN" nIconIdx="1" nIconIdxALT="1" strID_ALTname="EQUIP_BETTER_ARMOR_BOTTOM" 
+                                strID_stat1="ARMOR" fPercent_stat1="1.0" strID_stat2="MOBILITY" fPercent_stat2="0.7"
+                                strTemplateModifier="UPGRADE_SHIELD_IRONMAN" />
+      </EQUIPMENT>
+
+      <GEAR>
+        <EMPTY                strID_name="GEAR_NOGEAR" nIconIdx="0" nIconIdxALT="1" strID_longDesc="GEAR_EMPTY_DESC"/>
+        <WPN_FLASHBANG        strID_name="GEAR_FLASHBANG" nIconIdx="3" strID_longDesc="GEAR_FLASHBANG_DESC" />
+        <WPN_GRENADE          strID_name="GEAR_GRENADE" nIconIdx="2" strID_longDesc="GEAR_GRENADE_DESC" />
+        <WPN_SMOKE_GRENADE    strID_name="GEAR_SMOKE_GRENADE" nIconIdx="6" strID_longDesc="GEAR_SMOKE_GRENADE_DESC" />
+        <WPN_BREACHING_CHARGE strID_name="GEAR_BREACHING_CHARGE" nIconIdx="1" strID_longDesc="GEAR_BREACHING_CHARGE_DESC" />
+      </GEAR>
+    </CLASS>
+
+    <!-- FBI_AGENT CLASS OPTIONS -->
+    <CLASS type="FBI_AGENT" strID_desc="CLASS_FBI_AGENT_DESC" strID_difficulty="HARD" 
+           strXPBarTeam1="TEAM_LOGISTICS" strXPBarTeam2="TEAM_PHYSICAL" strXPBarClass1="F1_HANDGUN" strXPBarClass2="F2_MELEE" strXPBarClass3="F3_BUREAUCRACY">
+      <ULTIMATE>
+        <SA_FBI_AKIMBO        strID_name="ULTIMATE_AKIMBO" strID_longDesc="ULTIMATE_AKIMBO_DESC" nIconIdx="5" />
+        <SA_FBI_MP5K          strID_name="ULTIMATE_MP5K" strID_longDesc="ULTIMATE_MP5K_DESC" nIconIdx="6" />
+      </ULTIMATE>
+
+      <WEAPONS>
+        <WPN_PISTOL_G19M_FBI   strID_name="WPN_PISTOL_G19M" nIconIdx="0" strALTFireWeaponTemplate="WPN_PISTOL_G19M_FBI_ALTFIRE" strID_ALTname="SPECIAL_DOUBLE_TAP" nIconIdxALT="8"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.33" strID_stat2="RECOIL" fPercent_stat2="0.3" strID_stat3="AMMO" fPercent_stat3="0.762" strID_stat4="RELOAD" fPercent_stat4="0.5"/>
+        <WPN_PISTOL_MP40_FBI  strID_name="WPN_PISTOL_MP40" nIconIdx="1" strALTFireWeaponTemplate="WPN_PISTOL_MP40_FBI_ALTFIRE" strID_ALTname="SPECIAL_DOUBLE_TAP" nIconIdxALT="8"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.4" strID_stat2="RECOIL" fPercent_stat2="0.4" strID_stat3="AMMO" fPercent_stat3="0.762" strID_stat4="RELOAD" fPercent_stat4="0.5"/>
+        <WPN_PISTOL_1911_FBI  strID_name="WPN_PISTOL_1911" nIconIdx="2" strALTFireWeaponTemplate="WPN_PISTOL_1911_FBI_ALTFIRE" strID_ALTname="SPECIAL_DOUBLE_TAP" nIconIdxALT="8"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.5" strID_stat2="RECOIL" fPercent_stat2="0.75" strID_stat3="AMMO" fPercent_stat3="0.381" strID_stat4="RELOAD" fPercent_stat4="0.7"/>
+        <WPN_PISTOL_MODEL1076_FBI  strID_name="WPN_PISTOL_MODEL1076" nIconIdx="15" strALTFireWeaponTemplate="WPN_PISTOL_MODEL1076_FBI_ALTFIRE" strID_ALTname="SPECIAL_DOUBLE_TAP" nIconIdxALT="8"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.5" strID_stat2="RECOIL" fPercent_stat2="0.65" strID_stat3="AMMO" fPercent_stat3="0.571" strID_stat4="RELOAD" fPercent_stat4="0.7"/>        
+        <WPN_PISTOL_FIVESEVEN_FBI  strID_name="WPN_PISTOL_FIVESEVEN" nIconIdx="13" strALTFireWeaponTemplate="WPN_PISTOL_FIVESEVEN_FBI_ALTFIRE" strID_ALTname="SPECIAL_DOUBLE_TAP" nIconIdxALT="8"
+                              strID_stat1="APDAMAGE" fPercent_stat1="0.25" strID_stat2="RECOIL" fPercent_stat2="0.2" strID_stat3="AMMO" fPercent_stat3="1.0" strID_stat4="RELOAD" fPercent_stat4="0.6"/>
+        <WPN_PISTOL_G18C_FBI     strID_name="WPN_G18C_AUTO_PISTOL" nIconIdx="23" strID_ALTname="NONE" nIconIdxALT="0"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.33" strID_stat2="RECOIL" fPercent_stat2="0.3" strID_stat3="AMMO" fPercent_stat3="0.94" strID_stat4="RELOAD" fPercent_stat4="0.7"/>
+        <WPN_FBI_REVOLVER     strID_name="WPN_FBI_REVOLVER" nIconIdx="24" strALTFireWeaponTemplate="WPN_FBI_REVOLVER_AIMED" strID_ALTname="SPECIAL_AIMED_SHOT" nIconIdxALT="2"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.66" strID_stat2="RECOIL" fPercent_stat2="0.65" strID_stat3="AMMO" fPercent_stat3="0.286" strID_stat4="RELOAD" fPercent_stat4="0.4"/>
+      </WEAPONS>
+
+      <EQUIPMENT>
+        <EMPTY                strID_name="EQUIP_NOEQUIPMENT" nIconIdx="0" nIconIdxALT="1" strID_longDesc="GEAR_EMPTY_DESC"/>
+        <EQUIP_BETTER_ARMOR   strID_name="EQUIP_BETTER_ARMOR" nIconIdx="8" nIconIdxALT="1" strID_ALTname="EQUIP_BETTER_ARMOR_BOTTOM"
+                              strID_longDesc="EQUIP_BETTER_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_FBI_ARMOR" />
+       <EQUIP_ANTISTAB_ARMOR strID_name="EQUIP_ANTISTAB_ARMOR" nIconIdx="9" nIconIdxALT="1" strID_ALTname="EQUIP_ANTISTAB_ARMOR_BOTTOM"
+                              strID_longDesc="EQUIP_ANTISTAB_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_ANTISTAB" />
+        <EQUIP_SPEED_POUCHES  strID_name="EQUIP_SPEED_POUCHES" nIconIdx="4" nIconIdxALT="1" strID_ALTname="EQUIP_SPEED_POUCHES_BOTTOM"
+                              strID_longDesc="EQUIP_SPEED_POUCHES_RIGHT" strTemplateModifier="UPGRADE_EQUIP_SPEED_POUCHES" />
+        <EQUIP_EXTRA_GEAR     strID_name="EQUIP_EXTRA_GEAR" nIconIdx="7" nIconIdxALT="1" strID_ALTname="EQUIP_EXTRA_GEAR_BOTTOM"
+                              strID_longDesc="EQUIP_EXTRA_GEAR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_EXTRA_GEAR" />
+      </EQUIPMENT>
+
+      <GEAR>
+        <EMPTY                strID_name="GEAR_NOGEAR" nIconIdx="0" nIconIdxALT="1" strID_longDesc="GEAR_EMPTY_DESC"/>
+        <WPN_FLASHBANG        strID_name="GEAR_FLASHBANG" nIconIdx="3" strID_longDesc="GEAR_FLASHBANG_DESC" />
+        <WPN_GRENADE          strID_name="GEAR_GRENADE" nIconIdx="2" strID_longDesc="GEAR_GRENADE_DESC" />
+        <WPN_SMOKE_GRENADE    strID_name="GEAR_SMOKE_GRENADE" nIconIdx="6" strID_longDesc="GEAR_SMOKE_GRENADE_DESC" />
+        <WPN_BREACHING_CHARGE strID_name="GEAR_BREACHING_CHARGE" nIconIdx="1" strID_longDesc="GEAR_BREACHING_CHARGE_DESC" />
+      </GEAR>
+    </CLASS>
+
+  <!-- RECON CLASS OPTIONS -->
+    <CLASS type="RECON" strID_desc="CLASS_RECON_DESC" strID_difficulty="MEDIUM"
+           strXPBarTeam1="TEAM_LOGISTICS" strXPBarTeam2="TEAM_PHYSICAL" strXPBarClass1="R1_GUNPLAY" strXPBarClass2="R2_RECON" strXPBarClass3="R3_TACTICS">
+      
+      <ULTIMATE>
+        <SA_SNIPER_SUPPORT    strID_name="ULTIMATE_SNIPER_SUPPORT" strID_longDesc="ULTIMATE_SNIPER_SUPPORT_DESC" nIconIdx="0" />
+        <SA_RECON_MARKSMAN    strID_name="ULTIMATE_RECON_MARKSMAN" strID_longDesc="ULTIMATE_RECON_MARKSMAN_DESC" nIconIdx="8" />
+        <SA_RECON_SIX12SD     strID_name="ULTIMATE_RECON_SIX12SD" strID_longDesc="ULTIMATE_RECON_SIX12SD_DESC" nIconIdx="10" />
+      </ULTIMATE>
+
+      <WEAPONS>
+        <WPN_SMG_MP9SD        strID_name="WPN_SMG_MP9SD" nIconIdx="18" strALTFireWeaponTemplate="WPN_MP9SD_AIMED" strID_ALTname="SPECIAL_RECON_BURST" nIconIdxALT="9"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.18" strID_stat2="ROF" fPercent_stat2="0.832" strID_stat3="ACCURACY" fPercent_stat3="0.6" strID_stat4="RECOIL" fPercent_stat4="0.2"/>
+        <WPN_SMG_UZI          strID_name="WPN_SMG_UZI" nIconIdx="21" strALTFireWeaponTemplate="WPN_UZI_AIMED" strID_ALTname="SPECIAL_RECON_BURST" nIconIdxALT="9"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.25"  strID_stat2="ROF" fPercent_stat2="0.455" strID_stat3="ACCURACY" fPercent_stat3="0.81" strID_stat4="RECOIL" fPercent_stat4="0.25"/>
+        <WPN_SMG_MP5SD        strID_name="WPN_SMG_MP5SD" nIconIdx="17" strALTFireWeaponTemplate="WPN_RECONMP5SD_STEADY" strID_ALTname="SPECIAL_AIMED_SHOT" nIconIdxALT="2"
+                              strID_stat1="DAMAGE" fPercent_stat1="0.15" strID_stat2="ROF" fPercent_stat2="0.527" strID_stat3="ACCURACY" fPercent_stat3="0.9" strID_stat4="RECOIL" fPercent_stat4="0.2"/>
+        <WPN_SMG_MP7SD        strID_name="WPN_SMG_MP7SD" nIconIdx="19" strALTFireWeaponTemplate="WPN_MP7SD_AIMED" strID_ALTname="SPECIAL_RECON_BURST" nIconIdxALT="9"
+                              strID_stat1="APDAMAGE" fPercent_stat1="0.17" strID_stat2="ROF" fPercent_stat2="0.682" strID_stat3="ACCURACY" fPercent_stat3="0.81" strID_stat4="RECOIL" fPercent_stat4="0.21"/>
+        <WPN_SMG_CBJ          strID_name="WPN_SMG_CBJ" nIconIdx="20" strALTFireWeaponTemplate="WPN_CBJ_AIMED" strID_ALTname="SPECIAL_RECON_BURST" nIconIdxALT="9"
+                              strID_stat1="APDAMAGE" fPercent_stat1="0.22" strID_stat2="ROF" fPercent_stat2="0.527" strID_stat3="ACCURACY" fPercent_stat3="0.52" strID_stat4="RECOIL" fPercent_stat4="0.35"/>
+      </WEAPONS>
+
+      <EQUIPMENT>
+        <EMPTY                strID_name="EQUIP_NOEQUIPMENT" nIconIdx="0" nIconIdxALT="1" strID_longDesc="GEAR_EMPTY_DESC"/>
+        <EQUIP_BODY_ARMOR     strID_name="EQUIP_BODY_ARMOR" nIconIdx="5" nIconIdxALT="1" strID_ALTname="EQUIP_BODY_ARMOR_BOTTOM" 
+                              strID_longDesc="EQUIP_BODY_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_BODY_ARMOR" />
+        <EQUIP_RECON_ARMOR   strID_name="EQUIP_RECON_ARMOR" nIconIdx="10" nIconIdxALT="1" strID_ALTname="EQUIP_RECON_ARMOR_BOTTOM"
+                              strID_longDesc="EQUIP_RECON_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_RECON_ARMOR" />
+        <EQUIP_ANTISTAB_ARMOR strID_name="EQUIP_ANTISTAB_ARMOR" nIconIdx="9" nIconIdxALT="1" strID_ALTname="EQUIP_ANTISTAB_ARMOR_BOTTOM"
+                              strID_longDesc="EQUIP_ANTISTAB_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_ANTISTAB" />
+        <EQUIP_SPEED_POUCHES  strID_name="EQUIP_SPEED_POUCHES" nIconIdx="4" nIconIdxALT="1" strID_ALTname="EQUIP_SPEED_POUCHES_BOTTOM" 
+                              strID_longDesc="EQUIP_SPEED_POUCHES_RIGHT" strTemplateModifier="UPGRADE_EQUIP_SPEED_POUCHES" />
+ 
+      </EQUIPMENT>
+
+      <GEAR>
+        <EMPTY                strID_name="GEAR_NOGEAR" nIconIdx="0" nIconIdxALT="1" strID_longDesc="GEAR_EMPTY_DESC"/>
+        <WPN_CAM_BALL         strID_name="GEAR_CAM_BALL" nIconIdx="7" strID_longDesc="GEAR_CAM_BALL_DESC" />
+        <WPN_SPY_CAMERA       strID_name="GEAR_SPY_CAMERA" nIconIdx="8" strID_longDesc="GEAR_SPY_CAMERA_DESC" />
+        <WPN_FLASHBANG        strID_name="GEAR_FLASHBANG" nIconIdx="3" strID_longDesc="GEAR_FLASHBANG_DESC" />
+        <WPN_GRENADE          strID_name="GEAR_GRENADE" nIconIdx="2" strID_longDesc="GEAR_GRENADE_DESC" />
+        <WPN_SMOKE_GRENADE    strID_name="GEAR_SMOKE_GRENADE" nIconIdx="6" strID_longDesc="GEAR_SMOKE_GRENADE_DESC" />
+        <WPN_BREACHING_CHARGE strID_name="GEAR_BREACHING_CHARGE" nIconIdx="1" strID_longDesc="GEAR_BREACHING_CHARGE_DESC" />
+      </GEAR>
+    </CLASS>
+
+  <!-- OFF-DUTY GUY CLASS OPTIONS -->
+    <CLASS type="OFFDUTYGUY" strID_desc="CLASS_OFFDUTYGUY_DESC" strID_difficulty="MEDIUM"
+           strXPBarTeam1="TEAM_LOGISTICS" strXPBarTeam2="TEAM_PHYSICAL" strXPBarClass1="O1_SHOOTING" strXPBarClass2="O2_FITNESS" strXPBarClass3="O3_GEAR_BAG">
+      
+      <ULTIMATE>
+        <SA_OFFDUTY_GARAND    strID_name="ULTIMATE_M1_GARAND" strID_longDesc="ULTIMATE_M1_GARAND_DESC" nIconIdx="9" />
+        <SA_HOMEMADE_PIE      strID_name="ULTIMATE_HOMEMADE_PIE" strID_longDesc="ULTIMATE_HOMEMADE_PIE_DESC" nIconIdx="11" />
+        <SA_SNIPER_SUPPORT    strID_name="ULTIMATE_SNIPER_SUPPORT" strID_longDesc="ULTIMATE_SNIPER_SUPPORT_DESC" nIconIdx="0" />
+      </ULTIMATE>
+
+      <WEAPONS>
+        <WPN_TRUNK_CARBINE    strID_name="WPN_TRUNK_CARBINE" nIconIdx="31" strALTFireWeaponTemplate="WPN_SUBMACHINE_STEADY" strID_ALTname="SPECIAL_AIMED_SHOT" nIconIdxALT="2"
+                              strID_stat1="APDAMAGE" fPercent_stat1="0.45" strID_stat2="ROF" fPercent_stat2="0.273" strID_stat3="ACCURACY" fPercent_stat3="1.0" strID_stat4="RECOIL" fPercent_stat4="0.7"/>
+        <WPN_TRAPPER_RIFLE    strID_name="WPN_TRAPPER_RIFLE" nIconIdx="29" strALTFireWeaponTemplate="WPN_SUBMACHINE_STEADY" strID_ALTname="SPECIAL_AIMED_SHOT" nIconIdxALT="2"
+                              strID_stat1="DAMAGE" fPercent_stat1="1.0" strID_stat2="ROF" fPercent_stat2="0.064" strID_stat3="ACCURACY" fPercent_stat3="0.6" strID_stat4="RECOIL" fPercent_stat4="0.3"/>
+        <WPN_TRICKED_OUT_AK   strID_name="WPN_TRICKED_OUT_AK" nIconIdx="27" strALTFireWeaponTemplate="WPN_SUBMACHINE_STEADY" strID_ALTname="SPECIAL_AIMED_SHOT" nIconIdxALT="2"
+                              strID_stat1="APDAMAGE" fPercent_stat1="0.5" strID_stat2="ROF" fPercent_stat2="0.273" strID_stat3="ACCURACY" fPercent_stat3="0.456" strID_stat4="RECOIL" fPercent_stat4="0.6"/>
+      </WEAPONS>
+
+      <EQUIPMENT>
+        <EMPTY                strID_name="EQUIP_NOEQUIPMENT" nIconIdx="0" nIconIdxALT="1" strID_longDesc="GEAR_EMPTY_DESC"/>
+        <EQUIP_BODY_ARMOR     strID_name="EQUIP_BODY_ARMOR" nIconIdx="5" nIconIdxALT="1" strID_ALTname="EQUIP_BODY_ARMOR_BOTTOM" 
+                              strID_longDesc="EQUIP_BODY_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_BODY_ARMOR" />
+        <EQUIP_BETTER_ARMOR   strID_name="EQUIP_BETTER_ARMOR" nIconIdx="8" nIconIdxALT="1" strID_ALTname="EQUIP_BETTER_ARMOR_BOTTOM"
+                              strID_longDesc="EQUIP_BETTER_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_IMPROVED_ARMOR" />
+        <EQUIP_ANTISTAB_ARMOR strID_name="EQUIP_ANTISTAB_ARMOR" nIconIdx="9" nIconIdxALT="1" strID_ALTname="EQUIP_ANTISTAB_ARMOR_BOTTOM"
+                              strID_longDesc="EQUIP_ANTISTAB_ARMOR_RIGHT" strTemplateModifier="UPGRADE_EQUIP_ANTISTAB" />
+        <EQUIP_SPEED_POUCHES  strID_name="EQUIP_SPEED_POUCHES" nIconIdx="4" nIconIdxALT="1" strID_ALTname="EQUIP_SPEED_POUCHES_BOTTOM" 
+                              strID_longDesc="EQUIP_SPEED_POUCHES_RIGHT" strTemplateModifier="UPGRADE_EQUIP_SPEED_POUCHES" />
+      </EQUIPMENT>
+
+      <GEAR>
+        <EMPTY                strID_name="GEAR_NOGEAR" nIconIdx="0" nIconIdxALT="1" strID_longDesc="GEAR_EMPTY_DESC"/>
+        <WPN_FLASHBANG        strID_name="GEAR_FLASHBANG" nIconIdx="3" strID_longDesc="GEAR_FLASHBANG_DESC" />
+        <WPN_GRENADE          strID_name="GEAR_GRENADE" nIconIdx="2" strID_longDesc="GEAR_GRENADE_DESC" />
+        <WPN_SMOKE_GRENADE    strID_name="GEAR_SMOKE_GRENADE" nIconIdx="6" strID_longDesc="GEAR_SMOKE_GRENADE_DESC" />
+        <WPN_BREACHING_CHARGE strID_name="GEAR_BREACHING_CHARGE" nIconIdx="1" strID_longDesc="GEAR_BREACHING_CHARGE_DESC" />
+        <WPN_TWINKIE          strID_name="GEAR_TWINKIE" nIconIdx="10" strID_longDesc="GEAR_TWINKIE_DESC" />
+        
+      </GEAR>
+    </CLASS>
+    
+    
+  </ITEMS>
+
+</GEAR_DATA>

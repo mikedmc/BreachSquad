@@ -1,0 +1,5 @@
+collisionPts.txt
+backFlags.txt
+activesAframes.txt
+activesAnimations.txt
+actorsAFrames.txt

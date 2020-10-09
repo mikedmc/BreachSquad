@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+
+<!-- 
+nChapter, nLevel - numeric and start from 1
+sFilename - name of level file
+nChapterImgFrame="0" - index of chapter image from ANM_MENUS_SPR_CHAPTER_SPLASHES_LG and ANM_MENUS_SPR_CHAPTER_SPLASHES (must be in the same order in both animations)
+sStrID_LevelName - string ID of level name
+-->
+
+<Chapters>
+  <!-- chapter 1 -->
+  <Chapter nChapterImgFrame="0" sStrID_ChapterName="MISSION0" nMissionsToUnlock="0">
+    <Mission sStrID_LevelName="LEVELNAME0" sFilename="01_01_slow_starters.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME1" sFilename="01_02_knock_knock.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME2" sFilename="01_03_old_embassy.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME3" sFilename="01_04_night_call.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME4" sFilename="01_05_tread_carefully.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME5" sFilename="01_06_255th_precinct.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME6" sFilename="01_07_high_rise.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME7" sFilename="01_08_the_warehouse.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME8" sFilename="01_09_office_day.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME9" sFilename="01_10_flashbang_junction.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME10" sFilename="01_11_cleanup.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME11" sFilename="01_12_meet_big_boss.dkas" />
+  </Chapter>
+  <!-- chapter 2 -->
+  <Chapter nChapterImgFrame="1" sStrID_ChapterName="MISSION1" nMissionsToUnlock="6">
+    <Mission sStrID_LevelName="LEVELNAME12" sFilename="02_01_meeting_bart.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME13" sFilename="02_02_volatile_motel.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME14" sFilename="02_03_going_under.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME15" sFilename="02_04_the_bunker.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME16" sFilename="02_05_midnight_folies.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME17" sFilename="02_06_mountain_hideout.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME18" sFilename="02_07_outpost.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME19" sFilename="02_08_bombs_away.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME20" sFilename="02_09_the_block.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME21" sFilename="02_10_caught_in_the_maze.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME22" sFilename="02_11_the_musem.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME23" sFilename="02_12_the_yard.dkas" />
+  </Chapter>
+  <!-- chapter 3 -->
+  <Chapter nChapterImgFrame="2" sStrID_ChapterName="MISSION2" nMissionsToUnlock="12">
+    <Mission sStrID_LevelName="LEVELNAME24" sFilename="03_01_frankie_the_fanatic.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME25" sFilename="03_02_crisis_at_mcdonuts.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME26" sFilename="03_03_metro_madness.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME27" sFilename="03_04_molotov_delivery.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME28" sFilename="03_05_vertigo.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME29" sFilename="03_06_water_works_inc.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME30" sFilename="03_07_cold_exposure.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME31" sFilename="03_08_hipster_beer_factory.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME32" sFilename="03_09_climbing_the_shaft.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME33" sFilename="03_10_laboratory_crisis.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME34" sFilename="03_11_raid_on_plaza.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME35" sFilename="03_12_doomsday_train.dkas" />
+  </Chapter>
+  <!-- chapter 4 -->
+  <Chapter nChapterImgFrame="3" sStrID_ChapterName="MISSION3" nMissionsToUnlock="18">
+    <Mission sStrID_LevelName="LEVELNAME36" sFilename="04_01_bank_heist.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME37" sFilename="04_02_queens_cross.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME38" sFilename="04_03_fibonacci.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME39" sFilename="04_04_on_the_anvil.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME40" sFilename="04_05_secret_stronghold.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME41" sFilename="04_06_caneville.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME42" sFilename="04_07_on_vacation.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME43" sFilename="04_08_whine_and_dine.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME44" sFilename="04_09_lights_out.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME45" sFilename="04_10_to_the_airport.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME46" sFilename="04_11_around_the_clock.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME47" sFilename="04_12_the_great_batsby.dkas" />
+  </Chapter>
+  <!-- chapter 5 -->
+  <Chapter nChapterImgFrame="4" sStrID_ChapterName="MISSION4" nMissionsToUnlock="24">
+    <Mission sStrID_LevelName="LEVELNAME48" sFilename="05_01_i_am_the_captain_now.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME49" sFilename="05_02_reservoir_docks.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME50" sFilename="05_03_dusty_neighbours.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME51" sFilename="05_04_the_shiny.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME52" sFilename="05_05_el_quarantino.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME53" sFilename="05_06_joint_block.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME54" sFilename="05_07_sky_scratchers.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME55" sFilename="05_08_nctv_cribs.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME56" sFilename="05_09_tinytanic.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME57" sFilename="05_10_flying_high.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME58" sFilename="05_11_word_on_the_street.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME59" sFilename="05_12_the_crib.dkas" />
+  </Chapter>
+  <!-- chapter 6 -->
+  <Chapter nChapterImgFrame="5" sStrID_ChapterName="MISSION5" nMissionsToUnlock="0">
+    <Mission sStrID_LevelName="LEVELNAME60" sFilename="06_weekly_challenge_1_fixer_upper.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME61" sFilename="06_weekly_challenge_2_snitches_galore.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME62" sFilename="06_weekly_challenge_3_graveyard_surprise.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME63" sFilename="06_weekly_challenge_4_long_way_down.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME64" sFilename="06_weekly_challenge_5_terror_from_the_terrace.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME65" sFilename="06_weekly_challenge_6_hard_core.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME66" sFilename="06_weekly_challenge_7_its_raining_men.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME67" sFilename="06_weekly_challenge_8_pool_party_crashers.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME68" sFilename="06_weekly_challenge_9_downstairs_cage.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME69" sFilename="06_weekly_challenge_10_crates_and_bombs.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME70" sFilename="06_weekly_challenge_11_western_express.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME71" sFilename="06_weekly_challenge_12_consulate_crisis.dkas" />
+  </Chapter>
+  <!-- chapter 7 -->
+  <Chapter nChapterImgFrame="6" sStrID_ChapterName="MISSION6" nMissionsToUnlock="30">
+    <Mission sStrID_LevelName="LEVELNAME72" sFilename="07_01_stoners_paradise.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME73" sFilename="07_02_peace_and_quiet.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME74" sFilename="07_03_high_as_a_kite.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME75" sFilename="07_04_living_on_the_ledge.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME76" sFilename="07_05_cutting_edge.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME77" sFilename="07_06_earthworm_ben.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME78" sFilename="07_07_switch_and_destroy.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME79" sFilename="07_08_home_box_office.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME80" sFilename="07_09_leap_of_faith.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME81" sFilename="07_10_under_pressure.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME82" sFilename="07_11_monty_hall.dkas" />
+    <Mission sStrID_LevelName="LEVELNAME83" sFilename="07_12_no_excuse.dkas" />
+  </Chapter>  
+
+</Chapters>
+
