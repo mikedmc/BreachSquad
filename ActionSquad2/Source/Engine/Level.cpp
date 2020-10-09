@@ -1682,135 +1682,8 @@ bool CLevel::GetIsAreaNeutral(RECTXYWH_F rectArea)
 	return true;
 }
 
-D3DXVECTOR2 CActor::GetPosHeart()
-{
-	//heart pos nu tine cont de flip (ar trebui sa aiba mereu X=0)
-	if (fLife <= 0.0f)
-		return (pos + vecHeart_abs[2]);
-	if (bCrouched)
-		return (pos + vecHeart_abs[1]);
-	return pos + vecHeart_abs[0];
-}
-
-D3DXVECTOR2 CActor::GetPosWeapon()
-{
-	if (fLife <= 0.0f)
-		return D3DXVECTOR2(pos.x + vecWeapon_abs[2].x * lookDirXsign, pos.y + vecWeapon_abs[2].y);
-	else if (bCrouched)							 
-		return D3DXVECTOR2(pos.x + vecWeapon_abs[1].x * lookDirXsign, pos.y + vecWeapon_abs[1].y);
-
-	return D3DXVECTOR2(pos.x + vecWeapon_abs[0].x * lookDirXsign, pos.y + vecWeapon_abs[0].y);
-}
-
-void CActor::UpdateBBoxAndPoints()
-{
-	posWeapon = GetPosWeapon();
-	posHeart = GetPosHeart();
-
-	int bboxidx = 0;
-	//trece pe bbox de dead doar daca a terminat animatia de dead
-	if (fLife <= 0.0f)
-	{
-		//comenteaza linia de mai jos ca sa ia bbox doar cand a terminat animatia de moarte
-		//if(((eLastAnimSet == K_LVL_ACT_ANIM_DIE) || (eLastAnimSet == K_LVL_ACT_ANIM_DIE_ALT)) && (sprite.animStatus == ANIM_STATUS_FRAMELOCK))
-			bboxidx = 2;
-	}
-	else if (bCrouched)
-		bboxidx = 1;
-
-	bbox_ini.Set(stateBBoxes[bboxidx]);
-	bbox = bbox_ini;
-	bbox.Move(pos);
-
-	bbox_exported_ini.Set(stateBBoxes[0]); //standing
-	bbox_exported = bbox_exported_ini;
-	bbox_exported.Move(pos);
-}
-
-void CActor::SetIcon(EActorIconTypes iconType, float fDuration)
-{
-	if ((iconType == K_LVL_ACT_ICON_REMOVE_ICON) || (templateActor.actorClass == K_LVL_ACT_CLASS_ZOMBIE))
-	{
-		fIconTimer = 0.0f;
-		nIconType = K_LVL_ACT_ICON_NONE;
-		return;
-	}
-
-	nIconType = iconType;
-	fIconTimer = fDuration;
-
-	if (fDuration <= 0.0f)
-		nIconType = K_LVL_ACT_ICON_NONE;
-}
-
-void CActor::SetAnimSet(int newAnimSet)
-{
-	if (newAnimSet != nAnimSet)
-	{
-		nAnimSet = newAnimSet;
-		//force reset animations
-		eLastAnimSet = K_LVL_ACT_ANIM_EMPTY;
-		eLastAnimSet_feet = K_LVL_ACT_ANIM_EMPTY;
-	}
-}
-
-FORCEINLINE int CActor::GetAnimSet() const
-{
-	return nAnimSet;
-}
-
-void CActor::SetAngle(float fNewAngle)
-{
-	fAngle = fNewAngle;
-	vAngleDir = D3DXVECTOR2(cos(fAngle), sin(fAngle));
-}
-
-EAIBehaviorType CActor::GetCurrentBehavior()
-{
-	if ((m_nAIcurrentBehaviorIdx < 0) || (m_pAIcurrentState == null))
-		return AI_BEHAVIOR_EMPTY;
-	return m_pAIcurrentState->m_arrBehaviors[m_nAIcurrentBehaviorIdx].nType;
-}
-
-void CActor::SetPos(D3DXVECTOR2 newPos)
-{
-	pos = newPos;
-
-	UpdateBBoxAndPoints();
-}
-
-void CActor::Move(D3DXVECTOR2 delta)
-{
-	pos += delta;
-
-	UpdateBBoxAndPoints();
-}
 
 
-///--- CACTIVE ---
-void CActive::SetPos(D3DXVECTOR2 newPos)
-{
-	pos = newPos;
-	bbox.Set(&bbox_ini, pos);
-	bbox_exported.Set(&bbox_exported_ini, pos);
-}
-
-void CActive::Move(D3DXVECTOR2 delta)
-{
-	pos += delta;
-	bbox.Set(&bbox_ini, pos);
-	bbox_exported.Set(&bbox_exported_ini, pos);
-}
-
-void CActive::SetAngle(float fnAngle)
-{
-	fAngle = fnAngle;
-}
-
-void CActive::InitInternalData()
-{
-
-}
 
 
 UINT32 CLevel::GenerateNextID()
@@ -1849,8 +1722,6 @@ CLevel::CLevel()
 	//bullets
 	m_propsLightsMeshIdx = -1;
 
-	m_BackAnimIdx = -1;
-	m_bPaintBackground = true;
 	//indexuri texturi
 	m_tilesTexBaseIdx = -1;
 	m_tilesTexNormIdx = -1;
@@ -3045,10 +2916,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_colAmbientGlobal = 0xffffffff;
 	m_fThunderTimer = 0.0f;
 
-	m_BackAnimIdx = -1;
 	m_waterAnimIdx = -1;
-	//not showing background by default
-	m_bPaintBackground = false;
 	//team doors
 	m_nTeleportSlots = 0;
 	m_bTeleportActivated = false;
@@ -3884,17 +3752,17 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 							//first param is the bsx-ul for the background so load it
 							StringCchPrintf(wcsMediaAddr, MAX_PATH, L"media/back/%s", wvarval);
 							FileManager::GetMediaPath(wcsMediaAddr, Path);
-							m_sprBack.LoadSprites(Path);
+							//m_sprBack.LoadSprites(Path);
 							//defaults on first anim
-							m_BackAnimIdx = 0;
+							//m_BackAnimIdx = 0;
 						}
 						else if (wcscmp(wvarname, L"str_anim") == 0) 
 						{
-							m_BackAnimIdx = m_sprBack.getAnimationIdxByName(wvarval);
+							//m_BackAnimIdx = m_sprBack.getAnimationIdxByName(wvarval);
 						}
 						else if (wcscmp(wvarname, L"str_water_anim") == 0)
 						{
-							m_waterAnimIdx = m_sprBack.getAnimationIdxByName(wvarval);
+							//m_waterAnimIdx = m_sprBack.getAnimationIdxByName(wvarval);
 						}
 					}
 				}
@@ -3902,7 +3770,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 				//pozitia o citesc si nu o folosesc
 				OS_freadUInt32(fl); OS_freadUInt32(fl);
 
-				m_bPaintBackground = true;
+				//m_bPaintBackground = true;
 			}
 			break;
 			case K_LVL_MISC_RAILS:
@@ -3982,10 +3850,10 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			{
 				//anim name
 				UINT32 animHash = frontobj->varParams.GetVariantByName(L"strAnim")->m_strArg.getHash();
-				frontobj->sprite.animationIdx = m_sprBack.getAnimationIdxByNameHash(animHash);
+				frontobj->sprite.animationIdx = -1;// m_sprBack.getAnimationIdxByNameHash(animHash);
 				frontobj->sprite.currentFrame = frontobj->varParams.GetVariantByName(L"nFrame")->m_asUINT32;
 				//set bbox
-				frontobj->aabb_ini.Set(m_sprBack.GetAFrameBBox(frontobj->sprite.animationIdx, frontobj->sprite.currentFrame));
+				//frontobj->aabb_ini.Set(m_sprBack.GetAFrameBBox(frontobj->sprite.animationIdx, frontobj->sprite.currentFrame));
 			}
 		}
 	}
@@ -6262,7 +6130,7 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 								//get in hidden room?
 								if (m_bInsideHiddenRoom)
 								{
-									m_bPaintBackground = false;
+									//m_bPaintBackground = false;
 								}
 								else //get out of hidden room
 								{
@@ -6275,7 +6143,7 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 									else
 										m_camLevel.SetCamPos(&m_camTargetActive->pos, 1.0f, true);
 									//start painting the background
-									m_bPaintBackground = true;
+									//m_bPaintBackground = true;
 									
 									//black out screen
 									RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
@@ -17640,6 +17508,7 @@ HRESULT CLevel::PaintOffscreen()
 		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_FRONT_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), true);
 
 		///--- paint water details ---
+		/*
 		//#TODO: de vazut daca se mai poate optimiza aici...si daca merita optimizat
 		//daca voi avea mai multe chestii de desenat din acest array atunci nu mai merita optimizat
 		m_pSprite->SetTransform(&mattrans);
@@ -17679,7 +17548,7 @@ HRESULT CLevel::PaintOffscreen()
 			}
 		}
 		m_pSprite->SetTransform(&g_matIdentity);
-
+		*/
 		///--- paint actives front layer ---
 		D3DXMatrixAffineTransformation2D(&mattrans, 1.0f, NULL, 0.0f, &D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
 		m_pSprite->SetTransform(&mattrans);
@@ -18028,92 +17897,6 @@ HRESULT CLevel::PaintOffscreen_nothing()
 	return S_OK;
 }
 
-void CLevel::PaintBackground()
-{
-	if ((!m_bPaintBackground) || (!m_sprBack.IsLoaded()) || (m_BackAnimIdx < 0))
-		return;
-
-	RECTXYWH_F camRect = m_camLevel.GetCamWorldAABB();
-	m_pSprite->SetTransform(&g_matIdentity);
-
-	CSprite	spr;
-	//2. merge prin toate frames din prima animatie din fisier (cea care contine toate layerele de desenat)
-	for (int kk = 0; kk < m_sprBack.GetAFramesCnt(m_BackAnimIdx); kk++)
-	{
-		//Cred ca toate aceste decodari de flag ar trebui facute pe onload si puse in structuri de background layer
-		UINT32 aframeflag = m_sprBack.GetAFrameFlag(m_BackAnimIdx, kk);
-		bool repeatX = (aframeflag >> K_LVL_BK_AFRAMESHIFT_REPEAT_X) & K_LVL_BK_AFRAMEBITMASK_REPEAT_X;
-		bool repeatY = (aframeflag >> K_LVL_BK_AFRAMESHIFT_REPEAT_Y) & K_LVL_BK_AFRAMEBITMASK_REPEAT_Y;
-		float xmove_mul = float((aframeflag >> K_LVL_BK_AFRAMESHIFT_XMOVE_MUL) & K_LVL_BK_AFRAMEBITMASK_XMOVE_MUL) / 255.0f;
-		float ymove_mul = float((aframeflag >> K_LVL_BK_AFRAMESHIFT_YMOVE_MUL) & K_LVL_BK_AFRAMEBITMASK_YMOVE_MUL) / 255.0f;
-		float xmove_byTime = float((aframeflag >> K_LVL_BK_AFRAMESHIFT_XBYTIME) & K_LVL_BK_AFRAMEBITMASK_XBYTIME);
-		if ((aframeflag >> K_LVL_BK_AFRAMESHIFT_XBYTIMENEG) & K_LVL_BK_AFRAMEBITMASK_XBYTIMENEG)
-			xmove_byTime = -xmove_byTime;
-		float ymove_byTime = float((aframeflag >> K_LVL_BK_AFRAMESHIFT_YBYTIME) & K_LVL_BK_AFRAMEBITMASK_YBYTIME);
-		if ((aframeflag >> K_LVL_BK_AFRAMESHIFT_YBYTIMENEG) & K_LVL_BK_AFRAMEBITMASK_YBYTIMENEG)
-			ymove_byTime = -ymove_byTime;
-
-		const float fMoveByTimeMultiplier = 2.0f;
-		ymove_byTime *= fMoveByTimeMultiplier;
-		xmove_byTime *= fMoveByTimeMultiplier;
-
-		RECTXYWH aframeBB = m_sprBack.GetAFrameBBox(m_BackAnimIdx, kk);
-		///--- desenarea efectiva ---
-		D3DXVECTOR2 camOffset(m_vLevelOrigin.x - camRect.x, m_vLevelOrigin.y - camRect.Bottom());
-		D3DXVECTOR2 paintOffset(camOffset.x * xmove_mul - xmove_byTime * fLocalTimeline, camOffset.y * ymove_mul + ymove_byTime * fLocalTimeline);
-		//#TODO: de facut sa se repete si pe Y
-		if (repeatX && repeatY)
-		{
-			spr.Init(m_BackAnimIdx, 0.0f, 0.0f, kk);
-			int timesx = 2 + (int)(ceil(camRect.w)) / aframeBB.w;
-			int timesy = 2 + (int)(ceil(camRect.h)) / aframeBB.h;
-
-			float localoffsetx = FLOAT_FRAC(paintOffset.x / (float)aframeBB.w) * aframeBB.w;
-			float localoffsety = FLOAT_FRAC(paintOffset.y / (float)aframeBB.h) * aframeBB.h;
-			for (int llx = -1; llx < timesx; llx++)
-			{
-				for (int lly = -1; lly <= timesy; lly++)
-				{
-					spr.pos = D3DXVECTOR2(camRect.x + localoffsetx + llx * aframeBB.w, camRect.Bottom() + localoffsety - lly * aframeBB.h);
-					spr.paint(&m_sprBack);
-				}
-			}
-		}
-		else if (repeatX)
-		{
-			spr.Init(m_BackAnimIdx, 0.0f, 0.0f, kk);
-			//daca trebuie facut tiling pe X se calculeaza de cate ori intra in ecran ca sa-l acopere
-			int times = 2 + (int)(ceil(camRect.w)) / aframeBB.w;
-			//desenam unul in stanga originii locale in plus fata de cate ori intra
-			float localoffsetx = FLOAT_FRAC(paintOffset.x / (float)aframeBB.w) * aframeBB.w;
-			for (int ll = -1; ll < times; ll++)
-			{
-				spr.pos = D3DXVECTOR2(camRect.x + localoffsetx + ll * aframeBB.w, camRect.Bottom() + paintOffset.y);
-				spr.paint(&m_sprBack);
-			}
-		}
-		else if (repeatY)
-		{
-			spr.Init(m_BackAnimIdx, 0.0f, 0.0f, kk);
-			//daca trebuie facut tiling pe Y se calculeaza de cate ori intra in ecran ca sa-l acopere
-			int times = 2 + (int)(ceil(camRect.h)) / aframeBB.h; //adaug 2 ca sa nu conteze cum sunt aliniate obiectele din editor fata de origine
-			 //desenam unul in stanga originii locale in plus fata de cate ori intra
-			float localoffsety = FLOAT_FRAC(paintOffset.y / (float)aframeBB.h) * aframeBB.h;
-			for (int ll = -1; ll <= times; ll++)
-			{
-				spr.pos = D3DXVECTOR2(camRect.x + paintOffset.x, camRect.Bottom() + localoffsety - ll * aframeBB.h);
-				spr.paint(&m_sprBack);
-			}
-		}
-		else //no repeat flags
-		{
-			spr.Init(m_BackAnimIdx, camRect.x + paintOffset.x, camRect.Bottom() + paintOffset.y, kk);
-			spr.paint(&m_sprBack);
-		}
-	}
-
-	m_pSprite->Flush();
-}
 
 //local usable variables
 static CSprite	sprInteract;
@@ -18220,7 +18003,7 @@ void CLevel::Paint()
 	m_pDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
 	//1. paint level background
-	PaintBackground();
+	//PaintBackground();
 	//--- paint thunder ---
 	if ((m_fThunderTimer > 0.0f) && (m_fThunderTimer < 0.4f) && (randint(1000) < 500) && (!UTGetControlsManager().bIsBlocking) && (!DXUTIsTimePaused()) && (!m_bInsideHiddenRoom))
 	{
@@ -18785,6 +18568,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	}
 
 	///--- paint front layer parallax objects with linear blending ---
+	/*
 	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
@@ -18820,6 +18604,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 
 	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	*/
 
 	///--- paint string particles in level coords ---
 	UTGetFontsManager().SetPauseOnTTFontsReplacement(true);
@@ -19098,7 +18883,6 @@ void CLevel::Release()
 	m_sprLights.Release();
 	m_sprActives.Release();
 	m_sprActors.Release();
-	m_sprBack.Release();
 	m_sprInterface.Release();
 
 	m_texManager.Release();
@@ -19134,7 +18918,6 @@ HRESULT CLevel::OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_D
 	V_RETURN(m_sprLights.OnCreateDevice(pd3dDevice));
 	V_RETURN(m_sprActives.OnCreateDevice(pd3dDevice));
 	V_RETURN(m_sprActors.OnCreateDevice(pd3dDevice));
-	V_RETURN(m_sprBack.OnCreateDevice(pd3dDevice));
 	V_RETURN(m_sprInterface.OnCreateDevice(pd3dDevice));
 	V_RETURN(m_texManager.OnCreateDevice(pd3dDevice));
 
@@ -19235,7 +19018,6 @@ HRESULT CLevel::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DE
 	V_RETURN(m_sprLights.OnResetDevice(pd3dDevice));
 	V_RETURN(m_sprActives.OnResetDevice(pd3dDevice));
 	V_RETURN(m_sprActors.OnResetDevice(pd3dDevice));
-	V_RETURN(m_sprBack.OnResetDevice(pd3dDevice));
 	V_RETURN(m_sprInterface.OnResetDevice(pd3dDevice));
 	V_RETURN(m_texManager.OnResetDevice(pd3dDevice));
 
@@ -19260,7 +19042,6 @@ HRESULT CLevel::OnLostDevice( void* pUserContext )
 	m_sprLights.OnLostDevice();
 	m_sprActives.OnLostDevice();
 	m_sprActors.OnLostDevice();
-	m_sprBack.OnLostDevice();
 	m_sprInterface.OnLostDevice();
 	m_texManager.OnLostDevice();
 
@@ -19276,7 +19057,6 @@ HRESULT CLevel::OnDestroyDevice( void* pUserContext )
 	m_sprLights.OnDestroyDevice();
 	m_sprActives.OnDestroyDevice();
 	m_sprActors.OnDestroyDevice();
-	m_sprBack.OnDestroyDevice();
 	m_sprInterface.OnDestroyDevice();
 	m_texManager.OnDestroyDevice();
 
@@ -25394,7 +25174,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			if (UTGetAppClass().IsGameNetworked() && (m_bPlayerInHiddenRoom[g_netlock.Net_GetPlayerIndex()] == false))
 				return true;
 
-			m_bPaintBackground = false;
+			//m_bPaintBackground = false;
 			return true;
 		}
 		break;
@@ -25404,13 +25184,13 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			if (UTGetAppClass().IsGameNetworked() && (m_bPlayerInHiddenRoom[g_netlock.Net_GetPlayerIndex()] == true))
 				return true;
 
-			m_bPaintBackground = true;
+			//m_bPaintBackground = true;
 			return true;
 		}
 		break;
 		case instr_LEVEL_TOGGLE_BACKGROUND:
 		{
-			m_bPaintBackground = !m_bPaintBackground;
+			//m_bPaintBackground = !m_bPaintBackground;
 			return true;
 		}
 

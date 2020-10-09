@@ -190,9 +190,12 @@
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyUtils.h" />
+    <ClInclude Include="Source\Engine\gameplay\Active.h" />
     <ClInclude Include="Source\Engine\gameplay\ActiveInterface.h" />
+    <ClInclude Include="Source\Engine\gameplay\Actor.h" />
     <ClInclude Include="Source\Engine\gameplay\CollisionShape.h" />
     <ClInclude Include="Source\Engine\gameplay\GameConstants.h" />
+    <ClInclude Include="Source\Engine\gameplay\GameStructs.h" />
     <ClInclude Include="Source\Engine\gameplay\Light.h" />
     <ClInclude Include="Source\Engine\GetDXVer.h" />
     <ClInclude Include="Source\Engine\Constants\igminterface_SPR.h" />
@@ -234,6 +237,7 @@
     <ClInclude Include="Source\Engine\pugiconfig.hpp" />
     <ClInclude Include="Source\Engine\pugixml.hpp" />
     <ClInclude Include="Source\Engine\Randoms.h" />
+    <ClInclude Include="Source\Engine\utils\ParallaxBg.h" />
     <ClInclude Include="Source\resource.h" />
     <ClInclude Include="Source\resource1.h" />
     <ClInclude Include="Source\Engine\ScriptManager.h" />
@@ -320,7 +324,9 @@
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyLeaderboards.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\Active.cpp" />
     <ClCompile Include="Source\Engine\gameplay\ActiveInterface.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\Actor.cpp" />
     <ClCompile Include="Source\Engine\gameplay\CollisionShape.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Light.cpp" />
     <ClCompile Include="Source\Engine\GetDXVer.cpp">
@@ -382,6 +388,7 @@
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\UTAppClassStates.cpp" />
+    <ClCompile Include="Source\Engine\utils\ParallaxBg.cpp" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\Engine\ogg.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
