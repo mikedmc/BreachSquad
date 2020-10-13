@@ -114,13 +114,5 @@ void CCollisionShape::InitInternalData()
 
 bool CCollisionShape::RemoveTouchingActor(CActor* actor)
 {
-	if (actor->standOnBox == null)
-		return false;
-	int fndidx = actor->standOnBox->touchingActors.IndexOf(actor);
-	//not found
-	if (fndidx < 0)
-		return false;
-	//found	
-	actor->standOnBox->touchingActors.Remove(fndidx);
 	return true;
 }

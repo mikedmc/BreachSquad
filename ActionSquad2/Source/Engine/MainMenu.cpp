@@ -648,11 +648,11 @@ void CMainMenu::Update(float dTime)
 			//--- mouse selection on mouse click ---
 			//check chapters click
 			RECTXYWH picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_AD_ICONS, 0);
-			picrect.x += worldrect.Right();
-			picrect.y += worldrect.Bottom();
+			picrect.x += (int)worldrect.Right();
+			picrect.y += (int)worldrect.Bottom();
 			if (PointInRect(vLocalMousePos, picrect))
 			{
-				inc_limit(m_fSelTimer, dTime * 10.0, 1.0f);
+				inc_limit(m_fSelTimer, dTime * 10.0f, 1.0f);
 				// open browser window
 				if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTRELEASED)
 				{
@@ -661,7 +661,7 @@ void CMainMenu::Update(float dTime)
 			}
 			else
 			{
-				dec_limit(m_fSelTimer, dTime * 10.0, 0.0f);
+				dec_limit(m_fSelTimer, dTime * 10.0f, 0.0f);
 			}
 		}
 		break;

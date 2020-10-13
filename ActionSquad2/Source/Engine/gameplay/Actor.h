@@ -55,6 +55,9 @@ public:
 	class CAICommands
 	{
 	public:
+		bool				bThrust;
+		D3DXVECTOR2			vMoveDir;
+		
 		bool				bRunning;	//daca alearga
 		bool				bThrustX;	//should be a float (0..1) to replace bRunning
 		bool				bCrouched;	//daca este crouch sau nu
@@ -80,12 +83,16 @@ public:
 			bRunning(false), bThrustX(false), nMoveDirX(0), nMoveDirY(0), bJump(false),
 			nLookDirX(0), bCrouched(false), bClimb(false), nInteractKeyState(K_CM_BUTSTATE_NOTPRESSED), nColor(0),
 			eAttackCommand(K_LVL_ACT_ATTACK_IDLE), eAttackCommand_last(K_LVL_ACT_ATTACK_IDLE), nDeathCommand(K_LVL_ACT_DEATHCMD_NONE),
-			nIconType(K_LVL_ACT_ICON_NONE), fIconDuration(0.0f), eOverrideAnim(K_LVL_ACT_ANIM_EMPTY)
+			nIconType(K_LVL_ACT_ICON_NONE), fIconDuration(0.0f), eOverrideAnim(K_LVL_ACT_ANIM_EMPTY),
+			bThrust(false)
 		{
 		}
 
 		void Reset()
 		{
+			bThrust = false;
+			vMoveDir = D3DXVECTOR2(0.0f, 0.0f);
+			
 			bThrustX = false;
 			bRunning = false;
 			nMoveDirX = 0;
@@ -140,8 +147,6 @@ public:
 	//collision
 	bool		bHasCollision;			//se calculeaza coliziunea cu nivelul
 	UINT16		collisionFlags;		    //iti spune in ce directii are coliziune (K_DIRFLAG_)
-	CCollisionShape*	standOnBox;		//cutia pe care sta, de la care ia miscarea. 
-	float		fTimeAirborn;			//de cat timp este in aer, util pt jump after falling
 
 	//puncte de interes	[3] - shooting, crouched, dead
 	D3DXVECTOR2 vecWeapon_abs[3], vecHeart_abs[3], vecGroundCheck_abs[3]; //offseturi relative incarcate din REF_POSE
@@ -221,7 +226,7 @@ public:
 	CActor() :
 		m_pAIcurrentState(null), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nTookDamageFrames(0), nLastDamageTakenFromUID(0),
 		pCurrentWeapon(null), nSkinIdx(0),
-		eLastAnimSet(K_LVL_ACT_ANIM_EMPTY), nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), fTimeAirborn(0.0f),
+		eLastAnimSet(K_LVL_ACT_ANIM_EMPTY), nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), 
 		eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1)
 	{
 		bAnimated = true;

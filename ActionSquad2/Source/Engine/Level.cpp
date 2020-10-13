@@ -146,8 +146,6 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, D3DXVECT
 	actor->bReleaseIt = false;
 	actor->speed = D3DXVECTOR2(0.0f, 0.0f);
 	actor->vSpeedImpulse = D3DXVECTOR2(0.0f, 0.0f);
-	actor->standOnBox = NULL;
-	actor->fTimeAirborn = 0.0f;
 	actor->vecCamFollowPos = D3DXVECTOR2(0.0f, 0.0f);
 
 	actor->m_sprOverheadIcon.Init(-1, 0.0f, 0.0f);
@@ -1132,9 +1130,6 @@ void CLevel::SpawnPlayer(D3DXVECTOR2 spawnPos, int nPlayerOrdinal, int nAnimset)
 	//overwrite player if already there
 	if ((pPlayerActor[nPlayerOrdinal] != null) && (pPlayerActor[nPlayerOrdinal]->fLife > 0.0f))
 	{
-		//reset loose pointers
-		if (pPlayerActor[nPlayerOrdinal]->standOnBox != null)
-			pPlayerActor[nPlayerOrdinal]->standOnBox->RemoveTouchingActor(pPlayerActor[nPlayerOrdinal]);
 		//change player
 		InitActor(pPlayerActor[nPlayerOrdinal], &templateLocal, pPlayerActor[nPlayerOrdinal]->pos);
 		//set controller
@@ -2628,8 +2623,6 @@ bool CLevel::IsPlatformEnding(CActor* actor, int nDirSign)
 {
 	if (nDirSign == 0)
 		return false;
-	if (actor->standOnBox == null)
-		return false;
 	//presupunem ca ai-ul de dead nu cauta platform ends si ca pe crouch nu se misca asa ca folosim mereu datele din standing adica vecGroundCheck[0]
 	D3DXVECTOR2 vChkPos = actor->pos;
 	vChkPos.y += actor->vecGroundCheck_abs[0].y;
@@ -2638,17 +2631,6 @@ bool CLevel::IsPlatformEnding(CActor* actor, int nDirSign)
 	else
 		vChkPos.x += actor->vecGroundCheck_abs[0].x;
 
-	if ((actor->collisionFlags & (K_DIRFLAG_LEFT | K_DIRFLAG_RIGHT)) == 0)
-	{
-		if (((nDirSign > 0) && (actor->bbox.vMax.x > actor->standOnBox->bbox.vMax.x)) ||
-			((nDirSign < 0) && (actor->bbox.vMin.x < actor->standOnBox->bbox.vMin.x)))
-		{
-			if (NULL == GetCollisionShapeAt(vChkPos, K_LVL_COLL_TYPE_SOLID))
-			{
-				return true;
-			}
-		}
-	}
 
 	return false;
 }
@@ -7491,46 +7473,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		}
 	}
 	//update Damage Over Time effect
+	/*
 	if (actor->cDamageOverTime.eType != CDamageOverTime::K_LVL_DoT_NONE)
 	{
 		if (actor->cDamageOverTime.fDamagePerSec != 0.0f)
 		{
-			//update damaging DoT (rarely)
-			float fCheckTimeSec = 0.5f;
-			if (m_Timers.Tick((int)(fCheckTimeSec * 1000.0f)))
-			{
-				actor->cDamageOverTime.fDuration -= fCheckTimeSec;
-				if (actor->cDamageOverTime.fDamagePerSec > 0.0f) //damage
-				{
-					float fDamage = actor->cDamageOverTime.fDamagePerSec * fCheckTimeSec;
-					//#PERK: NOMEX SUIT
-					if ((actor->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_FIRE) &&
-						(actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER))
-					{
-						if (g_playerSelScr.IsPerkEnabled(actor->nPlayerOrdinal, &shPerk_NOMEX_SUIT))
-							fDamage *= 0.5f;
-					}
-					//#TODO: add special class for the DoT Effects
-					HitActor(actor, fCheckTimeSec * fDamage, actor->cDamageOverTime.nOwnerUID, K_LVL_ACT_CLASS_EXPLOSION);
-				}
-				else if (actor->cDamageOverTime.fDamagePerSec < 0.0f) //heal
-				{
-					float fHeal = -actor->cDamageOverTime.fDamagePerSec * fCheckTimeSec;
-					if (actor->fLife > 0.0f)
-					{
-						actor->fLife += fHeal;
-						if (actor->fLife >= actor->templateActor.fLife)
-						{
-							actor->fLife = actor->templateActor.fLife;
-							actor->cDamageOverTime.eType = CDamageOverTime::K_LVL_DoT_NONE;
-						}
-					}
-					else //remove heal effect on dead bodies
-					{
-						actor->cDamageOverTime.eType = CDamageOverTime::K_LVL_DoT_NONE;
-					}
-				}
-			}
 		}
 		else
 		{
@@ -7541,92 +7488,10 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		{
 			case CDamageOverTime::K_LVL_DoT_ZOMBIE_POISON:
 			{
-				//#ZOMBIE: if biten by a zombie set permanent bite flag
-				if ((actor->templateActor.actorClass != K_LVL_ACT_CLASS_ZOMBIE) &&
-					(actor->templateActor.eMaterial == K_LVL_MATERIAL_FLESH) &&
-					(actor->templateActor.shName != shActorNameDog))
-				actor->templateActor.eCaps |= CActorTemplate::K_ACT_CAPS_TURN_TO_ZOMBIE;
-
-				if (m_Timers.Tick(50.0f))
-				{
-					D3DXVECTOR2 ppos(actor->bbox.vMin.x + randfloat(actor->bbox.vSize.x), actor->bbox.vMin.y + randfloat(actor->bbox.vSize.y));
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_SMOKE, false, randint(2), &ppos, &D3DXVECTOR2(0.0f, -20.0f), 
-						&D3DXVECTOR2(randfloatsgn(20.0f), -10.0f - randfloat(30.0f)), 1.0f + randfloat(0.5f), 0.4f, 0.25f, randfloat(PI), randfloatsgn(0.3f), 0.5f, 2.0f, 0x4433ff33, K_PART_LAYER_FRONT, 2.0f);
-				}
 			}
 			break;
 			case CDamageOverTime::K_LVL_DoT_FIRE:
 			{
-				if (m_Timers.Tick(30.0f))
-				{
-					D3DXVECTOR2 ppos(actor->bbox.vMin.x + randfloat(actor->bbox.vSize.x), actor->bbox.vMin.y + randfloat(actor->bbox.vSize.y));
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK1, true, randint(2), &ppos, NULL, &D3DXVECTOR2(randfloatsgn(1.0f), -10.0f - randfloat(5.0f)), 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-					ppos = D3DXVECTOR2(actor->bbox.vMin.x + randfloat(actor->bbox.vSize.x), actor->bbox.vMin.y + randfloat(actor->bbox.vSize.y));
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, 0, &ppos, NULL, &D3DXVECTOR2(randfloatsgn(1.0f), -10.0f - randfloat(5.0f)), 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-				}
-			}
-			break;
-			case CDamageOverTime::K_LVL_DoT_HEAL_LIFE:
-			{
-				if (m_Timers.Tick(30.0f))
-				{
-					D3DXVECTOR2 ppos(actor->bbox.vMin.x + randfloat(actor->bbox.vSize.x), actor->bbox.vMin.y + randfloat(actor->bbox.vSize.y));
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_CROSS_SM, true, 0, &ppos, NULL, &D3DXVECTOR2(0.0f, -30.0f - randfloat(10.0f)), 0.6f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.2f, 0xff55ff55, K_PART_LAYER_RT_FRONT_NRM);
-				}
-			}
-			break;
-			case CDamageOverTime::K_LVL_DoT_TARGETED_ALLY:
-			case CDamageOverTime::K_LVL_DoT_TARGETED:
-			{
-				//remove target if dead
-				if (actor->fLife <= 0.0f)
-					actor->cDamageOverTime.Reset();
-			}
-			break;
-			case CDamageOverTime::K_LVL_DoT_INVINCIBLE:
-			{
-			}
-			break;
-			case CDamageOverTime::K_LVL_DoT_SNIPER_TARGET:
-			{
-				//remove target if dead
-				if (actor->fLife <= 0.0f)
-				{
-					actor->cDamageOverTime.Reset();
-					break;
-				}
-				//sound
-				if ((actor->cDamageOverTime.fDuration + dTime > 0.8f) && (actor->cDamageOverTime.fDuration <= 0.8f))
-				{
-					//SND_PLAY(SNDIDX_SNIPER_SUPPORT_AIM);
-				}
-				//when timer finished kill actor
-				if (actor->cDamageOverTime.fDuration <= 0.0f)
-				{
-					//SND_PLAY_POSITIONAL_RAND2(SNDIDX_GUN_M4_01, SNDIDX_GUN_M4_02, actor->pos);
-					//add kill for specified actor
-					CActor* pAct = GetPlayerByUID(actor->cDamageOverTime.nOwnerUID);
-					if (pAct)
-					{
-						//only count actors that give you strategic points
-						if(actor->templateActor.fStrategicPoints > 0.0f)
-							m_arrStats[K_LVL_STATS_PL1_KILLS + pAct->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT]++;
-						if(!IsNetworkPlayer(pAct))
-							App_IncreaseGamestat(K_MEMID_GAMESTATS_SA_SNIPER_FRAGS);
-					}
-					//count sniper victims
-					m_arrStats[K_LVL_STATS_LEVEL_SNIPER_VICTIMS]++;
-					//kill actor with TRAP class so we don't get SP for them
-					HitActor(actor, 100.0f, 0, K_LVL_ACT_CLASS_TRAP);
-					//generate headshot
-					DWORD dwCol = 0xff671010;
-					if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_ZOMBIE)
-						dwCol = 0xff82b600;
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HEADSHOT1 + randint(2), true, 0, &actor->posHeart, NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_BACK_NRM);
-					//add alert effect
-					AddAIEvent(K_LVL_AI_EVENT_STRANGE, actor->GetUID(), actor->templateActor.actorClass, actor->GetPosHeart(), 132.0f, 0.5f);
-
-				}
 			}
 			break;
 		}
@@ -7634,6 +7499,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		if (actor->cDamageOverTime.fDuration <= 0.0f)
 			actor->cDamageOverTime.Reset();
 	}
+	*/
 
 	//--- UPDATE ANIMATION ---
 	//get displacement from anim moves
@@ -7671,7 +7537,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//------------------------------------------------------------------------------------------
 	//	INTEGRATOR - physics
 	//------------------------------------------------------------------------------------------
-	//check speed limits
+	//#TODO: check speed limits - should be done on the speed vector, normalized
 	CLAMP(actor->speed.x, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED);
 	CLAMP(actor->speed.y, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED);
 	//update impulse
@@ -7700,7 +7566,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	if (actor->bHasCollision)
 	{
-		//1. gasesc box-ul dintre oldAABB si actual AABB ca sa vedem cu ce se paote intersecta la viteze mari
+		//1. fine bbox start and end union that includes all collisions when moving at high speeds
 		CAABB destbox, oldbox;
 		destbox = actor->bbox_ini;
 		destbox.Move(actor->pos);
@@ -7761,7 +7627,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		UINT16 unTotalFlags = 0;
 
 		bool bSquashPlayer = false;
-		CCollisionShape* actorStandOn = null;
 		if (tempCollBoxList.Count() > 0)
 		{
 			for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
@@ -7877,23 +7742,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				{
 					bSquashPlayer = true;
 				}
-
-				//save last stand on box doar daca am retdirflag de DOWN fix cu boxul curent
-				if ((actor->speed.y >= 0.0f) && (retDirFlag == K_DIRFLAG_DOWN))
-				{
-					//save stand on shape
-					actorStandOn = colshape;
-				}
-			}
-
-			//after all collisions make sure we still have a standing platform
-			if ((actorStandOn != null) && (unTotalFlags & K_DIRFLAG_DOWN))
-			{
-				if (!destbox.Intersects(&actorStandOn->bbox))
-				{
-					actorStandOn = null;
-					unTotalFlags &= ~K_DIRFLAG_DOWN;
-				}
 			}
 
 			//set actor current collision flags
@@ -7914,80 +7762,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//DOWN collision
 			if ((actor->speed.y > 0.0f) && (actor->collisionFlags & K_DIRFLAG_DOWN))
 			{
-				//cand cade si nu statea pe nici o cutie inseamna ca era in aer
-				if (actor->standOnBox == NULL)
-				{
-					if (actor->speed.y > K_LVL_MAX_FALL_SPEED_Y_DUST)
-					{
-						//adaug particula de praf la picioare cand aterizeaza
-						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_DUST_JUMP, true, 0, &actor->pos, NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_BACK_NRM);
-						//face zgomot cand cade de sus
-						AddAIEvent(K_LVL_AI_EVENT_STRANGE, actor->GetUID(), actor->templateActor.actorClass, actor->GetPosHeart(), 132.0f, 0.5f);
-						//da stun la inamicii de sub player atunci cand cade
-						if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
-						{
-							for (int ll = 0; ll < m_visibleList.logic_actors_closeby.Count(); ll++)
-							{
-								CActor* tact = m_visibleList.logic_actors_closeby[ll];
-								if ((tact == actor) || (tact->fLife <= 0.0f))
-									continue;
-								if (tact->templateActor.actorClass != K_LVL_ACT_CLASS_HUMAN)
-									continue;
-								if (D3DXVec2LengthSq(&(tact->pos - actor->pos)) < 100.0f)
-								{
-									SetActorStun(tact, 2.0f);
-									//departeaza victima de tine putin
-									tact->vSpeedImpulse.x = SIGN(tact->pos.x - actor->pos.x) * 100.0f;
-									//#PERK: ASSAULT JUMP - do damage when falling on enemies
-									if (g_playerSelScr.m_arrPlayers[actor->nPlayerOrdinal].eType == K_PSS_CLASS_ASSAULTER)
-									{
-										if (g_playerSelScr.IsPerkEnabled(actor->nPlayerOrdinal, &shPerk_ASSAULT_JUMP))
-										{
-											HitActor(tact, 15.0f, actor->GetUID(), K_LVL_ACT_CLASS_PLAYER, NULL, 
-												K_LVL_BULLET_FLAG_NO_IMPACT_PARTICLES | K_LVL_BULLET_FLAG_NOT_BALLISTIC | K_LVL_BULLET_FLAG_IGNORE_ARMOR | K_LVL_BULLET_FLAG_IGNORE_COVER | K_LVL_BULLET_FLAG_NO_DECALS, 10, 0.0f);
-										}
-									}
-								}
-							}
-						}
-					}
-					//fallen from high above, hurt him
-					if (actor->speed.y >= K_LVL_ACTOR_MAX_SPEED)
-					{
-						HitActor(actor, K_LVL_ACTOR_FALL_DAMAGE, 0, K_LVL_ACT_CLASS_TRAP, NULL,
-							K_LVL_BULLET_FLAG_NO_IMPACT_PARTICLES | K_LVL_BULLET_FLAG_NOT_BALLISTIC | K_LVL_BULLET_FLAG_IGNORE_ARMOR | K_LVL_BULLET_FLAG_IGNORE_COVER | K_LVL_BULLET_FLAG_NO_DECALS, 10, 0.0f);
-
-					}
-				}
-
-				//ma adaug in lista cutiei cand se schimba cutia pe care stau
-				if (actor->standOnBox != actorStandOn)
-				{
-					//ies din lista veche daca e cazul
-					if (actor->standOnBox != NULL)
-						actor->standOnBox->RemoveTouchingActor(actor);
-					//ma bag in lista noua
-					if (actorStandOn != NULL)
-						actorStandOn->touchingActors.Add(actor);
-				}
-				//semnalizez cutia pe care stau
-				actor->standOnBox = actorStandOn;
-
-				//#HARDCODE: daca ai aterizat pe geam il sparge
-				if (actor->standOnBox->AIstate == K_AI_STATE_COLL_BREAKABLE_WINDOW)
-				{
-					if (actor->speed.y > K_LVL_MAX_FALL_SPEED_Y_BREAKGLASS)
-					{
-						CCollisionShape* shape = actor->standOnBox;
-						//scadem viata geamului
-						shape->AIfvar1 = 0.0f;
-						shape->varAIparams.SetNamedVarFloat(L"fForceDirX", 0.0f);
-					}
-				}
 				//reset speed to 0 !!!
 				actor->speed.y = 0.0f;
-				//reset airborn timer
-				actor->fTimeAirborn = 0.0f;
 			}
 			//UP collision
 			else if ((actor->speed.y < 0.0f) && (actor->collisionFlags & K_DIRFLAG_UP))
@@ -8016,14 +7792,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			actor->collisionFlags = 0;
 		}
 
-		//daca nu stai pe nimic sterge pointerul la platforma de sub el
-		if (((actor->collisionFlags & K_DIRFLAG_DOWN) == 0) && (actor->speed.y > 1.0f))
-		{
-			if (actor->standOnBox != NULL)
-				actor->standOnBox->RemoveTouchingActor(actor);
-			//actor not touching
-			actor->standOnBox = NULL;
-		}
 	}
 	//end phys
 
@@ -8035,6 +7803,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	///--- ACTOR CAPS ---
 	//check if fall off ladder
+	/*
 	if (actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_CLIMB) 
 	{
 		//check bottom center of bbox
@@ -8083,7 +7852,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			}
 		}
 	}
-
+	*/
 	//--- find closest touchable ---
 	if (actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_INTERACT)
 	{
@@ -8470,34 +8239,23 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					//SND_PLAY(SNDIDX_CLICK_DENIED);
 				}
 
-				bool bPressedRight = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) > 0.0f);
-				bool bPressedLeft = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f);
-				//daca apasa ambele butoane nu se misca
-				if (bPressedLeft && bPressedRight)
-					bPressedLeft = bPressedRight = false;
-
-				if (!bPressedLeft && bPressedRight)
+				D3DXVECTOR2 vMoveDir = pController->GetDoubleAxisVector(K_CM_COMMAND_MOVE_X, K_CM_COMMAND_MOVE_Y);
+				if (D3DXVec2LengthSq(&vMoveDir) > 0.0f)
 				{
-					actor->m_AIcommands.bThrustX = true;
-					actor->m_AIcommands.nLookDirX = 1;
-					actor->m_AIcommands.nMoveDirX = 1;
-					actor->m_AIcommands.bRunning = true;
-				}
-				if (bPressedLeft && !bPressedRight)
-				{
-					actor->m_AIcommands.bThrustX = true;
-					actor->m_AIcommands.nLookDirX = -1;
-					actor->m_AIcommands.nMoveDirX = -1;
+					actor->m_AIcommands.bThrust = true;
+					actor->m_AIcommands.vMoveDir = vMoveDir;
 					actor->m_AIcommands.bRunning = true;
 				}
 
 				//reset roll status
+				/*
 				if (actor->nRolling == K_STATE_FINISHED)
 				{
 					//reset only when thrustX off
 					if ((!bPressedLeft) && (!bPressedRight))
 						actor->nRolling = K_STATE_READY;
 				}
+				*/
 
 				//climb ladders and interact
 				/* //#DMC: commented 13 oct 2020
@@ -8582,31 +8340,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					(pController->sCommands.keyState[K_CM_COMMAND_USE_GEAR] == K_CM_BUTSTATE_JUSTPRESSED))
 				{
 					//SND_PLAY_POSITIONAL_RAND2(SNDIDX_GUN_EMPTY_01, SNDIDX_GUN_EMPTY_02, actor->pos);
-				}
-				//JUMP
-				if (pController->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTPRESSED)
-				{
-					actor->m_AIcommands.bJump = true;
-					actor->m_AIcommands.bClimb = false;
-//					actor->m_AIcommands.bThrustY = false;
-					//jump if touching ground
-					if ((actor->collisionFlags & K_DIRFLAG_DOWN) || (actor->fTimeAirborn < K_LVL_ACTOR_JUMP_AFTER_PLATFORM_TIME))
-					{
-						if (!pController->sCommands.bKeyDown[K_CM_COMMAND_DOWN])
-						{
-							actor->m_AIcommands.nMoveDirY = -1;
-						}
-						else //jump through stairs
-						{
-							actor->m_AIcommands.nMoveDirY = 1;
-						}
-					}
-					//jump down if on ladder
-					if ((actor->bOnLadder) && (pController->sCommands.bKeyDown[K_CM_COMMAND_DOWN]))
-					{
-						actor->m_AIcommands.bJump = true;
-						actor->m_AIcommands.nMoveDirY = 1;
-					}
 				}
 
 				//when selecting strategic ability only crouch
@@ -12416,77 +12149,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	///--- AI commands ---
 	actor->nInteractingState = 0;
 
-	//#HARDCODE: recon lockpick
-	if ((actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_INTERACT) && 
-		(actor->pClosestTouchable != null) && (!actor->bOnLadder) && (actor->collisionFlags & K_DIRFLAG_DOWN)) //only interact while standing (not in midair)
-	{
-		//#HACK: the Recon class can pick locked doors
-		bool bDoorConverted = false;
-		if ( (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (g_playerSelScr.m_arrPlayers[actor->nPlayerOrdinal].eType == K_PSS_CLASS_RECON) && 
-			(actor->pClosestTouchable->AIstate == K_AI_STATE_ACTIVE_DOOR_SECTION) && (actor->pClosestTouchable->varAIparams.GetVariantByName(L"n_locked")->m_asINT32 > 0))
-		{
-			//set open door script
-			actor->pClosestTouchable->fTouchDuration = actor->pClosestTouchable->varAIparams.GetVariantByName(L"f_lockpickTime")->m_asFloat;
-			actor->pClosestTouchable->script_hash.Init(L"ACTIVE_LOCKPICK_DOOR");
-			bDoorConverted = true;
-		}
-
-		if ((actor->m_AIcommands.nInteractKeyState != K_CM_BUTSTATE_NOTPRESSED) && (actor->nAttackStatus <= K_LVL_ACT_ATTACK_RELOADING))
-		{
-			//default short interact
-			if (actor->pClosestTouchable->fTouchDuration == 0.0f)
-			{
-				if (actor->m_AIcommands.nInteractKeyState == K_CM_BUTSTATE_JUSTPRESSED)
-				{
-					TouchClosestActive(actor, dTime);
-					//short touching actors doesn't interrupt reloading (like saving hostages)
-					if(actor->pClosestTouchable->GetClassType() == K_LVL_IAI_TYPE_ACTIVE)
-						StopReloadingWeapon(actor->pCurrentWeapon);
-				}
-			}
-			else //when touching has a duration
-			{
-				actor->nInteractingState = 1;
-				//bomb touching verse
-				if ((actor->pClosestTouchable != null) && (actor->pClosestTouchable->AIstate == K_AI_STATE_ACTIVE_BOMB))
-				{
-					if (actor->m_AIcommands.nInteractKeyState == K_CM_BUTSTATE_JUSTPRESSED)
-					{
-						PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_BOMB_DEFUSING, true);
-					}
-				}
-				//lockpick verse
-				if (bDoorConverted)
-				{
-					if (actor->m_AIcommands.nInteractKeyState == K_CM_BUTSTATE_JUSTPRESSED)
-					{
-						PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_LOCKPICK_START, true);
-					}
-				}
-
-				//pe interact long nu am voie sa ma misc si sa trag sau sa fac crouch
-				actor->m_AIcommands.bThrustX = false;
-//				actor->m_AIcommands.bThrustY = false;
-				actor->m_AIcommands.bCrouched = false;
-				actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
-				//finally dau si touch (la cele cu touch duration negativ trebuie sa dea touch toti playerii)
-				TouchClosestActive(actor, dTime);
-				StopReloadingWeapon(actor->pCurrentWeapon);
-			}
-		}
-		//convert door back to simple locked door
-		if (bDoorConverted)
-		{
-			actor->pClosestTouchable->fTouchDuration = 0.0f;
-			actor->pClosestTouchable->script_hash.Init(L"ACTIVE_LOCKED_BREAKABLE");
-			//state 2 on RECON means he's lockpicking
-			if (actor->nInteractingState != 0)
-			{
-				actor->nInteractingState = 2;
-				actor->m_AIcommands.nLookDirX = SIGN(actor->pClosestTouchable->bbox.vCenter.x - actor->posHeart.x);
-			}
-		}
-	}
 
 	//save old crouch state
 	bool bCrouchedOldState = actor->bCrouched;
@@ -12661,72 +12323,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		}
 	}
 
-	//jumping
-	if (actor->m_AIcommands.bJump)
-	{
-		//normal jumps
-		if (actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_JUMP)
-		{
-			if (!actor->bOnLadder)
-			{
-				//ca sa poti sa cobori prin stairs si boxes
-				if (actor->m_AIcommands.nMoveDirY == 1)
-				{
-					if ((actor->standOnBox != NULL) && 
-						((actor->standOnBox->type == K_LVL_COLL_TYPE_STAIRS) || (actor->standOnBox->type == K_LVL_COLL_TYPE_BOX) || (actor->standOnBox->type == K_LVL_COLL_TYPE_LEDGE)))
-					{
-						//move the player a little lower so he drops through the platform
-						actor->pos.y += 3.0f;
-						actor->bCrouched = false;
-						actor->pCover = null;
-						//scot actorul din lista de contacte a platformei
-						if (actor->standOnBox != NULL)
-							actor->standOnBox->RemoveTouchingActor(actor);
-						actor->standOnBox = NULL;
-						actor->collisionFlags &= ~K_DIRFLAG_DOWN;
-					}
-				}
-
-				if (actor->m_AIcommands.nMoveDirY == -1)
-				{
-					//get up from crouch
-					actor->bCrouched = false;
-					actor->pCover = null;
-					//jump from platforms
-					if ((actor->collisionFlags & K_DIRFLAG_DOWN) || (actor->fTimeAirborn < K_LVL_ACTOR_JUMP_AFTER_PLATFORM_TIME))
-					{
-						actor->speed.y = actor->templateActor.jumpSpeed;
-						//aici se adauga viteza obiectului la viteza de saritura a omului daca vrem sa se intample asa
-
-						//scot actorul din lista de contacte a platformei
-						if (actor->standOnBox != NULL)
-							actor->standOnBox->RemoveTouchingActor(actor);
-						//adaug particula de praf la picioare
-						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_DUST_JUMP, true, 0, &actor->pos, NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_BACK_NRM);
-
-						actor->standOnBox = NULL;
-						//set airborn time to lower limit so you can't do a lot of jumps
-						actor->fTimeAirborn = K_LVL_ACTOR_JUMP_AFTER_PLATFORM_TIME; 
-						//remove collision flag
-						actor->collisionFlags &= ~K_DIRFLAG_DOWN;
-					}
-				}
-			}
-			else  //daca e pe scara nu mai ii da jump in sus
-			{
-				actor->bOnLadder = false;
-
-				if (actor->standOnBox != NULL)
-					actor->standOnBox->RemoveTouchingActor(actor);
-				//daca nu am tinut apasat pe jos sare in sus
-				if (actor->m_AIcommands.nMoveDirY != 1)
-				{
-					//jump up
-					actor->speed.y = actor->templateActor.jumpSpeed;
-				}
-			}
-		}
-	}
 	
 	///--- Look direction ---
 	//trebuie sa avem pointerul mereu setat
@@ -12954,36 +12550,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		actor->pCurrentWeapon->SetTriggerStates(false, false);
 	}
 
-	//don't reload if weapon can't be reloaded
-	if (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_RELOADING)
-	{
-		//weapon can't be reloaded
-		if (actor->pCurrentWeapon->WeaponTemplate.nReloadUnitSize <= 0)
-		{
-			actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
-		}
-		if (actor->pCurrentWeapon->ammoLeft >= actor->pCurrentWeapon->WeaponTemplate.nClipSize + actor->pCurrentWeapon->WeaponTemplate.nBulletChamberSize)
-		{
-			actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
-			/*
-			//just pressed reload right now and weapon already full:
-			if (actor->pCurrentWeapon->statusOld != K_LVL_WPN_STATUS_RELOADING)
-			{
-				//#HACK: reload MAG READY
-				CWeapon* pGear = actor->pSelectedWeapon[K_LVL_ACT_WEAPON_GEAR];
-				if ((pGear != null) && (pGear->WeaponTemplate.name == shWpnMagReady) && (pGear->ammoLeft == 0))
-				{
-					pGear->ammoLeft++;
-
-					actor->pCurrentWeapon->ammoLeft = actor->pCurrentWeapon->WeaponTemplate.nBulletChamberSize;
-					actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_RELOADING;
-					actor->pCurrentWeapon->status = K_LVL_WPN_STATUS_RELOADING;
-				}
-			}
-			*/
-		}
-	}
-
 	///--- update weapons ---
 	for (auto& weapon : actor->weapons)
 	{
@@ -13093,6 +12659,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	actor->UpdateBBoxAndPoints();
 
 	///--- find and save last safe pos for respawn ---
+	/*
 	if (((actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (actor->GetCurrentBehavior() == AI_BEHAVIOR_PLAYER_CONTROL) && 
 		(actor->collisionFlags & K_DIRFLAG_DOWN) != 0) &&
 		(actor->standOnBox != null) && (actor->fLife > 0.0f))
@@ -13103,7 +12670,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		if((actor->standOnBox != null) && (actor->pos.y > actor->standOnBox->bbox.vMin.y))
 			m_arrPlayerLastSafePos[actor->nPlayerOrdinal].y = actor->standOnBox->bbox.vMin.y;
 	}
-
+	*/
 
 	//final shoot precheck
 	bool bRunScriptOnEmpty = false;
@@ -13290,28 +12857,23 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	if (actor->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]->status != K_LVL_WPN_STATUS_UNKNOWN)
 		fWpnSpeedPenaltyPercent = actor->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]->WeaponTemplate.fSpeedPenaltyPercent;
 
-	/*
-	if (actor->m_AIcommands.bThrustY)
+	if (actor->m_AIcommands.bThrust)
 	{
 		//add speed
-		float fspeed = actor->templateActor.climbSpeed;
-		//penalizare viteza 
+		float fspeed = actor->templateActor.moveMinSpeed;
+		//daca alearga schimb viteza
+		if (actor->m_AIcommands.bRunning)
+			fspeed = actor->templateActor.moveMaxSpeed;
+		//speed penalty
 		fspeed -= fspeed * fWpnSpeedPenaltyPercent;
-		//daca setez directia de move o foloseste pe cea comandata altfel se misca in directia in care se uita
-		if (actor->m_AIcommands.nMoveDirY != 0)
-			fspeed *= actor->m_AIcommands.nMoveDirY;
-		//setam thrust
-		actor->speed.y = fspeed;
+
+		// set final speed
+		actor->speed = actor->m_AIcommands.vMoveDir * fspeed;
 	}
 	else
 	{
-		if (actor->bOnLadder)
-		{
-			actor->speed.y = 0.0f;
-		}
+		actor->speed = D3DXVECTOR2(0.0f, 0.0f);
 	}
-	*/
-
 
 
 	/*
@@ -13494,8 +13056,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					//reset physics
 					actor->speed = D3DXVECTOR2(0.0f, 0.0f);
 					actor->vSpeedImpulse = D3DXVECTOR2(0.0f, 0.0f);
-					actor->standOnBox = NULL;
-					actor->fTimeAirborn = 0.0f;
 					actor->vecCamFollowPos = D3DXVECTOR2(0.0f, 0.0f);
 					//move invisible body back to last safe pos
 					D3DXVECTOR2 vSpawnPos = m_arrPlayerLastSafePos[actor->nPlayerOrdinal];
@@ -13704,7 +13264,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				int reloadAnimIdx = actor->sprite.animationIdx;
 				int aframescnt = m_sprActors.GetAFramesCnt(reloadAnimIdx);
 				float frameAdvPerc = actor->pCurrentWeapon->reloadTimer / actor->pCurrentWeapon->WeaponTemplate.fReloadTimePerUnit;
-				int nTopFrame = int(aframescnt * frameAdvPerc);
+				int nTopFrame = (int)(aframescnt * frameAdvPerc);
 				CLAMP(nTopFrame, 0, (aframescnt - 1));
 				actor->sprite.currentFrame = nTopFrame;
 			}
@@ -14640,14 +14200,6 @@ void CLevel::CleanupDeadObjects()
 		if (m_arrActors[kk]->bReleaseIt)
 		{
 			CActor* act = m_arrActors[kk];
-			//elibereaza pointeri 
-			if (act->standOnBox != NULL)
-			{
-				//scot actorul din lista de contacte a platformei
-				int fndidx = act->standOnBox->touchingActors.IndexOf(act);
-				if (fndidx >= 0)
-					act->standOnBox->touchingActors.Remove(fndidx);
-			}
 			// make sure we don't keep pointer to actor
 			for (int i = 0; i < m_arrActors.GetSize(); i++)
 			{
@@ -19448,69 +19000,6 @@ bool CLevel::ActivateSpecialAbility(int nAbilityIdx, int nTargetPlayerOrdinal)
 			AddProp_Light(pAct->GetPosHeart(), ANM_LIGHTS_SPR_POINT1, 1.0f, 0.2f, 0xff55ff55, 1.0f);
 		}
 		break;
-		case K_CI_STRATEGIC_GEAR_REFILL:
-		{
-			//see if player is standing on ground
-			if (
-				((pAct->collisionFlags & K_DIRFLAG_DOWN) == 0) || 
-				((pAct->standOnBox != null) && (pAct->standOnBox->type == K_LVL_COLL_TYPE_MOVING_PLATFORM))
-				)
-			{
-				if (!IsNetworkPlayer(pAct))
-				{
-					m_interfaceTextBubble.ShowLevelHint(&m_camLevel, STR_CANT_ACTIVATE_HERE, FONTIDX_6_NS1, D3DXVECTOR2(pAct->posHeart.x, pAct->posHeart.y - 10.0f), 1.0f);
-				}
-				return false;
-			}
-
-			//#PERK: DOUBLE GEAR
-			int nGearQty = 2;
-			int nAnimIdx = ANM_ACTIVES_SPR_AMMO_BOX_SM;
-			if (g_playerSelScr.IsPerkEnabled(nTargetPlayerOrdinal, &shPerk_DOUBLE_GEAR))
-			{
-				nGearQty = 4;
-				nAnimIdx = ANM_ACTIVES_SPR_AMMO_BOX;
-			}
-
-			CActive* active = SpawnActive(pAct->pos, nAnimIdx, 0, K_LVL_LAYER_MIDDLE);
-			if (active)
-			{
-				SetAI(active, K_AI_STATE_ACTIVE_AMMO_BOX, null);
-				active->varAIparams.SetNamedVarINT32(L"n_ammoLeft", nGearQty);
-				active->script_hash.Init("GIVE_AMMO");
-				active->bCanInteract = true;
-				active->bStandsOut = true;
-
-				///find better placing if necessary
-				int nInitialScore = GetPowerupPlacingScore(active, pAct->GetPosHeart());
-				D3DXVECTOR2 vInitial = active->pos;
-				D3DXVECTOR2 vFinalOffset(0.0f, 0.0f);
-				//look for better position
-				if (nInitialScore < 0)
-				{
-					for (int kk = 2; kk <= 10; kk++)
-					{
-						int nsgn = (((kk % 2) * 2) - 1);
-						D3DXVECTOR2 vOffset(nsgn * ((kk / 2) * K_TILE_HSIZE), 0.0f);
-						active->SetPos(vInitial + vOffset);
-						int nScoreNow = GetPowerupPlacingScore(active, pAct->GetPosHeart());
-						if (nScoreNow > nInitialScore)
-						{
-							vFinalOffset = vOffset;
-							nInitialScore = nScoreNow;
-						}
-					}
-				}
-				//final placing
-				active->SetPos(vInitial + vFinalOffset);
-
-				//grafica
-				g_particlesMgr.GenerateHealEffect(active->pos, 0xff55ff55, K_PART_LAYER_RT_FRONT_NRM);
-				//SND_PLAY_POSITIONAL(SNDIDX_PLAYER_PISTOL_UNHOLSTER, pAct->pos);
-			}
-			
-		}
-		break;
 		case K_CI_STRATEGIC_SNIPER_SUPPORT:
 		{
 			int nFound = 0;
@@ -19559,68 +19048,6 @@ bool CLevel::ActivateSpecialAbility(int nAbilityIdx, int nTargetPlayerOrdinal)
 			//no enemies? don't spend points
 			if (nFound == 0)
 				return false;
-		}
-		break;
-		case K_CI_STRATEGIC_MEDIKIT:
-		{
-			//see if player is standing on ground
-			if (
-				((pAct->collisionFlags & K_DIRFLAG_DOWN) == 0) || 
-				((pAct->standOnBox != null) && (pAct->standOnBox->type == K_LVL_COLL_TYPE_MOVING_PLATFORM))
-				)
-			{
-				if (!IsNetworkPlayer(pAct))
-				{
-					m_interfaceTextBubble.ShowLevelHint(&m_camLevel, STR_CANT_ACTIVATE_HERE, FONTIDX_6_NS1, D3DXVECTOR2(pAct->posHeart.x, pAct->posHeart.y - 10.0f), 1.0f);
-				}
-				return false;
-			}
-
-			//#PERK: DOUBLE MEDIKITS
-			int nGearQty = 1;
-			int nAnimIdx = ANM_ACTIVES_SPR_HEALTH_BOX_SM;
-			if (g_playerSelScr.IsPerkEnabled(nTargetPlayerOrdinal, &shPerk_DOUBLE_MEDIKITS))
-			{
-				nGearQty = 2;
-				nAnimIdx = ANM_ACTIVES_SPR_HEALTH_BOX;
-			}
-
-			CActive* active = SpawnActive(pAct->pos, nAnimIdx, 0, K_LVL_LAYER_MIDDLE);
-			if (active)
-			{
-				SetAI(active, K_AI_STATE_ACTIVE_HEALTH_BOX, null);
-				active->varAIparams.SetNamedVarINT32(L"n_healthLeft", nGearQty);
-				active->script_hash.Init("GIVE_HEALTH");
-				active->bCanInteract = true;
-				active->bStandsOut = true;
-
-				///find better placing if necessary
-				int nInitialScore = GetPowerupPlacingScore(active, pAct->GetPosHeart());
-				D3DXVECTOR2 vInitial = active->pos;
-				D3DXVECTOR2 vFinalOffset(0.0f, 0.0f);
-				//look for better position
-				if (nInitialScore < 0)
-				{
-					for (int kk = 2; kk <= 10; kk++)
-					{
-						int nsgn = (((kk % 2) * 2) - 1);
-						D3DXVECTOR2 vOffset(nsgn * ((kk / 2) * K_TILE_HSIZE), 0.0f);
-						active->SetPos(vInitial + vOffset);
-						int nScoreNow = GetPowerupPlacingScore(active, pAct->GetPosHeart());
-						if (nScoreNow > nInitialScore)
-						{
-							vFinalOffset = vOffset;
-							nInitialScore = nScoreNow;
-						}
-					}
-				}
-				//final placing
-				active->SetPos(vInitial + vFinalOffset);
-
-				//grafica
-				g_particlesMgr.GenerateHealEffect(active->pos, 0xff55ff55, K_PART_LAYER_RT_FRONT_NRM);
-				//SND_PLAY_POSITIONAL(SNDIDX_PLAYER_PISTOL_UNHOLSTER, pAct->pos);
-			}
 		}
 		break;
 		case K_CI_STRATEGIC_REINFORCEMENT:
