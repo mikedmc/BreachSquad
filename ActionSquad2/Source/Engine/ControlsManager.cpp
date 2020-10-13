@@ -4303,7 +4303,7 @@ void CControlsManager::Update(float dTime)
 	{
 		CController* ctrlr = UTGetControllersManager().m_arrControllers[kk];
 		//always skip network controllers
-		if (ctrlr->eType == K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK)
+		if (ctrlr->eType == K_CM_CT_NET_FRAMELOCK)
 			continue;
 
 		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f))

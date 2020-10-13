@@ -3,7 +3,7 @@
 CControllersManager::CControllersManager()
 {
 	m_arrControllers.RemoveAll();
-	for (int kk = 0; kk < K_CM_CONTROLLERTYPES_CNT; kk++)
+	for (int kk = 0; kk < K_CM_CTS_CNT; kk++)
 	{
 		arrControllerTypesCnt[kk] = 0;
 	}
@@ -27,12 +27,14 @@ CController* CControllersManager::AddController(EControllerType neType, WCHAR * 
 	//default mappings
 	switch(neType)
 	{
-		case K_CM_CONTROLLERTYPE_KEYBOARD_SDL:
+		case K_CM_CT_KBM_SDL:
 		{
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_X, SDL_SCANCODE_LEFT, 0.0f, -1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_X, SDL_SCANCODE_RIGHT, 0.0f, 1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_SCANCODE_UP, 0.0f, -1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_SCANCODE_DOWN, 0.0f, 1.0f);
+
+			//ctrl->AddTrigger(K_CM_POINTER_BUTTON, K_CM_COMMAND_FIRE1, SDL_BUTTON_LEFT, 0.0f, 1.0f);
 
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_JUMP, SDL_SCANCODE_SPACE, 0.0f, 1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_FIRE1, SDL_SCANCODE_LCTRL, 0.0f, 1.0f);
@@ -66,7 +68,7 @@ CController* CControllersManager::AddController(EControllerType neType, WCHAR * 
 		}
 		break;
 		*/
-		case K_CM_CONTROLLERTYPE_JOYSTICK_SDL:
+		case K_CM_CT_JOYSTICK_SDL:
 		{
 			ctrl->AddTrigger(K_CM_AXIS, K_CM_COMMAND_MOVE_X, SDL_CONTROLLER_AXIS_LEFTX, 0.2f, 1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_X, SDL_CONTROLLER_BUTTON_DPAD_LEFT, 0.0f, -1.0f);
@@ -119,7 +121,7 @@ int CControllersManager::RegisterAllSDLControllers()
 				StringCchPrintfA(ctrlrname, MAX_PATH, SDL_GameControllerName(pad));
 				mbstowcs(wctrlrname, ctrlrname, MAX_PATH);
 
-				CController* ctrlr = AddController(K_CM_CONTROLLERTYPE_JOYSTICK_SDL, wctrlrname);
+				CController* ctrlr = AddController(K_CM_CT_JOYSTICK_SDL, wctrlrname);
 				//save SDL data too
 				ctrlr->nSDLInstanceId = instanceID;
 				ctrlr->nSDLidx = i;
@@ -137,7 +139,7 @@ void CControllersManager::ReleaseAllControllers(bool bOnlySDL)
 {
 	for (int kk = m_arrControllers.GetSize() - 1; kk >= 0; kk--)
 	{
-		if ((bOnlySDL) && (m_arrControllers[kk]->eType != K_CM_CONTROLLERTYPE_JOYSTICK_SDL))
+		if ((bOnlySDL) && (m_arrControllers[kk]->eType != K_CM_CT_JOYSTICK_SDL))
 			continue;
 		if (m_arrControllers[kk]->SDLpgc != null)
 		{
@@ -145,7 +147,7 @@ void CControllersManager::ReleaseAllControllers(bool bOnlySDL)
 			m_arrControllers[kk]->SDLpgc = null;
 		}
 		SAFE_DELETE(m_arrControllers[kk]);
-		arrControllerTypesCnt[K_CM_CONTROLLERTYPE_JOYSTICK_SDL]--;
+		arrControllerTypesCnt[K_CM_CT_JOYSTICK_SDL]--;
 		m_arrControllers.Remove(kk);
 	}
 }
@@ -265,7 +267,7 @@ void CControllersManager::AddSDLController(int SDL_ctrlr_idx)
 			StringCchPrintfA(ctrlrname, MAX_PATH, SDL_GameControllerName(pad));
 			mbstowcs(wctrlrname, ctrlrname, MAX_PATH);
 
-			CController* ctrlr = AddController(K_CM_CONTROLLERTYPE_JOYSTICK_SDL, wctrlrname);
+			CController* ctrlr = AddController(K_CM_CT_JOYSTICK_SDL, wctrlrname);
 
 			//save SDL data too
 			ctrlr->nSDLInstanceId = instanceID;
@@ -335,7 +337,7 @@ CController* CControllersManager::GetControllerByName(WCHAR* strControllerName)
 
 void CControllersManager::OnSDLControllerButton(const SDL_ControllerButtonEvent sdlEvent)
 {
-	if (arrControllerTypesCnt[K_CM_CONTROLLERTYPE_JOYSTICK_SDL] <= 0)
+	if (arrControllerTypesCnt[K_CM_CT_JOYSTICK_SDL] <= 0)
 		return;
 	CController* ctrlr = GetControllerByInstanceID(sdlEvent.which);
 	if (ctrlr == null)
@@ -364,7 +366,7 @@ void CControllersManager::OnSDLControllerButton(const SDL_ControllerButtonEvent 
 
 void CControllersManager::OnSDLControllerAxis(const SDL_ControllerAxisEvent sdlEvent)
 {
-	if (arrControllerTypesCnt[K_CM_CONTROLLERTYPE_JOYSTICK_SDL] <= 0)
+	if (arrControllerTypesCnt[K_CM_CT_JOYSTICK_SDL] <= 0)
 		return;
 	CController* ctrlr = GetControllerByInstanceID(sdlEvent.which);
 	if (ctrlr == null)
@@ -426,13 +428,13 @@ void CControllersManager::OnSDLControllerAxis(const SDL_ControllerAxisEvent sdlE
 
 void CControllersManager::OnSDLKeypress(const SDL_KeyboardEvent sdlEvent, bool bKeyDown)
 {
-	if (arrControllerTypesCnt[K_CM_CONTROLLERTYPE_KEYBOARD_SDL] <= 0)
+	if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
 		return;
 
 	for (int kk = 0; kk < m_arrControllers.GetSize(); kk++)
 	{
 		CController* ctrlr = m_arrControllers[kk];
-		if (ctrlr->eType != K_CM_CONTROLLERTYPE_KEYBOARD_SDL)
+		if (ctrlr->eType != K_CM_CT_KBM_SDL)
 			continue;
 
 		for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
@@ -447,6 +449,42 @@ void CControllersManager::OnSDLKeypress(const SDL_KeyboardEvent sdlEvent, bool b
 
 }
 
+
+void CControllersManager::OnSDLMouseButton(const SDL_MouseButtonEvent sdlEvent)
+{
+	if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
+		return;
+
+	bool bButDown = false;
+	float fButPress = 0.0f;
+	if (sdlEvent.state == SDL_PRESSED)
+	{
+		bButDown = true;
+		fButPress = 1.0f;
+	}
+	//find button
+	for (int kk = 0; kk < m_arrControllers.GetSize(); kk++)
+	{
+		CController* ctrlr = m_arrControllers[kk];
+		if (ctrlr->eType != K_CM_CT_KBM_SDL)
+			continue;
+
+		for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
+		{
+			if (ctrlr->arrTriggers[ll].eType != K_CM_POINTER_BUTTON)
+				continue;
+			if (ctrlr->arrTriggers[ll].keyMapping == sdlEvent.button)
+			{
+				ctrlr->arrTriggers[ll].fTriggerActivatedPercent = fButPress;
+			}
+		}
+	}
+}
+
+void CControllersManager::OnSDLMouseMove(const SDL_MouseMotionEvent sdlEvent)
+{
+
+}
 
 ///----- CController -----
 
@@ -550,7 +588,7 @@ void CController::ClearTriggers()
 void CController::TranslateTriggersToCommands()
 {
 
-	if ((eType == K_CM_CONTROLLERTYPE_INVALID) || (eType == K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK))
+	if ((eType == K_CM_CT_INVALID) || (eType == K_CM_CT_NET_FRAMELOCK))
 		return;
 
 	float fPressedPerc[K_CM_COMMANDS_COUNT] = { 0.0f };

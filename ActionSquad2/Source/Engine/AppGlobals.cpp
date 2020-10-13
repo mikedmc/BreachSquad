@@ -1016,13 +1016,13 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 	int nKeyIcon = -1;
 	CStringDesc sdKeyName;
 	//save command names
-	if (pCtrlr->eType == K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK)
+	if (pCtrlr->eType == K_CM_CT_NET_FRAMELOCK)
 	{
 		nKeyIcon = -1;
 		sdKeyName.Reset();
 		return;
 	}
-	else if (pCtrlr->eType == K_CM_CONTROLLERTYPE_KEYBOARD_SDL)
+	else if (pCtrlr->eType == K_CM_CT_KBM_SDL)
 	{
 		nKeyIcon = -1;//reset icons on DON'T SHOW
 
@@ -1030,7 +1030,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 		mbstowcs_s(null, strKey, UTGetControllersManager().GetSDLScancodeName(commandscan), MAX_PATH);
 		g_stringsMgr.SetStringDesc(&sdKeyName, strKey);
 	}
-	else if (pCtrlr->eType == K_CM_CONTROLLERTYPE_JOYSTICK_SDL)
+	else if (pCtrlr->eType == K_CM_CT_JOYSTICK_SDL)
 	{
 		CControllerTrigger* trigger = pCtrlr->GetTriggerForCommand(eCommand);
 

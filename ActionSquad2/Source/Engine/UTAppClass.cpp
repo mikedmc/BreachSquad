@@ -2119,10 +2119,14 @@ void CApplication::PollSDLControllers()
 			break;
 			case SDL_MOUSEBUTTONDOWN:
 			{
+				bCommandsReceived = true;
+				UTGetControllersManager().OnSDLMouseButton(e.button);
 			}
 			break;
 			case SDL_MOUSEBUTTONUP:
 			{
+				bCommandsReceived = true;
+				UTGetControllersManager().OnSDLMouseButton(e.button);
 			}
 			break;
 

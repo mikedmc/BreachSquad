@@ -688,7 +688,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 	}; 
 	
 	bool bDrawKeys = true;
-	if ((ctrlr != null) && (ctrlr->eType == K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK))
+	if ((ctrlr != null) && (ctrlr->eType == K_CM_CT_NET_FRAMELOCK))
 		bDrawKeys = false;
 
 	//draw buttons for local players
@@ -828,7 +828,7 @@ void CCustomInterfaceIGM::Init(CSpriteCollection* sprCollection, CActor * player
 			};
 			WCHAR strKey[MAX_PATH];
 			//save command names
-			if (ctrlr->eType == K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK)
+			if (ctrlr->eType == K_CM_CT_NET_FRAMELOCK)
 			{
 				for (int ii = 0; ii < ARRAY_SIZE(arr_commands); ii++)
 				{
@@ -837,7 +837,7 @@ void CCustomInterfaceIGM::Init(CSpriteCollection* sprCollection, CActor * player
 					arrKeyNames[kk][ii].Reset();
 				}
 			}
-			else if (ctrlr->eType == K_CM_CONTROLLERTYPE_KEYBOARD_SDL)
+			else if (ctrlr->eType == K_CM_CT_KBM_SDL)
 			{
 				for (int ii = 0; ii < ARRAY_SIZE(arr_commands); ii++)
 				{
@@ -849,7 +849,7 @@ void CCustomInterfaceIGM::Init(CSpriteCollection* sprCollection, CActor * player
 					g_stringsMgr.SetStringDesc(&arrKeyNames[kk][ii], strKey);
 				}
 			}
-			else if (ctrlr->eType == K_CM_CONTROLLERTYPE_JOYSTICK_SDL)
+			else if (ctrlr->eType == K_CM_CT_JOYSTICK_SDL)
 			{
 				for (int ii = 0; ii < ARRAY_SIZE(arr_commands); ii++)
 				{

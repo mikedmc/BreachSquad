@@ -10702,7 +10702,7 @@ void CLevel::Update(float dTime_original)
 					{
 						CController* ctrlr = UTGetControllersManager().m_arrControllers[ll];
 						//Shows controller mapping - only when not online
-						if ((ctrlr->eType == K_CM_CONTROLLERTYPE_JOYSTICK_SDL) && (!UTGetAppClass().IsGameNetworked()) && (false == UTGetControlsManager().bIsBlocking) && 
+						if ((ctrlr->eType == K_CM_CT_JOYSTICK_SDL) && (!UTGetAppClass().IsGameNetworked()) && (false == UTGetControlsManager().bIsBlocking) && 
 							(ctrlr->sCommands.keyState[K_CM_COMMAND_SELECT] == K_CM_BUTSTATE_JUSTPRESSED))
 						{
 							UTGetControlsManager().ShowLayerOnce("LAYER_ID_CONTROLLER_MAP");

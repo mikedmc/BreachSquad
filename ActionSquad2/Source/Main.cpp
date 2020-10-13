@@ -394,7 +394,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	//se initializeaza dupa crearea device-ului ca sa nu interfereze cu procedura de creare
 	UTGetAppClass().InitSDL(DXUTGetHWND());
 	//add keyboard controllers and map keys
-	CController* ctrlrkeys1 = UTGetControllersManager().AddController(K_CM_CONTROLLERTYPE_KEYBOARD_SDL, g_stringsMgr.strings[STR_KEYBOARD1]->sText);
+	CController* ctrlrkeys1 = UTGetControllersManager().AddController(K_CM_CT_KBM_SDL, g_stringsMgr.strings[STR_KEYBOARD1]->sText);
 	ctrlrkeys1->nSDLInstanceId = K_CM_DEFAULT_KEYBOARD1_INSTANCE_ID; //set keyboard instance ID so it isn't empty
 	//ctrlrkeys1->ClearTriggers(); //clear default mapping
 
@@ -405,7 +405,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	//App_SetSDLTriggersFromUserData(ctrlrkeys1, ctrlrkeys2);
 	
 	//add network controller for coop play (used for peer controller simulation)
-	CController* ctrlrnet1 = UTGetControllersManager().AddController(K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK, g_stringsMgr.strings[STR_NETWORK1]->sText);
+	CController* ctrlrnet1 = UTGetControllersManager().AddController(K_CM_CT_NET_FRAMELOCK, g_stringsMgr.strings[STR_NETWORK1]->sText);
 	ctrlrnet1->nSDLInstanceId = K_CM_DEFAULT_NETWORK1_INSTANCE_ID;
 
 
@@ -1324,7 +1324,7 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 							{
 								CController* ctrlr = UTGetControllersManager().m_arrControllers[kk];
 								//ignore network controllers
-								if (ctrlr->eType == K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK)
+								if (ctrlr->eType == K_CM_CT_NET_FRAMELOCK)
 									continue;
 								//show menu
 								if (ctrlr->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
@@ -1341,7 +1341,7 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 							{
 								CController* ctrlr = UTGetControllersManager().m_arrControllers[kk];
 								//ignore network controllers
-								if (ctrlr->eType == K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK)
+								if (ctrlr->eType == K_CM_CT_NET_FRAMELOCK)
 									continue;
 								//remove onscreen menu
 								if ((ctrlr->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED) ||

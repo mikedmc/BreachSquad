@@ -1428,9 +1428,9 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(playersel->nInstanceID);
 		if (ctrlr != null)
 		{
-			if (ctrlr->eType == K_CM_CONTROLLERTYPE_KEYBOARD_SDL)
+			if (ctrlr->eType == K_CM_CT_KBM_SDL)
 				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, winbox.Right(), winbox.y, ANM_CONTROLS_SPR_ICONS_CONTROLLER, 0, dwTitleColor);
-			else if (ctrlr->eType == K_CM_CONTROLLERTYPE_JOYSTICK_SDL)
+			else if (ctrlr->eType == K_CM_CT_JOYSTICK_SDL)
 				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, winbox.Right(), winbox.y, ANM_CONTROLS_SPR_ICONS_CONTROLLER, 1, dwTitleColor);
 			else //network
 				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, winbox.Right(), winbox.y, ANM_CONTROLS_SPR_ICONS_CONTROLLER, 2, dwTitleColor);
@@ -1630,7 +1630,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		{
 			CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(playersel->nInstanceID);
 			EControllerCommand eCmd = K_CM_COMMAND_FIRE1;
-			if (ctrlr->eType == K_CM_CONTROLLERTYPE_JOYSTICK_SDL)
+			if (ctrlr->eType == K_CM_CT_JOYSTICK_SDL)
 				eCmd = K_CM_COMMAND_JUMP;
 			App_PaintControllerKey(ctrlr, eCmd, D3DXVECTOR2(rcCursor.Right() - 1.0f, rcCursor.Bottom() - 5.0f), ((g_timers.GetTimerValue(600) < 0.3f) ? true : false), -1);
 		}
@@ -1784,7 +1784,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				App_PaintControllerKey(ctrlr, eCmdBak, D3DXVECTOR2(tempbox.Right() - 1.0f, tempbox.Bottom() - 15.0f), ((g_timers.GetTimerValue(600) >= 0.3f) ? true : false), -1, 0xffff9999);
 				//accept
 				EControllerCommand eCmd = K_CM_COMMAND_FIRE1;
-				if (ctrlr->eType == K_CM_CONTROLLERTYPE_JOYSTICK_SDL)
+				if (ctrlr->eType == K_CM_CT_JOYSTICK_SDL)
 					eCmd = K_CM_COMMAND_JUMP;
 				App_PaintControllerKey(ctrlr, eCmd, D3DXVECTOR2(tempbox.Right() - 1.0f, tempbox.Bottom() - 5.0f), ((g_timers.GetTimerValue(600) < 0.3f) ? true : false), -1);
 			}
@@ -1914,7 +1914,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				App_PaintControllerKey(ctrlr, eCmdBak, D3DXVECTOR2(tempbox.Right() - 1.0f, tempbox.Bottom() - 15.0f), ((g_timers.GetTimerValue(600) >= 0.3f) ? true : false), -1, 0xffff9999);
 				//accept
 				EControllerCommand eCmd = K_CM_COMMAND_FIRE1;
-				if (ctrlr->eType == K_CM_CONTROLLERTYPE_JOYSTICK_SDL)
+				if (ctrlr->eType == K_CM_CT_JOYSTICK_SDL)
 					eCmd = K_CM_COMMAND_JUMP;
 				App_PaintControllerKey(ctrlr, eCmd, D3DXVECTOR2(tempbox.Right() - 1.0f, tempbox.Bottom() - 5.0f), ((g_timers.GetTimerValue(600) < 0.3f) ? true : false), -1);
 			}
@@ -2088,7 +2088,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				App_PaintControllerKey(ctrlr, eCmdBak, D3DXVECTOR2(tempbox.Right() - 1.0f, tempbox.Bottom() - 15.0f), ((g_timers.GetTimerValue(600) >= 0.3f) ? true : false), -1, 0xffff9999);
 				//accept
 				EControllerCommand eCmd = K_CM_COMMAND_FIRE1;
-				if (ctrlr->eType == K_CM_CONTROLLERTYPE_JOYSTICK_SDL)
+				if (ctrlr->eType == K_CM_CT_JOYSTICK_SDL)
 					eCmd = K_CM_COMMAND_JUMP;
 				App_PaintControllerKey(ctrlr, eCmd, D3DXVECTOR2(tempbox.Right() - 1.0f, tempbox.Bottom() - 5.0f), ((g_timers.GetTimerValue(600) < 0.3f) ? true : false), -1);
 			}
@@ -2235,7 +2235,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				App_PaintControllerKey(ctrlr, eCmdBak, D3DXVECTOR2(tempbox.Right() - 1.0f, tempbox.Bottom() - 15.0f), ((g_timers.GetTimerValue(600) >= 0.3f) ? true : false), -1, 0xffff9999);
 				//accept
 				EControllerCommand eCmd = K_CM_COMMAND_FIRE1;
-				if (ctrlr->eType == K_CM_CONTROLLERTYPE_JOYSTICK_SDL)
+				if (ctrlr->eType == K_CM_CT_JOYSTICK_SDL)
 					eCmd = K_CM_COMMAND_JUMP;
 				App_PaintControllerKey(ctrlr, eCmd, D3DXVECTOR2(tempbox.Right() - 1.0f, tempbox.Bottom() - 5.0f), ((g_timers.GetTimerValue(600) < 0.3f) ? true : false), -1);
 			}

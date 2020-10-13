@@ -11,18 +11,25 @@ enum EControllerTriggerType {
 	K_CM_HALF_AXIS,
 	// analog full axis converted into a single command
 	// activated when fabs(axis) > fabs(fTriggerMin)
-	K_CM_AXIS
+	K_CM_AXIS,
+	// mouse or touch pointer split into 2 axis
+	// can/should/will be transformed to game space, relative to interested party
+	K_CM_POINTER_X,
+	K_CM_POINTER_Y,
+	// mouse button  or touch event
+	// 0/1 button that adds to command: fTriggerMin when released and fTriggerMax when pressed
+	K_CM_POINTER_BUTTON,
 };
 
 //controller types
 enum EControllerType {
-	K_CM_CONTROLLERTYPE_INVALID = -1,
-	K_CM_CONTROLLERTYPE_KEYBOARD_SDL = 0,		// input from SDL pipeline
-	K_CM_CONTROLLERTYPE_JOYSTICK_SDL,			// SDL controller
-	//K_CM_CONTROLLERTYPE_KEYBOARD_WIN ,			// takes input from windows messages
-	K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK,		// framelock networked controller
+	K_CM_CT_INVALID = -1,
+	K_CM_CT_KBM_SDL = 0,						// Keyboard and Mouse type
+	K_CM_CT_JOYSTICK_SDL,						// SDL controller
+	//K_CM_CT_KEYBOARD_WIN ,					// takes input from windows messages
+	K_CM_CT_NET_FRAMELOCK,						// framelock networked controller
 	//count
-	K_CM_CONTROLLERTYPES_CNT,		
+	K_CM_CTS_CNT,		
 };
 //buttons status
 enum EControllerButtonState {
@@ -210,7 +217,7 @@ public:
 class CControllersManager
 {
 protected:
-	int arrControllerTypesCnt[K_CM_CONTROLLERTYPES_CNT];  //aici se scrie cate controale din fiecare tip avem alocate
+	int arrControllerTypesCnt[K_CM_CTS_CNT];  //aici se scrie cate controale din fiecare tip avem alocate
 public:
 	CGrowableArray<CController*> m_arrControllers;
 	//CTOR/DTOR
@@ -236,6 +243,10 @@ public:
 	void OnSDLControllerAxis(const SDL_ControllerAxisEvent sdlEvent);
 	//callback SDL keys
 	void OnSDLKeypress(const SDL_KeyboardEvent sdlEvent, bool bKeyDown);
+	//callback SDL mouse buttons
+	void OnSDLMouseButton(const SDL_MouseButtonEvent sdlEvent);
+	//callback SDL mouse buttons
+	void OnSDLMouseMove(const SDL_MouseMotionEvent sdlEvent);
 	//get pointer to Controller by SDLInstanceID
 	CController* GetControllerByInstanceID(int nnInstanceID);
 	//get pointer to Controller by name

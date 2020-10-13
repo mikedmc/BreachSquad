@@ -371,7 +371,7 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 //enable SDL support
 #define K_GLOBAL_ENABLE_SDL
 // comment out to use mouse events
-#define K_SDL_IGNORE_MOUSE_EVENTS
+//#define K_SDL_IGNORE_MOUSE_EVENTS
 
 #if defined(K_GLOBAL_ENABLE_SDL)
 	#include <SDL.h>
