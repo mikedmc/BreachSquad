@@ -1,4 +1,5 @@
 #pragma once
+#include "dxstdafx.h"
 //--------------------------------------------------------------------------------------
 // Controller handling class
 //--------------------------------------------------------------------------------------
@@ -108,10 +109,10 @@ public:
 	// structure that keeps data about all commands in a controller
 	struct sControllerCommands
 	{
-		bool					bKeyDown[K_CM_COMMANDS_COUNT];			//pressed or not
-		EControllerButtonState	keyState[K_CM_COMMANDS_COUNT];			//0-not pressed, 1-just pressed, 2-drag, 3-just released
-		float					fKeyPressedTime[K_CM_COMMANDS_COUNT];	//time it's been kept pressed
-		float					fKeyDownPercent[K_CM_COMMANDS_COUNT];	//pressed percentage
+		bool					bKeyDown[K_CM_COMMANDS_COUNT]{};		//pressed or not
+		EControllerButtonState	keyState[K_CM_COMMANDS_COUNT]{};		//0-not pressed, 1-just pressed, 2-drag, 3-just released
+		float					fKeyPressedTime[K_CM_COMMANDS_COUNT]{};	//time it's been kept pressed
+		float					fKeyDownPercent[K_CM_COMMANDS_COUNT]{};	//pressed percentage
 
 		/* CTOR */
 		sControllerCommands();

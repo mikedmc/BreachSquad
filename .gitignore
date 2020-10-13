@@ -11,3 +11,4 @@ ActionSquad2/Bin/*.exe
 *.suo
 *.sdf
 ActionSquad2/Obj/
+*.lastcodeanalysissucceeded

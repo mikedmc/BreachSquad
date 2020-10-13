@@ -109,10 +109,9 @@ void CParticlesManager::AddStringParticle(CTexturedFont *pFont, WCHAR* text,
 void CParticlesManager::UpdateStringParticles(float dtime)
 {
 	//particule text
-	CStringParticle *parts;
-	for(int ii=m_vStringParticles.GetSize() - 1; ii>=0; ii--)
+	for (int ii = m_vStringParticles.GetSize() - 1; ii >= 0; ii--)
 	{
-		parts = m_vStringParticles[ii];
+		CStringParticle* parts = m_vStringParticles[ii];
 
 		//update pos
 		parts->m_vSpeed += parts->m_vGravity * dtime;
