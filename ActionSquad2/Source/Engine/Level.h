@@ -4,6 +4,7 @@
 #include "gameplay/GameStructs.h"
 
 #include "gameplay/LevelTypes.h"
+#include "gameplay/Level_scriptable.h"
 
 #include "gameplay/ActiveInterface.h"
 #include "gameplay/CollisionShape.h"
@@ -394,7 +395,7 @@ public:
 	// \returns: true if success, false if failed
 	bool					ActivateSpecialAbility(int nAbilityIdx, int nTargetPlayerOrdinal);
 	// Vede daca am linie directa intre 2 puncte dar verifica coliziunea doar cu rect-urile probabile
-	bool					UnobstructedLineOfSight(D3DXVECTOR2 pt1, D3DXVECTOR2 pt2, D3DXVECTOR2 * retVecCollisionPt = null, D3DXVECTOR2 * retVecCollisionNormal = null);
+	bool					IsLineOfSight(D3DXVECTOR2 pt1, D3DXVECTOR2 pt2, D3DXVECTOR2 * retVecCollisionPt = null, D3DXVECTOR2 * retVecCollisionNormal = null);
 
 	UINT32					m_unLastID;				//Last loaded ID - used to assign unique IDs to runtime spawned elements
 	//Generates a new ID and increments m_unLastID

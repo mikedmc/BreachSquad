@@ -197,6 +197,7 @@
     <ClInclude Include="Source\Engine\gameplay\GameConstants.h" />
     <ClInclude Include="Source\Engine\gameplay\GameStructs.h" />
     <ClInclude Include="Source\Engine\gameplay\LevelTypes.h" />
+    <ClInclude Include="Source\Engine\gameplay\Level_scriptable.h" />
     <ClInclude Include="Source\Engine\gameplay\Light.h" />
     <ClInclude Include="Source\Engine\GetDXVer.h" />
     <ClInclude Include="Source\Engine\Constants\igminterface_SPR.h" />
@@ -329,6 +330,7 @@
     <ClCompile Include="Source\Engine\gameplay\Actor.cpp" />
     <ClCompile Include="Source\Engine\gameplay\CollisionShape.cpp" />
     <ClCompile Include="Source\Engine\gameplay\LevelTypes.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\Level_scriptable.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Light.cpp" />
     <ClCompile Include="Source\Engine\GetDXVer.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
