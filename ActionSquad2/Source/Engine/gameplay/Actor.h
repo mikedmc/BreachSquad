@@ -56,7 +56,7 @@ public:
 	{
 	public:
 		bool				bRunning;	//daca alearga
-		bool				bThrustX, bThrustY;	//daca se deplaseaza sau nu
+		bool				bThrustX;	//should be a float (0..1) to replace bRunning
 		bool				bCrouched;	//daca este crouch sau nu
 		bool				bJump;		//comanda de jump
 		bool				bClimb;		//comanda sa se catere
@@ -77,7 +77,7 @@ public:
 		DWORD				nColor; 
 
 		CAICommands() :
-			bRunning(false), bThrustX(false), bThrustY(false), nMoveDirX(0), nMoveDirY(0), bJump(false),
+			bRunning(false), bThrustX(false), nMoveDirX(0), nMoveDirY(0), bJump(false),
 			nLookDirX(0), bCrouched(false), bClimb(false), nInteractKeyState(K_CM_BUTSTATE_NOTPRESSED), nColor(0),
 			eAttackCommand(K_LVL_ACT_ATTACK_IDLE), eAttackCommand_last(K_LVL_ACT_ATTACK_IDLE), nDeathCommand(K_LVL_ACT_DEATHCMD_NONE),
 			nIconType(K_LVL_ACT_ICON_NONE), fIconDuration(0.0f), eOverrideAnim(K_LVL_ACT_ANIM_EMPTY)
@@ -87,7 +87,6 @@ public:
 		void Reset()
 		{
 			bThrustX = false;
-			bThrustY = false;
 			bRunning = false;
 			nMoveDirX = 0;
 			nMoveDirY = 0;
@@ -112,7 +111,6 @@ public:
 		void ResetMoveCommands()
 		{
 			bThrustX = false;
-			bThrustY = false;
 			bRunning = false;
 			nMoveDirX = 0;
 			nMoveDirY = 0;
@@ -158,6 +156,8 @@ public:
 
 	D3DXVECTOR2		speed;
 	D3DXVECTOR2		vSpeedImpulse;	//viteza aplicata extern (cand e impuscat de exemplu). Se va atenua automat.
+
+	D3DXVECTOR2				vMoveDirN;	//normalized movement direction
 
 	int			lookDirXsign; //directia in care se uita pe X (-1 sau 1)
 	D3DXVECTOR2	vAngleDir;		//directia efectiva a privirii in fn de fAngle (folosita doar de catre unele specii de actori)

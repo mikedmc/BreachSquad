@@ -2029,6 +2029,15 @@ void CApplication::OnGameOverlayActivated(GameOverlayActivated_t *callback)
 ///**************************************************************************************
 #if defined(K_GLOBAL_ENABLE_SDL)
 
+#if defined(K_SDL_IGNORE_MOUSE_EVENTS)
+int SDLFilter_IsMouseEvent(void * userdata, SDL_Event* event)
+{
+	if (event->type == SDL_MOUSEMOTION)
+		return 0;
+	return 1;
+}
+#endif
+
 bool CApplication::InitSDL(HWND hWnd)
 {
 	WCHAR txt[MAX_PATH];
@@ -2062,6 +2071,10 @@ bool CApplication::InitSDL(HWND hWnd)
 		}
 	}
 
+#if defined(K_SDL_IGNORE_MOUSE_EVENTS)
+	SDL_SetEventFilter(SDLFilter_IsMouseEvent, null);
+#endif
+
 	return success;
 }
 
@@ -2087,13 +2100,36 @@ void CApplication::PollSDLControllers()
 	//Handle events on queue
 	while (SDL_PollEvent(&e) != 0)
 	{
-		bCommandsReceived = true;
-
 		switch (e.type)
 		{
+			//-- pointer ---
+			case SDL_MOUSEMOTION:
+			{
+				//DebugLogA("mouse %d at %d:%d", e.motion.which, e.motion.x, e.motion.y);
+
+				/*
+				if (event->type == SDL_MOUSEMOTION) {
+					printf("Mouse moved to (%d,%d)\n",
+						event->motion.x, event->motion.y);
+					return(0);
+				}
+				return(1);
+				*/
+			}
+			break;
+			case SDL_MOUSEBUTTONDOWN:
+			{
+			}
+			break;
+			case SDL_MOUSEBUTTONUP:
+			{
+			}
+			break;
+
 			//-- keyboard ---
 			case SDL_KEYDOWN:
 			{
+				bCommandsReceived = true;
 				UTGetControllersManager().OnSDLKeypress(e.key, true);
 				//send key up event to controls manager (for key redefining mostly)
 				UTGetControlsManager().ReceiveInput(K_CCTRLMGR_INPUT_SDL_KEY, 1, (int)e.key.keysym.scancode);
@@ -2101,6 +2137,7 @@ void CApplication::PollSDLControllers()
 			break;
 			case SDL_KEYUP:
 			{
+				bCommandsReceived = true;
 				UTGetControllersManager().OnSDLKeypress(e.key, false);
 				//send key up event to controls manager
 				UTGetControlsManager().ReceiveInput(K_CCTRLMGR_INPUT_SDL_KEY, 0, (int)e.key.keysym.scancode);
@@ -2109,12 +2146,14 @@ void CApplication::PollSDLControllers()
 			//--- controllers ---
 			case SDL_CONTROLLERDEVICEADDED:
 			{
+				bCommandsReceived = true;
 				UTGetControllersManager().AddSDLController(e.cdevice.which);
 			}
 			break;
 
 			case SDL_CONTROLLERDEVICEREMOVED:
 			{
+				bCommandsReceived = true;
 				UTGetControllersManager().RemoveSDLController(e.cdevice.which);
 			}
 			break;
@@ -2122,12 +2161,14 @@ void CApplication::PollSDLControllers()
 			case SDL_CONTROLLERBUTTONDOWN:
 			case SDL_CONTROLLERBUTTONUP:
 			{
+				bCommandsReceived = true;
 				UTGetControllersManager().OnSDLControllerButton(e.cbutton);
 			}
 			break;
 
 			case SDL_CONTROLLERAXISMOTION:
 			{
+				bCommandsReceived = true;
 				UTGetControllersManager().OnSDLControllerAxis(e.caxis);
 			}
 			break;

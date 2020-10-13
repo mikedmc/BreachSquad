@@ -29,62 +29,63 @@ CController* CControllersManager::AddController(EControllerType neType, WCHAR * 
 	{
 		case K_CM_CONTROLLERTYPE_KEYBOARD_SDL:
 		{
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_LEFT, SDL_SCANCODE_LEFT);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_RIGHT, SDL_SCANCODE_RIGHT);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_UP, SDL_SCANCODE_UP);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_DOWN, SDL_SCANCODE_DOWN);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_JUMP, SDL_SCANCODE_SPACE);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_FIRE1, SDL_SCANCODE_LCTRL);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_FIRE2, SDL_SCANCODE_LSHIFT);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_USE_GEAR, SDL_SCANCODE_E);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_RELOAD, SDL_SCANCODE_R);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_MELEE, SDL_SCANCODE_C);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_SELECT, SDL_SCANCODE_RETURN);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_SELECT, SDL_SCANCODE_SPACE);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_BACK, SDL_SCANCODE_ESCAPE);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_STRATEGIC_MENU, SDL_SCANCODE_V);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_X, SDL_SCANCODE_LEFT, 0.0f, -1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_X, SDL_SCANCODE_RIGHT, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_SCANCODE_UP, 0.0f, -1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_SCANCODE_DOWN, 0.0f, 1.0f);
+
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_JUMP, SDL_SCANCODE_SPACE, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_FIRE1, SDL_SCANCODE_LCTRL, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_FIRE2, SDL_SCANCODE_LSHIFT, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_USE_GEAR, SDL_SCANCODE_E, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_RELOAD, SDL_SCANCODE_R, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MELEE, SDL_SCANCODE_C, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_SELECT, SDL_SCANCODE_RETURN, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_SELECT, SDL_SCANCODE_SPACE, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_BACK, SDL_SCANCODE_ESCAPE, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_STRATEGIC_MENU, SDL_SCANCODE_V, 0.0f, 1.0f);
 		}
 		break;
+		/*
 		case K_CM_CONTROLLERTYPE_KEYBOARD_WIN:
 		{
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_LEFT, VK_LEFT);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_RIGHT, VK_RIGHT);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_UP, VK_UP);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_DOWN, VK_DOWN);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_JUMP, VK_SPACE);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_FIRE1, VK_LCONTROL);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_FIRE2, VK_LSHIFT);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_USE_GEAR, 'R');
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_RELOAD, 'E');
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_MELEE, 'C');
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_SELECT, VK_RETURN);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_SELECT, VK_SPACE);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_BACK, VK_ESCAPE);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_STRATEGIC_MENU, 'V');
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_LEFT, VK_LEFT);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_RIGHT, VK_RIGHT);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_UP, VK_UP);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_DOWN, VK_DOWN);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_JUMP, VK_SPACE);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_FIRE1, VK_LCONTROL);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_FIRE2, VK_LSHIFT);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_USE_GEAR, 'R');
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_RELOAD, 'E');
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MELEE, 'C');
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_SELECT, VK_RETURN);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_SELECT, VK_SPACE);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_BACK, VK_ESCAPE);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_STRATEGIC_MENU, 'V');
 		}
 		break;
+		*/
 		case K_CM_CONTROLLERTYPE_JOYSTICK_SDL:
 		{
-			ctrl->AddTrigger(K_CM_BUTTYPE_AXIS, K_CM_COMMAND_LEFT, SDL_CONTROLLER_AXIS_LEFTX, -1.1f, -0.6f);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_LEFT, SDL_CONTROLLER_BUTTON_DPAD_LEFT);
-			ctrl->AddTrigger(K_CM_BUTTYPE_AXIS, K_CM_COMMAND_RIGHT, SDL_CONTROLLER_AXIS_LEFTX, 0.6f, 1.1f);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_RIGHT, SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-			ctrl->AddTrigger(K_CM_BUTTYPE_AXIS, K_CM_COMMAND_UP, SDL_CONTROLLER_AXIS_LEFTY, -1.1f, -0.7f);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_UP, SDL_CONTROLLER_BUTTON_DPAD_UP);
-			ctrl->AddTrigger(K_CM_BUTTYPE_AXIS, K_CM_COMMAND_DOWN, SDL_CONTROLLER_AXIS_LEFTY, 0.7f, 1.1f);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_DOWN, SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_JUMP, SDL_CONTROLLER_BUTTON_A);
-			
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_FIRE1, SDL_CONTROLLER_BUTTON_X);
-			ctrl->AddTrigger(K_CM_BUTTYPE_AXIS, K_CM_COMMAND_FIRE1, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, 0.5f, 1.1f);
-			ctrl->AddTrigger(K_CM_BUTTYPE_AXIS, K_CM_COMMAND_FIRE2, SDL_CONTROLLER_AXIS_TRIGGERLEFT, 0.5f, 1.1f);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_USE_GEAR, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_RELOAD, SDL_CONTROLLER_BUTTON_B);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_MELEE, SDL_CONTROLLER_BUTTON_Y);
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_SELECT, SDL_CONTROLLER_BUTTON_BACK);	//SELECT during gameplay shows mapping
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_BACK, SDL_CONTROLLER_BUTTON_START);	//start is usually MENU
+			ctrl->AddTrigger(K_CM_AXIS, K_CM_COMMAND_MOVE_X, SDL_CONTROLLER_AXIS_LEFTX, 0.2f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_X, SDL_CONTROLLER_BUTTON_DPAD_LEFT, 0.0f, -1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_RIGHT, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_AXIS, K_CM_COMMAND_MOVE_Y, SDL_CONTROLLER_AXIS_LEFTY, 0.2, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_CONTROLLER_BUTTON_DPAD_UP, 0.0f, -1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_CONTROLLER_BUTTON_DPAD_DOWN, 0.0f, 1.0f);
 
-			ctrl->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_STRATEGIC_MENU, SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_JUMP, SDL_CONTROLLER_BUTTON_A);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_FIRE1, SDL_CONTROLLER_BUTTON_X);
+			ctrl->AddTrigger(K_CM_HALF_AXIS, K_CM_COMMAND_FIRE1, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, 0.5f, 1.1f);
+			ctrl->AddTrigger(K_CM_HALF_AXIS, K_CM_COMMAND_FIRE2, SDL_CONTROLLER_AXIS_TRIGGERLEFT, 0.5f, 1.1f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_USE_GEAR, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_RELOAD, SDL_CONTROLLER_BUTTON_B);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MELEE, SDL_CONTROLLER_BUTTON_Y);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_SELECT, SDL_CONTROLLER_BUTTON_BACK);	//SELECT during gameplay shows mapping
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_BACK, SDL_CONTROLLER_BUTTON_START);	//start is usually MENU
+
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_STRATEGIC_MENU, SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
 		}
 		break;
 	}
@@ -195,6 +196,7 @@ void CControllersManager::ResetAllControllersKeypresses()
 	}
 }
 
+/*
 void CControllersManager::ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAltDown)
 {
 	if (arrControllerTypesCnt[K_CM_CONTROLLERTYPE_KEYBOARD_WIN] <= 0)
@@ -208,7 +210,7 @@ void CControllersManager::ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAlt
 
 		for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
 		{
-			if (ctrlr->arrTriggers[ll].eType != K_CM_BUTTYPE_BUTTON)
+			if (ctrlr->arrTriggers[ll].eType != K_CM_BUTTON)
 				continue;
 			if (ctrlr->arrTriggers[ll].keyMapping == nChar)
 			{
@@ -217,6 +219,7 @@ void CControllersManager::ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAlt
 		}
 	}
 }
+*/
 
 
 bool CControllersManager::KeyPressed(EControllerCommand eCommandFilter /*= K_CM_COMMAND_NONE*/)
@@ -350,7 +353,7 @@ void CControllersManager::OnSDLControllerButton(const SDL_ControllerButtonEvent 
 	//find button
 	for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
 	{
-		if (ctrlr->arrTriggers[ll].eType != K_CM_BUTTYPE_BUTTON)
+		if (ctrlr->arrTriggers[ll].eType != K_CM_BUTTON)
 			continue;
 		if (ctrlr->arrTriggers[ll].keyMapping == sdlEvent.button)
 		{
@@ -370,19 +373,24 @@ void CControllersManager::OnSDLControllerAxis(const SDL_ControllerAxisEvent sdlE
 		return;
 	}
 	float perc = (float)sdlEvent.value / 32767.0f;
-	//find button
+	//find trigger
 	for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
 	{
-		if (ctrlr->arrTriggers[ll].eType != K_CM_BUTTYPE_AXIS)
+		// only axis triggers selected
+		if (ctrlr->arrTriggers[ll].eType != K_CM_HALF_AXIS && ctrlr->arrTriggers[ll].eType != K_CM_AXIS)
 			continue;
 		//trec prin toate controalele pentru ca pe o axa sunt 2 comenzi
-		if (ctrlr->arrTriggers[ll].keyMapping == sdlEvent.axis)
+		CControllerTrigger* trigger = &ctrlr->arrTriggers[ll];
+		if (trigger->keyMapping != sdlEvent.axis)
+			continue;
+
+		if (trigger->eType == K_CM_HALF_AXIS)
 		{
 			bool bButDown = false;
-			float fMin = ctrlr->arrTriggers[ll].fTriggerMin;
-			float fMax = ctrlr->arrTriggers[ll].fTriggerMax;
+			float fMin = trigger->fTriggerMin;
+			float fMax = trigger->fTriggerMax;
 			//already activated? move the INACTIVE domain a little to avoid analog jitter
-			if (ctrlr->arrTriggers[ll].fTriggerActivatedPercent > 0.0f)
+			if (trigger->fTriggerActivatedPercent > 0.0f)
 			{
 				//  |----fmin----fmax---|zero|---fmin----fmax----|
 				if (fMax < 0.05f)
@@ -391,11 +399,26 @@ void CControllersManager::OnSDLControllerAxis(const SDL_ControllerAxisEvent sdlE
 					fMin -= 0.05f;
 			}
 			if ((perc >= fMin) && (perc <= fMax))
-			{
 				bButDown = true;
-			}
 
-			ctrlr->arrTriggers[ll].fTriggerActivatedPercent = ((bButDown == true) ? fabs(perc) : 0.0f);
+			trigger->fTriggerActivatedPercent = ((bButDown == true) ? perc : 0.0f);
+		}
+		// AXIS - returns actual +/- percent if over the minimum threshold
+		else if (trigger->eType == K_CM_AXIS)
+		{
+			bool bButDown = false;
+			float fMinAbs = fabs(trigger->fTriggerMin);
+			//already activated? move the INACTIVE domain a little to avoid analog jitter
+			if (fabs(trigger->fTriggerActivatedPercent) > 0.0f)
+			{
+				//  |--------fminabs---|zero|---fminabs--------|
+				if (fMinAbs > 0.05f)
+					fMinAbs -= 0.05f;
+			}
+			if (fabs(perc) >= fMinAbs)
+				bButDown = true;
+
+			trigger->fTriggerActivatedPercent = ((bButDown == true) ? perc : 0.0f);
 		}
 	}
 }
@@ -414,12 +437,11 @@ void CControllersManager::OnSDLKeypress(const SDL_KeyboardEvent sdlEvent, bool b
 
 		for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
 		{
-			if (ctrlr->arrTriggers[ll].eType != K_CM_BUTTYPE_BUTTON)
+			CControllerTrigger* trigger = &ctrlr->arrTriggers[ll];
+			if ((trigger->eType != K_CM_BUTTON) || (trigger->keyMapping != sdlEvent.keysym.scancode))
 				continue;
-			if (ctrlr->arrTriggers[ll].keyMapping == sdlEvent.keysym.scancode)
-			{
-				ctrlr->arrTriggers[ll].fTriggerActivatedPercent = ((bKeyDown == true) ? 1.0f : 0.0f);
-			}
+			// set absolute values (+/- values) set when defining triggers
+			trigger->fTriggerActivatedPercent = ((bKeyDown == true) ? trigger->fTriggerMax : trigger->fTriggerMin);
 		}
 	}
 
@@ -452,13 +474,6 @@ void CController::UpdateCommands(float dTime)
 	//increase last keypress time
 	fTimeSinceKeypress += dTime;
 
-#if defined(ENABLE_CHEATS)
-	//you have 2 seconds for next keypress
-	if ((fTimeSinceKeypress >= 0.25f) && (fTimeSinceKeypress - dTime < 0.25f))
-	{
-		arrStackHistory.Clear();
-	}
-#endif
 }
 
 void CController::AddTrigger(EControllerTriggerType neType, EControllerCommand neCommand, int nKeyMapping, float nfTriggerMin /*= 0.1f*/, float nfTriggerMax /*= 1.1f*/)
@@ -534,14 +549,6 @@ void CController::ClearTriggers()
 
 void CController::TranslateTriggersToCommands()
 {
-#if defined(ENABLE_CHEATS)
-	const int K_CHEATS_CNT = 2;
-	const int K_CHEATS_COMBINATION_LENGTH = 8;
-	EControllerCommand matCombinations[K_CHEATS_CNT][K_CHEATS_COMBINATION_LENGTH] = {
-		{K_CM_COMMAND_LEFT, K_CM_COMMAND_LEFT, K_CM_COMMAND_RIGHT, K_CM_COMMAND_RIGHT, K_CM_COMMAND_DOWN, K_CM_COMMAND_UP, K_CM_COMMAND_DOWN, K_CM_COMMAND_MELEE},  //give stars
-		{K_CM_COMMAND_LEFT, K_CM_COMMAND_LEFT, K_CM_COMMAND_LEFT, K_CM_COMMAND_DOWN, K_CM_COMMAND_RIGHT, K_CM_COMMAND_RIGHT, K_CM_COMMAND_RIGHT, K_CM_COMMAND_MELEE}, //give strategic points
-	};
-#endif
 
 	if ((eType == K_CM_CONTROLLERTYPE_INVALID) || (eType == K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK))
 		return;
@@ -551,87 +558,17 @@ void CController::TranslateTriggersToCommands()
 	{
 		CControllerTrigger* trig = &arrTriggers[kk];
 		int command = trig->eTargetCommand;
-		if (trig->fTriggerActivatedPercent > fPressedPerc[command])
-			fPressedPerc[command] = trig->fTriggerActivatedPercent;
+		fPressedPerc[command] += trig->fTriggerActivatedPercent;
 	}
 
 	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
 	{
-		bool bOldKeydownState = bKeyDown[kk];
 		//translate data
 		fKeyDownPercent[kk] = fPressedPerc[kk];
 		bKeyDown[kk] = (fKeyDownPercent[kk] != 0.0f);
-		//update keypress timer
+		//update ANY keypress timer
 		if(bKeyDown[kk] == true)
 			fTimeSinceKeypress = 0.0f;
-
-#if defined(ENABLE_CHEATS)
-		if ((!UTGetAppClass().IsGameNetworked()) && (g_gameState == GAME_STATE_GAME) && (bKeyDown[kk] == true) && (bOldKeydownState == false))
-		{
-			arrStackHistory.Add((EControllerCommand)kk);
-
-			if (arrStackHistory.Count() >= 8) //normal cheats len
-			{
-				for (int nCheatIdx = 0; nCheatIdx < K_CHEATS_CNT; nCheatIdx++)
-				{
-					bool bFound = true;
-					for (int mm = 0; mm < K_CHEATS_COMBINATION_LENGTH; mm++)
-					{
-						if (matCombinations[nCheatIdx][mm] != arrStackHistory[arrStackHistory.nTail + mm])
-						{
-							bFound = false;
-							break;
-						}
-					}
-					if (bFound)
-					{
-						switch (nCheatIdx)
-						{
-							case 0:	//give stars
-							{
-								//give stars
-								int nMaxStars = UTGetChaptersList().GetChaptersCnt() * K_GAME_LEVELS_PER_CHAPTER * 3;
-								if (g_userData[K_MEMID_STARS_TOTAL] < nMaxStars)
-									g_userData[K_MEMID_STARS_TOTAL] += 5;
-								else 
-									g_userData[K_MEMID_STARS_SPENT] -= 5;
-								//limit
-								if (g_userData[K_MEMID_STARS_SPENT] < 0)
-									g_userData[K_MEMID_STARS_SPENT] = 0;
-								if (g_userData[K_MEMID_STARS_TOTAL] > nMaxStars)
-									g_userData[K_MEMID_STARS_TOTAL] = nMaxStars;
-
-								App_UpdateLevelStats();
-								LOG(L"CHEATER! More Stars to Spend!");
-
-								D3DXVECTOR2 vpos = g_level.m_camLevel.GetCamWorldAABB().Center();
-								g_particlesMgr.AddStringParticle(g_font12wow, L"CHEATER!", &vpos, NULL, NULL, 3.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0xffffffff, K_PART_LAYER_NORMAL);
-								g_particlesMgr.AddStringParticle(g_font8b1, L"More Stars to Spend", &D3DXVECTOR2(vpos.x, vpos.y + 10.0f), NULL, NULL, 3.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0xffffffff, K_PART_LAYER_NORMAL);
-
-								SND_PLAY(SNDIDX_STARHIT);
-							}
-							break;
-							case 1: //give Strategic Points
-							{
-								g_level.GiveStrategicPoints(4.0f);
-								LOG(L"CHEATER! Strategic Points");
-
-								D3DXVECTOR2 vpos = g_level.m_camLevel.GetCamWorldAABB().Center();
-								g_particlesMgr.AddStringParticle(g_font12wow, L"CHEATER!", &vpos, NULL, NULL, 3.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0xffffffff, K_PART_LAYER_NORMAL);
-								g_particlesMgr.AddStringParticle(g_font8b1, L"Strategic Points", &D3DXVECTOR2(vpos.x, vpos.y + 10.0f), NULL, NULL, 3.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0xffffffff, K_PART_LAYER_NORMAL);
-
-								SND_PLAY(SNDIDX_STARHIT);
-							}
-							break;
-						}
-						//clear history
-						arrStackHistory.Clear();
-						break; //!!!
-					}
-				}
-			}
-		}
-#endif
 	}
 
 }
@@ -669,6 +606,14 @@ bool CController::WasControllerTouched(bool bSticksToo /*= false*/)
 	return false;
 }
 
+
+D3DXVECTOR2 CController::GetDoubleAxisVector(const EControllerCommand commXaxis, const EControllerCommand commYaxis)
+{
+	D3DXVECTOR2 retvec(0.0f, 0.0f);
+	D3DXVec2Normalize(&retvec, &D3DXVECTOR2(sCommands.fKeyDownPercent[commXaxis], sCommands.fKeyDownPercent[commYaxis]));
+	return retvec;
+}
+
 ///----- sControllerCommands -----
 
 CController::sControllerCommands::sControllerCommands()
@@ -688,14 +633,14 @@ void CController::sControllerCommands::UpdateCommands(float dTime, float fKeysPr
 	{
 		//load data from param
 		fKeyDownPercent[kk] = fKeysPressedPercents[kk];
-		bKeyDown[kk] = (fKeyDownPercent[kk] > 0.0f);
+		bKeyDown[kk] = (fabs(fKeyDownPercent[kk]) > 0.0f);
 
 		//update pressed time
 		fKeyPressedTime[kk] += dTime;
 
 		if (bKeyDown[kk])
 		{
-			if (keyState[kk] == K_CM_BUTSTATE_NOTPRESSED)
+			if (keyState[kk] == K_CM_BUTSTATE_NOTPRESSED || keyState[kk] == K_CM_BUTSTATE_JUSTRELEASED)
 			{
 				keyState[kk] = K_CM_BUTSTATE_JUSTPRESSED; //just pressed
 			}
@@ -706,7 +651,7 @@ void CController::sControllerCommands::UpdateCommands(float dTime, float fKeysPr
 		}
 		else
 		{
-			if (keyState[kk] == K_CM_BUTSTATE_PRESSING)
+			if (keyState[kk] == K_CM_BUTSTATE_PRESSING || keyState[kk] == K_CM_BUTSTATE_JUSTPRESSED)
 			{
 				keyState[kk] = K_CM_BUTSTATE_JUSTRELEASED;
 			}

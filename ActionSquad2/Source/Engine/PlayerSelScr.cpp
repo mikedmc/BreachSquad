@@ -275,13 +275,13 @@ void CPlayerSelScr::Update(float dTime)
 
 		CController* ctrlr = UTGetControllersManager().m_arrControllers[kk];
 
-		if (ctrlr->sCommands.keyState[K_CM_COMMAND_LEFT] == K_CM_BUTSTATE_JUSTPRESSED)
+		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f))
 			eCommand = K_PSS_COMMAND_LEFT;
-		if (ctrlr->sCommands.keyState[K_CM_COMMAND_RIGHT] == K_CM_BUTSTATE_JUSTPRESSED)
+		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) > 0.0f))
 			eCommand = K_PSS_COMMAND_RIGHT;
-		if (ctrlr->sCommands.keyState[K_CM_COMMAND_UP] == K_CM_BUTSTATE_JUSTPRESSED)
+		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_Y) < 0.0f))
 			eCommand = K_PSS_COMMAND_UP;
-		if (ctrlr->sCommands.keyState[K_CM_COMMAND_DOWN] == K_CM_BUTSTATE_JUSTPRESSED)
+		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_Y) > 0.0f))
 			eCommand = K_PSS_COMMAND_DOWN;
 		if ((ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTPRESSED) || 
 			(ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTPRESSED))
@@ -1428,7 +1428,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(playersel->nInstanceID);
 		if (ctrlr != null)
 		{
-			if ((ctrlr->eType == K_CM_CONTROLLERTYPE_KEYBOARD_SDL) || (ctrlr->eType == K_CM_CONTROLLERTYPE_KEYBOARD_WIN))
+			if (ctrlr->eType == K_CM_CONTROLLERTYPE_KEYBOARD_SDL)
 				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, winbox.Right(), winbox.y, ANM_CONTROLS_SPR_ICONS_CONTROLLER, 0, dwTitleColor);
 			else if (ctrlr->eType == K_CM_CONTROLLERTYPE_JOYSTICK_SDL)
 				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, winbox.Right(), winbox.y, ANM_CONTROLS_SPR_ICONS_CONTROLLER, 1, dwTitleColor);

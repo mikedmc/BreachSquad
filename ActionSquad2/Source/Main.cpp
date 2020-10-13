@@ -396,13 +396,13 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	//add keyboard controllers and map keys
 	CController* ctrlrkeys1 = UTGetControllersManager().AddController(K_CM_CONTROLLERTYPE_KEYBOARD_SDL, g_stringsMgr.strings[STR_KEYBOARD1]->sText);
 	ctrlrkeys1->nSDLInstanceId = K_CM_DEFAULT_KEYBOARD1_INSTANCE_ID; //set keyboard instance ID so it isn't empty
-	ctrlrkeys1->ClearTriggers(); //clear default mapping
+	//ctrlrkeys1->ClearTriggers(); //clear default mapping
 
-	CController* ctrlrkeys2 = UTGetControllersManager().AddController(K_CM_CONTROLLERTYPE_KEYBOARD_SDL, g_stringsMgr.strings[STR_KEYBOARD2]->sText);
-	ctrlrkeys2->nSDLInstanceId = K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID; //set keyboard instance ID so it isn't empty
-	ctrlrkeys2->ClearTriggers(); //clear default mapping
+	//CController* ctrlrkeys2 = UTGetControllersManager().AddController(K_CM_CONTROLLERTYPE_KEYBOARD_SDL, g_stringsMgr.strings[STR_KEYBOARD2]->sText);
+	//ctrlrkeys2->nSDLInstanceId = K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID; //set keyboard instance ID so it isn't empty
+	//ctrlrkeys2->ClearTriggers(); //clear default mapping
 
-	App_SetSDLTriggersFromUserData(ctrlrkeys1, ctrlrkeys2);
+	//App_SetSDLTriggersFromUserData(ctrlrkeys1, ctrlrkeys2);
 	
 	//add network controller for coop play (used for peer controller simulation)
 	CController* ctrlrnet1 = UTGetControllersManager().AddController(K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK, g_stringsMgr.strings[STR_NETWORK1]->sText);
@@ -514,18 +514,48 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 //**************************************************************************************
 // Initialize the app - before creating the window
 //**************************************************************************************
+/*
+struct CTest {
+	int value;
+	CTest() { value = 1; ErrorBox(K_ERR_WARNING, L"CTest constructed!"); };
+	~CTest() { ErrorBox(K_ERR_WARNING, L"CTest destructor! val:%d", value); };
+};
+*/
+
 HRESULT InitApp(void)
 {
 	/*
-	// test smart pointers
-	std::weak_ptr<int> act;
-	{
-		auto nule = std::make_shared<int>(10);
-		act = nule;
-		ErrorBox(K_ERR_WARNING, L"used: %d", act.use_count());
-	}
-	ErrorBox(K_ERR_WARNING, L"used: %d", act.use_count());
+	std::vector<std::shared_ptr<CTest>> vecActors;
+	auto nact = std::make_shared<CTest>();
+	nact->value = 666;
+	ErrorBox(K_ERR_WARNING, L"Value:%d", nact->value);
+	vecActors.push_back(std::move(nact));
 
+	// set weak_ptr to point
+	std::weak_ptr<CTest> pointing;
+	pointing = vecActors[0];
+	{
+		auto test = pointing.lock();
+		if (test) {
+			ErrorBox(K_ERR_WARNING, L"pointing Value:%d", test->value);
+		}
+	}
+
+
+	ErrorBox(K_ERR_WARNING, L"deallocationg");
+	vecActors.clear();
+
+	{
+		auto test = pointing.lock();
+		if (test) {
+			ErrorBox(K_ERR_WARNING, L"pointing Value:%d", test->value);
+		}
+		else 
+		{
+			// goes here!!
+			ErrorBox(K_ERR_WARNING, L"pointing Value was reset!");
+		}
+	}
 	*/
 
 	HRESULT hr = S_OK;
@@ -2572,7 +2602,7 @@ void CALLBACK MouseProc(bool bLeftButton, bool bRightButton, bool /*bMiddleButto
 void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 {
 	//send keypress to controllers class
-	UTGetControllersManager().ReceiveKeypress(nChar, bKeyDown, bAltDown);
+	//UTGetControllersManager().ReceiveKeypress(nChar, bKeyDown, bAltDown);
 
 	if (bKeyDown)
 	{

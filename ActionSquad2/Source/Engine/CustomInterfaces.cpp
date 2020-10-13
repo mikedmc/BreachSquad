@@ -855,7 +855,7 @@ void CCustomInterfaceIGM::Init(CSpriteCollection* sprCollection, CActor * player
 				{
 					CControllerTrigger* trigger = ctrlr->GetTriggerForCommand(arr_commands[ii]);
 
-					if (trigger->eType == K_CM_BUTTYPE_BUTTON)
+					if (trigger->eType == K_CM_BUTTON)
 					{
 						//set icon from CTRLR_XBOX_UP/DOWN from controls.bsx
 						arrKeyIcons[kk][ii] = K_CI_ARR_BUTICONS_FRAMES[trigger->keyMapping];
@@ -868,7 +868,7 @@ void CCustomInterfaceIGM::Init(CSpriteCollection* sprCollection, CActor * player
 						mbstowcs_s(null, strKey, sName, MAX_PATH);
 						g_stringsMgr.SetStringDesc(&arrKeyNames[kk][ii], strKey);
 					}
-					else if (trigger->eType == K_CM_BUTTYPE_AXIS)
+					else if (trigger->eType == K_CM_HALF_AXIS)
 					{
 						arrKeyIcons[kk][ii] = K_CI_ARR_AXISICONS_FRAMES[trigger->keyMapping];
 						//save string name as a fallback

@@ -40,8 +40,6 @@
 
 //important only in DEBUG mode:
 #if defined(DEBUG) | defined(_DEBUG)						  
-//enables general cheats
-#define ENABLE_CHEATS
 //reset all steam achievements on startup? 
 //#define ENABLE_ACHIEVEMENTS_RESET_ON_STARTUP
 //playerus invinctus:
@@ -49,8 +47,6 @@
 #endif
 
 #if defined(ENABLE_DEVMODE_RELEASE)
-//enables general cheats
-#define ENABLE_CHEATS
 //level camera scrolls with the mouse so we can check the level rendering
 //#define ENABLE_LEVEL_SHOWCASE
 #endif
@@ -374,6 +370,9 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 
 //enable SDL support
 #define K_GLOBAL_ENABLE_SDL
+// comment out to use mouse events
+#define K_SDL_IGNORE_MOUSE_EVENTS
+
 #if defined(K_GLOBAL_ENABLE_SDL)
 	#include <SDL.h>
 #endif

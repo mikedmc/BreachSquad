@@ -141,6 +141,8 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, D3DXVECT
 	actor->bHasGravity = true;
 	actor->bSkipRender = false;
 
+	actor->vMoveDirN = D3DXVECTOR2(0.0f, 0.0f);
+
 	actor->bReleaseIt = false;
 	actor->speed = D3DXVECTOR2(0.0f, 0.0f);
 	actor->vSpeedImpulse = D3DXVECTOR2(0.0f, 0.0f);
@@ -7648,33 +7650,35 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		{
 			//slow down feet anim too if weapon slows us down
 			float fTimeAdv = dTime;
-			if ((actor->nAttackStatus > K_LVL_ACT_ATTACK_RELOADING) && (actor->collisionFlags & K_DIRFLAG_DOWN))
-			{
-				fTimeAdv = dTime * (1.0f - actor->pCurrentWeapon->WeaponTemplate.fShooterSpeedSlowingPercent);
-			}
+			//if ((actor->nAttackStatus > K_LVL_ACT_ATTACK_RELOADING) && (actor->collisionFlags & K_DIRFLAG_DOWN))
+			//{
+			//	fTimeAdv = dTime * (1.0f - actor->pCurrentWeapon->WeaponTemplate.fShooterSpeedSlowingPercent);
+			//}
 
 			aframeFlag_feet = actor->sprite_feet.Update(&m_sprActors, fTimeAdv, false);
 		}
 	}
 	
 	//adaug miscarea din sprite editor
+	/*
 	if (actor->sprite.animStatus == ANIM_STATUS_PLAYING_FRAME_ADVANCED)
 	{
 		vAnimMove.x = actor->sprite.pos.x * actor->lookDirXsign;
 		vAnimMove.y = actor->sprite.pos.y;
 	}
+	*/
 
 	//------------------------------------------------------------------------------------------
 	//	INTEGRATOR - physics
 	//------------------------------------------------------------------------------------------
 	//check speed limits
-	CLAMP(actor->speed.y, -K_LVL_ACTOR_MAX_FALL_SPEED_Y, K_LVL_ACTOR_MAX_FALL_SPEED_Y);
-	CLAMP(actor->speed.x, -K_LVL_ACTOR_MAX_LATERAL_SPEED_X, K_LVL_ACTOR_MAX_LATERAL_SPEED_X);
+	CLAMP(actor->speed.x, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED);
+	CLAMP(actor->speed.y, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED);
 	//update impulse
 	D3DXVECTOR2 impFriction(K_LVL_GROUND_DEFAULT_FRICTION, K_LVL_GROUND_DEFAULT_FRICTION);
 	//limit impulse
-	CLAMP(actor->vSpeedImpulse.y, -K_LVL_ACTOR_MAX_FALL_SPEED_Y, K_LVL_ACTOR_MAX_FALL_SPEED_Y);
-	CLAMP(actor->vSpeedImpulse.x, -K_LVL_ACTOR_MAX_LATERAL_IMPULSE_X, K_LVL_ACTOR_MAX_LATERAL_IMPULSE_X);
+	CLAMP(actor->vSpeedImpulse.y, -K_LVL_ACTOR_MAX_IMPULSE, K_LVL_ACTOR_MAX_IMPULSE);
+	CLAMP(actor->vSpeedImpulse.x, -K_LVL_ACTOR_MAX_IMPULSE, K_LVL_ACTOR_MAX_IMPULSE);
 	//ATENTIE!!! daca trece prin usi inseamna ca bboxul din starea dead e mai lat decat cel din normal.
 
 	actor->vSpeedImpulse.x -= actor->vSpeedImpulse.x * impFriction.x * dTime;
@@ -7948,7 +7952,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						}
 					}
 					//fallen from high above, hurt him
-					if (actor->speed.y >= K_LVL_ACTOR_MAX_FALL_SPEED_Y)
+					if (actor->speed.y >= K_LVL_ACTOR_MAX_SPEED)
 					{
 						HitActor(actor, K_LVL_ACTOR_FALL_DAMAGE, 0, K_LVL_ACT_CLASS_TRAP, NULL,
 							K_LVL_BULLET_FLAG_NO_IMPACT_PARTICLES | K_LVL_BULLET_FLAG_NOT_BALLISTIC | K_LVL_BULLET_FLAG_IGNORE_ARMOR | K_LVL_BULLET_FLAG_IGNORE_COVER | K_LVL_BULLET_FLAG_NO_DECALS, 10, 0.0f);
@@ -8392,8 +8396,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					}
 				}
 				//daca apesi st/dr se intoarce cu fatza in directia respectiva
-				bool bPressedRight = pController->sCommands.bKeyDown[K_CM_COMMAND_RIGHT];
-				bool bPressedLeft = pController->sCommands.bKeyDown[K_CM_COMMAND_LEFT];
+				bool bPressedRight = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) > 0.0f);
+				bool bPressedLeft = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f);
 				//daca apasa ambele butoane nu se misca
 				if (bPressedLeft && bPressedRight)
 					bPressedLeft = bPressedRight = false;
@@ -8466,8 +8470,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					//SND_PLAY(SNDIDX_CLICK_DENIED);
 				}
 
-				bool bPressedRight = pController->sCommands.bKeyDown[K_CM_COMMAND_RIGHT];
-				bool bPressedLeft = pController->sCommands.bKeyDown[K_CM_COMMAND_LEFT];
+				bool bPressedRight = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) > 0.0f);
+				bool bPressedLeft = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f);
 				//daca apasa ambele butoane nu se misca
 				if (bPressedLeft && bPressedRight)
 					bPressedLeft = bPressedRight = false;
@@ -8496,12 +8500,13 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 
 				//climb ladders and interact
+				/* //#DMC: commented 13 oct 2020
 				if (pController->sCommands.keyState[K_CM_COMMAND_UP] != K_CM_BUTSTATE_NOTPRESSED)
 				{
 					if (actor->bOnLadder)
 					{
 						actor->m_AIcommands.nMoveDirY = -1;
-						actor->m_AIcommands.bThrustY = true;
+						//actor->m_AIcommands.bThrustY = true;
 					}
 					else
 					{
@@ -8515,7 +8520,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					if (actor->bOnLadder)
 					{
 						actor->m_AIcommands.nMoveDirY = 1;
-						actor->m_AIcommands.bThrustY = true;
+						//actor->m_AIcommands.bThrustY = true;
 					}
 					else
 					{
@@ -8527,6 +8532,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 				//touch
 				actor->m_AIcommands.nInteractKeyState = pController->sCommands.keyState[K_CM_COMMAND_UP];
+				*/
+				actor->m_AIcommands.nInteractKeyState = K_CM_BUTSTATE_NOTPRESSED;
 				//FIRE SHOOT
 				if (pController->sCommands.bKeyDown[K_CM_COMMAND_FIRE1])
 				{
@@ -8581,7 +8588,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				{
 					actor->m_AIcommands.bJump = true;
 					actor->m_AIcommands.bClimb = false;
-					actor->m_AIcommands.bThrustY = false;
+//					actor->m_AIcommands.bThrustY = false;
 					//jump if touching ground
 					if ((actor->collisionFlags & K_DIRFLAG_DOWN) || (actor->fTimeAirborn < K_LVL_ACTOR_JUMP_AFTER_PLATFORM_TIME))
 					{
@@ -8803,7 +8810,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			case AI_BEHAVIOR_FLY_AWAY:
 			{
 				actor->m_AIcommands.bThrustX = true;
-				actor->m_AIcommands.bThrustY = true;
+//				actor->m_AIcommands.bThrustY = true;
 				actor->m_AIcommands.nMoveDirY = -1;
 				//change direction when flying
 				if (actor->collisionFlags & K_DIRFLAG_LEFT)
@@ -8826,8 +8833,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					if (pController != null)
 					{
 						//daca apesi st/dr se intoarce cu fatza in directia respectiva
-						bool bPressedRight = pController->sCommands.bKeyDown[K_CM_COMMAND_RIGHT];
-						bool bPressedLeft = pController->sCommands.bKeyDown[K_CM_COMMAND_LEFT];
+						bool bPressedRight = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) > 0.0f);
+						bool bPressedLeft = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f);
 						//daca apasa ambele butoane nu se misca
 						if (bPressedLeft && bPressedRight)
 							bPressedLeft = bPressedRight = false;
@@ -9815,10 +9822,10 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					bSet = true;
 				}
 				//no event set or saw enemy? exit now
-				if ((actor->m_AIsensorInfo.pTargetedActor != null) || (!bSet))
+				if ((actor->m_AIsensorInfo.pTargetedActor != NULL) || (!bSet))
 				{
 					//finishes state when it sees the player
-					if (actor->m_AIsensorInfo.pTargetedActor != null)
+					if (actor->m_AIsensorInfo.pTargetedActor != NULL)
 						vInterestPos = actor->m_AIsensorInfo.pTargetedActor->posHeart;
 					bBehaviorFinished = true;
 					break;
@@ -12459,7 +12466,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 				//pe interact long nu am voie sa ma misc si sa trag sau sa fac crouch
 				actor->m_AIcommands.bThrustX = false;
-				actor->m_AIcommands.bThrustY = false;
+//				actor->m_AIcommands.bThrustY = false;
 				actor->m_AIcommands.bCrouched = false;
 				actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
 				//finally dau si touch (la cele cu touch duration negativ trebuie sa dea touch toti playerii)
@@ -12820,7 +12827,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			if (((actor->bbox.vMin.y < lockrect.y) && (actor->m_AIcommands.nMoveDirY < 0)) ||
 				((actor->bbox.vMax.y > lockrect.Bottom()) && (actor->m_AIcommands.nMoveDirY > 0)))
 			{
-				actor->m_AIcommands.bThrustY = false;
+//				actor->m_AIcommands.bThrustY = false;
 			}
 			//daca actorul a iesit din ecran ii da suspend
 			if (camAABB.Intersects(&actor->bbox))
@@ -12978,9 +12985,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	}
 
 	///--- update weapons ---
-	for (int jj = 0; jj < K_LVL_ACT_WEAPONS_CNT; jj++)
+	for (auto& weapon : actor->weapons)
 	{
-		UpdateWeapon(&actor->weapons[jj], dTime);
+		UpdateWeapon(&weapon, dTime);
 	}
 
 	// anim synced weapons only shoot when anim ready
@@ -13281,8 +13288,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//add equipped weapon speed penalty
 	float fWpnSpeedPenaltyPercent = 0.0f;
 	if (actor->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]->status != K_LVL_WPN_STATUS_UNKNOWN)
-			fWpnSpeedPenaltyPercent = actor->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]->WeaponTemplate.fSpeedPenaltyPercent;
+		fWpnSpeedPenaltyPercent = actor->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]->WeaponTemplate.fSpeedPenaltyPercent;
 
+	/*
 	if (actor->m_AIcommands.bThrustY)
 	{
 		//add speed
@@ -13302,7 +13310,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			actor->speed.y = 0.0f;
 		}
 	}
+	*/
 
+
+
+	/*
 	if (actor->m_AIcommands.bThrustX)
 	{
 		//add speed
@@ -13363,6 +13375,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				actor->vSpeedImpulse.x = fPushForce;
 		}
 	}
+	*/
 
 	//comanda culoare
 	if (actor->m_AIcommands.nColor != 0)
@@ -15039,6 +15052,8 @@ void CLevel::Update(float dTime_original)
 								}
 							}
 							//here you can change character when hot joining (not having played before)
+							/*
+							#DMC: commented out 13 oct 2020
 							if (m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED + plidx * K_LVL_STATS_PLAYER_STATS_COUNT] == 0)
 							{
 								if (ctrlr->sCommands.keyState[K_CM_COMMAND_LEFT] == K_CM_BUTSTATE_JUSTPRESSED)
@@ -15054,6 +15069,7 @@ void CLevel::Update(float dTime_original)
 										m_arrPlayerSelHotJoin[plidx] = 0;
 								}
 							}
+							*/
 						}
 					}
 				}
@@ -15077,6 +15093,8 @@ void CLevel::Update(float dTime_original)
 				}
 
 				///--- updates player selection for strategic points ---
+				//#DMC: commented out 13 oct 2020
+				/*
 				if (m_arrPlayerSelStrategic[plidx] >= 0)
 				{
 					CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(m_arrPlayerControllersIIDs[plidx]);
@@ -15148,6 +15166,7 @@ void CLevel::Update(float dTime_original)
 						m_interfaceIGM.SetStrategicSelection(plidx, nSelectedIdxNew);
 					}
 				}
+				*/
 			}
 
 			///--- level targets - mission success accomplished ---

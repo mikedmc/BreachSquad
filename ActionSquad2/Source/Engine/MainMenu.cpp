@@ -286,15 +286,15 @@ void CMainMenu::Update(float dTime)
 	for (int kk = 0; kk < UTGetControllersManager().m_arrControllers.GetSize(); kk++)
 	{
 		CController* ctrlr = UTGetControllersManager().m_arrControllers[kk];
-
-		if (ctrlr->sCommands.keyState[K_CM_COMMAND_LEFT] == K_CM_BUTSTATE_JUSTPRESSED)
+		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f))
 			eCommand = K_CCTRLMGR_COMMAND_LEFT;
-		if (ctrlr->sCommands.keyState[K_CM_COMMAND_RIGHT] == K_CM_BUTSTATE_JUSTPRESSED)
+		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) > 0.0f))
 			eCommand = K_CCTRLMGR_COMMAND_RIGHT;
-		if (ctrlr->sCommands.keyState[K_CM_COMMAND_UP] == K_CM_BUTSTATE_JUSTPRESSED)
+		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_Y) < 0.0f))
 			eCommand = K_CCTRLMGR_COMMAND_UP;
-		if (ctrlr->sCommands.keyState[K_CM_COMMAND_DOWN] == K_CM_BUTSTATE_JUSTPRESSED)
+		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_Y) > 0.0f))
 			eCommand = K_CCTRLMGR_COMMAND_DOWN;
+
 		if ((ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTPRESSED) ||
 			(ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTPRESSED) ||
 			(ctrlr->sCommands.keyState[K_CM_COMMAND_SELECT] == K_CM_BUTSTATE_JUSTPRESSED))

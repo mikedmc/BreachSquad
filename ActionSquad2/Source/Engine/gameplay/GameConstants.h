@@ -38,11 +38,10 @@
 #define K_LVL_RECON_AIMING_DURATION 1.0f
 
 //--- ENEMIES si personaj ---
-#define K_LVL_ACTOR_MAX_FALL_SPEED_Y 500.0f
-//max lateral speed
-#define K_LVL_ACTOR_MAX_LATERAL_SPEED_X 400.0f
+//max allowed speed
+#define K_LVL_ACTOR_MAX_SPEED 400.0f
 //max lateral impulse
-#define K_LVL_ACTOR_MAX_LATERAL_IMPULSE_X 1200.0f
+#define K_LVL_ACTOR_MAX_IMPULSE 1200.0f
 //cu ce viteza trebuie sa cada ca sa faca praf
 #define K_LVL_MAX_FALL_SPEED_Y_DUST 300.0f
 //cu ce viteza trebuie sa cada ca sa sparga geamul
@@ -63,7 +62,6 @@
 #define K_LVL_CAM_FOLLOW_SPRING_KS 100.0f
 #define K_LVL_CAM_FOLLOW_DAMPING_KD 20.0f
 //impulse friction
-#define K_LVL_AIR_DEFAULT_FRICTION 8.0f
 #define K_LVL_GROUND_DEFAULT_FRICTION 10.0f
 //multiplier de impuls pe cadavre
 #define K_LVL_DEAD_BODY_BULLET_MOMENTUM_MULTIPLIER 2.0f

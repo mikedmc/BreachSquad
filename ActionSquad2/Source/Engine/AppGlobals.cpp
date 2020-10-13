@@ -656,18 +656,19 @@ void App_SetSDLTriggersFromUserData(CController* ctrlrkeys1, CController* ctrlrk
 	CHAR strKeys[MAX_PATH];
 	WCHAR wcsKeys[MAX_PATH] = { 0 };
 	//--- KEYBOARD 1 ---
+	/*
 	if (ctrlrkeys1 != null)
 	{
 		ctrlrkeys1->ClearTriggers(); //clear default mapping
 		for (int kk = K_CM_COMMAND_LEFT; kk <= K_CM_COMMAND_STRATEGIC_MENU; kk++)
 		{
 			if (g_userData[K_MEMID_KEY1_LEFT + kk] >= 0)
-				ctrlrkeys1->AddTrigger(K_CM_BUTTYPE_BUTTON, (EControllerCommand)kk, g_userData[K_MEMID_KEY1_LEFT + kk]);
+				ctrlrkeys1->AddTrigger(K_CM_BUTTON, (EControllerCommand)kk, g_userData[K_MEMID_KEY1_LEFT + kk]);
 		}
 
-		ctrlrkeys1->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_SELECT, SDL_SCANCODE_RETURN);
+		ctrlrkeys1->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_SELECT, SDL_SCANCODE_RETURN);
 		//ctrlrkeys1->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_SELECT, SDL_SCANCODE_SPACE);
-		ctrlrkeys1->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_BACK, SDL_SCANCODE_ESCAPE);
+		ctrlrkeys1->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_BACK, SDL_SCANCODE_ESCAPE);
 
 		//set keyboard keys string
 		memset(strKeys, 0, MAX_PATH * sizeof(CHAR));
@@ -696,12 +697,12 @@ void App_SetSDLTriggersFromUserData(CController* ctrlrkeys1, CController* ctrlrk
 		for (int kk = K_CM_COMMAND_LEFT; kk <= K_CM_COMMAND_STRATEGIC_MENU; kk++)
 		{
 			if (g_userData[K_MEMID_KEY2_LEFT + kk] >= 0)
-				ctrlrkeys2->AddTrigger(K_CM_BUTTYPE_BUTTON, (EControllerCommand)kk, g_userData[K_MEMID_KEY2_LEFT + kk]);
+				ctrlrkeys2->AddTrigger(K_CM_BUTTON, (EControllerCommand)kk, g_userData[K_MEMID_KEY2_LEFT + kk]);
 		}
 
-		ctrlrkeys2->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_SELECT, SDL_SCANCODE_RETURN);
+		ctrlrkeys2->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_SELECT, SDL_SCANCODE_RETURN);
 		//ctrlrkeys2->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_SELECT, SDL_SCANCODE_SPACE);
-		ctrlrkeys2->AddTrigger(K_CM_BUTTYPE_BUTTON, K_CM_COMMAND_BACK, SDL_SCANCODE_ESCAPE);
+		ctrlrkeys2->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_BACK, SDL_SCANCODE_ESCAPE);
 
 		//set keyboard keys string
 		memset(strKeys, 0, MAX_PATH * sizeof(CHAR));
@@ -723,6 +724,7 @@ void App_SetSDLTriggersFromUserData(CController* ctrlrkeys1, CController* ctrlrk
 		mbstowcs(wcsKeys, strKeys, MAX_PATH);
 		g_stringsMgr.SetString(STR_KEYS2_VAL, wcsKeys);
 	}
+	*/
 }
 
 ///--- WINDOW CLIP/CENTER functions ---
@@ -1032,7 +1034,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 	{
 		CControllerTrigger* trigger = pCtrlr->GetTriggerForCommand(eCommand);
 
-		if (trigger->eType == K_CM_BUTTYPE_BUTTON)
+		if (trigger->eType == K_CM_BUTTON)
 		{
 			//set icon from CTRLR_XBOX_UP/DOWN from controls.bsx
 			nKeyIcon = K_CI_ARR_BUTICONS_FRAMES[trigger->keyMapping];
@@ -1047,7 +1049,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 			g_stringsMgr.SetStringDesc(&sdKeyName, strKey);
 			*/
 		}
-		else if (trigger->eType == K_CM_BUTTYPE_AXIS)
+		else if (trigger->eType == K_CM_HALF_AXIS)
 		{
 			nKeyIcon = K_CI_ARR_AXISICONS_FRAMES[trigger->keyMapping];
 			//save string name as a fallback - not used

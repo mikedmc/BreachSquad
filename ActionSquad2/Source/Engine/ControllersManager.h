@@ -4,19 +4,25 @@
 //--------------------------------------------------------------------------------------
 //fiecare controller are o lista de "triggers" care pointeaza spre comenzi ca sa poti avea mai multe butoane pe aceeasi actiune
 enum EControllerTriggerType {
-	K_CM_BUTTYPE_BUTTON = 0,
-	K_CM_BUTTYPE_AXIS
+	// 0/1 button that adds to command: fTriggerMin when released and fTriggerMax when pressed
+	K_CM_BUTTON = 0,
+	// analog half axis (used to transform analog movement on same axis to 2 separate commands)
+	// activated when axis >= fTriggerMin && axis <= fTriggerMax
+	K_CM_HALF_AXIS,
+	// analog full axis converted into a single command
+	// activated when fabs(axis) > fabs(fTriggerMin)
+	K_CM_AXIS
 };
 
 //controller types
 enum EControllerType {
 	K_CM_CONTROLLERTYPE_INVALID = -1,
-	K_CM_CONTROLLERTYPE_KEYBOARD_WIN = 0,  //tastatura cu input din mesaje de windows
-	K_CM_CONTROLLERTYPE_KEYBOARD_SDL,		//tastatura cu mesaje SDL
-	K_CM_CONTROLLERTYPE_JOYSTICK_SDL,		//controllere SDL
-	K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK,	//controller folosit pentru framelock
-
-	K_CM_CONTROLLERTYPES_CNT,		//count
+	K_CM_CONTROLLERTYPE_KEYBOARD_SDL = 0,		// input from SDL pipeline
+	K_CM_CONTROLLERTYPE_JOYSTICK_SDL,			// SDL controller
+	//K_CM_CONTROLLERTYPE_KEYBOARD_WIN ,			// takes input from windows messages
+	K_CM_CONTROLLERTYPE_NETWORK_FRAMELOCK,		// framelock networked controller
+	//count
+	K_CM_CONTROLLERTYPES_CNT,		
 };
 //buttons status
 enum EControllerButtonState {
@@ -29,9 +35,9 @@ enum EControllerButtonState {
 enum EControllerCommand {
 	K_CM_COMMAND_NONE = -1, //not used, default
 	//don't change the order! Synced with strings and memid items
-	K_CM_COMMAND_LEFT = 0,
+	K_CM_COMMAND_MOVE_X = 0,
 	K_CM_COMMAND_RIGHT,
-	K_CM_COMMAND_UP,
+	K_CM_COMMAND_MOVE_Y,
 	K_CM_COMMAND_DOWN,
 	K_CM_COMMAND_JUMP,
 	K_CM_COMMAND_FIRE1,
@@ -66,7 +72,7 @@ const CStringHash EControllerCommandNames[] = {
 //input trigger on commands
 class CControllerTrigger {
 public:
-	EControllerTriggerType	eType;						//button or axis
+	EControllerTriggerType	eType;						//button or axisor pointer
 	EControllerCommand		eTargetCommand;				//comanda pe care o efectueaza triggerul
 	float					fTriggerMin, fTriggerMax;	//valorile min si max intre care se face trigger
 	int						keyMapping;					//valoare ce activeaza trigger //when using SDL_KEYBOARD map with SDL scancodes, WIN_KEYBOARD with VK_ codes and Joysticks with SDL_CONTROLLER_AXIS_ and SDL_CONTROLLER_BUTTON_
@@ -92,12 +98,13 @@ public:
 class CController
 {
 public:
+	// structure that keeps data about all commands in a controller
 	struct sControllerCommands
 	{
-		bool					bKeyDown[K_CM_COMMANDS_COUNT];			//daca e apasat sau nu
+		bool					bKeyDown[K_CM_COMMANDS_COUNT];			//pressed or not
 		EControllerButtonState	keyState[K_CM_COMMANDS_COUNT];			//0-not pressed, 1-just pressed, 2-drag, 3-just released
-		float					fKeyPressedTime[K_CM_COMMANDS_COUNT];	//de cat timp e apasata o tasta anume
-		float					fKeyDownPercent[K_CM_COMMANDS_COUNT];	//cat de apasat e (merge si pt axe)
+		float					fKeyPressedTime[K_CM_COMMANDS_COUNT];	//time it's been kept pressed
+		float					fKeyDownPercent[K_CM_COMMANDS_COUNT];	//pressed percentage
 
 		/* CTOR */
 		sControllerCommands();
@@ -111,27 +118,23 @@ public:
 
 public:
 	int						arrTriggersCnt;
-	CControllerTrigger		arrTriggers[K_CM_MAX_TRIGGERS]; //array de triggers
+	CControllerTrigger		arrTriggers[K_CM_MAX_TRIGGERS]; //array of triggers
 	CStringHash				strName;						//controller name
 public:
 	//SDL data
-	int						nSDLidx;						//index controller 
-	int						nSDLInstanceId;					//instance id folosit de SDL
-	SDL_GameController		*SDLpgc;						//pointer la controller
+	int						nSDLidx;						//controller index
+	int						nSDLInstanceId;					//instance id used by SDL
+	SDL_GameController		*SDLpgc;						//pointer to controller
 public:
-	EControllerType			eType;							//tip controller
+	EControllerType			eType;							//controller type
 	sControllerCommands		sCommands;						//controller commands (to be used ingame)
 	int						nFlags;							//flags needed sometimes
 																	
 //internal data, don't use
 private:
-	bool					bKeyDown[K_CM_COMMANDS_COUNT];			//daca e apasat sau nu
-	float					fKeyDownPercent[K_CM_COMMANDS_COUNT];	//cat de apasat e (merge si pt axe)
-	float					fTimeSinceKeypress;						//cat timp de la ultima apasare
-
-#if defined(ENABLE_CHEATS)		
-	CCircularStack<EControllerCommand, 10>	arrStackHistory;		//istoric comenzi
-#endif
+	bool					bKeyDown[K_CM_COMMANDS_COUNT];			//pressed or not?
+	float					fKeyDownPercent[K_CM_COMMANDS_COUNT];	//analog pressed percentage
+	float					fTimeSinceKeypress;						//time from any last press
 
 public:
 	CController();
@@ -141,7 +144,7 @@ public:
 
 	/*
 	* Adds a trigger for a specific command
-	* param: fTriggerMin si fTriggerMax se seteaza sortate pe axa (negative, min va fi -1.1f iar max va fi mai spre 0.0f)
+	* param: fTriggerMin si fTriggerMax will be axis sorted (negative, min is -1.1  max is -0.1)
 	*/
 	void AddTrigger(EControllerTriggerType neType, EControllerCommand neCommand, int nKeyMapping, float nfTriggerMin = 0.1f, float nfTriggerMax = 1.1f);
 
@@ -187,6 +190,19 @@ public:
 
 	// Tells if a button was pressed on the controller (or a stick too)
 	bool WasControllerTouched(bool bSticksToo = false);
+
+	// returns the pressed state of specified command
+	inline EControllerButtonState GetCommandState(const EControllerCommand comm) {
+		return sCommands.keyState[comm];
+	}
+
+	// returns the pressed percentage of specified command
+	inline float GetCommandAxisPercent(const EControllerCommand comm) {
+		return sCommands.fKeyDownPercent[comm];
+	}
+
+	// returns the normalized compound vector for 2 axis commands
+	D3DXVECTOR2 GetDoubleAxisVector(const EControllerCommand commXaxis, const EControllerCommand commYaxis);
 };
 
 ///--- controllers manager ---
@@ -228,8 +244,8 @@ public:
 	void ResetKeypresses(CController* ctrlr);
 	//Reset keypresses on all controllers
 	void ResetAllControllersKeypresses();
-	//metoda folosita pentru a trimite mesajele de Windows pentru K_CM_CONTROLLER_KEYBOARD_WIN
-	void ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAltDown);
+	//used to get messages from Windows for K_CM_CONTROLLER_KEYBOARD_WIN
+	//void ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAltDown);
 	/*!
 	 *	Tells you if any key is pressed on any controller
 	 */
