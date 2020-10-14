@@ -283,7 +283,7 @@ void CMainMenu::Update(float dTime)
 
 	ECtrlMgrCommandType eCommand = K_CCTRLMGR_COMMAND_NONE;
 	//aleg din controllere doar comenzile necesare clasei
-	for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
+	for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 	{
 		CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
 		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_X) < 0.0f))

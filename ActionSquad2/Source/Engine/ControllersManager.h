@@ -197,7 +197,7 @@ protected:
 	// pointer to normalization function for absolute axis like mouse coords
 	NormalizeCoordsFn	pNormalizeFn;
 public:
-	CGrowableArray<CController*> m_arrControllers;
+	std::vector<CController*> m_arrControllers;
 	//CTOR/DTOR
 	CControllersManager();
 	~CControllersManager();

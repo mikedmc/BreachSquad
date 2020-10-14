@@ -10742,7 +10742,7 @@ void CLevel::Update(float dTime_original)
 					//if(!bEnableHotJoin)
 						//continue;
 					//HOT JOIN LOGIC
-					for (int ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.GetSize(); ll++)
+					for (int ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.size(); ll++)
 					{
 						CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ll];
 						//Shows controller mapping - only when not online

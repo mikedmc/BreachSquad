@@ -4299,7 +4299,7 @@ void CControlsManager::Update(float dTime)
 	}
 
 	// check input from all connected controllers and translate to local commands
-	for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
+	for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 	{
 		CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
 		//always skip network controllers

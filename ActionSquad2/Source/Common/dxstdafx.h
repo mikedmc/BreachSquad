@@ -199,6 +199,10 @@
 #define SAFE_DELETE_GROWABLE_ARRAY(p) { for(int xkx = 0; xkx < p.GetSize(); xkx++) { SAFE_DELETE(p[xkx]); } p.RemoveAll(); }
 #endif
 
+#ifndef SAFE_DELETE_STDVEC
+#define SAFE_DELETE_STDVEC(p) { for(int xkx = 0; xkx < p.size(); xkx++) { SAFE_DELETE(p[xkx]); } p.clear(); }
+#endif
+
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
 #define null NULL

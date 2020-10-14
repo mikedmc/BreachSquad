@@ -5,7 +5,7 @@ CControllersManager::CControllersManager()
 	// reset normalize function
 	pNormalizeFn = nullptr;
 
-	m_arrControllers.RemoveAll();
+	m_arrControllers.clear();
 	for (int kk = 0; kk < K_CM_CTS_CNT; kk++)
 	{
 		arrControllerTypesCnt[kk] = 0;
@@ -14,7 +14,7 @@ CControllersManager::CControllersManager()
 
 CControllersManager::~CControllersManager()
 {
-	SAFE_DELETE_GROWABLE_ARRAY(m_arrControllers);
+	SAFE_DELETE_STDVEC(m_arrControllers);
 	// reset normalize function
 	pNormalizeFn = nullptr;
 }
@@ -104,7 +104,7 @@ CController* CControllersManager::AddController(EControllerType neType, WCHAR * 
 		break;
 	}
 
-	m_arrControllers.Add(ctrl);
+	m_arrControllers.push_back(ctrl);
 
 	return ctrl;
 }
@@ -149,7 +149,7 @@ int CControllersManager::RegisterAllSDLControllers()
 
 void CControllersManager::ReleaseAllControllers(bool bOnlySDL)
 {
-	for (int kk = m_arrControllers.GetSize() - 1; kk >= 0; kk--)
+	for (int kk = m_arrControllers.size() - 1; kk >= 0; kk--)
 	{
 		if ((bOnlySDL) && (m_arrControllers[kk]->eType != K_CM_CT_JOYSTICK_SDL))
 			continue;
@@ -160,7 +160,7 @@ void CControllersManager::ReleaseAllControllers(bool bOnlySDL)
 		}
 		SAFE_DELETE(m_arrControllers[kk]);
 		arrControllerTypesCnt[K_CM_CT_JOYSTICK_SDL]--;
-		m_arrControllers.Remove(kk);
+		m_arrControllers.erase(m_arrControllers.begin() + kk);
 	}
 }
 
@@ -204,9 +204,9 @@ void CControllersManager::ResetKeypresses(CController* ctrlr)
 
 void CControllersManager::ResetAllControllersKeypresses()
 {
-	for (int kk = 0; kk < m_arrControllers.GetSize(); kk++)
+	for (auto const & ctrlr: m_arrControllers)
 	{
-		ResetKeypresses(m_arrControllers[kk]);
+		ResetKeypresses(ctrlr);
 	}
 }
 
@@ -238,7 +238,7 @@ void CControllersManager::ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAlt
 
 bool CControllersManager::KeyPressed(EControllerCommand eCommandFilter /*= K_CM_COMMAND_NONE*/)
 {
-	for (int ll = 0; ll < m_arrControllers.GetSize(); ll++)
+	for (int ll = 0; ll < m_arrControllers.size(); ll++)
 	{
 		CController* ctrlr = m_arrControllers[ll];
 		if (eCommandFilter == K_CM_COMMAND_NONE)
@@ -374,7 +374,7 @@ void CControllersManager::AddSDLController(int SDL_ctrlr_idx)
 
 bool CControllersManager::RemoveSDLController(int nnInstanceID)
 {
-	for (int kk = 0; kk < m_arrControllers.GetSize(); kk++)
+	for (int kk = 0; kk < m_arrControllers.size(); kk++)
 	{
 		if (m_arrControllers[kk]->nSDLInstanceId == nnInstanceID)
 		{
@@ -391,7 +391,7 @@ bool CControllersManager::RemoveSDLController(int nnInstanceID)
 			SDL_GameControllerClose(m_arrControllers[kk]->SDLpgc);
 			arrControllerTypesCnt[m_arrControllers[kk]->eType]--;
 			SAFE_DELETE(m_arrControllers[kk]);
-			m_arrControllers.Remove(kk);
+			m_arrControllers.erase(m_arrControllers.begin() + kk);
 
 			return true;
 		}
@@ -403,7 +403,7 @@ bool CControllersManager::RemoveSDLController(int nnInstanceID)
 
 CController* CControllersManager::GetControllerByInstanceID(int nnInstanceID)
 {
-	for (int kk = 0; kk < m_arrControllers.GetSize(); kk++)
+	for (int kk = 0; kk < m_arrControllers.size(); kk++)
 	{
 		if (m_arrControllers[kk]->nSDLInstanceId == nnInstanceID)
 			return m_arrControllers[kk];
@@ -413,7 +413,7 @@ CController* CControllersManager::GetControllerByInstanceID(int nnInstanceID)
 
 CController* CControllersManager::GetControllerByName(WCHAR* strControllerName)
 {
-	for (int kk = 0; kk < m_arrControllers.GetSize(); kk++)
+	for (int kk = 0; kk < m_arrControllers.size(); kk++)
 	{
 		if (m_arrControllers[kk]->strName.IsEqual(strControllerName))
 			return m_arrControllers[kk];
@@ -518,7 +518,7 @@ void CControllersManager::OnSDLKeypress(const SDL_KeyboardEvent sdlEvent, bool b
 	if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
 		return;
 
-	for (int kk = 0; kk < m_arrControllers.GetSize(); kk++)
+	for (int kk = 0; kk < m_arrControllers.size(); kk++)
 	{
 		CController* ctrlr = m_arrControllers[kk];
 		if (ctrlr->eType != K_CM_CT_KBM_SDL)
@@ -550,7 +550,7 @@ void CControllersManager::OnSDLMouseButton(const SDL_MouseButtonEvent sdlEvent)
 		fButPress = 1.0f;
 	}
 	//find button
-	for (int kk = 0; kk < m_arrControllers.GetSize(); kk++)
+	for (int kk = 0; kk < m_arrControllers.size(); kk++)
 	{
 		CController* ctrlr = m_arrControllers[kk];
 		if (ctrlr->eType != K_CM_CT_KBM_SDL)
@@ -573,7 +573,7 @@ void CControllersManager::OnSDLMouseMove(const SDL_MouseMotionEvent sdlEvent)
 	if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
 		return;
 	//find button
-	for (int kk = 0; kk < m_arrControllers.GetSize(); kk++)
+	for (int kk = 0; kk < m_arrControllers.size(); kk++)
 	{
 		CController* ctrlr = m_arrControllers[kk];
 		if (ctrlr->eType != K_CM_CT_KBM_SDL)

@@ -1232,7 +1232,7 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 			}
 #endif
 
-			for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
+			for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 			{
 				if (UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
 				{
@@ -1266,7 +1266,7 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 					CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_IGM_MENU");
 					if ((layer == null) && (!UTGetControlsManager().bIsBlocking))
 					{
-						for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
+						for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 						{
 							//show menu
 							if (UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
@@ -1279,7 +1279,7 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 					}
 					else if ((layer != null) && (layer == UTGetControlsManager().GetTopmostInputLayer()))
 					{
-						for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
+						for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 						{
 							//remove onscreen menu
 							if ((UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED) ||
@@ -1327,7 +1327,7 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 						CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_IGM_MENU_NET");
 						if ((layer == null) && (!UTGetControlsManager().bIsBlocking))
 						{
-							for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
+							for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 							{
 								CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
 								//ignore network controllers
@@ -1344,7 +1344,7 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 						}
 						else if ((layer != null) && (layer == UTGetControlsManager().GetTopmostInputLayer()) && (layer->alpha >= 1.0f))
 						{
-							for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
+							for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 							{
 								CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
 								//ignore network controllers
@@ -1919,7 +1919,7 @@ void CALLBACK OnFrameMove(IDirect3DDevice9* pd3dDevice, double fTime, float fEla
 			WORD wFrameFlagsPeer = g_netlock.m_arrReceived[g_nUpdateFrame % CNetLock::K_NETLOCK_MAX_STATE_PACKAGES].m_wFrameFlags;
 
 			//update all controllers with internal data but used ones with network data
-			for (int ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.GetSize(); ll++)
+			for (int ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.size(); ll++)
 			{
 				CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ll];
 				//update local controller with net data only when not in menus
@@ -1952,7 +1952,7 @@ void CALLBACK OnFrameMove(IDirect3DDevice9* pd3dDevice, double fTime, float fEla
 		else  //if(bSync)
 		{
 			//update all controllers with internal data
-			for (int ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.GetSize(); ll++)
+			for (int ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.size(); ll++)
 			{
 				UTGetCtrlrMgr().UpdateController(UTGetCtrlrMgr().m_arrControllers[ll], fElapsedTime);
 			}

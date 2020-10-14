@@ -267,7 +267,7 @@ void CPlayerSelScr::Update(float dTime)
 	//aleg din controllere doar comenzile necesare clasei
 	bool bBackProcessed = false;
 	bool bBackPressed = false;
-	for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
+	for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 	{
 		//pt fiecare controller resetez comanda si instanceID
 		EPSSInputCommand eCommand = K_PSS_COMMAND_NONE;
