@@ -370,7 +370,7 @@ void CApplication::App_UpdateState_Splash(LPDIRECT3DDEVICE9 pDevice, double fTim
 			//inc anim timer
 			g_gameStateTimer += dTime;
 
-			if ((g_mouse.Lbut != K_MOUSE_BUTT_NOTPRESSED) || (g_mouse.Rbut != K_MOUSE_BUTT_NOTPRESSED) || (UTGetControllersManager().KeyPressed()))
+			if ((g_mouse.Lbut != K_MOUSE_BUTT_NOTPRESSED) || (g_mouse.Rbut != K_MOUSE_BUTT_NOTPRESSED) || (UTGetCtrlrMgr().KeyPressed()))
 			{
 				g_gameSubstate++;
 			}
@@ -576,7 +576,7 @@ void CApplication::App_UpdateState_Publisher(LPDIRECT3DDEVICE9 pDevice, double f
 {
 	if ((!g_bDuringTransition) && (g_gameStateTimer > 0.5f))
 	{
-		if ((g_texManager.GetTexture(0) == null) || (g_mouse.Lbut != K_MOUSE_BUTT_NOTPRESSED) || (g_mouse.Rbut != K_MOUSE_BUTT_NOTPRESSED) || (UTGetControllersManager().KeyPressed()))
+		if ((g_texManager.GetTexture(0) == null) || (g_mouse.Lbut != K_MOUSE_BUTT_NOTPRESSED) || (g_mouse.Rbut != K_MOUSE_BUTT_NOTPRESSED) || (UTGetCtrlrMgr().KeyPressed()))
 		{
 			g_gameStateTimer = 0.5f;
 		}
@@ -645,7 +645,7 @@ void CApplication::App_UpdateState_Developer(LPDIRECT3DDEVICE9 pDevice, double f
 {
 	if ((!g_bDuringTransition) && (g_gameStateTimer > 0.5f))
 	{
-		if ((g_texManager.GetTexture(0) == null) || (g_mouse.Lbut != K_MOUSE_BUTT_NOTPRESSED) || (g_mouse.Rbut != K_MOUSE_BUTT_NOTPRESSED) || (UTGetControllersManager().KeyPressed()))
+		if ((g_texManager.GetTexture(0) == null) || (g_mouse.Lbut != K_MOUSE_BUTT_NOTPRESSED) || (g_mouse.Rbut != K_MOUSE_BUTT_NOTPRESSED) || (UTGetCtrlrMgr().KeyPressed()))
 		{
 			g_gameStateTimer = 0.5f;
 		}

@@ -148,7 +148,7 @@ public:
 	CScreenVignette	  m_screenVignetteDamage;	//damage vignette
 
 	// transforms mouse coordinates from screen space to game world (necessary for network play)
-	bool NormalizeMouseCoords(int ControllerIID, float fX, float fY, float & ret_fX, float & ret_fY);
+	bool NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue);
 
 	CVisibilityLists  m_visibleList; //lista de elemente vizibile sau active
 	void BuildVisibilityLists();

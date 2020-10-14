@@ -101,6 +101,7 @@ public:
 		INT32	m_nFrame;			//frame assigned to button states
 		DWORD	m_dwSyncCheck;		//used to check the sync of the random numbers generators
 		WORD	m_wFrameFlags;		//different flags like MENU_SHOWN, etc
+		//#TODO: de facut o structura minima pentru serializarea controllerului in clasa de controllers manager
 		bool	m_bButStates[K_CM_COMMANDS_COUNT]; //actual button pressed data
 
 		sPacketNetlock();

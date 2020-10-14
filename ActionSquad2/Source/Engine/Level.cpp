@@ -2685,7 +2685,7 @@ bool CLevel::IsNetworkPlayer(CActor* pPlayer)
 	if (pPlayer == null)
 		return false;
 
-	return (pPlayer->nControllerInstanceID == K_CM_DEFAULT_NETWORK1_INSTANCE_ID);
+	return (pPlayer->nControllerInstanceID == K_CM_IID_NET1);
 }
 
 CActive* CLevel::GetActiveByUID(UINT32 UID)
@@ -4600,10 +4600,9 @@ void CLevel::SetTimeMultiplier(float fMultiplier, float fDuration)
 //used to save last player positions
 static D3DXVECTOR2 s_vLastPlayerPos[K_MAX_PLAYERS_CNT];
 
-bool CLevel::NormalizeMouseCoords(int ControllerIID, float fX, float fY, float & ret_fX, float & ret_fY)
+bool CLevel::NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue)
 {
-	ret_fX = fX;
-	ret_fY = fY;
+	ret_fAxisValue = fAxisValue;
 	// level not loaded? return same coordinates
 	if (!m_bLoaded)
 		return false;
@@ -4617,13 +4616,25 @@ bool CLevel::NormalizeMouseCoords(int ControllerIID, float fX, float fY, float &
 				ErrorBox(K_ERR_WARNING, L"NormalizeMouseCoords player pointer is missing! idx:", kk);
 				return false;
 			}
-			D3DXVECTOR2 retpt = m_camLevel.ScreenToWorld(D3DXVECTOR2(fX, fY));
-			// make coords relative to player
-			retpt -= pPlayer->pos;
-			// set final coords
-			ret_fX = retpt.x;
-			ret_fY = retpt.y;
-			return true;
+
+			if (bIsHorizontalAxis)
+			{
+				D3DXVECTOR2 retpt = m_camLevel.ScreenToWorld(D3DXVECTOR2(fAxisValue, 0.0f));
+				// make coords relative to player
+				retpt.x -= pPlayer->pos.x;
+				// set final coords
+				ret_fAxisValue = retpt.x;
+				return true;
+			}
+			else
+			{
+				D3DXVECTOR2 retpt = m_camLevel.ScreenToWorld(D3DXVECTOR2(0.0f, fAxisValue));
+				// make coords relative to player
+				retpt.y -= pPlayer->pos.y;
+				// set final coords
+				ret_fAxisValue = retpt.y;
+				return true;
+			}
 		}
 	}
 
@@ -7844,7 +7855,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//acest AI e folosit la teleportarea intre usi in multiplayer si singleplayer ca sa se astepte playerii intre ei (timer si time slowdown)
 			case AI_BEHAVIOR_PLAYER_TEAM_TELEPORT:
 			{
-				CController* pController = UTGetControllersManager().GetControllerByInstanceID(actor->nControllerInstanceID);
+				CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID(actor->nControllerInstanceID);
 				if (pController == null) //controller not set or removed, skipping AI
 				{
 					break;
@@ -7875,8 +7886,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 				*/
 				//daca apesi st/dr se intoarce cu fatza in directia respectiva
-				bool bPressedRight = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) > 0.0f);
-				bool bPressedLeft = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f);
+				bool bPressedRight = (pController->GetAxisVal(K_CM_COMMAND_MOVE_X) > 0.0f);
+				bool bPressedLeft = (pController->GetAxisVal(K_CM_COMMAND_MOVE_X) < 0.0f);
 				//daca apasa ambele butoane nu se misca
 				if (bPressedLeft && bPressedRight)
 					bPressedLeft = bPressedRight = false;
@@ -7918,7 +7929,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			break;
 			case AI_BEHAVIOR_PLAYER_CONTROL:
 			{
-				CController* pController = UTGetControllersManager().GetControllerByInstanceID(actor->nControllerInstanceID);
+				CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID(actor->nControllerInstanceID);
 				//controller not set or removed, skipping AI
 				if ((pController == null) || (pController->nFlags & K_CM_CTRLR_FLAG_PAUSED) || (actor->bSuspendInput))
 				{
@@ -7949,7 +7960,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					//SND_PLAY(SNDIDX_CLICK_DENIED);
 				}
 
-				D3DXVECTOR2 vMoveDir = pController->GetDoubleAxisVector(K_CM_COMMAND_MOVE_X, K_CM_COMMAND_MOVE_Y);
+				D3DXVECTOR2 vMoveDir = pController->GetDoubleAxisVectorN(K_CM_COMMAND_MOVE_X, K_CM_COMMAND_MOVE_Y);
 				if (D3DXVec2LengthSq(&vMoveDir) > 0.0f)
 				{
 					actor->m_AIcommands.bThrust = true;
@@ -8163,12 +8174,12 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				//playerii pot schimba directia si pe play anim
 				if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
 				{
-					CController* pController = UTGetControllersManager().GetControllerByInstanceID(actor->nControllerInstanceID);
+					CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID(actor->nControllerInstanceID);
 					if (pController != null)
 					{
 						//daca apesi st/dr se intoarce cu fatza in directia respectiva
-						bool bPressedRight = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) > 0.0f);
-						bool bPressedLeft = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f);
+						bool bPressedRight = (pController->GetAxisVal(K_CM_COMMAND_MOVE_X) > 0.0f);
+						bool bPressedLeft = (pController->GetAxisVal(K_CM_COMMAND_MOVE_X) < 0.0f);
 						//daca apasa ambele butoane nu se misca
 						if (bPressedLeft && bPressedRight)
 							bPressedLeft = bPressedRight = false;
@@ -8299,7 +8310,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					//actor->varAIparams.SetNamedVarINT32(L"nDeathCommand", K_LVL_ACT_DEATHCMD_RESET_TO_ZERO);
 					//#HACK: death timer - waits for the timer before executing the state, only for players
 					//press fire to reset timer
-					CController* pController = UTGetControllersManager().GetControllerByInstanceID(actor->nControllerInstanceID);
+					CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID(actor->nControllerInstanceID);
 					//daca apesi fire dupa o secunda scursa nu mai asteapta timerul
 					bool bContinue = false;
 					if ((pController != null) && (actor->AItimer1 < K_LVL_PLAYER_DEATH_TIMER - 1.0f) && 
@@ -10731,9 +10742,9 @@ void CLevel::Update(float dTime_original)
 					//if(!bEnableHotJoin)
 						//continue;
 					//HOT JOIN LOGIC
-					for (int ll = 0; ll < UTGetControllersManager().m_arrControllers.GetSize(); ll++)
+					for (int ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.GetSize(); ll++)
 					{
-						CController* ctrlr = UTGetControllersManager().m_arrControllers[ll];
+						CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ll];
 						//Shows controller mapping - only when not online
 						if ((ctrlr->eType == K_CM_CT_JOYSTICK_SDL) && (!UTGetAppClass().IsGameNetworked()) && (false == UTGetControlsManager().bIsBlocking) && 
 							(ctrlr->sCommands.keyState[K_CM_COMMAND_SELECT] == K_CM_BUTSTATE_JUSTPRESSED))
@@ -10786,7 +10797,7 @@ void CLevel::Update(float dTime_original)
 				}
 				else //daca nu e empty verific daca mai exista controllerul respectiv
 				{
-					CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(m_arrPlayerControllersIIDs[plidx]);
+					CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(m_arrPlayerControllersIIDs[plidx]);
 					if (ctrlr == null)
 					{
 						m_arrPlayerControllersIIDs[plidx] = -1;
@@ -11838,7 +11849,7 @@ void CLevel::Update(float dTime_original)
 				{
 #ifdef ENABLE_LEADERBOARDS
 					//show leaderboard when pressing melee key (any controller)
-					if ((UTGetControllersManager().KeyPressed(K_CM_COMMAND_MELEE)) && (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE))
+					if ((UTGetCtrlrMgr().KeyPressed(K_CM_COMMAND_MELEE)) && (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE))
 					{
 						CCtrlLayer* lay = UTGetControlsManager().GetLayerByName("LAYER_ID_LEADERBOARDS_IGM");
 						if (lay == null)
@@ -12291,7 +12302,7 @@ void CLevel::Update(float dTime_original)
 				default:
 #ifdef ENABLE_LEADERBOARDS
 					//show leaderboard when pressing melee key (any controller)	for VERTICAL VINFINITE mode
-					if ((UTGetControllersManager().KeyPressed(K_CM_COMMAND_MELEE)) && (m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_VINFINITE_MODE))
+					if ((UTGetCtrlrMgr().KeyPressed(K_CM_COMMAND_MELEE)) && (m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_VINFINITE_MODE))
 					{
 						CCtrlLayer* lay = UTGetControlsManager().GetLayerByName("LAYER_ID_LEADERBOARDS_IGM");
 						if (lay == null)

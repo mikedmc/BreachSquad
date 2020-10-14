@@ -4,6 +4,7 @@
 
 void CNetLock::sPacketNetlock::SaveButtonsPressedPercents(int nFrame, float arrSrcPressedPercents[K_CM_COMMANDS_COUNT])
 {
+	//#TODO: de facut serializare buna si mica pentru trimitere si primire prin retea
 	//save frame
 	m_nFrame = nFrame;
 	//save states

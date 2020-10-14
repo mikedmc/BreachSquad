@@ -42,7 +42,7 @@ void CPlayerSelScr::ResetSelection(bool bResetInstanceIDs)
 		//counts the active players and see if the controller is still present
 		if (m_arrPlayers[kk].nInstanceID != -1)
 		{
-			if (null != UTGetControllersManager().GetControllerByInstanceID(m_arrPlayers[kk].nInstanceID))
+			if (null != UTGetCtrlrMgr().GetControllerByInstanceID(m_arrPlayers[kk].nInstanceID))
 				m_nPlayersCnt++;  //controller still there
 			else
 				m_arrPlayers[kk].nInstanceID = -1; //must press fire again to select new controller
@@ -106,7 +106,7 @@ void CPlayerSelScr::OnControllerRemoved(int ctrlrInstanceID)
 		else
 		{
 			// on networked games just move it to default keyboard so we don't break the flow
-			m_arrPlayers[nAffectedIdx].nInstanceID = K_CM_DEFAULT_KEYBOARD1_INSTANCE_ID;
+			m_arrPlayers[nAffectedIdx].nInstanceID = K_CM_IID_KBM1;
 		}
 	}
 }
@@ -226,7 +226,7 @@ void CPlayerSelScr::Update(float dTime)
 							m_arrPlayers[nPeerOrdinal].fVerseReadyTimer = K_PSS_WAIT_BEFORE_VERSE_SEC - EPS;
 						}
 						//setam instance ID ca sa legam user de controller
-						m_arrPlayers[nPeerOrdinal].nInstanceID = K_CM_DEFAULT_NETWORK1_INSTANCE_ID;
+						m_arrPlayers[nPeerOrdinal].nInstanceID = K_CM_IID_NET1;
 						m_arrPlayers[nPeerOrdinal].bIsNetworkPlayer = true;
 						//increase players cnt
 						m_nPlayersCnt++;
@@ -267,21 +267,21 @@ void CPlayerSelScr::Update(float dTime)
 	//aleg din controllere doar comenzile necesare clasei
 	bool bBackProcessed = false;
 	bool bBackPressed = false;
-	for (int kk = 0; kk < UTGetControllersManager().m_arrControllers.GetSize(); kk++)
+	for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
 	{
 		//pt fiecare controller resetez comanda si instanceID
 		EPSSInputCommand eCommand = K_PSS_COMMAND_NONE;
 		int	nInstanceID = -1;
 
-		CController* ctrlr = UTGetControllersManager().m_arrControllers[kk];
+		CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
 
-		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f))
+		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_X) < 0.0f))
 			eCommand = K_PSS_COMMAND_LEFT;
-		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) > 0.0f))
+		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_X) > 0.0f))
 			eCommand = K_PSS_COMMAND_RIGHT;
-		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_Y) < 0.0f))
+		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_Y) < 0.0f))
 			eCommand = K_PSS_COMMAND_UP;
-		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_Y) > 0.0f))
+		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_Y) > 0.0f))
 			eCommand = K_PSS_COMMAND_DOWN;
 		if ((ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTPRESSED) || 
 			(ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTPRESSED))
@@ -1425,7 +1425,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		clipper.Set(winbox.x + 3, winbox.y - 12, winbox.w - 20, 20);
 		g_font8b1->DrawStringClamped(&strTemp, clipper.x, clipper.y, clipper.w, FONTFLAG_ANCHOR_TOPLEFT, dwTitleColor);
 		//icon controller
-		CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(playersel->nInstanceID);
+		CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(playersel->nInstanceID);
 		if (ctrlr != null)
 		{
 			if (ctrlr->eType == K_CM_CT_KBM_SDL)
@@ -1628,7 +1628,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		///--- paints controller command for selection ---
 		if ((!playersel->bSelected) && (!playersel->bIsNetworkPlayer) && (playersel->nCursorMoreReal < 0) && (playersel->nCursorPosReal < K_PSS_CURPOS_READY) && (playersel->fTimeSinceCursorMoved > K_PSS_HINT_WAIT_TIMER))
 		{
-			CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(playersel->nInstanceID);
+			CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(playersel->nInstanceID);
 			EControllerCommand eCmd = K_CM_COMMAND_FIRE1;
 			if (ctrlr->eType == K_CM_CT_JOYSTICK_SDL)
 				eCmd = K_CM_COMMAND_JUMP;
@@ -1778,7 +1778,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			///--- paints controller command for selection ---
 			if ((!playersel->bSelected) && (!playersel->bIsNetworkPlayer) && (playersel->fTimeSinceCursorMoved > K_PSS_HINT_WAIT_TIMER))
 			{
-				CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(playersel->nInstanceID);
+				CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(playersel->nInstanceID);
 				//back
 				EControllerCommand eCmdBak = K_CM_COMMAND_RELOAD;
 				App_PaintControllerKey(ctrlr, eCmdBak, D3DXVECTOR2(tempbox.Right() - 1.0f, tempbox.Bottom() - 15.0f), ((g_timers.GetTimerValue(600) >= 0.3f) ? true : false), -1, 0xffff9999);
@@ -1908,7 +1908,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			///--- paints controller command for selection ---
 			if ((!playersel->bSelected) && (!playersel->bIsNetworkPlayer) && (playersel->fTimeSinceCursorMoved > K_PSS_HINT_WAIT_TIMER))
 			{
-				CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(playersel->nInstanceID);
+				CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(playersel->nInstanceID);
 				//back
 				EControllerCommand eCmdBak = K_CM_COMMAND_RELOAD;
 				App_PaintControllerKey(ctrlr, eCmdBak, D3DXVECTOR2(tempbox.Right() - 1.0f, tempbox.Bottom() - 15.0f), ((g_timers.GetTimerValue(600) >= 0.3f) ? true : false), -1, 0xffff9999);
@@ -2082,7 +2082,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			///--- paints controller command for selection ---
 			if ((!playersel->bSelected) && (!playersel->bIsNetworkPlayer) && (playersel->fTimeSinceCursorMoved > K_PSS_HINT_WAIT_TIMER))
 			{
-				CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(playersel->nInstanceID);
+				CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(playersel->nInstanceID);
 				//back
 				EControllerCommand eCmdBak = K_CM_COMMAND_RELOAD;
 				App_PaintControllerKey(ctrlr, eCmdBak, D3DXVECTOR2(tempbox.Right() - 1.0f, tempbox.Bottom() - 15.0f), ((g_timers.GetTimerValue(600) >= 0.3f) ? true : false), -1, 0xffff9999);
@@ -2229,7 +2229,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			///--- paints controller command for selection ---
 			if ((!playersel->bSelected) && (!playersel->bIsNetworkPlayer) && (playersel->fTimeSinceCursorMoved > K_PSS_HINT_WAIT_TIMER))
 			{
-				CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(playersel->nInstanceID);
+				CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(playersel->nInstanceID);
 				//back
 				EControllerCommand eCmdBak = K_CM_COMMAND_RELOAD;
 				App_PaintControllerKey(ctrlr, eCmdBak, D3DXVECTOR2(tempbox.Right() - 1.0f, tempbox.Bottom() - 15.0f), ((g_timers.GetTimerValue(600) >= 0.3f) ? true : false), -1, 0xffff9999);

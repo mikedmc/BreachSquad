@@ -338,34 +338,6 @@ enum EControllerKeys {
 	K_KEYS_COUNT
 };
 
-//structura asta a fost inlocuita de controllersManager dar o mai las poate va mai fi necesara
-class CControllerData {
-public:
-	bool		bKeyDown[K_KEYS_COUNT]; //daca e apasat sau nu
-	EKeyState	keyState[K_KEYS_COUNT]; ////0-not pressed, 1-just pressed, 2-drag, 3-just released
-	float		fKeyPressedTime[K_KEYS_COUNT]; //de cat timp e apasata o tasta anume
-
-	UINT	keyMappings[K_KEYS_COUNT]; //ce caracter corespunde fiecarei directii
-
-	CControllerData()
-	{
-		for (int kk = 0; kk < K_KEYS_COUNT; kk++)
-		{
-			bKeyDown[kk] = false;
-			keyState[kk] = K_KEYSTATE_NOTPRESSED;
-			fKeyPressedTime[kk] = 0.0f;
-			keyMappings[kk] = 0;
-		}
-	};
-
-	void MapKeys(UINT nLeftKey, UINT nRightKey, UINT nUpKey, UINT nDownKey, UINT nJumpKey, UINT nFire1Key, UINT nFireAltKey, UINT nReloadKey, UINT nUseGearKey);
-	void MapKey(EControllerKeys nKeyType, UINT nKey);
-	//Reseteaza apasarile de taste pe NOT PRESSED
-	void ResetKeypresses();
-	void ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAltDown);
-	void Update(float dTime);
-};
-
 
 // changes saturation (rgb->hsl->h(s*S)l->rgb)
 DWORD SetSaturation(DWORD c, float S);

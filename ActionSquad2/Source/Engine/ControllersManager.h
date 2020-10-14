@@ -1,10 +1,13 @@
 #pragma once
 #include "dxstdafx.h"
 
-// type of callback member function to use when normalizing	XY coords, returning data in ret_fX/Y
-typedef void (*NormalizeCoordsFn)(int ControllerIID, float fX, float fY, float & ret_fX, float & ret_fY);
+// \brief The type of callback member function to use when normalizing XY coords, returning data in ret_fX/Y
+//
+// Some coordinates (like mouse position) depend on window size but we want them to correspond between
+// network peers so they need to be normalized into game/level space, relative to controller owner character
+typedef void (*NormalizeCoordsFn)(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue);
 
-//each controller has a list of triggers that translate to commands. you can have more triggers per command, each adding its value to the total output.
+// Each controller has a list of triggers that translate to commands. you can have more triggers per command, each adding its value to the total axis value.
 enum EControllerTriggerType {
 	// 0/1 button that adds to command: fTriggerMin when released and fTriggerMax when pressed
 	K_CM_BUTTON = 0,
@@ -15,7 +18,7 @@ enum EControllerTriggerType {
 	// activated when fabs(axis) > fabs(fTriggerMin)
 	K_CM_AXIS,
 	// mouse or touch pointer split into 2 axis
-	// can/should/will be transformed to game space, relative to interested party
+	// can/should/will be transformed to game space, relative to controller owner character
 	K_CM_POINTER_X,
 	K_CM_POINTER_Y,
 	// mouse button  or touch event
@@ -23,27 +26,30 @@ enum EControllerTriggerType {
 	K_CM_POINTER_BUTTON,
 };
 
-//controller types
+// Controller types
 enum EControllerType {
 	K_CM_CT_INVALID = -1,
-	K_CM_CT_KBM_SDL = 0,						// Keyboard and Mouse type
+	K_CM_CT_KBM_SDL = 0,						// KeyBoard and Mouse type (one per computer)
 	K_CM_CT_JOYSTICK_SDL,						// SDL controller
 	//K_CM_CT_KEYBOARD_WIN ,					// takes input from windows messages
-	K_CM_CT_NET_FRAMELOCK,						// framelock networked controller
+	K_CM_CT_NET_FRAMELOCK,						// framelock networked helper controller
 	//count
 	K_CM_CTS_CNT,		
 };
-//buttons status
+
+// Buttons statuses
 enum EControllerButtonState {
 	K_CM_BUTSTATE_NOTPRESSED = 0,
 	K_CM_BUTSTATE_JUSTPRESSED,
 	K_CM_BUTSTATE_PRESSING,
 	K_CM_BUTSTATE_JUSTRELEASED,
 };
-//virtual controller commands: commands - game specific
+
+// Virtual controller commands: commands - game specific
+// Don't change the order! Synced with strings and memid items
 enum EControllerCommand {
 	K_CM_COMMAND_NONE = -1, //not used, default
-	//don't change the order! Synced with strings and memid items
+
 	K_CM_COMMAND_MOVE_X = 0,
 	K_CM_COMMAND_MOVE_Y,
 	K_CM_COMMAND_AIM_X,
@@ -78,7 +84,7 @@ const CStringHash EControllerCommandNames[] = {
 	L"COMMAND_BACK", 
 };
 
-//input trigger on commands
+// Input trigger for commands
 class CControllerTrigger {
 public:
 	EControllerTriggerType	eType;						//button or axisor pointer
@@ -92,11 +98,11 @@ public:
 ///--- controller class ---
 //max number of triggers per controller
 #define K_CM_MAX_TRIGGERS 30
-//default keyboard ID
-#define K_CM_DEFAULT_KEYBOARD1_INSTANCE_ID 0xffff0
-#define K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID 0xffff1
-//default virtual network controller ID	(if we'll ever need more network controllers we should add a flag bPlayerIsNetworked)
-#define K_CM_DEFAULT_NETWORK1_INSTANCE_ID 0xffff5
+
+// Default KBM IID, added from the start on PC builds
+#define K_CM_IID_KBM1 0xffff0
+// Default virtual network controller ID	(if we'll ever need more network controllers we should add a flag bPlayerIsNetworked)
+#define K_CM_IID_NET1 0xffff5
 
 //--- controller flags ---
 //flag that tells us that the controller is paused
@@ -110,16 +116,13 @@ public:
 	// structure that keeps data about all commands in a controller
 	struct sControllerCommands
 	{
-		bool					bKeyDown[K_CM_COMMANDS_COUNT]{};		//pressed or not
-		EControllerButtonState	keyState[K_CM_COMMANDS_COUNT]{};		//0-not pressed, 1-just pressed, 2-drag, 3-just released
-		float					fKeyPressedTime[K_CM_COMMANDS_COUNT]{};	//time it's been kept pressed
-		float					fKeyDownPercent[K_CM_COMMANDS_COUNT]{};	//pressed percentage
+		bool					bKeyDown[K_CM_COMMANDS_COUNT];			//pressed or not
+		EControllerButtonState	keyState[K_CM_COMMANDS_COUNT];			//0-not pressed, 1-just pressed, 2-drag, 3-just released
+		float					fKeyPressedTime[K_CM_COMMANDS_COUNT];	//time it's been kept pressed
+		float					arrAxisVal_N[K_CM_COMMANDS_COUNT];		//analog axis value (finale, after normalization and update)
 
 		/* CTOR */
 		sControllerCommands();
-
-		/* updates all internal arrays based on pressed percents */
-		void UpdateCommands(float dTime, float fKeysPressedPercents[K_CM_COMMANDS_COUNT]);
 
 		/* resets keypresses */
 		void Reset();
@@ -139,17 +142,8 @@ public:
 	sControllerCommands		sCommands;						//controller commands (to be used ingame)
 	int						nFlags;							//flags needed sometimes
 																	
-//internal data, don't use
-private:
-	bool					ctrl_bKeyDown[K_CM_COMMANDS_COUNT];			//pressed or not?
-	float					ctrl_fKeyDownPercent[K_CM_COMMANDS_COUNT];	//analog pressed percentage
-	float					ctrl_fTimeSinceKeypress;						//time from any last press
-
 public:
 	CController();
-
-	// Updates internal commands property using private fKeydownPercent array
-	void UpdateCommands(float dTime);
 
 	// Adds a trigger for a specific command
 	// param: fTriggerMin si fTriggerMax will be axis sorted (negative, min is -1.1  max is -0.1)
@@ -171,10 +165,6 @@ public:
 	// Clears all triggers
 	void ClearTriggers();
 
-	// \brief Translates triggers to commands. Handles all triggers before setting command On or Off
-	// Must be called after reading the input. Very important when using analog and digital triggers on the same command so they do not cancel each other out
-	void TranslateTriggersToCommands();
-
 	// \brief Resets all keypresses
 	void ResetKeypresses();
 
@@ -185,17 +175,17 @@ public:
 	bool WasControllerTouched(bool bSticksToo = false);
 
 	// returns the pressed state of specified command
-	inline EControllerButtonState GetCommandState(const EControllerCommand comm) {
+	inline EControllerButtonState GetButState(const EControllerCommand comm) {
 		return sCommands.keyState[comm];
 	}
 
 	// returns the pressed percentage of specified command
-	inline float GetCommandAxisPercent(const EControllerCommand comm) {
-		return sCommands.fKeyDownPercent[comm];
+	inline float GetAxisVal(const EControllerCommand comm) {
+		return sCommands.arrAxisVal_N[comm];
 	}
 
 	// returns the normalized compound vector for 2 axis commands
-	D3DXVECTOR2 GetDoubleAxisVector(const EControllerCommand commXaxis, const EControllerCommand commYaxis);
+	D3DXVECTOR2 GetDoubleAxisVectorN(const EControllerCommand commXaxis, const EControllerCommand commYaxis);
 };
 
 ///--- controllers manager ---
@@ -221,37 +211,36 @@ public:
 	//deallocates all SDL controllers
 	void				ReleaseAllControllers(bool bOnlySDL = false);
 
-	///--- SDL methods ---
-	//get scancode name. Shorten default SDL names before.
+	// Get scancode name. Shorten default SDL names before.
 	const char*			GetSDLScancodeName(SDL_Scancode scancode);
-	//adauga un controller SDL dupa idx-ul acestuia
+	// Adds SDL after SDL index
 	void				AddSDLController(int SDL_ctrlr_idx);
-	//sterge un controller SDL dupa instanceID
+	// Deletes controller with nnInstanceID from ctrlrs array
 	bool				RemoveSDLController(int nnInstanceID);
-	//callback SDL buttons
+
 	void				OnSDLControllerButton(const SDL_ControllerButtonEvent sdlEvent);
-	//callback SDL axis
 	void				OnSDLControllerAxis(const SDL_ControllerAxisEvent sdlEvent);
-	//callback SDL keys
 	void				OnSDLKeypress(const SDL_KeyboardEvent sdlEvent, bool bKeyDown);
-	//callback SDL mouse buttons
 	void				OnSDLMouseButton(const SDL_MouseButtonEvent sdlEvent);
-	//callback SDL mouse buttons
 	void				OnSDLMouseMove(const SDL_MouseMotionEvent sdlEvent);
+
 	//get pointer to Controller by SDLInstanceID
 	CController*		GetControllerByInstanceID(int nnInstanceID);
 	//get pointer to Controller by name
 	CController*		GetControllerByName(WCHAR* strControllerName);
-	//Reseteaza apasarile de taste pe NOT PRESSED
+	// Resets all keypresses to NOT PRESSED
 	void				ResetKeypresses(CController* ctrlr);
-	//Reset keypresses on all controllers
+	// Reset keypresses on all controllers
 	void				ResetAllControllersKeypresses();
-	// Used to get messages from Windows for K_CM_CONTROLLER_KEYBOARD_WIN
+	// Used to get messages from Windows for K_CM_CONTROLLER_KEYBOARD_WIN - obsolete
 	//void ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAltDown);
 	// Tells you if any key is pressed on any controller
 	bool				KeyPressed(EControllerCommand eCommandFilter = K_CM_COMMAND_NONE);
+	// Updates internal controller data, must be called every frame, before using the controller data
+	// \param arrOverrideDownPercent - must be an array of K_CM_COMMANDS_CNT length and it gets copied over the internal normalized array (updates are made after it gets copied)
+	void				UpdateController(CController* ctrlr, float dTime, float * arrOverrideDownPercents = null);
 };
 
 
-//declar singletonul
-CControllersManager& UTGetControllersManager();
+//singleton to access Controllers manager class
+CControllersManager& UTGetCtrlrMgr();

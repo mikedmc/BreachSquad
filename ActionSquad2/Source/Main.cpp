@@ -144,10 +144,10 @@ void UpdateTransition(float dTime);
 void PaintTransition(float dTime, float fTimeline, LPDIRECT3DDEVICE9 pd3dDevice); 
 
 // Function used by controllers manager to normalize mouse input from global to ingame player relative
-void NormalizeIngameMouseCoords(int ControllerIID, float fX, float fY, float & ret_fX, float & ret_fY)
+void NormalizeIngameMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue)
 {
-	g_level.NormalizeMouseCoords(ControllerIID, fX, fY, ret_fX, ret_fY);
-	DebugPrintA("coords: %.2f,%.2f -> %.2f,%.2f\n", fX, fY, ret_fX, ret_fY);
+	g_level.NormalizeMouseCoords(ControllerIID, fAxisValue, bIsHorizontalAxis, ret_fAxisValue);
+	DebugPrintA("coords: axis:%d %.2f -> %.2f\n", bIsHorizontalAxis, fAxisValue, ret_fAxisValue);
 }
 
 //#define DEBUG_VS
@@ -401,8 +401,8 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	//se initializeaza dupa crearea device-ului ca sa nu interfereze cu procedura de creare
 	UTGetAppClass().InitSDL(DXUTGetHWND());
 	//add keyboard controllers and map keys
-	CController* ctrlrkeys1 = UTGetControllersManager().AddController(K_CM_CT_KBM_SDL, g_stringsMgr.strings[STR_KEYBOARD1]->sText);
-	ctrlrkeys1->nSDLInstanceId = K_CM_DEFAULT_KEYBOARD1_INSTANCE_ID; //set keyboard instance ID so it isn't empty
+	CController* ctrlrkeys1 = UTGetCtrlrMgr().AddController(K_CM_CT_KBM_SDL, g_stringsMgr.strings[STR_KEYBOARD1]->sText);
+	ctrlrkeys1->nSDLInstanceId = K_CM_IID_KBM1; //set keyboard instance ID so it isn't empty
 	//ctrlrkeys1->ClearTriggers(); //clear default mapping
 
 	//CController* ctrlrkeys2 = UTGetControllersManager().AddController(K_CM_CONTROLLERTYPE_KEYBOARD_SDL, g_stringsMgr.strings[STR_KEYBOARD2]->sText);
@@ -412,12 +412,12 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	//App_SetSDLTriggersFromUserData(ctrlrkeys1, ctrlrkeys2);
 	
 	//add network controller for coop play (used for peer controller simulation)
-	CController* ctrlrnet1 = UTGetControllersManager().AddController(K_CM_CT_NET_FRAMELOCK, g_stringsMgr.strings[STR_NETWORK1]->sText);
-	ctrlrnet1->nSDLInstanceId = K_CM_DEFAULT_NETWORK1_INSTANCE_ID;
+	CController* ctrlrnet1 = UTGetCtrlrMgr().AddController(K_CM_CT_NET_FRAMELOCK, g_stringsMgr.strings[STR_NETWORK1]->sText);
+	ctrlrnet1->nSDLInstanceId = K_CM_IID_NET1;
 
 
 	//find/add controllers if any
-	UTGetControllersManager().RegisterAllSDLControllers();
+	UTGetCtrlrMgr().RegisterAllSDLControllers();
 
 	//send analytics about gfx caps
 	CHAR ctxt[MAX_PATH];
@@ -493,7 +493,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	LOG(L"System:: Main loop ended.");
 
 	///--- release all controllers ---
-	UTGetControllersManager().ReleaseAllControllers(false);
+	UTGetCtrlrMgr().ReleaseAllControllers(false);
 	///--- shut down SDL ---
 	UTGetAppClass().CloseSDL();
 
@@ -1232,9 +1232,9 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 			}
 #endif
 
-			for (int kk = 0; kk < UTGetControllersManager().m_arrControllers.GetSize(); kk++)
+			for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
 			{
-				if (UTGetControllersManager().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
+				if (UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
 				{
 					CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_QUITGAME");
 					if ((layer == null) && (!UTGetControlsManager().bIsBlocking))
@@ -1266,10 +1266,10 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 					CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_IGM_MENU");
 					if ((layer == null) && (!UTGetControlsManager().bIsBlocking))
 					{
-						for (int kk = 0; kk < UTGetControllersManager().m_arrControllers.GetSize(); kk++)
+						for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
 						{
 							//show menu
-							if (UTGetControllersManager().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
+							if (UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
 							{
 								SND_PLAY(SNDIDX_CLICK);
 								UTGetControlsManager().ShowLayerOnce("LAYER_ID_IGM_MENU");
@@ -1279,11 +1279,11 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 					}
 					else if ((layer != null) && (layer == UTGetControlsManager().GetTopmostInputLayer()))
 					{
-						for (int kk = 0; kk < UTGetControllersManager().m_arrControllers.GetSize(); kk++)
+						for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
 						{
 							//remove onscreen menu
-							if ((UTGetControllersManager().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED) ||
-								(UTGetControllersManager().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_RELOAD] == K_CM_BUTSTATE_JUSTPRESSED))
+							if ((UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED) ||
+								(UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_RELOAD] == K_CM_BUTSTATE_JUSTPRESSED))
 							{
 								SND_PLAY(SNDIDX_DENIED);
 								UTGetControlsManager().RemoveLayer("LAYER_ID_IGM_MENU");
@@ -1327,9 +1327,9 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 						CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_IGM_MENU_NET");
 						if ((layer == null) && (!UTGetControlsManager().bIsBlocking))
 						{
-							for (int kk = 0; kk < UTGetControllersManager().m_arrControllers.GetSize(); kk++)
+							for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
 							{
-								CController* ctrlr = UTGetControllersManager().m_arrControllers[kk];
+								CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
 								//ignore network controllers
 								if (ctrlr->eType == K_CM_CT_NET_FRAMELOCK)
 									continue;
@@ -1344,9 +1344,9 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 						}
 						else if ((layer != null) && (layer == UTGetControlsManager().GetTopmostInputLayer()) && (layer->alpha >= 1.0f))
 						{
-							for (int kk = 0; kk < UTGetControllersManager().m_arrControllers.GetSize(); kk++)
+							for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
 							{
-								CController* ctrlr = UTGetControllersManager().m_arrControllers[kk];
+								CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
 								//ignore network controllers
 								if (ctrlr->eType == K_CM_CT_NET_FRAMELOCK)
 									continue;
@@ -1745,7 +1745,7 @@ void CALLBACK OnFrameMove(IDirect3DDevice9* pd3dDevice, double fTime, float fEla
 			float arrKeysDown[K_CM_COMMANDS_COUNT] = { 0.0f };
 
 			int nInstanceLocal = g_level.m_arrPlayerControllersIIDs[g_netlock.Net_GetPlayerIndex()];
-			CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(nInstanceLocal);
+			CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(nInstanceLocal);
 			if (ctrlr != null)
 				ctrlr->GetKeysDownPercents(arrKeysDown);
 			///write controller data into net package
@@ -1905,9 +1905,9 @@ void CALLBACK OnFrameMove(IDirect3DDevice9* pd3dDevice, double fTime, float fEla
 			int nInstancePeer = g_level.m_arrPlayerControllersIIDs[g_netlock.Net_GetOtherPlayerIndex()];
 
 			CController* ctrlr_local = null;
-			ctrlr_local = UTGetControllersManager().GetControllerByInstanceID(nInstanceLocal);
+			ctrlr_local = UTGetCtrlrMgr().GetControllerByInstanceID(nInstanceLocal);
 			CController* ctrlr_peer = null;
-			ctrlr_peer = UTGetControllersManager().GetControllerByInstanceID(nInstancePeer);
+			ctrlr_peer = UTGetCtrlrMgr().GetControllerByInstanceID(nInstancePeer);
 
 			//save local buttons states
 			float arrStateLocal[K_CM_COMMANDS_COUNT] = { 0.0f };
@@ -1919,13 +1919,14 @@ void CALLBACK OnFrameMove(IDirect3DDevice9* pd3dDevice, double fTime, float fEla
 			WORD wFrameFlagsPeer = g_netlock.m_arrReceived[g_nUpdateFrame % CNetLock::K_NETLOCK_MAX_STATE_PACKAGES].m_wFrameFlags;
 
 			//update all controllers with internal data but used ones with network data
-			for (int ll = 0; ll < UTGetControllersManager().m_arrControllers.GetSize(); ll++)
+			for (int ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.GetSize(); ll++)
 			{
-				CController* ctrlr = UTGetControllersManager().m_arrControllers[ll];
+				CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ll];
 				//update local controller with net data only when not in menus
 				if (ctrlr == ctrlr_local)
 				{
-					UTGetControllersManager().m_arrControllers[ll]->sCommands.UpdateCommands(fElapsedTime, arrStateLocal);
+					// update controller overriding keypresses with what we registered before
+					UTGetCtrlrMgr().UpdateController(ctrlr, fElapsedTime, arrStateLocal);
 					//set paused if needed
 					if (wFrameFlagsLocal & K_NETLOCK_FRAMEFLAG_INPUT_PAUSED_INGAME)
 						ctrlr->nFlags |= K_CM_CTRLR_FLAG_PAUSED;
@@ -1934,7 +1935,8 @@ void CALLBACK OnFrameMove(IDirect3DDevice9* pd3dDevice, double fTime, float fEla
 				}
 				else if (ctrlr == ctrlr_peer)
 				{
-					UTGetControllersManager().m_arrControllers[ll]->sCommands.UpdateCommands(fElapsedTime, arrStatePeer);
+					// update controller overriding keypresses with what we received
+					UTGetCtrlrMgr().UpdateController(ctrlr, fElapsedTime, arrStateLocal);
 					//set paused if needed
 					if (wFrameFlagsPeer & K_NETLOCK_FRAMEFLAG_INPUT_PAUSED_INGAME)
 						ctrlr->nFlags |= K_CM_CTRLR_FLAG_PAUSED;
@@ -1943,16 +1945,16 @@ void CALLBACK OnFrameMove(IDirect3DDevice9* pd3dDevice, double fTime, float fEla
 				}
 				else //all the other non synced controllers get updated the usual way
 				{
-					UTGetControllersManager().m_arrControllers[ll]->UpdateCommands(fElapsedTime);
+					UTGetCtrlrMgr().UpdateController(ctrlr, fElapsedTime);
 				}
 			}
 		}
 		else  //if(bSync)
 		{
 			//update all controllers with internal data
-			for (int ll = 0; ll < UTGetControllersManager().m_arrControllers.GetSize(); ll++)
+			for (int ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.GetSize(); ll++)
 			{
-				UTGetControllersManager().m_arrControllers[ll]->UpdateCommands(fElapsedTime);
+				UTGetCtrlrMgr().UpdateController(UTGetCtrlrMgr().m_arrControllers[ll], fElapsedTime);
 			}
 		}
 
@@ -2556,7 +2558,7 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 		{
 			//on lost focus reset keypresses (ONLY ON NOT NETWORKED GAMES OR IT WILL DESYNC)
 			if (!UTGetAppClass().IsGameNetworked())
-				UTGetControllersManager().ResetAllControllersKeypresses();
+				UTGetCtrlrMgr().ResetAllControllersKeypresses();
 			//cand e pe fullscreen si pierzi focus forteaza minimize ca sa vezi ce se intampla
 			if (!DXUTIsWindowed())
 				ShowWindow(hWnd, SW_MINIMIZE);
@@ -2885,7 +2887,7 @@ void ChangeGameState(int newState, int param1, int param2)
 				UTGetLeaderboards().QueueJob(K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, g_userData[K_MEMID_TOTAL_SCORE_SOLO]);
 #endif
 			//must be called here to reset controller flags
-			UTGetControllersManager().ResetAllControllersKeypresses();
+			UTGetCtrlrMgr().ResetAllControllersKeypresses();
 			//stop all sounds
 			UTGetSoundManager().StopGroup("sounds", false, true);
 			UTGetSoundManager().StopGroup("ingame", false, true);
@@ -2894,7 +2896,7 @@ void ChangeGameState(int newState, int param1, int param2)
 
 			g_level.Release();
 			// level was unloaded, immediately set the controller pointer to null
-			UTGetControllersManager().SetNormalizeCoordsFunctionPtr(nullptr);
+			UTGetCtrlrMgr().SetNormalizeCoordsFunctionPtr(nullptr);
 
 			UTGetControlsManager().RemoveAllLayers(true);
 
@@ -3225,7 +3227,7 @@ void ChangeGameState(int newState, int param1, int param2)
 			//release main menu class
 			g_mainMenu.Release();
 			// set the controller pointer normalization function (gets set to nullptr when not in game)
-			UTGetControllersManager().SetNormalizeCoordsFunctionPtr(NormalizeIngameMouseCoords);
+			UTGetCtrlrMgr().SetNormalizeCoordsFunctionPtr(NormalizeIngameMouseCoords);
 
 			//reset all scripts
 			UTGetScriptManager().StopAllScripts();

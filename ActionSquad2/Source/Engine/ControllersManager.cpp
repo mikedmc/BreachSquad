@@ -258,6 +258,81 @@ bool CControllersManager::KeyPressed(EControllerCommand eCommandFilter /*= K_CM_
 	return false;
 }
 
+void CControllersManager::UpdateController(CController* ctrlr, float dTime, float * arrOverrideDownPercents)
+{
+	if ((ctrlr == nullptr) || (ctrlr->eType == K_CM_CT_INVALID) || (ctrlr->eType == K_CM_CT_NET_FRAMELOCK))
+		return;
+
+	///--- 1. Translate triggers to commands or handle override
+
+	// if we don't override pressed precents then data is computed from triggers
+	if (arrOverrideDownPercents == null)
+	{
+		float fPressedPerc[K_CM_COMMANDS_COUNT] = { 0.0f };
+		for (int kk = 0; kk < ctrlr->arrTriggersCnt; kk++)
+		{
+			CControllerTrigger* trig = &ctrlr->arrTriggers[kk];
+			float fAxisVal = trig->fTriggerActivatedPercent;
+			// normalize axis if necessary without touching the internal data
+			if (pNormalizeFn)
+			{
+				if (trig->eType == K_CM_POINTER_X)
+				{
+					(*pNormalizeFn)(ctrlr->nSDLInstanceId, trig->fTriggerActivatedPercent, true, fAxisVal);
+				}
+				if (trig->eType == K_CM_POINTER_Y)
+				{
+					(*pNormalizeFn)(ctrlr->nSDLInstanceId, trig->fTriggerActivatedPercent, false, fAxisVal);
+				}
+			}
+			// sum all triggers here
+			fPressedPerc[trig->eTargetCommand] += fAxisVal;
+		}
+		// copy final data to normalized data
+		memcpy(ctrlr->sCommands.arrAxisVal_N, fPressedPerc, sizeof(float) * K_CM_COMMANDS_COUNT);
+	}
+	else
+	{
+		// copy override data (could come from the network step)
+		memcpy(ctrlr->sCommands.arrAxisVal_N, arrOverrideDownPercents, sizeof(float) * K_CM_COMMANDS_COUNT);
+	}
+
+	///--- 2. Update internal commands structure
+	CController::sControllerCommands* scom = &ctrlr->sCommands;
+	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
+	{
+		scom->bKeyDown[kk] = (fabs(scom->arrAxisVal_N[kk]) > 0.0f);
+
+		//update pressed time
+		scom->fKeyPressedTime[kk] += dTime;
+
+		if (scom->bKeyDown[kk])
+		{
+			if (scom->keyState[kk] == K_CM_BUTSTATE_NOTPRESSED || scom->keyState[kk] == K_CM_BUTSTATE_JUSTRELEASED)
+			{
+				scom->keyState[kk] = K_CM_BUTSTATE_JUSTPRESSED; //just pressed
+			}
+			else if (scom->keyState[kk] == K_CM_BUTSTATE_JUSTPRESSED)
+			{
+				scom->keyState[kk] = K_CM_BUTSTATE_PRESSING; //drag
+			}
+		}
+		else
+		{
+			if (scom->keyState[kk] == K_CM_BUTSTATE_PRESSING || scom->keyState[kk] == K_CM_BUTSTATE_JUSTPRESSED)
+			{
+				scom->keyState[kk] = K_CM_BUTSTATE_JUSTRELEASED;
+			}
+			else
+			{
+				scom->keyState[kk] = K_CM_BUTSTATE_NOTPRESSED;
+			}
+			//reset pressed timer when not pressed
+			scom->fKeyPressedTime[kk] = 0.0f;
+		}
+	}
+}
+
 void CControllersManager::AddSDLController(int SDL_ctrlr_idx)
 {
 	if (SDL_IsGameController(SDL_ctrlr_idx))
@@ -506,10 +581,6 @@ void CControllersManager::OnSDLMouseMove(const SDL_MouseMotionEvent sdlEvent)
 		// if we have a normalization fn pointer then call it on the data
 		float retX = (float)sdlEvent.x;
 		float retY = (float)sdlEvent.y;
-		if (pNormalizeFn)
-		{
-			(*pNormalizeFn)(ctrlr->nSDLInstanceId, retX, retY, retX, retY);
-		}
 
 		for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
 		{
@@ -527,27 +598,10 @@ void CControllersManager::OnSDLMouseMove(const SDL_MouseMotionEvent sdlEvent)
 
 ///----- CController -----
 
-CController::CController() : eType(K_CM_CT_INVALID), arrTriggersCnt(0), nFlags(0)
+CController::CController() : 
+	eType(K_CM_CT_INVALID), arrTriggersCnt(0), nFlags(0), 
+	nSDLidx(-1), nSDLInstanceId(-1), SDLpgc(nullptr)
 {
-	//SDL
-	nSDLidx = -1;
-	nSDLInstanceId = -1;
-	SDLpgc = nullptr;
-
-	ctrl_fTimeSinceKeypress = 0.0f;
-	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
-	{
-		ctrl_bKeyDown[kk] = false;
-		ctrl_fKeyDownPercent[kk] = 0.0f;
-	}
-}
-
-void CController::UpdateCommands(float dTime)
-{
-	sCommands.UpdateCommands(dTime, ctrl_fKeyDownPercent);
-	//increase last keypress time
-	ctrl_fTimeSinceKeypress += dTime;
-
 }
 
 void CController::AddTrigger(EControllerTriggerType neType, EControllerCommand neCommand, int nKeyMapping, float nfTriggerMin /*= 0.1f*/, float nfTriggerMax /*= 1.1f*/)
@@ -621,48 +675,16 @@ void CController::ClearTriggers()
 	arrTriggersCnt = 0;
 }
 
-void CController::TranslateTriggersToCommands()
-{
-
-	if ((eType == K_CM_CT_INVALID) || (eType == K_CM_CT_NET_FRAMELOCK))
-		return;
-
-	float fPressedPerc[K_CM_COMMANDS_COUNT] = { 0.0f };
-	for (int kk = 0; kk < arrTriggersCnt; kk++)
-	{
-		CControllerTrigger* trig = &arrTriggers[kk];
-		fPressedPerc[trig->eTargetCommand] += trig->fTriggerActivatedPercent;
-	}
-
-	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
-	{
-		//translate data
-		ctrl_fKeyDownPercent[kk] = fPressedPerc[kk];
-		ctrl_bKeyDown[kk] = (ctrl_fKeyDownPercent[kk] != 0.0f);
-		//update ANY keypress timer
-		if (ctrl_bKeyDown[kk] == true)
-			ctrl_fTimeSinceKeypress = 0.0f;
-	}
-
-}
-
 void CController::ResetKeypresses()
 {
 	//reset flags too
 	nFlags = 0;
-
-	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
-	{
-		ctrl_bKeyDown[kk] = false;
-		ctrl_fKeyDownPercent[kk] = 0.0f;
-		//reset commands too
-		sCommands.Reset();
-	}
+	sCommands.Reset();
 }
 
 void CController::GetKeysDownPercents(float arrDest[K_CM_COMMANDS_COUNT])
 {
-	memcpy(arrDest, ctrl_fKeyDownPercent, sizeof(float) * K_CM_COMMANDS_COUNT);
+	memcpy(arrDest, sCommands.arrAxisVal_N, sizeof(float) * K_CM_COMMANDS_COUNT);
 }
 
 bool CController::WasControllerTouched(bool bSticksToo /*= false*/)
@@ -681,10 +703,10 @@ bool CController::WasControllerTouched(bool bSticksToo /*= false*/)
 }
 
 
-D3DXVECTOR2 CController::GetDoubleAxisVector(const EControllerCommand commXaxis, const EControllerCommand commYaxis)
+D3DXVECTOR2 CController::GetDoubleAxisVectorN(const EControllerCommand commXaxis, const EControllerCommand commYaxis)
 {
 	D3DXVECTOR2 retvec(0.0f, 0.0f);
-	D3DXVec2Normalize(&retvec, &D3DXVECTOR2(sCommands.fKeyDownPercent[commXaxis], sCommands.fKeyDownPercent[commYaxis]));
+	D3DXVec2Normalize(&retvec, &D3DXVECTOR2(sCommands.arrAxisVal_N[commXaxis], sCommands.arrAxisVal_N[commYaxis]));
 	return retvec;
 }
 
@@ -692,53 +714,8 @@ D3DXVECTOR2 CController::GetDoubleAxisVector(const EControllerCommand commXaxis,
 
 CController::sControllerCommands::sControllerCommands()
 {
-	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
-	{
-		bKeyDown[kk] = false;
-		keyState[kk] = K_CM_BUTSTATE_NOTPRESSED;
-		fKeyDownPercent[kk] = 0.0f;
-		fKeyPressedTime[kk] = 0.0f;
-	}
+	Reset();
 }
-
-void CController::sControllerCommands::UpdateCommands(float dTime, float fKeysPressedPercents[K_CM_COMMANDS_COUNT])
-{
-	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
-	{
-		//load data from param
-		fKeyDownPercent[kk] = fKeysPressedPercents[kk];
-		bKeyDown[kk] = (fabs(fKeyDownPercent[kk]) > 0.0f);
-
-		//update pressed time
-		fKeyPressedTime[kk] += dTime;
-
-		if (bKeyDown[kk])
-		{
-			if (keyState[kk] == K_CM_BUTSTATE_NOTPRESSED || keyState[kk] == K_CM_BUTSTATE_JUSTRELEASED)
-			{
-				keyState[kk] = K_CM_BUTSTATE_JUSTPRESSED; //just pressed
-			}
-			else if (keyState[kk] == K_CM_BUTSTATE_JUSTPRESSED)
-			{
-				keyState[kk] = K_CM_BUTSTATE_PRESSING; //drag
-			}
-		}
-		else
-		{
-			if (keyState[kk] == K_CM_BUTSTATE_PRESSING || keyState[kk] == K_CM_BUTSTATE_JUSTPRESSED)
-			{
-				keyState[kk] = K_CM_BUTSTATE_JUSTRELEASED;
-			}
-			else
-			{
-				keyState[kk] = K_CM_BUTSTATE_NOTPRESSED;
-			}
-			//reset pressed timer when not pressed
-			fKeyPressedTime[kk] = 0.0f;
-		}
-	}
-}
-
 
 void CController::sControllerCommands::Reset()
 {
@@ -746,16 +723,17 @@ void CController::sControllerCommands::Reset()
 	{
 		bKeyDown[kk] = false;
 		keyState[kk] = K_CM_BUTSTATE_NOTPRESSED;
-		fKeyDownPercent[kk] = 0.0f;
 		fKeyPressedTime[kk] = 0.0f;
+		arrAxisVal_N[kk] = 0.0f;
 	}
 }
+
 
 ///**************************************************************************************
 /// Sigleton de acces
 ///**************************************************************************************
 
-CControllersManager& UTGetControllersManager()
+CControllersManager& UTGetCtrlrMgr()
 {
 	static CControllersManager g_ControllersManager;
 	return g_ControllersManager;

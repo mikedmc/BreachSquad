@@ -283,16 +283,16 @@ void CMainMenu::Update(float dTime)
 
 	ECtrlMgrCommandType eCommand = K_CCTRLMGR_COMMAND_NONE;
 	//aleg din controllere doar comenzile necesare clasei
-	for (int kk = 0; kk < UTGetControllersManager().m_arrControllers.GetSize(); kk++)
+	for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
 	{
-		CController* ctrlr = UTGetControllersManager().m_arrControllers[kk];
-		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f))
+		CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
+		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_X) < 0.0f))
 			eCommand = K_CCTRLMGR_COMMAND_LEFT;
-		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) > 0.0f))
+		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_X) > 0.0f))
 			eCommand = K_CCTRLMGR_COMMAND_RIGHT;
-		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_Y) < 0.0f))
+		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_Y) < 0.0f))
 			eCommand = K_CCTRLMGR_COMMAND_UP;
-		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_Y) > 0.0f))
+		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_Y) > 0.0f))
 			eCommand = K_CCTRLMGR_COMMAND_DOWN;
 
 		if ((ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTPRESSED) ||
@@ -1342,7 +1342,7 @@ void CMainMenu::Update(float dTime)
 			//#HACK: info button - should be on commands
 #ifdef ENABLE_LEADERBOARDS
 			//show leaderboard when pressing melee key (any controller)
-			if (UTGetControllersManager().KeyPressed(K_CM_COMMAND_MELEE))
+			if (UTGetCtrlrMgr().KeyPressed(K_CM_COMMAND_MELEE))
 			{
 				CCtrlLayer* lay = UTGetControlsManager().GetLayerByName("LAYER_ID_LEADERBOARDS_LVL");
 				if (lay == null)

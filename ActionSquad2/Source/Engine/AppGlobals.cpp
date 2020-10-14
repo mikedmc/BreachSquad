@@ -382,8 +382,8 @@ void App_ResetUserData()
 	//--- keys 2 ---
 	App_ResetKeybindings(1);
 	//change actual triggers
-	CController* keybd1 = UTGetControllersManager().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD1_INSTANCE_ID);
-	CController* keybd2 = UTGetControllersManager().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
+	CController* keybd1 = UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_IID_KBM1);
+	CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 	App_SetSDLTriggersFromUserData(keybd1, keybd2);
 
 	//parse all levels and see what kind they are
@@ -1027,7 +1027,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 		nKeyIcon = -1;//reset icons on DON'T SHOW
 
 		SDL_Scancode commandscan = (SDL_Scancode)pCtrlr->GetKeyMappingForCommand(eCommand);
-		mbstowcs_s(null, strKey, UTGetControllersManager().GetSDLScancodeName(commandscan), MAX_PATH);
+		mbstowcs_s(null, strKey, UTGetCtrlrMgr().GetSDLScancodeName(commandscan), MAX_PATH);
 		g_stringsMgr.SetStringDesc(&sdKeyName, strKey);
 	}
 	else if (pCtrlr->eType == K_CM_CT_JOYSTICK_SDL)
@@ -1179,8 +1179,8 @@ HRESULT App_LocaLoadStrings()
 	//set version number
 	g_stringsMgr.SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
 	//set keyboard strings
-	CController* keybd1 = UTGetControllersManager().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD1_INSTANCE_ID);
-	CController* keybd2 = UTGetControllersManager().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
+	CController* keybd1 = UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_IID_KBM1);
+	CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 	App_SetSDLTriggersFromUserData(keybd1, keybd2);
 
 	return S_OK;

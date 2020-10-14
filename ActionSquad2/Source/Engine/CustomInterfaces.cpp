@@ -202,7 +202,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 	
 	DWORD dwIconHoverCol = D3DCOLOR_FFFA(0.5f + 0.5f * sin(fLocalTimeline * 5.0f));
 	//get player controller ptr
-	CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(playerAct[nPlayerOrdinal]->nControllerInstanceID);
+	CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(playerAct[nPlayerOrdinal]->nControllerInstanceID);
 
 	//--- player is alive ---
 	CSprite spr;
@@ -814,7 +814,7 @@ void CCustomInterfaceIGM::Init(CSpriteCollection* sprCollection, CActor * player
 
 			///--- save key names ---
 			//get player controller ptr
-			CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(playerAct[kk]->nControllerInstanceID);
+			CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(playerAct[kk]->nControllerInstanceID);
 
 			if (ctrlr == null)
 			{
@@ -845,7 +845,7 @@ void CCustomInterfaceIGM::Init(CSpriteCollection* sprCollection, CActor * player
 
 					SDL_Scancode commandscan = (SDL_Scancode)ctrlr->GetKeyMappingForCommand(arr_commands[ii]);
 					//mbstowcs_s(null, strKey, SDL_GetScancodeName(commandscan), MAX_PATH);
-					mbstowcs_s(null, strKey, UTGetControllersManager().GetSDLScancodeName(commandscan), MAX_PATH);
+					mbstowcs_s(null, strKey, UTGetCtrlrMgr().GetSDLScancodeName(commandscan), MAX_PATH);
 					g_stringsMgr.SetStringDesc(&arrKeyNames[kk][ii], strKey);
 				}
 			}

@@ -4299,20 +4299,20 @@ void CControlsManager::Update(float dTime)
 	}
 
 	// check input from all connected controllers and translate to local commands
-	for (int kk = 0; kk < UTGetControllersManager().m_arrControllers.GetSize(); kk++)
+	for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.GetSize(); kk++)
 	{
-		CController* ctrlr = UTGetControllersManager().m_arrControllers[kk];
+		CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
 		//always skip network controllers
 		if (ctrlr->eType == K_CM_CT_NET_FRAMELOCK)
 			continue;
 
-		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f))
+		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_X) < 0.0f))
 			ReceiveInput(K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_LEFT, ctrlr->nSDLInstanceId);
-		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) > 0.0f))
+		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_X) > 0.0f))
 			ReceiveInput(K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_RIGHT, ctrlr->nSDLInstanceId);
-		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_Y) < 0.0f))
+		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_Y) < 0.0f))
 			ReceiveInput(K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_UP, ctrlr->nSDLInstanceId);
-		if ((ctrlr->GetCommandState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetCommandAxisPercent(K_CM_COMMAND_MOVE_Y) > 0.0f))
+		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_Y) > 0.0f))
 			ReceiveInput(K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_DOWN, ctrlr->nSDLInstanceId);
 
 		if ((ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTPRESSED) ||

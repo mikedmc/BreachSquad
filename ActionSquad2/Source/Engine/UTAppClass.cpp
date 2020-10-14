@@ -1478,8 +1478,8 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				{
 					App_ResetKeybindings(0);
 					//change actual triggers
-					CController* keybd1 = UTGetControllersManager().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD1_INSTANCE_ID);
-					CController* keybd2 = UTGetControllersManager().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
+					CController* keybd1 = UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_IID_KBM1);
+					CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 					App_SetSDLTriggersFromUserData(keybd1, keybd2);
 
 					UTGetControlsManager().RemoveTopmostLayer();
@@ -1489,8 +1489,8 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				{
 					App_ResetKeybindings(1);
 					//change actual triggers
-					CController* keybd1 = UTGetControllersManager().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD1_INSTANCE_ID);
-					CController* keybd2 = UTGetControllersManager().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
+					CController* keybd1 = UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_IID_KBM1);
+					CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 					App_SetSDLTriggersFromUserData(keybd1, keybd2);
 
 					UTGetControlsManager().RemoveTopmostLayer();
@@ -1700,8 +1700,8 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					int nKeysOff = K_MEMID_KEYS2_FIRSTITEM - K_MEMID_KEYS1_FIRSTITEM;
 					g_userData[K_MEMID_KEY1_LEFT + (nKeyboardOrdinal * nKeysOff) + nSDLcommand] = nKeycode;
 					//change actual triggers
-					CController* keybd1 = UTGetControllersManager().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD1_INSTANCE_ID);
-					CController* keybd2 = UTGetControllersManager().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
+					CController* keybd1 = UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_IID_KBM1);
+					CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 					App_SetSDLTriggersFromUserData(keybd1, keybd2);
 				}
 
@@ -2091,8 +2091,6 @@ void CApplication::CloseSDL()
 //gets input data from SDL controllers
 void CApplication::PollSDLControllers()
 {
-
-	bool bCommandsReceived = false;
 	//---------------------------------------
 	// SDL Event handler
 	//---------------------------------------
@@ -2105,36 +2103,31 @@ void CApplication::PollSDLControllers()
 			//-- pointer ---
 			case SDL_MOUSEMOTION:
 			{
-				bCommandsReceived = true;
-				UTGetControllersManager().OnSDLMouseMove(e.motion);
+				UTGetCtrlrMgr().OnSDLMouseMove(e.motion);
 			}
 			break;
 			case SDL_MOUSEBUTTONDOWN:
 			{
-				bCommandsReceived = true;
-				UTGetControllersManager().OnSDLMouseButton(e.button);
+				UTGetCtrlrMgr().OnSDLMouseButton(e.button);
 			}
 			break;
 			case SDL_MOUSEBUTTONUP:
 			{
-				bCommandsReceived = true;
-				UTGetControllersManager().OnSDLMouseButton(e.button);
+				UTGetCtrlrMgr().OnSDLMouseButton(e.button);
 			}
 			break;
 
 			//-- keyboard ---
 			case SDL_KEYDOWN:
 			{
-				bCommandsReceived = true;
-				UTGetControllersManager().OnSDLKeypress(e.key, true);
+				UTGetCtrlrMgr().OnSDLKeypress(e.key, true);
 				//send key up event to controls manager (for key redefining mostly)
 				UTGetControlsManager().ReceiveInput(K_CCTRLMGR_INPUT_SDL_KEY, 1, (int)e.key.keysym.scancode);
 			}
 			break;
 			case SDL_KEYUP:
 			{
-				bCommandsReceived = true;
-				UTGetControllersManager().OnSDLKeypress(e.key, false);
+				UTGetCtrlrMgr().OnSDLKeypress(e.key, false);
 				//send key up event to controls manager
 				UTGetControlsManager().ReceiveInput(K_CCTRLMGR_INPUT_SDL_KEY, 0, (int)e.key.keysym.scancode);
 			}
@@ -2142,45 +2135,30 @@ void CApplication::PollSDLControllers()
 			//--- controllers ---
 			case SDL_CONTROLLERDEVICEADDED:
 			{
-				bCommandsReceived = true;
-				UTGetControllersManager().AddSDLController(e.cdevice.which);
+				UTGetCtrlrMgr().AddSDLController(e.cdevice.which);
 			}
 			break;
 
 			case SDL_CONTROLLERDEVICEREMOVED:
 			{
-				bCommandsReceived = true;
-				UTGetControllersManager().RemoveSDLController(e.cdevice.which);
+				UTGetCtrlrMgr().RemoveSDLController(e.cdevice.which);
 			}
 			break;
 
 			case SDL_CONTROLLERBUTTONDOWN:
 			case SDL_CONTROLLERBUTTONUP:
 			{
-				bCommandsReceived = true;
-				UTGetControllersManager().OnSDLControllerButton(e.cbutton);
+				UTGetCtrlrMgr().OnSDLControllerButton(e.cbutton);
 			}
 			break;
 
 			case SDL_CONTROLLERAXISMOTION:
 			{
-				bCommandsReceived = true;
-				UTGetControllersManager().OnSDLControllerAxis(e.caxis);
+				UTGetCtrlrMgr().OnSDLControllerAxis(e.caxis);
 			}
 			break;
 		}
 	}
-
-	//translate input from triggers to commands
-	if (bCommandsReceived)
-	{
-		for (int kk = 0; kk < UTGetControllersManager().m_arrControllers.GetSize(); kk++)
-		{
-			CController* ctrlr = UTGetControllersManager().m_arrControllers[kk];
-			ctrlr->TranslateTriggersToCommands();
-		}
-	}
-
 }
 
 #endif
