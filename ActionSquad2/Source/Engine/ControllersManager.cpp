@@ -2,6 +2,9 @@
 
 CControllersManager::CControllersManager()
 {
+	// reset normalize function
+	pNormalizeFn = nullptr;
+
 	m_arrControllers.RemoveAll();
 	for (int kk = 0; kk < K_CM_CTS_CNT; kk++)
 	{
@@ -12,6 +15,14 @@ CControllersManager::CControllersManager()
 CControllersManager::~CControllersManager()
 {
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrControllers);
+	// reset normalize function
+	pNormalizeFn = nullptr;
+}
+
+void CControllersManager::SetNormalizeCoordsFunctionPtr(NormalizeCoordsFn pFnPtr)
+{
+	pNormalizeFn = pFnPtr;
+	DebugPrintA("--CControllersManager:: Normalize ptr set to %d \n", pFnPtr);
 }
 
 CController* CControllersManager::AddController(EControllerType neType, WCHAR * strName)
@@ -35,6 +46,8 @@ CController* CControllersManager::AddController(EControllerType neType, WCHAR * 
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_SCANCODE_DOWN, 0.0f, 1.0f);
 
 			//ctrl->AddTrigger(K_CM_POINTER_BUTTON, K_CM_COMMAND_FIRE1, SDL_BUTTON_LEFT, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_POINTER_X, K_CM_COMMAND_AIM_X, 0);
+			ctrl->AddTrigger(K_CM_POINTER_Y, K_CM_COMMAND_AIM_Y, 0);
 
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_JUMP, SDL_SCANCODE_SPACE, 0.0f, 1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_FIRE1, SDL_SCANCODE_LCTRL, 0.0f, 1.0f);
@@ -72,7 +85,6 @@ CController* CControllersManager::AddController(EControllerType neType, WCHAR * 
 		{
 			ctrl->AddTrigger(K_CM_AXIS, K_CM_COMMAND_MOVE_X, SDL_CONTROLLER_AXIS_LEFTX, 0.2f, 1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_X, SDL_CONTROLLER_BUTTON_DPAD_LEFT, 0.0f, -1.0f);
-			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_RIGHT, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, 0.0f, 1.0f);
 			ctrl->AddTrigger(K_CM_AXIS, K_CM_COMMAND_MOVE_Y, SDL_CONTROLLER_AXIS_LEFTY, 0.2f, 1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_CONTROLLER_BUTTON_DPAD_UP, 0.0f, -1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_CONTROLLER_BUTTON_DPAD_DOWN, 0.0f, 1.0f);
@@ -483,7 +495,34 @@ void CControllersManager::OnSDLMouseButton(const SDL_MouseButtonEvent sdlEvent)
 
 void CControllersManager::OnSDLMouseMove(const SDL_MouseMotionEvent sdlEvent)
 {
+	if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
+		return;
+	//find button
+	for (int kk = 0; kk < m_arrControllers.GetSize(); kk++)
+	{
+		CController* ctrlr = m_arrControllers[kk];
+		if (ctrlr->eType != K_CM_CT_KBM_SDL)
+			continue;
+		// if we have a normalization fn pointer then call it on the data
+		float retX = (float)sdlEvent.x;
+		float retY = (float)sdlEvent.y;
+		if (pNormalizeFn)
+		{
+			(*pNormalizeFn)(ctrlr->nSDLInstanceId, retX, retY, retX, retY);
+		}
 
+		for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
+		{
+			if (ctrlr->arrTriggers[ll].eType == K_CM_POINTER_X)
+			{
+				ctrlr->arrTriggers[ll].fTriggerActivatedPercent = retX;
+			}
+			else if (ctrlr->arrTriggers[ll].eType == K_CM_POINTER_Y)
+			{
+				ctrlr->arrTriggers[ll].fTriggerActivatedPercent = retY;
+			}
+		}
+	}
 }
 
 ///----- CController -----
@@ -495,19 +534,19 @@ CController::CController() : eType(K_CM_CT_INVALID), arrTriggersCnt(0), nFlags(0
 	nSDLInstanceId = -1;
 	SDLpgc = nullptr;
 
-	fTimeSinceKeypress = 0.0f;
+	ctrl_fTimeSinceKeypress = 0.0f;
 	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
 	{
-		bKeyDown[kk] = false;
-		fKeyDownPercent[kk] = 0.0f;
+		ctrl_bKeyDown[kk] = false;
+		ctrl_fKeyDownPercent[kk] = 0.0f;
 	}
 }
 
 void CController::UpdateCommands(float dTime)
 {
-	sCommands.UpdateCommands(dTime, fKeyDownPercent);
+	sCommands.UpdateCommands(dTime, ctrl_fKeyDownPercent);
 	//increase last keypress time
-	fTimeSinceKeypress += dTime;
+	ctrl_fTimeSinceKeypress += dTime;
 
 }
 
@@ -598,11 +637,11 @@ void CController::TranslateTriggersToCommands()
 	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
 	{
 		//translate data
-		fKeyDownPercent[kk] = fPressedPerc[kk];
-		bKeyDown[kk] = (fKeyDownPercent[kk] != 0.0f);
+		ctrl_fKeyDownPercent[kk] = fPressedPerc[kk];
+		ctrl_bKeyDown[kk] = (ctrl_fKeyDownPercent[kk] != 0.0f);
 		//update ANY keypress timer
-		if (bKeyDown[kk] == true)
-			fTimeSinceKeypress = 0.0f;
+		if (ctrl_bKeyDown[kk] == true)
+			ctrl_fTimeSinceKeypress = 0.0f;
 	}
 
 }
@@ -614,8 +653,8 @@ void CController::ResetKeypresses()
 
 	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
 	{
-		bKeyDown[kk] = false;
-		fKeyDownPercent[kk] = 0.0f;
+		ctrl_bKeyDown[kk] = false;
+		ctrl_fKeyDownPercent[kk] = 0.0f;
 		//reset commands too
 		sCommands.Reset();
 	}
@@ -623,7 +662,7 @@ void CController::ResetKeypresses()
 
 void CController::GetKeysDownPercents(float arrDest[K_CM_COMMANDS_COUNT])
 {
-	memcpy(arrDest, fKeyDownPercent, sizeof(float) * K_CM_COMMANDS_COUNT);
+	memcpy(arrDest, ctrl_fKeyDownPercent, sizeof(float) * K_CM_COMMANDS_COUNT);
 }
 
 bool CController::WasControllerTouched(bool bSticksToo /*= false*/)
@@ -631,9 +670,10 @@ bool CController::WasControllerTouched(bool bSticksToo /*= false*/)
 	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
 	{
 		//lower than "down" we have only directionals
+		/*
 		if ((!bSticksToo) && (kk <= K_CM_COMMAND_DOWN))
 			continue;
-
+		*/
 		if (sCommands.bKeyDown[kk])
 			return true;
 	}

@@ -217,7 +217,6 @@ D3DXVECTOR2	CCameraTransform::ViewportToScreen(D3DXVECTOR2 inPt)
 }
 
 
-//TODO: de testat functiile de scrToW si invers pt SIZEWH_F
 SIZEWH_F CCameraTransform::ScreenToWorld(SIZEWH_F inSZ)
 {
 	double percX, percY;

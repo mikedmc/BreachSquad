@@ -2105,16 +2105,8 @@ void CApplication::PollSDLControllers()
 			//-- pointer ---
 			case SDL_MOUSEMOTION:
 			{
-				//DebugLogA("mouse %d at %d:%d", e.motion.which, e.motion.x, e.motion.y);
-
-				/*
-				if (event->type == SDL_MOUSEMOTION) {
-					printf("Mouse moved to (%d,%d)\n",
-						event->motion.x, event->motion.y);
-					return(0);
-				}
-				return(1);
-				*/
+				bCommandsReceived = true;
+				UTGetControllersManager().OnSDLMouseMove(e.motion);
 			}
 			break;
 			case SDL_MOUSEBUTTONDOWN:

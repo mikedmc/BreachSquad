@@ -58,8 +58,6 @@ enum AI_STATE
 
 int GetAIStateByNameHash(UINT32 stateHash);
 
-
-
 ///--- lista de obiecte vizibile/active ---
 class CVisibilityLists {
 //visual
@@ -148,6 +146,9 @@ public:
 
 	CScreenVignette	  m_screenVignette;	//darken screen vignette
 	CScreenVignette	  m_screenVignetteDamage;	//damage vignette
+
+	// transforms mouse coordinates from screen space to game world (necessary for network play)
+	bool NormalizeMouseCoords(int ControllerIID, float fX, float fY, float & ret_fX, float & ret_fY);
 
 	CVisibilityLists  m_visibleList; //lista de elemente vizibile sau active
 	void BuildVisibilityLists();

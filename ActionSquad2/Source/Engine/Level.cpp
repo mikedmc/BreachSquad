@@ -4600,6 +4600,37 @@ void CLevel::SetTimeMultiplier(float fMultiplier, float fDuration)
 //used to save last player positions
 static D3DXVECTOR2 s_vLastPlayerPos[K_MAX_PLAYERS_CNT];
 
+bool CLevel::NormalizeMouseCoords(int ControllerIID, float fX, float fY, float & ret_fX, float & ret_fY)
+{
+	ret_fX = fX;
+	ret_fY = fY;
+	// level not loaded? return same coordinates
+	if (!m_bLoaded)
+		return false;
+
+	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
+	{
+		if (m_arrPlayerControllersIIDs[kk] == ControllerIID) {
+			CActor* pPlayer = pPlayerActor[kk];
+			if (pPlayerActor == null)
+			{
+				ErrorBox(K_ERR_WARNING, L"NormalizeMouseCoords player pointer is missing! idx:", kk);
+				return false;
+			}
+			D3DXVECTOR2 retpt = m_camLevel.ScreenToWorld(D3DXVECTOR2(fX, fY));
+			// make coords relative to player
+			retpt -= pPlayer->pos;
+			// set final coords
+			ret_fX = retpt.x;
+			ret_fY = retpt.y;
+			return true;
+		}
+	}
+
+	ErrorBox(K_ERR_WARNING, L"NormalizeMouseCoords couldn't find player with ControllerIID:%d", ControllerIID);
+	return false;
+}
+
 void CLevel::BuildVisibilityLists()
 {
 	//level aabb
@@ -7828,6 +7859,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 				*/
 				//daca apas alt buton iese din teleport
+				/*
 				if ((pController->sCommands.keyState[K_CM_COMMAND_DOWN] == K_CM_BUTSTATE_JUSTPRESSED) && (m_nTeleportSlots < m_nPlayersActive))
 				{
 					//termina behavior
@@ -7841,6 +7873,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						}
 					}
 				}
+				*/
 				//daca apesi st/dr se intoarce cu fatza in directia respectiva
 				bool bPressedRight = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) > 0.0f);
 				bool bPressedLeft = (pController->GetCommandAxisPercent(K_CM_COMMAND_MOVE_X) < 0.0f);

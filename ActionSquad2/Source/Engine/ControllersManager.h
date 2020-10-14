@@ -1,9 +1,10 @@
 #pragma once
 #include "dxstdafx.h"
-//--------------------------------------------------------------------------------------
-// Controller handling class
-//--------------------------------------------------------------------------------------
-//fiecare controller are o lista de "triggers" care pointeaza spre comenzi ca sa poti avea mai multe butoane pe aceeasi actiune
+
+// type of callback member function to use when normalizing	XY coords, returning data in ret_fX/Y
+typedef void (*NormalizeCoordsFn)(int ControllerIID, float fX, float fY, float & ret_fX, float & ret_fY);
+
+//each controller has a list of triggers that translate to commands. you can have more triggers per command, each adding its value to the total output.
 enum EControllerTriggerType {
 	// 0/1 button that adds to command: fTriggerMin when released and fTriggerMax when pressed
 	K_CM_BUTTON = 0,
@@ -44,9 +45,9 @@ enum EControllerCommand {
 	K_CM_COMMAND_NONE = -1, //not used, default
 	//don't change the order! Synced with strings and memid items
 	K_CM_COMMAND_MOVE_X = 0,
-	K_CM_COMMAND_RIGHT,
 	K_CM_COMMAND_MOVE_Y,
-	K_CM_COMMAND_DOWN,
+	K_CM_COMMAND_AIM_X,
+	K_CM_COMMAND_AIM_Y,
 	K_CM_COMMAND_JUMP,
 	K_CM_COMMAND_FIRE1,
 	K_CM_COMMAND_FIRE2,
@@ -62,10 +63,10 @@ enum EControllerCommand {
 };
 
 const CStringHash EControllerCommandNames[] = {
-	L"COMMAND_LEFT",
-	L"COMMAND_RIGHT",
-	L"COMMAND_UP",
-	L"COMMAND_DOWN",
+	L"COMMAND_MOVE_X",
+	L"COMMAND_MOVE_Y",
+	L"COMMAND_AIM_X",
+	L"COMMAND_AIM_Y",
 	L"COMMAND_JUMP",
 	L"COMMAND_FIRE1",
 	L"COMMAND_FIRE2",
@@ -140,60 +141,44 @@ public:
 																	
 //internal data, don't use
 private:
-	bool					bKeyDown[K_CM_COMMANDS_COUNT];			//pressed or not?
-	float					fKeyDownPercent[K_CM_COMMANDS_COUNT];	//analog pressed percentage
-	float					fTimeSinceKeypress;						//time from any last press
+	bool					ctrl_bKeyDown[K_CM_COMMANDS_COUNT];			//pressed or not?
+	float					ctrl_fKeyDownPercent[K_CM_COMMANDS_COUNT];	//analog pressed percentage
+	float					ctrl_fTimeSinceKeypress;						//time from any last press
 
 public:
 	CController();
 
-	/* Updates internal commands property using private fKeydownPercent array */
+	// Updates internal commands property using private fKeydownPercent array
 	void UpdateCommands(float dTime);
 
-	/*
-	* Adds a trigger for a specific command
-	* param: fTriggerMin si fTriggerMax will be axis sorted (negative, min is -1.1  max is -0.1)
-	*/
+	// Adds a trigger for a specific command
+	// param: fTriggerMin si fTriggerMax will be axis sorted (negative, min is -1.1  max is -0.1)
 	void AddTrigger(EControllerTriggerType neType, EControllerCommand neCommand, int nKeyMapping, float nfTriggerMin = 0.1f, float nfTriggerMax = 1.1f);
 
-	/*!
-	 *	Returns the first key mapping for a specified command or -1 if command isn't mapped
-	 *	TODO: it should return all triggers
-	 */
+	// Returns the first key mapping for a specified command or -1 if command isn't mapped
+	// TODO: it should return all triggers
 	int GetKeyMappingForCommand(EControllerCommand neCommand);
 
-	/*!
-	*	Returns the first trigger for a specified command or null if command isn't mapped
-	*/
+	// Returns the first trigger for a specified command or null if command isn't mapped
 	CControllerTrigger* GetTriggerForCommand(EControllerCommand neCommand);
 
-	/*!
-	 *	Removes all triggers for a specified command
-	 */
+	// Removes all triggers for a specified command
 	void RemoveTriggers(EControllerCommand neCommand);
 
-	/*!
-	 *	Removes trigger by key mapping
-	 */
+	 //	Removes trigger by key mapping
 	void RemoveTriggerByKeyMapping(int nKeyMapping);
 
-	/*!
-	 * Clears all triggers
-	 */
+	// Clears all triggers
 	void ClearTriggers();
 
-	/*!
-	 * \brief Translates triggers to commands. Handles all triggers before setting command On or Off
-	 * Must be called after reading the input. Very important when using analog and digital triggers on the same command so they do not cancel each other out
-	 */
+	// \brief Translates triggers to commands. Handles all triggers before setting command On or Off
+	// Must be called after reading the input. Very important when using analog and digital triggers on the same command so they do not cancel each other out
 	void TranslateTriggersToCommands();
 
-	/*!
-	 * \brief Resets all keypresses
-	 */
+	// \brief Resets all keypresses
 	void ResetKeypresses();
 
-	/* gets all keys pressed percentages into the destination array */
+	// Gets all keys pressed percentages into the destination array
 	void GetKeysDownPercents(float arrDest[K_CM_COMMANDS_COUNT]);
 
 	// Tells if a button was pressed on the controller (or a stick too)
@@ -218,50 +203,53 @@ public:
 class CControllersManager
 {
 protected:
-	int arrControllerTypesCnt[K_CM_CTS_CNT];  //aici se scrie cate controale din fiecare tip avem alocate
+	int					arrControllerTypesCnt[K_CM_CTS_CNT];  //aici se scrie cate controale din fiecare tip avem alocate
+	// pointer to normalization function for absolute axis like mouse coords
+	NormalizeCoordsFn	pNormalizeFn;
 public:
 	CGrowableArray<CController*> m_arrControllers;
 	//CTOR/DTOR
 	CControllersManager();
 	~CControllersManager();
 
-	CController* AddController(EControllerType neType, WCHAR * strName);
+	// Sets the normalize axis function pointer
+	void				SetNormalizeCoordsFunctionPtr(NormalizeCoordsFn pFnPtr);
+
+	CController*		AddController(EControllerType neType, WCHAR * strName);
 	//finds all connected controllers (keyboard and joysticks) - se cheama la inceputul jocului
-	int RegisterAllSDLControllers(); 
+	int					RegisterAllSDLControllers(); 
 	//deallocates all SDL controllers
-	void ReleaseAllControllers(bool bOnlySDL = false);
+	void				ReleaseAllControllers(bool bOnlySDL = false);
+
 	///--- SDL methods ---
-	
 	//get scancode name. Shorten default SDL names before.
-	const char* GetSDLScancodeName(SDL_Scancode scancode);
+	const char*			GetSDLScancodeName(SDL_Scancode scancode);
 	//adauga un controller SDL dupa idx-ul acestuia
-	void AddSDLController(int SDL_ctrlr_idx);
+	void				AddSDLController(int SDL_ctrlr_idx);
 	//sterge un controller SDL dupa instanceID
-	bool RemoveSDLController(int nnInstanceID);
+	bool				RemoveSDLController(int nnInstanceID);
 	//callback SDL buttons
-	void OnSDLControllerButton(const SDL_ControllerButtonEvent sdlEvent);
+	void				OnSDLControllerButton(const SDL_ControllerButtonEvent sdlEvent);
 	//callback SDL axis
-	void OnSDLControllerAxis(const SDL_ControllerAxisEvent sdlEvent);
+	void				OnSDLControllerAxis(const SDL_ControllerAxisEvent sdlEvent);
 	//callback SDL keys
-	void OnSDLKeypress(const SDL_KeyboardEvent sdlEvent, bool bKeyDown);
+	void				OnSDLKeypress(const SDL_KeyboardEvent sdlEvent, bool bKeyDown);
 	//callback SDL mouse buttons
-	void OnSDLMouseButton(const SDL_MouseButtonEvent sdlEvent);
+	void				OnSDLMouseButton(const SDL_MouseButtonEvent sdlEvent);
 	//callback SDL mouse buttons
-	void OnSDLMouseMove(const SDL_MouseMotionEvent sdlEvent);
+	void				OnSDLMouseMove(const SDL_MouseMotionEvent sdlEvent);
 	//get pointer to Controller by SDLInstanceID
-	CController* GetControllerByInstanceID(int nnInstanceID);
+	CController*		GetControllerByInstanceID(int nnInstanceID);
 	//get pointer to Controller by name
-	CController* GetControllerByName(WCHAR* strControllerName);
+	CController*		GetControllerByName(WCHAR* strControllerName);
 	//Reseteaza apasarile de taste pe NOT PRESSED
-	void ResetKeypresses(CController* ctrlr);
+	void				ResetKeypresses(CController* ctrlr);
 	//Reset keypresses on all controllers
-	void ResetAllControllersKeypresses();
-	//used to get messages from Windows for K_CM_CONTROLLER_KEYBOARD_WIN
+	void				ResetAllControllersKeypresses();
+	// Used to get messages from Windows for K_CM_CONTROLLER_KEYBOARD_WIN
 	//void ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAltDown);
-	/*!
-	 *	Tells you if any key is pressed on any controller
-	 */
-	bool KeyPressed(EControllerCommand eCommandFilter = K_CM_COMMAND_NONE);
+	// Tells you if any key is pressed on any controller
+	bool				KeyPressed(EControllerCommand eCommandFilter = K_CM_COMMAND_NONE);
 };
 
 

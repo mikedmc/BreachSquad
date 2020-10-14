@@ -143,6 +143,13 @@ void ChangeGameStateTransition(int newState, int param1 = 0, int param2 = 0, int
 void UpdateTransition(float dTime);
 void PaintTransition(float dTime, float fTimeline, LPDIRECT3DDEVICE9 pd3dDevice); 
 
+// Function used by controllers manager to normalize mouse input from global to ingame player relative
+void NormalizeIngameMouseCoords(int ControllerIID, float fX, float fY, float & ret_fX, float & ret_fY)
+{
+	g_level.NormalizeMouseCoords(ControllerIID, fX, fY, ret_fX, ret_fY);
+	DebugPrintA("coords: %.2f,%.2f -> %.2f,%.2f\n", fX, fY, ret_fX, ret_fY);
+}
+
 //#define DEBUG_VS
 //#define DEBUG_PS
 
@@ -2886,6 +2893,9 @@ void ChangeGameState(int newState, int param1, int param2)
 			SND_SET_GROUP_FREQUENCY("ingame", 1.0f, false);
 
 			g_level.Release();
+			// level was unloaded, immediately set the controller pointer to null
+			UTGetControllersManager().SetNormalizeCoordsFunctionPtr(nullptr);
+
 			UTGetControlsManager().RemoveAllLayers(true);
 
 			UTGetSoundManager().StopGroup("music", false, true);
@@ -3214,6 +3224,8 @@ void ChangeGameState(int newState, int param1, int param2)
 			App_SaveUserData();
 			//release main menu class
 			g_mainMenu.Release();
+			// set the controller pointer normalization function (gets set to nullptr when not in game)
+			UTGetControllersManager().SetNormalizeCoordsFunctionPtr(NormalizeIngameMouseCoords);
 
 			//reset all scripts
 			UTGetScriptManager().StopAllScripts();
