@@ -68,6 +68,12 @@ enum EControllerCommand {
 	K_CM_COMMANDS_COUNT
 };
 
+#define K_CM_AXIS_START K_CM_COMMAND_MOVE_X
+#define K_CM_AXIS_END K_CM_COMMAND_AIM_Y
+#define K_CM_BUTT_START K_CM_COMMAND_JUMP
+#define K_CM_BUTT_END K_CM_COMMAND_BACK
+
+
 const CStringHash EControllerCommandNames[] = {
 	L"COMMAND_MOVE_X",
 	L"COMMAND_MOVE_Y",
@@ -235,7 +241,7 @@ public:
 	void				ResetAllControllersKeypresses();
 	// Used to get messages from Windows for K_CM_CONTROLLER_KEYBOARD_WIN - obsolete
 	//void ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAltDown);
-	// Tells you if any key is pressed on any controller
+	// Tells you if any key is pressed on any controller (excluding axes)
 	bool				KeyPressed(EControllerCommand eCommandFilter = K_CM_COMMAND_NONE);
 	// Updates internal controller data, must be called every frame, before using the controller data
 	// \param arrOverrideDownPercent - must be an array of K_CM_COMMANDS_CNT length and it gets copied over the internal normalized array (updates are made after it gets copied)

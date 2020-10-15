@@ -232,14 +232,13 @@ void CControllersManager::ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAlt
 }
 */
 
-
 bool CControllersManager::KeyPressed(EControllerCommand eCommandFilter /*= K_CM_COMMAND_NONE*/)
 {
 	for (CController * ctrlr : m_arrControllers)
 	{
 		if (eCommandFilter == K_CM_COMMAND_NONE)
 		{
-			for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
+			for (int kk = K_CM_BUTT_START; kk <= K_CM_BUTT_END; kk++)
 			{
 				if (ctrlr->sCommands.bKeyDown[kk])
 					return true;
@@ -682,11 +681,10 @@ void CControllersManager::UpdateController(CController* ctrlr, float dTime, floa
 	{
 		for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
 		{
-			//lower than "down" we have only directionals
-			/*
-		if ((!bSticksToo) && (kk <= K_CM_COMMAND_DOWN))
-			continue;
-		*/
+			//lower than "AIM_Y" we have only directional axis
+			if ((!bSticksToo) && (kk >= K_CM_AXIS_START) && (kk <= K_CM_AXIS_END))
+				continue;
+
 			if (sCommands.bKeyDown[kk])
 				return true;
 		}
