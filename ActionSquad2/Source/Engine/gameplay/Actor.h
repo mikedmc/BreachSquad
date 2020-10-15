@@ -159,6 +159,7 @@ public:
 
 	D3DXVECTOR2	vecCamFollowPos;	//pozitia relativa in care se uita camera cand am in focus Actorul curent
 
+	D3DXVECTOR2		pos_last;		// position on last frame
 	D3DXVECTOR2		speed;
 	D3DXVECTOR2		vSpeedImpulse;	//viteza aplicata extern (cand e impuscat de exemplu). Se va atenua automat.
 

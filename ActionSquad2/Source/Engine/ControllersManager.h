@@ -129,10 +129,6 @@ public:
 	};
 
 public:
-	int						arrTriggersCnt;
-	CControllerTrigger		arrTriggers[K_CM_MAX_TRIGGERS]; //array of triggers
-	CStringHash				strName;						//controller name
-public:
 	//SDL data
 	int						nSDLidx;						//controller index
 	int						nSDLInstanceId;					//instance id used by SDL
@@ -141,6 +137,10 @@ public:
 	EControllerType			eType;							//controller type
 	sControllerCommands		sCommands;						//controller commands (to be used ingame)
 	int						nFlags;							//flags needed sometimes
+public:
+	int						arrTriggersCnt;
+	CControllerTrigger		arrTriggers[K_CM_MAX_TRIGGERS]; //array of triggers
+	CStringHash				strName;						//controller name
 																	
 public:
 	CController();
@@ -151,7 +151,7 @@ public:
 
 	// Returns the first key mapping for a specified command or -1 if command isn't mapped
 	// TODO: it should return all triggers
-	int GetKeyMappingForCommand(EControllerCommand neCommand);
+	int GetKeyMappingForCommand(EControllerCommand neCommand) const;
 
 	// Returns the first trigger for a specified command or null if command isn't mapped
 	CControllerTrigger* GetTriggerForCommand(EControllerCommand neCommand);
@@ -169,7 +169,7 @@ public:
 	void ResetKeypresses();
 
 	// Gets all keys pressed percentages into the destination array
-	void GetKeysDownPercents(float arrDest[K_CM_COMMANDS_COUNT]);
+	void GetKeysDownPercents(float arrDest[K_CM_COMMANDS_COUNT]) const;
 
 	// Tells if a button was pressed on the controller (or a stick too)
 	bool WasControllerTouched(bool bSticksToo = false);
@@ -193,7 +193,8 @@ public:
 class CControllersManager
 {
 protected:
-	int					arrControllerTypesCnt[K_CM_CTS_CNT];  //aici se scrie cate controale din fiecare tip avem alocate
+	// Number of active controls per controller type
+	int					arrControllerTypesCnt[K_CM_CTS_CNT];  
 	// pointer to normalization function for absolute axis like mouse coords
 	NormalizeCoordsFn	pNormalizeFn;
 public:
@@ -238,7 +239,7 @@ public:
 	bool				KeyPressed(EControllerCommand eCommandFilter = K_CM_COMMAND_NONE);
 	// Updates internal controller data, must be called every frame, before using the controller data
 	// \param arrOverrideDownPercent - must be an array of K_CM_COMMANDS_CNT length and it gets copied over the internal normalized array (updates are made after it gets copied)
-	void				UpdateController(CController* ctrlr, float dTime, float * arrOverrideDownPercents = null);
+	void				UpdateController(CController* ctrlr, float dTime, float * arrOverrideDownPercents = nullptr);
 };
 
 

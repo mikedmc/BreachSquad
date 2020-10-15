@@ -6,10 +6,7 @@ CControllersManager::CControllersManager()
 	pNormalizeFn = nullptr;
 
 	m_arrControllers.clear();
-	for (int kk = 0; kk < K_CM_CTS_CNT; kk++)
-	{
-		arrControllerTypesCnt[kk] = 0;
-	}
+	memset(arrControllerTypesCnt, 0, sizeof(int) * K_CM_CTS_CNT);
 }
 
 CControllersManager::~CControllersManager()
@@ -40,16 +37,16 @@ CController* CControllersManager::AddController(EControllerType neType, WCHAR * 
 	{
 		case K_CM_CT_KBM_SDL:
 		{
-			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_X, SDL_SCANCODE_LEFT, 0.0f, -1.0f);
-			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_X, SDL_SCANCODE_RIGHT, 0.0f, 1.0f);
-			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_SCANCODE_UP, 0.0f, -1.0f);
-			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_SCANCODE_DOWN, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_X, SDL_SCANCODE_A, 0.0f, -1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_X, SDL_SCANCODE_D, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_SCANCODE_W, 0.0f, -1.0f);
+			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MOVE_Y, SDL_SCANCODE_S, 0.0f, 1.0f);
 
-			//ctrl->AddTrigger(K_CM_POINTER_BUTTON, K_CM_COMMAND_FIRE1, SDL_BUTTON_LEFT, 0.0f, 1.0f);
 			ctrl->AddTrigger(K_CM_POINTER_X, K_CM_COMMAND_AIM_X, 0);
 			ctrl->AddTrigger(K_CM_POINTER_Y, K_CM_COMMAND_AIM_Y, 0);
 
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_JUMP, SDL_SCANCODE_SPACE, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_POINTER_BUTTON, K_CM_COMMAND_FIRE1, SDL_BUTTON_LEFT, 0.0f, 1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_FIRE1, SDL_SCANCODE_LCTRL, 0.0f, 1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_FIRE2, SDL_SCANCODE_LSHIFT, 0.0f, 1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_USE_GEAR, SDL_SCANCODE_E, 0.0f, 1.0f);
@@ -265,7 +262,7 @@ void CControllersManager::UpdateController(CController* ctrlr, float dTime, floa
 	///--- 1. Translate triggers to commands or handle override
 
 	// if we don't override pressed precents then data is computed from triggers
-	if (arrOverrideDownPercents == null)
+	if (arrOverrideDownPercents == nullptr)
 	{
 		float fPressedPerc[K_CM_COMMANDS_COUNT] = { 0.0f };
 		for (int kk = 0; kk < ctrlr->arrTriggersCnt; kk++)
@@ -330,232 +327,118 @@ void CControllersManager::UpdateController(CController* ctrlr, float dTime, floa
 			scom->fKeyPressedTime[kk] = 0.0f;
 		}
 	}
-}
+	}
 
-void CControllersManager::AddSDLController(int SDL_ctrlr_idx)
-{
-	if (SDL_IsGameController(SDL_ctrlr_idx))
+	void CControllersManager::AddSDLController(int SDL_ctrlr_idx)
 	{
-		SDL_GameController *pad = SDL_GameControllerOpen(SDL_ctrlr_idx);
-		if (pad)
+		if (SDL_IsGameController(SDL_ctrlr_idx))
 		{
-			SDL_Joystick *joy = SDL_GameControllerGetJoystick(pad);
-			int instanceID = SDL_JoystickInstanceID(joy);
-
-			//vede daca e deja adaugat ca sa nu il adauge de mai multe ori
-			if (GetControllerByInstanceID(instanceID) != null)
+			SDL_GameController *pad = SDL_GameControllerOpen(SDL_ctrlr_idx);
+			if (pad)
 			{
-				return;
+				SDL_Joystick *joy = SDL_GameControllerGetJoystick(pad);
+				int instanceID = SDL_JoystickInstanceID(joy);
+
+				//vede daca e deja adaugat ca sa nu il adauge de mai multe ori
+				if (GetControllerByInstanceID(instanceID) != null)
+				{
+					return;
+				}
+				//get controller name
+				char ctrlrname[MAX_PATH];
+				WCHAR wctrlrname[MAX_PATH];
+				StringCchPrintfA(ctrlrname, MAX_PATH, SDL_GameControllerName(pad));
+				mbstowcs(wctrlrname, ctrlrname, MAX_PATH);
+
+				CController* ctrlr = AddController(K_CM_CT_JOYSTICK_SDL, wctrlrname);
+
+				//save SDL data too
+				ctrlr->nSDLInstanceId = instanceID;
+				ctrlr->nSDLidx = SDL_ctrlr_idx;
+				ctrlr->SDLpgc = pad;
+
+				//ErrorBox(K_ERR_WARNING, L"added instanceID:%d", instanceID);
+
+				//signal with event
+				CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_CONTROLLER_ADDED);
+				nevent->AddNamedArgINT32(L"SDLinstanceID", instanceID);
+				nevent->AddNamedArgString(L"strName", wctrlrname);
+				UTGetEventManager().QueueEvent(nevent);
 			}
-			//get controller name
-			char ctrlrname[MAX_PATH];
-			WCHAR wctrlrname[MAX_PATH];
-			StringCchPrintfA(ctrlrname, MAX_PATH, SDL_GameControllerName(pad));
-			mbstowcs(wctrlrname, ctrlrname, MAX_PATH);
-
-			CController* ctrlr = AddController(K_CM_CT_JOYSTICK_SDL, wctrlrname);
-
-			//save SDL data too
-			ctrlr->nSDLInstanceId = instanceID;
-			ctrlr->nSDLidx = SDL_ctrlr_idx;
-			ctrlr->SDLpgc = pad;
-
-			//ErrorBox(K_ERR_WARNING, L"added instanceID:%d", instanceID);
-
-			//signal with event
-			CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_CONTROLLER_ADDED);
-			nevent->AddNamedArgINT32(L"SDLinstanceID", instanceID);
-			nevent->AddNamedArgString(L"strName", wctrlrname);
-			UTGetEventManager().QueueEvent(nevent);
-		}
-	}
-}
-
-bool CControllersManager::RemoveSDLController(int nnInstanceID)
-{
-	for (int kk = 0; kk < m_arrControllers.size(); kk++)
-	{
-		if (m_arrControllers[kk]->nSDLInstanceId == nnInstanceID)
-		{
-			//signal with event
-			CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_CONTROLLER_REMOVED);
-			nevent->AddNamedArgINT32(L"SDLinstanceID", nnInstanceID);
-			nevent->AddNamedArgString(L"strName", m_arrControllers[kk]->strName.text);
-			UTGetEventManager().QueueEvent(nevent);
-
-			//remove selected characters on local game
-			//#TODO: instead of calling it directly playerSelScr should register for SYSTEM events
-			g_playerSelScr.OnControllerRemoved(m_arrControllers[kk]->nSDLInstanceId);
-
-			SDL_GameControllerClose(m_arrControllers[kk]->SDLpgc);
-			arrControllerTypesCnt[m_arrControllers[kk]->eType]--;
-			SAFE_DELETE(m_arrControllers[kk]);
-			m_arrControllers.erase(m_arrControllers.begin() + kk);
-
-			return true;
 		}
 	}
 
-	ErrorBox(K_ERR_WARNING, TEXT("RemoveSDLController: SDL Controller instanceID=%d not found!"), nnInstanceID);
-	return false;
-}
-
-CController* CControllersManager::GetControllerByInstanceID(int nnInstanceID)
-{
-	for (auto & ctrlr : m_arrControllers)
+	bool CControllersManager::RemoveSDLController(int nnInstanceID)
 	{
-		if (ctrlr->nSDLInstanceId == nnInstanceID)
-			return ctrlr;
-	}
-	return null;
-}
-
-CController* CControllersManager::GetControllerByName(WCHAR* strControllerName)
-{
-	for (auto & ctrlr : m_arrControllers)
-	{
-		if (ctrlr->strName.IsEqual(strControllerName))
-			return ctrlr;
-	}
-	ErrorBox(K_ERR_WARNING, TEXT("* CControllersManager::GetControllerByName - Controller [%s] not found! Returning null."), strControllerName);
-	return null;
-}
-
-void CControllersManager::OnSDLControllerButton(const SDL_ControllerButtonEvent sdlEvent)
-{
-	if (arrControllerTypesCnt[K_CM_CT_JOYSTICK_SDL] <= 0)
-		return;
-	CController* ctrlr = GetControllerByInstanceID(sdlEvent.which);
-	if (ctrlr == null)
-	{
-		ErrorBox(K_ERR_WARNING, TEXT("OnSDLControllerButton:instanceID=%d not found!"), sdlEvent.which);
-		return;
-	}
-	bool bButDown = false;
-	float fButPress = 0.0f;
-	if (sdlEvent.state == SDL_PRESSED)
-	{
-		bButDown = true;
-		fButPress = 1.0f;
-	}
-	//find button
-	for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
-	{
-		if (ctrlr->arrTriggers[ll].eType != K_CM_BUTTON)
-			continue;
-		if (ctrlr->arrTriggers[ll].keyMapping == sdlEvent.button)
+		for (int kk = 0; kk < m_arrControllers.size(); kk++)
 		{
-			ctrlr->arrTriggers[ll].fTriggerActivatedPercent = fButPress;
-		}
-	}
-}
-
-void CControllersManager::OnSDLControllerAxis(const SDL_ControllerAxisEvent sdlEvent)
-{
-	if (arrControllerTypesCnt[K_CM_CT_JOYSTICK_SDL] <= 0)
-		return;
-	CController* ctrlr = GetControllerByInstanceID(sdlEvent.which);
-	if (ctrlr == null)
-	{
-		ErrorBox(K_ERR_WARNING, TEXT("OnSDLControllerAxis:instanceID=%d not found!"), sdlEvent.which);
-		return;
-	}
-	float perc = (float)sdlEvent.value / 32767.0f;
-	//find trigger
-	for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
-	{
-		// only axis triggers selected
-		if (ctrlr->arrTriggers[ll].eType != K_CM_HALF_AXIS && ctrlr->arrTriggers[ll].eType != K_CM_AXIS)
-			continue;
-		//trec prin toate controalele pentru ca pe o axa sunt 2 comenzi
-		CControllerTrigger* trigger = &ctrlr->arrTriggers[ll];
-		if (trigger->keyMapping != sdlEvent.axis)
-			continue;
-
-		if (trigger->eType == K_CM_HALF_AXIS)
-		{
-			bool bButDown = false;
-			float fMin = trigger->fTriggerMin;
-			float fMax = trigger->fTriggerMax;
-			//already activated? move the INACTIVE domain a little to avoid analog jitter
-			if (trigger->fTriggerActivatedPercent > 0.0f)
+			if (m_arrControllers[kk]->nSDLInstanceId == nnInstanceID)
 			{
-				//  |----fmin----fmax---|zero|---fmin----fmax----|
-				if (fMax < 0.05f)
-					fMax += 0.05f;
-				if (fMin > 0.05f)
-					fMin -= 0.05f;
-			}
-			if ((perc >= fMin) && (perc <= fMax))
-				bButDown = true;
+				//signal with event
+				CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_CONTROLLER_REMOVED);
+				nevent->AddNamedArgINT32(L"SDLinstanceID", nnInstanceID);
+				nevent->AddNamedArgString(L"strName", m_arrControllers[kk]->strName.text);
+				UTGetEventManager().QueueEvent(nevent);
 
-			trigger->fTriggerActivatedPercent = ((bButDown == true) ? perc : 0.0f);
-		}
-		// AXIS - returns actual +/- percent if over the minimum threshold
-		else if (trigger->eType == K_CM_AXIS)
-		{
-			bool bButDown = false;
-			float fMinAbs = fabs(trigger->fTriggerMin);
-			//already activated? move the INACTIVE domain a little to avoid analog jitter
-			if (fabs(trigger->fTriggerActivatedPercent) > 0.0f)
-			{
-				//  |--------fminabs---|zero|---fminabs--------|
-				if (fMinAbs > 0.05f)
-					fMinAbs -= 0.05f;
-			}
-			if (fabs(perc) >= fMinAbs)
-				bButDown = true;
+				//remove selected characters on local game
+				//#TODO: instead of calling it directly playerSelScr should register for SYSTEM events
+				g_playerSelScr.OnControllerRemoved(m_arrControllers[kk]->nSDLInstanceId);
 
-			trigger->fTriggerActivatedPercent = ((bButDown == true) ? perc : 0.0f);
+				SDL_GameControllerClose(m_arrControllers[kk]->SDLpgc);
+				arrControllerTypesCnt[m_arrControllers[kk]->eType]--;
+				SAFE_DELETE(m_arrControllers[kk]);
+				m_arrControllers.erase(m_arrControllers.begin() + kk);
+
+				return true;
+			}
 		}
+
+		ErrorBox(K_ERR_WARNING, TEXT("RemoveSDLController: SDL Controller instanceID=%d not found!"), nnInstanceID);
+		return false;
 	}
-}
 
-
-void CControllersManager::OnSDLKeypress(const SDL_KeyboardEvent sdlEvent, bool bKeyDown)
-{
-	if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
-		return;
-
-	for (CController * ctrlr : m_arrControllers)
+	CController* CControllersManager::GetControllerByInstanceID(int nnInstanceID)
 	{
-		if (ctrlr->eType != K_CM_CT_KBM_SDL)
-			continue;
+		for (auto & ctrlr : m_arrControllers)
+		{
+			if (ctrlr->nSDLInstanceId == nnInstanceID)
+				return ctrlr;
+		}
+		return null;
+	}
 
+	CController* CControllersManager::GetControllerByName(WCHAR* strControllerName)
+	{
+		for (auto & ctrlr : m_arrControllers)
+		{
+			if (ctrlr->strName.IsEqual(strControllerName))
+				return ctrlr;
+		}
+		ErrorBox(K_ERR_WARNING, TEXT("* CControllersManager::GetControllerByName - Controller [%s] not found! Returning null."), strControllerName);
+		return null;
+	}
+
+	void CControllersManager::OnSDLControllerButton(const SDL_ControllerButtonEvent sdlEvent)
+	{
+		if (arrControllerTypesCnt[K_CM_CT_JOYSTICK_SDL] <= 0)
+			return;
+		CController* ctrlr = GetControllerByInstanceID(sdlEvent.which);
+		if (ctrlr == nullptr)
+		{
+			ErrorBox(K_ERR_WARNING, TEXT("OnSDLControllerButton:instanceID=%d not found!"), sdlEvent.which);
+			return;
+		}
+		bool bButDown = false;
+		float fButPress = 0.0f;
+		if (sdlEvent.state == SDL_PRESSED)
+		{
+			bButDown = true;
+			fButPress = 1.0f;
+		}
+		//find button
 		for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
 		{
-			CControllerTrigger* trigger = &ctrlr->arrTriggers[ll];
-			if ((trigger->eType != K_CM_BUTTON) || (trigger->keyMapping != sdlEvent.keysym.scancode))
-				continue;
-			// set absolute values (+/- values) set when defining triggers
-			trigger->fTriggerActivatedPercent = ((bKeyDown == true) ? trigger->fTriggerMax : trigger->fTriggerMin);
-		}
-	}
-
-}
-
-
-void CControllersManager::OnSDLMouseButton(const SDL_MouseButtonEvent sdlEvent)
-{
-	if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
-		return;
-
-	bool bButDown = false;
-	float fButPress = 0.0f;
-	if (sdlEvent.state == SDL_PRESSED)
-	{
-		bButDown = true;
-		fButPress = 1.0f;
-	}
-	//find button
-	for (CController * ctrlr : m_arrControllers)
-	{
-		if (ctrlr->eType != K_CM_CT_KBM_SDL)
-			continue;
-
-		for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
-		{
-			if (ctrlr->arrTriggers[ll].eType != K_CM_POINTER_BUTTON)
+			if (ctrlr->arrTriggers[ll].eType != K_CM_BUTTON)
 				continue;
 			if (ctrlr->arrTriggers[ll].keyMapping == sdlEvent.button)
 			{
@@ -563,177 +446,289 @@ void CControllersManager::OnSDLMouseButton(const SDL_MouseButtonEvent sdlEvent)
 			}
 		}
 	}
-}
 
-void CControllersManager::OnSDLMouseMove(const SDL_MouseMotionEvent sdlEvent)
-{
-	if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
-		return;
-	//find button
-	for (CController * ctrlr : m_arrControllers)
+	void CControllersManager::OnSDLControllerAxis(const SDL_ControllerAxisEvent sdlEvent)
 	{
-		if (ctrlr->eType != K_CM_CT_KBM_SDL)
-			continue;
-		// if we have a normalization fn pointer then call it on the data
-		float retX = (float)sdlEvent.x;
-		float retY = (float)sdlEvent.y;
-
+		if (arrControllerTypesCnt[K_CM_CT_JOYSTICK_SDL] <= 0)
+			return;
+		CController* ctrlr = GetControllerByInstanceID(sdlEvent.which);
+		if (ctrlr == nullptr)
+		{
+			ErrorBox(K_ERR_WARNING, TEXT("OnSDLControllerAxis:instanceID=%d not found!"), sdlEvent.which);
+			return;
+		}
+		float perc = (float)sdlEvent.value / 32767.0f;
+		//find trigger
 		for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
 		{
-			if (ctrlr->arrTriggers[ll].eType == K_CM_POINTER_X)
+			// only axis triggers selected
+			if (ctrlr->arrTriggers[ll].eType != K_CM_HALF_AXIS && ctrlr->arrTriggers[ll].eType != K_CM_AXIS)
+				continue;
+			//trec prin toate controalele pentru ca pe o axa sunt 2 comenzi
+			CControllerTrigger* trigger = &ctrlr->arrTriggers[ll];
+			if (trigger->keyMapping != sdlEvent.axis)
+				continue;
+
+			if (trigger->eType == K_CM_HALF_AXIS)
 			{
-				ctrlr->arrTriggers[ll].fTriggerActivatedPercent = retX;
+				bool bButDown = false;
+				float fMin = trigger->fTriggerMin;
+				float fMax = trigger->fTriggerMax;
+				//already activated? move the INACTIVE domain a little to avoid analog jitter
+				if (trigger->fTriggerActivatedPercent > 0.0f)
+				{
+					//  |----fmin----fmax---|zero|---fmin----fmax----|
+					if (fMax < 0.05f)
+						fMax += 0.05f;
+					if (fMin > 0.05f)
+						fMin -= 0.05f;
+				}
+				if ((perc >= fMin) && (perc <= fMax))
+					bButDown = true;
+
+				trigger->fTriggerActivatedPercent = ((bButDown == true) ? perc : 0.0f);
 			}
-			else if (ctrlr->arrTriggers[ll].eType == K_CM_POINTER_Y)
+				// AXIS - returns actual +/- percent if over the minimum threshold
+			else if (trigger->eType == K_CM_AXIS)
 			{
-				ctrlr->arrTriggers[ll].fTriggerActivatedPercent = retY;
+				bool bButDown = false;
+				float fMinAbs = fabs(trigger->fTriggerMin);
+				//already activated? move the INACTIVE domain a little to avoid analog jitter
+				if (fabs(trigger->fTriggerActivatedPercent) > 0.0f)
+				{
+					//  |--------fminabs---|zero|---fminabs--------|
+					if (fMinAbs > 0.05f)
+						fMinAbs -= 0.05f;
+				}
+				if (fabs(perc) >= fMinAbs)
+					bButDown = true;
+
+				trigger->fTriggerActivatedPercent = ((bButDown == true) ? perc : 0.0f);
 			}
 		}
 	}
-}
 
-///----- CController -----
 
-CController::CController() : 
-	eType(K_CM_CT_INVALID), arrTriggersCnt(0), nFlags(0), 
-	nSDLidx(-1), nSDLInstanceId(-1), SDLpgc(nullptr)
-{
-}
-
-void CController::AddTrigger(EControllerTriggerType neType, EControllerCommand neCommand, int nKeyMapping, float nfTriggerMin /*= 0.1f*/, float nfTriggerMax /*= 1.1f*/)
-{
-	assert(arrTriggersCnt < K_CM_MAX_TRIGGERS);
-
-	arrTriggers[arrTriggersCnt].eType = neType;
-	arrTriggers[arrTriggersCnt].eTargetCommand = neCommand;
-	arrTriggers[arrTriggersCnt].keyMapping = nKeyMapping;
-	arrTriggers[arrTriggersCnt].fTriggerMin = nfTriggerMin;
-	arrTriggers[arrTriggersCnt].fTriggerMax = nfTriggerMax;
-	arrTriggers[arrTriggersCnt].fTriggerActivatedPercent = 0.0f;
-
-	arrTriggersCnt++;
-}
-
-int CController::GetKeyMappingForCommand(EControllerCommand neCommand)
-{
-	for (int kk = 0; kk < arrTriggersCnt; kk++)
+	void CControllersManager::OnSDLKeypress(const SDL_KeyboardEvent sdlEvent, bool bKeyDown)
 	{
-		if (arrTriggers[kk].eTargetCommand == neCommand)
-			return arrTriggers[kk].keyMapping;
-	}
-	return -1;
-}
+		if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
+			return;
 
-CControllerTrigger* CController::GetTriggerForCommand(EControllerCommand neCommand)
-{
-	for (int kk = 0; kk < arrTriggersCnt; kk++)
-	{
-		if (arrTriggers[kk].eTargetCommand == neCommand)
-			return &arrTriggers[kk];
-	}
-	return nullptr;
-}
-
-void CController::RemoveTriggers(EControllerCommand neCommand)
-{
-	for (int kk = 0; kk < arrTriggersCnt; kk++)
-	{
-		if (arrTriggers[kk].eTargetCommand == neCommand)
+		for (CController * ctrlr : m_arrControllers)
 		{
-			for (int ll = kk; ll < arrTriggersCnt - 1; ll++)
+			if (ctrlr->eType != K_CM_CT_KBM_SDL)
+				continue;
+
+			for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
 			{
-				arrTriggers[ll] = arrTriggers[ll + 1];
+				CControllerTrigger* trigger = &ctrlr->arrTriggers[ll];
+				if ((trigger->eType != K_CM_BUTTON) || (trigger->keyMapping != sdlEvent.keysym.scancode))
+					continue;
+				// set absolute values (+/- values) set when defining triggers
+				trigger->fTriggerActivatedPercent = ((bKeyDown == true) ? trigger->fTriggerMax : trigger->fTriggerMin);
 			}
-
-			arrTriggersCnt--;
 		}
-	}
-}
 
-void CController::RemoveTriggerByKeyMapping(int nKeyMapping)
-{
-	for (int kk = 0; kk < arrTriggersCnt; kk++)
+	}
+
+
+	void CControllersManager::OnSDLMouseButton(const SDL_MouseButtonEvent sdlEvent)
 	{
-		if (arrTriggers[kk].keyMapping == nKeyMapping)
+		if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
+			return;
+
+		float fButPress = 0.0f;
+		if (sdlEvent.state == SDL_PRESSED)
 		{
-			for (int ll = kk; ll < arrTriggersCnt - 1; ll++)
-			{
-				arrTriggers[ll] = arrTriggers[ll + 1];
-			}
+			fButPress = 1.0f;
+		}
+		//find button
+		for (CController * ctrlr : m_arrControllers)
+		{
+			if (ctrlr->eType != K_CM_CT_KBM_SDL)
+				continue;
 
-			arrTriggersCnt--;
+			for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
+			{
+				if (ctrlr->arrTriggers[ll].eType != K_CM_POINTER_BUTTON)
+					continue;
+				if (ctrlr->arrTriggers[ll].keyMapping == sdlEvent.button)
+				{
+					ctrlr->arrTriggers[ll].fTriggerActivatedPercent = fButPress;
+				}
+			}
 		}
 	}
-}
 
-void CController::ClearTriggers()
-{
-	arrTriggersCnt = 0;
-}
-
-void CController::ResetKeypresses()
-{
-	//reset flags too
-	nFlags = 0;
-	sCommands.Reset();
-}
-
-void CController::GetKeysDownPercents(float arrDest[K_CM_COMMANDS_COUNT])
-{
-	memcpy(arrDest, sCommands.arrAxisVal_N, sizeof(float) * K_CM_COMMANDS_COUNT);
-}
-
-bool CController::WasControllerTouched(bool bSticksToo /*= false*/)
-{
-	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
+	void CControllersManager::OnSDLMouseMove(const SDL_MouseMotionEvent sdlEvent)
 	{
-		//lower than "down" we have only directionals
-		/*
+		if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
+			return;
+		//find button
+		for (CController * ctrlr : m_arrControllers)
+		{
+			if (ctrlr->eType != K_CM_CT_KBM_SDL)
+				continue;
+			// if we have a normalization fn pointer then call it on the data
+			float retX = (float)sdlEvent.x;
+			float retY = (float)sdlEvent.y;
+
+			for (int ll = 0; ll < ctrlr->arrTriggersCnt; ll++)
+			{
+				if (ctrlr->arrTriggers[ll].eType == K_CM_POINTER_X)
+				{
+					ctrlr->arrTriggers[ll].fTriggerActivatedPercent = retX;
+				}
+				else if (ctrlr->arrTriggers[ll].eType == K_CM_POINTER_Y)
+				{
+					ctrlr->arrTriggers[ll].fTriggerActivatedPercent = retY;
+				}
+			}
+		}
+	}
+
+	///----- CController -----
+
+	CController::CController() :
+		eType(K_CM_CT_INVALID), arrTriggersCnt(0), arrTriggers{}, nFlags(0),
+		nSDLidx(-1), nSDLInstanceId(-1), SDLpgc(nullptr)
+	{
+	}
+
+	void CController::AddTrigger(EControllerTriggerType neType, EControllerCommand neCommand, int nKeyMapping, float nfTriggerMin /*= 0.1f*/, float nfTriggerMax /*= 1.1f*/)
+	{
+		assert(arrTriggersCnt < K_CM_MAX_TRIGGERS);
+
+		arrTriggers[arrTriggersCnt].eType = neType;
+		arrTriggers[arrTriggersCnt].eTargetCommand = neCommand;
+		arrTriggers[arrTriggersCnt].keyMapping = nKeyMapping;
+		arrTriggers[arrTriggersCnt].fTriggerMin = nfTriggerMin;
+		arrTriggers[arrTriggersCnt].fTriggerMax = nfTriggerMax;
+		arrTriggers[arrTriggersCnt].fTriggerActivatedPercent = 0.0f;
+
+		arrTriggersCnt++;
+	}
+
+	int CController::GetKeyMappingForCommand(EControllerCommand neCommand) const
+	{
+		for (int kk = 0; kk < arrTriggersCnt; kk++)
+		{
+			if (arrTriggers[kk].eTargetCommand == neCommand)
+				return arrTriggers[kk].keyMapping;
+		}
+		return -1;
+	}
+
+	CControllerTrigger* CController::GetTriggerForCommand(EControllerCommand neCommand)
+	{
+		for (int kk = 0; kk < arrTriggersCnt; kk++)
+		{
+			if (arrTriggers[kk].eTargetCommand == neCommand)
+				return &arrTriggers[kk];
+		}
+		return nullptr;
+	}
+
+	void CController::RemoveTriggers(EControllerCommand neCommand)
+	{
+		for (int kk = 0; kk < arrTriggersCnt; kk++)
+		{
+			if (arrTriggers[kk].eTargetCommand == neCommand)
+			{
+				for (int ll = kk; ll < arrTriggersCnt - 1; ll++)
+				{
+					arrTriggers[ll] = arrTriggers[ll + 1];
+				}
+
+				arrTriggersCnt--;
+			}
+		}
+	}
+
+	void CController::RemoveTriggerByKeyMapping(int nKeyMapping)
+	{
+		for (int kk = 0; kk < arrTriggersCnt; kk++)
+		{
+			if (arrTriggers[kk].keyMapping == nKeyMapping)
+			{
+				for (int ll = kk; ll < arrTriggersCnt - 1; ll++)
+				{
+					arrTriggers[ll] = arrTriggers[ll + 1];
+				}
+
+				arrTriggersCnt--;
+			}
+		}
+	}
+
+	void CController::ClearTriggers()
+	{
+		arrTriggersCnt = 0;
+	}
+
+	void CController::ResetKeypresses()
+	{
+		//reset flags too
+		nFlags = 0;
+		sCommands.Reset();
+	}
+
+	void CController::GetKeysDownPercents(float arrDest[K_CM_COMMANDS_COUNT]) const
+	{
+		memcpy(arrDest, sCommands.arrAxisVal_N, sizeof(float) * K_CM_COMMANDS_COUNT);
+	}
+
+	bool CController::WasControllerTouched(bool bSticksToo /*= false*/)
+	{
+		for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
+		{
+			//lower than "down" we have only directionals
+			/*
 		if ((!bSticksToo) && (kk <= K_CM_COMMAND_DOWN))
 			continue;
 		*/
-		if (sCommands.bKeyDown[kk])
-			return true;
+			if (sCommands.bKeyDown[kk])
+				return true;
+		}
+		return false;
 	}
-	return false;
-}
 
 
-D3DXVECTOR2 CController::GetDoubleAxisVector(const EControllerCommand commXaxis, const EControllerCommand commYaxis, bool bNormalize)
-{
-	D3DXVECTOR2 retvec(sCommands.arrAxisVal_N[commXaxis], sCommands.arrAxisVal_N[commYaxis]);
-	if (bNormalize)
+	D3DXVECTOR2 CController::GetDoubleAxisVector(const EControllerCommand commXaxis, const EControllerCommand commYaxis, bool bNormalize)
 	{
-		D3DXVec2Normalize(&retvec, &retvec);
+		D3DXVECTOR2 retvec(sCommands.arrAxisVal_N[commXaxis], sCommands.arrAxisVal_N[commYaxis]);
+		if (bNormalize)
+		{
+			D3DXVec2Normalize(&retvec, &retvec);
+		}
+		return retvec;
 	}
-	return retvec;
-}
 
-///----- sControllerCommands -----
+	///----- sControllerCommands -----
 
-CController::sControllerCommands::sControllerCommands()
-{
-	Reset();
-}
-
-void CController::sControllerCommands::Reset()
-{
-	for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
+	CController::sControllerCommands::sControllerCommands()
 	{
-		bKeyDown[kk] = false;
-		keyState[kk] = K_CM_BUTSTATE_NOTPRESSED;
-		fKeyPressedTime[kk] = 0.0f;
-		arrAxisVal_N[kk] = 0.0f;
+		Reset();
 	}
-}
+
+	void CController::sControllerCommands::Reset()
+	{
+		for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
+		{
+			bKeyDown[kk] = false;
+			keyState[kk] = K_CM_BUTSTATE_NOTPRESSED;
+			fKeyPressedTime[kk] = 0.0f;
+			arrAxisVal_N[kk] = 0.0f;
+		}
+	}
 
 
-///**************************************************************************************
+	///**************************************************************************************
 /// Sigleton de acces
 ///**************************************************************************************
 
-CControllersManager& UTGetCtrlrMgr()
-{
-	static CControllersManager g_ControllersManager;
-	return g_ControllersManager;
-}
+	CControllersManager& UTGetCtrlrMgr()
+	{
+		static CControllersManager g_ControllersManager;
+		return g_ControllersManager;
+	}

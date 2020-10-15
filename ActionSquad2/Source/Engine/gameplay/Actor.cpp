@@ -88,6 +88,7 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 
 void CActor::SetPos(D3DXVECTOR2 newPos)
 {
+	pos_last = pos;
 	pos = newPos;
 
 	UpdateBBoxAndPoints();

@@ -1824,8 +1824,11 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 					case STR_PLAY:
 					{
+						g_userData[K_MEMID_SELECTED_CHAPTER] = 0;
+						g_userData[K_MEMID_SELECTED_LEVEL] = 0;
+
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
-						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
+						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 					}

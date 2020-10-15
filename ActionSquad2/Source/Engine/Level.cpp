@@ -7282,243 +7282,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	}
 	
 
-	//------------------------------------------------------------------------------------------
-	//	INTEGRATOR - physics
-	//------------------------------------------------------------------------------------------
-	//#TODO: check speed limits - should be done on the speed vector, normalized
-	CLAMP(actor->speed.x, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED);
-	CLAMP(actor->speed.y, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED);
-	//update impulse
-	D3DXVECTOR2 impFriction(K_LVL_GROUND_DEFAULT_FRICTION, K_LVL_GROUND_DEFAULT_FRICTION);
-	//limit impulse
-	CLAMP(actor->vSpeedImpulse.y, -K_LVL_ACTOR_MAX_IMPULSE, K_LVL_ACTOR_MAX_IMPULSE);
-	CLAMP(actor->vSpeedImpulse.x, -K_LVL_ACTOR_MAX_IMPULSE, K_LVL_ACTOR_MAX_IMPULSE);
-	//ATENTIE!!! daca trece prin usi inseamna ca bboxul din starea dead e mai lat decat cel din normal.
-
-	actor->vSpeedImpulse.x -= actor->vSpeedImpulse.x * impFriction.x * dTime;
-	actor->vSpeedImpulse.y -= actor->vSpeedImpulse.y * impFriction.y * dTime;
-	//reset vertical impulse so we don't get pushed up (seems to jump for a frame)
-	if (actor->vSpeedImpulse.y < 0.0f)
-		actor->vSpeedImpulse.y = 0.0f;
-	///--- move actor ---
-	//setez viteza
-	D3DXVECTOR2 movevec = actor->speed * dTime;
-	
-	//movevec += vAnimMove;//adaug si animatia exportata din editor (nu e in fn de dTime)
-	D3DXVECTOR2 actorOldPos = actor->pos;
-	//move actor to next position
-	actor->pos += movevec; 
-
-	if (actor->bHasCollision)
-	{
-		//1. fine bbox start and end union that includes all collisions when moving at high speeds
-		CAABB destbox, oldbox;
-		destbox = actor->bbox_ini;
-		destbox.Move(actor->pos);
-		oldbox = actor->bbox_ini;
-		oldbox.Move(actorOldPos);
-		//uniunea lor
-		CAABB boxUnion = AABB_Union(destbox, oldbox);
-		//optional
-		boxUnion.Inflate(K_TILE_HSIZE, K_TILE_HSIZE);
-
-		//#TODO: if it gets getting more expensive just use a quad tree on the collision boxes
-		//array care tine pointeri la boxurile cu care e contact pe boxul final
-		tempCollBoxList.Clear();
-
-		for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
-		{
-			if (m_arrColShapes[kk]->bHidden)
-				continue;
-
-			//nu am intersectie probabils - trec mai departe
-			if (!boxUnion.Intersects(&m_arrColShapes[kk]->bbox))
-				continue;
-
-			//adauga bbox in lista de probabile pt intersectie
-			if (m_arrColShapes[kk]->collFlags != K_DIRFLAG_NONE)
-			{
-				tempCollBoxList.Add(m_arrColShapes[kk]);
-
-				//ne asiguram ca nu trecem prin cutii mici (solide) la viteze foarte mari
-				//#TODO: implement other collision types here
-				if (m_arrColShapes[kk]->type == K_LVL_COLL_TYPE_SOLID)
-				{
-					CAABB* box = &m_arrColShapes[kk]->bbox;
-					if ((box->vSize.x <= fabs(movevec.x)) || (box->vSize.y <= fabs(movevec.y)))
-					{
-						//sweep test - enlarge bbox and check intersections between centers vector
-						CAABB staticBoxGrown = *box;
-						staticBoxGrown.Inflate(oldbox.vHalfSize.x, oldbox.vHalfSize.y);
-
-						D3DXVECTOR2 vColPt;
-						if (AABB_Segment_Intersection_NoHeads(oldbox.vCenter, destbox.vCenter, staticBoxGrown, &vColPt))
-						{
-							//repozitionam
-							movevec = vColPt - oldbox.vCenter;
-							actor->pos = actorOldPos + movevec;
-							//destbox set
-							destbox = actor->bbox_ini;
-							destbox.Move(actor->pos);
-						}
-					}
-				}
-
-			}
-
-		}
-
-		//reset coll flags
-		UINT16 unTotalFlags = 0;
-
-		bool bSquashPlayer = false;
-		if (tempCollBoxList.Count() > 0)
-		{
-			for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
-			{
-				CCollisionShape *colshape = tempCollBoxList[kk];
-				CAABB box = colshape->bbox; //copy box to edit it
-
-				CAABB minkAABB = AABB_GetMinkowskiDifference(destbox, box);
-				//verificam coliziune: daca nu contine originea nu e coliziune
-				if ((minkAABB.vMin.x > 0.0f) || (minkAABB.vMin.y > 0.0f) || (minkAABB.vMax.x < 0.0f) || (minkAABB.vMax.y < 0.0f))
-					continue;
-				//daca avem coliziune gasim vectorul de penetrare adica distanta minima de la origine la margini
-				float minx = fabs(minkAABB.vMin.x);
-				float maxx = fabs(minkAABB.vMax.x);
-				float miny = fabs(minkAABB.vMin.y);
-				float maxy = fabs(minkAABB.vMax.y);
-
-				int retDirFlag = K_DIRFLAG_NONE;
-				D3DXVECTOR2 vPenetrate(0.0f, 0.0f);
-				float mindist = 1000000.0f;
-
-				if (colshape->collFlags & K_DIRFLAG_LEFT)
-				{
-					if (actor->speed.x == 0.0f)
-					{
-						mindist = minx;
-						vPenetrate.x = -minx; vPenetrate.y = 0.0f;
-						retDirFlag = K_DIRFLAG_LEFT;
-					}
-					else //ignore left collisions if difference is small (small stairs)
-					{
-						float fDY = actor->bbox.vMax.y - colshape->bbox.vMin.y;
-						//don't ignore collision if stairs too high or feet not on ground
-						if ((fDY > 4.0f) || (fDY <= 0.0f) || ((actor->collisionFlags & K_DIRFLAG_DOWN) == 0))
-						{
-							mindist = minx;
-							vPenetrate.x = -minx; vPenetrate.y = 0.0f;
-							retDirFlag = K_DIRFLAG_LEFT;
-						}
-					}
-				}
-				if ((maxx < mindist) && (colshape->collFlags & K_DIRFLAG_RIGHT))
-				{
-					if (actor->speed.x == 0.0f)
-					{
-						mindist = maxx;
-						vPenetrate.x = maxx; vPenetrate.y = 0.0f;
-						retDirFlag = K_DIRFLAG_RIGHT;
-					}
-					else //ignore right collisions if difference is small (small stairs)
-					{
-						float fDY = actor->bbox.vMax.y - colshape->bbox.vMin.y;
-						if ((fDY > 4.0f) || (fDY <= 0.0f) || ((actor->collisionFlags & K_DIRFLAG_DOWN) == 0))
-						{
-							mindist = maxx;
-							vPenetrate.x = maxx; vPenetrate.y = 0.0f;
-							retDirFlag = K_DIRFLAG_RIGHT;
-						}
-					}
-				}
-				if ((maxy < mindist) && (colshape->collFlags & K_DIRFLAG_DOWN))
-				{ 
-					if (movevec.y >= 0.0f) //this if is optional but it helps when jumping near an interactible so we don't get the interact icon shown
-					{
-						mindist = maxy;
-						vPenetrate.x = 0.0f; vPenetrate.y = maxy;
-						retDirFlag = K_DIRFLAG_DOWN;
-					}
-				}
-				if ((miny < mindist) && (colshape->collFlags & K_DIRFLAG_UP))
-				{
-					mindist = miny;
-					vPenetrate.x = 0.0f; vPenetrate.y = -miny;
-					retDirFlag = K_DIRFLAG_UP;
-				}
-				//daca nu da coliziune din cauza flagurilor ignor boxul
-				if (retDirFlag == K_DIRFLAG_NONE)
-					continue;
-
-				//set collision flags
-				unTotalFlags |= retDirFlag;
-				//change actor placement
-				actor->pos -= vPenetrate;
-				movevec = actor->pos - actorOldPos;
-				//destbox set
-				destbox = actor->bbox_ini;
-				destbox.Move(actor->pos);
-				//still penetrating? SQUASH!
-				if ((fabs(vPenetrate.x) > K_LVL_MAX_PENETRATION) || (fabs(vPenetrate.y) > K_LVL_MAX_PENETRATION))
-				{
-					bSquashPlayer = true;
-				}
-			}
-
-			//set actor current collision flags
-			actor->collisionFlags = unTotalFlags;
-
-			//final check
-			//squash - cand esti strivit moare cu splat
-			if ((bSquashPlayer) &&
-				( ((actor->collisionFlags & K_DIRFLAG_UP_DOWN) == K_DIRFLAG_UP_DOWN) || ((actor->collisionFlags & K_DIRFLAG_LEFT_RIGHT) == K_DIRFLAG_LEFT_RIGHT) ) )
-			{
-				HitActor(actor, -500.0f, actor->GetUID(), K_LVL_ACT_CLASS_EXPLOSION);
-			}
-			//DOWN collision
-			if ((actor->speed.y > 0.0f) && (actor->collisionFlags & K_DIRFLAG_DOWN))
-			{
-				//reset speed to 0 !!!
-				actor->speed.y = 0.0f;
-			}
-			//UP collision
-			else if ((actor->speed.y < 0.0f) && (actor->collisionFlags & K_DIRFLAG_UP))
-			{
-				actor->speed.y = 0.0f;
-			}
-			//LEFT collision
-			if ((actor->speed.x < 0.0f) && (actor->collisionFlags & K_DIRFLAG_LEFT))
-			{
-				actor->speed.x = 0.0f;
-			}
-			//RIGHT collision
-			if ((actor->speed.x > 0.0f) && (actor->collisionFlags & K_DIRFLAG_RIGHT))
-			{
-				actor->speed.x = 0.0f;
-			}
-			//LEFT RIGHT collision - impulse
-			if (((actor->vSpeedImpulse.x < 0.0f) && (actor->collisionFlags & K_DIRFLAG_LEFT)) ||
-				((actor->vSpeedImpulse.x > 0.0f) && (actor->collisionFlags & K_DIRFLAG_RIGHT)) || 
-				((actor->vSpeedImpulse.y < 0.0f) && (actor->collisionFlags & K_DIRFLAG_UP)) || 
-				((actor->vSpeedImpulse.y > 0.0f) && (actor->collisionFlags & K_DIRFLAG_DOWN)))
-			{
-				actor->vSpeedImpulse.x = 0.0f;
-			}
-		}
-		else
-		{
-			actor->collisionFlags = 0;
-		}
-
-	}
-	//end phys
-
-	//check world bounds for each actor - kill if out
-	if (!PointInRect(actor->pos, m_levelAABB))
-	{
-		KillActor(actor);
-	}
 
 	///--- ACTOR CAPS ---
 	//check if fall off ladder
@@ -8466,47 +8229,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	//save old crouch state
 	bool bCrouchedOldState = actor->bCrouched;
-	//daca actorul se poate catara si are comanda de climb si directia verifica daca se urca pe scari
-	if ((actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_CLIMB) && (!actor->bOnLadder))
-	{
-		if ((actor->m_AIcommands.bClimb) && (	//daca e pe pamant poti face climb cu orice tasta, in aer doar cu sus ca sa poti sa iti dai drumul de pe scara
-				((actor->m_AIcommands.nMoveDirY != 0) && ((actor->collisionFlags & K_DIRFLAG_DOWN) != 0)) || 
-				((actor->m_AIcommands.nMoveDirY == -1) && ((actor->collisionFlags & K_DIRFLAG_DOWN) == 0)) 
-			))
-		{
-			//check actor bottom center of bbox by default
-			D3DXVECTOR2 checkpos = D3DXVECTOR2(actor->bbox.vMin.x + actor->bbox.vHalfSize.x, actor->bbox.vMax.y);
-			if (actor->m_AIcommands.nMoveDirY == -1)
-				checkpos = actor->posHeart;
-
-			actor->bOnLadder = false;
-			for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
-			{
-				if (((tempCollBoxList[kk]->collFlags & K_DIRFLAG_DOWN) == 0) || (tempCollBoxList[kk]->type != K_LVL_COLL_TYPE_LADDER))
-					continue;
-
-				if (tempCollBoxList[kk]->bbox.PointIn(checkpos))
-				{
-					actor->bOnLadder = true;
-					actor->bCrouched = false;
-					actor->m_AIcommands.bCrouched = false;
-					actor->pCover = null;
-					//centram X pe scara
-					actor->pos.x = tempCollBoxList[kk]->bbox.vCenter.x;
-					//stop reloading
-					StopReloadingWeapon(actor->pCurrentWeapon);
-					actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
-					break; //exit for loop
-				}
-			}
-		}
-	}
-	//hold still on ladder
-	if (actor->bOnLadder)
-	{
-		actor->m_AIcommands.bThrustX = false;
-		actor->m_AIcommands.nMoveDirX = 0;
-	}
 
 	//still in cover if can't roll
 	if (actor->pCover != null)
@@ -9814,8 +9536,250 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		}
 	}
 	///--- update-uri finale ---
+
+	//------------------------------------------------------------------------------------------
+	//	INTEGRATOR - physics
+	//------------------------------------------------------------------------------------------
+	//#TODO: check speed limits - should be done on the speed vector, normalized
+	CLAMP(actor->speed.x, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED);
+	CLAMP(actor->speed.y, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED);
+	//update impulse
+	D3DXVECTOR2 impFriction(K_LVL_GROUND_DEFAULT_FRICTION, K_LVL_GROUND_DEFAULT_FRICTION);
+	//limit impulse
+	CLAMP(actor->vSpeedImpulse.y, -K_LVL_ACTOR_MAX_IMPULSE, K_LVL_ACTOR_MAX_IMPULSE);
+	CLAMP(actor->vSpeedImpulse.x, -K_LVL_ACTOR_MAX_IMPULSE, K_LVL_ACTOR_MAX_IMPULSE);
+	//ATENTIE!!! daca trece prin usi inseamna ca bboxul din starea dead e mai lat decat cel din normal.
+
+	actor->vSpeedImpulse.x -= actor->vSpeedImpulse.x * impFriction.x * dTime;
+	actor->vSpeedImpulse.y -= actor->vSpeedImpulse.y * impFriction.y * dTime;
+	//reset vertical impulse so we don't get pushed up (seems to jump for a frame)
+	if (actor->vSpeedImpulse.y < 0.0f)
+		actor->vSpeedImpulse.y = 0.0f;
+	///--- move actor ---
+	//setez viteza
+	D3DXVECTOR2 movevec = actor->speed * dTime;
+
+	//movevec += vAnimMove;//adaug si animatia exportata din editor (nu e in fn de dTime)
+	D3DXVECTOR2 actorOldPos = actor->pos;
+	//move actor to next position
+	actor->pos += movevec;
+
+	if (actor->bHasCollision)
+	{
+		//1. fine bbox start and end union that includes all collisions when moving at high speeds
+		CAABB destbox, oldbox;
+		destbox = actor->bbox_ini;
+		destbox.Move(actor->pos);
+		oldbox = actor->bbox_ini;
+		oldbox.Move(actorOldPos);
+		//uniunea lor
+		CAABB boxUnion = AABB_Union(destbox, oldbox);
+		//optional
+		boxUnion.Inflate(K_TILE_HSIZE, K_TILE_HSIZE);
+
+		//#TODO: if it gets getting more expensive just use a quad tree on the collision boxes
+		//array care tine pointeri la boxurile cu care e contact pe boxul final
+		tempCollBoxList.Clear();
+
+		for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
+		{
+			if (m_arrColShapes[kk]->bHidden)
+				continue;
+
+			//nu am intersectie probabils - trec mai departe
+			if (!boxUnion.Intersects(&m_arrColShapes[kk]->bbox))
+				continue;
+
+			//adauga bbox in lista de probabile pt intersectie
+			if (m_arrColShapes[kk]->collFlags != K_DIRFLAG_NONE)
+			{
+				tempCollBoxList.Add(m_arrColShapes[kk]);
+
+				//ne asiguram ca nu trecem prin cutii mici (solide) la viteze foarte mari
+				//#TODO: implement other collision types here
+				if (m_arrColShapes[kk]->type == K_LVL_COLL_TYPE_SOLID)
+				{
+					CAABB* box = &m_arrColShapes[kk]->bbox;
+					if ((box->vSize.x <= fabs(movevec.x)) || (box->vSize.y <= fabs(movevec.y)))
+					{
+						//sweep test - enlarge bbox and check intersections between centers vector
+						CAABB staticBoxGrown = *box;
+						staticBoxGrown.Inflate(oldbox.vHalfSize.x, oldbox.vHalfSize.y);
+
+						D3DXVECTOR2 vColPt;
+						if (AABB_Segment_Intersection_NoHeads(oldbox.vCenter, destbox.vCenter, staticBoxGrown, &vColPt))
+						{
+							//repozitionam
+							movevec = vColPt - oldbox.vCenter;
+							actor->pos = actorOldPos + movevec;
+							//destbox set
+							destbox = actor->bbox_ini;
+							destbox.Move(actor->pos);
+						}
+					}
+				}
+
+			}
+
+		}
+
+		//reset coll flags
+		UINT16 unTotalFlags = 0;
+
+		bool bSquashPlayer = false;
+		if (tempCollBoxList.Count() > 0)
+		{
+			for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
+			{
+				CCollisionShape *colshape = tempCollBoxList[kk];
+				CAABB box = colshape->bbox; //copy box to edit it
+
+				CAABB minkAABB = AABB_GetMinkowskiDifference(destbox, box);
+				//verificam coliziune: daca nu contine originea nu e coliziune
+				if ((minkAABB.vMin.x > 0.0f) || (minkAABB.vMin.y > 0.0f) || (minkAABB.vMax.x < 0.0f) || (minkAABB.vMax.y < 0.0f))
+					continue;
+				//daca avem coliziune gasim vectorul de penetrare adica distanta minima de la origine la margini
+				float minx = fabs(minkAABB.vMin.x);
+				float maxx = fabs(minkAABB.vMax.x);
+				float miny = fabs(minkAABB.vMin.y);
+				float maxy = fabs(minkAABB.vMax.y);
+
+				int retDirFlag = K_DIRFLAG_NONE;
+				D3DXVECTOR2 vPenetrate(0.0f, 0.0f);
+				float mindist = 1000000.0f;
+
+				if (colshape->collFlags & K_DIRFLAG_LEFT)
+				{
+					if (actor->speed.x == 0.0f)
+					{
+						mindist = minx;
+						vPenetrate.x = -minx; vPenetrate.y = 0.0f;
+						retDirFlag = K_DIRFLAG_LEFT;
+					}
+					else //ignore left collisions if difference is small (small stairs)
+					{
+						float fDY = actor->bbox.vMax.y - colshape->bbox.vMin.y;
+						//don't ignore collision if stairs too high or feet not on ground
+						if ((fDY > 4.0f) || (fDY <= 0.0f) || ((actor->collisionFlags & K_DIRFLAG_DOWN) == 0))
+						{
+							mindist = minx;
+							vPenetrate.x = -minx; vPenetrate.y = 0.0f;
+							retDirFlag = K_DIRFLAG_LEFT;
+						}
+					}
+				}
+				if ((maxx < mindist) && (colshape->collFlags & K_DIRFLAG_RIGHT))
+				{
+					if (actor->speed.x == 0.0f)
+					{
+						mindist = maxx;
+						vPenetrate.x = maxx; vPenetrate.y = 0.0f;
+						retDirFlag = K_DIRFLAG_RIGHT;
+					}
+					else //ignore right collisions if difference is small (small stairs)
+					{
+						float fDY = actor->bbox.vMax.y - colshape->bbox.vMin.y;
+						if ((fDY > 4.0f) || (fDY <= 0.0f) || ((actor->collisionFlags & K_DIRFLAG_DOWN) == 0))
+						{
+							mindist = maxx;
+							vPenetrate.x = maxx; vPenetrate.y = 0.0f;
+							retDirFlag = K_DIRFLAG_RIGHT;
+						}
+					}
+				}
+				if ((maxy < mindist) && (colshape->collFlags & K_DIRFLAG_DOWN))
+				{
+					if (movevec.y >= 0.0f) //this if is optional but it helps when jumping near an interactible so we don't get the interact icon shown
+					{
+						mindist = maxy;
+						vPenetrate.x = 0.0f; vPenetrate.y = maxy;
+						retDirFlag = K_DIRFLAG_DOWN;
+					}
+				}
+				if ((miny < mindist) && (colshape->collFlags & K_DIRFLAG_UP))
+				{
+					mindist = miny;
+					vPenetrate.x = 0.0f; vPenetrate.y = -miny;
+					retDirFlag = K_DIRFLAG_UP;
+				}
+				//daca nu da coliziune din cauza flagurilor ignor boxul
+				if (retDirFlag == K_DIRFLAG_NONE)
+					continue;
+
+				//set collision flags
+				unTotalFlags |= retDirFlag;
+				//change actor placement
+				actor->pos -= vPenetrate;
+				movevec = actor->pos - actorOldPos;
+				//destbox set
+				destbox = actor->bbox_ini;
+				destbox.Move(actor->pos);
+				//still penetrating? SQUASH!
+				if ((fabs(vPenetrate.x) > K_LVL_MAX_PENETRATION) || (fabs(vPenetrate.y) > K_LVL_MAX_PENETRATION))
+				{
+					bSquashPlayer = true;
+				}
+			}
+
+			//set actor current collision flags
+			actor->collisionFlags = unTotalFlags;
+
+			//final check
+			//squash - cand esti strivit moare cu splat
+			if ((bSquashPlayer) &&
+				(((actor->collisionFlags & K_DIRFLAG_UP_DOWN) == K_DIRFLAG_UP_DOWN) || ((actor->collisionFlags & K_DIRFLAG_LEFT_RIGHT) == K_DIRFLAG_LEFT_RIGHT)))
+			{
+				HitActor(actor, -500.0f, actor->GetUID(), K_LVL_ACT_CLASS_EXPLOSION);
+			}
+			//DOWN collision
+			if ((actor->speed.y > 0.0f) && (actor->collisionFlags & K_DIRFLAG_DOWN))
+			{
+				//reset speed to 0 !!!
+				actor->speed.y = 0.0f;
+			}
+			//UP collision
+			else if ((actor->speed.y < 0.0f) && (actor->collisionFlags & K_DIRFLAG_UP))
+			{
+				actor->speed.y = 0.0f;
+			}
+			//LEFT collision
+			if ((actor->speed.x < 0.0f) && (actor->collisionFlags & K_DIRFLAG_LEFT))
+			{
+				actor->speed.x = 0.0f;
+			}
+			//RIGHT collision
+			if ((actor->speed.x > 0.0f) && (actor->collisionFlags & K_DIRFLAG_RIGHT))
+			{
+				actor->speed.x = 0.0f;
+			}
+			//LEFT RIGHT collision - impulse
+			if (((actor->vSpeedImpulse.x < 0.0f) && (actor->collisionFlags & K_DIRFLAG_LEFT)) ||
+				((actor->vSpeedImpulse.x > 0.0f) && (actor->collisionFlags & K_DIRFLAG_RIGHT)) ||
+				((actor->vSpeedImpulse.y < 0.0f) && (actor->collisionFlags & K_DIRFLAG_UP)) ||
+				((actor->vSpeedImpulse.y > 0.0f) && (actor->collisionFlags & K_DIRFLAG_DOWN)))
+			{
+				actor->vSpeedImpulse.x = 0.0f;
+			}
+		}
+		else
+		{
+			actor->collisionFlags = 0;
+		}
+
+	}
+	//end phys
+
+	//check world bounds for each actor - kill if out
+	if (!PointInRect(actor->pos, m_levelAABB))
+	{
+		KillActor(actor);
+	}
+
+
 	//set final position
 	actor->SetPos(actor->pos);
+	// save last position in pos_last (SetPos does but we already altered actor->pos)
+	actor->pos_last = actorOldPos;
 	//set camera vector
 	if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
 	{
@@ -14175,8 +14139,10 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	{
 		if (pPlayerActor[kk] == null)
 			continue;
-		D3DXVECTOR2 vto = pPlayerActor[kk]->pos + pPlayerActor[kk]->m_AIcommands.vAimVec;
+
 		// paint aiming cursor
+		// vAimVec was normalized using last frame data so paint it at last frame actor position
+		D3DXVECTOR2 vto = pPlayerActor[kk]->pos_last + pPlayerActor[kk]->m_AIcommands.vAimVec;
 		CSprite::paintFrame(&m_sprInterface, vto.x, vto.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffffffff);
 		
 	}
