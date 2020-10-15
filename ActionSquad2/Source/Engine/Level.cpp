@@ -14134,7 +14134,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		m_pDevice->SetPixelShader(null);
 	}
 
-	//#HARDCODE: crosshair paint
+	///--- paint crosshairs 
 	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 	{
 		if (pPlayerActor[kk] == null)
@@ -14144,11 +14144,9 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		// vAimVec was normalized using last frame data so paint it at last frame actor position
 		D3DXVECTOR2 vto = pPlayerActor[kk]->pos_last + pPlayerActor[kk]->m_AIcommands.vAimVec;
 		CSprite::paintFrame(&m_sprInterface, vto.x, vto.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffffffff);
-		
 	}
-
-
-	//--- actors icons and stun stars ---
+								  
+	///--- actors icons and stun stars ---
 	for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
 	{
 		CActor* act = m_visibleList.visible_actors.m_pData[kk];
@@ -14170,124 +14168,6 @@ HRESULT CLevel::PaintUsingFinalRTT()
 			int curframe = int(fLocalTimeline * 25.0f) % g_particlesMgr.m_sprCol.GetAFramesCnt(ANM_PARTICLES_SPR_STUN_STARS);
 			D3DXVECTOR2 vStarsPos = act->GetPosHeart();
 			CSprite::paintFrameModule(&g_particlesMgr.m_sprCol, vStarsPos.x, vStarsPos.y - 10.0f, ANM_PARTICLES_SPR_STUN_STARS, curframe, 0, act->color);
-		}
-
-		//LASER SIGHT - for non players
-		if ((act->pCurrentWeapon->bPaintLaserSight) && (act->m_AIsensorInfo.pTargetedActor != null) && (act->templateActor.actorClass != K_LVL_ACT_CLASS_PLAYER))
-		{
-			float fRayLen = 0.0f;
-
-			D3DXVECTOR2 vfrom = act->GetPosWeapon();
-			D3DXVECTOR2 vto = vfrom;
-			vto.x += act->lookDirXsign * act->templateActor.distSee;
-			//coliziunea cu nivelul
-			D3DXVECTOR2 collisionPoint, collisionNormal;
-			CCollisionShape* colShape = ColShape_Segment_Intersection_Arr(vfrom, vto, m_visibleList.logic_colShapes.m_pData, m_visibleList.logic_colShapes.Count(), &collisionPoint, &collisionNormal);
-			if (colShape != null)
-			{
-				vto = collisionPoint;
-				fRayLen = fabs(vto.x - vfrom.x);
-			}
-			//coliziunea cu inamicul targetat
-			D3DXVECTOR2 retpt;
-			CActor* enemy = act->m_AIsensorInfo.pTargetedActor;
-
-			CAABB actaabb = enemy->bbox;
-			if (AABB_Segment_Intersection(vfrom, vto, actaabb, &retpt))
-			{
-				//vto se scurteaza pana cand nu mai colizioneaza cu nimic
-				vto = retpt;
-			}
-
-			//daca e prea scurt nu mai desenez raza
-			if (fabs(vto.x - vfrom.x) > 1.0f)
-			{
-				if (vto.x < vfrom.x)
-					SWAP(vfrom, vto);
-
-				CSprite laserspr(ANM_ACTIVES_SPR_BULLETS_FIRE, vfrom);
-				laserspr.currentFrame = 3;
-				laserspr.color = 0xff00ff00;
-
-				//m_pSprite->SetTransform(&mattrans);
-				laserspr.paintTiled(&m_sprActives, vto.x - vfrom.x);
-				//capete raza laser
-				CSprite::paintFrame(&m_sprActives, vfrom.x, vfrom.y, ANM_ACTIVES_SPR_BULLETS_FIRE, 0, 0xff00ff00);
-				CSprite::paintFrame(&m_sprActives, vto.x, vto.y, ANM_ACTIVES_SPR_BULLETS_FIRE, 0, 0xff00ff00);
-			}
-		}
-
-
-		//--- paint DoT for static effects ---
-		switch (act->cDamageOverTime.eType)
-		{
-			case CDamageOverTime::K_LVL_DoT_TARGETED_ALLY:
-			case CDamageOverTime::K_LVL_DoT_TARGETED:
-			{
-				float fp = cos(act->cDamageOverTime.fDuration * 4.0f);
-				float fAlphaHeads = MATH_GetAlphaOnDomainEnds(act->cDamageOverTime.fDuration, act->cDamageOverTime.fDuration_ini, 0.2f);
-				//different colors for both effects
-				DWORD dwCol = D3DCOLOR_COLORALPHA(0xffff0000, fAlphaHeads);
-				if (act->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_TARGETED_ALLY)
-					dwCol = D3DCOLOR_COLORALPHA(0xff00ff00, fAlphaHeads);
-
-
-				//find closest CAM BALL
-				float fMinDist = 200.0f;
-				CBullet *pCamball = null;
-				for (int ll = 0; ll < m_arrBulletsTemp.Count(); ll++)
-				{
-					CBullet* bul = m_arrBulletsTemp.m_pData[ll];
-					if (bul->type != K_LVL_BULLET_CAM_BALL)
-						continue;
-					if (!bul->physPt->m_data.bIsStatic)
-						continue;
-					D3DXVECTOR2 vBulPos = bul->physPt->m_data.pos;
-					float fDist = D3DXVec2Length(&(vBulPos - act->posHeart));
-					if (fDist <= fMinDist)
-					{
-						fMinDist = fDist;
-						pCamball = bul;
-					}
-				}
-				if (pCamball != null)
-				{
-					D3DXVECTOR2 vBulPos = pCamball->physPt->m_data.pos + pCamball->physPt->m_data.contactNormal * 2.0f;
-					D3DXVECTOR2 vDir = act->posHeart - vBulPos;
-					D3DXVec2Normalize(&vDir, &vDir);
-					CSprite spr(ANM_IGM_INTERFACE_SPR_LINES_H, 0.0f, 0.0f);
-					spr.currentFrame = 1;
-					spr.color = D3DCOLOR_COLORALPHA(dwCol, 0.4f + 0.15f * sin(fLocalTimeline * 3.0f));
-					spr.paintTiledHOriented(&m_sprInterface, vBulPos + vDir * 2.0f, act->posHeart);
-				}
-
-				//paint normal markings
-				CSprite::paintFrame(&m_sprInterface, act->bbox.vMin.x - fabs(2.0f * fp), act->bbox.vMax.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 2, dwCol);
-				CSprite::paintFrame(&m_sprInterface, act->bbox.vMax.x + fabs(2.0f * fp), act->bbox.vMax.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 3, dwCol);
-			}
-			break;
-			case CDamageOverTime::K_LVL_DoT_SNIPER_TARGET:
-			{
-				D3DXVECTOR2 vTarget = act->GetPosHeart();
-				D3DXMATRIXA16 matt;
-				float fAlpha = 0.0f;
-				float fScale = 0.8f;
-				float fRotation = 0.0f;
-				if (act->cDamageOverTime.fDuration <= 1.0f)
-				{
-					fAlpha = 1.0f - act->cDamageOverTime.fDuration;
-				}
-				if ((act->cDamageOverTime.fDuration > 0.4f) && (act->cDamageOverTime.fDuration < 1.0f))
-				{
-					fRotation = (act->cDamageOverTime.fDuration - 0.4f) * PI;
-					fScale = 0.8f * (1.0f + act->cDamageOverTime.fDuration - 0.4f);
-				}
-				D3DXMatrixAffineTransformation2D(&matt, fScale, NULL, fRotation, &vTarget);
-				m_pSprite->SetTransform(&matt);
-				CSprite::paintFrame(&m_sprInterface, 0.0f, 0.0f, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 0, D3DCOLOR_FFFA(fAlpha));
-				m_pSprite->SetTransform(&g_matIdentity);
-			}
-			break;
 		}
 
 		//energy bars
