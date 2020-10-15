@@ -7960,13 +7960,16 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					//SND_PLAY(SNDIDX_CLICK_DENIED);
 				}
 
-				D3DXVECTOR2 vMoveDir = pController->GetDoubleAxisVectorN(K_CM_COMMAND_MOVE_X, K_CM_COMMAND_MOVE_Y);
+				D3DXVECTOR2 vMoveDir = pController->GetDoubleAxisVector(K_CM_COMMAND_MOVE_X, K_CM_COMMAND_MOVE_Y, true);
 				if (D3DXVec2LengthSq(&vMoveDir) > 0.0f)
 				{
 					actor->m_AIcommands.bThrust = true;
 					actor->m_AIcommands.vMoveDir = vMoveDir;
 					actor->m_AIcommands.bRunning = true;
 				}
+				D3DXVECTOR2 vAimVec = pController->GetDoubleAxisVector(K_CM_COMMAND_AIM_X, K_CM_COMMAND_AIM_Y, false);
+				//DebugPrintA("aim: %.2f, %.2f\n", vAimVec.x, vAimVec.y);
+				actor->m_AIcommands.vAimVec = vAimVec;
 
 				//reset roll status
 				/*
@@ -9008,8 +9011,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			if (!actor->pCurrentWeapon->WeaponTemplate.bAnimSync)
 			{
 				D3DXVECTOR2 vShootDir;
-				if (actor->m_AIcommands.vAimDir.x != 0.0f)
-					vShootDir = actor->m_AIcommands.vAimDir;
+				if (actor->m_AIcommands.vAimVec.x != 0.0f)
+					vShootDir = actor->m_AIcommands.vAimVec;
 				else
 					vShootDir = D3DXVECTOR2(actor->lookDirXsign, 0.0f);
 
@@ -9038,8 +9041,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						bShoot = true;
 
 					D3DXVECTOR2 vShootDir;
-					if (actor->m_AIcommands.vAimDir.x != 0.0f)
-						vShootDir = actor->m_AIcommands.vAimDir;
+					if (actor->m_AIcommands.vAimVec.x != 0.0f)
+						vShootDir = actor->m_AIcommands.vAimVec;
 					else
 						vShootDir = D3DXVECTOR2(actor->lookDirXsign, 0.0f);
 
@@ -14167,61 +14170,15 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		m_pDevice->SetPixelShader(null);
 	}
 
-	//#HARDCODE: laser sight drawing for players 
+	//#HARDCODE: crosshair paint
 	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 	{
 		if (pPlayerActor[kk] == null)
 			continue;
-		if ((pPlayerActor[kk] != NULL) && (pPlayerActor[kk]->pCurrentWeapon->bPaintLaserSight))
-		{
-			float fRayLen = 0.0f;
-
-			D3DXVECTOR2 vfrom = pPlayerActor[kk]->GetPosWeapon();
-			D3DXVECTOR2 vto = vfrom;
-			vto.x += pPlayerActor[kk]->lookDirXsign * pPlayerActor[kk]->templateActor.distSee;
-			//coliziunea cu nivelul
-			D3DXVECTOR2 collisionPoint, collisionNormal;
-			CCollisionShape* colShape = ColShape_Segment_Intersection_Arr(vfrom, vto, m_visibleList.logic_colShapes.m_pData, m_visibleList.logic_colShapes.Count(), &collisionPoint, &collisionNormal);
-			if (colShape != null)
-			{
-				vto = collisionPoint;
-				fRayLen = fabs(vto.x - vfrom.x);
-			}
-			//coliziunea cu inamicii
-			for (int ll = 0; ll < m_visibleList.visible_actors.Count(); ll++)
-			{
-				D3DXVECTOR2 retpt;
-				CActor* enemy = m_visibleList.visible_actors.m_pData[ll];
-				if (enemy->templateActor.actorClass < K_LVL_ACT_CLASS_HUMAN)
-					continue;
-				if ((enemy->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0)
-					continue;
-
-				CAABB actaabb = enemy->bbox;
-				if (AABB_Segment_Intersection(vfrom, vto, actaabb, &retpt))
-				{
-					//vto se scurteaza pana cand nu mai colizioneaza cu nimic
-					vto = retpt;
-				}
-			}
-
-			//too short? don't draw
-			if (fabs(vto.x - vfrom.x) < 1.0f)
-				continue;
-
-			if (vto.x < vfrom.x)
-				SWAP(vfrom, vto);
-
-			CSprite laserspr(ANM_ACTIVES_SPR_BULLETS_FIRE, vfrom);
-			laserspr.currentFrame = 3;
-			laserspr.color = 0xffff0000;
-
-			//m_pSprite->SetTransform(&mattrans);
-			laserspr.paintTiled(&m_sprActives, vto.x - vfrom.x);
-			//capete raza laser
-			CSprite::paintFrame(&m_sprActives, vfrom.x, vfrom.y, ANM_ACTIVES_SPR_BULLETS_FIRE, 0, 0xffff0000);
-			CSprite::paintFrame(&m_sprActives, vto.x, vto.y, ANM_ACTIVES_SPR_BULLETS_FIRE, 0, 0xffff0000);
-		}
+		D3DXVECTOR2 vto = pPlayerActor[kk]->pos + pPlayerActor[kk]->m_AIcommands.vAimVec;
+		// paint aiming cursor
+		CSprite::paintFrame(&m_sprInterface, vto.x, vto.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffffffff);
+		
 	}
 
 

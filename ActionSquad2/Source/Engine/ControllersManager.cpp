@@ -238,9 +238,8 @@ void CControllersManager::ReceiveKeypress(UINT nChar, bool bIsKeyDown, bool bAlt
 
 bool CControllersManager::KeyPressed(EControllerCommand eCommandFilter /*= K_CM_COMMAND_NONE*/)
 {
-	for (int ll = 0; ll < m_arrControllers.size(); ll++)
+	for (CController * ctrlr : m_arrControllers)
 	{
-		CController* ctrlr = m_arrControllers[ll];
 		if (eCommandFilter == K_CM_COMMAND_NONE)
 		{
 			for (int kk = 0; kk < K_CM_COMMANDS_COUNT; kk++)
@@ -403,20 +402,20 @@ bool CControllersManager::RemoveSDLController(int nnInstanceID)
 
 CController* CControllersManager::GetControllerByInstanceID(int nnInstanceID)
 {
-	for (int kk = 0; kk < m_arrControllers.size(); kk++)
+	for (auto & ctrlr : m_arrControllers)
 	{
-		if (m_arrControllers[kk]->nSDLInstanceId == nnInstanceID)
-			return m_arrControllers[kk];
+		if (ctrlr->nSDLInstanceId == nnInstanceID)
+			return ctrlr;
 	}
 	return null;
 }
 
 CController* CControllersManager::GetControllerByName(WCHAR* strControllerName)
 {
-	for (int kk = 0; kk < m_arrControllers.size(); kk++)
+	for (auto & ctrlr : m_arrControllers)
 	{
-		if (m_arrControllers[kk]->strName.IsEqual(strControllerName))
-			return m_arrControllers[kk];
+		if (ctrlr->strName.IsEqual(strControllerName))
+			return ctrlr;
 	}
 	ErrorBox(K_ERR_WARNING, TEXT("* CControllersManager::GetControllerByName - Controller [%s] not found! Returning null."), strControllerName);
 	return null;
@@ -518,9 +517,8 @@ void CControllersManager::OnSDLKeypress(const SDL_KeyboardEvent sdlEvent, bool b
 	if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
 		return;
 
-	for (int kk = 0; kk < m_arrControllers.size(); kk++)
+	for (CController * ctrlr : m_arrControllers)
 	{
-		CController* ctrlr = m_arrControllers[kk];
 		if (ctrlr->eType != K_CM_CT_KBM_SDL)
 			continue;
 
@@ -550,9 +548,8 @@ void CControllersManager::OnSDLMouseButton(const SDL_MouseButtonEvent sdlEvent)
 		fButPress = 1.0f;
 	}
 	//find button
-	for (int kk = 0; kk < m_arrControllers.size(); kk++)
+	for (CController * ctrlr : m_arrControllers)
 	{
-		CController* ctrlr = m_arrControllers[kk];
 		if (ctrlr->eType != K_CM_CT_KBM_SDL)
 			continue;
 
@@ -573,9 +570,8 @@ void CControllersManager::OnSDLMouseMove(const SDL_MouseMotionEvent sdlEvent)
 	if (arrControllerTypesCnt[K_CM_CT_KBM_SDL] <= 0)
 		return;
 	//find button
-	for (int kk = 0; kk < m_arrControllers.size(); kk++)
+	for (CController * ctrlr : m_arrControllers)
 	{
-		CController* ctrlr = m_arrControllers[kk];
 		if (ctrlr->eType != K_CM_CT_KBM_SDL)
 			continue;
 		// if we have a normalization fn pointer then call it on the data
@@ -703,10 +699,13 @@ bool CController::WasControllerTouched(bool bSticksToo /*= false*/)
 }
 
 
-D3DXVECTOR2 CController::GetDoubleAxisVectorN(const EControllerCommand commXaxis, const EControllerCommand commYaxis)
+D3DXVECTOR2 CController::GetDoubleAxisVector(const EControllerCommand commXaxis, const EControllerCommand commYaxis, bool bNormalize)
 {
-	D3DXVECTOR2 retvec(0.0f, 0.0f);
-	D3DXVec2Normalize(&retvec, &D3DXVECTOR2(sCommands.arrAxisVal_N[commXaxis], sCommands.arrAxisVal_N[commYaxis]));
+	D3DXVECTOR2 retvec(sCommands.arrAxisVal_N[commXaxis], sCommands.arrAxisVal_N[commYaxis]);
+	if (bNormalize)
+	{
+		D3DXVec2Normalize(&retvec, &retvec);
+	}
 	return retvec;
 }
 

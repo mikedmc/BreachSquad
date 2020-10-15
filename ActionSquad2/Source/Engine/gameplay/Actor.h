@@ -57,7 +57,8 @@ public:
 	public:
 		bool				bThrust;
 		D3DXVECTOR2			vMoveDir;
-		
+		D3DXVECTOR2			vAimVec;		
+
 		bool				bRunning;	//daca alearga
 		bool				bThrustX;	//should be a float (0..1) to replace bRunning
 		bool				bCrouched;	//daca este crouch sau nu
@@ -67,7 +68,6 @@ public:
 		int					nMoveDirX;	//directia de miscare ca si flaguri (-1,0,1)
 		int					nMoveDirY;	//directia de miscare ca si flaguri (-1,0,1)
 		int					nLookDirX;	//directia in care se uita -1/0/1
-		D3DXVECTOR2			vAimDir;		//comanda de aiming pentru arma	(0.0f, 0.0f - for no aiming)
 		EActorAnims			eOverrideAnim;	//if not empty, overrides actor animation
 
 		EActorDeathCommand	nDeathCommand; //0-not dead, 1-dead, 2-splat, 3-splat+explode
@@ -98,7 +98,7 @@ public:
 			nMoveDirX = 0;
 			nMoveDirY = 0;
 			nLookDirX = 0;
-			vAimDir = D3DXVECTOR2(0.0f, 0.0f);
+			vAimVec = D3DXVECTOR2(0.0f, 0.0f);
 
 			bCrouched = false;
 			bJump = false;
@@ -122,7 +122,7 @@ public:
 			nMoveDirX = 0;
 			nMoveDirY = 0;
 			nLookDirX = 0;
-			vAimDir = D3DXVECTOR2(0.0f, 0.0f);
+			vAimVec = D3DXVECTOR2(0.0f, 0.0f);
 
 			bCrouched = false;
 			bJump = false;

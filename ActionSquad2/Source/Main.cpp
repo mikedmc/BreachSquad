@@ -147,7 +147,7 @@ void PaintTransition(float dTime, float fTimeline, LPDIRECT3DDEVICE9 pd3dDevice)
 void NormalizeIngameMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue)
 {
 	g_level.NormalizeMouseCoords(ControllerIID, fAxisValue, bIsHorizontalAxis, ret_fAxisValue);
-	DebugPrintA("coords: axis:%d %.2f -> %.2f\n", bIsHorizontalAxis, fAxisValue, ret_fAxisValue);
+	//DebugPrintA("coords: axis:%d %.2f -> %.2f\n", bIsHorizontalAxis, fAxisValue, ret_fAxisValue);
 }
 
 //#define DEBUG_VS
