@@ -356,16 +356,16 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 
 #if defined(_DEBUG) || defined(DEBUG)
 	//debug test
-	UTGetAnalytics().Init("UA-111197045-7", strUID);
+	UTGetAnalytics().Init("UA-181007525-1", strUID);
 #else
 
 	#ifdef ENABLE_STEAM
 		//final steam - RELEASE
-	UTGetAnalytics().Init("UA-111197045-6", strUID);
+	UTGetAnalytics().Init("UA-181007525-2", strUID);
 	#endif
 	#ifdef ENABLE_GALAXY
 		//final GoG - RELEASE
-		UTGetAnalytics().Init("UA-111197045-5", strUID);
+	UTGetAnalytics().Init("UA-181007525-3", strUID);
 	#endif
 
 #endif //else

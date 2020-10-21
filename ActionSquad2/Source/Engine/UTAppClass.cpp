@@ -214,28 +214,6 @@ void CApplication::Init()
 	StringCchPrintf(g_wszAppResDir, MAX_PATH, L"%smedia", g_wszExePath);
 
 
-	//#TODO: to remove
-	//copy files from older location (migrate from MyDocuments to AppData) - initially files were saved in MyDocuments
-	/*
-	WCHAR strOldDataDir[MAX_PATH] = { 0 };
-	hr = ::SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, strOldDataDir);
-	if (SUCCEEDED(hr))
-	{
-		WCHAR strPath[MAX_PATH] = { 0 };
-		StringCchPrintf(strPath, MAX_PATH, L"%s%s%s", strOldDataDir, K_GAME_USERDATA_COMPANY_SUFFIX, K_GAME_USERDATA_FOLDER_SUFFIX);
-		WCHAR strFileSrc[MAX_PATH] = { 0 };
-		WCHAR strFileDst[MAX_PATH] = { 0 };
-		//options.xml - copy fails if files already migrated (param 3 = TRUE)
-		StringCchPrintf(strFileSrc, MAX_PATH, L"%s%s", strPath, L"options.xml");
-		StringCchPrintf(strFileDst, MAX_PATH, L"%s%s", g_wszUserDataDir, L"options.xml");
-		::CopyFile(strFileSrc, strFileDst, TRUE);
-		//userdata.bin - copy fails if files already migrated (param 3 = TRUE)
-		StringCchPrintf(strFileSrc, MAX_PATH, L"%s%s", strPath, L"userdata.bin");
-		StringCchPrintf(strFileDst, MAX_PATH, L"%s%s", g_wszUserDataDir, L"userdata.bin");
-		::CopyFile(strFileSrc, strFileDst, TRUE);
-	}
-	*/
-
 	//-- set cam animation ---
 	g_letterbox.w = g_letterbox.h = 0.0f;
 	//camera
