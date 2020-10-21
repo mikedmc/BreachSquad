@@ -12,3 +12,4 @@ ActionSquad2/Bin/*.exe
 *.sdf
 ActionSquad2/Obj/
 *.lastcodeanalysissucceeded
+Tools/AStar/AStarApp1/AStarApp1/obj/
