@@ -15,7 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AStarCpp.cpp">
+    <ClInclude Include="fsa.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stlastar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="findpath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

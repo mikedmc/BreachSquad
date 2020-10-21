@@ -151,7 +151,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AStarCpp.cpp" />
+    <ClInclude Include="fsa.h" />
+    <ClInclude Include="stlastar.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="findpath.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
