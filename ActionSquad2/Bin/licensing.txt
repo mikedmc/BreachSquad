@@ -1,5 +1,5 @@
 ---------------------------------------
-Door Kickers: Action Squad uses libcurl.
+Action Squad uses libcurl.
 ---------------------------------------
 
 COPYRIGHT AND PERMISSION NOTICE
@@ -25,7 +25,7 @@ in advertising or otherwise to promote the sale, use or other dealings in this S
 without prior written authorization of the copyright holder.
 
 ---------------------------------------
-Door Kickers: Action Squad uses SDL 2.0.
+Action Squad uses SDL 2.0.
 ---------------------------------------
 
 SDL 2.0 and newer are available under the zlib license :
@@ -48,14 +48,14 @@ SDL 1.2 and older are available under the GNU LGPL license .
 
 
 ---------------------------------------
-DOOR KICKERS: ACTION SQUAD
+ACTION SQUAD
 End-User License Agreement
 ---------------------------------------
 
 PLEASE READ THIS AGREEMENT (“AGREEMENT”) CAREFULLY BEFORE PROCEEDING. 
 THIS AGREEMENT LICENSES SOFTWARE TO YOU FROM PIXEL SHARD LABS (“LICENSOR”) AND KILLHOUSE GAMES ("PUBLISHER") AND CONTAINS WARRANTY AND LIABILITY DISCLAIMERS. BY SELECTING THE “ACCEPT” OR “AGREE” BUTTON, YOU ARE CONFIRMING THAT YOU HAVE READ AND UNDERSTAND THIS AGREEMENT, AND AGREE TO BE BOUND BY THE TERMS OF THIS AGREEMENT. IF YOU DO NOT AGREE WITH THE TERMS OF THIS AGREEMENT, YOU SHOULD EXIT THIS PAGE WITHOUT SELECTING THE “ACCEPT” OR “AGREE” BUTTON.  IN THE SOLE EVENT YOU WERE ONLY PRESENTED WITH THE AGREEMENT FOR REVIEW AFTER YOU HAVE MADE A PAYMENT FOR THE LICENSOR SOFTWARE AND YOU DID NOT CLICK THE “ACCEPT” OR “AGREE” BUTTON, YOU MAY SEEK A REFUND OF THE AMOUNT YOU PAID FOR THE LICENSOR SOFTWARE (IF ANY). 
 1.	Definitions 
-(a) “Licensor Software“ means the software program known as Door Kickers: Action Squad™ (including any and all musical content contained therein or provided in association therewith) and all related updates supplied by Licensor which is owned by Licensor and/or its licensors; 
+(a) “Licensor Software“ means the software program known as Action Squad™ (including any and all musical content contained therein or provided in association therewith) and all related updates supplied by Licensor which is owned by Licensor and/or its licensors; 
 
 2.	License
 This Agreement allows you, subject to the below restrictions, to: (a) use the Licensor Software for your own non-commercial, personal enjoyment on a single computer solely in connection with User Content; (b) make one copy of the Licensor Software in machine-readable form solely for backup purposes; and (c) distribute the installer for the trial (free) version of the Licensor Software without modification to third parties at no charge to such third parties on a non-commercial basis. You must reproduce on any such copy all copyright notices and any other proprietary legends found on the original.  All rights not expressly granted are reserved.  

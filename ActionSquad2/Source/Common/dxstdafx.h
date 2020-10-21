@@ -226,13 +226,13 @@
 #include "..\\versioning\\versioning.h"
 #include "..\\Engine\\dbgutil.h"
 
-#define K_GAME_USERDATA_COMPANY_SUFFIX		L"\\KillHouseGames\\"
-#define K_GAME_USERDATA_FOLDER_SUFFIX		L"ActionSquad\\"
+#define K_GAME_USERDATA_COMPANY_SUFFIX		L"\\PixelShard\\"
+#define K_GAME_USERDATA_FOLDER_SUFFIX		L"ActionSquad2\\"
 #define K_GAME_USERDATA_MODS_SUFFIX			L"mods\\"
-#define K_GAME_USERDATA_MODS_SUFFIX_TEMP	L"DKAS_mods_temp\\"
-#define K_GAME_WINDOW_CLASSNAME				L"DKActionSquadWindowClass"
-#define K_GAME_EMAIL						L"actionsquad@inthekillhouse.com"
-#define K_GAME_CONTACT_URL					L"http://inthekillhouse.com/contact-as/"
+#define K_GAME_USERDATA_MODS_SUFFIX_TEMP	L"AS2_mods_temp\\"
+#define K_GAME_WINDOW_CLASSNAME				L"ActionSquad2WindowClass"
+#define K_GAME_EMAIL						L"devteam@pixelshard.com"
+#define K_GAME_CONTACT_URL					L"https://pixelshard.com/contact"
 
 #ifdef K_CONTROLS_EDITOR
 #include "DXUTgui.h"

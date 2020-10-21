@@ -644,25 +644,6 @@ void CMainMenu::Update(float dTime)
 					&D3DXVECTOR2(-8.0f, -4.0f), &D3DXVECTOR2(-40.0f - randfloat(20.0f), -10.0f - randfloat(10.0f)), 3.0f + randfloat(2.0f), 0.5f - randfloat(0.2f), -0.05f, 0.0f, randfloatsgn(PI), 0.1f, 1.0f, 0xaaffffff, K_PART_LAYER_NORMAL_LIGHT);
 			}
 
-			//#ADS: check hover on DK2 an
-			//--- mouse selection on mouse click ---
-			//check chapters click
-			RECTXYWH picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_AD_ICONS, 0);
-			picrect.x += (int)worldrect.Right();
-			picrect.y += (int)worldrect.Bottom();
-			if (PointInRect(vLocalMousePos, picrect))
-			{
-				inc_limit(m_fSelTimer, dTime * 10.0f, 1.0f);
-				// open browser window
-				if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTRELEASED)
-				{
-					WEBSITE_OPEN(L"https://store.steampowered.com/app/1239080/Door_Kickers_2_Task_Force_North/");
-				}
-			}
-			else
-			{
-				dec_limit(m_fSelTimer, dTime * 10.0f, 0.0f);
-			}
 		}
 		break;
 
@@ -1910,13 +1891,6 @@ void CMainMenu::Paint()
 			//paint logo bling
 			CSprite spr(ANM_MENUS_SPR_TITLE, scrrect.Right(), scrrect.y);
 			spr.currentFrame = 1;
-			//#ADS: paint DK2 AD
-			CSprite::paintFrame(&m_sprCol, scrrect.Right(), scrrect.Bottom(), ANM_MENUS_SPR_AD_ICONS, 0);
-
-			AdditiveBlendingON(m_pDevice, m_pSprite);
-			//#ADS: DK2 AD hover
-			CSprite::paintFrame(&m_sprCol, scrrect.Right(), scrrect.Bottom(), ANM_MENUS_SPR_AD_ICONS, 0, D3DCOLOR_FFFA(m_fSelTimer));
-
 			CSprite spr2 = spr;
 
 			//float fAlpha = (2.0f * PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.6f, 0.5f, 2)) - 1.0f;

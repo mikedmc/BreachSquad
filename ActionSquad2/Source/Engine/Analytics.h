@@ -17,7 +17,7 @@
 //--- triggers a page view ---
 #define ANALYTICS_PAGEVIEW(strHostname, strPage, strTitle)				UTGetAnalytics().TriggerPageView(strHostname, strPage, strTitle)
 //--- triggers a screenview ---
-#define ANALYTICS_SCREENVIEW(strScreenName)		UTGetAnalytics().TriggerScreenView(strScreenName, "DKActionSquad", _VERSION_CHARSTR_, "psh.dk.actionsquad", "valve.steam")
+#define ANALYTICS_SCREENVIEW(strScreenName)		UTGetAnalytics().TriggerScreenView(strScreenName, "ActionSquad2", _VERSION_CHARSTR_, "psh.dk.actionsquad2", "valve.steam")
 
 #if defined(K_GAME_ENABLE_ANALYTICS)
 

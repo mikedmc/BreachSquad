@@ -942,7 +942,7 @@ int CLevel::MeleeBlow(int nBulletType, D3DXVECTOR2 vPos, D3DXVECTOR2 vDirection,
 }
 
 /* \brief Spawns a new player at spawnPos
-* Takes all the necessary spawn data from the "Gear selection screen" object. Optimized for DoorKickers.
+* Takes all the necessary spawn data from the "Gear selection screen" object.
 * \param nPlayerOrdinal - 0-player1 or 1-player2
 * \param nAnimset: -1 to skip spawn animation, 0 first animation, 1 second animation
 */

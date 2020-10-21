@@ -31,7 +31,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_MAIN_ICON           ICON                    "DKAS.ico"
+IDI_MAIN_ICON           ICON                    "AS2.ico"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -80,23 +80,23 @@ END
 
 // VERSION INFO - DMC
 1 VERSIONINFO
-FILEVERSION 1,2,8,0
-PRODUCTVERSION 1,2,8,0
+FILEVERSION 0,0,1,0
+PRODUCTVERSION 0,0,1,0
 FILETYPE VFT_APP
 {
   BLOCK "StringFileInfo"
     {
-       BLOCK "040904E4"//"040704E4"
+       BLOCK "040A04E4"//"040704E4"
        {
           VALUE "CompanyName", "PixelShard.com"
-          VALUE "FileVersion", "1.2.8"
-          VALUE "FileDescription", "ActionSquad"
-          VALUE "InternalName", "ActionSquad"
-          VALUE "LegalCopyright", "©2020 KillHouse PixelShard"
+          VALUE "FileVersion", "0.0.1"
+          VALUE "FileDescription", "ActionSquad2"
+          VALUE "InternalName", "ActionSquad2"
+          VALUE "LegalCopyright", "©2020 PixelShard"
           VALUE "LegalTrademarks", ""
-          VALUE "OriginalFilename", "ActionSquad.exe"
-          VALUE "ProductName", "Door Kickers: Action Squad"
-          VALUE "ProductVersion", "1.2.8"
+          VALUE "OriginalFilename", "ActionSquad2.exe"
+          VALUE "ProductName", "Action Squad 2"
+          VALUE "ProductVersion", "0.0.1"
        }
     }
   BLOCK "VarFileInfo"
