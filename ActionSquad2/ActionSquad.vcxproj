@@ -25,7 +25,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -203,6 +203,14 @@
     <ClInclude Include="Source\Engine\Constants\igminterface_SPR.h" />
     <ClInclude Include="Source\Engine\Constants\interface_mg_SPR.h" />
     <ClInclude Include="Source\Engine\Constants\interlevel_SPR.h" />
+    <ClInclude Include="Source\Engine\imgui\api\imconfig.h" />
+    <ClInclude Include="Source\Engine\imgui\api\imgui.h" />
+    <ClInclude Include="Source\Engine\imgui\api\imgui_internal.h" />
+    <ClInclude Include="Source\Engine\imgui\api\imstb_rectpack.h" />
+    <ClInclude Include="Source\Engine\imgui\api\imstb_textedit.h" />
+    <ClInclude Include="Source\Engine\imgui\api\imstb_truetype.h" />
+    <ClInclude Include="Source\Engine\imgui\backends\imgui_impl_dx9.h" />
+    <ClInclude Include="Source\Engine\imgui\backends\imgui_impl_win32.h" />
     <ClInclude Include="Source\Engine\InfiniteVerticalMode.h" />
     <ClInclude Include="Source\Engine\Level.h" />
     <ClInclude Include="Source\Engine\LibraryManager.h" />
@@ -335,6 +343,12 @@
     <ClCompile Include="Source\Engine\GetDXVer.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
+    <ClCompile Include="Source\Engine\imgui\api\imgui.cpp" />
+    <ClCompile Include="Source\Engine\imgui\api\imgui_demo.cpp" />
+    <ClCompile Include="Source\Engine\imgui\api\imgui_draw.cpp" />
+    <ClCompile Include="Source\Engine\imgui\api\imgui_widgets.cpp" />
+    <ClCompile Include="Source\Engine\imgui\backends\imgui_impl_dx9.cpp" />
+    <ClCompile Include="Source\Engine\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="Source\Engine\InfiniteVerticalMode.cpp" />
     <ClCompile Include="Source\Engine\Level.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
