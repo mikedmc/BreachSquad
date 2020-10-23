@@ -137,8 +137,16 @@
 #define K_CONTROLS_EDITOR
 #endif
 
-#define MAX_PATH_STD	MAX_PATH
+#if !defined(IMGUI_DISABLE)
+#include "imgui/api/imgui.h"
+#include "imgui/backends/imgui_impl_dx9.h"
+#include "imgui/backends/imgui_impl_win32.h"
+// callback for proc handler
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+#endif
+
+#define MAX_PATH_STD	MAX_PATH
 //-- macrouri de stringuit alte macrouri - vezi versioning.h ---
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)

@@ -226,7 +226,8 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	galaxy::api::User()->SignInGalaxy();
 #endif // ENABLE_GALAXY
 
-
+	// declare that we're DPI aware
+	ImGui_ImplWin32_EnableDpiAwareness();
 
 	//load game settings FIRST AND FOREMOST (includes selected language and so on)
 	UTGetAppClass().LoadSettings();
@@ -397,8 +398,8 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 #endif
 #endif
 
+	//after device creation:
 	///--- init SDL ---
-	//se initializeaza dupa crearea device-ului ca sa nu interfereze cu procedura de creare
 	UTGetAppClass().InitSDL(DXUTGetHWND());
 	//add keyboard controllers and map keys
 	CController* ctrlrkeys1 = UTGetCtrlrMgr().AddController(K_CM_CT_KBM_SDL, g_stringsMgr.strings[STR_KEYBOARD1]->sText);
@@ -810,7 +811,7 @@ HRESULT CALLBACK OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_D
 	nevent->AddNamedArgUINT32(L"height", pBackBufferSurfaceDesc->Height);
 	UTGetEventManager().TriggerEvent(nevent);
 
-	// Verifica minreq si iese daca nu corespund
+	// check minimum requirements and exit if not met
 	if (FAILED(UTGetAppClass().VerifyRequirements()))
 	{
 		DXUTShutdown();
@@ -861,6 +862,7 @@ HRESULT CALLBACK OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_D
 HRESULT CALLBACK OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
 {
 	LOG(L"---OnResetDevice w:%d h:%d ---", pBackBufferSurfaceDesc->Width, pBackBufferSurfaceDesc->Height);
+	ImGui_ImplDX9_CreateDeviceObjects();
 	//trigger resolution change immediately
 	CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_RESOLUTION_CHANGE);
 	nevent->AddNamedArgUINT32(L"width", pBackBufferSurfaceDesc->Width);
@@ -946,6 +948,7 @@ HRESULT CALLBACK OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DE
 void CALLBACK OnLostDevice(void)
 {
 	DebugPrintA("---On lost device---\n");
+	ImGui_ImplDX9_InvalidateDeviceObjects();
 
 	UTGetAppClass().OnLostDevice();
 	UTGetTTFManager().OnLostDevice();
@@ -2441,6 +2444,8 @@ void CALLBACK OnFrameRender(IDirect3DDevice9* pd3dDevice, double fTime, float fE
 
 		V(pd3dDevice->EndScene());
 	}
+
+	UTGetAppClass().App_Paint_IMGUI(pd3dDevice, true, false, ImVec4(0.45f, 0.55f, 0.60f, 0.00f));
 }
 
 
@@ -2460,6 +2465,8 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 	if (*pbNoFurtherProcessing)
 		return 0;
 #endif
+
+	ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
 
 	switch (uMsg)
 	{
@@ -2521,7 +2528,7 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 				EventTrack.cbSize = sizeof(TRACKMOUSEEVENT);
 				TrackMouseEvent(&EventTrack);
 
-				return TRUE;
+				return 0;
 			}
 		}
 		break;
@@ -2575,6 +2582,19 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 			//window moved or finished resizing
 		}
 		break;
+		/*
+		case WM_DPICHANGED:
+		{
+			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DpiEnableScaleViewports)
+			{
+				//const int dpi = HIWORD(wParam);
+				//printf("WM_DPICHANGED to %d (%.0f%%)\n", dpi, (float)dpi / 96.0f * 100.0f);
+				const RECT* suggested_rect = (RECT*)lParam;
+				::SetWindowPos(hWnd, NULL, suggested_rect->left, suggested_rect->top, suggested_rect->right - suggested_rect->left, suggested_rect->bottom - suggested_rect->top, SWP_NOZORDER | SWP_NOACTIVATE);
+			}
+		}
+		break;
+		*/
 		case WM_CHAR:
 		{
 			UTGetControlsManager().ReceiveInput(K_CCTRLMGR_INPUT_CHAR, (UINT32)wParam);
@@ -2601,6 +2621,7 @@ void CALLBACK MouseProc(bool bLeftButton, bool bRightButton, bool /*bMiddleButto
 	g_mouse.bRbut = bRightButton;
 	//salvez si delta
 	g_mouse.wheelDelta = nMouseWheelDelta;
+
 }
 
 
