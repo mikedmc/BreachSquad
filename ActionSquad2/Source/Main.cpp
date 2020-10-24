@@ -14,80 +14,60 @@
 //**************************************************************************************
 // Global variables
 //**************************************************************************************
-//cand dai alt+f4 sa nu mai cheme meniul
-bool					 requestedExit = false;
-
 ///--- FIXED TIMESTEP ---
 //fixed timestep simulation (netsync)
-#define K_FIXED_TIMESTEP_DTIME (1.0f / 60.0f)
+#define	K_FIXED_TIMESTEP_DTIME (1.0f / 60.0f)
 #define K_FIXED_TIMESTEP_DTIME_MS (1000.0f / 60.0f)
-//time accumulator that handles the fixed timestep input acquiring pipeline
-double					g_fTimeAccumInput = 0.0f; 
-// Time accumulator for fixed timestep update (different from input acquiring)
-double					g_fTimeAccumUpdate = 0.0f;
-// Time accumulator for coop input sending
-double					g_fTimeAccumSend = 0.0f;
+
+bool						g_bRequestedExit = false;			// Exit game was requested
+double						g_fTimeAccumInput = 0.0f;			// Time accumulator that handles the fixed timestep input acquiring pipeline
+double						g_fTimeAccumUpdate = 0.0f;			// Time accumulator for fixed timestep update (different from input acquiring)
+double						g_fTimeAccumSend = 0.0f;			// Time accumulator for coop input sending
 
 ///--- startup commands ---
-eStartupCommand			g_startupCommand = GAME_STARTUP_NONE;	//startup command set usually by command line params
-CStringHash				g_startupParam;							//parameter used for startup commands
+eStartupCommand				g_startupCommand = GAME_STARTUP_NONE;	// Startup command set usually by command line params
+CStringHash					g_startupParam;							// Parameter used for startup commands
 
 ///--- network data ---
-//frame counter for updates
-int g_nUpdateFrame = 0;
-//timer that detects when network freezes
-float g_fLastUpdateTimer = 0.0f;
-//numaratoarea de input taken frames
-int g_nInputFrame = 0;
-//transmit last frame that was simulated locally
-int g_nLastSyncedFrame = -1;
-//last hash to check sync for g_nLastSyncedFrame
-DWORD g_nLastSyncHash = 0;
+int							g_nUpdateFrame = 0;					//frame counter for updates
+float						g_fLastUpdateTimer = 0.0f;			//timer that detects when network freezes
+int							g_nInputFrame = 0;					//input taken frames counter
+int							g_nLastSyncedFrame = -1;			//transmit last frame that was simulated locally
+DWORD						g_nLastSyncHash = 0;				//last hash to check sync for g_nLastSyncedFrame
 
-int g_debugInt1, g_debugInt2;
-float g_debugFloat1, g_debugFloat2;
+bool						g_bShowDebugStats = false;			//when enabled it paints debug information
+bool						g_bJustStarted = true;				//game was just started now
+bool						g_bForceOneUpdatePerFrame = false;	// flag used to force only one update per frame when necessary (like during loading)
 
-//when enabled it paints debug information
-bool showDebugStats = false;
-//game was just started now
-bool g_bJustStarted = true;
-// flag used to force only one update per frame when necessary (like during loading)
-bool g_bForceOneUpdatePerFrame = false;
+#define						K_GRAVITY	500.0f
+Vec2						g_vecGravity;						//gravity
 
-#define	K_GRAVITY 500.0f
-D3DXVECTOR2					g_vecGravity;   //gravitatia
+ID3DXSprite*				g_pGameSprite = NULL;				//Main Sprite class 
+MatA16						g_matIdentity;						//identity matrix
+MatA16						g_matWorld;							//world matrix
 
-//--------------------------------------------------------------------------------------
-// Variabile globale care nu merita sa fie incluse in UTAppClass
-//--------------------------------------------------------------------------------------
-ID3DXSprite*				g_pGameSprite = NULL;	//Main Sprite class 
-D3DXMATRIXA16				g_matIdentity;  //identity matrix
-D3DXMATRIXA16				g_matWorld;		//world matrix
-
-CLog*						g_pLog;		//log class
+CLog*						g_pLog;								//log class
 
 UINT32						g_gameState = GAME_STATE_EMPTY;		//state machine's current state. defined in dxstdafx.h 
 UINT32						g_gameSubstate = 0;					//current state's substate - if needed
 eGameMode					g_gameMode = GAME_MODE_CLASSIC;		//current selected game mode
 
-float	g_gameStateTimer; //timer folosit uneori
-int		g_gameStateErrorStringIdx; //daca este diferit de 0, dupa schimbarea starii si finalul tranzitiei afiseaza msgbox cu mesajul respectiv
+float						g_gameStateTimer;					
+int							g_gameStateErrorStringIdx;			// not 0 => after changing the state shows error box with specified message
 
-bool g_bDuringTransition = false;	//daca e in timpul unei tranzitii
-bool g_bRequestedExit = false;			//cand dai alt+f4 sa nu mai cheme meniul
-bool g_bCanPause = false;			//sa puna pauza totala doar dupa starea de loading
-bool g_bLevelNeedsUpdate = false; //pentru un singur frame ramane true dupa resolution change ca sa faca update chiar daca jocul e pe pauza
-//--- redefine keys ---
-//command to redefine (NONE means sequence wasn't initialized)
-EControllerCommand			g_keydef_command = K_CM_COMMAND_NONE;
-//scancode for command (SDL scancodes for now)
-int							g_keydef_scancode = -1;
+bool						g_bDuringTransition = false;		// Is it during transition?
+bool						g_bCanPause = false;				// Global flag: can we pause the game while in background?
+bool						g_bLevelNeedsUpdate = false;		//#HACK: pentru un singur frame ramane true dupa resolution change ca sa faca update chiar daca jocul e pe pauza
 
-CMouseData					g_mouse;		//date despre mouse
+///--- Redefine Keys ---
+EControllerCommand			g_keydef_command = K_CM_COMMAND_NONE;	//command to redefine (NONE means sequence wasn't initialized)
+int							g_keydef_scancode = -1;					//scancode for command (SDL scancodes for now)
 
-CStringsManager				g_stringsMgr;	//manager strings
-CParticlesManager			g_particlesMgr; //manager global de particule
-///--- fonts ---
+CMouseData					g_mouse;								// Mouse data, global
+
+CStringsManager				g_stringsMgr;	
+CParticlesManager			g_particlesMgr; 
+///--- Fonts ---
 //fonts pointers
 CTexturedFont				*g_font12wow;
 CTexturedFont				*g_font10b1, *g_font10bs1;
@@ -96,32 +76,34 @@ CTexturedFont				*g_font9b1;
 CTexturedFont				*g_font6n1, *g_font6ns1, *g_font6nc1;
 CTexturedFont				*g_font5n1, *g_font5n2, *g_font5ns2;
 
-CTimersArray				g_timers(3000, 10);	//array de timers
+CTimersArray				g_timers(3000, 10);					//Timers array
 
-CPlayerSelScr				g_playerSelScr;	//player selection screen
-CMainMenu					g_mainMenu;		//main menu class
-CLevel						g_level;		//nivelul curent
-CInfiniteVerticalMode		g_verticalMode;	//vertical mode generator
+///--- Game classes ---
+CPlayerSelScr				g_playerSelScr;						// Player selection screen
+CMainMenu					g_mainMenu;							// Main menu class
+CLevel						g_level;							// Current Level
+CInfiniteVerticalMode		g_verticalMode;						// vertical mode generator
 
 #ifdef K_CONTROLS_EDITOR
-CControlsEditor				g_ControlsEditor;
+CControlsEditor				g_ControlsEditor;					// Controls editor for debug/develop mode (F2 to show)
 #endif
 
 #ifdef ENABLE_CHAT_WINDOW
-CChatWnd					g_ChatWnd;
+CChatWnd					g_ChatWnd;							// Ingame chat window for networked matches
 #endif
 
-//-- networking class --
+///--- Lockstep networking class ---
 CNetLock					g_netlock;
+
 //**************************************************************************************
 // Forward declarations 
 //**************************************************************************************
 bool    CALLBACK IsDeviceAcceptable(D3DCAPS9* pCaps, D3DFORMAT AdapterFormat, D3DFORMAT BackBufferFormat, bool bWindowed);
 void    CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* pDeviceSettings, const D3DCAPS9* pCaps);
-HRESULT CALLBACK OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc);
-HRESULT CALLBACK OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc);
-void    CALLBACK OnFrameMove(IDirect3DDevice9* pd3dDevice, double fTime, float fElapsedTime);
-void    CALLBACK OnFrameRender(IDirect3DDevice9* pd3dDevice, double fTime, float fElapsedTime);
+HRESULT CALLBACK OnCreateDevice(PDEVICE pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc);
+HRESULT CALLBACK OnResetDevice(PDEVICE pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc);
+void    CALLBACK OnFrameMove(PDEVICE pd3dDevice, double fTime, float fElapsedTime);
+void    CALLBACK OnFrameRender(PDEVICE pd3dDevice, double fTime, float fElapsedTime);
 LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, bool* pbNoFurtherProcessing);
 void    CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown);
 void    CALLBACK OnLostDevice(void);
@@ -133,15 +115,11 @@ HRESULT InitApp(void);
 void	ShutdownApp(void);
 HRESULT	InitSound(void);
 
-
-//*************************************************************************************************
-// GAME FUNCTIONS
-//*************************************************************************************************
+// Transition functions
 void ChangeGameState(int newState, int param1 = 0, int param2 = 0); //are parametru default, in caz ca e necesar
 void ChangeGameStateTransition(int newState, int param1 = 0, int param2 = 0, int transitionType = K_TRANSITION_TYPE_SIMPLE);
-
 void UpdateTransition(float dTime);
-void PaintTransition(float dTime, float fTimeline, LPDIRECT3DDEVICE9 pd3dDevice); 
+void PaintTransition(float dTime, float fTimeline, PDEVICE pDevice); 
 
 // Function used by controllers manager to normalize mouse input from global to ingame player relative
 void NormalizeIngameMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue)
@@ -585,9 +563,9 @@ HRESULT InitApp(void)
 	//--------------------------------------------------------------------------------------
 	// setari initiale
 	//--------------------------------------------------------------------------------------
-	D3DXMatrixIdentity(&g_matIdentity);
-	D3DXMatrixIdentity(&g_matWorld);
-	g_vecGravity = D3DXVECTOR2(0.0f, K_GRAVITY);
+	MUMatIdentity(&g_matIdentity);
+	MUMatIdentity(&g_matWorld);
+	g_vecGravity = Vec2(0.0f, K_GRAVITY);
 
 	//set version number
 	g_stringsMgr.SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
@@ -655,7 +633,7 @@ HRESULT InitSound(void)
 		return hr;
 	}
 
-	UTGetSoundManager().EnablePositionalSounds(D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(UTGetAppClass().g_rectGameScreen.w * 0.7f, UTGetAppClass().g_rectGameScreen.h * 0.7f));
+	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTGetAppClass().g_rectGameScreen.w * 0.7f, UTGetAppClass().g_rectGameScreen.h * 0.7f));
 	UTGetSoundManager().SetListenerVolumeFadeStart(0.7f);
 
 	return hr;
@@ -801,7 +779,7 @@ void CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* pDeviceSettings, const D3
 // here should be released in the OnDestroyDevice callback. 
 //**************************************************************************************
 
-HRESULT CALLBACK OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
+HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
 {
 	HRESULT hr = S_OK;
 
@@ -818,36 +796,36 @@ HRESULT CALLBACK OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_D
 		return S_OK;
 	}
 
-	UTGetTTFManager().OnCreateDevice(pd3dDevice, pBackBufferSurfaceDesc);
+	UTGetTTFManager().OnCreateDevice(pDevice, pBackBufferSurfaceDesc);
 
-	V_RETURN(UTGetAppClass().OnCreateDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(UTGetShaderManager().OnCreateDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(UTGetFontsManager().OnCreateDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_level.OnCreateDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_particlesMgr.OnCreateDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(UTGetControlsManager().OnCreateDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_playerSelScr.OnCreateDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_mainMenu.OnCreateDevice(pd3dDevice, pBackBufferSurfaceDesc));
+	V_RETURN(UTGetAppClass().OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(UTGetShaderManager().OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(UTGetFontsManager().OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(g_level.OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(g_particlesMgr.OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(UTGetControlsManager().OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(g_playerSelScr.OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(g_mainMenu.OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
 
 #ifdef K_CONTROLS_EDITOR
-	V_RETURN(g_ControlsEditor.OnCreateDevice(pd3dDevice, pBackBufferSurfaceDesc));
+	V_RETURN(g_ControlsEditor.OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
 #endif
 
 	//diverse setari sampler
-	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
-	pd3dDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
-	pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+	pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
+	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
-	pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-	pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-	pd3dDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-	pd3dDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	pDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	pDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 	//texture mirrors
-	pd3dDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);
-	pd3dDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);
-	pd3dDevice->SetSamplerState(1, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);
-	pd3dDevice->SetSamplerState(1, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);
+	pDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);
+	pDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);
+	pDevice->SetSamplerState(1, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);
+	pDevice->SetSamplerState(1, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);
 
 	return S_OK;
 }
@@ -859,7 +837,7 @@ HRESULT CALLBACK OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_D
 // the device is lost. Resources created here should be released in the OnLostDevice 
 // callback. 
 //**************************************************************************************
-HRESULT CALLBACK OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
+HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
 {
 	LOG(L"---OnResetDevice w:%d h:%d ---", pBackBufferSurfaceDesc->Width, pBackBufferSurfaceDesc->Height);
 	ImGui_ImplDX9_CreateDeviceObjects();
@@ -872,27 +850,27 @@ HRESULT CALLBACK OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DE
 	//keep render rect always updated - se cheama si prin triggerEvent de mai sus
 	//UTGetAppClass().OnRenderSizeChanged(pBackBufferSurfaceDesc->Width, pBackBufferSurfaceDesc->Height);
 	//se va auzi inca jumatate de ecran in afara ecranului vizibil
-	UTGetSoundManager().EnablePositionalSounds(D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(UTGetAppClass().g_rectGameScreen.w * 0.7f, UTGetAppClass().g_rectGameScreen.h * 0.7f));
+	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTGetAppClass().g_rectGameScreen.w * 0.7f, UTGetAppClass().g_rectGameScreen.h * 0.7f));
 
 	HRESULT hr;
 
 	// Create main game sprite
-	V_RETURN(D3DXCreateSprite(pd3dDevice, &g_pGameSprite));
+	V_RETURN(D3DXCreateSprite(pDevice, &g_pGameSprite));
 	//should be first to be called here
-	V_RETURN(UTGetAppClass().OnResetDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(UTGetShaderManager().OnResetDevice(pd3dDevice, pBackBufferSurfaceDesc));
+	V_RETURN(UTGetAppClass().OnResetDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(UTGetShaderManager().OnResetDevice(pDevice, pBackBufferSurfaceDesc));
 
-	UTGetTTFManager().OnResetDevice(pd3dDevice, pBackBufferSurfaceDesc);
+	UTGetTTFManager().OnResetDevice(pDevice, pBackBufferSurfaceDesc);
 
-	V_RETURN(UTGetFontsManager().OnResetDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_level.OnResetDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_particlesMgr.OnResetDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(UTGetControlsManager().OnResetDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_playerSelScr.OnResetDevice(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_mainMenu.OnResetDevice(pd3dDevice, pBackBufferSurfaceDesc));
+	V_RETURN(UTGetFontsManager().OnResetDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(g_level.OnResetDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(g_particlesMgr.OnResetDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(UTGetControlsManager().OnResetDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(g_playerSelScr.OnResetDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(g_mainMenu.OnResetDevice(pDevice, pBackBufferSurfaceDesc));
 
 #ifdef K_CONTROLS_EDITOR
-	V_RETURN(g_ControlsEditor.OnResetDevice(pd3dDevice, pBackBufferSurfaceDesc));
+	V_RETURN(g_ControlsEditor.OnResetDevice(pDevice, pBackBufferSurfaceDesc));
 	g_ControlsEditor.SetSpritePtr(g_pGameSprite);
 #endif
 	//--- set Sprite painter class pointer ---
@@ -920,20 +898,20 @@ HRESULT CALLBACK OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DE
 
 
 	//reface setarile initiale
-	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
-	pd3dDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
-	pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+	pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
+	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
-	pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-	pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-	pd3dDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-	pd3dDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	pDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	pDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 	//texture mirrors
-	pd3dDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);
-	pd3dDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);
-	pd3dDevice->SetSamplerState(1, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);
-	pd3dDevice->SetSamplerState(1, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);
+	pDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);
+	pDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);
+	pDevice->SetSamplerState(1, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);
+	pDevice->SetSamplerState(1, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);
 
 	return S_OK;
 }
@@ -996,7 +974,7 @@ void CALLBACK OnDestroyDevice(void)
 ///----------------------------------------------------
 /// Updates the game
 ///----------------------------------------------------
-void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, bool bNetCoop)
+void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 {
 	bool bSyncUpdate = bNetCoop;
 
@@ -1024,22 +1002,22 @@ void UpdateGame(LPDIRECT3DDEVICE9 pd3dDevice, float fElapsedTime, float fTime, b
 	{
 		case GAME_STATE_PUBLISHER:
 		{
-			UTGetAppClass().App_UpdateState_Publisher(pd3dDevice, fTime, fElapsedTime);
+			UTGetAppClass().App_UpdateState_Publisher(pDevice, fTime, fElapsedTime);
 		}
 		break;
 		case GAME_STATE_DEVELOPER:
 		{
-			UTGetAppClass().App_UpdateState_Developer(pd3dDevice, fTime, fElapsedTime);
+			UTGetAppClass().App_UpdateState_Developer(pDevice, fTime, fElapsedTime);
 		}
 		break;
 		case GAME_STATE_LOADING:
 		{
-			UTGetAppClass().App_UpdateState_Loading(pd3dDevice, fTime, fElapsedTime);
+			UTGetAppClass().App_UpdateState_Loading(pDevice, fTime, fElapsedTime);
 		}
 		break;
 		case GAME_STATE_SPLASH:
 		{
-			UTGetAppClass().App_UpdateState_Splash(pd3dDevice, fTime, fElapsedTime);
+			UTGetAppClass().App_UpdateState_Splash(pDevice, fTime, fElapsedTime);
 		}
 		break;
 
@@ -1476,7 +1454,7 @@ bool AllowCoopUpdateCheck(bool bSyncUpdate, int nFrame)
 }
 
 
-void CALLBACK OnFrameMove(IDirect3DDevice9* pd3dDevice, double fTime, float fElapsedTime_original)
+void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_original)
 {
 	///--- Set float rounding mode for online play (framesync) ---
 #ifdef WIN32
@@ -1513,7 +1491,7 @@ void CALLBACK OnFrameMove(IDirect3DDevice9* pd3dDevice, double fTime, float fEla
 	//update achievements and stats
 	UTGetAchievementManager().Update(fElapsedTime);
 
-	if (!pd3dDevice)
+	if (!pDevice)
 	{
 		return;
 	}
@@ -1962,7 +1940,7 @@ void CALLBACK OnFrameMove(IDirect3DDevice9* pd3dDevice, double fTime, float fEla
 		}
 
 		///--- UPDATE THE GAME ---
-		UpdateGame(pd3dDevice, fElapsedTime, fTime, bSyncUpdate);
+		UpdateGame(pDevice, fElapsedTime, fTime, bSyncUpdate);
 
 		//!!! make sure we're still syncing the update(net state can change on level finished)
 		bSyncUpdate = (UTGetAppClass().m_Settings.devnet_eSyncStatus == CApplicationSettings::K_NETGAME_SYNC_SYNCING);
@@ -2128,18 +2106,18 @@ void CALLBACK OnFrameMove(IDirect3DDevice9* pd3dDevice, double fTime, float fEla
 // rendering calls for the scene, and it will also be called if the window needs to be 
 // repainted.
 //**************************************************************************************
-void CALLBACK OnFrameRender(IDirect3DDevice9* pd3dDevice, double fTime, float fElapsedTime)
+void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 {
-	if(!pd3dDevice)
+	if(!pDevice)
 	{
 		return;
 	}
 
 	HRESULT hr;
-	D3DXMATRIXA16 mView;
-	D3DXMATRIXA16 mProj;
-	D3DXMATRIXA16 mWorldView;
-	D3DXMATRIXA16 mWorldViewProjection;
+	MatA16 mView;
+	MatA16 mProj;
+	MatA16 mWorldView;
+	MatA16 mWorldViewProjection;
 
 
 	///PART1. Here it paints the offscreen surfaces
@@ -2170,39 +2148,39 @@ void CALLBACK OnFrameRender(IDirect3DDevice9* pd3dDevice, double fTime, float fE
 
 
 	///PART2. --- Render onscreen - FINAL PASS ---
-	if (SUCCEEDED(pd3dDevice->BeginScene()))
+	if (SUCCEEDED(pDevice->BeginScene()))
 	{
-		V(pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, K_GAME_CLEAR_COLOR, 1.0f, 0));
+		V(pDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, K_GAME_CLEAR_COLOR, 1.0f, 0));
 
 
 		g_pGameSprite->Begin(D3DXSPRITE_ALPHABLEND | /*D3DXSPRITE_OBJECTSPACE |*/ D3DXSPRITE_DONOTSAVESTATE);
 
-		pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-		pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+		pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+		pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 
 		switch (g_gameState)
 		{
 			case GAME_STATE_PUBLISHER:
 			{
-				UTGetAppClass().App_PaintState_Publisher(pd3dDevice, g_pGameSprite, fElapsedTime);
+				UTGetAppClass().App_PaintState_Publisher(pDevice, g_pGameSprite, fElapsedTime);
 			}
 			break;
 
 			case GAME_STATE_DEVELOPER:
 			{
-				UTGetAppClass().App_PaintState_Developer(pd3dDevice, g_pGameSprite, fElapsedTime);
+				UTGetAppClass().App_PaintState_Developer(pDevice, g_pGameSprite, fElapsedTime);
 			}
 			break;
 
 			case GAME_STATE_LOADING:
 			{
-				UTGetAppClass().App_PaintState_Loading(pd3dDevice, g_pGameSprite, fElapsedTime);
+				UTGetAppClass().App_PaintState_Loading(pDevice, g_pGameSprite, fElapsedTime);
 			}
 			break;
 
 			case GAME_STATE_SPLASH:
 			{
-				UTGetAppClass().App_PaintState_Splash(pd3dDevice, g_pGameSprite, fElapsedTime);
+				UTGetAppClass().App_PaintState_Splash(pDevice, g_pGameSprite, fElapsedTime);
 			}
 			break;
 
@@ -2236,11 +2214,11 @@ void CALLBACK OnFrameRender(IDirect3DDevice9* pd3dDevice, double fTime, float fE
 				RECTXYWH_F gamerect(0.0f, 0.0f, UTGetAppClass().g_rectScreen.w, UTGetAppClass().g_rectScreen.h);
 
 				//real screen space
-				CCameraTransform::SetActiveCamera(pd3dDevice, &UTGetAppClass().g_camScreen);
+				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
 				//paint game 
 				RECT srcrct;
 				SetRect(&srcrct, gamerect.x, gamerect.y, gamerect.w, gamerect.h);
-				g_pGameSprite->Draw(g_level.m_pRTTexture_final, &srcrct, NULL, &D3DXVECTOR3(0.0f, 0.0f, 0.0f), 0xffffffff);
+				g_pGameSprite->Draw(g_level.m_pRTTexture_final, &srcrct, NULL, &Vec3(0.0f, 0.0f, 0.0f), 0xffffffff);
 				g_pGameSprite->Flush();
 				// paint game elements above RTT content
 				g_level.PaintUsingFinalRTT();
@@ -2248,40 +2226,40 @@ void CALLBACK OnFrameRender(IDirect3DDevice9* pd3dDevice, double fTime, float fE
 				//final flush
 				g_pGameSprite->Flush();
 				//ingame interface
-				g_level.m_interfaceIGM.Paint(pd3dDevice, g_pGameSprite);
+				g_level.m_interfaceIGM.Paint(pDevice, g_pGameSprite);
 				//interface particles
 				g_particlesMgr.PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
 
 				///--- string dummies ---
 				g_pGameSprite->SetTransform(&g_matIdentity);
 				//paint string dummies
-				CCameraTransform::SetActiveCamera(pd3dDevice, &UTGetAppClass().g_cam240hScreen);
+				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam240hScreen);
 				g_particlesMgr.PaintStringDummies();
 				g_pGameSprite->Flush();
 
 				//debug stuff
 #if defined(_DEBUG) || defined(DEBUG)
 				//game screen space
-				CCameraTransform::SetActiveCamera(pd3dDevice, &UTGetAppClass().g_camGameScreen);
+				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camGameScreen);
 
 				if (DXUTIsKeyDown('9'))
 				{
 					g_pGameSprite->Flush();
-					CCameraTransform::SetActiveCameraIdentity(pd3dDevice);
+					CCameraTransform::SetActiveCameraIdentity(pDevice);
 					RECT src;
 					SetRect(&src, 0, 0, 512, 512);
 					g_pGameSprite->SetTransform(&g_matIdentity);
-					g_pGameSprite->Draw(g_level.m_pRTTexture, &src, NULL, &D3DXVECTOR3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
+					g_pGameSprite->Draw(g_level.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
 					g_pGameSprite->Flush();
 				}
 				if (DXUTIsKeyDown('0'))
 				{
 					g_pGameSprite->Flush();
-					CCameraTransform::SetActiveCameraIdentity(pd3dDevice);
+					CCameraTransform::SetActiveCameraIdentity(pDevice);
 					RECT src;
 					SetRect(&src, 512, 0, 1024, 512);
 					g_pGameSprite->SetTransform(&g_matIdentity);
-					g_pGameSprite->Draw(g_level.m_pRTTexture, &src, NULL, &D3DXVECTOR3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
+					g_pGameSprite->Draw(g_level.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
 					g_pGameSprite->Flush();
 				}
 #endif
@@ -2302,11 +2280,11 @@ void CALLBACK OnFrameRender(IDirect3DDevice9* pd3dDevice, double fTime, float fE
 		if ((UTGetAppClass().IsGameNetworked()) && (g_gameState == GAME_STATE_GAME) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
 		{
 			g_pGameSprite->Flush();
-			CCameraTransform::SetActiveCamera(pd3dDevice, &UTGetAppClass().g_camScreen);
+			CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
 			RECTXYWH_F camrectchat = UTGetAppClass().g_camScreen.GetCamWorldAABB();
 
-			D3DXVECTOR2 vIgmIntSz = UTGetAppClass().g_cam240hScreen.WorldToScreen(D3DXVECTOR2(0.0f, 56.0f));
-			g_ChatWnd.Paint(D3DXVECTOR2(camrectchat.x + 5.0f, camrectchat.Bottom() - vIgmIntSz.y));
+			Vec2 vIgmIntSz = UTGetAppClass().g_cam240hScreen.WorldToScreen(Vec2(0.0f, 56.0f));
+			g_ChatWnd.Paint(Vec2(camrectchat.x + 5.0f, camrectchat.Bottom() - vIgmIntSz.y));
 			g_pGameSprite->Flush();
 		}
 #endif
@@ -2324,11 +2302,11 @@ void CALLBACK OnFrameRender(IDirect3DDevice9* pd3dDevice, double fTime, float fE
 #endif
 
 		//real screen space
-		CCameraTransform::SetActiveCamera(pd3dDevice, &UTGetAppClass().g_camScreen);
+		CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
 		RECTXYWH_F camrect = UTGetAppClass().g_camScreen.GetCamWorldAABB();
 
 		//--- TRANSITIONS ---		
-		PaintTransition(fElapsedTime, fTime, pd3dDevice);
+		PaintTransition(fElapsedTime, fTime, pDevice);
 		//--- if it is paused paints "PAUSE" ---
 #ifdef K_GAME_HAS_PAUSE_SCREEN
 		if ((g_bCanPause) && (DXUTIsTimePaused()) && (g_font10b1 != NULL))
@@ -2336,13 +2314,13 @@ void CALLBACK OnFrameRender(IDirect3DDevice9* pd3dDevice, double fTime, float fE
 			g_pGameSprite->Flush();
 			//draw black poly over
 			DWORD color = D3DCOLOR_COLORVALUE(0.0f, 0.0f, 0.0f, 0.6f);
-			pd3dDevice->SetTexture(0, NULL); 
-			pd3dDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-			pd3dDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
+			pDevice->SetTexture(0, NULL); 
+			pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+			pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
 			RECT rct;
 			SetRect(&rct, UTGetAppClass().g_rectRender.x, UTGetAppClass().g_rectRender.y, UTGetAppClass().g_rectRender.Right(), UTGetAppClass().g_rectRender.Bottom());
-			DrawRectUP_TL1T(pd3dDevice, rct, D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f), color);
+			DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
 
 			g_font10b1->DrawString(STR_PAUSED, UTGetAppClass().g_rectRender.CenterX(), UTGetAppClass().g_rectRender.CenterY(), FONTFLAG_ANCHOR_BOTTOMCENTER, 0xffffffff);
 		}
@@ -2354,36 +2332,36 @@ void CALLBACK OnFrameRender(IDirect3DDevice9* pd3dDevice, double fTime, float fE
 			g_pGameSprite->Flush();
 			//black poly over
 			DWORD color = D3DCOLOR_COLORVALUE(0.0f, 0.0f, 0.0f, 1.0f);
-			pd3dDevice->SetTexture(0, NULL); //textura aiurea
-			pd3dDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-			pd3dDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
+			pDevice->SetTexture(0, NULL); //textura aiurea
+			pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+			pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
 			RECT rct;
 			if (UTGetAppClass().g_letterbox.w != 0.0f)
 			{
 				SetRect(&rct, UTGetAppClass().g_rectScreen.x, UTGetAppClass().g_rectScreen.y, UTGetAppClass().g_rectRender.x, UTGetAppClass().g_rectScreen.Bottom());
-				DrawRectUP_TL1T(pd3dDevice, rct, D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f), color);
+				DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
 				SetRect(&rct, UTGetAppClass().g_rectRender.Right(), UTGetAppClass().g_rectScreen.y, UTGetAppClass().g_rectScreen.Right(), UTGetAppClass().g_rectScreen.Bottom());
-				DrawRectUP_TL1T(pd3dDevice, rct, D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f), color);
+				DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
 			}
 			else if (UTGetAppClass().g_letterbox.h != 0.0f)
 			{
 				SetRect(&rct, UTGetAppClass().g_rectScreen.x, UTGetAppClass().g_rectScreen.y, UTGetAppClass().g_rectScreen.Right(), UTGetAppClass().g_rectRender.y);
-				DrawRectUP_TL1T(pd3dDevice, rct, D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f), color);
+				DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
 				SetRect(&rct, UTGetAppClass().g_rectScreen.x, UTGetAppClass().g_rectRender.Bottom(), UTGetAppClass().g_rectScreen.Right(), UTGetAppClass().g_rectScreen.Bottom());
-				DrawRectUP_TL1T(pd3dDevice, rct, D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f), color);
+				DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
 			}
 		}
 
 		///----- debug info -----
-		if (showDebugStats)
+		if (g_bShowDebugStats)
 		{
 			g_pGameSprite->Flush();
 			////reset transform
-			pd3dDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-			CCameraTransform::SetActiveCamera(pd3dDevice, &UTGetAppClass().g_camScreen);
+			pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+			CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
 			//find a pos so doesn't overlap with the igm interface
-			D3DXVECTOR2 vStartPos = UTGetAppClass().g_cam240hScreen.WorldToScreen(D3DXVECTOR2(0.0f, 25.0f));
+			Vec2 vStartPos = UTGetAppClass().g_cam240hScreen.WorldToScreen(Vec2(0.0f, 25.0f));
 			int posY = vStartPos.y;
 			WCHAR todraw[MAX_PATH] = { 0 };
 			CStringDesc strdesc;
@@ -2436,16 +2414,16 @@ void CALLBACK OnFrameRender(IDirect3DDevice9* pd3dDevice, double fTime, float fE
 #endif
 
 		//!OPTIMIZARE driver: unbind all resource channels
-		pd3dDevice->SetTexture(0, NULL);
-		pd3dDevice->SetTexture(1, NULL);
-		pd3dDevice->SetStreamSource(0, NULL, 0, 0);
-		pd3dDevice->SetVertexShader(null);
-		pd3dDevice->SetPixelShader(null);
+		pDevice->SetTexture(0, NULL);
+		pDevice->SetTexture(1, NULL);
+		pDevice->SetStreamSource(0, NULL, 0, 0);
+		pDevice->SetVertexShader(null);
+		pDevice->SetPixelShader(null);
 
-		V(pd3dDevice->EndScene());
+		V(pDevice->EndScene());
 	}
 
-	UTGetAppClass().App_Paint_IMGUI(pd3dDevice, true, false, ImVec4(0.45f, 0.55f, 0.60f, 0.00f));
+	UTGetAppClass().App_Paint_IMGUI(pDevice, true, false, ImVec4(0.45f, 0.55f, 0.60f, 0.00f));
 }
 
 
@@ -2546,7 +2524,7 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 			//force quit lobby on exit
 			g_netlock.Net_QuitLobby();
 
-			requestedExit = true;
+			g_bRequestedExit = true;
 			DXUTSetShortcutKeySettings(true, true);
 			//set old cursor
 			//::SetCursor(hcurOriginal);
@@ -2636,9 +2614,9 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 
 	if (bKeyDown)
 	{
-		if((bAltDown) && (nChar == VK_F4) && (!requestedExit))
+		if((bAltDown) && (nChar == VK_F4) && (!g_bRequestedExit))
 		{
-			requestedExit = true;
+			g_bRequestedExit = true;
 
 			PostQuitMessage(0);
 			//ar trebui sa salveze starea instantaneu
@@ -2679,12 +2657,12 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 					}
 					else
 					{
-						showDebugStats = !showDebugStats;
+						g_bShowDebugStats = !g_bShowDebugStats;
 					}
 				}
 				else  //no dev mode
 				{
-					showDebugStats = !showDebugStats;
+					g_bShowDebugStats = !g_bShowDebugStats;
 				}
 			}
 			break;
@@ -3417,7 +3395,7 @@ void UpdateTransition(float dTime)
 
 }
 
-void PaintTransition(float dTime, float fTimeline, LPDIRECT3DDEVICE9 pd3dDevice)
+void PaintTransition(float dTime, float fTimeline, PDEVICE pDevice)
 {
 	if (!g_bDuringTransition) return;
 
@@ -3427,8 +3405,8 @@ void PaintTransition(float dTime, float fTimeline, LPDIRECT3DDEVICE9 pd3dDevice)
 		case K_TRANSITION_TYPE_SIMPLE:
 		{
 			//reset transforms
-			pd3dDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-			pd3dDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
+			pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+			pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
 			RECT rect;
 			SetRect(&rect, UTGetAppClass().g_rectRender.x, UTGetAppClass().g_rectRender.y, UTGetAppClass().g_rectRender.Right(), UTGetAppClass().g_rectRender.Bottom());
@@ -3439,14 +3417,14 @@ void PaintTransition(float dTime, float fTimeline, LPDIRECT3DDEVICE9 pd3dDevice)
 				{
 					g_pGameSprite->Flush();
 					//deseneaza poly negru peste
-					pd3dDevice->SetTexture(0, NULL); //textura aiurea
+					pDevice->SetTexture(0, NULL); //textura aiurea
 					//fac ca jumatate din timpul tranzitiei sa stea pe full opac ca sa nu se vada absolut nimic cand schimba starea
 					float fAlpha = LIMIT(1.5f * g_fTransitionPercent, 0.0f, 1.0f);
-					DrawRectUP_TL1T(pd3dDevice, rect, D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f), D3DCOLOR_XXXA(fAlpha));
+					DrawRectUP_TL1T(pDevice, rect, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), D3DCOLOR_XXXA(fAlpha));
 					//write "loading"
 					if ((UTGetControlsManager().m_sprCol.IsLoaded()) && (fAlpha >= 0.95f))
 					{
-						CCameraTransform::SetActiveCamera(pd3dDevice, &UTGetAppClass().g_cam240hScreen);
+						CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam240hScreen);
 						RECTXYWH_F scrrect = UTGetAppClass().g_cam240hScreen.GetCamWorldAABB();
 						CSprite::paintFrame(&UTGetControlsManager().m_sprCol, scrrect.Right() - 3, scrrect.Bottom() - 3, ANM_CONTROLS_SPR_LOADING_ICONS, 0, 0x88ffffff);
 					}
@@ -3456,9 +3434,9 @@ void PaintTransition(float dTime, float fTimeline, LPDIRECT3DDEVICE9 pd3dDevice)
 				{
 					g_pGameSprite->Flush();
 					//deseneaza poly negru peste
-					pd3dDevice->SetTexture(0, NULL); //textura aiurea
+					pDevice->SetTexture(0, NULL); //textura aiurea
 					float fAlpha = LIMIT((1.5f - 1.5f * g_fTransitionPercent), 0.0f, 1.0f);
-					DrawRectUP_TL1T(pd3dDevice, rect, D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f), D3DCOLOR_XXXA(fAlpha));
+					DrawRectUP_TL1T(pDevice, rect, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), D3DCOLOR_XXXA(fAlpha));
 				}
 				break;
 			}

@@ -137,15 +137,6 @@
 #define K_CONTROLS_EDITOR
 #endif
 
-#if !defined(IMGUI_DISABLE)
-#include "imgui/api/imgui.h"
-#include "imgui/backends/imgui_impl_dx9.h"
-#include "imgui/backends/imgui_impl_win32.h"
-// callback for proc handler
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-#endif
-
 #define MAX_PATH_STD	MAX_PATH
 //-- macrouri de stringuit alte macrouri - vezi versioning.h ---
 #define STRINGIFY(x) #x
@@ -158,7 +149,16 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include <d3dx9.h>
 #include <dxerr9.h>
 
-//--- pt VERSIUNE DIRECTX ---
+/// --- IMGUI ---
+#if !defined(IMGUI_DISABLE)
+#include "imgui/api/imgui.h"
+#include "imgui/backends/imgui_impl_dx9.h"
+#include "imgui/backends/imgui_impl_win32.h"
+// callback for proc handler
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#endif
+
+/// --- Get DX version ---
 #pragma warning(disable: 4995)
 #define INITGUID
 #include <guiddef.h> //aici sunt puse GUID-urile
@@ -231,8 +231,10 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 //#define _CRT_NONSTDC_NO_DEPRECATE
 
-#include "..\\versioning\\versioning.h"
-#include "..\\Engine\\dbgutil.h"
+#include "..\versioning\versioning.h"
+#include "..\Engine\dbgutil.h"
+#include "utils\UTMath.h"
+#include "utils\PlatformTypes.h"
 
 #define K_GAME_USERDATA_COMPANY_SUFFIX		L"\\PixelShard\\"
 #define K_GAME_USERDATA_FOLDER_SUFFIX		L"ActionSquad2\\"
@@ -580,9 +582,6 @@ extern CTexturedFont	*g_font8b1, *g_font8bs1;
 extern CTexturedFont	*g_font9b1;
 extern CTexturedFont	*g_font6n1, *g_font6ns1, *g_font6nc1;
 extern CTexturedFont	*g_font5n1, *g_font5n2, *g_font5ns2;
-
-extern int g_debugInt1, g_debugInt2;
-extern float g_debugFloat1, g_debugFloat2;
 
 #ifdef K_CONTROLS_EDITOR
 extern CControlsEditor				g_ControlsEditor;

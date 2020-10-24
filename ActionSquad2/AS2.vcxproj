@@ -12,7 +12,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{97105727-EDAB-4B2C-AB1E-4ACFD3BA5187}</ProjectGuid>
-    <RootNamespace>ActionSquad</RootNamespace>
+    <RootNamespace>ActionSquad2</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>ActionSquad2</ProjectName>
@@ -247,6 +247,8 @@
     <ClInclude Include="Source\Engine\pugixml.hpp" />
     <ClInclude Include="Source\Engine\Randoms.h" />
     <ClInclude Include="Source\Engine\utils\ParallaxBg.h" />
+    <ClInclude Include="Source\Engine\utils\PlatformTypes.h" />
+    <ClInclude Include="Source\Engine\utils\UTMath.h" />
     <ClInclude Include="Source\resource.h" />
     <ClInclude Include="Source\resource1.h" />
     <ClInclude Include="Source\Engine\ScriptManager.h" />
@@ -263,7 +265,7 @@
     <ClInclude Include="Versioning\versioning.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Source\ActionSquad.rc" />
+    <ResourceCompile Include="Source\AS2.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Common\DXUTgui.cpp">
@@ -403,6 +405,7 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\UTAppClassStates.cpp" />
     <ClCompile Include="Source\Engine\utils\ParallaxBg.cpp" />
+    <ClCompile Include="Source\Engine\utils\UTMath.cpp" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\Engine\ogg.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
