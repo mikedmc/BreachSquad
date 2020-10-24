@@ -37,6 +37,8 @@
 //#define K_NET_ENGINE_DBG_VERBOSE
 // enables debug output to check net coop desyncs
 //#define K_SYNC_ENGINE_DBG_VERBOSE
+// Enables IMGUI api
+#define K_ENABLE_IMGUI
 
 //important only in DEBUG mode:
 #if defined(DEBUG) | defined(_DEBUG)						  
@@ -150,12 +152,19 @@
 #include <dxerr9.h>
 
 /// --- IMGUI ---
-#if !defined(IMGUI_DISABLE)
+#if defined(K_ENABLE_IMGUI)
+
+#ifndef WM_DPICHANGED
+#define WM_DPICHANGED 0x02E0 // From Windows SDK 8.1+ headers
+#endif
+
 #include "imgui/api/imgui.h"
 #include "imgui/backends/imgui_impl_dx9.h"
 #include "imgui/backends/imgui_impl_win32.h"
 // callback for proc handler
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#else 
+#define IMGUI_DISABLE
 #endif
 
 /// --- Get DX version ---
@@ -437,6 +446,7 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "ControlsManager.h" 
 //main app class
 #include "UTAppClass.h"
+#include "imgui/imguiWrapper.h"
 ///--- game specific classes ---
 #include "Shop.h"
 #include "PlayerSelScr.h"

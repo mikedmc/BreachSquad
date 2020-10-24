@@ -204,7 +204,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	galaxy::api::User()->SignInGalaxy();
 #endif // ENABLE_GALAXY
 
-	// declare that we're DPI aware
+	// declare that we're DPI aware (even with imgui off)
 	ImGui_ImplWin32_EnableDpiAwareness();
 
 	//load game settings FIRST AND FOREMOST (includes selected language and so on)
@@ -779,14 +779,14 @@ void CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* pDeviceSettings, const D3
 // here should be released in the OnDestroyDevice callback. 
 //**************************************************************************************
 
-HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
+HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 {
 	HRESULT hr = S_OK;
 
 	//trigger resolution change immediately
 	CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_RESOLUTION_CHANGE);
-	nevent->AddNamedArgUINT32(L"width", pBackBufferSurfaceDesc->Width);
-	nevent->AddNamedArgUINT32(L"height", pBackBufferSurfaceDesc->Height);
+	nevent->AddNamedArgUINT32(L"width", pBBDesc->Width);
+	nevent->AddNamedArgUINT32(L"height", pBBDesc->Height);
 	UTGetEventManager().TriggerEvent(nevent);
 
 	// check minimum requirements and exit if not met
@@ -796,19 +796,20 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBackBuf
 		return S_OK;
 	}
 
-	UTGetTTFManager().OnCreateDevice(pDevice, pBackBufferSurfaceDesc);
+	UTGetTTFManager().OnCreateDevice(pDevice, pBBDesc);
 
-	V_RETURN(UTGetAppClass().OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(UTGetShaderManager().OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(UTGetFontsManager().OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_level.OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_particlesMgr.OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(UTGetControlsManager().OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_playerSelScr.OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_mainMenu.OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(UTGetAppClass().OnCreateDevice(pDevice, pBBDesc));
+	UTimgui().OnCreateDevice(pDevice, pBBDesc);
+	V_RETURN(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
+	V_RETURN(UTGetFontsManager().OnCreateDevice(pDevice, pBBDesc));
+	V_RETURN(g_level.OnCreateDevice(pDevice, pBBDesc));
+	V_RETURN(g_particlesMgr.OnCreateDevice(pDevice, pBBDesc));
+	V_RETURN(UTGetControlsManager().OnCreateDevice(pDevice, pBBDesc));
+	V_RETURN(g_playerSelScr.OnCreateDevice(pDevice, pBBDesc));
+	V_RETURN(g_mainMenu.OnCreateDevice(pDevice, pBBDesc));
 
 #ifdef K_CONTROLS_EDITOR
-	V_RETURN(g_ControlsEditor.OnCreateDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(g_ControlsEditor.OnCreateDevice(pDevice, pBBDesc));
 #endif
 
 	//diverse setari sampler
@@ -837,14 +838,14 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBackBuf
 // the device is lost. Resources created here should be released in the OnLostDevice 
 // callback. 
 //**************************************************************************************
-HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
+HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 {
-	LOG(L"---OnResetDevice w:%d h:%d ---", pBackBufferSurfaceDesc->Width, pBackBufferSurfaceDesc->Height);
-	ImGui_ImplDX9_CreateDeviceObjects();
+	LOG(L"---OnResetDevice w:%d h:%d ---", pBBDesc->Width, pBBDesc->Height);
+	
 	//trigger resolution change immediately
 	CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_RESOLUTION_CHANGE);
-	nevent->AddNamedArgUINT32(L"width", pBackBufferSurfaceDesc->Width);
-	nevent->AddNamedArgUINT32(L"height", pBackBufferSurfaceDesc->Height);
+	nevent->AddNamedArgUINT32(L"width", pBBDesc->Width);
+	nevent->AddNamedArgUINT32(L"height", pBBDesc->Height);
 	UTGetEventManager().TriggerEvent(nevent);
 
 	//keep render rect always updated - se cheama si prin triggerEvent de mai sus
@@ -857,20 +858,21 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBackBuff
 	// Create main game sprite
 	V_RETURN(D3DXCreateSprite(pDevice, &g_pGameSprite));
 	//should be first to be called here
-	V_RETURN(UTGetAppClass().OnResetDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(UTGetShaderManager().OnResetDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(UTGetAppClass().OnResetDevice(pDevice, pBBDesc));
+	UTimgui().OnResetDevice(pDevice, pBBDesc);
+	V_RETURN(UTGetShaderManager().OnResetDevice(pDevice, pBBDesc));
 
-	UTGetTTFManager().OnResetDevice(pDevice, pBackBufferSurfaceDesc);
+	UTGetTTFManager().OnResetDevice(pDevice, pBBDesc);
 
-	V_RETURN(UTGetFontsManager().OnResetDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_level.OnResetDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_particlesMgr.OnResetDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(UTGetControlsManager().OnResetDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_playerSelScr.OnResetDevice(pDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_mainMenu.OnResetDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(UTGetFontsManager().OnResetDevice(pDevice, pBBDesc));
+	V_RETURN(g_level.OnResetDevice(pDevice, pBBDesc));
+	V_RETURN(g_particlesMgr.OnResetDevice(pDevice, pBBDesc));
+	V_RETURN(UTGetControlsManager().OnResetDevice(pDevice, pBBDesc));
+	V_RETURN(g_playerSelScr.OnResetDevice(pDevice, pBBDesc));
+	V_RETURN(g_mainMenu.OnResetDevice(pDevice, pBBDesc));
 
 #ifdef K_CONTROLS_EDITOR
-	V_RETURN(g_ControlsEditor.OnResetDevice(pDevice, pBackBufferSurfaceDesc));
+	V_RETURN(g_ControlsEditor.OnResetDevice(pDevice, pBBDesc));
 	g_ControlsEditor.SetSpritePtr(g_pGameSprite);
 #endif
 	//--- set Sprite painter class pointer ---
@@ -926,9 +928,9 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBackBuff
 void CALLBACK OnLostDevice(void)
 {
 	DebugPrintA("---On lost device---\n");
-	ImGui_ImplDX9_InvalidateDeviceObjects();
 
 	UTGetAppClass().OnLostDevice();
+	UTimgui().OnLostDevice();
 	UTGetTTFManager().OnLostDevice();
 	UTGetShaderManager().OnLostDevice();
 
@@ -956,6 +958,7 @@ void CALLBACK OnLostDevice(void)
 void CALLBACK OnDestroyDevice(void)
 {
 	UTGetAppClass().OnDestroyDevice();
+	UTimgui().OnDestroyDevice();
 	UTGetShaderManager().OnDestroyDevice();
 	UTGetTTFManager().OnDestroyDevice();
 	UTGetFontsManager().OnDestroyDevice();
@@ -2413,7 +2416,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		}
 #endif
 
-		//!OPTIMIZARE driver: unbind all resource channels
+		//!driver optimization: unbind all resource channels
 		pDevice->SetTexture(0, NULL);
 		pDevice->SetTexture(1, NULL);
 		pDevice->SetStreamSource(0, NULL, 0, 0);
@@ -2423,7 +2426,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		V(pDevice->EndScene());
 	}
 
-	UTGetAppClass().App_Paint_IMGUI(pDevice, true, false, ImVec4(0.45f, 0.55f, 0.60f, 0.00f));
+	UTimgui().Paint(pDevice, true, true, ImVec4(0.45f, 0.55f, 0.60f, 0.00f));
 }
 
 
@@ -2444,7 +2447,10 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 		return 0;
 #endif
 
+	///--- IMGUI message handler---
+#if defined(K_ENABLE_IMGUI)
 	ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
+#endif
 
 	switch (uMsg)
 	{
@@ -2560,9 +2566,10 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 			//window moved or finished resizing
 		}
 		break;
-		/*
+		
 		case WM_DPICHANGED:
 		{
+			/*
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DpiEnableScaleViewports)
 			{
 				//const int dpi = HIWORD(wParam);
@@ -2570,9 +2577,10 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 				const RECT* suggested_rect = (RECT*)lParam;
 				::SetWindowPos(hWnd, NULL, suggested_rect->left, suggested_rect->top, suggested_rect->right - suggested_rect->left, suggested_rect->bottom - suggested_rect->top, SWP_NOZORDER | SWP_NOACTIVATE);
 			}
+			*/
 		}
 		break;
-		*/
+		
 		case WM_CHAR:
 		{
 			UTGetControlsManager().ReceiveInput(K_CCTRLMGR_INPUT_CHAR, (UINT32)wParam);
@@ -2728,30 +2736,6 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			break;
 
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
-			case VK_F3:
-			{
-				if (bAltDown)
-				{
-					if (g_gameState == GAME_STATE_GAME)
-					{
-						if(!UTGetAppClass().IsGameNetworked())
-							g_level.GiveStrategicPoints(8.0f);
-					}
-					if (g_gameState != GAME_STATE_GAME)
-					{
-						g_userData[K_MEMID_STARS_TOTAL] += 5;
-						App_UpdateLevelStats();
-					}
-				}
-			}
-			break;
-
-			case VK_F6:
-			{
-				g_level.SetLevelState(K_LVL_STATE_MISSION_ACCOMPLISHED);
-			}
-			break;
-
 			case VK_F7:
 			{
 				g_font12wow->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTGetAppClass().g_cam480hScreen);

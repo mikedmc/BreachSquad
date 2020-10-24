@@ -192,9 +192,6 @@ public:
 	// Called after each finished level (win or lose or cancelled)
 	void App_OnLevelFinished(int nEpisodeIdx, int nLevelIdx);
 
-	void App_Init_IMGUI(LPDIRECT3DDEVICE9 pDevice, HWND hwnd);
-	void App_Paint_IMGUI(LPDIRECT3DDEVICE9 pDevice, bool show_demo_window, bool show_another_window, ImVec4 clear_color);
-
 public: //--- framework methods ---
 	HRESULT OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
 	HRESULT OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
@@ -203,5 +200,5 @@ public: //--- framework methods ---
 };
 
 
-//declar singletonul
+//SINGLETON
 CApplication& UTGetAppClass();

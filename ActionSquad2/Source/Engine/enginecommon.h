@@ -563,8 +563,8 @@ public:
 		return (textHash != 0);
 	}
 
-	const bool IsEqual(WCHAR* text) const {
-		return (textHash == FastHash(text, wcslen(text)));
+	const bool IsEqual(WCHAR* stext) const {
+		return (textHash == FastHash(stext, wcslen(stext)));
 	}
 
 	void Init(WCHAR const * const strText)
