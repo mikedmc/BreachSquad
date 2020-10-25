@@ -2072,6 +2072,13 @@ void CApplication::CloseSDL()
 //gets input data from SDL controllers
 void CApplication::PollSDLControllers()
 {
+	// when using imGUI check if it wants exclusive control
+	bool bIgnoreMouse = false;
+#if defined(K_ENABLE_IMGUI)
+	if (UTimgui().bEnabled && UTimgui().GetWantCaptureMouse())
+		bIgnoreMouse = true;
+#endif
+
 	//---------------------------------------
 	// SDL Event handler
 	//---------------------------------------
@@ -2081,23 +2088,33 @@ void CApplication::PollSDLControllers()
 	{
 		switch (e.type)
 		{
+#if !defined(K_SDL_IGNORE_MOUSE_EVENTS)
 			//-- pointer ---
 			case SDL_MOUSEMOTION:
 			{
-				UTGetCtrlrMgr().OnSDLMouseMove(e.motion);
+				if (!bIgnoreMouse)
+				{
+					UTGetCtrlrMgr().OnSDLMouseMove(e.motion);
+				}
 			}
 			break;
 			case SDL_MOUSEBUTTONDOWN:
 			{
-				UTGetCtrlrMgr().OnSDLMouseButton(e.button);
+				if (!bIgnoreMouse)
+				{
+					UTGetCtrlrMgr().OnSDLMouseButton(e.button);
+				}
 			}
 			break;
 			case SDL_MOUSEBUTTONUP:
 			{
-				UTGetCtrlrMgr().OnSDLMouseButton(e.button);
+				if (!bIgnoreMouse)
+				{
+					UTGetCtrlrMgr().OnSDLMouseButton(e.button);
+				}
 			}
 			break;
-
+#endif
 			//-- keyboard ---
 			case SDL_KEYDOWN:
 			{

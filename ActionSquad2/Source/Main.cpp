@@ -2799,13 +2799,14 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			break;
 #endif
 
+#if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
 			// IMGUI show/hide
 			case VK_F3:
 			{
 				UTimgui().SetEnabled(!UTimgui().bEnabled);
 			}
 			break;
-
+#endif
 		}
 	}
 }
