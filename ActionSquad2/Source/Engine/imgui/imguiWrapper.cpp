@@ -1,6 +1,21 @@
 #include "dxstdafx.h"
 #include "imguiWrapper.h"
 
+void CimguiWrapper::SetEnabled(bool bEnable)
+{
+	bEnabled = bEnable;
+}
+
+bool CimguiWrapper::GetWantCaptureMouse()
+{
+	return ImGui::GetIO().WantCaptureMouse;
+}
+
+bool CimguiWrapper::GetWantCaptureKeyboard()
+{
+	return ImGui::GetIO().WantCaptureKeyboard;
+}
+
 void CimguiWrapper::Init(PDEVICE pDevice, HWND hwnd)
 {
 	// Setup Dear ImGui context
@@ -48,6 +63,10 @@ void CimguiWrapper::Init(PDEVICE pDevice, HWND hwnd)
 
 void CimguiWrapper::Paint(PDEVICE pDevice, bool show_demo_window, bool show_another_window, ImVec4 clear_color)
 {
+	// not enabled? skip everything
+	if (!bEnabled)
+		return;
+
 	ImGuiIO& io = ImGui::GetIO();
 	// Start the Dear ImGui frame
 	ImGui_ImplDX9_NewFrame();
@@ -111,6 +130,11 @@ void CimguiWrapper::Paint(PDEVICE pDevice, bool show_demo_window, bool show_anot
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
 	}
+}
+
+CimguiWrapper::CimguiWrapper() : bEnabled(false)
+{
+	
 }
 
 HRESULT CimguiWrapper::OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc /*= NULL*/)

@@ -2786,7 +2786,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 #endif
 
 #ifdef K_CONTROLS_EDITOR
-		case VK_F2:
+			case VK_F2:
 			{
 				int nextState = GAME_STATE_CONTROLSED;
 				if (g_gameState == GAME_STATE_CONTROLSED)
@@ -2799,7 +2799,14 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			break;
 #endif
 
- 		}
+			// IMGUI show/hide
+			case VK_F3:
+			{
+				UTimgui().SetEnabled(!UTimgui().bEnabled);
+			}
+			break;
+
+		}
 	}
 }
 
