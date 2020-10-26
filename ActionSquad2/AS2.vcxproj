@@ -212,6 +212,8 @@
     <ClInclude Include="Source\Engine\imgui\backends\imgui_impl_dx9.h" />
     <ClInclude Include="Source\Engine\imgui\backends\imgui_impl_win32.h" />
     <ClInclude Include="Source\Engine\imgui\imguiWrapper.h" />
+    <ClInclude Include="Source\Engine\imgui\wnds\imguiWndInterface.h" />
+    <ClInclude Include="Source\Engine\imgui\wnds\WndTest.h" />
     <ClInclude Include="Source\Engine\InfiniteVerticalMode.h" />
     <ClInclude Include="Source\Engine\Level.h" />
     <ClInclude Include="Source\Engine\LibraryManager.h" />
@@ -353,6 +355,7 @@
     <ClCompile Include="Source\Engine\imgui\backends\imgui_impl_dx9.cpp" />
     <ClCompile Include="Source\Engine\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="Source\Engine\imgui\imguiWrapper.cpp" />
+    <ClCompile Include="Source\Engine\imgui\wnds\WndTest.cpp" />
     <ClCompile Include="Source\Engine\InfiniteVerticalMode.cpp" />
     <ClCompile Include="Source\Engine\Level.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>

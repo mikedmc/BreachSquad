@@ -2803,7 +2803,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			// IMGUI show/hide
 			case VK_F3:
 			{
-				UTimgui().SetEnabled(!UTimgui().bEnabled);
+				UTimgui().SetGlobalEnabled(!UTimgui().bEnabled);
 			}
 			break;
 #endif

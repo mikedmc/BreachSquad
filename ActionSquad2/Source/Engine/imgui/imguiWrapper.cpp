@@ -1,7 +1,8 @@
 #include "dxstdafx.h"
 #include "imguiWrapper.h"
 
-void CimguiWrapper::SetEnabled(bool bEnable)
+
+void CimguiWrapper::SetGlobalEnabled(bool bEnable)
 {
 	bEnabled = bEnable;
 }
@@ -59,6 +60,13 @@ void CimguiWrapper::Init(PDEVICE pDevice, HWND hwnd)
 	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
 	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 	//IM_ASSERT(font != NULL);
+
+	auto wndptr = AddWindow(make_shared<CWndTest>("Test Wnd1", true, true));
+	auto wndconv = std::static_pointer_cast<CWndTest>(wndptr);
+	if (wndconv)
+	{
+		bool b = wndconv->bIsOpen;
+	}
 }
 
 void CimguiWrapper::Paint(PDEVICE pDevice, bool show_demo_window, bool show_another_window, ImVec4 clear_color)
@@ -100,6 +108,15 @@ void CimguiWrapper::Paint(PDEVICE pDevice, bool show_demo_window, bool show_anot
 		ImGui::End();
 	}
 
+
+	for (auto wnd : arrWnds)
+	{
+		if (wnd->bIsOpen) {
+			wnd->Paint();
+		}
+	}
+
+	/*
 	// 3. Show another simple window.
 	if (show_another_window)
 	{
@@ -109,6 +126,7 @@ void CimguiWrapper::Paint(PDEVICE pDevice, bool show_demo_window, bool show_anot
 			show_another_window = false;
 		ImGui::End();
 	}
+	*/
 
 	// Rendering
 	ImGui::EndFrame();
@@ -130,6 +148,12 @@ void CimguiWrapper::Paint(PDEVICE pDevice, bool show_demo_window, bool show_anot
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
 	}
+}
+
+shared_ptr<CimguiWndInterface> CimguiWrapper::AddWindow(shared_ptr<CimguiWndInterface> wndptr)
+{
+	arrWnds.push_back(wndptr);
+	return wndptr;
 }
 
 CimguiWrapper::CimguiWrapper() : bEnabled(false)
