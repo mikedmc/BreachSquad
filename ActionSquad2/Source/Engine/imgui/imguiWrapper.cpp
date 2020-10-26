@@ -61,12 +61,16 @@ void CimguiWrapper::Init(PDEVICE pDevice, HWND hwnd)
 	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 	//IM_ASSERT(font != NULL);
 
+
+	//#DMC: Add windows like this:
+	/*
 	auto wndptr = AddWindow(make_shared<CWndTest>("Test Wnd1", true, true));
 	auto wndconv = std::static_pointer_cast<CWndTest>(wndptr);
 	if (wndconv)
 	{
 		bool b = wndconv->bIsOpen;
 	}
+	*/
 }
 
 void CimguiWrapper::Paint(PDEVICE pDevice, bool show_demo_window, bool show_another_window, ImVec4 clear_color)
