@@ -2085,6 +2085,8 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 		UTGetControlsManager().MessageBoxOK(STR_OOPS, stridx);
 	}
 
+
+
 	///--- check Float rounding mode wasn't changed ---
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
 	#ifdef WIN32
@@ -2426,13 +2428,15 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		V(pDevice->EndScene());
 	}
 
-	///--- IMGUI RENDERING ---
+	///--- IMGUI UPDATE ---
+	// must be last as it will enable and disable on user input
 	if (UTimgui().BeginPaint())
 	{
 
 		bool show_demo_window = true;
 		if (show_demo_window)
 			ImGui::ShowDemoWindow(&show_demo_window);
+
 
 		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 		/*
@@ -2459,16 +2463,14 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		}
 		*/
 
-		//--- CONTROLS EDITOR PAINT ---
+		//--- CONTROLS EDITOR INTERFACES ---
 #ifdef K_CONTROLS_EDITOR
 		if (g_gameState == GAME_STATE_CONTROLSED)
 		{
-			g_ControlsEditor.PaintImguiInterfaces();
+			g_ControlsEditor.ShowImguiInterfaces();
 		}
 #endif
-
-
-		//--- finally close everything ---
+		// Last but not least, paint
 		UTimgui().EndPaint(pDevice);
 	}
 }

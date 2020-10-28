@@ -67,13 +67,14 @@ void CimguiWrapper::Init(PDEVICE pDevice, HWND hwnd)
 	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 	//IM_ASSERT(font != NULL);
 
+	bInitialized = true;
 	LOG("[IMGUI] v%s Initialized! ini file: %s", ImGui::GetVersion(), sIniPath);
 }
 
 bool CimguiWrapper::BeginPaint()
 {
 	// not enabled? skip everything
-	if (!bEnabled)
+	if (bEnabled == false || bInitialized == false)
 		return false;
 
 	// Start the Dear ImGui frame
@@ -86,6 +87,8 @@ bool CimguiWrapper::BeginPaint()
 
 void CimguiWrapper::EndPaint(PDEVICE pDevice)
 {
+	if (bEnabled == false || bInitialized == false)
+		return;
 	// Rendering
 	ImGui::EndFrame();
 	pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
@@ -111,10 +114,11 @@ void CimguiWrapper::EndPaint(PDEVICE pDevice)
 }
 
 
-CimguiWrapper::CimguiWrapper() : bEnabled(false)
+CimguiWrapper::CimguiWrapper() : bEnabled(false), bInitialized(false)
 {
 	
 }
+
 
 HRESULT CimguiWrapper::OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc /*= NULL*/)
 {
@@ -125,18 +129,22 @@ HRESULT CimguiWrapper::OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pB
 
 HRESULT CimguiWrapper::OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc /*= NULL*/)
 {
+	bInitialized = true;
 	ImGui_ImplDX9_CreateDeviceObjects();
 	return S_OK;
 }
 
 HRESULT CimguiWrapper::OnLostDevice(void)
 {
+	bInitialized = false;
 	ImGui_ImplDX9_InvalidateDeviceObjects();
 	return S_OK;
 }
 
 HRESULT CimguiWrapper::OnDestroyDevice(void)
 {
+	bInitialized = false;
+	bEnabled = false;
 	ImGui_ImplDX9_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();

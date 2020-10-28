@@ -1675,7 +1675,7 @@ void CControlsEditor::PaintInterface(float fElapsedTime)
 	propertiesPanel.OnRender(fElapsedTime);
 }
 
-void CControlsEditor::PaintImguiInterfaces()
+void CControlsEditor::ShowImguiInterfaces()
 {
 	{
 		ImGuiViewport * vp = ImGui::GetWindowViewport();

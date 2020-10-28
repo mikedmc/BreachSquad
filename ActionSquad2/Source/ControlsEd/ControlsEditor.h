@@ -73,7 +73,7 @@ public:
 	void PaintInterface(float fElapsedTime);
 	
 	//--- IMGUI paint all
-	void PaintImguiInterfaces();
+	void ShowImguiInterfaces();
 	//--- IMGUI adds controls specific to selected control
 	void IMGUI_AddCurControlProps();
 
