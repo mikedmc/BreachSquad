@@ -1589,12 +1589,16 @@ SIZEWH CTexturedFont::MeasureString(CStringDesc* strDesc, int nMaxWidth)
 
 		if (tmpWidth > maxWidth) //calucleaza de la paintStart pana la lastSpace
 		{
-			//reseteaza
-			paintStart = lastSpace + 1;
-			textCur = lastSpace;
-			tmpWidth = 0;
+			// make sure we don't split if we had no space yet
+			if (lastSpace != 0)
+			{
+				//reset x, new row
+				paintStart = lastSpace + 1;
+				textCur = lastSpace;
+				tmpWidth = 0;
 
-			posy += rowHeight + rowSpacing;
+				posy += rowHeight + rowSpacing;
+			}
 		}
 
 		textCur++;
@@ -1689,12 +1693,16 @@ SIZEWH CTexturedFont::MeasureHString(UINT32 strHash, int maxWidth)
 
 		if(tmpWidth > maxWidth) //calucleaza de la paintStart pana la lastSpace
 		{
-			//reseteaza
-			paintStart = lastSpace + 1;
-			textCur = lastSpace;
-			tmpWidth = 0;
+			// make sure we don't split if we had no space yet
+			if (lastSpace != 0)
+			{
+				//reset x, new row
+				paintStart = lastSpace + 1;
+				textCur = lastSpace;
+				tmpWidth = 0;
 
-			posy += rowHeight + rowSpacing;
+				posy += rowHeight + rowSpacing;
+			}
 		}
 
 		textCur++;

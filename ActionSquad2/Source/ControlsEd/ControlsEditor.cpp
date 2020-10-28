@@ -454,11 +454,11 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			break;
 		}
 	}
-
 	if (ctrlIdx < 0)
 		return;
 
-	CVariantCollection* ctrl = ctrlTemplates.GetAt(ctrlIdx);
+	CControl* ctrl = currLayer->controls[currCtrlIdx];
+	CVariantCollection* ctrlTemplate = ctrlTemplates.GetAt(ctrlIdx);
 
 	if ((selectedCtrls.GetSize() == 1) && (currCtrlIdx >= 0))
 	{
@@ -472,45 +472,80 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 	ImGui::Separator();
 	ImGui::TextDisabled("Control properties");
 
-	for (int ii = 1; ii < ctrl->m_variants.Count(); ii++)
+	bool bDataChanged = false;
+	for (int ii = 1; ii < ctrlTemplate->m_variants.Count(); ii++)
 	{
 		// variable name from template
-		CVariantComplex* pVarName = ctrl->m_variants[ii];
+		CVariantComplex* pVarName = ctrlTemplate->m_variants[ii];
 		// actual value from control
 		CVariantComplex* pValue = currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByNameHash(pVarName->m_name.getHash());
 		char sVarName[MAX_PATH];
 		wcstombs(sVarName, pVarName->m_name.text, MAX_PATH);
 		// hardcoded controls properties
-		if(pValue->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
-		//if ((pVar->m_name.IsEqual(L"FontColor")) || (pVar->m_name.IsEqual(L"Color")))
+		switch (pValue->m_type)
 		{
-			ImVec4 color;
-			D3DCOLOR_UNPACKTOFLOAT(pValue->m_asUINT32, color.w, color.x, color.y, color.z);
-			ImGui::ColorPicker4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex );
-			if (ImGui::IsItemEdited())
+			case CVariantComplex::K_ARGTYPE_HEXCOLOR:
 			{
-				// re-pack color if changed
-				pValue->m_asUINT32 = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, color.w);
+				ImVec4 color;
+				D3DCOLOR_UNPACKTOFLOAT(pValue->m_asUINT32, color.w, color.x, color.y, color.z);
+				ImGui::ColorPicker4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);
+				if (ImGui::IsItemEdited())
+				{
+					// re-pack color if changed
+					pValue->m_asUINT32 = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, color.w);
+					bDataChanged = true;
+				}
 			}
-		}
-		// all other elements
-		else
-		{
-			char str0[128];
-			if (pValue->m_type == CVariantComplex::K_ARGTYPE_NONE)
+			break;
+			case CVariantComplex::K_ARGTYPE_BOOL:
 			{
-				sprintf(str0, "empty");
+				ImGui::Checkbox(sVarName, &pValue->m_asBool);
+				if (ImGui::IsItemEdited())
+				{
+					bDataChanged = true;
+				}
 			}
-			else
+			break;
+			case CVariantComplex::K_ARGTYPE_INT32:
 			{
-				pValue->asString(str0, 128);
+				ImGui::InputInt(sVarName, &pValue->m_asINT32);
+				if (ImGui::IsItemEdited())
+				{
+					bDataChanged = true;
+				}
 			}
+			break;
+			case CVariantComplex::K_ARGTYPE_FLOAT:
+			{
+				ImGui::InputFloat(sVarName, &pValue->m_asFloat);
+				if (ImGui::IsItemEdited())
+				{
+					bDataChanged = true;
+				}
+			}
+			break;
+			// string and all other types get treated as string
+			case CVariantComplex::K_ARGTYPE_STRING:
+			default:
+			{
+				char str0[128];
+				if (pValue->m_type == CVariantComplex::K_ARGTYPE_NONE)
+				{
+					sprintf(str0, "empty");
+				}
+				else
+				{
+					pValue->asString(str0, 128);
+				}
 
-			ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
-			if (ImGui::IsItemEdited())
-			{
-				pValue->m_strArg.Init(str0);
+				ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
+				if (ImGui::IsItemEdited())
+				{
+					pValue->m_strArg.Init(str0);
+					bDataChanged = true;
+				}
 			}
+			break;
 		}
 
 
@@ -582,6 +617,20 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		}
 		*/
 	}
+
+	if (selectedCtrls.GetSize() == 1)
+	{
+		// update control
+		if (bDataChanged)
+		{
+			UpdateControlDisplayProps(ctrl);
+		}
+	}
+	else
+	{
+		// update layer
+	}
+
 }
 
 
@@ -1470,6 +1519,14 @@ void CControlsEditor::DeleteLayer()
 	int layidx = UTGetControlsManager().layersDefinitions.IndexOf(currLayer);
 	UTGetControlsManager().layersDefinitions.Remove(layidx);
 	SAFE_DELETE(currLayer);
+}
+
+void CControlsEditor::UpdateControlDisplayProps(CControl* ctrl)
+{
+	ctrl->bbox.x = ctrl->paramsDict.GetVariantByName(L"X")->m_asINT32;
+	ctrl->bbox.y = ctrl->paramsDict.GetVariantByName(L"Y")->m_asINT32;
+	ctrl->bbox.w = ctrl->paramsDict.GetVariantByName(L"W")->m_asINT32;
+	ctrl->bbox.h = ctrl->paramsDict.GetVariantByName(L"H")->m_asINT32;
 }
 
 void CControlsEditor::ChangeControlPaintOrder(int dir)

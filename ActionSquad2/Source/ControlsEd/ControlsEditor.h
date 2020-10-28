@@ -94,6 +94,8 @@ public:
 	void CloneControl();
 	void DeleteControl();
 	void DeleteLayer();
+	// Updates control's visual data from internal parameters
+	void UpdateControlDisplayProps(CControl* ctrl);
 	// changes paint order of selected control
 	void ChangeControlPaintOrder(int dir);
 	// centers selected elements or selected layer if no elements selected
