@@ -1569,30 +1569,26 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 	}
 
 	var = paramsDict.GetVariantByName(L"FontColor");
-	float fColAlpha = 1.0f;
-	if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+	if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
 	{
-		wchar_t * pEnd;
-		dwFontColor = wcstoul(var->m_strArg.text, &pEnd, 16);
-		fColAlpha = D3DCOLOR_GETFALPHA(dwFontColor);
+		dwFontColor = var->m_asUINT32;
 	}
 	//set font color
+	float fColAlpha = D3DCOLOR_GETFALPHA(dwFontColor);
 	dwFontColor = D3DCOLOR_COLORALPHA(dwFontColor, layer->alpha * fColAlpha);
 
 	var = paramsDict.GetVariantByName(L"Color");
-	fColAlpha = 1.0f;
-	if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+	if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
 	{
-		wchar_t * pEnd;
-		dwColor = wcstoul(var->m_strArg.text, &pEnd, 16);
-		if (dwColor == 0)
-		{
-			dwColor = 0xffffffff;
-			paramsDict.SetNamedVarString(L"Color", L"0xffffffff");
-		}
-		fColAlpha = D3DCOLOR_GETFALPHA(dwColor);
+		dwColor = var->m_asUINT32;
+	}
+	else
+	{
+		// mandatory param
+		paramsDict.SetNamedVarHEXCOLOR(L"Color", 0xffffffff);
 	}
 	//set font color
+	fColAlpha = D3DCOLOR_GETFALPHA(dwColor);
 	dwColor = D3DCOLOR_COLORALPHA(dwColor, layer->alpha * fColAlpha);
 
 
@@ -1767,10 +1763,9 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				{
 					DWORD dwColorRight = 0xffffffff;
 					var = paramsDict.GetVariantByName(L"FontColor_right");
-					if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+					if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
 					{
-						wchar_t * pEnd;
-						dwColorRight = wcstoul(var->m_strArg.text, &pEnd, 16);
+						dwColorRight = var->m_asUINT32;
 					}
 					dwColorRight = D3DCOLOR_COLORALPHA(dwColorRight, layer->alpha);
 					//draw string
@@ -1869,10 +1864,9 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				{
 					DWORD dwColorRight = 0xffffffff;
 					var = paramsDict.GetVariantByName(L"FontColor_right");
-					if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+					if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
 					{
-						wchar_t * pEnd;
-						dwColorRight = wcstoul(var->m_strArg.text, &pEnd, 16);
+						dwColorRight = var->m_asUINT32;
 					}
 					dwColorRight = D3DCOLOR_COLORALPHA(dwColorRight, layer->alpha);
 					//draw string
@@ -2555,10 +2549,9 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			if (fTimer < fBlinkTimer)
 			{
 				CVariantComplex* var = paramsDict.GetVariantByName(L"BlinkColor");
-				if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+				if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
 				{
-					wchar_t * pEnd;
-					textcol = wcstoul(var->m_strArg.text, &pEnd, 16);
+					textcol = var->m_asUINT32;
 				}
 			}
 

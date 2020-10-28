@@ -806,7 +806,7 @@ void CTimersArray::ResetTimers()
 	}
 }
 
-//RETURNS: tipul variabilei scrise in string: int, float sau string
+//RETURNS: guesses the type of a string variable
 eVarTypes GetTypeFromString(const WCHAR *str)
 {
 	int hasdot = 0;
@@ -815,9 +815,12 @@ eVarTypes GetTypeFromString(const WCHAR *str)
 	if(len <= 0)
 		return K_RETTYPE_EMPTY;
 
+	if ((str[0] == '#') && (len > 1))
+		return K_RETTYPE_HEXCOLOR;
+
 	for(int kk=0; kk<len; kk++)
 	{
-		//ignora semnele + si - si spatiile
+		//ignores +/- and space
 		if((str[kk] == L'-') || (str[kk] == L'+') || (str[kk]==L' '))
 			continue;
 		if(str[kk] == L'.')
@@ -1163,6 +1166,16 @@ int CVariantCollection::SetNamedVarUINT32(const WCHAR* argName, UINT32 val)
 	return m_variants.GetSize();
 }
 
+int CVariantCollection::SetNamedVarHEXCOLOR(const WCHAR* argName, UINT32 val)
+{
+	DeleteVar(argName);
+
+	CVariantComplex* nvar = new CVariantComplex();
+	nvar->Set_HEXCOLOR(argName, val);
+	m_variants.Add(nvar);
+	return m_variants.GetSize();
+}
+
 int CVariantCollection::SetNamedVarINT32(const WCHAR* argName, INT32 val)
 {
 	DeleteVar(argName);
@@ -1226,7 +1239,7 @@ int CVariantCollection::SetNamedVarAUTO(const WCHAR* argName, WCHAR* strVal)
 #if defined(_DEBUG) || defined(DEBUG)
 void CVariantCollection::DumpDataToOutputWindow()
 {
-	//TODO: aici ar trebui sa ia in considerare tipul variantului pentru output
+	//#TODO: aici ar trebui sa ia in considerare tipul variantului pentru output
 	for (int kk = 0; kk < m_variants.GetSize(); kk++)
 	{
 		DebugPrintFnW(L"%s=%d\n", m_variants[kk]->m_name.text, m_variants[kk]->m_asUINT32);

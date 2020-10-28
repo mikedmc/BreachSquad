@@ -935,8 +935,16 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 							}
 							else if ((wcscmp(propertyName, L"Color") == 0) || (wcscmp(propertyName, L"FontColor") == 0))
 							{
+								// too short? save solid white
 								if ((wcscmp(propertyValue, L"0") == 0) || (wcslen(propertyValue) < 2))
+								{
 									StringCchPrintf(propertyValue, MAX_PATH, L"0xffffffff");
+								}
+								else 
+								{
+									// translate color to string
+									var->asString(propertyValue, MAX_PATH);
+								}
 							}
 
 							ctrlAttribute = ctrlNode.append_attribute(propertyName);

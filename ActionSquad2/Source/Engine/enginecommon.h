@@ -634,6 +634,7 @@ enum eVarTypes {
 	K_RETTYPE_INT = 0,
 	K_RETTYPE_FLOAT = 1,
 	K_RETTYPE_STRING = 2,
+	K_RETTYPE_HEXCOLOR = 3,
 };
 //RETURNS: type specified by *str: int, float or string
 eVarTypes GetTypeFromString(const WCHAR *str);
@@ -648,6 +649,7 @@ public:
 		K_ARGTYPE_FLOAT,
 		K_ARGTYPE_BOOL,
 		K_ARGTYPE_UINT32,
+		K_ARGTYPE_HEXCOLOR,	//DWORD
 		K_ARGTYPE_VOIDP,
 
 		K_ARGTYPE_STRING,
@@ -722,6 +724,7 @@ public:
 
 	void Set_INT32(const WCHAR* argName, INT32 int32Val) { m_name.Init(argName); m_asINT32 = int32Val; m_type = K_ARGTYPE_INT32;}
 	void Set_UINT32(const WCHAR* argName, UINT32 uint32Val) { m_name.Init(argName); m_asUINT32 = uint32Val; m_type = K_ARGTYPE_UINT32;}
+	void Set_HEXCOLOR(const WCHAR* argName, UINT32 uint32Val) { m_name.Init(argName); m_asUINT32 = uint32Val; m_type = K_ARGTYPE_HEXCOLOR; }
 	void Set_BOOL(const WCHAR* argName, bool boolVal) { m_name.Init(argName); m_asBool = boolVal; m_type = K_ARGTYPE_BOOL;}
 	void Set_FLOAT(const WCHAR* argName, float floatVal) { m_name.Init(argName); m_asFloat = floatVal; m_type = K_ARGTYPE_FLOAT;}
 	void Set_STRING(const WCHAR* argName, WCHAR* strVal) { m_name.Init(argName); m_strArg.Init(strVal); m_asUINT32 = 0.0f; m_type = K_ARGTYPE_STRING;}
@@ -738,6 +741,17 @@ public:
 				WCHAR *stopstr;
 				INT32 val = (INT32)wcstol(strVal, &stopstr, 10);
 				Set_INT32(argName, val);
+			}
+			break;
+			case K_RETTYPE_HEXCOLOR:
+			{
+				UINT32 val = 0x0;
+				WCHAR* p = strVal;
+				while (*p == '#' || *p == ' ' || *p == '\t')
+					p++;
+				swscanf_s(p, L"%08X", &val);
+
+				Set_HEXCOLOR(argName, val);
 			}
 			break;
 			case K_RETTYPE_FLOAT:
@@ -775,6 +789,9 @@ public:
 			case K_ARGTYPE_UINT32:
 				StringCchPrintf(destStr, maxLen, L"%d", m_asUINT32);
 				break;
+			case K_ARGTYPE_HEXCOLOR:
+				StringCchPrintf(destStr, maxLen, L"#%08X", m_asUINT32);
+				break;
 		}
 		return 0;
 	}
@@ -795,6 +812,9 @@ public:
 			default:
 			case K_ARGTYPE_UINT32:
 				sprintf(destStr, "%d", m_asUINT32);
+				break;
+			case K_ARGTYPE_HEXCOLOR:
+				sprintf(destStr, "#%08X", m_asUINT32);
 				break;
 		}
 		return 0;
@@ -821,6 +841,7 @@ public:
 				return _wtof(m_strArg.text);
 			case K_ARGTYPE_FLOAT:
 				return (float)m_asFloat;
+			case K_ARGTYPE_HEXCOLOR:
 			case K_ARGTYPE_UINT32:
 				return (float)m_asUINT32;
 			default:
@@ -938,6 +959,7 @@ public:
 	int AddVariant(CVariantComplex * variant);
 
 	int SetNamedVarUINT32(const WCHAR* varName, UINT32 val);
+	int SetNamedVarHEXCOLOR(const WCHAR* varName, UINT32 val);
 	int SetNamedVarINT32(const WCHAR* varName, INT32 val);
 	int SetNamedVarFloat(const WCHAR* varName, float val);
 	int SetNamedVarBool(const WCHAR* varName, bool val);
