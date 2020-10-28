@@ -19,8 +19,8 @@
 	<Layer ID="LAYER_ID_IGM_MENU" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="center" anchorY="center">
 		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
 		<Control Type="Widebar" animID="WIDEBAR2" Color="0xffffffff" X="-111" Y="-40" W="217" H="95" />
-		<Control Type="ScrollMenu" ID="CTRL_SCROLL_IGMMENU" animID="ANM_" FontID="FONT_12_WOW" FontColor="0xff5a8dba" align="center" Vspacing="18" DisabledFlags="0" StringID0="RESUME" StringID1="RESTART_LEVEL" StringID2="OPTIONS" StringID3="QUIT" StringID4="" StringID5="" StringID6="" StringID7="" X="-114" Y="-22" W="228" H="69" />
 		<Control Type="Animation" animID="LOGO" Animated="0" setFrame="0" scaleImage="0" X="-84" Y="-98" W="169" H="74" />
+		<Control Type="ScrollMenu" ID="CTRL_SCROLL_IGMMENU" animID="ANM_" FontID="FONT_12_WOW" FontColor="0xff5a8dba" align="center" Vspacing="18" DisabledFlags="0" StringID0="RESUME" StringID1="RESTART_LEVEL" StringID2="OPTIONS" StringID3="QUIT" StringID4="" StringID5="" StringID6="" StringID7="" X="-114" Y="-34" W="228" H="69" />
 	</Layer>
 	<Layer ID="LAYER_ID_LEVELWIN_1P" X="0" Y="0" isBlocking="false" getsInput="true" anchorX="center" anchorY="center" focusedControlID="BUT_LEVEL_WIN">
 		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0xcc000000" />
@@ -605,7 +605,7 @@
 		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" Color="0x88000000" />
 		<Control Type="Window" ID="WINDOW_LOBBIES_LIST" animID="WINDOW_BLACK1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="LOBBIES_LIST" inflate="0" X="-81" Y="-74" W="163" H="162" />
 		<Control Type="ListSelectorTT" ID="CTRL_LOBBIES_SELECTOR" FontColor="0xff5a8dba" FontColor_right="0xffffffff" stringID="LOBBIES_LIST_VAL" stringID_right="" nMinPage="0" nMaxPage="0" nBaseIndex="0" inflate="3" X="-78" Y="-67" W="156" H="93" />
-    <Control Type="Button" ID="BUT_REFRESH_LOBBIES" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="REFRESH" X="-48" Y="30" W="97" H="16" />
+		<Control Type="Button" ID="BUT_REFRESH_LOBBIES" animID="BUTTON2" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="REFRESH" X="-48" Y="30" W="97" H="16" />
 		<Control Type="Button" ID="BUT_JOIN_LOBBY" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="JOIN_GAME" X="-48" Y="49" W="97" H="16" />
 		<Control Type="Button" ID="BUT_CLOSE_LOBBIES_LIST" animID="BUTTON1" FontID="FONT_8_BS1" FontColor="0xffffffff" stringID="CANCEL" X="-39" Y="68" W="78" H="16" />
 	</Layer>

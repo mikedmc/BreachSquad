@@ -44,18 +44,16 @@ private:
 	ID3DXSprite*		m_pSprite;
 public:
 	bool				hideBBoxes;
-	CDXUTDialog			globalPanel;
-	CDXUTDialog			controlsPanel;
-	CDXUTDialog			layersPanel;
 	CDXUTDialog			propertiesPanel;
 
 	CGrowableArray<CVariantCollection*>		ctrlTemplates;
 	CVariantCollection						layerTemplate;
 
-	CCtrlLayer*			currLayer;		// referinta la layer-ul curent
+	CCtrlLayer*			currLayer;		// current layer
+	int					currLayerIdx;	// current layer idx in list
 	CCtrlLayer*			testLayer;
 	CGrowableArray<int>	selectedCtrls;	// lista de controale selectate (pt selectie multipla)
-	int					currCtrl;		// tine ultimul control pe care am apasat
+	int					currCtrlIdx;	// tine ultimul control pe care am apasat
 
 	int tool; // moving / resizing controls
 	bool clickedInterface;
@@ -64,14 +62,20 @@ public:
 	// offset-ul layer-ului fata de centrul ecranului
 	D3DXVECTOR2 offset;
 
+	// Loads everything it needs
 	void Launch();
-	/* Deallocates everything */
+	// Deallocates everything
 	void Close();
 	void Update(float dTime);
 	void UpdateCtrlParamsList(); // asta e update-ul scrisului din panel pt atunci cand misti un control cu mouse-u sau din sageti
 	void Paint();
 	void PaintBBoxes();
 	void PaintInterface(float fElapsedTime);
+	
+	//--- IMGUI paint all
+	void PaintImguiInterfaces();
+	//--- IMGUI adds controls specific to selected control
+	void IMGUI_AddCurControlProps();
 
 	void DrawBBox(RECTXYWH rect, bool selected);
 	void DrawLine(int x1, int y1, int x2, int y2, D3DCOLOR col = 0xff0000ff);
@@ -85,12 +89,15 @@ public:
 	void FillControlProperties();
 	// incarca lista de proprietati a layer-ului selectat
 	void FillLayerProperties();
-	void LoadLayerNames();
 
 	void AddControl(CVariantCollection* vcol);
 	void CloneControl();
-	void DeleteControl(); // sterge controlul selectat
+	void DeleteControl();
 	void DeleteLayer();
+	// changes paint order of selected control
+	void ChangeControlPaintOrder(int dir);
+	// centers selected elements or selected layer if no elements selected
+	void CenterElements(bool H, bool V);
 
 	void ReceiveKeys(UINT key);
 
@@ -99,10 +106,7 @@ public:
 	CControlsEditor();
 	~CControlsEditor();
 
-	void GlobalPanelCallBack(UINT nEvent, int nControlID, CDXUTControl* pControl);
 	void PropertiesPanelCallBack(UINT nEvent, int nControlID, CDXUTControl* pControl);
-	void ControlsPanelCallBack(UINT nEvent, int nControlID, CDXUTControl* pControl);
-	void LayersPanelCallBack(UINT nEvent, int nControlID, CDXUTControl* pControl);
 
 	void SetSpritePtr(ID3DXSprite* pSprite);
 

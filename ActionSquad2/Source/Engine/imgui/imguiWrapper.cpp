@@ -19,10 +19,16 @@ bool CimguiWrapper::GetWantCaptureKeyboard()
 
 void CimguiWrapper::Init(PDEVICE pDevice, HWND hwnd)
 {
+	// create ini file path
+	char sTempPath[MAX_PATH];
+	wcstombs(sTempPath, UTGetAppClass().g_wszTempFolderPath, MAX_PATH);
+	sprintf_s(sIniPath, "%simgui.ini", sTempPath);
+
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.IniFilename = sIniPath;									// save ini file location
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
@@ -61,83 +67,31 @@ void CimguiWrapper::Init(PDEVICE pDevice, HWND hwnd)
 	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 	//IM_ASSERT(font != NULL);
 
-
-	//#DMC: Add windows like this:
-	/*
-	auto wndptr = AddWindow(make_shared<CWndTest>("Test Wnd1", true, true));
-	auto wndconv = std::static_pointer_cast<CWndTest>(wndptr);
-	if (wndconv)
-	{
-		bool b = wndconv->bIsOpen;
-	}
-	*/
+	LOG("[IMGUI] v%s Initialized! ini file: %s", ImGui::GetVersion(), sIniPath);
 }
 
-void CimguiWrapper::Paint(PDEVICE pDevice, bool show_demo_window, bool show_another_window, ImVec4 clear_color)
+bool CimguiWrapper::BeginPaint()
 {
 	// not enabled? skip everything
 	if (!bEnabled)
-		return;
+		return false;
 
-	ImGuiIO& io = ImGui::GetIO();
 	// Start the Dear ImGui frame
 	ImGui_ImplDX9_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-	if (show_demo_window)
-		ImGui::ShowDemoWindow(&show_demo_window);
+	return true;
+}
 
-	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-	{
-		static float f = 0.0f;
-		static int counter = 0;
-
-		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-		ImGui::Text("WantCaptureMouse:%d", io.WantCaptureMouse);
-		ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-		ImGui::Checkbox("Another Window", &show_another_window);
-
-		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::End();
-	}
-
-
-	for (auto wnd : arrWnds)
-	{
-		if (wnd->bIsOpen) {
-			wnd->Paint();
-		}
-	}
-
-	/*
-	// 3. Show another simple window.
-	if (show_another_window)
-	{
-		ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		ImGui::Text("Hello from another window!");
-		if (ImGui::Button("Close Me"))
-			show_another_window = false;
-		ImGui::End();
-	}
-	*/
-
+void CimguiWrapper::EndPaint(PDEVICE pDevice)
+{
 	// Rendering
 	ImGui::EndFrame();
 	pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
 	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 	pDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
-	D3DCOLOR clear_col_dx = D3DCOLOR_RGBA((int)(clear_color.x*255.0f), (int)(clear_color.y*255.0f), (int)(clear_color.z*255.0f), (int)(clear_color.w*255.0f));
+	D3DCOLOR clear_col_dx = D3DCOLOR_RGBA(255, 0, 0, 255);
 	pDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, clear_col_dx, 1.0f, 0);
 	if (pDevice->BeginScene() >= 0)
 	{
@@ -147,18 +101,15 @@ void CimguiWrapper::Paint(PDEVICE pDevice, bool show_demo_window, bool show_anot
 	}
 
 	// Update and Render additional Platform Windows
+	ImGuiIO& io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
 	}
+
 }
 
-shared_ptr<CimguiWndInterface> CimguiWrapper::AddWindow(shared_ptr<CimguiWndInterface> wndptr)
-{
-	arrWnds.push_back(wndptr);
-	return wndptr;
-}
 
 CimguiWrapper::CimguiWrapper() : bEnabled(false)
 {
@@ -168,6 +119,7 @@ CimguiWrapper::CimguiWrapper() : bEnabled(false)
 HRESULT CimguiWrapper::OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc /*= NULL*/)
 {
 	Init(pDevice, DXUTGetHWND());
+
 	return S_OK;
 }
 
@@ -188,6 +140,8 @@ HRESULT CimguiWrapper::OnDestroyDevice(void)
 	ImGui_ImplDX9_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
+	LOG("[IMGUI] Released.");
 
 	return S_OK;
 }

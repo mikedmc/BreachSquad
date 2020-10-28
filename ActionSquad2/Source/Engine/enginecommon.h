@@ -779,6 +779,28 @@ public:
 		return 0;
 	}
 
+	int asString(CHAR *destStr, int maxLen)
+	{
+		switch (m_type)
+		{
+			case K_ARGTYPE_STRING:
+				wcstombs(destStr, m_strArg.text, maxLen);
+				break;
+			case K_ARGTYPE_INT32:
+				sprintf(destStr, "%d", m_asINT32);
+				break;
+			case K_ARGTYPE_FLOAT:
+				sprintf(destStr, "%.2f", m_asFloat);
+				break;
+			default:
+			case K_ARGTYPE_UINT32:
+				sprintf(destStr, "%d", m_asUINT32);
+				break;
+		}
+		return 0;
+	}
+
+
 	INT32 asInt32() 
 	{
 		switch (m_type)

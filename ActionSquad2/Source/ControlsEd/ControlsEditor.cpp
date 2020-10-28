@@ -1,16 +1,18 @@
 #include "dxstdafx.h"
 
+#include <vector>
+#include <string>
+using namespace std;
+
 #define K_BBOX_SCALE_BOX_SIZE 10
 
-RECTXYWH globalPanelRect;
-RECTXYWH controlsPanelRect;
-RECTXYWH layersPanelRect;
 RECTXYWH propertiesPanelRect;
 
 CControlsEditor::CControlsEditor()
 {
 	currLayer = NULL;
-	currCtrl = -1;
+	currLayerIdx = -1;
+	currCtrlIdx = -1;
 
 	m_pSprite = null;
 	m_pd3dDevice = null;
@@ -168,10 +170,10 @@ void CControlsEditor::DrawBBox(RECTXYWH rect, bool selected)
 
 void CControlsEditor::UpdateCtrlParamsList()
 {
-	if (currLayer == NULL || currCtrl == -1)
+	if (currLayer == NULL || currCtrlIdx == -1)
 		return;
 
-	CControl* ctrl = currLayer->controls[currCtrl];
+	CControl* ctrl = currLayer->controls[currCtrlIdx];
 	for (int ii = K_PP_CONTROLS_PROPS_START; ii <= K_PP_CONTROLS_PROPS_END; ii++)
 	{
 		CDXUTControl *dxCtrl = NULL;
@@ -252,6 +254,7 @@ void CControlsEditor::FillLayerControlsList(int layIdx)
 	CCtrlLayer *layer = UTGetControlsManager().layersDefinitions.GetAt(layIdx);
 	currLayer = UTGetControlsManager().layersDefinitions.GetAt(layIdx);
 	currLayer->pControlsManager = &UTGetControlsManager();
+	currLayerIdx = layIdx;
 	//currCtrl = 0;
 
 	CDXUTListBox* pList;
@@ -332,7 +335,7 @@ void CControlsEditor::FillLayerProperties()
 
 void CControlsEditor::FillControlProperties()
 {
-	if (currCtrl < 0)
+	if (currCtrlIdx < 0)
 		return;
 
 	for (int ii = K_PP_CONTROLS_PROPS_START; ii <= K_PP_CONTROLS_PROPS_END; ii++)
@@ -341,7 +344,7 @@ void CControlsEditor::FillControlProperties()
 	// caut controlul in templates ca sa incarc exact proprietatile din templates
 	int ctrlIdx = -1;
 	WCHAR type[MAX_PATH];
-	StringCchPrintf(type, MAX_PATH, currLayer->controls[currCtrl]->paramsDict.GetVariantByName(L"Type")->m_strArg.text);
+	StringCchPrintf(type, MAX_PATH, currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByName(L"Type")->m_strArg.text);
 	UINT id = FastHash(type);
 	for (int ii = 0; ii < ctrlTemplates.Count(); ii++)
 	{
@@ -364,7 +367,7 @@ void CControlsEditor::FillControlProperties()
 		propertiesPanel.AddStatic(K_PP_CONTROLS_PROPS_START + ii * 2, var->m_name.text, -60, starty + 30 * (ii - 1), 200, 30, true);
 
 		// pe impar pun editbox-urile cu valoarea proprietatii luata din controlul efectiv
-		CVariantComplex* currvar = currLayer->controls[currCtrl]->paramsDict.GetVariantByNameHash(var->m_name.getHash());
+		CVariantComplex* currvar = currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByNameHash(var->m_name.getHash());
 		if (var->m_name.IsEqual(L"animID"))
 		{
 			CDXUTComboBox *CB;
@@ -429,6 +432,173 @@ void CControlsEditor::FillControlProperties()
 	propertiesPanel.GetListBox(K_PP_CONTROLS_LIST)->m_bHasFocus = true;
 }
 
+void CControlsEditor::IMGUI_AddCurControlProps()
+{
+	if ((currCtrlIdx < 0) || (selectedCtrls.GetSize() != 1))
+		return;
+
+	int ctrlIdx = -1;
+	WCHAR type[MAX_PATH];
+	StringCchPrintf(type, MAX_PATH, currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByName(L"Type")->m_strArg.text);
+	UINT id = FastHash(type);
+	for (int ii = 0; ii < ctrlTemplates.Count(); ii++)
+	{
+		CVariantCollection* ctrl = ctrlTemplates.GetAt(ii);
+		CVariantComplex* ctrlType = ctrl->m_variants.GetAt(0);
+		if (id == ctrlType->m_strArg.getHash())
+		{
+			ctrlIdx = ii;
+			break;
+		}
+	}
+
+	if (ctrlIdx < 0)
+		return;
+
+	CVariantCollection* ctrl = ctrlTemplates.GetAt(ctrlIdx);
+
+	if ((selectedCtrls.GetSize() == 1) && (currCtrlIdx >= 0))
+	{
+		ImGui::Separator();
+		ImGui::TextDisabled("Control options");
+		if (ImGui::Button("Clone Control", ImVec2(120, 0)))
+		{
+		}
+	}
+
+	ImGui::Separator();
+	ImGui::TextDisabled("Control properties");
+
+	for (int ii = 1; ii < ctrl->m_variants.Count(); ii++)
+	{
+		// variable name from template
+		CVariantComplex* pVar = ctrl->m_variants[ii];
+		// actual value from control
+		CVariantComplex* pValue = currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByNameHash(pVar->m_name.getHash());
+		char sVarName[MAX_PATH];
+		wcstombs(sVarName, pVar->m_name.text, MAX_PATH);
+		// hardcoded controls properties
+		if ((pVar->m_name.IsEqual(L"FontColor")) || (pVar->m_name.IsEqual(L"Color")))
+		{
+			//#TODO: de despartit imgui pe update si paint si de testat var fara fereastra, in debug
+			//#TODO: culoarea trebuie tinuta DWORD si doar la incarcare si la salvare covnertite in string
+			//#TODO: ca tipuri de date in variant complex am putea sa avem si color ca sa nu mai fac switch dupa nume
+			ImVec4 color;
+			/*
+				char* p = buf;
+				while (*p == '#' || ImCharIsBlankA(*p))
+					p++;
+				i[0] = i[1] = i[2] = i[3] = 0;
+					sscanf(p, "%02X%02X%02X%02X", (unsigned int*)&i[0], (unsigned int*)&i[1], (unsigned int*)&i[2], (unsigned int*)&i[3]); // Treat at unsigned (%X is unsigned)
+					*/
+			ImGui::ColorPicker4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex );
+
+			// D3DCOLOR_COLORVALUE - transforma in hexa
+			//sprintf("#%08X", valoare) ca sa salveze in format hexa
+
+			/*
+			WCHAR value[MAX_PATH];
+			if (currvar->m_type == CVariantComplex::K_ARGTYPE_STRING)
+				StringCchPrintf(value, MAX_PATH, L"%s", currvar->m_strArg.text);
+			else
+				StringCchPrintf(value, MAX_PATH, L"0xffffffff");
+
+			propertiesPanel.AddEditBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, value, 75, starty + 30 * (ii - 1), 165, 30);
+			*/
+		}
+		// all other elements
+		else
+		{
+			char str0[128];
+			if (pValue->m_type == CVariantComplex::K_ARGTYPE_NONE)
+			{
+				sprintf(str0, "empty");
+			}
+			else
+			{
+				pValue->asString(str0, 128);
+			}
+
+			ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
+			if (ImGui::IsItemEdited())
+			{
+				LOG("text changed %d", randint(1000));
+				pValue->m_strArg.Init(str0);
+			}
+		}
+
+
+		/*
+		// pe par pun staticele cu numele proprietatii (X, Y, W, H etc)
+		CVariantComplex* var = ctrl->m_variants[ii];
+		propertiesPanel.AddStatic(K_PP_CONTROLS_PROPS_START + ii * 2, var->m_name.text, -60, starty + 30 * (ii - 1), 200, 30, true);
+
+		// pe impar pun editbox-urile cu valoarea proprietatii luata din controlul efectiv
+		CVariantComplex* currvar = currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByNameHash(var->m_name.getHash());
+		if (var->m_name.IsEqual(L"animID"))
+		{
+			CDXUTComboBox *CB;
+			propertiesPanel.AddComboBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, 75, starty + 30 * (ii - 1), 175, 30, 0U, false, &CB);
+			for (int ii = 0; ii < UTGetControlsManager().m_sprCol.Animations.Count(); ii++)
+			{
+				scAnimation *anm = UTGetControlsManager().m_sprCol.Animations.GetAt(ii);
+				CB->AddItem(anm->animName.text, NULL);
+			}
+			CB->AddItem(L"_EMPTY_", NULL);
+
+			if (CB->SetSelectedByIndex(currvar->m_asINT32) != S_OK)
+				CB->SetSelectedByText(L"_EMPTY_");
+		}
+		else if (var->m_name.IsEqual(L"FontID"))
+		{
+			CDXUTComboBox *CB;
+			propertiesPanel.AddComboBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, 75, starty + 30 * (ii - 1), 175, 30, 0U, false, &CB);
+			for (int ii = 0; ii < UTGetFontsManager().fonts.Count(); ii++)
+			{
+				CTexturedFont* font = UTGetFontsManager().fonts.GetAt(ii);
+				CB->AddItem(font->shFontName.text, NULL);
+			}
+			CB->AddItem(L"_EMPTY_", NULL);
+			if (CB->SetSelectedByIndex(currvar->m_asINT32) != S_OK)
+				CB->SetSelectedByText(L"_EMPTY_");
+		}
+		else if (var->m_name.IsEqual(L"stringID"))
+		{
+			WCHAR value[MAX_PATH];
+			if (currvar->m_asINT32 != g_stringsMgr.defaultStringIdx) //daca nu am stringul setat scriu empty
+				StringCchPrintf(value, MAX_PATH, L"%s", g_stringsMgr.strings[currvar->m_asINT32]->shStringName.text);
+			else
+				StringCchPrintf(value, MAX_PATH, L"empty");
+
+			propertiesPanel.AddEditBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, value, 75, starty + 30 * (ii - 1), 165, 30);
+		}
+		else if ((var->m_name.IsEqual(L"FontColor")) || (var->m_name.IsEqual(L"Color")))
+		{
+			WCHAR value[MAX_PATH];
+			if (currvar->m_type == CVariantComplex::K_ARGTYPE_STRING)
+				StringCchPrintf(value, MAX_PATH, L"%s", currvar->m_strArg.text);
+			else
+				StringCchPrintf(value, MAX_PATH, L"0xffffffff");
+
+			propertiesPanel.AddEditBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, value, 75, starty + 30 * (ii - 1), 165, 30);
+		}
+		else
+		{
+			WCHAR value[MAX_PATH];
+			currvar->asString(value, MAX_PATH);
+
+			if (currvar->m_type == CVariantComplex::K_ARGTYPE_NONE)
+			{
+				StringCchPrintf(value, MAX_PATH, L"empty");
+			}
+
+			propertiesPanel.AddEditBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, value, 75, starty + 30 * (ii - 1), 165, 30);
+		}
+		*/
+	}
+}
+
+
 void CControlsEditor::AddControl(CVariantCollection* vcol)
 {
 	if (currLayer == NULL)
@@ -456,9 +626,9 @@ void CControlsEditor::AddControl(CVariantCollection* vcol)
 	nctrl->layer = currLayer;
 	currLayer->controls.Add(nctrl);
 
-	currCtrl = currLayer->controls.Count() - 1;
+	currCtrlIdx = currLayer->controls.Count() - 1;
 	selectedCtrls.RemoveAll();
-	selectedCtrls.Add(currCtrl);
+	selectedCtrls.Add(currCtrlIdx);
 
 	// reincarca listbox-ul layerului cu controlul nou adaugat
 	FillLayerControlsList(UTGetControlsManager().layersDefinitions.IndexOf(currLayer));
@@ -466,118 +636,11 @@ void CControlsEditor::AddControl(CVariantCollection* vcol)
 	FillControlProperties();
 }
 
-// ---------------------------------------------
-// --- CALLBACK-URI PT FIECARE PANEL SEPARAT ---
-// ---------------------------------------------
-void CALLBACK OnControlsPanelEvent(UINT nEvent, int nControlID, CDXUTControl* pControl)
-{
-	g_ControlsEditor.ControlsPanelCallBack(nEvent, nControlID, pControl);
-}
-void CALLBACK OnLayersPanelEvent(UINT nEvent, int nControlID, CDXUTControl* pControl)
-{
-	g_ControlsEditor.LayersPanelCallBack(nEvent, nControlID, pControl);
-}
 void CALLBACK OnPropertiesPanelEvent(UINT nEvent, int nControlID, CDXUTControl* pControl)
 {
 	g_ControlsEditor.PropertiesPanelCallBack(nEvent, nControlID, pControl);
 }
-void CALLBACK OnGlobalPanelEvent(UINT nEvent, int nControlID, CDXUTControl* pControl)
-{
-	g_ControlsEditor.GlobalPanelCallBack(nEvent, nControlID, pControl);
-}
 
-
-void CControlsEditor::ControlsPanelCallBack(UINT nEvent, int nControlID, CDXUTControl* pControl)
-{
-	switch (nControlID)
-	{
-		case K_CP_CONTROLS_LISTBOX:
-		{
-			switch (nEvent)
-			{
-				case EVENT_LISTBOX_ITEM_DBLCLK:
-				{
-					int ctrlIdx = ((CDXUTListBox *)pControl)->GetSelectedIndex();
-					CVariantCollection* vcol = ctrlTemplates.GetAt(ctrlIdx);
-					AddControl(vcol);
-				}
-				break;
-			}
-		}
-		break;
-	}
-}
-
-void CControlsEditor::LayersPanelCallBack(UINT nEvent, int nControlID, CDXUTControl* pControl)
-{
-	switch (nControlID)
-	{
-		case K_LP_LAYERS_LISTBOX:
-		{
-			switch (nEvent)
-			{
-				case EVENT_LISTBOX_SELECTION:
-				{
-					int layIdx = ((CDXUTListBox *)pControl)->GetSelectedIndex();
-					currCtrl = -1;
-					selectedCtrls.RemoveAll();
-					FillLayerControlsList(layIdx);
-					FillLayerProperties();
-				}
-				break;
-			}
-		}
-		break;
-		case K_LP_BUTTON_NEW_LAYER:
-		{
-			CCtrlLayer* nlayer = new CCtrlLayer();
-			nlayer->bBlocking = _wtoi(layerTemplate.GetVariantByName(L"isBlocking")->m_strArg.text);
-			nlayer->bGetsInput = _wtoi(layerTemplate.GetVariantByName(L"getsInput")->m_strArg.text);
-			int lx = _wtoi(layerTemplate.GetVariantByName(L"X")->m_strArg.text);
-			int ly = _wtoi(layerTemplate.GetVariantByName(L"Y")->m_strArg.text);
-			nlayer->SetPos(lx, ly);
-			nlayer->ID.Init(layerTemplate.GetVariantByName(L"ID")->m_strArg.text);
-			nlayer->fDestroyTimer = layerTemplate.GetVariantByName(L"fTimer")->asFloat();
-			nlayer->shFocusedControlID.Reset();
-
-			nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_CENTER;
-			if(layerTemplate.GetVariantByName(L"anchorX")->m_strArg.getHash() == FastHash(L"min"))
-				nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_MIN;
-			else if (layerTemplate.GetVariantByName(L"anchorX")->m_strArg.getHash() == FastHash(L"max"))
-				nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_MAX;
-
-			nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_CENTER;
-			if (layerTemplate.GetVariantByName(L"anchorY")->m_strArg.getHash() == FastHash(L"min"))
-				nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_MIN;
-			else if (layerTemplate.GetVariantByName(L"anchorY")->m_strArg.getHash() == FastHash(L"max"))
-				nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_MAX;
-
-			UTGetControlsManager().layersDefinitions.Add(nlayer);
-
-			layersPanel.GetListBox(K_LP_LAYERS_LISTBOX)->AddItem(nlayer->ID.text, (LPVOID)0x11111111);
-			int idx = UTGetControlsManager().layersDefinitions.Count() - 1;
-			layersPanel.GetListBox(K_LP_LAYERS_LISTBOX)->SelectItem(idx);
-		}
-		break;
-		case K_LP_BUTTON_CLONE_LAYER:
-		{
-			if (currLayer == NULL)
-				return;
-
-			CCtrlLayer* nlayer = currLayer->Clone();
-			testLayer = currLayer;
-			WCHAR newName[MAX_PATH];
-			StringCchPrintfW(newName, MAX_PATH, L"%s_%d", currLayer->ID.text, randint(100));
-			nlayer->ID.Init(newName);
-			UTGetControlsManager().layersDefinitions.Add(nlayer);
-
-			layersPanel.GetListBox(K_LP_LAYERS_LISTBOX)->AddItem(nlayer->ID.text, (LPVOID)0x11111111);
-			int idx = UTGetControlsManager().layersDefinitions.Count() - 1;
-			layersPanel.GetListBox(K_LP_LAYERS_LISTBOX)->SelectItem(idx);
-		}
-		break;
-	}
-}
 
 void CControlsEditor::SetSpritePtr(ID3DXSprite* pSprite)
 {
@@ -586,10 +649,10 @@ void CControlsEditor::SetSpritePtr(ID3DXSprite* pSprite)
 
 void CControlsEditor::CloneControl()
 {
-	if (currCtrl < 0 || selectedCtrls.Count() > 1)
+	if (currCtrlIdx < 0 || selectedCtrls.Count() > 1)
 		return;
 
-	CControl* ctrl = currLayer->controls.GetAt(currCtrl);
+	CControl* ctrl = currLayer->controls.GetAt(currCtrlIdx);
 
 	CControl *nctrl = new CControl(ctrl);
 	currLayer->controls.Add(nctrl);
@@ -605,21 +668,21 @@ void CControlsEditor::PropertiesPanelCallBack(UINT nEvent, int nControlID, CDXUT
 			if (!DXUTIsKeyDown(VK_CONTROL))
 				selectedCtrls.RemoveAll();
 
-			currCtrl = ((CDXUTListBox *)pControl)->GetSelectedIndex();
-			if (!selectedCtrls.Contains(currCtrl))
+			currCtrlIdx = ((CDXUTListBox *)pControl)->GetSelectedIndex();
+			if (!selectedCtrls.Contains(currCtrlIdx))
 			{
-				selectedCtrls.Add(currCtrl);
+				selectedCtrls.Add(currCtrlIdx);
 			}
 			else
 			{
-				selectedCtrls.Remove(selectedCtrls.IndexOf(currCtrl));
+				selectedCtrls.Remove(selectedCtrls.IndexOf(currCtrlIdx));
 			}
 			FillControlProperties();
 		}
 		break;
 		case K_PP_BUTTON_CLONE_CONTROL:
 		{
-			if (currCtrl < 0 || selectedCtrls.Count() > 1)
+			if (currCtrlIdx < 0 || selectedCtrls.Count() > 1)
 				return;
 
 			CloneControl();
@@ -638,14 +701,14 @@ void CControlsEditor::PropertiesPanelCallBack(UINT nEvent, int nControlID, CDXUT
 						StringCchPrintf(propertyName, MAX_PATH, L"%s", propertiesPanel.GetStatic(nControlID - 1)->GetText());
 						StringCchPrintf(propertyValue, MAX_PATH, L"%s", ((CDXUTEditBox*)pControl)->GetText());
 
-						if (currCtrl > -1)
+						if (currCtrlIdx > -1)
 						{
-							UTGetControlsManager().SetParamValue(currLayer->controls[currCtrl], propertyName, propertyValue);
+							UTGetControlsManager().SetParamValue(currLayer->controls[currCtrlIdx], propertyName, propertyValue);
 							// daca modific ID-ul sa se reincarce lista de controale a layer-ului (ca sa se actualizeze ID-ul si acolo)
 							if (wcscmp(propertyName, L"ID") == 0)
 							{
 								FillLayerControlsList(UTGetControlsManager().layersDefinitions.IndexOf(currLayer));
-								propertiesPanel.GetListBox(K_PP_CONTROLS_LIST)->SelectItem(currCtrl);
+								propertiesPanel.GetListBox(K_PP_CONTROLS_LIST)->SelectItem(currCtrlIdx);
 							}
 						}
 						else
@@ -669,9 +732,6 @@ void CControlsEditor::PropertiesPanelCallBack(UINT nEvent, int nControlID, CDXUT
 							else if (wcscmp(propertyName, L"ID") == 0)
 							{
 								currLayer->ID.Init(propertyValue);
-								// trebuie reincarcata lista  de nume de layere ca sa se actualizeze noul ID dat in lista
-								LoadLayerNames();
-								layersPanel.GetListBox(K_LP_LAYERS_LISTBOX)->SelectItem(UTGetControlsManager().layersDefinitions.Count() - 1);
 							}
 							else if (wcscmp(propertyName, L"focusCtrlID") == 0)
 							{
@@ -712,9 +772,9 @@ void CControlsEditor::PropertiesPanelCallBack(UINT nEvent, int nControlID, CDXUT
 						StringCchPrintf(propertyName, MAX_PATH, L"%s", propertiesPanel.GetStatic(nControlID - 1)->GetText());
 						StringCchPrintf(propertyValue, MAX_PATH, L"%s", ((CDXUTComboBox*)pControl)->GetSelectedItem()->strText);
 
-						if (currCtrl > -1)
+						if (currCtrlIdx > -1)
 						{
-							UTGetControlsManager().SetParamValue(currLayer->controls[currCtrl], propertyName, propertyValue);
+							UTGetControlsManager().SetParamValue(currLayer->controls[currCtrlIdx], propertyName, propertyValue);
 						}
 						break;
 					}	
@@ -725,212 +785,16 @@ void CControlsEditor::PropertiesPanelCallBack(UINT nEvent, int nControlID, CDXUT
 	}
 }
 
-void CControlsEditor::GlobalPanelCallBack(UINT nEvent, int nControlID, CDXUTControl* pControl)
-{
-	switch (nControlID)
-	{
-	case K_GL_BUTTON_HIDE_BBOX:
-	{
-		hideBBoxes = !hideBBoxes;
-	}
-	break;
-	case K_GL_BUTTON_SAVE:
-	{
-		SaveXML(UTGetControlsManager().loadedFile);
-	}
-	break;
-	case K_GL_BUTTON_VCENTER:
-	{
-		if (currLayer == NULL)
-			return;
-
-		if (selectedCtrls.Count() > 1)
-		{
-			int ymin = UTGetAppClass().g_rectRender.h;
-			int ymax = -UTGetAppClass().g_rectRender.h;
-
-			for (int ii = 0; ii < selectedCtrls.Count(); ii++)
-			{
-				CControl* ctrl = currLayer->controls[selectedCtrls[ii]];
-				int ctrlY = ctrl->bbox.y;
-				int ctrlH = ctrl->bbox.h;
-				if (ctrlY < ymin)
-					ymin = ctrlY;
-				if (ctrlY + ctrlH > ymax)
-					ymax = ctrlY + ctrlH;
-			}
-
-			int dy = (ymax - ymin) / 2;
-			for (int ii = 0; ii < selectedCtrls.Count(); ii++)
-			{
-				CControl* ctrl = currLayer->controls[selectedCtrls[ii]];
-				WCHAR val[MAX_PATH];
-				int ctrlY = ctrl->bbox.y;
-				int intVal = -(ymin - ctrlY) - dy;
-				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
-				UTGetControlsManager().SetParamValue(ctrl, L"Y", val);
-				UpdateCtrlParamsList();
-			}
-		}
-		else  if (selectedCtrls.Count() == 1)
-		{
-			if (currCtrl > -1)
-			{
-				WCHAR val[MAX_PATH];
-				CControl* lCtrl = currLayer->controls[currCtrl];
-				int ctrlH = lCtrl->bbox.h;
-				int intVal = -(ctrlH / 2);
-				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
-				UTGetControlsManager().SetParamValue(currLayer->controls[currCtrl], L"Y", val);
-				UpdateCtrlParamsList();
-			}
-		}
-		else if (selectedCtrls.Count() == 0)
-		{
-			currLayer->Y = 0;
-			FillLayerProperties();
-		}
-	}
-	break;
-	case K_GL_BUTTON_HCENTER:
-	{
-		if (currLayer == NULL)
-			return;
-
-		if (selectedCtrls.Count() > 1)
-		{
-			int xmin = UTGetAppClass().g_rectRender.w;
-			int xmax = -UTGetAppClass().g_rectRender.w;
-
-			for (int ii = 0; ii < selectedCtrls.Count(); ii++)
-			{
-				CControl* ctrl = currLayer->controls[selectedCtrls[ii]];
-				int ctrlX = ctrl->bbox.x;
-				int ctrlW = ctrl->bbox.w;
-				if (ctrlX < xmin)
-					xmin = ctrlX;
-				if (ctrlX + ctrlW > xmax)
-					xmax = ctrlX + ctrlW;
-			}
-
-			int dx = (xmax - xmin) / 2;
-			for (int ii = 0; ii < selectedCtrls.Count(); ii++)
-			{
-				CControl* ctrl = currLayer->controls[selectedCtrls[ii]];
-				int ctrlX = ctrl->bbox.x;
-				WCHAR val[MAX_PATH];
-				int intVal = -(xmin - ctrlX) - dx;
-				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
-				UTGetControlsManager().SetParamValue(ctrl, L"X", val);
-				UpdateCtrlParamsList();
-			}
-		}
-		else if (selectedCtrls.Count() == 1)
-		{
-			if (currCtrl > -1)
-			{
-				WCHAR val[MAX_PATH];
-				CControl* lCtrl = currLayer->controls[currCtrl];
-				int ctrlW = lCtrl->bbox.w;
-				int intVal = -(ctrlW / 2);
-				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
-				UTGetControlsManager().SetParamValue(lCtrl, L"X", val);
-				UpdateCtrlParamsList();
-			}
-		}
-		else if (selectedCtrls.Count() == 0)
-		{
-			currLayer->X = 0;
-			FillLayerProperties();
-		}
-	}
-	break;
-	case K_GL_BUTTON_MOVEUP:
-	{
-		if (currCtrl > -1 && currCtrl < (currLayer->controls.Count() - 1))
-		{
-			SWAP(currLayer->controls[currCtrl], currLayer->controls[currCtrl + 1]);
-			selectedCtrls.Remove(selectedCtrls.IndexOf(currCtrl));
-			currCtrl++;
-			selectedCtrls.Add(currCtrl);
-			FillLayerControlsList(UTGetControlsManager().layersDefinitions.IndexOf(currLayer));
-			propertiesPanel.GetListBox(K_PP_CONTROLS_LIST)->SelectItem(currCtrl);
-		}
-	}
-	break;
-	case K_GL_BUTTON_MOVEDOWN:
-	{
-		if (currCtrl > -1 && currCtrl > 0)
-		{
-			SWAP(currLayer->controls[currCtrl], currLayer->controls[currCtrl - 1]);
-			selectedCtrls.Remove(selectedCtrls.IndexOf(currCtrl));
-			currCtrl--;
-			selectedCtrls.Add(currCtrl);
-			FillLayerControlsList(UTGetControlsManager().layersDefinitions.IndexOf(currLayer));
-			propertiesPanel.GetListBox(K_PP_CONTROLS_LIST)->SelectItem(currCtrl);
-		}
-	}
-	break;
-	}
-}
 // --- END CALLBACKS ---
 
 void CControlsEditor::Launch()
 {
-	globalPanelRect = RECTXYWH(0, 0, 200, UTGetAppClass().g_rectRender.h);
-	controlsPanelRect = RECTXYWH(255, 0, 250, 180);
-	layersPanelRect = RECTXYWH(510, 0, 250, 210);
 	propertiesPanelRect = RECTXYWH(UTGetAppClass().g_rectRender.w - 250, 0, 250, UTGetAppClass().g_rectRender.h);
-
-	controlsPanel.SetCallback(OnControlsPanelEvent);
-	layersPanel.SetCallback(OnLayersPanelEvent);
 	propertiesPanel.SetCallback(OnPropertiesPanelEvent);
-	globalPanel.SetCallback(OnGlobalPanelEvent);
-
-	globalPanel.EnableCaption(true);
-	globalPanel.SetLocation(globalPanelRect.x, globalPanelRect.y);
-	globalPanel.SetSize(globalPanelRect.w, globalPanelRect.h);
-	globalPanel.SetCaptionText(L"Options");
-	globalPanel.SetBackgroundColors(D3DCOLOR_ARGB(100, 255, 255, 255));
-	globalPanel.AddButton(K_GL_BUTTON_HIDE_BBOX, L"Hide BBox", 10, 10, 150, 25);
-	globalPanel.AddButton(K_GL_BUTTON_VCENTER, L"VCENTER", 10, 40, 150, 25);
-	globalPanel.AddButton(K_GL_BUTTON_HCENTER, L"HCENTER", 10, 70, 150, 25);
-	globalPanel.AddButton(K_GL_BUTTON_MOVEUP, L"Move Up", 10, 100, 150, 25);
-	globalPanel.AddButton(K_GL_BUTTON_MOVEDOWN, L"Move Down", 10, 130, 150, 25);
-	globalPanel.AddButton(K_GL_BUTTON_SAVE, L"SAVE", 10, 250, 150, 25);
 
 	WCHAR xmlpath[MAX_PATH];
 	StringCchPrintf(xmlpath, MAX_PATH, L"%sControlsEd\\ctrlTemplates.xml", UTGetAppClass().g_wszExePath);
 	LoadCtrlTemplatesXML(xmlpath);
-
-	controlsPanel.EnableCaption(true);
-	controlsPanel.SetLocation(controlsPanelRect.x, controlsPanelRect.y);
-	controlsPanel.SetSize(controlsPanelRect.w, controlsPanelRect.h);
-	controlsPanel.SetCaptionText(L"Controls List");
-	controlsPanel.SetBackgroundColors(D3DCOLOR_ARGB(100, 255, 255, 255));
-
-	// Listbox cu control templates
-	CDXUTListBox *pList;
-	controlsPanel.AddListBox(K_CP_CONTROLS_LISTBOX, controlsPanelRect.w / 2 - 100, 5, 200, 150, 0, &pList);
-	if (pList)
-	{
-		for (int ii = 0; ii < ctrlTemplates.Count(); ii++)
-		{
-			CVariantCollection *col = ctrlTemplates.GetAt(ii);
-			CVariantComplex* var = col->m_variants.GetAt(0);
-			pList->AddItem(var->m_strArg.text, (LPVOID)0x11111111);
-		}
-	}
-
-
-	layersPanel.EnableCaption(true);
-	layersPanel.SetLocation(layersPanelRect.x, layersPanelRect.y);
-	layersPanel.SetSize(layersPanelRect.w, layersPanelRect.h);
-	layersPanel.SetCaptionText(L"Layers List");
-	layersPanel.SetBackgroundColors(D3DCOLOR_ARGB(100, 255, 255, 255));
-	layersPanel.AddButton(K_LP_BUTTON_NEW_LAYER, L"New Layer", 5, 160, 115, 25);
-	layersPanel.AddButton(K_LP_BUTTON_CLONE_LAYER, L"Clone Layer", 125, 160, 115, 25);
-	LoadLayerNames();
 
 	propertiesPanel.EnableCaption(true);
 	propertiesPanel.SetLocation(propertiesPanelRect.x, propertiesPanelRect.y);
@@ -1096,29 +960,9 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 	MessageBox(DXUTGetHWND(), XMLpath, L"Saved In", MB_OK);
 }
 
-void CControlsEditor::LoadLayerNames()
-{
-	layersPanel.RemoveControl(K_LP_LAYERS_LISTBOX);
-	// Listbox cu numele layerelor
-	CDXUTListBox *pList;
-	layersPanel.AddListBox(K_LP_LAYERS_LISTBOX, layersPanelRect.w / 2 - 100, 5, 200, 150, 0, &pList);
-	if (pList)
-	{
-		for (int ii = 0; ii < UTGetControlsManager().layersDefinitions.Count(); ii++)
-		{
-			CStringHash * lID = &UTGetControlsManager().layersDefinitions[ii]->ID;
-			pList->AddItem(lID->text, (LPVOID)0x11111111);
-		}
-	}
-}
-
 void CControlsEditor::Close()
 {
-	// de fiecare data cand inchid dezaloc tot (pt cazul in care se aduc modificari in ctrlTemplates)
-
-	// panel-uri
-	controlsPanel.RemoveAllControls();
-	layersPanel.RemoveAllControls();
+	// panels
 	propertiesPanel.RemoveAllControls();
 
 	// control templates
@@ -1130,14 +974,14 @@ void CControlsEditor::Close()
 	}
 	ctrlTemplates.RemoveAll();
 
-	// sterg referinta la layer-ul curent
+	// release reference
 	if (currLayer)
 	{
 		currLayer->pControlsManager = NULL;
 		currLayer = NULL;
 	}
 
-	currCtrl = -1;
+	currCtrlIdx = -1;
 	tool = TOOL_TYPE_NO_TOOL;
 	selectedCtrls.RemoveAll();
 }
@@ -1146,39 +990,30 @@ static D3DXVECTOR2 vLastMouse;
 void CControlsEditor::Update(float dTime)
 {
 	D3DXVECTOR2 vecRenderCenter(UTGetAppClass().g_rectRender.CenterX(), UTGetAppClass().g_rectRender.CenterY());
-	globalPanelRect = RECTXYWH(0, 0, 200, UTGetAppClass().g_rectRender.h);
-	controlsPanelRect = RECTXYWH(vecRenderCenter.x - 255, 0, 250, 180);
-	layersPanelRect = RECTXYWH(vecRenderCenter.x + 5, 0, 250, 210);
 	propertiesPanelRect = RECTXYWH(UTGetAppClass().g_rectRender.x + UTGetAppClass().g_rectRender.w - 250, 0, 250, UTGetAppClass().g_rectRender.h);
 
-	globalPanel.SetLocation(globalPanelRect.x, globalPanelRect.y);
-	globalPanel.SetSize(globalPanelRect.w, globalPanelRect.h);
-	controlsPanel.SetLocation(controlsPanelRect.x, controlsPanelRect.y);
-	controlsPanel.SetSize(controlsPanelRect.w, controlsPanelRect.h);
-	layersPanel.SetLocation(layersPanelRect.x, layersPanelRect.y);
-	layersPanel.SetSize(layersPanelRect.w, layersPanelRect.h);
 	propertiesPanel.SetLocation(propertiesPanelRect.x, propertiesPanelRect.y);
 	propertiesPanel.SetSize(propertiesPanelRect.w, propertiesPanelRect.h);
 
 	// daca dau click pe interfata sa nu faca update-uri
 	if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
 		if ((PointInRect(g_mouse.pos.x, g_mouse.pos.y, &propertiesPanelRect) && !propertiesPanel.GetMinimized())
-			|| (PointInRect(g_mouse.pos.x, g_mouse.pos.y, &layersPanelRect) && !layersPanel.GetMinimized())
-			|| (PointInRect(g_mouse.pos.x, g_mouse.pos.y, &controlsPanelRect) && !controlsPanel.GetMinimized())
-			|| (PointInRect(g_mouse.pos.x, g_mouse.pos.y, &globalPanelRect) && !globalPanel.GetMinimized())
 			)
 			clickedInterface = true;
 		else
 			clickedInterface = false;
+
+	if (UTimgui().GetWantCaptureMouse())
+		clickedInterface = true;
 
 	if (currLayer != NULL)
 	{
 		if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED && !clickedInterface)
 		{			
 			vLastMouse = g_mouse.pos; //save last mouse
-			if (currCtrl > -1 && selectedCtrls.Count() == 1)
+			if (currCtrlIdx > -1 && selectedCtrls.Count() == 1)
 			{
-				RECTXYWH bbox = currLayer->controls[currCtrl]->GetBBox();
+				RECTXYWH bbox = currLayer->controls[currCtrlIdx]->GetBBox();
 				
 				if (m_pCamera != null)
 				{
@@ -1278,7 +1113,7 @@ void CControlsEditor::Update(float dTime)
 			}
 			else
 			{
-				if (currCtrl > -1)
+				if (currCtrlIdx > -1)
 				{
 					if (tool == TOOL_TYPE_MOVE)
 					{
@@ -1299,7 +1134,7 @@ void CControlsEditor::Update(float dTime)
 					}
 					else
 					{
-						RECTXYWH BBox = currLayer->controls[currCtrl]->GetBBox();
+						RECTXYWH BBox = currLayer->controls[currCtrlIdx]->GetBBox();
 						switch (tool)
 						{
 						case TOOL_TYPE_RESIZE_TOP_LEFT:
@@ -1441,7 +1276,7 @@ void CControlsEditor::Update(float dTime)
 			// selectie layer
 			if (newClickedCtrls.Count() == 0)
 			{
-				currCtrl = -1;
+				currCtrlIdx = -1;
 				selectedCtrls.RemoveAll();
 				FillLayerProperties();
 			}
@@ -1474,7 +1309,7 @@ void CControlsEditor::Update(float dTime)
 					}
 					else // daca apas pe aceeasi lista de controale trebuie sa schimb selectia prin rotatie
 					{
-						int ctrlIdx = clickedCtrls.IndexOf(currCtrl);
+						int ctrlIdx = clickedCtrls.IndexOf(currCtrlIdx);
 						ctrlIdx++;
 						if (ctrlIdx >= clickedCtrls.Count())
 							ctrlIdx = 0;
@@ -1632,7 +1467,7 @@ void CControlsEditor::ReceiveKeys(UINT key)
 		break;
 	case VK_DELETE:
 	{
-		if (currCtrl >= 0 && selectedCtrls.Count() == 1)
+		if (currCtrlIdx >= 0 && selectedCtrls.Count() == 1)
 			DeleteControl();
 		else if (currLayer)
 			DeleteLayer();
@@ -1646,18 +1481,152 @@ void CControlsEditor::DeleteLayer()
 	int layidx = UTGetControlsManager().layersDefinitions.IndexOf(currLayer);
 	UTGetControlsManager().layersDefinitions.Remove(layidx);
 	SAFE_DELETE(currLayer);
+}
 
-	// reincarca listbox-ul cu numele layerelor
-	LoadLayerNames();
+void CControlsEditor::ChangeControlPaintOrder(int dir)
+{
+	if (dir > 0)
+	{
+		if (currCtrlIdx > -1 && currCtrlIdx > 0)
+		{
+			SWAP(currLayer->controls[currCtrlIdx], currLayer->controls[currCtrlIdx - 1]);
+			selectedCtrls.Remove(selectedCtrls.IndexOf(currCtrlIdx));
+			currCtrlIdx--;
+			selectedCtrls.Add(currCtrlIdx);
+			FillLayerControlsList(UTGetControlsManager().layersDefinitions.IndexOf(currLayer));
+			propertiesPanel.GetListBox(K_PP_CONTROLS_LIST)->SelectItem(currCtrlIdx);
+		}
+	}
+	else if (dir < 0)
+	{
+		if (currCtrlIdx > -1 && currCtrlIdx < (currLayer->controls.Count() - 1))
+		{
+			SWAP(currLayer->controls[currCtrlIdx], currLayer->controls[currCtrlIdx + 1]);
+			selectedCtrls.Remove(selectedCtrls.IndexOf(currCtrlIdx));
+			currCtrlIdx++;
+			selectedCtrls.Add(currCtrlIdx);
+			FillLayerControlsList(UTGetControlsManager().layersDefinitions.IndexOf(currLayer));
+			propertiesPanel.GetListBox(K_PP_CONTROLS_LIST)->SelectItem(currCtrlIdx);
+		}
+	}
+}
+
+void CControlsEditor::CenterElements(bool H, bool V)
+{
+	if (H)
+	{
+		if (currLayer == NULL)
+			return;
+
+		if (selectedCtrls.Count() > 1)
+		{
+			int xmin = UTGetAppClass().g_rectRender.w;
+			int xmax = -UTGetAppClass().g_rectRender.w;
+
+			for (int ii = 0; ii < selectedCtrls.Count(); ii++)
+			{
+				CControl* ctrl = currLayer->controls[selectedCtrls[ii]];
+				int ctrlX = ctrl->bbox.x;
+				int ctrlW = ctrl->bbox.w;
+				if (ctrlX < xmin)
+					xmin = ctrlX;
+				if (ctrlX + ctrlW > xmax)
+					xmax = ctrlX + ctrlW;
+			}
+
+			int dx = (xmax - xmin) / 2;
+			for (int ii = 0; ii < selectedCtrls.Count(); ii++)
+			{
+				CControl* ctrl = currLayer->controls[selectedCtrls[ii]];
+				int ctrlX = ctrl->bbox.x;
+				WCHAR val[MAX_PATH];
+				int intVal = -(xmin - ctrlX) - dx;
+				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
+				UTGetControlsManager().SetParamValue(ctrl, L"X", val);
+				UpdateCtrlParamsList();
+			}
+		}
+		else if (selectedCtrls.Count() == 1)
+		{
+			if (currCtrlIdx > -1)
+			{
+				WCHAR val[MAX_PATH];
+				CControl* lCtrl = currLayer->controls[currCtrlIdx];
+				int ctrlW = lCtrl->bbox.w;
+				int intVal = -(ctrlW / 2);
+				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
+				UTGetControlsManager().SetParamValue(lCtrl, L"X", val);
+				UpdateCtrlParamsList();
+			}
+		}
+		else if (selectedCtrls.Count() == 0)
+		{
+			currLayer->X = 0;
+			FillLayerProperties();
+		}
+	}
+
+	if (V)
+	{
+		if (currLayer == NULL)
+			return;
+
+		if (selectedCtrls.Count() > 1)
+		{
+			int ymin = UTGetAppClass().g_rectRender.h;
+			int ymax = -UTGetAppClass().g_rectRender.h;
+
+			for (int ii = 0; ii < selectedCtrls.Count(); ii++)
+			{
+				CControl* ctrl = currLayer->controls[selectedCtrls[ii]];
+				int ctrlY = ctrl->bbox.y;
+				int ctrlH = ctrl->bbox.h;
+				if (ctrlY < ymin)
+					ymin = ctrlY;
+				if (ctrlY + ctrlH > ymax)
+					ymax = ctrlY + ctrlH;
+			}
+
+			int dy = (ymax - ymin) / 2;
+			for (int ii = 0; ii < selectedCtrls.Count(); ii++)
+			{
+				CControl* ctrl = currLayer->controls[selectedCtrls[ii]];
+				WCHAR val[MAX_PATH];
+				int ctrlY = ctrl->bbox.y;
+				int intVal = -(ymin - ctrlY) - dy;
+				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
+				UTGetControlsManager().SetParamValue(ctrl, L"Y", val);
+				UpdateCtrlParamsList();
+			}
+		}
+		else  if (selectedCtrls.Count() == 1)
+		{
+			if (currCtrlIdx > -1)
+			{
+				WCHAR val[MAX_PATH];
+				CControl* lCtrl = currLayer->controls[currCtrlIdx];
+				int ctrlH = lCtrl->bbox.h;
+				int intVal = -(ctrlH / 2);
+				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
+				UTGetControlsManager().SetParamValue(currLayer->controls[currCtrlIdx], L"Y", val);
+				UpdateCtrlParamsList();
+			}
+		}
+		else if (selectedCtrls.Count() == 0)
+		{
+			currLayer->Y = 0;
+			FillLayerProperties();
+		}
+	}
 }
 
 void CControlsEditor::DeleteControl()
 {
-	SAFE_DELETE(currLayer->controls[currCtrl]);
-	currLayer->controls.Remove(currCtrl);
+	SAFE_DELETE(currLayer->controls[currCtrlIdx]);
+	currLayer->controls.Remove(currCtrlIdx);
 
 	selectedCtrls.RemoveAll();
-	currCtrl = -1;
+	currCtrlIdx = -1;
 
 	FillLayerControlsList(UTGetControlsManager().layersDefinitions.IndexOf(currLayer));
 }
@@ -1703,10 +1672,238 @@ void CControlsEditor::Paint()
 void CControlsEditor::PaintInterface(float fElapsedTime)
 {
 	// desenare panel-uri
-	controlsPanel.OnRender(fElapsedTime);
-	layersPanel.OnRender(fElapsedTime);
 	propertiesPanel.OnRender(fElapsedTime);
-	globalPanel.OnRender(fElapsedTime);
+}
+
+void CControlsEditor::PaintImguiInterfaces()
+{
+	{
+		ImGuiViewport * vp = ImGui::GetWindowViewport();
+		
+		///--- TOOLS WINDOW
+		ImGui::Begin("Tools");
+		if (ImGui::Button("Hide BBox", ImVec2(80, 0)))
+		{
+			hideBBoxes = !hideBBoxes;
+		}
+		if (ImGui::Button("V Center", ImVec2(80, 0)))
+		{
+			CenterElements(false, true);
+		}
+		if (ImGui::Button("H Center", ImVec2(80, 0)))
+		{
+			CenterElements(true, false);
+		}
+		if (ImGui::Button("Layer Up", ImVec2(80, 0)))
+		{
+			ChangeControlPaintOrder(-1);
+		}
+		if (ImGui::Button("Layer Down", ImVec2(80, 0)))
+		{
+			ChangeControlPaintOrder(1);
+		}
+		if (ImGui::Button("Save", ImVec2(80, 0)))
+		{
+			SaveXML(UTGetControlsManager().loadedFile);
+		}
+		ImGui::End();
+
+
+		///--- CONTROLS TEMPLATES
+		if (vp)
+			ImGui::SetNextWindowPos(vp->Pos, ImGuiCond_Once);
+		ImGui::Begin("Controls Templates");
+
+		vector<string> arrItems;
+		for (int ii = 0; ii < ctrlTemplates.Count(); ii++)
+		{
+			CVariantCollection *col = ctrlTemplates.GetAt(ii);
+			CVariantComplex* var = col->m_variants.GetAt(0);
+			char strName[MAX_PATH];
+			wcstombs(strName, var->m_strArg.text, MAX_PATH);
+			arrItems.push_back(strName);
+		}
+
+		ImGui::PushItemWidth(240);
+		if (ImGui::ListBoxHeader(" "))
+		{
+			for (int kk = 0; kk < arrItems.size(); kk++)
+			{
+				auto item = arrItems[kk];
+				if (ImGui::Selectable(item.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+				{
+					if (ImGui::IsMouseDoubleClicked(0))
+					{
+						CVariantCollection* vcol = ctrlTemplates.GetAt(kk);
+						AddControl(vcol);
+					}
+				}
+			}
+			ImGui::ListBoxFooter();
+		}
+		ImGui::PopItemWidth();
+		ImGui::End();
+
+		///--- LAYERS LIST 
+		ImGui::Begin("Interfaces");
+
+		vector<string> arrLayerNames;
+		int nLayersCnt = UTGetControlsManager().layersDefinitions.Count();
+		for (int ii = 0; ii < nLayersCnt; ii++)
+		{
+			CStringHash * lID = &UTGetControlsManager().layersDefinitions[ii]->ID;
+			char strName[MAX_PATH];
+			wcstombs(strName, lID->text, MAX_PATH);
+			arrLayerNames.push_back(strName);
+		}
+
+		ImGui::SetNextItemWidth(-1.0f);
+		if (ImGui::ListBoxHeader("##", ImVec2(200, 200)))
+		{
+			for (int kk = 0; kk < arrLayerNames.size(); kk++)
+			{
+				auto layer = arrLayerNames[kk];
+				if (ImGui::Selectable(layer.c_str(), (kk == currLayerIdx) ? true : false, ImGuiSelectableFlags_None))
+				{
+					int layIdx = kk;
+					currCtrlIdx = -1;
+					selectedCtrls.RemoveAll();
+					FillLayerControlsList(layIdx);
+					FillLayerProperties();
+				}
+			}
+			ImGui::ListBoxFooter();
+		}
+
+		if (ImGui::Button("New Layer", ImVec2(120, 0)))
+		{
+			CCtrlLayer* nlayer = new CCtrlLayer();
+			nlayer->bBlocking = _wtoi(layerTemplate.GetVariantByName(L"isBlocking")->m_strArg.text);
+			nlayer->bGetsInput = _wtoi(layerTemplate.GetVariantByName(L"getsInput")->m_strArg.text);
+			int lx = _wtoi(layerTemplate.GetVariantByName(L"X")->m_strArg.text);
+			int ly = _wtoi(layerTemplate.GetVariantByName(L"Y")->m_strArg.text);
+			nlayer->SetPos(lx, ly);
+			nlayer->ID.Init(layerTemplate.GetVariantByName(L"ID")->m_strArg.text);
+			nlayer->fDestroyTimer = layerTemplate.GetVariantByName(L"fTimer")->asFloat();
+			nlayer->shFocusedControlID.Reset();
+
+			nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_CENTER;
+			if (layerTemplate.GetVariantByName(L"anchorX")->m_strArg.getHash() == FastHash(L"min"))
+				nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_MIN;
+			else if (layerTemplate.GetVariantByName(L"anchorX")->m_strArg.getHash() == FastHash(L"max"))
+				nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_MAX;
+
+			nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_CENTER;
+			if (layerTemplate.GetVariantByName(L"anchorY")->m_strArg.getHash() == FastHash(L"min"))
+				nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_MIN;
+			else if (layerTemplate.GetVariantByName(L"anchorY")->m_strArg.getHash() == FastHash(L"max"))
+				nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_MAX;
+
+			UTGetControlsManager().layersDefinitions.Add(nlayer);
+
+			int idx = UTGetControlsManager().layersDefinitions.Count() - 1;
+			currCtrlIdx = -1;
+			FillLayerControlsList(idx);
+		}
+		if (ImGui::Button("Clone Layer", ImVec2(120, 0)))
+		{
+			if (currLayer == NULL)
+				return;
+
+			CCtrlLayer* nlayer = currLayer->Clone();
+			testLayer = currLayer;
+			WCHAR newName[MAX_PATH];
+			StringCchPrintfW(newName, MAX_PATH, L"%s_%d", currLayer->ID.text, randint(100));
+			nlayer->ID.Init(newName);
+			UTGetControlsManager().layersDefinitions.Add(nlayer);
+
+			int idx = UTGetControlsManager().layersDefinitions.Count() - 1;
+			currCtrlIdx = -1;
+			FillLayerControlsList(idx);
+		}
+		ImGui::End();
+
+		///--- CONTROLS/LAYERS PROPERTIES
+		ImGui::Begin("Properties");
+		vector<string> arrControlsNames;
+		if ((currLayerIdx >= 0) && (currLayerIdx < UTGetControlsManager().layersDefinitions.GetSize()))
+		{
+			CCtrlLayer *layer = UTGetControlsManager().layersDefinitions.GetAt(currLayerIdx);
+			for (int ii = 0; ii < layer->controls.Count(); ii++)
+			{
+				CControl* ctrl = layer->controls.GetAt(ii);
+				wstring itemName = ctrl->paramsDict.GetVariantByName(L"Type")->m_strArg.text;
+				if (ctrl->paramsDict.GetVariantByName(L"ID") && wcslen(ctrl->paramsDict.GetVariantByName(L"ID")->m_strArg.text) > 0)
+				{
+					itemName.append(L":");
+					itemName.append(ctrl->paramsDict.GetVariantByName(L"ID")->m_strArg.text);
+				}
+				char strName[MAX_PATH];
+				wcstombs(strName, itemName.c_str(), MAX_PATH);
+
+				arrControlsNames.push_back(strName);
+			}
+		}
+
+		ImGui::SetNextItemWidth(-1.0f);
+		if (ImGui::ListBoxHeader("##", ImVec2(200, 200)))
+		{
+			for (int kk = 0; kk < arrControlsNames.size(); kk++)
+			{
+				string ctrl(arrControlsNames[kk]);
+				char sID[MAX_PATH];
+				sprintf(sID, "%s##ID%d", arrControlsNames[kk].c_str(), kk);
+				if (ImGui::Selectable(sID, (kk == currCtrlIdx) ? true : false, ImGuiSelectableFlags_None))
+				{
+					if (!DXUTIsKeyDown(VK_CONTROL))
+						selectedCtrls.RemoveAll();
+
+					currCtrlIdx = kk;
+					if (!selectedCtrls.Contains(currCtrlIdx))
+					{
+						selectedCtrls.Add(currCtrlIdx);
+					}
+					else
+					{
+						selectedCtrls.Remove(selectedCtrls.IndexOf(currCtrlIdx));
+					}
+				}
+			}
+			ImGui::ListBoxFooter();
+
+			if (selectedCtrls.GetSize() == 1)
+			{
+				IMGUI_AddCurControlProps();
+			}
+		}
+
+		ImGui::End();
+
+		/*
+		ImGui::Text("Hello from %s!", strName);
+		if (ImGui::Button("Close it"))
+			bIsOpen = false;
+		  */
+
+
+		  // List box
+		/*
+		const char* items[] = { "Apple", "Banana", "Cherry", "Kiwi", "Mango", "Orange", "Pineapple", "Strawberry", "Watermelon" };
+		static int item_current = 1;
+		ImGui::ListBox("listbox\n(single select)", &item_current, items, IM_ARRAYSIZE(items), 8);
+		const bool controlsHovered = ImGui::IsItemActive();
+		if (controlsHovered && ImGui::IsMouseDoubleClicked(0))
+		{
+			LOG("dblclk: %d", item_current);
+		}
+		*/
+
+		//static int listbox_item_current2 = 2;
+		//ImGui::SetNextItemWidth(-1);
+		//ImGui::ListBox("##listbox2", &listbox_item_current2, listbox_items, IM_ARRAYSIZE(listbox_items), 4);
+
+	}
+
 }
 
 void CControlsEditor::PaintBBoxes()

@@ -2426,7 +2426,51 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		V(pDevice->EndScene());
 	}
 
-	UTimgui().Paint(pDevice, true, true, ImVec4(0.45f, 0.55f, 0.60f, 0.00f));
+	///--- IMGUI RENDERING ---
+	if (UTimgui().BeginPaint())
+	{
+
+		bool show_demo_window = true;
+		if (show_demo_window)
+			ImGui::ShowDemoWindow(&show_demo_window);
+
+		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+		/*
+		{
+			static float f = 0.0f;
+			static int counter = 0;
+
+			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+			ImGui::Text("WantCaptureMouse:%d", io.WantCaptureMouse);
+			ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+			ImGui::Checkbox("Another Window", &show_another_window);
+
+			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+			if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+				counter++;
+			ImGui::SameLine();
+			ImGui::Text("counter = %d", counter);
+
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
+		}
+		*/
+
+		//--- CONTROLS EDITOR PAINT ---
+#ifdef K_CONTROLS_EDITOR
+		if (g_gameState == GAME_STATE_CONTROLSED)
+		{
+			g_ControlsEditor.PaintImguiInterfaces();
+		}
+#endif
+
+
+		//--- finally close everything ---
+		UTimgui().EndPaint(pDevice);
+	}
 }
 
 
@@ -2439,10 +2483,7 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 {
 
 #ifdef K_CONTROLS_EDITOR
-	*pbNoFurtherProcessing = g_ControlsEditor.controlsPanel.MsgProc(hWnd, uMsg, wParam, lParam);
-	*pbNoFurtherProcessing = g_ControlsEditor.layersPanel.MsgProc(hWnd, uMsg, wParam, lParam);
 	*pbNoFurtherProcessing = g_ControlsEditor.propertiesPanel.MsgProc(hWnd, uMsg, wParam, lParam);
-	*pbNoFurtherProcessing = g_ControlsEditor.globalPanel.MsgProc(hWnd, uMsg, wParam, lParam);
 	if (*pbNoFurtherProcessing)
 		return 0;
 #endif
@@ -2969,6 +3010,7 @@ void ChangeGameState(int newState, int param1, int param2)
 #ifdef K_CONTROLS_EDITOR
 		case GAME_STATE_CONTROLSED:
 		{
+			UTimgui().SetGlobalEnabled(false);
 			g_ControlsEditor.Close();
 		}
 		break;
@@ -3320,6 +3362,7 @@ void ChangeGameState(int newState, int param1, int param2)
 		{
 			UTGetControlsManager().RemoveAllLayers(true);
 			g_ControlsEditor.Launch();
+			UTimgui().SetGlobalEnabled(true);
 		}
 		break;
 #endif
