@@ -11,6 +11,26 @@ const DWORD VERT_TL1T::FVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1;
 const DWORD VERT_TL1TS::FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
 const DWORD VERT_TL1TC::FVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE;
 
+void D3DCOLOR_UNPACKTOFLOAT(DWORD color, float & a, float & r, float & g, float & b)
+{
+	unsigned char cnl = color & 0x000000ff;
+	b = (float)cnl / 255.0f;
+	cnl = (color >> 8) & 0x000000ff;
+	g = (float)cnl / 255.0f;
+	cnl = (color >> 16) & 0x000000ff;
+	r = (float)cnl / 255.0f;
+	cnl = (color >> 24) & 0x000000ff;
+	a = (float)cnl / 255.0f;
+}
+
+void D3DCOLOR_UNPACKTOBYTE(DWORD color, unsigned char & a, unsigned char & r, unsigned char & g, unsigned char & b)
+{
+	b = color & 0x000000ff;
+	g = (color >> 8) & 0x000000ff;
+	r = (color >> 16) & 0x000000ff;
+	a = (color >> 24) & 0x000000ff;
+}
+
 DWORD SetSaturation(DWORD c, float S)
 {
 	float frac = 1.0f / 255.0f;

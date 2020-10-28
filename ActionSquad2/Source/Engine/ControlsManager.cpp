@@ -4047,7 +4047,7 @@ HRESULT CControlsManager::LoadControlsXML(WCHAR* XMLpath)
 			{
 				WCHAR attValue[MAX_PATH];
 				StringCchPrintf(attValue, MAX_PATH, L"%s", attData.value());
-				//setam parametrul cu traducerea inputului in indexuri
+				//set param - translates data from string to binary
 				SetParamValue(nctrl, attData.name(), attValue, true);
 			}
 

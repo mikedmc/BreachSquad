@@ -408,10 +408,13 @@ void CControlsEditor::FillControlProperties()
 		else if ((var->m_name.IsEqual(L"FontColor")) || (var->m_name.IsEqual(L"Color")))
 		{
 			WCHAR value[MAX_PATH];
-			if (currvar->m_type == CVariantComplex::K_ARGTYPE_STRING)
-				StringCchPrintf(value, MAX_PATH, L"%s", currvar->m_strArg.text);
+			if (currvar->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
+			{
+				currvar->asString(value, MAX_PATH);
+				StringCchPrintf(value, MAX_PATH, L"%s", value);
+			}
 			else
-				StringCchPrintf(value, MAX_PATH, L"0xffffffff");
+				StringCchPrintf(value, MAX_PATH, L"#ffffffff");
 
 			propertiesPanel.AddEditBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, value, 75, starty + 30 * (ii - 1), 165, 30);
 		}
@@ -472,39 +475,23 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 	for (int ii = 1; ii < ctrl->m_variants.Count(); ii++)
 	{
 		// variable name from template
-		CVariantComplex* pVar = ctrl->m_variants[ii];
+		CVariantComplex* pVarName = ctrl->m_variants[ii];
 		// actual value from control
-		CVariantComplex* pValue = currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByNameHash(pVar->m_name.getHash());
+		CVariantComplex* pValue = currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByNameHash(pVarName->m_name.getHash());
 		char sVarName[MAX_PATH];
-		wcstombs(sVarName, pVar->m_name.text, MAX_PATH);
+		wcstombs(sVarName, pVarName->m_name.text, MAX_PATH);
 		// hardcoded controls properties
-		if ((pVar->m_name.IsEqual(L"FontColor")) || (pVar->m_name.IsEqual(L"Color")))
+		if(pValue->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
+		//if ((pVar->m_name.IsEqual(L"FontColor")) || (pVar->m_name.IsEqual(L"Color")))
 		{
-			//#TODO: de despartit imgui pe update si paint si de testat var fara fereastra, in debug
-			//#TODO: culoarea trebuie tinuta DWORD si doar la incarcare si la salvare covnertite in string
-			//#TODO: ca tipuri de date in variant complex am putea sa avem si color ca sa nu mai fac switch dupa nume
 			ImVec4 color;
-			/*
-				char* p = buf;
-				while (*p == '#' || ImCharIsBlankA(*p))
-					p++;
-				i[0] = i[1] = i[2] = i[3] = 0;
-					sscanf(p, "%02X%02X%02X%02X", (unsigned int*)&i[0], (unsigned int*)&i[1], (unsigned int*)&i[2], (unsigned int*)&i[3]); // Treat at unsigned (%X is unsigned)
-					*/
+			D3DCOLOR_UNPACKTOFLOAT(pValue->m_asUINT32, color.w, color.x, color.y, color.z);
 			ImGui::ColorPicker4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex );
-
-			// D3DCOLOR_COLORVALUE - transforma in hexa
-			//sprintf("#%08X", valoare) ca sa salveze in format hexa
-
-			/*
-			WCHAR value[MAX_PATH];
-			if (currvar->m_type == CVariantComplex::K_ARGTYPE_STRING)
-				StringCchPrintf(value, MAX_PATH, L"%s", currvar->m_strArg.text);
-			else
-				StringCchPrintf(value, MAX_PATH, L"0xffffffff");
-
-			propertiesPanel.AddEditBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, value, 75, starty + 30 * (ii - 1), 165, 30);
-			*/
+			if (ImGui::IsItemEdited())
+			{
+				// re-pack color if changed
+				pValue->m_asUINT32 = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, color.w);
+			}
 		}
 		// all other elements
 		else
@@ -522,7 +509,6 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
 			if (ImGui::IsItemEdited())
 			{
-				LOG("text changed %d", randint(1000));
 				pValue->m_strArg.Init(str0);
 			}
 		}
@@ -935,15 +921,10 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 							}
 							else if ((wcscmp(propertyName, L"Color") == 0) || (wcscmp(propertyName, L"FontColor") == 0))
 							{
-								// too short? save solid white
+								// too short? save solid white. Otherwise the color has been converted to #xxxxxxxx already
 								if ((wcscmp(propertyValue, L"0") == 0) || (wcslen(propertyValue) < 2))
 								{
-									StringCchPrintf(propertyValue, MAX_PATH, L"0xffffffff");
-								}
-								else 
-								{
-									// translate color to string
-									var->asString(propertyValue, MAX_PATH);
+									StringCchPrintf(propertyValue, MAX_PATH, L"#ffffffff");
 								}
 							}
 

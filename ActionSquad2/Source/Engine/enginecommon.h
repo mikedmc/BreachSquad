@@ -39,6 +39,12 @@
 #define DEG_TO_RAD(a) ((a / 360.0f) * DOUBLE_PI)
 #define RAD_TO_DEG(a) ((a / DOUBLE_PI) * 360.0f)
 
+// Unpacks DWORD color to float channels
+void D3DCOLOR_UNPACKTOFLOAT(DWORD color, float & a, float & r, float & g, float & b);
+// Unpacks DWORD color to byte channels
+void D3DCOLOR_UNPACKTOBYTE(DWORD color, unsigned char & a, unsigned char & r, unsigned char & g, unsigned char & b);
+
+
 struct VERT_TL1TC
 {
 	D3DXVECTOR4 pos;
