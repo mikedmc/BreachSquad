@@ -339,7 +339,7 @@ void CControl::Initialize()
 			{
 				stringIdx = var->m_asINT32;
 			}
-			var = paramsDict.GetVariantByName(L"FontID");
+			var = paramsDict.GetVariantByName(L"fontID");
 			if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
 			{
 				fontIdx = var->m_asINT32;
@@ -450,7 +450,7 @@ void CControl::Update(float dTime, float fTimeline)
 	{
 		animIdx = var->m_asINT32;
 	}
-	var = paramsDict.GetVariantByName(L"FontID");
+	var = paramsDict.GetVariantByName(L"fontID");
 	if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
 	{
 		fontIdx = var->m_asINT32;
@@ -1556,7 +1556,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 		animIdx = var->m_asINT32;
 	}
 
-	var = paramsDict.GetVariantByName(L"FontID");
+	var = paramsDict.GetVariantByName(L"fontID");
 	if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
 	{
 		fontIdx = var->m_asINT32;
@@ -1568,7 +1568,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 		stringIdx = var->m_asINT32;
 	}
 
-	var = paramsDict.GetVariantByName(L"FontColor");
+	var = paramsDict.GetVariantByName(L"fontColor");
 	if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
 	{
 		dwFontColor = var->m_asUINT32;
@@ -1577,7 +1577,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 	float fColAlpha = D3DCOLOR_GETFALPHA(dwFontColor);
 	dwFontColor = D3DCOLOR_COLORALPHA(dwFontColor, layer->alpha * fColAlpha);
 
-	var = paramsDict.GetVariantByName(L"Color");
+	var = paramsDict.GetVariantByName(L"color");
 	if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
 	{
 		dwColor = var->m_asUINT32;
@@ -1585,7 +1585,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 	else
 	{
 		// mandatory param
-		paramsDict.SetNamedVarHEXCOLOR(L"Color", 0xffffffff);
+		paramsDict.SetNamedVarHEXCOLOR(L"color", 0xffffffff);
 	}
 	//set font color
 	fColAlpha = D3DCOLOR_GETFALPHA(dwColor);
@@ -3250,7 +3250,7 @@ void CControlsManager::SetParamValue(CControl * pCtrl, const WCHAR * sParamName,
 		
 		pCtrl->paramsDict.SetNamedVarINT32(sParamName, anmIdx);
 	}
-	else if (paramNameHash == FastHash(L"FontID"))
+	else if (paramNameHash == FastHash(L"fontID"))
 	{
 		int fontIdx = m_pFontsMgr->GetFontIdx(sParamValue);
 		if ((fontIdx < 0) && (!bIgnoreWarnings))
@@ -4006,19 +4006,9 @@ HRESULT CControlsManager::LoadControlsXML(WCHAR* XMLpath)
 		//layer anchors
 		WCHAR sAnchorValue[MAX_PATH];
 		//X anchor
-		StringCchCopy(sAnchorValue, MAX_PATH, layerdata.attribute(L"anchorX").value());
-		nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_CENTER;
-		if (_wcsicmp(sAnchorValue, L"max") == 0)
-			nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_MAX;
-		else if (_wcsicmp(sAnchorValue, L"min") == 0)
-			nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_MIN;
+		nlayer->anchorX =(ECtrlAnchor)layerdata.attribute(L"anchorX").as_int();
 		//Y anchor
-		StringCchCopy(sAnchorValue, MAX_PATH, layerdata.attribute(L"anchorY").value());
-		nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_CENTER;
-		if (_wcsicmp(sAnchorValue, L"max") == 0)
-			nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_MAX;
-		else if (_wcsicmp(sAnchorValue, L"min") == 0)
-			nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_MIN;
+		nlayer->anchorY = (ECtrlAnchor)layerdata.attribute(L"anchorY").as_int();
 
 		if(!layerdata.attribute(L"ID").empty())
 		{

@@ -73,9 +73,11 @@ public:
 	void PaintInterface(float fElapsedTime);
 	
 	//--- IMGUI paint all
-	void ShowImguiInterfaces();
+	void IMGUI_ShowInterfaces();
 	//--- IMGUI adds controls specific to selected control
 	void IMGUI_AddCurControlProps();
+	//--- IMGUI adds controls for current layer
+	void IMGUI_AddLayerProps();
 
 	void DrawBBox(RECTXYWH rect, bool selected);
 	void DrawLine(int x1, int y1, int x2, int y2, D3DCOLOR col = 0xff0000ff);
@@ -91,7 +93,7 @@ public:
 	void FillLayerProperties();
 
 	void AddControl(CVariantCollection* vcol);
-	void CloneControl();
+	void CloneControl(int offx, int offy);
 	void DeleteControl();
 	void DeleteLayer();
 	// Updates control's visual data from internal parameters

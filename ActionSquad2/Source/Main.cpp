@@ -2467,7 +2467,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 #ifdef K_CONTROLS_EDITOR
 		if (g_gameState == GAME_STATE_CONTROLSED)
 		{
-			g_ControlsEditor.ShowImguiInterfaces();
+			g_ControlsEditor.IMGUI_ShowInterfaces();
 		}
 #endif
 		// Last but not least, paint

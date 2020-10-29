@@ -308,7 +308,7 @@ int CStringsManager::getStrIdx(const CHAR* strID)
 			return kk;
 	}
 	//daca nu gaseste ID-ul cautat intoarce idx string default "StrNotFound"
-	ErrorBox(K_ERR_WARNING, L"getStrIdx->String not found! %s", strID);
+	//ErrorBox(K_ERR_WARNING, L"getStrIdx->String not found! %s", strID);
 	return defaultStringIdx;
 }
 

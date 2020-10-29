@@ -1492,7 +1492,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 					if (ctrl = layer->GetControlByName("WINDOW_REDEFINE"))
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"StringID", STR_KEYBOARD1);
+						ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_KEYBOARD1);
 					}
 					if (ctrl = layer->GetControlByName("BUT_RESET_KEYS_SURE"))
 					{
@@ -1519,7 +1519,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 					if (ctrl = layer->GetControlByName("WINDOW_REDEFINE"))
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"StringID", STR_KEYBOARD2);
+						ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_KEYBOARD2);
 					}
 					if (ctrl = layer->GetControlByName("BUT_RESET_KEYS_SURE"))
 					{

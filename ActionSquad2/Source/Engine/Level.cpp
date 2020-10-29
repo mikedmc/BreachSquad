@@ -11405,14 +11405,14 @@ void CLevel::Update(float dTime_original)
 							{
 								if (ctrl = layer->GetControlByName("LABEL_HOSTAGES"))
 								{
-									ctrl->paramsDict.SetNamedVarString(L"FontColor", L"0xffff0000");
+									ctrl->paramsDict.SetNamedVarString(L"fontColor", L"0xffff0000");
 								}
 							}
 							if (m_arrStats[K_LVL_STATS_PL1_DEATHS] + m_arrStats[K_LVL_STATS_PL2_DEATHS] > 0)
 							{
 								if (ctrl = layer->GetControlByName("LABEL_CASUALTIES"))
 								{
-									ctrl->paramsDict.SetNamedVarString(L"FontColor", L"0xffff0000");
+									ctrl->paramsDict.SetNamedVarString(L"fontColor", L"0xffff0000");
 								}
 							}
 
@@ -11420,7 +11420,7 @@ void CLevel::Update(float dTime_original)
 							if (m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_DOWNLOADED)
 							{
 								if (ctrl = layer->GetControlByName("LABEL_LEADERBOARDS"))
-									ctrl->paramsDict.SetNamedVarString(L"FontColor", L"0x00000000");
+									ctrl->paramsDict.SetNamedVarString(L"fontColor", L"0x00000000");
 							}
 
 							if (nPlayers == 1)
@@ -12141,9 +12141,9 @@ void CLevel::Update(float dTime_original)
 							{
 								CControl* ctrl = null;
 								if (ctrl = layer->GetControlByName("LABEL_LEADERBOARDS"))
-									ctrl->paramsDict.SetNamedVarString(L"FontColor", L"0xffffffff");
+									ctrl->paramsDict.SetNamedVarString(L"fontColor", L"0xffffffff");
 								if (ctrl = layer->GetControlByName("LABEL_TITLE"))
-									ctrl->paramsDict.SetNamedVarINT32(L"StringID", STR_FLOOR_X_VALUE);
+									ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_FLOOR_X_VALUE);
 							}
 
 							if (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE)
@@ -12250,9 +12250,9 @@ void CLevel::Update(float dTime_original)
 								{
 									CControl* ctrl = null;
 									if (ctrl = layer->GetControlByName("LABEL_LEADERBOARDS"))
-										ctrl->paramsDict.SetNamedVarString(L"FontColor", L"0xffffffff");
+										ctrl->paramsDict.SetNamedVarString(L"fontColor", L"0xffffffff");
 									if (ctrl = layer->GetControlByName("LABEL_TITLE"))
-										ctrl->paramsDict.SetNamedVarINT32(L"StringID", STR_FLOOR_X_VALUE);
+										ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_FLOOR_X_VALUE);
 									//disable "next mission" on infinity towers mode
 									if (ctrl = layer->GetControlByName("BUT_COOPFAIL_CONTINUE"))
 										ctrl->bDisabled = true;

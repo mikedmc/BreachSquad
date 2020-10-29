@@ -892,7 +892,7 @@ void CPlayerSelScr::Update(float dTime)
 											//red price when no money
 											if (ctrl = layer->GetControlByName("CTRL_LABEL_PRICE"))
 											{
-												ctrl->paramsDict.SetNamedVarString(L"FontColor", L"0xffff0000");
+												ctrl->paramsDict.SetNamedVarString(L"fontColor", L"0xffff0000");
 											}
 										}
 									}

@@ -382,7 +382,7 @@ void CControlsEditor::FillControlProperties()
 			if (CB->SetSelectedByIndex(currvar->m_asINT32) != S_OK)
 				CB->SetSelectedByText(L"_EMPTY_");
 		}
-		else if (var->m_name.IsEqual(L"FontID"))
+		else if (var->m_name.IsEqual(L"fontID"))
 		{
 			CDXUTComboBox *CB;
 			propertiesPanel.AddComboBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, 75, starty + 30 * (ii - 1), 175, 30, 0U, false, &CB);
@@ -405,7 +405,7 @@ void CControlsEditor::FillControlProperties()
 
 			propertiesPanel.AddEditBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, value, 75, starty + 30 * (ii - 1), 165, 30);
 		}
-		else if ((var->m_name.IsEqual(L"FontColor")) || (var->m_name.IsEqual(L"Color")))
+		else if ((var->m_name.IsEqual(L"fontColor")) || (var->m_name.IsEqual(L"color")))
 		{
 			WCHAR value[MAX_PATH];
 			if (currvar->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
@@ -437,6 +437,7 @@ void CControlsEditor::FillControlProperties()
 
 void CControlsEditor::IMGUI_AddCurControlProps()
 {
+	// SINGLE SELECTION:
 	if ((currCtrlIdx < 0) || (selectedCtrls.GetSize() != 1))
 		return;
 
@@ -466,13 +467,14 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		ImGui::TextDisabled("Control options");
 		if (ImGui::Button("Clone Control", ImVec2(120, 0)))
 		{
+			CloneControl(10, 10);
 		}
 	}
 
 	ImGui::Separator();
 	ImGui::TextDisabled("Control properties");
 
-	bool bDataChanged = false;
+	bool bNeedsUpdate = false;
 	for (int ii = 1; ii < ctrlTemplate->m_variants.Count(); ii++)
 	{
 		// variable name from template
@@ -482,157 +484,243 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		char sVarName[MAX_PATH];
 		wcstombs(sVarName, pVarName->m_name.text, MAX_PATH);
 		// hardcoded controls properties
-		switch (pValue->m_type)
+		if (strcmp(sVarName, "animID") == 0)
 		{
-			case CVariantComplex::K_ARGTYPE_HEXCOLOR:
-			{
-				ImVec4 color;
-				D3DCOLOR_UNPACKTOFLOAT(pValue->m_asUINT32, color.w, color.x, color.y, color.z);
-				ImGui::ColorPicker4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);
-				if (ImGui::IsItemEdited())
-				{
-					// re-pack color if changed
-					pValue->m_asUINT32 = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, color.w);
-					bDataChanged = true;
-				}
-			}
-			break;
-			case CVariantComplex::K_ARGTYPE_BOOL:
-			{
-				ImGui::Checkbox(sVarName, &pValue->m_asBool);
-				if (ImGui::IsItemEdited())
-				{
-					bDataChanged = true;
-				}
-			}
-			break;
-			case CVariantComplex::K_ARGTYPE_INT32:
-			{
-				ImGui::InputInt(sVarName, &pValue->m_asINT32);
-				if (ImGui::IsItemEdited())
-				{
-					bDataChanged = true;
-				}
-			}
-			break;
-			case CVariantComplex::K_ARGTYPE_FLOAT:
-			{
-				ImGui::InputFloat(sVarName, &pValue->m_asFloat);
-				if (ImGui::IsItemEdited())
-				{
-					bDataChanged = true;
-				}
-			}
-			break;
-			// string and all other types get treated as string
-			case CVariantComplex::K_ARGTYPE_STRING:
-			default:
-			{
-				char str0[128];
-				if (pValue->m_type == CVariantComplex::K_ARGTYPE_NONE)
-				{
-					sprintf(str0, "empty");
-				}
-				else
-				{
-					pValue->asString(str0, 128);
-				}
-
-				ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
-				if (ImGui::IsItemEdited())
-				{
-					pValue->m_strArg.Init(str0);
-					bDataChanged = true;
-				}
-			}
-			break;
-		}
-
-
-		/*
-		// pe par pun staticele cu numele proprietatii (X, Y, W, H etc)
-		CVariantComplex* var = ctrl->m_variants[ii];
-		propertiesPanel.AddStatic(K_PP_CONTROLS_PROPS_START + ii * 2, var->m_name.text, -60, starty + 30 * (ii - 1), 200, 30, true);
-
-		// pe impar pun editbox-urile cu valoarea proprietatii luata din controlul efectiv
-		CVariantComplex* currvar = currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByNameHash(var->m_name.getHash());
-		if (var->m_name.IsEqual(L"animID"))
-		{
-			CDXUTComboBox *CB;
-			propertiesPanel.AddComboBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, 75, starty + 30 * (ii - 1), 175, 30, 0U, false, &CB);
+			vector<string> arrAnims;
+			// first animation will be the empty animation or not set. Index is -1
+			// not set will be the first
+			arrAnims.push_back("NOT SET");
 			for (int ii = 0; ii < UTGetControlsManager().m_sprCol.Animations.Count(); ii++)
 			{
 				scAnimation *anm = UTGetControlsManager().m_sprCol.Animations.GetAt(ii);
-				CB->AddItem(anm->animName.text, NULL);
+				char strName[MAX_PATH];
+				wcstombs(strName, anm->animName.text, MAX_PATH);
+				arrAnims.push_back(strName);
 			}
-			CB->AddItem(L"_EMPTY_", NULL);
 
-			if (CB->SetSelectedByIndex(currvar->m_asINT32) != S_OK)
-				CB->SetSelectedByText(L"_EMPTY_");
+			int nRealIndex = (pValue->m_asUINT32 < 0) ? -1 : pValue->m_asUINT32;
+			// we add 1 to bring it in [0..] domain
+			int item_current_idx = nRealIndex + 1;
+
+			const char* combo_label = arrAnims[item_current_idx].c_str();
+			if (ImGui::BeginCombo(sVarName, combo_label, ImGuiComboFlags_PopupAlignLeft))
+			{
+				for (int n = 0; n < arrAnims.size(); n++)
+				{
+					const bool is_selected = (item_current_idx == n);
+					if (ImGui::Selectable(arrAnims[n].c_str(), is_selected))
+					{
+						item_current_idx = n;
+						// save back value
+						pValue->m_asINT32 = item_current_idx - 1;
+					}
+
+					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
+			}
 		}
-		else if (var->m_name.IsEqual(L"FontID"))
+		else if (strcmp(sVarName, "align") == 0)
 		{
-			CDXUTComboBox *CB;
-			propertiesPanel.AddComboBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, 75, starty + 30 * (ii - 1), 175, 30, 0U, false, &CB);
+			//int textAlignFlags = ctrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+
+			//const int anchor_values[] = { FONTFLAG_ANCHOR_LEFT, FONTFLAG_ANCHOR_CENTER, FONTFLAG_ANCHOR_RIGHT, FONTFLAG_JUSTIFY };
+			//int nval = 0;
+			//for (int kk = 0; kk < ARRAY_SIZE(anchor_values); kk++)
+			//{
+			//	if ((textAlignFlags & anchor_values[kk]) != 0)
+			//	{
+			//		nval = kk;
+			//		break;
+			//	}
+			//}
+			//const char* anchor_names[] = { "left", "center", "max", "justify" };
+			//const char* elem_name = (nval >= 0 && nval <= 3) ? anchor_names[nval] : "unknown";
+			//ImGui::SliderInt(sVarName, &nval, 0, 3, elem_name);
+			//if (ImGui::IsItemEdited())
+			//{
+			//	// erase old flags
+			//	textAlignFlags &= (~(FONTFLAG_ANCHOR_RIGHT | FONTFLAG_ANCHOR_CENTER | FONTFLAG_ANCHOR_LEFT | FONTFLAG_JUSTIFY));
+			//	// save new ones
+			//	textAlignFlags |= anchor_values[nval];
+			//	ctrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
+			//	LOG("changed align");
+			//}
+		}
+		else if (strcmp(sVarName, "fontID") == 0)
+		{
+			vector<string> arrFonts;
+			// first animation will be the empty animation or not set. Index is -1
+			// not set will be the first
+			arrFonts.push_back("NOT SET");
 			for (int ii = 0; ii < UTGetFontsManager().fonts.Count(); ii++)
 			{
 				CTexturedFont* font = UTGetFontsManager().fonts.GetAt(ii);
-				CB->AddItem(font->shFontName.text, NULL);
+				char strName[MAX_PATH];
+				wcstombs(strName, font->shFontName.text, MAX_PATH);
+				arrFonts.push_back(strName);
 			}
-			CB->AddItem(L"_EMPTY_", NULL);
-			if (CB->SetSelectedByIndex(currvar->m_asINT32) != S_OK)
-				CB->SetSelectedByText(L"_EMPTY_");
-		}
-		else if (var->m_name.IsEqual(L"stringID"))
-		{
-			WCHAR value[MAX_PATH];
-			if (currvar->m_asINT32 != g_stringsMgr.defaultStringIdx) //daca nu am stringul setat scriu empty
-				StringCchPrintf(value, MAX_PATH, L"%s", g_stringsMgr.strings[currvar->m_asINT32]->shStringName.text);
-			else
-				StringCchPrintf(value, MAX_PATH, L"empty");
 
-			propertiesPanel.AddEditBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, value, 75, starty + 30 * (ii - 1), 165, 30);
-		}
-		else if ((var->m_name.IsEqual(L"FontColor")) || (var->m_name.IsEqual(L"Color")))
-		{
-			WCHAR value[MAX_PATH];
-			if (currvar->m_type == CVariantComplex::K_ARGTYPE_STRING)
-				StringCchPrintf(value, MAX_PATH, L"%s", currvar->m_strArg.text);
-			else
-				StringCchPrintf(value, MAX_PATH, L"0xffffffff");
+			int nRealIndex = (pValue->m_asUINT32 < 0) ? -1 : pValue->m_asUINT32;
+			// we add 1 to bring it in [0..] domain
+			int item_current_idx = nRealIndex + 1;
 
-			propertiesPanel.AddEditBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, value, 75, starty + 30 * (ii - 1), 165, 30);
-		}
-		else
-		{
-			WCHAR value[MAX_PATH];
-			currvar->asString(value, MAX_PATH);
-
-			if (currvar->m_type == CVariantComplex::K_ARGTYPE_NONE)
+			const char* combo_label = arrFonts[item_current_idx].c_str();
+			if (ImGui::BeginCombo(sVarName, combo_label, ImGuiComboFlags_PopupAlignLeft))
 			{
-				StringCchPrintf(value, MAX_PATH, L"empty");
+				for (int n = 0; n < arrFonts.size(); n++)
+				{
+					const bool is_selected = (item_current_idx == n);
+					if (ImGui::Selectable(arrFonts[n].c_str(), is_selected))
+					{
+						item_current_idx = n;
+						pValue->m_asINT32 = item_current_idx - 1;
+					}
+
+					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
+			}
+		}
+		else if (strcmp(sVarName, "stringID") == 0)
+		{
+			// main string is kept as an integer (for speed) so we convert it to string to use it
+			char str0[128] = " ";
+			if (pValue->m_type == CVariantComplex::K_ARGTYPE_INT32)
+			{
+				wcstombs(str0, g_stringsMgr.strings[pValue->m_asINT32]->shStringName.text, 128);
 			}
 
-			propertiesPanel.AddEditBox(K_PP_CONTROLS_PROPS_START + ii * 2 + 1, value, 75, starty + 30 * (ii - 1), 165, 30);
+			ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
+			if (ImGui::IsItemEdited())
+			{
+				pValue->m_asINT32 = g_stringsMgr.getStrIdx(str0);
+			}
 		}
-		*/
-	}
-
-	if (selectedCtrls.GetSize() == 1)
-	{
-		// update control
-		if (bDataChanged)
+		else // non custom properties get treated by type
 		{
-			UpdateControlDisplayProps(ctrl);
+			// generic control properties
+			switch (pValue->m_type)
+			{
+				case CVariantComplex::K_ARGTYPE_HEXCOLOR:
+				{
+					ImVec4 color;
+					D3DCOLOR_UNPACKTOFLOAT(pValue->m_asUINT32, color.w, color.x, color.y, color.z);
+					ImGui::ColorPicker4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);
+					if (ImGui::IsItemEdited())
+					{
+						// re-pack color if changed
+						pValue->m_asUINT32 = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, color.w);
+						bNeedsUpdate = true;
+					}
+				}
+				break;
+				case CVariantComplex::K_ARGTYPE_BOOL:
+				{
+					ImGui::Checkbox(sVarName, &pValue->m_asBool);
+					if (ImGui::IsItemEdited())
+					{
+						bNeedsUpdate = true;
+					}
+				}
+				break;
+				case CVariantComplex::K_ARGTYPE_INT32:
+				{
+					ImGui::InputInt(sVarName, &pValue->m_asINT32);
+					if (ImGui::IsItemEdited())
+					{
+						bNeedsUpdate = true;
+					}
+				}
+				break;
+				case CVariantComplex::K_ARGTYPE_FLOAT:
+				{
+					ImGui::InputFloat(sVarName, &pValue->m_asFloat);
+					if (ImGui::IsItemEdited())
+					{
+						bNeedsUpdate = true;
+					}
+				}
+				break;
+				// string and all other types get treated as string
+				case CVariantComplex::K_ARGTYPE_STRING:
+				default:
+				{
+					char str0[128];
+					if (pValue->m_type == CVariantComplex::K_ARGTYPE_NONE)
+					{
+						sprintf(str0, "empty");
+					}
+					else
+					{
+						pValue->asString(str0, 128);
+					}
+
+					ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
+					if (ImGui::IsItemEdited())
+					{
+						pValue->m_strArg.Init(str0);
+						bNeedsUpdate = true;
+					}
+				}
+				break;
+			}
 		}
 	}
-	else
-	{
-		// update layer
-	}
 
+	// update control
+	if (bNeedsUpdate)
+	{
+		UpdateControlDisplayProps(ctrl);
+	}
 }
 
+
+void CControlsEditor::IMGUI_AddLayerProps()
+{
+	// NO SELECTION (layer properties)
+	if ((currLayer != nullptr) && (currCtrlIdx < 0) && (selectedCtrls.GetSize() == 0))
+	{
+		ImGui::Separator();
+		ImGui::TextDisabled("Layer properties");
+		//ID
+		char str0[128];
+		wcstombs(str0, currLayer->ID.text, 128);
+		ImGui::InputText("ID", str0, IM_ARRAYSIZE(str0));
+		if (ImGui::IsItemEdited())
+		{
+			currLayer->ID.Init(str0);
+		}
+
+		ImGui::InputInt("X", &currLayer->X);
+		ImGui::InputInt("Y", &currLayer->Y);
+
+		const char* anchor_names[3] = { "min", "center", "max" };
+		const char* elem_name = (currLayer->anchorX >= -1 && currLayer->anchorX <= 1) ? anchor_names[currLayer->anchorX + 1] : "unknown";
+		ImGui::SliderInt("X anchor", (int*)&currLayer->anchorX, -1, 1, elem_name);
+
+		elem_name = (currLayer->anchorY >= -1 && currLayer->anchorY <= 1) ? anchor_names[currLayer->anchorY + 1] : "unknown";
+		ImGui::SliderInt("Y anchor", (int*)&currLayer->anchorY, -1, 1, elem_name);
+
+		ImGui::Checkbox("Blocking", &currLayer->bBlocking);
+		ImGui::Checkbox("Gets Input", &currLayer->bGetsInput);
+		ImGui::InputFloat("DestroyTimer", &currLayer->fDestroyTimer, 0.5f, 100.0f, "%.1f", ImGuiConfigFlags_None);
+
+		ImGui::Separator();
+
+		char str1[128];
+		wcstombs(str1, currLayer->shFocusedControlID.text, 128);
+		ImGui::InputText("Focused Ctrl", str1, IM_ARRAYSIZE(str0));
+		if (ImGui::IsItemEdited())
+		{
+			currLayer->shFocusedControlID.Init(str1);
+		}
+	}
+}
 
 void CControlsEditor::AddControl(CVariantCollection* vcol)
 {
@@ -682,7 +770,7 @@ void CControlsEditor::SetSpritePtr(ID3DXSprite* pSprite)
 	m_pSprite = pSprite;
 }
 
-void CControlsEditor::CloneControl()
+void CControlsEditor::CloneControl(int offx, int offy)
 {
 	if (currCtrlIdx < 0 || selectedCtrls.Count() > 1)
 		return;
@@ -690,6 +778,14 @@ void CControlsEditor::CloneControl()
 	CControl* ctrl = currLayer->controls.GetAt(currCtrlIdx);
 
 	CControl *nctrl = new CControl(ctrl);
+
+	// move it a little
+	WCHAR val[MAX_PATH];
+	StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->bbox.x + offx);
+	UTGetControlsManager().SetParamValue(nctrl, L"X", val);
+	StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->bbox.y + offy);
+	UTGetControlsManager().SetParamValue(nctrl, L"Y", val);
+
 	currLayer->controls.Add(nctrl);
 }
 
@@ -720,8 +816,8 @@ void CControlsEditor::PropertiesPanelCallBack(UINT nEvent, int nControlID, CDXUT
 			if (currCtrlIdx < 0 || selectedCtrls.Count() > 1)
 				return;
 
-			CloneControl();
-			FillLayerControlsList(UTGetControlsManager().layersDefinitions.IndexOf(currLayer));
+			//CloneControl();
+			///FillLayerControlsList(UTGetControlsManager().layersDefinitions.IndexOf(currLayer));
 		}
 		break;
 		default:
@@ -877,24 +973,11 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 		layerAttribute.set_value(layer->bGetsInput);
 
 		//anchors
-		WCHAR val[MAX_PATH];
-		if (layer->anchorX == K_CCTRL_LAYER_ANCHOR_MIN)
-			StringCchPrintfW(val, MAX_PATH, L"min");
-		else if (layer->anchorX == K_CCTRL_LAYER_ANCHOR_MAX)
-			StringCchPrintfW(val, MAX_PATH, L"max");
-		else
-			StringCchPrintfW(val, MAX_PATH, L"center");
 		layerAttribute = layerNode.append_attribute(L"anchorX");
-		layerAttribute.set_value(val);
+		layerAttribute.set_value(layer->anchorX);
 
-		if (layer->anchorY == K_CCTRL_LAYER_ANCHOR_MIN)
-			StringCchPrintfW(val, MAX_PATH, L"min");
-		else if (layer->anchorY == K_CCTRL_LAYER_ANCHOR_MAX)
-			StringCchPrintfW(val, MAX_PATH, L"max");
-		else
-			StringCchPrintfW(val, MAX_PATH, L"center");
 		layerAttribute = layerNode.append_attribute(L"anchorY");
-		layerAttribute.set_value(val);
+		layerAttribute.set_value(layer->anchorY);
 
 		if (layer->fDestroyTimer > 0.0f)
 		{
@@ -952,7 +1035,7 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 								else
 									StringCchPrintf(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
 							}
-							else if (wcscmp(propertyName, L"FontID") == 0)
+							else if (wcscmp(propertyName, L"fontID") == 0)
 							{
 								int intVal = _wtoi(propertyValue);
 								if (intVal >= 0 && wcscmp(propertyValue, L"_EMPTY_"))
@@ -968,7 +1051,7 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 								else
 									StringCchPrintf(propertyValue, MAX_PATH, L"%s", g_stringsMgr.strings[strIdx]->shStringName.text);
 							}
-							else if ((wcscmp(propertyName, L"Color") == 0) || (wcscmp(propertyName, L"FontColor") == 0))
+							else if ((wcscmp(propertyName, L"color") == 0) || (wcscmp(propertyName, L"fontColor") == 0))
 							{
 								// too short? save solid white. Otherwise the color has been converted to #xxxxxxxx already
 								if ((wcscmp(propertyValue, L"0") == 0) || (wcslen(propertyValue) < 2))
@@ -1721,7 +1804,7 @@ void CControlsEditor::PaintInterface(float fElapsedTime)
 	propertiesPanel.OnRender(fElapsedTime);
 }
 
-void CControlsEditor::ShowImguiInterfaces()
+void CControlsEditor::IMGUI_ShowInterfaces()
 {
 	{
 		ImGuiViewport * vp = ImGui::GetWindowViewport();
@@ -1740,18 +1823,22 @@ void CControlsEditor::ShowImguiInterfaces()
 		{
 			CenterElements(true, false);
 		}
-		if (ImGui::Button("Layer Up", ImVec2(80, 0)))
+		if (ImGui::Button("Pull Up", ImVec2(80, 0)))
 		{
 			ChangeControlPaintOrder(-1);
 		}
-		if (ImGui::Button("Layer Down", ImVec2(80, 0)))
+		if (ImGui::Button("Push Down", ImVec2(80, 0)))
 		{
 			ChangeControlPaintOrder(1);
 		}
-		if (ImGui::Button("Save", ImVec2(80, 0)))
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.2f, 0.2f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.2f, 0.2f, 1.0f));
+		if (ImGui::Button("Save All", ImVec2(80, 0)))
 		{
 			SaveXML(UTGetControlsManager().loadedFile);
 		}
+		ImGui::PopStyleColor(2);
+
 		ImGui::End();
 
 
@@ -1892,7 +1979,7 @@ void CControlsEditor::ShowImguiInterfaces()
 		}
 
 		ImGui::SetNextItemWidth(-1.0f);
-		if (ImGui::ListBoxHeader("##", ImVec2(200, 200)))
+		if (ImGui::ListBoxHeader("Controls", ImVec2(200, 200)))
 		{
 			for (int kk = 0; kk < arrControlsNames.size(); kk++)
 			{
@@ -1917,9 +2004,16 @@ void CControlsEditor::ShowImguiInterfaces()
 			}
 			ImGui::ListBoxFooter();
 
+			// selected control
 			if (selectedCtrls.GetSize() == 1)
 			{
 				IMGUI_AddCurControlProps();
+			}
+
+			// current layer
+			if (selectedCtrls.GetSize() == 0)
+			{
+				IMGUI_AddLayerProps();
 			}
 		}
 
