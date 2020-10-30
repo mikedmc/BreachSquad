@@ -253,7 +253,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #define K_GAME_EMAIL						L"devteam@pixelshard.com"
 #define K_GAME_CONTACT_URL					L"https://pixelshard.com/contact"
 
-#ifdef K_CONTROLS_EDITOR
+// DXUT DIALOGS are not used atm
+#ifdef K_INCLUDE_DXUT_DIALOGS
 #include "DXUTgui.h"
 #include "DXUTsettingsDlg.h"
 #endif

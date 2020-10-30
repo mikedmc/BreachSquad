@@ -157,7 +157,7 @@ protected:
 		LPDXUTCALLBACKMOUSE                 m_MouseFunc;                // mouse callback
 		LPDXUTCALLBACKMSGPROC               m_WindowMsgFunc;            // window messages callback
 
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 		CD3DSettingsDlg*             m_D3DSettingsDlg;                  // CD3DSettings object
 		bool                         m_ShowD3DSettingsDlg;              // if true, then show the D3DSettingsDlg
 #endif
@@ -295,7 +295,7 @@ public:
 	GET_SET_ACCESSOR(LPDXUTCALLBACKMOUSE, MouseFunc);
 	GET_SET_ACCESSOR(LPDXUTCALLBACKMSGPROC, WindowMsgFunc);
 
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 	GET_SET_ACCESSOR(CD3DSettingsDlg*, D3DSettingsDlg);   
 	GET_SET_ACCESSOR(bool, ShowD3DSettingsDlg);   
 #endif
@@ -329,7 +329,7 @@ typedef DECLSPEC_IMPORT UINT (WINAPI* LPTIMEBEGINPERIOD)(UINT uPeriod);
 int     DXUTMapButtonToArrayIndex(BYTE vButton);
 void    DXUTParseCommandLine();
 CD3DEnumeration* DXUTPrepareEnumerationObject(bool bEnumerate = false);
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 CD3DSettingsDlg* DXUTPrepareSettingsDialog();
 #endif
 void    DXUTBuildOptimalDeviceSettings(DXUTDeviceSettings* pOptimalDeviceSettings, DXUTDeviceSettings* pDeviceSettingsIn, DXUTMatchOptions* pMatchOptions);
@@ -1523,7 +1523,7 @@ CD3DEnumeration* DXUTPrepareEnumerationObject(bool bEnumerate)
 // Internal helper function to prepare the settings dialog by creating it if it didn't 
 // already exist and enumerating if desired.
 //--------------------------------------------------------------------------------------
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 CD3DSettingsDlg* DXUTPrepareSettingsDialog()
 {
 	CD3DSettingsDlg* pD3DSettingsDlg = GetDXUTState().GetD3DSettingsDlg();
@@ -3335,7 +3335,7 @@ HRESULT DXUTInitialize3DEnvironment()
 	// store backbuffer desc and caps from the device
 	DXUTPrepareDevice(pd3dDevice);
 
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 	// If the settings dialog exists, then call OnCreatedDevice() & OnResetDevice() on it.
 	CD3DSettingsDlg* pD3DSettingsDlg = GetDXUTState().GetD3DSettingsDlg();
 	if (pD3DSettingsDlg)
@@ -3359,7 +3359,7 @@ HRESULT DXUTInitialize3DEnvironment()
 	}
 #endif	
 	// Call the resource cache created function
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 	hr = DXUTGetGlobalResourceCache().OnCreateDevice(pd3dDevice);
 	if (FAILED(hr))
 	{
@@ -3391,13 +3391,13 @@ HRESULT DXUTInitialize3DEnvironment()
 	else
 	{
 		// Call the GUI resource device reset function
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 		hr = DXUTGetGlobalDialogResourceManager()->OnResetDevice();
 		if (FAILED(hr))
 			return DXUT_ERR(L"OnResetDevice", DXUTERR_RESETTINGDEVICEOBJECTS);
 #endif
 		// Call the resource cache device reset function
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 		hr = DXUTGetGlobalResourceCache().OnResetDevice(pd3dDevice);
 		if (FAILED(hr))
 			return DXUT_ERR(L"OnResetDevice", DXUTERR_RESETTINGDEVICEOBJECTS);
@@ -3442,7 +3442,7 @@ HRESULT DXUTReset3DEnvironment()
 	IDirect3DDevice9* pd3dDevice = DXUTGetD3DDevice();
 	assert(pd3dDevice != NULL);
 
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 	CD3DSettingsDlg* pD3DSettingsDlg = GetDXUTState().GetD3DSettingsDlg();
 	if (pD3DSettingsDlg)
 		pD3DSettingsDlg->OnLostDevice();
@@ -3451,7 +3451,7 @@ HRESULT DXUTReset3DEnvironment()
 	if (GetDXUTState().GetDeviceObjectsReset())
 	{
 		GetDXUTState().SetInsideDeviceCallback(true);
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 		DXUTGetGlobalDialogResourceManager()->OnLostDevice();
 		DXUTGetGlobalResourceCache().OnLostDevice();
 #endif
@@ -3482,7 +3482,7 @@ HRESULT DXUTReset3DEnvironment()
 	DXUTPrepareDevice(pd3dDevice);
 
 	// If the settings dialog exists call its OnResetDevice() 
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 	if (pD3DSettingsDlg)
 	{
 		hr = pD3DSettingsDlg->OnResetDevice();
@@ -3512,7 +3512,7 @@ HRESULT DXUTReset3DEnvironment()
 		DXUT_ERR(L"DeviceResetCallback", hr);
 		if (hr != DXUTERR_MEDIANOTFOUND)
 			hr = DXUTERR_RESETTINGDEVICEOBJECTS;
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 		DXUTGetGlobalDialogResourceManager()->OnLostDevice();
 		DXUTGetGlobalResourceCache().OnLostDevice();
 #endif
@@ -4268,7 +4268,7 @@ void DXUTUpdateStaticFrameStats()
 LRESULT CALLBACK DXUTStaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// If the settings dialog exists and is being show then pass messages to it 
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 	CD3DSettingsDlg* pD3DSettingsDlg = GetDXUTState().GetD3DSettingsDlg();
 	if (pD3DSettingsDlg && GetDXUTState().GetShowD3DSettingsDlg())
 	{
@@ -4276,7 +4276,7 @@ LRESULT CALLBACK DXUTStaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 	}
 	else
 #endif
-#ifdef K_CONTROLS_EDITOR	
+#ifdef K_INCLUDE_DXUT_DIALOGS	
 	{ 
 #endif
 
@@ -4360,7 +4360,7 @@ LRESULT CALLBACK DXUTStaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 			if (bNoFurtherProcessing)
 				return nResult;
 		}
-#ifdef K_CONTROLS_EDITOR	
+#ifdef K_INCLUDE_DXUT_DIALOGS	
 	} 
 #endif
 
@@ -4770,7 +4770,7 @@ LRESULT CALLBACK DXUTStaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 		// proper functionalities and the static msg proc ensures that
 		// this happens even if no control has the input focus.
 		//DMC: comentate liniile de mai jos ca sa scot dxutsettingsdlg si dxutgui. Adaugat break
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 		if (CDXUTIMEEditBox::StaticMsgProc(uMsg, wParam, lParam))
 			return 0;
 #endif
@@ -4839,7 +4839,7 @@ void DXUTShutdown()
 //--------------------------------------------------------------------------------------
 void DXUTCleanup3DEnvironment(bool bReleaseSettings)
 {
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 	DXUTGetGlobalDialogResourceManager()->OnLostDevice();
 	DXUTGetGlobalDialogResourceManager()->OnDestroyDevice();
 
@@ -4850,7 +4850,7 @@ void DXUTCleanup3DEnvironment(bool bReleaseSettings)
 	if (pd3dDevice != NULL)
 	{
 		// If the settings dialog exists, then call its OnLostDevice() and OnDestroyedDevice()
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 		CD3DSettingsDlg* pD3DSettingsDlg = GetDXUTState().GetD3DSettingsDlg();
 		if (pD3DSettingsDlg)
 		{
@@ -4859,7 +4859,7 @@ void DXUTCleanup3DEnvironment(bool bReleaseSettings)
 		}
 #endif
 		GetDXUTState().SetInsideDeviceCallback(true);
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 		DXUTGetGlobalDialogResourceManager()->OnLostDevice();
 		DXUTGetGlobalResourceCache().OnLostDevice();
 #endif
@@ -5000,7 +5000,7 @@ void DXUTHandleTimers()
 //--------------------------------------------------------------------------------------
 // Show the settings dialog, and create if needed
 //--------------------------------------------------------------------------------------
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 void DXUTSetShowSettingsDialog(bool bShow)
 {
 	GetDXUTState().SetShowD3DSettingsDlg(bShow);
@@ -5031,7 +5031,7 @@ float DXUTGetFPS()                                  { return GetDXUTState().GetF
 LPCWSTR DXUTGetWindowTitle()                        { return GetDXUTState().GetWindowTitle(); }
 LPCWSTR DXUTGetFrameStats()                         { return GetDXUTState().GetFrameStats(); }
 LPCWSTR DXUTGetDeviceStats()                        { return GetDXUTState().GetDeviceStats(); }
-#ifdef K_CONTROLS_EDITOR
+#ifdef K_INCLUDE_DXUT_DIALOGS
 bool DXUTGetShowSettingsDialog()                    { return GetDXUTState().GetShowD3DSettingsDlg(); }
 #endif
 bool DXUTIsRenderingPaused()                        { return GetDXUTState().GetPauseRenderingCount() > 0; }

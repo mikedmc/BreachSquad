@@ -1456,8 +1456,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 			arrItems.push_back(strName);
 		}
 
-		ImGui::PushItemWidth(240);
-		if (ImGui::ListBoxHeader(" "))
+		if (ImGui::ListBoxHeader("##", ImVec2(250, 120)))
 		{
 			for (int kk = 0; kk < arrItems.size(); kk++)
 			{
@@ -1473,7 +1472,6 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 			}
 			ImGui::ListBoxFooter();
 		}
-		ImGui::PopItemWidth();
 		ImGui::End();
 
 		///--- LAYERS LIST 
@@ -1490,7 +1488,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		}
 
 		ImGui::SetNextItemWidth(-1.0f);
-		if (ImGui::ListBoxHeader("##", ImVec2(200, 200)))
+		if (ImGui::ListBoxHeader("##", ImVec2(250, 220)))
 		{
 			for (int kk = 0; kk < arrLayerNames.size(); kk++)
 			{
@@ -1578,7 +1576,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		}
 
 		ImGui::SetNextItemWidth(-1.0f);
-		if (ImGui::ListBoxHeader("Controls", ImVec2(200, 200)))
+		if (ImGui::ListBoxHeader("##", ImVec2(250, 200)))
 		{
 			for (int kk = 0; kk < arrControlsNames.size(); kk++)
 			{
