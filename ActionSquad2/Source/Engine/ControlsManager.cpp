@@ -226,7 +226,7 @@ void CControl::Reset()
 			paramsDict.SetNamedVarINT32(L"nSelectedIdx", 0);
 			paramsDict.SetNamedVarINT32(L"nTextAlignFlags", 0);
 			paramsDict.SetNamedVarINT32(L"Vspacing", 20);
-			paramsDict.SetNamedVarINT32(L"DisabledFlags", 0);
+			paramsDict.SetNamedVarINT32(L"disabledFlags", 0);
 		}
 		break;
 		case CCTRL_TYPE_BUTTON:
@@ -655,7 +655,7 @@ void CControl::Update(float dTime, float fTimeline)
 		case CCTRL_TYPE_BLINKING_LABEL:
 		{
 			float fTimer = paramsDict.GetVariantByName(L"fTimer")->m_asFloat;
-			float fLoopTimer = paramsDict.GetVariantByName(L"TimerLoop")->m_asFloat;
+			float fLoopTimer = paramsDict.GetVariantByName(L"timerLoop")->m_asFloat;
 
 			fTimer += dTime;
 			if (fTimer >= fLoopTimer)
@@ -1003,7 +1003,7 @@ void CControl::Update(float dTime, float fTimeline)
 			float fSelectionCursor = paramsDict.GetVariantByName(L"fSelectionCursor")->m_asFloat;
 			int	selectedIdx = paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
 			int vSpacing = paramsDict.GetVariantByName(L"Vspacing")->m_asINT32;
-			int nDisabledFlags = paramsDict.GetVariantByName(L"DisabledFlags")->m_asINT32;
+			int nDisabledFlags = paramsDict.GetVariantByName(L"disabledFlags")->m_asINT32;
 
 			//tratare statusuri setate in receive input
 			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDDOWN)
@@ -2235,7 +2235,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			int	selectedIdx = paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
 			int textAlignFlags = paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
 			int vSpacing = paramsDict.GetVariantByName(L"Vspacing")->m_asINT32;
-			int nDisabledFlags = paramsDict.GetVariantByName(L"DisabledFlags")->m_asINT32;
+			int nDisabledFlags = paramsDict.GetVariantByName(L"disabledFlags")->m_asINT32;
 			//desenam meniul
 			DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
 			//cursor size
@@ -2542,13 +2542,13 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 		case CCTRL_TYPE_BLINKING_LABEL:
 		{
 			float fTimer = paramsDict.GetVariantByName(L"fTimer")->m_asFloat;
-			float fBlinkTimer = paramsDict.GetVariantByName(L"TimerBlink")->m_asFloat;
+			float fBlinkTimer = paramsDict.GetVariantByName(L"timerBlink")->m_asFloat;
 
 			DWORD textcol = dwFontColor;
 			
 			if (fTimer < fBlinkTimer)
 			{
-				CVariantComplex* var = paramsDict.GetVariantByName(L"BlinkColor");
+				CVariantComplex* var = paramsDict.GetVariantByName(L"blinkColor");
 				if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
 				{
 					textcol = var->m_asUINT32;
@@ -3269,50 +3269,69 @@ void CControlsManager::SetParamValue(CControl * pCtrl, const WCHAR * sParamName,
 	else if (paramNameHash == FastHash(L"wrapText"))
 	{
 		int textAlignFlags = pCtrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+		bool wrap = false;
+		if (wcscmp(sParamValue, L"true") == 0)
+			wrap = true;
 
-		bool wrap = _wtoi(sParamValue);
 		if (wrap)
-			textAlignFlags |= FONTFLAG_WRAPTEXT | FONTFLAG_JUSTIFY;
+			textAlignFlags |= FONTFLAG_WRAPTEXT;
 		else
-			textAlignFlags &= (~(FONTFLAG_WRAPTEXT | FONTFLAG_JUSTIFY));
+			textAlignFlags &= ~FONTFLAG_WRAPTEXT;
+
+		pCtrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
+		//add it in the dictionary so it shows up in the editor
+		pCtrl->paramsDict.SetNamedVarBool(sParamName, wrap);
+	}
+	else if (paramNameHash == FastHash(L"justify"))
+	{
+		int textAlignFlags = pCtrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+
+		bool justify = false;
+		if (wcscmp(sParamValue, L"true") == 0)
+			justify = true;
+
+		if (justify)
+			textAlignFlags |= FONTFLAG_JUSTIFY;
+		else
+			textAlignFlags &= ~FONTFLAG_JUSTIFY;
 
 		pCtrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarAUTO(sParamName, sParamValue);
+		pCtrl->paramsDict.SetNamedVarBool(sParamName, justify);
 	}
 	else if (paramNameHash == FastHash(L"align"))
 	{
 		int textAlignFlags = pCtrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
 
 		textAlignFlags &= (~(FONTFLAG_ANCHOR_RIGHT | FONTFLAG_ANCHOR_CENTER | FONTFLAG_ANCHOR_LEFT));
-		if (_wcsicmp(sParamValue, L"right") == 0)
+		int align = _wtoi(sParamValue);
+		if (align == 1)
 			textAlignFlags |= FONTFLAG_ANCHOR_RIGHT;
-		else if (_wcsicmp(sParamValue, L"center") == 0)
-			textAlignFlags |= FONTFLAG_ANCHOR_CENTER;
-		else
+		else if (align == -1)
 			textAlignFlags |= FONTFLAG_ANCHOR_LEFT;
+		else
+			textAlignFlags |= FONTFLAG_ANCHOR_CENTER;
 
 		pCtrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarAUTO(sParamName, sParamValue);
+		pCtrl->paramsDict.SetNamedVarINT32(sParamName, align);
 	}
 	else if (paramNameHash == FastHash(L"valign"))
 	{
 		int textAlignFlags = pCtrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
 
 		textAlignFlags &= (~(FONTFLAG_ANCHOR_TOP | FONTFLAG_ANCHOR_VCENTER | FONTFLAG_ANCHOR_BOTTOM));
-		if (_wcsicmp(sParamValue, L"bottom") == 0)
+		int valign = _wtoi(sParamValue);
+		if (valign == 1)
 			textAlignFlags |= FONTFLAG_ANCHOR_BOTTOM;
-		else if (_wcsicmp(sParamValue, L"vcenter") == 0)
-			textAlignFlags |= FONTFLAG_ANCHOR_VCENTER;
-		else if (_wcsicmp(sParamValue, L"center") == 0)
-			textAlignFlags |= FONTFLAG_ANCHOR_VCENTER;
-		else
+		else if (valign == -1)
 			textAlignFlags |= FONTFLAG_ANCHOR_TOP;
+		else
+			textAlignFlags |= FONTFLAG_ANCHOR_VCENTER;
 
 		pCtrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarAUTO(sParamName, sParamValue);
+		pCtrl->paramsDict.SetNamedVarINT32(sParamName, valign);
 	}
 	else  //daca nu e parametru special de tradus, il salveaza cu auto type
 	{
@@ -4023,8 +4042,7 @@ HRESULT CControlsManager::LoadControlsXML(WCHAR* XMLpath)
 			ErrorBox(K_ERR_WARNING, L"Layer ID empty in file: %s", XMLpath);
 			nlayer->ID.Reset();
 		}
-		///--- citeste controalele ---
-		//pugi::xml_node controlsnodes = layerdata.child(L"Control");
+		///--- reads controls ---
 		for (pugi::xml_node controldata = layerdata.first_child(); controldata; controldata = controldata.next_sibling())
 		{
 			const WCHAR* cType = controldata.attribute(L"Type").value();

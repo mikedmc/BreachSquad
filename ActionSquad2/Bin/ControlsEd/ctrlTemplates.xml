@@ -13,42 +13,42 @@ CONTROLS:
 - valign: -1, 0, 1
 - inflate: cu cat se modifica dimensiunile grafice fata de bbox (in special la frame, listbox, dar si buton si altele)
 -->
-<Layer ID="LAYER_ID_" X="0" Y="0" isBlocking="1" getsInput="false" anchorX="center" anchorY="center" fTimer="0.0" focusedControlID="" >
-	<Control Type="Window" ID="empty" animID="ANM_" fontID="FONT_" fontColor="0xffffffff" stringID="STR_" inflate="0" X="-50" Y="-50" W="100" H="100" />
-	<Control Type="Frame" ID="empty" animID="ANM_" color="0xffffffff" inflate="0" X="-50" Y="-50" W="100" H="100" />
-	<Control Type="Button" ID="CTRL_BUT_" animID="BUTTON" fontID="FONT_" fontColor="0xffffffff" stringID="STR_" X="10" Y="10" W="60" H="16" />
-	<Control Type="Label" ID="empty" fontID="FONT_" fontColor="0xffffffff" stringID="STR_" wrapText="false" justify="false" align="-1" valign="0" X="10" Y="10" W="100" H="16" />
-	<Control Type="BlinkingLabel" ID="empty" fontID="FONT_" fontColor="0xffffffff" Blinkcolor="0xffff0000" TimerLoop="1.0" TimerBlink="0.5" stringID="STR_" wrapText="false" justify="false" align="-1" valign="0" X="10" Y="10" W="100" H="16" />
-	<Control Type="Checkbox" ID="CTRL_CHECK_" animID="ANM_" fontID="FONT_" fontColor="0xffffffff" stringID="STR_" X="0" Y="0" W="13" H="13" />
+<Layer ID="LAYER_ID_" X="0" Y="0" isBlocking="1" getsInput="false" anchorX="center" anchorY="center" fTimer="0.0" focusedControlID="empty" >
+	<Control Type="Window" ID="empty" animID="ANM_" fontID="FONT_" fontColor="#ffffffff" stringID="STR_" inflate="0" X="-50" Y="-50" W="100" H="100" />
+	<Control Type="Frame" ID="empty" animID="ANM_" color="#ffffffff" inflate="0" X="-50" Y="-50" W="100" H="100" />
+	<Control Type="Button" ID="CTRL_BUT_" animID="BUTTON" fontID="FONT_" fontColor="#ffffffff" stringID="STR_" X="10" Y="10" W="60" H="16" />
+	<Control Type="Label" ID="empty" fontID="FONT_" fontColor="#ffffffff" stringID="STR_" wrapText="false" justify="false" align="-1" valign="0" X="10" Y="10" W="100" H="16" />
+	<Control Type="BlinkingLabel" ID="empty" fontID="FONT_" fontColor="#ffffffff" blinkcolor="#ffff0000" timerLoop="1.0" timerBlink="0.5" stringID="STR_" wrapText="false" justify="false" align="-1" valign="0" X="10" Y="10" W="100" H="16" />
+	<Control Type="Checkbox" ID="CTRL_CHECK_" animID="ANM_" fontID="FONT_" fontColor="#ffffffff" stringID="STR_" X="0" Y="0" W="13" H="13" />
 	<Control Type="Slider" ID="CTRL_SLIDER_" animID="ANM_" Steps="0" HasArrows="0" X="10" Y="10" W="180" H="35" />
-	<Control Type="Inputbox" ID="CTRL_INPUT_" animID="ANM_" fontID="FONT_" fontColor="0xffffffff" maxLen="10" X="10" Y="10" W="60" H="16" />
-	<Control Type="Textbox" ID="empty" animID="ANM_" fontID="FONT_" fontColor="0xffffffff" stringID="STR_" align="-1" valign="-1" inflate="0" X="10" Y="10" W="200" H="100" />
+	<Control Type="Inputbox" ID="CTRL_INPUT_" animID="ANM_" fontID="FONT_" fontColor="#ffffffff" maxLen="10" X="10" Y="10" W="60" H="16" />
+	<Control Type="Textbox" ID="empty" animID="ANM_" fontID="FONT_" fontColor="#ffffffff" stringID="STR_" align="-1" valign="-1" inflate="0" X="10" Y="10" W="200" H="100" />
 	<Control Type="PaintedButton" ID="CTRL_BUTP_" animID="ANM_" frameIdx="0" X="10" Y="10" W="30" H="30" />
 	<Control Type="Animation" ID="empty" animID="ANM_" Animated="0" setFrame="0" scaleImage="0" X="10" Y="10" W="30" H="30" />
-	<Control Type="DropDown" ID="CTRL_DROP_" fontID="FONT_" stringID="STR_" fontColor="0xffffffff" animID="ANM_" X="10" Y="10" W="100" H="15" />
-	<Control Type="Listbox" ID="CTRL_LISTBOX_" fontID="FONT_" fontColor="0xffffffff" animID="ANM_" stringID="STR_" inflate="0" X="10" Y="10" W="200" H="100" />
+	<Control Type="DropDown" ID="CTRL_DROP_" fontID="FONT_" stringID="STR_" fontColor="#ffffffff" animID="ANM_" X="10" Y="10" W="100" H="15" />
+	<Control Type="Listbox" ID="CTRL_LISTBOX_" fontID="FONT_" fontColor="#ffffffff" animID="ANM_" stringID="STR_" inflate="0" X="10" Y="10" W="200" H="100" />
 	<Control Type="ProgressBar" ID="CTRL_PROGRESSBAR_" animID="ANM_" X="10" Y="10" W="100" H="20"/>
-	<Control Type="Vignette" ID="empty" animID="ANM_" frameIdx="0" color="0x88000000" />
-<!-- Scroll menu: DisabledFlags="3" means first and second options are disabled; stringID0 - first menu item string id; stringID_7 - last menu item string ID (max 8 options per menu) -->
-	<Control Type="ScrollMenu" ID="CTRL_SMENU_" animID="ANM_" fontID="FONT_" fontColor="0xffffffff" align="0" Vspacing="20" DisabledFlags="0" stringID0="STR_" stringID1="STR_" stringID2="STR_" stringID3="STR_" stringID4="" stringID5="" stringID6="" stringID7="" X="-50" Y="-50" W="100" H="100" />
-	<Control Type="Widebar" ID="CTRL_WBAR_" animID="ANM_" color="0xffffffff" X="-50" Y="-50" W="100" H="100" />
+	<Control Type="Vignette" ID="empty" animID="ANM_" frameIdx="0" color="#88000000" />
+<!-- Scroll menu: disabledFlags="3" means first and second options are disabled; stringID0 - first menu item string id; stringID_7 - last menu item string ID (max 8 options per menu) -->
+	<Control Type="ScrollMenu" ID="CTRL_SMENU_" animID="ANM_" fontID="FONT_" fontColor="#ffffffff" align="0" Vspacing="20" disabledFlags="0" stringID0="STR_" stringID1="STR_" stringID2="STR_" stringID3="STR_" stringID4="" stringID5="" stringID6="" stringID7="" X="-50" Y="-50" W="100" H="100" />
+	<Control Type="Widebar" ID="CTRL_WBAR_" animID="ANM_" color="#ffffffff" X="-50" Y="-50" W="100" H="100" />
 <!-- Mission results stars. Needs animation with empty star on frame 0 and full star on frame 1 (painted over empty star) -->
 	<Control Type="FillingStars" ID="empty" animID="ANM_" nStars="3" X="-20" Y="-10" W="40" H="20"/>
 <!-- SDL scancode reader - used for key redefining keys - shows ? when nSDLscancode is -1 (not set) -->
-	<Control Type="SDL_KeyReader" ID="empty" fontID="FONT_" fontColor="0xffffffff" nSDLscancode="-1" X="-20" Y="-10" W="40" H="20"/>
+	<Control Type="SDL_KeyReader" ID="empty" fontID="FONT_" fontColor="#ffffffff" nSDLscancode="-1" X="-20" Y="-10" W="40" H="20"/>
 <!-- list selector - shows 2 strings side by side and allows selection. nBaseIndex is added to the 0 based selection index -->
-	<Control Type="ListSelector" ID="CTRL_LSEL_" fontID="FONT_" fontColor="0xffffffff" fontColor_right="0xffffffff" stringID="STR_" stringID_right="STR_" nBaseIndex="0" inflate="0" X="10" Y="10" W="100" H="80" />
-	<Control Type="ListSelectorTT" ID="CTRL_LSEL_" fontColor="0xffffffff" fontColor_right="0xffffffff" stringID="STR_" stringID_right="STR_" nMinPage="0" nMaxPage="0" nBaseIndex="0" inflate="0" X="10" Y="10" W="100" H="80" />
+	<Control Type="ListSelector" ID="CTRL_LSEL_" fontID="FONT_" fontColor="#ffffffff" fontColor_right="#ffffffff" stringID="STR_" stringID_right="STR_" nBaseIndex="0" inflate="0" X="10" Y="10" W="100" H="80" />
+	<Control Type="ListSelectorTT" ID="CTRL_LSEL_" fontColor="#ffffffff" fontColor_right="#ffffffff" stringID="STR_" stringID_right="STR_" nMinPage="0" nMaxPage="0" nBaseIndex="0" inflate="0" X="10" Y="10" W="100" H="80" />
 <!-- CUSTOM PAINT control - paint is made in custom function (differentiated by subType) -->
 	<Control Type="CustomPaint" subType="ST_" ID="CUSTOM_" inflate="0" X="10" Y="10" W="50" H="50" />
 	<Control Type="NetVote" ID="CTRL_NETV_" animID="ANM_" leftVote="0" rightVote="0" X="10" Y="10" W="50" H="50" />
 <!-- Paints a standard XP bar for character upgrades -->
-	<Control Type="XPBar" ID="CTRL_XPBAR_" animID="ANM_" fontID="FONT_" fontColor="0xffffffff" nOldValue="10" nNewValue="50" X="10" Y="10" W="100" H="20"/>
+	<Control Type="XPBar" ID="CTRL_XPBAR_" animID="ANM_" fontID="FONT_" fontColor="#ffffffff" nOldValue="10" nNewValue="50" X="10" Y="10" W="100" H="20"/>
 <!-- Game specific class/char upgrade control -->
 	<Control Type="PlayerUpgradeControl" ID="CTRL_PLUPG_" animID="ANM_" inflate="2" fontID="FONT_" nPlayerClass="-1" X="10" Y="10" W="100" H="20"/>
 <!-- Game specific leaderboards true type font list (names/scores) -->
-	<Control Type="ScoresListTT" ID="CTRL_SCORESLIST_" stringID="STR_" stringID_right="STR_" nSelectedIdx="-1" color="0xffffffff" fontColor="0xffffffff" X="10" Y="10" W="160" H="100" inflate="0" />
+	<Control Type="ScoresListTT" ID="CTRL_SCORESLIST_" stringID="STR_" stringID_right="STR_" nSelectedIdx="-1" color="#ffffffff" fontColor="#ffffffff" X="10" Y="10" W="160" H="100" inflate="0" />
 <!-- Control that shows tasks -->  
-	<Control Type="TasksList" ID="CTRL_TASKS_" animID="ANM_" fontID="FONT_" fontColor="0xffffffff" nIconFrame1="0" stringID1="STR_" nIconFrame2="0" stringID2="STR_" X="10" Y="10" W="160" H="32" />
+	<Control Type="TasksList" ID="CTRL_TASKS_" animID="ANM_" fontID="FONT_" fontColor="#ffffffff" nIconFrame1="0" stringID1="STR_" nIconFrame2="0" stringID2="STR_" X="10" Y="10" W="160" H="32" />
 	<Control Type="SliderPages" ID="CTRL_SLIDER_" animID="ANM_" nMinPage="-1" nMaxPage="-1" X="10" Y="10" W="180" H="35" />
 </Layer>

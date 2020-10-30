@@ -1054,7 +1054,7 @@ int CVariantCollection::AddVarUINT32(UINT32 val)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_UINT32(NULL, val);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::AddVarINT32(INT32 val)
@@ -1062,7 +1062,7 @@ int CVariantCollection::AddVarINT32(INT32 val)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_INT32(NULL, val);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::AddVarFloat(float val)
@@ -1070,7 +1070,7 @@ int CVariantCollection::AddVarFloat(float val)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_FLOAT(NULL, val);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::AddVarBool(bool val)
@@ -1078,7 +1078,7 @@ int CVariantCollection::AddVarBool(bool val)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_BOOL(NULL, val);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::AddVarVoidP(void* val)
@@ -1086,7 +1086,7 @@ int CVariantCollection::AddVarVoidP(void* val)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_VOIDP(NULL, val);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::AddVarString(WCHAR* strVal)
@@ -1094,7 +1094,7 @@ int CVariantCollection::AddVarString(WCHAR* strVal)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_STRING(NULL, strVal);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 //
@@ -1163,7 +1163,7 @@ int CVariantCollection::AddVariant(CVariantComplex variant)
 	CVariantComplex* nvar = new CVariantComplex();
 	*nvar = variant;
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::AddVariant(CVariantComplex * variant)
@@ -1173,7 +1173,7 @@ int CVariantCollection::AddVariant(CVariantComplex * variant)
 	CVariantComplex* nvar = new CVariantComplex();
 	*nvar = *variant;
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::SetNamedVarUINT32(const WCHAR* argName, UINT32 val)
@@ -1183,7 +1183,7 @@ int CVariantCollection::SetNamedVarUINT32(const WCHAR* argName, UINT32 val)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_UINT32(argName, val);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::SetNamedVarHEXCOLOR(const WCHAR* argName, UINT32 val)
@@ -1193,7 +1193,7 @@ int CVariantCollection::SetNamedVarHEXCOLOR(const WCHAR* argName, UINT32 val)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_HEXCOLOR(argName, val);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::SetNamedVarINT32(const WCHAR* argName, INT32 val)
@@ -1203,7 +1203,7 @@ int CVariantCollection::SetNamedVarINT32(const WCHAR* argName, INT32 val)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_INT32(argName, val);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::SetNamedVarFloat(const WCHAR* argName, float val)
@@ -1213,7 +1213,7 @@ int CVariantCollection::SetNamedVarFloat(const WCHAR* argName, float val)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_FLOAT(argName, val);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::SetNamedVarBool(const WCHAR* argName, bool val)
@@ -1223,7 +1223,7 @@ int CVariantCollection::SetNamedVarBool(const WCHAR* argName, bool val)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_BOOL(argName, val);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::SetNamedVarVoidP(const WCHAR* argName, void* val)
@@ -1233,7 +1233,7 @@ int CVariantCollection::SetNamedVarVoidP(const WCHAR* argName, void* val)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_VOIDP(argName, val);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::SetNamedVarString(const WCHAR* argName, WCHAR* strVal)
@@ -1243,7 +1243,7 @@ int CVariantCollection::SetNamedVarString(const WCHAR* argName, WCHAR* strVal)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_STRING(argName, strVal);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 int CVariantCollection::SetNamedVarAUTO(const WCHAR* argName, WCHAR* strVal)
@@ -1253,7 +1253,7 @@ int CVariantCollection::SetNamedVarAUTO(const WCHAR* argName, WCHAR* strVal)
 	CVariantComplex* nvar = new CVariantComplex();
 	nvar->Set_AUTO(argName, strVal);
 	m_variants.Add(nvar);
-	return m_variants.GetSize();
+	return m_variants.GetSize() - 1;
 }
 
 #if defined(_DEBUG) || defined(DEBUG)

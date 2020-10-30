@@ -798,6 +798,12 @@ public:
 			case K_ARGTYPE_HEXCOLOR:
 				StringCchPrintf(destStr, maxLen, L"#%08X", m_asUINT32);
 				break;
+			case K_ARGTYPE_BOOL:
+				if(m_asBool)
+					StringCchPrintf(destStr, maxLen, L"true");
+				else
+					StringCchPrintf(destStr, maxLen, L"false");
+				break;
 		}
 		return 0;
 	}
@@ -821,6 +827,12 @@ public:
 				break;
 			case K_ARGTYPE_HEXCOLOR:
 				sprintf(destStr, "#%08X", m_asUINT32);
+				break;
+			case K_ARGTYPE_BOOL:
+				if (m_asBool)
+					sprintf(destStr, "true");
+				else
+					sprintf(destStr, "false");
 				break;
 		}
 		return 0;

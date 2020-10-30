@@ -480,11 +480,34 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		// variable name from template
 		CVariantComplex* pVarName = ctrlTemplate->m_variants[ii];
 		// actual value from control
-		CVariantComplex* pValue = currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByNameHash(pVarName->m_name.getHash());
+		CVariantComplex* pValue = ctrl->paramsDict.GetVariantByNameHash(pVarName->m_name.getHash());
 		char sVarName[MAX_PATH];
 		wcstombs(sVarName, pVarName->m_name.text, MAX_PATH);
 		// hardcoded controls properties
-		if (strcmp(sVarName, "animID") == 0)
+		if (strcmp(sVarName, "ID") == 0)
+		{
+			char str0[MAX_PATH] = { 0 };
+			// ID set? show it!
+			if (pValue->m_type != CVariantComplex::K_ARGTYPE_NONE)
+			{
+				pValue->asString(str0, MAX_PATH);
+			}
+
+			ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
+			if (ImGui::IsItemEdited())
+			{
+				if (pValue->m_type == CVariantComplex::K_ARGTYPE_NONE)
+				{
+					int varidx = ctrl->paramsDict.SetNamedVarString(L"ID", L"");
+					// set pointer on new var
+					pValue = ctrl->paramsDict[varidx];
+				}
+				
+				pValue->m_strArg.Init(str0);
+				bNeedsUpdate = true;
+			}
+		}
+		else if (strcmp(sVarName, "animID") == 0)
 		{
 			vector<string> arrAnims;
 			// first animation will be the empty animation or not set. Index is -1
@@ -524,30 +547,39 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		}
 		else if (strcmp(sVarName, "align") == 0)
 		{
-			//int textAlignFlags = ctrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+			const char* anchor_names[3] = { "min", "center", "max" };
+			const char* elem_name = (pValue->m_asINT32 >= -1 && pValue->m_asINT32 <= 1) ? anchor_names[pValue->m_asINT32 + 1] : "unknown";
+			ImGui::SliderInt(sVarName, (int*)&pValue->m_asINT32, -1, 1, elem_name);
 
-			//const int anchor_values[] = { FONTFLAG_ANCHOR_LEFT, FONTFLAG_ANCHOR_CENTER, FONTFLAG_ANCHOR_RIGHT, FONTFLAG_JUSTIFY };
-			//int nval = 0;
-			//for (int kk = 0; kk < ARRAY_SIZE(anchor_values); kk++)
-			//{
-			//	if ((textAlignFlags & anchor_values[kk]) != 0)
-			//	{
-			//		nval = kk;
-			//		break;
-			//	}
-			//}
-			//const char* anchor_names[] = { "left", "center", "max", "justify" };
-			//const char* elem_name = (nval >= 0 && nval <= 3) ? anchor_names[nval] : "unknown";
-			//ImGui::SliderInt(sVarName, &nval, 0, 3, elem_name);
-			//if (ImGui::IsItemEdited())
-			//{
-			//	// erase old flags
-			//	textAlignFlags &= (~(FONTFLAG_ANCHOR_RIGHT | FONTFLAG_ANCHOR_CENTER | FONTFLAG_ANCHOR_LEFT | FONTFLAG_JUSTIFY));
-			//	// save new ones
-			//	textAlignFlags |= anchor_values[nval];
-			//	ctrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
-			//	LOG("changed align");
-			//}
+			if (ImGui::IsItemEdited())
+			{
+				const int anchor_values[] = { FONTFLAG_ANCHOR_LEFT, FONTFLAG_ANCHOR_CENTER, FONTFLAG_ANCHOR_RIGHT };
+				// erase old flags
+				int textAlignFlags = ctrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+				textAlignFlags &= (~(FONTFLAG_ANCHOR_RIGHT | FONTFLAG_ANCHOR_CENTER | FONTFLAG_ANCHOR_LEFT ));
+				// save new ones
+				textAlignFlags |= anchor_values[pValue->m_asINT32 + 1];
+				ctrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
+				LOG("changed align %d", pValue->m_asINT32);
+			}
+		}
+		else if (strcmp(sVarName, "valign") == 0)
+		{
+			const char* anchor_names[3] = { "min", "center", "max" };
+			const char* elem_name = (pValue->m_asINT32 >= -1 && pValue->m_asINT32 <= 1) ? anchor_names[pValue->m_asINT32 + 1] : "unknown";
+			ImGui::SliderInt(sVarName, (int*)&pValue->m_asINT32, -1, 1, elem_name);
+
+			if (ImGui::IsItemEdited())
+			{
+				const int anchor_values[] = { FONTFLAG_ANCHOR_TOP, FONTFLAG_ANCHOR_VCENTER, FONTFLAG_ANCHOR_BOTTOM};
+				// erase old flags
+				int textAlignFlags = ctrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+				textAlignFlags &= (~(FONTFLAG_ANCHOR_TOP| FONTFLAG_ANCHOR_VCENTER | FONTFLAG_ANCHOR_BOTTOM));
+				// save new ones
+				textAlignFlags |= anchor_values[pValue->m_asINT32 + 1];
+				ctrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
+				LOG("changed valign %d", pValue->m_asINT32);
+			}
 		}
 		else if (strcmp(sVarName, "fontID") == 0)
 		{
@@ -650,15 +682,8 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 				case CVariantComplex::K_ARGTYPE_STRING:
 				default:
 				{
-					char str0[128];
-					if (pValue->m_type == CVariantComplex::K_ARGTYPE_NONE)
-					{
-						sprintf(str0, "empty");
-					}
-					else
-					{
-						pValue->asString(str0, 128);
-					}
+					char str0[MAX_PATH];
+					pValue->asString(str0, MAX_PATH);
 
 					ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
 					if (ImGui::IsItemEdited())
@@ -740,8 +765,8 @@ void CControlsEditor::AddControl(CVariantCollection* vcol)
 
 		StringCchPrintf(propertyName, MAX_PATH, L"%s", var->m_name.text);
 		StringCchPrintf(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
-		//sarim unele proprietati
-		if (wcscmp(propertyName, L"ID") == 0 && wcscmp(propertyValue, L"empty"))
+		//If template has "empty" as ID then don't add the ID key
+		if ((wcscmp(propertyName, L"ID") == 0) && (wcscmp(propertyValue, L"empty") == 0))
 			continue;
 		
 		UTGetControlsManager().SetParamValue(nctrl, propertyName, propertyValue, true);
@@ -1021,7 +1046,7 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 							StringCchPrintf(propertyName, MAX_PATH, var->m_name.text);
 							ctrlCol->GetVariantByName(propertyName)->asString(propertyValue, MAX_PATH);
 
-							// daca ID-ul este empty string sau coincide cu cel din templates nu-l mai scriu
+							// ID is empty string or equals the one in templates then we skip it
 							if (wcscmp(propertyName, L"ID") == 0)
 								if (wcslen(ctrlCol->GetVariantByName(L"ID")->m_strArg.text) == 0
 									|| wcscmp(ctrlCol->GetVariantByName(L"ID")->m_strArg.text, var->m_strArg.text) == 0)
@@ -1030,7 +1055,7 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 							if (wcscmp(propertyName, L"animID") == 0)
 							{
 								int intVal = _wtoi(propertyValue);
-								if (intVal >= 0 && wcscmp(propertyValue, L"_EMPTY_"))
+								if (intVal >= 0 && wcscmp(propertyValue, L"_EMPTY_") != 0)
 									StringCchPrintf(propertyValue, MAX_PATH, L"%s", UTGetControlsManager().m_sprCol.Animations[intVal]->animName.text);
 								else
 									StringCchPrintf(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
@@ -1038,7 +1063,7 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 							else if (wcscmp(propertyName, L"fontID") == 0)
 							{
 								int intVal = _wtoi(propertyValue);
-								if (intVal >= 0 && wcscmp(propertyValue, L"_EMPTY_"))
+								if (intVal >= 0 && wcscmp(propertyValue, L"_EMPTY_") != 0)
 									StringCchPrintf(propertyValue, MAX_PATH, L"%s", UTGetFontsManager().fonts[_wtoi(propertyValue)]->shFontName.text);
 								else
 									StringCchPrintf(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
