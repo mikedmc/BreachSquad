@@ -234,7 +234,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
   TypeName(const TypeName&);   \
   void operator=(const TypeName&)
 
-//ca sa nu mai dea warningurile de insecure
+// remove "insecure" warnings
 #define _CRT_SECURE_NO_DEPRECATE 
 //#define _CRT_SECURE_NO_WARNINGS
 
@@ -321,20 +321,20 @@ enum eGameMode {
 #define K_GAME_HALF_HEIGHT_MAX  (K_GAME_HALF_WIDTH / K_WINDOW_ASPECT_RATIO_MIN)
 ///--- CLEAR COLOR ---
 #define K_GAME_CLEAR_COLOR	0x00000000
-//cat timp sunt afisate splashurile
+// splashscreen show time
 #define K_GAME_SPLASH_SHOW_TIMER 2.5f
 
-//dimensiunea ferestrei cand apar probleme, o rezolutie suportata de orice monitor (1360x768) (1920x1080)
+// default resolution for when failing to get supported res list (1360x768) (1920x1080)
 #define	K_WINDOW_WIDTH_SAFE		800
 #define	K_WINDOW_HEIGHT_SAFE	600
-//dimensiunile minime acceptate de joc (filtreaza lista de rezolutii)
+// minimum resolution for the game (res list gets filtered by this)
 #define	K_WINDOW_WIDTH_MIN		640
 #define	K_WINDOW_HEIGHT_MIN		480
-//aspect ratio limits
+// aspect ratio limits
 #define K_WINDOW_ASPECT_RATIO_MIN	(4.0f / 3.0f)
 #define K_WINDOW_ASPECT_RATIO_MAX	(16.0f / 9.0f)
 
-//numarul maxim de human players
+// max no of human players
 #define K_MAX_PLAYERS_CNT	2
 
 #ifndef uint64_t

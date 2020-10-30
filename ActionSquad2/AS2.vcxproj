@@ -329,6 +329,7 @@
     <ClCompile Include="Source\Engine\gameplay\Actor.cpp" />
     <ClCompile Include="Source\Engine\gameplay\CollisionShape.cpp" />
     <ClCompile Include="Source\Engine\gameplay\LevelTypes.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\Level_loaders.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_scriptable.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Light.cpp" />
     <ClCompile Include="Source\Engine\GetDXVer.cpp">
