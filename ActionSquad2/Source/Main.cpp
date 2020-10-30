@@ -2413,7 +2413,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		if (g_gameState == GAME_STATE_CONTROLSED)
 		{
 			//pd3dDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
-			g_ControlsEditor.PaintInterface(fElapsedTime);
 			g_ControlsEditor.PaintBBoxes();
 		}
 #endif
@@ -2483,12 +2482,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 //**************************************************************************************
 LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, bool *pbNoFurtherProcessing)
 {
-
-#ifdef K_CONTROLS_EDITOR
-	*pbNoFurtherProcessing = g_ControlsEditor.propertiesPanel.MsgProc(hWnd, uMsg, wParam, lParam);
-	if (*pbNoFurtherProcessing)
-		return 0;
-#endif
 
 	///--- IMGUI message handler---
 #if defined(K_ENABLE_IMGUI)
