@@ -149,7 +149,7 @@
 // Direct3D includes
 #include <d3d9.h>
 #include <d3dx9.h>
-#include <dxerr9.h>
+//#include <dxerr9.h>
 
 /// --- IMGUI ---
 #if defined(K_ENABLE_IMGUI)
@@ -186,20 +186,11 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "DXUTmisc.h"
 #include "DXUTenum.h"
 
-#if defined(DEBUG) | defined(_DEBUG)
-    #ifndef V
-        #define V(x)           { hr = x; if( FAILED(hr) ) { DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true ); } }
-    #endif
-    #ifndef V_RETURN
-        #define V_RETURN(x)    { hr = x; if( FAILED(hr) ) { return DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true ); } }
-    #endif
-#else
-    #ifndef V
-		#define V(x)           { hr = x; if (FAILED(hr) ) { ErrorBoxFnW(K_ERR_CRITICAL,  __FILE__, __LINE__, L"FAILED(hr) HRESULT=%x", hr); } }
-    #endif
-    #ifndef V_RETURN
-        #define V_RETURN(x)    { hr = x; if( FAILED(hr) ) { ErrorBoxFnW(K_ERR_CRITICAL,  __FILE__, __LINE__, L"FAILED(hr) HRESULT=%x", hr); return hr; } }
-    #endif
+#ifndef V
+	#define V(x)           { hr = x; if (FAILED(hr) ) { ErrorBoxFnW(K_ERR_CRITICAL,  __FILE__, __LINE__, L"FAILED(hr) HRESULT=%x", hr); } }
+#endif
+#ifndef V_RETURN
+    #define V_RETURN(x)    { hr = x; if( FAILED(hr) ) { ErrorBoxFnW(K_ERR_CRITICAL,  __FILE__, __LINE__, L"FAILED(hr) HRESULT=%x", hr); return hr; } }
 #endif
 
 #ifndef SAFE_DELETE

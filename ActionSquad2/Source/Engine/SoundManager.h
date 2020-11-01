@@ -85,7 +85,7 @@ public:
 class CSoundManager : public IEventListener
 {
 protected:
-	IDirectSound8* m_pDS;
+	IDirectSound* m_pDS;
 	bool sndOK;		//everything loaded ok
 
 	//positional sounds

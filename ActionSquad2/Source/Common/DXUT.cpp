@@ -3384,9 +3384,13 @@ HRESULT DXUTInitialize3DEnvironment()
 
 		DXUT_ERR(L"DeviceCreated callback", hr);        
 		if (hr == DXUTERR_MEDIANOTFOUND)
-			return DXUT_ERR(L"DeviceCreatedCallback", DXUTERR_MEDIANOTFOUND);
+		{
+			return DXUT_ERR(L"DeviceCreatedCallback", (DXUTERR_MEDIANOTFOUND));
+		}
 		else
+		{
 			return DXUT_ERR(L"DeviceCreatedCallback", DXUTERR_CREATINGDEVICEOBJECTS);
+		}
 	}
 	else
 	{
@@ -5170,23 +5174,6 @@ void DXUTDisplayErrorMessage(HRESULT hr)
 	}
 }
 
-
-//--------------------------------------------------------------------------------------
-// Display error msg box to help debug 
-//--------------------------------------------------------------------------------------
-#if defined(_DEBUG) || defined(DEBUG)
-
-HRESULT WINAPI DXUTTrace(const CHAR* strFile, DWORD dwLine, HRESULT hr,
-						 const WCHAR* strMsg, bool bPopMsgBox)
-{
-	bool bShowMsgBoxOnError = GetDXUTState().GetShowMsgBoxOnError();
-	if (bPopMsgBox && bShowMsgBoxOnError == false)
-		bPopMsgBox = false;
-
-	return DXTrace(strFile, dwLine, hr, strMsg, bPopMsgBox);
-}
-
-#endif
 
 //--------------------------------------------------------------------------------------
 // Checks to see if the HWND changed monitors, and if it did it creates a device 

@@ -111,7 +111,6 @@ HRESULT CreateVS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DVERTEXSH
 		else
 		{
 			CloseHandle(hFile);
-			DXTRACE_ERR(L"[C3DUtils::CreateVS] Unable to get vs filesize", hr);
 			CHAR szErr[2048];
 			GetErrorMessageA(GetLastError(), szErr, ARRAY_SIZE(szErr));
 			ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreateVS] Unable to get vs filesize.\n\t\t%s\n", szErr);
@@ -120,7 +119,6 @@ HRESULT CreateVS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DVERTEXSH
 	}	
 	else
 	{
-		DXTRACE_ERR(L"[C3DUtils::CreateVS] Unable to open vs file", hr);
 		CHAR szErr[2048];
 		GetErrorMessageA(GetLastError(), szErr, ARRAY_SIZE(szErr));
 		ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreateVS] Unable to open vs file.\n\t\t%s\n", szErr);
@@ -130,7 +128,6 @@ HRESULT CreateVS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DVERTEXSH
 	pdwVS = (DWORD*)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
 	if (FAILED(hr = pd3dDevice->CreateVertexShader(pdwVS, pVS)))
 	{
-		DXTRACE_ERR(L"[C3DUtils::CreateVS] Failed to create vertex shader", hr);
 		ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreateVS] Failed to create vertex shader.\n\t\thresult=%x\n", hr);
 		return hr;
 	}
@@ -157,7 +154,6 @@ HRESULT CreatePS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DPIXELSHA
 		else
 		{
 			CloseHandle(hFile);
-			DXTRACE_ERR(L"[C3DUtils::CreatePS] Unable to get PS filesize", hr);
 			CHAR szErr[2048];
 			GetErrorMessageA(GetLastError(), szErr, ARRAY_SIZE(szErr));
 			ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreatePS] Unable to get PS filesize.\n\t\t%s\n", szErr);
@@ -166,7 +162,6 @@ HRESULT CreatePS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DPIXELSHA
 	}	
 	else
 	{
-		DXTRACE_ERR(L"[C3DUtils::CreatePS] Unable to open PS file", hr);
 		CHAR szErr[2048];
 		GetErrorMessageA(GetLastError(), szErr, ARRAY_SIZE(szErr));
 		ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreatePS] Unable to open PS file.\n\t\t%s\n", szErr);
@@ -176,7 +171,6 @@ HRESULT CreatePS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DPIXELSHA
 	pdwPS = (DWORD*)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
 	if (FAILED(hr = pd3dDevice->CreatePixelShader(pdwPS, pPS)))
 	{
-		DXTRACE_ERR(L"[C3DUtils::CreatePS] Failed to create vertex shader", hr);
 		ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreatePS] Failed to create vertex shader.\n\t\thresult=%x\n", hr);
 		return hr;
 	}

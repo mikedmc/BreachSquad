@@ -143,7 +143,7 @@ HRESULT CSoundManager::Init(HWND hWnd, DWORD dwPrimaryChannels, DWORD dwPrimaryF
 	m_pDS = NULL;
 	//SAFE_RELEASE(m_pDS);
 	// Create IDirectSound using the primary sound device
-	if (FAILED(hr = DirectSoundCreate8(NULL, &m_pDS, NULL)))
+	if (FAILED(hr = DirectSoundCreate(NULL, &m_pDS, NULL)))
 	{
 		ErrorBox(K_ERR_WARNING, L"Sound->Init->DirectSoundCreate8 failed (hr: %x)\n", hr);
 		return hr;

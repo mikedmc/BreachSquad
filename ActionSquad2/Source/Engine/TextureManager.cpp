@@ -178,7 +178,7 @@ HRESULT CTextureManager::LoadTexture(const int nTexIdx)
 		WCHAR wszMsg[512];
 		StringCchPrintf(wszMsg, ARRAY_SIZE(wszMsg), L"[CTextureManager::LoadTexture] D3DXCreateTextureFromFileEx\n -Could not load texture %s\n", pTN->fileName);
 		ErrorBox(K_ERR_WARNING, L"%s", wszMsg);
-		return DXTRACE_ERR_MSGBOX(wszMsg, hr);
+		return E_FAIL;
 	}
 
 	LOG(L"CTextureManager::Loaded %s", pTN->fileName);

@@ -2210,6 +2210,12 @@ VOID DXUTOutputDebugStringA(LPCSTR strMsg, ...)
 }
 
 
+HRESULT DXUTErrMsg(WCHAR * str, HRESULT hr)
+{
+	MessageBox(nullptr, str, L"Warning!", MB_OK);
+	return hr;
+}
+
 //--------------------------------------------------------------------------------------
 CDXUTLineManager::CDXUTLineManager()
 {
@@ -2485,15 +2491,21 @@ HRESULT CDXUTTextHelper::DrawFormattedTextLine(const WCHAR* strMsg, ...)
 //--------------------------------------------------------------------------------------
 HRESULT CDXUTTextHelper::DrawTextLine(const WCHAR* strMsg)
 {
-	if (NULL == m_pFont) 
-		return DXUT_ERR_MSGBOX(L"DrawTextLine", E_INVALIDARG);
+	if (NULL == m_pFont)
+	{
+		DXUT_ERR_MSGBOX(L"DrawTextLine", E_INVALIDARG);
+		return E_INVALIDARG;
+	}
 
 	HRESULT hr;
 	RECT rc;
 	SetRect(&rc, m_pt.x, m_pt.y, 0, 0); 
 	hr = m_pFont->DrawText(m_pSprite, strMsg, -1, &rc, DT_NOCLIP, m_clr);
 	if (FAILED(hr))
-		return DXTRACE_ERR_MSGBOX(L"DrawText", hr);
+	{
+		ErrorBox(K_ERR_WARNING, L"DrawTextLine error! hresult:%x", hr);
+		return E_FAIL;// DXTRACE_ERR_MSGBOX(L"DrawText", hr);
+	}
 
 	m_pt.y += m_nLineHeight;
 
@@ -2517,13 +2529,19 @@ HRESULT CDXUTTextHelper::DrawFormattedTextLine(RECT &rc, DWORD dwFlags, const WC
 
 HRESULT CDXUTTextHelper::DrawTextLine(RECT &rc, DWORD dwFlags, const WCHAR* strMsg)
 {
-	if (NULL == m_pFont) 
-		return DXUT_ERR_MSGBOX(L"DrawTextLine", E_INVALIDARG);
+	if (NULL == m_pFont)
+	{
+		DXUT_ERR_MSGBOX(L"DrawTextLine", E_INVALIDARG);
+		return E_INVALIDARG;
+	}
 
 	HRESULT hr;
 	hr = m_pFont->DrawText(m_pSprite, strMsg, -1, &rc, dwFlags, m_clr);
 	if (FAILED(hr))
-		return DXTRACE_ERR_MSGBOX(L"DrawText", hr);
+	{
+		ErrorBox(K_ERR_WARNING, L"DrawTextLine error! hresult:%x", hr);
+		return E_FAIL;// DXTRACE_ERR_MSGBOX(L"DrawText", hr);
+	}
 
 	m_pt.y += m_nLineHeight;
 

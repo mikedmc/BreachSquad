@@ -94,11 +94,9 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 			if (FAILED(hr))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"SpriteCollection::loadSpriteXML->createTextures\n%s", ntex->imagePath);
-
 				Release();
-				WCHAR wszMsg[512];
-				StringCchPrintf(wszMsg, ARRAY_SIZE(wszMsg), L"SpriteCollection::loadSpriteXML->createTextures\n%s", ntex->imagePath);
-				return DXTRACE_ERR_MSGBOX(wszMsg, hr);
+
+				return E_FAIL;
 			}
 		}
 		Textures.Add(ntex);
@@ -565,8 +563,7 @@ HRESULT CSpriteCollection::OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3
 			WCHAR wszMsg[512];
 			StringCchPrintf(wszMsg, ARRAY_SIZE(wszMsg), L"SpriteCollection::OnCreateDevice->createTextures\n%s", ntex->imagePath);
 			ErrorBox(K_ERR_CRITICAL, L"%s", wszMsg);
-			//Daca da fail aici ar trebui sa iasa cu un mesaj de eroare
-			return DXTRACE_ERR_MSGBOX(wszMsg, hr);
+			return E_FAIL;
 		}
 	}
 
