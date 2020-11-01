@@ -2432,6 +2432,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	if (UTimgui().BeginPaint())
 	{
 		// IMGUI tutorial window
+		//static bool show_demo_window = true;
 		//ImGui::ShowDemoWindow(&show_demo_window);
 		//--- CONTROLS EDITOR INTERFACES ---
 #ifdef K_CONTROLS_EDITOR

@@ -407,7 +407,12 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 				{
 					ImVec4 color;
 					D3DCOLOR_UNPACKTOFLOAT(pValue->m_asUINT32, color.w, color.x, color.y, color.z);
-					ImGui::ColorPicker4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);
+					
+					// small color button
+					ImGui::ColorEdit4("sVarName", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);
+
+					// full fledged color picker
+					//ImGui::ColorPicker4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);
 					if (ImGui::IsItemEdited())
 					{
 						// re-pack color if changed
@@ -756,9 +761,9 @@ void CControlsEditor::Update(float dTime)
 	if (UTimgui().GetWantCaptureMouse())
 		clickedInterface = true;
 
-	if (currLayer != NULL)
+	if ((currLayer != NULL) && (!clickedInterface))
 	{
-		if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED && !clickedInterface)
+		if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
 		{			
 			vLastMouse = g_mouse.pos; //save last mouse
 			if (currCtrlIdx > -1 && selectedCtrls.Count() == 1)
@@ -826,7 +831,7 @@ void CControlsEditor::Update(float dTime)
 				}
 			}
 		}
-		if (g_mouse.Lbut == K_MOUSE_BUTT_DRAG && !clickedInterface)
+		if (g_mouse.Lbut == K_MOUSE_BUTT_DRAG)
 		{
 			SIZEWH_F mousedelta(g_mouse.pos.x - vLastMouse.x, g_mouse.pos.y - vLastMouse.y);
 			if (m_pCamera != null)
@@ -1090,6 +1095,9 @@ void CControlsEditor::Update(float dTime)
 
 void CControlsEditor::ReceiveKeys(UINT key)
 {
+	if (UTimgui().GetWantCaptureKeyboard())
+		return;
+
 	switch (key)
 	{
 		case VK_HOME:
