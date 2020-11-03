@@ -121,7 +121,17 @@ void ChangeGameStateTransition(int newState, int param1 = 0, int param2 = 0, int
 void UpdateTransition(float dTime);
 void PaintTransition(float dTime, float fTimeline, PDEVICE pDevice); 
 
-// Function used by controllers manager to normalize mouse input from global to ingame player relative
+///-----------------------------------------------------
+/// MISC UTILITY FUNCTIONS
+///-----------------------------------------------------
+
+// Spine extension used for allocation and deallocations (singleton)
+spine::SpineExtension *spine::getDefaultExtension() {
+	static spine::DefaultSpineExtension g_spineExtension;
+	return &g_spineExtension;
+}
+
+// Callback used by ControllersMgr to normalize mouse input from global to ingame player relative
 void NormalizeIngameMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue)
 {
 	g_level.NormalizeMouseCoords(ControllerIID, fAxisValue, bIsHorizontalAxis, ret_fAxisValue);
@@ -1216,7 +1226,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 			}
 #endif
 
-			for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
+			for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 			{
 				if (UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
 				{
@@ -1250,7 +1260,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 					CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_IGM_MENU");
 					if ((layer == null) && (!UTGetControlsManager().bIsBlocking))
 					{
-						for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
+						for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 						{
 							//show menu
 							if (UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
@@ -1263,7 +1273,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 					}
 					else if ((layer != null) && (layer == UTGetControlsManager().GetTopmostInputLayer()))
 					{
-						for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
+						for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 						{
 							//remove onscreen menu
 							if ((UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED) ||
@@ -1311,7 +1321,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 						CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_IGM_MENU_NET");
 						if ((layer == null) && (!UTGetControlsManager().bIsBlocking))
 						{
-							for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
+							for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 							{
 								CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
 								//ignore network controllers
@@ -1328,7 +1338,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 						}
 						else if ((layer != null) && (layer == UTGetControlsManager().GetTopmostInputLayer()) && (layer->alpha >= 1.0f))
 						{
-							for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
+							for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 							{
 								CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
 								//ignore network controllers
@@ -1903,7 +1913,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			WORD wFrameFlagsPeer = g_netlock.m_arrReceived[g_nUpdateFrame % CNetLock::K_NETLOCK_MAX_STATE_PACKAGES].m_wFrameFlags;
 
 			//update all controllers with internal data but used ones with network data
-			for (int ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.size(); ll++)
+			for (UINT ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.size(); ll++)
 			{
 				CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ll];
 				//update local controller with net data only when not in menus
@@ -1936,7 +1946,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 		else  //if(bSync)
 		{
 			//update all controllers with internal data
-			for (int ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.size(); ll++)
+			for (UINT ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.size(); ll++)
 			{
 				UTGetCtrlrMgr().UpdateController(UTGetCtrlrMgr().m_arrControllers[ll], fElapsedTime);
 			}
@@ -2829,7 +2839,7 @@ void ChangeGameState(int newState, int param1, int param2)
 	int oldGameState = g_gameState;
 
 	///--- from what state is it coming? ---
-	switch (g_gameState)
+	switch (oldGameState)
 	{
 		case GAME_STATE_PUBLISHER:
 		{

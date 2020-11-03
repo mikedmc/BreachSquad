@@ -104,12 +104,6 @@ HRESULT CBufferedSprites::End()
 	return S_OK;
 }
 
-void CBufferedSprites::SetTransformWorld(D3DXMATRIXA16 *matWrld)
-{
-	Flush();
-	m_matWorld = *matWrld;
-}
-
 HRESULT CBufferedSprites::Flush()
 {
 	//inainte de ultima afisare trebe sa forteze schimbarea de textura
@@ -135,8 +129,6 @@ HRESULT CBufferedSprites::Flush()
 	pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
 	pDevice->SetStreamSource(0, m_vb, 0, sizeof(_VERTEX_PNCT4T4));
 	pDevice->SetIndices(m_ib);
-	//use the last world transformation
-	pDevice->SetTransform(D3DTS_WORLD, &m_matWorld);
 
 	for (UINT32 kk = 0; kk < m_nTexChangesCursor; kk++)
 	{
@@ -147,12 +139,6 @@ HRESULT CBufferedSprites::Flush()
 
 		pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, m_nTrisOffsets[kk] * 2, m_nTrisPerTexture[kk] * 2, m_nTrisOffsets[kk] * 3, m_nTrisPerTexture[kk]);
 	}
-/*	
-	pDevice->SetTexture(0, m_texPtrs[0]);
-	pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 8, 0, 4);
-	pDevice->SetTexture(0, m_texPtrs[1]);
-	pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 8, 8, 12, 4);
-	*/
 
 	//reset verts
 	m_nVertexCursor = 0;
@@ -168,50 +154,8 @@ HRESULT CBufferedSprites::Flush()
 	return S_OK;
 }
 
-
-HRESULT CBufferedSprites::Draw4VertsSpriteBuffered(LPDIRECT3DTEXTURE9 pTexture, _VERTEX_PNCT4T4 *verts, D3DXVECTOR3 *pos, DWORD color)
-{
-	m_verts[m_nVertexCursor] = verts[0];
-	m_verts[m_nVertexCursor].color = color;
-	m_verts[m_nVertexCursor++].pos += *pos;
-
-	m_verts[m_nVertexCursor] = verts[1];
-	m_verts[m_nVertexCursor].color = color;
-	m_verts[m_nVertexCursor++].pos += *pos;
-
-	m_verts[m_nVertexCursor] = verts[2];
-	m_verts[m_nVertexCursor].color = color;
-	m_verts[m_nVertexCursor++].pos += *pos;
-
-	m_verts[m_nVertexCursor] = verts[3];
-	m_verts[m_nVertexCursor].color = color;
-	m_verts[m_nVertexCursor++].pos += *pos;
-
-	//verifica daca a schimbat textura
-	if (pTexture != m_texPtrs[m_nTexChangesCursor])
-	{
-		if(m_texPtrs[m_nTexChangesCursor] == NULL)
-		{
-			m_texPtrs[m_nTexChangesCursor] = pTexture;
-			m_nTrisOffsets[m_nTexChangesCursor] = 0;
-		}
-		else
-		{
-			m_nTexChangesCursor++;
-			m_texPtrs[m_nTexChangesCursor] = pTexture;
-			m_nTrisOffsets[m_nTexChangesCursor] = m_nTrisOffsets[m_nTexChangesCursor - 1] + m_nTrisPerTexture[m_nTexChangesCursor - 1];
-		}
-	}
-
-	//verificare sa nu faca prea multe schimbari de textura
-	assert(m_nTexChangesCursor < K_BS_MAX_TEXCHANGES_CNT);
-	m_nTrisPerTexture[m_nTexChangesCursor] += 2;
-
-	return S_OK;
-}
-
 //--- acelasi format ca DRAW=ul din Sprite ---
-// !!! trebuie optimizat ca coord in textura sa fie calculate inca de la import !!!
+//#TODO: !!! trebuie optimizat ca coord in textura sa fie calculate inca de la import !!!
 D3DXVECTOR3 vecPos;
 D3DXVECTOR3 vecArr[4];
 HRESULT CBufferedSprites::DrawBuffered(LPDIRECT3DTEXTURE9 pTexture, RECTXYXY_F *pSrcRectUV, RECTXYWH_F *pSrcCoord, D3DXVECTOR3 *pCenter, D3DXVECTOR3 *pPosition, DWORD color)
@@ -271,69 +215,6 @@ HRESULT CBufferedSprites::DrawBuffered(LPDIRECT3DTEXTURE9 pTexture, RECTXYXY_F *
 	return S_OK;
 }
 
-//aplica o matrice de transformare pe coordonate inainte sa adauge pozitia primita
-//adauga transformat in buffer
-HRESULT CBufferedSprites::DrawBufferedTransformed(LPDIRECT3DTEXTURE9 pTexture, RECTXYXY_F *pSrcRectUV, RECTXYWH_F *pSrcCoord, D3DXVECTOR3 *pCenter, D3DXMATRIXA16* coordtrans, D3DXVECTOR3 *pPosition, DWORD color)
-{
-	vecPos.x = vecPos.y = vecPos.z = 0.0f;
-	if(pPosition != NULL)
-		vecPos += *pPosition;
-	if(pCenter != NULL)
-		vecPos -= *pCenter;
-
-	
-	vecArr[0] = vecArr[1] = vecArr[2] = vecArr[3] = -(*pCenter);
-	vecArr[1].x += pSrcCoord->w;
-	vecArr[2].y += pSrcCoord->h;
-	vecArr[3].x += pSrcCoord->w;
-	vecArr[3].y += pSrcCoord->h;
-	D3DXVec3TransformCoordArray(&vecArr[0], sizeof(D3DXVECTOR3), &vecArr[0], sizeof(D3DXVECTOR3), coordtrans, 4);
-	//ul
-	m_verts[m_nVertexCursor].pos = vecPos + vecArr[0];
-	m_verts[m_nVertexCursor].tex1.x = pSrcRectUV->x1;
-	m_verts[m_nVertexCursor].tex1.y = pSrcRectUV->y1;
-	m_verts[m_nVertexCursor++].color = color;
-	//ur
-	m_verts[m_nVertexCursor].pos = vecPos + vecArr[1];
-	m_verts[m_nVertexCursor].tex1.x = pSrcRectUV->x2;
-	m_verts[m_nVertexCursor].tex1.y = pSrcRectUV->y1;
-	m_verts[m_nVertexCursor++].color = color;
-	//dl
-	m_verts[m_nVertexCursor].pos = vecPos + vecArr[2];
-	m_verts[m_nVertexCursor].tex1.x = pSrcRectUV->x1;
-	m_verts[m_nVertexCursor].tex1.y = pSrcRectUV->y2;
-	m_verts[m_nVertexCursor++].color = color;
-	//dr
-	m_verts[m_nVertexCursor].pos = vecPos + vecArr[3];
-	m_verts[m_nVertexCursor].tex1.x = pSrcRectUV->x2;
-	m_verts[m_nVertexCursor].tex1.y = pSrcRectUV->y2;
-	m_verts[m_nVertexCursor++].color = color;
-
-	//D3DXVec3TransformCoordArray(&m_verts[m_nVertexCursor - 4].pos, sizeof(_VERTEX_PNCT4T4), &m_verts[m_nVertexCursor - 4].pos, sizeof(_VERTEX_PNCT4T4), coordtrans, 4);
-
-	assert(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4));
-	//verifica daca a schimbat textura
-	if (pTexture != m_texPtrs[m_nTexChangesCursor])
-	{
-		if(m_texPtrs[m_nTexChangesCursor] == NULL)
-		{
-			m_texPtrs[m_nTexChangesCursor] = pTexture;
-			m_nTrisOffsets[m_nTexChangesCursor] = 0;
-		}
-		else
-		{
-			m_nTexChangesCursor++;
-			//verifica pe debug cand depaseste array-ul
-			assert(m_nTexChangesCursor < K_BS_MAX_TEXCHANGES_CNT);
-
-			m_texPtrs[m_nTexChangesCursor] = pTexture;
-			m_nTrisOffsets[m_nTexChangesCursor] = m_nTrisOffsets[m_nTexChangesCursor - 1] + m_nTrisPerTexture[m_nTexChangesCursor - 1];
-		}
-	}
-	m_nTrisPerTexture[m_nTexChangesCursor] += 2;
-
-	return S_OK;
-}
 
 //--- framework ---
 HRESULT CBufferedSprites::OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext )
@@ -415,7 +296,7 @@ HRESULT CBufferedPainter::BeginMesh(UINT32 & retMeshIdx)
 	if (m_bMeshStarted)
 	{
 		EndMesh();
-		ErrorBox(K_ERR_DEBUGOUT, L"A mesh is already started. Closing mesh and starting another.");
+		ErrorBox(K_ERR_LOG, L"A mesh is already started. Closing mesh and starting another.");
 	}
 
 	if (m_nMeshesCnt >= K_BP_MAX_MESHES_CNT)
@@ -445,6 +326,10 @@ HRESULT CBufferedPainter::AddTriangles(_VERTEX_PNCT4T4 *points, int trisCount)
 		return E_FAIL;
 	}
 
+#if defined(_DEBUG) || defined(DEBUG)
+	assert(m_nVertexCursor + trisCount * 3 < K_BP_MAX_TRIS_CNT * 3);
+#endif
+
 	memcpy(&m_verts[m_nVertexCursor], points, sizeof(_VERTEX_PNCT4T4) * 3 * trisCount);
 
 	m_nVertexCursor += 3 * trisCount;
@@ -455,9 +340,13 @@ HRESULT CBufferedPainter::AddTriangles(_VERTEX_PNCT4T4 *points, int trisCount)
 
 HRESULT CBufferedPainter::EndMesh()
 {
+	//make sure we close any pending meshes
+	if (m_bMeshStarted == false)
+		return S_OK;
+
 	m_bMeshStarted = false;
 
-	if (m_nMeshesCnt == 0) //daca e primul mesh
+	if (m_nMeshesCnt == 0) //is it the first mesh?
 	{
 		m_nTrisOffsets[m_nMeshesCnt] = 0;
 	}
@@ -465,7 +354,7 @@ HRESULT CBufferedPainter::EndMesh()
 	{
 		m_nTrisOffsets[m_nMeshesCnt] = m_nTrisOffsets[m_nMeshesCnt - 1] + m_nTrisPerMesh[m_nMeshesCnt - 1];
 	}
-	//trec la urmatorul mesh
+	//get to next mesh
 	m_nMeshesCnt++;
 
 	return S_OK;
@@ -484,6 +373,8 @@ HRESULT CBufferedPainter::ClearBuffers()
 
 HRESULT CBufferedPainter::BuildBuffers()
 {
+	EndMesh();
+
 	if (m_nVertexCursor == 0)
 		return S_OK;
 
@@ -510,13 +401,13 @@ HRESULT CBufferedPainter::DrawMesh(int meshIdx, bool setFVF)
 	//empty mesh: exit
 	if (meshIdx < 0)
 	{
-		//DebugPrintA("!!! WARNING: CBufferedPainter::DrawMesh called with mesh idx = -1\n");
+		LOG(L"!!! WARNING: CBufferedPainter::DrawMesh called with mesh idx = -1\n");
 		return E_INVALIDARG;
 	}
 
 	if (meshIdx >= m_nMeshesCnt)
 	{
-		//ErrorBox(K_ERR_WARNING, L"Trying to draw a mesh that doesn't exist! Input idx=%d meshesCnt=%d", meshIdx, m_nMeshesCnt);
+		LOG(L"Trying to draw a mesh that doesn't exist! Input idx=%d meshesCnt=%d", meshIdx, m_nMeshesCnt);
 		return E_FAIL;
 	}
 	if (m_nTrisPerMesh[meshIdx] == 0)
@@ -615,3 +506,85 @@ HRESULT CBufferedPainter::OnDestroyDevice(void* pUserContext)
 
 	return S_OK;
 }
+
+///----------------------------------------------------
+/// CBufferedTexPainter
+///----------------------------------------------------
+
+CBufferedTexPainter::CBufferedTexPainter()
+{
+	passesCnt = 0;
+}
+
+CBufferedTexPainter::~CBufferedTexPainter()
+{
+	Clear();
+}
+
+void CBufferedTexPainter::BufferMesh(_VERTEX_PNCT4T4 *points, int trisCount, CSpineTex* pTex, EBlendMode eMode)
+{
+	//if we have no mesh or if last mesh has another mode or texture then we initialize another mesh
+	if ((passesCnt == 0) || (arrPasses[passesCnt - 1].eMode != eMode) || (arrPasses[passesCnt - 1].pTex != pTex))
+	{
+		if (!FAILED(BeginMesh(arrPasses[passesCnt].nMeshIdx)))
+		{
+			arrPasses[passesCnt].pTex = pTex;
+			arrPasses[passesCnt].eMode = eMode;
+			passesCnt++;
+		}
+	}
+
+	AddTriangles(points, trisCount);
+}
+
+void CBufferedTexPainter::Clear()
+{
+	passesCnt = 0;
+	ClearBuffers();
+}
+
+void CBufferedTexPainter::Paint(bool setFVF /*= true*/, ETexChannel eChannel)
+{
+	//set FVF if necessary
+	if (setFVF)
+		pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
+
+	for (int kk = 0; kk < passesCnt; kk++)
+	{
+		//#TODO: set mode
+		switch (arrPasses[kk].eMode)
+		{
+		case BLEND_NORMAL:
+		{
+		}
+		break;
+		case BLEND_ADDITIVE:
+		{
+		}
+		break;
+		case BLEND_MULTIPLY:
+		{
+		}
+		break;
+		case BLEND_SCREEN:
+		{
+		}
+		break;
+
+		default:
+			break;
+		}
+
+		//set texture
+		if(eChannel == K_TEXCHAN_COLORMAP)
+			pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture);
+		else if (eChannel == K_TEXCHAN_NORMALMAP)
+			pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture_N);
+		else if (eChannel == K_TEXCHAN_SPECULARMAP)
+			pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture_S);
+
+		DrawMesh(arrPasses[kk].nMeshIdx, false);
+	}
+}
+
+

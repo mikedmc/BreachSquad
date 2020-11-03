@@ -188,7 +188,7 @@ void OS_freadWString(FILE* fl, WCHAR* outBuffer)
 void OS_fwriteWString(FILE* fl, WCHAR* inBuffer)
 {
 	if (fl == NULL) return;
-	USHORT len = wcslen(inBuffer);
+	USHORT len = (USHORT)wcslen(inBuffer);
 	fwrite(&len, sizeof(len), 1, fl);
 	fwrite(inBuffer, sizeof(WCHAR), len, fl);
 }
@@ -1328,6 +1328,100 @@ int GetListIndexByNameHash(const UINT32 nameHash, const CStringHash *arrNamesLis
 	return -1;
 }
 
+char* OS_readFileToBuffer(const WCHAR* wcsPath, int &nRetSize)
+{
+	FILE *pFile = NULL;
+	errno_t err;
+	if ((err = _wfopen_s(&pFile, wcsPath, L"rb")) != 0)
+	{
+		return null;
+	}
+
+	fseek(pFile, 0, SEEK_END);
+	long size = ftell(pFile);
+	//allocate buffer
+	if (size <= 0)
+		return null;
+
+	fseek(pFile, 0, SEEK_SET);
+	char* retPtr = new char[size];
+	fread(retPtr, sizeof(char), size, pFile);
+	// close stream
+	fclose(pFile);
+
+	nRetSize = size;
+	return retPtr;
+}
+
+unsigned char* OS_readFileToBufferUC(const WCHAR* wcsPath, int &nRetSize)
+{
+	FILE *pFile = NULL;
+	errno_t err;
+	if ((err = _wfopen_s(&pFile, wcsPath, L"rb")) != 0)
+	{
+		return null;
+	}
+
+	fseek(pFile, 0, SEEK_END);
+	long size = ftell(pFile);
+	//allocate buffer
+	if (size <= 0)
+		return null;
+
+	fseek(pFile, 0, SEEK_SET);
+	unsigned char* retPtr = new unsigned char[size];
+	fread(retPtr, sizeof(unsigned char), size, pFile);
+	// close stream
+	fclose(pFile);
+
+	nRetSize = size;
+	return retPtr;
+}
+
+
+int OS_GetFileNameWithoutExtension(WCHAR * destPath, int destSize, WCHAR * srcPath)
+{
+	if (srcPath == null)
+		return -1;
+	if ((int)wcslen(srcPath) == 0)
+		return 0;
+
+	StringCchCopy(destPath, destSize, srcPath);
+
+	int nIdx = (int)wcslen(destPath);
+	while (--nIdx > 0 && destPath[nIdx] != '.');
+	if (nIdx <= 0)
+		return 0;
+
+	destPath[nIdx] = '\0';
+	return nIdx;
+}
+
+int OS_GetFileNameExtension(WCHAR * destStr, int destSize, WCHAR * srcPath)
+{
+	if (srcPath == null)
+		return -1;
+	int srclen = (int)wcslen(srcPath);
+	if (srclen == 0)
+		return 0;
+
+	int nIdx = (int)wcslen(srcPath);
+	while (--nIdx > 0 && srcPath[nIdx] != '.');
+	if (nIdx <= 0)
+		return 0;
+	// ending in "." ?
+	int extlen = srclen - nIdx - 1;
+	if (extlen <= 0)
+		return 0;
+	if (extlen > destSize - 1)
+		extlen = destSize - 1;
+
+	memcpy(destStr, srcPath + nIdx + 1, extlen * sizeof(WCHAR));
+	destStr[extlen] = '\0';
+	return extlen;
+}
+
+
 unsigned int OS_GetTimeMS()
 {
 	LARGE_INTEGER frequency;
@@ -1494,13 +1588,16 @@ bool OS_DeleteRecursive(WCHAR r_szPath[1024])
 		{
 			WCHAR l_szFile[1025] = { 0 };
 			wsprintf(l_szFile, L"%s\\%s", l_szPath, FindFileData.cFileName);
-			BOOL l_bRet = DeleteFile(l_szFile);
+			if (!DeleteFile(l_szFile))
+			{
+				LOG(L"OS_DeleteRecursive could not DeleteFile: %s", l_szFile);
+			}
 		}
 
 	} while (FindNextFile(hFind, &FindFileData));
 	FindClose(hFind);
 	//delete actual folder
-	BOOL l_bRet = RemoveDirectory(r_szPath);
+	/*BOOL l_bRet = */RemoveDirectory(r_szPath);
 
 	return TRUE;
 #else 
@@ -1569,6 +1666,10 @@ bool OS_CopyRecursive(WCHAR r_szSrcPath[1024], WCHAR r_szDesPath[1024])
 			wsprintf(l_szDesFile, L"%s\\%s", l_szDesPath, FindFileData.cFileName);
 			wsprintf(l_szSrcFile, L"%s\\%s", l_szSrcPath, FindFileData.cFileName);
 			BOOL l_bRet = CopyFile(l_szSrcFile, l_szDesFile, FALSE); //overwrites existing files
+			if (!l_bRet) 
+			{
+				LOG(L"OS_CopyRecursive failed to copy file: %s", l_szSrcFile);
+			}
 		}
 
 	} while (FindNextFile(hFind, &FindFileData));

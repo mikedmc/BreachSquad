@@ -301,6 +301,15 @@ enum eGameMode {
 	GAME_MODES_CNT
 };
 
+///----------------------------------------------------
+/// Texture channels for painting diffuse, normals, etc 
+///----------------------------------------------------
+enum ETexChannel {
+	K_TEXCHAN_COLORMAP,
+	K_TEXCHAN_NORMALMAP,
+	K_TEXCHAN_SPECULARMAP
+};
+
 ///--- CONSTANTE JOC ---
 #define K_TILE_SIZE			16
 #define K_TILE_HSIZE		8
@@ -398,7 +407,7 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "BitPacker.h"
 #include "DataTypes.h"
 #include "enginecommon.h"
-#include "MathUtil.h"
+#include "CMathUtil.h"
 #include "Randoms.h"
 #include "GetDXVer.h"
 #include "pugixml.hpp"
@@ -439,6 +448,28 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 //main app class
 #include "UTAppClass.h"
 #include "imgui/imguiWrapper.h"
+///--- Spine EsotericSoftware ---
+//undefine min and max macros from windef.h because it conflicts with spine.mathutil
+#undef min
+#undef max
+
+#include "spine/spine.h"
+using namespace spine;
+// Initialize default stuff so it can allocate and deallocate (uses malloc, free, FILE)
+// Otherwise you can derrive from either SpineExtension or DefaultSpineExtension and override the _malloc, _calloc, _realloc, _free and _readFile methods.
+#include "spine/Extension.h"
+
+#include "spine/SpineManager.h"
+#if defined(_DEBUG) || defined(DEBUG)
+#include "spine/Debug.h"
+#endif
+//define min and max macros again
+#ifndef max
+#define max(a,b)            (((a) > (b)) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
 ///--- game specific classes ---
 #include "Shop.h"
 #include "PlayerSelScr.h"

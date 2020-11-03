@@ -2,10 +2,10 @@
 
 
 ///-------------------------------------------------------------
-///	 buffered sprites 
+///	 buffered sprites - deprecated class for drawing sprites (should be remade)
 ///-------------------------------------------------------------
 
-#define K_BS_MAX_QUAD_CNT 2000
+#define K_BS_MAX_QUAD_CNT 4000
 #define K_BS_MAX_TEXCHANGES_CNT 50
 //--- begin flags ---
 //enables alpha bleding
@@ -20,7 +20,6 @@ class CBufferedSprites
 private:
 	UINT32 m_nVertexCursor;
 
-	D3DXMATRIXA16 m_matWorld;
 	LPDIRECT3DVERTEXBUFFER9 m_vb;
 	LPDIRECT3DINDEXBUFFER9 m_ib;
 
@@ -38,16 +37,8 @@ public:
 
 	HRESULT Begin(UINT32 flags = K_BS_ALPHABLENDING | K_BS_ALPHATEST | K_BS_MODULATE_COLORS);
 	HRESULT End();
-
-	HRESULT Flush();
-	
-	//--- old draw methods ---
 	HRESULT DrawBuffered(LPDIRECT3DTEXTURE9 pTexture, RECTXYXY_F *pSrcRectUV, RECTXYWH_F *pSrcCoord, D3DXVECTOR3 *pCenter, D3DXVECTOR3 *pPosition, DWORD color = 0xffffffff);
-	//aplica o matrice inainte sa aplice pozitia -> folositor la particule
-	HRESULT DrawBufferedTransformed(LPDIRECT3DTEXTURE9 pTexture, RECTXYXY_F *pSrcRectUV, RECTXYWH_F *pSrcCoord, D3DXVECTOR3 *pCenter, D3DXMATRIXA16* coordtrans, D3DXVECTOR3 *pPosition, DWORD color = 0xffffffff);
-	HRESULT Draw4VertsSpriteBuffered(LPDIRECT3DTEXTURE9 pTexture, _VERTEX_PNCT4T4 *verts, D3DXVECTOR3 *pos, DWORD color);
-
-	void	SetTransformWorld(D3DXMATRIXA16 *matWrld);
+	HRESULT Flush();
 
 	HRESULT OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
 	HRESULT OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
@@ -57,17 +48,17 @@ public:
 
 
 ///-----------------------------------------------------------------------------------------------
-///	 BUFFERED PAINTER - tempalte class
-///  - adaugi triunghiuri unul cate unul si la final face un VB si IB din care poti desena mesh-ul
+///	 BUFFERED PAINTER - well tested
+///  Adds geometry to meshes identified by index and then builds VB and IB and draws them
 ///-----------------------------------------------------------------------------------------------
 #define K_BP_SENTINEL 10
 
-#define K_BP_MAX_TRIS_CNT 3000
+#define K_BP_MAX_TRIS_CNT 4000
 #define K_BP_MAX_MESHES_CNT 100
 
 class CBufferedPainter
 {
-private:
+protected:
 	LPDIRECT3DVERTEXBUFFER9 m_vb;
 	LPDIRECT3DINDEXBUFFER9 m_ib;
 
@@ -85,19 +76,19 @@ public:
 	CBufferedPainter(void);
 	~CBufferedPainter(void);
 
-	//Se cheama inainte sa adaugi triunghiuri ca sa iei idx-ul meshului pe care il construiesti
+	//Announce mesh editing start
 	HRESULT BeginMesh(UINT32 &retMeshIdx);
-	//Adauga un triunghi in meshul curent
+	//Add triangle to current mesh
 	HRESULT AddTriangles(_VERTEX_PNCT4T4 *points, int trisCount);
-	//Am terminat de editat un mesh ca sa stie sa treaca la urmatorul
+	//Announce mesh editing ended
 	HRESULT EndMesh();
-	//Se cheama dupa ce ai terminat treaba ca sa golesti bufferele
+	//Empties all buffers
 	HRESULT ClearBuffers();
-	//Se cheama ca sa creeze VB si IB ca sa poti desena din ele
+	//Builds vertex and index buffers. Call this before DrawMesh .
 	HRESULT BuildBuffers();
-	//Se cheama ca sa desenezi un mesh
+	//Draws a mesh by index
 	HRESULT DrawMesh(int meshIdx, bool setFVF = true);
-	//Intoarce numarul de triunghiuri din mesh
+	//Returns number of triangles in mesh
 	const int GetTrisCount(int meshIdx) const;
 
 	HRESULT OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
@@ -105,3 +96,52 @@ public:
 	HRESULT OnLostDevice(void* pUserContext = NULL);
 	HRESULT OnDestroyDevice(void* pUserContext = NULL);
 };
+
+
+///----------------------------------------------------
+/// Class that paints buffered meshes
+/// Keeps track of texture and mode changes
+/// Intended for small and fast meshes
+///----------------------------------------------------
+class CSpineTex;
+class CBufferedTexPainter : private CBufferedPainter {
+public:
+	enum EBlendMode {
+		BLEND_NORMAL = 0,
+		BLEND_ADDITIVE = 1,
+		BLEND_MULTIPLY,
+		BLEND_SCREEN
+	};
+
+private:
+	// It holds data about each pass (mode change) in the buffer
+	struct CPaintPassData {
+		EBlendMode			eMode;
+		CSpineTex*			pTex;
+		UINT32				nMeshIdx;
+	};
+
+	int					passesCnt;							// total number of "passes" or "mode changes" needed to paint the meshes
+	CPaintPassData		arrPasses[K_BP_MAX_MESHES_CNT];
+
+public:
+	CBufferedTexPainter();
+	~CBufferedTexPainter();
+	// Adds triangles to the paint buffer (CSpineTex can be replaced with texture pointer)
+	void				BufferMesh(_VERTEX_PNCT4T4 *points, int trisCount, CSpineTex* pTex, EBlendMode eMode);
+	// Creates the actual vertex buffer with the data
+	// Could be called inside Paint, left public for more granular control
+	using				CBufferedPainter::BuildBuffers;
+	// Clears all buffers
+	void				Clear();
+	// Paints all buffered meshes
+	void				Paint(bool setFVF = true, ETexChannel eChannel = K_TEXCHAN_COLORMAP);
+
+	//make parent framework methods public with "using"
+	using				CBufferedPainter::OnCreateDevice;
+	using				CBufferedPainter::OnResetDevice;
+	using				CBufferedPainter::OnLostDevice;
+	using				CBufferedPainter::OnDestroyDevice;
+};
+
+

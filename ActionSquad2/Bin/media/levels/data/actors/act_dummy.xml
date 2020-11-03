@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<ACTOR sSkeletonTemplateXML="skel_biped.xml" sSkin="robot-01">
+  
+  <ACTOR_DATA             sMaterial="FLESH" fLife="20.0" fArmorFront="0.0" fArmorBack="0.0" sWeapon="WPN_SMG"
+                          fSpeedMove="100.0" fSpeedClimb="48.0" nJumpMaxTiles="5" nFallMaxTiles="8" nWalkMaxTiles="5"
+                          bCanCover="true" bCanClimb="true" />
+
+  <!-- animations default on LOOPING -->
+  <ANIMS>
+    <IDLE set0="ramp-not/idle" />
+    <IDLE_CROUCH set0="ramp-not/crouch" />
+    <AIM set0="aim" bLoop="true" nTrack="1" />
+    <SHOOT set0="shoot" bLoop="false" nTrack="1" />
+    <CLIMB_UP set0="ramp-not/ladder" />
+    <MOVE_FAST set0="ramp-not/jog" />
+    <MOVE set0="ramp-not/walk" />
+    <DIE set0="ramp-not/death-2" bLoop="false" />
+  </ANIMS>
+
+  <VERSES>
+    <DIE set0="VOICE_ASSAULTER_DYING" set1="VOICE_ASSAULTER_DYING2" />
+    <TAKING_DAMAGE set0="VOICE_ASSAULTER_WOUNDED" set1="VOICE_ASSAULTER_WOUNDED2" />
+  </VERSES>
+
+</ACTOR>
+

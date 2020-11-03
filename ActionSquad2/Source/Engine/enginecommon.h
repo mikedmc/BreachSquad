@@ -1037,6 +1037,14 @@ FORCEINLINE size_t		OS_fwrite(const void * _Str, size_t _Size, size_t _Count, FI
 }
 
 ///--- FILE FUNCTIONS ---
+// Reads a file and returns number of bytes read in nRetSize
+char*					OS_readFileToBuffer(const WCHAR* wcsPath, int &nRetSize);
+unsigned char*			OS_readFileToBufferUC(const WCHAR* wcsPath, int &nRetSize);
+// Writes the path without extension in destPath and returns the length of the string 
+int						OS_GetFileNameWithoutExtension(WCHAR * destPath, int destSize, WCHAR * srcPath);
+// Writes the extension in destStr (without the dot) and returns the length of the string or 0 on error or no dot found
+int						OS_GetFileNameExtension(WCHAR * destStr, int destSize, WCHAR * srcPath);
+
 long					OS_GetFileSize(WCHAR *path);
 bool					OS_CreateFolder(const char* szPath);
 bool					OS_DeleteFolder(const char* szPath); // folder must be empty and you must have permission to delete it. For recursively deleting a folder hierarchy, use FileManager::DeleteFolder()
