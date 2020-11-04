@@ -302,6 +302,7 @@
     <ClInclude Include="Source\Engine\PlayerSelScr.h" />
     <ClInclude Include="Source\Engine\PolyFOV.h" />
     <ClInclude Include="Source\Engine\Queue.h" />
+    <ClInclude Include="Source\Engine\RTManager.h" />
     <ClInclude Include="Source\Engine\ShaderManager.h" />
     <ClInclude Include="Source\Engine\Shop.h" />
     <ClInclude Include="Source\Engine\spine\SpineDefines.h" />
@@ -640,6 +641,7 @@
     <ClCompile Include="Source\Engine\PolyFOV.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
+    <ClCompile Include="Source\Engine\RTManager.cpp" />
     <ClCompile Include="Source\Engine\ShaderManager.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>

@@ -300,6 +300,17 @@ enum eGameMode {
 	GAME_MODES_CNT
 };
 
+///--- RENDER TARGET IDs ---
+enum ERTIDChannel {
+	K_RTID_NONE = 0,
+
+	K_RTID_COLORMAP = 1,
+	K_RTID_NORMALMAP = 2,
+	K_RTID_SPECULARMAP = 3,
+	K_RTID_FINAL = 4,
+
+	K_RTIDS_COUNT
+};
 ///----------------------------------------------------
 /// Texture channels for painting diffuse, normals, etc 
 ///----------------------------------------------------
@@ -421,6 +432,7 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "ScriptManager.h"
 #include "EventManager.h"
 
+#include "RTManager.h"
 #include "CameraTransform.h"
 
 #include "ShaderManager.h"

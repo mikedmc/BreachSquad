@@ -810,6 +810,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	UTGetTTFManager().OnCreateDevice(pDevice, pBBDesc);
 
 	V_RETURN(UTGetAppClass().OnCreateDevice(pDevice, pBBDesc));
+	V_RETURN(UTGetRTManager().OnCreateDevice(pDevice, pBBDesc));
 	UTimgui().OnCreateDevice(pDevice, pBBDesc);
 	V_RETURN(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetFontsManager().OnCreateDevice(pDevice, pBBDesc));
@@ -871,6 +872,23 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(D3DXCreateSprite(pDevice, &g_pGameSprite));
 	//should be first to be called here
 	V_RETURN(UTGetAppClass().OnResetDevice(pDevice, pBBDesc));
+	// Because the render targets and handled globally and are changing in size depending on screen resolution we just release them in OnLostDevice and re-create them in OnResetDevice
+	V_RETURN(UTGetRTManager().OnResetDevice(pDevice, pBBDesc));
+	// Add necessary render targets after OnResetDevice so we don't try to create them 2 times
+	/*
+	//#DMC: trebuiesc alocate cele necesare
+	float fAspectReal = (float)pBackBufferSurfaceDesc->Width / (float)pBackBufferSurfaceDesc->Height;
+	float fAspect = LIMIT(fAspectReal, K_WINDOW_ASPECT_RATIO_MIN, K_WINDOW_ASPECT_RATIO_MAX);
+	UINT fGameHpx = K_GAME_HEIGHT * K_GAME_PIXEL_SIZE;
+	UINT fGameWpx = (UINT)(fGameHpx * fAspect);
+	// Create RTs
+	UTGetRenderTargetsManager().AddRT(K_RTID_COLORMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
+	UTGetRenderTargetsManager().AddRT(K_RTID_NORMALMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
+	UTGetRenderTargetsManager().AddRT(K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, true, D3DFMT_D24S8);
+	if (UTGetAppClass().m_Settings.nLOD_lights >= K_UT_LOD_MED)
+		UTGetRenderTargetsManager().AddRT(K_RTID_SPECULARMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
+	*/
+
 	UTimgui().OnResetDevice(pDevice, pBBDesc);
 	V_RETURN(UTGetShaderManager().OnResetDevice(pDevice, pBBDesc));
 
@@ -949,6 +967,9 @@ void CALLBACK OnLostDevice(void)
 
 	UTGetFontsManager().OnLostDevice();
 	UTGetControlsManager().OnLostDevice();
+	//because the render targets and handled globally and are changing in size depending on screen resolution we just release them in OnLostDevice and re-create them in OnResetDevice
+	UTGetRTManager().Release();
+	UTGetRTManager().OnLostDevice();
 
 	g_level.OnLostDevice();
 	g_particlesMgr.OnLostDevice();
@@ -972,6 +993,7 @@ void CALLBACK OnLostDevice(void)
 void CALLBACK OnDestroyDevice(void)
 {
 	UTGetAppClass().OnDestroyDevice();
+	UTGetRTManager().OnDestroyDevice();
 	UTimgui().OnDestroyDevice();
 	UTGetShaderManager().OnDestroyDevice();
 	UTGetTTFManager().OnDestroyDevice();
@@ -2158,6 +2180,15 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			//build normal maps and self illumi
 			g_level.PaintOffscreen();
 			//compose maps into final RT
+			/*
+			//#DMC: asa se foloseste RT manager, vezi rebel strain
+			RECT srcrct;
+			SetRect(&srcrct, gamerect.x, gamerect.y, gamerect.w, gamerect.h);
+			CRTManager::CEngineRenderTarget* pRT = UTGetRenderTargetsManager().GetRTbyUID(K_RTID_FINAL);
+			if (pRT != null)
+				g_pGameSprite->Draw(pRT->m_pRTTexture, &srcrct, NULL, &D3DXVECTOR3(0.0f, 0.0f, 0.0f), 0xffffffff);
+			*/
+
 			g_level.PaintComposition();
 		}
 		break;
