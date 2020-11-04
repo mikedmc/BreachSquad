@@ -77,7 +77,7 @@ public:
 	~CBufferedPainter(void);
 
 	//Announce mesh editing start
-	HRESULT BeginMesh(UINT32 &retMeshIdx);
+	HRESULT BeginMesh(int &retMeshIdx);
 	//Add triangle to current mesh
 	HRESULT AddTriangles(_VERTEX_PNCT4T4 *points, int trisCount);
 	//Announce mesh editing ended
@@ -118,7 +118,7 @@ private:
 	struct CPaintPassData {
 		EBlendMode			eMode;
 		CSpineTex*			pTex;
-		UINT32				nMeshIdx;
+		int					nMeshIdx;
 	};
 
 	int					passesCnt;							// total number of "passes" or "mode changes" needed to paint the meshes

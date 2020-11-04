@@ -1782,6 +1782,5 @@ enum ELevelStats {
 #define K_LVL_LEVEL_FLAG_NONE				0
 #define K_LVL_LEVEL_FLAG_DOWNLOADED			1
 #define K_LVL_LEVEL_FLAG_MODS_ON			2
-#define K_LVL_LEVEL_FLAG_VINFINITE_MODE		4
 
 

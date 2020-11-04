@@ -291,7 +291,7 @@ CBufferedPainter::~CBufferedPainter(void)
 	SAFE_DELETE_ARRAY(m_verts);
 }
 
-HRESULT CBufferedPainter::BeginMesh(UINT32 & retMeshIdx)
+HRESULT CBufferedPainter::BeginMesh(int &retMeshIdx)
 {
 	if (m_bMeshStarted)
 	{

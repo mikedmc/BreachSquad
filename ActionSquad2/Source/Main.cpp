@@ -82,7 +82,6 @@ CTimersArray				g_timers(3000, 10);					//Timers array
 CPlayerSelScr				g_playerSelScr;						// Player selection screen
 CMainMenu					g_mainMenu;							// Main menu class
 CLevel						g_level;							// Current Level
-CInfiniteVerticalMode		g_verticalMode;						// vertical mode generator
 
 #ifdef K_CONTROLS_EDITOR
 CControlsEditor				g_ControlsEditor;					// Controls editor for debug/develop mode (F2 to show)
@@ -94,6 +93,8 @@ CChatWnd					g_ChatWnd;							// Ingame chat window for networked matches
 
 ///--- Lockstep networking class ---
 CNetLock					g_netlock;
+///-- spine manager --
+CSpineManager				g_spineMgr;
 
 //**************************************************************************************
 // Forward declarations 
@@ -307,11 +308,11 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 		StringCchPrintf(wcsPath, MAX_PATH, L"%s\\levels\\missions\\missions.xml", UTGetAppClass().g_wszAppResDir);
 		UTGetChaptersList().LoadChapters(wcsPath);
 		//load infinite tower mode desc
-		g_verticalMode.Init(&g_level, L"media/levels/mod_prefabs/infinite_tower.xml");
+		//g_verticalMode.Init(&g_level, L"media/levels/mod_prefabs/infinite_tower.xml");
 		//check CRC after loading chapters (levels needed)
 		UINT32 unGameCRC = App_GetGameFilesCRC();
 		//we loaded the descriptors
-		unGameCRC += g_verticalMode.GetFilesCRC(true);
+		//unGameCRC += g_verticalMode.GetFilesCRC(true);
 
 		UTGetAppClass().m_Settings.dev_unCurrentCRC = unGameCRC;
 		UTGetAppClass().m_Settings.dev_unCurrentModsCRC = unGameCRC;
@@ -624,7 +625,7 @@ void ShutdownApp(void)
 #ifdef ENABLE_LEADERBOARDS
 	UTGetLeaderboards().Release();
 #endif
-
+	g_spineMgr.Release();
 }
 
 
@@ -817,6 +818,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(UTGetControlsManager().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnCreateDevice(pDevice, pBBDesc));
+	V_RETURN(g_spineMgr.OnCreateDevice(pDevice, pBBDesc));
 
 #ifdef K_CONTROLS_EDITOR
 	V_RETURN(g_ControlsEditor.OnCreateDevice(pDevice, pBBDesc));
@@ -880,6 +882,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(UTGetControlsManager().OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnResetDevice(pDevice, pBBDesc));
+	V_RETURN(g_spineMgr.OnResetDevice(pDevice, pBBDesc));
 
 #ifdef K_CONTROLS_EDITOR
 	V_RETURN(g_ControlsEditor.OnResetDevice(pDevice, pBBDesc));
@@ -951,6 +954,7 @@ void CALLBACK OnLostDevice(void)
 	g_particlesMgr.OnLostDevice();
 	g_playerSelScr.OnLostDevice();
 	g_mainMenu.OnLostDevice();
+	g_spineMgr.OnLostDevice();
 
 	SAFE_RELEASE(g_pGameSprite);
 
@@ -977,6 +981,7 @@ void CALLBACK OnDestroyDevice(void)
 	g_particlesMgr.OnDestroyDevice();
 	g_playerSelScr.OnDestroyDevice();
 	g_mainMenu.OnDestroyDevice();
+	g_spineMgr.OnDestroyDevice();
 
 #ifdef K_CONTROLS_EDITOR
 	g_ControlsEditor.OnDestroyDevice();
@@ -1290,10 +1295,13 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 				//update game if no blocking window is shown
 				if (!UTGetControlsManager().bIsBlocking)
 				{
-					if (g_gameMode == GAME_MODE_INFINITE_TOWER)
-						g_verticalMode.Update(fElapsedTime);
+					//SPINE update animation states
+					g_spineMgr.UpdateAnimationStates(fElapsedTime, fTime);
 
 					g_level.Update(fElapsedTime);
+					//SPINE update final skeleton world positions (no bone changes allowed after this)
+					g_spineMgr.Update(fElapsedTime, fTime);
+
 					g_bLevelNeedsUpdate = false;
 				}
 				//#HACK: update once after resolution changed so we adjust cameras
@@ -1361,11 +1369,12 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 				g_level.m_rand.SetRandomSeed(g_netlock.m_unRandomSeed + g_nUpdateFrame);
 				//LOG(L"--update dT=%.6f T=%.6f rand:%d--", fElapsedTime, fTime, g_level.m_rand.GetRandomSeed());
 
-				//update level no matter what (paused, menus, etc)
-				if (g_gameMode == GAME_MODE_INFINITE_TOWER)
-					g_verticalMode.Update(fElapsedTime);
+				//SPINE update animation states
+				g_spineMgr.UpdateAnimationStates(fElapsedTime, fTime);
 
 				g_level.Update(fElapsedTime);
+				//SPINE update animation states
+				g_spineMgr.UpdateAnimationStates(fElapsedTime, fTime);
 				g_bLevelNeedsUpdate = false;
 
 				//check sync by log
@@ -2948,9 +2957,9 @@ void ChangeGameState(int newState, int param1, int param2)
 			///compute mods CRC
 			UINT32 unModsCRC = App_GetActiveModsCRC();
 			//initialize vertical mode after modding
-			g_verticalMode.Init(&g_level, L"media/levels/mod_prefabs/infinite_tower.xml");
+			//g_verticalMode.Init(&g_level, L"media/levels/mod_prefabs/infinite_tower.xml");
 			
-			unModsCRC += g_verticalMode.GetFilesCRC(false);
+			//unModsCRC += g_verticalMode.GetFilesCRC(false);
 			UTGetAppClass().m_Settings.dev_unCurrentModsCRC = unModsCRC;
 			LOG(L"--> CRC_BASE [%08x] CRC_MODS [%08x] <--", UTGetAppClass().m_Settings.dev_unCurrentCRC, UTGetAppClass().m_Settings.dev_unCurrentModsCRC);
 			//when returning from the mods screen reload the main menu in case it changed
@@ -3260,28 +3269,17 @@ void ChangeGameState(int newState, int param1, int param2)
 				}
 				else
 				{
-					if (g_gameMode == GAME_MODE_INFINITE_TOWER)
+					int nChapterNumber = g_userData[K_MEMID_SELECTED_CHAPTER];
+					int nLevelNumber = g_userData[K_MEMID_SELECTED_LEVEL];
+					bool bLevelFound = UTGetChaptersList().GetMissionFilename(nChapterNumber, nLevelNumber, strLevelPath, MAX_PATH);
+					if (!bLevelFound)
 					{
-						FileManager::GetMediaPath(g_verticalMode.GetBaseLevelMediaID(), strLevelPath);
-						//write current mission name and number
-						g_stringsMgr.SetString(STR_CURRENT_MISSION_VAL, g_stringsMgr.strings[STR_VINFINITE_MODE]->sText);
-						//ask for a level restart
-						g_verticalMode.RestartLevel();
+						ChangeGameStateTransition(GAME_STATE_LEVEL_SELECTION, 0, 0, K_TRANSITION_TYPE_SIMPLE);
+						break;
 					}
-					else //classic mode and modifiers
-					{
-						int nChapterNumber = g_userData[K_MEMID_SELECTED_CHAPTER];
-						int nLevelNumber = g_userData[K_MEMID_SELECTED_LEVEL];
-						bool bLevelFound = UTGetChaptersList().GetMissionFilename(nChapterNumber, nLevelNumber, strLevelPath, MAX_PATH);
-						if (!bLevelFound)
-						{
-							ChangeGameStateTransition(GAME_STATE_LEVEL_SELECTION, 0, 0, K_TRANSITION_TYPE_SIMPLE);
-							break;
-						}
-						//write current mission name and number
-						int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[nChapterNumber]->arrLevelNameStrIdx[nLevelNumber];
-						g_stringsMgr.SetString(STR_CURRENT_MISSION_VAL, L"%d.%d %s", nChapterNumber + 1, nLevelNumber + 1, g_stringsMgr.strings[nStrIdxLevelName]->sText);
-					}
+					//write current mission name and number
+					int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[nChapterNumber]->arrLevelNameStrIdx[nLevelNumber];
+					g_stringsMgr.SetString(STR_CURRENT_MISSION_VAL, L"%d.%d %s", nChapterNumber + 1, nLevelNumber + 1, g_stringsMgr.strings[nStrIdxLevelName]->sText);
 				}
 
 				if (FAILED(g_level.LoadLevel(strLevelPath)))

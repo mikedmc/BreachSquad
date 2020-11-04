@@ -296,7 +296,6 @@ enum eGameState {
 enum eGameMode {
 	GAME_MODE_CLASSIC = 0,
 	GAME_MODE_ZOMBIE_INVASION,
-	GAME_MODE_INFINITE_TOWER,
 
 	GAME_MODES_CNT
 };
@@ -474,7 +473,6 @@ using namespace spine;
 #include "Shop.h"
 #include "PlayerSelScr.h"
 #include "Level.h"
-#include "InfiniteVerticalMode.h"
 #include "MainMenu.h"
 
 #ifdef ENABLE_GALAXY
@@ -626,7 +624,6 @@ extern int g_keydef_scancode;
 extern CNetLock						g_netlock;
 
 extern CLevel						g_level;		
-extern CInfiniteVerticalMode		g_verticalMode;	//vertical mode generator
 extern CMainMenu					g_mainMenu;	
 
 #ifdef ENABLE_CHAT_WINDOW

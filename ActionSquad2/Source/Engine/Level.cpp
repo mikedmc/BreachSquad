@@ -536,9 +536,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, D3DXVECTO
 			{
 				if (actor->UID != pBullet->ownerUID)
 				{
-					//on infinite mode don't give SP points for enemies
-					if (g_gameMode != GAME_MODE_INFINITE_TOWER)
-						GiveStrategicPoints(actor->templateActor.fStrategicPoints, &D3DXVECTOR2(actor->bbox.vCenter.x, actor->bbox.vMin.y));
+					GiveStrategicPoints(actor->templateActor.fStrategicPoints, &D3DXVECTOR2(actor->bbox.vCenter.x, actor->bbox.vMin.y));
 				}
 			}
 		}
@@ -2864,10 +2862,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 			m_levelSubState = 0;
 			m_levelStateTimer = 0.0f;
 
-			if(g_gameMode == GAME_MODE_INFINITE_TOWER)
-				g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, D3DXVECTOR2(0.0f, -50.0f), STR_YOU_DIED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
-			else
-				g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, D3DXVECTOR2(0.0f, -50.0f), STR_MISSION_FAILED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
+			g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, D3DXVECTOR2(0.0f, -50.0f), STR_MISSION_FAILED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
 			//enter level results sync
 			if (UTGetAppClass().IsGameNetworked())
 			{
@@ -8998,30 +8993,6 @@ void CLevel::Update(float dTime_original)
 				}
 			}
 
-			//#TUTORIAL: showing tutorial windows if in single player and not on custom content
-			/*
-			if ((fLocalTimeline > 0.3f) && (fLocalTimeline - dTime <= 0.3f) && (m_nPlayers == 1))
-			{
-				if (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE)
-				{
-					int nLevelIdx = g_userData[K_MEMID_SELECTED_LEVEL] + g_userData[K_MEMID_SELECTED_CHAPTER] * K_GAME_LEVELS_PER_CHAPTER;
-					if (g_levelStats[nLevelIdx].nLevelType == K_GAME_LSTYPE_ARREST_WARRANT)
-						App_TutorialWindowShow(K_MEMID_TUT_ARREST_MODE);
-					else if (g_levelStats[nLevelIdx].nLevelType == K_GAME_LSTYPE_BOMB)
-						App_TutorialWindowShow(K_MEMID_TUT_BOMB_MODE);
-					else if (g_levelStats[nLevelIdx].nLevelType == K_GAME_LSTYPE_HOSTAGE)
-						App_TutorialWindowShow(K_MEMID_TUT_HOSTAGE_MODE);
-					else if ((g_levelStats[nLevelIdx].nPlayedTimes > 0) && (pPlayerActor[0]->pSelectedWeapon[K_LVL_ACT_WEAPON_SECONDARY]->status != K_LVL_WPN_STATUS_UNKNOWN))
-						App_TutorialWindowShow(K_MEMID_TUT_INTERFACE_IGM);
-				}
-				//infinite mode
-				if ((m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_VINFINITE_MODE) != 0)
-				{
-					App_TutorialWindowShow(K_MEMID_TUT_VINFINITE_MODE);
-				}
-			}
-			*/
-
 			//set to true to enable hot join
 			static const bool bEnableHotJoin = false;
 			///--- handle controllers dynamically and hot join ---
@@ -9366,18 +9337,6 @@ void CLevel::Update(float dTime_original)
 			//mission win? wait for scripts
 			if ((bMissionFinished) && (nStrIdxMissionFailed < 0) && (UTGetScriptManager().GetRunningScriptsCount() > 0))
 				bMissionFinished = false;
-			//on infinite mode you never finish!
-			if ((g_gameMode == GAME_MODE_INFINITE_TOWER) && (bMissionFinished == true))
-			{
-				if (nStrIdxMissionFailed < 0) //success?
-					bMissionFinished = false;
-				else //fail?
-				{
-					//only fail if dead
-					if (nStrIdxMissionFailed != STR_TEAM_KILLED)
-						bMissionFinished = false;
-				}
-			}
 
 			//is mission finished?
 			if (bMissionFinished)
@@ -10394,36 +10353,6 @@ void CLevel::Update(float dTime_original)
 
 						App_SaveUserData();
 
-						//report score to steam leaderboards for infinite mode
-#ifdef ENABLE_LEADERBOARDS
-						if (m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_VINFINITE_MODE)
-						{
-							char pszBoardName[MAX_PATH];
-							if (nPlayers == 1)
-							{
-								StringCchPrintfA(pszBoardName, MAX_PATH, "%s", K_GAME_STR_LEADERBOARDS_VINFINITE_PREFIX_SP);
-							}
-							else
-							{
-								StringCchPrintfA(pszBoardName, MAX_PATH, "%s", K_GAME_STR_LEADERBOARDS_VINFINITE_PREFIX_COOP);
-							}
-							//on zombie mode leaderboards have an appendix
-							if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
-								StringCchCatA(pszBoardName, MAX_PATH, "_zm");
-							//reset old scores
-							UTGetLeaderboards().ResetScoresList();
-							//reset strings too
-							g_stringsMgr.SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
-							g_stringsMgr.SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
-							g_stringsMgr.SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, L"...");
-							//now upload value
-							UTGetLeaderboards().QueueJob(K_JOB_UPLOAD_SCORE, pszBoardName, m_arrStats[K_LVL_STATS_LEVEL_VINFINITE_FLOOR]);
-							//request downloading of scores
-							UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, pszBoardName, 1);
-							//request downloading of your own score
-							UTGetLeaderboards().QueueJob(K_JOB_GET_SCORE_FOR_CURRENT_USER, pszBoardName, 0);
-						}
-#endif
 
 						//--- show windows and change portraits and title text ---
 						if (nPlayers == 1)
@@ -10459,16 +10388,6 @@ void CLevel::Update(float dTime_original)
 									ctrl->paramsDict.SetNamedVarINT32(L"nOldValue", nXPpl1);
 									ctrl->paramsDict.SetNamedVarINT32(L"nNewValue", g_userData[nPlBaseIdx]);
 								}
-							}
-
-							//show "melee = leaderboards" on tower mode and reached level
-							if (m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_VINFINITE_MODE)
-							{
-								CControl* ctrl = null;
-								if (ctrl = layer->GetControlByName("LABEL_LEADERBOARDS"))
-									ctrl->paramsDict.SetNamedVarString(L"fontColor", L"0xffffffff");
-								if (ctrl = layer->GetControlByName("LABEL_TITLE"))
-									ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_FLOOR_X_VALUE);
 							}
 
 							if (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE)
@@ -10570,19 +10489,6 @@ void CLevel::Update(float dTime_original)
 									}
 								}
 
-								//show "melee = leaderboards" on tower mode	and reached level
-								if (m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_VINFINITE_MODE)
-								{
-									CControl* ctrl = null;
-									if (ctrl = layer->GetControlByName("LABEL_LEADERBOARDS"))
-										ctrl->paramsDict.SetNamedVarString(L"fontColor", L"0xffffffff");
-									if (ctrl = layer->GetControlByName("LABEL_TITLE"))
-										ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_FLOOR_X_VALUE);
-									//disable "next mission" on infinity towers mode
-									if (ctrl = layer->GetControlByName("BUT_COOPFAIL_CONTINUE"))
-										ctrl->bDisabled = true;
-								}
-
 							}
 						}
 						// notify level finished for achievements
@@ -10592,44 +10498,6 @@ void CLevel::Update(float dTime_original)
 				}
 				break;
 				default:
-#ifdef ENABLE_LEADERBOARDS
-					//show leaderboard when pressing melee key (any controller)	for VERTICAL VINFINITE mode
-					if ((UTGetCtrlrMgr().KeyPressed(K_CM_COMMAND_MELEE)) && (m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_VINFINITE_MODE))
-					{
-						CCtrlLayer* lay = UTGetControlsManager().GetLayerByName("LAYER_ID_LEADERBOARDS_IGM");
-						if (lay == null)
-						{
-							//show layer
-							lay = UTGetControlsManager().ShowLayerOnce("LAYER_ID_LEADERBOARDS_IGM");
-							if (lay)
-							{
-								CControl* ctrl = null;
-								//change label that tells type of leaderboard that is shown
-								if (ctrl = lay->GetControlByName("LABEL_LBTYPE"))
-								{
-									int nPlayers = m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED] + m_arrStats[K_LVL_STATS_PL2_HAS_PLAYED];
-									if (nPlayers == 1)
-										ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_SINGLE_PLAYER);
-									else
-										ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_COOP_ONLINE);
-									//level name in STR_TEMP10
-									g_stringsMgr.SetString(STR_TEMP10, L"%s", g_stringsMgr.strings[STR_VINFINITE_MODE]->sText);
-								}
-								//set player selection
-								ctrl = lay->GetControlByName("CTRL_SCORESLIST_TT");
-								if (ctrl != null)
-								{
-									ctrl->paramsDict.SetNamedVarINT32(L"nSelectedIdx", UTGetLeaderboards().GetDownloadedScores_PlayerIndex());
-									ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", UTGetLeaderboards().GetDownloadedScoresCount());
-#ifndef ENABLE_LEADERBOARDS_NAMES_SELECTION
-									ctrl->bCanHaveFocus = false;
-									ctrl->paramsDict.SetNamedVarBool(L"bUserCanSelect", false);
-#endif
-								}
-							}
-						}
-					}
-#endif
 					break;
 			}
 		}
@@ -10825,12 +10693,9 @@ void CLevel::Update(float dTime_original)
 				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
-				//adauga mesh dinamic pentru volumul luminii
-				nl->m_nLightMeshIdx = -1; //resetez idx mesh
-
-				UINT32 meshidx;
-				m_bufferedPainter.BeginMesh(meshidx);
-				nl->m_nLightMeshIdx = (int)meshidx;
+				//dynsamic mesh for light geometry
+				nl->m_nLightMeshIdx = -1;
+				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
 				m_bufferedPainter.AddTriangles(lightRectV, 2);
 				m_bufferedPainter.EndMesh();
 
@@ -10852,9 +10717,7 @@ void CLevel::Update(float dTime_original)
 						if (retVerts > 0)
 						{
 							//adauga mesh dinamic pentru volumul umbrei
-							UINT32 meshidx;
-							m_bufferedPainter.BeginMesh(meshidx);
-							nl->m_nShadowMeshIdx = (int)meshidx;
+							m_bufferedPainter.BeginMesh(nl->m_nShadowMeshIdx);
 							m_bufferedPainter.AddTriangles(arrVerts, retVerts / 3);
 							m_bufferedPainter.EndMesh();
 						}
@@ -10900,12 +10763,9 @@ void CLevel::Update(float dTime_original)
 				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
-				//adauga mesh dinamic pentru volumul luminii
+				//dynamic mesh index for light geometry
 				nl->m_nLightMeshIdx = -1; //resetez idx mesh
-
-				UINT32 meshidx;
-				m_bufferedPainter.BeginMesh(meshidx);
-				nl->m_nLightMeshIdx = (int)meshidx;
+				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
 				m_bufferedPainter.AddTriangles(lightRectV, 2);
 				m_bufferedPainter.EndMesh();
 			}
@@ -10943,9 +10803,7 @@ void CLevel::Update(float dTime_original)
 				//adauga mesh dinamic pentru volumul luminii
 				nl->m_nLightMeshIdx = -1; //resetez idx mesh
 
-				UINT32 meshidx;
-				m_bufferedPainter.BeginMesh(meshidx);
-				nl->m_nLightMeshIdx = (int)meshidx;
+				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
 				m_bufferedPainter.AddTriangles(lightRectV, 2);
 				m_bufferedPainter.EndMesh();
 			}
@@ -10991,9 +10849,7 @@ void CLevel::Update(float dTime_original)
 				//adauga mesh dinamic pentru volumul luminii
 				nl->m_nLightMeshIdx = -1; //resetez idx mesh
 
-				UINT32 meshidx;
-				m_bufferedPainter.BeginMesh(meshidx);
-				nl->m_nLightMeshIdx = (int)meshidx;
+				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
 				m_bufferedPainter.AddTriangles(lightRectV, 2);
 				m_bufferedPainter.EndMesh();
 			}
@@ -11003,9 +10859,7 @@ void CLevel::Update(float dTime_original)
 	//2. poligoane alte lumini: gloante, particule, etc
 	//PROPS lights - temp lights - gunshot lights, explo lights
 	m_propsLightsMeshIdx = -1;
-	UINT32 meshidx;
-	m_bufferedPainter.BeginMesh(meshidx);
-	m_propsLightsMeshIdx = (int)meshidx;
+	m_bufferedPainter.BeginMesh(m_propsLightsMeshIdx);
 
 	CLinkedPool<CLevelProp>::CLinkedPoolNode *node = m_poolProps.pListUsed.m_pNext;
 	while (node != &m_poolProps.pListUsed)
@@ -11085,8 +10939,7 @@ void CLevel::Update(float dTime_original)
 	//#TODO: should try not clamping water and FOW rects to screen maybe it fixes the texture/pshader issue on some cards
 
 	//3. poligoane apa
-	m_bufferedPainter.BeginMesh(meshidx);
-	m_waterMeshIdx = (int)meshidx;
+	m_bufferedPainter.BeginMesh(m_waterMeshIdx);
 	//salvez date textura apa	
 	float waterTexScale = 2.0f;
 	float waterTexSize = m_texManager.m_Texs[m_waterTexIdx]->info.Width;
@@ -11137,8 +10990,7 @@ void CLevel::Update(float dTime_original)
 
 
 	//4. poligoane fow
-	m_bufferedPainter.BeginMesh(meshidx);
-	m_fogofwarMeshIdx = (int)meshidx;
+	m_bufferedPainter.BeginMesh(m_fogofwarMeshIdx);
 
 	for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
 	{
@@ -15013,9 +14865,7 @@ void CLevel::UpdateBullets(float dTime)
 
 	if (nBulletsTrisCnt > 0)
 	{
-		UINT32 meshidx;
-		m_bufferedPainter.BeginMesh(meshidx);
-		m_bulletsMeshIdx = (int)meshidx;
+		m_bufferedPainter.BeginMesh(m_bulletsMeshIdx);
 		m_bufferedPainter.AddTriangles(arrBulletsTris, nBulletsTrisCnt);
 		m_bufferedPainter.EndMesh();
 	}

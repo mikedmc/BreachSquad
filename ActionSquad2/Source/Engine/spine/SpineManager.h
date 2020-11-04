@@ -6,6 +6,7 @@
 
 #define K_SM_DEFAULT_MIX_DURATION 0.2f
 
+// Loads all necessary spine atlasses and textures
 class CSpineManager {
 public:
 	struct CAtlasContainer {

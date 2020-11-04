@@ -21,11 +21,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		m_unLoadedLevelFlags |= K_LVL_LEVEL_FLAG_DOWNLOADED;
 	if (UTGetAppClass().IsGameModded())
 		m_unLoadedLevelFlags |= K_LVL_LEVEL_FLAG_MODS_ON;
-	if (g_gameMode == GAME_MODE_INFINITE_TOWER)
-	{
-		m_unLoadedLevelFlags |= K_LVL_LEVEL_FLAG_VINFINITE_MODE;
-		g_stringsMgr.ReplaceTokenInt(STR_FLOOR_X_VALUE, STR_FLOOR_X, 1, 0);
-	}
 
 	WCHAR Path[MAX_PATH] = { 0 };
 
@@ -1216,7 +1211,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	BuildVisibilityLists();
 
 	//show level type																																							 
-	if ((m_unLoadedLevelFlags & (K_LVL_LEVEL_FLAG_DOWNLOADED | K_LVL_LEVEL_FLAG_VINFINITE_MODE)) == 0)
+	if ((m_unLoadedLevelFlags & (K_LVL_LEVEL_FLAG_DOWNLOADED )) == 0)
 	{
 		int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[nChapterNumber]->arrLevelNameStrIdx[nLevelNumber];
 		if (nStrIdxLevelName >= 0)
@@ -1238,14 +1233,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, D3DXVECTOR2(0.0f, -50.0f), STR_MISSION_TYPE1 + missionType, FONTIDX_12_WOW, 1.0f, 2.0f, K_COLOR_SELECTED_TEXT);
 			m_nLoadedChapter = 1000;
 			m_nLoadedLevel = nModIdx_SelectedContent;
-		}
-		else if (m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_VINFINITE_MODE)
-		{
-			int idx = g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, D3DXVECTOR2(0.0f, -50.0f), STR_CURRENT_MISSION_VAL, FONTIDX_12_WOW, 1.0f, 2.0f, K_COLOR_SELECTED_TEXT);
-			//add second line of text
-			CStringDummy* dum = g_particlesMgr.m_vDummies[idx];
-			dum->intParam3 = STR_MISSION_TYPE1;  //kill'em all by default
-			dum->intParam4 = FONTIDX_8_BS1;
 		}
 	}
 	//save type of loaded mission

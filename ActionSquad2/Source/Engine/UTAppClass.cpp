@@ -849,20 +849,10 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				}
 				else
 				{
-					if (g_gameMode == GAME_MODE_INFINITE_TOWER)
-					{
-						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
-						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
-					}
-					else
-					{
-						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
-						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
-					}
+					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
+					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
+					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					UTGetEventManager().QueueEvent(nevent);
 				}
 
 				return true;
@@ -871,24 +861,14 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			{
 				if (!UTGetAppClass().IsGameNetworked())
 				{
-					if (g_gameMode == GAME_MODE_INFINITE_TOWER)
-					{
-						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
-						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
-					}
-					else
-					{
-						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
-						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
+					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
+					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
+					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					UTGetEventManager().QueueEvent(nevent);
 
-						CHAR ctxt[MAX_PATH];
-						StringCchPrintfA(ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL]);
-						ANALYTICS_EVENT("level_fail_quit", ctxt, "", 0);
-					}
+					CHAR ctxt[MAX_PATH];
+					StringCchPrintfA(ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL]);
+					ANALYTICS_EVENT("level_fail_quit", ctxt, "", 0);
 				}
 				else //on networked games only send state to peer
 				{
@@ -906,24 +886,14 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			{
 				if (!UTGetAppClass().IsGameNetworked())
 				{
-					if (g_gameMode == GAME_MODE_INFINITE_TOWER)
-					{
-						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
-						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
-					}
-					else
-					{
-						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
-						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
+					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
+					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
+					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					UTGetEventManager().QueueEvent(nevent);
 
-						CHAR ctxt[MAX_PATH];
-						StringCchPrintfA(ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL]);
-						ANALYTICS_EVENT("igm_level_quit", ctxt, "", 0);
-					}
+					CHAR ctxt[MAX_PATH];
+					StringCchPrintfA(ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL]);
+					ANALYTICS_EVENT("igm_level_quit", ctxt, "", 0);
 				}
 				else //on networked games go to main menu
 				{

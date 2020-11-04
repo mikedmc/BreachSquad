@@ -250,14 +250,6 @@ bool CMainMenu::RequestLeaderboardsUpdate(bool bCoop)
 		StringCchPrintfA(pszBoardName, MAX_PATH, strFormat, K_GAME_STR_LEADERBOARDS_PREFIX_SP, nChapterNumber + 1, nLevelNumber + 1);
 	else
 		StringCchPrintfA(pszBoardName, MAX_PATH, strFormat, K_GAME_STR_LEADERBOARDS_PREFIX_COOP, nChapterNumber + 1, nLevelNumber + 1);
-	//vertical infinite mode? (not really necessary because this function is only called from menus therefore not available for infinite tower)
-	if (g_gameMode == GAME_MODE_INFINITE_TOWER)
-	{
-		if (!bCoop)
-			StringCchPrintfA(pszBoardName, MAX_PATH, "%s", K_GAME_STR_LEADERBOARDS_VINFINITE_PREFIX_SP);
-		else
-			StringCchPrintfA(pszBoardName, MAX_PATH, "%s", K_GAME_STR_LEADERBOARDS_VINFINITE_PREFIX_COOP);
-	}
 	//on zombie mode leaderboards have an appendix
 	if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
 		StringCchCatA(pszBoardName, MAX_PATH, "_zm");
@@ -809,35 +801,7 @@ void CMainMenu::Update(float dTime)
 
 						case K_MM_MODE_VINFINITE:
 						{
-							SND_PLAY(SNDIDX_CLICK);
-
-							g_gameMode = GAME_MODE_INFINITE_TOWER;
-							//special case for target game modes
-							if (m_eTargetGameState == GAME_STATE_JOIN_COOP_LIST)
-							{
-								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
-								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_JOIN_COOP_LIST);
-								nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-								UTGetEventManager().QueueEvent(nevent);
-								break;
-							}
-
-							if (!UTGetAppClass().IsGameNetworked())
-							{
-								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
-								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
-								nevent->AddNamedArgINT32(L"arg1", 1); //reset player selection
-								nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-								UTGetEventManager().QueueEvent(nevent);
-							}
-							else  //networked quick match
-							{
-								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
-								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
-								nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-								nevent->AddNamedArgINT32(L"arg1", (int)UTGetAppClass().m_Settings.devnet_eNetGameType);
-								UTGetEventManager().QueueEvent(nevent);
-							}
+							SND_PLAY(SNDIDX_DENIED);
 						}
 						break;
 
