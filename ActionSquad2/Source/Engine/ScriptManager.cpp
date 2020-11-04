@@ -1,24 +1,6 @@
 #include "dxstdafx.h"
 #include "ScriptManager.h"
 
-//CTOR
-CScriptInstruction::CScriptInstruction(const WCHAR* strInstruction)
-{
-	m_instruction.Init(strInstruction);
-	m_arrArgs.DeleteAll();
-}
-
-FORCEINLINE CVariantComplex* CScriptInstruction::GetArgument(WCHAR* strArgName)
-{
-	return m_arrArgs.GetVariantByName(strArgName);
-}
-
-FORCEINLINE CVariantComplex* CScriptInstruction::GetArgument(UINT32 dwArgNameHash)
-{
-	return m_arrArgs.GetVariantByNameHash(dwArgNameHash);
-}
-
-
 ///--- SCRIPT ---
 CScript::~CScript()
 {

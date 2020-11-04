@@ -14,10 +14,20 @@ public:
 	CStringHash		m_instruction;
 	CVariantCollection m_arrArgs; //instruction arguments
 	//create event
-	CScriptInstruction(const WCHAR* strInstruction);
+	CScriptInstruction(const WCHAR* strInstruction)
+	{
+		m_instruction.Init(strInstruction);
+		m_arrArgs.DeleteAll();
+	}
 
-	FORCEINLINE CVariantComplex* GetArgument(WCHAR* strArgName);
-	FORCEINLINE CVariantComplex* GetArgument(UINT32 dwArgNameHash);
+	FORCEINLINE CVariantComplex* GetArgument(WCHAR* strArgName)
+	{
+		return m_arrArgs.GetVariantByName(strArgName);
+	}
+	FORCEINLINE CVariantComplex* GetArgument(UINT32 dwArgNameHash)
+	{
+		return m_arrArgs.GetVariantByNameHash(dwArgNameHash);
+	}
 };
 
 ///--- Script Definition ---

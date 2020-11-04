@@ -343,7 +343,7 @@ void CApplication::App_UpdateState_Splash(LPDIRECT3DDEVICE9 pDevice, double fTim
 			g_gameStateTimer = 4.4f;
 #else
 			//play intro sound (fixed length)
-			SND_PLAY(SNDIDX_THEME_INTRO);
+			SND_PLAY(SNDIDX_THEME_MENU1);
 #endif
 		}
 		break;

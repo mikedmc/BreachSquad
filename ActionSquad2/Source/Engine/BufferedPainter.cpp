@@ -401,7 +401,8 @@ HRESULT CBufferedPainter::DrawMesh(int meshIdx, bool setFVF)
 	//empty mesh: exit
 	if (meshIdx < 0)
 	{
-		LOG(L"!!! WARNING: CBufferedPainter::DrawMesh called with mesh idx = -1\n");
+		// this happens often if light touches no shadow casters. Logging not necessary.
+		//LOG(L"!!! WARNING: CBufferedPainter::DrawMesh called with mesh idx = -1\n");
 		return E_INVALIDARG;
 	}
 
