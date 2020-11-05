@@ -114,7 +114,7 @@ public:
 /// Intended for small and fast meshes
 ///----------------------------------------------------
 class CSpineTex;
-class CBufferedTexPainter : private CBufferedPainter {
+class CBufferedSpinePainter : private CBufferedPainter {
 public:
 	enum EBlendMode {
 		BLEND_NORMAL = 0,
@@ -132,11 +132,11 @@ private:
 	};
 
 	int						passesCnt;								// total number of "passes" or "mode changes" needed to paint the meshes
-	CPaintPassData			arrPasses[K_BP_MAX_MESHES_CNT];
+	CPaintPassData			arrPasses[K_BP_MAX_MESHES_CNT]{};
 
 public:
-	CBufferedTexPainter();
-	~CBufferedTexPainter();
+	CBufferedSpinePainter();
+	~CBufferedSpinePainter();
 
 	using				CBufferedPainter::Init;
 

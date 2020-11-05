@@ -401,23 +401,23 @@ void CSpineManager::BatchSkeleton(Skeleton* skel)
 
 		// Fetch the blend mode from the slot and
 		// translate it to the engine blend mode
-		CBufferedTexPainter::EBlendMode engineBlendMode;
+		CBufferedSpinePainter::EBlendMode engineBlendMode;
 		switch (slot->getData().getBlendMode()) 
 		{
 		case BlendMode_Normal:
-			engineBlendMode = CBufferedTexPainter::BLEND_NORMAL;
+			engineBlendMode = CBufferedSpinePainter::BLEND_NORMAL;
 			break;
 		case BlendMode_Additive:
-			engineBlendMode = CBufferedTexPainter::BLEND_ADDITIVE;
+			engineBlendMode = CBufferedSpinePainter::BLEND_ADDITIVE;
 			break;
 		case BlendMode_Multiply:
-			engineBlendMode = CBufferedTexPainter::BLEND_MULTIPLY;
+			engineBlendMode = CBufferedSpinePainter::BLEND_MULTIPLY;
 			break;
 		case BlendMode_Screen:
-			engineBlendMode = CBufferedTexPainter::BLEND_SCREEN;
+			engineBlendMode = CBufferedSpinePainter::BLEND_SCREEN;
 			break;
 		default:
-			engineBlendMode = CBufferedTexPainter::BLEND_NORMAL;
+			engineBlendMode = CBufferedSpinePainter::BLEND_NORMAL;
 			break;
 		}
 

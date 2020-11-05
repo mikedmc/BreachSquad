@@ -52,7 +52,7 @@ public:
 public:
 	LPDIRECT3DDEVICE9					m_pDevice;				// pointer to GFX device
 
-	CBufferedTexPainter					m_Painter;				// buffered painter for skeleton meshes
+	CBufferedSpinePainter				m_Painter;				// buffered painter for skeleton meshes
 	CSpineTexLoader						m_TexMgr;				// custom texture manager for spine
 
 	CGrowableArray<CAtlasContainer*>	arrAtlasses;			// atlasses array

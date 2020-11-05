@@ -521,17 +521,17 @@ HRESULT CBufferedPainter::OnDestroyDevice(void* pUserContext)
 /// CBufferedTexPainter
 ///----------------------------------------------------
 
-CBufferedTexPainter::CBufferedTexPainter()
+CBufferedSpinePainter::CBufferedSpinePainter()
 {
 	passesCnt = 0;
 }
 
-CBufferedTexPainter::~CBufferedTexPainter()
+CBufferedSpinePainter::~CBufferedSpinePainter()
 {
 	Clear();
 }
 
-void CBufferedTexPainter::BufferMesh(_VERTEX_PNCT4T4 *points, int trisCount, CSpineTex* pTex, EBlendMode eMode)
+void CBufferedSpinePainter::BufferMesh(_VERTEX_PNCT4T4 *points, int trisCount, CSpineTex* pTex, EBlendMode eMode)
 {
 	//if we have no mesh or if last mesh has another mode or texture then we initialize another mesh
 	if ((passesCnt == 0) || (arrPasses[passesCnt - 1].eMode != eMode) || (arrPasses[passesCnt - 1].pTex != pTex))
@@ -547,13 +547,13 @@ void CBufferedTexPainter::BufferMesh(_VERTEX_PNCT4T4 *points, int trisCount, CSp
 	AddTriangles(points, trisCount);
 }
 
-void CBufferedTexPainter::Clear()
+void CBufferedSpinePainter::Clear()
 {
 	passesCnt = 0;
 	ClearBuffers();
 }
 
-void CBufferedTexPainter::Paint(bool setFVF /*= true*/, ETexChannel eChannel)
+void CBufferedSpinePainter::Paint(bool setFVF /*= true*/, ETexChannel eChannel)
 {
 	//set FVF if necessary
 	if (setFVF)
@@ -561,7 +561,7 @@ void CBufferedTexPainter::Paint(bool setFVF /*= true*/, ETexChannel eChannel)
 
 	for (int kk = 0; kk < passesCnt; kk++)
 	{
-		//#TODO: set mode
+		//#TODO: set blending modes
 		switch (arrPasses[kk].eMode)
 		{
 		case BLEND_NORMAL:
