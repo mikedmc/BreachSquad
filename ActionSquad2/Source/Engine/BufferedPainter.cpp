@@ -1,11 +1,12 @@
 #include "dxstdafx.h"
+#include "dxstdafx.h"
 
 
 
 ///-------------------------------------------------------------
 ///	 buffered sprites 
 ///-------------------------------------------------------------
-
+/*
 CBufferedSprites::CBufferedSprites(void)
 {
 	m_vb = NULL;
@@ -155,7 +156,7 @@ HRESULT CBufferedSprites::Flush()
 }
 
 //--- acelasi format ca DRAW=ul din Sprite ---
-HRESULT CBufferedSprites::DrawBuffered(LPDIRECT3DTEXTURE9 pTexture, RECTXYXY_F *pSrcRectUV, RECTXYWH_F *pSrcCoord, Vec3 *pCenter, Vec3 *pPosition, DWORD color)
+HRESULT CBufferedSprites::DrawBuffered(PTEXTURE pTexture, RECTXYXY_F *pSrcRectUV, RECTXYWH_F *pSrcCoord, Vec3 *pCenter, Vec3 *pPosition, DWORD color)
 {
 	Vec3 vecPos;
 	vecPos.x = vecPos.y = vecPos.z = 0.0f;
@@ -268,20 +269,18 @@ HRESULT CBufferedSprites::OnDestroyDevice( void* pUserContext )
 
 	return S_OK;
 }
-
+*/
 
 ///-----------------------------------------------------------------------------------------------
 ///	 BUFFERED PAINTER
 ///  - adaugi triunghiuri unul cate unul si la final face un VB si IB din care poti desena mesh-ul
 ///-----------------------------------------------------------------------------------------------
 
-CBufferedPainter::CBufferedPainter(void)
+CBufferedPainter::CBufferedPainter() :
+	m_vb(null), m_ib(null), m_pDevice(null),
+	m_nMeshesCnt(0), m_nVertexCursor(0), m_bMeshStarted(false),
+	m_verts(null), m_nMaxTrisCnt(0)
 {
-	m_verts = new _VERTEX_PNCT4T4[(K_BP_MAX_TRIS_CNT + K_BP_SENTINEL) * 3];
-
-	m_nMeshesCnt = 0;
-	m_nVertexCursor = 0;
-	m_bMeshStarted = false;
 }
 
 CBufferedPainter::~CBufferedPainter(void)
@@ -289,17 +288,23 @@ CBufferedPainter::~CBufferedPainter(void)
 	SAFE_DELETE_ARRAY(m_verts);
 }
 
+void CBufferedPainter::Init(int nMaxTrisCnt)
+{
+	m_nMaxTrisCnt = nMaxTrisCnt;
+	m_verts = new _VERTEX_PNCT4T4[(m_nMaxTrisCnt + K_BP_SENTINEL_TRIS) * 3];
+}
+
 HRESULT CBufferedPainter::BeginMesh(int &retMeshIdx)
 {
 	if (m_bMeshStarted)
 	{
 		EndMesh();
-		ErrorBox(K_ERR_LOG, L"A mesh is already started. Closing mesh and starting another.");
+		ErrorBox(K_ERR_LOG, L"CBufferedPainter:: A mesh is already started. Closing mesh and starting another.");
 	}
 
 	if (m_nMeshesCnt >= K_BP_MAX_MESHES_CNT)
 	{
-		ErrorBox(K_ERR_WARNING, L"Too many meshes!");
+		ErrorBox(K_ERR_WARNING, L"CBufferedPainter:: Too many meshes!");
 
 		retMeshIdx = -1;
 		return E_FAIL;
@@ -318,6 +323,8 @@ HRESULT CBufferedPainter::BeginMesh(int &retMeshIdx)
 
 HRESULT CBufferedPainter::AddTriangles(_VERTEX_PNCT4T4 *points, int trisCount)
 {
+	assert(m_nMaxTrisCnt > 0);
+
 	if (!m_bMeshStarted)
 	{
 		ErrorBox(K_ERR_WARNING, L"You have to call BeginMesh() first!");
@@ -325,7 +332,7 @@ HRESULT CBufferedPainter::AddTriangles(_VERTEX_PNCT4T4 *points, int trisCount)
 	}
 
 #if defined(_DEBUG) || defined(DEBUG)
-	assert(m_nVertexCursor + trisCount * 3 < K_BP_MAX_TRIS_CNT * 3);
+	assert(m_nVertexCursor + trisCount * 3 < m_nMaxTrisCnt * 3);
 #endif
 
 	memcpy(&m_verts[m_nVertexCursor], points, sizeof(_VERTEX_PNCT4T4) * 3 * trisCount);
@@ -440,11 +447,13 @@ const int CBufferedPainter::GetTrisCount(int meshIdx) const
 //--- framework ---
 HRESULT CBufferedPainter::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
 {
+	assert(m_nMaxTrisCnt > 0);
+
 	HRESULT hr = S_OK;
 
 	m_pDevice = pDevice;
 	//create index buffer (fixed) - deci va desena numai triunghiuri independente
-	if (FAILED(m_pDevice->CreateIndexBuffer((K_BP_MAX_TRIS_CNT + K_BP_SENTINEL) * 3 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, 0)))
+	if (FAILED(m_pDevice->CreateIndexBuffer((m_nMaxTrisCnt + K_BP_SENTINEL_TRIS) * 3 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, 0)))
 	{
 		ErrorBox(K_ERR_WARNING, L"[ERROR] CBufferedPainter: Create Index Buffer failed!");
 		return E_FAIL;
@@ -457,7 +466,7 @@ HRESULT CBufferedPainter::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pB
 		return E_FAIL;
 	}
 
-	for (int kk = 0; kk < K_BP_MAX_TRIS_CNT; kk++)
+	for (int kk = 0; kk < m_nMaxTrisCnt; kk++)
 	{
 		pIndices[kk * 3 + 0] = (DWORD)(kk * 3 + 0);
 		pIndices[kk * 3 + 1] = (DWORD)(kk * 3 + 1);
@@ -470,11 +479,13 @@ HRESULT CBufferedPainter::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pB
 
 HRESULT CBufferedPainter::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
 {
+	assert(m_nMaxTrisCnt > 0);
+
 	HRESULT hr = S_OK;
 	m_pDevice = pDevice;
 
 	//create vb and ib
-	if (FAILED(m_pDevice->CreateVertexBuffer((K_BP_MAX_TRIS_CNT + K_BP_SENTINEL) * 3 * sizeof(_VERTEX_PNCT4T4),
+	if (FAILED(m_pDevice->CreateVertexBuffer((m_nMaxTrisCnt + K_BP_SENTINEL_TRIS) * 3 * sizeof(_VERTEX_PNCT4T4),
 		D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC,
 		_VERTEX_PNCT4T4::FVF, D3DPOOL_DEFAULT,
 		&m_vb, NULL)))

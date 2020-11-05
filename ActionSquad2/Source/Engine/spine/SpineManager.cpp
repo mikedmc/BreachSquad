@@ -3,6 +3,7 @@
 
 CSpineManager::CSpineManager()
 {
+	m_Painter.Init(4000);
 }
 
 CSpineManager::~CSpineManager()

@@ -1550,6 +1550,8 @@ UINT32 CLevel::GenerateNextID()
 
 CLevel::CLevel()
 {
+	m_bufferedPainter.Init(4000);
+		
 	m_bLoaded = false;
 	m_bOneUpdateDone = false;
 
