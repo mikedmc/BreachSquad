@@ -23,7 +23,7 @@ private:
 	LPDIRECT3DVERTEXBUFFER9 m_vb;
 	LPDIRECT3DINDEXBUFFER9 m_ib;
 
-	LPDIRECT3DDEVICE9 pDevice;
+	LPDIRECT3DDEVICE9 m_pDevice;
 	//TODO: Poate ar fi bine sa il fac cu un template class ca sa ii specific in constructor ce fel de verts folosim. Sau ceva generic cu void*
 	_VERTEX_PNCT4T4 *m_verts; //aici scrie tot si abia la flush face VB-ul
 	//texture changes
@@ -37,18 +37,18 @@ public:
 
 	HRESULT Begin(UINT32 flags = K_BS_ALPHABLENDING | K_BS_ALPHATEST | K_BS_MODULATE_COLORS);
 	HRESULT End();
-	HRESULT DrawBuffered(LPDIRECT3DTEXTURE9 pTexture, RECTXYXY_F *pSrcRectUV, RECTXYWH_F *pSrcCoord, D3DXVECTOR3 *pCenter, D3DXVECTOR3 *pPosition, DWORD color = 0xffffffff);
+	HRESULT DrawBuffered(LPDIRECT3DTEXTURE9 pTexture, RECTXYXY_F *pSrcRectUV, RECTXYWH_F *pSrcCoord, Vec3 *pCenter, Vec3 *pPosition, DWORD color = 0xffffffff);
 	HRESULT Flush();
 
-	HRESULT OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
-	HRESULT OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
+	HRESULT OnCreateDevice( IDirect3DDevice9* pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
+	HRESULT OnResetDevice( IDirect3DDevice9* pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
 	HRESULT OnLostDevice( void* pUserContext = NULL);
 	HRESULT OnDestroyDevice( void* pUserContext = NULL);
 };
 
 
 ///-----------------------------------------------------------------------------------------------
-///	 BUFFERED PAINTER - well tested
+///	 BUFFERED PAINTER
 ///  Adds geometry to meshes identified by index and then builds VB and IB and draws them
 ///-----------------------------------------------------------------------------------------------
 #define K_BP_SENTINEL 10
@@ -59,10 +59,10 @@ public:
 class CBufferedPainter
 {
 protected:
-	LPDIRECT3DVERTEXBUFFER9 m_vb;
-	LPDIRECT3DINDEXBUFFER9 m_ib;
+	PVERTEXBUFFER				m_vb;
+	PINDEXBUFFER				m_ib;
 
-	LPDIRECT3DDEVICE9 pDevice;
+	PDEVICE						m_pDevice;
 
 	UINT32  m_nVertexCursor; //la ce vertex suntem in buffer
 	_VERTEX_PNCT4T4 *m_verts; //aici scrie tot si abia la final face VB-ul
@@ -91,8 +91,8 @@ public:
 	//Returns number of triangles in mesh
 	const int GetTrisCount(int meshIdx) const;
 
-	HRESULT OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
-	HRESULT OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
+	HRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
+	HRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
 	HRESULT OnLostDevice(void* pUserContext = NULL);
 	HRESULT OnDestroyDevice(void* pUserContext = NULL);
 };

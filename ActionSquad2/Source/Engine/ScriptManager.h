@@ -1,7 +1,3 @@
-///--- COMMENTS ---
-///--- nu cred ca ar trebui sa poata trimite events direct din script pentru ca ar avea prea mare control asupra sistemului direct din scrip (hackerii)
-///			- ar putea avea un filtru pe events, sa trimita doar unele care nu sunt periculoase
-
 #pragma once
 
 

@@ -11,7 +11,7 @@ CBufferedSprites::CBufferedSprites(void)
 	m_vb = NULL;
 	m_ib = NULL;
 
-	pDevice = NULL;
+	m_pDevice = NULL;
 
 	m_nVertexCursor = 0;
 	m_verts = NULL;
@@ -24,38 +24,38 @@ CBufferedSprites::~CBufferedSprites(void)
 HRESULT CBufferedSprites::Begin(UINT32 flags)
 {
 	//--- set render flags ---
-	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	if (flags & K_BS_ALPHABLENDING)
 	{
-		pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
+		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
 
-		pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	}
 	//pha test = true => poate accelereaza putin dat fiind ca o mare parte din sprite e transparent total de obicei
 	if (flags & K_BS_ALPHATEST)
 	{
-		pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, true);
-		pDevice->SetRenderState(D3DRS_ALPHAREF, 0x0000000C); //0.05f
+		m_pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, true);
+		m_pDevice->SetRenderState(D3DRS_ALPHAREF, 0x0000000C); //0.05f
 	}
 
 	if (flags & K_BS_MODULATE_COLORS)
 	{
-		pDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-		pDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-		pDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-		pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		pDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-		pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+		m_pDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+		m_pDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+		m_pDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+		m_pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+		m_pDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+		m_pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 	}
 	else
 	{
-		pDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-		pDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-		pDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-		pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		pDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-		pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+		m_pDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+		m_pDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+		m_pDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+		m_pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+		m_pDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+		m_pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
 	}
 
 	//reset verts
@@ -85,9 +85,9 @@ HRESULT CBufferedSprites::Begin(UINT32 flags)
 	//pDevice->SetVertexDeclaration(g_shaderMan._VERTEX_PNCT4T4_decl);
 	//pDevice->SetVertexShaderConstantF(0, (float*)&matViewProj,			4);
 
-	pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
-	pDevice->SetStreamSource(0, m_vb, 0, sizeof(_VERTEX_PNCT4T4));
-	pDevice->SetIndices(m_ib);
+	m_pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
+	m_pDevice->SetStreamSource(0, m_vb, 0, sizeof(_VERTEX_PNCT4T4));
+	m_pDevice->SetIndices(m_ib);
 
 	return S_OK;
 }
@@ -97,7 +97,7 @@ HRESULT CBufferedSprites::End()
 	HRESULT hr = S_OK;
 
 	V_RETURN(Flush());
-	pDevice->SetIndices(NULL);
+	m_pDevice->SetIndices(NULL);
 
 	//pDevice->SetVertexShader(NULL);
 
@@ -126,18 +126,18 @@ HRESULT CBufferedSprites::Flush()
     m_vb->Unlock();
 	//paint
 
-	pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
-	pDevice->SetStreamSource(0, m_vb, 0, sizeof(_VERTEX_PNCT4T4));
-	pDevice->SetIndices(m_ib);
+	m_pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
+	m_pDevice->SetStreamSource(0, m_vb, 0, sizeof(_VERTEX_PNCT4T4));
+	m_pDevice->SetIndices(m_ib);
 
 	for (UINT32 kk = 0; kk < m_nTexChangesCursor; kk++)
 	{
 		if(m_nTrisPerTexture[kk] == 0)
 			continue;
 	
-		pDevice->SetTexture(0, m_texPtrs[kk]);
+		m_pDevice->SetTexture(0, m_texPtrs[kk]);
 
-		pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, m_nTrisOffsets[kk] * 2, m_nTrisPerTexture[kk] * 2, m_nTrisOffsets[kk] * 3, m_nTrisPerTexture[kk]);
+		m_pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, m_nTrisOffsets[kk] * 2, m_nTrisPerTexture[kk] * 2, m_nTrisOffsets[kk] * 3, m_nTrisPerTexture[kk]);
 	}
 
 	//reset verts
@@ -155,11 +155,9 @@ HRESULT CBufferedSprites::Flush()
 }
 
 //--- acelasi format ca DRAW=ul din Sprite ---
-//#TODO: !!! trebuie optimizat ca coord in textura sa fie calculate inca de la import !!!
-D3DXVECTOR3 vecPos;
-D3DXVECTOR3 vecArr[4];
-HRESULT CBufferedSprites::DrawBuffered(LPDIRECT3DTEXTURE9 pTexture, RECTXYXY_F *pSrcRectUV, RECTXYWH_F *pSrcCoord, D3DXVECTOR3 *pCenter, D3DXVECTOR3 *pPosition, DWORD color)
+HRESULT CBufferedSprites::DrawBuffered(LPDIRECT3DTEXTURE9 pTexture, RECTXYXY_F *pSrcRectUV, RECTXYWH_F *pSrcCoord, Vec3 *pCenter, Vec3 *pPosition, DWORD color)
 {
+	Vec3 vecPos;
 	vecPos.x = vecPos.y = vecPos.z = 0.0f;
 	if(pPosition != NULL)
 		vecPos += *pPosition;
@@ -217,22 +215,22 @@ HRESULT CBufferedSprites::DrawBuffered(LPDIRECT3DTEXTURE9 pTexture, RECTXYXY_F *
 
 
 //--- framework ---
-HRESULT CBufferedSprites::OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext )
+HRESULT CBufferedSprites::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc, void* pUserContext )
 {
 	HRESULT hr = S_OK;
 	m_verts = new _VERTEX_PNCT4T4[(K_BS_MAX_QUAD_CNT + 2) * 4];
 
-	pDevice = pd3dDevice;
+	m_pDevice = pDevice;
 	//create index buffer (fixed) - deci va desena numai dreptunghiuri
-	V_RETURN(pd3dDevice->CreateIndexBuffer((K_BS_MAX_QUAD_CNT + 2) * 6 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, 0));
+	V_RETURN(m_pDevice->CreateIndexBuffer((K_BS_MAX_QUAD_CNT + 2) * 6 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, 0));
 
 	return S_OK;
 }
 
-HRESULT CBufferedSprites::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext )
+HRESULT CBufferedSprites::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc, void* pUserContext )
 {
 	HRESULT hr = S_OK;
-	pDevice = pd3dDevice;
+	m_pDevice = pDevice;
 
     DWORD * pIndices;
     V_RETURN(m_ib->Lock( 0, NULL, (void**) &pIndices, 0 ));
@@ -247,7 +245,7 @@ HRESULT CBufferedSprites::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3D
 	}
 	m_ib->Unlock();
 	//create vb and ib
-    V_RETURN( pd3dDevice->CreateVertexBuffer( (K_BS_MAX_QUAD_CNT + 2) * 4 * sizeof(_VERTEX_PNCT4T4), 
+    V_RETURN( m_pDevice->CreateVertexBuffer( (K_BS_MAX_QUAD_CNT + 2) * 4 * sizeof(_VERTEX_PNCT4T4), 
                                                 D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC,
                                                 _VERTEX_PNCT4T4::FVF, D3DPOOL_DEFAULT,
                                                 &m_vb, NULL ) );
@@ -415,12 +413,12 @@ HRESULT CBufferedPainter::DrawMesh(int meshIdx, bool setFVF)
 		return S_OK;
 	
 	if(setFVF)
-		pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
+		m_pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
 
-	pDevice->SetStreamSource(0, m_vb, 0, sizeof(_VERTEX_PNCT4T4));
-	pDevice->SetIndices(m_ib);
+	m_pDevice->SetStreamSource(0, m_vb, 0, sizeof(_VERTEX_PNCT4T4));
+	m_pDevice->SetIndices(m_ib);
 
-	if (FAILED(pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, m_nTrisOffsets[meshIdx] * 3, 0, m_nTrisPerMesh[meshIdx] * 3, 0, m_nTrisPerMesh[meshIdx])))
+	if (FAILED(m_pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, m_nTrisOffsets[meshIdx] * 3, 0, m_nTrisPerMesh[meshIdx] * 3, 0, m_nTrisPerMesh[meshIdx])))
 	{
 		ErrorBox(K_ERR_WARNING, L"CBufferedPainter::DrawMesh failed(%d, %d, %d)!", m_nTrisOffsets[meshIdx], m_nTrisPerMesh[meshIdx], m_nTrisPerMesh[meshIdx]);
 		return E_FAIL;
@@ -440,13 +438,13 @@ const int CBufferedPainter::GetTrisCount(int meshIdx) const
 }
 
 //--- framework ---
-HRESULT CBufferedPainter::OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
+HRESULT CBufferedPainter::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
 {
 	HRESULT hr = S_OK;
 
-	pDevice = pd3dDevice;
+	m_pDevice = pDevice;
 	//create index buffer (fixed) - deci va desena numai triunghiuri independente
-	if (FAILED(pd3dDevice->CreateIndexBuffer((K_BP_MAX_TRIS_CNT + K_BP_SENTINEL) * 3 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, 0)))
+	if (FAILED(m_pDevice->CreateIndexBuffer((K_BP_MAX_TRIS_CNT + K_BP_SENTINEL) * 3 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, 0)))
 	{
 		ErrorBox(K_ERR_WARNING, L"[ERROR] CBufferedPainter: Create Index Buffer failed!");
 		return E_FAIL;
@@ -470,13 +468,13 @@ HRESULT CBufferedPainter::OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3D
 	return S_OK;
 }
 
-HRESULT CBufferedPainter::OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
+HRESULT CBufferedPainter::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
 {
 	HRESULT hr = S_OK;
-	pDevice = pd3dDevice;
+	m_pDevice = pDevice;
 
 	//create vb and ib
-	if (FAILED(pd3dDevice->CreateVertexBuffer((K_BP_MAX_TRIS_CNT + K_BP_SENTINEL) * 3 * sizeof(_VERTEX_PNCT4T4),
+	if (FAILED(m_pDevice->CreateVertexBuffer((K_BP_MAX_TRIS_CNT + K_BP_SENTINEL) * 3 * sizeof(_VERTEX_PNCT4T4),
 		D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC,
 		_VERTEX_PNCT4T4::FVF, D3DPOOL_DEFAULT,
 		&m_vb, NULL)))
@@ -548,7 +546,7 @@ void CBufferedTexPainter::Paint(bool setFVF /*= true*/, ETexChannel eChannel)
 {
 	//set FVF if necessary
 	if (setFVF)
-		pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
+		m_pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
 
 	for (int kk = 0; kk < passesCnt; kk++)
 	{
@@ -578,11 +576,11 @@ void CBufferedTexPainter::Paint(bool setFVF /*= true*/, ETexChannel eChannel)
 
 		//set texture
 		if(eChannel == K_TEXCHAN_COLORMAP)
-			pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture);
+			m_pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture);
 		else if (eChannel == K_TEXCHAN_NORMALMAP)
-			pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture_N);
+			m_pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture_N);
 		else if (eChannel == K_TEXCHAN_SPECULARMAP)
-			pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture_S);
+			m_pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture_S);
 
 		DrawMesh(arrPasses[kk].nMeshIdx, false);
 	}
