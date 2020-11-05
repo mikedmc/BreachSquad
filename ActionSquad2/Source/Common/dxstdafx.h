@@ -231,10 +231,12 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 //#define _CRT_NONSTDC_NO_DEPRECATE
 
-#include "..\versioning\versioning.h"
-#include "..\Engine\dbgutil.h"
-#include "utils\UTMath.h"
-#include "utils\PlatformTypes.h"
+#include "../versioning/versioning.h"
+#include "../Engine/dbgutil.h"
+#include "OpResult.h"
+
+#include "utils/UTMath.h"
+#include "utils/PlatformTypes.h"
 
 #define K_GAME_USERDATA_COMPANY_SUFFIX		L"\\PixelShard\\"
 #define K_GAME_USERDATA_FOLDER_SUFFIX		L"ActionSquad2\\"
@@ -249,6 +251,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "DXUTgui.h"
 #include "DXUTsettingsDlg.h"
 #endif
+
 
 ///--- generic states used for state machines ---
 enum eGenericState {

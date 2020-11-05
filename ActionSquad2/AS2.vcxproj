@@ -274,6 +274,7 @@
     <ClInclude Include="Source\Engine\gameplay\LevelTypes.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_scriptable.h" />
     <ClInclude Include="Source\Engine\gameplay\Light.h" />
+    <ClInclude Include="Source\Engine\gameplay\TileBlockMesh.h" />
     <ClInclude Include="Source\Engine\GetDXVer.h" />
     <ClInclude Include="Source\Engine\Constants\igminterface_SPR.h" />
     <ClInclude Include="Source\Engine\Constants\interface_mg_SPR.h" />
@@ -299,6 +300,7 @@
     <ClInclude Include="Source\Engine\Network.h" />
     <ClInclude Include="Source\Engine\NetworkBase.h" />
     <ClInclude Include="Source\Engine\NetworkDummy.h" />
+    <ClInclude Include="Source\Engine\OpResult.h" />
     <ClInclude Include="Source\Engine\PlayerSelScr.h" />
     <ClInclude Include="Source\Engine\PolyFOV.h" />
     <ClInclude Include="Source\Engine\Queue.h" />
@@ -661,6 +663,7 @@
     <ClCompile Include="Source\Engine\gameplay\Level_loaders.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_scriptable.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Light.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\TileBlockMesh.cpp" />
     <ClCompile Include="Source\Engine\GetDXVer.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>

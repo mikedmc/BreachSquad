@@ -163,7 +163,7 @@ public:
 
 	CTile**					tiles;				//actual tilemap
 	int						m_tilesTexBaseIdx, m_tilesTexNormIdx;		//indexuri la texturile folosite pt tileset
-	D3DXVECTOR2				m_vLevelOrigin;		//originea fictiva a nivelului
+	Vec2					m_vLevelOrigin;		//originea fictiva a nivelului
 
 	RECTXYWH_F				m_visibleArea;		//zona vizibila din BBuff in pixeli, coord world
 	RECTXYWH				m_visibleAreaTL;	//zona vizibila din nivel, in tiles.

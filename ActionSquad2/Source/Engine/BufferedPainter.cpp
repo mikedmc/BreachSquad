@@ -285,7 +285,13 @@ CBufferedPainter::CBufferedPainter() :
 
 CBufferedPainter::~CBufferedPainter(void)
 {
+	ClearBuffers();
 	SAFE_DELETE_ARRAY(m_verts);
+
+	SAFE_RELEASE(m_vb);
+	SAFE_RELEASE(m_ib);
+
+	m_nMaxTrisCnt = 0;
 }
 
 void CBufferedPainter::Init(int nMaxTrisCnt)
@@ -389,7 +395,7 @@ HRESULT CBufferedPainter::BuildBuffers()
 	if (FAILED(m_vb->Lock(0, m_nVertexCursor * sizeof(_VERTEX_PNCT4T4), (void**)&pVerts, D3DLOCK_DISCARD)))
 	{
 		ErrorBox(K_ERR_WARNING, L"[ERROR] CBufferedPainter: Build buffers failed!");
-		return E_FAIL;
+		return hr;
 	}
 
 	memcpy(pVerts, m_verts, m_nVertexCursor * sizeof(_VERTEX_PNCT4T4));
@@ -428,7 +434,7 @@ HRESULT CBufferedPainter::DrawMesh(int meshIdx, bool setFVF)
 	if (FAILED(m_pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, m_nTrisOffsets[meshIdx] * 3, 0, m_nTrisPerMesh[meshIdx] * 3, 0, m_nTrisPerMesh[meshIdx])))
 	{
 		ErrorBox(K_ERR_WARNING, L"CBufferedPainter::DrawMesh failed(%d, %d, %d)!", m_nTrisOffsets[meshIdx], m_nTrisPerMesh[meshIdx], m_nTrisPerMesh[meshIdx]);
-		return E_FAIL;
+		return hr;
 	}
 	
 	return S_OK;
@@ -463,7 +469,7 @@ HRESULT CBufferedPainter::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pB
 	if (FAILED(m_ib->Lock(0, NULL, (void**)&pIndices, 0)))
 	{
 		ErrorBox(K_ERR_WARNING, L"[ERROR] CBufferedPainter: Lock Index Buffer failed!");
-		return E_FAIL;
+		return hr;
 	}
 
 	for (int kk = 0; kk < m_nMaxTrisCnt; kk++)
@@ -491,13 +497,13 @@ HRESULT CBufferedPainter::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBa
 		&m_vb, NULL)))
 	{
 		ErrorBox(K_ERR_WARNING, L"[ERROR] CBufferedPainter::OnResetDevice: Create Vertex Buffer failed!");
-		return E_FAIL;
+		return hr;
 	}
 	//builds buffers too
 	if (FAILED(BuildBuffers()))
 	{
 		ErrorBox(K_ERR_WARNING, L"[ERROR] CBufferedPainter::OnResetDevice: BuildBuffers failed!");
-		return E_FAIL;
+		return hr;
 	}
 
 	return S_OK;
