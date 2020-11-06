@@ -81,30 +81,30 @@ public:
 	void						Init(int nMaxTrisCnt);
 
 	// Announce mesh editing start
-	HRESULT						BeginMesh(int &retMeshIdx);
+	OPRESULT					BeginMesh(int &retMeshIdx);
 
 	// Add triangle to current mesh
-	HRESULT						AddTriangles(_VERTEX_PNCT4T4 *points, int trisCount);
+	OPRESULT					AddTriangles(_VERTEX_PNCT4T4 *points, int trisCount);
 
 	// Announce mesh editing ended
-	HRESULT						EndMesh();
+	int							EndMesh();
 
 	// Empties all buffers
-	HRESULT						ClearBuffers();
+	OPRESULT					ClearBuffers();
 
 	// Builds vertex and index buffers. Call this before DrawMesh .
-	HRESULT						BuildBuffers();
+	OPRESULT					BuildBuffers();
 
 	// Draws a mesh by index
-	HRESULT						DrawMesh(int meshIdx, bool setFVF = true);
+	OPRESULT					DrawMesh(int meshIdx, bool setFVF = true);
 
 	// Returns number of triangles in mesh
 	const int					GetTrisCount(int meshIdx) const;
 
-	HRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
-	HRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
-	HRESULT OnLostDevice(void* pUserContext = NULL);
-	HRESULT OnDestroyDevice(void* pUserContext = NULL);
+	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
+	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
+	OPRESULT OnLostDevice(void* pUserContext = NULL);
+	OPRESULT OnDestroyDevice(void* pUserContext = NULL);
 };
 
 

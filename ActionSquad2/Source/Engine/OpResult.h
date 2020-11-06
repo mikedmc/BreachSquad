@@ -1,9 +1,15 @@
-#pragma once
+///-----------------------------------------------------------
+/// generic error class for return values (to replace HRESULT)
+///-----------------------------------------------------------
 
-//#TODO: constructor with printf format for message
+#pragma once
 
 #define OP_FAILED(er) ((((int)er.code)) < 0)
 #define OP_SUCCESS(er) ((((int)er.code)) >= 0)
+
+#ifndef V_OP_RETHR
+	#define V_OP_RETHR(x)           { if (OP_FAILED(x)) { return E_FAIL; } }
+#endif
 
 ///--- generic return values
 enum eOpResult {
@@ -13,29 +19,26 @@ enum eOpResult {
 };
 
 enum eOpSeverity {
-	K_OP_SEVERITY_FORGET = 0,
-	K_OP_SEVERITY_LOG,
-	K_OP_SEVERITY_WARNING,
-	K_OP_SEVERITY_ERROR,
+	K_SEVERITY_NONE = 0,
+	K_SEVERITY_LOG,
+	K_SEVERITY_WARNING,
+	K_SEVERITY_CRITICAL,
 };
 
-///-----------------------------------------------------------
-/// generic error class for return values (to replace HRESULT)
-///-----------------------------------------------------------
 class OPRESULT {
 public:
 	eOpResult			code;
 	eOpSeverity			severity;
-	WCHAR				message[256];
+	WCHAR				message[256]{};
 
 	// converts OPRESULT to HRESULT
 	operator HRESULT() const
 	{
 		return (code >= 0) ? S_OK : E_FAIL;
 	}
-
+	/*
 	// converts HRESULT to OPRESULT
-	OPRESULT(HRESULT hr, eOpSeverity eSeverity = K_OP_SEVERITY_FORGET)
+	OPRESULT(HRESULT hr, eOpSeverity eSeverity = K_SEVERITY_FORGET)
 	{
 		code = (hr >= 0) ? K_OP_OK : K_OP_FAILED;
 		severity = eSeverity;
@@ -43,41 +46,65 @@ public:
 
 		LogResult();
 	}
+	*/
 
-	OPRESULT(eOpResult eCode, eOpSeverity eSeverity = K_OP_SEVERITY_FORGET) 
+	OPRESULT(eOpResult eCode, eOpSeverity eSeverity = K_SEVERITY_NONE) 
 	{
 		code = eCode;
 		severity = eSeverity;
 		wcscpy_s(message, TEXT("No message"));
 
-		LogResult();
+		if (severity > K_SEVERITY_NONE)
+			LogResult();
 	}
 
-	OPRESULT(eOpResult eCode, const WCHAR * strMessage, eOpSeverity eSeverity = K_OP_SEVERITY_FORGET) 
+	OPRESULT(eOpResult eCode, const WCHAR * strMessage, eOpSeverity eSeverity = K_SEVERITY_NONE) 
 	{
 		code = eCode;
 		severity = eSeverity;
 		wcscpy_s(message, strMessage);
 
-		LogResult();
+		if (severity > K_SEVERITY_NONE)
+			LogResult();
 	}
+
+	OPRESULT(HRESULT hr, const WCHAR * strMessage, eOpSeverity eSeverity = K_SEVERITY_NONE)
+	{
+		code = (hr >= 0) ? K_OP_OK : K_OP_FAILED;
+		severity = eSeverity;
+		wsprintf(message, L"HRESULT[%d] %s", hr, strMessage);
+
+		if(severity > K_SEVERITY_NONE)
+			LogResult();
+	}
+
+
+	OPRESULT(eOpResult eCode, eOpSeverity eSeverity, WCHAR* szFormat, ...)
+	{
+		code = eCode;
+		severity = eSeverity;
+
+		va_list marker;
+		va_start(marker, szFormat);
+		wsprintf(message, szFormat, marker);
+		va_end(marker);
+
+		if (severity > K_SEVERITY_NONE)
+			LogResult();
+	}
+
 
 private:
 	// after setting all vars call this to show the return op onscreen
-	void LogResult()
+	inline void LogResult()
 	{
-		if (severity == K_OP_SEVERITY_LOG)
-		{
-			LOG(TEXT("OPRESULT[%d] %s"), code, message);
-		}
-		else if (severity == K_OP_SEVERITY_WARNING)
-		{
-			ErrorBox(K_ERR_WARNING, TEXT("OPRESULT[%d] %s"), code, message);
-		}
-		else if (severity == K_OP_SEVERITY_ERROR)
-		{
-			ErrorBox(K_ERR_CRITICAL, TEXT("OPRESULT[%d] %s"), code, message);
-		}
+		int nErrSeverity = K_ERR_LOG;
+		if (severity == K_SEVERITY_WARNING)
+			nErrSeverity = K_ERR_WARNING;
+		else if (severity == K_SEVERITY_CRITICAL)
+			nErrSeverity = K_ERR_CRITICAL;
+
+		ErrorBox(nErrSeverity, TEXT("OPRESULT[%d] %s"), code, message);
 	}
 };
 

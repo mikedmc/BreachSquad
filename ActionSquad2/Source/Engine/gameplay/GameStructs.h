@@ -7,10 +7,13 @@
 //total number of layers
 #define K_LVL_LAYERS_CNT 3
 
-class CTile {
+class CTile {						
 public:
 	int tileIDs[K_LVL_LAYERS_CNT];
 	RECT srcRects[K_LVL_LAYERS_CNT];
+	// precomputed UV coords (min and max)
+	Vec2 vUVmin[K_LVL_LAYERS_CNT];
+	Vec2 vUVmax[K_LVL_LAYERS_CNT];
 
 	CTile()
 	{
@@ -18,6 +21,9 @@ public:
 		{
 			tileIDs[kk] = -1;
 			SetRect(&srcRects[kk], 0, 0, 0, 0);
+			
+			vUVmin[kk] = Vec2(0.0f, 0.0f);
+			vUVmax[kk] = Vec2(0.0f, 0.0f);
 		}
 	}
 };

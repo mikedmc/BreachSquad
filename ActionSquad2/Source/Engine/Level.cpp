@@ -12736,9 +12736,7 @@ HRESULT CLevel::OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_D
 	V_RETURN(m_sprActors.OnCreateDevice(pd3dDevice));
 	V_RETURN(m_sprInterface.OnCreateDevice(pd3dDevice));
 	V_RETURN(m_texManager.OnCreateDevice(pd3dDevice));
-
 	V_RETURN(m_bufferedPainter.OnCreateDevice(pd3dDevice));
-
 	return S_OK;
 }
 
