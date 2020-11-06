@@ -453,6 +453,7 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 
 #include "Sprite.h"
 #include "BufferedPainter.h"
+#include "BufferedPainterQuad.h"
 #include "PolyFOV.h"  //se ocupa de gasirea poligonului vizibil al unei lumini
 #include "ParticlesManager.h"
 #include "SoundManager.h"

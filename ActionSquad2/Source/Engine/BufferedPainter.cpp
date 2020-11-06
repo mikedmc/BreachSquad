@@ -1,5 +1,5 @@
 #include "dxstdafx.h"
-#include "dxstdafx.h"
+#include "BufferedPainter.h"
 
 
 

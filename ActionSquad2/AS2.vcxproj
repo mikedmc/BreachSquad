@@ -224,6 +224,7 @@
     <ClInclude Include="Source\Engine\AppGlobals.h" />
     <ClInclude Include="Source\Engine\BitPacker.h" />
     <ClInclude Include="Source\Engine\BufferedPainter.h" />
+    <ClInclude Include="Source\Engine\BufferedPainterQuad.h" />
     <ClInclude Include="Source\Engine\CameraTransform.h" />
     <ClInclude Include="Source\Engine\Chapters.h" />
     <ClInclude Include="Source\Engine\ChatWnd.h" />
@@ -608,6 +609,7 @@
     <ClCompile Include="Source\Engine\BufferedPainter.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
+    <ClCompile Include="Source\Engine\BufferedPainterQuad.cpp" />
     <ClCompile Include="Source\Engine\CameraTransform.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>

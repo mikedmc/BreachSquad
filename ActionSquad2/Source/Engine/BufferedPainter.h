@@ -48,7 +48,7 @@ public:
  */
 
 ///-----------------------------------------------------------------------------------------------
-///	 BUFFERED PAINTER
+///	 BUFFERED PAINTER TRIANGLES
 ///  Adds geometry to meshes identified by index and then builds VB and IB and draws them
 ///-----------------------------------------------------------------------------------------------
 #define K_BP_SENTINEL_TRIS		10

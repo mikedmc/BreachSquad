@@ -9,7 +9,7 @@
 class CTileBlockMesh
 {
 public:
-	CBufferedPainter			m_Painter;
+	CBufferedPainterQuads		m_Painter;
 
 	RECTXYWH					m_bboxTL;					// BBOX in tiles
 	CAABB						m_bbox;						// BBOX in world coords
