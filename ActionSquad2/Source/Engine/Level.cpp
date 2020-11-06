@@ -12668,6 +12668,8 @@ void CLevel::Release()
 {
 	ClearVisibilityLists();
 
+	mapMesh.Release();
+
 	if (tiles != NULL)
 	{
 		for (int kk = 0; kk < levelSizeTL.w; kk++)
@@ -12726,7 +12728,7 @@ void CLevel::Release()
 
 ///--- framework implementations ---
 #pragma region FRAMEWORK_IMPL
-HRESULT CLevel::OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext )
+HRESULT CLevel::OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBBDesc, void* pUserContext )
 {
 	HRESULT hr = S_OK;
 	m_pDevice = pd3dDevice;
@@ -12737,10 +12739,11 @@ HRESULT CLevel::OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_D
 	V_RETURN(m_sprInterface.OnCreateDevice(pd3dDevice));
 	V_RETURN(m_texManager.OnCreateDevice(pd3dDevice));
 	V_RETURN(m_bufferedPainter.OnCreateDevice(pd3dDevice));
+	V_OP_RETHR(mapMesh.OnCreateDevice(pd3dDevice));
 	return S_OK;
 }
 
-HRESULT CLevel::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext )
+HRESULT CLevel::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBBdesc, void* pUserContext )
 {
 	HRESULT hr = S_OK;
 	m_pDevice = pd3dDevice;
@@ -12789,8 +12792,8 @@ HRESULT CLevel::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DE
 
 	//--- face textura pentru RT de compozitie ---
 	if (FAILED(D3DXCreateTexture(pd3dDevice,
-		pBackBufferSurfaceDesc->Width,
-		pBackBufferSurfaceDesc->Height,
+		pBBdesc->Width,
+		pBBdesc->Height,
 		1,
 		D3DUSAGE_RENDERTARGET,
 		D3DFMT_X8R8G8B8,   //nu am nevoie de alpha
@@ -12836,6 +12839,7 @@ HRESULT CLevel::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DE
 	V_RETURN(m_texManager.OnResetDevice(pd3dDevice));
 
 	V_RETURN(m_bufferedPainter.OnResetDevice(pd3dDevice));
+	V_OP_RETHR(mapMesh.OnResetDevice(pd3dDevice));
 
 	return S_OK;
 }
@@ -12860,6 +12864,7 @@ HRESULT CLevel::OnLostDevice( void* pUserContext )
 	m_texManager.OnLostDevice();
 
 	m_bufferedPainter.OnLostDevice();
+	mapMesh.OnLostDevice();
 
 	return S_OK;
 }
@@ -12875,6 +12880,7 @@ HRESULT CLevel::OnDestroyDevice( void* pUserContext )
 	m_texManager.OnDestroyDevice();
 
 	m_bufferedPainter.OnDestroyDevice();
+	mapMesh.OnDestroyDevice();
 
 	return S_OK;
 }

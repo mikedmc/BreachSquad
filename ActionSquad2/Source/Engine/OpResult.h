@@ -89,7 +89,7 @@ public:
 
 		va_list marker;
 		va_start(marker, szFormat);
-		wsprintf(message, szFormat, marker);
+		wvsprintf(message, szFormat, marker);
 		va_end(marker);
 
 		if (severity > K_SEVERITY_NONE)

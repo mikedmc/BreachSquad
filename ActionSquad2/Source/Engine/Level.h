@@ -12,6 +12,7 @@
 #include "gameplay/Active.h"
 #include "gameplay/Actor.h"
 
+#include "gameplay/TileBlockMesh.h"
 
 //this enum must be sincronizat with AI_states list (level.cpp)
 enum AI_STATE 
@@ -444,6 +445,7 @@ public:
 	int						Local_ComputeMissionXP(int nStars);
 
 ///-- update/paint --	
+	CTileBlockMeshManager	mapMesh;				// Mesh manager for the map
 	// Main level Update
 	void					Update(float dTime_original);
 

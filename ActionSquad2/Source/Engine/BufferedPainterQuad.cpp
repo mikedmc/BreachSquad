@@ -113,6 +113,9 @@ OPRESULT CBufferedPainterQuads::BuildBuffers()
 {
 	EndMesh();
 
+	if (m_vb == nullptr)
+		return OPRESULT(K_OP_FAILED, L"CBufferedPainterQuads::BuildBuffers(): VB is null!", K_SEVERITY_WARNING);
+
 	if (m_nVertexCursor == 0)
 		return K_OP_OK;
 

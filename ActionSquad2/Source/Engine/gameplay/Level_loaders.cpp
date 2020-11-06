@@ -1248,6 +1248,9 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	LOG(L"Game:: Total Targets:[%d] Hostages:[%d]", m_arrStats[K_LVL_STATS_TARGETS_TOTAL], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]);
 #endif
 
+	// create meshes
+	V_OP_RETHR(mapMesh.BuildBuffers(tiles, levelSizeTL, m_vLevelOrigin));
+
 	return hr;
 }
 

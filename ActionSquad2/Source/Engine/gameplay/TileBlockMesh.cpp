@@ -4,7 +4,7 @@
 CTileBlockMesh::CTileBlockMesh()
 {
 	m_Painter.Init(512);
-	memset(m_arrMeshIdx, -1, sizeof(int));
+	memset(m_arrMeshIdx, -1, sizeof(int) * ARRAY_SIZE(m_arrMeshIdx));
 }
 
 CTileBlockMesh::~CTileBlockMesh()
@@ -42,6 +42,9 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 				for (int xx = 0; xx < m_bboxTL.w; xx++)
 				{
 					CTile* tl = &map[m_bboxTL.x + xx][m_bboxTL.y + yy];
+					// skip empty tiles
+					if (tl->tileIDs[lay] < 0)
+						continue;
 					// add geometry
 					SET_PNCT4T4(&arrVerts[nCur++], Vec3(m_bbox.vMin.x + xx * K_TILE_SIZE, m_bbox.vMin.y + yy * K_TILE_SIZE, 0.0f), 
 						Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
@@ -60,6 +63,8 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 
 			m_Painter.AddQuads(arrVerts, nCur / 4);
 			int nQuads = m_Painter.EndMesh();
+
+			LOG("map lay:%d pos:[%d,%d] WH:[%d,%d] quads:%d", lay, m_bboxTL.x, m_bboxTL.y, m_bboxTL.w, m_bboxTL.h, nQuads);
 			if (nQuads > 0)
 				bIsEmpty = false;				// we have at least some tris so block is not empty
 			else
@@ -69,7 +74,11 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 
 	if (bIsEmpty)
 	{
-		return OPRESULT(K_OP_FAILED, L"Empty block detected.", K_SEVERITY_WARNING);
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_LOG, L"Empty block detected! pos:%d,%d ", m_bboxTL.x, m_bboxTL.y);
+	}
+	else
+	{
+		//m_Painter.BuildBuffers();
 	}
 
 	return K_OP_OK;
@@ -77,7 +86,7 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 
 void CTileBlockMesh::Clear()
 {
-	memset(m_arrMeshIdx, -1, sizeof(int));
+	memset(m_arrMeshIdx, -1, sizeof(int) * ARRAY_SIZE(m_arrMeshIdx));
 	m_Painter.ClearBuffers();
 }
 
@@ -107,8 +116,8 @@ OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2
 		return OPRESULT(K_OP_INVALIDARGS, L"BuildBuffers:: Map param is null!", K_SEVERITY_WARNING);
 
 	// parse map block by block
-	int blocksX = (mapSizeTL.w / K_TBM_BLOCK_W) + ((mapSizeTL.w % K_TBM_BLOCK_W) > 0) ? 1 : 0;
-	int blocksY = (mapSizeTL.h / K_TBM_BLOCK_H) + ((mapSizeTL.h % K_TBM_BLOCK_H) > 0) ? 1 : 0;
+	int blocksX = (mapSizeTL.w / K_TBM_BLOCK_W) + (((mapSizeTL.w % K_TBM_BLOCK_W) > 0) ? 1 : 0);
+	int blocksY = (mapSizeTL.h / K_TBM_BLOCK_H) + (((mapSizeTL.h % K_TBM_BLOCK_H) > 0) ? 1 : 0);
 
 	for (int blY = 0; blY < blocksY; blY++)
 	{
@@ -117,10 +126,12 @@ OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2
 			CTileBlockMesh* tbm = new CTileBlockMesh();
 			if (OP_FAILED(tbm->BuildBuffers(POINTXY_INT(blX * K_TBM_BLOCK_W, blY * K_TBM_BLOCK_H), map, mapSizeTL, vLevelOrigin)))
 			{
+				LOG("Block NOT added!");
 				delete tbm;
 				continue;
 			}
 			// add block if it could be created
+			LOG("Block added!");
 			arrBlocks.Add(tbm);
 		}
 	}
