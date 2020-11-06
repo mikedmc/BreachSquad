@@ -24,6 +24,8 @@ public:
 	// Receives pointer to map tiles
 	OPRESULT					BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZEWH mapSizeTL, Vec2 vLevelOrigin);
 
+	void						Clear();
+
 	inline void					PaintLayer(int nLayer, bool bSetFVF = false) 
 	{
 		assert((nLayer >= 0) && (nLayer < K_TBM_MAX_LAYERS));

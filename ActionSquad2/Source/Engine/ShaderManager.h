@@ -67,6 +67,16 @@ typedef struct _tagVERTEX_PC
 	static const DWORD FVF;
 } _VERTEX_PC;
 
+//--- setters ---
+inline void SET_PNCT4T4(_VERTEX_PNCT4T4 * vert, Vec3 pos, Vec3 n, DWORD color, Vec4 tex1, Vec4 tex2)
+{
+	assert(vert != nullptr);
+	vert->pos = pos;
+	vert->n = n;
+	vert->color = color;
+	vert->tex1 = tex1;
+	vert->tex2 = tex2;
+}
 
 //-=-=-= PS/VS nodes =-=-=-
 struct VSnode

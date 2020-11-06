@@ -10,6 +10,9 @@
 #ifndef V_OP_RETHR
 	#define V_OP_RETHR(x)           { if (OP_FAILED(x)) { return E_FAIL; } }
 #endif
+#ifndef V_OP_RET
+	#define V_OP_RET(x)           { if (OP_FAILED(x)) { return x; } }
+#endif
 
 ///--- generic return values
 enum eOpResult {

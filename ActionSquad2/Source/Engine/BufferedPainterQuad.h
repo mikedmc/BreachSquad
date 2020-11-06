@@ -38,7 +38,7 @@ public:
 	// Add quad to current mesh. Vertices must be in clockwise order
 	OPRESULT					AddQuads(_VERTEX_PNCT4T4 *points, int quadsCount);
 
-	// Announce mesh editing ended
+	// Announce mesh editing ended and returns number of quads added
 	int							EndMesh();
 
 	// Empties all buffers

@@ -82,7 +82,7 @@ int CBufferedPainterQuads::EndMesh()
 
 	m_bMeshStarted = false;
 
-	int nTris = 0;
+	int nQuads = 0;
 	if (m_nMeshesCnt == 0) //is it the first mesh?
 	{
 		m_nQuadsOffsets[m_nMeshesCnt] = 0;
@@ -91,11 +91,11 @@ int CBufferedPainterQuads::EndMesh()
 	{
 		m_nQuadsOffsets[m_nMeshesCnt] = m_nQuadsOffsets[m_nMeshesCnt - 1] + m_nQuadsPerMesh[m_nMeshesCnt - 1];
 	}
-	nTris = m_nQuadsPerMesh[m_nMeshesCnt];
+	nQuads = m_nQuadsPerMesh[m_nMeshesCnt];
 	//get to next mesh
 	m_nMeshesCnt++;
 
-	return nTris;
+	return nQuads;
 }
 
 OPRESULT CBufferedPainterQuads::ClearBuffers()
