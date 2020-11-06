@@ -1088,7 +1088,8 @@ void CControlsEditor::Update(float dTime)
 				}
 			}
 
-			
+			// remove focus when clicking outside the imgui windows
+			ImGui::SetWindowFocus(NULL);
 		}
 	}	
 }
@@ -1417,7 +1418,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		ImGuiViewport * vp = ImGui::GetWindowViewport();
 		
 		///--- TOOLS WINDOW
-		ImGui::Begin("Tools");
+		ImGui::Begin("Tools", null, ImGuiWindowFlags_NoNavInputs);
 		if (ImGui::Button("Hide BBox", ImVec2(80, 0)))
 		{
 			hideBBoxes = !hideBBoxes;
@@ -1452,7 +1453,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		///--- CONTROLS TEMPLATES
 		if (vp)
 			ImGui::SetNextWindowPos(vp->Pos, ImGuiCond_Once);
-		ImGui::Begin("Controls Templates");
+		ImGui::Begin("Controls Templates", null, ImGuiWindowFlags_NoNavInputs);
 
 		vector<string> arrItems;
 		for (int ii = 0; ii < ctrlTemplates.Count(); ii++)
@@ -1483,7 +1484,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		ImGui::End();
 
 		///--- LAYERS LIST 
-		ImGui::Begin("Interfaces");
+		ImGui::Begin("Interfaces", null, ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus );
 
 		vector<string> arrLayerNames;
 		int nLayersCnt = UTGetControlsManager().layersDefinitions.Count();
