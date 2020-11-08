@@ -12006,17 +12006,6 @@ void CLevel::Paint()
 	//--- paint thunder ---
 	if ((m_fThunderTimer > 0.0f) && (m_fThunderTimer < 0.4f) && (randint(1000) < 500) && (!UTGetControlsManager().bIsBlocking) && (!DXUTIsTimePaused()) && (!m_bInsideHiddenRoom))
 	{
-		AdditiveBlendingON(m_pDevice, m_pSprite);
-
-		D3DXMATRIXA16 mattranslg;
-		RECTXYWH_F bbox = m_sprInterface.GetAFrameBBox_real(ANM_IGM_INTERFACE_SPR_VIGNETTES, 0);
-		D3DXMatrixAffineTransformation2D(&mattranslg, UTGetAppClass().g_rectRender.w / bbox.w, NULL, 0.0f, &D3DXVECTOR2(0.0f, 0.0f));
-		m_pSprite->SetTransform(&mattranslg);
-		float alpha = 0.4f + randfloat(0.6f);
-		CSprite::paintFrame(&m_sprInterface, 0.0f, 0.0f, ANM_IGM_INTERFACE_SPR_VIGNETTES, 0, D3DCOLOR_FFFA(alpha));
-		m_pSprite->SetTransform(&g_matIdentity);
-
-		AdditiveBlendingOFF(m_pDevice, m_pSprite);
 	}
 
 

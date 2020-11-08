@@ -107,6 +107,7 @@ CTileBlockMeshManager::~CTileBlockMeshManager()
 
 void CTileBlockMeshManager::Release()
 {
+	arrVisible.Clear();
 	SAFE_DELETE_GROWABLE_ARRAY(arrBlocks);
 }
 
@@ -134,6 +135,32 @@ OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2
 			LOG("Block added!");
 			arrBlocks.Add(tbm);
 		}
+	}
+
+	return K_OP_OK;
+}
+
+int CTileBlockMeshManager::BuildVisibilityList(RECTXYWH_F camRect)
+{
+	arrVisible.Clear();
+	for (int kk = 0; kk < arrBlocks.GetSize(); kk++)
+	{
+		CAABB camAABB(camRect);
+		if (camAABB.Intersects(&arrBlocks[kk]->m_bbox))
+			arrVisible.Add(arrBlocks[kk]);
+	}
+	return arrVisible.Count();
+}
+
+OPRESULT CTileBlockMeshManager::PaintLayer(int layerIdx)
+{
+	if (arrVisible.Count() <= 0)
+		return OPRESULT(K_OP_FAILED, L"No visible blocks to paint!", K_SEVERITY_NONE);
+
+	for (int kk = 0; kk < arrVisible.Count() ; kk++)
+	{
+		CTileBlockMesh* tbm = arrVisible[kk];
+		tbm->PaintLayer(layerIdx, false);
 	}
 
 	return K_OP_OK;

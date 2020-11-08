@@ -124,6 +124,10 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		ErrorBox(K_ERR_CRITICAL, L"Couldn't load tileset texture: %s", Path);
 		return E_FAIL;
 	}
+	// SAVE TEXTURE SIZE
+	Vec2 vTilesetSize = m_texManager.GetTextureSize(m_tilesTexBaseIdx);
+	assert(vTilesetSize.x > 0.0f && vTilesetSize.y > 0.0f);
+
 	//#TODO: deletes the last 4 characters (.png) and adds another ending... should be handled differently (from the editor)
 	wcsMediaAddr[wcslen(wcsMediaAddr) - 4] = 0;
 	StringCchCat(wcsMediaAddr, MAX_PATH, L"_n.png");
@@ -173,14 +177,21 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	{
 		for (int xx = 0; xx < levelSizeTL.w; xx++)
 		{
+			CTile* tl = &tiles[xx][yy];
 			for (int kk = 0; kk < nLayersCnt; kk++)
 			{
 				//nivel
 				int tileID = OS_freadInt32(fl);
-				tiles[xx][yy].tileIDs[kk] = tileID;
+				tl->tileIDs[kk] = tileID;
 				if (tileID >= 0)
 				{
-					SetRect(&tiles[xx][yy].srcRects[kk], (tileID % tilesetColumns) * tileW, (tileID / tilesetColumns) * tileH, (tileID % tilesetColumns) * tileW + tileW, (tileID / tilesetColumns) * tileH + tileH);
+					RECT srcrect;
+					SetRect(&srcrect, (tileID % tilesetColumns) * tileW, (tileID / tilesetColumns) * tileH, 
+						(tileID % tilesetColumns) * tileW + tileW, (tileID / tilesetColumns) * tileH + tileH);
+					tiles[xx][yy].srcRects[kk] = srcrect;
+					//#TODO: aici trebuie sa le scada jumatate de texel daca e DX, si sa verifici ca afiseaza si ultimul pixel din textura
+					tl->vUVmin[kk] = Vec2(srcrect.left / vTilesetSize.x, srcrect.top / vTilesetSize.y);
+					tl->vUVmax[kk] = Vec2(srcrect.right / vTilesetSize.x, srcrect.bottom / vTilesetSize.y);
 				}
 			}
 		}
@@ -1306,6 +1317,9 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 	int nPrefabOriginY = OS_freadInt16(fl);
 	int nPrefabOriginX = OS_freadInt16(fl);
 
+	Vec2 vTilesetSize = m_texManager.GetTextureSize(m_tilesTexBaseIdx);
+	assert(vTilesetSize.x > 0.0f && vTilesetSize.y > 0.0f);
+
 	//read tiles, not a rare matrix
 	for (int yy = 0; yy < levelH; yy++)
 	{
@@ -1323,10 +1337,16 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 				if ((bAddOnly) && (tileID < 0))
 					continue;
 				tiles[nTLx][nTLy].tileIDs[kk] = tileID;
+				RECT srcrect;
 				if (tileID >= 0)
-					SetRect(&tiles[nTLx][nTLy].srcRects[kk], (tileID % tilesetColumns) * tileW, (tileID / tilesetColumns) * tileH, (tileID % tilesetColumns) * tileW + tileW, (tileID / tilesetColumns) * tileH + tileH);
+					SetRect(&srcrect, (tileID % tilesetColumns) * tileW, (tileID / tilesetColumns) * tileH, (tileID % tilesetColumns) * tileW + tileW, (tileID / tilesetColumns) * tileH + tileH);
 				else
-					SetRect(&tiles[nTLx][nTLy].srcRects[kk], 0, 0, 0, 0);
+					SetRect(&srcrect, 0, 0, 0, 0);
+
+				tiles[nTLx][nTLy].srcRects[kk] = srcrect;
+				//#TODO: aici trebuie sa le scada jumatate de texel daca e DX, si sa verifici ca afiseaza si ultimul pixel din textura
+				tiles[nTLx][nTLy].vUVmin[kk] = Vec2(srcrect.left / vTilesetSize.x, srcrect.top / vTilesetSize.y);
+				tiles[nTLx][nTLy].vUVmax[kk] = Vec2(srcrect.right / vTilesetSize.x, srcrect.bottom / vTilesetSize.y);
 			}
 		}
 	}

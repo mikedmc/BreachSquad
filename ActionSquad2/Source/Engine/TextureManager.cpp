@@ -35,6 +35,13 @@ LPDIRECT3DTEXTURE9 CTextureManager::GetTexture(int nTexIdx)
 }
 
 
+Vec2 CTextureManager::GetTextureSize(int nTexIdx)
+{
+	if (nTexIdx < 0 || nTexIdx >= m_Texs.GetSize())
+		return Vec2(0.0f, 0.0f);
+	return Vec2(m_Texs[nTexIdx]->info.Width, m_Texs[nTexIdx]->info.Height);
+}
+
 HRESULT	CTextureManager::AddTexture(const WCHAR* fileName, int *retTexIdx, D3DFORMAT format, DWORD filter, DWORD mipFilter, UINT nSetWidth, UINT nSetHeight)
 {
 	int texIdx = -1;

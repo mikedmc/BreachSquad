@@ -38,6 +38,7 @@ public:
 	//Replaces a loaded texture with another one. Checks to see if it is the same.
 	HRESULT ReplaceTexture(int texIdx, const WCHAR* fileName, D3DFORMAT format, DWORD filter = D3DX_DEFAULT, DWORD mipFilter = D3DX_DEFAULT);
 	LPDIRECT3DTEXTURE9	GetTexture(int nTexIdx);
+	Vec2 GetTextureSize(int nTexIdx);
 
 	CGrowableArray<TexNode*>	m_Texs;
 	TexNode* GetTextureNode(int nTexIdx);

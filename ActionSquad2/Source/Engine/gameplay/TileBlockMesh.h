@@ -38,6 +38,8 @@ class CTileBlockMeshManager
 {
 private:
 	PDEVICE							m_pDevice;
+	// array of visible blocks
+	CFixedArray<CTileBlockMesh*, 8> arrVisible;
 public:
 	CGrowableArray<CTileBlockMesh*> arrBlocks;
 
@@ -45,8 +47,13 @@ public:
 	~CTileBlockMeshManager();
 
 	void						Release();
-	// Builds all buffers for specified map
+	// Builds all buffers for specified map, called after loading a level and when we have changes
 	OPRESULT					BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2 vLevelOrigin);
+	// Creates list of visible blocks. camRect is the XY plane of the AABB of the camera frustum.
+	// Must be called before PaintLayer.
+	int							BuildVisibilityList(RECTXYWH_F camRect);
+	// Paints tile layer for visible buffers
+	OPRESULT					PaintLayer(int layerIdx);
 
 	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
 	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
