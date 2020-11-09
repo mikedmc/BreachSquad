@@ -50,6 +50,7 @@ public:
 	HRESULT					BeginSceneRT(CEngineRenderTarget* pRT);
 	// Called when drawing finished so we flush everything and announce that won't paint to the RT anylonger
 	HRESULT					EndSceneRT(UINT32 dwID);
+	HRESULT					EndSceneRT(CEngineRenderTarget* pRT);
 	// Releases all allocated render targets and deletes them from the RT collection
 	void					Release();
 	// Returns pointer to RT or null if ID not found

@@ -92,7 +92,8 @@ CApplication::CApplication()
 	//keep real screen and virtual screen sizes
 	g_rectRender = RECTXYWH_F(0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h);
 	g_rectScreen = RECTXYWH_F(0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h);
-	g_rectGameScreen = RECTXYWH_F(0.0f, 0.0f, K_GAME_WIDTH, (g_rectRender.h / g_rectRender.w) * K_GAME_WIDTH);
+	g_rectGameScreen = RECTXYWH_F(0.0f, 0.0f, (g_rectRender.w / g_rectRender.h) * K_GAME_HEIGHT, K_GAME_HEIGHT);
+	g_rectRT = RECTXYWH_F(0.0f, 0.0f, (g_rectRender.w / g_rectRender.h) * K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F, K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F);
 	//dreptunghiul de mai jos aproximeaza rezolutia de W/240 pixeli si e fix ca sa arate interfetele mereu la fel
 	g_rect240hWorld = RECTXYWH_F(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * 240.0f), 240.0f);
 	g_rect480hWorld = RECTXYWH_F(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * 480.0f), 480.0f);
@@ -225,6 +226,8 @@ void CApplication::Init()
 	
 	g_cam480hScreen.SetCamAnimationNone();
 	g_cam480hScreen.SetPixelPerfect(true);
+
+	g_camRT.SetCamAnimationNone();
 	//-- resolutions --
 	g_arrResolutions.RemoveAll();
 }
@@ -259,16 +262,17 @@ void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 
 	g_rectRender = RECTXYWH_F(g_letterbox.w, g_letterbox.h, szRender.w, szRender.h);
 
-	g_rectGameScreen = RECTXYWH_F(0.0f, 0.0f, K_GAME_WIDTH, fAspectInv * K_GAME_WIDTH);
+	g_rectGameScreen = RECTXYWH_F(0.0f, 0.0f, fAspect * K_GAME_HEIGHT, K_GAME_HEIGHT);
 	g_rect240hWorld = RECTXYWH_F(0.0f, 0.0f, (fAspect * 240.0f), 240.0f);
 	g_rect480hWorld = RECTXYWH_F(0.0f, 0.0f, (fAspect * 480.0f), 480.0f);
+	g_rectRT = RECTXYWH_F(0.0f, 0.0f, fAspect * K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F, K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F);
 	D3DXMatrixOrthoOffCenterLH(&g_matProj, g_rectScreen.x + 0.5f, g_rectScreen.w + 0.5f, g_rectScreen.h + 0.5f, g_rectScreen.y + 0.5f, 0.0f, 1.0f);
 
 	g_camScreen.SetWorldBounds(g_rectScreen, true, K_CAMTRANS_AXIS_V, g_rectScreen.h, g_rectScreen.h);
 	g_camScreen.InitCamera(g_rectScreen, g_rectScreen.h, K_CAMTRANS_AXIS_V, g_rectScreen.Center());
 
-	g_camGameScreen.SetWorldBounds(g_rectGameScreen, true, K_CAMTRANS_AXIS_H, K_GAME_WIDTH, K_GAME_WIDTH);
-	g_camGameScreen.InitCamera(g_rectRender, K_GAME_WIDTH, K_CAMTRANS_AXIS_H, g_rectGameScreen.Center());
+	g_camGameScreen.SetWorldBounds(g_rectGameScreen, true, K_CAMTRANS_AXIS_V, K_GAME_HEIGHT, K_GAME_HEIGHT);
+	g_camGameScreen.InitCamera(g_rectRender, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, g_rectGameScreen.Center());
 
 	g_cam240hScreen.SetWorldBounds(g_rect240hWorld, true, K_CAMTRANS_AXIS_V, g_rect240hWorld.h, g_rect240hWorld.h);
 	g_cam240hScreen.InitCamera(g_rectRender, g_rect240hWorld.h, K_CAMTRANS_AXIS_V, g_rect240hWorld.Center());
@@ -276,6 +280,8 @@ void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 	g_cam480hScreen.SetWorldBounds(g_rect480hWorld, true, K_CAMTRANS_AXIS_V, g_rect480hWorld.h, g_rect480hWorld.h);
 	g_cam480hScreen.InitCamera(g_rectRender, g_rect480hWorld.h, K_CAMTRANS_AXIS_V, g_rect480hWorld.Center());
 
+	g_camRT.SetWorldBounds(g_rectRT, true, K_CAMTRANS_AXIS_V, g_rectRT.h, g_rectRT.h);
+	g_camRT.InitCamera(g_rectRender, g_rectRT.h, K_CAMTRANS_AXIS_V, g_rectRT.Center());
 	//#HACK: set main flag for resolution change 
 	g_bLevelNeedsUpdate = true;
 }
@@ -286,6 +292,7 @@ void CApplication::Update(float dTime)
 	g_camGameScreen.Update(dTime);
 	g_cam240hScreen.Update(dTime);
 	g_cam480hScreen.Update(dTime);
+	g_camRT.Update(dTime);
 }
 
 bool CApplication::IsOnlyInstance(LPCTSTR className)

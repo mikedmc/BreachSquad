@@ -53,7 +53,7 @@ public:
 
 	// Creates list of visible blocks. camRect is the XY plane of the AABB of the camera frustum.
 	// Must be called before PaintLayer.
-	int							BuildVisibilityList(RECTXYWH_F camRect);
+	int							UpdateVisibility(RECTXYWH_F camRect);
 
 	// Paints tile layer for visible buffers
 	OPRESULT					PaintLayer(int layerIdx);

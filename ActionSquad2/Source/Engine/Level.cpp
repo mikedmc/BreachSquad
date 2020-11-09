@@ -2447,7 +2447,7 @@ void CLevel::PlayActorSoundVerse(CActor* actor, EActorSoundVerse sVerse, bool bP
 	//actually play the sound
 	//play only nearby sounds
 	D3DXVECTOR2 vDist(actor->pos.x - m_camLevel.GetCamPos().x, actor->pos.y - m_camLevel.GetCamPos().y);
-	if (D3DXVec2Length(&vDist) < K_GAME_HALF_WIDTH * 1.5f)
+	if (D3DXVec2Length(&vDist) < K_GAME_HALF_HEIGHT * 1.5f)
 	{
 		SND_PLAY_POSITIONAL(actor->templateActor.soundIDs[(int)sVerse][nVariation], actor->posHeart);
 	}
@@ -2973,7 +2973,7 @@ void CLevel::BuildVisibilityLists()
 	RECTXYWH_F camrect_old = m_camLevel.GetCamWorldAABB();
 	//build a camera view rectangle constant across different resolutions so it doesn't desync when on multiplayer
 	//it will need intervention if camera constraint changes axis in order to maintain maximum visible area
-	SIZEWH_F camrectsz(K_GAME_WIDTH, K_GAME_HEIGHT_MAX);
+	SIZEWH_F camrectsz(K_GAME_WIDTH_MAX, K_GAME_HEIGHT);
 	RECTXYWH_F camrect(camrect_old.CenterX() - camrectsz.w * 0.5f, camrect_old.CenterY() - camrectsz.h * 0.5f, camrectsz.w, camrectsz.h);
 	//maximize camrect vertically
 	CAABB camaabb(D3DXVECTOR2(camrect.x, camrect.y), D3DXVECTOR2(camrect.Right(), camrect.Bottom()));
@@ -10600,7 +10600,7 @@ void CLevel::Update(float dTime_original)
 	}
 
 	//handles render size changes
-	m_camLevel.SetViewport(UTGetAppClass().g_rectRender); 
+	m_camLevel.SetViewport(UTGetAppClass().g_rectRT); 
 	//daca nu are target se uita dupa players (media pozitiilor lor)
 	if (m_camTargetActive == null)
 	{
@@ -11980,6 +11980,96 @@ HRESULT CLevel::PaintComposition_nothing()
 
 	V(m_pRT_final->EndScene(0));
 	return S_OK;
+}
+
+OPRESULT CLevel::PaintDeferredBuffers()
+{
+	HRESULT hr = S_OK;
+
+	///----------------------------------------------------
+	/// COLOR MAP
+	///----------------------------------------------------
+	CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_COLORDEPTHSTENCIL);
+	if (pRT != null)
+	{
+		hr = UTGetRTManager().BeginSceneRT(pRT);
+		if (SUCCEEDED(hr))
+		{
+			// Clear the render target and the zbuffer 
+			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0));
+
+			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
+			D3DXMATRIXA16 matProj;
+			D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
+			m_pDevice->SetTransform(D3DTS_PROJECTION, &matProj);
+
+			m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+			m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
+
+			RenderPass(K_LVL_RP_COLORS);
+
+			V(UTGetRTManager().EndSceneRT(pRT));
+
+		}
+	}
+
+	return K_OP_OK;
+}
+
+OPRESULT CLevel::RenderPass(eLVLRenderPass ePass)
+{
+	if (ePass != K_LVL_RP_COLORS)
+		return K_OP_FAILED;
+
+	D3DXMATRIXA16	matView;
+
+	RECTXYWH_F		camrect = m_camLevel.GetCamWorldAABB();
+	CAABB			camAABB(camrect.x, camrect.y, camrect.Right(), camrect.Bottom());
+
+	//locally used temp matrix
+	D3DXMATRIXA16	matlocal;
+
+	///----------------------------------------------------
+	/// INITIAL SETUP
+	///----------------------------------------------------
+
+	m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
+
+	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+
+	m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	m_pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	//#IMPORTANT: we need separate alpha blending or it will look bad when blending alpha values between them.
+	//eg: if we blend semitransparent things on top of fully opaque walls, the walls become transparent
+	//necessary but not really well supported. Better with a shader and custom sprite painter
+	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
+	{
+		m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, true);
+		m_pDevice->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_SRCALPHA);
+		m_pDevice->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_DESTALPHA);
+		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
+	}
+
+	D3DXMatrixAffineTransformation2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &D3DXVECTOR2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
+	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
+	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+
+
+	// paint tiles
+
+	mapMesh.UpdateVisibility(camrect);
+
+	m_pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
+	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(g_level.m_tilesTexBaseIdx));
+
+	mapMesh.PaintLayer(0);
+	mapMesh.PaintLayer(1);
+	mapMesh.PaintLayer(2);
+
+	return K_OP_FAILED;
 }
 
 void CLevel::Paint()

@@ -152,7 +152,7 @@ OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2
 	return K_OP_OK;
 }
 
-int CTileBlockMeshManager::BuildVisibilityList(RECTXYWH_F camRect)
+int CTileBlockMeshManager::UpdateVisibility(RECTXYWH_F camRect)
 {
 	arrVisible.Clear();
 	for (int kk = 0; kk < arrBlocks.GetSize(); kk++)

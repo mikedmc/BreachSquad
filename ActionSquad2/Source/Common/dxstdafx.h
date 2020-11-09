@@ -307,10 +307,9 @@ enum eGameMode {
 enum ERTIDChannel {
 	K_RTID_NONE = 0,
 
-	K_RTID_COLORMAP = 1,
-	K_RTID_NORMALMAP = 2,
-	K_RTID_SPECULARMAP = 3,
-	K_RTID_FINAL = 4,
+	K_RTID_COLORDEPTHSTENCIL = 1,	// has depth and stencil
+	K_RTID_TEMP1 = 2,				// just colors
+	K_RTID_FINAL = 3,				// just colors
 
 	K_RTIDS_COUNT
 };
@@ -326,12 +325,18 @@ enum ETexChannel {
 ///--- CONSTANTE JOC ---
 #define K_TILE_SIZE			16
 #define K_TILE_HSIZE		8
-//aici setam numarul de tiles ce incap pe orizontala ca sa tinem fix acest numar
-#define K_GAME_WIDTH_TL			24
-#define K_GAME_WIDTH			(K_TILE_SIZE * K_GAME_WIDTH_TL)
-#define K_GAME_HALF_WIDTH		((K_TILE_SIZE * K_GAME_WIDTH_TL) / 2)
-#define K_GAME_HEIGHT_MAX		(K_GAME_WIDTH / K_WINDOW_ASPECT_RATIO_MIN)
-#define K_GAME_HALF_HEIGHT_MAX  (K_GAME_HALF_WIDTH / K_WINDOW_ASPECT_RATIO_MIN)
+
+// number of vertical visible tiles in a screen
+#define K_GAME_HEIGHT_TL			15
+// game scaling to final RT (pixel size)
+#define K_GAME_PIXEL_SIZE			3
+#define K_GAME_PIXEL_SIZE_F			3.0f
+
+#define K_GAME_HEIGHT				(K_TILE_SIZE * K_GAME_HEIGHT_TL)
+#define K_GAME_HALF_HEIGHT			(K_GAME_HEIGHT / 2)
+#define K_GAME_WIDTH_MIN			(K_GAME_HEIGHT * K_WINDOW_ASPECT_RATIO_MIN)
+#define K_GAME_WIDTH_MAX			(K_GAME_HEIGHT * K_WINDOW_ASPECT_RATIO_MAX)
+
 ///--- CLEAR COLOR ---
 #define K_GAME_CLEAR_COLOR	0x00000066
 // splashscreen show time

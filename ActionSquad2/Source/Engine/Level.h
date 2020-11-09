@@ -458,6 +458,10 @@ public:
 	//just clears the compositing buffer
 	HRESULT					PaintComposition_nothing();
 
+	//#TODO: to be replaced with generic function that takes a "channel" param
+	OPRESULT				PaintDeferredBuffers();
+	OPRESULT				RenderPass(eLVLRenderPass ePass);
+
 	// level paint into composition texture 
 	void					Paint();
 	// paints final res effects (water, distortion, icons, etc)

@@ -93,6 +93,20 @@ HRESULT CRTManager::EndSceneRT(UINT32 dwID)
 	return hr;
 }
 
+HRESULT CRTManager::EndSceneRT(CEngineRenderTarget* pRT)
+{
+	HRESULT hr = S_OK;
+	//end scene paint/pass
+	if ((pRT != null) && (pRT->m_pRenderToSurface != null))
+	{
+		hr = pRT->m_pRenderToSurface->EndScene(0);
+	}
+	else
+		ErrorBox(K_ERR_WARNING, L"[WARNING]CRTManager: EndSceneRT: failed!");
+
+	return hr;
+}
+
 void CRTManager::Release()
 {
 	for (int kk = 0; kk < arrRT.nCount; kk++)

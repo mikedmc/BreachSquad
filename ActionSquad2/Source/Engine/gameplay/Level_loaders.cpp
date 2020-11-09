@@ -1170,7 +1170,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_HiddenRoomAABB.Set(0.0f, 0.0f, 0.0f, 0.0f);
 	//for the render targets we render 1:1
 	m_vCamPosDefault = vLastSpawnPoint; //spawn pointul este initializat in setAI cand gaseste checkpoint cu bIsFirst
-	m_camLevel.InitCamera(UTGetAppClass().g_rectRender, K_GAME_WIDTH, K_CAMTRANS_AXIS_H, m_vCamPosDefault); //initializam pe primul spawn point
+	m_camLevel.InitCamera(UTGetAppClass().g_rectRT, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault); //initializam pe primul spawn point
 	m_camLevel.SetCamAnimationSpring(K_LVL_CAM_FOLLOW_SPRING_KS, K_LVL_CAM_FOLLOW_DAMPING_KD);
 	//chemam un update ca sa ne asiguram ca am initializat toate variabilele camerei
 	m_camLevel.Update(0.0f);

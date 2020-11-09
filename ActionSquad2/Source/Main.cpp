@@ -874,20 +874,18 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(UTGetAppClass().OnResetDevice(pDevice, pBBDesc));
 	// Because the render targets and handled globally and are changing in size depending on screen resolution we just release them in OnLostDevice and re-create them in OnResetDevice
 	V_RETURN(UTGetRTManager().OnResetDevice(pDevice, pBBDesc));
-	// Add necessary render targets after OnResetDevice so we don't try to create them 2 times
-	/*
-	//#DMC: trebuiesc alocate cele necesare
-	float fAspectReal = (float)pBackBufferSurfaceDesc->Width / (float)pBackBufferSurfaceDesc->Height;
+
+	// Create necessary render targets when device gets reset (created or reset)
+	float fAspectReal = (float)pBBDesc->Width / (float)pBBDesc->Height;
 	float fAspect = LIMIT(fAspectReal, K_WINDOW_ASPECT_RATIO_MIN, K_WINDOW_ASPECT_RATIO_MAX);
 	UINT fGameHpx = K_GAME_HEIGHT * K_GAME_PIXEL_SIZE;
-	UINT fGameWpx = (UINT)(fGameHpx * fAspect);
+	UINT fGameWpx = (UINT)ceil(fGameHpx * fAspect);
 	// Create RTs
-	UTGetRenderTargetsManager().AddRT(K_RTID_COLORMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
-	UTGetRenderTargetsManager().AddRT(K_RTID_NORMALMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
-	UTGetRenderTargetsManager().AddRT(K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, true, D3DFMT_D24S8);
-	if (UTGetAppClass().m_Settings.nLOD_lights >= K_UT_LOD_MED)
-		UTGetRenderTargetsManager().AddRT(K_RTID_SPECULARMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
-	*/
+	UTGetRTManager().AddRT(K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, true, D3DFMT_D24S8);
+	//UTGetRTManager().AddRT(K_RTID_NORMALMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
+	//UTGetRTManager().AddRT(K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, true, D3DFMT_D24S8);
+	//if (UTGetAppClass().m_Settings.nLOD_lights >= K_UT_LOD_MED)
+		//UTGetRenderTargetsManager().AddRT(K_RTID_SPECULARMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
 
 	UTimgui().OnResetDevice(pDevice, pBBDesc);
 	V_RETURN(UTGetShaderManager().OnResetDevice(pDevice, pBBDesc));
@@ -2190,6 +2188,9 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			*/
 
 			g_level.PaintComposition();
+
+			// this will be called here (the only one)
+			g_level.PaintDeferredBuffers();
 		}
 		break;
 
@@ -2300,32 +2301,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				g_pGameSprite->Flush();
 				//ingame interface
 				g_level.m_interfaceIGM.Paint(pDevice, g_pGameSprite);
-
-
-
-
-				// paint level
-				/*
-				// to see the actual blocks onscreen set screen camera
-				//CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
-				*/
-
-				CCameraTransform::SetActiveCamera(pDevice, &g_level.m_camLevel);
-				pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-
-				RECTXYWH_F camrect = g_level.m_camLevel.GetCamWorldAABB();
-				g_level.mapMesh.BuildVisibilityList(camrect);
-				pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
-				pDevice->SetTexture(0, g_level.m_texManager.GetTexture(g_level.m_tilesTexBaseIdx));
-
-				g_level.mapMesh.PaintLayer(0);
-				g_level.mapMesh.PaintLayer(1);
-				g_level.mapMesh.PaintLayer(2);
-
-				
-
-
-
 				//interface particles
 				g_particlesMgr.PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
 
@@ -2343,24 +2318,38 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 				if (DXUTIsKeyDown('9'))
 				{
-					g_pGameSprite->Flush();
-					CCameraTransform::SetActiveCameraIdentity(pDevice);
-					RECT src;
-					SetRect(&src, 0, 0, 512, 512);
-					g_pGameSprite->SetTransform(&g_matIdentity);
-					g_pGameSprite->Draw(g_level.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
-					g_pGameSprite->Flush();
+					CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_COLORDEPTHSTENCIL);
+					if (pRT != null)
+					{
+						g_pGameSprite->Flush();
+						CCameraTransform::SetActiveCameraIdentity(pDevice);
+						RECT src;
+						SetRect(&src, 0, 0, pRT->nWidth, pRT->nHeight);
+						g_pGameSprite->SetTransform(&g_matIdentity);
+						g_pGameSprite->Draw(pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
+						g_pGameSprite->Flush();
+					}
 				}
-				if (DXUTIsKeyDown('0'))
-				{
-					g_pGameSprite->Flush();
-					CCameraTransform::SetActiveCameraIdentity(pDevice);
-					RECT src;
-					SetRect(&src, 512, 0, 1024, 512);
-					g_pGameSprite->SetTransform(&g_matIdentity);
-					g_pGameSprite->Draw(g_level.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
-					g_pGameSprite->Flush();
-				}
+				//if (DXUTIsKeyDown('9'))
+				//{
+				//	g_pGameSprite->Flush();
+				//	CCameraTransform::SetActiveCameraIdentity(pDevice);
+				//	RECT src;
+				//	SetRect(&src, 0, 0, 512, 512);
+				//	g_pGameSprite->SetTransform(&g_matIdentity);
+				//	g_pGameSprite->Draw(g_level.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
+				//	g_pGameSprite->Flush();
+				//}
+				//if (DXUTIsKeyDown('0'))
+				//{
+				//	g_pGameSprite->Flush();
+				//	CCameraTransform::SetActiveCameraIdentity(pDevice);
+				//	RECT src;
+				//	SetRect(&src, 512, 0, 1024, 512);
+				//	g_pGameSprite->SetTransform(&g_matIdentity);
+				//	g_pGameSprite->Draw(g_level.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
+				//	g_pGameSprite->Flush();
+				//}
 #endif
 			}
 			break;
