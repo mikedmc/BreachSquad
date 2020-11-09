@@ -23,6 +23,7 @@ protected:
 
 	bool						m_bMeshStarted;							// Did mesh editing start?
 	int							m_nMaxQuadsCnt;							// Max no of quads
+	bool						m_bVBBuilt;								// Have VB buffers been built?
 
 public:
 	CBufferedPainterQuads();

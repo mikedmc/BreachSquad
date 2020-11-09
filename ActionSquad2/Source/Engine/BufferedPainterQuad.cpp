@@ -8,7 +8,7 @@
 CBufferedPainterQuads::CBufferedPainterQuads() :
 	m_vb(null), m_ib(null), m_pDevice(null),
 	m_nMeshesCnt(0), m_nVertexCursor(0), m_bMeshStarted(false),
-	m_verts(null), m_nMaxQuadsCnt(0)
+	m_verts(null), m_nMaxQuadsCnt(0), m_bVBBuilt(false)
 {
 }
 
@@ -108,6 +108,7 @@ int CBufferedPainterQuads::EndMesh()
 OPRESULT CBufferedPainterQuads::ClearBuffers()
 {
 	//reset all counters
+	m_bVBBuilt = false;
 	m_nMeshesCnt = 0;
 	m_bMeshStarted = false;
 
@@ -137,6 +138,8 @@ OPRESULT CBufferedPainterQuads::BuildBuffers()
 	memcpy(pVerts, m_verts, m_nVertexCursor * sizeof(_VERTEX_PNCT4T4));
 
 	m_vb->Unlock();
+	// mark buffer as built
+	m_bVBBuilt = true;
 
 	return K_OP_OK;
 }
@@ -145,10 +148,18 @@ OPRESULT CBufferedPainterQuads::DrawMesh(int meshIdx, bool setFVF)
 {
 	HRESULT hr = S_OK;
 
+	// trying to draw before calling buildBuffers?
+#if defined(_DEBUG) || defined(DEBUG)
+	if (m_bVBBuilt == false)
+	{
+		return OPRESULT(K_OP_FAILED, L"CBufferedPainterQuads::DrawMesh called before BuildBuffers!", K_SEVERITY_WARNING);
+	}
+#endif
+
 	//empty mesh: exit
 	if (meshIdx < 0)
 	{
-		// this happens often if light touches no shadow casters. Logging not necessary.
+		// this happens often if light touches no shadow casters. Logging not necessary:
 		//LOG(L"!!! WARNING: CBufferedPainterQuads::DrawMesh called with mesh idx = -1\n");
 		return K_OP_INVALIDARGS;
 	}
@@ -158,6 +169,7 @@ OPRESULT CBufferedPainterQuads::DrawMesh(int meshIdx, bool setFVF)
 		LOG(L"Trying to draw a mesh that doesn't exist! Input idx=%d meshesCnt=%d", meshIdx, m_nMeshesCnt);
 		return K_OP_FAILED;
 	}
+
 	if (m_nQuadsPerMesh[meshIdx] == 0)
 		return K_OP_OK;
 	

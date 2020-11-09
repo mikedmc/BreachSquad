@@ -88,7 +88,7 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 	}
 	else
 	{
-		m_Painter.BuildBuffers();
+		//m_Painter.BuildBuffers();
 	}
 
 	return K_OP_OK;
