@@ -9,4 +9,6 @@
 #define			MatA16			D3DXMATRIXA16
 
 //functions
-#define			MUMatIdentity	D3DXMatrixIdentity
+#define			MUMatIdentity			D3DXMatrixIdentity
+#define			MUMatScaling			D3DXMatrixScaling
+#define			MUMatTranslation		D3DXMatrixTranslation
