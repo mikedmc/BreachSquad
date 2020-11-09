@@ -29,8 +29,9 @@ public:
 	~CBufferedPainterQuads(void);
 
 
-	// Allocates temp buffer of verts
-	void						Init(int nMaxQuadsCnt);
+	// Initializes all buffers. Set pDevice if you want VB and IB to be created when called.
+	// leave pDevice NULL if you know onCreateDevice and onResetDevice will be called before using the object (when it isn't created dinamically)
+	void						Init(int nMaxQuadsCnt, PDEVICE pDevice = nullptr);
 
 	// Announce mesh editing start
 	OPRESULT					BeginMesh(int &retMeshIdx);
@@ -44,7 +45,7 @@ public:
 	// Empties all buffers
 	OPRESULT					ClearBuffers();
 
-	// Builds vertex and index buffers. Call this before DrawMesh .
+	// Fills VB data. Call this before render.
 	OPRESULT					BuildBuffers();
 
 	// Draws a mesh by index
@@ -53,8 +54,15 @@ public:
 	// Returns number of triangles in mesh
 	const int					GetTrisCount(int meshIdx) const;
 
-	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
-	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
+private:
+	// Creates the VB (dynamic usually, re-created on reset device). Device must be set before using it.
+	OPRESULT					CreateVB();
+	// Creates the IB (unuslly only created once when creating the device). Device must be set before using it.
+	OPRESULT					CreateIB();
+
+public:
+	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
+	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
 	OPRESULT OnLostDevice(void* pUserContext = NULL);
 	OPRESULT OnDestroyDevice(void* pUserContext = NULL);
 };

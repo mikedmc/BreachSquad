@@ -2253,6 +2253,21 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			case GAME_STATE_MAINMENU:
 			{
 				g_mainMenu.Paint();
+
+				//pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, false);
+				//pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+
+				//_VERTEX_PNCT4T4 verts[10];
+				//verts[0].pos = Vec3(0.0f, 0.0f, 0.0f); verts[0].color = 0xffffffff;
+				//verts[1].pos = Vec3(200.0f, 0.0f, 0.0f); verts[1].color = 0xff00ffff;
+				//verts[2].pos = Vec3(0.0f, 100.0f, 0.0f); verts[2].color = 0xffffff00;
+				//verts[3].pos = Vec3(0.0f, 0.0f, 0.0f); verts[3].color = 0xffffffff;
+				//verts[4].pos = Vec3(-100.0f, 0.0f, 0.0f); verts[4].color = 0xff00ffff;
+				//verts[5].pos = Vec3(0.0f, -100.0f, 0.0f); verts[5].color = 0xffffff00;
+
+				//pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
+				//pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 2, &verts, sizeof(_VERTEX_PNCT4T4));
+
 			}
 			break;
 			case GAME_STATE_PLAYER_SELECTION:
@@ -2268,8 +2283,11 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 				RECTXYWH_F gamerect(0.0f, 0.0f, UTGetAppClass().g_rectScreen.w, UTGetAppClass().g_rectScreen.h);
 
+				
+
 				//real screen space
 				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
+
 				//paint game 
 				RECT srcrct;
 				SetRect(&srcrct, gamerect.x, gamerect.y, gamerect.w, gamerect.h);
@@ -2282,6 +2300,59 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				g_pGameSprite->Flush();
 				//ingame interface
 				g_level.m_interfaceIGM.Paint(pDevice, g_pGameSprite);
+
+
+
+
+				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
+				pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+
+				pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, false);
+				pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+
+				_VERTEX_PNCT4T4 verts[10];
+				verts[0].pos = Vec3(0.0f, 0.0f, 0.0f); verts[0].color = 0xff00ffff; verts[0].tex1 = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+				verts[1].pos = Vec3(200.0f, 0.0f, 0.0f); verts[1].color = 0xffff00ff; verts[1].tex1 = Vec4(1.0f, 0.0f, 0.0f, 0.0f);
+				verts[2].pos = Vec3(200.0f, 200.0f, 0.0f); verts[2].color = 0xffffff00; verts[2].tex1 = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
+				verts[3].pos = Vec3(0.0f, 0.0f, 0.0f); verts[3].color = 0xff00ffff; verts[3].tex1 = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+				verts[4].pos = Vec3(200.0f, 200.0f, 0.0f); verts[4].color = 0xff0000ff; verts[4].tex1 = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
+				verts[5].pos = Vec3(0.0f, 200.0f, 0.0f); verts[5].color = 0xffff0000; verts[5].tex1 = Vec4(0.0f, 1.0f, 0.0f, 0.0f);
+
+				//pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
+				
+				int meshidx = -1;
+				g_level.m_bufferedPainter.BeginMesh(meshidx);
+				if (meshidx >= 0)
+				{
+					g_level.m_bufferedPainter.AddTriangles(verts, 2);
+					g_level.m_bufferedPainter.EndMesh();
+
+					pDevice->SetVertexShader(null);
+					pDevice->SetPixelShader(null);
+					pDevice->SetTexture(0, g_level.m_texManager.GetTexture(g_level.m_tilesTexBaseIdx));
+					pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, false);
+					pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+					g_level.m_bufferedPainter.BuildBuffers();
+					g_level.m_bufferedPainter.DrawMesh(meshidx);
+				}
+				
+
+				//CCameraTransform::SetActiveCamera(pDevice, &g_level.m_camLevel);
+				//pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+
+				RECTXYWH_F camrect = g_level.m_camLevel.GetCamWorldAABB();
+				g_level.mapMesh.BuildVisibilityList(camrect);
+				pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
+				pDevice->SetTexture(0, g_level.m_texManager.GetTexture(g_level.m_tilesTexBaseIdx));
+
+				g_level.mapMesh.PaintLayer(0);
+				g_level.mapMesh.PaintLayer(1);
+				g_level.mapMesh.PaintLayer(2);
+
+				
+
+
+
 				//interface particles
 				g_particlesMgr.PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
 
@@ -2481,6 +2552,18 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	// must be last as it will enable and disable on user input
 	if (UTimgui().BeginPaint())
 	{
+		// DEBUG IMGUI WINDOW
+		if(g_gameState == GAME_STATE_GAME)
+		{
+			ImGui::Begin("Debug Info", null, ImGuiWindowFlags_NoNavInputs);
+			ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
+
+			RECTXYWH_F camrect = g_level.m_camLevel.GetCamWorldAABB();
+			ImGui::Text("camrect %.1f %.1f %.1f %.1f", camrect.x, camrect.y, camrect.w, camrect.h);
+
+			ImGui::End();
+		}
+
 		// IMGUI tutorial window
 		//static bool show_demo_window = true;
 		//ImGui::ShowDemoWindow(&show_demo_window);

@@ -4,9 +4,6 @@
 HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 {
 	HRESULT hr = S_OK;
-	//offset the level down 
-	int nLevelOffsetY_TL = 1000;
-	int nLevelOffsetY = 1000 * K_TILE_SIZE;
 
 	//set last ID on a number that will never get reached from the editor
 	m_unLastID = 100000;
@@ -162,7 +159,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	levelSizeTL.h = levelH;
 
 	//set level size
-	m_levelAABB_TL.Set(0, nLevelOffsetY_TL, levelSizeTL.w, levelSizeTL.h);
+	m_levelAABB_TL.Set(0, 0, levelSizeTL.w, levelSizeTL.h);
 	m_levelAABB.Set(m_levelAABB_TL.x * tileW, m_levelAABB_TL.y * tileH, levelSizeTL.w * tileW, levelSizeTL.h * tileH);
 	m_vLevelOrigin.x = (float)originX + m_levelAABB.x;
 	m_vLevelOrigin.y = (float)originY + m_levelAABB.y;
@@ -230,7 +227,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		//z nu are voie sa fie in acelasi plan cu fundalul
 		if (nl->pos3D.z == 0.0f)
 			nl->pos3D.z = 0.1f;
-		nl->pos3D.y += (float)nLevelOffsetY;
 
 		nl->pos_ini = nl->pos = D3DXVECTOR2(nl->pos3D.x, nl->pos3D.y);
 		//animID
@@ -249,7 +245,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		D3DXVECTOR2 bbmin, bbmax;
 		bbmin.x = (float)OS_freadInt32(fl);
 		bbmin.y = (float)OS_freadInt32(fl);
-		bbmin.y += (float)nLevelOffsetY;
 		bbmax.x = bbmin.x + (float)OS_freadInt32(fl);
 		bbmax.y = bbmin.y + (float)OS_freadInt32(fl);
 		//set loaded size (default)
@@ -332,7 +327,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		D3DXVECTOR2 cmin, cmax;
 		cmin.x = (float)OS_freadInt32(fl); cmin.y = (float)OS_freadInt32(fl); //XY
 		cmax.x = (float)OS_freadUInt32(fl); cmax.y = (float)OS_freadUInt32(fl); //WH
-		cmin.y += (float)nLevelOffsetY;
 		cmax += cmin;
 		colobj->bbox.Set(cmin, cmax);
 		//bbox safeguarding
@@ -386,7 +380,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		//position (used to load UINT32)
 		obj->pos.x = (float)OS_freadInt32(fl);
 		obj->pos.y = (float)OS_freadInt32(fl);
-		obj->pos.y += (float)nLevelOffsetY;
 		obj->pos_ini = obj->pos;
 		//animation
 		CHAR charAnmName[MAX_PATH];
@@ -564,7 +557,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		D3DXVECTOR2 actPos;
 		actPos.x = (float)OS_freadInt32(fl);
 		actPos.y = (float)OS_freadInt32(fl);
-		actPos.y += nLevelOffsetY;
 		//boolean SetAngle si unghi
 		bool bSetActorAngle = (OS_freadByte(fl) != 0) ? true : false;
 		float fActorAngle = DEG_TO_RAD(OS_freadInt16(fl));
@@ -787,7 +779,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 				//pozitia o citesc si nu o folosesc
 				frontobj->pos.x = (float)OS_freadInt32(fl);
 				frontobj->pos.y = (float)OS_freadInt32(fl);
-				frontobj->pos.y += (float)nLevelOffsetY;
 				//set color
 				frontobj->sprite.color = m_colAmbientGlobal;
 
@@ -911,7 +902,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 					D3DXVECTOR2 pt;
 					pt.x = OS_freadInt32(fl);
 					pt.y = OS_freadInt32(fl);
-					pt.y += nLevelOffsetY;
 					rail->arrPoints.Add(pt);
 					//lungimile
 					if (i == 0)
@@ -1260,7 +1250,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 #endif
 
 	// create meshes
-	V_OP_RETHR(mapMesh.BuildBuffers(tiles, levelSizeTL, m_vLevelOrigin));
+	V_OP_RETHR(mapMesh.BuildBuffers(tiles, levelSizeTL, D3DXVECTOR2(0.0f, 0.0f)));
 
 	return hr;
 }

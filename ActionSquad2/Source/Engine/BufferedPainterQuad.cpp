@@ -23,10 +23,17 @@ CBufferedPainterQuads::~CBufferedPainterQuads(void)
 	m_nMaxQuadsCnt = 0;
 }
 
-void CBufferedPainterQuads::Init(int nMaxQuadsCnt)
+void CBufferedPainterQuads::Init(int nMaxQuadsCnt, PDEVICE pDevice)
 {
 	m_nMaxQuadsCnt = nMaxQuadsCnt;
 	m_verts = new _VERTEX_PNCT4T4[(m_nMaxQuadsCnt + K_BP_SENTINEL_QUADS) * 4];
+
+	if (pDevice)
+	{
+		m_pDevice = pDevice;
+		CreateIB();
+		CreateVB();
+	}
 }
 
 OPRESULT CBufferedPainterQuads::BeginMesh(int &retMeshIdx)
@@ -178,47 +185,14 @@ const int CBufferedPainterQuads::GetTrisCount(int meshIdx) const
 	return m_nQuadsPerMesh[meshIdx] * 2;
 }
 
-//--- framework ---
-OPRESULT CBufferedPainterQuads::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
+OPRESULT CBufferedPainterQuads::CreateVB()
 {
-	assert(m_nMaxQuadsCnt > 0);
-
 	HRESULT hr = S_OK;
-
-	m_pDevice = pDevice;
-	//create index buffer (fixed) - deci va desena numai triunghiuri independente
-	if (FAILED(m_pDevice->CreateIndexBuffer((m_nMaxQuadsCnt + K_BP_SENTINEL_QUADS) * 6 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, 0)))
-	{
-		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads: Create Index Buffer failed!", K_SEVERITY_WARNING);
-	}
-	//lock and fill
-	DWORD * pIndices;
-	if (FAILED(m_ib->Lock(0, NULL, (void**)&pIndices, 0)))
-	{
-		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads: Lock Index Buffer failed!", K_SEVERITY_WARNING);
-	}
-
-	for (int kk = 0; kk < m_nMaxQuadsCnt; kk++)
-	{
-		pIndices[kk * 6 + 0] = (DWORD)(kk * 6 + 0);
-		pIndices[kk * 6 + 1] = (DWORD)(kk * 6 + 1);
-		pIndices[kk * 6 + 2] = (DWORD)(kk * 6 + 2);
-											
-		pIndices[kk * 6 + 0] = (DWORD)(kk * 6 + 0);
-		pIndices[kk * 6 + 2] = (DWORD)(kk * 6 + 2);
-		pIndices[kk * 6 + 3] = (DWORD)(kk * 6 + 3);
-	}
-	m_ib->Unlock();
-
-	return K_OP_OK;
-}
-
-OPRESULT CBufferedPainterQuads::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
-{
 	assert(m_nMaxQuadsCnt > 0);
+	if (m_pDevice == nullptr)
+		return OPRESULT(K_OP_INVALIDARGS, L"CBufferedPainterQuads::CreateVB: Device not set!", K_SEVERITY_WARNING);
 
-	HRESULT hr = S_OK;
-	m_pDevice = pDevice;
+	SAFE_RELEASE(m_vb);
 
 	//create vb and ib
 	if (FAILED(m_pDevice->CreateVertexBuffer((m_nMaxQuadsCnt + K_BP_SENTINEL_QUADS) * 4 * sizeof(_VERTEX_PNCT4T4),
@@ -233,6 +207,63 @@ OPRESULT CBufferedPainterQuads::OnResetDevice(PDEVICE pDevice, const SURFACE_DES
 	{
 		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads::OnResetDevice: BuildBuffers failed!", K_SEVERITY_WARNING);
 	}
+
+	return K_OP_OK;
+}
+
+OPRESULT CBufferedPainterQuads::CreateIB()
+{
+	HRESULT hr = S_OK;
+	assert(m_nMaxQuadsCnt > 0);
+	if (m_pDevice == nullptr)
+		return OPRESULT(K_OP_INVALIDARGS, L"CBufferedPainterQuads::CreateVB: Device not set!", K_SEVERITY_WARNING);
+
+	SAFE_RELEASE(m_ib);
+
+	//create index buffer (fixed) - deci va desena numai triunghiuri independente
+	if (FAILED(m_pDevice->CreateIndexBuffer((m_nMaxQuadsCnt + K_BP_SENTINEL_QUADS) * 6 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, 0)))
+	{
+		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads: Create Index Buffer failed!", K_SEVERITY_WARNING);
+	}
+	//lock and fill
+	DWORD * pIndices;
+	if (FAILED(m_ib->Lock(0, NULL, (void**)&pIndices, 0)))
+	{
+		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads: Lock Index Buffer failed!", K_SEVERITY_WARNING);
+	}
+
+	for (int kk = 0; kk < m_nMaxQuadsCnt; kk++)
+	{
+		pIndices[kk * 6 + 0] = (DWORD)(kk * 4 + 0);
+		pIndices[kk * 6 + 1] = (DWORD)(kk * 4 + 1);
+		pIndices[kk * 6 + 2] = (DWORD)(kk * 4 + 2);
+
+		pIndices[kk * 6 + 3] = (DWORD)(kk * 4 + 0);
+		pIndices[kk * 6 + 4] = (DWORD)(kk * 4 + 2);
+		pIndices[kk * 6 + 5] = (DWORD)(kk * 4 + 3);
+	}
+	m_ib->Unlock();
+
+	return K_OP_OK;
+}
+
+//--- framework ---
+OPRESULT CBufferedPainterQuads::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBackBufferSurfaceDesc)
+{
+	// set device pointer first
+	m_pDevice = pDevice;
+
+	V_OP_RET(CreateIB());
+
+	return K_OP_OK;
+}
+
+OPRESULT CBufferedPainterQuads::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBackBufferSurfaceDesc)
+{
+	// set device pointer first
+	m_pDevice = pDevice;
+
+	V_OP_RET(CreateVB());
 
 	return K_OP_OK;
 }

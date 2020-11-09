@@ -12391,6 +12391,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		m_pDevice->SetPixelShader(null);
 	}
 
+
 	///--- paint front layer parallax objects with linear blending ---
 	/*
 	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
