@@ -4535,7 +4535,7 @@ bool CLevel::SetActorAIState(CActor * actor, WCHAR * strStateName)
 
 void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 {
-	assert((pWeapon != null) && (pActor != null));
+	_ASSERT((pWeapon != null) && (pActor != null));
 
 	//reset actor template to initial one
 	pActor->templateActor = pActor->templateActor_ini;
@@ -6684,7 +6684,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	
 	///--- Look direction ---
 	//trebuie sa avem pointerul mereu setat
-	assert(actor->pCurrentWeapon != null);
+	_ASSERT(actor->pCurrentWeapon != null);
 	///--- Shooting and reloading ---
 	if (actor->pCurrentWeapon->status == K_LVL_WPN_STATUS_RELOADING)
 	{
@@ -8692,7 +8692,7 @@ void CLevel::SetAI(IActiveInterface * active, int AIstate, CVariantCollection * 
 			int genType = g_particlesMgr.GetPartEmitterTypeByNameHash(active->varAIparams.GetVariantByName(L"s_Type")->m_strArg.textHash);
 			int partLayer = g_particlesMgr.GetParticleLayerByName(active->varAIparams.GetVariantByName(L"s_Layer")->m_strArg.textHash);
 			//ca sa nu intre de mai multe ori si sa aloce de mai multe ori. Daca se intampla trebuie dezalocat mai intai
-			assert(active->varAIparams.GetVariantByName(L"emitterPtr")->m_type == CVariantComplex::K_ARGTYPE_NONE);
+			_ASSERT(active->varAIparams.GetVariantByName(L"emitterPtr")->m_type == CVariantComplex::K_ARGTYPE_NONE);
 
 			CParticleEmitter * pe = g_particlesMgr.AddPartEmitter(genType, &active->bbox, partLayer);
 			//salveaza aici pointer la ParticleEmitter-ul alocat si il controlez din update sa ii dau stop si play cand iese din ecran
@@ -11099,7 +11099,7 @@ HRESULT CLevel::PaintOffscreen()
 		}
 		//set scroll matrix
 		D3DXMATRIXA16 mattrans;
-		D3DXMatrixAffineTransformation2D(&mattrans, 1.0f, NULL, 0.0f, &D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
+		MUMatAffine2D(&mattrans, 1.0f, NULL, 0.0f, &D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
 		m_pSprite->SetTransform(&mattrans);
 
 		///.////////////////////////////////////////////////////////
@@ -11549,7 +11549,7 @@ HRESULT CLevel::PaintOffscreen()
 		m_pSprite->SetTransform(&g_matIdentity);
 		*/
 		///--- paint actives front layer ---
-		D3DXMatrixAffineTransformation2D(&mattrans, 1.0f, NULL, 0.0f, &D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
+		MUMatAffine2D(&mattrans, 1.0f, NULL, 0.0f, &D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
 		m_pSprite->SetTransform(&mattrans);
 
 		for (int kk = 0; kk < m_visibleList.visible_actives[K_LVL_LAYER_FRONT].Count(); kk++)
@@ -11576,7 +11576,7 @@ HRESULT CLevel::PaintOffscreen()
 				else
 				{
 					//for now only front objects can be rotated... much optimization, such speed
-					D3DXMatrixAffineTransformation2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x - m_visibleArea.x, active->pos.y - m_visibleArea.y));
+					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x - m_visibleArea.x, active->pos.y - m_visibleArea.y));
 
 					m_pSprite->SetTransform(&matlocal);
 					active->sprite.pos = D3DXVECTOR2(0.0f, 0.0f);
@@ -11629,7 +11629,7 @@ HRESULT CLevel::PaintOffscreen()
 				}
 				else
 				{
-					D3DXMatrixAffineTransformation2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x - m_visibleArea.x, active->pos.y - m_visibleArea.y));
+					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x - m_visibleArea.x, active->pos.y - m_visibleArea.y));
 
 					m_pSprite->SetTransform(&matlocal);
 					CSprite spr = active->sprite;
@@ -11849,7 +11849,7 @@ HRESULT CLevel::PaintOffscreen()
 				else
 				{
 					//#TODO: daca ma hotarasc sa nu pun rotatii la obiecte scot partea asta. Momentan am rotatii doar pe front layer la active
-					D3DXMatrixAffineTransformation2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x + K_RTT_H_WIDTH - m_visibleArea.x, active->pos.y - m_visibleArea.y));
+					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x + K_RTT_H_WIDTH - m_visibleArea.x, active->pos.y - m_visibleArea.y));
 
 					m_pSprite->SetTransform(&matlocal);
 					active->sprite.pos = D3DXVECTOR2(0.0f, 0.0f);
@@ -11997,6 +11997,8 @@ OPRESULT CLevel::PaintDeferredBuffers()
 		{
 			// Clear the render target and the zbuffer 
 			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0));
+			//use sprite
+			m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
 			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
 			D3DXMATRIXA16 matProj;
@@ -12008,6 +12010,9 @@ OPRESULT CLevel::PaintDeferredBuffers()
 
 			RenderPass(K_LVL_RP_COLORS);
 
+			// end sprite
+			m_pSprite->End();
+
 			V(UTGetRTManager().EndSceneRT(pRT));
 
 		}
@@ -12018,8 +12023,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 
 OPRESULT CLevel::RenderPass(eLVLRenderPass ePass)
 {
-	if (ePass != K_LVL_RP_COLORS)
-		return K_OP_FAILED;
+	_ASSERT((ePass > K_LVL_RP_NONE) && (ePass < K_LVL_RP_COUNT));
 
 	D3DXMATRIXA16	matView;
 
@@ -12033,6 +12037,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass)
 	/// INITIAL SETUP
 	///----------------------------------------------------
 
+
 	m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
 
 	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
@@ -12042,34 +12047,59 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass)
 	m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	m_pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	//#IMPORTANT: we need separate alpha blending or it will look bad when blending alpha values between them.
-	//eg: if we blend semitransparent things on top of fully opaque walls, the walls become transparent
-	//necessary but not really well supported. Better with a shader and custom sprite painter
 	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
 	{
+		//#IMPORTANT: we need separate alpha blending or it will look bad when blending alpha values between them.
+		//eg: if we blend semitransparent things on top of fully opaque walls, the walls become transparent
+		//necessary but not really well supported. Better with a shader and custom sprite painter
 		m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, true);
 		m_pDevice->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_SRCALPHA);
 		m_pDevice->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_DESTALPHA);
 		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
 	}
 
-	D3DXMatrixAffineTransformation2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &D3DXVECTOR2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
+	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &D3DXVECTOR2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 
-
 	// paint tiles
-
 	mapMesh.UpdateVisibility(camrect);
 
-	m_pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(g_level.m_tilesTexBaseIdx));
-
+	// paint floors and vertical walls
 	mapMesh.PaintLayer(0);
 	mapMesh.PaintLayer(1);
+
+	///--- paint actors
+	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+	m_pSprite->SetTransform(&g_matIdentity);
+	for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
+	{
+		CActor* actor = m_visibleList.visible_actors.m_pData[kk];
+
+		if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
+		{
+			actor->sprite_feet.paint_firstModule_texOverride(&m_sprActors, actor->nSkinIdx * 2);
+		}
+		actor->sprite.paint_firstModule_texOverride(&m_sprActors, actor->nSkinIdx * 2);
+
+		//--- muzzle flash ---
+		if ((actor->pCurrentWeapon != null) && (actor->pCurrentWeapon->m_sprMuzzleFlash.animationIdx >= 0) &&
+			(actor->pCurrentWeapon->m_sprMuzzleFlash.animStatus != ANIM_STATUS_FRAMELOCK))
+		{
+			actor->pCurrentWeapon->m_sprMuzzleFlash.pos = actor->pos + actor->vecWeapon_abs[((actor->bCrouched) ? 1 : 0)];
+			actor->pCurrentWeapon->m_sprMuzzleFlash.paint_firstModule(&m_sprActors);
+		}
+	}
+	m_pSprite->Flush();
+	m_pSprite->SetTransform(&g_matIdentity);
+
+
+	///--- paint hanging objects, FOW and top part of the walls
+	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(g_level.m_tilesTexBaseIdx));
 	mapMesh.PaintLayer(2);
 
-	return K_OP_FAILED;
+	return K_OP_OK;
 }
 
 void CLevel::Paint()
@@ -12356,7 +12386,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	if (m_bufferedPainter.GetTrisCount(m_waterMeshIdx) > 0)
 	{
 		//set textures, states and shaders
-		assert(m_waterTexIdx >= 0);
+		_ASSERT(m_waterTexIdx >= 0);
 
 		m_pDevice->SetTexture(0, m_pRTTexture_final);
 		m_pDevice->SetTexture(1, m_texManager.m_Texs[m_waterTexIdx]->pTexture); //textura apa
@@ -12511,7 +12541,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		if (!finalaabb.Intersects(&camAABB))
 			continue;
 
-		D3DXMatrixAffineTransformation2D(&matfront, K_LVL_FRONTLAYER_SCALING, NULL, 0.0f, &(obj->pos + off));
+		MUMatAffine2D(&matfront, K_LVL_FRONTLAYER_SCALING, NULL, 0.0f, &(obj->pos + off));
 		m_pSprite->SetTransform(&matfront);
 		obj->sprite.paint(&m_sprBack);
 	}
@@ -12685,7 +12715,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 				{
 					float fAng = HALF_PI + Math_GetVectorAngle(camAABB.vCenter - vpos);
 					D3DXMATRIXA16 matrt;
-					D3DXMatrixAffineTransformation2D(&matrt, 1.0f, NULL, fAng, &vpos);
+					MUMatAffine2D(&matrt, 1.0f, NULL, fAng, &vpos);
 					m_pSprite->SetTransform(&matrt);
 					CSprite::paintFrame(&m_sprInterface, 0.0f, 0.0f, ANM_IGM_INTERFACE_SPR_PLAYER_NR_ICONS, 2 + pPlayerActor[kk]->nPlayerOrdinal);
 					m_pSprite->SetTransform(&g_matIdentity);
@@ -12731,7 +12761,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		DWORD colEffect = D3DCOLOR_COLORALPHA(0xff000088, 1.0f - m_fTimeMultiplier_real);
 		D3DXMATRIXA16 mattrans;
 		RECTXYWH_F bbox = UTGetControlsManager().m_sprCol.GetAFrameBBox_real(ANM_CONTROLS_SPR_VIGNETTES, 1);
-		D3DXMatrixAffineTransformation2D(&mattrans, UTGetAppClass().g_rectRender.h / bbox.h, NULL, 0.0f, &UTGetAppClass().g_rectRender.Center());
+		MUMatAffine2D(&mattrans, UTGetAppClass().g_rectRender.h / bbox.h, NULL, 0.0f, &UTGetAppClass().g_rectRender.Center());
 		m_pSprite->SetTransform(&mattrans);
 		CSprite::paintFrame(&UTGetControlsManager().m_sprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, 1, colEffect);
 		m_pSprite->Flush();
@@ -12972,7 +13002,7 @@ HRESULT CLevel::OnDestroyDevice( void* pUserContext )
 //-------------------------------------------------------------
 void CLevel::AddOccludersFromAABB_stencil(D3DXVECTOR2 viewerPos, CAABB * aabb)
 {
-	assert(m_occludersCnt < K_LVL_MAX_OCCLUDERS_CNT - 4);
+	_ASSERT(m_occludersCnt < K_LVL_MAX_OCCLUDERS_CNT - 4);
 	//adaug marginile AABB-ului ce trebuies extrudate
 	if (viewerPos.y > aabb->vMax.y)
 	{
@@ -13085,7 +13115,7 @@ int CLevel::BuildShadowVolume(CLight * light, CAABB * visibleAABB, COccluder * p
 		//daca proiectia pica pe segment ii fac split
 		if ((dotN >= 0.0f) && (dotN <= dirL))
 		{
-			assert(vertsCur < outVertsMaxCnt - 12);
+			_ASSERT(vertsCur < outVertsMaxCnt - 12);
 
 			D3DXVECTOR2 projPt = occ->start + dirN * dotN;
 			COccluder oc1, oc2, exoc1, exoc2;
@@ -13131,7 +13161,7 @@ int CLevel::BuildShadowVolume(CLight * light, CAABB * visibleAABB, COccluder * p
 		}
 		else //daca nu pica pe segment doar fac extrude
 		{
-			assert(vertsCur < outVertsMaxCnt - 6);
+			_ASSERT(vertsCur < outVertsMaxCnt - 6);
 
 			COccluder oc, exoc;
 			oc = *occ;
@@ -13284,7 +13314,7 @@ void CLevel::GiveStrategicPoints(float fPoints, D3DXVECTOR2 * vPos)
 	if (m_nPlayers == 1)
 		fMultiplier *= 2.0f;
 	//just making sure...
-	assert((fPoints >= 0.0f) && (fPoints <= (float)K_LVL_MAX_STRATEGIC_POINTS));
+	_ASSERT((fPoints >= 0.0f) && (fPoints <= (float)K_LVL_MAX_STRATEGIC_POINTS));
 	float fPointsGiven = LIMIT(fPoints, 0.0f, (float)K_LVL_MAX_STRATEGIC_POINTS);
 
 	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
@@ -14986,7 +15016,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				{
 					D3DXVECTOR2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 					float ang = Math_GetVectorAngle(vdir);
-					D3DXMatrixAffineTransformation2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
+					MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule(&m_sprActives);
 				}
@@ -15011,7 +15041,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				{
 #if defined(_DEBUG) || defined(DEBUG)
 					float ang = Math_GetVectorAngle(node->m_data.physPt->m_data.speed);
-					D3DXMatrixAffineTransformation2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
+					MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule(&m_sprActives);
 #endif
@@ -15020,7 +15050,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				case K_LVL_BULLET_CAM_BALL:
 				case K_LVL_BULLET_SMOKE_GRENADE:
 				{
-					D3DXMatrixAffineTransformation2D(&matbullet, 1.0f, NULL, 0.0f, &node->m_data.physPt->m_data.pos);
+					MUMatAffine2D(&matbullet, 1.0f, NULL, 0.0f, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule(&m_sprActives);
 				}
@@ -15030,7 +15060,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				case K_LVL_BULLET_GRENADE:
 				case K_LVL_BULLET_GRENADE_ROUND:
 				{
-					D3DXMatrixAffineTransformation2D(&matbullet, 1.0f, NULL, 0.0f, &node->m_data.physPt->m_data.pos);
+					MUMatAffine2D(&matbullet, 1.0f, NULL, 0.0f, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule(&m_sprActives);
 					//exclamation sign
@@ -15051,7 +15081,7 @@ void CLevel::PaintBullets(bool paintNormals)
 						else if(node->m_data.physPt->m_data.contactNormal.x > 0.0f)
 							fang = HALF_PI;
 					}
-					D3DXMatrixAffineTransformation2D(&matbullet, 1.0f, NULL, fang, &node->m_data.physPt->m_data.pos);
+					MUMatAffine2D(&matbullet, 1.0f, NULL, fang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule(&m_sprActives);
 				}
@@ -15088,7 +15118,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				{
 					D3DXVECTOR2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 					float ang = Math_GetVectorAngle(vdir);
-					D3DXMatrixAffineTransformation2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
+					MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprActives, 1);
 				}
@@ -15113,7 +15143,7 @@ void CLevel::PaintBullets(bool paintNormals)
 #if defined(_DEBUG) || defined(DEBUG)
 
 					float ang = Math_GetVectorAngle(node->m_data.physPt->m_data.speed);
-					D3DXMatrixAffineTransformation2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
+					MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprActives, 1);
 #endif
@@ -15122,7 +15152,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				case K_LVL_BULLET_CAM_BALL:
  				case K_LVL_BULLET_SMOKE_GRENADE:
 				{
-					D3DXMatrixAffineTransformation2D(&matbullet, 1.0f, NULL, 0.0f, &node->m_data.physPt->m_data.pos);
+					MUMatAffine2D(&matbullet, 1.0f, NULL, 0.0f, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprActives, 1);
 				}
@@ -15132,7 +15162,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				case K_LVL_BULLET_GRENADE:
 				case K_LVL_BULLET_GRENADE_ROUND:
 				{
-					D3DXMatrixAffineTransformation2D(&matbullet, 1.0f, NULL, 0.0f, &node->m_data.physPt->m_data.pos);
+					MUMatAffine2D(&matbullet, 1.0f, NULL, 0.0f, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprActives, 1);
 					//exclamation sign
@@ -15153,7 +15183,7 @@ void CLevel::PaintBullets(bool paintNormals)
 						else if (node->m_data.physPt->m_data.contactNormal.x > 0.0f)
 							fang = HALF_PI;
 					}
-					D3DXMatrixAffineTransformation2D(&matbullet, 1.0f, NULL, fang, &node->m_data.physPt->m_data.pos);
+					MUMatAffine2D(&matbullet, 1.0f, NULL, fang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprActives, 1);
 				}
@@ -16488,7 +16518,7 @@ void CLevel::GenerateEffect(CStringHash sEffectName, D3DXVECTOR2 pos, float fSiz
 
 void CLevel::TouchClosestActive(CActor * pToucherAct, float dTime)
 {
-	assert(pToucherAct != null);
+	_ASSERT(pToucherAct != null);
 
 	if(pToucherAct->pClosestTouchable != null)
 	{
@@ -16550,7 +16580,7 @@ CCollisionShape* CLevel::SpawnCollisionShape(int nType, D3DXVECTOR2 vMin, D3DXVE
 CCollisionShape* CLevel::ColShape_Segment_Intersection_Arr(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CCollisionShape * arrBoxes[], int nBoxesCnt, D3DXVECTOR2 * retCollisionPoint, D3DXVECTOR2 * retNormal)
 {
 	//verificari initiale
-	assert(arrBoxes != NULL);
+	_ASSERT(arrBoxes != NULL);
 
 	if (nBoxesCnt <= 0)
 		return null;

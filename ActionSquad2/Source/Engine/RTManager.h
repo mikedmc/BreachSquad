@@ -12,9 +12,9 @@ class CRTManager {
 public:
 	struct CEngineRenderTarget {
 		// DirectX specific stuff
-		LPD3DXRENDERTOSURFACE   m_pRenderToSurface;
-		LPDIRECT3DTEXTURE9      m_pRTTexture;
-		LPDIRECT3DSURFACE9      m_pRTSurface;
+		PRENDERTOSURFACE		m_pRenderToSurface;
+		PTEXTURE				m_pRTTexture;
+		PSURFACE				m_pRTSurface;
 
 		bool					bReady;					// Ready to be used
 		UINT32					UID;					// ID of the resource
@@ -23,8 +23,8 @@ public:
 		UINT					nWidth;
 		UINT					nHeight;
 		UINT					nMipLevels;
-		D3DFORMAT				dwTexFormat;
-		D3DFORMAT				dwDepthStencilFormat;
+		FORMAT3D				dwTexFormat;
+		FORMAT3D				dwDepthStencilFormat;
 
 		CEngineRenderTarget() :
 			bReady(false), nWidth(0), nHeight(0),
@@ -35,7 +35,7 @@ public:
 	};
 
 private:
-	LPDIRECT3DDEVICE9	m_pDevice;
+	PDEVICE						m_pDevice;
 public:
 	CFixedArray<CEngineRenderTarget*, 10> arrRT;
 	
@@ -44,13 +44,13 @@ public:
 	~CRTManager();
 
 	// Adds a new render target	to the RT collection
-	void					AddRT(UINT32 dwID, UINT width, UINT height, UINT mipLevels, D3DFORMAT texFormat, bool bDepthStencil = TRUE, D3DFORMAT depthStencilFormat = D3DFMT_D24X8);
+	void					AddRT(UINT32 dwID, UINT width, UINT height, UINT mipLevels, FORMAT3D texFormat, bool bDepthStencil = TRUE, FORMAT3D depthStencilFormat = D3DFMT_D24X8);
 	// Called before drawing so the engine knows to draw to the specified RT
-	HRESULT					BeginSceneRT(UINT32 dwID);
-	HRESULT					BeginSceneRT(CEngineRenderTarget* pRT);
+	OPRESULT				BeginSceneRT(UINT32 dwID);
+	OPRESULT				BeginSceneRT(CEngineRenderTarget* pRT);
 	// Called when drawing finished so we flush everything and announce that won't paint to the RT anylonger
-	HRESULT					EndSceneRT(UINT32 dwID);
-	HRESULT					EndSceneRT(CEngineRenderTarget* pRT);
+	OPRESULT				EndSceneRT(UINT32 dwID);
+	OPRESULT				EndSceneRT(CEngineRenderTarget* pRT);
 	// Releases all allocated render targets and deletes them from the RT collection
 	void					Release();
 	// Returns pointer to RT or null if ID not found
@@ -58,13 +58,13 @@ public:
 
 private:
 	// Creates a new render target texture and all associated surfaces and structures
-	HRESULT					CreateRT(CEngineRenderTarget* pRT);
+	OPRESULT				CreateRT(CEngineRenderTarget* pRT);
 
 public: //--- framework methods ---
-	HRESULT OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
-	HRESULT OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
-	HRESULT OnLostDevice(void* pUserContext = NULL);
-	HRESULT OnDestroyDevice(void* pUserContext = NULL);
+	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
+	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
+	OPRESULT OnLostDevice();
+	OPRESULT OnDestroyDevice();
 };
 
 ///--- SINGLETON ---

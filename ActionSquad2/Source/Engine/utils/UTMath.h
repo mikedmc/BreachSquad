@@ -12,3 +12,4 @@
 #define			MUMatIdentity			D3DXMatrixIdentity
 #define			MUMatScaling			D3DXMatrixScaling
 #define			MUMatTranslation		D3DXMatrixTranslation
+#define			MUMatAffine2D			D3DXMatrixAffineTransformation2D

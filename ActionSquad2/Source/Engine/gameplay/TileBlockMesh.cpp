@@ -172,7 +172,7 @@ OPRESULT CTileBlockMeshManager::PaintLayer(int layerIdx)
 	for (int kk = 0; kk < arrVisible.Count() ; kk++)
 	{
 		CTileBlockMesh* tbm = arrVisible[kk];
-		tbm->PaintLayer(layerIdx, false);
+		tbm->PaintLayer(layerIdx, true);
 	}
 
 	return K_OP_OK;

@@ -149,11 +149,11 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 #if defined(_CHECK_HEAP_STACK_)
 	_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     _CrtSetReportMode ( _CRT_ERROR, _CRTDBG_MODE_DEBUG);
-/*
-//ca sa prinda si new-delete(da file si line number):
-//#define DEBUG_NEW new(_NORMAL_BLOCK, _FILE_, _LINE_)
-//#define new DEBUG_NEW
-*/
+	/*
+	//to catch new and new-delete with line number:
+	//#define DEBUG_NEW new(_NORMAL_BLOCK, _FILE_, _LINE_)
+	//#define new DEBUG_NEW
+	*/
 	_ASSERTE( _CrtCheckMemory( ) );
 #endif
 
@@ -810,7 +810,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	UTGetTTFManager().OnCreateDevice(pDevice, pBBDesc);
 
 	V_RETURN(UTGetAppClass().OnCreateDevice(pDevice, pBBDesc));
-	V_RETURN(UTGetRTManager().OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(UTGetRTManager().OnCreateDevice(pDevice, pBBDesc));
 	UTimgui().OnCreateDevice(pDevice, pBBDesc);
 	V_RETURN(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetFontsManager().OnCreateDevice(pDevice, pBBDesc));
@@ -873,7 +873,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	//should be first to be called here
 	V_RETURN(UTGetAppClass().OnResetDevice(pDevice, pBBDesc));
 	// Because the render targets and handled globally and are changing in size depending on screen resolution we just release them in OnLostDevice and re-create them in OnResetDevice
-	V_RETURN(UTGetRTManager().OnResetDevice(pDevice, pBBDesc));
+	V_OP_RETHR(UTGetRTManager().OnResetDevice(pDevice, pBBDesc));
 
 	// Create necessary render targets when device gets reset (created or reset)
 	float fAspectReal = (float)pBBDesc->Width / (float)pBBDesc->Height;

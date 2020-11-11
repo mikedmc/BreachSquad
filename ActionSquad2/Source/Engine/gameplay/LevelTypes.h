@@ -27,7 +27,7 @@ const CStringHash ELVLEffectTypeNames[] = {
 };
 
 ///----------------------------------------------------------------------------------
-/// RENDER PASSES
+/// RENDER PASSES that the level needs/does
 ///----------------------------------------------------------------------------------
 enum eLVLRenderPass {
 	K_LVL_RP_NONE = -1,

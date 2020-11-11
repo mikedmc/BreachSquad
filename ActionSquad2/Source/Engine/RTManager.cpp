@@ -15,10 +15,8 @@ CRTManager::~CRTManager()
 	Release();
 }
 
-void CRTManager::AddRT(UINT32 dwID, UINT width, UINT height, UINT mipLevels, D3DFORMAT texFormat, bool bDepthStencil /*= TRUE*/, D3DFORMAT depthStencilFormat /*= D3DFMT_D24X8*/)
+void CRTManager::AddRT(UINT32 dwID, UINT width, UINT height, UINT mipLevels, FORMAT3D texFormat, bool bDepthStencil /*= TRUE*/, FORMAT3D depthStencilFormat /*= D3DFMT_D24X8*/)
 {
-	HRESULT hr = S_OK;
-
 	CEngineRenderTarget * pRT = new CEngineRenderTarget();
 	pRT->UID = dwID;
 	pRT->nWidth = width;
@@ -34,7 +32,7 @@ void CRTManager::AddRT(UINT32 dwID, UINT width, UINT height, UINT mipLevels, D3D
 	// try to create the RT right now
 	if (m_pDevice != null)
 	{
-		if (!FAILED(CreateRT(pRT)))
+		if (OP_SUCCESS(CreateRT(pRT)))
 		{
 			UTGetAppClass().g_gfxFlags |= K_UT_GFXFLAG_RTT;
 		}
@@ -45,7 +43,7 @@ void CRTManager::AddRT(UINT32 dwID, UINT width, UINT height, UINT mipLevels, D3D
 	}
 }
 
-HRESULT CRTManager::BeginSceneRT(UINT32 dwID)
+OPRESULT CRTManager::BeginSceneRT(UINT32 dwID)
 {
 	HRESULT hr = S_OK;
 	CEngineRenderTarget* pTarget = GetRTbyUID(dwID);
@@ -53,58 +51,60 @@ HRESULT CRTManager::BeginSceneRT(UINT32 dwID)
 	{
 		if (FAILED(pTarget->m_pRenderToSurface->BeginScene(pTarget->m_pRTSurface, NULL)))
 		{
-			ErrorBox(K_ERR_WARNING, L"[WARNING]CRTManager: BeginScene failed on RT:%d", dwID);
+			return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"[WARNING]CRTManager: BeginScene failed on RT:%d", dwID);
 		}
 	}
 	else
-		ErrorBox(K_ERR_WARNING, L"[WARNING]CRTManager: BeginSceneRT: Target ID not found: %d", dwID);
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"[WARNING]CRTManager: BeginSceneRT: Target ID not found: %d", dwID);
 
-	return hr;
+	return K_OP_OK;
 }
 
-HRESULT CRTManager::BeginSceneRT(CEngineRenderTarget* pRT)
+OPRESULT CRTManager::BeginSceneRT(CEngineRenderTarget* pRT)
 {
 	HRESULT hr = S_OK;
 	if ((pRT != null) && (pRT->bReady == true) && (pRT->m_pRenderToSurface != null))
 	{
 		if (FAILED(pRT->m_pRenderToSurface->BeginScene(pRT->m_pRTSurface, NULL)))
 		{
-			ErrorBox(K_ERR_WARNING, L"[WARNING]CRTManager: BeginScene(p) failed on RT:%d", pRT->UID);
+			return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CRTManager: BeginScene(p) failed on RT:%d", pRT->UID);
 		}
 	}
 	else
-		ErrorBox(K_ERR_WARNING, L"[WARNING]CRTManager: BeginSceneRT(p) failed!");
+		return OPRESULT(K_OP_FAILED, L"CRTManager: BeginSceneRT(p) failed!", K_SEVERITY_WARNING);
 
-	return hr;
+	return K_OP_OK;
 }
 
-HRESULT CRTManager::EndSceneRT(UINT32 dwID)
+OPRESULT CRTManager::EndSceneRT(UINT32 dwID)
 {
-	HRESULT hr = S_OK;
 	CEngineRenderTarget* pTarget = GetRTbyUID(dwID);
 	//end scene paint/pass
 	if ((pTarget != null) && (pTarget->m_pRenderToSurface != null))
 	{
-		hr = pTarget->m_pRenderToSurface->EndScene(0);
+		pTarget->m_pRenderToSurface->EndScene(0);
 	}
 	else
-		ErrorBox(K_ERR_WARNING, L"[WARNING]CRTManager: EndSceneRT: Target ID not found: %d", dwID);
+	{
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"[WARNING]CRTManager: EndSceneRT: Target ID not found: %d", dwID);
+	}
 
-	return hr;
+	return K_OP_OK;
 }
 
-HRESULT CRTManager::EndSceneRT(CEngineRenderTarget* pRT)
+OPRESULT CRTManager::EndSceneRT(CEngineRenderTarget* pRT)
 {
-	HRESULT hr = S_OK;
 	//end scene paint/pass
 	if ((pRT != null) && (pRT->m_pRenderToSurface != null))
 	{
-		hr = pRT->m_pRenderToSurface->EndScene(0);
+		pRT->m_pRenderToSurface->EndScene(0);
 	}
 	else
-		ErrorBox(K_ERR_WARNING, L"[WARNING]CRTManager: EndSceneRT: failed!");
+	{
+		return OPRESULT(K_OP_FAILED, L"[WARNING]CRTManager: EndSceneRT: failed!", K_SEVERITY_WARNING);
+	}
 
-	return hr;
+	return K_OP_OK;
 }
 
 void CRTManager::Release()
@@ -134,21 +134,19 @@ CRTManager::CEngineRenderTarget* CRTManager::GetRTbyUID(UINT32 dwID)
 	return null;
 }
 
-HRESULT CRTManager::CreateRT(CEngineRenderTarget* pRT)
+OPRESULT CRTManager::CreateRT(CEngineRenderTarget* pRT)
 {
 	if (m_pDevice == null)
 	{
-		LOG_DBG(L"CRTManager: CreateRT: Device is null! pD:%d pRT:%d", m_pDevice, pRT);
-		return E_NOT_VALID_STATE;
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CRTManager: CreateRT: Device is null! pD:%d pRT:%d", m_pDevice, pRT);
 	}
 	if ((pRT == null) || (pRT->bReady))
 	{
-		LOG_DBG(L"CRTManager: CreateRT: Engine RT is null or already ready! pD:%d pRT:%d", m_pDevice, pRT);
-		return E_NOT_VALID_STATE;
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CRTManager: CreateRT: Engine RT is null or already ready! pD:%d pRT:%d", m_pDevice, pRT);
 	}
 
-	HRESULT hr = S_OK;
 	//--- create RT texture ---
+	HRESULT hr = S_OK;
 	if (FAILED(D3DXCreateTexture(m_pDevice,
 		pRT->nWidth,
 		pRT->nHeight,
@@ -158,8 +156,7 @@ HRESULT CRTManager::CreateRT(CEngineRenderTarget* pRT)
 		D3DPOOL_DEFAULT,
 		&pRT->m_pRTTexture)))
 	{
-		ErrorBox(K_ERR_WARNING, L"CRTManager: CreateRT: Failed creating RT texture [ID:%d]. Setting CARD_FLAG_RTT to false.", pRT->UID);
-		return E_FAIL;
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CRTManager: CreateRT: Failed creating RT texture [ID:%d]. Setting CARD_FLAG_RTT to false.", pRT->UID);
 	}
 	else //if NOT failed
 	{
@@ -178,36 +175,35 @@ HRESULT CRTManager::CreateRT(CEngineRenderTarget* pRT)
 		{
 			SAFE_RELEASE(pRT->m_pRTTexture);
 			SAFE_RELEASE(pRT->m_pRTSurface);
-			ErrorBox(K_ERR_WARNING, L"CRTManager: CreateRT: Failed creating RT surface [ID:%d]. Setting CARD_FLAG_RTT to false.", pRT->UID);
-			return E_FAIL;
+
+			return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CRTManager: CreateRT: Failed creating RT surface [ID:%d]. Setting CARD_FLAG_RTT to false.", pRT->UID);
 		}
 	}
 
 	pRT->bReady = true;
 	LOG_DBG(L"CRTManager: CreateRT: Created RT [ID:%d] w:%d h:%d", pRT->UID, pRT->nWidth, pRT->nHeight);
-	return S_OK;
+	return K_OP_OK;
 }
 
 
 ///----------------------------------------------------
 /// DEVICE FUNCTIONS
 ///----------------------------------------------------
-HRESULT CRTManager::OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
+OPRESULT CRTManager::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
 {
-	m_pDevice = pd3dDevice;
-	return S_OK;
+	m_pDevice = pDevice;
+	return K_OP_OK;
 }
 
-HRESULT CRTManager::OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
+OPRESULT CRTManager::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
 {
-	m_pDevice = pd3dDevice;
+	m_pDevice = pDevice;
 
-	HRESULT hr = S_OK;
 	for (int kk = 0; kk < arrRT.nCount; kk++)
 	{
 		// try to create the RT right now
 		CEngineRenderTarget * pRT = arrRT.m_pData[kk];
-		if (!FAILED(CreateRT(pRT)))
+		if (OP_SUCCESS(CreateRT(pRT)))
 		{
 			UTGetAppClass().g_gfxFlags |= K_UT_GFXFLAG_RTT;
 		}
@@ -218,10 +214,10 @@ HRESULT CRTManager::OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE
 		}
 	}
 
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT CRTManager::OnLostDevice(void* pUserContext)
+OPRESULT CRTManager::OnLostDevice()
 {
 	m_pDevice = null;
 
@@ -234,13 +230,13 @@ HRESULT CRTManager::OnLostDevice(void* pUserContext)
 		arrRT.m_pData[kk]->bReady = false;
 	}
 
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT CRTManager::OnDestroyDevice(void* pUserContext)
+OPRESULT CRTManager::OnDestroyDevice()
 {
 	m_pDevice = null;
-	return S_OK;
+	return K_OP_OK;
 }
 
 
