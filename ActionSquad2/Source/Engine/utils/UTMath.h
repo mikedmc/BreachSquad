@@ -13,3 +13,8 @@
 #define			MUMatScaling			D3DXMatrixScaling
 #define			MUMatTranslation		D3DXMatrixTranslation
 #define			MUMatAffine2D			D3DXMatrixAffineTransformation2D
+
+
+// macros
+#define			Vec3ToVec2XY(vec)		Vec2(vec.x, vec.y)
+#define			Vec2ToVec3XY0(vec)		Vec3(vec.x, vec.y, 0.0f)
