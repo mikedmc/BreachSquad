@@ -3557,7 +3557,7 @@ POINTXY_INT CCtrlLayer::GetPos()
 CControl* CCtrlLayer::GetControlByIdx(int nIdx)
 {
 	if((nIdx < 0) || (nIdx >= controls.GetSize()))
-		return NULL;
+		return nullptr;
 	return controls[nIdx];
 }
 
@@ -3572,7 +3572,7 @@ CControl* CCtrlLayer::GetControlByName(char* ctrlName)
 		if (controls[kk]->paramsDict.GetVariantByName(L"ID")->m_strArg.getHash() == chash)
 			return controls[kk];
 	}
-	return NULL;
+	return nullptr;
 }
 
 bool CCtrlLayer::ControlSetDisableByName(bool bDisabledValue, char* ctrlName)
@@ -3944,7 +3944,7 @@ void CControlsManager::SetCameraTransform(CCameraTransform* pCamera)
 CCtrlLayer* CControlsManager::GetTopmostLayer()
 {
 	if (Layers.GetSize() <= 0)
-		return null;
+		return nullptr;
 	return Layers[Layers.GetSize() - 1];
 }
 
@@ -4501,7 +4501,7 @@ CCtrlLayer* CControlsManager::ShowLayerOnce(CHAR* layerName, float fAlpha, int p
 	if(GetLayerByName(layerName) == NULL)
 		return ShowLayer(layerName, fAlpha, posX, posY);
 	
-	return null;
+	return nullptr;
 }
 
 CCtrlLayer* CControlsManager::ShowLayer(CHAR* layerName, float fAlpha, int posX, int posY)
@@ -4521,7 +4521,7 @@ CCtrlLayer* CControlsManager::ShowLayer(CHAR* layerName, float fAlpha, int posX,
 		WCHAR txtline[MAX_PATH];
 		mbstowcs(txtline, layerName, MAX_PATH);
 		ErrorBox(K_ERR_WARNING, L"Layer definition not found! %s", txtline);
-		return null;
+		return nullptr;
 	}
 	//daca am gasit layerul, deci il clonez
 	CCtrlLayer *srclay = layersDefinitions[layIdx]->Clone();
@@ -4598,7 +4598,7 @@ CCtrlLayer* CControlsManager::GetLayerByNameHash(UINT32 layerNameHash)
 		if(Layers[kk]->ID.textHash == layerNameHash)
 			return Layers[kk];
 	}
-	return NULL;
+	return nullptr;
 }
 
 CCtrlLayer* CControlsManager::GetLayerByName(CHAR* layerName)
@@ -4609,13 +4609,13 @@ CCtrlLayer* CControlsManager::GetLayerByName(CHAR* layerName)
 		if(Layers[kk]->ID.textHash == layID)
 			return Layers[kk];
 	}
-	return NULL;
+	return nullptr;
 }
 
 CCtrlLayer* CControlsManager::GetLayerByIdx(int layerIdx)
 {
 	if((layerIdx < 0) || (layerIdx >= Layers.GetSize()))
-		return NULL;
+		return nullptr;
 	return Layers[layerIdx];
 }
 
@@ -4626,7 +4626,7 @@ CCtrlLayer* CControlsManager::GetTopmostInputLayer()
 		if(Layers[kk]->bGetsInput == true)
 			return Layers[kk];
 	}
-	return NULL;
+	return nullptr;
 }
 
 /*----------------------------------*\

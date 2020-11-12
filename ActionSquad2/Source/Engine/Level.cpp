@@ -9366,12 +9366,12 @@ void CLevel::Update(float dTime_original)
 				if (layer)
 				{
 					CControl* ctrl;
-					if (ctrl = layer->GetControlByName("CTRL_NETVOTE_RESTART"))
+					if ((ctrl = layer->GetControlByName("CTRL_NETVOTE_RESTART")) != nullptr)
 					{
 						ctrl->paramsDict.SetNamedVarINT32(L"leftVote", (g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART) ? 1 : 0);
 						ctrl->paramsDict.SetNamedVarINT32(L"rightVote", (g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART) ? 1 : 0);
 					}
-					if (ctrl = layer->GetControlByName("CTRL_NETVOTE_CONTINUE"))
+					if ((ctrl = layer->GetControlByName("CTRL_NETVOTE_CONTINUE")) != nullptr)
 					{
 						ctrl->paramsDict.SetNamedVarINT32(L"leftVote", (g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE) ? 1 : 0);
 						ctrl->paramsDict.SetNamedVarINT32(L"rightVote", (g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE) ? 1 : 0);
@@ -9679,34 +9679,34 @@ void CLevel::Update(float dTime_original)
 						}
 #endif
 
-						CControl* ctrl = null;
 						if (layer != null)
 						{
-							if (ctrl = layer->GetControlByName("CTRL_STARS"))
+							CControl* ctrltop = null;
+							if ((ctrltop = layer->GetControlByName("CTRL_STARS")) != nullptr)
 							{
-								ctrl->paramsDict.SetNamedVarINT32(L"nStars", nStars);
+								ctrltop->paramsDict.SetNamedVarINT32(L"nStars", nStars);
 							}
 							//red labels for conditions that aren't satisfied						   
 							if (m_arrStats[K_LVL_STATS_HOSTAGES_KILLED] > 0)
 							{
-								if (ctrl = layer->GetControlByName("LABEL_HOSTAGES"))
+								if ((ctrltop = layer->GetControlByName("LABEL_HOSTAGES")) != nullptr)
 								{
-									ctrl->paramsDict.SetNamedVarString(L"fontColor", L"0xffff0000");
+									ctrltop->paramsDict.SetNamedVarString(L"fontColor", L"0xffff0000");
 								}
 							}
 							if (m_arrStats[K_LVL_STATS_PL1_DEATHS] + m_arrStats[K_LVL_STATS_PL2_DEATHS] > 0)
 							{
-								if (ctrl = layer->GetControlByName("LABEL_CASUALTIES"))
+								if ((ctrltop = layer->GetControlByName("LABEL_CASUALTIES")) != nullptr)
 								{
-									ctrl->paramsDict.SetNamedVarString(L"fontColor", L"0xffff0000");
+									ctrltop->paramsDict.SetNamedVarString(L"fontColor", L"0xffff0000");
 								}
 							}
 
 							//on custom downloaded levels hide the MELEE-leaderboards 
 							if (m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_DOWNLOADED)
 							{
-								if (ctrl = layer->GetControlByName("LABEL_LEADERBOARDS"))
-									ctrl->paramsDict.SetNamedVarString(L"fontColor", L"0x00000000");
+								if ((ctrltop = layer->GetControlByName("LABEL_LEADERBOARDS")) != nullptr)
+									ctrltop->paramsDict.SetNamedVarString(L"fontColor", L"0x00000000");
 							}
 
 							if (nPlayers == 1)
@@ -12018,6 +12018,39 @@ OPRESULT CLevel::PaintDeferredBuffers()
 		}
 	}
 
+	///----------------------------------------------------
+	/// NORMAL MAP AND HEIGHT MAP
+	///----------------------------------------------------
+	pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
+	if (pRT != null)
+	{
+		hr = UTGetRTManager().BeginSceneRT(pRT);
+		if (SUCCEEDED(hr))
+		{
+			// Clear the render target and the zbuffer 
+			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0));
+			//use sprite
+			m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
+
+			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
+			D3DXMATRIXA16 matProj;
+			D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
+			m_pDevice->SetTransform(D3DTS_PROJECTION, &matProj);
+
+			m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+			m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
+
+			RenderPass(K_LVL_RP_NORMALS_HEIGHT);
+
+			// end sprite
+			m_pSprite->End();
+
+			V(UTGetRTManager().EndSceneRT(pRT));
+
+		}
+	}
+
+
 	return K_OP_OK;
 }
 
@@ -12065,7 +12098,22 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass)
 	// paint tiles
 	mapMesh.UpdateVisibility(camrect);
 
-	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(g_level.m_tilesTexBaseIdx));
+	int nTilesTexIdx = g_level.m_tilesTexBaseIdx;
+	switch (ePass)
+	{
+		case K_LVL_RP_COLORS:
+		{
+			nTilesTexIdx = g_level.m_tilesTexBaseIdx;
+		}
+		break;
+		case K_LVL_RP_NORMALS_HEIGHT:
+		{
+			nTilesTexIdx = g_level.m_tilesTexNormIdx;
+		}
+		break;
+	}
+
+	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
 	// paint floors and vertical walls
 	mapMesh.PaintLayer(0);
 	mapMesh.PaintLayer(1);
@@ -12095,8 +12143,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass)
 	m_pSprite->SetTransform(&g_matIdentity);
 
 
-	///--- paint hanging objects, FOW and top part of the walls
-	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(g_level.m_tilesTexBaseIdx));
+	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
 	mapMesh.PaintLayer(2);
 
 	return K_OP_OK;

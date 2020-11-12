@@ -127,7 +127,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 	//#TODO: deletes the last 4 characters (.png) and adds another ending... should be handled differently (from the editor)
 	wcsMediaAddr[wcslen(wcsMediaAddr) - 4] = 0;
-	StringCchCat(wcsMediaAddr, MAX_PATH, L"_n.png");
+	StringCchCat(wcsMediaAddr, MAX_PATH, L"_nh.png");
 	FileManager::GetMediaPath(wcsMediaAddr, Path);
 	if (FAILED(m_texManager.AddTexture(Path, &m_tilesTexNormIdx, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE)))
 	{

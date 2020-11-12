@@ -131,7 +131,7 @@ CRTManager::CEngineRenderTarget* CRTManager::GetRTbyUID(UINT32 dwID)
 		if (arrRT.m_pData[kk]->UID == dwID)
 			return arrRT.m_pData[kk];
 	}
-	return null;
+	return nullptr;
 }
 
 OPRESULT CRTManager::CreateRT(CEngineRenderTarget* pRT)
