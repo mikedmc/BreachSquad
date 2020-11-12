@@ -1,5 +1,7 @@
 #pragma once
 
+//#TODO: convert to namespace UTMath
+
 ///------------------------------------------------------------------------------------------------------------------------------------------
 ///  Generic math utils
 ///------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,18 +41,9 @@ float Math_GetVectorAngle(D3DXVECTOR2 start, D3DXVECTOR2 end);
 /* RETURNS: angle in rad between 2 vectors */
 float Math_GetAngleBetweenVectors(D3DXVECTOR2 vec1, D3DXVECTOR2 vec2);
 
-inline int Log2i(float val)
-{
-	return ((*(int *)(&val) >> 23) & 0xFF) - 127;
-}
-inline int Log2i(int val) 
-{ 
-	return Log2i((float)val); 
-}
-inline int MATH_GetBitsNeededForValue(int val) 
-{ 
-	return Log2i(val) + 1; 
-}
+int Log2i(float val);
+int Log2i(int val);
+int MATH_GetBitsNeededForValue(int val);
 
 //returns number of bits set in dwValue
 int MATH_CountBits(UINT32 dwValue);

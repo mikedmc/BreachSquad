@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<SpriteCollection Version="2.0">
+  <Image>lvled.png</Image>
+  <Modules>
+    <Module ImageIdx="0" X="0" Y="0" W="32" H="32" />
+    <Module ImageIdx="0" X="32" Y="0" W="32" H="32" />
+    <Module ImageIdx="0" X="64" Y="0" W="32" H="32" />
+    <Module ImageIdx="0" X="96" Y="0" W="32" H="32" />
+    <Module ImageIdx="0" X="128" Y="0" W="32" H="32" />
+    <Module ImageIdx="0" X="0" Y="32" W="32" H="32" />
+    <Module ImageIdx="0" X="32" Y="32" W="32" H="32" />
+    <Module ImageIdx="0" X="64" Y="32" W="32" H="32" />
+    <Module ImageIdx="0" X="96" Y="32" W="32" H="32" />
+    <Module ImageIdx="0" X="128" Y="32" W="32" H="32" />
+  </Modules>
+  <FrameModules>
+    <FrameModule ModuleIdx="0" OX="-16" OY="-16" Flags="0" />
+    <FrameModule ModuleIdx="1" OX="-16" OY="-16" Flags="0" />
+    <FrameModule ModuleIdx="2" OX="-16" OY="-16" Flags="0" />
+    <FrameModule ModuleIdx="3" OX="-16" OY="-16" Flags="0" />
+    <FrameModule ModuleIdx="4" OX="-16" OY="-16" Flags="0" />
+    <FrameModule ModuleIdx="5" OX="-16" OY="-16" Flags="0" />
+    <FrameModule ModuleIdx="6" OX="-16" OY="-16" Flags="0" />
+    <FrameModule ModuleIdx="7" OX="-16" OY="-16" Flags="0" />
+    <FrameModule ModuleIdx="8" OX="-16" OY="-16" Flags="0" />
+    <FrameModule ModuleIdx="9" OX="-16" OY="-16" Flags="0" />
+  </FrameModules>
+  <Frames>
+    <Frame BBoxX="-16" BBoxY="-16" BBoxW="32" BBoxH="32">
+      <FModules>
+        <FModule Idx="0" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-16" BBoxY="-16" BBoxW="32" BBoxH="32">
+      <FModules>
+        <FModule Idx="1" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-16" BBoxY="-16" BBoxW="32" BBoxH="32">
+      <FModules>
+        <FModule Idx="2" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-16" BBoxY="-16" BBoxW="32" BBoxH="32">
+      <FModules>
+        <FModule Idx="3" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-16" BBoxY="-16" BBoxW="32" BBoxH="32">
+      <FModules>
+        <FModule Idx="4" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-16" BBoxY="-16" BBoxW="32" BBoxH="32">
+      <FModules>
+        <FModule Idx="5" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-16" BBoxY="-16" BBoxW="32" BBoxH="32">
+      <FModules>
+        <FModule Idx="6" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-16" BBoxY="-16" BBoxW="32" BBoxH="32">
+      <FModules>
+        <FModule Idx="7" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-16" BBoxY="-16" BBoxW="32" BBoxH="32">
+      <FModules>
+        <FModule Idx="8" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-16" BBoxY="-16" BBoxW="32" BBoxH="32">
+      <FModules>
+        <FModule Idx="9" />
+      </FModules>
+      <Points />
+    </Frame>
+  </Frames>
+  <AnimationFrames>
+    <AnimationFrame FrameIdx="0" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="1" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="2" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="3" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="4" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="5" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="6" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="7" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="8" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="9" Duration="1" DX="0" DY="0" Flags="0" />
+  </AnimationFrames>
+  <Animations>
+    <Animation ID="ICONS_BASE" Flags="0">
+      <AFrame Idx="0" />
+      <AFrame Idx="1" />
+      <AFrame Idx="2" />
+      <AFrame Idx="3" />
+      <AFrame Idx="4" />
+    </Animation>
+    <Animation ID="ICONS_BASE_SEL" Flags="0">
+      <AFrame Idx="5" />
+      <AFrame Idx="6" />
+      <AFrame Idx="7" />
+      <AFrame Idx="8" />
+      <AFrame Idx="9" />
+    </Animation>
+  </Animations>
+</SpriteCollection>

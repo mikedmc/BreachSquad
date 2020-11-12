@@ -1,6 +1,6 @@
 #pragma once
 
-enum ToolType
+enum eCtrlEdTool
 {
 	TOOL_TYPE_NO_TOOL = 0,
 	TOOL_TYPE_RESIZE_TOP_LEFT = 1,

@@ -82,6 +82,7 @@ CTimersArray				g_timers(3000, 10);					//Timers array
 CPlayerSelScr				g_playerSelScr;						// Player selection screen
 CMainMenu					g_mainMenu;							// Main menu class
 CLevel						g_level;							// Current Level
+CLevelEditor				g_editor;							// Level editor - defined global, initialized on loading, destroyed on app shutdown
 
 #ifdef K_CONTROLS_EDITOR
 CControlsEditor				g_ControlsEditor;					// Controls editor for debug/develop mode (F2 to show)
@@ -611,6 +612,7 @@ HRESULT InitApp(void)
 
 void ShutdownApp(void)
 {
+	g_editor.Release();
 	g_stringsMgr.Release();
 	g_particlesMgr.Release();
 
@@ -815,6 +817,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetFontsManager().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_level.OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(g_editor.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_particlesMgr.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetControlsManager().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnCreateDevice(pDevice, pBBDesc));
@@ -894,6 +897,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	V_RETURN(UTGetFontsManager().OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_level.OnResetDevice(pDevice, pBBDesc));
+	V_OP_RETHR(g_editor.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_particlesMgr.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetControlsManager().OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnResetDevice(pDevice, pBBDesc));
@@ -906,6 +910,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 #endif
 	//--- set Sprite painter class pointer ---
 	g_level.SetSpritePtr(g_pGameSprite);
+	g_editor.SetSpritePtr(g_pGameSprite);
 	g_particlesMgr.SetSpritePtr(g_pGameSprite);
 	CTexturedFont::SetGlobalSpritePtr(g_pGameSprite);
 	CSprite::SetGlobalSpritePtr(g_pGameSprite);
@@ -970,6 +975,7 @@ void CALLBACK OnLostDevice(void)
 	UTGetRTManager().OnLostDevice();
 
 	g_level.OnLostDevice();
+	g_editor.OnLostDevice();
 	g_particlesMgr.OnLostDevice();
 	g_playerSelScr.OnLostDevice();
 	g_mainMenu.OnLostDevice();
@@ -998,6 +1004,7 @@ void CALLBACK OnDestroyDevice(void)
 	UTGetFontsManager().OnDestroyDevice();
 	UTGetControlsManager().OnDestroyDevice();
 	g_level.OnDestroyDevice();
+	g_editor.OnDestroyDevice();
 	g_particlesMgr.OnDestroyDevice();
 	g_playerSelScr.OnDestroyDevice();
 	g_mainMenu.OnDestroyDevice();

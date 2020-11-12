@@ -108,7 +108,7 @@ public:
 	WCHAR	g_wszModsDir[MAX_PATH];			//user mods folder 
 	WCHAR	g_wszModsDirTemp[MAX_PATH];		//user mods temporary folder (safer location for unpacking)
 	WCHAR	g_wszUserDataDir[MAX_PATH];		//user data folder 
-	WCHAR	g_wszAppResDir[MAX_PATH];		//path to game's res folder "media"
+	WCHAR	g_wszAppResDir[MAX_PATH];		//path to game's res folder "media" (no trailing separator)
 	WCHAR	g_wszTempFilePath[MAX_PATH];	//path to temp file
 	WCHAR	g_wszTempFolderPath[MAX_PATH];	//temp folder path, finishing with folder separator
 

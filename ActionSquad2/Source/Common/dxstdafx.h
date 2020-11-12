@@ -495,6 +495,7 @@ using namespace spine;
 #include "Shop.h"
 #include "PlayerSelScr.h"
 #include "Level.h"
+#include "../LevelEd/LevelEditor.h"
 #include "MainMenu.h"
 
 #ifdef ENABLE_GALAXY
@@ -646,6 +647,7 @@ extern int g_keydef_scancode;
 extern CNetLock						g_netlock;
 
 extern CLevel						g_level;		
+extern CLevelEditor					g_editor;
 extern CMainMenu					g_mainMenu;	
 
 #ifdef ENABLE_CHAT_WINDOW

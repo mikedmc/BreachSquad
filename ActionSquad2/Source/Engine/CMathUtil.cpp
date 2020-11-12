@@ -151,6 +151,23 @@ float Math_GetAngleBetweenVectors(D3DXVECTOR2 vec1, D3DXVECTOR2 vec2)
 }
 
 
+int Log2i(float val)
+{
+	return ((*(int *)(&val) >> 23) & 0xFF) - 127;
+}
+
+int Log2i(int val)
+{
+
+	return Log2i((float)val);
+}
+
+int MATH_GetBitsNeededForValue(int val)
+{
+
+	return Log2i(val) + 1;
+}
+
 int MATH_CountBits(UINT32 dwValue)
 {
 	int nBits = 0;

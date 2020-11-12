@@ -154,6 +154,9 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 		{
 			g_gameSubstate++;
 
+			// load editor sprites
+			g_editor.Init();
+
 			WCHAR xmlpath[MAX_PATH];
 			FileManager::GetMediaPath(L"media/scripts.xml", xmlpath);
 			UTGetScriptManager().AddScripts(xmlpath);

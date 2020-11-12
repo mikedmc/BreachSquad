@@ -308,6 +308,8 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 
 	bIsLoaded = true;
 
+	LOG_DBG(L"SpriteCollection:: Loaded: %s", wcsFullPath);
+
 	return S_OK;
 }
 
