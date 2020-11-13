@@ -238,10 +238,10 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "utils/UTMath.h"
 #include "utils/PlatformTypes.h"
 
-#define K_GAME_USERDATA_COMPANY_SUFFIX		L"\\PixelShard\\"
-#define K_GAME_USERDATA_FOLDER_SUFFIX		L"ActionSquad2\\"
-#define K_GAME_USERDATA_MODS_SUFFIX			L"mods\\"
-#define K_GAME_USERDATA_MODS_SUFFIX_TEMP	L"AS2_mods_temp\\"
+#define K_GAME_USERDATA_COMPANY_SUFFIX		L"/PixelShard/"
+#define K_GAME_USERDATA_FOLDER_SUFFIX		L"ActionSquad2/"
+#define K_GAME_USERDATA_MODS_SUFFIX			L"mods/"
+#define K_GAME_USERDATA_MODS_SUFFIX_TEMP	L"AS2_mods_temp/"
 #define K_GAME_WINDOW_CLASSNAME				L"ActionSquad2WindowClass"
 #define K_GAME_EMAIL						L"devteam@pixelshard.com"
 #define K_GAME_CONTACT_URL					L"https://pixelshard.com/contact"
@@ -337,8 +337,17 @@ enum ETexChannel {
 #define K_GAME_WIDTH_MIN			(K_GAME_HEIGHT * K_WINDOW_ASPECT_RATIO_MIN)
 #define K_GAME_WIDTH_MAX			(K_GAME_HEIGHT * K_WINDOW_ASPECT_RATIO_MAX)
 
+// scale to use when transforming Z to H (added to Y, projection)
+#define ZHSCALE						0.5f
+// Transforms World coord Z in onscreen elevation that we add to Y value (45deg projection)
+#define Z_TO_H(posZ)				(posZ * ZHSCALE)
+// Transforms onscreen elevation to World coord Z (
+#define H_TO_Z(posZ)				(posZ * (1 / ZHSCALE))
+// Converts Vec3 world space in Vec2 proojected space
+#define V3projV2(vec)				(Vec2(vec.x, vec.y - vec.z * ZHSCALE))
+
 ///--- CLEAR COLOR ---
-#define K_GAME_CLEAR_COLOR	0x00000066
+#define K_GAME_CLEAR_COLOR	0x00000044
 // splashscreen show time
 #define K_GAME_SPLASH_SHOW_TIMER 2.5f
 
@@ -397,18 +406,19 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #define ENABLE_LEADERBOARDS
 
 ///--- constantele exportate de obicei din editoare ---
-#include "constants\\strings.h"
-#include "constants\\font_ids.h"
-#include "constants\\sounds.h"
+#include "constants/strings.h"
+#include "constants/font_ids.h"
+#include "constants/sounds.h"
 //exportate din editor
-#include "constants\\lights_SPR.h"
-#include "constants\\actives_SPR.h"
-#include "constants\\particles_SPR.h"
-#include "constants\\igm_interface_SPR.h"
-#include "constants\\bk_city_SPR.h"
-#include "constants\\controls_SPR.h"
-#include "constants\\menus_SPR.h"
-#include "constants\\title_screen_SPR.h"
+#include "constants/lvled_SPR.h"
+#include "constants/lights_SPR.h"
+#include "constants/actives_SPR.h"
+#include "constants/particles_SPR.h"
+#include "constants/igm_interface_SPR.h"
+#include "constants/bk_city_SPR.h"
+#include "constants/controls_SPR.h"
+#include "constants/menus_SPR.h"
+#include "constants/title_screen_SPR.h"
 
 //enable SDL support
 #define K_GLOBAL_ENABLE_SDL
@@ -579,7 +589,7 @@ using namespace spine;
 #include "AppGlobals.h"
 
 #ifdef K_CONTROLS_EDITOR
-	#include "..\\ControlsEd\\ControlsEditor.h"
+	#include "../ControlsEd/ControlsEditor.h"
 #endif
 
 ///--------------------------------------------------------------------------------------

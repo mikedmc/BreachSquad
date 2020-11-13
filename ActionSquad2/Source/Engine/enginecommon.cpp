@@ -1565,7 +1565,7 @@ bool OS_DeleteRecursive(WCHAR r_szPath[1024])
 
 	WCHAR l_szTmp[1025] = { 0 };
 	memcpy(l_szTmp, r_szPath, 1024 * sizeof(WCHAR));
-	wcscat(l_szTmp, L"\\*");
+	wcscat(l_szTmp, L"/*");
 
 	hFind = FindFirstFile(l_szTmp, &FindFileData);
 	if ((hFind == NULL) || (hFind == INVALID_HANDLE_VALUE)) 
@@ -1579,7 +1579,7 @@ bool OS_DeleteRecursive(WCHAR r_szPath[1024])
 			{
 				if (wcscmp(FindFileData.cFileName, L".."))
 				{
-					wsprintf(l_szNewPath, L"%s\\%s", l_szPath, FindFileData.cFileName);
+					wsprintf(l_szNewPath, L"%s/%s", l_szPath, FindFileData.cFileName);
 					OS_DeleteRecursive(l_szNewPath);
 				}
 			}
@@ -1587,7 +1587,7 @@ bool OS_DeleteRecursive(WCHAR r_szPath[1024])
 		else
 		{
 			WCHAR l_szFile[1025] = { 0 };
-			wsprintf(l_szFile, L"%s\\%s", l_szPath, FindFileData.cFileName);
+			wsprintf(l_szFile, L"%s/%s", l_szPath, FindFileData.cFileName);
 			if (!DeleteFile(l_szFile))
 			{
 				LOG(L"OS_DeleteRecursive could not DeleteFile: %s", l_szFile);
@@ -1637,7 +1637,7 @@ bool OS_CopyRecursive(WCHAR r_szSrcPath[1024], WCHAR r_szDesPath[1024])
 	WCHAR l_szNewSrcPath[1025] = { 0 };
 	WCHAR l_szNewDesPath[1025] = { 0 };
 
-	wcscat(l_szTmp, L"\\*");
+	wcscat(l_szTmp, L"/*");
 
 	hFind = FindFirstFile(l_szTmp, &FindFileData);
 	if ((hFind == NULL) || (hFind == INVALID_HANDLE_VALUE))
@@ -1652,8 +1652,8 @@ bool OS_CopyRecursive(WCHAR r_szSrcPath[1024], WCHAR r_szDesPath[1024])
 			{
 				if (wcscmp(FindFileData.cFileName, L".."))
 				{
-					wsprintf(l_szNewDesPath, L"%s\\%s", l_szDesPath, FindFileData.cFileName);
-					wsprintf(l_szNewSrcPath, L"%s\\%s", l_szSrcPath, FindFileData.cFileName);
+					wsprintf(l_szNewDesPath, L"%s/%s", l_szDesPath, FindFileData.cFileName);
+					wsprintf(l_szNewSrcPath, L"%s/%s", l_szSrcPath, FindFileData.cFileName);
 					CreateDirectory(l_szNewDesPath, NULL);
 					OS_CopyRecursive(l_szNewSrcPath, l_szNewDesPath);
 				}
@@ -1663,8 +1663,8 @@ bool OS_CopyRecursive(WCHAR r_szSrcPath[1024], WCHAR r_szDesPath[1024])
 		{
 			WCHAR l_szSrcFile[1025] = { 0 };
 			WCHAR l_szDesFile[1025] = { 0 };
-			wsprintf(l_szDesFile, L"%s\\%s", l_szDesPath, FindFileData.cFileName);
-			wsprintf(l_szSrcFile, L"%s\\%s", l_szSrcPath, FindFileData.cFileName);
+			wsprintf(l_szDesFile, L"%s/%s", l_szDesPath, FindFileData.cFileName);
+			wsprintf(l_szSrcFile, L"%s/%s", l_szSrcPath, FindFileData.cFileName);
 			BOOL l_bRet = CopyFile(l_szSrcFile, l_szDesFile, FALSE); //overwrites existing files
 			if (!l_bRet) 
 			{

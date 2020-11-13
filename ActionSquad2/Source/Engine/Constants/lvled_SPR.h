@@ -1,0 +1,10 @@
+
+//Animation indexes (Idx)
+#define 	ANM_LVLED_SPR_ICONS_BASE   0
+#define 	ANM_LVLED_SPR_ICONS_BASE_SEL   1
+#define 	ANM_LVLED_SPR_RULERS   2
+
+//Animation names (ID)
+#define 	ANMID_LVLED_SPR_ICONS_BASE   "ICONS_BASE"
+#define 	ANMID_LVLED_SPR_ICONS_BASE_SEL   "ICONS_BASE_SEL"
+#define 	ANMID_LVLED_SPR_RULERS   "RULERS"

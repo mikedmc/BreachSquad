@@ -11,7 +11,7 @@
 		<Control Type="Label" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="SYS_CONTROLLER_REMOVED" wrapText="false" justify="false" align="0" valign="0" X="-85" Y="10" W="170" H="11" />
 	</Layer>
 	<Layer ID="LAYER_ID_MAINMENU" X="0" Y="0" isBlocking="false" getsInput="true" anchorX="-1" anchorY="1">
-		<Control Type="ScrollMenu" ID="CTRL_SCROLL_MAINMENU" animID="SCROLLMENU_CURSOR" fontID="FONT_12_WOW" fontColor="#FFE5220D" align="-1" Vspacing="18" disabledFlags="0" stringID0="PLAY" stringID1="COOP" stringID2="WORKSHOP" stringID3="OPTIONS" stringID4="LEADERBOARDS" stringID5="EXIT" stringID6="" stringID7="" X="3" Y="-109" W="166" H="107" />
+		<Control Type="ScrollMenu" ID="CTRL_SCROLL_MAINMENU" animID="SCROLLMENU_CURSOR" fontID="FONT_12_WOW" fontColor="#FFFEFEFF" align="-1" Vspacing="18" disabledFlags="0" stringID0="PLAY" stringID1="COOP" stringID2="WORKSHOP" stringID3="OPTIONS" stringID4="LEADERBOARDS" stringID5="EXIT" stringID6="" stringID7="" X="13" Y="-111" W="166" H="107" />
 	</Layer>
 	<Layer ID="LAYER_ID_MAINMENU_NOWORKSHOP" X="0" Y="0" isBlocking="false" getsInput="true" anchorX="-1" anchorY="1">
 		<Control Type="ScrollMenu" ID="CTRL_SCROLL_MAINMENU" animID="SCROLLMENU_CURSOR" fontID="FONT_12_WOW" fontColor="#FFAAAAAA" align="-1" Vspacing="18" disabledFlags="0" stringID0="PLAY" stringID1="COOP" stringID2="OPTIONS" stringID3="LEADERBOARDS" stringID4="EXIT" stringID5="" stringID6="" stringID7="" X="15" Y="-90" W="166" H="88" />

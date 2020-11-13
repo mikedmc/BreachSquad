@@ -334,13 +334,13 @@ void GetExePathA(CHAR szPath[], int nLen)
 	WCHAR szwPath[MAX_PATH];
 	GetModuleFileName(NULL, szwPath, nLen);
 	int nIdx = (int)wcslen(szwPath);
-	while (--nIdx > 0 && szwPath[nIdx] != '\\');
+	while (--nIdx > 0 && szwPath[nIdx] != '\\' && szwPath[nIdx] != '/');
 	szwPath[nIdx + 1] = '\0';
 	wcstombs(szPath, szwPath, nLen);
 #else
 	GetModuleFileName(NULL, szPath, nLen);
 	int nIdx = (int)wcslen(szPath);
-	while (--nIdx > 0 && szPath[nIdx] != '\\');
+	while (--nIdx > 0 && szPath[nIdx] != '\\' && szwPath[nIdx] != '/');
 	szPath[nIdx + 1] = '\0';
 #endif
 }
@@ -350,13 +350,13 @@ void GetExePathW(WCHAR szwPath[], int nLen)
 #ifdef UNICODE
 	GetModuleFileName(NULL, szwPath, nLen);
 	int nIdx = (int)wcslen(szwPath);
-	while (--nIdx > 0 && szwPath[nIdx] != '\\');
+	while (--nIdx > 0 && szwPath[nIdx] != '\\' && szwPath[nIdx] != '/');
 	szwPath[nIdx + 1] = '\0';
 #else
 	CHAR szPath[MAX_PATH];
 	GetModuleFileName(NULL, szPath, nLen);
 	int nIdx = (int)wcslen(szPath);
-	while (--nIdx > 0 && szPath[nIdx] != '\\');
+	while (--nIdx > 0 && szPath[nIdx] != '\\' && szwPath[nIdx] != '/');
 	szPath[nIdx + 1] = '\0';
 	mbstowcs(szwPath, szPath, nLen);
 #endif

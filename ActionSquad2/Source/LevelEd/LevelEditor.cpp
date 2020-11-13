@@ -10,7 +10,8 @@ using namespace std;
 
 
 CLevelEditor::CLevelEditor() :
-	m_pLevel(nullptr), m_pSprite(nullptr), m_pDevice(nullptr)
+	m_pLevel(nullptr), m_pDevice(nullptr),
+	eTool(K_LED_LIGHT)
 {
 }
 
@@ -28,7 +29,7 @@ OPRESULT CLevelEditor::Init()
 	WCHAR wsPath[MAX_PATH];
 	wsprintf(wsPath, L"%s/interfaces/lvled.bsx", UTGetAppClass().g_wszAppResDir);
 	HRESULT hr = S_OK;
-	if (FAILED(m_sprMgr.LoadSprites(wsPath)))
+	if (FAILED(m_sprCol.LoadSprites(wsPath)))
 	{
 		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CLevelEditor::Init: Couldn't find file: %s", wsPath);
 	}
@@ -39,154 +40,10 @@ OPRESULT CLevelEditor::Init()
 
 void CLevelEditor::Release()
 {
-	m_sprMgr.Release();
+	m_sprCol.Release();
 }
 
 
-void CLevelEditor::DrawLine(int x1, int y1, int x2, int y2, D3DCOLOR col)
-{
-	VERT_TL1TC vertices[2];
-	vertices[0].pos.x = x1; vertices[0].pos.y = y1; vertices[0].pos.z = 0.0f; vertices[0].pos.w = 1.0f;
-	vertices[1].pos.x = x2; vertices[1].pos.y = y2;	vertices[1].pos.z = 0.0f; vertices[1].pos.w = 1.0f;
-	vertices[0].color = vertices[1].color = col;
-	m_pDevice->SetFVF(VERT_TL1TC::FVF);
-	m_pDevice->DrawPrimitiveUP(D3DPT_LINELIST, 2, &vertices, sizeof(VERT_TL1TC));
-}
-
-
-void CLevelEditor::CloneCamTransform(CCameraTransform* pSrcCamera)
-{
-	camMain = *pSrcCamera;
-}
-
-
-void CLevelEditor::DrawBBox(RECTXYWH rect, bool selected)
-{
-	VERT_TL1TC vertices[5];
-	//init verts
-	for (int kk = 0; kk < 5; kk++)
-	{
-		vertices[kk].pos = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
-	}
-
-	DWORD col = 0xffff0000;
-	if (selected)
-	{
-		col = 0xff00ff00;
-	}
-
-	// BBox
-	vertices[0].pos.x = rect.x; vertices[0].pos.y = rect.y;
-	vertices[1].pos.x = rect.x + rect.w; vertices[1].pos.y = rect.y;
-	vertices[2].pos.x = rect.x + rect.w; vertices[2].pos.y = rect.y + rect.h;
-	vertices[3].pos.x = rect.x; vertices[3].pos.y = rect.y + rect.h;
-	vertices[4].pos.x = rect.x; vertices[4].pos.y = rect.y;
- 
-	vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
-
-	m_pDevice->SetFVF(VERT_TL1TC::FVF);
-	m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
-	
-	if (selected)
-	{
-		// top-left scalespot
-		vertices[0].pos.x = rect.x; vertices[0].pos.y = rect.y;
-		vertices[1].pos.x = rect.x + K_BBOX_SCALE_BOX_SIZE; vertices[1].pos.y = rect.y;
-		vertices[2].pos.x = rect.x + K_BBOX_SCALE_BOX_SIZE; vertices[2].pos.y = rect.y + K_BBOX_SCALE_BOX_SIZE;
-		vertices[3].pos.x = rect.x; vertices[3].pos.y = rect.y + K_BBOX_SCALE_BOX_SIZE;
-		vertices[4].pos.x = rect.x; vertices[4].pos.y = rect.y;
-
-		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
-
-		m_pDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
-
-	
-		// top-right scalespot
-		vertices[0].pos.x = rect.x + rect.w; vertices[0].pos.y = rect.y;
-		vertices[1].pos.x = rect.x + rect.w; vertices[1].pos.y = rect.y + K_BBOX_SCALE_BOX_SIZE;
-		vertices[2].pos.x = rect.x + rect.w - K_BBOX_SCALE_BOX_SIZE; vertices[2].pos.y = rect.y + K_BBOX_SCALE_BOX_SIZE;
-		vertices[3].pos.x = rect.x + rect.w - K_BBOX_SCALE_BOX_SIZE; vertices[3].pos.y = rect.y;
-		vertices[4].pos.x = rect.x + rect.w; vertices[4].pos.y = rect.y;
-
-		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
-
-		m_pDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
-
-		// bottom-right scalespot
-		vertices[0].pos.x = rect.x + rect.w; vertices[0].pos.y = rect.y + rect.h;
-		vertices[1].pos.x = rect.x + rect.w - K_BBOX_SCALE_BOX_SIZE; vertices[1].pos.y = rect.y + rect.h;
-		vertices[2].pos.x = rect.x + rect.w - K_BBOX_SCALE_BOX_SIZE; vertices[2].pos.y = rect.y + rect.h - K_BBOX_SCALE_BOX_SIZE;
-		vertices[3].pos.x = rect.x + rect.w; vertices[3].pos.y = rect.y + rect.h - K_BBOX_SCALE_BOX_SIZE;
-		vertices[4].pos.x = rect.x + rect.w; vertices[4].pos.y = rect.y + rect.h;
-
-		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
-
-		m_pDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
-
-		// bottom-left scalespot
-		vertices[0].pos.x = rect.x; vertices[0].pos.y = rect.y + rect.h;
-		vertices[1].pos.x = rect.x; vertices[1].pos.y = rect.y + rect.h - K_BBOX_SCALE_BOX_SIZE;
-		vertices[2].pos.x = rect.x + K_BBOX_SCALE_BOX_SIZE; vertices[2].pos.y = rect.y + rect.h - K_BBOX_SCALE_BOX_SIZE;
-		vertices[3].pos.x = rect.x + K_BBOX_SCALE_BOX_SIZE; vertices[3].pos.y = rect.y + rect.h;
-		vertices[4].pos.x = rect.x; vertices[4].pos.y = rect.y + rect.h;
-
-		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
-
-		m_pDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
-
-		// top-mid scalespot
-		vertices[0].pos.x = rect.x + rect.w / 2 - K_BBOX_SCALE_BOX_SIZE / 2; vertices[0].pos.y = rect.y;
-		vertices[1].pos.x = rect.x + rect.w / 2 + K_BBOX_SCALE_BOX_SIZE / 2; vertices[1].pos.y = rect.y;
-		vertices[2].pos.x = rect.x + rect.w / 2 + K_BBOX_SCALE_BOX_SIZE / 2; vertices[2].pos.y = rect.y + K_BBOX_SCALE_BOX_SIZE;
-		vertices[3].pos.x = rect.x + rect.w / 2 - K_BBOX_SCALE_BOX_SIZE / 2; vertices[3].pos.y = rect.y + K_BBOX_SCALE_BOX_SIZE;
-		vertices[4].pos.x = rect.x + rect.w / 2 - K_BBOX_SCALE_BOX_SIZE / 2; vertices[4].pos.y = rect.y;
-
-		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
-
-		m_pDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
-
-		// bot-mid scalespot
-		vertices[0].pos.x = rect.x + rect.w / 2 - K_BBOX_SCALE_BOX_SIZE / 2; vertices[0].pos.y = rect.y + rect.h;
-		vertices[1].pos.x = rect.x + rect.w / 2 + K_BBOX_SCALE_BOX_SIZE / 2; vertices[1].pos.y = rect.y + rect.h;
-		vertices[2].pos.x = rect.x + rect.w / 2 + K_BBOX_SCALE_BOX_SIZE / 2; vertices[2].pos.y = rect.y + rect.h - K_BBOX_SCALE_BOX_SIZE;
-		vertices[3].pos.x = rect.x + rect.w / 2 - K_BBOX_SCALE_BOX_SIZE / 2; vertices[3].pos.y = rect.y + rect.h - K_BBOX_SCALE_BOX_SIZE;
-		vertices[4].pos.x = rect.x + rect.w / 2 - K_BBOX_SCALE_BOX_SIZE / 2; vertices[4].pos.y = rect.y + rect.h;
-
-		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
-
-		m_pDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
-
-		// left-mid scalespot
-		vertices[0].pos.x = rect.x; vertices[0].pos.y = rect.y + rect.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2;
-		vertices[1].pos.x = rect.x + K_BBOX_SCALE_BOX_SIZE; vertices[1].pos.y = rect.y + rect.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2;
-		vertices[2].pos.x = rect.x + K_BBOX_SCALE_BOX_SIZE; vertices[2].pos.y = rect.y + rect.h / 2 + K_BBOX_SCALE_BOX_SIZE / 2;
-		vertices[3].pos.x = rect.x; vertices[3].pos.y = rect.y + rect.h / 2 + K_BBOX_SCALE_BOX_SIZE / 2;
-		vertices[4].pos.x = rect.x; vertices[4].pos.y = rect.y + rect.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2;
-
-		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
-
-		m_pDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
-
-		// right-mid scalespot
-		vertices[0].pos.x = rect.x + rect.w; vertices[0].pos.y = rect.y + rect.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2;
-		vertices[1].pos.x = rect.x + rect.w - K_BBOX_SCALE_BOX_SIZE; vertices[1].pos.y = rect.y + rect.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2;
-		vertices[2].pos.x = rect.x + rect.w - K_BBOX_SCALE_BOX_SIZE; vertices[2].pos.y = rect.y + rect.h / 2 + K_BBOX_SCALE_BOX_SIZE / 2;
-		vertices[3].pos.x = rect.x + rect.w; vertices[3].pos.y = rect.y + rect.h / 2 + K_BBOX_SCALE_BOX_SIZE / 2;
-		vertices[4].pos.x = rect.x + rect.w; vertices[4].pos.y = rect.y + rect.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2;
-
-		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
-
-		m_pDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
-	}
-}
 
 /*
 void CLevelEditor::IMGUI_AddCurControlProps()
@@ -508,15 +365,14 @@ void CLevelEditor::IMGUI_AddLayerProps()
 */
 
 
-void CLevelEditor::SetSpritePtr(ID3DXSprite* pSprite)
-{
-	m_pSprite = pSprite;
-}
-
-
 
 void CLevelEditor::Launch(CLevel* level)
 {
+	_ASSERT(level != nullptr);
+	// only if level already loaded
+	if (!level->m_bLoaded)
+		return;
+	// save pointer to current level
 	m_pLevel = level;
 }
 
@@ -529,10 +385,19 @@ void CLevelEditor::Close()
 
 void CLevelEditor::Update(float dTime)
 {
+	if (!m_pLevel)
+		return;
 	// don't do any processing if clicked on imgui
 	if (UTimgui().GetWantCaptureMouse())
 		return;
 
+	// mouse pos in level world
+	Vec2 mousepos = m_pLevel->m_camLevel.ScreenToWorld(g_mouse.pos);
+
+	if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
+	{
+		pSelected = SelectClosest(mousepos);
+	}
 }
 
 
@@ -564,277 +429,168 @@ OPRESULT CLevelEditor::SaveLevel(WCHAR* strPath)
 }
 
 
-void CLevelEditor::Paint()
+void CLevelEditor::Paint(ID3DXSprite* pSpr)
 {
 	if (m_pLevel == nullptr)
 		return;
-	_ASSERT((m_pDevice != nullptr) && (m_pSprite != nullptr));
+	_ASSERT(m_pDevice != nullptr);
 
-	CCameraTransform::SetActiveCamera(m_pDevice, &camMain);
+	CCameraTransform::SetActiveCamera(m_pDevice, &UTGetAppClass().g_camScreen);
+
+	switch (eTool)
+	{
+		case K_LED_LIGHT:
+		{
+			for (int kk = 0; kk < m_pLevel->m_visibleList.visible_lights.Count(); kk++)
+			{
+				CLight* lg = m_pLevel->m_visibleList.visible_lights[kk];
+				Vec2 lgproj = V3projV2(lg->pos3D);
+				Vec2 vpos = m_pLevel->m_camLevel.WorldToScreen(lgproj);
+				Vec2 vposprj = m_pLevel->m_camLevel.WorldToScreen(lg->pos);
+				
+				DWORD lcol = (pSelected == lg) ? 0xffff2222 : 0xff22ff22;
+				DrawHRuler(vposprj, vposprj.y - vpos.y, lcol);
+
+				int anm = (pSelected == lg) ? ANM_LVLED_SPR_ICONS_BASE_SEL : ANM_LVLED_SPR_ICONS_BASE;
+				CSprite::paintFrame(&m_sprCol, vpos.x, vpos.y, ANM_LVLED_SPR_ICONS_BASE, 0, 0xffffffff);
+			}
+		}
+		break;
+	}
+
+	pSpr->Flush();
 }
 
 
 void CLevelEditor::IMGUI_ShowInterfaces()
 {
-	/*
+	// get type of selected element
+	eActiveInterfaceType selType = K_LVL_IAI_TYPE_UNKNOWN;
+	if (pSelected)
+	{
+		selType = (eActiveInterfaceType)pSelected->GetClassType();
+	}
+
 	{
 		ImGuiViewport * vp = ImGui::GetWindowViewport();
-		
+
 		///--- TOOLS WINDOW
 		ImGui::Begin("Tools", null, ImGuiWindowFlags_NoNavInputs);
-		if (ImGui::Button("Hide BBox", ImVec2(80, 0)))
-		{
-			hideBBoxes = !hideBBoxes;
-		}
 		if (ImGui::Button("V Center", ImVec2(80, 0)))
 		{
-			CenterElements(false, true);
 		}
 		if (ImGui::Button("H Center", ImVec2(80, 0)))
 		{
-			CenterElements(true, false);
 		}
 		if (ImGui::Button("Pull Up", ImVec2(80, 0)))
 		{
-			ChangeControlPaintOrder(-1);
 		}
 		if (ImGui::Button("Push Down", ImVec2(80, 0)))
 		{
-			ChangeControlPaintOrder(1);
 		}
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.2f, 0.2f, 1.0f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.2f, 0.2f, 1.0f));
 		if (ImGui::Button("Save All", ImVec2(80, 0)))
 		{
-			SaveXML(UTGetControlsManager().loadedFile);
+			//SaveLevel();
 		}
 		ImGui::PopStyleColor(2);
-
 		ImGui::End();
 
 
 		///--- CONTROLS TEMPLATES
 		if (vp)
 			ImGui::SetNextWindowPos(vp->Pos, ImGuiCond_Once);
-		ImGui::Begin("Controls Templates", null, ImGuiWindowFlags_NoNavInputs);
+		ImGui::Begin("Properties", null, ImGuiWindowFlags_NoNavInputs);
 
-		vector<string> arrItems;
-		for (int ii = 0; ii < ctrlTemplates.Count(); ii++)
+		switch (selType)
 		{
-			CVariantCollection *col = ctrlTemplates.GetAt(ii);
-			CVariantComplex* var = col->m_variants.GetAt(0);
-			char strName[MAX_PATH];
-			wcstombs(strName, var->m_strArg.text, MAX_PATH);
-			arrItems.push_back(strName);
-		}
-
-		if (ImGui::ListBoxHeader("##", ImVec2(250, 120)))
-		{
-			for (int kk = 0; kk < arrItems.size(); kk++)
-			{
-				auto item = arrItems[kk];
-				if (ImGui::Selectable(item.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
-				{
-					if (ImGui::IsMouseDoubleClicked(0))
-					{
-						CVariantCollection* vcol = ctrlTemplates.GetAt(kk);
-						AddControl(vcol);
-					}
-				}
-			}
-			ImGui::ListBoxFooter();
-		}
-		ImGui::End();
-
-		///--- LAYERS LIST 
-		ImGui::Begin("Interfaces", null, ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus );
-
-		vector<string> arrLayerNames;
-		int nLayersCnt = UTGetControlsManager().layersDefinitions.Count();
-		for (int ii = 0; ii < nLayersCnt; ii++)
-		{
-			CStringHash * lID = &UTGetControlsManager().layersDefinitions[ii]->ID;
-			char strName[MAX_PATH];
-			wcstombs(strName, lID->text, MAX_PATH);
-			arrLayerNames.push_back(strName);
-		}
-
-		ImGui::SetNextItemWidth(-1.0f);
-		if (ImGui::ListBoxHeader("##", ImVec2(250, 220)))
-		{
-			for (int kk = 0; kk < arrLayerNames.size(); kk++)
-			{
-				auto layer = arrLayerNames[kk];
-				if (ImGui::Selectable(layer.c_str(), (kk == currLayerIdx) ? true : false, ImGuiSelectableFlags_None))
-				{
-					currCtrlIdx = -1;
-					selectedCtrls.RemoveAll();
-					clickedCtrls.RemoveAll();
-
-					currLayerIdx = kk;
-					currLayer = UTGetControlsManager().layersDefinitions.GetAt(kk);
-					currLayer->pControlsManager = &UTGetControlsManager();
-				}
-			}
-			ImGui::ListBoxFooter();
-		}
-
-		if (ImGui::Button("New Layer", ImVec2(120, 0)))
-		{
-			CCtrlLayer* nlayer = new CCtrlLayer();
-			nlayer->bBlocking = _wtoi(layerTemplate.GetVariantByName(L"isBlocking")->m_strArg.text);
-			nlayer->bGetsInput = _wtoi(layerTemplate.GetVariantByName(L"getsInput")->m_strArg.text);
-			int lx = _wtoi(layerTemplate.GetVariantByName(L"X")->m_strArg.text);
-			int ly = _wtoi(layerTemplate.GetVariantByName(L"Y")->m_strArg.text);
-			nlayer->SetPos(lx, ly);
-			nlayer->ID.Init(layerTemplate.GetVariantByName(L"ID")->m_strArg.text);
-			nlayer->fDestroyTimer = layerTemplate.GetVariantByName(L"fTimer")->asFloat();
-			nlayer->shFocusedControlID.Reset();
-
-			nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_CENTER;
-			if (layerTemplate.GetVariantByName(L"anchorX")->m_strArg.getHash() == FastHash(L"min"))
-				nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_MIN;
-			else if (layerTemplate.GetVariantByName(L"anchorX")->m_strArg.getHash() == FastHash(L"max"))
-				nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_MAX;
-
-			nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_CENTER;
-			if (layerTemplate.GetVariantByName(L"anchorY")->m_strArg.getHash() == FastHash(L"min"))
-				nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_MIN;
-			else if (layerTemplate.GetVariantByName(L"anchorY")->m_strArg.getHash() == FastHash(L"max"))
-				nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_MAX;
-
-			UTGetControlsManager().layersDefinitions.Add(nlayer);
-
-			int idx = UTGetControlsManager().layersDefinitions.Count() - 1;
-			currCtrlIdx = -1;
-		}
-		if (ImGui::Button("Clone Layer", ImVec2(120, 0)))
-		{
-			if (currLayer == NULL)
-				return;
-
-			CCtrlLayer* nlayer = currLayer->Clone();
-			testLayer = currLayer;
-			WCHAR newName[MAX_PATH];
-			StringCchPrintfW(newName, MAX_PATH, L"%s_%d", currLayer->ID.text, randint(100));
-			nlayer->ID.Init(newName);
-			UTGetControlsManager().layersDefinitions.Add(nlayer);
-
-			int idx = UTGetControlsManager().layersDefinitions.Count() - 1;
-			currCtrlIdx = -1;
-		}
-		ImGui::End();
-
-		///--- CONTROLS/LAYERS PROPERTIES
-		ImGui::Begin("Properties");
-		vector<string> arrControlsNames;
-		if ((currLayerIdx >= 0) && (currLayerIdx < UTGetControlsManager().layersDefinitions.GetSize()))
-		{
-			CCtrlLayer *layer = UTGetControlsManager().layersDefinitions.GetAt(currLayerIdx);
-			for (int ii = 0; ii < layer->controls.Count(); ii++)
-			{
-				CControl* ctrl = layer->controls.GetAt(ii);
-				wstring itemName = ctrl->paramsDict.GetVariantByName(L"Type")->m_strArg.text;
-				if (ctrl->paramsDict.GetVariantByName(L"ID") && wcslen(ctrl->paramsDict.GetVariantByName(L"ID")->m_strArg.text) > 0)
-				{
-					itemName.append(L":");
-					itemName.append(ctrl->paramsDict.GetVariantByName(L"ID")->m_strArg.text);
-				}
-				char strName[MAX_PATH];
-				wcstombs(strName, itemName.c_str(), MAX_PATH);
-
-				arrControlsNames.push_back(strName);
-			}
-		}
-
-		ImGui::SetNextItemWidth(-1.0f);
-		if (ImGui::ListBoxHeader("##", ImVec2(250, 200)))
-		{
-			for (int kk = 0; kk < arrControlsNames.size(); kk++)
-			{
-				string ctrl(arrControlsNames[kk]);
-				char sID[MAX_PATH];
-				sprintf(sID, "%s##ID%d", arrControlsNames[kk].c_str(), kk);
-				if (ImGui::Selectable(sID, (kk == currCtrlIdx) ? true : false, ImGuiSelectableFlags_None))
-				{
-					if (!DXUTIsKeyDown(VK_CONTROL))
-						selectedCtrls.RemoveAll();
-
-					currCtrlIdx = kk;
-					if (!selectedCtrls.Contains(currCtrlIdx))
-					{
-						selectedCtrls.Add(currCtrlIdx);
-					}
-					else
-					{
-						selectedCtrls.Remove(selectedCtrls.IndexOf(currCtrlIdx));
-					}
-				}
-			}
-			ImGui::ListBoxFooter();
-
-			// selected control
-			if (selectedCtrls.GetSize() == 1)
-			{
-				IMGUI_AddCurControlProps();
-			}
-
-			// current layer
-			if (selectedCtrls.GetSize() == 0)
-			{
-				IMGUI_AddLayerProps();
-			}
+			case K_LVL_IAI_TYPE_LIGHT:
+				IMGUI_AddLightProps(static_cast<CLight*>(pSelected));
+				break;
+			case K_LVL_IAI_TYPE_ACTIVE:
+				break;
+			case K_LVL_IAI_TYPE_ACTOR:
+				break;
+			case K_LVL_IAI_TYPE_COLSHAPE:
+				break;
+			case K_LVL_IAI_TYPE_BASE:
+				// should never get here
+				break;
+			default:
+				// nothing is selected
+				break;
 		}
 
 		ImGui::End();
-
-		//ImGui::Text("Hello from %s!", strName);
-		//if (ImGui::Button("Close it"))
-		//	bIsOpen = false;
-
-		//  // List box
-		//const char* items[] = { "Apple", "Banana", "Cherry", "Kiwi", "Mango", "Orange", "Pineapple", "Strawberry", "Watermelon" };
-		//static int item_current = 1;
-		//ImGui::ListBox("listbox\n(single select)", &item_current, items, IM_ARRAYSIZE(items), 8);
-		//const bool controlsHovered = ImGui::IsItemActive();
-		//if (controlsHovered && ImGui::IsMouseDoubleClicked(0))
-		//{
-		//	LOG("dblclk: %d", item_current);
-		//}
-
-		//static int listbox_item_current2 = 2;
-		//ImGui::SetNextItemWidth(-1);
-		//ImGui::ListBox("##listbox2", &listbox_item_current2, listbox_items, IM_ARRAYSIZE(listbox_items), 4);
 	}
-*/
 }
 
+
+IActiveInterface* CLevelEditor::SelectClosest(Vec2 vPoint, float fMaxRadius)
+{
+	if ((eTool < K_LED_TOOL_SELECTABLES_START) || (eTool >= K_LED_TOOLS_CNT))
+		return nullptr;
+
+	IActiveInterface* pSel = nullptr;
+	float mindist = 100000.0f;
+	switch (eTool)
+	{
+		case K_LED_LIGHT:
+		{
+			for (int kk = 0; kk < m_pLevel->m_visibleList.visible_lights.Count(); kk++)
+			{
+				CLight* lg = m_pLevel->m_visibleList.visible_lights[kk];
+				float dst = MUVec2Len(&(lg->pos - vPoint));
+				if ((dst < fMaxRadius) && (dst < mindist))
+				{
+					mindist = dst;
+					pSel = lg;
+				}
+			}
+		}
+		break;
+	}
+
+	return pSel;
+}
+
+void CLevelEditor::IMGUI_AddLightProps(CLight* light)
+{
+	ImGui::Text("Light properties!");
+}
+
+void CLevelEditor::DrawHRuler(Vec2 vBase, float fHeight, DWORD col)
+{
+	RECTXYWH cliprct(vBase.x - 10, vBase.y - fHeight, 20, fHeight + 10);
+	CSprite::paintFrameClipped(&m_sprCol, vBase.x, vBase.y, ANM_LVLED_SPR_RULERS, 0, cliprct, col);
+}
 
 OPRESULT CLevelEditor::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
 {
 	m_pDevice = pDevice;
-	m_sprMgr.OnCreateDevice(pDevice, pBBDesc);
+	m_sprCol.OnCreateDevice(pDevice, pBBDesc);
 	return K_OP_OK;
 }
 
 OPRESULT CLevelEditor::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
 {
 	m_pDevice = pDevice;
-	m_sprMgr.OnResetDevice(pDevice, pBBDesc);
+	m_sprCol.OnResetDevice(pDevice, pBBDesc);
 	return K_OP_OK;
 }
 
 OPRESULT CLevelEditor::OnLostDevice()
 {
 	m_pDevice = NULL;
-	m_sprMgr.OnLostDevice();
+	m_sprCol.OnLostDevice();
 	return K_OP_OK;
 }
 
 OPRESULT CLevelEditor::OnDestroyDevice()
 {
 	m_pDevice = NULL;
-	m_sprMgr.OnDestroyDevice();
+	m_sprCol.OnDestroyDevice();
 	return K_OP_OK;
 }
 

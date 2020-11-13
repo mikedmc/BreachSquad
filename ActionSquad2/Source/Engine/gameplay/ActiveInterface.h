@@ -7,7 +7,8 @@
 //perioada standard de asteptare inainte sa schimbe starile (de ex daca nu te mai vede timp de N secunde trece pe idle)
 #define K_LVL_AI_STATE_WAIT		3.0f
 
-enum {
+enum eActiveInterfaceType {
+	K_LVL_IAI_TYPE_UNKNOWN,
 	K_LVL_IAI_TYPE_BASE,
 	K_LVL_IAI_TYPE_LIGHT,
 	K_LVL_IAI_TYPE_ACTIVE,
@@ -76,6 +77,7 @@ public: //logic
 	IActiveInterface();
 	virtual ~IActiveInterface();
 
+	//#TODO: sa intoarca tip eAIType
 	virtual const int GetClassType() const {
 		return K_LVL_IAI_TYPE_BASE;
 	}

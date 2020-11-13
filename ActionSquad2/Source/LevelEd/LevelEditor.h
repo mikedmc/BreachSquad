@@ -1,19 +1,29 @@
 #pragma once
 
+enum eLvlEdTool {
+	K_LED_TILE = 0,		
+	// selectable objects from here
+	K_LED_LIGHT = 1,		// lights, go figure
+	K_LED_OBJECT,			// all other objects, static or active
+	K_LED_ACTOR,			// players and enemies
+	K_LED_COLBOX,			// collision boxes
+
+	K_LED_TOOLS_CNT,
+};
+
+// index of first tool that allows selection
+#define K_LED_TOOL_SELECTABLES_START	K_LED_LIGHT
 
 class CLevelEditor
 {
 private:
 	PDEVICE				m_pDevice;
-	ID3DXSprite*		m_pSprite;
 	CLevel*				m_pLevel;
 
-	CSpriteCollection	m_sprMgr;				// Sprite collection to hold editor only graphics
+	CSpriteCollection	m_sprCol;				// Sprite collection to hold editor only graphics
 
+	eLvlEdTool			eTool;					// Current tool
 	IActiveInterface*	pSelected;				// Selected item
-
-public:
-	CCameraTransform	camMain;				// main camera of the level editor
 
 public: 
 	CLevelEditor();
@@ -30,30 +40,26 @@ public:
 	void				Close();
 
 	void				Update(float dTime);
-	void				Paint();
+	void				Paint(ID3DXSprite* pSpr);
 	
 	inline bool			IsLaunched() {
 		return (m_pLevel != nullptr);
 	}
 
-	//--- IMGUI paint all
-	void				IMGUI_ShowInterfaces();
-	/*
-	//--- IMGUI adds controls specific to selected control
-	void IMGUI_AddCurControlProps();
-	//--- IMGUI adds controls for current layer
-	void IMGUI_AddLayerProps();
-	*/
-
-	void				DrawBBox(RECTXYWH rect, bool selected);
-	void				DrawLine(int x1, int y1, int x2, int y2, D3DCOLOR col = 0xffffffff);
-
-	void				CloneCamTransform(CCameraTransform* pSrcCamera);
-
 	void				ReceiveKeys(UINT key);
 	OPRESULT			SaveLevel(WCHAR* strPath);
 
-	void				SetSpritePtr(ID3DXSprite* pSprite);
+	//--- IMGUI paint all interfaces
+	void				IMGUI_ShowInterfaces();
+
+	// selects closest active depending on selected tool
+	IActiveInterface*	SelectClosest(Vec2 vPoint, float fMaxRadius = 32.0f);
+private:
+	//--- IMGUI adds controls specific to selected light
+	void				IMGUI_AddLightProps(CLight* light);
+
+	void				DrawHRuler(Vec2 vBase, float fHeight, DWORD col);
+
 
 public: //--- framework methods ---
 	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);

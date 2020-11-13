@@ -163,7 +163,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			///--- SHADERS ---
 			// no modding support on shaders!
 			WCHAR mszPath[MAX_PATH];
-			StringCchPrintf(mszPath, MAX_PATH, L"%s\\shaders\\shaders.xml", UTGetAppClass().g_wszAppResDir);
+			StringCchPrintf(mszPath, MAX_PATH, L"%s/shaders/shaders.xml", UTGetAppClass().g_wszAppResDir);
 			if (FAILED(UTGetShaderManager().LoadShaders(mszPath)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load shaders XML: %s", mszPath);
@@ -333,7 +333,7 @@ void CApplication::App_UpdateState_Splash(LPDIRECT3DDEVICE9 pDevice, double fTim
 		{
 			//load splash
 			WCHAR wsPath[MAX_PATH];
-			StringCchPrintf(wsPath, MAX_PATH, L"%s\\interfaces\\title_screen.bsx", UTGetAppClass().g_wszAppResDir);
+			StringCchPrintf(wsPath, MAX_PATH, L"%s/interfaces/title_screen.bsx", UTGetAppClass().g_wszAppResDir);
 			if (FAILED(g_sprMgrGlobal.LoadSprites(wsPath)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load splashscreen!");
@@ -571,7 +571,7 @@ void CApplication::App_EnterState_Publisher()
 	g_texManager.Release();
 	//load the texture
 	WCHAR texpath[MAX_PATH];
-	StringCchPrintf(texpath, MAX_PATH, L"%s\\interfaces\\publisher.png", UTGetAppClass().g_wszAppResDir);
+	StringCchPrintf(texpath, MAX_PATH, L"%s/interfaces/publisher.png", UTGetAppClass().g_wszAppResDir);
 	g_texManager.AddTexture(texpath, null, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
 }
 
@@ -640,7 +640,7 @@ void CApplication::App_EnterState_Developer()
 	UTGetAppClass().g_texManager.Release();
 	//load the texture
 	WCHAR texpath[MAX_PATH];
-	StringCchPrintf(texpath, MAX_PATH, L"%s\\interfaces\\pixelshard.png", UTGetAppClass().g_wszAppResDir);
+	StringCchPrintf(texpath, MAX_PATH, L"%s/interfaces/pixelshard.png", UTGetAppClass().g_wszAppResDir);
 	UTGetAppClass().g_texManager.AddTexture(texpath, null, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
 }
 

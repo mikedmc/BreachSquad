@@ -12,6 +12,7 @@
     <Module ImageIdx="0" X="64" Y="32" W="32" H="32" />
     <Module ImageIdx="0" X="96" Y="32" W="32" H="32" />
     <Module ImageIdx="0" X="128" Y="32" W="32" H="32" />
+    <Module ImageIdx="0" X="497" Y="0" W="15" H="512" />
   </Modules>
   <FrameModules>
     <FrameModule ModuleIdx="0" OX="-16" OY="-16" Flags="0" />
@@ -24,6 +25,7 @@
     <FrameModule ModuleIdx="7" OX="-16" OY="-16" Flags="0" />
     <FrameModule ModuleIdx="8" OX="-16" OY="-16" Flags="0" />
     <FrameModule ModuleIdx="9" OX="-16" OY="-16" Flags="0" />
+    <FrameModule ModuleIdx="10" OX="-7" OY="-507" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="-16" BBoxY="-16" BBoxW="32" BBoxH="32">
@@ -86,6 +88,12 @@
       </FModules>
       <Points />
     </Frame>
+    <Frame BBoxX="-7" BBoxY="-507" BBoxW="15" BBoxH="512">
+      <FModules>
+        <FModule Idx="10" />
+      </FModules>
+      <Points />
+    </Frame>
   </Frames>
   <AnimationFrames>
     <AnimationFrame FrameIdx="0" Duration="1" DX="0" DY="0" Flags="0" />
@@ -98,6 +106,7 @@
     <AnimationFrame FrameIdx="7" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="8" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="9" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="10" Duration="1" DX="0" DY="0" Flags="0" />
   </AnimationFrames>
   <Animations>
     <Animation ID="ICONS_BASE" Flags="0">
@@ -113,6 +122,9 @@
       <AFrame Idx="7" />
       <AFrame Idx="8" />
       <AFrame Idx="9" />
+    </Animation>
+    <Animation ID="RULERS" Flags="0">
+      <AFrame Idx="10" />
     </Animation>
   </Animations>
 </SpriteCollection>

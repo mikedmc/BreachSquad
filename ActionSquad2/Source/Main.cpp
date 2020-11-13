@@ -306,7 +306,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 		///--- COMPUTE BASE GAME CRC ---
 		//Chapters should be loaded before everything! Load original chapters list to compute game base CRC.
 		WCHAR wcsPath[MAX_PATH];
-		StringCchPrintf(wcsPath, MAX_PATH, L"%s\\levels\\missions\\missions.xml", UTGetAppClass().g_wszAppResDir);
+		StringCchPrintf(wcsPath, MAX_PATH, L"%s/levels/missions/missions.xml", UTGetAppClass().g_wszAppResDir);
 		UTGetChaptersList().LoadChapters(wcsPath);
 		//load infinite tower mode desc
 		//g_verticalMode.Init(&g_level, L"media/levels/mod_prefabs/infinite_tower.xml");
@@ -910,7 +910,6 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 #endif
 	//--- set Sprite painter class pointer ---
 	g_level.SetSpritePtr(g_pGameSprite);
-	g_editor.SetSpritePtr(g_pGameSprite);
 	g_particlesMgr.SetSpritePtr(g_pGameSprite);
 	CTexturedFont::SetGlobalSpritePtr(g_pGameSprite);
 	CSprite::SetGlobalSpritePtr(g_pGameSprite);
@@ -1415,6 +1414,8 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 				LOG(L"-- frame %d faccum %.9g", g_nUpdateFrame, faccum);
 				*/
 			}
+
+			g_editor.Update(fElapsedTime);
 		}
 		break;
 
@@ -2311,6 +2312,9 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				//interface particles
 				g_particlesMgr.PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
 
+				///--- level editor ---
+				g_editor.Paint(g_pGameSprite);
+
 				///--- string dummies ---
 				g_pGameSprite->SetTransform(&g_matIdentity);
 				//paint string dummies
@@ -2536,16 +2540,47 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	if (UTimgui().BeginPaint())
 	{
 		// DEBUG IMGUI WINDOW
-		if(g_gameState == GAME_STATE_GAME)
+		if (g_gameState == GAME_STATE_GAME)
 		{
-			ImGui::Begin("Debug Info", null, ImGuiWindowFlags_NoNavInputs);
-			ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
+			// non editor windows
+			{
+				if (!g_editor.IsLaunched())
+				{
+					// debug controls
+					ImGui::Begin("Debug Info", null, ImGuiWindowFlags_NoNavInputs);
+					ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
 
-			RECTXYWH_F camrect = g_level.m_camLevel.GetCamWorldAABB();
-			ImGui::Text("camrect %.1f %.1f %.1f %.1f", camrect.x, camrect.y, camrect.w, camrect.h);
+					RECTXYWH_F camrect = g_level.m_camLevel.GetCamWorldAABB();
+					ImGui::Text("camrect %.1f %.1f %.1f %.1f", camrect.x, camrect.y, camrect.w, camrect.h);
 
-			ImGui::End();
+					ImGui::End();
+				}
+			}
+
+			// editor block
+			{
+				ImGui::Begin("Commands", null, ImGuiWindowFlags_NoNavInputs);
+				if (!g_editor.IsLaunched())
+				{
+					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.8f, 0.2f, 1.0f));
+					if (ImGui::Button("Start Editor", ImVec2(120, 0)))
+						g_editor.Launch(&g_level);
+					ImGui::PopStyleColor(1);
+				}
+				else
+				{
+					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+					if (ImGui::Button("Close Editor", ImVec2(120, 0)))
+						g_editor.Close();
+					ImGui::PopStyleColor(1);
+
+					// show editor controls
+					g_editor.IMGUI_ShowInterfaces();
+				}
+				ImGui::End();
+			}
 		}
+	
 
 		// IMGUI tutorial window
 		//static bool show_demo_window = true;
@@ -2777,7 +2812,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 						//	UTGetScriptManager().Release();
 
 						//	WCHAR xmlpath[MAX_PATH];
-						//	StringCchPrintf(xmlpath, MAX_PATH, L"%s\\scripts.xml", UTGetAppClass().g_wszAppResDir);
+						//	StringCchPrintf(xmlpath, MAX_PATH, L"%s/scripts.xml", UTGetAppClass().g_wszAppResDir);
 						//	UTGetScriptManager().AddScripts(xmlpath);
 
 						//	///--- player selection screen items ---

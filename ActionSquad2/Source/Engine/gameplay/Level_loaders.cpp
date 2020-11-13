@@ -1211,7 +1211,8 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	//facem un build visibility lists
 	BuildVisibilityLists();
 
-	//show level type																																							 
+	//show level type					
+	/*
 	if ((m_unLoadedLevelFlags & (K_LVL_LEVEL_FLAG_DOWNLOADED )) == 0)
 	{
 		int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[nChapterNumber]->arrLevelNameStrIdx[nLevelNumber];
@@ -1236,6 +1237,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			m_nLoadedLevel = nModIdx_SelectedContent;
 		}
 	}
+	*/
 	//save type of loaded mission
 	m_nLoadedLevelType = missionType;
 	///--- LAST THINGS ---

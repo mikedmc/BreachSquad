@@ -578,7 +578,7 @@ void CControlsEditor::CloneControl(int offx, int offy)
 void CControlsEditor::Launch()
 {
 	WCHAR xmlpath[MAX_PATH];
-	StringCchPrintf(xmlpath, MAX_PATH, L"%sControlsEd\\ctrlTemplates.xml", UTGetAppClass().g_wszExePath);
+	StringCchPrintf(xmlpath, MAX_PATH, L"%sControlsEd/ctrlTemplates.xml", UTGetAppClass().g_wszExePath);
 	LoadCtrlTemplatesXML(xmlpath);
 
 	tool = TOOL_TYPE_NO_TOOL;
