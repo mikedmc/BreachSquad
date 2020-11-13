@@ -352,26 +352,26 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 
 	///--- objects - decorations ---
-	SAFE_DELETE_GROWABLE_ARRAY(m_arrActives);
-	m_arrActivesPtrInteract.Clear();
+	SAFE_DELETE_GROWABLE_ARRAY(m_arrProps);
+	m_arrPropsPtrInteract.Clear();
 	//read path
 	OS_freadString(fl, charArr);
 	mbstowcs_s(&converted, wcharArr, charArr, MAX_PATH);
 	//load bsx
 	StringCchPrintf(wcsMediaAddr, MAX_PATH, L"media/levels/data/%s", wcharArr);
 	FileManager::GetMediaPath(wcsMediaAddr, Path);
-	if (FAILED(m_sprActives.LoadSprites(Path)))
+	if (FAILED(m_sprProps.LoadSprites(Path)))
 	{
 		return E_FAIL;
 	}
 
-	//--- actives ---
+	//--- props ---
 	CFixedArray<int, 20> arrLocalBombIDs;
 
 	int decocnt = (int)OS_freadUInt32(fl);
 	for (int kk = 0; kk < decocnt; kk++)
 	{
-		CActive* obj = new CActive();
+		CProp* obj = new CProp();
 
 		obj->ID = OS_freadUInt32(fl);
 		//convert layer from editor values to game values (editor misses MID layer):
@@ -384,7 +384,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		//animation
 		CHAR charAnmName[MAX_PATH];
 		OS_freadString(fl, charAnmName);
-		int animIdx = m_sprActives.getAnimationIdxByName(charAnmName);
+		int animIdx = m_sprProps.getAnimationIdxByName(charAnmName);
 		if (animIdx < 0)
 			ErrorBox(K_ERR_WARNING, L"Active ID:%d without animation!", obj->ID);
 		//frame
@@ -409,11 +409,11 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		//animated? select different start frame
 		if (obj->bAnimated)
 		{
-			obj->sprite.currentFrame = m_rand.RandInt(m_sprActives.GetAFramesCnt(obj->sprite.animationIdx));
+			obj->sprite.currentFrame = m_rand.RandInt(m_sprProps.GetAFramesCnt(obj->sprite.animationIdx));
 		}
 		//bbox
-		RECTXYWH bbox_set = m_sprActives.GetAFrameBBox(animIdx, frameIdx);
-		RECTXYWH objbox = m_sprActives.GetAFrameBBox_real(animIdx, frameIdx);
+		RECTXYWH bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
+		RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
 		obj->bbox_ini.Set(objbox);
 		obj->bbox_exported_ini.Set(bbox_set);
 		//daca e flipat pe X flipez si bbox. Pe Y nu e cazul pt ca se pastreaza in acelasi bbox in paint
@@ -432,11 +432,11 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		obj->LoadLogic(fl);
 		obj->InitInternalData();
 
-		m_arrActives.Add(obj);
+		m_arrProps.Add(obj);
 
 		//mark and save interactibles
 		if (obj->bCanInteract)
-			m_arrActivesPtrInteract.Add(obj);
+			m_arrPropsPtrInteract.Add(obj);
 
 		///--- setari speciale ---
 		//#HARDCODE: is cover? - add bbox as cover box
@@ -448,7 +448,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			CCollisionShape* colobj = new CCollisionShape();
 			colobj->ID = GenerateNextID();
 
-			RECTXYWH objbox = m_sprActives.GetAFrameBBox(obj->sprite.animationIdx, obj->sprite.currentFrame);
+			RECTXYWH objbox = m_sprProps.GetAFrameBBox(obj->sprite.animationIdx, obj->sprite.currentFrame);
 			//objbox.Move(obj->pos.x, obj->pos.y);
 
 			colobj->bbox.Set(objbox);
@@ -511,7 +511,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		{
 			if (kk != nFinalBombIdx)
 			{
-				CActive* bombact = dynamic_cast<CActive*>(GetIActiveInterfacePtr(arrLocalBombIDs[kk]));
+				CProp* bombact = dynamic_cast<CProp*>(GetIActiveInterfacePtr(arrLocalBombIDs[kk]));
 				if (bombact != null)
 				{
 					bombact->bSetHidden = true;
@@ -535,7 +535,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		return E_FAIL;
 	}
 
-	//--- load actors templates and weaponry right after actives sprite ---
+	//--- load actors templates and weaponry right after props sprite ---
 	FileManager::GetMediaPath(L"media/levels/data/weapons_data.xml", Path);
 	if (FAILED(LoadWeaponTemplates(Path)))
 	{
@@ -1005,7 +1005,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 				//check distance from walls and active elements
 				if (!bFailTest)
 				{
-					RECTXYWH_F objrect = m_sprActives.GetAFrameBBox(ANM_ACTIVES_SPR_ZOMBIE_SPAWNER_APPEAR, 0);
+					RECTXYWH_F objrect = m_sprProps.GetAFrameBBox(ANM_ACTIVES_SPR_ZOMBIE_SPAWNER_APPEAR, 0);
 					objrect.Move(vPos.x, vPos.y - 2.0f);
 					//find a random placing spot
 					float fOffX = 0.0f;
@@ -1071,7 +1071,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			pLight->varAIparams.SetNamedVarFloat(L"f_timeMul", 4.0f);
 			pLight->varAIparams.SetNamedVarFloat(L"f_threshold", 0.5f);
 
-			CActive* pSpawner = SpawnActive(vPos, ANM_ACTIVES_SPR_ZOMBIE_SPAWNER_APPEAR, 0, K_LVL_LAYER_MIDDLE);
+			CProp* pSpawner = SpawnProp(vPos, ANM_ACTIVES_SPR_ZOMBIE_SPAWNER_APPEAR, 0, K_LVL_LAYER_MIDDLE);
 			pSpawner->bAnimated = false;
 			pSpawner->nLayer = K_LVL_LAYER_MIDDLE; //so it doesn't get dirty
 			pSpawner->bCanInteract = true;
@@ -1143,9 +1143,9 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		CCollisionShape * shape = m_arrColShapes[kk];
 		SetAI(shape, shape->AIstate, &shape->varAIparams, shape->targetID_ini);
 	}
-	for (int kk = 0; kk < m_arrActives.GetSize(); kk++)
+	for (int kk = 0; kk < m_arrProps.GetSize(); kk++)
 	{
-		CActive * activ = m_arrActives[kk];
+		CProp * activ = m_arrProps[kk];
 		SetAI(activ, activ->AIstate, &activ->varAIparams, activ->targetID_ini);
 	}
 	//ma asigur ca toti actorii au pointerii setati bine chemand inca odata setAI
@@ -1464,16 +1464,16 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 		m_arrColShapes.Add(colobj);
 	}
 
-	///--- ACTIVES - decorations ---
+	///--- PROPS - decorations ---
 	//read path
 	OS_freadString(fl, charArr);
-	//--- actives ---
+	//--- props ---
 	int decocnt = (int)OS_freadUInt32(fl);
-	int nDecoCntOld = m_arrActives.GetSize();
+	int nDecoCntOld = m_arrProps.GetSize();
 	for (int kk = 0; kk < decocnt; kk++)
 	{
 		D3DXVECTOR2 vOffset(nPosXtiles * tileW - nPrefabOriginX, nPosYtiles * tileH - nPrefabOriginY);
-		CActive* obj = new CActive();
+		CProp* obj = new CProp();
 
 		obj->ID = OS_freadUInt32(fl) + dwBaseID;
 		if (obj->ID > dwMaxIDlocal)
@@ -1491,7 +1491,7 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 		//animation
 		CHAR charAnmName[MAX_PATH];
 		OS_freadString(fl, charAnmName);
-		int animIdx = m_sprActives.getAnimationIdxByName(charAnmName);
+		int animIdx = m_sprProps.getAnimationIdxByName(charAnmName);
 		if (animIdx < 0)
 			ErrorBox(K_ERR_WARNING, L"Active ID:%d without animation!", obj->ID);
 		//frame
@@ -1516,11 +1516,11 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 		//animated? select different start frame
 		if (obj->bAnimated)
 		{
-			obj->sprite.currentFrame = m_rand.RandInt(m_sprActives.GetAFramesCnt(obj->sprite.animationIdx));
+			obj->sprite.currentFrame = m_rand.RandInt(m_sprProps.GetAFramesCnt(obj->sprite.animationIdx));
 		}
 		//bbox
-		RECTXYWH bbox_set = m_sprActives.GetAFrameBBox(animIdx, frameIdx);
-		RECTXYWH objbox = m_sprActives.GetAFrameBBox_real(animIdx, frameIdx);
+		RECTXYWH bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
+		RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
 		obj->bbox_ini.Set(objbox);
 		obj->bbox_exported_ini.Set(bbox_set);
 		//daca e flipat pe X flipez si bbox. Pe Y nu e cazul pt ca se pastreaza in acelasi bbox in paint
@@ -1542,7 +1542,7 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 			obj->targetID_ini += dwBaseID;
 		obj->InitInternalData();
 
-		m_arrActives.Add(obj);
+		m_arrProps.Add(obj);
 
 		///--- special settings ---
 		//#HACK: is it a door? set special AI
@@ -1664,9 +1664,9 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 		CCollisionShape * shape = m_arrColShapes[kk];
 		SetAI(shape, shape->AIstate, &shape->varAIparams, shape->targetID_ini);
 	}
-	for (int kk = nDecoCntOld; kk < m_arrActives.GetSize(); kk++)
+	for (int kk = nDecoCntOld; kk < m_arrProps.GetSize(); kk++)
 	{
-		CActive * activ = m_arrActives[kk];
+		CProp * activ = m_arrProps[kk];
 		SetAI(activ, activ->AIstate, &activ->varAIparams, activ->targetID_ini);
 	}
 	//ma asigur ca toti actorii au pointerii setati bine chemand inca odata setAI

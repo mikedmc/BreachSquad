@@ -9,7 +9,7 @@
 #include "gameplay/ActiveInterface.h"
 #include "gameplay/CollisionShape.h"
 #include "gameplay/Light.h"
-#include "gameplay/Active.h"
+#include "gameplay/Prop.h"
 #include "gameplay/Actor.h"
 
 #include "gameplay/TileBlockMesh.h"
@@ -66,7 +66,7 @@ public:
 	//liste de pointeri activi
 	CFixedArray<CLight*, 128> visible_lights;
 	//lista de activi vizibili
-	CFixedArray<CActive*, 512> visible_actives[K_LVL_LAYERS_CNT];
+	CFixedArray<CProp*, 512> visible_props[K_LVL_LAYERS_CNT];
 	//decals
 	CFixedArray<CDecal*, 512> visible_decals[K_LVL_DECAL_LAYERS];
 	//visible actors
@@ -81,7 +81,7 @@ public:
 	//collision shapes from a larger area
 	CFixedArray<CCollisionShape*, 1024>	logic_colShapesExtended; 
 
-	CFixedArray<CActive*, 512> logic_actives_closeby[K_LVL_LAYERS_CNT]; //actives that can be interacted with
+	CFixedArray<CProp*, 512> logic_props_closeby[K_LVL_LAYERS_CNT]; //actives that can be interacted with
 	CFixedArray<CActor*, 256> logic_actors_closeby; //closeby actors - bullets tests
 	CFixedArray<CCollisionShape*, 256> logic_colShapesSpecial; //special collision shapes (water, triggers)
 	//CTOR/DTOR
@@ -142,7 +142,7 @@ public:
 	CTextureManager m_texManager;
 
 	CSpriteCollection m_sprLights;  //Animatiile de lumini au un format specific in fn de lumina (point:fr0-spot, fr1-glow)
-	CSpriteCollection m_sprActives; //decorations
+	CSpriteCollection m_sprProps; //decorations
 	CSpriteCollection m_sprActors;	//animations for the actors (main characters, enemies etc)
 
 	CScreenVignette	  m_screenVignette;	//darken screen vignette
@@ -195,8 +195,8 @@ public:
 	// returns the first intersection of aabbSRC with a Collision Shape
 	CCollisionShape*		ColShape_CAABB_Intersect_Arr(CAABB * aabbSrc, CCollisionShape * arrBoxes[], int nBoxesCnt);
 
-	CGrowableArray<CActive*>	m_arrActives;				//obiectele din nivel (active sau nu)
-	CFixedArray<CActive*, 256>	m_arrActivesPtrInteract;	//array containing objects that you can interact with (for speed checks)
+	CGrowableArray<CProp*>	m_arrProps;				//obiectele din nivel (active sau nu)
+	CFixedArray<CProp*, 256>	m_arrPropsPtrInteract;	//array containing objects that you can interact with (for speed checks)
 	CGrowableArray<CActor*>		m_arrActors;				//actorii - inamici cu animatii
 	// Initializes CActor with specified template and sets all the data it needs 
 	HRESULT					InitActor(CActor* actor, CActorTemplate * actTemplate, D3DXVECTOR2 spawnPos);
@@ -240,12 +240,12 @@ public:
 	// Spawns an actor (NPC)
 	CActor*					SpawnActor(D3DXVECTOR2 spawnPos, WCHAR* strTemplateName, int nLookDirSign, CStringHash* shStateOverride = null);
 	// Spawns a new Active with empty properties
-	CActive*				SpawnActive(D3DXVECTOR2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer = K_LVL_LAYER_BACK);
+	CProp*					SpawnProp(D3DXVECTOR2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer = K_LVL_LAYER_BACK);
 	// Spawns a light
 	CLight*					SpawnLight(D3DXVECTOR3 spawnPos, int nType, int nAnimIdx, DWORD dwColor, float fScale = 1.0f, bool bCastShadows = false);
 	// Gives a score for the user powerups placement 
 	// \brief: used to move player spawned objects away from intersections with other interactibles and walls
-	int						GetPowerupPlacingScore(CActive * active, D3DXVECTOR2 vPlacerPos);
+	int						GetPowerupPlacingScore(CProp * active, D3DXVECTOR2 vPlacerPos);
 	// Finds the best spawning rect for a proposed position
 	// \returns false when can't be spawned safely
 	// \param rectProposed_ret - the proposed placing rectangle
@@ -267,7 +267,7 @@ public:
 	bool					UpdateAI_base(IActiveInterface* active, float dTime, double fTimeline);
 	//updates AI for derived classes (particulare)
 	void					UpdateAI_light(CLight* light, float dTime);
-	void					UpdateAI_active(CActive* active, float dTime);
+	void					UpdateAI_prop(CProp* prop, float dTime);
 	void					UpdateAI_actor(CActor* actor, float dTime);
 	void					UpdateAI_collshape(CCollisionShape * colshape, float dTime);
 	//Seteaza AI si face toate setarile initiale din AI
@@ -419,7 +419,7 @@ public:
 	IActiveInterface*		GetIActiveInterfacePtr(int ID);
 	IActiveInterface*		GetIActiveInterfacePtr_byUID(UINT32 UID);
 	//Intoarce pointer la CActive cu UID-ul respectiv
-	CActive*				GetActiveByUID(UINT32 UID);
+	CProp*				GetActiveByUID(UINT32 UID);
 	CActor*					GetActorByUID(UINT32 UID);
 	CLight*					GetLightByUID(UINT32 UID);
 	// Gets the player with specified UID or NULL if not found

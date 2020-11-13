@@ -1,32 +1,32 @@
 #include "dxstdafx.h"
-#include "Active.h"
+#include "Prop.h"
 
 ///--- CACTIVE ---
-void CActive::SetPos(D3DXVECTOR2 newPos)
+void CProp::SetPos(D3DXVECTOR2 newPos)
 {
 	pos = newPos;
 	bbox.Set(&bbox_ini, pos);
 	bbox_exported.Set(&bbox_exported_ini, pos);
 }
 
-void CActive::Move(D3DXVECTOR2 delta)
+void CProp::Move(D3DXVECTOR2 delta)
 {
 	pos += delta;
 	bbox.Set(&bbox_ini, pos);
 	bbox_exported.Set(&bbox_exported_ini, pos);
 }
 
-void CActive::SetAngle(float fnAngle)
+void CProp::SetAngle(float fnAngle)
 {
 	fAngle = fnAngle;
 }
 
-void CActive::InitInternalData()
+void CProp::InitInternalData()
 {
 
 }
 
-void CActive::BeginPlay()
+void CProp::BeginPlay()
 {
 
 }

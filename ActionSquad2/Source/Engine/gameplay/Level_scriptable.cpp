@@ -426,7 +426,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_ACTIVE_AMMOBOX_GIVE_AMMO:
 		{
-			CActive* active = GetActiveByUID(executorUID);
+			CProp* active = GetActiveByUID(executorUID);
 			if ((active == null) || (active->AIstate != K_AI_STATE_ACTIVE_AMMO_BOX))
 			{
 				LOG(L"SCRIPT::ACTIVE_AMMOBOX_GIVE_AMMO - executor doesn't have AMMO_BOX AI\n");
@@ -486,7 +486,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_ACTIVE_HEALTHBOX_GIVE_HEALTH:
 		{
-			CActive* active = GetActiveByUID(executorUID);
+			CProp* active = GetActiveByUID(executorUID);
 			if ((active == null) || (active->AIstate != K_AI_STATE_ACTIVE_HEALTH_BOX))
 			{
 				LOG(L"SCRIPT::ACTIVE_HEALTHBOX_GIVE_HEALTH- executor doesn't have HEALTH_BOX AI\n");
@@ -681,7 +681,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			//--- daca este cleared setam animatia targetului pe usa deschisa si tot ce trebuie ca sa nu se mai animeze cand intri ---
 			if ((bCleared) && (target->pTarget != null))
 			{
-				CActive* dooract = dynamic_cast<CActive*>(target->pTarget);
+				CProp* dooract = dynamic_cast<CProp*>(target->pTarget);
 				if (dooract == null)
 				{
 					ErrorBox(K_ERR_WARNING, L"COLL_CHECK_HIDDEN_ROOM_CLEARED bad cast to CActive. Target not an active!");
@@ -699,11 +699,11 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					//ii spunem sa nu se mai inchida/deschida
 					dooract->varAIparams.SetNamedVarINT32(L"b_DontChangeFrames", 1);
 					//spawn green chem light
-					SpawnActive(dooract->pos, ANM_ACTIVES_SPR_CHEMLIGHT, 0, K_LVL_LAYER_MIDDLE);
+					SpawnProp(dooract->pos, ANM_ACTIVES_SPR_CHEMLIGHT, 0, K_LVL_LAYER_MIDDLE);
 				}
 
 				//--- lasam deschisa si usa din camera ascunsa ---
-				CActive* dooract_other = dynamic_cast<CActive*>(dooract->pTarget);
+				CProp* dooract_other = dynamic_cast<CProp*>(dooract->pTarget);
 				if (dooract_other == null)
 				{
 					ErrorBox(K_ERR_WARNING, L"COLL_CHECK_HIDDEN_ROOM_CLEARED - Other door target not set!");
@@ -721,7 +721,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					//ii spunem sa nu se mai inchida/deschida
 					dooract_other->varAIparams.SetNamedVarINT32(L"b_DontChangeFrames", 1);
 					//spawn green chem light
-					SpawnActive(dooract_other->pos, ANM_ACTIVES_SPR_CHEMLIGHT, 0, K_LVL_LAYER_MIDDLE);
+					SpawnProp(dooract_other->pos, ANM_ACTIVES_SPR_CHEMLIGHT, 0, K_LVL_LAYER_MIDDLE);
 				}
 			}
 
@@ -1512,7 +1512,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			bool loop = true;
 			if (param2) loop = param2->m_asBool;
 
-			CActive* active = dynamic_cast<CActive*>(target);
+			CProp* active = dynamic_cast<CProp*>(target);
 			if (active == null)
 			{
 				LOG(L"SCRIPT::IACTIVE_INC_FRAME - Bad cast to CActive* !\n");
@@ -1522,7 +1522,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			active->sprite.currentFrame += step;
 			if (loop)
 			{
-				int frcnt = m_sprActives.GetAFramesCnt(active->sprite.animationIdx);
+				int frcnt = m_sprProps.GetAFramesCnt(active->sprite.animationIdx);
 				if (active->sprite.currentFrame < 0)
 					active->sprite.currentFrame += frcnt;
 				else
@@ -1530,10 +1530,10 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 			else
 			{
-				CLAMP(active->sprite.currentFrame, 0, m_sprActives.GetAFramesCnt(active->sprite.animationIdx));
+				CLAMP(active->sprite.currentFrame, 0, m_sprProps.GetAFramesCnt(active->sprite.animationIdx));
 			}
 			//set new bbox
-			RECTXYWH objbox = m_sprActives.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
+			RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
 			active->bbox_ini.Set(D3DXVECTOR2(objbox.x, objbox.y), D3DXVECTOR2(objbox.Right(), objbox.Bottom()));
 			if (active->flipX)
 			{
@@ -1565,7 +1565,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 
-			CActive* active = dynamic_cast<CActive*>(target);
+			CProp* active = dynamic_cast<CProp*>(target);
 			if (active == null)
 			{
 				LOG(L"SCRIPT::IACTIVE_SET_ANIM - Bad cast to CActive!\n");
@@ -1574,7 +1574,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			//get params
 			int anim = active->sprite.animationIdx;
 			if (parAnim)
-				anim = m_sprActives.getAnimationIdxByNameHash(parAnim->m_strArg.getHash());
+				anim = m_sprProps.getAnimationIdxByNameHash(parAnim->m_strArg.getHash());
 			if (anim == -1)
 			{
 				anim = active->sprite.animationIdx;
@@ -1584,7 +1584,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			if (parFrame)
 			{
 				frame = (int)parFrame->m_asINT32;
-				CLAMP(frame, 0, m_sprActives.GetAFramesCnt(anim) - 1);
+				CLAMP(frame, 0, m_sprProps.GetAFramesCnt(anim) - 1);
 			}
 			bool animated = active->bAnimated;
 			if (parAnimated)
@@ -1593,7 +1593,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			active->sprite.Init(anim, active->pos.x, active->pos.y, frame);
 			active->bAnimated = animated;
 			//set new bbox
-			RECTXYWH objbox = m_sprActives.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
+			RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
 			active->bbox_ini.Set(D3DXVECTOR2(objbox.x, objbox.y), D3DXVECTOR2(objbox.Right(), objbox.Bottom()));
 			if (active->flipX)
 			{

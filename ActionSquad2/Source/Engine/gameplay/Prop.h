@@ -1,9 +1,9 @@
 #pragma once
 
 ///--------------------------------------------------------------------------
-///--- ACTIVES : obiectele din nivel, de decor sau scriptabile
+/// PROPS - all objects that are not players
 ///--------------------------------------------------------------------------
-class CActive : public IActiveInterface
+class CProp : public IActiveInterface
 {
 public:
 	CSprite			sprite;
@@ -12,7 +12,7 @@ public:
 
 	bool			flipX, flipY; //flip flags
 
-	CActive() :
+	CProp() :
 		flipX(false), flipY(false),
 		nAnim_ini(-1), nFrame_ini(-1), nLayer(0)
 	{}

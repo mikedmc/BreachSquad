@@ -1533,7 +1533,7 @@ public:
 	int			nSubType;	//folosit de fiecare tip in mod diferit
 	float		fTimer;		//timer care porneste de la 0
 	bool		bAnimated;	//daca e animat sprite-ul
-	CSprite		spr, spr2;	//grafica din Actives (unele au nevoie de 2 sprites)
+	CSprite		spr, spr2;	//grafica din Props (unele au nevoie de 2 sprites)
 	float		fSize;		
 	//--- variabile lumini ---
 	bool		bMakesLight;

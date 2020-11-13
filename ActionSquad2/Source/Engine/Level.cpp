@@ -28,7 +28,7 @@ static const CStringHash AI_states[] = {
 	L"AI_COLL_BREAKABLE_DOOR", //pentru collShapes care se sparg de la charge si shotgun. va seta automat animatia usii pe cea de distrugere
 	L"AI_COLL_BREAKABLE_WINDOW", //pentru collShapes care se sparg de la gloante. va seta automat frame-ul urmator al animatiei
 	L"AI_COLL_KILL_ACTORS", //kills actors inside of it
-	///--- ACTIVES ---
+	///--- PROPS ---
 	L"AI_ACTIVE_SWINGING_FRONTOBJ",	//interactioneaza cu grenada si se balanseaza
 	L"AI_ACTIVE_EXPLO_TRAP",	//capcana care explodeaza cand se intersecteaza bboxuul ei cu playerul
 	L"AI_ACTIVE_CHECKPOINT",	//AI special pentru checkpoints - verifica intersectia cu personajul si lanseaza script
@@ -1187,9 +1187,9 @@ CActor* CLevel::SpawnActor(D3DXVECTOR2 spawnPos, WCHAR* strTemplateName, int nLo
 	return nact;
 }
 
-CActive* CLevel::SpawnActive(D3DXVECTOR2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer)
+CProp* CLevel::SpawnProp(D3DXVECTOR2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer)
 {
-	CActive* obj = new CActive();
+	CProp* obj = new CProp();
 
 	obj->ID = GenerateNextID();
 	obj->nLayer = nLayer;
@@ -1217,11 +1217,11 @@ CActive* CLevel::SpawnActive(D3DXVECTOR2 spawnPos, int nAnimIdx, int nFrameIdx, 
 	//cand e animat selecteaza random frame-ul de pornire
 	if (obj->bAnimated)
 	{
-		obj->sprite.currentFrame = m_rand.RandInt(m_sprActives.GetAFramesCnt(obj->sprite.animationIdx));
+		obj->sprite.currentFrame = m_rand.RandInt(m_sprProps.GetAFramesCnt(obj->sprite.animationIdx));
 	}
 	//bbox
-	RECTXYWH bbox_set = m_sprActives.GetAFrameBBox(animIdx, frameIdx);
-	RECTXYWH objbox = m_sprActives.GetAFrameBBox_real(animIdx, frameIdx);
+	RECTXYWH bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
+	RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
 	obj->bbox_ini.Set(objbox);
 	obj->bbox_exported_ini.Set(bbox_set);
 	//daca e flipat pe X flipez si bbox. Pe Y nu e cazul pt ca se pastreaza in acelasi bbox in paint
@@ -1249,7 +1249,7 @@ CActive* CLevel::SpawnActive(D3DXVECTOR2 spawnPos, int nAnimIdx, int nFrameIdx, 
 	obj->script_hash.Reset();
 	obj->AIstate = K_AI_STATE_UNDEFINED;
 
-	m_arrActives.Add(obj);
+	m_arrProps.Add(obj);
 
 	return obj;
 }
@@ -1364,7 +1364,7 @@ CLight* CLevel::SpawnLight(D3DXVECTOR3 spawnPos, int nType, int nAnimIdx, DWORD 
 	return nl;
 }
 
-int CLevel::GetPowerupPlacingScore(CActive* active, D3DXVECTOR2 vPlacerPos)
+int CLevel::GetPowerupPlacingScore(CProp* active, D3DXVECTOR2 vPlacerPos)
 {
 	//find a new position if necessary
 	int nScore = 0;
@@ -1392,9 +1392,9 @@ int CLevel::GetPowerupPlacingScore(CActive* active, D3DXVECTOR2 vPlacerPos)
 		return nScore;
 	}
 	//interactible active
-	for (int kk = 0; kk < m_visibleList.logic_actives_closeby[K_LVL_LAYER_BACK].nCount; kk++)
+	for (int kk = 0; kk < m_visibleList.logic_props_closeby[K_LVL_LAYER_BACK].nCount; kk++)
 	{
-		CActive* pActiv = m_visibleList.logic_actives_closeby[K_LVL_LAYER_BACK].m_pData[kk];
+		CProp* pActiv = m_visibleList.logic_props_closeby[K_LVL_LAYER_BACK].m_pData[kk];
 		if (!pActiv->bCanInteract)
 			continue;
 		if (pActiv == active)
@@ -1404,9 +1404,9 @@ int CLevel::GetPowerupPlacingScore(CActive* active, D3DXVECTOR2 vPlacerPos)
 			nScore--;
 	}
 	//mid layer
-	for (int kk = 0; kk < m_visibleList.logic_actives_closeby[K_LVL_LAYER_MIDDLE].nCount; kk++)
+	for (int kk = 0; kk < m_visibleList.logic_props_closeby[K_LVL_LAYER_MIDDLE].nCount; kk++)
 	{
-		CActive* pActiv = m_visibleList.logic_actives_closeby[K_LVL_LAYER_MIDDLE].m_pData[kk];
+		CProp* pActiv = m_visibleList.logic_props_closeby[K_LVL_LAYER_MIDDLE].m_pData[kk];
 		if (!pActiv->bCanInteract)
 			continue;
 		if (pActiv == active)
@@ -1505,9 +1505,9 @@ bool CLevel::GetIsAreaNeutral(RECTXYWH_F rectArea)
 {
 	CAABB bbox(rectArea);
 	//interactible active
-	for (int kk = 0; kk < m_arrActives.GetSize(); kk++)
+	for (int kk = 0; kk < m_arrProps.GetSize(); kk++)
 	{
-		CActive* pActiv = m_arrActives[kk];
+		CProp* pActiv = m_arrProps[kk];
 		if (!pActiv->bCanInteract)
 			continue;
 
@@ -2540,10 +2540,10 @@ IActiveInterface* CLevel::GetIActiveInterfacePtr(int ID)
 	if (ID < 0)
 		return null;
 	//check actives
-	for (int kk = 0; kk < m_arrActives.GetSize(); kk++)
+	for (int kk = 0; kk < m_arrProps.GetSize(); kk++)
 	{
-		if (m_arrActives[kk]->ID == ID)
-			return m_arrActives[kk];
+		if (m_arrProps[kk]->ID == ID)
+			return m_arrProps[kk];
 	}
 	//check lights
 	for (int kk = 0; kk < m_arrLights.GetSize(); kk++)
@@ -2572,10 +2572,10 @@ IActiveInterface* CLevel::GetIActiveInterfacePtr_byUID(UINT32 UID)
 	if (UID == 0)
 		return null;
 	//check actives
-	for (int kk = 0; kk < m_arrActives.GetSize(); kk++)
+	for (int kk = 0; kk < m_arrProps.GetSize(); kk++)
 	{
-		if (m_arrActives[kk]->GetUID() == UID)
-			return m_arrActives[kk];
+		if (m_arrProps[kk]->GetUID() == UID)
+			return m_arrProps[kk];
 	}
 	//verifica si actorii
 	for (int kk = 0; kk < m_arrActors.Count(); kk++)
@@ -2688,14 +2688,14 @@ bool CLevel::IsNetworkPlayer(CActor* pPlayer)
 	return (pPlayer->nControllerInstanceID == K_CM_IID_NET1);
 }
 
-CActive* CLevel::GetActiveByUID(UINT32 UID)
+CProp* CLevel::GetActiveByUID(UINT32 UID)
 {
 	if (UID == 0)
 		return NULL;
-	for (int kk = 0; kk < m_arrActives.Count(); kk++)
+	for (int kk = 0; kk < m_arrProps.Count(); kk++)
 	{
-		if (m_arrActives[kk]->GetUID() == UID)
-			return m_arrActives[kk];
+		if (m_arrProps[kk]->GetUID() == UID)
+			return m_arrProps[kk];
 	}
 	return NULL;
 }
@@ -2705,8 +2705,8 @@ void CLevel::ClearVisibilityLists()
 {
 	for (int jj = 0; jj < K_LVL_LAYERS_CNT; jj++)
 	{
-		m_visibleList.visible_actives[jj].Clear();
-		m_visibleList.logic_actives_closeby[jj].Clear();
+		m_visibleList.visible_props[jj].Clear();
+		m_visibleList.logic_props_closeby[jj].Clear();
 	}
 
 	for (int kk = 0; kk < K_LVL_DECAL_LAYERS; kk++)
@@ -2979,8 +2979,8 @@ void CLevel::BuildVisibilityLists()
 	CAABB camaabb(D3DXVECTOR2(camrect.x, camrect.y), D3DXVECTOR2(camrect.Right(), camrect.Bottom()));
 	//union of all visible lights AABBs
 	CAABB lightsCommonAABB(D3DXVECTOR2(-1000.0f, -1000.0f), D3DXVECTOR2(-1000.0f, -1000.0f)); 
-	//for detecting visible actives (objects)
-	CAABB activesPaintAABB = camaabb; 
+	//for detecting visible props (objects)
+	CAABB propsPaintAABB = camaabb; 
 	//for detecting visible actors
 	CAABB actorsPaintAABB = camaabb; //box-ul care zice daca actorul e vizibil sau nu
 	actorsPaintAABB.Inflate(D3DXVECTOR2(K_TILE_SIZE, K_TILE_SIZE)); //maresc putin bboxul actorilor pt ca cei morti au bbox mai mic
@@ -2994,8 +2994,8 @@ void CLevel::BuildVisibilityLists()
 	CAABB collisionAreaAABBs_extended[K_MAX_PLAYERS_CNT];
 	//filter only closeby actors (events triggering, bullets collisions etc)
 	CAABB actorsNearbyAABBs[K_MAX_PLAYERS_CNT];
-	//filter closeby actives
-	CAABB activesNearbyAABBs[K_MAX_PLAYERS_CNT];
+	//filter closeby props
+	CAABB propsNearbyAABBs[K_MAX_PLAYERS_CNT];
 	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 	{
 		//saves the last position so it doesn't go crazy when the players get freed
@@ -3013,8 +3013,8 @@ void CLevel::BuildVisibilityLists()
 		actorsNearbyAABBs[kk].Set(s_vLastPlayerPos[kk] - camaabb.vHalfSize * 1.5f, s_vLastPlayerPos[kk] + camaabb.vHalfSize * 1.5f);
 		AABB_KeepInside(actorsNearbyAABBs[kk], lvlAABB);
 
-		//filter actives area
-		activesNearbyAABBs[kk] = actorsNearbyAABBs[kk];
+		//filter props area
+		propsNearbyAABBs[kk] = actorsNearbyAABBs[kk];
 	}
 
 	//flag used for rendering:
@@ -3156,26 +3156,26 @@ void CLevel::BuildVisibilityLists()
 				m_visibleList.visible_actors.Add(actor);
 		}
 	}
-	//all actives onscreen for rendering
+	//all props onscreen for rendering
 	for (int jj = 0; jj < K_LVL_LAYERS_CNT; jj++)
 	{
-		m_visibleList.visible_actives[jj].Clear();
-		m_visibleList.logic_actives_closeby[jj].Clear();
+		m_visibleList.visible_props[jj].Clear();
+		m_visibleList.logic_props_closeby[jj].Clear();
 	}
 
-	for (int kk = 0; kk < m_arrActives.GetSize(); kk++)
+	for (int kk = 0; kk < m_arrProps.GetSize(); kk++)
 	{
-		if (m_arrActives[kk]->bHidden)
+		if (m_arrProps[kk]->bHidden)
 			continue;
-		CActive* active = m_arrActives[kk];
-		//visible actives
-		if (activesPaintAABB.Intersects(&active->bbox))
+		CProp* active = m_arrProps[kk];
+		//visible props
+		if (propsPaintAABB.Intersects(&active->bbox))
 		{
-			m_visibleList.visible_actives[(int)active->nLayer].Add(active);
+			m_visibleList.visible_props[(int)active->nLayer].Add(active);
 			//#PERSONALIZARE: bomb was seen? let us know
 			if ((m_arrStats[K_LVL_STATS_LEVEL_HAS_BOMBS] != 0) && (m_arrStats[K_LVL_STATS_LEVEL_BOMB_SEEN] == 0))
 			{
-				if (m_arrActives[kk]->ID == m_arrStats[K_LVL_STATS_LEVEL_BOMB_ID])
+				if (m_arrProps[kk]->ID == m_arrStats[K_LVL_STATS_LEVEL_BOMB_ID])
 				{
 					m_arrStats[K_LVL_STATS_LEVEL_BOMB_SEEN] = 1;
 					//find first valid player
@@ -3186,9 +3186,9 @@ void CLevel::BuildVisibilityLists()
 			}
 		}
 		//logical closeby actives
-		if ((activesNearbyAABBs[0].Intersects(&active->bbox)) || (activesNearbyAABBs[1].Intersects(&active->bbox)))
+		if ((propsNearbyAABBs[0].Intersects(&active->bbox)) || (propsNearbyAABBs[1].Intersects(&active->bbox)))
 		{
-			m_visibleList.logic_actives_closeby[(int)active->nLayer].Add(active);
+			m_visibleList.logic_props_closeby[(int)active->nLayer].Add(active);
 		}
 	}
 	//clear all decals layers
@@ -3199,7 +3199,7 @@ void CLevel::BuildVisibilityLists()
 
 	for (int kk = 0; kk < m_arrDecals.GetSize(); kk++)
 	{
-		if (activesPaintAABB.Intersects(&m_arrDecals[kk]->aabb))
+		if (propsPaintAABB.Intersects(&m_arrDecals[kk]->aabb))
 		{
 			m_visibleList.visible_decals[m_arrDecals[kk]->layer].Add(m_arrDecals[kk]);
 		}
@@ -3570,7 +3570,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 					if (colshape->pTarget != NULL)
 					{
 						//trebuie sa pointeze spre un CActive neaparat
-						CActive* winact = dynamic_cast<CActive*>(colshape->pTarget);
+						CProp* winact = dynamic_cast<CProp*>(colshape->pTarget);
 						if (winact == null)
 						{
 							ErrorBox(K_ERR_WARNING, L"K_AI_STATE_COLL_BREAKABLE_WINDOW bad cast to CActive");
@@ -3639,7 +3639,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 					if (colshape->pTarget != NULL)
 					{
 						//trebuie sa pointeze spre un CActive neaparat
-						CActive* dooract = dynamic_cast<CActive*>(colshape->pTarget);
+						CProp* dooract = dynamic_cast<CProp*>(colshape->pTarget);
 						if (dooract == null)
 						{
 							ErrorBox(K_ERR_WARNING, L"K_AI_STATE_COLL_BREAKABLE_DOOR bad cast to CActive");
@@ -3698,7 +3698,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 						{
 							dec_limit(colshape->AItimer1, 0.05f, 0.0f);
 							//trebuie sa pointeze spre un CActive neaparat
-							CActive* dooract = dynamic_cast<CActive*>(colshape->pTarget);
+							CProp* dooract = dynamic_cast<CProp*>(colshape->pTarget);
 							if (dooract == null)
 							{
 								ErrorBox(K_ERR_WARNING, L"K_AI_STATE_COLL_BREAKABLE_DOOR bad cast to CActive (doorshake)");
@@ -3895,86 +3895,86 @@ void CLevel::UpdateAI_light(CLight* light, float dTime)
 	light->SetPos(light->pos);
 }
 
-void CLevel::UpdateAI_active(CActive* active, float dTime)
+void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 {
 	//touch timer reset
-	//daca trebuie actionat de toata echipa verific aici (doar pentru active pentru ca nu voi actiona pe actori sau collisions)
+	//daca trebuie actionat de toata echipa verific aici (doar pentru props pentru ca nu voi actiona pe actori sau collisions)
 	bool bResetTouchTimer = false;
-	if (active->fTouchDuration < 0.0f)
+	if (prop->fTouchDuration < 0.0f)
 	{
 		for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 		{
 			if (pPlayerActor[kk] != null)
 			{
 				//sa fiu sigur ca interactioneaza pe acelasi obiect
-				if ((pPlayerActor[kk]->nInteractingState == 0) || (pPlayerActor[kk]->pClosestTouchable != active))
+				if ((pPlayerActor[kk]->nInteractingState == 0) || (pPlayerActor[kk]->pClosestTouchable != prop))
 				{
-					active->fTouchTimer = 0.0f;
+					prop->fTouchTimer = 0.0f;
 					break;
 				}
 			}
 		}
 	}
 
-	active->UpdateTouchTimerReset(dTime);
+	prop->UpdateTouchTimerReset(dTime);
 	//daca am schimbat vizibilitatea
-	active->bHidden = active->bSetHidden;
+	prop->bHidden = prop->bSetHidden;
 	//daca este hidden nu mai verifica AI
-	if (active->bHidden)
+	if (prop->bHidden)
 		return;
 
 	//update timeline
-	active->fTimelineAI += dTime;
+	prop->fTimelineAI += dTime;
 
 	//update sprite if animated
-	if (active->bAnimated)
+	if (prop->bAnimated)
 	{
-		UINT32 aframeFlag = active->sprite.Update(&m_sprActives, dTime);
+		UINT32 aframeFlag = prop->sprite.Update(&m_sprProps, dTime);
 		//cand ajunge la capatul animatiei scoate flagul de animated
-		if (active->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
-			active->bAnimated = false;
+		if (prop->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
+			prop->bAnimated = false;
 		//la obiectele animate luam bbox-ul la fiecare frame
-		if ((active->sprite.animStatus == ANIM_STATUS_PLAYING_FRAME_ADVANCED) || (active->sprite.animStatus == ANIM_STATUS_FRAMELOCK))
+		if ((prop->sprite.animStatus == ANIM_STATUS_PLAYING_FRAME_ADVANCED) || (prop->sprite.animStatus == ANIM_STATUS_FRAMELOCK))
 		{
-			RECTXYWH frrect = m_sprActives.GetAFrameBBox(active->sprite.animationIdx, active->sprite.currentFrame);
-			active->bbox_ini.Set(frrect);
+			RECTXYWH frrect = m_sprProps.GetAFrameBBox(prop->sprite.animationIdx, prop->sprite.currentFrame);
+			prop->bbox_ini.Set(frrect);
 			//nu pastreaza acelasi bbox la flip deci flipam bboxul
-			if (active->flipX)
+			if (prop->flipX)
 			{
-				active->bbox_ini.Flip(true, false);
+				prop->bbox_ini.Flip(true, false);
 			}
 		}
 	}
 
 	//daca nu a fost tratata starea curenta inseamna ca este particulara pt clasa asta
-	if (active->AIstate != K_AI_STATE_UNDEFINED)
+	if (prop->AIstate != K_AI_STATE_UNDEFINED)
 	{
 		//stari particulare obiectelor (se pot suprascrie cele default)
-		switch (active->AIstate)
+		switch (prop->AIstate)
 		{
 			case K_AI_STATE_ACTIVE_ZOMBIE_SPAWNER:
 			{
-				switch (active->AIsubState)
+				switch (prop->AIsubState)
 				{
 					case 0: //not enabled yet
 					{
 						//make sure we don't animate
-						active->bAnimated = false;
+						prop->bAnimated = false;
 
 						for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 						{
 							CActor* pPlayer = pPlayerActor[kk];
 							if (pPlayer == null)
 								continue;
-							float fDist = D3DXVec2Length(&(pPlayer->GetPosHeart() - active->pos));
+							float fDist = D3DXVec2Length(&(pPlayer->GetPosHeart() - prop->pos));
 							const float fActivationDistance = 150.0f;
 							if (fDist <= fActivationDistance)
 							{
-								active->AIsubState = 1;
-								active->sprite.setAnimation(ANM_ACTIVES_SPR_ZOMBIE_SPAWNER_APPEAR);
-								active->bAnimated = true;
+								prop->AIsubState = 1;
+								prop->sprite.setAnimation(ANM_ACTIVES_SPR_ZOMBIE_SPAWNER_APPEAR);
+								prop->bAnimated = true;
 
-								m_camLevel.ShakeScreen(2.0f, 4.0f, &active->pos);
+								m_camLevel.ShakeScreen(2.0f, 4.0f, &prop->pos);
 								//SND_PLAY_POSITIONAL(SNDIDX_STONE_MOVE1, active->pos);
 								break;
 							}
@@ -3984,19 +3984,19 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 					case 1: //appearing
 					{
 						//wait for it to finish the animation
-						if (active->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
+						if (prop->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
 						{
 							//change to spawning
-							active->AIsubState = 2;
+							prop->AIsubState = 2;
 							//spawn quickly after activation
-							active->AItimer1 = active->AItimer2 - 1.0f - m_rand.RandFloat(1.0f);
+							prop->AItimer1 = prop->AItimer2 - 1.0f - m_rand.RandFloat(1.0f);
 							//change on looping animation
-							active->sprite.setAnimation(ANM_ACTIVES_SPR_ZOMBIE_SPAWNER_ACTIVE);
-							active->bAnimated = true;
+							prop->sprite.setAnimation(ANM_ACTIVES_SPR_ZOMBIE_SPAWNER_ACTIVE);
+							prop->bAnimated = true;
 							//enable target light
-							if (active->pTarget != null)
+							if (prop->pTarget != null)
 							{
-								active->pTarget->bSetHidden = false;
+								prop->pTarget->bSetHidden = false;
 							}
 						}
 					}
@@ -4004,13 +4004,13 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 					case 2: //active
 					{
 						//check spawn count
-						if (active->AIvar1 < active->AIvar2)
+						if (prop->AIvar1 < prop->AIvar2)
 						{
-							active->AItimer1 += dTime;
-							if (active->AItimer1 >= active->AItimer2)
+							prop->AItimer1 += dTime;
+							if (prop->AItimer1 >= prop->AItimer2)
 							{
-								active->AIvar1++;
-								active->AItimer1 = 0.0f;
+								prop->AIvar1++;
+								prop->AItimer1 = 0.0f;
 								//spawn zombie
 								CStringHash shTemplate;
 								//#ZOMBIE: generate zombies
@@ -4027,9 +4027,9 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 									shTemplate.Init(L"ACTOR_ZOMBIE_SLOW1"); //34%
 								//spawn
 								CStringHash shState(L"AWARE");
-								SpawnActor(active->pos, shTemplate.text, 0, &shState);
+								SpawnActor(prop->pos, shTemplate.text, 0, &shState);
 
-								g_particlesMgr.GenerateZombieSpawn(active->pos, 0x8800ff00, K_PART_LAYER_RT_FRONT_NRM);
+								g_particlesMgr.GenerateZombieSpawn(prop->pos, 0x8800ff00, K_PART_LAYER_RT_FRONT_NRM);
 							}
 						}
 					}
@@ -4044,14 +4044,14 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 				if (m_levelState != K_LVL_STATE_PLAYING)
 					break;
 
-				float fOldTimer = active->AItimer1;
-				active->AItimer1 -= dTime;
-				m_interfaceIGM.SetBombTimer(active->AItimer1);
+				float fOldTimer = prop->AItimer1;
+				prop->AItimer1 -= dTime;
+				m_interfaceIGM.SetBombTimer(prop->AItimer1);
 
 				//--- sounds ---
-				if (active->AItimer1 > 15.0f)
+				if (prop->AItimer1 > 15.0f)
 				{
-					if (floor(fOldTimer) > floor(active->AItimer1))
+					if (floor(fOldTimer) > floor(prop->AItimer1))
 					{
 						//SND_PLAY(SNDIDX_BOMBBEEP);
 					}
@@ -4064,17 +4064,17 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 					}
 				}
 
-				if (active->AItimer1 <= 0.0f)
+				if (prop->AItimer1 <= 0.0f)
 				{
 					m_interfaceIGM.SetBombTimer(0.0f);
 					//add some explosions so everybody will die
-					AddProp_Explo(hash_EXPLO_LARGE_XL, active->pos, active->UID, K_LVL_ACT_CLASS_EXPLOSION);
-					AddProp_Explo(hash_EXPLO_LARGE_XL, active->pos + D3DXVECTOR2(32.0f, 0.0f), active->UID, K_LVL_ACT_CLASS_EXPLOSION);
-					AddProp_Explo(hash_EXPLO_LARGE_XL, active->pos - D3DXVECTOR2(32.0f, 0.0f), active->UID, K_LVL_ACT_CLASS_EXPLOSION);
+					AddProp_Explo(hash_EXPLO_LARGE_XL, prop->pos, prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
+					AddProp_Explo(hash_EXPLO_LARGE_XL, prop->pos + D3DXVECTOR2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
+					AddProp_Explo(hash_EXPLO_LARGE_XL, prop->pos - D3DXVECTOR2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
 
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &D3DXVECTOR2(active->pos.x, active->pos.y - 15.0f), NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &D3DXVECTOR2(prop->pos.x, prop->pos.y - 15.0f), NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 
-					active->sprite.setAnimation("BOMB_EXPLODED", &m_sprActives);
+					prop->sprite.setAnimation("BOMB_EXPLODED", &m_sprProps);
 
 					SetLevelState(K_LVL_STATE_MISSION_FAILED, STR_BOMB_EXPLODED);
 				}
@@ -4082,69 +4082,69 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 			break;
 			case K_AI_STATE_ACTIVE_AMMO_BOX:
 			{
-				int nAmmoLeft = active->varAIparams.GetVariantByName(L"n_ammoLeft")->m_asINT32;
-				active->sprite.currentFrame = nAmmoLeft;
+				int nAmmoLeft = prop->varAIparams.GetVariantByName(L"n_ammoLeft")->m_asINT32;
+				prop->sprite.currentFrame = nAmmoLeft;
 
 				//fade out
 				if (nAmmoLeft <= 0)
 				{
-					active->AItimer1 -= dTime;
-					if (active->AItimer1 <= 0.0f)
+					prop->AItimer1 -= dTime;
+					if (prop->AItimer1 <= 0.0f)
 					{
-						active->bReleaseIt = true;
+						prop->bReleaseIt = true;
 					}
 					//color
-					float fAlpha = LIMIT(active->AItimer1, 0.0f, 1.0f);
-					active->color = D3DCOLOR_COLORALPHA(active->color_ini, fAlpha);
+					float fAlpha = LIMIT(prop->AItimer1, 0.0f, 1.0f);
+					prop->color = D3DCOLOR_COLORALPHA(prop->color_ini, fAlpha);
 				}
 			}
 			break;
 			case K_AI_STATE_ACTIVE_HEALTH_BOX:
 			{
-				int nHealthLeft = active->varAIparams.GetVariantByName(L"n_healthLeft")->m_asINT32;
-				active->sprite.currentFrame = nHealthLeft;
+				int nHealthLeft = prop->varAIparams.GetVariantByName(L"n_healthLeft")->m_asINT32;
+				prop->sprite.currentFrame = nHealthLeft;
 
 				//fade out
 				if (nHealthLeft <= 0)
 				{
-					active->AItimer1 -= dTime;
-					if (active->AItimer1 <= 0.0f)
+					prop->AItimer1 -= dTime;
+					if (prop->AItimer1 <= 0.0f)
 					{
-						active->bReleaseIt = true;
+						prop->bReleaseIt = true;
 					}
 					//color
-					float fAlpha = LIMIT(active->AItimer1, 0.0f, 1.0f);
-					active->color = D3DCOLOR_COLORALPHA(active->color_ini, fAlpha);
+					float fAlpha = LIMIT(prop->AItimer1, 0.0f, 1.0f);
+					prop->color = D3DCOLOR_COLORALPHA(prop->color_ini, fAlpha);
 				}
 			}
 			break;
 			case K_AI_STATE_ACTIVE_TEAM_TELEPORTER_2FRAMES:
 			{
 				//keep door open (AIvar1 contine frame-ul default) - set frame
-				active->sprite.currentFrame = active->nFrame_ini;
-				if (active->AItimer1 > 0.0f)
+				prop->sprite.currentFrame = prop->nFrame_ini;
+				if (prop->AItimer1 > 0.0f)
 				{
-					active->AItimer1 -= dTime;
-					bool bDontChangeFrames = (bool)(active->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
+					prop->AItimer1 -= dTime;
+					bool bDontChangeFrames = (bool)(prop->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
 					if (!bDontChangeFrames)
 					{
-						active->sprite.currentFrame++;
+						prop->sprite.currentFrame++;
 					}
-					if (active->AItimer1 < 0.0f)
-						active->AItimer1 = 0.0f;
+					if (prop->AItimer1 < 0.0f)
+						prop->AItimer1 = 0.0f;
 				}
 
 				//daca primesc parametru de toucher inseamna ca a fost activata usa si o tin deschisa pana cand actorul activator intra in behavior de TEAM_TELEPORT
-				UINT32 nCurrentToucher = active->varAIparams.GetVariantByName(L"nToucherUID")->m_asUINT32;
+				UINT32 nCurrentToucher = prop->varAIparams.GetVariantByName(L"nToucherUID")->m_asUINT32;
 				if (nCurrentToucher != 0)
 				{
 					//Teleport logic (merge doar pentru actori)
 					CActor* toucher = GetActorByUID(nCurrentToucher);
 					//verifica daca e deja un player intr-un teleporter si daca este nu iti da voie sa intri in altul
-					if ((m_pTeleportSource != null) && (m_pTeleportSource != active))
+					if ((m_pTeleportSource != null) && (m_pTeleportSource != prop))
 					{
-						active->varAIparams.SetNamedVarUINT32(L"nToucherUID", 0);
-						SND_PLAY_POSITIONAL(SNDIDX_DENIED, active->pos);
+						prop->varAIparams.SetNamedVarUINT32(L"nToucherUID", 0);
+						SND_PLAY_POSITIONAL(SNDIDX_DENIED, prop->pos);
 						break;
 					}
 
@@ -4154,32 +4154,32 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 						//setam starea TEAM_TELEPORT pentru actorul toucher
 						SetActorAIState(toucher, L"TEAM_TELEPORT");
 						//tinem usa deschisa o perioada	daca nu e setat flagul de don't change frames
-						bool bDontChangeFrames = (bool)(active->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
+						bool bDontChangeFrames = (bool)(prop->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
 						if(!bDontChangeFrames)
-							active->AItimer1 = 1.0f;
+							prop->AItimer1 = 1.0f;
 						//centram player
-						toucher->pos = active->pos;
+						toucher->pos = prop->pos;
 						toucher->speed.x = 0.0f;
 						//setam si pointerul la teleporter
 						if (m_pTeleportSource == null)
 						{
-							m_pTeleportSource = active;
+							m_pTeleportSource = prop;
 						}
 					}
 					//reset touch command
-					active->varAIparams.SetNamedVarUINT32(L"nToucherUID", 0);
+					prop->varAIparams.SetNamedVarUINT32(L"nToucherUID", 0);
 				}
 
 				//#PERSONALIZARE: player in limbo? keep door open
-				if ((m_nTeleportSlots > 0) && (m_pTeleportSource == active) && (m_fTeleportTimer <= 0.0f))
+				if ((m_nTeleportSlots > 0) && (m_pTeleportSource == prop) && (m_fTeleportTimer <= 0.0f))
 				{
-					bool bDontChangeFrames = (bool)(active->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
+					bool bDontChangeFrames = (bool)(prop->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
 					if (!bDontChangeFrames)
-						active->AItimer1 = 1.0f;
+						prop->AItimer1 = 1.0f;
 				}
 
 				//daca am activat teleportul face teleport
-				if ((/*(m_bTeleportRequested) || */(m_nTeleportSlots == m_nPlayersActive)) && (m_pTeleportSource == active))
+				if ((/*(m_bTeleportRequested) || */(m_nTeleportSlots == m_nPlayersActive)) && (m_pTeleportSource == prop))
 				{
 					bool bCanTeleport = true;
 					//verificare finala daca pot face teleport request de unul dintre players
@@ -4202,7 +4202,7 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 					}
 					*/
 					//teleport players
-					if ((active->pTarget != null) && (bCanTeleport))
+					if ((prop->pTarget != null) && (bCanTeleport))
 					{
 						bool bTeleported[K_MAX_PLAYERS_CNT] = { false, false };
 
@@ -4214,12 +4214,12 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 								{
 									if (pPlayerActor[kk]->GetCurrentBehavior() == AI_BEHAVIOR_PLAYER_TEAM_TELEPORT)
 									{
-										pPlayerActor[kk]->pos = active->pTarget->pos;
+										pPlayerActor[kk]->pos = prop->pTarget->pos;
 										bTeleported[kk] = true;
 										//close source door after teleport (ca sa nu se vada deschis liftul pe 2 paliere)
-										active->AItimer1 = 0.0f;
+										prop->AItimer1 = 0.0f;
 										//set duration timer
-										m_fTeleportTimer = EPS + active->varAIparams.GetVariantByName(L"f_teleportDuration")->m_asFloat;
+										m_fTeleportTimer = EPS + prop->varAIparams.GetVariantByName(L"f_teleportDuration")->m_asFloat;
 									}
 									else																  
 									{
@@ -4244,16 +4244,16 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 								m_fTeleportTimer = 0.0f;
 
 								//tinem usa destinatie deschisa o perioada daca nu e setat flagul de don't change frames
-								bool bDontChangeFrames = (bool)(active->pTarget->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
+								bool bDontChangeFrames = (bool)(prop->pTarget->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
 								if (!bDontChangeFrames)
 								{
-									active->pTarget->AItimer1 = 1.0f;
+									prop->pTarget->AItimer1 = 1.0f;
 								}
 
 								m_bTeleportActivated = true;
 
 								//door takes to hidden room
-								bool bHiddenRoom = (bool)(active->varAIparams.GetVariantByName(L"b_EnterHiddenRoom")->m_asINT32);
+								bool bHiddenRoom = (bool)(prop->varAIparams.GetVariantByName(L"b_EnterHiddenRoom")->m_asINT32);
 								//black out screen for a bit
 								//when on multiplayer, darken only if teleported to hidden room
 								if (bHiddenRoom)
@@ -4264,7 +4264,7 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 									}
 								}
 								//daca avem slow time facem acum
-								float fSlowTimeDuration = active->varAIparams.GetVariantByName(L"f_SlowTimeDuration")->m_asFloat;
+								float fSlowTimeDuration = prop->varAIparams.GetVariantByName(L"f_SlowTimeDuration")->m_asFloat;
 								if (fSlowTimeDuration > 0.0f)
 								{
 									if (!UTGetAppClass().IsGameNetworked())
@@ -4277,7 +4277,7 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 											SetTimeMultiplier(0.5f, fSlowTimeDuration);
 									}
 									//ca sa faca doar prima data slowdown stergem variabila
-									active->varAIparams.SetNamedVarFloat(L"f_SlowTimeDuration", 0.0f);
+									prop->varAIparams.SetNamedVarFloat(L"f_SlowTimeDuration", 0.0f);
 								}
 								//set hidden room flag
 								m_bInsideHiddenRoom = bHiddenRoom;
@@ -4308,7 +4308,7 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 									RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
 									CAABB camAABB(D3DXVECTOR2(camrect.x, camrect.y), D3DXVECTOR2(camrect.Right(), camrect.Bottom()));
 									//black out screen only if teleporting outside the screen
-									if(!camAABB.Intersects(&active->pTarget->bbox_exported))
+									if(!camAABB.Intersects(&prop->pTarget->bbox_exported))
 										m_screenVignette.Init(0.5f, 0xff000000, 0.0f, 0.5f);
 								}
 							}
@@ -4317,104 +4317,104 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 				}
 
 				//open/close sounds
-				if ((active->AIvarBool1 == false) && (active->AItimer1 > 0.0f))
+				if ((prop->AIvarBool1 == false) && (prop->AItimer1 > 0.0f))
 				{
 					//just opened
-					CVariantComplex* cvc = active->varAIparams.GetVariantByName(L"s_openSnd");
+					CVariantComplex* cvc = prop->varAIparams.GetVariantByName(L"s_openSnd");
 					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 					{
 						int sndidx = UTGetSoundManager().getSndIdx(cvc->m_strArg.textHash);
-						SND_PLAY_POSITIONAL(sndidx, active->pos);
+						SND_PLAY_POSITIONAL(sndidx, prop->pos);
 					}
 					//on open script
-					cvc = active->varAIparams.GetVariantByName(L"s_ScriptOnOpen");
+					cvc = prop->varAIparams.GetVariantByName(L"s_ScriptOnOpen");
 					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 					{
-						UTGetScriptManager().StartScript(cvc->m_strArg.textHash, active->UID);
+						UTGetScriptManager().StartScript(cvc->m_strArg.textHash, prop->UID);
 					}
 
-					active->AIvarBool1 = true;
+					prop->AIvarBool1 = true;
 				}
-				else if ((active->AIvarBool1 == true) && (active->AItimer1 <= 0.0f))
+				else if ((prop->AIvarBool1 == true) && (prop->AItimer1 <= 0.0f))
 				{
 					//just closed
-					CVariantComplex* cvc = active->varAIparams.GetVariantByName(L"s_closeSnd");
+					CVariantComplex* cvc = prop->varAIparams.GetVariantByName(L"s_closeSnd");
 					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 					{
 						int sndidx = UTGetSoundManager().getSndIdx(cvc->m_strArg.textHash);
-						SND_PLAY_POSITIONAL(sndidx, active->pos);
+						SND_PLAY_POSITIONAL(sndidx, prop->pos);
 					}
 					//on close script
-					cvc = active->varAIparams.GetVariantByName(L"s_ScriptOnClose");
+					cvc = prop->varAIparams.GetVariantByName(L"s_ScriptOnClose");
 					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 					{
-						UTGetScriptManager().StartScript(cvc->m_strArg.textHash, active->UID);
+						UTGetScriptManager().StartScript(cvc->m_strArg.textHash, prop->UID);
 					}
 					//save state
-					active->AIvarBool1 = false;
+					prop->AIvarBool1 = false;
 				}
 			}
 			break;
 
 			case K_AI_STATE_ACTIVE_DOOR_SECTION:
 			{
-				active->AItimer1 = 0.0f;
+				prop->AItimer1 = 0.0f;
 			}
 			break;
 
 			case K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE:
 			{
 				//keep door open (AIvar1 contine frame-ul default) - set frame
-				active->sprite.currentFrame = active->nFrame_ini;
-				if (active->AItimer1 > 0.0f)
+				prop->sprite.currentFrame = prop->nFrame_ini;
+				if (prop->AItimer1 > 0.0f)
 				{
-					active->AItimer1 -= dTime;
+					prop->AItimer1 -= dTime;
 					
-					bool bDontChangeFrames = (bool)(active->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
+					bool bDontChangeFrames = (bool)(prop->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
 					if (!bDontChangeFrames)
 					{
-						active->sprite.currentFrame++;
+						prop->sprite.currentFrame++;
 					}
 
-					if (active->AItimer1 < 0.0f)
-						active->AItimer1 = 0.0f;
+					if (prop->AItimer1 < 0.0f)
+						prop->AItimer1 = 0.0f;
 				}
 
 				//open/close sounds
-				if ((active->AIvarBool1 == false) && (active->AItimer1 > 0.0f))
+				if ((prop->AIvarBool1 == false) && (prop->AItimer1 > 0.0f))
 				{
 					//just opened
-					CVariantComplex* cvc = active->varAIparams.GetVariantByName(L"s_openSnd");
+					CVariantComplex* cvc = prop->varAIparams.GetVariantByName(L"s_openSnd");
 					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 					{
 						int sndidx = UTGetSoundManager().getSndIdx(cvc->m_strArg.textHash);
-						SND_PLAY_POSITIONAL(sndidx, active->pos);
+						SND_PLAY_POSITIONAL(sndidx, prop->pos);
 					}
 					//on open script
-					cvc = active->varAIparams.GetVariantByName(L"s_ScriptOnOpen");
+					cvc = prop->varAIparams.GetVariantByName(L"s_ScriptOnOpen");
 					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 					{
-						UTGetScriptManager().StartScript(cvc->m_strArg.textHash, active->UID);
+						UTGetScriptManager().StartScript(cvc->m_strArg.textHash, prop->UID);
 					}
 
-					active->AIvarBool1 = true;
+					prop->AIvarBool1 = true;
 				}
-				else if ((active->AIvarBool1 == true) && (active->AItimer1 <= 0.0f))
+				else if ((prop->AIvarBool1 == true) && (prop->AItimer1 <= 0.0f))
 				{
 					//just closed
-					CVariantComplex* cvc = active->varAIparams.GetVariantByName(L"s_closeSnd");
+					CVariantComplex* cvc = prop->varAIparams.GetVariantByName(L"s_closeSnd");
 					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 					{
 						int sndidx = UTGetSoundManager().getSndIdx(cvc->m_strArg.textHash);
-						SND_PLAY_POSITIONAL(sndidx, active->pos);
+						SND_PLAY_POSITIONAL(sndidx, prop->pos);
 					}
 					//on close script
-					cvc = active->varAIparams.GetVariantByName(L"s_ScriptOnClose");
+					cvc = prop->varAIparams.GetVariantByName(L"s_ScriptOnClose");
 					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 					{
-						UTGetScriptManager().StartScript(cvc->m_strArg.textHash, active->UID);
+						UTGetScriptManager().StartScript(cvc->m_strArg.textHash, prop->UID);
 					}
-					active->AIvarBool1 = false;
+					prop->AIvarBool1 = false;
 				}
 
 			}
@@ -4423,18 +4423,18 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 			case K_AI_STATE_ACTIVE_SWINGING_FRONTOBJ:
 			{
 				//implementare balans
-				float fAng = active->fAngle;
-				float angDelta = active->fAngle - active->fAngle_ini;
+				float fAng = prop->fAngle;
+				float angDelta = prop->fAngle - prop->fAngle_ini;
 				
 				float fFriction = 0.4f;
 				//ca sa se miste incet scot frecarea la viteze mici
-				if (fabs(active->AIfvar1) <= 0.04f)
+				if (fabs(prop->AIfvar1) <= 0.04f)
 					fFriction = 0.0f;
-				active->AIfvar1 -= angDelta * dTime * 20.0f + active->AIfvar1 * dTime * fFriction;
-				fAng += active->AIfvar1 * dTime;
-				CLAMP(fAng, active->fAngle_ini - 1.4f, active->fAngle_ini + 1.4f);
+				prop->AIfvar1 -= angDelta * dTime * 20.0f + prop->AIfvar1 * dTime * fFriction;
+				fAng += prop->AIfvar1 * dTime;
+				CLAMP(fAng, prop->fAngle_ini - 1.4f, prop->fAngle_ini + 1.4f);
 				
-				active->SetAngle(fAng);
+				prop->SetAngle(fAng);
 			}
 			break;
 
@@ -4444,14 +4444,14 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 				{
 					if (pPlayerActor[kk] == null)
 						continue;
-					if (pPlayerActor[kk]->bbox.Intersects(&active->bbox))
+					if (pPlayerActor[kk]->bbox.Intersects(&prop->bbox))
 					{
 						//generate explo
-						AddProp_Explo(hash_EXPLO_GRENADE_GROUND, active->pos, active->GetUID(), K_LVL_ACT_CLASS_EXPLOSION);
+						AddProp_Explo(hash_EXPLO_GRENADE_GROUND, prop->pos, prop->GetUID(), K_LVL_ACT_CLASS_EXPLOSION);
 						//decal explo mark
-						AddDecal(K_LVL_DECAL_LAYER_BACKWALLS, active->pos, ANM_ACTIVES_SPR_DECAL_EXPLOMARKS, randint(3), 0xffffffff);
+						AddDecal(K_LVL_DECAL_LAYER_BACKWALLS, prop->pos, ANM_ACTIVES_SPR_DECAL_EXPLOMARKS, randint(3), 0xffffffff);
 
-						active->bReleaseIt = true;
+						prop->bReleaseIt = true;
 						break;
 					}
 				}
@@ -4463,11 +4463,11 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 				{
 					if (pPlayerActor[kk] == null)
 						continue;
-					if (pPlayerActor[kk]->bbox.Intersects(&active->bbox))
+					if (pPlayerActor[kk]->bbox.Intersects(&prop->bbox))
 					{
-						active->Touch(pPlayerActor[kk]->GetUID(), dTime);
+						prop->Touch(pPlayerActor[kk]->GetUID(), dTime);
 						//save checkpoint
-						vLastSpawnPoint = active->pos;
+						vLastSpawnPoint = prop->pos;
 						break;
 					}
 				}
@@ -4475,19 +4475,19 @@ void CLevel::UpdateAI_active(CActive* active, float dTime)
 			break;
 			default:
 			{
-				if (!UpdateAI_base(active, dTime, active->fTimelineAI))
+				if (!UpdateAI_base(prop, dTime, prop->fTimelineAI))
 				{
-					ErrorBox(K_ERR_WARNING, L"CLevel::UpdateAI_active - AIstate not handled: %d", active->AIstate);
+					ErrorBox(K_ERR_WARNING, L"CLevel::UpdateAI_active - AIstate not handled: %d", prop->AIstate);
 				}
 			}
 			break;
 		}
 	}
 
-	active->SetPos(active->pos);
+	prop->SetPos(prop->pos);
 	//update-uri finale
-	active->sprite.pos = active->pos;
-	active->sprite.color = active->color;
+	prop->sprite.pos = prop->pos;
+	prop->sprite.color = prop->color;
 }
 
 
@@ -5664,9 +5664,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		actor->pClosestTouchable = null;
 		//find the active that has the biggest bbox intersection surface with our player
 		float fSurface = 0.0f;
-		for (int kk = 0; kk < m_arrActivesPtrInteract.Count(); kk++)
+		for (int kk = 0; kk < m_arrPropsPtrInteract.Count(); kk++)
 		{
-			CActive* activ = m_arrActivesPtrInteract.m_pData[kk];
+			CProp* activ = m_arrPropsPtrInteract.m_pData[kk];
 			if ((activ->bHidden) || (!activ->bCanInteract))
 				continue;
 			//aici verificam cu bboxul setat in editor
@@ -8775,12 +8775,12 @@ void CLevel::SetAIparams(IActiveInterface * active, CVariantCollection * params,
 void CLevel::CleanupDeadObjects()
 {
 	//check active objects
-	for (int kk = m_arrActives.GetSize() - 1; kk >= 0; kk--)
+	for (int kk = m_arrProps.GetSize() - 1; kk >= 0; kk--)
 	{
-		if (m_arrActives[kk]->bReleaseIt)
+		if (m_arrProps[kk]->bReleaseIt)
 		{
-			SAFE_DELETE(m_arrActives[kk]);
-			m_arrActives.Remove(kk);
+			SAFE_DELETE(m_arrProps[kk]);
+			m_arrProps.Remove(kk);
 		}
 	}
 
@@ -8824,13 +8824,13 @@ void CLevel::UpdateAI(float dTime)
 	}
 
 	//check active objects and save interactibles
-	m_arrActivesPtrInteract.Clear();
-	for (int kk = m_arrActives.GetSize() - 1; kk >= 0; kk--)
+	m_arrPropsPtrInteract.Clear();
+	for (int kk = m_arrProps.GetSize() - 1; kk >= 0; kk--)
 	{
-		UpdateAI_active(m_arrActives[kk], dTime);
+		UpdateAI_prop(m_arrProps[kk], dTime);
 		//add interactible?
-		if (m_arrActives[kk]->bCanInteract)
-			m_arrActivesPtrInteract.Add(m_arrActives[kk]);
+		if (m_arrProps[kk]->bCanInteract)
+			m_arrPropsPtrInteract.Add(m_arrProps[kk]);
 	}
 
 	//check lights
@@ -11138,9 +11138,9 @@ HRESULT CLevel::PaintOffscreen()
 		///--- objects back layer ---
 		m_pSprite->SetTransform(&mattrans);
 
-		for (int kk = 0; kk < m_visibleList.visible_actives[K_LVL_LAYER_BACK].Count(); kk++)
+		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_BACK].Count(); kk++)
 		{
-			CActive *active = m_visibleList.visible_actives[K_LVL_LAYER_BACK].m_pData[kk];
+			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_BACK].m_pData[kk];
 			if (active->flipX /*|| active->flipY*/)
 			{
 				matlocal = mattrans;
@@ -11151,12 +11151,12 @@ HRESULT CLevel::PaintOffscreen()
 					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; 
 				}
 				m_pSprite->SetTransform(&matlocal);
-				active->sprite.paint_firstModule(&m_sprActives);
+				active->sprite.paint_firstModule(&m_sprProps);
 				m_pSprite->SetTransform(&mattrans);
 			}
 			else
 			{
-				active->sprite.paint_firstModule(&m_sprActives);
+				active->sprite.paint_firstModule(&m_sprProps);
 			}
 		}
 		m_pSprite->Flush();
@@ -11197,7 +11197,7 @@ HRESULT CLevel::PaintOffscreen()
 			//--- paint them ---
 			for (int kk = 0; kk < m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKWALLS].Count(); kk++)
 			{
-				m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKWALLS].m_pData[kk]->sprite.paint_firstModule(&m_sprActives);
+				m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKWALLS].m_pData[kk]->sprite.paint_firstModule(&m_sprProps);
 			}
 			m_pSprite->Flush();
 
@@ -11218,9 +11218,9 @@ HRESULT CLevel::PaintOffscreen()
 		///--- objects MIDDLE layer ---
 		m_pSprite->SetTransform(&mattrans);
 
-		for (int kk = 0; kk < m_visibleList.visible_actives[K_LVL_LAYER_MIDDLE].Count(); kk++)
+		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].Count(); kk++)
 		{
-			CActive *active = m_visibleList.visible_actives[K_LVL_LAYER_MIDDLE].m_pData[kk];
+			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].m_pData[kk];
 			if (active->flipX)
 			{
 				matlocal = mattrans;
@@ -11231,12 +11231,12 @@ HRESULT CLevel::PaintOffscreen()
 					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; 
 				}
 				m_pSprite->SetTransform(&matlocal);
-				active->sprite.paint_firstModule(&m_sprActives);
+				active->sprite.paint_firstModule(&m_sprProps);
 				m_pSprite->SetTransform(&mattrans);
 			}
 			else
 			{
-				active->sprite.paint_firstModule(&m_sprActives);
+				active->sprite.paint_firstModule(&m_sprProps);
 			}
 		}
 
@@ -11244,9 +11244,9 @@ HRESULT CLevel::PaintOffscreen()
 		AdditiveBlendingON(m_pDevice, m_pSprite);
 		float fAlp = 0.4f * LIMIT(float((2.0f * sin(fLocalTimeline * 2.5f)) - 1.0f), 0.0f, 1.0f);
 		float fAlp2 = 0.4f * ((sin(fLocalTimeline * 10.0f) + 1.0f) / 2.0f);
-		for (int kk = 0; kk < m_visibleList.visible_actives[K_LVL_LAYER_MIDDLE].Count(); kk++)
+		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].Count(); kk++)
 		{
-			CActive *active = m_visibleList.visible_actives[K_LVL_LAYER_MIDDLE].m_pData[kk];
+			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].m_pData[kk];
 			
 			if (!active->bStandsOut)
 				continue;
@@ -11270,14 +11270,14 @@ HRESULT CLevel::PaintOffscreen()
 				m_pSprite->SetTransform(&matlocal);
 				CSprite spr = active->sprite;
 				spr.color = colAlpha;
-				spr.paint_firstModule(&m_sprActives);
+				spr.paint_firstModule(&m_sprProps);
 				m_pSprite->SetTransform(&mattrans);
 			}
 			else
 			{
 				CSprite spr = active->sprite;
 				spr.color = colAlpha;
-				spr.paint_firstModule(&m_sprActives);
+				spr.paint_firstModule(&m_sprProps);
 			}
 		}
 		AdditiveBlendingOFF(m_pDevice, m_pSprite);
@@ -11450,7 +11450,7 @@ HRESULT CLevel::PaintOffscreen()
 		m_pSprite->SetTransform(&mattrans);
 		for (int kk = 0; kk < m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKOBJECTS].Count(); kk++)
 		{
-			m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKOBJECTS].m_pData[kk]->sprite.paint_firstModule(&m_sprActives);
+			m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKOBJECTS].m_pData[kk]->sprite.paint_firstModule(&m_sprProps);
 		}
 		m_pSprite->Flush();
 
@@ -11552,9 +11552,9 @@ HRESULT CLevel::PaintOffscreen()
 		MUMatAffine2D(&mattrans, 1.0f, NULL, 0.0f, &D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
 		m_pSprite->SetTransform(&mattrans);
 
-		for (int kk = 0; kk < m_visibleList.visible_actives[K_LVL_LAYER_FRONT].Count(); kk++)
+		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_FRONT].Count(); kk++)
 		{
-			CActive *active = m_visibleList.visible_actives[K_LVL_LAYER_FRONT].m_pData[kk];
+			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_FRONT].m_pData[kk];
 			if (active->flipX)
 			{
 				matlocal = mattrans;
@@ -11564,14 +11564,14 @@ HRESULT CLevel::PaintOffscreen()
 					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; //e un calcul logic ca sa ramana incadrat in acelasi bbox real
 				}
 				m_pSprite->SetTransform(&matlocal);
-				active->sprite.paint_firstModule(&m_sprActives);
+				active->sprite.paint_firstModule(&m_sprProps);
 				m_pSprite->SetTransform(&mattrans);
 			}
 			else
 			{
 				if (active->fAngle == 0.0f)
 				{
-					active->sprite.paint_firstModule(&m_sprActives);
+					active->sprite.paint_firstModule(&m_sprProps);
 				}
 				else
 				{
@@ -11580,16 +11580,16 @@ HRESULT CLevel::PaintOffscreen()
 
 					m_pSprite->SetTransform(&matlocal);
 					active->sprite.pos = D3DXVECTOR2(0.0f, 0.0f);
-					active->sprite.paint_firstModule(&m_sprActives);
+					active->sprite.paint_firstModule(&m_sprProps);
 					m_pSprite->SetTransform(&mattrans);
 				}
 			}
 		}
 		///------ paint interactible front objects ------
 		AdditiveBlendingON(m_pDevice, m_pSprite);
-		for (int kk = 0; kk < m_visibleList.visible_actives[K_LVL_LAYER_FRONT].Count(); kk++)
+		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_FRONT].Count(); kk++)
 		{
-			CActive *active = m_visibleList.visible_actives[K_LVL_LAYER_FRONT].m_pData[kk];
+			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_FRONT].m_pData[kk];
 			if (!active->bStandsOut)
 				continue;
 
@@ -11602,7 +11602,7 @@ HRESULT CLevel::PaintOffscreen()
 
 			if (active->flipX)
 			{
-				RECTXYWH active_bbox = m_sprActives.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
+				RECTXYWH active_bbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
 
 				matlocal = mattrans;
 				//pozitie sprite
@@ -11615,7 +11615,7 @@ HRESULT CLevel::PaintOffscreen()
 
 				CSprite spr = active->sprite;
 				spr.color = colAlpha;
-				spr.paint_firstModule(&m_sprActives);
+				spr.paint_firstModule(&m_sprProps);
 
 				m_pSprite->SetTransform(&mattrans);
 			}
@@ -11625,7 +11625,7 @@ HRESULT CLevel::PaintOffscreen()
 				{
 					CSprite spr = active->sprite;
 					spr.color = colAlpha;
-					spr.paint_firstModule(&m_sprActives);
+					spr.paint_firstModule(&m_sprProps);
 				}
 				else
 				{
@@ -11635,7 +11635,7 @@ HRESULT CLevel::PaintOffscreen()
 					CSprite spr = active->sprite;
 					spr.color = colAlpha;
 					spr.pos = D3DXVECTOR2(0.0f, 0.0f);
-					spr.paint_firstModule(&m_sprActives);
+					spr.paint_firstModule(&m_sprProps);
 					m_pSprite->SetTransform(&mattrans);
 				}
 			}
@@ -11671,13 +11671,13 @@ HRESULT CLevel::PaintOffscreen()
 		///--- actives back layer ---
 		m_pSprite->SetTransform(&mattrans);
 
-		for (int kk = 0; kk < m_visibleList.visible_actives[K_LVL_LAYER_BACK].Count(); kk++)
+		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_BACK].Count(); kk++)
 		{
-			CActive *active = m_visibleList.visible_actives[K_LVL_LAYER_BACK].m_pData[kk];
+			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_BACK].m_pData[kk];
 
 			if (active->flipX)
 			{
-				RECTXYWH active_bbox = m_sprActives.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
+				RECTXYWH active_bbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
 
 				matlocal = mattrans;
 				//pozitie sprite
@@ -11690,12 +11690,12 @@ HRESULT CLevel::PaintOffscreen()
 				matlocal._41 += K_RTT_H_WIDTH;
 
 				m_pSprite->SetTransform(&matlocal);
-				active->sprite.paint_firstModule_texOverride(&m_sprActives, 1);
+				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
 				m_pSprite->SetTransform(&mattrans);
 			}
 			else
 			{
-				active->sprite.paint_firstModule_texOverride(&m_sprActives, 1, K_RTT_H_WIDTH);
+				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1, K_RTT_H_WIDTH);
 			}
 		}
 		m_pSprite->Flush();
@@ -11718,9 +11718,9 @@ HRESULT CLevel::PaintOffscreen()
 
 		///--- MIDDLE LAYER objects
 		m_pSprite->SetTransform(&mattrans);
-		for (int kk = 0; kk < m_visibleList.visible_actives[K_LVL_LAYER_MIDDLE].Count(); kk++)
+		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].Count(); kk++)
 		{
-			CActive *active = m_visibleList.visible_actives[K_LVL_LAYER_MIDDLE].m_pData[kk];
+			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].m_pData[kk];
 
 			if (active->flipX)
 			{
@@ -11735,12 +11735,12 @@ HRESULT CLevel::PaintOffscreen()
 				matlocal._41 += K_RTT_H_WIDTH;
 
 				m_pSprite->SetTransform(&matlocal);
-				active->sprite.paint_firstModule_texOverride(&m_sprActives, 1);
+				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
 				m_pSprite->SetTransform(&mattrans);
 			}
 			else
 			{
-				active->sprite.paint_firstModule_texOverride(&m_sprActives, 1, K_RTT_H_WIDTH);
+				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1, K_RTT_H_WIDTH);
 			}
 		}
 		m_pSprite->Flush();
@@ -11817,13 +11817,13 @@ HRESULT CLevel::PaintOffscreen()
 
 		///--- paint actives front layer NORMALS ---
 		m_pSprite->SetTransform(&mattrans);
-		for (int kk = 0; kk < m_visibleList.visible_actives[K_LVL_LAYER_FRONT].Count(); kk++)
+		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_FRONT].Count(); kk++)
 		{
-			CActive *active = m_visibleList.visible_actives[K_LVL_LAYER_FRONT].m_pData[kk];
+			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_FRONT].m_pData[kk];
 
 			if (active->flipX)
 			{
-				RECTXYWH active_bbox = m_sprActives.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
+				RECTXYWH active_bbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
 
 				matlocal = mattrans;
 				//pozitie sprite
@@ -11836,7 +11836,7 @@ HRESULT CLevel::PaintOffscreen()
 				matlocal._41 += K_RTT_H_WIDTH;
 
 				m_pSprite->SetTransform(&matlocal);
-				active->sprite.paint_firstModule_texOverride(&m_sprActives, 1);
+				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
 				m_pSprite->SetTransform(&mattrans);
 			}
 			else
@@ -11844,7 +11844,7 @@ HRESULT CLevel::PaintOffscreen()
 				if (active->fAngle == 0.0f)
 				{
 					//mut sprite pe zona de normale
-					active->sprite.paint_firstModule_texOverride(&m_sprActives, 1, K_RTT_H_WIDTH);
+					active->sprite.paint_firstModule_texOverride(&m_sprProps, 1, K_RTT_H_WIDTH);
 				}
 				else
 				{
@@ -11853,7 +11853,7 @@ HRESULT CLevel::PaintOffscreen()
 
 					m_pSprite->SetTransform(&matlocal);
 					active->sprite.pos = D3DXVECTOR2(0.0f, 0.0f);
-					active->sprite.paint_firstModule_texOverride(&m_sprActives, 1);
+					active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
 					m_pSprite->SetTransform(&mattrans);
 				}
 			}
@@ -12838,8 +12838,8 @@ void CLevel::Release()
 
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrColShapes);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrLights);
-	m_arrActivesPtrInteract.Clear();
-	SAFE_DELETE_GROWABLE_ARRAY(m_arrActives);
+	m_arrPropsPtrInteract.Clear();
+	SAFE_DELETE_GROWABLE_ARRAY(m_arrProps);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrDecals);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrActors);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrMiscObjects);
@@ -12856,7 +12856,7 @@ void CLevel::Release()
 	m_poolPhysPts.Release();
 
 	m_sprLights.Release();
-	m_sprActives.Release();
+	m_sprProps.Release();
 	m_sprActors.Release();
 	m_sprInterface.Release();
 
@@ -12891,7 +12891,7 @@ HRESULT CLevel::OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_D
 	m_pDevice = pd3dDevice;
 
 	V_RETURN(m_sprLights.OnCreateDevice(pd3dDevice));
-	V_RETURN(m_sprActives.OnCreateDevice(pd3dDevice));
+	V_RETURN(m_sprProps.OnCreateDevice(pd3dDevice));
 	V_RETURN(m_sprActors.OnCreateDevice(pd3dDevice));
 	V_RETURN(m_sprInterface.OnCreateDevice(pd3dDevice));
 	V_RETURN(m_texManager.OnCreateDevice(pd3dDevice));
@@ -12990,7 +12990,7 @@ HRESULT CLevel::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DE
 
 
 	V_RETURN(m_sprLights.OnResetDevice(pd3dDevice));
-	V_RETURN(m_sprActives.OnResetDevice(pd3dDevice));
+	V_RETURN(m_sprProps.OnResetDevice(pd3dDevice));
 	V_RETURN(m_sprActors.OnResetDevice(pd3dDevice));
 	V_RETURN(m_sprInterface.OnResetDevice(pd3dDevice));
 	V_RETURN(m_texManager.OnResetDevice(pd3dDevice));
@@ -13015,7 +13015,7 @@ HRESULT CLevel::OnLostDevice( void* pUserContext )
 	SAFE_RELEASE(m_pRTSurface_final);
 
 	m_sprLights.OnLostDevice();
-	m_sprActives.OnLostDevice();
+	m_sprProps.OnLostDevice();
 	m_sprActors.OnLostDevice();
 	m_sprInterface.OnLostDevice();
 	m_texManager.OnLostDevice();
@@ -13031,7 +13031,7 @@ HRESULT CLevel::OnDestroyDevice( void* pUserContext )
 	m_pDevice = NULL;
 
 	m_sprLights.OnDestroyDevice();
-	m_sprActives.OnDestroyDevice();
+	m_sprProps.OnDestroyDevice();
 	m_sprActors.OnDestroyDevice();
 	m_sprInterface.OnDestroyDevice();
 	m_texManager.OnDestroyDevice();
@@ -13924,7 +13924,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 			node->m_data.szTailSize.w = 32.0f;
 			node->m_data.szTailSize.h = 4.0f;
 			//texture rectangle
-			node->m_data.rectTailTex = m_sprActives.GetModuleRect_TexCoords(ANM_ACTIVES_SPR_BULLETS_FIRE, 3, 0);
+			node->m_data.rectTailTex = m_sprProps.GetModuleRect_TexCoords(ANM_ACTIVES_SPR_BULLETS_FIRE, 3, 0);
 			//shoot with lava blobs too
 			if (m_rand.RandFloat(100.0f) < 40.0f)
 			{
@@ -13942,7 +13942,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 			node->m_data.szTailSize.w = 16.0f;
 			node->m_data.szTailSize.h = 2.0f;
 			//texture rectangle
-			node->m_data.rectTailTex = m_sprActives.GetModuleRect_TexCoords(ANM_ACTIVES_SPR_BULLETS_FIRE, 3, 0);
+			node->m_data.rectTailTex = m_sprProps.GetModuleRect_TexCoords(ANM_ACTIVES_SPR_BULLETS_FIRE, 3, 0);
 		}
 		break;
 		case K_LVL_BULLET_SHOTGUN_SLUG:
@@ -13962,7 +13962,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 			node->m_data.szTailSize.w = 48.0f;
 			node->m_data.szTailSize.h = 3.6f;
 			//texture rectangle
-			node->m_data.rectTailTex = m_sprActives.GetModuleRect_TexCoords(ANM_ACTIVES_SPR_BULLETS_FIRE, 9, 0);
+			node->m_data.rectTailTex = m_sprProps.GetModuleRect_TexCoords(ANM_ACTIVES_SPR_BULLETS_FIRE, 9, 0);
 		}
 		break;
 		case K_LVL_BULLET_TRACER1:
@@ -13972,7 +13972,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 			node->m_data.szTailSize.w = 32.0f;
 			node->m_data.szTailSize.h = 2.6f;
 			//texture rectangle
-			node->m_data.rectTailTex = m_sprActives.GetModuleRect_TexCoords(ANM_ACTIVES_SPR_BULLETS_FIRE, 3, 0);
+			node->m_data.rectTailTex = m_sprProps.GetModuleRect_TexCoords(ANM_ACTIVES_SPR_BULLETS_FIRE, 3, 0);
 		}
 		break;
 		case K_LVL_BULLET_FLASHBANG:
@@ -14547,7 +14547,7 @@ void CLevel::UpdateBullets(float dTime)
 			break;
 			case K_LVL_BULLET_FLASHBANG:				
 			{
-				bullet->sprBullet.Update(&m_sprActives, dTime);
+				bullet->sprBullet.Update(&m_sprProps, dTime);
 				//#PERK: DOUBLE BANGERS - flashbang bangs twice
 				if ((fBulletOldLife > bullet->fLife_ini * 0.5f) && (bullet->fLife <= bullet->fLife_ini * 0.5f))
 				{
@@ -14611,7 +14611,7 @@ void CLevel::UpdateBullets(float dTime)
 			case K_LVL_BULLET_CAM_BALL:
 			{
 				if (!bullet->physPt->m_data.bContacting)
-					bullet->sprBullet.Update(&m_sprActives, dTime);
+					bullet->sprBullet.Update(&m_sprProps, dTime);
 				//die after a while
 				if (bullet->fLife <= 0.0f)
 					killbullet = true;
@@ -14660,7 +14660,7 @@ void CLevel::UpdateBullets(float dTime)
 			case K_LVL_BULLET_GRENADE_ROUND:
 			case K_LVL_BULLET_GRENADE:
 			{
-				bullet->sprBullet.Update(&m_sprActives, dTime);
+				bullet->sprBullet.Update(&m_sprProps, dTime);
 				//daca depaseste range-ul
 				if (bullet->fLife <= 0.0f)
 				{
@@ -14691,7 +14691,7 @@ void CLevel::UpdateBullets(float dTime)
 			break;
 			case K_LVL_BULLET_GOO:
 			{
-				bullet->sprBullet.Update(&m_sprActives, dTime);
+				bullet->sprBullet.Update(&m_sprProps, dTime);
 
 				//break on contact
 				bool bHitEnemy = false;
@@ -14781,7 +14781,7 @@ void CLevel::UpdateBullets(float dTime)
 			break;
 			case K_LVL_BULLET_MOLOTOV:
 			{
-				bullet->sprBullet.Update(&m_sprActives, dTime);
+				bullet->sprBullet.Update(&m_sprProps, dTime);
 				//break on contact
 				if (bullet->physPt->m_data.bContactStarted)
 				{
@@ -14827,7 +14827,7 @@ void CLevel::UpdateBullets(float dTime)
 			break;
 			case K_LVL_BULLET_BREACHING_CHARGE:
 			{
-				bullet->sprBullet.Update(&m_sprActives, dTime);
+				bullet->sprBullet.Update(&m_sprProps, dTime);
 				//sticks to it							//aici era sa se lipeasca doar de usi
 				if (bullet->physPt->m_data.bContactStarted)// && (bullet->physPt->m_data.pContactShape->AIstate == K_AI_STATE_COLL_EXPLOCHARGE_TOUCH))
 				{
@@ -15045,7 +15045,7 @@ void CLevel::PaintBullets(bool paintNormals)
 		if (m_bulletsMeshIdx >= 0)
 		{
 			//#HARDCODE: set first texture which contains color info
-			m_pDevice->SetTexture(0, m_sprActives.Textures[0]->pTex);
+			m_pDevice->SetTexture(0, m_sprProps.Textures[0]->pTex);
 			//draw textured bullets (actives texture, just like the bullets)
 			m_bufferedPainter.DrawMesh(m_bulletsMeshIdx, true);
 		}
@@ -15065,7 +15065,7 @@ void CLevel::PaintBullets(bool paintNormals)
 					float ang = Math_GetVectorAngle(vdir);
 					MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
-					node->m_data.sprBullet.paint_firstModule(&m_sprActives);
+					node->m_data.sprBullet.paint_firstModule(&m_sprProps);
 				}
 				break;
 
@@ -15090,7 +15090,7 @@ void CLevel::PaintBullets(bool paintNormals)
 					float ang = Math_GetVectorAngle(node->m_data.physPt->m_data.speed);
 					MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
-					node->m_data.sprBullet.paint_firstModule(&m_sprActives);
+					node->m_data.sprBullet.paint_firstModule(&m_sprProps);
 #endif
 				}
 				break;
@@ -15099,7 +15099,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				{
 					MUMatAffine2D(&matbullet, 1.0f, NULL, 0.0f, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
-					node->m_data.sprBullet.paint_firstModule(&m_sprActives);
+					node->m_data.sprBullet.paint_firstModule(&m_sprProps);
 				}
 				break;
 				case K_LVL_BULLET_FLASHBANG:
@@ -15109,12 +15109,12 @@ void CLevel::PaintBullets(bool paintNormals)
 				{
 					MUMatAffine2D(&matbullet, 1.0f, NULL, 0.0f, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
-					node->m_data.sprBullet.paint_firstModule(&m_sprActives);
+					node->m_data.sprBullet.paint_firstModule(&m_sprProps);
 					//exclamation sign
 					if (sin(fLocalTimeline * ((node->m_data.fLife > 0.5f) ? 10.0f : 30.0f)) > 0.0f)
 					{
 						CSprite tmpspr(ANM_ACTIVES_SPR_ICONS, 0.0f, -10.0f);
-						tmpspr.paint_firstModule(&m_sprActives);
+						tmpspr.paint_firstModule(&m_sprProps);
 					}
 				}
 				break;
@@ -15130,7 +15130,7 @@ void CLevel::PaintBullets(bool paintNormals)
 					}
 					MUMatAffine2D(&matbullet, 1.0f, NULL, fang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
-					node->m_data.sprBullet.paint_firstModule(&m_sprActives);
+					node->m_data.sprBullet.paint_firstModule(&m_sprProps);
 				}
 				break;
 			}
@@ -15147,7 +15147,7 @@ void CLevel::PaintBullets(bool paintNormals)
 		if (m_bulletsMeshIdx >= 0)
 		{
 			//#HARDCODE: set first texture which contains color info
-			m_pDevice->SetTexture(0, m_sprActives.Textures[1]->pTex);
+			m_pDevice->SetTexture(0, m_sprProps.Textures[1]->pTex);
 
 			m_bufferedPainter.DrawMesh(m_bulletsMeshIdx, true);
 		}
@@ -15167,7 +15167,7 @@ void CLevel::PaintBullets(bool paintNormals)
 					float ang = Math_GetVectorAngle(vdir);
 					MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
-					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprActives, 1);
+					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprProps, 1);
 				}
 				break;
 
@@ -15192,7 +15192,7 @@ void CLevel::PaintBullets(bool paintNormals)
 					float ang = Math_GetVectorAngle(node->m_data.physPt->m_data.speed);
 					MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
-					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprActives, 1);
+					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprProps, 1);
 #endif
 				}
 				break;
@@ -15201,7 +15201,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				{
 					MUMatAffine2D(&matbullet, 1.0f, NULL, 0.0f, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
-					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprActives, 1);
+					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprProps, 1);
 				}
 				break;
 				case K_LVL_BULLET_FLASHBANG:
@@ -15211,12 +15211,12 @@ void CLevel::PaintBullets(bool paintNormals)
 				{
 					MUMatAffine2D(&matbullet, 1.0f, NULL, 0.0f, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
-					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprActives, 1);
+					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprProps, 1);
 					//exclamation sign
 					if (sin(fLocalTimeline * ((node->m_data.fLife > 0.5f) ? 10.0f : 30.0f)) > 0.0f)
 					{
 						CSprite tmpspr(ANM_ACTIVES_SPR_ICONS, 0.0f, -10.0f);
-						tmpspr.paint_firstModule_texOverride(&m_sprActives, 1);
+						tmpspr.paint_firstModule_texOverride(&m_sprProps, 1);
 					}
 				}
 				break;
@@ -15232,7 +15232,7 @@ void CLevel::PaintBullets(bool paintNormals)
 					}
 					MUMatAffine2D(&matbullet, 1.0f, NULL, fang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
-					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprActives, 1);
+					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprProps, 1);
 				}
 				break;
 			}
@@ -15275,7 +15275,7 @@ void CLevel::AddDecal(EDecalLayer nLayer, D3DXVECTOR2 pos, int animIdx, int fram
 
 	ndec->layer = nLayer;
 	ndec->sprite.Init(animIdx, (int)pos.x, (int)pos.y, frameIdx, color);
-	RECTLTRB_F framerect = m_sprActives.GetAFrameBBox_real_LTRB(animIdx, frameIdx);
+	RECTLTRB_F framerect = m_sprProps.GetAFrameBBox_real_LTRB(animIdx, frameIdx);
 	ndec->aabb.Set(D3DXVECTOR2(framerect.left + pos.x, framerect.top + pos.y), D3DXVECTOR2(framerect.right + pos.x, framerect.bottom + pos.y));
 	ndec->bAnimated = bIsAnimated;
 
@@ -15290,7 +15290,7 @@ void CLevel::UpdateDecals(float dTime)
 	{
 		if (m_arrDecals[kk]->bAnimated)
 		{
-			m_arrDecals[kk]->sprite.Update(&m_sprActives, dTime);
+			m_arrDecals[kk]->sprite.Update(&m_sprProps, dTime);
 			//remove animation flag when anim ends
 			if (m_arrDecals[kk]->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
 				m_arrDecals[kk]->bAnimated = false;
@@ -15495,7 +15495,7 @@ void CLevel::AddProp(ESpecialPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed
 			case K_SPROP_SHELL:
 			{
 				//check subtype validity
-				if (nSubType * 4 + 3 >= m_sprActives.GetAFramesCnt(ANM_ACTIVES_SPR_SHELLS))
+				if (nSubType * 4 + 3 >= m_sprProps.GetAFramesCnt(ANM_ACTIVES_SPR_SHELLS))
 				{
 					ErrorBox(K_ERR_WARNING, L"Invalid weapon nDropShellFrame param! resetting to 0");
 					node->m_data.nSubType = 0;
@@ -16178,9 +16178,9 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			//check grenade interaction AIs
 			if ((fMaxDamage > 0.0f) && (bInteractAI) && (fDamageRadius > 0.0f))
 			{
-				for (int kk = 0; kk < m_visibleList.logic_actives_closeby[K_LVL_LAYER_FRONT].Count(); kk++)
+				for (int kk = 0; kk < m_visibleList.logic_props_closeby[K_LVL_LAYER_FRONT].Count(); kk++)
 				{
-					CActive * activ = m_visibleList.logic_actives_closeby[K_LVL_LAYER_FRONT].m_pData[kk];
+					CProp * activ = m_visibleList.logic_props_closeby[K_LVL_LAYER_FRONT].m_pData[kk];
 					if (activ->AIstate == K_AI_STATE_ACTIVE_SWINGING_FRONTOBJ)
 					{
 						//daca am activ swinging si e in raza grenadei
@@ -16347,7 +16347,7 @@ void CLevel::UpdateProps(float dTime)
 			case K_SPROP_SHRAPNEL_SMOKING:
 			{
 				//update sprite
-				node->m_data.spr.Update(&m_sprActives, dTime);
+				node->m_data.spr.Update(&m_sprProps, dTime);
 				//add smoke
 				if ((m_Timers.Tick(60)) && (!prop->physPt->m_data.bContacting))
 				{
@@ -16433,7 +16433,7 @@ void CLevel::PaintProps()
 				{
 					D3DXVECTOR2 ppos = node->m_data.physPt->m_data.pos;
 					float falpha = LIMIT(node->m_data.fTimer, 0.0f, 1.0f);
-					CSprite::paintFrameModule(&m_sprActives, ppos.x, ppos.y, ANM_ACTIVES_SPR_BULLETS_FIRE, 0, 0, D3DCOLOR_FFFA(falpha));
+					CSprite::paintFrameModule(&m_sprProps, ppos.x, ppos.y, ANM_ACTIVES_SPR_BULLETS_FIRE, 0, 0, D3DCOLOR_FFFA(falpha));
 				}
 			}
 			break;
@@ -16441,7 +16441,7 @@ void CLevel::PaintProps()
 			{
 				node->m_data.spr.pos = node->m_data.physPt->m_data.pos;
 				node->m_data.spr.currentFrame = node->m_data.nSubType * 4 + (int(node->m_data.spr.pos.x * 3.0f) % 4);
-				node->m_data.spr.paint_firstModule(&m_sprActives);
+				node->m_data.spr.paint_firstModule(&m_sprProps);
 			}
 			break;
 			case K_SPROP_SHRAPNEL_SMOKING:
@@ -16451,15 +16451,15 @@ void CLevel::PaintProps()
 				node->m_data.spr2.pos = node->m_data.physPt->m_data.pos;
 				node->m_data.spr2.color = D3DCOLOR_FFFA(LIMIT(node->m_data.fTimer, 0.0f, 1.0f));
 
-				node->m_data.spr.paint_firstModule(&m_sprActives);
-				node->m_data.spr2.paint_firstModule(&m_sprActives);
+				node->m_data.spr.paint_firstModule(&m_sprProps);
+				node->m_data.spr2.paint_firstModule(&m_sprProps);
 			}
 			break;
 			case K_SPROP_GOO:
 			case K_SPROP_MEAT:
 			{
 				node->m_data.spr.pos = node->m_data.physPt->m_data.pos;
-				node->m_data.spr.paint_firstModule(&m_sprActives);
+				node->m_data.spr.paint_firstModule(&m_sprProps);
 			}
 			break;
 		}
