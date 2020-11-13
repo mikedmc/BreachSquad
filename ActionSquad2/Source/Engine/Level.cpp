@@ -7337,11 +7337,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						}
 						for (int ll = 0; ll < 6; ll++)
 						{
-							AddProp(K_LVL_PROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravity, nSubType);
+							AddProp(K_SPROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravity, nSubType);
 						}
 						//goes straight down to stain the floor
-						AddProp(K_LVL_PROP_MEAT, actor->GetPosHeart(), &D3DXVECTOR2(200.0f, 50.0f), &g_vecGravity, nSubType);
-						AddProp(K_LVL_PROP_MEAT, actor->GetPosHeart(), &D3DXVECTOR2(-200.0f, 50.0f), &g_vecGravity, nSubType);
+						AddProp(K_SPROP_MEAT, actor->GetPosHeart(), &D3DXVECTOR2(200.0f, 50.0f), &g_vecGravity, nSubType);
+						AddProp(K_SPROP_MEAT, actor->GetPosHeart(), &D3DXVECTOR2(-200.0f, 50.0f), &g_vecGravity, nSubType);
 						//human blood gibs particle
 						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &actor->pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_FRONT_NRM);
 					}
@@ -7349,7 +7349,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					{
 						for (int ll = 0; ll < 2; ll++)
 						{
-							AddProp(K_LVL_PROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravity);
+							AddProp(K_SPROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravity);
 						}
 						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &actor->pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM);
 					}
@@ -10863,12 +10863,12 @@ void CLevel::Update(float dTime_original)
 	m_propsLightsMeshIdx = -1;
 	m_bufferedPainter.BeginMesh(m_propsLightsMeshIdx);
 
-	CLinkedPool<CLevelProp>::CLinkedPoolNode *node = m_poolProps.pListUsed.m_pNext;
+	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.pListUsed.m_pNext;
 	while (node != &m_poolProps.pListUsed)
 	{
 		//salvez locatia urmatoare ca s apot avansa pe ea
-		CLinkedPool<CLevelProp>::CLinkedPoolNode *nextnode = node->m_pNext;
-		CLevelProp* prop = &node->m_data;
+		CLinkedPool<CSpecialProp>::CLinkedPoolNode *nextnode = node->m_pNext;
+		CSpecialProp* prop = &node->m_data;
 
 		if (prop->bMakesLight)
 		{
@@ -13789,7 +13789,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, D3DXVECTOR2 vDir)
 		//adaug shell
 		if (weapon->WeaponTemplate.nDropShellFrame >= 0)
 		{
-			AddProp(K_LVL_PROP_SHELL, weapon->pOwner->GetPosHeart(), &D3DXVECTOR2(-weapon->pOwner->lookDirXsign * (40.0f + randfloat(30.0f)), -50.0f - randfloat(20.0f)), &g_vecGravity, weapon->WeaponTemplate.nDropShellFrame);
+			AddProp(K_SPROP_SHELL, weapon->pOwner->GetPosHeart(), &D3DXVECTOR2(-weapon->pOwner->lookDirXsign * (40.0f + randfloat(30.0f)), -50.0f - randfloat(20.0f)), &g_vecGravity, weapon->WeaponTemplate.nDropShellFrame);
 		}
 
 		float fAimErrorMul = 1.0f;
@@ -13928,7 +13928,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 			//shoot with lava blobs too
 			if (m_rand.RandFloat(100.0f) < 40.0f)
 			{
-				AddProp(K_LVL_PROP_FIRE_SOURCE, pos, &D3DXVECTOR2(node->m_data.physPt->m_data.speed.x * (0.7f + m_rand.RandFloatSgn(0.1f)), node->m_data.physPt->m_data.speed.y), &g_vecGravity);
+				AddProp(K_SPROP_FIRE_SOURCE, pos, &D3DXVECTOR2(node->m_data.physPt->m_data.speed.x * (0.7f + m_rand.RandFloatSgn(0.1f)), node->m_data.physPt->m_data.speed.y), &g_vecGravity);
 			}
 		}
 		break;
@@ -15452,20 +15452,20 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 
 
 ///--- LEVEL PROPS MANAGER ---
-void CLevel::AddProp(EPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXVECTOR2 * accel, int nSubType /*= 0*/)
+void CLevel::AddProp(ESpecialPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXVECTOR2 * accel, int nSubType /*= 0*/)
 {
 	bool bGoreEnabled = UTGetAppClass().m_Settings.bGoreEnabled;
-	if ((!bGoreEnabled) && (type == K_LVL_PROP_MEAT))
+	if ((!bGoreEnabled) && (type == K_SPROP_MEAT))
 		return;
 	//pre-checks
-	if (type == K_LVL_PROP_MEAT)
+	if (type == K_SPROP_MEAT)
 	{
 		//don't spawn meat if inside collisions
 		if (GetCollisionShapeAt(pos, K_LVL_COLL_TYPE_SOLID) != null)
 			return;
 	}
 
-	CLinkedPool<CLevelProp>::CLinkedPoolNode *node = m_poolProps.HireNode();
+	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.HireNode();
 	//set 
 	if (node != null)
 	{
@@ -15492,7 +15492,7 @@ void CLevel::AddProp(EPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXV
 			}
 			break;
 			
-			case K_LVL_PROP_SHELL:
+			case K_SPROP_SHELL:
 			{
 				//check subtype validity
 				if (nSubType * 4 + 3 >= m_sprActives.GetAFramesCnt(ANM_ACTIVES_SPR_SHELLS))
@@ -15515,7 +15515,7 @@ void CLevel::AddProp(EPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXV
 			}
 			break;
 			
-			case K_LVL_PROP_FIRE_SOURCE:
+			case K_SPROP_FIRE_SOURCE:
 			{
 				//punem aici tipul de lumina pe care il face
 				node->m_data.spr.Init(ANM_ACTIVES_SPR_MELTING_LAVA, 0.0f, 0.0f, 0);
@@ -15540,7 +15540,7 @@ void CLevel::AddProp(EPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXV
 			}
 			break;
 
-			case K_LVL_PROP_MEAT:
+			case K_SPROP_MEAT:
 			{
 				//0-red meat, 1-green meat
 				node->m_data.nSubType = nSubType;
@@ -15563,7 +15563,7 @@ void CLevel::AddProp(EPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXV
 			}
 			break;
 
-			case K_LVL_PROP_GOO:
+			case K_SPROP_GOO:
 			{
 				node->m_data.spr.Init(ANM_ACTIVES_SPR_GOO_SM, 0.0f, 0.0f, randint(4));
 				//physics
@@ -15582,7 +15582,7 @@ void CLevel::AddProp(EPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXV
 			break;
 
 
-			case K_LVL_PROP_SHRAPNEL_SMOKING:
+			case K_SPROP_SHRAPNEL_SMOKING:
 			{
 				//grafica shrapnel
 				node->m_data.spr.Init(ANM_ACTIVES_SPR_SHRAPNEL, 0.0f, 0.0f, 0);
@@ -15609,10 +15609,10 @@ void CLevel::AddProp(EPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXV
 				node->m_data.physPt->m_data.fFrictionF = 10.0f;
 			}
 			break;
-			case K_LVL_PROP_LIGHT:
+			case K_SPROP_LIGHT:
 				ErrorBox(K_ERR_WARNING, L"Use AddProp_Light() for this type!");
 				break;
-			case K_LVL_PROP_EXPLOSION:
+			case K_SPROP_EXPLOSION:
 				ErrorBox(K_ERR_WARNING, L"Use AddProp_Explo() for this type!");
 				break;
 		}
@@ -15621,7 +15621,7 @@ void CLevel::AddProp(EPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXV
 
 void CLevel::AddProp_Light(D3DXVECTOR2 pos, int nLightAnimIdx, float fDuration, float fFadeTime, DWORD color, float fScale)
 {
-	CLinkedPool<CLevelProp>::CLinkedPoolNode *node = m_poolProps.HireNode();
+	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.HireNode();
 	//set 
 	if (node != null)
 	{
@@ -15637,7 +15637,7 @@ void CLevel::AddProp_Light(D3DXVECTOR2 pos, int nLightAnimIdx, float fDuration, 
 		//reset
 		node->m_data.physPt->m_data.Init();
 
-		node->m_data.type = K_LVL_PROP_LIGHT;
+		node->m_data.type = K_SPROP_LIGHT;
 
 		node->m_data.sprLight.Init(nLightAnimIdx, 0.0f, 0.0f, 0, color);
 		node->m_data.fLightScaling = fScale * K_LVL_LIGHTRENDER_BSX_SCALING;
@@ -15664,7 +15664,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 	if (explotemplate == NULL)
 		return;
 
-	CLinkedPool<CLevelProp>::CLinkedPoolNode *node = m_poolProps.HireNode();
+	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.HireNode();
 	//set 
 	if (node != null)
 	{
@@ -15680,7 +15680,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 		//reset
 		node->m_data.physPt->m_data.Init();
 
-		node->m_data.type = K_LVL_PROP_EXPLOSION;
+		node->m_data.type = K_SPROP_EXPLOSION;
 		//physics
 		node->m_data.physPt->m_data.eCollType = CPhysicsPoint2D::K_COLLTYPE_NONE;
 		node->m_data.physPt->m_data.bFlagPhysicsEnabled = false;
@@ -15708,14 +15708,14 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			{
 				float fdx = m_rand.RandFloatSgn(150.0f);
 				float fdy = -100.0f - m_rand.RandFloat(150.0f);
-				AddProp(K_LVL_PROP_SHRAPNEL_SMOKING, pos, &D3DXVECTOR2(fdx, fdy), &g_vecGravity);
+				AddProp(K_SPROP_SHRAPNEL_SMOKING, pos, &D3DXVECTOR2(fdx, fdy), &g_vecGravity);
 			}
 			//napalm
 			for (int ll = 0; ll < explotemplate->nNapalmCnt; ll++)
 			{
 				float fdx = m_rand.RandFloatSgn(60.0f);
 				float fdy = -100.0f - m_rand.RandFloat(120.0f);
-				AddProp(K_LVL_PROP_FIRE_SOURCE, pos, &D3DXVECTOR2(fdx, fdy), &g_vecGravity);
+				AddProp(K_SPROP_FIRE_SOURCE, pos, &D3DXVECTOR2(fdx, fdy), &g_vecGravity);
 			}
 		}
 		else
@@ -15725,7 +15725,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			{
 				float fdx = m_rand.RandFloatSgn(150.0f);
 				float fdy = -100.0f - m_rand.RandFloat(150.0f);
-				AddProp(K_LVL_PROP_SHRAPNEL_SMOKING, pos + m_rand.RandD3DXVECTOR2sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y), 
+				AddProp(K_SPROP_SHRAPNEL_SMOKING, pos + m_rand.RandD3DXVECTOR2sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y), 
 					&D3DXVECTOR2(fdx, fdy), &g_vecGravity);
 			}
 			//napalm
@@ -15733,7 +15733,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			{
 				float fdx = m_rand.RandFloatSgn(60.0f);
 				float fdy = -100.0f - m_rand.RandFloat(120.0f);
-				AddProp(K_LVL_PROP_FIRE_SOURCE, pos + m_rand.RandD3DXVECTOR2sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y), 
+				AddProp(K_SPROP_FIRE_SOURCE, pos + m_rand.RandD3DXVECTOR2sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y), 
 					&D3DXVECTOR2(fdx, fdy), &g_vecGravity);
 			}
 		}
@@ -15831,7 +15831,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_GREEN_ROUND, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			for (int ll = 0; ll < 4; ll++)															  
 			{
-				AddProp(K_LVL_PROP_GOO, pos, &D3DXVECTOR2(m_rand.RandFloatSgn(50.0f), -100.0f - m_rand.RandFloat(60.0f)), &g_vecGravity);
+				AddProp(K_SPROP_GOO, pos, &D3DXVECTOR2(m_rand.RandFloatSgn(50.0f), -100.0f - m_rand.RandFloat(60.0f)), &g_vecGravity);
 			}
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_GREEN_GOO_GROUND)
@@ -15839,7 +15839,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_GREEN_GROUND, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			for (int ll = 0; ll < 4; ll++)
 			{
-				AddProp(K_LVL_PROP_GOO, pos, &D3DXVECTOR2(m_rand.RandFloatSgn(50.0f), -130.0f - m_rand.RandFloat(60.0f)), &g_vecGravity);
+				AddProp(K_SPROP_GOO, pos, &D3DXVECTOR2(m_rand.RandFloatSgn(50.0f), -130.0f - m_rand.RandFloat(60.0f)), &g_vecGravity);
 			}
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_BURN_DOT)
@@ -16214,12 +16214,12 @@ void CLevel::UpdateProps(float dTime)
 	RECTXYWH_F camrect_larger = camrect;
 	camrect_larger.Inflate(2.0f * K_TILE_SIZE);
 
-	CLinkedPool<CLevelProp>::CLinkedPoolNode *node = m_poolProps.pListUsed.m_pNext;
+	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.pListUsed.m_pNext;
 	while (node != &m_poolProps.pListUsed)
 	{
 		//salvez locatia urmatoare ca s apot avansa pe ea
-		CLinkedPool<CLevelProp>::CLinkedPoolNode *nextnode = node->m_pNext;
-		CLevelProp* prop = &node->m_data;
+		CLinkedPool<CSpecialProp>::CLinkedPoolNode *nextnode = node->m_pNext;
+		CSpecialProp* prop = &node->m_data;
 
 		bool killprop = false;
 		//daca iese din zona de joc
@@ -16231,7 +16231,7 @@ void CLevel::UpdateProps(float dTime)
 
 		switch (prop->type)
 		{
-			case K_LVL_PROP_SHELL:
+			case K_SPROP_SHELL:
 			{
 				if ((prop->bVar1 == false) && (prop->physPt->m_data.bContactStarted))
 				{
@@ -16261,7 +16261,7 @@ void CLevel::UpdateProps(float dTime)
 				}
 			}
 			break;
-			case K_LVL_PROP_FIRE_SOURCE:
+			case K_SPROP_FIRE_SOURCE:
 			{	
 				if (!prop->physPt->m_data.bContacting)
 				{
@@ -16294,7 +16294,7 @@ void CLevel::UpdateProps(float dTime)
 			}
 			break;
 
-			case K_LVL_PROP_MEAT:
+			case K_SPROP_MEAT:
 			{
 				DWORD dwCol = 0xff671010;
 				if (prop->nSubType != 0) //zombies green blood
@@ -16327,7 +16327,7 @@ void CLevel::UpdateProps(float dTime)
 			}
 			break;
 
-			case K_LVL_PROP_GOO:
+			case K_SPROP_GOO:
 			{
 				if (m_Timers.Tick(50))
 				{
@@ -16344,7 +16344,7 @@ void CLevel::UpdateProps(float dTime)
 			break;
 
 
-			case K_LVL_PROP_SHRAPNEL_SMOKING:
+			case K_SPROP_SHRAPNEL_SMOKING:
 			{
 				//update sprite
 				node->m_data.spr.Update(&m_sprActives, dTime);
@@ -16385,7 +16385,7 @@ void CLevel::UpdateProps(float dTime)
 				}
 			}
 			break;
-			case K_LVL_PROP_LIGHT:
+			case K_SPROP_LIGHT:
 			{
 				prop->fTimer += dTime;
 				//kill on timing out
@@ -16393,7 +16393,7 @@ void CLevel::UpdateProps(float dTime)
 					killprop = true;
 			}
 			break;
-			case K_LVL_PROP_EXPLOSION:
+			case K_SPROP_EXPLOSION:
 			{
 				prop->fTimer -= dTime;
 				if (prop->fTimer <= 0.0f)
@@ -16419,15 +16419,15 @@ void CLevel::PaintProps()
 	m_pSprite->SetTransform(&g_matIdentity);
 	D3DXMATRIXA16 mattrans;
 
-	CLinkedPool<CLevelProp>::CLinkedPoolNode *node = m_poolProps.pListUsed.m_pNext;
+	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.pListUsed.m_pNext;
 	while (node != &m_poolProps.pListUsed)
 	{
 		//salvez locatia urmatoare ca sa pot avansa pe ea
-		CLinkedPool<CLevelProp>::CLinkedPoolNode *nextnode = node->m_pNext;
+		CLinkedPool<CSpecialProp>::CLinkedPoolNode *nextnode = node->m_pNext;
 
 		switch (node->m_data.type)
 		{
-			case K_LVL_PROP_FIRE_SOURCE:
+			case K_SPROP_FIRE_SOURCE:
 			{
 				if (!node->m_data.physPt->m_data.bContacting)
 				{
@@ -16437,14 +16437,14 @@ void CLevel::PaintProps()
 				}
 			}
 			break;
-			case K_LVL_PROP_SHELL:
+			case K_SPROP_SHELL:
 			{
 				node->m_data.spr.pos = node->m_data.physPt->m_data.pos;
 				node->m_data.spr.currentFrame = node->m_data.nSubType * 4 + (int(node->m_data.spr.pos.x * 3.0f) % 4);
 				node->m_data.spr.paint_firstModule(&m_sprActives);
 			}
 			break;
-			case K_LVL_PROP_SHRAPNEL_SMOKING:
+			case K_SPROP_SHRAPNEL_SMOKING:
 			{
 				node->m_data.spr.pos = node->m_data.physPt->m_data.pos;
 				
@@ -16455,8 +16455,8 @@ void CLevel::PaintProps()
 				node->m_data.spr2.paint_firstModule(&m_sprActives);
 			}
 			break;
-			case K_LVL_PROP_GOO:
-			case K_LVL_PROP_MEAT:
+			case K_SPROP_GOO:
+			case K_SPROP_MEAT:
 			{
 				node->m_data.spr.pos = node->m_data.physPt->m_data.pos;
 				node->m_data.spr.paint_firstModule(&m_sprActives);
@@ -16504,11 +16504,11 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float f
 			CAABB genbox(pos.x - 10.0f, pos.y - 15.0f, pos.x + 10.0f, pos.y);
 			for (int ll = 0; ll < 6; ll++)
 			{
-				AddProp(K_LVL_PROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f), -130.0f - randfloat(100.0f)), &g_vecGravity, 1);
+				AddProp(K_SPROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f), -130.0f - randfloat(100.0f)), &g_vecGravity, 1);
 			}
 			//goes straight down to stain the floor
-			AddProp(K_LVL_PROP_MEAT, D3DXVECTOR2(pos.x, pos.y - 10.0f), &D3DXVECTOR2(200.0f, 50.0f), &g_vecGravity, 1);
-			AddProp(K_LVL_PROP_MEAT, D3DXVECTOR2(pos.x, pos.y - 10.0f), &D3DXVECTOR2(-200.0f, 50.0f), &g_vecGravity, 1);
+			AddProp(K_SPROP_MEAT, D3DXVECTOR2(pos.x, pos.y - 10.0f), &D3DXVECTOR2(200.0f, 50.0f), &g_vecGravity, 1);
+			AddProp(K_SPROP_MEAT, D3DXVECTOR2(pos.x, pos.y - 10.0f), &D3DXVECTOR2(-200.0f, 50.0f), &g_vecGravity, 1);
 			//human blood gibs
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff1a3423, K_PART_LAYER_RT_FRONT_NRM);
 		}

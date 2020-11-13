@@ -1513,21 +1513,21 @@ public:
 //pool de obiecte speciale cu fizica sau fara, de tipul cartuse cu coliziune, bucati de carne care genereaza sange si splaturi pe pereti cand se lovesc
 #define K_LVL_PROPS_MAX_CNT 256
 //types
-enum EPropType {
-	K_LVL_PROP_NOT_SET = -1,
+enum ESpecialPropType {
+	K_SPROP_NOT_SET = -1,
 
-	K_LVL_PROP_SHELL = 0,	//cartusele jucatorului
-	K_LVL_PROP_MEAT = 1,	//carnea care sare din oameni
-	K_LVL_PROP_SHRAPNEL_SMOKING, //bucati de bomba care lasa fum in urma
-	K_LVL_PROP_LIGHT,		//lumina temporara pentru arme, explozii, etc. Deseneaza din m_sprLights.
-	K_LVL_PROP_EXPLOSION,	//explozie care deformeaza ecranul (si deseneaza si explozia (cu particule))
-	K_LVL_PROP_FIRE_SOURCE, //o bucata de foc care moare dupa un timp dar loveste toti oamenii
-	K_LVL_PROP_GOO,			//green goo
+	K_SPROP_SHELL = 0,	//cartusele jucatorului
+	K_SPROP_MEAT = 1,	//carnea care sare din oameni
+	K_SPROP_SHRAPNEL_SMOKING, //bucati de bomba care lasa fum in urma
+	K_SPROP_LIGHT,		//lumina temporara pentru arme, explozii, etc. Deseneaza din m_sprLights.
+	K_SPROP_EXPLOSION,	//explozie care deformeaza ecranul (si deseneaza si explozia (cu particule))
+	K_SPROP_FIRE_SOURCE, //o bucata de foc care moare dupa un timp dar loveste toti oamenii
+	K_SPROP_GOO,			//green goo
 };
 
-class CLevelProp {
+class CSpecialProp {
 public:
-	EPropType	type;		
+	ESpecialPropType	type;		
 	CLinkedPool<CPhysicsPoint2D>::CLinkedPoolNode *physPt; //punctul fizic (coliziune, pozitie, etc)
 
 	int			nSubType;	//folosit de fiecare tip in mod diferit
@@ -1545,7 +1545,7 @@ public:
 	bool		bVar1;
 	int			nIntVar1;
 
-	CLevelProp() : physPt(null), type(K_LVL_PROP_NOT_SET), nSubType(0), fTimer(0.0f), bAnimated(false), fSize(1.0f),
+	CSpecialProp() : physPt(null), type(K_SPROP_NOT_SET), nSubType(0), fTimer(0.0f), bAnimated(false), fSize(1.0f),
 		bMakesLight(false), fLightDuration(0.0f), fLightFadeOut(0.0f), fLightScaling(1.0f), fLightTimer(0.0f), bVar1(false), nIntVar1(0)
 	{
 	}
@@ -1553,7 +1553,7 @@ public:
 	void Reset()
 	{
 		physPt = null; 
-		type = K_LVL_PROP_NOT_SET; nSubType = 0; fTimer = 0.0f; bAnimated = false; fSize = 1.0f;
+		type = K_SPROP_NOT_SET; nSubType = 0; fTimer = 0.0f; bAnimated = false; fSize = 1.0f;
 		bMakesLight = false; fLightDuration = 0.0f; fLightFadeOut = 0.0f; fLightScaling = 1.0f; fLightTimer = 0.0f;
 	}
 };

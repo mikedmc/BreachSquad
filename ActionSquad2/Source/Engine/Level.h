@@ -338,10 +338,10 @@ public:
 	int						KillBulletsOfType(int nBulletType, UINT32 dwOwnerUID = 0);
 	///--- level props pool ---
 	int						m_propsLightsMeshIdx;	//id-ul meshului pentru desenarea luminii propsurilor
-	CLinkedPool<CLevelProp>	m_poolProps;			//pool de props
+	CLinkedPool<CSpecialProp>	m_poolProps;			//pool de props
 	// Adds a generic prop (physical particle)
 	// \param nSubType - secondary type of the added Prop, handled differently on every prop
-	void					AddProp(EPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXVECTOR2 * accel, int nSubType = 0);
+	void					AddProp(ESpecialPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXVECTOR2 * accel, int nSubType = 0);
 	//adauga prop - o lumina provizorie (gunshots, etc)
 	void					AddProp_Light(D3DXVECTOR2 pos, int nLightAnimIdx, float fDuration, float fFadeTime, DWORD color, float fScale = 1.0f);
 	// \brief helper fn: adds an explosion (atat vizual cat si logic). 
