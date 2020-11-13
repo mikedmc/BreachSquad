@@ -1264,12 +1264,12 @@ CLight* CLevel::SpawnLight(D3DXVECTOR3 spawnPos, int nType, int nAnimIdx, DWORD 
 	nl->type = nType;
 	nl->fVolumeAlpha = 1.0f;
 	nl->fIntensity = 1.0f;
-	nl->pos3D = spawnPos;
+	nl->vPos = spawnPos;
 	//can't be 0.0f - same plane as background
-	if (nl->pos3D.z == 0.0f)
-		nl->pos3D.z = 0.1f;
+	if (nl->vPos.z == 0.0f)
+		nl->vPos.z = 0.1f;
 
-	nl->pos = D3DXVECTOR2(nl->pos3D.x, nl->pos3D.y);
+	nl->pos = D3DXVECTOR2(nl->vPos.x, nl->vPos.y);
 	nl->pos_ini = nl->pos;
 	//animID
 	nl->animID = nAnimIdx;
@@ -10686,10 +10686,10 @@ void CLevel::Update(float dTime_original)
 				vdl.tex1 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.bottom, 0.0f, 0.0f);
 				vdr.tex1 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.bottom, 0.0f, 0.0f);
 				//setez normalele finale
-				vul.n = nl->pos3D - vul.pos;
-				vur.n = nl->pos3D - vur.pos;
-				vdl.n = nl->pos3D - vdl.pos;
-				vdr.n = nl->pos3D - vdr.pos;
+				vul.n = nl->vPos - vul.pos;
+				vur.n = nl->vPos - vur.pos;
+				vdl.n = nl->vPos - vdl.pos;
+				vdr.n = nl->vPos - vdr.pos;
 				//construiesc VB-ul exact
 				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
 				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
@@ -10837,7 +10837,7 @@ void CLevel::Update(float dTime_original)
 				vdr.tex1 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.bottom, 0.0f, 0.0f);
 				//Coord de mapare pe RTT (tex2) se seteaza din shader
 				//setez normalele finale - directia catre lumina
-				D3DXVECTOR3 lightdir(-100.0f * cos(nl->fAngle), -100.0f * sin(nl->fAngle), nl->pos3D.z);
+				D3DXVECTOR3 lightdir(-100.0f * cos(nl->fAngle), -100.0f * sin(nl->fAngle), nl->vPos.z);
 				vul.n = lightdir;
 				vur.n = lightdir;
 				vdl.n = lightdir;

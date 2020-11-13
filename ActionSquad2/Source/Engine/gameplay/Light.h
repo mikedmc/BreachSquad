@@ -35,7 +35,6 @@ public:
 	int				m_nShadowMeshIdx;	//buffer-ul dinamic pt shadow volume
 
 public:
-	D3DXVECTOR3		pos3D;				//avem nevoie de pozitie 3D. Se modifica in Update in fn de pos.
 	int				animID;				//-1 - not set
 	int				type;
 	bool			castShadows;
@@ -47,7 +46,6 @@ public:
 		m_nLightMeshIdx(-1), m_nShadowMeshIdx(-1), type(0), animID(-1), fMaxRadius(0.0f), fVolumeAlpha(1.0f), castShadows(false)
 	{
 		vnDirection = D3DXVECTOR3(0.0f, 1.0f, 0.0f); //default direction
-		pos3D = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	}
 
 	const int GetClassType() const {

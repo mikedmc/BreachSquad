@@ -221,14 +221,14 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		nl->fVolumeAlpha = 1.0f - (float)nVolumeAttenuationPerc / 100.0f;
 		nl->fIntensity = OS_freadFloat32(fl);
 		CLAMP(nl->fIntensity, 0.0f, 1.0f);
-		nl->pos3D.x = (float)OS_freadInt32(fl);
-		nl->pos3D.y = (float)OS_freadInt32(fl);
-		nl->pos3D.z = (float)OS_freadInt32(fl);
+		nl->vPos.x = (float)OS_freadInt32(fl);
+		nl->vPos.y = (float)OS_freadInt32(fl);
+		nl->vPos.z = (float)OS_freadInt32(fl);
 		//z nu are voie sa fie in acelasi plan cu fundalul
-		if (nl->pos3D.z == 0.0f)
-			nl->pos3D.z = 0.1f;
+		if (nl->vPos.z == 0.0f)
+			nl->vPos.z = 0.1f;
 
-		nl->pos_ini = nl->pos = D3DXVECTOR2(nl->pos3D.x, nl->pos3D.y);
+		nl->pos_ini = nl->pos = D3DXVECTOR2(nl->vPos.x, nl->vPos.y);
 		//animID
 		CHAR charAnmName[MAX_PATH];
 		OS_freadString(fl, charAnmName);
@@ -1366,17 +1366,17 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 		nl->fVolumeAlpha = 1.0f - (float)nVolumeAttenuationPerc / 100.0f;
 		nl->fIntensity = OS_freadFloat32(fl);
 		CLAMP(nl->fIntensity, 0.0f, 1.0f);
-		nl->pos3D.x = (float)OS_freadInt32(fl);
-		nl->pos3D.y = (float)OS_freadInt32(fl);
-		nl->pos3D.z = (float)OS_freadInt32(fl);
+		nl->vPos.x = (float)OS_freadInt32(fl);
+		nl->vPos.y = (float)OS_freadInt32(fl);
+		nl->vPos.z = (float)OS_freadInt32(fl);
 		//z can't be in the same plane as the background
-		if (nl->pos3D.z == 0.0f)
-			nl->pos3D.z = 0.1f;
+		if (nl->vPos.z == 0.0f)
+			nl->vPos.z = 0.1f;
 		//move light by spawn pos
-		nl->pos3D.x += vOffset.x;
-		nl->pos3D.y += vOffset.y;
+		nl->vPos.x += vOffset.x;
+		nl->vPos.y += vOffset.y;
 
-		nl->pos_ini = nl->pos = D3DXVECTOR2(nl->pos3D.x, nl->pos3D.y);
+		nl->pos_ini = nl->pos = D3DXVECTOR2(nl->vPos.x, nl->vPos.y);
 		//animID
 		CHAR charAnmName[MAX_PATH];
 		OS_freadString(fl, charAnmName);

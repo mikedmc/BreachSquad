@@ -82,7 +82,7 @@ void CLight::SetPos(D3DXVECTOR2 newPos)
 {
 	pos = newPos;
 	//set relative data
-	pos3D.x = pos.x; pos3D.y = pos.y;
+	vPos.x = pos.x; vPos.y = pos.y;
 	bbox = bbox_ini;
 	bbox.Move(pos);
 }
@@ -91,7 +91,7 @@ void CLight::Move(D3DXVECTOR2 delta)
 {
 	pos += delta;
 	//set relative data
-	pos3D.x = pos.x; pos3D.y = pos.y;
+	vPos.x = pos.x; vPos.y = pos.y;
 	bbox = bbox_ini;
 	bbox.Move(pos);
 }

@@ -444,7 +444,7 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 			for (int kk = 0; kk < m_pLevel->m_visibleList.visible_lights.Count(); kk++)
 			{
 				CLight* lg = m_pLevel->m_visibleList.visible_lights[kk];
-				Vec2 lgproj = V3projV2(lg->pos3D);
+				Vec2 lgproj = V3projV2(lg->vPos);
 				Vec2 vpos = m_pLevel->m_camLevel.WorldToScreen(lgproj);
 				Vec2 vposprj = m_pLevel->m_camLevel.WorldToScreen(lg->pos);
 				
