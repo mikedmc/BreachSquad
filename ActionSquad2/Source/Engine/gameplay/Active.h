@@ -27,4 +27,5 @@ public:
 
 	// Initializes custom internal data (hardcodes usually)
 	void InitInternalData();
+	void BeginPlay() override;
 };

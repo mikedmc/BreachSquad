@@ -3,13 +3,19 @@
 
 
 
-IActiveInterface::IActiveInterface() : ID(-1), targetID_ini(-1), bHidden(false), bSetHidden(false), bSkipRender(false), bAnimated(false), fAngle(0.0f), fAngle_ini(0.0f), color(0xffffffff), color_ini(0xffffffff),
-bTouching(false), nTouchingUID(0), fTouchTimer(0.0f), fTouchDuration(0.0f), fTouchTimerReset(0.0f), bReleaseIt(false), bStandsOut(false),
-pTarget(null), bCanInteract(false), bHideInteractIcon(false), AIstate(-1), AItimerDecision(K_LVL_AI_DECISION_INTERVAL),
-nRunningScriptUID(0), AItargetUID(0), fTimelineAI(0.0f), AItimerSurprise(0.0f),
-AItimer1(0.0f), AItimer2(0.0f), AIfvar1(0.0f), AIfvar2(0.0f), AIfvar3(0.0f), AIvar1(0), AIvar2(0), AIvarBool1(true), AIvarBool2(true)
+IActiveInterface::IActiveInterface() : 
+	ID(-1), targetID_ini(-1), bHidden(false), bSetHidden(false), bSkipRender(false), bAnimated(false),
+	fAngle(0.0f), fAngle_ini(0.0f), color(0xffffffff), color_ini(0xffffffff),
+	bTouching(false), nTouchingUID(0), fTouchTimer(0.0f), fTouchDuration(0.0f), fTouchTimerReset(0.0f), bReleaseIt(false), bStandsOut(false),
+	pTarget(null), bCanInteract(false), bHideInteractIcon(false), AIstate(-1), AItimerDecision(K_LVL_AI_DECISION_INTERVAL),
+	nRunningScriptUID(0), AItargetUID(0), fTimelineAI(0.0f), AItimerSurprise(0.0f),
+	AItimer1(0.0f), AItimer2(0.0f), AIfvar1(0.0f), AIfvar2(0.0f), AIfvar3(0.0f), AIvar1(0), AIvar2(0), AIvarBool1(true), AIvarBool2(true)
 {
 	UID = GenerateUID();
+
+	vPos = Vec3(0.0f, 0.0f, 0.0f);
+	vDir = Vec3(0.0f, 0.0f, 0.0f);
+
 	pos = pos_ini = D3DXVECTOR2(0.0f, 0.0f);
 	script_hash.Reset();
 	varAIparams.DeleteAll();

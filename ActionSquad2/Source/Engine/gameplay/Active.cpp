@@ -25,3 +25,8 @@ void CActive::InitInternalData()
 {
 
 }
+
+void CActive::BeginPlay()
+{
+
+}

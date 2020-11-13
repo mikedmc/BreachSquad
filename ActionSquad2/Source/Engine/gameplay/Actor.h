@@ -241,4 +241,6 @@ public:
 	void SetPos(D3DXVECTOR2 newPos) override;
 	void Move(D3DXVECTOR2 delta) override;
 	void SetAngle(float fNewAngle) override; //seteaza unghiul si vAngleDir
+
+	void BeginPlay() override;
 };

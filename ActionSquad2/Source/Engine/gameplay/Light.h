@@ -58,6 +58,8 @@ public:
 	void Move(D3DXVECTOR2 delta) override;
 	void SetAngle(float fnAngle) override;
 
+	void BeginPlay() override;
+
 	// Initializes internal data for rendering
 	// Make sure all basic light data is set before calling 
 	void InitGeometry(CSpriteCollection* pLightsSprCol);

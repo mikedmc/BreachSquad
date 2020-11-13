@@ -10,6 +10,11 @@ void CLight::SetAngle(float fnAngle)
 	vnDirection = D3DXVECTOR3(-sin(fAngle), cos(fAngle), 0.0f);
 }
 
+void CLight::BeginPlay()
+{
+
+}
+
 void CLight::InitGeometry(CSpriteCollection* pLightsSprCol)
 {
 	switch (type)

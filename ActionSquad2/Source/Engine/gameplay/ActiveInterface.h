@@ -19,16 +19,16 @@ enum eActiveInterfaceType {
 class IActiveInterface
 {
 public:
-	UINT32	UID;				//uid unic 
+	UINT32				UID;			// ingame UID
+	int					ID;				// ID exported from editor (not the same as UID).
+	Vec3				vPos;			// Z coord gets added to Y to simulate 3D when rendering (see Z_TO_H macros)
+	Vec3				vDir;
 
 	bool	bTouching;			//folosit ca sa elimine eventuale cicluri infinite.
 	UINT32 	nTouchingUID;   	//Reprezinta UID-ul celui care a facut touch sau 0 pt niciunul
 	float	fTouchTimerReset;	//folosit la resetarea touch timerului
-public:
 	float	fTouchTimer;		//pentru cat timp s-a facut touch? sunt obiecte la care trebuie sa faci touch pentru o durata anume
 	float	fTouchDuration;		//durata ceruta pentru touch
-public:	//generic
-	int			ID;			   //ID-ul din editor
 
 	D3DXVECTOR2	pos;		   //pozitie activ
 	float		fAngle;
@@ -42,6 +42,7 @@ public: //valori initiale ale coordonatelor folositoare la miscari nerelative (u
 	float		fAngle_ini;
 	DWORD		color_ini;
 	INT32		targetID_ini;	//target ID citit din editor
+
 public: //logic
 	IActiveInterface	*pTarget;		//target-ul din editor //TODO:poate trebuie inlocuita cu un UID ca sa nu am probleme cand dezaloc obiecte...? depinde de viteza cu care se cheama la rails
 	bool				bCanInteract;	//can interact with it?
@@ -103,4 +104,7 @@ public: //logic
 	virtual void SetPos(D3DXVECTOR2 newPos) = 0;
 	virtual void Move(D3DXVECTOR2 delta) = 0;
 	virtual void SetAngle(float fnAngle) = 0;
+
+	// Gets called by the engine as soon as the object gets initialized
+	virtual void BeginPlay() = 0;
 };

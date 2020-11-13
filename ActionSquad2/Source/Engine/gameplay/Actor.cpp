@@ -79,6 +79,11 @@ void CActor::SetAngle(float fNewAngle)
 	vAngleDir = D3DXVECTOR2(cos(fAngle), sin(fAngle));
 }
 
+void CActor::BeginPlay()
+{
+
+}
+
 EAIBehaviorType CActor::GetCurrentBehavior()
 {
 	if ((m_nAIcurrentBehaviorIdx < 0) || (m_pAIcurrentState == null))

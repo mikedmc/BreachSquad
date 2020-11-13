@@ -63,6 +63,7 @@ public:
 		fAngle = fnAngle;
 	}
 
+	void BeginPlay() override;
 	// Initializes internal data
 	void InitInternalData();
 };

@@ -34,6 +34,11 @@ void CCollisionShape::Move(D3DXVECTOR2 delta)
 	bbox_exported = bbox;
 }
 
+void CCollisionShape::BeginPlay()
+{
+
+}
+
 void CCollisionShape::InitInternalData()
 {
 	switch (type)
