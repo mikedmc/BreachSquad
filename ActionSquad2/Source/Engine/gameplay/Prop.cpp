@@ -21,12 +21,17 @@ void CProp::SetAngle(float fnAngle)
 	fAngle = fnAngle;
 }
 
-void CProp::InitInternalData()
+void CProp::PostConstructionInit()
 {
 
 }
 
 void CProp::BeginPlay()
+{
+
+}
+
+void CProp::EndPlay()
 {
 
 }

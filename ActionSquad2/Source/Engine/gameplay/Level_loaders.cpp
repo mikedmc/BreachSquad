@@ -345,8 +345,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 		//load logic and init custom data
 		colobj->LoadLogic(fl);
-		colobj->InitInternalData();
-
+		colobj->PostConstructionInit();
 		m_arrColShapes.Add(colobj);
 	}
 
@@ -430,7 +429,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 		//load logic and init data
 		obj->LoadLogic(fl);
-		obj->InitInternalData();
+		obj->PostConstructionInit();
 
 		m_arrProps.Add(obj);
 
@@ -1459,7 +1458,7 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 		colobj->LoadLogic(fl);
 		if (colobj->targetID_ini >= 0)
 			colobj->targetID_ini += dwBaseID;
-		colobj->InitInternalData();
+		colobj->PostConstructionInit();
 
 		m_arrColShapes.Add(colobj);
 	}
@@ -1540,7 +1539,7 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 		//change target ids
 		if (obj->targetID_ini >= 0)
 			obj->targetID_ini += dwBaseID;
-		obj->InitInternalData();
+		obj->PostConstructionInit();
 
 		m_arrProps.Add(obj);
 

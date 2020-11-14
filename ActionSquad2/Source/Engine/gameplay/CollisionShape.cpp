@@ -39,7 +39,12 @@ void CCollisionShape::BeginPlay()
 
 }
 
-void CCollisionShape::InitInternalData()
+void CCollisionShape::EndPlay()
+{
+
+}
+
+void CCollisionShape::PostConstructionInit()
 {
 	switch (type)
 	{

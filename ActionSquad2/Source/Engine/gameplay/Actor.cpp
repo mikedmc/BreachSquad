@@ -79,7 +79,17 @@ void CActor::SetAngle(float fNewAngle)
 	vAngleDir = D3DXVECTOR2(cos(fAngle), sin(fAngle));
 }
 
+void CActor::PostConstructionInit()
+{
+
+}
+
 void CActor::BeginPlay()
+{
+
+}
+
+void CActor::EndPlay()
 {
 
 }

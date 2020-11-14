@@ -123,3 +123,10 @@ void IActiveInterface::UpdateTouchTimerReset(float dTime)
 		}
 	}
 }
+
+void IActiveInterface::Kill()
+{
+	bPendingKill = true;
+	// let it know he's out!
+	EndPlay();
+}

@@ -18,6 +18,9 @@ enum eActiveInterfaceType {
 
 class IActiveInterface
 {
+protected:
+	bool				bPendingKill;	// exited gameplay, waits for garbage collection
+
 public:
 	UINT32				UID;			// ingame UID
 	int					ID;				// ID exported from editor (not the same as UID).
@@ -83,13 +86,18 @@ public: //logic
 		return K_LVL_IAI_TYPE_BASE;
 	}
 
-	FORCEINLINE UINT32 GetUID() const {
+	inline UINT32 GetUID() const {
 		return UID;
 	}
 
 	//Returns: UID of activ that interacted with it
-	FORCEINLINE UINT32 GetToucherUID() const {
+	inline UINT32 GetToucherUID() const {
 		return nTouchingUID;
+	}
+
+	// tells if object is still alive or if it is pending kill
+	inline bool Alive() {
+		return (!bPendingKill);
 	}
 
 	// Loads logic from binary file (editor exported logic)
@@ -105,6 +113,13 @@ public: //logic
 	virtual void Move(D3DXVECTOR2 delta) = 0;
 	virtual void SetAngle(float fnAngle) = 0;
 
+	// Call this to mark it for destruction
+	void Kill();
+
+	// Gets called after active was added to the actives array, after being fully initialized (end of loading or spawn)
+	virtual void PostConstructionInit() = 0;
 	// Gets called by the engine as soon as the object gets initialized
 	virtual void BeginPlay() = 0;
+	// Gets called when gets killed
+	virtual void EndPlay() = 0;
 };

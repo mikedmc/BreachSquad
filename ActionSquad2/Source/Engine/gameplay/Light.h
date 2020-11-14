@@ -56,7 +56,10 @@ public:
 	void Move(D3DXVECTOR2 delta) override;
 	void SetAngle(float fnAngle) override;
 
+	// engine callbacks
+	void PostConstructionInit() override;
 	void BeginPlay() override;
+	void EndPlay() override;
 
 	// Initializes internal data for rendering
 	// Make sure all basic light data is set before calling 

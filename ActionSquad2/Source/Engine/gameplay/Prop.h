@@ -26,6 +26,7 @@ public:
 	void SetAngle(float fnAngle) override;
 
 	// Initializes custom internal data (hardcodes usually)
-	void InitInternalData();
+	void PostConstructionInit() override;
 	void BeginPlay() override;
+	void EndPlay() override;
 };

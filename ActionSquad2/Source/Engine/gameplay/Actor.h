@@ -242,5 +242,7 @@ public:
 	void Move(D3DXVECTOR2 delta) override;
 	void SetAngle(float fNewAngle) override; //seteaza unghiul si vAngleDir
 
+	void PostConstructionInit() override;
 	void BeginPlay() override;
+	void EndPlay() override;
 };
