@@ -216,7 +216,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		nl->m_nShadowMeshIdx = -1;
 
 		nl->ID = OS_freadUInt32(fl);
-		nl->type = OS_freadByte(fl); //tip lumina
+		nl->type = (eLightType)OS_freadByte(fl); //tip lumina
 		int nVolumeAttenuationPerc = (int)OS_freadUInt32(fl);
 		nl->fVolumeAlpha = 1.0f - (float)nVolumeAttenuationPerc / 100.0f;
 		nl->fIntensity = OS_freadFloat32(fl);
@@ -234,7 +234,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		OS_freadString(fl, charAnmName);
 
 		nl->animID = m_sprLights.getAnimationIdxByName(charAnmName);
-		if ((nl->animID < 0) && (nl->type != K_LVL_LIGHT_AMBIENTAL))
+		if ((nl->animID < 0) && (nl->type != K_LVL_LT_AMBIENTAL))
 			ErrorBox(K_ERR_WARNING, L"Light ID:%d doesn't have animID!!", nl->ID);
 		//color
 		BYTE ca, cr, cg, cb;
@@ -279,7 +279,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		nl->castShadows = ((u2b & K_EDITOR_LIGHT_FLAG_CAST_SHADOWS) != 0);
 
 		//save global ambient light color
-		if (nl->type == K_LVL_LIGHT_AMBIENTAL)
+		if (nl->type == K_LVL_LT_AMBIENTAL)
 			m_colAmbientGlobal = nl->color;
 
 		//set all internal light data needed for rendering
@@ -1062,7 +1062,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		{
 			D3DXVECTOR2 vPos = arrLocalSpawnersPos.m_pData[kk];
 			//add green flickering light
-			CLight* pLight = SpawnLight(D3DXVECTOR3(vPos.x, vPos.y - 20.0f, 100.0f), K_LVL_LIGHT_POINT, ANM_LIGHTS_SPR_POINT1, 0xff3bff3b, 1.0f, false);
+			CLight* pLight = SpawnLight(D3DXVECTOR3(vPos.x, vPos.y - 20.0f, 100.0f), K_LVL_LT_POINT, ANM_LIGHTS_SPR_POINT1, 0xff3bff3b, 1.0f, false);
 			pLight->AIstate = K_AI_STATE_FN_LIGHT_FLICKER1;
 			pLight->bHidden = true;
 			pLight->bSetHidden = true;
@@ -1360,7 +1360,7 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 		nl->ID = OS_freadUInt32(fl) + dwBaseID;
 		if (nl->ID > dwMaxIDlocal)
 			dwMaxIDlocal = nl->ID;
-		nl->type = OS_freadByte(fl); //tip lumina
+		nl->type = (eLightType)OS_freadByte(fl); //tip lumina
 		int nVolumeAttenuationPerc = (int)OS_freadUInt32(fl);
 		nl->fVolumeAlpha = 1.0f - (float)nVolumeAttenuationPerc / 100.0f;
 		nl->fIntensity = OS_freadFloat32(fl);
@@ -1381,7 +1381,7 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 		OS_freadString(fl, charAnmName);
 
 		nl->animID = m_sprLights.getAnimationIdxByName(charAnmName);
-		if ((nl->animID < 0) && (nl->type != K_LVL_LIGHT_AMBIENTAL))
+		if ((nl->animID < 0) && (nl->type != K_LVL_LT_AMBIENTAL))
 			ErrorBox(K_ERR_WARNING, L"[WARNING]Prefab::Light ID:%d doesn't have animID!!", nl->ID);
 		//color
 		BYTE ca, cr, cg, cb;

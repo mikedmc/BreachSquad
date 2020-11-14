@@ -25,7 +25,6 @@ public:
 	UINT32				UID;			// ingame UID
 	int					ID;				// ID exported from editor (not the same as UID).
 	Vec3				vPos;			// Z coord gets added to Y to simulate 3D when rendering (see Z_TO_H macros)
-	Vec3				vDir;
 
 	bool	bTouching;			//folosit ca sa elimine eventuale cicluri infinite.
 	UINT32 	nTouchingUID;   	//Reprezinta UID-ul celui care a facut touch sau 0 pt niciunul
@@ -81,8 +80,7 @@ public: //logic
 	IActiveInterface();
 	virtual ~IActiveInterface();
 
-	//#TODO: sa intoarca tip eAIType
-	virtual const int GetClassType() const {
+	virtual const eActiveInterfaceType GetClassType() const {
 		return K_LVL_IAI_TYPE_BASE;
 	}
 

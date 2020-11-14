@@ -1261,7 +1261,7 @@ CLight* CLevel::SpawnLight(D3DXVECTOR3 spawnPos, int nType, int nAnimIdx, DWORD 
 	nl->m_nShadowMeshIdx = -1;
 
 	nl->ID = GenerateNextID();
-	nl->type = nType;
+	nl->type = (eLightType)nType;
 	nl->fVolumeAlpha = 1.0f;
 	nl->fIntensity = 1.0f;
 	nl->vPos = spawnPos;
@@ -1273,7 +1273,7 @@ CLight* CLevel::SpawnLight(D3DXVECTOR3 spawnPos, int nType, int nAnimIdx, DWORD 
 	nl->pos_ini = nl->pos;
 	//animID
 	nl->animID = nAnimIdx;
-	if ((nl->animID < 0) && (nl->type != K_LVL_LIGHT_AMBIENTAL))
+	if ((nl->animID < 0) && (nl->type != K_LVL_LT_AMBIENTAL))
 		ErrorBox(K_ERR_WARNING, L"[WARNING] SpawnLight::Light ID:%d doesn't have animID!!", nl->ID);
 	//color
 	nl->color = dwColor;
@@ -1300,7 +1300,7 @@ CLight* CLevel::SpawnLight(D3DXVECTOR3 spawnPos, int nType, int nAnimIdx, DWORD 
 	//setam buffer intern in fn de dreptunghiul frame-ului si animatiei ca sa nu le mai calculez pe paint
 	switch (nl->type)
 	{
-		case K_LVL_LIGHT_POINT:
+		case K_LVL_LT_POINT:
 		{
 			nl->fVolumeAlpha = 1.0f;
 			//coord spotului in planul 0, relativ la lumina
@@ -1319,12 +1319,12 @@ CLight* CLevel::SpawnLight(D3DXVECTOR3 spawnPos, int nType, int nAnimIdx, DWORD 
 			nl->fMaxRadius = dmax;
 		}
 		break;
-		case K_LVL_LIGHT_REALISTIC_IES_OBSOLETE:
+		case K_LVL_LT_IES:
 		{
 			ErrorBox(K_ERR_WARNING, L"[WARNING] SpawnLight:: Illegal light type (IES LIGHT)!");
 		}
 		break;
-		case K_LVL_LIGHT_AMBIENTAL:
+		case K_LVL_LT_AMBIENTAL:
 		{
 			nl->castShadows = false;
 			nl->fVolumeAlpha = 0.0f;
@@ -1333,7 +1333,7 @@ CLight* CLevel::SpawnLight(D3DXVECTOR3 spawnPos, int nType, int nAnimIdx, DWORD 
 			nl->bbox = nl->bbox_ini;
 		}
 		break;
-		case K_LVL_LIGHT_AREA:
+		case K_LVL_LT_AREA:
 		{
 			nl->castShadows = false;
 			nl->fVolumeAlpha = 0.0f;
@@ -1345,7 +1345,7 @@ CLight* CLevel::SpawnLight(D3DXVECTOR3 spawnPos, int nType, int nAnimIdx, DWORD 
 				nl->lTexRect = m_sprLights.GetModuleRect_TexCoords(nl->animID, 0, 0);
 		}
 		break;
-		case K_LVL_LIGHT_DIRECTIONAL:
+		case K_LVL_LT_DIRECTIONAL:
 		{
 			nl->castShadows = false;
 			nl->fVolumeAlpha = 0.0f;
@@ -3028,7 +3028,7 @@ void CLevel::BuildVisibilityLists()
 		if (light->bHidden)
 			continue;
 
-		if (light->type == K_LVL_LIGHT_AMBIENTAL)
+		if (light->type == K_LVL_LT_AMBIENTAL)
 		{
 			m_visibleList.visible_lights.Add(m_arrLights[kk]);
 			continue;
@@ -3877,7 +3877,7 @@ void CLevel::UpdateAI_light(CLight* light, float dTime)
 				//fvar1 - height, fvar2 - radius, timer1 - timeMul, timer2 - timeAdd
 				D3DXVECTOR3 conepoint(0.0f, -light->AIfvar1, 0.0f);
 				D3DXVECTOR3 ppos = D3DXVECTOR3(light->AIfvar2 * sin((light->fTimelineAI + light->AItimer2) * light->AItimer1), 0.0f, light->AIfvar2 * cos((light->fTimelineAI + light->AItimer2) * light->AItimer1));
-				D3DXVec3Normalize(&light->vnDirection, &(ppos - conepoint));
+				D3DXVec3Normalize(&light->vnDir, &(ppos - conepoint));
 			}
 			break;
 			default:
@@ -10648,12 +10648,12 @@ void CLevel::Update(float dTime_original)
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
 		switch (nl->type)
 		{
-			case K_LVL_LIGHT_REALISTIC_IES_OBSOLETE:
+			case K_LVL_LT_IES:
 			{
 				ErrorBox(K_ERR_WARNING, L"CLevel::Update: Illegal light type!");
 			}
 			break;
-			case K_LVL_LIGHT_POINT:
+			case K_LVL_LT_POINT:
 			{
 				//Creez forma luminii (mesh-ul) - fac rotatia aici si nu in shader ca sa pot scoate bb-ul final al luminii
 				D3DXVECTOR3 lcorners[4]; //ul, ur, dl, dr
@@ -10729,7 +10729,7 @@ void CLevel::Update(float dTime_original)
 				}
 			}
 			break;
-			case K_LVL_LIGHT_AREA:
+			case K_LVL_LT_AREA:
 			{
 				//create light mesh - rotating the actual mesh isn't necessary
 				D3DXVECTOR3 lcorners[4]; //ul, ur, dl, dr
@@ -10772,7 +10772,7 @@ void CLevel::Update(float dTime_original)
 				m_bufferedPainter.EndMesh();
 			}
 			break;
-			case K_LVL_LIGHT_AMBIENTAL:
+			case K_LVL_LT_AMBIENTAL:
 			{
 				//se face un dreptunghi cat ecranul, mapat din textura. Se va lua in considerare self illumination
 				RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB(); 
@@ -10810,7 +10810,7 @@ void CLevel::Update(float dTime_original)
 				m_bufferedPainter.EndMesh();
 			}
 			break;
-			case K_LVL_LIGHT_DIRECTIONAL:
+			case K_LVL_LT_DIRECTIONAL:
 			{
 				//Creez forma luminii (mesh-ul) - nu fac rotatie pentru ca nu foloseste la nimic
 				D3DXVECTOR3 lcorners[4]; //ul, ur, dl, dr
@@ -11335,7 +11335,7 @@ HRESULT CLevel::PaintOffscreen()
 						CLight* light = m_visibleList.visible_lights[ll];
 						if (!light->castShadows)
 							continue;
-						if (light->type != K_LVL_LIGHT_POINT)
+						if (light->type != K_LVL_LT_POINT)
 							continue;
 						D3DXVECTOR2 lightdir = light->pos - actor->posHeart;
 						float lightdist = D3DXVec2Length(&lightdir);
@@ -11390,7 +11390,7 @@ HRESULT CLevel::PaintOffscreen()
 						CLight* light = m_visibleList.visible_lights[ll];
 						if (!light->castShadows)
 							continue;
-						if (light->type != K_LVL_LIGHT_POINT)
+						if (light->type != K_LVL_LT_POINT)
 							continue;
 						D3DXVECTOR2 lightdir = light->pos - actor->GetPosHeart();
 						float lightdist = D3DXVec2Length(&lightdir);
@@ -12205,7 +12205,7 @@ void CLevel::Paint()
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
-		if (nl->type == K_LVL_LIGHT_AMBIENTAL)
+		if (nl->type == K_LVL_LT_AMBIENTAL)
 		{
 			//paint and exit
 			m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, false);
@@ -12239,7 +12239,7 @@ void CLevel::Paint()
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
 		//ambiental already painted
-		if (nl->type == K_LVL_LIGHT_AMBIENTAL)
+		if (nl->type == K_LVL_LT_AMBIENTAL)
 			continue; 
 
 		if (nl->castShadows)

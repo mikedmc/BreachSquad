@@ -1,15 +1,18 @@
 #pragma once
 
-///--------------------------------------------------------------------------
-///--- LIGHTS ---
-///--------------------------------------------------------------------------
-#define K_LVL_LIGHT_AMBIENTAL 0
-#define K_LVL_LIGHT_AREA 1
-#define K_LVL_LIGHT_POINT 2
-#define K_LVL_LIGHT_DIRECTIONAL 3
-#define K_LVL_LIGHT_REALISTIC_IES_OBSOLETE 4
+//  Light Type
+enum eLightType {
+	K_LVL_LT_UNKNOWN = -1,
+	K_LVL_LT_AMBIENTAL = 0,
+	K_LVL_LT_AREA = 1,
+	K_LVL_LT_POINT,
+	K_LVL_LT_DIRECTIONAL,
+	K_LVL_LT_IES,
 
-///--- LIGHTS FLAGS ---
+	K_LVL_LTS_CNT,
+};
+
+///--- LIGHTS EDITOR FLAGS ---
 #define K_EDITOR_LIGHT_FLAG_CAST_SHADOWS 1
 #define K_EDITOR_LIGHT_FLAG_HAS_LENS_FLARE_OBSOLETE 2
 
@@ -27,41 +30,39 @@
 class CLight : public IActiveInterface
 {
 public:
-	D3DXVECTOR3		lCorners[4];		//ul, ur, dl, dr - mesh-ul spotului relativ la pozitia luminii; coord Z este 0 
-	RECTLTRB_F		lTexRect;			//dreptunghiul in textura al spotului
-	float			fMaxRadius;			//raza maxima a luminii
-public:
-	int				m_nLightMeshIdx;	//buffer-ul dinamic pt spotul luminii
-	int				m_nShadowMeshIdx;	//buffer-ul dinamic pt shadow volume
-
-public:
-	int				animID;				//-1 - not set
-	int				type;
-	bool			castShadows;
-	float			fIntensity;			//light intensity
-	float			fVolumeAlpha;		//light's atmospheric volume alpha
-	D3DXVECTOR3		vnDirection;		//directia normalizata a luminii (folosita doar la unele lumini, cum ar fi spoturile IES)
-
-	CLight() :
-		m_nLightMeshIdx(-1), m_nShadowMeshIdx(-1), type(0), animID(-1), fMaxRadius(0.0f), fVolumeAlpha(1.0f), castShadows(false)
-	{
-		vnDirection = D3DXVECTOR3(0.0f, 1.0f, 0.0f); //default direction
-	}
-
-	const int GetClassType() const {
+	const eActiveInterfaceType GetClassType() const {
 		return K_LVL_IAI_TYPE_LIGHT;
 	}
 
-	void SetPos(D3DXVECTOR2 newPos) override;
-	void Move(D3DXVECTOR2 delta) override;
-	void SetAngle(float fnAngle) override;
+public:
+	eLightType			type;
+
+	Vec3				lCorners[4];				// ul, ur, dl, dr - mesh-ul spotului relativ la pozitia luminii; coord Z este 0 
+	RECTLTRB_F			lTexRect;					// dreptunghiul in textura al spotului
+	float				fMaxRadius;					// raza maxima a luminii
+													   
+	int					m_nLightMeshIdx;			// buffer-ul dinamic pt spotul luminii
+	int					m_nShadowMeshIdx;			// buffer-ul dinamic pt shadow volume
+													   
+	int					animID;						// -1 - not set
+	bool				castShadows;				   
+	float				fIntensity;					// light intensity
+	float				fVolumeAlpha;				// light's atmospheric volume alpha
+	Vec3				vnDir;						// directia normalizata a luminii (folosita doar la unele lumini, cum ar fi spoturile IES)
+
+public:
+	CLight();
+
+	void				SetPos(Vec2 newPos) override;
+	void				Move(Vec2 delta) override;
+	void				SetAngle(float fnAngle) override;
 
 	// engine callbacks
-	void PostConstructionInit() override;
-	void BeginPlay() override;
-	void EndPlay() override;
+	void				PostConstructionInit() override;
+	void				BeginPlay() override;
+	void				EndPlay() override;
 
 	// Initializes internal data for rendering
-	// Make sure all basic light data is set before calling 
-	void InitGeometry(CSpriteCollection* pLightsSprCol);
+	// Make sure all basic light data is set before calling it (or call inside PostConstructionInit)
+	void				InitGeometry(CSpriteCollection* pLightsSprCol);
 };

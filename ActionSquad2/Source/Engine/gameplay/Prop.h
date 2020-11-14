@@ -17,7 +17,7 @@ public:
 		nAnim_ini(-1), nFrame_ini(-1), nLayer(0)
 	{}
 
-	const int GetClassType() const {
+	const eActiveInterfaceType GetClassType() const {
 		return K_LVL_IAI_TYPE_ACTIVE;
 	}
 

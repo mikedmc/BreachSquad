@@ -234,7 +234,7 @@ public:
 		nControllerInstanceID = -1;
 	}
 
-	const int GetClassType() const {
+	const eActiveInterfaceType GetClassType() const {
 		return K_LVL_IAI_TYPE_ACTOR;
 	}
 
