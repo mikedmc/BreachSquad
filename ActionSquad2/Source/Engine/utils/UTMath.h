@@ -13,6 +13,7 @@
 #define			MUMatScaling			D3DXMatrixScaling
 #define			MUMatTranslation		D3DXMatrixTranslation
 #define			MUMatAffine2D			D3DXMatrixAffineTransformation2D
+#define			MUOrthoOffCenterLH		D3DXMatrixOrthoOffCenterLH
 #define			MUVec2Len				D3DXVec2Length
 #define			MUVec2LenSq				D3DXVec2LengthSq
 

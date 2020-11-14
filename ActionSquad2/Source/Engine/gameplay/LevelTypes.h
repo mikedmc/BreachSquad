@@ -33,6 +33,8 @@ enum eLVLRenderPass {
 	K_LVL_RP_NONE = -1,
 	K_LVL_RP_COLORS = 0,
 	K_LVL_RP_NORMALS_HEIGHT = 1,
+	// renders all lights in a single surface (with shadows)
+	K_LVL_RP_LIGHTS,			
 
 	K_LVL_RP_COUNT
 };
