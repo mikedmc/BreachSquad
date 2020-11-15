@@ -1,0 +1,4 @@
+**compile to asm:**
+fxc /Tvs_3_0 /Cc /nologo /Evs_main vs_pointlight.hlsl
+
+**build binary**
