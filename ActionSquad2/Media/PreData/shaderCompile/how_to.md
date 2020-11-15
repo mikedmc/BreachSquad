@@ -6,3 +6,5 @@ Add it as a VS external tool:
 command: $(ProjectDir)\Media\PreData\shaderCompile\build_vshader.bat
 arguments: $(ItemPath)
 initial dir: $(ProjectDir)\Media\PreData\shaderCompile
+
+Matrices must be packed "row major"

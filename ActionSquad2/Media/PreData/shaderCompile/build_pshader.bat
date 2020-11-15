@@ -14,7 +14,7 @@
 
 @echo.
 @echo --- Compiling to PS 3.0 asm ---
-fxc /Tps_3_0 /nologo /Eps_main /Fcbuild/%shadername%.pasm %1
+fxc /Tps_3_0 /Zpr /nologo /Eps_main /Fcbuild/%shadername%.pasm %1
 
 @echo.
 @echo --- Assembling shader ---

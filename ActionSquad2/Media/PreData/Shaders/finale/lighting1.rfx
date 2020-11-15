@@ -994,12 +994,12 @@
         <RmIntegerVariable NAME="Minimized Y" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="-1" MIN="-10" MAX="10" CLAMP="FALSE"/>
        </RmRegistryBranch>
        <RmRegistryBranch NAME="Effect Workspace.Final_06dec2018.pointLight" API="" XML_VERSION="RenderMonkey 1.71">
-        <RmIntegerVariable NAME="X" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="0" MIN="-10" MAX="10" CLAMP="FALSE"/>
-        <RmIntegerVariable NAME="Y" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="0" MIN="-10" MAX="10" CLAMP="FALSE"/>
+        <RmIntegerVariable NAME="X" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="680" MIN="-10" MAX="10" CLAMP="FALSE"/>
+        <RmIntegerVariable NAME="Y" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="4" MIN="-10" MAX="10" CLAMP="FALSE"/>
         <RmIntegerVariable NAME="Width" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="350" MIN="-10" MAX="10" CLAMP="FALSE"/>
         <RmIntegerVariable NAME="Height" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="350" MIN="-10" MAX="10" CLAMP="FALSE"/>
         <RmIntegerVariable NAME="ShowStatus" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="1" MIN="-10" MAX="10" CLAMP="FALSE"/>
-        <RmIntegerVariable NAME="Visible" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="0" MIN="-10" MAX="10" CLAMP="FALSE"/>
+        <RmIntegerVariable NAME="Visible" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="1" MIN="-10" MAX="10" CLAMP="FALSE"/>
         <RmIntegerVariable NAME="Minimized X" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="-1" MIN="-10" MAX="10" CLAMP="FALSE"/>
         <RmIntegerVariable NAME="Minimized Y" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="-1" MIN="-10" MAX="10" CLAMP="FALSE"/>
        </RmRegistryBranch>
@@ -1295,17 +1295,17 @@ Single Pass]]></RmTextDataBlock></RmStringVariable>
       <RmRegistryBranch NAME="Effect Workspace.Final_06dec2018.pointLight" API="" XML_VERSION="RenderMonkey 1.71">
        <RmRegistryBranch NAME="Disassembly" API="" XML_VERSION="RenderMonkey 1.71"/>
        <RmStringVariable NAME="Editing Shader" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC=""><RmTextDataBlock TYPE="TEXT"><![CDATA[
-Vertex Shader]]></RmTextDataBlock></RmStringVariable>
+Pixel Shader]]></RmTextDataBlock></RmStringVariable>
        <RmStringVariable NAME="Editing Pass" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC=""><RmTextDataBlock TYPE="TEXT"><![CDATA[
 Single Pass]]></RmTextDataBlock></RmStringVariable>
-       <RmIntegerVariable NAME="Y" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="-1" MIN="-10" MAX="10" CLAMP="FALSE"/>
-       <RmIntegerVariable NAME="Width" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="979" MIN="-10" MAX="10" CLAMP="FALSE"/>
+       <RmIntegerVariable NAME="Y" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="0" MIN="-10" MAX="10" CLAMP="FALSE"/>
+       <RmIntegerVariable NAME="Width" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="650" MIN="-10" MAX="10" CLAMP="FALSE"/>
        <RmIntegerVariable NAME="Height" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="650" MIN="-10" MAX="10" CLAMP="FALSE"/>
        <RmIntegerVariable NAME="ShowStatus" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="1" MIN="-10" MAX="10" CLAMP="FALSE"/>
        <RmIntegerVariable NAME="Visible" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="1" MIN="-10" MAX="10" CLAMP="FALSE"/>
        <RmIntegerVariable NAME="Minimized X" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="-1" MIN="-10" MAX="10" CLAMP="FALSE"/>
        <RmIntegerVariable NAME="Minimized Y" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="-1" MIN="-10" MAX="10" CLAMP="FALSE"/>
-       <RmIntegerVariable NAME="X" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="147" MIN="-10" MAX="10" CLAMP="FALSE"/>
+       <RmIntegerVariable NAME="X" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="-3" MIN="-10" MAX="10" CLAMP="FALSE"/>
       </RmRegistryBranch>
      </RmRegistryBranch>
      <RmRegistryBranch NAME="RmRenderStateBlockEditor" API="" XML_VERSION="RenderMonkey 1.71">
@@ -1432,7 +1432,7 @@ Single Pass]]></RmTextDataBlock></RmStringVariable>
     </RmRegistryBranch>
     <RmRegistryBranch NAME="WORKSPACE" API="" XML_VERSION="RenderMonkey 1.71">
      <RmStringVariable NAME="LAST_SAVE" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC=""><RmTextDataBlock TYPE="TEXT"><![CDATA[
-14/11/2020 19:34:24]]></RmTextDataBlock></RmStringVariable>
+15/11/2020 10:36:5]]></RmTextDataBlock></RmStringVariable>
      <RmStringVariable NAME="VERSION" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC=""><RmTextDataBlock TYPE="TEXT"><![CDATA[
 RenderMonkey Version 1.82 (build 322)]]></RmTextDataBlock></RmStringVariable>
      <RmStringVariable NAME="XML_VERSION" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC=""><RmTextDataBlock TYPE="TEXT"><![CDATA[
@@ -3281,7 +3281,7 @@ float4 ps_main( PS_INPUT Input ) : COLOR0
     <RmStringVariable NAME="Screen-AlignedQuad_1Notes" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC=""><RmTextDataBlock TYPE="TEXT"><![CDATA[
 Editat: 14.nov.2020
 ]]></RmTextDataBlock></RmStringVariable>
-    <RmMatrixVariable NAME="matViewProjection" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="WorldViewProjection" VALUE_0="2.245950" VALUE_1="0.000000" VALUE_2="0.000000" VALUE_3="0.000000" VALUE_4="0.000000" VALUE_5="2.414214" VALUE_6="0.000000" VALUE_7="0.000000" VALUE_8="0.000000" VALUE_9="0.000000" VALUE_10="1.001001" VALUE_11="199.199203" VALUE_12="0.000000" VALUE_13="0.000000" VALUE_14="1.000000" VALUE_15="200.000000"/>
+    <RmMatrixVariable NAME="matViewProjection" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="WorldViewProjection" VALUE_0="2.245950" VALUE_1="0.000000" VALUE_2="0.000000" VALUE_3="0.000000" VALUE_4="0.000000" VALUE_5="2.414214" VALUE_6="0.000000" VALUE_7="0.000000" VALUE_8="0.000000" VALUE_9="0.000000" VALUE_10="1.001001" VALUE_11="199.199188" VALUE_12="0.000000" VALUE_13="0.000000" VALUE_14="1.000000" VALUE_15="200.000000"/>
     <RmVectorVariable NAME="fLightData" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE_0="35.000000" VALUE_1="0.000000" VALUE_2="0.000000" VALUE_3="0.000000" MIN="-10.000000" MAX="10.000000" CLAMP="FALSE" NORMALIZE="FALSE">
      <RmStringVariable NAME="fSpecularDataNotes" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC=""><RmTextDataBlock TYPE="TEXT"><![CDATA[
 //x=spec power, y=spec intens, z=light intensity]]></RmTextDataBlock></RmStringVariable>

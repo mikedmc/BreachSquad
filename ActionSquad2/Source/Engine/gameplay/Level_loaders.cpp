@@ -224,9 +224,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		nl->vPos.x = (float)OS_freadInt32(fl);
 		nl->vPos.y = (float)OS_freadInt32(fl);
 		nl->vPos.z = (float)OS_freadInt32(fl);
-		//z nu are voie sa fie in acelasi plan cu fundalul
-		if (nl->vPos.z == 0.0f)
-			nl->vPos.z = 0.1f;
+		nl->vPos.z = 32.0f;
 
 		nl->pos_ini = nl->pos = D3DXVECTOR2(nl->vPos.x, nl->vPos.y);
 		//animID

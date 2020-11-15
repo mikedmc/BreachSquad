@@ -14,7 +14,7 @@
 
 @echo.
 @echo --- Compiling to VS 3.0 asm ---
-fxc /Tvs_3_0 /nologo /Evs_main /Fcbuild/%shadername%.vasm %1
+fxc /Tvs_3_0 /Zpr /nologo /Evs_main /Fcbuild/%shadername%.vasm %1
 
 @echo.
 @echo --- Assembling shader ---

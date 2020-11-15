@@ -12221,7 +12221,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 
 	//pixel shader
 	pPShader = UTGetShaderManager().GetPShaderByName(L"PS_POINTLIGHT");
-	m_pDevice->SetPixelShader(null /*pPShader*/);
+	m_pDevice->SetPixelShader(pPShader);
 
 	///--- 3.paint lights ---
 	CFixedArray<int, 64> arrLightsShadIdx; //shadowing lights
@@ -12234,7 +12234,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 
 		//set Pshader constants
 		float fConstData[][4] = { 
-			{ 0.2f, 1.0f, 0.0f, 0.0f },
+			{ 0.2f, 1.0f, nl->fMaxRadius, 0.0f },
 			// x: game height projection inverse
 			{ ZHSCALE, 0.0f, 0.0f, 0.0f },
 			// light world position

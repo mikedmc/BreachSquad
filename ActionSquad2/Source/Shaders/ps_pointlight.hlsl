@@ -1,5 +1,5 @@
 // distance attenuation formula: 1.0/(1.0 + c1*d + c1*d^2)
-float4 fLightData : register(c0); //x-atten c1, y-atten c2
+float4 fLightData : register(c0); //x-atten c1, y-atten c2, z-light radius
 float4 fWorldConstants : register(c1); //x-mul to convert height in Y offset (2D projection)
 float3 vLightPosWorld : register(c2);   // world coords light position
 
@@ -37,8 +37,10 @@ float4 ps_main( PS_INPUT Input ) : COLOR0
    float3 lightRayN = lightRay / lightDist;
    float dotN = dot(lightRayN, normalN);
    dotN = clamp(dotN, 0.0f, 1.0f);
+   // scales light distance to light radius because attenuation is based on light radius
+   float attenDist = lightDist / fLightData.z;
    // distance attenuation
-   float distAtten = 1.0f / (1.0f + fLightData.x * lightDist + fLightData.y * lightDist * lightDist);
+   float distAtten = 1.0f / (1.0f + fLightData.x * attenDist + fLightData.y * attenDist * attenDist);
    float4 fvFinalColor = distAtten * (Input.VertColor * dotN);
    
    return( fvFinalColor );

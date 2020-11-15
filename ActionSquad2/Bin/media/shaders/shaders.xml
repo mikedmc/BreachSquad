@@ -5,13 +5,13 @@
     <VextexShader name="VS_TEXspot" path="texSpot.vso" />
     <VertexShader name="VS_WATER" path="water.vso" />
     <VertexShader name="VS_FOW" path="fow.vso" />
-    <VertexShader name="VS_POINTLIGHT" path="pointlight.vso" />
+    <VertexShader name="VS_POINTLIGHT" path="vs_pointlight.vso" />
   </VertexShaders>
   <PixelShaders>
     <PixelShader name="PS_TEXspot" path="texSpot.pso" />
     <PixelShader name="PS_AMBIENT_SI" path="texAmbientSelfIllum.pso" />
     <PixelShader name="PS_WATER" path="water.pso" />
     <PixelShader name="PS_FOW" path="fow.pso" />
-    <PixelShader name="PS_POINTLIGHT" path="pointlight.pso" />
+    <PixelShader name="PS_POINTLIGHT" path="ps_pointlight.pso" />
   </PixelShaders>
 </Shaders>
