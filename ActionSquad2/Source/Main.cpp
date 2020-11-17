@@ -2548,6 +2548,12 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				{
 					// debug controls
 					ImGui::Begin("Debug Info", null, ImGuiWindowFlags_NoNavInputs);
+
+					if (ImGui::Button("Reload Shaders", ImVec2(120, 0)))
+					{
+						UTGetShaderManager().ReloadAllShaders();
+					}
+
 					ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
 
 					RECTXYWH_F camrect = g_level.m_camLevel.GetCamWorldAABB();

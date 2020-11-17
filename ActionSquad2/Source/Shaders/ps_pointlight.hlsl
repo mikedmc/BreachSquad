@@ -1,4 +1,4 @@
-// distance attenuation formula: 1.0/(1.0 + c1*d + c1*d^2)
+// distance attenuation formula: 1.0/(1.0 + c1*d + c2*d^2)
 float4 fLightData : register(c0); //x-atten c1, y-atten c2, z-light radius
 float4 fWorldConstants : register(c1); //x-mul to convert height in Y offset (2D projection)
 float3 vLightPosWorld : register(c2);   // world coords light position
@@ -26,7 +26,7 @@ float4 ps_main( PS_INPUT Input ) : COLOR0
    // convert normal XY in -1..1 (input normal is already normalized)
    normal_h = (normal_h * 2.0f) - 1.0f;
    // build normal Z
-   float nrmZ = sqrt(1.0f - normal_h.x * normal_h.x - normal_h.y - normal_h.y);
+   float nrmZ = sqrt(1.0f - normal_h.x * normal_h.x - normal_h.y * normal_h.y);
    // compose final normal vector, normalized
    float3 normalN = float3(normal_h.xy, nrmZ);
 

@@ -142,6 +142,9 @@ public:
 	int		GetVShadersCount(void)	{ return VertexShaders.GetSize();	}
 	int		GetPShadersCount(void)	{ return PixelShaders.GetSize();	}
 
+	// Reloads all shaders instantly (debug only)
+	void	ReloadAllShaders();
+
 	//vertex declarations are initialised here
 	HRESULT CreateVertexDeclarations(LPDIRECT3DDEVICE9 pDevice);
 	HRESULT ReleaseVertexDeclarations();

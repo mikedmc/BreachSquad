@@ -40,7 +40,7 @@
     mul r0.xyz, r0.w, r0
     rcp r0.w, r0.w
     mad r1.w, r1.x, -r1.x, c3.w
-    mad r1.w, r1.y, -c3.y, r1.w
+    mad r1.w, r1.y, -r1.y, r1.w
     rsq r1.w, r1.w
     rcp r1.z, r1.w
     dp3_sat r0.x, r0, r1

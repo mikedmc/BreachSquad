@@ -453,6 +453,15 @@ LPDIRECT3DPIXELSHADER9 CShaderManager::GetPShaderByNameHash(UINT32 nNameHash)
 	return NULL;
 }
 
+void CShaderManager::ReloadAllShaders()
+{
+#if defined(_DEBUG) || defined(DEBUG)
+	OnLostDevice(m_pd3dDevice);
+	OnResetDevice(m_pd3dDevice, null);
+	LOG_DBG(L"-- ALL SHADERS RELOADED!");
+#endif
+}
+
 //-=-=-= vertex declarations =-=-=-
 HRESULT CShaderManager::CreateVertexDeclarations(LPDIRECT3DDEVICE9 pDevice)
 {

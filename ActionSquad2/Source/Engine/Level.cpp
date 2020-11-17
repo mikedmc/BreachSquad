@@ -10774,36 +10774,17 @@ void CLevel::Update(float dTime_original)
 			break;
 			case K_LVL_LT_AMBIENTAL:
 			{
-				//se face un dreptunghi cat ecranul, mapat din textura. Se va lua in considerare self illumination
-				RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB(); 
-
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				vul.pos = D3DXVECTOR3(camrect.x, camrect.y, 0.0f);
-				vur.pos = D3DXVECTOR3(camrect.Right(), camrect.y, 0.0f);
-				vdl.pos = D3DXVECTOR3(camrect.x, camrect.Bottom(), 0.0f);
-				vdr.pos = D3DXVECTOR3(camrect.Right(), camrect.Bottom(), 0.0f);
-				//setez culoarea
+				vul.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMin.y, 0.0f);
+				vur.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMin.y, 0.0f);
+				vdl.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMax.y, 0.0f);
+				vdr.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMax.y, 0.0f);
+				//set color
 				vul.color = vur.color = vdl.color = vdr.color = nl->color;
-				//setez coordonate textura spot
-				vul.tex1 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.top, 0.0f, 0.0f);
-				vur.tex1 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.top, 0.0f, 0.0f);
-				vdl.tex1 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.bottom, 0.0f, 0.0f);
-				vdr.tex1 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.bottom, 0.0f, 0.0f);
-				//Coord de mapare pe RTT (tex2) se seteaza din shader
-				//setez normalele finale - directia catre lumina
-				D3DXVECTOR3 lightdir(0.0f, 0.0f, 1.0f);
-				vul.n = lightdir;
-				vur.n = lightdir;
-				vdl.n = lightdir;
-				vdr.n = lightdir;
-
-				//construiesc VB-ul exact
+				//build verts
 				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
 				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-				//adauga mesh dinamic pentru volumul luminii
-				nl->m_nLightMeshIdx = -1; //resetez idx mesh
 
 				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
 				m_bufferedPainter.AddTriangles(lightRectV, 2);
@@ -12028,7 +12009,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 		if (SUCCEEDED(hr))
 		{
 			// Clear the render target and the zbuffer 
-			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_STENCIL | D3DCLEAR_ZBUFFER, 0xff004400, 1.0f, 0));
+			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_STENCIL | D3DCLEAR_ZBUFFER, 0xff000000, 1.0f, 0));
 			//use sprite
 			m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
@@ -12201,7 +12182,23 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	PPIXELSHADER pPShader = null;
 
 	D3DXMATRIXA16 matWVP = matView * (*matProj);
-	//vertex shaderulis the same for everything
+
+	///--- 2. paint level ambient lights
+	m_pDevice->SetTexture(0, nullptr);
+	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
+	{
+		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		if (nl->type == K_LVL_LT_AMBIENTAL)
+		{
+			//paint and exit
+			m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
+		}
+	}
+
+
+
+	AdditiveBlendingON(m_pDevice, NULL);
+
 	pVShader = UTGetShaderManager().GetVShaderByName(L"VS_POINTLIGHT");
 	m_pDevice->SetVertexShader(pVShader);
 
@@ -12212,7 +12209,6 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	m_pDevice->SetVertexShaderConstantF(0, (float*)&matWVP, 4);
 	m_pDevice->SetVertexShaderConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
 
-	//AdditiveBlendingON(m_pDevice, NULL);
 	CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
 	if (pRT != null)
 	{
@@ -12234,16 +12230,19 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 
 		//set Pshader constants
 		float fConstData[][4] = { 
-			{ 0.2f, 1.0f, nl->fMaxRadius, 0.0f },
+			// x:atten c1, y:atten c2, z:light radius, w:
+			{ K_LVL_LIGHTRENDER_ATTEN_C1, K_LVL_LIGHTRENDER_ATTEN_C2, nl->fMaxRadius, 0.0f },
 			// x: game height projection inverse
 			{ ZHSCALE, 0.0f, 0.0f, 0.0f },
-			// light world position
+			// xyz: light world position
 			{ nl->vPos.x, nl->vPos.y, nl->vPos.z, 0.0f }
 		};
 		m_pDevice->SetPixelShaderConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
 
 		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, false);
 	}
+
+	AdditiveBlendingOFF(m_pDevice, NULL);
 
 	m_pDevice->SetVertexShader(nullptr);
 	m_pDevice->SetPixelShader(nullptr);

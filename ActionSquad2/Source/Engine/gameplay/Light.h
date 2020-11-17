@@ -27,6 +27,10 @@ enum eLightType {
 #define K_LVL_LIGHTRENDER_SPOT_COLOR_DODGE_ALPHA	0.9f
 #define K_LVL_LIGHTRENDER_SPOT_LINEAR_DODGE_ALPHA	0.55f
 
+// distance attenuation formula: 1.0/(1.0 + c1*dist + c2*dist*dist)
+#define K_LVL_LIGHTRENDER_ATTEN_C1					0.2f
+#define K_LVL_LIGHTRENDER_ATTEN_C2					1.0f
+
 class CLight : public IActiveInterface
 {
 public:
