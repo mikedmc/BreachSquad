@@ -25,6 +25,7 @@
 
     ps_3_0
     def c3, 255, 2, -1, 1
+    def c4, 0, -1.44269502, 0, 0
     dcl_color v0
     dcl_texcoord v1.xy
     dcl_texcoord1 v2.xy
@@ -47,11 +48,13 @@
     mul r1, r0.x, v0
     rcp r0.x, c0.z
     mul r0.x, r0.x, r0.w
-    mov r0.w, c3.w
-    mad r0.y, c0.x, r0.x, r0.w
     mul r0.x, r0.x, r0.x
-    mad r0.x, r0.x, c0.y, r0.y
-    rcp r0.x, r0.x
+    mov r2.x, c0.x
+    dp2add r0.y, r2.x, r2.x, c4.x
+    rcp r0.y, r0.y
+    mul r0.x, r0.y, r0.x
+    mul r0.x, r0.x, c4.y
+    exp r0.x, r0.x
     mul oC0, r1, r0.x
 
-// approximately 24 instruction slots used (1 texture, 23 arithmetic)
+// approximately 27 instruction slots used (1 texture, 26 arithmetic)

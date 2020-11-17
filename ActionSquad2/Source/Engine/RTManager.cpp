@@ -131,6 +131,8 @@ CRTManager::CEngineRenderTarget* CRTManager::GetRTbyUID(UINT32 dwID)
 		if (arrRT.m_pData[kk]->UID == dwID)
 			return arrRT.m_pData[kk];
 	}
+
+	ErrorBox(K_ERR_WARNING, L"RTManager: RT not found ID:%d", dwID);
 	return nullptr;
 }
 

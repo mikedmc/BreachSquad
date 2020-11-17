@@ -12033,6 +12033,72 @@ OPRESULT CLevel::PaintDeferredBuffers()
 		}
 	}
 
+	///----------------------------------------------------
+	/// 3. COLOR MAP - overwrites the normal map as we don't need it anymore
+	///----------------------------------------------------
+	pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
+	if (pRT != null)
+	{
+		hr = UTGetRTManager().BeginSceneRT(pRT);
+		if (SUCCEEDED(hr))
+		{
+			// Clear the render target and the zbuffer 
+			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0));
+			//use sprite
+			m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
+
+			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
+			D3DXMATRIXA16 matProj;
+			D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
+			m_pDevice->SetTransform(D3DTS_PROJECTION, &matProj);
+
+			m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+			m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
+
+			RenderPass(K_LVL_RP_COLORS, &matProj);
+
+			// end sprite
+			m_pSprite->End();
+
+			V(UTGetRTManager().EndSceneRT(pRT));
+
+		}
+	}
+
+	///----------------------------------------------------
+	/// 4. COMPOSITION - composes buffers into one
+	///----------------------------------------------------
+	pRT = UTGetRTManager().GetRTbyUID(K_RTID_FINAL);
+	if (pRT != null)
+	{
+		hr = UTGetRTManager().BeginSceneRT(pRT);
+		if (SUCCEEDED(hr))
+		{
+			// Clear the render target and the zbuffer 
+			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, 0xffff0000, 1.0f, 0));
+			//use sprite
+			m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
+
+			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
+			D3DXMATRIXA16 matProj;
+			D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
+			m_pDevice->SetTransform(D3DTS_PROJECTION, &matProj);
+
+			m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+			m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
+
+			// RT sized quad with tex1 color, tex2 lightmap
+			RenderPass_Composition(&matProj);
+
+			// end sprite
+			m_pSprite->End();
+
+			V(UTGetRTManager().EndSceneRT(pRT));
+
+		}
+	}
+
+
 	return K_OP_OK;
 }
 
@@ -12142,9 +12208,6 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	RECTXYWH_F		camrect = m_camLevel.GetCamWorldAABB();
 	CAABB			camAABB(camrect.x, camrect.y, camrect.Right(), camrect.Bottom());
 
-	//locally used temp matrix
-	D3DXMATRIXA16	matlocal;
-
 	///----------------------------------------------------
 	/// INITIAL SETUP
 	///----------------------------------------------------
@@ -12231,7 +12294,8 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 		//set Pshader constants
 		float fConstData[][4] = { 
 			// x:atten c1, y:atten c2, z:light radius, w:
-			{ K_LVL_LIGHTRENDER_ATTEN_C1, K_LVL_LIGHTRENDER_ATTEN_C2, nl->fMaxRadius, 0.0f },
+			//{ K_LVL_LIGHTRENDER_ATTEN_C1, K_LVL_LIGHTRENDER_ATTEN_C2, nl->fMaxRadius, 0.0f },
+			{ ct_fGaussLen, K_LVL_LIGHTRENDER_ATTEN_C2, nl->fMaxRadius, 0.0f },
 			// x: game height projection inverse
 			{ ZHSCALE, 0.0f, 0.0f, 0.0f },
 			// xyz: light world position
@@ -12243,6 +12307,102 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	}
 
 	AdditiveBlendingOFF(m_pDevice, NULL);
+
+	m_pDevice->SetVertexShader(nullptr);
+	m_pDevice->SetPixelShader(nullptr);
+
+	return K_OP_OK;
+}
+
+OPRESULT CLevel::RenderPass_Composition(MatA16* matProj)
+{
+	MatA16	matView;
+
+	RECTXYWH_F		camrect = m_camLevel.GetCamWorldAABB();
+	CAABB			camAABB(camrect.x, camrect.y, camrect.Right(), camrect.Bottom());
+	///----------------------------------------------------
+	/// INITIAL SETUP
+	///----------------------------------------------------
+	m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
+
+	m_pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
+	m_pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+
+	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+
+	m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	m_pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
+	{
+		//#IMPORTANT: we need separate alpha blending or it will look bad when blending alpha values between them.
+		//eg: if we blend semitransparent things on top of fully opaque walls, the walls become transparent
+		//necessary but not really well supported. Better with a shader and custom sprite painter
+		m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, true);
+		m_pDevice->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_SRCALPHA);
+		m_pDevice->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_DESTALPHA);
+		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
+	}
+
+	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &D3DXVECTOR2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
+	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
+	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+
+	///--- paint lights ---
+	PVERTEXSHADER pVShader = null;
+	PPIXELSHADER pPShader = null;
+
+	D3DXMATRIXA16 matWVP = matView * (*matProj);
+
+	///--- build RT rect ---
+	_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+	vul.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMin.y, 0.0f);
+	vur.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMin.y, 0.0f);
+	vdl.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMax.y, 0.0f);
+	vdr.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMax.y, 0.0f);
+
+	vul.tex1 = vul.tex2 = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 0.0f);
+	vur.tex1 = vur.tex2 = D3DXVECTOR4(1.0f, 0.0f, 0.0f, 0.0f);
+	vdl.tex1 = vdl.tex2 = D3DXVECTOR4(0.0f, 1.0f, 0.0f, 0.0f);
+	vdr.tex1 = vdr.tex2 = D3DXVECTOR4(1.0f, 1.0f, 0.0f, 0.0f);
+	//set color
+	vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
+	//build verts
+	_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+	lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+	lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+	CRTManager::CEngineRenderTarget* pRTcolor = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
+	if (pRTcolor != null)
+		m_pDevice->SetTexture(0, pRTcolor->m_pRTTexture);
+	CRTManager::CEngineRenderTarget* pRTlights = UTGetRTManager().GetRTbyUID(K_RTID_COLORDEPTHSTENCIL);
+	if (pRTlights != null)
+		m_pDevice->SetTexture(1, pRTlights->m_pRTTexture);
+
+	///--- set vertex shader
+	pVShader = UTGetShaderManager().GetVShaderByName(L"VS_COMPOSITION");
+	m_pDevice->SetVertexShader(pVShader);
+
+	m_pDevice->SetVertexDeclaration(UTGetShaderManager()._VERTEX_PNCT4T4_decl);
+	m_pDevice->SetVertexShaderConstantF(0, (float*)&matWVP, 4);
+
+	///--- set pixel shader
+	pPShader = UTGetShaderManager().GetPShaderByName(L"PS_COMPOSITION");
+	m_pDevice->SetPixelShader(pPShader);
+	//set Pshader constants
+	float fGamma = 2.2f;
+	float fConstData[][4] = {
+		// x:gamma, y:1.0f/gamma
+		{ fGamma, 1.0f / fGamma, 0.0f, 0.0f }
+	};
+	m_pDevice->SetPixelShaderConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
+
+
+	//m_pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
+	m_pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof(_VERTEX_PNCT4T4));
+
 
 	m_pDevice->SetVertexShader(nullptr);
 	m_pDevice->SetPixelShader(nullptr);

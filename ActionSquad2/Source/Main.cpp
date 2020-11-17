@@ -97,6 +97,11 @@ CNetLock					g_netlock;
 ///-- spine manager --
 CSpineManager				g_spineMgr;
 
+
+float ct_fGaussLen = 0.5f;
+
+
+
 //**************************************************************************************
 // Forward declarations 
 //**************************************************************************************
@@ -886,7 +891,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	// Create RTs
 	UTGetRTManager().AddRT(K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, true, D3DFMT_D24S8);
 	UTGetRTManager().AddRT(K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
-	//UTGetRTManager().AddRT(K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, true, D3DFMT_D24S8);
+	UTGetRTManager().AddRT(K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
 	//if (UTGetAppClass().m_Settings.nLOD_lights >= K_UT_LOD_MED)
 		//UTGetRenderTargetsManager().AddRT(K_RTID_SPECULARMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
 
@@ -2341,9 +2346,23 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 						g_pGameSprite->Flush();
 					}
 				}
-				if (DXUTIsKeyDown('0'))
+				if (DXUTIsKeyDown('8'))
 				{
 					CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
+					if (pRT != null)
+					{
+						g_pGameSprite->Flush();
+						CCameraTransform::SetActiveCameraIdentity(pDevice);
+						RECT src;
+						SetRect(&src, 0, 0, pRT->nWidth, pRT->nHeight);
+						g_pGameSprite->SetTransform(&g_matIdentity);
+						g_pGameSprite->Draw(pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
+						g_pGameSprite->Flush();
+					}
+				}
+				if (DXUTIsKeyDown('0'))
+				{
+					CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_FINAL);
 					if (pRT != null)
 					{
 						g_pGameSprite->Flush();
@@ -2553,6 +2572,8 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 					{
 						UTGetShaderManager().ReloadAllShaders();
 					}
+
+					ImGui::SliderFloat("gauss", &ct_fGaussLen, 0.0, 5.0);
 
 					ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
 

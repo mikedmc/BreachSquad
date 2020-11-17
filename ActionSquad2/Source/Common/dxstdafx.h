@@ -664,4 +664,7 @@ extern CMainMenu					g_mainMenu;
 extern CChatWnd						g_ChatWnd;
 #endif
 
+
+extern float ct_fGaussLen;
+
 #endif
