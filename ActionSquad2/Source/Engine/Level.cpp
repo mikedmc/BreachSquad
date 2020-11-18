@@ -12296,8 +12296,8 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 			// x:atten c1, y:atten c2, z:light radius, w:
 			//{ K_LVL_LIGHTRENDER_ATTEN_C1, K_LVL_LIGHTRENDER_ATTEN_C2, nl->fMaxRadius, 0.0f },
 			{ ct_fGaussLen, K_LVL_LIGHTRENDER_ATTEN_C2, nl->fMaxRadius, 0.0f },
-			// x: game height projection inverse
-			{ ZHSCALE, 0.0f, 0.0f, 0.0f },
+			// x: game height projection, y: height projection inverse (projected -> real)
+			{ ZHSCALE, INV_ZHSCALE, 0.0f, 0.0f },
 			// xyz: light world position
 			{ nl->vPos.x, nl->vPos.y, nl->vPos.z, 0.0f }
 		};
