@@ -47,15 +47,16 @@
     rcp r1.z, r1.w
     dp3_sat r0.x, r0, r1
     mul r1, r0.x, v0
-    rcp r0.x, c0.z
+    rcp r0.x, c0.y
     mul r0.x, r0.x, r0.w
     mul r0.x, r0.x, r0.x
-    mov r2.x, c0.x
-    dp2add r0.y, r2.x, r2.x, c4.x
+    mov r0.z, c1.z
+    dp2add r0.y, r0.z, r0.z, c4.x
     rcp r0.y, r0.y
     mul r0.x, r0.y, r0.x
     mul r0.x, r0.x, c4.y
     exp r0.x, r0.x
+    mul r0.x, r0.x, c0.x
     mul oC0, r1, r0.x
 
-// approximately 28 instruction slots used (1 texture, 27 arithmetic)
+// approximately 29 instruction slots used (1 texture, 28 arithmetic)

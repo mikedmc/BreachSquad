@@ -25,6 +25,7 @@ public:
 	UINT32				UID;			// ingame UID
 	int					ID;				// ID exported from editor (not the same as UID).
 	Vec3				vPos;			// Z coord gets added to Y to simulate 3D when rendering (see Z_TO_H macros)
+	Vec3				vPos_ini;		// initial position needed for relative calculations. Usually only set when spawned.
 
 	bool	bTouching;			//folosit ca sa elimine eventuale cicluri infinite.
 	UINT32 	nTouchingUID;   	//Reprezinta UID-ul celui care a facut touch sau 0 pt niciunul

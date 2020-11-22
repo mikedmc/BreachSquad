@@ -1289,75 +1289,15 @@ CLight* CLevel::SpawnLight(D3DXVECTOR3 spawnPos, int nType, int nAnimIdx, DWORD 
 	nl->bbox.Set_Corrected(bbmin, bbmax);
 	nl->bbox_ini = nl->bbox;
 	nl->bbox_ini.Move(-nl->pos);
-	nl->fMaxRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
+	nl->fRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
 	//read angle and convert to radians
 	nl->fAngle = 0.0f;
 	nl->fAngle = DEG_TO_RAD(nl->fAngle);
 	nl->fAngle_ini = nl->fAngle;
 	//casts shadows
 	nl->castShadows = bCastShadows;
-
-	//setam buffer intern in fn de dreptunghiul frame-ului si animatiei ca sa nu le mai calculez pe paint
-	switch (nl->type)
-	{
-		case K_LVL_LT_POINT:
-		{
-			nl->fVolumeAlpha = 1.0f;
-			//coord spotului in planul 0, relativ la lumina
-			nl->lCorners[0] = D3DXVECTOR3(nl->bbox.vMin.x - nl->pos.x, nl->bbox.vMin.y - nl->pos.y, 0.0f);
-			nl->lCorners[1] = D3DXVECTOR3(nl->bbox.vMax.x - nl->pos.x, nl->bbox.vMin.y - nl->pos.y, 0.0f);
-			nl->lCorners[2] = D3DXVECTOR3(nl->bbox.vMin.x - nl->pos.x, nl->bbox.vMax.y - nl->pos.y, 0.0f);
-			nl->lCorners[3] = D3DXVECTOR3(nl->bbox.vMax.x - nl->pos.x, nl->bbox.vMax.y - nl->pos.y, 0.0f);
-			//coord in textura
-			if (nl->animID >= 0)
-				nl->lTexRect = m_sprLights.GetModuleRect_TexCoords(nl->animID, 0, 0);
-			//daca lumina este descentrata luam distanta maxima de la lumina la colturi si facem bbox-ul maxim in fn de ea
-			float d1 = D3DXVec2Length(&D3DXVECTOR2(nl->pos.x - nl->bbox.vMin.x, nl->pos.y - nl->bbox.vMin.y));
-			float d2 = max(d1, D3DXVec2Length(&D3DXVECTOR2(nl->pos.x - nl->bbox.vMax.x, nl->pos.y - nl->bbox.vMin.y)));
-			float d3 = max(d2, D3DXVec2Length(&D3DXVECTOR2(nl->pos.x - nl->bbox.vMin.x, nl->pos.y - nl->bbox.vMax.y)));
-			float dmax = max(d3, D3DXVec2Length(&D3DXVECTOR2(nl->pos.x - nl->bbox.vMax.x, nl->pos.y - nl->bbox.vMax.y)));
-			nl->fMaxRadius = dmax;
-		}
-		break;
-		case K_LVL_LT_IES:
-		{
-			ErrorBox(K_ERR_WARNING, L"[WARNING] SpawnLight:: Illegal light type (IES LIGHT)!");
-		}
-		break;
-		case K_LVL_LT_AMBIENTAL:
-		{
-			nl->castShadows = false;
-			nl->fVolumeAlpha = 0.0f;
-			m_colAmbientGlobal = nl->color;
-			nl->bbox_ini.Set(D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(0.0f, 0.0f));
-			nl->bbox = nl->bbox_ini;
-		}
-		break;
-		case K_LVL_LT_AREA:
-		{
-			nl->castShadows = false;
-			nl->fVolumeAlpha = 0.0f;
-			nl->lCorners[0] = D3DXVECTOR3(-nl->bbox.vHalfSize.x, -nl->bbox.vHalfSize.y, 0.0f);
-			nl->lCorners[1] = D3DXVECTOR3(nl->bbox.vHalfSize.x, -nl->bbox.vHalfSize.y, 0.0f);
-			nl->lCorners[2] = D3DXVECTOR3(-nl->bbox.vHalfSize.x, nl->bbox.vHalfSize.y, 0.0f);
-			nl->lCorners[3] = D3DXVECTOR3(nl->bbox.vHalfSize.x, nl->bbox.vHalfSize.y, 0.0f);
-			if (nl->animID >= 0)
-				nl->lTexRect = m_sprLights.GetModuleRect_TexCoords(nl->animID, 0, 0);
-		}
-		break;
-		case K_LVL_LT_DIRECTIONAL:
-		{
-			nl->castShadows = false;
-			nl->fVolumeAlpha = 0.0f;
-			nl->lCorners[0] = D3DXVECTOR3(-nl->bbox.vHalfSize.x, -nl->bbox.vHalfSize.y, 0.0f);
-			nl->lCorners[1] = D3DXVECTOR3(nl->bbox.vHalfSize.x, -nl->bbox.vHalfSize.y, 0.0f);
-			nl->lCorners[2] = D3DXVECTOR3(-nl->bbox.vHalfSize.x, nl->bbox.vHalfSize.y, 0.0f);
-			nl->lCorners[3] = D3DXVECTOR3(nl->bbox.vHalfSize.x, nl->bbox.vHalfSize.y, 0.0f);
-			if (nl->animID >= 0)
-				nl->lTexRect = m_sprLights.GetModuleRect_TexCoords(nl->animID, 0, 0);
-		}
-		break;
-	}
+	
+	//nl->InitGeometry(???);
 
 	//add light and return it
 	m_arrLights.Add(nl);
@@ -3034,7 +2974,7 @@ void CLevel::BuildVisibilityLists()
 			continue;
 		}
 
-		if (camaabb.IntersectsCircle(light->pos, light->fMaxRadius))
+		if (camaabb.IntersectsCircle(light->pos, light->fRadius))
 		{
 			//if we have hidden room clip area on, ignore the lights outside
 			if ((m_HiddenRoomAABB.vSize.x > 0.0f) && (m_HiddenRoomAABB.vSize.y >= 0.0f))
@@ -3045,7 +2985,7 @@ void CLevel::BuildVisibilityLists()
 				break;
 			if (m_arrLights[kk]->castShadows)
 			{
-				CAABB bbox_max(D3DXVECTOR2(light->pos.x - light->fMaxRadius, light->pos.y - light->fMaxRadius), D3DXVECTOR2(light->pos.x + light->fMaxRadius, light->pos.y + light->fMaxRadius));
+				CAABB bbox_max(D3DXVECTOR2(light->pos.x - light->fRadius, light->pos.y - light->fRadius), D3DXVECTOR2(light->pos.x + light->fRadius, light->pos.y + light->fRadius));
 				//la prima lumina cu shadow seteaza lightsCommonAABB fix pe bbox-ul luminii
 				if (bFirstShadowingLightSet == false)
 				{
@@ -6497,10 +6437,10 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				//execute script on death if no other important command issued
 				if (actor->m_AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_RUNSCRIPT)
 				{
-					CVariantComplex* cvc = actor->varAIparams.GetVariantByName(L"sDeathScript");
-					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
+					CVariantComplex* cvc2 = actor->varAIparams.GetVariantByName(L"sDeathScript");
+					if (cvc2->m_type == CVariantComplex::K_ARGTYPE_STRING)
 					{
-						StartScript(cvc->m_strArg.text, actor);
+						StartScript(cvc2->m_strArg.text, actor);
 						//clear script and death command
 						actor->varAIparams.DeleteVar(L"sDeathScript");
 						actor->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_NONE;
@@ -10655,45 +10595,25 @@ void CLevel::Update(float dTime_original)
 			break;
 			case K_LVL_LT_POINT:
 			{
-				//Creez forma luminii (mesh-ul) - fac rotatia aici si nu in shader ca sa pot scoate bb-ul final al luminii
 				D3DXVECTOR3 lcorners[4]; //ul, ur, dl, dr
 				memcpy(lcorners, nl->lCorners, 4 * sizeof(D3DXVECTOR3));
-				if (nl->fAngle != 0.0f)
-				{
-					D3DXMATRIXA16 matrot;
-					D3DXMatrixRotationZ(&matrot, nl->fAngle);
-					D3DXVec3TransformCoordArray(lcorners, sizeof(D3DXVECTOR3), lcorners, sizeof(D3DXVECTOR3), &matrot, 4);
-				}
-				//mut mesh pe pozitia finala
-				lcorners[0].x += nl->pos.x; lcorners[0].y += nl->pos.y;
-				lcorners[1].x += nl->pos.x; lcorners[1].y += nl->pos.y;
-				lcorners[2].x += nl->pos.x; lcorners[2].y += nl->pos.y;
-				lcorners[3].x += nl->pos.x; lcorners[3].y += nl->pos.y;
-				//iau bbox-ul final dupa AABB-ul dat de cele 4 puncte rotite
-				CAABB rotAABB = AABB_FromPoints(lcorners, 4);
-				//scriu VS-ul final
+				// move mesh to light position (!z must remain 0!)
+				lcorners[0].x += nl->vPos.x; lcorners[0].y += nl->vPos.y;
+				lcorners[1].x += nl->vPos.x; lcorners[1].y += nl->vPos.y;
+				lcorners[2].x += nl->vPos.x; lcorners[2].y += nl->vPos.y;
+				lcorners[3].x += nl->vPos.x; lcorners[3].y += nl->vPos.y;
+				//write final VS verts
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
 				vul.pos = lcorners[0];
 				vur.pos = lcorners[1];
-				vdl.pos = lcorners[2];
-				vdr.pos = lcorners[3];
-				//setez culoarea
+				vdr.pos = lcorners[2];
+				vdl.pos = lcorners[3];
+				//set color
 				vul.color = vur.color = vdl.color = vdr.color = nl->color;
-				//setez coordonate textura spot
-				//Coord de mapare pe RTT (tex2) se seteaza din shader
-				vul.tex1 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.top, 0.0f, 0.0f);
-				vur.tex1 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.top, 0.0f, 0.0f);
-				vdl.tex1 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.bottom, 0.0f, 0.0f);
-				vdr.tex1 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.bottom, 0.0f, 0.0f);
-				//setez normalele finale
-				vul.n = nl->vPos - vul.pos;
-				vur.n = nl->vPos - vur.pos;
-				vdl.n = nl->vPos - vdl.pos;
-				vdr.n = nl->vPos - vdr.pos;
-				//construiesc VB-ul exact
+				// triangles vb
 				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
 				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+				lightRectV[3] = vur; lightRectV[4] = vdr; lightRectV[5] = vdl;
 
 				//dynamic mesh for light geometry
 				nl->m_nLightMeshIdx = -1;
@@ -10707,6 +10627,7 @@ void CLevel::Update(float dTime_original)
 					int occludersCnt = 0;
 					nl->m_nShadowMeshIdx = -1;
 					//foloseste pt verificare aabb-ul rotit al luminii
+					CAABB rotAABB = AABB_FromPoints(lcorners, 4);
 					COccluder* occludersArr = GetVisibleAABBs_toOccluders(D3DXVECTOR2(nl->pos.x, nl->pos.y), &rotAABB, occludersCnt); //returneaza pointer la array pe stack deci nu trebuie 
 					//trimitem occluderele pt extinderea volumelor de umbre
 					if (occludersCnt > 0)
@@ -11320,14 +11241,14 @@ HRESULT CLevel::PaintOffscreen()
 							continue;
 						D3DXVECTOR2 lightdir = light->pos - actor->posHeart;
 						float lightdist = D3DXVec2Length(&lightdir);
-						if (lightdist > light->fMaxRadius)
+						if (lightdist > light->fRadius)
 							continue;
 						if (!IsLineOfSight(light->pos, actor->GetPosHeart()))
 							continue;
 
 						//normalize vector
 						lightdir /= lightdist;
-						float opacity = 1.0f - lightdist / m_visibleList.visible_lights.m_pData[ll]->fMaxRadius;
+						float opacity = 1.0f - lightdist / m_visibleList.visible_lights.m_pData[ll]->fRadius;
 
 						fIllumination += opacity;
 						//medie ponderata a vectorilor
@@ -11375,13 +11296,13 @@ HRESULT CLevel::PaintOffscreen()
 							continue;
 						D3DXVECTOR2 lightdir = light->pos - actor->GetPosHeart();
 						float lightdist = D3DXVec2Length(&lightdir);
-						if (lightdist > light->fMaxRadius)
+						if (lightdist > light->fRadius)
 							continue;
 						if (!IsLineOfSight(light->pos, actor->posHeart))
 							continue;
 						//normalize vector
 						lightdir /= lightdist;
-						float opacity = 1.0f - lightdist / light->fMaxRadius;
+						float opacity = 1.0f - lightdist / light->fRadius;
 
 						matshad = matlocal;
 
@@ -12294,10 +12215,9 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 		//set Pshader constants
 		float fConstData[][4] = { 
 			// x:atten c1, y:atten c2, z:light radius, w:
-			//{ K_LVL_LIGHTRENDER_ATTEN_C1, K_LVL_LIGHTRENDER_ATTEN_C2, nl->fMaxRadius, 0.0f },
-			{ ct_fGaussLen, K_LVL_LIGHTRENDER_ATTEN_C2, nl->fMaxRadius, 0.0f },
-			// x: game height projection, y: height projection inverse (projected -> real)
-			{ ZHSCALE, INV_ZHSCALE, 0.0f, 0.0f },
+			{ nl->fIntensity, nl->fRadius, 0.0f, 0.0f },
+			// x: game height projection, y: height projection inverse (projected -> real), z: gauss dist atten factor
+			{ ZHSCALE, INV_ZHSCALE, ct_fGaussLen, 0.0f },
 			// xyz: light world position
 			{ nl->vPos.x, nl->vPos.y, nl->vPos.z, 0.0f }
 		};

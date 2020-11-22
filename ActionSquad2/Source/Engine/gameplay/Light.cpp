@@ -31,20 +31,16 @@ void CLight::InitGeometry(CSpriteCollection* pLightsSprCol)
 	{
 	case K_LVL_LT_POINT:
 	{
-		//coord spotului in planul 0, relativ la lumina
-		lCorners[0] = Vec3(bbox.vMin.x - pos.x, bbox.vMin.y - pos.y, 0.0f);
-		lCorners[1] = Vec3(bbox.vMax.x - pos.x, bbox.vMin.y - pos.y, 0.0f);
-		lCorners[2] = Vec3(bbox.vMin.x - pos.x, bbox.vMax.y - pos.y, 0.0f);
-		lCorners[3] = Vec3(bbox.vMax.x - pos.x, bbox.vMax.y - pos.y, 0.0f);
-		//coord in textura
-		if (animID >= 0)
-			lTexRect = pLightsSprCol->GetModuleRect_TexCoords(animID, 0, 0);
-		//daca lumina este descentrata luam distanta maxima de la lumina la colturi si facem bbox-ul maxim in fn de ea
-		float d1 = MUVec2Len(&Vec2(pos.x - bbox.vMin.x, pos.y - bbox.vMin.y));
-		float d2 = max(d1, MUVec2Len(&Vec2(pos.x - bbox.vMax.x, pos.y - bbox.vMin.y)));
-		float d3 = max(d2, MUVec2Len(&Vec2(pos.x - bbox.vMin.x, pos.y - bbox.vMax.y)));
-		float dmax = max(d3, MUVec2Len(&Vec2(pos.x - bbox.vMax.x, pos.y - bbox.vMax.y)));
-		fMaxRadius = dmax;
+		// Gaussian attenuated radius. 
+		// The attenuation with a 0.55 coefficient dops off to 0 at about 2.0f * fRadius. (2.0 is a little too big)
+		// Beacuse light is farther away from the lit surfaces radius can be smaller so adjust this based on usage.
+		float fRad = fRadius * 1.0f;
+
+		// screen space light rectangle (clockwise) relative to light
+		lCorners[0] = Vec3(-fRad, -fRad, 0.0f);
+		lCorners[1] = Vec3( fRad, -fRad, 0.0f);
+		lCorners[2] = Vec3( fRad,  fRad, 0.0f);
+		lCorners[3] = Vec3(-fRad,  fRad, 0.0f);
 	}
 	break;
 	case K_LVL_LT_IES:
@@ -89,7 +85,7 @@ void CLight::InitGeometry(CSpriteCollection* pLightsSprCol)
 }
 
 CLight::CLight() :
-	m_nLightMeshIdx(-1), m_nShadowMeshIdx(-1), type(K_LVL_LT_UNKNOWN), animID(-1), fMaxRadius(0.0f), fVolumeAlpha(1.0f), castShadows(false)
+	m_nLightMeshIdx(-1), m_nShadowMeshIdx(-1), type(K_LVL_LT_UNKNOWN), animID(-1), fRadius(0.0f), fVolumeAlpha(1.0f), castShadows(false)
 {
 	vnDir = Vec3(0.0f, 1.0f, 0.0f); //default direction
 }

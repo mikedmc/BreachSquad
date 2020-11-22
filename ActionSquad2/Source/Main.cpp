@@ -98,7 +98,8 @@ CNetLock					g_netlock;
 CSpineManager				g_spineMgr;
 
 
-float ct_fGaussLen = 0.5f;
+//#TODO: default value for gauss bell with attenuation almost 2 at fRadius * 2.0f
+float ct_fGaussLen = 0.55f; 
 
 
 

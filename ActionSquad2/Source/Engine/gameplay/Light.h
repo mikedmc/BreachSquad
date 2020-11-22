@@ -43,7 +43,7 @@ public:
 
 	Vec3				lCorners[4];				// ul, ur, dl, dr - mesh-ul spotului relativ la pozitia luminii; coord Z este 0 
 	RECTLTRB_F			lTexRect;					// dreptunghiul in textura al spotului
-	float				fMaxRadius;					// raza maxima a luminii
+	float				fRadius;					// raza maxima a luminii
 													   
 	int					m_nLightMeshIdx;			// buffer-ul dinamic pt spotul luminii
 	int					m_nShadowMeshIdx;			// buffer-ul dinamic pt shadow volume

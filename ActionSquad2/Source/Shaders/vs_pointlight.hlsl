@@ -6,7 +6,7 @@ struct VS_INPUT
    float4 Position : POSITION0;
    float3 Normal : NORMAL;       //unused
    float4 Color : COLOR0;         
-   float2 Tex0 : TEXCOORD0;      //RT coords for normals_height
+   float2 Tex0 : TEXCOORD0;      
    float3 Tex1 : TEXCOORD1; 
    
 };
@@ -16,7 +16,7 @@ struct VS_OUTPUT
    float4 Position :        POSITION0;
    float4 Color :           COLOR0;
    float2 Tex0 :            TEXCOORD0;
-   float4 Tex1:             TEXCOORD1; // world coords
+   float4 Tex1:             TEXCOORD1; // will contain world coords
 };
 
 VS_OUTPUT vs_main( VS_INPUT Input )

@@ -1,6 +1,5 @@
-// distance attenuation formula: 1.0/(1.0 + c1*d + c2*d^2)
-float4 fLightData : register(c0); //x-atten c1, y-atten c2, z-light radius
-//x: mul to convert H in Y offset (inverse 2D projection, world->screen), y: inv Z to H projection (screen -> world)
+float4 fLightData : register(c0); //x:light intensity, y:light radius
+//x: mul to convert H in Y offset (inverse 2D projection, world->screen), y: inv Z to H projection (screen -> world), z: light atten c1 gauss (usually 0.55)
 float4 fWorldConstants : register(c1); 
 // world coords light position
 float3 vLightPosWorld : register(c2);   
@@ -39,19 +38,20 @@ float4 ps_main(PS_INPUT Input) : COLOR0
 	float dotN = dot(lightRayN, normalN);
 	dotN = clamp(dotN, 0.0f, 1.0f);
 	// scales light distance to light radius because attenuation is based on light radius
-	float attenDist = lightDist / fLightData.z;
-	// distance attenuation
-	//float distAtten = 1.0f / (1.0f + fLightData.x * attenDist + fLightData.y * attenDist * attenDist);
+	float attenDist = lightDist / fLightData.y;
 
+	// distance attenuation	 (not used, never gets down to 0, light clipping becomes visible on deferred shading making the light rectangle fullscreen)
+	//float distAtten = 1.0f / (1.0f + fLightData.x * attenDist + fLightData.y * attenDist * attenDist);
 	// attenuation based on distance, moved down so it approaces 0
 	//float distAtten = (1.0f / (1.0f + fLightData.y * attenDist * attenDist) - 0.1) * 1.111;
 
-	// attenuation based on gauss bell (fLightData.x is the gauss bell base)
-	float distAtten = exp(-((attenDist * attenDist) / (2.0f * fLightData.x * fLightData.x)));
+	// attenuation based on gauss bell (fWorldConstants.z is the gauss bell base)
+	float distAtten = exp(-((attenDist * attenDist) / (2.0f * fWorldConstants.z * fWorldConstants.z)));
 
-	// original:
-	float4 fvFinalColor = distAtten * (Input.VertColor * dotN);
-	// good effect if we ignore dotN and just use dist atten
+	// original:		 //lg intensity
+	float4 fvFinalColor = fLightData.x * distAtten * (Input.VertColor * dotN);
+	
+	// good smnooth effect if we ignore dotN and just use dist atten (gives illumination on other side too)
 	//float4 fvFinalColor = distAtten * (Input.VertColor);
 
 	return(fvFinalColor);

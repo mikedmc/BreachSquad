@@ -14,6 +14,7 @@ IActiveInterface::IActiveInterface() :
 	UID = GenerateUID();
 
 	vPos = Vec3(0.0f, 0.0f, 0.0f);
+	vPos_ini = Vec3(0.0f, 0.0f, 0.0f);
 
 	pos = pos_ini = D3DXVECTOR2(0.0f, 0.0f);
 	script_hash.Reset();

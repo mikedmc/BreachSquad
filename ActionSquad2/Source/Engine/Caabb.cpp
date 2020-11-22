@@ -55,7 +55,7 @@ void CAABB::Set(float xmin, float ymin, float xmax, float ymax)
 	Set(vMin, vMax);
 }
 
-//seteaza corect bbox indiferent de pozitia punctelor
+// checks min and max points before setting the bbox
 void CAABB::Set_Corrected(D3DXVECTOR2 pt1, D3DXVECTOR2 pt2)
 {
 	D3DXVECTOR2 min, max;

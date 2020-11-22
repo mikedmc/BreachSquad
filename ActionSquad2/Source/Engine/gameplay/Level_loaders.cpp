@@ -208,7 +208,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	}
 
 	int lightsCnt = (int)OS_freadUInt32(fl);
-	//date fiecare 
+	// Data for each light 
 	for (int kk = 0; kk < lightsCnt; kk++)
 	{
 		CLight *nl = new CLight();
@@ -224,8 +224,10 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		nl->vPos.x = (float)OS_freadInt32(fl);
 		nl->vPos.y = (float)OS_freadInt32(fl);
 		nl->vPos.z = (float)OS_freadInt32(fl);
+		//#TODO: should load from level file
 		nl->vPos.z = 32.0f;
 
+		nl->vPos_ini = nl->vPos;
 		nl->pos_ini = nl->pos = D3DXVECTOR2(nl->vPos.x, nl->vPos.y);
 		//animID
 		CHAR charAnmName[MAX_PATH];
@@ -249,7 +251,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		nl->bbox.Set_Corrected(bbmin, bbmax);
 		nl->bbox_ini = nl->bbox;
 		nl->bbox_ini.Move(-nl->pos);
-		nl->fMaxRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
+		nl->fRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
 		//re-arrange spots (maybe lights image changed)
 		if (nl->animID >= 0)
 		{
@@ -265,8 +267,11 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			nl->bbox.Set_Corrected(bbmin, bbmax);
 			nl->bbox_ini = nl->bbox;
 			nl->bbox_ini.Move(-nl->pos);
-			nl->fMaxRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
+			nl->fRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
 		}
+
+		//#HACK: hardcodes the radius
+		nl->fRadius = 128.0f;
 
 		//read angle and convert to radians
 		nl->fAngle = (float)OS_freadInt16(fl);
@@ -286,6 +291,8 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		//load logic
 		nl->LoadLogic(fl);
 
+		// called when adding the light to the lights array
+		nl->PostConstructionInit();
 		m_arrLights.Add(nl);
 	}
 
@@ -1397,7 +1404,7 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 		nl->bbox.Set_Corrected(bbmin, bbmax);
 		nl->bbox_ini = nl->bbox;
 		nl->bbox_ini.Move(-nl->pos);
-		nl->fMaxRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
+		nl->fRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
 		//read angle and convert to radians
 		nl->fAngle = (float)OS_freadInt16(fl);
 		nl->fAngle = DEG_TO_RAD(nl->fAngle);
