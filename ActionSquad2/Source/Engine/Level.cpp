@@ -3235,7 +3235,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 						break;
 					//normalize
 					//vActPl /= fActPlLen;
-					float fPlayerAng = Math_GetVectorAngle(vActPl);
+					float fPlayerAng = UTMath::GetVectorAngle(vActPl);
 					fPlayerAng -= active->AIfvar1; //angle
 					//#TODO: is direct line of sight?
 					//is in fov?
@@ -8281,7 +8281,7 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 				continue;
 			//daca e destul de aproape
 			//vede daca inamicul este in FOV. Face testul doar daca FOV nu este maxim (adica vede si deasupra)
-			if ((sourceActor->fFOVPercent < 1.0f) && (Math_GetAngleBetweenVectors(enemy->posHeart - sourceActor->posHeart, sourceActor->vAngleDir) > (HALF_PI * sourceActor->fFOVPercent)))
+			if ((sourceActor->fFOVPercent < 1.0f) && (UTMath::GetAngleBetweenVectors(enemy->posHeart - sourceActor->posHeart, sourceActor->vAngleDir) > (HALF_PI * sourceActor->fFOVPercent)))
 				continue;
 			//verifica daca am linie directa de vedere
 			if (!IsLineOfSight(sourceActor->posHeart, enemy->posHeart))
@@ -13021,7 +13021,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 				localAABB.Inflate(-K_TILE_SIZE + fabs(3.0f * sin(fLocalTimeline * 4.0f)), -K_TILE_SIZE + fabs(3.0f * sin(fLocalTimeline * 4.0f)));
 				if (AABB_Segment_Intersection(vpos, camAABB.vCenter, localAABB, &vpos))
 				{
-					float fAng = HALF_PI + Math_GetVectorAngle(camAABB.vCenter - vpos);
+					float fAng = HALF_PI + UTMath::GetVectorAngle(camAABB.vCenter - vpos);
 					D3DXMATRIXA16 matrt;
 					MUMatAffine2D(&matrt, 1.0f, NULL, fAng, &vpos);
 					m_pSprite->SetTransform(&matrt);
@@ -13970,7 +13970,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, D3DXVECTOR2 vDir)
 		weapon->m_nBurstBulletsShot++;
 		weapon->m_nBulletsShotSinceCool++;
 		//process aim error
-		float fAimAng = Math_GetVectorAngle(vFinalDir);
+		float fAimAng = UTMath::GetVectorAngle(vFinalDir);
 		float fAimAngError = 0.0f;
 		if (weapon->WeaponTemplate.fAimErrorAddPerShot < 0.0f)
 		{
@@ -15323,7 +15323,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				case K_LVL_BULLET_GOO:
 				{
 					D3DXVECTOR2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
-					float ang = Math_GetVectorAngle(vdir);
+					float ang = UTMath::GetVectorAngle(vdir);
 					MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule(&m_sprProps);
@@ -15348,7 +15348,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				case K_LVL_BULLET_MELEE_SAW:
 				{
 #if defined(_DEBUG) || defined(DEBUG)
-					float ang = Math_GetVectorAngle(node->m_data.physPt->m_data.speed);
+					float ang = UTMath::GetVectorAngle(node->m_data.physPt->m_data.speed);
 					MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule(&m_sprProps);
@@ -15425,7 +15425,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				case K_LVL_BULLET_GOO:
 				{
 					D3DXVECTOR2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
-					float ang = Math_GetVectorAngle(vdir);
+					float ang = UTMath::GetVectorAngle(vdir);
 					MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprProps, 1);
@@ -15450,7 +15450,7 @@ void CLevel::PaintBullets(bool paintNormals)
 				{
 #if defined(_DEBUG) || defined(DEBUG)
 
-					float ang = Math_GetVectorAngle(node->m_data.physPt->m_data.speed);
+					float ang = UTMath::GetVectorAngle(node->m_data.physPt->m_data.speed);
 					MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
 					m_pSprite->SetTransform(&matbullet);
 					node->m_data.sprBullet.paint_firstModule_texOverride(&m_sprProps, 1);
@@ -16000,7 +16000,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 		}
 
 		//explo direction
-		float fExploAng = Math_GetVectorAngle(vExploDir);
+		float fExploAng = UTMath::GetVectorAngle(vExploDir);
 		//#TODO: explo-interactAI e o proprietate ce va fi exportata (interactioneaza cu AI-uri care se activeaza la explozii?)
 		bool bInteractAI = false;
 
@@ -16883,114 +16883,6 @@ CCollisionShape* CLevel::SpawnCollisionShape(int nType, D3DXVECTOR2 vMin, D3DXVE
 
 	m_arrColShapes.Add(pCol);
 	return pCol;
-}
-
-CCollisionShape* CLevel::ColShape_Segment_Intersection_Arr(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CCollisionShape * arrBoxes[], int nBoxesCnt, D3DXVECTOR2 * retCollisionPoint, D3DXVECTOR2 * retNormal)
-{
-	//verificari initiale
-	_ASSERT(arrBoxes != NULL);
-
-	if (nBoxesCnt <= 0)
-		return null;
-	//calculeaza termeni segment
-	D3DXVECTOR2 dir = end - start;
-	float seglen = D3DXVec2Length(&dir);
-	if (seglen <= 0.0f)
-		return null;
-	dir /= seglen;
-
-	D3DXVECTOR2 dirfrac;
-	// r.dir is unit direction vector of ray
-	dirfrac.x = 1.0f / dir.x;
-	dirfrac.y = 1.0f / dir.y;
-	//tine intersectia minima
-	float minTfinal = FLT_MAX;
-	//fast check box - checks box box intersection before checking segment intersection
-	CAABB boxCheck;
-	boxCheck.Set_Corrected(start, end);
-	//valoarea de return 
-	CAABB* retBox = null;
-	CCollisionShape* retShape = null;
-	for (int kk = 0; kk < nBoxesCnt; kk++)
-	{
-		//cursorul prin arrBoxes
-		CAABB* box = &arrBoxes[kk]->bbox;
-		//vector bounding box noit intersecting target box means no collision
-		if ((box->vMin.x > boxCheck.vMax.x) || (box->vMax.x < boxCheck.vMin.x) || (box->vMin.y > boxCheck.vMax.y) || (box->vMax.y < boxCheck.vMin.y))
-			continue;
-
-		float t1 = (box->vMin.x - start.x) * dirfrac.x;
-		float t2 = (box->vMax.x - start.x) * dirfrac.x;
-		float t3 = (box->vMin.y - start.y) * dirfrac.y;
-		float t4 = (box->vMax.y - start.y) * dirfrac.y;
-
-		float tmin = max(min(t1, t2), min(t3, t4));
-		float tmax = min(max(t1, t2), max(t3, t4));
-
-		// if tmax < 0, ray (line) is intersecting AABB, but whole AABB is behind us
-		// if tmin > tmax, ray doesn't intersect AABB
-		//daca tmin e mai mare decat lungimea segmentului inseamna ca se intersecteaza dupa al doilea punct
-		//daca tmin e mai mare decat minTfinal inseamna ca am coliziune mai departata decat ultima verificata
-		//AM INVERSAT if-ul ca sa fie mai scurt codul
-		if ((tmax >= 0.0f) && (tmin <= tmax) && (tmin <= seglen) && (tmin < minTfinal))
-		{
-			retBox = box;
-			retShape = arrBoxes[kk];
-			minTfinal = tmin;
-		}
-	}
-	//minTfinal contine procentul intersectiei
-	if (retCollisionPoint != NULL)
-	{
-		if (retBox != null)
-		{
-			*retCollisionPoint = start + minTfinal * dir;
-			//pentru normala: daca e intre ymin si ymax e coliziune cu latura verticala
-			if (retNormal != NULL)
-			{
-				retNormal->x = retNormal->y = 0.0f;
-				if ((retCollisionPoint->y > retBox->vMin.y) && (retCollisionPoint->y < retBox->vMax.y))
-				{
-					if (retCollisionPoint->x < retBox->vCenter.x)
-						retNormal->x = -1.0f;
-					else
-						retNormal->x = 1.0f;
-				}
-				else
-				{
-					if (retCollisionPoint->y < retBox->vCenter.y)
-						retNormal->y = -1.0f;
-					else
-						retNormal->y = 1.0f;
-				}
-			}
-		}
-		else
-		{
-			*retCollisionPoint = end;
-			if (retNormal != null)
-			{
-				*retNormal = D3DXVECTOR2(0.0f, 0.0f);
-			}
-		}
-	}
-	//intorc boxul colizionat daca este cazul sau null daca nu a avut coliziune
-	return retShape;
-}
-
-
-CCollisionShape* CLevel::ColShape_CAABB_Intersect_Arr(CAABB * aabbSrc, CCollisionShape * arrBoxes[], int nBoxesCnt)
-{
-	if (aabbSrc == null)
-		return null;
-	for (int kk = 0; kk < nBoxesCnt; kk++)
-	{
-		//cursorul prin arrBoxes
-		CAABB* box = &arrBoxes[kk]->bbox;
-		if (box->Intersects(aabbSrc))
-			return arrBoxes[kk];
-	}
-	return null;
 }
 
 

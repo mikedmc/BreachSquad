@@ -54,11 +54,11 @@ void CPolyFOV::AddPolySegment(double angle1, double angle2, COccluder *wall)
 
 
 	D3DXVECTOR2 pBegin, pEnd;
-	bool ok1 = MATH_LineLineIntersection(p3, p4, p1, p2, &pBegin);
+	bool ok1 = UTMath::LineLineIntersection(p3, p4, p1, p2, &pBegin);
 
 	p2.x = m_vViewerPos.x + (float)cos(angle2);
 	p2.y = m_vViewerPos.y + (float)sin(angle2);
-	bool ok2 = MATH_LineLineIntersection(p3, p4, p1, p2, &pEnd);
+	bool ok2 = UTMath::LineLineIntersection(p3, p4, p1, p2, &pEnd);
 
 	if (ok1 && ok2)
 	{

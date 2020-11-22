@@ -273,10 +273,10 @@
     <ClInclude Include="Source\Engine\gameplay\Actor.h" />
     <ClInclude Include="Source\Engine\gameplay\CollisionShape.h" />
     <ClInclude Include="Source\Engine\gameplay\GameConstants.h" />
-    <ClInclude Include="Source\Engine\gameplay\GameStructs.h" />
     <ClInclude Include="Source\Engine\gameplay\LevelTypes.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_scriptable.h" />
     <ClInclude Include="Source\Engine\gameplay\Light.h" />
+    <ClInclude Include="Source\Engine\gameplay\Tile.h" />
     <ClInclude Include="Source\Engine\gameplay\TileBlockMesh.h" />
     <ClInclude Include="Source\Engine\GetDXVer.h" />
     <ClInclude Include="Source\Engine\Constants\igminterface_SPR.h" />
@@ -661,6 +661,7 @@
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyLeaderboards.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\Level_intersections.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Prop.cpp" />
     <ClCompile Include="Source\Engine\gameplay\ActiveInterface.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Actor.cpp" />

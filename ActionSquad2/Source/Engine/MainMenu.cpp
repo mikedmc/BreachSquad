@@ -575,7 +575,7 @@ void CMainMenu::Update(float dTime)
 
 					//float selection cursor
 					if (m_nSelection >= 0)
-						MATH_EaseTo_quadratic(&m_fSelPageCursor, (float)m_nSelection, 10.0f * dTime, 1.0f * dTime);
+						UTMath::EaseTo_quadratic(&m_fSelPageCursor, (float)m_nSelection, 10.0f * dTime, 1.0f * dTime);
 					//set selection rect
 					if (m_nSelection >= 0)
 					{
@@ -844,7 +844,7 @@ void CMainMenu::Update(float dTime)
 
 			//float selection cursor
 			if(m_nSelection >= 0)
-				MATH_EaseTo_quadratic(&m_fSelPageCursor, (float)m_nSelection, 10.0f * dTime, 1.0f * dTime);
+				UTMath::EaseTo_quadratic(&m_fSelPageCursor, (float)m_nSelection, 10.0f * dTime, 1.0f * dTime);
 			//set selection rect
 			if (m_nSelection >= 0)
 			{
@@ -1034,7 +1034,7 @@ void CMainMenu::Update(float dTime)
 			{
 				m_nSelPage = m_nSelection;
 			}
-			MATH_EaseTo_quadratic(&m_fSelPageCursor, (float)m_nSelPage, 10.0f * dTime, 1.0f * dTime);
+			UTMath::EaseTo_quadratic(&m_fSelPageCursor, (float)m_nSelPage, 10.0f * dTime, 1.0f * dTime);
 
 			//set selection rect
 			if (m_nSelection >= 0)
@@ -1343,7 +1343,7 @@ void CMainMenu::Update(float dTime)
 				nColumn = (m_nSelection % nSelPerPage) % m_nSelColumns;
 			}
 
-			MATH_EaseTo_quadratic(&m_fSelPageCursor, (float)m_nSelPage, 10.0f * dTime, 1.0f * dTime);
+			UTMath::EaseTo_quadratic(&m_fSelPageCursor, (float)m_nSelPage, 10.0f * dTime, 1.0f * dTime);
 			//--- update selection ---
 			if (m_nSelection >= 0)
 			{
@@ -1591,7 +1591,7 @@ void CMainMenu::Update(float dTime)
 				nColumn = (m_nSelection % nSelPerPage) % m_nSelColumns;
 			}
 
-			MATH_EaseTo_quadratic(&m_fSelPageCursor, (float)m_nSelPage, 10.0f * dTime, 1.0f * dTime);
+			UTMath::EaseTo_quadratic(&m_fSelPageCursor, (float)m_nSelPage, 10.0f * dTime, 1.0f * dTime);
 			//--- update selection ---
 			if (m_nSelection >= 0)
 			{

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gameplay/GameConstants.h"
-#include "gameplay/GameStructs.h"
+#include "gameplay/Tile.h"
 
 #include "gameplay/LevelTypes.h"
 #include "gameplay/Level_scriptable.h"
@@ -194,6 +194,8 @@ public:
 	CCollisionShape*		ColShape_Segment_Intersection_Arr(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CCollisionShape * arrBoxes[], int nBoxesCnt, D3DXVECTOR2 * retCollisionPoint, D3DXVECTOR2 * retNormal);
 	// returns the first intersection of aabbSRC with a Collision Shape
 	CCollisionShape*		ColShape_CAABB_Intersect_Arr(CAABB * aabbSrc, CCollisionShape * arrBoxes[], int nBoxesCnt);
+	// returns segment intersection with tiles, starting form vStart
+	bool					SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i * hitTilePosTL = nullptr);
 
 	CGrowableArray<CProp*>	m_arrProps;				//obiectele din nivel (active sau nu)
 	CFixedArray<CProp*, 256>	m_arrPropsPtrInteract;	//array containing objects that you can interact with (for speed checks)

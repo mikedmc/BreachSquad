@@ -1614,7 +1614,7 @@ void CParticlesManager::GenerateStarEffect(D3DXVECTOR2 npos, int nLayer /*= K_PA
 
 void CParticlesManager::GenerateDoorBreak(D3DXVECTOR2 npos, D3DXVECTOR2 dir, int nLayer /*= K_PART_LAYER_NORMAL*/)
 {
-	float fAngBase = Math_GetVectorAngle(dir);
+	float fAngBase = UTMath::GetVectorAngle(dir);
 	D3DXVec2Normalize(&dir, &dir);
 	D3DXVECTOR2 ldir;
 	//praf
@@ -1655,7 +1655,7 @@ void CParticlesManager::GenerateSmokePuff(D3DXVECTOR2 npos, float fRadius, int n
 
 void CParticlesManager::GenerateHeadshot(D3DXVECTOR2 npos, D3DXVECTOR2 dir, DWORD dwColor, int nLayer /*= K_PART_LAYER_NORMAL*/)
 {
-	float fAngBase = Math_GetVectorAngle(dir);
+	float fAngBase = UTMath::GetVectorAngle(dir);
 	D3DXVec2Normalize(&dir, &dir);
 	D3DXVECTOR2 ldir;
 	//praf rosu

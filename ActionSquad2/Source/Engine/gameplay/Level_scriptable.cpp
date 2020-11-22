@@ -206,7 +206,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					g_userData[K_MEMID_SECRET_ITEMS_FLAGS] |= (1 << (idx - 1));
 					g_userData[K_MEMID_SECRET_ITEMS_FLAGS] &= 0xfffff; //masking 20 bits for 20 doughnuts
 					UINT32 unBits = g_userData[K_MEMID_SECRET_ITEMS_FLAGS] & 0xfffff;
-					int nCollectedCnt = MATH_CountBits(unBits);
+					int nCollectedCnt = UTMath::CountBits(unBits);
 					//save collected
 					UTGetAchievementManager().SetStat(EGameStats::N_STAT_SECRET_ITEMS, (float)nCollectedCnt);
 #ifndef K_AUTO_ACHIEVE_FROM_STATS

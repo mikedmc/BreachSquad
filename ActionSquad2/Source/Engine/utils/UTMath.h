@@ -20,3 +20,5 @@
 // macros
 #define			Vec3ToVec2XY(vec)		Vec2(vec.x, vec.y)
 #define			Vec2ToVec3XY0(vec)		Vec3(vec.x, vec.y, 0.0f)
+
+#define			Vec2i					POINTXY_INT

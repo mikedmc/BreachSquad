@@ -1,11 +1,7 @@
 #include "dxstdafx.h"
 #include "CMathUtil.h"
 
-///------------------------------------------------------------------------------------------------------------------------------------------
-///  Generic math equations
-///------------------------------------------------------------------------------------------------------------------------------------------
-
-float MATH_LineDist(D3DXVECTOR3 p, D3DXVECTOR3 v1, D3DXVECTOR3 v2, D3DXVECTOR3 *n)
+float UTMath::LineDist(D3DXVECTOR3 p, D3DXVECTOR3 v1, D3DXVECTOR3 v2, D3DXVECTOR3 *n)
 {
 	D3DXVECTOR3 v1p, v2p, v1v2, nr;
 	float a, b, c, prj;
@@ -41,7 +37,7 @@ float MATH_LineDist(D3DXVECTOR3 p, D3DXVECTOR3 v1, D3DXVECTOR3 v2, D3DXVECTOR3 *
 }
 
 
-bool MATH_LineLineIntersection(D3DXVECTOR2 p1, D3DXVECTOR2 p2, D3DXVECTOR2 p3, D3DXVECTOR2 p4, D3DXVECTOR2 *outPt)
+bool UTMath::LineLineIntersection(D3DXVECTOR2 p1, D3DXVECTOR2 p2, D3DXVECTOR2 p3, D3DXVECTOR2 p4, D3DXVECTOR2 *outPt)
 {
 	// Store the values for fast access and easy
 	// equations-to-code conversion
@@ -74,7 +70,7 @@ bool MATH_LineLineIntersection(D3DXVECTOR2 p1, D3DXVECTOR2 p2, D3DXVECTOR2 p3, D
 	return true;
 }
 
-void MATH_EaseTo_quadratic(float * current, float target, float fDistMultiplier, float fMinSpeed)
+void UTMath::EaseTo_quadratic(float * current, float target, float fDistMultiplier, float fMinSpeed)
 {
 	if (current == null)
 		return;
@@ -92,7 +88,7 @@ void MATH_EaseTo_quadratic(float * current, float target, float fDistMultiplier,
 	}
 }
 
-void MATH_EaseTo_linear(float * current, float target, float fSpeed)
+void UTMath::EaseTo_linear(float * current, float target, float fSpeed)
 {
 	if (current == null)
 		return;
@@ -105,7 +101,7 @@ void MATH_EaseTo_linear(float * current, float target, float fSpeed)
 }
 
 
-float MATH_GetAlphaOnDomainEnds(float fCursor, float fDomainLength, float fAlphaRegionSize)
+float UTMath::GetAlphaOnDomainEnds(float fCursor, float fDomainLength, float fAlphaRegionSize)
 {
 	CLAMP(fCursor, 0.0f, fDomainLength);
 	if (fCursor < fAlphaRegionSize)
@@ -115,12 +111,12 @@ float MATH_GetAlphaOnDomainEnds(float fCursor, float fDomainLength, float fAlpha
 	return 1.0f;
 }
 
-bool MATH_IsPowerOfTwo(unsigned int nVal)
+bool UTMath::IsPowerOfTwo(unsigned int nVal)
 {
 	return ((nVal != 0) && !(nVal & (nVal - 1)));
 }
 
-float Math_GetVectorAngle(D3DXVECTOR2 start, D3DXVECTOR2 end)
+float UTMath::GetVectorAngle(D3DXVECTOR2 start, D3DXVECTOR2 end)
 {
 	D3DXVECTOR2 vecdir = end - start;
 	float len = D3DXVec2LengthSq(&vecdir);
@@ -131,7 +127,7 @@ float Math_GetVectorAngle(D3DXVECTOR2 start, D3DXVECTOR2 end)
 	return 0.0f;
 }
 
-float Math_GetVectorAngle(D3DXVECTOR2 const &dir)
+float UTMath::GetVectorAngle(D3DXVECTOR2 const &dir)
 {
 	float len = D3DXVec2LengthSq(&dir);
 	if (len > 0.0f)
@@ -141,7 +137,7 @@ float Math_GetVectorAngle(D3DXVECTOR2 const &dir)
 	return 0.0f;
 }
 
-float Math_GetAngleBetweenVectors(D3DXVECTOR2 vec1, D3DXVECTOR2 vec2)
+float UTMath::GetAngleBetweenVectors(D3DXVECTOR2 vec1, D3DXVECTOR2 vec2)
 {
 	D3DXVECTOR2 v1, v2;
 	D3DXVec2Normalize(&v1, &vec1);
@@ -151,24 +147,24 @@ float Math_GetAngleBetweenVectors(D3DXVECTOR2 vec1, D3DXVECTOR2 vec2)
 }
 
 
-int Log2i(float val)
+int UTMath::Log2i(float val)
 {
 	return ((*(int *)(&val) >> 23) & 0xFF) - 127;
 }
 
-int Log2i(int val)
+int UTMath::Log2i(int val)
 {
 
-	return Log2i((float)val);
+	return UTMath::Log2i((float)val);
 }
 
-int MATH_GetBitsNeededForValue(int val)
+int UTMath::GetBitsNeededForValue(int val)
 {
 
-	return Log2i(val) + 1;
+	return UTMath::Log2i(val) + 1;
 }
 
-int MATH_CountBits(UINT32 dwValue)
+int UTMath::CountBits(UINT32 dwValue)
 {
 	int nBits = 0;
 	while (dwValue > 0)
@@ -180,3 +176,4 @@ int MATH_CountBits(UINT32 dwValue)
 
 	return nBits;
 }
+

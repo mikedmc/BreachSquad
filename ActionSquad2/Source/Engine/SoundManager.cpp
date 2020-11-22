@@ -1210,12 +1210,12 @@ void CSoundManager::Update(float dTime)
 
 		if (snd->fVolume_real != snd->fVolume)
 		{
-			MATH_EaseTo_linear(&snd->fVolume_real, snd->fVolume, SND_UPDATE_PERIOD * SND_FADE_SPEED);
+			UTMath::EaseTo_linear(&snd->fVolume_real, snd->fVolume, SND_UPDATE_PERIOD * SND_FADE_SPEED);
 			bEasing = true;
 		}
 		if (snd->fFrequency_real != snd->fFrequency)
 		{
-			MATH_EaseTo_linear(&snd->fFrequency_real, snd->fFrequency, SND_UPDATE_PERIOD * SND_FADE_SPEED);
+			UTMath::EaseTo_linear(&snd->fFrequency_real, snd->fFrequency, SND_UPDATE_PERIOD * SND_FADE_SPEED);
 			bEasing = true;
 		}
 

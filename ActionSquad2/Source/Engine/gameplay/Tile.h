@@ -7,8 +7,13 @@
 //total number of layers
 #define K_LVL_LAYERS_CNT 3
 
+///--- TILE FLAGS ---
+#define K_TILEFLAG_NONE			0
+#define K_TILEFLAG_BLOCKED		1
+
 class CTile {						
 public:
+	UINT32					flags;
 	int tileIDs[K_LVL_LAYERS_CNT];
 	RECT srcRects[K_LVL_LAYERS_CNT];
 	// precomputed UV coords (min and max)
@@ -19,6 +24,7 @@ public:
 	{
 		for (int kk = 0; kk < K_LVL_LAYERS_CNT; kk++)
 		{
+			flags = K_TILEFLAG_NONE;
 			tileIDs[kk] = -1;
 			SetRect(&srcRects[kk], 0, 0, 0, 0);
 			

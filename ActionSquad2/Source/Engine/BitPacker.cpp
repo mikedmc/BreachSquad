@@ -19,7 +19,7 @@ void BitPacker::WriteBits(int value, int numBits)
 		return;
 	}
 
-	if (value < 0 && (numBits < 8 || !MATH_IsPowerOfTwo((UINT32)numBits))) // signed values only for 8/16/32 bits (for now)
+	if (value < 0 && (numBits < 8 || !UTMath::IsPowerOfTwo((UINT32)numBits))) // signed values only for 8/16/32 bits (for now)
 	{
 		ErrorBox(K_ERR_CRITICAL, L"[Error] BitPacker::WriteBits() trying to write negative value %d with less than 32 bits (%d)\n", value, numBits);
 		return;
@@ -191,7 +191,7 @@ void BitPacker::WriteFloatCompressed(float value, float min, float max, float re
 	const float delta = max - min;
 	const float numPossibleValues = delta / resolution;
 	const int iNumPossibleValues = (int)ceilf(numPossibleValues);
-	const int bitsRequired = MATH_GetBitsNeededForValue(iNumPossibleValues);
+	const int bitsRequired = UTMath::GetBitsNeededForValue(iNumPossibleValues);
 	const float valueRatio = LIMIT((value - min) / delta, 0.0f, 1.0f);
 	const int iValue = (int)floorf(valueRatio * iNumPossibleValues + 0.5f);
 	WriteBits(iValue, bitsRequired);
@@ -202,7 +202,7 @@ float BitPacker::ReadFloatCompressed(float min, float max, float resolution) con
 	const float delta = max - min;
 	const float numPossibleValues = delta / resolution;
 	const int iNumPossibleValues = (int)ceilf(numPossibleValues);
-	const int bitsRequired = MATH_GetBitsNeededForValue(iNumPossibleValues);
+	const int bitsRequired = UTMath::GetBitsNeededForValue(iNumPossibleValues);
 	const int iValue = ReadBits(bitsRequired);
 	const float valueRatio = iValue / (float)iNumPossibleValues;
 	return (valueRatio * delta + min);
