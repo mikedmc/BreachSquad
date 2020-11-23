@@ -9,6 +9,19 @@ using namespace std;
 #define K_BBOX_SCALE_BOX_SIZE 10
 
 
+// light types by name, mostly used in the editor
+// must correspond to eLightType
+const char* K_LIGHT_TYPES_NAMES_ARR[] =
+{
+	"Ambiental",
+	"Area",
+	"Point",
+	"Directional",
+	"IES"
+};
+
+
+
 CLevelEditor::CLevelEditor() :
 	m_pLevel(nullptr), m_pDevice(nullptr),
 	eTool(K_LED_LIGHT)
@@ -559,12 +572,43 @@ IActiveInterface* CLevelEditor::SelectClosest(Vec2 vPoint, float fMaxRadius)
 
 void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 {
-	static float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z};
-	if (ImGui::DragFloat3("Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f"))
+	// type of light
+	int ltype = (int)light->type;
+	if (ImGui::Combo("Type", &ltype, K_LIGHT_TYPES_NAMES_ARR, IM_ARRAYSIZE(K_LIGHT_TYPES_NAMES_ARR), IM_ARRAYSIZE(K_LIGHT_TYPES_NAMES_ARR)))
 	{
-		light->SetPos(Vec2(f3[0], f3[1]));
-		light->vPos.z = f3[2];
+		light->type = (eLightType)ltype;
 	}
+
+	// custom data for each light type	
+	switch (light->type)
+	{
+		case K_LVL_LT_POINT:
+		{
+			// position
+			float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z };
+			if (ImGui::DragFloat3("Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f"))
+			{
+				light->SetPos(Vec2(f3[0], f3[1]));
+				light->vPos.z = f3[2];
+			}
+			// radius
+			ImGui::DragFloat("Radius", &light->fRadius, 1.0f, 16.0f, 1000.0f, "%.2f");
+			// intensity
+			ImGui::DragFloat("Intensity", &light->fIntensity, 0.01f, 0.1f, 5.0f, "%.2f");
+			// color
+			ImVec4 color;
+			D3DCOLOR_UNPACKTOFLOAT(light->color, color.w, color.x, color.y, color.z);
+			// small color button
+			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
+			if (ImGui::IsItemEdited())
+			{
+				// re-pack color if changed
+				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
+			}
+		}
+		break;
+	}
+
 }
 
 void CLevelEditor::DrawHRuler(Vec2 vBase, float fHeight, DWORD col)

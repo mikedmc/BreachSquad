@@ -1,7 +1,6 @@
 #include "dxstdafx.h"
 #include "Light.h"
 
-
 ///--- CLIGHT ---
 void CLight::SetAngle(float fnAngle)
 {
