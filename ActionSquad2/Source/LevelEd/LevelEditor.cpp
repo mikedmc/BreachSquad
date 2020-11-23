@@ -557,7 +557,12 @@ IActiveInterface* CLevelEditor::SelectClosest(Vec2 vPoint, float fMaxRadius)
 
 void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 {
-	ImGui::Text("Light properties!");
+	static float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z};
+	if (ImGui::DragFloat3("Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f"))
+	{
+		light->SetPos(Vec2(f3[0], f3[1]));
+		light->vPos.z = f3[2];
+	}
 }
 
 void CLevelEditor::DrawHRuler(Vec2 vBase, float fHeight, DWORD col)

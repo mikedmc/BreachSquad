@@ -2190,7 +2190,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			}
 
 			//build normal maps and self illumi
-			g_level.PaintOffscreen();
+			//g_level.PaintOffscreen();
 			//compose maps into final RT
 			/*
 			//#DMC: asa se foloseste RT manager, vezi rebel strain
@@ -2201,7 +2201,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				g_pGameSprite->Draw(pRT->m_pRTTexture, &srcrct, NULL, &D3DXVECTOR3(0.0f, 0.0f, 0.0f), 0xffffffff);
 			*/
 
-			g_level.PaintComposition();
+			//g_level.PaintComposition();
 
 			// this will be called here (the only one)
 			g_level.PaintDeferredBuffers();
@@ -2304,19 +2304,33 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
 
 				//paint game 
+				/*
 				RECT srcrct;
 				SetRect(&srcrct, gamerect.x, gamerect.y, gamerect.w, gamerect.h);
 				g_pGameSprite->Draw(g_level.m_pRTTexture_final, &srcrct, NULL, &Vec3(0.0f, 0.0f, 0.0f), 0xffffffff);
 				g_pGameSprite->Flush();
+				*/
+
+				CRTManager::CEngineRenderTarget* pRTfinal = UTGetRTManager().GetRTbyUID(K_RTID_FINAL);
+				if (pRTfinal != null)
+				{
+					g_pGameSprite->Flush();
+					CCameraTransform::SetActiveCameraIdentity(pDevice);
+					RECT src;
+					SetRect(&src, 0, 0, pRTfinal->nWidth, pRTfinal->nHeight);
+					g_pGameSprite->SetTransform(&g_matIdentity);
+					g_pGameSprite->Draw(pRTfinal->m_pRTTexture, &src, NULL, &D3DXVECTOR3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
+					g_pGameSprite->Flush();
+				}
 				// paint game elements above RTT content
 				g_level.PaintUsingFinalRTT();
 				
 				//final flush
 				g_pGameSprite->Flush();
 				//ingame interface
-				g_level.m_interfaceIGM.Paint(pDevice, g_pGameSprite);
+				//g_level.m_interfaceIGM.Paint(pDevice, g_pGameSprite);
 				//interface particles
-				g_particlesMgr.PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
+				//g_particlesMgr.PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
 
 				///--- level editor ---
 				g_editor.Paint(g_pGameSprite);
@@ -2324,10 +2338,11 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				///--- string dummies ---
 				g_pGameSprite->SetTransform(&g_matIdentity);
 				//paint string dummies
+				/*
 				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam240hScreen);
 				g_particlesMgr.PaintStringDummies();
 				g_pGameSprite->Flush();
-
+				 */
 				//debug stuff
 #if defined(_DEBUG) || defined(DEBUG)
 				//game screen space

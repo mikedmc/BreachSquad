@@ -113,7 +113,7 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 {
 	//#INFO: when going from right to left and bottom to top, if the end point is on the tile border it doesn't detect the intersection. Might happen to slow moving bullets but it should be fine.
 
-	//#TODO: verifica sa nu iasa punctele din harta
+	//#TODO: verifica sa nu iasa punctele din harta si de pus tileflags la coliziuni
 
 	Vec2i startTL((int)floor(vStart.x / K_TILE_SIZE), (int)floor(vStart.y / K_TILE_SIZE));
 	Vec2i endTL((int)floor(vEnd.x / K_TILE_SIZE), (int)floor(vEnd.y / K_TILE_SIZE));
