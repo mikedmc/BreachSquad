@@ -1496,14 +1496,6 @@ CLevel::CLevel()
 	m_bOneUpdateDone = false;
 
 	m_dwSyncCheckHash = 0;
-	//init render targets
-	m_pRenderToSurface = NULL;
-	m_pRTTexture = NULL;
-	m_pRTSurface = NULL;
-
-	m_pRT_final = NULL;
-	m_pRTTexture_final = NULL;
-	m_pRTSurface_final = NULL;
 
 	fLocalTimeline = 0.0f;
 
@@ -10964,7 +10956,7 @@ HRESULT CLevel::PaintOffscreen()
 	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_RTT) == 0)
 		return E_FAIL;
 
-	hr = m_pRenderToSurface->BeginScene(m_pRTSurface, NULL);
+	hr = S_OK;
 	if (SUCCEEDED(hr))
 	{
 		// Clear the render target and the zbuffer 
@@ -11773,7 +11765,7 @@ HRESULT CLevel::PaintOffscreen()
 		m_pSprite->SetTransform(&g_matIdentity);
 		m_pSprite->End();
 		//end scene paint/pass
-		V(m_pRenderToSurface->EndScene(0));
+		//V(m_pRenderToSurface->EndScene(0));
 	}
 
 	return hr;
@@ -11786,7 +11778,7 @@ HRESULT CLevel::PaintOffscreen_nothing()
 	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_RTT) == 0)
 		return E_FAIL;
 
-	hr = m_pRenderToSurface->BeginScene(m_pRTSurface, NULL);
+	hr = S_OK;// m_pRenderToSurface->BeginScene(m_pRTSurface, NULL);
 	if (SUCCEEDED(hr))
 	{
 		// Clear the render target and the zbuffer 
@@ -11794,7 +11786,7 @@ HRESULT CLevel::PaintOffscreen_nothing()
 
 	}
 	//end scene paint/pass
-	V(m_pRenderToSurface->EndScene(0));
+	//V(m_pRenderToSurface->EndScene(0));
 	return S_OK;
 }
 
@@ -11815,7 +11807,7 @@ HRESULT CLevel::PaintComposition()
 	LPDIRECT3DVERTEXSHADER9 pVShader = null;
 	LPDIRECT3DPIXELSHADER9 pPShader = null;
 	//--- RENDER LEVEL in compositing RT - COMPOZITIE ---
-	hr = m_pRT_final->BeginScene(m_pRTSurface_final, NULL);
+	hr = S_OK;// m_pRT_final->BeginScene(m_pRTSurface_final, NULL);
 	if (SUCCEEDED(hr))
 	{
 		// Clear the render target and the zbuffer 
@@ -11856,7 +11848,7 @@ HRESULT CLevel::PaintComposition()
 		m_pDevice->SetVertexShader(null);
 		m_pDevice->SetPixelShader(null);
 
-		V(m_pRT_final->EndScene(0));
+		//V(m_pRT_final->EndScene(0));
 	}
 	else
 	{
@@ -11873,14 +11865,14 @@ HRESULT CLevel::PaintComposition_nothing()
 	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_RTT) == 0)
 		return E_FAIL;
 
-	hr = m_pRT_final->BeginScene(m_pRTSurface_final, NULL);
+	//hr = m_pRT_final->BeginScene(m_pRTSurface_final, NULL);
 	if (SUCCEEDED(hr))
 	{
 		// Clear the render target and the zbuffer 
 		V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, K_GAME_CLEAR_COLOR, 1.0f, 0));
 	}
 
-	V(m_pRT_final->EndScene(0));
+	//V(m_pRT_final->EndScene(0));
 	return S_OK;
 }
 
@@ -12358,7 +12350,7 @@ void CLevel::Paint()
 
 
 	//set textures, states and shaders
-	m_pDevice->SetTexture(0, m_pRTTexture);
+	//m_pDevice->SetTexture(0, m_pRTTexture);
 	//#HACK: daca am mai multe texturi de lumina trebuie schimbat settexture sa ia pentru fiecare lumina textura ei. Daca am o singura textura merge foarte bine asa
 	m_pDevice->SetTexture(1, m_sprLights.Textures[0]->pTex);
 
@@ -12394,7 +12386,7 @@ void CLevel::Paint()
 		}
 	}
 	//set textures, states and shaders
-	m_pDevice->SetTexture(0, m_pRTTexture);
+	//m_pDevice->SetTexture(0, m_pRTTexture);
 	//#HACK: daca am mai multe texturi de lumina trebuie schimbat settexture sa ia pentru fiecare lumina textura ei. Daca am o singura textura merge foarte bine asa
 	m_pDevice->SetTexture(1, m_sprLights.Textures[0]->pTex);
 
@@ -12537,7 +12529,7 @@ void CLevel::Paint()
 		m_pDevice->SetVertexShaderConstantF(0, (float*)&matWVP, 4);
 		m_pDevice->SetVertexShaderConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
 		//render target texture on level 0
-		m_pDevice->SetTexture(0, m_pRTTexture);
+//		m_pDevice->SetTexture(0, m_pRTTexture);
 		//light spot texture on level 1
 		//#TODO: if we have more textures for the lights we'll need to set the right texture for each light
 		m_pDevice->SetTexture(1, m_sprLights.Textures[0]->pTex);
@@ -12616,7 +12608,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		//set textures, states and shaders
 		_ASSERT(m_waterTexIdx >= 0);
 
-		m_pDevice->SetTexture(0, m_pRTTexture_final);
+//		m_pDevice->SetTexture(0, m_pRTTexture_final);
 		m_pDevice->SetTexture(1, m_texManager.m_Texs[m_waterTexIdx]->pTexture); //textura apa
 
 		D3DXMATRIXA16 matWVP = matCam * UTGetAppClass().g_matProj;
@@ -12711,7 +12703,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		m_pDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 		m_pDevice->SetSamplerState(1, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
 
-		m_pDevice->SetTexture(0, m_pRTTexture_final);
+//		m_pDevice->SetTexture(0, m_pRTTexture_final);
 		m_pDevice->SetTexture(1, null);// m_texManager.m_Texs[m_fogofwarTexIdx]->pTexture); //textura FOW
 
 		D3DXMATRIXA16 matWVP = matCam * UTGetAppClass().g_matProj;
@@ -13086,90 +13078,6 @@ HRESULT CLevel::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DE
 	HRESULT hr = S_OK;
 	m_pDevice = pd3dDevice;
 
-	//--- face textura pentru backbuffer RTT ---
-	if (FAILED(D3DXCreateTexture(pd3dDevice,
-								K_RTT_WIDTH,
-								K_RTT_HEIGHT,
-								1,
-								D3DUSAGE_RENDERTARGET,
-								D3DFMT_A8R8G8B8,   //am nevoie de alpha
-								D3DPOOL_DEFAULT,
-								&m_pRTTexture)))
-	{
-		UTGetAppClass().g_gfxFlags &= ~K_UT_GFXFLAG_RTT;
-		ErrorBox(K_ERR_CRITICAL, L"Failed creating Level RTT texture. Setting CARD_FLAG_RTT to false. Application will now quit!");
-	}
-	else //if NOT failed
-	{
-		UTGetAppClass().g_gfxFlags |= K_UT_GFXFLAG_RTT;
-		// Create off-screen "render to" surfaces...
-		D3DSURFACE_DESC desc;
-		m_pRTTexture->GetSurfaceLevel(0, &m_pRTSurface);
-		m_pRTSurface->GetDesc(&desc);
-
-		if (FAILED(D3DXCreateRenderToSurface(pd3dDevice,
-			desc.Width,
-			desc.Height,
-			desc.Format,
-			TRUE,
-			D3DFMT_D24X8, //aici nu am nevoie de stencil
-			&m_pRenderToSurface)))
-		{
-			UTGetAppClass().g_gfxFlags &= ~K_UT_GFXFLAG_RTT;
-			ErrorBox(K_ERR_CRITICAL, L"Failed creating Level RTT surface. Setting CARD_FLAG_RTT to false. Application will now quit!");
-
-			SAFE_RELEASE(m_pRTTexture);
-		}
-		else
-		{
-			//RTT ok
-			UTGetAppClass().g_gfxFlags |= K_UT_GFXFLAG_RTT;
-		}
-	}
-
-
-	//--- face textura pentru RT de compozitie ---
-	if (FAILED(D3DXCreateTexture(pd3dDevice,
-		pBBdesc->Width,
-		pBBdesc->Height,
-		1,
-		D3DUSAGE_RENDERTARGET,
-		D3DFMT_X8R8G8B8,   //nu am nevoie de alpha
-		D3DPOOL_DEFAULT,
-		&m_pRTTexture_final)))
-	{
-		UTGetAppClass().g_gfxFlags &= ~K_UT_GFXFLAG_RTT;
-		ErrorBox(K_ERR_CRITICAL, L"Failed creating Compositing RTT texture. Setting CARD_FLAG_RTT to false. Application will now quit!");
-	}
-	else //if NOT failed
-	{
-		UTGetAppClass().g_gfxFlags |= K_UT_GFXFLAG_RTT;
-		// Create off-screen "render to" surfaces...
-		D3DSURFACE_DESC desc;
-		m_pRTTexture_final->GetSurfaceLevel(0, &m_pRTSurface_final);
-		m_pRTSurface_final->GetDesc(&desc);
-
-		if (FAILED(D3DXCreateRenderToSurface(pd3dDevice,
-			desc.Width,
-			desc.Height,
-			desc.Format,
-			TRUE,
-			D3DFMT_D24S8, //aici am nevoie de stencil
-			&m_pRT_final)))
-		{
-			UTGetAppClass().g_gfxFlags &= ~K_UT_GFXFLAG_RTT;
-			ErrorBox(K_ERR_CRITICAL, L"Failed creating Compositing RTT surface. Setting CARD_FLAG_RTT to false. Application will now quit!");
-
-			SAFE_RELEASE(m_pRTTexture_final);
-		}
-		else
-		{
-			//RTT ok
-			UTGetAppClass().g_gfxFlags |= K_UT_GFXFLAG_RTT;
-		}
-	}
-
-
 	V_RETURN(m_sprLights.OnResetDevice(pd3dDevice));
 	V_RETURN(m_sprProps.OnResetDevice(pd3dDevice));
 	V_RETURN(m_sprActors.OnResetDevice(pd3dDevice));
@@ -13185,15 +13093,6 @@ HRESULT CLevel::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DE
 HRESULT CLevel::OnLostDevice( void* pUserContext )
 {
 	m_pDevice = NULL;
-
-	//RTT
-	SAFE_RELEASE(m_pRenderToSurface);
-	SAFE_RELEASE(m_pRTTexture);
-	SAFE_RELEASE(m_pRTSurface);
-
-	SAFE_RELEASE(m_pRT_final);
-	SAFE_RELEASE(m_pRTTexture_final);
-	SAFE_RELEASE(m_pRTSurface_final);
 
 	m_sprLights.OnLostDevice();
 	m_sprProps.OnLostDevice();

@@ -99,15 +99,6 @@ enum ELevelState {
 class CLevel : public IScriptable
 {
 public:
-	//--- RTT nivel (color, normals, etc) ---
-	LPD3DXRENDERTOSURFACE   m_pRenderToSurface;
-	LPDIRECT3DTEXTURE9      m_pRTTexture;
-	LPDIRECT3DSURFACE9      m_pRTSurface;
-	//--- RTT composite - nivelul iluminat, inainte de efectele de deformare tip foc, apa, explozii ---
-	LPD3DXRENDERTOSURFACE   m_pRT_final;
-	LPDIRECT3DTEXTURE9      m_pRTTexture_final;
-	LPDIRECT3DSURFACE9      m_pRTSurface_final;
-
 	double			fLocalTimeline;
 	CTimersArray	m_Timers;
 	//network synced random generator

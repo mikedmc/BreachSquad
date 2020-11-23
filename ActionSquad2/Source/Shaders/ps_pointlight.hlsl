@@ -19,9 +19,10 @@ float4 ps_main(PS_INPUT Input) : COLOR0
 	//XY normals, Z is height in world space. W is alpha
 	float4 normal_h = tex2D(texNrmH, Input.Tex0.xy);
 	// bring height from 0..1 to 0..255
-	float3 posWorld = float3(Input.Tex1.xy, normal_h.z * 255.0f * fWorldConstants.y);
-	// invert projection (texture ia e height gradient)
-	posWorld.y += normal_h.z; //or: posWorld.z * fWorldConstants.x which is the same;
+	float nrmTexH = normal_h.z * 255.0f;
+	float3 posWorld = float3(Input.Tex1.x, Input.Tex1.y + nrmTexH, nrmTexH * fWorldConstants.y);
+	// invert projection (texture height gradient)
+	//posWorld.y += normal_h.z * 4.0f;// fWorldConstants.y;
 
 	// convert normal XY in -1..1 (input normal is already normalized)
 	normal_h = (normal_h * 2.0f) - 1.0f;

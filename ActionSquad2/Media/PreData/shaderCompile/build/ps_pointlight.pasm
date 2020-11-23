@@ -32,9 +32,9 @@
     dcl_2d s0
     mov r0.x, v2.x
     texld r1, v1, s0
-    mul r0.w, r1.z, c1.y
-    mul r0.z, r0.w, c3.x
-    add r0.y, r1.z, v2.y
+    mul r0.w, r1.z, c3.x
+    mul r0.z, r0.w, c1.y
+    mad r0.y, r1.z, c3.x, v2.y
     mad r1.xy, r1, c3.y, c3.z
     add r0.xyz, -r0, c2
     dp3 r0.w, r0, r0

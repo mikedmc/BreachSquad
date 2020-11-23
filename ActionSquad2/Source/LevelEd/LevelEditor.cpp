@@ -499,8 +499,10 @@ void CLevelEditor::IMGUI_ShowInterfaces()
 
 
 		///--- CONTROLS TEMPLATES
+		/*
 		if (vp)
 			ImGui::SetNextWindowPos(vp->Pos, ImGuiCond_Once);
+			*/
 		ImGui::Begin("Properties", null, ImGuiWindowFlags_NoNavInputs);
 
 		switch (selType)
