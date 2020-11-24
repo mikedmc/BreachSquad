@@ -337,6 +337,8 @@ enum ETexChannel {
 #define K_GAME_WIDTH_MIN			(K_GAME_HEIGHT * K_WINDOW_ASPECT_RATIO_MIN)
 #define K_GAME_WIDTH_MAX			(K_GAME_HEIGHT * K_WINDOW_ASPECT_RATIO_MAX)
 
+// height of wall in world coordinates (not projected, use Z_TO_H to convert)
+#define K_WALL_HEIGHT_WORLD			64.0f
 // scale to use when transforming Z to H (added to Y, projection)
 #define ZHSCALE						0.5f
 #define INV_ZHSCALE					(1.0f / 0.5f)

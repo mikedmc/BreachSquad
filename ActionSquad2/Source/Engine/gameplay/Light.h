@@ -4,11 +4,11 @@
 enum eLightType {
 	K_LVL_LT_UNKNOWN = -1,
 	K_LVL_LT_AMBIENTAL = 0,
-	K_LVL_LT_AREA = 1,
-	K_LVL_LT_POINT,
+	K_LVL_LT_PROJECTED_DIR = 1,			// projected directional (lights from windows and other parallel textured sources)
+	K_LVL_LT_POINT,						// classic pointlight
 	K_LVL_LT_DIRECTIONAL,
 	K_LVL_LT_IES,
-
+	//K_LVL_LT_TEX_SPOT					// textured spotlight (texture in polar coordinates)
 	K_LVL_LTS_CNT,
 };
 
@@ -42,18 +42,18 @@ public:
 public:
 	eLightType			type;
 
-	Vec3				lCorners[4];				// ul, ur, dl, dr - mesh-ul spotului relativ la pozitia luminii; coord Z este 0 
-	RECTLTRB_F			lTexRect;					// dreptunghiul in textura al spotului
-	float				fRadius;					// raza maxima a luminii
-													   
+	Vec3				lCorners[4];				// screen space light rectangle (clockwise) relative to light (Z must be 0). Min rect that fits 2d projection of light. Used to accelerate creation of light mesh.
+	Vec3				vnDir;						// normalized direction of light (necessary for some lights)
+	RECTLTRB_F			lTexRect;					// light spot source texture when necessary
+	float				fRadius;					// radius of light where necessary
+	bool				castShadows;
+	float				fIntensity;					// light intensity
+
 	int					m_nLightMeshIdx;			// buffer-ul dinamic pt spotul luminii
 	int					m_nShadowMeshIdx;			// buffer-ul dinamic pt shadow volume
 													   
 	int					animID;						// -1 - not set
-	bool				castShadows;				   
-	float				fIntensity;					// light intensity
 	float				fVolumeAlpha;				// light's atmospheric volume alpha
-	Vec3				vnDir;						// directia normalizata a luminii (folosita doar la unele lumini, cum ar fi spoturile IES)
 
 public:
 	CLight();
@@ -67,7 +67,10 @@ public:
 	void				BeginPlay() override;
 	void				EndPlay() override;
 
+	// sets light direction with fallback for empty vectors
+	void				SetDir(Vec3 nDir);
+
 	// Initializes internal data for rendering
 	// Make sure all basic light data is set before calling it (or call inside PostConstructionInit)
-	void				InitGeometry(CSpriteCollection* pLightsSprCol);
+	void				UpdateInternalData(CSpriteCollection* pLightsSprCol = nullptr);
 };

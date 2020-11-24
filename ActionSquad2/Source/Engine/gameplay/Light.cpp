@@ -24,7 +24,18 @@ void CLight::EndPlay()
 
 }
 
-void CLight::InitGeometry(CSpriteCollection* pLightsSprCol)
+void CLight::SetDir(Vec3 nDir)
+{
+	if (MUVec3AlmostZero(nDir))
+	{
+		vnDir = Vec3(0.0f, 0.0f, -1.0f); //looking down
+		return;
+	}
+
+	MUVec3Norm(&vnDir, &nDir);
+}
+
+void CLight::UpdateInternalData(CSpriteCollection* pLightsSprCol)
 {
 	switch (type)
 	{
@@ -40,11 +51,12 @@ void CLight::InitGeometry(CSpriteCollection* pLightsSprCol)
 		lCorners[1] = Vec3( fRad, -fRad, 0.0f);
 		lCorners[2] = Vec3( fRad,  fRad, 0.0f);
 		lCorners[3] = Vec3(-fRad,  fRad, 0.0f);
+
+		bbox_ini.Set(lCorners[0].x, lCorners[0].y, lCorners[2].x, lCorners[2].y);
 	}
 	break;
 	case K_LVL_LT_IES:
 	{
-		ErrorBox(K_ERR_WARNING, L"LoadLevel:: Found IES light! Shouldn't get here!");
 	}
 	break;
 	case K_LVL_LT_AMBIENTAL:
@@ -55,22 +67,34 @@ void CLight::InitGeometry(CSpriteCollection* pLightsSprCol)
 		bbox = bbox_ini;
 	}
 	break;
-	case K_LVL_LT_AREA:
+	case K_LVL_LT_PROJECTED_DIR:
 	{
+		vPos.z = vPos_ini.z = 0.0f;
 		castShadows = false;
-		fVolumeAlpha = 0.0f;
-		lCorners[0] = Vec3(-bbox.vHalfSize.x, -bbox.vHalfSize.y, 0.0f);
-		lCorners[1] = Vec3(bbox.vHalfSize.x, -bbox.vHalfSize.y, 0.0f);
-		lCorners[2] = Vec3(-bbox.vHalfSize.x, bbox.vHalfSize.y, 0.0f);
-		lCorners[3] = Vec3(bbox.vHalfSize.x, bbox.vHalfSize.y, 0.0f);
-		if (animID >= 0)
-			lTexRect = pLightsSprCol->GetModuleRect_TexCoords(animID, 0, 0);
+
+
+		// intersects light direction with level top and bottom planes, projects back to 2D and make a union between them.
+		// can still be optimized
+		Vec3 vmove = -vnDir * K_WALL_HEIGHT_WORLD;
+		CAABB lowRect(bbox_ini);
+		CAABB highRect(bbox_ini);
+		Vec2 vmoveproj = V3projV2(vmove);
+		highRect.Move(vmoveproj);
+		lowRect.Move(-vmoveproj);
+		CAABB unionAABB = AABB_Union(lowRect, highRect);
+		//clockwise
+		lCorners[0] = Vec3(unionAABB.vMin.x, unionAABB.vMin.y, 0.0f);
+		lCorners[1] = Vec3(unionAABB.vMax.x, unionAABB.vMin.y, 0.0f);
+		lCorners[2] = Vec3(unionAABB.vMax.x, unionAABB.vMax.y, 0.0f);
+		lCorners[3] = Vec3(unionAABB.vMin.x, unionAABB.vMax.y, 0.0f);
+
+		if ((animID >= 0) && (pLightsSprCol != null))
+			lTexRect = pLightsSprCol->GetModuleRect_TexCoords(ANM_LIGHTS_SPR_PROJECTED_DIR, 0, 0);
 	}
 	break;
 	case K_LVL_LT_DIRECTIONAL:
 	{
 		castShadows = false;
-		fVolumeAlpha = 0.0f;
 		lCorners[0] = Vec3(-bbox.vHalfSize.x, -bbox.vHalfSize.y, 0.0f);
 		lCorners[1] = Vec3(bbox.vHalfSize.x, -bbox.vHalfSize.y, 0.0f);
 		lCorners[2] = Vec3(-bbox.vHalfSize.x, bbox.vHalfSize.y, 0.0f);
@@ -86,7 +110,7 @@ void CLight::InitGeometry(CSpriteCollection* pLightsSprCol)
 CLight::CLight() :
 	m_nLightMeshIdx(-1), m_nShadowMeshIdx(-1), type(K_LVL_LT_UNKNOWN), animID(-1), fRadius(0.0f), fVolumeAlpha(1.0f), castShadows(false)
 {
-	vnDir = Vec3(0.0f, 1.0f, 0.0f); //default direction
+	vnDir = Vec3(0.0f, 0.0f, -1.0f); //default direction (looking down)
 }
 
 void CLight::SetPos(Vec2 newPos)

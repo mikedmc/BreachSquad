@@ -451,7 +451,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				{
 					//					SND_PLAY_POSITIONAL(SNDIDX_RELOAD_EMERGENCY, active->pos);
 					g_particlesMgr.GenerateHealEffect(toucheractor->pos, 0xff5555ff, K_PART_LAYER_RT_FRONT_NRM);
-					AddProp_Light(toucheractor->GetPosHeart(), ANM_LIGHTS_SPR_POINT1, 1.0f, 0.2f, 0xff5555ff, 1.0f);
 
 					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_INTERFACE_ELEMENTS, false, 0, &toucheractor->GetPosHeart(), NULL, &D3DXVECTOR2(0.0f, -10.0f), 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xffffffff, K_PART_LAYER_FRONT);
 
@@ -507,7 +506,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				if (toucheractor->fLife < toucheractor->templateActor.fLife)
 				{
 					g_particlesMgr.GenerateHealEffect(toucheractor->pos, 0xff55ff55, K_PART_LAYER_RT_FRONT_NRM);
-					AddProp_Light(toucheractor->GetPosHeart(), ANM_LIGHTS_SPR_POINT1, 1.0f, 0.2f, 0xff55ff55, 1.0f);
 
 					toucheractor->fLife = toucheractor->templateActor.fLife;
 					nHealthLeft--;

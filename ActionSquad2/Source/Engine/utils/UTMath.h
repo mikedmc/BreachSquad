@@ -14,11 +14,22 @@
 #define			MUMatTranslation		D3DXMatrixTranslation
 #define			MUMatAffine2D			D3DXMatrixAffineTransformation2D
 #define			MUOrthoOffCenterLH		D3DXMatrixOrthoOffCenterLH
+
 #define			MUVec2Len				D3DXVec2Length
 #define			MUVec2LenSq				D3DXVec2LengthSq
+
+#define			MUVec3Len				D3DXVec3Length
+#define			MUVec3LenSq				D3DXVec3LengthSq
+#define			MUVec3Norm				D3DXVec3Normalize
 
 // macros
 #define			Vec3ToVec2XY(vec)		Vec2(vec.x, vec.y)
 #define			Vec2ToVec3XY0(vec)		Vec3(vec.x, vec.y, 0.0f)
 
 #define			Vec2i					POINTXY_INT
+
+
+bool			MUVec2AlmostZero(Vec2 vec);
+bool			MUVec3AlmostZero(Vec3 vec);
+
+

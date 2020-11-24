@@ -111,17 +111,17 @@ HRESULT CreateVS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DVERTEXSH
 		else
 		{
 			CloseHandle(hFile);
-			CHAR szErr[2048];
-			GetErrorMessageA(GetLastError(), szErr, ARRAY_SIZE(szErr));
-			ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreateVS] Unable to get vs filesize.\n\t\t%s\n", szErr);
+			WCHAR wszErr[2048];
+			GetErrorMessageW(GetLastError(), wszErr, ARRAY_SIZE(wszErr));
+			ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreateVS] Unable to get vs filesize.\n\t\t%s\n", wszErr);
 			return E_FAIL;		
 		}
 	}	
 	else
 	{
-		CHAR szErr[2048];
-		GetErrorMessageA(GetLastError(), szErr, ARRAY_SIZE(szErr));
-		ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreateVS] Unable to open vs file.\n\t\t%s\n", szErr);
+		WCHAR wszErr[2048];
+		GetErrorMessageW(GetLastError(), wszErr, ARRAY_SIZE(wszErr));
+		ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreateVS] Unable to open vs file.\n\t\t%s\n", wszErr);
 		return E_FAIL;	
 	}
 	// maps a view of a file into the address space of the calling process
@@ -154,17 +154,17 @@ HRESULT CreatePS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DPIXELSHA
 		else
 		{
 			CloseHandle(hFile);
-			CHAR szErr[2048];
-			GetErrorMessageA(GetLastError(), szErr, ARRAY_SIZE(szErr));
-			ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreatePS] Unable to get PS filesize.\n\t\t%s\n", szErr);
+			WCHAR wszErr[2048];
+			GetErrorMessageW(GetLastError(), wszErr, ARRAY_SIZE(wszErr));
+			ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreatePS] Unable to get PS filesize.\n\t\t%s\n", wszErr);
 			return E_FAIL;		
 		}
 	}	
 	else
 	{
-		CHAR szErr[2048];
-		GetErrorMessageA(GetLastError(), szErr, ARRAY_SIZE(szErr));
-		ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreatePS] Unable to open PS file.\n\t\t%s\n", szErr);
+		WCHAR wszErr[2048];
+		GetErrorMessageW(GetLastError(), wszErr, ARRAY_SIZE(wszErr));
+		ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreatePS] Unable to open PS file.\n\t\t%s\n", wszErr);
 		return E_FAIL;	
 	}
 	// maps a view of a file into the address space of the calling process

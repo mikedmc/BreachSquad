@@ -7,6 +7,7 @@
     <VertexShader name="VS_FOW" path="fow.vso" />
     <VertexShader name="VS_POINTLIGHT" path="vs_pointlight.vso" />
     <VertexShader name="VS_COMPOSITION" path="vs_composition.vso" />
+    <VertexShader name="VS_PROJECTEDDIR" path="vs_projecteddir.vso" />
   </VertexShaders>
   <PixelShaders>
     <PixelShader name="PS_TEXspot" path="texSpot.pso" />
@@ -15,5 +16,6 @@
     <PixelShader name="PS_FOW" path="fow.pso" />
     <PixelShader name="PS_POINTLIGHT" path="ps_pointlight.pso" />
     <PixelShader name="PS_COMPOSITION" path="ps_composition.pso" />
+    <PixelShader name="PS_PROJECTEDDIR" path="ps_projecteddir.pso" />
   </PixelShaders>
 </Shaders>

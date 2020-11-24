@@ -13,11 +13,11 @@ using namespace std;
 // must correspond to eLightType
 const char* K_LIGHT_TYPES_NAMES_ARR[] =
 {
-	"Ambiental",
-	"Area",
+	"Ambient",
+	"Projected",
 	"Point",
 	"Directional",
-	"IES"
+	"IES",
 };
 
 
@@ -407,7 +407,8 @@ void CLevelEditor::Update(float dTime)
 	// mouse pos in level world
 	Vec2 mousepos = m_pLevel->m_camLevel.ScreenToWorld(g_mouse.pos);
 
-	if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
+	// right mouse button
+	if (g_mouse.Rbut == K_MOUSE_BUTT_JUSTPRESSED)
 	{
 		pSelected = SelectClosest(mousepos);
 	}
@@ -465,7 +466,9 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 				DrawHRuler(vposprj, vposprj.y - vpos.y, lcol);
 
 				int anm = (pSelected == lg) ? ANM_LVLED_SPR_ICONS_BASE_SEL : ANM_LVLED_SPR_ICONS_BASE;
-				CSprite::paintFrame(&m_sprCol, vpos.x, vpos.y, ANM_LVLED_SPR_ICONS_BASE, 0, 0xffffffff);
+				int iconIdx = (int)lg->type;
+				CLAMP(iconIdx, 0, m_sprCol.GetAFramesCnt(anm));
+				CSprite::paintFrame(&m_sprCol, vpos.x, vpos.y, anm, iconIdx, 0xffffffff);
 			}
 		}
 		break;
@@ -579,6 +582,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 		light->type = (eLightType)ltype;
 	}
 
+	ImGui::Separator();
 	// custom data for each light type	
 	switch (light->type)
 	{
@@ -592,17 +596,49 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 				light->vPos.z = f3[2];
 			}
 			// radius
-			ImGui::DragFloat("Radius", &light->fRadius, 1.0f, 16.0f, 1000.0f, "%.2f");
+			if (ImGui::DragFloat("Radius", &light->fRadius, 1.0f, 16.0f, 1000.0f, "%.2f"))
+			{
+				light->UpdateInternalData();
+			}
 			// intensity
 			ImGui::DragFloat("Intensity", &light->fIntensity, 0.01f, 0.1f, 5.0f, "%.2f");
 			// color
 			ImVec4 color;
 			D3DCOLOR_UNPACKTOFLOAT(light->color, color.w, color.x, color.y, color.z);
-			// small color button
 			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
 			if (ImGui::IsItemEdited())
 			{
-				// re-pack color if changed
+				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
+			}
+			// cast shadows
+			ImGui::Checkbox("Shadows", &light->castShadows);
+		}
+		break;
+
+		case K_LVL_LT_PROJECTED_DIR:
+		{
+			// position
+			float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z };
+			if (ImGui::DragFloat3("Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f"))
+			{
+				light->SetPos(Vec2(f3[0], f3[1]));
+				light->vPos.z = 0.0f;
+			}
+			// direction
+			float d3[3] = { light->vnDir.x, light->vnDir.y, light->vnDir.z };
+			if (ImGui::DragFloat3("Direction", d3, 0.02f, -1.0f, 1.0f, "%.2f"))
+			{
+				light->SetDir(Vec3(d3[0], d3[1], d3[2]));
+				light->UpdateInternalData(&m_pLevel->m_sprLights);
+			}
+			// intensity
+			ImGui::DragFloat("Intensity", &light->fIntensity, 0.01f, 0.1f, 5.0f, "%.2f");
+			// color
+			ImVec4 color;
+			D3DCOLOR_UNPACKTOFLOAT(light->color, color.w, color.x, color.y, color.z);
+			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
+			if (ImGui::IsItemEdited())
+			{
 				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
 			}
 		}

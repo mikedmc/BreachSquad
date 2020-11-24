@@ -234,8 +234,10 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		OS_freadString(fl, charAnmName);
 
 		nl->animID = m_sprLights.getAnimationIdxByName(charAnmName);
+		/*
 		if ((nl->animID < 0) && (nl->type != K_LVL_LT_AMBIENTAL))
 			ErrorBox(K_ERR_WARNING, L"Light ID:%d doesn't have animID!!", nl->ID);
+			*/
 		//color
 		BYTE ca, cr, cg, cb;
 		ca = OS_freadUByte(fl); cr = OS_freadUByte(fl); cg = OS_freadUByte(fl); cb = OS_freadUByte(fl);
@@ -256,17 +258,10 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		if (nl->animID >= 0)
 		{
 			RECTXYWH lrect = m_sprLights.GetAFrameBBox_real(nl->animID, 0);
-			float fScaleX = nl->bbox.vSize.x / lrect.w;
-			float fScaleY = nl->bbox.vSize.y / lrect.h;
+			nl->bbox_ini.Set(lrect);
+			nl->bbox = nl->bbox_ini;
+			nl->bbox.Move(nl->pos);
 
-			bbmin.x = lrect.x * fScaleX; bbmin.y = lrect.y * fScaleY;
-			bbmax.x = lrect.w * fScaleX; bbmax.y = lrect.h * fScaleY;
-			bbmin += nl->pos;
-			bbmax += bbmin;
-			//set bbox
-			nl->bbox.Set_Corrected(bbmin, bbmax);
-			nl->bbox_ini = nl->bbox;
-			nl->bbox_ini.Move(-nl->pos);
 			nl->fRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
 		}
 
@@ -285,12 +280,11 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		if (nl->type == K_LVL_LT_AMBIENTAL)
 			m_colAmbientGlobal = nl->color;
 
-		//set all internal light data needed for rendering
-		nl->InitGeometry(&m_sprLights);
-
 		//load logic
 		nl->LoadLogic(fl);
 
+		//set all internal light data needed for rendering
+		nl->UpdateInternalData(&m_sprLights);
 		// called when adding the light to the lights array
 		nl->PostConstructionInit();
 		m_arrLights.Add(nl);
@@ -1063,6 +1057,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			}
 		}
 
+		/*
 		for (int kk = 0; kk < arrLocalSpawnersPos.Count(); kk++)
 		{
 			D3DXVECTOR2 vPos = arrLocalSpawnersPos.m_pData[kk];
@@ -1090,7 +1085,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			//save stats
 			m_arrStats[K_LVL_STATS_ZOMBIE_PORTALS]++;
 		}
-
+		*/ 
 		//STEP 2: replace a few hostages with fake ones
 		int nFakeHostages = m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] / 4;
 		if (nFakeHostages >= 2)
@@ -1414,7 +1409,7 @@ HRESULT CLevel::LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPo
 		nl->castShadows = ((u2b & K_EDITOR_LIGHT_FLAG_CAST_SHADOWS) != 0);
 
 		//set all internal light data needed for rendering
-		nl->InitGeometry(&m_sprLights);
+		nl->UpdateInternalData(&m_sprLights);
 		//load logic
 		nl->LoadLogic(fl);
 		if (nl->targetID_ini >= 0)

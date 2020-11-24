@@ -1077,7 +1077,7 @@ void CLevel::SpawnPlayer(D3DXVECTOR2 spawnPos, int nPlayerOrdinal, int nAnimset)
 	{
 		nact->SetAnimSet(nAnimset);
 		SetActorAIState(nact, L"JOIN_GAME");
-		AddProp_Light(nact->GetPosHeart(), ANM_LIGHTS_SPR_POINT1, 0.5f, 0.1f, 0x8888ff00, 1.0f);
+		//AddProp_Light(nact->GetPosHeart(), ANM_LIGHTS_SPR_POINT1, 0.5f, 0.1f, 0x8888ff00, 1.0f);
 
 		//set invulnerability
 		SetActorDoT(nact, CDamageOverTime::K_LVL_DoT_INVINCIBLE, 2.0f, 0.0f, K_LVL_ACT_CLASS_ANY, K_LVL_ACT_CLASS_ANY, 0);
@@ -6663,7 +6663,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						//animate player on spawn (only if told otherwise by nAnimset=-1)
 						actor->SetAnimSet(0);
 						SetActorAIState(actor, L"JOIN_GAME");
-						AddProp_Light(actor->GetPosHeart(), ANM_LIGHTS_SPR_POINT1, 0.5f, 0.1f, 0x8888ff00, 1.0f);
+						//AddProp_Light(actor->GetPosHeart(), ANM_LIGHTS_SPR_POINT1, 0.5f, 0.1f, 0x8888ff00, 1.0f);
 					}
 
 				}
@@ -10582,7 +10582,6 @@ void CLevel::Update(float dTime_original)
 		{
 			case K_LVL_LT_IES:
 			{
-				ErrorBox(K_ERR_WARNING, L"CLevel::Update: Illegal light type!");
 			}
 			break;
 			case K_LVL_LT_POINT:
@@ -10642,39 +10641,35 @@ void CLevel::Update(float dTime_original)
 				}
 			}
 			break;
-			case K_LVL_LT_AREA:
+			case K_LVL_LT_PROJECTED_DIR:
 			{
 				//create light mesh - rotating the actual mesh isn't necessary
-				D3DXVECTOR3 lcorners[4]; //ul, ur, dl, dr
+				D3DXVECTOR3 lcorners[4]; //ul, ur, dr, dl
 				memcpy(lcorners, nl->lCorners, 4 * sizeof(D3DXVECTOR3));
-				//mut mesh pe pozitia finala
-				lcorners[0].x += nl->pos.x; lcorners[0].y += nl->pos.y;
-				lcorners[1].x += nl->pos.x; lcorners[1].y += nl->pos.y;
-				lcorners[2].x += nl->pos.x; lcorners[2].y += nl->pos.y;
-				lcorners[3].x += nl->pos.x; lcorners[3].y += nl->pos.y;
-				//iau bbox-ul final dupa AABB-ul dat de cele 4 puncte rotite
-				CAABB rotAABB = AABB_FromPoints(lcorners, 4);
+				//move mesh to final pos
+				lcorners[0].x += nl->vPos.x; lcorners[0].y += nl->vPos.y;
+				lcorners[1].x += nl->vPos.x; lcorners[1].y += nl->vPos.y;
+				lcorners[2].x += nl->vPos.x; lcorners[2].y += nl->vPos.y;
+				lcorners[3].x += nl->vPos.x; lcorners[3].y += nl->vPos.y;
 				//scriu VS-ul final
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
 				vul.pos = lcorners[0];
 				vur.pos = lcorners[1];
-				vdl.pos = lcorners[2];
-				vdr.pos = lcorners[3];
+				vdr.pos = lcorners[2];
+				vdl.pos = lcorners[3];
 				//setez culoarea
 				vul.color = vur.color = vdl.color = vdr.color = nl->color;
-				//setez coordonate textura spot
-				vul.tex1 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.top, 0.0f, 0.0f);
-				vur.tex1 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.top, 0.0f, 0.0f);
-				vdl.tex1 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.bottom, 0.0f, 0.0f);
-				vdr.tex1 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.bottom, 0.0f, 0.0f);
-				//Coord de mapare pe RTT (tex2) se seteaza din shader
-				//setez normalele finale - directia catre lumina
-				vul.n = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-				vur.n = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-				vdl.n = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-				vdr.n = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-				//construiesc VB-ul exact
-				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+				//to test: coordonate textura spot (useless)
+				/*
+				vul.tex2 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.top, 0.0f, 0.0f);
+				vur.tex2 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.top, 0.0f, 0.0f);
+				vdl.tex2 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.bottom, 0.0f, 0.0f);
+				vdr.tex2 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.bottom, 0.0f, 0.0f);
+				*/
+				//light direction as normals but not really used
+				vul.n = vur.n = vdl.n = vdr.n = nl->vnDir;
+				
+				_VERTEX_PNCT4T4 lightRectV[6]; 
 				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
@@ -12174,7 +12169,14 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 
 
 	AdditiveBlendingON(m_pDevice, NULL);
+	CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
+	if (pRT != null)
+	{
+		m_pDevice->SetTexture(0, pRT->m_pRTTexture);
+	}
 
+	///--- point lights without shadow
+	// VS
 	pVShader = UTGetShaderManager().GetVShaderByName(L"VS_POINTLIGHT");
 	m_pDevice->SetVertexShader(pVShader);
 
@@ -12184,23 +12186,14 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	};
 	m_pDevice->SetVertexShaderConstantF(0, (float*)&matWVP, 4);
 	m_pDevice->SetVertexShaderConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
-
-	CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
-	if (pRT != null)
-	{
-		m_pDevice->SetTexture(0, pRT->m_pRTTexture);
-	}
-
-	//pixel shader
+	// PS
 	pPShader = UTGetShaderManager().GetPShaderByName(L"PS_POINTLIGHT");
 	m_pDevice->SetPixelShader(pPShader);
-
-	///--- 3.paint lights ---
-	CFixedArray<int, 64> arrLightsShadIdx; //shadowing lights
+	
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
-		//ambiental already painted
+		
 		if ((nl->type != K_LVL_LT_POINT) || (nl->castShadows))
 			continue;
 
@@ -12214,9 +12207,50 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 			{ nl->vPos.x, nl->vPos.y, nl->vPos.z, 0.0f }
 		};
 		m_pDevice->SetPixelShaderConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
-
 		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, false);
 	}
+
+	///--- directional projected lights
+	//#HACK: daca am mai multe texturi de lumina trebuie schimbat settexture sa ia pentru fiecare lumina textura ei. Daca am o singura textura merge foarte bine asa
+	m_pDevice->SetTexture(1, m_sprLights.Textures[0]->pTex);
+	m_pDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	m_pDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+
+	pVShader = UTGetShaderManager().GetVShaderByName(L"VS_PROJECTEDDIR");
+	m_pDevice->SetVertexShader(pVShader);
+	m_pDevice->SetVertexDeclaration(UTGetShaderManager()._VERTEX_PNCT4T4_decl);
+	float fConstDataVS2[][4] = {
+		{ camrect.x, camrect.y, camrect.w, camrect.h } //RTT rect_xywh in world coords
+	};
+	m_pDevice->SetVertexShaderConstantF(0, (float*)&matWVP, 4);
+	m_pDevice->SetVertexShaderConstantF(4, (float*)fConstDataVS2, ARRAY_SIZE(fConstDataVS));
+
+	pPShader = UTGetShaderManager().GetPShaderByName(L"PS_PROJECTEDDIR");
+	m_pDevice->SetPixelShader(pPShader);
+	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
+	{
+		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+
+		if (nl->type != K_LVL_LT_PROJECTED_DIR)
+			continue;
+
+		//set Pshader constants
+		float fConstData[][4] = {
+			//x: light intensity, y: geometry half size W, z: geometry half size H
+			{ nl->fIntensity, nl->bbox_ini.vHalfSize.x, nl->bbox_ini.vHalfSize.y, 0.0f },
+			// x: game height projection, y: height projection inverse (projected -> real), z: gauss dist atten factor
+			{ ZHSCALE, INV_ZHSCALE, ct_fGaussLen, 0.0f },
+			// xyz: light world position
+			{ nl->vPos.x, nl->vPos.y, nl->vPos.z, 0.0f },
+			// xyz: direction of light, normalized
+			{ nl->vnDir.x, nl->vnDir.y, nl->vnDir.z, 0.0f },
+			// xy: UL tex spot coords; zw: WH spot width height
+			{ nl->lTexRect.left, nl->lTexRect.top, nl->lTexRect.right - nl->lTexRect.left, nl->lTexRect.bottom - nl->lTexRect.top }
+		};
+		m_pDevice->SetPixelShaderConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
+		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, false);
+	}
+
 
 	AdditiveBlendingOFF(m_pDevice, NULL);
 
@@ -13889,7 +13923,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, D3DXVECTOR2 vDir)
 			//prop - nozzle light
 			float fPropAlpha = 0.8f * weapon->WeaponTemplate.fMuzzleLightSize;
 			CLAMP(fPropAlpha, 0.0f, 1.0f);
-			AddProp_Light(vShootPos, ANM_LIGHTS_SPR_POINT1, 0.05f, 0.0f, D3DCOLOR_COLORALPHA(0xffFDB727, fPropAlpha), weapon->WeaponTemplate.fMuzzleLightSize);
+//			AddProp_Light(vShootPos, ANM_LIGHTS_SPR_POINT1, 0.05f, 0.0f, D3DCOLOR_COLORALPHA(0xffFDB727, fPropAlpha), weapon->WeaponTemplate.fMuzzleLightSize);
 		}
 		//adaug eventAI de sunet
 		AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, shooter->GetUID(), shooter->templateActor.actorClass, shooter->posHeart, weapon->WeaponTemplate.fSoundRadius);
@@ -14698,7 +14732,7 @@ void CLevel::UpdateBullets(float dTime)
 				if ((node->m_data.nSubstate == 0) && (bullet->physPt->m_data.bIsStatic))
 				{
 					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_CAMBALL_DIGITAL, true, 0, &bullet->physPt->m_data.pos, NULL, NULL, 3.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_FRONT);
-					AddProp_Light(bullet->physPt->m_data.pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xff00d0ff, 2.0f);
+//					AddProp_Light(bullet->physPt->m_data.pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xff00d0ff, 2.0f);
 					m_screenVignette.Init(0.2f, 0xff00d0ff, 0.0f, 0.2f, 0.6f);
 
 					node->m_data.nSubstate = 1;
@@ -15604,7 +15638,7 @@ void CLevel::AddProp(ESpecialPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed
 				node->m_data.bMakesLight = true;
 				node->m_data.fLightDuration = node->m_data.fTimer;
 				node->m_data.fLightFadeOut = 0.3f;
-				node->m_data.sprLight.Init(ANM_LIGHTS_SPR_POINT_SM1, 0.0f, 0.0f, 0, 0xfffdb727);
+//				node->m_data.sprLight.Init(ANM_LIGHTS_SPR_POINT_SM1, 0.0f, 0.0f, 0, 0xfffdb727);
 				//physics
 				node->m_data.physPt->m_data.eCollType = CPhysicsPoint2D::K_COLLTYPE_PRECISE;
 				node->m_data.physPt->m_data.bFlagPhysicsEnabled = true;
@@ -15673,7 +15707,7 @@ void CLevel::AddProp(ESpecialPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed
 				node->m_data.bMakesLight = true;
 				node->m_data.fLightDuration = node->m_data.fTimer;
 				node->m_data.fLightFadeOut = 0.3f;
-				node->m_data.sprLight.Init(ANM_LIGHTS_SPR_POINT_SM1, 0.0f, 0.0f, 0, 0xfffdb727);
+//				node->m_data.sprLight.Init(ANM_LIGHTS_SPR_POINT_SM1, 0.0f, 0.0f, 0, 0xfffdb727);
 
 				//physics
 				node->m_data.physPt->m_data.eCollType = CPhysicsPoint2D::K_COLLTYPE_PRECISE;
@@ -15837,7 +15871,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			node->m_data.fTimer = 0.4f;
 
 			//prop - light
-			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 1.0f, 0.2f, 0xffFDB727, 2.0f);
+//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 1.0f, 0.2f, 0xffFDB727, 2.0f);
 			//add visually stunning stuff
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &pos, NULL, &D3DXVECTOR2(0.0f, -20.0f), 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
@@ -15857,7 +15891,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			node->m_data.fTimer = 0.4f;
 
 			//prop - light
-			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.8f, 0.2f, 0xffFDB727, 1.6f);
+//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.8f, 0.2f, 0xffFDB727, 1.6f);
 			//add visually stunning stuff
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_LG1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
@@ -15877,7 +15911,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			node->m_data.fTimer = 0.4f;
 
 			//prop - light
-			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.8f, 0.2f, 0xffFDB727, 1.6f);
+//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.8f, 0.2f, 0xffFDB727, 1.6f);
 			//add visually stunning stuff
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_LG2, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
@@ -15896,7 +15930,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			node->m_data.fTimer = 0.4f;
 
 			//prop - light
-			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.8f, 0.2f, 0xffFDB727, 1.6f);
+//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.8f, 0.2f, 0xffFDB727, 1.6f);
 			//add visually stunning stuff
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ATOMIC1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
@@ -15960,7 +15994,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			node->m_data.fTimer = 0.2f;
 
 			//prop - light
-			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xffFDB727, 1.6f);
+//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xffFDB727, 1.6f);
 			//add visually stunning stuff
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_CHARGE1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
@@ -15998,7 +16032,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			node->m_data.fTimer = 0.2f;
 
 			//prop - light
-			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xffFDB727, 1.6f);
+//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xffFDB727, 1.6f);
 			//add visually stunning stuff
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_SM1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
@@ -16018,7 +16052,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			node->m_data.fTimer = 0.2f;
 
 			//prop - light
-			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xffFDB727, 1.6f);
+//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xffFDB727, 1.6f);
 			//add visually stunning stuff
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_GROUND1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
@@ -16034,7 +16068,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			node->m_data.fSize = 1.0f;
 			node->m_data.fTimer = 0.2f;
 			//prop - light
-			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 1.0f, 0.2f, 0xffffffff, 1.5f);
+//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 1.0f, 0.2f, 0xffffffff, 1.5f);
 			//add visually stunning stuff
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FLASH_AIR, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 
@@ -16045,7 +16079,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_FAKE_SPY_CAMERA)
 		{
-			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xff00d0ff, 2.0f);
+//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xff00d0ff, 2.0f);
 			m_screenVignette.Init(0.2f, 0xff00d0ff, 0.0f, 0.2f, 0.6f);
 		}
 
@@ -16600,7 +16634,7 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float f
 		break;
 		case K_LVL_EFFECT_ELECTRIC_BREAK_SPARKS:
 		{
-			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.4f, 0.1f, 0x88FDB727, 1.0f);
+//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.4f, 0.1f, 0x88FDB727, 1.0f);
 			//particule sparkle
 			for (int kk = 0; kk < 20; kk++)
 			{
@@ -16610,7 +16644,7 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float f
 		break;
 		case K_LVL_EFFECT_STARS_CONFETTI:
 		{
-			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0x88FDB727, 3.0f * fSize);
+//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0x88FDB727, 3.0f * fSize);
 			//fire ring
 			for (int kk = 0; kk < 30; kk++)
 			{
