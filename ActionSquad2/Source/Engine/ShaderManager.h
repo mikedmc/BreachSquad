@@ -105,18 +105,22 @@ struct PSnode
 	}
 };
 
+enum eVertexDeclarationType {
+	K_SHM_PNCT4T4,
+	K_SHM_PNCT,
+	K_SHM_PT4T4,
+};
+
 class CShaderManager
 {
 public:
 	//all vertex declarations are kept here
 	LPDIRECT3DVERTEXDECLARATION9 _VERTEX_PNCT4T4_decl;
-	LPDIRECT3DVERTEXDECLARATION9 _VERTEX_PNCT_decl;
-	LPDIRECT3DVERTEXDECLARATION9 _VERTEX_PNT_decl;
-	LPDIRECT3DVERTEXDECLARATION9 _VERTEX_PC_decl;
-	LPDIRECT3DVERTEXDECLARATION9 _VERTEX_PT2T2_decl;
+	LPDIRECT3DVERTEXDECLARATION9 _VERTEX_PNCT4_decl;
+	LPDIRECT3DVERTEXDECLARATION9 _VERTEX_PCT4T4_decl;
 
 public:
-	LPDIRECT3DDEVICE9			m_pd3dDevice;
+	LPDIRECT3DDEVICE9			pDevice;
 	CGrowableArray<VSnode*>		VertexShaders;
 	CGrowableArray<PSnode*>		PixelShaders;
 
@@ -146,8 +150,20 @@ public:
 	void	ReloadAllShaders();
 
 	//vertex declarations are initialised here
-	HRESULT CreateVertexDeclarations(LPDIRECT3DDEVICE9 pDevice);
+	HRESULT CreateVertexDeclarations();
 	HRESULT ReleaseVertexDeclarations();
+
+	// sets a VS by name or nullptr if name is null
+	HRESULT SetVS(PVERTEXSHADER pShader);
+	HRESULT SetVSByName(WCHAR* shaderName);
+	HRESULT SetVSConstantF(UINT StartRegister, const float* pConstantData, UINT Vector4fCount);
+	HRESULT SetVertexDeclaration(eVertexDeclarationType vtype);
+
+	// sets a PS by name or nullptr if name is null
+	HRESULT SetPS(PPIXELSHADER pShader);
+	HRESULT SetPSByName(WCHAR* shaderName);
+	HRESULT SetPSConstantF(UINT StartRegister, const float* pConstantData, UINT Vector4fCount);
+
 
 	HRESULT OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext = NULL);
 	HRESULT OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext = NULL);

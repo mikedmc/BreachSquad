@@ -12177,18 +12177,15 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 
 	///--- point lights without shadow
 	// VS
-	pVShader = UTGetShaderManager().GetVShaderByName(L"VS_POINTLIGHT");
-	m_pDevice->SetVertexShader(pVShader);
-
-	m_pDevice->SetVertexDeclaration(UTGetShaderManager()._VERTEX_PNCT4T4_decl);
+	UTGetShaderManager().SetVSByName(L"VS_POINTLIGHT");
+	UTGetShaderManager().SetVertexDeclaration(K_SHM_PNCT4T4);
 	float fConstDataVS[][4] = {
 		{ camrect.x, camrect.y, camrect.w, camrect.h } //RTT rect_xywh in world coords
 	};
-	m_pDevice->SetVertexShaderConstantF(0, (float*)&matWVP, 4);
-	m_pDevice->SetVertexShaderConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
+	UTGetShaderManager().SetVSConstantF(0, (float*)&matWVP, 4);
+	UTGetShaderManager().SetVSConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
 	// PS
-	pPShader = UTGetShaderManager().GetPShaderByName(L"PS_POINTLIGHT");
-	m_pDevice->SetPixelShader(pPShader);
+	UTGetShaderManager().SetPSByName(L"PS_POINTLIGHT");
 	
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
 	{
@@ -12206,7 +12203,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 			// xyz: light world position
 			{ nl->vPos.x, nl->vPos.y, nl->vPos.z, 0.0f }
 		};
-		m_pDevice->SetPixelShaderConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
+		UTGetShaderManager().SetPSConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
 		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, false);
 	}
 
@@ -12216,17 +12213,15 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	m_pDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 	m_pDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 
-	pVShader = UTGetShaderManager().GetVShaderByName(L"VS_PROJECTEDDIR");
-	m_pDevice->SetVertexShader(pVShader);
-	m_pDevice->SetVertexDeclaration(UTGetShaderManager()._VERTEX_PNCT4T4_decl);
+	UTGetShaderManager().SetVSByName(L"VS_PROJECTEDDIR");
+	UTGetShaderManager().SetVertexDeclaration(K_SHM_PNCT4T4);
 	float fConstDataVS2[][4] = {
 		{ camrect.x, camrect.y, camrect.w, camrect.h } //RTT rect_xywh in world coords
 	};
-	m_pDevice->SetVertexShaderConstantF(0, (float*)&matWVP, 4);
-	m_pDevice->SetVertexShaderConstantF(4, (float*)fConstDataVS2, ARRAY_SIZE(fConstDataVS));
+	UTGetShaderManager().SetVSConstantF(0, (float*)&matWVP, 4);
+	UTGetShaderManager().SetVSConstantF(4, (float*)fConstDataVS2, ARRAY_SIZE(fConstDataVS));
 
-	pPShader = UTGetShaderManager().GetPShaderByName(L"PS_PROJECTEDDIR");
-	m_pDevice->SetPixelShader(pPShader);
+	UTGetShaderManager().SetPSByName(L"PS_PROJECTEDDIR");
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
@@ -12247,15 +12242,15 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 			// xy: UL tex spot coords; zw: WH spot width height
 			{ nl->lTexRect.left, nl->lTexRect.top, nl->lTexRect.right - nl->lTexRect.left, nl->lTexRect.bottom - nl->lTexRect.top }
 		};
-		m_pDevice->SetPixelShaderConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
+		UTGetShaderManager().SetPSConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
 		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, false);
 	}
 
 
 	AdditiveBlendingOFF(m_pDevice, NULL);
 
-	m_pDevice->SetVertexShader(nullptr);
-	m_pDevice->SetPixelShader(nullptr);
+	UTGetShaderManager().SetVS(nullptr);
+	UTGetShaderManager().SetPS(nullptr);
 
 	return K_OP_OK;
 }

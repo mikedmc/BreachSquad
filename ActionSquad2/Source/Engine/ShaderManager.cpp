@@ -19,39 +19,20 @@ D3DVERTEXELEMENT9 _VERTEX_PNCT4T4_ve[] =
 	{0, 44, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1 },
 	D3DDECL_END()
 };
-D3DVERTEXELEMENT9 _VERTEX_PT2T2_ve[] =
+D3DVERTEXELEMENT9 _VERTEX_PCT4T4_ve[] =
 {
 	{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
-	{ 0, 28, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
-	{ 0, 44, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1 },
+	{ 0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
+	{ 0, 16, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+	{ 0, 32, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1 },
 	D3DDECL_END()
 };
-D3DVERTEXELEMENT9 _VERTEX_PNCT_ve[] =
+D3DVERTEXELEMENT9 _VERTEX_PNCT4_ve[] =
 {
 	{0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
 	{0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0 },
 	{0, 24, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
-	{0, 28, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
-	D3DDECL_END()
-};
-D3DVERTEXELEMENT9 _VERTEX_PNT_ve[] =
-{
-	{0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
-	{0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0 },
-	{0, 24, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
-	D3DDECL_END()
-};
-D3DVERTEXELEMENT9 _VERTEX_PTC_ve[] =
-{
-	{0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
-	{0, 12, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
-	{0, 20, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
-	D3DDECL_END()
-};
-D3DVERTEXELEMENT9 _VERTEX_PC_ve[] =
-{
-	{0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
-	{0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
+	{0, 28, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
 	D3DDECL_END()
 };
 
@@ -185,9 +166,9 @@ HRESULT CreatePS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DPIXELSHA
 
 CShaderManager::CShaderManager(void)
 {
-	_VERTEX_PNT_decl = NULL;
-	_VERTEX_PNCT_decl = NULL;
-	_VERTEX_PNCT4T4_decl = NULL;
+	_VERTEX_PNCT4T4_decl = null;
+	_VERTEX_PNCT4_decl = null;
+	_VERTEX_PCT4T4_decl = null;
 }
 CShaderManager::~CShaderManager(void)
 {
@@ -313,7 +294,7 @@ HRESULT	CShaderManager::AddVShader(WCHAR *szPath, WCHAR * szFriendlyName, int * 
 	//shader name
 	pNewVS->shName.Init(szFriendlyName);
 	//face shaderul
-	if (FAILED(hr = CreateVS(m_pd3dDevice, szPath, &pNewVS->pShader)))
+	if (FAILED(hr = CreateVS(pDevice, szPath, &pNewVS->pShader)))
 	{
 		ErrorBox(K_ERR_CRITICAL, L"Failed to create vertex shader.\n\t\t%s\n", szPath);
 		return hr;
@@ -354,7 +335,7 @@ HRESULT	CShaderManager::AddPShader(WCHAR * szPath, WCHAR * szFriendlyName, int *
 	//set friendly name
 	pNewPS->shName.Init(szFriendlyName);
 	//face shaderul
-	if (FAILED(hr = CreatePS(m_pd3dDevice, szPath, &pNewPS->pShader)))
+	if (FAILED(hr = CreatePS(pDevice, szPath, &pNewPS->pShader)))
 	{
 		ErrorBox(K_ERR_CRITICAL, L"Failed to create pixel shader.\n\t\t%s\n", szPath);
 		return hr;
@@ -456,46 +437,105 @@ LPDIRECT3DPIXELSHADER9 CShaderManager::GetPShaderByNameHash(UINT32 nNameHash)
 void CShaderManager::ReloadAllShaders()
 {
 #if defined(_DEBUG) || defined(DEBUG)
-	OnLostDevice(m_pd3dDevice);
-	OnResetDevice(m_pd3dDevice, null);
+	OnLostDevice(pDevice);
+	OnResetDevice(pDevice, null);
 	LOG_DBG(L"-- ALL SHADERS RELOADED!");
 #endif
 }
 
 //-=-=-= vertex declarations =-=-=-
-HRESULT CShaderManager::CreateVertexDeclarations(LPDIRECT3DDEVICE9 pDevice)
+HRESULT CShaderManager::CreateVertexDeclarations()
 {
 	HRESULT hr = S_OK;
 	V_RETURN(pDevice->CreateVertexDeclaration(_VERTEX_PNCT4T4_ve, &_VERTEX_PNCT4T4_decl));
-	V_RETURN(pDevice->CreateVertexDeclaration(_VERTEX_PNCT_ve, &_VERTEX_PNCT_decl));
-	V_RETURN(pDevice->CreateVertexDeclaration(_VERTEX_PNT_ve, &_VERTEX_PNT_decl));
-	V_RETURN(pDevice->CreateVertexDeclaration(_VERTEX_PC_ve, &_VERTEX_PC_decl));
-	V_RETURN(pDevice->CreateVertexDeclaration(_VERTEX_PT2T2_ve, &_VERTEX_PT2T2_decl));
+	V_RETURN(pDevice->CreateVertexDeclaration(_VERTEX_PNCT4_ve, &_VERTEX_PNCT4_decl));
+	V_RETURN(pDevice->CreateVertexDeclaration(_VERTEX_PCT4T4_ve, &_VERTEX_PCT4T4_decl));
 
 	return S_OK;
 }
 HRESULT CShaderManager::ReleaseVertexDeclarations()
 {
 	SAFE_RELEASE(_VERTEX_PNCT4T4_decl);
-	SAFE_RELEASE(_VERTEX_PNCT_decl);
-	SAFE_RELEASE(_VERTEX_PNT_decl);
-	SAFE_RELEASE(_VERTEX_PC_decl);
-	SAFE_RELEASE(_VERTEX_PT2T2_decl);
+	SAFE_RELEASE(_VERTEX_PNCT4_decl);
+	SAFE_RELEASE(_VERTEX_PCT4T4_decl);
 
 	return S_OK;
+}
+
+HRESULT CShaderManager::SetVS(PVERTEXSHADER pShader)
+{
+	return pDevice->SetVertexShader(pShader);
+}
+
+HRESULT CShaderManager::SetVSByName(WCHAR* shaderName)
+{
+	if (shaderName == nullptr)
+		return pDevice->SetVertexShader(nullptr);
+
+	PVERTEXSHADER pVShader = GetVShaderByName(shaderName);
+	if (pVShader)
+		return pDevice->SetVertexShader(pVShader);
+
+	return E_FAIL;
+}
+
+HRESULT CShaderManager::SetVSConstantF(UINT StartRegister, const float* pConstantData, UINT Vector4fCount)
+{
+	return pDevice->SetVertexShaderConstantF(StartRegister, pConstantData, Vector4fCount);
+}
+
+HRESULT CShaderManager::SetVertexDeclaration(eVertexDeclarationType vtype)
+{
+	switch (vtype)
+	{
+		case K_SHM_PNCT4T4:
+			return pDevice->SetVertexDeclaration(_VERTEX_PNCT4T4_decl);
+			break;
+		case K_SHM_PNCT:
+			return pDevice->SetVertexDeclaration(_VERTEX_PNCT4_decl);
+			break;
+		case K_SHM_PT4T4:
+			return pDevice->SetVertexDeclaration(_VERTEX_PNCT4T4_decl);
+			break;
+		default:
+			return E_FAIL;
+			break;
+	}
+}
+
+HRESULT CShaderManager::SetPS(PPIXELSHADER pShader)
+{
+	return pDevice->SetPixelShader(pShader);
+}
+
+HRESULT CShaderManager::SetPSByName(WCHAR* shaderName)
+{
+	if (shaderName == nullptr)
+		return pDevice->SetPixelShader(nullptr);
+
+	PPIXELSHADER pPShader = GetPShaderByName(shaderName);
+	if (pPShader)
+		return pDevice->SetPixelShader(pPShader);
+
+	return E_FAIL;
+}
+
+HRESULT CShaderManager::SetPSConstantF(UINT StartRegister, const float* pConstantData, UINT Vector4fCount)
+{
+	return pDevice->SetPixelShaderConstantF(StartRegister, pConstantData, Vector4fCount);
 }
 
 //=-=-=- DEVICE FUNCTIONS -=-=-=
 HRESULT CShaderManager::OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext )
 {
-	m_pd3dDevice = pd3dDevice;
+	pDevice = pd3dDevice;
 	return S_OK;
 }
 
 HRESULT CShaderManager::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext )
 {
-	m_pd3dDevice = pd3dDevice;
-	HRESULT hr = CreateVertexDeclarations(pd3dDevice);
+	pDevice = pd3dDevice;
+	HRESULT hr = CreateVertexDeclarations();
 	if(FAILED(hr))
 	{
 		ErrorBox(K_ERR_CRITICAL, L"CShaderManager::OnResetDevice->Failed to createVertexDeclarations()\n");
@@ -505,7 +545,7 @@ HRESULT CShaderManager::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSU
 	//reface shaderele
 	for(int ii=0; ii<VertexShaders.GetSize(); ii++)
 	{
-		if (FAILED(hr = CreateVS(m_pd3dDevice, VertexShaders[ii]->szFilename, &VertexShaders[ii]->pShader)))
+		if (FAILED(hr = CreateVS(pDevice, VertexShaders[ii]->szFilename, &VertexShaders[ii]->pShader)))
 		{
 			ErrorBox(K_ERR_CRITICAL, L"Failed to re-create vertex shader.\n\t\t%s\n", VertexShaders[ii]->szFilename);
 			return hr;
@@ -513,7 +553,7 @@ HRESULT CShaderManager::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSU
 	}
 	for(int ii=0; ii<PixelShaders.GetSize(); ii++)
 	{
-		if (FAILED(hr = CreatePS(m_pd3dDevice, PixelShaders[ii]->szFilename, &PixelShaders[ii]->pShader)))
+		if (FAILED(hr = CreatePS(pDevice, PixelShaders[ii]->szFilename, &PixelShaders[ii]->pShader)))
 		{
 			ErrorBox(K_ERR_CRITICAL, L"Failed to re-create pixel shader.\n\t\t%s\n", PixelShaders[ii]->szFilename);
 			return hr;
