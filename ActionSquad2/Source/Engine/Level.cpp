@@ -11855,7 +11855,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 
 			// special method for rendering lights pass
 			// uses the height/normals render target
-			RenderPass_Lights(&matProj);
+			RenderPass_Lights(&matProj, Vec2(pRT->nWidth, pRT->nHeight));
 
 			// end sprite
 			m_pSprite->End();
@@ -12033,7 +12033,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, MatA16* matProj)
 	return K_OP_OK;
 }
 
-OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
+OPRESULT CLevel::RenderPass_Lights(MatA16* matProj, Vec2 vRTsize)
 {
 	MatA16	matView;
 
@@ -12102,13 +12102,38 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 		m_pDevice->SetTexture(0, pRT->m_pRTTexture);
 	}
 
+	// generic VS data so we can automatically find positions
+	float fConstDataVS[][4] = {
+		{ camrect.x, camrect.y, camrect.w, camrect.h } //RTT rect_xywh in world coords
+	};
+
 	///--- directional light(s)
+	// VS
+	UTGetShaderManager().SetVSByName(L"VS_POINTLIGHT");
+	UTGetShaderManager().SetVertexDeclaration(K_SHM_PNCT4T4);
+	UTGetShaderManager().SetVSConstantF(0, (float*)&matWVP, 4);
+	UTGetShaderManager().SetVSConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
+	// PS
+	UTGetShaderManager().SetPSByName(L"PS_DIRECTIONAL");
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
 		if (nl->type != K_LVL_LT_DIRECTIONAL)
 			continue;
 
+		// find projection of inverse direction vector, scaled to length where we want to check for shadows, scaled to RT texture coords
+		Vec2 chkdir = V3projV2(-nl->vnDir) * K_TILE_SIZE_F;
+		chkdir.x /= vRTsize.x;
+		chkdir.y /= vRTsize.y;
+
+		//set Pshader constants
+		float fConstData[][4] = {
+			//x: intensity, y: height threshold, z: check vec length
+			{ nl->fIntensity, ct_fDirThreshold, ct_fDirCheckdist, 0.0f },
+			// 2d projected vector (xy) for the texture check (must be scaled to -1..1, relative to pixel position, size of a tile or similar
+			{ chkdir.x, chkdir.y, 0.0f, 0.0f }
+		};
+		UTGetShaderManager().SetPSConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
 		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
 	}
 
@@ -12117,9 +12142,6 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	// VS
 	UTGetShaderManager().SetVSByName(L"VS_POINTLIGHT");
 	UTGetShaderManager().SetVertexDeclaration(K_SHM_PNCT4T4);
-	float fConstDataVS[][4] = {
-		{ camrect.x, camrect.y, camrect.w, camrect.h } //RTT rect_xywh in world coords
-	};
 	UTGetShaderManager().SetVSConstantF(0, (float*)&matWVP, 4);
 	UTGetShaderManager().SetVSConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
 	// PS

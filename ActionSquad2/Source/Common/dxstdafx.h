@@ -671,5 +671,7 @@ extern CChatWnd						g_ChatWnd;
 
 
 extern float ct_fGaussLen;
+extern float ct_fDirThreshold;
+extern float ct_fDirCheckdist;
 
 #endif
