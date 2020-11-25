@@ -6,7 +6,7 @@ enum eLightType {
 	K_LVL_LT_AMBIENTAL = 0,
 	K_LVL_LT_PROJECTED_DIR = 1,			// projected directional (lights from windows and other parallel textured sources)
 	K_LVL_LT_POINT,						// classic pointlight
-	K_LVL_LT_DIRECTIONAL,
+	K_LVL_LT_DIRECTIONAL,				// full level directional light (like ambient but with shadows)
 	K_LVL_LT_IES,
 	//K_LVL_LT_TEX_SPOT					// textured spotlight (texture in polar coordinates)
 	K_LVL_LTS_CNT,
@@ -48,6 +48,7 @@ public:
 	float				fRadius;					// radius of light where necessary
 	bool				castShadows;
 	float				fIntensity;					// light intensity
+	int					nProfileID;					// keeps frameID for textured lights and IES profile for IES lights
 
 	int					m_nLightMeshIdx;			// buffer-ul dinamic pt spotul luminii
 	int					m_nShadowMeshIdx;			// buffer-ul dinamic pt shadow volume

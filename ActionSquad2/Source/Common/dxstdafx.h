@@ -325,6 +325,8 @@ enum ETexChannel {
 ///--- CONSTANTE JOC ---
 #define K_TILE_SIZE			16
 #define K_TILE_HSIZE		8
+#define K_TILE_SIZE_F		16.0f
+#define K_TILE_HSIZE_F		8.0f
 
 // number of vertical visible tiles in a screen
 #define K_GAME_HEIGHT_TL			15

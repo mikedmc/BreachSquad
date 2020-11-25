@@ -171,7 +171,7 @@ public:
 	RECTXYWH GetModuleRect(int animIdx, int frameIdx, int moduleIdx);
 	RECTLTRB_F GetModuleRect_TexCoords(int animIdx, int frameIdx, int moduleIdx);
 	SIZEWH GetTextureSizeByAnim(int animIdx);
-	LPDIRECT3DTEXTURE9 GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx);
+	scTexture* GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx);
 	//intoarce nr de hitpoints (sau 0 daca e eroare sau nu are)
 	int GetAFrameHitPointsCnt(int animIdx, int frameIdx);
 	//cate sunt care respecta filtrul de flag (flag & flagFilter != 0)

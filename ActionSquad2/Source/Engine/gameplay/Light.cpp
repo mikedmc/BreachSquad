@@ -39,76 +39,65 @@ void CLight::UpdateInternalData(CSpriteCollection* pLightsSprCol)
 {
 	switch (type)
 	{
-	case K_LVL_LT_POINT:
-	{
-		// Gaussian attenuated radius. 
-		// The attenuation with a 0.55 coefficient dops off to 0 at about 2.0f * fRadius. (2.0 is a little too big)
-		// Beacuse light is farther away from the lit surfaces radius can be smaller so adjust this based on usage.
-		float fRad = fRadius * 1.0f;
+		case K_LVL_LT_IES:
+		case K_LVL_LT_POINT:
+		{
+			// Gaussian attenuated radius. 
+			// The attenuation with a 0.55 coefficient dops off to 0 at about 2.0f * fRadius. (2.0 is a little too big)
+			// Beacuse light is farther away from the lit surfaces radius can be smaller so adjust this based on usage.
+			float fRad = fRadius * 1.0f;
 
-		// screen space light rectangle (clockwise) relative to light
-		lCorners[0] = Vec3(-fRad, -fRad, 0.0f);
-		lCorners[1] = Vec3( fRad, -fRad, 0.0f);
-		lCorners[2] = Vec3( fRad,  fRad, 0.0f);
-		lCorners[3] = Vec3(-fRad,  fRad, 0.0f);
+			// screen space light rectangle (clockwise) relative to light
+			lCorners[0] = Vec3(-fRad, -fRad, 0.0f);
+			lCorners[1] = Vec3(fRad, -fRad, 0.0f);
+			lCorners[2] = Vec3(fRad, fRad, 0.0f);
+			lCorners[3] = Vec3(-fRad, fRad, 0.0f);
 
-		bbox_ini.Set(lCorners[0].x, lCorners[0].y, lCorners[2].x, lCorners[2].y);
-	}
-	break;
-	case K_LVL_LT_IES:
-	{
-	}
-	break;
-	case K_LVL_LT_AMBIENTAL:
-	{
-		castShadows = false;
-		fVolumeAlpha = 0.0f;
-		bbox_ini.Set(Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f));
-		bbox = bbox_ini;
-	}
-	break;
-	case K_LVL_LT_PROJECTED_DIR:
-	{
-		vPos.z = vPos_ini.z = 0.0f;
-		castShadows = false;
+			bbox_ini.Set(lCorners[0].x, lCorners[0].y, lCorners[2].x, lCorners[2].y);
+		}
+		break;
+		case K_LVL_LT_DIRECTIONAL:
+		case K_LVL_LT_AMBIENTAL:
+		{
+			castShadows = false;
+			fVolumeAlpha = 0.0f;
+			bbox_ini.Set(Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f));
+			bbox = bbox_ini;
+		}
+		break;
+		case K_LVL_LT_PROJECTED_DIR:
+		{
+			vPos.z = vPos_ini.z = 0.0f;
+			castShadows = false;
 
 
-		// intersects light direction with level top and bottom planes, projects back to 2D and make a union between them.
-		// can still be optimized
-		Vec3 vmove = -vnDir * K_WALL_HEIGHT_WORLD;
-		CAABB lowRect(bbox_ini);
-		CAABB highRect(bbox_ini);
-		Vec2 vmoveproj = V3projV2(vmove);
-		highRect.Move(vmoveproj);
-		lowRect.Move(-vmoveproj);
-		CAABB unionAABB = AABB_Union(lowRect, highRect);
-		//clockwise
-		lCorners[0] = Vec3(unionAABB.vMin.x, unionAABB.vMin.y, 0.0f);
-		lCorners[1] = Vec3(unionAABB.vMax.x, unionAABB.vMin.y, 0.0f);
-		lCorners[2] = Vec3(unionAABB.vMax.x, unionAABB.vMax.y, 0.0f);
-		lCorners[3] = Vec3(unionAABB.vMin.x, unionAABB.vMax.y, 0.0f);
+			// intersects light direction with level top and bottom planes, projects back to 2D and make a union between them.
+			// can still be optimized
+			Vec3 vmove = -vnDir * K_WALL_HEIGHT_WORLD;
+			CAABB lowRect(bbox_ini);
+			CAABB highRect(bbox_ini);
+			Vec2 vmoveproj = V3projV2(vmove);
+			highRect.Move(vmoveproj);
+			lowRect.Move(-vmoveproj);
+			CAABB unionAABB = AABB_Union(lowRect, highRect);
+			//clockwise
+			lCorners[0] = Vec3(unionAABB.vMin.x, unionAABB.vMin.y, 0.0f);
+			lCorners[1] = Vec3(unionAABB.vMax.x, unionAABB.vMin.y, 0.0f);
+			lCorners[2] = Vec3(unionAABB.vMax.x, unionAABB.vMax.y, 0.0f);
+			lCorners[3] = Vec3(unionAABB.vMin.x, unionAABB.vMax.y, 0.0f);
 
-		if ((animID >= 0) && (pLightsSprCol != null))
-			lTexRect = pLightsSprCol->GetModuleRect_TexCoords(ANM_LIGHTS_SPR_PROJECTED_DIR, 0, 0);
-	}
-	break;
-	case K_LVL_LT_DIRECTIONAL:
-	{
-		castShadows = false;
-		lCorners[0] = Vec3(-bbox.vHalfSize.x, -bbox.vHalfSize.y, 0.0f);
-		lCorners[1] = Vec3(bbox.vHalfSize.x, -bbox.vHalfSize.y, 0.0f);
-		lCorners[2] = Vec3(-bbox.vHalfSize.x, bbox.vHalfSize.y, 0.0f);
-		lCorners[3] = Vec3(bbox.vHalfSize.x, bbox.vHalfSize.y, 0.0f);
-		if (animID >= 0)
-			lTexRect = pLightsSprCol->GetModuleRect_TexCoords(animID, 0, 0);
-	}
-	break;
+			if ((animID >= 0) && (pLightsSprCol != null))
+				lTexRect = pLightsSprCol->GetModuleRect_TexCoords(ANM_LIGHTS_SPR_PROJECTED_DIR, 0, 0);
+		}
+		break;
 	}
 
 }
 
 CLight::CLight() :
-	m_nLightMeshIdx(-1), m_nShadowMeshIdx(-1), type(K_LVL_LT_UNKNOWN), animID(-1), fRadius(0.0f), fVolumeAlpha(1.0f), castShadows(false)
+	m_nLightMeshIdx(-1), m_nShadowMeshIdx(-1), type(K_LVL_LT_UNKNOWN), animID(-1), 
+	fRadius(0.0f), fVolumeAlpha(1.0f), castShadows(false),
+	nProfileID(0)
 {
 	vnDir = Vec3(0.0f, 0.0f, -1.0f); //default direction (looking down)
 }

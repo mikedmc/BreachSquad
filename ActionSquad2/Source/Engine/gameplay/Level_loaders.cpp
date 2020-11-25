@@ -1057,35 +1057,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			}
 		}
 
-		/*
-		for (int kk = 0; kk < arrLocalSpawnersPos.Count(); kk++)
-		{
-			D3DXVECTOR2 vPos = arrLocalSpawnersPos.m_pData[kk];
-			//add green flickering light
-			CLight* pLight = SpawnLight(D3DXVECTOR3(vPos.x, vPos.y - 20.0f, 100.0f), K_LVL_LT_POINT, ANM_LIGHTS_SPR_POINT1, 0xff3bff3b, 1.0f, false);
-			pLight->AIstate = K_AI_STATE_FN_LIGHT_FLICKER1;
-			pLight->bHidden = true;
-			pLight->bSetHidden = true;
-			//AI data
-			pLight->varAIparams.SetNamedVarFloat(L"f_timeMul", 4.0f);
-			pLight->varAIparams.SetNamedVarFloat(L"f_threshold", 0.5f);
-
-			CProp* pSpawner = SpawnProp(vPos, ANM_ACTIVES_SPR_ZOMBIE_SPAWNER_APPEAR, 0, K_LVL_LAYER_MIDDLE);
-			pSpawner->bAnimated = false;
-			pSpawner->nLayer = K_LVL_LAYER_MIDDLE; //so it doesn't get dirty
-			pSpawner->bCanInteract = true;
-			pSpawner->fTouchDuration = 4.0f;
-			pSpawner->script_hash.Init(L"DISABLE_ZOMBIE_SPAWNER");
-			//AI data
-			pSpawner->AIstate = K_AI_STATE_ACTIVE_ZOMBIE_SPAWNER;
-			pSpawner->targetID_ini = pLight->ID;
-			pSpawner->varAIparams.SetNamedVarFloat(L"f_spawnFreq", 4.0f + m_rand.RandFloat(2.0f));
-			pSpawner->varAIparams.SetNamedVarINT32(L"n_maxSpawns", nMediumSpawnCount - 1 + m_rand.RandInt(3));
-
-			//save stats
-			m_arrStats[K_LVL_STATS_ZOMBIE_PORTALS]++;
-		}
-		*/ 
 		//STEP 2: replace a few hostages with fake ones
 		int nFakeHostages = m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] / 4;
 		if (nFakeHostages >= 2)

@@ -1254,51 +1254,29 @@ CProp* CLevel::SpawnProp(D3DXVECTOR2 spawnPos, int nAnimIdx, int nFrameIdx, int 
 	return obj;
 }
 
-CLight* CLevel::SpawnLight(D3DXVECTOR3 spawnPos, int nType, int nAnimIdx, DWORD dwColor, float fScale, bool bCastShadows)
+CLight*	CLevel::SpawnLight(D3DXVECTOR3 spawnPos, eLightType eType, DWORD dwColor, float fRadius, int profileID, bool bCastShadows)
 {
 	CLight *nl = new CLight();
-	nl->m_nLightMeshIdx = -1;
-	nl->m_nShadowMeshIdx = -1;
-
 	nl->ID = GenerateNextID();
-	nl->type = (eLightType)nType;
+	nl->type = eType;
 	nl->fVolumeAlpha = 1.0f;
 	nl->fIntensity = 1.0f;
 	nl->vPos = spawnPos;
-	//can't be 0.0f - same plane as background
-	if (nl->vPos.z == 0.0f)
-		nl->vPos.z = 0.1f;
 
-	nl->pos = D3DXVECTOR2(nl->vPos.x, nl->vPos.y);
+	nl->pos = Vec3ToVec2XY(nl->vPos);
 	nl->pos_ini = nl->pos;
 	//animID
-	nl->animID = nAnimIdx;
-	if ((nl->animID < 0) && (nl->type != K_LVL_LT_AMBIENTAL))
-		ErrorBox(K_ERR_WARNING, L"[WARNING] SpawnLight::Light ID:%d doesn't have animID!!", nl->ID);
-	//color
+	nl->animID = 0;
+	nl->nProfileID = profileID;
+	nl->fRadius = fRadius;
 	nl->color = dwColor;
 	nl->color_ini = nl->color;
-	//get anim bbox
-	RECTXYWH rectAnim = m_sprLights.GetAFrameBBox_real(nl->animID, 0);
-	D3DXVECTOR2 bbmin, bbmax;
-	float fLocalScale = fScale * K_LVL_LIGHTRENDER_BSX_SCALING;
-	bbmin.x = nl->pos.x + rectAnim.x * fLocalScale;
-	bbmin.y = nl->pos.y + rectAnim.y * fLocalScale;
-	bbmax.x = bbmin.x + rectAnim.w * fLocalScale;
-	bbmax.y = bbmin.y + rectAnim.h * fLocalScale;
-	nl->bbox.Set_Corrected(bbmin, bbmax);
-	nl->bbox_ini = nl->bbox;
-	nl->bbox_ini.Move(-nl->pos);
-	nl->fRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
-	//read angle and convert to radians
-	nl->fAngle = 0.0f;
-	nl->fAngle = DEG_TO_RAD(nl->fAngle);
-	nl->fAngle_ini = nl->fAngle;
-	//casts shadows
 	nl->castShadows = bCastShadows;
-	
-	//nl->InitGeometry(???);
 
+	//set all internal light data needed for rendering
+	nl->UpdateInternalData(&m_sprLights);
+	// called when adding the light to the lights array
+	nl->PostConstructionInit();
 	//add light and return it
 	m_arrLights.Add(nl);
 	return nl;
@@ -10581,9 +10559,6 @@ void CLevel::Update(float dTime_original)
 		switch (nl->type)
 		{
 			case K_LVL_LT_IES:
-			{
-			}
-			break;
 			case K_LVL_LT_POINT:
 			{
 				D3DXVECTOR3 lcorners[4]; //ul, ur, dl, dr
@@ -10659,13 +10634,6 @@ void CLevel::Update(float dTime_original)
 				vdl.pos = lcorners[3];
 				//setez culoarea
 				vul.color = vur.color = vdl.color = vdr.color = nl->color;
-				//to test: coordonate textura spot (useless)
-				/*
-				vul.tex2 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.top, 0.0f, 0.0f);
-				vur.tex2 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.top, 0.0f, 0.0f);
-				vdl.tex2 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.bottom, 0.0f, 0.0f);
-				vdr.tex2 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.bottom, 0.0f, 0.0f);
-				*/
 				//light direction as normals but not really used
 				vul.n = vur.n = vdl.n = vdr.n = nl->vnDir;
 				
@@ -10680,6 +10648,8 @@ void CLevel::Update(float dTime_original)
 				m_bufferedPainter.EndMesh();
 			}
 			break;
+
+			case K_LVL_LT_DIRECTIONAL:
 			case K_LVL_LT_AMBIENTAL:
 			{
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
@@ -10693,52 +10663,6 @@ void CLevel::Update(float dTime_original)
 				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
 				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
-				m_bufferedPainter.AddTriangles(lightRectV, 2);
-				m_bufferedPainter.EndMesh();
-			}
-			break;
-			case K_LVL_LT_DIRECTIONAL:
-			{
-				//Creez forma luminii (mesh-ul) - nu fac rotatie pentru ca nu foloseste la nimic
-				D3DXVECTOR3 lcorners[4]; //ul, ur, dl, dr
-				memcpy(lcorners, nl->lCorners, 4 * sizeof(D3DXVECTOR3));
-				//mut mesh pe pozitia finala
-				lcorners[0].x += nl->pos.x; lcorners[0].y += nl->pos.y;
-				lcorners[1].x += nl->pos.x; lcorners[1].y += nl->pos.y;
-				lcorners[2].x += nl->pos.x; lcorners[2].y += nl->pos.y;
-				lcorners[3].x += nl->pos.x; lcorners[3].y += nl->pos.y;
-				//iau bbox-ul final dupa AABB-ul dat de cele 4 puncte rotite
-				CAABB rotAABB = AABB_FromPoints(lcorners, 4);
-				//scriu VS-ul final
-				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				vul.pos = lcorners[0];
-				vur.pos = lcorners[1];
-				vdl.pos = lcorners[2];
-				vdr.pos = lcorners[3];
-				//setez culoarea
-				vul.color = vur.color = vdl.color = vdr.color = nl->color;
-				//setez coordonate textura spot
-				vul.tex1 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.top, 0.0f, 0.0f);
-				vur.tex1 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.top, 0.0f, 0.0f);
-				vdl.tex1 = D3DXVECTOR4(nl->lTexRect.left, nl->lTexRect.bottom, 0.0f, 0.0f);
-				vdr.tex1 = D3DXVECTOR4(nl->lTexRect.right, nl->lTexRect.bottom, 0.0f, 0.0f);
-				//Coord de mapare pe RTT (tex2) se seteaza din shader
-				//setez normalele finale - directia catre lumina
-				D3DXVECTOR3 lightdir(-100.0f * cos(nl->fAngle), -100.0f * sin(nl->fAngle), nl->vPos.z);
-				vul.n = lightdir;
-				vur.n = lightdir;
-				vdl.n = lightdir;
-				vdr.n = lightdir;
-
-				//construiesc VB-ul exact
-				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
-				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-				//adauga mesh dinamic pentru volumul luminii
-				nl->m_nLightMeshIdx = -1; //resetez idx mesh
 
 				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
 				m_bufferedPainter.AddTriangles(lightRectV, 2);
@@ -12154,8 +12078,11 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 
 	D3DXMATRIXA16 matWVP = matView * (*matProj);
 
-	///--- 2. paint level ambient lights
+	///--- ambient light(s)
+	// paint without additive, like a clear color, or with additive if we have more of themn
+	//#TODO: if we only have one ambiental per level then take color from g_wAmbientcolor
 	m_pDevice->SetTexture(0, nullptr);
+	m_pDevice->SetTexture(1, nullptr);
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
@@ -12163,9 +12090,9 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 		{
 			//paint and exit
 			m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
+			break;
 		}
 	}
-
 
 
 	AdditiveBlendingON(m_pDevice, NULL);
@@ -12174,6 +12101,17 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	{
 		m_pDevice->SetTexture(0, pRT->m_pRTTexture);
 	}
+
+	///--- directional light(s)
+	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
+	{
+		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		if (nl->type != K_LVL_LT_DIRECTIONAL)
+			continue;
+
+		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
+	}
+
 
 	///--- point lights without shadow
 	// VS
@@ -12207,19 +12145,19 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, false);
 	}
 
+
 	///--- directional projected lights
-	//#HACK: daca am mai multe texturi de lumina trebuie schimbat settexture sa ia pentru fiecare lumina textura ei. Daca am o singura textura merge foarte bine asa
-	m_pDevice->SetTexture(1, m_sprLights.Textures[0]->pTex);
+	//all directional projected light must be in the same animation
+	scTexture* pLightTex = m_sprLights.GetTextureByAnim(ANM_LIGHTS_SPR_PROJECTED_DIR, 0, 0);
+	if(pLightTex)
+		m_pDevice->SetTexture(1, pLightTex->pTex);
 	m_pDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 	m_pDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 
 	UTGetShaderManager().SetVSByName(L"VS_PROJECTEDDIR");
 	UTGetShaderManager().SetVertexDeclaration(K_SHM_PNCT4T4);
-	float fConstDataVS2[][4] = {
-		{ camrect.x, camrect.y, camrect.w, camrect.h } //RTT rect_xywh in world coords
-	};
 	UTGetShaderManager().SetVSConstantF(0, (float*)&matWVP, 4);
-	UTGetShaderManager().SetVSConstantF(4, (float*)fConstDataVS2, ARRAY_SIZE(fConstDataVS));
+	UTGetShaderManager().SetVSConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
 
 	UTGetShaderManager().SetPSByName(L"PS_PROJECTEDDIR");
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
@@ -12245,6 +12183,46 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 		UTGetShaderManager().SetPSConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
 		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, false);
 	}
+
+
+	///--- IES lights without shadow
+	scTexture* pIESTex = m_sprLights.GetTextureByAnim(ANM_LIGHTS_SPR_IES, 0, 0);
+	if(pIESTex)
+		m_pDevice->SetTexture(1, pIESTex->pTex);
+	m_pDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	m_pDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	// VS
+	UTGetShaderManager().SetVSByName(L"VS_POINTLIGHT");
+	UTGetShaderManager().SetVertexDeclaration(K_SHM_PNCT4T4);
+	UTGetShaderManager().SetVSConstantF(0, (float*)&matWVP, 4);
+	UTGetShaderManager().SetVSConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
+	// PS
+	UTGetShaderManager().SetPSByName(L"PS_IESLIGHT");
+
+	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
+	{
+		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+
+		if ((nl->type != K_LVL_LT_IES) || (nl->castShadows))
+			continue;
+
+		//the IES dot texture has 3 pixel lines per IES profile so we don't get interpolation problems
+		float IES_texV = (float)(nl->nProfileID * 3 + 1) / (float)pIESTex->info.Height;
+		//set Pshader constants
+		float fConstData[][4] = {
+			//x:light intensity, y:light radius, z: IES profile (V in texture coordinates)
+			{ nl->fIntensity, nl->fRadius, IES_texV, 0.0f },
+			// x: game height projection, y: height projection inverse (projected -> real), z: gauss dist atten factor
+			{ ZHSCALE, INV_ZHSCALE, ct_fGaussLen, 0.0f },
+			// xyz: light world position
+			{ nl->vPos.x, nl->vPos.y, nl->vPos.z, 0.0f },
+			// light direction normalized
+			{ nl->vnDir.x, nl->vnDir.y, nl->vnDir.z, 0.0f }
+		};
+		UTGetShaderManager().SetPSConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
+		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, false);
+	}
+
 
 
 	AdditiveBlendingOFF(m_pDevice, NULL);

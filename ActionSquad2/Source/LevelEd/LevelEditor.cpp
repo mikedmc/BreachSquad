@@ -407,6 +407,26 @@ void CLevelEditor::Update(float dTime)
 	// mouse pos in level world
 	Vec2 mousepos = m_pLevel->m_camLevel.ScreenToWorld(g_mouse.pos);
 
+	// left mouse button
+	if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
+	{
+		switch (eTool)
+		{
+			case K_LED_LIGHT:
+			{
+				if ((pSelected != nullptr) && (MUVec2Len(&(V3projV2(pSelected->vPos) - mousepos)) < K_TILE_HSIZE_F))
+				{
+					// move it
+				}
+				else
+				{
+					pSelected = m_pLevel->SpawnLight(Vec3(mousepos.x, mousepos.y, K_WALL_HEIGHT_WORLD), K_LVL_LT_POINT, 0xffffffff, 64.0f);
+				}
+			}
+			break;
+		}
+	}
+
 	// right mouse button
 	if (g_mouse.Rbut == K_MOUSE_BUTT_JUSTPRESSED)
 	{
@@ -515,10 +535,6 @@ void CLevelEditor::IMGUI_ShowInterfaces()
 
 
 		///--- CONTROLS TEMPLATES
-		/*
-		if (vp)
-			ImGui::SetNextWindowPos(vp->Pos, ImGuiCond_Once);
-			*/
 		ImGui::Begin("Properties", null, ImGuiWindowFlags_NoNavInputs);
 
 		switch (selType)
@@ -580,6 +596,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 	if (ImGui::Combo("Type", &ltype, K_LIGHT_TYPES_NAMES_ARR, IM_ARRAYSIZE(K_LIGHT_TYPES_NAMES_ARR), IM_ARRAYSIZE(K_LIGHT_TYPES_NAMES_ARR)))
 	{
 		light->type = (eLightType)ltype;
+		light->UpdateInternalData(&m_pLevel->m_sprLights);
 	}
 
 	ImGui::Separator();
@@ -641,6 +658,44 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			{
 				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
 			}
+		}
+		break;
+
+		case K_LVL_LT_IES:
+		{
+			// position
+			float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z };
+			if (ImGui::DragFloat3("Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f"))
+			{
+				light->SetPos(Vec2(f3[0], f3[1]));
+				light->vPos.z = f3[2];
+			}
+			// direction
+			float d3[3] = { light->vnDir.x, light->vnDir.y, light->vnDir.z };
+			if (ImGui::DragFloat3("Direction", d3, 0.02f, -1.0f, 1.0f, "%.2f"))
+			{
+				light->SetDir(Vec3(d3[0], d3[1], d3[2]));
+				light->UpdateInternalData(&m_pLevel->m_sprLights);
+			}
+			// radius
+			if (ImGui::DragFloat("Radius", &light->fRadius, 1.0f, 16.0f, 1000.0f, "%.2f"))
+			{
+				light->UpdateInternalData();
+			}
+			// IES profile
+			ImGui::InputInt("IES Profile", &light->nProfileID, 1, 1);
+			// intensity
+			ImGui::DragFloat("Intensity", &light->fIntensity, 0.01f, 0.1f, 5.0f, "%.2f");
+			// color
+			ImVec4 color;
+			D3DCOLOR_UNPACKTOFLOAT(light->color, color.w, color.x, color.y, color.z);
+			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
+			if (ImGui::IsItemEdited())
+			{
+				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
+			}
+			// cast shadows
+			ImGui::Checkbox("Shadows", &light->castShadows);
 		}
 		break;
 	}

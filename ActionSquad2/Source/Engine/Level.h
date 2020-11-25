@@ -235,7 +235,7 @@ public:
 	// Spawns a new Active with empty properties
 	CProp*					SpawnProp(D3DXVECTOR2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer = K_LVL_LAYER_BACK);
 	// Spawns a light
-	CLight*					SpawnLight(D3DXVECTOR3 spawnPos, int nType, int nAnimIdx, DWORD dwColor, float fScale = 1.0f, bool bCastShadows = false);
+	CLight*					SpawnLight(D3DXVECTOR3 spawnPos, eLightType eType, DWORD dwColor, float fRadius = 64.0f, int profileID = 0, bool bCastShadows = false);
 	// Gives a score for the user powerups placement 
 	// \brief: used to move player spawned objects away from intersections with other interactibles and walls
 	int						GetPowerupPlacingScore(CProp * active, D3DXVECTOR2 vPlacerPos);

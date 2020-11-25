@@ -523,7 +523,7 @@ SIZEWH CSpriteCollection::GetTextureSizeByAnim(int animIdx)
 	return SIZEWH(texW, texH);
 }
 
-LPDIRECT3DTEXTURE9 CSpriteCollection::GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx)
+scTexture* CSpriteCollection::GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx)
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	if ((animIdx >= Animations.GetSize()) || (frameIdx >= Animations[animIdx]->aframesNo) || (moduleIdx >= AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->fmodulesNo))
@@ -533,7 +533,7 @@ LPDIRECT3DTEXTURE9 CSpriteCollection::GetTextureByAnim(int animIdx, int frameIdx
 	}
 #endif;
 	scFModule *module = FModules[AFrames[Animations[animIdx]->aframesIdx[0]]->fmodulesIdx[0]];
-	return Textures[module->imgIdx]->pTex;
+	return Textures[module->imgIdx];
 }
 
 bool CSpriteCollection::IsLooping(int animIdx)
