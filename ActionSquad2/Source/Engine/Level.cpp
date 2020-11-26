@@ -10581,31 +10581,32 @@ void CLevel::Update(float dTime_original)
 				vdl.pos = lcorners[3];
 				//set color
 				vul.color = vur.color = vdl.color = vdr.color = nl->color;
-				// triangles vb
-				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
-				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-				lightRectV[3] = vur; lightRectV[4] = vdr; lightRectV[5] = vdl;
-
-				//dynamic mesh for light geometry
-				nl->m_nLightMeshIdx = -1;
-				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
-				m_bufferedPainter.AddTriangles(lightRectV, 2);
-				m_bufferedPainter.EndMesh();
 
 				//--- create light volumes for shadow casting lights	---
+				nl->m_nLightMeshIdx = -1;
 				if (nl->castShadows)
 				{
-					nl->m_nShadowMeshIdx = -1;
 					int retVerts = BuildLightVolume(nl, arrVerts, arrVertsSize);
 
 					// adaugam triunghiurile ca si mesh
 					if (retVerts > 0)
 					{
 						//adauga mesh dinamic pentru volumul umbrei
-						m_bufferedPainter.BeginMesh(nl->m_nShadowMeshIdx);
+						m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
 						m_bufferedPainter.AddTriangles(arrVerts, retVerts / 3);
 						m_bufferedPainter.EndMesh();
 					}
+				}
+				else
+				{
+					// triangles vb
+					_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+					lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+					lightRectV[3] = vur; lightRectV[4] = vdr; lightRectV[5] = vdl;
+
+					m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
+					m_bufferedPainter.AddTriangles(lightRectV, 2);
+					m_bufferedPainter.EndMesh();
 				}
 			}
 			break;
@@ -12100,7 +12101,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 		if ((nl->type != K_LVL_LT_POINT) || (nl->castShadows == false))
 			continue;
 
-		m_bufferedPainter.DrawMesh(nl->m_nShadowMeshIdx, true);
+		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
 	}
 	m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 
@@ -13333,6 +13334,7 @@ int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outV
 		Vec2 vPos;
 		Vec2 vNorm;
 		POINTXY_INT tlPos;
+		bool bCollided;
 	};
 
 	const int	nSteps = 360;
@@ -13368,6 +13370,7 @@ int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outV
 			if(nSameSince > 1)
 				arrCollCur--;
 
+			arrColl[arrCollCur].bCollided = true;
 			arrColl[arrCollCur].vPos = vRetPt;
 			arrColl[arrCollCur].vNorm = vRetNrm;
 			arrColl[arrCollCur].tlPos = tilePosTL;
@@ -13383,6 +13386,7 @@ int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outV
 				arrCollCur--;
 
 			// add end of ray
+			arrColl[arrCollCur].bCollided = false;
 			arrColl[arrCollCur].vPos = vTo;
 			arrColl[arrCollCur].vNorm = Vec2(0.0f, 0.0f);
 			arrColl[arrCollCur].tlPos = Vec2i(-1, -1);
@@ -13397,12 +13401,31 @@ int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outV
 	{
 		_ASSERT(nVertCnt < outVertsMaxCnt);
 
-		int ptidx = kk % arrCollCur;
-		int ptidxold = (kk - 1) % arrCollCur;
+		sCollPoint* pt = &arrColl[kk % arrCollCur];
+		sCollPoint* ptold = &arrColl[(kk - 1) % arrCollCur];
+
+		Vec3 ptpos(pt->vPos.x, pt->vPos.y, 0.0f);
+		Vec3 ptoldpos(ptold->vPos.x, ptold->vPos.y, 0.0f);
 
 		outVerts[nVertCnt].pos = vFrom3; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
-		outVerts[nVertCnt].pos = Vec2ToVec3XY0(arrColl[ptidx].vPos); outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
-		outVerts[nVertCnt].pos = Vec2ToVec3XY0(arrColl[ptidxold].vPos); outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+		outVerts[nVertCnt].pos = ptpos; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+		outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+
+		// extend on wall
+		if ((pt->bCollided) && (ptold->bCollided) && (pt->tlPos.y == ptold->tlPos.y) &&
+			(pt->vNorm.y >= 1.0f) && (ptold->vNorm.y >= 1.0f))
+		{
+			// add 2 tris per wall segment
+			Vec3 vWallH(0.0f, -K_WALL_HEIGHT_SCREEN, 0.0f);
+
+			outVerts[nVertCnt].pos = ptpos; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+			outVerts[nVertCnt].pos = ptpos + vWallH; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+			outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+
+			outVerts[nVertCnt].pos = ptpos + vWallH; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+			outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+			outVerts[nVertCnt].pos = ptoldpos + vWallH; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+		}
 	}
 
 	return nVertCnt;

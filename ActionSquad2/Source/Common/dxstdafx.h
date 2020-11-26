@@ -339,8 +339,6 @@ enum ETexChannel {
 #define K_GAME_WIDTH_MIN			(K_GAME_HEIGHT * K_WINDOW_ASPECT_RATIO_MIN)
 #define K_GAME_WIDTH_MAX			(K_GAME_HEIGHT * K_WINDOW_ASPECT_RATIO_MAX)
 
-// height of wall in world coordinates (not projected, use Z_TO_H to convert)
-#define K_WALL_HEIGHT_WORLD			64.0f
 // scale to use when transforming Z to H (added to Y, projection)
 #define ZHSCALE						0.5f
 #define INV_ZHSCALE					(1.0f / 0.5f)
@@ -350,6 +348,10 @@ enum ETexChannel {
 #define H_TO_Z(posZ)				(posZ * INV_ZHSCALE)
 // Converts Vec3 world space in Vec2 proojected space
 #define V3projV2(vec)				(Vec2(vec.x, vec.y - vec.z * ZHSCALE))
+
+// height of wall in world coordinates (not projected, use Z_TO_H to convert)
+#define K_WALL_HEIGHT_WORLD			64.0f
+#define K_WALL_HEIGHT_SCREEN		(K_WALL_HEIGHT_WORLD * ZHSCALE)
 
 ///--- CLEAR COLOR ---
 #define K_GAME_CLEAR_COLOR	0x00000044
