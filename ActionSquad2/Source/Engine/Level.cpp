@@ -13332,12 +13332,13 @@ int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outV
 	struct sCollPoint {
 		Vec2 vPos;
 		Vec2 vNorm;
+		POINTXY_INT tlPos;
 	};
 
 	const int	nSteps = 360;
 	int			nVertCnt = 0;
 	// collisions array
-	Vec3		arrColl[nSteps];
+	sCollPoint	arrColl[nSteps];
 	int			arrCollCur = 0;
 
 	float		fAngStep = DOUBLE_PI / (float)nSteps;
@@ -13349,6 +13350,8 @@ int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outV
 	// collision results
 	Vec2 vRetPt(0.0f, 0.0f), vRetNrm(0.0f, 0.0f);
 	POINTXY_INT tilePosTL;
+	// counts how many collisions of the same type (no collision or same tile) were made in order
+	int nSameSince = 0;
 
 	for (int kk = 0; kk < nSteps; kk++)
 	{
@@ -13356,13 +13359,33 @@ int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outV
 		Vec2 vTo = vFrom + vdir * fMaxRad;
 		if (SegmentTilesIntersection(vFrom, vTo, vRetPt, vRetNrm, &tilePosTL))
 		{
-			arrColl[arrCollCur] = Vec2ToVec3XY0(vRetPt);
+			// are we still on the same tile, same kind of collision? take a step back and overwrite last value
+			if ((tilePosTL == arrColl[arrCollCur - 1].tlPos) && (vRetNrm == arrColl[arrCollCur - 1].vNorm))
+				nSameSince++;
+			else
+				nSameSince = 0;
+			// make sure we use the first different collision (from nothing to wall for example) so it doesn't cut corners
+			if(nSameSince > 1)
+				arrCollCur--;
+
+			arrColl[arrCollCur].vPos = vRetPt;
+			arrColl[arrCollCur].vNorm = vRetNrm;
+			arrColl[arrCollCur].tlPos = tilePosTL;
 			arrCollCur++;
 		}
 		else
 		{
+			// optimizes so it just adds one triangle every N collisions
+			nSameSince++;
+			if (nSameSince > 5)
+				nSameSince = 0;
+			if (nSameSince > 1)
+				arrCollCur--;
+
 			// add end of ray
-			arrColl[arrCollCur] = Vec2ToVec3XY0(vTo);
+			arrColl[arrCollCur].vPos = vTo;
+			arrColl[arrCollCur].vNorm = Vec2(0.0f, 0.0f);
+			arrColl[arrCollCur].tlPos = Vec2i(-1, -1);
 			arrCollCur++;
 		}
 		// increase angle
@@ -13378,8 +13401,8 @@ int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outV
 		int ptidxold = (kk - 1) % arrCollCur;
 
 		outVerts[nVertCnt].pos = vFrom3; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
-		outVerts[nVertCnt].pos = arrColl[ptidx]; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
-		outVerts[nVertCnt].pos = arrColl[ptidxold]; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+		outVerts[nVertCnt].pos = Vec2ToVec3XY0(arrColl[ptidx].vPos); outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+		outVerts[nVertCnt].pos = Vec2ToVec3XY0(arrColl[ptidxold].vPos); outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
 	}
 
 	return nVertCnt;
