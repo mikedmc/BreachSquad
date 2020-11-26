@@ -95,7 +95,8 @@ void CLight::UpdateInternalData(CSpriteCollection* pLightsSprCol)
 }
 
 CLight::CLight() :
-	m_nLightMeshIdx(-1), m_nShadowMeshIdx(-1), type(K_LVL_LT_UNKNOWN), animID(-1), 
+	m_nLightMeshIdx(-1), m_nShadowMeshIdx(-1),
+	type(K_LVL_LT_UNKNOWN), animID(-1), 
 	fRadius(0.0f), fVolumeAlpha(1.0f), castShadows(false),
 	nProfileID(0)
 {

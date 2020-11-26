@@ -2579,25 +2579,22 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		{
 			// non editor windows
 			{
-				if (!g_editor.IsLaunched())
+				// debug controls
+				ImGui::Begin("Debug Info", null, ImGuiWindowFlags_NoNavInputs);
+
+				if (ImGui::Button("Reload Shaders", ImVec2(120, 0)))
 				{
-					// debug controls
-					ImGui::Begin("Debug Info", null, ImGuiWindowFlags_NoNavInputs);
-
-					if (ImGui::Button("Reload Shaders", ImVec2(120, 0)))
-					{
-						UTGetShaderManager().ReloadAllShaders();
-					}
-
-					ImGui::SliderFloat("gauss", &ct_fGaussLen, 0.0, 5.0);
-
-					ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
-
-					RECTXYWH_F camrect = g_level.m_camLevel.GetCamWorldAABB();
-					ImGui::Text("camrect %.1f %.1f %.1f %.1f", camrect.x, camrect.y, camrect.w, camrect.h);
-
-					ImGui::End();
+					UTGetShaderManager().ReloadAllShaders();
 				}
+
+				ImGui::SliderFloat("gauss", &ct_fGaussLen, 0.0, 5.0);
+
+				ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
+
+				RECTXYWH_F camrect = g_level.m_camLevel.GetCamWorldAABB();
+				ImGui::Text("camrect %.1f %.1f %.1f %.1f", camrect.x, camrect.y, camrect.w, camrect.h);
+
+				ImGui::End();
 			}
 
 			// editor block

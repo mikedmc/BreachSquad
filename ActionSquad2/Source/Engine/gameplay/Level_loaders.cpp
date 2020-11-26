@@ -190,6 +190,12 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 					tl->vUVmin[kk] = Vec2(srcrect.left / vTilesetSize.x, srcrect.top / vTilesetSize.y);
 					tl->vUVmax[kk] = Vec2(srcrect.right / vTilesetSize.x, srcrect.bottom / vTilesetSize.y);
 				}
+
+				//TEMP: set collision on empty floor tiles
+				if ((kk == 0) && (tileID < 0))
+				{
+					tl->flags |= K_TILEFLAG_BLOCKED;
+				}
 			}
 		}
 	}

@@ -491,6 +491,9 @@ private: //--- misc functions ---
 	COccluder*				GetVisibleAABBs_toOccluders(D3DXVECTOR2 viewPos, CAABB * viewRect, int & retOccludersCnt);
 	void					AddOccludersFromAABB_stencil(D3DXVECTOR2 viewerPos, CAABB * aabb); //ver cu stencil
 	int						BuildShadowVolume(CLight * light, CAABB * visibleAABB, COccluder * p_arrOccluders, int nOccludersCount, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt);
+	// Builds a triangle list that paints over the whole area that a light can shine on (works with 2.5D walls)
+	// Returns number of written verts (3 * tris cnt)
+	int						BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt);
 
 public: //--- framework methods ---
 	HRESULT OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);

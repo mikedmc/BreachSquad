@@ -10552,6 +10552,11 @@ void CLevel::Update(float dTime_original)
 	///--- update visibility lists (after update) ---
 	BuildVisibilityLists();
 
+	/// preallocate verts array for light volume
+	//properly size the array (360 rays, possibly 6 more verts per half of the rays for top wall intersections
+	const int arrVertsSize = 360 * 3 + 180 * 6;
+	_VERTEX_PNCT4T4 *arrVerts = new _VERTEX_PNCT4T4[arrVertsSize];
+
 	///--- create vert buffers for lights ---
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
 	{
@@ -10587,31 +10592,19 @@ void CLevel::Update(float dTime_original)
 				m_bufferedPainter.AddTriangles(lightRectV, 2);
 				m_bufferedPainter.EndMesh();
 
-				//--- pentru luminile cu umbre creez shadow volumes	---
+				//--- create light volumes for shadow casting lights	---
 				if (nl->castShadows)
 				{
-					int occludersCnt = 0;
 					nl->m_nShadowMeshIdx = -1;
-					//foloseste pt verificare aabb-ul rotit al luminii
-					CAABB rotAABB = AABB_FromPoints(lcorners, 4);
-					COccluder* occludersArr = GetVisibleAABBs_toOccluders(D3DXVECTOR2(nl->pos.x, nl->pos.y), &rotAABB, occludersCnt); //returneaza pointer la array pe stack deci nu trebuie 
-					//trimitem occluderele pt extinderea volumelor de umbre
-					if (occludersCnt > 0)
+					int retVerts = BuildLightVolume(nl, arrVerts, arrVertsSize);
+
+					// adaugam triunghiurile ca si mesh
+					if (retVerts > 0)
 					{
-						//in cel mai rau caz avem toate occluderele splituite deci occCnt * 2 * 6 verts per occluder + sentinel (sunt cazuri cand suntem fix pe fix)
-						_VERTEX_PNCT4T4 *arrVerts = new _VERTEX_PNCT4T4[occludersCnt * 12 + 12];
-						int retVerts = BuildShadowVolume(nl, &rotAABB, occludersArr, occludersCnt, arrVerts, occludersCnt * 12 + 12);
-
-						// adaugam triunghiurile ca si mesh
-						if (retVerts > 0)
-						{
-							//adauga mesh dinamic pentru volumul umbrei
-							m_bufferedPainter.BeginMesh(nl->m_nShadowMeshIdx);
-							m_bufferedPainter.AddTriangles(arrVerts, retVerts / 3);
-							m_bufferedPainter.EndMesh();
-						}
-
-						SAFE_DELETE_ARRAY(arrVerts);
+						//adauga mesh dinamic pentru volumul umbrei
+						m_bufferedPainter.BeginMesh(nl->m_nShadowMeshIdx);
+						m_bufferedPainter.AddTriangles(arrVerts, retVerts / 3);
+						m_bufferedPainter.EndMesh();
 					}
 				}
 			}
@@ -10671,6 +10664,10 @@ void CLevel::Update(float dTime_original)
 			break;
 		}
 	}
+	// delete preallocated verts array
+	SAFE_DELETE_ARRAY(arrVerts);
+
+
 	//2. poligoane alte lumini: gloante, particule, etc
 	//PROPS lights - temp lights - gunshot lights, explo lights
 	m_propsLightsMeshIdx = -1;
@@ -12095,23 +12092,26 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	}
 
 
+	m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
+	{
+		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+
+		if ((nl->type != K_LVL_LT_POINT) || (nl->castShadows == false))
+			continue;
+
+		m_bufferedPainter.DrawMesh(nl->m_nShadowMeshIdx, true);
+	}
+	m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+
+
+
 	AdditiveBlendingON(m_pDevice, NULL);
 	CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
 	if (pRT != null)
 	{
 		m_pDevice->SetTexture(0, pRT->m_pRTTexture);
 	}
-
-	///--- directional light(s)
-	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
-	{
-		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
-		if (nl->type != K_LVL_LT_DIRECTIONAL)
-			continue;
-
-		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
-	}
-
 
 	///--- point lights without shadow
 	// VS
@@ -13321,6 +13321,68 @@ int CLevel::BuildShadowVolume(CLight * light, CAABB * visibleAABB, COccluder * p
 	}
 
 	return vertsCur;
+}
+
+int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt)
+{
+	_ASSERT(outVerts != null);
+	// sends 360 rays and finds collisions with tileset base of walls. When we collide with a wall facing the camera we also add polys for the wall.
+	// could be optimized: if we collide with same tile then we just move last point instead of adding another.
+
+	struct sCollPoint {
+		Vec2 vPos;
+		Vec2 vNorm;
+	};
+
+	const int	nSteps = 360;
+	int			nVertCnt = 0;
+	// collisions array
+	Vec3		arrColl[nSteps];
+	int			arrCollCur = 0;
+
+	float		fAngStep = DOUBLE_PI / (float)nSteps;
+	float		fAng = 0.0f;
+
+	float fMaxRad = max(light->bbox_ini.vHalfSize.x, light->bbox_ini.vHalfSize.y);
+	Vec2 vFrom = Vec3ToVec2XY(light->vPos);
+	Vec3 vFrom3 = Vec2ToVec3XY0(vFrom);
+	// collision results
+	Vec2 vRetPt(0.0f, 0.0f), vRetNrm(0.0f, 0.0f);
+	POINTXY_INT tilePosTL;
+
+	for (int kk = 0; kk < nSteps; kk++)
+	{
+		Vec2 vdir(cos(fAng), sin(fAng));
+		Vec2 vTo = vFrom + vdir * fMaxRad;
+		if (SegmentTilesIntersection(vFrom, vTo, vRetPt, vRetNrm, &tilePosTL))
+		{
+			arrColl[arrCollCur] = Vec2ToVec3XY0(vRetPt);
+			arrCollCur++;
+		}
+		else
+		{
+			// add end of ray
+			arrColl[arrCollCur] = Vec2ToVec3XY0(vTo);
+			arrCollCur++;
+		}
+		// increase angle
+		fAng += fAngStep;
+	}
+
+	// create triangles (skip first point, will be handled last)
+	for (int kk = 1; kk <= arrCollCur; kk++)
+	{
+		_ASSERT(nVertCnt < outVertsMaxCnt);
+
+		int ptidx = kk % arrCollCur;
+		int ptidxold = (kk - 1) % arrCollCur;
+
+		outVerts[nVertCnt].pos = vFrom3; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+		outVerts[nVertCnt].pos = arrColl[ptidx]; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+		outVerts[nVertCnt].pos = arrColl[ptidxold]; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+	}
+
+	return nVertCnt;
 }
 
 void CLevel::InitializeStrategicAbilities(int nPlayerOrdinal)

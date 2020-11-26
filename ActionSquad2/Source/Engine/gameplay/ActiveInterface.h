@@ -39,7 +39,7 @@ public:
 	CAABB		bbox;
 	CAABB		bbox_exported; //bboxul exportat din BSX (mutat la pozitia activului)
 public: //valori initiale ale coordonatelor folositoare la miscari nerelative (unele stari AI le folosesc)
-	CAABB		bbox_ini;		//bbox nerelativ la pozitie player
+	CAABB		bbox_ini;			//non relative to object position AABB
 	CAABB		bbox_exported_ini; //bboxul exportat din BSX (inital)
 	D3DXVECTOR2 pos_ini;
 	float		fAngle_ini;
