@@ -113,7 +113,7 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 {
 	//#INFO: when going from right to left and bottom to top, if the end point is on the tile border it doesn't detect the intersection. Might happen to slow moving bullets but it should be fine.
 
-	//#TODO: verifica sa nu iasa punctele din harta si de pus tileflags la coliziuni
+	//#TODO: de pus tileflags options la coliziuni
 
 	Vec2i startTL((int)floor(vStart.x / K_TILE_SIZE), (int)floor(vStart.y / K_TILE_SIZE));
 	Vec2i endTL((int)floor(vEnd.x / K_TILE_SIZE), (int)floor(vEnd.y / K_TILE_SIZE));
@@ -136,6 +136,7 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 		// find first vertical grid collisions
 		if (vDir.x < 0.0f)
 		{
+			float vLimit = max(0.0f, vEnd.x);
 			// distance to margin
 			float dstX = vStart.x - startTL.x * K_TILE_SIZE;
 			// find first intersection with vertical axes
@@ -145,9 +146,13 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 			// walk from tile to tile horizontally until destination
 			Vec2 vCur = vFrom;
 			// test collisions on left side
-			while (vCur.x >= vEnd.x)
+			while (vCur.x >= vLimit)
 			{
 				chktlV = Vec2i((int)((vCur.x - K_TILE_SIZE / 2.0f) / K_TILE_SIZE), (int)(vCur.y / K_TILE_SIZE));
+				//outside map?
+				if ((chktlV.y < 0) || (chktlV.y >= levelSizeTL.w))
+					break;
+
 				if (tiles[chktlV.x][chktlV.y].flags & K_TILEFLAG_BLOCKED)
 				{
 					bFoundV = true;
@@ -161,6 +166,7 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 		}
 		else if (vDir.x > 0.0f)
 		{
+			float vLimit = min(vEnd.x, m_levelAABB.Right());
 			// distance to margin
 			float dstX = (startTL.x + 1) * K_TILE_SIZE - vStart.x;
 			// find first intersection with vertical axes
@@ -170,9 +176,12 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 			// walk from tile to tile horizontally until destination
 			Vec2 vCur = vFrom;
 			// test collisions on right side
-			while (vCur.x <= vEnd.x)
+			while (vCur.x <= vLimit)
 			{
 				chktlV = Vec2i((int)((vCur.x + K_TILE_SIZE / 2.0f) / K_TILE_SIZE), (int)(vCur.y / K_TILE_SIZE));
+				//outside map?
+				if ((chktlV.y < 0) || (chktlV.y >= levelSizeTL.w))
+					break;
 				if (tiles[chktlV.x][chktlV.y].flags & K_TILEFLAG_BLOCKED)
 				{
 					bFoundV = true;
@@ -196,6 +205,7 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 		// find first vertical grid collisions
 		if (vDir.y < 0.0f)
 		{
+			float vLimit = max(0.0f, vEnd.y);
 			// distance to margin
 			float dstY = vStart.y - startTL.y * K_TILE_SIZE;
 			// find first intersection with vertical axes
@@ -205,9 +215,12 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 			// walk from tile to tile horizontally until destination
 			Vec2 vCur = vFrom;
 			// test collisions on left side
-			while (vCur.y >= vEnd.y)
+			while (vCur.y >= vLimit)
 			{	
 				chktlH = Vec2i((int)((vCur.x) / K_TILE_SIZE), (int)((vCur.y - K_TILE_SIZE / 2.0f) / K_TILE_SIZE));
+				//outside map?
+				if ((chktlH.x < 0) || (chktlH.x >= levelSizeTL.h))
+					break;
 				if (tiles[chktlH.x][chktlH.y].flags & K_TILEFLAG_BLOCKED)
 				{
 					bFoundH = true;
@@ -221,9 +234,9 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 		}
 		else if (vDir.y > 0.0f)
 		{
+			float vLimit = min(vEnd.y, m_levelAABB.Bottom());
 			// distance to margin
 			float dstY = (startTL.y + 1) * K_TILE_SIZE - vStart.y;
-
 			// find first intersection with vertical axes
 			float vecmul = dstY / fabs(vDirN.y);
 			Vec2 vFrom(vStart.x + vDirN.x * vecmul, vStart.y + vDirN.y * vecmul);
@@ -231,9 +244,12 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 			// walk from tile to tile horizontally until destination
 			Vec2 vCur = vFrom;
 			// test collisions on right side
-			while (vCur.y <= vEnd.y)
+			while (vCur.y <= vLimit)
 			{
 				chktlH = Vec2i((int)((vCur.x) / K_TILE_SIZE), (int)((vCur.y + K_TILE_SIZE / 2) / K_TILE_SIZE));
+				//outside map?
+				if ((chktlH.x < 0) || (chktlH.x >= levelSizeTL.h))
+					break;
 				if (tiles[chktlH.x][chktlH.y].flags & K_TILEFLAG_BLOCKED)
 				{
 					bFoundH = true;

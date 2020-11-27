@@ -12092,7 +12092,8 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 		}
 	}
 
-
+#if defined(_DEBUG) || defined(DEBUG)
+	// Paints the shadowed lights volume in wireframe	
 	m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
 	{
@@ -12104,6 +12105,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
 	}
 	m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+#endif
 
 
 
@@ -12130,7 +12132,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
 		
-		if ((nl->type != K_LVL_LT_POINT) || (nl->castShadows))
+		if (nl->type != K_LVL_LT_POINT)
 			continue;
 
 		//set Pshader constants
