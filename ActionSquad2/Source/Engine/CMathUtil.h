@@ -5,6 +5,12 @@
 // Are ALL the flags set?
 #define		IS_FLAG_ALL(x, flag)		( ((x) & (flag)) == (flag) )
 
+// atan2 approximation const values
+#define ATAN2_PI_FLOAT		3.14159265f
+#define ATAN2_PIBY2_FLOAT	1.5707963f
+#define ONEQTR_PI			(M_PI / 4.0f);
+#define THRQTR_PI			(3.0f * M_PI / 4.0f);
+
 namespace UTMath
 {
 	// distance to segment. Returns capsule shaped distance field.
@@ -50,4 +56,9 @@ namespace UTMath
 
 	// Returns number of bits set in dwValue
 	int				CountBits(UINT32 dwValue);
+
+	// faster atan2 approx
+	float atan2_approximation1(float y, float x);
+	// faster atan2 approx
+	float atan2_approximation2(float y, float x);
 }

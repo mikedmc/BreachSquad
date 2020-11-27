@@ -13364,6 +13364,7 @@ int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outV
 		if (SegmentTilesIntersection(vFrom, vTo, vRetPt, vRetNrm, &tilePosTL))
 		{
 			// are we still on the same tile, same kind of collision? take a step back and overwrite last value
+			
 			if ((tilePosTL == arrColl[arrCollCur - 1].tlPos) && (vRetNrm == arrColl[arrCollCur - 1].vNorm))
 				nSameSince++;
 			else
@@ -13371,6 +13372,16 @@ int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outV
 			// make sure we use the first different collision (from nothing to wall for example) so it doesn't cut corners
 			if(nSameSince > 1)
 				arrCollCur--;
+			
+			// fix wiggling corners (snap to tile corners when colliding visible wall)
+			float chkX1 = tilePosTL.x * K_TILE_SIZE_F, chkX2 = chkX1 + K_TILE_SIZE_F;
+			if (vRetNrm.y > 0.0f)
+			{
+				if (fabs(vRetPt.x - chkX1) <= 1.5f)
+					vRetPt.x = chkX1;
+				else if (fabs(vRetPt.x - chkX2) <= 1.5f)
+					vRetPt.x = chkX2;
+			}
 
 			arrColl[arrCollCur].bCollided = true;
 			arrColl[arrCollCur].vPos = vRetPt;
@@ -13381,12 +13392,13 @@ int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outV
 		else
 		{
 			// optimizes so it just adds one triangle every N collisions
+			/*
 			nSameSince++;
 			if (nSameSince > 5)
 				nSameSince = 0;
 			if (nSameSince > 1)
 				arrCollCur--;
-
+			  */
 			// add end of ray
 			arrColl[arrCollCur].bCollided = false;
 			arrColl[arrCollCur].vPos = vTo;

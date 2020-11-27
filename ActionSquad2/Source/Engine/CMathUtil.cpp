@@ -119,22 +119,18 @@ bool UTMath::IsPowerOfTwo(unsigned int nVal)
 float UTMath::GetVectorAngle(D3DXVECTOR2 start, D3DXVECTOR2 end)
 {
 	D3DXVECTOR2 vecdir = end - start;
-	float len = D3DXVec2LengthSq(&vecdir);
-	if (len > 0.0f)
-	{
-		return((float)(HALF_PI - atan2(vecdir.x, vecdir.y)));
-	}
-	return 0.0f;
+	if ((vecdir.x == 0.0f) && (vecdir.y == 0))
+		return 0.0f;
+
+	return((float)(HALF_PI - atan2(vecdir.x, vecdir.y)));
 }
 
 float UTMath::GetVectorAngle(D3DXVECTOR2 const &dir)
 {
-	float len = D3DXVec2LengthSq(&dir);
-	if (len > 0.0f)
-	{
-		return((float)(HALF_PI - atan2(dir.x, dir.y)));
-	}
-	return 0.0f;
+	if ((dir.x == 0.0f) && (dir.y == 0.0f))
+		return 0.0f;
+
+	return((float)(HALF_PI - atan2(dir.x, dir.y)));
 }
 
 float UTMath::GetAngleBetweenVectors(D3DXVECTOR2 vec1, D3DXVECTOR2 vec2)
@@ -177,3 +173,64 @@ int UTMath::CountBits(UINT32 dwValue)
 	return nBits;
 }
 
+/*
+ATAN approximation
+In my (somewhat limited but concise) testing on both a very fast Gen 7 Xeon and an STM32F4 (w/FPU) ARM micro show atan2_approximation1 to be faster (and much more accurate) than the 2nd version.
+On STM32F4 a1 is ~2.3 times faster than stdlib (with gcc-arm 4.7.4)., while a2 is ~2.1 times faster than stdlib.
+On the Xeon under Windows with MSVC a1 shows maybe a very slight improvement in speed over std (within margin of error, really), while with MinGW-w64 on same system the std version is a whopping 12 times slower!
+Thanks for this snip, very handy!
+*/
+
+float UTMath::atan2_approximation1(float y, float x)
+{
+	//http://pubs.opengroup.org/onlinepubs/009695399/functions/atan2.html
+	//Volkan SALMA
+
+	float r, angle;
+	float abs_y = fabs(y) + 1e-10f;      // kludge to prevent 0/0 condition
+	if (x < 0.0f)
+	{
+		r = (x + abs_y) / (abs_y - x);
+		angle = THRQTR_PI;
+	}
+	else
+	{
+		r = (x - abs_y) / (x + abs_y);
+		angle = ONEQTR_PI;
+	}
+	angle += (0.1963f * r * r - 0.9817f) * r;
+	if (y < 0.0f)
+		return(-angle);     // negate if in quad III or IV
+	else
+		return(angle);
+
+
+}
+
+// |error| < 0.005
+float UTMath::atan2_approximation2(float y, float x)
+{
+	if (x == 0.0f)
+	{
+		if (y > 0.0f) return ATAN2_PIBY2_FLOAT;
+		if (y == 0.0f) return 0.0f;
+		return -ATAN2_PIBY2_FLOAT;
+	}
+	float atan;
+	float z = y / x;
+	if (fabs(z) < 1.0f)
+	{
+		atan = z / (1.0f + 0.28f*z*z);
+		if (x < 0.0f)
+		{
+			if (y < 0.0f) return atan - ATAN2_PI_FLOAT;
+			return atan + ATAN2_PI_FLOAT;
+		}
+	}
+	else
+	{
+		atan = ATAN2_PIBY2_FLOAT - z / (z*z + 0.28f);
+		if (y < 0.0f) return atan - ATAN2_PI_FLOAT;
+	}
+	return atan;
+}
