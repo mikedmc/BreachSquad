@@ -13,7 +13,7 @@
 #include "gameplay/Actor.h"
 
 #include "gameplay/TileBlockMesh.h"
-
+#include "CFOVUtil.h"
 //this enum must be sincronizat with AI_states list (level.cpp)
 enum AI_STATE 
 {
@@ -489,11 +489,6 @@ public:
 	// includes tile segments, light range bbox segments and objects aabb segments.
 	// \returns Number of segments returned. Writes segments in provided pRetArr.
 	int						GetOccluderSegments(CLight* light, COccluderSegment* pRetArr, int maxRetArrSize);
-	// Builds the FOV as a list of triangles, intersecting with all given shadowing occluders
-	int						BuildOccludedVolume(Vec2 vEye, COccluderSegment* arrOcc, int nOccludersCnt, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt);
-	// Gets closest occluder that intersects ray, from occluders array. Occluders MUST have ongles set according to checked vEye!
-	// Used by BuildOccludedVolume
-	COccluderSegment*		RayOccludersIntersection(Vec2 vEye, Vec2 vTo, float fRayAngle, COccluderSegment* arrOcc, int nOccludersCnt, Vec2 & vRetPt);
 
 private: //--- misc functions ---
 	COccluder				m_occluders[K_LVL_MAX_OCCLUDERS_CNT];	 //stiva locala folosita de AddOccludersFromAABB

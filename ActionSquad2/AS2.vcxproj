@@ -228,6 +228,7 @@
     <ClInclude Include="Source\Engine\BufferedPainterQuad.h" />
     <ClInclude Include="Source\Engine\Caabb.h" />
     <ClInclude Include="Source\Engine\CameraTransform.h" />
+    <ClInclude Include="Source\Engine\CFOVUtil.h" />
     <ClInclude Include="Source\Engine\Chapters.h" />
     <ClInclude Include="Source\Engine\ChatWnd.h" />
     <ClInclude Include="Source\Engine\Constants\actives_SPR.h" />
@@ -617,6 +618,7 @@
     <ClCompile Include="Source\Engine\CameraTransform.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
+    <ClCompile Include="Source\Engine\CFOVUtil.cpp" />
     <ClCompile Include="Source\Engine\Chapters.cpp" />
     <ClCompile Include="Source\Engine\ChatWnd.cpp" />
     <ClCompile Include="Source\Engine\ConstEvents.cpp">
