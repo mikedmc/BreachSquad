@@ -159,7 +159,6 @@ CAABB AABB_Lerp(CAABB &a, CAABB &b, float fFactor)
 	return CAABB(vmin, vmax);
 }
 
-///--- operatii pe aabb ---
 bool AABB_Intersection(CAABB & a, CAABB & b, CAABB & retVal)
 {
 	D3DXVECTOR2 vMax, vMin;

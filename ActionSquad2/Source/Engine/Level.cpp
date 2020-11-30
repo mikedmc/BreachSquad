@@ -5,6 +5,8 @@
 //disable warning
 //#pragma warning(disable : 4706)  //assignment within conditional expression
 
+#include <algorithm> // std::sort
+
 ///--- AI STATES/FUNCTIONS ---
 //possible states - must be in editor/Data/behaviors.txt too
 static const CStringHash AI_states[] = {
@@ -10557,6 +10559,8 @@ void CLevel::Update(float dTime_original)
 	const int arrVertsSize = 360 * 3 + 180 * 6;
 	_VERTEX_PNCT4T4 *arrVerts = new _VERTEX_PNCT4T4[arrVertsSize];
 
+	const int arrOccludersSize = 100;
+	COccluderSegment arrOccluders[arrOccludersSize];
 	///--- create vert buffers for lights ---
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
 	{
@@ -10566,39 +10570,67 @@ void CLevel::Update(float dTime_original)
 			case K_LVL_LT_IES:
 			case K_LVL_LT_POINT:
 			{
-				D3DXVECTOR3 lcorners[4]; //ul, ur, dl, dr
-				memcpy(lcorners, nl->lCorners, 4 * sizeof(D3DXVECTOR3));
-				// move mesh to light position (!z must remain 0!)
-				lcorners[0].x += nl->vPos.x; lcorners[0].y += nl->vPos.y;
-				lcorners[1].x += nl->vPos.x; lcorners[1].y += nl->vPos.y;
-				lcorners[2].x += nl->vPos.x; lcorners[2].y += nl->vPos.y;
-				lcorners[3].x += nl->vPos.x; lcorners[3].y += nl->vPos.y;
-				//write final VS verts
-				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				vul.pos = lcorners[0];
-				vur.pos = lcorners[1];
-				vdr.pos = lcorners[2];
-				vdl.pos = lcorners[3];
-				//set color
-				vul.color = vur.color = vdl.color = vdr.color = nl->color;
-
 				//--- create light volumes for shadow casting lights	---
 				nl->m_nLightMeshIdx = -1;
 				if (nl->castShadows)
 				{
-					int retVerts = BuildLightVolume(nl, arrVerts, arrVertsSize);
+					// returns a list of segments that will form shadows (from both tiles and collision boxes)
+					int nOccluders = GetOccluderSegments(nl, arrOccluders, arrOccludersSize);
 
-					// adaugam triunghiurile ca si mesh
-					if (retVerts > 0)
+					/*
+					// shows occluders instead of mesh. Checked for consistency.
+					int nVertCnt = 0;
+					for (int kk = 0; kk < nOccluders; kk++)
 					{
-						//adauga mesh dinamic pentru volumul umbrei
+						arrVerts[nVertCnt].pos = Vec3(nl->vPos.x, nl->vPos.y, 0.0f);	
+						arrVerts[nVertCnt].color = 0x00ffffff; nVertCnt++;
+						arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vStart);		
+						arrVerts[nVertCnt].color = 0xff00ff00; nVertCnt++;
+						arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vEnd);
+						arrVerts[nVertCnt].color = 0xff0000ff; nVertCnt++;
+					}
+
+					if (nVertCnt > 3)
+					{
 						m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
-						m_bufferedPainter.AddTriangles(arrVerts, retVerts / 3);
+						m_bufferedPainter.AddTriangles(arrVerts, nVertCnt / 3);
 						m_bufferedPainter.EndMesh();
+					}
+					*/
+
+
+					if (nOccluders > 0)
+					{
+						// sends rays and builds the light FOV as a triangle list mesh
+						int retVerts = BuildOccludedVolume(Vec3ToVec2XY(nl->vPos), arrOccluders, nOccluders, arrVerts, arrVertsSize);
+
+						// adaugam triunghiurile ca si mesh
+						if (retVerts > 0)
+						{
+							//adauga mesh dinamic pentru volumul umbrei
+							m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
+							m_bufferedPainter.AddTriangles(arrVerts, retVerts / 3);
+							m_bufferedPainter.EndMesh();
+						}
 					}
 				}
 				else
 				{
+					Vec3 lcorners[4]; //ul, ur, dl, dr
+					memcpy(lcorners, nl->lCorners, 4 * sizeof(Vec3));
+					// move mesh to light position (!z must remain 0!)
+					lcorners[0].x += nl->vPos.x; lcorners[0].y += nl->vPos.y;
+					lcorners[1].x += nl->vPos.x; lcorners[1].y += nl->vPos.y;
+					lcorners[2].x += nl->vPos.x; lcorners[2].y += nl->vPos.y;
+					lcorners[3].x += nl->vPos.x; lcorners[3].y += nl->vPos.y;
+					//write final VS verts
+					_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+					vul.pos = lcorners[0];
+					vur.pos = lcorners[1];
+					vdr.pos = lcorners[2];
+					vdl.pos = lcorners[3];
+					//set color
+					vul.color = vur.color = vdl.color = vdr.color = nl->color;
 					// triangles vb
 					_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
 					lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
@@ -12095,6 +12127,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 #if defined(_DEBUG) || defined(DEBUG)
 	// Paints the shadowed lights volume in wireframe	
 	m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+	m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD); //needed for color interpolation
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
@@ -12104,6 +12137,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 
 		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
 	}
+	m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
 	m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 #endif
 
@@ -12116,7 +12150,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 		m_pDevice->SetTexture(0, pRT->m_pRTTexture);
 	}
 
-	///--- point lights without shadow
+	///--- point lights
 	// VS
 	UTGetShaderManager().SetVSByName(L"VS_POINTLIGHT");
 	UTGetShaderManager().SetVertexDeclaration(K_SHM_PNCT4T4);
@@ -12132,7 +12166,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
 		
-		if (nl->type != K_LVL_LT_POINT)
+		if ((nl->type != K_LVL_LT_POINT) || (nl->castShadows))
 			continue;
 
 		//set Pshader constants
@@ -13443,6 +13477,164 @@ int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outV
 	}
 
 	return nVertCnt;
+}
+
+
+bool OccluderIntersectionSorter(sOccluderIntersection & a, sOccluderIntersection & b) 
+{ 
+	return (a.fAngle < b.fAngle); 
+}
+
+int CLevel::BuildOccludedVolume(Vec2 vEye, COccluderSegment* arrOcc, int nOccludersCnt, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt)
+{
+	// send rays to each occluder end point and to +/-0.0001 rad of it to see the back collisions, sort collision points by angle and create poly from them
+	// if lateral (corner) ray hits the same occluder we skip it as it means we're sending the ray inside the same poly
+	// optimize by getting rid of the occluders which are not in the intersection path (by using the angles of the ends)
+	//#TODO: could be optimized by having a small cache for the last 2 angles so we don't process same angle many times.
+
+	std::vector<sOccluderIntersection> arrVerts;
+	arrVerts.reserve(100);
+
+	for (int ii = 0; ii < nOccludersCnt; ii++)
+	{
+		COccluderSegment* occ = &arrOcc[ii];
+		// ray to start
+		Vec2 vRetPt;
+		// do vStart then vEnd
+		for (int ll = 0; ll < 2; ll++)
+		{
+			// selects occ->start then occ->end
+			Vec2 vTarget;
+			float fTargetAng;
+			if (ll == 0)
+			{
+				vTarget = occ->vStart;
+				fTargetAng = occ->fStartAng;
+			}
+			else
+			{
+				vTarget = occ->vEnd;
+				fTargetAng = occ->fEndAng;
+			}
+			
+			//1. trace to occluder end, register collision
+			
+			COccluderSegment* occcol = RayOccludersIntersection(vEye, vTarget, fTargetAng, arrOcc, nOccludersCnt, vRetPt);
+			if (occcol)
+			{
+				arrVerts.push_back(sOccluderIntersection(vRetPt, occ->vN, fTargetAng));
+			}
+			
+
+			//2. check with ray at angle -0.0001 and +0.0001, excluding ray if it hits segment
+			//#HINT: !! if segments are all defined clockwise we can skip this test and we know that we make vStart-0.0001 and vEnd+0.0001 but it forces us to have them all defined clockwise
+			//#HINT: we can also make collision removing the ends of the segments but also add angles to the intersection so we sort them correctly (might look complicated)
+
+			// left ray
+			
+			float fang = fTargetAng - 0.00001f;
+			Vec2 vTo(100.0f * cos(fang) + vEye.x, 100.0f * sin(fang) + vEye.y);
+			//make sure we don't send ray inside our current occluder, just outside (see hints above)
+			if (!UTMath::RaySegmentIntersection(vEye, vTo, occ->vStart, occ->vEnd, nullptr))
+			{
+				COccluderSegment* retocc = RayOccludersIntersection(vEye, vTo, fang, arrOcc, nOccludersCnt, vRetPt);
+				if (retocc)
+				{
+					arrVerts.push_back(sOccluderIntersection(vRetPt, occ->vN, fang));
+				}
+			}
+			// right ray
+			fang = fTargetAng + 0.00001f;
+			vTo = Vec2(100.0f * cos(fang) + vEye.x, 100.0f * sin(fang) + vEye.y);
+			//make sure we don't send ray inside our current occluder, just outside (see hints above)
+			if (!UTMath::RaySegmentIntersection(vEye, vTo, occ->vStart, occ->vEnd, nullptr))
+			{
+				COccluderSegment* retocc = RayOccludersIntersection(vEye, vTo, fang, arrOcc, nOccludersCnt, vRetPt);
+				if (retocc)
+				{
+					arrVerts.push_back(sOccluderIntersection(vRetPt, occ->vN, fang));
+				}
+			}
+
+		}
+	}
+
+	//4. sort std::vector by angle and add polygons (could be a trianglestrip but we need another buffered painter class for that)
+	std::sort(arrVerts.begin(), arrVerts.end(), OccluderIntersectionSorter);
+
+	//5. add triangles to geometry
+	int nVertCnt = 0;
+	int arrVertsSize = arrVerts.size();
+	// cached data
+	Vec3 vEye3D(vEye.x, vEye.y, 0.0f);
+	Vec3 vWallH(0.0f, -K_WALL_HEIGHT_SCREEN, 0.0f);
+
+	for (int kk = 1; kk <= arrVertsSize; kk++)
+	{
+		_ASSERT(nVertCnt < outVertsMaxCnt);
+
+		sOccluderIntersection* pt = &arrVerts[kk % arrVertsSize];
+		sOccluderIntersection* ptold = &arrVerts[(kk - 1) % arrVertsSize];
+
+		Vec3 ptpos(pt->vPos.x, pt->vPos.y, 0.0f);
+		Vec3 ptoldpos(ptold->vPos.x, ptold->vPos.y, 0.0f);
+
+		outVerts[nVertCnt].pos = vEye3D; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+		outVerts[nVertCnt].pos = ptpos; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+		outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+
+		// extend on wall
+		/*
+		if ((pt->vPos.y == ptold->vPos.y) && (pt->vN.y >= 1.0f) && (ptold->vN.y >= 1.0f))
+		{
+			outVerts[nVertCnt].pos = ptpos; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+			outVerts[nVertCnt].pos = ptpos + vWallH; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+			outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+
+			outVerts[nVertCnt].pos = ptpos + vWallH; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+			outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+			outVerts[nVertCnt].pos = ptoldpos + vWallH; outVerts[nVertCnt].color = 0xffff00ff; nVertCnt++;
+		}
+		*/
+	}
+
+	return nVertCnt;
+}
+
+
+
+COccluderSegment* CLevel::RayOccludersIntersection(Vec2 vEye, Vec2 vTo, float fRayAngle, COccluderSegment* arrOcc, int nOccludersCnt, Vec2 & vRetPt)
+{
+	float	minr = 100000.0f;
+	float	colls = 0.0f;
+	int		closestidx = -1;
+	Vec2	vDir = vTo - vEye;
+	for (int kk = 0; kk < nOccludersCnt; kk++)
+	{
+		float r, s;
+		COccluderSegment* occto = &arrOcc[kk];
+		//1.a. verify if segment can intersect (by angles and by !normal backface culling!) and all possible cheap things
+	
+		// 2. facem RaySegmentIntersects_denom si salvam cel mai mic denominator al razei si index segment lovit si calculam abia la final punctul efectiv
+		if (UTMath::RaySegmentIntersection_denom(vEye, vTo, occto->vStart, occto->vEnd, r, s, nullptr))
+		{
+			if (r < minr)
+			{
+				closestidx = kk;
+				minr = r;
+				colls = s;
+			}
+		}
+	}
+
+	if (closestidx < 0)
+		return null;
+
+	// get intersection point
+	COccluderSegment* occto = &arrOcc[closestidx];
+	vRetPt.x = occto->vStart.x * (1.0f - colls) + occto->vEnd.x * colls;
+	vRetPt.y = occto->vStart.y * (1.0f - colls) + occto->vEnd.y * colls;
+	return occto;
 }
 
 void CLevel::InitializeStrategicAbilities(int nPlayerOrdinal)
@@ -16780,6 +16972,61 @@ void CLevel::TouchClosestActive(CActor * pToucherAct, float dTime)
 	{
 		pToucherAct->pClosestTouchable->Touch(pToucherAct->GetUID(), dTime);
 	}
+}
+
+int CLevel::GetOccluderSegments(CLight* light, COccluderSegment* pRetArr, int maxRetArrSize)
+{
+	_ASSERT(pRetArr != nullptr && maxRetArrSize > 0);
+
+	int nCur = 0;
+
+	Vec2 vPos = Vec3ToVec2XY(light->vPos);
+	Vec2 vNYp(0.0f, 1.0f), vNYn(0.0f, -1.0f), vNXp(1.0f, 0.0f), vNXn(-1.0f, 0.0f), vZero(0.0f, 0.0f);
+	///--- add light range segments (don't set normals so we don't extend the walls on it)
+	_ASSERT(nCur < maxRetArrSize - 4);
+	pRetArr[nCur++].Set(light->bbox.vMin, Vec2(light->bbox.vMax.x, light->bbox.vMin.y), vZero, vPos);
+	pRetArr[nCur++].Set(Vec2(light->bbox.vMin.x, light->bbox.vMax.y), light->bbox.vMax, vZero, vPos);
+	pRetArr[nCur++].Set(light->bbox.vMin, Vec2(light->bbox.vMin.x, light->bbox.vMax.y), vZero, vPos);
+	pRetArr[nCur++].Set(Vec2(light->bbox.vMax.x, light->bbox.vMin.y), light->bbox.vMax, vZero, vPos);
+	///--- add segments from bboxes
+	m_occludersCnt = 0;
+	CAABB lbox = light->bbox;
+	//lbox.Inflate(D3DXVECTOR2(-1.0f, -1.0f));
+
+	//check only the occluders in the visible area as we don't process lights outside the screen
+	for (int kk = 0; kk < m_visibleList.visible_colShapesLights.Count(); kk++)
+	{
+		_ASSERT(nCur < maxRetArrSize - 2);
+		// add just visible sides
+		CAABB* chkbb = &m_visibleList.visible_colShapesLights.m_pData[kk]->bbox;
+		// if we want to clip occluders to light bbox:
+		//CAABB retbb;
+		//if (AABB_Intersection(lbox, m_visibleList.visible_colShapesLights.m_pData[kk]->bbox, retbb))
+		if (lbox.Intersects(chkbb)) 
+		{
+			if (light->vPos.y > chkbb->vMax.y)
+			{
+				pRetArr[nCur++].Set(Vec2(chkbb->vMin.x, chkbb->vMax.y), chkbb->vMax, vNYp, vPos);
+			}
+			else if (light->vPos.y < chkbb->vMin.y)
+			{
+				pRetArr[nCur++].Set(Vec2(chkbb->vMax.x, chkbb->vMin.y), chkbb->vMin, vNYn, vPos);
+			}
+
+			if (light->vPos.x > chkbb->vMax.x)
+			{
+				pRetArr[nCur++].Set(chkbb->vMax, Vec2(chkbb->vMax.x, chkbb->vMin.y), vNXp, vPos);
+			}
+			else if (light->vPos.x < chkbb->vMin.x)
+			{
+				pRetArr[nCur++].Set(chkbb->vMin, Vec2(chkbb->vMin.x, chkbb->vMax.y), vNXn, vPos);
+			}
+		}
+	}
+
+	//#TODO: add occluders from tiles, optimizing for same wall lines
+
+	return nCur;
 }
 
 CCollisionShape * CLevel::GetCollisionShapeAt(D3DXVECTOR2 point, int collisionType)

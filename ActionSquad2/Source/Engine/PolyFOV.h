@@ -1,10 +1,42 @@
 #pragma once
 
+class COccluderSegment
+{
+public:
+	Vec2 vStart;
+	Vec2 vEnd;
+	Vec2 vN;
+	float fStartAng;
+	float fEndAng;
+
+	void Set(Vec2 vfrom, Vec2 vto, Vec2 vNrm, Vec2 vViewerPos);
+	// Computes angles from vOrigin
+	void ComputeAngles(Vec2 vViewerPos);
+
+	COccluderSegment() :
+		fStartAng(0.0f), fEndAng(0.0f),
+		vN(0.0f, 0.0f), vStart(0.0f, 0.0f), vEnd(0.0f, 0.0f)
+	{}
+};
+
+// structure used for sorting the occluder intersections
+struct sOccluderIntersection
+{
+	Vec2 vPos;
+	Vec2 vN;
+	float fAngle;
+
+	sOccluderIntersection(Vec2 pos, Vec2 vnormal, float angle) :
+		vPos(pos), vN(vnormal), fAngle(angle)
+	{}
+};
+
+
 class COccluder
 {
 public:
-	D3DXVECTOR2 start;
-	D3DXVECTOR2 end;
+	Vec2 start;
+	Vec2 end;
 
 	COccluder()
 	{
@@ -12,7 +44,7 @@ public:
 		end.x = end.y = 0.0f;
 	}
 	//este punctul la stanga Occluderului?
-	bool PointOnLeft(D3DXVECTOR2 &p);
+	bool PointOnLeft(Vec2 &p);
 };
 
 class COccluderNode

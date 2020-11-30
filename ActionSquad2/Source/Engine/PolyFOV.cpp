@@ -17,7 +17,7 @@ int CPolyFOV::OccluderNodesComparer(const void* a, const void* b)
 	return 0;
 }
 
-bool COccluder::PointOnLeft(D3DXVECTOR2 &p)
+bool COccluder::PointOnLeft(Vec2 &p)
 {
 	float cross = (end.x - start.x) * (p.y - start.y) - (end.y - start.y) * (p.x - start.x);
 	return cross < 0;
@@ -272,3 +272,19 @@ CPolyFOV::CSegment* CPolyFOV::ComputeFOV(int &retBasesCnt)
 }
 
 
+void COccluderSegment::Set(Vec2 vfrom, Vec2 vto, Vec2 vNrm, Vec2 vViewerPos)
+{
+	vStart = vfrom;
+	vEnd = vto;
+	vN = vNrm;
+	// compute angles now
+	fStartAng = atan2(vStart.y- vViewerPos.y, vStart.x - vViewerPos.x);
+	fEndAng = atan2(vEnd.y - vViewerPos.y, vEnd.x - vViewerPos.x);
+	//#TODO: try and measure faster approximated version: UTMath::atan2_approximation2
+}
+
+void COccluderSegment::ComputeAngles(Vec2 vViewerPos)
+{
+	fStartAng	= atan2(vStart.y - vViewerPos.y, vStart.x - vViewerPos.x);
+	fEndAng		= atan2(vEnd.y - vViewerPos.y, vEnd.x - vViewerPos.x);
+}

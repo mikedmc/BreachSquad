@@ -70,6 +70,81 @@ bool UTMath::LineLineIntersection(D3DXVECTOR2 p1, D3DXVECTOR2 p2, D3DXVECTOR2 p3
 	return true;
 }
 
+bool UTMath::LineLineIntersects_denom(Vec2 a, Vec2 b, Vec2 c, Vec2 d, float & r, float & s)
+{
+	float denominator = ((b.x - a.x) * (d.y - c.y)) - ((b.y - a.y) * (d.x - c.x));
+
+	// returns false fa ALL parallel lines
+	if (denominator == 0.0f)
+		return false;
+
+	float numerator1 = ((a.y - c.y) * (d.x - c.x)) - ((a.x - c.x) * (d.y - c.y));
+	float numerator2 = ((a.y - c.y) * (b.x - a.x)) - ((a.x - c.x) * (b.y - a.y));
+	// If you need intersections between parallel overlapping lines use this:
+	//if (denominator == 0.0f) return numerator1 == 0 && numerator2 == 0;
+
+	r = numerator2 / denominator; // segment a-b 
+	s = numerator1 / denominator; // segment c-d
+
+	return (r >= 0.0f && r <= 1.0f) && (s >= 0.0f && s <= 1.0f);
+}
+
+bool UTMath::RaySegmentIntersection(Vec2 a, Vec2 b, Vec2 c, Vec2 d, Vec2 *outPt)
+{
+	float denominator = ((b.x - a.x) * (d.y - c.y)) - ((b.y - a.y) * (d.x - c.x));
+
+	// returns false fa ALL parallel lines
+	if (denominator == 0.0f)
+		return false;
+
+	float numerator1 = ((a.y - c.y) * (d.x - c.x)) - ((a.x - c.x) * (d.y - c.y));
+	float numerator2 = ((a.y - c.y) * (b.x - a.x)) - ((a.x - c.x) * (b.y - a.y));
+	// If you need intersections between parallel overlapping lines use this:
+	//if (denominator == 0.0f) return numerator1 == 0 && numerator2 == 0;
+
+	float s = numerator2 / denominator;		// segment (c-d)
+	float r = numerator1 / denominator;		// ray (a->b)
+	// intersection behind ray start
+	if (r < 0.0f) return false;
+	// intersection outside segment (includes heads in collisions)
+	if (s < 0 || s > 1.0f) return false;
+
+	if (outPt)
+	{
+		// interpolate between them
+		*outPt = Vec2((1.0f - s) * c.x + s * d.x, (1.0f - s) * c.y + s * d.y);
+	}
+	return true;
+}
+
+bool UTMath::RaySegmentIntersection_denom(Vec2 a, Vec2 b, Vec2 c, Vec2 d, float &retR, float &retS, Vec2 *outPt /*= nullptr*/)
+{
+	float denominator = ((b.x - a.x) * (d.y - c.y)) - ((b.y - a.y) * (d.x - c.x));
+
+	// returns false fa ALL parallel lines
+	if (denominator == 0.0f)
+		return false;
+
+	float numerator1 = ((a.y - c.y) * (d.x - c.x)) - ((a.x - c.x) * (d.y - c.y));
+	float numerator2 = ((a.y - c.y) * (b.x - a.x)) - ((a.x - c.x) * (b.y - a.y));
+	// If you need intersections between parallel overlapping lines use this:
+	//if (denominator == 0.0f) return numerator1 == 0 && numerator2 == 0;
+
+	retS = numerator2 / denominator;		// segment (c-d)
+	retR = numerator1 / denominator;		// ray (a->b)
+	// intersection behind ray start
+	if (retR < 0.0f) return false;
+	// intersection outside segment (includes heads in collisions)
+	if (retS < 0 || retS > 1.0f) return false;
+
+	if (outPt)
+	{
+		// interpolate between them
+		*outPt = Vec2((1.0f - retS) * c.x + retS * d.x, (1.0f - retS) * c.y + retS * d.y);
+	}
+	return true;
+}
+
 void UTMath::EaseTo_quadratic(float * current, float target, float fDistMultiplier, float fMinSpeed)
 {
 	if (current == null)

@@ -19,6 +19,17 @@ namespace UTMath
 	// finds intersection between p1-p2 and p3-p4
 	bool			LineLineIntersection(D3DXVECTOR2 p1, D3DXVECTOR2 p2, D3DXVECTOR2 p3, D3DXVECTOR2 p4, D3DXVECTOR2 *outPt);
 
+	// tells if lines intersect and returns r and s denominators (percentages between segments defining the lines)
+	// a must be different from b. c and d can be the same.
+	bool			LineLineIntersects_denom(Vec2 a, Vec2 b, Vec2 c, Vec2 d, float & r, float & s);
+
+	// finds intersection between ray starting at a going through b and segment c-d
+	// a and b must not be the same
+	bool			RaySegmentIntersection(Vec2 a, Vec2 b, Vec2 c, Vec2 d, Vec2 *outPt = nullptr);
+	// finds intersection between ray starting at a going through b and segment c-d
+	// returns denominators retR for the ray and retS for the segment
+	bool			RaySegmentIntersection_denom(Vec2 a, Vec2 b, Vec2 c, Vec2 d, float &retR, float &retS, Vec2 *outPt = nullptr);
+
 	/*!
 	*	\brief transforms "current" into "target" using quadratic easing
 	*	\param: fMinSpeed should include delta time
