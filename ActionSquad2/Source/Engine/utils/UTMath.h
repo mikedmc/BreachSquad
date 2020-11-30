@@ -17,9 +17,15 @@
 
 #define			MUVec2Len				D3DXVec2Length
 #define			MUVec2LenSq				D3DXVec2LengthSq
+#define			MUVec2Dot				D3DXVec2Dot
+#define			MUVec2Cross				D3DXVec2CCW
+#define			MUVec2Norm				D3DXVec2Normalize
 
 #define			MUVec3Len				D3DXVec3Length
 #define			MUVec3LenSq				D3DXVec3LengthSq
+#define			MUVec3Norm				D3DXVec3Normalize
+#define			MUVec3Dot				D3DXVec3Dot
+#define			MUVec3Cross				D3DXVec3Cross
 #define			MUVec3Norm				D3DXVec3Normalize
 
 // macros

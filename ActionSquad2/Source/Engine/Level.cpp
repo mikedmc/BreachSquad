@@ -13609,13 +13609,55 @@ COccluderSegment* CLevel::RayOccludersIntersection(Vec2 vEye, Vec2 vTo, float fR
 	float	colls = 0.0f;
 	int		closestidx = -1;
 	Vec2	vDir = vTo - vEye;
+
+	int excluded = 0;
 	for (int kk = 0; kk < nOccludersCnt; kk++)
 	{
 		float r, s;
 		COccluderSegment* occto = &arrOcc[kk];
 		//1.a. verify if segment can intersect (by angles and by !normal backface culling!) and all possible cheap things
-	
-		// 2. facem RaySegmentIntersects_denom si salvam cel mai mic denominator al razei si index segment lovit si calculam abia la final punctul efectiv
+		// backface culling (normals have same direction)
+		if (MUVec2Dot(&occto->vN, &vDir) > 0.0f)
+		{
+			excluded++;
+			continue;
+		}
+		// check by angle (see if ray is inside the solid angle created by the occluder). Might be expensive (12 ops worse case vs 20-22 ops the collision)
+		// good and aggressive but doesn't work so well....
+		/*
+		float up1p2 = fabs(occto->fEndAng - occto->fStartAng); if (up1p2 > DOUBLE_PI) up1p2 = DOUBLE_PI - up1p2;
+		float up1v = fabs(occto->fStartAng - fRayAngle); if (up1v > DOUBLE_PI) up1v = DOUBLE_PI - up1v;
+		float up2v = fabs(occto->fEndAng - fRayAngle); if (up2v > DOUBLE_PI) up2v = DOUBLE_PI - up2v;
+		if (up1v + up2v > up1p2)
+		{
+			excluded++;
+			continue;
+		}
+		*/
+		// exclude by quadrant position
+		if (vDir.x > 0.0f)
+		{
+			if (occto->vStart.x < vEye.x && occto->vEnd.x < vEye.x)
+				continue;
+		}
+		else if (vDir.x < 0.0f)
+		{
+			if (occto->vStart.x > vEye.x && occto->vEnd.x > vEye.x)
+				continue;
+		}
+
+		if (vDir.y > 0.0f)
+		{
+			if (occto->vStart.y < vEye.y && occto->vEnd.y < vEye.y)
+				continue;
+		}
+		else if (vDir.y < 0.0f)
+		{
+			if (occto->vStart.y > vEye.y && occto->vEnd.y > vEye.y)
+				continue;
+		}
+		
+		// 2. save smallest denominator of ray and occluder index to be fast, and compute point at the end
 		if (UTMath::RaySegmentIntersection_denom(vEye, vTo, occto->vStart, occto->vEnd, r, s, nullptr))
 		{
 			if (r < minr)
@@ -16981,13 +17023,13 @@ int CLevel::GetOccluderSegments(CLight* light, COccluderSegment* pRetArr, int ma
 	int nCur = 0;
 
 	Vec2 vPos = Vec3ToVec2XY(light->vPos);
-	Vec2 vNYp(0.0f, 1.0f), vNYn(0.0f, -1.0f), vNXp(1.0f, 0.0f), vNXn(-1.0f, 0.0f), vZero(0.0f, 0.0f);
+	Vec2 vNYp(0.0f, 1.0f), vNYn(0.0f, -1.0f), vNXp(1.0f, 0.0f), vNXn(-1.0f, 0.0f);
 	///--- add light range segments (don't set normals so we don't extend the walls on it)
 	_ASSERT(nCur < maxRetArrSize - 4);
-	pRetArr[nCur++].Set(light->bbox.vMin, Vec2(light->bbox.vMax.x, light->bbox.vMin.y), vZero, vPos);
-	pRetArr[nCur++].Set(Vec2(light->bbox.vMin.x, light->bbox.vMax.y), light->bbox.vMax, vZero, vPos);
-	pRetArr[nCur++].Set(light->bbox.vMin, Vec2(light->bbox.vMin.x, light->bbox.vMax.y), vZero, vPos);
-	pRetArr[nCur++].Set(Vec2(light->bbox.vMax.x, light->bbox.vMin.y), light->bbox.vMax, vZero, vPos);
+	pRetArr[nCur++].Set(light->bbox.vMin, Vec2(light->bbox.vMax.x, light->bbox.vMin.y), vNYp, vPos);
+	pRetArr[nCur++].Set(Vec2(light->bbox.vMin.x, light->bbox.vMax.y), light->bbox.vMax, vNYn, vPos);
+	pRetArr[nCur++].Set(light->bbox.vMin, Vec2(light->bbox.vMin.x, light->bbox.vMax.y), vNXp, vPos);
+	pRetArr[nCur++].Set(Vec2(light->bbox.vMax.x, light->bbox.vMin.y), light->bbox.vMax, vNXn, vPos);
 	///--- add segments from bboxes
 	m_occludersCnt = 0;
 	CAABB lbox = light->bbox;
@@ -16997,12 +17039,16 @@ int CLevel::GetOccluderSegments(CLight* light, COccluderSegment* pRetArr, int ma
 	for (int kk = 0; kk < m_visibleList.visible_colShapesLights.Count(); kk++)
 	{
 		_ASSERT(nCur < maxRetArrSize - 2);
-		// add just visible sides
-		CAABB* chkbb = &m_visibleList.visible_colShapesLights.m_pData[kk]->bbox;
+		// if we want the whole bbox:
+		//CAABB* chkbb = &m_visibleList.visible_colShapesLights.m_pData[kk]->bbox;
+
 		// if we want to clip occluders to light bbox:
-		//CAABB retbb;
-		//if (AABB_Intersection(lbox, m_visibleList.visible_colShapesLights.m_pData[kk]->bbox, retbb))
-		if (lbox.Intersects(chkbb)) 
+		CAABB retbb;
+		CAABB* chkbb = &retbb;
+		// clipped check (looks better with longer occluders):
+		if (AABB_Intersection(lbox, m_visibleList.visible_colShapesLights.m_pData[kk]->bbox, retbb))
+		// non clipped check (faster):
+		//if (lbox.Intersects(chkbb)) 
 		{
 			if (light->vPos.y > chkbb->vMax.y)
 			{

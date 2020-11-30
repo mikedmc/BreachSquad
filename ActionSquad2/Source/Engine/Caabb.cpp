@@ -168,7 +168,7 @@ bool AABB_Intersection(CAABB & a, CAABB & b, CAABB & retVal)
 	vMax.y = min(a.vMax.y, b.vMax.y);
 	retVal.Set(vMin, vMax);
 
-	//daca e negativ inseamna ca nu am intersectie
+	//negative means no intersection
 	if ((vMax.x < vMin.x) || (vMax.y < vMin.y))
 		return false;
 	return true;
