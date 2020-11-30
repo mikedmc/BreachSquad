@@ -13526,12 +13526,12 @@ int CLevel::BuildOccludedVolume(Vec2 vEye, COccluderSegment* arrOcc, int nOcclud
 			}
 			
 
-			//2. check with ray at angle -0.0001 and +0.0001, excluding ray if it hits segment
-			//#HINT: !! if segments are all defined clockwise we can skip this test and we know that we make vStart-0.0001 and vEnd+0.0001 but it forces us to have them all defined clockwise
-			//#HINT: we can also make collision removing the ends of the segments but also add angles to the intersection so we sort them correctly (might look complicated)
-
-			// left ray
+			//2. check with ray at angle -0.0001 and +0.0001, excluding ray if it hits segment to detect collisions around corners (back collisions)
+			/// 2.a. version 1: sends both rays and detects which one falls inside the source occluder to cancel it. 
+			/// Occluders don't have to be defined clockwise (vStart before vEnd in CCW order)
 			
+			/*
+			// left ray
 			float fang = fTargetAng - 0.00001f;
 			Vec2 vTo(100.0f * cos(fang) + vEye.x, 100.0f * sin(fang) + vEye.y);
 			//make sure we don't send ray inside our current occluder, just outside (see hints above)
@@ -13554,6 +13554,22 @@ int CLevel::BuildOccludedVolume(Vec2 vEye, COccluderSegment* arrOcc, int nOcclud
 				{
 					arrVerts.push_back(sOccluderIntersection(vRetPt, occ->vN, fang));
 				}
+			}
+			*/
+
+			/// 2.b. version 2:
+			/// OCCLUDERS NEED TO BE DEFINED CLOCKWISE => vStart sends ray at -0.0001 rad, vEnd sends at angle + 0.0001 rad
+			float fang = fTargetAng - 0.00001f;
+			if (ll == 1)
+			{
+				fang = fTargetAng + 0.00001f;
+			}
+
+			Vec2 vTo(100.0f * cos(fang) + vEye.x, 100.0f * sin(fang) + vEye.y);
+			COccluderSegment* retocc = RayOccludersIntersection(vEye, vTo, fang, arrOcc, nOccludersCnt, vRetPt);
+			if (retocc)
+			{
+				arrVerts.push_back(sOccluderIntersection(vRetPt, occ->vN, fang));
 			}
 
 		}
