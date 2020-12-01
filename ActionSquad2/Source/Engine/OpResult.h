@@ -13,6 +13,9 @@
 #ifndef V_OP_RET
 	#define V_OP_RET(x)           { if (OP_FAILED(x)) { return x; } }
 #endif
+#ifndef V_OP_HRTOOP
+#define V_OP_HRTOOP(hr)           { if (hr < 0) { return K_OP_FAILED; } }
+#endif
 
 ///--- generic return values
 enum eOpResult {

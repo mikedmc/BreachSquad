@@ -13139,267 +13139,9 @@ void CLevel::Release()
 	m_bOneUpdateDone = false;
 }
 
-///--- framework implementations ---
-#pragma region FRAMEWORK_IMPL
-HRESULT CLevel::OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBBDesc, void* pUserContext )
-{
-	HRESULT hr = S_OK;
-	m_pDevice = pd3dDevice;
 
-	V_RETURN(m_sprLights.OnCreateDevice(pd3dDevice));
-	V_RETURN(m_sprProps.OnCreateDevice(pd3dDevice));
-	V_RETURN(m_sprActors.OnCreateDevice(pd3dDevice));
-	V_RETURN(m_sprInterface.OnCreateDevice(pd3dDevice));
-	V_RETURN(m_texManager.OnCreateDevice(pd3dDevice));
-	V_RETURN(m_bufferedPainter.OnCreateDevice(pd3dDevice));
-	V_OP_RETHR(mapMesh.OnCreateDevice(pd3dDevice));
-	return S_OK;
-}
 
-HRESULT CLevel::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBBdesc, void* pUserContext )
-{
-	HRESULT hr = S_OK;
-	m_pDevice = pd3dDevice;
-
-	V_RETURN(m_sprLights.OnResetDevice(pd3dDevice));
-	V_RETURN(m_sprProps.OnResetDevice(pd3dDevice));
-	V_RETURN(m_sprActors.OnResetDevice(pd3dDevice));
-	V_RETURN(m_sprInterface.OnResetDevice(pd3dDevice));
-	V_RETURN(m_texManager.OnResetDevice(pd3dDevice));
-
-	V_RETURN(m_bufferedPainter.OnResetDevice(pd3dDevice));
-	V_OP_RETHR(mapMesh.OnResetDevice(pd3dDevice));
-
-	return S_OK;
-}
-
-HRESULT CLevel::OnLostDevice( void* pUserContext )
-{
-	m_pDevice = NULL;
-
-	m_sprLights.OnLostDevice();
-	m_sprProps.OnLostDevice();
-	m_sprActors.OnLostDevice();
-	m_sprInterface.OnLostDevice();
-	m_texManager.OnLostDevice();
-
-	m_bufferedPainter.OnLostDevice();
-	mapMesh.OnLostDevice();
-
-	return S_OK;
-}
-
-HRESULT CLevel::OnDestroyDevice( void* pUserContext )
-{
-	m_pDevice = NULL;
-
-	m_sprLights.OnDestroyDevice();
-	m_sprProps.OnDestroyDevice();
-	m_sprActors.OnDestroyDevice();
-	m_sprInterface.OnDestroyDevice();
-	m_texManager.OnDestroyDevice();
-
-	m_bufferedPainter.OnDestroyDevice();
-	mapMesh.OnDestroyDevice();
-
-	return S_OK;
-}
-
-#pragma endregion FRAMEWORK_IMPL
-
-//-------------------------------------------------------------
-// Functii pentru gasirea occluderelor pt iluminare
-//-------------------------------------------------------------
-void CLevel::AddOccludersFromAABB_stencil(D3DXVECTOR2 viewerPos, CAABB * aabb)
-{
-	_ASSERT(m_occludersCnt < K_LVL_MAX_OCCLUDERS_CNT - 4);
-	//adaug marginile AABB-ului ce trebuies extrudate
-	if (viewerPos.y > aabb->vMax.y)
-	{
-		m_occluders[m_occludersCnt].start = aabb->vMax;
-		m_occluders[m_occludersCnt].end = D3DXVECTOR2(aabb->vMin.x, aabb->vMax.y);
-		m_occludersCnt++;
-	}
-	else if (viewerPos.y < aabb->vMin.y)
-	{
-		m_occluders[m_occludersCnt].start = aabb->vMin;
-		m_occluders[m_occludersCnt].end = D3DXVECTOR2(aabb->vMax.x, aabb->vMin.y);
-		m_occludersCnt++;
-	}
-	else //daca e in interior le adauga pe ambele
-	{
-		m_occluders[m_occludersCnt].start = aabb->vMax;
-		m_occluders[m_occludersCnt].end = D3DXVECTOR2(aabb->vMin.x, aabb->vMax.y);
-		m_occludersCnt++;
-
-		m_occluders[m_occludersCnt].start = aabb->vMin;
-		m_occluders[m_occludersCnt].end = D3DXVECTOR2(aabb->vMax.x, aabb->vMin.y);
-		m_occludersCnt++;
-	}
-
-	if (viewerPos.x > aabb->vMax.x)
-	{
-		m_occluders[m_occludersCnt].start = D3DXVECTOR2(aabb->vMax.x, aabb->vMin.y);
-		m_occluders[m_occludersCnt].end = aabb->vMax;
-		m_occludersCnt++;
-	}
-	else if (viewerPos.x < aabb->vMin.x)
-	{
-		m_occluders[m_occludersCnt].start = D3DXVECTOR2(aabb->vMin.x, aabb->vMax.y);
-		m_occluders[m_occludersCnt].end = aabb->vMin;
-		m_occludersCnt++;
-	}
-	else
-	{
-		m_occluders[m_occludersCnt].start = D3DXVECTOR2(aabb->vMax.x, aabb->vMin.y);
-		m_occluders[m_occludersCnt].end = aabb->vMax;
-		m_occludersCnt++;
-
-		m_occluders[m_occludersCnt].start = D3DXVECTOR2(aabb->vMin.x, aabb->vMax.y);
-		m_occluders[m_occludersCnt].end = aabb->vMin;
-		m_occludersCnt++;
-	}
-}
-
-//scrie intr-un array mare declarat in clasa clevel ca sa nu aloc si sa dezaloc mereu
-COccluder* CLevel::GetVisibleAABBs_toOccluders(D3DXVECTOR2 viewPos, CAABB * viewRect, int & retOccludersCnt)
-{
-	m_occludersCnt = 0;
-	//clip AABB
-	CAABB clip = *viewRect;
-	clip.Inflate(D3DXVECTOR2(-1.0f, -1.0f));
-
-	//gasesc toate occluderele care se intersecteaza cu viewRect si le fac clip
-	for (int kk = 0; kk < m_visibleList.visible_colShapesLights.Count(); kk++)
-	{
-		//sunt filtrate deja la constuirea listei (doar cele care fac shadow casting apar in lista)
-		//if (!m_visibleList.colShapes[kk]->castShadows)
-			//continue;
-		//#TODO: aici ar trebui luate in calcul si celelalte tipuri de collision shapes cand ma hotarasc sa adaug segmente si alte forme
-		CAABB retaabb;
-		if (AABB_Intersection(clip, m_visibleList.visible_colShapesLights.m_pData[kk]->bbox, retaabb))
-		{
-			AddOccludersFromAABB_stencil(viewPos, &retaabb);
-		}
-	}
-	//return 
-	retOccludersCnt = m_occludersCnt;
-	return m_occluders;
-}
-
-//outVerts e array-ul in care primesti vertecsii finali
-//outVertsMaxCnt e marimea array-ului
-//returns - numarul efectiv de verts scrisi
-int CLevel::BuildShadowVolume(CLight * light, CAABB * visibleAABB, COccluder * p_arrOccluders, int nOccludersCount, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt)
-{
-	int vertsCur = 0;
-	//1. daca punctul de distanta intr viewerPos si occluder care pe occluder ii facem split ca sa ne asiguram ca acopera tot volumul necesar
-	//#TODO: sa permita shadow volumes si pt lumini directionale (extinde altfel poligoanele)
-	//#TODO: ar fi tare daca as putea face clip la volume in aabb-ul luminii
-
-	//alegem raza pana la care extindem poligoanele. Trebuie sa fie 2 * dim max bbox ca daca avem occluder f aproape de lumina sa fim siguri ca acopera cercul circumscris bbox-ului
-	float outerR = 100.0f;
-	if (visibleAABB == NULL)
-	{
-		outerR = 4.0f * max(light->bbox.vHalfSize.x, light->bbox.vHalfSize.y);
-	}
-	else
-	{
-		//daca lumina este descentrata total trebuie luata distanta maxima de la lumina la laturile aabb-ului si facuta o raza de 2X distanta asta sau nu va desena corect volumele de umbre
-		float radx = max(fabs(light->pos.x - visibleAABB->vMin.x), fabs(visibleAABB->vMax.x - light->pos.x));
-		float rady = max(fabs(light->pos.y - visibleAABB->vMin.y), fabs(visibleAABB->vMax.y - light->pos.y));
-		outerR = 2.0f * max(radx, rady);
-	}
-
-	for (int kk = 0; kk < nOccludersCount; kk++)
-	{
-		COccluder* occ = &p_arrOccluders[kk];
-		//gasim proiectia
-		D3DXVECTOR2 dir = occ->end - occ->start;
-		float dirL = D3DXVec2Length(&dir);
-		D3DXVECTOR2 dirN = dir / dirL;
-		D3DXVECTOR2 lDir(light->pos.x - occ->start.x, light->pos.y - occ->start.y);
-
-		float dotN = D3DXVec2Dot(&lDir, &dirN);
-
-		//daca proiectia pica pe segment ii fac split
-		if ((dotN >= 0.0f) && (dotN <= dirL))
-		{
-			_ASSERT(vertsCur < outVertsMaxCnt - 12);
-
-			D3DXVECTOR2 projPt = occ->start + dirN * dotN;
-			COccluder oc1, oc2, exoc1, exoc2;
-			oc1.start = occ->start; oc1.end = projPt;
-			oc2.start = projPt; oc2.end = occ->end;
-			//extrudam oc1
-			D3DXVECTOR2 lDirN;
-			float lDirL = D3DXVec2Length(&lDir);
-			lDirN = lDir / lDirL;
-			exoc1.start = oc1.start - lDirN * (outerR - lDirL);
-
-			lDir = D3DXVECTOR2(light->pos.x - oc1.end.x, light->pos.y - oc1.end.y);
-			lDirL = D3DXVec2Length(&lDir);
-			lDirN = lDir / lDirL;
-			exoc1.end = oc1.end - lDirN * (outerR - lDirL);
-			//extrudam oc2
-			lDir = D3DXVECTOR2(light->pos.x - oc2.start.x, light->pos.y - oc2.start.y);
-			lDirL = D3DXVec2Length(&lDir);
-			lDirN = lDir / lDirL;
-			exoc2.start = oc2.start - lDirN * (outerR - lDirL);
-
-			lDir = D3DXVECTOR2(light->pos.x - oc2.end.x, light->pos.y - oc2.end.y);
-			lDirL = D3DXVec2Length(&lDir);
-			lDirN = lDir / lDirL;
-			exoc2.end = oc2.end - lDirN * (outerR - lDirL);
-			//adaugam poligoanele
-			outVerts[vertsCur++].pos = D3DXVECTOR3(oc1.start.x, oc1.start.y, 0.0f);
-			outVerts[vertsCur++].pos = D3DXVECTOR3(exoc1.start.x, exoc1.start.y, 0.0f);
-			outVerts[vertsCur++].pos = D3DXVECTOR3(exoc1.end.x, exoc1.end.y, 0.0f);
-
-			outVerts[vertsCur++].pos = D3DXVECTOR3(oc1.start.x, oc1.start.y, 0.0f);
-			outVerts[vertsCur++].pos = D3DXVECTOR3(exoc1.end.x, exoc1.end.y, 0.0f);
-			outVerts[vertsCur++].pos = D3DXVECTOR3(oc1.end.x, oc1.end.y, 0.0f);
-			////si al doilea
-			outVerts[vertsCur++].pos = D3DXVECTOR3(oc2.start.x, oc2.start.y, 0.0f);
-			outVerts[vertsCur++].pos = D3DXVECTOR3(exoc2.start.x, exoc2.start.y, 0.0f);
-			outVerts[vertsCur++].pos = D3DXVECTOR3(exoc2.end.x, exoc2.end.y, 0.0f);
-
-			outVerts[vertsCur++].pos = D3DXVECTOR3(oc2.start.x, oc2.start.y, 0.0f);
-			outVerts[vertsCur++].pos = D3DXVECTOR3(exoc2.end.x, exoc2.end.y, 0.0f);
-			outVerts[vertsCur++].pos = D3DXVECTOR3(oc2.end.x, oc2.end.y, 0.0f);
-
-		}
-		else //daca nu pica pe segment doar fac extrude
-		{
-			_ASSERT(vertsCur < outVertsMaxCnt - 6);
-
-			COccluder oc, exoc;
-			oc = *occ;
-
-			D3DXVECTOR2 lDirN;
-			float lDirL = D3DXVec2Length(&lDir);
-			lDirN = lDir / lDirL;
-			exoc.start = oc.start - lDirN * (outerR - lDirL);
-
-			lDir = D3DXVECTOR2(light->pos.x - occ->end.x, light->pos.y - occ->end.y);
-			lDirL = D3DXVec2Length(&lDir);
-			lDirN = lDir / lDirL;
-			exoc.end = oc.end - lDirN * (outerR - lDirL);
-			//adaug verts
-			outVerts[vertsCur++].pos = D3DXVECTOR3(oc.start.x, oc.start.y, 0.0f);
-			outVerts[vertsCur++].pos = D3DXVECTOR3(exoc.start.x, exoc.start.y, 0.0f);
-			outVerts[vertsCur++].pos = D3DXVECTOR3(exoc.end.x, exoc.end.y, 0.0f);
-
-			outVerts[vertsCur++].pos = D3DXVECTOR3(oc.start.x, oc.start.y, 0.0f);
-			outVerts[vertsCur++].pos = D3DXVECTOR3(exoc.end.x, exoc.end.y, 0.0f);
-			outVerts[vertsCur++].pos = D3DXVECTOR3(oc.end.x, oc.end.y, 0.0f);
-		}
-	}
-
-	return vertsCur;
-}
-
-int CLevel::BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt)
+int CLevel::BuildLightVolume360(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt)
 {
 	_ASSERT(outVerts != null);
 	// sends 360 rays and finds collisions with tileset base of walls. When we collide with a wall facing the camera we also add polys for the wall.
@@ -16872,7 +16614,6 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 	pRetArr[nCur++].Set(bbox.vMin, Vec2(bbox.vMin.x, bbox.vMax.y), vNXp, vPos);
 	pRetArr[nCur++].Set(Vec2(bbox.vMax.x, bbox.vMin.y), bbox.vMax, vNXn, vPos);
 	///--- add segments from bboxes
-	m_occludersCnt = 0;
 			 
 	//check only the occluders in the visible area as we don't process lights outside the screen
 	for (int kk = 0; kk < m_visibleList.visible_colShapesLights.Count(); kk++)
@@ -17014,6 +16755,72 @@ CCollisionShape* CLevel::SpawnCollisionShape(int nType, D3DXVECTOR2 vMin, D3DXVE
 }
 
 
+///--- framework implementations ---
+#pragma region FRAMEWORK_IMPL
+OPRESULT CLevel::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, void* pUserContext)
+{
+	HRESULT hr = S_OK;
+	m_pDevice = pDevice;
+
+	V_OP_HRTOOP(m_sprLights.OnCreateDevice(pDevice));
+	V_OP_HRTOOP(m_sprProps.OnCreateDevice(pDevice));
+	V_OP_HRTOOP(m_sprActors.OnCreateDevice(pDevice));
+	V_OP_HRTOOP(m_sprInterface.OnCreateDevice(pDevice));
+	V_OP_HRTOOP(m_texManager.OnCreateDevice(pDevice));
+	V_OP_HRTOOP(m_bufferedPainter.OnCreateDevice(pDevice));
+	V_OP_RET(mapMesh.OnCreateDevice(pDevice));
+	return K_OP_OK;
+}
+
+OPRESULT CLevel::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, void* pUserContext)
+{
+	HRESULT hr = S_OK;
+	m_pDevice = pDevice;
+
+	V_OP_HRTOOP(m_sprLights.OnResetDevice(pDevice));
+	V_OP_HRTOOP(m_sprProps.OnResetDevice(pDevice));
+	V_OP_HRTOOP(m_sprActors.OnResetDevice(pDevice));
+	V_OP_HRTOOP(m_sprInterface.OnResetDevice(pDevice));
+	V_OP_HRTOOP(m_texManager.OnResetDevice(pDevice));
+	V_OP_HRTOOP(m_bufferedPainter.OnResetDevice(pDevice));
+	V_OP_RET(mapMesh.OnResetDevice(pDevice));
+
+	return K_OP_OK;
+}
+
+OPRESULT CLevel::OnLostDevice(void* pUserContext)
+{
+	m_pDevice = NULL;
+
+	m_sprLights.OnLostDevice();
+	m_sprProps.OnLostDevice();
+	m_sprActors.OnLostDevice();
+	m_sprInterface.OnLostDevice();
+	m_texManager.OnLostDevice();
+
+	m_bufferedPainter.OnLostDevice();
+	mapMesh.OnLostDevice();
+
+	return K_OP_OK;
+}
+
+OPRESULT CLevel::OnDestroyDevice(void* pUserContext)
+{
+	m_pDevice = NULL;
+
+	m_sprLights.OnDestroyDevice();
+	m_sprProps.OnDestroyDevice();
+	m_sprActors.OnDestroyDevice();
+	m_sprInterface.OnDestroyDevice();
+	m_texManager.OnDestroyDevice();
+
+	m_bufferedPainter.OnDestroyDevice();
+	mapMesh.OnDestroyDevice();
+
+	return K_OP_OK;
+}
+
+#pragma endregion FRAMEWORK_IMPL
 
 
 #pragma warning(pop)

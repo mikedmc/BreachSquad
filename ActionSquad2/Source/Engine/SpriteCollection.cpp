@@ -82,7 +82,7 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 		StringCchPrintf(ntex->imagePath, MAX_PATH, L"%s%s", wcsFullFolder, imgname);
 #endif
 
-		assert((pDevice != NULL) && "Device shouldn't be null");
+		_ASSERT((pDevice != NULL) && "Device shouldn't be null");
 		if (pDevice != NULL)
 		{
 			//tries to create textures here

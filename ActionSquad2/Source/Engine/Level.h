@@ -482,36 +482,28 @@ public:
 ///--- SCRIPT ---
 	//activeaza cel mai apropiat obiect, primul gasit
 	void					TouchClosestActive(CActor * pToucherAct, float dTime);
-	//porneste un script si salveaza toate datele necesare in active. Trimite si lista de params din AI ca var locale in script
+	// Starts a script sending AI params as script local vars
 	void					StartScript(WCHAR* scriptName, IActiveInterface * active);
 	void					StartScript(UINT32 scriptNameHash, IActiveInterface * active);
-	//proceseaza local instructiunile venite din script
-	//RETURNS: true - instr processed, false - not processed
+	// RETURNS: true - instr processed, false - not processed
 	bool					ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executorUID, UINT32 scriptUID);
 	bool					OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantCollection * pArrScriptVars);
 	char const *			GetProcessorName(void) { return "CLevel"; }
-	//functie ajutatoare pentru procesare instructiuni. Gaseste activ in fn de valoare parametru: SELF pt caller, TARGET pentru targetID si numar pt ID efectiv
+	// functie ajutatoare pentru procesare instructiuni. Gaseste activ in fn de valoare parametru: SELF pt caller, TARGET pentru targetID si numar pt ID efectiv
 	IActiveInterface*		ScriptGetActiveInterfaceByTargetParam(CVariantComplex* vcTarget, UINT32 executorUID);
 
 	// Gets all occluders for a specific light
-	// includes tile segments, light range bbox segments and objects aabb segments.
+	// includes tile segments, light range bbox segments and objects aabb segments. vEye MUST be inside bbox!
 	// \returns Number of segments returned. Writes segments in provided pRetArr.
 	int						GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr, int maxRetArrSize);
 
-private: //--- misc functions ---
-	COccluder				m_occluders[K_LVL_MAX_OCCLUDERS_CNT];	 //stiva locala folosita de AddOccludersFromAABB
-	int						m_occludersCnt;
-	//cauta in lista de AABBs vizibile si le face clip la cel specificat (pt algoritmul de iluminare cu poly)
-	COccluder*				GetVisibleAABBs_toOccluders(D3DXVECTOR2 viewPos, CAABB * viewRect, int & retOccludersCnt);
-	void					AddOccludersFromAABB_stencil(D3DXVECTOR2 viewerPos, CAABB * aabb); //ver cu stencil
-	int						BuildShadowVolume(CLight * light, CAABB * visibleAABB, COccluder * p_arrOccluders, int nOccludersCount, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt);
-	// Builds a triangle list that paints over the whole area that a light can shine on (works with 2.5D walls)
-	// Returns number of written verts (3 * tris cnt)
-	int						BuildLightVolume(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt);
+private:
+	// Cheaper method of shadow casting but not precise enough. Can be used on low end devices
+	int						BuildLightVolume360(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt);
 
 public: //--- framework methods ---
-	HRESULT OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
-	HRESULT OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
-	HRESULT OnLostDevice( void* pUserContext = NULL);
-	HRESULT OnDestroyDevice( void* pUserContext = NULL);
+	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
+	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
+	OPRESULT OnLostDevice(void* pUserContext = NULL);
+	OPRESULT OnDestroyDevice(void* pUserContext = NULL);
 };
