@@ -14,6 +14,8 @@
 
 #include "gameplay/TileBlockMesh.h"
 #include "CFOVUtil.h"
+
+using namespace std;
 //this enum must be sincronizat with AI_states list (level.cpp)
 enum AI_STATE 
 {
@@ -142,23 +144,29 @@ public:
 	// transforms mouse coordinates from screen space to game world (necessary for network play)
 	bool NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue);
 
-	CVisibilityLists  m_visibleList; //lista de elemente vizibile sau active
+	CVisibilityLists  m_visibleList;			// list of visible/active entities
 	void BuildVisibilityLists();
 	void ClearVisibilityLists();
 
-	CBufferedPainter		m_bufferedPainter;	//folosit la desenarea de poligoane
+	CBufferedPainter		m_bufferedPainter;	// used when drawing dynamic meshes
 
 	int						tileW, tileH;		//size of tiles
 	SIZEWH					levelSizeTL;		//size of the level (in tiles)
 	RECTXYWH_F				m_levelAABB;		//level AABB in pixels
 	RECTXYWH				m_levelAABB_TL;		//level AABB in tiles (active tiles area, can be moved when generating random levels)
 
-	CTile**					tiles;				//actual tilemap
-	int						m_tilesTexBaseIdx, m_tilesTexNormIdx;		//indexuri la texturile folosite pt tileset
-	Vec2					m_vLevelOrigin;		//originea fictiva a nivelului
+	CTile**					tiles;				// actual tilemap
+	int						m_tilesTexBaseIdx;	// tileset base texture index
+	int						m_tilesTexNormIdx;	// tileset normals texture index
+	Vec2					m_vLevelOrigin;		// level origin for the editor (usually around start location)
 
 	RECTXYWH_F				m_visibleArea;		//zona vizibila din BBuff in pixeli, coord world
 	RECTXYWH				m_visibleAreaTL;	//zona vizibila din nivel, in tiles.
+	///--- dirty rects ---
+	vector<RECTXYXY>		m_arrDirtyRectsTL;	// tiles that need updating
+	// Updates the tiles in the dirty rects (should return if changes were made)
+	void					UpdateDirtyRects();
+
 	///--- TEMPLATES ---
 	CGrowableArray<CWeaponTemplate*>		m_arrTemplatesWeapon;
 	CGrowableArray<CExplosionTemplate*>		m_arrTemplatesExplosion;
@@ -412,7 +420,7 @@ public:
 	IActiveInterface*		GetIActiveInterfacePtr(int ID);
 	IActiveInterface*		GetIActiveInterfacePtr_byUID(UINT32 UID);
 	//Intoarce pointer la CActive cu UID-ul respectiv
-	CProp*				GetActiveByUID(UINT32 UID);
+	CProp*					GetActiveByUID(UINT32 UID);
 	CActor*					GetActorByUID(UINT32 UID);
 	CLight*					GetLightByUID(UINT32 UID);
 	// Gets the player with specified UID or NULL if not found

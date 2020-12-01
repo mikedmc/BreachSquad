@@ -1,7 +1,7 @@
 #pragma once
 
 //--------------------------------------------------------------------------------------
-// Array rapid de marime fixa.
+// fast fixed size array
 //--------------------------------------------------------------------------------------
 template<typename TYPE, int nMaxSize> class CFixedArray
 {
@@ -83,7 +83,7 @@ public:
 
 
 //--------------------------------------------------------------------------------------
-// Array circular rapid de marime fixa.
+// Circular array of fixed size
 //--------------------------------------------------------------------------------------
 template<typename TYPE, int nMaxSize> class CCircularStack
 {
@@ -184,7 +184,7 @@ public:
 
 
 //--------------------------------------------------------------------------------------
-// Pool de obiecte template tinute ca lista dublu inlantuita
+// Template object linked list pool
 //--------------------------------------------------------------------------------------
 template<typename TYPE> class CLinkedPool
 {

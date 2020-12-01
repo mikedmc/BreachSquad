@@ -44,6 +44,31 @@ void D3DCOLOR_UNPACKTOFLOAT(DWORD color, float & a, float & r, float & g, float 
 // Unpacks DWORD color to byte channels
 void D3DCOLOR_UNPACKTOBYTE(DWORD color, unsigned char & a, unsigned char & r, unsigned char & g, unsigned char & b);
 
+template <class anyType>
+__inline void CLAMP(anyType &var, anyType min, anyType max)
+{
+	var = ((var < min) ? min : ((var > max) ? max : var));
+}
+/*
+Limits "var" between "min" and "max" without changing the actual value of "var".
+RETURNS: clamped value
+*/
+template <class anyType>
+__inline anyType LIMIT(anyType var, anyType min, anyType max)
+{
+	return ((var < min) ? min : ((var > max) ? max : var));
+}
+
+template <class T>
+void SWAP(T& x, T& y)
+{
+	T temp;
+	temp = x;
+	x = y;
+	y = temp;
+}
+
+
 
 struct VERT_TL1TC
 {
@@ -267,7 +292,36 @@ public:
 	{}
 };
 
-//trece un punct din coordonatele primului dreptunghi in al doilea (un fel de barycentric).
+class RECTXYXY {
+public:
+	int x1, y1, x2, y2;
+	RECTXYXY() :
+		x1(0), y1(0), x2(0), y2(0)
+	{}
+	RECTXYXY(RECT& rectSrc) :
+		x1(rectSrc.left), y1(rectSrc.top), x2(rectSrc.right), y2(rectSrc.bottom)
+	{}
+	RECTXYXY(int nx1, int ny1, int nx2, int ny2) :
+		x1(nx1), y1(ny1), x2(nx2), y2(ny2)
+	{}
+	RECTXYXY(const RECTXYXY& rectsrc) :
+		x1(rectsrc.x1), x2(rectsrc.x2), y1(rectsrc.y1), y2(rectsrc.y2)
+	{}
+	RECTXYXY(const RECTXYWH rectsrc) :
+		x1(rectsrc.x), y1(rectsrc.y), x2(rectsrc.x + rectsrc.w), y2(rectsrc.y + rectsrc.h)
+	{}
+
+	void Clamp(int xmin, int ymin, int xmax, int ymax)
+	{
+		CLAMP(x1, xmin, xmax);
+		CLAMP(x2, xmin, xmax);
+		CLAMP(y1, ymin, ymax);
+		CLAMP(y2, ymin, ymax);
+	}
+};
+
+
+// barycentric coords for rectangles, changing coords from one to the other
 inline D3DXVECTOR2 FromRectToRect(D3DXVECTOR2 & point, RECTXYWH_F & src, RECTXYWH_F & dest)
 {
 	return D3DXVECTOR2(((point.x - src.x) / src.w) * dest.w + dest.x, ((point.y - src.y) / src.h) * dest.h + dest.y);
@@ -353,32 +407,9 @@ __inline DWORD FtoDW(float f)
 	return *((DWORD*)(&f));
 }
 
-template <class anyType>
-__inline void CLAMP(anyType &var, anyType min, anyType max) 
-{
-	var = ((var<min)?min:((var>max)?max:var));
-}
 
 // var changes into targetVar with specified fSpeed (must be called in loop)
 void REACH_VALUE_LINEAR(float &var, float targetVar, float fSpeed);
-/*
-Limits "var" between "min" and "max" without changing the actual value of "var".
-RETURNS: clamped value
-*/
-template <class anyType>
-__inline anyType LIMIT(anyType var, anyType min, anyType max) 
-{
-	return ((var < min) ? min : ((var > max) ? max : var));
-}
-
-template <class T>
-void SWAP(T& x,T& y)
-{
-     T temp;
-     temp=x;
-     x=y;
-     y=temp;
-}
 
 ///--- structura care poate contine mai multe tipuri de date ---
 struct CVariant 

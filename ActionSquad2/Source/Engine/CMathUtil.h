@@ -4,6 +4,8 @@
 #define		IS_FLAG_ANY(x, flag)		( ((x) & (flag)) != 0 )
 // Are ALL the flags set?
 #define		IS_FLAG_ALL(x, flag)		( ((x) & (flag)) == (flag) )
+// (NOT IS) make sure no flag is set
+#define		NIS_FLAG_ANY(x, flag)		( ((x) & (flag)) == 0 )
 
 // atan2 approximation const values
 #define ATAN2_PI_FLOAT		3.14159265f

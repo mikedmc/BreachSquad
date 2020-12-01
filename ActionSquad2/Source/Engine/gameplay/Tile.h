@@ -1,15 +1,22 @@
 #pragma once
 
 ///--- TILE CLASS ---
-#define K_LVL_LAYER_BACK	0
-#define K_LVL_LAYER_MIDDLE	1
-#define K_LVL_LAYER_FRONT	2
+#define		K_LVL_LAYER_BACK		0
+#define		K_LVL_LAYER_MIDDLE		1
+#define		K_LVL_LAYER_FRONT		2
 //total number of layers
-#define K_LVL_LAYERS_CNT 3
+#define		K_LVL_LAYERS_CNT		3
 
 ///--- TILE FLAGS ---
-#define K_TILEFLAG_NONE			0
-#define K_TILEFLAG_BLOCKED		1
+#define		K_TILEFLAG_NONE			0
+// do we have a floor on FLOORS layer? then we call it walkable
+#define		K_TILEFLAG_WALKABLE		1
+// visible walls flags (bits 1-4)
+#define		K_TILEFLAG_HASWALL_U	2
+#define		K_TILEFLAG_HASWALL_R	4
+#define		K_TILEFLAG_HASWALL_D	8
+#define		K_TILEFLAG_HASWALL_L	16
+#define		K_TILEFLAG_HASWALL_MASK 0x1E
 
 class CTile {						
 public:
@@ -31,6 +38,12 @@ public:
 			vUVmin[kk] = Vec2(0.0f, 0.0f);
 			vUVmax[kk] = Vec2(0.0f, 0.0f);
 		}
+	}
+
+	void PostConstructionInit()
+	{
+		if (tileIDs[K_LVL_LAYER_BACK] >= 0)
+			flags |= K_TILEFLAG_WALKABLE;
 	}
 };
 

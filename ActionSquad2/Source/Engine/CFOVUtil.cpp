@@ -2,12 +2,37 @@
 #include "CFOVUtil.h"
 #include <algorithm> // std::sort
 
+void COccluderSegment::Set(Vec2 vfrom, Vec2 vto, Vec2 vNrm, Vec2 vViewerPos, DWORD wallID, float wallH)
+{
+	vStart = vfrom;
+	vEnd = vto;
+	vN = vNrm;
+	dwWallID = wallID;
+	fWallH = wallH;
+	// compute angles now
+	fStartAng = atan2(vStart.y - vViewerPos.y, vStart.x - vViewerPos.x);
+	fEndAng = atan2(vEnd.y - vViewerPos.y, vEnd.x - vViewerPos.x);
+	//#TODO: try and measure faster approximated version: UTMath::atan2_approximation2
+}
+
+void COccluderSegment::MoveStart(Vec2 vPos, Vec2 vViewerPos)
+{
+	vStart = vPos;
+	fStartAng = atan2(vStart.y - vViewerPos.y, vStart.x - vViewerPos.x);
+}
+
+void COccluderSegment::MoveEnd(Vec2 vPos, Vec2 vViewerPos)
+{
+	vEnd = vPos;
+	fEndAng = atan2(vEnd.y - vViewerPos.y, vEnd.x - vViewerPos.x);
+}
+
 bool OccluderIntersectionSorter(sOccluderIntersection & a, sOccluderIntersection & b)
 {
 	return (a.fAngle < b.fAngle);
 }
 
-int FOVUtil::BuildOccludedVolume(Vec2 vEye, COccluderSegment* arrOcc, int nOccludersCnt, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt)
+int FOVUtil::BuildOccludedVolume(Vec2 vEye, DWORD dwColor, COccluderSegment* arrOcc, int nOccludersCnt, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt)
 {
 	// send rays to each occluder end point and to +/-0.0001 rad of it to see the back collisions, sort collision points by angle and create poly from them
 	// if lateral (corner) ray hits the same occluder we skip it as it means we're sending the ray inside the same poly
@@ -117,20 +142,20 @@ int FOVUtil::BuildOccludedVolume(Vec2 vEye, COccluderSegment* arrOcc, int nOcclu
 		Vec3 ptpos(pt->vPos.x, pt->vPos.y, 0.0f);
 		Vec3 ptoldpos(ptold->vPos.x, ptold->vPos.y, 0.0f);
 
-		outVerts[nVertCnt].pos = vEye3D; outVerts[nVertCnt].color = 0xffffffff; nVertCnt++;
-		outVerts[nVertCnt].pos = ptpos; outVerts[nVertCnt].color = 0xffffffff; nVertCnt++;
-		outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].color = 0xffffffff; nVertCnt++;
+		outVerts[nVertCnt].pos = vEye3D; outVerts[nVertCnt].color = dwColor; nVertCnt++;
+		outVerts[nVertCnt].pos = ptpos; outVerts[nVertCnt].color = dwColor; nVertCnt++;
+		outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].color = dwColor; nVertCnt++;
 
 		// extend on wall
 		if ((pt->fWallH > 0.0f) && (ptold->fWallH > 0.0f) && (pt->dwWallID == ptold->dwWallID))
 		{
-			outVerts[nVertCnt].pos = ptpos; outVerts[nVertCnt].color = 0xffffffff; nVertCnt++;
-			outVerts[nVertCnt].pos = ptpos; outVerts[nVertCnt].pos.y -= pt->fWallH; outVerts[nVertCnt].color = 0xffffffff; nVertCnt++;
-			outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].color = 0xffffffff; nVertCnt++;
+			outVerts[nVertCnt].pos = ptpos; outVerts[nVertCnt].color = dwColor; nVertCnt++;
+			outVerts[nVertCnt].pos = ptpos; outVerts[nVertCnt].pos.y -= pt->fWallH; outVerts[nVertCnt].color = dwColor; nVertCnt++;
+			outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].color = dwColor; nVertCnt++;
 
-			outVerts[nVertCnt].pos = ptpos; outVerts[nVertCnt].pos.y -= pt->fWallH; outVerts[nVertCnt].color = 0xffffffff; nVertCnt++;
-			outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].color = 0xffffffff; nVertCnt++;
-			outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].pos.y -= ptold->fWallH; outVerts[nVertCnt].color = 0xffffffff; nVertCnt++;
+			outVerts[nVertCnt].pos = ptpos; outVerts[nVertCnt].pos.y -= pt->fWallH; outVerts[nVertCnt].color = dwColor; nVertCnt++;
+			outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].color = dwColor; nVertCnt++;
+			outVerts[nVertCnt].pos = ptoldpos; outVerts[nVertCnt].pos.y -= ptold->fWallH; outVerts[nVertCnt].color = dwColor; nVertCnt++;
 		}
 	}
 

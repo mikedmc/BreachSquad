@@ -13,6 +13,10 @@ public:
 	float		fWallH;		//0 means no light on wall height
 
 	void		Set(Vec2 vfrom, Vec2 vto, Vec2 vNrm, Vec2 vViewerPos, DWORD wallID = 0, float wallH = 0);
+	// Moves the start point and recomputes the angle
+	void		MoveStart(Vec2 vPos, Vec2 vViewerPos);
+	// Moves the end point and recomputes the angle
+	void		MoveEnd(Vec2 vPos, Vec2 vViewerPos);
 
 	COccluderSegment() :
 		fStartAng(0.0f), fEndAng(0.0f),
@@ -38,7 +42,7 @@ struct sOccluderIntersection
 namespace FOVUtil
 {
 	// Builds the FOV as a list of triangles, intersecting with all given shadowing occluders
-	int						BuildOccludedVolume(Vec2 vEye, COccluderSegment* arrOcc, int nOccludersCnt, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt);
+	int						BuildOccludedVolume(Vec2 vEye, DWORD dwColor, COccluderSegment* arrOcc, int nOccludersCnt, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt);
 	// Gets closest occluder that intersects ray, from occluders array. Occluders MUST have ongles set according to checked vEye!
 	// Used by BuildOccludedVolume
 	COccluderSegment*		RayOccludersIntersection(Vec2 vEye, Vec2 vTo, float fRayAngle, COccluderSegment* arrOcc, int nOccludersCnt, Vec2 & vRetPt);

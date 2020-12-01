@@ -272,16 +272,3 @@ CPolyFOV::CSegment* CPolyFOV::ComputeFOV(int &retBasesCnt)
 }
 
 
-void COccluderSegment::Set(Vec2 vfrom, Vec2 vto, Vec2 vNrm, Vec2 vViewerPos, DWORD wallID, float wallH)
-{
-	vStart = vfrom;
-	vEnd = vto;
-	vN = vNrm;
-	dwWallID = wallID;
-	fWallH = wallH;
-	// compute angles now
-	fStartAng = atan2(vStart.y- vViewerPos.y, vStart.x - vViewerPos.x);
-	fEndAng = atan2(vEnd.y - vViewerPos.y, vEnd.x - vViewerPos.x);
-	//#TODO: try and measure faster approximated version: UTMath::atan2_approximation2
-}
-

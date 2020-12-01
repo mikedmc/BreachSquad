@@ -190,15 +190,15 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 					tl->vUVmin[kk] = Vec2(srcrect.left / vTilesetSize.x, srcrect.top / vTilesetSize.y);
 					tl->vUVmax[kk] = Vec2(srcrect.right / vTilesetSize.x, srcrect.bottom / vTilesetSize.y);
 				}
-
-				//TEMP: set collision on empty floor tiles
-				if ((kk == 0) && (tileID < 0))
-				{
-					tl->flags |= K_TILEFLAG_BLOCKED;
-				}
 			}
+			// computes some basic data about tiles
+			tl->PostConstructionInit();
 		}
 	}
+	// add dirty rect on level so it computes everything
+	m_arrDirtyRectsTL.clear();
+	m_arrDirtyRectsTL.reserve(5);
+	m_arrDirtyRectsTL.push_back(RECTXYXY(0, 0, levelSizeTL.w, levelSizeTL.h));
 
 	///--- lights ---
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrLights);
@@ -956,157 +956,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 	OS_fclose(fl);
 
-
-	//#ZOMBIE: place spawners in level only if level doesn't have zombies. Leave as it is if it has.
-	if ((g_gameMode == GAME_MODE_ZOMBIE_INVASION) && (m_arrStats[K_LVL_STATS_ZOMBIES_TOTAL] <= 0))
-	{
-		//decide number of spawners based on number of enemies/targets
-		int nTotalTargets = m_arrStats[K_LVL_STATS_TARGETS_TOTAL];
-		int nZombiesToSpawn = nTotalTargets / 3;
-		if (nZombiesToSpawn < 5)
-			nZombiesToSpawn = 5;
-		int nMediumSpawnCount = 4 + m_rand.RandInt(3);
-		int nSpawnersCnt = nZombiesToSpawn / nMediumSpawnCount;
-		if (nSpawnersCnt < 1)
-			nSpawnersCnt = 1;
-
-		LOG(L"ZOMBIE MODE: Adding %d spawners (spawn count:%d)", nSpawnersCnt, nMediumSpawnCount);
-
-		//min distance between spawners
-		const float fMinSpawnersDistance = 300.0f;
-
-		CFixedArray<D3DXVECTOR2, 50> arrLocalSpawnersPos;
-		for (int kk = 0; kk < nSpawnersCnt; kk++)
-		{
-			int nTries = 0;
-			int nSelectedActorIdx = -1;
-			bool bFound = false;
-			while ((nTries < 50) && (bFound == false))
-			{
-				nSelectedActorIdx = m_rand.RandInt(m_arrActors.GetSize());
-				assert((nSelectedActorIdx >= 0) && (nSelectedActorIdx < m_arrActors.GetSize()));
-
-				D3DXVECTOR2 vPos = m_arrActors[nSelectedActorIdx]->pos;
-				//check valid position
-				bool bFailTest = false;
-				//spawn only where enemies are present
-				if (m_arrActors[nSelectedActorIdx]->templateActor.actorClass != K_LVL_ACT_CLASS_HUMAN)
-					bFailTest = true;
-
-				//check distance from other spawners
-				if (!bFailTest)
-				{
-					for (int ll = 0; ll < arrLocalSpawnersPos.Count(); ll++)
-					{
-						if (D3DXVec2Length(&(arrLocalSpawnersPos.m_pData[ll] - vPos)) < fMinSpawnersDistance)
-						{
-							bFailTest = true;
-							break;
-						}
-					}
-				}
-
-				//check distance from walls and active elements
-				if (!bFailTest)
-				{
-					RECTXYWH_F objrect = m_sprProps.GetAFrameBBox(ANM_ACTIVES_SPR_ZOMBIE_SPAWNER_APPEAR, 0);
-					objrect.Move(vPos.x, vPos.y - 2.0f);
-					//find a random placing spot
-					float fOffX = 0.0f;
-					RECTXYWH_F placerect = objrect;
-					int nLocTries = 30;
-					bool bPlaced = false;
-					while ((nLocTries > 0) && (bPlaced == false))
-					{
-						// call randoms on separate lines so they don't switch order on dbg/release
-						int nSgn = m_rand.RandSign();
-						float fOffXf = m_rand.RandFloat(objrect.w);
-						fOffX = nSgn * ((objrect.w / 2.0f) + fOffXf);
-						placerect = objrect;
-						placerect.Move(fOffX, 0.0f);
-						bPlaced = GetIsAreaNeutral(placerect);
-						//is spawner placed on ground?
-						if (bPlaced)
-						{
-							CCollisionShape* colshape = GetCollisionShapeAt(D3DXVECTOR2(vPos.x + fOffX, vPos.y + 2.0f));
-							if (colshape == null)
-								bPlaced = false;
-						}
-						//line of sight between start and end pos
-						if (bPlaced)
-						{
-							if (!IsLineOfSight(objrect.Center(), placerect.Center()))
-								bPlaced = false;
-						}
-
-						nLocTries--;
-					}
-
-					if (!bPlaced)
-						bFailTest = true;
-					else
-						vPos.x += fOffX;
-				}
-
-				//All good, save spawn pos
-				if (!bFailTest)
-				{
-					bFound = true;
-					arrLocalSpawnersPos.Add(vPos);
-				}
-
-				nTries++;
-				if (nTries >= 50)
-				{
-					ErrorBox(K_ERR_WARNING, L"ZOMBIE MODE: Could not place spawner!");
-				}
-			}
-		}
-
-		//STEP 2: replace a few hostages with fake ones
-		int nFakeHostages = m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] / 4;
-		if (nFakeHostages >= 2)
-		{
-			nFakeHostages += m_rand.RandInt(3) - 1;
-			if (nFakeHostages < 0)
-				nFakeHostages = 0;
-		}
-
-		CFixedArray<int, 50> arrLocalHostageIdx;
-		for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
-		{
-			if (m_arrActors[kk]->templateActor.actorClass == K_LVL_ACT_CLASS_HOSTAGE)
-				arrLocalHostageIdx.Add(kk);
-		}
-
-		CActorTemplate* pTemplate = GetTemplateActor(L"ACTOR_ZOMBIE_HOSTAGE_CROUCHED");
-		if (pTemplate != null)
-		{
-			int nHostageIdx = m_rand.RandInt(100);
-			for (int kk = 0; kk < nFakeHostages; kk++)
-			{
-				int nActIdx = arrLocalHostageIdx.m_pData[nHostageIdx % arrLocalHostageIdx.Count()];
-				nHostageIdx += m_rand.RandInt(100);
-
-				CActor* act = m_arrActors[nActIdx];
-				//set new template and make sure it wasn't already converted
-				if ((act->templateActor.actorClass == K_LVL_ACT_CLASS_HOSTAGE) && (!act->script_hash.IsEqual(L"HOSTAGE_TO_ZOMBIE")))
-				{
-					InitActor(act, pTemplate, act->pos);
-					act->script_hash.Init(L"HOSTAGE_TO_ZOMBIE");
-					act->bCanInteract = true;
-					//not necessary to end the level
-					m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]--;
-					m_arrStats[K_LVL_STATS_TARGETS_TOTAL]--;
-					//has to be killed
-					m_arrStats[K_LVL_STATS_TARGETS_TOTAL]++;
-				}
-			}
-		}
-	}
-
-
-
 	///--- everything loaded, SetAI here ---
 	//setez ai-ul la final ca sa execute functiile de initializare cand avem toate array-urile incarcate (ca sa ma asigur ca gaseste target ID-urile)
 	for (int kk = 0; kk < m_arrLights.GetSize(); kk++)
@@ -1184,36 +1033,11 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 	//reset time multiplier
 	SetTimeMultiplier(1.0f, 0.0f);
+	// compute dirty rects (collisions and walls and other data)
+	UpdateDirtyRects();
 	//facem un build visibility lists
 	BuildVisibilityLists();
 
-	//show level type					
-	/*
-	if ((m_unLoadedLevelFlags & (K_LVL_LEVEL_FLAG_DOWNLOADED )) == 0)
-	{
-		int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[nChapterNumber]->arrLevelNameStrIdx[nLevelNumber];
-		if (nStrIdxLevelName >= 0)
-		{
-			int idx = g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, D3DXVECTOR2(0.0f, -50.0f), nStrIdxLevelName, FONTIDX_12_WOW, 1.0f, 2.0f, K_COLOR_SELECTED_TEXT);
-			//add second line of text
-			CStringDummy* dum = g_particlesMgr.m_vDummies[idx];
-			dum->intParam3 = STR_MISSION_TYPE1 + missionType;
-			dum->intParam4 = FONTIDX_8_BS1;
-		}
-
-		m_nLoadedChapter = nChapterNumber;
-		m_nLoadedLevel = nLevelNumber;
-	}
-	else
-	{
-		if (m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_DOWNLOADED)
-		{
-			g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, D3DXVECTOR2(0.0f, -50.0f), STR_MISSION_TYPE1 + missionType, FONTIDX_12_WOW, 1.0f, 2.0f, K_COLOR_SELECTED_TEXT);
-			m_nLoadedChapter = 1000;
-			m_nLoadedLevel = nModIdx_SelectedContent;
-		}
-	}
-	*/
 	//save type of loaded mission
 	m_nLoadedLevelType = missionType;
 	///--- LAST THINGS ---

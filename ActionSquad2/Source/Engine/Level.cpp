@@ -1811,6 +1811,40 @@ HRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 	return hr;
 }
 
+void CLevel::UpdateDirtyRects()
+{
+	//#TODO: doesn't change floor flags, that should be done during loading or level editing for speed
+	///--- compute tile flags ---
+	for (int kk = 0; kk < m_arrDirtyRectsTL.size(); kk++)
+	{
+		RECTXYXY rect = m_arrDirtyRectsTL[kk];
+		// clamp to smaller size because we check neighbours
+		rect.Clamp(1, 1, levelSizeTL.w - 2, levelSizeTL.h - 2);
+		for (int yy = rect.y1; yy <= rect.y2; yy++)
+		{
+			for (int xx = rect.x1; xx <= rect.x2; xx++)
+			{
+				CTile* tl = &tiles[xx][yy];
+				// set wall flags on non walkable tiles
+				if ((tl->flags & K_TILEFLAG_WALKABLE) == 0)
+				{
+					if (IS_FLAG_ANY(tiles[xx - 1][yy].flags, K_TILEFLAG_WALKABLE))
+						tl->flags |= K_TILEFLAG_HASWALL_L;
+					if (IS_FLAG_ANY(tiles[xx + 1][yy].flags, K_TILEFLAG_WALKABLE))
+						tl->flags |= K_TILEFLAG_HASWALL_R;
+					if (IS_FLAG_ANY(tiles[xx][yy - 1].flags, K_TILEFLAG_WALKABLE))
+						tl->flags |= K_TILEFLAG_HASWALL_U;
+					if (IS_FLAG_ANY(tiles[xx][yy + 1].flags, K_TILEFLAG_WALKABLE))
+						tl->flags |= K_TILEFLAG_HASWALL_D;
+				}
+			}
+		}
+	}
+
+	// finished with dirty rects, clear the array
+	m_arrDirtyRectsTL.clear();
+}
+
 CWeaponTemplate* CLevel::GetTemplateWeapon(WCHAR * templateName)
 {
 	UINT32 nameHash = FastHash(templateName);
@@ -10417,6 +10451,9 @@ void CLevel::Update(float dTime_original)
 
 	}
 
+	// updates dirty rects (tileset and more)
+	UpdateDirtyRects();
+
 	//clear poly buffers first
 	m_bufferedPainter.ClearBuffers();
 
@@ -10574,8 +10611,9 @@ void CLevel::Update(float dTime_original)
 					// returns a list of segments that will form shadows (from both tiles and collision boxes)
 					int nOccluders = GetOccluderSegments(nl, arrOccluders, arrOccludersSize);
 
-					/*
+					
 					// shows occluders instead of mesh. Checked for consistency.
+					/*
 					int nVertCnt = 0;
 					for (int kk = 0; kk < nOccluders; kk++)
 					{
@@ -10595,11 +10633,11 @@ void CLevel::Update(float dTime_original)
 					}
 					*/
 
-
+					
 					if (nOccluders > 0)
 					{
 						// sends rays and builds the light FOV as a triangle list mesh
-						int retVerts = FOVUtil::BuildOccludedVolume(Vec3ToVec2XY(nl->vPos), arrOccluders, nOccluders, arrVerts, arrVertsSize);
+						int retVerts = FOVUtil::BuildOccludedVolume(Vec3ToVec2XY(nl->vPos), nl->color, arrOccluders, nOccluders, arrVerts, arrVertsSize);
 
 						// adaugam triunghiurile ca si mesh
 						if (retVerts > 0)
@@ -10610,6 +10648,7 @@ void CLevel::Update(float dTime_original)
 							m_bufferedPainter.EndMesh();
 						}
 					}
+					
 				}
 				else
 				{
@@ -16833,7 +16872,7 @@ int CLevel::GetOccluderSegments(CLight* light, COccluderSegment* pRetArr, int ma
 	///--- add segments from bboxes
 	m_occludersCnt = 0;
 	CAABB lbox = light->bbox;
-
+			 
 	//check only the occluders in the visible area as we don't process lights outside the screen
 	for (int kk = 0; kk < m_visibleList.visible_colShapesLights.Count(); kk++)
 	{
@@ -16868,10 +16907,10 @@ int CLevel::GetOccluderSegments(CLight* light, COccluderSegment* pRetArr, int ma
 			}
 		}
 	}
-
+		
 	// add occluders from tiles, optimizing for same wall lines
 	Vec2i tlmin(floor(light->bbox.vMin.x / K_TILE_SIZE_F), floor(light->bbox.vMin.y / K_TILE_SIZE_F));
-	Vec2i tlmax(ceil(light->bbox.vMax.x / K_TILE_SIZE_F), ceil(light->bbox.vMax.y / K_TILE_SIZE_F));
+	Vec2i tlmax(floor(light->bbox.vMax.x / K_TILE_SIZE_F), floor(light->bbox.vMax.y / K_TILE_SIZE_F));
 	if (tlmin.x < 0) tlmin.x = 0;
 	if (tlmin.y < 0) tlmin.y = 0;
 	if (tlmax.x > levelSizeTL.w - 1) tlmax.x = levelSizeTL.w - 1;
@@ -16885,25 +16924,33 @@ int CLevel::GetOccluderSegments(CLight* light, COccluderSegment* pRetArr, int ma
 
 			CTile* tl = &tiles[xx][yy];
 			CAABB chkbb(xx * K_TILE_SIZE_F, yy * K_TILE_SIZE_F, (xx + 1) * K_TILE_SIZE_F, (yy + 1) * K_TILE_SIZE_F);
-			//#TODO: optimize for same wall
 
-			// does the tile cast shadows ?
-			if (tl->flags & K_TILEFLAG_BLOCKED)
+			// can the tile cast shadows
+			if (tl->flags & K_TILEFLAG_HASWALL_MASK)
 			{
-				if (vEye.y > chkbb.vMax.y)
+				if ((tl->flags & K_TILEFLAG_HASWALL_D) && (vEye.y > chkbb.vMax.y))
 				{
-					pRetArr[nCur++].Set(Vec2(chkbb.vMin.x, chkbb.vMax.y), chkbb.vMax, vNYp, vPos, /*ID is wall Y in tileset*/yy, K_WALL_HEIGHT_SCREEN);
+					//optimize same wall: check last wall and if it's the same just make the occluder longer
+					if ((nCur > 0) && (pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vEnd.x == chkbb.vMin.x))
+						pRetArr[nCur - 1].MoveEnd(chkbb.vMax, vPos);
+					else
+						/*ID is wall Y in tileset plus a value to not collide with the collbox ids */
+						pRetArr[nCur++].Set(Vec2(chkbb.vMin.x, chkbb.vMax.y), chkbb.vMax, vNYp, vPos, yy, K_WALL_HEIGHT_SCREEN);
 				}
-				else if (vEye.y < chkbb.vMin.y)
+				else if ((tl->flags & K_TILEFLAG_HASWALL_U) && (vEye.y < chkbb.vMin.y))
 				{
-					pRetArr[nCur++].Set(Vec2(chkbb.vMax.x, chkbb.vMin.y), chkbb.vMin, vNYn, vPos);
+					//optimize same wall: check last wall and if it's the same just make the occluder longer
+					if ((nCur > 0) && (pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vStart.x == chkbb.vMin.x))
+						pRetArr[nCur - 1].MoveStart(Vec2(chkbb.vMax.x, chkbb.vMin.y), vPos);
+					else
+						pRetArr[nCur++].Set(Vec2(chkbb.vMax.x, chkbb.vMin.y), chkbb.vMin, vNYn, vPos, yy, 0.0f);
 				}
 
-				if (vEye.x > chkbb.vMax.x)
+				if ((tl->flags & K_TILEFLAG_HASWALL_R) && (vEye.x > chkbb.vMax.x))
 				{
 					pRetArr[nCur++].Set(chkbb.vMax, Vec2(chkbb.vMax.x, chkbb.vMin.y), vNXp, vPos);
 				}
-				else if (vEye.x < chkbb.vMin.x)
+				else if ((tl->flags & K_TILEFLAG_HASWALL_L) && (vEye.x < chkbb.vMin.x))
 				{
 					pRetArr[nCur++].Set(chkbb.vMin, Vec2(chkbb.vMin.x, chkbb.vMax.y), vNXn, vPos);
 				}

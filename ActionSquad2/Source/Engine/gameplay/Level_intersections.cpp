@@ -119,8 +119,8 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 	Vec2i startTL((int)floor(vStart.x / K_TILE_SIZE), (int)floor(vStart.y / K_TILE_SIZE));
 	Vec2i endTL((int)floor(vEnd.x / K_TILE_SIZE), (int)floor(vEnd.y / K_TILE_SIZE));
 
-	// check if current start is occupied 
-	if (tiles[startTL.x][startTL.y].flags & K_TILEFLAG_BLOCKED)
+	// check if current start is non walkable
+	if (NIS_FLAG_ANY(tiles[startTL.x][startTL.y].flags, K_TILEFLAG_WALKABLE))
 		return false;
 
 	Vec2 vDir = vEnd - vStart;
@@ -154,7 +154,7 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 				if ((chktlV.y < 0) || (chktlV.y >= levelSizeTL.w))
 					break;
 
-				if (tiles[chktlV.x][chktlV.y].flags & K_TILEFLAG_BLOCKED)
+				if (NIS_FLAG_ANY(tiles[chktlV.x][chktlV.y].flags, K_TILEFLAG_WALKABLE))
 				{
 					bFoundV = true;
 					vRetPtV = vCur;
@@ -183,7 +183,7 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 				//outside map?
 				if ((chktlV.y < 0) || (chktlV.y >= levelSizeTL.w))
 					break;
-				if (tiles[chktlV.x][chktlV.y].flags & K_TILEFLAG_BLOCKED)
+				if (NIS_FLAG_ANY(tiles[chktlV.x][chktlV.y].flags, K_TILEFLAG_WALKABLE))
 				{
 					bFoundV = true;
 					vRetPtV = vCur;
@@ -222,7 +222,7 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 				//outside map?
 				if ((chktlH.x < 0) || (chktlH.x >= levelSizeTL.h))
 					break;
-				if (tiles[chktlH.x][chktlH.y].flags & K_TILEFLAG_BLOCKED)
+				if (NIS_FLAG_ANY(tiles[chktlH.x][chktlH.y].flags, K_TILEFLAG_WALKABLE))
 				{
 					bFoundH = true;
 					vRetPtH = vCur;
@@ -251,7 +251,7 @@ bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, V
 				//outside map?
 				if ((chktlH.x < 0) || (chktlH.x >= levelSizeTL.h))
 					break;
-				if (tiles[chktlH.x][chktlH.y].flags & K_TILEFLAG_BLOCKED)
+				if (NIS_FLAG_ANY(tiles[chktlH.x][chktlH.y].flags, K_TILEFLAG_WALKABLE))
 				{
 					bFoundH = true;
 					vRetPtH = vCur;

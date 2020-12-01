@@ -497,7 +497,7 @@ void CSpineManager::BatchSkeleton(Skeleton* skel)
 
 			ScratchDisk_Reset();
 			// Copy color and UVs to the vertices
-			for (size_t j = 0; j < numIndices; j++) 
+			for (int j = 0; j < numIndices; j++) 
 			{
 				int nIdx = arrIndices[j];
 				ScratchDisk_AddVert(arrVertsPos[nIdx], arrUVs[nIdx * 2 + 0], arrUVs[nIdx * 2 + 1], dwSlotColor);
