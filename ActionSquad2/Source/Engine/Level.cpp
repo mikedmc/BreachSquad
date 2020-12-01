@@ -12066,8 +12066,8 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, MatA16* matProj)
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
 	// paint floors and vertical walls
 	mapMesh.UpdateVisibility(camrect);
-	mapMesh.PaintLayer(0);
-	mapMesh.PaintLayer(1);
+	mapMesh.PaintLayer(K_TILE_LAYER_FLOOR);
+	mapMesh.PaintLayer(K_TILE_LAYER_WALLS);
 
 	///--- paint actors
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
@@ -12095,7 +12095,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, MatA16* matProj)
 
 
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
-	mapMesh.PaintLayer(2);
+	mapMesh.PaintLayer(K_TILE_LAYER_CEILING);
 
 	return K_OP_OK;
 }

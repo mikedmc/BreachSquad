@@ -408,10 +408,6 @@ public:
 	~CLevel();
 	// Loads a level from an absolute path
 	HRESULT					LoadLevel(WCHAR * strPathAbs);
-	// Loads a prefab at set position (given in tiles). It doesn't scale the level matrix.
-	// \param nPosXtiles, nPosYtiles - absolute position in level tiles space
-	// \param bAddOnly - if true it doesn't erase tiles if source tile is 0
-	HRESULT					LoadPrefabAtPosition(WCHAR * strPathAbs, int nPosXtiles, int nPosYtiles, bool bAddOnly = false);
 	// Releases all level data
 	void					Release();
 	//Gives you a random level from a shuffled list so you play all of them in random order

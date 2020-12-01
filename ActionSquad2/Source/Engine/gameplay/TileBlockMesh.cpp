@@ -38,7 +38,7 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 
 	bool bIsEmpty = true;
 
-	for (int lay = 0; lay < K_LVL_LAYERS_CNT; lay++)
+	for (int lay = 0; lay < K_TILE_LAYERS_CNT; lay++)
 	{
 		if (OP_SUCCESS(m_Painter.BeginMesh(m_arrMeshIdx[lay])))
 		{
