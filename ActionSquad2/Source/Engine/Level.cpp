@@ -10586,6 +10586,7 @@ void CLevel::Update(float dTime_original)
 	CLAMP(m_visibleAreaTL.x, m_levelAABB_TL.x, (m_levelAABB_TL.Right() - m_visibleAreaTL.w));
 	CLAMP(m_visibleAreaTL.y, m_levelAABB_TL.y, (m_levelAABB_TL.Bottom() - m_visibleAreaTL.h));
 	m_visibleArea.Set(m_visibleAreaTL.x * tileW, m_visibleAreaTL.y * tileH, m_visibleAreaTL.w * tileW, m_visibleAreaTL.h * tileH);
+	CAABB visibleAABB(m_visibleArea);
 	///--- update visibility lists (after update) ---
 	BuildVisibilityLists();
 
@@ -10609,7 +10610,7 @@ void CLevel::Update(float dTime_original)
 				if (nl->castShadows)
 				{
 					// returns a list of segments that will form shadows (from both tiles and collision boxes)
-					int nOccluders = GetOccluderSegments(nl, arrOccluders, arrOccludersSize);
+					int nOccluders = GetOccluderSegments(Vec3ToVec2XY(nl->vPos), nl->bbox, arrOccluders, arrOccludersSize);
 
 					
 					// shows occluders instead of mesh. Checked for consistency.
@@ -12161,6 +12162,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	}
 
 #if defined(_DEBUG) || defined(DEBUG)
+	/*
 	// Paints the shadowed lights volume in wireframe	
 	m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
 	m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD); //needed for color interpolation
@@ -12175,6 +12177,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	}
 	m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
 	m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+	*/
 #endif
 
 
@@ -12202,7 +12205,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
 		
-		if ((nl->type != K_LVL_LT_POINT) || (nl->castShadows))
+		if (nl->type != K_LVL_LT_POINT) 
 			continue;
 
 		//set Pshader constants
@@ -16854,24 +16857,22 @@ void CLevel::TouchClosestActive(CActor * pToucherAct, float dTime)
 	}
 }
 
-int CLevel::GetOccluderSegments(CLight* light, COccluderSegment* pRetArr, int maxRetArrSize)
+int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr, int maxRetArrSize)
 {
 	_ASSERT(pRetArr != nullptr && maxRetArrSize > 0);
 
 	int nCur = 0;
 
-	Vec2 vPos = Vec3ToVec2XY(light->vPos);
+	Vec2 vPos = vEye;
 	Vec2 vNYp(0.0f, 1.0f), vNYn(0.0f, -1.0f), vNXp(1.0f, 0.0f), vNXn(-1.0f, 0.0f);
-	Vec2 vEye(light->vPos.x, light->vPos.y);
 	///--- add light range segments (don't set normals so we don't extend the walls on it)
 	_ASSERT(nCur < maxRetArrSize - 4);
-	pRetArr[nCur++].Set(light->bbox.vMin, Vec2(light->bbox.vMax.x, light->bbox.vMin.y), vNYp, vPos);
-	pRetArr[nCur++].Set(Vec2(light->bbox.vMin.x, light->bbox.vMax.y), light->bbox.vMax, vNYn, vPos);
-	pRetArr[nCur++].Set(light->bbox.vMin, Vec2(light->bbox.vMin.x, light->bbox.vMax.y), vNXp, vPos);
-	pRetArr[nCur++].Set(Vec2(light->bbox.vMax.x, light->bbox.vMin.y), light->bbox.vMax, vNXn, vPos);
+	pRetArr[nCur++].Set(bbox.vMin, Vec2(bbox.vMax.x, bbox.vMin.y), vNYp, vPos);
+	pRetArr[nCur++].Set(Vec2(bbox.vMin.x, bbox.vMax.y), bbox.vMax, vNYn, vPos);
+	pRetArr[nCur++].Set(bbox.vMin, Vec2(bbox.vMin.x, bbox.vMax.y), vNXp, vPos);
+	pRetArr[nCur++].Set(Vec2(bbox.vMax.x, bbox.vMin.y), bbox.vMax, vNXn, vPos);
 	///--- add segments from bboxes
 	m_occludersCnt = 0;
-	CAABB lbox = light->bbox;
 			 
 	//check only the occluders in the visible area as we don't process lights outside the screen
 	for (int kk = 0; kk < m_visibleList.visible_colShapesLights.Count(); kk++)
@@ -16884,7 +16885,7 @@ int CLevel::GetOccluderSegments(CLight* light, COccluderSegment* pRetArr, int ma
 		CAABB retbb;
 		CAABB* chkbb = &retbb;
 		// clipped check (looks better with longer occluders):
-		if (AABB_Intersection(lbox, m_visibleList.visible_colShapesLights.m_pData[kk]->bbox, retbb))
+		if (AABB_Intersection(bbox, m_visibleList.visible_colShapesLights.m_pData[kk]->bbox, retbb))
 		// non clipped check (faster):
 		//if (lbox.Intersects(chkbb)) 
 		{
@@ -16909,8 +16910,8 @@ int CLevel::GetOccluderSegments(CLight* light, COccluderSegment* pRetArr, int ma
 	}
 		
 	// add occluders from tiles, optimizing for same wall lines
-	Vec2i tlmin(floor(light->bbox.vMin.x / K_TILE_SIZE_F), floor(light->bbox.vMin.y / K_TILE_SIZE_F));
-	Vec2i tlmax(floor(light->bbox.vMax.x / K_TILE_SIZE_F), floor(light->bbox.vMax.y / K_TILE_SIZE_F));
+	Vec2i tlmin(floor(bbox.vMin.x / K_TILE_SIZE_F), floor(bbox.vMin.y / K_TILE_SIZE_F));
+	Vec2i tlmax(floor(bbox.vMax.x / K_TILE_SIZE_F), floor(bbox.vMax.y / K_TILE_SIZE_F));
 	if (tlmin.x < 0) tlmin.x = 0;
 	if (tlmin.y < 0) tlmin.y = 0;
 	if (tlmax.x > levelSizeTL.w - 1) tlmax.x = levelSizeTL.w - 1;

@@ -496,7 +496,7 @@ public:
 	// Gets all occluders for a specific light
 	// includes tile segments, light range bbox segments and objects aabb segments.
 	// \returns Number of segments returned. Writes segments in provided pRetArr.
-	int						GetOccluderSegments(CLight* light, COccluderSegment* pRetArr, int maxRetArrSize);
+	int						GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr, int maxRetArrSize);
 
 private: //--- misc functions ---
 	COccluder				m_occluders[K_LVL_MAX_OCCLUDERS_CNT];	 //stiva locala folosita de AddOccludersFromAABB
