@@ -1813,7 +1813,7 @@ HRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 
 void CLevel::UpdateDirtyRects()
 {
-	//#TODO: doesn't change floor flags, that should be done during loading or level editing for speed
+	//#TODO: doesn't change WALKABLE floor flags, that should be done during loading or level editing for speed
 	///--- compute tile flags ---
 	for (int kk = 0; kk < m_arrDirtyRectsTL.size(); kk++)
 	{
@@ -1825,17 +1825,59 @@ void CLevel::UpdateDirtyRects()
 			for (int xx = rect.x1; xx <= rect.x2; xx++)
 			{
 				CTile* tl = &tiles[xx][yy];
+				// neighbours
+				CTile* tlL = &tiles[xx - 1][yy];
+				CTile* tlR = &tiles[xx + 1][yy];
+				CTile* tlU = &tiles[xx][yy - 1];
+				CTile* tlD = &tiles[xx][yy + 1];
 				// set wall flags on non walkable tiles
 				if ((tl->flags & K_TILEFLAG_WALKABLE) == 0)
 				{
-					if (IS_FLAG_ANY(tiles[xx - 1][yy].flags, K_TILEFLAG_WALKABLE))
+					if (IS_FLAG_ANY(tlL->flags, K_TILEFLAG_WALKABLE))
 						tl->flags |= K_TILEFLAG_HASWALL_L;
-					if (IS_FLAG_ANY(tiles[xx + 1][yy].flags, K_TILEFLAG_WALKABLE))
+					if (IS_FLAG_ANY(tlR->flags, K_TILEFLAG_WALKABLE))
 						tl->flags |= K_TILEFLAG_HASWALL_R;
-					if (IS_FLAG_ANY(tiles[xx][yy - 1].flags, K_TILEFLAG_WALKABLE))
+					if (IS_FLAG_ANY(tlU->flags, K_TILEFLAG_WALKABLE))
 						tl->flags |= K_TILEFLAG_HASWALL_U;
-					if (IS_FLAG_ANY(tiles[xx][yy + 1].flags, K_TILEFLAG_WALKABLE))
+					if (IS_FLAG_ANY(tlD->flags, K_TILEFLAG_WALKABLE))
 						tl->flags |= K_TILEFLAG_HASWALL_D;
+				}
+
+				// compute wall shadows
+				CTile* tlDL = &tiles[xx - 1][yy + 1];
+				CTile* tlUL = &tiles[xx - 1][yy - 1];
+				// it can only receive if it's a floor or a wall but not a ceiling on that tile
+				tl->nShadowFrame = -1;
+				bool bHasShadow = (tlL->flags & K_TILEFLAG_HASWALL_R);
+				if (bHasShadow)
+				{
+					bool bCanReceive = ((tl->tileIDs[K_TILE_LAYER_FLOOR] >= 0) || (tl->tileIDs[K_TILE_LAYER_WALLS] >= 0))/* && (tl->tileIDs[K_TILE_LAYER_CEILING] < 0)*/;
+					if (bCanReceive)
+					{
+						// now compute the exact shadow frame
+						bool bIsFloor = (tl->tileIDs[K_TILE_LAYER_FLOOR] >= 0) && (tl->tileIDs[K_TILE_LAYER_WALLS] < 0);
+						if (bIsFloor)
+						{
+							// no wall DL then shadow starts here
+							if (NIS_FLAG_ANY(tlDL->flags, K_TILEFLAG_HASWALL_MASK))
+								tl->nShadowFrame = 0; //small corner starting shadow
+							else
+							{
+								if(NIS_FLAG_ANY(tlUL->flags, K_TILEFLAG_HASWALL_MASK))
+									tl->nShadowFrame = 2; //shadow end
+								else
+									tl->nShadowFrame = 1; //continuous shadow
+							}
+						}
+						else //wall
+						{
+							// if it's bottom part of the wall
+							if (NIS_FLAG_ANY(tlD->flags, K_TILEFLAG_HASWALL_MASK))
+								tl->nShadowFrame = 3; //bottom of the wall, larger shadow
+							else
+								tl->nShadowFrame = 4; // top of the wall, smaller shadow
+						}
+					}
 				}
 			}
 		}
@@ -12161,6 +12203,8 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 		}
 	}
 
+	///#TODO: directional lights (non shadowing) - might look more realistic if light intensity changes between floor and walls (floor better lit)
+
 #if defined(_DEBUG) || defined(DEBUG)
 	/*
 	// Paints the shadowed lights volume in wireframe	
@@ -12182,13 +12226,22 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 
 
 
+	///--- precomputed wall shadows
+	scTexture* pShadowsTex = m_sprLights.GetTextureByAnim(ANM_LIGHTS_SPR_SHADOWS, 0, 0);
+	if (pShadowsTex)
+		m_pDevice->SetTexture(0, pShadowsTex->pTex);
+	//#HINT: UpdateVisibility is optional as it was done in the previous colors render pass
+	mapMesh.UpdateVisibility(camrect);
+	mapMesh.PaintShadowLayer();
+
+
+	// Additive lighting from here on
 	AdditiveBlendingON(m_pDevice, NULL);
 	CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
 	if (pRT != null)
 	{
 		m_pDevice->SetTexture(0, pRT->m_pRTTexture);
 	}
-
 	///--- point lights
 	// VS
 	UTGetShaderManager().SetVSByName(L"VS_POINTLIGHT");

@@ -10,8 +10,6 @@ enum eTileLayer {
 	K_TILE_LAYER_FLOOR_DECO2,
 	// vertical walls
 	K_TILE_LAYER_WALLS,
-	// wall shadows (generated automatically)
-	K_TILE_LAYER_SHADOWS,
 	// ceiling objects like pipes and other stuff that can cast shadows
 	K_TILE_LAYER_CEILING_DECO,
 	// Wall sections and FOW
@@ -27,8 +25,6 @@ enum eTileLayer {
 #define		K_LVL_LAYER_FRONT	K_TILE_LAYER_CEILING
 #define		K_LVL_LAYERS_CNT	3
 
-
-
 ///--- TILE FLAGS ---
 #define		K_TILEFLAG_NONE			0
 // do we have a floor on FLOORS layer? then we call it walkable
@@ -42,14 +38,16 @@ enum eTileLayer {
 
 class CTile {						
 public:
-	UINT32					flags;
-	int tileIDs[K_TILE_LAYERS_CNT];
-	RECT srcRects[K_TILE_LAYERS_CNT];
-	// precomputed UV coords (min and max)
-	Vec2 vUVmin[K_TILE_LAYERS_CNT];
-	Vec2 vUVmax[K_TILE_LAYERS_CNT];
+	UINT32		flags;							// tile flags
+	int			tileIDs[K_TILE_LAYERS_CNT];		// actual tile
+	RECT		srcRects[K_TILE_LAYERS_CNT];	// #TEMP: will be removed (precomputed RECT for drawing as sprite)
+	
+	Vec2		vUVmin[K_TILE_LAYERS_CNT];		// precomputed UV coords min 
+	Vec2		vUVmax[K_TILE_LAYERS_CNT];		// precomputed UV coords max
 
-	CTile()
+	int			nShadowFrame;					// Frame of shadow from lights sprites (3 times the resolution). See sprite for shadow frames.
+
+	CTile() : flags(K_TILEFLAG_NONE), nShadowFrame(-1)
 	{
 		for (int kk = 0; kk < K_TILE_LAYERS_CNT; kk++)
 		{

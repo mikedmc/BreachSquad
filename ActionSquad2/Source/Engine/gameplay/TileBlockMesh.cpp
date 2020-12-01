@@ -5,12 +5,14 @@ CTileBlockMesh::CTileBlockMesh()
 {
 	m_Painter.Init(512);
 	memset(m_arrMeshIdx, -1, sizeof(int) * ARRAY_SIZE(m_arrMeshIdx));
+	m_ShadowMeshIdx = -1;
 }
 
 CTileBlockMesh::CTileBlockMesh(PDEVICE pDevice)
 {
 	m_Painter.Init(512, pDevice);
 	memset(m_arrMeshIdx, -1, sizeof(int) * ARRAY_SIZE(m_arrMeshIdx));
+	m_ShadowMeshIdx = -1;
 }
 
 CTileBlockMesh::~CTileBlockMesh()
@@ -18,7 +20,7 @@ CTileBlockMesh::~CTileBlockMesh()
 	Clear();
 }
 
-OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZEWH mapSizeTL, Vec2 vOffset)
+OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZEWH mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr)
 {
 	// allocate maximum possible number per layer plus sentinel
 	_VERTEX_PNCT4T4 arrVerts[K_TBM_BLOCK_W * K_TBM_BLOCK_H * 4 + 16];
@@ -38,6 +40,8 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 
 	bool bIsEmpty = true;
 
+	Vec2 vOrig(vOffset.x + m_bbox.vMin.x, vOffset.y + m_bbox.vMin.y);
+	//#TODO: create all meshes in a single pass with many open meshes
 	for (int lay = 0; lay < K_TILE_LAYERS_CNT; lay++)
 	{
 		if (OP_SUCCESS(m_Painter.BeginMesh(m_arrMeshIdx[lay])))
@@ -52,20 +56,16 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 					if (tl->tileIDs[lay] < 0)
 						continue;
 					// add geometry
-					SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOffset.x + m_bbox.vMin.x + xx * K_TILE_SIZE, 
-						vOffset.y + m_bbox.vMin.y + yy * K_TILE_SIZE, 0.0f),
+					SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
 						Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
 						Vec4(tl->vUVmin[lay].x, tl->vUVmin[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
-					SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOffset.x + m_bbox.vMin.x + (xx + 1) * K_TILE_SIZE, 
-						vOffset.y + m_bbox.vMin.y + yy * K_TILE_SIZE, 0.0f),
+					SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + (xx + 1) * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
 						Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
 						Vec4(tl->vUVmax[lay].x, tl->vUVmin[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
-					SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOffset.x + m_bbox.vMin.x + (xx + 1) * K_TILE_SIZE, 
-						vOffset.y + m_bbox.vMin.y + (yy + 1) * K_TILE_SIZE, 0.0f),
+					SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + (xx + 1) * K_TILE_SIZE, vOrig.y + (yy + 1) * K_TILE_SIZE, 0.0f),
 						Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
 						Vec4(tl->vUVmax[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
-					SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOffset.x + m_bbox.vMin.x + xx * K_TILE_SIZE, 
-						vOffset.y + m_bbox.vMin.y + (yy + 1) * K_TILE_SIZE, 0.0f),
+					SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + (yy + 1) * K_TILE_SIZE, 0.0f),
 						Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
 						Vec4(tl->vUVmin[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
 				}
@@ -81,6 +81,47 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 				m_arrMeshIdx[lay] = -1;			// make sure we don't even call draw if layer is empty
 		}
 	}
+
+	///--- build shadow buffer ---
+	if (OP_SUCCESS(m_Painter.BeginMesh(m_ShadowMeshIdx)))
+	{
+		nCur = 0;
+		for (int yy = 0; yy < m_mapAreaTL.h; yy++)
+		{
+			for (int xx = 0; xx < m_mapAreaTL.w; xx++)
+			{
+				CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
+				// skip non shadowed tiles
+				if (tl->nShadowFrame < 0)
+					continue;
+				// get shadow tex coords
+				RECTLTRB_F texrect = pLightsSpr->GetModuleRect_TexCoords(ANM_LIGHTS_SPR_SHADOWS, tl->nShadowFrame, 0);
+				// add geometry (Clockwise)
+				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
+					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
+					Vec4(texrect.left, texrect.top, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + (xx + 1) * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
+					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
+					Vec4(texrect.right, texrect.top, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + (xx + 1) * K_TILE_SIZE, vOrig.y + (yy + 1) * K_TILE_SIZE, 0.0f),
+					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
+					Vec4(texrect.right, texrect.bottom, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + (yy + 1) * K_TILE_SIZE, 0.0f),
+					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
+					Vec4(texrect.left, texrect.bottom, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+			}
+		}
+
+		m_Painter.AddQuads(arrVerts, nCur / 4);
+		int nQuads = m_Painter.EndMesh();
+
+		LOG("shadow quads:%d", nQuads);
+		if (nQuads > 0)
+			bIsEmpty = false;				// we have at least some tris so block is not empty
+		else
+			m_ShadowMeshIdx = -1;			// make sure we don't even call draw if layer is empty
+	}
+
 
 	if (bIsEmpty)
 	{
@@ -98,6 +139,18 @@ void CTileBlockMesh::Clear()
 {
 	memset(m_arrMeshIdx, -1, sizeof(int) * ARRAY_SIZE(m_arrMeshIdx));
 	m_Painter.ClearBuffers();
+	m_ShadowMeshIdx = -1;
+}
+
+void CTileBlockMesh::PaintLayer(int nLayer, bool bSetFVF /*= false*/)
+{
+	_ASSERT((nLayer >= 0) && (nLayer < K_TBM_MAX_LAYERS));
+	m_Painter.DrawMesh(m_arrMeshIdx[nLayer], bSetFVF);
+}
+
+void CTileBlockMesh::PaintShadowLayer(bool bSetFVF /*= false*/)
+{
+	m_Painter.DrawMesh(m_ShadowMeshIdx, bSetFVF);
 }
 
 ///----------------------------------------------
@@ -121,7 +174,7 @@ void CTileBlockMeshManager::Release()
 	SAFE_DELETE_GROWABLE_ARRAY(arrBlocks);
 }
 
-OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2 vOffset)
+OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr)
 {
 	if (map == nullptr)
 		return OPRESULT(K_OP_INVALIDARGS, L"BuildBuffers:: Map param is null!", K_SEVERITY_WARNING);
@@ -137,7 +190,7 @@ OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2
 			// block is allocated now so it missed device creation. Set device pointer and create needed buffers now
 			CTileBlockMesh* tbm = new CTileBlockMesh(m_pDevice);
 
-			if (OP_FAILED(tbm->BuildBuffers(POINTXY_INT(blX * K_TBM_BLOCK_W, blY * K_TBM_BLOCK_H), map, mapSizeTL, vOffset)))
+			if (OP_FAILED(tbm->BuildBuffers(POINTXY_INT(blX * K_TBM_BLOCK_W, blY * K_TBM_BLOCK_H), map, mapSizeTL, vOffset, pLightsSpr)))
 			{
 				LOG("Block NOT added!");
 				delete tbm;
@@ -173,6 +226,19 @@ OPRESULT CTileBlockMeshManager::PaintLayer(int layerIdx)
 	{
 		CTileBlockMesh* tbm = arrVisible[kk];
 		tbm->PaintLayer(layerIdx, true);
+	}
+
+	return K_OP_OK;
+}
+
+OPRESULT CTileBlockMeshManager::PaintShadowLayer()
+{
+	if (arrVisible.Count() <= 0)
+		return OPRESULT(K_OP_FAILED, L"No visible blocks to paint!", K_SEVERITY_NONE);
+
+	for (int kk = 0; kk < arrVisible.Count(); kk++)
+	{
+		arrVisible[kk]->PaintShadowLayer(true);
 	}
 
 	return K_OP_OK;

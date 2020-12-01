@@ -2,7 +2,9 @@
 //Animation indexes (Idx)
 #define 	ANM_LIGHTS_SPR_PROJECTED_DIR   0
 #define 	ANM_LIGHTS_SPR_IES   1
+#define 	ANM_LIGHTS_SPR_SHADOWS   2
 
 //Animation names (ID)
 #define 	ANMID_LIGHTS_SPR_PROJECTED_DIR   "PROJECTED_DIR"
 #define 	ANMID_LIGHTS_SPR_IES   "IES"
+#define 	ANMID_LIGHTS_SPR_SHADOWS   "SHADOWS"

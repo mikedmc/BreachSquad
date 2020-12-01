@@ -1055,7 +1055,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 #endif
 
 	// create meshes
-	V_OP_RETHR(mapMesh.BuildBuffers(tiles, levelSizeTL, D3DXVECTOR2(0.0f, 0.0f)));
+	V_OP_RETHR(mapMesh.BuildBuffers(tiles, levelSizeTL, Vec2(0.0f, 0.0f), &m_sprLights));
 
 	return hr;
 }

@@ -15,6 +15,7 @@ public:
 	CAABB						m_bbox;						// BBOX in world coords
 
 	int							m_arrMeshIdx[K_TBM_MAX_LAYERS]{};	// Array of mesh indexes per layer, or -1 for empty layers
+	int							m_ShadowMeshIdx;			// The shadow is different because it's painted from the lights texture (triple the resolution)
 
 public:
 	CTileBlockMesh();
@@ -23,15 +24,12 @@ public:
 
 	// Creates meshes for each layer
 	// Receives pointer to map tiles
-	OPRESULT					BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZEWH mapSizeTL, Vec2 vOffset);
+	OPRESULT					BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZEWH mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr);
 
 	void						Clear();
 
-	inline void					PaintLayer(int nLayer, bool bSetFVF = false) 
-	{
-		assert((nLayer >= 0) && (nLayer < K_TBM_MAX_LAYERS));
-		m_Painter.DrawMesh(m_arrMeshIdx[nLayer], bSetFVF);
-	}
+	void						PaintLayer(int nLayer, bool bSetFVF = false);
+	void						PaintShadowLayer(bool bSetFVF = false);
 };
 
 // Keeps an array of tileblocks and manages them
@@ -49,7 +47,7 @@ public:
 	void						Release();
 
 	// Builds all buffers for specified map, called after loading a level and when we have changes
-	OPRESULT					BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2 vOffset);
+	OPRESULT					BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr);
 
 	// Creates list of visible blocks. camRect is the XY plane of the AABB of the camera frustum.
 	// Must be called before PaintLayer.
@@ -57,6 +55,8 @@ public:
 
 	// Paints tile layer for visible buffers
 	OPRESULT					PaintLayer(int layerIdx);
+	// Paints the shadow layer
+	OPRESULT					PaintShadowLayer();
 
 	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
 	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
