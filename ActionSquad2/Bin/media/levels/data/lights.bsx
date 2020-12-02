@@ -33,11 +33,10 @@
     <Module ImageIdx="0" X="320" Y="317" W="83" H="97" />
     <Module ImageIdx="0" X="181" Y="388" W="48" H="48" />
     <Module ImageIdx="0" X="101" Y="231" W="83" H="85" />
-    <Module ImageIdx="0" X="16" Y="544" W="16" H="16" />
-    <Module ImageIdx="0" X="16" Y="528" W="16" H="16" />
-    <Module ImageIdx="0" X="16" Y="512" W="16" H="16" />
-    <Module ImageIdx="0" X="32" Y="528" W="16" H="16" />
-    <Module ImageIdx="0" X="32" Y="512" W="16" H="16" />
+    <Module ImageIdx="0" X="16" Y="832" W="48" H="48" />
+    <Module ImageIdx="0" X="16" Y="784" W="48" H="48" />
+    <Module ImageIdx="0" X="16" Y="736" W="48" H="48" />
+    <Module ImageIdx="0" X="16" Y="688" W="48" H="48" />
   </Modules>
   <FrameModules>
     <FrameModule ModuleIdx="0" OX="-53" OY="-51" Flags="0" />
@@ -74,7 +73,6 @@
     <FrameModule ModuleIdx="31" OX="0" OY="0" Flags="0" />
     <FrameModule ModuleIdx="32" OX="0" OY="0" Flags="0" />
     <FrameModule ModuleIdx="33" OX="0" OY="0" Flags="0" />
-    <FrameModule ModuleIdx="34" OX="0" OY="0" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="-53" BBoxY="-51" BBoxW="107" BBoxH="100">
@@ -257,33 +255,27 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="0" BBoxY="0" BBoxW="16" BBoxH="16">
+    <Frame BBoxX="0" BBoxY="0" BBoxW="48" BBoxH="48">
       <FModules>
         <FModule Idx="30" />
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="0" BBoxY="0" BBoxW="16" BBoxH="16">
+    <Frame BBoxX="0" BBoxY="0" BBoxW="48" BBoxH="48">
       <FModules>
         <FModule Idx="31" />
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="0" BBoxY="0" BBoxW="16" BBoxH="16">
+    <Frame BBoxX="0" BBoxY="0" BBoxW="48" BBoxH="48">
       <FModules>
         <FModule Idx="32" />
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="0" BBoxY="0" BBoxW="16" BBoxH="16">
+    <Frame BBoxX="0" BBoxY="0" BBoxW="48" BBoxH="48">
       <FModules>
         <FModule Idx="33" />
-      </FModules>
-      <Points />
-    </Frame>
-    <Frame BBoxX="0" BBoxY="0" BBoxW="16" BBoxH="16">
-      <FModules>
-        <FModule Idx="34" />
       </FModules>
       <Points />
     </Frame>
@@ -297,7 +289,6 @@
     <AnimationFrame FrameIdx="31" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="32" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="33" Duration="1" DX="0" DY="0" Flags="0" />
-    <AnimationFrame FrameIdx="34" Duration="1" DX="0" DY="0" Flags="0" />
   </AnimationFrames>
   <Animations>
     <Animation ID="PROJECTED_DIR" Flags="0">
@@ -313,7 +304,6 @@
       <AFrame Idx="5" />
       <AFrame Idx="6" />
       <AFrame Idx="7" />
-      <AFrame Idx="8" />
     </Animation>
   </Animations>
 </SpriteCollection>

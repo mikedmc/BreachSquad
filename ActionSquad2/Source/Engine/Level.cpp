@@ -1845,38 +1845,48 @@ void CLevel::UpdateDirtyRects()
 
 				// compute wall shadows
 				CTile* tlDL = &tiles[xx - 1][yy + 1];
-				CTile* tlUL = &tiles[xx - 1][yy - 1];
 				// it can only receive if it's a floor or a wall but not a ceiling on that tile
 				tl->nShadowFrame = -1;
-				bool bHasShadow = (tlL->flags & K_TILEFLAG_HASWALL_R);
-				if (bHasShadow)
+
+				// only walls and floor get shadowed, when having a non walkable tile on the left (hole in the floor usually, but not water hole)
+				bool bCanReceive = ((tl->tileIDs[K_TILE_LAYER_FLOOR] >= 0) || (tl->tileIDs[K_TILE_LAYER_WALLS] >= 0)) && 
+					(tlL->tileIDs[K_TILE_LAYER_FLOOR] < 0) && (tl->tileIDs[K_TILE_LAYER_CEILING] < 0);
+				if (bCanReceive)
 				{
-					bool bCanReceive = ((tl->tileIDs[K_TILE_LAYER_FLOOR] >= 0) || (tl->tileIDs[K_TILE_LAYER_WALLS] >= 0))/* && (tl->tileIDs[K_TILE_LAYER_CEILING] < 0)*/;
-					if (bCanReceive)
+					int nCasterH = 0; 
+					if (tlL->tileIDs[K_TILE_LAYER_CEILING] >= 0) nCasterH = 3;
+					else if (tlL->tileIDs[K_TILE_LAYER_WALLS] >= 0)
 					{
-						// now compute the exact shadow frame
-						bool bIsFloor = (tl->tileIDs[K_TILE_LAYER_FLOOR] >= 0) && (tl->tileIDs[K_TILE_LAYER_WALLS] < 0);
-						if (bIsFloor)
+						if (tlDL->tileIDs[K_TILE_LAYER_WALLS] >= 0)
+							nCasterH = 2;	// top of the wall
+						else
+							nCasterH = 1;   // base of the wall
+					}
+					int nReceiverH = 0;
+					if (tl->tileIDs[K_TILE_LAYER_WALLS] >= 0)
+					{
+						if (tlD->tileIDs[K_TILE_LAYER_WALLS] >= 0)
+							nReceiverH = 2;
+						else
+							nReceiverH = 1;
+					}
+
+					if (nReceiverH == 0) //floor
+					{
+						if (nCasterH == 1)
+							tl->nShadowFrame = 0; //floor shadow start
+						else
 						{
-							// no wall DL then shadow starts here
-							if (NIS_FLAG_ANY(tlDL->flags, K_TILEFLAG_HASWALL_MASK))
-								tl->nShadowFrame = 0; //small corner starting shadow
-							else
-							{
-								if(NIS_FLAG_ANY(tlUL->flags, K_TILEFLAG_HASWALL_MASK))
-									tl->nShadowFrame = 2; //shadow end
-								else
-									tl->nShadowFrame = 1; //continuous shadow
-							}
+							tl->nShadowFrame = 1; //continuous shadow
 						}
-						else //wall
-						{
-							// if it's bottom part of the wall
-							if (NIS_FLAG_ANY(tlD->flags, K_TILEFLAG_HASWALL_MASK))
-								tl->nShadowFrame = 3; //bottom of the wall, larger shadow
-							else
-								tl->nShadowFrame = 4; // top of the wall, smaller shadow
-						}
+					}
+					else if ((nReceiverH == 1) && (nCasterH > 1))
+					{
+						tl->nShadowFrame = 2; //base of wall shadowed
+					}
+					else if ((nReceiverH == 2) && (nCasterH > 2))
+					{
+						tl->nShadowFrame = 3; //top of wall shadowed
 					}
 				}
 			}
@@ -12230,9 +12240,13 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	scTexture* pShadowsTex = m_sprLights.GetTextureByAnim(ANM_LIGHTS_SPR_SHADOWS, 0, 0);
 	if (pShadowsTex)
 		m_pDevice->SetTexture(0, pShadowsTex->pTex);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 	//#HINT: UpdateVisibility is optional as it was done in the previous colors render pass
 	mapMesh.UpdateVisibility(camrect);
 	mapMesh.PaintShadowLayer();
+	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 
 
 	// Additive lighting from here on
