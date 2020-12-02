@@ -12217,18 +12217,21 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	*/
 #endif
 
-	// paint all directional lights with additive here
+	// generic VS data so we can automatically find positions
+	float fConstDataVS[][4] = {
+		{ camrect.x, camrect.y, camrect.w, camrect.h } //RTT rect_xywh in world coords
+	};
+
 	AdditiveBlendingON(m_pDevice, NULL);
+	
+	/*
+	// directional light with shader, more expensive, harder to control
 	CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
 	if (pRT != null)
 	{
 		m_pDevice->SetTexture(0, pRT->m_pRTTexture);
 	}
 
-	// generic VS data so we can automatically find positions
-	float fConstDataVS[][4] = {
-		{ camrect.x, camrect.y, camrect.w, camrect.h } //RTT rect_xywh in world coords
-	};
 
 	///--- directional light(s)
 	// VS
@@ -12254,10 +12257,26 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 		UTGetShaderManager().SetPSConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
 		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
 	}
-
+	*/
 
 	UTGetShaderManager().SetVS(nullptr);
 	UTGetShaderManager().SetPS(nullptr);
+
+	///--- directional lights under shadow
+	// directional light without shader, doesn't take into account the object normals
+	m_pDevice->SetTexture(0, nullptr);
+	m_pDevice->SetTexture(1, nullptr);
+	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
+	{
+		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		if (nl->type == K_LVL_LT_DIRECTIONAL)
+		{
+			//paint and exit
+			m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
+			break;
+		}
+	}
+
 
 	///--- precomputed wall shadows over directional lights
 	AdditiveBlendingOFF(m_pDevice, NULL);
@@ -12273,8 +12292,9 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 	AdditiveBlendingON(m_pDevice, NULL);
 
+	
 	///--- ambient light(s)
-	// paint without additive, like a clear color, or with additive if we have more of themn
+	// paint all general ambient lights and area lights here
 	//#TODO: if we only have one ambiental per level then take color from g_wAmbientcolor
 	m_pDevice->SetTexture(0, nullptr);
 	m_pDevice->SetTexture(1, nullptr);
@@ -12290,6 +12310,7 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	}
 
 	///--- point lights
+	CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
 	if (pRT != null)
 	{
 		m_pDevice->SetTexture(0, pRT->m_pRTTexture);

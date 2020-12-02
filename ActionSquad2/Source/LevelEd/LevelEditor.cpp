@@ -690,6 +690,25 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 		}
 		break;
 
+		case K_LVL_LT_AMBIENTAL:
+		{
+			// position
+			float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z };
+			if (ImGui::DragFloat3("Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f"))
+			{
+				light->SetPos(Vec2(f3[0], f3[1]));
+				light->vPos.z = 0.0f;
+			}
+			// color
+			ImVec4 color;
+			D3DCOLOR_UNPACKTOFLOAT(light->color, color.w, color.x, color.y, color.z);
+			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
+			if (ImGui::IsItemEdited())
+			{
+				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
+			}
+		}
+		break;
 
 		case K_LVL_LT_IES:
 		{
