@@ -420,7 +420,7 @@ void CLevelEditor::Update(float dTime)
 				}
 				else
 				{
-					pSelected = m_pLevel->SpawnLight(Vec3(mousepos.x, mousepos.y, K_WALL_HEIGHT_WORLD), K_LVL_LT_POINT, 0xffffffff, 64.0f);
+					pSelected = m_pLevel->SpawnLight(Vec3(mousepos.x, mousepos.y, 32.0f), K_LVL_LT_POINT, 0xffffffff, 32.0f);
 				}
 			}
 			break;
@@ -660,6 +660,36 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			}
 		}
 		break;
+
+		case K_LVL_LT_DIRECTIONAL:
+		{
+			// position
+			float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z };
+			if (ImGui::DragFloat3("Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f"))
+			{
+				light->SetPos(Vec2(f3[0], f3[1]));
+				light->vPos.z = 0.0f;
+			}
+			// direction
+			float d3[3] = { light->vnDir.x, light->vnDir.y, light->vnDir.z };
+			if (ImGui::DragFloat3("Direction", d3, 0.02f, -1.0f, 1.0f, "%.2f"))
+			{
+				light->SetDir(Vec3(d3[0], d3[1], d3[2]));
+				light->UpdateInternalData(&m_pLevel->m_sprLights);
+			}
+			// intensity
+			ImGui::DragFloat("Intensity", &light->fIntensity, 0.01f, 0.1f, 5.0f, "%.2f");
+			// color
+			ImVec4 color;
+			D3DCOLOR_UNPACKTOFLOAT(light->color, color.w, color.x, color.y, color.z);
+			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
+			if (ImGui::IsItemEdited())
+			{
+				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
+			}
+		}
+		break;
+
 
 		case K_LVL_LT_IES:
 		{

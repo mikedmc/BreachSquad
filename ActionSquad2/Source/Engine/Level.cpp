@@ -3024,7 +3024,7 @@ void CLevel::BuildVisibilityLists()
 		if (light->bHidden)
 			continue;
 
-		if (light->type == K_LVL_LT_AMBIENTAL)
+		if ((light->type == K_LVL_LT_AMBIENTAL) || (light->type == K_LVL_LT_DIRECTIONAL))
 		{
 			m_visibleList.visible_lights.Add(m_arrLights[kk]);
 			continue;
@@ -12197,27 +12197,10 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 
 	D3DXMATRIXA16 matWVP = matView * (*matProj);
 
-	///--- ambient light(s)
-	// paint without additive, like a clear color, or with additive if we have more of themn
-	//#TODO: if we only have one ambiental per level then take color from g_wAmbientcolor
-	m_pDevice->SetTexture(0, nullptr);
-	m_pDevice->SetTexture(1, nullptr);
-	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
-	{
-		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
-		if (nl->type == K_LVL_LT_AMBIENTAL)
-		{
-			//paint and exit
-			m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
-			break;
-		}
-	}
-
-	///#TODO: directional lights (non shadowing) - might look more realistic if light intensity changes between floor and walls (floor better lit)
 
 #if defined(_DEBUG) || defined(DEBUG)
 	/*
-	// Paints the shadowed lights volume in wireframe	
+	// Paints the shadowed lights volume in wireframe
 	m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
 	m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD); //needed for color interpolation
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
@@ -12234,35 +12217,86 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	*/
 #endif
 
-
-
-	///--- precomputed wall shadows
-	scTexture* pShadowsTex = m_sprLights.GetTextureByAnim(ANM_LIGHTS_SPR_SHADOWS, 0, 0);
-	if (pShadowsTex)
-		m_pDevice->SetTexture(0, pShadowsTex->pTex);
-	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-	//#HINT: UpdateVisibility is optional as it was done in the previous colors render pass
-	mapMesh.UpdateVisibility(camrect);
-	mapMesh.PaintShadowLayer();
-	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-
-
-	// Additive lighting from here on
+	// paint all directional lights with additive here
 	AdditiveBlendingON(m_pDevice, NULL);
 	CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
 	if (pRT != null)
 	{
 		m_pDevice->SetTexture(0, pRT->m_pRTTexture);
 	}
-	///--- point lights
-	// VS
-	UTGetShaderManager().SetVSByName(L"VS_POINTLIGHT");
-	UTGetShaderManager().SetVertexDeclaration(K_SHM_PNCT4T4);
+
+	// generic VS data so we can automatically find positions
 	float fConstDataVS[][4] = {
 		{ camrect.x, camrect.y, camrect.w, camrect.h } //RTT rect_xywh in world coords
 	};
+
+	///--- directional light(s)
+	// VS
+	UTGetShaderManager().SetVSByName(L"VS_POINTLIGHT");
+	UTGetShaderManager().SetVertexDeclaration(K_SHM_PNCT4T4);
+	UTGetShaderManager().SetVSConstantF(0, (float*)&matWVP, 4);
+	UTGetShaderManager().SetVSConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
+	// PS
+	UTGetShaderManager().SetPSByName(L"PS_DIRECTIONAL");
+	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
+	{
+		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		if (nl->type != K_LVL_LT_DIRECTIONAL)
+			continue;
+
+		//set Pshader constants
+		float fConstData[][4] = {
+			//x: intensity 
+			{ nl->fIntensity, 0.0f, 0.0f, 0.0f },
+			// xyz: inversed normalized directon
+			{ -nl->vnDir.x, -nl->vnDir.y, -nl->vnDir.z, 0.0f }
+		};
+		UTGetShaderManager().SetPSConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
+		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
+	}
+
+
+	UTGetShaderManager().SetVS(nullptr);
+	UTGetShaderManager().SetPS(nullptr);
+
+	///--- precomputed wall shadows over directional lights
+	AdditiveBlendingOFF(m_pDevice, NULL);
+	scTexture* pShadowsTex = m_sprLights.GetTextureByAnim(ANM_LIGHTS_SPR_SHADOWS, 0, 0);
+	if (pShadowsTex)
+		m_pDevice->SetTexture(0, pShadowsTex->pTex);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	//#HINT: UpdateVisibility is optional as it was done in the previous colors render pass
+	mapMesh.UpdateVisibility(camrect);
+	mapMesh.PaintShadowLayer();
+	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	AdditiveBlendingON(m_pDevice, NULL);
+
+	///--- ambient light(s)
+	// paint without additive, like a clear color, or with additive if we have more of themn
+	//#TODO: if we only have one ambiental per level then take color from g_wAmbientcolor
+	m_pDevice->SetTexture(0, nullptr);
+	m_pDevice->SetTexture(1, nullptr);
+	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
+	{
+		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		if (nl->type == K_LVL_LT_AMBIENTAL)
+		{
+			//paint and exit
+			m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
+			break;
+		}
+	}
+
+	///--- point lights
+	if (pRT != null)
+	{
+		m_pDevice->SetTexture(0, pRT->m_pRTTexture);
+	}
+	// VS
+	UTGetShaderManager().SetVSByName(L"VS_POINTLIGHT");
+	UTGetShaderManager().SetVertexDeclaration(K_SHM_PNCT4T4);
 	UTGetShaderManager().SetVSConstantF(0, (float*)&matWVP, 4);
 	UTGetShaderManager().SetVSConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
 	// PS
