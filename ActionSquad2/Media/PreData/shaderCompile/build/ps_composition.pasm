@@ -22,7 +22,7 @@
 //
 
     ps_3_0
-    def c1, 0.400000006, 1, 1.39999998, 0
+    def c1, 0.400000006, 1, 0, 0
     dcl_texcoord v0.xy
     dcl_2d s0
     dcl_2d s1
@@ -40,8 +40,7 @@
     rcp r2.x, r1.x
     rcp r2.y, r1.y
     rcp r2.z, r1.z
-    mul r0.xyz, r0, r2
-    mul oC0.xyz, r0, c1.z
+    mul oC0.xyz, r0, r2
     mov oC0.w, c1.y
 
-// approximately 17 instruction slots used (2 texture, 15 arithmetic)
+// approximately 16 instruction slots used (2 texture, 14 arithmetic)
