@@ -30,17 +30,17 @@
 //
 
     ps_3_0
-    def c5, 255, 1, -1, 2
-    def c6, 0.5, 0, 0, 0
+    def c5, 255, -128, 1, -1
+    def c6, 2, 0.5, 0, 0
     dcl_color v0
     dcl_texcoord v1.xy
     dcl_texcoord1 v2.xy
     dcl_2d s0
     dcl_2d s1
     texld r0, v1, s0
-    mul r0.x, r0.z, c5.x
-    mad r1.y, r0.z, c5.x, v2.y
+    mad r0.x, r0.z, c5.x, c5.y
     mul r1.z, r0.x, c1.y
+    add r1.y, r0.x, v2.y
     mov r1.x, v2.x
     add r0.xyz, r1, -c2
     dp3 r0.x, r0, c3
@@ -50,13 +50,13 @@
     rcp r1.xz, c0.y
     rcp r1.yw, c0.z
     mul r2, r0, r1
-    mad r0, r0.zwzw, r1.zwzw, c5.y
-    cmp r0, r0, r2, c5.z
-    add r0, r0, c5.zzyy
-    cmp r0.xy, r0, c5.w, r0.zwzw
+    mad r0, r0.zwzw, r1.zwzw, c5.z
+    cmp r0, r0, r2, c5.w
+    add r0, r0, c5.wwzz
+    cmp r0.xy, r0, c6.x, r0.zwzw
     mul r0.xy, r0, c4.zwzw
-    mov r1.xy, c4
-    mad r0.xy, r0, c6.x, r1
+    mov r1.y, c6.y
+    mad r0.xy, r0, r1.y, c4
     texld r0, r0, s1
     mul r0, r0, c0.x
     mul oC0, r0, v0

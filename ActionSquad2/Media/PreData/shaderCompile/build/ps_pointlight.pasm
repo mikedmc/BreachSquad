@@ -24,7 +24,7 @@
 //
 
     ps_3_0
-    def c3, 255, 2, -1, 1
+    def c3, 255, -128, 2, -1
     def c4, 0, -1.44269502, 0, 0
     dcl_color v0
     dcl_texcoord v1.xy
@@ -32,16 +32,16 @@
     dcl_2d s0
     mov r0.x, v2.x
     texld r1, v1, s0
-    mul r0.w, r1.z, c3.x
+    mad r0.w, r1.z, c3.x, c3.y
+    mad r1.xy, r1, c3.z, c3.w
+    add r0.y, r0.w, v2.y
     mul r0.z, r0.w, c1.y
-    mad r0.y, r1.z, c3.x, v2.y
-    mad r1.xy, r1, c3.y, c3.z
     add r0.xyz, -r0, c2
     dp3 r0.w, r0, r0
     rsq r0.w, r0.w
     mul r0.xyz, r0.w, r0
     rcp r0.w, r0.w
-    mad r1.w, r1.x, -r1.x, c3.w
+    mad r1.w, r1.x, -r1.x, -c3.w
     mad r1.w, r1.y, -r1.y, r1.w
     rsq r1.w, r1.w
     rcp r1.z, r1.w

@@ -25,8 +25,8 @@ float4 ps_main(PS_INPUT Input) : COLOR0
 {
 	//XY normals, Z is height in world space. W is alpha
 	float4 normal_h = tex2D(texNrmH, Input.Tex0.xy);
-	// bring height from 0..1 to 0..255
-	float nrmTexH = normal_h.z * 255.0f;
+	// bring height from 0..1 to -128..128 (has negative values too, relative to level floor)
+	float nrmTexH = normal_h.z * 255.0f - 128.0f;
 	float3 posWorld = float3(Input.Tex1.x, Input.Tex1.y + nrmTexH, nrmTexH * fWorldConstants.y);
 
 	// direction light->pixel

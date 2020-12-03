@@ -1016,7 +1016,7 @@ CVariantComplex* CVariantComplex::Deserialize(FILE *f)
 		break;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 ///--- CComplexVariant NAMED COLLECTION ---
@@ -1569,7 +1569,7 @@ bool OS_DeleteRecursive(WCHAR r_szPath[1024])
 
 	hFind = FindFirstFile(l_szTmp, &FindFileData);
 	if ((hFind == NULL) || (hFind == INVALID_HANDLE_VALUE)) 
-		return FALSE;
+		return false;
 
 	do
 	{
@@ -1599,9 +1599,9 @@ bool OS_DeleteRecursive(WCHAR r_szPath[1024])
 	//delete actual folder
 	/*BOOL l_bRet = */RemoveDirectory(r_szPath);
 
-	return TRUE;
+	return true;
 #else 
-	return FALSE;
+	return false;
 #endif
 }
 
@@ -1641,7 +1641,7 @@ bool OS_CopyRecursive(WCHAR r_szSrcPath[1024], WCHAR r_szDesPath[1024])
 
 	hFind = FindFirstFile(l_szTmp, &FindFileData);
 	if ((hFind == NULL) || (hFind == INVALID_HANDLE_VALUE))
-		return FALSE;
+		return false;
 
 	do
 	{

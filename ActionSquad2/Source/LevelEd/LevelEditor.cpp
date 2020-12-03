@@ -607,7 +607,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 		{
 			// position
 			float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z };
-			if (ImGui::DragFloat3("Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f"))
+			if (ImGui::DragFloat3("Pos", f3, 1.0f, -128.0f, 100000.0f, "%.2f"))
 			{
 				light->SetPos(Vec2(f3[0], f3[1]));
 				light->vPos.z = f3[2];
@@ -773,14 +773,14 @@ OPRESULT CLevelEditor::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDes
 
 OPRESULT CLevelEditor::OnLostDevice()
 {
-	m_pDevice = NULL;
+	m_pDevice = nullptr;
 	m_sprCol.OnLostDevice();
 	return K_OP_OK;
 }
 
 OPRESULT CLevelEditor::OnDestroyDevice()
 {
-	m_pDevice = NULL;
+	m_pDevice = nullptr;
 	m_sprCol.OnDestroyDevice();
 	return K_OP_OK;
 }
