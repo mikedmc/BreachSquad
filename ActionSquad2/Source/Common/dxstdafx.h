@@ -673,5 +673,7 @@ extern CChatWnd						g_ChatWnd;
 
 
 extern float ct_fGaussLen;
+extern float ct_fLightMul;
+extern float ct_fColorDodge;
 
 #endif

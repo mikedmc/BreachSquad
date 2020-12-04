@@ -99,7 +99,10 @@ CSpineManager				g_spineMgr;
 
 
 //#TODO: default value for gauss bell with attenuation almost 2 at fRadius * 2.0f
-float ct_fGaussLen = 0.55f; 
+// convert these to constants
+float ct_fGaussLen = 0.35f; 
+float ct_fLightMul = 2.0f;
+float ct_fColorDodge = 0.4f;
 
 
 //**************************************************************************************
@@ -889,7 +892,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	UINT fGameHpx = K_GAME_HEIGHT * K_GAME_PIXEL_SIZE;
 	UINT fGameWpx = (UINT)ceil(fGameHpx * fAspect);
 	// Create RTs
-	UTGetRTManager().AddRT(K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, true, D3DFMT_D24S8);
+	UTGetRTManager().AddRT(K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
 	UTGetRTManager().AddRT(K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
 	UTGetRTManager().AddRT(K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
 	//if (UTGetAppClass().m_Settings.nLOD_lights >= K_UT_LOD_MED)
@@ -2587,6 +2590,8 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				}
 
 				ImGui::SliderFloat("gauss", &ct_fGaussLen, 0.0, 5.0);
+				ImGui::SliderFloat("final multiplier", &ct_fLightMul, 0.0, 10.0);
+				ImGui::SliderFloat("dodge", &ct_fColorDodge, 0.0, 1.0);
 
 				ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
 

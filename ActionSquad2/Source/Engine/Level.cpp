@@ -10998,7 +10998,7 @@ HRESULT CLevel::PaintOffscreen()
 	if (SUCCEEDED(hr))
 	{
 		// Clear the render target and the zbuffer 
-		V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, K_GAME_CLEAR_COLOR, 1.0f, 0));
+		V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET , K_GAME_CLEAR_COLOR, 1.0f, 0));
 
 		m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 		m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
@@ -11960,7 +11960,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 		if (SUCCEEDED(hr))
 		{
 			// Clear the render target and the zbuffer 
-			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_STENCIL | D3DCLEAR_ZBUFFER, 0xff000000, 1.0f, 0));
+			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET , 0xff000000, 1.0f, 0));
 			//use sprite
 			m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
@@ -12512,7 +12512,7 @@ OPRESULT CLevel::RenderPass_Composition(MatA16* matProj)
 	float fGamma = 2.2f;
 	float fConstData[][4] = {
 		// x:gamma, y:1.0f/gamma
-		{ fGamma, 1.0f / fGamma, 0.0f, 0.0f }
+		{ fGamma, 1.0f / fGamma, ct_fLightMul, ct_fColorDodge}
 	};
 	m_pDevice->SetPixelShaderConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
 

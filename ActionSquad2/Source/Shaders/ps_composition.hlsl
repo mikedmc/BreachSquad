@@ -1,4 +1,4 @@
-float4 fCompData : register(c0); //x:gamma, y:1/gamma
+float4 fCompData : register(c0); //x:gamma, y:1/gamma, z:final light multiplier, w:color dodge
 
 sampler2D texColor : register(s0);  //color RT texture (diffuse color)
 sampler2D texLights : register(s1);  //lightmap RT
@@ -17,15 +17,11 @@ float4 ps_main(PS_INPUT Input) : COLOR0
 	// gamma correct light
 	vLight = pow(vLight, fCompData.yyy);
 	
-	float3 fvFinal = vLight * vCol;
+	float3 fvFinal = vLight * vCol * fCompData.z;
 	// color dodge: Composite = Background / (1 - foreground * effect_alpha)
-	fvFinal /= (1.0f - vLight * 0.4f);
-	// linear dodge for light volume (try it!) - looks best if we filter out the low lights (ambient, small bulbs etc)
+	fvFinal /= (1.0f - vLight * fCompData.w); //0.4f default
+	// linear dodge for light volume (try it!)
 	//fvFinal += vLight.rgb * 0.2f;
-	// additional color add to make it lighter (looks good but maybe lightens it too much)
-	//fvFinal *= 1.4f;
-
-	// ar putea sa filtreze lumina finala, sa amplifice ce este peste un threshold si sa ii faca clamp, sa adauge la imaginea finala ca sa faca un burn artificial
 
 	return float4(fvFinal, 1.0f);
 }
