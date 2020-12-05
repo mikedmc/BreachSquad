@@ -16721,6 +16721,7 @@ void CLevel::TouchClosestActive(CActor * pToucherAct, float dTime)
 	}
 }
 
+#define K_CLIP_OCCLUDERS_TO_LIGHT
 int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr, int maxRetArrSize)
 {
 	_ASSERT(pRetArr != nullptr && maxRetArrSize > 0);
@@ -16729,28 +16730,23 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 
 	Vec2 vPos = vEye;
 	Vec2 vNYp(0.0f, 1.0f), vNYn(0.0f, -1.0f), vNXp(1.0f, 0.0f), vNXn(-1.0f, 0.0f);
-	///--- add light range segments (don't set normals so we don't extend the walls on it)
-	_ASSERT(nCur < maxRetArrSize - 4);
-	pRetArr[nCur++].Set(bbox.vMin, Vec2(bbox.vMax.x, bbox.vMin.y), vNYp, vPos);
-	pRetArr[nCur++].Set(Vec2(bbox.vMin.x, bbox.vMax.y), bbox.vMax, vNYn, vPos);
-	pRetArr[nCur++].Set(bbox.vMin, Vec2(bbox.vMin.x, bbox.vMax.y), vNXp, vPos);
-	pRetArr[nCur++].Set(Vec2(bbox.vMax.x, bbox.vMin.y), bbox.vMax, vNXn, vPos);
 	///--- add segments from bboxes
-			 
 	//check only the occluders in the visible area as we don't process lights outside the screen
 	for (int kk = 0; kk < m_visibleList.visible_colShapesLights.Count(); kk++)
 	{
 		_ASSERT(nCur < maxRetArrSize - 2);
-		// if we want the whole bbox:
-		//CAABB* chkbb = &m_visibleList.visible_colShapesLights.m_pData[kk]->bbox;
-
 		// if we want to clip occluders to light bbox:
+#ifdef K_CLIP_OCCLUDERS_TO_LIGHT
 		CAABB retbb;
 		CAABB* chkbb = &retbb;
 		// clipped check (looks better with longer occluders):
 		if (AABB_Intersection(bbox, m_visibleList.visible_colShapesLights.m_pData[kk]->bbox, retbb))
+#else
+		// if we want the whole bbox:
+		CAABB* chkbb = &m_visibleList.visible_colShapesLights.m_pData[kk]->bbox;
 		// non clipped check (faster):
-		//if (lbox.Intersects(chkbb)) 
+		if (lbox.Intersects(chkbb)) 
+#endif
 		{
 			if (vEye.y > chkbb->vMax.y)
 			{
@@ -16772,7 +16768,7 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 		}
 	}
 		
-	// add occluders from tiles, optimizing for same wall lines
+	///--- add occluders from tiles, optimizing for same wall lines
 	Vec2i tlmin(floor(bbox.vMin.x / K_TILE_SIZE_F), floor(bbox.vMin.y / K_TILE_SIZE_F));
 	Vec2i tlmax(floor(bbox.vMax.x / K_TILE_SIZE_F), floor(bbox.vMax.y / K_TILE_SIZE_F));
 	if (tlmin.x < 0) tlmin.x = 0;
@@ -16788,6 +16784,14 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 
 			CTile* tl = &tiles[xx][yy];
 			CAABB chkbb(xx * K_TILE_SIZE_F, yy * K_TILE_SIZE_F, (xx + 1) * K_TILE_SIZE_F, (yy + 1) * K_TILE_SIZE_F);
+#ifdef K_CLIP_OCCLUDERS_TO_LIGHT
+			// clip horizontally, do it in a fast way just so we don't miss wall intersections when colliders go outside the light bbox
+			if (chkbb.vMax.x > bbox.vMax.x) chkbb.vMax.x = bbox.vMax.x;
+			if (chkbb.vMin.x < bbox.vMin.x) chkbb.vMin.x = bbox.vMin.x;
+			// ignore vertically for now, it errors but not so much as to be visible
+			//if (chkbb.vMax.y > bbox.vMax.y) chkbb.vMax.y = bbox.vMax.y;
+			//if (chkbb.vMin.y < bbox.vMin.y) chkbb.vMin.y = bbox.vMin.y;
+#endif
 
 			// can the tile cast shadows
 			if (tl->flags & K_TILEFLAG_HASWALL_MASK)
@@ -16821,6 +16825,14 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 			}
 		}
 	}
+
+	///--- add light range segments (don't set normals so we don't extend the walls on it)
+	// add them last so we prioritize intersecting with the others first
+	_ASSERT(nCur < maxRetArrSize - 4);
+	pRetArr[nCur++].Set(bbox.vMin, Vec2(bbox.vMax.x, bbox.vMin.y), vNYp, vPos);
+	pRetArr[nCur++].Set(Vec2(bbox.vMin.x, bbox.vMax.y), bbox.vMax, vNYn, vPos);
+	pRetArr[nCur++].Set(bbox.vMin, Vec2(bbox.vMin.x, bbox.vMax.y), vNXp, vPos);
+	pRetArr[nCur++].Set(Vec2(bbox.vMax.x, bbox.vMin.y), bbox.vMax, vNXn, vPos);
 
 	return nCur;
 }
