@@ -31,7 +31,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_MAIN_ICON           ICON                    "AS2.ico"
+IDI_MAIN_ICON           ICON                    "BS.ico"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -90,12 +90,12 @@ FILETYPE VFT_APP
        {
           VALUE "CompanyName", "PixelShard.com"
           VALUE "FileVersion", "0.0.1"
-          VALUE "FileDescription", "ActionSquad2"
-          VALUE "InternalName", "ActionSquad2"
+          VALUE "FileDescription", "BreacherSquad"
+          VALUE "InternalName", "BreacherSquad"
           VALUE "LegalCopyright", "©2020 PixelShard"
           VALUE "LegalTrademarks", ""
-          VALUE "OriginalFilename", "ActionSquad2.exe"
-          VALUE "ProductName", "Action Squad 2"
+          VALUE "OriginalFilename", "BreacherSquad.exe"
+          VALUE "ProductName", "Breacher Squad"
           VALUE "ProductVersion", "0.0.1"
        }
     }

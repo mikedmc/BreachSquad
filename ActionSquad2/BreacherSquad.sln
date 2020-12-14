@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ActionSquad2", "AS2.vcxproj", "{97105727-EDAB-4B2C-AB1E-4ACFD3BA5187}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BreacherSquad", "BS.vcxproj", "{97105727-EDAB-4B2C-AB1E-4ACFD3BA5187}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

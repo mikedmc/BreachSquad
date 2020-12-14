@@ -12,10 +12,10 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{97105727-EDAB-4B2C-AB1E-4ACFD3BA5187}</ProjectGuid>
-    <RootNamespace>ActionSquad2</RootNamespace>
+    <RootNamespace>BreacherSquad</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
-    <ProjectName>ActionSquad2</ProjectName>
+    <ProjectName>BreacherSquad</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -352,7 +352,7 @@
     <ClInclude Include="Versioning\versioning.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Source\AS2.rc" />
+    <ResourceCompile Include="Source\BS.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Libs\release\spine\src\spine\Animation.cpp">

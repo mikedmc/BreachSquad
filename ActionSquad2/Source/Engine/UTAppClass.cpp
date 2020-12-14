@@ -124,7 +124,7 @@ HRESULT CApplication::SaveScreenshot()
 	SYSTEMTIME systime;
 	GetLocalTime(&systime);
 	WCHAR szFileName[MAX_PATH];
-	StringCchPrintf(szFileName, MAX_PATH, L"ActionSquad2_%u_%u_%u_%u_%u_%u", systime.wYear, systime.wMonth, systime.wDay, systime.wHour, systime.wMinute, systime.wSecond);
+	StringCchPrintf(szFileName, MAX_PATH, L"BreacherSquad_%u_%u_%u_%u_%u_%u", systime.wYear, systime.wMonth, systime.wDay, systime.wHour, systime.wMinute, systime.wSecond);
 
 	WCHAR szFullFileName[MAX_PATH];
 	StringCchPrintf(szFullFileName, MAX_PATH, L"%s%s.png", UTGetAppClass().g_wszUserDataDir, szFileName);
