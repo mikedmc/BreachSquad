@@ -199,6 +199,13 @@ void Workshop_CheckSubscriptions()
 		// wait a bit, until we finish sharing the file
 		unsigned int lastTime = OS_GetTimeMS();
 		g_pLog->Write("CheckSteamWorkshopSubscriptions: Getting subscribed mod list ... \n");
+
+		if (steamEnumerateAnswerReceiver.m_modsRetrievedStatus != k_EResultOK)
+		{
+			g_pLog->Write("[Error] OnSubscribedModsRetrieved: Could not enumerate mods (no connection?).\n");
+			return;
+		}
+
 		while(!steamEnumerateAnswerReceiver.m_bModsRetrieved)
 		{
 			SteamAPI_RunCallbacks();
