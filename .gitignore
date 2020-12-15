@@ -1,5 +1,5 @@
 *.tlog
-ActionSquad2/Bin/*.exe
+Bin/*.exe
 *.opendb
 *.db
 *.dkas_auto
@@ -10,11 +10,11 @@ ActionSquad2/Bin/*.exe
 *.user
 *.suo
 *.sdf
-ActionSquad2/Obj/
 *.lastcodeanalysissucceeded
 Tools/AStar/AStarApp1/AStarApp1/obj/
 *.idb
 Tools/AStar/AStarCpp/Debug/
 Tools/AStar/AStarCpp/AStarCpp/Debug/
 *.aps
-ActionSquad2/imgui.ini
+imgui.ini
+Obj/
