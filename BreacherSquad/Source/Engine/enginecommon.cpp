@@ -1694,12 +1694,12 @@ std::wstring RemoveQuotationMarks(const std::wstring& initialString)
 	return sOutString;
 }
 
-int OS_WCHARtoUTF8(char* dest, WCHAR* src, int maxSize)
+int WCHARtoUTF8(char* dest, WCHAR* src, int maxSize)
 {
 	return WideCharToMultiByte(CP_UTF8, 0, src, (int)wcslen(src), dest, maxSize - 1, null, null);
 }
 
-int OS_UTF8toWCHAR(WCHAR* dest, char* src, int maxSize)
+int UTF8toWCHAR(WCHAR* dest, char* src, int maxSize)
 {
 	return MultiByteToWideChar(CP_UTF8, 0, src, (int)strlen(src), dest, maxSize - 1);
 }

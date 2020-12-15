@@ -1087,10 +1087,13 @@ bool					OS_DeleteRecursive(WCHAR r_szPath[1024]);
 // Copies already opened files
 void					OS_FileCopy(FILE *dest, FILE *src);
 
+
+///--- String utils ---
+
 // Converts WCHAR text to UTF8 (platform specific, used for paths)
-int						OS_WCHARtoUTF8(char* dest, WCHAR* src, int maxSize);
+int						WCHARtoUTF8(char* dest, WCHAR* src, int maxSize);
 // Converts UTF8 text to WCHAR (platform specific, used for paths)
-int						OS_UTF8toWCHAR(WCHAR* dest, char* src, int maxSize);
+int						UTF8toWCHAR(WCHAR* dest, char* src, int maxSize);
 
 
 std::wstring RemoveQuotationMarks(const std::wstring& initialString);

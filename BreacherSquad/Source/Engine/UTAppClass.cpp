@@ -2030,8 +2030,9 @@ bool CApplication::InitSDL(HWND hWnd)
 	WCHAR dbpath[MAX_PATH];
 	wsprintf(dbpath, L"%sgamecontrollerdb.txt", g_wszExePath);
 	CHAR txtpath[1024] = { 0 };
-	OS_WCHARtoUTF8(txtpath, dbpath, 1024);
+	WCHARtoUTF8(txtpath, dbpath, 1024);
 
+	//#HINT: most recent definitions are here: https://github.com/gabomdq/SDL_GameControllerDB
 	int nLoaded = SDL_GameControllerAddMappingsFromFile(txtpath);
 	if (nLoaded < 0)
 	{

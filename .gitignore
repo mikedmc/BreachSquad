@@ -1,5 +1,4 @@
 *.tlog
-Bin/*.exe
 *.opendb
 *.db
 *.dkas_auto
