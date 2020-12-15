@@ -1996,11 +1996,11 @@ int SDLFilter_IsMouseEvent(void * userdata, SDL_Event* event)
 }
 #endif
 
+
 bool CApplication::InitSDL(HWND hWnd)
 {
 	WCHAR txt[MAX_PATH];
 	//Initialization flag
-	bool success = true;
 
 	//print out version used
 	SDL_version compiled;
@@ -2010,31 +2010,46 @@ bool CApplication::InitSDL(HWND hWnd)
 	SDL_GetVersion(&linked);
 	LOG(L"SDL Init. compiled v%d.%d.%d linked v%d.%d.%d", compiled.major, compiled.minor, compiled.patch, linked.major, linked.minor, linked.patch);
 
-	//Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER ) < 0)
+	//Initialize SDL (video needed for window messages keys and mouse)
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0)
 	{
 		mbstowcs(txt, SDL_GetError(), MAX_PATH);
 		ErrorBox(K_ERR_CRITICAL, L"SDL could not initialize! SDL Error: %s\n", txt);
-		success = false;
+		return false;
+	}
+	//Create window - needed for keyboard input
+	gWindow = SDL_CreateWindowFrom((void*)hWnd);
+	if (gWindow == NULL)
+	{
+		mbstowcs(txt, SDL_GetError(), MAX_PATH);
+		ErrorBox(K_ERR_CRITICAL, L"SDL Window couldn't initialize! SDL Error: %s\n", txt);
+		return false;
+	}
+
+	// load custom mappings (might not work on chinese paths)
+	WCHAR dbpath[MAX_PATH];
+	wsprintf(dbpath, L"%sgamecontrollerdb.txt", g_wszExePath);
+	CHAR txtpath[1024] = { 0 };
+	OS_WCHARtoUTF8(txtpath, dbpath, 1024);
+
+	int nLoaded = SDL_GameControllerAddMappingsFromFile(txtpath);
+	if (nLoaded < 0)
+	{
+		mbstowcs(txt, SDL_GetError(), MAX_PATH);
+		ErrorBox(K_ERR_LOG, L"SDL Couldn't load controller mappings from file! SDL Error: %s\n", txt);
 	}
 	else
 	{
-		//Create window
-		gWindow = SDL_CreateWindowFrom((void*)hWnd);
-		if (gWindow == NULL)
-		{
-			mbstowcs(txt, SDL_GetError(), MAX_PATH);
-			ErrorBox(K_ERR_CRITICAL, L"SDL Window couldn't initialize! SDL Error: %s\n", txt);
-			success = false;
-		}
+		LOG(L"SDL loaded %d controller mappings from file.", nLoaded);
 	}
 
 #if defined(K_SDL_IGNORE_MOUSE_EVENTS)
 	SDL_SetEventFilter(SDLFilter_IsMouseEvent, null);
 #endif
 
-	return success;
+	return true;
 }
+
 
 void CApplication::CloseSDL()
 {

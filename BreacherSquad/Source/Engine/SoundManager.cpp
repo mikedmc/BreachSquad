@@ -434,7 +434,7 @@ HRESULT CSoundManager::LoadSoundsXML(WCHAR* XMLpath)
 		WCHAR wcsFilePath[MAX_PATH];
 		StringCchPrintf(wcsResAddr, MAX_PATH, L"media/sounds/%s", path);
 		FileManager::GetMediaPath(wcsResAddr, wcsFilePath);
-		LOG(L"[%d,%d] AddingSound:%s", bufCnt, bOnlyLoadPlaying, wcsResAddr);
+		//LOG(L"[%d,%d] AddingSound:%s", bufCnt, bOnlyLoadPlaying, wcsResAddr);
 
 		HRESULT hr = S_OK;
 		hr = AddSound(wcsFilePath, sID, sGroupID, bufCnt, bOnlyLoadPlaying);
@@ -450,7 +450,7 @@ HRESULT CSoundManager::LoadSoundsXML(WCHAR* XMLpath)
 	//--- delete temp file ---
 	_wremove(UTGetAppClass().g_wszTempFilePath);
 
-	LOG(L"Sounds:: Sounds loaded OK.");
+	LOG(L"Sounds:: %d Sounds Loaded.", count);
 
 	return S_OK;
 }

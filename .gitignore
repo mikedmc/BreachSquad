@@ -18,3 +18,5 @@ Tools/AStar/AStarCpp/AStarCpp/Debug/
 *.aps
 imgui.ini
 Obj/
+BreacherSquad/Bin/*.exe
+BreacherSquad/Obj/

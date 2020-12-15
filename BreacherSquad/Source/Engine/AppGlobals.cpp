@@ -338,6 +338,7 @@ eMissionType App_GetMissionType(WCHAR * strLevelPath)
 
 void App_ParseAllLevelsForData(bool bResetAllStats)
 {
+	/*
 	LOG(L"--> Parsing all levels for type...");
 	//parse all levels and see what kind they are
 	WCHAR xmlPath[MAX_PATH];
@@ -365,6 +366,7 @@ void App_ParseAllLevelsForData(bool bResetAllStats)
 		}
 	}
 	LOG(L"... Parsing finished on %d levels.", UTGetChaptersList().GetTotalLevelsCnt());
+	*/
 }
 
 void App_ResetUserData()

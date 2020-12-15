@@ -137,7 +137,6 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			WCHAR xmlpath[MAX_PATH];
 			///--- SOUNDS ---
 			FileManager::GetMediaPath(L"media/sounds/sounds.xml", xmlpath);
-			LOG("Loading sounds from: %s", xmlpath);
 			if (FAILED(hr = UTGetSoundManager().LoadSoundsXML(xmlpath)))
 			{
 				ErrorBox(K_ERR_WARNING, L"Failed INITSOUND->LoadSoundsXML()\n");
