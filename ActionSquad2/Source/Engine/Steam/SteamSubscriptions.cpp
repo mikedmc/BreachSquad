@@ -188,25 +188,20 @@ void Workshop_CheckSubscriptions()
 	UTGetModsManager().LoadModsFromCacheFile();
 
 	SteamModsRetrievedAnswerReceiver steamEnumerateAnswerReceiver;
+	int nTries = 3;				// how many times to try to get the mods
 	int startIndex = 0;
 	do
 	{
 		// check subscriptions, and update accordingly
 		SteamAPICall_t enumerateHandle = SteamRemoteStorage()->EnumerateUserSubscribedFiles(startIndex);
 		CCallResult<SteamModsRetrievedAnswerReceiver, RemoteStorageEnumerateUserSubscribedFilesResult_t > subscribedModsRetrievedCallResult;
-		subscribedModsRetrievedCallResult.Set( enumerateHandle, &steamEnumerateAnswerReceiver, &SteamModsRetrievedAnswerReceiver::OnSubscribedModsRetrieved );
+		subscribedModsRetrievedCallResult.Set(enumerateHandle, &steamEnumerateAnswerReceiver, &SteamModsRetrievedAnswerReceiver::OnSubscribedModsRetrieved);
 
 		// wait a bit, until we finish sharing the file
 		unsigned int lastTime = OS_GetTimeMS();
 		g_pLog->Write("CheckSteamWorkshopSubscriptions: Getting subscribed mod list ... \n");
 
-		if (steamEnumerateAnswerReceiver.m_modsRetrievedStatus != k_EResultOK)
-		{
-			g_pLog->Write("[Error] OnSubscribedModsRetrieved: Could not enumerate mods (no connection?).\n");
-			return;
-		}
-
-		while(!steamEnumerateAnswerReceiver.m_bModsRetrieved)
+		while (!steamEnumerateAnswerReceiver.m_bModsRetrieved)
 		{
 			SteamAPI_RunCallbacks();
 
@@ -220,10 +215,13 @@ void Workshop_CheckSubscriptions()
 		steamEnumerateAnswerReceiver.m_bModsRetrieved = false;
 		startIndex = steamEnumerateAnswerReceiver.m_vModsSubscribed.size();
 
-	} while (startIndex != steamEnumerateAnswerReceiver.m_totalSubscriptions || steamEnumerateAnswerReceiver.m_modsRetrievedStatus != k_EResultOK);
+		nTries--;
+
+	} while ((nTries > 0) && (startIndex != steamEnumerateAnswerReceiver.m_totalSubscriptions || steamEnumerateAnswerReceiver.m_modsRetrievedStatus != k_EResultOK));
 
 	if (steamEnumerateAnswerReceiver.m_modsRetrievedStatus != k_EResultOK)
 	{
+		LOG(L"[Warning] Failed to get mods list.");
 		return; // do not continue, otherwise mods will get deleted
 	}
 
