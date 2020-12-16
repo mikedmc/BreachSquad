@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <SpriteCollection Version="2.0">
   <Image>props0.png</Image>
+  <Image>props0_nh.png</Image>
   <Modules>
     <Module ImageIdx="0" X="3" Y="21" W="26" H="26" />
     <Module ImageIdx="0" X="32" Y="0" W="16" H="48" />

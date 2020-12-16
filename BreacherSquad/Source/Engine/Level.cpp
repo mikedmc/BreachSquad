@@ -10641,8 +10641,10 @@ void CLevel::Update(float dTime_original)
 	CAABB visibleAABB(m_visibleArea);
 	///--- update visibility lists (after update) ---
 	BuildVisibilityLists();
+	//#TODO: de mutat ce urmeaza mai jos in CreateDynamicMeshes()
 
 	/// preallocate verts array for light volume
+	//#TODO: sa nu mai le aloce dinamic pe fiecare frame ci sa fie alocati din start static sau ca membru al CLevel
 	const int arrVertsSize = 1200 * 3;
 	_VERTEX_PNCT4T4 *arrVerts = new _VERTEX_PNCT4T4[arrVertsSize];
 
@@ -12096,16 +12098,20 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, MatA16* matProj)
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 
 	int nTilesTexIdx = g_level.m_tilesTexBaseIdx;
+	// Offset in texture index so we paint from the normals texture when we render the normals pass
+	int nTexIdxOffset = 0;				
 	switch (ePass)
 	{
 		case K_LVL_RP_COLORS:
 		{
 			nTilesTexIdx = g_level.m_tilesTexBaseIdx;
+			nTexIdxOffset = 0;
 		}
 		break;
 		case K_LVL_RP_NORMALS_HEIGHT:
 		{
 			nTilesTexIdx = g_level.m_tilesTexNormIdx;
+			nTexIdxOffset = 1;
 		}
 		break;
 		case K_LVL_RP_LIGHTS:
@@ -12144,6 +12150,32 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, MatA16* matProj)
 	}
 	m_pSprite->Flush();
 	m_pSprite->SetTransform(&g_matIdentity);
+
+	///--- props
+	m_pSprite->SetTransform(&g_matIdentity);
+
+	for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_BACK].Count(); kk++)
+	{
+		CProp *active = m_visibleList.visible_props[K_LVL_LAYER_BACK].m_pData[kk];
+		if (active->flipX /*|| active->flipY*/)
+		{
+			matlocal = g_matIdentity;
+			//pozitie sprite
+			if (active->flipX)
+			{
+				matlocal._11 = -1.0f; //scalare X
+				matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; 
+			}
+			m_pSprite->SetTransform(&matlocal);
+			active->sprite.paint_firstModule_texOverride(&m_sprProps, nTexIdxOffset);
+			m_pSprite->SetTransform(&g_matIdentity);
+		}
+		else
+		{
+			active->sprite.paint_firstModule_texOverride(&m_sprProps, nTexIdxOffset);
+		}
+	}
+	m_pSprite->Flush();
 
 
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
