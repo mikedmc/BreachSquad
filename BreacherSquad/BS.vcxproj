@@ -243,11 +243,13 @@
     <ClInclude Include="Source\Engine\Constants\igm_int_SPR.h" />
     <ClInclude Include="Source\Engine\Constants\lights_SPR.h" />
     <ClInclude Include="Source\Engine\Constants\loading_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\lvled_SPR.h" />
     <ClInclude Include="Source\Engine\Constants\map0_SPR.h" />
     <ClInclude Include="Source\Engine\Constants\map1_SPR.h" />
     <ClInclude Include="Source\Engine\Constants\mapall_SPR.h" />
     <ClInclude Include="Source\Engine\Constants\map_interface_SPR.h" />
     <ClInclude Include="Source\Engine\Constants\menus_SPR.h" />
+    <ClInclude Include="Source\Engine\Constants\props_SPR.h" />
     <ClInclude Include="Source\Engine\Constants\tiles_SPR.h" />
     <ClInclude Include="Source\Engine\Constants\title_screen_SPR.h" />
     <ClInclude Include="Source\Engine\ConstEvents.h" />

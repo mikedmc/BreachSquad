@@ -416,10 +416,11 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "constants/strings.h"
 #include "constants/font_ids.h"
 #include "constants/sounds.h"
-//exportate din editor
+// editor exported
 #include "constants/lvled_SPR.h"
 #include "constants/lights_SPR.h"
 #include "constants/actives_SPR.h"
+#include "constants/props_SPR.h"
 #include "constants/particles_SPR.h"
 #include "constants/igm_interface_SPR.h"
 #include "constants/bk_city_SPR.h"
