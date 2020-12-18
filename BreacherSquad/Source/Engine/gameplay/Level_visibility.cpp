@@ -198,11 +198,8 @@ void CLevel::BuildVisibilityLists()
 		}
 	}
 	//all props onscreen for rendering
-	for (int jj = 0; jj < K_LVL_LAYERS_CNT; jj++)
-	{
-		m_visibleList.visible_props[jj].Clear();
-		m_visibleList.logic_props_closeby[jj].Clear();
-	}
+	m_visibleList.visible_props.Clear();
+	m_visibleList.logic_props_closeby.Clear();
 
 	for (int kk = 0; kk < m_arrProps.GetSize(); kk++)
 	{
@@ -212,24 +209,12 @@ void CLevel::BuildVisibilityLists()
 		//visible props
 		if (propsPaintAABB.Intersects(&active->bbox))
 		{
-			m_visibleList.visible_props[(int)active->nLayer].Add(active);
-			//#PERSONALIZARE: bomb was seen? let us know
-			if ((m_arrStats[K_LVL_STATS_LEVEL_HAS_BOMBS] != 0) && (m_arrStats[K_LVL_STATS_LEVEL_BOMB_SEEN] == 0))
-			{
-				if (m_arrProps[kk]->ID == m_arrStats[K_LVL_STATS_LEVEL_BOMB_ID])
-				{
-					m_arrStats[K_LVL_STATS_LEVEL_BOMB_SEEN] = 1;
-					//find first valid player
-					CActor* pPlayer = GetClosestPlayer(active->pos);
-					if (pPlayer != null)
-						PlayActorSoundVerse(pPlayer, K_LVL_ACT_VERSE_BOMB_LOCATED);
-				}
-			}
+			m_visibleList.visible_props.Add(active);
 		}
 		//logical closeby actives
 		if ((propsNearbyAABBs[0].Intersects(&active->bbox)) || (propsNearbyAABBs[1].Intersects(&active->bbox)))
 		{
-			m_visibleList.logic_props_closeby[(int)active->nLayer].Add(active);
+			m_visibleList.logic_props_closeby.Add(active);
 		}
 	}
 	//clear all decals layers
@@ -249,11 +234,8 @@ void CLevel::BuildVisibilityLists()
 
 void CLevel::ClearVisibilityLists()
 {
-	for (int jj = 0; jj < K_LVL_LAYERS_CNT; jj++)
-	{
-		m_visibleList.visible_props[jj].Clear();
-		m_visibleList.logic_props_closeby[jj].Clear();
-	}
+	m_visibleList.visible_props.Clear();
+	m_visibleList.logic_props_closeby.Clear();
 
 	for (int kk = 0; kk < K_LVL_DECAL_LAYERS; kk++)
 		m_visibleList.visible_decals[kk].Clear();

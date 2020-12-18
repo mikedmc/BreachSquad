@@ -24,7 +24,7 @@ const char* K_LIGHT_TYPES_NAMES_ARR[] =
 
 CLevelEditor::CLevelEditor() :
 	m_pLevel(nullptr), m_pDevice(nullptr),
-	eTool(K_LED_LIGHT)
+	eTool(K_LED_TILE), fTimeline(0.0)
 {
 }
 
@@ -81,6 +81,9 @@ void CLevelEditor::Update(float dTime)
 {
 	if (!m_pLevel)
 		return;
+
+	fTimeline += dTime;
+
 	// don't do any processing if clicked on imgui
 	if (UTimgui().GetWantCaptureMouse())
 		return;
@@ -170,7 +173,7 @@ void CLevelEditor::ReceiveKeys(UINT key)
 						pSelected = nullptr;
 					}
 					break;
-				case K_LED_OBJECT:
+				case K_LED_PROP:
 					break;
 				case K_LED_ACTOR:
 					break;
@@ -229,6 +232,28 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 			}
 		}
 		break;
+
+		case K_LED_PROP:
+		{
+			if (pSelected)
+			{
+				// paint bbox
+				CProp *pp = static_cast<CProp*>(pSelected);
+				RECTXYWH_F bb(pp->bbox.vMin.x, pp->bbox.vMin.y, pp->bbox.vSize.x, pp->bbox.vSize.y);
+				RECTXYWH_F prjrct = m_pLevel->m_camLevel.WorldToScreen(bb);
+				DrawBBox(prjrct, 0xffffffff);
+				// paint origin
+				Vec2 vposprj = m_pLevel->m_camLevel.WorldToScreen(Vec3ToVec2XY(pp->vPos));
+				CSprite::paintFrame(&m_sprCol, vposprj.x, vposprj.y, ANM_LVLED_SPR_CROSSHAIRS, 0, 0xffff2222);
+
+				// paint elevation
+				if (pp->vPos.z != 0.0f)
+				{
+					//DrawHRuler(vposprj, Z_TO_H(pp->vPos.z), 0xffff2222);
+				}
+			}
+		}
+		break;
 	}
 
 	pSpr->Flush();
@@ -249,18 +274,24 @@ void CLevelEditor::IMGUI_ShowInterfaces()
 
 		///--- TOOLS WINDOW
 		ImGui::Begin("Tools", null, ImGuiWindowFlags_NoNavInputs);
-		if (ImGui::Button("V Center", ImVec2(80, 0)))
+		const char* arrtools[] = { "Tiles", "Lights", "Props", "Actors", "CollBoxes" };
+		
+		for (int kk = 0; kk < K_LED_TOOLS_CNT; kk++)
 		{
+			if((eLvlEdTool)kk == eTool)
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.2f, 1.0f));
+			else
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.3f, 0.2f, 1.0f));
+
+			if (ImGui::Button(arrtools[kk], ImVec2(80, 0)))
+			{
+				eTool = (eLvlEdTool)kk;
+			}
+
+			ImGui::PopStyleColor(1);
 		}
-		if (ImGui::Button("H Center", ImVec2(80, 0)))
-		{
-		}
-		if (ImGui::Button("Pull Up", ImVec2(80, 0)))
-		{
-		}
-		if (ImGui::Button("Push Down", ImVec2(80, 0)))
-		{
-		}
+
+		ImGui::Separator();
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.2f, 0.2f, 1.0f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.2f, 0.2f, 1.0f));
 		if (ImGui::Button("Save All", ImVec2(80, 0)))
@@ -317,6 +348,19 @@ IActiveInterface* CLevelEditor::SelectClosest(Vec2 vPoint, float fMaxRadius)
 				{
 					mindist = dst;
 					pSel = lg;
+				}
+			}
+		}
+		break;
+		case K_LED_PROP:
+		{
+			for (int kk = 0; kk < m_pLevel->m_visibleList.visible_props.Count(); kk++)
+			{
+				CProp* lg = m_pLevel->m_visibleList.visible_props[kk];
+				if (lg->bbox.PointIn(vPoint))
+				{
+					pSel = lg;
+					break;
 				}
 			}
 		}
@@ -543,6 +587,18 @@ void CLevelEditor::DrawHRuler(Vec2 vBase, float fHeight, DWORD col)
 		RECTXYWH cliprct(vBase.x - 10, vBase.y - 10, 20, -fHeight + 10);
 		CSprite::paintFrameClipped(&m_sprCol, vBase.x, vBase.y, ANM_LVLED_SPR_RULERS, 1, cliprct, col);
 	}
+}
+
+void CLevelEditor::DrawBBox(RECTXYWH_F bbox, DWORD dwCol)
+{
+	RECTXYWH cliprect(bbox.x - 1, bbox.y - 1, bbox.w + 2, 3);
+	CSprite::paintFrameClipped(&m_sprCol, bbox.x, bbox.y, ANM_LVLED_SPR_BBOX, 0, cliprect, dwCol);
+	cliprect.y += bbox.h;
+	CSprite::paintFrameClipped(&m_sprCol, bbox.x, bbox.y + bbox.h, ANM_LVLED_SPR_BBOX, 0, cliprect, dwCol);
+	cliprect.Set(bbox.x - 1, bbox.y - 1, 3, bbox.h + 2);
+	CSprite::paintFrameClipped(&m_sprCol, bbox.x, bbox.y, ANM_LVLED_SPR_BBOX, 1, cliprect, dwCol);
+	cliprect.x += bbox.w;
+	CSprite::paintFrameClipped(&m_sprCol, bbox.x + bbox.w, bbox.y, ANM_LVLED_SPR_BBOX, 1, cliprect, dwCol);
 }
 
 OPRESULT CLevelEditor::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)

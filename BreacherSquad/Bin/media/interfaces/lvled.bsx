@@ -13,6 +13,10 @@
     <Module ImageIdx="0" X="96" Y="32" W="32" H="32" />
     <Module ImageIdx="0" X="128" Y="32" W="32" H="32" />
     <Module ImageIdx="0" X="497" Y="10" W="15" H="499" />
+    <Module ImageIdx="0" X="484" Y="27" W="3" H="465" />
+    <Module ImageIdx="0" X="17" Y="495" W="464" H="3" />
+    <Module ImageIdx="0" X="453" Y="478" W="9" H="9" />
+    <Module ImageIdx="0" X="467" Y="477" W="11" H="11" />
   </Modules>
   <FrameModules>
     <FrameModule ModuleIdx="0" OX="-16" OY="-16" Flags="0" />
@@ -27,6 +31,10 @@
     <FrameModule ModuleIdx="9" OX="-16" OY="-16" Flags="0" />
     <FrameModule ModuleIdx="10" OX="-7" OY="-498" Flags="0" />
     <FrameModule ModuleIdx="10" OX="-7" OY="-1" Flags="0" />
+    <FrameModule ModuleIdx="11" OX="-1" OY="-1" Flags="0" />
+    <FrameModule ModuleIdx="12" OX="-1" OY="-1" Flags="0" />
+    <FrameModule ModuleIdx="13" OX="-4" OY="-4" Flags="0" />
+    <FrameModule ModuleIdx="14" OX="-5" OY="-5" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="-16" BBoxY="-16" BBoxW="32" BBoxH="32">
@@ -101,6 +109,30 @@
       </FModules>
       <Points />
     </Frame>
+    <Frame BBoxX="-1" BBoxY="-1" BBoxW="3" BBoxH="465">
+      <FModules>
+        <FModule Idx="12" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-1" BBoxY="-1" BBoxW="464" BBoxH="3">
+      <FModules>
+        <FModule Idx="13" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-4" BBoxY="-4" BBoxW="9" BBoxH="9">
+      <FModules>
+        <FModule Idx="14" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-5" BBoxY="-5" BBoxW="11" BBoxH="11">
+      <FModules>
+        <FModule Idx="15" />
+      </FModules>
+      <Points />
+    </Frame>
   </Frames>
   <AnimationFrames>
     <AnimationFrame FrameIdx="0" Duration="1" DX="0" DY="0" Flags="0" />
@@ -115,6 +147,10 @@
     <AnimationFrame FrameIdx="9" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="10" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="11" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="13" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="12" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="14" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="15" Duration="1" DX="0" DY="0" Flags="0" />
   </AnimationFrames>
   <Animations>
     <Animation ID="ICONS_BASE" Flags="0">
@@ -134,6 +170,14 @@
     <Animation ID="RULERS" Flags="0">
       <AFrame Idx="10" />
       <AFrame Idx="11" />
+    </Animation>
+    <Animation ID="BBOX" Flags="0">
+      <AFrame Idx="12" />
+      <AFrame Idx="13" />
+    </Animation>
+    <Animation ID="CROSSHAIRS" Flags="0">
+      <AFrame Idx="14" />
+      <AFrame Idx="15" />
     </Animation>
   </Animations>
 </SpriteCollection>

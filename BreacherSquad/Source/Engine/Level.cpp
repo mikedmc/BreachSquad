@@ -1310,21 +1310,9 @@ int CLevel::GetPowerupPlacingScore(CProp* active, D3DXVECTOR2 vPlacerPos)
 		return nScore;
 	}
 	//interactible active
-	for (int kk = 0; kk < m_visibleList.logic_props_closeby[K_LVL_LAYER_BACK].nCount; kk++)
+	for (int kk = 0; kk < m_visibleList.logic_props_closeby.nCount; kk++)
 	{
-		CProp* pActiv = m_visibleList.logic_props_closeby[K_LVL_LAYER_BACK].m_pData[kk];
-		if (!pActiv->bCanInteract)
-			continue;
-		if (pActiv == active)
-			continue;
-
-		if (pActiv->bbox.Intersects(&active->bbox))
-			nScore--;
-	}
-	//mid layer
-	for (int kk = 0; kk < m_visibleList.logic_props_closeby[K_LVL_LAYER_MIDDLE].nCount; kk++)
-	{
-		CProp* pActiv = m_visibleList.logic_props_closeby[K_LVL_LAYER_MIDDLE].m_pData[kk];
+		CProp* pActiv = m_visibleList.logic_props_closeby.m_pData[kk];
 		if (!pActiv->bCanInteract)
 			continue;
 		if (pActiv == active)
@@ -10731,834 +10719,835 @@ void CLevel::Update(float dTime_original)
 
 HRESULT CLevel::PaintOffscreen()
 {
-	if ((!m_bLoaded) || (!m_bOneUpdateDone))
-		return E_FAIL;
-
-	RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
-	//CAABB al camerei
-	CAABB		camAABB;  
-	camAABB.Set(D3DXVECTOR2(camrect.x, camrect.y), D3DXVECTOR2(camrect.Right(), camrect.Bottom()));
-	//matrice folosita local
-	D3DXMATRIXA16 matlocal;
-
-	HRESULT hr = S_OK;
-	//daca nu am capabilitatea de offscreen ies cu eroare
-	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_RTT) == 0)
-		return E_FAIL;
-
-	hr = S_OK;
-	if (SUCCEEDED(hr))
-	{
-		// Clear the render target and the zbuffer 
-		V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET , K_GAME_CLEAR_COLOR, 1.0f, 0));
-
-		m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-		m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
-		//matrice de proiectie offsetata ca sa incapa un pixel intreg (pixel center e in centru)
-		D3DXMATRIXA16 matProj;
-		D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, K_RTT_WIDTH + 0.5f, K_RTT_HEIGHT + 0.5f, 0.5f, 0.0f, 1.0f);
-		m_pDevice->SetTransform(D3DTS_PROJECTION, &matProj);
-
-		m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
-		//use sprite
-		m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
-
-		m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-		m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-		m_pDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
-
-		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-		m_pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-		//#HACK:cand am alpha pe jumatate rezultatul blendingului pe alpha ar iesi si el pe 0 deci in schimba alpha pe mai mica
-		//asta inseamna ca daca am chestii semitransparente imi modifica alpha finala a render targetului
-		//#TODO: aici ar trebui ca umbrele obiectelor sa fie facute din normal map cumva ca sa nu mai am nevoie de separate alpha blending
-		//#TODO: totusi daca am tiles semitransparente pe layer din fatza imi apare aiurea pe cel din spate daca are semitransparenta sau nu e activat alphatest.
-		if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
-		{
-			m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, true);  //????? - este necesara dar nu e foarte bine suportata de multe placi
-			m_pDevice->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_SRCALPHA);
-			m_pDevice->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_DESTALPHA);
-			m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
-		}
-		//set scroll matrix
-		D3DXMATRIXA16 mattrans;
-		MUMatAffine2D(&mattrans, 1.0f, NULL, 0.0f, &D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
-		m_pSprite->SetTransform(&mattrans);
-
-		///.////////////////////////////////////////////////////////
-		///	COLOR MAP
-		///.////////////////////////////////////////////////////////
-
-		CAABB aabbScissor;
-		aabbScissor.Set(0.0f, 0.0f, (float)K_RTT_H_WIDTH, (float)K_RTT_H_HEIGHT);
-		//set clip on colormap
-		if ((m_bInsideHiddenRoom) && (m_HiddenRoomAABB.vSize.x > 0.0f) && (m_HiddenRoomAABB.vSize.y > 0.0f))
-		{
-			CAABB aabbVisible;
-			aabbVisible.Set(m_visibleArea);
-			AABB_Intersection(aabbVisible, m_HiddenRoomAABB, aabbScissor);
-			aabbScissor.Move(D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
-		}
-
-		SetScissorClip(m_pDevice, aabbScissor.vMin.x, aabbScissor.vMin.y, aabbScissor.vSize.x, aabbScissor.vSize.y);
-
-		///--- tiles back layer
-		m_pSprite->SetTransform(&g_matIdentity);
-		//tiles - background
-		for (int yy = 0; yy < m_visibleAreaTL.h; yy++)
-		{
-			for (int xx = 0; xx < m_visibleAreaTL.w; xx++)
-			{
-				int tlX = xx + m_visibleAreaTL.x - m_levelAABB_TL.x;
-				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
-				CTile *tl = &tiles[tlX][tlY];
-				if (tl->tileIDs[0] >= 0)
-					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexBaseIdx]->pTexture, &tl->srcRects[0], NULL, &D3DXVECTOR3(xx * tileW, yy * tileH, 0.0f), 0xffffffff);
-			}
-		}
-		m_pSprite->Flush();
-
-		///--- objects back layer ---
-		m_pSprite->SetTransform(&mattrans);
-
-		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_BACK].Count(); kk++)
-		{
-			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_BACK].m_pData[kk];
-			if (active->flipX /*|| active->flipY*/)
-			{
-				matlocal = mattrans;
-				//pozitie sprite
-				if (active->flipX)
-				{
-					matlocal._11 = -1.0f; //scalare X
-					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; 
-				}
-				m_pSprite->SetTransform(&matlocal);
-				active->sprite.paint_firstModule(&m_sprProps);
-				m_pSprite->SetTransform(&mattrans);
-			}
-			else
-			{
-				active->sprite.paint_firstModule(&m_sprProps);
-			}
-		}
-		m_pSprite->Flush();
-
-		///--- tiles MIDDLE layer
-		m_pSprite->SetTransform(&g_matIdentity);
-		//tiles - background
-		for (int yy = 0; yy < m_visibleAreaTL.h; yy++)
-		{
-			for (int xx = 0; xx < m_visibleAreaTL.w; xx++)
-			{
-				int tlX = xx + m_visibleAreaTL.x - m_levelAABB_TL.x;
-				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
-				CTile *tl = &tiles[tlX][tlY];
-				if (tl->tileIDs[1] >= 0)
-					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexBaseIdx]->pTexture, &tl->srcRects[1], NULL, &D3DXVECTOR3(xx * tileW, yy * tileH, 0.0f), 0xffffffff);
-			}
-		}
-		m_pSprite->Flush();
-
-		///--- decals (blood stains, explosion marks, bullet holes etc) ---
-		if (m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKWALLS].Count() > 0)
-		{
-			m_pSprite->SetTransform(&mattrans);
-			//set special state (keep alpha of destination)
-			if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
-			{
-				m_pDevice->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_ZERO);
-				m_pDevice->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_ONE);
-				m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
-			}
-			else
-			{
-				m_pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, true); //neaparat nevoie
-				m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTALPHA);
-				m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-			}
-			//--- paint them ---
-			for (int kk = 0; kk < m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKWALLS].Count(); kk++)
-			{
-				m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKWALLS].m_pData[kk]->sprite.paint_firstModule(&m_sprProps);
-			}
-			m_pSprite->Flush();
-
-			//restore state
-			if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
-			{
-				m_pDevice->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_SRCALPHA);
-				m_pDevice->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_DESTALPHA);
-				m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
-			}
-			else
-			{
-				m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-				m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-			}
-		}
-
-		///--- objects MIDDLE layer ---
-		m_pSprite->SetTransform(&mattrans);
-
-		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].Count(); kk++)
-		{
-			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].m_pData[kk];
-			if (active->flipX)
-			{
-				matlocal = mattrans;
-				//pozitie sprite
-				if (active->flipX)
-				{
-					matlocal._11 = -1.0f; //scalare X
-					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; 
-				}
-				m_pSprite->SetTransform(&matlocal);
-				active->sprite.paint_firstModule(&m_sprProps);
-				m_pSprite->SetTransform(&mattrans);
-			}
-			else
-			{
-				active->sprite.paint_firstModule(&m_sprProps);
-			}
-		}
-
-		//--- middle objects that can be interacted with are blinking ---
-		AdditiveBlendingON(m_pDevice, m_pSprite);
-		float fAlp = 0.4f * LIMIT(float((2.0f * sin(fLocalTimeline * 2.5f)) - 1.0f), 0.0f, 1.0f);
-		float fAlp2 = 0.4f * ((sin(fLocalTimeline * 10.0f) + 1.0f) / 2.0f);
-		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].Count(); kk++)
-		{
-			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].m_pData[kk];
-			
-			if (!active->bStandsOut)
-				continue;
-
-			DWORD colAlpha = D3DCOLOR_FFFA(fAlp);
-			//object is being touched so show it
-			if( ((pPlayerActor[0] != null) && (active == pPlayerActor[0]->pClosestTouchable)) ||
-				((pPlayerActor[1] != null) && (active == pPlayerActor[1]->pClosestTouchable)) )
-				colAlpha = D3DCOLOR_FFFA(fAlp2);
-
-			if (active->flipX)
-			{
-				matlocal = mattrans;
-				//pozitie sprite
-				if (active->flipX)
-				{
-					matlocal._11 = -1.0f; //scalare X
-					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; 
-				}
-
-				m_pSprite->SetTransform(&matlocal);
-				CSprite spr = active->sprite;
-				spr.color = colAlpha;
-				spr.paint_firstModule(&m_sprProps);
-				m_pSprite->SetTransform(&mattrans);
-			}
-			else
-			{
-				CSprite spr = active->sprite;
-				spr.color = colAlpha;
-				spr.paint_firstModule(&m_sprProps);
-			}
-		}
-		AdditiveBlendingOFF(m_pDevice, m_pSprite);
-
-
-		///--- actor shadows --- only on super high level of detail ---
-		m_pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, true); //neaparat nevoie
-		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTALPHA);
-		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
-		m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, FALSE);  //disable
-
-		for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
-		{
-			CActor* actor = m_visibleList.visible_actors.m_pData[kk];
-		
-			matlocal = mattrans;
-			//aplic matrice flipX daca este cazul
-			if (actor->lookDirXsign == -1)
-			{
-				matlocal._11 = -1.0f;
-				matlocal._41 += 2.0f * actor->sprite_feet.pos.x;
-			}
-
-			//--- versiune cu o umbra fixa ---
-			switch (UTGetAppClass().m_Settings.nLOD_shadows)
-			{
-				case K_UT_LOD_LOW:
-				{
-					matlocal._41 += 6.0f; //distanta umbrei
-					m_pSprite->SetTransform(&matlocal);
-					
-					float spriteAlpha = D3DCOLOR_GETFALPHA(actor->color);
-					DWORD dwShadCol = D3DCOLOR_XXXA(spriteAlpha * 0.4f);
-
-					if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
-					{
-						actor->sprite_feet.paint_firstModuleColorized(&m_sprActors, dwShadCol);
-					}
-					actor->sprite.paint_firstModuleColorized(&m_sprActors, dwShadCol);
-				}
-				break;
-				case K_UT_LOD_MED:
-				{
-					//versiune cu o singura umbra dinamica, media iluminarii
-					//max shadow offset (16.0f)
-					float fMaxOffset = 16.0f;
-
-					float fIllumination = 0.0f; //cantitatea de lumina care cade pe actor
-					D3DXVECTOR2 vLightResultant(0.0f, 0.0f); //media vectorilor de iluminare
-
-					int influences = 0;
-					for (int ll = 0; ll < m_visibleList.visible_lights.Count(); ll++)
-					{
-						CLight* light = m_visibleList.visible_lights[ll];
-						if (!light->castShadows)
-							continue;
-						if (light->type != K_LVL_LT_POINT)
-							continue;
-						D3DXVECTOR2 lightdir = light->pos - actor->posHeart;
-						float lightdist = D3DXVec2Length(&lightdir);
-						if (lightdist > light->fRadius)
-							continue;
-						if (!IsLineOfSight(light->pos, actor->GetPosHeart()))
-							continue;
-
-						//normalize vector
-						lightdir /= lightdist;
-						float opacity = 1.0f - lightdist / m_visibleList.visible_lights.m_pData[ll]->fRadius;
-
-						fIllumination += opacity;
-						//medie ponderata a vectorilor
-						vLightResultant += (lightdir * (1.0f - opacity) * fMaxOffset) * opacity;
-						influences++;
-					}
-
-					if (influences > 0)
-					{
-						vLightResultant /= (float)influences;
-						D3DXMATRIXA16 matshad = matlocal;
-						//scalare offset
-						float offlen = D3DXVec2Length(&vLightResultant);
-						if (offlen > fMaxOffset)
-							vLightResultant *= fMaxOffset / offlen;
-
-						matshad._41 -= vLightResultant.x;
-						matshad._42 -= vLightResultant.y;
-
-						m_pSprite->SetTransform(&matshad);
-
-						float spriteAlpha = D3DCOLOR_GETFALPHA(actor->color);
-						DWORD dwShadCol = D3DCOLOR_COLORALPHA(0x00000000, spriteAlpha * (fIllumination * 0.6f)); //max opacity = 0.7f
-
-						if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
-						{
-							actor->sprite_feet.paint_firstModuleColorized(&m_sprActors, dwShadCol);
-						}
-						actor->sprite.paint_firstModuleColorized(&m_sprActors, dwShadCol);
-					}
-				}
-				break;
-				case K_UT_LOD_HIGH:
-				{
-					//pentru fiecare lumina vad unde pica proiectia umbrei - versiune cu umbre dinamice
-					//are mici probleme cand nu te vede lumina si cand e lumina de sub tine si apare doar printr-o raza (umbra apare intreaga si iese din volumul luminii)
-					D3DXMATRIXA16 matshad;
-					float spriteAlpha = D3DCOLOR_GETFALPHA(actor->color);
-					for (int ll = 0; ll < m_visibleList.visible_lights.Count(); ll++)
-					{
-						CLight* light = m_visibleList.visible_lights[ll];
-						if (!light->castShadows)
-							continue;
-						if (light->type != K_LVL_LT_POINT)
-							continue;
-						D3DXVECTOR2 lightdir = light->pos - actor->GetPosHeart();
-						float lightdist = D3DXVec2Length(&lightdir);
-						if (lightdist > light->fRadius)
-							continue;
-						if (!IsLineOfSight(light->pos, actor->posHeart))
-							continue;
-						//normalize vector
-						lightdir /= lightdist;
-						float opacity = 1.0f - lightdist / light->fRadius;
-
-						matshad = matlocal;
-
-						//max shadow offset (16.0f)
-						matshad._41 -= (1.0f - opacity) * lightdir.x * 16.0f;
-						matshad._42 -= (1.0f - opacity) * lightdir.y * 16.0f;
-
-						m_pSprite->SetTransform(&matshad);
-						DWORD dwShadCol = D3DCOLOR_COLORALPHA(0x00000000, spriteAlpha * opacity * 0.7f); //max opacity = 0.7f
-						if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
-						{
-							actor->sprite_feet.paint_firstModuleColorized(&m_sprActors, dwShadCol);
-						}
-						actor->sprite.paint_firstModuleColorized(&m_sprActors, dwShadCol);
-					}
-				}
-				break;
-			}
-		}
-		m_pSprite->Flush();
-
-		//restore state for normal rendering
-		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-		if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
-		{
-			m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
-		}
-
-		///--- WALLS - front layer/sections ---
-		m_pSprite->SetTransform(&g_matIdentity);
-		//tiles - foreground/sections
-		for (int yy = 0; yy < m_visibleAreaTL.h; yy++)
-		{
-			for (int xx = 0; xx < m_visibleAreaTL.w; xx++)
-			{
-				int tlX = xx + m_visibleAreaTL.x - m_levelAABB_TL.x;
-				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
-				CTile *tl = &tiles[tlX][tlY];
-				if (tl->tileIDs[2] >= 0)
-					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexBaseIdx]->pTexture, &tl->srcRects[2], NULL, &D3DXVECTOR3(xx * tileW, yy * tileH, 0.0f), 0xffffffff);
-			}
-		}
-		m_pSprite->Flush();
-
-		///--- decals objects FRONT layer 
-		m_pSprite->SetTransform(&mattrans);
-		for (int kk = 0; kk < m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKOBJECTS].Count(); kk++)
-		{
-			m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKOBJECTS].m_pData[kk]->sprite.paint_firstModule(&m_sprProps);
-		}
-		m_pSprite->Flush();
-
-		///--- paint RT particles - BACK ---
-		m_pSprite->SetTransform(&g_matIdentity);
-		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_BACK_NRM, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), false);
-		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_BACK_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), true);
-
-
-		///--- paint actors (player included) ---
-		m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-		for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
-		{
-			CActor* actor = m_visibleList.visible_actors.m_pData[kk];
-
-			matlocal = mattrans;
-			//apply flipX matrix
-			if (actor->lookDirXsign == -1)
-			{
-				matlocal._11 = -1.0f;
-				matlocal._41 += 2.0f * actor->sprite_feet.pos.x; //takes the coord from the sprite position as that's already rounded (eliminates jitter)
-			}
-			m_pSprite->SetTransform(&matlocal);
-
-			if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
-			{
-				actor->sprite_feet.paint_firstModule_texOverride(&m_sprActors, actor->nSkinIdx * 2);
-			}
-			actor->sprite.paint_firstModule_texOverride(&m_sprActors, actor->nSkinIdx * 2);
-
-			//--- muzzle flash ---
-			if ((actor->pCurrentWeapon != null) && (actor->pCurrentWeapon->m_sprMuzzleFlash.animationIdx >= 0) && 
-				(actor->pCurrentWeapon->m_sprMuzzleFlash.animStatus != ANIM_STATUS_FRAMELOCK) )
-			{
-				actor->pCurrentWeapon->m_sprMuzzleFlash.pos = actor->pos + actor->vecWeapon_abs[((actor->bCrouched) ? 1 : 0)];
-				actor->pCurrentWeapon->m_sprMuzzleFlash.paint_firstModule(&m_sprActors);
-			}
-		}
-
-		m_pSprite->Flush();
-
-		m_pDevice->SetTransform(D3DTS_WORLD, &mattrans);
-		///--- BULLETS ---
-		PaintBullets();
-		//--- paint level Props ---
-		PaintProps(); //se deseneaza din active
-		
-		m_pSprite->Flush();
-		m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-
-		//--- paint RT particles - FRONT ---
-		m_pSprite->SetTransform(&g_matIdentity);
-		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_FRONT_NRM, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), false);
-		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_FRONT_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), true);
-
-		///--- paint water details ---
-		/*
-		//#TODO: de vazut daca se mai poate optimiza aici...si daca merita optimizat
-		//daca voi avea mai multe chestii de desenat din acest array atunci nu mai merita optimizat
-		m_pSprite->SetTransform(&mattrans);
-		for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
-		{
-			CCollisionShape * col = m_visibleList.logic_colShapesSpecial.m_pData[kk];
-			//water
-			if (col->type == K_LVL_COLL_TYPE_WATER)
-			{
-				if (m_waterAnimIdx < 0)
-				{
-#if defined(_DEBUG) || defined(DEBUG)
-					ErrorBox(K_ERR_WARNING, L"Water animation not set in background object (editor)!");
-#endif
-					continue;
-				}
-				CAABB wbb; //water bbox
-				if (AABB_Intersection(col->bbox, camAABB, wbb))
-				{
-					D3DXVECTOR2 texoff = col->bbox.vMin - wbb.vMin;
-					//!! animatia de apa trebuie sa aiba frame 1 pt suprafata apei si 2 pentru luminile din apa
-					CSprite spr(m_waterAnimIdx, wbb.vMin.x, wbb.vMin.y);
-					spr.color = 0xffffffff;
-
-					spr.currentFrame = 1; //linie apa
-					spr.paintTiledOffset(&m_sprBack, wbb.vSize.x, -1, texoff.x, texoff.y);
-
-					spr.currentFrame = 2; //lumini prin apa
-					spr.pos.y = col->bbox.vMin.y;
-					//alterneaza luminile intre ele	(animatie)
-					float alpha = (sin(fLocalTimeline) + 1.0f) * 0.5f;
-					spr.color = D3DCOLOR_FFFA(alpha);
-					spr.paintTiledOffset(&m_sprBack, wbb.vSize.x, -1, texoff.x, 0.0f);
-					spr.color = D3DCOLOR_FFFA(1.0f - alpha);
-					spr.paintTiledOffset(&m_sprBack, wbb.vSize.x, -1, texoff.x + 64.0f, 0.0f);
-				}
-			}
-		}
-		m_pSprite->SetTransform(&g_matIdentity);
-		*/
-		///--- paint actives front layer ---
-		MUMatAffine2D(&mattrans, 1.0f, NULL, 0.0f, &D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
-		m_pSprite->SetTransform(&mattrans);
-
-		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_FRONT].Count(); kk++)
-		{
-			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_FRONT].m_pData[kk];
-			if (active->flipX)
-			{
-				matlocal = mattrans;
-				if (active->flipX)
-				{
-					matlocal._11 = -1.0f; //scalare X
-					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; //e un calcul logic ca sa ramana incadrat in acelasi bbox real
-				}
-				m_pSprite->SetTransform(&matlocal);
-				active->sprite.paint_firstModule(&m_sprProps);
-				m_pSprite->SetTransform(&mattrans);
-			}
-			else
-			{
-				if (active->fAngle == 0.0f)
-				{
-					active->sprite.paint_firstModule(&m_sprProps);
-				}
-				else
-				{
-					//for now only front objects can be rotated... much optimization, such speed
-					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x - m_visibleArea.x, active->pos.y - m_visibleArea.y));
-
-					m_pSprite->SetTransform(&matlocal);
-					active->sprite.pos = D3DXVECTOR2(0.0f, 0.0f);
-					active->sprite.paint_firstModule(&m_sprProps);
-					m_pSprite->SetTransform(&mattrans);
-				}
-			}
-		}
-		///------ paint interactible front objects ------
-		AdditiveBlendingON(m_pDevice, m_pSprite);
-		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_FRONT].Count(); kk++)
-		{
-			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_FRONT].m_pData[kk];
-			if (!active->bStandsOut)
-				continue;
-
-			DWORD colAlpha = D3DCOLOR_FFFA(fAlp);
-			//object is being touched so show it
-			if (((pPlayerActor[0] != null) && (active == pPlayerActor[0]->pClosestTouchable)) ||
-				((pPlayerActor[1] != null) && (active == pPlayerActor[1]->pClosestTouchable)))
-				colAlpha = D3DCOLOR_FFFA(fAlp2);
-
-
-			if (active->flipX)
-			{
-				RECTXYWH active_bbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
-
-				matlocal = mattrans;
-				//pozitie sprite
-				if (active->flipX)
-				{
-					matlocal._11 = -1.0f; //scalare X
-					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; //e un calcul logic ca sa ramana incadrat in acelasi bbox real
-				}
-				m_pSprite->SetTransform(&matlocal);
-
-				CSprite spr = active->sprite;
-				spr.color = colAlpha;
-				spr.paint_firstModule(&m_sprProps);
-
-				m_pSprite->SetTransform(&mattrans);
-			}
-			else
-			{
-				if (active->fAngle == 0.0f)
-				{
-					CSprite spr = active->sprite;
-					spr.color = colAlpha;
-					spr.paint_firstModule(&m_sprProps);
-				}
-				else
-				{
-					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x - m_visibleArea.x, active->pos.y - m_visibleArea.y));
-
-					m_pSprite->SetTransform(&matlocal);
-					CSprite spr = active->sprite;
-					spr.color = colAlpha;
-					spr.pos = D3DXVECTOR2(0.0f, 0.0f);
-					spr.paint_firstModule(&m_sprProps);
-					m_pSprite->SetTransform(&mattrans);
-				}
-			}
-		}
-		AdditiveBlendingOFF(m_pDevice, m_pSprite);
-
-		
-		m_pSprite->SetTransform(&g_matIdentity);
-		m_pSprite->Flush(); //acest flush trebuie chemat neaparat
-
-		///.////////////////////////////////////////////////////////
-		///	NORMAL MAP
-		///.////////////////////////////////////////////////////////
-		//set clip on colormap
-		aabbScissor.Move(D3DXVECTOR2(K_RTT_H_WIDTH, 0.0f));
-		SetScissorClip(m_pDevice, aabbScissor.vMin.x, aabbScissor.vMin.y, aabbScissor.vSize.x, aabbScissor.vSize.y);
-
-		///--- back tiles normal map
-		m_pSprite->SetTransform(&g_matIdentity);
-		for (int yy = 0; yy < m_visibleAreaTL.h; yy++)
-		{
-			for (int xx = 0; xx < m_visibleAreaTL.w; xx++)
-			{
-				int tlX = xx + m_visibleAreaTL.x - m_levelAABB_TL.x;
-				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
-				CTile *tl = &tiles[tlX][tlY];
-				if (tl->tileIDs[0] >= 0)
-					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexNormIdx]->pTexture, &tl->srcRects[0], NULL, &D3DXVECTOR3(K_RTT_H_WIDTH + xx * tileW, yy * tileH, 0.0f), 0xffffffff);
-			}
-		}
-		m_pSprite->Flush();
-
-		///--- actives back layer ---
-		m_pSprite->SetTransform(&mattrans);
-
-		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_BACK].Count(); kk++)
-		{
-			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_BACK].m_pData[kk];
-
-			if (active->flipX)
-			{
-				RECTXYWH active_bbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
-
-				matlocal = mattrans;
-				//pozitie sprite
-				if (active->flipX)
-				{
-					matlocal._11 = -1.0f; //scalare X
-					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; 
-				}
-				//move obj to normals part of the RT
-				matlocal._41 += K_RTT_H_WIDTH;
-
-				m_pSprite->SetTransform(&matlocal);
-				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
-				m_pSprite->SetTransform(&mattrans);
-			}
-			else
-			{
-				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1, K_RTT_H_WIDTH);
-			}
-		}
-		m_pSprite->Flush();
-
-		///--- middle tiles normal map
-		m_pSprite->SetTransform(&g_matIdentity);
-		for (int yy = 0; yy < m_visibleAreaTL.h; yy++)
-		{
-			for (int xx = 0; xx < m_visibleAreaTL.w; xx++)
-			{
-				int tlX = xx + m_visibleAreaTL.x - m_levelAABB_TL.x;
-				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
-				CTile *tl = &tiles[tlX][tlY];
-
-				if (tl->tileIDs[1] >= 0)
-					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexNormIdx]->pTexture, &tl->srcRects[1], NULL, &D3DXVECTOR3(K_RTT_H_WIDTH + xx * tileW, yy * tileH, 0.0f), 0xffffffff);
-			}
-		}
-		m_pSprite->Flush();
-
-		///--- MIDDLE LAYER objects
-		m_pSprite->SetTransform(&mattrans);
-		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].Count(); kk++)
-		{
-			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].m_pData[kk];
-
-			if (active->flipX)
-			{
-				matlocal = mattrans;
-				//pozitie sprite
-				if (active->flipX)
-				{
-					matlocal._11 = -1.0f; //scalare X
-					matlocal._41 += 2.0f * active->pos.x;
-				}
-				//mut sprite pe zona de normale
-				matlocal._41 += K_RTT_H_WIDTH;
-
-				m_pSprite->SetTransform(&matlocal);
-				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
-				m_pSprite->SetTransform(&mattrans);
-			}
-			else
-			{
-				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1, K_RTT_H_WIDTH);
-			}
-		}
-		m_pSprite->Flush();
-
-		///--- front tiles normal map ---
-		m_pSprite->SetTransform(&g_matIdentity);
-		for (int yy = 0; yy < m_visibleAreaTL.h; yy++)
-		{
-			for (int xx = 0; xx < m_visibleAreaTL.w; xx++)
-			{
-				int tlX = xx + m_visibleAreaTL.x - m_levelAABB_TL.x;
-				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
-				CTile *tl = &tiles[tlX][tlY];
-				if (tl->tileIDs[2] >= 0)
-					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexNormIdx]->pTexture, &tl->srcRects[2], NULL, &D3DXVECTOR3(K_RTT_H_WIDTH + xx * tileW, yy * tileH, 0.0f), 0xffffffff);
-			}
-		}
-		m_pSprite->Flush();
-
-		///--- paint RT particles - BACK ---
-		m_pSprite->SetTransform(&g_matIdentity);
-		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_BACK_NRM, D3DXVECTOR2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
-		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_BACK_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
-
-		///--- ACTORS NORMALS
-		for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
-		{
-			CActor* actor = m_visibleList.visible_actors.m_pData[kk];
-			//aplic matricea de aliniere cu m_visibleArea
-			matlocal = mattrans;
-			//aplic matrice flipX daca este cazul
-			if (actor->lookDirXsign == -1)
-			{
-				matlocal._11 = -1.0f;
-				matlocal._41 += 2.0f * actor->sprite_feet.pos.x;
-			}
-			matlocal._41 += K_RTT_H_WIDTH;
-
-			m_pSprite->SetTransform(&matlocal);
-			//#HACK: when taking damage paint the color frame instead of the normals frame so it looks loghter
-			int nTexOverride = 1;
-			if (actor->nTookDamageFrames > 0)
-				nTexOverride = 0;
-
-			if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
-			{
-				actor->sprite_feet.color = actor->color;
-				actor->sprite_feet.paint_firstModule_texOverride(&m_sprActors, nTexOverride);
-			}
-			actor->sprite.color = actor->color;
-			actor->sprite.paint_firstModule_texOverride(&m_sprActors, nTexOverride);
-
-			//--- muzzle flash ---
-			if ((actor->pCurrentWeapon != null) && (actor->pCurrentWeapon->m_sprMuzzleFlash.animationIdx >= 0) && (actor->pCurrentWeapon->m_sprMuzzleFlash.animStatus != ANIM_STATUS_FRAMELOCK))
-			{
-				actor->pCurrentWeapon->m_sprMuzzleFlash.pos = actor->pos + actor->vecWeapon_abs[((actor->bCrouched) ? 1 : 0)];
-				actor->pCurrentWeapon->m_sprMuzzleFlash.paint_firstModule_texOverride(&m_sprActors, 1);
-			}
-		}
-		m_pSprite->Flush();
-
-		///--- BULLETS NORMALS/self illumi ---
-		matlocal = mattrans;
-		matlocal._41 += K_RTT_H_WIDTH;
-		m_pDevice->SetTransform(D3DTS_WORLD, &matlocal);
-		PaintBullets(true);
-		m_pSprite->Flush();
-		m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-
-		///--- paint RT particles - FRONT ---
-		m_pSprite->SetTransform(&g_matIdentity);
-		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_FRONT_NRM, D3DXVECTOR2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
-		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_FRONT_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
-
-		///--- paint actives front layer NORMALS ---
-		m_pSprite->SetTransform(&mattrans);
-		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_FRONT].Count(); kk++)
-		{
-			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_FRONT].m_pData[kk];
-
-			if (active->flipX)
-			{
-				RECTXYWH active_bbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
-
-				matlocal = mattrans;
-				//pozitie sprite
-				if (active->flipX)
-				{
-					matlocal._11 = -1.0f; //scalare X
-					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; //e un calcul logic ca sa ramana incadrat in acelasi bbox real
-				}
-				//move sprite to right side of RT (normals)
-				matlocal._41 += K_RTT_H_WIDTH;
-
-				m_pSprite->SetTransform(&matlocal);
-				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
-				m_pSprite->SetTransform(&mattrans);
-			}
-			else
-			{
-				if (active->fAngle == 0.0f)
-				{
-					//mut sprite pe zona de normale
-					active->sprite.paint_firstModule_texOverride(&m_sprProps, 1, K_RTT_H_WIDTH);
-				}
-				else
-				{
-					//#TODO: daca ma hotarasc sa nu pun rotatii la obiecte scot partea asta. Momentan am rotatii doar pe front layer la active
-					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x + K_RTT_H_WIDTH - m_visibleArea.x, active->pos.y - m_visibleArea.y));
-
-					m_pSprite->SetTransform(&matlocal);
-					active->sprite.pos = D3DXVECTOR2(0.0f, 0.0f);
-					active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
-					m_pSprite->SetTransform(&mattrans);
-				}
-			}
-		}
-		m_pSprite->Flush();
-
-
-		//close separate alpha blending
-		if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
-		{
-			m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, false);
-		}
-
-		//end sprite
-		m_pSprite->SetTransform(&g_matIdentity);
-		m_pSprite->End();
-		//end scene paint/pass
-		//V(m_pRenderToSurface->EndScene(0));
-	}
-
-	return hr;
+//	if ((!m_bLoaded) || (!m_bOneUpdateDone))
+//		return E_FAIL;
+//
+//	RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
+//	//CAABB al camerei
+//	CAABB		camAABB;  
+//	camAABB.Set(D3DXVECTOR2(camrect.x, camrect.y), D3DXVECTOR2(camrect.Right(), camrect.Bottom()));
+//	//matrice folosita local
+//	D3DXMATRIXA16 matlocal;
+//
+//	HRESULT hr = S_OK;
+//	//daca nu am capabilitatea de offscreen ies cu eroare
+//	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_RTT) == 0)
+//		return E_FAIL;
+//
+//	hr = S_OK;
+//	if (SUCCEEDED(hr))
+//	{
+//		// Clear the render target and the zbuffer 
+//		V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET , K_GAME_CLEAR_COLOR, 1.0f, 0));
+//
+//		m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+//		m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
+//		//matrice de proiectie offsetata ca sa incapa un pixel intreg (pixel center e in centru)
+//		D3DXMATRIXA16 matProj;
+//		D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, K_RTT_WIDTH + 0.5f, K_RTT_HEIGHT + 0.5f, 0.5f, 0.0f, 1.0f);
+//		m_pDevice->SetTransform(D3DTS_PROJECTION, &matProj);
+//
+//		m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
+//		//use sprite
+//		m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
+//
+//		m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+//		m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+//		m_pDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+//
+//		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+//		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+//		m_pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+//		//#HACK:cand am alpha pe jumatate rezultatul blendingului pe alpha ar iesi si el pe 0 deci in schimba alpha pe mai mica
+//		//asta inseamna ca daca am chestii semitransparente imi modifica alpha finala a render targetului
+//		//#TODO: aici ar trebui ca umbrele obiectelor sa fie facute din normal map cumva ca sa nu mai am nevoie de separate alpha blending
+//		//#TODO: totusi daca am tiles semitransparente pe layer din fatza imi apare aiurea pe cel din spate daca are semitransparenta sau nu e activat alphatest.
+//		if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
+//		{
+//			m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, true);  //????? - este necesara dar nu e foarte bine suportata de multe placi
+//			m_pDevice->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_SRCALPHA);
+//			m_pDevice->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_DESTALPHA);
+//			m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
+//		}
+//		//set scroll matrix
+//		D3DXMATRIXA16 mattrans;
+//		MUMatAffine2D(&mattrans, 1.0f, NULL, 0.0f, &D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
+//		m_pSprite->SetTransform(&mattrans);
+//
+//		///.////////////////////////////////////////////////////////
+//		///	COLOR MAP
+//		///.////////////////////////////////////////////////////////
+//
+//		CAABB aabbScissor;
+//		aabbScissor.Set(0.0f, 0.0f, (float)K_RTT_H_WIDTH, (float)K_RTT_H_HEIGHT);
+//		//set clip on colormap
+//		if ((m_bInsideHiddenRoom) && (m_HiddenRoomAABB.vSize.x > 0.0f) && (m_HiddenRoomAABB.vSize.y > 0.0f))
+//		{
+//			CAABB aabbVisible;
+//			aabbVisible.Set(m_visibleArea);
+//			AABB_Intersection(aabbVisible, m_HiddenRoomAABB, aabbScissor);
+//			aabbScissor.Move(D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
+//		}
+//
+//		SetScissorClip(m_pDevice, aabbScissor.vMin.x, aabbScissor.vMin.y, aabbScissor.vSize.x, aabbScissor.vSize.y);
+//
+//		///--- tiles back layer
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		//tiles - background
+//		for (int yy = 0; yy < m_visibleAreaTL.h; yy++)
+//		{
+//			for (int xx = 0; xx < m_visibleAreaTL.w; xx++)
+//			{
+//				int tlX = xx + m_visibleAreaTL.x - m_levelAABB_TL.x;
+//				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
+//				CTile *tl = &tiles[tlX][tlY];
+//				if (tl->tileIDs[0] >= 0)
+//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexBaseIdx]->pTexture, &tl->srcRects[0], NULL, &D3DXVECTOR3(xx * tileW, yy * tileH, 0.0f), 0xffffffff);
+//			}
+//		}
+//		m_pSprite->Flush();
+//
+//		///--- objects back layer ---
+//		m_pSprite->SetTransform(&mattrans);
+//
+//		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_BACK].Count(); kk++)
+//		{
+//			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_BACK].m_pData[kk];
+//			if (active->flipX /*|| active->flipY*/)
+//			{
+//				matlocal = mattrans;
+//				//pozitie sprite
+//				if (active->flipX)
+//				{
+//					matlocal._11 = -1.0f; //scalare X
+//					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; 
+//				}
+//				m_pSprite->SetTransform(&matlocal);
+//				active->sprite.paint_firstModule(&m_sprProps);
+//				m_pSprite->SetTransform(&mattrans);
+//			}
+//			else
+//			{
+//				active->sprite.paint_firstModule(&m_sprProps);
+//			}
+//		}
+//		m_pSprite->Flush();
+//
+//		///--- tiles MIDDLE layer
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		//tiles - background
+//		for (int yy = 0; yy < m_visibleAreaTL.h; yy++)
+//		{
+//			for (int xx = 0; xx < m_visibleAreaTL.w; xx++)
+//			{
+//				int tlX = xx + m_visibleAreaTL.x - m_levelAABB_TL.x;
+//				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
+//				CTile *tl = &tiles[tlX][tlY];
+//				if (tl->tileIDs[1] >= 0)
+//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexBaseIdx]->pTexture, &tl->srcRects[1], NULL, &D3DXVECTOR3(xx * tileW, yy * tileH, 0.0f), 0xffffffff);
+//			}
+//		}
+//		m_pSprite->Flush();
+//
+//		///--- decals (blood stains, explosion marks, bullet holes etc) ---
+//		if (m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKWALLS].Count() > 0)
+//		{
+//			m_pSprite->SetTransform(&mattrans);
+//			//set special state (keep alpha of destination)
+//			if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
+//			{
+//				m_pDevice->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_ZERO);
+//				m_pDevice->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_ONE);
+//				m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
+//			}
+//			else
+//			{
+//				m_pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, true); //neaparat nevoie
+//				m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTALPHA);
+//				m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+//			}
+//			//--- paint them ---
+//			for (int kk = 0; kk < m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKWALLS].Count(); kk++)
+//			{
+//				m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKWALLS].m_pData[kk]->sprite.paint_firstModule(&m_sprProps);
+//			}
+//			m_pSprite->Flush();
+//
+//			//restore state
+//			if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
+//			{
+//				m_pDevice->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_SRCALPHA);
+//				m_pDevice->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_DESTALPHA);
+//				m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
+//			}
+//			else
+//			{
+//				m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+//				m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+//			}
+//		}
+//
+//		///--- objects MIDDLE layer ---
+//		m_pSprite->SetTransform(&mattrans);
+//
+//		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].Count(); kk++)
+//		{
+//			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].m_pData[kk];
+//			if (active->flipX)
+//			{
+//				matlocal = mattrans;
+//				//pozitie sprite
+//				if (active->flipX)
+//				{
+//					matlocal._11 = -1.0f; //scalare X
+//					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; 
+//				}
+//				m_pSprite->SetTransform(&matlocal);
+//				active->sprite.paint_firstModule(&m_sprProps);
+//				m_pSprite->SetTransform(&mattrans);
+//			}
+//			else
+//			{
+//				active->sprite.paint_firstModule(&m_sprProps);
+//			}
+//		}
+//
+//		//--- middle objects that can be interacted with are blinking ---
+//		AdditiveBlendingON(m_pDevice, m_pSprite);
+//		float fAlp = 0.4f * LIMIT(float((2.0f * sin(fLocalTimeline * 2.5f)) - 1.0f), 0.0f, 1.0f);
+//		float fAlp2 = 0.4f * ((sin(fLocalTimeline * 10.0f) + 1.0f) / 2.0f);
+//		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].Count(); kk++)
+//		{
+//			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].m_pData[kk];
+//			
+//			if (!active->bStandsOut)
+//				continue;
+//
+//			DWORD colAlpha = D3DCOLOR_FFFA(fAlp);
+//			//object is being touched so show it
+//			if( ((pPlayerActor[0] != null) && (active == pPlayerActor[0]->pClosestTouchable)) ||
+//				((pPlayerActor[1] != null) && (active == pPlayerActor[1]->pClosestTouchable)) )
+//				colAlpha = D3DCOLOR_FFFA(fAlp2);
+//
+//			if (active->flipX)
+//			{
+//				matlocal = mattrans;
+//				//pozitie sprite
+//				if (active->flipX)
+//				{
+//					matlocal._11 = -1.0f; //scalare X
+//					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; 
+//				}
+//
+//				m_pSprite->SetTransform(&matlocal);
+//				CSprite spr = active->sprite;
+//				spr.color = colAlpha;
+//				spr.paint_firstModule(&m_sprProps);
+//				m_pSprite->SetTransform(&mattrans);
+//			}
+//			else
+//			{
+//				CSprite spr = active->sprite;
+//				spr.color = colAlpha;
+//				spr.paint_firstModule(&m_sprProps);
+//			}
+//		}
+//		AdditiveBlendingOFF(m_pDevice, m_pSprite);
+//
+//
+//		///--- actor shadows --- only on super high level of detail ---
+//		m_pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, true); //neaparat nevoie
+//		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTALPHA);
+//		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+//
+//		m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, FALSE);  //disable
+//
+//		for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
+//		{
+//			CActor* actor = m_visibleList.visible_actors.m_pData[kk];
+//		
+//			matlocal = mattrans;
+//			//aplic matrice flipX daca este cazul
+//			if (actor->lookDirXsign == -1)
+//			{
+//				matlocal._11 = -1.0f;
+//				matlocal._41 += 2.0f * actor->sprite_feet.pos.x;
+//			}
+//
+//			//--- versiune cu o umbra fixa ---
+//			switch (UTGetAppClass().m_Settings.nLOD_shadows)
+//			{
+//				case K_UT_LOD_LOW:
+//				{
+//					matlocal._41 += 6.0f; //distanta umbrei
+//					m_pSprite->SetTransform(&matlocal);
+//					
+//					float spriteAlpha = D3DCOLOR_GETFALPHA(actor->color);
+//					DWORD dwShadCol = D3DCOLOR_XXXA(spriteAlpha * 0.4f);
+//
+//					if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
+//					{
+//						actor->sprite_feet.paint_firstModuleColorized(&m_sprActors, dwShadCol);
+//					}
+//					actor->sprite.paint_firstModuleColorized(&m_sprActors, dwShadCol);
+//				}
+//				break;
+//				case K_UT_LOD_MED:
+//				{
+//					//versiune cu o singura umbra dinamica, media iluminarii
+//					//max shadow offset (16.0f)
+//					float fMaxOffset = 16.0f;
+//
+//					float fIllumination = 0.0f; //cantitatea de lumina care cade pe actor
+//					D3DXVECTOR2 vLightResultant(0.0f, 0.0f); //media vectorilor de iluminare
+//
+//					int influences = 0;
+//					for (int ll = 0; ll < m_visibleList.visible_lights.Count(); ll++)
+//					{
+//						CLight* light = m_visibleList.visible_lights[ll];
+//						if (!light->castShadows)
+//							continue;
+//						if (light->type != K_LVL_LT_POINT)
+//							continue;
+//						D3DXVECTOR2 lightdir = light->pos - actor->posHeart;
+//						float lightdist = D3DXVec2Length(&lightdir);
+//						if (lightdist > light->fRadius)
+//							continue;
+//						if (!IsLineOfSight(light->pos, actor->GetPosHeart()))
+//							continue;
+//
+//						//normalize vector
+//						lightdir /= lightdist;
+//						float opacity = 1.0f - lightdist / m_visibleList.visible_lights.m_pData[ll]->fRadius;
+//
+//						fIllumination += opacity;
+//						//medie ponderata a vectorilor
+//						vLightResultant += (lightdir * (1.0f - opacity) * fMaxOffset) * opacity;
+//						influences++;
+//					}
+//
+//					if (influences > 0)
+//					{
+//						vLightResultant /= (float)influences;
+//						D3DXMATRIXA16 matshad = matlocal;
+//						//scalare offset
+//						float offlen = D3DXVec2Length(&vLightResultant);
+//						if (offlen > fMaxOffset)
+//							vLightResultant *= fMaxOffset / offlen;
+//
+//						matshad._41 -= vLightResultant.x;
+//						matshad._42 -= vLightResultant.y;
+//
+//						m_pSprite->SetTransform(&matshad);
+//
+//						float spriteAlpha = D3DCOLOR_GETFALPHA(actor->color);
+//						DWORD dwShadCol = D3DCOLOR_COLORALPHA(0x00000000, spriteAlpha * (fIllumination * 0.6f)); //max opacity = 0.7f
+//
+//						if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
+//						{
+//							actor->sprite_feet.paint_firstModuleColorized(&m_sprActors, dwShadCol);
+//						}
+//						actor->sprite.paint_firstModuleColorized(&m_sprActors, dwShadCol);
+//					}
+//				}
+//				break;
+//				case K_UT_LOD_HIGH:
+//				{
+//					//pentru fiecare lumina vad unde pica proiectia umbrei - versiune cu umbre dinamice
+//					//are mici probleme cand nu te vede lumina si cand e lumina de sub tine si apare doar printr-o raza (umbra apare intreaga si iese din volumul luminii)
+//					D3DXMATRIXA16 matshad;
+//					float spriteAlpha = D3DCOLOR_GETFALPHA(actor->color);
+//					for (int ll = 0; ll < m_visibleList.visible_lights.Count(); ll++)
+//					{
+//						CLight* light = m_visibleList.visible_lights[ll];
+//						if (!light->castShadows)
+//							continue;
+//						if (light->type != K_LVL_LT_POINT)
+//							continue;
+//						D3DXVECTOR2 lightdir = light->pos - actor->GetPosHeart();
+//						float lightdist = D3DXVec2Length(&lightdir);
+//						if (lightdist > light->fRadius)
+//							continue;
+//						if (!IsLineOfSight(light->pos, actor->posHeart))
+//							continue;
+//						//normalize vector
+//						lightdir /= lightdist;
+//						float opacity = 1.0f - lightdist / light->fRadius;
+//
+//						matshad = matlocal;
+//
+//						//max shadow offset (16.0f)
+//						matshad._41 -= (1.0f - opacity) * lightdir.x * 16.0f;
+//						matshad._42 -= (1.0f - opacity) * lightdir.y * 16.0f;
+//
+//						m_pSprite->SetTransform(&matshad);
+//						DWORD dwShadCol = D3DCOLOR_COLORALPHA(0x00000000, spriteAlpha * opacity * 0.7f); //max opacity = 0.7f
+//						if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
+//						{
+//							actor->sprite_feet.paint_firstModuleColorized(&m_sprActors, dwShadCol);
+//						}
+//						actor->sprite.paint_firstModuleColorized(&m_sprActors, dwShadCol);
+//					}
+//				}
+//				break;
+//			}
+//		}
+//		m_pSprite->Flush();
+//
+//		//restore state for normal rendering
+//		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+//		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+//		if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
+//		{
+//			m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
+//		}
+//
+//		///--- WALLS - front layer/sections ---
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		//tiles - foreground/sections
+//		for (int yy = 0; yy < m_visibleAreaTL.h; yy++)
+//		{
+//			for (int xx = 0; xx < m_visibleAreaTL.w; xx++)
+//			{
+//				int tlX = xx + m_visibleAreaTL.x - m_levelAABB_TL.x;
+//				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
+//				CTile *tl = &tiles[tlX][tlY];
+//				if (tl->tileIDs[2] >= 0)
+//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexBaseIdx]->pTexture, &tl->srcRects[2], NULL, &D3DXVECTOR3(xx * tileW, yy * tileH, 0.0f), 0xffffffff);
+//			}
+//		}
+//		m_pSprite->Flush();
+//
+//		///--- decals objects FRONT layer 
+//		m_pSprite->SetTransform(&mattrans);
+//		for (int kk = 0; kk < m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKOBJECTS].Count(); kk++)
+//		{
+//			m_visibleList.visible_decals[K_LVL_DECAL_LAYER_BACKOBJECTS].m_pData[kk]->sprite.paint_firstModule(&m_sprProps);
+//		}
+//		m_pSprite->Flush();
+//
+//		///--- paint RT particles - BACK ---
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_BACK_NRM, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), false);
+//		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_BACK_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), true);
+//
+//
+//		///--- paint actors (player included) ---
+//		m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+//		for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
+//		{
+//			CActor* actor = m_visibleList.visible_actors.m_pData[kk];
+//
+//			matlocal = mattrans;
+//			//apply flipX matrix
+//			if (actor->lookDirXsign == -1)
+//			{
+//				matlocal._11 = -1.0f;
+//				matlocal._41 += 2.0f * actor->sprite_feet.pos.x; //takes the coord from the sprite position as that's already rounded (eliminates jitter)
+//			}
+//			m_pSprite->SetTransform(&matlocal);
+//
+//			if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
+//			{
+//				actor->sprite_feet.paint_firstModule_texOverride(&m_sprActors, actor->nSkinIdx * 2);
+//			}
+//			actor->sprite.paint_firstModule_texOverride(&m_sprActors, actor->nSkinIdx * 2);
+//
+//			//--- muzzle flash ---
+//			if ((actor->pCurrentWeapon != null) && (actor->pCurrentWeapon->m_sprMuzzleFlash.animationIdx >= 0) && 
+//				(actor->pCurrentWeapon->m_sprMuzzleFlash.animStatus != ANIM_STATUS_FRAMELOCK) )
+//			{
+//				actor->pCurrentWeapon->m_sprMuzzleFlash.pos = actor->pos + actor->vecWeapon_abs[((actor->bCrouched) ? 1 : 0)];
+//				actor->pCurrentWeapon->m_sprMuzzleFlash.paint_firstModule(&m_sprActors);
+//			}
+//		}
+//
+//		m_pSprite->Flush();
+//
+//		m_pDevice->SetTransform(D3DTS_WORLD, &mattrans);
+//		///--- BULLETS ---
+//		PaintBullets();
+//		//--- paint level Props ---
+//		PaintProps(); //se deseneaza din active
+//		
+//		m_pSprite->Flush();
+//		m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+//
+//		//--- paint RT particles - FRONT ---
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_FRONT_NRM, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), false);
+//		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_FRONT_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), true);
+//
+//		///--- paint water details ---
+//		/*
+//		//#TODO: de vazut daca se mai poate optimiza aici...si daca merita optimizat
+//		//daca voi avea mai multe chestii de desenat din acest array atunci nu mai merita optimizat
+//		m_pSprite->SetTransform(&mattrans);
+//		for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
+//		{
+//			CCollisionShape * col = m_visibleList.logic_colShapesSpecial.m_pData[kk];
+//			//water
+//			if (col->type == K_LVL_COLL_TYPE_WATER)
+//			{
+//				if (m_waterAnimIdx < 0)
+//				{
+//#if defined(_DEBUG) || defined(DEBUG)
+//					ErrorBox(K_ERR_WARNING, L"Water animation not set in background object (editor)!");
+//#endif
+//					continue;
+//				}
+//				CAABB wbb; //water bbox
+//				if (AABB_Intersection(col->bbox, camAABB, wbb))
+//				{
+//					D3DXVECTOR2 texoff = col->bbox.vMin - wbb.vMin;
+//					//!! animatia de apa trebuie sa aiba frame 1 pt suprafata apei si 2 pentru luminile din apa
+//					CSprite spr(m_waterAnimIdx, wbb.vMin.x, wbb.vMin.y);
+//					spr.color = 0xffffffff;
+//
+//					spr.currentFrame = 1; //linie apa
+//					spr.paintTiledOffset(&m_sprBack, wbb.vSize.x, -1, texoff.x, texoff.y);
+//
+//					spr.currentFrame = 2; //lumini prin apa
+//					spr.pos.y = col->bbox.vMin.y;
+//					//alterneaza luminile intre ele	(animatie)
+//					float alpha = (sin(fLocalTimeline) + 1.0f) * 0.5f;
+//					spr.color = D3DCOLOR_FFFA(alpha);
+//					spr.paintTiledOffset(&m_sprBack, wbb.vSize.x, -1, texoff.x, 0.0f);
+//					spr.color = D3DCOLOR_FFFA(1.0f - alpha);
+//					spr.paintTiledOffset(&m_sprBack, wbb.vSize.x, -1, texoff.x + 64.0f, 0.0f);
+//				}
+//			}
+//		}
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		*/
+//		///--- paint actives front layer ---
+//		MUMatAffine2D(&mattrans, 1.0f, NULL, 0.0f, &D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
+//		m_pSprite->SetTransform(&mattrans);
+//
+//		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_FRONT].Count(); kk++)
+//		{
+//			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_FRONT].m_pData[kk];
+//			if (active->flipX)
+//			{
+//				matlocal = mattrans;
+//				if (active->flipX)
+//				{
+//					matlocal._11 = -1.0f; //scalare X
+//					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; //e un calcul logic ca sa ramana incadrat in acelasi bbox real
+//				}
+//				m_pSprite->SetTransform(&matlocal);
+//				active->sprite.paint_firstModule(&m_sprProps);
+//				m_pSprite->SetTransform(&mattrans);
+//			}
+//			else
+//			{
+//				if (active->fAngle == 0.0f)
+//				{
+//					active->sprite.paint_firstModule(&m_sprProps);
+//				}
+//				else
+//				{
+//					//for now only front objects can be rotated... much optimization, such speed
+//					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x - m_visibleArea.x, active->pos.y - m_visibleArea.y));
+//
+//					m_pSprite->SetTransform(&matlocal);
+//					active->sprite.pos = D3DXVECTOR2(0.0f, 0.0f);
+//					active->sprite.paint_firstModule(&m_sprProps);
+//					m_pSprite->SetTransform(&mattrans);
+//				}
+//			}
+//		}
+//		///------ paint interactible front objects ------
+//		AdditiveBlendingON(m_pDevice, m_pSprite);
+//		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_FRONT].Count(); kk++)
+//		{
+//			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_FRONT].m_pData[kk];
+//			if (!active->bStandsOut)
+//				continue;
+//
+//			DWORD colAlpha = D3DCOLOR_FFFA(fAlp);
+//			//object is being touched so show it
+//			if (((pPlayerActor[0] != null) && (active == pPlayerActor[0]->pClosestTouchable)) ||
+//				((pPlayerActor[1] != null) && (active == pPlayerActor[1]->pClosestTouchable)))
+//				colAlpha = D3DCOLOR_FFFA(fAlp2);
+//
+//
+//			if (active->flipX)
+//			{
+//				RECTXYWH active_bbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
+//
+//				matlocal = mattrans;
+//				//pozitie sprite
+//				if (active->flipX)
+//				{
+//					matlocal._11 = -1.0f; //scalare X
+//					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; //e un calcul logic ca sa ramana incadrat in acelasi bbox real
+//				}
+//				m_pSprite->SetTransform(&matlocal);
+//
+//				CSprite spr = active->sprite;
+//				spr.color = colAlpha;
+//				spr.paint_firstModule(&m_sprProps);
+//
+//				m_pSprite->SetTransform(&mattrans);
+//			}
+//			else
+//			{
+//				if (active->fAngle == 0.0f)
+//				{
+//					CSprite spr = active->sprite;
+//					spr.color = colAlpha;
+//					spr.paint_firstModule(&m_sprProps);
+//				}
+//				else
+//				{
+//					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x - m_visibleArea.x, active->pos.y - m_visibleArea.y));
+//
+//					m_pSprite->SetTransform(&matlocal);
+//					CSprite spr = active->sprite;
+//					spr.color = colAlpha;
+//					spr.pos = D3DXVECTOR2(0.0f, 0.0f);
+//					spr.paint_firstModule(&m_sprProps);
+//					m_pSprite->SetTransform(&mattrans);
+//				}
+//			}
+//		}
+//		AdditiveBlendingOFF(m_pDevice, m_pSprite);
+//
+//		
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		m_pSprite->Flush(); //acest flush trebuie chemat neaparat
+//
+//		///.////////////////////////////////////////////////////////
+//		///	NORMAL MAP
+//		///.////////////////////////////////////////////////////////
+//		//set clip on colormap
+//		aabbScissor.Move(D3DXVECTOR2(K_RTT_H_WIDTH, 0.0f));
+//		SetScissorClip(m_pDevice, aabbScissor.vMin.x, aabbScissor.vMin.y, aabbScissor.vSize.x, aabbScissor.vSize.y);
+//
+//		///--- back tiles normal map
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		for (int yy = 0; yy < m_visibleAreaTL.h; yy++)
+//		{
+//			for (int xx = 0; xx < m_visibleAreaTL.w; xx++)
+//			{
+//				int tlX = xx + m_visibleAreaTL.x - m_levelAABB_TL.x;
+//				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
+//				CTile *tl = &tiles[tlX][tlY];
+//				if (tl->tileIDs[0] >= 0)
+//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexNormIdx]->pTexture, &tl->srcRects[0], NULL, &D3DXVECTOR3(K_RTT_H_WIDTH + xx * tileW, yy * tileH, 0.0f), 0xffffffff);
+//			}
+//		}
+//		m_pSprite->Flush();
+//
+//		///--- actives back layer ---
+//		m_pSprite->SetTransform(&mattrans);
+//
+//		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_BACK].Count(); kk++)
+//		{
+//			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_BACK].m_pData[kk];
+//
+//			if (active->flipX)
+//			{
+//				RECTXYWH active_bbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
+//
+//				matlocal = mattrans;
+//				//pozitie sprite
+//				if (active->flipX)
+//				{
+//					matlocal._11 = -1.0f; //scalare X
+//					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; 
+//				}
+//				//move obj to normals part of the RT
+//				matlocal._41 += K_RTT_H_WIDTH;
+//
+//				m_pSprite->SetTransform(&matlocal);
+//				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
+//				m_pSprite->SetTransform(&mattrans);
+//			}
+//			else
+//			{
+//				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1, K_RTT_H_WIDTH);
+//			}
+//		}
+//		m_pSprite->Flush();
+//
+//		///--- middle tiles normal map
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		for (int yy = 0; yy < m_visibleAreaTL.h; yy++)
+//		{
+//			for (int xx = 0; xx < m_visibleAreaTL.w; xx++)
+//			{
+//				int tlX = xx + m_visibleAreaTL.x - m_levelAABB_TL.x;
+//				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
+//				CTile *tl = &tiles[tlX][tlY];
+//
+//				if (tl->tileIDs[1] >= 0)
+//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexNormIdx]->pTexture, &tl->srcRects[1], NULL, &D3DXVECTOR3(K_RTT_H_WIDTH + xx * tileW, yy * tileH, 0.0f), 0xffffffff);
+//			}
+//		}
+//		m_pSprite->Flush();
+//
+//		///--- MIDDLE LAYER objects
+//		m_pSprite->SetTransform(&mattrans);
+//		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].Count(); kk++)
+//		{
+//			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_MIDDLE].m_pData[kk];
+//
+//			if (active->flipX)
+//			{
+//				matlocal = mattrans;
+//				//pozitie sprite
+//				if (active->flipX)
+//				{
+//					matlocal._11 = -1.0f; //scalare X
+//					matlocal._41 += 2.0f * active->pos.x;
+//				}
+//				//mut sprite pe zona de normale
+//				matlocal._41 += K_RTT_H_WIDTH;
+//
+//				m_pSprite->SetTransform(&matlocal);
+//				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
+//				m_pSprite->SetTransform(&mattrans);
+//			}
+//			else
+//			{
+//				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1, K_RTT_H_WIDTH);
+//			}
+//		}
+//		m_pSprite->Flush();
+//
+//		///--- front tiles normal map ---
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		for (int yy = 0; yy < m_visibleAreaTL.h; yy++)
+//		{
+//			for (int xx = 0; xx < m_visibleAreaTL.w; xx++)
+//			{
+//				int tlX = xx + m_visibleAreaTL.x - m_levelAABB_TL.x;
+//				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
+//				CTile *tl = &tiles[tlX][tlY];
+//				if (tl->tileIDs[2] >= 0)
+//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexNormIdx]->pTexture, &tl->srcRects[2], NULL, &D3DXVECTOR3(K_RTT_H_WIDTH + xx * tileW, yy * tileH, 0.0f), 0xffffffff);
+//			}
+//		}
+//		m_pSprite->Flush();
+//
+//		///--- paint RT particles - BACK ---
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_BACK_NRM, D3DXVECTOR2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
+//		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_BACK_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
+//
+//		///--- ACTORS NORMALS
+//		for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
+//		{
+//			CActor* actor = m_visibleList.visible_actors.m_pData[kk];
+//			//aplic matricea de aliniere cu m_visibleArea
+//			matlocal = mattrans;
+//			//aplic matrice flipX daca este cazul
+//			if (actor->lookDirXsign == -1)
+//			{
+//				matlocal._11 = -1.0f;
+//				matlocal._41 += 2.0f * actor->sprite_feet.pos.x;
+//			}
+//			matlocal._41 += K_RTT_H_WIDTH;
+//
+//			m_pSprite->SetTransform(&matlocal);
+//			//#HACK: when taking damage paint the color frame instead of the normals frame so it looks loghter
+//			int nTexOverride = 1;
+//			if (actor->nTookDamageFrames > 0)
+//				nTexOverride = 0;
+//
+//			if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
+//			{
+//				actor->sprite_feet.color = actor->color;
+//				actor->sprite_feet.paint_firstModule_texOverride(&m_sprActors, nTexOverride);
+//			}
+//			actor->sprite.color = actor->color;
+//			actor->sprite.paint_firstModule_texOverride(&m_sprActors, nTexOverride);
+//
+//			//--- muzzle flash ---
+//			if ((actor->pCurrentWeapon != null) && (actor->pCurrentWeapon->m_sprMuzzleFlash.animationIdx >= 0) && (actor->pCurrentWeapon->m_sprMuzzleFlash.animStatus != ANIM_STATUS_FRAMELOCK))
+//			{
+//				actor->pCurrentWeapon->m_sprMuzzleFlash.pos = actor->pos + actor->vecWeapon_abs[((actor->bCrouched) ? 1 : 0)];
+//				actor->pCurrentWeapon->m_sprMuzzleFlash.paint_firstModule_texOverride(&m_sprActors, 1);
+//			}
+//		}
+//		m_pSprite->Flush();
+//
+//		///--- BULLETS NORMALS/self illumi ---
+//		matlocal = mattrans;
+//		matlocal._41 += K_RTT_H_WIDTH;
+//		m_pDevice->SetTransform(D3DTS_WORLD, &matlocal);
+//		PaintBullets(true);
+//		m_pSprite->Flush();
+//		m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+//
+//		///--- paint RT particles - FRONT ---
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_FRONT_NRM, D3DXVECTOR2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
+//		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_FRONT_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
+//
+//		///--- paint actives front layer NORMALS ---
+//		m_pSprite->SetTransform(&mattrans);
+//		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_FRONT].Count(); kk++)
+//		{
+//			CProp *active = m_visibleList.visible_props[K_LVL_LAYER_FRONT].m_pData[kk];
+//
+//			if (active->flipX)
+//			{
+//				RECTXYWH active_bbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
+//
+//				matlocal = mattrans;
+//				//pozitie sprite
+//				if (active->flipX)
+//				{
+//					matlocal._11 = -1.0f; //scalare X
+//					matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; //e un calcul logic ca sa ramana incadrat in acelasi bbox real
+//				}
+//				//move sprite to right side of RT (normals)
+//				matlocal._41 += K_RTT_H_WIDTH;
+//
+//				m_pSprite->SetTransform(&matlocal);
+//				active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
+//				m_pSprite->SetTransform(&mattrans);
+//			}
+//			else
+//			{
+//				if (active->fAngle == 0.0f)
+//				{
+//					//mut sprite pe zona de normale
+//					active->sprite.paint_firstModule_texOverride(&m_sprProps, 1, K_RTT_H_WIDTH);
+//				}
+//				else
+//				{
+//					//#TODO: daca ma hotarasc sa nu pun rotatii la obiecte scot partea asta. Momentan am rotatii doar pe front layer la active
+//					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x + K_RTT_H_WIDTH - m_visibleArea.x, active->pos.y - m_visibleArea.y));
+//
+//					m_pSprite->SetTransform(&matlocal);
+//					active->sprite.pos = D3DXVECTOR2(0.0f, 0.0f);
+//					active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
+//					m_pSprite->SetTransform(&mattrans);
+//				}
+//			}
+//		}
+//		m_pSprite->Flush();
+//
+//
+//		//close separate alpha blending
+//		if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
+//		{
+//			m_pDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, false);
+//		}
+//
+//		//end sprite
+//		m_pSprite->SetTransform(&g_matIdentity);
+//		m_pSprite->End();
+//		//end scene paint/pass
+//		//V(m_pRenderToSurface->EndScene(0));
+//	}
+//
+//	return hr;
+	return S_OK;
 }
 
 HRESULT CLevel::PaintOffscreen_nothing()
@@ -11904,9 +11893,9 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, MatA16* matProj)
 	///--- props
 	m_pSprite->SetTransform(&g_matIdentity);
 
-	for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_BACK].Count(); kk++)
+	for (int kk = 0; kk < m_visibleList.visible_props.Count(); kk++)
 	{
-		CProp *active = m_visibleList.visible_props[K_LVL_LAYER_BACK].m_pData[kk];
+		CProp *active = m_visibleList.visible_props.m_pData[kk];
 		if (active->flipX /*|| active->flipY*/)
 		{
 			matlocal = g_matIdentity;
@@ -16108,9 +16097,9 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			//check grenade interaction AIs
 			if ((fMaxDamage > 0.0f) && (bInteractAI) && (fDamageRadius > 0.0f))
 			{
-				for (int kk = 0; kk < m_visibleList.logic_props_closeby[K_LVL_LAYER_FRONT].Count(); kk++)
+				for (int kk = 0; kk < m_visibleList.logic_props_closeby.Count(); kk++)
 				{
-					CProp * activ = m_visibleList.logic_props_closeby[K_LVL_LAYER_FRONT].m_pData[kk];
+					CProp * activ = m_visibleList.logic_props_closeby.m_pData[kk];
 					if (activ->AIstate == K_AI_STATE_ACTIVE_SWINGING_FRONTOBJ)
 					{
 						//daca am activ swinging si e in raza grenadei

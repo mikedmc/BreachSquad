@@ -6,7 +6,7 @@ enum eLvlEdTool {
 	K_LED_TILE = 0,		
 	// selectable objects from here
 	K_LED_LIGHT = 1,		// lights, go figure
-	K_LED_OBJECT,			// all other objects, static or active
+	K_LED_PROP,				// all other objects, static or active
 	K_LED_ACTOR,			// players and enemies
 	K_LED_COLBOX,			// collision boxes
 
@@ -28,6 +28,7 @@ private:
 	IActiveInterface*	pSelected;				// Selected item
 
 	Vec2				m_vCamPos_ini;			// saved initial camera position (HOME)
+	double				fTimeline;				// used for some animations
 public: 
 	Vec2				m_vCamPos;				// Camera position
 
@@ -63,8 +64,10 @@ public:
 private:
 	//--- IMGUI adds controls specific to selected light
 	void				IMGUI_AddLightProps(CLight* light);
+	
 	// draws a ruler to show you the height of an object
 	void				DrawHRuler(Vec2 vBase, float fHeight, DWORD col);
+	void				DrawBBox(RECTXYWH_F bbox, DWORD dwCol);
 
 
 public: //--- framework methods ---
