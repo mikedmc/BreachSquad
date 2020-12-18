@@ -1,5 +1,7 @@
 #pragma once
 
+#define K_LED_CAMSPEED				256.0f
+
 enum eLvlEdTool {
 	K_LED_TILE = 0,		
 	// selectable objects from here
@@ -25,7 +27,11 @@ private:
 	eLvlEdTool			eTool;					// Current tool
 	IActiveInterface*	pSelected;				// Selected item
 
+	Vec2				m_vCamPos_ini;			// saved initial camera position (HOME)
 public: 
+	Vec2				m_vCamPos;				// Camera position
+
+public:
 	CLevelEditor();
 	~CLevelEditor();
 
@@ -57,7 +63,7 @@ public:
 private:
 	//--- IMGUI adds controls specific to selected light
 	void				IMGUI_AddLightProps(CLight* light);
-
+	// draws a ruler to show you the height of an object
 	void				DrawHRuler(Vec2 vBase, float fHeight, DWORD col);
 
 

@@ -98,10 +98,6 @@ void CCollisionShape::PostConstructionInit()
 		collFlags = K_DIRFLAG_NONE;
 		stairSize = 0;
 		castShadows = false;
-#ifdef ENABLE_LEVEL_SHOWCASE
-		bHidden = true;
-		bSetHidden = true;
-#endif // ENABLE_LEVEL_SHOWCASE
 		//setez by default AI de FOW unde nu am setat AI din editor
 		if (AIstate == K_AI_STATE_UNDEFINED)
 			AIstate = K_AI_STATE_COLL_FOG_OF_WAR;

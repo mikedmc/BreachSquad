@@ -95,9 +95,14 @@ public: //logic
 	}
 
 	// tells if object is still alive or if it is pending kill
-	inline bool Alive() {
+	inline bool IsAlive() {
 		return (!bPendingKill);
 	}
+
+	// Tells if object is waiting to be deallocated
+	inline bool IsPendingKill() {
+		return bPendingKill;
+	}	
 
 	// Loads logic from binary file (editor exported logic)
 	void LoadLogic(FILE* fl);

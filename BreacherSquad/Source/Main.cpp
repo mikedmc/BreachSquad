@@ -2837,6 +2837,8 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 #ifdef K_CONTROLS_EDITOR
 		g_ControlsEditor.ReceiveKeys(nChar);
 #endif
+
+		g_editor.ReceiveKeys(nChar);
 		///--- send keys to controls manager ---
 		UTGetControlsManager().ReceiveInput(K_CCTRLMGR_INPUT_KEY, (UINT32)nChar);
 																				 

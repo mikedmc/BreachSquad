@@ -236,7 +236,7 @@ public:
 	/* Releases all dead objects (bReleaseIt flag set) on a separate step so they don't get deallocated when still in visibility lists */
 	void					CleanupDeadObjects();
 	/*--- updates all IActiveInterface implementations ---*/
-	void					UpdateAI(float dTime);
+	void					UpdateAI(float dTime, bool bInEditor = false);
 	//updates AI for base class (common AIs)
 	bool					UpdateAI_base(IActiveInterface* active, float dTime, double fTimeline);
 	//updates AI for derived classes (particulare)

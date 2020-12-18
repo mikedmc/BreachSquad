@@ -11,7 +11,7 @@ void CLight::SetAngle(float fnAngle)
 
 void CLight::PostConstructionInit()
 {
-
+	bPendingKill = false;
 }
 
 void CLight::BeginPlay()

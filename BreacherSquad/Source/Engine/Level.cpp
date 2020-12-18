@@ -8536,9 +8536,19 @@ void CLevel::CleanupDeadObjects()
 			m_arrActors.Remove(kk);
 		}
 	}
+
+	//check lights
+	for (int kk = 0; kk < m_arrLights.GetSize(); kk++)
+	{
+		if (m_arrLights[kk]->IsPendingKill())
+		{
+			SAFE_DELETE(m_arrLights[kk]);
+			m_arrLights.Remove(kk);
+		}
+	}
 }
 
-void CLevel::UpdateAI(float dTime)
+void CLevel::UpdateAI(float dTime, bool bInEditor)
 {
 	//reset targets left (will be counted below)
 	m_arrStats[K_LVL_STATS_TARGETS_LEFT] = 0;
@@ -8581,7 +8591,10 @@ void CLevel::UpdateAI(float dTime)
 	for (int kk = m_arrActors.GetSize() - 1; kk >= 0; kk--)
 	{
 		CActor* act = m_arrActors[kk];
-		UpdateAI_actor(act, dTime);
+		if (!bInEditor)
+		{
+			UpdateAI_actor(act, dTime);
+		}
 		//add some floats to detect network inconsistencies
 		fHashKey += act->pos.x + act->pos.y + act->AItimerDecision + act->fLife + act->fArmor + act->fStunTimer;
 
@@ -10254,7 +10267,7 @@ void CLevel::Update(float dTime_original)
 	///--- DECALS ---
 	UpdateDecals(dTime);
 	///--- ACTIVES ---
-	UpdateAI(dTime);
+	UpdateAI(dTime, g_editor.IsLaunched());
 
 	///--- release dead objects all at once here ---
 	//(called before BuildVisibilityLists but after bullets,physics updates because it deallocates stuff from visibility lists)
@@ -10336,23 +10349,24 @@ void CLevel::Update(float dTime_original)
 
 	//handles render size changes
 	m_camLevel.SetViewport(UTGetAppClass().g_rectRT); 
-	//daca nu are target se uita dupa players (media pozitiilor lor)
-	if (m_camTargetActive == null)
+	if (g_editor.IsLaunched())
 	{
-		if ((bAvgSet) && (!m_bInsideHiddenRoom))
-			m_vCamPosDefault = vPlayersAvg;
-
-#ifdef ENABLE_LEVEL_SHOWCASE
-		//show the level with the mouse move
-		m_vCamPosDefault = D3DXVECTOR2(	m_levelAABB.x + m_levelAABB.w * g_mouse.pos.x / UTGetAppClass().g_rectRender.w, 
-										m_levelAABB.y + m_levelAABB.h * g_mouse.pos.y / UTGetAppClass().g_rectRender.h	);
-#endif // ENABLE_LEVEL_SHOWCASE
-
-		m_camLevel.SetCamPos(&m_vCamPosDefault);
+		m_camLevel.SetCamPos(&g_editor.m_vCamPos);
 	}
 	else
 	{
-		m_camLevel.SetCamPos(&(m_camTargetActive->pos));
+		//no target camera object? look at the player pos average
+		if (m_camTargetActive == null)
+		{
+			if ((bAvgSet) && (!m_bInsideHiddenRoom))
+				m_vCamPosDefault = vPlayersAvg;
+
+			m_camLevel.SetCamPos(&m_vCamPosDefault);
+		}
+		else
+		{
+			m_camLevel.SetCamPos(&(m_camTargetActive->pos));
+		}
 	}
 
 	m_camLevel.Update(dTime);

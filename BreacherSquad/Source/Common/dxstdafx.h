@@ -49,8 +49,8 @@
 #endif
 
 #if defined(ENABLE_DEVMODE_RELEASE)
-//level camera scrolls with the mouse so we can check the level rendering
-//#define ENABLE_LEVEL_SHOWCASE
+
+
 #endif
 
 //when enabled it checks if the game freezed during online gameplay
