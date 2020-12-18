@@ -658,6 +658,49 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			{
 				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
 			}
+
+			// show light textures in child window
+			{
+				ImGui::Separator();
+				ImGui::Text("Light Texture");
+				ImGui::BeginChild("ChildL", ImVec2(ImGui::GetWindowContentRegionWidth(), 260), true, 0);
+
+
+				const int anmID = light->animID;
+				ImVec2 button_sz(48, 48);
+				scAnimation* anm = m_pLevel->m_sprLights.Animations[anmID];
+				PTEXTURE imgtex = m_pLevel->m_sprLights.Textures[0]->pTex;
+
+				ImGuiStyle& style = ImGui::GetStyle();
+				float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+
+				for (int n = 0; n < anm->aframesNo; n++)
+				{
+					RECTLTRB_F texrect = m_pLevel->m_sprLights.GetModuleRect_TexCoords(anmID, n, 0);
+					ImVec2 tul(texrect.left, texrect.top);
+					ImVec2 tdr(texrect.right, texrect.bottom);
+
+					ImVec4 bgcol(0.0f, 0.0f, 0.0f, 1.0f);
+					if (n == light->frameID)
+						bgcol = { 0.5f, 0.0f, 0.0f, 1.0f };
+
+					ImGui::PushID(n);
+					if (ImGui::ImageButton((void*)(intptr_t)imgtex, button_sz, tul, tdr, 1, bgcol))
+					{
+						light->SetLightTexture(&m_pLevel->m_sprLights, anmID, n);
+					}
+
+					float last_button_x2 = ImGui::GetItemRectMax().x;
+					float next_button_x2 = last_button_x2 + style.ItemSpacing.x + button_sz.x; // Expected position if next button was on same line
+					if (n + 1 < anm->aframesNo && next_button_x2 < window_visible_x2)
+						ImGui::SameLine();
+					ImGui::PopID();
+				}
+
+
+				ImGui::EndChild();
+			}
+
 		}
 		break;
 

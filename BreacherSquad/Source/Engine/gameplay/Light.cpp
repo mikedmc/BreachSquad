@@ -87,16 +87,32 @@ void CLight::UpdateInternalData(CSpriteCollection* pLightsSprCol)
 			lCorners[3] = Vec3(unionAABB.vMin.x, unionAABB.vMax.y, 0.0f);
 
 			if ((animID >= 0) && (pLightsSprCol != null))
-				lTexRect = pLightsSprCol->GetModuleRect_TexCoords(ANM_LIGHTS_SPR_PROJECTED_DIR, 0, 0);
+				lTexRect = pLightsSprCol->GetModuleRect_TexCoords(animID, frameID, 0);
 		}
 		break;
 	}
 
 }
 
+void CLight::SetLightTexture(CSpriteCollection* sprCol, int nAnimID, int nFrameID)
+{
+	animID = nAnimID;
+	frameID = nFrameID;
+	if (animID >= 0)
+	{
+		//lTexRect = sprCol->GetModuleRect_TexCoords(animID, frameID, 0);
+		RECTXYWH lrect = sprCol->GetAFrameBBox_real(animID, frameID);
+		bbox_ini.Set(lrect);
+		bbox = bbox_ini;
+		bbox.Move(pos);
+	}
+
+	UpdateInternalData(sprCol);
+}
+
 CLight::CLight() :
 	m_nLightMeshIdx(-1), m_nShadowMeshIdx(-1),
-	type(K_LVL_LT_UNKNOWN), animID(-1), 
+	type(K_LVL_LT_UNKNOWN), animID(-1), frameID(0),
 	fRadius(0.0f), fVolumeAlpha(1.0f), castShadows(false),
 	nProfileID(0)
 {

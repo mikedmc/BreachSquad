@@ -54,6 +54,7 @@ public:
 	int					m_nShadowMeshIdx;			// buffer-ul dinamic pt shadow volume
 													   
 	int					animID;						// -1 - not set
+	int					frameID;					// must be set when animID is set
 	float				fVolumeAlpha;				// light's atmospheric volume alpha
 
 public:
@@ -74,4 +75,7 @@ public:
 	// Initializes internal data for rendering
 	// Make sure all basic light data is set before calling it (or call inside PostConstructionInit)
 	void				UpdateInternalData(CSpriteCollection* pLightsSprCol = nullptr);
+
+	// Sets the light's texture, if necessary
+	void				SetLightTexture(CSpriteCollection* sprCol, int nAnimID, int nFrameID);
 };

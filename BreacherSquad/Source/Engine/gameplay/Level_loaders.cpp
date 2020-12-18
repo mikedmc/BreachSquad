@@ -243,6 +243,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		OS_freadString(fl, charAnmName);
 
 		nl->animID = m_sprLights.getAnimationIdxByName(charAnmName);
+		nl->frameID = 0;
 		/*
 		if ((nl->animID < 0) && (nl->type != K_LVL_LT_AMBIENTAL))
 			ErrorBox(K_ERR_WARNING, L"Light ID:%d doesn't have animID!!", nl->ID);
@@ -264,15 +265,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		nl->bbox_ini.Move(-nl->pos);
 		nl->fRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
 		//re-arrange spots (maybe lights image changed)
-		if (nl->animID >= 0)
-		{
-			RECTXYWH lrect = m_sprLights.GetAFrameBBox_real(nl->animID, 0);
-			nl->bbox_ini.Set(lrect);
-			nl->bbox = nl->bbox_ini;
-			nl->bbox.Move(nl->pos);
-
-			nl->fRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
-		}
+		nl->SetLightTexture(&m_sprLights, nl->animID, nl->frameID);
 
 		//#HACK: hardcodes the radius
 		nl->fRadius = 128.0f;

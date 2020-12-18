@@ -39,8 +39,9 @@ int FOVUtil::BuildOccludedVolume(Vec2 vEye, DWORD dwColor, COccluderSegment* arr
 	// optimize by getting rid of the occluders which are not in the intersection path (by using the angles of the ends)
 	//#TODO: could be optimized by having a small cache for the last 2 angles so we don't process same angle many times.
 
+	const int nReservedSize = 200;
 	std::vector<sOccluderIntersection> arrVerts;
-	arrVerts.reserve(200);
+	arrVerts.reserve(nReservedSize);
 
 	for (int ii = 0; ii < nOccludersCnt; ii++)
 	{
@@ -121,6 +122,12 @@ int FOVUtil::BuildOccludedVolume(Vec2 vEye, DWORD dwColor, COccluderSegment* arr
 
 		}
 	}
+#if defined(_DEBUG) || defined(DEBUG)
+	if (arrVerts.size() > nReservedSize)
+	{
+		LOG("[WARN] BuildOccludedVolume:: vector buffer too small!");
+	}
+#endif
 
 	//4. sort std::vector by angle and add polygons (could be a trianglestrip but we need another buffered painter class for that)
 	std::sort(arrVerts.begin(), arrVerts.end(), OccluderIntersectionSorter);
