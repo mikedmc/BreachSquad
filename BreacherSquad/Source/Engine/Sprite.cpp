@@ -850,3 +850,21 @@ void CSprite::PaintStretchedXOriented_texOverride(CSpriteCollection *sprManager,
 		s_pSprite->SetTransform(&g_matIdentity);
 	}
 }
+
+void CSprite::paintFrameNEW(CSpriteCollection *sprCol, Vec3 vPos, int animID, int frameID, DWORD ncolor, float fRotZ, Vec2 vScale)
+{
+	_ASSERT(animID < sprCol->Animations.Count());
+	_ASSERT(frameID < sprCol->Animations[animID]->aframesNo);
+
+	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameID];
+	for (int ii = 0; ii < sprCol->AFrames[aframeIdx]->fmodulesNo; ii++)
+	{
+		int fmoduleIdx = sprCol->AFrames[aframeIdx]->fmodulesIdx[ii];
+		
+		g_SprPainter.Draw(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx]->pTex,
+			sprCol->FModules[fmoduleIdx]->texRect,
+			sprCol->FModules[fmoduleIdx]->moduleRectOff,
+			&vPos,
+			ncolor, fRotZ, vScale);
+	}
+}

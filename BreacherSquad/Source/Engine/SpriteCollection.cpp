@@ -132,13 +132,13 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 		int texW = Textures[nfmod->imgIdx]->info.Width;
 		int texH = Textures[nfmod->imgIdx]->info.Height;
 		
-		nfmod->texRect.left		= nfmod->moduleX / texW;
-		nfmod->texRect.top		= nfmod->moduleY / texH;
-		nfmod->texRect.right	= (nfmod->moduleX + nfmod->moduleW) / texW;
-		nfmod->texRect.bottom	= (nfmod->moduleY + nfmod->moduleH) / texH;
+		nfmod->texRect.left		= nfmod->moduleX / (float)texW;
+		nfmod->texRect.top		= nfmod->moduleY / (float)texH;
+		nfmod->texRect.right	= (nfmod->moduleX + nfmod->moduleW) / (float)texW;
+		nfmod->texRect.bottom	= (nfmod->moduleY + nfmod->moduleH) / (float)texH;
 
-		// set module rect moved by ox/oy
-		nfmod->moduleRectOff.Set(nfmod->moduleX + nfmod->ox, nfmod->moduleY + nfmod->oy, nfmod->moduleX + nfmod->moduleW + nfmod->ox, nfmod->moduleY + nfmod->moduleH + nfmod->oy);
+		// set module rect moved by ox/oy (by default painted in 0,0 top left corner)
+		nfmod->moduleRectOff.Set(nfmod->ox, nfmod->oy, nfmod->moduleW + nfmod->ox, nfmod->moduleH + nfmod->oy);
 
 		//set RECT for painting
 		SetRect(&nfmod->moduleRect, nfmod->moduleX, nfmod->moduleY, nfmod->moduleX + nfmod->moduleW, nfmod->moduleY + nfmod->moduleH);

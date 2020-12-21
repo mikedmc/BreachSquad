@@ -1,7 +1,7 @@
 #pragma once
 
 //----------------------------------------------------------	
-//FORMAT FISER
+// bsx FILE FORMAT 
 //<?xml version="1.0"?>
 //<SpriteCollection Version="2.0">
 //  <Image>intro1.png</Image>

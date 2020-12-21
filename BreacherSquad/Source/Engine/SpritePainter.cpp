@@ -131,18 +131,18 @@ OPRESULT CSpritePainter::Flush()
 	return K_OP_OK;
 }
 
-OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec3 *pPosition, DWORD color)
+OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec3 *pPosition, DWORD color, float fRotationZ, Vec2 vScale)
 {
 	//#TODO: automatically call Flush if we're over the bounds, in loc de asserturi.
 	assert(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4) - 4);
 
 	// Shader data:
-	// Tex2 contain position
+	// Normal contains position
 	Vec3 vecPos(0.0f, 0.0f, 0.0f);
 	if(pPosition != NULL)
 		vecPos = *pPosition;
-	// Normal contains: x: scale x, y: scale y, z: Z rotation
-	Vec4 vecScaleRot(1.0f, 1.0f, 0.0f, 0.0f);
+	// Tex2 contains: x: scale x, y: scale y, z: Z rotation
+	Vec4 vecScaleRot(vScale.x, vScale.y, fRotationZ, 0.0f);
 
 	//ul
 	m_verts[m_nVertexCursor].pos	= Vec3(pDestRect.left, pDestRect.top, 0.0f);

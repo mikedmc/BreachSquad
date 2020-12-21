@@ -2,7 +2,7 @@
 <!-- shader files path is relative to this xml file -->
 <Shaders>
   <VertexShaders>
-    <VertexShader name="VS_WATER" path="vs_sprites2d.vso" />
+    <VertexShader name="VS_SPRITES2D" path="vs_sprites2d.vso" />
     <VertexShader name="VS_POINTLIGHT" path="vs_pointlight.vso" />
     <VertexShader name="VS_COMPOSITION" path="vs_composition.vso" />
     <VertexShader name="VS_PROJECTEDDIR" path="vs_projecteddir.vso" />

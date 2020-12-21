@@ -27,12 +27,12 @@
     dcl_position o0
     dcl_color o1
     dcl_texcoord o2.xy
-    mad r0.x, v1.z, c4.x, c4.y
+    mad r0.x, v4.z, c4.x, c4.y
     frc r0.x, r0.x
     mad r0.x, r0.x, c4.z, c4.w
     sincos r1.xy, r0.x
-    mul r0.x, -r1.y, v1.x
-    mul r0.yzw, r1.xxyx, v1.xxyy
+    mul r0.x, -r1.y, v4.x
+    mul r0.yzw, r1.xxyx, v4.xxyy
     mul r1, r0.x, c1
     mad r1, r0.y, c0, r1
     mul r2, r0.w, c1
@@ -40,9 +40,9 @@
     mul r0, r0, v0.y
     mad r0, v0.x, r1, r0
     mad r0, v0.z, c2, r0
-    mul r1, c1, v4.y
-    mad r1, v4.x, c0, r1
-    mad r1, v4.z, c2, r1
+    mul r1, c1, v1.y
+    mad r1, v1.x, c0, r1
+    mad r1, v1.z, c2, r1
     add r1, r1, c3
     mad o0, v0.w, r1, r0
     mov o1, v2

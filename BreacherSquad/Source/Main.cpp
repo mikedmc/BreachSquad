@@ -2275,21 +2275,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			case GAME_STATE_MAINMENU:
 			{
 				g_mainMenu.Paint();
-
-				//pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, false);
-				//pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
-
-				//_VERTEX_PNCT4T4 verts[10];
-				//verts[0].pos = Vec3(0.0f, 0.0f, 0.0f); verts[0].color = 0xffffffff;
-				//verts[1].pos = Vec3(200.0f, 0.0f, 0.0f); verts[1].color = 0xff00ffff;
-				//verts[2].pos = Vec3(0.0f, 100.0f, 0.0f); verts[2].color = 0xffffff00;
-				//verts[3].pos = Vec3(0.0f, 0.0f, 0.0f); verts[3].color = 0xffffffff;
-				//verts[4].pos = Vec3(-100.0f, 0.0f, 0.0f); verts[4].color = 0xff00ffff;
-				//verts[5].pos = Vec3(0.0f, -100.0f, 0.0f); verts[5].color = 0xffffff00;
-
-				//pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
-				//pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 2, &verts, sizeof(_VERTEX_PNCT4T4));
-
 			}
 			break;
 			case GAME_STATE_PLAYER_SELECTION:
@@ -2338,6 +2323,22 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				//g_level.m_interfaceIGM.Paint(pDevice, g_pGameSprite);
 				//interface particles
 				//g_particlesMgr.PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
+
+				g_pGameSprite->Flush();
+				PVERTEXSHADER vsspr = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
+				if (vsspr)
+				{
+					g_SprPainter.Begin(vsspr, UTGetAppClass().g_matProj);
+
+					for (int kk = 0; kk < 5; kk++)
+						CSprite::paintFrameNEW(&g_level.m_sprInterface, Vec3(100.0f + 30.0f * kk, 100.0f + 30.0f * kk, 0.0f), ANM_IGM_INTERFACE_SPR_PORTRAITS, kk, 
+							0xffffffff, fTime, Vec2(1.0f, 1.0f));
+
+
+					g_SprPainter.End();
+				}
+
+
 
 				///--- level editor ---
 				g_editor.Paint(g_pGameSprite);
@@ -2527,23 +2528,9 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				g_stringsMgr.SetStringDesc(&strdesc, todraw);
 				g_font10bs1->DrawString(&strdesc, 10, posY, FONTFLAG_ANCHOR_TOPLEFT, 0xffffffff);
 				posY += 15;
-				//debug vars
-				CStringDesc dbgdesc;
-				// network latency
-				if ((g_gameState == GAME_STATE_GAME) && (UTGetAppClass().IsGameNetworked()))
-				{
-					int nLagFrames = g_nLastSyncedFrame - g_netlock.m_nReceived_SyncFrame;
-
-					g_stringsMgr.SetStringDesc(&dbgdesc, L"Lag Frames=%d", nLagFrames);
-					g_font10bs1->DrawString(&dbgdesc, 10, posY, FONTFLAG_ANCHOR_TOPLEFT, 0xffffffff);
-					posY += 15;
-					g_stringsMgr.SetStringDesc(&dbgdesc, L"local(head:%d tail:%d) peer(head:%d tail:%d) sync:%d", 
-						g_netlock.m_nToSend_Head - g_nLastSyncedFrame, g_netlock.m_nToSend_Tail - g_nLastSyncedFrame,
-						g_netlock.m_nReceived_Head - g_netlock.m_nReceived_SyncFrame, g_netlock.m_nReceived_Tail - g_netlock.m_nReceived_SyncFrame,
-						g_nLastSyncedFrame - g_netlock.m_nReceived_SyncFrame);
-					g_font10bs1->DrawString(&dbgdesc, 10, posY, FONTFLAG_ANCHOR_TOPLEFT, 0xffffffff);
-					posY += 15;
-				}
+				StringCchPrintf(todraw, MAX_PATH, L"pointer %.2f:%.2f", g_mouse.pos.x, g_mouse.pos.y);
+				g_stringsMgr.SetStringDesc(&strdesc, todraw);
+				g_font10bs1->DrawString(&strdesc, 10, posY, FONTFLAG_ANCHOR_TOPLEFT, 0xffffffff);
 			}
 			else  //no dev mode show only ping
 			{
