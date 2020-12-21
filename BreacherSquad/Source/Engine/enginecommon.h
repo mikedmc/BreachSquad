@@ -270,6 +270,12 @@ public:
 	RECTLTRB_F(const RECTXYWH_F rectsrc) :
 		left(rectsrc.x), top(rectsrc.y), right(rectsrc.x + rectsrc.w), bottom(rectsrc.y + rectsrc.h)
 	{}
+
+
+	void Set(float nleft, float ntop, float nright, float nbottom)
+	{
+		left = nleft; top = ntop; right = nright; bottom = nbottom;
+	}
 };
 
 class RECTXYXY_F {

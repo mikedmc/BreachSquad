@@ -36,12 +36,7 @@
 
 #define BSX_VERSION 2.0
 
-//////////////////////////////////////////////////////////////////////////////////////////
-//
-//   Structurile de date pentru afisare
-//
-//////////////////////////////////////////////////////////////////////////////////////////
-//MODULE - folosit doar la incarcare
+//MODULE - used only when loading
 class scModule 
 {
 public:
@@ -51,6 +46,7 @@ public:
 	int W;
 	int H;
 };
+
 //FrameModule
 typedef struct _nscFModule 
 {
@@ -58,18 +54,20 @@ typedef struct _nscFModule
 	int ox;
 	int oy;
 	UINT32 flags;
-	//datele luate din modul
+	//data from module, copied here for fast access
 	UINT16 imgIdx;
 	RECT moduleRect;
 	int moduleX;
 	int moduleY;
 	int moduleW;
 	int moduleH;
-	//coordonatele in textura in functie de dimensiunea texturii
-	D3DXVECTOR2 texUL;
-	D3DXVECTOR2 texDR;
+	// tex coords of module
+	RECTLTRB_F texRect;
+	// module rect offsetted by ox and oy
+	RECTLTRB_F moduleRectOff;
 } scFModule;
-//Frame - folosit doar la incarcare
+
+//Frame - only used when loading from file (doubled in AFrame)
 class scFrame 
 {
 public:

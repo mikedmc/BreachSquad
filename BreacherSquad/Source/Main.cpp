@@ -43,6 +43,7 @@ bool						g_bForceOneUpdatePerFrame = false;	// flag used to force only one upda
 Vec2						g_vecGravity;						//gravity
 
 ID3DXSprite*				g_pGameSprite = NULL;				//Main Sprite class 
+CSpritePainter				g_SprPainter;						// Custom class for painting fast sprites
 MatA16						g_matIdentity;						//identity matrix
 MatA16						g_matWorld;							//world matrix
 
@@ -823,6 +824,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_OP_RETHR(UTGetRTManager().OnCreateDevice(pDevice, pBBDesc));
 	UTimgui().OnCreateDevice(pDevice, pBBDesc);
 	V_RETURN(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(g_SprPainter.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetFontsManager().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_level.OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnCreateDevice(pDevice, pBBDesc));
@@ -900,6 +902,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	UTimgui().OnResetDevice(pDevice, pBBDesc);
 	V_RETURN(UTGetShaderManager().OnResetDevice(pDevice, pBBDesc));
+	V_OP_RETHR(g_SprPainter.OnResetDevice(pDevice, pBBDesc));
 
 	UTGetTTFManager().OnResetDevice(pDevice, pBBDesc);
 
@@ -974,6 +977,7 @@ void CALLBACK OnLostDevice(void)
 	UTimgui().OnLostDevice();
 	UTGetTTFManager().OnLostDevice();
 	UTGetShaderManager().OnLostDevice();
+	g_SprPainter.OnLostDevice();
 
 	UTGetFontsManager().OnLostDevice();
 	UTGetControlsManager().OnLostDevice();
@@ -1007,6 +1011,7 @@ void CALLBACK OnDestroyDevice(void)
 	UTGetRTManager().OnDestroyDevice();
 	UTimgui().OnDestroyDevice();
 	UTGetShaderManager().OnDestroyDevice();
+	g_SprPainter.OnDestroyDevice();
 	UTGetTTFManager().OnDestroyDevice();
 	UTGetFontsManager().OnDestroyDevice();
 	UTGetControlsManager().OnDestroyDevice();

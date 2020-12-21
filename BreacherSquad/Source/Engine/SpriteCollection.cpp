@@ -102,7 +102,7 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 		Textures.Add(ntex);
 	}
 	imageNo = Textures.GetSize();
-	///--- citeste modulele
+	///--- read modules
 	pugi::xml_node modulesnode = spritenodes.child(L"Modules");
 	CGrowableArray<scModule*> tempModules;
     for (pugi::xml_node moduledata = modulesnode.first_child(); moduledata; moduledata = moduledata.next_sibling())
@@ -115,7 +115,7 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 		nmod->imgIdx = moduledata.attribute(L"ImageIdx").as_int();
 		tempModules.Add(nmod);
 	}
-	///--- citeste frame modules
+	///--- reads frame modules
 	pugi::xml_node fmodulesnode = spritenodes.child(L"FrameModules");
     for (pugi::xml_node fmoduledata = fmodulesnode.first_child(); fmoduledata; fmoduledata = fmoduledata.next_sibling())
     {
@@ -128,15 +128,19 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 		nfmod->moduleX = tempModules[midx]->X; nfmod->moduleY = tempModules[midx]->Y;
 		nfmod->moduleW = tempModules[midx]->W; nfmod->moduleH = tempModules[midx]->H;
 		nfmod->imgIdx = tempModules[midx]->imgIdx;
-		//salveaza si coordonatele in texture space in fn de dimensiunea texturii
+		//compute and save tex coords
 		int texW = Textures[nfmod->imgIdx]->info.Width;
 		int texH = Textures[nfmod->imgIdx]->info.Height;
-		nfmod->texUL.x = nfmod->moduleX / texW;
-		nfmod->texUL.y = nfmod->moduleY / texH;
-		nfmod->texDR.x = (nfmod->moduleX + nfmod->moduleW) / texW;
-		nfmod->texDR.y = (nfmod->moduleY + nfmod->moduleH) / texH;
+		
+		nfmod->texRect.left		= nfmod->moduleX / texW;
+		nfmod->texRect.top		= nfmod->moduleY / texH;
+		nfmod->texRect.right	= (nfmod->moduleX + nfmod->moduleW) / texW;
+		nfmod->texRect.bottom	= (nfmod->moduleY + nfmod->moduleH) / texH;
 
-		//seteaza si RECT-ul
+		// set module rect moved by ox/oy
+		nfmod->moduleRectOff.Set(nfmod->moduleX + nfmod->ox, nfmod->moduleY + nfmod->oy, nfmod->moduleX + nfmod->moduleW + nfmod->ox, nfmod->moduleY + nfmod->moduleH + nfmod->oy);
+
+		//set RECT for painting
 		SetRect(&nfmod->moduleRect, nfmod->moduleX, nfmod->moduleY, nfmod->moduleX + nfmod->moduleW, nfmod->moduleY + nfmod->moduleH);
 		FModules.Add(nfmod);
 	}

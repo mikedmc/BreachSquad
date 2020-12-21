@@ -1,52 +1,6 @@
 #pragma once
 
 
-///-------------------------------------------------------------
-///	 buffered sprites - deprecated class for drawing sprites (should be remade)
-///-------------------------------------------------------------
-
-/*
-#define K_BS_MAX_QUAD_CNT 4000
-#define K_BS_MAX_TEXCHANGES_CNT 50
-//--- begin flags ---
-//enables alpha bleding
-#define K_BS_ALPHABLENDING 1
-//enables alpha testing
-#define K_BS_ALPHATEST 2
-//set = modulates vertex and texture colors / not set = uses texture colors
-#define K_BS_MODULATE_COLORS 4
-
-class CBufferedSprites
-{
-private:
-	UINT32				m_nVertexCursor;
-
-	PVERTEXBUFFER		m_vb;
-	PINDEXBUFFER		m_ib;
-
-	PDEVICE				m_pDevice;
-	_VERTEX_PNCT4T4 *m_verts; //aici scrie tot si abia la flush face VB-ul
-	//texture changes
-	UINT32 m_nTexChangesCursor;
-	PTEXTURE m_texPtrs[K_BS_MAX_TEXCHANGES_CNT];
-	UINT32	m_nTrisPerTexture[K_BS_MAX_TEXCHANGES_CNT];
-	UINT32  m_nTrisOffsets[K_BS_MAX_TEXCHANGES_CNT];
-public:
-	CBufferedSprites(void);
-	~CBufferedSprites(void);
-
-	HRESULT Begin(UINT32 flags = K_BS_ALPHABLENDING | K_BS_ALPHATEST | K_BS_MODULATE_COLORS);
-	HRESULT End();
-	HRESULT DrawBuffered(PTEXTURE pTexture, RECTXYXY_F *pSrcRectUV, RECTXYWH_F *pSrcCoord, Vec3 *pCenter, Vec3 *pPosition, DWORD color = 0xffffffff);
-	HRESULT Flush();
-
-	HRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
-	HRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
-	HRESULT OnLostDevice( void* pUserContext = NULL);
-	HRESULT OnDestroyDevice( void* pUserContext = NULL);
-};
- */
-
 ///-----------------------------------------------------------------------------------------------
 ///	 BUFFERED PAINTER TRIANGLES
 ///  Adds geometry to meshes identified by index and then builds VB and IB and draws them

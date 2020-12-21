@@ -470,6 +470,7 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 
 #include "TextureManager.h"
 #include "SpriteCollection.h"
+#include "SpritePainter.h"
 #include "TexturedFont.h"
 
 #include "TTFont.h"
@@ -628,6 +629,8 @@ extern CStringHash		g_startupParam;
 
 extern int		g_gameStateErrorStringIdx;
 extern float	g_gameStateTimer; //timer folosit uneori
+
+extern CSpritePainter g_SprPainter;
 /*
 * --- transitions ---
 */

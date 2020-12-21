@@ -318,6 +318,7 @@
     <ClInclude Include="Source\Engine\spine\SpineEventsListener.h" />
     <ClInclude Include="Source\Engine\spine\SpineManager.h" />
     <ClInclude Include="Source\Engine\spine\SpineTexLoader.h" />
+    <ClInclude Include="Source\Engine\SpritePainter.h" />
     <ClInclude Include="Source\Engine\Steam.h" />
     <ClInclude Include="Source\Engine\Steam\SteamAchievements.h" />
     <ClInclude Include="Source\Engine\Steam\SteamLeaderboards.h" />
@@ -727,6 +728,7 @@
     <ClCompile Include="Source\Engine\spine\SpineEventsListener.cpp" />
     <ClCompile Include="Source\Engine\spine\SpineManager.cpp" />
     <ClCompile Include="Source\Engine\spine\SpineTexLoader.cpp" />
+    <ClCompile Include="Source\Engine\SpritePainter.cpp" />
     <ClCompile Include="Source\Engine\Steam.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
