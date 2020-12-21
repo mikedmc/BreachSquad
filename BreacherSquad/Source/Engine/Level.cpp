@@ -11671,7 +11671,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			// Clear the render target and the zbuffer 
 			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0));
 			//use sprite
-			m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
+			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
 			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
 			D3DXMATRIXA16 matProj;
@@ -11684,7 +11684,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			RenderPass(K_LVL_RP_NORMALS_HEIGHT, &matProj);
 
 			// end sprite
-			m_pSprite->End();
+			//m_pSprite->End();
 
 			V(UTGetRTManager().EndSceneRT(pRT));
 
@@ -11703,7 +11703,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			// Clear the render target and the zbuffer 
 			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET , 0xff000000, 1.0f, 0));
 			//use sprite
-			m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
+			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
 			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
 			D3DXMATRIXA16 matProj;
@@ -11718,7 +11718,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			RenderPass_Lights(&matProj);
 
 			// end sprite
-			m_pSprite->End();
+			//m_pSprite->End();
 
 			V(UTGetRTManager().EndSceneRT(pRT));
 
@@ -11737,7 +11737,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			// Clear the render target and the zbuffer 
 			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0));
 			//use sprite
-			m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
+			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
 			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
 			D3DXMATRIXA16 matProj;
@@ -11750,7 +11750,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			RenderPass(K_LVL_RP_COLORS, &matProj);
 
 			// end sprite
-			m_pSprite->End();
+			//m_pSprite->End();
 
 			V(UTGetRTManager().EndSceneRT(pRT));
 
@@ -11866,57 +11866,41 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, MatA16* matProj)
 	mapMesh.PaintLayer(K_TILE_LAYER_FLOOR);
 	mapMesh.PaintLayer(K_TILE_LAYER_WALLS);
 
+	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
+	if (pSprVS)
+		g_SprPainter.Begin(pSprVS, matView * *matProj);
+
 	///--- paint actors
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-	m_pSprite->SetTransform(&g_matIdentity);
+	//m_pSprite->SetTransform(&g_matIdentity);
 	for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
 	{
 		CActor* actor = m_visibleList.visible_actors.m_pData[kk];
 
 		if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
 		{
-			actor->sprite_feet.paint_firstModule_texOverride(&m_sprActors, actor->nSkinIdx * 2);
-		}
-		actor->sprite.paint_firstModule_texOverride(&m_sprActors, actor->nSkinIdx * 2);
-
-		//--- muzzle flash ---
-		if ((actor->pCurrentWeapon != null) && (actor->pCurrentWeapon->m_sprMuzzleFlash.animationIdx >= 0) &&
-			(actor->pCurrentWeapon->m_sprMuzzleFlash.animStatus != ANIM_STATUS_FRAMELOCK))
-		{
-			actor->pCurrentWeapon->m_sprMuzzleFlash.pos = actor->pos + actor->vecWeapon_abs[((actor->bCrouched) ? 1 : 0)];
-			actor->pCurrentWeapon->m_sprMuzzleFlash.paint_firstModule(&m_sprActors);
-		}
+			actor->sprite_feet.paintModule_texOverride(&m_sprActors, 0, 0);
+		}																 
+		actor->sprite.paintModule_texOverride(&m_sprActors, 0, 0);
 	}
-	m_pSprite->Flush();
-	m_pSprite->SetTransform(&g_matIdentity);
+	g_SprPainter.Flush();
+	//m_pSprite->Flush();
+	//m_pSprite->SetTransform(&g_matIdentity);
 
 	///--- props
-	m_pSprite->SetTransform(&g_matIdentity);
+	//m_pSprite->SetTransform(&g_matIdentity);
 
 	for (int kk = 0; kk < m_visibleList.visible_props.Count(); kk++)
 	{
-		CProp *active = m_visibleList.visible_props.m_pData[kk];
-		if (active->flipX /*|| active->flipY*/)
-		{
-			matlocal = g_matIdentity;
-			//pozitie sprite
-			if (active->flipX)
-			{
-				matlocal._11 = -1.0f; //scalare X
-				matlocal._41 += 2.0f * active->pos.x;// +2.0f * active_bbox.x + active_bbox.w; 
-			}
-			m_pSprite->SetTransform(&matlocal);
-			active->sprite.paint_firstModule_texOverride(&m_sprProps, nTexIdxOffset);
-			m_pSprite->SetTransform(&g_matIdentity);
-		}
-		else
-		{
-			active->sprite.paint_firstModule_texOverride(&m_sprProps, nTexIdxOffset);
-		}
+		CProp *prop = m_visibleList.visible_props.m_pData[kk];
+		prop->sprite.paintModule_texOverride(&m_sprProps, 0, nTexIdxOffset);
 	}
-	m_pSprite->Flush();
+	g_SprPainter.Flush();
+	g_SprPainter.End();
 
+	//m_pSprite->Flush();
 
+	UTGetShaderManager().SetVS(nullptr);
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
 	mapMesh.PaintLayer(K_TILE_LAYER_CEILING);
 

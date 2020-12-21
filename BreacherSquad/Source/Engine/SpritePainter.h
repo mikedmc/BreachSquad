@@ -36,6 +36,8 @@ private:
 	UINT32					m_nTrisPerTexture[K_BS_MAX_MODECHANGES_CNT];
 	UINT32					m_nTrisOffsets[K_BS_MAX_MODECHANGES_CNT];
 
+	bool					bStarted;										// Begin was called
+
 #if defined(_DEBUG) || defined(DEBUG)
 public:
 	int stats_sprites;			// sprites painted
@@ -48,7 +50,7 @@ public:
 	~CSpritePainter(void);
 
 	// Call before painting anything
-	OPRESULT				Begin(PVERTEXSHADER pVShader, Mat matProj, UINT32 flags = K_BS_ALPHABLENDING | K_BS_ALPHATEST);
+	OPRESULT Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 flags = K_BS_ALPHABLENDING | K_BS_ALPHATEST);
 	
 	// Flushes remaining sprites and ends a scene. Clears shaders, flushes everything
 	OPRESULT				End();

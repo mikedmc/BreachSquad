@@ -15,9 +15,10 @@
 class CSprite
 {
 public:
-	static ID3DXSprite*		s_pSprite;					
+	static ID3DXSprite*		s_pSprite;				
+	static CSpritePainter*	s_pSP;						// Pointer to sprite painter
 	// Sets the sprite used for painting (s_pSprite)
-	static void SetGlobalSpritePtr(ID3DXSprite* pSprite);	
+	static void SetGlobalSpritePtr(ID3DXSprite* pSprite, CSpritePainter* pSP);	
 public:
 	int		animationIdx;
 	D3DXVECTOR2 pos;
@@ -74,7 +75,10 @@ public:
 	void PaintStretchedXOriented(CSpriteCollection *sprManager, D3DXVECTOR2 pt1, D3DXVECTOR2 pt2);
 	void PaintStretchedXOriented_texOverride(CSpriteCollection *sprManager, D3DXVECTOR2 pt1, D3DXVECTOR2 pt2, int texIdxOffset);
 
+	void paintModule_texOverride(CSpriteCollection *sprCol, int nModuleIdx, int texIdxOffset);
+
 	static void paintFrameNEW(CSpriteCollection *sprCol, Vec3 vPos, int animID, int frameID, DWORD ncolor = 0xffffffff, float fRotZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
+	static void paintFrameModuleNEW(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, DWORD ncolor = 0xffffffff);
 };
 
 

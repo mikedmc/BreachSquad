@@ -923,7 +923,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	g_level.SetSpritePtr(g_pGameSprite);
 	g_particlesMgr.SetSpritePtr(g_pGameSprite);
 	CTexturedFont::SetGlobalSpritePtr(g_pGameSprite);
-	CSprite::SetGlobalSpritePtr(g_pGameSprite);
+	CSprite::SetGlobalSpritePtr(g_pGameSprite, &g_SprPainter);
 	CTTFontsManager::SetGlobalSpritePtr(g_pGameSprite);
 	UTGetControlsManager().SetSpritePtr(g_pGameSprite);
 	g_mainMenu.SetSpritePtr(g_pGameSprite);
@@ -2324,6 +2324,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				//interface particles
 				//g_particlesMgr.PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
 
+				/*
 				g_pGameSprite->Flush();
 				PVERTEXSHADER vsspr = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 				if (vsspr)
@@ -2337,7 +2338,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 					g_SprPainter.End();
 				}
-
+				*/
 
 
 				///--- level editor ---

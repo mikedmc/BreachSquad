@@ -16,6 +16,8 @@ CSpritePainter::CSpritePainter(void)
 	m_nTexChangesCursor = 0;
 	m_verts = nullptr;
 
+	bStarted = false;
+
 	ClearStatistics();
 }
 
@@ -27,13 +29,13 @@ CSpritePainter::~CSpritePainter(void)
 }
 
 
-OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matProj, UINT32 flags)
+OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 flags /*= K_BS_ALPHABLENDING | K_BS_ALPHATEST*/)
 {
 	_ASSERT(m_pDevice != nullptr);
 	stats_sequences++;
 	// set shader and projection matrix
 	m_pVShader = pVShader;
-	m_matProj = matProj;
+	m_matProj = matViewProj;
 	//--- set render flags ---
 	m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	if (flags & K_BS_ALPHABLENDING)
@@ -62,6 +64,7 @@ OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matProj, UINT32 flags
 		m_nTrisOffsets[kk] = 0;
 	}
 
+	bStarted = true;
 	return K_OP_OK;
 }
 
@@ -72,6 +75,7 @@ OPRESULT CSpritePainter::End()
 
 	m_pDevice->SetVertexShader(nullptr);
 
+	bStarted = false;
 	return K_OP_OK;
 }
 
@@ -154,6 +158,7 @@ OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F 
 {
 	_ASSERT(pTexture != nullptr);
 	_ASSERT(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4) - 4);
+	_ASSERT(bStarted == true);
 
 	// Shader data:
 	// Normal contains position
@@ -219,6 +224,7 @@ OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_
 {
 	_ASSERT(pTexture != nullptr);
 	_ASSERT(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4) - 4);
+	_ASSERT(bStarted == true);
 
 	// Shader data:
 	// Normal contains position

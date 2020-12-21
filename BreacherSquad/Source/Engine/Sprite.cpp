@@ -6,9 +6,12 @@
 
 ///--- STATIC MEMBERS ---
 ID3DXSprite* CSprite::s_pSprite = NULL;
-void CSprite::SetGlobalSpritePtr(ID3DXSprite* pSprite)
+CSpritePainter* CSprite::s_pSP = nullptr;
+
+void CSprite::SetGlobalSpritePtr(ID3DXSprite* pSprite, CSpritePainter* pSP)
 {
 	s_pSprite = pSprite;
+	s_pSP = pSP;
 }
 ///--- end STATIC ---
 
@@ -851,6 +854,23 @@ void CSprite::PaintStretchedXOriented_texOverride(CSpriteCollection *sprManager,
 	}
 }
 
+void CSprite::paintModule_texOverride(CSpriteCollection *sprCol, int nModuleIdx, int texIdxOffset)
+{
+	_ASSERT(animationIdx < sprCol->Animations.Count());
+	_ASSERT(currentFrame < sprCol->Animations[animationIdx]->aframesNo);
+	//nu am luat in considerare inca flagsurile
+	int aframeIdx = sprCol->Animations[animationIdx]->aframesIdx[currentFrame];
+	_ASSERT(nModuleIdx < sprCol->AFrames[aframeIdx]->fmodulesNo);
+
+	int fmoduleIdx = sprCol->AFrames[aframeIdx]->fmodulesIdx[nModuleIdx];
+	
+	g_SprPainter.Draw(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx + texIdxOffset]->pTex,
+		sprCol->FModules[fmoduleIdx]->texRect,
+		sprCol->FModules[fmoduleIdx]->moduleRectOff,
+		&Vec3(pos.x, pos.y, 0.0f),
+		color);
+}
+
 void CSprite::paintFrameNEW(CSpriteCollection *sprCol, Vec3 vPos, int animID, int frameID, DWORD ncolor, float fRotZ, Vec2 vScale)
 {
 	_ASSERT(animID < sprCol->Animations.Count());
@@ -867,4 +887,20 @@ void CSprite::paintFrameNEW(CSpriteCollection *sprCol, Vec3 vPos, int animID, in
 			&vPos,
 			ncolor, fRotZ, vScale);
 	}
+}
+
+//?? this is bad...
+void CSprite::paintFrameModuleNEW(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, DWORD ncolor)
+{
+	_ASSERT(animID < sprCol->Animations.Count());
+	_ASSERT(frameID < sprCol->Animations[animID]->aframesNo);
+	_ASSERT(moduleID < sprCol->AFrames[sprCol->Animations[animID]->aframesIdx[frameID]]->fmodulesNo);
+
+	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameID];
+	int fmoduleIdx = sprCol->AFrames[aframeIdx]->fmodulesIdx[moduleID];
+	
+	s_pSP->Draw(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx]->pTex,
+		sprCol->FModules[fmoduleIdx]->texRect,
+		sprCol->FModules[fmoduleIdx]->moduleRectOff,
+		&Vec3(nX, nY, 0.0f), ncolor);
 }
