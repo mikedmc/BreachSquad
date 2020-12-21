@@ -861,7 +861,7 @@ void CSprite::paintFrameNEW(CSpriteCollection *sprCol, Vec3 vPos, int animID, in
 	{
 		int fmoduleIdx = sprCol->AFrames[aframeIdx]->fmodulesIdx[ii];
 		
-		g_SprPainter.Draw(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx]->pTex,
+		g_SprPainter.DrawEx(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx]->pTex,
 			sprCol->FModules[fmoduleIdx]->texRect,
 			sprCol->FModules[fmoduleIdx]->moduleRectOff,
 			&vPos,

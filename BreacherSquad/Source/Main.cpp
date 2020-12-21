@@ -2332,7 +2332,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 					for (int kk = 0; kk < 5; kk++)
 						CSprite::paintFrameNEW(&g_level.m_sprInterface, Vec3(100.0f + 30.0f * kk, 100.0f + 30.0f * kk, 0.0f), ANM_IGM_INTERFACE_SPR_PORTRAITS, kk, 
-							0xffffffff, fTime, Vec2(1.0f, 1.0f));
+							0xffffffff, fTime, Vec2(1.0f + 0.4f * sin(fTime), 1.0f - 0.4f * sin(fTime)));
 
 
 					g_SprPainter.End();
@@ -2554,6 +2554,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		}
 #endif
 
+
 		//!driver optimization: unbind all resource channels
 		pDevice->SetTexture(0, NULL);
 		pDevice->SetTexture(1, NULL);
@@ -2585,10 +2586,14 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				ImGui::SliderFloat("final multiplier", &ct_fLightMul, 0.0, 10.0);
 				ImGui::SliderFloat("dodge", &ct_fColorDodge, 0.0, 1.0);
 
-				ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
-
-				RECTXYWH_F camrect = g_level.m_camLevel.GetCamWorldAABB();
-				ImGui::Text("camrect %.1f %.1f %.1f %.1f", camrect.x, camrect.y, camrect.w, camrect.h);
+				//ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
+#if defined(_DEBUG) || defined(DEBUG)
+				ImGui::Separator();
+				ImGui::Text("Sprites: %d", g_SprPainter.stats_sprites);
+				ImGui::Text("Calls: %d", g_SprPainter.stats_calls);
+				ImGui::Text("Begin/End: %d", g_SprPainter.stats_sequences);
+				ImGui::Text("Flush Calls: %d", g_SprPainter.stats_flushes);
+#endif
 
 				ImGui::End();
 			}
@@ -2631,6 +2636,10 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		// Last but not least, paint
 		UTimgui().EndPaint(pDevice);
 	}
+
+#if defined(_DEBUG) || defined(DEBUG)
+	g_SprPainter.ClearStatistics();
+#endif
 }
 
 

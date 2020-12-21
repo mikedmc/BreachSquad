@@ -1,5 +1,9 @@
 #pragma once
 
+// Flags used with Draw functions
+#define K_SPRFLAG_FLIP_X 1
+#define K_SPRFLAG_FLIP_Y 2
+
 ///-------------------------------------------------------------
 ///	 Immediate mode sprite painter with transforms 
 ///  Uses ShaderManager to load the shaders
@@ -31,6 +35,14 @@ private:
 	PTEXTURE				m_texPtrs[K_BS_MAX_MODECHANGES_CNT];
 	UINT32					m_nTrisPerTexture[K_BS_MAX_MODECHANGES_CNT];
 	UINT32					m_nTrisOffsets[K_BS_MAX_MODECHANGES_CNT];
+
+#if defined(_DEBUG) || defined(DEBUG)
+public:
+	int stats_sprites;			// sprites painted
+	int stats_calls;			// total draw calls
+	int stats_sequences;		// begin/end sequences
+	int stats_flushes;			// flush calls
+#endif
 public:
 	CSpritePainter(void);
 	~CSpritePainter(void);
@@ -47,13 +59,16 @@ public:
 	// Use together with pPosition if you need rotations as rotations are applied before moving the pDestRect to pPosition 
 	// allowing you to specify origin of rotation by defining pDestRect around the origin.
 	OPRESULT				Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec3 *pPosition, DWORD color = 0xffffffff, float fRotationZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
-	// Draw version with flip flags (a little slower)
-	OPRESULT				DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec3 *pPosition, DWORD color = 0xffffffff, float fRotationZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f }, int flipFlags = 0);
+	// Draw version with flip flags (a little slower)... #TODO: poate nu e asa de slow si ppot pune flags default de flip
+	OPRESULT				DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec3 *pPosition, DWORD color = 0xffffffff, float fRotationZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f }, UINT paintFlags = 0);
 	// #TODO: DRAW version with clip rect
 	// #TODO: version with scissors for scene wide clip rects (setclip/remove clip)
 
 	// Forces flushing of remaining sprites
 	OPRESULT				Flush();
+
+	// call at the end of engine paint. Read statistics right before this function call.
+	void ClearStatistics();
 
 
 	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);

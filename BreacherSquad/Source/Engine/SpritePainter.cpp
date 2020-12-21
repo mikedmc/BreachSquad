@@ -15,6 +15,8 @@ CSpritePainter::CSpritePainter(void)
 	m_nVertexCursor = 0;
 	m_nTexChangesCursor = 0;
 	m_verts = nullptr;
+
+	ClearStatistics();
 }
 
 CSpritePainter::~CSpritePainter(void)
@@ -28,6 +30,7 @@ CSpritePainter::~CSpritePainter(void)
 OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matProj, UINT32 flags)
 {
 	_ASSERT(m_pDevice != nullptr);
+	stats_sequences++;
 	// set shader and projection matrix
 	m_pVShader = pVShader;
 	m_matProj = matProj;
@@ -73,12 +76,14 @@ OPRESULT CSpritePainter::End()
 
 OPRESULT CSpritePainter::Flush()
 {
-	//inainte de ultima afisare trebe sa forteze schimbarea de textura
+	stats_flushes++;
+
+	if (m_nVertexCursor == 0)
+		return K_OP_OK;
+
+	//before last draw we must force texture change
 	m_nTexChangesCursor++;
 	m_nTrisOffsets[m_nTexChangesCursor] = m_nTrisOffsets[m_nTexChangesCursor - 1] + m_nTrisPerTexture[m_nTexChangesCursor - 1];
-
-	if(m_nVertexCursor == 0)
-		return K_OP_OK;
 
 	//write verts to VB
     _VERTEX_PNCT4T4* pVerts;
@@ -115,6 +120,9 @@ OPRESULT CSpritePainter::Flush()
 		m_pDevice->SetTexture(0, m_texPtrs[kk]);
 
 		m_pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, m_nTrisOffsets[kk] * 2, m_nTrisPerTexture[kk] * 2, m_nTrisOffsets[kk] * 3, m_nTrisPerTexture[kk]);
+
+		stats_calls++;
+		stats_sprites += m_nTrisPerTexture[kk] / 2;
 	}
 
 	//reset verts
@@ -129,6 +137,16 @@ OPRESULT CSpritePainter::Flush()
 	}
 
 	return K_OP_OK;
+}
+
+void CSpritePainter::ClearStatistics()
+{
+#if defined(_DEBUG) || defined(DEBUG)
+	stats_calls = 0;
+	stats_flushes = 0;
+	stats_sequences = 0;
+	stats_sprites = 0;
+#endif
 }
 
 OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec3 *pPosition, DWORD color, float fRotationZ, Vec2 vScale)
@@ -196,6 +214,84 @@ OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F 
 	return K_OP_OK;
 }
 
+
+OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec3 *pPosition, DWORD color /*= 0xffffffff*/, float fRotationZ /*= 0.0f*/, Vec2 vScale /*= { 1.0f, 1.0f }*/, UINT paintFlags /*= 0*/)
+{
+	//#TODO: automatically call Flush if we're over the bounds, in loc de asserturi.
+	assert(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4) - 4);
+
+	// Shader data:
+	// Normal contains position
+	Vec3 vecPos(0.0f, 0.0f, 0.0f);
+	if (pPosition != NULL)
+		vecPos = *pPosition;
+	// Tex2 contains: x: scale x, y: scale y, z: Z rotation
+	Vec4 vecScaleRot(vScale.x, vScale.y, fRotationZ, 0.0f);
+
+	// paint flags
+	RECTLTRB_F pUV(pSrcUV);
+	if (paintFlags & K_SPRFLAG_FLIP_X)
+	{
+		pUV.left = pSrcUV.right;
+		pUV.right = pSrcUV.left;
+	}
+	if (paintFlags & K_SPRFLAG_FLIP_Y)
+	{
+		pUV.top = pSrcUV.bottom;
+		pUV.bottom = pSrcUV.top;
+	}
+
+	//ul
+	m_verts[m_nVertexCursor].pos = Vec3(pDestRect.left, pDestRect.top, 0.0f);
+	m_verts[m_nVertexCursor].n = vecPos;
+	m_verts[m_nVertexCursor].tex1 = Vec4(pUV.left, pUV.top, 0.0f, 0.0f);
+	m_verts[m_nVertexCursor].tex2 = vecScaleRot;
+	m_verts[m_nVertexCursor].color = color;
+	m_nVertexCursor++;
+	//ur
+	m_verts[m_nVertexCursor].pos = Vec3(pDestRect.right, pDestRect.top, 0.0f);
+	m_verts[m_nVertexCursor].n = vecPos;
+	m_verts[m_nVertexCursor].tex1 = Vec4(pUV.right, pUV.top, 0.0f, 0.0f);
+	m_verts[m_nVertexCursor].tex2 = vecScaleRot;
+	m_verts[m_nVertexCursor].color = color;
+	m_nVertexCursor++;
+	//dl
+	m_verts[m_nVertexCursor].pos = Vec3(pDestRect.left, pDestRect.bottom, 0.0f);
+	m_verts[m_nVertexCursor].n = vecPos;
+	m_verts[m_nVertexCursor].tex1 = Vec4(pUV.left, pUV.bottom, 0.0f, 0.0f);
+	m_verts[m_nVertexCursor].tex2 = vecScaleRot;
+	m_verts[m_nVertexCursor].color = color;
+	m_nVertexCursor++;
+	//dr
+	m_verts[m_nVertexCursor].pos = Vec3(pDestRect.right, pDestRect.bottom, 0.0f);
+	m_verts[m_nVertexCursor].n = vecPos;
+	m_verts[m_nVertexCursor].tex1 = Vec4(pUV.right, pUV.bottom, 0.0f, 0.0f);
+	m_verts[m_nVertexCursor].tex2 = vecScaleRot;
+	m_verts[m_nVertexCursor].color = color;
+	m_nVertexCursor++;
+
+	//see if texture changed
+	if (pTexture != m_texPtrs[m_nTexChangesCursor])
+	{
+		if (m_texPtrs[m_nTexChangesCursor] == NULL)
+		{
+			m_texPtrs[m_nTexChangesCursor] = pTexture;
+			m_nTrisOffsets[m_nTexChangesCursor] = 0;
+		}
+		else
+		{
+			m_nTexChangesCursor++;
+			//#TODO: do a flush instead of assert
+			assert(m_nTexChangesCursor < K_BS_MAX_MODECHANGES_CNT);
+
+			m_texPtrs[m_nTexChangesCursor] = pTexture;
+			m_nTrisOffsets[m_nTexChangesCursor] = m_nTrisOffsets[m_nTexChangesCursor - 1] + m_nTrisPerTexture[m_nTexChangesCursor - 1];
+		}
+	}
+	m_nTrisPerTexture[m_nTexChangesCursor] += 2;
+
+	return K_OP_OK;
+}
 
 //--- framework ---
 OPRESULT CSpritePainter::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc )
