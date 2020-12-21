@@ -54,9 +54,10 @@ OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matProj, UINT32 flags
 	m_nVertexCursor = 0;
 	//reset tex changes
 	m_nTexChangesCursor = 0;
+
 	for(int kk=0; kk < K_BS_MAX_MODECHANGES_CNT; kk++)
 	{
-		m_texPtrs[kk] = NULL;
+		m_texPtrs[kk] = nullptr;
 		m_nTrisPerTexture[kk] = 0;
 		m_nTrisOffsets[kk] = 0;
 	}
@@ -131,7 +132,7 @@ OPRESULT CSpritePainter::Flush()
 	m_nTexChangesCursor = 0;
 	for (int kk = 0; kk < K_BS_MAX_MODECHANGES_CNT; kk++)
 	{
-		m_texPtrs[kk] = NULL;
+		m_texPtrs[kk] = nullptr;
 		m_nTrisPerTexture[kk] = 0;
 		m_nTrisOffsets[kk] = 0;
 	}
@@ -151,8 +152,8 @@ void CSpritePainter::ClearStatistics()
 
 OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec3 *pPosition, DWORD color, float fRotationZ, Vec2 vScale)
 {
-	//#TODO: automatically call Flush if we're over the bounds, in loc de asserturi.
-	assert(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4) - 4);
+	_ASSERT(pTexture != nullptr);
+	_ASSERT(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4) - 4);
 
 	// Shader data:
 	// Normal contains position
@@ -194,7 +195,7 @@ OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F 
 	//see if texture changed
 	if (pTexture != m_texPtrs[m_nTexChangesCursor])
 	{
-		if(m_texPtrs[m_nTexChangesCursor] == NULL)
+		if(m_texPtrs[m_nTexChangesCursor] == nullptr)
 		{
 			m_texPtrs[m_nTexChangesCursor] = pTexture;
 			m_nTrisOffsets[m_nTexChangesCursor] = 0;
@@ -202,11 +203,10 @@ OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F 
 		else
 		{
 			m_nTexChangesCursor++;
-			//#TODO: do a flush instead of assert
-			assert(m_nTexChangesCursor < K_BS_MAX_MODECHANGES_CNT);
 
 			m_texPtrs[m_nTexChangesCursor] = pTexture;
 			m_nTrisOffsets[m_nTexChangesCursor] = m_nTrisOffsets[m_nTexChangesCursor - 1] + m_nTrisPerTexture[m_nTexChangesCursor - 1];
+			_ASSERT(m_nTexChangesCursor < K_BS_MAX_MODECHANGES_CNT);
 		}
 	}
 	m_nTrisPerTexture[m_nTexChangesCursor] += 2;
@@ -215,10 +215,10 @@ OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F 
 }
 
 
-OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec3 *pPosition, DWORD color /*= 0xffffffff*/, float fRotationZ /*= 0.0f*/, Vec2 vScale /*= { 1.0f, 1.0f }*/, UINT paintFlags /*= 0*/)
+OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec3 *pPosition, DWORD color, float fRotationZ, Vec2 vScale, UINT paintFlags)
 {
-	//#TODO: automatically call Flush if we're over the bounds, in loc de asserturi.
-	assert(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4) - 4);
+	_ASSERT(pTexture != nullptr);
+	_ASSERT(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4) - 4);
 
 	// Shader data:
 	// Normal contains position
@@ -281,11 +281,10 @@ OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_
 		else
 		{
 			m_nTexChangesCursor++;
-			//#TODO: do a flush instead of assert
-			assert(m_nTexChangesCursor < K_BS_MAX_MODECHANGES_CNT);
 
 			m_texPtrs[m_nTexChangesCursor] = pTexture;
 			m_nTrisOffsets[m_nTexChangesCursor] = m_nTrisOffsets[m_nTexChangesCursor - 1] + m_nTrisPerTexture[m_nTexChangesCursor - 1];
+			_ASSERT(m_nTexChangesCursor < K_BS_MAX_MODECHANGES_CNT);
 		}
 	}
 	m_nTrisPerTexture[m_nTexChangesCursor] += 2;
