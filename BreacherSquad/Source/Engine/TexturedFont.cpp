@@ -1,7 +1,7 @@
 #include "dxstdafx.h"
 //#include "../dbgutil.h"
-#include ".\TexturedFont.h"
-#include ".\enginecommon.h"
+#include "TexturedFont.h"
+#include "utils/enginecommon.h"
 
 ///--- STATICS ---
 //pointer comun catre strings manager ca sa nu mai folosesc extern

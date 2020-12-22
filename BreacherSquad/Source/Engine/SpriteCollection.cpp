@@ -1,6 +1,5 @@
 #include "dxstdafx.h"
 #include "spriteCollection.h"
-#include "enginecommon.h"
 
 
 //clasa CSpriteCollection
@@ -70,7 +69,7 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 
 		WCHAR wcsImgPath[MAX_PATH];
 		StringCchPrintf(wcsImgPath, MAX_PATH, L"%s%s", str_fullpath.c_str(), imgname);
-		for (int ll = 0; ll < wcslen(wcsImgPath); ll++)
+		for (UINT ll = 0; ll < wcslen(wcsImgPath); ll++)
 		{
 			if (wcsImgPath[ll] == '\\')
 				wcsImgPath[ll] = '/';

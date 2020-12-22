@@ -232,7 +232,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 //#define _CRT_NONSTDC_NO_DEPRECATE
 
 #include "../versioning/versioning.h"
-#include "../Engine/dbgutil.h"
+#include "utils/dbgutil.h"
 #include "OpResult.h"
 
 #include "utils/UTMath.h"
@@ -441,13 +441,13 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "List.h"
 ///--- enumerari ---
 #include "BitPacker.h"
-#include "DataTypes.h"
-#include "enginecommon.h"
-#include "CMathUtil.h"
+#include "utils/DataTypes.h"
+#include "utils/enginecommon.h"
+#include "utils/CMathUtil.h"
 #include "Caabb.h"
 #include "Randoms.h"
 #include "GetDXVer.h"
-#include "Engine/pugixml/pugixml.hpp"
+#include "pugixml/pugixml.hpp"
 #include "FileManager.h"
 #include "Chapters.h"
 

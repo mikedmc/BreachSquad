@@ -257,13 +257,10 @@
     <ClInclude Include="Source\Engine\ControllersManager.h" />
     <ClInclude Include="Source\Engine\ControlsManager.h" />
     <ClInclude Include="Source\Engine\CustomInterfaces.h" />
-    <ClInclude Include="Source\Engine\DataTypes.h" />
-    <ClInclude Include="Source\Engine\dbgutil.h" />
     <ClInclude Include="Source\Common\dxstdafx.h" />
     <ClInclude Include="Source\Common\DXUT.h" />
     <ClInclude Include="Source\Common\DXUTenum.h" />
     <ClInclude Include="Source\Common\DXUTmisc.h" />
-    <ClInclude Include="Source\Engine\enginecommon.h" />
     <ClInclude Include="Source\Engine\EventManager.h" />
     <ClInclude Include="Source\Engine\Constants\font_ids.h" />
     <ClInclude Include="Source\Engine\FileManager.h" />
@@ -300,7 +297,6 @@
     <ClInclude Include="Source\Engine\List.h" />
     <ClInclude Include="Source\Engine\Log.h" />
     <ClInclude Include="Source\Engine\MainMenu.h" />
-    <ClInclude Include="Source\Engine\CMathUtil.h" />
     <ClInclude Include="Source\Engine\MiniDump.h" />
     <ClInclude Include="Source\Engine\Mods.h" />
     <ClInclude Include="Source\Engine\Netlock.h" />
@@ -336,6 +332,10 @@
     <ClInclude Include="Source\Engine\Constants\particles_SPR.h" />
     <ClInclude Include="Source\Engine\ParticlesManager.h" />
     <ClInclude Include="Source\Engine\Randoms.h" />
+    <ClInclude Include="Source\Engine\utils\CMathUtil.h" />
+    <ClInclude Include="Source\Engine\utils\DataTypes.h" />
+    <ClInclude Include="Source\Engine\utils\dbgutil.h" />
+    <ClInclude Include="Source\Engine\utils\enginecommon.h" />
     <ClInclude Include="Source\Engine\utils\ParallaxBg.h" />
     <ClInclude Include="Source\Engine\utils\PlatformTypes.h" />
     <ClInclude Include="Source\Engine\utils\UTMath.h" />
@@ -637,12 +637,6 @@
     <ClCompile Include="Source\Engine\CustomInterfaces.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
-    <ClCompile Include="Source\Engine\DataTypes.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
-    </ClCompile>
-    <ClCompile Include="Source\Engine\dbgutil.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
-    </ClCompile>
     <ClCompile Include="Source\Common\dxstdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
@@ -655,9 +649,6 @@
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Common\DXUTmisc.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
-    </ClCompile>
-    <ClCompile Include="Source\Engine\enginecommon.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\EventManager.cpp">
@@ -699,9 +690,6 @@
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\MainMenu.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
-    </ClCompile>
-    <ClCompile Include="Source\Engine\CMathUtil.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\MiniDump.cpp">
@@ -747,6 +735,10 @@
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\UTAppClassStates.cpp" />
+    <ClCompile Include="Source\Engine\utils\CMathUtil.cpp" />
+    <ClCompile Include="Source\Engine\utils\DataTypes.cpp" />
+    <ClCompile Include="Source\Engine\utils\dbgutil.cpp" />
+    <ClCompile Include="Source\Engine\utils\enginecommon.cpp" />
     <ClCompile Include="Source\Engine\utils\ParallaxBg.cpp" />
     <ClCompile Include="Source\Engine\utils\UTMath.cpp" />
     <ClCompile Include="Source\LevelEd\LevelEditor.cpp" />
