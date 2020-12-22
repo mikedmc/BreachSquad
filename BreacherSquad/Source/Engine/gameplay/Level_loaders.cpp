@@ -981,7 +981,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 	//set interfaces ptrs
 	m_interfaceIGM.Init(&m_sprInterface, pPlayerActor[0], pPlayerActor[1]);
-	m_interfaceTextBubble.Init(&UTGetControlsManager().m_sprCol);
+	m_interfaceTextBubble.Init(&UTGetGUI().m_sprCol);
 	///--- camera ---
 	//target
 	m_camTargetActive = null; //cand nu am target se uita dupa players

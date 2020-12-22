@@ -290,4 +290,4 @@ public:
 };
 
 //declare singleton
-CControlsManager& UTGetControlsManager();
+CControlsManager& UTGetGUI();

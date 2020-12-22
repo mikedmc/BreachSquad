@@ -242,7 +242,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 			float fPercent = weapon->fAimErrorFOV / weapon->WeaponTemplate.fAimErrorMaxFOV;
 
 			RECTXYWH rect(pos.x + 5, pos.y - 200, 60, 5);
-			CtrlMgrDrawProgress_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PROGRESS, rect, fPercent, 0xffffffff);
+			CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS, rect, fPercent, 0xffffffff);
 		}
 	}
 #endif
@@ -529,11 +529,11 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 		tmprect.Set(vPos.x + barrect.w + 50, vPos.y - scrRect.h + 5, 120, 24);
 		SIZEWH txtsz = g_font6n1->MeasureString(STR_TUTORIAL_INTERFACE_STRATEGIC, tmprect.w);
 		tmprect.h = txtsz.h;
-		CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME1, tmprect, 0xffffffff);
+		CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, tmprect, 0xffffffff);
 		g_font6n1->DrawString(STR_TUTORIAL_INTERFACE_STRATEGIC, tmprect, FONTFLAG_ANCHOR_VCENTERHCENTER | FONTFLAG_WRAPTEXT, 0xffffffff);
 		//arrow too
 		float foff = max(0.0f, 5.0f * sin(fLocalTimeline * 6.0f));
-		CSprite::paintFrame(&UTGetControlsManager().m_sprCol, vPos.x + barrect.w + 45.0f + foff, vPos.y - scrRect.h + 9, ANM_CONTROLS_SPR_TUTORIAL_L_ARR, 0, 0xffffffff);
+		CSprite::paintFrame(&UTGetGUI().m_sprCol, vPos.x + barrect.w + 45.0f + foff, vPos.y - scrRect.h + 9, ANM_CONTROLS_SPR_TUTORIAL_L_ARR, 0, 0xffffffff);
 	}
 
 
@@ -654,7 +654,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 			if (nRoff > 0)
 				butrect.x -= nRoff;
 
-			CtrlMgrDrawHTilingAnim_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_BUT_SM_DARKBLUE, 0, butrect, 0xffffffff);
+			CtrlMgrDrawHTilingAnim_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUT_SM_DARKBLUE, 0, butrect, 0xffffffff);
 			pFont->DrawString(strDesc, butrect.CenterX(), vButCenter.y, FONTFLAG_ANCHOR_VCENTERHCENTER, 0xffffffff);
 
 			//show helper key
@@ -722,7 +722,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 
 				if ((UTGetAppClass().m_Settings.bShowInterfaceHelp) || (arr_commands[kk] == K_CM_COMMAND_RELOAD) || (arr_commands[kk] == K_CM_COMMAND_STRATEGIC_MENU) || (kk == 6))
 				{
-					CtrlMgrDrawButtonFromText(&UTGetControlsManager().m_sprCol, anmIdx, bPressed, &arrKeyNames[nPlayerOrdinal][kk], g_font5n2, vBP, 0xffffffff, nAlign);
+					CtrlMgrDrawButtonFromText(&UTGetGUI().m_sprCol, anmIdx, bPressed, &arrKeyNames[nPlayerOrdinal][kk], g_font5n2, vBP, 0xffffffff, nAlign);
 				}
 			}
 			else //key icons set
@@ -744,9 +744,9 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 
 				if ((UTGetAppClass().m_Settings.bShowInterfaceHelp) || (arr_commands[kk] == K_CM_COMMAND_RELOAD) || (arr_commands[kk] == K_CM_COMMAND_STRATEGIC_MENU) || (kk == 6))
 				{
-					int butw = UTGetControlsManager().m_sprCol.GetAFrameBBox(anmIdx, arrKeyIcons[nPlayerOrdinal][kk]).w;
+					int butw = UTGetGUI().m_sprCol.GetAFrameBBox(anmIdx, arrKeyIcons[nPlayerOrdinal][kk]).w;
 					int algnoffx = (-nAlign * butw) / 2;
-					CSprite::paintFrame(&UTGetControlsManager().m_sprCol, vBP.x + algnoffx, vBP.y, anmIdx, arrKeyIcons[nPlayerOrdinal][kk]);
+					CSprite::paintFrame(&UTGetGUI().m_sprCol, vBP.x + algnoffx, vBP.y, anmIdx, arrKeyIcons[nPlayerOrdinal][kk]);
 				}
 			}
 		}

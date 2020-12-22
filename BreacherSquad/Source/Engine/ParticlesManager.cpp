@@ -493,7 +493,7 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 
 				DWORD dwcol = D3DCOLOR_COLORALPHA(ndum->sprite.color, fAlpha);
 				RECTXYWH ptrect(0, (int)floor(camrect.CenterY() + ndum->pos.y - fonth * 0.75f), 200, fonth * 1.5f + fonth2);
-				CtrlMgrDrawWidebar(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, ptrect, dwcol);
+				CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, ptrect, dwcol);
 
 				//paint string
 				float offx = 0.0f;

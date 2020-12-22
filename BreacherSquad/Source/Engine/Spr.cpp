@@ -196,12 +196,12 @@ void CSpr::Paint(CSpriteCollection* sprCol)
 	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameID];
 	for( int ii = 0; ii < sprCol->AFrames[aframeIdx]->fmodulesNo; ii++ )
 	{
-		int fmoduleIdx = sprCol->AFrames[aframeIdx]->fmodulesIdx[ii];
+		scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[ii]];
 		
-		s_pSP->Draw(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx]->pTex, 
-			&sprCol->FModules[fmoduleIdx]->moduleRect, 
-			NULL, 
-			&D3DXVECTOR3(pos.x + sprCol->FModules[fmoduleIdx]->ox, pos.y + sprCol->FModules[fmoduleIdx]->oy, 0.0f),
+		s_pSP->Draw(sprCol->Textures[mod->imgIdx]->pTex,
+			mod->texRect,
+			mod->moduleRectOff,
+			pos,
 			color);
 	}
 }
@@ -213,13 +213,9 @@ void CSpr::PaintModule(CSpriteCollection* sprCol, int moduleIdx)
 	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameID];
 	_ASSERT(moduleIdx < sprCol->AFrames[aframeIdx]->fmodulesNo); 
 
-	int fmoduleIdx = sprCol->AFrames[aframeIdx]->fmodulesIdx[moduleIdx];
-	
-	s_pSprite->Draw(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx]->pTex,
-		&sprCol->FModules[fmoduleIdx]->moduleRect,
-		NULL,
-		&D3DXVECTOR3(pos.x + sprCol->FModules[fmoduleIdx]->ox, pos.y + sprCol->FModules[fmoduleIdx]->oy, 0.0f),
-		color);
+	scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[moduleIdx]];
+
+	s_pSP->Draw(sprCol->Textures[mod->imgIdx]->pTex, mod->texRect, mod->moduleRectOff, pos, color);
 }
 
 void UTSprite::PaintFrameEx(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameID, DWORD ncolor, float fRotZ, Vec2 vScale)

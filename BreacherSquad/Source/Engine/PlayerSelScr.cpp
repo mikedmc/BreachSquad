@@ -555,7 +555,7 @@ void CPlayerSelScr::Update(float dTime)
 							break;
 							case K_PSS_CURPOS_XP_POINTS:
 							{
-								CCtrlLayer* layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_PLAYER_UPGRADE");
+								CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_PLAYER_UPGRADE");
 								if (layer)
 								{
 									int nPlayerType = (int)playersel->eType;
@@ -847,11 +847,11 @@ void CPlayerSelScr::Update(float dTime)
 								
 								if (g_userData[K_MEMID_STARS_TOTAL] - g_userData[K_MEMID_STARS_SPENT] < wpnPrice)
 								{
-									UTGetControlsManager().MessageBoxOK(STR_UNLOCK_ITEM, STR_NOT_ENOUGH_STARS);
+									UTGetGUI().MessageBoxOK(STR_UNLOCK_ITEM, STR_NOT_ENOUGH_STARS);
 								}
 								else
 								{
-									CCtrlLayer* layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_BUY_WEAPON");
+									CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_BUY_WEAPON");
 									CControl* ctrl = null;
 									if (layer != null)
 									{
@@ -909,7 +909,7 @@ void CPlayerSelScr::Update(float dTime)
 	if ((bBackPressed) && (!bBackProcessed))
 	{
 		SND_PLAY(SNDIDX_DENIED);
-		UTGetControlsManager().ShowLayerOnce("LAYER_ID_QUIT_PLAYERSEL");
+		UTGetGUI().ShowLayerOnce("LAYER_ID_QUIT_PLAYERSEL");
 	}
 
 	//update cursor things and other time dependent stuff
@@ -1394,7 +1394,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 	if (playersel->nInstanceID < 0) //empty slot
 	{
 		RECTXYWH tempbox(winbox.x, winbox.CenterY() - 25, winbox.w, 50);
-		CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME3, tempbox, dwWinColor);
+		CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME3, tempbox, dwWinColor);
 
 		CStringDesc strPlayer;
 		if (sPlayerName == null)
@@ -1419,7 +1419,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		else
 			g_stringsMgr.SetStringDesc(&strTemp, sPlayerName->text);
 
-		CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_WINDOW2, winbox, dwWinColor);
+		CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WINDOW2, winbox, dwWinColor);
 		//player names
 		RECTXYWH clipper;
 		clipper.Set(winbox.x + 3, winbox.y - 12, winbox.w - 20, 20);
@@ -1429,11 +1429,11 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		if (ctrlr != null)
 		{
 			if (ctrlr->eType == K_CM_CT_KBM_SDL)
-				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, winbox.Right(), winbox.y, ANM_CONTROLS_SPR_ICONS_CONTROLLER, 0, dwTitleColor);
+				CSprite::paintFrame(&UTGetGUI().m_sprCol, winbox.Right(), winbox.y, ANM_CONTROLS_SPR_ICONS_CONTROLLER, 0, dwTitleColor);
 			else if (ctrlr->eType == K_CM_CT_JOYSTICK_SDL)
-				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, winbox.Right(), winbox.y, ANM_CONTROLS_SPR_ICONS_CONTROLLER, 1, dwTitleColor);
+				CSprite::paintFrame(&UTGetGUI().m_sprCol, winbox.Right(), winbox.y, ANM_CONTROLS_SPR_ICONS_CONTROLLER, 1, dwTitleColor);
 			else //network
-				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, winbox.Right(), winbox.y, ANM_CONTROLS_SPR_ICONS_CONTROLLER, 2, dwTitleColor);
+				CSprite::paintFrame(&UTGetGUI().m_sprCol, winbox.Right(), winbox.y, ANM_CONTROLS_SPR_ICONS_CONTROLLER, 2, dwTitleColor);
 		}
 		//placeholder portraits
 		CSprite::paintFrame(&m_sprCol, winbox.x, winbox.y, ANM_MENUS_SPR_CHARSEL_WND_DECO, 0, dwWinColor);
@@ -1444,7 +1444,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		if ((!playersel->bSelected) && (playersel->nCursorMoreReal < 0))
 		{
 			//paint actual scaling cursor
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME5, rcCursor, 0xffffffff);
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, rcCursor, 0xffffffff);
 		}
 		
 		///--- poza si frame player
@@ -1465,7 +1465,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 
 		///--- player class
 		recttemp.Set(winbox.x + 52, recttemp.y + 4, winbox.w - 62, 16);
-		CtrlMgrDrawHTilingAnim_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_INPUT_BOX2, 0, recttemp, dwWinColor);
+		CtrlMgrDrawHTilingAnim_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_INPUT_BOX2, 0, recttemp, dwWinColor);
 		recttemp.Set(winbox.x + 44, recttemp.y, winbox.w - 46, 16);
 		g_font9b1->DrawString(STR_PLAYER_CLASS_ASSAULTER + (int)playersel->eType, recttemp.CenterX(), recttemp.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT_LIGHTER, fAlpha));
 		//player types page dots under the class name
@@ -1481,45 +1481,45 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 
 		recttemp.y += recttemp.h + 4;
 		recttemp.h = 32;
-		CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME1, recttemp, dwWinColor, -4);
+		CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, recttemp, dwWinColor, -4);
 		//XP progress and numbers
 		recttemp2.Set(recttemp.x + 17, recttemp.y + 3, recttemp.w - 22, 12);
 		CStringDesc strDesc;
 		if (nLevel < K_GAME_MAX_UPGRADE_LEVELS)
 		{
 			float fPercFill = (float)(nTotalXP - nMinXP) / (float)(nMaxXP - nMinXP);
-			CtrlMgrDrawProgress_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_SM_XP, recttemp2, fPercFill, dwWinColor);
+			CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_SM_XP, recttemp2, fPercFill, dwWinColor);
 			g_stringsMgr.SetStringDesc(&strDesc, L"%d/%d", nTotalXP - nMinXP, nMaxXP - nMinXP);
 			g_font6nc1->DrawString(&strDesc, recttemp2, FONTFLAG_ANCHOR_VCENTERHCENTER, dwWinColor);
 		}
 		else
 		{
-			CtrlMgrDrawProgress_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_SM_XP, recttemp2, 1.0f, dwWinColor);
+			CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_SM_XP, recttemp2, 1.0f, dwWinColor);
 			g_font6nc1->DrawString(STR_MAX_LEVEL, recttemp2, FONTFLAG_ANCHOR_VCENTERHCENTER, dwWinColor);
 		}
 		//shieldicon and level
-		CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.x, recttemp2.CenterY(), ANM_CONTROLS_SPR_PROGRESS_XP_UPGRADE, 9, dwWinColor);
+		CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.x, recttemp2.CenterY(), ANM_CONTROLS_SPR_PROGRESS_XP_UPGRADE, 9, dwWinColor);
 		g_stringsMgr.SetStringDesc(&strDesc, L"%d", nLevel + 1);
 		g_font6nc1->DrawString(&strDesc, recttemp2.x - 8, recttemp2.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(0xfffdb727, fAlpha));
 
 		//frame nume abilitate
 		recttemp2.Set(recttemp.x + 4, recttemp.y + 20, recttemp.w - 8, 8);
-		CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME4, recttemp2, dwWinColor);
+		CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, recttemp2, dwWinColor);
 		g_font8b1->DrawString(STR_SKILLS, recttemp2.CenterX(), recttemp2.y, FONTFLAG_ANCHOR_TOPCENTER, dwTextColor);
 		//upgrade chevron
 		if ((!playersel->bIsNetworkPlayer) && (nUpgradePoints > 0) && (g_timers.GetTimerValue(600) < 0.4f))
 		{
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.x + 4, recttemp2.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 0, dwWinColor);
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.Right() - 5, recttemp2.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 0, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.x + 4, recttemp2.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 0, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.Right() - 5, recttemp2.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 0, dwWinColor);
 		}
 
 		///--- Primary weapon
 		sPSSItemData* pItem = GetItem(playersel->eType, PSS_ITEMCAT_WEAPON, playersel->nSelection[PSS_ITEMCAT_WEAPON]);
 		recttemp.Set(winbox.x + 6, recttemp.Bottom() + 17, winbox.w - 12, 29);
-		CtrlMgrDrawWindow(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, recttemp, dwWinColor, FONTIDX_8_B1, STR_PRIMARY_WEAPON, dwTextColor);
+		CtrlMgrDrawWindow(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, recttemp, dwWinColor, FONTIDX_8_B1, STR_PRIMARY_WEAPON, dwTextColor);
 		//weapon icon
 		recttemp2.Set(recttemp.x, recttemp.y + 2, 44, 14);
-		CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
+		CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
 		DWORD dwWCol = dwWinColor;
 		if (playersel->nPrice[PSS_ITEMCAT_WEAPON] <= 0)
 		{
@@ -1531,8 +1531,8 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 			dwWCol = D3DCOLOR_COLORALPHA(0xff888888, fAlpha);
 			//paint lock on locked weapons
 			CSprite::paintFrame(&m_sprCol, recttemp2.CenterX(), recttemp2.CenterY(), ANM_MENUS_SPR_ICONS_WEAPONS, pItem->iconIdx, dwWCol);
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.x + 4, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_LOCKS, 0, dwWinColor);
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.Right() - 4, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_STARS_2F_SM, 1, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.x + 4, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_LOCKS, 0, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.Right() - 4, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_STARS_2F_SM, 1, dwWinColor);
 			//paint cost
 			CStringDesc sdPrice;
 			g_stringsMgr.SetStringDesc(&sdPrice, L"%d", nWeaponPrice);
@@ -1545,7 +1545,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		
 		//special
 		recttemp2.Set(recttemp.x, recttemp.y + 21, recttemp.w, 8);
-		CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME4, recttemp2, dwWinColor);
+		CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, recttemp2, dwWinColor);
 		CSprite::paintFrame(&m_sprCol, recttemp2.x, recttemp2.y, ANM_MENUS_SPR_ICONS_SPECIALS, pItem->iconALTidx, dwWinColor);
 		g_font6n1->DrawStringClamped(pItem->strIdxALTscreenName, recttemp2.x + 10, recttemp2.y + 1, recttemp2.w, FONTFLAG_ANCHOR_TOPLEFT, dwTextColor);
 		//page dots
@@ -1556,10 +1556,10 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		///slot 1 left
 		pItem = GetItem(playersel->eType, PSS_ITEMCAT_EQUIPMENT, playersel->nSelection[PSS_ITEMCAT_EQUIPMENT]);
 		recttemp.Set(winbox.x + 6, recttemp.Bottom() + 21, winbox.w / 2 - 12, 15);
-		CtrlMgrDrawWindow(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, recttemp, dwWinColor, FONTIDX_8_B1, STR_GEAR, dwTextColor);
+		CtrlMgrDrawWindow(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, recttemp, dwWinColor, FONTIDX_8_B1, STR_GEAR, dwTextColor);
 		//icon
 		recttemp2.Set(recttemp.x, recttemp.y + 2, recttemp.w, 13);
-		CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
+		CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
 		dwWCol = dwWinColor;
 		CSprite::paintFrame(&m_sprCol, recttemp2.CenterX(), recttemp2.CenterY(), ANM_MENUS_SPR_ICONS_EQUIPMENT, pItem->iconIdx, dwWCol);
 		//special ability icon - only paint if we have a valid icon
@@ -1574,10 +1574,10 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		///slot 2 right (no special ability)
 		pItem = GetItem(playersel->eType, PSS_ITEMCAT_GEAR, playersel->nSelection[PSS_ITEMCAT_GEAR]);
 		recttemp.x = winbox.x + winbox.w / 2 + 6;
-		CtrlMgrDrawWindow(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, recttemp, dwWinColor, FONTIDX_8_B1, STR_GEAR, dwTextColor);
+		CtrlMgrDrawWindow(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, recttemp, dwWinColor, FONTIDX_8_B1, STR_GEAR, dwTextColor);
 		//icon
 		recttemp2.Set(recttemp.x, recttemp.y + 2, recttemp.w, 13);
-		CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
+		CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
 		dwWCol = dwWinColor;
 		CSprite::paintFrame(&m_sprCol, recttemp2.CenterX(), recttemp2.CenterY(), ANM_MENUS_SPR_ICONS_GEAR, pItem->iconIdx, dwWCol);
 		//special ability icon - only paint if we have a valid icon
@@ -1593,17 +1593,17 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		///--- ULTIMATE
 		pItem = GetItem(playersel->eType, PSS_ITEMCAT_ULTIMATE, playersel->nSelection[PSS_ITEMCAT_ULTIMATE]);
 		recttemp.Set(winbox.x + 6, recttemp.Bottom() + 21, winbox.w - 12, 25);
-		CtrlMgrDrawWindow(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, recttemp, dwWinColor, FONTIDX_8_B1, STR_ULTIMATE, dwTextColor);
+		CtrlMgrDrawWindow(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, recttemp, dwWinColor, FONTIDX_8_B1, STR_ULTIMATE, dwTextColor);
 		//frame si icon abilitate
 		recttemp2.Set(recttemp.CenterX() - 22, recttemp.y + 2, 44, 10);
-		CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
+		CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
 		CSprite::paintFrame(&m_sprCol, recttemp2.CenterX(), recttemp2.CenterY(), ANM_MENUS_SPR_ICONS_ULTIMATE, pItem->iconIdx, dwWinColor);
 		//window deco
 		CSprite::paintFrame(&m_sprCol, recttemp2.x - 10, recttemp2.CenterY(), ANM_MENUS_SPR_MISC_ICONS, 0, dwWinColor);
 		CSprite::paintFrame(&m_sprCol, recttemp2.Right() + 10, recttemp2.CenterY(), ANM_MENUS_SPR_MISC_ICONS, 1, dwWinColor);
 		//frame ability name
 		recttemp2.Set(recttemp.x, recttemp.y + 17, recttemp.w, 8);
-		CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME4, recttemp2, dwWinColor);
+		CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, recttemp2, dwWinColor);
 		g_font6n1->DrawString(pItem->strIdxScreenName, recttemp2.CenterX(), recttemp2.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, dwTextColor);
 		//abilities page dots
 		recttemp2 = recttemp; recttemp2.h += 2;
@@ -1618,7 +1618,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		if (playersel->bSelected)
 			butframe = 6;
 
-		CtrlMgrDrawHTilingAnim(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, dwWinColor);
+		CtrlMgrDrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, dwWinColor);
 		//textul
 		if(!playersel->bSelected)
 			recttemp.y -= 1;
@@ -1688,17 +1688,17 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 					posY = localbox.Bottom() + (kk - nSelectedIdx) * 20.0f - 9.0f + 20.0f * playersel->fAnimCursor;
 
 				recttemp.Set(localbox.x, posY, localbox.w, 10);
-				CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME1, recttemp, dwWinColor);
+				CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, recttemp, dwWinColor);
 				//icon
 				recttemp2.Set(recttemp.x, recttemp.y, 32, 12);
 				int nPortraitAnm = (nPlayerOrdinal == 0) ? ANM_MENUS_SPR_CHAR_PORTRAITS_SM: ANM_MENUS_SPR_CHAR_PORTRAITS_SM_R;
 				CSprite::paintFrame(&m_sprCol, recttemp2.CenterX() + 3, recttemp2.y - 1, nPortraitAnm, kk, dwWinColor);
 				//name
 				recttemp2.Set(recttemp.Right() - 85, recttemp.y, 85, recttemp.h);
-				CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME4, recttemp2, dwWinColor);
+				CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, recttemp2, dwWinColor);
 				g_font9b1->DrawString(STR_PLAYER_CLASS_ASSAULTER + kk, recttemp2.CenterX(), recttemp2.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, dwTextColor);
 				//shieldicon and level
-				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp.x + 12, recttemp.Bottom() - 5, ANM_CONTROLS_SPR_PROGRESS_XP_UPGRADE, 9, dwWinColor);
+				CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp.x + 12, recttemp.Bottom() - 5, ANM_CONTROLS_SPR_PROGRESS_XP_UPGRADE, 9, dwWinColor);
 				int nxppts = g_userData[K_MEMID_TOTALXP_PER_CLASS_START + kk];
 				int nlvllocal = App_GetXPLevel(nxppts);
 				g_stringsMgr.SetStringDesc(&strDesc, L"%d", nlvllocal + 1);
@@ -1706,34 +1706,34 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			}
 
 			///--- selected class ---
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME5, tempbox, 0xffffffff);
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME1, localbox, dwWinColor);
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, tempbox, 0xffffffff);
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, localbox, dwWinColor);
 
 			//icon
 			recttemp.Set(localbox.x - 2, localbox.y - 2, 38, 38);
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp, D3DCOLOR_COLORALPHA(0xff2A3946, fAlpha));
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp, D3DCOLOR_COLORALPHA(0xff2A3946, fAlpha));
 			int nPortraitAnm = (nPlayerOrdinal == 0) ? ANM_MENUS_SPR_CHAR_PORTRAITS_LARGE : ANM_MENUS_SPR_CHAR_PORTRAITS_LARGE_R;
 			CSprite::paintFrame(&m_sprCol, recttemp.CenterX(), recttemp.y, nPortraitAnm, (int)playersel->eType, dwWinColor);
 			//shieldicon and level
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp.x + 14, recttemp.Bottom() - 7, ANM_CONTROLS_SPR_PROGRESS_XP_UPGRADE, 9, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp.x + 14, recttemp.Bottom() - 7, ANM_CONTROLS_SPR_PROGRESS_XP_UPGRADE, 9, dwWinColor);
 			g_stringsMgr.SetStringDesc(&strDesc, L"%d", nLevel + 1);
 			g_font6nc1->DrawString(&strDesc, recttemp.x + 14 - 8, recttemp.Bottom() - 7, FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(0xfffdb727, fAlpha));
 			//class name
 			recttemp2.Set(localbox.x + 48, localbox.y - 1, winbox.w - 62, 16);
-			CtrlMgrDrawHTilingAnim_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_INPUT_BOX2, 0, recttemp2, dwWinColor);
+			CtrlMgrDrawHTilingAnim_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_INPUT_BOX2, 0, recttemp2, dwWinColor);
 			g_font9b1->DrawString(STR_PLAYER_CLASS_ASSAULTER + (int)playersel->eType, recttemp2.CenterX(), recttemp2.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT_LIGHTER, fAlpha));
 			//difficulty and XP
 			recttemp2.Set(recttemp.Right() + 6, recttemp.y + 17, localbox.w - recttemp.w - 4, 8);
 			if (nLevel < K_GAME_MAX_UPGRADE_LEVELS)
 			{
 				float fPercFill = (float)(nTotalXP - nMinXP) / (float)(nMaxXP - nMinXP);
-				CtrlMgrDrawProgress_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_SM_XP, recttemp2, fPercFill, dwWinColor);
+				CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_SM_XP, recttemp2, fPercFill, dwWinColor);
 				g_stringsMgr.SetStringDesc(&strDesc, L"%d/%d", nTotalXP - nMinXP, nMaxXP - nMinXP);
 				g_font6nc1->DrawString(&strDesc, recttemp2, FONTFLAG_ANCHOR_VCENTERHCENTER, dwWinColor);
 			}
 			else
 			{
-				CtrlMgrDrawProgress_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_SM_XP, recttemp2, 1.0f, dwWinColor);
+				CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_SM_XP, recttemp2, 1.0f, dwWinColor);
 				g_font6nc1->DrawString(STR_MAX_LEVEL, recttemp2, FONTFLAG_ANCHOR_VCENTERHCENTER, dwWinColor);
 			}
 			//difficulty
@@ -1748,7 +1748,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 
 			//description
 			recttemp2.Set(localbox.x, recttemp.Bottom() + 8, localbox.w, 18);
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp2, D3DCOLOR_COLORALPHA(0xff1C252E, fAlpha));
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp2, D3DCOLOR_COLORALPHA(0xff1C252E, fAlpha));
 			if (arrItemsByClass[playersel->eType].nStrIdx_desc >= 0)
 			{
 				int texth = g_font6n1->MeasureString(arrItemsByClass[playersel->eType].nStrIdx_desc, recttemp2.w).h;
@@ -1767,9 +1767,9 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 
 			float off = sin(fLocalTimeline * 5.0f);
 			//if (playersel->eType > 0)
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, tempbox.CenterX(), tempbox.y - off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_UP, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, tempbox.CenterX(), tempbox.y - off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_UP, dwWinColor);
 			//if (playersel->eType < K_PSS_CLASSES_COUNT - 1)
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, tempbox.CenterX(), tempbox.Bottom() + off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_DOWN, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, tempbox.CenterX(), tempbox.Bottom() + off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_DOWN, dwWinColor);
 
 			//page dots
 			//recttemp2 = localbox; recttemp2.h += 2;
@@ -1824,12 +1824,12 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				int nPrice = UTGetShop().GetItemPrice(pItemSm->shName.getHash());
 				
 				recttemp.Set(localbox.x, posY, localbox.w, 14);
-				CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME1, recttemp, dwWinColor);
+				CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, recttemp, dwWinColor);
 				if (nPrice <= 0) //owned
 				{
 					//icon
 					recttemp2.Set(recttemp.x, recttemp.y, 44, 14);
-					CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
+					CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
 					CSprite::paintFrame(&m_sprCol, recttemp2.CenterX(), recttemp2.CenterY(), ANM_MENUS_SPR_ICONS_WEAPONS, pItemSm->iconIdx, dwWinColor);
 					//name
 					recttemp2.Set(recttemp.Right() - 72, recttemp.y - 1, 74, 18);
@@ -1839,10 +1839,10 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				{
 					//icon
 					recttemp2.Set(recttemp.x, recttemp.y, 44, 14);
-					CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
+					CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
 					CSprite::paintFrame(&m_sprCol, recttemp2.CenterX(), recttemp2.CenterY(), ANM_MENUS_SPR_ICONS_WEAPONS, pItemSm->iconIdx, dwWColDenied);
 					//lock
-					CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.x + 2, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_LOCKS, 3, dwWinColor);
+					CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.x + 2, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_LOCKS, 3, dwWinColor);
 					//name
 					recttemp2.Set(recttemp.Right() - 72, recttemp.y - 1, 74, 18);
 					g_font6n1->DrawString(pItemSm->strIdxScreenName, recttemp2, FONTFLAG_ANCHOR_TOPRIGHT | FONTFLAG_WRAPTEXT, dwTextColor);
@@ -1850,13 +1850,13 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			}
 
 			///--- selected item ---
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME5, tempbox, 0xffffffff);
-			CtrlMgrDrawWindow(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, localbox, dwWinColor, FONTIDX_8_B1, pItem->strIdxScreenName, dwTextColor);
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, tempbox, 0xffffffff);
+			CtrlMgrDrawWindow(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, localbox, dwWinColor, FONTIDX_8_B1, pItem->strIdxScreenName, dwTextColor);
 			//weapon icon
 			recttemp2.Set(localbox.x, localbox.y + 2, 44, 31);
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, recttemp2, D3DCOLOR_COLORALPHA(0xff2A3946, fAlpha));
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, recttemp2, D3DCOLOR_COLORALPHA(0xff2A3946, fAlpha));
 			recttemp.Set(localbox.x, localbox.y + 2, 44, 14);
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp, dwWinColor);
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp, dwWinColor);
 			if (playersel->nPrice[(int)eItemCat] <= 0)
 			{
 				CSprite::paintFrame(&m_sprCol, recttemp.CenterX(), recttemp.CenterY(), ANM_MENUS_SPR_ICONS_WEAPONS, pItem->iconIdx, dwWinColor);
@@ -1867,8 +1867,8 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				int nWeaponPrice = playersel->nPrice[(int)eItemCat];
 				//paint lock on locked weapons
 				CSprite::paintFrame(&m_sprCol, recttemp.CenterX(), recttemp.CenterY(), ANM_MENUS_SPR_ICONS_WEAPONS, pItem->iconIdx, dwWColDenied);
-				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.x + 8, recttemp2.Bottom() - 7, ANM_CONTROLS_SPR_LOCKS, 2, dwWinColor);
-				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.Right() - 12, recttemp2.Bottom() - 4, ANM_CONTROLS_SPR_ICONS_MISC, 1, dwWinColor);
+				CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.x + 8, recttemp2.Bottom() - 7, ANM_CONTROLS_SPR_LOCKS, 2, dwWinColor);
+				CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.Right() - 12, recttemp2.Bottom() - 4, ANM_CONTROLS_SPR_ICONS_MISC, 1, dwWinColor);
 				//paint cost
 				CStringDesc sdPrice;
 				g_stringsMgr.SetStringDesc(&sdPrice, L"%d", nWeaponPrice);
@@ -1882,14 +1882,14 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				if (nStrIdx >= 0)
 				{
 					float fPerc = (float)pItem->nStatsData[oo * 2 + 1] / 100.0f;
-					CtrlMgrDrawProgress_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PROGRESS, recttemp2, fPerc, dwWinColor);
+					CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS, recttemp2, fPerc, dwWinColor);
 					g_font6n1->DrawString(nStrIdx, recttemp2.x - 3, recttemp2.y + 8, FONTFLAG_ANCHOR_BOTTOMRIGHT, dwTextColor);
 					recttemp2.y += 9;
 				}
 			}
 			//special ability
 			recttemp2.Set(localbox.x, localbox.Bottom() - 8, localbox.w, 8);
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME4, recttemp2, dwWinColor);
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, recttemp2, dwWinColor);
 			CSprite::paintFrame(&m_sprCol, recttemp2.x, recttemp2.y, ANM_MENUS_SPR_ICONS_SPECIALS, pItem->iconALTidx, dwWinColor);
 			if (pItem->strIdxALTscreenName >= 0)
 				g_font6n1->DrawStringClamped(pItem->strIdxALTscreenName, recttemp2.x + 10, recttemp2.y + 1, recttemp2.w, FONTFLAG_ANCHOR_TOPLEFT, dwTextColor);
@@ -1901,9 +1901,9 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			//arrows
 			float off = sin(fLocalTimeline * 5.0f);
 			//if (playersel->nSelection[(int)eItemCat] > 0)
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, tempbox.CenterX(), tempbox.y - off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_UP, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, tempbox.CenterX(), tempbox.y - off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_UP, dwWinColor);
 			//if (playersel->nSelection[(int)eItemCat] < nItemsCnt - 1)
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, tempbox.CenterX(), tempbox.Bottom() + off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_DOWN, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, tempbox.CenterX(), tempbox.Bottom() + off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_DOWN, dwWinColor);
 
 			///--- paints controller command for selection ---
 			if ((!playersel->bSelected) && (!playersel->bIsNetworkPlayer) && (playersel->fTimeSinceCursorMoved > K_PSS_HINT_WAIT_TIMER))
@@ -1961,7 +1961,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				int nPrice = UTGetShop().GetItemPrice(pItemSm->shName.getHash());
 
 				recttemp.Set(localbox.x, posY, localbox.w, 14);
-				CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME1, recttemp, dwWinColor);
+				CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, recttemp, dwWinColor);
 
 				UINT16 ualign = 0;
 				if (playersel->nCursorPosReal == K_PSS_CURPOS_EQUIPMENT)
@@ -1980,7 +1980,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				if (nPrice <= 0) //owned
 				{
 					//icon
-					CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
+					CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
 					CSprite::paintFrame(&m_sprCol, recttemp2.CenterX(), recttemp2.CenterY(), nIconsAnim, pItemSm->iconIdx, dwWinColor);
 					//name
 					g_font6n1->DrawString(pItemSm->strIdxScreenName, recttemp3, ualign, dwTextColor);
@@ -1988,18 +1988,18 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				else //locked
 				{
 					//icon
-					CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
+					CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
 					CSprite::paintFrame(&m_sprCol, recttemp2.CenterX(), recttemp2.CenterY(), nIconsAnim, pItemSm->iconIdx, dwWColDenied);
 					//lock
-					CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.x + 2, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_LOCKS, 3, dwWinColor);
+					CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.x + 2, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_LOCKS, 3, dwWinColor);
 					//name
 					g_font6n1->DrawString(pItemSm->strIdxScreenName, recttemp3, ualign, dwTextColor);
 				}
 			}
 
 			///--- selected item ---
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME5, tempbox, 0xffffffff);
-			CtrlMgrDrawWindow(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, localbox, dwWinColor, FONTIDX_8_B1, pItem->strIdxScreenName, dwTextColor);
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, tempbox, 0xffffffff);
+			CtrlMgrDrawWindow(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, localbox, dwWinColor, FONTIDX_8_B1, pItem->strIdxScreenName, dwTextColor);
 
 			//icon
 			if (playersel->nCursorPosReal == K_PSS_CURPOS_EQUIPMENT)
@@ -2013,8 +2013,8 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				recttemp.Set(localbox.Right() - 54, localbox.y + 2, 54, 13);
 			}
 
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, recttemp2, D3DCOLOR_COLORALPHA(0xff2A3946, fAlpha));
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp, dwWinColor);
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, recttemp2, D3DCOLOR_COLORALPHA(0xff2A3946, fAlpha));
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp, dwWinColor);
 			DWORD dwWCol = dwWinColor;
 			if (playersel->nPrice[(int)eItemCat] <= 0)
 			{
@@ -2026,8 +2026,8 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				int nWeaponPrice = playersel->nPrice[(int)eItemCat];
 				//paint lock on locked weapons
 				CSprite::paintFrame(&m_sprCol, recttemp.CenterX(), recttemp.CenterY(), nIconsAnim, pItem->iconIdx, dwWColDenied);
-				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.CenterX() - 14, recttemp2.Bottom() - 7, ANM_CONTROLS_SPR_LOCKS, 2, dwWinColor);
-				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.CenterX() + 10, recttemp2.Bottom() - 4, ANM_CONTROLS_SPR_ICONS_MISC, 1, dwWinColor);
+				CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.CenterX() - 14, recttemp2.Bottom() - 7, ANM_CONTROLS_SPR_LOCKS, 2, dwWinColor);
+				CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.CenterX() + 10, recttemp2.Bottom() - 4, ANM_CONTROLS_SPR_ICONS_MISC, 1, dwWinColor);
 				//paint cost
 				CStringDesc sdPrice;
 				g_stringsMgr.SetStringDesc(&sdPrice, L"%d", nWeaponPrice);
@@ -2036,7 +2036,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 
 			//description frame and text
 			recttemp.Set(localbox.x, recttemp2.Bottom() + 6, localbox.w, 18);
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp, D3DCOLOR_COLORALPHA(0xff1C252E, fAlpha));
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp, D3DCOLOR_COLORALPHA(0xff1C252E, fAlpha));
 			if (pItem->strIdxLongDescription >= 0)
 			{
 				int texth = g_font6n1->MeasureString(pItem->strIdxLongDescription, recttemp.w).h;
@@ -2060,14 +2060,14 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				if (nStrIdx >= 0)
 				{
 					float fPerc = (float)pItem->nStatsData[oo * 2 + 1] / 100.0f;
-					CtrlMgrDrawProgress_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PROGRESS, recttemp2, fPerc, dwWinColor);
+					CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS, recttemp2, fPerc, dwWinColor);
 					g_font6n1->DrawString(nStrIdx, recttemp2.Right() + 5, recttemp2.y + 2, FONTFLAG_ANCHOR_TOPLEFT, dwTextColor);
 					recttemp2.y += 9;
 				}
 			}
 			//special ability
 			recttemp2.Set(localbox.x, localbox.Bottom() - 8, localbox.w, 8);
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME4, recttemp2, dwWinColor);
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, recttemp2, dwWinColor);
 			CSprite::paintFrame(&m_sprCol, recttemp2.x, recttemp2.y, ANM_MENUS_SPR_ICONS_SPECIALS, pItem->iconALTidx, dwWinColor);
 			if (pItem->strIdxALTscreenName >= 0)
 				g_font6n1->DrawStringClamped(pItem->strIdxALTscreenName, recttemp2.x + 10, recttemp2.y + 1, recttemp2.w, FONTFLAG_ANCHOR_TOPLEFT, dwTextColor);
@@ -2076,9 +2076,9 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			//CtrlMgrDrawPageSelector(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR, recttemp2, GetItemsCount(playersel->eType, eItemCat), playersel->nSelection[(int)eItemCat], dwWinColor);
 			float off = sin(fLocalTimeline * 5.0f);
 			//if (playersel->nSelection[(int)eItemCat] > 0)
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, tempbox.CenterX(), tempbox.y - off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_UP, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, tempbox.CenterX(), tempbox.y - off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_UP, dwWinColor);
 			//if (playersel->nSelection[(int)eItemCat] < nItemsCnt - 1)
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, tempbox.CenterX(), tempbox.Bottom() + off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_DOWN, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, tempbox.CenterX(), tempbox.Bottom() + off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_DOWN, dwWinColor);
 			///--- paints controller command for selection ---
 			if ((!playersel->bSelected) && (!playersel->bIsNetworkPlayer) && (playersel->fTimeSinceCursorMoved > K_PSS_HINT_WAIT_TIMER))
 			{
@@ -2129,12 +2129,12 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				int nPrice = UTGetShop().GetItemPrice(pItemSm->shName.getHash());
 
 				recttemp.Set(localbox.x, posY, localbox.w, 10);
-				CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME1, recttemp, dwWinColor);
+				CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, recttemp, dwWinColor);
 				if (nPrice <= 0) //owned
 				{
 					//icon
 					recttemp2.Set(recttemp.x, recttemp.y, 44, 10);
-					CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
+					CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
 					CSprite::paintFrame(&m_sprCol, recttemp2.CenterX(), recttemp2.CenterY(), ANM_MENUS_SPR_ICONS_ULTIMATE, pItemSm->iconIdx, dwWinColor);
 					//name
 					recttemp2.Set(recttemp.Right() - 72, recttemp.y - 1, 74, 18);
@@ -2144,10 +2144,10 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				{
 					//icon
 					recttemp2.Set(recttemp.x, recttemp.y, 44, 10);
-					CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
+					CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp2, dwWinColor);
 					CSprite::paintFrame(&m_sprCol, recttemp2.CenterX(), recttemp2.CenterY(), ANM_MENUS_SPR_ICONS_ULTIMATE, pItemSm->iconIdx, dwWColDenied);
 					//lock
-					CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.x + 2, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_LOCKS, 3, dwWinColor);
+					CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.x + 2, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_LOCKS, 3, dwWinColor);
 					//name
 					recttemp2.Set(recttemp.Right() - 72, recttemp.y - 1, 74, 18);
 					g_font6n1->DrawString(pItemSm->strIdxScreenName, recttemp2, FONTFLAG_ANCHOR_TOPRIGHT | FONTFLAG_WRAPTEXT, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT_HALFALPHA, 0.4f));
@@ -2155,15 +2155,15 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			}
 
 			///--- selected item ---
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME5, tempbox, 0xffffffff);
-			CtrlMgrDrawWindow(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, localbox, dwWinColor, FONTIDX_8_B1, pItem->strIdxScreenName, dwTextColor);
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, tempbox, 0xffffffff);
+			CtrlMgrDrawWindow(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, localbox, dwWinColor, FONTIDX_8_B1, pItem->strIdxScreenName, dwTextColor);
 
 			//icon
 			recttemp2.Set(localbox.x, localbox.y + 2, localbox.w - 4, 10);
 			recttemp.Set(localbox.CenterX() - 22, localbox.y + 2, 44, 10);
 
 			//CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, recttemp2, D3DCOLOR_COLORALPHA(0xff2A3946, fAlpha));
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp, dwWinColor);
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp, dwWinColor);
 
 			if (playersel->nPrice[(int)eItemCat] <= 0)
 			{
@@ -2175,8 +2175,8 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				int nWeaponPrice = playersel->nPrice[(int)eItemCat];
 				//paint lock on locked weapons
 				CSprite::paintFrame(&m_sprCol, recttemp.CenterX(), recttemp.CenterY(), ANM_MENUS_SPR_ICONS_ULTIMATE, pItem->iconIdx, dwWColDenied);
-				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.CenterX() - 14, recttemp2.Bottom() - 7, ANM_CONTROLS_SPR_LOCKS, 1, dwWinColor);
-				CSprite::paintFrame(&UTGetControlsManager().m_sprCol, recttemp2.CenterX() + 10, recttemp2.Bottom() - 4, ANM_CONTROLS_SPR_ICONS_MISC, 1, dwWinColor);
+				CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.CenterX() - 14, recttemp2.Bottom() - 7, ANM_CONTROLS_SPR_LOCKS, 1, dwWinColor);
+				CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.CenterX() + 10, recttemp2.Bottom() - 4, ANM_CONTROLS_SPR_ICONS_MISC, 1, dwWinColor);
 				//paint cost
 				CStringDesc sdPrice;
 				g_stringsMgr.SetStringDesc(&sdPrice, L"%d", nWeaponPrice);
@@ -2188,7 +2188,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 
 			//description frame and text
 			recttemp.Set(localbox.x, recttemp2.Bottom() + 5, localbox.w, 18);
-			CtrlMgrDrawFrame(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp, D3DCOLOR_COLORALPHA(0xff1C252E, fAlpha));
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp, D3DCOLOR_COLORALPHA(0xff1C252E, fAlpha));
 			if (pItem->strIdxLongDescription >= 0)
 			{
 				//g_font6n1->DrawString(pItem->strIdxLongDescription, recttemp, FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, dwTextColor);
@@ -2213,7 +2213,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				if (nStrIdx >= 0)
 				{
 					float fPerc = (float)pItem->nStatsData[oo * 2 + 1] / 100.0f;
-					CtrlMgrDrawProgress_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PROGRESS, recttemp2, fPerc, dwWinColor);
+					CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS, recttemp2, fPerc, dwWinColor);
 					g_font6n1->DrawString(nStrIdx, recttemp2.Right() + 5, recttemp2.y + 2, FONTFLAG_ANCHOR_TOPLEFT, dwTextColor);
 					recttemp2.y += 9;
 				}
@@ -2223,9 +2223,9 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			//CtrlMgrDrawPageSelector(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR, recttemp2, GetItemsCount(playersel->eType, eItemCat), playersel->nSelection[(int)eItemCat], dwWinColor);
 			float off = sin(fLocalTimeline * 5.0f);
 			//if (playersel->nSelection[(int)eItemCat] > 0)
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, tempbox.CenterX(), tempbox.y - off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_UP, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, tempbox.CenterX(), tempbox.y - off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_UP, dwWinColor);
 			//if (playersel->nSelection[(int)eItemCat] < nItemsCnt - 1)
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, tempbox.CenterX(), tempbox.Bottom() + off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_DOWN, dwWinColor);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, tempbox.CenterX(), tempbox.Bottom() + off, ANM_CONTROLS_SPR_ARROWS1, K_DIR_DOWN, dwWinColor);
 			///--- paints controller command for selection ---
 			if ((!playersel->bSelected) && (!playersel->bIsNetworkPlayer) && (playersel->fTimeSinceCursorMoved > K_PSS_HINT_WAIT_TIMER))
 			{

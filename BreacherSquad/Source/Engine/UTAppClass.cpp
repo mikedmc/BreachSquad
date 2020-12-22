@@ -516,12 +516,12 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 		else if (nEvent.m_eventCommand == CEventCommands::evtC_SYSTEM_CONTROLLER_ADDED)
 		{
 			g_stringsMgr.SetString(STR_TEMP10, L"%s", nEvent.GetArgumentByName(L"strName")->m_strArg.text);
-			UTGetControlsManager().ShowLayer("LAYER_ID_CTRLR_CONNECTED");
+			UTGetGUI().ShowLayer("LAYER_ID_CTRLR_CONNECTED");
 		}
 		else if (nEvent.m_eventCommand == CEventCommands::evtC_SYSTEM_CONTROLLER_REMOVED)
 		{
 			g_stringsMgr.SetString(STR_TEMP10, L"%s", nEvent.GetArgumentByName(L"strName")->m_strArg.text);
-			UTGetControlsManager().ShowLayer("LAYER_ID_CTRLR_DISCONNECTED");
+			UTGetGUI().ShowLayer("LAYER_ID_CTRLR_DISCONNECTED");
 		}
 	}
 
@@ -578,22 +578,22 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			//ID-uri generice butoane (remove layer, etc)
 			if (ctrlID == GET_FAST_HASH("BUT_CLOSE")) //close normal la orice fereastra
 			{
-				UTGetControlsManager().RemoveTopmostLayer();
+				UTGetGUI().RemoveTopmostLayer();
 				return true;
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_CLOSE_SETTINGS")) //close settings, save settings
 			{
-				UTGetControlsManager().RemoveTopmostLayer();
+				UTGetGUI().RemoveTopmostLayer();
 				UTGetAppClass().SaveSettings();
 				return true;
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_CLOSE_KEYDEF")) //close key redefining
 			{
-				UTGetControlsManager().RemoveTopmostLayer();
+				UTGetGUI().RemoveTopmostLayer();
 				//save user data (including keys)
 				App_SaveUserData();
 
-				CCtrlLayer* layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_OPTIONS_MM");
+				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_OPTIONS_MM");
 				if (layer != null)
 				{
 					CControl* ctrl;
@@ -611,7 +611,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_CLOSE_FORCED")) //face close la fereastra fara sa mai faca fade-out
 			{
-				UTGetControlsManager().RemoveTopmostLayer(true);
+				UTGetGUI().RemoveTopmostLayer(true);
 				return true;
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_EXIT_GAME"))
@@ -640,7 +640,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				}
 				g_stringsMgr.SetString(STR_RESOLUTIONS_LIST, wsResStr);
 				//setup controls
-				CCtrlLayer* layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_GFX_OPTIONS");
+				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_GFX_OPTIONS");
 				if (layer != null)
 				{
 					CControl* ctrl = null;
@@ -689,7 +689,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				//save old settings so we can see what's changed
 				CApplicationSettings m_SettingsOld = m_Settings;
 
-				CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_GFX_OPTIONS");
+				CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_GFX_OPTIONS");
 				if (layer != null)
 				{
 					CControl* ctrl;
@@ -838,7 +838,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						}
 					}
 					//close layer
-					UTGetControlsManager().RemoveLayer("LAYER_ID_GFX_OPTIONS");
+					UTGetGUI().RemoveLayer("LAYER_ID_GFX_OPTIONS");
 					//save settings
 					SaveSettings();
 				}
@@ -965,7 +965,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == GET_FAST_HASH("BUT_JOIN_LOBBY"))
 			{
 				int nLobbyIdx = -1;
-				CCtrlLayer* lay = UTGetControlsManager().GetTopmostInputLayer();
+				CCtrlLayer* lay = UTGetGUI().GetTopmostInputLayer();
 				if (lay != null)
 				{
 					CControl *ctrl = lay->GetControlByName("CTRL_LOBBIES_SELECTOR");
@@ -996,7 +996,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				g_netlock.Net_RequestLobbyList(10);
 				g_stringsMgr.SetString(STR_LOBBIES_LIST_VAL, L"%s", g_stringsMgr.strings[STR_PLEASE_HANG]->sText);
 
-				CCtrlLayer* lay = UTGetControlsManager().GetTopmostInputLayer();
+				CCtrlLayer* lay = UTGetGUI().GetTopmostInputLayer();
 				//disable the refresh button if still working
 				if (lay != null)
 				{
@@ -1112,7 +1112,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 				}
 
-				UTGetControlsManager().RemoveTopmostLayer();
+				UTGetGUI().RemoveTopmostLayer();
 
 				return true;
 			}
@@ -1120,7 +1120,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			{
 				int nKeybdIdx = nEvent.GetArgumentByName(L"nMsgParamINT32")->m_asINT32;
 				//trimitem mai departe indexul tastaturii selectate
-				CCtrlLayer* layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_RESET_KEYS");
+				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_RESET_KEYS");
 				CControl* ctrl = null;
 				if (ctrl = layer->GetControlByName("BUT_RESET_KEYS"))
 				{
@@ -1129,36 +1129,36 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_REDEFINE_KEYS"))
 			{
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_REDEFINE_KEYS");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_REDEFINE_KEYS");
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_CREDITS"))
 			{
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_CREDITS");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_CREDITS");
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_KEYS_LAYOUT"))
 			{
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_KEYMAP");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_KEYMAP");
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_MORE_OPTIONS"))
 			{
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_MORE_OPTIONS");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_MORE_OPTIONS");
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_CREDITS_MORE"))
 			{
 				//remove credits layer
-				UTGetControlsManager().RemoveLayer("LAYER_ID_CREDITS");
+				UTGetGUI().RemoveLayer("LAYER_ID_CREDITS");
 				//add additional credits
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_CREDITS_MORE");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_CREDITS_MORE");
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_RESET_PROGRESS"))
 			{
-				UTGetControlsManager().RemoveLayer("LAYER_ID_MORE_OPTIONS");
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_RESET_PROGRESS");
+				UTGetGUI().RemoveLayer("LAYER_ID_MORE_OPTIONS");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_RESET_PROGRESS");
 			}
 			//reset XP upgrades
 			else if (ctrlID == GET_FAST_HASH("BUT_RESET_UPGRADES"))
 			{
-				CCtrlLayer* lay = UTGetControlsManager().GetLayerByName("LAYER_ID_PLAYER_UPGRADE");
+				CCtrlLayer* lay = UTGetGUI().GetLayerByName("LAYER_ID_PLAYER_UPGRADE");
 				if (lay != null)
 				{
 					CControl* ctrl = lay->GetControlByName("CTRLID_UPGRADE_PLAYER");
@@ -1185,7 +1185,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			//apply XP upgrades
 			else if (ctrlID == GET_FAST_HASH("BUT_ACCEPT_UPGRADE"))
 			{
-				CCtrlLayer* lay = UTGetControlsManager().GetLayerByName("LAYER_ID_PLAYER_UPGRADE");
+				CCtrlLayer* lay = UTGetGUI().GetLayerByName("LAYER_ID_PLAYER_UPGRADE");
 				if (lay != null)
 				{
 					CControl* ctrl = lay->GetControlByName("CTRLID_UPGRADE_PLAYER");
@@ -1226,7 +1226,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						//save data
 						App_SaveUserData();
 						//hide window
-						UTGetControlsManager().RemoveLayer(lay->ID.textHash);
+						UTGetGUI().RemoveLayer(lay->ID.textHash);
 					}
 				}
 			}
@@ -1237,7 +1237,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				App_ResetUserData();
 				App_SaveUserData();
 
-				UTGetControlsManager().RemoveLayer("LAYER_ID_RESET_PROGRESS");
+				UTGetGUI().RemoveLayer("LAYER_ID_RESET_PROGRESS");
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_RESET_PROGRESS_SURE_EA")) //early access version
 			{
@@ -1246,7 +1246,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				App_ResetUserData();
 				App_SaveUserData();
 
-				UTGetControlsManager().RemoveLayer("LAYER_ID_RESET_PROGRESS_EA");
+				UTGetGUI().RemoveLayer("LAYER_ID_RESET_PROGRESS_EA");
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_LANGUAGE"))
 			{
@@ -1261,8 +1261,8 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				//save lang list
 				g_stringsMgr.SetString(STR_TEMP15, txt);
 
-				UTGetControlsManager().RemoveTopmostLayer();
-				CCtrlLayer *pLay = UTGetControlsManager().ShowLayerOnce("LAYER_ID_LANGUAGE");
+				UTGetGUI().RemoveTopmostLayer();
+				CCtrlLayer *pLay = UTGetGUI().ShowLayerOnce("LAYER_ID_LANGUAGE");
 				//set selection on current language
 				if (pLay != null)
 				{
@@ -1283,7 +1283,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == GET_FAST_HASH("BUT_SELECT_LANGUAGE"))
 			{
 				int nLangIdx = -1;
-				CCtrlLayer *pLay = UTGetControlsManager().GetLayerByName("LAYER_ID_LANGUAGE");
+				CCtrlLayer *pLay = UTGetGUI().GetLayerByName("LAYER_ID_LANGUAGE");
 				if (pLay != null)
 				{
 					CControl *ctrl = pLay->GetControlByName("CTRL_LANGLIST_TT");
@@ -1293,7 +1293,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 				}
 				//remove layer
-				UTGetControlsManager().RemoveTopmostLayer();
+				UTGetGUI().RemoveTopmostLayer();
 				//change language
 				if (nLangIdx >= 0)
 				{
@@ -1309,7 +1309,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_CTRLR_LAYOUT"))
 			{
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_CONTROLLER_MAP");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_CONTROLLER_MAP");
 			}
 #ifdef ENABLE_LEADERBOARDS
 			//leaderboards from main menu, global ones
@@ -1323,7 +1323,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				g_stringsMgr.SetString(STR_TEMP15, L"%d", g_userData[K_MEMID_TOTAL_SCORE_SOLO]);
 
 				//reset scroll page and save leaderboard index as a payload in this control
-				CCtrlLayer *pLay = UTGetControlsManager().GetLayerByName("LAYER_ID_LEADERBOARDS_MM");
+				CCtrlLayer *pLay = UTGetGUI().GetLayerByName("LAYER_ID_LEADERBOARDS_MM");
 				if (pLay != null)
 				{
 					// set scores list on empty
@@ -1346,7 +1346,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				//write score for YOUR SCORE label
 				g_stringsMgr.SetString(STR_TEMP15, L"%d", g_userData[K_MEMID_TOTAL_SCORE_COOP]);
 				//reset scroll page and save leaderboard index as a payload in this control
-				CCtrlLayer *pLay = UTGetControlsManager().GetLayerByName("LAYER_ID_LEADERBOARDS_MM");
+				CCtrlLayer *pLay = UTGetGUI().GetLayerByName("LAYER_ID_LEADERBOARDS_MM");
 				if (pLay != null)
 				{
 					// set scores list on empty
@@ -1364,7 +1364,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == GET_FAST_HASH("BUT_BOARDS_SINGLE_LVL"))
 			{
 				//reset scroll page and save leaderboard index as a payload in this control
-				CCtrlLayer *pLay = UTGetControlsManager().GetTopmostLayer();
+				CCtrlLayer *pLay = UTGetGUI().GetTopmostLayer();
 				if (pLay != null)
 				{
 					// set scores list on empty
@@ -1383,7 +1383,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == GET_FAST_HASH("BUT_BOARDS_COOP_LVL"))
 			{
 				//reset scroll page and save leaderboard index as a payload in this control
-				CCtrlLayer *pLay = UTGetControlsManager().GetTopmostLayer();
+				CCtrlLayer *pLay = UTGetGUI().GetTopmostLayer();
 				if (pLay != null)
 				{
 					// set scores list on empty
@@ -1403,27 +1403,27 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 #endif
 			else if (ctrlID == GET_FAST_HASH("BUT_JOKE1_OK"))
 			{
-				UTGetControlsManager().RemoveLayer("LAYER_ID_JOKE1");
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_JOKE2");
+				UTGetGUI().RemoveLayer("LAYER_ID_JOKE1");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_JOKE2");
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_JOKE2_OK"))
 			{
-				UTGetControlsManager().RemoveLayer("LAYER_ID_JOKE2");
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_JOKE3");
+				UTGetGUI().RemoveLayer("LAYER_ID_JOKE2");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_JOKE3");
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_JOKE3_OK"))
 			{
-				UTGetControlsManager().RemoveLayer("LAYER_ID_JOKE3");
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_JOKE4");
+				UTGetGUI().RemoveLayer("LAYER_ID_JOKE3");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_JOKE4");
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_JOKE4_OK"))
 			{
-				UTGetControlsManager().RemoveLayer("LAYER_ID_JOKE4");
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_JOKE5");
+				UTGetGUI().RemoveLayer("LAYER_ID_JOKE4");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_JOKE5");
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_JOKE5_OK"))
 			{
-				UTGetControlsManager().RemoveLayer("LAYER_ID_JOKE5");
+				UTGetGUI().RemoveLayer("LAYER_ID_JOKE5");
 			}
 
 			else if (ctrlID == GET_FAST_HASH("BUT_RESET_KEYS")) //resets player keys
@@ -1437,7 +1437,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 					App_SetSDLTriggersFromUserData(keybd1, keybd2);
 
-					UTGetControlsManager().RemoveTopmostLayer();
+					UTGetGUI().RemoveTopmostLayer();
 					return true;
 				}
 				else //second keyboard
@@ -1448,16 +1448,16 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 					App_SetSDLTriggersFromUserData(keybd1, keybd2);
 
-					UTGetControlsManager().RemoveTopmostLayer();
+					UTGetGUI().RemoveTopmostLayer();
 					return true;
 				}
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_REDEFINE_KEY1"))
 			{
-				UTGetControlsManager().RemoveLayer("LAYER_ID_REDEFINE_KEYS");
-				UTGetControlsManager().RemoveLayer("LAYER_ID_OPTIONS_MM");
+				UTGetGUI().RemoveLayer("LAYER_ID_REDEFINE_KEYS");
+				UTGetGUI().RemoveLayer("LAYER_ID_OPTIONS_MM");
 
-				CCtrlLayer* layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_KEYDEFINE");
+				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_KEYDEFINE");
 				if (layer != null)
 				{
 					CControl* ctrl = null;
@@ -1479,10 +1479,10 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_REDEFINE_KEY2"))
 			{
-				UTGetControlsManager().RemoveLayer("LAYER_ID_REDEFINE_KEYS");
-				UTGetControlsManager().RemoveLayer("LAYER_ID_OPTIONS_MM");
+				UTGetGUI().RemoveLayer("LAYER_ID_REDEFINE_KEYS");
+				UTGetGUI().RemoveLayer("LAYER_ID_OPTIONS_MM");
 
-				CCtrlLayer* layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_KEYDEFINE");
+				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_KEYDEFINE");
 				if (layer != null)
 				{
 					CControl* ctrl = null;
@@ -1533,7 +1533,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 			if (ctrlID == GET_FAST_HASH("CTRL_CHECK_ANTIALIAS"))
 			{
-				CCtrlLayer* layer = UTGetControlsManager().GetTopmostInputLayer();
+				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
 				if (layer != null)
 				{
 					CControl* ctrl;
@@ -1543,8 +1543,8 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 				}
 
-				UTGetControlsManager().RemoveLayer("LAYER_ID_OPTIONS_MM");
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_JOKE1");
+				UTGetGUI().RemoveLayer("LAYER_ID_OPTIONS_MM");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_JOKE1");
 				
 				//analytics
 				ANALYTICS_SCREENVIEW("antialias_joke");
@@ -1554,7 +1554,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if ((ctrlID == GET_FAST_HASH("CTRL_CHECK_BORDERLESS")) ||
 					 (ctrlID == GET_FAST_HASH("CTRL_CHECK_FULLSCREEN"))	)
 			{
-				CCtrlLayer* layer = UTGetControlsManager().GetTopmostInputLayer();
+				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
 				if (layer != null)
 				{
 					bool bFS = false, bBorderless = false;
@@ -1586,7 +1586,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			if (ctrlID == GET_FAST_HASH("CTRL_SCORESLIST_TT"))
 			{
 				int nLeaderboardID = 0;
-				CCtrlLayer* pLay = UTGetControlsManager().GetLayerByNameHash(layerID);
+				CCtrlLayer* pLay = UTGetGUI().GetLayerByNameHash(layerID);
 				//#HACK: get leaderboards type from the controls's payload
 				if (pLay != null)
 				{
@@ -1634,16 +1634,16 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				if (nKeycode == SDL_SCANCODE_ESCAPE)
 				{
 					//hide layer
-					UTGetControlsManager().RemoveTopmostLayer();
+					UTGetGUI().RemoveTopmostLayer();
 				}
 				else if ((nKeycode >= SDL_SCANCODE_F1) && (nKeycode <= SDL_SCANCODE_F12))
 				{
-					UTGetControlsManager().MessageBoxOK(STR_WARNING, STR_KEY_INVALID);
+					UTGetGUI().MessageBoxOK(STR_WARNING, STR_KEY_INVALID);
 				}
 				else
 				{
 					//hide layer
-					UTGetControlsManager().RemoveTopmostLayer();
+					UTGetGUI().RemoveTopmostLayer();
 					//overwrite user command
 					for (int kk = K_MEMID_KEYSALL_START; kk <= K_MEMID_KEYSALL_END; kk++)
 					{
@@ -1679,7 +1679,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				if (g_level.ActivateSpecialAbility(nSelectedIdx, nSDLinstanceID))
 				{
-					UTGetControlsManager().RemoveTopmostLayer();
+					UTGetGUI().RemoveTopmostLayer();
 				}
 
 				return true;
@@ -1688,7 +1688,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			{
 				int nLangIdx = nEvent.GetArgumentByName(L"nSelectedIdx")->m_asINT32;
 				//remove layer
-				UTGetControlsManager().RemoveTopmostLayer();
+				UTGetGUI().RemoveTopmostLayer();
 				//change language
 				if (nLangIdx >= 0)
 				{
@@ -1736,7 +1736,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				int command = selection % nKeysOff;
 				int keyboardOrdinal = selection / nKeysOff;
 
-				CCtrlLayer* layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_KEYGRAB");
+				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_KEYGRAB");
 				CControl* ctrl = null;
 				if (layer != null)
 				{
@@ -1761,7 +1761,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					case STR_COOP:
 					{
 #ifdef ENABLE_NETWORKING
-						UTGetControlsManager().ShowLayerOnce("LAYER_ID_COOP_WND");
+						UTGetGUI().ShowLayerOnce("LAYER_ID_COOP_WND");
 #endif
 					}
 					break;
@@ -1799,7 +1799,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						//write score for YOUR SCORE label
 						g_stringsMgr.SetString(STR_TEMP15, L"%d", g_userData[K_MEMID_TOTAL_SCORE_SOLO]);
 
-						CCtrlLayer* pLay = UTGetControlsManager().ShowLayerOnce("LAYER_ID_LEADERBOARDS_MM");
+						CCtrlLayer* pLay = UTGetGUI().ShowLayerOnce("LAYER_ID_LEADERBOARDS_MM");
 						//reset scroll page and save leaderboard index as a payload in this control
 						if (pLay != null)
 						{
@@ -1820,12 +1820,12 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					break;
 					case STR_CREDITS:
 					{
-						UTGetControlsManager().ShowLayerOnce("LAYER_ID_CREDITS");
+						UTGetGUI().ShowLayerOnce("LAYER_ID_CREDITS");
 					}
 					break;
 					case STR_OPTIONS:
 					{
-						CCtrlLayer* layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_OPTIONS_MM");
+						CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_OPTIONS_MM");
 						if (layer != null)
 						{
 							CControl* ctrl;
@@ -1841,7 +1841,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 					break;
 					case STR_EXIT:
-						UTGetControlsManager().ShowLayerOnce("LAYER_ID_QUITGAME");
+						UTGetGUI().ShowLayerOnce("LAYER_ID_QUITGAME");
 						break;
 				}
 				return true;
@@ -1861,12 +1861,12 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					break;
 					case STR_QUIT:
 					{
-						UTGetControlsManager().ShowLayerOnce("LAYER_ID_QUITLEVEL");
+						UTGetGUI().ShowLayerOnce("LAYER_ID_QUITLEVEL");
 					}
 					break;
 					case STR_OPTIONS:
 					{
-						CCtrlLayer* layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_OPTIONS_IGM");
+						CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_OPTIONS_IGM");
 						if (layer != null)
 						{
 							CControl* ctrl;
@@ -1885,7 +1885,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					default:
 					{
 						SND_PLAY(SNDIDX_DENIED);
-						UTGetControlsManager().RemoveTopmostLayer();
+						UTGetGUI().RemoveTopmostLayer();
 					}
 					break;
 				}
@@ -1898,13 +1898,13 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				{
 					case STR_QUIT:
 					{
-						UTGetControlsManager().ShowLayerOnce("LAYER_ID_QUITLEVEL_NET");
+						UTGetGUI().ShowLayerOnce("LAYER_ID_QUITLEVEL_NET");
 					}
 					break;
 
 					case STR_OPTIONS:
 					{
-						CCtrlLayer* layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_OPTIONS_IGM");
+						CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_OPTIONS_IGM");
 						if (layer != null)
 						{
 							CControl* ctrl;
@@ -1941,7 +1941,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 							}
 
 							//close menu
-							UTGetControlsManager().RemoveTopmostLayer();
+							UTGetGUI().RemoveTopmostLayer();
 						}
 					}
 					break;
@@ -1950,7 +1950,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					default:
 					{
 						SND_PLAY(SNDIDX_DENIED);
-						UTGetControlsManager().RemoveTopmostLayer();
+						UTGetGUI().RemoveTopmostLayer();
 					}
 					break;
 				}
@@ -2113,14 +2113,14 @@ void CApplication::PollSDLControllers()
 			{
 				UTGetCtrlrMgr().OnSDLKeypress(e.key, true);
 				//send key up event to controls manager (for key redefining mostly)
-				UTGetControlsManager().ReceiveInput(K_CCTRLMGR_INPUT_SDL_KEY, 1, (int)e.key.keysym.scancode);
+				UTGetGUI().ReceiveInput(K_CCTRLMGR_INPUT_SDL_KEY, 1, (int)e.key.keysym.scancode);
 			}
 			break;
 			case SDL_KEYUP:
 			{
 				UTGetCtrlrMgr().OnSDLKeypress(e.key, false);
 				//send key up event to controls manager
-				UTGetControlsManager().ReceiveInput(K_CCTRLMGR_INPUT_SDL_KEY, 0, (int)e.key.keysym.scancode);
+				UTGetGUI().ReceiveInput(K_CCTRLMGR_INPUT_SDL_KEY, 0, (int)e.key.keysym.scancode);
 			}
 			break;
 			//--- controllers ---

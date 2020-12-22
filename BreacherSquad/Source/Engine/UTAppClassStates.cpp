@@ -117,12 +117,12 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 
 
 			///--- CONTROLS ---
-			UTGetControlsManager().SetManagersPtr(&g_stringsMgr, &UTGetFontsManager());
-			UTGetControlsManager().SetCameraTransform(&UTGetAppClass().g_cam240hScreen);
+			UTGetGUI().SetManagersPtr(&g_stringsMgr, &UTGetFontsManager());
+			UTGetGUI().SetCameraTransform(&UTGetAppClass().g_cam240hScreen);
 
 			WCHAR xmlpath[MAX_PATH];
 			FileManager::GetMediaPath(L"media/interfaces/interfaces.xml", xmlpath);
-			if (FAILED(UTGetControlsManager().LoadControlsXML(xmlpath)))
+			if (FAILED(UTGetGUI().LoadControlsXML(xmlpath)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load interfaces sprites!");
 				return;

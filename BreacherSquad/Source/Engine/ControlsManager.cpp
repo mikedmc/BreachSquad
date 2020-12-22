@@ -4699,7 +4699,7 @@ void CControl::drawDebugText(int x, int y, const wchar_t* text, DWORD color)
 /// Sigleton de acces
 ///**************************************************************************************
 
-CControlsManager& UTGetControlsManager()
+CControlsManager& UTGetGUI()
 {
 	static CControlsManager g_ControlsManager;
 	return g_ControlsManager;

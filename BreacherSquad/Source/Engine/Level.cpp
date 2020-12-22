@@ -1505,7 +1505,7 @@ CLevel::CLevel()
 	}
 	//init interfaces
 	m_interfaceIGM.Init(&m_sprInterface, pPlayerActor[0], pPlayerActor[1]);
-	m_interfaceTextBubble.Init(&UTGetControlsManager().m_sprCol);
+	m_interfaceTextBubble.Init(&UTGetGUI().m_sprCol);
 
 	vLastSpawnPoint = D3DXVECTOR2(0.0f, 0.0f);
 	m_vCamPosDefault = D3DXVECTOR2(0.0f, 0.0f);
@@ -2751,7 +2751,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 			//save level finished time
 			m_arrStats[K_LVL_STATS_LEVEL_END_SEC] = (int)floor(fLocalTimeline);
 			//remove any interfaces that might be shown
-			UTGetControlsManager().RemoveAllLayers();
+			UTGetGUI().RemoveAllLayers();
 
 			SND_STOP_GROUP("music", false, true);
 
@@ -2817,7 +2817,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 			//save level finished time
 			m_arrStats[K_LVL_STATS_LEVEL_END_SEC] = (int)floor(fLocalTimeline);
 			//remove any interfaces that might be shown
-			UTGetControlsManager().RemoveAllLayers();
+			UTGetGUI().RemoveAllLayers();
 
 			SND_STOP_GROUP("music", false, true);
 
@@ -8744,10 +8744,10 @@ void CLevel::Update(float dTime_original)
 					{
 						CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ll];
 						//Shows controller mapping - only when not online
-						if ((ctrlr->eType == K_CM_CT_JOYSTICK_SDL) && (!UTGetAppClass().IsGameNetworked()) && (false == UTGetControlsManager().bIsBlocking) && 
+						if ((ctrlr->eType == K_CM_CT_JOYSTICK_SDL) && (!UTGetAppClass().IsGameNetworked()) && (false == UTGetGUI().bIsBlocking) && 
 							(ctrlr->sCommands.keyState[K_CM_COMMAND_SELECT] == K_CM_BUTSTATE_JUSTPRESSED))
 						{
-							UTGetControlsManager().ShowLayerOnce("LAYER_ID_CONTROLLER_MAP");
+							UTGetGUI().ShowLayerOnce("LAYER_ID_CONTROLLER_MAP");
 						}
 						//when player was left without controller give him the new controller when ctrlr touched
 						bool bActivate = false;
@@ -9095,7 +9095,7 @@ void CLevel::Update(float dTime_original)
 			{
 				g_netlock.Net_UpdateLevelResults(dTime);
 				//show net votes
-				CCtrlLayer* layer = UTGetControlsManager().GetTopmostInputLayer();
+				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
 				if (layer)
 				{
 					CControl* ctrl;
@@ -9360,17 +9360,17 @@ void CLevel::Update(float dTime_original)
 						App_SaveUserData();
 
 						//--- show windows and change portraits and title text ---
-						UTGetControlsManager().RemoveAllLayers();
+						UTGetGUI().RemoveAllLayers();
 						//generic changes
 						CCtrlLayer *layer = null;
 						if (nPlayers == 1)
-							layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_LEVELWIN_1P");
+							layer = UTGetGUI().ShowLayerOnce("LAYER_ID_LEVELWIN_1P");
 						else
 						{
 							if (!UTGetAppClass().IsGameNetworked())
-								layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_LEVELWIN_2P");
+								layer = UTGetGUI().ShowLayerOnce("LAYER_ID_LEVELWIN_2P");
 							else
-								layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_LEVELWIN_2P_COOP");
+								layer = UTGetGUI().ShowLayerOnce("LAYER_ID_LEVELWIN_2P_COOP");
 						}
 
 						//report score to steam leaderboards
@@ -9837,11 +9837,11 @@ void CLevel::Update(float dTime_original)
 					//show leaderboard when pressing melee key (any controller)
 					if ((UTGetCtrlrMgr().KeyPressed(K_CM_COMMAND_MELEE)) && (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE))
 					{
-						CCtrlLayer* lay = UTGetControlsManager().GetLayerByName("LAYER_ID_LEADERBOARDS_IGM");
+						CCtrlLayer* lay = UTGetGUI().GetLayerByName("LAYER_ID_LEADERBOARDS_IGM");
 						if (lay == null)
 						{
 							//show layer
-							lay = UTGetControlsManager().ShowLayerOnce("LAYER_ID_LEADERBOARDS_IGM");
+							lay = UTGetGUI().ShowLayerOnce("LAYER_ID_LEADERBOARDS_IGM");
 							if (lay)
 							{
 								CControl* ctrl = null;
@@ -9891,7 +9891,7 @@ void CLevel::Update(float dTime_original)
 			{
 				g_netlock.Net_UpdateLevelResults(dTime);
 				//show net votes
-				CCtrlLayer* layer = UTGetControlsManager().GetTopmostInputLayer();
+				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
 				if (layer)
 				{
 					CControl* ctrl;
@@ -10092,8 +10092,8 @@ void CLevel::Update(float dTime_original)
 						//--- show windows and change portraits and title text ---
 						if (nPlayers == 1)
 						{
-							UTGetControlsManager().RemoveAllLayers();
-							CCtrlLayer* layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_LEVELFAIL_1P");
+							UTGetGUI().RemoveAllLayers();
+							CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_LEVELFAIL_1P");
 							if (layer != null)
 							{
 								CControl* ctrl = layer->GetControlByName("CTRL_STARS");
@@ -10134,13 +10134,13 @@ void CLevel::Update(float dTime_original)
 						}
 						else //2 players
 						{
-							UTGetControlsManager().RemoveAllLayers();
+							UTGetGUI().RemoveAllLayers();
 
 							CCtrlLayer* layer = null;
 							if(!UTGetAppClass().IsGameNetworked())
-								layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_LEVELFAIL_2P");
+								layer = UTGetGUI().ShowLayerOnce("LAYER_ID_LEVELFAIL_2P");
 							else
-								layer = UTGetControlsManager().ShowLayerOnce("LAYER_ID_LEVELFAIL_2P_COOP");
+								layer = UTGetGUI().ShowLayerOnce("LAYER_ID_LEVELFAIL_2P_COOP");
 
 							if (layer != null)
 							{
@@ -12304,7 +12304,7 @@ void CLevel::Paint()
 	//1. paint level background
 	//PaintBackground();
 	//--- paint thunder ---
-	if ((m_fThunderTimer > 0.0f) && (m_fThunderTimer < 0.4f) && (randint(1000) < 500) && (!UTGetControlsManager().bIsBlocking) && (!DXUTIsTimePaused()) && (!m_bInsideHiddenRoom))
+	if ((m_fThunderTimer > 0.0f) && (m_fThunderTimer < 0.4f) && (randint(1000) < 500) && (!UTGetGUI().bIsBlocking) && (!DXUTIsTimePaused()) && (!m_bInsideHiddenRoom))
 	{
 	}
 
@@ -12778,7 +12778,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 				if ((perc > 0.0f) && (perc < 1.0f))
 				{
 					RECTXYWH recttemp(vpos.x - barlen / 2.0f, vpos.y - 20.0f, barlen, 6);
-					CtrlMgrDrawProgress_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
+					CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
 				}
 			}
 
@@ -12820,7 +12820,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 					{
 						//RECTXYWH recttemp(vpos.x - barlen / 2.0f, activ->bbox_exported.vMax.y + 4, barlen, 8);
 						RECTXYWH recttemp(activ->pTarget->pos.x - barlen / 2.0f, activ->pTarget->bbox_exported.vMax.y + 4, barlen, 8);
-						CtrlMgrDrawProgress_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
+						CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
 					}
 					//#HACK: set interact icon position too so it doesn't vibrate when kicking the door
 					player->m_sprOverheadIcon.pos.x = activ->pTarget->bbox_exported.vCenter.x - 1.0f;
@@ -12866,7 +12866,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 				if ((perc > 0.0f) && (perc < 1.0f))
 				{
 					RECTXYWH recttemp(vpos.x - barlen / 2.0f, vpos.y - 20.0f, barlen, 6);
-					CtrlMgrDrawProgress_HeadsOutside(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
+					CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
 				}
 			}
 		}
@@ -12875,7 +12875,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		if (player->pCover != null)
 		{
 			D3DXVECTOR2 vpos = D3DXVECTOR2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
-			CSprite::paintFrame(&UTGetControlsManager().m_sprCol, vpos.x, vpos.y, ANM_CONTROLS_SPR_PLAYER_ICONS, 0, pPlayerActor[kk]->color);
+			CSprite::paintFrame(&UTGetGUI().m_sprCol, vpos.x, vpos.y, ANM_CONTROLS_SPR_PLAYER_ICONS, 0, pPlayerActor[kk]->color);
 		}
 		else if (UTGetAppClass().m_Settings.bShowInterfaceHelp) //player numeric icon (only if shield not visible)
 		{
@@ -12932,18 +12932,18 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
-	m_screenVignetteDamage.Paint(m_pSprite, &UTGetControlsManager().m_sprCol);
-	m_screenVignette.Paint(m_pSprite, &UTGetControlsManager().m_sprCol);
+	m_screenVignetteDamage.Paint(m_pSprite, &UTGetGUI().m_sprCol);
+	m_screenVignette.Paint(m_pSprite, &UTGetGUI().m_sprCol);
 
 	///--- paint time slowdown screen effect ---
 	if (m_fTimeMultiplier_real < 1.0f)
 	{
 		DWORD colEffect = D3DCOLOR_COLORALPHA(0xff000088, 1.0f - m_fTimeMultiplier_real);
 		D3DXMATRIXA16 mattrans;
-		RECTXYWH_F bbox = UTGetControlsManager().m_sprCol.GetAFrameBBox_real(ANM_CONTROLS_SPR_VIGNETTES, 1);
+		RECTXYWH_F bbox = UTGetGUI().m_sprCol.GetAFrameBBox_real(ANM_CONTROLS_SPR_VIGNETTES, 1);
 		MUMatAffine2D(&mattrans, UTGetAppClass().g_rectRender.h / bbox.h, NULL, 0.0f, &UTGetAppClass().g_rectRender.Center());
 		m_pSprite->SetTransform(&mattrans);
-		CSprite::paintFrame(&UTGetControlsManager().m_sprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, 1, colEffect);
+		CSprite::paintFrame(&UTGetGUI().m_sprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, 1, colEffect);
 		m_pSprite->Flush();
 	}
 

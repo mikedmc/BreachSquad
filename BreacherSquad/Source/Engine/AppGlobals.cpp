@@ -677,10 +677,10 @@ void App_ToggleBorderlessFullscreen(HWND wndHwnd)
 	//save final fullscreen status
 	UTGetAppClass().m_Settings.bFullscreen = (bBorderlessFullscreenOn || !DXUTIsWindowed());
 	//close GFX options window if open
-	CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_GFX_OPTIONS");
+	CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_GFX_OPTIONS");
 	if (layer != null)
 	{
-		UTGetControlsManager().RemoveLayer("LAYER_ID_GFX_OPTIONS");
+		UTGetGUI().RemoveLayer("LAYER_ID_GFX_OPTIONS");
 	}
 }
 
@@ -696,7 +696,7 @@ bool App_TutorialWindowShow(int nTutID)
 
 	if (UTGetAppClass().IsGameNetworked())
 		return false;
-	if (UTGetControlsManager().bIsBlocking)
+	if (UTGetGUI().bIsBlocking)
 		return false;
 
 	SND_PLAY(SNDIDX_DENIED);
@@ -705,7 +705,7 @@ bool App_TutorialWindowShow(int nTutID)
 	{
 		case K_MEMID_TUT_INTERFACE_IGM:
 		{
-			UTGetControlsManager().ShowLayerOnce("LAYER_ID_TUT_IGM");
+			UTGetGUI().ShowLayerOnce("LAYER_ID_TUT_IGM");
 		}
 		break;
 		case K_MEMID_TUT_INTERFACE_STRATEGIC:
@@ -714,7 +714,7 @@ bool App_TutorialWindowShow(int nTutID)
 		break;
 		case K_MEMID_TUT_VINFINITE_MODE:
 		{
-			CCtrlLayer* lay = UTGetControlsManager().ShowLayerOnce("LAYER_ID_TUT_PIC");
+			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce("LAYER_ID_TUT_PIC");
 			if (lay != null)
 			{
 				CControl* ctrl = lay->GetControlByName("WINDOW");
@@ -731,7 +731,7 @@ bool App_TutorialWindowShow(int nTutID)
 		break;
 		case K_MEMID_TUT_ARREST_MODE:
 		{
-			CCtrlLayer* lay = UTGetControlsManager().ShowLayerOnce("LAYER_ID_TUT_PIC");
+			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce("LAYER_ID_TUT_PIC");
 			if (lay != null)
 			{
 				CControl* ctrl = lay->GetControlByName("WINDOW");
@@ -748,7 +748,7 @@ bool App_TutorialWindowShow(int nTutID)
 		break;
 		case K_MEMID_TUT_BOMB_MODE:
 		{
-			CCtrlLayer* lay = UTGetControlsManager().ShowLayerOnce("LAYER_ID_TUT_PIC");
+			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce("LAYER_ID_TUT_PIC");
 			if (lay != null)
 			{
 				CControl* ctrl = lay->GetControlByName("WINDOW");
@@ -765,7 +765,7 @@ bool App_TutorialWindowShow(int nTutID)
 		break;
 		case K_MEMID_TUT_HOSTAGE_MODE:
 		{
-			CCtrlLayer* lay = UTGetControlsManager().ShowLayerOnce("LAYER_ID_TUT_PIC");
+			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce("LAYER_ID_TUT_PIC");
 			if (lay != null)
 			{
 				CControl* ctrl = lay->GetControlByName("WINDOW");
@@ -957,7 +957,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 	if (nKeyIcon < 0)
 	{
 		int anmIdx = ANM_CONTROLS_SPR_BUT_SM_GREY2;
-		CtrlMgrDrawButtonFromText(&UTGetControlsManager().m_sprCol, anmIdx, bPressed, &sdKeyName, g_font5n2, vBP, dwColor, nAlign);
+		CtrlMgrDrawButtonFromText(&UTGetGUI().m_sprCol, anmIdx, bPressed, &sdKeyName, g_font5n2, vBP, dwColor, nAlign);
 	}
 	else //key icons set
 	{
@@ -965,9 +965,9 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 		if (bPressed)
 			anmIdx = ANM_CONTROLS_SPR_CTRLR_XBOX_DOWN;
 
-		int butw = UTGetControlsManager().m_sprCol.GetAFrameBBox(anmIdx, nKeyIcon).w;
+		int butw = UTGetGUI().m_sprCol.GetAFrameBBox(anmIdx, nKeyIcon).w;
 		int algnoffx = (-nAlign * butw) / 2;
-		CSprite::paintFrame(&UTGetControlsManager().m_sprCol, vBP.x + algnoffx, vBP.y, anmIdx, nKeyIcon, dwColor);
+		CSprite::paintFrame(&UTGetGUI().m_sprCol, vBP.x + algnoffx, vBP.y, anmIdx, nKeyIcon, dwColor);
 	}
 }
 

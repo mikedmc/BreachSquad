@@ -278,9 +278,9 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			// first animation will be the empty animation or not set. Index is -1
 			// not set will be the first
 			arrAnims.push_back("NOT SET");
-			for (int ii = 0; ii < UTGetControlsManager().m_sprCol.Animations.Count(); ii++)
+			for (int ii = 0; ii < UTGetGUI().m_sprCol.Animations.Count(); ii++)
 			{
-				scAnimation *anm = UTGetControlsManager().m_sprCol.Animations.GetAt(ii);
+				scAnimation *anm = UTGetGUI().m_sprCol.Animations.GetAt(ii);
 				char strName[MAX_PATH];
 				wcstombs(strName, anm->animName.text, MAX_PATH);
 				arrAnims.push_back(strName);
@@ -539,7 +539,7 @@ void CControlsEditor::AddControl(CVariantCollection* vcol)
 		if ((wcscmp(propertyName, L"ID") == 0) && (wcscmp(propertyValue, L"empty") == 0))
 			continue;
 		
-		UTGetControlsManager().SetParamValue(nctrl, propertyName, propertyValue, true);
+		UTGetGUI().SetParamValue(nctrl, propertyName, propertyValue, true);
 	}
 	nctrl->layer = currLayer;
 	currLayer->controls.Add(nctrl);
@@ -567,9 +567,9 @@ void CControlsEditor::CloneControl(int offx, int offy)
 	// move it a little
 	WCHAR val[MAX_PATH];
 	StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->bbox.x + offx);
-	UTGetControlsManager().SetParamValue(nctrl, L"X", val);
+	UTGetGUI().SetParamValue(nctrl, L"X", val);
 	StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->bbox.y + offy);
-	UTGetControlsManager().SetParamValue(nctrl, L"Y", val);
+	UTGetGUI().SetParamValue(nctrl, L"Y", val);
 
 	currLayer->controls.Add(nctrl);
 }
@@ -595,9 +595,9 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 	doc.child(L"Interfaces").append_attribute(L"SpriteCollection");
 	doc.child(L"Interfaces").attribute(L"Version").set_value(L"1.0");
 	doc.child(L"Interfaces").attribute(L"SpriteCollection").set_value(L"controls.bsx");
-	for (int ii = 0; ii < UTGetControlsManager().layersDefinitions.Count(); ii++)
+	for (int ii = 0; ii < UTGetGUI().layersDefinitions.Count(); ii++)
 	{
-		CCtrlLayer* layer = UTGetControlsManager().layersDefinitions.GetAt(ii);
+		CCtrlLayer* layer = UTGetGUI().layersDefinitions.GetAt(ii);
 
 		pugi::xml_node layerNode; 
 		pugi::xml_attribute layerAttribute;
@@ -678,7 +678,7 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 							{
 								int intVal = _wtoi(propertyValue);
 								if (intVal >= 0 && wcscmp(propertyValue, L"_EMPTY_") != 0)
-									StringCchPrintf(propertyValue, MAX_PATH, L"%s", UTGetControlsManager().m_sprCol.Animations[intVal]->animName.text);
+									StringCchPrintf(propertyValue, MAX_PATH, L"%s", UTGetGUI().m_sprCol.Animations[intVal]->animName.text);
 								else
 									StringCchPrintf(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
 							}
@@ -882,9 +882,9 @@ void CControlsEditor::Update(float dTime)
 							WCHAR val[MAX_PATH];
 							CControl* ctrl = currLayer->controls[selCtrl];
 							StringCchPrintfW(val, MAX_PATH, L"%d", bbox.x);
-							UTGetControlsManager().SetParamValue(ctrl, L"X", val);
+							UTGetGUI().SetParamValue(ctrl, L"X", val);
 							StringCchPrintfW(val, MAX_PATH, L"%d", bbox.y);
-							UTGetControlsManager().SetParamValue(ctrl, L"Y", val);
+							UTGetGUI().SetParamValue(ctrl, L"Y", val);
 						}
 					}
 					else
@@ -979,13 +979,13 @@ void CControlsEditor::Update(float dTime)
 							CControl* ctrl = currLayer->controls[selCtrl];
 							WCHAR val[MAX_PATH];
 							StringCchPrintfW(val, MAX_PATH, L"%d", BBox.x);
-							UTGetControlsManager().SetParamValue(ctrl, L"X", val);
+							UTGetGUI().SetParamValue(ctrl, L"X", val);
 							StringCchPrintfW(val, MAX_PATH, L"%d", BBox.y);
-							UTGetControlsManager().SetParamValue(ctrl, L"Y", val);
+							UTGetGUI().SetParamValue(ctrl, L"Y", val);
 							StringCchPrintfW(val, MAX_PATH, L"%d", BBox.w);
-							UTGetControlsManager().SetParamValue(ctrl, L"W", val);
+							UTGetGUI().SetParamValue(ctrl, L"W", val);
 							StringCchPrintfW(val, MAX_PATH, L"%d", BBox.h);
-							UTGetControlsManager().SetParamValue(ctrl, L"H", val);
+							UTGetGUI().SetParamValue(ctrl, L"H", val);
 						}
 					}
 				}
@@ -1123,12 +1123,12 @@ void CControlsEditor::ReceiveKeys(UINT key)
 				if (DXUTIsKeyDown(VK_MENU))
 				{
 					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().h - dY);
-					UTGetControlsManager().SetParamValue(ctrl, L"H", val);
+					UTGetGUI().SetParamValue(ctrl, L"H", val);
 				}
 				else
 				{
 					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().y - dY);
-					UTGetControlsManager().SetParamValue(ctrl, L"Y", val);
+					UTGetGUI().SetParamValue(ctrl, L"Y", val);
 				}
 			}
 		}
@@ -1149,12 +1149,12 @@ void CControlsEditor::ReceiveKeys(UINT key)
 				if (DXUTIsKeyDown(VK_MENU))
 				{
 					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().h + dY);
-					UTGetControlsManager().SetParamValue(ctrl, L"H", val);
+					UTGetGUI().SetParamValue(ctrl, L"H", val);
 				}
 				else
 				{
 					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().y + dY);
-					UTGetControlsManager().SetParamValue(ctrl, L"Y", val);
+					UTGetGUI().SetParamValue(ctrl, L"Y", val);
 				}
 			}
 		}
@@ -1175,12 +1175,12 @@ void CControlsEditor::ReceiveKeys(UINT key)
 				if (DXUTIsKeyDown(VK_MENU))
 				{
 					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().w - dX);
-					UTGetControlsManager().SetParamValue(ctrl, L"W", val);
+					UTGetGUI().SetParamValue(ctrl, L"W", val);
 				}
 				else
 				{
 					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().x - dX);
-					UTGetControlsManager().SetParamValue(ctrl, L"X", val);
+					UTGetGUI().SetParamValue(ctrl, L"X", val);
 				}
 			}
 		}
@@ -1201,12 +1201,12 @@ void CControlsEditor::ReceiveKeys(UINT key)
 				if (DXUTIsKeyDown(VK_MENU))
 				{
 					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().w + dX);
-					UTGetControlsManager().SetParamValue(ctrl, L"W", val);
+					UTGetGUI().SetParamValue(ctrl, L"W", val);
 				}
 				else
 				{
 					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().x + dX);
-					UTGetControlsManager().SetParamValue(ctrl, L"X", val);
+					UTGetGUI().SetParamValue(ctrl, L"X", val);
 				}
 			}
 		}
@@ -1224,8 +1224,8 @@ void CControlsEditor::ReceiveKeys(UINT key)
 
 void CControlsEditor::DeleteLayer()
 {
-	int layidx = UTGetControlsManager().layersDefinitions.IndexOf(currLayer);
-	UTGetControlsManager().layersDefinitions.Remove(layidx);
+	int layidx = UTGetGUI().layersDefinitions.IndexOf(currLayer);
+	UTGetGUI().layersDefinitions.Remove(layidx);
 	SAFE_DELETE(currLayer);
 }
 
@@ -1292,7 +1292,7 @@ void CControlsEditor::CenterElements(bool H, bool V)
 				WCHAR val[MAX_PATH];
 				int intVal = -(xmin - ctrlX) - dx;
 				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
-				UTGetControlsManager().SetParamValue(ctrl, L"X", val);
+				UTGetGUI().SetParamValue(ctrl, L"X", val);
 			}
 		}
 		else if (selectedCtrls.Count() == 1)
@@ -1304,7 +1304,7 @@ void CControlsEditor::CenterElements(bool H, bool V)
 				int ctrlW = lCtrl->bbox.w;
 				int intVal = -(ctrlW / 2);
 				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
-				UTGetControlsManager().SetParamValue(lCtrl, L"X", val);
+				UTGetGUI().SetParamValue(lCtrl, L"X", val);
 			}
 		}
 		else if (selectedCtrls.Count() == 0)
@@ -1342,7 +1342,7 @@ void CControlsEditor::CenterElements(bool H, bool V)
 				int ctrlY = ctrl->bbox.y;
 				int intVal = -(ymin - ctrlY) - dy;
 				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
-				UTGetControlsManager().SetParamValue(ctrl, L"Y", val);
+				UTGetGUI().SetParamValue(ctrl, L"Y", val);
 			}
 		}
 		else  if (selectedCtrls.Count() == 1)
@@ -1354,7 +1354,7 @@ void CControlsEditor::CenterElements(bool H, bool V)
 				int ctrlH = lCtrl->bbox.h;
 				int intVal = -(ctrlH / 2);
 				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
-				UTGetControlsManager().SetParamValue(currLayer->controls[currCtrlIdx], L"Y", val);
+				UTGetGUI().SetParamValue(currLayer->controls[currCtrlIdx], L"Y", val);
 			}
 		}
 		else if (selectedCtrls.Count() == 0)
@@ -1443,7 +1443,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.2f, 0.2f, 1.0f));
 		if (ImGui::Button("Save All", ImVec2(80, 0)))
 		{
-			SaveXML(UTGetControlsManager().loadedFile);
+			SaveXML(UTGetGUI().loadedFile);
 		}
 		ImGui::PopStyleColor(2);
 
@@ -1487,10 +1487,10 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		ImGui::Begin("Interfaces", null, ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus );
 
 		vector<string> arrLayerNames;
-		int nLayersCnt = UTGetControlsManager().layersDefinitions.Count();
+		int nLayersCnt = UTGetGUI().layersDefinitions.Count();
 		for (int ii = 0; ii < nLayersCnt; ii++)
 		{
-			CStringHash * lID = &UTGetControlsManager().layersDefinitions[ii]->ID;
+			CStringHash * lID = &UTGetGUI().layersDefinitions[ii]->ID;
 			char strName[MAX_PATH];
 			wcstombs(strName, lID->text, MAX_PATH);
 			arrLayerNames.push_back(strName);
@@ -1509,8 +1509,8 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 					clickedCtrls.RemoveAll();
 
 					currLayerIdx = kk;
-					currLayer = UTGetControlsManager().layersDefinitions.GetAt(kk);
-					currLayer->pControlsManager = &UTGetControlsManager();
+					currLayer = UTGetGUI().layersDefinitions.GetAt(kk);
+					currLayer->pControlsManager = &UTGetGUI();
 				}
 			}
 			ImGui::ListBoxFooter();
@@ -1540,9 +1540,9 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 			else if (layerTemplate.GetVariantByName(L"anchorY")->m_strArg.getHash() == FastHash(L"max"))
 				nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_MAX;
 
-			UTGetControlsManager().layersDefinitions.Add(nlayer);
+			UTGetGUI().layersDefinitions.Add(nlayer);
 
-			int idx = UTGetControlsManager().layersDefinitions.Count() - 1;
+			int idx = UTGetGUI().layersDefinitions.Count() - 1;
 			currCtrlIdx = -1;
 		}
 		if (ImGui::Button("Clone Layer", ImVec2(120, 0)))
@@ -1555,9 +1555,9 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 			WCHAR newName[MAX_PATH];
 			StringCchPrintfW(newName, MAX_PATH, L"%s_%d", currLayer->ID.text, randint(100));
 			nlayer->ID.Init(newName);
-			UTGetControlsManager().layersDefinitions.Add(nlayer);
+			UTGetGUI().layersDefinitions.Add(nlayer);
 
-			int idx = UTGetControlsManager().layersDefinitions.Count() - 1;
+			int idx = UTGetGUI().layersDefinitions.Count() - 1;
 			currCtrlIdx = -1;
 		}
 		ImGui::End();
@@ -1565,9 +1565,9 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		///--- CONTROLS/LAYERS PROPERTIES
 		ImGui::Begin("Properties");
 		vector<string> arrControlsNames;
-		if ((currLayerIdx >= 0) && (currLayerIdx < UTGetControlsManager().layersDefinitions.GetSize()))
+		if ((currLayerIdx >= 0) && (currLayerIdx < UTGetGUI().layersDefinitions.GetSize()))
 		{
-			CCtrlLayer *layer = UTGetControlsManager().layersDefinitions.GetAt(currLayerIdx);
+			CCtrlLayer *layer = UTGetGUI().layersDefinitions.GetAt(currLayerIdx);
 			for (int ii = 0; ii < layer->controls.Count(); ii++)
 			{
 				CControl* ctrl = layer->controls.GetAt(ii);

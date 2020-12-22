@@ -1414,10 +1414,10 @@ HRESULT DXUTToggleFullScreen()
 
 	UTGetAppClass().m_Settings.bFullscreen = !DXUTIsWindowed();
 	//daca e fereastra de gfx options pornita o inchid
-	CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_GFX_OPTIONS");
+	CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_GFX_OPTIONS");
 	if (layer != null)
 	{
-		UTGetControlsManager().RemoveLayer("LAYER_ID_GFX_OPTIONS");
+		UTGetGUI().RemoveLayer("LAYER_ID_GFX_OPTIONS");
 	}
 
 	return hr;

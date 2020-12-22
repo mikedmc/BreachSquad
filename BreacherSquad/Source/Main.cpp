@@ -828,7 +828,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(g_level.OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_particlesMgr.OnCreateDevice(pDevice, pBBDesc));
-	V_RETURN(UTGetControlsManager().OnCreateDevice(pDevice, pBBDesc));
+	V_RETURN(UTGetGUI().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_spineMgr.OnCreateDevice(pDevice, pBBDesc));
@@ -909,7 +909,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(g_level.OnResetDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_particlesMgr.OnResetDevice(pDevice, pBBDesc));
-	V_RETURN(UTGetControlsManager().OnResetDevice(pDevice, pBBDesc));
+	V_RETURN(UTGetGUI().OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_spineMgr.OnResetDevice(pDevice, pBBDesc));
@@ -924,7 +924,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	CTexturedFont::SetGlobalSpritePtr(g_pGameSprite);
 	CSprite::SetGlobalSpritePtr(g_pGameSprite, &UTPainter());
 	CTTFontsManager::SetGlobalSpritePtr(g_pGameSprite);
-	UTGetControlsManager().SetSpritePtr(g_pGameSprite);
+	UTGetGUI().SetSpritePtr(g_pGameSprite);
 	g_mainMenu.SetSpritePtr(g_pGameSprite);
 
 	///--- write resolution string for use in options screen ---
@@ -979,7 +979,7 @@ void CALLBACK OnLostDevice(void)
 	UTPainter().OnLostDevice();
 
 	UTGetFontsManager().OnLostDevice();
-	UTGetControlsManager().OnLostDevice();
+	UTGetGUI().OnLostDevice();
 	//because the render targets and handled globally and are changing in size depending on screen resolution we just release them in OnLostDevice and re-create them in OnResetDevice
 	UTGetRTManager().Release();
 	UTGetRTManager().OnLostDevice();
@@ -1013,7 +1013,7 @@ void CALLBACK OnDestroyDevice(void)
 	UTPainter().OnDestroyDevice();
 	UTGetTTFManager().OnDestroyDevice();
 	UTGetFontsManager().OnDestroyDevice();
-	UTGetControlsManager().OnDestroyDevice();
+	UTGetGUI().OnDestroyDevice();
 	g_level.OnDestroyDevice();
 	g_editor.OnDestroyDevice();
 	g_particlesMgr.OnDestroyDevice();
@@ -1052,7 +1052,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 	}
 
 	//update controls manager
-	UTGetControlsManager().Update(fElapsedTime);
+	UTGetGUI().Update(fElapsedTime);
 
 	switch (g_gameState)
 	{
@@ -1141,7 +1141,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 
 		case GAME_STATE_PLAYER_SELECTION:
 		{
-			if ((!g_bDuringTransition) && (!UTGetControlsManager().bIsBlocking))
+			if ((!g_bDuringTransition) && (!UTGetGUI().bIsBlocking))
 				g_playerSelScr.Update(fElapsedTime);
 		}
 		break;
@@ -1151,7 +1151,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 			//update list on timer
 			if (g_timers.Tick(2000))
 			{
-				CCtrlLayer* lay = UTGetControlsManager().GetTopmostInputLayer();
+				CCtrlLayer* lay = UTGetGUI().GetTopmostInputLayer();
 				//disable the refresh button if still working
 				if (lay != null)
 				{
@@ -1226,7 +1226,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 		case GAME_STATE_LEVEL_SELECTION:
 		case GAME_STATE_CHAPTER_SELECTION:
 		{
-			if ((!g_bDuringTransition) && (!UTGetControlsManager().bIsBlocking))
+			if ((!g_bDuringTransition) && (!UTGetGUI().bIsBlocking))
 				g_mainMenu.Update(fElapsedTime);
 		}
 		break;
@@ -1236,7 +1236,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 			if (g_bDuringTransition)
 				break;
 			//update background
-			if (!UTGetControlsManager().bIsBlocking)
+			if (!UTGetGUI().bIsBlocking)
 				g_mainMenu.Update(fElapsedTime);
 
 			//update lobby
@@ -1249,23 +1249,23 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 			//offer to reset the user data
 			if (g_userData[K_MEMID_OFFER_RESET_USER_DATA] != 0)
 			{
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_RESET_PROGRESS_EA");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_RESET_PROGRESS_EA");
 				g_userData[K_MEMID_OFFER_RESET_USER_DATA] = 0;
 			}
 
-			if ((!g_bDuringTransition) && (!UTGetControlsManager().bIsBlocking))
+			if ((!g_bDuringTransition) && (!UTGetGUI().bIsBlocking))
 				g_mainMenu.Update(fElapsedTime);
 
 			//always check to see if menu exists
 #ifdef ENABLE_STEAM_WORKSHOP
-			if (UTGetControlsManager().GetLayerByName("LAYER_ID_MAINMENU") == null)
+			if (UTGetGUI().GetLayerByName("LAYER_ID_MAINMENU") == null)
 			{
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_MAINMENU");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_MAINMENU");
 			}
 #else
-			if (UTGetControlsManager().GetLayerByName("LAYER_ID_MAINMENU_NOWORKSHOP") == null)
+			if (UTGetGUI().GetLayerByName("LAYER_ID_MAINMENU_NOWORKSHOP") == null)
 			{
-				UTGetControlsManager().ShowLayerOnce("LAYER_ID_MAINMENU_NOWORKSHOP");
+				UTGetGUI().ShowLayerOnce("LAYER_ID_MAINMENU_NOWORKSHOP");
 			}
 #endif
 
@@ -1273,11 +1273,11 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 			{
 				if (UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
 				{
-					CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_QUITGAME");
-					if ((layer == null) && (!UTGetControlsManager().bIsBlocking))
+					CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_QUITGAME");
+					if ((layer == null) && (!UTGetGUI().bIsBlocking))
 					{
 						SND_PLAY(SNDIDX_CLICK);
-						UTGetControlsManager().ShowLayerOnce("LAYER_ID_QUITGAME");
+						UTGetGUI().ShowLayerOnce("LAYER_ID_QUITGAME");
 					}
 					/*
 					//windows close when pressing back
@@ -1300,8 +1300,8 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 				//ingame menu on ESC-back
 				if (g_level.m_levelState == K_LVL_STATE_PLAYING)
 				{
-					CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_IGM_MENU");
-					if ((layer == null) && (!UTGetControlsManager().bIsBlocking))
+					CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_IGM_MENU");
+					if ((layer == null) && (!UTGetGUI().bIsBlocking))
 					{
 						for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 						{
@@ -1309,12 +1309,12 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 							if (UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
 							{
 								SND_PLAY(SNDIDX_CLICK);
-								UTGetControlsManager().ShowLayerOnce("LAYER_ID_IGM_MENU");
+								UTGetGUI().ShowLayerOnce("LAYER_ID_IGM_MENU");
 								break;
 							}
 						}
 					}
-					else if ((layer != null) && (layer == UTGetControlsManager().GetTopmostInputLayer()))
+					else if ((layer != null) && (layer == UTGetGUI().GetTopmostInputLayer()))
 					{
 						for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 						{
@@ -1323,7 +1323,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 								(UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_RELOAD] == K_CM_BUTSTATE_JUSTPRESSED))
 							{
 								SND_PLAY(SNDIDX_DENIED);
-								UTGetControlsManager().RemoveLayer("LAYER_ID_IGM_MENU");
+								UTGetGUI().RemoveLayer("LAYER_ID_IGM_MENU");
 								break;
 							}
 						}
@@ -1331,7 +1331,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 				}
 
 				//update game if no blocking window is shown
-				if (!UTGetControlsManager().bIsBlocking)
+				if (!UTGetGUI().bIsBlocking)
 				{
 					//SPINE update animation states
 					g_spineMgr.UpdateAnimationStates(fElapsedTime, fTime);
@@ -1364,8 +1364,8 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 					//ingame menu on ESC-back
 					if (g_level.m_levelState == K_LVL_STATE_PLAYING)
 					{
-						CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_IGM_MENU_NET");
-						if ((layer == null) && (!UTGetControlsManager().bIsBlocking))
+						CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_IGM_MENU_NET");
+						if ((layer == null) && (!UTGetGUI().bIsBlocking))
 						{
 							for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 							{
@@ -1377,12 +1377,12 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 								if (ctrlr->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
 								{
 									SND_PLAY(SNDIDX_CLICK);
-									UTGetControlsManager().ShowLayerOnce("LAYER_ID_IGM_MENU_NET");
+									UTGetGUI().ShowLayerOnce("LAYER_ID_IGM_MENU_NET");
 									break;
 								}
 							}
 						}
-						else if ((layer != null) && (layer == UTGetControlsManager().GetTopmostInputLayer()) && (layer->alpha >= 1.0f))
+						else if ((layer != null) && (layer == UTGetGUI().GetTopmostInputLayer()) && (layer->alpha >= 1.0f))
 						{
 							for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
 							{
@@ -1395,7 +1395,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 									(ctrlr->sCommands.keyState[K_CM_COMMAND_RELOAD] == K_CM_BUTSTATE_JUSTPRESSED))
 								{
 									SND_PLAY(SNDIDX_DENIED);
-									UTGetControlsManager().RemoveLayer("LAYER_ID_IGM_MENU_NET");
+									UTGetGUI().RemoveLayer("LAYER_ID_IGM_MENU_NET");
 									break;
 								}
 							}
@@ -1797,7 +1797,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			///save other data about the current frame
 			WORD wFrameFlag = 0;
 			//blocking interface shown so block controller input (includes ingame menu and level finished windows)
-			if (UTGetControlsManager().GetTopmostInputLayer() != null)
+			if (UTGetGUI().GetTopmostInputLayer() != null)
 				wFrameFlag |= K_NETLOCK_FRAMEFLAG_INPUT_PAUSED_INGAME;
 			//chat window open, block local controller
 #ifdef ENABLE_CHAT_WINDOW
@@ -2105,7 +2105,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 		}
 
 		// update the number of selectable items in the leaderboards window
-		CCtrlLayer* pLay = UTGetControlsManager().GetTopmostLayer();
+		CCtrlLayer* pLay = UTGetGUI().GetTopmostLayer();
 		if (pLay != null)
 		{
 			CControl* ctrl = pLay->GetControlByName("CTRL_SCORESLIST_TT");
@@ -2141,7 +2141,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 		//reset error string
 		g_gameStateErrorStringIdx = -1;
 		//show window after reset
-		UTGetControlsManager().MessageBoxOK(STR_OOPS, stridx);
+		UTGetGUI().MessageBoxOK(STR_OOPS, stridx);
 	}
 
 
@@ -2449,11 +2449,11 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 #ifdef K_CONTROLS_EDITOR
 		if (g_gameState != GAME_STATE_CONTROLSED)
 		{
-			UTGetControlsManager().Paint();
+			UTGetGUI().Paint();
 			g_pGameSprite->Flush();
 		}
 #else
-		UTGetControlsManager().Paint();
+		UTGetGUI().Paint();
 		g_pGameSprite->Flush();
 #endif
 
@@ -2787,7 +2787,7 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 		
 		case WM_CHAR:
 		{
-			UTGetControlsManager().ReceiveInput(K_CCTRLMGR_INPUT_CHAR, (UINT32)wParam);
+			UTGetGUI().ReceiveInput(K_CCTRLMGR_INPUT_CHAR, (UINT32)wParam);
 #ifdef ENABLE_CHAT_WINDOW
 			g_ChatWnd.ReceiveChar((UINT32)wParam);
 #endif
@@ -2841,7 +2841,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 
 		g_editor.ReceiveKeys(nChar);
 		///--- send keys to controls manager ---
-		UTGetControlsManager().ReceiveInput(K_CCTRLMGR_INPUT_KEY, (UINT32)nChar);
+		UTGetGUI().ReceiveInput(K_CCTRLMGR_INPUT_KEY, (UINT32)nChar);
 																				 
 		switch (nChar)
 		{
@@ -2890,10 +2890,10 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 					{
 						if (!UTGetAppClass().IsGameNetworked())
 						{
-							CCtrlLayer* layer = UTGetControlsManager().GetLayerByName("LAYER_ID_KEYMAP");
+							CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_KEYMAP");
 							if (layer == null)
 							{
-								CCtrlLayer *lay =UTGetControlsManager().ShowLayerOnce("LAYER_ID_KEYMAP");
+								CCtrlLayer *lay =UTGetGUI().ShowLayerOnce("LAYER_ID_KEYMAP");
 								if (lay)
 								{
 									CControl *ctrl = lay->GetControlByName("LS_KEYS1");
@@ -2912,7 +2912,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 							}
 							else
 							{
-								UTGetControlsManager().RemoveLayer("LAYER_ID_KEYMAP");
+								UTGetGUI().RemoveLayer("LAYER_ID_KEYMAP");
 							}
 						}
 					}
@@ -2981,7 +2981,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			{
 				//chat available only when playing networked game and no other interface visible
 				if ((UTGetAppClass().IsGameNetworked()) && (g_gameState == GAME_STATE_GAME) && 
-					(g_level.m_levelState == K_LVL_STATE_PLAYING) && (UTGetControlsManager().Layers.GetSize() == 0))
+					(g_level.m_levelState == K_LVL_STATE_PLAYING) && (UTGetGUI().Layers.GetSize() == 0))
 				{
 					//enable input if not already enabled
 					if (!g_ChatWnd.IsReceivingInput())
@@ -3062,7 +3062,7 @@ void ChangeGameState(int newState, int param1, int param2)
 				ErrorBox(K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath);
 			}
 
-			UTGetControlsManager().RemoveAllLayers(true);
+			UTGetGUI().RemoveAllLayers(true);
 		}
 		break;
 		case GAME_STATE_GAME:
@@ -3095,7 +3095,7 @@ void ChangeGameState(int newState, int param1, int param2)
 			// level was unloaded, immediately set the controller pointer to null
 			UTGetCtrlrMgr().SetNormalizeCoordsFunctionPtr(nullptr);
 
-			UTGetControlsManager().RemoveAllLayers(true);
+			UTGetGUI().RemoveAllLayers(true);
 
 			UTGetSoundManager().StopGroup("music", false, true);
 			if (newState != GAME_STATE_GAME)
@@ -3128,7 +3128,7 @@ void ChangeGameState(int newState, int param1, int param2)
 		case GAME_STATE_WORKSHOP:
 		{
 			UTGetSoundManager().StopGroup("sounds", false, true);
-			UTGetControlsManager().RemoveAllLayers(true);
+			UTGetGUI().RemoveAllLayers(true);
 			//release used textures here:
 			UTGetAppClass().g_texManager.Release();
 			//make sure we reload everything that can be modded
@@ -3156,7 +3156,7 @@ void ChangeGameState(int newState, int param1, int param2)
 		case GAME_STATE_JOIN_COOP_LIST:
 		{
 			UTGetSoundManager().StopGroup("sounds", false, true);
-			UTGetControlsManager().RemoveAllLayers(true);
+			UTGetGUI().RemoveAllLayers(true);
 		}
 		break;
 
@@ -3167,7 +3167,7 @@ void ChangeGameState(int newState, int param1, int param2)
 		case GAME_STATE_MAINMENU:
 		{
 			UTGetSoundManager().StopGroup("sounds", false, true);
-			UTGetControlsManager().RemoveAllLayers(true);
+			UTGetGUI().RemoveAllLayers(true);
 			//release used textures here:
 			UTGetAppClass().g_texManager.Release();
 		}
@@ -3270,7 +3270,7 @@ void ChangeGameState(int newState, int param1, int param2)
 
 			g_stringsMgr.SetString(STR_LOBBIES_LIST_VAL, L"%s", g_stringsMgr.strings[STR_PLEASE_HANG]->sText);
 			//add the window
-			CCtrlLayer* lay = UTGetControlsManager().ShowLayerOnce("LAYER_ID_LOBBIES_LIST");
+			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce("LAYER_ID_LOBBIES_LIST");
 			if (lay != null)
 			{
 				CControl* ctrl = lay->GetControlByName("BUT_JOIN_LOBBY");
@@ -3303,10 +3303,10 @@ void ChangeGameState(int newState, int param1, int param2)
 
 			//show window
 #ifdef ENABLE_STEAM
-			UTGetControlsManager().ShowLayerOnce("LAYER_ID_QUICK_MATCH_INVITE");
+			UTGetGUI().ShowLayerOnce("LAYER_ID_QUICK_MATCH_INVITE");
 #endif
 #ifdef ENABLE_GALAXY
-			UTGetControlsManager().ShowLayerOnce("LAYER_ID_QUICK_MATCH");
+			UTGetGUI().ShowLayerOnce("LAYER_ID_QUICK_MATCH");
 #endif
 			//change menu on net lobby background
 			g_mainMenu.SetState(K_MM_STATE_NET_LOBBY);
@@ -3514,7 +3514,7 @@ void ChangeGameState(int newState, int param1, int param2)
 #ifdef K_CONTROLS_EDITOR
 		case GAME_STATE_CONTROLSED:
 		{
-			UTGetControlsManager().RemoveAllLayers(true);
+			UTGetGUI().RemoveAllLayers(true);
 			g_ControlsEditor.Launch();
 			UTimgui().SetGlobalEnabled(true);
 		}
@@ -3611,11 +3611,11 @@ void PaintTransition(float dTime, float fTimeline, PDEVICE pDevice)
 					float fAlpha = LIMIT(1.5f * g_fTransitionPercent, 0.0f, 1.0f);
 					DrawRectUP_TL1T(pDevice, rect, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), D3DCOLOR_XXXA(fAlpha));
 					//write "loading"
-					if ((UTGetControlsManager().m_sprCol.IsLoaded()) && (fAlpha >= 0.95f))
+					if ((UTGetGUI().m_sprCol.IsLoaded()) && (fAlpha >= 0.95f))
 					{
 						CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam240hScreen);
 						RECTXYWH_F scrrect = UTGetAppClass().g_cam240hScreen.GetCamWorldAABB();
-						CSprite::paintFrame(&UTGetControlsManager().m_sprCol, scrrect.Right() - 3, scrrect.Bottom() - 3, ANM_CONTROLS_SPR_LOADING_ICONS, 0, 0x88ffffff);
+						CSprite::paintFrame(&UTGetGUI().m_sprCol, scrrect.Right() - 3, scrrect.Bottom() - 3, ANM_CONTROLS_SPR_LOADING_ICONS, 0, 0x88ffffff);
 					}
 				}
 				break;
