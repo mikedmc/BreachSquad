@@ -5,13 +5,7 @@
 #define SPR_ED_TIMELINE 100.0f
 
 ///--- STATIC MEMBERS ---
-CSpritePainter* CSpr::s_pSP = nullptr;
-void CSpr::SetGlobalSpritePtr(CSpritePainter* pSP)
-{
-	s_pSP = pSP;
-}
-
-
+CSpritePainter* CSpr::s_pSP = &UTPainter();
 
 CSpr::CSpr() 
 {
@@ -67,7 +61,7 @@ void CSpr::Init(int animIdx, Vec2 vPos, int nframeIdx, DWORD nColor)
 
 void CSpr::Init(CHAR* strAnimID, CSpriteCollection *sprCollection, Vec2 vPos, int nframeIdx, DWORD nColor)
 {
-	animID = sprCollection->getAnimationIdxByName(strAnimID);
+	animID = sprCollection->GetAnimationIdxByName(strAnimID);
 	if (animID < 0)
 	{
 		LOG("Sprite::Init: Animation [%s] not found!", strAnimID);
@@ -113,7 +107,7 @@ void CSpr::SetAnimOnce(int animIdx, int frameIdx)
 
 void CSpr::SetAnim(CSpriteCollection *sprCollection, CHAR* strAnimID)
 {
-	animID = sprCollection->getAnimationIdxByName(strAnimID);
+	animID = sprCollection->GetAnimationIdxByName(strAnimID);
 	if (animID < 0)
 	{
 		LOG("Sprite::SetAnim: Animation [%s] not found!", strAnimID);
@@ -216,6 +210,18 @@ void CSpr::PaintModule(CSpriteCollection* sprCol, int moduleIdx)
 	scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[moduleIdx]];
 
 	s_pSP->Draw(sprCol->Textures[mod->imgIdx]->pTex, mod->texRect, mod->moduleRectOff, pos, color);
+}
+
+void CSpr::PaintModule_texOverride(CSpriteCollection *sprCol, int moduleIdx, int texIdxOffset)
+{
+	_ASSERT(animID < sprCol->Animations.Count());
+	_ASSERT(frameID < sprCol->Animations[animID]->aframesNo);
+	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameID];
+	_ASSERT(moduleIdx < sprCol->AFrames[aframeIdx]->fmodulesNo);
+
+	scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[moduleIdx]];
+
+	s_pSP->Draw(sprCol->Textures[mod->imgIdx + texIdxOffset]->pTex, mod->texRect, mod->moduleRectOff, pos, color);
 }
 
 void UTSprite::PaintFrameEx(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameID, DWORD ncolor, float fRotZ, Vec2 vScale)

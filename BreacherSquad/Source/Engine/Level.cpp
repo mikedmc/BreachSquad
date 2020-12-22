@@ -1596,10 +1596,10 @@ HRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		//load generic weapon data
 		templ->nHUD_AnimIdx = -1;
 		if (!bnode.attribute(L"sHUDanimName").empty())
-			templ->nHUD_AnimIdx = m_sprInterface.getAnimationIdxByName(bnode.attribute(L"sHUDanimName").value());
+			templ->nHUD_AnimIdx = m_sprInterface.GetAnimationIdxByName(bnode.attribute(L"sHUDanimName").value());
 		templ->nHUD_AnimIdxALT = -1;
 		if (!bnode.attribute(L"sHUDanimNameIcon").empty())
-			templ->nHUD_AnimIdxALT = m_sprInterface.getAnimationIdxByName(bnode.attribute(L"sHUDanimNameIcon").value());
+			templ->nHUD_AnimIdxALT = m_sprInterface.GetAnimationIdxByName(bnode.attribute(L"sHUDanimNameIcon").value());
 		if (!bnode.attribute(L"fSpeedPenaltyPercent").empty())
 			templ->fSpeedPenaltyPercent = bnode.attribute(L"fSpeedPenaltyPercent").as_float();
 		if (!bnode.attribute(L"bPassive").empty())
@@ -1608,7 +1608,7 @@ HRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		//muzzle flash anim
 		templ->nMuzzleFlashAnim = -1;
 		if (!bnode.attribute(L"sMuzzleFlashAnim").empty())
-			templ->nMuzzleFlashAnim = m_sprActors.getAnimationIdxByName(bnode.attribute(L"sMuzzleFlashAnim").value());
+			templ->nMuzzleFlashAnim = m_sprActors.GetAnimationIdxByName(bnode.attribute(L"sMuzzleFlashAnim").value());
 		//template overwrite sTemplateOverwrite - overwrites the actor default template (Adds to it)
 		if (!bnode.attribute(L"sTemplateOverwrite").empty())
 		{
@@ -2102,7 +2102,7 @@ HRESULT CLevel::LoadActorTemplates(WCHAR * xmlPath)
 				if (nmnode != NULL)
 				{
 					//main animation
-					templ->animIDs[kk][0] = m_sprActors.getAnimationIdxByName(nmnode.attribute(L"set0").value());
+					templ->animIDs[kk][0] = m_sprActors.GetAnimationIdxByName(nmnode.attribute(L"set0").value());
 					if (templ->animIDs[kk][0] == -1)
 					{
 						ErrorBox(K_ERR_WARNING, L"Template set0 animation not found!\n%s", nmnode.attribute(L"set0").value());
@@ -2110,7 +2110,7 @@ HRESULT CLevel::LoadActorTemplates(WCHAR * xmlPath)
 					//next sets aren't mandatory
 					if (!nmnode.attribute(L"set1").empty())
 					{
-						templ->animIDs[kk][1] = m_sprActors.getAnimationIdxByName(nmnode.attribute(L"set1").value());
+						templ->animIDs[kk][1] = m_sprActors.GetAnimationIdxByName(nmnode.attribute(L"set1").value());
 						if (templ->animIDs[kk][1] == -1)
 						{
 							ErrorBox(K_ERR_WARNING, L"Template variation animation not found!\n%s", nmnode.attribute(L"set1").value());
@@ -10547,7 +10547,7 @@ void CLevel::Update(float dTime_original)
 			if (prop->sprLight.animationIdx >= 0)
 			{
 				//Creez forma luminii (mesh-ul)
-				RECTLTRB_F realrect = m_sprLights.GetAFrameBBox_real_LTRB(prop->sprLight.animationIdx, 0);
+				RECTLTRB_F realrect = m_sprLights.GetAFrameBBox_real(prop->sprLight.animationIdx, 0);
 				//Scalez dreptunghi lumina
 				if (prop->fLightScaling != 1.0f)
 				{
@@ -15178,7 +15178,7 @@ void CLevel::AddDecal(EDecalLayer nLayer, D3DXVECTOR2 pos, int animIdx, int fram
 
 	ndec->layer = nLayer;
 	ndec->sprite.Init(animIdx, (int)pos.x, (int)pos.y, frameIdx, color);
-	RECTLTRB_F framerect = m_sprProps.GetAFrameBBox_real_LTRB(animIdx, frameIdx);
+	RECTLTRB_F framerect = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
 	ndec->aabb.Set(D3DXVECTOR2(framerect.left + pos.x, framerect.top + pos.y), D3DXVECTOR2(framerect.right + pos.x, framerect.bottom + pos.y));
 	ndec->bAnimated = bIsAnimated;
 

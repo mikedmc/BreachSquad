@@ -12,9 +12,8 @@ enum eSpriteAnimState {
 class CSpr
 {
 public:
-	// Pointer to global sprite painter
+	// Pointer to global sprite painter, for speed...
 	static CSpritePainter*	s_pSP;						
-	static void SetGlobalSpritePtr(CSpritePainter* pSP);	
 
 public:
 	int						animID;						// Animation index
@@ -43,7 +42,6 @@ public:
 	UINT32					Update(CSpriteCollection *sprCollection, float dTime, bool bUpdatePos = false);
 
 	void					Paint(CSpriteCollection *sprCol);
-	void					Paint(CSpriteCollection *sprCol, RECTXYWH *clipRct);
 	// Optimized paint for a single module when we don't have more modules per frame (skips a for)
 	void					PaintModule(CSpriteCollection *sprCol, int moduleIdx);
 	// Optimized paint for a single module when we don't have more modules per frame (skips a for)

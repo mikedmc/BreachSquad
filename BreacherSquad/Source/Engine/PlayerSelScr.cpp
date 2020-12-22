@@ -146,11 +146,9 @@ CPlayerSelScr::~CPlayerSelScr()
 
 HRESULT CPlayerSelScr::InitSprites(WCHAR * strPath)
 {
-	HRESULT hr = S_OK;
-	hr = m_sprCol.LoadSprites(strPath);
 	fLocalTimeline = 0.0f;
-
-	return hr;
+	V_OP_RETHR(m_sprCol.LoadSprites(strPath));
+	return S_OK;
 }
 
 void CPlayerSelScr::Update(float dTime)

@@ -1,5 +1,7 @@
 #pragma once
 
+#define K_EDITOR_ANIMATION_FLAG_LOOPED 0x1
+
 //----------------------------------------------------------	
 // bsx FILE FORMAT 
 //<?xml version="1.0"?>
@@ -36,88 +38,82 @@
 
 #define BSX_VERSION 2.0
 
-//MODULE - used only when loading
-class scModule 
+//Texture class
+class scTexture
 {
 public:
-	UINT16 imgIdx;
-	int X;
-	int Y;
-	int W;
-	int H;
+	PTEXTURE			pTex;
+	TEXTURE_INFO		info;
+	WCHAR				imagePath[MAX_PATH];
+	//CTOR
+	scTexture() :
+		pTex(NULL)
+	{
+	}
+};
+
+//MODULE - used only when loading
+struct scModule 
+{
+	UINT16				imgIdx;
+	int					X;
+	int					Y;
+	int					W;
+	int					H;
 };
 
 //FrameModule
-typedef struct _nscFModule 
+struct scFModule 
 {
-	//offsetul unde deseneaza modulul
-	int ox;
-	int oy;
-	UINT32 flags;
-	//data from module, copied here for fast access
-	UINT16 imgIdx;
-	RECT moduleRect;
-	int moduleX;
-	int moduleY;
-	int moduleW;
-	int moduleH;
-	// tex coords of module
-	RECTLTRB_F texRect;
-	// module rect offsetted by ox and oy
-	RECTLTRB_F moduleRectOff;
-} scFModule;
+	int					ox;						// offset where module is to be painted
+	int					oy;						// offset where module is to be painted
+	UINT32				flags;
+	UINT16				imgIdx;					// image index in texture array
+	scTexture*			pImg;					// pointer to texture for fast access
+	RECT				moduleRect;				// RECT of module
+	RECTXYWH			moduleXYWH;				// XYWH of module
+	
+	RECTLTRB_F			texRect;				// tex coords of module
+	RECTLTRB_F			moduleRectOff;			// module rect offsetted by ox and oy
+};
 
 //Frame - only used when loading from file (doubled in AFrame)
-class scFrame 
+struct scFrame 
 {
-public:
-	RECTXYWH BBox;
-	int frame_hitPtsNo;
-	int* frame_hitPtsPosXYF; //sunt scrise la rand: [frame][x1,y1,flag1,x2,y2...]
-	UCHAR frame_fmodulesNo;  
-	int* frame_fmodulesIdx;
+	RECTXYWH			BBox;
+	int					frame_hitPtsNo;
+	int*				frame_hitPtsPosXYF;		//written like this: [frame][x1,y1,flag1,x2,y2...]
+	UCHAR				frame_fmodulesNo;  
+	int*				frame_fmodulesIdx;
 };
 //AnimationFrame
-typedef struct _nscAFrame
+struct scAFrame
 {
-	int dx;
-	int dy;
-	UINT32 flags;
-	int duration;
-	//date frame
-	RECTXYWH BBox; //BBox incarcat din editor
-	int PointsNo;
-	int* PointsXYFlag; //sunt scrise la rand: [frame][x1,y1,flag1,x2,y2...]
-	UCHAR fmodulesNo;  
-	int* fmodulesIdx;
+	int					dx;
+	int					dy;
+	UINT32				flags;
+	int					duration;
+	RECTXYWH			BBox;					// BBox loaded from editor
+	int					PointsNo;				// hitpoints no
+	int*				PointsXYFlag;			// [frame][x1,y1,flag1,x2,y2...]
+	UCHAR				fmodulesNo;  
+	int*				fmodulesIdx;
 	
-	RECTXYWH BBox_real; //bounding box real, calculat din module, folosit in paint de obicei
-} scAFrame;
+	RECTXYWH			BBox_real;				// bounding box real, computed from modules
+};
 
 //Animation
 #define K_SPRITECOLLECTION_MAX_ANIM_NAME 128
 class scAnimation
 {
 public:
-	int aframesNo;
-	int* aframesIdx;// [A-frameid1, A-frameid2, ...]
-	UINT32 flags;
-	//salveaza numele animatiei si hash-ul ei
-	CStringHash animName;
+	int					aframesNo;
+	int*				aframesIdx;				// [A-frameid1, A-frameid2, ...]
+	UINT32				flags;
+	
+	CStringHash			animName;				// save anim name and hash
 };
-//Textures
-class scTexture
-{
-public:
-	LPDIRECT3DTEXTURE9	pTex;
-	D3DXIMAGE_INFO		info;
-	WCHAR				imagePath[MAX_PATH];
-	//CTOR
-	scTexture() :
-	pTex(NULL)
-	{
-	}
-};
+
 
 /*!
  * \class CSpriteCollection
@@ -127,64 +123,62 @@ public:
 class CSpriteCollection
 {
 private:
-	bool bIsLoaded;
+	bool							bIsLoaded;
+	PDEVICE							m_pDevice;
+
 public:
-	WCHAR wcsLoadedFile[MAX_PATH];
-// images ////////////// 
-	CGrowableArray<scTexture*> Textures;
-	short imageNo;
-// fmodules /////////////
-	int fmoduleNo;
-	CGrowableArray<scFModule*> FModules;
-// Animation frames//////////
-	int aframesNo;
-	CGrowableArray<scAFrame*> AFrames;
-// animations ////
-	int animationNo;
-	CGrowableArray<scAnimation*> Animations;
+	WCHAR							wcsLoadedFile[MAX_PATH];	// Path of currently loaded file
+	short							imageNo;
+	CGrowableArray<scTexture*>		Textures;
+	int								fmoduleNo;
+	CGrowableArray<scFModule*>		FModules;
+	int								aframesNo;
+	CGrowableArray<scAFrame*>		AFrames;
+	int								animationNo;
+	CGrowableArray<scAnimation*>	Animations;
 
 	CSpriteCollection(void);
 	~CSpriteCollection(void);
 
 public:
-	LPDIRECT3DDEVICE9	pDevice;
 	// Loads the specified sprites collection.
 	// \param wcsImageFolderOverride - images get searched here. If null they get loaded from the wcsFullPath folder
-	HRESULT				LoadSprites(WCHAR* wcsFullPath);
+	OPRESULT						LoadSprites(WCHAR* wcsFullPath);
 	// Releases currently loaded collection
-	void				Release();
-	inline bool			IsLoaded() const { return bIsLoaded; }
+	void							Release();
+	inline bool						IsLoaded() const { return bIsLoaded; }
 
-	int					getAnimationIdxByName(const WCHAR* animName);
-	int					getAnimationIdxByName(const CHAR* animName);
-	int					getAnimationIdxByNameHash(const UINT32 animNameHash);
+	int								GetAnimationIdxByName(const WCHAR* animName);
+	int								GetAnimationIdxByName(const CHAR* animName);
+	int								GetAnimationIdxByNameHash(const UINT32 animNameHash);
 
-	//intoarce BBOX-ul frame-ului setat din editor
-	FORCEINLINE RECTXYWH GetAFrameBBox(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox; }
-	FORCEINLINE UINT32   GetAFrameFlag(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->flags; }
-	//intoarce bbox-ul frame-ului, calculat la load
-	FORCEINLINE RECTXYWH GetAFrameBBox_real(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox_real; }
-	FORCEINLINE RECTLTRB_F GetAFrameBBox_real_LTRB(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox_real; }
-	//intoarce dreptunghiul din textura al unui modul
-	RECTXYWH GetModuleRect(int animIdx, int frameIdx, int moduleIdx);
-	RECTLTRB_F GetModuleRect_TexCoords(int animIdx, int frameIdx, int moduleIdx);
-	SIZEWH GetTextureSizeByAnim(int animIdx);
-	scTexture* GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx);
-	//intoarce nr de hitpoints (sau 0 daca e eroare sau nu are)
-	int GetAFrameHitPointsCnt(int animIdx, int frameIdx);
-	//cate sunt care respecta filtrul de flag (flag & flagFilter != 0)
-	int GetAFrameHitPointsCntFlag(int animIdx, int frameIdx, DWORD flagFilter = 0xffffffff);
-	//intoarce hitpoint cu indexul corespunzator din animatie, frame (filtreaza punctele dupa masca flagfilter)
-	HRESULT GetAFrameHitPoint(int animIdx, int frameIdx, int pointIdx, POINTXYZ_INT *outvar);
-	//intoarce al N-lea hitpoint al carui flag & flagFilter != 0
-	HRESULT GetAFrameHitPointFlag(int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, POINTXYZ_INT *outvar);
-	//intoarce nr de frames dintr-o animatie
-	const int	GetAFramesCnt(int anmIdx) const { return Animations[anmIdx]->aframesNo; }
+	// Returns BBOX set from editor
+	inline RECTXYWH					GetAFrameBBox(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox; }
+	inline UINT32					GetAFrameFlag(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->flags; }
+	// Returns real BBOX computed at load time
+	inline RECTXYWH					GetAFrameBBox_real(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox_real; }
+	RECTXYWH						GetModuleRect(int animIdx, int frameIdx, int moduleIdx);
+	RECTLTRB_F						GetModuleRect_TexCoords(int animIdx, int frameIdx, int moduleIdx);
+	SIZEWH							GetTextureSizeByAnim(int animIdx);
+	scTexture*						GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx);
+	// Returns no of aframe hitpoints
+	int								GetAFrameHitPointsCnt(int animIdx, int frameIdx);
+	// Returns no of hitpoints where (flag & flagFilter != 0)
+	int								GetAFrameHitPointsCntFlag(int animIdx, int frameIdx, DWORD flagFilter = 0xffffffff);
+	// Get actual hitpoint data. Returns TRUE if success
+	bool							GetAFrameHitPoint(int animIdx, int frameIdx, int pointIdx, POINTXYZ_INT *outvar);
+	// Returns Nth hitpoint where (flag & flagFilter != 0)
+	bool							GetAFrameHitPointFlag(int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, POINTXYZ_INT *outvar);
+	// Returns no of frames from an anim
+	inline const int				GetAFramesCnt(int anmIdx) const { return Animations[anmIdx]->aframesNo; }
 	
-	bool IsLooping(int animIdx);
+	inline bool IsLooping(int animIdx)
+	{
+		return ((Animations[animIdx]->flags & K_EDITOR_ANIMATION_FLAG_LOOPED) != 0);
+	}
 
-	HRESULT OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL);
-	HRESULT OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL);
-	HRESULT OnLostDevice(void);
-	HRESULT OnDestroyDevice(void);
+	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
+	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
+	OPRESULT OnLostDevice(void);
+	OPRESULT OnDestroyDevice(void);
 };

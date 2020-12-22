@@ -656,9 +656,7 @@ HRESULT CParticlesManager::Init(WCHAR* XMLpath, int nMaxParticlesCnt)
 {
 	HRESULT hr = S_OK;
 	//load sprites
-	hr = m_sprCol.LoadSprites(XMLpath);
-	if(FAILED(hr))
-		return hr;
+	V_OP_RETHR(m_sprCol.LoadSprites(XMLpath));
 	//allocate particles
 	nParticlesCnt = nMaxParticlesCnt;
 	//asigura un numar minim de particule

@@ -79,7 +79,7 @@ void CSprite::Init(int animIdx, float pX, float pY, int nframeIdx, DWORD nColor)
 
 void CSprite::Init(CHAR* animID, CSpriteCollection *sprCollection, float pX, float pY, int nframeIdx, DWORD nColor)
 {
-	animationIdx = sprCollection->getAnimationIdxByName(animID);
+	animationIdx = sprCollection->GetAnimationIdxByName(animID);
 	assert((animationIdx >= 0) && (animationIdx < sprCollection->animationNo));
 
 	pos.x = pX;
@@ -135,7 +135,7 @@ void CSprite::setAnimationOnce_keepFrame(CSpriteCollection *sprCol, int animIdx)
 
 void CSprite::setAnimation(CHAR* animID, CSpriteCollection *sprCollection)
 {
-	animationIdx = sprCollection->getAnimationIdxByName(animID);
+	animationIdx = sprCollection->GetAnimationIdxByName(animID);
 	assert((animationIdx >= 0) && (animationIdx < sprCollection->animationNo));
 
 	timePassed = 0.0f;

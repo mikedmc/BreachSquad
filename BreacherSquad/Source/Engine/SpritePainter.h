@@ -50,7 +50,7 @@ public:
 	~CSpritePainter(void);
 
 	// Call before painting anything
-	OPRESULT Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 flags = K_BS_ALPHABLENDING | K_BS_ALPHATEST);
+	OPRESULT Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 flags = K_BS_ALPHABLENDING );
 	
 	// Flushes remaining sprites and ends a scene. Clears shaders, flushes everything
 	OPRESULT				End();

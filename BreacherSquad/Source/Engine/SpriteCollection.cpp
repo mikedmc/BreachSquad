@@ -5,7 +5,7 @@
 //clasa CSpriteCollection
 CSpriteCollection::CSpriteCollection(void)
 {
-	pDevice = NULL;
+	m_pDevice = NULL;
 	bIsLoaded = false;
 }
 
@@ -15,14 +15,12 @@ CSpriteCollection::~CSpriteCollection(void)
 }
 
 
-HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
+OPRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 {
-	HRESULT hr = S_OK;
-	
 	if(bIsLoaded)
 	{
 		if((0 == _wcsnicmp(wcsLoadedFile, wcsFullPath, MAX_PATH))) //already loaded
-			return S_OK;
+			return K_OP_OK;
 		else //not loaded, release current one
 			Release();
 	}
@@ -32,15 +30,13 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
     pugi::xml_document doc;
 	if (!doc.load_file(wcsFullPath))
 	{
-		ErrorBox(K_ERR_WARNING, L"Unable to load Sprites XML:%s\n", wcsFullPath);
-		return E_FAIL;
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Unable to load Sprites XML:%s\n", wcsFullPath);
 	}
 
 	pugi::xml_attribute ver = doc.root().child(L"SpriteCollection").attribute(L"Version");
 	if(ver.as_float() != BSX_VERSION)
 	{
-		ErrorBox(K_ERR_WARNING, L"SpriteCollection XML wrong version:%s\n", wcsFullPath);
-		return E_FAIL;
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"SpriteCollection XML wrong version:%s\n", wcsFullPath);
 	}
 
 
@@ -81,21 +77,19 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 		StringCchPrintf(ntex->imagePath, MAX_PATH, L"%s%s", wcsFullFolder, imgname);
 #endif
 
-		_ASSERT((pDevice != NULL) && "Device shouldn't be null");
-		if (pDevice != NULL)
+		_ASSERT((m_pDevice != NULL) && "Device shouldn't be null");
+		if (m_pDevice != NULL)
 		{
 			//tries to create textures here
-			hr = D3DXCreateTextureFromFileEx(pDevice, ntex->imagePath, D3DX_DEFAULT, D3DX_DEFAULT,
+			HRESULT hr = D3DXCreateTextureFromFileEx(m_pDevice, ntex->imagePath, D3DX_DEFAULT, D3DX_DEFAULT,
 				1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED,
 				D3DX_FILTER_NONE, D3DX_FILTER_NONE, 0,
 				&ntex->info, NULL, &ntex->pTex);
 
 			if (FAILED(hr))
 			{
-				ErrorBox(K_ERR_CRITICAL, L"SpriteCollection::loadSpriteXML->createTextures\n%s", ntex->imagePath);
 				Release();
-
-				return E_FAIL;
+				return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"SpriteCollection::loadSpriteXML->createTextures\n%s", ntex->imagePath);
 			}
 		}
 		Textures.Add(ntex);
@@ -124,23 +118,23 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 		nfmod->oy = fmoduledata.attribute(L"OY").as_int();
 		nfmod->flags = fmoduledata.attribute(L"Flags").as_uint();
 
-		nfmod->moduleX = tempModules[midx]->X; nfmod->moduleY = tempModules[midx]->Y;
-		nfmod->moduleW = tempModules[midx]->W; nfmod->moduleH = tempModules[midx]->H;
+		nfmod->moduleXYWH.Set(tempModules[midx]->X, tempModules[midx]->Y, tempModules[midx]->W, tempModules[midx]->H);
 		nfmod->imgIdx = tempModules[midx]->imgIdx;
+		nfmod->pImg = Textures[nfmod->imgIdx];
 		//compute and save tex coords
 		int texW = Textures[nfmod->imgIdx]->info.Width;
 		int texH = Textures[nfmod->imgIdx]->info.Height;
 		
-		nfmod->texRect.left		= nfmod->moduleX / (float)texW;
-		nfmod->texRect.top		= nfmod->moduleY / (float)texH;
-		nfmod->texRect.right	= (nfmod->moduleX + nfmod->moduleW) / (float)texW;
-		nfmod->texRect.bottom	= (nfmod->moduleY + nfmod->moduleH) / (float)texH;
+		nfmod->texRect.left		= nfmod->moduleXYWH.x / (float)texW;
+		nfmod->texRect.top		= nfmod->moduleXYWH.y / (float)texH;
+		nfmod->texRect.right	= (nfmod->moduleXYWH.x + nfmod->moduleXYWH.w) / (float)texW;
+		nfmod->texRect.bottom	= (nfmod->moduleXYWH.y + nfmod->moduleXYWH.h) / (float)texH;
 
 		// set module rect moved by ox/oy (by default painted in 0,0 top left corner)
-		nfmod->moduleRectOff.Set(nfmod->ox, nfmod->oy, nfmod->moduleW + nfmod->ox, nfmod->moduleH + nfmod->oy);
+		nfmod->moduleRectOff.Set(nfmod->ox, nfmod->oy, nfmod->moduleXYWH.w + nfmod->ox, nfmod->moduleXYWH.h + nfmod->oy);
 
 		//set RECT for painting
-		SetRect(&nfmod->moduleRect, nfmod->moduleX, nfmod->moduleY, nfmod->moduleX + nfmod->moduleW, nfmod->moduleY + nfmod->moduleH);
+		SetRect(&nfmod->moduleRect, nfmod->moduleXYWH.x, nfmod->moduleXYWH.y, nfmod->moduleXYWH.x + nfmod->moduleXYWH.w, nfmod->moduleXYWH.y + nfmod->moduleXYWH.h);
 		FModules.Add(nfmod);
 	}
 	fmoduleNo = FModules.GetSize();
@@ -150,7 +144,7 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 		SAFE_DELETE(tempModules[kk]);
 	}
 	tempModules.RemoveAll();
-	///--- incarca temp frames
+	///--- load temp frames
 	pugi::xml_node framesnode = spritenodes.child(L"Frames");
 	CGrowableArray<scFrame*> tempFrames;
     for (pugi::xml_node framedata = framesnode.first_child(); framedata; framedata = framedata.next_sibling())
@@ -206,7 +200,7 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 		tempFrames.Add(nfrm);
 	}
 
-	///--- incarca AFrames
+	///--- load AFrames
 	pugi::xml_node faframesnode = spritenodes.child(L"AnimationFrames");
     for (pugi::xml_node faframedata = faframesnode.first_child(); faframedata; faframedata = faframedata.next_sibling())
     {
@@ -242,8 +236,8 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 		{
 			minx = min(minx, FModules[naframe->fmodulesIdx[kk]]->ox);
 			miny = min(miny, FModules[naframe->fmodulesIdx[kk]]->oy);
-			maxx = max(maxx, (FModules[naframe->fmodulesIdx[kk]]->ox + FModules[naframe->fmodulesIdx[kk]]->moduleW));
-			maxy = max(maxy, (FModules[naframe->fmodulesIdx[kk]]->oy + FModules[naframe->fmodulesIdx[kk]]->moduleH));
+			maxx = max(maxx, (FModules[naframe->fmodulesIdx[kk]]->ox + FModules[naframe->fmodulesIdx[kk]]->moduleXYWH.w));
+			maxy = max(maxy, (FModules[naframe->fmodulesIdx[kk]]->oy + FModules[naframe->fmodulesIdx[kk]]->moduleXYWH.h));
 		}
 		naframe->BBox_real.Set(minx, miny, maxx - minx, maxy - miny);
 
@@ -260,7 +254,7 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 	}
 	tempFrames.RemoveAll();
 													
-	///--- incarca animatiile
+	///--- load anims
 	pugi::xml_node animsnode = spritenodes.child(L"Animations");
     for (pugi::xml_node animdata = animsnode.first_child(); animdata; animdata = animdata.next_sibling())
     {
@@ -313,7 +307,7 @@ HRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 
 	LOG_DBG(L"SpriteCollection:: Loaded: %s", wcsFullPath);
 
-	return S_OK;
+	return K_OP_OK;
 }
 
 
@@ -354,7 +348,7 @@ void CSpriteCollection::Release()
 //--- utilities ---
 
 //RETURNS: animIdx or -1 if animation wasn't found
-int CSpriteCollection::getAnimationIdxByName(const CHAR* animName)
+int CSpriteCollection::GetAnimationIdxByName(const CHAR* animName)
 {
 	UINT32 strHash = FastHash(animName, strlen(animName));
 
@@ -368,7 +362,7 @@ int CSpriteCollection::getAnimationIdxByName(const CHAR* animName)
 }
 
 //RETURNS: animIdx or -1 if animation wasn't found
-int CSpriteCollection::getAnimationIdxByName(const WCHAR* animName)
+int CSpriteCollection::GetAnimationIdxByName(const WCHAR* animName)
 {
 	UINT32 strHash = FastHash(animName, wcslen(animName));
 
@@ -386,7 +380,7 @@ int CSpriteCollection::getAnimationIdxByName(const WCHAR* animName)
  *
  * @return animation index or -1 if not found
  */
-int CSpriteCollection::getAnimationIdxByNameHash(const UINT32 animNameHash)
+int CSpriteCollection::GetAnimationIdxByNameHash(const UINT32 animNameHash)
 {
 	for (int kk = 0; kk < Animations.GetSize(); kk++)
 	{
@@ -421,7 +415,7 @@ int CSpriteCollection::GetAFrameHitPointsCnt(int animIdx, int frameIdx)
 	return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->PointsNo;
 }
 
-HRESULT CSpriteCollection::GetAFrameHitPoint(int animIdx, int frameIdx, int pointIdx, POINTXYZ_INT *outvar)
+bool CSpriteCollection::GetAFrameHitPoint(int animIdx, int frameIdx, int pointIdx, POINTXYZ_INT *outvar)
 {
 	if(pointIdx >= AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->PointsNo)
 	{
@@ -430,7 +424,7 @@ HRESULT CSpriteCollection::GetAFrameHitPoint(int animIdx, int frameIdx, int poin
 		{
 			outvar->x = outvar->y = outvar->z = 0;
 		}
-		return E_FAIL;
+		return false;
 	}
 	if(outvar)
 	{
@@ -438,22 +432,22 @@ HRESULT CSpriteCollection::GetAFrameHitPoint(int animIdx, int frameIdx, int poin
 		outvar->y = AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->PointsXYFlag[pointIdx * 3 + 1];
 		outvar->z = AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->PointsXYFlag[pointIdx * 3 + 2];
 	}
-	return S_OK;
+	return true;
 }
 
-HRESULT CSpriteCollection::GetAFrameHitPointFlag(int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, POINTXYZ_INT *outvar)
+bool CSpriteCollection::GetAFrameHitPointFlag(int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, POINTXYZ_INT *outvar)
 {
 	if(outvar == NULL)
 	{
 		ErrorBox(K_ERR_DEBUGOUT, L"GetAframeHitPointFlag outvar param is NULL!");
-		return E_FAIL;
+		return false;
 	}
 	//init on 0
 	outvar->x = outvar->y = outvar->z = 0;
 
 	if(pointIdx >= AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->PointsNo)
 	{
-		return E_FAIL;
+		return true;
 	}
 
 	scAFrame* aframe = AFrames[Animations[animIdx]->aframesIdx[frameIdx]];
@@ -491,7 +485,7 @@ RECTXYWH CSpriteCollection::GetModuleRect(int animIdx, int frameIdx, int moduleI
 		return RECTXYWH(0, 0, 0, 0);
 	}
 #endif;
-	return RECTXYWH(FModules[AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->fmodulesIdx[moduleIdx]]->moduleRect);
+	return FModules[AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->fmodulesIdx[moduleIdx]]->moduleXYWH;
 }
 
 RECTLTRB_F CSpriteCollection::GetModuleRect_TexCoords(int animIdx, int frameIdx, int moduleIdx)
@@ -504,10 +498,7 @@ RECTLTRB_F CSpriteCollection::GetModuleRect_TexCoords(int animIdx, int frameIdx,
 	}
 #endif;
 	scFModule *module = FModules[AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->fmodulesIdx[moduleIdx]];
-	RECT moduleRect = module->moduleRect;
-	float texW = Textures[module->imgIdx]->info.Width;
-	float texH = Textures[module->imgIdx]->info.Height;
-	return RECTLTRB_F(moduleRect.left / texW, moduleRect.top / texH, moduleRect.right / texW, moduleRect.bottom / texH);
+	return module->texRect;
 }
 
 
@@ -521,9 +512,7 @@ SIZEWH CSpriteCollection::GetTextureSizeByAnim(int animIdx)
 	}
 #endif;
 	scFModule *module = FModules[AFrames[Animations[animIdx]->aframesIdx[0]]->fmodulesIdx[0]];
-	int texW = (int)Textures[module->imgIdx]->info.Width;
-	int texH = (int)Textures[module->imgIdx]->info.Height;
-	return SIZEWH(texW, texH);
+	return SIZEWH(module->pImg->info.Width, module->pImg->info.Height);
 }
 
 scTexture* CSpriteCollection::GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx)
@@ -539,63 +528,50 @@ scTexture* CSpriteCollection::GetTextureByAnim(int animIdx, int frameIdx, int mo
 	return Textures[module->imgIdx];
 }
 
-bool CSpriteCollection::IsLooping(int animIdx)
-{
-	if ((Animations[animIdx]->flags & ANIMATION_FLAG_LOOPED) == 0)
-		return false;
-
-	return true;
-}
-
-
 //-=-=-= SYSTEM / FRAMEWORK =-=-=-
-HRESULT CSpriteCollection::OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
+OPRESULT CSpriteCollection::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
 {
-	HRESULT hr = S_OK;
-	pDevice = pd3dDevice;
-	//incearca sa realoce texturile daca s-a schimbat device-ul
-	for(int kk=0; kk<Textures.GetSize(); kk++)
+	m_pDevice = pDevice;
+	// Reload textures when device is lost
+	for (int kk = 0; kk < Textures.GetSize(); kk++)
 	{
 		scTexture *ntex = Textures[kk];
 
-		hr =  D3DXCreateTextureFromFileEx(pDevice, ntex->imagePath, D3DX_DEFAULT, D3DX_DEFAULT, 
+		HRESULT hr =  D3DXCreateTextureFromFileEx(m_pDevice, ntex->imagePath, D3DX_DEFAULT, D3DX_DEFAULT, 
 			1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, 
 			D3DX_FILTER_NONE, D3DX_FILTER_NONE, 0, 
 			&ntex->info, NULL, &ntex->pTex);
 
 		if(FAILED(hr))
 		{
-			WCHAR wszMsg[512];
-			StringCchPrintf(wszMsg, ARRAY_SIZE(wszMsg), L"SpriteCollection::OnCreateDevice->createTextures\n%s", ntex->imagePath);
-			ErrorBox(K_ERR_CRITICAL, L"%s", wszMsg);
-			return E_FAIL;
+			return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"SpriteCollection::OnCreateDevice->createTextures\n%s", ntex->imagePath);
 		}
 	}
 
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT CSpriteCollection::OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
+OPRESULT CSpriteCollection::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
 {
-	pDevice = pd3dDevice;
-	return S_OK;
+	m_pDevice = pDevice;
+	return K_OP_OK;
 }
 
-HRESULT CSpriteCollection::OnLostDevice(void)
+OPRESULT CSpriteCollection::OnLostDevice(void)
 {
-	pDevice = NULL;
-	return S_OK;
+	m_pDevice = NULL;
+	return K_OP_OK;
 }
 
-HRESULT CSpriteCollection::OnDestroyDevice(void)
+OPRESULT CSpriteCollection::OnDestroyDevice(void)
 {
-	pDevice = NULL;
+	m_pDevice = NULL;
 	//cand se pierde device-ul dezaloca texturile alocate pe device
 	for(int kk=0; kk<Textures.GetSize(); kk++)
 	{
 		SAFE_RELEASE(Textures[kk]->pTex);
 	}
 
-	return S_OK;
+	return K_OP_OK;
 }
 

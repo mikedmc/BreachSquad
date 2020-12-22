@@ -3244,7 +3244,7 @@ void CControlsManager::SetParamValue(CControl * pCtrl, const WCHAR * sParamName,
 	}
 	else if (paramNameHash == FastHash(L"animID"))
 	{
-		int anmIdx = m_sprCol.getAnimationIdxByName(sParamValue);
+		int anmIdx = m_sprCol.GetAnimationIdxByName(sParamValue);
 		if ((anmIdx < 0) && (!bIgnoreWarnings))
 			ErrorBox(K_ERR_WARNING, L"CControlsManager::SetParamValue - couldn't find animation [%s]", sParamValue);
 		
@@ -3999,7 +3999,7 @@ HRESULT CControlsManager::LoadControlsXML(WCHAR* XMLpath)
 	szwPath[nIdx + 1] = '\0';
 	StringCchCat(szwPath, MAX_PATH, sprName);
 
-	V_RETURN(m_sprCol.LoadSprites(szwPath));
+	V_OP_RETHR(m_sprCol.LoadSprites(szwPath));
 
 	//acum incarca si lista de controale
 	pugi::xml_node layernodes = doc.root().child(L"Interfaces");

@@ -41,11 +41,8 @@ OPRESULT CLevelEditor::Init()
 	// load necessary sprites from file
 	WCHAR wsPath[MAX_PATH];
 	wsprintf(wsPath, L"%s/interfaces/lvled.bsx", UTGetAppClass().g_wszAppResDir);
-	HRESULT hr = S_OK;
-	if (FAILED(m_sprCol.LoadSprites(wsPath)))
-	{
-		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CLevelEditor::Init: Couldn't find file: %s", wsPath);
-	}
+
+	V_OP_RET(m_sprCol.LoadSprites(wsPath));
 
 	return K_OP_OK;
 }

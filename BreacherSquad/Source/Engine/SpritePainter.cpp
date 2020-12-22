@@ -29,7 +29,7 @@ CSpritePainter::~CSpritePainter(void)
 }
 
 
-OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 flags /*= K_BS_ALPHABLENDING | K_BS_ALPHATEST*/)
+OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 flags /*= K_BS_ALPHABLENDING */)
 {
 	_ASSERT(m_pDevice != nullptr);
 	stats_sequences++;

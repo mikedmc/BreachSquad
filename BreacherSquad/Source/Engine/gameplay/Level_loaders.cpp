@@ -67,7 +67,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_interfaceIGM.SetBombTimer(-1.0f);
 	//load interface sprites
 	FileManager::GetMediaPath(L"media/interfaces/igm_interface.bsx", Path);
-	if (FAILED(m_sprInterface.LoadSprites(Path)))
+	if (OP_FAILED(m_sprInterface.LoadSprites(Path)))
 	{
 		return E_FAIL;
 	}
@@ -211,7 +211,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	//load bsx
 	StringCchPrintf(wcsMediaAddr, MAX_PATH, L"media/levels/data/%s", wcharArr);
 	FileManager::GetMediaPath(wcsMediaAddr, Path);
-	if (FAILED(m_sprLights.LoadSprites(Path)))
+	if (OP_FAILED(m_sprLights.LoadSprites(Path)))
 	{
 		return E_FAIL;
 	}
@@ -242,7 +242,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		CHAR charAnmName[MAX_PATH];
 		OS_freadString(fl, charAnmName);
 
-		nl->animID = m_sprLights.getAnimationIdxByName(charAnmName);
+		nl->animID = m_sprLights.GetAnimationIdxByName(charAnmName);
 		nl->frameID = 0;
 		/*
 		if ((nl->animID < 0) && (nl->type != K_LVL_LT_AMBIENTAL))
@@ -360,7 +360,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	//load bsx
 	StringCchPrintf(wcsMediaAddr, MAX_PATH, L"media/levels/data/%s", wcharArr);
 	FileManager::GetMediaPath(wcsMediaAddr, Path);
-	if (FAILED(m_sprProps.LoadSprites(Path)))
+	if (OP_FAILED(m_sprProps.LoadSprites(Path)))
 	{
 		return E_FAIL;
 	}
@@ -384,7 +384,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		//animation
 		CHAR charAnmName[MAX_PATH];
 		OS_freadString(fl, charAnmName);
-		int animIdx = m_sprProps.getAnimationIdxByName(charAnmName);
+		int animIdx = m_sprProps.GetAnimationIdxByName(charAnmName);
 		if (animIdx < 0)
 			ErrorBox(K_ERR_WARNING, L"Active ID:%d without animation!", obj->ID);
 		//frame
@@ -530,7 +530,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	//load bsx
 	StringCchPrintf(wcsMediaAddr, MAX_PATH, L"media/levels/data/%s", wcharArr);
 	FileManager::GetMediaPath(wcsMediaAddr, Path);
-	if (FAILED(m_sprActors.LoadSprites(Path)))
+	if (OP_FAILED(m_sprActors.LoadSprites(Path)))
 	{
 		return E_FAIL;
 	}

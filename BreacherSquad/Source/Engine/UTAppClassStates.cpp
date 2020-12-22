@@ -333,7 +333,7 @@ void CApplication::App_UpdateState_Splash(LPDIRECT3DDEVICE9 pDevice, double fTim
 			//load splash
 			WCHAR wsPath[MAX_PATH];
 			StringCchPrintf(wsPath, MAX_PATH, L"%s/interfaces/title_screen.bsx", UTGetAppClass().g_wszAppResDir);
-			if (FAILED(g_sprMgrGlobal.LoadSprites(wsPath)))
+			if (OP_FAILED(g_sprMgrGlobal.LoadSprites(wsPath)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load splashscreen!");
 				return;

@@ -30,7 +30,7 @@ CMainMenu::~CMainMenu()
 HRESULT CMainMenu::LoadSprites(WCHAR * strSpritePath)
 {
 	HRESULT hr = S_OK;
-	if (FAILED(m_sprCol.LoadSprites(strSpritePath)))
+	if (OP_FAILED(m_sprCol.LoadSprites(strSpritePath)))
 	{
 		return hr;
 	}

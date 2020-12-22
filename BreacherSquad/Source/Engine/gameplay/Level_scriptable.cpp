@@ -1572,7 +1572,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			//get params
 			int anim = active->sprite.animationIdx;
 			if (parAnim)
-				anim = m_sprProps.getAnimationIdxByNameHash(parAnim->m_strArg.getHash());
+				anim = m_sprProps.GetAnimationIdxByNameHash(parAnim->m_strArg.getHash());
 			if (anim == -1)
 			{
 				anim = active->sprite.animationIdx;
