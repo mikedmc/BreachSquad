@@ -310,6 +310,8 @@
     <ClInclude Include="Source\Engine\OpResult.h" />
     <ClInclude Include="Source\Engine\PlayerSelScr.h" />
     <ClInclude Include="Source\Engine\PolyFOV.h" />
+    <ClInclude Include="Source\Engine\pugixml\pugiconfig.hpp" />
+    <ClInclude Include="Source\Engine\pugixml\pugixml.hpp" />
     <ClInclude Include="Source\Engine\Queue.h" />
     <ClInclude Include="Source\Engine\RTManager.h" />
     <ClInclude Include="Source\Engine\ShaderManager.h" />
@@ -333,8 +335,6 @@
     <ClInclude Include="Source\Engine\ogg.h" />
     <ClInclude Include="Source\Engine\Constants\particles_SPR.h" />
     <ClInclude Include="Source\Engine\ParticlesManager.h" />
-    <ClInclude Include="Source\Engine\pugiconfig.hpp" />
-    <ClInclude Include="Source\Engine\pugixml.hpp" />
     <ClInclude Include="Source\Engine\Randoms.h" />
     <ClInclude Include="Source\Engine\utils\ParallaxBg.h" />
     <ClInclude Include="Source\Engine\utils\PlatformTypes.h" />
@@ -720,6 +720,7 @@
     <ClCompile Include="Source\Engine\PolyFOV.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
+    <ClCompile Include="Source\Engine\pugixml\pugixml.cpp" />
     <ClCompile Include="Source\Engine\RTManager.cpp" />
     <ClCompile Include="Source\Engine\ShaderManager.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
@@ -754,9 +755,6 @@
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\ParticlesManager.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
-    </ClCompile>
-    <ClCompile Include="Source\Engine\pugixml.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\Randoms.cpp">
