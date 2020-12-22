@@ -77,7 +77,7 @@ public:
 
 	void paintModule_texOverride(CSpriteCollection *sprCol, int nModuleIdx, int texIdxOffset);
 
-	static void paintFrameNEW(CSpriteCollection *sprCol, Vec3 vPos, int animID, int frameID, DWORD ncolor = 0xffffffff, float fRotZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
+	static void paintFrameNEW(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameID, DWORD ncolor = 0xffffffff, float fRotZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
 	static void paintFrameModuleNEW(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, DWORD ncolor = 0xffffffff);
 };
 

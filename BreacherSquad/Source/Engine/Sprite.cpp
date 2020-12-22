@@ -858,20 +858,20 @@ void CSprite::paintModule_texOverride(CSpriteCollection *sprCol, int nModuleIdx,
 {
 	_ASSERT(animationIdx < sprCol->Animations.Count());
 	_ASSERT(currentFrame < sprCol->Animations[animationIdx]->aframesNo);
-	//nu am luat in considerare inca flagsurile
+	
 	int aframeIdx = sprCol->Animations[animationIdx]->aframesIdx[currentFrame];
 	_ASSERT(nModuleIdx < sprCol->AFrames[aframeIdx]->fmodulesNo);
 
-	int fmoduleIdx = sprCol->AFrames[aframeIdx]->fmodulesIdx[nModuleIdx];
+	scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[nModuleIdx]];
 	
-	g_SprPainter.Draw(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx + texIdxOffset]->pTex,
-		sprCol->FModules[fmoduleIdx]->texRect,
-		sprCol->FModules[fmoduleIdx]->moduleRectOff,
-		&Vec3(pos.x, pos.y, 0.0f),
+	g_SprPainter.Draw(sprCol->Textures[mod->imgIdx + texIdxOffset]->pTex,
+		mod->texRect,
+		mod->moduleRectOff,
+		pos,
 		color);
 }
 
-void CSprite::paintFrameNEW(CSpriteCollection *sprCol, Vec3 vPos, int animID, int frameID, DWORD ncolor, float fRotZ, Vec2 vScale)
+void CSprite::paintFrameNEW(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameID, DWORD ncolor, float fRotZ, Vec2 vScale)
 {
 	_ASSERT(animID < sprCol->Animations.Count());
 	_ASSERT(frameID < sprCol->Animations[animID]->aframesNo);
@@ -884,7 +884,7 @@ void CSprite::paintFrameNEW(CSpriteCollection *sprCol, Vec3 vPos, int animID, in
 		g_SprPainter.DrawEx(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx]->pTex,
 			sprCol->FModules[fmoduleIdx]->texRect,
 			sprCol->FModules[fmoduleIdx]->moduleRectOff,
-			&vPos,
+			vPos,
 			ncolor, fRotZ, vScale);
 	}
 }
@@ -902,5 +902,5 @@ void CSprite::paintFrameModuleNEW(CSpriteCollection *sprCol, float nX, float nY,
 	s_pSP->Draw(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx]->pTex,
 		sprCol->FModules[fmoduleIdx]->texRect,
 		sprCol->FModules[fmoduleIdx]->moduleRectOff,
-		&Vec3(nX, nY, 0.0f), ncolor);
+		Vec2(nX, nY), ncolor);
 }

@@ -154,7 +154,7 @@ void CSpritePainter::ClearStatistics()
 #endif
 }
 
-OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec3 *pPosition, DWORD color, float fRotationZ, Vec2 vScale)
+OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec2 vPos, DWORD color, float fRotationZ, Vec2 vScale)
 {
 	_ASSERT(pTexture != nullptr);
 	_ASSERT(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4) - 4);
@@ -162,9 +162,7 @@ OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F 
 
 	// Shader data:
 	// Normal contains position
-	Vec3 vecPos(0.0f, 0.0f, 0.0f);
-	if(pPosition != NULL)
-		vecPos = *pPosition;
+	Vec3 vecPos(vPos.x, vPos.y, 0.0f);
 	// Tex2 contains: x: scale x, y: scale y, z: Z rotation
 	Vec4 vecScaleRot(vScale.x, vScale.y, fRotationZ, 0.0f);
 
@@ -220,7 +218,7 @@ OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F 
 }
 
 
-OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec3 *pPosition, DWORD color, float fRotationZ, Vec2 vScale, UINT paintFlags)
+OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec2 vPos, DWORD color, float fRotationZ, Vec2 vScale, UINT paintFlags)
 {
 	_ASSERT(pTexture != nullptr);
 	_ASSERT(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4) - 4);
@@ -228,9 +226,7 @@ OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_
 
 	// Shader data:
 	// Normal contains position
-	Vec3 vecPos(0.0f, 0.0f, 0.0f);
-	if (pPosition != NULL)
-		vecPos = *pPosition;
+	Vec3 vecPos(vPos.x, vPos.y, 0.0f);
 	// Tex2 contains: x: scale x, y: scale y, z: Z rotation
 	Vec4 vecScaleRot(vScale.x, vScale.y, fRotationZ, 0.0f);
 
