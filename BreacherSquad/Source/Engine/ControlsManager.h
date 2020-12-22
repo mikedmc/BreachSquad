@@ -289,5 +289,5 @@ public:
 	HRESULT OnDestroyDevice(void);
 };
 
-//declar singleton
+//declare singleton
 CControlsManager& UTGetControlsManager();

@@ -11868,7 +11868,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, MatA16* matProj)
 
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 	if (pSprVS)
-		g_SprPainter.Begin(pSprVS, matView * *matProj);
+		UTPainter().Begin(pSprVS, matView * *matProj);
 
 	///--- paint actors
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
@@ -11883,7 +11883,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, MatA16* matProj)
 		}																 
 		actor->sprite.paintModule_texOverride(&m_sprActors, 0, 0);
 	}
-	g_SprPainter.Flush();
+	UTPainter().Flush();
 	//m_pSprite->Flush();
 	//m_pSprite->SetTransform(&g_matIdentity);
 
@@ -11895,8 +11895,8 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, MatA16* matProj)
 		CProp *prop = m_visibleList.visible_props.m_pData[kk];
 		prop->sprite.paintModule_texOverride(&m_sprProps, 0, nTexIdxOffset);
 	}
-	g_SprPainter.Flush();
-	g_SprPainter.End();
+	UTPainter().Flush();
+	UTPainter().End();
 
 	//m_pSprite->Flush();
 

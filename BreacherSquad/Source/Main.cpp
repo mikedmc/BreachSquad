@@ -43,7 +43,6 @@ bool						g_bForceOneUpdatePerFrame = false;	// flag used to force only one upda
 Vec2						g_vecGravity;						//gravity
 
 ID3DXSprite*				g_pGameSprite = NULL;				//Main Sprite class 
-CSpritePainter				g_SprPainter;						// Custom class for painting fast sprites
 MatA16						g_matIdentity;						//identity matrix
 MatA16						g_matWorld;							//world matrix
 
@@ -824,7 +823,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_OP_RETHR(UTGetRTManager().OnCreateDevice(pDevice, pBBDesc));
 	UTimgui().OnCreateDevice(pDevice, pBBDesc);
 	V_RETURN(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
-	V_OP_RETHR(g_SprPainter.OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(UTPainter().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetFontsManager().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_level.OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnCreateDevice(pDevice, pBBDesc));
@@ -902,7 +901,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	UTimgui().OnResetDevice(pDevice, pBBDesc);
 	V_RETURN(UTGetShaderManager().OnResetDevice(pDevice, pBBDesc));
-	V_OP_RETHR(g_SprPainter.OnResetDevice(pDevice, pBBDesc));
+	V_OP_RETHR(UTPainter().OnResetDevice(pDevice, pBBDesc));
 
 	UTGetTTFManager().OnResetDevice(pDevice, pBBDesc);
 
@@ -923,7 +922,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	g_level.SetSpritePtr(g_pGameSprite);
 	g_particlesMgr.SetSpritePtr(g_pGameSprite);
 	CTexturedFont::SetGlobalSpritePtr(g_pGameSprite);
-	CSprite::SetGlobalSpritePtr(g_pGameSprite, &g_SprPainter);
+	CSprite::SetGlobalSpritePtr(g_pGameSprite, &UTPainter());
 	CTTFontsManager::SetGlobalSpritePtr(g_pGameSprite);
 	UTGetControlsManager().SetSpritePtr(g_pGameSprite);
 	g_mainMenu.SetSpritePtr(g_pGameSprite);
@@ -977,7 +976,7 @@ void CALLBACK OnLostDevice(void)
 	UTimgui().OnLostDevice();
 	UTGetTTFManager().OnLostDevice();
 	UTGetShaderManager().OnLostDevice();
-	g_SprPainter.OnLostDevice();
+	UTPainter().OnLostDevice();
 
 	UTGetFontsManager().OnLostDevice();
 	UTGetControlsManager().OnLostDevice();
@@ -1011,7 +1010,7 @@ void CALLBACK OnDestroyDevice(void)
 	UTGetRTManager().OnDestroyDevice();
 	UTimgui().OnDestroyDevice();
 	UTGetShaderManager().OnDestroyDevice();
-	g_SprPainter.OnDestroyDevice();
+	UTPainter().OnDestroyDevice();
 	UTGetTTFManager().OnDestroyDevice();
 	UTGetFontsManager().OnDestroyDevice();
 	UTGetControlsManager().OnDestroyDevice();
@@ -2590,10 +2589,10 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				//ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
 #if defined(_DEBUG) || defined(DEBUG)
 				ImGui::Separator();
-				ImGui::Text("Sprites: %d", g_SprPainter.stats_sprites);
-				ImGui::Text("Calls: %d", g_SprPainter.stats_calls);
-				ImGui::Text("Begin/End: %d", g_SprPainter.stats_sequences);
-				ImGui::Text("Flush Calls: %d", g_SprPainter.stats_flushes);
+				ImGui::Text("Sprites: %d", UTPainter().stats_sprites);
+				ImGui::Text("Calls: %d", UTPainter().stats_calls);
+				ImGui::Text("Begin/End: %d", UTPainter().stats_sequences);
+				ImGui::Text("Flush Calls: %d", UTPainter().stats_flushes);
 #endif
 
 				ImGui::End();
@@ -2639,7 +2638,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	}
 
 #if defined(_DEBUG) || defined(DEBUG)
-	g_SprPainter.ClearStatistics();
+	UTPainter().ClearStatistics();
 #endif
 }
 

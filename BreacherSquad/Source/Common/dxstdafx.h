@@ -477,6 +477,8 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "ChatWnd.h"
 
 #include "Sprite.h"
+#include "Spr.h"
+
 #include "BufferedPainter.h"
 #include "BufferedPainterQuad.h"
 #include "PolyFOV.h"  //se ocupa de gasirea poligonului vizibil al unei lumini
@@ -630,7 +632,6 @@ extern CStringHash		g_startupParam;
 extern int		g_gameStateErrorStringIdx;
 extern float	g_gameStateTimer; //timer folosit uneori
 
-extern CSpritePainter g_SprPainter;
 /*
 * --- transitions ---
 */

@@ -864,7 +864,7 @@ void CSprite::paintModule_texOverride(CSpriteCollection *sprCol, int nModuleIdx,
 
 	scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[nModuleIdx]];
 	
-	g_SprPainter.Draw(sprCol->Textures[mod->imgIdx + texIdxOffset]->pTex,
+	s_pSP->Draw(sprCol->Textures[mod->imgIdx + texIdxOffset]->pTex,
 		mod->texRect,
 		mod->moduleRectOff,
 		pos,
@@ -881,7 +881,7 @@ void CSprite::paintFrameNEW(CSpriteCollection *sprCol, Vec2 vPos, int animID, in
 	{
 		int fmoduleIdx = sprCol->AFrames[aframeIdx]->fmodulesIdx[ii];
 		
-		g_SprPainter.DrawEx(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx]->pTex,
+		s_pSP->DrawEx(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx]->pTex,
 			sprCol->FModules[fmoduleIdx]->texRect,
 			sprCol->FModules[fmoduleIdx]->moduleRectOff,
 			vPos,

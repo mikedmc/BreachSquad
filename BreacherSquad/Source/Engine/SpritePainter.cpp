@@ -358,3 +358,14 @@ OPRESULT CSpritePainter::OnDestroyDevice()
 	return K_OP_OK;
 }
 
+
+
+///**************************************************************************************
+/// Sigleton 
+///**************************************************************************************
+CSpritePainter& UTPainter()
+{
+	static CSpritePainter g_SpritePainter;
+	return g_SpritePainter;
+}
+

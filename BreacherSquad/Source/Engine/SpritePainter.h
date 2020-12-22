@@ -79,4 +79,5 @@ public:
 	OPRESULT OnDestroyDevice();
 };
 
-
+// Access singleton
+CSpritePainter& UTPainter();
