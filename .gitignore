@@ -19,3 +19,4 @@ imgui.ini
 Obj/
 BreacherSquad/Bin/*.exe
 BreacherSquad/Obj/
+BreacherSquad/Libs/release/freetype/objs/Win32/
