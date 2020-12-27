@@ -2027,13 +2027,15 @@ bool CApplication::InitSDL(HWND hWnd)
 	}
 
 	// load custom mappings (might not work on chinese paths)
+	/*
 	WCHAR dbpath[MAX_PATH];
 	wsprintf(dbpath, L"%sgamecontrollerdb.txt", g_wszExePath);
 	CHAR txtpath[1024] = { 0 };
 	WCHARtoUTF8(txtpath, dbpath, 1024);
-
+	*/
 	//#HINT: most recent definitions are here: https://github.com/gabomdq/SDL_GameControllerDB
-	int nLoaded = SDL_GameControllerAddMappingsFromFile(txtpath);
+	// Make sure you have the WorkingDir set to $TargetDir or it won't load. If you can't do that, use the commented path built above.
+	int nLoaded = SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
 	if (nLoaded < 0)
 	{
 		mbstowcs(txt, SDL_GetError(), MAX_PATH);
