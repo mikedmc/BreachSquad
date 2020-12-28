@@ -115,6 +115,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				return;
 			}
 
+			g_font1.CreateAtlas(pDevice, "media/fonts/NotoSans-Medium.ttf", 12, L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&*()-_=+[{]};:',<.>/?¡¢£¥§©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº");
 
 			///--- CONTROLS ---
 			UTGetGUI().SetManagersPtr(&g_stringsMgr, &UTGetFontsManager());

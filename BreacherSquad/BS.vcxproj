@@ -63,7 +63,7 @@
     </CustomBuildStep>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>Libs\release\spine\include;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;Libs\release\GogSDK-1.133.6\Include;Libs\release\steam\public\steam;Libs\release\curl\include\curl;Libs\release\SDL\include;Source;Source\Common;Source\Engine;Libs\release\VLD\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Libs\release\freetype\include;Libs\release\spine\include;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;Libs\release\GogSDK-1.133.6\Include;Libs\release\steam\public\steam;Libs\release\curl\include\curl;Libs\release\SDL\include;Source;Source\Common;Source\Engine;Libs\release\VLD\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -78,9 +78,9 @@
       <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>/nod:kernel32.lib;/nod:advapi32.lib;/nod:user32.lib;/nod:gdi32.lib;/nod:shell32.lib;/nod:comdlg32.lib;/nod:version.lib;/nod:mpr.lib;/nod:rasapi32.lib;/nod:winmm.lib;/nod:winspool.lib;/nod:vfw32.lib;/nod:secur32.lib;/nod:oleacc.lib;/nod:oledlg.lib;/nod:sensapi.lib;/nod:shfolder.lib;unicows.lib;Kernel32.lib;Advapi32.lib;User32.lib;Shell32.lib;Gdi32.lib;Comdlg32.lib;Version.lib;Mpr.lib;Rasapi32.lib;Winmm.lib;Winspool.lib;Vfw32.lib;Secur32.lib;Oleacc.lib;Oledlg.lib;Sensapi.lib;dxguid.lib;d3d9.lib;d3dx9.lib;dsound.lib;comctl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>/nod:kernel32.lib;/nod:advapi32.lib;/nod:user32.lib;/nod:gdi32.lib;/nod:shell32.lib;/nod:comdlg32.lib;/nod:version.lib;/nod:mpr.lib;/nod:rasapi32.lib;/nod:winmm.lib;/nod:winspool.lib;/nod:vfw32.lib;/nod:secur32.lib;/nod:oleacc.lib;/nod:oledlg.lib;/nod:sensapi.lib;/nod:shfolder.lib;unicows.lib;Kernel32.lib;Advapi32.lib;User32.lib;Shell32.lib;Gdi32.lib;Comdlg32.lib;Version.lib;Mpr.lib;Rasapi32.lib;Winmm.lib;Winspool.lib;Vfw32.lib;Secur32.lib;Oleacc.lib;Oledlg.lib;Sensapi.lib;dxguid.lib;d3d9.lib;d3dx9.lib;dsound.lib;comctl32.lib;SDL2.lib;SDL2main.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(ProjectDir)\Bin\$(ProjectName)_d.exe</OutputFile>
-      <AdditionalLibraryDirectories>"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86";Libs\release\GogSDK-1.133.6\Libraries;Libs\release\steam\redistributable_bin;Libs\release\curl\lib;Libs\release\SDL\lib\x86;Libs\release\VLD\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;Libs\release\GogSDK-1.133.6\Libraries;Libs\release\steam\redistributable_bin;Libs\release\curl\lib;Libs\release\freetype\objs;Libs\release\SDL\lib\x86;Libs\release\VLD\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libcp.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -100,7 +100,7 @@
     <ClCompile>
       <Optimization>Full</Optimization>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include";Libs\release\GogSDK-1.133.6\Include;Libs\release\curl\include\curl;Libs\release\steam\public\steam;Libs\release\SDL\include;Source;Source\Common;Source\Engine;Libs\release\spine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;Libs\release\GogSDK-1.133.6\Include;Libs\release\curl\include\curl;Libs\release\steam\public\steam;Libs\release\SDL\include;Libs\release\freetype\include;Libs\release\spine\include;Source;Source\Common;Source\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Strict</FloatingPointModel>
@@ -112,10 +112,10 @@
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>/nod:kernel32.lib;/nod:advapi32.lib;/nod:user32.lib;/nod:gdi32.lib;/nod:shell32.lib;/nod:comdlg32.lib;/nod:version.lib;/nod:mpr.lib;/nod:rasapi32.lib;/nod:winmm.lib;/nod:winspool.lib;/nod:vfw32.lib;/nod:secur32.lib;/nod:oleacc.lib;/nod:oledlg.lib;/nod:sensapi.lib;/nod:shfolder.lib;unicows.lib;Kernel32.lib;Advapi32.lib;User32.lib;Shell32.lib;Gdi32.lib;Comdlg32.lib;Version.lib;Mpr.lib;Rasapi32.lib;Winmm.lib;Winspool.lib;Vfw32.lib;Secur32.lib;Oleacc.lib;Oledlg.lib;Sensapi.lib;dxguid.lib;d3d9.lib;d3dx9.lib;dsound.lib;comctl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>/nod:kernel32.lib;/nod:advapi32.lib;/nod:user32.lib;/nod:gdi32.lib;/nod:shell32.lib;/nod:comdlg32.lib;/nod:version.lib;/nod:mpr.lib;/nod:rasapi32.lib;/nod:winmm.lib;/nod:winspool.lib;/nod:vfw32.lib;/nod:secur32.lib;/nod:oleacc.lib;/nod:oledlg.lib;/nod:sensapi.lib;/nod:shfolder.lib;unicows.lib;Kernel32.lib;Advapi32.lib;User32.lib;Shell32.lib;Gdi32.lib;Comdlg32.lib;Version.lib;Mpr.lib;Rasapi32.lib;Winmm.lib;Winspool.lib;Vfw32.lib;Secur32.lib;Oleacc.lib;Oledlg.lib;Sensapi.lib;dxguid.lib;d3d9.lib;d3dx9.lib;dsound.lib;comctl32.lib;SDL2.lib;SDL2main.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>LinkVerboseLib</ShowProgress>
       <OutputFile>$(ProjectDir)\Bin\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>Libs\release\GogSDK-1.133.6\Libraries;Libs\release\curl\lib;Libs\release\steam\public\steam\lib\win32;Libs\release\steam\redistributable_bin;Libs\release\SDL\lib\x86;"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>Libs\release\freetype\objs;Libs\release\GogSDK-1.133.6\Libraries;Libs\release\curl\lib;Libs\release\steam\public\steam\lib\win32;Libs\release\steam\redistributable_bin;Libs\release\SDL\lib\x86;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <IgnoreSpecificDefaultLibraries>libcp.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -264,6 +264,7 @@
     <ClInclude Include="Source\Engine\EventManager.h" />
     <ClInclude Include="Source\Engine\Constants\font_ids.h" />
     <ClInclude Include="Source\Engine\FileManager.h" />
+    <ClInclude Include="Source\Engine\FreeTypeFont.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyLeaderboards.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.h" />
@@ -656,6 +657,7 @@
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\FileManager.cpp" />
+    <ClCompile Include="Source\Engine\FreeTypeFont.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyLeaderboards.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.cpp" />

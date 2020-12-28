@@ -472,7 +472,7 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "SpriteCollection.h"
 #include "SpritePainter.h"
 #include "TexturedFont.h"
-
+#include "FreeTypeFont.h"
 #include "TTFont.h"
 #include "ChatWnd.h"
 
@@ -680,5 +680,7 @@ extern CChatWnd						g_ChatWnd;
 extern float ct_fGaussLen;
 extern float ct_fLightMul;
 extern float ct_fColorDodge;
+
+extern CFreeTypeFont				g_font1;
 
 #endif

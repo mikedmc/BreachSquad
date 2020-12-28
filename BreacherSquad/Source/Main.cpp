@@ -97,6 +97,7 @@ CNetLock					g_netlock;
 ///-- spine manager --
 CSpineManager				g_spineMgr;
 
+CFreeTypeFont				g_font1;
 
 //#TODO: default value for gauss bell with attenuation almost 2 at fRadius * 2.0f
 // convert these to constants
@@ -636,6 +637,7 @@ void ShutdownApp(void)
 	UTGetLeaderboards().Release();
 #endif
 	g_spineMgr.Release();
+
 }
 
 
@@ -837,7 +839,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(g_ControlsEditor.OnCreateDevice(pDevice, pBBDesc));
 #endif
 
-	//diverse setari sampler
+	//restore sampler settings
 	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 	pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
@@ -1006,6 +1008,8 @@ void CALLBACK OnLostDevice(void)
 //**************************************************************************************
 void CALLBACK OnDestroyDevice(void)
 {
+	g_font1.Release();
+
 	UTGetAppClass().OnDestroyDevice();
 	UTGetRTManager().OnDestroyDevice();
 	UTimgui().OnDestroyDevice();
@@ -2274,6 +2278,22 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			case GAME_STATE_MAINMENU:
 			{
 				g_mainMenu.Paint();
+
+				// show font image
+				if (DXUTIsKeyDown('6'))
+				{
+					if (g_font1.m_atlas.pTex != nullptr)
+					{
+						g_pGameSprite->Flush();
+						CCameraTransform::SetActiveCameraIdentity(pDevice);
+						RECT src;
+						SetRect(&src, 0, 0, g_font1.m_atlas.atlasSize.w, g_font1.m_atlas.atlasSize.h);
+						g_pGameSprite->SetTransform(&g_matIdentity);
+						g_pGameSprite->Draw(g_font1.m_atlas.pTex, &src, NULL, &D3DXVECTOR3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
+						g_pGameSprite->Flush();
+					}
+				}
+
 			}
 			break;
 			case GAME_STATE_PLAYER_SELECTION:
