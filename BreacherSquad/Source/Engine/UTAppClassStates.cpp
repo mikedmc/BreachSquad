@@ -116,7 +116,9 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			}
 
 			// strings are already loaded
-			g_font1.CreateAtlas(pDevice, "media/fonts/gunshipcond.ttf", 32, UTLang().alphabet);
+			sFreeTypeFontStyle fstyle;
+			fstyle.strTexturePath = "media/fonts/rust64.png";
+			g_font1.CreateAtlas(pDevice, "media/fonts/gunshipcond.ttf", 32, UTLang().alphabet, &fstyle);
 			g_font1.SetStyle(-1, 2, 8);
 
 			///--- CONTROLS ---

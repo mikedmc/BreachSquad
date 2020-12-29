@@ -1,9 +1,11 @@
 #include "dxstdafx.h"
 #include "FreeTypeFont.h"
-
+// FreeType includes
 #include "ft2build.h"
 #include FT_FREETYPE_H
-
+// PNG loader includes - used when texturing fonts
+#include "lodepng/lodepng.h"
+#include <iostream>
 
 ///--- STATICS ---
 //CStringsManager*				CFreeTypeFont::m_pStrManager = NULL;
@@ -24,8 +26,25 @@ CFreeTypeFont::~CFreeTypeFont()
 }
 
 
-OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSize, WCHAR* wstrUniqueChars)
+OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSize, WCHAR* wstrUniqueChars, sFreeTypeFontStyle *pStyle)
 {
+	//the raw pixels of the texturing png image	(R,G,B,A,...)
+	std::vector<unsigned char> png_image; 
+	unsigned png_width, png_height;
+
+	//#TODO: copy to BYTE array so we speed things up
+	if (pStyle != nullptr)
+	{
+		if (!pStyle->strTexturePath.empty())
+		{
+			unsigned error = lodepng::decode(png_image, png_width, png_height, pStyle->strTexturePath);
+			if (error != 0)
+			{
+				LOG("CFreeTypeFont::CreateAtlas: Could not load overlay texture! %s\n%s", pStyle->strTexturePath.c_str(), lodepng_error_text(error));
+			}
+		}
+	}
+
 	FT_Library ft;
 	FT_Face    face;
 
@@ -69,7 +88,7 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 	m_atlas.atlasSize.h = tex_height;
 
 	// render glyphs to atlas
-	char* pixels = new char[tex_width * tex_height];
+	unsigned char* pixels = new unsigned char[tex_width * tex_height];
 	// clear pixels
 	memset(pixels, 0, tex_width * tex_height);
 
@@ -126,6 +145,8 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 		// glyph data
 		sGlyphInfo ginfo;
 
+		/*
+		// removed as unnecessary
 		ginfo.x0 = pen_x;
 		ginfo.y0 = pen_y;
 		ginfo.x1 = pen_x + bmp->width;
@@ -133,6 +154,7 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 
 		ginfo.x_off = face->glyph->bitmap_left;
 		ginfo.y_off = face->glyph->bitmap_top;
+		*/
 		ginfo.advanceX = face->glyph->advance.x >> 6;
 
 		ginfo.texRect.Set((float)pen_x / (float)tex_width, (float)pen_y / (float)tex_height, 
@@ -169,17 +191,32 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 		for (int xx = 0; xx < tex_width; xx++)
 		{
 			int idx = yy * tex_width + xx;
-			char pcol = pixels[yy * tex_width + xx];
-			img[idx * 4 + 0] = pcol;
-			img[idx * 4 + 1] = pcol;
-			img[idx * 4 + 2] = pcol;
-			img[idx * 4 + 3] = pcol;
+			unsigned char pcol = pixels[yy * tex_width + xx];
+			unsigned char cola = pcol, colr = pcol, colg = pcol, colb = pcol;
+			// do we have a loaded image?
+			if (png_image.size() > 0)
+			{
+				float fcol = ((float)pcol) / 255.0f;
+				int tex_idx = (yy % png_height) * png_width + (xx % png_width);
+				colr = (unsigned char)(fcol * png_image[tex_idx * 4 + 0]);
+				colg = (unsigned char)(fcol * png_image[tex_idx * 4 + 1]);
+				colb = (unsigned char)(fcol * png_image[tex_idx * 4 + 2]);
+				cola = (unsigned char)(fcol * png_image[tex_idx * 4 + 3]);
+			}
+			// Looks like BGRA
+			img[idx * 4 + 0] = colb;		//blue
+			img[idx * 4 + 1] = colg;		//green
+			img[idx * 4 + 2] = colr;		//red
+			img[idx * 4 + 3] = cola;		//alpha
 		}
 	}
 
 	m_atlas.pTex->UnlockRect(0);
 
 	delete [] pixels;
+	// clear texture image
+	png_image.clear();
+	png_image.shrink_to_fit();
 
 	bLoaded = true;
 	shFontName.Init(utf8Path);

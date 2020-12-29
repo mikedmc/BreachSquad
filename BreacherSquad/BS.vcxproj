@@ -296,6 +296,7 @@
     <ClInclude Include="Source\Engine\Level.h" />
     <ClInclude Include="Source\Engine\LibraryManager.h" />
     <ClInclude Include="Source\Engine\List.h" />
+    <ClInclude Include="Source\Engine\lodepng\lodepng.h" />
     <ClInclude Include="Source\Engine\Log.h" />
     <ClInclude Include="Source\Engine\MainMenu.h" />
     <ClInclude Include="Source\Engine\MiniDump.h" />
@@ -688,6 +689,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\LibraryManager.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\lodepng\lodepng.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Source\Engine\Log.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>

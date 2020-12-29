@@ -18,12 +18,7 @@
 #define FTFF_VCENTERRIGHT 36
 
 struct sGlyphInfo {
-	// should remove these:
-	int x0, y0, x1, y1;
-	int x_off, y_off;  
-	
 	int advanceX;								// cursor advance after glyph
-
 	RECTLTRB_F			texRect;				// tex coords of module
 	RECTLTRB_F			moduleRectOff;			// module rect offsetted by x_off and y_off. Origin in cursor point.
 };
@@ -53,6 +48,16 @@ public:
 	}
 };
 
+// Structure fed to CreateAtlas for advanced font rendering
+struct sFreeTypeFontStyle
+{
+	std::string				strTexturePath;				// empty string for no texture
+	DWORD					dwOutlineColor;				// 0 for no outline
+	DWORD					dwShadowColor;				// 0 for no shadow
+	int						shadowOffsetX;
+	int						shadowOffsetY;
+};
+
 class CFreeTypeFont
 {
 private:
@@ -75,7 +80,7 @@ public:
 
 
 	// Creates texture atlas from font
-	OPRESULT				CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSize, WCHAR* wstrUniqueChars);
+	OPRESULT				CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSize, WCHAR* wstrUniqueChars, sFreeTypeFontStyle *pStyle = nullptr);
 	// Sets font style variables
 	void					SetStyle(int nLetterSpacing, int nRowSpacing, int nSpaceSize);
 	// Releases font and atlas
