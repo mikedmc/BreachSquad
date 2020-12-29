@@ -116,7 +116,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			}
 
 			// strings are already loaded
-			g_font1.CreateAtlas(pDevice, "media/fonts/NotoSansSC-Medium.otf", 18, UTLang().alphabet);
+			g_font1.CreateAtlas(pDevice, "media/fonts/gunshipcond.ttf", 32, UTLang().alphabet);
 			g_font1.SetStyle(-1, 2, 8);
 
 			///--- CONTROLS ---
