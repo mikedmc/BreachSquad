@@ -29,18 +29,26 @@ CFreeTypeFont::~CFreeTypeFont()
 OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSize, WCHAR* wstrUniqueChars, sFreeTypeFontStyle *pStyle)
 {
 	//the raw pixels of the texturing png image	(R,G,B,A,...)
-	std::vector<unsigned char> png_image; 
 	unsigned png_width, png_height;
+	unsigned char *png_bytes = nullptr;
 
-	//#TODO: copy to BYTE array so we speed things up
 	if (pStyle != nullptr)
 	{
 		if (!pStyle->strTexturePath.empty())
 		{
+			std::vector<unsigned char> png_image;
 			unsigned error = lodepng::decode(png_image, png_width, png_height, pStyle->strTexturePath);
 			if (error != 0)
 			{
 				LOG("CFreeTypeFont::CreateAtlas: Could not load overlay texture! %s\n%s", pStyle->strTexturePath.c_str(), lodepng_error_text(error));
+			}
+			else
+			{
+				// copy data to dinamically allocated array so it goes faster (yes it does!)
+				png_bytes = new unsigned char[png_image.size()];
+				memcpy(png_bytes, png_image.data(), png_image.size());
+				png_image.clear();
+				png_image.shrink_to_fit();
 			}
 		}
 	}
@@ -194,14 +202,14 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 			unsigned char pcol = pixels[yy * tex_width + xx];
 			unsigned char cola = pcol, colr = pcol, colg = pcol, colb = pcol;
 			// do we have a loaded image?
-			if (png_image.size() > 0)
+			if (png_bytes != nullptr)
 			{
 				float fcol = ((float)pcol) / 255.0f;
 				int tex_idx = (yy % png_height) * png_width + (xx % png_width);
-				colr = (unsigned char)(fcol * png_image[tex_idx * 4 + 0]);
-				colg = (unsigned char)(fcol * png_image[tex_idx * 4 + 1]);
-				colb = (unsigned char)(fcol * png_image[tex_idx * 4 + 2]);
-				cola = (unsigned char)(fcol * png_image[tex_idx * 4 + 3]);
+				colr = (unsigned char)(fcol * png_bytes[tex_idx * 4 + 0]);
+				colg = (unsigned char)(fcol * png_bytes[tex_idx * 4 + 1]);
+				colb = (unsigned char)(fcol * png_bytes[tex_idx * 4 + 2]);
+				cola = (unsigned char)(fcol * png_bytes[tex_idx * 4 + 3]);
 			}
 			// Looks like BGRA
 			img[idx * 4 + 0] = colb;		//blue
@@ -213,10 +221,9 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 
 	m_atlas.pTex->UnlockRect(0);
 
-	delete [] pixels;
+	SAFE_DELETE_ARRAY(pixels);
 	// clear texture image
-	png_image.clear();
-	png_image.shrink_to_fit();
+	SAFE_DELETE_ARRAY(png_bytes);
 
 	bLoaded = true;
 	shFontName.Init(utf8Path);
