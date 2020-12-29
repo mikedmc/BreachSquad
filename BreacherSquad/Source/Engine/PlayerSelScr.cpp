@@ -252,7 +252,7 @@ void CPlayerSelScr::Update(float dTime)
 						m_arrPlayers[nPeerOrdinal].arrUpgradeBarsPts[kk] = (int)netSel.arrUpgradeBarsPts[kk];
 					}
 					//save networked stars number
-					g_stringsMgr.SetString(STR_PEER_STARS_VAL, L"%d", (int)netSel.nPlayerStars);
+					UTLang().SetString(STR_PEER_STARS_VAL, L"%d", (int)netSel.nPlayerStars);
 				}
 				else
 				{
@@ -559,9 +559,9 @@ void CPlayerSelScr::Update(float dTime)
 									int nPlayerType = (int)playersel->eType;
 									int nXPPoints = App_GetAvailableXPPoints(playersel->eType);
 									//write points to string
-									g_stringsMgr.SetString(STR_UNUSED_POINTS_VAL, L"%d", nXPPoints);
+									UTLang().SetString(STR_UNUSED_POINTS_VAL, L"%d", nXPPoints);
 									//erase description
-									g_stringsMgr.SetString(STR_SELECTED_PERK_DESC_VAL, L" ");
+									UTLang().SetString(STR_SELECTED_PERK_DESC_VAL, L" ");
 									//portrait
 									CControl* ctrl = null;
 									ctrl = layer->GetControlByName("CTRL_ANIM_PORTRAIT");
@@ -854,8 +854,8 @@ void CPlayerSelScr::Update(float dTime)
 									if (layer != null)
 									{
 										//set prices strings
-										g_stringsMgr.SetString(STR_TEMP1, L"%d", g_userData[K_MEMID_STARS_TOTAL] - g_userData[K_MEMID_STARS_SPENT]);
-										g_stringsMgr.SetString(STR_TEMP2, L"%d", wpnPrice);
+										UTLang().SetString(STR_TEMP1, L"%d", g_userData[K_MEMID_STARS_TOTAL] - g_userData[K_MEMID_STARS_SPENT]);
+										UTLang().SetString(STR_TEMP2, L"%d", wpnPrice);
 
 										if (ctrl = layer->GetControlByName("LABEL_WPN_NAME"))
 										{
@@ -1148,9 +1148,9 @@ HRESULT CPlayerSelScr::LoadItems()
 		if (!xbar.attribute(L"strUID").empty())
 			nbar->shUID.Init(xbar.attribute(L"strUID").value());
 		if (!xbar.attribute(L"strID_name").empty())
-			nbar->nStrIdx_name = g_stringsMgr.getStrIdx(xbar.attribute(L"strID_name").value());
+			nbar->nStrIdx_name = UTLang().getStrIdx(xbar.attribute(L"strID_name").value());
 		if (!xbar.attribute(L"strID_desc").empty())
-			nbar->nStrIdx_desc = g_stringsMgr.getStrIdx(xbar.attribute(L"strID_desc").value());
+			nbar->nStrIdx_desc = UTLang().getStrIdx(xbar.attribute(L"strID_desc").value());
 
 		nbar->nTotalPoints = xbar.attribute(L"nTotalPoints").as_int();
 		if ((nbar->nTotalPoints <= 0) || (nbar->nTotalPoints >= K_PSS_UPGRADE_BAR_MAX_POINTS))
@@ -1180,7 +1180,7 @@ HRESULT CPlayerSelScr::LoadItems()
 			perk.nIconIdx = xperk.attribute(L"nIconIdx").as_int();
 			perk.nPointPrice = xperk.attribute(L"nPointsPrice").as_int();
 			if (!xperk.attribute(L"strID_desc").empty())
-				perk.nStrIdx_desc = g_stringsMgr.getStrIdx(xperk.attribute(L"strID_desc").value());
+				perk.nStrIdx_desc = UTLang().getStrIdx(xperk.attribute(L"strID_desc").value());
 
 			int nIdx = perk.nPointPrice - 1;
 			if ((nIdx >= 0) && (nIdx < nbar->nTotalPoints))
@@ -1212,9 +1212,9 @@ HRESULT CPlayerSelScr::LoadItems()
 		itm->ePlayerType = (EPSSPlayerClass)idx;
 		//load descriptive texts
 		if (!bclass.attribute(L"strID_desc").empty())
-			itm->nStrIdx_desc = g_stringsMgr.getStrIdx(bclass.attribute(L"strID_desc").value());
+			itm->nStrIdx_desc = UTLang().getStrIdx(bclass.attribute(L"strID_desc").value());
 		if (!bclass.attribute(L"strID_difficulty").empty())
-			itm->nStrIdx_difficulty= g_stringsMgr.getStrIdx(bclass.attribute(L"strID_difficulty").value());
+			itm->nStrIdx_difficulty= UTLang().getStrIdx(bclass.attribute(L"strID_difficulty").value());
 		//load upgrade bars
 		//TEAM BARS
 		itm->arrUpgradeBarsIdx[0] = GetUpgradeBarIdx(bclass.attribute(L"strXPBarTeam1").value());
@@ -1256,14 +1256,14 @@ HRESULT CPlayerSelScr::LoadItems()
 					itdata.shName.Reset();
 
 				if (!bnode.attribute(L"strID_name").empty())
-					itdata.strIdxScreenName = g_stringsMgr.getStrIdx(bnode.attribute(L"strID_name").value());
+					itdata.strIdxScreenName = UTLang().getStrIdx(bnode.attribute(L"strID_name").value());
 				if (!bnode.attribute(L"nIconIdx").empty())
 					itdata.iconIdx = bnode.attribute(L"nIconIdx").as_int();
 
 				if (!bnode.attribute(L"strALTFireWeaponTemplate").empty())
 					itdata.shALTweaponTemplate.Init(bnode.attribute(L"strALTFireWeaponTemplate").value());
 				if (!bnode.attribute(L"strID_ALTname").empty())
-					itdata.strIdxALTscreenName = g_stringsMgr.getStrIdx(bnode.attribute(L"strID_ALTname").value());
+					itdata.strIdxALTscreenName = UTLang().getStrIdx(bnode.attribute(L"strID_ALTname").value());
 				if (!bnode.attribute(L"nIconIdxALT").empty())
 					itdata.iconALTidx = bnode.attribute(L"nIconIdxALT").as_int();
 
@@ -1273,14 +1273,14 @@ HRESULT CPlayerSelScr::LoadItems()
 					WCHAR strKey[MAX_PATH];
 					StringCchPrintf(strKey, MAX_PATH, L"strID_stat%d", kk + 1);
 					if (!bnode.attribute(strKey).empty())
-						itdata.nStatsData[kk * 2] = g_stringsMgr.getStrIdx(bnode.attribute(strKey).value());
+						itdata.nStatsData[kk * 2] = UTLang().getStrIdx(bnode.attribute(strKey).value());
 					StringCchPrintf(strKey, MAX_PATH, L"fPercent_stat%d", kk + 1);
 					if (!bnode.attribute(strKey).empty())
 						itdata.nStatsData[kk * 2 + 1] = (int)ceil(bnode.attribute(strKey).as_float() * 100.0f);
 				}
 
 				if (!bnode.attribute(L"strID_longDesc").empty())
-					itdata.strIdxLongDescription = g_stringsMgr.getStrIdx(bnode.attribute(L"strID_longDesc").value());
+					itdata.strIdxLongDescription = UTLang().getStrIdx(bnode.attribute(L"strID_longDesc").value());
 				if (!bnode.attribute(L"strTemplateModifier").empty())
 					itdata.shModifierTemplate.Init(bnode.attribute(L"strTemplateModifier").value());
 
@@ -1396,9 +1396,9 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 
 		CStringDesc strPlayer;
 		if (sPlayerName == null)
-			g_stringsMgr.ReplaceTokenInt(&strPlayer, STR_PLAYER_N, 1, nPlayerOrdinal + 1);
+			UTLang().ReplaceTokenInt(&strPlayer, STR_PLAYER_N, 1, nPlayerOrdinal + 1);
 		else
-			g_stringsMgr.SetStringDesc(&strPlayer, sPlayerName->text);
+			UTLang().SetStringDesc(&strPlayer, sPlayerName->text);
 
 		g_font10bs1->DrawStringClamped(&strPlayer, winbox.CenterX(), winbox.CenterY() - 4, winbox.w, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_DEFAULT_TEXT);
 
@@ -1413,9 +1413,9 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		CStringDesc strTemp;
 		///--- fereastra principala
 		if (sPlayerName == null)
-			g_stringsMgr.ReplaceTokenInt(&strTemp, STR_PLAYER_N, 1, nPlayerOrdinal + 1);
+			UTLang().ReplaceTokenInt(&strTemp, STR_PLAYER_N, 1, nPlayerOrdinal + 1);
 		else
-			g_stringsMgr.SetStringDesc(&strTemp, sPlayerName->text);
+			UTLang().SetStringDesc(&strTemp, sPlayerName->text);
 
 		CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WINDOW2, winbox, dwWinColor);
 		//player names
@@ -1487,7 +1487,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		{
 			float fPercFill = (float)(nTotalXP - nMinXP) / (float)(nMaxXP - nMinXP);
 			CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_SM_XP, recttemp2, fPercFill, dwWinColor);
-			g_stringsMgr.SetStringDesc(&strDesc, L"%d/%d", nTotalXP - nMinXP, nMaxXP - nMinXP);
+			UTLang().SetStringDesc(&strDesc, L"%d/%d", nTotalXP - nMinXP, nMaxXP - nMinXP);
 			g_font6nc1->DrawString(&strDesc, recttemp2, FONTFLAG_ANCHOR_VCENTERHCENTER, dwWinColor);
 		}
 		else
@@ -1497,7 +1497,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		}
 		//shieldicon and level
 		CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.x, recttemp2.CenterY(), ANM_CONTROLS_SPR_PROGRESS_XP_UPGRADE, 9, dwWinColor);
-		g_stringsMgr.SetStringDesc(&strDesc, L"%d", nLevel + 1);
+		UTLang().SetStringDesc(&strDesc, L"%d", nLevel + 1);
 		g_font6nc1->DrawString(&strDesc, recttemp2.x - 8, recttemp2.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(0xfffdb727, fAlpha));
 
 		//frame nume abilitate
@@ -1533,7 +1533,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 			CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.Right() - 4, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_STARS_2F_SM, 1, dwWinColor);
 			//paint cost
 			CStringDesc sdPrice;
-			g_stringsMgr.SetStringDesc(&sdPrice, L"%d", nWeaponPrice);
+			UTLang().SetStringDesc(&sdPrice, L"%d", nWeaponPrice);
 			g_font6n1->DrawString(&sdPrice, recttemp2.Right() - 8, recttemp2.Bottom(), FONTFLAG_ANCHOR_BOTTOMRIGHT, dwTextColor);
 		}
 
@@ -1699,7 +1699,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp.x + 12, recttemp.Bottom() - 5, ANM_CONTROLS_SPR_PROGRESS_XP_UPGRADE, 9, dwWinColor);
 				int nxppts = g_userData[K_MEMID_TOTALXP_PER_CLASS_START + kk];
 				int nlvllocal = App_GetXPLevel(nxppts);
-				g_stringsMgr.SetStringDesc(&strDesc, L"%d", nlvllocal + 1);
+				UTLang().SetStringDesc(&strDesc, L"%d", nlvllocal + 1);
 				g_font6nc1->DrawString(&strDesc, recttemp.x + 12 - 8, recttemp.Bottom() - 5, FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(0xfffdb727, fAlpha));
 			}
 
@@ -1714,7 +1714,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			CSprite::paintFrame(&m_sprCol, recttemp.CenterX(), recttemp.y, nPortraitAnm, (int)playersel->eType, dwWinColor);
 			//shieldicon and level
 			CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp.x + 14, recttemp.Bottom() - 7, ANM_CONTROLS_SPR_PROGRESS_XP_UPGRADE, 9, dwWinColor);
-			g_stringsMgr.SetStringDesc(&strDesc, L"%d", nLevel + 1);
+			UTLang().SetStringDesc(&strDesc, L"%d", nLevel + 1);
 			g_font6nc1->DrawString(&strDesc, recttemp.x + 14 - 8, recttemp.Bottom() - 7, FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(0xfffdb727, fAlpha));
 			//class name
 			recttemp2.Set(localbox.x + 48, localbox.y - 1, winbox.w - 62, 16);
@@ -1726,7 +1726,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			{
 				float fPercFill = (float)(nTotalXP - nMinXP) / (float)(nMaxXP - nMinXP);
 				CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_SM_XP, recttemp2, fPercFill, dwWinColor);
-				g_stringsMgr.SetStringDesc(&strDesc, L"%d/%d", nTotalXP - nMinXP, nMaxXP - nMinXP);
+				UTLang().SetStringDesc(&strDesc, L"%d/%d", nTotalXP - nMinXP, nMaxXP - nMinXP);
 				g_font6nc1->DrawString(&strDesc, recttemp2, FONTFLAG_ANCHOR_VCENTERHCENTER, dwWinColor);
 			}
 			else
@@ -1869,7 +1869,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.Right() - 12, recttemp2.Bottom() - 4, ANM_CONTROLS_SPR_ICONS_MISC, 1, dwWinColor);
 				//paint cost
 				CStringDesc sdPrice;
-				g_stringsMgr.SetStringDesc(&sdPrice, L"%d", nWeaponPrice);
+				UTLang().SetStringDesc(&sdPrice, L"%d", nWeaponPrice);
 				g_font6n1->DrawString(&sdPrice, recttemp2.Right() - 7, recttemp2.Bottom() - 3, FONTFLAG_ANCHOR_BOTTOMCENTER, dwTextColor);
 			}
 			//stats (max 4)
@@ -2028,7 +2028,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.CenterX() + 10, recttemp2.Bottom() - 4, ANM_CONTROLS_SPR_ICONS_MISC, 1, dwWinColor);
 				//paint cost
 				CStringDesc sdPrice;
-				g_stringsMgr.SetStringDesc(&sdPrice, L"%d", nWeaponPrice);
+				UTLang().SetStringDesc(&sdPrice, L"%d", nWeaponPrice);
 				g_font6n1->DrawString(&sdPrice, recttemp2.CenterX() + 14, recttemp2.Bottom() - 3, FONTFLAG_ANCHOR_BOTTOMCENTER, dwTextColor);
 			}
 
@@ -2177,7 +2177,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.CenterX() + 10, recttemp2.Bottom() - 4, ANM_CONTROLS_SPR_ICONS_MISC, 1, dwWinColor);
 				//paint cost
 				CStringDesc sdPrice;
-				g_stringsMgr.SetStringDesc(&sdPrice, L"%d", nWeaponPrice);
+				UTLang().SetStringDesc(&sdPrice, L"%d", nWeaponPrice);
 				g_font6n1->DrawString(&sdPrice, recttemp2.CenterX() + 14, recttemp2.Bottom() - 3, FONTFLAG_ANCHOR_BOTTOMCENTER, dwTextColor);
 			}
 			//window deco

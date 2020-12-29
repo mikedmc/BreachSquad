@@ -515,12 +515,12 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 		}
 		else if (nEvent.m_eventCommand == CEventCommands::evtC_SYSTEM_CONTROLLER_ADDED)
 		{
-			g_stringsMgr.SetString(STR_TEMP10, L"%s", nEvent.GetArgumentByName(L"strName")->m_strArg.text);
+			UTLang().SetString(STR_TEMP10, L"%s", nEvent.GetArgumentByName(L"strName")->m_strArg.text);
 			UTGetGUI().ShowLayer("LAYER_ID_CTRLR_CONNECTED");
 		}
 		else if (nEvent.m_eventCommand == CEventCommands::evtC_SYSTEM_CONTROLLER_REMOVED)
 		{
-			g_stringsMgr.SetString(STR_TEMP10, L"%s", nEvent.GetArgumentByName(L"strName")->m_strArg.text);
+			UTLang().SetString(STR_TEMP10, L"%s", nEvent.GetArgumentByName(L"strName")->m_strArg.text);
 			UTGetGUI().ShowLayer("LAYER_ID_CTRLR_DISCONNECTED");
 		}
 	}
@@ -638,7 +638,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 					StringCchCat(wsResStr, 1024, wsRes);
 				}
-				g_stringsMgr.SetString(STR_RESOLUTIONS_LIST, wsResStr);
+				UTLang().SetString(STR_RESOLUTIONS_LIST, wsResStr);
 				//setup controls
 				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_GFX_OPTIONS");
 				if (layer != null)
@@ -994,7 +994,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			{
 				//as soon as we enter we ask for the lobbies list and the state will read the lobbies a little later (on a timer job)
 				g_netlock.Net_RequestLobbyList(10);
-				g_stringsMgr.SetString(STR_LOBBIES_LIST_VAL, L"%s", g_stringsMgr.strings[STR_PLEASE_HANG]->sText);
+				UTLang().SetString(STR_LOBBIES_LIST_VAL, L"%s", UTLang().strings[STR_PLEASE_HANG]->sText);
 
 				CCtrlLayer* lay = UTGetGUI().GetTopmostInputLayer();
 				//disable the refresh button if still working
@@ -1259,7 +1259,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						StringCchCat(txt, 1024, L"\n");
 				}
 				//save lang list
-				g_stringsMgr.SetString(STR_TEMP15, txt);
+				UTLang().SetString(STR_TEMP15, txt);
 
 				UTGetGUI().RemoveTopmostLayer();
 				CCtrlLayer *pLay = UTGetGUI().ShowLayerOnce("LAYER_ID_LANGUAGE");
@@ -1304,7 +1304,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 					UTGetAppClass().SaveSettings();
 					//set version number
-					g_stringsMgr.SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
+					UTLang().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
 				}
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_CTRLR_LAYOUT"))
@@ -1315,12 +1315,12 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			//leaderboards from main menu, global ones
 			else if (ctrlID == GET_FAST_HASH("BUT_BOARDS_SINGLE"))
 			{
-				g_stringsMgr.SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
-				g_stringsMgr.SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
+				UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
+				UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 				//request single player scores
 				UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 1);
 				//write score for YOUR SCORE label
-				g_stringsMgr.SetString(STR_TEMP15, L"%d", g_userData[K_MEMID_TOTAL_SCORE_SOLO]);
+				UTLang().SetString(STR_TEMP15, L"%d", g_userData[K_MEMID_TOTAL_SCORE_SOLO]);
 
 				//reset scroll page and save leaderboard index as a payload in this control
 				CCtrlLayer *pLay = UTGetGUI().GetLayerByName("LAYER_ID_LEADERBOARDS_MM");
@@ -1339,12 +1339,12 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_BOARDS_COOP"))
 			{
-				g_stringsMgr.SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
-				g_stringsMgr.SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
+				UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
+				UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 				//request single player scores
 				UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_COOP, 1);
 				//write score for YOUR SCORE label
-				g_stringsMgr.SetString(STR_TEMP15, L"%d", g_userData[K_MEMID_TOTAL_SCORE_COOP]);
+				UTLang().SetString(STR_TEMP15, L"%d", g_userData[K_MEMID_TOTAL_SCORE_COOP]);
 				//reset scroll page and save leaderboard index as a payload in this control
 				CCtrlLayer *pLay = UTGetGUI().GetLayerByName("LAYER_ID_LEADERBOARDS_MM");
 				if (pLay != null)
@@ -1604,8 +1604,8 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				}
 				if (!UTGetLeaderboards().IsBusy())
 				{
-					g_stringsMgr.SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
-					g_stringsMgr.SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
+					UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
+					UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 
 					if (nLeaderboardID == 0)
 						UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 1 + nPageIdx * K_LB_SCORES_LIST_SIZE);
@@ -1699,7 +1699,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 					UTGetAppClass().SaveSettings();
 					//set version number
-					g_stringsMgr.SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
+					UTLang().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
 				}
 				return true;
 			}
@@ -1792,12 +1792,12 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					{
 #ifdef ENABLE_LEADERBOARDS
 						//reset strings
-						g_stringsMgr.SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
-						g_stringsMgr.SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
+						UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
+						UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 						//request single player scores
 						UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 1);
 						//write score for YOUR SCORE label
-						g_stringsMgr.SetString(STR_TEMP15, L"%d", g_userData[K_MEMID_TOTAL_SCORE_SOLO]);
+						UTLang().SetString(STR_TEMP15, L"%d", g_userData[K_MEMID_TOTAL_SCORE_SOLO]);
 
 						CCtrlLayer* pLay = UTGetGUI().ShowLayerOnce("LAYER_ID_LEADERBOARDS_MM");
 						//reset scroll page and save leaderboard index as a payload in this control

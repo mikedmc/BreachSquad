@@ -65,7 +65,6 @@ int							g_keydef_scancode = -1;					//scancode for command (SDL scancodes for 
 
 CMouseData					g_mouse;								// Mouse data, global
 
-CStringsManager				g_stringsMgr;	
 CParticlesManager			g_particlesMgr; 
 ///--- Fonts ---
 //fonts pointers
@@ -269,7 +268,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	DXUTSetMultimonSettings(true);
 
 	WCHAR windowTitle[MAX_PATH];
-	StringCchPrintf(windowTitle, MAX_PATH, L"%s", g_stringsMgr.strings[STR_TITLE]->sText);
+	StringCchPrintf(windowTitle, MAX_PATH, L"%s", UTLang().strings[STR_TITLE]->sText);
 
 	if (FAILED(DXUTCreateWindow(windowTitle, hInst, NULL, NULL /*, 0, 0*/)))
 	{
@@ -295,10 +294,10 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	struct tm tm = *localtime(&t);
 	LOG(L"Log system started. (%d-%d-%d %d:%d:%d)", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 #ifdef ENABLE_STEAM
-	LOG(L"Steam Version %s, Savefile Version %d", g_stringsMgr.strings[STR_VERSION_NUMBER]->sText, _VERSION_DATAFILE_);
+	LOG(L"Steam Version %s, Savefile Version %d", UTLang().strings[STR_VERSION_NUMBER]->sText, _VERSION_DATAFILE_);
 #endif // ENABLE_STEAM
 #ifdef ENABLE_GALAXY
-	LOG(L"GoG Version %s, Savefile Version %d", g_stringsMgr.strings[STR_VERSION_NUMBER]->sText, _VERSION_DATAFILE_);
+	LOG(L"GoG Version %s, Savefile Version %d", UTLang().strings[STR_VERSION_NUMBER]->sText, _VERSION_DATAFILE_);
 #endif // ENABLE_GALAXY
 
 
@@ -401,18 +400,18 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	///--- init SDL ---
 	UTGetAppClass().InitSDL(DXUTGetHWND());
 	//add keyboard controllers and map keys
-	CController* ctrlrkeys1 = UTGetCtrlrMgr().AddController(K_CM_CT_KBM_SDL, g_stringsMgr.strings[STR_KEYBOARD1]->sText);
+	CController* ctrlrkeys1 = UTGetCtrlrMgr().AddController(K_CM_CT_KBM_SDL, UTLang().strings[STR_KEYBOARD1]->sText);
 	ctrlrkeys1->nSDLInstanceId = K_CM_IID_KBM1; //set keyboard instance ID so it isn't empty
 	//ctrlrkeys1->ClearTriggers(); //clear default mapping
 
-	//CController* ctrlrkeys2 = UTGetControllersManager().AddController(K_CM_CONTROLLERTYPE_KEYBOARD_SDL, g_stringsMgr.strings[STR_KEYBOARD2]->sText);
+	//CController* ctrlrkeys2 = UTGetControllersManager().AddController(K_CM_CONTROLLERTYPE_KEYBOARD_SDL, UTLang().strings[STR_KEYBOARD2]->sText);
 	//ctrlrkeys2->nSDLInstanceId = K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID; //set keyboard instance ID so it isn't empty
 	//ctrlrkeys2->ClearTriggers(); //clear default mapping
 
 	//App_SetSDLTriggersFromUserData(ctrlrkeys1, ctrlrkeys2);
 	
 	//add network controller for coop play (used for peer controller simulation)
-	CController* ctrlrnet1 = UTGetCtrlrMgr().AddController(K_CM_CT_NET_FRAMELOCK, g_stringsMgr.strings[STR_NETWORK1]->sText);
+	CController* ctrlrnet1 = UTGetCtrlrMgr().AddController(K_CM_CT_NET_FRAMELOCK, UTLang().strings[STR_NETWORK1]->sText);
 	ctrlrnet1->nSDLInstanceId = K_CM_IID_NET1;
 
 
@@ -589,7 +588,7 @@ HRESULT InitApp(void)
 	g_vecGravity = Vec2(0.0f, K_GRAVITY);
 
 	//set version number
-	g_stringsMgr.SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
+	UTLang().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
 	//--------------------------------------------------------------------------------------
 	// add listeners
 	//--------------------------------------------------------------------------------------
@@ -622,7 +621,7 @@ HRESULT InitApp(void)
 void ShutdownApp(void)
 {
 	g_editor.Release();
-	g_stringsMgr.Release();
+	UTLang().Release();
 	g_particlesMgr.Release();
 
 	UTGetSoundManager().Release();
@@ -941,7 +940,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 		StringCchCat(wsResStr, 1024, wsRes);
 	}
-	g_stringsMgr.SetString(STR_RESOLUTIONS_LIST, wsResStr);
+	UTLang().SetString(STR_RESOLUTIONS_LIST, wsResStr);
 
 
 	//reface setarile initiale
@@ -1172,7 +1171,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 				if (nLobbiesCnt == 0)
 				{
 					if (!g_pNetwork->IsRequestingLobby())
-						g_stringsMgr.SetString(STR_LOBBIES_LIST_VAL, L"%s", g_stringsMgr.strings[STR_NO_LOBBIES]->sText);
+						UTLang().SetString(STR_LOBBIES_LIST_VAL, L"%s", UTLang().strings[STR_NO_LOBBIES]->sText);
 
 					//disable controls (list, join)
 					if (lay != null)
@@ -1198,14 +1197,14 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 						char strLobbyName[250];
 
 						g_pNetwork->GetLobbyListEntry(kk, iLobbyID, strLobbyName);
-						g_stringsMgr.SetStringDescUTF8(&sdName, strLobbyName);
+						UTLang().SetStringDescUTF8(&sdName, strLobbyName);
 
 						StringCchCat(strLobbiesList, 2048, sdName.sText);
 						if (kk < nLobbiesCnt - 1)
 							StringCchCat(strLobbiesList, 2048, L"\n");
 					}
 
-					g_stringsMgr.SetString(STR_LOBBIES_LIST_VAL, strLobbiesList);
+					UTLang().SetString(STR_LOBBIES_LIST_VAL, strLobbiesList);
 
 					//enable controls (list, join)
 					if (lay != null)
@@ -2077,7 +2076,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			{
 				//name and rank
 				CStringDesc sdName;
-				g_stringsMgr.SetStringDescUTF8(&sdName, scoresList.m_arrNames[kk]);
+				UTLang().SetStringDescUTF8(&sdName, scoresList.m_arrNames[kk]);
 				StringCchPrintf(strLine, MAX_PATH, L"%d.%s\n", scoresList.m_arrRank[kk], sdName.sText);
 				//append
 				StringCchCat(strNames, 1024, strLine);
@@ -2091,21 +2090,21 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			StringCchCat(strNames, 1024, L" ");
 			StringCchCat(strScores, 1024, L" ");
 			//set final strings
-			g_stringsMgr.SetString(STR_LEADERBOARDS_NAMES_VAL, strNames);
-			g_stringsMgr.SetString(STR_LEADERBOARDS_SCORES_VAL, strScores);
+			UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, strNames);
+			UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, strScores);
 
 			//save user score
 			int nUserScore = UTGetLeaderboards().GetUserScore();
 			if(nUserScore == 0)
-				g_stringsMgr.SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, g_stringsMgr.strings[STR_NOT_AVAILABLE]->sText);
+				UTLang().SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, UTLang().strings[STR_NOT_AVAILABLE]->sText);
 			else
-				g_stringsMgr.SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, L"%d", nUserScore);
+				UTLang().SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, L"%d", nUserScore);
 		}
 		else
 		{
 			//no scores
-			g_stringsMgr.SetString(STR_LEADERBOARDS_NAMES_VAL, g_stringsMgr.strings[STR_NOT_AVAILABLE]->sText);
-			g_stringsMgr.SetString(STR_LEADERBOARDS_SCORES_VAL, g_stringsMgr.strings[STR_NOT_AVAILABLE]->sText);
+			UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, UTLang().strings[STR_NOT_AVAILABLE]->sText);
+			UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, UTLang().strings[STR_NOT_AVAILABLE]->sText);
 		}
 
 		// update the number of selectable items in the leaderboards window
@@ -2294,15 +2293,15 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 					}
 				}
 
-				g_stringsMgr.SetString(STR_TEMP1, L"AVENIDA Principe Salman, 1");
+				UTLang().SetString(STR_TEMP1, L"AVENIDA Principe Salman, 1");
 
 				PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 				if (pSprVS)
 					UTPainter().Begin(pSprVS, UTGetAppClass().g_matProj);
 
-				RECTXYWH retrt1 = g_font1.DrawStringLine(g_stringsMgr.strings[STR_TEMP1], 400.0f, 200.0f, FTFF_LEFT | FTFF_VCENTER, 0xffff8888);
-				RECTXYWH retrt2 = g_font1.DrawStringLine(g_stringsMgr.strings[STR_TEMP1], 400.0f, 200.0f + g_font1.rowHeight, FTFF_RIGHT, 0xff88ff88);
-				RECTXYWH retrt3 = g_font1.DrawStringLine(g_stringsMgr.strings[STR_TEMP1], 400.0f, 200.0f + 2 * g_font1.rowHeight, FTFF_CENTER, 0xff8888ff);
+				RECTXYWH retrt1 = g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f, FTFF_LEFT | FTFF_VCENTER, 0xffff8888);
+				RECTXYWH retrt2 = g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f + g_font1.rowHeight, FTFF_RIGHT, 0xff88ff88);
+				RECTXYWH retrt3 = g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f + 2 * g_font1.rowHeight, FTFF_CENTER, 0xff8888ff);
 
 				UTPainter().End();
 			}
@@ -2556,18 +2555,18 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			if(UTGetAppClass().m_Settings.dev_bDevMode)
 			{
 				StringCchPrintf(todraw, MAX_PATH, DXUTGetFrameStats());
-				g_stringsMgr.SetStringDesc(&strdesc, todraw);
+				UTLang().SetStringDesc(&strdesc, todraw);
 				g_font10bs1->DrawString(&strdesc, 10, posY, FONTFLAG_ANCHOR_TOPLEFT, 0xffffffff);
 				posY += 15;
 				StringCchPrintf(todraw, MAX_PATH, L"pointer %.2f:%.2f", g_mouse.pos.x, g_mouse.pos.y);
-				g_stringsMgr.SetStringDesc(&strdesc, todraw);
+				UTLang().SetStringDesc(&strdesc, todraw);
 				g_font10bs1->DrawString(&strdesc, 10, posY, FONTFLAG_ANCHOR_TOPLEFT, 0xffffffff);
 			}
 			else  //no dev mode show only ping
 			{
 				//FPS and gfx data
 				StringCchPrintf(todraw, MAX_PATH, DXUTGetFrameStats());
-				g_stringsMgr.SetStringDesc(&strdesc, todraw);
+				UTLang().SetStringDesc(&strdesc, todraw);
 				g_font10bs1->DrawString(&strdesc, 10, posY, FONTFLAG_ANCHOR_TOPLEFT, 0xffffffff);
 				posY += 15;
 			}
@@ -3299,7 +3298,7 @@ void ChangeGameState(int newState, int param1, int param2)
 			//as soon as we enter we ask for the lobbies list and the state will read the lobbies a little later (on a timer job)
 			g_netlock.Net_RequestLobbyList(10);
 
-			g_stringsMgr.SetString(STR_LOBBIES_LIST_VAL, L"%s", g_stringsMgr.strings[STR_PLEASE_HANG]->sText);
+			UTLang().SetString(STR_LOBBIES_LIST_VAL, L"%s", UTLang().strings[STR_PLEASE_HANG]->sText);
 			//add the window
 			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce("LAYER_ID_LOBBIES_LIST");
 			if (lay != null)
@@ -3475,7 +3474,7 @@ void ChangeGameState(int newState, int param1, int param2)
 					//starting game with forced map
 					StringCchPrintf(strLevelPath, MAX_PATH, L"%s", sProcessedPath.c_str());
 					//write current mission name and number
-					g_stringsMgr.SetString(STR_CURRENT_MISSION_VAL, L"");
+					UTLang().SetString(STR_CURRENT_MISSION_VAL, L"");
 				}
 				else
 				{
@@ -3489,7 +3488,7 @@ void ChangeGameState(int newState, int param1, int param2)
 					}
 					//write current mission name and number
 					int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[nChapterNumber]->arrLevelNameStrIdx[nLevelNumber];
-					g_stringsMgr.SetString(STR_CURRENT_MISSION_VAL, L"%d.%d %s", nChapterNumber + 1, nLevelNumber + 1, g_stringsMgr.strings[nStrIdxLevelName]->sText);
+					UTLang().SetString(STR_CURRENT_MISSION_VAL, L"%d.%d %s", nChapterNumber + 1, nLevelNumber + 1, UTLang().strings[nStrIdxLevelName]->sText);
 				}
 
 				if (FAILED(g_level.LoadLevel(strLevelPath)))
@@ -3514,7 +3513,7 @@ void ChangeGameState(int newState, int param1, int param2)
 				WCHAR wcsLevelPath[MAX_PATH] = { 0 };
 				mod->GetFullPathToAffectedFile(0, wcsLevelPath, MAX_PATH);
 				//write current mission name and number
-				g_stringsMgr.SetString(STR_CURRENT_MISSION_VAL, L"%s", mod->shName.text);
+				UTLang().SetString(STR_CURRENT_MISSION_VAL, L"%s", mod->shName.text);
 
 				if (FAILED(g_level.LoadLevel(wcsLevelPath)))
 				{

@@ -2718,7 +2718,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 
 #ifdef ENABLE_CHAT_WINDOW
 				//say: "press ENTER to chat"
-				g_ChatWnd.AddLine(g_stringsMgr.strings[STR_ENTER_TO_CHAT]->sText, L"SYSTEM", K_CW_SYSTEM_COLOR);
+				g_ChatWnd.AddLine(UTLang().strings[STR_ENTER_TO_CHAT]->sText, L"SYSTEM", K_CW_SYSTEM_COLOR);
 #endif
 				LOG(L"Level::SetLevelState - Started networked game!");
 				if (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE)
@@ -9229,25 +9229,25 @@ void CLevel::Update(float dTime_original)
 						if (m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0)
 							fAccuracyP1 = (float)m_arrStats[K_LVL_STATS_PL1_BULLETS_HIT] / (float)m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT];
 						CLAMP(fAccuracyP1, 0.0f, 1.0f);
-						g_stringsMgr.SetString(STR_MISSION_P1_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL1_KILLS]);
+						UTLang().SetString(STR_MISSION_P1_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL1_KILLS]);
 						if (m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0)
-							g_stringsMgr.SetString(STR_MISSION_P1_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP1);
+							UTLang().SetString(STR_MISSION_P1_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP1);
 						else
-							g_stringsMgr.SetString(STR_MISSION_P1_ACCURACY, L"%s", g_stringsMgr.strings[STR_NOT_AVAILABLE]->sText);
-						g_stringsMgr.SetString(STR_MISSION_P1_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]);
-						g_stringsMgr.SetString(STR_MISSION_P1_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS]);
+							UTLang().SetString(STR_MISSION_P1_ACCURACY, L"%s", UTLang().strings[STR_NOT_AVAILABLE]->sText);
+						UTLang().SetString(STR_MISSION_P1_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]);
+						UTLang().SetString(STR_MISSION_P1_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS]);
 						//--- PL2 data ---
 						float fAccuracyP2 = 1.0f;
 						if (m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0)
 							fAccuracyP2 = (float)m_arrStats[K_LVL_STATS_PL2_BULLETS_HIT] / (float)m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT];
 						CLAMP(fAccuracyP2, 0.0f, 1.0f);
-						g_stringsMgr.SetString(STR_MISSION_P2_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL2_KILLS]);
+						UTLang().SetString(STR_MISSION_P2_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL2_KILLS]);
 						if (m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0)
-							g_stringsMgr.SetString(STR_MISSION_P2_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP2);
+							UTLang().SetString(STR_MISSION_P2_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP2);
 						else
-							g_stringsMgr.SetString(STR_MISSION_P2_ACCURACY, L"%s", g_stringsMgr.strings[STR_NOT_AVAILABLE]->sText);
-						g_stringsMgr.SetString(STR_MISSION_P2_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]);
-						g_stringsMgr.SetString(STR_MISSION_P2_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL2_DEATHS]);
+							UTLang().SetString(STR_MISSION_P2_ACCURACY, L"%s", UTLang().strings[STR_NOT_AVAILABLE]->sText);
+						UTLang().SetString(STR_MISSION_P2_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]);
+						UTLang().SetString(STR_MISSION_P2_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL2_DEATHS]);
 
 						//level time
 						int nTimeSpent = m_arrStats[K_LVL_STATS_LEVEL_END_SEC] - m_arrStats[K_LVL_STATS_LEVEL_START_SEC];
@@ -9294,12 +9294,12 @@ void CLevel::Update(float dTime_original)
 
 						//--- STARS WINDOW ---
 						OS_FormatTime(tmpstr, MAX_PATH, (float)(nTimeSpent));
-						g_stringsMgr.SetString(STR_MISSION_TIME, tmpstr);
-						g_stringsMgr.SetString(STR_MISSION_CASUALTIES, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS] + m_arrStats[K_LVL_STATS_PL2_DEATHS]);
-						g_stringsMgr.SetString(STR_MISSION_SCORE, L"%d", nTotalLevelScore);
+						UTLang().SetString(STR_MISSION_TIME, tmpstr);
+						UTLang().SetString(STR_MISSION_CASUALTIES, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS] + m_arrStats[K_LVL_STATS_PL2_DEATHS]);
+						UTLang().SetString(STR_MISSION_SCORE, L"%d", nTotalLevelScore);
 
 						int nHostagesSaved = m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED] + m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED];
-						g_stringsMgr.SetString(STR_MISSION_HOSTAGES, L"%d / %d", nHostagesSaved, m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]);
+						UTLang().SetString(STR_MISSION_HOSTAGES, L"%d / %d", nHostagesSaved, m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]);
 
 						//--- SAVE LEVEL DATA ---
 						if (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE)
@@ -9400,9 +9400,9 @@ void CLevel::Update(float dTime_original)
 							//reset old scores
 							UTGetLeaderboards().ResetScoresList();
 							//reset strings too
-							g_stringsMgr.SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
-							g_stringsMgr.SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
-							g_stringsMgr.SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, L"...");
+							UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
+							UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
+							UTLang().SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, L"...");
 							//now upload score
 							UTGetLeaderboards().QueueJob(K_JOB_UPLOAD_SCORE, pszBoardName, nTotalLevelScore);
 							//request downloading of scores
@@ -9858,9 +9858,9 @@ void CLevel::Update(float dTime_original)
 									int nLevel = g_userData[K_MEMID_SELECTED_LEVEL];
 									int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[nChapter]->arrLevelNameStrIdx[nLevel];
 									if(nStrIdxLevelName >= 0)
-										g_stringsMgr.SetString(STR_TEMP10, L"%d.%d %s", nChapter + 1, nLevel + 1, g_stringsMgr.strings[nStrIdxLevelName]->sText);
+										UTLang().SetString(STR_TEMP10, L"%d.%d %s", nChapter + 1, nLevel + 1, UTLang().strings[nStrIdxLevelName]->sText);
 									else
-										g_stringsMgr.SetString(STR_TEMP10, L"%d.%d", nChapter + 1, nLevel + 1);
+										UTLang().SetString(STR_TEMP10, L"%d.%d", nChapter + 1, nLevel + 1);
 								}
 								//set player selection
 								ctrl = lay->GetControlByName("CTRL_SCORESLIST_TT");
@@ -10019,25 +10019,25 @@ void CLevel::Update(float dTime_original)
 						if (m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0)
 							fAccuracyP1 = (float)m_arrStats[K_LVL_STATS_PL1_BULLETS_HIT] / (float)m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT];
 						CLAMP(fAccuracyP1, 0.0f, 1.0f);
-						g_stringsMgr.SetString(STR_MISSION_P1_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL1_KILLS]);
+						UTLang().SetString(STR_MISSION_P1_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL1_KILLS]);
 						if (m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0)
-							g_stringsMgr.SetString(STR_MISSION_P1_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP1);
+							UTLang().SetString(STR_MISSION_P1_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP1);
 						else
-							g_stringsMgr.SetString(STR_MISSION_P1_ACCURACY, L"%s", g_stringsMgr.strings[STR_NOT_AVAILABLE]->sText);
-						g_stringsMgr.SetString(STR_MISSION_P1_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]);
-						g_stringsMgr.SetString(STR_MISSION_P1_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS]);
+							UTLang().SetString(STR_MISSION_P1_ACCURACY, L"%s", UTLang().strings[STR_NOT_AVAILABLE]->sText);
+						UTLang().SetString(STR_MISSION_P1_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]);
+						UTLang().SetString(STR_MISSION_P1_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS]);
 						//--- PL2 data ---
 						float fAccuracyP2 = 1.0f;
 						if (m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0)
 							fAccuracyP2 = (float)m_arrStats[K_LVL_STATS_PL2_BULLETS_HIT] / (float)m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT];
 						CLAMP(fAccuracyP2, 0.0f, 1.0f);
-						g_stringsMgr.SetString(STR_MISSION_P2_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL2_KILLS]);
+						UTLang().SetString(STR_MISSION_P2_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL2_KILLS]);
 						if (m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0)
-							g_stringsMgr.SetString(STR_MISSION_P2_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP2);
+							UTLang().SetString(STR_MISSION_P2_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP2);
 						else
-							g_stringsMgr.SetString(STR_MISSION_P2_ACCURACY, L"%s", g_stringsMgr.strings[STR_NOT_AVAILABLE]->sText);
-						g_stringsMgr.SetString(STR_MISSION_P2_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]);
-						g_stringsMgr.SetString(STR_MISSION_P2_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL2_DEATHS]);
+							UTLang().SetString(STR_MISSION_P2_ACCURACY, L"%s", UTLang().strings[STR_NOT_AVAILABLE]->sText);
+						UTLang().SetString(STR_MISSION_P2_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]);
+						UTLang().SetString(STR_MISSION_P2_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL2_DEATHS]);
 
 						///--- XP Points ---
 						int nXPpl1 = 0, nXPpl2 = 0;
@@ -10047,7 +10047,7 @@ void CLevel::Update(float dTime_original)
 						//--- STARS WINDOW ---
 						int nTimeSpent = m_arrStats[K_LVL_STATS_LEVEL_END_SEC] - m_arrStats[K_LVL_STATS_LEVEL_START_SEC];
 						OS_FormatTime(tmpstr, MAX_PATH, (float)(nTimeSpent));
-						g_stringsMgr.SetString(STR_MISSION_TIME, tmpstr);
+						UTLang().SetString(STR_MISSION_TIME, tmpstr);
 
 						//--- SAVE LEVEL DATA ---
 						// not playing downloaded levels so save played times counter
@@ -14209,7 +14209,7 @@ void CLevel::UpdateBullets(float dTime)
 						{
 							if (m_rand.RandInt(1000) < 50)
 							{
-								g_particlesMgr.AddStringParticle(g_font5ns2, g_stringsMgr.strings[STR_CRIPPLED]->sText, &vecHitPoint, NULL, &D3DXVECTOR2(0.0f, -10.0f), 0.8f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xccaeffc2, K_PART_LAYER_NORMAL);
+								g_particlesMgr.AddStringParticle(g_font5ns2, UTLang().strings[STR_CRIPPLED]->sText, &vecHitPoint, NULL, &D3DXVECTOR2(0.0f, -10.0f), 0.8f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xccaeffc2, K_PART_LAYER_NORMAL);
 								SetActorDoT(pHitActor, CDamageOverTime::K_LVL_DoT_CRIPPLED, 2.0f, 0.0f, K_LVL_ACT_CLASS_PLAYER, K_LVL_ACT_CLASS_HUMAN, bullet->ownerUID);
 							}
 						}
@@ -14238,7 +14238,7 @@ void CLevel::UpdateBullets(float dTime)
 							//sunet headshot
 							//SND_PLAY_POSITIONAL_RAND2(SNDIDX_BULLET_HIT_BODY_CRITICAL_01, SNDIDX_BULLET_HIT_BODY_CRITICAL_02, vecHitPoint);
 							
-							g_particlesMgr.AddStringParticle(g_font5ns2, g_stringsMgr.strings[STR_CRITICAL_HIT]->sText, &vecHitPoint, NULL, &D3DXVECTOR2(0.0f, -10.0f), 0.8f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xccffaec2, K_PART_LAYER_NORMAL);
+							g_particlesMgr.AddStringParticle(g_font5ns2, UTLang().strings[STR_CRITICAL_HIT]->sText, &vecHitPoint, NULL, &D3DXVECTOR2(0.0f, -10.0f), 0.8f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xccffaec2, K_PART_LAYER_NORMAL);
 							//headshot effect
 							if (bGoreEnabled)
 							{

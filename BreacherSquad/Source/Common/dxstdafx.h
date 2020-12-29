@@ -645,7 +645,6 @@ extern void ChangeGameStateTransition(int newState, int param1, int param2, int 
 //particles
 extern CTimersArray			g_timers;
 extern CParticlesManager	g_particlesMgr;
-extern CStringsManager		g_stringsMgr;
 extern CPlayerSelScr		g_playerSelScr;
 
 extern bool     g_bShowHelp;

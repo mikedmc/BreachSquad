@@ -17,7 +17,7 @@ void App_UpdateLevelStats()
 		ErrorBox(K_ERR_CRITICAL, L"[ERROR] App_UpdateLevelStats::Array too small!!! Contact support!");
 	}
 
-	g_stringsMgr.SetString(STR_TOTAL_STARS_VAL, L"%d", g_userData[K_MEMID_STARS_TOTAL] - g_userData[K_MEMID_STARS_SPENT]);
+	UTLang().SetString(STR_TOTAL_STARS_VAL, L"%d", g_userData[K_MEMID_STARS_TOTAL] - g_userData[K_MEMID_STARS_SPENT]);
 	//count played missions, total scores, etc
 	int nCompletedMissions = 0;
 	g_userData[K_MEMID_TOTAL_SCORE_SOLO] = 0;
@@ -580,7 +580,7 @@ void App_SetSDLTriggersFromUserData(CController* ctrlrkeys1, CController* ctrlrk
 		//add a space at the end
 		StringCchCatA(strKeys, MAX_PATH, " ");
 		mbstowcs(wcsKeys, strKeys, MAX_PATH);
-		g_stringsMgr.SetString(STR_KEYS1_VAL, wcsKeys);
+		UTLang().SetString(STR_KEYS1_VAL, wcsKeys);
 	}
 	//--- KEYBOARD 2 ---
 	if (ctrlrkeys2 != null)
@@ -614,7 +614,7 @@ void App_SetSDLTriggersFromUserData(CController* ctrlrkeys1, CController* ctrlrk
 		//add a space at the end
 		StringCchCatA(strKeys, MAX_PATH, " ");
 		mbstowcs(wcsKeys, strKeys, MAX_PATH);
-		g_stringsMgr.SetString(STR_KEYS2_VAL, wcsKeys);
+		UTLang().SetString(STR_KEYS2_VAL, wcsKeys);
 	}
 	*/
 }
@@ -920,7 +920,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 
 		SDL_Scancode commandscan = (SDL_Scancode)pCtrlr->GetKeyMappingForCommand(eCommand);
 		mbstowcs_s(null, strKey, UTGetCtrlrMgr().GetSDLScancodeName(commandscan), MAX_PATH);
-		g_stringsMgr.SetStringDesc(&sdKeyName, strKey);
+		UTLang().SetStringDesc(&sdKeyName, strKey);
 	}
 	else if (pCtrlr->eType == K_CM_CT_JOYSTICK_SDL)
 	{
@@ -938,7 +938,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 				sName[ll] = toupper(sName[ll]);
 
 			mbstowcs_s(null, strKey, sName, MAX_PATH);
-			g_stringsMgr.SetStringDesc(&sdKeyName, strKey);
+			UTLang().SetStringDesc(&sdKeyName, strKey);
 			*/
 		}
 		else if (trigger->eType == K_CM_HALF_AXIS)
@@ -947,7 +947,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 			//save string name as a fallback - not used
 			/*
 			mbstowcs_s(null, strKey, SDL_GameControllerGetStringForAxis((SDL_GameControllerAxis)trigger->keyMapping), MAX_PATH);
-			g_stringsMgr.SetStringDesc(&sdKeyName, strKey);
+			UTLang().SetStringDesc(&sdKeyName, strKey);
 			*/
 		}
 	}
@@ -1063,13 +1063,13 @@ HRESULT App_LocaLoadStrings()
 	LOG(L"[LANG] Loading strings: %s", xmlpath);
 	
 	//load strings and ignore missing characters when using TTF fonts
-	if (FAILED(hr = g_stringsMgr.LoadFromXML(xmlpath, g_Language.bUseTTFonts)))
+	if (FAILED(hr = UTLang().LoadFromXML(xmlpath, g_Language.bUseTTFonts)))
 	{
 		ErrorBox(K_ERR_WARNING, L"[ERROR] Failed loading strings XML! file:%s", xmlpath);
 		return hr;
 	}
 	//set version number
-	g_stringsMgr.SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
+	UTLang().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
 	//set keyboard strings
 	CController* keybd1 = UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_IID_KBM1);
 	CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);

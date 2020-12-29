@@ -250,7 +250,8 @@ RECTXYWH CFreeTypeFont::DrawStringLine(CStringDesc *strDesc, float X, float Y, U
 	}
 	else if (Flags & FTFF_VCENTER)
 	{
-		vpos.y += rowHeight / 2.0f;
+		// round to int so it looks crispy
+		vpos.y += (int)(rowHeight / 2);
 	}
 
 	retBB.x = vpos.x; 
@@ -282,5 +283,11 @@ RECTXYWH CFreeTypeFont::DrawStringLine(CStringDesc *strDesc, float X, float Y, U
 	retBB.h = rowHeight;
 
 	return retBB;
+}
+
+RECTXYWH CFreeTypeFont::DrawStringLine(int strID, float X, float Y, UINT16 Flags /*= FTFF_BOTTOMLEFT*/, DWORD Color /*= 0xffffffff*/)
+{
+	int id = UTLang().getStrIdx(strID);
+	return DrawStringLine(UTLang().strings[id], X, Y, Flags, Color);
 }
 

@@ -42,13 +42,13 @@ bool CChaptersList::LoadChapters(WCHAR * strXmlPath)
 		CChapterDesc* cdesc = new CChapterDesc();
 		cdesc->nLevelsCnt = 0;
 		//get chapter data
-		cdesc->nChapterNameStrIdx = g_stringsMgr.getStrIdx(FastHash(chapternode.attribute(L"sStrID_ChapterName").value()));
+		cdesc->nChapterNameStrIdx = UTLang().getStrIdx(FastHash(chapternode.attribute(L"sStrID_ChapterName").value()));
 		cdesc->nChapterMissionsToUnlock = chapternode.attribute(L"nMissionsToUnlock").as_int();
 		cdesc->nChapterImgFrame = chapternode.attribute(L"nChapterImgFrame").as_int();
 		//add all missions:
 		for (pugi::xml_node missionnode = chapternode.first_child(); missionnode; missionnode = missionnode.next_sibling())
 		{
-			cdesc->arrLevelNameStrIdx[cdesc->nLevelsCnt] = g_stringsMgr.getStrIdx(missionnode.attribute(L"sStrID_LevelName").value());
+			cdesc->arrLevelNameStrIdx[cdesc->nLevelsCnt] = UTLang().getStrIdx(missionnode.attribute(L"sStrID_LevelName").value());
 			cdesc->arrLevelFilenames[cdesc->nLevelsCnt].Init(missionnode.attribute(L"sFilename").value());
 			cdesc->nLevelsCnt++;
 		}

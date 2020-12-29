@@ -106,7 +106,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 
 			///--- FONTS ---
 			//set strings manager
-			UTGetFontsManager().SetManagersPtr(&g_stringsMgr); 
+			UTGetFontsManager().SetManagersPtr(&UTLang());
 			//load fonts based on selected language
 			HRESULT hr = S_OK;
 			if (FAILED(hr = App_LocaLoadFonts(g_Language.bUseTTFonts)))
@@ -116,11 +116,11 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			}
 
 			// strings are already loaded
-			g_font1.CreateAtlas(pDevice, "media/fonts/NotoSansSC-Medium.otf", 18, g_stringsMgr.alphabet);
+			g_font1.CreateAtlas(pDevice, "media/fonts/NotoSansSC-Medium.otf", 18, UTLang().alphabet);
 			g_font1.SetStyle(-1, 2, 8);
 
 			///--- CONTROLS ---
-			UTGetGUI().SetManagersPtr(&g_stringsMgr, &UTGetFontsManager());
+			UTGetGUI().SetManagersPtr(&UTLang(), &UTGetFontsManager());
 			UTGetGUI().SetCameraTransform(&UTGetAppClass().g_cam240hScreen);
 
 			WCHAR xmlpath[MAX_PATH];
@@ -297,8 +297,8 @@ void CApplication::App_ExitState_Loading()
 	//start initialize job
 	UTGetLeaderboards().QueueJob(K_JOB_INITIALIZE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 0);
 	//reset strings for scores
-	g_stringsMgr.SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
-	g_stringsMgr.SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
+	UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
+	UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 	//reset old scores
 	UTGetLeaderboards().ResetScoresList();
 	//upload multiplayer score

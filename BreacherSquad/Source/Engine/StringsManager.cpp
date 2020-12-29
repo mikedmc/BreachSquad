@@ -724,3 +724,14 @@ int CStringsManager::UTF8toWCHAR(const char* szUTF8string, WCHAR* strDest, int n
 
 	return actualCharCount;
 }
+
+
+///**************************************************************************************
+/// Sigleton 
+///**************************************************************************************
+CStringsManager& UTLang()
+{
+	static CStringsManager g_StringsManager;
+	return g_StringsManager;
+}
+

@@ -85,6 +85,7 @@ public:
 
 	// Writes a line of texts without breaking it into multiple lines (no justify, no wrap)
 	RECTXYWH				DrawStringLine(CStringDesc *strDesc, float X, float Y, UINT16 Flags = FTFF_BOTTOMLEFT, DWORD Color = 0xffffffff);
+	RECTXYWH				DrawStringLine(int strID, float X, float Y, UINT16 Flags = FTFF_BOTTOMLEFT, DWORD Color = 0xffffffff);
 };
 
 
