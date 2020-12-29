@@ -612,7 +612,7 @@ HRESULT InitApp(void)
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
 	ChangeGameState(GAME_STATE_LOADING);
 #else
-	ChangeGameState(GAME_STATE_PUBLISHER);
+	ChangeGameState(GAME_STATE_DEVELOPER);
 #endif
 
 	return S_OK;
@@ -1059,11 +1059,6 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 
 	switch (g_gameState)
 	{
-		case GAME_STATE_PUBLISHER:
-		{
-			UTGetAppClass().App_UpdateState_Publisher(pDevice, fTime, fElapsedTime);
-		}
-		break;
 		case GAME_STATE_DEVELOPER:
 		{
 			UTGetAppClass().App_UpdateState_Developer(pDevice, fTime, fElapsedTime);
@@ -2239,12 +2234,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 		switch (g_gameState)
 		{
-			case GAME_STATE_PUBLISHER:
-			{
-				UTGetAppClass().App_PaintState_Publisher(pDevice, g_pGameSprite, fElapsedTime);
-			}
-			break;
-
 			case GAME_STATE_DEVELOPER:
 			{
 				UTGetAppClass().App_PaintState_Developer(pDevice, g_pGameSprite, fElapsedTime);
@@ -3059,11 +3048,6 @@ void ChangeGameState(int newState, int param1, int param2)
 	///--- from what state is it coming? ---
 	switch (oldGameState)
 	{
-		case GAME_STATE_PUBLISHER:
-		{
-			UTGetAppClass().App_ExitState_Publisher();
-		}
-		break;
 		case GAME_STATE_DEVELOPER:
 		{
 			UTGetAppClass().App_ExitState_Developer();
@@ -3217,12 +3201,6 @@ void ChangeGameState(int newState, int param1, int param2)
 
 	switch (newState)
 	{
-		case GAME_STATE_PUBLISHER:
-		{
-			UTGetAppClass().App_EnterState_Publisher();
-		}
-		break;
-
 		case GAME_STATE_DEVELOPER:
 		{
 			UTGetAppClass().App_EnterState_Developer();

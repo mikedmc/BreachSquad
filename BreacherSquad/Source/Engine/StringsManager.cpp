@@ -84,8 +84,8 @@ void CStringsManager::SetStringDesc(CStringDesc *desc, WCHAR* szFormat, ...)
 //<PSTexts Version="1.0">
 //  <Alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/?΅Ά£¥§©®ΏΐΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡÒΣΤΥΦΨΩΪΫάέίΰαβγδεζηθικλμνξοπρςστυφψωϊϋόύÿ</Alphabet>
 //  <Texts Lang="EN" Count="346">
-//    <Text ID="TITLE">text De Proba</Text>
-//    <Text ID="TITLE2">Text important</Text>
+//    <Text ID="TITLE">Example text 1</Text>
+//    <Text ID="TITLE2">Example text 2</Text>
 //  </Texts>
 //</PSTexts>
 //-------------------------------------------
@@ -134,21 +134,20 @@ HRESULT CStringsManager::LoadFromXML(WCHAR* fileName, bool bIgnoreMissingChars)
     {
 		CStringDesc *nstr = new CStringDesc();
 
-		//Citesc ID-ul stringului si il convertesc in char pt FastHash
 		UINT stringLen;
 		StringCchLength(stringnode.attribute(L"ID").value(), K_STRMGR_CONTENT_MAX_LEN, &stringLen);
 		if(stringLen > 0)
 		{
 			WCHAR strID[MAX_PATH];
 			StringCchCopy(strID, MAX_PATH, stringnode.attribute(L"ID").value());
-			//calculez hash-ul numelui ca sa il caut repede
+			// Compute string hash
 			nstr->shStringName.Init(strID);
 		}
 		else
 		{
 			ErrorBox(K_ERR_WARNING, L"Strings XML - 0 length string name! %s\n", stringnode.attribute(L"ID").value());
 		}
-		//citesc stringul in sine
+		// read actual string
 		const WCHAR *content = stringnode.child_value();
 		stringLen = 0;
 		if(!FAILED(StringCchLength(content, K_STRMGR_CONTENT_MAX_LEN, &stringLen)))
@@ -174,7 +173,7 @@ HRESULT CStringsManager::LoadFromXML(WCHAR* fileName, bool bIgnoreMissingChars)
 		}
 		nstr->len = stringLen; //IMPORTANT
 
-		//aici calculeaza si codurile
+		//here it computes the codes
 		WCHAR notFoundChars[MAX_PATH];
 		int retbuild = BuildStringCodes(nstr, notFoundChars);
 
@@ -182,7 +181,7 @@ HRESULT CStringsManager::LoadFromXML(WCHAR* fileName, bool bIgnoreMissingChars)
 			ErrorBox(K_ERR_WARNING, L"(%s) chars not found in string %s\n", notFoundChars, stringnode.attribute(L"ID").value());
 
 		strings.Add(nstr);
-		//count intern al functiei
+
 		count++;
     }
 
@@ -193,7 +192,7 @@ HRESULT CStringsManager::LoadFromXML(WCHAR* fileName, bool bIgnoreMissingChars)
 	StringCchCopy(fstr->sText, fstr->len + 1, K_STRMGR_DEFAULT_STRING);
 	BuildStringCodes(fstr);
 	strings.Add(fstr);
-	//salveaza idx string default
+	//default string idx
 	defaultStringIdx = strings.GetSize() - 1;
 
 	loaded = true;
@@ -307,8 +306,6 @@ int CStringsManager::getStrIdx(const CHAR* strID)
 		if(strings[kk]->shStringName.textHash == strHash)
 			return kk;
 	}
-	//daca nu gaseste ID-ul cautat intoarce idx string default "StrNotFound"
-	//ErrorBox(K_ERR_WARNING, L"getStrIdx->String not found! %s", strID);
 	return defaultStringIdx;
 }
 
@@ -321,8 +318,6 @@ int CStringsManager::getStrIdx(const WCHAR* strID)
 		if(strings[kk]->shStringName.textHash == strHash)
 			return kk;
 	}
-	//daca nu gaseste ID-ul cautat intoarce idx string default "StrNotFound"
-	//ErrorBox(K_ERR_WARNING, L"getStrIdx->String not found! %s", strID);
 	return defaultStringIdx;
 }
 
@@ -333,8 +328,6 @@ int CStringsManager::getStrIdx(UINT32 strHash)
 		if (strings[kk]->shStringName.textHash == strHash)
 			return kk;
 	}
-	//daca nu gaseste ID-ul cautat intoarce idx string default "StrNotFound"
-	//ErrorBox(K_ERR_WARNING, L"getStrIdx->String hash not found! hash:%d", strHash);
 	return defaultStringIdx;
 }
 
@@ -352,7 +345,6 @@ int CStringsManager::SetString(int idx, WCHAR* szFormat, ...)
 	va_start(marker, szFormat);
 	StringCchVPrintf(szBuffer, ARRAY_SIZE(szBuffer), szFormat, marker);
 	va_end(marker);
-	//il scrie
 
 	UINT stringLen;
 	if((!FAILED(StringCchLength(szBuffer, K_STRMGR_CONTENT_MAX_LEN, &stringLen))) && (stringLen > 0))
@@ -379,13 +371,13 @@ int CStringsManager::SetString(CHAR* id, WCHAR* szFormat, ...)
 	int retBuild = -1;
 
 	CStringDesc *nstr = strings[idx];
-	//formeaza stringul
+	
 	WCHAR szBuffer[K_STRMGR_CONTENT_MAX_LEN];
 	va_list marker;
 	va_start(marker, szFormat);
 	StringCchVPrintf(szBuffer, ARRAY_SIZE(szBuffer), szFormat, marker);
 	va_end(marker);
-	//il scrie
+	
 	UINT stringLen;
 	if((!FAILED(StringCchLength(szBuffer, K_STRMGR_CONTENT_MAX_LEN, &stringLen))) && (stringLen > 0))
 	{

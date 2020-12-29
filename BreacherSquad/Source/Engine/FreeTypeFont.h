@@ -57,8 +57,6 @@ class CFreeTypeFont
 {
 private:
 	CSpritePainter*			m_pSP;
-	//static CStringsManager			*m_pStrManager;
-	//static void SetManagersPtr(CStringsManager *strManager);
 
 public:
 	CFreeTypeAtlas			m_atlas;

@@ -182,11 +182,6 @@ public:
 	void App_PaintState_Splash(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline);
 	void App_ExitState_Splash();
 
-	void App_EnterState_Publisher();
-	void App_UpdateState_Publisher(LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime);
-	void App_PaintState_Publisher(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline);
-	void App_ExitState_Publisher();
-
 	void App_EnterState_Developer();
 	void App_UpdateState_Developer(LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime);
 	void App_PaintState_Developer(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline);
