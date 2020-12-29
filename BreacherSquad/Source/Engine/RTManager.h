@@ -11,7 +11,7 @@
 class CRTManager {
 public:
 	struct CEngineRenderTarget {
-		// DirectX specific stuff
+		
 		PRENDERTOSURFACE		m_pRenderToSurface;
 		PTEXTURE				m_pRTTexture;
 		PSURFACE				m_pRTSurface;
@@ -26,11 +26,14 @@ public:
 		FORMAT3D				dwTexFormat;
 		FORMAT3D				dwDepthStencilFormat;
 
+		MatA16					matProj;				// Projection matrix specific to this RT
+
 		CEngineRenderTarget() :
 			bReady(false), nWidth(0), nHeight(0),
 			dwTexFormat(D3DFMT_A8B8G8R8), UID(0), bDepthStencilBuffer(true),
 			dwDepthStencilFormat(D3DFMT_D24X8), nMipLevels(1)
 		{
+			MUMatIdentity(&matProj);
 		}
 	};
 

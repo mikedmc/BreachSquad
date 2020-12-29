@@ -11673,15 +11673,14 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			//use sprite
 			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
-			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
-			D3DXMATRIXA16 matProj;
-			D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
-			m_pDevice->SetTransform(D3DTS_PROJECTION, &matProj);
+			//D3DXMATRIXA16 matProj;
+			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
+			m_pDevice->SetTransform(D3DTS_PROJECTION, &pRT->matProj);
 
 			m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 			m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
-			RenderPass(K_LVL_RP_NORMALS_HEIGHT, &matProj);
+			RenderPass(K_LVL_RP_NORMALS_HEIGHT, &pRT->matProj);
 
 			// end sprite
 			//m_pSprite->End();
@@ -11705,17 +11704,16 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			//use sprite
 			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
-			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
-			D3DXMATRIXA16 matProj;
-			D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
-			m_pDevice->SetTransform(D3DTS_PROJECTION, &matProj);
+			//D3DXMATRIXA16 matProj;
+			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
+			m_pDevice->SetTransform(D3DTS_PROJECTION, &pRT->matProj);
 
 			m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 			m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
 			// special method for rendering lights pass
 			// uses the height/normals render target
-			RenderPass_Lights(&matProj);
+			RenderPass_Lights(&pRT->matProj);
 
 			// end sprite
 			//m_pSprite->End();
@@ -11740,14 +11738,14 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
 			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
-			D3DXMATRIXA16 matProj;
-			D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
-			m_pDevice->SetTransform(D3DTS_PROJECTION, &matProj);
+			//D3DXMATRIXA16 matProj;
+			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
+			m_pDevice->SetTransform(D3DTS_PROJECTION, &pRT->matProj);
 
 			m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 			m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
-			RenderPass(K_LVL_RP_COLORS, &matProj);
+			RenderPass(K_LVL_RP_COLORS, &pRT->matProj);
 
 			// end sprite
 			//m_pSprite->End();
@@ -11772,15 +11770,15 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
 			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
-			D3DXMATRIXA16 matProj;
-			D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
-			m_pDevice->SetTransform(D3DTS_PROJECTION, &matProj);
+			//D3DXMATRIXA16 matProj;
+			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
+			m_pDevice->SetTransform(D3DTS_PROJECTION, &pRT->matProj);
 
 			m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 			m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
 			// RT sized quad with tex1 color, tex2 lightmap
-			RenderPass_Composition(&matProj);
+			RenderPass_Composition(&pRT->matProj);
 
 			// end sprite
 			m_pSprite->End();

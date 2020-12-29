@@ -25,6 +25,9 @@ void CRTManager::AddRT(UINT32 dwID, UINT width, UINT height, UINT mipLevels, FOR
 	pRT->bDepthStencilBuffer = bDepthStencil;
 	pRT->dwDepthStencilFormat = depthStencilFormat;
 	pRT->nMipLevels = mipLevels;
+	// create projection matrix specific for this RT
+	// uses 0.5 because in DirectX9 UV of 0.0 means center of texel. Change this to 0.0f on OpenGL if blurry.
+	MUMatOrthoOffCenterLH(&pRT->matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
 	// Add RT to list 
 	arrRT.Add(pRT);
 

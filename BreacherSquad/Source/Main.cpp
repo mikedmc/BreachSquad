@@ -2288,9 +2288,9 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				if (pSprVS)
 					UTPainter().Begin(pSprVS, UTGetAppClass().g_matProj);
 
-				RECTXYWH retrt1 = g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f, FTFF_LEFT | FTFF_VCENTER, 0xffff8888);
-				RECTXYWH retrt2 = g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f + g_font1.rowHeight, FTFF_RIGHT, 0xff88ff88);
-				RECTXYWH retrt3 = g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f + 2 * g_font1.rowHeight, FTFF_CENTER, 0xff8888ff);
+				g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f, FTFF_LEFT | FTFF_VCENTER, 0xffff8888);
+				g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f + g_font1.rowHeight, FTFF_RIGHT, 0xff88ff88);
+				g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f + 2 * g_font1.rowHeight, FTFF_CENTER, 0xff8888ff);
 
 				UTPainter().End();
 			}
