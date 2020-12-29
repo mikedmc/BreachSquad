@@ -2294,6 +2294,17 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 					}
 				}
 
+				g_stringsMgr.SetString(STR_TEMP1, L"AVENIDA Principe Salman, 1");
+
+				PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
+				if (pSprVS)
+					UTPainter().Begin(pSprVS, UTGetAppClass().g_matProj);
+
+				RECTXYWH retrt1 = g_font1.DrawStringLine(g_stringsMgr.strings[STR_TEMP1], 400.0f, 200.0f, FTFF_LEFT | FTFF_VCENTER, 0xffff8888);
+				RECTXYWH retrt2 = g_font1.DrawStringLine(g_stringsMgr.strings[STR_TEMP1], 400.0f, 200.0f + g_font1.rowHeight, FTFF_RIGHT, 0xff88ff88);
+				RECTXYWH retrt3 = g_font1.DrawStringLine(g_stringsMgr.strings[STR_TEMP1], 400.0f, 200.0f + 2 * g_font1.rowHeight, FTFF_CENTER, 0xff8888ff);
+
+				UTPainter().End();
 			}
 			break;
 			case GAME_STATE_PLAYER_SELECTION:

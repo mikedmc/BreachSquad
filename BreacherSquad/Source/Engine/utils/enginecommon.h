@@ -1104,3 +1104,19 @@ int						UTF8toWCHAR(WCHAR* dest, char* src, int maxSize);
 
 std::wstring RemoveQuotationMarks(const std::wstring& initialString);
 std::vector<std::string>& split(const std::string &s, char delim, std::vector<std::string> &elems);
+
+/*
+// Use it to get charcater by character from utf8 encoded string:
+// usage example:
+	const char*    p = strutf8;
+	const char*    end = p + strlen(strutf8);
+	for (;;)
+	{
+		int ch = utf8_next(&p, end);
+		if (ch < 0)
+			break;
+
+		unsigned long codepoint = (unsigned long)ch;
+    }
+*/
+int utf8_next(const char**  pcursor, const char*   end);

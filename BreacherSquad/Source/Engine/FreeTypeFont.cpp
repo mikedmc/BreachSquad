@@ -10,13 +10,19 @@
 
 CFreeTypeFont::CFreeTypeFont()
 {
-	//m_pStrManager = nullptr;
+	rowHeight = 0;
+	letterSpacing = 0;
+	rowSpacing = 1;
+	spaceSize = 8;
+	
+	m_pSP = &UTPainter();
 }
 
 CFreeTypeFont::~CFreeTypeFont()
 {
 	Release();
 }
+
 
 OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSize, WCHAR* wstrUniqueChars)
 {
@@ -41,6 +47,7 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 	int nCharsCnt = wcslen(wstrUniqueChars);
 	_ASSERT(nCharsCnt > 0);
 
+	//#TODO: should parse all characters and compute the total texture area necessary for the letters and then find the closest texture size
 	int max_dim = (1 + (face->size->metrics.height >> 6)) * ceilf(sqrtf(nCharsCnt));
 	int tex_width = 1;
 	while (tex_width < max_dim) tex_width <<= 1;
@@ -66,11 +73,42 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 	// clear pixels
 	memset(pixels, 0, tex_width * tex_height);
 
+	m_atlas.nMaxBearingY = 0;
+	int maxW = 0;
+
 	int pen_x = 0, pen_y = 0;
 
+	/*
+	// alternative mode: convert string to utf8 (or get it as utf 8 and parse it char by char)
+
+	char strutf8[2048];
+	WCHARtoUTF8(strutf8, wstrUniqueChars, 2048);
+
+	const char*    p = strutf8;
+	const char*    end = p + strlen(strutf8); 
+	for (;;)
+	{
+		int ch = utf8_next(&p, end);
+		if (ch < 0)
+			break;
+
+		unsigned long codepoint = (unsigned long)ch;
+	 }
+	 */
+
 	for (int i = 0; i < nCharsCnt; ++i) {
-		FT_Load_Char(face, wstrUniqueChars[i], FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT);
+		FT_Int32 nLoadFlags = FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT;
+		FT_ULong codepoint = (FT_ULong)wstrUniqueChars[i];
+		
+		FT_Load_Char(face, codepoint, nLoadFlags);
+
 		FT_Bitmap* bmp = &face->glyph->bitmap;
+		// compute max char height from all characters (ignoring letters that go under or over)
+		if (m_atlas.nMaxBearingY < (face->glyph->metrics.horiBearingY >> 6))
+			m_atlas.nMaxBearingY = (face->glyph->metrics.horiBearingY >> 6);
+		// space size will be the widest character divided by 2
+		if (maxW < bmp->width)
+			maxW = bmp->width;
 
 		if (pen_x + bmp->width >= tex_width) {
 			pen_x = 0;
@@ -97,10 +135,23 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 		ginfo.y_off = face->glyph->bitmap_top;
 		ginfo.advanceX = face->glyph->advance.x >> 6;
 
+		ginfo.texRect.Set((float)pen_x / (float)tex_width, (float)pen_y / (float)tex_height, 
+			(float)(pen_x + bmp->width) / (float)tex_width, (float)(pen_y + bmp->rows) / (float)tex_height);
+
+		int bx = face->glyph->metrics.horiBearingX >> 6;
+		int by = face->glyph->metrics.horiBearingY >> 6;
+		ginfo.moduleRectOff.Set(bx, -by,
+			bx + bmp->width, -by + bmp->rows);
+
 		m_atlas.arrGlyphs.Add(ginfo);
 
 		pen_x += bmp->width + 1;
 	}
+
+	// save font data
+	spaceSize = maxW / 2;
+	// row height could be used from font metrics: face->size->metrics.height but this is usually bigger.
+	rowHeight = m_atlas.nMaxBearingY;
 
 	FT_Done_Face(face);
 	FT_Done_FreeType(ft);
@@ -137,11 +188,99 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 	return K_OP_OK;
 }
 
+void CFreeTypeFont::SetStyle(int nLetterSpacing, int nRowSpacing, int nSpaceSize)
+{
+	letterSpacing = nLetterSpacing;
+	rowSpacing = nRowSpacing;
+	spaceSize = nSpaceSize;
+}
+
 void CFreeTypeFont::Release()
 {
 	LOG(L"CFreeTypeFont::Release font:%s", shFontName.text);
 	bLoaded = false;
 	shFontName.Reset();
 	m_atlas.Release();
+}
+
+RECTXYWH CFreeTypeFont::DrawStringLine(CStringDesc *strDesc, float X, float Y, UINT16 Flags, DWORD Color)
+{
+	RECTXYWH retBB;
+	if (strDesc == nullptr)
+		return retBB;
+
+	Vec2 vpos(X, Y);
+
+	UINT16 length = strDesc->len;
+	UINT16* text = strDesc->codes;
+
+	if (length == 0)
+		return retBB;
+
+	// we have to compute text line width
+	int nLineW = 0;
+	if (IS_FLAG_ANY(Flags, FTFF_CENTER | FTFF_RIGHT))
+	{
+		for (int ii = 0; ii < length; ii++)
+		{
+			int cod = text[ii];
+			if (cod == K_STRMGR_RETURN)
+				continue;
+			else if (cod == K_STRMGR_SPACE)
+			{
+				nLineW += spaceSize;
+				continue;
+			}
+			nLineW += m_atlas.arrGlyphs[cod].advanceX + letterSpacing;
+		}
+
+		if (Flags & FTFF_RIGHT)
+		{
+			vpos.x = X - nLineW;
+		}
+		else if (Flags & FTFF_CENTER)
+		{
+			vpos.x = X - nLineW / 2;
+		}
+	}
+
+	if (Flags & FTFF_TOP)
+	{
+		vpos.y += rowHeight;
+	}
+	else if (Flags & FTFF_VCENTER)
+	{
+		vpos.y += rowHeight / 2.0f;
+	}
+
+	retBB.x = vpos.x; 
+	retBB.y = vpos.y - rowHeight;
+
+	// paint text
+	nLineW = 0;
+	for (int ii = 0; ii < length; ii++)
+	{
+		int cod = text[ii];
+		if (cod == K_STRMGR_RETURN)
+		{
+			continue;
+		}
+		else if (cod == K_STRMGR_SPACE)
+		{
+			vpos.x += spaceSize;
+			continue;
+		}
+
+		// draws the letter
+		sGlyphInfo* glyph = &m_atlas.arrGlyphs[cod];
+		UTPainter().Draw(m_atlas.pTex, glyph->texRect, glyph->moduleRectOff, vpos, Color);
+		vpos.x += (float)(glyph->advanceX + letterSpacing);
+		nLineW += glyph->advanceX + letterSpacing;
+	}
+
+	retBB.w = nLineW;
+	retBB.h = rowHeight;
+
+	return retBB;
 }
 
