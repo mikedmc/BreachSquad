@@ -51,7 +51,7 @@ public:
 // Structure fed to CreateAtlas for advanced font rendering
 struct sFreeTypeFontStyle
 {
-	std::string				strTexturePath;				// empty string for no texture
+	std::string				strTexturePath;				// empty string for no texture. The specified PNG gets aligned with the center on the letter baseline.
 	DWORD					dwOutlineColor;				// 0 for no outline
 	DWORD					dwShadowColor;				// 0 for no shadow
 	int						shadowOffsetX;

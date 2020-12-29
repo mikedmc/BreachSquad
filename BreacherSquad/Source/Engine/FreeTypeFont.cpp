@@ -95,10 +95,10 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 	m_atlas.atlasSize.w = tex_width;
 	m_atlas.atlasSize.h = tex_height;
 
-	// render glyphs to atlas
-	unsigned char* pixels = new unsigned char[tex_width * tex_height];
+	// render glyphs to atlas in RGBA format (4 bytes per pixel)
+	unsigned char* pixels = new unsigned char[tex_width * tex_height * 4];
 	// clear pixels
-	memset(pixels, 0, tex_width * tex_height);
+	memset(pixels, 0, tex_width * tex_height * 4);
 
 	m_atlas.nMaxBearingY = 0;
 	int maxW = 0;
@@ -142,11 +142,32 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 			pen_y += ((face->size->metrics.height >> 6) + 1);
 		}
 
+		int glyphBearing = (face->glyph->metrics.horiBearingY >> 6);
 		for (int row = 0; row < bmp->rows; ++row) {
 			for (int col = 0; col < bmp->width; ++col) {
 				int x = pen_x + col;
 				int y = pen_y + row;
-				pixels[y * tex_width + x] = bmp->buffer[row * bmp->pitch + col];
+				BYTE glyphcol = bmp->buffer[row * bmp->pitch + col];
+				
+				int pidx = y * tex_width + x;
+				unsigned char pcol = glyphcol;
+				unsigned char cola = pcol, colr = pcol, colg = pcol, colb = pcol;
+				// do we have a loaded image?
+				if (png_bytes != nullptr)
+				{
+					float fcol = ((float)pcol) / 255.0f;
+					// texture center gets aligned to font baseline
+					int png_idx = ((png_height + png_height / 2 + row - glyphBearing) % png_height) * png_width + (x % png_width);
+					colr = (unsigned char)(fcol * png_bytes[png_idx * 4 + 0]);
+					colg = (unsigned char)(fcol * png_bytes[png_idx * 4 + 1]);
+					colb = (unsigned char)(fcol * png_bytes[png_idx * 4 + 2]);
+					cola = (unsigned char)(fcol * png_bytes[png_idx * 4 + 3]);
+				}
+				// save final color into pixels in RGBA format
+				pixels[pidx * 4 + 0] = colr;
+				pixels[pidx * 4 + 1] = colg;
+				pixels[pidx * 4 + 2] = colb;
+				pixels[pidx * 4 + 3] = cola;
 			}
 		}
 
@@ -199,23 +220,11 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 		for (int xx = 0; xx < tex_width; xx++)
 		{
 			int idx = yy * tex_width + xx;
-			unsigned char pcol = pixels[yy * tex_width + xx];
-			unsigned char cola = pcol, colr = pcol, colg = pcol, colb = pcol;
-			// do we have a loaded image?
-			if (png_bytes != nullptr)
-			{
-				float fcol = ((float)pcol) / 255.0f;
-				int tex_idx = (yy % png_height) * png_width + (xx % png_width);
-				colr = (unsigned char)(fcol * png_bytes[tex_idx * 4 + 0]);
-				colg = (unsigned char)(fcol * png_bytes[tex_idx * 4 + 1]);
-				colb = (unsigned char)(fcol * png_bytes[tex_idx * 4 + 2]);
-				cola = (unsigned char)(fcol * png_bytes[tex_idx * 4 + 3]);
-			}
-			// Looks like BGRA
-			img[idx * 4 + 0] = colb;		//blue
-			img[idx * 4 + 1] = colg;		//green
-			img[idx * 4 + 2] = colr;		//red
-			img[idx * 4 + 3] = cola;		//alpha
+			// TARGET texture: BGRA, source pixels: RGBA
+			img[idx * 4 + 0] = pixels[idx * 4 + 2];
+			img[idx * 4 + 1] = pixels[idx * 4 + 1];
+			img[idx * 4 + 2] = pixels[idx * 4 + 0];
+			img[idx * 4 + 3] = pixels[idx * 4 + 3];
 		}
 	}
 
