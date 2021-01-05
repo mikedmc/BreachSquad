@@ -120,8 +120,8 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			fstyle.strTexturePath = "media/fonts/rust64.png";
 			fstyle.fShadowAlpha = 0.6f;
 			fstyle.shadowOffsetX = 2;
-			fstyle.shadowOffsetY = 5;
-			fstyle.dwOutlineColor = 0x66000000;
+			fstyle.shadowOffsetY = 4;
+			fstyle.dwOutlineColor = 0x88000000;
 			g_font1.CreateAtlas(pDevice, "media/fonts/gunshipcond.ttf", 32, UTLang().alphabet, &fstyle);
 			g_font1.SetStyle(-1, 2, 8);
 

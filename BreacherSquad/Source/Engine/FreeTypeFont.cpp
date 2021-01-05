@@ -29,11 +29,12 @@ CFreeTypeFont::~CFreeTypeFont()
 OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSize, WCHAR* wstrUniqueChars, sFreeTypeFontStyle *pStyle)
 {
 	//the raw pixels of the texturing png image	(R,G,B,A,...)
-	unsigned png_width, png_height;
+	unsigned png_width = 1, png_height = 1;
 	unsigned char *png_bytes = nullptr;
 	// padding for each letter (distance to edge)
 	int padL = 0, padR = 0, padD = 0, padU = 0;
 	//outline color
+	float fOutlineA = 0.0f;
 	BYTE outlineA = 0, outlineR = 0, outlineG = 0, outlineB = 0;
 
 	if (pStyle != nullptr)
@@ -75,6 +76,7 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 			padU = max(padU, 1);
 			padD = max(padD, 1);
 			D3DCOLOR_UNPACKTOBYTE(pStyle->dwOutlineColor, outlineA, outlineR, outlineG, outlineB);
+			fOutlineA = (float)outlineA / 255.0f;
 		}
 	}
 
@@ -126,7 +128,7 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 	memset(pixels, 0, tex_width * tex_height * 4);
 
 	m_atlas.nMaxBearingY = 0;
-	int maxW = 0;
+	unsigned int maxW = 0;
 
 	int pen_x = 0, pen_y = 0;
 
@@ -162,7 +164,7 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 		if (maxW < bmp->width)
 			maxW = bmp->width;
 
-		if (pen_x + bmp->width + padL + padR >= tex_width) {
+		if (pen_x + (int)bmp->width + padL + padR >= tex_width) {
 			pen_x = 0;
 			pen_y += ((face->size->metrics.height >> 6) + 1) + padU + padD;
 		}
@@ -178,8 +180,8 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 				bOutline = true;
 		}
 
-		for (int row = 0; row < bmp->rows; ++row) {
-			for (int col = 0; col < bmp->width; ++col) {
+		for (int row = 0; row < (int)bmp->rows; ++row) {
+			for (int col = 0; col < (int)bmp->width; ++col) {
 				int x = pen_x + col + padL;
 				int y = pen_y + row + padU;
 				BYTE glyphcol = bmp->buffer[row * bmp->pitch + col];
@@ -206,41 +208,58 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 					pixels[pidx * 4 + 0] = colr;
 					pixels[pidx * 4 + 1] = colg;
 					pixels[pidx * 4 + 2] = colb;
-					// keep existing alpha if bigger than what we write (shadow could be there)
-					if (bShadow)
-						pixels[pidx * 4 + 3] = max(cola, pixels[pidx * 4 + 3]);
-					else
-						pixels[pidx * 4 + 3] = cola;
+					pixels[pidx * 4 + 3] = cola;
 				}
-
-				//writes outline
-				if (bOutline && (cola > 0))
-				{
-					int arroff[] = { -1,0, 0,-1, 1,0, 0,1 };
-					for (int kk = 0; kk < 4; kk++)
-					{
-						int sidx = (y + arroff[kk * 2 + 1]) * tex_width + x + arroff[kk * 2 + 0];
-						// only write if alpha not set
-						if (pixels[sidx * 4 + 3] < outlineA)
-						{
-							pixels[sidx * 4 + 0] = outlineR;
-							pixels[sidx * 4 + 1] = outlineG;
-							pixels[sidx * 4 + 2] = outlineB;
-							pixels[sidx * 4 + 3] = outlineA;
-						}
-					}
-				}
-
-				// writes shadow pixels
-				if (bShadow && (cola > 0))
-				{
-					int sidx = (y + pStyle->shadowOffsetY) * tex_width + x + pStyle->shadowOffsetX;
-					// all pixels have 0 color (array is cleared) so we just set alpha (defaults to black shadow)
-					pixels[sidx * 4 + 3] = (BYTE)(cola * pStyle->fShadowAlpha);
-				}
-
 			}
 		}
+
+		// add shadow and outline
+		if (bShadow || bOutline)
+		{
+			for (int row = 0; row < (int)bmp->rows; ++row) {
+				for (int col = 0; col < (int)bmp->width; ++col) {
+					int x = pen_x + col + padL;
+					int y = pen_y + row + padU;
+					BYTE glyphcol = bmp->buffer[row * bmp->pitch + col];
+
+					unsigned char cola = glyphcol;
+
+					//writes outline
+					if (bOutline && (cola > 0))
+					{
+						int arroff[] = { -1,0, 0,-1, 1,0, 0,1 };
+						for (int kk = 0; kk < 4; kk++)
+						{
+							int sidx = (y + arroff[kk * 2 + 1]) * tex_width + x + arroff[kk * 2 + 0];
+							// only write if alpha not set
+							if (pixels[sidx * 4 + 3] < outlineA)
+							{
+								pixels[sidx * 4 + 0] = outlineR;
+								pixels[sidx * 4 + 1] = outlineG;
+								pixels[sidx * 4 + 2] = outlineB;
+								pixels[sidx * 4 + 3] = (BYTE)(fOutlineA * cola);
+							}
+						}
+					}
+
+					// writes shadow pixels
+					if (bShadow && (cola > 0))
+					{
+						int sidx = (y + pStyle->shadowOffsetY) * tex_width + x + pStyle->shadowOffsetX;
+						BYTE shadowCol = (BYTE)(cola * pStyle->fShadowAlpha);
+
+						// all pixels have 0 color (array is cleared) so we just set alpha (defaults to black shadow)
+						if (pixels[sidx * 4 + 3] < shadowCol)
+						{
+							pixels[sidx * 4 + 3] = shadowCol;
+						}
+						
+					}
+				}
+			}
+		}
+
+
 
 		// glyph data
 		sGlyphInfo ginfo;
@@ -261,7 +280,7 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 	}
 
 	// save font data
-	spaceSize = maxW / 2;
+	spaceSize = (int)(maxW / 2);
 	// row height could be used from font metrics: face->size->metrics.height but this is usually bigger.
 	rowHeight = m_atlas.nMaxBearingY;
 
