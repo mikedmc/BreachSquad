@@ -4889,7 +4889,7 @@ void DXUTCleanup3DEnvironment(bool bReleaseSettings)
 			if (pd3dDevice->Release() > 0)  
 			{
 				DXUTDisplayErrorMessage(DXUTERR_NONZEROREFCOUNT);
-				DXUT_ERR(L"DXUTCleanup3DEnvironment", DXUTERR_NONZEROREFCOUNT);
+				DXUT_ERR(L"DXUTCleanup3DEnvironment not all resources released!", DXUTERR_NONZEROREFCOUNT);
 			}
 		}
 		GetDXUTState().SetD3DDevice(NULL);

@@ -618,7 +618,7 @@ void CNetLock::Net_EnterLobby(bool bHostGame, bool bPrivateLobby)
 	//downloaded level
 	memset(m_csModID_DwnLvl, 0, sizeof(m_csModID_DwnLvl));
 	//text shown on connection window
-	g_stringsMgr.SetString(STR_CONNECTION_MSG, g_stringsMgr.strings[STR_WAITING_PEER]->sText);
+	UTLang().SetString(STR_CONNECTION_MSG, UTLang().strings[STR_WAITING_PEER]->sText);
 
 	// request lobby ahead of time or join a lobby if invited
 	if (m_ullCurLobbyID == 0) //create/join lobby
@@ -651,8 +651,8 @@ void CNetLock::Net_QuitLobby()
 	m_nPlayerFlags[0] = 0;
 	m_nPlayerFlags[1] = 0;
 	//erase names from 
-	g_stringsMgr.SetString(STR_NETWORK_HOST_NAME, L"host");
-	g_stringsMgr.SetString(STR_NETWORK_PEER_NAME, L"peer");
+	UTLang().SetString(STR_NETWORK_HOST_NAME, L"host");
+	UTLang().SetString(STR_NETWORK_PEER_NAME, L"peer");
 }
 
 void CNetLock::Net_UpdateLobby(float dTime)
@@ -778,11 +778,11 @@ void CNetLock::Net_UpdateLobby(float dTime)
 		CStringsManager::UTF8toWCHAR(lobby.players[1].m_rgchName, szTemp, MAX_PATH);
 		m_sNames[1].Init(szTemp);
 		//write names in strings too
-		g_stringsMgr.SetString(STR_NETWORK_HOST_NAME, m_sNames[0].text);
-		g_stringsMgr.SetString(STR_NETWORK_PEER_NAME, m_sNames[1].text);
+		UTLang().SetString(STR_NETWORK_HOST_NAME, m_sNames[0].text);
+		UTLang().SetString(STR_NETWORK_PEER_NAME, m_sNames[1].text);
 
 		//change interface text from waiting to connecting
-		g_stringsMgr.ReplaceTokenString(STR_CONNECTION_MSG, STR_CONNECTING_PEER_X, 1, m_sNames[Net_GetOtherPlayerIndex()].text);
+		UTLang().ReplaceTokenString(STR_CONNECTION_MSG, STR_CONNECTING_PEER_X, 1, m_sNames[Net_GetOtherPlayerIndex()].text);
 
 		//#TODO: disable CANCEL button (should have timeout)
 		//CCtrlLayer* layer = UTGetControlsManager().GetTopmostInputLayer();

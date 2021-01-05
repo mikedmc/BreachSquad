@@ -6,6 +6,7 @@
 
 #define OP_FAILED(er) ((((int)er.code)) < 0)
 #define OP_SUCCESS(er) ((((int)er.code)) >= 0)
+#define OPHRFAILED(hr) (hr < 0)
 
 #ifndef V_OP_RETHR
 	#define V_OP_RETHR(x)           { if (OP_FAILED(x)) { return E_FAIL; } }
@@ -14,8 +15,9 @@
 	#define V_OP_RET(x)           { if (OP_FAILED(x)) { return x; } }
 #endif
 #ifndef V_OP_HRTOOP
-#define V_OP_HRTOOP(hr)           { if (hr < 0) { return K_OP_FAILED; } }
+	#define V_OP_HRTOOP(hr)           { if (hr < 0) { return K_OP_FAILED; } }
 #endif
+
 
 ///--- generic return values
 enum eOpResult {

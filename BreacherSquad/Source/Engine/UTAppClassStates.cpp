@@ -106,7 +106,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 
 			///--- FONTS ---
 			//set strings manager
-			UTGetFontsManager().SetManagersPtr(&g_stringsMgr); 
+			UTGetFontsManager().SetManagersPtr(&UTLang());
 			//load fonts based on selected language
 			HRESULT hr = S_OK;
 			if (FAILED(hr = App_LocaLoadFonts(g_Language.bUseTTFonts)))
@@ -115,9 +115,18 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				return;
 			}
 
+			// strings are already loaded
+			sFreeTypeFontStyle fstyle;
+			fstyle.strTexturePath = "media/fonts/rust64.png";
+			fstyle.fShadowAlpha = 0.6f;
+			fstyle.shadowOffsetX = 2;
+			fstyle.shadowOffsetY = 4;
+			fstyle.dwOutlineColor = 0x88000000;
+			g_font1.CreateAtlas(pDevice, "media/fonts/gunshipcond.ttf", 32, UTLang().alphabet, &fstyle);
+			g_font1.SetStyle(-1, 2, 8);
 
 			///--- CONTROLS ---
-			UTGetGUI().SetManagersPtr(&g_stringsMgr, &UTGetFontsManager());
+			UTGetGUI().SetManagersPtr(&UTLang(), &UTGetFontsManager());
 			UTGetGUI().SetCameraTransform(&UTGetAppClass().g_cam240hScreen);
 
 			WCHAR xmlpath[MAX_PATH];
@@ -176,8 +185,10 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				return;
 			}
 			///--- load main menu ---
+			WCHAR xmlpath2[MAX_PATH];
 			FileManager::GetMediaPath(L"media/interfaces/menus.bsx", xmlpath);
-			if (FAILED(g_mainMenu.LoadSprites(xmlpath)))
+			FileManager::GetMediaPath(L"media/interfaces/menus0.bsx", xmlpath2);
+			if (FAILED(g_mainMenu.LoadSprites(xmlpath, xmlpath2)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath);
 			}
@@ -294,8 +305,8 @@ void CApplication::App_ExitState_Loading()
 	//start initialize job
 	UTGetLeaderboards().QueueJob(K_JOB_INITIALIZE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 0);
 	//reset strings for scores
-	g_stringsMgr.SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
-	g_stringsMgr.SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
+	UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
+	UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 	//reset old scores
 	UTGetLeaderboards().ResetScoresList();
 	//upload multiplayer score
@@ -559,74 +570,6 @@ void CApplication::App_ExitState_Splash()
 	SND_PLAY_FADEIN(SNDIDX_THEME_MENU1, 1.0f, DSBPLAY_LOOPING);
 }
 
-
-///----- GAME_STATE_PUBLISHER -----
-
-void CApplication::App_EnterState_Publisher()
-{
-	g_gameSubstate = 0;
-	g_gameStateTimer = K_GAME_SPLASH_SHOW_TIMER;
-	//make sure we release everything
-	g_texManager.Release();
-	//load the texture
-	WCHAR texpath[MAX_PATH];
-	StringCchPrintf(texpath, MAX_PATH, L"%s/interfaces/publisher.png", UTGetAppClass().g_wszAppResDir);
-	g_texManager.AddTexture(texpath, null, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
-}
-
-void CApplication::App_UpdateState_Publisher(LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime)
-{
-	if ((!g_bDuringTransition) && (g_gameStateTimer > 0.5f))
-	{
-		if ((g_texManager.GetTexture(0) == null) || (g_mouse.Lbut != K_MOUSE_BUTT_NOTPRESSED) || (g_mouse.Rbut != K_MOUSE_BUTT_NOTPRESSED) || (UTGetCtrlrMgr().KeyPressed()))
-		{
-			g_gameStateTimer = 0.5f;
-		}
-	}
-
-	if (g_gameSubstate == 0)
-	{
-		g_gameStateTimer -= dTime;
-		if (g_gameStateTimer <= 0.0f)
-		{
-			g_gameSubstate = 1;
-			//change state to loading
-			CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
-			nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_DEVELOPER);
-			nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-			UTGetEventManager().QueueEvent(nevent);
-		}
-	}
-}
-
-void CApplication::App_PaintState_Publisher(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline)
-{
-	//setam ecranul standard de 240h inaltime
-	CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam240hScreen);
-	App_SetWorldTransform(pDevice, &g_matIdentity);
-
-	RECTXYWH_F scrrect = UTGetAppClass().g_cam240hScreen.GetCamWorldAABB();
-	RECTXYWH_F worldrect = UTGetAppClass().g_rect240hWorld;
-	RECT src;
-	//logo
-	LPDIRECT3DTEXTURE9 pTex = g_texManager.GetTexture(0);
-	if (pTex != null)
-	{
-		//7x3 frames 71x86px
-		int nAnimFrames = 25;
-		SIZEWH recsz(93, 74);
-		int nFrame = (int)floor(nAnimFrames * (1.0f - (g_gameStateTimer / K_GAME_SPLASH_SHOW_TIMER)));
-		int nx = nFrame % 5, ny = nFrame / 5;
-
-		SetRect(&src, nx * recsz.w, ny * recsz.h, (nx + 1) * recsz.w, (ny + 1) * recsz.h);
-		pSprite->Draw(pTex, &src, &D3DXVECTOR3((src.right - src.left) / 2.0f, (src.bottom - src.top) / 2.0f, 0.0f), &D3DXVECTOR3(scrrect.CenterX(), scrrect.CenterY(), 0.0f), 0xffffffff);
-	}
-}
-
-void CApplication::App_ExitState_Publisher()
-{
-	g_texManager.Release();
-}
 
 
 ///----- GAME_STATE_DEVELOPER -----

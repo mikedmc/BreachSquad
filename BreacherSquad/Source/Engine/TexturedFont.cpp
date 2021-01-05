@@ -344,7 +344,7 @@ int CTexturedFont::DrawStringClamped(CStringDesc *strDesc, int X, int Y, int max
 	int maxHeight = rowHeight;
 
 	//measure 3 dots length
-	int dotscode = g_stringsMgr.getLetterIdx('.');
+	int dotscode = UTLang().getLetterIdx('.');
 	int dotsw = 3 * (frameBBox[dotscode].w + letterSpacing);
 
 	int localLen = 0;

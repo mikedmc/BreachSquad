@@ -1,14 +1,14 @@
 #pragma once
 
-//--- ORDINEA NORMALA DE ADAUGARE IN STRUCTURA A DATELOR ---
-//D3DFVF_XYZ       - position in 3D space
-//D3DFVF_XYZRHW      - already transformed co-ordinate (2D space)
-//D3DFVF_NORMAL      - normal
-//D3DFVF_DIFFUSE     - diffuse colour
-//D3DFVF_SPECULAR     - specular colour
-//D3DFVF_TEX1       - one texture co-ordinate
-//D3DFVF_TEX2       - two texture co-ordinates
-//--- pt fixced pipeline nu schimba ordinea !!!! ---
+//--- DX order of elements in fixed pipeline structures ---
+//D3DFVF_XYZ			- position in 3D space
+//D3DFVF_XYZRHW			- already transformed co-ordinate (2D space)
+//D3DFVF_NORMAL			- normal
+//D3DFVF_DIFFUSE		- diffuse colour
+//D3DFVF_SPECULAR		- specular colour
+//D3DFVF_TEX1			- one texture co-ordinate
+//D3DFVF_TEX2			- two texture co-ordinates
+//--- for fixed pipeline don't change order in structs ---
 
 //-=-=-= VERTEX TYPES =-=-=-
 typedef struct _tagVERTEX_PNCT4T4

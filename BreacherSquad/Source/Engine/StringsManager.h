@@ -91,3 +91,6 @@ public:
 	static int UTF8toWCHAR(const char* szUTF8string, WCHAR* strDest, int nMaxLenDest);
 };
 
+// Access singleton
+CStringsManager& UTLang();
+

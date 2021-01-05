@@ -69,7 +69,7 @@ void CParticlesManager::AddStringParticle(CTexturedFont *pFont, WCHAR* text,
 	newp->m_stringDesc.sText = new WCHAR[newp->m_stringDesc.len + 1];
 	newp->strColor = nColor;
 	memcpy(newp->m_stringDesc.sText, text, sizeof(WCHAR) * (newp->m_stringDesc.len + 1));
-	g_stringsMgr.BuildStringCodes(&newp->m_stringDesc);
+	UTLang().BuildStringCodes(&newp->m_stringDesc);
 
 	if(pos)
 		newp->m_vPos = *pos;
@@ -252,7 +252,7 @@ int CParticlesManager::AddStringDummy(int nType, D3DXVECTOR2 np1, int stringID, 
 			ndum->intParam2 = fontID;
 			ndum->timer = 0.0f;
 			ndum->intPt.x = fontID;
-			ndum->intPt.y = size * UTGetFontsManager()[fontID]->MeasureHString(g_stringsMgr.strings[stringID]->shStringName.textHash).w;
+			ndum->intPt.y = size * UTGetFontsManager()[fontID]->MeasureHString(UTLang().strings[stringID]->shStringName.textHash).w;
 			ndum->fparam = size;
 			ndum->fparam2 = showTime;
 
@@ -280,10 +280,10 @@ int CParticlesManager::AddStringDummy(int nType, D3DXVECTOR2 np1, int stringID, 
 			ndum->pt1 = np1;
 			ndum->status = 0;
 			ndum->intParam = stringID;
-			ndum->intParam2 = g_stringsMgr.strings[stringID]->len;
+			ndum->intParam2 = UTLang().strings[stringID]->len;
 			ndum->timer = 0.0f;
 			ndum->intPt.x = fontID;
-			ndum->intPt.y = size * UTGetFontsManager()[fontID]->MeasureHString(g_stringsMgr.strings[stringID]->shStringName.textHash).w;
+			ndum->intPt.y = size * UTGetFontsManager()[fontID]->MeasureHString(UTLang().strings[stringID]->shStringName.textHash).w;
 			ndum->fparam = size;
 			ndum->fparam2 = showTime;
 
@@ -565,7 +565,7 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 				for( int ii = 0; ii < ndum->intParam2; ii++ )
 				{
 					RECT letterRect;
-					int cod = g_stringsMgr.strings[ndum->intParam]->codes[ii];
+					int cod = UTLang().strings[ndum->intParam]->codes[ii];
 					if((cod == K_STRMGR_SPACE)||(cod == K_STRMGR_RETURN)) 
 					{
 						posx += UTGetFontsManager()[ndum->intPt.x]->spaceSize * ndum->fPtr[ii] * ndum->fparam;

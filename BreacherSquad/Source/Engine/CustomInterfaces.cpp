@@ -159,7 +159,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 
 			float fTimer = pPlayer->AItimer1;
 			CStringDesc strdesc;
-			g_stringsMgr.ReplaceTokenInt(&strdesc, STR_RESPAWNING_IN_N, 1, (int)ceil(fTimer));
+			UTLang().ReplaceTokenInt(&strdesc, STR_RESPAWNING_IN_N, 1, (int)ceil(fTimer));
 			//ca sa licare
 			if ((FLOAT_FRAC(fTimer) > 0.2f) && (fTimer > 0.0f))
 			{
@@ -350,7 +350,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 			if (gearwpn->ammoLeft >= 0)
 			{
 				CStringDesc sdAmmo;
-				g_stringsMgr.SetStringDesc(&sdAmmo, L"%d", gearwpn->ammoLeft);
+				UTLang().SetStringDesc(&sdAmmo, L"%d", gearwpn->ammoLeft);
 				if (bFlipped)
 				{
 					pSprite->SetTransform(&g_matIdentity);
@@ -643,7 +643,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 			}
 			spr.paint(sprCol);
 			//nume icon
-			CStringDesc * strDesc = g_stringsMgr.strings[arrStrategicNames[kk]];
+			CStringDesc * strDesc = UTLang().strings[arrStrategicNames[kk]];
 			CTexturedFont* pFont = g_font5n1;
 			D3DXVECTOR2 vButCenter(spr2.pos.x + 8, spr2.pos.y + 33);
 			SIZEWH fsz = pFont->MeasureString(strDesc);
@@ -846,7 +846,7 @@ void CCustomInterfaceIGM::Init(CSpriteCollection* sprCollection, CActor * player
 					SDL_Scancode commandscan = (SDL_Scancode)ctrlr->GetKeyMappingForCommand(arr_commands[ii]);
 					//mbstowcs_s(null, strKey, SDL_GetScancodeName(commandscan), MAX_PATH);
 					mbstowcs_s(null, strKey, UTGetCtrlrMgr().GetSDLScancodeName(commandscan), MAX_PATH);
-					g_stringsMgr.SetStringDesc(&arrKeyNames[kk][ii], strKey);
+					UTLang().SetStringDesc(&arrKeyNames[kk][ii], strKey);
 				}
 			}
 			else if (ctrlr->eType == K_CM_CT_JOYSTICK_SDL)
@@ -866,14 +866,14 @@ void CCustomInterfaceIGM::Init(CSpriteCollection* sprCollection, CActor * player
 							sName[ll] = toupper(sName[ll]);
 
 						mbstowcs_s(null, strKey, sName, MAX_PATH);
-						g_stringsMgr.SetStringDesc(&arrKeyNames[kk][ii], strKey);
+						UTLang().SetStringDesc(&arrKeyNames[kk][ii], strKey);
 					}
 					else if (trigger->eType == K_CM_HALF_AXIS)
 					{
 						arrKeyIcons[kk][ii] = K_CI_ARR_AXISICONS_FRAMES[trigger->keyMapping];
 						//save string name as a fallback
 						mbstowcs_s(null, strKey, SDL_GameControllerGetStringForAxis((SDL_GameControllerAxis)trigger->keyMapping), MAX_PATH);
-						g_stringsMgr.SetStringDesc(&arrKeyNames[kk][ii], strKey);
+						UTLang().SetStringDesc(&arrKeyNames[kk][ii], strKey);
 					}
 				}
 			}
@@ -967,7 +967,7 @@ void CCustomInterfaceIGM::Paint(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite)
 		WCHAR txt[MAX_PATH];
 		OS_FormatTime(txt, MAX_PATH, m_fBombTimer);
 		CStringDesc strdesc;
-		g_stringsMgr.SetStringDesc(&strdesc, txt);
+		UTLang().SetStringDesc(&strdesc, txt);
 		g_font8bs1->DrawString(&strdesc, vTimerPos.x, vTimerPos.y, FONTFLAG_ANCHOR_BOTTOMCENTER, wcol);
 	}
 
@@ -1144,7 +1144,7 @@ void CCustomInterfaceTextBubble::Paint(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* p
 				RECT trct;
 				SetRect(&trct, vPosUL.x, vPosUL.y, vPosDR.x, vPosDR.y);
 				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam480hScreen);
-				pFont->pFontReplacementTTF->pFont->DrawTextW(pSprite, g_stringsMgr.strings[nTextIDX]->sText, -1, &trct, DT_CENTER | DT_VCENTER, dwCol);
+				pFont->pFontReplacementTTF->pFont->DrawTextW(pSprite, UTLang().strings[nTextIDX]->sText, -1, &trct, DT_CENTER | DT_VCENTER, dwCol);
 				pSprite->Flush();
 				CCameraTransform::SetActiveCamera(pDevice, pcam);
 			}

@@ -145,9 +145,9 @@ void CChatWnd::AddLine(WCHAR * strText, WCHAR * strAuthor, DWORD dwColor /*= 0xf
 			CStringDesc sdOut;
 			CChatLine* cl = new CChatLine();
 			if ((strAuthor == null) || (wcslen(strAuthor) <= 0))
-				g_stringsMgr.ReplaceTokenString(&sdOut, STR_ABORT_MISSION_REQ_MSG, 1, L"PEER");
+				UTLang().ReplaceTokenString(&sdOut, STR_ABORT_MISSION_REQ_MSG, 1, L"PEER");
 			else
-				g_stringsMgr.ReplaceTokenString(&sdOut, STR_ABORT_MISSION_REQ_MSG, 1, strAuthor);
+				UTLang().ReplaceTokenString(&sdOut, STR_ABORT_MISSION_REQ_MSG, 1, strAuthor);
 
 			StringCchPrintf(cl->sText, MAX_PATH, L"%s", sdOut.sText);
 			cl->dwColor = K_CW_SYSTEM_COLOR_GREEN;
