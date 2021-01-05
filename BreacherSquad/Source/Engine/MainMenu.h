@@ -61,7 +61,8 @@ public:
 	~CMainMenu();
 
 	CSpriteCollection	m_sprCol;
-	HRESULT LoadSprites(WCHAR * strSpritePath);
+	CSpriteCollection	m_sprColNew;
+	HRESULT LoadSprites(WCHAR * strSpritePath, WCHAR * strSprPath);
 
 	void SetSpritePtr(ID3DXSprite* pSprite);
 	void SetState(EMM_State neState, int nArg1 = 0);
@@ -70,9 +71,10 @@ public:
 
 	void Update(float dTime);
 	void Paint();
-	/*!
-	 *	Paints the main background (3 heroes) modulated with a color
-	 */
+
+	// Paints the animated background
+	void PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles = false);
+
 	void PaintMainBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles = false);
 	void PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD dwColor);
 	void PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, float fAlpha);

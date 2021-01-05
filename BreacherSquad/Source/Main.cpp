@@ -3069,9 +3069,10 @@ void ChangeGameState(int newState, int param1, int param2)
 		{
 			g_playerSelScr.ReleaseSprites();
 			///--- load main menu ---
-			WCHAR xmlpath[MAX_PATH];
+			WCHAR xmlpath[MAX_PATH], xmlpath2[MAX_PATH];
 			FileManager::GetMediaPath(L"media/interfaces/menus.bsx", xmlpath);
-			if (FAILED(g_mainMenu.LoadSprites(xmlpath)))
+			FileManager::GetMediaPath(L"media/interfaces/menus0.bsx", xmlpath2);
+			if (FAILED(g_mainMenu.LoadSprites(xmlpath, xmlpath2)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath);
 			}
@@ -3130,9 +3131,10 @@ void ChangeGameState(int newState, int param1, int param2)
 			SND_SET_GROUP_VOLUME("music", UTGetAppClass().m_Settings.fMusicVolume, false);
 
 			///--- load main menu ---
-			WCHAR xmlpath[MAX_PATH];
+			WCHAR xmlpath[MAX_PATH], xmlpath2[MAX_PATH];
 			FileManager::GetMediaPath(L"media/interfaces/menus.bsx", xmlpath);
-			if (FAILED(g_mainMenu.LoadSprites(xmlpath)))
+			FileManager::GetMediaPath(L"media/interfaces/menus0.bsx", xmlpath2);
+			if (FAILED(g_mainMenu.LoadSprites(xmlpath, xmlpath2)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath);
 			}
@@ -3159,8 +3161,10 @@ void ChangeGameState(int newState, int param1, int param2)
 			g_mainMenu.Release();
 			
 			WCHAR xmlpath[MAX_PATH];
+			WCHAR xmlpath2[MAX_PATH];
 			FileManager::GetMediaPath(L"media/interfaces/menus.bsx", xmlpath);
-			if (FAILED(g_mainMenu.LoadSprites(xmlpath)))
+			FileManager::GetMediaPath(L"media/interfaces/menus0.bsx", xmlpath2);
+			if (FAILED(g_mainMenu.LoadSprites(xmlpath, xmlpath2)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath);
 			}

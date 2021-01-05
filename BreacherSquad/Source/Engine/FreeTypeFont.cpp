@@ -31,6 +31,10 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 	//the raw pixels of the texturing png image	(R,G,B,A,...)
 	unsigned png_width, png_height;
 	unsigned char *png_bytes = nullptr;
+	// padding for each letter (distance to edge)
+	int padL = 0, padR = 0, padD = 0, padU = 0;
+	//outline color
+	BYTE outlineA = 0, outlineR = 0, outlineG = 0, outlineB = 0;
 
 	if (pStyle != nullptr)
 	{
@@ -50,6 +54,27 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 				png_image.clear();
 				png_image.shrink_to_fit();
 			}
+		}
+		// enlarge glyph rect if using shadow or outline
+		if (pStyle->fShadowAlpha > 0.0f)
+		{
+			if (pStyle->shadowOffsetX > 0)
+				padR = pStyle->shadowOffsetX;
+			else if (pStyle->shadowOffsetX < 0)
+				padL = -pStyle->shadowOffsetX;
+			if (pStyle->shadowOffsetY > 0)
+				padD = pStyle->shadowOffsetY;
+			else if (pStyle->shadowOffsetY < 0)
+				padU = -pStyle->shadowOffsetY;
+		}
+
+		if (pStyle->dwOutlineColor > 0x0)
+		{
+			padR = max(padR, 1);
+			padL = max(padL, 1);
+			padU = max(padU, 1);
+			padD = max(padD, 1);
+			D3DCOLOR_UNPACKTOBYTE(pStyle->dwOutlineColor, outlineA, outlineR, outlineG, outlineB);
 		}
 	}
 
@@ -75,7 +100,7 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 	_ASSERT(nCharsCnt > 0);
 
 	//#TODO: should parse all characters and compute the total texture area necessary for the letters and then find the closest texture size
-	int max_dim = (1 + (face->size->metrics.height >> 6)) * ceilf(sqrtf(nCharsCnt));
+	int max_dim = (1 + (face->size->metrics.height >> 6) + padU + padD) * ceilf(sqrtf(nCharsCnt));
 	int tex_width = 1;
 	while (tex_width < max_dim) tex_width <<= 1;
 	int tex_height = tex_width;
@@ -137,22 +162,32 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 		if (maxW < bmp->width)
 			maxW = bmp->width;
 
-		if (pen_x + bmp->width >= tex_width) {
+		if (pen_x + bmp->width + padL + padR >= tex_width) {
 			pen_x = 0;
-			pen_y += ((face->size->metrics.height >> 6) + 1);
+			pen_y += ((face->size->metrics.height >> 6) + 1) + padU + padD;
 		}
 
 		int glyphBearing = (face->glyph->metrics.horiBearingY >> 6);
+
+		bool bShadow = false, bOutline = false;
+		if (pStyle != nullptr)
+		{
+			if (pStyle->fShadowAlpha > 0.0f)
+				bShadow = true;
+			if (pStyle->dwOutlineColor > 0x0)
+				bOutline = true;
+		}
+
 		for (int row = 0; row < bmp->rows; ++row) {
 			for (int col = 0; col < bmp->width; ++col) {
-				int x = pen_x + col;
-				int y = pen_y + row;
+				int x = pen_x + col + padL;
+				int y = pen_y + row + padU;
 				BYTE glyphcol = bmp->buffer[row * bmp->pitch + col];
 				
 				int pidx = y * tex_width + x;
 				unsigned char pcol = glyphcol;
 				unsigned char cola = pcol, colr = pcol, colg = pcol, colb = pcol;
-				// do we have a loaded image?
+				// do we have a loaded png image to texture our font?
 				if (png_bytes != nullptr)
 				{
 					float fcol = ((float)pcol) / 255.0f;
@@ -163,40 +198,66 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 					colb = (unsigned char)(fcol * png_bytes[png_idx * 4 + 2]);
 					cola = (unsigned char)(fcol * png_bytes[png_idx * 4 + 3]);
 				}
-				// save final color into pixels in RGBA format
-				pixels[pidx * 4 + 0] = colr;
-				pixels[pidx * 4 + 1] = colg;
-				pixels[pidx * 4 + 2] = colb;
-				pixels[pidx * 4 + 3] = cola;
+
+				//FINALLY save final color into pixels in RGBA format
+				if (cola > 0)
+				{
+					// only write opaque pixels
+					pixels[pidx * 4 + 0] = colr;
+					pixels[pidx * 4 + 1] = colg;
+					pixels[pidx * 4 + 2] = colb;
+					// keep existing alpha if bigger than what we write (shadow could be there)
+					if (bShadow)
+						pixels[pidx * 4 + 3] = max(cola, pixels[pidx * 4 + 3]);
+					else
+						pixels[pidx * 4 + 3] = cola;
+				}
+
+				//writes outline
+				if (bOutline && (cola > 0))
+				{
+					int arroff[] = { -1,0, 0,-1, 1,0, 0,1 };
+					for (int kk = 0; kk < 4; kk++)
+					{
+						int sidx = (y + arroff[kk * 2 + 1]) * tex_width + x + arroff[kk * 2 + 0];
+						// only write if alpha not set
+						if (pixels[sidx * 4 + 3] < outlineA)
+						{
+							pixels[sidx * 4 + 0] = outlineR;
+							pixels[sidx * 4 + 1] = outlineG;
+							pixels[sidx * 4 + 2] = outlineB;
+							pixels[sidx * 4 + 3] = outlineA;
+						}
+					}
+				}
+
+				// writes shadow pixels
+				if (bShadow && (cola > 0))
+				{
+					int sidx = (y + pStyle->shadowOffsetY) * tex_width + x + pStyle->shadowOffsetX;
+					// all pixels have 0 color (array is cleared) so we just set alpha (defaults to black shadow)
+					pixels[sidx * 4 + 3] = (BYTE)(cola * pStyle->fShadowAlpha);
+				}
+
 			}
 		}
 
 		// glyph data
 		sGlyphInfo ginfo;
 
-		/*
-		// removed as unnecessary
-		ginfo.x0 = pen_x;
-		ginfo.y0 = pen_y;
-		ginfo.x1 = pen_x + bmp->width;
-		ginfo.y1 = pen_y + bmp->rows;
-
-		ginfo.x_off = face->glyph->bitmap_left;
-		ginfo.y_off = face->glyph->bitmap_top;
-		*/
 		ginfo.advanceX = face->glyph->advance.x >> 6;
 
 		ginfo.texRect.Set((float)pen_x / (float)tex_width, (float)pen_y / (float)tex_height, 
-			(float)(pen_x + bmp->width) / (float)tex_width, (float)(pen_y + bmp->rows) / (float)tex_height);
+			(float)(pen_x + bmp->width + padL + padR) / (float)tex_width, (float)(pen_y + bmp->rows + padU + padD) / (float)tex_height);
 
 		int bx = face->glyph->metrics.horiBearingX >> 6;
 		int by = face->glyph->metrics.horiBearingY >> 6;
-		ginfo.moduleRectOff.Set(bx, -by,
-			bx + bmp->width, -by + bmp->rows);
+		ginfo.moduleRectOff.Set(bx - padL, -by - padU,
+			bx - padL + bmp->width + padR, -by - padU + bmp->rows + padD);
 
 		m_atlas.arrGlyphs.Add(ginfo);
 
-		pen_x += bmp->width + 1;
+		pen_x += bmp->width + 1 + padL + padR;
 	}
 
 	// save font data

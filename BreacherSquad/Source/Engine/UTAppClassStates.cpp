@@ -118,6 +118,10 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			// strings are already loaded
 			sFreeTypeFontStyle fstyle;
 			fstyle.strTexturePath = "media/fonts/rust64.png";
+			fstyle.fShadowAlpha = 0.6f;
+			fstyle.shadowOffsetX = 2;
+			fstyle.shadowOffsetY = 5;
+			fstyle.dwOutlineColor = 0x66000000;
 			g_font1.CreateAtlas(pDevice, "media/fonts/gunshipcond.ttf", 32, UTLang().alphabet, &fstyle);
 			g_font1.SetStyle(-1, 2, 8);
 
@@ -181,8 +185,10 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				return;
 			}
 			///--- load main menu ---
+			WCHAR xmlpath2[MAX_PATH];
 			FileManager::GetMediaPath(L"media/interfaces/menus.bsx", xmlpath);
-			if (FAILED(g_mainMenu.LoadSprites(xmlpath)))
+			FileManager::GetMediaPath(L"media/interfaces/menus0.bsx", xmlpath2);
+			if (FAILED(g_mainMenu.LoadSprites(xmlpath, xmlpath2)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath);
 			}

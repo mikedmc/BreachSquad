@@ -52,10 +52,15 @@ public:
 struct sFreeTypeFontStyle
 {
 	std::string				strTexturePath;				// empty string for no texture. The specified PNG gets aligned with the center on the letter baseline.
-	DWORD					dwOutlineColor;				// 0 for no outline
-	DWORD					dwShadowColor;				// 0 for no shadow
+	DWORD					dwOutlineColor;				// 0 for no outline, should always set alpha to non zero when enabled
+	float					fShadowAlpha;				// 0 for no shadow
 	int						shadowOffsetX;
 	int						shadowOffsetY;
+
+	sFreeTypeFontStyle() :
+		dwOutlineColor(0), fShadowAlpha(0.0f),
+		shadowOffsetX(0), shadowOffsetY(2)
+	{}
 };
 
 class CFreeTypeFont

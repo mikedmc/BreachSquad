@@ -27,10 +27,14 @@ CMainMenu::~CMainMenu()
 	Release();
 }
 
-HRESULT CMainMenu::LoadSprites(WCHAR * strSpritePath)
+HRESULT CMainMenu::LoadSprites(WCHAR * strSpritePath, WCHAR * strSprPath)
 {
 	HRESULT hr = S_OK;
 	if (OP_FAILED(m_sprCol.LoadSprites(strSpritePath)))
+	{
+		return hr;
+	}
+	if (OP_FAILED(m_sprColNew.LoadSprites(strSprPath)))
 	{
 		return hr;
 	}
@@ -1836,14 +1840,14 @@ void CMainMenu::Paint()
 
 		case K_MM_STATE_MAINMENU:
 		{
-			PaintMainBackground(worldrect, 0xffffffff, true);
+			PaintBackground(worldrect, 0xffffffff, true);
 
 			//linear sampling
 			m_pSprite->Flush();
 			m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 			m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
-			//particule foc
+			//fire particles
 			g_particlesMgr.PaintLayer(K_PART_LAYER_FRONT_LIGHT, true);
 
 			m_pSprite->Flush();
@@ -1851,18 +1855,7 @@ void CMainMenu::Paint()
 			m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 
 			//paint logo
-			CSprite::paintFrame(&m_sprCol, scrrect.Right(), scrrect.y, ANM_MENUS_SPR_TITLE, 0);
-			//paint logo bling
-			CSprite spr(ANM_MENUS_SPR_TITLE, scrrect.Right(), scrrect.y);
-			spr.currentFrame = 1;
-			CSprite spr2 = spr;
-
-			//float fAlpha = (2.0f * PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.6f, 0.5f, 2)) - 1.0f;
-			float fAlpha = (((1.0f + sin(fLocalTimeline)) * 5.0f) - 9.0f);
-			CLAMP(fAlpha, 0.0f, 1.0f);
-			spr2.color = D3DCOLOR_FFFA(fAlpha * 0.7f);
-			spr2.paint(&m_sprCol);
-			AdditiveBlendingOFF(m_pDevice, m_pSprite);
+			CSprite::paintFrame(&m_sprColNew, (int)scrrect.x, (int)scrrect.Bottom(), ANM_MENUS0_SPR_LOGO_MM, 0);
 		}
 		break;
 
@@ -2529,6 +2522,39 @@ void CMainMenu::Paint()
 	m_pSprite->Flush();
 }
 
+void CMainMenu::PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles /*= false*/)
+{
+	//background
+	CSprite::paintFrame(&m_sprColNew, (int)worldRect.x, (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 0, dwColor);
+	// chars back layer
+	CSprite::paintFrame(&m_sprColNew, (int)worldRect.x, (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 1, dwColor);
+	// chars front layer
+	CSprite::paintFrame(&m_sprColNew, (int)worldRect.x, (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 2, dwColor);
+	//particles
+	/*
+	if (bPaintParticles)
+	{
+		//linear sampling
+		m_pSprite->Flush();
+		m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+		m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+
+		//particule foc
+		g_particlesMgr.PaintLayer(K_PART_LAYER_NORMAL_LIGHT, true);
+
+		m_pSprite->Flush();
+		m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+		m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	}
+	*/
+	//paint character flickering orange light
+	AdditiveBlendingON(m_pDevice, m_pSprite);
+	float alpha = 0.2f + PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.4f, 0.5f, 2);
+	//paint flickering right glow
+	CSprite::paintFrame(&m_sprColNew, (int)worldRect.x, (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 3, D3DCOLOR_COLORALPHA(dwColor, alpha));
+	AdditiveBlendingOFF(m_pDevice, m_pSprite);
+}
+
 void CMainMenu::PaintMainBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles)
 {
 	//paint back
@@ -2761,6 +2787,7 @@ void CMainMenu::PaintGameModeWindow(D3DXVECTOR2 vCenter, int nGameModeIdx, float
 void CMainMenu::Release()
 {
 	m_sprCol.Release();
+	m_sprColNew.Release();
 }
 
 /*----------------------------------*\
@@ -2772,6 +2799,7 @@ HRESULT CMainMenu::OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE
 	HRESULT hr = S_OK;
 
 	V_RETURN(m_sprCol.OnCreateDevice(pd3dDevice));
+	V_RETURN(m_sprColNew.OnCreateDevice(pd3dDevice));
 	return hr;
 }
 
@@ -2780,6 +2808,7 @@ HRESULT CMainMenu::OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_
 	m_pDevice = pd3dDevice;
 	HRESULT hr = S_OK;
 	V_RETURN(m_sprCol.OnResetDevice(pd3dDevice));
+	V_RETURN(m_sprColNew.OnResetDevice(pd3dDevice));
 	return hr;
 }
 
@@ -2788,6 +2817,7 @@ HRESULT CMainMenu::OnLostDevice(void)
 	HRESULT hr = S_OK;
 	m_pDevice = NULL;
 	V_RETURN(m_sprCol.OnLostDevice());
+	V_RETURN(m_sprColNew.OnLostDevice());
 	return hr;
 }
 
@@ -2796,5 +2826,6 @@ HRESULT CMainMenu::OnDestroyDevice(void)
 	m_pDevice = NULL;
 	HRESULT hr = S_OK;
 	V_RETURN(m_sprCol.OnDestroyDevice());
+	V_RETURN(m_sprColNew.OnDestroyDevice());
 	return hr;
 }

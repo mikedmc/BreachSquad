@@ -425,6 +425,7 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "constants/bk_city_SPR.h"
 #include "constants/controls_SPR.h"
 #include "constants/menus_SPR.h"
+#include "constants/menus0_SPR.h"
 #include "constants/title_screen_SPR.h"
 
 //enable SDL support
