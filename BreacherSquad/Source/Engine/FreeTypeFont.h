@@ -61,6 +61,14 @@ struct sFreeTypeFontStyle
 		dwOutlineColor(0), fShadowAlpha(0.0f),
 		shadowOffsetX(0), shadowOffsetY(2)
 	{}
+
+	sFreeTypeFontStyle(DWORD dwOutlineCol, float fShadowA, int nShadOffX, int nShadOffY, CHAR* strTexPath = nullptr) :
+		dwOutlineColor(dwOutlineCol), fShadowAlpha(fShadowA),
+		shadowOffsetX(nShadOffX), shadowOffsetY(nShadOffY)
+	{
+		if (strTexPath != nullptr)
+			strTexturePath = strTexPath;
+	}
 };
 
 class CFreeTypeFont

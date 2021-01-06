@@ -2267,6 +2267,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			{
 				g_mainMenu.Paint();
 
+				/*
 				// show font image
 				if (DXUTIsKeyDown('6'))
 				{
@@ -2293,6 +2294,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f + 2 * g_font1.rowHeight, FTFF_CENTER, 0xff8888ff);
 
 				UTPainter().End();
+				*/
 			}
 			break;
 			case GAME_STATE_PLAYER_SELECTION:
