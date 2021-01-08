@@ -32,7 +32,9 @@ CSpritePainter::~CSpritePainter(void)
 OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 flags /*= K_BS_ALPHABLENDING */)
 {
 	_ASSERT(m_pDevice != nullptr);
+#if defined(_DEBUG) || defined(DEBUG)
 	stats_sequences++;
+#endif
 	// set shader and projection matrix
 	m_pVShader = pVShader;
 	m_matProj = matViewProj;
@@ -81,7 +83,9 @@ OPRESULT CSpritePainter::End()
 
 OPRESULT CSpritePainter::Flush()
 {
+#if defined(_DEBUG) || defined(DEBUG)
 	stats_flushes++;
+#endif
 
 	if (m_nVertexCursor == 0)
 		return K_OP_OK;
@@ -126,8 +130,10 @@ OPRESULT CSpritePainter::Flush()
 
 		m_pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, m_nTrisOffsets[kk] * 2, m_nTrisPerTexture[kk] * 2, m_nTrisOffsets[kk] * 3, m_nTrisPerTexture[kk]);
 
+#if defined(_DEBUG) || defined(DEBUG)
 		stats_calls++;
 		stats_sprites += m_nTrisPerTexture[kk] / 2;
+#endif
 	}
 
 	//reset verts

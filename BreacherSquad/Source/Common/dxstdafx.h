@@ -616,9 +616,9 @@ using namespace spine;
 extern CLog*				g_pLog;		//log class
 
 extern bool					g_bCanPause;  //poate pune pauza?
-extern D3DXMATRIXA16		g_matIdentity;
-extern D3DXMATRIXA16		g_matWorld;
-extern D3DXVECTOR2			g_vecGravity;
+extern Mat					g_matIdentity;
+extern Mat					g_matWorld;
+extern Vec2					g_vecGravity;
 //mouse
 extern CMouseData			g_mouse;
 //gamestate

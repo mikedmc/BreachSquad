@@ -138,7 +138,7 @@ OPRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 		FModules.Add(nfmod);
 	}
 	fmoduleNo = FModules.GetSize();
-	//dezaloca tempmodules
+	//release tempmodules
 	for(int kk=0; kk<tempModules.GetSize(); kk++)
 	{
 		SAFE_DELETE(tempModules[kk]);
@@ -245,7 +245,7 @@ OPRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 	}
 	aframesNo = AFrames.GetSize();
 
-	//sterge tempframes
+	//delete temp frames
 	for(int kk=0; kk < tempFrames.GetSize(); kk++ )
 	{
 		SAFE_DELETE_ARRAY(tempFrames[kk]->frame_fmodulesIdx);
@@ -266,7 +266,7 @@ OPRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 		{
 			nanim->animName.Init(animdata.attribute(L"ID").value());
 
-//pe debug verifica coliziuni
+// on debug check anim name hash collisions
 #if defined(_DEBUG) || defined(DEBUG)
 			for(int jj=0; jj<Animations.GetSize(); jj++)
 				if(Animations[jj]->animName == nanim->animName)

@@ -192,7 +192,7 @@ void CSpr::Paint(CSpriteCollection* sprCol)
 	{
 		scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[ii]];
 		
-		s_pSP->Draw(sprCol->Textures[mod->imgIdx]->pTex,
+		s_pSP->Draw(mod->pImg->pTex,
 			mod->texRect,
 			mod->moduleRectOff,
 			pos,
@@ -209,7 +209,7 @@ void CSpr::PaintModule(CSpriteCollection* sprCol, int moduleIdx)
 
 	scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[moduleIdx]];
 
-	s_pSP->Draw(sprCol->Textures[mod->imgIdx]->pTex, mod->texRect, mod->moduleRectOff, pos, color);
+	s_pSP->Draw(mod->pImg->pTex, mod->texRect, mod->moduleRectOff, pos, color);
 }
 
 void CSpr::PaintModule_texOverride(CSpriteCollection *sprCol, int moduleIdx, int texIdxOffset)
@@ -232,11 +232,11 @@ void UTSprite::PaintFrameEx(CSpriteCollection *sprCol, Vec2 vPos, int animID, in
 	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameID];
 	for (int ii = 0; ii < sprCol->AFrames[aframeIdx]->fmodulesNo; ii++)
 	{
-		int fmoduleIdx = sprCol->AFrames[aframeIdx]->fmodulesIdx[ii];
+		scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[ii]];
 
-		UTPainter().DrawEx(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx]->pTex,
-			sprCol->FModules[fmoduleIdx]->texRect,
-			sprCol->FModules[fmoduleIdx]->moduleRectOff,
+		UTPainter().DrawEx(mod->pImg->pTex,
+			mod->texRect,
+			mod->moduleRectOff,
 			vPos,
 			ncolor, fRotZ, vScale);
 	}
@@ -249,11 +249,11 @@ void UTSprite::PaintFrameModule(CSpriteCollection *sprCol, Vec2 vPos, int animID
 	_ASSERT(moduleID < sprCol->AFrames[sprCol->Animations[animID]->aframesIdx[frameID]]->fmodulesNo);
 
 	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameID];
-	int fmoduleIdx = sprCol->AFrames[aframeIdx]->fmodulesIdx[moduleID];
+	scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[moduleID]];
 
-	UTPainter().Draw(sprCol->Textures[sprCol->FModules[fmoduleIdx]->imgIdx]->pTex,
-		sprCol->FModules[fmoduleIdx]->texRect,
-		sprCol->FModules[fmoduleIdx]->moduleRectOff,
+	UTPainter().Draw(mod->pImg->pTex,
+		mod->texRect,
+		mod->moduleRectOff,
 		vPos, ncolor);
 }
 

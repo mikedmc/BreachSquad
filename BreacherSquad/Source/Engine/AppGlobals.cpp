@@ -971,7 +971,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 	}
 }
 
-void App_SetWorldTransform(LPDIRECT3DDEVICE9 pDevice, D3DXMATRIXA16* matWorld)
+void App_SetWorldTransform(PDEVICE pDevice, Mat* matWorld)
 {
 	g_matWorld = *matWorld;
 	pDevice->SetTransform(D3DTS_WORLD, matWorld);

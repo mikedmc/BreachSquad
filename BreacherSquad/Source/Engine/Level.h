@@ -430,11 +430,11 @@ public:
 
 	//#TODO: to be replaced with generic function that takes a "channel" param
 	OPRESULT				PaintDeferredBuffers();
-	OPRESULT				RenderPass(eLVLRenderPass ePass, MatA16* matProj);
+	OPRESULT				RenderPass(eLVLRenderPass ePass, Mat* matProj);
 	// the lights pass is so very different that it needs a special function
-	OPRESULT				RenderPass_Lights(MatA16* matProj);
+	OPRESULT				RenderPass_Lights(Mat* matProj);
 	// composes color and lights into one RT
-	OPRESULT				RenderPass_Composition(MatA16* matProj);
+	OPRESULT				RenderPass_Composition(Mat* matProj);
 
 	// level paint into composition texture 
 	void					Paint();

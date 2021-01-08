@@ -11792,7 +11792,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 	return K_OP_OK;
 }
 
-OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, MatA16* matProj)
+OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 {
 	_ASSERT((ePass > K_LVL_RP_NONE) && (ePass < K_LVL_RP_COUNT));
 
@@ -11905,9 +11905,9 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, MatA16* matProj)
 	return K_OP_OK;
 }
 
-OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
+OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 {
-	MatA16	matView;
+	Mat				matView;
 
 	RECTXYWH_F		camrect = m_camLevel.GetCamWorldAABB();
 	CAABB			camAABB(camrect.x, camrect.y, camrect.Right(), camrect.Bottom());
@@ -12184,9 +12184,9 @@ OPRESULT CLevel::RenderPass_Lights(MatA16* matProj)
 	return K_OP_OK;
 }
 
-OPRESULT CLevel::RenderPass_Composition(MatA16* matProj)
+OPRESULT CLevel::RenderPass_Composition(Mat* matProj)
 {
-	MatA16	matView;
+	Mat				matView;
 
 	RECTXYWH_F		camrect = m_camLevel.GetCamWorldAABB();
 	CAABB			camAABB(camrect.x, camrect.y, camrect.Right(), camrect.Bottom());

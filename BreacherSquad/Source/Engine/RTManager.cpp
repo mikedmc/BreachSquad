@@ -18,6 +18,7 @@ CRTManager::~CRTManager()
 void CRTManager::AddRT(UINT32 dwID, UINT width, UINT height, UINT mipLevels, FORMAT3D texFormat, bool bDepthStencil /*= TRUE*/, FORMAT3D depthStencilFormat /*= D3DFMT_D24X8*/)
 {
 	CEngineRenderTarget * pRT = new CEngineRenderTarget();
+
 	pRT->UID = dwID;
 	pRT->nWidth = width;
 	pRT->nHeight = height;

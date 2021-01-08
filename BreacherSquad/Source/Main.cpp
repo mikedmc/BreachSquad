@@ -43,8 +43,8 @@ bool						g_bForceOneUpdatePerFrame = false;	// flag used to force only one upda
 Vec2						g_vecGravity;						//gravity
 
 ID3DXSprite*				g_pGameSprite = NULL;				//Main Sprite class 
-MatA16						g_matIdentity;						//identity matrix
-MatA16						g_matWorld;							//world matrix
+Mat							g_matIdentity;						//identity matrix
+Mat							g_matWorld;							//world matrix
 
 CLog*						g_pLog;								//log class
 
@@ -2176,10 +2176,10 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	}
 
 	HRESULT hr;
-	MatA16 mView;
-	MatA16 mProj;
-	MatA16 mWorldView;
-	MatA16 mWorldViewProjection;
+	Mat mView;
+	Mat mProj;
+	Mat mWorldView;
+	Mat mWorldViewProjection;
 
 
 	///PART1. Here it paints the offscreen surfaces
@@ -2283,7 +2283,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 					}
 				}
 
-				UTLang().SetString(STR_TEMP1, L"AVENIDA Principe Salman, 1");
+				UTLang().SetString(STR_TEMP1, L"Play Game now!");
 
 				PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 				if (pSprVS)
