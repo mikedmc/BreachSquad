@@ -132,6 +132,10 @@ int CStringsManager::LoadFromXML(WCHAR* fileName, WCHAR* strLangCode, std::wstri
 		{
 			for (int kk = 0; kk < contentLen; kk++)
 			{
+				// don't add space and new line characters, or tab
+				if ((content[kk] == ' ') || (content[kk] == '\n') || (content[kk] == '\t'))
+					continue;
+
 				std::size_t found = strAlphabet.find(content[kk]);
 				if (found == std::string::npos)
 				{
@@ -143,8 +147,8 @@ int CStringsManager::LoadFromXML(WCHAR* fileName, WCHAR* strLangCode, std::wstri
 
 		nStringsCnt++;
 	}
-	// sort alphabet now just for good looks
-	std::sort(strAlphabet.begin(), strAlphabet.end());
+	// sort alphabet now just for good looks. Not always good as it moves letters after numbers but then it becomes harder to find the letter codes (deeper iterations)
+	//std::sort(strAlphabet.begin(), strAlphabet.end());
 
 	alphabet = new WCHAR[strAlphabet.length() + 1];
 	memset(alphabet, 0, sizeof(WCHAR) * (strAlphabet.length() + 1));
