@@ -1,19 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <LocaList>
-  <Loca LangName="English" LangAlias="english" TextsFileName="strings.xml" />
+  <Loca LangName="English" LangAlias="english" TextsFileName="strings.xml" 
+	MinimumAlphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/\?¡¢©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº" />
   <Loca LangName="Deutsch" LangAlias="german" TextsFileName="strings_de.xml" />
+	MinimumAlphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/\?¡¢©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº" />
   <Loca LangName="Русский" LangAlias="russian" TextsFileName="strings_ru.xml" />
+	MinimumAlphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/\?¡¢©®¿ºАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя" />
   <Loca LangName="Français" LangAlias="french" TextsFileName="strings_fr.xml" />
+	MinimumAlphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/\?¡¢©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº" />
   <Loca LangName="Español" LangAlias="spanish" TextsFileName="strings_es.xml" />
+	MinimumAlphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/\?¡¢©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº" />
   <Loca LangName="Português-Brasil" LangAlias="brazilian" TextsFileName="strings_ptbr.xml" />
+	MinimumAlphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/\?¡¢©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº" />
   <Loca LangName="Português" LangAlias="portuguese" TextsFileName="strings_pt.xml" />
+	MinimumAlphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/\?¡¢©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº" />
   <Loca LangName="Italiano" LangAlias="italian" TextsFileName="strings_it.xml" />
+	MinimumAlphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/\?¡¢©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº" />
   <Loca LangName="简体中文" LangAlias="schinese" TextsFileName="strings_cn.xml" bUseTTFonts="true" />
+	MinimumAlphabet="0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/\?¡¢©®º" />
   <Loca LangName="日本語" LangAlias="japanese" TextsFileName="strings_jp.xml" bUseTTFonts="true" />
+	MinimumAlphabet="0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/\?¡¢©®º" />
   <Loca LangName="한국어" LangAlias="koreana" TextsFileName="strings_kr.xml" bUseTTFonts="true" />
+	MinimumAlphabet="0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/\?¡¢©®º" />
 </LocaList>
 
 <!-- 
+MinimumAlphabet - specify the glyphs that you want to make sure that get created. Unspecified ones will be added from the strings.
+
 For LangAlias see steam API language codes in supported languages list here: 
 https://partner.steamgames.com/doc/store/localization#supported_languages
 -->

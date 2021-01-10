@@ -336,16 +336,18 @@ void			App_SetWorldTransform(PDEVICE pDevice, Mat* matWorld);
 
 ///----------------------------- LOCALIZATIONS - LANGUAGES ----------------------------
 struct CLocaLanguage {
-	CStringHash shLangName;
-	CStringHash	shLangAlias;
-	CStringHash shFileName;
-	bool		bUseTTFonts; //use true type fonts only
+	CStringHash					shLangName;
+	CStringHash					shLangAlias;
+	CStringHash					shFileName;
+	std::wstring				strMinAlphabet; // minimum alphabet to create
+	bool						bUseTTFonts; //use true type fonts only
 
 	CLocaLanguage() : bUseTTFonts(false)
 	{
 		shLangName.Reset();
 		shLangAlias.Reset();
 		shFileName.Reset();
+		strMinAlphabet.clear();
 	}
 };
 

@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "dxstdafx.h"
 
+#include <algorithm>
+
 CStringDesc::CStringDesc()
 {
 	codes = NULL;
@@ -47,6 +49,8 @@ CStringsManager::CStringsManager()
 
 	alphabet = NULL;
 	loaded = false;
+
+	strLangAlias.clear();
 }
 
 CStringsManager::~CStringsManager()
@@ -82,14 +86,13 @@ void CStringsManager::SetStringDesc(CStringDesc *desc, WCHAR* szFormat, ...)
 //-------------------------------------------
 //<?xml version="1.0" encoding="utf-8"?>
 //<PSTexts Version="1.0">
-//  <Alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/?¡¢£¥§©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖØÙÚÛÜİŸßàáâãäåæçèéêëìíîïğñòóôõöøùúûüıÿŒœ</Alphabet>
-//  <Texts Lang="EN" Count="346">
+//  <Texts>
 //    <Text ID="TITLE">Example text 1</Text>
 //    <Text ID="TITLE2">Example text 2</Text>
 //  </Texts>
 //</PSTexts>
 //-------------------------------------------
-HRESULT CStringsManager::LoadFromXML(WCHAR* fileName, bool bIgnoreMissingChars)
+int CStringsManager::LoadFromXML(WCHAR* fileName, WCHAR* strLangCode, std::wstring* strMinimumAlphabet, bool bIgnoreMissingChars)
 {
 	//release strings if already loaded
 	Release();
@@ -98,7 +101,7 @@ HRESULT CStringsManager::LoadFromXML(WCHAR* fileName, bool bIgnoreMissingChars)
 	if (!doc.load_file(fileName))
 	{
 		ErrorBox(K_ERR_WARNING, L"Unable to load XML:%s\n", fileName);
-		return(E_FAIL);
+		return -1;
 	}
 
 	pugi::xml_attribute ver = doc.root().child(L"PSTexts").attribute(L"Version");
@@ -108,29 +111,49 @@ HRESULT CStringsManager::LoadFromXML(WCHAR* fileName, bool bIgnoreMissingChars)
 	}
 
 	pugi::xml_node septextsnode = doc.root().child(L"PSTexts");
-	//save alphabet
-	pugi::xml_node alphabetnode = septextsnode.child(L"Alphabet");
-	const WCHAR *retalphabet = alphabetnode.child_value();
-	
-	if(FAILED(StringCchLength(retalphabet, K_STRMGR_CONTENT_MAX_LEN, &alphabetLen)))
-	{
-		ErrorBox(K_ERR_WARNING, L"Failed getting Alphabet length.\n", fileName);
-		return E_FAIL;
-	}
-	alphabet = new WCHAR[alphabetLen + 1];
-	StringCchCopy(alphabet, alphabetLen + 1, retalphabet);
 
-	//ia parintele listei de strings
+	//strings list parent node
 	pugi::xml_node textsnode = septextsnode.child(L"Texts");
-	const WCHAR *texlang = textsnode.attribute(L"Lang").value();
-	UINT langLen;
-	if(!FAILED(StringCchLength(texlang, K_STRMGR_CONTENT_MAX_LEN, &langLen)))
+	// save minimum alphabet
+	std::wstring strAlphabet;
+	if (strMinimumAlphabet != nullptr)
 	{
-		StringCchCopy(language, langLen + 1, texlang);
+		strAlphabet = *strMinimumAlphabet;
 	}
+	// find extra unique characters and alphabet
+	int nStringsCnt = 0;
+	int nFoundGlyphs = 0;
+	for (pugi::xml_node stringnode = textsnode.first_child(); stringnode; stringnode = stringnode.next_sibling())
+	{
+		// read each string
+		const WCHAR *content = stringnode.child_value();
+		int contentLen = wcslen(content);
+		if (contentLen > 0)
+		{
+			for (int kk = 0; kk < contentLen; kk++)
+			{
+				std::size_t found = strAlphabet.find(content[kk]);
+				if (found == std::string::npos)
+				{
+					strAlphabet.append(1, content[kk]);
+					nFoundGlyphs++;
+				}
+			}
+		}
 
-	int count = 0;
-    for (pugi::xml_node stringnode = textsnode.first_child(); stringnode; stringnode = stringnode.next_sibling())
+		nStringsCnt++;
+	}
+	// sort alphabet now just for good looks
+	std::sort(strAlphabet.begin(), strAlphabet.end());
+
+	alphabet = new WCHAR[strAlphabet.length() + 1];
+	memset(alphabet, 0, sizeof(WCHAR) * (strAlphabet.length() + 1));
+	wcscpy(alphabet, strAlphabet.c_str());
+
+	strAlphabet.clear();
+	strAlphabet.shrink_to_fit();
+
+	for (pugi::xml_node stringnode = textsnode.first_child(); stringnode; stringnode = stringnode.next_sibling())
     {
 		CStringDesc *nstr = new CStringDesc();
 
@@ -181,8 +204,6 @@ HRESULT CStringsManager::LoadFromXML(WCHAR* fileName, bool bIgnoreMissingChars)
 			ErrorBox(K_ERR_WARNING, L"(%s) chars not found in string %s\n", notFoundChars, stringnode.attribute(L"ID").value());
 
 		strings.Add(nstr);
-
-		count++;
     }
 
 	///--- adauga string default pt atunci cand nu gaseste strID cautat ---
@@ -196,11 +217,15 @@ HRESULT CStringsManager::LoadFromXML(WCHAR* fileName, bool bIgnoreMissingChars)
 	defaultStringIdx = strings.GetSize() - 1;
 
 	loaded = true;
+	// save loaded language alias
+	strLangAlias = strLangCode;
 
-	return S_OK;
+	LOG(L"Strings:: Loaded from %s. Alias: %s. Total letters: %d. Letters added from strings: %d.", fileName, strLangCode, strAlphabet.length(), nFoundGlyphs);
+
+	return nStringsCnt;
 }
 
-const int CStringsManager::getLetterIdx(const WCHAR c)
+const int CStringsManager::GetLetterIdx(const WCHAR c)
 {
 	if(c == '\n')
 		return K_STRMGR_RETURN;
@@ -217,7 +242,7 @@ const int CStringsManager::getLetterIdx(const WCHAR c)
 		alphapos++;
 		code++;
 	}
-	//daca nu o gaseste
+	// not found
 	return -1;
 }
 
@@ -294,10 +319,12 @@ void CStringsManager::Release()
 	}
 	strings.RemoveAll();
 
+	strLangAlias.clear();
+
 	loaded = false;
 }
 
-int CStringsManager::getStrIdx(const CHAR* strID)
+int CStringsManager::GetStrIdx(const CHAR* strID)
 {
 	UINT32 strHash = FastHash(strID, strlen(strID));
 
@@ -309,7 +336,7 @@ int CStringsManager::getStrIdx(const CHAR* strID)
 	return defaultStringIdx;
 }
 
-int CStringsManager::getStrIdx(const WCHAR* strID)
+int CStringsManager::GetStrIdx(const WCHAR* strID)
 {
 	UINT32 strHash = FastHash(strID, wcslen(strID));
 
@@ -321,7 +348,7 @@ int CStringsManager::getStrIdx(const WCHAR* strID)
 	return defaultStringIdx;
 }
 
-int CStringsManager::getStrIdx(UINT32 strHash)
+int CStringsManager::GetStrIdx(UINT32 strHash)
 {
 	for (int kk = 0; kk < strings.GetSize(); kk++)
 	{
@@ -362,7 +389,7 @@ int CStringsManager::SetString(int idx, WCHAR* szFormat, ...)
 
 int CStringsManager::SetString(CHAR* id, WCHAR* szFormat, ...)
 {
-	int idx = getStrIdx(id);
+	int idx = GetStrIdx(id);
 	if((idx < 0) || (idx >= strings.GetSize()) )
 	{
 		ErrorBox(K_ERR_WARNING, L"CStringsManager::setString(WCHAR_id)->String not found! [%s]\n", id);
@@ -414,10 +441,10 @@ int CStringsManager::SetString_NoParse(int idx, WCHAR* szString)
 	return retBuild;
 }
 
-HRESULT CStringsManager::ReplaceTokenString(int destStrIdx, int srcStrIdx, int tokenNumber, WCHAR* tokenText)
+bool CStringsManager::ReplaceTokenString(int destStrIdx, int srcStrIdx, int tokenNumber, WCHAR* tokenText)
 {
 	if((destStrIdx >= strings.GetSize()) || (srcStrIdx >= strings.GetSize()))
-		return S_FALSE;
+		return false;
 
 	WCHAR tokenStr[MAX_PATH];
 	StringCchPrintf(tokenStr, MAX_PATH, L"{%%%d}", tokenNumber);
@@ -428,13 +455,13 @@ HRESULT CStringsManager::ReplaceTokenString(int destStrIdx, int srcStrIdx, int t
 
 	SetString(destStrIdx, L"%s", original);	
 
-	return S_OK;	
+	return true;	
 }
 
-HRESULT CStringsManager::ReplaceTokenInt(int destStrIdx, int srcStrIdx, int tokenNumber, int tokenVal)
+bool CStringsManager::ReplaceTokenInt(int destStrIdx, int srcStrIdx, int tokenNumber, int tokenVal)
 {
 	if((destStrIdx >= strings.GetSize()) || (srcStrIdx >= strings.GetSize()))
-		return S_FALSE;
+		return false;
 
 	WCHAR tokenStr[MAX_PATH];
 	StringCchPrintf(tokenStr, MAX_PATH, L"{%%%d}", tokenNumber);
@@ -448,7 +475,7 @@ HRESULT CStringsManager::ReplaceTokenInt(int destStrIdx, int srcStrIdx, int toke
 
 	SetString(destStrIdx, L"%s", original);	
 
-	return S_OK;	
+	return true;	
 }
 
 WCHAR* CStringsManager::GetStringText(int strIdx)
@@ -458,10 +485,10 @@ WCHAR* CStringsManager::GetStringText(int strIdx)
 	return strings[strIdx]->sText;
 }
 
-HRESULT CStringsManager::ReplaceTokenString(CStringDesc* destStrDesc, int srcStrIdx, int tokenNumber, WCHAR* tokenText)
+bool CStringsManager::ReplaceTokenString(CStringDesc* destStrDesc, int srcStrIdx, int tokenNumber, WCHAR* tokenText)
 {
 	if ((destStrDesc == NULL) || (srcStrIdx >= strings.GetSize()))
-		return S_FALSE;
+		return false;
 
 	WCHAR tokenStr[MAX_PATH];
 	StringCchPrintf(tokenStr, MAX_PATH, L"{%%%d}", tokenNumber);
@@ -472,13 +499,13 @@ HRESULT CStringsManager::ReplaceTokenString(CStringDesc* destStrDesc, int srcStr
 
 	SetStringDesc(destStrDesc, L"%s", original);
 
-	return S_OK;
+	return true;
 }
 
-HRESULT CStringsManager::ReplaceTokenInt(CStringDesc* destStrDesc, int srcStrIdx, int tokenNumber, int tokenVal)
+bool CStringsManager::ReplaceTokenInt(CStringDesc* destStrDesc, int srcStrIdx, int tokenNumber, int tokenVal)
 {
 	if ((destStrDesc == NULL) || (srcStrIdx >= strings.GetSize()))
-		return S_FALSE;
+		return false;
 
 	WCHAR tokenStr[MAX_PATH];
 	StringCchPrintf(tokenStr, MAX_PATH, L"{%%%d}", tokenNumber);
@@ -492,17 +519,17 @@ HRESULT CStringsManager::ReplaceTokenInt(CStringDesc* destStrDesc, int srcStrIdx
 
 	SetStringDesc(destStrDesc, L"%s", original);
 
-	return S_OK;
+	return true;
 }
 
-HRESULT CStringsManager::GetSubstring(CStringDesc* destStrDesc, int srcStrIdx, int nSubstringIdx, WCHAR wcSeparator)
+bool CStringsManager::GetSubstring(CStringDesc* destStrDesc, int srcStrIdx, int nSubstringIdx, WCHAR wcSeparator)
 {
 	if ((destStrDesc == null) || (srcStrIdx < 0) || (srcStrIdx >= strings.GetSize()))
-		return S_FALSE;
+		return false;
 
 	WCHAR wcSubstr[1024] = { 0 };
-	int startIdx = 0;
-	int endIdx = 0;
+	UINT startIdx = 0;
+	UINT endIdx = 0;
 	int currentSubstrIdx = 0;
 	bool bFound = false;
 		
@@ -519,7 +546,7 @@ HRESULT CStringsManager::GetSubstring(CStringDesc* destStrDesc, int srcStrIdx, i
 			{
 				memcpy(wcSubstr, &strings[srcStrIdx]->sText[startIdx], sizeof(WCHAR) * (endIdx - startIdx));
 				SetStringDesc(destStrDesc, wcSubstr);
-				return S_OK;
+				return true;
 			}
 		}
 		else
@@ -529,10 +556,10 @@ HRESULT CStringsManager::GetSubstring(CStringDesc* destStrDesc, int srcStrIdx, i
 			currentSubstrIdx++;
 
 			if (startIdx >= strings[srcStrIdx]->len)
-				return S_FALSE;
+				return false;
 		}
 	}
-	return S_FALSE;
+	return true;
 }
 
 int CStringsManager::GetSubstringsCount(int srcStrIdx, WCHAR wcSeparator)
@@ -541,7 +568,7 @@ int CStringsManager::GetSubstringsCount(int srcStrIdx, WCHAR wcSeparator)
 		return 0;
 
 	int nSeparators = 0;
-	for (int kk = 0; kk < strings[srcStrIdx]->len; kk++)
+	for (UINT kk = 0; kk < strings[srcStrIdx]->len; kk++)
 	{
 		if (strings[srcStrIdx]->sText[kk] == wcSeparator)
 			nSeparators++;
@@ -634,7 +661,7 @@ ERROR1:
 	//return code_unit1 + 0xDC00;
 
 	//ErrorBox(K_ERR_CRITICAL, L"[Error] IFont::GetCodePointFromUTF8(): malformed UTF8\n");
-	seqLen = -1;
+	seqLen = (unsigned char)-1;
 	return (unsigned int)-1;
 }
 

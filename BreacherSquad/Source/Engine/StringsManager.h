@@ -26,68 +26,70 @@ public:
 
 class CStringsManager{
 public:
-	bool loaded;		//daca e incarcat sau nu
-	int defaultStringIdx; //index defaul string
+	bool						loaded;						// Are strings loaded?
+	int							defaultStringIdx;			// Default string index when string wasn't found
 
-	WCHAR* alphabet;	//alfabetul incarcat din XML
-	UINT alphabetLen;	//numarul de litere din alfabet
-	WCHAR language[10]; //limba in care sunt textele, din 2 litere
+	WCHAR*						alphabet;					// complete alphabet
+	std::wstring				strLangAlias;				// saves loaded language code/alias/name
 
-	CGrowableArray <CStringDesc*> strings;
+	CGrowableArray<CStringDesc*> strings;					// Actual loaded strings
 
 	CStringsManager();
 	~CStringsManager();
-	HRESULT LoadFromXML(WCHAR* fileName, bool bIgnoreMissingChars = false);
-	void Release();
 
-	//gaseste indexul unei litere in alfabet
-	const int getLetterIdx(const WCHAR c);
-	//Construieste codes in functie de string
-	//returns: -1 pt eroare sau numarul de caractere negasite in alfabet (scrie in notFoundChars ce nu a gasit)
-	int BuildStringCodes(CStringDesc *desc, WCHAR *notFoundChars = NULL);
-	void SetStringDesc(CStringDesc *desc, WCHAR* szFormat, ...); //seteaza stringul in string desc
-	//intoarce indexul stringului in lista de stringuri, in functie de hash-ul ID-ului text sau -1 daca nu exista
-	//va fi folosita pentru resursele externe (interfete) care iau stringurile dupa nume
-	int getStrIdx(const CHAR* strID);
-	int getStrIdx(const WCHAR* strID);
-	int getStrIdx(UINT32 strHash);
-	//Seteaza un string. Primeste ca parametri ID si format string ca la printf
-	//returns: -1 pt eroare sau numarul de caractere negasite in alfabet
-	int SetString(int idx, WCHAR* szFormat, ...);
-	int SetString(CHAR* id, WCHAR* szFormat, ...);
-	//sets a string without parsing special characters like %d
-	int SetString_NoParse(int idx, WCHAR* szString);
-	//inlocuieste parametrii de forma {%1} si {%2} cu parametrii pasati in functie
-	//RETURNS: S_FALSE pt eroare sau S_OK
-	HRESULT ReplaceTokenString(int destStrIdx, int srcStrIdx, int tokenNumber, WCHAR* tokenText);
-	HRESULT ReplaceTokenInt(int destStrIdx, int srcStrIdx, int tokenNumber, int tokenVal);
-	HRESULT ReplaceTokenString(CStringDesc* destStrDesc, int srcStrIdx, int tokenNumber, WCHAR* tokenText);
-	HRESULT ReplaceTokenInt(CStringDesc* destStrDesc, int srcStrIdx, int tokenNumber, int tokenVal);
+	// Loads strings from xml and returns number of total strings or -1 in case of error
+	int							LoadFromXML(WCHAR* fileName, WCHAR* strLangCode, std::wstring* strMinimumAlphabet = nullptr, bool bIgnoreMissingChars = false);
+	void						Release();
+
+	// Finds index of one letter in alphabet
+	const int					GetLetterIdx(const WCHAR c);
+
+	// Builds string codes (idx to letters) based on actual string
+	// \returns: -1 for error or number of characters not found in alphabet
+	int							BuildStringCodes(CStringDesc *desc, WCHAR *notFoundChars = NULL);
+
+	// Sets string
+	void						SetStringDesc(CStringDesc *desc, WCHAR* szFormat, ...);
+
+	// Returns index of string or -1 if not found
+	int							GetStrIdx(const CHAR* strID);
+	int							GetStrIdx(const WCHAR* strID);
+	int							GetStrIdx(UINT32 strHash);
+
+	// Sets a string based on a printf format
+	// \returns: -1 for error or number of chars not found in alphabet
+	int							SetString(int idx, WCHAR* szFormat, ...);
+	int							SetString(CHAR* id, WCHAR* szFormat, ...);
+
+	// Sets a string without parsing special characters like %d
+	int							SetString_NoParse(int idx, WCHAR* szString);
+
+	// Replaces tokens like {%1} si {%2} with params
+	bool						ReplaceTokenString(int destStrIdx, int srcStrIdx, int tokenNumber, WCHAR* tokenText);
+	bool						ReplaceTokenInt(int destStrIdx, int srcStrIdx, int tokenNumber, int tokenVal);
+	bool						ReplaceTokenString(CStringDesc* destStrDesc, int srcStrIdx, int tokenNumber, WCHAR* tokenText);
+	bool						ReplaceTokenInt(CStringDesc* destStrDesc, int srcStrIdx, int tokenNumber, int tokenVal);
 	
-	/*
-	 * \brief Gets the WCHAR text of a specified string
-	 */
-	WCHAR* GetStringText(int strIdx);
+	
+	// \brief Gets the WCHAR text of a specified string
+	WCHAR*						GetStringText(int strIdx);
 	/*
 	 * \brief: Fills a CStringDesc structure with the N-th substring from a string. 
 	 * \param: wcSeparator - the separator that separates the substrings
 	 * CStringDesc will contain a 0 length string if substring not found.
 	 */
-	HRESULT GetSubstring(CStringDesc* destStrDesc, int srcStrIdx, int nSubstringIdx, WCHAR wcSeparator);
-	/*
-	 * Returns the number of substrings separated by wcSeparator
-	 */
-	int GetSubstringsCount(int srcStrIdx, WCHAR wcSeparator);
+	bool						GetSubstring(CStringDesc* destStrDesc, int srcStrIdx, int nSubstringIdx, WCHAR wcSeparator);
+	
+	// Returns the number of substrings separated by wcSeparator
+	int							GetSubstringsCount(int srcStrIdx, WCHAR wcSeparator);
 
 	///--- UTF8 encoding ---
-	/*
-	 * Utility that converts UTF8 char to WCHAR
-	 */
+
+	// Utility that converts UTF8 char to WCHAR
 	static const unsigned int GetCodePointFromUTF8(const char* utf8_4byteChunk, unsigned char& seqLen);
+
 	int SetStringDescUTF8(CStringDesc *desc, const char* szUTF8string);
-	/*
-	 * Generic conversion from UTF8 to WCHAR
-	 */
+	// Generic conversion from UTF8 to WCHAR
 	static int UTF8toWCHAR(const char* szUTF8string, WCHAR* strDest, int nMaxLenDest);
 };
 

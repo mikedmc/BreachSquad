@@ -344,7 +344,7 @@ int CTexturedFont::DrawStringClamped(CStringDesc *strDesc, int X, int Y, int max
 	int maxHeight = rowHeight;
 
 	//measure 3 dots length
-	int dotscode = UTLang().getLetterIdx('.');
+	int dotscode = UTLang().GetLetterIdx('.');
 	int dotsw = 3 * (frameBBox[dotscode].w + letterSpacing);
 
 	int localLen = 0;
@@ -1611,25 +1611,25 @@ SIZEWH CTexturedFont::MeasureString(CStringDesc* strDesc, int nMaxWidth)
 ///--- functiile care adreseaza stringul prin hash ---
 int CTexturedFont::DrawHString(UINT32 strHash, int X, int Y, UINT16 Flags, DWORD Color)
 {
-	int strIdx = m_pStrManager->getStrIdx(strHash);
+	int strIdx = m_pStrManager->GetStrIdx(strHash);
 	return DrawString(strIdx, X, Y, Flags, Color);
 }
 
 void CTexturedFont::DrawHString(UINT32 strHash, RECTXYWH rect, UINT16 Flags, DWORD Color)
 {
-	int strIdx = m_pStrManager->getStrIdx(strHash);
+	int strIdx = m_pStrManager->GetStrIdx(strHash);
 	DrawString(strIdx, rect, Flags, Color);
 }
 
 void CTexturedFont::DrawHStringOffsetY(UINT32 strHash, RECTXYWH rect, int offsetY, UINT16 Flags, DWORD Color)
 {
-	int strIdx = m_pStrManager->getStrIdx(strHash);
+	int strIdx = m_pStrManager->GetStrIdx(strHash);
 	DrawStringOffsetY(strIdx, rect, offsetY, Flags, Color);
 }
 
 SIZEWH CTexturedFont::MeasureHString(UINT32 strHash)
 {
-	int strIdx = m_pStrManager->getStrIdx(strHash);
+	int strIdx = m_pStrManager->GetStrIdx(strHash);
 
 	SIZEWH retsz(0, rowHeight);
 
@@ -1652,7 +1652,7 @@ SIZEWH CTexturedFont::MeasureHString(UINT32 strHash)
 
 SIZEWH CTexturedFont::MeasureHString(UINT32 strHash, int maxWidth)
 {
-	int strIdx = m_pStrManager->getStrIdx(strHash);
+	int strIdx = m_pStrManager->GetStrIdx(strHash);
 	SIZEWH retsz(maxWidth, 0);
 
 	int textLen = m_pStrManager->strings[strIdx]->len;

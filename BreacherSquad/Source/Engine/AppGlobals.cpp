@@ -1023,6 +1023,7 @@ HRESULT App_LocaLoadLangList(CStringHash shSelectedLangAlias)
 		nlang.shLangAlias.Init(langnode.attribute(L"LangAlias").value());
 		nlang.shFileName.Init(langnode.attribute(L"TextsFileName").value());
 		nlang.bUseTTFonts = langnode.attribute(L"bUseTTFonts").as_bool();
+		nlang.strMinAlphabet = langnode.attribute(L"MinimumAlphabet").value();
 		if ((nlang.shLangName.IsEmpty()) || (nlang.shLangAlias.IsEmpty()) || (nlang.shFileName.IsEmpty()))
 		{
 			ErrorBox(K_ERR_WARNING, L"Error loading language list! name[%s] alias[%s] file[%s]", nlang.shLangName.text, nlang.shLangAlias.text, nlang.shFileName.text);
@@ -1063,7 +1064,7 @@ HRESULT App_LocaLoadStrings()
 	LOG(L"[LANG] Loading strings: %s", xmlpath);
 	
 	//load strings and ignore missing characters when using TTF fonts
-	if (FAILED(hr = UTLang().LoadFromXML(xmlpath, g_Language.bUseTTFonts)))
+	if (FAILED(hr = UTLang().LoadFromXML(xmlpath, g_Language.shLangName.text, &g_Language.strMinAlphabet, g_Language.bUseTTFonts)))
 	{
 		ErrorBox(K_ERR_WARNING, L"[ERROR] Failed loading strings XML! file:%s", xmlpath);
 		return hr;

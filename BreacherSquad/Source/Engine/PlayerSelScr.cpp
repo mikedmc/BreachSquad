@@ -1148,9 +1148,9 @@ HRESULT CPlayerSelScr::LoadItems()
 		if (!xbar.attribute(L"strUID").empty())
 			nbar->shUID.Init(xbar.attribute(L"strUID").value());
 		if (!xbar.attribute(L"strID_name").empty())
-			nbar->nStrIdx_name = UTLang().getStrIdx(xbar.attribute(L"strID_name").value());
+			nbar->nStrIdx_name = UTLang().GetStrIdx(xbar.attribute(L"strID_name").value());
 		if (!xbar.attribute(L"strID_desc").empty())
-			nbar->nStrIdx_desc = UTLang().getStrIdx(xbar.attribute(L"strID_desc").value());
+			nbar->nStrIdx_desc = UTLang().GetStrIdx(xbar.attribute(L"strID_desc").value());
 
 		nbar->nTotalPoints = xbar.attribute(L"nTotalPoints").as_int();
 		if ((nbar->nTotalPoints <= 0) || (nbar->nTotalPoints >= K_PSS_UPGRADE_BAR_MAX_POINTS))
@@ -1180,7 +1180,7 @@ HRESULT CPlayerSelScr::LoadItems()
 			perk.nIconIdx = xperk.attribute(L"nIconIdx").as_int();
 			perk.nPointPrice = xperk.attribute(L"nPointsPrice").as_int();
 			if (!xperk.attribute(L"strID_desc").empty())
-				perk.nStrIdx_desc = UTLang().getStrIdx(xperk.attribute(L"strID_desc").value());
+				perk.nStrIdx_desc = UTLang().GetStrIdx(xperk.attribute(L"strID_desc").value());
 
 			int nIdx = perk.nPointPrice - 1;
 			if ((nIdx >= 0) && (nIdx < nbar->nTotalPoints))
@@ -1212,9 +1212,9 @@ HRESULT CPlayerSelScr::LoadItems()
 		itm->ePlayerType = (EPSSPlayerClass)idx;
 		//load descriptive texts
 		if (!bclass.attribute(L"strID_desc").empty())
-			itm->nStrIdx_desc = UTLang().getStrIdx(bclass.attribute(L"strID_desc").value());
+			itm->nStrIdx_desc = UTLang().GetStrIdx(bclass.attribute(L"strID_desc").value());
 		if (!bclass.attribute(L"strID_difficulty").empty())
-			itm->nStrIdx_difficulty= UTLang().getStrIdx(bclass.attribute(L"strID_difficulty").value());
+			itm->nStrIdx_difficulty= UTLang().GetStrIdx(bclass.attribute(L"strID_difficulty").value());
 		//load upgrade bars
 		//TEAM BARS
 		itm->arrUpgradeBarsIdx[0] = GetUpgradeBarIdx(bclass.attribute(L"strXPBarTeam1").value());
@@ -1256,14 +1256,14 @@ HRESULT CPlayerSelScr::LoadItems()
 					itdata.shName.Reset();
 
 				if (!bnode.attribute(L"strID_name").empty())
-					itdata.strIdxScreenName = UTLang().getStrIdx(bnode.attribute(L"strID_name").value());
+					itdata.strIdxScreenName = UTLang().GetStrIdx(bnode.attribute(L"strID_name").value());
 				if (!bnode.attribute(L"nIconIdx").empty())
 					itdata.iconIdx = bnode.attribute(L"nIconIdx").as_int();
 
 				if (!bnode.attribute(L"strALTFireWeaponTemplate").empty())
 					itdata.shALTweaponTemplate.Init(bnode.attribute(L"strALTFireWeaponTemplate").value());
 				if (!bnode.attribute(L"strID_ALTname").empty())
-					itdata.strIdxALTscreenName = UTLang().getStrIdx(bnode.attribute(L"strID_ALTname").value());
+					itdata.strIdxALTscreenName = UTLang().GetStrIdx(bnode.attribute(L"strID_ALTname").value());
 				if (!bnode.attribute(L"nIconIdxALT").empty())
 					itdata.iconALTidx = bnode.attribute(L"nIconIdxALT").as_int();
 
@@ -1273,14 +1273,14 @@ HRESULT CPlayerSelScr::LoadItems()
 					WCHAR strKey[MAX_PATH];
 					StringCchPrintf(strKey, MAX_PATH, L"strID_stat%d", kk + 1);
 					if (!bnode.attribute(strKey).empty())
-						itdata.nStatsData[kk * 2] = UTLang().getStrIdx(bnode.attribute(strKey).value());
+						itdata.nStatsData[kk * 2] = UTLang().GetStrIdx(bnode.attribute(strKey).value());
 					StringCchPrintf(strKey, MAX_PATH, L"fPercent_stat%d", kk + 1);
 					if (!bnode.attribute(strKey).empty())
 						itdata.nStatsData[kk * 2 + 1] = (int)ceil(bnode.attribute(strKey).as_float() * 100.0f);
 				}
 
 				if (!bnode.attribute(L"strID_longDesc").empty())
-					itdata.strIdxLongDescription = UTLang().getStrIdx(bnode.attribute(L"strID_longDesc").value());
+					itdata.strIdxLongDescription = UTLang().GetStrIdx(bnode.attribute(L"strID_longDesc").value());
 				if (!bnode.attribute(L"strTemplateModifier").empty())
 					itdata.shModifierTemplate.Init(bnode.attribute(L"strTemplateModifier").value());
 

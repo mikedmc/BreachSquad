@@ -395,7 +395,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
 			if (ImGui::IsItemEdited())
 			{
-				pValue->m_asINT32 = UTLang().getStrIdx(str0);
+				pValue->m_asINT32 = UTLang().GetStrIdx(str0);
 			}
 		}
 		else // non custom properties get treated by type

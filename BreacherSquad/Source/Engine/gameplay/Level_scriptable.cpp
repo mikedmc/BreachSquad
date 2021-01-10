@@ -794,7 +794,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				LOG(L"SCRIPT::IACTIVE_ADD_NOTIFICATION - target is null! Probably wrong ID\n");
 				return true;
 			}
-			int stridx = UTLang().getStrIdx(vcStringID->m_strArg.textHash);
+			int stridx = UTLang().GetStrIdx(vcStringID->m_strArg.textHash);
 			if ((vcStringID->m_type == CVariantComplex::K_ARGTYPE_NONE) || (stridx < 0))
 			{
 				LOG(L"SCRIPT::IACTIVE_ADD_NOTIFICATION - couldn't find string:[%s]\n", vcStringID->m_strArg.text);

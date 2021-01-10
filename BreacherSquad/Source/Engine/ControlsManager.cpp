@@ -1089,7 +1089,7 @@ void CControl::Update(float dTime, float fTimeline)
 					CVariantComplex* vc = paramsDict.GetVariantByName(varname);
 					if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 					{
-						nStringIdx = UTLang().getStrIdx(vc->m_strArg.textHash);
+						nStringIdx = UTLang().GetStrIdx(vc->m_strArg.textHash);
 					}
 					//trimitem string idx
 					nevent->AddNamedArgINT32(L"nSelectedIdx", nStringIdx);
@@ -1758,7 +1758,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			CVariantComplex* vc = paramsDict.GetVariantByName(L"StringID_right");
 			if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 			{
-				int nStringIdx_right = UTLang().getStrIdx(vc->m_strArg.textHash);
+				int nStringIdx_right = UTLang().GetStrIdx(vc->m_strArg.textHash);
 				if (nStringIdx_right >= 0)
 				{
 					DWORD dwColorRight = 0xffffffff;
@@ -1859,7 +1859,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			CVariantComplex* vc = paramsDict.GetVariantByName(L"StringID_right");
 			if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 			{
-				int nStringIdx_right = UTLang().getStrIdx(vc->m_strArg.textHash);
+				int nStringIdx_right = UTLang().GetStrIdx(vc->m_strArg.textHash);
 				if (nStringIdx_right >= 0)
 				{
 					DWORD dwColorRight = 0xffffffff;
@@ -1902,7 +1902,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			CVariantComplex* vc = paramsDict.GetVariantByName(L"StringID_right");
 			if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 			{
-				nStringIdx_right = UTLang().getStrIdx(vc->m_strArg.textHash);
+				nStringIdx_right = UTLang().GetStrIdx(vc->m_strArg.textHash);
 				if (nStringIdx_right < 0)
 				{
 					drawDebugText(BBox.x, BBox.y + 20, L"Right list stringIdx missing!");
@@ -2255,7 +2255,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				CVariantComplex* vc = paramsDict.GetVariantByName(varname);
 				if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 				{
-					int nStringIdx = UTLang().getStrIdx(vc->m_strArg.textHash);
+					int nStringIdx = UTLang().GetStrIdx(vc->m_strArg.textHash);
 					SIZEWH strSz = m_pFontsMgr->fonts[fontIdx]->MeasureString(nStringIdx, BBox_inflated.w);
 
 					//paint cursor
@@ -2452,10 +2452,10 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				int nStrIdx1 = -1, nStrIdx2 = -1;
 				CVariantComplex* vc = paramsDict.GetVariantByName(L"stringID1");
 				if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
-					nStrIdx1 = UTLang().getStrIdx(vc->m_strArg.textHash);
+					nStrIdx1 = UTLang().GetStrIdx(vc->m_strArg.textHash);
 				vc = paramsDict.GetVariantByName(L"stringID2");
 				if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
-					nStrIdx2 = UTLang().getStrIdx(vc->m_strArg.textHash);
+					nStrIdx2 = UTLang().GetStrIdx(vc->m_strArg.textHash);
 
 				int nCount = 0;
 				if (nStrIdx1 >= 0)
@@ -3260,7 +3260,7 @@ void CControlsManager::SetParamValue(CControl * pCtrl, const WCHAR * sParamName,
 	}
 	else if (paramNameHash == FastHash(L"stringID"))
 	{
-		int stringIdx = m_pStrMgr->getStrIdx(sParamValue);
+		int stringIdx = m_pStrMgr->GetStrIdx(sParamValue);
 		if ((stringIdx < 0) && (!bIgnoreWarnings))
 			ErrorBox(K_ERR_WARNING, L"CControlsManager::SetParamValue - couldn't find string [%s]", sParamValue);
 
@@ -4146,7 +4146,7 @@ void CControlsManager::ReceiveInput(ECtrlMgrInputType eCommandType, UINT32 nComm
 						int textLen = _wtoi(ctrl->paramsDict.GetVariantByName(L"textLen")->m_strArg.text);
 						int maxLen = _wtoi(ctrl->paramsDict.GetVariantByName(L"maxLen")->m_strArg.text);
 
-						if ((m_pStrMgr->getLetterIdx(c) != K_STRMGR_SPACE) && (textLen < maxLen) && (c >= '0'))
+						if ((m_pStrMgr->GetLetterIdx(c) != K_STRMGR_SPACE) && (textLen < maxLen) && (c >= '0'))
 						{
 							WCHAR inputText[MAX_PATH];
 							StringCchPrintf(inputText, MAX_PATH, L"%s", ctrl->paramsDict.GetVariantByName(L"inputText")->m_strArg.text);

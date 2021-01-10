@@ -420,7 +420,7 @@ RECTXYWH CFreeTypeFont::DrawStringLine(CStringDesc *strDesc, float X, float Y, U
 
 RECTXYWH CFreeTypeFont::DrawStringLine(int strID, float X, float Y, UINT16 Flags /*= FTFF_BOTTOMLEFT*/, DWORD Color /*= 0xffffffff*/)
 {
-	int id = UTLang().getStrIdx(strID);
+	int id = UTLang().GetStrIdx(strID);
 	return DrawStringLine(UTLang().strings[id], X, Y, Flags, Color);
 }
 
