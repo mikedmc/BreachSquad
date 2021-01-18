@@ -1088,7 +1088,6 @@ HRESULT App_LocaLoadFonts(bool bUseTTFonts)
 {
 	//release all
 	UTGetFontsManager().Release();
-	UTGetTTFManager().Release();
 
 	HRESULT hr = S_OK;
 
