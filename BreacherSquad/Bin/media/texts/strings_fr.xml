@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PSTexts Version="1.0">
-  <Alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/?¡¢£¥§©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº\</Alphabet>
-  <Texts Lang="EN" Count="670">
+  <Texts Lang="EN">
     <Text ID="TITLE">Door Kickers : Action Squad</Text>
     <Text ID="VERSION_NUMBER">empty</Text>
     <Text ID="MSGBOX">empty</Text>

@@ -2779,7 +2779,7 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 			if (!DXUTIsWindowed())
 				ShowWindow(hWnd, SW_MINIMIZE);
 		}
-		break;
+		break;																					 
 
 		case WM_SETFOCUS:
 		case WM_MOVE:

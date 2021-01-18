@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Swept AABB Collision Question</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.min.js"></script>
+</head>
+<body>
+<script>
+    const tileSize = 16;
+    let mapSize;
+    let tileMap;
+    let entities;
+    let player;
+
+    let e0, e1;
+
+    function setup() {
+        createCanvas(320, 320);
+        mapSize = createVector(20, 20);
+        tileMap = [
+            // Tile map array represented as a 2D array using the map
+            // width as a stride for indexing it correctly. Feel free
+            // to edit this to structure your own testing ground. 0 is
+            // empty space and 1 or above is a solid tile.
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        ];
+        entities = [];
+        player = new Player();
+
+        e0 = new Entity(
+            createVector(64 * 2, 64),
+            createVector(tileSize, tileSize / 2)
+        );
+
+        e1 = new Entity(
+            createVector(64 * 2.5 + 16, 64),
+            createVector(tileSize, tileSize / 2)
+        );
+
+        entities.push(e0);
+        entities.push(e1);
+        entities.push(player);
+    }
+
+    function draw() {
+        deltaTime = 16;
+        background(150);
+        smooth();
+
+        // Draw the tile-map
+        stroke(0);
+        for (let y = 0; y < mapSize.y; y++)
+            for (let x = 0; x < mapSize.x; x++) {
+                if (tileMap[x + y * mapSize.x] !== 0) {
+                    fill(100, 50, 150);
+                    rect(x * tileSize, y * tileSize, tileSize, tileSize);
+                }
+            }
+
+        for (let e of entities) {
+            e.draw();
+        }
+
+        for (let e of entities) {
+            e.update(deltaTime / 1000);
+        }
+    }
+
+    // Bounding box class with a central position
+    class AABB {
+        constructor(center, extents) {
+            this.center = center;
+            this.extents = extents;
+        }
+
+        overlaps(aabb) {
+            return this.left < aabb.right &&
+                this.right > aabb.left &&
+                this.top < aabb.bottom &&
+                this.bottom > aabb.top;
+        }
+
+        copy() {
+            return new AABB(this.center.copy(), this.extents.copy());
+        }
+
+        get top() {
+            return this.center.y - this.extents.y;
+        }
+
+        set top(y) {
+            this.center.y = y + this.extents.y;
+        }
+
+        get bottom() {
+            return this.center.y + this.extents.y;
+        }
+
+        set bottom(y) {
+            this.center.y = y - this.extents.y;
+        }
+
+        get left() {
+            return this.center.x - this.extents.x;
+        }
+
+        set left(x) {
+            this.center.x = x + this.extents.x;
+        }
+
+        get right() {
+            return this.center.x + this.extents.x;
+        }
+
+        set right(x) {
+            this.center.x = x - this.extents.x;
+        }
+    }
+
+    // Simple struct that will hold data about a given swept collision detection
+    class SweepData {
+        constructor(aabb, collisionTime, normal, side, distance) {
+            this.aabb = aabb;
+            this.collisionTime = collisionTime;
+            this.normal = normal;
+            this.side = side;
+            this.distance = distance;
+        }
+    }
+
+    // All collision resolution
+    // logic for this demo will occur here.
+    class Entity extends AABB {
+        vel = createVector(0, 0); // Velocity component (starts at zero)
+        collisionStack = []; // Array containing all possible collisions ready to be resolved in the correct order
+
+        // Returns an AABB object with the position of the player, but it's size
+        // is the player's size plus the player's velocity in its respective direction.
+        // This will be used in my broad-phasing (yes, it can be optimized).
+        createMovementBoundary(deltaTime, movement = this.vel) {
+            let collisionBoundary = new AABB(this.center.copy(), this.extents.copy()); // Copy the player's shape
+            let vel = p5.Vector.mult(movement, deltaTime); // Constrain the movement vector to frame time
+            if (vel.x > 0) {
+                collisionBoundary.extents.x = this.extents.x + vel.x;
+                collisionBoundary.left = this.left;
+            } else {
+                collisionBoundary.extents.x = this.extents.x - vel.x;
+                collisionBoundary.right = this.right;
+            }
+
+            if (vel.y > 0) {
+                collisionBoundary.extents.y = this.extents.y + vel.y;
+                collisionBoundary.top = this.top;
+            } else {
+                collisionBoundary.extents.y = this.extents.y - vel.y;
+                collisionBoundary.bottom = this.bottom;
+            }
+            return collisionBoundary;
+        }
+
+        // Perform the sweep calculation and return it as a SweepData struct.
+        calculateSweepData(aabb, movement, deltaTime) {
+            let deltaEntry = createVector(0, 0);
+            let deltaExit = createVector(0, 0);
+
+            let velocity = p5.Vector.mult(movement, deltaTime);
+
+            if (velocity.x > 0) {
+                deltaEntry.x = aabb.left - this.right;
+                deltaExit.x = aabb.right - this.left;
+            } else {
+                deltaEntry.x = aabb.right - this.left;
+                deltaExit.x = aabb.left - this.right;
+            }
+
+            if (velocity.y > 0) {
+                deltaEntry.y = aabb.top - this.bottom;
+                deltaExit.y = aabb.bottom - this.top;
+            } else {
+                deltaEntry.y = aabb.bottom - this.top;
+                deltaExit.y = aabb.top - this.bottom;
+            }
+
+            let entryTime = createVector(0, 0);
+            let exitTime = createVector(0, 0);
+
+            if (velocity.x === 0) {
+                entryTime.x = -Infinity;
+                exitTime.x = Infinity;
+            } else {
+                entryTime.x = deltaEntry.x / velocity.x;
+                exitTime.x = deltaExit.x / velocity.x;
+            }
+
+            if (velocity.y === 0) {
+                entryTime.y = -Infinity;
+                exitTime.y = Infinity;
+            } else {
+                entryTime.y = deltaEntry.y / velocity.y;
+                exitTime.y = deltaExit.y / velocity.y;
+            }
+
+            if (entryTime.y > 1) entryTime.y = -Infinity;
+            if (entryTime.x > 1) entryTime.x = -Infinity;
+
+            let maxEntryTime = Math.max(entryTime.x, entryTime.y);
+            let minExitTime = Math.min(exitTime.x, exitTime.y);
+
+            let resultTime = 1;
+            let normal = createVector(0, 0);
+            let side = "";
+
+            if (!(maxEntryTime > minExitTime ||
+                (entryTime.x < 0 && entryTime.y < 0)
+                || (entryTime.x < 0 && (this.right + velocity.x * maxEntryTime < aabb.left || this.left + velocity.x * maxEntryTime > aabb.right))
+                || (entryTime.y < 0 && (this.bottom + velocity.y * maxEntryTime < aabb.top || this.top + velocity.y * maxEntryTime > aabb.bottom))
+            )) {
+                resultTime = maxEntryTime;
+                if (entryTime.x < entryTime.y) {
+                    normal = createVector(Math.sign(deltaEntry.x), 0);
+                    if (velocity.y > 0) side = "bottom";
+                    else if (velocity.y < 0) side = "top";
+                } else if (entryTime.x > entryTime.y) {
+                    normal = createVector(0, Math.sign(deltaEntry.y));
+                    if (velocity.x > 0) side = "right";
+                    else if (velocity.x < 0) side = "left";
+                } else {
+                    // Both axes now have equal intersection depth (direct and perfect corner collision).
+                    // We need to use the velocity to determine the correct collision normal
+                    let absVel = createVector(Math.abs(velocity.x), Math.abs(velocity.y));
+
+                    // If the x-velocity is stronger than the y-velocity, perform a y-collision like we did previously and vice-versa
+                    if (absVel.x >= absVel.y) {
+                        normal = createVector(Math.sign(velocity.x), 0);
+                        if (velocity.y > 0) side = "bottom";
+                        else if (velocity.y < 0) side = "top";
+                    } else {
+                        normal = createVector(0, Math.sign(velocity.y));
+                        if (velocity.x > 0) side = "right";
+                        else if (velocity.x < 0) side = "left";
+                    }
+                }
+            }
+
+            return new SweepData(
+                aabb, // Get a reference to the object the player has collided with
+                resultTime, // Retrieve the time of impact
+                normal, // Return the collision normal vector to apply sliding effect
+                side, // Know what side of the player has been touched (used for controlling logic like jumping and walking)
+                this.center.copy().sub(aabb.center).magSq() // Calculate the distance (squared for performance) used to resolve the closest collision subject
+            );
+        }
+
+        // Checks for collision with tiles around the player.
+        // Tiles with ID greater than zero are translated to
+        // an AABB object where it is used in the swept collision
+        // resolution (this makes the code extensible for different
+        // uses like moving objects in a spatial grid).
+        tileMapBroadPhase(deltaTime) {
+            let bounds = this.createMovementBoundary(deltaTime);
+            let centralTile = createVector( // Translate world position to tile grid position
+                Math.floor(this.center.x / tileSize),
+                Math.floor(this.center.y / tileSize),
+            );
+            const proxy = 1;
+            let tileX = Math.round(bounds.extents.x * 2 / tileSize + proxy);
+            let tileY = Math.round(bounds.extents.y * 2 / tileSize + proxy);
+            if (tileX === 1) tileX++;
+            if (tileY === 1) tileY++;
+            let tileArea = createVector(tileX, tileY);
+            for (let x = -tileArea.x + 1; x < tileArea.x; x++) {
+                for (let y = -tileArea.y + 1; y < tileArea.y; y++) {
+                    let xx = centralTile.x + x;
+                    let yy = centralTile.y + y;
+                    let tile = new AABB( // Translate tile to an AABB object
+                        createVector(xx * tileSize + tileSize / 2, yy * tileSize + tileSize / 2),
+                        createVector(tileSize / 2, tileSize / 2)
+                    );
+
+                    if (// Check map constraints and tile solidity
+                        xx < 0 || xx >= mapSize.x ||
+                        yy < 0 || yy >= mapSize.y ||
+                        tileMap[xx + yy * mapSize.x] === 0
+                        || !bounds.overlaps(tile)
+                    ) continue;
+
+                    this.collisionStack.push(this.calculateSweepData(tile, this.vel, deltaTime));
+                }
+            }
+        }
+
+        entityBroadPhase(deltaTime) {
+            for (let e of entities) {
+                if (this.createMovementBoundary(deltaTime).overlaps(e) && this !== e) {
+                    this.collisionStack.push(this.calculateSweepData(e, this.vel, deltaTime));
+                }
+            }
+        }
+
+        fixEqualSizedHoleCollision(hit, potentialMovement, time, collisionStack) {
+            if (collisionStack.length > 0) {
+                // The tile/entity the player currently stands on
+                let standingOn = hit.aabb;
+
+                // The tile/entity assumed to be next to the player-sized hole
+                let nextToHole = collisionStack[0].aabb;
+
+                // Signed integer expressing the player's movement direction
+                let movementDir;
+
+                // Signed integer expressing what direction the points to the surface the player touches
+                let touchDir;
+
+                // Distance from the player and the surface he's standing on used to determine if it's walked on
+                let requiredSurfaceDist;
+
+                // Boolean control variables that speak for themselves. They're not really needed,
+                // but make the code understandable.
+                let areBothUnderMe;
+                let isHoleBetween;
+
+                // Distance between each entity expected to form the player's size
+                let requiredHoleSize;
+
+                // Offset vector to displace a hypothetical "barrier" that blocks the player in order
+                // make it fall into the hole smoothly.
+                let barrierOffset = createVector(0, 0);
+
+                // Compute the above variables to detect and resolve the hole problem.
+                // The next else-if statement is essentially the same as this if-statement only
+                // that it works for sliding along walls.
+                if (hit.normal.x !== 0) {
+                    movementDir = Math.sign(hit.normal.x);
+                    touchDir = Math.sign(potentialMovement.y);
+                    requiredSurfaceDist = (standingOn.extents.y + this.extents.y) * touchDir;
+                    areBothUnderMe =
+                        (standingOn.center.y - this.center.y) === requiredSurfaceDist &&
+                        (nextToHole.center.y - this.center.y) === requiredSurfaceDist;
+                    requiredHoleSize = (this.extents.x * 2 + standingOn.extents.x + nextToHole.extents.x) * movementDir;
+                    isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredHoleSize;
+                    barrierOffset.y = this.extents.y * 2 * touchDir;
+                    barrierOffset.x = (this.extents.x - nextToHole.extents.x) * -movementDir;
+                    if (areBothUnderMe && isHoleBetween) {
+                        // Create a simulated barrier that will block the player and make him fall 
+                        // into the hole.
+                        let barrier = new AABB(nextToHole.center.copy(), this.extents.copy());
+                        barrier.center.sub(barrierOffset);
+                        this.center.x = barrier.center.x + (barrier.extents.x + this.extents.x) * (-movementDir);
+                        hit.normal.x = 0; // The player should now fall into the hole and no longer walk
+                        hit.normal.y = potentialMovement.y; // The sliding should now be applied to the hole wall
+                    }
+                } else if (hit.normal.y !== 0) {
+                    movementDir = Math.sign(hit.normal.y);
+                    touchDir = Math.sign(potentialMovement.x);
+                    requiredSurfaceDist = (standingOn.extents.x + this.extents.x) * touchDir;
+                    areBothUnderMe =
+                        (standingOn.center.x - this.center.x) === requiredSurfaceDist &&
+                        (nextToHole.center.x - this.center.x) === requiredSurfaceDist;
+                    requiredHoleSize = (this.extents.y * 2 + standingOn.extents.y + nextToHole.extents.y) * movementDir;
+                    isHoleBetween = (nextToHole.center.y - standingOn.center.y) === requiredHoleSize;
+                    barrierOffset.x = this.extents.x * 2 * touchDir;
+                    barrierOffset.y = (this.extents.y - nextToHole.extents.y) * -movementDir;
+                    if (areBothUnderMe && isHoleBetween) {
+                        let barrier = new AABB(nextToHole.center.copy(), this.extents.copy());
+                        barrier.center.sub(barrierOffset);
+                        this.center.y = barrier.center.y + (barrier.extents.y + this.extents.y) * (-movementDir);
+                        hit.normal.y = 0;
+                        hit.normal.x = potentialMovement.x;
+                    }
+                }
+            }
+        }
+
+        resolveCollisionOrMove(deltaTime, movement = this.vel, remainingTime = 1, collisionStack = this.collisionStack) {
+            // Sort collisions in the correct order: First by distance, then by
+            // time of impact to correct the order a bit.
+            collisionStack.sort((a, b) => a.distance - b.distance);
+            collisionStack.sort((a, b) => a.collisionTime - b.collisionTime);
+            let hit = collisionStack.shift();
+
+            // If a collision is detected at all, resolve for the closest AABB. Otherwise add velocity to position.
+            if (hit) {
+                this.center.x += movement.x * hit.collisionTime * deltaTime;
+                this.center.y += movement.y * hit.collisionTime * deltaTime;
+
+                // Calculate the correct time of impact for the remaining
+                // collisions or to apply movement
+                let time = remainingTime - hit.collisionTime;
+
+                // Calculate the collision normal (vector used to slide the object that collided)
+                let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
+                hit.normal.mult(dotProduct);
+
+                // Save the previous movement vector (it will get modified in onCollision)
+                let potential = movement.copy().mult(deltaTime);
+
+                // Handle events after each respective side that collided
+                this.onCollision(hit.side);
+                if (time > 0) {
+                    const boundary = this.createMovementBoundary(deltaTime, movement);
+                    // If the time of impact happened to be above zero, then recalculate
+                    // collision for all other potential collisions with respect to the normal vector
+                    let stack = [];
+
+                    // The magic function which solves all of this nonsense :)
+                    this.fixEqualSizedHoleCollision(hit, potential, time, collisionStack);
+                    for (let sweep of collisionStack) {
+                        // Pass the normal vector as the movement vector for the next possible collision
+                        if (boundary.overlaps(sweep.aabb)) {
+                            let newSweep = this.calculateSweepData(sweep.aabb, hit.normal, deltaTime);
+                            stack.push(newSweep);
+                        }
+                    }
+
+                    // Keep resolving collisions for the other potential collisions
+                    this.resolveCollisionOrMove(deltaTime, hit.normal, time, stack);
+                }
+            } else {
+                this.center.add(p5.Vector.mult(movement, deltaTime));
+            }
+        }
+
+        onCollision(side) {
+            switch (side) {
+                case "top":
+                case "bottom":
+                    this.vel.y = 0;
+                    break;
+                case "left":
+                case "right":
+                    this.vel.x = 0;
+                    break;
+            }
+        }
+
+        update(deltaTime) {
+            this.entityBroadPhase(deltaTime);
+            this.tileMapBroadPhase(deltaTime);
+            this.resolveCollisionOrMove(deltaTime);
+            this.collisionStack = [];
+        }
+
+        draw() {
+            fill(0, 150, 255);
+            rectMode(CENTER);
+            rect(this.center.x, this.center.y, this.extents.x * 2, this.extents.y * 2);
+            rectMode(CORNER);
+        }
+    }
+
+    class Player extends Entity {
+        constructor() {
+            super(
+                createVector(width / 2, height / 2), // Place the player at the center of the screen
+                createVector(tileSize / 2, tileSize / 2) // Give it the same size as a tile (to demonstrate the main problem)
+            );
+        }
+
+        update(deltaTime) {
+
+            this.controls(deltaTime);
+            super.update(deltaTime);
+        }
+
+        controls(deltaTime) {
+        		this.vel.x = 0;
+            this.vel.y += 600 * deltaTime;
+
+            let speed = 60;
+            if (keyIsDown(16)) speed = 5; // Press Shift to move extremely slow...
+            if (keyIsDown(81)) speed = 500; // Press Q to move extremely fast!
+            if (keyIsDown(65)) this.vel.x = -speed; // Press A to move left
+            if (keyIsDown(68)) this.vel.x = speed; // Press D to move left
+            if (keyIsDown(32)) { // Press space to fly
+                this.vel.y = -speed;
+            }
+        }
+    }
+
+    addEventListener("keydown", e => {
+        switch (e.keyCode) {
+            case 32:
+                e.preventDefault();
+        }
+    })
+
+</script>
+</body>
+</html>
