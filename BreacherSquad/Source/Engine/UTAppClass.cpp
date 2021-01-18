@@ -227,7 +227,6 @@ void CApplication::Init()
 	g_cam480hScreen.SetCamAnimationNone();
 	g_cam480hScreen.SetPixelPerfect(true);
 
-	g_camRT.SetCamAnimationNone();
 	//-- resolutions --
 	g_arrResolutions.RemoveAll();
 }
@@ -280,8 +279,6 @@ void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 	g_cam480hScreen.SetWorldBounds(g_rect480hWorld, true, K_CAMTRANS_AXIS_V, g_rect480hWorld.h, g_rect480hWorld.h);
 	g_cam480hScreen.InitCamera(g_rectRender, g_rect480hWorld.h, K_CAMTRANS_AXIS_V, g_rect480hWorld.Center());
 
-	g_camRT.SetWorldBounds(g_rectRT, true, K_CAMTRANS_AXIS_V, g_rectRT.h, g_rectRT.h);
-	g_camRT.InitCamera(g_rectRender, g_rectRT.h, K_CAMTRANS_AXIS_V, g_rectRT.Center());
 	//#HACK: set main flag for resolution change 
 	g_bLevelNeedsUpdate = true;
 }
@@ -292,7 +289,6 @@ void CApplication::Update(float dTime)
 	g_camGameScreen.Update(dTime);
 	g_cam240hScreen.Update(dTime);
 	g_cam480hScreen.Update(dTime);
-	g_camRT.Update(dTime);
 }
 
 bool CApplication::IsOnlyInstance(LPCTSTR className)

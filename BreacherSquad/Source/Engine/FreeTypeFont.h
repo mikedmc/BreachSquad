@@ -56,10 +56,12 @@ struct sFreeTypeFontStyle
 	float					fShadowAlpha;				// 0 for no shadow
 	int						shadowOffsetX;
 	int						shadowOffsetY;
+	float					fGeometryScale;				// 1.0f geometry is the same size as the texture (0.5 geometry half the size). Use it to give more detail to smaller text.
 
 	sFreeTypeFontStyle() :
 		dwOutlineColor(0), fShadowAlpha(0.0f),
-		shadowOffsetX(0), shadowOffsetY(2)
+		shadowOffsetX(0), shadowOffsetY(2),
+		fGeometryScale(1.0f)
 	{}
 
 	sFreeTypeFontStyle(DWORD dwOutlineCol, float fShadowA, int nShadOffX, int nShadOffY, CHAR* strTexPath = nullptr) :

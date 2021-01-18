@@ -216,10 +216,10 @@ private:
 	bool loaded;
 
 public:
-	float fLocalTimeline;	//timeline local
+	float				fLocalTimeline;	//timeline local
 
-	CCameraTransform	*m_pCamera; //transformul folosit pe toate controalele active
-	RECTXYWH_F			m_cameraScreenRect; //dreptunghiul ecran al camerei curente
+	CCameraTransform	*m_pCamera;			// transformul folosit pe toate controalele active
+	RECTXYWH_F			m_cameraScreenRect; // dreptunghiul ecran al camerei curente
 
 	WCHAR loadedFile[MAX_PATH];
 	//contine definitiile layerelor

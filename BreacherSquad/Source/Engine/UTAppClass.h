@@ -135,8 +135,7 @@ public:
 	CCameraTransform g_camScreen;		//real screen camera
 	CCameraTransform g_camGameScreen;	//game screen camera
 	CCameraTransform g_cam240hScreen;	//240px high camera (scaled up to actual resolution)
-	CCameraTransform g_cam480hScreen;	//480px high camera for system fonts (scaled up to actual resolution)
-	CCameraTransform g_camRT;			//RT to Screen
+	CCameraTransform g_cam480hScreen;	//480px high camera for controls (scaled up to actual resolution). Double the default resolution of the game.
 public:
 	static bool IsOnlyInstance(LPCTSTR className);
 	//verifica versiune DX, memorie necesara, etc. Daca da fail se iese din joc
