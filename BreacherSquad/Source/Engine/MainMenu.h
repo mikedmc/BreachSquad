@@ -73,9 +73,8 @@ public:
 	void Paint();
 
 	// Paints the animated background
-	void PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles = false);
+	void PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles = false, bool bPaintTitle = false);
 
-	void PaintMainBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles = false);
 	void PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD dwColor);
 	void PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, float fAlpha);
 	void PaintGameModeWindow(D3DXVECTOR2 vCenter, int nGameModeIdx, float fAlpha);

@@ -1645,7 +1645,7 @@ void CMainMenu::Paint()
 	{
 		case K_MM_STATE_WORKSHOP:
 		{
-			PaintMainBackground(worldrect, 0xff4444dd);
+			PaintBackground(worldrect, 0xff4444dd);
 
 #ifdef ENABLE_STEAM_WORKSHOP
 			switch (m_nSubstate)
@@ -1827,7 +1827,7 @@ void CMainMenu::Paint()
 
 		case K_MM_STATE_NET_LOBBY:
 		{
-			PaintMainBackground(worldrect, 0xff4444dd);
+			PaintBackground(worldrect, 0xff4444dd);
 
 			//show mod enabled message
 			if (UTGetAppClass().IsGameModded())
@@ -1840,7 +1840,7 @@ void CMainMenu::Paint()
 
 		case K_MM_STATE_MAINMENU:
 		{
-			PaintBackground(worldrect, 0xffffffff, true);
+			PaintBackground(worldrect, 0xffffffff, true, true);
 
 			//linear sampling
 			m_pSprite->Flush();
@@ -1861,7 +1861,7 @@ void CMainMenu::Paint()
 
 		case K_MM_STATE_GAME_MODE_SELECT:
 		{
-			PaintMainBackground(worldrect, 0xff4444dd);
+			PaintBackground(worldrect, 0xff4444dd);
 			//title
 			RECTXYWH rRect(0, 22, 100, 18);
 			CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
@@ -1936,7 +1936,7 @@ void CMainMenu::Paint()
 
 		case K_MM_STATE_CHAPTER_SELECT:
 		{
-			PaintMainBackground(worldrect, 0xff4444dd);
+			PaintBackground(worldrect, 0xff4444dd);
 			//title
 			RECTXYWH rRect(0, 22, 100, 18);
 			CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
@@ -2020,7 +2020,7 @@ void CMainMenu::Paint()
 
 			int nSelectedChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
 
-			PaintMainBackground(worldrect, 0xff4444dd);
+			PaintBackground(worldrect, 0xff4444dd);
 			//game mode name (top left)
 			if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
 				g_font8b1->DrawString(STR_ZOMBIE_INVASION, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
@@ -2353,7 +2353,7 @@ void CMainMenu::Paint()
 			RECTXYWH rectItemsPanel(worldrect.CenterX() - 160, 110, 320, worldrect.h - 110);
 			RECTXYWH tmprect; 
 
-			PaintMainBackground(worldrect, 0xff4444dd);
+			PaintBackground(worldrect, 0xff4444dd);
 			//game mode name (top left)
 			if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
 				g_font8b1->DrawString(STR_ZOMBIE_INVASION, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
@@ -2522,18 +2522,18 @@ void CMainMenu::Paint()
 	m_pSprite->Flush();
 }
 
-void CMainMenu::PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles /*= false*/)
+void CMainMenu::PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles, bool bPaintTitle )
 {
 	//background
 	CSprite::paintFrame(&m_sprColNew, worldRect.Right() - 10.0f * sin(fLocalTimeline * 0.15f), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 0, dwColor);
 	//paint logo
-	CSprite::paintFrame(&m_sprColNew, (int)worldRect.x, (int)worldRect.y, ANM_MENUS0_SPR_LOGO_MM, 0);
+	if(bPaintTitle)
+		CSprite::paintFrame(&m_sprColNew, (int)worldRect.x, (int)worldRect.y, ANM_MENUS0_SPR_LOGO_MM, 0);
 	// chars back layer
 	CSprite::paintFrame(&m_sprColNew, (worldRect.Right() + 8.0f * sin(fLocalTimeline * 0.15f)), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 1, dwColor);
 	// chars front layer
 	CSprite::paintFrame(&m_sprColNew, (worldRect.Right() + 20.0f * sin(fLocalTimeline * 0.15f)), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 2, dwColor);
 	//particles
-	/*
 	if (bPaintParticles)
 	{
 		//linear sampling
@@ -2548,59 +2548,12 @@ void CMainMenu::PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaint
 		m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 		m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 	}
-	*/
 	//paint character flickering orange light
 	AdditiveBlendingON(m_pDevice, m_pSprite);
-	float alpha = 0.1f + PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.4f, 0.3f, 2);
+	float alpha = PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.4f, 0.3f, 2);
 	//paint flickering right glow
 	CSprite::paintFrame(&m_sprColNew, (int)worldRect.Right(), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 3, D3DCOLOR_COLORALPHA(dwColor, alpha));
 	AdditiveBlendingOFF(m_pDevice, m_pSprite);
-}
-
-void CMainMenu::PaintMainBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles)
-{
-	//paint back
-	float fbackOffX = 10.0f + 8.0f * sin(fLocalTimeline * 0.4f + M_PI);
-	CSprite::paintFrame(&m_sprCol, worldRect.CenterX() + fbackOffX, worldRect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 0, dwColor);
-	//particles
-	if (bPaintParticles)
-	{
-		//linear sampling
-		m_pSprite->Flush();
-		m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-		m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-
-		//particule foc
-		g_particlesMgr.PaintLayer(K_PART_LAYER_NORMAL_LIGHT, true);
-
-		m_pSprite->Flush();
-		m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-		m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-	}
-	//paint chars
-	fbackOffX = 4.0f + 4.0f * sin(fLocalTimeline * 0.4f + M_PI);
-	CSprite::paintFrame(&m_sprCol, worldRect.CenterX() + fbackOffX, worldRect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 1, dwColor);
-	//paint character flickering orange light
-	AdditiveBlendingON(m_pDevice, m_pSprite);
-	float alpha = 0.4f + PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.4f, 0.5f, 2);
-	CSprite::paintFrame(&m_sprCol, worldRect.CenterX() + fbackOffX, worldRect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 2, D3DCOLOR_COLORALPHA(dwColor, alpha));
-
-	//paint flickering right glow
-	CSprite::paintFrame(&m_sprCol, worldRect.Right(), worldRect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 4, D3DCOLOR_COLORALPHA(dwColor, alpha));
-
-	AdditiveBlendingOFF(m_pDevice, m_pSprite);
-
-
-	//paint fog layer (w:375)
-	float fogoffx = -375.0f * FLOAT_FRAC(fLocalTimeline * 2.0f / 375.0f) + (2.0f * sin(fLocalTimeline * 0.4f + M_PI));
-	CSprite::paintFrame(&m_sprCol, worldRect.CenterX() + fogoffx, worldRect.CenterY(), ANM_MENUS_SPR_FOG, 0, dwColor);
-	CSprite::paintFrame(&m_sprCol, worldRect.CenterX() + fogoffx + 375.0f, worldRect.CenterY(), ANM_MENUS_SPR_FOG, 0, dwColor);
-
-	fogoffx = -375.0f * FLOAT_FRAC(fLocalTimeline * 5.0f / 375.0f) + (2.0f * sin(fLocalTimeline * 0.4f + M_PI));
-	CSprite::paintFrame(&m_sprCol, worldRect.CenterX() + fogoffx, worldRect.CenterY(), ANM_MENUS_SPR_FOG, 1, dwColor);
-	CSprite::paintFrame(&m_sprCol, worldRect.CenterX() + fogoffx + 375.0f, worldRect.CenterY(), ANM_MENUS_SPR_FOG, 1, dwColor);
-	//paint shotgun
-	CSprite::paintFrame(&m_sprCol, worldRect.CenterX() - 12.0f + (6.0f * sin(fLocalTimeline * 0.4f)), worldRect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 3, dwColor);
 }
 
 void CMainMenu::PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD dwColor)

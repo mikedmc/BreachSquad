@@ -1074,6 +1074,7 @@ void CPlayerSelScr::Paint(ID3DXSprite* pSprite)
 
 	RECTXYWH_F scrrect = UTGetAppClass().g_cam240hScreen.GetCamWorldAABB();
 	///--- paint background (from mainmenu.cpp, easily changed)
+
 	//#MAYBE: poate ar trebui ca desenarea asta sa fie intr-o functie generica (ca sa nu mai fie in 2 locuri)
 	DWORD dwColor = 0xff4444dd;
 	RECTXYWH_F worldrect = UTGetAppClass().g_rect240hWorld;
