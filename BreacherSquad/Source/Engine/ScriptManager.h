@@ -96,7 +96,7 @@ public:
 	explicit IScriptable() {}
 	virtual ~IScriptable() {}
 	//for debug purposes
-	virtual char const * GetProcessorName(void) = 0;
+	virtual char const * GetScriptProcessorName(void) = 0;
 
 	//RETURNS: consumed instruction? true - consumed, false - can propagate
 	virtual bool ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executorUID, UINT32 scriptUID) = 0;

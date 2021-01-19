@@ -5274,7 +5274,7 @@ void CLevel::OnActorBehaviorFinished(CActor * actor, EAIBehaviorType eOldBehavio
 }
 
 //lista temporara de collision shapes folosita la coliziuni
-CFixedArray<CCollisionShape*, 200> tempCollBoxList;
+CFixedArray<CAABB, 100> tempCollBoxList;
 
 void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 {
@@ -7614,8 +7614,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		destbox.Move(actor->pos);
 		oldbox = actor->bbox_ini;
 		oldbox.Move(actorOldPos);
-		//uniunea lor
+		// box unions to check all possible collisions
 		CAABB boxUnion = AABB_Union(destbox, oldbox);
+		// bbox union in tile coords, including every touched tile
+		RECTXYXY boxUnionTiles(floor(boxUnion.vMin.x / K_TILE_SIZE_F), floor(boxUnion.vMin.y / K_TILE_SIZE_F),
+			ceil(boxUnion.vMax.x / K_TILE_SIZE_F), ceil(boxUnion.vMax.y / K_TILE_SIZE_F));
 		//optional
 		boxUnion.Inflate(K_TILE_HSIZE, K_TILE_HSIZE);
 
@@ -7623,6 +7626,20 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		//array care tine pointeri la boxurile cu care e contact pe boxul final
 		tempCollBoxList.Clear();
 
+		//#TODO: add tiles boxes for collision
+		for (int yy = boxUnionTiles.y1; yy <= boxUnionTiles.y2; yy++)
+		{
+			for (int xx = boxUnionTiles.x1; xx <= boxUnionTiles.x2; xx++)
+			{
+				CTile* tl = &tiles[xx][yy];
+				if ((tl->flags & K_TILEFLAG_WALKABLE) == 0)
+				{
+					tempCollBoxList.Add(tl->bbox);
+				}
+			}
+		}
+
+		//#TODO: move all this in method named CollideOrMove
 		for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
 		{
 			if (m_arrColShapes[kk]->bHidden)
@@ -7635,13 +7652,13 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//adauga bbox in lista de probabile pt intersectie
 			if (m_arrColShapes[kk]->collFlags != K_DIRFLAG_NONE)
 			{
-				tempCollBoxList.Add(m_arrColShapes[kk]);
+				tempCollBoxList.Add(m_arrColShapes[kk]->bbox);
 
 				//ne asiguram ca nu trecem prin cutii mici (solide) la viteze foarte mari
-				//#TODO: implement other collision types here
 				if (m_arrColShapes[kk]->type == K_LVL_COLL_TYPE_SOLID)
 				{
 					CAABB* box = &m_arrColShapes[kk]->bbox;
+					//#TODO: de ce testez doar boxurile foarte inguste?? Ar tb sa mearga ok la toate daca sortez
 					if ((box->vSize.x <= fabs(movevec.x)) || (box->vSize.y <= fabs(movevec.y)))
 					{
 						//sweep test - enlarge bbox and check intersections between centers vector
@@ -7653,6 +7670,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						{
 							//repozitionam
 							movevec = vColPt - oldbox.vCenter;
+							//#TODO: nu ar trebui sa mute actorul ci doar sa faca clamp mereu la moveVec dupa colizionarea cu toate
 							actor->pos = actorOldPos + movevec;
 							//destbox set
 							destbox = actor->bbox_ini;
@@ -7673,10 +7691,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		{
 			for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
 			{
-				CCollisionShape *colshape = tempCollBoxList[kk];
-				CAABB box = colshape->bbox; //copy box to edit it
+				CAABB* box = &tempCollBoxList[kk]; 
 
-				CAABB minkAABB = AABB_GetMinkowskiDifference(destbox, box);
+				CAABB minkAABB = AABB_GetMinkowskiDifference(destbox, *box);
 				//verificam coliziune: daca nu contine originea nu e coliziune
 				if ((minkAABB.vMin.x > 0.0f) || (minkAABB.vMin.y > 0.0f) || (minkAABB.vMax.x < 0.0f) || (minkAABB.vMax.y < 0.0f))
 					continue;
@@ -7690,55 +7707,23 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				D3DXVECTOR2 vPenetrate(0.0f, 0.0f);
 				float mindist = 1000000.0f;
 
-				if (colshape->collFlags & K_DIRFLAG_LEFT)
+				mindist = minx;
+				vPenetrate.x = -minx; vPenetrate.y = 0.0f;
+				retDirFlag = K_DIRFLAG_LEFT;
+
+				if (maxx < mindist)
 				{
-					if (actor->speed.x == 0.0f)
-					{
-						mindist = minx;
-						vPenetrate.x = -minx; vPenetrate.y = 0.0f;
-						retDirFlag = K_DIRFLAG_LEFT;
-					}
-					else //ignore left collisions if difference is small (small stairs)
-					{
-						float fDY = actor->bbox.vMax.y - colshape->bbox.vMin.y;
-						//don't ignore collision if stairs too high or feet not on ground
-						if ((fDY > 4.0f) || (fDY <= 0.0f) || ((actor->collisionFlags & K_DIRFLAG_DOWN) == 0))
-						{
-							mindist = minx;
-							vPenetrate.x = -minx; vPenetrate.y = 0.0f;
-							retDirFlag = K_DIRFLAG_LEFT;
-						}
-					}
+					mindist = maxx;
+					vPenetrate.x = maxx; vPenetrate.y = 0.0f;
+					retDirFlag = K_DIRFLAG_RIGHT;
 				}
-				if ((maxx < mindist) && (colshape->collFlags & K_DIRFLAG_RIGHT))
+				if (maxy < mindist)
 				{
-					if (actor->speed.x == 0.0f)
-					{
-						mindist = maxx;
-						vPenetrate.x = maxx; vPenetrate.y = 0.0f;
-						retDirFlag = K_DIRFLAG_RIGHT;
-					}
-					else //ignore right collisions if difference is small (small stairs)
-					{
-						float fDY = actor->bbox.vMax.y - colshape->bbox.vMin.y;
-						if ((fDY > 4.0f) || (fDY <= 0.0f) || ((actor->collisionFlags & K_DIRFLAG_DOWN) == 0))
-						{
-							mindist = maxx;
-							vPenetrate.x = maxx; vPenetrate.y = 0.0f;
-							retDirFlag = K_DIRFLAG_RIGHT;
-						}
-					}
+					mindist = maxy;
+					vPenetrate.x = 0.0f; vPenetrate.y = maxy;
+					retDirFlag = K_DIRFLAG_DOWN;
 				}
-				if ((maxy < mindist) && (colshape->collFlags & K_DIRFLAG_DOWN))
-				{
-					if (movevec.y >= 0.0f) //this if is optional but it helps when jumping near an interactible so we don't get the interact icon shown
-					{
-						mindist = maxy;
-						vPenetrate.x = 0.0f; vPenetrate.y = maxy;
-						retDirFlag = K_DIRFLAG_DOWN;
-					}
-				}
-				if ((miny < mindist) && (colshape->collFlags & K_DIRFLAG_UP))
+				if (miny < mindist)
 				{
 					mindist = miny;
 					vPenetrate.x = 0.0f; vPenetrate.y = -miny;
@@ -7816,7 +7801,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	{
 		KillActor(actor);
 	}
-
 
 	//set final position
 	actor->SetPos(actor->pos);
@@ -13299,9 +13283,6 @@ void CLevel::GiveStrategicPoints(float fPoints, D3DXVECTOR2 * vPos)
 }
 
 
-//-------------------------------------------------------------
-// Functii utilitare
-//-------------------------------------------------------------
 bool CLevel::IsLineOfSight(D3DXVECTOR2 pt1, D3DXVECTOR2 pt2, D3DXVECTOR2 * retVecCollisionPt, D3DXVECTOR2 * retVecCollisionNormal)
 {
 	D3DXVECTOR2 collisionPoint, collisionNormal;

@@ -176,6 +176,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		for (int xx = 0; xx < levelSizeTL.w; xx++)
 		{
 			CTile* tl = &tiles[xx][yy];
+			tl->bbox.Set(xx * K_TILE_SIZE_F, yy * K_TILE_SIZE_F, (xx + 1) * K_TILE_SIZE_F, (yy + 1) * K_TILE_SIZE_F);
 			for (int kk = 0; kk < nLayersCnt; kk++)
 			{
 				//nivel
