@@ -227,6 +227,7 @@
     <ClInclude Include="Source\Engine\BufferedPainter.h" />
     <ClInclude Include="Source\Engine\BufferedPainterQuad.h" />
     <ClInclude Include="Source\Engine\Caabb.h" />
+    <ClInclude Include="Source\Engine\CaabbColl.h" />
     <ClInclude Include="Source\Engine\CameraTransform.h" />
     <ClInclude Include="Source\Engine\CFOVUtil.h" />
     <ClInclude Include="Source\Engine\Chapters.h" />

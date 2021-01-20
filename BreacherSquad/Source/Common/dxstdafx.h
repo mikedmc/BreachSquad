@@ -445,6 +445,7 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "utils/enginecommon.h"
 #include "utils/CMathUtil.h"
 #include "Caabb.h"
+#include "CaabbColl.h"
 #include "Randoms.h"
 #include "GetDXVer.h"
 #include "pugixml/pugixml.hpp"

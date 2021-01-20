@@ -5274,7 +5274,7 @@ void CLevel::OnActorBehaviorFinished(CActor * actor, EAIBehaviorType eOldBehavio
 }
 
 //lista temporara de collision shapes folosita la coliziuni
-CFixedArray<CAABB, 100> tempCollBoxList;
+CFixedArray<CAABBColl, 100> tempCollBoxList;
 
 void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 {
@@ -7626,7 +7626,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		//array care tine pointeri la boxurile cu care e contact pe boxul final
 		tempCollBoxList.Clear();
 
-		//#TODO: add tiles boxes for collision
+		//add boxes from tiles
 		for (int yy = boxUnionTiles.y1; yy <= boxUnionTiles.y2; yy++)
 		{
 			for (int xx = boxUnionTiles.x1; xx <= boxUnionTiles.x2; xx++)
@@ -7634,12 +7634,14 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				CTile* tl = &tiles[xx][yy];
 				if ((tl->flags & K_TILEFLAG_WALKABLE) == 0)
 				{
-					tempCollBoxList.Add(tl->bbox);
+					CAABBColl collb = tl->bbox;
+					collb.collFlags = K_DIRFLAG_ALL;
+					tempCollBoxList.Add(collb);
 				}
 			}
 		}
 
-		//#TODO: move all this in method named CollideOrMove
+		//add collision shapes
 		for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
 		{
 			if (m_arrColShapes[kk]->bHidden)
@@ -7652,36 +7654,37 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//adauga bbox in lista de probabile pt intersectie
 			if (m_arrColShapes[kk]->collFlags != K_DIRFLAG_NONE)
 			{
-				tempCollBoxList.Add(m_arrColShapes[kk]->bbox);
-
-				//ne asiguram ca nu trecem prin cutii mici (solide) la viteze foarte mari
-				if (m_arrColShapes[kk]->type == K_LVL_COLL_TYPE_SOLID)
-				{
-					CAABB* box = &m_arrColShapes[kk]->bbox;
-					//#TODO: de ce testez doar boxurile foarte inguste?? Ar tb sa mearga ok la toate daca sortez
-					if ((box->vSize.x <= fabs(movevec.x)) || (box->vSize.y <= fabs(movevec.y)))
-					{
-						//sweep test - enlarge bbox and check intersections between centers vector
-						CAABB staticBoxGrown = *box;
-						staticBoxGrown.Inflate(oldbox.vHalfSize.x, oldbox.vHalfSize.y);
-
-						D3DXVECTOR2 vColPt;
-						if (AABB_Segment_Intersection_NoHeads(oldbox.vCenter, destbox.vCenter, staticBoxGrown, &vColPt))
-						{
-							//repozitionam
-							movevec = vColPt - oldbox.vCenter;
-							//#TODO: nu ar trebui sa mute actorul ci doar sa faca clamp mereu la moveVec dupa colizionarea cu toate
-							actor->pos = actorOldPos + movevec;
-							//destbox set
-							destbox = actor->bbox_ini;
-							destbox.Move(actor->pos);
-						}
-					}
-				}
-
+				CAABBColl collb = m_arrColShapes[kk]->bbox;
+				collb.collFlags = m_arrColShapes[kk]->collFlags;
+				tempCollBoxList.Add(collb);
 			}
-
 		}
+
+		//#TODO: move all this in method named CollideOrMove
+
+		// clamp move vector to closest collision
+		Vec2 vDest = destbox.vCenter;
+		/*
+		for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
+		{
+			//sweep test - enlarge bbox and check intersections between centers vector
+			CAABB staticBoxGrown = tempCollBoxList[kk];
+			staticBoxGrown.Inflate(oldbox.vHalfSize.x, oldbox.vHalfSize.y);
+
+			D3DXVECTOR2 vColPt;
+			if (AABB_Segment_Intersection_NoHeads(oldbox.vCenter, vDest, staticBoxGrown, &vColPt))
+			{
+				vDest = vColPt;
+			}
+		}
+		*/
+		//repositionate actor
+		movevec = vDest - oldbox.vCenter;
+		actor->pos = actorOldPos + movevec;
+		//destbox set
+		destbox = actor->bbox_ini;
+		destbox.Move(actor->pos);
+
 
 		//reset coll flags
 		UINT16 unTotalFlags = 0;
@@ -7691,10 +7694,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		{
 			for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
 			{
-				CAABB* box = &tempCollBoxList[kk]; 
+				CAABBColl* box = &tempCollBoxList[kk]; 
 
 				CAABB minkAABB = AABB_GetMinkowskiDifference(destbox, *box);
 				//verificam coliziune: daca nu contine originea nu e coliziune
+				// ar trebui ca daca nu e coliziune abia aici sa fac continuous detection (cu viteza relativa a cutiilor)
 				if ((minkAABB.vMin.x > 0.0f) || (minkAABB.vMin.y > 0.0f) || (minkAABB.vMax.x < 0.0f) || (minkAABB.vMax.y < 0.0f))
 					continue;
 				//daca avem coliziune gasim vectorul de penetrare adica distanta minima de la origine la margini
@@ -7707,23 +7711,26 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				D3DXVECTOR2 vPenetrate(0.0f, 0.0f);
 				float mindist = 1000000.0f;
 
-				mindist = minx;
-				vPenetrate.x = -minx; vPenetrate.y = 0.0f;
-				retDirFlag = K_DIRFLAG_LEFT;
-
-				if (maxx < mindist)
+				
+				if ((minx < mindist) && (box->collFlags & K_DIRFLAG_RIGHT))
+				{
+					mindist = minx;
+					vPenetrate.x = -minx; vPenetrate.y = 0.0f;
+					retDirFlag = K_DIRFLAG_LEFT;
+				}
+				if ((maxx < mindist) && (box->collFlags & K_DIRFLAG_LEFT))
 				{
 					mindist = maxx;
 					vPenetrate.x = maxx; vPenetrate.y = 0.0f;
 					retDirFlag = K_DIRFLAG_RIGHT;
 				}
-				if (maxy < mindist)
+				if ((maxy < mindist) && (box->collFlags & K_DIRFLAG_UP))
 				{
 					mindist = maxy;
 					vPenetrate.x = 0.0f; vPenetrate.y = maxy;
 					retDirFlag = K_DIRFLAG_DOWN;
 				}
-				if (miny < mindist)
+				if ((miny < mindist) && (box->collFlags & K_DIRFLAG_DOWN))
 				{
 					mindist = miny;
 					vPenetrate.x = 0.0f; vPenetrate.y = -miny;
