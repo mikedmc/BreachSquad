@@ -70,7 +70,7 @@ OPRESULT CBufferedPainterQuads::AddQuads(_VERTEX_PNCT4T4 *points, int quadsCount
 		return OPRESULT(K_OP_FAILED, L"You have to call BeginMesh() first!", K_SEVERITY_WARNING);
 
 #if defined(_DEBUG) || defined(DEBUG)
-	assert(m_nVertexCursor + quadsCount * 4 < m_nMaxQuadsCnt * 4);
+	assert((int)m_nVertexCursor + quadsCount * 4 < m_nMaxQuadsCnt * 4);
 #endif
 
 	memcpy(&m_verts[m_nVertexCursor], points, sizeof(_VERTEX_PNCT4T4) * 4 * quadsCount);
@@ -127,7 +127,6 @@ OPRESULT CBufferedPainterQuads::BuildBuffers()
 	if (m_nVertexCursor == 0)
 		return K_OP_OK;
 
-	HRESULT hr = S_OK;
 	//write verts to VB
 	_VERTEX_PNCT4T4* pVerts;
 	if (FAILED(m_vb->Lock(0, m_nVertexCursor * sizeof(_VERTEX_PNCT4T4), (void**)&pVerts, D3DLOCK_DISCARD)))
@@ -146,8 +145,6 @@ OPRESULT CBufferedPainterQuads::BuildBuffers()
 
 OPRESULT CBufferedPainterQuads::DrawMesh(int meshIdx, bool setFVF)
 {
-	HRESULT hr = S_OK;
-
 	// trying to draw before calling buildBuffers?
 #if defined(_DEBUG) || defined(DEBUG)
 	if (m_bVBBuilt == false)
@@ -199,7 +196,6 @@ const int CBufferedPainterQuads::GetTrisCount(int meshIdx) const
 
 OPRESULT CBufferedPainterQuads::CreateVB()
 {
-	HRESULT hr = S_OK;
 	assert(m_nMaxQuadsCnt > 0);
 	if (m_pDevice == nullptr)
 		return OPRESULT(K_OP_INVALIDARGS, L"CBufferedPainterQuads::CreateVB: Device not set!", K_SEVERITY_WARNING);
@@ -225,7 +221,6 @@ OPRESULT CBufferedPainterQuads::CreateVB()
 
 OPRESULT CBufferedPainterQuads::CreateIB()
 {
-	HRESULT hr = S_OK;
 	assert(m_nMaxQuadsCnt > 0);
 	if (m_pDevice == nullptr)
 		return OPRESULT(K_OP_INVALIDARGS, L"CBufferedPainterQuads::CreateVB: Device not set!", K_SEVERITY_WARNING);

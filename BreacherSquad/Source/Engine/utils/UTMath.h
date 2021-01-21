@@ -33,8 +33,9 @@
 
 #define			Vec2i					POINTXY_INT
 
-
+// Is vector almost zero?
 bool			MUVec2AlmostZero(Vec2 vec);
+// Is vector almost zero?
 bool			MUVec3AlmostZero(Vec3 vec);
 
 

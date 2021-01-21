@@ -5,20 +5,21 @@
 #include <sstream>
 #include <stddef.h>
 
-#define null NULL
-//modifica variabila pana la o limita
+//#define null NULL
+
+// changes a var between 2 limits
 #define inc_limit(var, step, limit) {if(var < (limit)) {var += step; if((var) > (limit)) var = limit;}}
 #define dec_limit(var, step, limit) {if(var > (limit)) {var -= step; if((var) < (limit)) var = limit;}}
 #define SIGN(var) (((var) < 0) ? -1:1)
-//inverseaza un float intre 0 si 1
+// invert a float that'sbetween 0  and 1
 #define INV_UNIT(var) (1.0f - var)
-//vede daca 2 floaturi sunt egale, intr-o oarecare marja (threshold)
+// checks if floats are almost equal
 #define FLOATS_EQUAL(a, b, threshold) ((fabs((a) - (b)) < threshold)?true:false)
-//gaseste partea fractionala a unui float
+// finds fractional part of float
 #define FLOAT_FRAC(a) (a - floor(a))
-//face modulo la float intre limite
+// Acts like modulo but on float
 #define FLOAT_MOD(a, nModuloValue) ( (((int)floor(a)) % (int)(nModuloValue)) + (a - floor(a)) )
-//rotunjeste float in alt float folosind floor()
+// rounds a float to closest int value (kind of like casting to int)
 #define ROUND_FLOAT(x) (floor((x) + 0.5f))
 
 #define D3DCOLOR_FFFA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0xffffff)
@@ -32,6 +33,23 @@
 #define PI 3.1415926536f
 //float minimum
 #define EPS 0.00001f
+
+//generic directions (clockwise starting left)
+#define K_DIR_LEFT 0
+#define K_DIR_UP 1
+#define K_DIR_RIGHT 2
+#define K_DIR_DOWN 3
+
+//direction flags used when setting more directions on one int
+#define K_DIRFLAG_NONE 0
+#define K_DIRFLAG_LEFT 1
+#define K_DIRFLAG_UP 2
+#define K_DIRFLAG_RIGHT 4
+#define K_DIRFLAG_DOWN 8
+#define K_DIRFLAG_UP_DOWN 10
+#define K_DIRFLAG_LEFT_RIGHT 5
+#define K_DIRFLAG_ALL 15
+
 //value not set/touched
 #define K_DEAD_BEEF		0xDEADBEEF
 #define K_NOT_SET		0xDEADBEEF
