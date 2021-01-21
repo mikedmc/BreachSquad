@@ -1802,36 +1802,64 @@ HRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 void CLevel::UpdateDirtyRects()
 {
 	//#TODO: doesn't change WALKABLE floor flags, that should be done during loading or level editing for speed
+	//#TODO: should make sure the level always has a 1 tile border!
 	///--- compute tile flags ---
 	for (int kk = 0; kk < m_arrDirtyRectsTL.size(); kk++)
 	{
 		RECTXYXY rect = m_arrDirtyRectsTL[kk];
+		// take border tiles into account:
 		// clamp to smaller size because we check neighbours
-		rect.Clamp(1, 1, levelSizeTL.w - 2, levelSizeTL.h - 2);
+		rect.Clamp(0, 0, levelSizeTL.w - 1, levelSizeTL.h - 1);
 		for (int yy = rect.y1; yy <= rect.y2; yy++)
 		{
 			for (int xx = rect.x1; xx <= rect.x2; xx++)
 			{
 				CTile* tl = &tiles[xx][yy];
+
+				// take border tiles into account. they can't check for neighbours so we suppose they are solid
+				if ((xx <= 0) || (yy <= 0) || (xx == levelSizeTL.w - 1) || (yy == levelSizeTL.h - 1))
+				{
+					tl->flags |= K_TILEFLAG_HASWALL_MASK;
+					tl->bbox.collFlags = K_DIRFLAG_ALL;
+					continue;
+				}
+
 				// neighbours
 				CTile* tlL = &tiles[xx - 1][yy];
 				CTile* tlR = &tiles[xx + 1][yy];
 				CTile* tlU = &tiles[xx][yy - 1];
 				CTile* tlD = &tiles[xx][yy + 1];
-				// set wall flags on non walkable tiles
+				///--- set wall flags on non walkable tiles
 				if ((tl->flags & K_TILEFLAG_WALKABLE) == 0)
 				{
+					// clear flags
+					FLAGOP_CLEAR(tl->flags, K_TILEFLAG_HASWALL_MASK);
+					tl->bbox.collFlags = 0;
+
 					if (IS_FLAG_ANY(tlL->flags, K_TILEFLAG_WALKABLE))
+					{
 						tl->flags |= K_TILEFLAG_HASWALL_L;
+						tl->bbox.collFlags |= K_DIRFLAG_LEFT;
+					}
 					if (IS_FLAG_ANY(tlR->flags, K_TILEFLAG_WALKABLE))
+					{
 						tl->flags |= K_TILEFLAG_HASWALL_R;
+						tl->bbox.collFlags |= K_DIRFLAG_RIGHT;
+					}
 					if (IS_FLAG_ANY(tlU->flags, K_TILEFLAG_WALKABLE))
+					{
 						tl->flags |= K_TILEFLAG_HASWALL_U;
+						tl->bbox.collFlags |= K_DIRFLAG_UP;
+					}
 					if (IS_FLAG_ANY(tlD->flags, K_TILEFLAG_WALKABLE))
+					{
 						tl->flags |= K_TILEFLAG_HASWALL_D;
+						tl->bbox.collFlags |= K_DIRFLAG_DOWN;
+					}
 				}
 
-				// compute wall shadows
+
+				///--- compute wall shadows
 				CTile* tlDL = &tiles[xx - 1][yy + 1];
 				// it can only receive if it's a floor or a wall but not a ceiling on that tile
 				tl->nShadowFrame = -1;
@@ -7594,26 +7622,20 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	actor->vSpeedImpulse.x -= actor->vSpeedImpulse.x * impFriction.x * dTime;
 	actor->vSpeedImpulse.y -= actor->vSpeedImpulse.y * impFriction.y * dTime;
-	//reset vertical impulse so we don't get pushed up (seems to jump for a frame)
-	if (actor->vSpeedImpulse.y < 0.0f)
-		actor->vSpeedImpulse.y = 0.0f;
 	///--- move actor ---
 	//setez viteza
+	Vec2 vFrom = actor->pos;
 	D3DXVECTOR2 movevec = actor->speed * dTime;
-
-	//movevec += vAnimMove;//adaug si animatia exportata din editor (nu e in fn de dTime)
-	D3DXVECTOR2 actorOldPos = actor->pos;
-	//move actor to next position
-	actor->pos += movevec;
+	Vec2 vTo = actor->pos + movevec;
 
 	if (actor->bHasCollision)
 	{
 		//1. fine bbox start and end union that includes all collisions when moving at high speeds
 		CAABB destbox, oldbox;
 		destbox = actor->bbox_ini;
-		destbox.Move(actor->pos);
+		destbox.Move(actor->pos + movevec);
 		oldbox = actor->bbox_ini;
-		oldbox.Move(actorOldPos);
+		oldbox.Move(actor->pos);
 		// box unions to check all possible collisions
 		CAABB boxUnion = AABB_Union(destbox, oldbox);
 		// bbox union in tile coords, including every touched tile
@@ -7623,7 +7645,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		boxUnion.Inflate(K_TILE_HSIZE, K_TILE_HSIZE);
 
 		//#TODO: if it gets getting more expensive just use a quad tree on the collision boxes
-		//array care tine pointeri la boxurile cu care e contact pe boxul final
+		// keeps a list of all boxes that might be colliding
 		tempCollBoxList.Clear();
 
 		//add boxes from tiles
@@ -7634,9 +7656,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				CTile* tl = &tiles[xx][yy];
 				if ((tl->flags & K_TILEFLAG_WALKABLE) == 0)
 				{
-					CAABBColl collb = tl->bbox;
-					collb.collFlags = K_DIRFLAG_ALL;
-					tempCollBoxList.Add(collb);
+					tempCollBoxList.Add(tl->bbox);
 				}
 			}
 		}
@@ -7662,8 +7682,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 		//#TODO: move all this in method named CollideOrMove
 
-		// clamp move vector to closest collision
-		Vec2 vDest = destbox.vCenter;
+		
 		/*
 		for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
 		{
@@ -7678,14 +7697,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			}
 		}
 		*/
-		//repositionate actor
-		movevec = vDest - oldbox.vCenter;
-		actor->pos = actorOldPos + movevec;
-		//destbox set
-		destbox = actor->bbox_ini;
-		destbox.Move(actor->pos);
-
-
 		//reset coll flags
 		UINT16 unTotalFlags = 0;
 
@@ -7699,71 +7710,125 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				CAABB minkAABB = AABB_GetMinkowskiDifference(destbox, *box);
 				//verificam coliziune: daca nu contine originea nu e coliziune
 				// ar trebui ca daca nu e coliziune abia aici sa fac continuous detection (cu viteza relativa a cutiilor)
-				if ((minkAABB.vMin.x > 0.0f) || (minkAABB.vMin.y > 0.0f) || (minkAABB.vMax.x < 0.0f) || (minkAABB.vMax.y < 0.0f))
-					continue;
-				//daca avem coliziune gasim vectorul de penetrare adica distanta minima de la origine la margini
-				float minx = fabs(minkAABB.vMin.x);
-				float maxx = fabs(minkAABB.vMax.x);
-				float miny = fabs(minkAABB.vMin.y);
-				float maxy = fabs(minkAABB.vMax.y);
+				if ((minkAABB.vMin.x <= 0.0f) && (minkAABB.vMin.y <= 0.0f) && (minkAABB.vMax.x >= 0.0f) && (minkAABB.vMax.y >= 0.0f))
+				{
+					// colliding, do normal separation
+					float minx = fabs(minkAABB.vMin.x);
+					float maxx = fabs(minkAABB.vMax.x);
+					float miny = fabs(minkAABB.vMin.y);
+					float maxy = fabs(minkAABB.vMax.y);
 
-				int retDirFlag = K_DIRFLAG_NONE;
-				D3DXVECTOR2 vPenetrate(0.0f, 0.0f);
-				float mindist = 1000000.0f;
+					int retDirFlag = K_DIRFLAG_NONE;
+					D3DXVECTOR2 vPenetrate(0.0f, 0.0f);
+					float mindist = 1000000.0f;
 
-				
-				if ((minx < mindist) && (box->collFlags & K_DIRFLAG_RIGHT))
-				{
-					mindist = minx;
-					vPenetrate.x = -minx; vPenetrate.y = 0.0f;
-					retDirFlag = K_DIRFLAG_LEFT;
-				}
-				if ((maxx < mindist) && (box->collFlags & K_DIRFLAG_LEFT))
-				{
-					mindist = maxx;
-					vPenetrate.x = maxx; vPenetrate.y = 0.0f;
-					retDirFlag = K_DIRFLAG_RIGHT;
-				}
-				if ((maxy < mindist) && (box->collFlags & K_DIRFLAG_UP))
-				{
-					mindist = maxy;
-					vPenetrate.x = 0.0f; vPenetrate.y = maxy;
-					retDirFlag = K_DIRFLAG_DOWN;
-				}
-				if ((miny < mindist) && (box->collFlags & K_DIRFLAG_DOWN))
-				{
-					mindist = miny;
-					vPenetrate.x = 0.0f; vPenetrate.y = -miny;
-					retDirFlag = K_DIRFLAG_UP;
-				}
-				//daca nu da coliziune din cauza flagurilor ignor boxul
-				if (retDirFlag == K_DIRFLAG_NONE)
-					continue;
 
-				//set collision flags
-				unTotalFlags |= retDirFlag;
-				//change actor placement
-				actor->pos -= vPenetrate;
-				movevec = actor->pos - actorOldPos;
-				//destbox set
-				destbox = actor->bbox_ini;
-				destbox.Move(actor->pos);
-				//still penetrating? SQUASH!
-				if ((fabs(vPenetrate.x) > K_LVL_MAX_PENETRATION) || (fabs(vPenetrate.y) > K_LVL_MAX_PENETRATION))
+					if ((minx < mindist) && (box->collFlags & K_DIRFLAG_RIGHT))
+					{
+						mindist = minx;
+						vPenetrate.x = -minx; vPenetrate.y = 0.0f;
+						retDirFlag = K_DIRFLAG_LEFT;
+					}
+					if ((maxx < mindist) && (box->collFlags & K_DIRFLAG_LEFT))
+					{
+						mindist = maxx;
+						vPenetrate.x = maxx; vPenetrate.y = 0.0f;
+						retDirFlag = K_DIRFLAG_RIGHT;
+					}
+					if ((maxy < mindist) && (box->collFlags & K_DIRFLAG_UP))
+					{
+						mindist = maxy;
+						vPenetrate.x = 0.0f; vPenetrate.y = maxy;
+						retDirFlag = K_DIRFLAG_DOWN;
+					}
+					if ((miny < mindist) && (box->collFlags & K_DIRFLAG_DOWN))
+					{
+						mindist = miny;
+						vPenetrate.x = 0.0f; vPenetrate.y = -miny;
+						retDirFlag = K_DIRFLAG_UP;
+					}
+					//daca nu da coliziune din cauza flagurilor ignor boxul
+					if (retDirFlag == K_DIRFLAG_NONE)
+						continue;
+
+					//set collision flags
+					unTotalFlags |= retDirFlag;
+					//change actor placement
+					vTo -= vPenetrate;
+					movevec = vTo - vFrom;
+					
+					destbox= actor->bbox_ini;
+					destbox.Move(vTo);
+
+					//still penetrating? SQUASH!
+					if ((fabs(vPenetrate.x) > K_LVL_MAX_PENETRATION) || (fabs(vPenetrate.y) > K_LVL_MAX_PENETRATION))
+					{
+						bSquashPlayer = true;
+					}
+				}
+				else
 				{
-					bSquashPlayer = true;
+					// not colliding yet but they might: do swept collision
+					// calculate the relative motion between the two boxes
+					//Vec2 relativeMotion = (boxA.velocity - boxB.velocity);
+					Vec2 relativeMotion = movevec;
+
+					// ray-cast the relativeMotion vector against the Minkowski AABB
+					CAABBColl minkbb = minkAABB;
+					minkbb.collFlags = box->collFlags;
+					float h = 0.0f;
+
+					//#TODO: add collision flags after sweeping collision test too!
+
+					// check to see if a collision will happen this frame
+					// getRayIntersectionFraction returns Math.POSITIVE_INFINITY if there is no intersection
+					if (minkbb.GetRayIntersectionFraction(Vec2(0.0f, 0.0f), relativeMotion, h))
+					{
+						/*
+						// yup, there WILL be a collision this frame
+						// move the boxes appropriately
+						boxA.center += boxA.velocity * dt * h;
+						boxB.center += boxB.velocity * dt * h;
+
+						// zero the normal component of the velocity
+						// (project the velocity onto the tangent of the relative velocities
+						//  and only keep the projected component, tossing the normal component)
+						var tangent : Vector = relativeMotion.normalized.tangent;
+						boxA.velocity = Vector.dotProduct(boxA.velocity, tangent) * tangent;
+						boxB.velocity = Vector.dotProduct(boxB.velocity, tangent) * tangent;
+						*/
+						//DMC: eliminates intersection heads so it doesn't give fake collision when overlapping
+						if ((h > EPS) && (h < 1.0f - EPS))
+						{
+							movevec *= h;
+							vTo = vFrom + movevec;
+						}
+					}
+					else
+					{
+						// no intersection, move it along
+						//boxA.center += boxA.velocity * dt;
+						//boxB.center += boxB.velocity * dt;
+					}
 				}
 			}
+
+
+			//place actor on new position
+			actor->pos = vTo;
+			//destbox set
+			//destbox = actor->bbox_ini;
+			//destbox.Move(actor->pos);
+
 
 			//set actor current collision flags
 			actor->collisionFlags = unTotalFlags;
 
 			//final check
-			//squash - cand esti strivit moare cu splat
 			if ((bSquashPlayer) &&
 				(((actor->collisionFlags & K_DIRFLAG_UP_DOWN) == K_DIRFLAG_UP_DOWN) || ((actor->collisionFlags & K_DIRFLAG_LEFT_RIGHT) == K_DIRFLAG_LEFT_RIGHT)))
 			{
-				HitActor(actor, -500.0f, actor->GetUID(), K_LVL_ACT_CLASS_EXPLOSION);
+				//HitActor(actor, -500.0f, actor->GetUID(), K_LVL_ACT_CLASS_EXPLOSION);
 			}
 			//DOWN collision
 			if ((actor->speed.y > 0.0f) && (actor->collisionFlags & K_DIRFLAG_DOWN))
@@ -7798,8 +7863,15 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		else
 		{
 			actor->collisionFlags = 0;
+			// collision disabled
+			actor->pos = vTo;
 		}
 
+	}
+	else
+	{
+		// collision disabled
+		actor->pos = vTo;
 	}
 	//end phys
 
@@ -7812,7 +7884,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//set final position
 	actor->SetPos(actor->pos);
 	// save last position in pos_last (SetPos does but we already altered actor->pos)
-	actor->pos_last = actorOldPos;
+	actor->pos_last = vFrom;
 	//set camera vector
 	if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
 	{
@@ -11853,7 +11925,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	// paint floors and vertical walls
 	mapMesh.UpdateVisibility(camrect);
 	mapMesh.PaintLayer(K_TILE_LAYER_FLOOR);
-	mapMesh.PaintLayer(K_TILE_LAYER_WALLS);
+	//mapMesh.PaintLayer(K_TILE_LAYER_WALLS);
 
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 	if (pSprVS)
@@ -11891,7 +11963,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 
 	UTGetShaderManager().SetVS(nullptr);
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
-	mapMesh.PaintLayer(K_TILE_LAYER_CEILING);
+	//mapMesh.PaintLayer(K_TILE_LAYER_CEILING);
 
 	return K_OP_OK;
 }

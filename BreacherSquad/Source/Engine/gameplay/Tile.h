@@ -46,7 +46,7 @@ public:
 	Vec2		vUVmax[K_TILE_LAYERS_CNT];		// precomputed UV coords max
 
 	int			nShadowFrame;					// Frame of shadow from lights sprites (3 times the resolution). See sprite for shadow frames.
-	CAABB		bbox;							// BBox of tile in world coords
+	CAABBColl	bbox;							// BBox of tile in world coords containing tile collision flags
 
 	CTile() : flags(K_TILEFLAG_NONE), nShadowFrame(-1)
 	{

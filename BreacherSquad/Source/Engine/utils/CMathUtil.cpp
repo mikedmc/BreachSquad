@@ -74,7 +74,7 @@ bool UTMath::LineLineIntersects_denom(Vec2 a, Vec2 b, Vec2 c, Vec2 d, float & r,
 {
 	float denominator = ((b.x - a.x) * (d.y - c.y)) - ((b.y - a.y) * (d.x - c.x));
 
-	// returns false fa ALL parallel lines
+	// returns false for ALL parallel lines
 	if (denominator == 0.0f)
 		return false;
 
@@ -93,7 +93,7 @@ bool UTMath::RaySegmentIntersection(Vec2 a, Vec2 b, Vec2 c, Vec2 d, Vec2 *outPt)
 {
 	float denominator = ((b.x - a.x) * (d.y - c.y)) - ((b.y - a.y) * (d.x - c.x));
 
-	// returns false fa ALL parallel lines
+	// returns false for ALL parallel lines
 	if (denominator == 0.0f)
 		return false;
 

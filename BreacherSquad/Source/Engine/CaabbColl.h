@@ -27,7 +27,7 @@ public:
 	}
 
 	// Finds the closest intersection as a fraction of ^direction
-	float GetRayIntersectionFraction(Vec2 origin, Vec2 direction)
+	bool GetRayIntersectionFraction(Vec2 origin, Vec2 direction, float & frac)
 	{
 		Vec2 end = origin + direction;
 
@@ -58,7 +58,9 @@ public:
 		}
 
 		// return the fractional component along the ray where we collided
-		return minT;
+		frac = minT;
+		// return collision only if intersected
+		return (minT != 100000.0f) ? true : false;
 	}
 };
 
