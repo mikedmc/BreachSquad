@@ -44,7 +44,8 @@ public:
 		}
 		if ((collFlags & K_DIRFLAG_DOWN) && (UTMath::LineLineIntersects_denom(origin, end, Vec2(vMin.x, vMax.y), vMax, r, s)))
 		{
-			if (r < minT) minT = r;
+			if (r < minT) 
+				minT = r;
 		}
 		if ((collFlags & K_DIRFLAG_RIGHT) && (UTMath::LineLineIntersects_denom(origin, end, vMax, Vec2(vMax.x, vMin.y), r, s)))
 		{

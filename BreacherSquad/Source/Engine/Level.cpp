@@ -624,11 +624,13 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, D3DXVECTO
 	}
 
 	//daca are coliziuni laterale anulez impulsul ca sa nu intre prin geometrie
+	/*
 	if (((actor->collisionFlags & K_DIRFLAG_RIGHT) && (actor->vSpeedImpulse.x > 0.0f)) ||
 		((actor->collisionFlags & K_DIRFLAG_LEFT) && (actor->vSpeedImpulse.x < 0.0f)))
 	{
 		actor->vSpeedImpulse.x = 0.0f;
 	}
+	*/
 
 	retData.fPointsTaken = fBulletLostEnergy;
 	return retData;
@@ -7618,33 +7620,34 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//limit impulse
 	CLAMP(actor->vSpeedImpulse.y, -K_LVL_ACTOR_MAX_IMPULSE, K_LVL_ACTOR_MAX_IMPULSE);
 	CLAMP(actor->vSpeedImpulse.x, -K_LVL_ACTOR_MAX_IMPULSE, K_LVL_ACTOR_MAX_IMPULSE);
-	//ATENTIE!!! daca trece prin usi inseamna ca bboxul din starea dead e mai lat decat cel din normal.
 
 	actor->vSpeedImpulse.x -= actor->vSpeedImpulse.x * impFriction.x * dTime;
 	actor->vSpeedImpulse.y -= actor->vSpeedImpulse.y * impFriction.y * dTime;
-	///--- move actor ---
-	//setez viteza
-	Vec2 vFrom = actor->pos;
-	D3DXVECTOR2 movevec = actor->speed * dTime;
-	Vec2 vTo = actor->pos + movevec;
+	
+	Vec2 vPosIni = actor->pos;
 
-	if (actor->bHasCollision)
+	const int nMaxIterations = 3;
+	// Flags to specify what kind of collision has occurred
+	bool contactXleft = true, contactXright = true, contactYbottom = true, contactYtop = true;
+	// 2. incepem iteratii de contact solving pana faci maxIterations(3) sau nu mai ai coliziuni(cel putin odata)
+	UINT16 unCollFlags = 0;
+	for (int iteration = 0; iteration < nMaxIterations && (contactXleft || contactXright || contactYbottom || contactYtop); iteration++)
 	{
-		//1. fine bbox start and end union that includes all collisions when moving at high speeds
-		CAABB destbox, oldbox;
-		destbox = actor->bbox_ini;
-		destbox.Move(actor->pos + movevec);
-		oldbox = actor->bbox_ini;
-		oldbox.Move(actor->pos);
+		///a.calculezi vectorul de miscare al actorului(viteza * dt + miscare paltforma daca e necesar)
+		Vec2 vNextMove = (actor->speed + actor->vSpeedImpulse) * dTime; // Add connected platform movement if needed
+		///b.detectezi coliziuni posibile(bbox old + new pos)
+		//1. find bbox start and end union that includes all collisions when moving at high speeds
+		CAABB destbox, srcbox;
+		srcbox = actor->bbox_ini; srcbox.Move(actor->pos);
+		destbox = actor->bbox_ini; destbox.Move(actor->pos + vNextMove);
 		// box unions to check all possible collisions
-		CAABB boxUnion = AABB_Union(destbox, oldbox);
+		CAABB boxUnion = AABB_Union(destbox, srcbox);
 		// bbox union in tile coords, including every touched tile
 		RECTXYXY boxUnionTiles(floor(boxUnion.vMin.x / K_TILE_SIZE_F), floor(boxUnion.vMin.y / K_TILE_SIZE_F),
 			ceil(boxUnion.vMax.x / K_TILE_SIZE_F), ceil(boxUnion.vMax.y / K_TILE_SIZE_F));
-		//optional
-		boxUnion.Inflate(K_TILE_HSIZE, K_TILE_HSIZE);
+		//optional - to include more of the boxes
+		//boxUnion.Inflate(K_TILE_HSIZE, K_TILE_HSIZE);
 
-		//#TODO: if it gets getting more expensive just use a quad tree on the collision boxes
 		// keeps a list of all boxes that might be colliding
 		tempCollBoxList.Clear();
 
@@ -7656,12 +7659,13 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				CTile* tl = &tiles[xx][yy];
 				if ((tl->flags & K_TILEFLAG_WALKABLE) == 0)
 				{
-					tempCollBoxList.Add(tl->bbox);
+					CAABBColl tmpbox = tl->bbox;
+					tmpbox.collFlags = K_DIRFLAG_ALL;
+					tempCollBoxList.Add(tmpbox);
 				}
 			}
 		}
-
-		//add collision shapes
+		//add boxes from collision shapes
 		for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
 		{
 			if (m_arrColShapes[kk]->bHidden)
@@ -7675,205 +7679,130 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			if (m_arrColShapes[kk]->collFlags != K_DIRFLAG_NONE)
 			{
 				CAABBColl collb = m_arrColShapes[kk]->bbox;
-				collb.collFlags = m_arrColShapes[kk]->collFlags;
+				collb.collFlags = K_DIRFLAG_ALL;// m_arrColShapes[kk]->collFlags;
 				tempCollBoxList.Add(collb);
 			}
 		}
+		// No collisions found yet
+		contactXleft = contactXright = contactYbottom = contactYtop = false;
 
-		//#TODO: move all this in method named CollideOrMove
+		/// c.salvezi original move vector ca sa il avem pt flagurile de coliziune
+		Vec2 vProjectedMove;
+		Vec2 vOriginalMove = vNextMove;
 
-		
-		/*
-		for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
+		///	d.Iterezi prin toate posibile obiecte care ar putea coliziona
+
+		// Iterate over each object whose bounding box intersects with the player's bounding box
+		// until a collision is found
+		for (int kk = 0; kk < tempCollBoxList.Count() && !contactXleft && !contactXright && !contactYbottom && !contactYtop; kk++)
 		{
-			//sweep test - enlarge bbox and check intersections between centers vector
-			CAABB staticBoxGrown = tempCollBoxList[kk];
-			staticBoxGrown.Inflate(oldbox.vHalfSize.x, oldbox.vHalfSize.y);
+			CAABBColl* box = &tempCollBoxList[kk];
+			CAABB minkAABB = AABB_GetMinkowskiDifference(srcbox, tempCollBoxList[kk]);
+			///1. Speculative contacts(swept) : DOAR Daca NU colizioneaza inca : se muta o bucata de vector pana unde stie ca SIGUR nu are coliziuni(diferente din minkowski)
+			//	- merge din pixel in pixel pana cand are coliziune(cand are coliziune se intoarce un pas) si salveaza miscarea in vector nou numit projectedMove.
+			//	- ? Salveaza separat pe axe pentru ca testeaza coliziunea cu puncte.Eu fac un singur pass.
+			//	- trece projectedMove inapoi in nextMove
 
-			D3DXVECTOR2 vColPt;
-			if (AABB_Segment_Intersection_NoHeads(oldbox.vCenter, vDest, staticBoxGrown, &vColPt))
+			// minkowski diff not around origin then we have no collision
+			bool bBoxesColliding = !((minkAABB.vMin.x <= 0.0f) && (minkAABB.vMin.y <= 0.0f) && (minkAABB.vMax.x >= 0.0f) && (minkAABB.vMax.y >= 0.0f));
+			if (!bBoxesColliding)
 			{
-				vDest = vColPt;
-			}
-		}
-		*/
-		//reset coll flags
-		UINT16 unTotalFlags = 0;
-
-		bool bSquashPlayer = false;
-		if (tempCollBoxList.Count() > 0)
-		{
-			for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
-			{
-				CAABBColl* box = &tempCollBoxList[kk]; 
-
-				CAABB minkAABB = AABB_GetMinkowskiDifference(destbox, *box);
-				//verificam coliziune: daca nu contine originea nu e coliziune
-				// ar trebui ca daca nu e coliziune abia aici sa fac continuous detection (cu viteza relativa a cutiilor)
-				if ((minkAABB.vMin.x <= 0.0f) && (minkAABB.vMin.y <= 0.0f) && (minkAABB.vMax.x >= 0.0f) && (minkAABB.vMax.y >= 0.0f))
+				Vec2 relativeMotion = -vNextMove;
+				vProjectedMove = vNextMove;
+				// ray-cast the relativeMotion vector against the Minkowski AABB
+				CAABBColl minkbb = minkAABB;
+				minkbb.collFlags = K_DIRFLAG_ALL;// box->collFlags;
+				float h = 0.0f;
+				// check to see if a collision will happen this frame
+				// getRayIntersectionFraction returns Math.POSITIVE_INFINITY if there is no intersection
+				if (minkbb.GetRayIntersectionFraction(Vec2(0.0f, 0.0f), relativeMotion, h))
 				{
-					// colliding, do normal separation
-					float minx = fabs(minkAABB.vMin.x);
-					float maxx = fabs(minkAABB.vMax.x);
-					float miny = fabs(minkAABB.vMin.y);
-					float maxy = fabs(minkAABB.vMax.y);
-
-					int retDirFlag = K_DIRFLAG_NONE;
-					D3DXVECTOR2 vPenetrate(0.0f, 0.0f);
-					float mindist = 1000000.0f;
-
-
-					if ((minx < mindist) && (box->collFlags & K_DIRFLAG_RIGHT))
+					//DMC: eliminates intersection heads so it doesn't give fake collision when overlapping
+					//if ((h > EPS) && (h < 1.0f - EPS))
 					{
-						mindist = minx;
-						vPenetrate.x = -minx; vPenetrate.y = 0.0f;
-						retDirFlag = K_DIRFLAG_LEFT;
+						vProjectedMove *= h;
 					}
-					if ((maxx < mindist) && (box->collFlags & K_DIRFLAG_LEFT))
-					{
-						mindist = maxx;
-						vPenetrate.x = maxx; vPenetrate.y = 0.0f;
-						retDirFlag = K_DIRFLAG_RIGHT;
-					}
-					if ((maxy < mindist) && (box->collFlags & K_DIRFLAG_UP))
-					{
-						mindist = maxy;
-						vPenetrate.x = 0.0f; vPenetrate.y = maxy;
-						retDirFlag = K_DIRFLAG_DOWN;
-					}
-					if ((miny < mindist) && (box->collFlags & K_DIRFLAG_DOWN))
-					{
-						mindist = miny;
-						vPenetrate.x = 0.0f; vPenetrate.y = -miny;
-						retDirFlag = K_DIRFLAG_UP;
-					}
-					//daca nu da coliziune din cauza flagurilor ignor boxul
-					if (retDirFlag == K_DIRFLAG_NONE)
-						continue;
+				}
+				// save back to vNextMove
+				vNextMove = vProjectedMove;
+			}
 
-					//set collision flags
-					unTotalFlags |= retDirFlag;
-					//change actor placement
-					vTo -= vPenetrate;
-					movevec = vTo - vFrom;
+			///2. Penetration resolution(cu acelasi bbox inamic dar cu nextMove de deasupra).Impinge player din bboxul destinatie pe toate axele, nu doar pe cea mai apropiata... cred ca e acelasi lucru
+			destbox = actor->bbox_ini; destbox.Move(actor->pos + vNextMove);
+			CAABB minkDest = AABB_GetMinkowskiDifference(destbox, *box);
+
+			if ((minkDest.vMin.x <= 0.0f) && (minkDest.vMin.y <= 0.0f) && (minkDest.vMax.x >= 0.0f) && (minkDest.vMax.y >= 0.0f))
+			{
+				//	- ? (Salveaza in niste flaguri temp contactele ca sa vada squash)
 					
-					destbox= actor->bbox_ini;
-					destbox.Move(vTo);
+				// colliding, do normal separation
+				float minx = fabs(minkAABB.vMin.x);
+				float maxx = fabs(minkAABB.vMax.x);
+				float miny = fabs(minkAABB.vMin.y);
+				float maxy = fabs(minkAABB.vMax.y);
 
-					//still penetrating? SQUASH!
-					if ((fabs(vPenetrate.x) > K_LVL_MAX_PENETRATION) || (fabs(vPenetrate.y) > K_LVL_MAX_PENETRATION))
-					{
-						bSquashPlayer = true;
-					}
-				}
-				else
+				D3DXVECTOR2 vPenetrate(0.0f, 0.0f);
+				float mindist = 1000000.0f;
+
+				if ((minx < mindist) && (box->collFlags & K_DIRFLAG_RIGHT))
 				{
-					// not colliding yet but they might: do swept collision
-					// calculate the relative motion between the two boxes
-					//Vec2 relativeMotion = (boxA.velocity - boxB.velocity);
-					Vec2 relativeMotion = movevec;
-
-					// ray-cast the relativeMotion vector against the Minkowski AABB
-					CAABBColl minkbb = minkAABB;
-					minkbb.collFlags = box->collFlags;
-					float h = 0.0f;
-
-					//#TODO: add collision flags after sweeping collision test too!
-
-					// check to see if a collision will happen this frame
-					// getRayIntersectionFraction returns Math.POSITIVE_INFINITY if there is no intersection
-					if (minkbb.GetRayIntersectionFraction(Vec2(0.0f, 0.0f), relativeMotion, h))
-					{
-						/*
-						// yup, there WILL be a collision this frame
-						// move the boxes appropriately
-						boxA.center += boxA.velocity * dt * h;
-						boxB.center += boxB.velocity * dt * h;
-
-						// zero the normal component of the velocity
-						// (project the velocity onto the tangent of the relative velocities
-						//  and only keep the projected component, tossing the normal component)
-						var tangent : Vector = relativeMotion.normalized.tangent;
-						boxA.velocity = Vector.dotProduct(boxA.velocity, tangent) * tangent;
-						boxB.velocity = Vector.dotProduct(boxB.velocity, tangent) * tangent;
-						*/
-						//DMC: eliminates intersection heads so it doesn't give fake collision when overlapping
-						if ((h > EPS) && (h < 1.0f - EPS))
-						{
-							movevec *= h;
-							vTo = vFrom + movevec;
-						}
-					}
-					else
-					{
-						// no intersection, move it along
-						//boxA.center += boxA.velocity * dt;
-						//boxB.center += boxB.velocity * dt;
-					}
+					mindist = minx;
+					vPenetrate.x = -minx; vPenetrate.y = 0.0f;
 				}
+				if ((maxx < mindist) && (box->collFlags & K_DIRFLAG_LEFT))
+				{
+					mindist = maxx;
+					vPenetrate.x = maxx; vPenetrate.y = 0.0f;
+				}
+				if ((maxy < mindist) && (box->collFlags & K_DIRFLAG_UP))
+				{
+					mindist = maxy;
+					vPenetrate.x = 0.0f; vPenetrate.y = maxy;
+				}
+				if ((miny < mindist) && (box->collFlags & K_DIRFLAG_DOWN))
+				{
+					mindist = miny;
+					vPenetrate.x = 0.0f; vPenetrate.y = -miny;
+				}
+				// change the move vector so it doesn't penetrate
+				vNextMove -= vPenetrate;
 			}
 
-
-			//place actor on new position
-			actor->pos = vTo;
-			//destbox set
-			//destbox = actor->bbox_ini;
-			//destbox.Move(actor->pos);
-
-
-			//set actor current collision flags
-			actor->collisionFlags = unTotalFlags;
-
-			//final check
-			if ((bSquashPlayer) &&
-				(((actor->collisionFlags & K_DIRFLAG_UP_DOWN) == K_DIRFLAG_UP_DOWN) || ((actor->collisionFlags & K_DIRFLAG_LEFT_RIGHT) == K_DIRFLAG_LEFT_RIGHT)))
-			{
-				//HitActor(actor, -500.0f, actor->GetUID(), K_LVL_ACT_CLASS_EXPLOSION);
+			//	- Vede daca nextMove difera de originalMove ca sa seteze contact flags(pt forul de mai sus)
+			if (vNextMove.y > vOriginalMove.y) { 
+				contactYtop = true; unCollFlags |= K_DIRFLAG_UP; 
 			}
-			//DOWN collision
-			if ((actor->speed.y > 0.0f) && (actor->collisionFlags & K_DIRFLAG_DOWN))
-			{
-				//reset speed to 0 !!!
-				actor->speed.y = 0.0f;
+			if (vNextMove.y < vOriginalMove.y) {
+				contactYbottom = true; unCollFlags |= K_DIRFLAG_DOWN;
 			}
-			//UP collision
-			else if ((actor->speed.y < 0.0f) && (actor->collisionFlags & K_DIRFLAG_UP))
-			{
-				actor->speed.y = 0.0f;
+			if (vNextMove.x > vOriginalMove.x) {
+				contactXleft = true; unCollFlags |= K_DIRFLAG_LEFT;
 			}
-			//LEFT collision
-			if ((actor->speed.x < 0.0f) && (actor->collisionFlags & K_DIRFLAG_LEFT))
-			{
-				actor->speed.x = 0.0f;
-			}
-			//RIGHT collision
-			if ((actor->speed.x > 0.0f) && (actor->collisionFlags & K_DIRFLAG_RIGHT))
-			{
-				actor->speed.x = 0.0f;
-			}
-			//LEFT RIGHT collision - impulse
-			if (((actor->vSpeedImpulse.x < 0.0f) && (actor->collisionFlags & K_DIRFLAG_LEFT)) ||
-				((actor->vSpeedImpulse.x > 0.0f) && (actor->collisionFlags & K_DIRFLAG_RIGHT)) ||
-				((actor->vSpeedImpulse.y < 0.0f) && (actor->collisionFlags & K_DIRFLAG_UP)) ||
-				((actor->vSpeedImpulse.y > 0.0f) && (actor->collisionFlags & K_DIRFLAG_DOWN)))
-			{
-				actor->vSpeedImpulse.x = 0.0f;
+			if (vNextMove.x < vOriginalMove.x) {
+				contactXright = true; unCollFlags |= K_DIRFLAG_RIGHT;
 			}
 		}
-		else
+
+		// If a contact has been detected, apply the re-calculated movement vector
+		// and disable any further movement this frame (in either X or Y as appropriate)
+		if (contactYbottom || contactYtop)
 		{
-			actor->collisionFlags = 0;
-			// collision disabled
-			actor->pos = vTo;
+			actor->pos.y += vNextMove.y;
+			actor->vSpeedImpulse.y = 0.0f;
+			actor->speed.y = 0.0f;
+		}
+
+		if (contactXleft || contactXright)
+		{
+			actor->pos.x += vNextMove.x;
+			actor->vSpeedImpulse.x = 0.0f;
+			actor->speed.x = 0.0f;
 		}
 
 	}
-	else
-	{
-		// collision disabled
-		actor->pos = vTo;
-	}
-	//end phys
+	///3. Update player position : !!This must be done after the contact solver
+	actor->collisionFlags = unCollFlags;
+	actor->pos += (actor->speed + actor->vSpeedImpulse) * dTime;
 
 	//check world bounds for each actor - kill if out
 	if (!PointInRect(actor->pos, m_levelAABB))
@@ -7884,7 +7813,263 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//set final position
 	actor->SetPos(actor->pos);
 	// save last position in pos_last (SetPos does but we already altered actor->pos)
-	actor->pos_last = vFrom;
+	actor->pos_last = vPosIni;
+
+	//#TODO: 4. Proceseaza acceleratii si alte modificari de viteze (se pot face si inainte??)
+
+	///*
+	//if (actor->bHasCollision)
+	//{
+	//	//1. fine bbox start and end union that includes all collisions when moving at high speeds
+	//	CAABB destbox, oldbox;
+	//	destbox = actor->bbox_ini;
+	//	destbox.Move(actor->pos + movevec);
+	//	oldbox = actor->bbox_ini;
+	//	oldbox.Move(actor->pos);
+	//	// box unions to check all possible collisions
+	//	CAABB boxUnion = AABB_Union(destbox, oldbox);
+	//	// bbox union in tile coords, including every touched tile
+	//	RECTXYXY boxUnionTiles(floor(boxUnion.vMin.x / K_TILE_SIZE_F), floor(boxUnion.vMin.y / K_TILE_SIZE_F),
+	//		ceil(boxUnion.vMax.x / K_TILE_SIZE_F), ceil(boxUnion.vMax.y / K_TILE_SIZE_F));
+	//	//optional
+	//	boxUnion.Inflate(K_TILE_HSIZE, K_TILE_HSIZE);
+
+	//	//#TODO: if it gets getting more expensive just use a quad tree on the collision boxes
+	//	// keeps a list of all boxes that might be colliding
+	//	tempCollBoxList.Clear();
+
+	//	//add boxes from tiles
+	//	for (int yy = boxUnionTiles.y1; yy <= boxUnionTiles.y2; yy++)
+	//	{
+	//		for (int xx = boxUnionTiles.x1; xx <= boxUnionTiles.x2; xx++)
+	//		{
+	//			CTile* tl = &tiles[xx][yy];
+	//			if ((tl->flags & K_TILEFLAG_WALKABLE) == 0)
+	//			{
+	//				tempCollBoxList.Add(tl->bbox);
+	//			}
+	//		}
+	//	}
+
+	//	//add collision shapes
+	//	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
+	//	{
+	//		if (m_arrColShapes[kk]->bHidden)
+	//			continue;
+
+	//		//nu am intersectie probabils - trec mai departe
+	//		if (!boxUnion.Intersects(&m_arrColShapes[kk]->bbox))
+	//			continue;
+
+	//		//adauga bbox in lista de probabile pt intersectie
+	//		if (m_arrColShapes[kk]->collFlags != K_DIRFLAG_NONE)
+	//		{
+	//			CAABBColl collb = m_arrColShapes[kk]->bbox;
+	//			collb.collFlags = m_arrColShapes[kk]->collFlags;
+	//			tempCollBoxList.Add(collb);
+	//		}
+	//	}
+
+	//	//#TODO: move all this in method named CollideOrMove
+
+	//	
+	//	/*
+	//	for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
+	//	{
+	//		//sweep test - enlarge bbox and check intersections between centers vector
+	//		CAABB staticBoxGrown = tempCollBoxList[kk];
+	//		staticBoxGrown.Inflate(oldbox.vHalfSize.x, oldbox.vHalfSize.y);
+
+	//		D3DXVECTOR2 vColPt;
+	//		if (AABB_Segment_Intersection_NoHeads(oldbox.vCenter, vDest, staticBoxGrown, &vColPt))
+	//		{
+	//			vDest = vColPt;
+	//		}
+	//	}
+	//	*/
+	//	//reset coll flags
+	//	UINT16 unTotalFlags = 0;
+
+	//	bool bSquashPlayer = false;
+	//	if (tempCollBoxList.Count() > 0)
+	//	{
+	//		for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
+	//		{
+	//			CAABBColl* box = &tempCollBoxList[kk]; 
+
+	//			CAABB minkAABB = AABB_GetMinkowskiDifference(oldbox, *box);
+	//			//verificam coliziune: daca nu contine originea nu e coliziune
+	//			// ar trebui ca daca nu e coliziune abia aici sa fac continuous detection (cu viteza relativa a cutiilor)
+	//			if ((minkAABB.vMin.x <= 0.0f) && (minkAABB.vMin.y <= 0.0f) && (minkAABB.vMax.x >= 0.0f) && (minkAABB.vMax.y >= 0.0f))
+	//			{
+	//				/*
+	//				// colliding, do normal separation
+	//				float minx = fabs(minkAABB.vMin.x);
+	//				float maxx = fabs(minkAABB.vMax.x);
+	//				float miny = fabs(minkAABB.vMin.y);
+	//				float maxy = fabs(minkAABB.vMax.y);
+
+	//				int retDirFlag = K_DIRFLAG_NONE;
+	//				D3DXVECTOR2 vPenetrate(0.0f, 0.0f);
+	//				float mindist = 1000000.0f;
+
+
+	//				if ((minx < mindist) && (box->collFlags & K_DIRFLAG_RIGHT))
+	//				{
+	//					mindist = minx;
+	//					vPenetrate.x = -minx; vPenetrate.y = 0.0f;
+	//					retDirFlag = K_DIRFLAG_LEFT;
+	//				}
+	//				if ((maxx < mindist) && (box->collFlags & K_DIRFLAG_LEFT))
+	//				{
+	//					mindist = maxx;
+	//					vPenetrate.x = maxx; vPenetrate.y = 0.0f;
+	//					retDirFlag = K_DIRFLAG_RIGHT;
+	//				}
+	//				if ((maxy < mindist) && (box->collFlags & K_DIRFLAG_UP))
+	//				{
+	//					mindist = maxy;
+	//					vPenetrate.x = 0.0f; vPenetrate.y = maxy;
+	//					retDirFlag = K_DIRFLAG_DOWN;
+	//				}
+	//				if ((miny < mindist) && (box->collFlags & K_DIRFLAG_DOWN))
+	//				{
+	//					mindist = miny;
+	//					vPenetrate.x = 0.0f; vPenetrate.y = -miny;
+	//					retDirFlag = K_DIRFLAG_UP;
+	//				}
+	//				//daca nu da coliziune din cauza flagurilor ignor boxul
+	//				if (retDirFlag == K_DIRFLAG_NONE)
+	//					continue;
+
+	//				//set collision flags
+	//				unTotalFlags |= retDirFlag;
+	//				//change actor placement
+	//				vTo -= vPenetrate;
+	//				movevec = vTo - vFrom;
+	//				
+	//				destbox= actor->bbox_ini;
+	//				destbox.Move(vTo);
+
+	//				//still penetrating? SQUASH!
+	//				if ((fabs(vPenetrate.x) > K_LVL_MAX_PENETRATION) || (fabs(vPenetrate.y) > K_LVL_MAX_PENETRATION))
+	//				{
+	//					bSquashPlayer = true;
+	//				}
+	//				*/
+	//			}
+	//			else
+	//			{
+	//				// not colliding yet but they might: do swept collision
+	//				// calculate the relative motion between the two boxes
+	//				//Vec2 relativeMotion = (boxA.velocity - boxB.velocity);
+	//				// relative motion gets inverted when we have a single object because it's aminkowski DIFFERENCE
+	//				Vec2 relativeMotion = -movevec;
+
+	//				// ray-cast the relativeMotion vector against the Minkowski AABB
+	//				CAABBColl minkbb = minkAABB;
+	//				minkbb.collFlags = K_DIRFLAG_ALL;// box->collFlags;
+	//				float h = 0.0f;
+
+	//				//#TODO: add collision flags after sweeping collision test too!
+
+	//				// check to see if a collision will happen this frame
+	//				// getRayIntersectionFraction returns Math.POSITIVE_INFINITY if there is no intersection
+	//				if (minkbb.GetRayIntersectionFraction(Vec2(0.0f, 0.0f), relativeMotion, h))
+	//				{
+	//					/*
+	//					// yup, there WILL be a collision this frame
+	//					// move the boxes appropriately
+	//					boxA.center += boxA.velocity * dt * h;
+	//					boxB.center += boxB.velocity * dt * h;
+
+	//					// zero the normal component of the velocity
+	//					// (project the velocity onto the tangent of the relative velocities
+	//					//  and only keep the projected component, tossing the normal component)
+	//					var tangent : Vector = relativeMotion.normalized.tangent;
+	//					boxA.velocity = Vector.dotProduct(boxA.velocity, tangent) * tangent;
+	//					boxB.velocity = Vector.dotProduct(boxB.velocity, tangent) * tangent;
+	//					*/
+	//					//DMC: eliminates intersection heads so it doesn't give fake collision when overlapping
+	//					//if ((h > EPS) && (h < 1.0f - EPS))
+	//					{
+	//						movevec *= h;
+	//						vTo = vFrom + movevec;
+	//					}
+	//				}
+	//				else
+	//				{
+	//					// no intersection, move it along
+	//					//boxA.center += boxA.velocity * dt;
+	//					//boxB.center += boxB.velocity * dt;
+	//				}
+	//			}
+	//		}
+
+
+	//		//place actor on new position
+	//		actor->pos = vTo;
+	//		//destbox set
+	//		//destbox = actor->bbox_ini;
+	//		//destbox.Move(actor->pos);
+
+
+	//		//set actor current collision flags
+	//		actor->collisionFlags = unTotalFlags;
+
+	//		//final check
+	//		if ((bSquashPlayer) &&
+	//			(((actor->collisionFlags & K_DIRFLAG_UP_DOWN) == K_DIRFLAG_UP_DOWN) || ((actor->collisionFlags & K_DIRFLAG_LEFT_RIGHT) == K_DIRFLAG_LEFT_RIGHT)))
+	//		{
+	//			//HitActor(actor, -500.0f, actor->GetUID(), K_LVL_ACT_CLASS_EXPLOSION);
+	//		}
+	//		//DOWN collision
+	//		if ((actor->speed.y > 0.0f) && (actor->collisionFlags & K_DIRFLAG_DOWN))
+	//		{
+	//			//reset speed to 0 !!!
+	//			actor->speed.y = 0.0f;
+	//		}
+	//		//UP collision
+	//		else if ((actor->speed.y < 0.0f) && (actor->collisionFlags & K_DIRFLAG_UP))
+	//		{
+	//			actor->speed.y = 0.0f;
+	//		}
+	//		//LEFT collision
+	//		if ((actor->speed.x < 0.0f) && (actor->collisionFlags & K_DIRFLAG_LEFT))
+	//		{
+	//			actor->speed.x = 0.0f;
+	//		}
+	//		//RIGHT collision
+	//		if ((actor->speed.x > 0.0f) && (actor->collisionFlags & K_DIRFLAG_RIGHT))
+	//		{
+	//			actor->speed.x = 0.0f;
+	//		}
+	//		//LEFT RIGHT collision - impulse
+	//		if (((actor->vSpeedImpulse.x < 0.0f) && (actor->collisionFlags & K_DIRFLAG_LEFT)) ||
+	//			((actor->vSpeedImpulse.x > 0.0f) && (actor->collisionFlags & K_DIRFLAG_RIGHT)) ||
+	//			((actor->vSpeedImpulse.y < 0.0f) && (actor->collisionFlags & K_DIRFLAG_UP)) ||
+	//			((actor->vSpeedImpulse.y > 0.0f) && (actor->collisionFlags & K_DIRFLAG_DOWN)))
+	//		{
+	//			actor->vSpeedImpulse.x = 0.0f;
+	//		}
+	//	}
+	//	else
+	//	{
+	//		actor->collisionFlags = 0;
+	//		// collision disabled
+	//		actor->pos = vTo;
+	//	}
+
+	//}
+	//else
+	//{
+	//	// collision disabled
+	//	actor->pos = vTo;
+	//}
+	//*/
+
+	//end phys
+
 	//set camera vector
 	if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
 	{
@@ -8637,7 +8822,7 @@ void CLevel::UpdateAI(float dTime, bool bInEditor)
 		UpdateAI_collshape(m_arrColShapes[kk], dTime);
 	}
 
-	//check actors
+	//check actors - must be done after moving platforms (usually last is best)
 	double fHashKey = 0.0f;
 	for (int kk = m_arrActors.GetSize() - 1; kk >= 0; kk--)
 	{

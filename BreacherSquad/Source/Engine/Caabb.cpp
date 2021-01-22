@@ -485,6 +485,7 @@ CAABB AABB_GetMinkowskiDifference(CAABB &a, CAABB &b)
 	// alternativ:
 	//Vec2 sztotal = a.vSize + b.vSize;
 	//Vec2 bottomright = topleft + sztotal;
+	//original:
 	D3DXVECTOR2 bottomright = a.vMax - b.vMin;
 
 	return CAABB(topleft, bottomright);
