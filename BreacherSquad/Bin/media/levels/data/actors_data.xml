@@ -156,7 +156,7 @@ PREDEFINED BEHAVIORS:
 
 <ActorTemplates>
 
-  <ACTOR_PLAYER_ASSAULTER bEditorEnabled="false" AIstate="DEFAULT" Life="100.0" Armor="0.0" jumpSpeed="-270.0" climbSpeed="30.0" moveMaxSpeed="75.0" moveMinSpeed="75.0" moveBackSpeed="50.0" fDexterity="1.0" distSee="400.0" 
+  <ACTOR_PLAYER_ASSAULTER bEditorEnabled="false" AIstate="DEFAULT" Life="100.0" Armor="0.0" jumpSpeed="-270.0" climbSpeed="30.0" moveMaxSpeed="200.0" moveMinSpeed="200.0" moveBackSpeed="50.0" fDexterity="1.0" distSee="400.0" 
                           fMass="10.0" class="PLAYER" sMaterial="FLESH"
                           weapon="WPN_SMG_MP5A3" weaponAlt="WPN_SUBMACHINE_STEADY" weaponMelee="WPN_PLAYER_MELEE" weaponBreach="WPN_PLAYER_BREACH_MELEE"
                           canJump="true" canCrouch="true" canCover="true" canClimb="true" canInteract="true" bComposedAnimation="true" nHUDPortraitFrame="0" >

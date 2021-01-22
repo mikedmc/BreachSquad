@@ -7703,9 +7703,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//	- ? Salveaza separat pe axe pentru ca testeaza coliziunea cu puncte.Eu fac un singur pass.
 			//	- trece projectedMove inapoi in nextMove
 
-			// minkowski diff not around origin then we have no collision
-			bool bBoxesColliding = !((minkAABB.vMin.x <= 0.0f) && (minkAABB.vMin.y <= 0.0f) && (minkAABB.vMax.x >= 0.0f) && (minkAABB.vMax.y >= 0.0f));
-			if (!bBoxesColliding)
+			if (((minkAABB.vMin.x > 0.0f) || (minkAABB.vMin.y > 0.0f) || (minkAABB.vMax.x < 0.0f) || (minkAABB.vMax.y < 0.0f)))
 			{
 				Vec2 relativeMotion = -vNextMove;
 				vProjectedMove = vNextMove;
@@ -7718,7 +7716,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if (minkbb.GetRayIntersectionFraction(Vec2(0.0f, 0.0f), relativeMotion, h))
 				{
 					//DMC: eliminates intersection heads so it doesn't give fake collision when overlapping
-					//if ((h > EPS) && (h < 1.0f - EPS))
+					if ((h > EPS) && (h < 1.0f - EPS))
 					{
 						vProjectedMove *= h;
 					}
