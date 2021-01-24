@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -26,7 +26,7 @@
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
             1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
@@ -48,12 +48,12 @@
         player = new Player();
 
         e0 = new Entity(
-            createVector(64 * 1.0, 80),
-            createVector(tileSize * 3, tileSize * 0.2)
+            createVector(64 * 2.0, 80),
+            createVector(tileSize * 3, 4)
         );
 
         e1 = new Entity(
-            createVector(64 * 2.5 + 16, 100),
+            createVector(64 * 2.5 + 16, 90),
             createVector(tileSize, tileSize / 2)
         );
 
@@ -423,7 +423,7 @@
                     let stack = [];
 
                     // The magic function which solves all of this nonsense :)
-                    this.fixEqualSizedHoleCollision(hit, potential, time, collisionStack);
+                   //this.fixEqualSizedHoleCollision(hit, potential, time, collisionStack);
                     for (let sweep of collisionStack) {
                         // Pass the normal vector as the movement vector for the next possible collision
                         if (boundary.overlaps(sweep.aabb)) {
@@ -489,9 +489,9 @@
 
             let speed = 60;
             if (keyIsDown(16)) speed = 5; // Press Shift to move extremely slow...
-            if (keyIsDown(81)) speed = 500; // Press Q to move extremely fast!
+            if (keyIsDown(81)) speed = 1000; // Press Q to move extremely fast!
 			
-            if (keyIsDown(LEFT_ARROW)) this.vel.x = -speed; 
+            if (keyIsDown(LEFT_ARROW)) this.vel.x = -speed * 0.5; 
             if (keyIsDown(RIGHT_ARROW)) this.vel.x = speed; 
             if (keyIsDown(UP_ARROW)) { 
                 this.vel.y = -speed;

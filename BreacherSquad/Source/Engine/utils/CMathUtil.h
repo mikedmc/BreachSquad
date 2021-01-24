@@ -73,7 +73,7 @@ namespace UTMath
 	int				CountBits(UINT32 dwValue);
 
 	// faster atan2 approx
-	float atan2_approximation1(float y, float x);
+	float			atan2_approximation1(float y, float x);
 	// faster atan2 approx
-	float atan2_approximation2(float y, float x);
+	float			atan2_approximation2(float y, float x);
 }

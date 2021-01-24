@@ -11,6 +11,8 @@
 #define inc_limit(var, step, limit) {if(var < (limit)) {var += step; if((var) > (limit)) var = limit;}}
 #define dec_limit(var, step, limit) {if(var > (limit)) {var -= step; if((var) < (limit)) var = limit;}}
 #define SIGN(var) (((var) < 0) ? -1:1)
+// sign or zero
+#define SIGNZ(var) ((var == 0)?0: (((var) < 0) ? -1 : 1))
 // invert a float that'sbetween 0  and 1
 #define INV_UNIT(var) (1.0f - var)
 // checks if floats are almost equal
@@ -34,7 +36,15 @@
 //float minimum
 #define EPS 0.00001f
 
-//generic directions (clockwise starting left)
+// generic sides (corresponds to generic directions)
+#define K_SIDE_NONE -1
+#define K_SIDE_LEFT 0
+#define K_SIDE_TOP 1
+#define K_SIDE_RIGHT 2
+#define K_SIDE_BOTTOM 3
+
+// generic directions (clockwise starting left)
+#define K_DIR_NONE -1
 #define K_DIR_LEFT 0
 #define K_DIR_UP 1
 #define K_DIR_RIGHT 2

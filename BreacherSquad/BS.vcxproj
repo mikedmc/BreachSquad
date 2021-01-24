@@ -337,6 +337,7 @@
     <ClInclude Include="Source\Engine\ParticlesManager.h" />
     <ClInclude Include="Source\Engine\Randoms.h" />
     <ClInclude Include="Source\Engine\utils\CMathUtil.h" />
+    <ClInclude Include="Source\Engine\utils\CollisionAABB.h" />
     <ClInclude Include="Source\Engine\utils\DataTypes.h" />
     <ClInclude Include="Source\Engine\utils\dbgutil.h" />
     <ClInclude Include="Source\Engine\utils\enginecommon.h" />
@@ -746,6 +747,7 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\UTAppClassStates.cpp" />
     <ClCompile Include="Source\Engine\utils\CMathUtil.cpp" />
+    <ClCompile Include="Source\Engine\utils\CollisionAABB.cpp" />
     <ClCompile Include="Source\Engine\utils\DataTypes.cpp" />
     <ClCompile Include="Source\Engine\utils\dbgutil.cpp" />
     <ClCompile Include="Source\Engine\utils\enginecommon.cpp" />
