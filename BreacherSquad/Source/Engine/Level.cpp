@@ -1822,7 +1822,6 @@ void CLevel::UpdateDirtyRects()
 				if ((xx <= 0) || (yy <= 0) || (xx == levelSizeTL.w - 1) || (yy == levelSizeTL.h - 1))
 				{
 					tl->flags |= K_TILEFLAG_HASWALL_MASK;
-					tl->bbox.collFlags = K_DIRFLAG_ALL;
 					continue;
 				}
 
@@ -1836,27 +1835,22 @@ void CLevel::UpdateDirtyRects()
 				{
 					// clear flags
 					FLAGOP_CLEAR(tl->flags, K_TILEFLAG_HASWALL_MASK);
-					tl->bbox.collFlags = 0;
 
 					if (IS_FLAG_ANY(tlL->flags, K_TILEFLAG_WALKABLE))
 					{
 						tl->flags |= K_TILEFLAG_HASWALL_L;
-						tl->bbox.collFlags |= K_DIRFLAG_LEFT;
 					}
 					if (IS_FLAG_ANY(tlR->flags, K_TILEFLAG_WALKABLE))
 					{
 						tl->flags |= K_TILEFLAG_HASWALL_R;
-						tl->bbox.collFlags |= K_DIRFLAG_RIGHT;
 					}
 					if (IS_FLAG_ANY(tlU->flags, K_TILEFLAG_WALKABLE))
 					{
 						tl->flags |= K_TILEFLAG_HASWALL_U;
-						tl->bbox.collFlags |= K_DIRFLAG_UP;
 					}
 					if (IS_FLAG_ANY(tlD->flags, K_TILEFLAG_WALKABLE))
 					{
 						tl->flags |= K_TILEFLAG_HASWALL_D;
-						tl->bbox.collFlags |= K_DIRFLAG_DOWN;
 					}
 				}
 
@@ -5304,9 +5298,7 @@ void CLevel::OnActorBehaviorFinished(CActor * actor, EAIBehaviorType eOldBehavio
 }
 
 //lista temporara de collision shapes folosita la coliziuni
-CFixedArray<CAABBColl, 100> tempCollBoxList;
-//temporary collision objects stack from broad phase detection
-std::vector<SweepData> arrCollStack;
+CFixedArray<SweepAABB, 100> tempCollBoxList;
 
 void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 {
@@ -7181,13 +7173,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	actor->vSpeedImpulse.y -= actor->vSpeedImpulse.y * impFriction.y * dTime;
 	
 	Vec2 vPosIni = actor->pos;
-
-	const int nMaxIterations = 3;
-	// Flags to specify what kind of collision has occurred
-	bool contactXleft = true, contactXright = true, contactYbottom = true, contactYtop = true;
-	// 2. incepem iteratii de contact solving pana faci maxIterations(3) sau nu mai ai coliziuni(cel putin odata)
 	UINT16 unCollFlags = 0;
-	//for (int iteration = 0; iteration < nMaxIterations && (contactXleft || contactXright || contactYbottom || contactYtop); iteration++)
+
 	{
 		///a.calculezi vectorul de miscare al actorului(viteza * dt + miscare paltforma daca e necesar)
 		Vec2 vNextMove = (actor->speed + actor->vSpeedImpulse) * dTime; // Add connected platform movement if needed
@@ -7206,7 +7193,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 		// keeps a list of all boxes that might be colliding
 		tempCollBoxList.Clear();
-		arrCollStack.reserve(50);
 
 		/// BROAD PHASE SWEEP (find all POSSIBLE collision objects)
 
@@ -7223,9 +7209,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//adauga bbox in lista de probabile pt intersectie
 			if (m_arrColShapes[kk]->collFlags != K_DIRFLAG_NONE)
 			{
-				CAABBColl collb = m_arrColShapes[kk]->bbox;
-				collb.collFlags = 0;// was it handled?
-				tempCollBoxList.Add(collb);
+				tempCollBoxList.Add(m_arrColShapes[kk]->bbox);
 			}
 		}
 		//add boxes from tiles
@@ -7236,13 +7220,12 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				CTile* tl = &tiles[xx][yy];
 				if ((tl->flags & K_TILEFLAG_WALKABLE) == 0)
 				{
-					CAABBColl tmpbox = tl->bbox;
-					tmpbox.collFlags = 0;// was it handled?
-					tempCollBoxList.Add(tmpbox);
+					tempCollBoxList.Add(tl->bbox);
 				}
 			}
 		}
 
+		/// COLLISION HANDLING
 
 		float fRemainingTime = 1.0f;
 		while (fRemainingTime > 0.0f)
@@ -7252,17 +7235,17 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			// find closest collider
 			float minDistSq = 100000.0f;
 			float fClosestTime = 100000.0f;
-			CAABBColl* pClosestBox = nullptr;
+			SweepAABB* pClosestBox = nullptr;
 			for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
 			{
-				CAABBColl* tmpbox = &tempCollBoxList[kk];
+				SweepAABB* tmpbox = &tempCollBoxList[kk];
 				// skip boxes that have been handled this step
-				if (tmpbox->collFlags != 0)
+				if (tmpbox->bDisabled)
 					continue;
 
 				SweepData sdata = AABBSweep::CalculateSweepData(srcbox, vNextMove, *tmpbox);
 				// computes even if no valid collision. needs flag to eliminate them
-				if (sdata.eSide == K_SIDE_NONE)
+				if (sdata.bIsValid == false)
 					continue;
 
 				if (sdata.fCollisionTime < fClosestTime)
@@ -7282,13 +7265,12 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 			}
 
-			Vec2 vProjectedMove;
-			Vec2 vOriginalMove = vNextMove;
 			// do we have a collider?
 			if (pClosestBox != nullptr)
 			{
 				SweepData hit = AABBSweep::CalculateSweepData(srcbox, vNextMove, *pClosestBox);
-				pClosestBox->collFlags = 1; //handled
+				//handled already, disable it
+				pClosestBox->bDisabled = true; 
 
 				actor->pos += vNextMove * hit.fCollisionTime;
 
@@ -7301,20 +7283,38 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				float dotProduct = MUVec2Dot(&vNextMove, &hit.vNormal) * ftime;
 				hit.vNormal *= dotProduct;
 
-				// Save the previous movement vector (it will get modified in onCollision)
-				//float potential = movement.copy().mult(deltaTime);
-
 				// Handle events after each respective side that collided
-				//actor->OnCollision(hit.eSide);
-				if (hit.eSide == K_SIDE_BOTTOM || hit.eSide == K_SIDE_TOP)
+				//DMC: could implement actor->OnCollision(hit.eSide) if needed
+				switch (hit.eSide)
 				{
-					actor->speed.y = 0.0f;
-					actor->vSpeedImpulse.y = 0.0f;
-				}
-				else if (hit.eSide == K_SIDE_LEFT || hit.eSide == K_SIDE_RIGHT)
-				{
-					actor->speed.x = 0.0f;
-					actor->vSpeedImpulse.x = 0.0f;
+					case K_SIDE_BOTTOM:
+					{
+						actor->speed.y = 0.0f;
+						actor->vSpeedImpulse.y = 0.0f;
+						unCollFlags |= K_DIRFLAG_DOWN;
+					}
+					break;
+					case K_SIDE_TOP:
+					{
+						actor->speed.y = 0.0f;
+						actor->vSpeedImpulse.y = 0.0f;
+						unCollFlags |= K_DIRFLAG_UP;
+					}
+					break;
+					case K_SIDE_LEFT:
+					{
+						actor->speed.x = 0.0f;
+						actor->vSpeedImpulse.x = 0.0f;
+						unCollFlags |= K_DIRFLAG_LEFT;
+					}
+					break;
+					case K_SIDE_RIGHT:
+					{
+						actor->speed.x = 0.0f;
+						actor->vSpeedImpulse.x = 0.0f;
+						unCollFlags |= K_DIRFLAG_RIGHT;
+					}
+					break;
 				}
 
 				if (ftime > 0.0f)
@@ -7326,38 +7326,22 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					CAABB newboxdest = newboxsrc;
 					newboxdest.Move(vNextMove);
 					CAABB newBoundary = AABB_Union(newboxsrc, newboxdest);
-					//const boundary = this.createMovementBoundary(deltaTime, movement);
+
+					// call and implement this if you need tile sized boxes to enter tile wide holes
+					//this.fixEqualSizedHoleCollision(hit, potential, time, collisionStack);
 
 					//DMC: deactivate those boxes that don't fit the new boundary
 					for (int kk = 0; kk < tempCollBoxList.Count(); kk++)
 					{
-						CAABBColl* it = &tempCollBoxList.m_pData[kk];
-						if (it->collFlags != 0)
+						SweepAABB* it = &tempCollBoxList.m_pData[kk];
+						if (it->bDisabled)
 							continue;
+						// disable non intersecting ones
 						if (!newBoundary.Intersects(it))
-							it->collFlags = 1;
+							it->bDisabled = true;
 					}
-
+					// update remaining time and do again
 					fRemainingTime = ftime;
-
-					/*
-					// If the time of impact happened to be above zero, then recalculate
-					// collision for all other potential collisions with respect to the normal vector
-					let stack = [];
-
-					// The magic function which solves all of this nonsense :)
-				   //this.fixEqualSizedHoleCollision(hit, potential, time, collisionStack);
-					for (let sweep of collisionStack) {
-						// Pass the normal vector as the movement vector for the next possible collision
-						if (boundary.overlaps(sweep.aabb)) {
-							let newSweep = this.calculateSweepData(sweep.aabb, hit.normal, deltaTime);
-							stack.push(newSweep);
-						}
-					}
-
-					// Keep resolving collisions for the other potential collisions
-					this.resolveCollisionOrMove(deltaTime, hit.normal, time, stack);
-					*/
 				}
 
 			}
@@ -7369,132 +7353,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		}
 
 		//#TODO: ar trebui intarit cu o runda de penetration resolution, ori separare direct ori sa il scoata incet din pereti...
-
-		/*
-		// No collisions found yet
-		contactXleft = contactXright = contactYbottom = contactYtop = false;
-
-		/// c.salvezi original move vector ca sa il avem pt flagurile de coliziune
-		Vec2 vProjectedMove;
-		Vec2 vOriginalMove = vNextMove;
-
-		///	d.Iterezi prin toate posibile obiecte care ar putea coliziona
-
-		// Iterate over each object whose bounding box intersects with the player's bounding box
-		// until a collision is found
-		for (int kk = 0; kk < tempCollBoxList.Count() && !contactXleft && !contactXright && !contactYbottom && !contactYtop; kk++)
-		{
-			CAABBColl* box = &tempCollBoxList[kk];
-			CAABB minkAABB = AABB_GetMinkowskiDifference(srcbox, tempCollBoxList[kk]);
-			///1. Speculative contacts(swept) : DOAR Daca NU colizioneaza inca : se muta o bucata de vector pana unde stie ca SIGUR nu are coliziuni(diferente din minkowski)
-			//	- merge din pixel in pixel pana cand are coliziune(cand are coliziune se intoarce un pas) si salveaza miscarea in vector nou numit projectedMove.
-			//	- ? Salveaza separat pe axe pentru ca testeaza coliziunea cu puncte.Eu fac un singur pass.
-			//	- trece projectedMove inapoi in nextMove
-
-			if (((minkAABB.vMin.x > 0.0f) || (minkAABB.vMin.y > 0.0f) || (minkAABB.vMax.x < 0.0f) || (minkAABB.vMax.y < 0.0f)))
-			{
-				//#TODO: optimizeaza cu diferenta dintre bboxuri, stii directia, stii limita, etc
-				vProjectedMove.x = vProjectedMove.y = 0.0f;
-				float fMoveLen = MUVec2Len(&vNextMove);
-				Vec2 vStep = vNextMove / fMoveLen;
-				float steps = 0.0f;
-				CAABB chkbox = srcbox;
-				while ((!chkbox.Intersects(box)) && (steps < fMoveLen))
-				{
-					vProjectedMove += vStep;
-					chkbox = srcbox;
-					chkbox.Move(vProjectedMove);
-					steps += 1.0f;
-				}
-				// did it intersect?
-				if (steps < fMoveLen)
-				{
-					if (steps > 0.0f)
-					{
-						// go to the previous location without collision
-						vProjectedMove -= vStep;
-					}
-					vNextMove = vProjectedMove;
-				}
-			}
-
-			///2. Penetration resolution(cu acelasi bbox inamic dar cu nextMove de deasupra).Impinge player din bboxul destinatie pe toate axele, nu doar pe cea mai apropiata... cred ca e acelasi lucru
-			destbox = actor->bbox_ini; destbox.Move(actor->pos + vNextMove);
-			CAABB minkDest = AABB_GetMinkowskiDifference(destbox, *box);
-
-			if ((minkDest.vMin.x <= 0.0f) && (minkDest.vMin.y <= 0.0f) && (minkDest.vMax.x >= 0.0f) && (minkDest.vMax.y >= 0.0f))
-			{
-				//	- ? (Salveaza in niste flaguri temp contactele ca sa vada squash)
-					
-				// colliding, do normal separation
-				float minx = fabs(minkAABB.vMin.x);
-				float maxx = fabs(minkAABB.vMax.x);
-				float miny = fabs(minkAABB.vMin.y);
-				float maxy = fabs(minkAABB.vMax.y);
-
-				D3DXVECTOR2 vPenetrate(0.0f, 0.0f);
-				float mindist = 1000000.0f;
-
-				if ((minx < mindist) && (box->collFlags & K_DIRFLAG_RIGHT))
-				{
-					mindist = minx;
-					vPenetrate.x = -minx; vPenetrate.y = 0.0f;
-				}
-				if ((maxx < mindist) && (box->collFlags & K_DIRFLAG_LEFT))
-				{
-					mindist = maxx;
-					vPenetrate.x = maxx; vPenetrate.y = 0.0f;
-				}
-				if ((maxy < mindist) && (box->collFlags & K_DIRFLAG_UP))
-				{
-					mindist = maxy;
-					vPenetrate.x = 0.0f; vPenetrate.y = maxy;
-				}
-				if ((miny < mindist) && (box->collFlags & K_DIRFLAG_DOWN))
-				{
-					mindist = miny;
-					vPenetrate.x = 0.0f; vPenetrate.y = -miny;
-				}
-				// change the move vector so it doesn't penetrate
-				vNextMove -= vPenetrate;
-			}
-
-			//	- Vede daca nextMove difera de originalMove ca sa seteze contact flags(pt forul de mai sus)
-			if (vNextMove.y > vOriginalMove.y) { 
-				contactYtop = true; unCollFlags |= K_DIRFLAG_UP; 
-			}
-			if (vNextMove.y < vOriginalMove.y) {
-				contactYbottom = true; unCollFlags |= K_DIRFLAG_DOWN;
-			}
-			if (vNextMove.x > vOriginalMove.x) {
-				contactXleft = true; unCollFlags |= K_DIRFLAG_LEFT;
-			}
-			if (vNextMove.x < vOriginalMove.x) {
-				contactXright = true; unCollFlags |= K_DIRFLAG_RIGHT;
-			}
-		}
-
-		// If a contact has been detected, apply the re-calculated movement vector
-		// and disable any further movement this frame (in either X or Y as appropriate)
-		if (contactYbottom || contactYtop)
-		{
-			actor->pos.y += vNextMove.y;
-			actor->vSpeedImpulse.y = 0.0f;
-			actor->speed.y = 0.0f;
-		}
-
-		if (contactXleft || contactXright)
-		{
-			actor->pos.x += vNextMove.x;
-			actor->vSpeedImpulse.x = 0.0f;
-			actor->speed.x = 0.0f;
-		}
-	*/
 	}
-	///3. Update player position : !!This must be done after the contact solver
 
 	actor->collisionFlags = unCollFlags;
-	//actor->pos += (actor->speed + actor->vSpeedImpulse) * dTime;
 
 	//check world bounds for each actor - kill if out
 	if (!PointInRect(actor->pos, m_levelAABB))

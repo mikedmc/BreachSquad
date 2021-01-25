@@ -64,6 +64,7 @@ SweepData AABBSweep::CalculateSweepData(CAABB & movingbox, Vec2 movement, CAABB 
 	float resultTime = 1.0f;
 	Vec2 normal(0.0f, 0.0f);  // asta e de fapt tangenta
 	int side = K_SIDE_NONE;
+	bool bValid = false;
 
 	if (!(maxEntryTime > minExitTime
 		|| (entryTime.x < 0.0f && entryTime.y < 0.0f)
@@ -71,8 +72,8 @@ SweepData AABBSweep::CalculateSweepData(CAABB & movingbox, Vec2 movement, CAABB 
 		|| (entryTime.y < 0.0f && ((movingbox.vMax.y + velocity.y * maxEntryTime < staticbox.vMin.y) || (movingbox.vMin.y + velocity.y * maxEntryTime > staticbox.vMax.y)))
 		))
 	{
-		//#DMC: eu am scazut EPS pentru ca il lasa sa se duca prea mult si intra in boxes
-		resultTime = max(maxEntryTime - EPS, 0.0f);
+		//DMC: remove a small fraction so it doesn't penetrate the box or it will detect collisions at tile borders
+		resultTime = max(maxEntryTime - K_AABBSWEEP_EPS, 0.0f);
 		if (entryTime.x < entryTime.y)
 		{
 			normal = Vec2(SIGN(deltaEntry.x), 0.0f);
@@ -113,15 +114,17 @@ SweepData AABBSweep::CalculateSweepData(CAABB & movingbox, Vec2 movement, CAABB 
 					side = K_SIDE_LEFT;
 			}
 		}
+		// all data computed, output is valid
+		bValid = true;
 	}
 
 	float fDistSq = MUVec2LenSq(&(movingbox.vCenter - staticbox.vCenter));
 	SweepData retdata(
-		staticbox, // Get a reference to the object the player has collided with
-		resultTime, // Retrieve the time of impact
-		normal, // Return the collision normal vector to apply sliding effect
-		side, // Know what side of the player has been touched (used for controlling logic like jumping and walking)
-		fDistSq // Calculate the distance (squared for performance) used to resolve the closest collision subject
+		bValid,
+		resultTime,		// Retrieve the time of impact
+		normal,			// Return the collision normal vector to apply sliding effect
+		side,			// Know what side of the player has been touched (used for controlling logic like jumping and walking)
+		fDistSq			// Calculate the distance (squared for performance) used to resolve the closest collision subject
 	);
 
 	return retdata;

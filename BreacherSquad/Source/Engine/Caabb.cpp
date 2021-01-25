@@ -135,8 +135,9 @@ bool CAABB::PointIn(float x, float y)
 bool CAABB::Intersects(CAABB *dest)
 {
 	assert(dest != null);
-
-	if ((vMin.x > dest->vMax.x) || (vMax.x < dest->vMin.x) || (vMin.y > dest->vMax.y) || (vMax.y < dest->vMin.y))
+	// if they barely touch (border on border) I don't consider them intersecting
+	// Tiles that have bboxes should not figure as intersecting, that's why I use >= instead of >
+	if ((vMin.x >= dest->vMax.x) || (vMax.x <= dest->vMin.x) || (vMin.y >= dest->vMax.y) || (vMax.y <= dest->vMin.y))
 		return false;
 	return true;
 }
