@@ -16,37 +16,40 @@ public:
 	static CSpritePainter*	s_pSP;						
 
 public:
+	CSpriteCollection*		pSprCol;					// Pointer to sprite collection
 	int						animID;						// Animation index
 	int						frameID;					// Frame index in sprite collection
-	Vec2					pos;		
+	Vec2					pos;	
+	float					rotation;
+	Vec2					scale;
+	DWORD					color;
 
 	float					fTime;						// Animation time
 	eSpriteAnimState		animStatus;
-	DWORD					color;
 
 	CSpr();
-	CSpr(int animIdx, float pX, float pY);
 	CSpr(const CSpr& sprite);
-	CSpr(int animIdx, Vec2 vPos);
+	CSpr(CSpriteCollection* pSpriteColl, int animIdx, float pX, float pY);
+	CSpr(CSpriteCollection* pSpriteColl, int animIdx, Vec2 vPos);
 
-	void					Init(int animIdx, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff);
-	void					Init(CHAR* strAnimID, CSpriteCollection *sprCollection, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff);
+	void					Init(CSpriteCollection *sprCollection, int animIdx, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
+	void					Init(CSpriteCollection *sprCollection, CHAR* strAnimID, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
 
 	void					SetAnim(int animIdx, int frameIdx = 0);
-	void					SetAnim(CSpriteCollection *sprCollection, CHAR* strAnimID);
+	void					SetAnim(CHAR* strAnimID, int frameIdx = 0);
 	// Sets the animation only if it's not the current one
 	void					SetAnimOnce(int animIdx, int frameIdx = 0); 
 	void					SetFrame(int nFrameIdx);
 	
 	//RETURNS: AFrame flag - returns it only once when entering the frame. Used for sending events from the editor on each frame like footsteps and such
-	UINT32					Update(CSpriteCollection *sprCollection, float dTime, bool bUpdatePos = false);
+	UINT32					Update(float dTime, bool bUpdatePos = false);
 
-	void					Paint(CSpriteCollection *sprCol);
+	void					Paint();
 	// Optimized paint for a single module when we don't have more modules per frame (skips a for)
-	void					PaintModule(CSpriteCollection *sprCol, int moduleIdx);
+	void					PaintModule(int moduleIdx);
 	// Optimized paint for a single module when we don't have more modules per frame (skips a for)
 	// Adds texIdxOffset to the texture index (used when loading normals and other textures in the same sprite collection)
-	void					PaintModule_texOverride(CSpriteCollection *sprCol, int moduleIdx, int texIdxOffset);
+	void					PaintModule_texOverride(int moduleIdx, int texIdxOffset);
 };
 
 // generic data
