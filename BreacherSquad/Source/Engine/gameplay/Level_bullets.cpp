@@ -74,7 +74,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	node->m_data.szTailSize.h = 0.0f;
 
 	//particularizari gloante
-	node->m_data.sprBullet.Init(ANM_PROPS_SPR_BULLETS, 0.0f, 0.0f, 0);
+	node->m_data.sprBullet.Init(ANM_PROPS_SPR_BULLETS, Vec2(0.0f, 0.0f), 0);
 
 	return &node->m_data;
 }
@@ -229,18 +229,14 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 			//salvez locatia urmatoare ca sa pot avansa pe ea
 			CLinkedPool<CBullet>::CLinkedPoolNode *nextnode = node->m_pNext;
 
-			D3DXVECTOR2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
-			float ang = UTMath::GetVectorAngle(vdir);
-			MUMatAffine2D(&matbullet, 1.0f, NULL, ang, &node->m_data.physPt->m_data.pos);
-			m_pSprite->SetTransform(&matbullet);
-			node->m_data.sprBullet.paint_firstModule(&m_sprProps);
-
+			//D3DXVECTOR2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
+			//float ang = UTMath::GetVectorAngle(vdir);
+			node->m_data.sprBullet.pos = node->m_data.physPt->m_data.pos;
+			node->m_data.sprBullet.PaintModule(&m_sprProps, 0);
 
 			// advance to next bullet
 			node = nextnode;
 		}
-		//reset transform
-		m_pSprite->SetTransform(&g_matIdentity);
 	}
 }
 

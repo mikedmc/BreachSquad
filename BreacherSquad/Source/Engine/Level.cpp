@@ -11321,8 +11321,6 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	mapMesh.PaintLayer(K_TILE_LAYER_FLOOR);
 	mapMesh.PaintLayer(K_TILE_LAYER_WALLS);
 
-	// now paint the bullets
-	PaintBullets(ePass);
 
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 	if (pSprVS)
@@ -11330,7 +11328,8 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 
 	///--- paint actors
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-	//m_pSprite->SetTransform(&g_matIdentity);
+
+	// old method below, convert to CSpr!!
 	for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
 	{
 		CActor* actor = m_visibleList.visible_actors.m_pData[kk];
@@ -11341,23 +11340,23 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 		}																 
 		actor->sprite.paintModule_texOverride(&m_sprActors, 0, 0);
 	}
+
+	// now paint the bullets
+	PaintBullets(ePass);
+
 	UTPainter().Flush();
-	//m_pSprite->Flush();
-	//m_pSprite->SetTransform(&g_matIdentity);
 
-	///--- props
-	//m_pSprite->SetTransform(&g_matIdentity);
-
+	///--- props = objects
 	for (int kk = 0; kk < m_visibleList.visible_props.Count(); kk++)
 	{
 		CProp *prop = m_visibleList.visible_props.m_pData[kk];
 		prop->sprite.paintModule_texOverride(&m_sprProps, 0, nTexIdxOffset);
 	}
+
 	UTPainter().Flush();
 	UTPainter().End();
 
-	//m_pSprite->Flush();
-
+	// top layer of tiles
 	UTGetShaderManager().SetVS(nullptr);
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
 	mapMesh.PaintLayer(K_TILE_LAYER_CEILING);

@@ -53,7 +53,7 @@ fBulletCriticalChance="0.0" - values between 0.0 and 1.0 - chance for a bullet t
       <PRIMARY bAnimSync="false" bBulletChamber="true" fShooterSpeedSlowingPercent="0.2" fMuzzleLightSize="1.0" fSpreadFOV="0.05" fAimErrorMaxFOV="0.28" fAimErrorAddPerShot="0.015" fAimErrorMulPerShot="1.12" fAimErrorCooldownPerSec="0.74" nClipSize="30" nReloadUnitSize="30" fReloadTimePerUnit="1.6" fFireRatePerSec="13.0" bCanResetFireRate="false" nBurstSize="0"
                bCanShootFromCrouch="true" bCanShootFromCover="false" bCanShootFromAir="true" bCanShootFromLadders="false" nDropShellFrame="0"
                sSndShoot="GUN_MP5_01" sSndShoot2="GUN_MP5_02" sSndReload="RELOAD_TACTICAL" sSndReload2="RELOAD_EMERGENCY" sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02"
-               sBulletType="BULLET_TRACER1" nBulletsPerShot="1" fBulletDamage="20.0" nArmorPiercingRating="1" fBulletDamageLossPPx="0.0" fBulletLife="0.25" fBulletMomentum="0.02" fBulletCriticalChance="0.0" fBulletStunDuration="0.025" fBulletSpeed="1000.0" bBulletIgnoreArmor="false" bBulletIgnoreCover="false" bBulletDieOnImpact="true" fSoundRadius="240.0" />
+               sBulletType="BULLET_TRACER1" nBulletsPerShot="1" fBulletDamage="20.0" nArmorPiercingRating="1" fBulletDamageLossPPx="0.0" fBulletLife="0.25" fBulletMomentum="0.02" fBulletCriticalChance="0.0" fBulletStunDuration="0.025" fBulletSpeed="200.0" bBulletIgnoreArmor="false" bBulletIgnoreCover="false" bBulletDieOnImpact="true" fSoundRadius="240.0" />
     </WPN_SMG_MP5A3>
 
     <WPN_SMG_UMP45 sHUDanimName="WEAPON_SMG_UMP45" fSpeedPenaltyPercent="0.0" sMuzzleFlashAnim="MUZZLE_SMG1">

@@ -169,8 +169,7 @@ public:
 	int		nSubstate;				//bullet state used by some bullet types
 
 	CLinkedPool<CPhysicsPoint2D>::CLinkedPoolNode *physPt; //punctul fizic (coliziune, pozitie, etc)
-	//grafica
-	CSprite		sprBullet;	//grafica glont
+	CSpr		sprBullet;	//grafica glont
 
 	CBullet() : type(K_LVL_BULLET_SHOTGUN), fDamage(1.0f), fDamage_ini(1.0f), fDamageLossPPx(0.0f),
 		fLife(1.0f), fLife_ini(1.0f), actorClass(K_LVL_ACT_CLASS_PLAYER), nSubstate(0),
