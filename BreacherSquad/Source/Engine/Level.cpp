@@ -7352,7 +7352,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			}
 		}
 
-		//#TODO: ar trebui intarit cu o runda de penetration resolution, ori separare direct ori sa il scoata incet din pereti...
+		//#TODO: could use a penetration resolution round. Maybe after solving each collision so we make sure boxes don't actually touch? TBD
 	}
 
 	actor->collisionFlags = unCollFlags;
@@ -7368,7 +7368,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	// save last position in pos_last (SetPos does but we already altered actor->pos)
 	actor->pos_last = vPosIni;
 
-	//#TODO: 4. Proceseaza acceleratii si alte modificari de viteze (se pot face si inainte??)
+	//#TODO: Speeds and accelerations should be treated here, after the collision detection
 		
 
 	//end phys
@@ -11413,7 +11413,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	// paint floors and vertical walls
 	mapMesh.UpdateVisibility(camrect);
 	mapMesh.PaintLayer(K_TILE_LAYER_FLOOR);
-	//mapMesh.PaintLayer(K_TILE_LAYER_WALLS);
+	mapMesh.PaintLayer(K_TILE_LAYER_WALLS);
 
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 	if (pSprVS)
@@ -11451,7 +11451,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 
 	UTGetShaderManager().SetVS(nullptr);
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
-	//mapMesh.PaintLayer(K_TILE_LAYER_CEILING);
+	mapMesh.PaintLayer(K_TILE_LAYER_CEILING);
 
 	return K_OP_OK;
 }
