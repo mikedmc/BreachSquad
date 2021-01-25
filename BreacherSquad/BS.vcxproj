@@ -269,7 +269,9 @@
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyUtils.h" />
+    <ClInclude Include="Source\Engine\gameplay\Level_bullets.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_visibility.h" />
+    <ClInclude Include="Source\Engine\gameplay\Level_weapons.h" />
     <ClInclude Include="Source\Engine\gameplay\Prop.h" />
     <ClInclude Include="Source\Engine\gameplay\ActiveInterface.h" />
     <ClInclude Include="Source\Engine\gameplay\Actor.h" />
@@ -663,8 +665,10 @@
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyLeaderboards.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\Level_bullets.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_intersections.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_visibility.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\Level_weapons.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Prop.cpp" />
     <ClCompile Include="Source\Engine\gameplay\ActiveInterface.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Actor.cpp" />

@@ -793,7 +793,7 @@ static const WCHAR* arr_wcsImportantFilesCRC[] = {
 	L"media/levels/data/weapons_data.xml",
 	L"media/levels/data/actors_data.xml",
 	L"media/levels/data/gear_screen.xml",
-	L"media/levels/data/actives.bsx",
+	L"media/levels/data/props.bsx",
 	L"media/levels/data/actors.bsx",
 	L"media/levels/missions/missions.xml"
 };

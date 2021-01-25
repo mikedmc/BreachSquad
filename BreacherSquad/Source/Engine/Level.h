@@ -10,8 +10,10 @@
 #include "gameplay/CollisionShape.h"
 #include "gameplay/Light.h"
 #include "gameplay/Prop.h"
-#include "gameplay/Actor.h"
 #include "gameplay/Level_visibility.h"
+#include "gameplay/Level_bullets.h"
+#include "gameplay/Level_weapons.h"
+#include "gameplay/Actor.h"
 
 #include "gameplay/TileBlockMesh.h"
 #include "CFOVUtil.h"
@@ -306,7 +308,7 @@ public:
 	// Releases all bullets of said type from specified owner
 	void					ReleaseBullet(int nBulletType, UINT32 nOwnerUID);
 	void					UpdateBullets(float dTime);
-	void					PaintBullets(bool paintNormals = false);
+	void					PaintBullets(eLVLRenderPass pass);
 	// Marks bullets as killed and returns how many were marked 
 	// \param dwOwnerUID - specifies the owner UID filter or leave 0 to ignore the owner flag
 	int						KillBulletsOfType(int nBulletType, UINT32 dwOwnerUID = 0);

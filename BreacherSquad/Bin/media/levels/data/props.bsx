@@ -10,6 +10,9 @@
     <Module ImageIdx="0" X="118" Y="16" W="36" H="32" />
     <Module ImageIdx="0" X="1" Y="479" W="23" H="31" />
     <Module ImageIdx="0" X="29" Y="479" W="23" H="31" />
+    <Module ImageIdx="0" X="501" Y="4" W="6" H="7" />
+    <Module ImageIdx="0" X="494" Y="4" W="6" H="6" />
+    <Module ImageIdx="0" X="483" Y="2" W="10" H="11" />
   </Modules>
   <FrameModules>
     <FrameModule ModuleIdx="0" OX="-1" OY="-26" Flags="0" />
@@ -19,6 +22,9 @@
     <FrameModule ModuleIdx="4" OX="2" OY="-32" Flags="0" />
     <FrameModule ModuleIdx="5" OX="-14" OY="-31" Flags="0" />
     <FrameModule ModuleIdx="6" OX="-11" OY="-31" Flags="0" />
+    <FrameModule ModuleIdx="7" OX="-3" OY="-3" Flags="0" />
+    <FrameModule ModuleIdx="8" OX="-3" OY="-3" Flags="0" />
+    <FrameModule ModuleIdx="9" OX="-5" OY="-5" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="-1" BBoxY="-26" BBoxW="26" BBoxH="26">
@@ -63,6 +69,24 @@
       </FModules>
       <Points />
     </Frame>
+    <Frame BBoxX="-3" BBoxY="-3" BBoxW="6" BBoxH="7">
+      <FModules>
+        <FModule Idx="7" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-3" BBoxY="-3" BBoxW="6" BBoxH="6">
+      <FModules>
+        <FModule Idx="8" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-5" BBoxY="-5" BBoxW="10" BBoxH="11">
+      <FModules>
+        <FModule Idx="9" />
+      </FModules>
+      <Points />
+    </Frame>
   </Frames>
   <AnimationFrames>
     <AnimationFrame FrameIdx="0" Duration="1" DX="0" DY="0" Flags="0" />
@@ -72,6 +96,9 @@
     <AnimationFrame FrameIdx="4" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="5" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="6" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="7" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="8" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="9" Duration="1" DX="0" DY="0" Flags="0" />
   </AnimationFrames>
   <Animations>
     <Animation ID="MISC" Flags="0">
@@ -84,6 +111,11 @@
     <Animation ID="CHARACTERS" Flags="0">
       <AFrame Idx="5" />
       <AFrame Idx="6" />
+    </Animation>
+    <Animation ID="BULLETS" Flags="0">
+      <AFrame Idx="7" />
+      <AFrame Idx="8" />
+      <AFrame Idx="9" />
     </Animation>
   </Animations>
 </SpriteCollection>
