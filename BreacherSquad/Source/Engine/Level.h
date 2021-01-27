@@ -3,6 +3,7 @@
 #include "gameplay/GameConstants.h"
 #include "gameplay/Tile.h"
 
+#include "gameplay/PhysicsPoint.h"
 #include "gameplay/LevelTypes.h"
 #include "gameplay/Level_scriptable.h"
 

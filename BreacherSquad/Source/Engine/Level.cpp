@@ -12832,7 +12832,6 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 	CLinkedPool<CPhysicsPoint2D>::CLinkedPoolNode *node = m_poolPhysPts.pListUsed.m_pNext;
 	while (node != &m_poolPhysPts.pListUsed)
 	{
-		//salvez locatia urmatoare ca s apot avansa pe ea
 		CLinkedPool<CPhysicsPoint2D>::CLinkedPoolNode *nextnode = node->m_pNext;
 		//update
 		CPhysicsPoint2D *point = &node->m_data;

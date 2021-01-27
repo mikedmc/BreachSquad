@@ -71,54 +71,9 @@
 //level file format version from the Editor
 #define K_EDITOR_LEVEL_FILE_FORMAT_VERSION 1015
 
+// maximum number of allocated physics points
+#define K_LVL_PHYSP_MAX_CNT 256
 
-///--------------------------------------------------------------------------
-///strategic abilities enum (trebuie sa corespunda iconurilor din IGM_STRATEGIC_BAR_ICONS)
-///--------------------------------------------------------------------------
-enum eStrategicAbility
-{
-	K_CI_STRATEGIC_NONE = -1,
-
-	K_CI_STRATEGIC_BODY_ARMOR = 0,
-	K_CI_STRATEGIC_GEAR_REFILL = 1,
-	K_CI_STRATEGIC_MEDIKIT,
-	K_CI_STRATEGIC_REINFORCEMENT,
-	K_CI_STRATEGIC_EXTRA_LIFE,
-	K_CI_STRATEGIC_SNIPER_SUPPORT,
-	K_CI_STRATEGIC_ACTIVE_SNIPER_FIRE,
-	K_CI_STRATEGIC_DRAGON_BREATH,
-	K_CI_STRATEGIC_SUBMACHINEGUN,
-	K_CI_STRATEGIC_BREACHER_SAW,
-	K_CI_STRATEGIC_FBI_AKIMBO,
-	K_CI_STRATEGIC_FBI_MP5K,
-	K_CI_STRATEGIC_MK48MOD1,		//heavy weapon
-	K_CI_STRATEGIC_RECON_MARKSMAN,
-	K_CI_STRATEGIC_OFFDUTY_GARAND,	//huntingrifle
-	K_CI_STRATEGIC_RECON_SIX12SD,   //shotgun for recon
-	K_CI_STRATEGIC_HOMEMADE_PIE,
-
-	K_CI_STRATEGIC_COUNT
-};
-//names must correspond to the ones used in gear_screen.xml
-const CStringHash eStrategicAbilityNames[] = {
-	L"SA_BODY_ARMOR",
-	L"SA_GEAR_REFILL",
-	L"SA_MEDIKIT",
-	L"SA_REINFORCEMENT",
-	L"SA_EXTRA_LIFE",
-	L"SA_SNIPER_SUPPORT",
-	L"SA_ACTIVE_SNIPER_FIRE",
-	L"SA_DRAGON_BREATH",
-	L"SA_SUBMACHINEGUN",
-	L"SA_BREACHER_SAW",
-	L"SA_FBI_AKIMBO",
-	L"SA_FBI_MP5K",
-	L"SA_MK48MOD1",
-	L"SA_RECON_MARKSMAN",
-	L"SA_OFFDUTY_GARAND",
-	L"SA_RECON_SIX12SD",
-	L"SA_HOMEMADE_PIE",
-};
 
 //maximum number of strategic points
 #define K_LVL_MAX_STRATEGIC_POINTS 8

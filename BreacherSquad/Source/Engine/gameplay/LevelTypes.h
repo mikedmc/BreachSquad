@@ -4,6 +4,55 @@
 class CCollisionShape;
 
 ///--------------------------------------------------------------------------
+///strategic abilities enum (trebuie sa corespunda iconurilor din IGM_STRATEGIC_BAR_ICONS)
+///--------------------------------------------------------------------------
+enum eStrategicAbility
+{
+	K_CI_STRATEGIC_NONE = -1,
+
+	K_CI_STRATEGIC_BODY_ARMOR = 0,
+	K_CI_STRATEGIC_GEAR_REFILL = 1,
+	K_CI_STRATEGIC_MEDIKIT,
+	K_CI_STRATEGIC_REINFORCEMENT,
+	K_CI_STRATEGIC_EXTRA_LIFE,
+	K_CI_STRATEGIC_SNIPER_SUPPORT,
+	K_CI_STRATEGIC_ACTIVE_SNIPER_FIRE,
+	K_CI_STRATEGIC_DRAGON_BREATH,
+	K_CI_STRATEGIC_SUBMACHINEGUN,
+	K_CI_STRATEGIC_BREACHER_SAW,
+	K_CI_STRATEGIC_FBI_AKIMBO,
+	K_CI_STRATEGIC_FBI_MP5K,
+	K_CI_STRATEGIC_MK48MOD1,		//heavy weapon
+	K_CI_STRATEGIC_RECON_MARKSMAN,
+	K_CI_STRATEGIC_OFFDUTY_GARAND,	//huntingrifle
+	K_CI_STRATEGIC_RECON_SIX12SD,   //shotgun for recon
+	K_CI_STRATEGIC_HOMEMADE_PIE,
+
+	K_CI_STRATEGIC_COUNT
+};
+//names must correspond to the ones used in gear_screen.xml
+const CStringHash eStrategicAbilityNames[] = {
+	L"SA_BODY_ARMOR",
+	L"SA_GEAR_REFILL",
+	L"SA_MEDIKIT",
+	L"SA_REINFORCEMENT",
+	L"SA_EXTRA_LIFE",
+	L"SA_SNIPER_SUPPORT",
+	L"SA_ACTIVE_SNIPER_FIRE",
+	L"SA_DRAGON_BREATH",
+	L"SA_SUBMACHINEGUN",
+	L"SA_BREACHER_SAW",
+	L"SA_FBI_AKIMBO",
+	L"SA_FBI_MP5K",
+	L"SA_MK48MOD1",
+	L"SA_RECON_MARKSMAN",
+	L"SA_OFFDUTY_GARAND",
+	L"SA_RECON_SIX12SD",
+	L"SA_HOMEMADE_PIE",
+};
+
+
+///--------------------------------------------------------------------------
 /// EFFECT TYPES
 ///--------------------------------------------------------------------------
 enum ELVLEffectType {
@@ -58,74 +107,6 @@ const CStringHash EMaterialTypeNames[] =
 	L"METAL",
 	L"WALL",
 };
-
-///--------------------------------------------------------------------------
-/// PHYSICS POINTS
-///--------------------------------------------------------------------------
-
-#define K_LVL_PHYSP_MAX_CNT 256
-// calculeaza deplasare si coliziuni cu nivelul
-///--- collision flags ---
-//colizioneaza cu solide?
-#define K_LVL_PHYSP_COLLFLAG_SOLID	1
-//colizioneaza cu boxes?
-#define K_LVL_PHYSP_COLLFLAG_BOX	2
-//interactioneaza cu apa ? - daca pluteste sau alte efecte
-#define K_LVL_PHYSP_COLLFLAG_WATER	4
-
-class CPhysicsPoint2D {
-public:
-	enum eCollisionType {
-		K_COLLTYPE_NONE = 0,	//no collision
-		K_COLLTYPE_FAST,		//fast - collides with visible collshapes
-		K_COLLTYPE_PRECISE,		//precise - collides with ALL collshapes (slower)
-	};
-	//flaguri de control
-	bool		bFlagRotationEnabled;			//Set to enable rotation updates
-	eCollisionType	eCollType;					//Set to enable collision detection
-	bool		bFlagPhysicsEnabled;			//Set to enable physics (only with FlagCollision Enabled)
-
-	int			nFlagsCollision;  //flagurile de coliziune (cu ce boxes colizioneaza)
-//TODO: ca sa testezi coliziunea unui cerc trebuiesc marite toate dreptunghiurile cu o raza...
-//float		fRadius;	//raza de coliziune (de exemplu grenade si alte obiecte rotunde)
-
-	float		fAngle;
-	float		fAngularSpeed;
-	float		fAngularAccel;
-
-	D3DXVECTOR2 pos, pos_last;
-	D3DXVECTOR2 speed;
-	D3DXVECTOR2 accel;
-	//date frecare si bounce
-	bool  bContacting; //spune daca este in contact
-	bool  bContactStarted; //spune cand s-a initiat contactul, doar pentru un frame. Se poate pune sunet in fn de el
-	bool  bIsStatic;	//spune daca nu se mai misca
-	bool  bIsDead;		//spune daca e mort (afara din zona de joc)
-	D3DXVECTOR2 contactNormal;  //normala ultimului contact
-	D3DXVECTOR2 contactPos;		//pozitia ultimului contact
-	CCollisionShape* pContactShape; //collision shape-ul cu care face contact
-
-	float fBounceF;   //bounce restitution factor
-	float fFrictionF; //default 10.0f
-
-	CPhysicsPoint2D() : eCollType(K_COLLTYPE_NONE), bContacting(false), bContactStarted(false) , bIsStatic(false), nFlagsCollision(0),
-		bFlagRotationEnabled(false), fAngle(0.0f), fAngularSpeed(0.0f), fAngularAccel(0.0f),
-		bFlagPhysicsEnabled(false), fBounceF(0.5f), fFrictionF(10.0f), bIsDead(false), pContactShape(NULL)
-	{
-		pos = pos_last = D3DXVECTOR2(0.0f, 0.0f);
-		speed = D3DXVECTOR2(0.0f, 0.0f);
-		accel = D3DXVECTOR2(0.0f, 0.0f);
-		contactNormal = D3DXVECTOR2(0.0f, 0.0f);
-		contactPos = D3DXVECTOR2(0.0f, 0.0f);
-	};
-
-	void Init();
-	/*
-	 * Forces a new position for the point
-	 */
-	void SetPosForced(D3DXVECTOR2 vecPos);
-};
-
 
 
 ///--------------------------------------------------------------------------
@@ -1007,9 +988,6 @@ public:
 
 
 
-///--------------------------------------------------------------------------
-///--- PHYSICS PARTICLES ---
-///--------------------------------------------------------------------------
 const CStringHash EDoTTypeNames[] =
 {
 	L"DoT_NOEFFECT",

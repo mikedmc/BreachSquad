@@ -247,7 +247,7 @@ void CSpr::PaintModule_texOverride(int moduleIdx, int texIdxOffset)
 ///----------------------------------------------------------------------------------
  
 
-void UTSprite::PaintFrameEx(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameID, DWORD ncolor, float fRotZ, Vec2 vScale)
+void UTSprite::PaintFrameEx(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameID, DWORD ncolor, float fRotZ, Vec2 vScale, UINT unFlags)
 {
 	_ASSERT(animID < sprCol->Animations.Count());
 	_ASSERT(frameID < sprCol->Animations[animID]->aframesNo);
@@ -261,7 +261,7 @@ void UTSprite::PaintFrameEx(CSpriteCollection *sprCol, Vec2 vPos, int animID, in
 			mod->texRect,
 			mod->moduleRectOff,
 			vPos,
-			ncolor, fRotZ, vScale);
+			ncolor, fRotZ, vScale, unFlags);
 	}
 }
 

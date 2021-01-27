@@ -88,32 +88,6 @@ CAIState * CAITemplate::GetAIStateByName(CStringHash strName)
 }
 
 
-///--------------------------------------------------------------------------
-///--- Physics Points ---
-///--------------------------------------------------------------------------
-void CPhysicsPoint2D::Init()
-{
-	eCollType = K_COLLTYPE_NONE;
-	bContacting = false;
-	bIsStatic = false;
-	nFlagsCollision = 0;
-	bFlagRotationEnabled = false;
-	fAngle = 0.0f;
-	fAngularSpeed = 0.0f;
-	fAngularAccel = 0.0f;
-	bFlagPhysicsEnabled = false;
-	fBounceF = 0.5f;
-	fFrictionF = 10.0f;
-	pos = D3DXVECTOR2(0.0f, 0.0f);
-	speed = D3DXVECTOR2(0.0f, 0.0f);
-	accel = D3DXVECTOR2(0.0f, 0.0f);
-	bIsDead = false;
-}
-
-void CPhysicsPoint2D::SetPosForced(D3DXVECTOR2 vecPos)
-{
-	pos = vecPos;
-}
 
 ///--------------------------------------------------------------------------
 /// MISC OBJECTS - diverse obiecte speciale exportate din editor (RAILS, etc)
