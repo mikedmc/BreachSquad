@@ -12888,19 +12888,29 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 			Vec2 collisionPoint, collisionNormal;
 			Vec2 vFrom = Vec3ToVec2XY(point->pos_last);
 			Vec2 vTo = Vec3ToVec2XY(point->pos);
+			Vec2 vMove = vTo - vFrom;
 
 			CCollisionShape* colShape = nullptr;
 			
 			// XY plane collision
 			bool bCollided = false;
-			// tiles collision
-			if (SegmentTilesIntersection(vFrom, vTo, collisionPoint, collisionNormal))
+			if ((vMove.x != 0.0f) && (vMove.y != 0.0f))
 			{
-				bCollided = true;
-			}
+				// tiles collision
+				if (point->nFlagsCollision & K_LVL_PHYSP_COLLFLAG_TILES)
+				{
+					if (SegmentTilesIntersection(vFrom, vTo, collisionPoint, collisionNormal))
+						bCollided = true;
+				}
 
-			// collision with shapes (overwrite collpoint if closer)
-			//colShape = ColShape_Segment_Intersection_Arr(point->pos_last, point->pos, m_visibleList.logic_colShapes.m_pData, m_visibleList.logic_colShapes.Count(), &collisionPoint, &collisionNormal);
+				// collision with shapes 
+				if (point->nFlagsCollision & K_LVL_PHYSP_COLLFLAG_BOXES)
+				{
+					// (overwrite collpoint ONLY if closer and make other optimizations to see if we CAN collide with anything)
+				// get only the boxes in vMove box
+				//colShape = ColShape_Segment_Intersection_Arr(point->pos_last, point->pos, m_visibleList.logic_colShapes.m_pData, m_visibleList.logic_colShapes.Count(), &collisionPoint, &collisionNormal);
+				}
+			}
 
 			if (bCollided)
 			{
@@ -12922,14 +12932,8 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 					float fDot = MUVec3Dot(&point->speed, &point->contactNormal);
 					Vec3 Vn = point->contactNormal * fDot;
 					Vec3 Vt = point->speed - Vn;
-					//apply bounce and friction (for walls that is off for now)
-					//Vn *= point->fBounceF;
-					//Vt -= Vt * point->fFrictionF * dTime;
 					// compute final speed
 					point->speed = -Vn + Vt; 
-					//forces - reduc fortele care actioneaza pe punct doar la componenta tangentiala (anulez componenta normala) ?? de ce as face asta
-					//MUVec3Norm(&Vt, &Vt);
-					//vecForces = Vt * MUVec3Dot(&vecForces, &Vt);
 				}
 			}
 
@@ -12939,12 +12943,15 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 			float fFloorH = 0.0f;
 
 			// Z floor collision at the end to bring it back up
-			if (point->pos.z <= fFloorH)
+			// Only compute this part if we have vertical acceleration
+			if ((point->accel.z != 0.0f) && (point->pos.z <= fFloorH))
 			{
 				point->bContacting = true;
 				// get the point back above the floor
 				point->pos.z = fFloorH - point->pos.z;
-				point->speed.z *= -point->fBounceF;
+				// make sure it always ricochets upwards
+				point->speed.z = fabs(point->speed.z * point->fBounceF);
+				
 				if (fabs(point->speed.z * dTime) < fMinSpeedZ)
 				{
 					point->speed.z = 0.0f;
@@ -12961,18 +12968,19 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 					//send bounce message
 					point->bContactStarted = true;
 				}
-
-				// is it almost stopped?
-				if (MUVec3AlmostZero(point->speed * dTime, 0.5f))
-				{
-					point->bIsStatic = true;
-					point->speed = g_Vec3Zero;
-				}
-				else
-				{
-					point->bIsStatic = false;
-				}
 			}
+
+			// is it almost stopped?
+			if (MUVec3AlmostZero(point->speed * dTime, 0.5f))
+			{
+				point->bIsStatic = true;
+				point->speed = g_Vec3Zero;
+			}
+			else
+			{
+				point->bIsStatic = false;
+			}
+
 		}
 
 

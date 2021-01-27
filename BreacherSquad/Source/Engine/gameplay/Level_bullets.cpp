@@ -8,7 +8,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	//dull bullets don't actually get spawned (sometimes we need them)
 	if (bulletTemplate->nType == K_LVL_BULLET_DULL)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	//melee bullets
@@ -19,7 +19,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 		float fRange = fRangeObjects * 1.5f; //larger range for humans
 		int nHitActors = MeleeBlow(bulletTemplate->nType, pos, shootDir, nOwnerUID, actorClass, fRange, bulletTemplate->fDamage, bulletTemplate->fMomentum, bulletTemplate->fStunDuration, (EActorClass)actorClass, fRangeObjects, bulletTemplate->fDamageObjects);
 
-		return NULL;
+		return nullptr;
 	}
 
 	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.HireNode();
@@ -27,7 +27,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	if (node == null)
 	{
 		ErrorBox(K_ERR_WARNING, L"ShootBullet:We need more bullets!");
-		return NULL;
+		return nullptr;
 	}
 
 	//add simulation container
@@ -36,7 +36,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	{
 		ErrorBox(K_ERR_WARNING, L"ShootBullet:We need more physics points!");
 		m_poolBullets.DismissNode(node);
-		return NULL;
+		return nullptr;
 	}
 	//reset physics data
 	node->m_data.physPt->m_data.Init();
@@ -177,7 +177,6 @@ void CLevel::UpdateBullets(float dTime)
 		// exited play area
 		if (bullet->physPt->m_data.bIsDead)
 			killbullet = true;
-
 
 		// update position triplets
 		bullet->posProj = Vec3ProjVec2(bullet->physPt->m_data.pos);

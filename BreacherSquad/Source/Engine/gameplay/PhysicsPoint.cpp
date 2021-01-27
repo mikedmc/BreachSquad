@@ -7,17 +7,17 @@ void CPhysicsPoint::Init()
 	bContacting = false;
 	bIsStatic = false;
 	bIsStaticZ = false;
-	nFlagsCollision = 0;
+	nFlagsCollision = K_LVL_PHYSP_COLLFLAG_ALL;
 	bFlagRotationEnabled = false;
 	fAngle = 0.0f;
 	fAngularSpeed = 0.0f;
 	fAngularAccel = 0.0f;
 	bFlagPhysicsEnabled = false;
-	fBounceF = 0.5f;
-	fFrictionF = 10.0f;
-	pos = Vec3(0.0f, 0.0f, 0.0f);
-	speed = Vec3(0.0f, 0.0f, 0.0f);
-	accel = Vec3(0.0f, 0.0f, 0.0f);
+	fBounceF = K_LVL_PHYSPT_DEFAULT_FLOOR_BOUNCE;
+	fFrictionF = K_LVL_PHYSPT_DEFAULT_FLOOR_FRICTION;
+	pos = g_Vec3Zero;
+	speed = g_Vec3Zero;
+	accel = g_Vec3Zero;
 	bIsDead = false;
 }
 

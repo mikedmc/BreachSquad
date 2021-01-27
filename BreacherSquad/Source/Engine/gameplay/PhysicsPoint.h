@@ -3,6 +3,8 @@
 // declare used classes
 class CCollisionShape;
 
+#define K_LVL_PHYSPT_DEFAULT_FLOOR_FRICTION		10.0f
+#define K_LVL_PHYSPT_DEFAULT_FLOOR_BOUNCE		0.5f
 
 ///--------------------------------------------------------------------------
 /// PHYSICS POINTS
@@ -10,12 +12,12 @@ class CCollisionShape;
 ///--------------------------------------------------------------------------
 
 ///--- collision flags ---
-//colizioneaza cu solide?
-#define K_LVL_PHYSP_COLLFLAG_SOLID	1
-//colizioneaza cu boxes?
-#define K_LVL_PHYSP_COLLFLAG_BOX	2
-//interactioneaza cu apa ? - daca pluteste sau alte efecte
-#define K_LVL_PHYSP_COLLFLAG_WATER	4
+// collides with walls (tiles)
+#define K_LVL_PHYSP_COLLFLAG_TILES	1
+// collides with collision boxes
+#define K_LVL_PHYSP_COLLFLAG_BOXES	2
+// collides with everything
+#define K_LVL_PHYSP_COLLFLAG_ALL	0xffff
 
 class CPhysicsPoint {
 public:
@@ -35,25 +37,26 @@ public:
 	float				fAngularSpeed;
 	float				fAngularAccel;
 
-	Vec3				pos, pos_last;
-	Vec3				speed;
-	Vec3				accel;
+	Vec3				pos, pos_last;						// Position of the point
+	Vec3				speed;								// Current speed of the point
+	Vec3				accel;								// Forces that act on the point. Set Z to 0 to skip floor collision. Set XY to 0 to skip tiles/boxes collisions.
 	
 	bool				bContacting;						// Is it contacting?
 	bool				bContactStarted;					// Tells you for a frame that the contact has started
 	bool				bIsStatic;							// Did it completely stop?
 	bool				bIsStaticZ;							// Did it stop on Z axis?
-	bool				bIsDead;							// Tells if we must kill it as it exited the play area
+	bool				bIsDead;							// Tells if we must kill it as it exited the play area. #TODO: necessary?
 	Vec3				contactNormal;						// Last contact normal
 	Vec3				contactPos;							// Last contact pos
-	CCollisionShape*	pContactShape;						// Contacting shape/type TODO
+	CCollisionShape*	pContactShape;						// Contacting shape/type #TODO: add collision type with additional data in it
 
-	float				fBounceF;							// bounce restitution factor
-	float				fFrictionF;							// default 10.0f
+	float				fBounceF;							// floor bounce restitution factor
+	float				fFrictionF;							// floor friction
 
-	CPhysicsPoint() : eCollType(K_COLLTYPE_NONE), bContacting(false), bContactStarted(false), bIsStatic(false), nFlagsCollision(0),
+	CPhysicsPoint() : eCollType(K_COLLTYPE_NONE), bContacting(false), bContactStarted(false), bIsStatic(false), nFlagsCollision(K_LVL_PHYSP_COLLFLAG_ALL),
 		bFlagRotationEnabled(false), fAngle(0.0f), fAngularSpeed(0.0f), fAngularAccel(0.0f), bIsStaticZ(false),
-		bFlagPhysicsEnabled(false), fBounceF(0.5f), fFrictionF(10.0f), bIsDead(false), pContactShape(NULL)
+		bFlagPhysicsEnabled(false), fBounceF(K_LVL_PHYSPT_DEFAULT_FLOOR_BOUNCE), fFrictionF(K_LVL_PHYSPT_DEFAULT_FLOOR_FRICTION),
+		bIsDead(false), pContactShape(NULL)
 	{
 		pos = pos_last = Vec3(0.0f, 0.0f, 0.0f);
 		speed = Vec3(0.0f, 0.0f, 0.0f);
