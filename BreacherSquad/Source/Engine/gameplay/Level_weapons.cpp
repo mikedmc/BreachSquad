@@ -422,7 +422,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, D3DXVECTOR2 vDir)
 		//adaug shell
 		if (weapon->WeaponTemplate.nDropShellFrame >= 0)
 		{
-			AddProp(K_SPROP_SHELL, weapon->pOwner->GetPosHeart(), &D3DXVECTOR2(-weapon->pOwner->lookDirXsign * (40.0f + randfloat(30.0f)), -50.0f - randfloat(20.0f)), &g_vecGravity, weapon->WeaponTemplate.nDropShellFrame);
+			AddProp(K_SPROP_SHELL, weapon->pOwner->GetPosHeart(), &D3DXVECTOR2(-weapon->pOwner->lookDirXsign * (40.0f + randfloat(30.0f)), -50.0f - randfloat(20.0f)), &g_vecGravityOld, weapon->WeaponTemplate.nDropShellFrame);
 		}
 
 		float fAimErrorMul = 1.0f;

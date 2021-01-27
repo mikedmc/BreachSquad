@@ -34,8 +34,11 @@
 #define			Vec2i					POINTXY_INT
 
 // Is vector almost zero?
-bool			MUVec2AlmostZero(Vec2 vec);
+bool			MUVec2AlmostZero(Vec2 vec, float fThreshold = 0.00001f);
 // Is vector almost zero?
-bool			MUVec3AlmostZero(Vec3 vec);
-
+bool			MUVec3AlmostZero(Vec3 vec, float fThreshold = 0.00001f);
+// Zero vector
+#define			g_Vec3Zero		D3DXVECTOR3(0.0f, 0.0f, 0.0f)
+// Zero vector
+#define			g_Vec2Zero		D3DXVECTOR2(0.0f, 0.0f)
 

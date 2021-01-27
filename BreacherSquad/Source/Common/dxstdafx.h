@@ -346,7 +346,7 @@ enum ETexChannel {
 // Transforms onscreen elevation to World coord Z (
 #define H_TO_Z(posZ)				(posZ * INV_ZHSCALE)
 // Converts Vec3 world space in Vec2 proojected space
-#define V3projV2(vec)				(Vec2(vec.x, vec.y - vec.z * ZHSCALE))
+#define Vec3ProjVec2(vec)				(Vec2(vec.x, vec.y - vec.z * ZHSCALE))
 
 // height of wall in world coordinates (not projected, use Z_TO_H to convert)
 #define K_WALL_HEIGHT_WORLD			64.0f
@@ -618,7 +618,8 @@ extern CLog*				g_pLog;		//log class
 extern bool					g_bCanPause;  //poate pune pauza?
 extern Mat					g_matIdentity;
 extern Mat					g_matWorld;
-extern Vec2					g_vecGravity;
+extern Vec2					g_vecGravityOld;
+extern Vec3					g_vecGravity;
 //mouse
 extern CMouseData			g_mouse;
 //gamestate

@@ -4,6 +4,7 @@
 
 CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, D3DXVECTOR2 pos, D3DXVECTOR2 shootDir)
 {
+	Vec3 vPos = Vec3(pos.x, pos.y, 16.0f);
 	//dull bullets don't actually get spawned (sometimes we need them)
 	if (bulletTemplate->nType == K_LVL_BULLET_DULL)
 	{
@@ -60,15 +61,19 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	node->m_data.fSelfDamageMultiplier = bulletTemplate->fSelfDamageMultiplier;
 	node->m_data.fCriticalHitChance = bulletTemplate->fCriticalHitChance;
 
-	node->m_data.vSpawnPos = pos;
+	node->m_data.vSpawnPos = vPos;
 	//physics
-	node->m_data.physPt->m_data.pos = pos;
-	node->m_data.physPt->m_data.pos_last = pos;
+	node->m_data.physPt->m_data.pos = vPos;
+	node->m_data.physPt->m_data.pos_last = vPos;
 	//randomizam viteza glontului cu un procent anume
-	node->m_data.physPt->m_data.speed = shootDir * (bulletTemplate->fSpeed_ini + m_rand.RandFloatSgn(bulletTemplate->fSpeed_ini * 0.075f));
+	Vec2 dir2d = shootDir * (bulletTemplate->fSpeed_ini + m_rand.RandFloatSgn(bulletTemplate->fSpeed_ini * 0.075f));
+	node->m_data.physPt->m_data.speed = Vec2ToVec3XY0(dir2d);
+	// hardcoded for now
+	node->m_data.physPt->m_data.accel = g_vecGravity;
+	node->m_data.physPt->m_data.fBounceF = 0.9f;
 	//default states
-	node->m_data.physPt->m_data.eCollType = CPhysicsPoint2D::K_COLLTYPE_FAST;
-	node->m_data.physPt->m_data.bFlagPhysicsEnabled = false;
+	node->m_data.physPt->m_data.eCollType = CPhysicsPoint::K_COLLTYPE_FAST;
+	node->m_data.physPt->m_data.bFlagPhysicsEnabled = true;
 	//tail
 	node->m_data.szTailSize.w = 0.0f;
 	node->m_data.szTailSize.h = 0.0f;
@@ -79,9 +84,10 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	return &node->m_data;
 }
 
-CBullet* CLevel::GetClosestBullet(D3DXVECTOR2 vCheckPos, EBulletType nBulletType, float fMaxDistance, int dwOwnerUID /*= 0*/)
+CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float fMaxDistance, int dwOwnerUID /*= 0*/)
 {
 	float fMinDist = 100000.0f;
+	float fMaxDistanceSq = fMaxDistance * fMaxDistance;
 	CBullet* pRetBullet = null;
 
 	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.pListUsed.m_pNext;
@@ -98,8 +104,8 @@ CBullet* CLevel::GetClosestBullet(D3DXVECTOR2 vCheckPos, EBulletType nBulletType
 			bPassed = false;
 		if (bPassed)
 		{
-			float fDist = D3DXVec2Length(&(vCheckPos - bullet->physPt->m_data.pos));
-			if ((fMaxDistance <= 0.0f) || ((fMaxDistance > 0.0f) && (fDist <= fMaxDistance)))
+			float fDist = MUVec2LenSq(&(vCheckPos - Vec3ToVec2XY(bullet->physPt->m_data.pos)));
+			if ((fMaxDistance <= 0.0f) || ((fMaxDistance > 0.0f) && (fDist <= fMaxDistanceSq)))
 			{
 				if (fDist < fMinDist)
 				{
@@ -158,7 +164,9 @@ void CLevel::UpdateBullets(float dTime)
 	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.pListUsed.m_pNext;
 	while (node != &m_poolBullets.pListUsed)
 	{
+		// save link to next node as we might deallocate current node
 		CLinkedPool<CBullet>::CLinkedPoolNode *nextnode = node->m_pNext;
+
 		CBullet* bullet = &node->m_data;
 
 		float fBulletOldLife = bullet->fLife;
@@ -171,12 +179,16 @@ void CLevel::UpdateBullets(float dTime)
 			killbullet = true;
 
 
+		// update position triplets
+		bullet->posProj = Vec3ProjVec2(bullet->physPt->m_data.pos);
+		bullet->posShadow = Vec3ToVec2XY(bullet->physPt->m_data.pos);
 		//release the bullet
 		if (killbullet)
 		{
 			//some bullets explode at the end
 			if (bullet->nExploTemplateHash != 0)
 			{
+				/*
 				D3DXVECTOR2 vExploDir(0.0f, 0.0f);
 				if (bullet->nFlags & K_LVL_BULLET_FLAG_DIRECTIONAL)
 				{
@@ -187,16 +199,17 @@ void CLevel::UpdateBullets(float dTime)
 					vExploPos += bullet->physPt->m_data.contactNormal * 2.0f;
 				//now add explo
 				AddProp_Explo(bullet->nExploTemplateHash, vExploPos, bullet->ownerUID, bullet->actorClass, vExploDir);
+				*/
 			}
 
-			//release la nodul de fizica !!!
+			//release phys point
 			m_poolPhysPts.DismissNode(bullet->physPt);
-			//si eliberez glontul
+			//and release the bullet
 			m_poolBullets.DismissNode(node);
 		}
 
 
-		//avansez pointer
+		//advance pointer
 		node = nextnode;
 	}
 
@@ -213,30 +226,46 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 	D3DXMATRIXA16 matbullet;
 	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.pListUsed.m_pNext;
 
-	if (pass == K_LVL_RP_COLORS)
+	switch(pass)
 	{
-		////bullet tails and other geometry
-		if (m_bulletsMeshIdx >= 0)
+		case K_LVL_RP_COLORS:
 		{
-			//#HARDCODE: set first texture which contains color info
-			m_pDevice->SetTexture(0, m_sprProps.Textures[0]->pTex);
-			//draw textured bullets (actives texture, just like the bullets)
-			m_bufferedPainter.DrawMesh(m_bulletsMeshIdx, true);
-		}
+			////bullet tails and other geometry
+			if (m_bulletsMeshIdx >= 0)
+			{
+				//#HARDCODE: set first texture which contains color info
+				m_pDevice->SetTexture(0, m_sprProps.Textures[0]->pTex);
+				//draw textured bullets (actives texture, just like the bullets)
+				m_bufferedPainter.DrawMesh(m_bulletsMeshIdx, true);
+			}
 
-		while (node != &m_poolBullets.pListUsed)
+			while (node != &m_poolBullets.pListUsed)
+			{
+				CBullet* bullet = &node->m_data;
+				//D3DXVECTOR2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
+				//float ang = UTMath::GetVectorAngle(vdir);
+				bullet->sprBullet.pos = bullet->posProj;
+				bullet->sprBullet.PaintModule(0);
+
+				// advance to next bullet
+				node = node->m_pNext;
+			}
+		}
+		break;
+		case K_LVL_RP_SHADOWS:
 		{
-			//salvez locatia urmatoare ca sa pot avansa pe ea
-			CLinkedPool<CBullet>::CLinkedPoolNode *nextnode = node->m_pNext;
+			while (node != &m_poolBullets.pListUsed)
+			{
+				CBullet* bullet = &node->m_data;
+				//D3DXVECTOR2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
+				//float ang = UTMath::GetVectorAngle(vdir);
+				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->posShadow, bullet->sprBullet.animID, bullet->sprBullet.frameID, 0, 0xaa000000);
 
-			//D3DXVECTOR2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
-			//float ang = UTMath::GetVectorAngle(vdir);
-			node->m_data.sprBullet.pos = node->m_data.physPt->m_data.pos;
-			node->m_data.sprBullet.PaintModule(0);
-
-			// advance to next bullet
-			node = nextnode;
+				// advance to next bullet
+				node = node->m_pNext;
+			}
 		}
+		break;
 	}
 }
 

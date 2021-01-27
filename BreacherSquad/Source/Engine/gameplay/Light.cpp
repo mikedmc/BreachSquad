@@ -76,7 +76,7 @@ void CLight::UpdateInternalData(CSpriteCollection* pLightsSprCol)
 			Vec3 vmove = -vnDir * K_WALL_HEIGHT_WORLD;
 			CAABB lowRect(bbox_ini);
 			CAABB highRect(bbox_ini);
-			Vec2 vmoveproj = V3projV2(vmove);
+			Vec2 vmoveproj = Vec3ProjVec2(vmove);
 			highRect.Move(vmoveproj);
 			lowRect.Move(-vmoveproj);
 			CAABB unionAABB = AABB_Union(lowRect, highRect);

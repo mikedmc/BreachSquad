@@ -83,7 +83,9 @@ enum eLVLRenderPass {
 	K_LVL_RP_COLORS = 0,
 	K_LVL_RP_NORMALS_HEIGHT = 1,
 	// renders all lights in a single surface (with shadows)
-	K_LVL_RP_LIGHTS,			
+	K_LVL_RP_LIGHTS,
+	// some elements need shadows to be painted (some bullets, props, actors)
+	K_LVL_RP_SHADOWS,
 
 	K_LVL_RP_COUNT
 };
@@ -1164,7 +1166,7 @@ enum ESpecialPropType {
 class CSpecialProp {
 public:
 	ESpecialPropType	type;		
-	CLinkedPool<CPhysicsPoint2D>::CLinkedPoolNode *physPt; //punctul fizic (coliziune, pozitie, etc)
+	CLinkedPool<CPhysicsPoint>::CLinkedPoolNode *physPt; //punctul fizic (coliziune, pozitie, etc)
 
 	int			nSubType;	//folosit de fiecare tip in mod diferit
 	float		fTimer;		//timer care porneste de la 0

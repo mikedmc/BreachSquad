@@ -272,7 +272,7 @@ public:
 	//adds a blood decal (bLarge when enemy was splattered)
 	void					AddDecal_BloodSplat(D3DXVECTOR2 pos, bool bLarge, EActorClass eVictimClass = K_LVL_ACT_CLASS_ANY);
 	///--- physics points ---
-	CLinkedPool<CPhysicsPoint2D>	m_poolPhysPts; //pool de obiecte fizice
+	CLinkedPool<CPhysicsPoint>	m_poolPhysPts; //pool de obiecte fizice
 	void					UpdatePhysicsPoints(float dTime);
 	///--- bullets linked pool ---
 	CLinkedPool<CBullet>	m_poolBullets;			//pool-ul de gloante
@@ -305,7 +305,7 @@ public:
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.
 	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, D3DXVECTOR2 pos, D3DXVECTOR2 shootDir);
 	// Returns the closest bullet (or null) of nBulletType under fMaxDistance
-	CBullet*				GetClosestBullet(D3DXVECTOR2 vCheckPos, EBulletType nBulletType, float fMaxDistance = 0.0f, int dwOwnerUID = 0);
+	CBullet*				GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float fMaxDistance = 0.0f, int dwOwnerUID = 0);
 	// Releases all bullets of said type from specified owner
 	void					ReleaseBullet(int nBulletType, UINT32 nOwnerUID);
 	void					UpdateBullets(float dTime);

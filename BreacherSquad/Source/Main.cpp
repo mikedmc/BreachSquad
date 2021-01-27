@@ -40,7 +40,8 @@ bool						g_bJustStarted = true;				//game was just started now
 bool						g_bForceOneUpdatePerFrame = false;	// flag used to force only one update per frame when necessary (like during loading)
 
 #define						K_GRAVITY	500.0f
-Vec2						g_vecGravity;						//gravity
+Vec2						g_vecGravityOld;					//gravity
+Vec3						g_vecGravity;						//gravity
 
 ID3DXSprite*				g_pGameSprite = NULL;				//Main Sprite class 
 Mat							g_matIdentity;						//identity matrix
@@ -585,7 +586,8 @@ HRESULT InitApp(void)
 	//--------------------------------------------------------------------------------------
 	MUMatIdentity(&g_matIdentity);
 	MUMatIdentity(&g_matWorld);
-	g_vecGravity = Vec2(0.0f, K_GRAVITY);
+	g_vecGravityOld = Vec2(0.0f, K_GRAVITY);
+	g_vecGravity = Vec3(0.0f, 0.0f, -K_GRAVITY);
 
 	//set version number
 	UTLang().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);

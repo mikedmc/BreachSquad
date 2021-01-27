@@ -95,7 +95,7 @@ void CLevelEditor::Update(float dTime)
 		{
 			case K_LED_LIGHT:
 			{
-				if ((pSelected != nullptr) && (MUVec2Len(&(V3projV2(pSelected->vPos) - mousepos)) < K_TILE_HSIZE_F))
+				if ((pSelected != nullptr) && (MUVec2Len(&(Vec3ProjVec2(pSelected->vPos) - mousepos)) < K_TILE_HSIZE_F))
 				{
 					// move it
 				}
@@ -215,7 +215,7 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 			for (int kk = 0; kk < m_pLevel->m_visibleList.visible_lights.Count(); kk++)
 			{
 				CLight* lg = m_pLevel->m_visibleList.visible_lights[kk];
-				Vec2 lgproj = V3projV2(lg->vPos);
+				Vec2 lgproj = Vec3ProjVec2(lg->vPos);
 				Vec2 vpos = m_pLevel->m_camLevel.WorldToScreen(lgproj);
 				Vec2 vposprj = m_pLevel->m_camLevel.WorldToScreen(lg->pos);
 				

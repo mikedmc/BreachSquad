@@ -759,7 +759,7 @@ int CLevel::MeleeBlow(int nBulletType, D3DXVECTOR2 vPos, D3DXVECTOR2 vDirection,
 						D3DXVec2Normalize(&dir, &dir);
 						for (int kk = 0; kk < 12; kk++)
 						{
-							g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, 2 + randint(2), &collisionPoint, &g_vecGravity, 
+							g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, 2 + randint(2), &collisionPoint, &g_vecGravityOld, 
 								&(D3DXVECTOR2(dir.x + randfloatsgn(0.4f), dir.y + randfloatsgn(0.4f)) * (40.0f + randfloat(20.0f))), 
 								0.4f + randfloat(0.4f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_FRONT_LIGHT, 2.0f);
 						}
@@ -3331,7 +3331,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 						for (int ll = 0; ll < 20; ll++)
 						{
 							D3DXVECTOR2 ppos = AABB_GetRandomPointInBox(colshape->bbox);
-							g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLASS_SHARDS, false, randint(5), &ppos, &g_vecGravity, &D3DXVECTOR2(dirx * (60.0f + randfloat(60.0f)), -40.0f + randfloatsgn(50.0f)), 0.3f + randfloat(0.2f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+							g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLASS_SHARDS, false, randint(5), &ppos, &g_vecGravityOld, &D3DXVECTOR2(dirx * (60.0f + randfloat(60.0f)), -40.0f + randfloatsgn(50.0f)), 0.3f + randfloat(0.2f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 						}
 						//sound
 						//SND_PLAY_POSITIONAL_RAND2(SNDIDX_WINDOWBREAK1, SNDIDX_WINDOWBREAK2, colshape->bbox.vCenter);
@@ -3369,7 +3369,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 					for (int ll = 0; ll < 30; ll++)
 					{
 						D3DXVECTOR2 ppos = AABB_GetRandomPointInBox(colshape->bbox);
-						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_WOODEN_SPLINTERS, false, randint(6), &ppos, &g_vecGravity, &D3DXVECTOR2(dirx * (100.0f + randfloat(60.0f)), -40.0f + randfloatsgn(50.0f)), 0.3f + randfloat(0.2f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_WOODEN_SPLINTERS, false, randint(6), &ppos, &g_vecGravityOld, &D3DXVECTOR2(dirx * (100.0f + randfloat(60.0f)), -40.0f + randfloatsgn(50.0f)), 0.3f + randfloat(0.2f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 					}
 					//Adauga events de zgomot dincolo de usa
 					D3DXVECTOR2 sndpos1 = D3DXVECTOR2(colshape->bbox.vCenter.x + dirx * (colshape->bbox.vHalfSize.x + 2.0f), colshape->bbox.vCenter.y);
@@ -6936,11 +6936,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						}
 						for (int ll = 0; ll < 6; ll++)
 						{
-							AddProp(K_SPROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravity, nSubType);
+							AddProp(K_SPROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravityOld, nSubType);
 						}
 						//goes straight down to stain the floor
-						AddProp(K_SPROP_MEAT, actor->GetPosHeart(), &D3DXVECTOR2(200.0f, 50.0f), &g_vecGravity, nSubType);
-						AddProp(K_SPROP_MEAT, actor->GetPosHeart(), &D3DXVECTOR2(-200.0f, 50.0f), &g_vecGravity, nSubType);
+						AddProp(K_SPROP_MEAT, actor->GetPosHeart(), &D3DXVECTOR2(200.0f, 50.0f), &g_vecGravityOld, nSubType);
+						AddProp(K_SPROP_MEAT, actor->GetPosHeart(), &D3DXVECTOR2(-200.0f, 50.0f), &g_vecGravityOld, nSubType);
 						//human blood gibs particle
 						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &actor->pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_FRONT_NRM);
 					}
@@ -6948,7 +6948,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					{
 						for (int ll = 0; ll < 2; ll++)
 						{
-							AddProp(K_SPROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravity);
+							AddProp(K_SPROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravityOld);
 						}
 						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &actor->pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM);
 					}
@@ -9705,7 +9705,7 @@ void CLevel::Update(float dTime_original)
 
 	///--- PHYSICS POINTS ---
 	UpdatePhysicsPoints(dTime);
-	///--- BULLETS ---
+	///--- BULLETS (after phys pts) ---
 	UpdateBullets(dTime);
 	///--- PROPS ---
 	UpdateProps(dTime);
@@ -11489,6 +11489,9 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 		}
 	}
 
+	///----------------------------------------------------------------------------------
+	/// SHADOWS
+	///----------------------------------------------------------------------------------
 
 	///--- precomputed wall shadows over directional lights
 	AdditiveBlendingOFF(m_pDevice, NULL);
@@ -11502,9 +11505,24 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 	mapMesh.PaintShadowLayer();
 	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-	AdditiveBlendingON(m_pDevice, NULL);
-
 	
+	
+	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
+	if (pSprVS)
+		UTPainter().Begin(pSprVS, matWVP);
+	// bullet shadows
+	PaintBullets(K_LVL_RP_SHADOWS);
+
+	UTPainter().End();
+	
+	
+	///----------------------------------------------------------------------------------
+	/// LIGHTS
+	///----------------------------------------------------------------------------------
+	AdditiveBlendingON(m_pDevice, NULL);
+	UTGetShaderManager().SetVS(nullptr);
+	UTGetShaderManager().SetPS(nullptr);
+
 	///--- ambient light(s)
 	// paint all general ambient lights and area lights here
 	//#TODO: if we only have one ambiental per level then take color from g_wAmbientcolor
@@ -12829,19 +12847,17 @@ void CLevel::AddDecal_BloodSplat(D3DXVECTOR2 pos, bool bLarge, EActorClass eVict
 
 void CLevel::UpdatePhysicsPoints(float dTime)
 {
-	CLinkedPool<CPhysicsPoint2D>::CLinkedPoolNode *node = m_poolPhysPts.pListUsed.m_pNext;
+	CLinkedPool<CPhysicsPoint>::CLinkedPoolNode *node = m_poolPhysPts.pListUsed.m_pNext;
 	while (node != &m_poolPhysPts.pListUsed)
 	{
-		CLinkedPool<CPhysicsPoint2D>::CLinkedPoolNode *nextnode = node->m_pNext;
+		CLinkedPool<CPhysicsPoint>::CLinkedPoolNode *nextnode = node->m_pNext;
 		//update
-		CPhysicsPoint2D *point = &node->m_data;
-		D3DXVECTOR2 nextpos = point->pos + point->speed * dTime + point->accel * dTime * dTime;
-		//salvez in "vecForces" fortele care actioneaza asupra punctului (acceleratia gravitationala in cazul asta)
-		D3DXVECTOR2 vecForces = point->accel;
-		//check bounce
-		bool bWasContacting = point->bContacting;
-		//resetam contact data doar pe collision enabled ca sa nu "uite" datele de contact cand 
-		if (point->eCollType != CPhysicsPoint2D::K_COLLTYPE_NONE)
+		CPhysicsPoint*	point = &node->m_data;
+		// what forces act on the point
+		Vec3			vecForces = point->accel;
+		bool			bWasContacting = point->bContacting;
+		// reset contact only if collision enabled so it doesn't change external set contact data on no collision points
+		if (point->eCollType != CPhysicsPoint::K_COLLTYPE_NONE)
 		{
 			point->bContacting = false;
 			point->pContactShape = NULL;
@@ -12849,93 +12865,116 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 		point->bContactStarted = false;
 		//save last pos
 		point->pos_last = point->pos;
-		//checkcollision (if not static)
-		if (point->eCollType != CPhysicsPoint2D::K_COLLTYPE_NONE)
+
+		///--- integrator
+		//integrator
+		if (point->bIsStatic)
+			vecForces = g_Vec3Zero;
+		if (point->bIsStaticZ)
+			vecForces.z = 0.0f;
+
+		point->speed += vecForces * dTime;
+		point->pos += point->speed * dTime;
+
+		//daca iese din zona de joc	il seteaza ca static
+		if (!PointInRect(Vec3ToVec2XY(point->pos), m_levelAABB))
 		{
-			//#TODO: de luat in seama coliziunea dupa flagurile setate
-			D3DXVECTOR2 collisionPoint, collisionNormal;
+			point->bIsDead = true;
+		}
 
-			CCollisionShape* colShape = NULL;
-			if (point->eCollType == CPhysicsPoint2D::K_COLLTYPE_FAST)
+		//checkcollision (if not static)
+		if (point->eCollType != CPhysicsPoint::K_COLLTYPE_NONE)
+		{
+			Vec2 collisionPoint, collisionNormal;
+			Vec2 vFrom = Vec3ToVec2XY(point->pos_last);
+			Vec2 vTo = Vec3ToVec2XY(point->pos);
+
+			CCollisionShape* colShape = nullptr;
+			
+			// XY plane collision
+			bool bCollided = false;
+			// tiles collision
+			if (SegmentTilesIntersection(vFrom, vTo, collisionPoint, collisionNormal))
 			{
-				//fast collision computes collisions with visible colshapes
-				colShape = ColShape_Segment_Intersection_Arr(point->pos, nextpos, m_visibleList.logic_colShapes.m_pData, m_visibleList.logic_colShapes.Count(), &collisionPoint, &collisionNormal);
-			}
-			else if (point->eCollType == CPhysicsPoint2D::K_COLLTYPE_PRECISE)
-			{
-				//precise collision checks all collision shapes
-				colShape = ColShape_Segment_Intersection_Arr(point->pos, nextpos, m_visibleList.logic_colShapesExtended.m_pData, m_visibleList.logic_colShapesExtended.Count(), &collisionPoint, &collisionNormal);
+				bCollided = true;
 			}
 
-			if (colShape != NULL)
+			// collision with shapes (overwrite collpoint if closer)
+			//colShape = ColShape_Segment_Intersection_Arr(point->pos_last, point->pos, m_visibleList.logic_colShapes.m_pData, m_visibleList.logic_colShapes.Count(), &collisionPoint, &collisionNormal);
+
+			if (bCollided)
 			{
-				point->pos = collisionPoint;
+				point->pos.x = collisionPoint.x + collisionNormal.x;
+				point->pos.y = collisionPoint.y + collisionNormal.y;
 
 				point->bContacting = true;
 				point->pContactShape = colShape;
-				point->contactNormal = collisionNormal;
-				point->contactPos = collisionPoint;
+				point->contactNormal = Vec2ToVec3XY0(collisionNormal);
+				point->contactPos = Vec3(collisionPoint.x, collisionPoint.y, point->pos.z);
+				//check bounce or first contact - mainly for sounds and particles
+				if (bWasContacting == false)
+				{
+					point->bContactStarted = true;
+				}
+
+				if (point->bFlagPhysicsEnabled)
+				{
+					float fDot = MUVec3Dot(&point->speed, &point->contactNormal);
+					Vec3 Vn = point->contactNormal * fDot;
+					Vec3 Vt = point->speed - Vn;
+					//apply bounce and friction (for walls that is off for now)
+					//Vn *= point->fBounceF;
+					//Vt -= Vt * point->fFrictionF * dTime;
+					// compute final speed
+					point->speed = -Vn + Vt; 
+					//forces - reduc fortele care actioneaza pe punct doar la componenta tangentiala (anulez componenta normala) ?? de ce as face asta
+					//MUVec3Norm(&Vt, &Vt);
+					//vecForces = Vt * MUVec3Dot(&vecForces, &Vt);
+				}
+			}
+
+			// Minimum speed on Z when we consider the point stopped
+			const float fMinSpeedZ = 0.1f;
+
+			float fFloorH = 0.0f;
+
+			// Z floor collision at the end to bring it back up
+			if (point->pos.z <= fFloorH)
+			{
+				point->bContacting = true;
+				// get the point back above the floor
+				point->pos.z = fFloorH - point->pos.z;
+				point->speed.z *= -point->fBounceF;
+				if (fabs(point->speed.z * dTime) < fMinSpeedZ)
+				{
+					point->speed.z = 0.0f;
+					point->pos.z = fFloorH;
+					point->bIsStaticZ = true;
+				}
+				// apply friction
+				point->speed.x -= point->speed.x * point->fFrictionF * dTime;
+				point->speed.y -= point->speed.y * point->fFrictionF * dTime;
+
 				//check bounce or first contact - mainly for sounds and particles
 				if (bWasContacting == false)
 				{
 					//send bounce message
 					point->bContactStarted = true;
 				}
-				else //daca si frame-ul trecut a fost in contact verific sa fie static
-				{
-					if ((fabs(point->speed.x) < 0.1f) && (fabs(point->speed.y) < 0.1f))
-					{
-						point->bIsStatic = true;
-					}
-					else
-					{
-						point->bIsStatic = false;
-					}
-				}
 
-				if (point->bFlagPhysicsEnabled)
+				// is it almost stopped?
+				if (MUVec3AlmostZero(point->speed * dTime, 0.5f))
 				{
-					D3DXVECTOR2 Vn = collisionNormal * D3DXVec2Dot(&point->speed, &point->contactNormal);
-					D3DXVECTOR2 Vt = point->speed - Vn;
-					//apply bounce and friction
-					Vn *= point->fBounceF;
-					Vt -= Vt * point->fFrictionF * dTime;
-					//calculez viteza finala
-					point->speed = -Vn + Vt; //inversam Vn dupa coliziune
-					//forces - reduc fortele care actioneaza pe punct doar la componenta tangentiala (anulez componenta normala)
-					D3DXVec2Normalize(&Vt, &Vt);
-					vecForces = Vt * D3DXVec2Dot(&vecForces, &Vt);
+					point->bIsStatic = true;
+					point->speed = g_Vec3Zero;
+				}
+				else
+				{
+					point->bIsStatic = false;
 				}
 			}
 		}
 
-		//integrator
-		point->speed += vecForces * dTime;
-		//pe versiunea cu fizica modific pozitia la sfarsit, dupa rezolvarea sistemului
-		if (point->bFlagPhysicsEnabled)
-		{
-			point->pos += point->speed * dTime;
-			//reglaj pozitie dupa coliziune ca sa fie in punctul de contact (putin deasupra lui ca sa faca urmatoarele coliziuni bine)
-			if (point->bContactStarted)
-			{
-				//deplasez cu normala * dTime ca sa nu vibreze pe framerate foarte mare
-				point->pos = point->contactPos + (point->contactNormal * dTime);
-			}
-		}
-		else //pe versiunea fara fizica nu suprascriu pos
-		{
-			if (!point->bContacting)
-			{
-				point->pos = nextpos;
-			}
-			//nu am else pentru ca daca e contacting a fost setata corect pozitia pe punctul de contact
-		}
-
-		//daca iese din zona de joc	il seteaza ca static
-		if (!PointInRect(point->pos, m_levelAABB))
-		{
-			point->bIsDead = true;
-		}
 
 		//avansez pointer
 		node = nextnode;
@@ -13009,6 +13048,7 @@ void CLevel::AddProp(ESpecialPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed
 
 void CLevel::AddProp_Light(D3DXVECTOR2 pos, int nLightAnimIdx, float fDuration, float fFadeTime, DWORD color, float fScale)
 {
+	Vec3 vPos = Vec2ToVec3XY0(pos);
 	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.HireNode();
 	//set 
 	if (node != null)
@@ -13035,13 +13075,13 @@ void CLevel::AddProp_Light(D3DXVECTOR2 pos, int nLightAnimIdx, float fDuration, 
 
 		node->m_data.fTimer = 0.0f;
 		//physics
-		node->m_data.physPt->m_data.eCollType = CPhysicsPoint2D::K_COLLTYPE_NONE;
+		node->m_data.physPt->m_data.eCollType = CPhysicsPoint::K_COLLTYPE_NONE;
 		node->m_data.physPt->m_data.bFlagPhysicsEnabled = false;
 		node->m_data.physPt->m_data.bFlagRotationEnabled = false;
 
-		node->m_data.physPt->m_data.pos = pos;
-		node->m_data.physPt->m_data.speed = D3DXVECTOR2(0.0f, 0.0f);
-		node->m_data.physPt->m_data.accel = D3DXVECTOR2(0.0f, 0.0f);
+		node->m_data.physPt->m_data.pos = vPos;
+		node->m_data.physPt->m_data.speed = g_Vec3Zero;
+		node->m_data.physPt->m_data.accel = g_Vec3Zero;
 	}
 }
 
@@ -13070,13 +13110,13 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 
 		node->m_data.type = K_SPROP_EXPLOSION;
 		//physics
-		node->m_data.physPt->m_data.eCollType = CPhysicsPoint2D::K_COLLTYPE_NONE;
+		node->m_data.physPt->m_data.eCollType = CPhysicsPoint::K_COLLTYPE_NONE;
 		node->m_data.physPt->m_data.bFlagPhysicsEnabled = false;
 		node->m_data.physPt->m_data.bFlagRotationEnabled = false;
 
-		node->m_data.physPt->m_data.pos = pos;
-		node->m_data.physPt->m_data.speed = D3DXVECTOR2(0.0f, 0.0f);
-		node->m_data.physPt->m_data.accel = D3DXVECTOR2(0.0f, 0.0f);
+		node->m_data.physPt->m_data.pos = Vec2ToVec3XY0(pos);
+		node->m_data.physPt->m_data.speed = g_Vec3Zero;
+		node->m_data.physPt->m_data.accel = g_Vec3Zero;
 
 		//default
 		float fMaxDamage = explotemplate->fDamage;
@@ -13096,14 +13136,14 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			{
 				float fdx = m_rand.RandFloatSgn(150.0f);
 				float fdy = -100.0f - m_rand.RandFloat(150.0f);
-				AddProp(K_SPROP_SHRAPNEL_SMOKING, pos, &D3DXVECTOR2(fdx, fdy), &g_vecGravity);
+				AddProp(K_SPROP_SHRAPNEL_SMOKING, pos, &D3DXVECTOR2(fdx, fdy), &g_vecGravityOld);
 			}
 			//napalm
 			for (int ll = 0; ll < explotemplate->nNapalmCnt; ll++)
 			{
 				float fdx = m_rand.RandFloatSgn(60.0f);
 				float fdy = -100.0f - m_rand.RandFloat(120.0f);
-				AddProp(K_SPROP_FIRE_SOURCE, pos, &D3DXVECTOR2(fdx, fdy), &g_vecGravity);
+				AddProp(K_SPROP_FIRE_SOURCE, pos, &D3DXVECTOR2(fdx, fdy), &g_vecGravityOld);
 			}
 		}
 		else
@@ -13114,7 +13154,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 				float fdx = m_rand.RandFloatSgn(150.0f);
 				float fdy = -100.0f - m_rand.RandFloat(150.0f);
 				AddProp(K_SPROP_SHRAPNEL_SMOKING, pos + m_rand.RandD3DXVECTOR2sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y), 
-					&D3DXVECTOR2(fdx, fdy), &g_vecGravity);
+					&D3DXVECTOR2(fdx, fdy), &g_vecGravityOld);
 			}
 			//napalm
 			for (int ll = 0; ll < explotemplate->nNapalmCnt; ll++)
@@ -13122,7 +13162,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 				float fdx = m_rand.RandFloatSgn(60.0f);
 				float fdy = -100.0f - m_rand.RandFloat(120.0f);
 				AddProp(K_SPROP_FIRE_SOURCE, pos + m_rand.RandD3DXVECTOR2sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y), 
-					&D3DXVECTOR2(fdx, fdy), &g_vecGravity);
+					&D3DXVECTOR2(fdx, fdy), &g_vecGravityOld);
 			}
 		}
 
@@ -13219,7 +13259,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_GREEN_ROUND, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			for (int ll = 0; ll < 4; ll++)															  
 			{
-				AddProp(K_SPROP_GOO, pos, &D3DXVECTOR2(m_rand.RandFloatSgn(50.0f), -100.0f - m_rand.RandFloat(60.0f)), &g_vecGravity);
+				AddProp(K_SPROP_GOO, pos, &D3DXVECTOR2(m_rand.RandFloatSgn(50.0f), -100.0f - m_rand.RandFloat(60.0f)), &g_vecGravityOld);
 			}
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_GREEN_GOO_GROUND)
@@ -13227,7 +13267,7 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_GREEN_GROUND, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			for (int ll = 0; ll < 4; ll++)
 			{
-				AddProp(K_SPROP_GOO, pos, &D3DXVECTOR2(m_rand.RandFloatSgn(50.0f), -130.0f - m_rand.RandFloat(60.0f)), &g_vecGravity);
+				AddProp(K_SPROP_GOO, pos, &D3DXVECTOR2(m_rand.RandFloatSgn(50.0f), -130.0f - m_rand.RandFloat(60.0f)), &g_vecGravityOld);
 			}
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_BURN_DOT)
@@ -13635,15 +13675,17 @@ void CLevel::UpdateProps(float dTime)
 				if (prop->physPt->m_data.bIsStatic)
 				{
 					//put shell as decal
+					/*
 					if (randint(1000) < 200)
 					{
 						//daca collisionul are AI inseamna ca e lift sau ceva deci nu lasam sange
 						if ((prop->physPt->m_data.pContactShape != null) && (prop->physPt->m_data.pContactShape->AIstate == K_AI_STATE_UNDEFINED))
 							AddDecal(K_LVL_DECAL_LAYER_BACKOBJECTS, prop->physPt->m_data.pos, prop->spr.animationIdx, prop->spr.currentFrame, prop->spr.color);
 					}
+					*/
 					killprop = true;
 				}
-				else if (!PointInRect(prop->physPt->m_data.pos, camrect))
+				else if (!PointInRect(Vec3ProjVec2(prop->physPt->m_data.pos), camrect))
 				{
 					killprop = true;
 				}
@@ -13651,6 +13693,7 @@ void CLevel::UpdateProps(float dTime)
 			break;
 			case K_SPROP_FIRE_SOURCE:
 			{	
+				/*
 				if (!prop->physPt->m_data.bContacting)
 				{
 					if (m_Timers.Tick(50))
@@ -13673,6 +13716,7 @@ void CLevel::UpdateProps(float dTime)
 					D3DXVECTOR2 normal(0.0f, -1.0f);
 					ShootBullet(&wtempl->bulletTemplate, K_LVL_ACT_CLASS_TRAP, 0, prop->physPt->m_data.pos + normal, normal);
 				}
+				*/
 
 				prop->fTimer -= dTime;
 				if (prop->fTimer <= 0.0f)
@@ -13687,12 +13731,13 @@ void CLevel::UpdateProps(float dTime)
 				DWORD dwCol = 0xff671010;
 				if (prop->nSubType != 0) //zombies green blood
 					dwCol = 0xff82b600;
-
+				/*
 				if (m_Timers.Tick(50))
 				{
 					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_BLOOD, false, randint(5), &D3DXVECTOR2(prop->physPt->m_data.pos.x + randfloatsgn(5.0f), prop->physPt->m_data.pos.y + randfloatsgn(5.0f)), 
 						&D3DXVECTOR2(0.0f, 20.0f), &(prop->physPt->m_data.speed / (5.0f + randfloat(4.0f))), 0.6f, 1.0f, 0.0f, randfloat(PI), randfloatsgn(2.0f), 0.1f, 0.1f, dwCol, K_PART_LAYER_RT_BACK_NRM);
 				}
+				*/
 				//only stain at high velocities
 				if ((prop->physPt->m_data.bContactStarted) && (prop->physPt->m_data.contactNormal.y < 0.0f))
 				{
@@ -13710,7 +13755,7 @@ void CLevel::UpdateProps(float dTime)
 					*/
 				}
 
-				if ((prop->physPt->m_data.bIsStatic) || (!PointInRect(prop->physPt->m_data.pos, camrect_larger)))
+				if ((prop->physPt->m_data.bIsStatic) || (!PointInRect(Vec3ToVec2XY(prop->physPt->m_data.pos), camrect_larger)))
 				{
 					killprop = true;
 				}
@@ -13719,13 +13764,15 @@ void CLevel::UpdateProps(float dTime)
 
 			case K_SPROP_GOO:
 			{
+				/*
 				if (m_Timers.Tick(50))
 				{
 					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_BLOOD, false, randint(5), &D3DXVECTOR2(prop->physPt->m_data.pos.x + randfloatsgn(5.0f), prop->physPt->m_data.pos.y + randfloatsgn(5.0f)),
 						&D3DXVECTOR2(0.0f, 20.0f), &(prop->physPt->m_data.speed / (5.0f + randfloat(4.0f))), 0.6f, 1.0f, 0.0f, randfloat(PI), randfloatsgn(2.0f), 0.1f, 0.1f, 0xff00ff00, K_PART_LAYER_RT_BACK_NRM);
 				}
+				*/
 
-				if ((prop->physPt->m_data.bIsStatic) || (!PointInRect(prop->physPt->m_data.pos, camrect_larger)))
+				if ((prop->physPt->m_data.bIsStatic) || (!PointInRect(Vec3ToVec2XY(prop->physPt->m_data.pos), camrect_larger)))
 				{
 					killprop = true;
 //					SND_PLAY_POSITIONAL_RAND2(SNDIDX_GIBLET1, SNDIDX_GIBLET2, prop->physPt->m_data.pos);
@@ -13747,6 +13794,7 @@ void CLevel::UpdateProps(float dTime)
 						NULL, &(vDir * (5.0f + randfloat(5.0f))), 1.0f, 1.0f, 0.0f, fAng, 0.0f, 0.0f, 0.0f, 0xaaffffff, K_PART_LAYER_RT_FRONT_NRM);
 				}
 				//genereaza particule de foc doar cat e roshu
+				/*
 				if (node->m_data.fTimer > 0.0f)
 				{
 					node->m_data.fTimer -= dTime;
@@ -13773,6 +13821,7 @@ void CLevel::UpdateProps(float dTime)
 					g_particlesMgr.AddParticle(nAnmId, true, 0, &prop->physPt->m_data.pos,
 						NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xaaffffff, K_PART_LAYER_RT_FRONT_NRM);
 				}
+				*/
 			}
 			break;
 			case K_SPROP_LIGHT:
@@ -13831,13 +13880,16 @@ void CLevel::PaintProps()
 			break;
 			case K_SPROP_SHELL:
 			{
+				/*
 				node->m_data.spr.pos = node->m_data.physPt->m_data.pos;
 				node->m_data.spr.currentFrame = node->m_data.nSubType * 4 + (int(node->m_data.spr.pos.x * 3.0f) % 4);
 				node->m_data.spr.paint_firstModule(&m_sprProps);
+				*/
 			}
 			break;
 			case K_SPROP_SHRAPNEL_SMOKING:
 			{
+				/*
 				node->m_data.spr.pos = node->m_data.physPt->m_data.pos;
 				
 				node->m_data.spr2.pos = node->m_data.physPt->m_data.pos;
@@ -13845,13 +13897,16 @@ void CLevel::PaintProps()
 
 				node->m_data.spr.paint_firstModule(&m_sprProps);
 				node->m_data.spr2.paint_firstModule(&m_sprProps);
+				*/
 			}
 			break;
 			case K_SPROP_GOO:
 			case K_SPROP_MEAT:
 			{
+				/*
 				node->m_data.spr.pos = node->m_data.physPt->m_data.pos;
 				node->m_data.spr.paint_firstModule(&m_sprProps);
+				*/
 			}
 			break;
 		}
@@ -13896,11 +13951,11 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float f
 			CAABB genbox(pos.x - 10.0f, pos.y - 15.0f, pos.x + 10.0f, pos.y);
 			for (int ll = 0; ll < 6; ll++)
 			{
-				AddProp(K_SPROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f), -130.0f - randfloat(100.0f)), &g_vecGravity, 1);
+				AddProp(K_SPROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f), -130.0f - randfloat(100.0f)), &g_vecGravityOld, 1);
 			}
 			//goes straight down to stain the floor
-			AddProp(K_SPROP_MEAT, D3DXVECTOR2(pos.x, pos.y - 10.0f), &D3DXVECTOR2(200.0f, 50.0f), &g_vecGravity, 1);
-			AddProp(K_SPROP_MEAT, D3DXVECTOR2(pos.x, pos.y - 10.0f), &D3DXVECTOR2(-200.0f, 50.0f), &g_vecGravity, 1);
+			AddProp(K_SPROP_MEAT, D3DXVECTOR2(pos.x, pos.y - 10.0f), &D3DXVECTOR2(200.0f, 50.0f), &g_vecGravityOld, 1);
+			AddProp(K_SPROP_MEAT, D3DXVECTOR2(pos.x, pos.y - 10.0f), &D3DXVECTOR2(-200.0f, 50.0f), &g_vecGravityOld, 1);
 			//human blood gibs
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff1a3423, K_PART_LAYER_RT_FRONT_NRM);
 		}
@@ -13916,7 +13971,7 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float f
 			//particule sparkle
 			for (int kk = 0; kk < 20; kk++)
 			{
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, randint(2), &D3DXVECTOR2(pos.x + randfloatsgn(fSize), pos.y + randfloatsgn(fSize)), &g_vecGravity, &D3DXVECTOR2(randfloatsgn(60.0f), -10.0f - randfloat(40.0f)), 0.2f + randfloat(0.4f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 1.5f, kk * 0.025f);
+				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, randint(2), &D3DXVECTOR2(pos.x + randfloatsgn(fSize), pos.y + randfloatsgn(fSize)), &g_vecGravityOld, &D3DXVECTOR2(randfloatsgn(60.0f), -10.0f - randfloat(40.0f)), 0.2f + randfloat(0.4f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 1.5f, kk * 0.025f);
 			}
 		}
 		break;
