@@ -72,7 +72,6 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	node->m_data.physPt->m_data.accel = g_vecGravity;
 	node->m_data.physPt->m_data.fBounceF = 0.9f;
 	//default states
-	node->m_data.physPt->m_data.eCollType = CPhysicsPoint::K_COLLTYPE_FAST;
 	node->m_data.physPt->m_data.bFlagPhysicsEnabled = true;
 	//tail
 	node->m_data.szTailSize.w = 0.0f;

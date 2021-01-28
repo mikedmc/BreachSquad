@@ -12856,12 +12856,10 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 		// what forces act on the point
 		Vec3			vecForces = point->accel;
 		bool			bWasContacting = point->bContacting;
-		// reset contact only if collision enabled so it doesn't change external set contact data on no collision points
-		if (point->eCollType != CPhysicsPoint::K_COLLTYPE_NONE)
-		{
-			point->bContacting = false;
-			point->pContactShape = NULL;
-		}
+
+		point->contactType = K_COLLTYPE_NONE;
+		point->bContacting = false;
+		point->pContactShape = NULL;
 		point->bContactStarted = false;
 		//save last pos
 		point->pos_last = point->pos;
@@ -12876,31 +12874,36 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 		point->speed += vecForces * dTime;
 		point->pos += point->speed * dTime;
 
-		//daca iese din zona de joc	il seteaza ca static
+		// kill it when it gets outside the play area
 		if (!PointInRect(Vec3ToVec2XY(point->pos), m_levelAABB))
 		{
 			point->bIsDead = true;
 		}
 
-		//checkcollision (if not static)
-		if (point->eCollType != CPhysicsPoint::K_COLLTYPE_NONE)
+		///--- check collisions
 		{
 			Vec2 collisionPoint, collisionNormal;
 			Vec2 vFrom = Vec3ToVec2XY(point->pos_last);
 			Vec2 vTo = Vec3ToVec2XY(point->pos);
 			Vec2 vMove = vTo - vFrom;
 
+			eRetContactType contactT = K_COLLTYPE_NONE;
 			CCollisionShape* colShape = nullptr;
 			
 			// XY plane collision
 			bool bCollided = false;
+			float fMinContactDistance = 100000.0f;
 			if ((vMove.x != 0.0f) && (vMove.y != 0.0f))
 			{
 				// tiles collision
 				if (point->nFlagsCollision & K_LVL_PHYSP_COLLFLAG_TILES)
 				{
 					if (SegmentTilesIntersection(vFrom, vTo, collisionPoint, collisionNormal))
+					{
 						bCollided = true;
+						contactT = K_COLLTYPE_TILE;
+						fMinContactDistance = MUVec2Len(&(vFrom - collisionPoint));
+					}
 				}
 
 				// collision with shapes 
@@ -12921,11 +12924,7 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 				point->pContactShape = colShape;
 				point->contactNormal = Vec2ToVec3XY0(collisionNormal);
 				point->contactPos = Vec3(collisionPoint.x, collisionPoint.y, point->pos.z);
-				//check bounce or first contact - mainly for sounds and particles
-				if (bWasContacting == false)
-				{
-					point->bContactStarted = true;
-				}
+				point->contactType = contactT;
 
 				if (point->bFlagPhysicsEnabled)
 				{
@@ -12935,11 +12934,15 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 					// compute final speed
 					point->speed = -Vn + Vt; 
 				}
+				else
+				{
+					point->speed = g_Vec3Zero;
+				}
 			}
 
 			// Minimum speed on Z when we consider the point stopped
 			const float fMinSpeedZ = 0.1f;
-
+			// Current floor height. #TODO: should get it from each tile
 			float fFloorH = 0.0f;
 
 			// Z floor collision at the end to bring it back up
@@ -12947,27 +12950,42 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 			if ((point->accel.z != 0.0f) && (point->pos.z <= fFloorH))
 			{
 				point->bContacting = true;
+				// walls collisions have priority so only set normals if no other collision happened
+				if (!bCollided)
+				{
+					point->contactNormal = Vec3(0.0f, 0.0f, -1.0f);
+					point->contactPos = point->pos;
+					point->pContactShape = nullptr;
+					point->contactType = K_COLLTYPE_FLOOR;
+				}
 				// get the point back above the floor
 				point->pos.z = fFloorH - point->pos.z;
-				// make sure it always ricochets upwards
-				point->speed.z = fabs(point->speed.z * point->fBounceF);
-				
-				if (fabs(point->speed.z * dTime) < fMinSpeedZ)
-				{
-					point->speed.z = 0.0f;
-					point->pos.z = fFloorH;
-					point->bIsStaticZ = true;
-				}
-				// apply friction
-				point->speed.x -= point->speed.x * point->fFrictionF * dTime;
-				point->speed.y -= point->speed.y * point->fFrictionF * dTime;
 
-				//check bounce or first contact - mainly for sounds and particles
-				if (bWasContacting == false)
+				if (point->bFlagPhysicsEnabled)
 				{
-					//send bounce message
-					point->bContactStarted = true;
+					// make sure it always ricochets upwards
+					point->speed.z = fabs(point->speed.z * point->fBounceF);
+
+					if (fabs(point->speed.z * dTime) < fMinSpeedZ)
+					{
+						point->speed.z = 0.0f;
+						point->pos.z = fFloorH;
+						point->bIsStaticZ = true;
+					}
+					// apply friction
+					point->speed.x -= point->speed.x * point->fFrictionF * dTime;
+					point->speed.y -= point->speed.y * point->fFrictionF * dTime;
 				}
+				else
+				{
+					point->speed = g_Vec3Zero;
+				}
+			}
+
+			//check bounce or first contact - mainly for sounds and particles
+			if (bWasContacting == false)
+			{
+				point->bContactStarted = true;
 			}
 
 			// is it almost stopped?
@@ -12980,7 +12998,6 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 			{
 				point->bIsStatic = false;
 			}
-
 		}
 
 
@@ -13083,7 +13100,6 @@ void CLevel::AddProp_Light(D3DXVECTOR2 pos, int nLightAnimIdx, float fDuration, 
 
 		node->m_data.fTimer = 0.0f;
 		//physics
-		node->m_data.physPt->m_data.eCollType = CPhysicsPoint::K_COLLTYPE_NONE;
 		node->m_data.physPt->m_data.bFlagPhysicsEnabled = false;
 		node->m_data.physPt->m_data.bFlagRotationEnabled = false;
 
@@ -13118,7 +13134,6 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 
 		node->m_data.type = K_SPROP_EXPLOSION;
 		//physics
-		node->m_data.physPt->m_data.eCollType = CPhysicsPoint::K_COLLTYPE_NONE;
 		node->m_data.physPt->m_data.bFlagPhysicsEnabled = false;
 		node->m_data.physPt->m_data.bFlagRotationEnabled = false;
 

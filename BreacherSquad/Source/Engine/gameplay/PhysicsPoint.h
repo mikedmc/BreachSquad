@@ -11,6 +11,15 @@ class CCollisionShape;
 /// used for simulationg bullets and objects that collide with the level
 ///--------------------------------------------------------------------------
 
+// Type of returned collision
+enum eRetContactType {
+	K_COLLTYPE_NONE = 0,
+	K_COLLTYPE_TILE,	
+	K_COLLTYPE_BOX,
+	K_COLLTYPE_FLOOR,
+};
+
+
 ///--- collision flags ---
 // collides with walls (tiles)
 #define K_LVL_PHYSP_COLLFLAG_TILES	1
@@ -21,15 +30,9 @@ class CCollisionShape;
 
 class CPhysicsPoint {
 public:
-	enum eCollisionType {
-		K_COLLTYPE_NONE = 0,	// no collision
-		K_COLLTYPE_FAST,		// fast - collides with visible collshapes
-		K_COLLTYPE_PRECISE,		// precise - collides with ALL collshapes (slower)
-	};
 	
 	bool				bFlagRotationEnabled;				// Set to enable rotation updates
-	eCollisionType		eCollType;							// Set to enable collision detection
-	bool				bFlagPhysicsEnabled;				// Set to enable physics (only with FlagCollision Enabled) - bounce, friction etc
+	bool				bFlagPhysicsEnabled;				// Set to enable physics (only with FlagCollision Enabled) - bounce, friction etc. false-stops on collision
 
 	int					nFlagsCollision;					// Collision checking flags
 
@@ -46,6 +49,8 @@ public:
 	bool				bIsStatic;							// Did it completely stop?
 	bool				bIsStaticZ;							// Did it stop on Z axis?
 	bool				bIsDead;							// Tells if we must kill it as it exited the play area. #TODO: necessary?
+
+	eRetContactType		contactType;						// returns type of current/last collision (use it when bContacting is true)
 	Vec3				contactNormal;						// Last contact normal
 	Vec3				contactPos;							// Last contact pos
 	CCollisionShape*	pContactShape;						// Contacting shape/type #TODO: add collision type with additional data in it
@@ -53,7 +58,7 @@ public:
 	float				fBounceF;							// floor bounce restitution factor
 	float				fFrictionF;							// floor friction
 
-	CPhysicsPoint() : eCollType(K_COLLTYPE_NONE), bContacting(false), bContactStarted(false), bIsStatic(false), nFlagsCollision(K_LVL_PHYSP_COLLFLAG_ALL),
+	CPhysicsPoint() : contactType(K_COLLTYPE_NONE), bContacting(false), bContactStarted(false), bIsStatic(false), nFlagsCollision(K_LVL_PHYSP_COLLFLAG_ALL),
 		bFlagRotationEnabled(false), fAngle(0.0f), fAngularSpeed(0.0f), fAngularAccel(0.0f), bIsStaticZ(false),
 		bFlagPhysicsEnabled(false), fBounceF(K_LVL_PHYSPT_DEFAULT_FLOOR_BOUNCE), fFrictionF(K_LVL_PHYSPT_DEFAULT_FLOOR_FRICTION),
 		bIsDead(false), pContactShape(NULL)

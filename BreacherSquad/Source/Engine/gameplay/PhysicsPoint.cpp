@@ -3,7 +3,7 @@
 
 void CPhysicsPoint::Init()
 {
-	eCollType = K_COLLTYPE_NONE;
+	contactType = K_COLLTYPE_NONE;
 	bContacting = false;
 	bIsStatic = false;
 	bIsStaticZ = false;
