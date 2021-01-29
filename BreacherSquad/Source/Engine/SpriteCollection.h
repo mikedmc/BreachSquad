@@ -115,6 +115,23 @@ public:
 };
 
 
+// Identifier for a frame in an animation
+struct scFrameID
+{
+	int animIdx;
+	int frameIdx;
+
+	scFrameID() : 
+		animIdx(-1), frameIdx(0)
+	{}
+
+	void Init(int nAnimIdx, int nFrameIdx)
+	{
+		animIdx = nAnimIdx;
+		frameIdx = nFrameIdx;
+	}
+};
+
 /*!
  * \class CSpriteCollection
  *
@@ -154,7 +171,8 @@ public:
 
 	// Returns BBOX set from editor
 	inline RECTXYWH					GetAFrameBBox(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox; }
-	inline UINT32					GetAFrameFlag(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->flags; }
+	inline UINT32					GetAFrameFlags(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->flags; }
+	inline UINT32					GetAnimFlags(int animIdx) { return Animations[animIdx]->flags; }
 	// Returns real BBOX computed at load time
 	inline RECTXYWH					GetAFrameBBox_real(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox_real; }
 	RECTXYWH						GetModuleRect(int animIdx, int frameIdx, int moduleIdx);

@@ -17,8 +17,8 @@ public:
 
 public:
 	CSpriteCollection*		pSprCol;					// Pointer to sprite collection
-	int						animID;						// Animation index
-	int						frameID;					// Frame index in sprite collection
+	int						animIdx;						// Animation index
+	int						frameIdx;					// Frame index in sprite collection
 	Vec2					pos;	
 	float					rotation;
 	Vec2					scale;
@@ -32,7 +32,7 @@ public:
 	CSpr(CSpriteCollection* pSpriteColl, int animIdx, float pX, float pY);
 	CSpr(CSpriteCollection* pSpriteColl, int animIdx, Vec2 vPos);
 
-	void					Init(CSpriteCollection *sprCollection, int animIdx, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
+	void					Init(CSpriteCollection *sprCollection, int nAnimIdx, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
 	void					Init(CSpriteCollection *sprCollection, CHAR* strAnimID, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
 
 	void					SetAnim(int animIdx, int frameIdx = 0);

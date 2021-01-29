@@ -11408,6 +11408,10 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 	PPIXELSHADER pPShader = null;
 
 	D3DXMATRIXA16 matWVP = matView * (*matProj);
+	// begin the painter
+	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
+	if (pSprVS)
+		UTPainter().Begin(pSprVS, matWVP);
 
 
 #if defined(_DEBUG) || defined(DEBUG)
@@ -11474,7 +11478,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 	UTGetShaderManager().SetVS(nullptr);
 	UTGetShaderManager().SetPS(nullptr);
 
-	///--- directional lights under shadow
+	///--- directional lights (under shadow)
 	// directional light without shader, doesn't take into account the object normals
 	m_pDevice->SetTexture(0, nullptr);
 	m_pDevice->SetTexture(1, nullptr);
@@ -11498,34 +11502,26 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 	scTexture* pShadowsTex = m_sprLights.GetTextureByAnim(ANM_LIGHTS_SPR_SHADOWS, 0, 0);
 	if (pShadowsTex)
 		m_pDevice->SetTexture(0, pShadowsTex->pTex);
-	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 	//#HINT: UpdateVisibility is optional as it was done in the previous colors render pass
 	mapMesh.UpdateVisibility(camrect);
 	mapMesh.PaintShadowLayer();
-	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-	
-	
-	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
-	if (pSprVS)
-		UTPainter().Begin(pSprVS, matWVP);
-	// bullet shadows
-	PaintBullets(K_LVL_RP_SHADOWS);
-
-	UTPainter().End();
-	
 	
 	///----------------------------------------------------------------------------------
 	/// LIGHTS
 	///----------------------------------------------------------------------------------
 	AdditiveBlendingON(m_pDevice, NULL);
-	UTGetShaderManager().SetVS(nullptr);
-	UTGetShaderManager().SetPS(nullptr);
+
+	///--- bullet lights
+	// bullet shadows
+	PaintBullets(K_LVL_RP_LIGHTS);
+	UTPainter().Flush();
+	
 
 	///--- ambient light(s)
 	// paint all general ambient lights and area lights here
 	//#TODO: if we only have one ambiental per level then take color from g_wAmbientcolor
+	UTGetShaderManager().SetVS(nullptr);
+	UTGetShaderManager().SetPS(nullptr);
 	m_pDevice->SetTexture(0, nullptr);
 	m_pDevice->SetTexture(1, nullptr);
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
@@ -11651,12 +11647,14 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, false);
 	}
 
+	UTGetShaderManager().SetVS(nullptr);
+	UTGetShaderManager().SetPS(nullptr);
 
 
 	AdditiveBlendingOFF(m_pDevice, NULL);
+	// end sprite painter
+	UTPainter().End();
 
-	UTGetShaderManager().SetVS(nullptr);
-	UTGetShaderManager().SetPS(nullptr);
 
 	return K_OP_OK;
 }
@@ -11697,13 +11695,13 @@ OPRESULT CLevel::RenderPass_Composition(Mat* matProj)
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 
-	///--- paint lights ---
+	///--- compose scene from normals and color ---
 	PVERTEXSHADER pVShader = null;
 	PPIXELSHADER pPShader = null;
 
 	D3DXMATRIXA16 matWVP = matView * (*matProj);
 
-	///--- build RT rect ---
+	//--- build RT rect ---
 	_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
 	vul.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMin.y, 0.0f);
 	vur.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMin.y, 0.0f);
@@ -11728,29 +11726,22 @@ OPRESULT CLevel::RenderPass_Composition(Mat* matProj)
 	if (pRTlights != null)
 		m_pDevice->SetTexture(1, pRTlights->m_pRTTexture);
 
-	///--- set vertex shader
 	pVShader = UTGetShaderManager().GetVShaderByName(L"VS_COMPOSITION");
 	m_pDevice->SetVertexShader(pVShader);
-
 	m_pDevice->SetVertexDeclaration(UTGetShaderManager()._VERTEX_PNCT4T4_decl);
 	m_pDevice->SetVertexShaderConstantF(0, (float*)&matWVP, 4);
 
-	///--- set pixel shader
 	pPShader = UTGetShaderManager().GetPShaderByName(L"PS_COMPOSITION");
 	m_pDevice->SetPixelShader(pPShader);
-	//set Pshader constants
+	// set Pshader constants
 	float fGamma = 2.2f;
 	float fConstData[][4] = {
 		// x:gamma, y:1.0f/gamma
 		{ fGamma, 1.0f / fGamma, ct_fLightMul, ct_fColorDodge}
 	};
 	m_pDevice->SetPixelShaderConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
-
-
-	//m_pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
 	m_pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof(_VERTEX_PNCT4T4));
-
-
+	// remove VS PS
 	m_pDevice->SetVertexShader(nullptr);
 	m_pDevice->SetPixelShader(nullptr);
 

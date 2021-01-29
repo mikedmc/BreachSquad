@@ -10,11 +10,11 @@ CSpritePainter* CSpr::s_pSP = &UTPainter();
 CSpr::CSpr() 
 {
 	pSprCol = nullptr;
-	animID = 0;
+	animIdx = 0;
 	pos.x = 0.0f;
 	pos.y = 0.0f;
 	fTime = 0.0f;
-	frameID = 0;
+	frameIdx = 0;
 	animStatus = ANIM_JUST_STARTED;
 	color = 0xffffffff;
 	scale = Vec2(1.0f, 1.0f);
@@ -24,11 +24,11 @@ CSpr::CSpr()
 CSpr::CSpr(CSpriteCollection* pSpriteColl, int animIdx, float pX, float pY)
 {
 	pSprCol = pSpriteColl;
-	animID = animIdx;
+	animIdx = animIdx;
 	pos.x = pX;
 	pos.y = pY;
 	fTime = 0.0f;
-	frameID = 0;
+	frameIdx = 0;
 	animStatus = ANIM_JUST_STARTED;
 	color=0xffffffff;
 	rotation = 0.0f;
@@ -38,10 +38,10 @@ CSpr::CSpr(CSpriteCollection* pSpriteColl, int animIdx, float pX, float pY)
 CSpr::CSpr(CSpriteCollection* pSpriteColl, int animIdx, Vec2 vPos)
 {
 	pSprCol = pSpriteColl;
-	animID = animIdx;
+	animIdx = animIdx;
 	pos = vPos;
 	fTime = 0.0f;
-	frameID = 0;
+	frameIdx = 0;
 	animStatus = ANIM_JUST_STARTED;
 	color = 0xffffffff;
 	rotation = 0.0f;
@@ -51,23 +51,23 @@ CSpr::CSpr(CSpriteCollection* pSpriteColl, int animIdx, Vec2 vPos)
 CSpr::CSpr(const CSpr& sprite)
 {
 	pSprCol = sprite.pSprCol;
-	animID = sprite.animID;
+	animIdx = sprite.animIdx;
 	pos = sprite.pos;
 	fTime = sprite.fTime;
-	frameID = sprite.frameID;
+	frameIdx = sprite.frameIdx;
 	animStatus = sprite.animStatus;
 	color = sprite.color;
 	scale = sprite.scale;
 	rotation = sprite.rotation;
 }
 
-void CSpr::Init(CSpriteCollection *sprCollection, int animIdx, Vec2 vPos, int nframeIdx, DWORD nColor, float fRotation, Vec2 vScale)
+void CSpr::Init(CSpriteCollection *sprCollection, int nAnimIdx, Vec2 vPos, int nframeIdx, DWORD nColor, float fRotation, Vec2 vScale)
 {
 	pSprCol = sprCollection;
-	animID = animIdx;
+	animIdx = nAnimIdx;
 	pos = vPos;
 	fTime = 0.0f;
-	frameID = nframeIdx;
+	frameIdx = nframeIdx;
 	animStatus = ANIM_JUST_STARTED;
 	color = nColor;
 	scale = vScale;
@@ -76,8 +76,8 @@ void CSpr::Init(CSpriteCollection *sprCollection, int animIdx, Vec2 vPos, int nf
 
 void CSpr::Init(CSpriteCollection *sprCollection, CHAR* strAnimID, Vec2 vPos, int nframeIdx, DWORD nColor, float fRotation, Vec2 vScale)
 {
-	animID = sprCollection->GetAnimationIdxByName(strAnimID);
-	if (animID < 0)
+	animIdx = sprCollection->GetAnimationIdxByName(strAnimID);
+	if (animIdx < 0)
 	{
 		LOG("Sprite::Init: Animation [%s] not found!", strAnimID);
 		return;
@@ -86,7 +86,7 @@ void CSpr::Init(CSpriteCollection *sprCollection, CHAR* strAnimID, Vec2 vPos, in
 	pSprCol = sprCollection;
 	pos = vPos;
 	fTime = 0.0f;
-	frameID = nframeIdx;
+	frameIdx = nframeIdx;
 	animStatus = ANIM_JUST_STARTED;
 	color = nColor;
 	scale = vScale;
@@ -95,16 +95,16 @@ void CSpr::Init(CSpriteCollection *sprCollection, CHAR* strAnimID, Vec2 vPos, in
 
 void CSpr::SetAnim(int animIdx, int frameIdx)
 {
-	animID = animIdx;
+	animIdx = animIdx;
 
 	fTime = 0.0f;
-	frameID = frameIdx;
+	frameIdx = frameIdx;
 	animStatus = ANIM_JUST_STARTED;
 }
 
 void CSpr::SetFrame(int nFrameIdx)
 {
-	frameID = nFrameIdx;
+	frameIdx = nFrameIdx;
 	fTime = 0.0f;
 	animStatus = ANIM_PLAYING;
 }
@@ -112,28 +112,28 @@ void CSpr::SetFrame(int nFrameIdx)
 //seteaza animatia doar daca e alta
 void CSpr::SetAnimOnce(int animIdx, int frameIdx) 
 {
-	if((animIdx == animID) || (animIdx < 0))
+	if((animIdx == animIdx) || (animIdx < 0))
 		return;
 
-	animID = animIdx;
+	animIdx = animIdx;
 
 	fTime = 0.0f;
-	frameID = frameIdx;
+	frameIdx = frameIdx;
 	animStatus = ANIM_JUST_STARTED;
 }
 
 
 void CSpr::SetAnim(CHAR* strAnimID, int frameIdx)
 {
-	animID = pSprCol->GetAnimationIdxByName(strAnimID);
-	if (animID < 0)
+	animIdx = pSprCol->GetAnimationIdxByName(strAnimID);
+	if (animIdx < 0)
 	{
 		LOG("Sprite::SetAnim: Animation [%s] not found!", strAnimID);
 		return;
 	}
 
 	fTime = 0.0f;
-	frameID = frameIdx;
+	frameIdx = frameIdx;
 	animStatus = ANIM_JUST_STARTED;
 }
 
@@ -142,13 +142,13 @@ UINT32 CSpr::Update(float dTime, bool updatePos)
 {
 	UINT32 retAFrameFlag = 0;
 
-	_ASSERT(animID < pSprCol->Animations.Count());
-	_ASSERT(frameID < pSprCol->Animations[animID]->aframesNo);
+	_ASSERT(animIdx < pSprCol->Animations.Count());
+	_ASSERT(frameIdx < pSprCol->Animations[animIdx]->aframesNo);
 
 	if (animStatus == ANIM_FRAMELOCK)
 		return retAFrameFlag;
 
-	int aframeID = pSprCol->Animations[animID]->aframesIdx[frameID];
+	int aframeID = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 	//pentru animatiile abia setate imi intoarce aframe flag-ul frame-ului curent
 	if (animStatus == ANIM_JUST_STARTED)
 	{
@@ -171,28 +171,28 @@ UINT32 CSpr::Update(float dTime, bool updatePos)
 		}
 
 		fTime -= float(pSprCol->AFrames[aframeID]->duration) / SPR_ED_TIMELINE;
-		frameID++;
+		frameIdx++;
 
-		if (frameID >= pSprCol->Animations[animID]->aframesNo) 
+		if (frameIdx >= pSprCol->Animations[animIdx]->aframesNo) 
 		{
-			if ( (pSprCol->Animations[animID]->flags & ANIMATION_FLAG_LOOPED) == 0 )
+			if ( (pSprCol->Animations[animIdx]->flags & ANIMATION_FLAG_LOOPED) == 0 )
 			{ //daca e play once
-				frameID--; //pozitioneaza pe ultimul frame
+				frameIdx--; //pozitioneaza pe ultimul frame
 				animStatus = ANIM_FRAMELOCK; //face lock pe ultimul frame
 				//get new flag
-				aframeID = pSprCol->Animations[animID]->aframesIdx[frameID];
+				aframeID = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 			}
 			else 
 			{ //daca e looping
-				frameID = 0;
+				frameIdx = 0;
 				animStatus = ANIM_LOOPRESET;
 				//get new flag
-				aframeID = pSprCol->Animations[animID]->aframesIdx[frameID];
+				aframeID = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 			}
 		}
 		else
 		{
-			aframeID = pSprCol->Animations[animID]->aframesIdx[frameID];
+			aframeID = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 		}
 		//set aframe flag for return
 		retAFrameFlag = pSprCol->AFrames[aframeID]->flags;
@@ -202,10 +202,10 @@ UINT32 CSpr::Update(float dTime, bool updatePos)
 
 void CSpr::Paint()
 {
-	_ASSERT(animID < pSprCol->Animations.Count());
-	_ASSERT(frameID < pSprCol->Animations[animID]->aframesNo);
+	_ASSERT(animIdx < pSprCol->Animations.Count());
+	_ASSERT(frameIdx < pSprCol->Animations[animIdx]->aframesNo);
 	//nu am luat in considerare inca flagsurile
-	int aframeIdx = pSprCol->Animations[animID]->aframesIdx[frameID];
+	int aframeIdx = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 	for( int ii = 0; ii < pSprCol->AFrames[aframeIdx]->fmodulesNo; ii++ )
 	{
 		scFModule* mod = pSprCol->FModules[pSprCol->AFrames[aframeIdx]->fmodulesIdx[ii]];
@@ -220,9 +220,9 @@ void CSpr::Paint()
 
 void CSpr::PaintModule(int moduleIdx)
 {
-	_ASSERT(animID < pSprCol->Animations.Count());
-	_ASSERT(frameID < pSprCol->Animations[animID]->aframesNo);
-	int aframeIdx = pSprCol->Animations[animID]->aframesIdx[frameID];
+	_ASSERT(animIdx < pSprCol->Animations.Count());
+	_ASSERT(frameIdx < pSprCol->Animations[animIdx]->aframesNo);
+	int aframeIdx = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 	_ASSERT(moduleIdx < pSprCol->AFrames[aframeIdx]->fmodulesNo); 
 
 	scFModule* mod = pSprCol->FModules[pSprCol->AFrames[aframeIdx]->fmodulesIdx[moduleIdx]];
@@ -232,9 +232,9 @@ void CSpr::PaintModule(int moduleIdx)
 
 void CSpr::PaintModule_texOverride(int moduleIdx, int texIdxOffset)
 {
-	_ASSERT(animID < pSprCol->Animations.Count());
-	_ASSERT(frameID < pSprCol->Animations[animID]->aframesNo);
-	int aframeIdx = pSprCol->Animations[animID]->aframesIdx[frameID];
+	_ASSERT(animIdx < pSprCol->Animations.Count());
+	_ASSERT(frameIdx < pSprCol->Animations[animIdx]->aframesNo);
+	int aframeIdx = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 	_ASSERT(moduleIdx < pSprCol->AFrames[aframeIdx]->fmodulesNo);
 
 	scFModule* mod = pSprCol->FModules[pSprCol->AFrames[aframeIdx]->fmodulesIdx[moduleIdx]];

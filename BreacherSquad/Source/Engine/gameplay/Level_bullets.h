@@ -97,37 +97,34 @@ const CStringHash EBulletTypeNames[] =
 	L"BULLET_GOO"
 };
 
-/*!
- *	Structure used to return data from HitActor function
- */
+//	Structure used to return data from HitActor function
 struct CBulletHitReturnData {
-	float fPointsTaken;
-	EMaterialType eMaterial;
-	bool	bPenetratedShield;
-	bool	bArmorHit;			//kills shotgun penetrating bullets
-	bool	bKilledTarget;
+	float			fPointsTaken;
+	EMaterialType	eMaterial;
+	bool			bPenetratedShield;
+	bool			bArmorHit;			// kills shotgun penetrating bullets
+	bool			bKilledTarget;
 };
 
-//clasa de bullet template este folosita in Weapon Template cand incarca datele fiecarei arme iar apoi in ShootBullet ca sa stie ce trage
 class CBulletTemplate {
 public:
-	EBulletType		nType;					//tipul glontului din cele predefinite (-1 = not set)
-	EBulletGroup	nGroup;					//bullet group (classic, grenade, etc hardcoded)
+	EBulletType		nType;			
+	EBulletGroup	nGroup;			// bullet group (classic, grenade, etc hardcoded)
 
-	float	fDamage;				//cat damage poarta glontul
-	float	fDamageObjects;			//bullet damage for objects (mixed with BULLET_FLAG_CAN_BREAK_DOORS)
-	float	fDamageLossPPx;			//cat damage pierde in functie de distanta parcursa in pixeli (0.0f - nu pierde din damage)
-	float	fSelfDamageMultiplier;	//cat damage din damage-ul dat victimei se scade din damage-ul glontului (default 1.0f adica tot)
-	float	fCriticalHitChance;		//how probable it is to do a critical hit
-	float	fLife;					//cat timp traieste, life-ul initial
-	float	fMomentum;				//cat procent din viteza imprima in viteza inamicului
-	float	fStunDuration;			//face stun?
-	int		nArmorPiercingRating;	//AP class - bullet vs shield logic (see actor's ArmorRating)
-	UINT32  nExploTemplateHash;	//template of explosion
-	UINT32	nFlags;					//flaguri diverse K_LVL_BULLET_FLAG_*
+	float	fDamage;				// bullet total damage
+	float	fDamageObjects;			// bullet damage for objects (mixed with BULLET_FLAG_CAN_BREAK_DOORS)
+	float	fDamageLossPPx;			// cat damage pierde in functie de distanta parcursa in pixeli (0.0f - nu pierde din damage)
+	float	fSelfDamageMultiplier;	// cat damage din damage-ul dat victimei se scade din damage-ul glontului (default 1.0f adica tot)
+	float	fCriticalHitChance;		// how probable it is to do a critical hit
+	float	fLife;					// total lifetime of the bullet (0.0 for infinite)
+	float	fMomentum;				// speed * fMomentum transferred to enemy on impact
+	float	fStunDuration;			// time it stuns enemies
+	int		nArmorPiercingRating;	// AP class - bullet vs shield logic (see actor's ArmorRating)
+	UINT32  nExploTemplateHash;		// Template of explosion if bullet explodes when dying
+	UINT32	nFlags;					// misc flags from K_LVL_BULLET_FLAG_*
 
-	float	fSpeed_ini;				//viteza liniara initala glont
-	EActorClass eClass;				//shooter class
+	float	fSpeed_ini;				// initial bullet speed
+	EActorClass eClass;				// shooter's class
 
 
 	CBulletTemplate() :
@@ -141,17 +138,17 @@ public:
 
 class CBullet {
 public:
-	int					actorClass;				//clasa din care face parte (cine trage ca sa nu se loveasca intre ei inamici de aceeasi clasa)
-	UINT32				ownerUID;				//uneori am nevoie de UID-ul ownerului
-	UINT32				dwLastTargetUID;		//used in order to hit targets only once (penetrating) no matter the framerate
+	int					actorClass;				// shooter class
+	UINT32				ownerUID;				
+	UINT32				dwLastTargetUID;		// used in order to hit targets only once (penetrating) no matter the framerate
 
 public:
 	EBulletType			eType;					// bullet type: rocket, grenade, etc
-	float				fDamage;				//cat damage poarta glontul
-	float				fDamage_ini;			//initial damage (readonly please)
-	float				fDamageLossPPx;			//cat damage pierde in functie de distanta parcursa in pixeli (0.0f - nu pierde din damage)
-	float				fSelfDamageMultiplier;	//cat damage din damage-ul dat victimei se scade din damage-ul glontului (default 1.0f adica tot)
-	float				fCriticalHitChance;		//critical hit chance
+	float				fDamage;				// current damage
+	float				fDamage_ini;			// initial damage (readonly please)
+	float				fDamageLossPPx;			// damage lost per pixel of movement (0.0f - no damage lost)
+	float				fSelfDamageMultiplier;	// damage subtracted from bullet when it hits enemy (default 1.0f - loses all)
+	float				fCriticalHitChance;		// critical hit chance (0..1)
 
 	float				fLife;					//cat timp traieste
 	float				fLife_ini;				//initial fLife value (readonly please)
@@ -168,16 +165,20 @@ public:
 	SIZEWH_F 			szTailSize;				//bullets that have tails save the tail length here
 	RECTLTRB_F			rectTailTex;			//texture rectangle
 
-	UINT32				nFlags;					//flaguri diverse
-	int					nSubstate;				//bullet state used by some bullet types
+	UINT32				nFlags;					// misc flags
+	int					nSubstate;				// bullet state used by some bullet types
 
-	CLinkedPool<CPhysicsPoint>::CLinkedPoolNode *physPt; //punctul fizic (coliziune, pozitie, etc)
-	CSpr		sprBullet;	//grafica glont
+	CLinkedPool<CPhysicsPoint>::CLinkedPoolNode *physPt; // attached PhysPoint for collision detection and bounce
+	
+	CSpr				sprBullet;				// bullet sprite
+	bool				bAnimated;				// Sets itself when initialized. If animation is looped then we consider it to be animated.
+	scFrameID			fidLight;				// anim and frame for the light sprite
 
 	CBullet() : eType(K_LVL_BULLET_SHOTGUN), fDamage(1.0f), fDamage_ini(1.0f), fDamageLossPPx(0.0f),
 		fLife(1.0f), fLife_ini(1.0f), actorClass(K_LVL_ACT_CLASS_PLAYER), nSubstate(0),
 		fMomentum(0.0f), nFlags(0), fStunDuration(0.0f), ownerUID(0), dwLastTargetUID(0),
-		nArmorPiercingRating(0), nExploTemplateHash(0), fSelfDamageMultiplier(1.0f), fCriticalHitChance(0.0f)
+		nArmorPiercingRating(0), nExploTemplateHash(0), fSelfDamageMultiplier(1.0f), fCriticalHitChance(0.0f),
+		bAnimated(false)
 	{
 		physPt = null;
 		pos_ini = Vec3(0.0f, 0.0f, 0.0f);

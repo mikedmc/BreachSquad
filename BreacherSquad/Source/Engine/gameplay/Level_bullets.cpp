@@ -80,8 +80,11 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	bullet->szTailSize.w = 0.0f;
 	bullet->szTailSize.h = 0.0f;
 
-	//particularizari gloante
-	bullet->sprBullet.Init(&m_sprProps, ANM_PROPS_SPR_BULLETS, Vec3ToVec2XY(vPos), 0);
+	//bullet visuals
+	bullet->sprBullet.Init(&m_sprProps, ANM_PROPS_SPR_BULLETS_NOANIM, bullet->posProj, 0);
+	bullet->fidLight.Init(ANM_PROPS_SPR_BULLETS_LIGHTS, 0);
+	if (m_sprProps.GetAnimFlags(ANM_PROPS_SPR_BULLETS_NOANIM) & K_EDITOR_ANIMATION_FLAG_LOOPED)
+		bullet->bAnimated = true;
 
 	return &node->m_data;
 }
@@ -170,6 +173,11 @@ void CLevel::UpdateBullets(float dTime)
 		CLinkedPool<CBullet>::CLinkedPoolNode *nextnode = node->m_pNext;
 
 		CBullet* bullet = &node->m_data;
+		// animate sprite if necessary
+		if (bullet->bAnimated)
+		{
+			bullet->sprBullet.Update(dTime);
+		}
 
 		float fBulletOldLife = bullet->fLife;
 		dec_limit(bullet->fLife, dTime, 0.0f);
@@ -266,8 +274,19 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 				CBullet* bullet = &node->m_data;
 				//D3DXVECTOR2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 				//float ang = UTMath::GetVectorAngle(vdir);
-				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->posShadow, bullet->sprBullet.animID, bullet->sprBullet.frameID, 0, 0xaa000000);
+				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->posShadow, bullet->sprBullet.animIdx, bullet->sprBullet.frameIdx, 0, 0xaa000000);
 
+				// advance to next bullet
+				node = node->m_pNext;
+			}
+		}
+		break;
+		case K_LVL_RP_LIGHTS:
+		{
+			while (node != &m_poolBullets.pListUsed)
+			{
+				CBullet* bullet = &node->m_data;
+				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->posProj, bullet->fidLight.animIdx, bullet->fidLight.frameIdx, 0);
 				// advance to next bullet
 				node = node->m_pNext;
 			}

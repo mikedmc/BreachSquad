@@ -11,7 +11,7 @@ void PaintParallaxBackground(CSpriteCollection* m_sprBack, int m_BackAnimIdx, RE
 	for (int kk = 0; kk < m_sprBack->GetAFramesCnt(m_BackAnimIdx); kk++)
 	{
 		//Cred ca toate aceste decodari de flag ar trebui facute pe onload si puse in structuri de background layer
-		UINT32 aframeflag = m_sprBack->GetAFrameFlag(m_BackAnimIdx, kk);
+		UINT32 aframeflag = m_sprBack->GetAFrameFlags(m_BackAnimIdx, kk);
 		bool repeatX = (aframeflag >> K_LVL_BK_AFRAMESHIFT_REPEAT_X) & K_LVL_BK_AFRAMEBITMASK_REPEAT_X;
 		bool repeatY = (aframeflag >> K_LVL_BK_AFRAMESHIFT_REPEAT_Y) & K_LVL_BK_AFRAMEBITMASK_REPEAT_Y;
 		float xmove_mul = float((aframeflag >> K_LVL_BK_AFRAMESHIFT_XMOVE_MUL) & K_LVL_BK_AFRAMEBITMASK_XMOVE_MUL) / 255.0f;
