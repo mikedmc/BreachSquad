@@ -7488,7 +7488,7 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 		for (int ll = 0; ll < m_arrBulletsTemp.Count(); ll++)
 		{
 			CBullet* bul = m_arrBulletsTemp.m_pData[ll];
-			if (bul->type != K_LVL_BULLET_SMOKE_GRENADE)
+			if (bul->eType != K_LVL_BULLET_SMOKE_GRENADE)
 				continue;
 			D3DXVECTOR2 vBulPos = bul->physPt->m_data.pos;
 			
@@ -12853,6 +12853,13 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 		CLinkedPool<CPhysicsPoint>::CLinkedPoolNode *nextnode = node->m_pNext;
 		//update
 		CPhysicsPoint*	point = &node->m_data;
+		// kill it when it gets outside the play area
+		if (!PointInRect(Vec3ToVec2XY(point->pos), m_levelAABB))
+		{
+			point->bIsDead = true;
+			point->bIsStatic = true;
+		}
+
 		// what forces act on the point
 		Vec3			vecForces = point->accel;
 		bool			bWasContacting = point->bContacting;
@@ -12874,11 +12881,6 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 		point->speed += vecForces * dTime;
 		point->pos += point->speed * dTime;
 
-		// kill it when it gets outside the play area
-		if (!PointInRect(Vec3ToVec2XY(point->pos), m_levelAABB))
-		{
-			point->bIsDead = true;
-		}
 
 		///--- check collisions
 		{
@@ -12942,12 +12944,13 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 
 			// Minimum speed on Z when we consider the point stopped
 			const float fMinSpeedZ = 0.1f;
-			// Current floor height. #TODO: should get it from each tile
+			// Current floor height. #MAYBE: should get it from each tile
 			float fFloorH = 0.0f;
 
 			// Z floor collision at the end to bring it back up
-			// Only compute this part if we have vertical acceleration
-			if ((point->accel.z != 0.0f) && (point->pos.z <= fFloorH))
+			// Only compute this part if we have vertical acceleration and speed
+			//#MAYBE: should check collision with ceiling too
+			if ((point->accel.z != 0.0f) && (point->speed.z != 0.0f) && (point->pos.z <= fFloorH))
 			{
 				point->bContacting = true;
 				// walls collisions have priority so only set normals if no other collision happened

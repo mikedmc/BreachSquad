@@ -146,7 +146,7 @@ public:
 	UINT32				dwLastTargetUID;		//used in order to hit targets only once (penetrating) no matter the framerate
 
 public:
-	EBulletType			type;					// bullet type: rocket, grenade, etc
+	EBulletType			eType;					// bullet type: rocket, grenade, etc
 	float				fDamage;				//cat damage poarta glontul
 	float				fDamage_ini;			//initial damage (readonly please)
 	float				fDamageLossPPx;			//cat damage pierde in functie de distanta parcursa in pixeli (0.0f - nu pierde din damage)
@@ -161,7 +161,7 @@ public:
 	int					nArmorPiercingRating;	//AP class - bullet vs shield logic (see actor's ArmorRating)
 	UINT32				nExploTemplateHash;		//hash of explosion template at the end or 0 if none
 	
-	Vec3				vSpawnPos;				//pozitie spawnare
+	Vec3				pos_ini;				//pozitie spawnare
 	Vec2				posProj;				// 2D projected position
 	Vec2				posShadow;				// 2D shadow position (Z clamped)
 
@@ -174,13 +174,13 @@ public:
 	CLinkedPool<CPhysicsPoint>::CLinkedPoolNode *physPt; //punctul fizic (coliziune, pozitie, etc)
 	CSpr		sprBullet;	//grafica glont
 
-	CBullet() : type(K_LVL_BULLET_SHOTGUN), fDamage(1.0f), fDamage_ini(1.0f), fDamageLossPPx(0.0f),
+	CBullet() : eType(K_LVL_BULLET_SHOTGUN), fDamage(1.0f), fDamage_ini(1.0f), fDamageLossPPx(0.0f),
 		fLife(1.0f), fLife_ini(1.0f), actorClass(K_LVL_ACT_CLASS_PLAYER), nSubstate(0),
 		fMomentum(0.0f), nFlags(0), fStunDuration(0.0f), ownerUID(0), dwLastTargetUID(0),
 		nArmorPiercingRating(0), nExploTemplateHash(0), fSelfDamageMultiplier(1.0f), fCriticalHitChance(0.0f)
 	{
 		physPt = null;
-		vSpawnPos = Vec3(0.0f, 0.0f, 0.0f);
+		pos_ini = Vec3(0.0f, 0.0f, 0.0f);
 
 		szTailSize.w = szTailSize.h = 0.0f;
 	}

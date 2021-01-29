@@ -36,10 +36,6 @@ public:
 
 	int					nFlagsCollision;					// Collision checking flags
 
-	float				fAngle;
-	float				fAngularSpeed;
-	float				fAngularAccel;
-
 	Vec3				pos, pos_last;						// Position of the point
 	Vec3				speed;								// Current speed of the point
 	Vec3				accel;								// Forces that act on the point. Set Z to 0 to skip floor collision. Set XY to 0 to skip tiles/boxes collisions.
@@ -50,16 +46,16 @@ public:
 	bool				bIsStaticZ;							// Did it stop on Z axis?
 	bool				bIsDead;							// Tells if we must kill it as it exited the play area. #TODO: necessary?
 
-	eRetContactType		contactType;						// returns type of current/last collision (use it when bContacting is true)
+	eRetContactType		contactType;						// Returns type of current/last collision (use it when bContacting is true)
 	Vec3				contactNormal;						// Last contact normal
 	Vec3				contactPos;							// Last contact pos
 	CCollisionShape*	pContactShape;						// Contacting shape/type #TODO: add collision type with additional data in it
 
-	float				fBounceF;							// floor bounce restitution factor
-	float				fFrictionF;							// floor friction
+	float				fBounceF;							// Floor bounce restitution factor
+	float				fFrictionF;							// Floor friction
 
 	CPhysicsPoint() : contactType(K_COLLTYPE_NONE), bContacting(false), bContactStarted(false), bIsStatic(false), nFlagsCollision(K_LVL_PHYSP_COLLFLAG_ALL),
-		bFlagRotationEnabled(false), fAngle(0.0f), fAngularSpeed(0.0f), fAngularAccel(0.0f), bIsStaticZ(false),
+		bFlagRotationEnabled(false), bIsStaticZ(false),
 		bFlagPhysicsEnabled(false), fBounceF(K_LVL_PHYSPT_DEFAULT_FLOOR_BOUNCE), fFrictionF(K_LVL_PHYSPT_DEFAULT_FLOOR_FRICTION),
 		bIsDead(false), pContactShape(NULL)
 	{
@@ -73,7 +69,7 @@ public:
 	void Init();
 	
 	// Forces a new position for the point, in case of collisions or other situations
-	void SetPosForced(Vec3 vecPos);
+	inline void SetPosForced(Vec3 vecPos) { pos = vecPos; }
 };
 
 

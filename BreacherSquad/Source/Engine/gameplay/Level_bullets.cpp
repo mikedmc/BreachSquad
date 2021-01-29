@@ -41,44 +41,47 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	//reset physics data
 	node->m_data.physPt->m_data.Init();
 	//set bullet generic data
-	node->m_data.actorClass = actorClass;
-	node->m_data.ownerUID = nOwnerUID;
-	node->m_data.dwLastTargetUID = 0;
-	node->m_data.nSubstate = 0;
+	CBullet* bullet = &node->m_data;
+	bullet->actorClass = actorClass;
+	bullet->ownerUID = nOwnerUID;
+	bullet->dwLastTargetUID = 0;
+	bullet->nSubstate = 0;
 
-	node->m_data.type = bulletTemplate->nType;
-	node->m_data.nFlags = bulletTemplate->nFlags;
-	node->m_data.nExploTemplateHash = bulletTemplate->nExploTemplateHash;
+	bullet->eType = bulletTemplate->nType;
+	bullet->nFlags = bulletTemplate->nFlags;
+	bullet->nExploTemplateHash = bulletTemplate->nExploTemplateHash;
 
-	node->m_data.fStunDuration = bulletTemplate->fStunDuration;
-	node->m_data.fDamage = bulletTemplate->fDamage;
-	node->m_data.fDamage_ini = node->m_data.fDamage;
-	node->m_data.fDamageLossPPx = bulletTemplate->fDamageLossPPx;
-	node->m_data.fMomentum = bulletTemplate->fMomentum;
-	node->m_data.fLife = bulletTemplate->fLife;
-	node->m_data.fLife_ini = node->m_data.fLife;
-	node->m_data.nArmorPiercingRating = bulletTemplate->nArmorPiercingRating;
-	node->m_data.fSelfDamageMultiplier = bulletTemplate->fSelfDamageMultiplier;
-	node->m_data.fCriticalHitChance = bulletTemplate->fCriticalHitChance;
+	bullet->fStunDuration = bulletTemplate->fStunDuration;
+	bullet->fDamage = bulletTemplate->fDamage;
+	bullet->fDamage_ini = bullet->fDamage;
+	bullet->fDamageLossPPx = bulletTemplate->fDamageLossPPx;
+	bullet->fMomentum = bulletTemplate->fMomentum;
+	bullet->fLife = bulletTemplate->fLife;
+	bullet->fLife_ini = bullet->fLife;
+	bullet->nArmorPiercingRating = bulletTemplate->nArmorPiercingRating;
+	bullet->fSelfDamageMultiplier = bulletTemplate->fSelfDamageMultiplier;
+	bullet->fCriticalHitChance = bulletTemplate->fCriticalHitChance;
 
-	node->m_data.vSpawnPos = vPos;
+	bullet->pos_ini = vPos;
+	bullet->posProj = Vec3ProjVec2(vPos);
+	bullet->posShadow = Vec3ToVec2XY(vPos);
 	//physics
-	node->m_data.physPt->m_data.pos = vPos;
-	node->m_data.physPt->m_data.pos_last = vPos;
+	bullet->physPt->m_data.pos = vPos;
+	bullet->physPt->m_data.pos_last = vPos;
 	//randomizam viteza glontului cu un procent anume
 	Vec2 dir2d = shootDir * (bulletTemplate->fSpeed_ini + m_rand.RandFloatSgn(bulletTemplate->fSpeed_ini * 0.075f));
-	node->m_data.physPt->m_data.speed = Vec2ToVec3XY0(dir2d);
+	bullet->physPt->m_data.speed = Vec2ToVec3XY0(dir2d);
 	// hardcoded for now
-	node->m_data.physPt->m_data.accel = g_vecGravity;
-	node->m_data.physPt->m_data.fBounceF = 0.9f;
+	bullet->physPt->m_data.accel = g_Vec3Zero;
+	bullet->physPt->m_data.fBounceF = 0.0f;
 	//default states
-	node->m_data.physPt->m_data.bFlagPhysicsEnabled = true;
+	bullet->physPt->m_data.bFlagPhysicsEnabled = false;
 	//tail
-	node->m_data.szTailSize.w = 0.0f;
-	node->m_data.szTailSize.h = 0.0f;
+	bullet->szTailSize.w = 0.0f;
+	bullet->szTailSize.h = 0.0f;
 
 	//particularizari gloante
-	node->m_data.sprBullet.Init(&m_sprProps, ANM_PROPS_SPR_BULLETS, Vec2(0.0f, 0.0f), 0);
+	bullet->sprBullet.Init(&m_sprProps, ANM_PROPS_SPR_BULLETS, Vec3ToVec2XY(vPos), 0);
 
 	return &node->m_data;
 }
@@ -97,7 +100,7 @@ CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float
 		CBullet* bullet = &node->m_data;
 
 		bool bPassed = true;
-		if (bullet->type != nBulletType)
+		if (bullet->eType != nBulletType)
 			bPassed = false;
 		if ((dwOwnerUID != 0) && (bullet->ownerUID != dwOwnerUID))
 			bPassed = false;
@@ -131,7 +134,7 @@ void CLevel::ReleaseBullet(int nBulletType, UINT32 nOwnerUID)
 		CBullet* bullet = &node->m_data;
 
 		bool killbullet = false;
-		if ((bullet->type == nBulletType) && (bullet->ownerUID == nOwnerUID))
+		if ((bullet->eType == nBulletType) && (bullet->ownerUID == nOwnerUID))
 			killbullet = true;
 
 		//ii dam release
@@ -180,6 +183,12 @@ void CLevel::UpdateBullets(float dTime)
 		// update position triplets
 		bullet->posProj = Vec3ProjVec2(bullet->physPt->m_data.pos);
 		bullet->posShadow = Vec3ToVec2XY(bullet->physPt->m_data.pos);
+
+		if (bullet->physPt->m_data.bContacting)
+		{
+			killbullet = true;
+		}
+
 		//release the bullet
 		if (killbullet)
 		{
@@ -278,7 +287,7 @@ int CLevel::KillBulletsOfType(int nBulletType, UINT32 dwOwnerUID)
 		CLinkedPool<CBullet>::CLinkedPoolNode *nextnode = node->m_pNext;
 		CBullet* bullet = &node->m_data;
 
-		if ((bullet->type == nBulletType) && ((dwOwnerUID == 0) || (bullet->ownerUID == dwOwnerUID)))
+		if ((bullet->eType == nBulletType) && ((dwOwnerUID == 0) || (bullet->ownerUID == dwOwnerUID)))
 		{
 			//destroy charge
 			bullet->nFlags |= K_LVL_BULLET_FLAG_KILLITNOW;

@@ -9,9 +9,6 @@ void CPhysicsPoint::Init()
 	bIsStaticZ = false;
 	nFlagsCollision = K_LVL_PHYSP_COLLFLAG_ALL;
 	bFlagRotationEnabled = false;
-	fAngle = 0.0f;
-	fAngularSpeed = 0.0f;
-	fAngularAccel = 0.0f;
 	bFlagPhysicsEnabled = false;
 	fBounceF = K_LVL_PHYSPT_DEFAULT_FLOOR_BOUNCE;
 	fFrictionF = K_LVL_PHYSPT_DEFAULT_FLOOR_FRICTION;
@@ -20,10 +17,4 @@ void CPhysicsPoint::Init()
 	accel = g_Vec3Zero;
 	bIsDead = false;
 }
-
-void CPhysicsPoint::SetPosForced(Vec3 vecPos)
-{
-	pos = vecPos;
-}
-
 
