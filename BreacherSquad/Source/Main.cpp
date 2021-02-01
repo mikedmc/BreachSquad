@@ -1071,11 +1071,6 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 			UTGetAppClass().App_UpdateState_Loading(pDevice, fTime, fElapsedTime);
 		}
 		break;
-		case GAME_STATE_SPLASH:
-		{
-			UTGetAppClass().App_UpdateState_Splash(pDevice, fTime, fElapsedTime);
-		}
-		break;
 
 		//utility mod uploading to Steam
 		case GAME_STATE_UPLOAD_MOD:
@@ -2248,12 +2243,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			}
 			break;
 
-			case GAME_STATE_SPLASH:
-			{
-				UTGetAppClass().App_PaintState_Splash(pDevice, g_pGameSprite, fElapsedTime);
-			}
-			break;
-
 			case GAME_STATE_NET_LOBBY:
 			{
 				g_mainMenu.Paint();
@@ -3063,11 +3052,6 @@ void ChangeGameState(int newState, int param1, int param2)
 			g_bForceOneUpdatePerFrame = false;
 		}
 		break;
-		case GAME_STATE_SPLASH:
-		{
-			UTGetAppClass().App_ExitState_Splash();
-		}
-		break;
 
 		case GAME_STATE_PLAYER_SELECTION:
 		{
@@ -3223,12 +3207,6 @@ void ChangeGameState(int newState, int param1, int param2)
 			//on loading disable sync
 			UTGetAppClass().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_NO_NETWORK;
 			UTGetAppClass().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_STOPPED;
-		}
-		break;
-
-		case GAME_STATE_SPLASH:
-		{
-			UTGetAppClass().App_EnterState_Splash();
 		}
 		break;
 
