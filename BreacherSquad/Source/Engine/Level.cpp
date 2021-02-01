@@ -242,13 +242,6 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, D3DXVECTO
 		if(pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER)
 			fHitPointsTaken -= fHitPointsTaken * 0.5f;
 	}
-	//#PERK: FORTIFIED - reduced damage for front hits when crouching
-	if ((actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (actor->bCrouched) && (pvProjectileMomentum != null) &&
-		((actor->templateActor.nArmorDir == 0) || (SIGN(actor->lookDirXsign * actor->templateActor.nArmorDir) != SIGN(pvProjectileMomentum->x))) )
-	{
-		if (g_playerSelScr.IsPerkEnabled(actor->nPlayerOrdinal, &shPerk_FORTIFIED))
-			fHitPointsTaken *= 0.5f;
-	}
 
 	float fOldLife = actor->fLife;
 	if (fOldLife > 0.0f)
@@ -389,33 +382,6 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, D3DXVECTO
 		if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
 		{
 			float fDecLife = fLifeTaken;
-			//#PERK: DIE HARD
-			if ((actor->fLife < actor->templateActor.fLife * 0.1f) && (actor->fLife > 0.0f))
-			{
-				if (g_playerSelScr.IsPerkEnabled(actor->nPlayerOrdinal, &shPerk_DIE_HARD))
-					fDecLife = 0.1f * fLifeTaken;
-				//without the perk you take half the damage (attenuated die hard for the hack of it)
-				else if (actor->fLife < actor->templateActor.fLife * 0.1f)
-					fDecLife = 0.5f * fLifeTaken;
-			}
-			//#PERK: IRON MAN - stopped bullet increases shooter panic
-			if (retData.bArmorHit)
-			{
-				if (g_playerSelScr.IsPerkEnabled(actor->nPlayerOrdinal, &shPerk_IRON_MAN))
-				{
-					CActor* pShooter = GetActorByUID(pBullet->ownerUID);
-					SetActorDoT(pShooter, CDamageOverTime::K_LVL_DoT_INTIMIDATED, 0.5f, 0.0f, K_LVL_ACT_CLASS_PLAYER, K_LVL_ACT_CLASS_HUMAN, actor->GetUID());
-				}
-			}
-
-			//#HACK: when rolling only take half the damage
-			if (actor->nRolling == K_STATE_EXECUTING)
-			{
-				fDecLife = 0.5f * fLifeTaken;
-				//#PERK: EVASION - fbi lower damage when rolling
-				if (g_playerSelScr.IsPerkEnabled(actor->nPlayerOrdinal, &shPerk_EVASION))
-					fDecLife = 0.35f * fLifeTaken;
-			}
 
 #if defined(ENABLE_PLAYER_INVINCIBILITY)
 			fDecLife = 0.0f;
@@ -482,25 +448,6 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, D3DXVECTO
 				//only count actors that give you strategic points
 				if (actor->templateActor.fStrategicPoints > 0.0f)
 					m_arrStats[K_LVL_STATS_PL1_KILLS + pPlayer->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT]++;
-				
-				if ((g_playerSelScr.m_arrPlayers[pPlayer->nPlayerOrdinal].eType == K_PSS_CLASS_BREACHER) && (pBullet->fDamageLossPPx > 0.0f))
-				{
-					//#PERK: TWIN SHOT - shotguns get inc ROF after hit from close quarters
-					if (g_playerSelScr.IsPerkEnabled(pPlayer->nPlayerOrdinal, &shPerk_TWIN_SHOT))
-					{
-						pPlayer->pCurrentWeapon->m_activePerk.fROF_percAdd = -0.3f;
-						pPlayer->pCurrentWeapon->m_activePerk.nDurationShots = 1;
-						pPlayer->pCurrentWeapon->m_activePerk.bEnabled = true;
-					}
-					//#PERK: KILLING SPREE - increase damage for next shot
-					if (g_playerSelScr.IsPerkEnabled(pPlayer->nPlayerOrdinal, &shPerk_KILLING_SPREE))
-					{
-						pPlayer->pCurrentWeapon->m_activePerk.fDamage_percAdd = 0.25f;
-						pPlayer->pCurrentWeapon->m_activePerk.nDurationShots = 1;
-						pPlayer->pCurrentWeapon->m_activePerk.bEnabled = true;
-					}
-				}
-
 			}
 		}
 	}
@@ -868,38 +815,6 @@ int CLevel::MeleeBlow(int nBulletType, D3DXVECTOR2 vPos, D3DXVECTOR2 vDirection,
 					if (act->fLife <= 0.0f)
 						fDamage = fDamageObjects;
 					
-					if (nOwnerClass >= K_LVL_ACT_CLASS_HUMAN)
-					{
-						//#PERK: offduty fitness
-						if ((act->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) &&
-							(g_playerSelScr.m_arrPlayers[act->nPlayerOrdinal].eType == K_PSS_CLASS_OFFDUTYGUY))
-						{
-							float fMeleeResist = g_playerSelScr.GetUpgradeBarPercent(&g_playerSelScr.m_arrPlayers[act->nPlayerOrdinal], L"O2_FITNESS");
-							//remove damage due to armor melee resistance
-							fDamage *= (1.0f - fMeleeResist * 0.4f);
-						}
-						//#PERK: MELEE DEFENSE - melee damage from front takes only 70%
-						if ((act->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (SIGN(vDirection.x) != act->lookDirXsign))
-							if (g_playerSelScr.IsPerkEnabled(act->nPlayerOrdinal, &shPerk_MELEE_DEFENSE))
-								fDamage *= 0.8f;
-						//#PERK: COMBATIVES - melee further received for FBI
-						if (act->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
-							if (g_playerSelScr.IsPerkEnabled(act->nPlayerOrdinal, &shPerk_COMBATIVES))
-								fDamage *= 0.6f;
-					}
-					else if (nOwnerClass == K_LVL_ACT_CLASS_PLAYER)
-					{
-						//#PERK: FEDERAL JUSTICE - bonus for back stabbing
-						if (SIGN(vDirection.x) == act->lookDirXsign)
-						{
-							CActor* ownerAct = GetPlayerByUID(nOwnerUID);
-							if (ownerAct != NULL) {
-								if (g_playerSelScr.IsPerkEnabled(ownerAct->nPlayerOrdinal, &shPerk_FEDERAL_JUSTICE))
-									fDamage *= 1.5f;
-							}
-						}
-					}
-
 					//#TODO: armor piercing ar trebui transmis aici de deasupra prin bullet template
 					int nArmorPiercing = 5;
 
@@ -4317,14 +4232,6 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent(&g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"A1_ACCURACY");
 					pWeapon->WeaponTemplate.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
 				}
-				//#PERK: QUICK AIM - faster aiming for aimed shot
-				if (g_playerSelScr.IsPerkEnabled(pActor->nPlayerOrdinal, &shPerk_QUICK_AIM))
-				{
-					CActorTemplate* updateTemplate = GetTemplateActor(L"UPGRADE_ASSAULTER_AIMED_SHORTER");
-					//set animations from new template
-					pActor->templateActor.AddGenericDataFromTemplate(updateTemplate);
-					pActor->templateActor.OverwriteAnimsFromTemplate(updateTemplate);
-				}
 			}
 			break;
 			case K_PSS_CLASS_RECON:
@@ -4352,14 +4259,6 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent(&g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"S1_HANDGUN");
 					pWeapon->WeaponTemplate.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
 				}
-				//#PERK: DEVASTATOR - better smg ability 
-				if (pWeapon->WeaponTemplate.name.IsEqual(L"WPN_SA_UZZI"))
-				{
-					if (g_playerSelScr.IsPerkEnabled(pActor->nPlayerOrdinal, &shPerk_DEVASTATOR))
-					{
-						pWeapon->WeaponTemplate.bulletTemplate.fCriticalHitChance += 0.2f;
-					}
-				}
 			}
 			break;
 			case K_PSS_CLASS_BREACHER:
@@ -4372,14 +4271,6 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 				{
 					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent(&g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"O1_SHOOTING");
 					pWeapon->WeaponTemplate.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
-				}
-				//#PERK: AP_AMMO GARAND
-				if (pWeapon->WeaponTemplate.name.IsEqual(L"WPN_ULTIMATE_GARAND"))
-				{
-					if (g_playerSelScr.IsPerkEnabled(pActor->nPlayerOrdinal, &shPerk_GARAND_AP_AMMO))
-					{
-						pWeapon->WeaponTemplate.bulletTemplate.nArmorPiercingRating = pWeapon->WeaponTemplate.bulletTemplate.nArmorPiercingRating + 1;
-					}
 				}
 			}
 			break;
@@ -4876,15 +4767,6 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 
 			actor->fFOVPercent = 1.0f; //disable FOV check while attacking
 
-			//#PERK: INVISIBLE - HUMAN enemies react slower when seeing you
-			if ((actor->m_AIsensorInfo.m_AIcurrentEvent.nType == K_LVL_AI_EVENT_SEE_ENEMY) &&
-				(actor->m_AIsensorInfo.pTargetedActor != null) &&
-				(actor->templateActor.actorClass == K_LVL_ACT_CLASS_HUMAN) &&
-				(actor->m_AIsensorInfo.pTargetedActor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) &&
-				(g_playerSelScr.IsPerkEnabled(actor->m_AIsensorInfo.pTargetedActor->nPlayerOrdinal, &shPerk_INVISIBLE)))
-			{
-				actor->AItimer1 += 0.5f;
-			}
 		}
 		break;
 
@@ -5219,26 +5101,6 @@ void CLevel::SetActorDoT(CActor* act, CDamageOverTime::EDoTType eType, float fDu
 		//intimidated icon
 		if (eType == CDamageOverTime::K_LVL_DoT_INTIMIDATED)
 			act->SetIcon(K_LVL_ACT_ICON_SCARED, fDuration);
-
-		//set some perks again
-		if (pPlayerOwner != null)
-		{
-			if ((eType == CDamageOverTime::K_LVL_DoT_TARGETED) || (eType == CDamageOverTime::K_LVL_DoT_TARGETED_ALLY))
-			{
-				//#PERK: R2_RECON Bar percentage
-				float fReconPerc = g_playerSelScr.GetUpgradeBarPercent(&g_playerSelScr.m_arrPlayers[pPlayerOwner->nPlayerOrdinal], L"R2_RECON");
-				//set damage adder percent fVar1 here! (targeted enemies damage multiplier)
-				act->cDamageOverTime.fVar1 = 0.3f + fReconPerc * 0.2f;
-
-				//#PERK: DURACELLS - recon effects last longer
-				if (g_playerSelScr.IsPerkEnabled(pPlayerOwner->nPlayerOrdinal, &shPerk_DURACELLS))
-				{
-					act->cDamageOverTime.fDuration_ini *= 1.5f;
-					act->cDamageOverTime.fDuration = act->cDamageOverTime.fDuration_ini;
-				}
-			}
-		}
-
 	}
 }
 
@@ -5920,19 +5782,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					actor->AIsubState = 1;
 					actor->m_AIcommands.nIconType = K_LVL_ACT_ICON_SURPRISE;
 					actor->m_AIcommands.fIconDuration = 0.5f + actor->AItimer1;
-					
-					//#PERK: INTIMIDATING - surprised enemies inflict lower damage
-					if (actor->m_AIsensorInfo.pTargetedActor != null)
-					{
-						CActor *pPlayer = GetPlayerByUID(actor->m_AIsensorInfo.pTargetedActor->GetUID());
-						if ((pPlayer != null) && (g_playerSelScr.IsPerkEnabled(pPlayer->nPlayerOrdinal, &shPerk_INTIMIDATING)))
-						{
-							SetActorDoT(actor, CDamageOverTime::K_LVL_DoT_INTIMIDATED, 2.0f, 0.0f, K_LVL_ACT_CLASS_PLAYER, K_LVL_ACT_CLASS_HUMAN, pPlayer->GetUID());
-							//overwrite previous
-							actor->m_AIcommands.nIconType = K_LVL_ACT_ICON_SCARED;
-							actor->m_AIcommands.fIconDuration = 2.0f;
-						}
-					}
 				}
 
 				actor->AItimer1 -= dTime;
@@ -6966,18 +6815,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					}
 				}
 
-				// only large enemies get scared
-				if (actor->templateActor.fLife > 10.0f)
-				{
-					//#PERK: GORE DEALER - gibs scare enemies
-					CActor* pPlayer = GetPlayerByUID(actor->m_AIsensorInfo.m_lastInteractingActorUID);
-					if ((pPlayer != null) && (m_rand.RandFloat(100.0f) < 50.0f) &&
-						(g_playerSelScr.IsPerkEnabled(pPlayer->nPlayerOrdinal, &shPerk_GORE_DEALER)))
-					{
-						AddProp_Explo(hash_EXPLO_FAKE_INTIMIDATE, actor->GetPosHeart(), pPlayer->GetUID(), K_LVL_ACT_CLASS_PLAYER);
-					}
-				}
-
 				//#ZOMBIE: human cadavers become zombies so spawn one here
 				if ( (actor->templateActor.eMaterial == K_LVL_MATERIAL_FLESH) && 
 					 ((actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_TURN_TO_ZOMBIE) != 0) )
@@ -7482,16 +7319,6 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 			if (!aabbvision.PointIn(enemy->posHeart))
 				continue;
 			if (!IsLineOfSight(sourceActor->posHeart, enemy->posHeart))
-				continue;
-		}
-
-		//perks
-		//#PERK: CAUGHT IN THE ACT - if in cover hidden from perpetrators
-		if ((enemy->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (enemy->pCover != null) && (enemy->bCrouched) &&
-			(SIGN(enemy->pCover->bbox.vCenter.x - enemy->posHeart.x) != SIGN(enemy->pCover->bbox.vCenter.x - sourceActor->posHeart.x)) && //cover between them
-			(enemyDistSq > (K_TILE_SIZE * 4) * (K_TILE_SIZE * 4)) )
-		{
-			if (g_playerSelScr.IsPerkEnabled(enemy->nPlayerOrdinal, &shPerk_CAUGHT_IN_THE_ACT))
 				continue;
 		}
 
@@ -12409,9 +12236,6 @@ void CLevel::GiveStrategicPoints(float fPoints, D3DXVECTOR2 * vPos)
 			continue;
 		
 		int fMaxPoints = K_LVL_MAX_STRATEGIC_POINTS;
-		//#PERK: EXTRA SP SLOTS - gives you 2 additionsl SP slots
-		if (g_playerSelScr.IsPerkEnabled(pPlayerActor[kk]->nPlayerOrdinal, &shPerk_EXTRA_SP_SLOTS))
-			fMaxPoints += K_LVL_STRATEGIC_POINTS_ADDED_BY_PERK;
 
 		int nStatIdx = K_LVL_STATS_PL1_STRATEGIC_POINTS + pPlayerActor[kk]->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT;
 		int nAdder = (int)floor(fMultiplier * fPointsGiven * 1000.0f);
@@ -13086,35 +12910,6 @@ void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwner
 
 		//pointer to player that spawned the explosion, or null if it wasn't a player
 		CActor* pPlayer = GetPlayerByUID(dwOwnerUID);
-		//perks below
-		if ((pPlayer != null) && (pPlayer->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER))
-		{
-			//#PERK: RESCUE PLAN - highlight hostages too
-			if (g_playerSelScr.IsPerkEnabled(pPlayer->nPlayerOrdinal, &shPerk_RESCUE_PLAN))
-			{
-				if (explotemplate->name.textHash == hash_EXPLO_FAKE_CAM_BALL)
-					AddProp_Explo(hash_EXPLO_FAKE_CAM_BALL_HOSTAGE, pos, pPlayer->GetUID(), K_LVL_ACT_CLASS_PLAYER);
-				else if (explotemplate->name.textHash == hash_EXPLO_FAKE_SPY_CAMERA)
-					AddProp_Explo(hash_EXPLO_FAKE_SPY_CAMERA_HOSATAGE, pos, pPlayer->GetUID(), K_LVL_ACT_CLASS_PLAYER);
-				else if (explotemplate->name.textHash == hash_EXPLO_FAKE_CAM_BALL_1SEC)
-					AddProp_Explo(hash_EXPLO_FAKE_CAM_BALL_HOSTAGE_1SEC, pos, pPlayer->GetUID(), K_LVL_ACT_CLASS_PLAYER);
-			}
-
-			//#PERK: BIG BANGER - 50% more range for explo
-			if (g_playerSelScr.IsPerkEnabled(pPlayer->nPlayerOrdinal, &shPerk_BIG_BANGER))
-			{
-				if ((explotemplate->name.textHash == hash_EXPLO_GRENADE) || (explotemplate->name.textHash == hash_EXPLO_GRENADE_GROUND))
-				{
-					fStunRadius *= 1.5f;
-					fDamageRadius *= 1.5f;
-				}
-				if ((explotemplate->name.textHash == hash_EXPLO_CHARGE) || (explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE))
-				{
-					fStunRadius *= 2.0f;
-					fDamageRadius *= 2.0f;
-				}
-			}
-		}
 
 		//#IMPORTANT #TODO: should optimize in order to minimize the usage of UnobstructedLineOfSight
 		//stun enemy and damage over time

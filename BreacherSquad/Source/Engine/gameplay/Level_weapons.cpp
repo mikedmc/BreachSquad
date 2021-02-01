@@ -356,14 +356,6 @@ bool CLevel::ShootWeapon(CWeapon * weapon, D3DXVECTOR2 vDir)
 		float fMul = 1.0f;
 		if (shooter->bCrouched)
 			fMul = K_LVL_CROUCH_ERROR_MULTIPLIER;
-		//#PERK: BARRICADE
-		if ((shooter->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (shooter->pCover != null))
-			if (g_playerSelScr.IsPerkEnabled(shooter->nPlayerOrdinal, &shPerk_BARRICADE))
-				fMul = K_LVL_COVER_ERROR_MULTIPLIER;
-		//#PERK: STEADY HAND - precizion when crouched
-		if ((shooter->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (shooter->bCrouched))
-			if (g_playerSelScr.IsPerkEnabled(shooter->nPlayerOrdinal, &shPerk_STEADY_HAND))
-				fMul = K_LVL_COVER_ERROR_MULTIPLIER;
 
 		fAimAngError *= fMul;
 		//apply template aiming multiplier
@@ -374,21 +366,6 @@ bool CLevel::ShootWeapon(CWeapon * weapon, D3DXVECTOR2 vDir)
 		//some weapons force the actor to play a verse when shooting
 		PlayActorSoundVerse(shooter, weapon->WeaponTemplate.sndActorVerse);
 
-		//#HACK: player's last bullet does double damage (for fun)
-		if ((weapon->pOwner->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (weapon->ammoLeft == 0))
-			tmplBullet.fDamage *= 2.0f;
-		//#PERK: INITMIDATING - intimidated enemies bullets do lower damage
-		if (weapon->pOwner->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_INTIMIDATED)
-			tmplBullet.fDamage *= 0.8f;
-		//#PERK: WEAK SPOTTER - shotgun pellets skip armor
-		float fIgnoreArmorPerc = 0.0f;
-		if ((weapon->pOwner->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (weapon->WeaponTemplate.nBulletsPerShot > 1))
-		{
-			if (g_playerSelScr.IsPerkEnabled(shooter->nPlayerOrdinal, &shPerk_WEAK_SPOTTER))
-			{
-				fIgnoreArmorPerc = 30.0f;
-			}
-		}
 		//also shoot bullets
 		for (int kk = 0; kk < weapon->WeaponTemplate.nBulletsPerShot; kk++)
 		{
@@ -399,10 +376,6 @@ bool CLevel::ShootWeapon(CWeapon * weapon, D3DXVECTOR2 vDir)
 			vFinalDir.y = sin(fAimAng + fSpreadAng);
 			D3DXVec2Normalize(&vFinalDir, &vFinalDir);
 
-			if ((fIgnoreArmorPerc > 0.0f) && (m_rand.RandFloat(100.0f) < fIgnoreArmorPerc))
-			{
-				tmplBullet.nFlags |= K_LVL_BULLET_FLAG_IGNORE_ARMOR;
-			}
 			//apply weapon perk
 			if (weapon->m_activePerk.bEnabled)
 			{
@@ -426,10 +399,6 @@ bool CLevel::ShootWeapon(CWeapon * weapon, D3DXVECTOR2 vDir)
 		}
 
 		float fAimErrorMul = 1.0f;
-		//#PERK: STRONG_STANCE - second shot has 70% lower aim error
-		if ((shooter->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (weapon->m_nBulletsShotSinceCool == 2))
-			if (g_playerSelScr.IsPerkEnabled(shooter->nPlayerOrdinal, &shPerk_STRONG_STANCE))
-				fAimErrorMul = 0.3f;
 
 		weapon->fAimErrorFOV += fabs(weapon->WeaponTemplate.fAimErrorAddPerShot); //add aim error (can be negative too)
 		weapon->fAimErrorFOV *= weapon->WeaponTemplate.fAimErrorMulPerShot; //add non linear error

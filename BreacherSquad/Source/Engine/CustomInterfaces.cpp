@@ -807,11 +807,7 @@ void CCustomInterfaceIGM::Init(CSpriteCollection* sprCollection, CActor * player
 			//set same portrait on spawned players
 			nPortraitFrameHotJoin[kk] = nPortraitFrame[kk];
 
-			//#PERK: EXTRA SP SLOTS - gives you 2 additionsl SP slots
 			bHasExtraSPSlots[kk] = false;
-			if (g_playerSelScr.IsPerkEnabled(playerAct[kk]->nPlayerOrdinal, &shPerk_EXTRA_SP_SLOTS))
-				bHasExtraSPSlots[kk] = true;
-
 			///--- save key names ---
 			//get player controller ptr
 			CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(playerAct[kk]->nControllerInstanceID);
