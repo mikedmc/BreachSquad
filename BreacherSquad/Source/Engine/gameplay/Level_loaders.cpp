@@ -55,13 +55,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_fThunderTimer = 0.0f;
 
 	m_waterAnimIdx = -1;
-	//team doors
-	m_nTeleportSlots = 0;
-	m_bTeleportActivated = false;
-	//	m_bTeleportRequested = false;
-	m_bInsideHiddenRoom = false;
-	m_bPlayerInHiddenRoom[0] = m_bPlayerInHiddenRoom[1] = false;
-	m_pTeleportSource = null;
 
 	m_interfaceIGM.Reset();
 	m_interfaceIGM.SetBombTimer(-1.0f);
@@ -989,7 +982,6 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_camTargetOld = null;
 	//cam settings
 	m_camLevel.SetWorldBounds(m_levelAABB, true, K_CAMTRANS_AXIS_NONE);
-	m_HiddenRoomAABB.Set(0.0f, 0.0f, 0.0f, 0.0f);
 	//for the render targets we render 1:1
 	m_vCamPosDefault = vLastSpawnPoint; //spawn pointul este initializat in setAI cand gaseste checkpoint cu bIsFirst
 	m_camLevel.InitCamera(UTGetAppClass().g_rectRT, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault); //initializam pe primul spawn point

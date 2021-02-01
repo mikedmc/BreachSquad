@@ -77,11 +77,6 @@ void CLevel::BuildVisibilityLists()
 
 		if (camaabb.IntersectsCircle(light->pos, light->fRadius))
 		{
-			//if we have hidden room clip area on, ignore the lights outside
-			if ((m_HiddenRoomAABB.vSize.x > 0.0f) && (m_HiddenRoomAABB.vSize.y >= 0.0f))
-				if (!m_HiddenRoomAABB.PointIn(light->pos))
-					continue;
-
 			if (m_visibleList.visible_lights.Add(m_arrLights[kk]) < 0)
 				break;
 			if (m_arrLights[kk]->castShadows)

@@ -2950,6 +2950,335 @@ bool CLevel::NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsH
 }
 
 
+// allocate temp verts buffer on stack
+const int temp_arrVertsSize = 1200 * 3;
+_VERTEX_PNCT4T4 temp_arrVerts[temp_arrVertsSize];
+
+void CLevel::BuildDynamicGeometry(CAABB camAABB)
+{
+	const int arrOccludersSize = 200;
+	COccluderSegment arrOccluders[arrOccludersSize];
+	///--- create vert buffers for lights ---
+	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
+	{
+		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		switch (nl->type)
+		{
+			case K_LVL_LT_IES:
+			case K_LVL_LT_POINT:
+			{
+				//--- create light volumes for shadow casting lights	---
+				nl->m_nLightMeshIdx = -1;
+				if (nl->castShadows)
+				{
+					// returns a list of segments that will form shadows (from both tiles and collision boxes)
+					int nOccluders = GetOccluderSegments(Vec3ToVec2XY(nl->vPos), nl->bbox, arrOccluders, arrOccludersSize);
+
+
+					// shows occluders instead of mesh. Checked for consistency.
+					/*
+					int nVertCnt = 0;
+					for (int kk = 0; kk < nOccluders; kk++)
+					{
+						temp_arrVerts[nVertCnt].pos = Vec3(nl->vPos.x, nl->vPos.y, 0.0f);
+						temp_arrVerts[nVertCnt].color = 0x00ffffff; nVertCnt++;
+						temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vStart);
+						temp_arrVerts[nVertCnt].color = 0xff00ff00; nVertCnt++;
+						temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vEnd);
+						temp_arrVerts[nVertCnt].color = 0xff0000ff; nVertCnt++;
+					}
+
+					if (nVertCnt > 3)
+					{
+						m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
+						m_bufferedPainter.AddTriangles(temp_arrVerts, nVertCnt / 3);
+						m_bufferedPainter.EndMesh();
+					}
+					*/
+
+
+					if (nOccluders > 0)
+					{
+						// sends rays and builds the light FOV as a triangle list mesh
+						int retVerts = FOVUtil::BuildOccludedVolume(Vec3ToVec2XY(nl->vPos), nl->color, arrOccluders, nOccluders, temp_arrVerts, temp_arrVertsSize);
+
+						// adaugam triunghiurile ca si mesh
+						if (retVerts > 0)
+						{
+							//adauga mesh dinamic pentru volumul umbrei
+							m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
+							m_bufferedPainter.AddTriangles(temp_arrVerts, retVerts / 3);
+							m_bufferedPainter.EndMesh();
+						}
+					}
+
+				}
+				else
+				{
+					Vec3 lcorners[4]; //ul, ur, dl, dr
+					memcpy(lcorners, nl->lCorners, 4 * sizeof(Vec3));
+					// move mesh to light position (!z must remain 0!)
+					lcorners[0].x += nl->vPos.x; lcorners[0].y += nl->vPos.y;
+					lcorners[1].x += nl->vPos.x; lcorners[1].y += nl->vPos.y;
+					lcorners[2].x += nl->vPos.x; lcorners[2].y += nl->vPos.y;
+					lcorners[3].x += nl->vPos.x; lcorners[3].y += nl->vPos.y;
+					//write final VS verts
+					_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+					vul.pos = lcorners[0];
+					vur.pos = lcorners[1];
+					vdr.pos = lcorners[2];
+					vdl.pos = lcorners[3];
+					//set color
+					vul.color = vur.color = vdl.color = vdr.color = nl->color;
+					// triangles vb
+					_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+					lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+					lightRectV[3] = vur; lightRectV[4] = vdr; lightRectV[5] = vdl;
+
+					m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
+					m_bufferedPainter.AddTriangles(lightRectV, 2);
+					m_bufferedPainter.EndMesh();
+				}
+			}
+			break;
+			case K_LVL_LT_PROJECTED_DIR:
+			{
+				//create light mesh - rotating the actual mesh isn't necessary
+				D3DXVECTOR3 lcorners[4]; //ul, ur, dr, dl
+				memcpy(lcorners, nl->lCorners, 4 * sizeof(D3DXVECTOR3));
+				//move mesh to final pos
+				lcorners[0].x += nl->vPos.x; lcorners[0].y += nl->vPos.y;
+				lcorners[1].x += nl->vPos.x; lcorners[1].y += nl->vPos.y;
+				lcorners[2].x += nl->vPos.x; lcorners[2].y += nl->vPos.y;
+				lcorners[3].x += nl->vPos.x; lcorners[3].y += nl->vPos.y;
+				//scriu VS-ul final
+				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+				vul.pos = lcorners[0];
+				vur.pos = lcorners[1];
+				vdr.pos = lcorners[2];
+				vdl.pos = lcorners[3];
+				//setez culoarea
+				vul.color = vur.color = vdl.color = vdr.color = nl->color;
+				//light direction as normals but not really used
+				vul.n = vur.n = vdl.n = vdr.n = nl->vnDir;
+
+				_VERTEX_PNCT4T4 lightRectV[6];
+				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+				//dynamic mesh index for light geometry
+				nl->m_nLightMeshIdx = -1; //resetez idx mesh
+				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
+				m_bufferedPainter.AddTriangles(lightRectV, 2);
+				m_bufferedPainter.EndMesh();
+			}
+			break;
+
+			case K_LVL_LT_DIRECTIONAL:
+			case K_LVL_LT_AMBIENTAL:
+			{
+				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+				vul.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMin.y, 0.0f);
+				vur.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMin.y, 0.0f);
+				vdl.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMax.y, 0.0f);
+				vdr.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMax.y, 0.0f);
+				//set color
+				vul.color = vur.color = vdl.color = vdr.color = nl->color;
+				//build verts
+				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
+				m_bufferedPainter.AddTriangles(lightRectV, 2);
+				m_bufferedPainter.EndMesh();
+			}
+			break;
+		}
+	}
+
+
+	/// 2. other lights: bullets, particles, etc
+	//PROPS lights - temp lights - gunshot lights, explo lights
+	m_propsLightsMeshIdx = -1;
+	m_bufferedPainter.BeginMesh(m_propsLightsMeshIdx);
+
+	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.pListUsed.m_pNext;
+	while (node != &m_poolProps.pListUsed)
+	{
+		//salvez locatia urmatoare ca s apot avansa pe ea
+		CLinkedPool<CSpecialProp>::CLinkedPoolNode *nextnode = node->m_pNext;
+		CSpecialProp* prop = &node->m_data;
+
+		if (prop->bMakesLight)
+		{
+			if (prop->sprLight.animationIdx >= 0)
+			{
+				//Creez forma luminii (mesh-ul)
+				RECTLTRB_F realrect = m_sprLights.GetAFrameBBox_real(prop->sprLight.animationIdx, 0);
+				//Scalez dreptunghi lumina
+				if (prop->fLightScaling != 1.0f)
+				{
+					CAABB realaabb;
+					realaabb.Set(realrect);
+					realaabb.Scale(prop->fLightScaling);
+					realrect.left = realaabb.vMin.x; realrect.top = realaabb.vMin.y;
+					realrect.right = realaabb.vMax.x; realrect.bottom = realaabb.vMax.y;
+				}
+				//scriu VS-ul final
+				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+				D3DXVECTOR2 bpos2D = node->m_data.physPt->m_data.pos;
+				D3DXVECTOR3 bpos(node->m_data.physPt->m_data.pos.x, node->m_data.physPt->m_data.pos.y, 50.0f);
+				vul.pos = D3DXVECTOR3(bpos.x + realrect.left, bpos.y + realrect.top, 0.0f);
+				vur.pos = D3DXVECTOR3(bpos.x + realrect.right, bpos.y + realrect.top, 0.0f);
+				vdl.pos = D3DXVECTOR3(bpos.x + realrect.left, bpos.y + realrect.bottom, 0.0f);
+				vdr.pos = D3DXVECTOR3(bpos.x + realrect.right, bpos.y + realrect.bottom, 0.0f);
+				//setez culoarea
+				float fLife = prop->fLightDuration;
+				float fFadeTime = prop->fLightFadeOut;
+
+				float alpha = 1.0f;
+				//la unele nu setez fLife deci ma intereseaza sa se vada
+				if (fLife > 0.0f)
+				{
+					if (prop->fLightTimer < fFadeTime)
+						alpha = prop->fLightTimer / fFadeTime;
+					else if (prop->fLightTimer > fLife)
+						alpha = 0.0f;
+					else if (prop->fLightTimer > fLife - fFadeTime)
+						alpha = ((fLife - prop->fLightTimer) / fFadeTime);
+				}
+
+				float fOrigAlpha = D3DCOLOR_GETFALPHA(prop->sprLight.color);
+				vul.color = vur.color = vdl.color = vdr.color = D3DCOLOR_COLORALPHA(prop->sprLight.color, fOrigAlpha * alpha);
+				//setez coordonate textura spot
+				RECTLTRB_F lTexRect = m_sprLights.GetModuleRect_TexCoords(prop->sprLight.animationIdx, 0, 0);
+				//Coord de mapare pe RTT (tex2) se seteaza din shader
+				vul.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
+				vur.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
+				vdl.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
+				vdr.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
+				//setez normalele finale
+				vul.n = bpos - vul.pos;
+				vur.n = bpos - vur.pos;
+				vdl.n = bpos - vdl.pos;
+				vdr.n = bpos - vdr.pos;
+				//construiesc VB-ul exact
+				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+				m_bufferedPainter.AddTriangles(lightRectV, 2);
+			}
+		}
+
+		//get to next node
+		node = nextnode;
+	}
+	//inchid meshul
+	m_bufferedPainter.EndMesh();
+
+	//#TODO: should try not clamping water and FOW rects to screen maybe it fixes the texture/pshader issue on some cards
+
+	//3. poligoane apa
+	m_bufferedPainter.BeginMesh(m_waterMeshIdx);
+	//salvez date textura apa	
+	float waterTexScale = 2.0f;
+	float waterTexSize = m_texManager.m_Texs[m_waterTexIdx]->info.Width;
+
+	for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
+	{
+		if (m_visibleList.logic_colShapesSpecial.m_pData[kk]->type == K_LVL_COLL_TYPE_WATER)
+		{
+			CCollisionShape * col = m_visibleList.logic_colShapesSpecial.m_pData[kk];
+			CAABB wbb; //water bbox
+			if (AABB_Intersection(col->bbox, camAABB, wbb))
+			{
+				D3DXVECTOR2 texoff = col->bbox.vMin - wbb.vMin;
+				//save water plys in a sigle mesh, clipped to screen rect
+
+				//scriu VS-ul final
+				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+				vul.pos = D3DXVECTOR3(wbb.vMin.x, wbb.vMin.y, 0.0f);
+				vur.pos = D3DXVECTOR3(wbb.vMax.x, wbb.vMin.y, 0.0f);
+				vdl.pos = D3DXVECTOR3(wbb.vMin.x, wbb.vMax.y, 0.0f);
+				vdr.pos = D3DXVECTOR3(wbb.vMax.x, wbb.vMax.y, 0.0f);
+				//setez culoarea
+				//#TODO: culoarea sa fie setata undeva in editor. Poate as putea sa pun control de culoare la collision boxuri...
+				vul.color = vur.color = vdl.color = vdr.color = 0xaa30AFFF;// col->color;
+				//setez coordonate textura apa
+				D3DXVECTOR2 texul = (wbb.vMin * waterTexScale) / waterTexSize;
+				D3DXVECTOR2 texdr = (wbb.vMax * waterTexScale) / waterTexSize;
+
+				RECTLTRB_F lTexRect(texul.x, texul.y, texdr.x, texdr.y);
+				//Coord de mapare pe RTT (tex2) se seteaza din shader
+				vul.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
+				vur.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
+				vdl.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
+				vdr.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
+				//setez normalele finale
+				vul.n = vur.n = vdl.n = vdr.n = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+				//construiesc VB-ul exact
+				_VERTEX_PNCT4T4 waterRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+				waterRectV[0] = vul; waterRectV[1] = vur; waterRectV[2] = vdl;
+				waterRectV[3] = vur; waterRectV[4] = vdl; waterRectV[5] = vdr;
+
+				m_bufferedPainter.AddTriangles(waterRectV, 2);
+			}
+		}
+	}
+	//inchid meshul apelor
+	m_bufferedPainter.EndMesh();
+
+
+	//4. poligoane fow
+	m_bufferedPainter.BeginMesh(m_fogofwarMeshIdx);
+
+	for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
+	{
+		if (m_visibleList.logic_colShapesSpecial.m_pData[kk]->type == K_LVL_COLL_TYPE_FOG_OF_WAR)
+		{
+			CCollisionShape * col = m_visibleList.logic_colShapesSpecial.m_pData[kk];
+			CAABB wbb; //bbox
+			if (AABB_Intersection(col->bbox, camAABB, wbb))
+			{
+				//scriu VS-ul final
+				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+				vul.pos = D3DXVECTOR3(wbb.vMin.x, wbb.vMin.y, 0.0f);
+				vur.pos = D3DXVECTOR3(wbb.vMax.x, wbb.vMin.y, 0.0f);
+				vdl.pos = D3DXVECTOR3(wbb.vMin.x, wbb.vMax.y, 0.0f);
+				vdr.pos = D3DXVECTOR3(wbb.vMax.x, wbb.vMax.y, 0.0f);
+				//setez culoarea (setata pe onload)
+				vul.color = vur.color = vdl.color = vdr.color = col->color;
+				//setez coordonate tex2 (nu se folosesc)
+				D3DXVECTOR2 texul = wbb.vMin;
+				D3DXVECTOR2 texdr = wbb.vMax;
+
+				RECTLTRB_F lTexRect(texul.x, texul.y, texdr.x, texdr.y);
+				//Coord de mapare pe RTT (tex2) se seteaza din shader
+				vul.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
+				vur.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
+				vdl.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
+				vdr.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
+				//setez normalele finale
+				vul.n = vur.n = vdl.n = vdr.n = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+				//construiesc VB-ul exact
+				_VERTEX_PNCT4T4 fowRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+				fowRectV[0] = vul; fowRectV[1] = vur; fowRectV[2] = vdl;
+				fowRectV[3] = vur; fowRectV[4] = vdl; fowRectV[5] = vdr;
+
+				m_bufferedPainter.AddTriangles(fowRectV, 2);
+			}
+		}
+	}
+	//inchid meshul apelor
+	m_bufferedPainter.EndMesh();
+
+	///--- build buffered painter buffers ---
+	m_bufferedPainter.BuildBuffers();
+
+}
+
 ///--------------------------------------------------------------------------------
 ///--- AI UPDATES ---
 ///--------------------------------------------------------------------------------
@@ -3785,239 +4114,6 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 			break;
 			case K_AI_STATE_ACTIVE_TEAM_TELEPORTER_2FRAMES:
 			{
-				//keep door open (AIvar1 contine frame-ul default) - set frame
-				prop->sprite.currentFrame = prop->nFrame_ini;
-				if (prop->AItimer1 > 0.0f)
-				{
-					prop->AItimer1 -= dTime;
-					bool bDontChangeFrames = (bool)(prop->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
-					if (!bDontChangeFrames)
-					{
-						prop->sprite.currentFrame++;
-					}
-					if (prop->AItimer1 < 0.0f)
-						prop->AItimer1 = 0.0f;
-				}
-
-				//daca primesc parametru de toucher inseamna ca a fost activata usa si o tin deschisa pana cand actorul activator intra in behavior de TEAM_TELEPORT
-				UINT32 nCurrentToucher = prop->varAIparams.GetVariantByName(L"nToucherUID")->m_asUINT32;
-				if (nCurrentToucher != 0)
-				{
-					//Teleport logic (merge doar pentru actori)
-					CActor* toucher = GetActorByUID(nCurrentToucher);
-					//verifica daca e deja un player intr-un teleporter si daca este nu iti da voie sa intri in altul
-					if ((m_pTeleportSource != null) && (m_pTeleportSource != prop))
-					{
-						prop->varAIparams.SetNamedVarUINT32(L"nToucherUID", 0);
-						SND_PLAY_POSITIONAL(SNDIDX_DENIED, prop->pos);
-						break;
-					}
-
-					//set toucher teleport state - enter once
-					if ((toucher != null) && (toucher->m_pAIcurrentState != null) && (!toucher->m_pAIcurrentState->name.IsEqual(L"TEAM_TELEPORT")) && (m_fTeleportTimer <= 0.0f))
-					{
-						//setam starea TEAM_TELEPORT pentru actorul toucher
-						SetActorAIState(toucher, L"TEAM_TELEPORT");
-						//tinem usa deschisa o perioada	daca nu e setat flagul de don't change frames
-						bool bDontChangeFrames = (bool)(prop->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
-						if(!bDontChangeFrames)
-							prop->AItimer1 = 1.0f;
-						//centram player
-						toucher->pos = prop->pos;
-						toucher->speed.x = 0.0f;
-						//setam si pointerul la teleporter
-						if (m_pTeleportSource == null)
-						{
-							m_pTeleportSource = prop;
-						}
-					}
-					//reset touch command
-					prop->varAIparams.SetNamedVarUINT32(L"nToucherUID", 0);
-				}
-
-				//#PERSONALIZARE: player in limbo? keep door open
-				if ((m_nTeleportSlots > 0) && (m_pTeleportSource == prop) && (m_fTeleportTimer <= 0.0f))
-				{
-					bool bDontChangeFrames = (bool)(prop->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
-					if (!bDontChangeFrames)
-						prop->AItimer1 = 1.0f;
-				}
-
-				//daca am activat teleportul face teleport
-				if ((/*(m_bTeleportRequested) || */(m_nTeleportSlots == m_nPlayersActive)) && (m_pTeleportSource == prop))
-				{
-					bool bCanTeleport = true;
-					//verificare finala daca pot face teleport request de unul dintre players
-					/*
-					if (m_bTeleportRequested)
-					{
-						for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
-						{
-							if (pPlayerActor[kk] != null)
-							{
-								//daca unul dintre ei este in TEAM TELEPORT dar nu e inca pe behavior TEAM_TELEPORT atunci da cancel la request
-								//fara verificarea asta aparea un bug atunci cand unul apasa sus in timp ce celalalt intra pe usa
-								if ((pPlayerActor[kk]->m_pAIcurrentState->name.IsEqual(L"TEAM_TELEPORT")) && (pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_PLAYER_TEAM_TELEPORT))
-								{
-									m_bTeleportRequested = false;
-									bCanTeleport = false;
-								}
-							}
-						}
-					}
-					*/
-					//teleport players
-					if ((prop->pTarget != null) && (bCanTeleport))
-					{
-						bool bTeleported[K_MAX_PLAYERS_CNT] = { false, false };
-
-						if (m_fTeleportTimer <= 0.0f)
-						{
-							for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
-							{
-								if (pPlayerActor[kk] != null)
-								{
-									if (pPlayerActor[kk]->GetCurrentBehavior() == AI_BEHAVIOR_PLAYER_TEAM_TELEPORT)
-									{
-										pPlayerActor[kk]->pos = prop->pTarget->pos;
-										bTeleported[kk] = true;
-										//close source door after teleport (ca sa nu se vada deschis liftul pe 2 paliere)
-										prop->AItimer1 = 0.0f;
-										//set duration timer
-										m_fTeleportTimer = EPS + prop->varAIparams.GetVariantByName(L"f_teleportDuration")->m_asFloat;
-									}
-									else																  
-									{
-										//only on same PC multiplayer
-										if (!UTGetAppClass().IsGameNetworked())
-										{
-											//if we have player control (state DEFAULT) put him into LIMBO 
-											if (pPlayerActor[kk]->m_pAIcurrentState->name.IsEqual(L"DEFAULT"))
-												SetActorAIState(pPlayerActor[kk], L"IN_LIMBO");
-										}
-									}
-								}
-							}
-						}
-
-						//open destination door (SAME AI)
-						if (m_fTeleportTimer > 0.0f)
-						{
-							m_fTeleportTimer -= dTime;
-							if (m_fTeleportTimer <= 0.0f)
-							{
-								m_fTeleportTimer = 0.0f;
-
-								//tinem usa destinatie deschisa o perioada daca nu e setat flagul de don't change frames
-								bool bDontChangeFrames = (bool)(prop->pTarget->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
-								if (!bDontChangeFrames)
-								{
-									prop->pTarget->AItimer1 = 1.0f;
-								}
-
-								m_bTeleportActivated = true;
-
-								//door takes to hidden room
-								bool bHiddenRoom = (bool)(prop->varAIparams.GetVariantByName(L"b_EnterHiddenRoom")->m_asINT32);
-								//black out screen for a bit
-								//when on multiplayer, darken only if teleported to hidden room
-								if (bHiddenRoom)
-								{
-									if ((!UTGetAppClass().IsGameNetworked()) || (bTeleported[g_netlock.Net_GetPlayerIndex()]))
-									{
-										m_screenVignette.Init(0.5f, 0xff000000, 0.0f, 0.5f);
-									}
-								}
-								//daca avem slow time facem acum
-								float fSlowTimeDuration = prop->varAIparams.GetVariantByName(L"f_SlowTimeDuration")->m_asFloat;
-								if (fSlowTimeDuration > 0.0f)
-								{
-									if (!UTGetAppClass().IsGameNetworked())
-									{
-										SetTimeMultiplier(0.5f, fSlowTimeDuration);
-									}
-									else //on networked games only slow down time if both players enter
-									{
-										if ((bTeleported[0] == true) && (bTeleported[1] == true))
-											SetTimeMultiplier(0.5f, fSlowTimeDuration);
-									}
-									//ca sa faca doar prima data slowdown stergem variabila
-									prop->varAIparams.SetNamedVarFloat(L"f_SlowTimeDuration", 0.0f);
-								}
-								//set hidden room flag
-								m_bInsideHiddenRoom = bHiddenRoom;
-
-								if (bTeleported[0])
-									m_bPlayerInHiddenRoom[0] = bHiddenRoom;
-								if (bTeleported[1])
-									m_bPlayerInHiddenRoom[1] = bHiddenRoom;
-								//get in hidden room?
-								if (m_bInsideHiddenRoom)
-								{
-									//m_bPaintBackground = false;
-								}
-								else //get out of hidden room
-								{
-									SetTimeMultiplier(1.0f, 0.0f);
-									m_HiddenRoomAABB.Set(0.0f, 0.0f, 0.0f, 0.0f);
-									//reset camera target
-									m_camTargetActive = m_camTargetOld;
-									if (m_camTargetActive == null)
-										m_camLevel.SetCamPos(&m_vCamPosDefault, 1.0f, true);
-									else
-										m_camLevel.SetCamPos(&m_camTargetActive->pos, 1.0f, true);
-									//start painting the background
-									//m_bPaintBackground = true;
-									
-									//black out screen
-									RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
-									CAABB camAABB(D3DXVECTOR2(camrect.x, camrect.y), D3DXVECTOR2(camrect.Right(), camrect.Bottom()));
-									//black out screen only if teleporting outside the screen
-									if(!camAABB.Intersects(&prop->pTarget->bbox_exported))
-										m_screenVignette.Init(0.5f, 0xff000000, 0.0f, 0.5f);
-								}
-							}
-						}
-					}
-				}
-
-				//open/close sounds
-				if ((prop->AIvarBool1 == false) && (prop->AItimer1 > 0.0f))
-				{
-					//just opened
-					CVariantComplex* cvc = prop->varAIparams.GetVariantByName(L"s_openSnd");
-					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
-					{
-						int sndidx = UTGetSoundManager().getSndIdx(cvc->m_strArg.textHash);
-						SND_PLAY_POSITIONAL(sndidx, prop->pos);
-					}
-					//on open script
-					cvc = prop->varAIparams.GetVariantByName(L"s_ScriptOnOpen");
-					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
-					{
-						UTGetScriptManager().StartScript(cvc->m_strArg.textHash, prop->UID);
-					}
-
-					prop->AIvarBool1 = true;
-				}
-				else if ((prop->AIvarBool1 == true) && (prop->AItimer1 <= 0.0f))
-				{
-					//just closed
-					CVariantComplex* cvc = prop->varAIparams.GetVariantByName(L"s_closeSnd");
-					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
-					{
-						int sndidx = UTGetSoundManager().getSndIdx(cvc->m_strArg.textHash);
-						SND_PLAY_POSITIONAL(sndidx, prop->pos);
-					}
-					//on close script
-					cvc = prop->varAIparams.GetVariantByName(L"s_ScriptOnClose");
-					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
-					{
-						UTGetScriptManager().StartScript(cvc->m_strArg.textHash, prop->UID);
-					}
-					//save state
-					prop->AIvarBool1 = false;
-				}
 			}
 			break;
 
@@ -4442,16 +4538,6 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 		break;
 		case AI_BEHAVIOR_PLAYER_TEAM_TELEPORT:
 		{
-			actor->AIsubState = 0;
-			//setez teleport slots
-			m_nTeleportSlots++;
-			m_bTeleportActivated = false;
-			m_fTeleportTimer = 0.0f;
-			//cand intra in stare ma reasigur ca e setat pointerul de teleport source
-			if (m_pTeleportSource == null)
-			{
-				m_pTeleportSource = actor->pClosestTouchable;
-			}
 		}
 		break;
 		case AI_BEHAVIOR_IDLE_CROUCHED:
@@ -5525,15 +5611,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//IN_LIMBO se termina cand se revine din hidden room
 			case AI_BEHAVIOR_IN_LIMBO:
 			{
-				//set transparency to max
-				actor->m_AIcommands.nColor = D3DCOLOR_COLORALPHA(actor->color_ini, 0.0f);
-				//exit state when exiting hidden room
-				if (!m_bInsideHiddenRoom)
-				{
-					bBehaviorFinished = true;
-					//dupa behavior finished se reseteaza comenzile AI asa ca setam direct culoarea
-					actor->color = actor->color_ini;
-				}
 			}
 			break;
 			//acest AI e folosit la teleportarea intre usi in multiplayer si singleplayer ca sa se astepte playerii intre ei (timer si time slowdown)
@@ -5544,71 +5621,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				{
 					break;
 				}
-				//daca apasa pe UP cand sunt in teleporter cer teleportare fortata (doar cand nu sunt in camera ascunsa)
-				/*
-				if ((pController->sCommands.keyState[K_CM_COMMAND_UP] == K_CM_BUTSTATE_JUSTPRESSED) && (!m_bInsideHiddenRoom))
-				{
-					//can request teleportation by itself only on local coop
-					if(!UTGetAppClass().IsGameNetworked())
-						m_bTeleportRequested = true;
-				}
-				*/
-				//daca apas alt buton iese din teleport
-				/*
-				if ((pController->sCommands.keyState[K_CM_COMMAND_DOWN] == K_CM_BUTSTATE_JUSTPRESSED) && (m_nTeleportSlots < m_nPlayersActive))
-				{
-					//termina behavior
-					bBehaviorFinished = true;
-					//trimite info de deschidere usa la teleportor (timer)
-					if (m_pTeleportSource != null)
-					{
-						if (m_pTeleportSource->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32 == 0)
-						{
-							m_pTeleportSource->AItimer1 = 1.0f;
-						}
-					}
-				}
-				*/
-				//daca apesi st/dr se intoarce cu fatza in directia respectiva
-				bool bPressedRight = (pController->GetAxisVal(K_CM_COMMAND_MOVE_X) > 0.0f);
-				bool bPressedLeft = (pController->GetAxisVal(K_CM_COMMAND_MOVE_X) < 0.0f);
-				//daca apasa ambele butoane nu se misca
-				if (bPressedLeft && bPressedRight)
-					bPressedLeft = bPressedRight = false;
-
-				if (!bPressedLeft && bPressedRight)
-				{
-					actor->m_AIcommands.bThrustX = false;
-					actor->m_AIcommands.nLookDirX = 1;
-					actor->m_AIcommands.nMoveDirX = 1;
-				}
-				if (bPressedLeft && !bPressedRight)
-				{
-					actor->m_AIcommands.bThrustX = false;
-					actor->m_AIcommands.nLookDirX = -1;
-					actor->m_AIcommands.nMoveDirX = -1;
-				}
-
-				//iese din behavior dupa ce au fost teleportati
-				if (m_bTeleportActivated)
-				{
-					bBehaviorFinished = true;
-				}
-
-				if (bBehaviorFinished)
-				{
-					//scad numarul playerilor teleportati
-					m_nTeleportSlots--;
-					if (m_nTeleportSlots <= 0)
-					{
-						m_pTeleportSource = null;
-						m_nTeleportSlots = 0;
-						//m_bTeleportRequested = false;
-						m_bTeleportActivated = false;
-					}
-				}
-				//make sure it isn't invisible
-				actor->m_AIcommands.nColor = 0x00ffffff;
 			}
 			break;
 			case AI_BEHAVIOR_PLAYER_CONTROL:
@@ -9803,7 +9815,7 @@ void CLevel::Update(float dTime_original)
 		//no target camera object? look at the player pos average
 		if (m_camTargetActive == null)
 		{
-			if ((bAvgSet) && (!m_bInsideHiddenRoom))
+			if (bAvgSet)
 				m_vCamPosDefault = vPlayersAvg;
 
 			m_camLevel.SetCamPos(&m_vCamPosDefault);
@@ -9836,335 +9848,9 @@ void CLevel::Update(float dTime_original)
 	CAABB visibleAABB(m_visibleArea);
 	///--- update visibility lists (after update) ---
 	BuildVisibilityLists();
-	//#TODO: de mutat ce urmeaza mai jos in CreateDynamicMeshes()
 
-	/// preallocate verts array for light volume
-	//#TODO: sa nu mai le aloce dinamic pe fiecare frame ci sa fie alocati din start static sau ca membru al CLevel
-	const int arrVertsSize = 1200 * 3;
-	_VERTEX_PNCT4T4 *arrVerts = new _VERTEX_PNCT4T4[arrVertsSize];
-
-	const int arrOccludersSize = 200;
-	COccluderSegment arrOccluders[arrOccludersSize];
-	///--- create vert buffers for lights ---
-	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
-	{
-		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
-		switch (nl->type)
-		{
-			case K_LVL_LT_IES:
-			case K_LVL_LT_POINT:
-			{
-				//--- create light volumes for shadow casting lights	---
-				nl->m_nLightMeshIdx = -1;
-				if (nl->castShadows)
-				{
-					// returns a list of segments that will form shadows (from both tiles and collision boxes)
-					int nOccluders = GetOccluderSegments(Vec3ToVec2XY(nl->vPos), nl->bbox, arrOccluders, arrOccludersSize);
-
-					
-					// shows occluders instead of mesh. Checked for consistency.
-					/*
-					int nVertCnt = 0;
-					for (int kk = 0; kk < nOccluders; kk++)
-					{
-						arrVerts[nVertCnt].pos = Vec3(nl->vPos.x, nl->vPos.y, 0.0f);	
-						arrVerts[nVertCnt].color = 0x00ffffff; nVertCnt++;
-						arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vStart);		
-						arrVerts[nVertCnt].color = 0xff00ff00; nVertCnt++;
-						arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vEnd);
-						arrVerts[nVertCnt].color = 0xff0000ff; nVertCnt++;
-					}
-
-					if (nVertCnt > 3)
-					{
-						m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
-						m_bufferedPainter.AddTriangles(arrVerts, nVertCnt / 3);
-						m_bufferedPainter.EndMesh();
-					}
-					*/
-
-					
-					if (nOccluders > 0)
-					{
-						// sends rays and builds the light FOV as a triangle list mesh
-						int retVerts = FOVUtil::BuildOccludedVolume(Vec3ToVec2XY(nl->vPos), nl->color, arrOccluders, nOccluders, arrVerts, arrVertsSize);
-
-						// adaugam triunghiurile ca si mesh
-						if (retVerts > 0)
-						{
-							//adauga mesh dinamic pentru volumul umbrei
-							m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
-							m_bufferedPainter.AddTriangles(arrVerts, retVerts / 3);
-							m_bufferedPainter.EndMesh();
-						}
-					}
-					
-				}
-				else
-				{
-					Vec3 lcorners[4]; //ul, ur, dl, dr
-					memcpy(lcorners, nl->lCorners, 4 * sizeof(Vec3));
-					// move mesh to light position (!z must remain 0!)
-					lcorners[0].x += nl->vPos.x; lcorners[0].y += nl->vPos.y;
-					lcorners[1].x += nl->vPos.x; lcorners[1].y += nl->vPos.y;
-					lcorners[2].x += nl->vPos.x; lcorners[2].y += nl->vPos.y;
-					lcorners[3].x += nl->vPos.x; lcorners[3].y += nl->vPos.y;
-					//write final VS verts
-					_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-					vul.pos = lcorners[0];
-					vur.pos = lcorners[1];
-					vdr.pos = lcorners[2];
-					vdl.pos = lcorners[3];
-					//set color
-					vul.color = vur.color = vdl.color = vdr.color = nl->color;
-					// triangles vb
-					_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
-					lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-					lightRectV[3] = vur; lightRectV[4] = vdr; lightRectV[5] = vdl;
-
-					m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
-					m_bufferedPainter.AddTriangles(lightRectV, 2);
-					m_bufferedPainter.EndMesh();
-				}
-			}
-			break;
-			case K_LVL_LT_PROJECTED_DIR:
-			{
-				//create light mesh - rotating the actual mesh isn't necessary
-				D3DXVECTOR3 lcorners[4]; //ul, ur, dr, dl
-				memcpy(lcorners, nl->lCorners, 4 * sizeof(D3DXVECTOR3));
-				//move mesh to final pos
-				lcorners[0].x += nl->vPos.x; lcorners[0].y += nl->vPos.y;
-				lcorners[1].x += nl->vPos.x; lcorners[1].y += nl->vPos.y;
-				lcorners[2].x += nl->vPos.x; lcorners[2].y += nl->vPos.y;
-				lcorners[3].x += nl->vPos.x; lcorners[3].y += nl->vPos.y;
-				//scriu VS-ul final
-				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				vul.pos = lcorners[0];
-				vur.pos = lcorners[1];
-				vdr.pos = lcorners[2];
-				vdl.pos = lcorners[3];
-				//setez culoarea
-				vul.color = vur.color = vdl.color = vdr.color = nl->color;
-				//light direction as normals but not really used
-				vul.n = vur.n = vdl.n = vdr.n = nl->vnDir;
-				
-				_VERTEX_PNCT4T4 lightRectV[6]; 
-				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-				//dynamic mesh index for light geometry
-				nl->m_nLightMeshIdx = -1; //resetez idx mesh
-				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
-				m_bufferedPainter.AddTriangles(lightRectV, 2);
-				m_bufferedPainter.EndMesh();
-			}
-			break;
-
-			case K_LVL_LT_DIRECTIONAL:
-			case K_LVL_LT_AMBIENTAL:
-			{
-				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				vul.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMin.y, 0.0f);
-				vur.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMin.y, 0.0f);
-				vdl.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMax.y, 0.0f);
-				vdr.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMax.y, 0.0f);
-				//set color
-				vul.color = vur.color = vdl.color = vdr.color = nl->color;
-				//build verts
-				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
-				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
-				m_bufferedPainter.AddTriangles(lightRectV, 2);
-				m_bufferedPainter.EndMesh();
-			}
-			break;
-		}
-	}
-	// delete preallocated verts array
-	SAFE_DELETE_ARRAY(arrVerts);
-
-
-	//2. poligoane alte lumini: gloante, particule, etc
-	//PROPS lights - temp lights - gunshot lights, explo lights
-	m_propsLightsMeshIdx = -1;
-	m_bufferedPainter.BeginMesh(m_propsLightsMeshIdx);
-
-	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.pListUsed.m_pNext;
-	while (node != &m_poolProps.pListUsed)
-	{
-		//salvez locatia urmatoare ca s apot avansa pe ea
-		CLinkedPool<CSpecialProp>::CLinkedPoolNode *nextnode = node->m_pNext;
-		CSpecialProp* prop = &node->m_data;
-
-		if (prop->bMakesLight)
-		{
-			if (prop->sprLight.animationIdx >= 0)
-			{
-				//Creez forma luminii (mesh-ul)
-				RECTLTRB_F realrect = m_sprLights.GetAFrameBBox_real(prop->sprLight.animationIdx, 0);
-				//Scalez dreptunghi lumina
-				if (prop->fLightScaling != 1.0f)
-				{
-					CAABB realaabb;
-					realaabb.Set(realrect);
-					realaabb.Scale(prop->fLightScaling);
-					realrect.left = realaabb.vMin.x; realrect.top = realaabb.vMin.y;
-					realrect.right = realaabb.vMax.x; realrect.bottom = realaabb.vMax.y;
-				}
-				//scriu VS-ul final
-				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				D3DXVECTOR2 bpos2D = node->m_data.physPt->m_data.pos;
-				D3DXVECTOR3 bpos(node->m_data.physPt->m_data.pos.x, node->m_data.physPt->m_data.pos.y, 50.0f);
-				vul.pos = D3DXVECTOR3(bpos.x + realrect.left, bpos.y + realrect.top, 0.0f);
-				vur.pos = D3DXVECTOR3(bpos.x + realrect.right, bpos.y + realrect.top, 0.0f);
-				vdl.pos = D3DXVECTOR3(bpos.x + realrect.left, bpos.y + realrect.bottom, 0.0f);
-				vdr.pos = D3DXVECTOR3(bpos.x + realrect.right, bpos.y + realrect.bottom, 0.0f);
-				//setez culoarea
-				float fLife = prop->fLightDuration;
-				float fFadeTime = prop->fLightFadeOut;
-
-				float alpha = 1.0f;
-				//la unele nu setez fLife deci ma intereseaza sa se vada
-				if (fLife > 0.0f)
-				{
-					if (prop->fLightTimer < fFadeTime)
-						alpha = prop->fLightTimer / fFadeTime;
-					else if (prop->fLightTimer > fLife)
-						alpha = 0.0f;
-					else if (prop->fLightTimer > fLife - fFadeTime)
-						alpha = ((fLife - prop->fLightTimer) / fFadeTime);
-				}
-
-				float fOrigAlpha = D3DCOLOR_GETFALPHA(prop->sprLight.color);
-				vul.color = vur.color = vdl.color = vdr.color = D3DCOLOR_COLORALPHA(prop->sprLight.color, fOrigAlpha * alpha);
-				//setez coordonate textura spot
-				RECTLTRB_F lTexRect = m_sprLights.GetModuleRect_TexCoords(prop->sprLight.animationIdx, 0, 0);
-				//Coord de mapare pe RTT (tex2) se seteaza din shader
-				vul.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
-				vur.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
-				vdl.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
-				vdr.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
-				//setez normalele finale
-				vul.n = bpos - vul.pos;
-				vur.n = bpos - vur.pos;
-				vdl.n = bpos - vdl.pos;
-				vdr.n = bpos - vdr.pos;
-				//construiesc VB-ul exact
-				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
-				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-				m_bufferedPainter.AddTriangles(lightRectV, 2);
-			}
-		}
-
-		//get to next node
-		node = nextnode;
-	}
-	//inchid meshul
-	m_bufferedPainter.EndMesh();
-	
-	//#TODO: should try not clamping water and FOW rects to screen maybe it fixes the texture/pshader issue on some cards
-
-	//3. poligoane apa
-	m_bufferedPainter.BeginMesh(m_waterMeshIdx);
-	//salvez date textura apa	
-	float waterTexScale = 2.0f;
-	float waterTexSize = m_texManager.m_Texs[m_waterTexIdx]->info.Width;
-
-	for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
-	{
-		if (m_visibleList.logic_colShapesSpecial.m_pData[kk]->type == K_LVL_COLL_TYPE_WATER)
-		{
-			CCollisionShape * col = m_visibleList.logic_colShapesSpecial.m_pData[kk];
-			CAABB wbb; //water bbox
-			if (AABB_Intersection(col->bbox, camAABB, wbb))
-			{
-				D3DXVECTOR2 texoff = col->bbox.vMin - wbb.vMin;
-				//save water plys in a sigle mesh, clipped to screen rect
-				
-				//scriu VS-ul final
-				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				vul.pos = D3DXVECTOR3(wbb.vMin.x, wbb.vMin.y, 0.0f);
-				vur.pos = D3DXVECTOR3(wbb.vMax.x, wbb.vMin.y, 0.0f);
-				vdl.pos = D3DXVECTOR3(wbb.vMin.x, wbb.vMax.y, 0.0f);
-				vdr.pos = D3DXVECTOR3(wbb.vMax.x, wbb.vMax.y, 0.0f);
-				//setez culoarea
-				//#TODO: culoarea sa fie setata undeva in editor. Poate as putea sa pun control de culoare la collision boxuri...
-				vul.color = vur.color = vdl.color = vdr.color = 0xaa30AFFF;// col->color;
-				//setez coordonate textura apa
-				D3DXVECTOR2 texul = (wbb.vMin * waterTexScale) / waterTexSize;
-				D3DXVECTOR2 texdr = (wbb.vMax * waterTexScale) / waterTexSize;
-
-				RECTLTRB_F lTexRect(texul.x, texul.y, texdr.x, texdr.y);
-				//Coord de mapare pe RTT (tex2) se seteaza din shader
-				vul.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
-				vur.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
-				vdl.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
-				vdr.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
-				//setez normalele finale
-				vul.n = vur.n = vdl.n = vdr.n = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-				//construiesc VB-ul exact
-				_VERTEX_PNCT4T4 waterRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
-				waterRectV[0] = vul; waterRectV[1] = vur; waterRectV[2] = vdl;
-				waterRectV[3] = vur; waterRectV[4] = vdl; waterRectV[5] = vdr;
-
-				m_bufferedPainter.AddTriangles(waterRectV, 2);
-			}
-		}
-	}
-	//inchid meshul apelor
-	m_bufferedPainter.EndMesh();
-
-
-	//4. poligoane fow
-	m_bufferedPainter.BeginMesh(m_fogofwarMeshIdx);
-
-	for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
-	{
-		if (m_visibleList.logic_colShapesSpecial.m_pData[kk]->type == K_LVL_COLL_TYPE_FOG_OF_WAR)
-		{
-			CCollisionShape * col = m_visibleList.logic_colShapesSpecial.m_pData[kk];
-			CAABB wbb; //bbox
-			if (AABB_Intersection(col->bbox, camAABB, wbb))
-			{
-				//scriu VS-ul final
-				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				vul.pos = D3DXVECTOR3(wbb.vMin.x, wbb.vMin.y, 0.0f);
-				vur.pos = D3DXVECTOR3(wbb.vMax.x, wbb.vMin.y, 0.0f);
-				vdl.pos = D3DXVECTOR3(wbb.vMin.x, wbb.vMax.y, 0.0f);
-				vdr.pos = D3DXVECTOR3(wbb.vMax.x, wbb.vMax.y, 0.0f);
-				//setez culoarea (setata pe onload)
-				vul.color = vur.color = vdl.color = vdr.color = col->color;
-				//setez coordonate tex2 (nu se folosesc)
-				D3DXVECTOR2 texul = wbb.vMin;
-				D3DXVECTOR2 texdr = wbb.vMax;
-
-				RECTLTRB_F lTexRect(texul.x, texul.y, texdr.x, texdr.y);
-				//Coord de mapare pe RTT (tex2) se seteaza din shader
-				vul.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
-				vur.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
-				vdl.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
-				vdr.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
-				//setez normalele finale
-				vul.n = vur.n = vdl.n = vdr.n = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-				//construiesc VB-ul exact
-				_VERTEX_PNCT4T4 fowRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
-				fowRectV[0] = vul; fowRectV[1] = vur; fowRectV[2] = vdl;
-				fowRectV[3] = vur; fowRectV[4] = vdl; fowRectV[5] = vdr;
-
-				m_bufferedPainter.AddTriangles(fowRectV, 2);
-			}
-		}
-	}
-	//inchid meshul apelor
-	m_bufferedPainter.EndMesh();
-
-	///--- build buffered painter buffers ---
-	m_bufferedPainter.BuildBuffers();
+	// builds all dynamic meshes necessary for drawing the next frame
+	BuildDynamicGeometry(camAABB);
 
 	///--- update interface ---
 	m_interfaceIGM.Update(dTime);
@@ -11770,7 +11456,7 @@ void CLevel::Paint()
 	//1. paint level background
 	//PaintBackground();
 	//--- paint thunder ---
-	if ((m_fThunderTimer > 0.0f) && (m_fThunderTimer < 0.4f) && (randint(1000) < 500) && (!UTGetGUI().bIsBlocking) && (!DXUTIsTimePaused()) && (!m_bInsideHiddenRoom))
+	if ((m_fThunderTimer > 0.0f) && (m_fThunderTimer < 0.4f) && (randint(1000) < 500) && (!UTGetGUI().bIsBlocking) && (!DXUTIsTimePaused()))
 	{
 	}
 
@@ -12369,22 +12055,6 @@ HRESULT CLevel::PaintUsingFinalRTT()
 				}
 			}
 		}
-	}
-
-	//--- team icon team teleporters ---
-	if ((m_pTeleportSource != null) && (m_nPlayersActive > 1) && (m_fTeleportTimer <= 0.0f))
-	{
-		//vedem cati players sunt in starea de DOOR_TELEPORT ca sa  afisam corect iconurile
-		int icons = 0;
-		for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
-		{
-			//varianta comentata este cea care apare verde playerul doar dupa ce a intrat
-			//if ((pPlayerActor[kk] != null) && (pPlayerActor[kk]->GetCurrentBehavior() == AI_BEHAVIOR_PLAYER_TEAM_TELEPORT))
-			if ((pPlayerActor[kk] != null) && (pPlayerActor[kk]->m_pAIcurrentState->name.IsEqual(L"TEAM_TELEPORT")))
-				icons++;
-		}
-
-		CSprite::paintFrame(&m_sprInterface, m_pTeleportSource->bbox.vCenter.x, m_pTeleportSource->bbox.vMax.y, ANM_IGM_INTERFACE_SPR_TEAM_TELEPORT_ICONS, icons, 0xffffffff);
 	}
 
 	m_pSprite->Flush();

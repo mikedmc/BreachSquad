@@ -15,7 +15,7 @@
     <Module ImageIdx="0" X="483" Y="2" W="10" H="11" />
     <Module ImageIdx="0" X="454" Y="12" W="23" H="23" />
     <Module ImageIdx="0" X="477" Y="14" W="16" H="19" />
-    <Module ImageIdx="0" X="494" Y="13" W="18" H="21" />
+    <Module ImageIdx="0" X="456" Y="41" W="36" H="36" />
   </Modules>
   <FrameModules>
     <FrameModule ModuleIdx="0" OX="-1" OY="-26" Flags="0" />
@@ -30,7 +30,7 @@
     <FrameModule ModuleIdx="9" OX="-5" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="10" OX="-12" OY="-11" Flags="0" />
     <FrameModule ModuleIdx="11" OX="-8" OY="-9" Flags="0" />
-    <FrameModule ModuleIdx="12" OX="-9" OY="-10" Flags="0" />
+    <FrameModule ModuleIdx="12" OX="-18" OY="-17" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="-1" BBoxY="-26" BBoxW="26" BBoxH="26">
@@ -105,7 +105,7 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="-9" BBoxY="-10" BBoxW="18" BBoxH="21">
+    <Frame BBoxX="-18" BBoxY="-17" BBoxW="36" BBoxH="36">
       <FModules>
         <FModule Idx="12" />
       </FModules>

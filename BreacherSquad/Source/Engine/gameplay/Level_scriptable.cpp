@@ -588,57 +588,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_COLL_ENTER_HIDDEN_ROOM:
 		{
-			CVariantComplex* vcTarget = instr->GetArgument(L"target");
-			CVariantComplex* vcLockCamera = instr->GetArgument(L"lockCamera");
-			CVariantComplex* vcHideOutside = instr->GetArgument(L"hideOutside");
-			IActiveInterface* target = ScriptGetActiveInterfaceByTargetParam(vcTarget, executorUID);
-			if (target == null)
-			{
-				LOG(L"SCRIPT::COLL_ENTER_HIDDEN_ROOM - target is null! Probably wrong ID\n");
-				return true;
-			}
-
-			bool bSetCamera = true;
-			//in networked games only lock camera for teleported
-			if (UTGetAppClass().IsGameNetworked())
-			{
-				int playerIdx = g_netlock.Net_GetPlayerIndex();
-				if ((pPlayerActor[playerIdx] != null) && (m_bInsideHiddenRoom) && (m_bPlayerInHiddenRoom[playerIdx] == false))
-					bSetCamera = false;
-				//target already set on something, don't set again
-				if (m_camTargetActive != null)
-					bSetCamera = false;
-			}
-
-			if (bSetCamera)
-			{
-				if (vcLockCamera->asInt32() != 0)
-				{
-					m_camTargetOld = m_camTargetActive;
-					m_camTargetActive = target;
-
-					if (m_camTargetActive == null)
-						m_camLevel.SetCamPos(&m_vCamPosDefault, 1.0f, true);
-					else
-					{
-						m_camLevel.SetCamPos(&m_camTargetActive->pos, 1.0f, true);
-
-						//save hidden room extents
-						bool bHideOuside = (vcHideOutside->m_asINT32 != 0) ? true : false;
-						if (m_bInsideHiddenRoom)
-						{
-							//save trigger area too
-							if (bHideOuside)
-								m_HiddenRoomAABB = m_camTargetActive->bbox;
-							else
-								m_HiddenRoomAABB.Set(0.0f, 0.0f, 0.0f, 0.0f);
-
-						}
-
-					}
-				}
-			}
-
 			return true;
 		}
 		break;
@@ -1334,12 +1283,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				LOG(L"SCRIPT::ACTOR_SPAWN - where: missing param!\n");
 				return true;
 			}
-			//#HACK: sa nu spawneze pe usa daca ai player in usa
-			if (target == m_pTeleportSource)
-			{
-				LOG(L"SCRIPT::ACTOR_SPAWN - target object used as teleport source by player!\n");
-				return true;
-			}
 
 			//get template and state
 			if ((vcTemplate == null) || (vcTemplate->m_type != CVariantComplex::K_ARGTYPE_STRING))
@@ -1559,21 +1502,11 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_LEVEL_HIDE_BACKGROUND:
 		{
-			//hide background only if current player entered a hidden room
-			if (UTGetAppClass().IsGameNetworked() && (m_bPlayerInHiddenRoom[g_netlock.Net_GetPlayerIndex()] == false))
-				return true;
-
-			//m_bPaintBackground = false;
 			return true;
 		}
 		break;
 		case instr_LEVEL_SHOW_BACKGROUND:
 		{
-			//show background only if current player is out of a hidden room
-			if (UTGetAppClass().IsGameNetworked() && (m_bPlayerInHiddenRoom[g_netlock.Net_GetPlayerIndex()] == true))
-				return true;
-
-			//m_bPaintBackground = true;
 			return true;
 		}
 		break;

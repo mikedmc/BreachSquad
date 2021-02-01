@@ -124,6 +124,9 @@ public:
 	void BuildVisibilityLists();
 	void ClearVisibilityLists();
 
+	// builds frame-by-freame geometry for lights, water, etc (on Update)
+	void BuildDynamicGeometry(CAABB camAABB);
+
 	CBufferedPainter		m_bufferedPainter;	// used when drawing dynamic meshes
 
 	int						tileW, tileH;		//size of tiles
@@ -286,7 +289,7 @@ public:
 	///--- room occluders ---
 	int						m_fogofwarMeshIdx;		//idx mesh occludere
 
-	
+	///--- WEAPONS ---
 	// can we shoot the weapon? some weapons have pre-shoot conditions (maybe not working underWATER)
 	bool					CanShootWeapon(CWeapon * weapon);
 	// Trage cu arma specificata
@@ -302,6 +305,7 @@ public:
 	// seteaza comenzi arma
 	void					ResetBurstWeapon(CWeapon * weapon);
 
+	///--- BULLETS ---
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.
 	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, D3DXVECTOR2 pos, D3DXVECTOR2 shootDir);
 	// Returns the closest bullet (or null) of nBulletType under fMaxDistance
@@ -313,6 +317,7 @@ public:
 	// Marks bullets as killed and returns how many were marked 
 	// \param dwOwnerUID - specifies the owner UID filter or leave 0 to ignore the owner flag
 	int						KillBulletsOfType(int nBulletType, UINT32 dwOwnerUID = 0);
+
 	///--- level props pool ---
 	int						m_propsLightsMeshIdx;	//id-ul meshului pentru desenarea luminii propsurilor
 	CLinkedPool<CSpecialProp>	m_poolProps;			//pool de props
@@ -353,15 +358,7 @@ public:
 	void					InitializeStrategicAbilities(int nPlayerOrdinal);
 	// Last valid spawning pos (level start flags or checkpoints)
 	D3DXVECTOR2				vLastSpawnPoint; 
-	///--- TEAM TELEPORTING DOORS ---
-	int						m_nTeleportSlots;		//cate sloturi sunt pline pe usile de echipa (team doors)
-	bool					m_bTeleportActivated;	//daca trebuie facuta teleportare
-	//bool					m_bTeleportRequested;	//daca s-a cerut teleportarea inainte sa intre toata echipa
-	float					m_fTeleportTimer;		//durata teleportului
-	IActiveInterface*		m_pTeleportSource;		//pointer la obiectul care face teleport
-	bool					m_bInsideHiddenRoom;	//specifica daca cel putin un player a intrat intr-o camera ascunsa (ca sa stiu sa scot din LIMBO personajele care nu au intrat)
-	CAABB					m_HiddenRoomAABB;		//current hidden room trigger AABB
-	bool					m_bPlayerInHiddenRoom[K_MAX_PLAYERS_CNT];	//tells you what player is inside the hidden room
+	
 	///--- STATISTICS ---
 	int						m_arrStats[K_LVL_STATS_CNT];		//array that holds the statistics
 	void					ResetLevelStatistics();
