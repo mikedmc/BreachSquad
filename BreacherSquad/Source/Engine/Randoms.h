@@ -43,7 +43,7 @@ public:
 	int				RandSign();
 	//intoarce valoare intre -n si n
 	float			RandFloatSgn( float n );
-	D3DXVECTOR2     RandD3DXVECTOR2sgn(float x, float y);
+	Vec2     RandVec2sgn(float x, float y);
 	void			SetRandomSeed(unsigned int n);
 	unsigned int	GetRandomSeed(void);
 	void			Randomize(void);
@@ -153,7 +153,7 @@ CRandom& UTGetRandom()
 #define  randint(a)				UTGetRandom().RandInt(a)
 #define  randint_range(a, b)	UTGetRandom().RandInt(a, b)
 #define  randsign()				((int)((UTGetRandom().RandInt(0xffffffff) % 2) * 2) - 1)
-#define  randD3DXVECTOR2sgn(x,y) (D3DXVECTOR2(UTGetRandom().RandFloatSgn(x), UTGetRandom().RandFloatSgn(y)))
+#define  randVec2sgn(x,y) (Vec2(UTGetRandom().RandFloatSgn(x), UTGetRandom().RandFloatSgn(y)))
 
 #else
 
@@ -163,7 +163,7 @@ CRandom& UTGetRandom()
 #define  randint(a)				((unsigned int)((unsigned int)rand() % (unsigned int)(a)))
 #define  randint_range(a, b)	(a + ((unsigned int)((unsigned int)rand() % (unsigned int)(b - a + 1))))
 #define  randsign()				((int)(( ((unsigned int)rand() % (unsigned int)(2)) ) * 2 - 1))
-#define  randD3DXVECTOR2sgn(x,y) (D3DXVECTOR2((float((float)rand() / ((float)RAND_MAX / ((x) * 2.0f))) - (x)), (float((float)rand() / ((float)RAND_MAX / ((y) * 2.0f))) - (y))))
+#define  randVec2sgn(x,y)		(Vec2((float((float)rand() / ((float)RAND_MAX / ((x) * 2.0f))) - (x)), (float((float)rand() / ((float)RAND_MAX / ((y) * 2.0f))) - (y))))
 #define  randompercent(fProbabilityPercent) ((randfloat(100.0f) <= fProbabilityPercent) ? true : false)
 
 #endif

@@ -251,7 +251,7 @@ bool CLevel::CanShootWeapon(CWeapon * weapon)
 	return true;
 }
 
-bool CLevel::ShootWeapon(CWeapon * weapon, D3DXVECTOR2 vDir)
+bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
 {
 	if ((weapon == null) || (weapon->pOwner == null) || (weapon->status == K_LVL_WPN_STATUS_UNKNOWN))
 		return false;
@@ -260,8 +260,8 @@ bool CLevel::ShootWeapon(CWeapon * weapon, D3DXVECTOR2 vDir)
 		return false;
 
 	CActor* shooter = weapon->pOwner;
-	D3DXVECTOR2 vFinalDir = vDir;
-	D3DXVECTOR2 vShootPos = shooter->GetPosWeapon();
+	Vec2 vFinalDir = vDir;
+	Vec2 vShootPos = shooter->GetPosWeapon();
 
 	int nFinalClass = shooter->templateActor.actorClass;
 	//bullet has template class, set it to final class
@@ -395,7 +395,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, D3DXVECTOR2 vDir)
 		//adaug shell
 		if (weapon->WeaponTemplate.nDropShellFrame >= 0)
 		{
-			AddProp(K_SPROP_SHELL, weapon->pOwner->GetPosHeart(), &D3DXVECTOR2(-weapon->pOwner->lookDirXsign * (40.0f + randfloat(30.0f)), -50.0f - randfloat(20.0f)), &g_vecGravityOld, weapon->WeaponTemplate.nDropShellFrame);
+			AddDoofer(K_DOOFER_SHELL, weapon->pOwner->GetPosHeart(), &Vec2(-weapon->pOwner->lookDirXsign * (40.0f + randfloat(30.0f)), -50.0f - randfloat(20.0f)), &g_vecGravityOld, weapon->WeaponTemplate.nDropShellFrame);
 		}
 
 		float fAimErrorMul = 1.0f;

@@ -1,9 +1,16 @@
 #include "dxstdafx.h"
 #include "Level_visibility.h"
+#include <algorithm> // std::sort
+
+// function used when sorting the visible elements by Y
+bool VisibleItemsSorter(CVisibleSortable& a, CVisibleSortable& b)
+{
+	return (a.fValue < b.fValue);
+}
 
 
 //used to save last player positions
-static D3DXVECTOR2 s_vLastPlayerPos[K_MAX_PLAYERS_CNT];
+static Vec2 s_vLastPlayerPos[K_MAX_PLAYERS_CNT];
 
 void CLevel::BuildVisibilityLists()
 {
@@ -17,16 +24,17 @@ void CLevel::BuildVisibilityLists()
 	SIZEWH_F camrectsz(K_GAME_WIDTH_MAX, K_GAME_HEIGHT);
 	RECTXYWH_F camrect(camrect_old.CenterX() - camrectsz.w * 0.5f, camrect_old.CenterY() - camrectsz.h * 0.5f, camrectsz.w, camrectsz.h);
 	//maximize camrect vertically
-	CAABB camaabb(D3DXVECTOR2(camrect.x, camrect.y), D3DXVECTOR2(camrect.Right(), camrect.Bottom()));
+	CAABB camaabb(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));
 	//union of all visible lights AABBs
-	CAABB lightsCommonAABB(D3DXVECTOR2(-1000.0f, -1000.0f), D3DXVECTOR2(-1000.0f, -1000.0f));
+	CAABB lightsCommonAABB(Vec2(-1000.0f, -1000.0f), Vec2(-1000.0f, -1000.0f));
 	//for detecting visible props (objects)
 	CAABB propsPaintAABB = camaabb;
 	//for detecting visible actors
 	CAABB actorsPaintAABB = camaabb; //box-ul care zice daca actorul e vizibil sau nu
-	actorsPaintAABB.Inflate(D3DXVECTOR2(K_TILE_SIZE, K_TILE_SIZE)); //maresc putin bboxul actorilor pt ca cei morti au bbox mai mic
+	actorsPaintAABB.Inflate(Vec2(K_TILE_SIZE, K_TILE_SIZE)); //maresc putin bboxul actorilor pt ca cei morti au bbox mai mic
 
 	ClearVisibilityLists();
+	
 
 	///----- logical stuff - depends on both players -----
 	//filter only useful collision boxes here (bullets intersections and such)
@@ -81,7 +89,7 @@ void CLevel::BuildVisibilityLists()
 				break;
 			if (m_arrLights[kk]->castShadows)
 			{
-				CAABB bbox_max(D3DXVECTOR2(light->pos.x - light->fRadius, light->pos.y - light->fRadius), D3DXVECTOR2(light->pos.x + light->fRadius, light->pos.y + light->fRadius));
+				CAABB bbox_max(Vec2(light->pos.x - light->fRadius, light->pos.y - light->fRadius), Vec2(light->pos.x + light->fRadius, light->pos.y + light->fRadius));
 				//la prima lumina cu shadow seteaza lightsCommonAABB fix pe bbox-ul luminii
 				if (bFirstShadowingLightSet == false)
 				{
@@ -200,16 +208,16 @@ void CLevel::BuildVisibilityLists()
 	{
 		if (m_arrProps[kk]->bHidden)
 			continue;
-		CProp* active = m_arrProps[kk];
+		CProp* prop = m_arrProps[kk];
 		//visible props
-		if (propsPaintAABB.Intersects(&active->bbox))
+		if (propsPaintAABB.Intersects(&prop->bbox))
 		{
-			m_visibleList.visible_props.Add(active);
+			m_visibleList.visible_props.Add(prop);
 		}
 		//logical closeby actives
-		if ((propsNearbyAABBs[0].Intersects(&active->bbox)) || (propsNearbyAABBs[1].Intersects(&active->bbox)))
+		if ((propsNearbyAABBs[0].Intersects(&prop->bbox)) || (propsNearbyAABBs[1].Intersects(&prop->bbox)))
 		{
-			m_visibleList.logic_props_closeby.Add(active);
+			m_visibleList.logic_props_closeby.Add(prop);
 		}
 	}
 	//clear all decals layers
@@ -225,6 +233,16 @@ void CLevel::BuildVisibilityLists()
 			m_visibleList.visible_decals[m_arrDecals[kk]->layer].Add(m_arrDecals[kk]);
 		}
 	}
+
+	///--- sort all visible items
+	std::sort(m_visibleList.vecSorted.begin(), m_visibleList.vecSorted.end(), VisibleItemsSorter);
+
+#if defined(_DEBUG) || defined(DEBUG)
+	if (m_visibleList.vecSorted.size() >= K_VL_MAX_SORTED_VISIBLES)
+	{
+		ErrorBox(K_ERR_WARNING, L"VecSorted too small, speed improvement can be made by enlarging the vector.");
+	}
+#endif
 }
 
 void CLevel::ClearVisibilityLists()
@@ -243,4 +261,8 @@ void CLevel::ClearVisibilityLists()
 	m_visibleList.logic_colShapes.Clear();
 	m_visibleList.logic_colShapesExtended.Clear();
 	m_visibleList.logic_colShapesSpecial.Clear();
+
+	// reserve 100 elements for onscreen sorted elements
+	m_visibleList.vecSorted.clear();
+	m_visibleList.vecSorted.reserve(K_VL_MAX_SORTED_VISIBLES);
 }

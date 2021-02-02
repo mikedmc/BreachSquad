@@ -9,9 +9,9 @@
 
 enum eActiveInterfaceType {
 	K_LVL_IAI_TYPE_UNKNOWN,
-	K_LVL_IAI_TYPE_BASE,
+	K_LVL_IAI_TYPE_BASE,		// basinc IActiveInterface
 	K_LVL_IAI_TYPE_LIGHT,
-	K_LVL_IAI_TYPE_ACTIVE,
+	K_LVL_IAI_TYPE_PROP,
 	K_LVL_IAI_TYPE_ACTOR,
 	K_LVL_IAI_TYPE_COLSHAPE,
 };
@@ -33,7 +33,7 @@ public:
 	float	fTouchTimer;		//pentru cat timp s-a facut touch? sunt obiecte la care trebuie sa faci touch pentru o durata anume
 	float	fTouchDuration;		//durata ceruta pentru touch
 
-	D3DXVECTOR2	pos;		   //pozitie activ
+	Vec2		pos;		   //pozitie activ
 	float		fAngle;
 	DWORD		color;
 	CAABB		bbox;
@@ -41,7 +41,7 @@ public:
 public: //valori initiale ale coordonatelor folositoare la miscari nerelative (unele stari AI le folosesc)
 	CAABB		bbox_ini;			//non relative to object position AABB
 	CAABB		bbox_exported_ini; //bboxul exportat din BSX (inital)
-	D3DXVECTOR2 pos_ini;
+	Vec2		pos_ini;
 	float		fAngle_ini;
 	DWORD		color_ini;
 	INT32		targetID_ini;	//target ID citit din editor
@@ -62,7 +62,7 @@ public: //logic
 	float				AItimer1, AItimer2;	//timere folosite la diverse functii
 	float				AIfvar1, AIfvar2, AIfvar3; //diverse variabile folosite in AI
 	int					AIvar1, AIvar2;
-	D3DXVECTOR2			AIvec1;
+	Vec2			AIvec1;
 	bool				AIvarBool1, AIvarBool2;
 	CStringHash			AIstrvar1, AIstrvar2; //variabile string
 	int					AIsubState;			//sub-stare folosita la diferite AI-uri
@@ -113,8 +113,8 @@ public: //logic
 	void UpdateTouchTimerReset(float dTime);
 
 	//functie care seteaza pozitia complet (adica pos, bbox, puncte relative, etc)
-	virtual void SetPos(D3DXVECTOR2 newPos) = 0;
-	virtual void Move(D3DXVECTOR2 delta) = 0;
+	virtual void SetPos(Vec2 newPos) = 0;
+	virtual void Move(Vec2 delta) = 0;
 	virtual void SetAngle(float fnAngle) = 0;
 
 	// Call this to mark it for destruction

@@ -66,7 +66,7 @@ int GetAIStateByNameHash(UINT32 stateHash)
 static int nIntroVerseState = 0;
 
 
-HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, D3DXVECTOR2 spawnPos)
+HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, Vec2 spawnPos)
 {
 	if (actTemplate == NULL)
 	{
@@ -120,12 +120,12 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, D3DXVECT
 	actor->bHasGravity = true;
 	actor->bSkipRender = false;
 
-	actor->vMoveDirN = D3DXVECTOR2(0.0f, 0.0f);
+	actor->vMoveDirN = Vec2(0.0f, 0.0f);
 
 	actor->bReleaseIt = false;
-	actor->speed = D3DXVECTOR2(0.0f, 0.0f);
-	actor->vSpeedImpulse = D3DXVECTOR2(0.0f, 0.0f);
-	actor->vecCamFollowPos = D3DXVECTOR2(0.0f, 0.0f);
+	actor->speed = Vec2(0.0f, 0.0f);
+	actor->vSpeedImpulse = Vec2(0.0f, 0.0f);
+	actor->vecCamFollowPos = Vec2(0.0f, 0.0f);
 
 	actor->m_sprOverheadIcon.Init(-1, 0.0f, 0.0f);
 	//set hue
@@ -209,7 +209,7 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, D3DXVECT
 }
 
 
-CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, D3DXVECTOR2* pvProjectileMomentum)
+CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvProjectileMomentum)
 {
 	CBulletHitReturnData retData;
  	retData.eMaterial = actor->templateActor.eMaterial;
@@ -433,7 +433,6 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, D3DXVECTO
 			float fDmgPerc = 0.0f;
 			if (fLifeTaken > 0.0f) fDmgPerc += 0.4f;
 			if (fShieldPointsTaken > 0.0f) fDmgPerc += 0.2f;
-			m_screenVignetteDamage.Init(0.32f, 0xffff0000, 0.0f, 0.32f, fDmgPerc);
 		}
 	}
 	else if ((actor->templateActor.actorClass >= K_LVL_ACT_CLASS_HUMAN) && 
@@ -457,7 +456,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, D3DXVECTO
 	{
 		//adaug eventuri de GOT_HIT doar pe clasele HUMAN, cand sunt lovite de catre player
 		//find shooter pos. defaults on pos based on bullet speed
-		D3DXVECTOR2 evtpos = actor->posHeart;
+		Vec2 evtpos = actor->posHeart;
 		if (pvProjectileMomentum != null)
 			evtpos -= *pvProjectileMomentum;
 
@@ -483,7 +482,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, D3DXVECTO
 			{
 				if (actor->UID != pBullet->ownerUID)
 				{
-					GiveStrategicPoints(actor->templateActor.fStrategicPoints, &D3DXVECTOR2(actor->bbox.vCenter.x, actor->bbox.vMin.y));
+					GiveStrategicPoints(actor->templateActor.fStrategicPoints, &Vec2(actor->bbox.vCenter.x, actor->bbox.vMin.y));
 				}
 			}
 		}
@@ -583,7 +582,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, D3DXVECTO
 	return retData;
 }
 
-CBulletHitReturnData CLevel::HitActor(CActor * actor, float fDamage, UINT32 dwOwnerUID, EActorClass eOwnerClass, D3DXVECTOR2 *vDir /*= null*/, UINT32 dwBulletFlags /*= 0*/, int nArmorPiercingRating /*= 100*/, float fStunDuration /*= 0.0f*/)
+CBulletHitReturnData CLevel::HitActor(CActor * actor, float fDamage, UINT32 dwOwnerUID, EActorClass eOwnerClass, Vec2 *vDir /*= null*/, UINT32 dwBulletFlags /*= 0*/, int nArmorPiercingRating /*= 100*/, float fStunDuration /*= 0.0f*/)
 {
 	CBullet bullet;
 
@@ -664,7 +663,7 @@ void CLevel::SetActorStun(CActor* actor, float fStunDuration)
 * Executes a melee blow and returns the number of actors you've hit
 * \param fDamageObjects - >0.0f to damage doors and windows
 */	
-int CLevel::MeleeBlow(int nBulletType, D3DXVECTOR2 vPos, D3DXVECTOR2 vDirection, UINT32 nOwnerUID, int nOwnerClass, float fRange, float fDamageActors, float fImpulse, float fStunDurationMax, EActorClass eIgnoredClass, float fRangeObjects, float fDamageObjects)
+int CLevel::MeleeBlow(int nBulletType, Vec2 vPos, Vec2 vDirection, UINT32 nOwnerUID, int nOwnerClass, float fRange, float fDamageActors, float fImpulse, float fStunDurationMax, EActorClass eIgnoredClass, float fRangeObjects, float fDamageObjects)
 {
 	//MeleeHit
 	CFixedArray<CActor*, 50> arrAffectedActors;
@@ -673,16 +672,16 @@ int CLevel::MeleeBlow(int nBulletType, D3DXVECTOR2 vPos, D3DXVECTOR2 vDirection,
 	float fMinDistSq = 100000.0f;
 	float fMinDistSqAlive = 100000.0f;
 
-	D3DXVECTOR2 vDirN;
-	D3DXVec2Normalize(&vDirN, &vDirection);
+	Vec2 vDirN;
+	MUVec2Norm(&vDirN, &vDirection);
 	//get shooter bbox
 	CActor* pShooter = GetActorByUID(nOwnerUID);
 	///--- check doors and windows vs melee ---
 	if (fDamageObjects > 0.0f)
 	{
 		//coliziunea cu nivelul
-		D3DXVECTOR2 collisionPoint, collisionNormal;
-		D3DXVECTOR2 vEnd = (vPos + vDirN * fRangeObjects);
+		Vec2 collisionPoint, collisionNormal;
+		Vec2 vEnd = (vPos + vDirN * fRangeObjects);
 		CCollisionShape* colShape = ColShape_Segment_Intersection_Arr(vPos, vEnd, m_visibleList.logic_colShapesExtended.m_pData, m_visibleList.logic_colShapesExtended.Count(), &collisionPoint, &collisionNormal);
 		if (colShape != null)
 		{
@@ -701,13 +700,13 @@ int CLevel::MeleeBlow(int nBulletType, D3DXVECTOR2 vPos, D3DXVECTOR2 vDirection,
 					else
 					{
 						//generate sparks
-						D3DXVECTOR2 dir = collisionNormal;
+						Vec2 dir = collisionNormal;
 						dir.y -= 1.0f;
-						D3DXVec2Normalize(&dir, &dir);
+						MUVec2Norm(&dir, &dir);
 						for (int kk = 0; kk < 12; kk++)
 						{
 							g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, 2 + randint(2), &collisionPoint, &g_vecGravityOld, 
-								&(D3DXVECTOR2(dir.x + randfloatsgn(0.4f), dir.y + randfloatsgn(0.4f)) * (40.0f + randfloat(20.0f))), 
+								&(Vec2(dir.x + randfloatsgn(0.4f), dir.y + randfloatsgn(0.4f)) * (40.0f + randfloat(20.0f))), 
 								0.4f + randfloat(0.4f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_FRONT_LIGHT, 2.0f);
 						}
 					}
@@ -724,11 +723,11 @@ int CLevel::MeleeBlow(int nBulletType, D3DXVECTOR2 vPos, D3DXVECTOR2 vDirection,
 					colShape->varAIparams.SetNamedVarFloat(L"fForceDirX", vDirN.x * max(1.0f, fImpulse));
 					colShape->varAIparams.SetNamedVarINT32(L"bExploded", 0);
 					//add sound event on player's side of the door
-					D3DXVECTOR2 sndpos1 = D3DXVECTOR2(colShape->bbox.vCenter.x - vDirN.x * (colShape->bbox.vHalfSize.x + 2.0f), colShape->bbox.vCenter.y);
+					Vec2 sndpos1 = Vec2(colShape->bbox.vCenter.x - vDirN.x * (colShape->bbox.vHalfSize.x + 2.0f), colShape->bbox.vCenter.y);
 					AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, nOwnerUID, nOwnerClass, sndpos1, 200.0f, 1.0f);
 
 					//add events behind door
-					sndpos1 = D3DXVECTOR2(colShape->bbox.vCenter.x + vDirN.x * (colShape->bbox.vHalfSize.x + 2.0f), colShape->bbox.vCenter.y);
+					sndpos1 = Vec2(colShape->bbox.vCenter.x + vDirN.x * (colShape->bbox.vHalfSize.x + 2.0f), colShape->bbox.vCenter.y);
 					AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, 0, 0, sndpos1, 200.0f, 1.0f);
 					//breaching event behind door
 					AddAIEvent(K_LVL_AI_EVENT_SOUND_DOOR_BREACHING, 0, nOwnerClass, sndpos1, 160.0f, 1.0f);
@@ -748,7 +747,7 @@ int CLevel::MeleeBlow(int nBulletType, D3DXVECTOR2 vPos, D3DXVECTOR2 vDirection,
 	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 	{
 		CActor* act = m_arrActors[kk];
-		D3DXVECTOR2 vTo = act->posHeart - vPos;
+		Vec2 vTo = act->posHeart - vPos;
 		//ignored class
 		if (act->templateActor.actorClass == eIgnoredClass)
 			continue;
@@ -758,7 +757,7 @@ int CLevel::MeleeBlow(int nBulletType, D3DXVECTOR2 vPos, D3DXVECTOR2 vDirection,
 		if ((SIGN(vTo.x) != SIGN(vDirection.x)) && (!act->bbox.PointIn(vPos)))
 			continue;
 		//too far?
-		float fDistSq = D3DXVec2LengthSq(&vTo);
+		float fDistSq = MUVec2LenSq(&vTo);
 		if (fDistSq > fRangeSq)
 			continue;
 		//too high or too low
@@ -861,7 +860,7 @@ int CLevel::MeleeBlow(int nBulletType, D3DXVECTOR2 vPos, D3DXVECTOR2 vDirection,
 * \param nPlayerOrdinal - 0-player1 or 1-player2
 * \param nAnimset: -1 to skip spawn animation, 0 first animation, 1 second animation
 */
-void CLevel::SpawnPlayer(D3DXVECTOR2 spawnPos, int nPlayerOrdinal, int nAnimset)
+void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 {
 	if ((nPlayerOrdinal < 0) || (nPlayerOrdinal >= K_MAX_PLAYERS_CNT))
 	{
@@ -1033,7 +1032,7 @@ void CLevel::SpawnPlayer(D3DXVECTOR2 spawnPos, int nPlayerOrdinal, int nAnimset)
 	}
 }
 
-CActor* CLevel::SpawnActor(D3DXVECTOR2 spawnPos, WCHAR* strTemplateName, int nLookDirSign, CStringHash* shStateOverride)
+CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateName, int nLookDirSign, CStringHash* shStateOverride)
 {
 	CActor * nact = new CActor();
 	CActorTemplate* ntempl = GetTemplateActor(strTemplateName);
@@ -1104,7 +1103,7 @@ CActor* CLevel::SpawnActor(D3DXVECTOR2 spawnPos, WCHAR* strTemplateName, int nLo
 	return nact;
 }
 
-CProp* CLevel::SpawnProp(D3DXVECTOR2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer)
+CProp* CLevel::SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer)
 {
 	CProp* obj = new CProp();
 
@@ -1144,8 +1143,8 @@ CProp* CLevel::SpawnProp(D3DXVECTOR2 spawnPos, int nAnimIdx, int nFrameIdx, int 
 	//daca e flipat pe X flipez si bbox. Pe Y nu e cazul pt ca se pastreaza in acelasi bbox in paint
 	if (obj->flipX)
 	{
-		obj->bbox_ini.Move(D3DXVECTOR2(-2.0f * obj->bbox_ini.vCenter.x, 0.0f));
-		obj->bbox_exported_ini.Move(D3DXVECTOR2(-2.0f * obj->bbox_exported_ini.vCenter.x, 0.0f));
+		obj->bbox_ini.Move(Vec2(-2.0f * obj->bbox_ini.vCenter.x, 0.0f));
+		obj->bbox_exported_ini.Move(Vec2(-2.0f * obj->bbox_exported_ini.vCenter.x, 0.0f));
 	}
 	obj->bbox = obj->bbox_ini;
 	obj->bbox.Move(obj->pos);
@@ -1171,7 +1170,7 @@ CProp* CLevel::SpawnProp(D3DXVECTOR2 spawnPos, int nAnimIdx, int nFrameIdx, int 
 	return obj;
 }
 
-CLight*	CLevel::SpawnLight(D3DXVECTOR3 spawnPos, eLightType eType, DWORD dwColor, float fRadius, int profileID, bool bCastShadows)
+CLight*	CLevel::SpawnLight(Vec3 spawnPos, eLightType eType, DWORD dwColor, float fRadius, int profileID, bool bCastShadows)
 {
 	CLight *nl = new CLight();
 	nl->ID = GenerateNextID();
@@ -1199,7 +1198,7 @@ CLight*	CLevel::SpawnLight(D3DXVECTOR3 spawnPos, eLightType eType, DWORD dwColor
 	return nl;
 }
 
-int CLevel::GetPowerupPlacingScore(CProp* active, D3DXVECTOR2 vPlacerPos)
+int CLevel::GetPowerupPlacingScore(CProp* active, Vec2 vPlacerPos)
 {
 	//find a new position if necessary
 	int nScore = 0;
@@ -1253,7 +1252,7 @@ int CLevel::GetPowerupPlacingScore(CProp* active, D3DXVECTOR2 vPlacerPos)
 	return nScore;
 }
 
-bool CLevel::GetBestSpawningPos(D3DXVECTOR2 * vSpawn_ret, CAABB rectStart, CAABB * rectToAvoid)
+bool CLevel::GetBestSpawningPos(Vec2 * vSpawn_ret, CAABB rectStart, CAABB * rectToAvoid)
 {
 	if (vSpawn_ret == null)
 		return false;
@@ -1261,17 +1260,17 @@ bool CLevel::GetBestSpawningPos(D3DXVECTOR2 * vSpawn_ret, CAABB rectStart, CAABB
 	//#TODO: make sure we don't spawn under an elevator and return false if all spawn positions return under the elevator
 
 	///--- find best spawn position ---
-	D3DXVECTOR2 vSpawnFinal(rectStart.vCenter.x, rectStart.vMax.y);
-	D3DXVECTOR2 spawnPos = vSpawnFinal;
+	Vec2 vSpawnFinal(rectStart.vCenter.x, rectStart.vMax.y);
+	Vec2 spawnPos = vSpawnFinal;
 	//try a few times to the left and right and compute score
 	int nPlaceScore = -100000;
 	for (int kk = 0; kk < 8; kk++)
 	{
 		int nScore = 0;
 		int offx = ((kk / 2) * (((kk % 2) * 2) - 1)) * K_TILE_HSIZE;
-		D3DXVECTOR2 vCheck(spawnPos.x + (float)offx, spawnPos.y);
+		Vec2 vCheck(spawnPos.x + (float)offx, spawnPos.y);
 		CAABB rectCheck = rectStart;
-		rectCheck.Move(D3DXVECTOR2((float)offx, 0.0f));
+		rectCheck.Move(Vec2((float)offx, 0.0f));
 		//deform it a little
 		rectCheck.Inflate(4.0f, -2.0f);
 
@@ -1285,10 +1284,10 @@ bool CLevel::GetBestSpawningPos(D3DXVECTOR2 * vSpawn_ret, CAABB rectStart, CAABB
 
 		CCollisionShape* col = null;
 		//prefer both feet on ground
-		col = GetCollisionShapeAt(D3DXVECTOR2(vCheck.x + 6.0f, vCheck.y + 1.0f));
+		col = GetCollisionShapeAt(Vec2(vCheck.x + 6.0f, vCheck.y + 1.0f));
 		if (col == null)
 			nScore -= 50;
-		col = GetCollisionShapeAt(D3DXVECTOR2(vCheck.x - 6.0f, vCheck.y + 1.0f));
+		col = GetCollisionShapeAt(Vec2(vCheck.x - 6.0f, vCheck.y + 1.0f));
 		if (col == null)
 			nScore -= 50;
 		//prefer not intersecting geometry
@@ -1303,9 +1302,9 @@ bool CLevel::GetBestSpawningPos(D3DXVECTOR2 * vSpawn_ret, CAABB rectStart, CAABB
 	}
 
 	//make sure we have both feet on solid ground
-	CCollisionShape* col = GetCollisionShapeAt(D3DXVECTOR2(vSpawnFinal.x + 5.0f, vSpawnFinal.y + 1.0f));
+	CCollisionShape* col = GetCollisionShapeAt(Vec2(vSpawnFinal.x + 5.0f, vSpawnFinal.y + 1.0f));
 	if (col == null)
-		col = GetCollisionShapeAt(D3DXVECTOR2(vSpawnFinal.x - 5.0f, vSpawnFinal.y + 1.0f));
+		col = GetCollisionShapeAt(Vec2(vSpawnFinal.x - 5.0f, vSpawnFinal.y + 1.0f));
 	if ((col != null) && (col->type == K_LVL_COLL_TYPE_SOLID))
 	{
 		//very narrow bbox, center on it
@@ -1418,14 +1417,14 @@ CLevel::CLevel()
 		m_arrPlayerControllersIIDs[kk] = -1; //init player controllers array on no controller
 		m_arrPlayerSelHotJoin[kk] = -1;
 		m_arrPlayerSelStrategic[kk] = -1;
-		m_arrPlayerLastSafePos[kk] = D3DXVECTOR2(0.0f, 0.0f);
+		m_arrPlayerLastSafePos[kk] = Vec2(0.0f, 0.0f);
 	}
 	//init interfaces
 	m_interfaceIGM.Init(&m_sprInterface, pPlayerActor[0], pPlayerActor[1]);
 	m_interfaceTextBubble.Init(&UTGetGUI().m_sprCol);
 
-	vLastSpawnPoint = D3DXVECTOR2(0.0f, 0.0f);
-	m_vCamPosDefault = D3DXVECTOR2(0.0f, 0.0f);
+	vLastSpawnPoint = Vec2(0.0f, 0.0f);
+	m_vCamPosDefault = Vec2(0.0f, 0.0f);
 	//time control
 	m_fTimeMultiplier = m_fTimeMultiplier_real = 1.0f;
 	m_fTimeMultiplierDuration = 0.0f;
@@ -2216,9 +2215,9 @@ HRESULT CLevel::LoadActorBBoxAndPoints(CActor * destAct, EActorAnims eAnim, int 
 
 	for (int ll = 0; ll < 3; ll++)
 	{
-		destAct->vecWeapon_abs[ll] = D3DXVECTOR2(0.0f, -1.0f); //setez pe -1 ca sa iasa din podea
-		destAct->vecHeart_abs[ll] = D3DXVECTOR2(0.0f, -1.0f);
-		destAct->vecGroundCheck_abs[ll] = D3DXVECTOR2(0.0f, 0.0f);
+		destAct->vecWeapon_abs[ll] = Vec2(0.0f, -1.0f); //setez pe -1 ca sa iasa din podea
+		destAct->vecHeart_abs[ll] = Vec2(0.0f, -1.0f);
+		destAct->vecGroundCheck_abs[ll] = Vec2(0.0f, 0.0f);
 		destAct->stateBBoxes[ll].Set(0.0f, 0.0f, 0.0f, 0.0f);
 
 		if (ll >= refposeframes)
@@ -2230,17 +2229,17 @@ HRESULT CLevel::LoadActorBBoxAndPoints(CActor * destAct, EActorAnims eAnim, int 
 			//cautam punct arma
 			if (SUCCEEDED(m_sprActors.GetAFrameHitPointFlag(refposeAnim, ll, 0, K_LVL_ACTOR_HITPOINTFLAG_GUNPOS, &pt)))
 			{
-				destAct->vecWeapon_abs[ll] = D3DXVECTOR2(pt.x, pt.y);
+				destAct->vecWeapon_abs[ll] = Vec2(pt.x, pt.y);
 			}
 			//cautam punct inima
 			if (SUCCEEDED(m_sprActors.GetAFrameHitPointFlag(refposeAnim, ll, 0, K_LVL_ACTOR_HITPOINTFLAG_HEARTPOS, &pt)))
 			{
-				destAct->vecHeart_abs[ll] = D3DXVECTOR2(pt.x, pt.y);
+				destAct->vecHeart_abs[ll] = Vec2(pt.x, pt.y);
 			}
 			//cautam punct ground check
 			if (SUCCEEDED(m_sprActors.GetAFrameHitPointFlag(refposeAnim, ll, 0, K_LVL_ACTOR_HITPOINTFLAG_GROUND_SWEEP, &pt)))
 			{
-				destAct->vecGroundCheck_abs[ll] = D3DXVECTOR2(pt.x, pt.y);
+				destAct->vecGroundCheck_abs[ll] = Vec2(pt.x, pt.y);
 			}
 			//BBOX
 			RECTXYWH playerbbox = m_sprActors.GetAFrameBBox(refposeAnim, ll);
@@ -2369,8 +2368,8 @@ void CLevel::PlayActorSoundVerse(CActor* actor, EActorSoundVerse sVerse, bool bP
 	}
 	//actually play the sound
 	//play only nearby sounds
-	D3DXVECTOR2 vDist(actor->pos.x - m_camLevel.GetCamPos().x, actor->pos.y - m_camLevel.GetCamPos().y);
-	if (D3DXVec2Length(&vDist) < K_GAME_HALF_HEIGHT * 1.5f)
+	Vec2 vDist(actor->pos.x - m_camLevel.GetCamPos().x, actor->pos.y - m_camLevel.GetCamPos().y);
+	if (MUVec2Len(&vDist) < K_GAME_HALF_HEIGHT * 1.5f)
 	{
 		SND_PLAY_POSITIONAL(actor->templateActor.soundIDs[(int)sVerse][nVariation], actor->posHeart);
 	}
@@ -2408,7 +2407,7 @@ bool CLevel::IsPlatformEnding(CActor* actor, int nDirSign)
 	if (nDirSign == 0)
 		return false;
 	//presupunem ca ai-ul de dead nu cauta platform ends si ca pe crouch nu se misca asa ca folosim mereu datele din standing adica vecGroundCheck[0]
-	D3DXVECTOR2 vChkPos = actor->pos;
+	Vec2 vChkPos = actor->pos;
 	vChkPos.y += actor->vecGroundCheck_abs[0].y;
 	if(nDirSign < 0)
 		vChkPos.x -= actor->vecGroundCheck_abs[0].x;
@@ -2573,7 +2572,7 @@ CActor* CLevel::GetClosestPlayer(CActor* sourceActor, bool bIgnoreDead)
 		EAIBehaviorType beh = pPlayerActor[kk]->GetCurrentBehavior();
 		if ((bIgnoreDead) && (beh == AI_BEHAVIOR_DEAD))
 			continue;
-		float fDist = D3DXVec2Length(&(pPlayerActor[kk]->pos - sourceActor->pos));
+		float fDist = MUVec2Len(&(pPlayerActor[kk]->pos - sourceActor->pos));
 		if (fDist < fMinDist)
 		{
 			plact = pPlayerActor[kk];
@@ -2583,7 +2582,7 @@ CActor* CLevel::GetClosestPlayer(CActor* sourceActor, bool bIgnoreDead)
 	return plact;
 }
 
-CActor* CLevel::GetClosestPlayer(D3DXVECTOR2 vSrcPos, bool bIgnoreDead)
+CActor* CLevel::GetClosestPlayer(Vec2 vSrcPos, bool bIgnoreDead)
 {
 	float fMinDist = 100000.0f;
 	CActor* plact = null;
@@ -2593,7 +2592,7 @@ CActor* CLevel::GetClosestPlayer(D3DXVECTOR2 vSrcPos, bool bIgnoreDead)
 			continue;
 		if ((bIgnoreDead) && (pPlayerActor[kk]->GetCurrentBehavior() == AI_BEHAVIOR_DEAD))
 			continue;
-		float fDist = D3DXVec2Length(&(pPlayerActor[kk]->pos - vSrcPos));
+		float fDist = MUVec2Len(&(pPlayerActor[kk]->pos - vSrcPos));
 		if (fDist < fMinDist)
 		{
 			plact = pPlayerActor[kk];
@@ -2700,7 +2699,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 			m_levelSubState = 0;
 			m_levelStateTimer = 0.0f;
 
-			g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, D3DXVECTOR2(0.0f, -50.0f), STR_MISSION_ACCOMPLISHED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
+			g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_MISSION_ACCOMPLISHED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
 			//enter level results sync
 			if (UTGetAppClass().IsGameNetworked())
 			{
@@ -2767,7 +2766,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 			m_levelSubState = 0;
 			m_levelStateTimer = 0.0f;
 
-			g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, D3DXVECTOR2(0.0f, -50.0f), STR_MISSION_FAILED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
+			g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_MISSION_FAILED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
 			//enter level results sync
 			if (UTGetAppClass().IsGameNetworked())
 			{
@@ -2841,7 +2840,7 @@ bool CLevel::NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsH
 
 			if (bIsHorizontalAxis)
 			{
-				D3DXVECTOR2 retpt = m_camLevel.ScreenToWorld(D3DXVECTOR2(fAxisValue, 0.0f));
+				Vec2 retpt = m_camLevel.ScreenToWorld(Vec2(fAxisValue, 0.0f));
 				// make coords relative to player
 				retpt.x -= pPlayer->pos.x;
 				// set final coords
@@ -2850,7 +2849,7 @@ bool CLevel::NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsH
 			}
 			else
 			{
-				D3DXVECTOR2 retpt = m_camLevel.ScreenToWorld(D3DXVECTOR2(0.0f, fAxisValue));
+				Vec2 retpt = m_camLevel.ScreenToWorld(Vec2(0.0f, fAxisValue));
 				// make coords relative to player
 				retpt.y -= pPlayer->pos.y;
 				// set final coords
@@ -2959,8 +2958,8 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 			case K_LVL_LT_PROJECTED_DIR:
 			{
 				//create light mesh - rotating the actual mesh isn't necessary
-				D3DXVECTOR3 lcorners[4]; //ul, ur, dr, dl
-				memcpy(lcorners, nl->lCorners, 4 * sizeof(D3DXVECTOR3));
+				Vec3 lcorners[4]; //ul, ur, dr, dl
+				memcpy(lcorners, nl->lCorners, 4 * sizeof(Vec3));
 				//move mesh to final pos
 				lcorners[0].x += nl->vPos.x; lcorners[0].y += nl->vPos.y;
 				lcorners[1].x += nl->vPos.x; lcorners[1].y += nl->vPos.y;
@@ -2993,10 +2992,10 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 			case K_LVL_LT_AMBIENTAL:
 			{
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				vul.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMin.y, 0.0f);
-				vur.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMin.y, 0.0f);
-				vdl.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMax.y, 0.0f);
-				vdr.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMax.y, 0.0f);
+				vul.pos = Vec3(camAABB.vMin.x, camAABB.vMin.y, 0.0f);
+				vur.pos = Vec3(camAABB.vMax.x, camAABB.vMin.y, 0.0f);
+				vdl.pos = Vec3(camAABB.vMin.x, camAABB.vMax.y, 0.0f);
+				vdr.pos = Vec3(camAABB.vMax.x, camAABB.vMax.y, 0.0f);
 				//set color
 				vul.color = vur.color = vdl.color = vdr.color = nl->color;
 				//build verts
@@ -3018,12 +3017,12 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 	m_propsLightsMeshIdx = -1;
 	m_bufferedPainter.BeginMesh(m_propsLightsMeshIdx);
 
-	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.pListUsed.m_pNext;
-	while (node != &m_poolProps.pListUsed)
+	CLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.pListUsed.m_pNext;
+	while (node != &m_poolDoofers.pListUsed)
 	{
 		//salvez locatia urmatoare ca s apot avansa pe ea
-		CLinkedPool<CSpecialProp>::CLinkedPoolNode *nextnode = node->m_pNext;
-		CSpecialProp* prop = &node->m_data;
+		CLinkedPool<CDoofer>::CLinkedPoolNode *nextnode = node->m_pNext;
+		CDoofer* prop = &node->m_data;
 
 		if (prop->bMakesLight)
 		{
@@ -3042,12 +3041,12 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 				}
 				//scriu VS-ul final
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				D3DXVECTOR2 bpos2D = node->m_data.physPt->m_data.pos;
-				D3DXVECTOR3 bpos(node->m_data.physPt->m_data.pos.x, node->m_data.physPt->m_data.pos.y, 50.0f);
-				vul.pos = D3DXVECTOR3(bpos.x + realrect.left, bpos.y + realrect.top, 0.0f);
-				vur.pos = D3DXVECTOR3(bpos.x + realrect.right, bpos.y + realrect.top, 0.0f);
-				vdl.pos = D3DXVECTOR3(bpos.x + realrect.left, bpos.y + realrect.bottom, 0.0f);
-				vdr.pos = D3DXVECTOR3(bpos.x + realrect.right, bpos.y + realrect.bottom, 0.0f);
+				Vec2 bpos2D = node->m_data.physPt->m_data.pos;
+				Vec3 bpos(node->m_data.physPt->m_data.pos.x, node->m_data.physPt->m_data.pos.y, 50.0f);
+				vul.pos = Vec3(bpos.x + realrect.left, bpos.y + realrect.top, 0.0f);
+				vur.pos = Vec3(bpos.x + realrect.right, bpos.y + realrect.top, 0.0f);
+				vdl.pos = Vec3(bpos.x + realrect.left, bpos.y + realrect.bottom, 0.0f);
+				vdr.pos = Vec3(bpos.x + realrect.right, bpos.y + realrect.bottom, 0.0f);
 				//setez culoarea
 				float fLife = prop->fLightDuration;
 				float fFadeTime = prop->fLightFadeOut;
@@ -3069,10 +3068,10 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 				//setez coordonate textura spot
 				RECTLTRB_F lTexRect = m_sprLights.GetModuleRect_TexCoords(prop->sprLight.animationIdx, 0, 0);
 				//Coord de mapare pe RTT (tex2) se seteaza din shader
-				vul.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
-				vur.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
-				vdl.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
-				vdr.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
+				vul.tex1 = Vec4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
+				vur.tex1 = Vec4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
+				vdl.tex1 = Vec4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
+				vdr.tex1 = Vec4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
 				//setez normalele finale
 				vul.n = bpos - vul.pos;
 				vur.n = bpos - vur.pos;
@@ -3109,30 +3108,30 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 			CAABB wbb; //water bbox
 			if (AABB_Intersection(col->bbox, camAABB, wbb))
 			{
-				D3DXVECTOR2 texoff = col->bbox.vMin - wbb.vMin;
+				Vec2 texoff = col->bbox.vMin - wbb.vMin;
 				//save water plys in a sigle mesh, clipped to screen rect
 
 				//scriu VS-ul final
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				vul.pos = D3DXVECTOR3(wbb.vMin.x, wbb.vMin.y, 0.0f);
-				vur.pos = D3DXVECTOR3(wbb.vMax.x, wbb.vMin.y, 0.0f);
-				vdl.pos = D3DXVECTOR3(wbb.vMin.x, wbb.vMax.y, 0.0f);
-				vdr.pos = D3DXVECTOR3(wbb.vMax.x, wbb.vMax.y, 0.0f);
+				vul.pos = Vec3(wbb.vMin.x, wbb.vMin.y, 0.0f);
+				vur.pos = Vec3(wbb.vMax.x, wbb.vMin.y, 0.0f);
+				vdl.pos = Vec3(wbb.vMin.x, wbb.vMax.y, 0.0f);
+				vdr.pos = Vec3(wbb.vMax.x, wbb.vMax.y, 0.0f);
 				//setez culoarea
 				//#TODO: culoarea sa fie setata undeva in editor. Poate as putea sa pun control de culoare la collision boxuri...
 				vul.color = vur.color = vdl.color = vdr.color = 0xaa30AFFF;// col->color;
 				//setez coordonate textura apa
-				D3DXVECTOR2 texul = (wbb.vMin * waterTexScale) / waterTexSize;
-				D3DXVECTOR2 texdr = (wbb.vMax * waterTexScale) / waterTexSize;
+				Vec2 texul = (wbb.vMin * waterTexScale) / waterTexSize;
+				Vec2 texdr = (wbb.vMax * waterTexScale) / waterTexSize;
 
 				RECTLTRB_F lTexRect(texul.x, texul.y, texdr.x, texdr.y);
 				//Coord de mapare pe RTT (tex2) se seteaza din shader
-				vul.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
-				vur.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
-				vdl.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
-				vdr.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
+				vul.tex1 = Vec4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
+				vur.tex1 = Vec4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
+				vdl.tex1 = Vec4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
+				vdr.tex1 = Vec4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
 				//setez normalele finale
-				vul.n = vur.n = vdl.n = vdr.n = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+				vul.n = vur.n = vdl.n = vdr.n = Vec3(0.0f, 0.0f, 0.0f);
 				//construiesc VB-ul exact
 				_VERTEX_PNCT4T4 waterRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
 				waterRectV[0] = vul; waterRectV[1] = vur; waterRectV[2] = vdl;
@@ -3159,24 +3158,24 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 			{
 				//scriu VS-ul final
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				vul.pos = D3DXVECTOR3(wbb.vMin.x, wbb.vMin.y, 0.0f);
-				vur.pos = D3DXVECTOR3(wbb.vMax.x, wbb.vMin.y, 0.0f);
-				vdl.pos = D3DXVECTOR3(wbb.vMin.x, wbb.vMax.y, 0.0f);
-				vdr.pos = D3DXVECTOR3(wbb.vMax.x, wbb.vMax.y, 0.0f);
+				vul.pos = Vec3(wbb.vMin.x, wbb.vMin.y, 0.0f);
+				vur.pos = Vec3(wbb.vMax.x, wbb.vMin.y, 0.0f);
+				vdl.pos = Vec3(wbb.vMin.x, wbb.vMax.y, 0.0f);
+				vdr.pos = Vec3(wbb.vMax.x, wbb.vMax.y, 0.0f);
 				//setez culoarea (setata pe onload)
 				vul.color = vur.color = vdl.color = vdr.color = col->color;
 				//setez coordonate tex2 (nu se folosesc)
-				D3DXVECTOR2 texul = wbb.vMin;
-				D3DXVECTOR2 texdr = wbb.vMax;
+				Vec2 texul = wbb.vMin;
+				Vec2 texdr = wbb.vMax;
 
 				RECTLTRB_F lTexRect(texul.x, texul.y, texdr.x, texdr.y);
 				//Coord de mapare pe RTT (tex2) se seteaza din shader
-				vul.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
-				vur.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
-				vdl.tex1 = D3DXVECTOR4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
-				vdr.tex1 = D3DXVECTOR4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
+				vul.tex1 = Vec4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
+				vur.tex1 = Vec4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
+				vdl.tex1 = Vec4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
+				vdr.tex1 = Vec4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
 				//setez normalele finale
-				vul.n = vur.n = vdl.n = vdr.n = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+				vul.n = vur.n = vdl.n = vdr.n = Vec3(0.0f, 0.0f, 0.0f);
 				//construiesc VB-ul exact
 				_VERTEX_PNCT4T4 fowRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
 				fowRectV[0] = vul; fowRectV[1] = vur; fowRectV[2] = vdl;
@@ -3217,8 +3216,8 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 						continue;
 
 					//verifica sa fie in raza vizuala
-					D3DXVECTOR2 vActPl = pPlayerActor[kk]->posHeart - active->pos;
-					float fActPlLen = D3DXVec2Length(&vActPl);
+					Vec2 vActPl = pPlayerActor[kk]->posHeart - active->pos;
+					float fActPlLen = MUVec2Len(&vActPl);
 					if (fActPlLen > active->AIfvar3) //radius
 						break;
 					//normalize
@@ -3308,7 +3307,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 			float radY = active->varAIparams[1]->asFloat();
 			float timeMul = active->varAIparams[2]->asFloat();
 
-			D3DXVECTOR2 delta = D3DXVECTOR2(radX * cos(timeMul * fTimeline), radY * sin(timeMul * fTimeline));
+			Vec2 delta = Vec2(radX * cos(timeMul * fTimeline), radY * sin(timeMul * fTimeline));
 			active->SetPos(active->pos_ini + delta);
 		}
 		break;
@@ -3350,7 +3349,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 		{
 			if (active->pTarget != NULL)
 			{
-				D3DXVECTOR2 targetDelta = active->pTarget->pos - active->pTarget->pos_ini;
+				Vec2 targetDelta = active->pTarget->pos - active->pTarget->pos_ini;
 				//mut obiectul cu delta totala a targetului
 				active->SetPos(active->pos_ini + targetDelta);
 			}
@@ -3360,10 +3359,10 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 		{
 			if (active->pTarget != NULL)
 			{
-				D3DXVECTOR2 targetVec = active->pos_ini - active->pTarget->pos_ini;
-				D3DXMATRIXA16 matrot;
-				D3DXMatrixRotationZ(&matrot, active->pTarget->fAngle - active->pTarget->fAngle_ini);
-				D3DXVec2TransformCoord(&targetVec, &targetVec, &matrot);
+				Vec2 targetVec = active->pos_ini - active->pTarget->pos_ini;
+				Mat matrot;
+				MuMatRotZ(&matrot, active->pTarget->fAngle - active->pTarget->fAngle_ini);
+				MUVec2TransformCoord(&targetVec, &targetVec, &matrot);
 				//mut obiectul cu delta totala a targetului
 				active->SetPos(active->pTarget->pos_ini + targetVec);
 				active->SetAngle(active->fAngle_ini + (active->pTarget->fAngle - active->pTarget->fAngle_ini));
@@ -3441,7 +3440,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 					}
 				}
 			}
-			D3DXVECTOR2 newpos = rail->GetPos(active->AItimer1);
+			Vec2 newpos = rail->GetPos(active->AItimer1);
 			active->SetPos(newpos);
 		}
 		break;
@@ -3480,7 +3479,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 				if ((pPlayerActor[kk] == NULL) || (pPlayerActor[kk]->bHidden) || (pPlayerActor[kk]->fLife <= 0.0f) ||
 					((pPlayerActor[kk]->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0) )
 					continue;
-				D3DXVECTOR2 vCheckPt(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
+				Vec2 vCheckPt(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
 				if (colshape->bbox.PointIn(vCheckPt))
 				{
 					HitActor(pPlayerActor[kk], 50.0f, 0, K_LVL_ACT_CLASS_TRAP, null,
@@ -3495,7 +3494,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 					(m_arrActors[kk]->fLife <= 0.0f) ||
 					((m_arrActors[kk]->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
 					continue;
-				D3DXVECTOR2 vCheckPt(m_arrActors[kk]->bbox.vCenter.x, m_arrActors[kk]->bbox.vMin.y);
+				Vec2 vCheckPt(m_arrActors[kk]->bbox.vCenter.x, m_arrActors[kk]->bbox.vMin.y);
 				if (colshape->bbox.PointIn(vCheckPt))
 				{
 					HitActor(m_arrActors[kk], 50.0f, 0, K_LVL_ACT_CLASS_TRAP, null,
@@ -3574,8 +3573,8 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 						float dirx = SIGN(cvar->m_asFloat);
 						for (int ll = 0; ll < 20; ll++)
 						{
-							D3DXVECTOR2 ppos = AABB_GetRandomPointInBox(colshape->bbox);
-							g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLASS_SHARDS, false, randint(5), &ppos, &g_vecGravityOld, &D3DXVECTOR2(dirx * (60.0f + randfloat(60.0f)), -40.0f + randfloatsgn(50.0f)), 0.3f + randfloat(0.2f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+							Vec2 ppos = AABB_GetRandomPointInBox(colshape->bbox);
+							g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLASS_SHARDS, false, randint(5), &ppos, &g_vecGravityOld, &Vec2(dirx * (60.0f + randfloat(60.0f)), -40.0f + randfloatsgn(50.0f)), 0.3f + randfloat(0.2f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 						}
 						//sound
 						//SND_PLAY_POSITIONAL_RAND2(SNDIDX_WINDOWBREAK1, SNDIDX_WINDOWBREAK2, colshape->bbox.vCenter);
@@ -3612,11 +3611,11 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 					//generate particles
 					for (int ll = 0; ll < 30; ll++)
 					{
-						D3DXVECTOR2 ppos = AABB_GetRandomPointInBox(colshape->bbox);
-						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_WOODEN_SPLINTERS, false, randint(6), &ppos, &g_vecGravityOld, &D3DXVECTOR2(dirx * (100.0f + randfloat(60.0f)), -40.0f + randfloatsgn(50.0f)), 0.3f + randfloat(0.2f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+						Vec2 ppos = AABB_GetRandomPointInBox(colshape->bbox);
+						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_WOODEN_SPLINTERS, false, randint(6), &ppos, &g_vecGravityOld, &Vec2(dirx * (100.0f + randfloat(60.0f)), -40.0f + randfloatsgn(50.0f)), 0.3f + randfloat(0.2f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 					}
 					//Adauga events de zgomot dincolo de usa
-					D3DXVECTOR2 sndpos1 = D3DXVECTOR2(colshape->bbox.vCenter.x + dirx * (colshape->bbox.vHalfSize.x + 2.0f), colshape->bbox.vCenter.y);
+					Vec2 sndpos1 = Vec2(colshape->bbox.vCenter.x + dirx * (colshape->bbox.vHalfSize.x + 2.0f), colshape->bbox.vCenter.y);
 					//SND_PLAY_POSITIONAL_RAND2(SNDIDX_DOOR_HIT1, SNDIDX_DOOR_HIT2, sndpos1);
 				}
 
@@ -3636,7 +3635,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 						}
 
 						//centram pe bboxul initial
-						D3DXVECTOR2 vcenter = dooract->bbox.vCenter;
+						Vec2 vcenter = dooract->bbox.vCenter;
 						dooract->sprite.setAnimation(ANM_ACTIVES_SPR_DOOR_BREAKING);
 						dooract->bAnimated = true;
 						dooract->pos.x = vcenter.x;
@@ -3650,7 +3649,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 						{
 							dooract->flipX = true;
 
-							D3DXVECTOR2 secondExploPos(colshape->bbox.vCenter.x - (colshape->bbox.vHalfSize.x + 1.0f), colshape->bbox.vCenter.y);
+							Vec2 secondExploPos(colshape->bbox.vCenter.x - (colshape->bbox.vHalfSize.x + 1.0f), colshape->bbox.vCenter.y);
 							AddProp_Explo(hash_EXPLO_STUN_INVISIBLE, secondExploPos, 0, K_LVL_ACT_CLASS_PLAYER);
 						}
 						else
@@ -3658,11 +3657,11 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 							//trebuie setat si pe else pentru ca poate veni deja flipat din editor
 							dooract->flipX = false;
 
-							D3DXVECTOR2 secondExploPos(colshape->bbox.vCenter.x + (colshape->bbox.vHalfSize.x + 1.0f), colshape->bbox.vCenter.y);
+							Vec2 secondExploPos(colshape->bbox.vCenter.x + (colshape->bbox.vHalfSize.x + 1.0f), colshape->bbox.vCenter.y);
 							AddProp_Explo(hash_EXPLO_STUN_INVISIBLE, secondExploPos, 0, K_LVL_ACT_CLASS_PLAYER);
 						}
 
-						g_particlesMgr.GenerateDoorBreak(colshape->bbox.vCenter, D3DXVECTOR2(dirx, 0.0f), K_PART_LAYER_RT_FRONT_NRM);
+						g_particlesMgr.GenerateDoorBreak(colshape->bbox.vCenter, Vec2(dirx, 0.0f), K_PART_LAYER_RT_FRONT_NRM);
 						//sound
 						//SND_PLAY_POSITIONAL(SNDIDX_DOOR_BREAK, colshape->bbox.vCenter);
 						//analytics locale
@@ -3712,8 +3711,8 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 							continue;
 
 						CActor* pPlayer = pPlayerActor[npl];
-						CAABB aabbPlayerView(D3DXVECTOR2(pPlayer->posHeart.x - pPlayer->templateActor.distSee, pPlayer->posHeart.y - pPlayer->templateActor.distSee),
-							D3DXVECTOR2(pPlayer->posHeart.x + pPlayer->templateActor.distSee, pPlayer->posHeart.y + pPlayer->templateActor.distSee));
+						CAABB aabbPlayerView(Vec2(pPlayer->posHeart.x - pPlayer->templateActor.distSee, pPlayer->posHeart.y - pPlayer->templateActor.distSee),
+							Vec2(pPlayer->posHeart.x + pPlayer->templateActor.distSee, pPlayer->posHeart.y + pPlayer->templateActor.distSee));
 
 						//didn't decide to remove FOW:
 						if (colshape->AIfvar1 >= 1.0f)
@@ -3728,8 +3727,8 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 								bCheckH = false;
 							}
 
-							D3DXVECTOR2 vfrom = pPlayer->posHeart;
-							D3DXVECTOR2 vto = vfrom;
+							Vec2 vfrom = pPlayer->posHeart;
+							Vec2 vto = vfrom;
 							if (bCheckH)
 							{
 								vto.x += SIGN(colshape->bbox.vCenter.x - pPlayer->posHeart.x) * pPlayer->templateActor.distSee;
@@ -3742,7 +3741,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 							}
 
 							//do we have FOW collision?
-							D3DXVECTOR2 fowColPt;
+							Vec2 fowColPt;
 							float fowT = -1.0f;
 							if (AABB_Segment_IntersectionEx(vfrom, vto, colshape->bbox, &fowColPt, fowT))
 							{
@@ -3865,9 +3864,9 @@ void CLevel::UpdateAI_light(CLight* light, float dTime)
 			case K_AI_STATE_FN_LIGHT_ANG_CONE_XZ_TIME:
 			{
 				//fvar1 - height, fvar2 - radius, timer1 - timeMul, timer2 - timeAdd
-				D3DXVECTOR3 conepoint(0.0f, -light->AIfvar1, 0.0f);
-				D3DXVECTOR3 ppos = D3DXVECTOR3(light->AIfvar2 * sin((light->fTimelineAI + light->AItimer2) * light->AItimer1), 0.0f, light->AIfvar2 * cos((light->fTimelineAI + light->AItimer2) * light->AItimer1));
-				D3DXVec3Normalize(&light->vnDir, &(ppos - conepoint));
+				Vec3 conepoint(0.0f, -light->AIfvar1, 0.0f);
+				Vec3 ppos = Vec3(light->AIfvar2 * sin((light->fTimelineAI + light->AItimer2) * light->AItimer1), 0.0f, light->AIfvar2 * cos((light->fTimelineAI + light->AItimer2) * light->AItimer1));
+				MUVec3Norm(&light->vnDir, &(ppos - conepoint));
 			}
 			break;
 			default:
@@ -3977,11 +3976,11 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 				{
 					m_interfaceIGM.SetBombTimer(0.0f);
 					//add some explosions so everybody will die
-					AddProp_Explo(hash_EXPLO_LARGE_XL, prop->pos, prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
-					AddProp_Explo(hash_EXPLO_LARGE_XL, prop->pos + D3DXVECTOR2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
-					AddProp_Explo(hash_EXPLO_LARGE_XL, prop->pos - D3DXVECTOR2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
+					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos, prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
+					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos + Vec2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
+					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos - Vec2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
 
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &D3DXVECTOR2(prop->pos.x, prop->pos.y - 15.0f), NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &Vec2(prop->pos.x, prop->pos.y - 15.0f), NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 
 					prop->sprite.setAnimation("BOMB_EXPLODED", &m_sprProps);
 
@@ -4339,7 +4338,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 				actor->m_AIcommands.nLookDirX = SIGN(actor->m_AIsensorInfo.m_AIcurrentEvent.pos.x - actor->pos.x);
 			}
 			//add sound threat event
-			D3DXVECTOR2 vPos = actor->GetPosHeart();
+			Vec2 vPos = actor->GetPosHeart();
 			if (actor->m_AIsensorInfo.pTargetedActor != NULL)
 			{
 				vPos = actor->m_AIsensorInfo.pTargetedActor->GetPosHeart();
@@ -4614,8 +4613,8 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 				CActor* tact = m_arrActors[kk];
 				if ((tact->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_BE_DETONATED) == 0)
 					continue;
-				D3DXVECTOR2 vDelta = tact->GetPosHeart() - actor->GetPosHeart();
-				float fDist = D3DXVec2Length(&vDelta);
+				Vec2 vDelta = tact->GetPosHeart() - actor->GetPosHeart();
+				float fDist = MUVec2Len(&vDelta);
 				//too far?
 				if (fDist > actor->templateActor.distSee)
 					continue;
@@ -5030,7 +5029,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 					}
 					
 					App_IncreaseGamestat(K_MEMID_GAMESTATS_HOSTAGES_SAVED);
-					GiveStrategicPoints(actor->templateActor.fStrategicPoints, &D3DXVECTOR2(actor->bbox.vCenter.x, actor->bbox.vMin.y));
+					GiveStrategicPoints(actor->templateActor.fStrategicPoints, &Vec2(actor->bbox.vCenter.x, actor->bbox.vMin.y));
 					//make sure we release it on the next frame
 					actor->bReleaseIt = true;
 				}
@@ -5179,7 +5178,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	//--- UPDATE ANIMATION ---
 	//get displacement from anim moves
-	D3DXVECTOR2 vAnimMove(0.0f, 0.0f);
+	Vec2 vAnimMove(0.0f, 0.0f);
 	actor->sprite.pos.x = actor->sprite.pos.y = 0.0f; //resetez pozitia ca oricum se suprascrie la final de update
 	UINT32 aframeFlag = 0; //flagul aframe-ului resetat
 	UINT32 aframeFlag_feet = 0; //flagul aframe-ului resetat
@@ -5341,7 +5340,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			CActor* targetActor = GetClosestTarget(actor, actor->templateActor.foeClassFilter1, actor->templateActor.foeClassFilter2);
 			if (targetActor != null)
 			{
-				float enemyDst = D3DXVec2Length(&(targetActor->posHeart - actor->posHeart));
+				float enemyDst = MUVec2Len(&(targetActor->posHeart - actor->posHeart));
 				AddAIEvent(K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->templateActor.actorClass, targetActor->posHeart, enemyDst, 1.0f, actor->GetUID());
 				//#HACK: alerts the other enemies only if enemy class
 				if(actor->templateActor.actorClass >= K_LVL_ACT_CLASS_HUMAN)
@@ -5369,7 +5368,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					//sterg mesaj de see enemy pt actorul curent
 					DeleteAITargetedEvent(K_LVL_AI_EVENT_SEE_ENEMY, actor->GetUID());
 					//Trimit mesaj de LOST_ENEMY
-					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->posHeart + D3DXVECTOR2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 1.0f, actor->GetUID());
+					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->posHeart + Vec2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 1.0f, actor->GetUID());
 					//reset targeting actor
 					actor->m_AIsensorInfo.pTargetedActor = null;
 				}
@@ -5378,7 +5377,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if ((actor->m_AIsensorInfo.pTargetedActor == null) && (actor->m_AIsensorInfo.m_AIlastEvent.nType == K_LVL_AI_EVENT_GOT_HIT))
 				{
 					//put event behind him
-					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->posHeart - D3DXVECTOR2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 0.5f, actor->GetUID());
+					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->posHeart - Vec2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 0.5f, actor->GetUID());
 				}
 			}
 
@@ -5392,7 +5391,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			else
 			{
 				//nothing important, set idle tick
-				actor->m_AIsensorInfo.m_AIcurrentEvent.Set(K_LVL_AI_EVENT_IDLE_TICK, 0, 0, D3DXVECTOR2(0.0f, 0.0f), -1.0f, 1.0f);
+				actor->m_AIsensorInfo.m_AIcurrentEvent.Set(K_LVL_AI_EVENT_IDLE_TICK, 0, 0, Vec2(0.0f, 0.0f), -1.0f, 1.0f);
 			}
 			//----------------------------------------
 			//	THINK - decide best behavior
@@ -5518,14 +5517,14 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					//SND_PLAY(SNDIDX_CLICK_DENIED);
 				}
 
-				D3DXVECTOR2 vMoveDir = pController->GetDoubleAxisVector(K_CM_COMMAND_MOVE_X, K_CM_COMMAND_MOVE_Y, true);
-				if (D3DXVec2LengthSq(&vMoveDir) > 0.0f)
+				Vec2 vMoveDir = pController->GetDoubleAxisVector(K_CM_COMMAND_MOVE_X, K_CM_COMMAND_MOVE_Y, true);
+				if (MUVec2LenSq(&vMoveDir) > 0.0f)
 				{
 					actor->m_AIcommands.bThrust = true;
 					actor->m_AIcommands.vMoveDir = vMoveDir;
 					actor->m_AIcommands.bRunning = true;
 				}
-				D3DXVECTOR2 vAimVec = pController->GetDoubleAxisVector(K_CM_COMMAND_AIM_X, K_CM_COMMAND_AIM_Y, false);
+				Vec2 vAimVec = pController->GetDoubleAxisVector(K_CM_COMMAND_AIM_X, K_CM_COMMAND_AIM_Y, false);
 				//DebugPrintA("aim: %.2f, %.2f\n", vAimVec.x, vAimVec.y);
 				actor->m_AIcommands.vAimVec = vAimVec;
 
@@ -5650,10 +5649,10 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 							//generate particles too
 							if (m_Timers.Tick(40.0f))
 							{
-								D3DXVECTOR2 ppos(actor->bbox.vMin.x + randfloat(actor->bbox.vSize.x), actor->bbox.vMin.y + randfloat(actor->bbox.vSize.y));
-								g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK1, true, randint(2), &ppos, NULL, &D3DXVECTOR2(randfloatsgn(1.0f), -10.0f - randfloat(5.0f)), 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-								ppos = D3DXVECTOR2(actor->bbox.vMin.x + randfloat(actor->bbox.vSize.x), actor->bbox.vMin.y + randfloat(actor->bbox.vSize.y));
-								g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, 0, &ppos, NULL, &D3DXVECTOR2(randfloatsgn(1.0f), -10.0f - randfloat(5.0f)), 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+								Vec2 ppos(actor->bbox.vMin.x + randfloat(actor->bbox.vSize.x), actor->bbox.vMin.y + randfloat(actor->bbox.vSize.y));
+								g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK1, true, randint(2), &ppos, NULL, &Vec2(randfloatsgn(1.0f), -10.0f - randfloat(5.0f)), 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+								ppos = Vec2(actor->bbox.vMin.x + randfloat(actor->bbox.vSize.x), actor->bbox.vMin.y + randfloat(actor->bbox.vSize.y));
+								g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, 0, &ppos, NULL, &Vec2(randfloatsgn(1.0f), -10.0f - randfloat(5.0f)), 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 							}
 
 							actor->m_AIcommands.bThrustX = true;
@@ -5680,7 +5679,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 							PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_TAUNT);
 						}
 
-						D3DXVECTOR2 vDelta = actor->m_AIsensorInfo.pTargetedActor->GetPosHeart() - actor->GetPosHeart();
+						Vec2 vDelta = actor->m_AIsensorInfo.pTargetedActor->GetPosHeart() - actor->GetPosHeart();
 						float fDist = fabs(vDelta.x);
 						float fDistMin = max(K_TILE_SIZE, actor->templateActor.distAttackMin);
 						//see if target is already too close
@@ -5845,7 +5844,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					if (actor->varAIparams.GetVariantByName(L"bUseDamagerUID")->m_asBool)
 						unExploUID = actor->nLastDamageTakenFromUID;
 					//generate explo
-					AddProp_Explo(cvc->m_asUINT32, actor->posHeart, unExploUID, K_LVL_ACT_CLASS_EXPLOSION, D3DXVECTOR2(0.0f, 0.0f), &actor->bbox);
+					AddDoofer_Explo(cvc->m_asUINT32, actor->posHeart, unExploUID, K_LVL_ACT_CLASS_EXPLOSION, Vec2(0.0f, 0.0f), &actor->bbox);
 
 					//decal explo mark
 					//AddDecal(K_LVL_DECAL_LAYER_BACKWALLS, actor->posHeart, ANM_ACTIVES_SPR_DECAL_EXPLOMARKS, randint(3), 0xffffffff);
@@ -5935,14 +5934,14 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 							{
 								if (UTGetAppClass().m_Settings.bGoreEnabled)
 								{
-									g_particlesMgr.GenerateBulletHitEnemy(D3DXVECTOR2(actor->posHeart.x + randfloatsgn(5.0f), actor->posHeart.y),
-										D3DXVECTOR2((float)randsign(), -1.0f), K_LVL_ACT_CLASS_HUMAN, K_PART_LAYER_RT_FRONT_NRM);
+									g_particlesMgr.GenerateBulletHitEnemy(Vec2(actor->posHeart.x + randfloatsgn(5.0f), actor->posHeart.y),
+										Vec2((float)randsign(), -1.0f), K_LVL_ACT_CLASS_HUMAN, K_PART_LAYER_RT_FRONT_NRM);
 								}
 								else
 								{
 									//on gore off generate some stars
-									g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_CROSS_SM, true, 0, &D3DXVECTOR2(actor->posHeart.x + randfloatsgn(8.0f), actor->posHeart.y), NULL,
-										&D3DXVECTOR2(0.0f, -30.0f - randfloat(10.0f)), 0.6f, 0.7f, 0.0f, 0.0f, 0.0f, 0.2f, 0.2f, 0xff32a7fa, K_PART_LAYER_RT_FRONT_NRM);
+									g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_CROSS_SM, true, 0, &Vec2(actor->posHeart.x + randfloatsgn(8.0f), actor->posHeart.y), NULL,
+										&Vec2(0.0f, -30.0f - randfloat(10.0f)), 0.6f, 0.7f, 0.0f, 0.0f, 0.0f, 0.2f, 0.2f, 0xff32a7fa, K_PART_LAYER_RT_FRONT_NRM);
 
 								}
 							}
@@ -6184,7 +6183,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if((pOther != null) && (pOther->GetCurrentBehavior() != AI_BEHAVIOR_IN_LIMBO) &&
 					(pOther->nSuspendedFlags == K_LVL_SUSPENDFLAG_NONE) && (pOther->collisionFlags & K_DIRFLAG_DOWN))
 				{
-					D3DXVECTOR2 vTeleportPos = pOther->pos;
+					Vec2 vTeleportPos = pOther->pos;
 					if (GetBestSpawningPos(&vTeleportPos, pOther->bbox, &pOther->bbox))
 					{
 						actor->SetPos(vTeleportPos);
@@ -6203,11 +6202,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		if ((m_nPlayersActive > 1) || (actor->nSuspendedFlags & K_LVL_SUSPENDFLAG_OUTSIDE_SCREEN))
 		{
 			RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
-			CAABB camAABB(D3DXVECTOR2(camrect.x, camrect.y), D3DXVECTOR2(camrect.Right(), camrect.Bottom()));
+			CAABB camAABB(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));
 
 			camrect.Inflate(-16.0f);
 			//players midpoint
-			D3DXVECTOR2 avg(0.0f, 0.0f);
+			Vec2 avg(0.0f, 0.0f);
 			int plcnt = 0;
 			for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 			{
@@ -6310,7 +6309,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if ((act->templateActor.actorClass != K_LVL_ACT_CLASS_HUMAN) || (act->m_AIsensorInfo.pTargetedActor != null))
 					continue;
 				//daca inamicul este unde trebuie il agat si il arunc jos
-				D3DXVECTOR2 vChkPos = actor->GetPosHeart();
+				Vec2 vChkPos = actor->GetPosHeart();
 				//verifica cu jumatate de tile mai sus
 				vChkPos.y -= 16.0f;
 				if (act->bbox.PointIn(vChkPos))
@@ -6514,11 +6513,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//can we shoot?
 			if (!actor->pCurrentWeapon->WeaponTemplate.bAnimSync)
 			{
-				D3DXVECTOR2 vShootDir;
+				Vec2 vShootDir;
 				if (actor->m_AIcommands.vAimVec.x != 0.0f)
 					vShootDir = actor->m_AIcommands.vAimVec;
 				else
-					vShootDir = D3DXVECTOR2(actor->lookDirXsign, 0.0f);
+					vShootDir = Vec2(actor->lookDirXsign, 0.0f);
 
 				//shoot without waiting for a flag (forward or back)
 				if (ShootWeapon(actor->pCurrentWeapon, vShootDir))
@@ -6544,11 +6543,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					if ((actor->bOnLadder) && (bShoot == false))
 						bShoot = true;
 
-					D3DXVECTOR2 vShootDir;
+					Vec2 vShootDir;
 					if (actor->m_AIcommands.vAimVec.x != 0.0f)
 						vShootDir = actor->m_AIcommands.vAimVec;
 					else
-						vShootDir = D3DXVECTOR2(actor->lookDirXsign, 0.0f);
+						vShootDir = Vec2(actor->lookDirXsign, 0.0f);
 
 					if (bShoot)
 					{
@@ -6681,7 +6680,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	}
 	else
 	{
-		actor->speed = D3DXVECTOR2(0.0f, 0.0f);
+		actor->speed = Vec2(0.0f, 0.0f);
 	}
 
 
@@ -6781,8 +6780,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 					//SND_PLAY_POSITIONAL_RAND2(SNDIDX_BULLET_BODY_GIBBED_01, SNDIDX_BULLET_BODY_GIBBED_02, actor->GetPosHeart());
 					//meat lumps
-					D3DXVECTOR2 bulletSpeed;
-					D3DXVec2Normalize(&bulletSpeed, &actor->vSpeedImpulse);
+					Vec2 bulletSpeed;
+					MUVec2Norm(&bulletSpeed, &actor->vSpeedImpulse);
 
 					CAABB genbox = actor->bbox;
 					genbox.Inflate(-2.0f, -2.0f);
@@ -6797,11 +6796,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						}
 						for (int ll = 0; ll < 6; ll++)
 						{
-							AddProp(K_SPROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravityOld, nSubType);
+							AddDoofer(K_DOOFER_MEAT, AABB_GetRandomPointInBox(genbox), &Vec2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravityOld, nSubType);
 						}
 						//goes straight down to stain the floor
-						AddProp(K_SPROP_MEAT, actor->GetPosHeart(), &D3DXVECTOR2(200.0f, 50.0f), &g_vecGravityOld, nSubType);
-						AddProp(K_SPROP_MEAT, actor->GetPosHeart(), &D3DXVECTOR2(-200.0f, 50.0f), &g_vecGravityOld, nSubType);
+						AddDoofer(K_DOOFER_MEAT, actor->GetPosHeart(), &Vec2(200.0f, 50.0f), &g_vecGravityOld, nSubType);
+						AddDoofer(K_DOOFER_MEAT, actor->GetPosHeart(), &Vec2(-200.0f, 50.0f), &g_vecGravityOld, nSubType);
 						//human blood gibs particle
 						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &actor->pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_FRONT_NRM);
 					}
@@ -6809,7 +6808,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					{
 						for (int ll = 0; ll < 2; ll++)
 						{
-							AddProp(K_SPROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravityOld);
+							AddDoofer(K_DOOFER_MEAT, AABB_GetRandomPointInBox(genbox), &Vec2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravityOld);
 						}
 						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &actor->pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM);
 					}
@@ -6851,11 +6850,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					actor->bHasCollision = false;
 					actor->bSkipRender = true;
 					//reset physics
-					actor->speed = D3DXVECTOR2(0.0f, 0.0f);
-					actor->vSpeedImpulse = D3DXVECTOR2(0.0f, 0.0f);
-					actor->vecCamFollowPos = D3DXVECTOR2(0.0f, 0.0f);
+					actor->speed = Vec2(0.0f, 0.0f);
+					actor->vSpeedImpulse = Vec2(0.0f, 0.0f);
+					actor->vecCamFollowPos = Vec2(0.0f, 0.0f);
 					//move invisible body back to last safe pos
-					D3DXVECTOR2 vSpawnPos = m_arrPlayerLastSafePos[actor->nPlayerOrdinal];
+					Vec2 vSpawnPos = m_arrPlayerLastSafePos[actor->nPlayerOrdinal];
 					actor->SetPos(vSpawnPos);
 					break;
 				}
@@ -6919,7 +6918,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	CLAMP(actor->speed.x, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED);
 	CLAMP(actor->speed.y, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED);
 	//update impulse
-	D3DXVECTOR2 impFriction(K_LVL_GROUND_DEFAULT_FRICTION, K_LVL_GROUND_DEFAULT_FRICTION);
+	Vec2 impFriction(K_LVL_GROUND_DEFAULT_FRICTION, K_LVL_GROUND_DEFAULT_FRICTION);
 	//limit impulse
 	CLAMP(actor->vSpeedImpulse.y, -K_LVL_ACTOR_MAX_IMPULSE, K_LVL_ACTOR_MAX_IMPULSE);
 	CLAMP(actor->vSpeedImpulse.x, -K_LVL_ACTOR_MAX_IMPULSE, K_LVL_ACTOR_MAX_IMPULSE);
@@ -7131,19 +7130,19 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//set camera vector
 	if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
 	{
-		actor->vecCamFollowPos = D3DXVECTOR2(K_LVL_CAM_LOOK_OFFSET * actor->lookDirXsign, 0.0f);
+		actor->vecCamFollowPos = Vec2(K_LVL_CAM_LOOK_OFFSET * actor->lookDirXsign, 0.0f);
 		if (actor->nAttackStatus == K_LVL_ACT_ATTACK_SHOOTING)
 			actor->vecCamFollowPos.x += actor->lookDirXsign * actor->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]->WeaponTemplate.fCameraRecoil;
 	}
 	//set sprite pos
 	if (!actor->templateActor.bComposedAnimation)
 	{
-		actor->sprite.pos = D3DXVECTOR2((int)ROUND_FLOAT(actor->pos.x), (int)ROUND_FLOAT(actor->pos.y));
+		actor->sprite.pos = Vec2((int)ROUND_FLOAT(actor->pos.x), (int)ROUND_FLOAT(actor->pos.y));
 		actor->sprite_feet.pos = actor->sprite.pos;
 	}
 	else
 	{
-		actor->sprite_feet.pos = D3DXVECTOR2((int)ROUND_FLOAT(actor->pos.x), (int)ROUND_FLOAT(actor->pos.y));
+		actor->sprite_feet.pos = Vec2((int)ROUND_FLOAT(actor->pos.x), (int)ROUND_FLOAT(actor->pos.y));
 		POINTXYZ_INT stitchpt(0, 0, 0);
 		//find stitch point for torso
 		if (actor->sprite_feet.animationIdx >= 0)
@@ -7225,8 +7224,8 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 	}
 	CAABB aabbvision;
 	aabbvision.Set_Corrected(
-		D3DXVECTOR2(sourceActor->pos.x + sourceActor->lookDirXsign * fDistSee, sourceActor->pos.y + fDistDown),
-		D3DXVECTOR2(sourceActor->pos.x - sourceActor->lookDirXsign * fDistHear, sourceActor->pos.y - fDistUp)
+		Vec2(sourceActor->pos.x + sourceActor->lookDirXsign * fDistSee, sourceActor->pos.y + fDistDown),
+		Vec2(sourceActor->pos.x - sourceActor->lookDirXsign * fDistHear, sourceActor->pos.y - fDistUp)
 	);
 
 	//--- check all actors for enemy ---
@@ -7279,9 +7278,9 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 		if ((enemy->fLife <= 0.0f) || ((enemy->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
 			continue;
 
-		D3DXVECTOR2 enemyDistV = enemy->posHeart - sourceActor->posHeart;
+		Vec2 enemyDistV = enemy->posHeart - sourceActor->posHeart;
 		float viewDstSq = sourceActor->templateActor.distSee * sourceActor->templateActor.distSee;
-		float enemyDistSq = D3DXVec2LengthSq(&enemyDistV);
+		float enemyDistSq = MUVec2LenSq(&enemyDistV);
 
 		bool bPreciseFOV = false; //approximate FOV with rectangle? (good for gameplay)
 		if ((sourceActor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_ROTATE_VIEW) != 0)
@@ -7329,7 +7328,7 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 			CBullet* bul = m_arrBulletsTemp.m_pData[ll];
 			if (bul->eType != K_LVL_BULLET_SMOKE_GRENADE)
 				continue;
-			D3DXVECTOR2 vBulPos = bul->physPt->m_data.pos;
+			Vec2 vBulPos = bul->physPt->m_data.pos;
 			
 			CAABB smokeAABB;
 			smokeAABB.Set(vBulPos.x - K_TILE_SIZE, vBulPos.y - 4 * K_TILE_SIZE, vBulPos.x + K_TILE_SIZE, vBulPos.y + K_TILE_SIZE);
@@ -7368,8 +7367,8 @@ CActor * CLevel::GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTa
 		if ((enemy->fLife <= 0.0f) || ((enemy->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
 			continue;
 
-		D3DXVECTOR2 enemyDistV = enemy->posHeart - sourceActor->posHeart;
-		float enemyDistSq = D3DXVec2LengthSq(&enemyDistV);
+		Vec2 enemyDistV = enemy->posHeart - sourceActor->posHeart;
+		float enemyDistSq = MUVec2LenSq(&enemyDistV);
 		//daca e prea departe trece mai departe
 		float fSearchRadiusSq = (fMaxDistance <= 0.0f) ? (sourceActor->templateActor.distSee * sourceActor->templateActor.distSee) : (fMaxDistance * fMaxDistance);
 		if (enemyDistSq > fSearchRadiusSq)
@@ -7382,7 +7381,7 @@ CActor * CLevel::GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTa
 			continue;
 
 		//daca a trecut toate testele si inamicul curent este mai aproape decat cel selectat initial il setez pe cel nou
-		if ((retvalenemy == null) || (D3DXVec2LengthSq(&(retvalenemy->posHeart - sourceActor->posHeart)) > enemyDistSq))
+		if ((retvalenemy == null) || (MUVec2LenSq(&(retvalenemy->posHeart - sourceActor->posHeart)) > enemyDistSq))
 			retvalenemy = enemy;
 	}
 
@@ -7390,7 +7389,7 @@ CActor * CLevel::GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTa
 }
 
 
-CCollisionShape* CLevel::GetClosestCover(D3DXVECTOR2 vPos, float fMaxDistance /*= 0.0f*/)
+CCollisionShape* CLevel::GetClosestCover(Vec2 vPos, float fMaxDistance /*= 0.0f*/)
 {
 	float fMaxDstSq = fMaxDistance * fMaxDistance;
 	float fCurrentDist = 0.0f;
@@ -7400,7 +7399,7 @@ CCollisionShape* CLevel::GetClosestCover(D3DXVECTOR2 vPos, float fMaxDistance /*
 		CCollisionShape* shape = m_arrColShapes[kk];
 		if (shape->type != K_LVL_COLL_TYPE_COVER)
 			continue;
-		float fDstSq = D3DXVec2LengthSq(&(shape->bbox.vCenter - vPos));
+		float fDstSq = MUVec2LenSq(&(shape->bbox.vCenter - vPos));
 		if((fMaxDistance > 0.0f) && (fDstSq > fMaxDstSq))
 			continue;
 		if (!IsLineOfSight(vPos, shape->bbox.vCenter))
@@ -7415,7 +7414,7 @@ CCollisionShape* CLevel::GetClosestCover(D3DXVECTOR2 vPos, float fMaxDistance /*
 	return pRetShape;
 }
 
-void CLevel::AddAIEvent(EAIEventType eventType, UINT32 ownerUID, int ownerClass, D3DXVECTOR2 vPos, float radius, float duration, UINT32 targetUID)
+void CLevel::AddAIEvent(EAIEventType eventType, UINT32 ownerUID, int ownerClass, Vec2 vPos, float radius, float duration, UINT32 targetUID)
 {
 	//raza negativa inseamna infinita
 	if ((radius == 0.0f) || (duration <= 0.0f))
@@ -7510,7 +7509,7 @@ CAIEvent * CLevel::GetMostImportantAIEvent(CActor * callerActor, EAIEventType eT
 		float evtdstsq = 0.0f;
 		if (evt->fRadius > 0.0f)
 		{
-			evtdstsq = D3DXVec2LengthSq(&(callerActor->posHeart - evt->pos));
+			evtdstsq = MUVec2LenSq(&(callerActor->posHeart - evt->pos));
 			if (evtdstsq > evt->fRadius * evt->fRadius)
 				continue;
 		}
@@ -8136,7 +8135,7 @@ void CLevel::Update(float dTime_original)
 							if (bCheckSpawn)
 							{
 								//spawn pos
-								D3DXVECTOR2 vSpawnPos = m_arrPlayerLastSafePos[plidx];
+								Vec2 vSpawnPos = m_arrPlayerLastSafePos[plidx];
 								CAABB aabbSpawn;
 								CAABB* p_aabbPeer = null;
 								aabbSpawn.Set(vSpawnPos.x - 5.0f, vSpawnPos.y - 22.0f, vSpawnPos.x + 5.0f, vSpawnPos.y);
@@ -9547,7 +9546,7 @@ void CLevel::Update(float dTime_original)
 	///--- BULLETS (after phys pts) ---
 	UpdateBullets(dTime);
 	///--- PROPS ---
-	UpdateProps(dTime);
+	UpdateDoofers(dTime);
 	///--- DECALS ---
 	UpdateDecals(dTime);
 	///--- ACTIVES ---
@@ -9556,10 +9555,6 @@ void CLevel::Update(float dTime_original)
 	///--- release dead objects all at once here ---
 	//(called before BuildVisibilityLists but after bullets,physics updates because it deallocates stuff from visibility lists)
 	CleanupDeadObjects();
-
-	///--- screen vignette ---
-	m_screenVignetteDamage.Update(dTime);
-	m_screenVignette.Update(dTime);
 
 	///--- STATISTICS ---
 	//active players
@@ -9576,7 +9571,7 @@ void CLevel::Update(float dTime_original)
 
 	///--- update camera ---
 	//default camera position following the players
-	D3DXVECTOR2 avg_live(0.0f, 0.0f), avg_all(0.0f, 0.0f);
+	Vec2 avg_live(0.0f, 0.0f), avg_all(0.0f, 0.0f);
 	int plcnt_live = 0, plcnt_all = 0;
 	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 	{
@@ -9612,7 +9607,7 @@ void CLevel::Update(float dTime_original)
 
 	//average player positions
 	bool bAvgSet = false;
-	D3DXVECTOR2 vPlayersAvg(0.0f, 0.0f);
+	Vec2 vPlayersAvg(0.0f, 0.0f);
 	if (plcnt_all > 0)
 	{
 		bAvgSet = true;
@@ -9624,7 +9619,7 @@ void CLevel::Update(float dTime_original)
 		{
 			avg_live /= plcnt_live;
 			//are they too far apart? 
-			if (D3DXVec2Length(&(avg_all - avg_live)) > UTGetAppClass().g_rectGameScreen.h * 0.5f)
+			if (MUVec2Len(&(avg_all - avg_live)) > UTGetAppClass().g_rectGameScreen.h * 0.5f)
 			{
 				vPlayersAvg = avg_live;
 			}
@@ -9657,7 +9652,7 @@ void CLevel::Update(float dTime_original)
 
 	//find visible area
 	RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
-	CAABB camAABB(D3DXVECTOR2(camrect.x, camrect.y), D3DXVECTOR2(camrect.Right(), camrect.Bottom()));
+	CAABB camAABB(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));
 
 	//set sounds listener position
 	SND_SET_LISTENER_POS(camrect.Center());
@@ -9695,9 +9690,9 @@ HRESULT CLevel::PaintOffscreen()
 //	RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
 //	//CAABB al camerei
 //	CAABB		camAABB;  
-//	camAABB.Set(D3DXVECTOR2(camrect.x, camrect.y), D3DXVECTOR2(camrect.Right(), camrect.Bottom()));
+//	camAABB.Set(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));
 //	//matrice folosita local
-//	D3DXMATRIXA16 matlocal;
+//	Mat matlocal;
 //
 //	HRESULT hr = S_OK;
 //	//daca nu am capabilitatea de offscreen ies cu eroare
@@ -9713,7 +9708,7 @@ HRESULT CLevel::PaintOffscreen()
 //		m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 //		m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 //		//matrice de proiectie offsetata ca sa incapa un pixel intreg (pixel center e in centru)
-//		D3DXMATRIXA16 matProj;
+//		Mat matProj;
 //		D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, K_RTT_WIDTH + 0.5f, K_RTT_HEIGHT + 0.5f, 0.5f, 0.0f, 1.0f);
 //		m_pDevice->SetTransform(D3DTS_PROJECTION, &matProj);
 //
@@ -9740,8 +9735,8 @@ HRESULT CLevel::PaintOffscreen()
 //			m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
 //		}
 //		//set scroll matrix
-//		D3DXMATRIXA16 mattrans;
-//		MUMatAffine2D(&mattrans, 1.0f, NULL, 0.0f, &D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
+//		Mat mattrans;
+//		MUMatAffine2D(&mattrans, 1.0f, NULL, 0.0f, &Vec2(-m_visibleArea.x, -m_visibleArea.y));
 //		m_pSprite->SetTransform(&mattrans);
 //
 //		///.////////////////////////////////////////////////////////
@@ -9756,7 +9751,7 @@ HRESULT CLevel::PaintOffscreen()
 //			CAABB aabbVisible;
 //			aabbVisible.Set(m_visibleArea);
 //			AABB_Intersection(aabbVisible, m_HiddenRoomAABB, aabbScissor);
-//			aabbScissor.Move(D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
+//			aabbScissor.Move(Vec2(-m_visibleArea.x, -m_visibleArea.y));
 //		}
 //
 //		SetScissorClip(m_pDevice, aabbScissor.vMin.x, aabbScissor.vMin.y, aabbScissor.vSize.x, aabbScissor.vSize.y);
@@ -9772,7 +9767,7 @@ HRESULT CLevel::PaintOffscreen()
 //				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
 //				CTile *tl = &tiles[tlX][tlY];
 //				if (tl->tileIDs[0] >= 0)
-//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexBaseIdx]->pTexture, &tl->srcRects[0], NULL, &D3DXVECTOR3(xx * tileW, yy * tileH, 0.0f), 0xffffffff);
+//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexBaseIdx]->pTexture, &tl->srcRects[0], NULL, &Vec3(xx * tileW, yy * tileH, 0.0f), 0xffffffff);
 //			}
 //		}
 //		m_pSprite->Flush();
@@ -9814,7 +9809,7 @@ HRESULT CLevel::PaintOffscreen()
 //				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
 //				CTile *tl = &tiles[tlX][tlY];
 //				if (tl->tileIDs[1] >= 0)
-//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexBaseIdx]->pTexture, &tl->srcRects[1], NULL, &D3DXVECTOR3(xx * tileW, yy * tileH, 0.0f), 0xffffffff);
+//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexBaseIdx]->pTexture, &tl->srcRects[1], NULL, &Vec3(xx * tileW, yy * tileH, 0.0f), 0xffffffff);
 //			}
 //		}
 //		m_pSprite->Flush();
@@ -9969,7 +9964,7 @@ HRESULT CLevel::PaintOffscreen()
 //					float fMaxOffset = 16.0f;
 //
 //					float fIllumination = 0.0f; //cantitatea de lumina care cade pe actor
-//					D3DXVECTOR2 vLightResultant(0.0f, 0.0f); //media vectorilor de iluminare
+//					Vec2 vLightResultant(0.0f, 0.0f); //media vectorilor de iluminare
 //
 //					int influences = 0;
 //					for (int ll = 0; ll < m_visibleList.visible_lights.Count(); ll++)
@@ -9979,8 +9974,8 @@ HRESULT CLevel::PaintOffscreen()
 //							continue;
 //						if (light->type != K_LVL_LT_POINT)
 //							continue;
-//						D3DXVECTOR2 lightdir = light->pos - actor->posHeart;
-//						float lightdist = D3DXVec2Length(&lightdir);
+//						Vec2 lightdir = light->pos - actor->posHeart;
+//						float lightdist = MUVec2Len(&lightdir);
 //						if (lightdist > light->fRadius)
 //							continue;
 //						if (!IsLineOfSight(light->pos, actor->GetPosHeart()))
@@ -9999,9 +9994,9 @@ HRESULT CLevel::PaintOffscreen()
 //					if (influences > 0)
 //					{
 //						vLightResultant /= (float)influences;
-//						D3DXMATRIXA16 matshad = matlocal;
+//						Mat matshad = matlocal;
 //						//scalare offset
-//						float offlen = D3DXVec2Length(&vLightResultant);
+//						float offlen = MUVec2Len(&vLightResultant);
 //						if (offlen > fMaxOffset)
 //							vLightResultant *= fMaxOffset / offlen;
 //
@@ -10025,7 +10020,7 @@ HRESULT CLevel::PaintOffscreen()
 //				{
 //					//pentru fiecare lumina vad unde pica proiectia umbrei - versiune cu umbre dinamice
 //					//are mici probleme cand nu te vede lumina si cand e lumina de sub tine si apare doar printr-o raza (umbra apare intreaga si iese din volumul luminii)
-//					D3DXMATRIXA16 matshad;
+//					Mat matshad;
 //					float spriteAlpha = D3DCOLOR_GETFALPHA(actor->color);
 //					for (int ll = 0; ll < m_visibleList.visible_lights.Count(); ll++)
 //					{
@@ -10034,8 +10029,8 @@ HRESULT CLevel::PaintOffscreen()
 //							continue;
 //						if (light->type != K_LVL_LT_POINT)
 //							continue;
-//						D3DXVECTOR2 lightdir = light->pos - actor->GetPosHeart();
-//						float lightdist = D3DXVec2Length(&lightdir);
+//						Vec2 lightdir = light->pos - actor->GetPosHeart();
+//						float lightdist = MUVec2Len(&lightdir);
 //						if (lightdist > light->fRadius)
 //							continue;
 //						if (!IsLineOfSight(light->pos, actor->posHeart))
@@ -10083,7 +10078,7 @@ HRESULT CLevel::PaintOffscreen()
 //				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
 //				CTile *tl = &tiles[tlX][tlY];
 //				if (tl->tileIDs[2] >= 0)
-//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexBaseIdx]->pTexture, &tl->srcRects[2], NULL, &D3DXVECTOR3(xx * tileW, yy * tileH, 0.0f), 0xffffffff);
+//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexBaseIdx]->pTexture, &tl->srcRects[2], NULL, &Vec3(xx * tileW, yy * tileH, 0.0f), 0xffffffff);
 //			}
 //		}
 //		m_pSprite->Flush();
@@ -10098,8 +10093,8 @@ HRESULT CLevel::PaintOffscreen()
 //
 //		///--- paint RT particles - BACK ---
 //		m_pSprite->SetTransform(&g_matIdentity);
-//		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_BACK_NRM, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), false);
-//		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_BACK_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), true);
+//		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_BACK_NRM, Vec2(-m_visibleArea.x, -m_visibleArea.y), false);
+//		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_BACK_NRM_LIGHT, Vec2(-m_visibleArea.x, -m_visibleArea.y), true);
 //
 //
 //		///--- paint actors (player included) ---
@@ -10145,8 +10140,8 @@ HRESULT CLevel::PaintOffscreen()
 //
 //		//--- paint RT particles - FRONT ---
 //		m_pSprite->SetTransform(&g_matIdentity);
-//		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_FRONT_NRM, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), false);
-//		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_FRONT_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y), true);
+//		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_FRONT_NRM, Vec2(-m_visibleArea.x, -m_visibleArea.y), false);
+//		g_particlesMgr.PaintLayerOffset(K_PART_LAYER_RT_FRONT_NRM_LIGHT, Vec2(-m_visibleArea.x, -m_visibleArea.y), true);
 //
 //		///--- paint water details ---
 //		/*
@@ -10169,7 +10164,7 @@ HRESULT CLevel::PaintOffscreen()
 //				CAABB wbb; //water bbox
 //				if (AABB_Intersection(col->bbox, camAABB, wbb))
 //				{
-//					D3DXVECTOR2 texoff = col->bbox.vMin - wbb.vMin;
+//					Vec2 texoff = col->bbox.vMin - wbb.vMin;
 //					//!! animatia de apa trebuie sa aiba frame 1 pt suprafata apei si 2 pentru luminile din apa
 //					CSprite spr(m_waterAnimIdx, wbb.vMin.x, wbb.vMin.y);
 //					spr.color = 0xffffffff;
@@ -10191,7 +10186,7 @@ HRESULT CLevel::PaintOffscreen()
 //		m_pSprite->SetTransform(&g_matIdentity);
 //		*/
 //		///--- paint actives front layer ---
-//		MUMatAffine2D(&mattrans, 1.0f, NULL, 0.0f, &D3DXVECTOR2(-m_visibleArea.x, -m_visibleArea.y));
+//		MUMatAffine2D(&mattrans, 1.0f, NULL, 0.0f, &Vec2(-m_visibleArea.x, -m_visibleArea.y));
 //		m_pSprite->SetTransform(&mattrans);
 //
 //		for (int kk = 0; kk < m_visibleList.visible_props[K_LVL_LAYER_FRONT].Count(); kk++)
@@ -10218,10 +10213,10 @@ HRESULT CLevel::PaintOffscreen()
 //				else
 //				{
 //					//for now only front objects can be rotated... much optimization, such speed
-//					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x - m_visibleArea.x, active->pos.y - m_visibleArea.y));
+//					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &Vec2(active->pos.x - m_visibleArea.x, active->pos.y - m_visibleArea.y));
 //
 //					m_pSprite->SetTransform(&matlocal);
-//					active->sprite.pos = D3DXVECTOR2(0.0f, 0.0f);
+//					active->sprite.pos = Vec2(0.0f, 0.0f);
 //					active->sprite.paint_firstModule(&m_sprProps);
 //					m_pSprite->SetTransform(&mattrans);
 //				}
@@ -10271,12 +10266,12 @@ HRESULT CLevel::PaintOffscreen()
 //				}
 //				else
 //				{
-//					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x - m_visibleArea.x, active->pos.y - m_visibleArea.y));
+//					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &Vec2(active->pos.x - m_visibleArea.x, active->pos.y - m_visibleArea.y));
 //
 //					m_pSprite->SetTransform(&matlocal);
 //					CSprite spr = active->sprite;
 //					spr.color = colAlpha;
-//					spr.pos = D3DXVECTOR2(0.0f, 0.0f);
+//					spr.pos = Vec2(0.0f, 0.0f);
 //					spr.paint_firstModule(&m_sprProps);
 //					m_pSprite->SetTransform(&mattrans);
 //				}
@@ -10292,7 +10287,7 @@ HRESULT CLevel::PaintOffscreen()
 //		///	NORMAL MAP
 //		///.////////////////////////////////////////////////////////
 //		//set clip on colormap
-//		aabbScissor.Move(D3DXVECTOR2(K_RTT_H_WIDTH, 0.0f));
+//		aabbScissor.Move(Vec2(K_RTT_H_WIDTH, 0.0f));
 //		SetScissorClip(m_pDevice, aabbScissor.vMin.x, aabbScissor.vMin.y, aabbScissor.vSize.x, aabbScissor.vSize.y);
 //
 //		///--- back tiles normal map
@@ -10305,7 +10300,7 @@ HRESULT CLevel::PaintOffscreen()
 //				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
 //				CTile *tl = &tiles[tlX][tlY];
 //				if (tl->tileIDs[0] >= 0)
-//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexNormIdx]->pTexture, &tl->srcRects[0], NULL, &D3DXVECTOR3(K_RTT_H_WIDTH + xx * tileW, yy * tileH, 0.0f), 0xffffffff);
+//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexNormIdx]->pTexture, &tl->srcRects[0], NULL, &Vec3(K_RTT_H_WIDTH + xx * tileW, yy * tileH, 0.0f), 0xffffffff);
 //			}
 //		}
 //		m_pSprite->Flush();
@@ -10353,7 +10348,7 @@ HRESULT CLevel::PaintOffscreen()
 //				CTile *tl = &tiles[tlX][tlY];
 //
 //				if (tl->tileIDs[1] >= 0)
-//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexNormIdx]->pTexture, &tl->srcRects[1], NULL, &D3DXVECTOR3(K_RTT_H_WIDTH + xx * tileW, yy * tileH, 0.0f), 0xffffffff);
+//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexNormIdx]->pTexture, &tl->srcRects[1], NULL, &Vec3(K_RTT_H_WIDTH + xx * tileW, yy * tileH, 0.0f), 0xffffffff);
 //			}
 //		}
 //		m_pSprite->Flush();
@@ -10397,15 +10392,15 @@ HRESULT CLevel::PaintOffscreen()
 //				int tlY = yy + m_visibleAreaTL.y - m_levelAABB_TL.y;
 //				CTile *tl = &tiles[tlX][tlY];
 //				if (tl->tileIDs[2] >= 0)
-//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexNormIdx]->pTexture, &tl->srcRects[2], NULL, &D3DXVECTOR3(K_RTT_H_WIDTH + xx * tileW, yy * tileH, 0.0f), 0xffffffff);
+//					m_pSprite->Draw(m_texManager.m_Texs[m_tilesTexNormIdx]->pTexture, &tl->srcRects[2], NULL, &Vec3(K_RTT_H_WIDTH + xx * tileW, yy * tileH, 0.0f), 0xffffffff);
 //			}
 //		}
 //		m_pSprite->Flush();
 //
 //		///--- paint RT particles - BACK ---
 //		m_pSprite->SetTransform(&g_matIdentity);
-//		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_BACK_NRM, D3DXVECTOR2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
-//		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_BACK_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
+//		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_BACK_NRM, Vec2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
+//		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_BACK_NRM_LIGHT, Vec2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
 //
 //		///--- ACTORS NORMALS
 //		for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
@@ -10454,8 +10449,8 @@ HRESULT CLevel::PaintOffscreen()
 //
 //		///--- paint RT particles - FRONT ---
 //		m_pSprite->SetTransform(&g_matIdentity);
-//		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_FRONT_NRM, D3DXVECTOR2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
-//		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_FRONT_NRM_LIGHT, D3DXVECTOR2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
+//		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_FRONT_NRM, Vec2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
+//		g_particlesMgr.PaintLayerOffset_texOverride(K_PART_LAYER_RT_FRONT_NRM_LIGHT, Vec2(-m_visibleArea.x + K_RTT_H_WIDTH, -m_visibleArea.y), false, 1);
 //
 //		///--- paint actives front layer NORMALS ---
 //		m_pSprite->SetTransform(&mattrans);
@@ -10491,10 +10486,10 @@ HRESULT CLevel::PaintOffscreen()
 //				else
 //				{
 //					//#TODO: daca ma hotarasc sa nu pun rotatii la obiecte scot partea asta. Momentan am rotatii doar pe front layer la active
-//					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &D3DXVECTOR2(active->pos.x + K_RTT_H_WIDTH - m_visibleArea.x, active->pos.y - m_visibleArea.y));
+//					MUMatAffine2D(&matlocal, 1.0f, NULL, active->fAngle, &Vec2(active->pos.x + K_RTT_H_WIDTH - m_visibleArea.x, active->pos.y - m_visibleArea.y));
 //
 //					m_pSprite->SetTransform(&matlocal);
-//					active->sprite.pos = D3DXVECTOR2(0.0f, 0.0f);
+//					active->sprite.pos = Vec2(0.0f, 0.0f);
 //					active->sprite.paint_firstModule_texOverride(&m_sprProps, 1);
 //					m_pSprite->SetTransform(&mattrans);
 //				}
@@ -10562,7 +10557,7 @@ HRESULT CLevel::PaintComposition()
 		// Clear the render target and the zbuffer 
 		V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, K_GAME_CLEAR_COLOR, 1.0f, 0));
 
-		//D3DXMATRIXA16 matProj;
+		//Mat matProj;
 		//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, K_RTFINAL_WIDTH + 0.5f, K_RTFINAL_HEIGHT + 0.5f, 0.5f, 0.0f, 1.0f);
 		//pd3dDevice->SetTransform(D3DTS_PROJECTION, &matProj);
 
@@ -10643,7 +10638,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			//use sprite
 			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
-			//D3DXMATRIXA16 matProj;
+			//Mat matProj;
 			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
 			m_pDevice->SetTransform(D3DTS_PROJECTION, &pRT->matProj);
 
@@ -10674,7 +10669,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			//use sprite
 			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
-			//D3DXMATRIXA16 matProj;
+			//Mat matProj;
 			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
 			m_pDevice->SetTransform(D3DTS_PROJECTION, &pRT->matProj);
 
@@ -10708,7 +10703,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
 			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
-			//D3DXMATRIXA16 matProj;
+			//Mat matProj;
 			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
 			m_pDevice->SetTransform(D3DTS_PROJECTION, &pRT->matProj);
 
@@ -10740,7 +10735,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
 			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
-			//D3DXMATRIXA16 matProj;
+			//Mat matProj;
 			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
 			m_pDevice->SetTransform(D3DTS_PROJECTION, &pRT->matProj);
 
@@ -10766,13 +10761,13 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 {
 	_ASSERT((ePass > K_LVL_RP_NONE) && (ePass < K_LVL_RP_COUNT));
 
-	D3DXMATRIXA16	matView;
+	Mat	matView;
 
 	RECTXYWH_F		camrect = m_camLevel.GetCamWorldAABB();
 	CAABB			camAABB(camrect.x, camrect.y, camrect.Right(), camrect.Bottom());
 
 	//locally used temp matrix
-	D3DXMATRIXA16	matlocal;
+	Mat	matlocal;
 
 	///----------------------------------------------------
 	/// INITIAL SETUP
@@ -10800,7 +10795,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
 	}
 
-	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &D3DXVECTOR2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
+	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 
@@ -10910,7 +10905,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
 	}
 
-	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &D3DXVECTOR2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
+	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
 
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
@@ -10920,7 +10915,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 	PVERTEXSHADER pVShader = null;
 	PPIXELSHADER pPShader = null;
 
-	D3DXMATRIXA16 matWVP = matView * (*matProj);
+	Mat matWVP = matView * (*matProj);
 	// begin the painter
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 	if (pSprVS)
@@ -11204,7 +11199,7 @@ OPRESULT CLevel::RenderPass_Composition(Mat* matProj)
 		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
 	}
 
-	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &D3DXVECTOR2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
+	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 
@@ -11212,19 +11207,19 @@ OPRESULT CLevel::RenderPass_Composition(Mat* matProj)
 	PVERTEXSHADER pVShader = null;
 	PPIXELSHADER pPShader = null;
 
-	D3DXMATRIXA16 matWVP = matView * (*matProj);
+	Mat matWVP = matView * (*matProj);
 
 	//--- build RT rect ---
 	_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-	vul.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMin.y, 0.0f);
-	vur.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMin.y, 0.0f);
-	vdl.pos = D3DXVECTOR3(camAABB.vMin.x, camAABB.vMax.y, 0.0f);
-	vdr.pos = D3DXVECTOR3(camAABB.vMax.x, camAABB.vMax.y, 0.0f);
+	vul.pos = Vec3(camAABB.vMin.x, camAABB.vMin.y, 0.0f);
+	vur.pos = Vec3(camAABB.vMax.x, camAABB.vMin.y, 0.0f);
+	vdl.pos = Vec3(camAABB.vMin.x, camAABB.vMax.y, 0.0f);
+	vdr.pos = Vec3(camAABB.vMax.x, camAABB.vMax.y, 0.0f);
 
-	vul.tex1 = vul.tex2 = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 0.0f);
-	vur.tex1 = vur.tex2 = D3DXVECTOR4(1.0f, 0.0f, 0.0f, 0.0f);
-	vdl.tex1 = vdl.tex2 = D3DXVECTOR4(0.0f, 1.0f, 0.0f, 0.0f);
-	vdr.tex1 = vdr.tex2 = D3DXVECTOR4(1.0f, 1.0f, 0.0f, 0.0f);
+	vul.tex1 = vul.tex2 = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	vur.tex1 = vur.tex2 = Vec4(1.0f, 0.0f, 0.0f, 0.0f);
+	vdl.tex1 = vdl.tex2 = Vec4(0.0f, 1.0f, 0.0f, 0.0f);
+	vdr.tex1 = vdr.tex2 = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
 	//set color
 	vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
 	//build verts
@@ -11273,7 +11268,7 @@ void CLevel::Paint()
 	//1. set active camera
 	m_pSprite->Flush(); //chem un flush ca sa fiu sigur ca nu intru peste ce s-a desenat inainte
 	CCameraTransform::SetActiveCamera(m_pDevice, &m_camLevel);
-	D3DXMATRIXA16 matCam = m_camLevel.GetViewTransform(); //matricea camerei
+	Mat matCam = m_camLevel.GetViewTransform(); //matricea camerei
 
 	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
@@ -11293,7 +11288,7 @@ void CLevel::Paint()
 	//#HACK: daca am mai multe texturi de lumina trebuie schimbat settexture sa ia pentru fiecare lumina textura ei. Daca am o singura textura merge foarte bine asa
 	m_pDevice->SetTexture(1, m_sprLights.Textures[0]->pTex);
 
-	D3DXMATRIXA16 matWVP = matCam * UTGetAppClass().g_matProj;
+	Mat matWVP = matCam * UTGetAppClass().g_matProj;
 	//vertex shaderulis the same for everything
 	pVShaderTEXspot = UTGetShaderManager().GetVShaderByName(L"VS_TEXspot");
 	m_pDevice->SetVertexShader(pVShaderTEXspot);
@@ -11333,7 +11328,7 @@ void CLevel::Paint()
 	/*
 	//RECT srcrect;
 	//SetRect(&srcrect, 0, 0, m_visibleAreaTL.w * tileW, m_visibleAreaTL.h * tileH);
-	//D3DXVECTOR3 bgpos(m_visibleArea.x, m_visibleArea.y, 0.0f);
+	//Vec3 bgpos(m_visibleArea.x, m_visibleArea.y, 0.0f);
 	//m_pSprite->Draw(m_pRTTexture, &srcrect, NULL, &bgpos, m_colAmbientGlobal);
 	//m_pSprite->Flush();
 	*/
@@ -11417,7 +11412,7 @@ void CLevel::Paint()
 			//---TODO: need fast way to draw a fullscreen poly to clear the stencil to 0 (should be faster than calling Clear on the device)
 			RECT rct;
 			SetRect(&rct, UTGetAppClass().g_renderRect.x, UTGetAppClass().g_renderRect.y, UTGetAppClass().g_renderRect.Right(), UTGetAppClass().g_renderRect.Bottom());
-			DrawRectUP_TL1T(m_pDevice, rct, D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f), 0xffffffff);
+			DrawRectUP_TL1T(m_pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), 0xffffffff);
 			m_pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
 			*/
 		}
@@ -11536,10 +11531,10 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	CCameraTransform::SetActiveCamera(m_pDevice, &m_camLevel);
 	//get camera data
 	RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
-	D3DXMATRIXA16 matCam = m_camLevel.GetViewTransform();
+	Mat matCam = m_camLevel.GetViewTransform();
 	//CAABB al camerei
 	CAABB		camAABB;
-	camAABB.Set(D3DXVECTOR2(camrect.x, camrect.y), D3DXVECTOR2(camrect.Right(), camrect.Bottom()));
+	camAABB.Set(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));
 
 	///--- paint water ---
 	if (m_bufferedPainter.GetTrisCount(m_waterMeshIdx) > 0)
@@ -11550,7 +11545,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 //		m_pDevice->SetTexture(0, m_pRTTexture_final);
 		m_pDevice->SetTexture(1, m_texManager.m_Texs[m_waterTexIdx]->pTexture); //textura apa
 
-		D3DXMATRIXA16 matWVP = matCam * UTGetAppClass().g_matProj;
+		Mat matWVP = matCam * UTGetAppClass().g_matProj;
 		//vertex shaderul e acelasi pt toate
 		pVShader = UTGetShaderManager().GetVShaderByName(L"VS_WATER");
 		m_pDevice->SetVertexShader(pVShader);
@@ -11559,8 +11554,8 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		float fang = fLocalTimeline;
 		if (fang >= 1000.0f * PI)
 			fang -= 1000.0f * PI;
-		D3DXVECTOR2 woff1(0.05f * sin(fang * 1.0f), 0.04f * cos(fang * 1.0f));
-		D3DXVECTOR2 woff2(0.5f - 0.06f * sin(-fang * 0.63f), 0.5f - 0.05f * cos(-fang * 0.67f));
+		Vec2 woff1(0.05f * sin(fang * 1.0f), 0.04f * cos(fang * 1.0f));
+		Vec2 woff2(0.5f - 0.06f * sin(-fang * 0.63f), 0.5f - 0.05f * cos(-fang * 0.67f));
 		float fConstDataVS[][4] = {
 			{ camrect.x, camrect.y, camrect.w, camrect.h },//RTT rect_xywh
 			{ 0.0f, 0.0, 1.0f, 1.0f }, //RTT rect_xywh in tex coords
@@ -11589,7 +11584,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 
 		// paint aiming cursor
 		// vAimVec was normalized using last frame data so paint it at last frame actor position
-		D3DXVECTOR2 vto = pPlayerActor[kk]->pos_last + pPlayerActor[kk]->m_AIcommands.vAimVec;
+		Vec2 vto = pPlayerActor[kk]->pos_last + pPlayerActor[kk]->m_AIcommands.vAimVec;
 		CSprite::paintFrame(&m_sprInterface, vto.x, vto.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffffffff);
 	}
 								  
@@ -11613,7 +11608,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		if (act->fStunTimer >= K_LVL_MIN_STUN_DIZZY_DURATION)
 		{
 			int curframe = int(fLocalTimeline * 25.0f) % g_particlesMgr.m_sprCol.GetAFramesCnt(ANM_PARTICLES_SPR_STUN_STARS);
-			D3DXVECTOR2 vStarsPos = act->GetPosHeart();
+			Vec2 vStarsPos = act->GetPosHeart();
 			CSprite::paintFrameModule(&g_particlesMgr.m_sprCol, vStarsPos.x, vStarsPos.y - 10.0f, ANM_PARTICLES_SPR_STUN_STARS, curframe, 0, act->color);
 		}
 
@@ -11645,7 +11640,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 //		m_pDevice->SetTexture(0, m_pRTTexture_final);
 		m_pDevice->SetTexture(1, null);// m_texManager.m_Texs[m_fogofwarTexIdx]->pTexture); //textura FOW
 
-		D3DXMATRIXA16 matWVP = matCam * UTGetAppClass().g_matProj;
+		Mat matWVP = matCam * UTGetAppClass().g_matProj;
 		//vertex shaderul e acelasi pt toate
 		pVShader = UTGetShaderManager().GetVShaderByName(L"VS_FOW");
 		m_pDevice->SetVertexShader(pVShader);
@@ -11676,7 +11671,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
-	D3DXMATRIXA16 matfront;
+	Mat matfront;
 	CCameraTransform::SetActiveCamera(m_pDevice, &m_camLevel);
 
 	for (int kk = 0; kk < m_arrMiscObjects.Count(); kk++)
@@ -11690,8 +11685,8 @@ HRESULT CLevel::PaintUsingFinalRTT()
 			continue;
 		}
 
-		D3DXVECTOR3 campos = m_camLevel.GetCamPos();
-		D3DXVECTOR2 off(obj->pos.x - campos.x, obj->pos.y - campos.y);
+		Vec3 campos = m_camLevel.GetCamPos();
+		Vec2 off(obj->pos.x - campos.x, obj->pos.y - campos.y);
 		off *= K_LVL_FRONTLAYER_PARALLAX; //front layer moves faster
 										  //compute final aabb - visibility test
 		CAABB finalaabb = obj->aabb_ini;
@@ -11742,7 +11737,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 			IActiveInterface * activ = player->pClosestTouchable;
 			pLastPaintedTarget = player->pClosestTouchable;
 
-			D3DXVECTOR2 vpos(activ->bbox_exported.vCenter.x, activ->bbox_exported.vMin.y);
+			Vec2 vpos(activ->bbox_exported.vCenter.x, activ->bbox_exported.vMin.y);
 			//too low? don't cover the player
 			if (vpos.y > player->bbox_exported.vMin.y)
 				vpos.y = player->bbox_exported.vMin.y;
@@ -11853,12 +11848,12 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		//cover shield
 		if (player->pCover != null)
 		{
-			D3DXVECTOR2 vpos = D3DXVECTOR2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
+			Vec2 vpos = Vec2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
 			CSprite::paintFrame(&UTGetGUI().m_sprCol, vpos.x, vpos.y, ANM_CONTROLS_SPR_PLAYER_ICONS, 0, pPlayerActor[kk]->color);
 		}
 		else if (UTGetAppClass().m_Settings.bShowInterfaceHelp) //player numeric icon (only if shield not visible)
 		{
-			D3DXVECTOR2 vpos = D3DXVECTOR2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y + fabs(3.0f * sin(fLocalTimeline * 4.0f)));
+			Vec2 vpos = Vec2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y + fabs(3.0f * sin(fLocalTimeline * 4.0f)));
 			CSprite::paintFrame(&m_sprInterface, vpos.x, vpos.y, ANM_IGM_INTERFACE_SPR_PLAYER_NR_ICONS, pPlayerActor[kk]->nPlayerOrdinal);
 		}
 
@@ -11867,13 +11862,13 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		{
 			if ((pPlayerActor[kk]->nPlayerOrdinal == g_netlock.Net_GetOtherPlayerIndex()) && (!camAABB.Intersects(&pPlayerActor[kk]->bbox)))
 			{
-				D3DXVECTOR2 vpos = D3DXVECTOR2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
+				Vec2 vpos = Vec2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
 				CAABB localAABB = camAABB;
 				localAABB.Inflate(-K_TILE_SIZE + fabs(3.0f * sin(fLocalTimeline * 4.0f)), -K_TILE_SIZE + fabs(3.0f * sin(fLocalTimeline * 4.0f)));
 				if (AABB_Segment_Intersection(vpos, camAABB.vCenter, localAABB, &vpos))
 				{
 					float fAng = HALF_PI + UTMath::GetVectorAngle(camAABB.vCenter - vpos);
-					D3DXMATRIXA16 matrt;
+					Mat matrt;
 					MUMatAffine2D(&matrt, 1.0f, NULL, fAng, &vpos);
 					m_pSprite->SetTransform(&matrt);
 					CSprite::paintFrame(&m_sprInterface, 0.0f, 0.0f, ANM_IGM_INTERFACE_SPR_PLAYER_NR_ICONS, 2 + pPlayerActor[kk]->nPlayerOrdinal);
@@ -11891,18 +11886,15 @@ HRESULT CLevel::PaintUsingFinalRTT()
 
 	//set screen space
 	CCameraTransform::SetActiveCamera(m_pDevice, &UTGetAppClass().g_camScreen);
-	///--- paint vignettes ---
+
+	///--- paint time slowdown screen effect ---
 	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
-	m_screenVignetteDamage.Paint(m_pSprite, &UTGetGUI().m_sprCol);
-	m_screenVignette.Paint(m_pSprite, &UTGetGUI().m_sprCol);
-
-	///--- paint time slowdown screen effect ---
 	if (m_fTimeMultiplier_real < 1.0f)
 	{
 		DWORD colEffect = D3DCOLOR_COLORALPHA(0xff000088, 1.0f - m_fTimeMultiplier_real);
-		D3DXMATRIXA16 mattrans;
+		Mat mattrans;
 		RECTXYWH_F bbox = UTGetGUI().m_sprCol.GetAFrameBBox_real(ANM_CONTROLS_SPR_VIGNETTES, 1);
 		MUMatAffine2D(&mattrans, UTGetAppClass().g_rectRender.h / bbox.h, NULL, 0.0f, &UTGetAppClass().g_rectRender.Center());
 		m_pSprite->SetTransform(&mattrans);
@@ -11948,7 +11940,7 @@ void CLevel::Release()
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrAIevents);
 	//release bullets
 	m_poolBullets.Release();
-	m_poolProps.Release();
+	m_poolDoofers.Release();
 	m_poolPhysPts.Release();
 
 	m_sprLights.Release();
@@ -12213,7 +12205,7 @@ bool CLevel::ActivateSpecialAbility(int nAbilityIdx, int nTargetPlayerOrdinal)
 	return false;
 }
 
-void CLevel::GiveStrategicPoints(float fPoints, D3DXVECTOR2 * vPos)
+void CLevel::GiveStrategicPoints(float fPoints, Vec2 * vPos)
 {
 	if (fPoints <= 0.0f)
 		return;
@@ -12255,15 +12247,15 @@ void CLevel::GiveStrategicPoints(float fPoints, D3DXVECTOR2 * vPos)
 		else
 			StringCchPrintf(strPart, MAX_PATH, L"+%d SP", (int)fVal);
 
-		g_particlesMgr.AddStringParticle(g_font5ns2, strPart, vPos, NULL, &D3DXVECTOR2(0.0f, -20.0f), 1.2f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xcc21aec2, K_PART_LAYER_NORMAL);
+		g_particlesMgr.AddStringParticle(g_font5ns2, strPart, vPos, NULL, &Vec2(0.0f, -20.0f), 1.2f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xcc21aec2, K_PART_LAYER_NORMAL);
 	}
 
 }
 
 
-bool CLevel::IsLineOfSight(D3DXVECTOR2 pt1, D3DXVECTOR2 pt2, D3DXVECTOR2 * retVecCollisionPt, D3DXVECTOR2 * retVecCollisionNormal)
+bool CLevel::IsLineOfSight(Vec2 pt1, Vec2 pt2, Vec2 * retVecCollisionPt /*= null*/, Vec2 * retVecCollisionNormal /*= null*/)
 {
-	D3DXVECTOR2 collisionPoint, collisionNormal;
+	Vec2 collisionPoint, collisionNormal;
 	//before enemies attacked each other too, here was checking with closeby collisions
 	CCollisionShape* colShape = ColShape_Segment_Intersection_Arr(pt1, pt2, m_visibleList.logic_colShapesExtended.m_pData, m_visibleList.logic_colShapesExtended.Count(), retVecCollisionPt, retVecCollisionNormal);
 	if (colShape != NULL)
@@ -12276,14 +12268,14 @@ bool CLevel::IsLineOfSight(D3DXVECTOR2 pt1, D3DXVECTOR2 pt2, D3DXVECTOR2 * retVe
 
 
 ///--- DECALS ---
-void CLevel::AddDecal(EDecalLayer nLayer, D3DXVECTOR2 pos, int animIdx, int frameIdx /*= 0*/, DWORD color /*= 0xffffffff*/, bool bIsAnimated /*= false*/)
+void CLevel::AddDecal(EDecalLayer nLayer, Vec2 pos, int animIdx, int frameIdx /*= 0*/, DWORD color /*= 0xffffffff*/, bool bIsAnimated /*= false*/)
 {
 	CDecal *ndec = new CDecal();
 
 	ndec->layer = nLayer;
 	ndec->sprite.Init(animIdx, (int)pos.x, (int)pos.y, frameIdx, color);
 	RECTLTRB_F framerect = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
-	ndec->aabb.Set(D3DXVECTOR2(framerect.left + pos.x, framerect.top + pos.y), D3DXVECTOR2(framerect.right + pos.x, framerect.bottom + pos.y));
+	ndec->aabb.Set(Vec2(framerect.left + pos.x, framerect.top + pos.y), Vec2(framerect.right + pos.x, framerect.bottom + pos.y));
 	ndec->bAnimated = bIsAnimated;
 
 	m_arrDecals.Add(ndec);
@@ -12305,7 +12297,7 @@ void CLevel::UpdateDecals(float dTime)
 	}
 }
 
-void CLevel::AddDecal_BloodSplat(D3DXVECTOR2 pos, bool bLarge, EActorClass eVictimClass)
+void CLevel::AddDecal_BloodSplat(Vec2 pos, bool bLarge, EActorClass eVictimClass)
 {
 	/*
 	//blood splats are sorted by size (ascending)
@@ -12495,917 +12487,14 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 }
 
 
-///--- LEVEL PROPS MANAGER ---
-void CLevel::AddProp(ESpecialPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXVECTOR2 * accel, int nSubType /*= 0*/)
-{
-	/*
-	bool bGoreEnabled = UTGetAppClass().m_Settings.bGoreEnabled;
-	if ((!bGoreEnabled) && (type == K_SPROP_MEAT))
-		return;
-	//pre-checks
-	if (type == K_SPROP_MEAT)
-	{
-		//don't spawn meat if inside collisions
-		if (GetCollisionShapeAt(pos, K_LVL_COLL_TYPE_SOLID) != null)
-			return;
-	}
 
-	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.HireNode();
-	//set 
-	if (node != null)
-	{
-		node->m_data.Reset();
-		//add simulation container
-		node->m_data.physPt = m_poolPhysPts.HireNode();
-		if (node->m_data.physPt == NULL)
-		{
-			ErrorBox(K_ERR_WARNING, L"AddProp:We need more physics points!");
-			m_poolProps.DismissNode(node);
-			return;
-		}
-		//reset
-		node->m_data.physPt->m_data.Init();
-
-		node->m_data.type = type;
-		node->m_data.nSubType = nSubType;
-
-		switch (type)
-		{
-			case K_SPROP_SHELL:
-			{
-				//check subtype validity
-				if (nSubType * 4 + 3 >= m_sprProps.GetAFramesCnt(ANM_ACTIVES_SPR_SHELLS))
-				{
-					ErrorBox(K_ERR_WARNING, L"Invalid weapon nDropShellFrame param! resetting to 0");
-					node->m_data.nSubType = 0;
-				}
-				//all shells are in the same animation, 4 frames each
-				node->m_data.spr.Init(ANM_ACTIVES_SPR_SHELLS, 0.0f, 0.0f, node->m_data.nSubType * 4 + randint(4));
-				node->m_data.bVar1 = false; //face sunet o singura data la coliziune apoi seteaza bVar1 pe true
-				//physics
-				node->m_data.physPt->m_data.eCollType = CPhysicsPoint2D::K_COLLTYPE_FAST;
-				node->m_data.physPt->m_data.bFlagPhysicsEnabled = true;
-
-				node->m_data.physPt->m_data.pos = pos;
-				if (speed != null)
-					node->m_data.physPt->m_data.speed = *speed;
-				if (accel != null)
-					node->m_data.physPt->m_data.accel = *accel;
-			}
-			break;
-
-		}
-	}
-	*/
-}
-
-void CLevel::AddProp_Light(D3DXVECTOR2 pos, int nLightAnimIdx, float fDuration, float fFadeTime, DWORD color, float fScale)
-{
-	Vec3 vPos = Vec2ToVec3XY0(pos);
-	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.HireNode();
-	//set 
-	if (node != null)
-	{
-		node->m_data.Reset();
-		//add simulation container
-		node->m_data.physPt = m_poolPhysPts.HireNode();
-		if (node->m_data.physPt == NULL)
-		{
-			ErrorBox(K_ERR_WARNING, L"AddProp_Light:We need more physics points!");
-			m_poolProps.DismissNode(node);
-			return;
-		}
-		//reset
-		node->m_data.physPt->m_data.Init();
-
-		node->m_data.type = K_SPROP_LIGHT;
-
-		node->m_data.sprLight.Init(nLightAnimIdx, 0.0f, 0.0f, 0, color);
-		node->m_data.fLightScaling = fScale * K_LVL_LIGHTRENDER_BSX_SCALING;
-		node->m_data.bMakesLight = true;
-		node->m_data.fLightDuration = fDuration;
-		node->m_data.fLightFadeOut = fFadeTime;
-
-		node->m_data.fTimer = 0.0f;
-		//physics
-		node->m_data.physPt->m_data.bFlagPhysicsEnabled = false;
-		node->m_data.physPt->m_data.bFlagRotationEnabled = false;
-
-		node->m_data.physPt->m_data.pos = vPos;
-		node->m_data.physPt->m_data.speed = g_Vec3Zero;
-		node->m_data.physPt->m_data.accel = g_Vec3Zero;
-	}
-}
-
-//#TODO: de generalizat total exploziile la final cand stiu cum vor arata si cate tipuri vor fi. Sa am in xml si animatie si scalare si ce fel de particule arunca etc
-void CLevel::AddProp_Explo(UINT32 exploNameHash, D3DXVECTOR2 pos, UINT32 dwOwnerUID, int exploOwnerClass, D3DXVECTOR2 vExploDir, CAABB* exploAABB)
-{
-	CExplosionTemplate* explotemplate = GetTemplateExplosion(exploNameHash);
-	if (explotemplate == NULL)
-		return;
-
-	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.HireNode();
-	//set 
-	if (node != null)
-	{
-		node->m_data.Reset();
-		//add simulation container
-		node->m_data.physPt = m_poolPhysPts.HireNode();
-		if (node->m_data.physPt == NULL)
-		{
-			ErrorBox(K_ERR_WARNING, L"AddProp_Explo:Need more physics points!");
-			m_poolProps.DismissNode(node);
-			return;
-		}
-		//reset
-		node->m_data.physPt->m_data.Init();
-
-		node->m_data.type = K_SPROP_EXPLOSION;
-		//physics
-		node->m_data.physPt->m_data.bFlagPhysicsEnabled = false;
-		node->m_data.physPt->m_data.bFlagRotationEnabled = false;
-
-		node->m_data.physPt->m_data.pos = Vec2ToVec3XY0(pos);
-		node->m_data.physPt->m_data.speed = g_Vec3Zero;
-		node->m_data.physPt->m_data.accel = g_Vec3Zero;
-
-		//default
-		float fMaxDamage = explotemplate->fDamage;
-		float fMaxStun = explotemplate->fStunDuration;
-		float fDamageRadius = explotemplate->fDamageRadius;
-		float fStunRadius = explotemplate->fStunRadius;
-		float fMaxImpulse = explotemplate->fMaxImpulse;
-
-		//add sound event
-		if(explotemplate->fSoundRadius > 0.0f)
-			AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, 0, exploOwnerClass, pos, explotemplate->fSoundRadius, 1.0f);
-
-		if (exploAABB == null)
-		{
-			//shrapnel
-			for (int ll = 0; ll < explotemplate->nShrapnelCnt; ll++)
-			{
-				float fdx = m_rand.RandFloatSgn(150.0f);
-				float fdy = -100.0f - m_rand.RandFloat(150.0f);
-				AddProp(K_SPROP_SHRAPNEL_SMOKING, pos, &D3DXVECTOR2(fdx, fdy), &g_vecGravityOld);
-			}
-			//napalm
-			for (int ll = 0; ll < explotemplate->nNapalmCnt; ll++)
-			{
-				float fdx = m_rand.RandFloatSgn(60.0f);
-				float fdy = -100.0f - m_rand.RandFloat(120.0f);
-				AddProp(K_SPROP_FIRE_SOURCE, pos, &D3DXVECTOR2(fdx, fdy), &g_vecGravityOld);
-			}
-		}
-		else
-		{
-			//shrapnel
-			for (int ll = 0; ll < explotemplate->nShrapnelCnt; ll++)
-			{
-				float fdx = m_rand.RandFloatSgn(150.0f);
-				float fdy = -100.0f - m_rand.RandFloat(150.0f);
-				AddProp(K_SPROP_SHRAPNEL_SMOKING, pos + m_rand.RandD3DXVECTOR2sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y), 
-					&D3DXVECTOR2(fdx, fdy), &g_vecGravityOld);
-			}
-			//napalm
-			for (int ll = 0; ll < explotemplate->nNapalmCnt; ll++)
-			{
-				float fdx = m_rand.RandFloatSgn(60.0f);
-				float fdy = -100.0f - m_rand.RandFloat(120.0f);
-				AddProp(K_SPROP_FIRE_SOURCE, pos + m_rand.RandD3DXVECTOR2sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y), 
-					&D3DXVECTOR2(fdx, fdy), &g_vecGravityOld);
-			}
-		}
-
-		//explo direction
-		float fExploAng = UTMath::GetVectorAngle(vExploDir);
-		//#TODO: explo-interactAI e o proprietate ce va fi exportata (interactioneaza cu AI-uri care se activeaza la explozii?)
-		bool bInteractAI = false;
-
-		if (explotemplate->name.textHash == hash_EXPLO_INVISIBLE_EXPLODING_ZOMBIE)
-		{
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_GREEN_FATZOMBIE, true, 0, &D3DXVECTOR2(pos.x, pos.y + 6.0f), NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_BARREL)
-		{
-			bInteractAI = true;
-
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, 0.0f, 0.0f, 0);
-			node->m_data.fSize = 1.0f;
-
-			node->m_data.fTimer = 0.4f;
-
-			//prop - light
-//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 1.0f, 0.2f, 0xffFDB727, 2.0f);
-			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &pos, NULL, &D3DXVECTOR2(0.0f, -20.0f), 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
-
-			m_camLevel.ShakeScreen(4.0f, 8.0f, &pos);
-			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_BARREL_01, SNDIDX_EXPLOSION_BARREL_02, pos);
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_LARGE)
-		{
-			bInteractAI = true;
-
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_ROUND_LG1, 0.0f, 0.0f, 0);
-			node->m_data.fSize = 1.0f;
-
-			node->m_data.fTimer = 0.4f;
-
-			//prop - light
-//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.8f, 0.2f, 0xffFDB727, 1.6f);
-			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_LG1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
-
-			m_camLevel.ShakeScreen(6.0f, 10.0f, &pos);
-			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FRAG_GRENADE_01, SNDIDX_EXPLOSION_FRAG_GRENADE_02, pos);
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_LARGE_XL)
-		{
-			bInteractAI = true;
-
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_ROUND_LG2, 0.0f, 0.0f, 0);
-			node->m_data.fSize = 1.0f;
-
-			node->m_data.fTimer = 0.4f;
-
-			//prop - light
-//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.8f, 0.2f, 0xffFDB727, 1.6f);
-			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_LG2, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
-
-			m_camLevel.ShakeScreen(4.0f, 8.0f, &pos);
-			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FRAG_GRENADE_01, SNDIDX_EXPLOSION_FRAG_GRENADE_02, pos);
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_MOLOTOV)
-		{
-			bInteractAI = true;
-
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_ROUND_SM1, 0.0f, 0.0f, 0);
-			node->m_data.fSize = 1.0f;
-			node->m_data.fTimer = 0.4f;
-
-			//prop - light
-//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.8f, 0.2f, 0xffFDB727, 1.6f);
-			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ATOMIC1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
-
-			m_camLevel.ShakeScreen(4.0f, 8.0f, &pos);
-			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_MOLOTOV_EXPLOSION_01, SNDIDX_MOLOTOV_EXPLOSION_02, pos);
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_GREEN_GOO)
-		{
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_GREEN_ROUND, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-			for (int ll = 0; ll < 4; ll++)															  
-			{
-				AddProp(K_SPROP_GOO, pos, &D3DXVECTOR2(m_rand.RandFloatSgn(50.0f), -100.0f - m_rand.RandFloat(60.0f)), &g_vecGravityOld);
-			}
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_GREEN_GOO_GROUND)
-		{
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_GREEN_GROUND, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-			for (int ll = 0; ll < 4; ll++)
-			{
-				AddProp(K_SPROP_GOO, pos, &D3DXVECTOR2(m_rand.RandFloatSgn(50.0f), -130.0f - m_rand.RandFloat(60.0f)), &g_vecGravityOld);
-			}
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_BURN_DOT)
-		{
-			bInteractAI = FALSE;
-
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_FIRECRACKER1, 0.0f, 0.0f, 0);
-			node->m_data.fSize = 1.0f;
-			node->m_data.fTimer = 0.4f;
-
-			//add visually stunning stuff
-			if(randompercent(50.0f))
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRECRACKER1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-			else
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRECRACKER2, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_FLAME_JET)
-		{
-			bInteractAI = FALSE;
-
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_FIRECRACKER1, 0.0f, 0.0f, 0);
-			node->m_data.fSize = 1.0f;
-			node->m_data.fTimer = 0.4f;
-
-			//add visually stunning stuff
-			if (randompercent(50.0f))
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRECRACKER1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-			else
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRECRACKER2, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_CHARGE)
-		{
-			bInteractAI = true;
-
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_CHARGE1, 0.0f, 0.0f, 0);
-			node->m_data.fSize = 1.0f;
-
-			node->m_data.fTimer = 0.2f;
-
-			//prop - light
-//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xffFDB727, 1.6f);
-			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_CHARGE1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
-
-			m_camLevel.ShakeScreen(4.0f, 8.0f, &pos);
-			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_BREACHING_CHARGE_01, SNDIDX_EXPLOSION_BREACHING_CHARGE_02, pos);
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE)
-		{
-			bInteractAI = true;
-
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_CHARGE1, 0.0f, 0.0f, 0);
-			node->m_data.fSize = 1.0f;
-
-			node->m_data.fTimer = 0.2f;
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_STUN_INVISIBLE)
-		{
-			bInteractAI = true;
-
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_CHARGE1, 0.0f, 0.0f, 0);
-			node->m_data.fSize = 1.0f;
-
-			node->m_data.fTimer = 0.2f;
-		}
-		else if ((explotemplate->name.textHash == hash_EXPLO_GRENADE) || (explotemplate->name.textHash == hash_EXPLO_BLOWUP_VEST))
-		{
-			bInteractAI = true;
-
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_ROUND_SM1, 0.0f, 0.0f, 0);
-			node->m_data.fSize = 1.5f;
-
-			node->m_data.fTimer = 0.2f;
-
-			//prop - light
-//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xffFDB727, 1.6f);
-			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_SM1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
-
-			m_camLevel.ShakeScreen(4.0f, 8.0f, &pos);
-//			SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FRAG_GRENADE_01, SNDIDX_EXPLOSION_FRAG_GRENADE_02, pos);
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_GRENADE_GROUND)
-		{
-			bInteractAI = true;
-
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_GROUND1, 0.0f, 0.0f, 0);
-			node->m_data.fSize = 1.5f;
-
-			node->m_data.fTimer = 0.2f;
-
-			//prop - light
-//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xffFDB727, 1.6f);
-			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_GROUND1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
-
-			m_camLevel.ShakeScreen(4.0f, 8.0f, &pos);
-//			SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FRAG_GRENADE_01, SNDIDX_EXPLOSION_FRAG_GRENADE_02, pos);
-		}
-		else if ((explotemplate->name.textHash == hash_EXPLO_FLASHBANG) || (explotemplate->name.textHash == hash_EXPLO_SHIELD_FLASH))
-		{
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_FLASH_AIR, 0.0f, 0.0f, 0);
-			node->m_data.fSize = 1.0f;
-			node->m_data.fTimer = 0.2f;
-			//prop - light
-//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 1.0f, 0.2f, 0xffffffff, 1.5f);
-			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FLASH_AIR, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-
-			m_camLevel.ShakeScreen(3.0f, 4.0f, &pos);
-			m_screenVignette.Init(0.2f, 0xffffffff, 0.0f, 0.2f, 0.8f);
-
-//			SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FLASHBANG_01, SNDIDX_EXPLOSION_FLASHBANG_02, pos);
-		}
-		else if (explotemplate->name.textHash == hash_EXPLO_FAKE_SPY_CAMERA)
-		{
-//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xff00d0ff, 2.0f);
-			m_screenVignette.Init(0.2f, 0xff00d0ff, 0.0f, 0.2f, 0.6f);
-		}
-
-		//pointer to player that spawned the explosion, or null if it wasn't a player
-		CActor* pPlayer = GetPlayerByUID(dwOwnerUID);
-
-		//#IMPORTANT #TODO: should optimize in order to minimize the usage of UnobstructedLineOfSight
-		//stun enemy and damage over time
-		if ((fMaxStun > 0.0f) || (explotemplate->cDoT.eType != CDamageOverTime::K_LVL_DoT_NONE))
-		{
-			//find all actors and damage them (linearly)
-			for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
-			{
-				CActor* act = m_arrActors[kk];
-				//sar actorii ascunsi
-				if ((act->bHidden) || (act->fLife < 0.0f) || (act->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET))
-					continue;
-				//never stun the hostages
-				if ((act->templateActor.actorClass == K_LVL_ACT_CLASS_HOSTAGE) && (fMaxStun > 0.0f))
-					continue;
-				//distanta la inamic
-				D3DXVECTOR2 vDir = act->posHeart - pos;
-				float fDist = D3DXVec2Length(&vDir);
-
-				bool bDirectLine = IsLineOfSight(act->posHeart, pos);
-				//daca am damage over time il setez pe actor
-				if ((bDirectLine) && (explotemplate->cDoT.eType != CDamageOverTime::K_LVL_DoT_NONE) && (fDist < explotemplate->fDoTRadius))
-				{
-					//momentan nu pune DoT in functie de distanta ci pune uniform la toti din raza
-					SetActorDoT(act, explotemplate->cDoT.eType, explotemplate->cDoT.fDuration, explotemplate->cDoT.fDamagePerSec, explotemplate->cDoT.eExcludedActClass, explotemplate->cDoT.eFilteredActClass, dwOwnerUID);
-				}
-
-				//evit friendly stun
-				if (act->templateActor.actorClass != K_LVL_ACT_CLASS_HUMAN)
-					continue;
-				//daca e prea departe nu il ia in seama
-				if (fDist > fStunRadius)
-					continue;
-				//daca stun este directional si nu se potriveste directia
-				if ((vExploDir.x != 0.0f) && (SIGN(vExploDir.x) != SIGN(vDir.x)))
-					continue;
-				//daca nu e linie directa nu loveste
-				if (!bDirectLine)
-					continue;
-				//daca il vede ii da stun
-				if ((act->fStunTimer < fMaxStun) && (fMaxStun > 0.0f))
-				{
-					SetActorStun(act, fMaxStun);
-					//let him know he got stunned
-					AddAIEvent(K_LVL_AI_EVENT_GOT_HIT, 0, exploOwnerClass, pos, fStunRadius, fMaxStun + 0.5f, act->GetUID());
-				}
-			}
-		}
-
-		//do some damage
-		if ((fMaxDamage > 0.0f) && (fDamageRadius > 0.0f))
-		{
-			int nBombFrags = 0;
-			//find all actors and damage them (linearly)
-			for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
-			{
-				CActor* act = m_arrActors[kk];
-				//sar actorii ascunsi
-				if ((act->bHidden) || (act->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET))
-					continue;
-				//ignores specified classes
-				if (act->templateActor.actorClass == explotemplate->eIgnoreActorClass)
-					continue;
-				//distanta la inamic
-				D3DXVECTOR2 vDir = act->posHeart - pos;
-				float fDist = D3DXVec2Length(&vDir);
-				//daca e prea departe nu il ia in seama
-				if (fDist > fDamageRadius)
-					continue;
-				//daca nu e linie directa nu loveste
-				if (!IsLineOfSight(act->posHeart, pos))
-					continue;
-				//loveste liniar
-				float fPercent = 1.0f - (fDist / fDamageRadius);
-				CLAMP(fPercent, 0.0f, 1.0f);
-				//under cover damage
-				if (act->pCover != NULL)
-				{
-					D3DXVECTOR2 vIntPos;
-					bool bHitCover = AABB_Segment_Intersection(pos, act->posHeart, act->pCover->bbox, &vIntPos);
-					//atenueaza doar daca cover e intre om si explo
-					if((bHitCover) && (D3DXVec2Length(&(vIntPos - act->posHeart)) > 2.0f))
-						fPercent = fPercent * (1.0f - K_LVL_COVER_DAMAGE_ABSORBTION);
-				}
-				//add momentum
-				D3DXVec2Normalize(&vDir, &vDir);
-				vDir *= fPercent * fMaxImpulse;
-				//#HACK: ca sa nu mai arunce cadavrele in sus
-				if (vDir.y < 0.0f)
-					vDir.y = 0.0f;
-				
-				CBulletHitReturnData retdata;
-				retdata = HitActor(act, fPercent * fMaxDamage, dwOwnerUID, K_LVL_ACT_CLASS_EXPLOSION, &vDir, K_LVL_BULLET_FLAG_CAN_SPLAT, explotemplate->nArmorPiercingRating);
-				//count only enemies
-				if ((retdata.bKilledTarget) && (act->templateActor.actorClass >= K_LVL_ACT_CLASS_HUMAN))
-					nBombFrags++;
-
-				//#ACHIEVEMENTS: darwin award - player died from his own explosive
-				if ((act->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (!IsNetworkPlayer(act)) && (act->fLife <= 0.0f) && (dwOwnerUID == act->UID) && 
-					((explotemplate->name.textHash == hash_EXPLO_GRENADE_GROUND) || (explotemplate->name.textHash == hash_EXPLO_GRENADE) || 
-					 (explotemplate->name.textHash == hash_EXPLO_CHARGE) || (explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE)) )
-				{
-					UTGetAchievementManager().UnlockAchievement(ACH_DARWIN_AWARD);
-				}
-
-			}
-
-			//#ACHIEVEMENTS: explosion achievements
-			if ((nBombFrags >= 3) && (pPlayer != null) && (!IsNetworkPlayer(pPlayer)))
-			{
-				//breaching charge behind the door
-				if (explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE)
-				{
-					UTGetAchievementManager().UnlockAchievement(ACH_GOOD_BREACH);
-				}
-				if (explotemplate->name.textHash == hash_EXPLO_BARREL)
-				{
-					UTGetAchievementManager().UnlockAchievement(ACH_HEAT_UP_THE_NIGHT);
-				}
-			}
-
-			///--- check doors and windows breaking ---
-			if ((fMaxDamage > 0.0f) && (fDamageRadius > 0.0f))
-			{
-				for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
-				{
-					CCollisionShape* shape = m_visibleList.logic_colShapesSpecial.m_pData[kk];
-					//breaks doors?
-					if ((explotemplate->fDamageObjectsMultiplier > 0.0f) && (shape->AIstate == K_AI_STATE_COLL_BREAKABLE_DOOR))
-					{
-						if (shape->varAIparams.GetVariantByName(L"b_reinforced")->m_asINT32 != 0)
-							continue;
-
-						//loveste liniar
-						D3DXVECTOR2 vDist = (shape->bbox.vCenter - pos);
-						float fDist = D3DXVec2Length(&vDist);
-						if (explotemplate->fDamageObjectsMultiplier <= 0.0f)
-							continue;
-						float fPercent = 1.0f - (fDist / (fDamageRadius * explotemplate->fDamageObjectsMultiplier));
-						//too soft
-						if (fPercent <= 0.0f)
-							continue;
-						//not straight line (can't check with center or it will fail because of the actual bbox)
-						D3DXVECTOR2 vCheckPt = pos;
-						vCheckPt.x -= (shape->bbox.vHalfSize.x + 2.0f) * SIGN(vDist.x);
-						if (!IsLineOfSight(pos, vCheckPt))
-							continue;
-						//damage door
-						shape->AIfvar1 -= (fPercent * fMaxDamage) * explotemplate->fDamageObjectsMultiplier;
-						//was hit
-						shape->AIvarBool1 = true;
-						//save door explo direction
-						shape->varAIparams.SetNamedVarFloat(L"fForceDirX", SIGN(vDist.x));
-						shape->varAIparams.SetNamedVarINT32(L"bExploded", 1);
-					}
-
-					//windows?
-					if (shape->AIstate == K_AI_STATE_COLL_BREAKABLE_WINDOW)
-					{
-						//linear distance hit
-						float fDist = D3DXVec2Length(&(shape->bbox.vCenter - pos));
-						float fPercent = 1.0f - (fDist / fDamageRadius);
-						//subtract life
-						if (fPercent > 0.0f)
-						{
-							shape->AIfvar1 -= fPercent * fMaxDamage;
-							//door destroyed - save direction applied by explo
-							if (shape->AIfvar1 <= 0.0f)
-							{
-								shape->varAIparams.SetNamedVarFloat(L"fForceDirX", 1000.0f * SIGN(shape->bbox.vCenter.x - pos.x));
-							}
-						}
-					}
-				}
-			}
-			//check grenade interaction AIs
-			if ((fMaxDamage > 0.0f) && (bInteractAI) && (fDamageRadius > 0.0f))
-			{
-				for (int kk = 0; kk < m_visibleList.logic_props_closeby.Count(); kk++)
-				{
-					CProp * activ = m_visibleList.logic_props_closeby.m_pData[kk];
-					if (activ->AIstate == K_AI_STATE_ACTIVE_SWINGING_FRONTOBJ)
-					{
-						//daca am activ swinging si e in raza grenadei
-						D3DXVECTOR2 vDir = activ->pos - pos;
-						float fDist = D3DXVec2Length(&vDir);
-						//daca e prea departe nu il ia in seama
-						if (fDist > fDamageRadius * 2.0f)
-							continue;
-						//direct line of sight
-						if (!IsLineOfSight(activ->pos, pos))
-							continue;
-
-						//setam balans
-						float maxperc = 1.0f - (fDist / (fDamageRadius * 2.0f));
-						//viteza unghiulara
-						activ->AIfvar1 = -SIGN(vDir.x) * 8.0f * maxperc;
-					}
-				}
-			}
-		}
-
-		//damage over time
-	}
-}
-
-
-
-void CLevel::UpdateProps(float dTime)
-{
-	RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
-	RECTXYWH_F camrect_larger = camrect;
-	camrect_larger.Inflate(2.0f * K_TILE_SIZE);
-
-	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.pListUsed.m_pNext;
-	while (node != &m_poolProps.pListUsed)
-	{
-		//salvez locatia urmatoare ca s apot avansa pe ea
-		CLinkedPool<CSpecialProp>::CLinkedPoolNode *nextnode = node->m_pNext;
-		CSpecialProp* prop = &node->m_data;
-
-		bool killprop = false;
-		//daca iese din zona de joc
-		if (prop->physPt->m_data.bIsDead)
-			killprop = true;
-
-		//generic updates
-		prop->fLightTimer += dTime;
-
-		switch (prop->type)
-		{
-			case K_SPROP_SHELL:
-			{
-				if ((prop->bVar1 == false) && (prop->physPt->m_data.bContactStarted))
-				{
-					prop->bVar1 = true;
-					/*
-					if(prop->nSubType == 0) //shotgun shell
-						SND_PLAY_POSITIONAL(SNDIDX_RIFLE_SHELL_DROP, prop->physPt->m_data.pos);
-					else
-						SND_PLAY_POSITIONAL(SNDIDX_SHOTGUN_SHELL_DROP, prop->physPt->m_data.pos);
-						*/
-				}
-
-				if (prop->physPt->m_data.bIsStatic)
-				{
-					//put shell as decal
-					/*
-					if (randint(1000) < 200)
-					{
-						//daca collisionul are AI inseamna ca e lift sau ceva deci nu lasam sange
-						if ((prop->physPt->m_data.pContactShape != null) && (prop->physPt->m_data.pContactShape->AIstate == K_AI_STATE_UNDEFINED))
-							AddDecal(K_LVL_DECAL_LAYER_BACKOBJECTS, prop->physPt->m_data.pos, prop->spr.animationIdx, prop->spr.currentFrame, prop->spr.color);
-					}
-					*/
-					killprop = true;
-				}
-				else if (!PointInRect(Vec3ProjVec2(prop->physPt->m_data.pos), camrect))
-				{
-					killprop = true;
-				}
-			}
-			break;
-			case K_SPROP_FIRE_SOURCE:
-			{	
-				/*
-				if (!prop->physPt->m_data.bContacting)
-				{
-					if (m_Timers.Tick(50))
-					{
-						g_particlesMgr.GenerateFireRing(prop->physPt->m_data.pos, 5, 10.0f, 15.0f, K_PART_LAYER_RT_FRONT_NRM);
-					}
-				}
-				//genereaza particula de lava
-				if ((prop->physPt->m_data.bContactStarted) && (prop->physPt->m_data.contactNormal.y < -0.5f))
-				{
-					int anmidx = ANM_PARTICLES_SPR_MELTING_LAVA1;
-					if (randint(100) < 60)
-						anmidx = ANM_PARTICLES_SPR_MELTING_LAVA2;
-					g_particlesMgr.AddParticle(anmidx, true, 0, &prop->physPt->m_data.contactPos, NULL, NULL, 4.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_BACK_NRM);
-				}
-				//genereaza damage pana inainte de ultima secunda
-				if ((m_Timers.Tick(500.0f)) && (prop->physPt->m_data.bIsStatic) && (prop->fTimer > 1.0f))
-				{
-					CWeaponTemplate* wtempl = GetTemplateWeapon(L"WPN_LAVA_MELEE");
-					D3DXVECTOR2 normal(0.0f, -1.0f);
-					ShootBullet(&wtempl->bulletTemplate, K_LVL_ACT_CLASS_TRAP, 0, prop->physPt->m_data.pos + normal, normal);
-				}
-				*/
-
-				prop->fTimer -= dTime;
-				if (prop->fTimer <= 0.0f)
-				{
-					killprop = true;
-				}
-			}
-			break;
-
-			case K_SPROP_MEAT:
-			{
-				DWORD dwCol = 0xff671010;
-				if (prop->nSubType != 0) //zombies green blood
-					dwCol = 0xff82b600;
-				/*
-				if (m_Timers.Tick(50))
-				{
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_BLOOD, false, randint(5), &D3DXVECTOR2(prop->physPt->m_data.pos.x + randfloatsgn(5.0f), prop->physPt->m_data.pos.y + randfloatsgn(5.0f)), 
-						&D3DXVECTOR2(0.0f, 20.0f), &(prop->physPt->m_data.speed / (5.0f + randfloat(4.0f))), 0.6f, 1.0f, 0.0f, randfloat(PI), randfloatsgn(2.0f), 0.1f, 0.1f, dwCol, K_PART_LAYER_RT_BACK_NRM);
-				}
-				*/
-				//only stain at high velocities
-				if ((prop->physPt->m_data.bContactStarted) && (prop->physPt->m_data.contactNormal.y < 0.0f))
-				{
-					//don't stain moving platforms
-					/*
-					if ((prop->physPt->m_data.pContactShape != null) && (prop->physPt->m_data.pContactShape->AIstate == K_AI_STATE_UNDEFINED))
-					{
-						if(prop->nSubType == 0)
-							AddDecal(K_LVL_DECAL_LAYER_BACKOBJECTS, prop->physPt->m_data.pos, ANM_ACTIVES_SPR_DECAL_BLOOD_FRONTLAYER, randint(3), 0xffffffff);
-						else
-							AddDecal(K_LVL_DECAL_LAYER_BACKOBJECTS, prop->physPt->m_data.pos, ANM_ACTIVES_SPR_DECAL_BLOOD_FRONTLAYER_GREEN, randint(3), 0xffffffff);
-
-//						SND_PLAY_POSITIONAL_RAND2(SNDIDX_GIBLET1, SNDIDX_GIBLET2, prop->physPt->m_data.pos);
-					}
-					*/
-				}
-
-				if ((prop->physPt->m_data.bIsStatic) || (!PointInRect(Vec3ToVec2XY(prop->physPt->m_data.pos), camrect_larger)))
-				{
-					killprop = true;
-				}
-			}
-			break;
-
-			case K_SPROP_GOO:
-			{
-				/*
-				if (m_Timers.Tick(50))
-				{
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_BLOOD, false, randint(5), &D3DXVECTOR2(prop->physPt->m_data.pos.x + randfloatsgn(5.0f), prop->physPt->m_data.pos.y + randfloatsgn(5.0f)),
-						&D3DXVECTOR2(0.0f, 20.0f), &(prop->physPt->m_data.speed / (5.0f + randfloat(4.0f))), 0.6f, 1.0f, 0.0f, randfloat(PI), randfloatsgn(2.0f), 0.1f, 0.1f, 0xff00ff00, K_PART_LAYER_RT_BACK_NRM);
-				}
-				*/
-
-				if ((prop->physPt->m_data.bIsStatic) || (!PointInRect(Vec3ToVec2XY(prop->physPt->m_data.pos), camrect_larger)))
-				{
-					killprop = true;
-//					SND_PLAY_POSITIONAL_RAND2(SNDIDX_GIBLET1, SNDIDX_GIBLET2, prop->physPt->m_data.pos);
-				}
-			}
-			break;
-
-
-			case K_SPROP_SHRAPNEL_SMOKING:
-			{
-				//update sprite
-				node->m_data.spr.Update(&m_sprProps, dTime);
-				//add smoke
-				if ((m_Timers.Tick(60)) && (!prop->physPt->m_data.bContacting))
-				{
-					float fAng = randfloat(DOUBLE_PI);
-					D3DXVECTOR2 vDir(sin(fAng), cos(fAng));
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_PUFF_XS1 + randint(3), true, 0, &D3DXVECTOR2(prop->physPt->m_data.pos.x + randfloatsgn(2.0f), prop->physPt->m_data.pos.y + randfloatsgn(2.0f)),
-						NULL, &(vDir * (5.0f + randfloat(5.0f))), 1.0f, 1.0f, 0.0f, fAng, 0.0f, 0.0f, 0.0f, 0xaaffffff, K_PART_LAYER_RT_FRONT_NRM);
-				}
-				//genereaza particule de foc doar cat e roshu
-				/*
-				if (node->m_data.fTimer > 0.0f)
-				{
-					node->m_data.fTimer -= dTime;
-					if ((m_Timers.Tick(80)) && (!prop->physPt->m_data.bContacting))
-					{
-						g_particlesMgr.GenerateFireRing(prop->physPt->m_data.pos, 2, 8.0f, 10.0f, K_PART_LAYER_RT_FRONT_NRM);
-					}
-					//some secondary explosions too
-					if ((m_Timers.Tick(120)) && (randompercent(50.0f)))
-					{
-						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRECRACKER1 + randint(2), true, 0, &prop->physPt->m_data.pos,
-							NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-					}
-				}
-
-				if ((prop->physPt->m_data.bIsStatic) || (!PointInRect(prop->physPt->m_data.pos, camrect_larger)))
-				{
-					killprop = true;
-					//smoke puff when dead
-					int nAnmId = ANM_PARTICLES_SPR_PUFF_S_XS;
-					if (randompercent(50.0f))
-						nAnmId = ANM_PARTICLES_SPR_PUFF_S_XXS;
-
-					g_particlesMgr.AddParticle(nAnmId, true, 0, &prop->physPt->m_data.pos,
-						NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xaaffffff, K_PART_LAYER_RT_FRONT_NRM);
-				}
-				*/
-			}
-			break;
-			case K_SPROP_LIGHT:
-			{
-				prop->fTimer += dTime;
-				//kill on timing out
-				if (prop->fTimer >= prop->fLightDuration)
-					killprop = true;
-			}
-			break;
-			case K_SPROP_EXPLOSION:
-			{
-				prop->fTimer -= dTime;
-				if (prop->fTimer <= 0.0f)
-					killprop = true;
-			}
-			break;
-		}
-		//ii dam release
-		if (killprop)
-		{
-			//release la nodul de fizica !!!
- 			m_poolPhysPts.DismissNode(prop->physPt);
-			//si eliberez glontul
-			m_poolProps.DismissNode(node);
-		}
-		//avansez pointer
-		node = nextnode;
-	}
-}
-
-void CLevel::PaintProps()
-{
-	m_pSprite->SetTransform(&g_matIdentity);
-	D3DXMATRIXA16 mattrans;
-
-	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.pListUsed.m_pNext;
-	while (node != &m_poolProps.pListUsed)
-	{
-		//salvez locatia urmatoare ca sa pot avansa pe ea
-		CLinkedPool<CSpecialProp>::CLinkedPoolNode *nextnode = node->m_pNext;
-
-		switch (node->m_data.type)
-		{
-			case K_SPROP_FIRE_SOURCE:
-			{
-				if (!node->m_data.physPt->m_data.bContacting)
-				{
-					/*
-					D3DXVECTOR2 ppos = node->m_data.physPt->m_data.pos;
-					float falpha = LIMIT(node->m_data.fTimer, 0.0f, 1.0f);
-					CSprite::paintFrameModule(&m_sprProps, ppos.x, ppos.y, ANM_ACTIVES_SPR_BULLETS_FIRE, 0, 0, D3DCOLOR_FFFA(falpha));
-					*/
-				}
-			}
-			break;
-			case K_SPROP_SHELL:
-			{
-				/*
-				node->m_data.spr.pos = node->m_data.physPt->m_data.pos;
-				node->m_data.spr.currentFrame = node->m_data.nSubType * 4 + (int(node->m_data.spr.pos.x * 3.0f) % 4);
-				node->m_data.spr.paint_firstModule(&m_sprProps);
-				*/
-			}
-			break;
-			case K_SPROP_SHRAPNEL_SMOKING:
-			{
-				/*
-				node->m_data.spr.pos = node->m_data.physPt->m_data.pos;
-				
-				node->m_data.spr2.pos = node->m_data.physPt->m_data.pos;
-				node->m_data.spr2.color = D3DCOLOR_FFFA(LIMIT(node->m_data.fTimer, 0.0f, 1.0f));
-
-				node->m_data.spr.paint_firstModule(&m_sprProps);
-				node->m_data.spr2.paint_firstModule(&m_sprProps);
-				*/
-			}
-			break;
-			case K_SPROP_GOO:
-			case K_SPROP_MEAT:
-			{
-				/*
-				node->m_data.spr.pos = node->m_data.physPt->m_data.pos;
-				node->m_data.spr.paint_firstModule(&m_sprProps);
-				*/
-			}
-			break;
-		}
-
-		//avansez pointer
-		node = nextnode;
-	}
-}
-
-
-void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float fSize, DWORD color)
+void CLevel::GenerateEffect(ELVLEffectType nEffectType, Vec2 pos, float fSize, DWORD color)
 {
 	switch (nEffectType)
 	{
 		case K_LVL_EFFECT_STONE_BREAK:
 		{
-			g_particlesMgr.GenerateSmokePuff(D3DXVECTOR2(pos.x, pos.y - 10.0f), 20.0f, K_PART_LAYER_RT_FRONT_NRM);
+			g_particlesMgr.GenerateSmokePuff(Vec2(pos.x, pos.y - 10.0f), 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 			m_camLevel.ShakeScreen(2.0f, 8.0f, &pos);
 
 //			SND_PLAY_POSITIONAL(SNDIDX_STONE_BREAK1, pos);
@@ -13413,7 +12502,7 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float f
 		break;
 		case K_LVL_EFFECT_EXPLODING_ZOMBIE_DIE:
 		{
-			AddProp_Explo(hash_EXPLO_INVISIBLE_EXPLODING_ZOMBIE, pos, 0, K_LVL_ACT_CLASS_ZOMBIE);
+			AddDoofer_Explo(hash_EXPLO_INVISIBLE_EXPLODING_ZOMBIE, pos, 0, K_LVL_ACT_CLASS_ZOMBIE);
 			//throw slimes
 			CWeaponTemplate* wpnTemplate = GetTemplateWeapon(FastHash(L"WPN_GREEN_GOO_EXPLODING_ZOMBIE"));
 			if (wpnTemplate != null)
@@ -13421,9 +12510,9 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float f
 				for (int kk = 0; kk < 6; kk++)
 				{
 					float ang = kk * (PI / 6.0f);
-					D3DXVECTOR2 vdir(cos(ang), -sin(ang));
+					Vec2 vdir(cos(ang), -sin(ang));
 
-					ShootBullet(&wpnTemplate->bulletTemplate, K_LVL_ACT_CLASS_ZOMBIE, 0, D3DXVECTOR2(pos.x, pos.y), vdir);
+					ShootBullet(&wpnTemplate->bulletTemplate, K_LVL_ACT_CLASS_ZOMBIE, 0, Vec2(pos.x, pos.y), vdir);
 				}
 			}
 			//gibs
@@ -13433,18 +12522,18 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float f
 			CAABB genbox(pos.x - 10.0f, pos.y - 15.0f, pos.x + 10.0f, pos.y);
 			for (int ll = 0; ll < 6; ll++)
 			{
-				AddProp(K_SPROP_MEAT, AABB_GetRandomPointInBox(genbox), &D3DXVECTOR2(randfloatsgn(50.0f), -130.0f - randfloat(100.0f)), &g_vecGravityOld, 1);
+				AddDoofer(K_DOOFER_MEAT, AABB_GetRandomPointInBox(genbox), &Vec2(randfloatsgn(50.0f), -130.0f - randfloat(100.0f)), &g_vecGravityOld, 1);
 			}
 			//goes straight down to stain the floor
-			AddProp(K_SPROP_MEAT, D3DXVECTOR2(pos.x, pos.y - 10.0f), &D3DXVECTOR2(200.0f, 50.0f), &g_vecGravityOld, 1);
-			AddProp(K_SPROP_MEAT, D3DXVECTOR2(pos.x, pos.y - 10.0f), &D3DXVECTOR2(-200.0f, 50.0f), &g_vecGravityOld, 1);
+			AddDoofer(K_DOOFER_MEAT, Vec2(pos.x, pos.y - 10.0f), &Vec2(200.0f, 50.0f), &g_vecGravityOld, 1);
+			AddDoofer(K_DOOFER_MEAT, Vec2(pos.x, pos.y - 10.0f), &Vec2(-200.0f, 50.0f), &g_vecGravityOld, 1);
 			//human blood gibs
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff1a3423, K_PART_LAYER_RT_FRONT_NRM);
 		}
 		break;
 		case K_LVL_EFFECT_EXPLO_LARGE:
 		{
-			AddProp_Explo(hash_EXPLO_LARGE_XL, pos, 0, K_LVL_ACT_CLASS_EXPLOSION);
+			AddDoofer_Explo(hash_EXPLO_LARGE_XL, pos, 0, K_LVL_ACT_CLASS_EXPLOSION);
 		}
 		break;
 		case K_LVL_EFFECT_ELECTRIC_BREAK_SPARKS:
@@ -13453,7 +12542,7 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float f
 			//particule sparkle
 			for (int kk = 0; kk < 20; kk++)
 			{
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, randint(2), &D3DXVECTOR2(pos.x + randfloatsgn(fSize), pos.y + randfloatsgn(fSize)), &g_vecGravityOld, &D3DXVECTOR2(randfloatsgn(60.0f), -10.0f - randfloat(40.0f)), 0.2f + randfloat(0.4f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 1.5f, kk * 0.025f);
+				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, randint(2), &Vec2(pos.x + randfloatsgn(fSize), pos.y + randfloatsgn(fSize)), &g_vecGravityOld, &Vec2(randfloatsgn(60.0f), -10.0f - randfloat(40.0f)), 0.2f + randfloat(0.4f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 1.5f, kk * 0.025f);
 			}
 		}
 		break;
@@ -13464,7 +12553,7 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float f
 			for (int kk = 0; kk < 30; kk++)
 			{
 				float ang = randfloat(DOUBLE_PI);
-				D3DXVECTOR2 vdir(cos(ang), sin(ang));
+				Vec2 vdir(cos(ang), sin(ang));
 				if (randompercent(50.0f))
 					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK1, true, randint(2), &(pos + vdir * 10.0f), NULL, &(vdir * (40.0f + randfloat(20.0f))), 1.0f + randfloat(0.5f), 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 2.0f);
 				else
@@ -13474,7 +12563,7 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float f
 			//linii verticale
 			for (int kk = 0; kk < 6; kk++)
 			{
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_TELEPORT, false, 5 + randint(2), &D3DXVECTOR2(pos.x + randfloatsgn(8.0f), pos.y - 3), NULL, &D3DXVECTOR2(0.0f, -60.0f - randfloat(20.0f)), 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 0.0f, kk * 0.1f);
+				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_TELEPORT, false, 5 + randint(2), &Vec2(pos.x + randfloatsgn(8.0f), pos.y - 3), NULL, &Vec2(0.0f, -60.0f - randfloat(20.0f)), 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 0.0f, kk * 0.1f);
 			}
 			//add ring
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.2f, 0.2f, 10.0f, 0.0f, 0.0f, 0.1f, 0.3f, 0x55ffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT);
@@ -13486,7 +12575,7 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float f
 	}
 }
 
-void CLevel::GenerateEffect(CStringHash sEffectName, D3DXVECTOR2 pos, float fSize, DWORD color)
+void CLevel::GenerateEffect(CStringHash sEffectName, Vec2 pos, float fSize, DWORD color)
 {
 	ELVLEffectType effectidx = (ELVLEffectType)GetListIndexByNameHash(sEffectName.textHash, ELVLEffectTypeNames, K_LVL_EFFECTS_CNT);
 	GenerateEffect(effectidx, pos, fSize, color);
@@ -13618,7 +12707,7 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 	return nCur;
 }
 
-CCollisionShape * CLevel::GetCollisionShapeAt(D3DXVECTOR2 point, int collisionType)
+CCollisionShape * CLevel::GetCollisionShapeAt(Vec2 point, int collisionType)
 {
 	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
 	{
@@ -13643,7 +12732,7 @@ CCollisionShape* CLevel::GetCollisionShapeByUID(UINT32 nUID)
 	return null;
 }
 
-CCollisionShape* CLevel::SpawnCollisionShape(int nType, D3DXVECTOR2 vMin, D3DXVECTOR2 vMax)
+CCollisionShape* CLevel::SpawnCollisionShape(int nType, Vec2 vMin, Vec2 vMax)
 {
 	CCollisionShape* pCol = new CCollisionShape();
 	pCol->ID = GenerateNextID();

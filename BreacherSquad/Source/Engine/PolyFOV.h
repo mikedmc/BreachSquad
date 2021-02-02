@@ -18,7 +18,7 @@ public:
 class COccluderNode
 {
 public:
-	D3DXVECTOR2 pos;
+	Vec2 pos;
 	bool start;
 	COccluder* parentWall;
 	double angle;
@@ -49,8 +49,8 @@ public:
 	class CSegment
 	{
 	public:
-		D3DXVECTOR2 start;
-		D3DXVECTOR2 end;
+		Vec2 start;
+		Vec2 end;
 	};
 private:
 	//comparatorul de noduri pentru qsort
@@ -62,14 +62,14 @@ private:
 	CSegment    retTriangleBases[K_PFOV_MAX_FOV_TRIANGLES]; //aici salveaza FOV-ul calculat doar ca baze ale triunghiurilor (varful este mereu in viewerPos)
 	int			retTriangleBasesCnt; //numarul de baze de triunghi returnate
 	//viewer
-	D3DXVECTOR2 m_vViewerPos; //pozitia "centrului"
+	Vec2 m_vViewerPos; //pozitia "centrului"
 
 	void AddPolySegment(double angle1, double angle2, COccluder *wall);
 public:
-	CPolyFOV() : occludersCnt(0), retTriangleBasesCnt(0), m_vViewerPos(D3DXVECTOR2(0.0f, 0.0f))
+	CPolyFOV() : occludersCnt(0), retTriangleBasesCnt(0), m_vViewerPos(Vec2(0.0f, 0.0f))
 	{ };
 
-	void SetOccluders(D3DXVECTOR2 &vViewerPos, COccluder *p_arrOccluders, int nOccludersCount); //seteaza harta de occluderi si pozitia centrului
+	void SetOccluders(Vec2 &vViewerPos, COccluder *p_arrOccluders, int nOccludersCount); //seteaza harta de occluderi si pozitia centrului
 	//calculeaza FOV-ul si intoarce pointeri la array-urile de rezultate in retBasesArr si retBasesCnt
 	//in retBasesArr fiecare segment impreuna cu viewerPos formeaza un triunghi.
 	CSegment* ComputeFOV(int &retBasesCnt);

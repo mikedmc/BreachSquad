@@ -1,6 +1,6 @@
 #include "dxstdafx.h"
 
-CCollisionShape* CLevel::ColShape_Segment_Intersection_Arr(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CCollisionShape * arrBoxes[], int nBoxesCnt, D3DXVECTOR2 * retCollisionPoint, D3DXVECTOR2 * retNormal)
+CCollisionShape* CLevel::ColShape_Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CCollisionShape * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint, Vec2 * retNormal)
 {
 	//verificari initiale
 	_ASSERT(arrBoxes != NULL);
@@ -8,13 +8,13 @@ CCollisionShape* CLevel::ColShape_Segment_Intersection_Arr(D3DXVECTOR2 & start, 
 	if (nBoxesCnt <= 0)
 		return null;
 	//calculeaza termeni segment
-	D3DXVECTOR2 dir = end - start;
+	Vec2 dir = end - start;
 	float seglen = D3DXVec2Length(&dir);
 	if (seglen <= 0.0f)
 		return null;
 	dir /= seglen;
 
-	D3DXVECTOR2 dirfrac;
+	Vec2 dirfrac;
 	// r.dir is unit direction vector of ray
 	dirfrac.x = 1.0f / dir.x;
 	dirfrac.y = 1.0f / dir.y;
@@ -85,7 +85,7 @@ CCollisionShape* CLevel::ColShape_Segment_Intersection_Arr(D3DXVECTOR2 & start, 
 			*retCollisionPoint = end;
 			if (retNormal != null)
 			{
-				*retNormal = D3DXVECTOR2(0.0f, 0.0f);
+				*retNormal = Vec2(0.0f, 0.0f);
 			}
 		}
 	}

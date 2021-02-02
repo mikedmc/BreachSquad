@@ -100,7 +100,7 @@ void SWAP(T& x, T& y)
 
 struct VERT_TL1TC
 {
-	D3DXVECTOR4 pos;
+	Vec4 pos;
 	DWORD color;
 
 	static const DWORD FVF;
@@ -108,7 +108,7 @@ struct VERT_TL1TC
 
 struct VERT_TL1T
 {
-	D3DXVECTOR4 pos;
+	Vec4 pos;
 	DWORD color;
 	float tu, tv;
 
@@ -117,7 +117,7 @@ struct VERT_TL1T
 
 struct VERT_TL1TS
 {
-	D3DXVECTOR3 pos;
+	Vec3 pos;
 	DWORD color;
 	float tu, tv;
 
@@ -126,7 +126,7 @@ struct VERT_TL1TS
 
 struct VERT_TL2T
 {
-	D3DXVECTOR3 pos;
+	Vec3 pos;
 	float tu, tv;
 	float lu, lv;
 
@@ -140,7 +140,7 @@ struct POINTXY_INT {
 	POINTXY_INT(const POINTXY_INT& point) { x = point.x; y = point.y; }
 	bool operator==(const POINTXY_INT &other) const { return ((other.x == x) && (other.y == y)); }
 	bool operator!=(const POINTXY_INT &other) const { return ((other.x != x) || (other.y != y)); }
-	operator D3DXVECTOR2() { return D3DXVECTOR2((float)x, (float)y); }
+	operator Vec2() { return Vec2((float)x, (float)y); }
 };
 
 struct POINTXYZ_INT {
@@ -150,8 +150,8 @@ struct POINTXYZ_INT {
 	POINTXYZ_INT(const POINTXYZ_INT& point) { x = point.x; y = point.y; z = point.z; }
 	bool operator==(const POINTXYZ_INT &other) const { return ((other.x == x) && (other.y == y) && (other.z == z)); }
 	bool operator!=(const POINTXYZ_INT &other) const { return ((other.x != x) || (other.y != y) || (other.z != z)); }
-	operator D3DXVECTOR2() { return D3DXVECTOR2((float)x, (float)y); }
-	operator D3DXVECTOR3() { return D3DXVECTOR3((float)x, (float)y, (float)z); }
+	operator Vec2() { return Vec2((float)x, (float)y); }
+	operator Vec3() { return Vec3((float)x, (float)y, (float)z); }
 };
 
 class SIZEWH {
@@ -275,8 +275,8 @@ public:
 	inline const float CenterY() const {
 		return y + h / 2.0f;
 	}
-	inline const D3DXVECTOR2 Center() const {
-		return D3DXVECTOR2(x + w / 2.0f, y + h / 2.0f);
+	inline const Vec2 Center() const {
+		return Vec2(x + w / 2.0f, y + h / 2.0f);
 	}
 };
 
@@ -356,17 +356,17 @@ public:
 
 
 // barycentric coords for rectangles, changing coords from one to the other
-inline D3DXVECTOR2 FromRectToRect(D3DXVECTOR2 & point, RECTXYWH_F & src, RECTXYWH_F & dest)
+inline Vec2 FromRectToRect(Vec2 & point, RECTXYWH_F & src, RECTXYWH_F & dest)
 {
-	return D3DXVECTOR2(((point.x - src.x) / src.w) * dest.w + dest.x, ((point.y - src.y) / src.h) * dest.h + dest.y);
+	return Vec2(((point.x - src.x) / src.w) * dest.w + dest.x, ((point.y - src.y) / src.h) * dest.h + dest.y);
 }
-inline D3DXVECTOR2 FromRectToRect(D3DXVECTOR2 & point, RECTXYXY_F & src, RECTXYXY_F & dest)
+inline Vec2 FromRectToRect(Vec2 & point, RECTXYXY_F & src, RECTXYXY_F & dest)
 {
-	return D3DXVECTOR2(((point.x - src.x1) / (src.x2 - src.x1)) * (dest.x2 - dest.x1) + dest.x1, ((point.y - src.y1) / (src.y2- src.y1)) * (dest.y2 - dest.y1) + dest.y1);
+	return Vec2(((point.x - src.x1) / (src.x2 - src.x1)) * (dest.x2 - dest.x1) + dest.x1, ((point.y - src.y1) / (src.y2- src.y1)) * (dest.y2 - dest.y1) + dest.y1);
 }
-inline D3DXVECTOR2 FromRectToRect(D3DXVECTOR2 & point, RECTLTRB_F& src, RECTLTRB_F& dest)
+inline Vec2 FromRectToRect(Vec2 & point, RECTLTRB_F& src, RECTLTRB_F& dest)
 {
-	return D3DXVECTOR2(((point.x - src.left) / (src.right - src.left)) * (dest.right - dest.left) + dest.left, ((point.y - src.top) / (src.bottom - src.top)) * (dest.bottom - dest.top) + dest.top);
+	return Vec2(((point.x - src.left) / (src.right - src.left)) * (dest.right - dest.left) + dest.left, ((point.y - src.top) / (src.bottom - src.top)) * (dest.bottom - dest.top) + dest.top);
 }
 
 //--------------------------------------------------------------------------------------
@@ -388,9 +388,9 @@ public:
 	bool	bLbut; //daca e apasat sau nu
 	bool	bRbut; //daca e apasat sau nu
 public:
-	D3DXVECTOR2 pos; //in coordonate transformate prin camera transform
-	D3DXVECTOR2	lastPos; //last mouse position in coord reale de viewport
-	D3DXVECTOR2 delta; //delta movement
+	Vec2 pos; //in coordonate transformate prin camera transform
+	Vec2	lastPos; //last mouse position in coord reale de viewport
+	Vec2 delta; //delta movement
 	EMouseButtonState Lbut; 
 	EMouseButtonState Rbut; 
 	int     wheelDelta; //delta rotita scroll
@@ -535,7 +535,7 @@ unsigned short		buff_readUShort(void* buff, long &_cursor);
 unsigned int		buff_readUInt(void* buff, long &_cursor);
 
 
-bool				PointInRect(D3DXVECTOR2 pt, RECTXYWH_F rct);
+bool				PointInRect(Vec2 pt, RECTXYWH_F rct);
 bool				PointInRect(int x, int y, int rx, int ry, int rw, int rh);
 bool				PointInRect(int x, int y, RECTXYWH *r);
 bool				PointInRect(float x, float y, RECTXYWH_F *r);
@@ -544,8 +544,8 @@ bool				PointInRect(POINT *pt, RECTXYWH *r);
 // Formats time in human readable form
 void				OS_FormatTime(WCHAR* dest, int destSize, float timeInSecs);
 
-void DrawRectUP_TL1T(LPDIRECT3DDEVICE9 pDevice, RECT scrRect, D3DXVECTOR2 texUL, D3DXVECTOR2 texDR, DWORD color = 0xffffffff);
-void DrawLineUP_TL1T(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR2 start, D3DXVECTOR2 end, DWORD color = 0xffffffff);
+void DrawRectUP_TL1T(LPDIRECT3DDEVICE9 pDevice, RECT scrRect, Vec2 texUL, Vec2 texDR, DWORD color = 0xffffffff);
+void DrawLineUP_TL1T(LPDIRECT3DDEVICE9 pDevice, Vec2 start, Vec2 end, DWORD color = 0xffffffff);
 void DrawFullscreenVignette(LPDIRECT3DDEVICE9 pDevice, float alpha);
 
 //gets time by spline (0..1)
@@ -741,7 +741,7 @@ public:
 	};
 	CStringHash		m_strArg; //argument string
 	//exemplu tipuri speciale: 
-	//D3DXVECTOR3	m_argVec3; //argument vector, daca va fi nevoie de el
+	//Vec3	m_argVec3; //argument vector, daca va fi nevoie de el
 
 	CVariantComplex( const CVariantComplex &o):
 		m_type(o.m_type),

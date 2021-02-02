@@ -5,6 +5,7 @@
 
 #include "gameplay/PhysicsPoint.h"
 #include "gameplay/LevelTypes.h"
+#include "gameplay/Level_doofers.h"
 #include "gameplay/Level_scriptable.h"
 
 #include "gameplay/ActiveInterface.h"
@@ -77,74 +78,72 @@ enum ELevelState {
 class CLevel : public IScriptable
 {
 public:
-	double			fLocalTimeline;
-	CTimersArray	m_Timers;
-	//network synced random generator
-	CRandom			m_rand;
-	//--- level states ---
-	ELevelState m_levelState;	//masina de stari nivel
-	int m_levelSubState; //substarile unei stari
-	int	m_levelStateParam;	//parametru trimis schimbarii de stare (used only sometimes)
-	float m_levelStateTimer; //timer folosit de catre stari
-	void SetLevelState(ELevelState eNewState, int nLevelStateParam = 0);
-
-	bool	m_bLoaded;							//is level loaded?
-	int		m_nLoadedLevel, m_nLoadedChapter;	//nivelul si episodul incarcat
-	int		m_nLoadedLevelType;					//type of loaded level
+	double					fLocalTimeline;					// local ingame timeline
+	CTimersArray			m_Timers;						// array of timers used ingame
 	
-	int		m_unLoadedLevelFlags;				//K_LVL_LEVEL_FLAG_ set at level loading (usually prevent saving scores)
+	CRandom					m_rand;							// network synced random generator
+	///--- level state ---
+	ELevelState				m_levelState;					
+	int						m_levelSubState;				
+	int						m_levelStateParam;				// param sent to level state change action
+	float					m_levelStateTimer;				// timer used for some level changes 
+	void					SetLevelState(ELevelState eNewState, int nLevelStateParam = 0);
 
-	bool m_bOneUpdateDone;		//#HACK: daca a facut cel putin un update ca sa am toate variabilele setate inainte de paint
-	//--- time control ---
-	float m_fTimeMultiplier_real;	//multiplicator timp - Don't set directly
-	float m_fTimeMultiplier; //setare multiplicator dTime (valoare catre care tinde TimeMultiplier_real)
-	float m_fTimeMultiplierDuration; //cat timp dureaza schimbarea de timp
-	void SetTimeMultiplier(float fMultiplier, float fDuration);
+	bool					m_bLoaded;						// is level loaded?
+	int						m_nLoadedLevel, m_nLoadedChapter;			// level and episode of loaded level
+	int						m_nLoadedLevelType;				// type of loaded level
+
+	int						m_unLoadedLevelFlags;			// K_LVL_LEVEL_FLAG_ set at level loading (usually prevent saving scores)
+
+	bool					m_bOneUpdateDone;				//#HACK: tells you that at least one update was made so we're ok to paint
+	
+	float					m_fTimeMultiplier_real;			// current time multiplier - Don't set directly
+	float					m_fTimeMultiplier;				// wanted dTime multiplier (TimeMultiplier_real converges to this)
+	float					m_fTimeMultiplierDuration;		// how long the time shift lives
+	void					SetTimeMultiplier(float fMultiplier, float fDuration);
+
+	CLevel();
+	~CLevel();
+
 public:
-	LPDIRECT3DDEVICE9	m_pDevice; //pointer la device
-	//pointer la game sprite class	
-	ID3DXSprite*		m_pSprite; 
+	PDEVICE					m_pDevice;		
+	ID3DXSprite*			m_pSprite; 
 	void SetSpritePtr(ID3DXSprite* pSprite) {
 		m_pSprite = pSprite;
 	}
 
-	CTextureManager m_texManager;
+	CTextureManager			m_texManager;					// General texture manager for misc needed textures
+	CSpriteCollection		m_sprLights;					// light animations/sprites
+	CSpriteCollection		m_sprProps;						// decorations
+	CSpriteCollection		m_sprActors;					// animations for the actors (main characters, enemies etc)
 
-	CSpriteCollection m_sprLights;  //Animatiile de lumini au un format specific in fn de lumina (point:fr0-spot, fr1-glow)
-	CSpriteCollection m_sprProps; //decorations
-	CSpriteCollection m_sprActors;	//animations for the actors (main characters, enemies etc)
+	CVisibilityLists		m_visibleList;					// list of visible/active entities
+	void					BuildVisibilityLists();
+	void					ClearVisibilityLists();
 
-	CScreenVignette	  m_screenVignette;	//darken screen vignette
-	CScreenVignette	  m_screenVignetteDamage;	//damage vignette
+	CBufferedPainter		m_bufferedPainter;				// used when drawing dynamic meshes
 
-	// transforms mouse coordinates from screen space to game world (necessary for network play)
-	bool NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue);
+	int						tileW, tileH;					// size of tiles
+	SIZEWH					levelSizeTL;					// size of the level (in tiles)
+	RECTXYWH_F				m_levelAABB;					// level AABB in pixels
+	RECTXYWH				m_levelAABB_TL;					// level AABB in tiles (active tiles area, can be moved when generating random levels)
 
-	CVisibilityLists  m_visibleList;			// list of visible/active entities
-	void BuildVisibilityLists();
-	void ClearVisibilityLists();
+	CTile**					tiles;							// actual tilemap
+	int						m_tilesTexBaseIdx;				// tileset base texture index
+	int						m_tilesTexNormIdx;				// tileset normals texture index
+	Vec2					m_vLevelOrigin;					// level origin for the editor (usually around start location)
 
-	// builds frame-by-freame geometry for lights, water, etc (on Update)
-	void BuildDynamicGeometry(CAABB camAABB);
+	RECTXYWH_F				m_visibleArea;					// visible area, in pixels, world coords
+	RECTXYWH				m_visibleAreaTL;				// visible area in tiles
 
-	CBufferedPainter		m_bufferedPainter;	// used when drawing dynamic meshes
+	vector<RECTXYXY>		m_arrDirtyRectsTL;				// tiles that need updating
 
-	int						tileW, tileH;		//size of tiles
-	SIZEWH					levelSizeTL;		//size of the level (in tiles)
-	RECTXYWH_F				m_levelAABB;		//level AABB in pixels
-	RECTXYWH				m_levelAABB_TL;		//level AABB in tiles (active tiles area, can be moved when generating random levels)
-
-	CTile**					tiles;				// actual tilemap
-	int						m_tilesTexBaseIdx;	// tileset base texture index
-	int						m_tilesTexNormIdx;	// tileset normals texture index
-	Vec2					m_vLevelOrigin;		// level origin for the editor (usually around start location)
-
-	RECTXYWH_F				m_visibleArea;		//zona vizibila din BBuff in pixeli, coord world
-	RECTXYWH				m_visibleAreaTL;	//zona vizibila din nivel, in tiles.
-	///--- dirty rects ---
-	vector<RECTXYXY>		m_arrDirtyRectsTL;	// tiles that need updating
-	// Updates the tiles in the dirty rects (should return if changes were made)
+    // Updates the tiles in the dirty rects (should return if changes were made)
 	void					UpdateDirtyRects();
+	// Transforms mouse coordinates from screen space to game world (necessary for network play)
+	bool					NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue);
+	// Builds frame-by-freame geometry for lights, water, etc (on Update)
+	void					BuildDynamicGeometry(CAABB camAABB);
 
 	///--- TEMPLATES ---
 	CGrowableArray<CWeaponTemplate*>		m_arrTemplatesWeapon;
@@ -168,8 +167,8 @@ public:
 	bool					IsPlatformEnding(CActor* actor, int nDirSign);
 
 	CGrowableArray<CCollisionShape*>	m_arrColShapes;
-	// intoarce coliziunea unei drepte cu un collision shape. E cam ca AABB_Segment_Intersection_Arr dar cu coll shapes
-	CCollisionShape*		ColShape_Segment_Intersection_Arr(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CCollisionShape * arrBoxes[], int nBoxesCnt, D3DXVECTOR2 * retCollisionPoint, D3DXVECTOR2 * retNormal);
+	// returns intersection with a collision shape. Like AABB_Segment_Intersection_Arr but with collision shapes
+	CCollisionShape* ColShape_Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CCollisionShape * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint, Vec2 * retNormal);
 	// returns the first intersection of aabbSRC with a Collision Shape
 	CCollisionShape*		ColShape_CAABB_Intersect_Arr(CAABB * aabbSrc, CCollisionShape * arrBoxes[], int nBoxesCnt);
 	// returns segment intersection with tiles, starting form vStart
@@ -179,7 +178,7 @@ public:
 	CFixedArray<CProp*, 256>	m_arrPropsPtrInteract;	//array containing objects that you can interact with (for speed checks)
 	CGrowableArray<CActor*>		m_arrActors;				//actorii - inamici cu animatii
 	// Initializes CActor with specified template and sets all the data it needs 
-	HRESULT					InitActor(CActor* actor, CActorTemplate * actTemplate, D3DXVECTOR2 spawnPos);
+	HRESULT					InitActor(CActor* actor, CActorTemplate * actTemplate, Vec2 spawnPos);
 	// Seteaza noua stare si are in vedere si incheierea starii precedente
 	void					SetActorAIState(CActor * actor, CAIState* pNewState);
 	//sets the current actor's weapon and template upgrades and limitations generated by the weapon	
@@ -208,28 +207,28 @@ public:
 	// Use it to damage enemies and player
 	// @fHitPointsTaken - negative value - kills it immediately
 	// RETURNS: damage made, type of material hit.
-	CBulletHitReturnData	HitActor(CActor * actor, CBullet * pBullet, D3DXVECTOR2 * pvProjectileMomentum = NULL);
+	CBulletHitReturnData	HitActor(CActor * actor, CBullet * pBullet, Vec2 * pvProjectileMomentum = NULL);
 	
 	//hits the actor with other things than bullets
-	CBulletHitReturnData	HitActor(CActor * actor, float fDamage, UINT32 dwOwnerUID, EActorClass eOwnerClass, D3DXVECTOR2 *vDir = null, UINT32 dwBulletFlags = 0, int nArmorPiercingRating = 100, float fStunDuration = 0.0f);
+	CBulletHitReturnData	HitActor(CActor * actor, float fDamage, UINT32 dwOwnerUID, EActorClass eOwnerClass, Vec2 *vDir = null, UINT32 dwBulletFlags = 0, int nArmorPiercingRating = 100, float fStunDuration = 0.0f);
 	void					SetActorStun(CActor* actor, float fStunDuration);
 	//shoots melee blows (bullets)
-	int						MeleeBlow(int nBulletType, D3DXVECTOR2 vPos, D3DXVECTOR2 vDirection, UINT32 nOwnerUID, int nOwnerClass, float fRange, float fDamageActors, float fImpulse, float fStunDurationMax, EActorClass eIgnoredClass, float fRangeObjects, float fDamageObjects );
+	int						MeleeBlow(int nBulletType, Vec2 vPos, Vec2 vDirection, UINT32 nOwnerUID, int nOwnerClass, float fRange, float fDamageActors, float fImpulse, float fStunDurationMax, EActorClass eIgnoredClass, float fRangeObjects, float fDamageObjects );
 	// Spawns a player
-	void					SpawnPlayer(D3DXVECTOR2 spawnPos, int nPlayerOrdinal, int nAnimset = 0);
+	void					SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset = 0);
 	// Spawns an actor (NPC)
-	CActor*					SpawnActor(D3DXVECTOR2 spawnPos, WCHAR* strTemplateName, int nLookDirSign, CStringHash* shStateOverride = null);
+	CActor*					SpawnActor(Vec2 spawnPos, WCHAR* strTemplateName, int nLookDirSign, CStringHash* shStateOverride = null);
 	// Spawns a new Active with empty properties
-	CProp*					SpawnProp(D3DXVECTOR2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer = K_LVL_LAYER_BACK);
+	CProp*					SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer = K_LVL_LAYER_BACK);
 	// Spawns a light
-	CLight*					SpawnLight(D3DXVECTOR3 spawnPos, eLightType eType, DWORD dwColor, float fRadius = 64.0f, int profileID = 0, bool bCastShadows = false);
+	CLight*					SpawnLight(Vec3 spawnPos, eLightType eType, DWORD dwColor, float fRadius = 64.0f, int profileID = 0, bool bCastShadows = false);
 	// Gives a score for the user powerups placement 
 	// \brief: used to move player spawned objects away from intersections with other interactibles and walls
-	int						GetPowerupPlacingScore(CProp * active, D3DXVECTOR2 vPlacerPos);
+	int						GetPowerupPlacingScore(CProp * active, Vec2 vPlacerPos);
 	// Finds the best spawning rect for a proposed position
 	// \returns false when can't be spawned safely
 	// \param rectProposed_ret - the proposed placing rectangle
-	bool					GetBestSpawningPos(D3DXVECTOR2 * vSpawn_ret, CAABB rectStart, CAABB * rectToAvoid = NULL);
+	bool					GetBestSpawningPos(Vec2 * vSpawn_ret, CAABB rectStart, CAABB * rectToAvoid = NULL);
 	// Tells you if the bbox overlaps interactive elements (is relatively slow)
 	bool					GetIsAreaNeutral(RECTXYWH_F rectArea);
 	///--- LIGHTS ---
@@ -260,9 +259,9 @@ public:
 	// @fMaxDistance - if greater than 0 then it overrides seeDistance
 	CActor*					GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTargetTemplateName, float fMaxDistance = 0.0f);
 	// Finds the closest cover box from the level collision boxes list or null if none in range
-	CCollisionShape*		GetClosestCover(D3DXVECTOR2 vPos, float fMaxDistance = 0.0f);
+	CCollisionShape*		GetClosestCover(Vec2 vPos, float fMaxDistance = 0.0f);
 	//AI events (radius < 0.0f means infinite)
-	void					AddAIEvent(EAIEventType eventType, UINT32 ownerUID, int ownerClass, D3DXVECTOR2 vPos, float radius, float duration = 0.6f, UINT32 targetUID = 0);
+	void					AddAIEvent(EAIEventType eventType, UINT32 ownerUID, int ownerClass, Vec2 vPos, float radius, float duration = 0.6f, UINT32 targetUID = 0);
 	// Deletes a targeted event
 	// @targetUID - if not set it deletes all events of said type
 	void					DeleteAITargetedEvent(EAIEventType eEvtType, UINT32 targetUID = 0);
@@ -270,10 +269,10 @@ public:
 	CAIEvent*				GetMostImportantAIEvent(CActor * callerActor, EAIEventType eTypeFilter = K_LVL_AI_EVENT_ANY);
 	///--- decals ---
 	CGrowableArray<CDecal*> m_arrDecals;
-	void					AddDecal(EDecalLayer nLayer, D3DXVECTOR2 pos, int animIdx, int frameIdx = 0, DWORD color = 0xffffffff, bool bIsAnimated = false);
+	void					AddDecal(EDecalLayer nLayer, Vec2 pos, int animIdx, int frameIdx = 0, DWORD color = 0xffffffff, bool bIsAnimated = false);
 	void					UpdateDecals(float dTime);
 	//adds a blood decal (bLarge when enemy was splattered)
-	void					AddDecal_BloodSplat(D3DXVECTOR2 pos, bool bLarge, EActorClass eVictimClass = K_LVL_ACT_CLASS_ANY);
+	void					AddDecal_BloodSplat(Vec2 pos, bool bLarge, EActorClass eVictimClass = K_LVL_ACT_CLASS_ANY);
 	///--- physics points ---
 	CLinkedPool<CPhysicsPoint>	m_poolPhysPts; //pool de obiecte fizice
 	void					UpdatePhysicsPoints(float dTime);
@@ -294,7 +293,7 @@ public:
 	bool					CanShootWeapon(CWeapon * weapon);
 	// Trage cu arma specificata
 	// \returns: true daca a putut sa traga sau false daca nu
-	bool					ShootWeapon(CWeapon * weapon, D3DXVECTOR2 vDir);
+	bool					ShootWeapon(CWeapon * weapon, Vec2 vDir);
 	// \returns: weapon status
 	EnumWeaponStatus		UpdateWeapon(CWeapon * weapon, float dTime);
 	
@@ -307,7 +306,7 @@ public:
 
 	///--- BULLETS ---
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.
-	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, D3DXVECTOR2 pos, D3DXVECTOR2 shootDir);
+	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec2 pos, Vec2 shootDir);
 	// Returns the closest bullet (or null) of nBulletType under fMaxDistance
 	CBullet*				GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float fMaxDistance = 0.0f, int dwOwnerUID = 0);
 	// Releases all bullets of said type from specified owner
@@ -318,23 +317,25 @@ public:
 	// \param dwOwnerUID - specifies the owner UID filter or leave 0 to ignore the owner flag
 	int						KillBulletsOfType(int nBulletType, UINT32 dwOwnerUID = 0);
 
-	///--- level props pool ---
-	int						m_propsLightsMeshIdx;	//id-ul meshului pentru desenarea luminii propsurilor
-	CLinkedPool<CSpecialProp>	m_poolProps;			//pool de props
+	///--- level doofers pool ---
+	int						m_propsLightsMeshIdx;		//id-ul meshului pentru desenarea luminii propsurilor
+	CLinkedPool<CDoofer>	m_poolDoofers;		
 	// Adds a generic prop (physical particle)
 	// \param nSubType - secondary type of the added Prop, handled differently on every prop
-	void					AddProp(ESpecialPropType type, D3DXVECTOR2 pos, D3DXVECTOR2 * speed, D3DXVECTOR2 * accel, int nSubType = 0);
+	void					AddDoofer(EDooferType type, Vec2 pos, Vec2 * speed, Vec2 * accel, int nSubType = 0);
 	//adauga prop - o lumina provizorie (gunshots, etc)
-	void					AddProp_Light(D3DXVECTOR2 pos, int nLightAnimIdx, float fDuration, float fFadeTime, DWORD color, float fScale = 1.0f);
-	// \brief helper fn: adds an explosion (atat vizual cat si logic). 
-	// \param vDir este pentru exploziile directionale. 
-	// \param hash_EXPLO_name sunt constante predefinite
-	void					AddProp_Explo(UINT32 hash_EXPLO_name, D3DXVECTOR2 pos, UINT32 dwOwnerUID, int exploOwnerClass = K_LVL_ACT_CLASS_PLAYER, D3DXVECTOR2 vExploDir = { 0.0f, 0.0f }, CAABB* exploAABB = null);
-	void					UpdateProps(float dTime);
-	void					PaintProps();	  //nu cred ca e nevoie de visibility lists pt ca sunt efemere
+	void					AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float fFadeTime, DWORD color, float fScale = 1.0f);
+	// \brief helper fn: adds an explosion (logic and visual)
+	// \param vDir - for directional explosions like breaching charges
+	// \param hash_EXPLO_name - predefined constants for explosion params
+	void					AddDoofer_Explo(UINT32 hash_EXPLO_name, Vec2 pos, UINT32 dwOwnerUID, int exploOwnerClass = K_LVL_ACT_CLASS_PLAYER, Vec2 vExploDir = { 0.0f, 0.0f }, CAABB* exploAABB = null);
+	// Updates all doofers
+	void					UpdateDoofers(float dTime);
+	// Paints all doofers
+	void					PaintDoofers();	  
 	///--- efecte speciale ---
-	void					GenerateEffect(ELVLEffectType nEffectType, D3DXVECTOR2 pos, float fSize, DWORD color = 0xffffffff);
-	void					GenerateEffect(CStringHash sEffectName, D3DXVECTOR2 pos, float fSize, DWORD color = 0xffffffff);
+	void					GenerateEffect(ELVLEffectType nEffectType, Vec2 pos, float fSize, DWORD color = 0xffffffff);
+	void					GenerateEffect(CStringHash sEffectName, Vec2 pos, float fSize, DWORD color = 0xffffffff);
 	///--- misc objects (rails, etc) ---
 	CGrowableArray<CMiscObjectBase*>	m_arrMiscObjects;
 
@@ -344,7 +345,7 @@ public:
 	CActor*					pPlayerActor[K_MAX_PLAYERS_CNT];				//direct pointers to player controllers
 	int						m_arrPlayerControllersIIDs[K_MAX_PLAYERS_CNT];	//used to save player controllers IIDs for each player
 	int						m_arrPlayerSelHotJoin[K_MAX_PLAYERS_CNT];		//hot join selection
-	D3DXVECTOR2				m_arrPlayerLastSafePos[K_MAX_PLAYERS_CNT];
+	Vec2				m_arrPlayerLastSafePos[K_MAX_PLAYERS_CNT];
 	///------ sync check ------
 	DWORD					m_dwSyncCheckHash;		//used to sync network players by adding float actor data, hashing it and sending it over the network
 	//strategic abilities
@@ -357,7 +358,7 @@ public:
 	//initializes strategic abilities arrays arrays
 	void					InitializeStrategicAbilities(int nPlayerOrdinal);
 	// Last valid spawning pos (level start flags or checkpoints)
-	D3DXVECTOR2				vLastSpawnPoint; 
+	Vec2				vLastSpawnPoint; 
 	
 	///--- STATISTICS ---
 	int						m_arrStats[K_LVL_STATS_CNT];		//array that holds the statistics
@@ -365,25 +366,22 @@ public:
 	void					IncreaseLevelStatistics(int K_LVL_STATS_n, int nValueToAdd = 1);
 	// Gives strategic points for the strategic points bar 
 	// \param: vPos - if set it adds a text particle with the value
-	void					GiveStrategicPoints(float fPoints, D3DXVECTOR2 * vPos = null); 
+	void					GiveStrategicPoints(float fPoints, Vec2 * vPos = null); 
 	// Activates special ability, if possible
 	// \param: nAbilityIdx - ability index in g_arrStrategicAbilities and price at the same time
 	// \returns: true if success, false if failed
 	bool					ActivateSpecialAbility(int nAbilityIdx, int nTargetPlayerOrdinal);
-	// Vede daca am linie directa intre 2 puncte dar verifica coliziunea doar cu rect-urile probabile
-	bool					IsLineOfSight(D3DXVECTOR2 pt1, D3DXVECTOR2 pt2, D3DXVECTOR2 * retVecCollisionPt = null, D3DXVECTOR2 * retVecCollisionNormal = null);
+	// Do we have a line of sight between the 2 points
+	bool					IsLineOfSight(Vec2 pt1, Vec2 pt2, Vec2 * retVecCollisionPt = null, Vec2 * retVecCollisionNormal = null);
 
 	UINT32					m_unLastID;				//Last loaded ID - used to assign unique IDs to runtime spawned elements
 	//Generates a new ID and increments m_unLastID
 	UINT32					GenerateNextID();		
-
-	CLevel();
-	~CLevel();
 	// Loads a level from an absolute path
 	HRESULT					LoadLevel(WCHAR * strPathAbs);
 	// Releases all level data
 	void					Release();
-	//Gives you a random level from a shuffled list so you play all of them in random order
+	// Gives you a random level from a shuffled list so you play all of them in random order
 	int						GetNextRandomLevel();
 	//intoarce pointer catre activul cu id-ul (din editor) respectiv - derivate din CActiveInterface
 	IActiveInterface*		GetIActiveInterfacePtr(int ID);
@@ -396,20 +394,20 @@ public:
 	CActor*					GetPlayerByUID(UINT32 UID);
 	// Finds the closest player (visible or not)
 	CActor*					GetClosestPlayer(CActor* sourceActor, bool bIgnoreDead = false);
-	CActor*					GetClosestPlayer(D3DXVECTOR2 vSrcPos, bool bIgnoreDead = false);
+	CActor*					GetClosestPlayer(Vec2 vSrcPos, bool bIgnoreDead = false);
 	//tells if pPlayer is networked
 	bool					IsNetworkPlayer(CActor* pPlayer);
 	//intoarce collision shape-ul care contine punctul point si este de tipul collisionType
-	CCollisionShape*		GetCollisionShapeAt(D3DXVECTOR2 point, int collisionType = -1);
+	CCollisionShape*		GetCollisionShapeAt(Vec2 point, int collisionType = -1);
 	//gets a collision shape by UID
 	CCollisionShape*		GetCollisionShapeByUID(UINT32 nUID);
 	//spawn a new collision box
-	CCollisionShape*		SpawnCollisionShape(int nType, D3DXVECTOR2 vMin, D3DXVECTOR2 vMax);
+	CCollisionShape*		SpawnCollisionShape(int nType, Vec2 vMin, Vec2 vMax);
 	///--- pt vizualizare ---
 	IActiveInterface		*m_camTargetActive;		//la ce activ se uita camera sau null cand se uita la players
 	IActiveInterface		*m_camTargetOld;		//tine minte pe ce a fost locked ca sa se poata intoarce
 	CCameraTransform		m_camLevel;
-	D3DXVECTOR2				m_vCamPosDefault;		//camera position when not locked on special actors (hidden rooms, etc)
+	Vec2				m_vCamPosDefault;		//camera position when not locked on special actors (hidden rooms, etc)
 ///--- misc ---
 	// Returns the number of XP points gained after current mission
 	int						Local_ComputeMissionXP(int nStars);

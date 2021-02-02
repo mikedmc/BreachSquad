@@ -307,7 +307,7 @@ void CLevelEditor::IMGUI_ShowInterfaces()
 			case K_LVL_IAI_TYPE_LIGHT:
 				IMGUI_AddLightProps(static_cast<CLight*>(pSelected));
 				break;
-			case K_LVL_IAI_TYPE_ACTIVE:
+			case K_LVL_IAI_TYPE_PROP:
 				break;
 			case K_LVL_IAI_TYPE_ACTOR:
 				break;

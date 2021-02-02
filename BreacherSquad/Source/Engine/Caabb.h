@@ -55,9 +55,9 @@ CAABB AABB_Lerp(CAABB &a, CAABB &b, float fFactor);
 bool AABB_Intersection(CAABB &a, CAABB &b, CAABB &retVal);
 CAABB AABB_Union(CAABB &a, CAABB &b);
 //Gaseste AABB care cuprinde toate punctele.
-CAABB AABB_FromPoints(D3DXVECTOR2 * vecArr, int vecCnt);
+CAABB AABB_FromPoints(Vec2 * vecArr, int vecCnt);
 //Gaseste AABB care cuprinde toate punctele. Ignora coord Z
-CAABB AABB_FromPoints(D3DXVECTOR3 * vecArr, int vecCnt);
+CAABB AABB_FromPoints(Vec3 * vecArr, int vecCnt);
 /* 
  * Keeps source box inside destination box without scaling and only if possible 
  * /returns FALSE if can't fit source in destination
@@ -67,21 +67,21 @@ bool AABB_KeepInside(CAABB & boxSource, CAABB & boxDest);
  * \brief Calculeaza intersectia unui segment start-end cu toate aabb-urile din lista si intoarce pe cel cu care s-a intersectat (cel mai apropiat). 
  * Atentie! Daca segmentul pleaca din bbox punctul de coliziune va fi in spatele primului punct (ca sa nu poti trage prin pereti)
  */
-CAABB* AABB_Segment_Intersection_Arr(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CAABB * arrBoxes[], int nBoxesCnt, D3DXVECTOR2 * retCollisionPoint = NULL, D3DXVECTOR2 * retNormal = NULL);
+CAABB* AABB_Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CAABB * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint = NULL, Vec2 * retNormal = NULL);
 /*!
  * \brief AABB segment start-end intersection. 
  * \warning Daca segmentul pleaca din bbox punctul de coliziune va fi in spatele primului punct (ca sa nu poti trage prin pereti)
  */
-bool AABB_Segment_Intersection(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CAABB & box, D3DXVECTOR2 * retCollisionPoint = NULL);
+bool AABB_Segment_Intersection(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint = NULL);
 /*!
 * \brief AABB segment start-end intersection. 
 * fRetT is the intersection factor between 0 and 1 where 1 is segment len
 */
-bool AABB_Segment_IntersectionEx(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CAABB & box, D3DXVECTOR2 * retCollisionPoint, float &fRetT);
+bool AABB_Segment_IntersectionEx(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint, float &fRetT);
 /*!
 * \brief AABB segment start-end intersection without checking the heads of the segment.
 */
-bool AABB_Segment_Intersection_NoHeads(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CAABB & box, D3DXVECTOR2 * retCollisionPoint);
+bool AABB_Segment_Intersection_NoHeads(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint);
 
 // Diferenta minkowski a doua AABB-uri (folosita pt coliziune, foarte rapida)
 // \returns: AABB-ul rezultat, daca contine originea inseamna ca se intersecteaza iar distanta minima la laturi este vectorul de penetrare
@@ -99,5 +99,5 @@ void AABB_MorphInto_linear(CAABB *source, CAABB *target, float fSpeed);
 void AABB_MorphInto_quadratic(CAABB *source, CAABB *target, float fDistMultiplier, float fMinSpeed);
 
 //returns a random point inside the box
-D3DXVECTOR2 AABB_GetRandomPointInBox(CAABB &a);
+Vec2 AABB_GetRandomPointInBox(CAABB &a);
 FORCEINLINE float AABB_GetSurface(CAABB &a) { return a.vSize.x * a.vSize.y; }

@@ -373,7 +373,7 @@ inline void ScratchDisk_Reset()
 	arrScratchCnt = 0;
 }
 
-void ScratchDisk_AddVert(D3DXVECTOR2 vPos, float tU, float tV, DWORD dwColor)
+void ScratchDisk_AddVert(Vec2 vPos, float tU, float tV, DWORD dwColor)
 {
 	arrScratchBuff[arrScratchCnt].pos = D3DXVECTOR3(vPos.x, vPos.y, 0.0f);
 	arrScratchBuff[arrScratchCnt].tex1.x = tU;
@@ -386,7 +386,7 @@ void ScratchDisk_AddVert(D3DXVECTOR2 vPos, float tU, float tV, DWORD dwColor)
 void CSpineManager::BatchSkeleton(Skeleton* skel)
 {
 	unsigned short quadIndices[] = { 0, 1, 2, 2, 3, 0 };
-	spine::Vector<D3DXVECTOR2> arrVertsPos;
+	spine::Vector<Vec2> arrVertsPos;
 	// For each slot in the draw order array of the skeleton
 	for (size_t i = 0, n = skel->getSlots().size(); i < n; ++i) 
 	{
@@ -444,7 +444,7 @@ void CSpineManager::BatchSkeleton(Skeleton* skel)
 			texture = (CSpineTex*)((AtlasRegion*)regionAttachment->getRendererObject())->page->getRendererObject();
 
 			// Ensure there is enough room for vertices
-			arrVertsPos.setSize(4, D3DXVECTOR2(0.0f, 0.0f));
+			arrVertsPos.setSize(4, Vec2(0.0f, 0.0f));
 
 			// Computed the world vertices positions for the 4 vertices that make up
 			// the rectangular region attachment. This assumes the world transform of the
@@ -475,7 +475,7 @@ void CSpineManager::BatchSkeleton(Skeleton* skel)
 
 			// Ensure there is enough room for vertices
 			size_t numVertices = mesh->getWorldVerticesLength() / 2;
-			arrVertsPos.setSize(numVertices, D3DXVECTOR2(0.0f, 0.0f));
+			arrVertsPos.setSize(numVertices, Vec2(0.0f, 0.0f));
 
 			// Our engine specific Texture is stored in the AtlasRegion which was
 			// assigned to the attachment on load. It represents the texture atlas
@@ -483,7 +483,7 @@ void CSpineManager::BatchSkeleton(Skeleton* skel)
 			texture = (CSpineTex*)((AtlasRegion*)mesh->getRendererObject())->page->getRendererObject();
 
 			// The vertex positions will be written directly into the vertices array, count in "floats", stride in "floats"
-			// The vertex structure (D3DXVECTOR2) is 2 floats wide
+			// The vertex structure (Vec2) is 2 floats wide
 			mesh->computeWorldVertices(*slot, 0, numVertices * 2, &arrVertsPos.buffer()->x, 0, 2);
 
 			//get UVs

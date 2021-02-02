@@ -2,14 +2,14 @@
 #include "Prop.h"
 
 ///--- CACTIVE ---
-void CProp::SetPos(D3DXVECTOR2 newPos)
+void CProp::SetPos(Vec2 newPos)
 {
 	pos = newPos;
 	bbox.Set(&bbox_ini, pos);
 	bbox_exported.Set(&bbox_exported_ini, pos);
 }
 
-void CProp::Move(D3DXVECTOR2 delta)
+void CProp::Move(Vec2 delta)
 {
 	pos += delta;
 	bbox.Set(&bbox_ini, pos);

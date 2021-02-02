@@ -364,7 +364,7 @@ long buff_gets(CHAR* _out, int _maxcount, long &_cursor, void* buff)
 }
 
 
-bool PointInRect(D3DXVECTOR2 pt, RECTXYWH_F rct)
+bool PointInRect(Vec2 pt, RECTXYWH_F rct)
 {
 	if ((pt.x < rct.x) || (pt.y < rct.y) || (pt.x > rct.x + rct.w) || (pt.y > rct.y + rct.h))
 		return false;
@@ -435,13 +435,13 @@ void OS_FormatTime(WCHAR* dest, int destSize, float timeInSecs)
 //}
 
 
-void DrawRectUP_TL1T(LPDIRECT3DDEVICE9 pDevice, RECT scrRect, D3DXVECTOR2 texUL, D3DXVECTOR2 texDR, DWORD color)
+void DrawRectUP_TL1T(LPDIRECT3DDEVICE9 pDevice, RECT scrRect, Vec2 texUL, Vec2 texDR, DWORD color)
 {
 	VERT_TL1T verts[4];
-	verts[0].pos = D3DXVECTOR4(scrRect.left, scrRect.top, 0.0f, 1.0f);
-	verts[1].pos = D3DXVECTOR4(scrRect.right, scrRect.top, 0.0f, 1.0f);
-	verts[2].pos = D3DXVECTOR4(scrRect.left, scrRect.bottom, 0.0f, 1.0f);
-	verts[3].pos = D3DXVECTOR4(scrRect.right, scrRect.bottom, 0.0f, 1.0f);
+	verts[0].pos = Vec4(scrRect.left, scrRect.top, 0.0f, 1.0f);
+	verts[1].pos = Vec4(scrRect.right, scrRect.top, 0.0f, 1.0f);
+	verts[2].pos = Vec4(scrRect.left, scrRect.bottom, 0.0f, 1.0f);
+	verts[3].pos = Vec4(scrRect.right, scrRect.bottom, 0.0f, 1.0f);
 	verts[0].tu = texUL.x;verts[1].tu = texDR.x;verts[2].tu = texUL.x;verts[3].tu = texDR.x;
 	verts[0].tv = texUL.y;verts[1].tv = texUL.y;verts[2].tv = texDR.y;verts[3].tv = texDR.y;
 	verts[0].color = verts[1].color = verts[2].color = verts[3].color = color;
@@ -460,16 +460,16 @@ void DrawFullscreenVignette(LPDIRECT3DDEVICE9 pDevice, float alpha)
 	SetRect(&rect, g_renderRect.x, g_renderRect.y, g_renderRect.Right(), g_renderRect.Bottom());
 	pDevice->SetTexture(0, NULL); //textura aiurea
 	pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-	DrawRectUP_TL1T(pDevice, rect, D3DXVECTOR2(0, 0), D3DXVECTOR2(0, 0), D3DCOLOR_XXXA(alpha));
+	DrawRectUP_TL1T(pDevice, rect, Vec2(0, 0), Vec2(0, 0), D3DCOLOR_XXXA(alpha));
 	*/
 }
 
 
-void DrawLineUP_TL1T(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR2 start, D3DXVECTOR2 end, DWORD color )
+void DrawLineUP_TL1T(LPDIRECT3DDEVICE9 pDevice, Vec2 start, Vec2 end, DWORD color )
 {
 	VERT_TL1T verts[2];
-	verts[0].pos = D3DXVECTOR4(start.x, start.y, 0.0f, 1.0f);
-	verts[1].pos = D3DXVECTOR4(end.x, end.y, 0.0f, 1.0f);
+	verts[0].pos = Vec4(start.x, start.y, 0.0f, 1.0f);
+	verts[1].pos = Vec4(end.x, end.y, 0.0f, 1.0f);
 	verts[0].tu = 0.0f; verts[1].tu = 0.0f;
 	verts[0].tv = 0.0f; verts[1].tv = 0.0f;
 	verts[0].color = verts[1].color = color;
@@ -479,10 +479,10 @@ void DrawLineUP_TL1T(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR2 start, D3DXVECTOR2 e
 }
 
 
-D3DXVECTOR2 easing_a(0.0f, 0.0f), easing_at(1.0f, 0.0f), easing_b(1.0f, 1.0f), easing_bt(1.0f, 0.0f);
+Vec2 easing_a(0.0f, 0.0f), easing_at(1.0f, 0.0f), easing_b(1.0f, 1.0f), easing_bt(1.0f, 0.0f);
 float TimeEasing(float t)
 {
-	D3DXVECTOR2 ret;
+	Vec2 ret;
 	D3DXVec2Hermite(&ret, &easing_a, &easing_at, &easing_b, &easing_bt, t);
 	return ret.y;
 }

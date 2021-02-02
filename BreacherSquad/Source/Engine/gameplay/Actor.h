@@ -56,8 +56,8 @@ public:
 	{
 	public:
 		bool				bThrust;
-		D3DXVECTOR2			vMoveDir;
-		D3DXVECTOR2			vAimVec;		
+		Vec2			vMoveDir;
+		Vec2			vAimVec;		
 
 		bool				bRunning;	//daca alearga
 		bool				bThrustX;	//should be a float (0..1) to replace bRunning
@@ -91,14 +91,14 @@ public:
 		void Reset()
 		{
 			bThrust = false;
-			vMoveDir = D3DXVECTOR2(0.0f, 0.0f);
+			vMoveDir = Vec2(0.0f, 0.0f);
 			
 			bThrustX = false;
 			bRunning = false;
 			nMoveDirX = 0;
 			nMoveDirY = 0;
 			nLookDirX = 0;
-			vAimVec = D3DXVECTOR2(0.0f, 0.0f);
+			vAimVec = Vec2(0.0f, 0.0f);
 
 			bCrouched = false;
 			bJump = false;
@@ -122,7 +122,7 @@ public:
 			nMoveDirX = 0;
 			nMoveDirY = 0;
 			nLookDirX = 0;
-			vAimVec = D3DXVECTOR2(0.0f, 0.0f);
+			vAimVec = Vec2(0.0f, 0.0f);
 
 			bCrouched = false;
 			bJump = false;
@@ -149,24 +149,24 @@ public:
 	UINT16		collisionFlags;		    //iti spune in ce directii are coliziune (K_DIRFLAG_)
 
 	//puncte de interes	[3] - shooting, crouched, dead
-	D3DXVECTOR2 vecWeapon_abs[3], vecHeart_abs[3], vecGroundCheck_abs[3]; //offseturi relative incarcate din REF_POSE
+	Vec2 vecWeapon_abs[3], vecHeart_abs[3], vecGroundCheck_abs[3]; //offseturi relative incarcate din REF_POSE
 	RECTXYWH_F	stateBBoxes[3]; //bboxurile pentru idle, crouch, dead - salvate in InitActor
-	D3DXVECTOR2 GetPosHeart(); //intoarce pozitia exacta a inimii in fn de starea curenta
-	D3DXVECTOR2 GetPosWeapon();	//intoarce pozitia exacta a armei in fn de starea curenta
+	Vec2 GetPosHeart(); //intoarce pozitia exacta a inimii in fn de starea curenta
+	Vec2 GetPosWeapon();	//intoarce pozitia exacta a armei in fn de starea curenta
 
-	D3DXVECTOR2	posHeart, posWeapon;	//pozitii absolute inima si arma presalvate (pentru viteza)
+	Vec2	posHeart, posWeapon;	//pozitii absolute inima si arma presalvate (pentru viteza)
 	void UpdateBBoxAndPoints();		//aduce la zi variabilele de bbox si posweapon, posheart
 
-	D3DXVECTOR2	vecCamFollowPos;	//pozitia relativa in care se uita camera cand am in focus Actorul curent
+	Vec2	vecCamFollowPos;	//pozitia relativa in care se uita camera cand am in focus Actorul curent
 
-	D3DXVECTOR2		pos_last;		// position on last frame
-	D3DXVECTOR2		speed;
-	D3DXVECTOR2		vSpeedImpulse;	//viteza aplicata extern (cand e impuscat de exemplu). Se va atenua automat.
+	Vec2		pos_last;		// position on last frame
+	Vec2		speed;
+	Vec2		vSpeedImpulse;	//viteza aplicata extern (cand e impuscat de exemplu). Se va atenua automat.
 
-	D3DXVECTOR2				vMoveDirN;	//normalized movement direction
+	Vec2				vMoveDirN;	//normalized movement direction
 
 	int			lookDirXsign; //directia in care se uita pe X (-1 sau 1)
-	D3DXVECTOR2	vAngleDir;		//directia efectiva a privirii in fn de fAngle (folosita doar de catre unele specii de actori)
+	Vec2	vAngleDir;		//directia efectiva a privirii in fn de fAngle (folosita doar de catre unele specii de actori)
 	float		fLife, fArmor; //cata viata are si cata armura
 	float		fFOVPercent;   //field of view-ul personajului, intre 0 si 1 => 0.5 va fi FOV de 90 de grade. Reprezinta un fel de alertLevel si seteaza si hearing range
 	//flags
@@ -238,8 +238,8 @@ public:
 		return K_LVL_IAI_TYPE_ACTOR;
 	}
 
-	void SetPos(D3DXVECTOR2 newPos) override;
-	void Move(D3DXVECTOR2 delta) override;
+	void SetPos(Vec2 newPos) override;
+	void Move(Vec2 delta) override;
 	void SetAngle(float fNewAngle) override; //seteaza unghiul si vAngleDir
 
 	void PostConstructionInit() override;

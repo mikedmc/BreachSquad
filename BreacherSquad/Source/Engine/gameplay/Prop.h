@@ -18,11 +18,11 @@ public:
 	{}
 
 	const eActiveInterfaceType GetClassType() const {
-		return K_LVL_IAI_TYPE_ACTIVE;
+		return K_LVL_IAI_TYPE_PROP;
 	}
 
-	void SetPos(D3DXVECTOR2 newPos) override;
-	void Move(D3DXVECTOR2 delta) override;
+	void SetPos(Vec2 newPos) override;
+	void Move(Vec2 delta) override;
 	void SetAngle(float fnAngle) override;
 
 	// Initializes custom internal data (hardcodes usually)

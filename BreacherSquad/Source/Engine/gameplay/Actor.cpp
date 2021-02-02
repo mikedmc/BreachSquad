@@ -1,7 +1,7 @@
 #include "dxstdafx.h"
 #include "Actor.h"
 
-D3DXVECTOR2 CActor::GetPosHeart()
+Vec2 CActor::GetPosHeart()
 {
 	//heart pos nu tine cont de flip (ar trebui sa aiba mereu X=0)
 	if (fLife <= 0.0f)
@@ -11,14 +11,14 @@ D3DXVECTOR2 CActor::GetPosHeart()
 	return pos + vecHeart_abs[0];
 }
 
-D3DXVECTOR2 CActor::GetPosWeapon()
+Vec2 CActor::GetPosWeapon()
 {
 	if (fLife <= 0.0f)
-		return D3DXVECTOR2(pos.x + vecWeapon_abs[2].x * lookDirXsign, pos.y + vecWeapon_abs[2].y);
+		return Vec2(pos.x + vecWeapon_abs[2].x * lookDirXsign, pos.y + vecWeapon_abs[2].y);
 	else if (bCrouched)
-		return D3DXVECTOR2(pos.x + vecWeapon_abs[1].x * lookDirXsign, pos.y + vecWeapon_abs[1].y);
+		return Vec2(pos.x + vecWeapon_abs[1].x * lookDirXsign, pos.y + vecWeapon_abs[1].y);
 
-	return D3DXVECTOR2(pos.x + vecWeapon_abs[0].x * lookDirXsign, pos.y + vecWeapon_abs[0].y);
+	return Vec2(pos.x + vecWeapon_abs[0].x * lookDirXsign, pos.y + vecWeapon_abs[0].y);
 }
 
 void CActor::UpdateBBoxAndPoints()
@@ -76,7 +76,7 @@ void CActor::SetAnimSet(int newAnimSet)
 void CActor::SetAngle(float fNewAngle)
 {
 	fAngle = fNewAngle;
-	vAngleDir = D3DXVECTOR2(cos(fAngle), sin(fAngle));
+	vAngleDir = Vec2(cos(fAngle), sin(fAngle));
 }
 
 void CActor::PostConstructionInit()
@@ -101,7 +101,7 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 	return m_pAIcurrentState->m_arrBehaviors[m_nAIcurrentBehaviorIdx].nType;
 }
 
-void CActor::SetPos(D3DXVECTOR2 newPos)
+void CActor::SetPos(Vec2 newPos)
 {
 	pos_last = pos;
 	pos = newPos;
@@ -109,7 +109,7 @@ void CActor::SetPos(D3DXVECTOR2 newPos)
 	UpdateBBoxAndPoints();
 }
 
-void CActor::Move(D3DXVECTOR2 delta)
+void CActor::Move(Vec2 delta)
 {
 	pos += delta;
 

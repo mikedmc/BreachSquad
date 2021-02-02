@@ -2,9 +2,9 @@
 #include "CollisionShape.h"
 
 ///--- COLLISION SHAPES ---
-void CCollisionShape::SetPos(D3DXVECTOR2 newPos)
+void CCollisionShape::SetPos(Vec2 newPos)
 {
-	D3DXVECTOR2 delta = newPos - pos;
+	Vec2 delta = newPos - pos;
 	//vede daca am actori care stau pe mine si ii mut si pe ei
 	for (int kk = 0; kk < touchingActors.GetSize(); kk++)
 	{
@@ -20,7 +20,7 @@ void CCollisionShape::SetPos(D3DXVECTOR2 newPos)
 	bbox_exported_ini = bbox_ini;
 }
 
-void CCollisionShape::Move(D3DXVECTOR2 delta)
+void CCollisionShape::Move(Vec2 delta)
 {
 	//vede daca am actori care stau pe mine si ii mut si pe ei
 	for (int kk = 0; kk < touchingActors.GetSize(); kk++)
@@ -60,7 +60,7 @@ void CCollisionShape::PostConstructionInit()
 		if (bbox.vSize.x < 14.0f)
 		{
 			ErrorBox(K_ERR_WARNING, L"Game::LoadLevel:Ladder too narrow! RESIZING IT! Collision ID %d", ID);
-			bbox.Set(bbox.vMin, bbox.vMin + D3DXVECTOR2(14.0f, bbox.vSize.y));
+			bbox.Set(bbox.vMin, bbox.vMin + Vec2(14.0f, bbox.vSize.y));
 		}
 		break;
 	case K_LVL_COLL_TYPE_STAIRS:

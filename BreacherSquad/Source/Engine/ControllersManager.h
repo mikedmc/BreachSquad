@@ -191,7 +191,7 @@ public:
 	}
 
 	// returns the normalized compound vector for 2 axis commands
-	D3DXVECTOR2 GetDoubleAxisVector(const EControllerCommand commXaxis, const EControllerCommand commYaxis, bool bNormalize = false);
+	Vec2 GetDoubleAxisVector(const EControllerCommand commXaxis, const EControllerCommand commYaxis, bool bNormalize = false);
 };
 
 ///--- controllers manager ---

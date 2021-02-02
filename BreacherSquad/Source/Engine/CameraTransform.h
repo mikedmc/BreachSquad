@@ -31,16 +31,16 @@ private:
 
 	ECamAnimType	m_animType;			//tipul animatiei de look at
 	float			m_k1, m_k2;			//constante folosite la animatiile camerei	
-	D3DXVECTOR2		m_veck1, m_veck2;	//constante de tip vector
+	Vec2		m_veck1, m_veck2;	//constante de tip vector
 
 	RECTXYWH_F		m_worldAABB;		//AABB-ul lumii in coordonate world. daca este 0 inseamna ca nu trebuie luat in seama, ca nu are bounds
 	//datele din care se construieste dreptunghiul vizibil pe camera in world coords
-	D3DXVECTOR3		m_vecLookAt;		//(x, y, zoom) punctul unde se doreste pozitionata camera (vine spre acest punct cu animatie)
+	Vec3		m_vecLookAt;		//(x, y, zoom) punctul unde se doreste pozitionata camera (vine spre acest punct cu animatie)
 	//pentru animatie
-	D3DXVECTOR3		m_vecRealLookAt;	//(x, y, zoom) look at real - punctul spre care priveste acum camera, se duce catre punctul m_vecLookAt cu animatie
-	D3DXVECTOR3		m_vecLookAtSpeed;	//(x, y, zoom) viteza cu care se deplaseaza look at catre destinatie
+	Vec3		m_vecRealLookAt;	//(x, y, zoom) look at real - punctul spre care priveste acum camera, se duce catre punctul m_vecLookAt cu animatie
+	Vec3		m_vecLookAtSpeed;	//(x, y, zoom) viteza cu care se deplaseaza look at catre destinatie
 
-	D3DXVECTOR2		m_vecHW, m_vecHH;	//vectorii care pornesc din lookat (centru) si se duc pe jumatate din latimea/inaltimea ecranului - world space
+	Vec2		m_vecHW, m_vecHH;	//vectorii care pornesc din lookat (centru) si se duc pe jumatate din latimea/inaltimea ecranului - world space
 	RECTXYWH_F		m_camWorldAABB;		//camera view rectangle in world coords
 	
 	int				m_camScreenSize;	//marimea ecranului virtual vazut de camera. cealalta axa se calculeaza in fn de rezolutia ecranului
@@ -64,8 +64,8 @@ public:
 
 	///--- UTILS ---
 	//functii care seteaza transformarea curenta si iti spune ultima transformare setata
-	static void SetActiveCameraIdentity(LPDIRECT3DDEVICE9 pDevice);
-	static void SetActiveCamera(LPDIRECT3DDEVICE9 pDevice, CCameraTransform *camera);
+	static void SetActiveCameraIdentity(PDEVICE pDevice);
+	static void SetActiveCamera(PDEVICE pDevice, CCameraTransform *camera);
 	static CCameraTransform* GetActiveCamera();
 	///--- SET ---
     //Params SetWorldBounds
@@ -76,17 +76,17 @@ public:
 	//initializeaza camera
 	//viewport - viewportul in care face transformarile (coordonate ecran)
 	//camScreenSize - dimensiunea ecranului virtual (pe axa eSizeAxis) al camerei raportat la viewport, cand zoom este 1.0f; 0 - size of viewport
-	void InitCamera(RECTXYWH_F viewport, int camScreenSize, ECamAxisType eSizeAxis, D3DXVECTOR2 vecLookAt, float fZoom = 1.0f);
+	void InitCamera(RECTXYWH_F viewport, int camScreenSize, ECamAxisType eSizeAxis, Vec2 vecLookAt, float fZoom = 1.0f);
 	//se cheama dupa initCamera ca sa iti afiseze tot dreptunghiul lumii in dreptunghiul camerei. Seteaza hardWorldEdges pe false
 	void ZoomToFitWorld();
 	
 	// Sets camera target position
 	// \param pos==NULL sets only zoom-ul. Nu se aplica pe camera inertiala unde controlul este al utilizatorului. forced face repozitionare imediata
-	void SetCamPos(D3DXVECTOR2 *vecLookAt, float fZoom = 1.0f, bool forced = false);
+	void SetCamPos(Vec2 *vecLookAt, float fZoom = 1.0f, bool forced = false);
 	
 	// Moves camera look at vector with delta
 	// \param forced - moves immediately, doesn't wait for animation (moves real position too)
-	void MoveCamPos(D3DXVECTOR2 vDelta, bool forced = false);
+	void MoveCamPos(Vec2 vDelta, bool forced = false);
 
 	void SetViewport(RECTXYWH_F viewport);
 	//daca incui o axa nu va mai fi modificata din update. Practic ramane ce setezi in initCamera
@@ -99,21 +99,21 @@ public:
 	//seteaza tipurile de animatii, fiecare cu parametrii ei
 	void SetCamAnimationNone(); //default animation - optional
 	void SetCamAnimationSpring(float springKs = 5.0f, float dampingKd = 4.0f); //springKS - puterea arcului, springKd - damping
-	void SetCamAnimationInertial(D3DXVECTOR2 elasticBorderExtension, float frictionK = 4.0f, float springKd = 20.0f, float zoomMin = 1.0f, float zoomMax = 1.0f); //specifici daca il lasi sa iasa din limitele lumii si cu cat pe fiecare axa
+	void SetCamAnimationInertial(Vec2 elasticBorderExtension, float frictionK = 4.0f, float springKd = 20.0f, float zoomMin = 1.0f, float zoomMax = 1.0f); //specifici daca il lasi sa iasa din limitele lumii si cu cat pe fiecare axa
 
 	//screen shake
-	void ShakeScreen(float maxAmplitude, float attenuationPerSecond, D3DXVECTOR2 * vShakeSource = null);
+	void ShakeScreen(float maxAmplitude, float attenuationPerSecond, Vec2 * vShakeSource = null);
 	//calculeaza toti parametrii interni ca sa ii poti lua prin fns Get (userHasInput, inputDelta(x,y,zoom) sunt folosite doar pe animatia INERTIAL)
-	ECamMoveStatus  Update(float dTime, bool userHasInput = false, D3DXVECTOR3 inputDelta = D3DXVECTOR3(0.0f, 0.0f, 0.0f) );
+	ECamMoveStatus  Update(float dTime, bool userHasInput = false, Vec3 inputDelta = Vec3(0.0f, 0.0f, 0.0f) );
 	///--- GET ---
 	//functiile GET trebuiesc chemate dupa Update
 	FORCEINLINE D3DXMATRIXA16 & GetViewTransform() { return m_matView; }
-	FORCEINLINE const D3DXVECTOR3 & GetCamPos() const { return m_vecRealLookAt; }
+	FORCEINLINE const Vec3 & GetCamPos() const { return m_vecRealLookAt; }
 	/*!
 	 * \brief Gets the visible rectangle in world coordinates
 	 */
 	FORCEINLINE const RECTXYWH_F &	GetCamWorldAABB() const { return m_camWorldAABB; }
-	//void				GetCamVectors(D3DXVECTOR2 *LookAtPt, D3DXVECTOR2 *vecRightHW, D3DXVECTOR2 *vecDownHH);
+	//void				GetCamVectors(Vec2 *LookAtPt, Vec2 *vecRightHW, Vec2 *vecDownHH);
 
 	FORCEINLINE const RECTXYWH_F &	GetWorldAABB() const { return m_worldAABB; }
 	FORCEINLINE const RECTXYWH_F & GetViewport() const { return m_Viewport; }
@@ -121,10 +121,10 @@ public:
 	//trece din coord ecran in coord World
 	//param: inPt - punctul cerut ca input
 	//param: srcViewportOverride - daca inPt este in coordonate diferite de cele ale ecranului real se vor specifica aici. De exemplu touch-ul de la iOS are alte dimensiuni
-	D3DXVECTOR2		ScreenToWorld(D3DXVECTOR2 inPt, RECTXYWH_F *srcViewportOverride = NULL);
-	D3DXVECTOR2		WorldToScreen(D3DXVECTOR2 inPT, RECTXYWH_F *srcViewportOverride = NULL);
-	D3DXVECTOR2		ViewportToScreen(D3DXVECTOR2 inPt);
-	D3DXVECTOR2		ScreenToViewport(D3DXVECTOR2 inPT);
+	Vec2		ScreenToWorld(Vec2 inPt, RECTXYWH_F *srcViewportOverride = NULL);
+	Vec2		WorldToScreen(Vec2 inPT, RECTXYWH_F *srcViewportOverride = NULL);
+	Vec2		ViewportToScreen(Vec2 inPt);
+	Vec2		ScreenToViewport(Vec2 inPT);
 	SIZEWH_F		ScreenToWorld(SIZEWH_F inSZ);
 	SIZEWH_F		WorldToScreen(SIZEWH_F inSZ);
 	RECTXYWH_F		ScreenToWorld(RECTXYWH_F inRect);
@@ -132,7 +132,7 @@ public:
 	///--- transformari intre 2 camere ---
 
 	//Transforma un punct din viewportul camerei curente in viewportul camerei destCam
-	D3DXVECTOR2		ViewportToViewport(D3DXVECTOR2 inPt, CCameraTransform &destCam);
+	Vec2		ViewportToViewport(Vec2 inPt, CCameraTransform &destCam);
 	//Transforma un punct din Lumea camerei curente in lumea camerei destCam
-	D3DXVECTOR2		WorldToWorld(D3DXVECTOR2 inPt, CCameraTransform &destCam);
+	Vec2		WorldToWorld(Vec2 inPt, CCameraTransform &destCam);
 };

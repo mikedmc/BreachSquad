@@ -2,7 +2,7 @@
 #include "Caabb.h"
 
 
-CAABB::CAABB(D3DXVECTOR2 min, D3DXVECTOR2 max)
+CAABB::CAABB(Vec2 min, Vec2 max)
 {
 	vMin = min; vMax = max;
 	vSize = vMax - vMin;
@@ -12,13 +12,13 @@ CAABB::CAABB(D3DXVECTOR2 min, D3DXVECTOR2 max)
 
 CAABB::CAABB(float vminx, float vminy, float vmaxx, float vmaxy)
 {
-	vMin = D3DXVECTOR2(vminx, vminy); vMax = D3DXVECTOR2(vmaxx, vmaxy);
+	vMin = Vec2(vminx, vminy); vMax = Vec2(vmaxx, vmaxy);
 	vSize = vMax - vMin;
 	vHalfSize = vSize / 2.0f;
 	vCenter = vMin + vHalfSize;
 }
 
-void CAABB::Set(D3DXVECTOR2 min, D3DXVECTOR2 max)
+void CAABB::Set(Vec2 min, Vec2 max)
 {
 	vMin = min; vMax = max;
 	vSize = vMax - vMin;
@@ -28,7 +28,7 @@ void CAABB::Set(D3DXVECTOR2 min, D3DXVECTOR2 max)
 
 void CAABB::Set(RECTXYWH_F rect)
 {
-	vMin = D3DXVECTOR2(rect.x, rect.y); vMax = D3DXVECTOR2(rect.x + rect.w, rect.y + rect.h);
+	vMin = Vec2(rect.x, rect.y); vMax = Vec2(rect.x + rect.w, rect.y + rect.h);
 	vSize = vMax - vMin;
 	vHalfSize = vSize / 2.0f;
 	vCenter = vMin + vHalfSize;
@@ -36,14 +36,14 @@ void CAABB::Set(RECTXYWH_F rect)
 
 void CAABB::Set(RECTLTRB_F rect)
 {
-	vMin = D3DXVECTOR2(rect.left, rect.top); vMax = D3DXVECTOR2(rect.right, rect.bottom);
+	vMin = Vec2(rect.left, rect.top); vMax = Vec2(rect.right, rect.bottom);
 	vSize = vMax - vMin;
 	vHalfSize = vSize / 2.0f;
 	vCenter = vMin + vHalfSize;
 }
 
 
-void CAABB::Set(CAABB* sourceAABB, D3DXVECTOR2 vOffset)
+void CAABB::Set(CAABB* sourceAABB, Vec2 vOffset)
 {
 	Set(sourceAABB->vMin + vOffset, sourceAABB->vMax + vOffset);
 }
@@ -56,9 +56,9 @@ void CAABB::Set(float xmin, float ymin, float xmax, float ymax)
 }
 
 // checks min and max points before setting the bbox
-void CAABB::Set_Corrected(D3DXVECTOR2 pt1, D3DXVECTOR2 pt2)
+void CAABB::Set_Corrected(Vec2 pt1, Vec2 pt2)
 {
-	D3DXVECTOR2 min, max;
+	Vec2 min, max;
 	min.x = min(pt1.x, pt2.x); min.y = min(pt1.y, pt2.y);
 	max.x = max(pt1.x, pt2.x); max.y = max(pt1.y, pt2.y);
 	Set(min, max);
@@ -94,7 +94,7 @@ RECTXYWH CAABB::as_RECTXYWH()
 	return retval;
 }
 
-void CAABB::Inflate(D3DXVECTOR2 delta)
+void CAABB::Inflate(Vec2 delta)
 {
 	vMin -= delta;
 	vMax += delta;
@@ -118,7 +118,7 @@ void CAABB::Scale(float fScalePercent)
 
 
 ///--- teste pe AABB ---
-bool CAABB::PointIn(D3DXVECTOR2 pt1)
+bool CAABB::PointIn(Vec2 pt1)
 {
 	if ((pt1.x < vMin.x) || (pt1.x > vMax.x) || (pt1.y < vMin.y) || (pt1.y > vMax.y))
 		return false;
@@ -142,7 +142,7 @@ bool CAABB::Intersects(CAABB *dest)
 	return true;
 }
 
-bool CAABB::IntersectsCircle(D3DXVECTOR2 center, float radius)
+bool CAABB::IntersectsCircle(Vec2 center, float radius)
 {
 	if ((center.x < vMin.x - radius) || (center.x > vMax.x + radius) || (center.y < vMin.y - radius) || (center.y > vMax.y + radius))
 		return false;
@@ -154,15 +154,15 @@ CAABB AABB_Lerp(CAABB &a, CAABB &b, float fFactor)
 {
 	float fac = LIMIT(fFactor, 0.0f, 1.0f);
 	float invfac = 1.0f - fac;
-	D3DXVECTOR2 vmin = a.vMin * invfac + b.vMin * fac;
-	D3DXVECTOR2 vmax = a.vMax * invfac + b.vMax * fac;
+	Vec2 vmin = a.vMin * invfac + b.vMin * fac;
+	Vec2 vmax = a.vMax * invfac + b.vMax * fac;
 
 	return CAABB(vmin, vmax);
 }
 
 bool AABB_Intersection(CAABB & a, CAABB & b, CAABB & retVal)
 {
-	D3DXVECTOR2 vMax, vMin;
+	Vec2 vMax, vMin;
 	vMin.x = max(a.vMin.x, b.vMin.x);
 	vMin.y = max(a.vMin.y, b.vMin.y);
 	vMax.x = min(a.vMax.x, b.vMax.x);
@@ -177,7 +177,7 @@ bool AABB_Intersection(CAABB & a, CAABB & b, CAABB & retVal)
 
 CAABB AABB_Union(CAABB &a, CAABB &b)
 {
-	D3DXVECTOR2 vMax, vMin;
+	Vec2 vMax, vMin;
 	vMin.x = min(a.vMin.x, b.vMin.x);
 	vMin.y = min(a.vMin.y, b.vMin.y);
 	vMax.x = max(a.vMax.x, b.vMax.x);
@@ -186,16 +186,16 @@ CAABB AABB_Union(CAABB &a, CAABB &b)
 	return CAABB(vMin, vMax);
 }
 
-CAABB AABB_FromPoints(D3DXVECTOR2 * vecArr, int vecCnt)
+CAABB AABB_FromPoints(Vec2 * vecArr, int vecCnt)
 {
 	CAABB retAABB;
 	if ((vecArr == NULL) || (vecCnt == 0))
 		return retAABB;
-	D3DXVECTOR2 max = D3DXVECTOR2(-100000.0f, -100000.0f);
-	D3DXVECTOR2 min = D3DXVECTOR2(100000.0f, 100000.0f);
+	Vec2 max = Vec2(-100000.0f, -100000.0f);
+	Vec2 min = Vec2(100000.0f, 100000.0f);
 	for (int kk = 0; kk < vecCnt; kk++)
 	{
-		D3DXVECTOR2 *v = &vecArr[kk];
+		Vec2 *v = &vecArr[kk];
 		if (v->x < min.x) min.x = v->x;
 		if (v->x > max.x) max.x = v->x;
 		if (v->y < min.y) min.y = v->y;
@@ -206,16 +206,16 @@ CAABB AABB_FromPoints(D3DXVECTOR2 * vecArr, int vecCnt)
 	return retAABB;
 }
 
-CAABB AABB_FromPoints(D3DXVECTOR3 * vecArr, int vecCnt)
+CAABB AABB_FromPoints(Vec3 * vecArr, int vecCnt)
 {
 	CAABB retAABB;
 	if ((vecArr == NULL) || (vecCnt == 0))
 		return retAABB;
-	D3DXVECTOR2 max = D3DXVECTOR2(-100000.0f, -100000.0f);
-	D3DXVECTOR2 min = D3DXVECTOR2(100000.0f, 100000.0f);
+	Vec2 max = Vec2(-100000.0f, -100000.0f);
+	Vec2 min = Vec2(100000.0f, 100000.0f);
 	for (int kk = 0; kk < vecCnt; kk++)
 	{
-		D3DXVECTOR3 *v = &vecArr[kk];
+		Vec3 *v = &vecArr[kk];
 		if (v->x < min.x) min.x = v->x;
 		if (v->x > max.x) max.x = v->x;
 		if (v->y < min.y) min.y = v->y;
@@ -232,7 +232,7 @@ bool AABB_KeepInside(CAABB & boxSource, CAABB & boxDest)
 	if ((boxSource.vSize.x > boxDest.vSize.x) || (boxSource.vSize.y > boxDest.vSize.y))
 		return false;
 
-	D3DXVECTOR2 delta = boxSource.vMin - boxDest.vMin;
+	Vec2 delta = boxSource.vMin - boxDest.vMin;
 	if (delta.x >= 0.0f) delta.x = 0.0f;
 	if (delta.y >= 0.0f) delta.y = 0.0f;
 	boxSource.Move(-delta);
@@ -245,10 +245,10 @@ bool AABB_KeepInside(CAABB & boxSource, CAABB & boxDest)
 	return true;
 }
 
-bool AABB_Segment_Intersection(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CAABB & box, D3DXVECTOR2 * retCollisionPoint)
+bool AABB_Segment_Intersection(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint)
 {
 	//calculeaza termeni segment
-	D3DXVECTOR2 dir = end - start;
+	Vec2 dir = end - start;
 	//make sure we don't have horizontal lines
 	if (dir.x == 0.0f)
 		dir.x = EPS;
@@ -291,10 +291,10 @@ bool AABB_Segment_Intersection(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CAABB & b
 	return true;
 }
 
-bool AABB_Segment_IntersectionEx(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CAABB & box, D3DXVECTOR2 * retCollisionPoint, float &fRetT)
+bool AABB_Segment_IntersectionEx(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint, float &fRetT)
 {
 	//calculeaza termeni segment
-	D3DXVECTOR2 dir = end - start;
+	Vec2 dir = end - start;
 	//make sure we don't have horizontal lines
 	if (dir.x == 0.0f)
 		dir.x = EPS;
@@ -341,10 +341,10 @@ bool AABB_Segment_IntersectionEx(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CAABB &
 	return true;
 }
 
-bool AABB_Segment_Intersection_NoHeads(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CAABB & box, D3DXVECTOR2 * retCollisionPoint)
+bool AABB_Segment_Intersection_NoHeads(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint)
 {
 	//calculeaza termeni segment
-	D3DXVECTOR2 dir = end - start;
+	Vec2 dir = end - start;
 	//make sure we don't have horizontal lines
 	if (dir.x == 0.0f)
 		dir.x = EPS;
@@ -390,7 +390,7 @@ bool AABB_Segment_Intersection_NoHeads(D3DXVECTOR2 & start, D3DXVECTOR2 & end, C
 	return true;
 }
 
-CAABB* AABB_Segment_Intersection_Arr(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CAABB * arrBoxes[], int nBoxesCnt, D3DXVECTOR2 * retCollisionPoint, D3DXVECTOR2 * retNormal)
+CAABB* AABB_Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CAABB * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint, Vec2 * retNormal)
 {
 	//verificari initiale
 	assert(arrBoxes != NULL);
@@ -398,7 +398,7 @@ CAABB* AABB_Segment_Intersection_Arr(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CAA
 	if (nBoxesCnt <= 0)
 		return null;
 	//calculeaza termeni segment
-	D3DXVECTOR2 dir = end - start;
+	Vec2 dir = end - start;
 	//make sure we don't have horizontal lines
 	if (dir.x == 0.0f)
 		dir.x = EPS;
@@ -470,7 +470,7 @@ CAABB* AABB_Segment_Intersection_Arr(D3DXVECTOR2 & start, D3DXVECTOR2 & end, CAA
 			*retCollisionPoint = end;
 			if (retNormal != null)
 			{
-				*retNormal = D3DXVECTOR2(0.0f, 0.0f);
+				*retNormal = Vec2(0.0f, 0.0f);
 			}
 		}
 	}
@@ -482,12 +482,12 @@ CAABB AABB_GetMinkowskiDifference(CAABB &a, CAABB &b)
 {
 	CAABB retaabb;
 
-	D3DXVECTOR2 topleft = a.vMin - b.vMax;
+	Vec2 topleft = a.vMin - b.vMax;
 	// alternativ:
 	//Vec2 sztotal = a.vSize + b.vSize;
 	//Vec2 bottomright = topleft + sztotal;
 	//original:
-	D3DXVECTOR2 bottomright = a.vMax - b.vMin;
+	Vec2 bottomright = a.vMax - b.vMin;
 
 	return CAABB(topleft, bottomright);
 }
@@ -498,7 +498,7 @@ void AABB_MorphInto_linear(CAABB *source, CAABB *target, float fSpeed)
 		return;
 
 	int foundpts = 0;
-	D3DXVECTOR2 vdstm = target->vMin - source->vMin;
+	Vec2 vdstm = target->vMin - source->vMin;
 	float vlenm = D3DXVec2Length(&vdstm);
 	if (vlenm <= fSpeed)
 	{
@@ -535,7 +535,7 @@ void AABB_MorphInto_quadratic(CAABB *source, CAABB *target, float fDistMultiplie
 		return;
 
 	int foundpts = 0;
-	D3DXVECTOR2 vdstm = target->vMin - source->vMin;
+	Vec2 vdstm = target->vMin - source->vMin;
 	float vlenm = D3DXVec2Length(&vdstm);
 	if (vlenm <= fMinSpeed)
 	{
@@ -567,8 +567,8 @@ void AABB_MorphInto_quadratic(CAABB *source, CAABB *target, float fDistMultiplie
 
 }
 
-D3DXVECTOR2 AABB_GetRandomPointInBox(CAABB &a)
+Vec2 AABB_GetRandomPointInBox(CAABB &a)
 {
-	return D3DXVECTOR2(a.vMin.x + randfloat(a.vSize.x), a.vMin.y + randfloat(a.vSize.y));
+	return Vec2(a.vMin.x + randfloat(a.vSize.x), a.vMin.y + randfloat(a.vSize.y));
 }
 

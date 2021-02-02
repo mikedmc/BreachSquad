@@ -1,5 +1,19 @@
 #pragma once
 
+#define K_VL_MAX_SORTED_VISIBLES 100
+
+enum eVisibleSortableType {
+	K_VST_UNKNOWN = 0,
+	K_VST_PROP,
+	K_VST_ACTOR,
+};
+
+// struct that holds all sortable items with type and void pointers to them
+struct CVisibleSortable {
+	eVisibleSortableType	eType;
+	void*					pPtr;		// cast this pointer based on eType
+	float					fValue;		// sorting key1
+};
 
 ///--- list of visible/active entities ---
 class CVisibilityLists {
@@ -15,6 +29,9 @@ public:
 	CFixedArray<CActor*, 256> visible_actors;
 	//collision shapes folosite la construierea volumelor de umbra
 	CFixedArray<CCollisionShape*, 512> visible_colShapesLights;
+
+	// display elements sorted by Y
+	std::vector<CVisibleSortable> vecSorted;
 
 	//logic
 public:

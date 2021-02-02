@@ -3,7 +3,7 @@
 //--- static members ---
 CCameraTransform* CCameraTransform::g_currentCamera = NULL;
 
-void CCameraTransform::SetActiveCamera(LPDIRECT3DDEVICE9 pDevice, CCameraTransform *camera)
+void CCameraTransform::SetActiveCamera(PDEVICE pDevice, CCameraTransform *camera)
 {
 	if ((pDevice == NULL) || (camera == NULL))
 	{
@@ -20,7 +20,7 @@ CCameraTransform* CCameraTransform::GetActiveCamera()
 	return g_currentCamera;
 }
 
-void CCameraTransform::SetActiveCameraIdentity(LPDIRECT3DDEVICE9 pDevice)
+void CCameraTransform::SetActiveCameraIdentity(PDEVICE pDevice)
 {
 	if (pDevice == NULL)
 	{
@@ -50,14 +50,14 @@ CCameraTransform::CCameraTransform()
 	m_camScreenSize = 0;
 	m_camScreenAxis = K_CAMTRANS_AXIS_NONE;
 	//look at
-	m_vecLookAt = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-	m_vecLookAtSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	m_vecRealLookAt = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
+	m_vecLookAt = Vec3(0.0f, 0.0f, 1.0f);
+	m_vecLookAtSpeed = Vec3(0.0f, 0.0f, 0.0f);
+	m_vecRealLookAt = Vec3(0.0f, 0.0f, 1.0f);
 
-	m_vecHW = D3DXVECTOR2(1.0f, 0.0f);
-	m_vecHH = D3DXVECTOR2(0.0f, 1.0f);
+	m_vecHW = Vec2(1.0f, 0.0f);
+	m_vecHH = Vec2(0.0f, 1.0f);
 
-	m_veck1 = m_veck2 = D3DXVECTOR2(0.0f, 0.0f);
+	m_veck1 = m_veck2 = Vec2(0.0f, 0.0f);
 
 	m_camWorldAABB = RECTXYWH_F(0.0f, 0.0f, 0.0f, 0.0f);
 	m_constraintAxis = K_CAMTRANS_AXIS_NONE;
@@ -92,7 +92,7 @@ void CCameraTransform::SetWorldBounds(RECTXYWH_F worldAABB, bool bHardWorldEdges
     m_maxAxisSize = maxAxisSize;
 }
 
-void CCameraTransform::SetCamPos(D3DXVECTOR2 *vecLookAt, float fZoom, bool forced)
+void CCameraTransform::SetCamPos(Vec2 *vecLookAt, float fZoom, bool forced)
 {
 	if (vecLookAt != NULL)
 	{
@@ -116,11 +116,11 @@ void CCameraTransform::SetCamPos(D3DXVECTOR2 *vecLookAt, float fZoom, bool force
 	if (forced)
 	{
 		m_vecRealLookAt.z = m_vecLookAt.z;
-		m_vecLookAtSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		m_vecLookAtSpeed = Vec3(0.0f, 0.0f, 0.0f);
 	}
 }
 
-void CCameraTransform::MoveCamPos(D3DXVECTOR2 vDelta, bool forced /*= false*/)
+void CCameraTransform::MoveCamPos(Vec2 vDelta, bool forced /*= false*/)
 {
 	m_vecLookAt.x += vDelta.x;
 	if (forced)
@@ -132,13 +132,13 @@ void CCameraTransform::SetViewport(RECTXYWH_F viewport)
 	m_Viewport = viewport;
 }
 
-void CCameraTransform::InitCamera(RECTXYWH_F viewport, int camScreenSize, ECamAxisType eSizeAxis, D3DXVECTOR2 vecLookAt, float fZoom)
+void CCameraTransform::InitCamera(RECTXYWH_F viewport, int camScreenSize, ECamAxisType eSizeAxis, Vec2 vecLookAt, float fZoom)
 {
 	m_Viewport = viewport;
 	m_camScreenSize = abs(camScreenSize);
 	m_camScreenAxis = eSizeAxis;
-	m_vecLookAt = m_vecRealLookAt = D3DXVECTOR3(vecLookAt.x, vecLookAt.y, fZoom);
-	m_vecLookAtSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_vecLookAt = m_vecRealLookAt = Vec3(vecLookAt.x, vecLookAt.y, fZoom);
+	m_vecLookAtSpeed = Vec3(0.0f, 0.0f, 0.0f);
 }
 
 void CCameraTransform::ZoomToFitWorld()
@@ -146,7 +146,7 @@ void CCameraTransform::ZoomToFitWorld()
 	//TODO: de implementat
 }
 
-D3DXVECTOR2	CCameraTransform::ScreenToWorld(D3DXVECTOR2 inPt, RECTXYWH_F *srcViewportOverride)
+Vec2	CCameraTransform::ScreenToWorld(Vec2 inPt, RECTXYWH_F *srcViewportOverride)
 {
 	RECTXYWH_F *view;
 	if (srcViewportOverride != NULL)
@@ -158,8 +158,8 @@ D3DXVECTOR2	CCameraTransform::ScreenToWorld(D3DXVECTOR2 inPt, RECTXYWH_F *srcVie
 	//aflu procente intre -1 si 1 pt ca originea este centrul ecranului
 	percX = 2.0f * (((inPt.x - view->x) / view->w) - 0.5f);
 	percY = 2.0f * (((inPt.y - view->y) / view->h) - 0.5f);
-	D3DXVECTOR2 vecLookAtXY(m_vecRealLookAt.x, m_vecRealLookAt.y);
-	return vecLookAtXY + D3DXVECTOR2(percX * m_vecHW.x, percX * m_vecHW.y) + D3DXVECTOR2(percY * m_vecHH.x, percY * m_vecHH.y);
+	Vec2 vecLookAtXY(m_vecRealLookAt.x, m_vecRealLookAt.y);
+	return vecLookAtXY + Vec2(percX * m_vecHW.x, percX * m_vecHW.y) + Vec2(percY * m_vecHH.x, percY * m_vecHH.y);
 }
 
 RECTXYWH_F CCameraTransform::ScreenToWorld(RECTXYWH_F inRect)
@@ -168,16 +168,16 @@ RECTXYWH_F CCameraTransform::ScreenToWorld(RECTXYWH_F inRect)
 	//aflu procente intre -1 si 1 pt ca originea este centrul ecranului
 	percX = 2.0f * (((inRect.x - m_Viewport.x) / m_Viewport.w) - 0.5f);
 	percY = 2.0f * (((inRect.y - m_Viewport.y) / m_Viewport.h) - 0.5f);
-	D3DXVECTOR2 vecLookAtXY(m_vecRealLookAt.x, m_vecRealLookAt.y);
-	D3DXVECTOR2 retpos = vecLookAtXY + D3DXVECTOR2(percX * m_vecHW.x, percX * m_vecHW.y) + D3DXVECTOR2(percY * m_vecHH.x, percY * m_vecHH.y);
+	Vec2 vecLookAtXY(m_vecRealLookAt.x, m_vecRealLookAt.y);
+	Vec2 retpos = vecLookAtXY + Vec2(percX * m_vecHW.x, percX * m_vecHW.y) + Vec2(percY * m_vecHH.x, percY * m_vecHH.y);
 	//aflu procente intre 0 si 1 din jumatatile de vectori de directie
 	percX = inRect.w / m_Viewport.w;
 	percY = inRect.h / m_Viewport.h;
-	D3DXVECTOR2 nscale = percX * 2.0f * m_vecHW + percY * 2.0f * m_vecHH;
+	Vec2 nscale = percX * 2.0f * m_vecHW + percY * 2.0f * m_vecHH;
 	return RECTXYWH_F(retpos.x, retpos.y, nscale.x, nscale.y);
 }
 
-D3DXVECTOR2	CCameraTransform::WorldToScreen(D3DXVECTOR2 inPT, RECTXYWH_F *srcViewportOverride)
+Vec2	CCameraTransform::WorldToScreen(Vec2 inPT, RECTXYWH_F *srcViewportOverride)
 {
 	RECTXYWH_F *view;
 	if (srcViewportOverride != NULL)
@@ -190,7 +190,7 @@ D3DXVECTOR2	CCameraTransform::WorldToScreen(D3DXVECTOR2 inPT, RECTXYWH_F *srcVie
 	//TODO: daca adaug rotatie aici trebuie facut cu vectori si proiectii!
 	percX = ((inPT.x - m_vecRealLookAt.x) / m_vecHW.x) / 2.0f;
 	percY = ((inPT.y - m_vecRealLookAt.y) / m_vecHH.y) / 2.0f;
-	return D3DXVECTOR2(view->w / 2.0f + percX * view->w + view->x, view->h / 2.0f + percY * view->h + view->y);
+	return Vec2(view->w / 2.0f + percX * view->w + view->x, view->h / 2.0f + percY * view->h + view->y);
 }
 
 RECTXYWH_F CCameraTransform::WorldToScreen(RECTXYWH_F inRect)
@@ -200,20 +200,20 @@ RECTXYWH_F CCameraTransform::WorldToScreen(RECTXYWH_F inRect)
 	//TODO: daca adaug rotatie aici trebuie facut cu vectori si proiectii!
 	percX = ((inRect.x - m_vecRealLookAt.x) / m_vecHW.x) / 2.0f;
 	percY = ((inRect.y - m_vecRealLookAt.y) / m_vecHH.y) / 2.0f;
-	D3DXVECTOR2 vpos(m_Viewport.w / 2.0f + percX * m_Viewport.w + m_Viewport.x, m_Viewport.h / 2.0f + percY * m_Viewport.h + m_Viewport.y);
+	Vec2 vpos(m_Viewport.w / 2.0f + percX * m_Viewport.w + m_Viewport.x, m_Viewport.h / 2.0f + percY * m_Viewport.h + m_Viewport.y);
 	percX = (inRect.w / m_vecHW.x) / 2.0f;
 	percY = (inRect.h / m_vecHH.y) / 2.0f;
 	return RECTXYWH_F(vpos.x, vpos.y, percX * m_Viewport.w, percY * m_Viewport.h);
 }
 
-D3DXVECTOR2	CCameraTransform::ScreenToViewport(D3DXVECTOR2 inPt)
+Vec2	CCameraTransform::ScreenToViewport(Vec2 inPt)
 {
-	return D3DXVECTOR2(inPt.x - m_Viewport.x, inPt.y - m_Viewport.y);
+	return Vec2(inPt.x - m_Viewport.x, inPt.y - m_Viewport.y);
 }
 
-D3DXVECTOR2	CCameraTransform::ViewportToScreen(D3DXVECTOR2 inPt)
+Vec2	CCameraTransform::ViewportToScreen(Vec2 inPt)
 {
-	return D3DXVECTOR2(inPt.x + m_Viewport.x, inPt.y + m_Viewport.y);
+	return Vec2(inPt.x + m_Viewport.x, inPt.y + m_Viewport.y);
 }
 
 
@@ -223,7 +223,7 @@ SIZEWH_F CCameraTransform::ScreenToWorld(SIZEWH_F inSZ)
 	//aflu procente intre 0 si 1 din jumatatile de vectori de directie
 	percX = inSZ.w / m_Viewport.w;
 	percY = inSZ.h / m_Viewport.h;
-	D3DXVECTOR2 nscale = percX * 2.0f * m_vecHW + percY * 2.0f * m_vecHH;
+	Vec2 nscale = percX * 2.0f * m_vecHW + percY * 2.0f * m_vecHH;
 	return SIZEWH_F(nscale.x, nscale.y);
 }
 
@@ -237,19 +237,19 @@ SIZEWH_F CCameraTransform::WorldToScreen(SIZEWH_F inSZ)
 	return SIZEWH_F(percX * m_Viewport.w, percY * m_Viewport.h);
 }
 
-D3DXVECTOR2	CCameraTransform::ViewportToViewport(D3DXVECTOR2 inPt, CCameraTransform &destCam)
+Vec2	CCameraTransform::ViewportToViewport(Vec2 inPt, CCameraTransform &destCam)
 {
 	RECTXYWH_F newView = destCam.GetViewport();
 	//le aduce in ecranul default dupa care le duce in noul viewport
-	return D3DXVECTOR2(inPt.x + m_Viewport.x - newView.x, inPt.y + m_Viewport.y - newView.y);
+	return Vec2(inPt.x + m_Viewport.x - newView.x, inPt.y + m_Viewport.y - newView.y);
 }
 
 
-D3DXVECTOR2	CCameraTransform::WorldToWorld(D3DXVECTOR2 inPt, CCameraTransform &destCam)
+Vec2	CCameraTransform::WorldToWorld(Vec2 inPt, CCameraTransform &destCam)
 {
 	RECTXYWH_F newView = destCam.GetViewport();
 	//aduce punctul in viewport
-	D3DXVECTOR2 viewPos = WorldToScreen(inPt);
+	Vec2 viewPos = WorldToScreen(inPt);
 	//trece din destView in destWorld
 	return (destCam.ScreenToWorld(viewPos));
 }
@@ -267,17 +267,17 @@ void CCameraTransform::SetCamAnimationSpring(float springKs, float dampingKd)
 	m_k2 = dampingKd;
 }
 
-void CCameraTransform::SetCamAnimationInertial(D3DXVECTOR2 elasticBorderExtension, float frictionK, float springKd, float zoomMin, float zoomMax)
+void CCameraTransform::SetCamAnimationInertial(Vec2 elasticBorderExtension, float frictionK, float springKd, float zoomMin, float zoomMax)
 {
 	m_animType = K_CAMTRANS_ANIM_INERTIAL;
 	m_k1 = frictionK;
 	m_k2 = springKd;
 	m_veck1 = elasticBorderExtension;
-	m_veck2 = D3DXVECTOR2(zoomMin, zoomMax); //salvez constantele springului pt zoom
+	m_veck2 = Vec2(zoomMin, zoomMax); //salvez constantele springului pt zoom
 }
 
 ///--- screen shake ---
-void CCameraTransform::ShakeScreen(float maxAmplitude, float attenuationPerSecond, D3DXVECTOR2 * vShakeSource)
+void CCameraTransform::ShakeScreen(float maxAmplitude, float attenuationPerSecond, Vec2 * vShakeSource)
 {
 	if (UTGetAppClass().m_Settings.bScreenShakes == false)
 		return;
@@ -300,7 +300,7 @@ void CCameraTransform::ShakeScreen(float maxAmplitude, float attenuationPerSecon
 	m_shakeAttenuationPerSec = attenuationPerSecond;
 }
 
-ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, D3DXVECTOR3 inputDelta)
+ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, Vec3 inputDelta)
 {
 	ECamMoveStatus retval = K_CAMTRANS_STILL;
 	//update local timeline
@@ -308,7 +308,7 @@ ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, D3DXVECT
 	///--- calculeaza vectori initiali ecran ---
 	float fPixelSize = 1.0f;
 	//daca nu este setata marimea zonei virtuale a camerei o seteaza aici cat cea a ecranului final
-	D3DXVECTOR2 vScreenSize(m_Viewport.w, m_Viewport.h);
+	Vec2 vScreenSize(m_Viewport.w, m_Viewport.h);
 	if (m_camScreenSize != 0)
 	{
 		if (m_camScreenAxis == K_CAMTRANS_AXIS_V)
@@ -333,8 +333,8 @@ ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, D3DXVECT
 		}
 	}
 
-	m_vecHW = D3DXVECTOR2(vScreenSize.x * 0.5f, 0.0f);
-	m_vecHH = D3DXVECTOR2(0.0f, vScreenSize.y * 0.5f);
+	m_vecHW = Vec2(vScreenSize.x * 0.5f, 0.0f);
+	m_vecHH = Vec2(0.0f, vScreenSize.y * 0.5f);
 	//trateaza zoom
 	m_vecHH /= m_vecRealLookAt.z;
 	m_vecHW /= m_vecRealLookAt.z;
@@ -403,10 +403,10 @@ ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, D3DXVECT
 		{
 			//blocarea axelor este tratata in setCamPos
 			//pozitie
-			D3DXVECTOR3 deltaP = m_vecLookAt - m_vecRealLookAt;
+			Vec3 deltaP = m_vecLookAt - m_vecRealLookAt;
 			float dist = D3DXVec3Length(&deltaP);
 
-			D3DXVECTOR3 springForce, force;
+			Vec3 springForce, force;
 			D3DXVec3Normalize(&springForce, &deltaP);
 			springForce *= dist * m_k1; //konstanta hook
 			force = springForce - m_vecLookAtSpeed * m_k2; //aici face damping
@@ -435,7 +435,7 @@ ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, D3DXVECT
 			RECTLTRB_F centerRect(m_worldAABB.x + m_vecHW.x + m_veck1.x, m_worldAABB.y + m_vecHH.y + m_veck1.y,
 				m_worldAABB.x + m_worldAABB.w - m_vecHW.x - m_veck1.x, m_worldAABB.y + m_worldAABB.h - m_vecHH.y - m_veck1.y);
 
-			D3DXVECTOR2 springOff(0.0f, 0.0f);
+			Vec2 springOff(0.0f, 0.0f);
 			//verificare elasticitate centru
 			if (m_veck1.x > 0.0f)
 			{
@@ -551,9 +551,9 @@ ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, D3DXVECT
 		}
 	}
 	//scot din nou vectorii din bbox (vectorii de HW si HH sunt corecti, doar pozitia de look at se schimba)
-	m_vecRealLookAt = D3DXVECTOR3(m_camWorldAABB.x + m_camWorldAABB.w / 2.0f, m_camWorldAABB.y + m_camWorldAABB.h / 2.0f, m_vecRealLookAt.z);
+	m_vecRealLookAt = Vec3(m_camWorldAABB.x + m_camWorldAABB.w / 2.0f, m_camWorldAABB.y + m_camWorldAABB.h / 2.0f, m_vecRealLookAt.z);
 	//needs to be aligned to pixel edges? - se poate mai bine aici, adica ar trebui tratat si in partea cu paint, poate sa ia din tex de la 0.5f
-	D3DXVECTOR2 vFinalTranslate(m_Viewport.x + m_Viewport.w / 2.0f, m_Viewport.y + m_Viewport.h / 2.0f);
+	Vec2 vFinalTranslate(m_Viewport.x + m_Viewport.w / 2.0f, m_Viewport.y + m_Viewport.h / 2.0f);
 	if (m_bPixelPerfect)
 	{
 		m_vecRealLookAt.x = ROUND_FLOAT(m_vecRealLookAt.x);

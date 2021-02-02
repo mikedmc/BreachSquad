@@ -18,10 +18,10 @@
 namespace UTMath
 {
 	// distance to segment. Returns capsule shaped distance field.
-	float			LineDist(D3DXVECTOR3 p, D3DXVECTOR3 v1, D3DXVECTOR3 v2, D3DXVECTOR3 *n);
+	float			LineDist(Vec3 p, Vec3 v1, Vec3 v2, Vec3 *n);
 
 	// finds intersection between p1-p2 and p3-p4
-	bool			LineLineIntersection(D3DXVECTOR2 p1, D3DXVECTOR2 p2, D3DXVECTOR2 p3, D3DXVECTOR2 p4, D3DXVECTOR2 *outPt);
+	bool			LineLineIntersection(Vec2 p1, Vec2 p2, Vec2 p3, Vec2 p4, Vec2 *outPt);
 
 	// tells if lines intersect and returns r and s denominators (percentages between segments defining the lines)
 	// a must be different from b. c and d can be the same.
@@ -57,13 +57,13 @@ namespace UTMath
 	bool			IsPowerOfTwo(unsigned int nVal);
 
 	/* Get angle of vector. Returns -PI..PI */
-	float			GetVectorAngle(D3DXVECTOR2 const &dir);
+	float			GetVectorAngle(Vec2 const &dir);
 
 	/* Get angle of vector. Returns -PI..PI */
-	float			GetVectorAngle(D3DXVECTOR2 start, D3DXVECTOR2 end);
+	float			GetVectorAngle(Vec2 start, Vec2 end);
 
 	/* RETURNS: angle in rad between 2 vectors */
-	float			GetAngleBetweenVectors(D3DXVECTOR2 vec1, D3DXVECTOR2 vec2);
+	float			GetAngleBetweenVectors(Vec2 vec1, Vec2 vec2);
 
 	int				Log2i(float val);
 	int				Log2i(int val);

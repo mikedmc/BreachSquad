@@ -692,9 +692,9 @@ void CControllersManager::UpdateController(CController* ctrlr, float dTime, floa
 	}
 
 
-	D3DXVECTOR2 CController::GetDoubleAxisVector(const EControllerCommand commXaxis, const EControllerCommand commYaxis, bool bNormalize)
+	Vec2 CController::GetDoubleAxisVector(const EControllerCommand commXaxis, const EControllerCommand commYaxis, bool bNormalize)
 	{
-		D3DXVECTOR2 retvec(sCommands.arrAxisVal_N[commXaxis], sCommands.arrAxisVal_N[commYaxis]);
+		Vec2 retvec(sCommands.arrAxisVal_N[commXaxis], sCommands.arrAxisVal_N[commYaxis]);
 		if (bNormalize)
 		{
 			D3DXVec2Normalize(&retvec, &retvec);

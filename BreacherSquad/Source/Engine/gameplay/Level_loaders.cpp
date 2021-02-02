@@ -32,7 +32,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	}
 	//reset local timeline
 	fLocalTimeline = 0.0f;
-	vLastSpawnPoint = D3DXVECTOR2(0.0f, 0.0f);
+	vLastSpawnPoint = Vec2(0.0f, 0.0f);
 
 	//realease level if loaded
 	Release();
@@ -231,7 +231,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		nl->vPos.z = 32.0f;
 
 		nl->vPos_ini = nl->vPos;
-		nl->pos_ini = nl->pos = D3DXVECTOR2(nl->vPos.x, nl->vPos.y);
+		nl->pos_ini = nl->pos = Vec2(nl->vPos.x, nl->vPos.y);
 		//animID
 		CHAR charAnmName[MAX_PATH];
 		OS_freadString(fl, charAnmName);
@@ -248,7 +248,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		nl->color = D3DCOLOR_ARGB(ca, cr, cg, cb);
 		nl->color_ini = nl->color;
 
-		D3DXVECTOR2 bbmin, bbmax;
+		Vec2 bbmin, bbmax;
 		bbmin.x = (float)OS_freadInt32(fl);
 		bbmin.y = (float)OS_freadInt32(fl);
 		bbmax.x = bbmin.x + (float)OS_freadInt32(fl);
@@ -292,22 +292,22 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	CCollisionShape* cc = null;
 	//left
 	cc = new CCollisionShape();
-	cc->bbox.Set(D3DXVECTOR2(m_levelAABB.x - 32.0f, m_levelAABB.y), D3DXVECTOR2(m_levelAABB.x + 2.0f, m_levelAABB.Bottom()));
+	cc->bbox.Set(Vec2(m_levelAABB.x - 32.0f, m_levelAABB.y), Vec2(m_levelAABB.x + 2.0f, m_levelAABB.Bottom()));
 	cc->ubFlags = K_LVL_COLLFLAG_LEVEL_BOUNDS;
 	m_arrColShapes.Add(cc);
 	//right
 	cc = new CCollisionShape();
-	cc->bbox.Set(D3DXVECTOR2(m_levelAABB.Right() - 2.0f, m_levelAABB.y), D3DXVECTOR2(m_levelAABB.Right() + 32.0f, m_levelAABB.Bottom()));
+	cc->bbox.Set(Vec2(m_levelAABB.Right() - 2.0f, m_levelAABB.y), Vec2(m_levelAABB.Right() + 32.0f, m_levelAABB.Bottom()));
 	cc->ubFlags = K_LVL_COLLFLAG_LEVEL_BOUNDS;
 	m_arrColShapes.Add(cc);
 	//bottom
 	cc = new CCollisionShape();
-	cc->bbox.Set(D3DXVECTOR2(m_levelAABB.x, m_levelAABB.Bottom() - 2.0f), D3DXVECTOR2(m_levelAABB.Right(), m_levelAABB.Bottom() + 32.0f));
+	cc->bbox.Set(Vec2(m_levelAABB.x, m_levelAABB.Bottom() - 2.0f), Vec2(m_levelAABB.Right(), m_levelAABB.Bottom() + 32.0f));
 	cc->ubFlags = K_LVL_COLLFLAG_LEVEL_BOUNDS;
 	m_arrColShapes.Add(cc);
 	//top
 	cc = new CCollisionShape();
-	cc->bbox.Set(D3DXVECTOR2(m_levelAABB.x, m_levelAABB.y - 32.0f), D3DXVECTOR2(m_levelAABB.Right(), m_levelAABB.y + 2.0f));
+	cc->bbox.Set(Vec2(m_levelAABB.x, m_levelAABB.y - 32.0f), Vec2(m_levelAABB.Right(), m_levelAABB.y + 2.0f));
 	cc->ubFlags = K_LVL_COLLFLAG_LEVEL_BOUNDS;
 	m_arrColShapes.Add(cc);
 
@@ -319,14 +319,14 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		CCollisionShape* colobj = new CCollisionShape();
 		colobj->ID = OS_freadUInt32(fl);
 
-		D3DXVECTOR2 cmin, cmax;
+		Vec2 cmin, cmax;
 		cmin.x = (float)OS_freadInt32(fl); cmin.y = (float)OS_freadInt32(fl); //XY
 		cmax.x = (float)OS_freadUInt32(fl); cmax.y = (float)OS_freadUInt32(fl); //WH
 		cmax += cmin;
 		colobj->bbox.Set(cmin, cmax);
 		//bbox safeguarding
 		if ((colobj->bbox.vSize.x <= 0.0f) || (colobj->bbox.vSize.y <= 0.0f))
-			colobj->bbox.Set(D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(16.0f, 16.0f));
+			colobj->bbox.Set(Vec2(0.0f, 0.0f), Vec2(16.0f, 16.0f));
 		colobj->bbox_ini = colobj->bbox;
 		//set exported bboxes too
 		colobj->bbox_exported = colobj->bbox;
@@ -413,8 +413,8 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		//daca e flipat pe X flipez si bbox. Pe Y nu e cazul pt ca se pastreaza in acelasi bbox in paint
 		if (obj->flipX)
 		{
-			obj->bbox_ini.Move(D3DXVECTOR2(-2.0f * obj->bbox_ini.vCenter.x, 0.0f));
-			obj->bbox_exported_ini.Move(D3DXVECTOR2(-2.0f * obj->bbox_exported_ini.vCenter.x, 0.0f));
+			obj->bbox_ini.Move(Vec2(-2.0f * obj->bbox_ini.vCenter.x, 0.0f));
+			obj->bbox_exported_ini.Move(Vec2(-2.0f * obj->bbox_exported_ini.vCenter.x, 0.0f));
 		}
 		obj->bbox = obj->bbox_ini;
 		obj->bbox.Move(obj->pos);
@@ -548,7 +548,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	{
 		UINT32 actID = OS_freadUInt32(fl);
 		//pozitia
-		D3DXVECTOR2 actPos;
+		Vec2 actPos;
 		actPos.x = (float)OS_freadInt32(fl);
 		actPos.y = (float)OS_freadInt32(fl);
 		//boolean SetAngle si unghi
@@ -893,7 +893,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 				//coordonate puncte
 				for (int i = 0; i < ptscnt; i++)
 				{
-					D3DXVECTOR2 pt;
+					Vec2 pt;
 					pt.x = OS_freadInt32(fl);
 					pt.y = OS_freadInt32(fl);
 					rail->arrPoints.Add(pt);
@@ -905,7 +905,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 					}
 					else
 					{
-						D3DXVECTOR2 dist = rail->arrPoints.m_pData[i] - rail->arrPoints.m_pData[i - 1];
+						Vec2 dist = rail->arrPoints.m_pData[i] - rail->arrPoints.m_pData[i - 1];
 						float ldist = D3DXVec2Length(&dist);
 						totalLength += ldist;
 						rail->arrLenghts.Add(totalLength);
@@ -991,7 +991,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	//pools
 	m_poolPhysPts.Init(K_LVL_PHYSP_MAX_CNT);
 	m_poolBullets.Init(K_LVL_BULLETS_MAX_CNT);
-	m_poolProps.Init(K_LVL_PROPS_MAX_CNT);
+	m_poolDoofers.Init(K_LVL_DOOFERS_MAX_CNT);
 
 	//spawn selected players
 	m_nPlayers = 0;
@@ -1007,7 +1007,7 @@ HRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		{
 			//spawn Player aloca si controllerul potrivit
 			int offx = ((kk * 2) - 1) * K_TILE_HSIZE;
-			SpawnPlayer(vLastSpawnPoint + D3DXVECTOR2((float)offx, 0.0f), kk, -1);
+			SpawnPlayer(vLastSpawnPoint + Vec2((float)offx, 0.0f), kk, -1);
 			//resolve selection
 			m_arrPlayerSelHotJoin[kk] = (int)g_playerSelScr.m_arrPlayers[kk].eType;
 		}

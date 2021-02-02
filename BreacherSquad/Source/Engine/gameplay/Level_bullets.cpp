@@ -2,7 +2,7 @@
 #include "Level_bullets.h"
 
 
-CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, D3DXVECTOR2 pos, D3DXVECTOR2 shootDir)
+CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec2 pos, Vec2 shootDir)
 {
 	Vec3 vPos = Vec3(pos.x, pos.y, 16.0f);
 	//dull bullets don't actually get spawned (sometimes we need them)
@@ -204,12 +204,12 @@ void CLevel::UpdateBullets(float dTime)
 			if (bullet->nExploTemplateHash != 0)
 			{
 				/*
-				D3DXVECTOR2 vExploDir(0.0f, 0.0f);
+				Vec2 vExploDir(0.0f, 0.0f);
 				if (bullet->nFlags & K_LVL_BULLET_FLAG_DIRECTIONAL)
 				{
 					vExploDir = bullet->physPt->m_data.speed;
 				}
-				D3DXVECTOR2 vExploPos = bullet->physPt->m_data.pos;
+				Vec2 vExploPos = bullet->physPt->m_data.pos;
 				if (bullet->physPt->m_data.bContacting)
 					vExploPos += bullet->physPt->m_data.contactNormal * 2.0f;
 				//now add explo
@@ -257,7 +257,7 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 			while (node != &m_poolBullets.pListUsed)
 			{
 				CBullet* bullet = &node->m_data;
-				//D3DXVECTOR2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
+				//Vec2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 				//float ang = UTMath::GetVectorAngle(vdir);
 				bullet->sprBullet.pos = bullet->posProj;
 				bullet->sprBullet.PaintModule(0);
@@ -272,7 +272,7 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 			while (node != &m_poolBullets.pListUsed)
 			{
 				CBullet* bullet = &node->m_data;
-				//D3DXVECTOR2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
+				//Vec2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 				//float ang = UTMath::GetVectorAngle(vdir);
 				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->posShadow, bullet->sprBullet.animIdx, bullet->sprBullet.frameIdx, 0, 0xaa000000);
 

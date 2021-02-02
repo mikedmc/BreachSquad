@@ -17,11 +17,11 @@ IActiveInterface::IActiveInterface() :
 	vPos = Vec3(0.0f, 0.0f, 0.0f);
 	vPos_ini = Vec3(0.0f, 0.0f, 0.0f);
 
-	pos = pos_ini = D3DXVECTOR2(0.0f, 0.0f);
+	pos = pos_ini = Vec2(0.0f, 0.0f);
 	script_hash.Reset();
 	varAIparams.DeleteAll();
 
-	AIvec1 = D3DXVECTOR2(0.0f, 0.0f);
+	AIvec1 = Vec2(0.0f, 0.0f);
 }
 
 IActiveInterface::~IActiveInterface()

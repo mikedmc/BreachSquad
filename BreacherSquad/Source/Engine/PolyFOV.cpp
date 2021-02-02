@@ -29,10 +29,10 @@ void CPolyFOV::AddPolySegment(double angle1, double angle2, COccluder *wall)
 	//if (Math.Abs(angle1 - angle2) < 0.0001f)
 	//  return;
 
-	D3DXVECTOR2 p1 = m_vViewerPos;
-	D3DXVECTOR2 p2(m_vViewerPos.x + (float)cos((double)angle1), m_vViewerPos.y + (float)sin((double)angle1));
-	D3DXVECTOR2 p3(0.0f, 0.0f);
-	D3DXVECTOR2 p4(0.0f, 0.0f);
+	Vec2 p1 = m_vViewerPos;
+	Vec2 p2(m_vViewerPos.x + (float)cos((double)angle1), m_vViewerPos.y + (float)sin((double)angle1));
+	Vec2 p3(0.0f, 0.0f);
+	Vec2 p4(0.0f, 0.0f);
 
 	if (wall != null)
 	{
@@ -53,7 +53,7 @@ void CPolyFOV::AddPolySegment(double angle1, double angle2, COccluder *wall)
 	}
 
 
-	D3DXVECTOR2 pBegin, pEnd;
+	Vec2 pBegin, pEnd;
 	bool ok1 = UTMath::LineLineIntersection(p3, p4, p1, p2, &pBegin);
 
 	p2.x = m_vViewerPos.x + (float)cos(angle2);
@@ -73,14 +73,14 @@ void CPolyFOV::AddPolySegment(double angle1, double angle2, COccluder *wall)
 
 //TODO: aici poate fi optimizat in directX: verific daca cross-ul capetelor lui b sunt de aceeasi parte a lui a. Daca da, verific si ochiul sa fie de partea cealalta
 //Trebuie sa accepte si 0.0f ca produs ca sa nu mai scurtez peretii care se intersecteaza
-bool segment_in_front_of(COccluder a, COccluder b, D3DXVECTOR2 relativeTo)
+bool segment_in_front_of(COccluder a, COccluder b, Vec2 relativeTo)
 {
 	// NOTE: we slightly shorten the segments so that
 	// intersections of the endpoints (common) don't count as
 	// intersections in this algorithm
 
 	//TODO: aici in loc de interpolare pot scoate versorul si sa il scad si adaug din capete ca sa fie mai rapid
-	D3DXVECTOR2 tempvec;
+	Vec2 tempvec;
 	D3DXVec2Lerp(&tempvec, &b.start, &b.end, 0.01f);
 	bool A1 = a.PointOnLeft(tempvec);
 	D3DXVec2Lerp(&tempvec, &b.end, &b.start, 0.01f);
@@ -118,7 +118,7 @@ bool segment_in_front_of(COccluder a, COccluder b, D3DXVECTOR2 relativeTo)
 }
 
 
-void CPolyFOV::SetOccluders(D3DXVECTOR2 & vViewerPos, COccluder * p_arrOccluders, int nOccludersCount)
+void CPolyFOV::SetOccluders(Vec2 & vViewerPos, COccluder * p_arrOccluders, int nOccludersCount)
 {
 	assert(nOccludersCount < K_PFOV_MAX_OCCLUDERS);
 	//salvez pozitie viewer

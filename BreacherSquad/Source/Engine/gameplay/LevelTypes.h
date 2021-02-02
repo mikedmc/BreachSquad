@@ -311,7 +311,7 @@ public:
 	float			fRadius;
 	float			fDuration;	//durata event
 
-	D3DXVECTOR2		pos;		//pozitia eventului
+	Vec2		pos;		//pozitia eventului
 	
 	//CTOR/DTOR
 	CAIEvent() :
@@ -320,11 +320,11 @@ public:
 		fRadius(0.0f), fDuration(0.0f)
 	{}
 
-	CAIEvent(EAIEventType eventType, UINT32 evtOwnerUID, int evtOwnerClass, D3DXVECTOR2 vPos, float radius, float duration = 0.6f, UINT32 evtTargetUID = 0) :
+	CAIEvent(EAIEventType eventType, UINT32 evtOwnerUID, int evtOwnerClass, Vec2 vPos, float radius, float duration = 0.6f, UINT32 evtTargetUID = 0) :
 		nType(eventType), ownerUID(evtOwnerUID), ownerClass(evtOwnerClass), pos(vPos), fRadius(radius), fDuration(duration), targetUID(evtTargetUID)
 	{}
 
-	void Set(EAIEventType eventType, UINT32 evtOwnerUID, int evtOwnerClass, D3DXVECTOR2 vPos, float radius, float duration = 0.6f, UINT32 evtTargetUID = 0)
+	void Set(EAIEventType eventType, UINT32 evtOwnerUID, int evtOwnerClass, Vec2 vPos, float radius, float duration = 0.6f, UINT32 evtTargetUID = 0)
 	{
 		nType = eventType; 
 		ownerUID = evtOwnerUID; 
@@ -339,7 +339,7 @@ public:
 		nType = K_LVL_AI_EVENT_NONE;
 		ownerUID = 0;
 		ownerClass = 0;
-		pos = D3DXVECTOR2(0.0f, 0.0f);
+		pos = Vec2(0.0f, 0.0f);
 		fRadius = 0.0f;
 		fDuration = 0.0f;
 		targetUID = 0;
@@ -1148,56 +1148,6 @@ public:
 	}
 };
 
-//pool de obiecte speciale cu fizica sau fara, de tipul cartuse cu coliziune, bucati de carne care genereaza sange si splaturi pe pereti cand se lovesc
-#define K_LVL_PROPS_MAX_CNT 256
-//types
-enum ESpecialPropType {
-	K_SPROP_NOT_SET = -1,
-
-	K_SPROP_SHELL = 0,	//cartusele jucatorului
-	K_SPROP_MEAT = 1,	//carnea care sare din oameni
-	K_SPROP_SHRAPNEL_SMOKING, //bucati de bomba care lasa fum in urma
-	K_SPROP_LIGHT,		//lumina temporara pentru arme, explozii, etc. Deseneaza din m_sprLights.
-	K_SPROP_EXPLOSION,	//explozie care deformeaza ecranul (si deseneaza si explozia (cu particule))
-	K_SPROP_FIRE_SOURCE, //o bucata de foc care moare dupa un timp dar loveste toti oamenii
-	K_SPROP_GOO,			//green goo
-};
-
-class CSpecialProp {
-public:
-	ESpecialPropType	type;		
-	CLinkedPool<CPhysicsPoint>::CLinkedPoolNode *physPt; //punctul fizic (coliziune, pozitie, etc)
-
-	int			nSubType;	//folosit de fiecare tip in mod diferit
-	float		fTimer;		//timer care porneste de la 0
-	bool		bAnimated;	//daca e animat sprite-ul
-	CSprite		spr, spr2;	//grafica din Props (unele au nevoie de 2 sprites)
-	float		fSize;		
-	//--- variabile lumini ---
-	bool		bMakesLight;
-	CSprite		sprLight;
-	float		fLightDuration, fLightFadeOut;	//durata totala a luminii si durata de fade out
-	float		fLightScaling;
-	float		fLightTimer;		//timer-ul de viata al luminii
-	//--- diverse variabile ---
-	bool		bVar1;
-	int			nIntVar1;
-
-	CSpecialProp() : physPt(null), type(K_SPROP_NOT_SET), nSubType(0), fTimer(0.0f), bAnimated(false), fSize(1.0f),
-		bMakesLight(false), fLightDuration(0.0f), fLightFadeOut(0.0f), fLightScaling(1.0f), fLightTimer(0.0f), bVar1(false), nIntVar1(0)
-	{
-	}
-
-	void Reset()
-	{
-		physPt = null; 
-		type = K_SPROP_NOT_SET; nSubType = 0; fTimer = 0.0f; bAnimated = false; fSize = 1.0f;
-		bMakesLight = false; fLightDuration = 0.0f; fLightFadeOut = 0.0f; fLightScaling = 1.0f; fLightTimer = 0.0f;
-	}
-};
-
-
-
 
 ///--------------------------------------------------------------------------
 /// MISC OBJECTS - diverse obiecte speciale exportate din editor (RAILS, etc)
@@ -1242,14 +1192,14 @@ public:
 class CMiscObjectRail : public CMiscObjectBase
 {
 public:
-	CFixedArray<D3DXVECTOR2, 32> arrPoints; //maxim 32 de puncte pe un rail
+	CFixedArray<Vec2, 32> arrPoints; //maxim 32 de puncte pe un rail
 	CFixedArray<float, 32> arrLenghts;		//lungimea parcursa pana in fiecare nod
 	float fLength;							//lungimea totala
 
 	//intoarce pozitia pe rail in functie de cursor intre 0 si 1
-	D3DXVECTOR2 GetPosNormalized(float fCursorNormalized, D3DXVECTOR2 * retDir = NULL);
+	Vec2 GetPosNormalized(float fCursorNormalized, Vec2 * retDir = NULL);
 	//intoarce pozitia pe rail in fn de distanta parcursa (si directia normalizata)
-	D3DXVECTOR2 GetPos(float fDistFromStart, D3DXVECTOR2 * retDir = NULL);
+	Vec2 GetPos(float fDistFromStart, Vec2 * retDir = NULL);
 	//CTOR/DTOR
 	CMiscObjectRail() : fLength(0.0f)
 	{
@@ -1268,97 +1218,13 @@ public:
 class CMiscObject_FrontLayerObj : public CMiscObjectBase
 {
 public:
-	D3DXVECTOR2 pos;
+	Vec2 pos;
 	CSprite sprite;
 	CAABB aabb_ini;  //bbox initial
 
 	CMiscObject_FrontLayerObj()
 	{
 		type = K_LVL_MISC_FRONTLAYEROBJ;
-	}
-};
-
-
-
-///--------------------------------------------------------------------------
-/// SCREEN VIGNETTE
-///--------------------------------------------------------------------------
-
-class CScreenVignette
-{
-public:
-	CSprite sprite;
-	DWORD colorBase;
-	float fDuration; //durata totala de afisare
-	float fFadeInTime, fFadeOutTime;
-	float fLife;	//viata curenta (0.0f inseamna ca nu deseneaza)
-	float fAlpha, fMaxAlpha;	//alpha calculata in update
-
-	CScreenVignette() : colorBase(0x00000000), fDuration(0.0f), fLife(0.0f), fFadeInTime(0.0f), fFadeOutTime(0.0f), fAlpha(0.0f), fMaxAlpha(1.0f)
-	{
-		sprite.Init(ANM_CONTROLS_SPR_VIGNETTES, 0.0f, 0.0f, 0x00000000);
-	}
-
-	void Init(float nfLife, DWORD nColor = 0xff000000, float nfFadeInTime = 0.0f, float nfFadeOutTime = 0.0f, float nfMaxAlpha = 1.0f)
-	{
-		fLife = fDuration = nfLife;
-		colorBase = nColor;
-		fFadeInTime = nfFadeInTime;
-		fFadeOutTime = nfFadeOutTime;
-		fMaxAlpha = nfMaxAlpha;
-
-		//daca am fade in pornesc de la alpha 0
-		if (nfFadeInTime > 0.0f)
-		{
-			fAlpha = 0.0f;
-		}
-		else
-		{
-			fAlpha = 1.0f;
-		}
-
-		sprite.color = D3DCOLOR_COLORALPHA(colorBase, fAlpha * fMaxAlpha);
-	}
-
-	void Update(float dTime)
-	{
-		if (fLife <= 0.0f)
-			return;
-
-		fLife -= dTime;
-		//daca sunt in zona de fade in
-		if ((fDuration - fLife) < fFadeInTime)
-		{
-			fAlpha = (fDuration - fLife) / fFadeInTime;
-		}
-		else if (fLife < fFadeOutTime) //fade out
-		{
-			fAlpha = fLife / fFadeOutTime;
-		}
-		else //full color
-		{
-			fAlpha = 1.0f;
-		}
-
-		if (fLife <= 0.0f)
-		{
-			fLife = 0.0f;
-			fAlpha = 0.0f;
-		}
-
-		sprite.color = D3DCOLOR_COLORALPHA(colorBase, fAlpha * fMaxAlpha);
-	}
-
-	void Paint(ID3DXSprite* pSprite, CSpriteCollection* sprCol)
-	{
-		if (fLife <= 0.0f)
-			return;
-		D3DXMATRIXA16 mattrans;
-		RECTXYWH_F bbox = sprCol->GetAFrameBBox_real(sprite.animationIdx, 0);
-		D3DXMatrixAffineTransformation2D(&mattrans, UTGetAppClass().g_rectRender.h / bbox.h, NULL, 0.0f, &UTGetAppClass().g_rectRender.Center());
-		pSprite->SetTransform(&mattrans);
-		sprite.paint(sprCol);
-		pSprite->Flush();
 	}
 };
 

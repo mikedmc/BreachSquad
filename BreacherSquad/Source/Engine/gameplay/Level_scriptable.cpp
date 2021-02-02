@@ -148,7 +148,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 			else
 			{
-				GiveStrategicPoints(fPts, &D3DXVECTOR2(target->bbox.vCenter.x, target->bbox.vMin.y));
+				GiveStrategicPoints(fPts, &Vec2(target->bbox.vCenter.x, target->bbox.vMin.y));
 			}
 
 			return true;
@@ -174,7 +174,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					m_arrStats[K_LVL_STATS_LEVEL_HAS_BOMBS] = 0;
 					m_arrStats[K_LVL_STATS_BOMBS_DISARMED]++;
 					//message bomb defused
-					g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, D3DXVECTOR2(0.0f, -50.0f), STR_BOMB_DEFUSED, FONTIDX_12_WOW, 1.0f, 3.0f, K_COLOR_SELECTED_TEXT);
+					g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_BOMB_DEFUSED, FONTIDX_12_WOW, 1.0f, 3.0f, K_COLOR_SELECTED_TEXT);
 					//sound verse - bomb defused
 					IActiveInterface* target = GetIActiveInterfacePtr_byUID(executorUID);
 					if (target)
@@ -184,7 +184,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 						{
 							PlayActorSoundVerse(act, K_LVL_ACT_VERSE_BOMB_DEFUSED);
 							//give points
-							GiveStrategicPoints(2.0f, &D3DXVECTOR2(act->bbox.vCenter.x, act->bbox.vMin.y));
+							GiveStrategicPoints(2.0f, &Vec2(act->bbox.vCenter.x, act->bbox.vMin.y));
 						}
 					}
 					else
@@ -233,7 +233,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 
 					App_IncreaseGamestat(K_MEMID_GAMESTATS_ARREST_TARGETS_ARRESTED);
 					//success message
-					g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, D3DXVECTOR2(0.0f, -50.0f), STR_TARGET_ARRESTED, FONTIDX_12_WOW, 1.0f, 3.0f, K_COLOR_SELECTED_TEXT);
+					g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_TARGET_ARRESTED, FONTIDX_12_WOW, 1.0f, 3.0f, K_COLOR_SELECTED_TEXT);
 				}
 				else if (instr->m_arrArgs[ii]->m_name.getHash() == GET_FAST_HASH("nArrestedCivilians"))
 				{
@@ -246,7 +246,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					//show level number
 					UTLang().ReplaceTokenInt(STR_FLOOR_X_VALUE, STR_FLOOR_X, 1, m_arrStats[K_LVL_STATS_LEVEL_VINFINITE_FLOOR]);
 
-					g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_LETTERWAVER, D3DXVECTOR2(0.0f, -50.0f), STR_FLOOR_X_VALUE, FONTIDX_12_WOW, 1.0f, 2.0f, K_COLOR_SELECTED_TEXT);
+					g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_LETTERWAVER, Vec2(0.0f, -50.0f), STR_FLOOR_X_VALUE, FONTIDX_12_WOW, 1.0f, 2.0f, K_COLOR_SELECTED_TEXT);
 				}
 
 			}
@@ -364,8 +364,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					m_camLevel.SetCamPos(&m_vCamPosDefault, 1.0f, true);
 				else
 					m_camLevel.SetCamPos(&m_camTargetActive->pos, 1.0f, true);
-				//black out screen
-				m_screenVignette.Init(0.5f, 0xff000000, 0.0f, 0.5f);
 			}
 
 			return true;
@@ -417,8 +415,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					m_camLevel.SetCamPos(&m_vCamPosDefault, 1.0f, true);
 				else
 					m_camLevel.SetCamPos(&m_camTargetActive->pos, 1.0f, true);
-				//black out screen
-				m_screenVignette.Init(0.5f, 0xff000000, 0.0f, 0.5f);
 			}
 
 			return true;
@@ -452,7 +448,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					//					SND_PLAY_POSITIONAL(SNDIDX_RELOAD_EMERGENCY, active->pos);
 					g_particlesMgr.GenerateHealEffect(toucheractor->pos, 0xff5555ff, K_PART_LAYER_RT_FRONT_NRM);
 
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_INTERFACE_ELEMENTS, false, 0, &toucheractor->GetPosHeart(), NULL, &D3DXVECTOR2(0.0f, -10.0f), 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xffffffff, K_PART_LAYER_FRONT);
+					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_INTERFACE_ELEMENTS, false, 0, &toucheractor->GetPosHeart(), NULL, &Vec2(0.0f, -10.0f), 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xffffffff, K_PART_LAYER_FRONT);
 
 					toucheractor->weapons[K_LVL_ACT_WEAPON_GEAR].ammoLeft++;
 					nAmmoLeft--;
@@ -471,7 +467,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					//add notification if we actually have gear
 					if (toucheractor->weapons[K_LVL_ACT_WEAPON_GEAR].status != K_LVL_WPN_STATUS_UNKNOWN)
 					{
-						m_interfaceTextBubble.ShowLevelHint(&m_camLevel, STR_FULL_AMMO, FONTIDX_6_NS1, D3DXVECTOR2(active->bbox_exported.vCenter.x, active->bbox_exported.vMin.y), 4.0f);
+						m_interfaceTextBubble.ShowLevelHint(&m_camLevel, STR_FULL_AMMO, FONTIDX_6_NS1, Vec2(active->bbox_exported.vCenter.x, active->bbox_exported.vMin.y), 4.0f);
 					}
 					else
 					{
@@ -523,7 +519,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				else
 				{
 					//add notification
-					m_interfaceTextBubble.ShowLevelHint(&m_camLevel, STR_FULL_HEALTH, FONTIDX_6_NS1, D3DXVECTOR2(active->bbox_exported.vCenter.x, active->bbox_exported.vMin.y), 4.0f);
+					m_interfaceTextBubble.ShowLevelHint(&m_camLevel, STR_FULL_HEALTH, FONTIDX_6_NS1, Vec2(active->bbox_exported.vCenter.x, active->bbox_exported.vMin.y), 4.0f);
 				}
 			}
 
@@ -672,7 +668,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//add notification
-			m_interfaceTextBubble.ShowLevelHint(&m_camLevel, stridx, FONTIDX_6_NS1, D3DXVECTOR2(target->bbox_exported.vCenter.x, target->bbox_exported.vMin.y), fDuration);
+			m_interfaceTextBubble.ShowLevelHint(&m_camLevel, stridx, FONTIDX_6_NS1, Vec2(target->bbox_exported.vCenter.x, target->bbox_exported.vMin.y), fDuration);
 			return true;
 		}
 		break;
@@ -804,7 +800,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//Set final pos
-			toucheractor->SetPos(D3DXVECTOR2(target->pos.x + fOffX, target->pos.y + fOffY));
+			toucheractor->SetPos(Vec2(target->pos.x + fOffX, target->pos.y + fOffY));
 
 			return true;
 		}
@@ -935,12 +931,12 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			CVariantComplex* nWeaponIdx = instr->GetArgument(L"nWeaponIdx");
 			if (nWeaponIdx->m_type == CVariantComplex::K_ARGTYPE_INT32)
 			{
-				D3DXVECTOR2 vShootDir = D3DXVECTOR2(targetAct->lookDirXsign, 0.0f);
+				Vec2 vShootDir = Vec2(targetAct->lookDirXsign, 0.0f);
 				ShootWeapon(targetAct->pSelectedWeapon[nWeaponIdx->m_asINT32], vShootDir);
 			}
 			else
 			{
-				D3DXVECTOR2 vShootDir = D3DXVECTOR2(targetAct->lookDirXsign, 0.0f);
+				Vec2 vShootDir = Vec2(targetAct->lookDirXsign, 0.0f);
 				ShootWeapon(targetAct->pCurrentWeapon, vShootDir);
 			}
 
@@ -1311,7 +1307,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			{
 				fOffY = vcOffY->asFloat();
 			}
-			D3DXVECTOR2 vSpawnPos = target->pos;
+			Vec2 vSpawnPos = target->pos;
 			vSpawnPos.x += fOffX;
 			vSpawnPos.y += fOffY;
 
@@ -1364,7 +1360,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 
-			if (target->GetClassType() != K_LVL_IAI_TYPE_ACTIVE)
+			if (target->GetClassType() != K_LVL_IAI_TYPE_PROP)
 			{
 				LOG(L"SCRIPT::IACTIVE_INC_FRAME - target not an ACTIVE!\n");
 				return true;
@@ -1397,10 +1393,10 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 			//set new bbox
 			RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
-			active->bbox_ini.Set(D3DXVECTOR2(objbox.x, objbox.y), D3DXVECTOR2(objbox.Right(), objbox.Bottom()));
+			active->bbox_ini.Set(Vec2(objbox.x, objbox.y), Vec2(objbox.Right(), objbox.Bottom()));
 			if (active->flipX)
 			{
-				active->bbox_ini.Move(D3DXVECTOR2(-2.0f * active->bbox_ini.vCenter.x, 0.0f));
+				active->bbox_ini.Move(Vec2(-2.0f * active->bbox_ini.vCenter.x, 0.0f));
 			}
 			active->bbox = active->bbox_ini;
 			active->bbox.Move(active->pos);
@@ -1422,7 +1418,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 
-			if (target->GetClassType() != K_LVL_IAI_TYPE_ACTIVE)
+			if (target->GetClassType() != K_LVL_IAI_TYPE_PROP)
 			{
 				LOG(L"SCRIPT::IACTIVE_SET_ANIM - target not an ACTIVE!\n");
 				return true;
@@ -1457,10 +1453,10 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			active->bAnimated = animated;
 			//set new bbox
 			RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
-			active->bbox_ini.Set(D3DXVECTOR2(objbox.x, objbox.y), D3DXVECTOR2(objbox.Right(), objbox.Bottom()));
+			active->bbox_ini.Set(Vec2(objbox.x, objbox.y), Vec2(objbox.Right(), objbox.Bottom()));
 			if (active->flipX)
 			{
-				active->bbox_ini.Move(D3DXVECTOR2(-2.0f * active->bbox_ini.vCenter.x, 0.0f));
+				active->bbox_ini.Move(Vec2(-2.0f * active->bbox_ini.vCenter.x, 0.0f));
 			}
 			active->bbox = active->bbox_ini;
 			active->bbox.Move(active->pos);

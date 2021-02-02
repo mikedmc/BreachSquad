@@ -93,12 +93,12 @@ CAIState * CAITemplate::GetAIStateByName(CStringHash strName)
 /// MISC OBJECTS - diverse obiecte speciale exportate din editor (RAILS, etc)
 ///--------------------------------------------------------------------------
 
-D3DXVECTOR2 CMiscObjectRail::GetPosNormalized(float fCursorNormalized, D3DXVECTOR2 * retDir)
+Vec2 CMiscObjectRail::GetPosNormalized(float fCursorNormalized, Vec2 * retDir)
 {
 	return GetPos(fLength * fCursorNormalized, retDir);
 }
 
-D3DXVECTOR2 CMiscObjectRail::GetPos(float fDistFromStart, D3DXVECTOR2 * retDir)
+Vec2 CMiscObjectRail::GetPos(float fDistFromStart, Vec2 * retDir)
 {
 	if (fDistFromStart < 0.0f)
 		return arrPoints[0];

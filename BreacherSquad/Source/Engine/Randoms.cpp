@@ -199,10 +199,10 @@ float CRandom::RandFloatSgn(float n)
 	return ret;
 }
 
-D3DXVECTOR2 CRandom::RandD3DXVECTOR2sgn(float x, float y)
+Vec2 CRandom::RandVec2sgn(float x, float y)
 {
-	//LOG_DBG_BUFF(L":   RandD3DXVECTOR2sgn calls 2 randfloatsgn:");
-	return (D3DXVECTOR2(RandFloatSgn(x), RandFloatSgn(y)));
+	//LOG_DBG_BUFF(L":   RandVec2sgn calls 2 randfloatsgn:");
+	return (Vec2(RandFloatSgn(x), RandFloatSgn(y)));
 }
 
 void CRandom::SetRandomSeed(unsigned int n)

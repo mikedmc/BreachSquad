@@ -1,9 +1,9 @@
 #include "dxstdafx.h"
 #include "CMathUtil.h"
 
-float UTMath::LineDist(D3DXVECTOR3 p, D3DXVECTOR3 v1, D3DXVECTOR3 v2, D3DXVECTOR3 *n)
+float UTMath::LineDist(Vec3 p, Vec3 v1, Vec3 v2, Vec3 *n)
 {
-	D3DXVECTOR3 v1p, v2p, v1v2, nr;
+	Vec3 v1p, v2p, v1v2, nr;
 	float a, b, c, prj;
 
 	v1p = v1 - p;
@@ -37,7 +37,7 @@ float UTMath::LineDist(D3DXVECTOR3 p, D3DXVECTOR3 v1, D3DXVECTOR3 v2, D3DXVECTOR
 }
 
 
-bool UTMath::LineLineIntersection(D3DXVECTOR2 p1, D3DXVECTOR2 p2, D3DXVECTOR2 p3, D3DXVECTOR2 p4, D3DXVECTOR2 *outPt)
+bool UTMath::LineLineIntersection(Vec2 p1, Vec2 p2, Vec2 p3, Vec2 p4, Vec2 *outPt)
 {
 	// Store the values for fast access and easy
 	// equations-to-code conversion
@@ -191,16 +191,16 @@ bool UTMath::IsPowerOfTwo(unsigned int nVal)
 	return ((nVal != 0) && !(nVal & (nVal - 1)));
 }
 
-float UTMath::GetVectorAngle(D3DXVECTOR2 start, D3DXVECTOR2 end)
+float UTMath::GetVectorAngle(Vec2 start, Vec2 end)
 {
-	D3DXVECTOR2 vecdir = end - start;
+	Vec2 vecdir = end - start;
 	if ((vecdir.x == 0.0f) && (vecdir.y == 0))
 		return 0.0f;
 
 	return((float)(HALF_PI - atan2(vecdir.x, vecdir.y)));
 }
 
-float UTMath::GetVectorAngle(D3DXVECTOR2 const &dir)
+float UTMath::GetVectorAngle(Vec2 const &dir)
 {
 	if ((dir.x == 0.0f) && (dir.y == 0.0f))
 		return 0.0f;
@@ -208,9 +208,9 @@ float UTMath::GetVectorAngle(D3DXVECTOR2 const &dir)
 	return((float)(HALF_PI - atan2(dir.x, dir.y)));
 }
 
-float UTMath::GetAngleBetweenVectors(D3DXVECTOR2 vec1, D3DXVECTOR2 vec2)
+float UTMath::GetAngleBetweenVectors(Vec2 vec1, Vec2 vec2)
 {
-	D3DXVECTOR2 v1, v2;
+	Vec2 v1, v2;
 	D3DXVec2Normalize(&v1, &vec1);
 	D3DXVec2Normalize(&v2, &vec2);
 	float ang = acos(D3DXVec2Dot(&v1, &v2));

@@ -45,7 +45,7 @@ void CControlsEditor::DrawBBox(RECTXYWH rect, bool selected)
 	//init verts
 	for (int kk = 0; kk < 5; kk++)
 	{
-		vertices[kk].pos = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
+		vertices[kk].pos = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
 	DWORD col = 0xffff0000;
@@ -583,7 +583,7 @@ void CControlsEditor::Launch()
 
 	tool = TOOL_TYPE_NO_TOOL;
 	hideBBoxes = false;
-	offset = D3DXVECTOR2(0, 0);
+	offset = Vec2(0, 0);
 }
 
 void CControlsEditor::SaveXML(WCHAR* XMLpath)
@@ -751,10 +751,10 @@ void CControlsEditor::Close()
 	selectedCtrls.RemoveAll();
 }
 
-static D3DXVECTOR2 vLastMouse;
+static Vec2 vLastMouse;
 void CControlsEditor::Update(float dTime)
 {
-	D3DXVECTOR2 vecRenderCenter(UTGetAppClass().g_rectRender.CenterX(), UTGetAppClass().g_rectRender.CenterY());
+	Vec2 vecRenderCenter(UTGetAppClass().g_rectRender.CenterX(), UTGetAppClass().g_rectRender.CenterY());
 
 	clickedInterface = false;
 
@@ -1381,7 +1381,7 @@ void CControlsEditor::Paint()
 	}
 
 
-	D3DXVECTOR2 vecRenderCenter(UTGetAppClass().g_rectRender.CenterX(), UTGetAppClass().g_rectRender.CenterY());
+	Vec2 vecRenderCenter(UTGetAppClass().g_rectRender.CenterX(), UTGetAppClass().g_rectRender.CenterY());
 	if (currLayer)
 	{
 		POINTXY_INT lpos = currLayer->GetPos();
@@ -1390,7 +1390,7 @@ void CControlsEditor::Paint()
 		if(m_pSprite)
 			m_pSprite->Flush();
 
-		D3DXVECTOR2 scrCenter(vecRenderCenter.x + offset.x + lpos.x, vecRenderCenter.y + offset.y + lpos.y);
+		Vec2 scrCenter(vecRenderCenter.x + offset.x + lpos.x, vecRenderCenter.y + offset.y + lpos.y);
 		if (m_pCamera != null)
 		{
 			scrCenter = m_pCamera->ScreenToWorld(scrCenter);
@@ -1658,7 +1658,7 @@ void CControlsEditor::PaintBBoxes()
 
 	if (hideBBoxes)
 		return;
-	D3DXVECTOR2 vecRenderCenter(UTGetAppClass().g_rectRender.CenterX(), UTGetAppClass().g_rectRender.CenterY());
+	Vec2 vecRenderCenter(UTGetAppClass().g_rectRender.CenterX(), UTGetAppClass().g_rectRender.CenterY());
 	//axis
 	int w = UTGetAppClass().g_rectRender.w;
 	int h = UTGetAppClass().g_rectRender.h;
@@ -1678,7 +1678,7 @@ void CControlsEditor::PaintBBoxes()
 
 			if (m_pCamera != null)
 			{
-				D3DXVECTOR2 vul(rect.x, rect.y);
+				Vec2 vul(rect.x, rect.y);
 				SIZEWH_F rsz(rect.w, rect.h);
 				vul = m_pCamera->WorldToScreen(vul);
 				//adaug screen space coords

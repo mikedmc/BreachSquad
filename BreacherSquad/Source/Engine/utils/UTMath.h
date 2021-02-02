@@ -13,12 +13,16 @@
 #define			MUMatTranslation		D3DXMatrixTranslation
 #define			MUMatAffine2D			D3DXMatrixAffineTransformation2D
 #define			MUMatOrthoOffCenterLH	D3DXMatrixOrthoOffCenterLH
-										
+#define			MuMatRotX				D3DXMatrixRotationX
+#define			MuMatRotY				D3DXMatrixRotationY
+#define			MuMatRotZ				D3DXMatrixRotationZ
+
 #define			MUVec2Len				D3DXVec2Length
 #define			MUVec2LenSq				D3DXVec2LengthSq
 #define			MUVec2Dot				D3DXVec2Dot
 #define			MUVec2Cross				D3DXVec2CCW
 #define			MUVec2Norm				D3DXVec2Normalize
+#define			MUVec2TransformCoord	D3DXVec2TransformCoord
 
 #define			MUVec3Len				D3DXVec3Length
 #define			MUVec3LenSq				D3DXVec3LengthSq

@@ -37,7 +37,7 @@ public:
 	CGrowableArray<int>	clickedCtrls;
 
 	// offset-ul layer-ului fata de centrul ecranului
-	D3DXVECTOR2 offset;
+	Vec2 offset;
 
 	// Loads everything it needs
 	void Launch();
