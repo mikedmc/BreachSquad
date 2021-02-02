@@ -1372,6 +1372,7 @@ UINT32 CLevel::GenerateNextID()
 
 CLevel::CLevel()
 {
+	m_unLastID = 100000;
 	m_bufferedPainter.Init(4000);
 		
 	m_bLoaded = false;
@@ -1383,7 +1384,6 @@ CLevel::CLevel()
 
 	tiles = NULL;
 	m_pDevice = NULL;
-	levelSizeTL.w = levelSizeTL.h = 0;
 	tileW = tileH = 0;
 
 	m_levelAABB.Set(0.0f, 0.0f, 0.0f, 0.0f);

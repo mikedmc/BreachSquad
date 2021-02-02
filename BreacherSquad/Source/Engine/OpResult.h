@@ -12,7 +12,7 @@
 	#define V_OP_RETHR(x)           { if (OP_FAILED(x)) { return E_FAIL; } }
 #endif
 #ifndef V_OP_RET
-	#define V_OP_RET(x)           { if (OP_FAILED(x)) { return x; } }
+	#define V_OP_RET(x)           { OPRESULT opr = (x); if (OP_FAILED(opr)) { return opr; } }
 #endif
 #ifndef V_OP_HRTOOP
 	#define V_OP_HRTOOP(hr)           { if (hr < 0) { return K_OP_FAILED; } }

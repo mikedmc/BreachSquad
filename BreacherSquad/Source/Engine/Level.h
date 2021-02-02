@@ -18,6 +18,7 @@
 #include "gameplay/Actor.h"
 
 #include "gameplay/TileBlockMesh.h"
+#include "gameplay/LevelArea.h"
 #include "CFOVUtil.h"
 
 using namespace std;
@@ -124,11 +125,8 @@ public:
 	CBufferedPainter		m_bufferedPainter;				// used when drawing dynamic meshes
 
 	int						tileW, tileH;					// size of tiles
-	SIZEWH					levelSizeTL;					// size of the level (in tiles)
-	RECTXYWH_F				m_levelAABB;					// level AABB in pixels
-	RECTXYWH				m_levelAABB_TL;					// level AABB in tiles (active tiles area, can be moved when generating random levels)
-
-	CTile**					tiles;							// actual tilemap
+	RECTXYWH_F				m_levelAABB;					// level AABB in pixels - grows when adding areas
+	RECTXYWH				m_levelAABB_TL;					// level AABB in tiles  - grows when adding areas
 	int						m_tilesTexBaseIdx;				// tileset base texture index
 	int						m_tilesTexNormIdx;				// tileset normals texture index
 	Vec2					m_vLevelOrigin;					// level origin for the editor (usually around start location)
@@ -137,12 +135,12 @@ public:
 	RECTXYWH				m_visibleAreaTL;				// visible area in tiles
 
 	vector<RECTXYXY>		m_arrDirtyRectsTL;				// tiles that need updating
-
+	vector<CLevelArea*>		m_arrAreas;						// loaded areas
     // Updates the tiles in the dirty rects (should return if changes were made)
 	void					UpdateDirtyRects();
 	// Transforms mouse coordinates from screen space to game world (necessary for network play)
 	bool					NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue);
-	// Builds frame-by-freame geometry for lights, water, etc (on Update)
+	// Builds frame-by-freame geometry for lights, water, etc (called on Update)
 	void					BuildDynamicGeometry(CAABB camAABB);
 
 	///--- TEMPLATES ---
@@ -168,15 +166,16 @@ public:
 
 	CGrowableArray<CCollisionShape*>	m_arrColShapes;
 	// returns intersection with a collision shape. Like AABB_Segment_Intersection_Arr but with collision shapes
-	CCollisionShape* ColShape_Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CCollisionShape * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint, Vec2 * retNormal);
+	CCollisionShape*		ColShape_Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CCollisionShape * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint, Vec2 * retNormal);
 	// returns the first intersection of aabbSRC with a Collision Shape
 	CCollisionShape*		ColShape_CAABB_Intersect_Arr(CAABB * aabbSrc, CCollisionShape * arrBoxes[], int nBoxesCnt);
 	// returns segment intersection with tiles, starting form vStart
 	bool					SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i * hitTilePosTL = nullptr);
 
-	CGrowableArray<CProp*>	m_arrProps;				//obiectele din nivel (active sau nu)
-	CFixedArray<CProp*, 256>	m_arrPropsPtrInteract;	//array containing objects that you can interact with (for speed checks)
-	CGrowableArray<CActor*>		m_arrActors;				//actorii - inamici cu animatii
+	CGrowableArray<CProp*>	m_arrProps;					// objects list
+	CFixedArray<CProp*, 256>	m_arrPropsPtrInteract;	// array containing objects that you can interact with (for speed checks)
+
+	CGrowableArray<CActor*>	m_arrActors;				// actors list
 	// Initializes CActor with specified template and sets all the data it needs 
 	HRESULT					InitActor(CActor* actor, CActorTemplate * actTemplate, Vec2 spawnPos);
 	// Seteaza noua stare si are in vedere si incheierea starii precedente
@@ -345,7 +344,7 @@ public:
 	CActor*					pPlayerActor[K_MAX_PLAYERS_CNT];				//direct pointers to player controllers
 	int						m_arrPlayerControllersIIDs[K_MAX_PLAYERS_CNT];	//used to save player controllers IIDs for each player
 	int						m_arrPlayerSelHotJoin[K_MAX_PLAYERS_CNT];		//hot join selection
-	Vec2				m_arrPlayerLastSafePos[K_MAX_PLAYERS_CNT];
+	Vec2					m_arrPlayerLastSafePos[K_MAX_PLAYERS_CNT];
 	///------ sync check ------
 	DWORD					m_dwSyncCheckHash;		//used to sync network players by adding float actor data, hashing it and sending it over the network
 	//strategic abilities
@@ -358,7 +357,7 @@ public:
 	//initializes strategic abilities arrays arrays
 	void					InitializeStrategicAbilities(int nPlayerOrdinal);
 	// Last valid spawning pos (level start flags or checkpoints)
-	Vec2				vLastSpawnPoint; 
+	Vec2					vLastSpawnPoint; 
 	
 	///--- STATISTICS ---
 	int						m_arrStats[K_LVL_STATS_CNT];		//array that holds the statistics
@@ -375,10 +374,15 @@ public:
 	bool					IsLineOfSight(Vec2 pt1, Vec2 pt2, Vec2 * retVecCollisionPt = null, Vec2 * retVecCollisionNormal = null);
 
 	UINT32					m_unLastID;				//Last loaded ID - used to assign unique IDs to runtime spawned elements
+	UINT32					m_unLastAreaID;			//Last area ID - used to generate area IDs
 	//Generates a new ID and increments m_unLastID
 	UINT32					GenerateNextID();		
 	// Loads a level from an absolute path
 	HRESULT					LoadLevel(WCHAR * strPathAbs);
+	// Loads a new area and adds it to the level (absolute path, real drive path)
+	// Adds all elements to the level arrays too
+	OPRESULT				LoadArea(WCHAR * strPathAbs, Vec2i posTL);
+	OPRESULT				ReleaseArea(int areaID);
 	// Releases all level data
 	void					Release();
 	// Gives you a random level from a shuffled list so you play all of them in random order
@@ -407,7 +411,7 @@ public:
 	IActiveInterface		*m_camTargetActive;		//la ce activ se uita camera sau null cand se uita la players
 	IActiveInterface		*m_camTargetOld;		//tine minte pe ce a fost locked ca sa se poata intoarce
 	CCameraTransform		m_camLevel;
-	Vec2				m_vCamPosDefault;		//camera position when not locked on special actors (hidden rooms, etc)
+	Vec2					m_vCamPosDefault;		//camera position when not locked on special actors (hidden rooms, etc)
 ///--- misc ---
 	// Returns the number of XP points gained after current mission
 	int						Local_ComputeMissionXP(int nStars);

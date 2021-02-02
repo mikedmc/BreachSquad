@@ -247,6 +247,17 @@ public:
 	RECTXYWH_F(const RECTXYWH rectsrc) :
 		x((float)rectsrc.x), y((float)rectsrc.y), w((float)rectsrc.w), h((float)rectsrc.h)
 	{}
+	// grows to include "other"
+	void Union(RECTXYWH_F other)
+	{
+		Vec2 vMin, vMax;
+		vMin.x = min(x, other.x);
+		vMin.y = min(y, other.y);
+		vMax.x = max(x + w, other.x + other.w);
+		vMax.y = max(y + h, other.y + other.h);
+		x = vMin.x; y = vMin.y;
+		w = vMax.x - vMin.x; h = vMax.y - vMin.y;
+	}
 	void Set(float nx, float ny, float nw, float nh)
 	{
 		x = nx; y = ny; w = nw; h = nh;
