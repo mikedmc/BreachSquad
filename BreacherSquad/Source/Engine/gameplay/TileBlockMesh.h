@@ -44,6 +44,7 @@ public:
 	CTileBlockMeshManager();
 	~CTileBlockMeshManager();
 
+	void						Init(PDEVICE pDevice);
 	void						Release();
 
 	// Builds all buffers for specified map, called after loading a level and when we have changes
@@ -54,7 +55,7 @@ public:
 	int							UpdateVisibility(RECTXYWH_F camRect);
 
 	// Paints tile layer for visible buffers
-	OPRESULT					PaintLayer(int layerIdx);
+	OPRESULT					PaintLayer(eTileLayer layerIdx);
 	// Paints the shadow layer
 	OPRESULT					PaintShadowLayer();
 

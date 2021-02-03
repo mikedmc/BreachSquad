@@ -1438,7 +1438,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		CSprite::paintFrame(&m_sprCol, winbox.x, winbox.y, ANM_MENUS_SPR_CHARSEL_WND_DECO, 0, dwWinColor);
 
 		///--- selection cursor 
-		RECTXYWH rcCursor = playersel->aabbCursor.as_RECTXYWH();
+		RECTXYWH rcCursor = playersel->aabbCursor.to_RECTXYWH();
 		rcCursor.Move(winbox.x, winbox.y);
 		if ((!playersel->bSelected) && (playersel->nCursorMoreReal < 0))
 		{

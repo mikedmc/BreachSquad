@@ -208,6 +208,10 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #endif
 
 #ifndef SAFE_DELETE_STDVEC
+#define SAFE_DELETE_STDVEC(p) { for(auto xkx : p) { SAFE_DELETE(xkx); } p.clear(); p.shrink_to_fit(); }
+#endif
+
+#ifndef SAFE_DELETE_STDVEC
 #define SAFE_DELETE_STDVEC(p) { for(int xkx = 0; xkx < p.size(); xkx++) { SAFE_DELETE(p[xkx]); } p.clear(); }
 #endif
 

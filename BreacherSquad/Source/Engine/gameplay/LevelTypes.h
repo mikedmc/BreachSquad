@@ -1156,7 +1156,6 @@ enum EMiscObjectType
 {
 	K_LVL_MISC_UNDEFINED = -1,
 	K_LVL_MISC_RAILS = 0,		//params: none
-	K_LVL_MISC_BACKGROUND = 1,	//params: str_bsx = night.bsx (seteaza fundalul nivelului, apare unul singur pe nivel)
 	K_LVL_MISC_FRONTLAYEROBJ,	//params: strAnim - animatia din m_sprBack, nFrame = frame-ul
 	K_LVL_MISC_SCRIPT,	//params: str_script = SCRIPT_NAME
 

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+
+<Missions>
+	<Mission sStrID_LevelName="LEVELNAME0" sTileset="tileset1.png" sTilesetNH="tileset1_nh.png" sWaterTex="water1_n.png" nAreas="3">
+		
+	</Mission>
+</Missions>
+

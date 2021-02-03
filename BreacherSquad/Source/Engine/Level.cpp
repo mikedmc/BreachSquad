@@ -1372,7 +1372,9 @@ UINT32 CLevel::GenerateNextID()
 
 CLevel::CLevel()
 {
-	m_unLastID = 100000;
+	m_unLastID = 10000000;
+	m_unLastAreaID = 1;
+
 	m_bufferedPainter.Init(4000);
 		
 	m_bLoaded = false;
@@ -1382,7 +1384,6 @@ CLevel::CLevel()
 
 	fLocalTimeline = 0.0f;
 
-	tiles = NULL;
 	m_pDevice = NULL;
 	tileW = tileH = 0;
 
@@ -1720,99 +1721,97 @@ void CLevel::UpdateDirtyRects()
 	//#TODO: doesn't change WALKABLE floor flags, that should be done during loading or level editing for speed
 	//#TODO: should make sure the level always has a 1 tile border!
 	///--- compute tile flags ---
-	for (int kk = 0; kk < m_arrDirtyRectsTL.size(); kk++)
+	//for (int kk = 0; kk < m_arrDirtyRectsTL.size(); kk++)
+	for (auto rect : m_arrDirtyRectsTL)
 	{
-		RECTXYXY rect = m_arrDirtyRectsTL[kk];
-		// take border tiles into account:
-		// clamp to smaller size because we check neighbours
-		rect.Clamp(0, 0, levelSizeTL.w - 1, levelSizeTL.h - 1);
-		for (int yy = rect.y1; yy <= rect.y2; yy++)
+		for (auto area : m_arrAreas)
 		{
-			for (int xx = rect.x1; xx <= rect.x2; xx++)
+			// take border tiles into account:
+			// clamp to smaller size because we check neighbours
+			RECTXYXY lrect = rect;
+			lrect.Clamp(area->AABBbounds_TL.x, area->AABBbounds_TL.y, area->AABBbounds_TL.Right(), area->AABBbounds_TL.Bottom());
+			for (int yy = lrect.y1; yy <= lrect.y2; yy++)
 			{
-				CTile* tl = &tiles[xx][yy];
-
-				// take border tiles into account. they can't check for neighbours so we suppose they are solid
-				if ((xx <= 0) || (yy <= 0) || (xx == levelSizeTL.w - 1) || (yy == levelSizeTL.h - 1))
+				for (int xx = lrect.x1; xx <= lrect.x2; xx++)
 				{
-					tl->flags |= K_TILEFLAG_HASWALL_MASK;
-					continue;
-				}
+					CTile* tl = &area->tiles[xx][yy];
 
-				// neighbours
-				CTile* tlL = &tiles[xx - 1][yy];
-				CTile* tlR = &tiles[xx + 1][yy];
-				CTile* tlU = &tiles[xx][yy - 1];
-				CTile* tlD = &tiles[xx][yy + 1];
-				///--- set wall flags on non walkable tiles
-				if ((tl->flags & K_TILEFLAG_WALKABLE) == 0)
-				{
-					// clear flags
-					FLAGOP_CLEAR(tl->flags, K_TILEFLAG_HASWALL_MASK);
+					// neighbours
+					CTile* tlL = area->GetTile(xx - 1, yy);
+					CTile* tlR = area->GetTile(xx + 1, yy);
+					CTile* tlU = area->GetTile(xx, yy - 1);
+					CTile* tlD = area->GetTile(xx, yy + 1);
+					///--- set wall flags on non walkable tiles
+					if ((tl->flags & K_TILEFLAG_WALKABLE) == 0)
+					{
+						// clear flags
+						FLAGOP_CLEAR(tl->flags, K_TILEFLAG_HASWALL_MASK);
 
-					if (IS_FLAG_ANY(tlL->flags, K_TILEFLAG_WALKABLE))
-					{
-						tl->flags |= K_TILEFLAG_HASWALL_L;
-					}
-					if (IS_FLAG_ANY(tlR->flags, K_TILEFLAG_WALKABLE))
-					{
-						tl->flags |= K_TILEFLAG_HASWALL_R;
-					}
-					if (IS_FLAG_ANY(tlU->flags, K_TILEFLAG_WALKABLE))
-					{
-						tl->flags |= K_TILEFLAG_HASWALL_U;
-					}
-					if (IS_FLAG_ANY(tlD->flags, K_TILEFLAG_WALKABLE))
-					{
-						tl->flags |= K_TILEFLAG_HASWALL_D;
-					}
-				}
-
-
-				///--- compute wall shadows
-				CTile* tlDL = &tiles[xx - 1][yy + 1];
-				// it can only receive if it's a floor or a wall but not a ceiling on that tile
-				tl->nShadowFrame = -1;
-
-				// only walls and floor get shadowed, when having a non walkable tile on the left (hole in the floor usually, but not water hole)
-				bool bCanReceive = ((tl->tileIDs[K_TILE_LAYER_FLOOR] >= 0) || (tl->tileIDs[K_TILE_LAYER_WALLS] >= 0)) && 
-					(tlL->tileIDs[K_TILE_LAYER_FLOOR] < 0) && (tl->tileIDs[K_TILE_LAYER_CEILING] < 0);
-				if (bCanReceive)
-				{
-					int nCasterH = 0; 
-					if (tlL->tileIDs[K_TILE_LAYER_CEILING] >= 0) nCasterH = 3;
-					else if (tlL->tileIDs[K_TILE_LAYER_WALLS] >= 0)
-					{
-						if (tlDL->tileIDs[K_TILE_LAYER_WALLS] >= 0)
-							nCasterH = 2;	// top of the wall
-						else
-							nCasterH = 1;   // base of the wall
-					}
-					int nReceiverH = 0;
-					if (tl->tileIDs[K_TILE_LAYER_WALLS] >= 0)
-					{
-						if (tlD->tileIDs[K_TILE_LAYER_WALLS] >= 0)
-							nReceiverH = 2;
-						else
-							nReceiverH = 1;
-					}
-
-					if (nReceiverH == 0) //floor
-					{
-						if (nCasterH == 1)
-							tl->nShadowFrame = 0; //floor shadow start
-						else
+						if ((tlL) && (IS_FLAG_ANY(tlL->flags, K_TILEFLAG_WALKABLE)))
 						{
-							tl->nShadowFrame = 1; //continuous shadow
+							tl->flags |= K_TILEFLAG_HASWALL_L;
+						}
+						if ((tlR) && (IS_FLAG_ANY(tlR->flags, K_TILEFLAG_WALKABLE)))
+						{
+							tl->flags |= K_TILEFLAG_HASWALL_R;
+						}
+						if ((tlU) && (IS_FLAG_ANY(tlU->flags, K_TILEFLAG_WALKABLE)))
+						{
+							tl->flags |= K_TILEFLAG_HASWALL_U;
+						}
+						if ((tlD) && (IS_FLAG_ANY(tlD->flags, K_TILEFLAG_WALKABLE)))
+						{
+							tl->flags |= K_TILEFLAG_HASWALL_D;
 						}
 					}
-					else if ((nReceiverH == 1) && (nCasterH > 1))
+
+
+					///--- compute wall shadows
+					// it can only receive if it's a floor or a wall but not a ceiling on that tile
+					tl->nShadowFrame = -1;
+
+					// only walls and floor get shadowed, when having a non walkable tile on the left (hole in the floor usually, but not water hole)
+					bool bCanReceive = ((tl->tileIDs[K_TILE_LAYER_FLOOR] >= 0) || (tl->tileIDs[K_TILE_LAYER_WALLS] >= 0)) &&
+						(tlL) && (tlL->tileIDs[K_TILE_LAYER_FLOOR] < 0) && 
+						(tl->tileIDs[K_TILE_LAYER_CEILING] < 0);
+					if (bCanReceive)
 					{
-						tl->nShadowFrame = 2; //base of wall shadowed
-					}
-					else if ((nReceiverH == 2) && (nCasterH > 2))
-					{
-						tl->nShadowFrame = 3; //top of wall shadowed
+						CTile* tlDL = area->GetTile(xx - 1, yy + 1);
+						int nCasterH = 0;
+						if (tlL->tileIDs[K_TILE_LAYER_CEILING] >= 0) nCasterH = 3;
+						else if (tlL->tileIDs[K_TILE_LAYER_WALLS] >= 0)
+						{
+							if ((tlDL) && (tlDL->tileIDs[K_TILE_LAYER_WALLS] >= 0))
+								nCasterH = 2;	// top of the wall
+							else
+								nCasterH = 1;   // base of the wall
+						}
+						int nReceiverH = 0;
+						if (tl->tileIDs[K_TILE_LAYER_WALLS] >= 0)
+						{
+							if (tlD->tileIDs[K_TILE_LAYER_WALLS] >= 0)
+								nReceiverH = 2;
+							else
+								nReceiverH = 1;
+						}
+
+						if (nReceiverH == 0) //floor
+						{
+							if (nCasterH == 1)
+								tl->nShadowFrame = 0; //floor shadow start
+							else
+							{
+								tl->nShadowFrame = 1; //continuous shadow
+							}
+						}
+						else if ((nReceiverH == 1) && (nCasterH > 1))
+						{
+							tl->nShadowFrame = 2; //base of wall shadowed
+						}
+						else if ((nReceiverH == 2) && (nCasterH > 2))
+						{
+							tl->nShadowFrame = 3; //top of wall shadowed
+						}
 					}
 				}
 			}
@@ -1821,6 +1820,35 @@ void CLevel::UpdateDirtyRects()
 
 	// finished with dirty rects, clear the array
 	m_arrDirtyRectsTL.clear();
+}
+
+int CLevel::Areas_UpdateVisibility(RECTXYWH_F camRect)
+{
+	int nVisible = 0;
+	for (auto area : m_arrAreas)
+	{
+		if (area->UpdateVisibility(camRect))
+			nVisible++;
+	}
+	return nVisible;
+}
+
+OPRESULT CLevel::Areas_PaintLayer(eTileLayer layerIdx)
+{
+	for (auto area : m_arrAreas)
+	{
+		V_OP_RET(area->areaMesh.PaintLayer(layerIdx));
+	}
+	return K_OP_OK;
+}
+
+OPRESULT CLevel::Areas_PaintShadowLayer()
+{
+	for (auto area : m_arrAreas)
+	{
+		V_OP_RET(area->areaMesh.PaintShadowLayer());
+	}
+	return K_OP_OK;
 }
 
 CWeaponTemplate* CLevel::GetTemplateWeapon(WCHAR * templateName)
@@ -6967,6 +6995,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			}
 		}
 		//add boxes from tiles
+		/*
 		for (int yy = boxUnionTiles.y1; yy <= boxUnionTiles.y2; yy++)
 		{
 			for (int xx = boxUnionTiles.x1; xx <= boxUnionTiles.x2; xx++)
@@ -6978,6 +7007,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 			}
 		}
+		*/
 
 		/// COLLISION HANDLING
 
@@ -10825,7 +10855,11 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
 	// paint floors and vertical walls
+	Areas_UpdateVisibility(camrect);
 	mapMesh.UpdateVisibility(camrect);
+
+	Areas_PaintLayer(K_TILE_LAYER_FLOOR);
+	Areas_PaintLayer(K_TILE_LAYER_WALLS);
 	mapMesh.PaintLayer(K_TILE_LAYER_FLOOR);
 	mapMesh.PaintLayer(K_TILE_LAYER_WALLS);
 
@@ -10867,6 +10901,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	// top layer of tiles
 	UTGetShaderManager().SetVS(nullptr);
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
+	Areas_PaintLayer(K_TILE_LAYER_CEILING);
 	mapMesh.PaintLayer(K_TILE_LAYER_CEILING);
 
 	return K_OP_OK;
@@ -11012,7 +11047,9 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 		m_pDevice->SetTexture(0, pShadowsTex->pTex);
 	//#HINT: UpdateVisibility is optional as it was done in the previous colors render pass
 	mapMesh.UpdateVisibility(camrect);
+	Areas_UpdateVisibility(camrect);
 	mapMesh.PaintShadowLayer();
+	Areas_PaintShadowLayer();
 	
 	///----------------------------------------------------------------------------------
 	/// LIGHTS
@@ -11915,15 +11952,7 @@ void CLevel::Release()
 
 	mapMesh.Release();
 
-	if (tiles != NULL)
-	{
-		for (int kk = 0; kk < levelSizeTL.w; kk++)
-		{
-			SAFE_DELETE_ARRAY(tiles[kk]);
-		}
-		SAFE_DELETE_ARRAY(tiles);
-	}
-
+	SAFE_DELETE_STDVEC(m_arrAreas);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrColShapes);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrLights);
 	m_arrPropsPtrInteract.Clear();
@@ -12641,60 +12670,62 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 	///--- add occluders from tiles, optimizing for same wall lines
 	Vec2i tlmin(floor(bbox.vMin.x / K_TILE_SIZE_F), floor(bbox.vMin.y / K_TILE_SIZE_F));
 	Vec2i tlmax(floor(bbox.vMax.x / K_TILE_SIZE_F), floor(bbox.vMax.y / K_TILE_SIZE_F));
-	if (tlmin.x < 0) tlmin.x = 0;
-	if (tlmin.y < 0) tlmin.y = 0;
-	if (tlmax.x > levelSizeTL.w - 1) tlmax.x = levelSizeTL.w - 1;
-	if (tlmax.y > levelSizeTL.h - 1) tlmax.y = levelSizeTL.h - 1;
 
-	for (int yy = tlmin.y; yy <= tlmax.y; yy++)
-	{
-		for (int xx = tlmin.x; xx <= tlmax.x; xx++)
-		{
-			_ASSERT(nCur < maxRetArrSize - 2);
-
-			CTile* tl = &tiles[xx][yy];
-			CAABB chkbb(xx * K_TILE_SIZE_F, yy * K_TILE_SIZE_F, (xx + 1) * K_TILE_SIZE_F, (yy + 1) * K_TILE_SIZE_F);
-#ifdef K_CLIP_OCCLUDERS_TO_LIGHT
-			// clip horizontally, do it in a fast way just so we don't miss wall intersections when colliders go outside the light bbox
-			if (chkbb.vMax.x > bbox.vMax.x) chkbb.vMax.x = bbox.vMax.x;
-			if (chkbb.vMin.x < bbox.vMin.x) chkbb.vMin.x = bbox.vMin.x;
-			// ignore vertically for now, it errors but not so much as to be visible
-			//if (chkbb.vMax.y > bbox.vMax.y) chkbb.vMax.y = bbox.vMax.y;
-			//if (chkbb.vMin.y < bbox.vMin.y) chkbb.vMin.y = bbox.vMin.y;
-#endif
-
-			// can the tile cast shadows
-			if (tl->flags & K_TILEFLAG_HASWALL_MASK)
-			{
-				if ((tl->flags & K_TILEFLAG_HASWALL_D) && (vEye.y > chkbb.vMax.y))
-				{
-					//optimize same wall: check last wall and if it's the same just make the occluder longer
-					if ((nCur > 0) && (pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vEnd.x == chkbb.vMin.x))
-						pRetArr[nCur - 1].MoveEnd(chkbb.vMax, vPos);
-					else
-						/*ID is wall Y in tileset plus a value to not collide with the collbox ids */
-						pRetArr[nCur++].Set(Vec2(chkbb.vMin.x, chkbb.vMax.y), chkbb.vMax, vNYp, vPos, yy, K_WALL_HEIGHT_SCREEN);
-				}
-				else if ((tl->flags & K_TILEFLAG_HASWALL_U) && (vEye.y < chkbb.vMin.y))
-				{
-					//optimize same wall: check last wall and if it's the same just make the occluder longer
-					if ((nCur > 0) && (pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vStart.x == chkbb.vMin.x))
-						pRetArr[nCur - 1].MoveStart(Vec2(chkbb.vMax.x, chkbb.vMin.y), vPos);
-					else
-						pRetArr[nCur++].Set(Vec2(chkbb.vMax.x, chkbb.vMin.y), chkbb.vMin, vNYn, vPos, yy, 0.0f);
-				}
-
-				if ((tl->flags & K_TILEFLAG_HASWALL_R) && (vEye.x > chkbb.vMax.x))
-				{
-					pRetArr[nCur++].Set(chkbb.vMax, Vec2(chkbb.vMax.x, chkbb.vMin.y), vNXp, vPos);
-				}
-				else if ((tl->flags & K_TILEFLAG_HASWALL_L) && (vEye.x < chkbb.vMin.x))
-				{
-					pRetArr[nCur++].Set(chkbb.vMin, Vec2(chkbb.vMin.x, chkbb.vMax.y), vNXn, vPos);
-				}
-			}
-		}
-	}
+	//#TODO: metoda optimizata care aduce un array de tiles valide din intersectiile cu areas. Decomentez tot dupa ce fac functia respectiva.
+//	if (tlmin.x < 0) tlmin.x = 0;
+//	if (tlmin.y < 0) tlmin.y = 0;
+//	if (tlmax.x > levelSizeTL.w - 1) tlmax.x = levelSizeTL.w - 1;
+//	if (tlmax.y > levelSizeTL.h - 1) tlmax.y = levelSizeTL.h - 1;
+//
+//	for (int yy = tlmin.y; yy <= tlmax.y; yy++)
+//	{
+//		for (int xx = tlmin.x; xx <= tlmax.x; xx++)
+//		{
+//			_ASSERT(nCur < maxRetArrSize - 2);
+//
+//			CTile* tl = &tiles[xx][yy];
+//			CAABB chkbb(xx * K_TILE_SIZE_F, yy * K_TILE_SIZE_F, (xx + 1) * K_TILE_SIZE_F, (yy + 1) * K_TILE_SIZE_F);
+//#ifdef K_CLIP_OCCLUDERS_TO_LIGHT
+//			// clip horizontally, do it in a fast way just so we don't miss wall intersections when colliders go outside the light bbox
+//			if (chkbb.vMax.x > bbox.vMax.x) chkbb.vMax.x = bbox.vMax.x;
+//			if (chkbb.vMin.x < bbox.vMin.x) chkbb.vMin.x = bbox.vMin.x;
+//			// ignore vertically for now, it errors but not so much as to be visible
+//			//if (chkbb.vMax.y > bbox.vMax.y) chkbb.vMax.y = bbox.vMax.y;
+//			//if (chkbb.vMin.y < bbox.vMin.y) chkbb.vMin.y = bbox.vMin.y;
+//#endif
+//
+//			// can the tile cast shadows
+//			if (tl->flags & K_TILEFLAG_HASWALL_MASK)
+//			{
+//				if ((tl->flags & K_TILEFLAG_HASWALL_D) && (vEye.y > chkbb.vMax.y))
+//				{
+//					//optimize same wall: check last wall and if it's the same just make the occluder longer
+//					if ((nCur > 0) && (pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vEnd.x == chkbb.vMin.x))
+//						pRetArr[nCur - 1].MoveEnd(chkbb.vMax, vPos);
+//					else
+//						/*ID is wall Y in tileset plus a value to not collide with the collbox ids */
+//						pRetArr[nCur++].Set(Vec2(chkbb.vMin.x, chkbb.vMax.y), chkbb.vMax, vNYp, vPos, yy, K_WALL_HEIGHT_SCREEN);
+//				}
+//				else if ((tl->flags & K_TILEFLAG_HASWALL_U) && (vEye.y < chkbb.vMin.y))
+//				{
+//					//optimize same wall: check last wall and if it's the same just make the occluder longer
+//					if ((nCur > 0) && (pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vStart.x == chkbb.vMin.x))
+//						pRetArr[nCur - 1].MoveStart(Vec2(chkbb.vMax.x, chkbb.vMin.y), vPos);
+//					else
+//						pRetArr[nCur++].Set(Vec2(chkbb.vMax.x, chkbb.vMin.y), chkbb.vMin, vNYn, vPos, yy, 0.0f);
+//				}
+//
+//				if ((tl->flags & K_TILEFLAG_HASWALL_R) && (vEye.x > chkbb.vMax.x))
+//				{
+//					pRetArr[nCur++].Set(chkbb.vMax, Vec2(chkbb.vMax.x, chkbb.vMin.y), vNXp, vPos);
+//				}
+//				else if ((tl->flags & K_TILEFLAG_HASWALL_L) && (vEye.x < chkbb.vMin.x))
+//				{
+//					pRetArr[nCur++].Set(chkbb.vMin, Vec2(chkbb.vMin.x, chkbb.vMax.y), vNXn, vPos);
+//				}
+//			}
+//		}
+//	}
 
 	///--- add light range segments (don't set normals so we don't extend the walls on it)
 	// add them last so we prioritize intersecting with the others first
@@ -12766,12 +12797,18 @@ OPRESULT CLevel::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, vo
 	HRESULT hr = S_OK;
 	m_pDevice = pDevice;
 
-	V_OP_HRTOOP(m_sprLights.OnCreateDevice(pDevice));
-	V_OP_HRTOOP(m_sprProps.OnCreateDevice(pDevice));
-	V_OP_HRTOOP(m_sprActors.OnCreateDevice(pDevice));
-	V_OP_HRTOOP(m_sprInterface.OnCreateDevice(pDevice));
+	V_OP_RET(m_sprLights.OnCreateDevice(pDevice));
+	V_OP_RET(m_sprProps.OnCreateDevice(pDevice));
+	V_OP_RET(m_sprActors.OnCreateDevice(pDevice));
+	V_OP_RET(m_sprInterface.OnCreateDevice(pDevice));
 	V_OP_HRTOOP(m_texManager.OnCreateDevice(pDevice));
-	V_OP_HRTOOP(m_bufferedPainter.OnCreateDevice(pDevice));
+	V_OP_RET(m_bufferedPainter.OnCreateDevice(pDevice));
+
+	for (auto area : m_arrAreas)
+	{
+		V_OP_RET(area->OnCreateDevice(pDevice));
+	}
+
 	V_OP_RET(mapMesh.OnCreateDevice(pDevice));
 	return K_OP_OK;
 }
@@ -12781,12 +12818,18 @@ OPRESULT CLevel::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, voi
 	HRESULT hr = S_OK;
 	m_pDevice = pDevice;
 
-	V_OP_HRTOOP(m_sprLights.OnResetDevice(pDevice));
-	V_OP_HRTOOP(m_sprProps.OnResetDevice(pDevice));
-	V_OP_HRTOOP(m_sprActors.OnResetDevice(pDevice));
-	V_OP_HRTOOP(m_sprInterface.OnResetDevice(pDevice));
+	V_OP_RET(m_sprLights.OnResetDevice(pDevice));
+	V_OP_RET(m_sprProps.OnResetDevice(pDevice));
+	V_OP_RET(m_sprActors.OnResetDevice(pDevice));
+	V_OP_RET(m_sprInterface.OnResetDevice(pDevice));
 	V_OP_HRTOOP(m_texManager.OnResetDevice(pDevice));
-	V_OP_HRTOOP(m_bufferedPainter.OnResetDevice(pDevice));
+	V_OP_RET(m_bufferedPainter.OnResetDevice(pDevice));
+
+	for (auto area : m_arrAreas)
+	{
+		V_OP_RET(area->OnResetDevice(pDevice));
+	}
+
 	V_OP_RET(mapMesh.OnResetDevice(pDevice));
 
 	return K_OP_OK;
@@ -12803,6 +12846,12 @@ OPRESULT CLevel::OnLostDevice(void* pUserContext)
 	m_texManager.OnLostDevice();
 
 	m_bufferedPainter.OnLostDevice();
+
+	for (auto area : m_arrAreas)
+	{
+		V_OP_RET(area->OnLostDevice());
+	}
+
 	mapMesh.OnLostDevice();
 
 	return K_OP_OK;
@@ -12819,6 +12868,11 @@ OPRESULT CLevel::OnDestroyDevice(void* pUserContext)
 	m_texManager.OnDestroyDevice();
 
 	m_bufferedPainter.OnDestroyDevice();
+
+	for (auto area : m_arrAreas)
+	{
+		V_OP_RET(area->OnDestroyDevice());
+	}
 	mapMesh.OnDestroyDevice();
 
 	return K_OP_OK;

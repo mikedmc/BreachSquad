@@ -135,13 +135,21 @@ public:
 	RECTXYWH				m_visibleAreaTL;				// visible area in tiles
 
 	vector<RECTXYXY>		m_arrDirtyRectsTL;				// tiles that need updating
-	vector<CLevelArea*>		m_arrAreas;						// loaded areas
-    // Updates the tiles in the dirty rects (should return if changes were made)
-	void					UpdateDirtyRects();
+	vector<CLevelArea*>		m_arrAreas;				// loaded areas
 	// Transforms mouse coordinates from screen space to game world (necessary for network play)
 	bool					NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue);
 	// Builds frame-by-freame geometry for lights, water, etc (called on Update)
 	void					BuildDynamicGeometry(CAABB camAABB);
+
+	///--- AREAS ---
+	// Updates the tiles in the dirty rects (should return if changes were made)
+	void					UpdateDirtyRects();
+	// Updates areas visibility and returns number of visible areas
+	int						Areas_UpdateVisibility(RECTXYWH_F camRect);
+	// Paints tile layer for visible areas
+	OPRESULT				Areas_PaintLayer(eTileLayer layerIdx);
+	// Paints the shadow layer for visible areas
+	OPRESULT				Areas_PaintShadowLayer();
 
 	///--- TEMPLATES ---
 	CGrowableArray<CWeaponTemplate*>		m_arrTemplatesWeapon;
@@ -378,7 +386,7 @@ public:
 	//Generates a new ID and increments m_unLastID
 	UINT32					GenerateNextID();		
 	// Loads a level from an absolute path
-	HRESULT					LoadLevel(WCHAR * strPathAbs);
+	OPRESULT				LoadLevel(WCHAR * strPathAbs);
 	// Loads a new area and adds it to the level (absolute path, real drive path)
 	// Adds all elements to the level arrays too
 	OPRESULT				LoadArea(WCHAR * strPathAbs, Vec2i posTL);

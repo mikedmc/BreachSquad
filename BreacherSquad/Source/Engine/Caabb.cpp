@@ -87,9 +87,16 @@ void CAABB::Flip(bool flipX, bool flipY)
 	Set_Corrected(vMin, vMax);
 }
 
-RECTXYWH CAABB::as_RECTXYWH()
+RECTXYWH CAABB::to_RECTXYWH()
 {
 	RECTXYWH retval;
+	retval.Set(vMin.x, vMin.y, vSize.x, vSize.y);
+	return retval;
+}
+
+RECTXYWH_F CAABB::to_RECTXYWH_F()
+{
+	RECTXYWH_F retval;
 	retval.Set(vMin.x, vMin.y, vSize.x, vSize.y);
 	return retval;
 }

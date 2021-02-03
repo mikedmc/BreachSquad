@@ -168,6 +168,11 @@ CTileBlockMeshManager::~CTileBlockMeshManager()
 	Release();
 }
 
+void CTileBlockMeshManager::Init(PDEVICE pDevice)
+{
+	m_pDevice = pDevice;
+}
+
 void CTileBlockMeshManager::Release()
 {
 	arrVisible.Clear();
@@ -176,6 +181,7 @@ void CTileBlockMeshManager::Release()
 
 OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr)
 {
+	_ASSERT(m_pDevice != nullptr);
 	if (map == nullptr)
 		return OPRESULT(K_OP_INVALIDARGS, L"BuildBuffers:: Map param is null!", K_SEVERITY_WARNING);
 
@@ -217,7 +223,7 @@ int CTileBlockMeshManager::UpdateVisibility(RECTXYWH_F camRect)
 	return arrVisible.Count();
 }
 
-OPRESULT CTileBlockMeshManager::PaintLayer(int layerIdx)
+OPRESULT CTileBlockMeshManager::PaintLayer(eTileLayer layerIdx)
 {
 	if (arrVisible.Count() <= 0)
 		return OPRESULT(K_OP_FAILED, L"No visible blocks to paint!", K_SEVERITY_NONE);

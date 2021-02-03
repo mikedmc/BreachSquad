@@ -48,8 +48,12 @@ public:
 	//flips AABB around origin
 	void Flip(bool flipX, bool flipY);
 	//returns AABB as RECTXYWH
-	RECTXYWH as_RECTXYWH();
+	RECTXYWH to_RECTXYWH();
+	//returns AABB as RECTXYWH_F
+	RECTXYWH_F to_RECTXYWH_F();
 };
+
+//#TODO: de mutat in namespace AABB
 
 CAABB AABB_Lerp(CAABB &a, CAABB &b, float fFactor);
 bool AABB_Intersection(CAABB &a, CAABB &b, CAABB &retVal);
