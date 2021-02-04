@@ -40,7 +40,7 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 
 	bool bIsEmpty = true;
 
-	Vec2 vOrig(vOffset.x + m_bbox.vMin.x, vOffset.y + m_bbox.vMin.y);
+	Vec2 vOrig = m_bbox.vMin;
 	//#TODO: create all meshes in a single pass with many open meshes
 	for (int lay = 0; lay < K_TILE_LAYERS_CNT; lay++)
 	{

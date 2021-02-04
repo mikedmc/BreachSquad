@@ -115,8 +115,8 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	///--- LOAD AREAS:
 	FileManager::GetMediaPath(L"media/levels/missions/area0.dkas", Path);
 	V_OP_RET(LoadArea(Path, Vec2i(0,0)));
-	//FileManager::GetMediaPath(L"media/levels/missions/area1.dkas", Path);
-	//V_OP_RET(LoadArea(Path, Vec2i(16, 0)));
+	FileManager::GetMediaPath(L"media/levels/missions/area1.dkas", Path);
+	V_OP_RET(LoadArea(Path, Vec2i(16, 0)));
 
 
 
@@ -283,9 +283,10 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 	int originY = OS_freadInt16(fl);
 	int originX = OS_freadInt16(fl);
 
+	Vec2 vOffset(posTL.x * K_TILE_SIZE_F, posTL.y * K_TILE_SIZE_F);
 	//set level size
 	area->AABBbounds_TL.Set(posTL.x, posTL.y, areaW, areaH);
-	area->AABBbounds.Set(area->AABBbounds_TL.x * tileW, area->AABBbounds_TL.y * tileH, areaW * tileW, areaH * tileH);
+	area->AABBbounds.Set(area->AABBbounds_TL.x * tileW, area->AABBbounds_TL.y * tileH, area->AABBbounds_TL.Right() * tileW, area->AABBbounds_TL.Bottom() * tileH);
 	//m_vLevelOrigin.x = (float)originX + m_levelAABB.x;
 	//m_vLevelOrigin.y = (float)originY + m_levelAABB.y;
 
@@ -355,6 +356,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 		nl->vPos.z = (float)OS_freadInt32(fl);
 		//#TODO: should load from level file
 		nl->vPos.z = 32.0f;
+		nl->vPos.x += vOffset.x; nl->vPos.y += vOffset.y;
 
 		nl->vPos_ini = nl->vPos;
 		nl->pos_ini = nl->pos = Vec2(nl->vPos.x, nl->vPos.y);
@@ -432,6 +434,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 		//bbox safeguarding
 		if ((colobj->bbox.vSize.x <= 0.0f) || (colobj->bbox.vSize.y <= 0.0f))
 			colobj->bbox.Set(Vec2(0.0f, 0.0f), Vec2(16.0f, 16.0f));
+		colobj->bbox.Move(vOffset);
 		colobj->bbox_ini = colobj->bbox;
 		//set exported bboxes too
 		colobj->bbox_exported = colobj->bbox;
@@ -472,6 +475,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 		//position (used to load UINT32)
 		obj->pos.x = (float)OS_freadInt32(fl);
 		obj->pos.y = (float)OS_freadInt32(fl);
+		obj->pos.x += vOffset.x; obj->pos.y += vOffset.y;
 		obj->pos_ini = obj->pos;
 		//animation
 		CHAR charAnmName[MAX_PATH];
@@ -546,6 +550,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 		Vec2 actPos;
 		actPos.x = (float)OS_freadInt32(fl);
 		actPos.y = (float)OS_freadInt32(fl);
+		actPos += vOffset;
 		//boolean SetAngle si unghi
 		bool bSetActorAngle = (OS_freadByte(fl) != 0) ? true : false;
 		float fActorAngle = DEG_TO_RAD(OS_freadInt16(fl));
@@ -728,9 +733,9 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 					}
 				}
 				//specific data 
-				//pozitia o citesc si nu o folosesc
 				frontobj->pos.x = (float)OS_freadInt32(fl);
 				frontobj->pos.y = (float)OS_freadInt32(fl);
+				frontobj->pos += vOffset;
 				//set color
 				frontobj->sprite.color = m_colAmbientGlobal;
 
@@ -806,6 +811,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 					Vec2 pt;
 					pt.x = OS_freadInt32(fl);
 					pt.y = OS_freadInt32(fl);
+					pt += vOffset;
 					rail->arrPoints.Add(pt);
 					//lungimile
 					if (i == 0)
