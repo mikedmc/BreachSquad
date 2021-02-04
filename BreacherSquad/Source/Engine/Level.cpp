@@ -1721,7 +1721,6 @@ void CLevel::UpdateDirtyRects()
 	//#TODO: doesn't change WALKABLE floor flags, that should be done during loading or level editing for speed
 	//#TODO: should make sure the level always has a 1 tile border!
 	///--- compute tile flags ---
-	//for (int kk = 0; kk < m_arrDirtyRectsTL.size(); kk++)
 	for (auto rect : m_arrDirtyRectsTL)
 	{
 		for (auto area : m_arrAreas)
@@ -1729,7 +1728,10 @@ void CLevel::UpdateDirtyRects()
 			// take border tiles into account:
 			// clamp to smaller size because we check neighbours
 			RECTXYXY lrect = rect;
+			// clamp and bring rectangle to local space
 			lrect.Clamp(area->AABBbounds_TL.x, area->AABBbounds_TL.y, area->AABBbounds_TL.Right(), area->AABBbounds_TL.Bottom());
+			lrect.x1 -= area->AABBbounds_TL.x; lrect.x2 -= area->AABBbounds_TL.x;
+			lrect.y1 -= area->AABBbounds_TL.y; lrect.y2 -= area->AABBbounds_TL.y;
 			for (int yy = lrect.y1; yy <= lrect.y2; yy++)
 			{
 				for (int xx = lrect.x1; xx <= lrect.x2; xx++)
@@ -8349,16 +8351,15 @@ void CLevel::Update(float dTime_original)
 			}
 
 			///--- level targets - mission success accomplished ---
+			bool bMissionFinished = false;
+			int nStrIdxMissionFailed = -1; //means win if -1 or lose if >=0
+			/*
 			bool bMissionFinished = true;
 			if ((m_arrStats[K_LVL_STATS_LEVEL_HAS_BOMBS] != 0) && (m_arrStats[K_LVL_STATS_BOMBS_DISARMED] == 0))
 				bMissionFinished = false;
 			if (m_arrStats[K_LVL_STATS_TARGETS_LEFT] > 0)
 				bMissionFinished = false;
-			//#ZOMBIE: check all portals disabled to finish level
-			if ((m_arrStats[K_LVL_STATS_ZOMBIE_PORTALS] > 0) && (m_arrStats[K_LVL_STATS_ZOMBIE_PORTALS_DESTROYED] < m_arrStats[K_LVL_STATS_ZOMBIE_PORTALS]))
-				bMissionFinished = false;
 
-			int nStrIdxMissionFailed = -1; //means win if -1 or lose if >=0
 			///--- level failed if killed all hostages  ---
 			//only fail because of hostages on hostage rescue missions
 			if ((m_nLoadedLevelType == K_GAME_LSTYPE_HOSTAGE) &&
@@ -8368,7 +8369,7 @@ void CLevel::Update(float dTime_original)
 				bMissionFinished = true;
 				nStrIdxMissionFailed = STR_HOSTAGES_KILLED;
 			}
-
+			*/
 			///--- LEVEL FAILED when not pressing continue ---
 			bool bGaveUp = true;
 			bool bPlayerMightContinue = false;
@@ -10794,7 +10795,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	Mat	matView;
 
 	RECTXYWH_F		camrect = m_camLevel.GetCamWorldAABB();
-	CAABB			camAABB(camrect.x, camrect.y, camrect.Right(), camrect.Bottom());
+	CAABB			camAABB(camrect);
 
 	//locally used temp matrix
 	Mat	matlocal;
@@ -10856,12 +10857,9 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
 	// paint floors and vertical walls
 	Areas_UpdateVisibility(camrect);
-	mapMesh.UpdateVisibility(camrect);
 
 	Areas_PaintLayer(K_TILE_LAYER_FLOOR);
 	Areas_PaintLayer(K_TILE_LAYER_WALLS);
-	mapMesh.PaintLayer(K_TILE_LAYER_FLOOR);
-	mapMesh.PaintLayer(K_TILE_LAYER_WALLS);
 
 
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
@@ -10902,7 +10900,6 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	UTGetShaderManager().SetVS(nullptr);
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
 	Areas_PaintLayer(K_TILE_LAYER_CEILING);
-	mapMesh.PaintLayer(K_TILE_LAYER_CEILING);
 
 	return K_OP_OK;
 }
@@ -10912,7 +10909,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 	Mat				matView;
 
 	RECTXYWH_F		camrect = m_camLevel.GetCamWorldAABB();
-	CAABB			camAABB(camrect.x, camrect.y, camrect.Right(), camrect.Bottom());
+	CAABB			camAABB(camrect);
 
 	///----------------------------------------------------
 	/// INITIAL SETUP
@@ -11046,9 +11043,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 	if (pShadowsTex)
 		m_pDevice->SetTexture(0, pShadowsTex->pTex);
 	//#HINT: UpdateVisibility is optional as it was done in the previous colors render pass
-	mapMesh.UpdateVisibility(camrect);
 	Areas_UpdateVisibility(camrect);
-	mapMesh.PaintShadowLayer();
 	Areas_PaintShadowLayer();
 	
 	///----------------------------------------------------------------------------------
@@ -11950,8 +11945,6 @@ void CLevel::Release()
 {
 	ClearVisibilityLists();
 
-	mapMesh.Release();
-
 	SAFE_DELETE_STDVEC(m_arrAreas);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrColShapes);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrLights);
@@ -12809,7 +12802,6 @@ OPRESULT CLevel::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, vo
 		V_OP_RET(area->OnCreateDevice(pDevice));
 	}
 
-	V_OP_RET(mapMesh.OnCreateDevice(pDevice));
 	return K_OP_OK;
 }
 
@@ -12829,8 +12821,6 @@ OPRESULT CLevel::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, voi
 	{
 		V_OP_RET(area->OnResetDevice(pDevice));
 	}
-
-	V_OP_RET(mapMesh.OnResetDevice(pDevice));
 
 	return K_OP_OK;
 }
@@ -12852,8 +12842,6 @@ OPRESULT CLevel::OnLostDevice(void* pUserContext)
 		V_OP_RET(area->OnLostDevice());
 	}
 
-	mapMesh.OnLostDevice();
-
 	return K_OP_OK;
 }
 
@@ -12873,7 +12861,6 @@ OPRESULT CLevel::OnDestroyDevice(void* pUserContext)
 	{
 		V_OP_RET(area->OnDestroyDevice());
 	}
-	mapMesh.OnDestroyDevice();
 
 	return K_OP_OK;
 }

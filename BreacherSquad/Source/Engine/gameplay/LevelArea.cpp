@@ -13,7 +13,7 @@ CLevelArea::~CLevelArea()
 	Release();
 }
 
-OPRESULT CLevelArea::PostConstructionInit(PDEVICE pDevice, CSpriteCollection* pLightsSprCol)
+OPRESULT CLevelArea::BuildBuffers(PDEVICE pDevice, CSpriteCollection* pLightsSprCol)
 {
 	_ASSERT(pDevice != nullptr && pLightsSprCol != nullptr);
 

@@ -26,7 +26,7 @@ namespace HexxEditor
         public ActorsWnd g_wndActors;
 
         //save file version
-        public const int K_CURRENT_VERSION = 2500;
+        public const int K_CURRENT_VERSION = 1015;
 
         //mission types
         public const byte K_MISSION_TYPE_ELIMINATE_ALL = 0;
@@ -1318,8 +1318,8 @@ namespace HexxEditor
 
         #region TILE BLOCKS
 
-        public const int BLOCK_W = 16;
-        public const int BLOCK_H = 16;
+        public const int BLOCK_W = 8;
+        public const int BLOCK_H = 8;
 
         public class CTileBlock
         {
@@ -1327,7 +1327,7 @@ namespace HexxEditor
             public Graphics graphics; //graphics to image
 
             public CTile[,] tiles;
-            public Point pos; //in multiples of BLOCK_W like a top level grid
+            public Point pos; //in tiles
 
             public bool bHasUndo;
             public CTile[,] tiles_undo;
@@ -1818,7 +1818,7 @@ namespace HexxEditor
             layers_checkboxes[1] = chk_layer2;
             layers_checkboxes[2] = chk_layer3;
 
-            ResetLevel(false);
+            ResetLevel(true);
             //afisez fereastra
             butWndMaterials_Click(this, null);
 
@@ -4589,32 +4589,30 @@ namespace HexxEditor
 
             if (!bExportPrefab)
             {
-                if ((levelDR.X == levelUL.X) || (levelDR.Y == levelUL.Y))
-                {
-                    errorstxt += "- Can't save an empty level!\n";
-                    errors++;
-                }
-
                 if (g_wndMaterials.g_TilesetName.Length <= 0)
                 {
                     errorstxt += "- No Tileset loaded! Load a tileset first from the materials window.\n";
                     errors++;
                 }
-                
+
                 if ((g_sprObjects == null) || (g_sprObjects.bLoaded == false))
                 {
                     errorstxt += "- Objects sprite not loaded! Load a sprite first from the objects window.\n";
                     errors++;
                 }
-                /*
+
                 if ((g_sprActors == null) || (g_sprActors.bLoaded == false))
                 {
                     errorstxt += "- Actors sprite not loaded! Load a sprite first from the actors window.\n";
                     errors++;
                 }
-                */
+
+                if ((levelDR.X == levelUL.X) || (levelDR.Y == levelUL.Y))
+                {
+                    errorstxt += "- Can't save an empty level!\n";
+                    errors++;
+                }
                 //can't save levels without a background
-                /*
                 bool bFoundBg = false;
                 for (int kk = 0; kk < arrMisc.Count; kk++)
                 {
@@ -4627,7 +4625,6 @@ namespace HexxEditor
                     errorstxt += "You can't save a level without setting a background!\n\rGo to Edit->Set Level Background and select one.";
                     errors++;
                 }
-                */
             }
 
             //can't save objects with negative anims/frames
@@ -4647,7 +4644,7 @@ namespace HexxEditor
                 return false;
             }
 
-            //try
+            try
             {
                 //--- start writing level ---
                 Stream pLocalStream = null;
@@ -4680,33 +4677,23 @@ namespace HexxEditor
                 ub = g_missionType;
                 bw.Write(ub);
 
-                ///--- save layers data ---
-                s2b = K_LAYERS_CNT;
-                bw.Write(s2b);
-
                 //scrie numele tilesetului si date despre tileset
                 bw.Write(g_wndMaterials.g_TilesetName);
                 ub = (byte)TILE_WIDTH; bw.Write(ub);
                 ub = (byte)TILE_HEIGHT; bw.Write(ub);
                 u2b = (UInt16)TILESET_COLUMNS; bw.Write(u2b);
-                ub = (byte)BLOCK_W; bw.Write(ub);
-                ub = (byte)BLOCK_H; bw.Write(ub);
-                // write tileset texture size
-                u2b = (UInt16)g_wndMaterials.g_TilesetImg.Width; bw.Write(u2b);
-                u2b = (UInt16)g_wndMaterials.g_TilesetImg.Height; bw.Write(u2b);
 
                 //3. scrie marimea exacta in tiles a nivelului
-                s4b = (int)(levelDR.X - levelUL.X + 1);
-                bw.Write(s4b);
-                s4b = (int)(levelDR.Y - levelUL.Y + 1);
-                bw.Write(s4b);
+                u2b = (UInt16)(levelDR.X - levelUL.X + 1);
+                bw.Write(u2b);
+                u2b = (UInt16)(levelDR.Y - levelUL.Y + 1);
+                bw.Write(u2b);
                 //origine nivel
-                s4b = (int)(gLevelOrigin.Y - levelUL.Y * TILE_WIDTH);
-                bw.Write(s4b);
-                s4b = (int)(gLevelOrigin.X - levelUL.X * TILE_HEIGHT);
-                bw.Write(s4b);
+                s2b = (short)(gLevelOrigin.Y - levelUL.Y * TILE_WIDTH);
+                bw.Write(s2b);
+                s2b = (short)(gLevelOrigin.X - levelUL.X * TILE_HEIGHT);
+                bw.Write(s2b);
 
-                /*
                 //6. scrie tile-urile pe rand, toata matricea
                 for (int yy = levelUL.Y; yy <= levelDR.Y; yy++)
                 {
@@ -4734,42 +4721,8 @@ namespace HexxEditor
                         }
                     }
                 }
-                */
-                //6. write all tileblocks as they appear
-                // get rid of empty blocks
-                gMap.ClearEmptyblocks();
 
-                u4b = (UInt32)gMap.Blocks.Count;
-                bw.Write(u4b);
-                for (int kk = 0; kk < gMap.Blocks.Count; kk++)
-                {
-                    CTileBlock tb = gMap.Blocks[kk] as CTileBlock;
-                    // write block position in tiles
-                    s4b = (tb.pos.X * BLOCK_W) - levelUL.X;
-                    bw.Write(s4b);
-                    s4b = (tb.pos.Y * BLOCK_H) - levelUL.Y;
-                    bw.Write(s4b);
-                    for (int yy = 0; yy < BLOCK_H; yy++)
-                    {
-                        for (int xx = 0; xx < BLOCK_W; xx++)
-                        {
-                            CTile tl = tb.tiles[xx,yy] as CTile;
-                            //write tileID for each
-                            for (int lay = 0; lay < K_LAYERS_CNT; lay++)
-                            {
-                                s4b = tl.tileID[lay];
-                                if (s4b < 0)
-                                    s4b = -1;
-                                bw.Write(s4b);
-                            }
-                        }
-                    }
-                }
-
-
-
-                /*
-                ///--- export lights ---
+                ///--- scrie luminile ---
                 // calea catre bsx
                 string bsxLightsFilename = Path.GetFileName(g_sprLights.loadedPath);
                 bw.Write(bsxLightsFilename);
@@ -4825,7 +4778,7 @@ namespace HexxEditor
                     light.logic.Save(bw);
                 }
 
-                ///--- export collision shapes ---
+                //scrie formele de coliziune
                 u4b = (UInt32)arrCollisions.Count;
                 bw.Write(u4b);
                 //date fiecare element
@@ -4857,7 +4810,7 @@ namespace HexxEditor
                     //logic
                     coli.logic.Save(bw);
                 }
-                */
+
                 //scrie decoratiunile/actives
                 string bsxFilename = Path.GetFileName(g_sprObjects.loadedPath);
                 bw.Write(bsxFilename);
@@ -4893,7 +4846,7 @@ namespace HexxEditor
                     //logic
                     obj.logic.Save(bw);
                 }
-                /*
+
                 ///--- scrie Actorii - inamici si personaj ---
                 //scrie bsx pt actori
                 string bsxActorFilename = Path.GetFileName(g_sprActors.loadedPath);
@@ -5003,7 +4956,7 @@ namespace HexxEditor
                             break;
                     }
                 }
-                */
+
                 bw.Flush();
                 //close stream if reading from file or rewind if reading from memory
                 if (pDestStream == null)
@@ -5011,13 +4964,11 @@ namespace HexxEditor
                 else
                     pLocalStream.Position = 0;
             }
-            /*
             catch (Exception ex)
             {
                 MessageBox.Show("Save failed with exception:\n\r" + ex.Message);
                 return false;
             }
-            */
             //file saved on disk
             if (pDestStream == null)
             {
@@ -5710,6 +5661,8 @@ namespace HexxEditor
             UInt32 dwStartID = 0;
             if (bLoadPrefab)
                 dwStartID = GetUniqueID();
+            // reset it here
+            g_nLastID = 0;
 
             try
             {
@@ -5747,616 +5700,26 @@ namespace HexxEditor
                 //version check
                 if (arrInts[0] != K_CURRENT_VERSION)
                 {
-                    MessageBox.Show("Level failed to load! Unhandled version of file found: " + arrInts[0]);
-                    pLocalStream.Close();
-                    return false;
+                    if (arrInts[0] == 1013) //versiunea cu 2 layere de tiles (in loc de 3 adaugat in 1014)
+                    {
+                        nLayersCnt = 2;
+                        MessageBox.Show("Loading from older format with only 2 layers! All objects and tiles will go the the Back and Front layers! Check all objects and layers again!");
+                    }
+                    else if (arrInts[0] == 1014) //versiune cu IES lights
+                    {
+                    }
+                    else
+                    {
+                        MessageBox.Show("Level failed to load! Unhandled version of file found: " + arrInts[0]);
+                        pLocalStream.Close();
+                        return false;
+                    }
                 }
 
                 //1. tipul misiunii
                 ub = bw.ReadByte();
                 if (!bLoadPrefab)
                     g_missionType = ub;
-
-                // load layers count
-                int layersCnt = (int)bw.ReadInt16();
-
-                //scrie numele tilesetului si date despre tileset
-                String tilesetName = bw.ReadString();
-                int a, b;
-                a = bw.ReadByte(); //tilew
-                b = bw.ReadByte(); //tileH
-                int nLvlTilesetColumns = bw.ReadUInt16(); //tileset columns
-                a = bw.ReadByte(); //blockW
-                b = bw.ReadByte(); //blockH
-                // write tileset texture size
-                int texW = bw.ReadUInt16();
-                int texH = bw.ReadUInt16();
-
-                if (!bLoadPrefab)
-                {
-                    g_wndMaterials.LoadTileset(strBaseFolder + "\\data\\" + tilesetName); //seteaza singur toate chestiile legate de tileset
-                }
-
-                //marime exacta nivel in tiles
-                Int32 levelw = bw.ReadInt32();
-                Int32 levelh = bw.ReadInt32();
-                //level origin
-                Point vLocalLvlOrigin = new Point();
-                vLocalLvlOrigin.Y = bw.ReadInt32();
-                vLocalLvlOrigin.X = bw.ReadInt32();
-
-                Point LOCAL_OFFSET = LEVEL_OFFSET;
-                if (!bLoadPrefab)
-                {
-                    gLevelOrigin.Y = vLocalLvlOrigin.Y;
-                    gLevelOrigin.X = vLocalLvlOrigin.X;
-
-                    LOCAL_OFFSET = LEVEL_OFFSET;
-                    LOCAL_OFFSET.Y -= gLevelOrigin.Y / TILE_HEIGHT;
-                    gLevelOrigin.Y = LEVEL_OFFSET.Y * TILE_HEIGHT;
-                    LOCAL_OFFSET.X -= gLevelOrigin.X / TILE_WIDTH;
-                    gLevelOrigin.X = LEVEL_OFFSET.X * TILE_WIDTH;
-                }
-                else
-                {
-                    //prefab TileX and Y are in local level coords
-                    LOCAL_OFFSET.X = nPrefabTileX - vLocalLvlOrigin.X / TILE_WIDTH;
-                    LOCAL_OFFSET.Y = nPrefabTileY - vLocalLvlOrigin.Y / TILE_HEIGHT;
-                }
-
-                //tile-urile pe rand, toata matricea
-                 /*
-               for (int yy = 0; yy < levelh; yy++)
-               {
-                   for (int xx = 0; xx < levelw; xx++)
-                   {
-                       for (int kk = 0; kk < nLayersCnt; kk++)
-                       {
-                           Int32 lev = bw.ReadInt32();
-                           if (lev < 0)
-                               lev = -1;
-                           if (nLayersCnt == 3) //latest version has 3 layers
-                               gMap.setTile(LOCAL_OFFSET.X + xx, LOCAL_OFFSET.Y + yy, lev, kk);
-                           else //convert older layers to newer ones
-                               gMap.setTile(LOCAL_OFFSET.X + xx, LOCAL_OFFSET.Y + yy, lev, kk * 2); //0,1 becomes 0,2
-                       }
-                   }
-               }
-               */
-               
-                UInt32 nBlocksCnt = bw.ReadUInt32();
-                for (int kk = 0; kk < nBlocksCnt; kk++)
-                {
-                    CTileBlock tb = new CTileBlock(TILE_WIDTH);
-                    // write block position in tiles
-                    int posX = bw.ReadInt32();
-                    int posY = bw.ReadInt32();
-                    tb.pos.X = (LOCAL_OFFSET.X + posX) / BLOCK_W;
-                    tb.pos.Y = (LOCAL_OFFSET.Y + posY) / BLOCK_H;
-                    for (int yy = 0; yy < BLOCK_H; yy++)
-                    {
-                        for (int xx = 0; xx < BLOCK_W; xx++)
-                        {
-                            CTile tl = tb.tiles[xx, yy] as CTile;
-                            //write tileID for each
-                            for (int lay = 0; lay < K_LAYERS_CNT; lay++)
-                            {
-                                tl.tileID[lay] = bw.ReadInt32();
-                            }
-                        }
-                    }
-                    // add to array
-                    gMap.Blocks.Add(tb);
-                }
-                 
-
-                //auto adjust if we change the tileset resolution
-                if ((!bLoadPrefab) && (nLvlTilesetColumns != TILESET_COLUMNS))
-                    SetMaterialData(TILE_WIDTH, TILE_HEIGHT, nLvlTilesetColumns, TILESET_COLUMNS);
-                //build images for all blocks
-                BuildAllBlockImages();
-                /*
-                ///--- lights luminile ---
-                String bsxName = bw.ReadString();
-                if (!bLoadPrefab)
-                {
-                    arrLights.RemoveRange(0, arrLights.Count);
-                    g_wndLights.LoadBSX(strBaseFolder + "\\data\\" + bsxName); //seteaza singur toate chestiile legate de tileset
-                }
-
-                UInt32 nrlights = bw.ReadUInt32();
-                //date fiecare 
-                for (int kk = 0; kk < nrlights; kk++)
-                {
-                    CLight light = new CLight();
-
-                    light.ID = bw.ReadUInt32() + dwStartID;
-
-                    if(arrIDs.Contains(light.ID))
-                    {
-                        MessageBox.Show("Light ID conflict: " + light.ID, "Warning!");
-                    }
-                    arrIDs.Add(light.ID);
-
-                    if (g_nLastID < light.ID)
-                        g_nLastID = light.ID;
-
-                    light.type = bw.ReadByte();
-                    light.nAtmoAttenuationPerc = (int)bw.ReadUInt32();
-                    light.fIntensity = bw.ReadSingle();
-                    PointF lpos = new PointF();
-                    lpos.X = bw.ReadInt32() + LOCAL_OFFSET.X * TILE_WIDTH;
-                    lpos.Y = bw.ReadInt32() + LOCAL_OFFSET.Y * TILE_HEIGHT;
-                    light.posZ = bw.ReadInt32();
-                    //read anim name 
-                    string strLightAnm = bw.ReadString();
-                    //e ok sa ramana setata pe -1 daca nu avem animatie la lumina (poate fi ambientala)
-                    light.animId = g_sprLights.GetAnimIdxByName(strLightAnm);
-
-                    light.color = Color.FromArgb(bw.ReadByte(), bw.ReadByte(), bw.ReadByte(), bw.ReadByte());
-                    light.pos = lpos;
-
-                    light.area.X = bw.ReadInt32() + LOCAL_OFFSET.X * TILE_WIDTH;
-                    light.area.Y = bw.ReadInt32() + LOCAL_OFFSET.Y * TILE_WIDTH;
-                    light.area.Width = bw.ReadInt32();
-                    light.area.Height = bw.ReadInt32();
-
-                    //restul de date
-                    light.angle = bw.ReadInt16();
-                    //shadows
-                    u2b = bw.ReadUInt16();
-                    light.castsShadows = ((u2b & K_LIGHT_FLAG_CAST_SHADOWS) != 0);
-
-                    //logic
-                    light.logic.Load(bw, (int)dwStartID);
-
-                    //--- converts loaded IES lights into normal ones ---
-                    if (light.type == K_LIGHT_IES_REALISTIC_OBSOLETE)
-                    {
-                        light.type = K_LIGHT_POINT;
-                        light.animId = 0; //circular light
-                        MessageBox.Show("Converted light from type IES to point light. ID:" + light.ID);
-                    }
-                    //when loading from older version replace subtype with atmospheric attenuation
-                    //we used the UINT32 of subtype to save the attenuation (backwards compatibility)
-                    if (arrInts[0] == 1014)
-                    {
-                        if (light.type == K_LIGHT_POINT)
-                            light.nAtmoAttenuationPerc = 0;
-                        else
-                            light.nAtmoAttenuationPerc = 100;
-                    }
-
-                    //lights images changed?. re-center
-                    if (((light.type == K_LIGHT_POINT) || (light.type == K_LIGHT_AREA)) && (light.animId >= 0))
-                    {
-                        //folosim primul frame, adica cel al spotului.
-                        RectangleF rect = g_sprLights.anims[light.animId].aframes[0].frame.GetRect();
-
-                        float scaleX = light.area.Width / rect.Width;
-                        float scaleY = light.area.Height / rect.Height;
-                        rect.X *= scaleX; rect.Y *= scaleY;
-                        rect.Width *= scaleX; rect.Height *= scaleY;
-
-                        light.area = rect;
-                        light.area.X += light.pos.X;
-                        light.area.Y += light.pos.Y;
-                    }
-
-                    arrLights.Add(light);
-                }
-
-                ///--- formele de coliziune ---
-                if (!bLoadPrefab)
-                {
-                    arrCollisions.RemoveRange(0, arrCollisions.Count);
-                }    
-                UInt32 lCount = bw.ReadUInt32();
-                //date fiecare element
-                for (int kk = 0; kk < lCount; kk++)
-                {
-                    Rectangle crect = new Rectangle();
-                    //ID
-                    UInt32 nID = bw.ReadUInt32() + dwStartID;
-
-                    if (arrIDs.Contains(nID))
-                    {
-                        MessageBox.Show("Collision ID conflict: " + nID, "Warning!");
-                    }
-                    arrIDs.Add(nID);
-
-                    if (g_nLastID < nID)
-                        g_nLastID = nID;
-                    //collision rect
-                    crect.X = (int)(bw.ReadInt32() + LOCAL_OFFSET.X * TILE_WIDTH);
-                    crect.Y = (int)(bw.ReadInt32() + LOCAL_OFFSET.Y * TILE_HEIGHT);
-                    crect.Width = (int)bw.ReadUInt32();
-                    if (crect.Width <= 0)
-                        crect.Width = TILE_WIDTH;
-                    crect.Height = (int)bw.ReadUInt32();
-                    if (crect.Height <= 0)
-                        crect.Height = TILE_HEIGHT;
-                    //type (ub)
-                    byte tip = bw.ReadByte();
-                    //cast shadows
-                    bool castSh = false;
-                    ub = bw.ReadByte();
-                    if (ub != 0)
-                        castSh = true;
-
-                    CCollisionElement col = new CCollisionElement();
-                    col.ID = nID;
-                    col.rect = crect;
-                    col.castShadows = castSh;
-                    col.type = (int)tip;
-                    col.castShadows = castSh;
-
-                    //logic
-                    col.logic.Load(bw, (int)dwStartID);
-
-                    arrCollisions.Add(col);
-                }
-                */
-                //decoratiunile
-                String bsxName = bw.ReadString();
-                if (!bLoadPrefab)
-                {
-                    arrObjects.RemoveRange(0, arrObjects.Count);
-                    g_wndObjects.LoadBSX(strBaseFolder + "\\data\\" + bsxName); //seteaza singur toate chestiile legate de tileset
-                }
-
-                //save anim and frame numbers for later
-                int nAnimsCnt = g_wndObjects.GetSpriteLoader().anims.Count;
-                //nr deco
-                UInt32 objcnt = (UInt32)bw.ReadUInt32();
-                //date fiecare deco
-                for (int kk = 0; kk < objcnt; kk++)
-                {
-                    CObject obj = new CObject();
-
-                    obj.ID = bw.ReadUInt32() + dwStartID;
-                    if (arrIDs.Contains(obj.ID))
-                    {
-                        MessageBox.Show("Object ID conflict: " + obj.ID, "Warning!");
-                    }
-                    arrIDs.Add(obj.ID);
-
-                    if (g_nLastID < obj.ID)
-                        g_nLastID = obj.ID;
-
-                    obj.layer = bw.ReadByte();
-                    //move from old format to new format
-                    if (nLayersCnt == 2)
-                        obj.layer += 1; //0,1 becomes 1,2 (mid and front)
-                    //pozitia
-                    obj.pos.X = (int)(bw.ReadInt32() + LOCAL_OFFSET.X * TILE_WIDTH);
-                    obj.pos.Y = (int)(bw.ReadInt32() + LOCAL_OFFSET.Y * TILE_HEIGHT);
-                    //anim
-                    string strObjAnm = bw.ReadString();
-                    obj.animIdx = g_sprObjects.GetAnimIdxByName(strObjAnm);
-                    if (obj.animIdx < 0)
-                    {
-                        obj.animIdx = 0;
-                        MessageBox.Show("Object ID:" + obj.ID + " animation not found:[" + strObjAnm + "]. Animation was reset to the first animation in the file!");
-                    }
-                    //read frame number
-                    obj.frameIdx = bw.ReadUInt16();
-                    //check anim and frame (or reset on 0)
-                    if (obj.animIdx >= nAnimsCnt)
-                    {
-                        obj.animIdx = -1;
-                        MessageBox.Show("Wrong animation on Object ID:" + obj.ID + "\r\nResetting it to -1", "Warning!");
-                    }
-                    if (obj.frameIdx >= g_sprObjects.anims[obj.animIdx].aframes.Count)
-                    {
-                        obj.frameIdx = -1;
-                        MessageBox.Show("Wrong frameIdx on Object ID:" + obj.ID + "\r\nResetting it to -1", "Warning!");
-                    }
-                    //flags
-                    obj.flags = bw.ReadUInt32();
-
-                    //logic
-                    obj.logic.Load(bw, (int)dwStartID);
-
-                    //converteste usile de model vechi in usi de model nou (breach doar cu melee)
-                    if ((obj.logic.strScriptName == "ACTIVE_OPEN_DOOR_NO_CLOSE") && (obj.logic.nInteractTimer > 0))
-                    {
-                        obj.logic.strScriptName = "ACTIVE_LOCKED_BREAKABLE";
-                        obj.logic.nInteractTimer = 0;
-
-                        MessageBox.Show("Updated locked door ID " + obj.ID);
-                    }
-
-                    arrObjects.Add(obj);
-                }
-                /*
-                //reading actors bsx
-                bsxName = bw.ReadString();
-                if (!bLoadPrefab)
-                {
-                    arrActors.RemoveRange(0, arrActors.Count);
-                    g_wndActors.LoadBSX(strBaseFolder + "\\data\\" + bsxName);
-                }
-                UInt32 actcnt = (UInt32)bw.ReadUInt32();
-                //date fiecare actor
-                for (int kk = 0; kk < actcnt; kk++)
-                {
-                    CActor act = new CActor();
-
-                    act.ID = bw.ReadUInt32() + dwStartID;
-                    if (arrIDs.Contains(act.ID))
-                    {
-                        MessageBox.Show("Actor ID conflict: " + act.ID, "Warning!");
-                    }
-                    arrIDs.Add(act.ID);
-
-                    if (g_nLastID < act.ID)
-                        g_nLastID = act.ID;
-
-                    //pozitia
-                    act.pos.X = (int)(bw.ReadInt32() + LOCAL_OFFSET.X * TILE_WIDTH);
-                    act.pos.Y = (int)(bw.ReadInt32() + LOCAL_OFFSET.Y * TILE_HEIGHT);
-                    //unghi si boolean SetAngle
-                    act.bSetAngle = (bw.ReadByte() != 0) ? true : false;
-                    act.fAngle = (float)bw.ReadInt16();
-                    //template name
-                    act.templateName = bw.ReadString();
-                    //scrie nume starting AI state
-                    act.strSelectedAIState = bw.ReadString();
-                    //anim
-                    act.bLookLeft = (bw.ReadByte() != 0) ? true : false;
-                    //collision/gravity
-                    act.bHasCollision = (bw.ReadByte() != 0) ? true : false;
-                    act.bHasGravity = (bw.ReadByte() != 0) ? true : false;
-                    //logic
-                    act.logic.Load(bw, (int)dwStartID);
-
-                    arrActors.Add(act);
-                }
-
-                //misc objects (rails samd)
-                if(!bLoadPrefab)
-                    arrMisc.RemoveRange(0, arrMisc.Count);
-
-                UInt32 misccnt = bw.ReadUInt32();
-                //date fiecare misc object
-                for (int kk = 0; kk < misccnt; kk++)
-                {
-                    //datele generice:
-                    //tipul
-                    byte type = bw.ReadByte();
-                    //datele generice
-                    CMiscObjectBase mob = new CMiscObjectBase();
-                    mob.ID = bw.ReadUInt32() + dwStartID;
-
-                    if (arrIDs.Contains(mob.ID))
-                    {
-                        MessageBox.Show("Misc Object ID conflict: " + mob.ID, "Warning!");
-                    }
-                    arrIDs.Add(mob.ID);
-
-                    if (g_nLastID < mob.ID)
-                        g_nLastID = mob.ID;
-
-                    byte u1b = bw.ReadByte(); //nr params
-                    for (int i = 0; i < u1b; i++)
-                    {
-                        string paramname = bw.ReadString();
-                        string paramval = bw.ReadString();
-
-                        mob.listParams.Add(paramname);
-                        mob.listParams.Add(paramval);
-                    }
-                    //datele particulare
-                    switch (type)
-                    {
-                        case K_MISC_FRONTLAYEROBJ:
-                            {
-                                CMiscObject_FrontLayerObj back = new CMiscObject_FrontLayerObj();
-                                back.ID = mob.ID;
-                                back.listParams = mob.listParams;
-
-                                PointF npos = new PointF();
-                                npos.X = (float)bw.ReadInt32();
-                                if (npos.X < 0) npos.X = 0; if (npos.X > levelw * TILE_WIDTH) npos.X = levelw * TILE_WIDTH;
-                                npos.X += LOCAL_OFFSET.X * TILE_WIDTH;
-
-                                npos.Y = (float)bw.ReadInt32();
-                                if (npos.Y < 0) npos.Y = 0; if (npos.Y > levelh * TILE_HEIGHT) npos.Y = levelh * TILE_HEIGHT;
-                                npos.Y += LOCAL_OFFSET.Y * TILE_HEIGHT;
-
-                                back.pos = npos;
-
-                                arrMisc.Add(back);
-                            }
-                            break;
-                        case K_MISC_SCRIPT:
-                            {
-                                CMiscObject_Script scr = new CMiscObject_Script();
-                                scr.ID = mob.ID;
-                                scr.listParams = mob.listParams;
-
-                                PointF npos = new PointF();
-                                npos.X = (float)bw.ReadInt32();
-                                if (npos.X < 0) npos.X = 0; if (npos.X > levelw * TILE_WIDTH) npos.X = levelw * TILE_WIDTH;
-                                npos.X += LOCAL_OFFSET.X * TILE_WIDTH;
-
-                                npos.Y = (float)bw.ReadInt32();
-                                if (npos.Y < 0) npos.Y = 0; if (npos.Y > levelh * TILE_HEIGHT) npos.Y = levelh * TILE_HEIGHT;
-                                npos.Y += LOCAL_OFFSET.Y * TILE_HEIGHT;
-
-
-                                scr.pos = npos;
-
-                                arrMisc.Add(scr);
-                            }
-                            break;
-                        case K_MISC_BACKGROUND:
-                            {
-                                CMiscObject_Background back = new CMiscObject_Background();
-                                back.ID = mob.ID;
-                                back.listParams = mob.listParams;
-
-                                PointF npos = new PointF();
-                                npos.X = (float)bw.ReadInt32();
-                                if (npos.X < 0) npos.X = 0; if (npos.X > levelw * TILE_WIDTH) npos.X = levelw * TILE_WIDTH;
-                                npos.X += LOCAL_OFFSET.X * TILE_WIDTH;
-
-                                npos.Y = (float)bw.ReadInt32();
-                                if (npos.Y < 0) npos.Y = 0; if (npos.Y > levelh * TILE_HEIGHT) npos.Y = levelh * TILE_HEIGHT;
-                                npos.Y += LOCAL_OFFSET.Y * TILE_HEIGHT;
-
-
-                                back.pos = npos;
-
-                                arrMisc.Add(back);
-                            }
-                            break;
-                        case K_MISC_RAIL:
-                            {
-                                CMiscObject_Rail rail = new CMiscObject_Rail();
-                                rail.ID = mob.ID;
-                                rail.listParams = mob.listParams;
-                                //nr de puncte
-                                UInt16 ptscnt = bw.ReadUInt16();
-                                //coordonate puncte
-                                for (int i = 0; i < ptscnt; i++)
-                                {
-                                    PointF pos = new PointF();
-                                    pos.X = (float)bw.ReadInt32();
-                                    pos.X += LOCAL_OFFSET.X * TILE_WIDTH;
-
-                                    pos.Y = (float)bw.ReadInt32();
-                                    pos.Y += LOCAL_OFFSET.Y * TILE_HEIGHT;
-
-                                    rail.listPoints.Add(pos);
-                                }
-
-                                //adaug in lista
-                                arrMisc.Add(rail);
-                            }
-                            break;
-                        default:
-                            {
-                                MessageBox.Show("Load:Misc object type not handled!");
-                            }
-                            break;
-                    }
-
-                }
-                */
-                //close stream if reading from file
-                if(pSrcStream == null)
-                    pLocalStream.Dispose();
-
-                //populate templates list in ActorsWnd
-                /*
-                if (!bLoadPrefab)
-                {
-                    g_wndActors.PopulateTemplatesList(strBaseFolder + "\\data\\actors_data.xml");
-
-                    Undo_SetCurrent(K_UNDO_DISABLED);
-                }
-
-                //set actors animation indices
-                for (int kk = 0; kk < arrActors.Count; kk++)
-                {
-                    CActor act = arrActors[kk] as CActor;
-                    g_wndActors.SetActorAnimByTemplate(act);
-                }
-                
-                //prefabs list
-                if (!bLoadPrefab)
-                {
-                    g_wndPrefabs.SetPrefabsFolder(strBaseFolder + "\\prefabs\\");
-                    //mark file as not modified
-                    g_bFileModified = false;
-                    //save file path if loaded from disk
-                    if (pSrcStream == null)
-                    {
-                        g_strFilePath = strPath;
-                        this.Text = Path.GetFileNameWithoutExtension(strPath);
-                    }
-                }
-                else
-                {
-                    g_bFileModified = true;
-                }
-                */
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Level failed to load with exception:\n\r" + ex.Message);
-                return false;
-            }
-
-            g_strFilePath = strPath;
-            this.Text = Path.GetFileNameWithoutExtension(strPath);
-
-            return true;
-        }
-
-
-        // versiunea veche de load level DKAS
-        public bool LoadLevel_OLD(string strPath, bool bLoadPrefab = false, int nPrefabTileX = 0, int nPrefabTileY = 0, Stream pSrcStream = null)
-        {
-            //get base levels folder
-            string strBaseFolder = strPath;
-
-            ArrayList arrIDs = new ArrayList();
-            UInt32 dwStartID = 0;
-            if (bLoadPrefab)
-                dwStartID = GetUniqueID();
-
-            //try
-            {
-                strBaseFolder = Path.GetDirectoryName(strPath);
-                if (strBaseFolder.Length > 0) //remove another folder child 
-                    strBaseFolder = Path.GetDirectoryName(strBaseFolder);
-
-                Stream pLocalStream = null;
-                if (pSrcStream == null)
-                {
-                    FileStream fs = new FileStream(strPath, FileMode.Open);
-                    pLocalStream = fs;
-                }
-                else
-                {
-                    pLocalStream = pSrcStream;
-                }
-
-                BinaryReader bw = new BinaryReader(pLocalStream);
-
-                if ((pLocalStream == null) || (bw == null))
-                    return false;
-
-                int nLayersCnt = K_LAYERS_CNT;
-
-                Byte ub;
-                Int16 s2b;
-                UInt16 u2b;
-                //0. read first 10 integers
-                Int32[] arrInts = new Int32[10];
-                for (int kk = 0; kk < 10; kk++)
-                {
-                    arrInts[kk] = bw.ReadInt32();
-                }
-                //version check
-                if (arrInts[0] != K_CURRENT_VERSION)
-                {
-                    MessageBox.Show("Level failed to load! Unhandled version of file found: " + arrInts[0]);
-                    pLocalStream.Close();
-                    return false;
-                }
-
-                //1. tipul misiunii
-                ub = bw.ReadByte();
-                if (!bLoadPrefab)
-                    g_missionType = ub;
-
-                // load layers count
-                //int layersCnt = (int)bw.ReadInt16();
-
                 //scrie numele tilesetului si date despre tileset
                 String tilesetName = bw.ReadString();
                 int a, b;
@@ -6396,30 +5759,29 @@ namespace HexxEditor
                 }
 
                 //tile-urile pe rand, toata matricea
-              for (int yy = 0; yy < levelh; yy++)
-              {
-                  for (int xx = 0; xx < levelw; xx++)
-                  {
-                      for (int kk = 0; kk < nLayersCnt; kk++)
-                      {
-                          Int32 lev = bw.ReadInt32();
-                          if (lev < 0)
-                              lev = -1;
-                          if (nLayersCnt == 3) //latest version has 3 layers
-                              gMap.setTile(LOCAL_OFFSET.X + xx, LOCAL_OFFSET.Y + yy, lev, kk);
-                          else //convert older layers to newer ones
-                              gMap.setTile(LOCAL_OFFSET.X + xx, LOCAL_OFFSET.Y + yy, lev, kk * 2); //0,1 becomes 0,2
-                      }
-                  }
-              }
-
+                for (int yy = 0; yy < levelh; yy++)
+                {
+                    for (int xx = 0; xx < levelw; xx++)
+                    {
+                        for (int kk = 0; kk < nLayersCnt; kk++)
+                        {
+                            Int32 lev = bw.ReadInt32();
+                            if (lev < 0)
+                                lev = -1;
+                            if (nLayersCnt == 3) //latest version has 3 layers
+                                gMap.setTile(LOCAL_OFFSET.X + xx, LOCAL_OFFSET.Y + yy, lev, kk);
+                            else //convert older layers to newer ones
+                                gMap.setTile(LOCAL_OFFSET.X + xx, LOCAL_OFFSET.Y + yy, lev, kk * 2); //0,1 becomes 0,2
+                        }
+                    }
+                }
 
                 //auto adjust if we change the tileset resolution
                 if ((!bLoadPrefab) && (nLvlTilesetColumns != TILESET_COLUMNS))
                     SetMaterialData(TILE_WIDTH, TILE_HEIGHT, nLvlTilesetColumns, TILESET_COLUMNS);
                 //build images for all blocks
                 BuildAllBlockImages();
-                /*
+
                 ///--- lights luminile ---
                 String bsxName = bw.ReadString();
                 if (!bLoadPrefab)
@@ -6560,9 +5922,9 @@ namespace HexxEditor
 
                     arrCollisions.Add(col);
                 }
-                */
+
                 //decoratiunile
-                String bsxName = bw.ReadString();
+                bsxName = bw.ReadString();
                 if (!bLoadPrefab)
                 {
                     arrObjects.RemoveRange(0, arrObjects.Count);
@@ -6633,7 +5995,7 @@ namespace HexxEditor
 
                     arrObjects.Add(obj);
                 }
-                /*
+
                 //reading actors bsx
                 bsxName = bw.ReadString();
                 if (!bLoadPrefab)
@@ -6808,13 +6170,12 @@ namespace HexxEditor
                     }
 
                 }
-                */
+
                 //close stream if reading from file
-                if (pSrcStream == null)
+                if(pSrcStream == null)
                     pLocalStream.Dispose();
 
                 //populate templates list in ActorsWnd
-                /*
                 if (!bLoadPrefab)
                 {
                     g_wndActors.PopulateTemplatesList(strBaseFolder + "\\data\\actors_data.xml");
@@ -6828,7 +6189,7 @@ namespace HexxEditor
                     CActor act = arrActors[kk] as CActor;
                     g_wndActors.SetActorAnimByTemplate(act);
                 }
-                
+
                 //prefabs list
                 if (!bLoadPrefab)
                 {
@@ -6846,18 +6207,12 @@ namespace HexxEditor
                 {
                     g_bFileModified = true;
                 }
-                */
             }
-            /*
             catch (Exception ex)
             {
                 MessageBox.Show("Level failed to load with exception:\n\r" + ex.Message);
                 return false;
             }
-            */
-
-            g_strFilePath = strPath;
-            this.Text = Path.GetFileNameWithoutExtension(strPath);
 
             return true;
         }
@@ -7703,25 +7058,6 @@ namespace HexxEditor
             startInfo.Arguments = " +map \"" + g_strFilePath + "\"";
 
             Process exeProcess = Process.Start(startInfo);
-        }
-
-        private void openOldToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog sfd = new OpenFileDialog();
-            //fisier binar
-            sfd.Filter = "ActionSquad Level (*.dkas)|*.dkas|All Files (*.*)|*.*";
-            if (sfd.ShowDialog() == DialogResult.Cancel)
-                return;
-
-            ResetLevel();
-
-            bool bSuccess = LoadLevel_OLD(sfd.FileName);
-
-            PaintMap();
-
-            if (bSuccess)
-                MessageBox.Show("Level was loaded successfully!", "Success!");
-
         }
 
         private void butWndActors_Click(object sender, EventArgs e)

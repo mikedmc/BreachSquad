@@ -113,8 +113,10 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 
 	///--- LOAD AREAS:
-	FileManager::GetMediaPath(L"media/levels/missions/01_01_slow_starters.dkas", Path);
+	FileManager::GetMediaPath(L"media/levels/missions/area0.dkas", Path);
 	V_OP_RET(LoadArea(Path, Vec2i(0,0)));
+	//FileManager::GetMediaPath(L"media/levels/missions/area1.dkas", Path);
+	//V_OP_RET(LoadArea(Path, Vec2i(16, 0)));
 
 
 
@@ -152,7 +154,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_camTargetActive = null; //cand nu am target se uita dupa players
 	m_camTargetOld = null;
 	//cam settings
-	m_camLevel.SetWorldBounds(m_levelAABB, true, K_CAMTRANS_AXIS_NONE);
+	m_camLevel.SetWorldBounds(m_levelAABB, false, K_CAMTRANS_AXIS_NONE);
 	//for the render targets we render 1:1
 	m_vCamPosDefault = vLastSpawnPoint; //spawn pointul este initializat in setAI cand gaseste checkpoint cu bIsFirst
 	m_camLevel.InitCamera(UTGetAppClass().g_rectRT, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault); //initializam pe primul spawn point
@@ -193,8 +195,14 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 	//reset time multiplier
 	SetTimeMultiplier(1.0f, 0.0f);
-	// compute dirty rects (collisions and walls and other data)
+	// compute dirty rects (collisions and walls, wall shadows and other data)
 	UpdateDirtyRects();
+	// create Area meshes after shadows have been computed in UpdateDirtyRects
+	for (auto area : m_arrAreas)
+	{
+		V_OP_RET(area->BuildBuffers(m_pDevice, &m_sprLights));
+	}
+
 	//facem un build visibility lists
 	BuildVisibilityLists();
 
@@ -267,33 +275,36 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 	tileH = OS_freadByte(fl);
 	tilesetColumns = OS_freadUInt16(fl);
 	//level size
-	int levelW = OS_freadUInt16(fl);
-	int levelH = OS_freadUInt16(fl);
-	area->sizeTL.Init(levelW, levelH);
+	int areaW = OS_freadUInt16(fl);
+	int areaH = OS_freadUInt16(fl);
+	area->sizeTL.Init(areaW, areaH);
 
 	//level origin - in pixels
 	int originY = OS_freadInt16(fl);
 	int originX = OS_freadInt16(fl);
 
 	//set level size
-	area->AABBbounds_TL.Set(posTL.x, posTL.y, levelW, levelH);
-	area->AABBbounds.Set(m_levelAABB_TL.x * tileW, m_levelAABB_TL.y * tileH, levelW * tileW, levelH * tileH);
+	area->AABBbounds_TL.Set(posTL.x, posTL.y, areaW, areaH);
+	area->AABBbounds.Set(area->AABBbounds_TL.x * tileW, area->AABBbounds_TL.y * tileH, areaW * tileW, areaH * tileH);
 	//m_vLevelOrigin.x = (float)originX + m_levelAABB.x;
 	//m_vLevelOrigin.y = (float)originY + m_levelAABB.y;
+
+	// add dirty rect on area so it computes everything (dirty rect is inclusive so we subtract 1 from width and height)
+	m_arrDirtyRectsTL.push_back(RECTXYXY(posTL.x, posTL.y, areaW - 1, areaH - 1));
 
 	// need to know the tileset size
 	Vec2 vTilesetSize = m_texManager.GetTextureSize(m_tilesTexBaseIdx);
 
-	area->tiles = new CTile*[levelW];
-	for (int kk = 0; kk < levelW; kk++)
+	area->tiles = new CTile*[areaW];
+	for (int kk = 0; kk < areaW; kk++)
 	{
-		area->tiles[kk] = new CTile[levelH];
+		area->tiles[kk] = new CTile[areaH];
 	}
 	//read tiles, not a rare matrix
 	eTileLayer layerIDs[] = { K_TILE_LAYER_FLOOR, K_TILE_LAYER_WALLS, K_TILE_LAYER_CEILING };
-	for (int yy = 0; yy < levelH; yy++)
+	for (int yy = 0; yy < areaH; yy++)
 	{
-		for (int xx = 0; xx < levelW; xx++)
+		for (int xx = 0; xx < areaW; xx++)
 		{
 			CTile* tl = &area->tiles[xx][yy];
 			tl->bbox.Set(xx * K_TILE_SIZE_F, yy * K_TILE_SIZE_F, (xx + 1) * K_TILE_SIZE_F, (yy + 1) * K_TILE_SIZE_F);
@@ -319,8 +330,6 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 			tl->PostConstructionInit();
 		}
 	}
-	// add dirty rect on level so it computes everything
-	//m_arrDirtyRectsTL.push_back(RECTXYXY(0, 0, levelW, levelH));
 
 	size_t converted;
 	///--- lights ---
@@ -849,9 +858,6 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 
 
 	LOG(L"Game:: Area loaded:[%s] net.randcheck[%d]", strPathAbs, m_rand.RandInt(60000));
-
-	// create meshes
-	V_OP_RET(area->PostConstructionInit(m_pDevice, &m_sprLights));
 
 	m_arrAreas.push_back(area);
 	// enlarge level area and other level data

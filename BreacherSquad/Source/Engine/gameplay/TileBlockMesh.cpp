@@ -95,7 +95,7 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 				if (tl->nShadowFrame < 0)
 					continue;
 				// get shadow tex coords
-				RECTLTRB_F texrect = pLightsSpr->GetModuleRect_TexCoords(ANM_LIGHTS_SPR_SHADOWS, tl->nShadowFrame, 0);
+ 				RECTLTRB_F texrect = pLightsSpr->GetModuleRect_TexCoords(ANM_LIGHTS_SPR_SHADOWS, tl->nShadowFrame, 0);
 				// add geometry (Clockwise)
 				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
 					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,

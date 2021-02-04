@@ -32,12 +32,13 @@ public:
 	CLevelArea(UINT32 nID);
 	~CLevelArea();
 
-	OPRESULT				PostConstructionInit(PDEVICE pDevice, CSpriteCollection* pLightsSprCol);
 	void					Release();
 	// returns null if x,y outside valid area
 	CTile*					GetTile(int x, int y);
 	// Updates the level area visibility and blocks visibility
 	bool					UpdateVisibility(RECTXYWH_F camRect);
+	// orders building of the buffers
+	OPRESULT				BuildBuffers(PDEVICE pDevice, CSpriteCollection* pLightsSprCol);
 
 public: //--- framework methods ---
 	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
