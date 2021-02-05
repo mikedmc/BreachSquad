@@ -19,29 +19,30 @@ namespace circleEnvelope
         Graphics pbgr;
 
         // direction flags
+        public const int K_DIR_NONE = 0;
         public const int K_DIR_LEFT = 1;
         public const int K_DIR_UP = 2;
-        public const int K_DIR_RIGHT = 4;
-        public const int K_DIR_DOWN = 8;
+        public const int K_DIR_RIGHT = 3;
+        public const int K_DIR_DOWN = 4;
+        // reset to 0 after this
+        public const int K_DIRS_CNT = 5;
         //--- ZONELE DE INFLUENTA ---
         public class CGridCell
         {
 
             public bool bFilled;
-            public bool bConnected;
-            public int connectionFlag;
+            public Int32 connectionDir;
 
             public CGridCell()
             {
                 bFilled = false;
-                connectionFlag = 0;
+                connectionDir = K_DIR_NONE;
             }
 
             public void Reset()
             {
                 bFilled = false;
-                bConnected = false;
-                connectionFlag = 0;
+                connectionDir = K_DIR_NONE;
             }
         }
 
@@ -55,7 +56,7 @@ namespace circleEnvelope
             // limits are computed on the fly, do not serialize
             public Rectangle AABB = new Rectangle();
 
-            public void ComputeConnectionFlags()
+            public void ComputeInternalData()
             {
                 int vMinX = size.Width, vMinY = size.Height;
                 int vMaxX = 0, vMaxY = 0;
@@ -70,21 +71,6 @@ namespace circleEnvelope
                         if (xx < vMinX) vMinX = xx;
                         if (yy > vMaxY) vMaxY = yy;
                         if (yy < vMinY) vMinY = yy;
-                        // set flags
-                        blocks[xx][yy].connectionFlag = 0;
-
-                        if (blocks[xx][yy].bConnected)
-                        {
-                            CGridCell block = blocks[xx][yy];
-                            if (blocks[xx][yy - 1].bFilled == false)
-                                block.connectionFlag |= K_DIR_UP;
-                            if (blocks[xx][yy + 1].bFilled == false)
-                                block.connectionFlag |= K_DIR_DOWN;
-                            if (blocks[xx - 1][yy].bFilled == false)
-                                block.connectionFlag |= K_DIR_LEFT;
-                            if (blocks[xx + 1][yy].bFilled == false)
-                                block.connectionFlag |= K_DIR_RIGHT;
-                        }
                     }
                 }
                 // compute AABB
@@ -104,7 +90,7 @@ namespace circleEnvelope
                     for (int yy = 0; yy < size.Height; yy++)
                     {
                         bw.Write(blocks[xx][yy].bFilled);
-                        bw.Write(blocks[xx][yy].bConnected);
+                        bw.Write(blocks[xx][yy].connectionDir);
                     }
                 }
             }
@@ -134,7 +120,7 @@ namespace circleEnvelope
                     for (int yy = 0; yy < size.Height; yy++)
                     {
                         blocks[xx][yy].bFilled = br.ReadBoolean();
-                        blocks[xx][yy].bConnected = br.ReadBoolean();
+                        blocks[xx][yy].connectionDir = br.ReadInt32();
                     }
                 }
             }
@@ -175,18 +161,12 @@ namespace circleEnvelope
                 return;
             if ((x < 0) || (x >= gridW) || (y < 0) || (y >= gridH))
                 return;
-            if(m_area.blocks[x][y].bFilled)
-                m_area.blocks[x][y].bConnected = !m_area.blocks[x][y].bConnected;
-        }
-
-        public void SetGridFlag(int x, int y, int nDirFlag)
-        {
-            if (m_area == null)
-                return;
-            if ((x < 0) || (x >= gridW) || (y < 0) || (y >= gridH))
-                return;
-
-            m_area.blocks[x][y].connectionFlag = nDirFlag;
+            if (m_area.blocks[x][y].bFilled)
+            {
+                m_area.blocks[x][y].connectionDir++;
+                if (m_area.blocks[x][y].connectionDir >= K_DIRS_CNT)
+                    m_area.blocks[x][y].connectionDir = 0;
+            }
         }
 
         //paint grid
@@ -208,20 +188,20 @@ namespace circleEnvelope
                 {
                     for (int yy = 0; yy < gridH; yy++)
                     {
-                        if (m_area.blocks[xx][yy].bConnected)
-                            gr.FillRectangle(Brushes.DarkRed, xx * g_nGridSize, yy * g_nGridSize, g_nGridSize, g_nGridSize);
+                        if (m_area.blocks[xx][yy].connectionDir > K_DIR_NONE)
+                            gr.FillRectangle(Brushes.Green, xx * g_nGridSize, yy * g_nGridSize, g_nGridSize, g_nGridSize);
                         else if (m_area.blocks[xx][yy].bFilled)
                             gr.FillRectangle(Brushes.DarkGreen, xx * g_nGridSize, yy * g_nGridSize, g_nGridSize, g_nGridSize);
 
-                        int nDirFlags = m_area.blocks[xx][yy].connectionFlag;
-                        if ((nDirFlags & K_DIR_UP) != 0)
-                            gr.DrawLine(Pens.Red, xx * g_nGridSize, yy * g_nGridSize, (xx + 1) * g_nGridSize, yy * g_nGridSize);
-                        if ((nDirFlags & K_DIR_DOWN) != 0)
-                            gr.DrawLine(Pens.Red, xx * g_nGridSize, (yy+1) * g_nGridSize, (xx + 1) * g_nGridSize, (yy+1) * g_nGridSize);
-                        if ((nDirFlags & K_DIR_LEFT) != 0)
-                            gr.DrawLine(Pens.Red, xx * g_nGridSize, yy * g_nGridSize, xx * g_nGridSize, (yy + 1) * g_nGridSize);
-                        if ((nDirFlags & K_DIR_RIGHT) != 0)
-                            gr.DrawLine(Pens.Red, (xx + 1) * g_nGridSize, yy * g_nGridSize, (xx + 1) * g_nGridSize, (yy + 1) * g_nGridSize);
+                        int nDir = m_area.blocks[xx][yy].connectionDir;
+                        if (nDir == K_DIR_UP)
+                            gr.FillRectangle(Brushes.Red, xx * g_nGridSize, yy * g_nGridSize, g_nGridSize, 3);
+                        if (nDir == K_DIR_DOWN)
+                            gr.FillRectangle(Brushes.Red, xx * g_nGridSize, (yy+1) * g_nGridSize - 3, g_nGridSize, 3);
+                        if (nDir == K_DIR_LEFT)
+                            gr.FillRectangle(Brushes.Red, xx * g_nGridSize, yy * g_nGridSize, 3, g_nGridSize);
+                        if (nDir == K_DIR_RIGHT)
+                            gr.FillRectangle(Brushes.Red, (xx + 1) * g_nGridSize - 3, yy * g_nGridSize, 3, g_nGridSize);
                     }
                 }
 
@@ -361,14 +341,6 @@ namespace circleEnvelope
             lbAreas.SelectedIndex = nsel;
         }
 
-        public void SaveAreas(String strPath)
-        {
-
-        }
-
-        public void LoadAreas(String strPath)
-        {
-        }
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -572,6 +544,7 @@ namespace circleEnvelope
                     {
                         CAreaDesc ad = new CAreaDesc();
                         ad.Deserialize(bw);
+                        ad.ComputeInternalData();
                         m_arrAreas.Add(ad);
                     }
                     bw.Close();
@@ -594,7 +567,7 @@ namespace circleEnvelope
             if (lbAreas.SelectedIndex >= 0)
             {
                 CAreaDesc area = m_arrAreas[lbAreas.SelectedIndex] as CAreaDesc;
-                area.ComputeConnectionFlags();
+                area.ComputeInternalData();
             }
 
             repaintArea(pbgr);
