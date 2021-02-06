@@ -19,13 +19,57 @@ namespace circleEnvelope
         Graphics pbgr;
 
         // direction flags
+        public const int DIRFLAG_LEFT = 1;
+        public const int DIRFLAG_UP = 2;
+        public const int DIRFLAG_RIGHT = 4;
+        public const int DIRFLAG_DOWN = 8;
+        public const int DIRFLAG_ANY = 15;
+        // directions
         public const int K_DIR_NONE = 0;
         public const int K_DIR_LEFT = 1;
         public const int K_DIR_UP = 2;
         public const int K_DIR_RIGHT = 3;
         public const int K_DIR_DOWN = 4;
+
+        public static int INVERSE_DIR(int dir)
+        {
+            switch (dir)
+            {
+                case K_DIR_LEFT:
+                    return K_DIR_RIGHT;
+                case K_DIR_UP:
+                    return K_DIR_DOWN;
+                case K_DIR_RIGHT:
+                    return K_DIR_LEFT;
+                case K_DIR_DOWN:
+                    return K_DIR_UP;
+                default:
+                    return K_DIR_NONE;
+            }
+        }
+
+        public static Point DIR_OFFSET(int dir)
+        {
+            switch (dir)
+            {
+                case K_DIR_LEFT:
+                    return new Point(-1, 0);
+                case K_DIR_UP:
+                    return new Point(0, -1);
+                case K_DIR_RIGHT:
+                    return new Point(1, 0);
+                case K_DIR_DOWN:
+                    return new Point(0, 1);
+                default:
+                    return new Point(0, 0);
+            }
+        }
         // reset to 0 after this
         public const int K_DIRS_CNT = 5;
+
+        // level generator class
+        CLevelGen LevelGenerator = new CLevelGen();
+
         //--- ZONELE DE INFLUENTA ---
         public class CGridCell
         {
@@ -55,11 +99,30 @@ namespace circleEnvelope
 
             // limits are computed on the fly, do not serialize
             public Rectangle AABB = new Rectangle();
+            public List<Point> arrConnectors = new List<Point>();
+            public int areaConnDirFlags = 0;
+
+            // sa dea o lista de conectori si sa ii incerc pe toti pt fiecare piesa
+            public bool GetConnectorPos(int nDirection, out Point retpos)
+            {
+                foreach (Point pt in arrConnectors)
+                {
+                    if (blocks[pt.X][pt.Y].connectionDir == nDirection)
+                    {
+                        retpos = new Point(pt.X, pt.Y);
+                        return true;
+                    }
+                }
+                retpos = new Point();
+                return false;
+            }
 
             public void ComputeInternalData()
             {
                 int vMinX = size.Width, vMinY = size.Height;
                 int vMaxX = 0, vMaxY = 0;
+                arrConnectors.Clear();
+                areaConnDirFlags = 0;
                 for (int yy = 0; yy < size.Height; yy++)
                 {
                     for (int xx = 0; xx < size.Width; xx++)
@@ -71,6 +134,21 @@ namespace circleEnvelope
                         if (xx < vMinX) vMinX = xx;
                         if (yy > vMaxY) vMaxY = yy;
                         if (yy < vMinY) vMinY = yy;
+
+                        int nConDir = blocks[xx][yy].connectionDir;
+                        if (nConDir != K_DIR_NONE)
+                        {
+                            arrConnectors.Add(new Point(xx, yy));
+
+                            if (nConDir == K_DIR_LEFT)
+                                areaConnDirFlags |= DIRFLAG_LEFT;
+                            if (nConDir == K_DIR_UP)
+                                areaConnDirFlags |= DIRFLAG_UP;
+                            if (nConDir == K_DIR_RIGHT)
+                                areaConnDirFlags |= DIRFLAG_RIGHT;
+                            if (nConDir == K_DIR_DOWN)
+                                areaConnDirFlags |= DIRFLAG_DOWN;
+                        }
                     }
                 }
                 // compute AABB
@@ -172,44 +250,74 @@ namespace circleEnvelope
         //paint grid
         void PaintGrid(Graphics gr)
         {
-            Pen pgrey = new Pen(Color.FromArgb(28, 28, 28));
-            for (int kk = 0; kk <= gridW; kk++)
+            switch (g_eTool)
             {
-                gr.DrawLine(pgrey, kk * g_nGridSize, 0, kk * g_nGridSize, pictureBox1.Height);
-            }
-            for (int ll = 0; ll <= gridH; ll++)
-            {
-                gr.DrawLine(pgrey, 0, ll * g_nGridSize, pictureBox1.Width, ll * g_nGridSize);
-            }
-
-            if (m_area != null)
-            {
-                for (int xx = 0; xx < gridW; xx++)
-                {
-                    for (int yy = 0; yy < gridH; yy++)
+                case ETool.K_TOOL_AREA:
                     {
-                        if (m_area.blocks[xx][yy].connectionDir > K_DIR_NONE)
-                            gr.FillRectangle(Brushes.Green, xx * g_nGridSize, yy * g_nGridSize, g_nGridSize, g_nGridSize);
-                        else if (m_area.blocks[xx][yy].bFilled)
-                            gr.FillRectangle(Brushes.DarkGreen, xx * g_nGridSize, yy * g_nGridSize, g_nGridSize, g_nGridSize);
+                        Pen pgrey = new Pen(Color.FromArgb(28, 28, 28));
+                        for (int kk = 0; kk <= gridW; kk++)
+                        {
+                            gr.DrawLine(pgrey, kk * g_nGridSize, 0, kk * g_nGridSize, pictureBox1.Height);
+                        }
+                        for (int ll = 0; ll <= gridH; ll++)
+                        {
+                            gr.DrawLine(pgrey, 0, ll * g_nGridSize, pictureBox1.Width, ll * g_nGridSize);
+                        }
 
-                        int nDir = m_area.blocks[xx][yy].connectionDir;
-                        if (nDir == K_DIR_UP)
-                            gr.FillRectangle(Brushes.Red, xx * g_nGridSize, yy * g_nGridSize, g_nGridSize, 3);
-                        if (nDir == K_DIR_DOWN)
-                            gr.FillRectangle(Brushes.Red, xx * g_nGridSize, (yy+1) * g_nGridSize - 3, g_nGridSize, 3);
-                        if (nDir == K_DIR_LEFT)
-                            gr.FillRectangle(Brushes.Red, xx * g_nGridSize, yy * g_nGridSize, 3, g_nGridSize);
-                        if (nDir == K_DIR_RIGHT)
-                            gr.FillRectangle(Brushes.Red, (xx + 1) * g_nGridSize - 3, yy * g_nGridSize, 3, g_nGridSize);
+                        if (m_area != null)
+                        {
+                            for (int xx = 0; xx < gridW; xx++)
+                            {
+                                for (int yy = 0; yy < gridH; yy++)
+                                {
+                                    if (m_area.blocks[xx][yy].connectionDir > K_DIR_NONE)
+                                        gr.FillRectangle(Brushes.Green, xx * g_nGridSize, yy * g_nGridSize, g_nGridSize, g_nGridSize);
+                                    else if (m_area.blocks[xx][yy].bFilled)
+                                        gr.FillRectangle(Brushes.DarkGreen, xx * g_nGridSize, yy * g_nGridSize, g_nGridSize, g_nGridSize);
+
+                                    int nDir = m_area.blocks[xx][yy].connectionDir;
+                                    if (nDir == K_DIR_UP)
+                                        gr.FillRectangle(Brushes.Red, xx * g_nGridSize, yy * g_nGridSize, g_nGridSize, 3);
+                                    if (nDir == K_DIR_DOWN)
+                                        gr.FillRectangle(Brushes.Red, xx * g_nGridSize, (yy + 1) * g_nGridSize - 3, g_nGridSize, 3);
+                                    if (nDir == K_DIR_LEFT)
+                                        gr.FillRectangle(Brushes.Red, xx * g_nGridSize, yy * g_nGridSize, 3, g_nGridSize);
+                                    if (nDir == K_DIR_RIGHT)
+                                        gr.FillRectangle(Brushes.Red, (xx + 1) * g_nGridSize - 3, yy * g_nGridSize, 3, g_nGridSize);
+                                }
+                            }
+
+                            if ((m_area.AABB.Width > 0) && (m_area.AABB.Height > 0))
+                            {
+                                gr.DrawRectangle(Pens.DarkMagenta, new Rectangle(m_area.AABB.X * g_nGridSize - 1, m_area.AABB.Y * g_nGridSize - 1, m_area.AABB.Width * g_nGridSize + 2, m_area.AABB.Height * g_nGridSize + 2));
+                            }
+
+                        }
                     }
-                }
+                    break;
 
-                if ((m_area.AABB.Width > 0) && (m_area.AABB.Height > 0))
-                {
-                    gr.DrawRectangle(Pens.DarkMagenta, new Rectangle(m_area.AABB.X * g_nGridSize - 1, m_area.AABB.Y * g_nGridSize - 1, m_area.AABB.Width * g_nGridSize + 2, m_area.AABB.Height * g_nGridSize + 2));
-                }
+                case ETool.K_TOOL_GENERATOR:
+                    {
+                        int blSize = 10;
 
+                        foreach (CLevelGen.CPlacedArea pa in LevelGenerator.m_arrPlaced)
+                        {
+                            Point vOrigin = new Point(pa.AABB.X - LevelGenerator.m_levelAABB.X, pa.AABB.Y - LevelGenerator.m_levelAABB.Y);
+                            vOrigin.X *= blSize; vOrigin.Y *= blSize;
+                            gr.DrawRectangle(Pens.Green, new Rectangle(vOrigin.X, vOrigin.Y, pa.AABB.Width * blSize, pa.AABB.Height * blSize));
+                            for (int xx = 0; xx < pa.AABB.Width; xx++)
+                            {
+                                for (int yy = 0; yy < pa.AABB.Height; yy++)
+                                {
+                                    if (pa.blocks[xx, yy].connectionDir != 0)
+                                        gr.FillRectangle(Brushes.Red, new Rectangle(vOrigin.X + xx * blSize, vOrigin.Y + yy * blSize, blSize, blSize));
+                                    else if (pa.blocks[xx, yy].bFilled)
+                                        gr.FillRectangle(Brushes.CadetBlue, new Rectangle(vOrigin.X + xx * blSize, vOrigin.Y + yy * blSize, blSize, blSize));
+                                }
+                            }
+                        }
+                    }
+                    break;
             }
         }
 
@@ -418,29 +526,19 @@ namespace circleEnvelope
             pictureBox1.Refresh();
         }
 
-        private void butUpdate_Click(object sender, EventArgs e)
-        {
-            repaintArea(pbgr);
-            pictureBox1.Refresh();
-        }
-
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (tabControl1.SelectedIndex == 0)
             {
                 g_eTool = ETool.K_TOOL_AREA;
-                g_nGridSize = 32;
 
                 repaintArea(pbgr);
-                pictureBox1.Refresh();
             }
             else if (tabControl1.SelectedIndex == 1)
             {
                 g_eTool = ETool.K_TOOL_GENERATOR;
-                g_nGridSize = 16;
 
                 repaintArea(pbgr);
-                pictureBox1.Refresh();
             }
         }
 
@@ -570,6 +668,26 @@ namespace circleEnvelope
                 area.ComputeInternalData();
             }
 
+            repaintArea(pbgr);
+        }
+
+        private void butGenerate_Click(object sender, EventArgs e)
+        {
+            ArrayList inventory = new ArrayList();
+
+            foreach (CAreaDesc ad in m_arrAreas)
+            {
+                // make sure we have everything computed
+                ad.ComputeInternalData();
+
+                CLevelGen.CInventoryArea ia = new CLevelGen.CInventoryArea();
+                ia.area = ad;
+                ia.nAvailable = 5;
+                ia.nConsumed = 0;
+                inventory.Add(ia);
+            }
+
+            LevelGenerator.GenerateLevel(inventory);
             repaintArea(pbgr);
         }
 

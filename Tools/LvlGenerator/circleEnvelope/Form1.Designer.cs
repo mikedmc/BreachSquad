@@ -30,10 +30,12 @@
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.butClear = new System.Windows.Forms.Button();
-            this.butUpdate = new System.Windows.Forms.Button();
+            this.butGenerate = new System.Windows.Forms.Button();
             this.lbAreas = new System.Windows.Forms.ListBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabAreas = new System.Windows.Forms.TabPage();
+            this.label2 = new System.Windows.Forms.Label();
+            this.tb_areaName = new System.Windows.Forms.TextBox();
             this.butSaveArea = new System.Windows.Forms.Button();
             this.tabGenerator = new System.Windows.Forms.TabPage();
             this.but_DelArea = new System.Windows.Forms.Button();
@@ -42,12 +44,11 @@
             this.loadAreasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAreasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
-            this.tb_areaName = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.but_ComputeFlags = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabAreas.SuspendLayout();
+            this.tabGenerator.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -73,15 +74,15 @@
             this.butClear.UseVisualStyleBackColor = true;
             this.butClear.Click += new System.EventHandler(this.butClear_Click);
             // 
-            // butUpdate
+            // butGenerate
             // 
-            this.butUpdate.Location = new System.Drawing.Point(12, 642);
-            this.butUpdate.Name = "butUpdate";
-            this.butUpdate.Size = new System.Drawing.Size(84, 25);
-            this.butUpdate.TabIndex = 2;
-            this.butUpdate.Text = "Update";
-            this.butUpdate.UseVisualStyleBackColor = true;
-            this.butUpdate.Click += new System.EventHandler(this.butUpdate_Click);
+            this.butGenerate.Location = new System.Drawing.Point(6, 6);
+            this.butGenerate.Name = "butGenerate";
+            this.butGenerate.Size = new System.Drawing.Size(166, 25);
+            this.butGenerate.TabIndex = 2;
+            this.butGenerate.Text = "Generate";
+            this.butGenerate.UseVisualStyleBackColor = true;
+            this.butGenerate.Click += new System.EventHandler(this.butGenerate_Click);
             // 
             // lbAreas
             // 
@@ -118,6 +119,23 @@
             this.tabAreas.Text = "Areas";
             this.tabAreas.UseVisualStyleBackColor = true;
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 72);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(58, 13);
+            this.label2.TabIndex = 4;
+            this.label2.Text = "Area name";
+            // 
+            // tb_areaName
+            // 
+            this.tb_areaName.Location = new System.Drawing.Point(6, 88);
+            this.tb_areaName.Name = "tb_areaName";
+            this.tb_areaName.Size = new System.Drawing.Size(166, 20);
+            this.tb_areaName.TabIndex = 3;
+            this.tb_areaName.TextChanged += new System.EventHandler(this.tb_areaName_TextChanged);
+            // 
             // butSaveArea
             // 
             this.butSaveArea.Location = new System.Drawing.Point(6, 6);
@@ -130,10 +148,11 @@
             // 
             // tabGenerator
             // 
+            this.tabGenerator.Controls.Add(this.butGenerate);
             this.tabGenerator.Location = new System.Drawing.Point(4, 22);
             this.tabGenerator.Name = "tabGenerator";
             this.tabGenerator.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGenerator.Size = new System.Drawing.Size(178, 160);
+            this.tabGenerator.Size = new System.Drawing.Size(178, 235);
             this.tabGenerator.TabIndex = 1;
             this.tabGenerator.Text = "Generator";
             this.tabGenerator.UseVisualStyleBackColor = true;
@@ -170,14 +189,14 @@
             // loadAreasToolStripMenuItem
             // 
             this.loadAreasToolStripMenuItem.Name = "loadAreasToolStripMenuItem";
-            this.loadAreasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadAreasToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.loadAreasToolStripMenuItem.Text = "Load Areas...";
             this.loadAreasToolStripMenuItem.Click += new System.EventHandler(this.loadAreasToolStripMenuItem_Click);
             // 
             // saveAreasToolStripMenuItem
             // 
             this.saveAreasToolStripMenuItem.Name = "saveAreasToolStripMenuItem";
-            this.saveAreasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveAreasToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.saveAreasToolStripMenuItem.Text = "Save Areas...";
             this.saveAreasToolStripMenuItem.Click += new System.EventHandler(this.saveAreasToolStripMenuItem_Click);
             // 
@@ -189,23 +208,6 @@
             this.label1.Size = new System.Drawing.Size(34, 13);
             this.label1.TabIndex = 9;
             this.label1.Text = "Areas";
-            // 
-            // tb_areaName
-            // 
-            this.tb_areaName.Location = new System.Drawing.Point(6, 88);
-            this.tb_areaName.Name = "tb_areaName";
-            this.tb_areaName.Size = new System.Drawing.Size(166, 20);
-            this.tb_areaName.TabIndex = 3;
-            this.tb_areaName.TextChanged += new System.EventHandler(this.tb_areaName_TextChanged);
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 72);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(58, 13);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "Area name";
             // 
             // but_ComputeFlags
             // 
@@ -227,7 +229,6 @@
             this.Controls.Add(this.but_DelArea);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.lbAreas);
-            this.Controls.Add(this.butUpdate);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -238,6 +239,7 @@
             this.tabControl1.ResumeLayout(false);
             this.tabAreas.ResumeLayout(false);
             this.tabAreas.PerformLayout();
+            this.tabGenerator.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -249,7 +251,7 @@
 
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button butClear;
-        private System.Windows.Forms.Button butUpdate;
+        private System.Windows.Forms.Button butGenerate;
         private System.Windows.Forms.ListBox lbAreas;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabAreas;
