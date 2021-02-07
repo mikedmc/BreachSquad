@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Collections;
+using System.Windows.Forms;
 
 namespace circleEnvelope
 {
@@ -118,6 +119,7 @@ namespace circleEnvelope
             return null;
         }
 
+        //#TODO: !!!sa ma asigur si ca nu sunt vecini care au iesiri neocupate spre blocks solide fara intrare de pe iarea
         bool IsZoneClear(CInventoryArea iarea, Point vPos)
         {
             Rectangle AABBtest = iarea.area.AABB;
@@ -131,7 +133,7 @@ namespace circleEnvelope
                     // check map occupation only on occupied blocks in current test area
                     if (iarea.area.blocks[xx + iarea.area.AABB.X][yy + iarea.area.AABB.Y].bFilled)
                     {
-                        Form1.CGridCell block = GetPlacedBlockAt(new Point(xx + vPos.X, vPos.Y));
+                        Form1.CGridCell block = GetPlacedBlockAt(new Point(xx + vPos.X, yy + vPos.Y));
                         if ((block != null) && (block.bFilled))
                             return false;
                     }
@@ -149,31 +151,47 @@ namespace circleEnvelope
             if (parentConn.dir == Form1.K_DIR_RIGHT) nDirFlag = Form1.DIRFLAG_LEFT;
             if (parentConn.dir == Form1.K_DIR_DOWN) nDirFlag = Form1.DIRFLAG_UP;
 
+            Point vDirOff = Form1.DIR_OFFSET(parentConn.dir);
+            Point vStitchPt = new Point(parentConn.pos.X + parent.AABB.X, parentConn.pos.Y + parent.AABB.Y);
+            vStitchPt.X += vDirOff.X; vStitchPt.Y += vDirOff.Y;
+
             ArrayList availableList = FilterAreas(inventory, 2, 5, nDirFlag);
             ShuffleList(availableList);
 
-            foreach (CInventoryArea iarea in inventory)
+            foreach (CInventoryArea iarea in availableList)
             {
                 // find position of connection point
                 Point tryConnPt;
                 int tryConnDir = Form1.INVERSE_DIR(parentConn.dir);
+                //#TODO: sa ia o lista cu toti conectorii posibili si sa le faca shuffle si sa ii incerce pe rand, si sa ii si testeze pe rand daca se conecteaza corect
                 if (iarea.area.GetConnectorPos(tryConnDir, out tryConnPt))
                 {
+                    // bring connector pos in relative space
                     tryConnPt.X -= iarea.area.AABB.X;
                     tryConnPt.Y -= iarea.area.AABB.Y;
 
-                    Point vStitchPt = new Point(parentConn.pos.X + parent.AABB.X, parentConn.pos.Y + parent.AABB.Y);
-                    Point vDirOff = Form1.DIR_OFFSET(parentConn.dir);
-                    vStitchPt.X += vDirOff.X; vStitchPt.Y += vDirOff.Y;
                     // find origin for area to place
                     Point tryPos = new Point(vStitchPt.X - tryConnPt.X, vStitchPt.Y - tryConnPt.Y);
-                    // see if area is clear
+                    // see if area is clear 
                     if (IsZoneClear(iarea, tryPos))
                     {
+                        // consume from set
+                        iarea.nConsumed++;
                         // all good, add new area
                         CPlacedArea na = new CPlacedArea(iarea.area, tryPos);
                         na.nGeneration = nGeneration;
-                        iarea.nConsumed++;
+                        // point parent connection to this
+                        parentConn.pConnectedArea = na;
+                        //make child point to parent too
+                        Point vStitchLocal = new Point(vStitchPt.X - na.AABB.X, vStitchPt.Y - na.AABB.Y);
+                        foreach (CPlacedArea.CAreaConnector con in na.arrConnections)
+                        {
+                            if (con.pos == vStitchLocal)
+                            {
+                                con.pConnectedArea = parent;
+                                break;
+                            }
+                        }
 
                         m_arrPlaced.Add(na);
 
@@ -186,7 +204,7 @@ namespace circleEnvelope
         }
 
 
-        public bool GenerateLevel(ArrayList inventory)
+        public bool GenerateLevel(ArrayList inventory, int maxDepth)
         {
             m_arrPlaced.RemoveRange(0, m_arrPlaced.Count);
             
@@ -204,32 +222,48 @@ namespace circleEnvelope
 
                 int tries = 0;
                 bool bFinished = false;
-                int nMaxDepth = 2;
+                int nMaxDepth = maxDepth;
                 int nCurrGeneration = 0;
 
-                // for each placed area of current generation:
-                for (int kk = 0; kk < m_arrPlaced.Count; kk++)
+                for (int nDepth = 0; nDepth < nMaxDepth; nDepth++)
                 {
-                    // find placed area
-                    CPlacedArea placed = m_arrPlaced[kk] as CPlacedArea;
-                    if (placed.nGeneration != nCurrGeneration)
-                        continue;
-                    // get the shuffled connectors
-                    ArrayList arrConn = new ArrayList();
-                    for (int ncon = 0; ncon < placed.arrConnections.Count; ncon++)
+                    bool bGenerationPlaced = true;
+                    // for each placed area of current generation:
+                    int nPlacedCnt = m_arrPlaced.Count; //save count before, it grows
+                    for (int kk = 0; kk < nPlacedCnt; kk++)
                     {
-                        // only add not connected connectors
-                        if(placed.arrConnections[ncon].pConnectedArea == null)
-                            arrConn.Add(placed.arrConnections[ncon]);
+                        // find placed area
+                        CPlacedArea placed = m_arrPlaced[kk] as CPlacedArea;
+                        if (placed.nGeneration != nCurrGeneration)
+                            continue;
+                        // get the shuffled connectors
+                        ArrayList arrConn = new ArrayList();
+                        for (int ncon = 0; ncon < placed.arrConnections.Count; ncon++)
+                        {
+                            // only add not connected connectors
+                            if (placed.arrConnections[ncon].pConnectedArea == null)
+                                arrConn.Add(placed.arrConnections[ncon]);
+                        }
+                        ShuffleList(arrConn);
+                        // take connectors one by one:
+                        for (int ncon = 0; ncon < arrConn.Count; ncon++)
+                        {
+                            CPlacedArea.CAreaConnector curcon = arrConn[ncon] as CPlacedArea.CAreaConnector;
+                            bool bPlaced = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration + 1);
+                            if (!bPlaced)
+                            {
+                                MessageBox.Show("Could not place area!");
+                                bGenerationPlaced = false;
+                            }
+                        }
                     }
-                    ShuffleList(arrConn);
-                    // take connectors one by one:
-                    for (int ncon = 0; ncon < arrConn.Count; ncon++)
-                    {
-                        bool bPlaced = PlaceRandomArea(inventory, placed, arrConn[ncon] as CPlacedArea.CAreaConnector, 10);
-                    }
+
+                    // AL GOOD, prepare next generation
+                    if(bGenerationPlaced == true)
+                        nCurrGeneration++;
                 }
-             }
+            }
+
 
             // find level AABB
             Point vMin = new Point(1000000, 1000000);

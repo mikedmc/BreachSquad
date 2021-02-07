@@ -68,7 +68,7 @@ namespace circleEnvelope
         public const int K_DIRS_CNT = 5;
 
         // level generator class
-        CLevelGen LevelGenerator = new CLevelGen();
+        CLevelGen g_LevelGen = new CLevelGen();
 
         //--- ZONELE DE INFLUENTA ---
         public class CGridCell
@@ -247,6 +247,13 @@ namespace circleEnvelope
             }
         }
 
+        void DrawArrow(Graphics gr, PointF vCenter, int nDirection, float fSize)
+        {
+            Point vOff = DIR_OFFSET(nDirection);
+            PointF vDir = new PointF((float)vOff.X * fSize + vCenter.X, (float)vOff.Y * fSize + vCenter.Y);
+            gr.DrawLine(Pens.Red, vCenter, vDir);
+        }
+
         //paint grid
         void PaintGrid(Graphics gr)
         {
@@ -298,23 +305,41 @@ namespace circleEnvelope
 
                 case ETool.K_TOOL_GENERATOR:
                     {
-                        int blSize = 10;
+                        Font fnt = new Font("Arial", 8, FontStyle.Regular);
+                        int scale = 10;
+                        if ((g_LevelGen.m_levelAABB.Width > 0) && (g_LevelGen.m_levelAABB.Height > 0))
+                            scale = Math.Min(pictureBox1.Width / g_LevelGen.m_levelAABB.Width, pictureBox1.Height / g_LevelGen.m_levelAABB.Height);
 
-                        foreach (CLevelGen.CPlacedArea pa in LevelGenerator.m_arrPlaced)
+                        int blSize = scale;
+
+                        foreach (CLevelGen.CPlacedArea pa in g_LevelGen.m_arrPlaced)
                         {
-                            Point vOrigin = new Point(pa.AABB.X - LevelGenerator.m_levelAABB.X, pa.AABB.Y - LevelGenerator.m_levelAABB.Y);
+                            Point vOrigin = new Point(pa.AABB.X - g_LevelGen.m_levelAABB.X, pa.AABB.Y - g_LevelGen.m_levelAABB.Y);
                             vOrigin.X *= blSize; vOrigin.Y *= blSize;
-                            gr.DrawRectangle(Pens.Green, new Rectangle(vOrigin.X, vOrigin.Y, pa.AABB.Width * blSize, pa.AABB.Height * blSize));
+                            Rectangle paRect = new Rectangle(vOrigin.X, vOrigin.Y, pa.AABB.Width * blSize, pa.AABB.Height * blSize);
+
+                            int nMinLuminance = Math.Max(255 - pa.nGeneration * 15, 40);
+                            SolidBrush brcol = new SolidBrush(Color.FromArgb(128, 128, nMinLuminance));
+                            Brush brdark = new SolidBrush(Color.FromArgb(128, 40,40,40));
+
+                            gr.FillRectangle(brdark, paRect);
                             for (int xx = 0; xx < pa.AABB.Width; xx++)
                             {
                                 for (int yy = 0; yy < pa.AABB.Height; yy++)
                                 {
                                     if (pa.blocks[xx, yy].connectionDir != 0)
-                                        gr.FillRectangle(Brushes.Red, new Rectangle(vOrigin.X + xx * blSize, vOrigin.Y + yy * blSize, blSize, blSize));
+                                    {
+                                        gr.FillRectangle(Brushes.DarkGreen, new Rectangle(vOrigin.X + xx * blSize, vOrigin.Y + yy * blSize, blSize, blSize));
+                                        DrawArrow(gr, new PointF(vOrigin.X + xx * blSize + blSize / 2.0f, vOrigin.Y + yy * blSize + blSize / 2.0f),
+                                            pa.blocks[xx, yy].connectionDir, blSize / 2.0f);
+                                    }
                                     else if (pa.blocks[xx, yy].bFilled)
-                                        gr.FillRectangle(Brushes.CadetBlue, new Rectangle(vOrigin.X + xx * blSize, vOrigin.Y + yy * blSize, blSize, blSize));
+                                        gr.FillRectangle(brcol, new Rectangle(vOrigin.X + xx * blSize, vOrigin.Y + yy * blSize, blSize, blSize));
                                 }
                             }
+                            // generation
+                            gr.DrawString(pa.nGeneration.ToString(), fnt, Brushes.White, new Point(paRect.X + paRect.Width/2, paRect.Y + paRect.Height/2));
+                            gr.DrawRectangle(new Pen(Color.FromArgb(60,60,60)), paRect);
                         }
                     }
                     break;
@@ -383,56 +408,6 @@ namespace circleEnvelope
             return area;
         }
 
-        public void UpdateArea(CAreaDesc area)
-        {
-            /*
-            int vMinX = gridW, vMinY = gridH;
-            int vMaxX = 0, vMaxY = 0;
-            int blocks = 0;
-            for (int yy = 0; yy < gridH; yy++)
-            {
-                for (int xx = 0; xx < gridW; xx++)
-                {
-                    if (!tiles[xx][yy].bFilled)
-                        continue;
-                    blocks++;
-                    if (xx > vMaxX) vMaxX = xx;
-                    if (xx < vMinX) vMinX = xx;
-                    if (yy > vMaxY) vMaxY = yy;
-                    if (yy < vMinY) vMinY = yy;
-                }
-            }
-
-            if (blocks == 0)
-            {
-                MessageBox.Show("Draw at least one block!");
-                return;
-            }
-
-            // save it now
-            CAreaDesc area = new CAreaDesc();
-            area.ID = g_nAreaID;
-            g_nAreaID++;
-            area.size.Width = gridW; // vMaxX - vMinX + 1;
-            area.size.Height = gridH; // vMaxY - vMinY + 1;
-            area.blocks = new CGridCell[area.size.Width][];
-            for (int xx = 0; xx < area.size.Width; xx++)
-            {
-                area.blocks[xx] = new CGridCell[area.size.Height];
-                for (int yy = 0; yy < area.size.Height; yy++)
-                {
-                    area.blocks[xx][yy] = new CGridCell();
-                    area.blocks[xx][yy] = tiles[vMinX + xx][vMinY + yy];
-                }
-            }
-            //#TODO: should parse connection blocks and set flags
-
-            area.strName = "A" + area.ID + "_" + area.size.Width + "x" + area.size.Height;
-
-            m_arrAreas.Add(area);
-            RefreshAreasList(m_arrAreas.Count - 1);
-            */
-        }
 
         // -1 to keep old selection
         public void RefreshAreasList(int selectedIdx)
@@ -687,7 +662,8 @@ namespace circleEnvelope
                 inventory.Add(ia);
             }
 
-            LevelGenerator.GenerateLevel(inventory);
+            g_LevelGen.GenerateLevel(inventory, (int)numGenerations.Value);
+
             repaintArea(pbgr);
         }
 

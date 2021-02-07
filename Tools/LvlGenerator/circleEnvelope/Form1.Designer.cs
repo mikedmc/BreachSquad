@@ -45,11 +45,14 @@
             this.saveAreasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.but_ComputeFlags = new System.Windows.Forms.Button();
+            this.numGenerations = new System.Windows.Forms.NumericUpDown();
+            this.generations = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabAreas.SuspendLayout();
             this.tabGenerator.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numGenerations)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -148,6 +151,8 @@
             // 
             // tabGenerator
             // 
+            this.tabGenerator.Controls.Add(this.generations);
+            this.tabGenerator.Controls.Add(this.numGenerations);
             this.tabGenerator.Controls.Add(this.butGenerate);
             this.tabGenerator.Location = new System.Drawing.Point(4, 22);
             this.tabGenerator.Name = "tabGenerator";
@@ -219,6 +224,32 @@
             this.but_ComputeFlags.UseVisualStyleBackColor = true;
             this.but_ComputeFlags.Click += new System.EventHandler(this.but_ComputeFlags_Click);
             // 
+            // numGenerations
+            // 
+            this.numGenerations.Location = new System.Drawing.Point(98, 37);
+            this.numGenerations.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numGenerations.Name = "numGenerations";
+            this.numGenerations.Size = new System.Drawing.Size(74, 20);
+            this.numGenerations.TabIndex = 3;
+            this.numGenerations.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+            // 
+            // generations
+            // 
+            this.generations.AutoSize = true;
+            this.generations.Location = new System.Drawing.Point(6, 39);
+            this.generations.Name = "generations";
+            this.generations.Size = new System.Drawing.Size(62, 13);
+            this.generations.TabIndex = 4;
+            this.generations.Text = "generations";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -240,8 +271,10 @@
             this.tabAreas.ResumeLayout(false);
             this.tabAreas.PerformLayout();
             this.tabGenerator.ResumeLayout(false);
+            this.tabGenerator.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numGenerations)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -266,6 +299,8 @@
         private System.Windows.Forms.TextBox tb_areaName;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button but_ComputeFlags;
+        private System.Windows.Forms.Label generations;
+        private System.Windows.Forms.NumericUpDown numGenerations;
     }
 }
 
