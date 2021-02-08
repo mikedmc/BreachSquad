@@ -119,27 +119,115 @@ namespace circleEnvelope
             return null;
         }
 
-        //#TODO: !!!sa ma asigur si ca nu sunt vecini care au iesiri neocupate spre blocks solide fara intrare de pe iarea
         bool IsZoneClear(CInventoryArea iarea, Point vPos)
         {
             Rectangle AABBtest = iarea.area.AABB;
             AABBtest.X = vPos.X;
             AABBtest.Y = vPos.Y;
-
-            for (int xx = 0; xx < iarea.area.AABB.Width; xx++)
+            // check overlapping blocks
+            for (int xx = 0; xx < AABBtest.Width; xx++)
             {
-                for (int yy = 0; yy < iarea.area.AABB.Height; yy++)
+                for (int yy = 0; yy < AABBtest.Height; yy++)
                 {
                     // check map occupation only on occupied blocks in current test area
-                    if (iarea.area.blocks[xx + iarea.area.AABB.X][yy + iarea.area.AABB.Y].bFilled)
+                    Form1.CGridCell block = iarea.area.blocks[xx + iarea.area.AABB.X][yy + iarea.area.AABB.Y];
+                    if (block.bFilled)
                     {
-                        Form1.CGridCell block = GetPlacedBlockAt(new Point(xx + vPos.X, yy + vPos.Y));
-                        if ((block != null) && (block.bFilled))
+                        Form1.CGridCell blockPlaced = GetPlacedBlockAt(new Point(xx + vPos.X, yy + vPos.Y));
+                        if ((blockPlaced != null) && (blockPlaced.bFilled))
                             return false;
+                        // check borders for blocked connectors and random connections
+                        // TOP
+                        if (yy == 0)
+                        {
+                            Form1.CGridCell blockU = GetPlacedBlockAt(new Point(xx + vPos.X, yy + vPos.Y - 1));
+                            if ((blockU != null) && (blockU.bFilled))
+                            {
+                                // remote blocked connection
+                                if ((blockU.connectionDir == Form1.K_DIR_DOWN) && (block.connectionDir != Form1.K_DIR_UP))
+                                    return false;
+                                // local block blocked connection
+                                if (block.connectionDir == Form1.K_DIR_UP)
+                                {
+                                    // only allowed if remote block has matching connector
+                                    if (blockU.connectionDir != Form1.K_DIR_DOWN)
+                                        return false;
+                                    else
+                                    {
+                                        //MessageBox.Show("Random connection found UP!");
+                                    }
+                                }
+                            }
+                        }
+                        // BOTTOM
+                        if (yy == AABBtest.Height - 1)
+                        {
+                            Form1.CGridCell blockD = GetPlacedBlockAt(new Point(xx + vPos.X, yy + vPos.Y + 1));
+                            if ((blockD != null) && (blockD.bFilled))
+                            {
+                                // remote blocked connection
+                                if ((blockD.connectionDir == Form1.K_DIR_UP) && (block.connectionDir != Form1.K_DIR_DOWN))
+                                    return false;
+                                // local block blocked connection
+                                if (block.connectionDir == Form1.K_DIR_DOWN)
+                                {
+                                    // only allowed if remote block has matching connector
+                                    if (blockD.connectionDir != Form1.K_DIR_UP)
+                                        return false;
+                                    else
+                                    {
+                                        //MessageBox.Show("Random connection found DOWN!");
+                                    }
+                                }
+                            }
+                        }
+                        // LEFT
+                        if (xx == 0)
+                        {
+                            Form1.CGridCell blockL = GetPlacedBlockAt(new Point(xx + vPos.X - 1, yy + vPos.Y));
+                            if ((blockL != null) && (blockL.bFilled))
+                            {
+                                // remote blocked connection
+                                if ((blockL.connectionDir == Form1.K_DIR_RIGHT) && (block.connectionDir != Form1.K_DIR_LEFT))
+                                    return false;
+                                // local block blocked connection
+                                if (block.connectionDir == Form1.K_DIR_LEFT)
+                                {
+                                    // only allowed if remote block has matching connector
+                                    if (blockL.connectionDir != Form1.K_DIR_RIGHT)
+                                        return false;
+                                    else
+                                    {
+                                        //MessageBox.Show("Random connection found DOWN!");
+                                    }
+                                }
+                            }
+                        }
+                        // RIGHT
+                        if (xx == AABBtest.Width - 1)
+                        {
+                            Form1.CGridCell blockR = GetPlacedBlockAt(new Point(xx + vPos.X + 1, yy + vPos.Y));
+                            if ((blockR != null) && (blockR.bFilled))
+                            {
+                                // remote blocked connection
+                                if ((blockR.connectionDir == Form1.K_DIR_LEFT) && (block.connectionDir != Form1.K_DIR_RIGHT))
+                                    return false;
+                                // local block blocked connection
+                                if (block.connectionDir == Form1.K_DIR_RIGHT)
+                                {
+                                    // only allowed if remote block has matching connector
+                                    if (blockR.connectionDir != Form1.K_DIR_LEFT)
+                                        return false;
+                                    else
+                                    {
+                                        //MessageBox.Show("Random connection found DOWN!");
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
-
             return true;
         }
 
@@ -252,7 +340,7 @@ namespace circleEnvelope
                             bool bPlaced = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration + 1);
                             if (!bPlaced)
                             {
-                                MessageBox.Show("Could not place area!");
+                                //MessageBox.Show("Could not place area!");
                                 bGenerationPlaced = false;
                             }
                         }
