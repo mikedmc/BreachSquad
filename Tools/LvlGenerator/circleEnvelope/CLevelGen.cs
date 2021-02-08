@@ -214,12 +214,18 @@ namespace circleEnvelope
 
             foreach (CInventoryArea iarea in availableList)
             {
-                // find position of connection point
-                Point tryConnPt;
                 int tryConnDir = Form1.INVERSE_DIR(parentConn.dir);
-                //#TODO: sa ia o lista cu toti conectorii posibili si sa le faca shuffle si sa ii incerce pe rand, si sa ii si testeze pe rand daca se conecteaza corect
-                if (iarea.area.GetConnectorPos(tryConnDir, out tryConnPt))
+                //gets list of all connectors for a specified direction and shuffles them
+                ArrayList arrConn = null;
+                int nRetConn = iarea.area.GetConnectors(tryConnDir, out arrConn);
+                // we have no connectors that way, try next
+                if (nRetConn <= 0)
+                    continue;
+                ShuffleList(arrConn);
+                for (int kk = 0; kk < arrConn.Count; kk++)
                 {
+                    // find position of connection point
+                    Point tryConnPt = (Point)arrConn[kk];
                     // bring connector pos in relative space
                     tryConnPt.X -= iarea.area.AABB.X;
                     tryConnPt.Y -= iarea.area.AABB.Y;

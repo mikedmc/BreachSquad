@@ -102,19 +102,20 @@ namespace circleEnvelope
             public List<Point> arrConnectors = new List<Point>();
             public int areaConnDirFlags = 0;
 
-            // sa dea o lista de conectori si sa ii incerc pe toti pt fiecare piesa
-            public bool GetConnectorPos(int nDirection, out Point retpos)
+            // returns a vPoint list with all connectors for that direction
+            public int GetConnectors(int nDirection, out ArrayList arrConnPos)
             {
+                int nCnt = 0;
+                arrConnPos = new ArrayList();
                 foreach (Point pt in arrConnectors)
                 {
                     if (blocks[pt.X][pt.Y].connectionDir == nDirection)
                     {
-                        retpos = new Point(pt.X, pt.Y);
-                        return true;
+                        arrConnPos.Add(new Point(pt.X, pt.Y));
+                        nCnt++;
                     }
                 }
-                retpos = new Point();
-                return false;
+                return nCnt;
             }
 
             public void ComputeInternalData()
