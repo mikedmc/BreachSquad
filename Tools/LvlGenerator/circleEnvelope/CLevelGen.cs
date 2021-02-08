@@ -34,6 +34,23 @@ namespace circleEnvelope
 
             public int nGeneration = 0;
 
+            // returns 
+            public ArrayList GetShuffledAvailableConnectors(bool bShuffle)
+            {
+                ArrayList arrConn = new ArrayList();
+                for (int ncon = 0; ncon < arrConnections.Count; ncon++)
+                {
+                    // only add not connected connectors
+                    if (arrConnections[ncon].pConnectedArea == null)
+                        arrConn.Add(arrConnections[ncon]);
+                }
+
+                if (bShuffle)
+                    CLevelGen.ShuffleList(arrConn);
+
+                return arrConn;
+            }
+
             public CPlacedArea(Form1.CAreaDesc area, Point vPos)
             {
                 AABB = area.AABB;
@@ -66,7 +83,7 @@ namespace circleEnvelope
             }
         }
 
-        Random rnd = new Random();
+        public static Random rnd = new Random();
 
         Point posStart = new Point(10000, 10000);
         // placed CPlacedArea elements
@@ -90,7 +107,7 @@ namespace circleEnvelope
             return retList;
         }
 
-        public void ShuffleList(ArrayList list)
+        public static void ShuffleList(ArrayList list)
         {
             int nCount = list.Count;
             if (nCount <= 1)
@@ -137,90 +154,31 @@ namespace circleEnvelope
                         if ((blockPlaced != null) && (blockPlaced.bFilled))
                             return false;
                         // check borders for blocked connectors and random connections
-                        // TOP
-                        if (yy == 0)
+                        int[] directions = new int[] { Form1.K_DIR_LEFT, Form1.K_DIR_UP, Form1.K_DIR_RIGHT, Form1.K_DIR_DOWN };
+
+                        // check on all neighbours as blocks might overlap
+                        for (int kk = 0; kk < Form1.K_DIRS_CNT; kk++)
                         {
-                            Form1.CGridCell blockU = GetPlacedBlockAt(new Point(xx + vPos.X, yy + vPos.Y - 1));
-                            if ((blockU != null) && (blockU.bFilled))
+                            Point vOff = Form1.DIR_OFFSET(directions[kk]);
+                            Form1.CGridCell pNeigh = GetPlacedBlockAt(new Point(xx + vPos.X + vOff.X, yy + vPos.Y + vOff.Y));
+                            // for each neighbour that is alrady placed
+                            if ((pNeigh != null) && (pNeigh.bFilled))
                             {
+                                int dir = directions[kk];
+                                int dir_inv = Form1.INVERSE_DIR(directions[kk]);
                                 // remote blocked connection
-                                if ((blockU.connectionDir == Form1.K_DIR_DOWN) && (block.connectionDir != Form1.K_DIR_UP))
+                                if ((pNeigh.connectionDir == dir_inv) && (block.connectionDir != dir))
                                     return false;
                                 // local block blocked connection
-                                if (block.connectionDir == Form1.K_DIR_UP)
+                                if (block.connectionDir == dir)
                                 {
                                     // only allowed if remote block has matching connector
-                                    if (blockU.connectionDir != Form1.K_DIR_DOWN)
+                                    if (pNeigh.connectionDir != dir_inv)
                                         return false;
                                     else
                                     {
+                                        // check for random connection using the area generations or current stitch point
                                         //MessageBox.Show("Random connection found UP!");
-                                    }
-                                }
-                            }
-                        }
-                        // BOTTOM
-                        if (yy == AABBtest.Height - 1)
-                        {
-                            Form1.CGridCell blockD = GetPlacedBlockAt(new Point(xx + vPos.X, yy + vPos.Y + 1));
-                            if ((blockD != null) && (blockD.bFilled))
-                            {
-                                // remote blocked connection
-                                if ((blockD.connectionDir == Form1.K_DIR_UP) && (block.connectionDir != Form1.K_DIR_DOWN))
-                                    return false;
-                                // local block blocked connection
-                                if (block.connectionDir == Form1.K_DIR_DOWN)
-                                {
-                                    // only allowed if remote block has matching connector
-                                    if (blockD.connectionDir != Form1.K_DIR_UP)
-                                        return false;
-                                    else
-                                    {
-                                        //MessageBox.Show("Random connection found DOWN!");
-                                    }
-                                }
-                            }
-                        }
-                        // LEFT
-                        if (xx == 0)
-                        {
-                            Form1.CGridCell blockL = GetPlacedBlockAt(new Point(xx + vPos.X - 1, yy + vPos.Y));
-                            if ((blockL != null) && (blockL.bFilled))
-                            {
-                                // remote blocked connection
-                                if ((blockL.connectionDir == Form1.K_DIR_RIGHT) && (block.connectionDir != Form1.K_DIR_LEFT))
-                                    return false;
-                                // local block blocked connection
-                                if (block.connectionDir == Form1.K_DIR_LEFT)
-                                {
-                                    // only allowed if remote block has matching connector
-                                    if (blockL.connectionDir != Form1.K_DIR_RIGHT)
-                                        return false;
-                                    else
-                                    {
-                                        //MessageBox.Show("Random connection found DOWN!");
-                                    }
-                                }
-                            }
-                        }
-                        // RIGHT
-                        if (xx == AABBtest.Width - 1)
-                        {
-                            Form1.CGridCell blockR = GetPlacedBlockAt(new Point(xx + vPos.X + 1, yy + vPos.Y));
-                            if ((blockR != null) && (blockR.bFilled))
-                            {
-                                // remote blocked connection
-                                if ((blockR.connectionDir == Form1.K_DIR_LEFT) && (block.connectionDir != Form1.K_DIR_RIGHT))
-                                    return false;
-                                // local block blocked connection
-                                if (block.connectionDir == Form1.K_DIR_RIGHT)
-                                {
-                                    // only allowed if remote block has matching connector
-                                    if (blockR.connectionDir != Form1.K_DIR_LEFT)
-                                        return false;
-                                    else
-                                    {
-                                        //MessageBox.Show("Random connection found DOWN!");
                                     }
                                 }
                             }
@@ -231,7 +189,7 @@ namespace circleEnvelope
             return true;
         }
 
-        public bool PlaceRandomArea(ArrayList inventory, CPlacedArea parent, CPlacedArea.CAreaConnector parentConn, int nGeneration)
+        public bool PlaceRandomArea(ArrayList inventory, CPlacedArea parent, CPlacedArea.CAreaConnector parentConn, int nGeneration, int nMaxGeneration)
         {
             int nDirFlag = Form1.DIRFLAG_ANY;
             if (parentConn.dir == Form1.K_DIR_LEFT) nDirFlag = Form1.DIRFLAG_RIGHT;
@@ -243,7 +201,15 @@ namespace circleEnvelope
             Point vStitchPt = new Point(parentConn.pos.X + parent.AABB.X, parentConn.pos.Y + parent.AABB.Y);
             vStitchPt.X += vDirOff.X; vStitchPt.Y += vDirOff.Y;
 
-            ArrayList availableList = FilterAreas(inventory, 2, 5, nDirFlag);
+            // last generation only adds endings (here it should follow the level story data)
+            int nMinConn = 2;
+            int nMaxConn = 5;
+            if (nGeneration >= nMaxGeneration)
+            {
+                nMinConn = 1;
+                nMaxConn = 1;
+            }
+            ArrayList availableList = FilterAreas(inventory, nMinConn, nMaxConn, nDirFlag);
             ShuffleList(availableList);
 
             foreach (CInventoryArea iarea in availableList)
@@ -325,19 +291,12 @@ namespace circleEnvelope
                         if (placed.nGeneration != nCurrGeneration)
                             continue;
                         // get the shuffled connectors
-                        ArrayList arrConn = new ArrayList();
-                        for (int ncon = 0; ncon < placed.arrConnections.Count; ncon++)
-                        {
-                            // only add not connected connectors
-                            if (placed.arrConnections[ncon].pConnectedArea == null)
-                                arrConn.Add(placed.arrConnections[ncon]);
-                        }
-                        ShuffleList(arrConn);
+                        ArrayList arrConn = placed.GetShuffledAvailableConnectors(true);
                         // take connectors one by one:
                         for (int ncon = 0; ncon < arrConn.Count; ncon++)
                         {
                             CPlacedArea.CAreaConnector curcon = arrConn[ncon] as CPlacedArea.CAreaConnector;
-                            bool bPlaced = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration + 1);
+                            bool bPlaced = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration + 1, nMaxDepth);
                             if (!bPlaced)
                             {
                                 //MessageBox.Show("Could not place area!");

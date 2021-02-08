@@ -65,7 +65,7 @@ namespace circleEnvelope
             }
         }
         // reset to 0 after this
-        public const int K_DIRS_CNT = 5;
+        public const int K_DIRS_CNT = 4;
 
         // level generator class
         CLevelGen g_LevelGen = new CLevelGen();
@@ -233,6 +233,7 @@ namespace circleEnvelope
                 m_area.blocks[x][y].Reset();
         }
 
+        // changes a block connected state
         public void ToggleGridConnected(int x, int y)
         {
             if (m_area == null)
@@ -242,7 +243,7 @@ namespace circleEnvelope
             if (m_area.blocks[x][y].bFilled)
             {
                 m_area.blocks[x][y].connectionDir++;
-                if (m_area.blocks[x][y].connectionDir >= K_DIRS_CNT)
+                if (m_area.blocks[x][y].connectionDir > K_DIRS_CNT)
                     m_area.blocks[x][y].connectionDir = 0;
             }
         }
