@@ -47,6 +47,7 @@
             this.saveAreasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.but_ComputeFlags = new System.Windows.Forms.Button();
+            this.butCloneArea = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabAreas.SuspendLayout();
@@ -69,7 +70,7 @@
             // 
             // butClear
             // 
-            this.butClear.Location = new System.Drawing.Point(6, 37);
+            this.butClear.Location = new System.Drawing.Point(6, 165);
             this.butClear.Name = "butClear";
             this.butClear.Size = new System.Drawing.Size(166, 25);
             this.butClear.TabIndex = 1;
@@ -110,6 +111,7 @@
             // 
             // tabAreas
             // 
+            this.tabAreas.Controls.Add(this.butCloneArea);
             this.tabAreas.Controls.Add(this.label2);
             this.tabAreas.Controls.Add(this.tb_areaName);
             this.tabAreas.Controls.Add(this.butSaveArea);
@@ -125,7 +127,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 72);
+            this.label2.Location = new System.Drawing.Point(6, 193);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(58, 13);
             this.label2.TabIndex = 4;
@@ -133,7 +135,7 @@
             // 
             // tb_areaName
             // 
-            this.tb_areaName.Location = new System.Drawing.Point(6, 88);
+            this.tb_areaName.Location = new System.Drawing.Point(6, 209);
             this.tb_areaName.Name = "tb_areaName";
             this.tb_areaName.Size = new System.Drawing.Size(166, 20);
             this.tb_areaName.TabIndex = 3;
@@ -145,7 +147,7 @@
             this.butSaveArea.Name = "butSaveArea";
             this.butSaveArea.Size = new System.Drawing.Size(166, 25);
             this.butSaveArea.TabIndex = 2;
-            this.butSaveArea.Text = "Add Area";
+            this.butSaveArea.Text = "Add New Area";
             this.butSaveArea.UseVisualStyleBackColor = true;
             this.butSaveArea.Click += new System.EventHandler(this.butSaveArea_Click);
             // 
@@ -250,6 +252,16 @@
             this.but_ComputeFlags.UseVisualStyleBackColor = true;
             this.but_ComputeFlags.Click += new System.EventHandler(this.but_ComputeFlags_Click);
             // 
+            // butCloneArea
+            // 
+            this.butCloneArea.Location = new System.Drawing.Point(6, 37);
+            this.butCloneArea.Name = "butCloneArea";
+            this.butCloneArea.Size = new System.Drawing.Size(166, 25);
+            this.butCloneArea.TabIndex = 5;
+            this.butCloneArea.Text = "Clone Area";
+            this.butCloneArea.UseVisualStyleBackColor = true;
+            this.butCloneArea.Click += new System.EventHandler(this.butCloneArea_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -301,6 +313,7 @@
         private System.Windows.Forms.Button but_ComputeFlags;
         private System.Windows.Forms.Label generations;
         private System.Windows.Forms.NumericUpDown numGenerations;
+        private System.Windows.Forms.Button butCloneArea;
     }
 }
 

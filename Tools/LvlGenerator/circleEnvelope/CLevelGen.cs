@@ -189,6 +189,54 @@ namespace circleEnvelope
             return true;
         }
 
+        public void RemoveChildrenOf(CPlacedArea parent)
+        {
+            for (int kk = m_arrPlaced.Count - 1; kk >= 0; kk--) 
+            {
+                CPlacedArea area = m_arrPlaced[kk] as CPlacedArea;
+                // skip lower generation areas (parents)
+                if (area.nGeneration <= parent.nGeneration)
+                    continue;
+                foreach (CPlacedArea.CAreaConnector pconn in area.arrConnections)
+                {
+                    if (pconn.pConnectedArea == parent)
+                    {
+                        //remove and break
+                        m_arrPlaced.RemoveAt(kk);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // removes all generations >= nMinGeneration
+        public void RemoveGenerations(int nMinGeneration)
+        {
+            Console.WriteLine("Removing generations >= " + nMinGeneration);
+            // unlink remaining generations from useless ones
+            for (int kk = 0; kk < m_arrPlaced.Count; kk++)
+            {
+                CPlacedArea area = m_arrPlaced[kk] as CPlacedArea;
+                if (area.nGeneration < nMinGeneration)
+                {
+                    foreach (CPlacedArea.CAreaConnector conn in area.arrConnections)
+                    {
+                        if (conn.pConnectedArea.nGeneration >= nMinGeneration)
+                            conn.pConnectedArea = null;
+                    }
+                }
+            }
+            // delete useless generations
+            for (int kk = m_arrPlaced.Count - 1; kk >= 0; kk--)
+            {
+                CPlacedArea area = m_arrPlaced[kk] as CPlacedArea;
+                if (area.nGeneration >= nMinGeneration)
+                {
+                    m_arrPlaced.RemoveAt(kk);
+                }
+            }
+        }
+
         public bool PlaceRandomArea(ArrayList inventory, CPlacedArea parent, CPlacedArea.CAreaConnector parentConn, int nGeneration, int nMaxGeneration)
         {
             int nDirFlag = Form1.DIRFLAG_ANY;
@@ -211,6 +259,11 @@ namespace circleEnvelope
             }
             ArrayList availableList = FilterAreas(inventory, nMinConn, nMaxConn, nDirFlag);
             ShuffleList(availableList);
+
+            if (availableList.Count == 0)
+            {
+                Console.WriteLine("Insufficient rooms in inventory! dirflag:" + nDirFlag);
+            }
 
             foreach (CInventoryArea iarea in availableList)
             {
@@ -266,8 +319,11 @@ namespace circleEnvelope
 
         public bool GenerateLevel(ArrayList inventory, int maxDepth)
         {
+            Console.WriteLine("\n\nGenerating level...");
             m_arrPlaced.RemoveRange(0, m_arrPlaced.Count);
-            
+
+            bool bLevelGenerated = true;
+
             // add first area, starting area (only one exit)
             ArrayList availableList = FilterAreas(inventory, 1, 1, Form1.DIRFLAG_ANY);
             if (availableList.Count > 0)
@@ -279,59 +335,112 @@ namespace circleEnvelope
                 selarea.nConsumed++;
                 m_arrPlaced.Add(pa);
 
-
-                int tries = 0;
-                bool bFinished = false;
                 int nMaxDepth = maxDepth;
-                int nCurrGeneration = 0;
 
-                for (int nDepth = 0; nDepth < nMaxDepth; nDepth++)
+                int nCurrGeneration = 0;
+                while (nCurrGeneration < nMaxDepth)
                 {
-                    bool bGenerationPlaced = true;
-                    // for each placed area of current generation:
-                    int nPlacedCnt = m_arrPlaced.Count; //save count before, it grows
-                    for (int kk = 0; kk < nPlacedCnt; kk++)
+                    //_ASSERT(nCurrGeneration < 50);
+                    int generationTries = 10;
+                    bool bGenerationPlaced = false;
+                    while ((generationTries > 0) && (bGenerationPlaced == false))
                     {
-                        // find placed area
-                        CPlacedArea placed = m_arrPlaced[kk] as CPlacedArea;
-                        if (placed.nGeneration != nCurrGeneration)
-                            continue;
-                        // get the shuffled connectors
-                        ArrayList arrConn = placed.GetShuffledAvailableConnectors(true);
-                        // take connectors one by one:
-                        for (int ncon = 0; ncon < arrConn.Count; ncon++)
+                        bGenerationPlaced = true;
+                        // for each placed area of current generation:
+                        int nPlacedCnt = m_arrPlaced.Count; //save count before, it grows
+                        for (int kk = 0; kk < nPlacedCnt; kk++)
                         {
-                            CPlacedArea.CAreaConnector curcon = arrConn[ncon] as CPlacedArea.CAreaConnector;
-                            bool bPlaced = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration + 1, nMaxDepth);
-                            if (!bPlaced)
+                            // find placed area
+                            CPlacedArea placed = m_arrPlaced[kk] as CPlacedArea;
+                            if (placed.nGeneration != nCurrGeneration)
+                                continue;
+                            // for each area try connecting the children N times
+                            int childTries = 10;
+                            bool bChildrenPlaced = false;
+                            while ((childTries > 0) && (bChildrenPlaced == false))
                             {
-                                //MessageBox.Show("Could not place area!");
+                                bChildrenPlaced = true;
+                                // get the shuffled connectors
+                                ArrayList arrConn = placed.GetShuffledAvailableConnectors(true);
+                                // take connectors one by one and try to place random children
+                                for (int ncon = 0; ncon < arrConn.Count; ncon++)
+                                {
+                                    CPlacedArea.CAreaConnector curcon = arrConn[ncon] as CPlacedArea.CAreaConnector;
+                                    // Place random area tries to place all available items
+                                    bool bPlaced = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration + 1, nMaxDepth);
+                                    if (!bPlaced)
+                                    {
+                                        Console.WriteLine("Could not place children! Removing them! try:" + childTries);
+                                        bChildrenPlaced = false;
+                                        //remove already placed children of this parent area
+                                        RemoveChildrenOf(placed);
+                                    }
+                                }
+
+                                childTries--;
+                            }
+                            // failed to place children after many tries:
+                            if (bChildrenPlaced == false)
+                            {
+                                Console.WriteLine("Generation failed! try:" + generationTries);
                                 bGenerationPlaced = false;
+                                //remove parent generations and all of their children
+                                if (nCurrGeneration > 0)
+                                {
+                                    RemoveGenerations(nCurrGeneration);
+                                    nCurrGeneration--;
+                                }
+                                else
+                                {
+                                    // returned to starting point, failed generating level!
+                                    generationTries = 0;
+                                }
+                                // exit generations for
+                                break;
                             }
                         }
+
+                        generationTries--;
                     }
 
                     // AL GOOD, prepare next generation
-                    if(bGenerationPlaced == true)
+                    if (bGenerationPlaced == true)
+                    {
                         nCurrGeneration++;
+                    }
+                    else
+                    {
+                        m_arrPlaced.RemoveRange(0, m_arrPlaced.Count);
+                        bLevelGenerated = false;
+                        nCurrGeneration = maxDepth; //force exit while
+                        MessageBox.Show("Could not generate level!");
+                        break;
+                    }
                 }
             }
 
-
-            // find level AABB
-            Point vMin = new Point(1000000, 1000000);
-            Point vMax = new Point(-1000000, -1000000);
-            foreach (CPlacedArea pa in m_arrPlaced)
+            if (bLevelGenerated)
             {
-                if (pa.AABB.X < vMin.X) vMin.X = pa.AABB.X;
-                if (pa.AABB.Y < vMin.Y) vMin.Y = pa.AABB.Y;
-                if (pa.AABB.Right > vMax.X) vMax.X = pa.AABB.Right;
-                if (pa.AABB.Bottom > vMax.Y) vMax.Y = pa.AABB.Bottom;
+                // find level AABB
+                Point vMin = new Point(1000000, 1000000);
+                Point vMax = new Point(-1000000, -1000000);
+                foreach (CPlacedArea pa in m_arrPlaced)
+                {
+                    if (pa.AABB.X < vMin.X) vMin.X = pa.AABB.X;
+                    if (pa.AABB.Y < vMin.Y) vMin.Y = pa.AABB.Y;
+                    if (pa.AABB.Right > vMax.X) vMax.X = pa.AABB.Right;
+                    if (pa.AABB.Bottom > vMax.Y) vMax.Y = pa.AABB.Bottom;
+                }
+
+                m_levelAABB = new Rectangle(vMin.X, vMin.Y, vMax.X - vMin.X, vMax.Y - vMin.Y);
+                Console.WriteLine("-- Level generation OK!");
+            }
+            else
+            {
+                m_levelAABB = new Rectangle(0, 0, 0, 0);
             }
 
-            m_levelAABB = new Rectangle(vMin.X, vMin.Y, vMax.X - vMin.X, vMax.Y - vMin.Y);
-
-            return true;
+            return bLevelGenerated;
         }
     }
 }

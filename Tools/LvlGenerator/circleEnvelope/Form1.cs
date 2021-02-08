@@ -362,7 +362,7 @@ namespace circleEnvelope
             gridW = (int)((float)pictureBox1.Width / g_nGridSize);
             gridH = (int)((float)pictureBox1.Height / g_nGridSize);
 
-            m_area = AddNewArea();
+            m_area = AddNewArea(null);
 
             repaintArea(pbgr);
         }
@@ -385,7 +385,7 @@ namespace circleEnvelope
             return null;
         }
 
-        public CAreaDesc AddNewArea()
+        public CAreaDesc AddNewArea(CAreaDesc pClone = null)
         {
             // save it now
             CAreaDesc area = new CAreaDesc();
@@ -401,6 +401,12 @@ namespace circleEnvelope
                 {
                     area.blocks[xx][yy] = new CGridCell();
                     area.blocks[xx][yy].Reset();
+
+                    if (pClone != null)
+                    {
+                        area.blocks[xx][yy].bFilled = pClone.blocks[xx][yy].bFilled;
+                        area.blocks[xx][yy].connectionDir = pClone.blocks[xx][yy].connectionDir;
+                    }
                 }
             }
             area.strName = "A" + area.ID + "_" + area.size.Width + "x" + area.size.Height;
@@ -659,7 +665,7 @@ namespace circleEnvelope
 
                 CLevelGen.CInventoryArea ia = new CLevelGen.CInventoryArea();
                 ia.area = ad;
-                ia.nAvailable = 5;
+                ia.nAvailable = 10;
                 ia.nConsumed = 0;
                 inventory.Add(ia);
             }
@@ -667,6 +673,12 @@ namespace circleEnvelope
             g_LevelGen.GenerateLevel(inventory, (int)numGenerations.Value);
 
             repaintArea(pbgr);
+        }
+
+        private void butCloneArea_Click(object sender, EventArgs e)
+        {
+            m_area = AddNewArea(m_area);
+
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
