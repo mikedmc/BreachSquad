@@ -34,6 +34,7 @@
             this.lbAreas = new System.Windows.Forms.ListBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabAreas = new System.Windows.Forms.TabPage();
+            this.butCloneArea = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.tb_areaName = new System.Windows.Forms.TextBox();
             this.butSaveArea = new System.Windows.Forms.Button();
@@ -47,13 +48,36 @@
             this.saveAreasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.but_ComputeFlags = new System.Windows.Forms.Button();
-            this.butCloneArea = new System.Windows.Forms.Button();
+            this.tabStory = new System.Windows.Forms.TabPage();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.lbStory = new System.Windows.Forms.ListBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.lbStoryArea = new System.Windows.Forms.ListBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.wa_numChildren = new System.Windows.Forms.NumericUpDown();
+            this.wa_tbTags = new System.Windows.Forms.TextBox();
+            this.but_addStoryGen = new System.Windows.Forms.Button();
+            this.wa_butAddArea = new System.Windows.Forms.Button();
+            this.wa_numAddFlag = new System.Windows.Forms.NumericUpDown();
+            this.wa_numAvoidFlag = new System.Windows.Forms.NumericUpDown();
+            this.wa_butDelEntry = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabAreas.SuspendLayout();
             this.tabGenerator.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numGenerations)).BeginInit();
             this.menuStrip1.SuspendLayout();
+            this.tabStory.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.wa_numChildren)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.wa_numAddFlag)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.wa_numAvoidFlag)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -70,11 +94,11 @@
             // 
             // butClear
             // 
-            this.butClear.Location = new System.Drawing.Point(6, 165);
+            this.butClear.Location = new System.Drawing.Point(6, 531);
             this.butClear.Name = "butClear";
-            this.butClear.Size = new System.Drawing.Size(166, 25);
+            this.butClear.Size = new System.Drawing.Size(203, 25);
             this.butClear.TabIndex = 1;
-            this.butClear.Text = "Clear";
+            this.butClear.Text = "Clear Area";
             this.butClear.UseVisualStyleBackColor = true;
             this.butClear.Click += new System.EventHandler(this.butClear_Click);
             // 
@@ -82,7 +106,7 @@
             // 
             this.butGenerate.Location = new System.Drawing.Point(6, 6);
             this.butGenerate.Name = "butGenerate";
-            this.butGenerate.Size = new System.Drawing.Size(166, 25);
+            this.butGenerate.Size = new System.Drawing.Size(201, 25);
             this.butGenerate.TabIndex = 2;
             this.butGenerate.Text = "Generate";
             this.butGenerate.UseVisualStyleBackColor = true;
@@ -91,9 +115,9 @@
             // lbAreas
             // 
             this.lbAreas.FormattingEnabled = true;
-            this.lbAreas.Location = new System.Drawing.Point(780, 371);
+            this.lbAreas.Location = new System.Drawing.Point(6, 222);
             this.lbAreas.Name = "lbAreas";
-            this.lbAreas.Size = new System.Drawing.Size(186, 238);
+            this.lbAreas.Size = new System.Drawing.Size(200, 277);
             this.lbAreas.TabIndex = 5;
             this.lbAreas.SelectedIndexChanged += new System.EventHandler(this.lbAreas_SelectedIndexChanged);
             this.lbAreas.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lbAreas_MouseDoubleClick);
@@ -102,32 +126,46 @@
             // 
             this.tabControl1.Controls.Add(this.tabAreas);
             this.tabControl1.Controls.Add(this.tabGenerator);
+            this.tabControl1.Controls.Add(this.tabStory);
             this.tabControl1.Location = new System.Drawing.Point(780, 27);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(186, 261);
+            this.tabControl1.Size = new System.Drawing.Size(223, 585);
             this.tabControl1.TabIndex = 6;
             this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
             // tabAreas
             // 
+            this.tabAreas.Controls.Add(this.but_ComputeFlags);
+            this.tabAreas.Controls.Add(this.groupBox1);
+            this.tabAreas.Controls.Add(this.but_DelArea);
             this.tabAreas.Controls.Add(this.butCloneArea);
-            this.tabAreas.Controls.Add(this.label2);
-            this.tabAreas.Controls.Add(this.tb_areaName);
+            this.tabAreas.Controls.Add(this.label1);
             this.tabAreas.Controls.Add(this.butSaveArea);
+            this.tabAreas.Controls.Add(this.lbAreas);
             this.tabAreas.Controls.Add(this.butClear);
             this.tabAreas.Location = new System.Drawing.Point(4, 22);
             this.tabAreas.Name = "tabAreas";
             this.tabAreas.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAreas.Size = new System.Drawing.Size(178, 235);
+            this.tabAreas.Size = new System.Drawing.Size(215, 559);
             this.tabAreas.TabIndex = 0;
             this.tabAreas.Text = "Areas";
             this.tabAreas.UseVisualStyleBackColor = true;
             // 
+            // butCloneArea
+            // 
+            this.butCloneArea.Location = new System.Drawing.Point(108, 6);
+            this.butCloneArea.Name = "butCloneArea";
+            this.butCloneArea.Size = new System.Drawing.Size(101, 25);
+            this.butCloneArea.TabIndex = 5;
+            this.butCloneArea.Text = "Clone Area";
+            this.butCloneArea.UseVisualStyleBackColor = true;
+            this.butCloneArea.Click += new System.EventHandler(this.butCloneArea_Click);
+            // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 193);
+            this.label2.Location = new System.Drawing.Point(6, 26);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(58, 13);
             this.label2.TabIndex = 4;
@@ -135,7 +173,7 @@
             // 
             // tb_areaName
             // 
-            this.tb_areaName.Location = new System.Drawing.Point(6, 209);
+            this.tb_areaName.Location = new System.Drawing.Point(6, 42);
             this.tb_areaName.Name = "tb_areaName";
             this.tb_areaName.Size = new System.Drawing.Size(166, 20);
             this.tb_areaName.TabIndex = 3;
@@ -145,7 +183,7 @@
             // 
             this.butSaveArea.Location = new System.Drawing.Point(6, 6);
             this.butSaveArea.Name = "butSaveArea";
-            this.butSaveArea.Size = new System.Drawing.Size(166, 25);
+            this.butSaveArea.Size = new System.Drawing.Size(101, 25);
             this.butSaveArea.TabIndex = 2;
             this.butSaveArea.Text = "Add New Area";
             this.butSaveArea.UseVisualStyleBackColor = true;
@@ -159,7 +197,7 @@
             this.tabGenerator.Location = new System.Drawing.Point(4, 22);
             this.tabGenerator.Name = "tabGenerator";
             this.tabGenerator.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGenerator.Size = new System.Drawing.Size(178, 235);
+            this.tabGenerator.Size = new System.Drawing.Size(215, 559);
             this.tabGenerator.TabIndex = 1;
             this.tabGenerator.Text = "Generator";
             this.tabGenerator.UseVisualStyleBackColor = true;
@@ -175,7 +213,7 @@
             // 
             // numGenerations
             // 
-            this.numGenerations.Location = new System.Drawing.Point(98, 37);
+            this.numGenerations.Location = new System.Drawing.Point(133, 37);
             this.numGenerations.Minimum = new decimal(new int[] {
             1,
             0,
@@ -192,9 +230,9 @@
             // 
             // but_DelArea
             // 
-            this.but_DelArea.Location = new System.Drawing.Point(780, 615);
+            this.but_DelArea.Location = new System.Drawing.Point(6, 504);
             this.but_DelArea.Name = "but_DelArea";
-            this.but_DelArea.Size = new System.Drawing.Size(85, 25);
+            this.but_DelArea.Size = new System.Drawing.Size(101, 25);
             this.but_DelArea.TabIndex = 7;
             this.but_DelArea.Text = "Delete Area";
             this.but_DelArea.UseVisualStyleBackColor = true;
@@ -206,7 +244,7 @@
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(972, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1012, 24);
             this.menuStrip1.TabIndex = 8;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -236,7 +274,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(780, 355);
+            this.label1.Location = new System.Drawing.Point(6, 206);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(34, 13);
             this.label1.TabIndex = 9;
@@ -244,34 +282,214 @@
             // 
             // but_ComputeFlags
             // 
-            this.but_ComputeFlags.Location = new System.Drawing.Point(882, 615);
+            this.but_ComputeFlags.Location = new System.Drawing.Point(108, 504);
             this.but_ComputeFlags.Name = "but_ComputeFlags";
-            this.but_ComputeFlags.Size = new System.Drawing.Size(85, 25);
+            this.but_ComputeFlags.Size = new System.Drawing.Size(101, 25);
             this.but_ComputeFlags.TabIndex = 10;
             this.but_ComputeFlags.Text = "Compute Flags";
             this.but_ComputeFlags.UseVisualStyleBackColor = true;
             this.but_ComputeFlags.Click += new System.EventHandler(this.but_ComputeFlags_Click);
             // 
-            // butCloneArea
+            // tabStory
             // 
-            this.butCloneArea.Location = new System.Drawing.Point(6, 37);
-            this.butCloneArea.Name = "butCloneArea";
-            this.butCloneArea.Size = new System.Drawing.Size(166, 25);
-            this.butCloneArea.TabIndex = 5;
-            this.butCloneArea.Text = "Clone Area";
-            this.butCloneArea.UseVisualStyleBackColor = true;
-            this.butCloneArea.Click += new System.EventHandler(this.butCloneArea_Click);
+            this.tabStory.Controls.Add(this.but_addStoryGen);
+            this.tabStory.Controls.Add(this.groupBox2);
+            this.tabStory.Controls.Add(this.label3);
+            this.tabStory.Controls.Add(this.lbStory);
+            this.tabStory.Location = new System.Drawing.Point(4, 22);
+            this.tabStory.Name = "tabStory";
+            this.tabStory.Size = new System.Drawing.Size(215, 559);
+            this.tabStory.TabIndex = 2;
+            this.tabStory.Text = "Story";
+            this.tabStory.UseVisualStyleBackColor = true;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.tb_areaName);
+            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Location = new System.Drawing.Point(6, 112);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(200, 91);
+            this.groupBox1.TabIndex = 10;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Area Properties";
+            // 
+            // lbStory
+            // 
+            this.lbStory.FormattingEnabled = true;
+            this.lbStory.Location = new System.Drawing.Point(3, 20);
+            this.lbStory.Name = "lbStory";
+            this.lbStory.Size = new System.Drawing.Size(209, 134);
+            this.lbStory.TabIndex = 0;
+            this.lbStory.SelectedIndexChanged += new System.EventHandler(this.lbStory_SelectedIndexChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(3, 4);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(91, 13);
+            this.label3.TabIndex = 1;
+            this.label3.Text = "Story Generations";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.wa_butDelEntry);
+            this.groupBox2.Controls.Add(this.wa_butAddArea);
+            this.groupBox2.Controls.Add(this.wa_tbTags);
+            this.groupBox2.Controls.Add(this.wa_numAvoidFlag);
+            this.groupBox2.Controls.Add(this.wa_numAddFlag);
+            this.groupBox2.Controls.Add(this.wa_numChildren);
+            this.groupBox2.Controls.Add(this.label8);
+            this.groupBox2.Controls.Add(this.label7);
+            this.groupBox2.Controls.Add(this.label6);
+            this.groupBox2.Controls.Add(this.label5);
+            this.groupBox2.Controls.Add(this.label4);
+            this.groupBox2.Controls.Add(this.lbStoryArea);
+            this.groupBox2.Location = new System.Drawing.Point(3, 226);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(209, 330);
+            this.groupBox2.TabIndex = 2;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Generation Properties";
+            // 
+            // lbStoryArea
+            // 
+            this.lbStoryArea.FormattingEnabled = true;
+            this.lbStoryArea.Location = new System.Drawing.Point(6, 38);
+            this.lbStoryArea.Name = "lbStoryArea";
+            this.lbStoryArea.Size = new System.Drawing.Size(197, 108);
+            this.lbStoryArea.TabIndex = 0;
+            this.lbStoryArea.SelectedIndexChanged += new System.EventHandler(this.lbStoryArea_SelectedIndexChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 22);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(75, 13);
+            this.label4.TabIndex = 1;
+            this.label4.Text = "Wanted Areas";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(33, 166);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(44, 13);
+            this.label5.TabIndex = 2;
+            this.label5.Text = "children";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(50, 194);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(27, 13);
+            this.label6.TabIndex = 3;
+            this.label6.Text = "tags";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(24, 247);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(53, 13);
+            this.label7.TabIndex = 4;
+            this.label7.Text = "avoid flag";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(32, 221);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(45, 13);
+            this.label8.TabIndex = 4;
+            this.label8.Text = "add flag";
+            // 
+            // wa_numChildren
+            // 
+            this.wa_numChildren.Location = new System.Drawing.Point(83, 164);
+            this.wa_numChildren.Maximum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.wa_numChildren.Name = "wa_numChildren";
+            this.wa_numChildren.Size = new System.Drawing.Size(120, 20);
+            this.wa_numChildren.TabIndex = 5;
+            this.wa_numChildren.ValueChanged += new System.EventHandler(this.wa_numChildren_ValueChanged);
+            // 
+            // wa_tbTags
+            // 
+            this.wa_tbTags.Location = new System.Drawing.Point(83, 191);
+            this.wa_tbTags.Name = "wa_tbTags";
+            this.wa_tbTags.Size = new System.Drawing.Size(120, 20);
+            this.wa_tbTags.TabIndex = 6;
+            this.wa_tbTags.TextChanged += new System.EventHandler(this.wa_tbTags_TextChanged);
+            // 
+            // but_addStoryGen
+            // 
+            this.but_addStoryGen.Location = new System.Drawing.Point(3, 160);
+            this.but_addStoryGen.Name = "but_addStoryGen";
+            this.but_addStoryGen.Size = new System.Drawing.Size(91, 23);
+            this.but_addStoryGen.TabIndex = 3;
+            this.but_addStoryGen.Text = "Add Generation";
+            this.but_addStoryGen.UseVisualStyleBackColor = true;
+            this.but_addStoryGen.Click += new System.EventHandler(this.but_addStoryGen_Click);
+            // 
+            // wa_butAddArea
+            // 
+            this.wa_butAddArea.Location = new System.Drawing.Point(6, 301);
+            this.wa_butAddArea.Name = "wa_butAddArea";
+            this.wa_butAddArea.Size = new System.Drawing.Size(91, 23);
+            this.wa_butAddArea.TabIndex = 7;
+            this.wa_butAddArea.Text = "Add Entry";
+            this.wa_butAddArea.UseVisualStyleBackColor = true;
+            this.wa_butAddArea.Click += new System.EventHandler(this.wa_butAddArea_Click);
+            // 
+            // wa_numAddFlag
+            // 
+            this.wa_numAddFlag.Location = new System.Drawing.Point(83, 217);
+            this.wa_numAddFlag.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.wa_numAddFlag.Name = "wa_numAddFlag";
+            this.wa_numAddFlag.Size = new System.Drawing.Size(120, 20);
+            this.wa_numAddFlag.TabIndex = 5;
+            this.wa_numAddFlag.ValueChanged += new System.EventHandler(this.wa_numAddFlag_ValueChanged);
+            // 
+            // wa_numAvoidFlag
+            // 
+            this.wa_numAvoidFlag.Location = new System.Drawing.Point(83, 245);
+            this.wa_numAvoidFlag.Maximum = new decimal(new int[] {
+            5255,
+            0,
+            0,
+            0});
+            this.wa_numAvoidFlag.Name = "wa_numAvoidFlag";
+            this.wa_numAvoidFlag.Size = new System.Drawing.Size(120, 20);
+            this.wa_numAvoidFlag.TabIndex = 5;
+            this.wa_numAvoidFlag.ValueChanged += new System.EventHandler(this.wa_numAvoidFlag_ValueChanged);
+            // 
+            // wa_butDelEntry
+            // 
+            this.wa_butDelEntry.Location = new System.Drawing.Point(103, 301);
+            this.wa_butDelEntry.Name = "wa_butDelEntry";
+            this.wa_butDelEntry.Size = new System.Drawing.Size(91, 23);
+            this.wa_butDelEntry.TabIndex = 7;
+            this.wa_butDelEntry.Text = "Delete Entry";
+            this.wa_butDelEntry.UseVisualStyleBackColor = true;
+            this.wa_butDelEntry.Click += new System.EventHandler(this.wa_butDelEntry_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(972, 679);
-            this.Controls.Add(this.but_ComputeFlags);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.but_DelArea);
+            this.ClientSize = new System.Drawing.Size(1012, 624);
             this.Controls.Add(this.tabControl1);
-            this.Controls.Add(this.lbAreas);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -287,6 +505,15 @@
             ((System.ComponentModel.ISupportInitialize)(this.numGenerations)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.tabStory.ResumeLayout(false);
+            this.tabStory.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.wa_numChildren)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.wa_numAddFlag)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.wa_numAvoidFlag)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -314,6 +541,24 @@
         private System.Windows.Forms.Label generations;
         private System.Windows.Forms.NumericUpDown numGenerations;
         private System.Windows.Forms.Button butCloneArea;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.TabPage tabStory;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ListBox lbStory;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ListBox lbStoryArea;
+        private System.Windows.Forms.TextBox wa_tbTags;
+        private System.Windows.Forms.NumericUpDown wa_numChildren;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button but_addStoryGen;
+        private System.Windows.Forms.Button wa_butAddArea;
+        private System.Windows.Forms.NumericUpDown wa_numAvoidFlag;
+        private System.Windows.Forms.NumericUpDown wa_numAddFlag;
+        private System.Windows.Forms.Button wa_butDelEntry;
     }
 }
 

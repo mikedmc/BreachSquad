@@ -207,6 +207,9 @@ namespace circleEnvelope
         //areas collection
         ArrayList m_arrAreas = new ArrayList();
 
+        // story for the level
+        Story g_story = new Story();
+
         // current tool
         public enum ETool : int
         {
@@ -523,6 +526,13 @@ namespace circleEnvelope
 
                 repaintArea(pbgr);
             }
+            else if (tabControl1.SelectedIndex == 2)
+            {
+                g_eTool = ETool.K_TOOL_GENERATOR;
+
+                UpdateStoryGenerationsList(g_story);
+                repaintArea(pbgr);
+            }
         }
 
         private void butSaveArea_Click(object sender, EventArgs e)
@@ -688,5 +698,174 @@ namespace circleEnvelope
 
             }
         }
+
+        private void UpdateStoryGenerationsList(Story story)
+        {
+            lbStory.Items.Clear();
+            for (int kk = 0; kk < story.arrGenerations.Count; kk++)
+            {
+                Story.StoryGeneration gen = story.arrGenerations[kk];
+                string genname = "Gen:" + kk + " Entries:" + gen.arrEntries.Count;
+                lbStory.Items.Add(genname);
+            }
+        }
+
+        private void lbStory_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            PopulateGenerationSelection();
+            PopulateStoryGenEntryData();
+        }
+
+        private void but_addStoryGen_Click(object sender, EventArgs e)
+        {
+            g_story.AddGeneration();
+            UpdateStoryGenerationsList(g_story);
+            lbStory.SelectedIndex = lbStory.Items.Count - 1;
+
+            PopulateStoryGenEntryData();
+        }
+
+        private void wa_butAddArea_Click(object sender, EventArgs e)
+        {
+            int nSelIdx = lbStory.SelectedIndex;
+            if (nSelIdx < 0)
+            {
+                return;
+            }
+
+            Story.StoryGeneration gen = g_story.arrGenerations[nSelIdx];
+            gen.AddEntry(1, 0, 0, "");
+
+            RefreshGenerationsListStrings();
+
+            PopulateGenerationSelection();
+            lbStoryArea.SelectedIndex = lbStoryArea.Items.Count - 1;
+        }
+
+        private void lbStoryArea_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            PopulateStoryGenEntryData();
+        }
+
+        private void PopulateStoryGenEntryData()
+        {
+            int nGenIdx = lbStory.SelectedIndex;
+            int nEntryIdx = lbStoryArea.SelectedIndex;
+            if ((nGenIdx < 0) || (nEntryIdx < 0))
+            {
+                wa_numChildren.Value = 0;
+                wa_numAddFlag.Value = 0;
+                wa_numAvoidFlag.Value = 0;
+                wa_tbTags.Text = "";
+                return;
+            }
+
+            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
+            wa_numChildren.Value = entry.nChildren;
+            wa_numAddFlag.Value = entry.addFlag;
+            wa_numAvoidFlag.Value= entry.avoidFlag;
+            wa_tbTags.Text = entry.tags_any;
+        }
+
+        private void wa_numChildren_ValueChanged(object sender, EventArgs e)
+        {
+            int nGenIdx = lbStory.SelectedIndex;
+            if (nGenIdx < 0)
+                return;
+            int nEntryIdx = lbStoryArea.SelectedIndex;
+            if (nEntryIdx < 0)
+                return;
+
+            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
+            entry.nChildren = (int)wa_numChildren.Value;
+        }
+
+        private void wa_tbTags_TextChanged(object sender, EventArgs e)
+        {
+            int nGenIdx = lbStory.SelectedIndex;
+            if (nGenIdx < 0)
+                return;
+            int nEntryIdx = lbStoryArea.SelectedIndex;
+            if (nEntryIdx < 0)
+                return;
+
+            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
+            entry.tags_any = wa_tbTags.Text;
+        }
+
+        private void wa_numAddFlag_ValueChanged(object sender, EventArgs e)
+        {
+            int nGenIdx = lbStory.SelectedIndex;
+            if (nGenIdx < 0)
+                return;
+            int nEntryIdx = lbStoryArea.SelectedIndex;
+            if (nEntryIdx < 0)
+                return;
+
+            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
+            entry.addFlag = (int)wa_numAddFlag.Value;
+        }
+
+        private void wa_numAvoidFlag_ValueChanged(object sender, EventArgs e)
+        {
+            int nGenIdx = lbStory.SelectedIndex;
+            if (nGenIdx < 0)
+                return;
+            int nEntryIdx = lbStoryArea.SelectedIndex;
+            if (nEntryIdx < 0)
+                return;
+
+            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
+            entry.avoidFlag = (int)wa_numAvoidFlag.Value;
+        }
+
+        private void wa_butDelEntry_Click(object sender, EventArgs e)
+        {
+            int nGenIdx = lbStory.SelectedIndex;
+            if (nGenIdx < 0)
+                return;
+            int nEntryIdx = lbStoryArea.SelectedIndex;
+            if (nEntryIdx < 0)
+                return;
+
+            g_story.arrGenerations[nGenIdx].DeleteEntry(nEntryIdx);
+            lbStoryArea.SelectedIndex = nEntryIdx - 1;
+            RefreshGenerationsListStrings();
+            PopulateGenerationSelection();
+            PopulateStoryGenEntryData();
+        }
+
+        // populates fields with data about the story generation descriptors
+        private void PopulateGenerationSelection()
+        {
+            int nSelIdx = lbStory.SelectedIndex;
+            if (nSelIdx < 0)
+            {
+                lbStoryArea.Items.Clear();
+                return;
+            }
+
+            Story.StoryGeneration gen = g_story.arrGenerations[nSelIdx];
+            lbStoryArea.Items.Clear();
+            for (int kk = 0; kk < gen.arrEntries.Count; kk++)
+            {
+                string strName = "C[" + gen.arrEntries[kk].nChildren + "]T[" + gen.arrEntries[kk].tags_any + "]F[" + gen.arrEntries[kk].addFlag + "]NF[" + gen.arrEntries[kk].avoidFlag + "]";
+                lbStoryArea.Items.Add(strName);
+            }
+            if(lbStoryArea.Items.Count > 0)
+                lbStoryArea.SelectedIndex = 0;
+        }
+
+        private void RefreshGenerationsListStrings()
+        {
+            // refresh story generations names
+            for (int kk = 0; kk < g_story.arrGenerations.Count; kk++)
+            {
+                Story.StoryGeneration gen = g_story.arrGenerations[kk];
+                string genname = "Gen:" + kk + " Entries:" + gen.arrEntries.Count;
+                lbStory.Items[kk] = genname;
+            }
+        }
+
     }
 }
