@@ -29,6 +29,11 @@ namespace circleEnvelope
                 tags_all = "";
                 tags_none = "";
             }
+
+            public string GetName()
+            {
+                return "C[" + nChildren + "]T[" + tags_any + "]F[" + addFlag + "]NF[" + avoidFlag + "]";
+            }
         }
 
         // the story is composed of generations

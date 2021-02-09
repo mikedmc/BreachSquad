@@ -778,6 +778,7 @@ namespace circleEnvelope
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             entry.nChildren = (int)wa_numChildren.Value;
+            RefreshWantedAreaListName();
         }
 
         private void wa_tbTags_TextChanged(object sender, EventArgs e)
@@ -791,6 +792,7 @@ namespace circleEnvelope
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             entry.tags_any = wa_tbTags.Text;
+            //RefreshWantedAreaListName();
         }
 
         private void wa_numAddFlag_ValueChanged(object sender, EventArgs e)
@@ -804,6 +806,7 @@ namespace circleEnvelope
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             entry.addFlag = (int)wa_numAddFlag.Value;
+            RefreshWantedAreaListName();
         }
 
         private void wa_numAvoidFlag_ValueChanged(object sender, EventArgs e)
@@ -817,6 +820,7 @@ namespace circleEnvelope
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             entry.avoidFlag = (int)wa_numAvoidFlag.Value;
+            RefreshWantedAreaListName();
         }
 
         private void wa_butDelEntry_Click(object sender, EventArgs e)
@@ -849,11 +853,70 @@ namespace circleEnvelope
             lbStoryArea.Items.Clear();
             for (int kk = 0; kk < gen.arrEntries.Count; kk++)
             {
-                string strName = "C[" + gen.arrEntries[kk].nChildren + "]T[" + gen.arrEntries[kk].tags_any + "]F[" + gen.arrEntries[kk].addFlag + "]NF[" + gen.arrEntries[kk].avoidFlag + "]";
+                string strName = gen.arrEntries[kk].GetName();
                 lbStoryArea.Items.Add(strName);
             }
             if(lbStoryArea.Items.Count > 0)
                 lbStoryArea.SelectedIndex = 0;
+        }
+
+        private void saveStoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog dlg = new SaveFileDialog();
+            dlg.Filter = "XML Level Story (*.story)|*.story||";
+            dlg.DefaultExt = "story";
+            if (dlg.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            try
+            {
+                XmlTextWriter xw = new XmlTextWriter(dlg.FileName, null);
+                xw.Formatting = Formatting.Indented;
+                xw.WriteStartDocument();
+                // write elements
+                xw.WriteStartElement("LevelStory");
+                xw.WriteStartAttribute("Generations");
+                xw.WriteValue(g_story.arrGenerations.Count);
+                xw.WriteEndAttribute();
+
+                for (int kk = 0; kk < g_story.arrGenerations.Count; kk++)
+                {
+                    Story.StoryGeneration gen = g_story.arrGenerations[kk];
+                    xw.WriteStartElement("Generation");
+                    xw.WriteStartAttribute("Index");
+                    xw.WriteValue(kk);
+                    xw.WriteEndAttribute();
+                    xw.WriteStartAttribute("Areas");
+                    xw.WriteValue(gen.arrEntries.Count);
+                    xw.WriteEndAttribute();
+                    for (int jj = 0; jj < gen.arrEntries.Count; jj++)
+                    {
+                        Story.AreaEntry ae = gen.arrEntries[jj];
+
+                        xw.WriteStartElement("Area");
+
+                        xw.WriteAttributeString("Children", ae.nChildren.ToString());
+                        xw.WriteAttributeString("AddFlag", ae.addFlag.ToString());
+                        xw.WriteAttributeString("AvoidFlag", ae.avoidFlag.ToString());
+                        xw.WriteAttributeString("TagsAny", ae.tags_any);
+                        xw.WriteAttributeString("TagsAll", ae.tags_all);
+                        xw.WriteAttributeString("TagsNone", ae.tags_none);
+
+                        xw.WriteEndElement();
+                    }
+                    xw.WriteEndElement();
+                }
+                // end LevelStory
+                xw.WriteEndElement();
+                // end document
+                xw.WriteEndDocument();
+                xw.Flush();
+                xw.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving story! \n\n" + ex.Message);
+            }
         }
 
         private void RefreshGenerationsListStrings()
@@ -865,6 +928,19 @@ namespace circleEnvelope
                 string genname = "Gen:" + kk + " Entries:" + gen.arrEntries.Count;
                 lbStory.Items[kk] = genname;
             }
+        }
+
+        private void RefreshWantedAreaListName()
+        {
+            int nGenIdx = lbStory.SelectedIndex;
+            if (nGenIdx < 0)
+                return;
+            int nEntryIdx = lbStoryArea.SelectedIndex;
+            if (nEntryIdx < 0)
+                return;
+
+            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
+            lbStoryArea.Items[nEntryIdx] = entry.GetName();
         }
 
     }

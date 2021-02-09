@@ -66,6 +66,10 @@
             this.wa_numAddFlag = new System.Windows.Forms.NumericUpDown();
             this.wa_numAvoidFlag = new System.Windows.Forms.NumericUpDown();
             this.wa_butDelEntry = new System.Windows.Forms.Button();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.loadStoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveStoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.but_generateFromStory = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabAreas.SuspendLayout();
@@ -252,7 +256,10 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.loadAreasToolStripMenuItem,
-            this.saveAreasToolStripMenuItem});
+            this.saveAreasToolStripMenuItem,
+            this.toolStripMenuItem1,
+            this.loadStoryToolStripMenuItem,
+            this.saveStoryToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
@@ -260,14 +267,14 @@
             // loadAreasToolStripMenuItem
             // 
             this.loadAreasToolStripMenuItem.Name = "loadAreasToolStripMenuItem";
-            this.loadAreasToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.loadAreasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.loadAreasToolStripMenuItem.Text = "Load Areas...";
             this.loadAreasToolStripMenuItem.Click += new System.EventHandler(this.loadAreasToolStripMenuItem_Click);
             // 
             // saveAreasToolStripMenuItem
             // 
             this.saveAreasToolStripMenuItem.Name = "saveAreasToolStripMenuItem";
-            this.saveAreasToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.saveAreasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveAreasToolStripMenuItem.Text = "Save Areas...";
             this.saveAreasToolStripMenuItem.Click += new System.EventHandler(this.saveAreasToolStripMenuItem_Click);
             // 
@@ -292,6 +299,7 @@
             // 
             // tabStory
             // 
+            this.tabStory.Controls.Add(this.but_generateFromStory);
             this.tabStory.Controls.Add(this.but_addStoryGen);
             this.tabStory.Controls.Add(this.groupBox2);
             this.tabStory.Controls.Add(this.label3);
@@ -484,6 +492,33 @@
             this.wa_butDelEntry.UseVisualStyleBackColor = true;
             this.wa_butDelEntry.Click += new System.EventHandler(this.wa_butDelEntry_Click);
             // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
+            // 
+            // loadStoryToolStripMenuItem
+            // 
+            this.loadStoryToolStripMenuItem.Name = "loadStoryToolStripMenuItem";
+            this.loadStoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadStoryToolStripMenuItem.Text = "Load Story...";
+            // 
+            // saveStoryToolStripMenuItem
+            // 
+            this.saveStoryToolStripMenuItem.Name = "saveStoryToolStripMenuItem";
+            this.saveStoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveStoryToolStripMenuItem.Text = "Save Story...";
+            this.saveStoryToolStripMenuItem.Click += new System.EventHandler(this.saveStoryToolStripMenuItem_Click);
+            // 
+            // but_generateFromStory
+            // 
+            this.but_generateFromStory.Location = new System.Drawing.Point(9, 197);
+            this.but_generateFromStory.Name = "but_generateFromStory";
+            this.but_generateFromStory.Size = new System.Drawing.Size(197, 23);
+            this.but_generateFromStory.TabIndex = 4;
+            this.but_generateFromStory.Text = "Generate from story";
+            this.but_generateFromStory.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -559,6 +594,10 @@
         private System.Windows.Forms.NumericUpDown wa_numAvoidFlag;
         private System.Windows.Forms.NumericUpDown wa_numAddFlag;
         private System.Windows.Forms.Button wa_butDelEntry;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem loadStoryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveStoryToolStripMenuItem;
+        private System.Windows.Forms.Button but_generateFromStory;
     }
 }
 
