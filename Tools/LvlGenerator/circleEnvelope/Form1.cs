@@ -98,7 +98,8 @@ namespace circleEnvelope
             public Int32 ID = 0;
             public Size size;
             public CGridCell[][] blocks = null;
-            public String strName = "";
+            public string strName = "";
+            public string strTags = "";
 
             // limits are computed on the fly, do not serialize
             public Rectangle AABB = new Rectangle();
@@ -167,6 +168,7 @@ namespace circleEnvelope
                 bw.Write((Int32)size.Width);
                 bw.Write((Int32)size.Height);
                 bw.Write(strName);
+                bw.Write(strTags);
                 for (int xx = 0; xx < size.Width; xx++)
                 {
                     for (int yy = 0; yy < size.Height; yy++)
@@ -183,6 +185,7 @@ namespace circleEnvelope
                 size.Width = br.ReadInt32();
                 size.Height = br.ReadInt32();
                 strName = br.ReadString();
+                strTags = br.ReadString();
 
                 // allocate
                 blocks = new CGridCell[size.Width][];
@@ -706,6 +709,7 @@ namespace circleEnvelope
             {
                 m_area = m_arrAreas[lbAreas.SelectedIndex] as CAreaDesc;
                 tb_areaName.Text = m_area.strName;
+                tb_areaTags.Text = m_area.strTags;
                 RepaintArea(pbgr);
             }
         }
@@ -716,6 +720,13 @@ namespace circleEnvelope
                 return;
             m_area.strName = tb_areaName.Text;
             RefreshAreasList(-1);
+        }
+
+        private void tb_areaTags_TextChanged(object sender, EventArgs e)
+        {
+            if (m_area == null)
+                return;
+            m_area.strTags = tb_areaTags.Text;
         }
 
         private void saveAreasToolStripMenuItem_Click(object sender, EventArgs e)
@@ -974,6 +985,27 @@ namespace circleEnvelope
         private void but_GenFromStory_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void but_GenCorridors_Click(object sender, EventArgs e)
+        {
+            ArrayList inventory = new ArrayList();
+
+            foreach (CAreaDesc ad in m_arrAreas)
+            {
+                // make sure we have everything computed
+                ad.ComputeInternalData();
+
+                CLevelGen.CInventoryArea ia = new CLevelGen.CInventoryArea();
+                ia.area = ad;
+                ia.nAvailable = 10;
+                ia.nConsumed = 0;
+                inventory.Add(ia);
+            }
+
+            g_LevelGen.GenerateLevelWithCorridors(inventory, (int)numGenerations.Value, 0.5f);
+
+            RepaintArea(pbgr);
         }
 
         private void saveStoryToolStripMenuItem_Click(object sender, EventArgs e)

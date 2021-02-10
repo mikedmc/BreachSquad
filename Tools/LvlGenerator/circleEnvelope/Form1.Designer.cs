@@ -68,6 +68,9 @@
             this.loadStoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveStoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.but_GenFromStory = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.tb_areaTags = new System.Windows.Forms.TextBox();
+            this.but_GenCorridors = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabAreas.SuspendLayout();
@@ -166,27 +169,29 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.tb_areaTags);
             this.groupBox1.Controls.Add(this.tb_areaName);
+            this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Location = new System.Drawing.Point(6, 112);
+            this.groupBox1.Location = new System.Drawing.Point(6, 84);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(200, 91);
+            this.groupBox1.Size = new System.Drawing.Size(200, 108);
             this.groupBox1.TabIndex = 10;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Area Properties";
             // 
             // tb_areaName
             // 
-            this.tb_areaName.Location = new System.Drawing.Point(6, 42);
+            this.tb_areaName.Location = new System.Drawing.Point(9, 32);
             this.tb_areaName.Name = "tb_areaName";
-            this.tb_areaName.Size = new System.Drawing.Size(166, 20);
+            this.tb_areaName.Size = new System.Drawing.Size(185, 20);
             this.tb_areaName.TabIndex = 3;
             this.tb_areaName.TextChanged += new System.EventHandler(this.tb_areaName_TextChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 26);
+            this.label2.Location = new System.Drawing.Point(6, 16);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(58, 13);
             this.label2.TabIndex = 4;
@@ -236,6 +241,7 @@
             this.tabGenerator.Controls.Add(this.but_GenFromStory);
             this.tabGenerator.Controls.Add(this.generations);
             this.tabGenerator.Controls.Add(this.numGenerations);
+            this.tabGenerator.Controls.Add(this.but_GenCorridors);
             this.tabGenerator.Controls.Add(this.butGenerate);
             this.tabGenerator.Location = new System.Drawing.Point(4, 22);
             this.tabGenerator.Name = "tabGenerator";
@@ -499,6 +505,33 @@
             this.but_GenFromStory.UseVisualStyleBackColor = true;
             this.but_GenFromStory.Click += new System.EventHandler(this.but_GenFromStory_Click);
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 55);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(52, 13);
+            this.label4.TabIndex = 4;
+            this.label4.Text = "Area tags";
+            // 
+            // tb_areaTags
+            // 
+            this.tb_areaTags.Location = new System.Drawing.Point(9, 71);
+            this.tb_areaTags.Name = "tb_areaTags";
+            this.tb_areaTags.Size = new System.Drawing.Size(185, 20);
+            this.tb_areaTags.TabIndex = 3;
+            this.tb_areaTags.TextChanged += new System.EventHandler(this.tb_areaTags_TextChanged);
+            // 
+            // but_GenCorridors
+            // 
+            this.but_GenCorridors.Location = new System.Drawing.Point(8, 470);
+            this.but_GenCorridors.Name = "but_GenCorridors";
+            this.but_GenCorridors.Size = new System.Drawing.Size(201, 25);
+            this.but_GenCorridors.TabIndex = 2;
+            this.but_GenCorridors.Text = "Generate with corridors";
+            this.but_GenCorridors.UseVisualStyleBackColor = true;
+            this.but_GenCorridors.Click += new System.EventHandler(this.but_GenCorridors_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -576,6 +609,9 @@
         private System.Windows.Forms.ToolStripMenuItem saveStoryToolStripMenuItem;
         private System.Windows.Forms.Button but_generateFromStory;
         private System.Windows.Forms.Button but_GenFromStory;
+        private System.Windows.Forms.TextBox tb_areaTags;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button but_GenCorridors;
     }
 }
 
