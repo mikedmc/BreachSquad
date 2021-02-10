@@ -17,6 +17,9 @@ namespace circleEnvelope
     {
         Image pbimg;
         Graphics pbgr;
+        // paint origin
+        Point vOrigin = new Point(0, 0);
+        Point vMouseOld = new Point(0, 0);
 
         // direction flags
         public const int DIRFLAG_LEFT = 1;
@@ -215,6 +218,7 @@ namespace circleEnvelope
         {
             K_TOOL_AREA = 1,
             K_TOOL_GENERATOR = 2,
+            K_TOOL_STORY = 3,
         };
         public ETool g_eTool = ETool.K_TOOL_AREA;
 
@@ -252,6 +256,79 @@ namespace circleEnvelope
             }
         }
 
+        // selects the area from clicking on the graph
+        void SelectStoryFromGraph(Point vPos, Story story)
+        {
+            int areaSize = 32;
+            Point spacing = new Point(areaSize, areaSize / 4);
+            Point spacingoff = new Point(areaSize + spacing.X, areaSize + spacing.Y);
+            Rectangle areaRect = new Rectangle(vOrigin.X, vOrigin.Y, areaSize, areaSize);
+
+            int dx = vPos.X - vOrigin.X;
+            int genidx = dx / spacingoff.X;
+            if ((dx < 0) || (genidx >= story.arrGenerations.Count))
+                return;
+
+            int dy = vPos.Y - vOrigin.Y;
+            int areaidx = dy / spacingoff.Y;
+            if ((dy < 0) || (areaidx >= story.arrGenerations[genidx].arrEntries.Count))
+                return;
+
+            lbStory.SelectedIndex = genidx;
+            lbStoryArea.SelectedIndex = areaidx;
+        }
+
+        void DrawStoryTree(Graphics gr, Story story)
+        {
+            int areaSize = 32;
+            Point spacing = new Point(areaSize, areaSize / 4);
+            Point spacingoff = new Point(areaSize + spacing.X, areaSize + spacing.Y);
+            Rectangle areaRect = new Rectangle(vOrigin.X, vOrigin.Y, areaSize, areaSize);
+
+            int nSelGen = lbStory.SelectedIndex;
+            int nSelArea = lbStoryArea.SelectedIndex;
+
+            Font fnt = new Font("Arial", 9, FontStyle.Regular);
+
+            Point vCur = new Point(vOrigin.X, vOrigin.Y);
+            for (int kk = 0; kk < story.arrGenerations.Count; kk++)
+            {
+                // paint generation numbers
+                gr.DrawString(kk.ToString(), fnt, Brushes.AliceBlue, vOrigin.X + 5 + kk * spacingoff.X, vOrigin.Y - 20);
+
+                // paint boxes
+                int curChild = 0;
+
+                Story.StoryGeneration gen = story.arrGenerations[kk];
+                for (int ll = 0; ll < gen.arrEntries.Count; ll++)
+                {
+                    Story.AreaEntry area = gen.arrEntries[ll];
+                    Pen pn = Pens.Gray;
+
+                    areaRect.X = vCur.X; areaRect.Y = vCur.Y;
+                    gr.DrawRectangle(pn, areaRect);
+                    // selected one
+                    if ((kk == nSelGen) && (ll == nSelArea))
+                    {
+                        gr.DrawRectangle(Pens.GreenYellow, areaRect.X - 2, areaRect.Y - 2, areaRect.Width + 4, areaRect.Height + 4);
+                    }
+                    // paint links
+                    for (int oo = 0; oo < area.nChildren; oo++)
+                    {
+                        Pen pnl = Pens.Green;
+                        gr.DrawLine(pnl, areaRect.Right, areaRect.Y + areaRect.Height / 2, areaRect.Right + spacing.X, vOrigin.Y + areaSize / 2 + curChild * (areaSize + spacing.Y));
+                        curChild++;
+                    }
+
+                    // advance cursor
+                    vCur.Y += spacing.Y + areaSize;
+                }
+
+                vCur.X += spacing.X + areaSize;
+                vCur.Y = vOrigin.Y;
+            }
+        }
+
         void DrawArrow(Graphics gr, PointF vCenter, int nDirection, float fSize)
         {
             Point vOff = DIR_OFFSET(nDirection);
@@ -260,7 +337,7 @@ namespace circleEnvelope
         }
 
         //paint grid
-        void PaintGrid(Graphics gr)
+        void PaintScene(Graphics gr)
         {
             switch (g_eTool)
             {
@@ -348,6 +425,12 @@ namespace circleEnvelope
                         }
                     }
                     break;
+
+                case ETool.K_TOOL_STORY:
+                    {
+                        DrawStoryTree(gr, g_story);
+                    }
+                    break;
             }
         }
 
@@ -367,14 +450,14 @@ namespace circleEnvelope
 
             m_area = AddNewArea(null);
 
-            repaintArea(pbgr);
+            RepaintArea(pbgr);
         }
 
-        void repaintArea(Graphics gr)
+        void RepaintArea(Graphics gr)
         {
             gr.Clear(Color.Black);
 
-            PaintGrid(gr);
+            PaintScene(gr);
             pictureBox1.Refresh();
         }
 
@@ -438,60 +521,97 @@ namespace circleEnvelope
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            int mx = (int)(e.X / g_nGridSize);
-            int my = (int)(e.Y / g_nGridSize);
-            if (e.Button == MouseButtons.Left)
+            switch (g_eTool)
             {
-                SetGridFilled(mx, my, true);
+                case ETool.K_TOOL_AREA:
+                    {
+                        int mx = (int)(e.X / g_nGridSize);
+                        int my = (int)(e.Y / g_nGridSize);
 
-                repaintArea(pbgr);
-                pictureBox1.Refresh();
-            }
+                        if (e.Button == MouseButtons.Left)
+                        {
+                            SetGridFilled(mx, my, true);
 
-            //daca dai click dreapta e cancel
-            if (e.Button == MouseButtons.Right)
-            {
-                SetGridFilled(mx, my, false);
+                            RepaintArea(pbgr);
+                            pictureBox1.Refresh();
+                        }
 
-                repaintArea(pbgr);
-                pictureBox1.Refresh();
-            }
+                        if (e.Button == MouseButtons.Right)
+                        {
+                            SetGridFilled(mx, my, false);
 
-            if (e.Button == MouseButtons.Middle)
-            {
-                ToggleGridConnected(mx, my);
+                            RepaintArea(pbgr);
+                            pictureBox1.Refresh();
+                        }
 
-                repaintArea(pbgr);
-                pictureBox1.Refresh();
+                        if (e.Button == MouseButtons.Middle)
+                        {
+                            ToggleGridConnected(mx, my);
+
+                            RepaintArea(pbgr);
+                            pictureBox1.Refresh();
+                        }
+                    }
+                    break;
+                case ETool.K_TOOL_STORY:
+                    {
+                        // select area
+                        if (e.Button == MouseButtons.Left)
+                        {
+                            SelectStoryFromGraph(new Point(e.X, e.Y), g_story);
+                        }
+                    }
+                    break;
             }
         }
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
-            {
-            }
         }
 
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
-            int mx = (int)(e.X / g_nGridSize);
-            int my = (int)(e.Y / g_nGridSize);
-            if (e.Button == MouseButtons.Left)
+            Point vDelta = new Point(e.X - vMouseOld.X, e.Y - vMouseOld.Y);
+            vMouseOld.X = e.X; vMouseOld.Y = e.Y;
+
+            switch (g_eTool)
             {
-                SetGridFilled(mx, my, true);
+                case ETool.K_TOOL_AREA:
+                    {
+                        int mx = (int)(e.X / g_nGridSize);
+                        int my = (int)(e.Y / g_nGridSize);
 
-                repaintArea(pbgr);
-                pictureBox1.Refresh();
-            }
+                        if (e.Button == MouseButtons.Left)
+                        {
+                            SetGridFilled(mx, my, true);
 
-            //daca dai click dreapta e cancel
-            if (e.Button == MouseButtons.Right)
-            {
-                SetGridFilled(mx, my, false);
+                            RepaintArea(pbgr);
+                            pictureBox1.Refresh();
+                        }
 
-                repaintArea(pbgr);
-                pictureBox1.Refresh();
+                        //daca dai click dreapta e cancel
+                        if (e.Button == MouseButtons.Right)
+                        {
+                            SetGridFilled(mx, my, false);
+
+                            RepaintArea(pbgr);
+                            pictureBox1.Refresh();
+                        }
+                    }
+                    break;
+
+                case ETool.K_TOOL_STORY:
+                    {
+                        if (e.Button == MouseButtons.Middle)
+                        {
+                            vOrigin.X += vDelta.X;
+                            vOrigin.Y += vDelta.Y;
+
+                            RepaintArea(pbgr);
+                            pictureBox1.Refresh();
+                        }
+                    }
+                    break;
             }
         }
 
@@ -508,7 +628,7 @@ namespace circleEnvelope
                 }
             }
 
-            repaintArea(pbgr);
+            RepaintArea(pbgr);
             pictureBox1.Refresh();
         }
 
@@ -518,20 +638,22 @@ namespace circleEnvelope
             {
                 g_eTool = ETool.K_TOOL_AREA;
 
-                repaintArea(pbgr);
+                RepaintArea(pbgr);
             }
             else if (tabControl1.SelectedIndex == 1)
             {
                 g_eTool = ETool.K_TOOL_GENERATOR;
 
-                repaintArea(pbgr);
+                RepaintArea(pbgr);
             }
             else if (tabControl1.SelectedIndex == 2)
             {
-                g_eTool = ETool.K_TOOL_GENERATOR;
+                g_eTool = ETool.K_TOOL_STORY;
+                vOrigin.X = 16;
+                vOrigin.Y = 32;
 
                 UpdateStoryGenerationsList(g_story);
-                repaintArea(pbgr);
+                RepaintArea(pbgr);
             }
         }
 
@@ -567,7 +689,7 @@ namespace circleEnvelope
             {
                 m_area = m_arrAreas[lbAreas.SelectedIndex] as CAreaDesc;
                 tb_areaName.Text = m_area.strName;
-                repaintArea(pbgr);
+                RepaintArea(pbgr);
             }
         }
 
@@ -661,7 +783,7 @@ namespace circleEnvelope
                 area.ComputeInternalData();
             }
 
-            repaintArea(pbgr);
+            RepaintArea(pbgr);
         }
 
         private void butGenerate_Click(object sender, EventArgs e)
@@ -682,7 +804,7 @@ namespace circleEnvelope
 
             g_LevelGen.GenerateLevel(inventory, (int)numGenerations.Value);
 
-            repaintArea(pbgr);
+            RepaintArea(pbgr);
         }
 
         private void butCloneArea_Click(object sender, EventArgs e)
@@ -757,6 +879,8 @@ namespace circleEnvelope
                 wa_numAddFlag.Value = 0;
                 wa_numAvoidFlag.Value = 0;
                 wa_tbTags.Text = "";
+
+                RepaintArea(pbgr);
                 return;
             }
 
@@ -765,6 +889,8 @@ namespace circleEnvelope
             wa_numAddFlag.Value = entry.addFlag;
             wa_numAvoidFlag.Value= entry.avoidFlag;
             wa_tbTags.Text = entry.tags_any;
+
+            RepaintArea(pbgr);
         }
 
         private void wa_numChildren_ValueChanged(object sender, EventArgs e)
@@ -779,6 +905,8 @@ namespace circleEnvelope
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             entry.nChildren = (int)wa_numChildren.Value;
             RefreshWantedAreaListName();
+
+            RepaintArea(pbgr);
         }
 
         private void wa_tbTags_TextChanged(object sender, EventArgs e)
@@ -807,6 +935,8 @@ namespace circleEnvelope
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             entry.addFlag = (int)wa_numAddFlag.Value;
             RefreshWantedAreaListName();
+
+            RepaintArea(pbgr);
         }
 
         private void wa_numAvoidFlag_ValueChanged(object sender, EventArgs e)
@@ -821,6 +951,8 @@ namespace circleEnvelope
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             entry.avoidFlag = (int)wa_numAvoidFlag.Value;
             RefreshWantedAreaListName();
+
+            RepaintArea(pbgr);
         }
 
         private void wa_butDelEntry_Click(object sender, EventArgs e)
@@ -941,6 +1073,8 @@ namespace circleEnvelope
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             lbStoryArea.Items[nEntryIdx] = entry.GetName();
+
+            RepaintArea(pbgr);
         }
 
     }

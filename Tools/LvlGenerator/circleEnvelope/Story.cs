@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Drawing;
 
 namespace circleEnvelope
 {
@@ -88,7 +89,28 @@ namespace circleEnvelope
         {
             StoryGeneration sg = new StoryGeneration();
 
+            // add starting generation
+            AreaEntry ae = new AreaEntry();
+            ae.nChildren = 1;
+            ae.tags_any = "";
+            sg.arrEntries.Add(ae);
+
             arrGenerations.Add(sg);
+        }
+
+        // Returns a color for each flag (8 possible flags)
+        public Color GetFlagColor(int flag)
+        {
+            byte r = 0, g = 0, b = 0;
+            if ((flag & 1) != 0) r = 128;
+            if ((flag & 2) != 0) g = 128;
+            if ((flag & 4) != 0) b = 128;
+
+            if ((flag & 8) != 0) r += 64;
+            if ((flag & 16) != 0) g += 64;
+            if ((flag & 32) != 0) b += 64;
+
+            return Color.FromArgb(r, g, b);
         }
     }
 }
