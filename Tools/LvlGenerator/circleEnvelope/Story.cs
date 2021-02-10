@@ -66,12 +66,17 @@ namespace circleEnvelope
 
             public void DeleteEntry(int nIdx)
             {
+                if ((nIdx < 0) || (nIdx >= arrEntries.Count))
+                    return;
                 arrEntries.RemoveAt(nIdx);
             }
         }
 
         // list of generations
         public List<StoryGeneration> arrGenerations = new List<StoryGeneration>();
+        // selected generation and entry indexes
+        public int nSelGeneration = -1;
+        public int nSelArea = -1;
 
         public Story()
         {
@@ -83,6 +88,9 @@ namespace circleEnvelope
             sg.arrEntries.Add(ae);
 
             arrGenerations.Add(sg);
+
+            nSelGeneration = 0;
+            nSelArea = 0;
         }
 
         public void AddGeneration()
@@ -96,6 +104,36 @@ namespace circleEnvelope
             sg.arrEntries.Add(ae);
 
             arrGenerations.Add(sg);
+            nSelGeneration = arrGenerations.Count - 1;
+            nSelArea = sg.arrEntries.Count - 1;
+        }
+
+        public void AddGenerationEntry(int nGenerationIdx, int nExits, int nAddFlag, int nAvoidFlag, string strTags)
+        {
+            if ((nGenerationIdx < 0) || (nGenerationIdx >= arrGenerations.Count))
+                return;
+
+            arrGenerations[nGenerationIdx].AddEntry(nExits, nAddFlag, nAvoidFlag, strTags);
+            nSelArea = arrGenerations[nGenerationIdx].arrEntries.Count - 1;
+        }
+
+        public void DeleteGenerationEntry(int nGenerationIdx, int nEntryIdx)
+        {
+            if ((nGenerationIdx < 0) || (nGenerationIdx >= arrGenerations.Count))
+                return;
+            if (arrGenerations[nGenerationIdx].arrEntries.Count <= 1)
+                return;
+
+            arrGenerations[nGenerationIdx].DeleteEntry(nEntryIdx);
+            nSelArea = -1;
+        }
+
+        public void SortGenerations()
+        {
+            for (int kk = 0; kk < arrGenerations.Count; kk++)
+            {
+                arrGenerations[kk].arrEntries.Sort((x, y) => (x.nChildren > y.nChildren) ? 1 : 0);
+            }
         }
 
         // Returns a color for each flag (8 possible flags)

@@ -257,7 +257,7 @@ namespace circleEnvelope
         }
 
         // selects the area from clicking on the graph
-        void SelectStoryFromGraph(Point vPos, Story story)
+        void Story_SelectFromGraph(Point vPos, Story story)
         {
             int areaSize = 32;
             Point spacing = new Point(areaSize, areaSize / 4);
@@ -274,8 +274,11 @@ namespace circleEnvelope
             if ((dy < 0) || (areaidx >= story.arrGenerations[genidx].arrEntries.Count))
                 return;
 
-            lbStory.SelectedIndex = genidx;
-            lbStoryArea.SelectedIndex = areaidx;
+            story.nSelGeneration = genidx;
+            story.nSelArea = areaidx;
+
+            Story_PopulateGenEntryData();
+            RepaintArea(pbgr);
         }
 
         void DrawStoryTree(Graphics gr, Story story)
@@ -285,8 +288,8 @@ namespace circleEnvelope
             Point spacingoff = new Point(areaSize + spacing.X, areaSize + spacing.Y);
             Rectangle areaRect = new Rectangle(vOrigin.X, vOrigin.Y, areaSize, areaSize);
 
-            int nSelGen = lbStory.SelectedIndex;
-            int nSelArea = lbStoryArea.SelectedIndex;
+            int nSelGen = story.nSelGeneration;
+            int nSelArea = story.nSelArea;
 
             Font fnt = new Font("Arial", 9, FontStyle.Regular);
 
@@ -294,6 +297,8 @@ namespace circleEnvelope
             for (int kk = 0; kk < story.arrGenerations.Count; kk++)
             {
                 // paint generation numbers
+                if (kk == nSelGen)
+                    gr.FillRectangle(Brushes.DarkOrange, vOrigin.X + kk * spacingoff.X, vOrigin.Y - 20, spacingoff.X, 18);
                 gr.DrawString(kk.ToString(), fnt, Brushes.AliceBlue, vOrigin.X + 5 + kk * spacingoff.X, vOrigin.Y - 20);
 
                 // paint boxes
@@ -306,6 +311,19 @@ namespace circleEnvelope
                     Pen pn = Pens.Gray;
 
                     areaRect.X = vCur.X; areaRect.Y = vCur.Y;
+                    // paint add flag
+                    if (area.addFlag != 0)
+                    {
+                        Brush brf = new SolidBrush(g_story.GetFlagColor(area.addFlag));
+                        gr.FillRectangle(brf, areaRect.X, areaRect.Y, 10, 10);
+                    }
+                    if (area.avoidFlag != 0)
+                    {
+                        Brush brf = new SolidBrush(g_story.GetFlagColor(area.avoidFlag));
+                        gr.FillRectangle(brf, areaRect.X + areaRect.Width - 10, areaRect.Y, 10, 10);
+                        gr.DrawLine(Pens.DarkGray, areaRect.X + areaRect.Width - 10, areaRect.Y, areaRect.X + areaRect.Width, areaRect.Y + 10);
+                    }
+                    // paint node
                     gr.DrawRectangle(pn, areaRect);
                     // selected one
                     if ((kk == nSelGen) && (ll == nSelArea))
@@ -558,7 +576,7 @@ namespace circleEnvelope
                         // select area
                         if (e.Button == MouseButtons.Left)
                         {
-                            SelectStoryFromGraph(new Point(e.X, e.Y), g_story);
+                            Story_SelectFromGraph(new Point(e.X, e.Y), g_story);
                         }
                     }
                     break;
@@ -652,7 +670,6 @@ namespace circleEnvelope
                 vOrigin.X = 16;
                 vOrigin.Y = 32;
 
-                UpdateStoryGenerationsList(g_story);
                 RepaintArea(pbgr);
             }
         }
@@ -821,68 +838,61 @@ namespace circleEnvelope
             }
         }
 
-        private void UpdateStoryGenerationsList(Story story)
-        {
-            lbStory.Items.Clear();
-            for (int kk = 0; kk < story.arrGenerations.Count; kk++)
-            {
-                Story.StoryGeneration gen = story.arrGenerations[kk];
-                string genname = "Gen:" + kk + " Entries:" + gen.arrEntries.Count;
-                lbStory.Items.Add(genname);
-            }
-        }
-
         private void lbStory_SelectedIndexChanged(object sender, EventArgs e)
         {
-            PopulateGenerationSelection();
-            PopulateStoryGenEntryData();
+            Story_PopulateGenEntryData();
         }
 
         private void but_addStoryGen_Click(object sender, EventArgs e)
         {
             g_story.AddGeneration();
-            UpdateStoryGenerationsList(g_story);
-            lbStory.SelectedIndex = lbStory.Items.Count - 1;
 
-            PopulateStoryGenEntryData();
+            Story_PopulateGenEntryData();
         }
 
         private void wa_butAddArea_Click(object sender, EventArgs e)
         {
-            int nSelIdx = lbStory.SelectedIndex;
-            if (nSelIdx < 0)
+            if ((g_story.nSelGeneration < 0) || (g_story.nSelGeneration >= g_story.arrGenerations.Count))
             {
                 return;
             }
 
-            Story.StoryGeneration gen = g_story.arrGenerations[nSelIdx];
-            gen.AddEntry(1, 0, 0, "");
-
-            RefreshGenerationsListStrings();
-
-            PopulateGenerationSelection();
-            lbStoryArea.SelectedIndex = lbStoryArea.Items.Count - 1;
+            g_story.AddGenerationEntry(g_story.nSelGeneration, 1, 0, 0, "");
+            Story_PopulateGenEntryData();
+            RepaintArea(pbgr);
         }
 
-        private void lbStoryArea_SelectedIndexChanged(object sender, EventArgs e)
+        private bool Story_IsGenAreaSelected(Story story)
         {
-            PopulateStoryGenEntryData();
+            int nGenIdx = story.nSelGeneration;
+            int nEntryIdx = story.nSelArea;
+            if ((nGenIdx < 0) || (nGenIdx >= g_story.arrGenerations.Count))
+                return false;
+            else if ((nEntryIdx < 0) || (nEntryIdx >= g_story.arrGenerations[nGenIdx].arrEntries.Count))
+                return false;
+
+            return true;
         }
 
-        private void PopulateStoryGenEntryData()
+        private void Story_PopulateGenEntryData()
         {
-            int nGenIdx = lbStory.SelectedIndex;
-            int nEntryIdx = lbStoryArea.SelectedIndex;
-            if ((nGenIdx < 0) || (nEntryIdx < 0))
+            bool bEnabled = Story_IsGenAreaSelected(g_story);
+            if(!bEnabled)
             {
-                wa_numChildren.Value = 0;
-                wa_numAddFlag.Value = 0;
-                wa_numAvoidFlag.Value = 0;
-                wa_tbTags.Text = "";
+                groupBox_storyarea.Enabled = false;
+
+                //disable
+                groupBox_storyarea.Enabled = false;
 
                 RepaintArea(pbgr);
                 return;
             }
+
+            int nGenIdx = g_story.nSelGeneration;
+            int nEntryIdx = g_story.nSelArea;
+
+            //enable
+            groupBox_storyarea.Enabled = true;
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             wa_numChildren.Value = entry.nChildren;
@@ -895,101 +905,75 @@ namespace circleEnvelope
 
         private void wa_numChildren_ValueChanged(object sender, EventArgs e)
         {
-            int nGenIdx = lbStory.SelectedIndex;
-            if (nGenIdx < 0)
+            if (!Story_IsGenAreaSelected(g_story))
                 return;
-            int nEntryIdx = lbStoryArea.SelectedIndex;
-            if (nEntryIdx < 0)
-                return;
+            int nGenIdx = g_story.nSelGeneration;
+            int nEntryIdx = g_story.nSelArea;
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             entry.nChildren = (int)wa_numChildren.Value;
-            RefreshWantedAreaListName();
 
             RepaintArea(pbgr);
         }
 
         private void wa_tbTags_TextChanged(object sender, EventArgs e)
         {
-            int nGenIdx = lbStory.SelectedIndex;
-            if (nGenIdx < 0)
+            if (!Story_IsGenAreaSelected(g_story))
                 return;
-            int nEntryIdx = lbStoryArea.SelectedIndex;
-            if (nEntryIdx < 0)
-                return;
+            int nGenIdx = g_story.nSelGeneration;
+            int nEntryIdx = g_story.nSelArea;
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             entry.tags_any = wa_tbTags.Text;
-            //RefreshWantedAreaListName();
         }
 
         private void wa_numAddFlag_ValueChanged(object sender, EventArgs e)
         {
-            int nGenIdx = lbStory.SelectedIndex;
-            if (nGenIdx < 0)
+            if (!Story_IsGenAreaSelected(g_story))
                 return;
-            int nEntryIdx = lbStoryArea.SelectedIndex;
-            if (nEntryIdx < 0)
-                return;
+            int nGenIdx = g_story.nSelGeneration;
+            int nEntryIdx = g_story.nSelArea;
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             entry.addFlag = (int)wa_numAddFlag.Value;
-            RefreshWantedAreaListName();
 
             RepaintArea(pbgr);
         }
 
         private void wa_numAvoidFlag_ValueChanged(object sender, EventArgs e)
         {
-            int nGenIdx = lbStory.SelectedIndex;
-            if (nGenIdx < 0)
+            if (!Story_IsGenAreaSelected(g_story))
                 return;
-            int nEntryIdx = lbStoryArea.SelectedIndex;
-            if (nEntryIdx < 0)
-                return;
+            int nGenIdx = g_story.nSelGeneration;
+            int nEntryIdx = g_story.nSelArea;
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             entry.avoidFlag = (int)wa_numAvoidFlag.Value;
-            RefreshWantedAreaListName();
 
             RepaintArea(pbgr);
         }
 
         private void wa_butDelEntry_Click(object sender, EventArgs e)
         {
-            int nGenIdx = lbStory.SelectedIndex;
-            if (nGenIdx < 0)
+            if (!Story_IsGenAreaSelected(g_story))
                 return;
-            int nEntryIdx = lbStoryArea.SelectedIndex;
-            if (nEntryIdx < 0)
-                return;
+            int nGenIdx = g_story.nSelGeneration;
+            int nEntryIdx = g_story.nSelArea;
 
-            g_story.arrGenerations[nGenIdx].DeleteEntry(nEntryIdx);
-            lbStoryArea.SelectedIndex = nEntryIdx - 1;
-            RefreshGenerationsListStrings();
-            PopulateGenerationSelection();
-            PopulateStoryGenEntryData();
+            g_story.DeleteGenerationEntry(nGenIdx, nEntryIdx);
+            Story_PopulateGenEntryData();
+            RepaintArea(pbgr);
         }
 
-        // populates fields with data about the story generation descriptors
-        private void PopulateGenerationSelection()
+        private void but_generateFromStory_Click(object sender, EventArgs e)
         {
-            int nSelIdx = lbStory.SelectedIndex;
-            if (nSelIdx < 0)
-            {
-                lbStoryArea.Items.Clear();
-                return;
-            }
+            g_story.SortGenerations();
+            RepaintArea(pbgr);
+        }
 
-            Story.StoryGeneration gen = g_story.arrGenerations[nSelIdx];
-            lbStoryArea.Items.Clear();
-            for (int kk = 0; kk < gen.arrEntries.Count; kk++)
-            {
-                string strName = gen.arrEntries[kk].GetName();
-                lbStoryArea.Items.Add(strName);
-            }
-            if(lbStoryArea.Items.Count > 0)
-                lbStoryArea.SelectedIndex = 0;
+        private void but_GenFromStory_Click(object sender, EventArgs e)
+        {
+
         }
 
         private void saveStoryToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1049,32 +1033,6 @@ namespace circleEnvelope
             {
                 MessageBox.Show("Error saving story! \n\n" + ex.Message);
             }
-        }
-
-        private void RefreshGenerationsListStrings()
-        {
-            // refresh story generations names
-            for (int kk = 0; kk < g_story.arrGenerations.Count; kk++)
-            {
-                Story.StoryGeneration gen = g_story.arrGenerations[kk];
-                string genname = "Gen:" + kk + " Entries:" + gen.arrEntries.Count;
-                lbStory.Items[kk] = genname;
-            }
-        }
-
-        private void RefreshWantedAreaListName()
-        {
-            int nGenIdx = lbStory.SelectedIndex;
-            if (nGenIdx < 0)
-                return;
-            int nEntryIdx = lbStoryArea.SelectedIndex;
-            if (nEntryIdx < 0)
-                return;
-
-            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
-            lbStoryArea.Items[nEntryIdx] = entry.GetName();
-
-            RepaintArea(pbgr);
         }
 
     }
