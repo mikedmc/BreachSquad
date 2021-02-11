@@ -36,21 +36,25 @@
             this.tabAreas = new System.Windows.Forms.TabPage();
             this.but_ComputeFlags = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.tb_areaTags = new System.Windows.Forms.TextBox();
             this.tb_areaName = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.but_DelArea = new System.Windows.Forms.Button();
             this.butCloneArea = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.butSaveArea = new System.Windows.Forms.Button();
             this.tabGenerator = new System.Windows.Forms.TabPage();
+            this.but_GenFromStory = new System.Windows.Forms.Button();
             this.generations = new System.Windows.Forms.Label();
             this.numGenerations = new System.Windows.Forms.NumericUpDown();
+            this.but_GenCorridors = new System.Windows.Forms.Button();
             this.tabStory = new System.Windows.Forms.TabPage();
+            this.wa_butDelEntry = new System.Windows.Forms.Button();
+            this.wa_butAddArea = new System.Windows.Forms.Button();
             this.but_generateFromStory = new System.Windows.Forms.Button();
             this.but_addStoryGen = new System.Windows.Forms.Button();
             this.groupBox_storyarea = new System.Windows.Forms.GroupBox();
-            this.wa_butDelEntry = new System.Windows.Forms.Button();
-            this.wa_butAddArea = new System.Windows.Forms.Button();
             this.wa_tbTags = new System.Windows.Forms.TextBox();
             this.wa_numAvoidFlag = new System.Windows.Forms.NumericUpDown();
             this.wa_numAddFlag = new System.Windows.Forms.NumericUpDown();
@@ -67,10 +71,7 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.loadStoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveStoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.but_GenFromStory = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
-            this.tb_areaTags = new System.Windows.Forms.TextBox();
-            this.but_GenCorridors = new System.Windows.Forms.Button();
+            this.but_GenCorridorsNeeded = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabAreas.SuspendLayout();
@@ -180,6 +181,14 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Area Properties";
             // 
+            // tb_areaTags
+            // 
+            this.tb_areaTags.Location = new System.Drawing.Point(9, 71);
+            this.tb_areaTags.Name = "tb_areaTags";
+            this.tb_areaTags.Size = new System.Drawing.Size(185, 20);
+            this.tb_areaTags.TabIndex = 3;
+            this.tb_areaTags.TextChanged += new System.EventHandler(this.tb_areaTags_TextChanged);
+            // 
             // tb_areaName
             // 
             this.tb_areaName.Location = new System.Drawing.Point(9, 32);
@@ -187,6 +196,15 @@
             this.tb_areaName.Size = new System.Drawing.Size(185, 20);
             this.tb_areaName.TabIndex = 3;
             this.tb_areaName.TextChanged += new System.EventHandler(this.tb_areaName_TextChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 55);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(52, 13);
+            this.label4.TabIndex = 4;
+            this.label4.Text = "Area tags";
             // 
             // label2
             // 
@@ -241,6 +259,7 @@
             this.tabGenerator.Controls.Add(this.but_GenFromStory);
             this.tabGenerator.Controls.Add(this.generations);
             this.tabGenerator.Controls.Add(this.numGenerations);
+            this.tabGenerator.Controls.Add(this.but_GenCorridorsNeeded);
             this.tabGenerator.Controls.Add(this.but_GenCorridors);
             this.tabGenerator.Controls.Add(this.butGenerate);
             this.tabGenerator.Location = new System.Drawing.Point(4, 22);
@@ -250,6 +269,16 @@
             this.tabGenerator.TabIndex = 1;
             this.tabGenerator.Text = "Generator";
             this.tabGenerator.UseVisualStyleBackColor = true;
+            // 
+            // but_GenFromStory
+            // 
+            this.but_GenFromStory.Location = new System.Drawing.Point(8, 6);
+            this.but_GenFromStory.Name = "but_GenFromStory";
+            this.but_GenFromStory.Size = new System.Drawing.Size(201, 23);
+            this.but_GenFromStory.TabIndex = 5;
+            this.but_GenFromStory.Text = "Generate from Story";
+            this.but_GenFromStory.UseVisualStyleBackColor = true;
+            this.but_GenFromStory.Click += new System.EventHandler(this.but_GenFromStory_Click);
             // 
             // generations
             // 
@@ -277,6 +306,16 @@
             0,
             0});
             // 
+            // but_GenCorridors
+            // 
+            this.but_GenCorridors.Location = new System.Drawing.Point(8, 470);
+            this.but_GenCorridors.Name = "but_GenCorridors";
+            this.but_GenCorridors.Size = new System.Drawing.Size(201, 25);
+            this.but_GenCorridors.TabIndex = 2;
+            this.but_GenCorridors.Text = "Generate with corridors";
+            this.but_GenCorridors.UseVisualStyleBackColor = true;
+            this.but_GenCorridors.Click += new System.EventHandler(this.but_GenCorridors_Click);
+            // 
             // tabStory
             // 
             this.tabStory.Controls.Add(this.wa_butDelEntry);
@@ -291,6 +330,26 @@
             this.tabStory.TabIndex = 2;
             this.tabStory.Text = "Story";
             this.tabStory.UseVisualStyleBackColor = true;
+            // 
+            // wa_butDelEntry
+            // 
+            this.wa_butDelEntry.Location = new System.Drawing.Point(115, 376);
+            this.wa_butDelEntry.Name = "wa_butDelEntry";
+            this.wa_butDelEntry.Size = new System.Drawing.Size(91, 23);
+            this.wa_butDelEntry.TabIndex = 7;
+            this.wa_butDelEntry.Text = "Delete Entry";
+            this.wa_butDelEntry.UseVisualStyleBackColor = true;
+            this.wa_butDelEntry.Click += new System.EventHandler(this.wa_butDelEntry_Click);
+            // 
+            // wa_butAddArea
+            // 
+            this.wa_butAddArea.Location = new System.Drawing.Point(9, 376);
+            this.wa_butAddArea.Name = "wa_butAddArea";
+            this.wa_butAddArea.Size = new System.Drawing.Size(91, 23);
+            this.wa_butAddArea.TabIndex = 7;
+            this.wa_butAddArea.Text = "Add Entry";
+            this.wa_butAddArea.UseVisualStyleBackColor = true;
+            this.wa_butAddArea.Click += new System.EventHandler(this.wa_butAddArea_Click);
             // 
             // but_generateFromStory
             // 
@@ -328,26 +387,6 @@
             this.groupBox_storyarea.TabIndex = 2;
             this.groupBox_storyarea.TabStop = false;
             this.groupBox_storyarea.Text = "Generation Properties";
-            // 
-            // wa_butDelEntry
-            // 
-            this.wa_butDelEntry.Location = new System.Drawing.Point(115, 376);
-            this.wa_butDelEntry.Name = "wa_butDelEntry";
-            this.wa_butDelEntry.Size = new System.Drawing.Size(91, 23);
-            this.wa_butDelEntry.TabIndex = 7;
-            this.wa_butDelEntry.Text = "Delete Entry";
-            this.wa_butDelEntry.UseVisualStyleBackColor = true;
-            this.wa_butDelEntry.Click += new System.EventHandler(this.wa_butDelEntry_Click);
-            // 
-            // wa_butAddArea
-            // 
-            this.wa_butAddArea.Location = new System.Drawing.Point(9, 376);
-            this.wa_butAddArea.Name = "wa_butAddArea";
-            this.wa_butAddArea.Size = new System.Drawing.Size(91, 23);
-            this.wa_butAddArea.TabIndex = 7;
-            this.wa_butAddArea.Text = "Add Entry";
-            this.wa_butAddArea.UseVisualStyleBackColor = true;
-            this.wa_butAddArea.Click += new System.EventHandler(this.wa_butAddArea_Click);
             // 
             // wa_tbTags
             // 
@@ -495,42 +534,15 @@
             this.saveStoryToolStripMenuItem.Text = "Save Story...";
             this.saveStoryToolStripMenuItem.Click += new System.EventHandler(this.saveStoryToolStripMenuItem_Click);
             // 
-            // but_GenFromStory
+            // but_GenCorridorsNeeded
             // 
-            this.but_GenFromStory.Location = new System.Drawing.Point(8, 6);
-            this.but_GenFromStory.Name = "but_GenFromStory";
-            this.but_GenFromStory.Size = new System.Drawing.Size(201, 23);
-            this.but_GenFromStory.TabIndex = 5;
-            this.but_GenFromStory.Text = "Generate from Story";
-            this.but_GenFromStory.UseVisualStyleBackColor = true;
-            this.but_GenFromStory.Click += new System.EventHandler(this.but_GenFromStory_Click);
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 55);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(52, 13);
-            this.label4.TabIndex = 4;
-            this.label4.Text = "Area tags";
-            // 
-            // tb_areaTags
-            // 
-            this.tb_areaTags.Location = new System.Drawing.Point(9, 71);
-            this.tb_areaTags.Name = "tb_areaTags";
-            this.tb_areaTags.Size = new System.Drawing.Size(185, 20);
-            this.tb_areaTags.TabIndex = 3;
-            this.tb_areaTags.TextChanged += new System.EventHandler(this.tb_areaTags_TextChanged);
-            // 
-            // but_GenCorridors
-            // 
-            this.but_GenCorridors.Location = new System.Drawing.Point(8, 470);
-            this.but_GenCorridors.Name = "but_GenCorridors";
-            this.but_GenCorridors.Size = new System.Drawing.Size(201, 25);
-            this.but_GenCorridors.TabIndex = 2;
-            this.but_GenCorridors.Text = "Generate with corridors";
-            this.but_GenCorridors.UseVisualStyleBackColor = true;
-            this.but_GenCorridors.Click += new System.EventHandler(this.but_GenCorridors_Click);
+            this.but_GenCorridorsNeeded.Location = new System.Drawing.Point(8, 439);
+            this.but_GenCorridorsNeeded.Name = "but_GenCorridorsNeeded";
+            this.but_GenCorridorsNeeded.Size = new System.Drawing.Size(201, 25);
+            this.but_GenCorridorsNeeded.TabIndex = 2;
+            this.but_GenCorridorsNeeded.Text = "Generate corridors when needed";
+            this.but_GenCorridorsNeeded.UseVisualStyleBackColor = true;
+            this.but_GenCorridorsNeeded.Click += new System.EventHandler(this.but_GenCorridorsNeeded_Click);
             // 
             // Form1
             // 
@@ -612,6 +624,7 @@
         private System.Windows.Forms.TextBox tb_areaTags;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button but_GenCorridors;
+        private System.Windows.Forms.Button but_GenCorridorsNeeded;
     }
 }
 

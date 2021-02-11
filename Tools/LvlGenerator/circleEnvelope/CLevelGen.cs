@@ -199,6 +199,15 @@ namespace circleEnvelope
 
         public void RemoveChildrenOf(CPlacedArea parent)
         {
+            // unlink parent's children
+            for (int kk = 0; kk < parent.arrConnections.Count; kk++)
+            {
+                // removes only the lower child
+                if ((parent.arrConnections[kk].pConnectedArea != null) && (parent.arrConnections[kk].pConnectedArea.nGeneration > parent.nGeneration))
+                    parent.arrConnections[kk].pConnectedArea = null;
+
+            }
+
             for (int kk = m_arrPlaced.Count - 1; kk >= 0; kk--) 
             {
                 CPlacedArea area = m_arrPlaced[kk] as CPlacedArea;
@@ -207,6 +216,8 @@ namespace circleEnvelope
                     continue;
                 foreach (CPlacedArea.CAreaConnector pconn in area.arrConnections)
                 {
+                    if (pconn.pConnectedArea == null)
+                        continue;
                     if (pconn.pConnectedArea == parent)
                     {
                         //remove and break
@@ -324,6 +335,186 @@ namespace circleEnvelope
             return false;
         }
 
+        // returns array of all placed areas of specified generation
+        public ArrayList GetShuffledPlacedAreas(int nGeneration)
+        {
+            ArrayList retArr = new ArrayList();
+            for (int kk = 0; kk < m_arrPlaced.Count; kk++)
+            {
+                CPlacedArea placed = m_arrPlaced[kk] as CPlacedArea;
+                if (placed.nGeneration == nGeneration)
+                    retArr.Add(placed);
+            }
+
+            ShuffleList(retArr);
+
+            return retArr;
+        }
+
+
+        // Only adds corridors (based on probability) when children can't be placed
+        public bool GenerateWithCorridorsWhenNeeded(ArrayList inventory, int maxDepth, float fCorridorProb)
+        {
+            Console.WriteLine("\n\nGenerating level - corridors when needed probability:" + fCorridorProb.ToString());
+            m_arrPlaced.RemoveRange(0, m_arrPlaced.Count);
+
+            bool bLevelGenerated = true;
+
+            ArrayList availableList = FilterAreas(inventory, 1, 1, Form1.DIRFLAG_ANY, "start");
+            if (availableList.Count > 0)
+            {
+                ShuffleList(availableList);
+                // place starting area:
+                CInventoryArea selarea = availableList[0] as CInventoryArea;
+                CPlacedArea pa = new CPlacedArea(selarea.area, posStart);
+                selarea.nConsumed++;
+                m_arrPlaced.Add(pa);
+
+                int nMaxDepth = maxDepth;
+
+                int nCurrGeneration = 0;
+                while (nCurrGeneration < nMaxDepth)
+                {
+                    ///--- place actual rooms (corridors must be excluded)
+                    //_ASSERT(nCurrGeneration < 50);
+                    int generationTries = 10;
+                    bool bGenerationPlaced = false;
+                    while ((generationTries > 0) && (bGenerationPlaced == false))
+                    {
+                        bGenerationPlaced = true;
+                        // for each placed area of current generation:
+                        ArrayList arrGenAreas2 = GetShuffledPlacedAreas(nCurrGeneration);
+                        for (int kk = 0; kk < arrGenAreas2.Count; kk++)
+                        {
+                            // find placed area
+                            CPlacedArea placed = arrGenAreas2[kk] as CPlacedArea;
+                            if (placed.nGeneration != nCurrGeneration)
+                                continue;
+                            // for each area try connecting the children N times
+                            int childTries = 10;
+                            bool bChildrenPlaced = false;
+                            while ((childTries > 0) && (bChildrenPlaced == false))
+                            {
+                                bChildrenPlaced = true;
+                                // get the shuffled connectors
+                                ArrayList arrConn = placed.GetShuffledAvailableConnectors(true);
+                                // take connectors one by one and try to place random children
+                                for (int ncon = 0; ncon < arrConn.Count; ncon++)
+                                {
+                                    CPlacedArea.CAreaConnector curcon = arrConn[ncon] as CPlacedArea.CAreaConnector;
+                                    // Place random area tries to place all available items with future depth
+                                    bool bPlaced = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration + 1, nMaxDepth, "", "hall");
+                                    if (!bPlaced)
+                                    {
+                                        Console.WriteLine("Could not place children! Removing them! try:" + childTries);
+                                        bChildrenPlaced = false;
+                                        //remove already placed children of this parent area
+                                        RemoveChildrenOf(placed);
+
+                                        // add corridor on this connection
+                                        bool bPlacedCorridor = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration, nMaxDepth, "hall");
+                                        if (bPlacedCorridor)
+                                        {
+                                            Console.WriteLine("Corridor placed.");
+                                            // add corridor as level 6 area too so it gets completed on next pass
+                                            arrGenAreas2.Add(curcon.pConnectedArea);
+                                        }
+
+                                        // exit for
+                                        break;
+                                    }
+                                }
+
+                                /*
+                                // add corridors randomly if children placing failed (makes long corridors sometimes)
+                                if (bChildrenPlaced == false)
+                                {
+                                    Console.WriteLine("Trying to place corridors...");
+                                    for (int ncon = 0; ncon < arrConn.Count; ncon++)
+                                    {
+                                        // probability of corridor presence computed on each connector
+                                        if (rnd.Next(1000) > (int)(999 * fCorridorProb))
+                                            continue;
+
+                                        CPlacedArea.CAreaConnector curcon = arrConn[ncon] as CPlacedArea.CAreaConnector;
+                                        // Place corridor with same generation as parent
+                                        bool bPlaced = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration, nMaxDepth, "hall");
+                                        if (bPlaced)
+                                        {
+                                            Console.WriteLine("Corridor placed.");
+                                            // add corridor as level 6 area too so it gets completed on next pass
+                                            arrGenAreas2.Add(curcon.pConnectedArea);
+                                        }
+                                    }
+                                }
+                                */
+
+                                childTries--;
+                            }
+                            // failed to place children after many tries:
+                            if (bChildrenPlaced == false)
+                            {
+                                Console.WriteLine("Generation failed! try:" + generationTries);
+                                bGenerationPlaced = false;
+                                //remove parent generations and all of their children
+                                if (nCurrGeneration > 0)
+                                {
+                                    RemoveGenerations(nCurrGeneration);
+                                    nCurrGeneration--;
+                                }
+                                else
+                                {
+                                    // returned to starting point, failed generating level!
+                                    generationTries = 0;
+                                }
+                                // exit generations for
+                                break;
+                            }
+                        }
+
+                        generationTries--;
+                    }
+
+                    // AL GOOD, prepare next generation
+                    if (bGenerationPlaced == true)
+                    {
+                        nCurrGeneration++;
+                    }
+                    else
+                    {
+                        m_arrPlaced.RemoveRange(0, m_arrPlaced.Count);
+                        bLevelGenerated = false;
+                        nCurrGeneration = maxDepth; //force exit while
+                        MessageBox.Show("Could not generate level!");
+                        break;
+                    }
+                }
+            }
+
+            if (bLevelGenerated)
+            {
+                // find level AABB
+                Point vMin = new Point(1000000, 1000000);
+                Point vMax = new Point(-1000000, -1000000);
+                foreach (CPlacedArea pa in m_arrPlaced)
+                {
+                    if (pa.AABB.X < vMin.X) vMin.X = pa.AABB.X;
+                    if (pa.AABB.Y < vMin.Y) vMin.Y = pa.AABB.Y;
+                    if (pa.AABB.Right > vMax.X) vMax.X = pa.AABB.Right;
+                    if (pa.AABB.Bottom > vMax.Y) vMax.Y = pa.AABB.Bottom;
+                }
+
+                m_levelAABB = new Rectangle(vMin.X, vMin.Y, vMax.X - vMin.X, vMax.Y - vMin.Y);
+                Console.WriteLine("-- Level generation OK!");
+            }
+            else
+            {
+                m_levelAABB = new Rectangle(0, 0, 0, 0);
+            }
+
+            return bLevelGenerated;
+        }
+
 
         // generates level with additional step for corridors, using fCorridorProb as probability of attaching a corridor (0..1)
         public bool GenerateLevelWithCorridors(ArrayList inventory, int maxDepth, float fCorridorProb)
@@ -350,11 +541,11 @@ namespace circleEnvelope
                 {
                     ///--- place corridors before placing next generation, don't try too hard
                     // for each placed area of current generation:
-                    int nPlacedCntCorr = m_arrPlaced.Count; //save count before, it grows
-                    for (int kk = 0; kk < nPlacedCntCorr; kk++)
+                    ArrayList arrGenAreas = GetShuffledPlacedAreas(nCurrGeneration);
+                    for (int kk = 0; kk < arrGenAreas.Count; kk++)
                     {
                         // find placed area
-                        CPlacedArea placed = m_arrPlaced[kk] as CPlacedArea;
+                        CPlacedArea placed = arrGenAreas[kk] as CPlacedArea;
                         if (placed.nGeneration != nCurrGeneration)
                             continue;
 
@@ -385,11 +576,11 @@ namespace circleEnvelope
                     {
                         bGenerationPlaced = true;
                         // for each placed area of current generation:
-                        int nPlacedCnt = m_arrPlaced.Count; //save count before, it grows
-                        for (int kk = 0; kk < nPlacedCnt; kk++)
+                        ArrayList arrGenAreas2 = GetShuffledPlacedAreas(nCurrGeneration);
+                        for (int kk = 0; kk < arrGenAreas2.Count; kk++)
                         {
                             // find placed area
-                            CPlacedArea placed = m_arrPlaced[kk] as CPlacedArea;
+                            CPlacedArea placed = arrGenAreas2[kk] as CPlacedArea;
                             if (placed.nGeneration != nCurrGeneration)
                                 continue;
                             // for each area try connecting the children N times
@@ -412,6 +603,8 @@ namespace circleEnvelope
                                         bChildrenPlaced = false;
                                         //remove already placed children of this parent area
                                         RemoveChildrenOf(placed);
+                                        // exit for
+                                        break;
                                     }
                                 }
 
@@ -539,6 +732,8 @@ namespace circleEnvelope
                                         bChildrenPlaced = false;
                                         //remove already placed children of this parent area
                                         RemoveChildrenOf(placed);
+                                        // exit for
+                                        break;
                                     }
                                 }
 

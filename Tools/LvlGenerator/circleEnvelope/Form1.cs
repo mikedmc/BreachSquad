@@ -1008,6 +1008,27 @@ namespace circleEnvelope
             RepaintArea(pbgr);
         }
 
+        private void but_GenCorridorsNeeded_Click(object sender, EventArgs e)
+        {
+            ArrayList inventory = new ArrayList();
+
+            foreach (CAreaDesc ad in m_arrAreas)
+            {
+                // make sure we have everything computed
+                ad.ComputeInternalData();
+
+                CLevelGen.CInventoryArea ia = new CLevelGen.CInventoryArea();
+                ia.area = ad;
+                ia.nAvailable = 10;
+                ia.nConsumed = 0;
+                inventory.Add(ia);
+            }
+
+            g_LevelGen.GenerateWithCorridorsWhenNeeded(inventory, (int)numGenerations.Value, 0.5f);
+
+            RepaintArea(pbgr);
+        }
+
         private void saveStoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveFileDialog dlg = new SaveFileDialog();
