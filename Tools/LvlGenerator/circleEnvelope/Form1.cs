@@ -297,11 +297,14 @@ namespace circleEnvelope
             Font fnt = new Font("Arial", 9, FontStyle.Regular);
 
             Point vCur = new Point(vOrigin.X, vOrigin.Y);
+
+            // paint generation selection
+            if (nSelGen >= 0)
+                gr.FillRectangle(new SolidBrush(Color.FromArgb(20, 20, 20)), vOrigin.X + nSelGen * spacingoff.X - spacingoff.X / 4, vOrigin.Y - 20, spacingoff.X, 18 + story.arrGenerations[nSelGen].arrEntries.Count * spacingoff.Y);
+
             for (int kk = 0; kk < story.arrGenerations.Count; kk++)
             {
-                // paint generation numbers
-                if (kk == nSelGen)
-                    gr.FillRectangle(Brushes.DarkOrange, vOrigin.X + kk * spacingoff.X, vOrigin.Y - 20, spacingoff.X, 18);
+                //generation numbers
                 gr.DrawString(kk.ToString(), fnt, Brushes.AliceBlue, vOrigin.X + 5 + kk * spacingoff.X, vOrigin.Y - 20);
 
                 // paint boxes
@@ -314,20 +317,14 @@ namespace circleEnvelope
                     Pen pn = Pens.Gray;
 
                     areaRect.X = vCur.X; areaRect.Y = vCur.Y;
-                    // paint add flag
-                    if (area.addFlag != 0)
-                    {
-                        Brush brf = new SolidBrush(g_story.GetFlagColor(area.addFlag));
-                        gr.FillRectangle(brf, areaRect.X, areaRect.Y, 10, 10);
-                    }
-                    if (area.avoidFlag != 0)
-                    {
-                        Brush brf = new SolidBrush(g_story.GetFlagColor(area.avoidFlag));
-                        gr.FillRectangle(brf, areaRect.X + areaRect.Width - 10, areaRect.Y, 10, 10);
-                        gr.DrawLine(Pens.DarkGray, areaRect.X + areaRect.Width - 10, areaRect.Y, areaRect.X + areaRect.Width, areaRect.Y + 10);
-                    }
                     // paint node
                     gr.DrawRectangle(pn, areaRect);
+
+                    if (chk_ShowIDs.Checked)
+                    {
+                        gr.DrawString(area.nID.ToString(), fnt, Brushes.GreenYellow, areaRect.X, areaRect.Y);
+                        gr.DrawString("p" + area.nParentID.ToString(), fnt, Brushes.BlueViolet, areaRect.X, areaRect.Y + 10);
+                    }
                     // selected one
                     if ((kk == nSelGen) && (ll == nSelArea))
                     {
@@ -423,6 +420,7 @@ namespace circleEnvelope
 
                             int nMinLuminance = Math.Max(255 - pa.nGeneration * 15, 40);
                             SolidBrush brcol = new SolidBrush(Color.FromArgb(128, 128, nMinLuminance));
+
                             Brush brdark = new SolidBrush(Color.FromArgb(128, 40,40,40));
 
                             gr.FillRectangle(brdark, paRect);
@@ -907,8 +905,6 @@ namespace circleEnvelope
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             wa_numChildren.Value = entry.nChildren;
-            wa_numAddFlag.Value = entry.addFlag;
-            wa_numAvoidFlag.Value= entry.avoidFlag;
             wa_tbTags.Text = entry.tags_any;
 
             RepaintArea(pbgr);
@@ -936,32 +932,6 @@ namespace circleEnvelope
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             entry.tags_any = wa_tbTags.Text;
-        }
-
-        private void wa_numAddFlag_ValueChanged(object sender, EventArgs e)
-        {
-            if (!Story_IsGenAreaSelected(g_story))
-                return;
-            int nGenIdx = g_story.nSelGeneration;
-            int nEntryIdx = g_story.nSelArea;
-
-            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
-            entry.addFlag = (int)wa_numAddFlag.Value;
-
-            RepaintArea(pbgr);
-        }
-
-        private void wa_numAvoidFlag_ValueChanged(object sender, EventArgs e)
-        {
-            if (!Story_IsGenAreaSelected(g_story))
-                return;
-            int nGenIdx = g_story.nSelGeneration;
-            int nEntryIdx = g_story.nSelArea;
-
-            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
-            entry.avoidFlag = (int)wa_numAvoidFlag.Value;
-
-            RepaintArea(pbgr);
         }
 
         private void wa_butDelEntry_Click(object sender, EventArgs e)
@@ -1029,6 +999,18 @@ namespace circleEnvelope
             RepaintArea(pbgr);
         }
 
+        private void but_storyComputeIDs_Click(object sender, EventArgs e)
+        {
+            g_story.ComputeRelationships();
+            Story_PopulateGenEntryData();
+            RepaintArea(pbgr);
+        }
+
+        private void chk_ShowIDs_CheckedChanged(object sender, EventArgs e)
+        {
+            RepaintArea(pbgr);
+        }
+
         private void saveStoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveFileDialog dlg = new SaveFileDialog();
@@ -1065,8 +1047,8 @@ namespace circleEnvelope
                         xw.WriteStartElement("Area");
 
                         xw.WriteAttributeString("Children", ae.nChildren.ToString());
-                        xw.WriteAttributeString("AddFlag", ae.addFlag.ToString());
-                        xw.WriteAttributeString("AvoidFlag", ae.avoidFlag.ToString());
+                        xw.WriteAttributeString("ID", ae.nID.ToString());
+                        xw.WriteAttributeString("ParentID", ae.nParentID.ToString());
                         xw.WriteAttributeString("TagsAny", ae.tags_any);
                         xw.WriteAttributeString("TagsAll", ae.tags_all);
                         xw.WriteAttributeString("TagsNone", ae.tags_none);

@@ -426,7 +426,7 @@ namespace circleEnvelope
                                 }
 
                                 /*
-                                // add corridors randomly if children placing failed (makes long corridors sometimes)
+                                // version2: add corridors randomly if children placing failed (makes long corridors sometimes)
                                 if (bChildrenPlaced == false)
                                 {
                                     Console.WriteLine("Trying to place corridors...");

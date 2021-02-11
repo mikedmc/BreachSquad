@@ -42,7 +42,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.but_DelArea = new System.Windows.Forms.Button();
             this.butCloneArea = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
             this.butSaveArea = new System.Windows.Forms.Button();
             this.tabGenerator = new System.Windows.Forms.TabPage();
             this.but_GenFromStory = new System.Windows.Forms.Button();
@@ -56,11 +55,7 @@
             this.but_addStoryGen = new System.Windows.Forms.Button();
             this.groupBox_storyarea = new System.Windows.Forms.GroupBox();
             this.wa_tbTags = new System.Windows.Forms.TextBox();
-            this.wa_numAvoidFlag = new System.Windows.Forms.NumericUpDown();
-            this.wa_numAddFlag = new System.Windows.Forms.NumericUpDown();
             this.wa_numChildren = new System.Windows.Forms.NumericUpDown();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -72,6 +67,8 @@
             this.loadStoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveStoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.but_GenCorridorsNeeded = new System.Windows.Forms.Button();
+            this.but_storyComputeIDs = new System.Windows.Forms.Button();
+            this.chk_ShowIDs = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabAreas.SuspendLayout();
@@ -80,8 +77,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.numGenerations)).BeginInit();
             this.tabStory.SuspendLayout();
             this.groupBox_storyarea.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.wa_numAvoidFlag)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.wa_numAddFlag)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.wa_numChildren)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -100,7 +95,7 @@
             // 
             // butClear
             // 
-            this.butClear.Location = new System.Drawing.Point(6, 531);
+            this.butClear.Location = new System.Drawing.Point(6, 352);
             this.butClear.Name = "butClear";
             this.butClear.Size = new System.Drawing.Size(203, 25);
             this.butClear.TabIndex = 1;
@@ -121,9 +116,9 @@
             // lbAreas
             // 
             this.lbAreas.FormattingEnabled = true;
-            this.lbAreas.Location = new System.Drawing.Point(6, 222);
+            this.lbAreas.Location = new System.Drawing.Point(6, 6);
             this.lbAreas.Name = "lbAreas";
-            this.lbAreas.Size = new System.Drawing.Size(200, 277);
+            this.lbAreas.Size = new System.Drawing.Size(203, 277);
             this.lbAreas.TabIndex = 5;
             this.lbAreas.SelectedIndexChanged += new System.EventHandler(this.lbAreas_SelectedIndexChanged);
             this.lbAreas.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lbAreas_MouseDoubleClick);
@@ -146,7 +141,6 @@
             this.tabAreas.Controls.Add(this.groupBox1);
             this.tabAreas.Controls.Add(this.but_DelArea);
             this.tabAreas.Controls.Add(this.butCloneArea);
-            this.tabAreas.Controls.Add(this.label1);
             this.tabAreas.Controls.Add(this.butSaveArea);
             this.tabAreas.Controls.Add(this.lbAreas);
             this.tabAreas.Controls.Add(this.butClear);
@@ -160,7 +154,7 @@
             // 
             // but_ComputeFlags
             // 
-            this.but_ComputeFlags.Location = new System.Drawing.Point(108, 504);
+            this.but_ComputeFlags.Location = new System.Drawing.Point(108, 325);
             this.but_ComputeFlags.Name = "but_ComputeFlags";
             this.but_ComputeFlags.Size = new System.Drawing.Size(101, 25);
             this.but_ComputeFlags.TabIndex = 10;
@@ -174,7 +168,7 @@
             this.groupBox1.Controls.Add(this.tb_areaName);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Location = new System.Drawing.Point(6, 84);
+            this.groupBox1.Location = new System.Drawing.Point(6, 445);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(200, 108);
             this.groupBox1.TabIndex = 10;
@@ -217,7 +211,7 @@
             // 
             // but_DelArea
             // 
-            this.but_DelArea.Location = new System.Drawing.Point(6, 504);
+            this.but_DelArea.Location = new System.Drawing.Point(6, 325);
             this.but_DelArea.Name = "but_DelArea";
             this.but_DelArea.Size = new System.Drawing.Size(101, 25);
             this.but_DelArea.TabIndex = 7;
@@ -227,7 +221,7 @@
             // 
             // butCloneArea
             // 
-            this.butCloneArea.Location = new System.Drawing.Point(108, 6);
+            this.butCloneArea.Location = new System.Drawing.Point(108, 297);
             this.butCloneArea.Name = "butCloneArea";
             this.butCloneArea.Size = new System.Drawing.Size(101, 25);
             this.butCloneArea.TabIndex = 5;
@@ -235,18 +229,9 @@
             this.butCloneArea.UseVisualStyleBackColor = true;
             this.butCloneArea.Click += new System.EventHandler(this.butCloneArea_Click);
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 206);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(34, 13);
-            this.label1.TabIndex = 9;
-            this.label1.Text = "Areas";
-            // 
             // butSaveArea
             // 
-            this.butSaveArea.Location = new System.Drawing.Point(6, 6);
+            this.butSaveArea.Location = new System.Drawing.Point(6, 297);
             this.butSaveArea.Name = "butSaveArea";
             this.butSaveArea.Size = new System.Drawing.Size(101, 25);
             this.butSaveArea.TabIndex = 2;
@@ -318,9 +303,11 @@
             // 
             // tabStory
             // 
+            this.tabStory.Controls.Add(this.chk_ShowIDs);
             this.tabStory.Controls.Add(this.wa_butDelEntry);
             this.tabStory.Controls.Add(this.wa_butAddArea);
             this.tabStory.Controls.Add(this.but_generateFromStory);
+            this.tabStory.Controls.Add(this.but_storyComputeIDs);
             this.tabStory.Controls.Add(this.but_addStoryGen);
             this.tabStory.Controls.Add(this.groupBox_storyarea);
             this.tabStory.Controls.Add(this.label3);
@@ -333,9 +320,9 @@
             // 
             // wa_butDelEntry
             // 
-            this.wa_butDelEntry.Location = new System.Drawing.Point(115, 376);
+            this.wa_butDelEntry.Location = new System.Drawing.Point(109, 49);
             this.wa_butDelEntry.Name = "wa_butDelEntry";
-            this.wa_butDelEntry.Size = new System.Drawing.Size(91, 23);
+            this.wa_butDelEntry.Size = new System.Drawing.Size(103, 23);
             this.wa_butDelEntry.TabIndex = 7;
             this.wa_butDelEntry.Text = "Delete Entry";
             this.wa_butDelEntry.UseVisualStyleBackColor = true;
@@ -343,9 +330,9 @@
             // 
             // wa_butAddArea
             // 
-            this.wa_butAddArea.Location = new System.Drawing.Point(9, 376);
+            this.wa_butAddArea.Location = new System.Drawing.Point(3, 49);
             this.wa_butAddArea.Name = "wa_butAddArea";
-            this.wa_butAddArea.Size = new System.Drawing.Size(91, 23);
+            this.wa_butAddArea.Size = new System.Drawing.Size(103, 23);
             this.wa_butAddArea.TabIndex = 7;
             this.wa_butAddArea.Text = "Add Entry";
             this.wa_butAddArea.UseVisualStyleBackColor = true;
@@ -353,9 +340,9 @@
             // 
             // but_generateFromStory
             // 
-            this.but_generateFromStory.Location = new System.Drawing.Point(115, 197);
+            this.but_generateFromStory.Location = new System.Drawing.Point(3, 533);
             this.but_generateFromStory.Name = "but_generateFromStory";
-            this.but_generateFromStory.Size = new System.Drawing.Size(91, 23);
+            this.but_generateFromStory.Size = new System.Drawing.Size(103, 23);
             this.but_generateFromStory.TabIndex = 4;
             this.but_generateFromStory.Text = "Sort Visually";
             this.but_generateFromStory.UseVisualStyleBackColor = true;
@@ -363,9 +350,9 @@
             // 
             // but_addStoryGen
             // 
-            this.but_addStoryGen.Location = new System.Drawing.Point(3, 160);
+            this.but_addStoryGen.Location = new System.Drawing.Point(3, 20);
             this.but_addStoryGen.Name = "but_addStoryGen";
-            this.but_addStoryGen.Size = new System.Drawing.Size(91, 23);
+            this.but_addStoryGen.Size = new System.Drawing.Size(103, 23);
             this.but_addStoryGen.TabIndex = 3;
             this.but_addStoryGen.Text = "Add Generation";
             this.but_addStoryGen.UseVisualStyleBackColor = true;
@@ -374,19 +361,15 @@
             // groupBox_storyarea
             // 
             this.groupBox_storyarea.Controls.Add(this.wa_tbTags);
-            this.groupBox_storyarea.Controls.Add(this.wa_numAvoidFlag);
-            this.groupBox_storyarea.Controls.Add(this.wa_numAddFlag);
             this.groupBox_storyarea.Controls.Add(this.wa_numChildren);
-            this.groupBox_storyarea.Controls.Add(this.label8);
-            this.groupBox_storyarea.Controls.Add(this.label7);
             this.groupBox_storyarea.Controls.Add(this.label6);
             this.groupBox_storyarea.Controls.Add(this.label5);
-            this.groupBox_storyarea.Location = new System.Drawing.Point(3, 226);
+            this.groupBox_storyarea.Location = new System.Drawing.Point(3, 78);
             this.groupBox_storyarea.Name = "groupBox_storyarea";
-            this.groupBox_storyarea.Size = new System.Drawing.Size(209, 144);
+            this.groupBox_storyarea.Size = new System.Drawing.Size(209, 84);
             this.groupBox_storyarea.TabIndex = 2;
             this.groupBox_storyarea.TabStop = false;
-            this.groupBox_storyarea.Text = "Generation Properties";
+            this.groupBox_storyarea.Text = "Entry Properties";
             // 
             // wa_tbTags
             // 
@@ -395,32 +378,6 @@
             this.wa_tbTags.Size = new System.Drawing.Size(120, 20);
             this.wa_tbTags.TabIndex = 6;
             this.wa_tbTags.TextChanged += new System.EventHandler(this.wa_tbTags_TextChanged);
-            // 
-            // wa_numAvoidFlag
-            // 
-            this.wa_numAvoidFlag.Location = new System.Drawing.Point(74, 104);
-            this.wa_numAvoidFlag.Maximum = new decimal(new int[] {
-            5255,
-            0,
-            0,
-            0});
-            this.wa_numAvoidFlag.Name = "wa_numAvoidFlag";
-            this.wa_numAvoidFlag.Size = new System.Drawing.Size(120, 20);
-            this.wa_numAvoidFlag.TabIndex = 5;
-            this.wa_numAvoidFlag.ValueChanged += new System.EventHandler(this.wa_numAvoidFlag_ValueChanged);
-            // 
-            // wa_numAddFlag
-            // 
-            this.wa_numAddFlag.Location = new System.Drawing.Point(74, 76);
-            this.wa_numAddFlag.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
-            this.wa_numAddFlag.Name = "wa_numAddFlag";
-            this.wa_numAddFlag.Size = new System.Drawing.Size(120, 20);
-            this.wa_numAddFlag.TabIndex = 5;
-            this.wa_numAddFlag.ValueChanged += new System.EventHandler(this.wa_numAddFlag_ValueChanged);
             // 
             // wa_numChildren
             // 
@@ -434,24 +391,6 @@
             this.wa_numChildren.Size = new System.Drawing.Size(120, 20);
             this.wa_numChildren.TabIndex = 5;
             this.wa_numChildren.ValueChanged += new System.EventHandler(this.wa_numChildren_ValueChanged);
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(23, 80);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(45, 13);
-            this.label8.TabIndex = 4;
-            this.label8.Text = "add flag";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(15, 106);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(53, 13);
-            this.label7.TabIndex = 4;
-            this.label7.Text = "avoid flag";
             // 
             // label6
             // 
@@ -544,6 +483,27 @@
             this.but_GenCorridorsNeeded.UseVisualStyleBackColor = true;
             this.but_GenCorridorsNeeded.Click += new System.EventHandler(this.but_GenCorridorsNeeded_Click);
             // 
+            // but_storyComputeIDs
+            // 
+            this.but_storyComputeIDs.Location = new System.Drawing.Point(109, 533);
+            this.but_storyComputeIDs.Name = "but_storyComputeIDs";
+            this.but_storyComputeIDs.Size = new System.Drawing.Size(103, 23);
+            this.but_storyComputeIDs.TabIndex = 3;
+            this.but_storyComputeIDs.Text = "Compute IDs";
+            this.but_storyComputeIDs.UseVisualStyleBackColor = true;
+            this.but_storyComputeIDs.Click += new System.EventHandler(this.but_storyComputeIDs_Click);
+            // 
+            // chk_ShowIDs
+            // 
+            this.chk_ShowIDs.AutoSize = true;
+            this.chk_ShowIDs.Location = new System.Drawing.Point(3, 510);
+            this.chk_ShowIDs.Name = "chk_ShowIDs";
+            this.chk_ShowIDs.Size = new System.Drawing.Size(72, 17);
+            this.chk_ShowIDs.TabIndex = 8;
+            this.chk_ShowIDs.Text = "Show IDs";
+            this.chk_ShowIDs.UseVisualStyleBackColor = true;
+            this.chk_ShowIDs.CheckedChanged += new System.EventHandler(this.chk_ShowIDs_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -559,7 +519,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.tabControl1.ResumeLayout(false);
             this.tabAreas.ResumeLayout(false);
-            this.tabAreas.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.tabGenerator.ResumeLayout(false);
@@ -569,8 +528,6 @@
             this.tabStory.PerformLayout();
             this.groupBox_storyarea.ResumeLayout(false);
             this.groupBox_storyarea.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.wa_numAvoidFlag)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.wa_numAddFlag)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.wa_numChildren)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -596,7 +553,6 @@
         private System.Windows.Forms.ToolStripMenuItem saveAreasToolStripMenuItem;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox tb_areaName;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button but_ComputeFlags;
         private System.Windows.Forms.Label generations;
         private System.Windows.Forms.NumericUpDown numGenerations;
@@ -607,14 +563,10 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox wa_tbTags;
         private System.Windows.Forms.NumericUpDown wa_numChildren;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button but_addStoryGen;
         private System.Windows.Forms.Button wa_butAddArea;
-        private System.Windows.Forms.NumericUpDown wa_numAvoidFlag;
-        private System.Windows.Forms.NumericUpDown wa_numAddFlag;
         private System.Windows.Forms.Button wa_butDelEntry;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem loadStoryToolStripMenuItem;
@@ -625,6 +577,8 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button but_GenCorridors;
         private System.Windows.Forms.Button but_GenCorridorsNeeded;
+        private System.Windows.Forms.Button but_storyComputeIDs;
+        private System.Windows.Forms.CheckBox chk_ShowIDs;
     }
 }
 

@@ -12,28 +12,28 @@ namespace circleEnvelope
         {
             // number of children of the room (connections will be children + 1)
             public int nChildren;
-            // flag that gets OR-ed on all children
-            public int addFlag;
-            // flag to avoid when finding a placement for the area
-            public int avoidFlag;
             // area tags filters
             public string tags_any; // any of the tags will add it
             public string tags_all; // will add it only if contains ALL tags (doesn't exclude ANY filter)
             public string tags_none;// will remove it if it contains any of the tags here
 
+            // usage flag when generating the level
+            public bool bUsed;
+            // ID gets generated like generation * 1000 + entry index
+            public int nID;
+            public int nParentID;
+
+
             public AreaEntry()
             {
                 nChildren = 0;
-                addFlag = 0;
-                avoidFlag = 0;
                 tags_any = "";
                 tags_all = "";
                 tags_none = "";
-            }
 
-            public string GetName()
-            {
-                return "C[" + nChildren + "]T[" + tags_any + "]F[" + addFlag + "]NF[" + avoidFlag + "]";
+                bUsed = false;
+                nID = 0;
+                nParentID = -1;
             }
         }
 
@@ -42,26 +42,14 @@ namespace circleEnvelope
         {
             public List<AreaEntry> arrEntries = new List<AreaEntry>();
 
-            public void AddEntry(int nExits, int nAddFlag, int nAvoidFlag, string strTags)
+            public void AddEntry(int nID, int nExits, int nAddFlag, int nAvoidFlag, string strTags)
             {
                 AreaEntry ae = new AreaEntry();
 
                 ae.nChildren = nExits;
-                ae.addFlag = nAddFlag;
-                ae.avoidFlag = nAvoidFlag;
                 ae.tags_any = strTags;
 
                 arrEntries.Add(ae);
-            }
-
-            public void UpdateEntry(int nIdx, int nExits, int nAddFlag, int nAvoidFlag, string strTags)
-            {
-                AreaEntry ae = arrEntries[nIdx];
-
-                ae.nChildren = nExits;
-                ae.addFlag = nAddFlag;
-                ae.avoidFlag = nAvoidFlag;
-                ae.tags_any = strTags;
             }
 
             public void DeleteEntry(int nIdx)
@@ -93,6 +81,77 @@ namespace circleEnvelope
             nSelArea = 0;
         }
 
+        // removes areas children number where next area doesn't have enough children
+        public void TrimLooseEnds()
+        {
+            for (int gg = 0; gg < arrGenerations.Count; gg++)
+            {
+                int nChildIdx = 0;
+                StoryGeneration gen = arrGenerations[gg];
+                for (int aa = 0; aa < gen.arrEntries.Count; aa++)
+                {
+                    AreaEntry area = gen.arrEntries[aa];
+                    area.bUsed = false;
+                    area.nID = gg * 1000 + aa;
+                    // set children parents ids
+                    if (gg < arrGenerations.Count - 1)
+                    {
+                        for (int cc = 0; cc < area.nChildren; cc++)
+                        {
+                            if (cc < arrGenerations[gg + 1].arrEntries.Count)
+                            {
+                                if (nChildIdx + cc < arrGenerations[gg + 1].arrEntries.Count)
+                                    (arrGenerations[gg + 1] as StoryGeneration).arrEntries[nChildIdx + cc].nParentID = area.nID;
+                            }
+                        }
+                        nChildIdx += area.nChildren;
+                    }
+                }
+            }
+        }
+
+        // computes IDs and other data for the areas (call before generating a level)
+        public void ComputeRelationships()
+        {
+            nSelArea = -1;
+            nSelGeneration = -1;
+
+            for (int gg = 0; gg < arrGenerations.Count; gg++) 
+            {
+                int nChildIdx = 0;
+                StoryGeneration gen = arrGenerations[gg];
+                for (int aa = 0; aa < gen.arrEntries.Count; aa++) 
+                {
+                    AreaEntry area = gen.arrEntries[aa];
+                    area.bUsed = false;
+                    area.nID = gg * 100 + aa;
+                    // set children parents ids
+                    if (gg < arrGenerations.Count - 1)
+                    {
+                        int nFakeChildren = 0;
+                        for (int cc = 0; cc < area.nChildren; cc++)
+                        {
+                            if (nChildIdx + cc < arrGenerations[gg + 1].arrEntries.Count)
+                            {
+                                (arrGenerations[gg + 1] as StoryGeneration).arrEntries[nChildIdx + cc].nParentID = area.nID;
+                            }
+                            else
+                            {
+                                nFakeChildren++;
+                            }
+                        }
+                        area.nChildren -= nFakeChildren;
+                        nChildIdx += area.nChildren;
+                    }
+                    // trim children for last generation
+                    if (gg == arrGenerations.Count - 1)
+                    {
+                        area.nChildren = 0;
+                    }
+                }
+            }
+        }
+
         public void AddGeneration()
         {
             StoryGeneration sg = new StoryGeneration();
@@ -113,7 +172,8 @@ namespace circleEnvelope
             if ((nGenerationIdx < 0) || (nGenerationIdx >= arrGenerations.Count))
                 return;
 
-            arrGenerations[nGenerationIdx].AddEntry(nExits, nAddFlag, nAvoidFlag, strTags);
+            int nEntryID = nGenerationIdx * 1000 + arrGenerations[nGenerationIdx].arrEntries.Count;
+            arrGenerations[nGenerationIdx].AddEntry(nEntryID, nExits, nAddFlag, nAvoidFlag, strTags);
             nSelArea = arrGenerations[nGenerationIdx].arrEntries.Count - 1;
         }
 
