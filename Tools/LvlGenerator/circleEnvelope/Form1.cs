@@ -946,15 +946,29 @@ namespace circleEnvelope
             RepaintArea(pbgr);
         }
 
-        private void but_generateFromStory_Click(object sender, EventArgs e)
-        {
-            g_story.SortGenerations();
-            RepaintArea(pbgr);
-        }
-
         private void but_GenFromStory_Click(object sender, EventArgs e)
         {
+            if (g_story.arrGenerations.Count <= 2)
+                return;
 
+            g_story.ComputeRelationships();
+
+            ArrayList inventory = new ArrayList();
+            foreach (CAreaDesc ad in m_arrAreas)
+            {
+                // make sure we have everything computed
+                ad.ComputeInternalData();
+
+                CLevelGen.CInventoryArea ia = new CLevelGen.CInventoryArea();
+                ia.area = ad;
+                ia.nAvailable = 20;
+                ia.nConsumed = 0;
+                inventory.Add(ia);
+            }
+
+            g_LevelGen.GenerateFromStory(inventory, g_story);
+
+            RepaintArea(pbgr);
         }
 
         private void but_GenCorridors_Click(object sender, EventArgs e)
@@ -994,7 +1008,7 @@ namespace circleEnvelope
                 inventory.Add(ia);
             }
 
-            g_LevelGen.GenerateWithCorridorsWhenNeeded(inventory, (int)numGenerations.Value, 0.5f);
+            g_LevelGen.GenerateWithCorridorsWhenNeeded(inventory, (int)numGenerations.Value);
 
             RepaintArea(pbgr);
         }

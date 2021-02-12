@@ -110,6 +110,46 @@ namespace circleEnvelope
             }
         }
 
+        // returns an entry that wasn't used during level generation
+        public AreaEntry GetAvailableEntry(int nGeneration, int nParentID)
+        {
+            if ((nGeneration < 0) || (nGeneration >= arrGenerations.Count))
+                return null;
+            for (int kk = 0; kk < arrGenerations[nGeneration].arrEntries.Count; kk++)
+            {
+                if ((arrGenerations[nGeneration].arrEntries[kk].bUsed == false) && (arrGenerations[nGeneration].arrEntries[kk].nParentID == nParentID))
+                    return arrGenerations[nGeneration].arrEntries[kk];
+            }
+
+            return null;
+        }
+
+        // clear "used" flag from a generation, for a specific parentID
+        public void ClearChildEntries(int nGeneration, int nParentID)
+        {
+            if ((nGeneration < 0) || (nGeneration >= arrGenerations.Count))
+                return;
+            for (int kk = 0; kk < arrGenerations[nGeneration].arrEntries.Count; kk++)
+            {
+                if (arrGenerations[nGeneration].arrEntries[kk].nParentID == nParentID)
+                    arrGenerations[nGeneration].arrEntries[kk].bUsed = false;
+            }
+        }
+
+        // clear "used" flag fr a full generation and children ones
+        public void ClearEntriesFromGeneration(int nGeneration)
+        {
+            if ((nGeneration < 0) || (nGeneration >= arrGenerations.Count))
+                return;
+            for (int gen = nGeneration; gen < arrGenerations.Count; gen++)
+            {
+                for (int kk = 0; kk < arrGenerations[gen].arrEntries.Count; kk++)
+                {
+                    arrGenerations[gen].arrEntries[kk].bUsed = false;
+                }
+            }
+        }
+
         // computes IDs and other data for the areas (call before generating a level)
         public void ComputeRelationships()
         {
@@ -186,14 +226,6 @@ namespace circleEnvelope
 
             arrGenerations[nGenerationIdx].DeleteEntry(nEntryIdx);
             nSelArea = -1;
-        }
-
-        public void SortGenerations()
-        {
-            for (int kk = 0; kk < arrGenerations.Count; kk++)
-            {
-                arrGenerations[kk].arrEntries.Sort((x, y) => (x.nChildren > y.nChildren) ? 1 : 0);
-            }
         }
 
         // Returns a color for each flag (8 possible flags)

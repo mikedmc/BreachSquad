@@ -47,11 +47,13 @@
             this.but_GenFromStory = new System.Windows.Forms.Button();
             this.generations = new System.Windows.Forms.Label();
             this.numGenerations = new System.Windows.Forms.NumericUpDown();
+            this.but_GenCorridorsNeeded = new System.Windows.Forms.Button();
             this.but_GenCorridors = new System.Windows.Forms.Button();
             this.tabStory = new System.Windows.Forms.TabPage();
+            this.chk_ShowIDs = new System.Windows.Forms.CheckBox();
             this.wa_butDelEntry = new System.Windows.Forms.Button();
             this.wa_butAddArea = new System.Windows.Forms.Button();
-            this.but_generateFromStory = new System.Windows.Forms.Button();
+            this.but_storyComputeIDs = new System.Windows.Forms.Button();
             this.but_addStoryGen = new System.Windows.Forms.Button();
             this.groupBox_storyarea = new System.Windows.Forms.GroupBox();
             this.wa_tbTags = new System.Windows.Forms.TextBox();
@@ -66,9 +68,6 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.loadStoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveStoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.but_GenCorridorsNeeded = new System.Windows.Forms.Button();
-            this.but_storyComputeIDs = new System.Windows.Forms.Button();
-            this.chk_ShowIDs = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabAreas.SuspendLayout();
@@ -291,6 +290,16 @@
             0,
             0});
             // 
+            // but_GenCorridorsNeeded
+            // 
+            this.but_GenCorridorsNeeded.Location = new System.Drawing.Point(8, 439);
+            this.but_GenCorridorsNeeded.Name = "but_GenCorridorsNeeded";
+            this.but_GenCorridorsNeeded.Size = new System.Drawing.Size(201, 25);
+            this.but_GenCorridorsNeeded.TabIndex = 2;
+            this.but_GenCorridorsNeeded.Text = "Generate corridors when needed";
+            this.but_GenCorridorsNeeded.UseVisualStyleBackColor = true;
+            this.but_GenCorridorsNeeded.Click += new System.EventHandler(this.but_GenCorridorsNeeded_Click);
+            // 
             // but_GenCorridors
             // 
             this.but_GenCorridors.Location = new System.Drawing.Point(8, 470);
@@ -306,7 +315,6 @@
             this.tabStory.Controls.Add(this.chk_ShowIDs);
             this.tabStory.Controls.Add(this.wa_butDelEntry);
             this.tabStory.Controls.Add(this.wa_butAddArea);
-            this.tabStory.Controls.Add(this.but_generateFromStory);
             this.tabStory.Controls.Add(this.but_storyComputeIDs);
             this.tabStory.Controls.Add(this.but_addStoryGen);
             this.tabStory.Controls.Add(this.groupBox_storyarea);
@@ -317,6 +325,17 @@
             this.tabStory.TabIndex = 2;
             this.tabStory.Text = "Story";
             this.tabStory.UseVisualStyleBackColor = true;
+            // 
+            // chk_ShowIDs
+            // 
+            this.chk_ShowIDs.AutoSize = true;
+            this.chk_ShowIDs.Location = new System.Drawing.Point(3, 537);
+            this.chk_ShowIDs.Name = "chk_ShowIDs";
+            this.chk_ShowIDs.Size = new System.Drawing.Size(72, 17);
+            this.chk_ShowIDs.TabIndex = 8;
+            this.chk_ShowIDs.Text = "Show IDs";
+            this.chk_ShowIDs.UseVisualStyleBackColor = true;
+            this.chk_ShowIDs.CheckedChanged += new System.EventHandler(this.chk_ShowIDs_CheckedChanged);
             // 
             // wa_butDelEntry
             // 
@@ -338,15 +357,15 @@
             this.wa_butAddArea.UseVisualStyleBackColor = true;
             this.wa_butAddArea.Click += new System.EventHandler(this.wa_butAddArea_Click);
             // 
-            // but_generateFromStory
+            // but_storyComputeIDs
             // 
-            this.but_generateFromStory.Location = new System.Drawing.Point(3, 533);
-            this.but_generateFromStory.Name = "but_generateFromStory";
-            this.but_generateFromStory.Size = new System.Drawing.Size(103, 23);
-            this.but_generateFromStory.TabIndex = 4;
-            this.but_generateFromStory.Text = "Sort Visually";
-            this.but_generateFromStory.UseVisualStyleBackColor = true;
-            this.but_generateFromStory.Click += new System.EventHandler(this.but_generateFromStory_Click);
+            this.but_storyComputeIDs.Location = new System.Drawing.Point(109, 533);
+            this.but_storyComputeIDs.Name = "but_storyComputeIDs";
+            this.but_storyComputeIDs.Size = new System.Drawing.Size(103, 23);
+            this.but_storyComputeIDs.TabIndex = 3;
+            this.but_storyComputeIDs.Text = "Compute IDs";
+            this.but_storyComputeIDs.UseVisualStyleBackColor = true;
+            this.but_storyComputeIDs.Click += new System.EventHandler(this.but_storyComputeIDs_Click);
             // 
             // but_addStoryGen
             // 
@@ -473,37 +492,6 @@
             this.saveStoryToolStripMenuItem.Text = "Save Story...";
             this.saveStoryToolStripMenuItem.Click += new System.EventHandler(this.saveStoryToolStripMenuItem_Click);
             // 
-            // but_GenCorridorsNeeded
-            // 
-            this.but_GenCorridorsNeeded.Location = new System.Drawing.Point(8, 439);
-            this.but_GenCorridorsNeeded.Name = "but_GenCorridorsNeeded";
-            this.but_GenCorridorsNeeded.Size = new System.Drawing.Size(201, 25);
-            this.but_GenCorridorsNeeded.TabIndex = 2;
-            this.but_GenCorridorsNeeded.Text = "Generate corridors when needed";
-            this.but_GenCorridorsNeeded.UseVisualStyleBackColor = true;
-            this.but_GenCorridorsNeeded.Click += new System.EventHandler(this.but_GenCorridorsNeeded_Click);
-            // 
-            // but_storyComputeIDs
-            // 
-            this.but_storyComputeIDs.Location = new System.Drawing.Point(109, 533);
-            this.but_storyComputeIDs.Name = "but_storyComputeIDs";
-            this.but_storyComputeIDs.Size = new System.Drawing.Size(103, 23);
-            this.but_storyComputeIDs.TabIndex = 3;
-            this.but_storyComputeIDs.Text = "Compute IDs";
-            this.but_storyComputeIDs.UseVisualStyleBackColor = true;
-            this.but_storyComputeIDs.Click += new System.EventHandler(this.but_storyComputeIDs_Click);
-            // 
-            // chk_ShowIDs
-            // 
-            this.chk_ShowIDs.AutoSize = true;
-            this.chk_ShowIDs.Location = new System.Drawing.Point(3, 510);
-            this.chk_ShowIDs.Name = "chk_ShowIDs";
-            this.chk_ShowIDs.Size = new System.Drawing.Size(72, 17);
-            this.chk_ShowIDs.TabIndex = 8;
-            this.chk_ShowIDs.Text = "Show IDs";
-            this.chk_ShowIDs.UseVisualStyleBackColor = true;
-            this.chk_ShowIDs.CheckedChanged += new System.EventHandler(this.chk_ShowIDs_CheckedChanged);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -571,7 +559,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem loadStoryToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveStoryToolStripMenuItem;
-        private System.Windows.Forms.Button but_generateFromStory;
         private System.Windows.Forms.Button but_GenFromStory;
         private System.Windows.Forms.TextBox tb_areaTags;
         private System.Windows.Forms.Label label4;
