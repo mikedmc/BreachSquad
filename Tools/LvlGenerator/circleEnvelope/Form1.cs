@@ -420,6 +420,17 @@ namespace circleEnvelope
 
                             int nMinLuminance = Math.Max(255 - pa.nGeneration * 15, 40);
                             SolidBrush brcol = new SolidBrush(Color.FromArgb(128, 128, nMinLuminance));
+                            string strWriteOnArea = "";
+                            if (Utils.StringContainsAnyTag(pa.strAreaTags, "special", ','))
+                            {
+                                brcol = new SolidBrush(Color.FromArgb(200, 128, nMinLuminance));
+                                strWriteOnArea = pa.strAreaTags;
+                            }
+                            else if (Utils.StringContainsAnyTag(pa.strAreaTags, "hall", ','))
+                                brcol = new SolidBrush(Color.FromArgb(128, 200, nMinLuminance));
+
+                            SolidBrush brlinks = new SolidBrush(Color.FromArgb(64, 64, nMinLuminance));
+
 
                             Brush brdark = new SolidBrush(Color.FromArgb(128, 40,40,40));
 
@@ -430,7 +441,7 @@ namespace circleEnvelope
                                 {
                                     if (pa.blocks[xx, yy].connectionDir != 0)
                                     {
-                                        gr.FillRectangle(Brushes.DarkGreen, new Rectangle(vOrigin.X + xx * blSize, vOrigin.Y + yy * blSize, blSize, blSize));
+                                        gr.FillRectangle(brlinks, new Rectangle(vOrigin.X + xx * blSize, vOrigin.Y + yy * blSize, blSize, blSize));
                                         DrawArrow(gr, new PointF(vOrigin.X + xx * blSize + blSize / 2.0f, vOrigin.Y + yy * blSize + blSize / 2.0f),
                                             pa.blocks[xx, yy].connectionDir, blSize / 2.0f);
                                     }
@@ -440,6 +451,9 @@ namespace circleEnvelope
                             }
                             // generation
                             gr.DrawString(pa.nGeneration.ToString(), fnt, Brushes.White, new Point(paRect.X + paRect.Width/2, paRect.Y + paRect.Height/2));
+                            if (strWriteOnArea != "")
+                                gr.DrawString(strWriteOnArea, fnt, Brushes.White, new Point(paRect.X, paRect.Y));
+
                             gr.DrawRectangle(new Pen(Color.FromArgb(60,60,60)), paRect);
                         }
                     }
@@ -905,7 +919,9 @@ namespace circleEnvelope
 
             Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
             wa_numChildren.Value = entry.nChildren;
-            wa_tbTags.Text = entry.tags_any;
+            wa_tbTagsAny.Text = entry.tags_any;
+            wa_tbTagsAll.Text = entry.tags_all;
+            wa_tbTagsNone.Text = entry.tags_none;
 
             RepaintArea(pbgr);
         }
@@ -923,16 +939,6 @@ namespace circleEnvelope
             RepaintArea(pbgr);
         }
 
-        private void wa_tbTags_TextChanged(object sender, EventArgs e)
-        {
-            if (!Story_IsGenAreaSelected(g_story))
-                return;
-            int nGenIdx = g_story.nSelGeneration;
-            int nEntryIdx = g_story.nSelArea;
-
-            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
-            entry.tags_any = wa_tbTags.Text;
-        }
 
         private void wa_butDelEntry_Click(object sender, EventArgs e)
         {
@@ -1023,6 +1029,39 @@ namespace circleEnvelope
         private void chk_ShowIDs_CheckedChanged(object sender, EventArgs e)
         {
             RepaintArea(pbgr);
+        }
+
+        private void wa_tbTagsAll_TextChanged(object sender, EventArgs e)
+        {
+            if (!Story_IsGenAreaSelected(g_story))
+                return;
+            int nGenIdx = g_story.nSelGeneration;
+            int nEntryIdx = g_story.nSelArea;
+
+            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
+            entry.tags_all = wa_tbTagsAll.Text;
+        }
+
+        private void wa_tbTagsNone_TextChanged(object sender, EventArgs e)
+        {
+            if (!Story_IsGenAreaSelected(g_story))
+                return;
+            int nGenIdx = g_story.nSelGeneration;
+            int nEntryIdx = g_story.nSelArea;
+
+            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
+            entry.tags_none = wa_tbTagsNone.Text;
+        }
+
+        private void wa_tbTagsAny_TextChanged(object sender, EventArgs e)
+        {
+            if (!Story_IsGenAreaSelected(g_story))
+                return;
+            int nGenIdx = g_story.nSelGeneration;
+            int nEntryIdx = g_story.nSelArea;
+
+            Story.AreaEntry entry = g_story.arrGenerations[nGenIdx].arrEntries[nEntryIdx];
+            entry.tags_any = wa_tbTagsAny.Text;
         }
 
         private void saveStoryToolStripMenuItem_Click(object sender, EventArgs e)

@@ -56,8 +56,16 @@
             this.but_storyComputeIDs = new System.Windows.Forms.Button();
             this.but_addStoryGen = new System.Windows.Forms.Button();
             this.groupBox_storyarea = new System.Windows.Forms.GroupBox();
-            this.wa_tbTags = new System.Windows.Forms.TextBox();
+            this.wa_tbTagsNone = new System.Windows.Forms.TextBox();
+            this.wa_tbTagsAll = new System.Windows.Forms.TextBox();
+            this.wa_tbTagsAny = new System.Windows.Forms.TextBox();
             this.wa_numChildren = new System.Windows.Forms.NumericUpDown();
+            this.label11 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -362,7 +370,7 @@
             this.but_storyComputeIDs.Location = new System.Drawing.Point(109, 533);
             this.but_storyComputeIDs.Name = "but_storyComputeIDs";
             this.but_storyComputeIDs.Size = new System.Drawing.Size(103, 23);
-            this.but_storyComputeIDs.TabIndex = 3;
+            this.but_storyComputeIDs.TabIndex = 1;
             this.but_storyComputeIDs.Text = "Compute IDs";
             this.but_storyComputeIDs.UseVisualStyleBackColor = true;
             this.but_storyComputeIDs.Click += new System.EventHandler(this.but_storyComputeIDs_Click);
@@ -372,31 +380,55 @@
             this.but_addStoryGen.Location = new System.Drawing.Point(3, 20);
             this.but_addStoryGen.Name = "but_addStoryGen";
             this.but_addStoryGen.Size = new System.Drawing.Size(103, 23);
-            this.but_addStoryGen.TabIndex = 3;
+            this.but_addStoryGen.TabIndex = 0;
             this.but_addStoryGen.Text = "Add Generation";
             this.but_addStoryGen.UseVisualStyleBackColor = true;
             this.but_addStoryGen.Click += new System.EventHandler(this.but_addStoryGen_Click);
             // 
             // groupBox_storyarea
             // 
-            this.groupBox_storyarea.Controls.Add(this.wa_tbTags);
+            this.groupBox_storyarea.Controls.Add(this.wa_tbTagsNone);
+            this.groupBox_storyarea.Controls.Add(this.wa_tbTagsAll);
+            this.groupBox_storyarea.Controls.Add(this.wa_tbTagsAny);
             this.groupBox_storyarea.Controls.Add(this.wa_numChildren);
+            this.groupBox_storyarea.Controls.Add(this.label11);
+            this.groupBox_storyarea.Controls.Add(this.label10);
+            this.groupBox_storyarea.Controls.Add(this.label9);
+            this.groupBox_storyarea.Controls.Add(this.label8);
+            this.groupBox_storyarea.Controls.Add(this.label7);
+            this.groupBox_storyarea.Controls.Add(this.label1);
             this.groupBox_storyarea.Controls.Add(this.label6);
             this.groupBox_storyarea.Controls.Add(this.label5);
             this.groupBox_storyarea.Location = new System.Drawing.Point(3, 78);
             this.groupBox_storyarea.Name = "groupBox_storyarea";
-            this.groupBox_storyarea.Size = new System.Drawing.Size(209, 84);
+            this.groupBox_storyarea.Size = new System.Drawing.Size(209, 224);
             this.groupBox_storyarea.TabIndex = 2;
             this.groupBox_storyarea.TabStop = false;
             this.groupBox_storyarea.Text = "Entry Properties";
             // 
-            // wa_tbTags
+            // wa_tbTagsNone
             // 
-            this.wa_tbTags.Location = new System.Drawing.Point(74, 50);
-            this.wa_tbTags.Name = "wa_tbTags";
-            this.wa_tbTags.Size = new System.Drawing.Size(120, 20);
-            this.wa_tbTags.TabIndex = 6;
-            this.wa_tbTags.TextChanged += new System.EventHandler(this.wa_tbTags_TextChanged);
+            this.wa_tbTagsNone.Location = new System.Drawing.Point(74, 102);
+            this.wa_tbTagsNone.Name = "wa_tbTagsNone";
+            this.wa_tbTagsNone.Size = new System.Drawing.Size(120, 20);
+            this.wa_tbTagsNone.TabIndex = 4;
+            this.wa_tbTagsNone.TextChanged += new System.EventHandler(this.wa_tbTagsNone_TextChanged);
+            // 
+            // wa_tbTagsAll
+            // 
+            this.wa_tbTagsAll.Location = new System.Drawing.Point(74, 76);
+            this.wa_tbTagsAll.Name = "wa_tbTagsAll";
+            this.wa_tbTagsAll.Size = new System.Drawing.Size(120, 20);
+            this.wa_tbTagsAll.TabIndex = 3;
+            this.wa_tbTagsAll.TextChanged += new System.EventHandler(this.wa_tbTagsAll_TextChanged);
+            // 
+            // wa_tbTagsAny
+            // 
+            this.wa_tbTagsAny.Location = new System.Drawing.Point(74, 50);
+            this.wa_tbTagsAny.Name = "wa_tbTagsAny";
+            this.wa_tbTagsAny.Size = new System.Drawing.Size(120, 20);
+            this.wa_tbTagsAny.TabIndex = 2;
+            this.wa_tbTagsAny.TextChanged += new System.EventHandler(this.wa_tbTagsAny_TextChanged);
             // 
             // wa_numChildren
             // 
@@ -408,17 +440,71 @@
             0});
             this.wa_numChildren.Name = "wa_numChildren";
             this.wa_numChildren.Size = new System.Drawing.Size(120, 20);
-            this.wa_numChildren.TabIndex = 5;
+            this.wa_numChildren.TabIndex = 1;
             this.wa_numChildren.ValueChanged += new System.EventHandler(this.wa_numChildren_ValueChanged);
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(6, 170);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(200, 13);
+            this.label11.TabIndex = 3;
+            this.label11.Text = "NONE - exclude if any of the tags are set";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(7, 155);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(176, 13);
+            this.label10.TabIndex = 3;
+            this.label10.Text = "ALL - adds if ALL of the tags are set";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(7, 140);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(169, 13);
+            this.label9.TabIndex = 3;
+            this.label9.Text = "ANY - adds if any of the tags is set";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(7, 125);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(148, 13);
+            this.label8.TabIndex = 3;
+            this.label8.Text = "Use comma , to separate tags";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(7, 105);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(61, 13);
+            this.label7.TabIndex = 3;
+            this.label7.Text = "tags NONE";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(19, 79);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(49, 13);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "tags ALL";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(41, 53);
+            this.label6.Location = new System.Drawing.Point(16, 53);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(27, 13);
+            this.label6.Size = new System.Drawing.Size(52, 13);
             this.label6.TabIndex = 3;
-            this.label6.Text = "tags";
+            this.label6.Text = "tags ANY";
             // 
             // label5
             // 
@@ -549,7 +635,7 @@
         private System.Windows.Forms.TabPage tabStory;
         private System.Windows.Forms.GroupBox groupBox_storyarea;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox wa_tbTags;
+        private System.Windows.Forms.TextBox wa_tbTagsAny;
         private System.Windows.Forms.NumericUpDown wa_numChildren;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label5;
@@ -566,6 +652,14 @@
         private System.Windows.Forms.Button but_GenCorridorsNeeded;
         private System.Windows.Forms.Button but_storyComputeIDs;
         private System.Windows.Forms.CheckBox chk_ShowIDs;
+        private System.Windows.Forms.TextBox wa_tbTagsNone;
+        private System.Windows.Forms.TextBox wa_tbTagsAll;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label1;
     }
 }
 

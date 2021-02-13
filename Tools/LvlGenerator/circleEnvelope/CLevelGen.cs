@@ -33,8 +33,10 @@ namespace circleEnvelope
             public List<CAreaConnector> arrConnections = new List<CAreaConnector>();
 
             public int nID = 0; // area ID needed for generating from story
+            public int nGeneration = 0; // generation of placed area
 
-            public int nGeneration = 0;
+            public string strAreaTags = "";
+            public string strAreaName = "";
 
             // returns 
             public ArrayList GetShuffledAvailableConnectors(bool bShuffle)
@@ -58,6 +60,8 @@ namespace circleEnvelope
                 AABB = area.AABB;
                 AABB.X = vPos.X; AABB.Y = vPos.Y;
                 nGeneration = 0;
+                strAreaTags = area.strTags;
+                strAreaName = area.strName;
                 // allocate blocks
                 blocks = new Form1.CGridCell[AABB.Width, AABB.Height];
                 for (int yy = 0; yy < AABB.Height; yy++)
@@ -337,7 +341,7 @@ namespace circleEnvelope
             return false;
         }
 
-        public CPlacedArea PlaceStoryArea(ArrayList inventory, CPlacedArea parent, CPlacedArea.CAreaConnector parentConn, int nGeneration, int nConnections, string strTagInclude = "", string strTagExclude = "")
+        public CPlacedArea PlaceStoryArea(ArrayList inventory, CPlacedArea parent, CPlacedArea.CAreaConnector parentConn, int nGeneration, int nConnectionsMin, int nConnectionsMax, string strTagInclude = "", string strTagExclude = "")
         {
             int nDirFlag = Form1.DIRFLAG_ANY;
             if (parentConn.dir == Form1.K_DIR_LEFT) nDirFlag = Form1.DIRFLAG_RIGHT;
@@ -349,7 +353,7 @@ namespace circleEnvelope
             Point vStitchPt = new Point(parentConn.pos.X + parent.AABB.X, parentConn.pos.Y + parent.AABB.Y);
             vStitchPt.X += vDirOff.X; vStitchPt.Y += vDirOff.Y;
 
-            ArrayList availableList = FilterAreas(inventory, nConnections, nConnections, nDirFlag, strTagInclude, strTagExclude);
+            ArrayList availableList = FilterAreas(inventory, nConnectionsMin, nConnectionsMax, nDirFlag, strTagInclude, strTagExclude);
             ShuffleList(availableList);
 
             if (availableList.Count == 0)
@@ -489,7 +493,7 @@ namespace circleEnvelope
                                         continue;
                                     }
                                     // Place random area tries to place all available items with future generation depth
-                                    CPlacedArea parea = PlaceStoryArea(inventory, placed, curcon, placed.nGeneration + 1, entry.nChildren + 1, entry.tags_any, "hall");
+                                    CPlacedArea parea = PlaceStoryArea(inventory, placed, curcon, placed.nGeneration + 1, entry.nChildren + 1, entry.nChildren + 1, entry.tags_any, "hall");
                                     if (parea == null)
                                     {
                                         Console.WriteLine("Could not place children! Removing them! try:" + childTries);
@@ -639,8 +643,14 @@ namespace circleEnvelope
                                 {
                                     CPlacedArea.CAreaConnector curcon = arrConn[ncon] as CPlacedArea.CAreaConnector;
                                     // Place random area tries to place all available items with future depth
-                                    bool bPlaced = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration + 1, nMaxDepth, "", "hall");
-                                    if (!bPlaced)
+                                    int nMinConn = 2, nMaxConn = 4;
+                                    if (placed.nGeneration + 1 == nMaxDepth)
+                                    {
+                                        nMinConn = 1;
+                                        nMaxConn = 1;
+                                    }
+                                    CPlacedArea plarea = PlaceStoryArea(inventory, placed, curcon, placed.nGeneration + 1, nMinConn, nMaxConn, "", "hall");
+                                    if (plarea == null)
                                     {
                                         Console.WriteLine("Could not place children! Removing them! try:" + childTries);
                                         bChildrenPlaced = false;
@@ -648,8 +658,8 @@ namespace circleEnvelope
                                         RemoveChildrenOf(placed);
 
                                         // add corridor on this connection
-                                        bool bPlacedCorridor = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration, nMaxDepth, "hall");
-                                        if (bPlacedCorridor)
+                                        CPlacedArea plhall = PlaceStoryArea(inventory, placed, curcon, placed.nGeneration, 2, 2, "hall");
+                                        if (plhall != null)
                                         {
                                             Console.WriteLine("Corridor placed.");
                                             // add corridor as level 6 area too so it gets completed on next pass
