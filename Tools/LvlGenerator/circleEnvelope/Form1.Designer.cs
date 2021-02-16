@@ -549,32 +549,33 @@
             // loadAreasToolStripMenuItem
             // 
             this.loadAreasToolStripMenuItem.Name = "loadAreasToolStripMenuItem";
-            this.loadAreasToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.loadAreasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.loadAreasToolStripMenuItem.Text = "Load Areas...";
             this.loadAreasToolStripMenuItem.Click += new System.EventHandler(this.loadAreasToolStripMenuItem_Click);
             // 
             // saveAreasToolStripMenuItem
             // 
             this.saveAreasToolStripMenuItem.Name = "saveAreasToolStripMenuItem";
-            this.saveAreasToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.saveAreasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveAreasToolStripMenuItem.Text = "Save Areas...";
             this.saveAreasToolStripMenuItem.Click += new System.EventHandler(this.saveAreasToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(138, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
             // 
             // loadStoryToolStripMenuItem
             // 
             this.loadStoryToolStripMenuItem.Name = "loadStoryToolStripMenuItem";
-            this.loadStoryToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.loadStoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.loadStoryToolStripMenuItem.Text = "Load Story...";
+            this.loadStoryToolStripMenuItem.Click += new System.EventHandler(this.loadStoryToolStripMenuItem_Click);
             // 
             // saveStoryToolStripMenuItem
             // 
             this.saveStoryToolStripMenuItem.Name = "saveStoryToolStripMenuItem";
-            this.saveStoryToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.saveStoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveStoryToolStripMenuItem.Text = "Save Story...";
             this.saveStoryToolStripMenuItem.Click += new System.EventHandler(this.saveStoryToolStripMenuItem_Click);
             // 

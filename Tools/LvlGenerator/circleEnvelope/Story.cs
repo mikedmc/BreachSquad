@@ -42,12 +42,14 @@ namespace circleEnvelope
         {
             public List<AreaEntry> arrEntries = new List<AreaEntry>();
 
-            public void AddEntry(int nID, int nExits, int nAddFlag, int nAvoidFlag, string strTags)
+            public void AddEntry(int nID, int nExits, string strTagsAny, string strTagsAll, string strTagsNone)
             {
                 AreaEntry ae = new AreaEntry();
 
                 ae.nChildren = nExits;
-                ae.tags_any = strTags;
+                ae.tags_any = strTagsAny;
+                ae.tags_all = strTagsAll;
+                ae.tags_none = strTagsNone;
 
                 arrEntries.Add(ae);
             }
@@ -192,6 +194,12 @@ namespace circleEnvelope
             }
         }
 
+        public void AddEmptyGeneration()
+        {
+            StoryGeneration sg = new StoryGeneration();
+            arrGenerations.Add(sg);
+        }
+
         public void AddGeneration()
         {
             StoryGeneration sg = new StoryGeneration();
@@ -207,13 +215,13 @@ namespace circleEnvelope
             nSelArea = sg.arrEntries.Count - 1;
         }
 
-        public void AddGenerationEntry(int nGenerationIdx, int nExits, int nAddFlag, int nAvoidFlag, string strTags)
+        public void AddGenerationEntry(int nGenerationIdx, int nExits, string strTagsAny, string strTagsAll, string strTagsNone)
         {
             if ((nGenerationIdx < 0) || (nGenerationIdx >= arrGenerations.Count))
                 return;
 
             int nEntryID = nGenerationIdx * 1000 + arrGenerations[nGenerationIdx].arrEntries.Count;
-            arrGenerations[nGenerationIdx].AddEntry(nEntryID, nExits, nAddFlag, nAvoidFlag, strTags);
+            arrGenerations[nGenerationIdx].AddEntry(nEntryID, nExits, strTagsAny, strTagsAll, strTagsNone);
             nSelArea = arrGenerations[nGenerationIdx].arrEntries.Count - 1;
         }
 

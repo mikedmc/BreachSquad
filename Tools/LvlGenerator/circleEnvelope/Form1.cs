@@ -880,7 +880,7 @@ namespace circleEnvelope
                 return;
             }
 
-            g_story.AddGenerationEntry(g_story.nSelGeneration, 1, 0, 0, "");
+            g_story.AddGenerationEntry(g_story.nSelGeneration, 1, "", "", "");
             Story_PopulateGenEntryData();
             RepaintArea(pbgr);
         }
@@ -1064,6 +1064,54 @@ namespace circleEnvelope
             entry.tags_any = wa_tbTagsAny.Text;
         }
 
+        private void loadStoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "XML Level Story (*.story)|*.story||";
+            dlg.DefaultExt = "story";
+            if (dlg.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            g_story.arrGenerations.Clear();
+            g_story.nSelArea = -1;
+            g_story.nSelGeneration = -1;
+
+            try
+            {
+                XmlDocument xdoc = new XmlDocument();
+                xdoc.Load(dlg.FileName);
+
+                XmlNodeList nodesgen = xdoc.GetElementsByTagName("Generation");
+                foreach (XmlNode node in nodesgen)
+                {
+                    g_story.AddEmptyGeneration();
+
+                    int nindex = Convert.ToInt32(node.Attributes["Index"].InnerText);
+                    int nareas = Convert.ToInt32(node.Attributes["Areas"].InnerText);
+                    XmlNodeList anodes = node.SelectNodes("Area");
+                    foreach (XmlNode anode in anodes)
+                    {
+                        int nChildren = Convert.ToInt32(anode.Attributes["Children"].InnerText);
+                        int nID = Convert.ToInt32(anode.Attributes["ID"].InnerText);
+                        int nParentID = Convert.ToInt32(anode.Attributes["ParentID"].InnerText);
+                        string tags_any = anode.Attributes["TagsAny"].InnerText;
+                        string tags_all = anode.Attributes["TagsAll"].InnerText;
+                        string tags_none = anode.Attributes["TagsNone"].InnerText;
+                        g_story.AddGenerationEntry(nindex, nChildren, tags_any, tags_all, tags_none);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading story! \n\n" + ex.Message);
+            }
+
+            g_story.ComputeRelationships();
+            RepaintArea(pbgr);
+
+        }
+
         private void saveStoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveFileDialog dlg = new SaveFileDialog();
@@ -1071,6 +1119,8 @@ namespace circleEnvelope
             dlg.DefaultExt = "story";
             if (dlg.ShowDialog() == DialogResult.Cancel)
                 return;
+
+            g_story.ComputeRelationships();
 
             try
             {

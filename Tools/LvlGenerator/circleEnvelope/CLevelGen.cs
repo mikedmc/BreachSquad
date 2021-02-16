@@ -32,6 +32,7 @@ namespace circleEnvelope
             public Form1.CGridCell[,] blocks = null; //blocks in matrix of AABB.w/h
             public List<CAreaConnector> arrConnections = new List<CAreaConnector>();
 
+            public CInventoryArea pInventoryArea; // pointer to inventory area
             public int nID = 0; // area ID needed for generating from story
             public int nGeneration = 0; // generation of placed area
 
@@ -96,7 +97,9 @@ namespace circleEnvelope
         public ArrayList m_arrPlaced = new ArrayList();
         public Rectangle m_levelAABB = new Rectangle();
 
-        public ArrayList FilterAreas(ArrayList inventory, int nMinConnectors, int nMaxConnectors, int dirFlags, string strTagInclude = "", string strTagExclude = "")
+
+        // tags will be separated by commas
+        public ArrayList FilterAreas(ArrayList inventory, int nMinConnectors, int nMaxConnectors, int dirFlags, string strTagsAny = "", string strTagsAll = "", string strTagsNone = "")
         {
             ArrayList retList = new ArrayList();
             foreach (CInventoryArea iarea in inventory)
@@ -107,10 +110,12 @@ namespace circleEnvelope
                     ((iarea.area.areaConnDirFlags & dirFlags) != 0))
                 {
                     bool bAdd = true;
-                    // check tags too
-                    if ((strTagInclude.Length > 0) && (!iarea.area.strTags.Contains(strTagInclude)))
+                    // check tags
+                    if ((strTagsAny.Length > 0) && (!Utils.StringContainsAnyTag(iarea.area.strTags, strTagsAny, ',')))
                         bAdd = false;
-                    if ((strTagExclude.Length > 0) && (iarea.area.strTags.Contains(strTagExclude)))
+                    if ((strTagsAll.Length > 0) && (!Utils.StringContainsAllTags(iarea.area.strTags, strTagsAll, ',')))
+                        bAdd = false;
+                    if ((strTagsNone.Length > 0) && (Utils.StringContainsAnyTag(iarea.area.strTags, strTagsNone, ',')))
                         bAdd = false;
 
                     if (bAdd)
@@ -220,12 +225,15 @@ namespace circleEnvelope
                 // skip lower generation areas (parents)
                 if (area.nGeneration <= parent.nGeneration)
                     continue;
+
                 foreach (CPlacedArea.CAreaConnector pconn in area.arrConnections)
                 {
                     if (pconn.pConnectedArea == null)
                         continue;
                     if (pconn.pConnectedArea == parent)
                     {
+                        // put it back into inventory
+                        area.pInventoryArea.nConsumed--;
                         //remove and break
                         m_arrPlaced.RemoveAt(kk);
                         break;
@@ -246,7 +254,7 @@ namespace circleEnvelope
                 {
                     foreach (CPlacedArea.CAreaConnector conn in area.arrConnections)
                     {
-                        if (conn.pConnectedArea.nGeneration >= nMinGeneration)
+                        if ((conn.pConnectedArea != null) && (conn.pConnectedArea.nGeneration >= nMinGeneration))
                             conn.pConnectedArea = null;
                     }
                 }
@@ -257,12 +265,13 @@ namespace circleEnvelope
                 CPlacedArea area = m_arrPlaced[kk] as CPlacedArea;
                 if (area.nGeneration >= nMinGeneration)
                 {
+                    area.pInventoryArea.nConsumed--;
                     m_arrPlaced.RemoveAt(kk);
                 }
             }
         }
 
-        public bool PlaceRandomArea(ArrayList inventory, CPlacedArea parent, CPlacedArea.CAreaConnector parentConn, int nGeneration, int nMaxGeneration /**/, string strTagInclude = "", string strTagExclude = "")
+        public bool PlaceRandomArea(ArrayList inventory, CPlacedArea parent, CPlacedArea.CAreaConnector parentConn, int nGeneration, int nMaxGeneration /**/, string strTagsAny = "", string strTagsAll = "", string strTagsNone = "")
         {
             int nDirFlag = Form1.DIRFLAG_ANY;
             if (parentConn.dir == Form1.K_DIR_LEFT) nDirFlag = Form1.DIRFLAG_RIGHT;
@@ -282,7 +291,7 @@ namespace circleEnvelope
                 nMinConn = 1;
                 nMaxConn = 1;
             }
-            ArrayList availableList = FilterAreas(inventory, nMinConn, nMaxConn, nDirFlag, strTagInclude, strTagExclude);
+            ArrayList availableList = FilterAreas(inventory, nMinConn, nMaxConn, nDirFlag, strTagsAny, strTagsAll, strTagsNone);
             ShuffleList(availableList);
 
             if (availableList.Count == 0)
@@ -318,6 +327,8 @@ namespace circleEnvelope
                         // all good, add new area
                         CPlacedArea na = new CPlacedArea(iarea.area, tryPos);
                         na.nGeneration = nGeneration;
+                        // save reference so we can increase available items when removing the placed area
+                        na.pInventoryArea = iarea;
                         // point parent connection to this
                         parentConn.pConnectedArea = na;
                         //make child point to parent too
@@ -341,7 +352,7 @@ namespace circleEnvelope
             return false;
         }
 
-        public CPlacedArea PlaceStoryArea(ArrayList inventory, CPlacedArea parent, CPlacedArea.CAreaConnector parentConn, int nGeneration, int nConnectionsMin, int nConnectionsMax, string strTagInclude = "", string strTagExclude = "")
+        public CPlacedArea PlaceStoryArea(ArrayList inventory, CPlacedArea parent, CPlacedArea.CAreaConnector parentConn, int nGeneration, int nConnectionsMin, int nConnectionsMax, string strTagsAny = "", string strTagsAll = "", string strTagsNone = "")
         {
             int nDirFlag = Form1.DIRFLAG_ANY;
             if (parentConn.dir == Form1.K_DIR_LEFT) nDirFlag = Form1.DIRFLAG_RIGHT;
@@ -353,7 +364,7 @@ namespace circleEnvelope
             Point vStitchPt = new Point(parentConn.pos.X + parent.AABB.X, parentConn.pos.Y + parent.AABB.Y);
             vStitchPt.X += vDirOff.X; vStitchPt.Y += vDirOff.Y;
 
-            ArrayList availableList = FilterAreas(inventory, nConnectionsMin, nConnectionsMax, nDirFlag, strTagInclude, strTagExclude);
+            ArrayList availableList = FilterAreas(inventory, nConnectionsMin, nConnectionsMax, nDirFlag, strTagsAny, strTagsAll, strTagsNone);
             ShuffleList(availableList);
 
             if (availableList.Count == 0)
@@ -389,6 +400,8 @@ namespace circleEnvelope
                         // all good, add new area
                         CPlacedArea na = new CPlacedArea(iarea.area, tryPos);
                         na.nGeneration = nGeneration;
+                        // save reference so we can increase available items when removing the placed area
+                        na.pInventoryArea = iarea;
                         // point parent connection to this
                         parentConn.pConnectedArea = na;
                         //make child point to parent too
@@ -454,9 +467,18 @@ namespace circleEnvelope
                 selarea.nConsumed++;
                 m_arrPlaced.Add(pa);
 
+                int nLockWatchdog = 100;
                 int nCurrGeneration = 0;
                 while (nCurrGeneration < story.arrGenerations.Count)
                 {
+                    nLockWatchdog--;
+                    if (nLockWatchdog < 0)
+                    {
+                        m_arrPlaced.RemoveRange(0, m_arrPlaced.Count);
+                        bLevelGenerated = false;
+                        MessageBox.Show("Could not generate level! Deadlock!");
+                        break;
+                    }
                     ///--- place actual rooms (corridors must be excluded)
                     //_ASSERT(nCurrGeneration < 50);
                     int generationTries = 10;
@@ -492,8 +514,12 @@ namespace circleEnvelope
                                         //todo: should break level generation...?
                                         continue;
                                     }
+                                    // if area does not specify any kind of flag then we avoid special areas by default
+                                    string strTagsAvoid = entry.tags_none;
+                                    if ((entry.tags_none.Length == 0) && (entry.tags_any.Length == 0) && (entry.tags_all.Length == 0))
+                                        strTagsAvoid = "special,hall";
                                     // Place random area tries to place all available items with future generation depth
-                                    CPlacedArea parea = PlaceStoryArea(inventory, placed, curcon, placed.nGeneration + 1, entry.nChildren + 1, entry.nChildren + 1, entry.tags_any, "hall");
+                                    CPlacedArea parea = PlaceStoryArea(inventory, placed, curcon, placed.nGeneration + 1, entry.nChildren + 1, entry.nChildren + 1, entry.tags_any, entry.tags_all, strTagsAvoid);
                                     if (parea == null)
                                     {
                                         Console.WriteLine("Could not place children! Removing them! try:" + childTries);
@@ -504,10 +530,12 @@ namespace circleEnvelope
                                         story.ClearChildEntries(placed.nGeneration + 1, placed.nID);
 
                                         // add corridor on this connection
-                                        bool bPlacedCorridor = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration, 100, "hall");
-                                        if (bPlacedCorridor)
+                                        CPlacedArea pcorridor = PlaceStoryArea(inventory, placed, curcon, placed.nGeneration, 2, 2, "hall", "", "");
+                                        if (pcorridor != null)
                                         {
                                             Console.WriteLine("Corridor placed.");
+                                            // set same ID to corridor as room he's coming from
+                                            pcorridor.nID = placed.nID;
                                             // add corridor as level 6 area too so it gets completed on next pass
                                             arrGenAreas.Add(curcon.pConnectedArea);
                                         }
@@ -517,6 +545,7 @@ namespace circleEnvelope
                                     }
                                     else
                                     {
+                                        // set story id to room
                                         parea.nID = entry.nID;
                                         entry.bUsed = true;
                                     }
@@ -612,9 +641,18 @@ namespace circleEnvelope
 
                 int nMaxDepth = maxDepth;
 
+                int nLockWatchdog = 100;     // fails the level generation if it tries too many times
                 int nCurrGeneration = 0;
                 while (nCurrGeneration < nMaxDepth)
                 {
+                    nLockWatchdog--;
+                    if (nLockWatchdog < 0)
+                    {
+                        m_arrPlaced.RemoveRange(0, m_arrPlaced.Count);
+                        bLevelGenerated = false;
+                        MessageBox.Show("Could not generate level! Deadlock!");
+                        break;
+                    }
                     ///--- place actual rooms (corridors must be excluded)
                     //_ASSERT(nCurrGeneration < 50);
                     int generationTries = 10;
@@ -649,7 +687,7 @@ namespace circleEnvelope
                                         nMinConn = 1;
                                         nMaxConn = 1;
                                     }
-                                    CPlacedArea plarea = PlaceStoryArea(inventory, placed, curcon, placed.nGeneration + 1, nMinConn, nMaxConn, "", "hall");
+                                    CPlacedArea plarea = PlaceStoryArea(inventory, placed, curcon, placed.nGeneration + 1, nMinConn, nMaxConn, "", "", "hall,special");
                                     if (plarea == null)
                                     {
                                         Console.WriteLine("Could not place children! Removing them! try:" + childTries);
@@ -724,6 +762,7 @@ namespace circleEnvelope
                     // AL GOOD, prepare next generation
                     if (bGenerationPlaced == true)
                     {
+                        Console.WriteLine("Generation placed! gen:" + nCurrGeneration);
                         nCurrGeneration++;
                     }
                     else
@@ -782,9 +821,18 @@ namespace circleEnvelope
 
                 int nMaxDepth = maxDepth;
 
+                int nLockWatchdog = 100;
                 int nCurrGeneration = 0;
                 while (nCurrGeneration < nMaxDepth)
                 {
+                    nLockWatchdog--;
+                    if (nLockWatchdog < 0)
+                    {
+                        m_arrPlaced.RemoveRange(0, m_arrPlaced.Count);
+                        bLevelGenerated = false;
+                        MessageBox.Show("Could not generate level! Deadlock!");
+                        break;
+                    }
                     ///--- place corridors before placing next generation, don't try too hard
                     // for each placed area of current generation:
                     ArrayList arrGenAreas = GetShuffledPlacedAreas(nCurrGeneration);
@@ -842,7 +890,7 @@ namespace circleEnvelope
                                 {
                                     CPlacedArea.CAreaConnector curcon = arrConn[ncon] as CPlacedArea.CAreaConnector;
                                     // Place random area tries to place all available items with future depth
-                                    bool bPlaced = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration + 1, nMaxDepth, "", "hall");
+                                    bool bPlaced = PlaceRandomArea(inventory, placed, curcon, placed.nGeneration + 1, nMaxDepth, "", "", "hall,special");
                                     if (!bPlaced)
                                     {
                                         Console.WriteLine("Could not place children! Removing them! try:" + childTries);
@@ -929,7 +977,7 @@ namespace circleEnvelope
             bool bLevelGenerated = true;
 
             // add first area, starting area (only one exit)
-            ArrayList availableList = FilterAreas(inventory, 1, 1, Form1.DIRFLAG_ANY);
+            ArrayList availableList = FilterAreas(inventory, 1, 1, Form1.DIRFLAG_ANY, "start");
             if (availableList.Count > 0)
             {
                 ShuffleList(availableList);
