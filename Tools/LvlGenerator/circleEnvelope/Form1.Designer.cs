@@ -30,7 +30,6 @@
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.butClear = new System.Windows.Forms.Button();
-            this.butGenerate = new System.Windows.Forms.Button();
             this.lbAreas = new System.Windows.Forms.ListBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabAreas = new System.Windows.Forms.TabPage();
@@ -109,16 +108,6 @@
             this.butClear.Text = "Clear Area";
             this.butClear.UseVisualStyleBackColor = true;
             this.butClear.Click += new System.EventHandler(this.butClear_Click);
-            // 
-            // butGenerate
-            // 
-            this.butGenerate.Location = new System.Drawing.Point(8, 501);
-            this.butGenerate.Name = "butGenerate";
-            this.butGenerate.Size = new System.Drawing.Size(201, 25);
-            this.butGenerate.TabIndex = 2;
-            this.butGenerate.Text = "Generate Randomly";
-            this.butGenerate.UseVisualStyleBackColor = true;
-            this.butGenerate.Click += new System.EventHandler(this.butGenerate_Click);
             // 
             // lbAreas
             // 
@@ -253,7 +242,6 @@
             this.tabGenerator.Controls.Add(this.numGenerations);
             this.tabGenerator.Controls.Add(this.but_GenCorridorsNeeded);
             this.tabGenerator.Controls.Add(this.but_GenCorridors);
-            this.tabGenerator.Controls.Add(this.butGenerate);
             this.tabGenerator.Location = new System.Drawing.Point(4, 22);
             this.tabGenerator.Name = "tabGenerator";
             this.tabGenerator.Padding = new System.Windows.Forms.Padding(3);
@@ -549,33 +537,33 @@
             // loadAreasToolStripMenuItem
             // 
             this.loadAreasToolStripMenuItem.Name = "loadAreasToolStripMenuItem";
-            this.loadAreasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadAreasToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.loadAreasToolStripMenuItem.Text = "Load Areas...";
             this.loadAreasToolStripMenuItem.Click += new System.EventHandler(this.loadAreasToolStripMenuItem_Click);
             // 
             // saveAreasToolStripMenuItem
             // 
             this.saveAreasToolStripMenuItem.Name = "saveAreasToolStripMenuItem";
-            this.saveAreasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveAreasToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.saveAreasToolStripMenuItem.Text = "Save Areas...";
             this.saveAreasToolStripMenuItem.Click += new System.EventHandler(this.saveAreasToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(138, 6);
             // 
             // loadStoryToolStripMenuItem
             // 
             this.loadStoryToolStripMenuItem.Name = "loadStoryToolStripMenuItem";
-            this.loadStoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadStoryToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.loadStoryToolStripMenuItem.Text = "Load Story...";
             this.loadStoryToolStripMenuItem.Click += new System.EventHandler(this.loadStoryToolStripMenuItem_Click);
             // 
             // saveStoryToolStripMenuItem
             // 
             this.saveStoryToolStripMenuItem.Name = "saveStoryToolStripMenuItem";
-            this.saveStoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveStoryToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.saveStoryToolStripMenuItem.Text = "Save Story...";
             this.saveStoryToolStripMenuItem.Click += new System.EventHandler(this.saveStoryToolStripMenuItem_Click);
             // 
@@ -615,7 +603,6 @@
 
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button butClear;
-        private System.Windows.Forms.Button butGenerate;
         private System.Windows.Forms.ListBox lbAreas;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabAreas;

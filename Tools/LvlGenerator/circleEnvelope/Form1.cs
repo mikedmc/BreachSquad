@@ -826,27 +826,6 @@ namespace circleEnvelope
             RepaintArea(pbgr);
         }
 
-        private void butGenerate_Click(object sender, EventArgs e)
-        {
-            ArrayList inventory = new ArrayList();
-
-            foreach (CAreaDesc ad in m_arrAreas)
-            {
-                // make sure we have everything computed
-                ad.ComputeInternalData();
-
-                CLevelGen.CInventoryArea ia = new CLevelGen.CInventoryArea();
-                ia.area = ad;
-                ia.nAvailable = 10;
-                ia.nConsumed = 0;
-                inventory.Add(ia);
-            }
-
-            g_LevelGen.GenerateLevel(inventory, (int)numGenerations.Value);
-
-            RepaintArea(pbgr);
-        }
-
         private void butCloneArea_Click(object sender, EventArgs e)
         {
             m_area = AddNewArea(m_area);
@@ -868,7 +847,7 @@ namespace circleEnvelope
 
         private void but_addStoryGen_Click(object sender, EventArgs e)
         {
-            g_story.AddGeneration();
+            g_story.AddGeneration(true);
 
             Story_PopulateGenEntryData();
         }
@@ -957,7 +936,7 @@ namespace circleEnvelope
             if (g_story.arrGenerations.Count <= 2)
                 return;
 
-            g_story.ComputeRelationships();
+            g_story.ComputeRelationshipsGraph();
 
             ArrayList inventory = new ArrayList();
             foreach (CAreaDesc ad in m_arrAreas)
@@ -1021,7 +1000,7 @@ namespace circleEnvelope
 
         private void but_storyComputeIDs_Click(object sender, EventArgs e)
         {
-            g_story.ComputeRelationships();
+            g_story.ComputeRelationshipsGraph();
             Story_PopulateGenEntryData();
             RepaintArea(pbgr);
         }
@@ -1072,42 +1051,8 @@ namespace circleEnvelope
             if (dlg.ShowDialog() == DialogResult.Cancel)
                 return;
 
-            g_story.arrGenerations.Clear();
-            g_story.nSelArea = -1;
-            g_story.nSelGeneration = -1;
+            g_story.LoadStory(dlg.FileName);
 
-            try
-            {
-                XmlDocument xdoc = new XmlDocument();
-                xdoc.Load(dlg.FileName);
-
-                XmlNodeList nodesgen = xdoc.GetElementsByTagName("Generation");
-                foreach (XmlNode node in nodesgen)
-                {
-                    g_story.AddEmptyGeneration();
-
-                    int nindex = Convert.ToInt32(node.Attributes["Index"].InnerText);
-                    int nareas = Convert.ToInt32(node.Attributes["Areas"].InnerText);
-                    XmlNodeList anodes = node.SelectNodes("Area");
-                    foreach (XmlNode anode in anodes)
-                    {
-                        int nChildren = Convert.ToInt32(anode.Attributes["Children"].InnerText);
-                        int nID = Convert.ToInt32(anode.Attributes["ID"].InnerText);
-                        int nParentID = Convert.ToInt32(anode.Attributes["ParentID"].InnerText);
-                        string tags_any = anode.Attributes["TagsAny"].InnerText;
-                        string tags_all = anode.Attributes["TagsAll"].InnerText;
-                        string tags_none = anode.Attributes["TagsNone"].InnerText;
-                        g_story.AddGenerationEntry(nindex, nChildren, tags_any, tags_all, tags_none);
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error loading story! \n\n" + ex.Message);
-            }
-
-            g_story.ComputeRelationships();
             RepaintArea(pbgr);
 
         }
@@ -1120,57 +1065,8 @@ namespace circleEnvelope
             if (dlg.ShowDialog() == DialogResult.Cancel)
                 return;
 
-            g_story.ComputeRelationships();
+            g_story.SaveStory(dlg.FileName);
 
-            try
-            {
-                XmlTextWriter xw = new XmlTextWriter(dlg.FileName, null);
-                xw.Formatting = Formatting.Indented;
-                xw.WriteStartDocument();
-                // write elements
-                xw.WriteStartElement("LevelStory");
-                xw.WriteStartAttribute("Generations");
-                xw.WriteValue(g_story.arrGenerations.Count);
-                xw.WriteEndAttribute();
-
-                for (int kk = 0; kk < g_story.arrGenerations.Count; kk++)
-                {
-                    Story.StoryGeneration gen = g_story.arrGenerations[kk];
-                    xw.WriteStartElement("Generation");
-                    xw.WriteStartAttribute("Index");
-                    xw.WriteValue(kk);
-                    xw.WriteEndAttribute();
-                    xw.WriteStartAttribute("Areas");
-                    xw.WriteValue(gen.arrEntries.Count);
-                    xw.WriteEndAttribute();
-                    for (int jj = 0; jj < gen.arrEntries.Count; jj++)
-                    {
-                        Story.AreaEntry ae = gen.arrEntries[jj];
-
-                        xw.WriteStartElement("Area");
-
-                        xw.WriteAttributeString("Children", ae.nChildren.ToString());
-                        xw.WriteAttributeString("ID", ae.nID.ToString());
-                        xw.WriteAttributeString("ParentID", ae.nParentID.ToString());
-                        xw.WriteAttributeString("TagsAny", ae.tags_any);
-                        xw.WriteAttributeString("TagsAll", ae.tags_all);
-                        xw.WriteAttributeString("TagsNone", ae.tags_none);
-
-                        xw.WriteEndElement();
-                    }
-                    xw.WriteEndElement();
-                }
-                // end LevelStory
-                xw.WriteEndElement();
-                // end document
-                xw.WriteEndDocument();
-                xw.Flush();
-                xw.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error saving story! \n\n" + ex.Message);
-            }
         }
 
     }

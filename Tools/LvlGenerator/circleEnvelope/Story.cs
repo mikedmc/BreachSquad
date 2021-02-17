@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Xml;
+using System.Windows.Forms;
 
 namespace circleEnvelope
 {
@@ -19,7 +21,7 @@ namespace circleEnvelope
 
             // usage flag when generating the level
             public bool bUsed;
-            // ID gets generated like generation * 1000 + entry index
+            // ID gets generated like generation * 100 + entry index
             public int nID;
             public int nParentID;
 
@@ -153,7 +155,7 @@ namespace circleEnvelope
         }
 
         // computes IDs and other data for the areas (call before generating a level)
-        public void ComputeRelationships()
+        public void ComputeRelationshipsGraph()
         {
             nSelArea = -1;
             nSelGeneration = -1;
@@ -194,21 +196,18 @@ namespace circleEnvelope
             }
         }
 
-        public void AddEmptyGeneration()
-        {
-            StoryGeneration sg = new StoryGeneration();
-            arrGenerations.Add(sg);
-        }
-
-        public void AddGeneration()
+        public void AddGeneration(bool bAddEmptyArea = true)
         {
             StoryGeneration sg = new StoryGeneration();
 
             // add starting generation
-            AreaEntry ae = new AreaEntry();
-            ae.nChildren = 1;
-            ae.tags_any = "";
-            sg.arrEntries.Add(ae);
+            if (bAddEmptyArea)
+            {
+                AreaEntry ae = new AreaEntry();
+                ae.nChildren = 1;
+                ae.tags_any = "";
+                sg.arrEntries.Add(ae);
+            }
 
             arrGenerations.Add(sg);
             nSelGeneration = arrGenerations.Count - 1;
@@ -236,19 +235,102 @@ namespace circleEnvelope
             nSelArea = -1;
         }
 
-        // Returns a color for each flag (8 possible flags)
-        public Color GetFlagColor(int flag)
+        public void SaveStory(string strPath)
         {
-            byte r = 0, g = 0, b = 0;
-            if ((flag & 1) != 0) r = 128;
-            if ((flag & 2) != 0) g = 128;
-            if ((flag & 4) != 0) b = 128;
+            // must compute ids first
+            ComputeRelationshipsGraph();
 
-            if ((flag & 8) != 0) r += 64;
-            if ((flag & 16) != 0) g += 64;
-            if ((flag & 32) != 0) b += 64;
+            try
+            {
+                XmlTextWriter xw = new XmlTextWriter(strPath, null);
+                xw.Formatting = Formatting.Indented;
+                xw.WriteStartDocument();
+                // write elements
+                xw.WriteStartElement("LevelStory");
+                xw.WriteStartAttribute("Generations");
+                xw.WriteValue(arrGenerations.Count);
+                xw.WriteEndAttribute();
 
-            return Color.FromArgb(r, g, b);
+                for (int kk = 0; kk < arrGenerations.Count; kk++)
+                {
+                    Story.StoryGeneration gen = arrGenerations[kk];
+                    xw.WriteStartElement("Generation");
+                    xw.WriteStartAttribute("Index");
+                    xw.WriteValue(kk);
+                    xw.WriteEndAttribute();
+                    xw.WriteStartAttribute("Areas");
+                    xw.WriteValue(gen.arrEntries.Count);
+                    xw.WriteEndAttribute();
+                    for (int jj = 0; jj < gen.arrEntries.Count; jj++)
+                    {
+                        Story.AreaEntry ae = gen.arrEntries[jj];
+
+                        xw.WriteStartElement("Area");
+
+                        xw.WriteAttributeString("Children", ae.nChildren.ToString());
+                        xw.WriteAttributeString("ID", ae.nID.ToString());
+                        xw.WriteAttributeString("ParentID", ae.nParentID.ToString());
+                        xw.WriteAttributeString("TagsAny", ae.tags_any);
+                        xw.WriteAttributeString("TagsAll", ae.tags_all);
+                        xw.WriteAttributeString("TagsNone", ae.tags_none);
+
+                        xw.WriteEndElement();
+                    }
+                    xw.WriteEndElement();
+                }
+                // end LevelStory
+                xw.WriteEndElement();
+                // end document
+                xw.WriteEndDocument();
+                xw.Flush();
+                xw.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving story! \n\n" + ex.Message);
+            }
         }
+
+        public void LoadStory(string strPath)
+        {
+            arrGenerations.Clear();
+            nSelArea = -1;
+            nSelGeneration = -1;
+
+            try
+            {
+                XmlDocument xdoc = new XmlDocument();
+                xdoc.Load(strPath);
+
+                XmlNodeList nodesgen = xdoc.GetElementsByTagName("Generation");
+                foreach (XmlNode node in nodesgen)
+                {
+                    AddGeneration(false);
+
+                    int nindex = Convert.ToInt32(node.Attributes["Index"].InnerText);
+                    int nareas = Convert.ToInt32(node.Attributes["Areas"].InnerText);
+                    XmlNodeList anodes = node.SelectNodes("Area");
+                    foreach (XmlNode anode in anodes)
+                    {
+                        int nChildren = Convert.ToInt32(anode.Attributes["Children"].InnerText);
+                        int nID = Convert.ToInt32(anode.Attributes["ID"].InnerText);
+                        int nParentID = Convert.ToInt32(anode.Attributes["ParentID"].InnerText);
+                        string tags_any = anode.Attributes["TagsAny"].InnerText;
+                        string tags_all = anode.Attributes["TagsAll"].InnerText;
+                        string tags_none = anode.Attributes["TagsNone"].InnerText;
+                        AddGenerationEntry(nindex, nChildren, tags_any, tags_all, tags_none);
+                    }   
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading story! \n\n" + ex.Message);
+            }
+
+            // compune IDs again
+            ComputeRelationshipsGraph();
+        }
+
     }
 }
