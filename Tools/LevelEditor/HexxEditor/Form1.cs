@@ -4602,7 +4602,7 @@ namespace HexxEditor
                 xw.Formatting = Formatting.Indented;
                 xw.WriteStartDocument();
                 // write elements
-                xw.WriteStartElement("StoryArea");
+                xw.WriteStartElement("Area");
                 xw.WriteAttributeString("File", Path.GetFileNameWithoutExtension(strPath));
                 int blocksW = blmaxx - blminx + 1;
                 int blocksH = blmaxy - blminy + 1;
@@ -4631,7 +4631,7 @@ namespace HexxEditor
         public bool SaveLevel_V2(string strPath, bool bExportPrefab = false, Stream pDestStream = null)
         {
             // save additional file with area descriptor
-            SaveLevelDescriptorXML(Path.GetDirectoryName(strPath) + "\\" + Path.GetFileNameWithoutExtension(strPath) + ".story");
+            SaveLevelDescriptorXML(Path.GetDirectoryName(strPath) + "\\" + Path.GetFileNameWithoutExtension(strPath) + ".area_desc");
 
             //gaseste minimul si maximul tablei de joc, in blocuri si salveaza latimea si inaltimea nivelului, in blocuri
             Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;

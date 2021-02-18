@@ -113,9 +113,9 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 
 	///--- LOAD AREAS:
-	FileManager::GetMediaPath(L"media/levels/missions/area0.dkas", Path);
+	FileManager::GetMediaPath(L"media/levels/areas/area0.dkas", Path);
 	V_OP_RET(LoadArea(Path, Vec2i(0,0)));
-	FileManager::GetMediaPath(L"media/levels/missions/area1.dkas", Path);
+	FileManager::GetMediaPath(L"media/levels/areas/area1.dkas", Path);
 	V_OP_RET(LoadArea(Path, Vec2i(16, 0)));
 
 
