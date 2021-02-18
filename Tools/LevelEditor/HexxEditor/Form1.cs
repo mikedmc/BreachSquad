@@ -40,6 +40,13 @@ namespace HexxEditor
         public const int K_LAYER_FRONT = 2;
         public const int K_LAYERS_CNT = 3;
 
+        // directii generice
+        public const int K_DIR_NONE = 0;
+        public const int K_DIR_LEFT = 1;
+        public const int K_DIR_UP = 2;
+        public const int K_DIR_RIGHT = 3;
+        public const int K_DIR_DOWN = 4;
+
         //constante setate in fereastra de tileset
         public int TILE_WIDTH = 0;
         public int TILE_HWIDTH = 0;
@@ -1318,6 +1325,7 @@ namespace HexxEditor
 
         #region TILE BLOCKS
 
+
         public const int BLOCK_W = 8;
         public const int BLOCK_H = 8;
 
@@ -1331,7 +1339,6 @@ namespace HexxEditor
 
             public bool bHasUndo;
             public CTile[,] tiles_undo;
-
 
             public CTileBlock(int nTileSize)
             {
@@ -1361,6 +1368,47 @@ namespace HexxEditor
                 }
 
                 bHasUndo = false;
+            }
+
+            // returns true if it  has walkable tiles on specified extremity
+            public bool HasConnectionOnSide(int eDirection)
+            {
+                switch (eDirection)
+                {
+                    case K_DIR_UP:
+                        for (int kk = 0; kk < BLOCK_W; kk++)
+                        {
+                            if (tiles[kk, 0].tileID[K_LAYER_BACK] >= 0)
+                                return true;
+                        }
+                        break;
+                    case K_DIR_DOWN:
+                        for (int kk = 0; kk < BLOCK_W; kk++)
+                        {
+                            if (tiles[kk, BLOCK_H - 1].tileID[K_LAYER_BACK] >= 0)
+                                return true;
+                        }
+                        break;
+                    case K_DIR_LEFT:
+                        for (int kk = 0; kk < BLOCK_W; kk++)
+                        {
+                            if (tiles[0, kk].tileID[K_LAYER_BACK] >= 0)
+                                return true;
+                        }
+                        break;
+                    case K_DIR_RIGHT:
+                        for (int kk = 0; kk < BLOCK_W; kk++)
+                        {
+                            if (tiles[BLOCK_W - 1, kk].tileID[K_LAYER_BACK] >= 0)
+                                return true;
+                        }
+                        break;
+                    default:
+                        MessageBox.Show("Specify direction!");
+                        break;
+                }
+
+                return false;
             }
 
             public void Undo_SaveState()
@@ -1515,6 +1563,30 @@ namespace HexxEditor
                 else
                 {
                     return foundtb.tiles[xtl % BLOCK_W, ytl % BLOCK_H];
+                }
+            }
+
+            public CTileBlock getBlockAt(int xtl, int ytl)
+            {
+                if ((xtl < 0) || (ytl < 0))
+                    return null;
+                CTileBlock foundtb = null;
+                for (int kk = 0; kk < Blocks.Count; kk++)
+                {
+                    CTileBlock tb = Blocks[kk] as CTileBlock;
+                    if ((tb.pos.X == xtl / BLOCK_W) && (tb.pos.Y == ytl / BLOCK_H))
+                    {
+                        foundtb = tb;
+                    }
+                }
+                //daca nu a gasit tile block intoarce null
+                if (foundtb == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return foundtb;
                 }
             }
         }
@@ -4448,8 +4520,62 @@ namespace HexxEditor
         }
 
 
+        // saves data about the level blocks and connectivity
+        public void SaveLevelDescriptorXML(string strPath)
+        {
+            //gaseste minimul si maximul tablei de joc, in blocuri si salveaza latimea si inaltimea nivelului, in blocuri
+            Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;
+            for (int kk = 0; kk < gMap.Blocks.Count; kk++)
+            {
+                CTileBlock blk = gMap.Blocks[kk] as CTileBlock;
+                if (blk.pos.X < blminx) blminx = blk.pos.X;
+                if (blk.pos.Y < blminy) blminy = blk.pos.Y;
+                if (blk.pos.X > blmaxx) blmaxx = blk.pos.X;
+                if (blk.pos.Y > blmaxy) blmaxy = blk.pos.Y;
+            }
+
+            if ((blminx == 100000) || (blminy == 100000)) //no tiles
+            {
+                MessageBox.Show("Cand't save level descriptor for empty levels!");
+            }
+
+            for (int kk = 0; kk < gMap.Blocks.Count; kk++)
+            {
+                CTileBlock blk = gMap.Blocks[kk] as CTileBlock;
+                //  check if bordering
+                CTileBlock testblk = null;
+                // LEFT
+                testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W - BLOCK_W, blk.pos.Y * BLOCK_H);
+                if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_LEFT)))
+                {
+                    MessageBox.Show("Found connection LEFT on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                }
+                //RIGHT
+                testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W + BLOCK_W, blk.pos.Y * BLOCK_H);
+                if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_RIGHT)))
+                {
+                    MessageBox.Show("Found connection RIGHT on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                }
+                //UP
+                testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W, blk.pos.Y * BLOCK_H - BLOCK_H);
+                if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_UP)))
+                {
+                    MessageBox.Show("Found connection UP on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                }
+                //DOWN
+                testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W, blk.pos.Y * BLOCK_H + BLOCK_W);
+                if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_DOWN)))
+                {
+                    MessageBox.Show("Found connection DOWN on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                }
+            }
+        }
+
         public bool SaveLevel_V2(string strPath, bool bExportPrefab = false, Stream pDestStream = null)
         {
+            SaveLevelDescriptorXML(Path.GetFileNameWithoutExtension(strPath) + ".story");
+            return true;
+
             //gaseste minimul si maximul tablei de joc, in blocuri si salveaza latimea si inaltimea nivelului, in blocuri
             Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;
             for (int kk = 0; kk < gMap.Blocks.Count; kk++)
