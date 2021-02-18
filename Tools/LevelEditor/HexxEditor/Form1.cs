@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Collections;
 using System.Diagnostics;
+using System.Xml;
 
 namespace HexxEditor
 {
@@ -4537,44 +4538,100 @@ namespace HexxEditor
             if ((blminx == 100000) || (blminy == 100000)) //no tiles
             {
                 MessageBox.Show("Cand't save level descriptor for empty levels!");
+                return;
             }
 
-            for (int kk = 0; kk < gMap.Blocks.Count; kk++)
+            // level description is saved like a string, top left to bottom right, line by line
+            // 0 - not set, 1 - set block, LURD - connector direction on set block
+            string strDesc = "";
+
+            for (int yy = blminy; yy <= blmaxy; yy++)
             {
-                CTileBlock blk = gMap.Blocks[kk] as CTileBlock;
-                //  check if bordering
-                CTileBlock testblk = null;
-                // LEFT
-                testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W - BLOCK_W, blk.pos.Y * BLOCK_H);
-                if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_LEFT)))
+                for (int xx = blminx; xx <= blmaxx; xx++)
                 {
-                    MessageBox.Show("Found connection LEFT on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
-                }
-                //RIGHT
-                testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W + BLOCK_W, blk.pos.Y * BLOCK_H);
-                if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_RIGHT)))
-                {
-                    MessageBox.Show("Found connection RIGHT on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
-                }
-                //UP
-                testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W, blk.pos.Y * BLOCK_H - BLOCK_H);
-                if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_UP)))
-                {
-                    MessageBox.Show("Found connection UP on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
-                }
-                //DOWN
-                testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W, blk.pos.Y * BLOCK_H + BLOCK_W);
-                if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_DOWN)))
-                {
-                    MessageBox.Show("Found connection DOWN on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                    CTileBlock blk = gMap.getBlockAt(xx * BLOCK_W + BLOCK_W / 2, yy * BLOCK_H + BLOCK_H / 2);
+                    if (blk == null)
+                    {
+                        strDesc += "0";
+                        continue;
+                    }
+                    //  check if bordering
+                    CTileBlock testblk = null;
+                    // LEFT
+                    testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W - BLOCK_W, blk.pos.Y * BLOCK_H);
+                    if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_LEFT)))
+                    {
+                        strDesc += "L";
+                        MessageBox.Show("Found connection LEFT on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                        continue;
+                    }
+                    //RIGHT
+                    testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W + BLOCK_W, blk.pos.Y * BLOCK_H);
+                    if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_RIGHT)))
+                    {
+                        strDesc += "R";
+                        MessageBox.Show("Found connection RIGHT on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                        continue;
+                    }
+                    //UP
+                    testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W, blk.pos.Y * BLOCK_H - BLOCK_H);
+                    if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_UP)))
+                    {
+                        strDesc += "U";
+                        MessageBox.Show("Found connection UP on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                        continue;
+                    }
+                    //DOWN
+                    testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W, blk.pos.Y * BLOCK_H + BLOCK_W);
+                    if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_DOWN)))
+                    {
+                        strDesc += "D";
+                        MessageBox.Show("Found connection DOWN on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                        continue;
+                    }
+                    // no connection but set:
+                    strDesc += "1";
                 }
             }
+
+
+
+            try
+            {
+                XmlTextWriter xw = new XmlTextWriter(strPath, null);
+                xw.Formatting = Formatting.Indented;
+                xw.WriteStartDocument();
+                // write elements
+                xw.WriteStartElement("StoryArea");
+                xw.WriteAttributeString("File", Path.GetFileNameWithoutExtension(strPath));
+                int blocksW = blmaxx - blminx + 1;
+                int blocksH = blmaxy - blminy + 1;
+                xw.WriteAttributeString("BlocksW", blocksW.ToString());
+                xw.WriteAttributeString("BlocksH", blocksH.ToString());
+
+                xw.WriteAttributeString("ConnectorsDesc", strDesc);
+                xw.WriteAttributeString("Tags", "");
+                // end LevelStory
+                xw.WriteEndElement();
+                // end document
+                xw.WriteEndDocument();
+                xw.Flush();
+                xw.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving area descriptor! \n\n" + ex.Message);
+            }
+
+
+
+            MessageBox.Show(strDesc);
         }
 
         public bool SaveLevel_V2(string strPath, bool bExportPrefab = false, Stream pDestStream = null)
         {
-            SaveLevelDescriptorXML(Path.GetFileNameWithoutExtension(strPath) + ".story");
-            return true;
+            // save additional file with area descriptor
+            SaveLevelDescriptorXML(Path.GetDirectoryName(strPath) + "\\" + Path.GetFileNameWithoutExtension(strPath) + ".story");
 
             //gaseste minimul si maximul tablei de joc, in blocuri si salveaza latimea si inaltimea nivelului, in blocuri
             Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;
