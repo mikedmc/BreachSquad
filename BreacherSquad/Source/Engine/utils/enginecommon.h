@@ -568,8 +568,12 @@ HRESULT SetScissorClip(LPDIRECT3DDEVICE9 pDevice, int clipX, int clipY, int clip
 HRESULT RemoveScissorClip(LPDIRECT3DDEVICE9 pDevice);
 // Splits string into tokens
 std::vector<std::wstring> TokenizeString(const std::wstring& str, const std::wstring& delim);
+// Returns true if str contains ANY token from strTokens (separated by tokensSeparator)
+bool StringContainsAnyToken(const std::wstring& str, const std::wstring& strTokens, const std::wstring& tokensSeparator);
+// Returns true if str contains ALL tokens from strTokens (separated by tokensSeparator)
+bool StringContainsAllTokens(const std::wstring& str, const std::wstring& strTokens, const std::wstring& tokensSeparator);
 // Splits version string into major, minor, patch. Expects "1.6.12"
-bool	GetVersionFromString(WCHAR * inStr, int & outMajor, int & outMinor, int & outPatch);
+bool GetVersionFromString(WCHAR * inStr, int & outMajor, int & outMinor, int & outPatch);
 
 ///--- HASH FUNCTIONS ---
 unsigned __int32 FastHash (const char *data, int len);	//case insensitive Fast Hash

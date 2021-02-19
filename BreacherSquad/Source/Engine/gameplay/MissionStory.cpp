@@ -55,3 +55,60 @@ bool CMissionStory::IsLoaded()
 {
 	return (arrGenerations.size() > 0);
 }
+
+CStoryRoom* CMissionStory::GetNextAvailableRoom(int nGeneration, int nParentID, bool bMarkAsUsed)
+{
+	if ((nGeneration < 0) || (nGeneration >= arrGenerations.size()))
+		return nullptr;
+	CStoryGeneration* gen = &arrGenerations[nGeneration];
+	for (int kk = 0; kk < gen->arrRooms.size(); kk++)
+	{
+		if ((gen->arrRooms[kk].bUsed == false) && (gen->arrRooms[kk].nParentID == nParentID))
+		{
+			if (bMarkAsUsed)
+				gen->arrRooms[kk].bUsed = true;
+			return &gen->arrRooms[kk];
+		}
+	}
+
+	return nullptr;
+}
+
+void CMissionStory::ComputeRelationshipsGraph()
+{
+	for (int gg = 0; gg < arrGenerations.size(); gg++)
+	{
+		int nChildIdx = 0;
+		CStoryGeneration* gen = &arrGenerations[gg];
+		for (int aa = 0; aa < gen->arrRooms.size(); aa++)
+		{
+			CStoryRoom* room = &gen->arrRooms[aa];
+			room->bUsed = false;
+			room->nID = gg * 100 + aa;
+			// set children parents ids
+			if (gg < arrGenerations.size() - 1)
+			{
+				int nFakeChildren = 0;
+				for (int cc = 0; cc < room->nChildren; cc++)
+				{
+					if (nChildIdx + cc < arrGenerations[gg + 1].arrRooms.size())
+					{
+						arrGenerations[gg + 1].arrRooms[nChildIdx + cc].nParentID = room->nID;
+					}
+					else
+					{
+						nFakeChildren++;
+					}
+				}
+				room->nChildren -= nFakeChildren;
+				nChildIdx += room->nChildren;
+			}
+			// trim children for last generation
+			else if (gg == arrGenerations.size() - 1)
+			{
+				room->nChildren = 0;
+			}
+		}
+	}
+}
+

@@ -59,6 +59,11 @@ public:
 	void						Release();
 	// Tells if story is loaded
 	bool						IsLoaded();
+	// Returns a StoryRoom for specified nGeneration, with sepcified nParentID
+	// Used during level generation, uses bUsed flag
+	CStoryRoom*					GetNextAvailableRoom(int nGeneration, int nParentID, bool bMarkAsUsed = true);
+	// Computes IDs, parent IDs and trims loose children
+	void						ComputeRelationshipsGraph();
 };
 
 
