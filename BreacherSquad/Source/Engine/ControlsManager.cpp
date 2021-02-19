@@ -4696,7 +4696,7 @@ void CControl::drawDebugText(int x, int y, const wchar_t* text, DWORD color)
 
 
 ///**************************************************************************************
-/// Sigleton de acces
+/// SINGLETON
 ///**************************************************************************************
 
 CControlsManager& UTGetGUI()

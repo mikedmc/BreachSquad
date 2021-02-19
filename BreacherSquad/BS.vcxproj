@@ -269,6 +269,7 @@
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyUtils.h" />
+    <ClInclude Include="Source\Engine\gameplay\AreasInventory.h" />
     <ClInclude Include="Source\Engine\gameplay\LevelArea.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_bullets.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_doofers.h" />
@@ -668,6 +669,7 @@
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyLeaderboards.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\AreasInventory.cpp" />
     <ClCompile Include="Source\Engine\gameplay\LevelArea.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_bullets.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_doofers.cpp" />

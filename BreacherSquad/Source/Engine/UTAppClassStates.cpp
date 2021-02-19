@@ -138,6 +138,11 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load interfaces sprites!");
 				return;
 			}
+
+			///--- level areas inventory ---
+			FileManager::GetMediaPath(L"media/levels/areas/areas_list.xml", xmlpath);
+			if (OP_FAILED(UTGetAreasInv().LoadAreasSpecs(xmlpath)))
+				return;
 		}
 		break;
 		case 4:
