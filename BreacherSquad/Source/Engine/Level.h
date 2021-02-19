@@ -19,6 +19,8 @@
 
 #include "gameplay/TileBlockMesh.h"
 #include "gameplay/LevelArea.h"
+#include "gameplay/MissionStory.h"
+
 #include "CFOVUtil.h"
 
 using namespace std;
@@ -117,6 +119,7 @@ public:
 	CSpriteCollection		m_sprLights;					// light animations/sprites
 	CSpriteCollection		m_sprProps;						// decorations
 	CSpriteCollection		m_sprActors;					// animations for the actors (main characters, enemies etc)
+	CMissionStory			m_story;						// mission story
 
 	CVisibilityLists		m_visibleList;					// list of visible/active entities
 	void					BuildVisibilityLists();

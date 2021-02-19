@@ -16,11 +16,10 @@ OPRESULT CAreasInventory::LoadAreasSpecs(WCHAR* strXMLPath)
 	pugi::xml_document doc;
 	if (!doc.load_file(strXMLPath))
 	{
-		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Unable to load Weapon Templates XML:%s\n", strXMLPath);
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Unable to load Areas Inventory XML:%s\n", strXMLPath);
 	}
 
-	//load explosion templates
-	arrAreas.clear();
+	Release();
 
 	for (pugi::xml_node bnode = doc.root().first_child(); bnode; bnode = bnode.next_sibling())
 	{

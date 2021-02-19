@@ -275,6 +275,7 @@
     <ClInclude Include="Source\Engine\gameplay\Level_doofers.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_visibility.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_weapons.h" />
+    <ClInclude Include="Source\Engine\gameplay\MissionStory.h" />
     <ClInclude Include="Source\Engine\gameplay\PhysicsPoint.h" />
     <ClInclude Include="Source\Engine\gameplay\Prop.h" />
     <ClInclude Include="Source\Engine\gameplay\ActiveInterface.h" />
@@ -676,6 +677,7 @@
     <ClCompile Include="Source\Engine\gameplay\Level_intersections.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_visibility.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_weapons.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\MissionStory.cpp" />
     <ClCompile Include="Source\Engine\gameplay\PhysicsPoint.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Prop.cpp" />
     <ClCompile Include="Source\Engine\gameplay\ActiveInterface.cpp" />

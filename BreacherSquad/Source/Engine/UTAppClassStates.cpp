@@ -143,6 +143,11 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			FileManager::GetMediaPath(L"media/levels/areas/areas_list.xml", xmlpath);
 			if (OP_FAILED(UTGetAreasInv().LoadAreasSpecs(xmlpath)))
 				return;
+
+			//#TEMP: test story loading
+			FileManager::GetMediaPath(L"media/levels/stories/story1.story", xmlpath);
+			if (OP_FAILED(g_level.m_story.LoadStory(xmlpath)))
+				return;
 		}
 		break;
 		case 4:
