@@ -18,37 +18,42 @@
 class CRandom
 {
 private:
-	//keep track of randoms
 	int					randomCallsCount; //random calls since SetRandomSeed
 
 	// DATA
 	unsigned int		rseed;
 	unsigned int		rseed_sp;
-	unsigned long mt[CMATH_N]; /* the array for the state vector  */
-	int mti; /* mti==N+1 means mt[N] is not initialized */
+	unsigned long		mt[CMATH_N]; /* the array for the state vector  */
+	int					mti; /* mti==N+1 means mt[N] is not initialized */
 
 	// FUNCTIONS
 public:
 	CRandom(void);	
-	/* Returns the number of random calls since last SetRandomSeed */
-	int				GetRandomCallsCount();
-	//Returns the index of the array item with the selected probability
-	int				GetProbabilityFromDomain(float arrProbabilities[], int nProbabilitiesCnt);
+
+	
+	int				GetRandomCallsCount();			// Returns the number of random calls since last SetRandomSeed 
 	unsigned int	RandInt( unsigned int n );
-	int				RandInt( int min, int max );  //intoarce numere intre min si max, inclusiv
-// Returns a random float between 0.0f-1.0f
-	float			RandomF( );
+	int				RandInt( int min, int max );	// min <= rnd <= max
+	
+	float			RandomF();						// Returns a random float between 0.0f-1.0f
 	float			RandFloat( float n );
 	float			RandFloat( float min, float max );
-	int				RandSign();
-	//intoarce valoare intre -n si n
-	float			RandFloatSgn( float n );
-	Vec2     RandVec2sgn(float x, float y);
-	void			SetRandomSeed(unsigned int n);
-	unsigned int	GetRandomSeed(void);
-	void			Randomize(void);
-};
 
+	int				RandSign();
+	float			RandFloatSgn( float n );		//-n <= rnd <= n
+	Vec2			RandVec2Sgn(float x, float y);
+
+	void			SetRandSeed(unsigned int n);
+	unsigned int	GetRandSeed(void);
+	void			SetRandSeedTime(void);
+
+	//Returns the index of the array item with the selected probability
+	int				GetProbabilityFromDomain(float arrProbabilities[], int nProbabilitiesCnt);
+	
+	// Shuffles an array
+	template <class anyType>
+	void ShuffleArray(anyType *arrayArg, int arrayElementsCnt, int shuffles);
+};
 
 //========================================================================
 // PrimeSearch.h -  traverse a known set of items randomly only once
@@ -101,32 +106,31 @@ public:
 // PERLIN
 //--------------------------------------------------------------------------------------
 
+namespace UTPerlin
+{
+	float Noise1D(int x);
+	float SmoothedNoise1D(int x);
+	// fast noise fn without octaves
+	float InterpolatedNoise1D_cos(float x);
+	float InterpolatedNoise1D(float x);
+	//functie de cos cu octave pt variatie (variatia se aduna, deci va depasi amplitude
+	float PerlinNoise1D(float x, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves);
+	float PerlinNoise1D_cos(float x, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves);
+	
+	//2D noise
+	float Noise2D(int x, int y);
+	float SmoothedNoise2D(float x, float y);
+	float InterpolatedNoise2D(float x, float y);
+	float PerlinNoise2D(float x, float y, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves);
 
-float Noise1D(int x);
-float SmoothedNoise1D(int x);
-
-//functie rapida de noise, fara octave
-float InterpolatedNoise1D_cos(float x);
-float InterpolatedNoise1D(float x);
-//functie de cos cu octave pt variatie (variatia se aduna, deci va depasi amplitude
-float PerlinNoise1D(float x, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves);
-float PerlinNoise1D_cos(float x, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves);
-//2D noise
-float Noise2D(int x, int y);
-float SmoothedNoise2D(float x, float y);
-
-float InterpolatedNoise2D(float x, float y);
-float PerlinNoise2D(float x, float y, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves);
-
-//3D noise
-float Noise3D(int x, int y, int z);
-float SmoothedNoise3D(float x, float y, float z);
-
-float InterpolatedNoise3D(float x, float y, float z);
-float PerlinNoise3D(float x, float y, float z, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves);
-//varianta fara octave
-float PerlinNoise3D(float x, float y, float z, float frequency, float amplitude);
-
+	//3D noise
+	float Noise3D(int x, int y, int z);
+	float SmoothedNoise3D(float x, float y, float z);
+	float InterpolatedNoise3D(float x, float y, float z);
+	float PerlinNoise3D(float x, float y, float z, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves);
+	// no octaves version
+	float PerlinNoise3D(float x, float y, float z, float frequency, float amplitude);
+}
 
 //--------------------------------------------------------------------------------------
 // UTILITY
@@ -168,8 +172,8 @@ CRandom& UTGetRandom()
 
 #endif
 
-
-//dai un array de probabilitati si numarul de elemente din array si iti intoarce index
+/*
+// Receives array of probabilities and returns index based on those probabilities
 int Random_GetProbabilityFromDomain(float arrProbabilities[], int nProbabilitiesCnt);
 
 template <class anyType>
@@ -185,3 +189,4 @@ void Random_ShuffleArray(anyType *arrayArg, int arrayElementsCnt, int shuffles)
 		arrayArg[pos2] = pivot;
 	}
 }
+*/

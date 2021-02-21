@@ -1399,7 +1399,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 				}
 				//sync random seed again here (makes sure we don't get desynced between debug and release versions)
 				//resets the number of random numbers requested
-				g_level.m_rand.SetRandomSeed(g_netlock.m_unRandomSeed + g_nUpdateFrame);
+				g_level.m_rand.SetRandSeed(g_netlock.m_unRandomSeed + g_nUpdateFrame);
 				//LOG(L"--update dT=%.6f T=%.6f rand:%d--", fElapsedTime, fTime, g_level.m_rand.GetRandomSeed());
 
 				//SPINE update animation states

@@ -28,21 +28,18 @@ int CRandom::GetRandomCallsCount()
 
 int CRandom::GetProbabilityFromDomain(float arrProbabilities[], int nProbabilitiesCnt)
 {
-	//face suma tuturor probabilitatilor
+	//sums up all probabilities and randoms on sum, checks virtual segment (size of each probability) wher rnd falls and returns index
 	float sum = 0.0f;
 	for (int ii = 0; ii < nProbabilitiesCnt; ii++)
 	{
-		//daca am probabilitate negativa nu o iau in seama
 		sum += max(arrProbabilities[ii], 0.0f);
 	}
 	if (sum <= 0.0f)
 		return -1;
-	//alege o valoare in aceasta suma
 	float chosen = RandFloat(sum);
-	//vede pe ce "segment" cade;
+	// see where it falls
 	for (int ii = 0; ii < nProbabilitiesCnt; ii++)
 	{
-		//daca am probabilitate 0 sau mai mica o ignor
 		if (arrProbabilities[ii] <= 0.0f)
 			continue;
 
@@ -53,7 +50,7 @@ int CRandom::GetProbabilityFromDomain(float arrProbabilities[], int nProbabiliti
 
 		chosen -= arrProbabilities[ii];
 	}
-	//daca inca mai are probabilitate in el a mers ceva nasol deci da return -1 ca si cum nu ar fi dat pe nimic
+	//should not get here
 	return -1;
 }
 
@@ -74,7 +71,7 @@ unsigned int CRandom::RandInt( unsigned int n )
         int kk;
 
         if (mti == CMATH_N+1)   /* if sgenrand() has not been called, */
-            SetRandomSeed(4357); /* a default initial seed is used   */
+            SetRandSeed(4357); /* a default initial seed is used   */
 
         for (kk=0;kk<CMATH_N-CMATH_M;kk++) {
             y = (mt[kk]&CMATH_UPPER_MASK)|(mt[kk+1]&CMATH_LOWER_MASK);
@@ -125,7 +122,7 @@ int CRandom::RandInt( int min, int max )
 		int kk;
 
 		if (mti == CMATH_N + 1)   /* if sgenrand() has not been called, */
-			SetRandomSeed(4357); /* a default initial seed is used   */
+			SetRandSeed(4357); /* a default initial seed is used   */
 
 		for (kk = 0; kk < CMATH_N - CMATH_M; kk++) {
 			y = (mt[kk] & CMATH_UPPER_MASK) | (mt[kk + 1] & CMATH_LOWER_MASK);
@@ -199,13 +196,13 @@ float CRandom::RandFloatSgn(float n)
 	return ret;
 }
 
-Vec2 CRandom::RandVec2sgn(float x, float y)
+Vec2 CRandom::RandVec2Sgn(float x, float y)
 {
 	//LOG_DBG_BUFF(L":   RandVec2sgn calls 2 randfloatsgn:");
 	return (Vec2(RandFloatSgn(x), RandFloatSgn(y)));
 }
 
-void CRandom::SetRandomSeed(unsigned int n)
+void CRandom::SetRandSeed(unsigned int n)
 {
 	//LOG_DBG_BUFF(L": SetRandSeed(%d). Calls: %d", n, randomCallsCount);
 	randomCallsCount = 0;
@@ -220,14 +217,28 @@ void CRandom::SetRandomSeed(unsigned int n)
 	rseed = n;
 }
 
-unsigned int CRandom::GetRandomSeed(void)
+unsigned int CRandom::GetRandSeed(void)
 {
 	return(rseed);
 }
 
-void CRandom::Randomize(void)
+void CRandom::SetRandSeedTime(void)
 {
-	SetRandomSeed((unsigned int)time(NULL));
+	SetRandSeed((unsigned int)time(NULL));
+}
+
+template <class anyType>
+void CRandom::ShuffleArray(anyType *arrayArg, int arrayElementsCnt, int shuffles)
+{
+	anyType pivot;
+	for (int kk = 0; kk < shuffles; kk++)
+	{
+		int pos1 = randint(arrayElementsCnt);
+		int pos2 = randint(arrayElementsCnt);
+		pivot = arrayArg[pos1];
+		arrayArg[pos1] = arrayArg[pos2];
+		arrayArg[pos2] = pivot;
+	}
 }
 
 //--------------------------------------------------------------------------------
@@ -359,34 +370,21 @@ int CPrimeSearch::GetNext(bool restart)
 
 //--------------------------------------------------------------------------------------
 // PERLIN
-//TODO: De facut o clasa buna pentru perlin noise
 //--------------------------------------------------------------------------------------
-float CosineInterpolate(float a, float b, float t)
-{
-	float ft = t * 3.1415927f;
-	float f = (1 - cos(ft)) * 0.5f;
 
-	return  a * (1.0f - f) + b * f;
-}
-
-inline float Interpolate(float a, float b, float t)
-{
-	return a * (1.0f - t) + b * t;
-}
-
-float Noise1D(int x)
+float UTPerlin::Noise1D(int x)
 {
 	int nx = ((x << 13) ^ x);
 	return (1.0f - ((nx * (nx * nx * 15731 + 789221) + 1376312589) & 0x7fffffff) / 2147483648.0f);
 	//max float este 2147483647.0f
 }
 
-float SmoothedNoise1D(int x)
+float UTPerlin::SmoothedNoise1D(int x)
 {
 	return Noise1D(x) / 2 + Noise1D(x - 1) / 4 + Noise1D(x + 1) / 4;
 }
 
-float InterpolatedNoise1D(float x)
+float UTPerlin::InterpolatedNoise1D(float x)
 {
 	int integer_X = floor(x);
 	float fractional_X = x - integer_X;
@@ -397,7 +395,7 @@ float InterpolatedNoise1D(float x)
 	return (v1 * (1.0f - fractional_X) + v2 * fractional_X);
 }
 
-float InterpolatedNoise1D_cos(float x)
+float UTPerlin::InterpolatedNoise1D_cos(float x)
 {
 	int integer_X = floor(x);
 	float fractional_X = x - integer_X;
@@ -405,11 +403,10 @@ float InterpolatedNoise1D_cos(float x)
 	float v1 = SmoothedNoise1D(integer_X);
 	float v2 = SmoothedNoise1D(integer_X + 1.0f);
 
-	return CosineInterpolate(v1, v2, fractional_X);
+	return UTMath::Interpolate_cos(v1, v2, fractional_X);
 }
 
-
-float PerlinNoise1D(float x, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves)
+float UTPerlin::PerlinNoise1D(float x, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves)
 {
 	float total = 0.0f;
 	float inFreq = frequency;
@@ -425,7 +422,7 @@ float PerlinNoise1D(float x, float frequency, float freqMultiplier, float amplit
 	return total;
 }
 
-float PerlinNoise1D_cos(float x, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves)
+float UTPerlin::PerlinNoise1D_cos(float x, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves)
 {
 	float total = 0.0f;
 	float inFreq = frequency;
@@ -444,13 +441,13 @@ float PerlinNoise1D_cos(float x, float frequency, float freqMultiplier, float am
 
 //----- perlin 2D ------
 
-float Noise2D(int x, int y)
+float UTPerlin::Noise2D(int x, int y)
 {
 	int nx = x + y * 59;	 //era 57 aici
 	return (1.0f - ((nx * (nx * nx * 15731 + 789221) + 1376312589) & 0x7fffffff) / 2147483648.0f);
 }
 
-float SmoothedNoise2D(float x, float y)
+float UTPerlin::SmoothedNoise2D(float x, float y)
 {
 	float corners = (Noise2D(x - 1, y - 1) + Noise2D(x + 1, y - 1) + Noise2D(x - 1, y + 1) + Noise2D(x + 1, y + 1)) / 16;
 	float sides = (Noise2D(x - 1, y) + Noise2D(x + 1, y) + Noise2D(x, y - 1) + Noise2D(x, y + 1)) / 8;
@@ -461,7 +458,7 @@ float SmoothedNoise2D(float x, float y)
 	return (((corners + sides + center) / 0.2) - 1.0f) / 3.0f;
 }
 
-float InterpolatedNoise2D(float x, float y)
+float UTPerlin::InterpolatedNoise2D(float x, float y)
 {
 	int integer_X = floor(x);
 	float fractional_X = x - integer_X;
@@ -474,13 +471,13 @@ float InterpolatedNoise2D(float x, float y)
 	float v3 = SmoothedNoise2D(integer_X, integer_Y + 1);
 	float v4 = SmoothedNoise2D(integer_X + 1, integer_Y + 1);
 
-	float i1 = Interpolate(v1, v2, fractional_X);
-	float i2 = Interpolate(v3, v4, fractional_X);
+	float i1 = UTMath::Interpolate_lin(v1, v2, fractional_X);
+	float i2 = UTMath::Interpolate_lin(v3, v4, fractional_X);
 
-	return Interpolate(i1, i2, fractional_Y);
+	return UTMath::Interpolate_lin(i1, i2, fractional_Y);
 }
 
-float PerlinNoise2D(float x, float y, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves)
+float UTPerlin::PerlinNoise2D(float x, float y, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves)
 {
 	float total = 0.0f;
 	float inFreq = frequency;
@@ -498,13 +495,13 @@ float PerlinNoise2D(float x, float y, float frequency, float freqMultiplier, flo
 
 //----- perlin 3D -----
 
-float Noise3D(int x, int y, int z)
+float UTPerlin::Noise3D(int x, int y, int z)
 {
 	int nx = x + y * 59 + z * 67;
 	return (1.0f - ((nx * (nx * nx * 15731 + 789221) + 1376312589) & 0x7fffffff) / 2147483648.0f);
 }
 
-float SmoothedNoise3D(float x, float y, float z)
+float UTPerlin::SmoothedNoise3D(float x, float y, float z)
 {
 	float corners = (Noise3D(x - 1, y - 1, z - 1) + Noise3D(x + 1, y - 1, z - 1) + Noise3D(x - 1, y + 1, z - 1) + Noise3D(x + 1, y + 1, z - 1) +
 		Noise3D(x - 1, y - 1, z + 1) + Noise3D(x + 1, y - 1, z + 1) + Noise3D(x - 1, y + 1, z + 1) + Noise3D(x + 1, y + 1, z + 1)) / 32
@@ -514,7 +511,7 @@ float SmoothedNoise3D(float x, float y, float z)
 	return corners + sides + center;
 }
 
-float InterpolatedNoise3D(float x, float y, float z)
+float UTPerlin::InterpolatedNoise3D(float x, float y, float z)
 {
 	int integer_X = floor(x);
 	float fractional_X = x - integer_X;
@@ -530,24 +527,24 @@ float InterpolatedNoise3D(float x, float y, float z)
 	float v3 = SmoothedNoise3D(integer_X, integer_Y + 1, integer_Z);
 	float v4 = SmoothedNoise3D(integer_X + 1, integer_Y + 1, integer_Z);
 
-	float i1 = Interpolate(v1, v2, fractional_X);
-	float i2 = Interpolate(v3, v4, fractional_X);
+	float i1 = UTMath::Interpolate_lin(v1, v2, fractional_X);
+	float i2 = UTMath::Interpolate_lin(v3, v4, fractional_X);
 
 	float v5 = SmoothedNoise3D(integer_X, integer_Y, integer_Z + 1);
 	float v6 = SmoothedNoise3D(integer_X + 1, integer_Y, integer_Z + 1);
 	float v7 = SmoothedNoise3D(integer_X, integer_Y + 1, integer_Z + 1);
 	float v8 = SmoothedNoise3D(integer_X + 1, integer_Y + 1, integer_Z + 1);
 
-	float i3 = Interpolate(v5, v6, fractional_X);
-	float i4 = Interpolate(v7, v8, fractional_X);
+	float i3 = UTMath::Interpolate_lin(v5, v6, fractional_X);
+	float i4 = UTMath::Interpolate_lin(v7, v8, fractional_X);
 
-	float j1 = Interpolate(i1, i2, fractional_Y);
-	float j2 = Interpolate(i3, i4, fractional_Y);
+	float j1 = UTMath::Interpolate_lin(i1, i2, fractional_Y);
+	float j2 = UTMath::Interpolate_lin(i3, i4, fractional_Y);
 
-	return Interpolate(j1, j2, fractional_Z);
+	return UTMath::Interpolate_lin(j1, j2, fractional_Z);
 }
 
-float PerlinNoise3D(float x, float y, float z, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves)
+float UTPerlin::PerlinNoise3D(float x, float y, float z, float frequency, float freqMultiplier, float amplitude, float amplitudeMultiplier, int octaves)
 {
 	float zreal = z * frequency;
 	int integer_Z = floor(zreal);
@@ -556,7 +553,7 @@ float PerlinNoise3D(float x, float y, float z, float frequency, float freqMultip
 	float p1 = PerlinNoise2D(x, y + integer_Z * 53, frequency, freqMultiplier, amplitude, amplitudeMultiplier, octaves);
 	float p2 = PerlinNoise2D(x, y + (integer_Z + 1) * 53, frequency, freqMultiplier, amplitude, amplitudeMultiplier, octaves);
 
-	return Interpolate(p1, p2, fractional_Z * frequency);
+	return UTMath::Interpolate_lin(p1, p2, fractional_Z * frequency);
 
 	/*
 	//asa era inainte dar filtrul din smoothednoise3d nu arata la fel ca cel 2D
@@ -575,47 +572,44 @@ float PerlinNoise3D(float x, float y, float z, float frequency, float freqMultip
 	*/
 }
 
-float PerlinNoise3D(float x, float y, float z, float frequency, float amplitude)
+float UTPerlin::PerlinNoise3D(float x, float y, float z, float frequency, float amplitude)
 {
 	float zreal = z * frequency;
 	int integer_Z = floor(zreal);
 	float fractional_Z = zreal - integer_Z;
 
-	float p1 = InterpolatedNoise2D(x * frequency, (y + (integer_Z * 53)) * frequency) * amplitude;
-	float p2 = InterpolatedNoise2D(x * frequency, (y + ((integer_Z + 1) * 53)) * frequency) * amplitude;
+	float p1 = UTPerlin::InterpolatedNoise2D(x * frequency, (y + (integer_Z * 53)) * frequency) * amplitude;
+	float p2 = UTPerlin::InterpolatedNoise2D(x * frequency, (y + ((integer_Z + 1) * 53)) * frequency) * amplitude;
 
-	return Interpolate(p1, p2, fractional_Z);
+	return UTMath::Interpolate_lin(p1, p2, fractional_Z);
 
 }
 
-
+/*
 int Random_GetProbabilityFromDomain(float arrProbabilities[], int nProbabilitiesCnt)
 {
-	//face suma tuturor probabilitatilor
+	// sum up all probabilities
 	float sum = 0.0f;
 	for (int ii = 0; ii < nProbabilitiesCnt; ii++)
 	{
-		//daca am probabilitate negativa nu o iau in seama
+		//ignore negative probs...
 		sum += max(arrProbabilities[ii], 0.0f);
 	}
 	if (sum <= 0.0f)
 		return -1;
-	//alege o valoare in aceasta suma
 	float chosen = randfloat(sum);
-	//vede pe ce "segment" cade;
+	// see the segment where the value falls
 	for (int ii = 0; ii < nProbabilitiesCnt; ii++)
 	{
-		//daca am probabilitate 0 sau mai mica o ignor
 		if (arrProbabilities[ii] <= 0.0f)
 			continue;
 
 		if (chosen <= arrProbabilities[ii])
-		{
 			return ii;
-		}
 
 		chosen -= arrProbabilities[ii];
 	}
-	//daca inca mai are probabilitate in el a mers ceva nasol deci da return -1 ca si cum nu ar fi dat pe nimic
+	//should never get here
 	return -1;
 }
+*/

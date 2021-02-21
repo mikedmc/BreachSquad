@@ -169,7 +169,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			{
 				float fdx = m_rand.RandFloatSgn(150.0f);
 				float fdy = -100.0f - m_rand.RandFloat(150.0f);
-				AddDoofer(K_DOOFER_SHRAPNEL_SMOKING, pos + m_rand.RandVec2sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y),
+				AddDoofer(K_DOOFER_SHRAPNEL_SMOKING, pos + m_rand.RandVec2Sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y),
 					&Vec2(fdx, fdy), &g_vecGravityOld);
 			}
 			//napalm
@@ -177,7 +177,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			{
 				float fdx = m_rand.RandFloatSgn(60.0f);
 				float fdy = -100.0f - m_rand.RandFloat(120.0f);
-				AddDoofer(K_DOOFER_FIRE_SOURCE, pos + m_rand.RandVec2sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y),
+				AddDoofer(K_DOOFER_FIRE_SOURCE, pos + m_rand.RandVec2Sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y),
 					&Vec2(fdx, fdy), &g_vecGravityOld);
 			}
 		}

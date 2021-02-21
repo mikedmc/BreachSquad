@@ -50,6 +50,14 @@
 #define K_DIR_RIGHT 2
 #define K_DIR_DOWN 3
 
+enum EDir {
+	NONE = -1,
+	LEFT = 0,
+	UP = 1,
+	RIGHT = 2,
+	DOWN = 3,
+};
+
 //direction flags used when setting more directions on one int
 #define K_DIRFLAG_NONE 0
 #define K_DIRFLAG_LEFT 1

@@ -3882,7 +3882,7 @@ void CLevel::UpdateAI_light(CLight* light, float dTime)
 				//params: f_timeMul, f_threshold
 				float timeMul = light->varAIparams.GetVariantByName(L"f_timeMul")->m_asFloat;
 				float fThreshold = light->varAIparams.GetVariantByName(L"f_threshold")->asFloat();
-				float falpha = PerlinNoise1D(light->fTimelineAI * timeMul, 2.0f, 3.0f, 0.8f, 0.25f, 2);
+				float falpha = UTPerlin::PerlinNoise1D(light->fTimelineAI * timeMul, 2.0f, 3.0f, 0.8f, 0.25f, 2);
 				if (falpha > fThreshold)
 					falpha = 1.0f;
 				else
@@ -7950,7 +7950,7 @@ int CLevel::GetNextRandomLevel()
 			if (g_levelStats[kk].nLevelType != K_GAME_LSTYPE_NOTSET)
 				arrLevels[nValidLevels++] = kk;
 		}
-		Random_ShuffleArray(arrLevels, nValidLevels, 1000);
+		//Random_ShuffleArray(arrLevels, nValidLevels, 1000);
 	}
 
 	int nLevel = arrLevels[nNextIndex];

@@ -10,10 +10,10 @@
 class CAreaSpecs
 {
 public:
-	Vec2i				sizeBL;					// Number of blocks on each side
-	std::wstring		strSpecs;				// contains one char for each block (0-empty, 1-filled, LURD-connection direction on filled block)
-	std::wstring		strTags;				// area comma separated tags (hall,special,etc)
-	std::wstring		strFilename;			// filename of matching level area file
+	Vec2i						sizeBL;					// Number of blocks on each side
+	std::wstring				strSpecs;				// contains one char for each block (0-empty, 1-filled, LURD-connection direction on filled block)
+	std::wstring				strTags;				// area comma separated tags (hall,special,etc)
+	std::wstring				strFilename;			// filename of matching level area file
 
 public:
 	CAreaSpecs()

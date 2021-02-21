@@ -2550,7 +2550,7 @@ void CMainMenu::PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaint
 	}
 	//paint character flickering orange light
 	AdditiveBlendingON(m_pDevice, m_pSprite);
-	float alpha = PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.4f, 0.3f, 2);
+	float alpha = UTPerlin::PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.4f, 0.3f, 2);
 	//paint flickering right glow
 	CSprite::paintFrame(&m_sprColNew, (int)worldRect.Right(), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 3, D3DCOLOR_COLORALPHA(dwColor, alpha));
 	AdditiveBlendingOFF(m_pDevice, m_pSprite);

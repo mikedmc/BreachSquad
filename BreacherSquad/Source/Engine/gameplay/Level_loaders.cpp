@@ -22,12 +22,12 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 	if (UTGetAppClass().IsGameNetworked())
 	{
-		m_rand.SetRandomSeed(g_netlock.m_unRandomSeed);
+		m_rand.SetRandSeed(g_netlock.m_unRandomSeed);
 	}
 	else
 	{
 		//randomize seed
-		m_rand.SetRandomSeed(GetTickCount());
+		m_rand.SetRandSeed(GetTickCount());
 	}
 	//reset local timeline
 	fLocalTimeline = 0.0f;

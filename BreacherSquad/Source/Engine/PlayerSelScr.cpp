@@ -1086,7 +1086,7 @@ void CPlayerSelScr::Paint(ID3DXSprite* pSprite)
 	CSprite::paintFrame(&m_sprCol, worldrect.CenterX() + fbackOffX, worldrect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 1, dwColor);
 	//paint character flickering orange light
 	AdditiveBlendingON(m_pDevice, pSprite);
-	float alpha = 0.4f + PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.4f, 0.5f, 2);
+	float alpha = 0.4f + UTPerlin::PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.4f, 0.5f, 2);
 	CSprite::paintFrame(&m_sprCol, worldrect.CenterX() + fbackOffX, worldrect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 2, D3DCOLOR_COLORALPHA(dwColor, alpha));
 	AdditiveBlendingOFF(m_pDevice, pSprite);
 

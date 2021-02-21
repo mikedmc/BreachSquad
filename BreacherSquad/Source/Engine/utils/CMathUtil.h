@@ -76,4 +76,9 @@ namespace UTMath
 	float			atan2_approximation1(float y, float x);
 	// faster atan2 approx
 	float			atan2_approximation2(float y, float x);
+	// Cosine interpolation
+	float			Interpolate_cos(float a, float b, float t);
+	// Linear interpolation
+	float			Interpolate_lin(float a, float b, float t);
+
 }

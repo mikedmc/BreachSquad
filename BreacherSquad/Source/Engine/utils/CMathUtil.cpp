@@ -309,3 +309,16 @@ float UTMath::atan2_approximation2(float y, float x)
 	}
 	return atan;
 }
+
+float UTMath::Interpolate_cos(float a, float b, float t)
+{
+	float ft = t * 3.1415927f;
+	float f = (1 - cos(ft)) * 0.5f;
+
+	return  a * (1.0f - f) + b * f;
+}
+
+float UTMath::Interpolate_lin(float a, float b, float t)
+{
+	return a * (1.0f - t) + b * t;
+}
