@@ -183,6 +183,255 @@ void CMissionGenerator::RemoveGenerations(int nMinGeneration)
 	}
 }
 
+int CMissionGenerator::GetInventoryIdx(CInventoryArea* iarea)
+{
+	for (int kk = 0; kk < m_arrInventory.size(); kk++)
+	{
+		if (iarea == &m_arrInventory[kk])
+			return kk;
+	}
+	ErrorBox(K_ERR_WARNING, L"Inventory entry not found! Should not happen!");
+	return -1;
+}
+
+std::vector<CPlacedArea*> CMissionGenerator::GetShuffledPlacedAreas(int nGeneration)
+{
+	std::vector<CPlacedArea*> retArr;
+	for (auto placed : m_arrPlaced)
+	{
+		if (placed.nGeneration == nGeneration)
+			retArr.push_back(&placed);
+	}
+
+	m_rnd.ShuffleStdVector(retArr, retArr.size() * 2);
+
+	return retArr;
+}
+
+CPlacedArea* CMissionGenerator::PlaceStoryArea(CPlacedArea* parent, CAreaConnector* parentConn, int nGeneration, int nConnectionsMin, int nConnectionsMax, std::wstring strTagsAny /*= L""*/, std::wstring strTagsAll /*= L""*/, std::wstring strTagsNone /*= L""*/)
+{
+	int nDirFlag = K_DIRFLAG_ALL;
+	if (parentConn->dir == K_DIR_LEFT) nDirFlag = K_DIRFLAG_RIGHT;
+	if (parentConn->dir == K_DIR_UP) nDirFlag = K_DIRFLAG_DOWN;
+	if (parentConn->dir == K_DIR_RIGHT) nDirFlag = K_DIRFLAG_LEFT;
+	if (parentConn->dir == K_DIR_DOWN) nDirFlag = K_DIRFLAG_UP;
+
+	Vec2i vDirOff = GetDirVec2i(parentConn->dir);
+	Vec2i vStitchPt(parentConn->pos.x + parent->AABB.x, parentConn->pos.y + parent->AABB.y);
+	vStitchPt.x += vDirOff.x; vStitchPt.y += vDirOff.y;
+
+	auto availableList = FilterAreas(nConnectionsMin, nConnectionsMax, nDirFlag, strTagsAny, strTagsAll, strTagsNone);
+	m_rnd.ShuffleStdVector(availableList, availableList.size() * 2);
+
+	if (availableList.size() == 0)
+	{
+		LOG(L"Insufficient rooms in inventory! dirflag: %d", nDirFlag);
+	}
+
+	for (auto iarea : availableList)
+	{
+		EDir tryConnDir = GetDirInverse(parentConn->dir);
+		//gets list of all connectors for a specified direction and shuffles them
+		std::vector<CAreaConnector*> arrConn = iarea->GetMatchingConnectors(tryConnDir);
+		// we have no connectors that way, try next
+		if (arrConn.size() <= 0)
+			continue;
+		m_rnd.ShuffleStdVector(arrConn, arrConn.size() * 2);
+		for (auto pconnector : arrConn)
+		{
+			// find position of connection point
+			// then find origin for area to place
+			Vec2i tryPos(vStitchPt.x - pconnector->pos.x, vStitchPt.y - pconnector->pos.y);
+			// see if area is clear 
+			if (IsZoneClear(iarea, tryPos))
+			{
+				// consume from inventory
+				iarea->nAvailable--;
+				// all good, add new area
+				CPlacedArea na(iarea, tryPos);
+				na.nGeneration = nGeneration;
+				// save reference so we can increase available items when removing the placed area
+				na.nInventoryIdx = GetInventoryIdx(iarea);
+				// point parent connection to this
+				parentConn->pConnectedArea = &na;
+				//make child point to parent too
+				Vec2i vStitchLocal(vStitchPt.x - na.AABB.x, vStitchPt.y - na.AABB.y);
+				for (CAreaConnector con : na.arrConnections)
+				{
+					//#TODO: check for random connections and stitch them! Remove following "break" if doing so or generalize...
+					// IsAreaClear allows random connections but it could have a flag that would not allow that
+					if (con.pos == vStitchLocal)
+					{
+						con.pConnectedArea = parent;
+						break;
+					}
+				}
+
+				m_arrPlaced.push_back(na);
+
+				return &na;
+			}
+		}
+	}
+	// no area fits
+	return nullptr;
+}
+
+bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
+{
+	LOG(L"Generating level - corridors when needed...");
+	Vec2i posStart(10000, 10000);
+	m_arrPlaced.clear();
+
+	bool bLevelGenerated = true;
+
+	auto availableList = FilterAreas(1, 1, K_DIRFLAG_ALL, L"start");
+	if (availableList.size() > 0)
+	{
+		m_rnd.ShuffleStdVector(availableList, availableList.size() * 2);
+		// place starting area:
+		CInventoryArea* selarea = availableList[0];
+		CPlacedArea pa(selarea, posStart);
+		selarea->nAvailable--;
+		m_arrPlaced.push_back(pa);
+
+		int nMaxDepth = maxDepth;
+
+		int nLockWatchdog = K_LGEN_LOCK_WATCHDOG_COUNT;     // fails the level generation if it tries too many times
+		int nCurrGeneration = 0;
+		while (nCurrGeneration < nMaxDepth)
+		{
+			nLockWatchdog--;
+			if (nLockWatchdog < 0)
+			{
+				m_arrPlaced.clear();
+				bLevelGenerated = false;
+				ErrorBox(K_ERR_WARNING, L"Could not generate level! Deadlock!");
+				break;
+			}
+			///--- place actual rooms (corridors must be excluded)
+			_ASSERT(nCurrGeneration < 50);
+
+			int generationTries = K_LGEN_TRIES_GENERATIONS;
+			bool bGenerationPlaced = false;
+			while ((generationTries > 0) && (bGenerationPlaced == false))
+			{
+				bGenerationPlaced = true;
+				// for each placed area of current generation:
+				auto arrGenAreas2 = GetShuffledPlacedAreas(nCurrGeneration);
+				for (int kk = 0; kk < arrGenAreas2.size(); kk++)
+				{
+					// find placed area
+					CPlacedArea* placed = arrGenAreas2[kk];
+					if (placed->nGeneration != nCurrGeneration)
+						continue;
+					// for each area try connecting the children N times
+					int childTries = K_LGEN_TRIES_CHILDREN;
+					bool bChildrenPlaced = false;
+					while ((childTries > 0) && (bChildrenPlaced == false))
+					{
+						bChildrenPlaced = true;
+						// get the shuffled connectors
+						auto arrConn = placed->GetAvailableConnectors();
+						m_rnd.ShuffleStdVector(arrConn, arrConn.size() * 2);
+
+						// take connectors one by one and try to place random children
+						for (int ncon = 0; ncon < arrConn.size(); ncon++)
+						{
+							auto curcon = arrConn[ncon];
+							// Place random area tries to place all available items with future depth
+							int nMinConn = 2, nMaxConn = 4;
+							if (placed->nGeneration + 1 == nMaxDepth)
+							{
+								nMinConn = 1;
+								nMaxConn = 1;
+							}
+							CPlacedArea* plarea = PlaceStoryArea(placed, curcon, placed->nGeneration + 1, nMinConn, nMaxConn, L"", L"", L"hall,special");
+							if (plarea == null)
+							{
+								LOG(L"Could not place children! Removing them! try: %d", childTries);
+								bChildrenPlaced = false;
+								//remove already placed children of this parent area
+								RemoveChildrenOf(placed);
+
+								// add corridor on this connection
+								CPlacedArea* plhall = PlaceStoryArea(placed, curcon, placed->nGeneration, 2, 2, L"hall");
+								if (plhall != nullptr)
+								{
+									LOG(L"Corridor placed.");
+									// add corridor as level 6 area too so it gets completed on next pass
+									arrGenAreas2.push_back(curcon->pConnectedArea);
+								}
+
+								// exit for
+								break;
+							}
+						}
+
+						childTries--;
+					}
+					// failed to place children after many tries:
+					if (bChildrenPlaced == false)
+					{
+						LOG(L"Generation failed! try: %d", generationTries);
+						bGenerationPlaced = false;
+						//remove parent generations and all of their children
+						if (nCurrGeneration > 0)
+						{
+							RemoveGenerations(nCurrGeneration);
+							nCurrGeneration--;
+						}
+						else
+						{
+							// returned to starting point, failed generating level!
+							generationTries = 0;
+						}
+						// exit generations for
+						break;
+					}
+				}
+
+				generationTries--;
+			}
+
+			// AL GOOD, prepare next generation
+			if (bGenerationPlaced == true)
+			{
+				LOG(L"Generation placed! gen: %d", nCurrGeneration);
+				nCurrGeneration++;
+			}
+			else
+			{
+				m_arrPlaced.clear();
+				bLevelGenerated = false;
+				nCurrGeneration = maxDepth; //force exit while
+				ErrorBox(K_ERR_WARNING, L"Could not generate level!");
+				break;
+			}
+		}
+	}
+
+	m_levelAABB.Set(0, 0, 0, 0);
+	if (bLevelGenerated)
+	{
+		// find level AABB
+		Vec2i vMin(1000000, 1000000);
+		Vec2i vMax(-1000000, -1000000);
+		for (auto pa : m_arrPlaced)
+		{
+			if (pa.AABB.x < vMin.x) vMin.x = pa.AABB.x;
+			if (pa.AABB.y < vMin.y) vMin.y = pa.AABB.y;
+			if (pa.AABB.Right() > vMax.x) vMax.x = pa.AABB.Right();
+			if (pa.AABB.Bottom() > vMax.y) vMax.y = pa.AABB.Bottom();
+		}
+
+		m_levelAABB.Set(vMin.x, vMin.y, vMax.x - vMin.x, vMax.y - vMin.y);
+		LOG(L"-- Level generation OK!");
+	}
+
+	return bLevelGenerated;
+}
+
 CInventoryArea::CInventoryArea(CAreaSpecs as, int nTotalAvailable)
 {
 	areaSpecs = as;

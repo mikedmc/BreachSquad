@@ -1,5 +1,9 @@
 #pragma once
 
+#define K_LGEN_LOCK_WATCHDOG_COUNT  100
+#define K_LGEN_TRIES_GENERATIONS	10
+#define K_LGEN_TRIES_CHILDREN		10
+
 // Area connectors
 class CPlacedArea;
 class CAreaConnector
@@ -59,7 +63,7 @@ public:
 
 public:
 	// returns list of available connectors
-	std::vector<CAreaConnector*> GetAvailableConnectors(bool bShuffle)
+	std::vector<CAreaConnector*> GetAvailableConnectors()
 	{
 		std::vector<CAreaConnector*> arrConn;
 		for (int ncon = 0; ncon < arrConnections.size(); ncon++)
@@ -68,10 +72,6 @@ public:
 			if (arrConnections[ncon].pConnectedArea == null)
 				arrConn.push_back(&arrConnections[ncon]);
 		}
-
-		//#TODO: ar trebui sa foloseasca randomul sincronizat in retea. va face shuffle managerul
-		//if (bShuffle)
-			//m_rnd.ShuffleArray(arrConn.data(), arrConn.size(), arrConn.size() * 2);
 
 		return arrConn;
 	}
@@ -135,89 +135,17 @@ public:
 	// removes all areas of generation >= nMinGeneration
 	void RemoveGenerations(int nMinGeneration);
 
-	int GetInventoryIdx(CInventoryArea* iarea)
-	{
-		for (int kk = 0; kk < m_arrInventory.size(); kk++)
-		{
-			if (iarea == &m_arrInventory[kk])
-				return kk;
-		}
-		ErrorBox(K_ERR_WARNING, L"Inventory entry not found! Should not happen!");
-		return -1;
-	}
+	int GetInventoryIdx(CInventoryArea* iarea);
+
+	// returns array of all placed areas of specified generation
+	std::vector<CPlacedArea*> GetShuffledPlacedAreas(int nGeneration);
 
 	// gets a random area that fits the requirements and places it in the level returning reference to it
 	CPlacedArea* PlaceStoryArea(CPlacedArea* parent, CAreaConnector* parentConn, int nGeneration, int nConnectionsMin, int nConnectionsMax, 
-		std::wstring strTagsAny = L"", std::wstring strTagsAll = L"", std::wstring strTagsNone = L"")
-	{
-		int nDirFlag = K_DIRFLAG_ALL;
-		if (parentConn->dir == K_DIR_LEFT) nDirFlag = K_DIRFLAG_RIGHT;
-		if (parentConn->dir == K_DIR_UP) nDirFlag = K_DIRFLAG_DOWN;
-		if (parentConn->dir == K_DIR_RIGHT) nDirFlag = K_DIRFLAG_LEFT;
-		if (parentConn->dir == K_DIR_DOWN) nDirFlag = K_DIRFLAG_UP;
+		std::wstring strTagsAny = L"", std::wstring strTagsAll = L"", std::wstring strTagsNone = L"");
 
-		Vec2i vDirOff = GetDirVec2i(parentConn->dir);
-		Vec2i vStitchPt(parentConn->pos.x + parent->AABB.x, parentConn->pos.y + parent->AABB.y);
-		vStitchPt.x += vDirOff.x; vStitchPt.y += vDirOff.y;
-
-		auto availableList = FilterAreas(nConnectionsMin, nConnectionsMax, nDirFlag, strTagsAny, strTagsAll, strTagsNone);
-		m_rnd.ShuffleArray(availableList.data(), availableList.size(), availableList.size() * 2);
-
-		if (availableList.size() == 0)
-		{
-			LOG(L"Insufficient rooms in inventory! dirflag: %d", nDirFlag);
-		}
-
-		for(auto iarea : availableList)
-		{
-			EDir tryConnDir = GetDirInverse(parentConn->dir);
-			//gets list of all connectors for a specified direction and shuffles them
-			std::vector<CAreaConnector*> arrConn = iarea->GetMatchingConnectors(tryConnDir);
-			// we have no connectors that way, try next
-			if (arrConn.size() <= 0)
-				continue;
-			m_rnd.ShuffleArray(arrConn.data(), arrConn.size(), arrConn.size() * 2);
-			for (auto pconnector : arrConn)
-			{
-				// find position of connection point
-				// then find origin for area to place
-				Vec2i tryPos(vStitchPt.x - pconnector->pos.x, vStitchPt.y - pconnector->pos.y);
-				// see if area is clear 
-				if (IsZoneClear(iarea, tryPos))
-				{
-					// consume from inventory
-					iarea->nAvailable--;
-					// all good, add new area
-					CPlacedArea na(iarea, tryPos);
-					na.nGeneration = nGeneration;
-					// save reference so we can increase available items when removing the placed area
-					na.nInventoryIdx = GetInventoryIdx(iarea);
-					// point parent connection to this
-					parentConn->pConnectedArea = &na;
-					//make child point to parent too
-					Vec2i vStitchLocal(vStitchPt.x - na.AABB.x, vStitchPt.y - na.AABB.y);
-					for(CAreaConnector con : na.arrConnections)
-					{
-						//#TODO: check for random connections and stitch them! Remove following "break" if doing so or generalize...
-						// IsAreaClear allows random connections but it could have a flag that would not allow that
-						if (con.pos == vStitchLocal)
-						{
-							con.pConnectedArea = parent;
-							break;
-						}
-					}
-
-					m_arrPlaced.push_back(na);
-
-					return &na;
-				}
-			}
-		}
-		// no area fits
-		return nullptr;
-	}
-
-
+	// Only adds corridors when children can't be placed
+	bool GenerateWithCorridorsWhenNeeded(int maxDepth);
 };
 
 

@@ -50,10 +50,46 @@ public:
 	//Returns the index of the array item with the selected probability
 	int				GetProbabilityFromDomain(float arrProbabilities[], int nProbabilitiesCnt);
 	
-	// Shuffles an array
+	// Shuffles an array of base types
 	template <class anyType>
 	void ShuffleArray(anyType *arrayArg, int arrayElementsCnt, int shuffles);
+
+	template <class T>
+	void ShuffleStdVector(std::vector<T>& vec, int shuffles);
+
 };
+
+template <class anyType>
+void CRandom::ShuffleArray(anyType *arrayArg, int arrayElementsCnt, int shuffles)
+{
+	if (arrayElementsCnt <= 1)
+		return;
+
+	anyType pivot;
+	for (int kk = 0; kk < shuffles; kk++)
+	{
+		int pos1 = RandInt(arrayElementsCnt);
+		int pos2 = RandInt(arrayElementsCnt);
+		pivot = arrayArg[pos1];
+		arrayArg[pos1] = arrayArg[pos2];
+		arrayArg[pos2] = pivot;
+	}
+}
+
+template <class T>
+void CRandom::ShuffleStdVector(std::vector<T>& vec, int shuffles)
+{
+	int arrayElementsCnt = vec.size();
+	if (vec.size() <= 1)
+		return;
+
+	for (int kk = 0; kk < shuffles; kk++)
+	{
+		int pos1 = RandInt(arrayElementsCnt);
+		int pos2 = RandInt(arrayElementsCnt);
+		std::swap(vec[pos1], vec[pos2]);
+	}
+}
 
 //========================================================================
 // PrimeSearch.h -  traverse a known set of items randomly only once

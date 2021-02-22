@@ -227,23 +227,6 @@ void CRandom::SetRandSeedTime(void)
 	SetRandSeed((unsigned int)time(NULL));
 }
 
-template <class anyType>
-void CRandom::ShuffleArray(anyType *arrayArg, int arrayElementsCnt, int shuffles)
-{
-	if (arrayElementsCnt <= 1)
-		return;
-
-	anyType pivot;
-	for (int kk = 0; kk < shuffles; kk++)
-	{
-		int pos1 = RandInt(arrayElementsCnt);
-		int pos2 = RandInt(arrayElementsCnt);
-		pivot = arrayArg[pos1];
-		arrayArg[pos1] = arrayArg[pos2];
-		arrayArg[pos2] = pivot;
-	}
-}
-
 //--------------------------------------------------------------------------------
 // End CRandom - Twister
 //--------------------------------------------------------------------------------
