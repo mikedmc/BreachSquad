@@ -112,3 +112,27 @@ void CMissionStory::ComputeRelationshipsGraph()
 	}
 }
 
+void CMissionStory::ClearChildEntries(int nGeneration, int nParentID)
+{
+	if ((nGeneration < 0) || (nGeneration >= arrGenerations.size()))
+		return;
+	for (auto room : arrGenerations[nGeneration].arrRooms)
+	{
+		if (room.nParentID == nParentID)
+			room.bUsed = false;
+	}
+}
+
+void CMissionStory::ClearEntriesFromGeneration(int nGeneration)
+{
+	if ((nGeneration < 0) || (nGeneration >= arrGenerations.size()))
+		return;
+	for (int gen = nGeneration; gen < arrGenerations.size(); gen++)
+	{
+		for (int kk = 0; kk < arrGenerations[gen].arrRooms.size(); kk++)
+		{
+			arrGenerations[gen].arrRooms[kk].bUsed = false;
+		}
+	}
+}
+

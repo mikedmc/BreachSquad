@@ -1,11 +1,24 @@
 #pragma once
+#include "MissionStory.h"
 
+// deadlock counter (sometimes it oscillates indifinetly between 2 generations)
 #define K_LGEN_LOCK_WATCHDOG_COUNT  100
+// times to try to place one generation
 #define K_LGEN_TRIES_GENERATIONS	10
+// times to try to place children on one node
 #define K_LGEN_TRIES_CHILDREN		10
 
-// Area connectors
+// all tags that CAN'T be used for randomly picked rooms
+#define K_LGEN_TAGS_SPECIAL_AVOID		L"special,hall"
+// any of these tags will mean it's a hallway
+#define K_LGEN_TAGS_HALL_ANY			L"hall"
+
+// announce classes
 class CPlacedArea;
+
+///----------------------------------------------------------------------------------
+/// connector description for in-between relationships
+///----------------------------------------------------------------------------------
 class CAreaConnector
 {
 public:
@@ -20,14 +33,16 @@ public:
 	{}
 };
 
-// contents of the inventory
+///----------------------------------------------------------------------------------
+/// Contains inventory data like area description, how many were used, etc
+///----------------------------------------------------------------------------------
 class CInventoryArea
 {
 public:
-	CAreaSpecs			areaSpecs;			// data copied from AreasInventory
-	int					nAvailable;			// Number of available areas of this type
-	int					nAreaConnDirFlags;  // Flags of all connections available for this area
-	std::vector<CAreaConnector>		arrConnectors;	// List of available connectors (pos and dir)
+	CAreaSpecs			areaSpecs;					// data copied from AreasInventory
+	int					nAvailable;					// Number of available areas of this type
+	int					nAreaConnDirFlags;			// Flags of all connections available for this area
+	std::vector<CAreaConnector>		arrConnectors;	// List of available connectors (pos and dir) translated from areaSpecs
 
 	// Computes necessary connectors data and other necessary data
 	CInventoryArea(CAreaSpecs as, int nTotalAvailable = 1);
@@ -36,7 +51,9 @@ public:
 	std::vector<CAreaConnector*> GetMatchingConnectors(EDir dir);
 };
 
-// A single block, used as return type mostly
+///----------------------------------------------------------------------------------
+/// A single block, used as return type for different methods
+///----------------------------------------------------------------------------------
 struct CAreaBlock
 {
 	bool			bIsSet;
@@ -47,64 +64,40 @@ struct CAreaBlock
 	{}
 };
 
+///----------------------------------------------------------------------------------
+/// Area that has been placed in the level
+///----------------------------------------------------------------------------------
 class CPlacedArea
 {
 public:
-	RECTXYWH		AABB;				// world space rectangle in blocks positions
-	CAreaSpecs		areaSpecs;
-	int				nInventoryIdx;		// index in inventory. Could replace areaSpecs...
+	RECTXYWH			AABB;				// world space rectangle in blocks positions
+	CAreaSpecs			areaSpecs;
+	int					nInventoryIdx;		// index in inventory. Could replace areaSpecs...
 	std::vector<CAreaConnector> arrConnections;	// array of connections with neghboring areas
 
-	int				nID;				// area ID needed for generating from story
-	int				nGeneration;		// generation of placed area
+	int					nID;				// area ID needed for generating from story
+	int					nGeneration;		// generation of placed area
 
-	std::wstring	strAreaTags;
-	std::wstring	strAreaName;		// not useful in final game
+	std::wstring		strAreaTags;
+	std::wstring		strAreaFile;		// Loads the actual area from here
 
 public:
 	// returns list of available connectors
-	std::vector<CAreaConnector*> GetAvailableConnectors()
-	{
-		std::vector<CAreaConnector*> arrConn;
-		for (int ncon = 0; ncon < arrConnections.size(); ncon++)
-		{
-			// only add not connected connectors
-			if (arrConnections[ncon].pConnectedArea == null)
-				arrConn.push_back(&arrConnections[ncon]);
-		}
+	std::vector<CAreaConnector*> GetAvailableConnectors();
 
-		return arrConn;
-	}
-
-	CPlacedArea(CInventoryArea* area, Vec2i vPos)
-	{
-		AABB.Set(vPos.x, vPos.y, area->areaSpecs.sizeBL.x, area->areaSpecs.sizeBL.y);
-		nGeneration = -1;
-		nID = -1;
-		strAreaTags = area->areaSpecs.strTags;
-		strAreaName = area->areaSpecs.strFilename;
-		areaSpecs = area->areaSpecs;
-		arrConnections.clear();
-		// copy connectors
-		for (int kk = 0; kk < area->arrConnectors.size(); kk++)
-		{
-			CAreaConnector nc;
-			nc.pConnectedArea = null;
-			// bring connector position in placed area space:
-			nc.pos.x += vPos.x;
-			nc.pos.y += vPos.y;
-
-			arrConnections.push_back(nc);
-		}
-	}
+	// Constructs the placed area from an inventory area and positions it and connectors at vPos
+	CPlacedArea(CInventoryArea* area, Vec2i vPos);
 
 };
 
+///----------------------------------------------------------------------------------
+/// Generates random levels from an inventory of areas that are divided in blocks
+/// Blocks are 8x8 tiles. See areasInventory.h
+///----------------------------------------------------------------------------------
 class CMissionGenerator
 {
 private:
-	CRandom						m_rnd;				// RNG
-	Vec2i						m_vStart;			// Level generation start point
+	CRandom						m_rand;				// RNG
 	RECTXYWH					m_levelAABB;		// level AABB after generation
 	
 	std::vector<CPlacedArea>	m_arrPlaced;		// placed CPlacedArea elements
@@ -116,7 +109,7 @@ public:
 	CMissionGenerator();
 	~CMissionGenerator();
 	// Builds the inventory from available areas
-	void						BuildInventory(DWORD LevelRandSeed);
+	void						BuildInventory();
 	// Releases all areas descriptors
 	void						Release();
 
@@ -126,27 +119,33 @@ public:
 
 	// Returns block data and returns connection direction if it has a connection (EDIR_NONE if not)
 	// Returns AreaBlock.filled=false 
-	CAreaBlock GetPlacedBlockDescAt(Vec2i vPos);
+	CAreaBlock					GetPlacedBlockDescAt(Vec2i vPos);
 
 	// Returns true is iarea can be placed and linked correctly with existing areas
-	bool IsZoneClear(CInventoryArea* iarea, Vec2i vPos);
+	bool						IsZoneClear(CInventoryArea* iarea, Vec2i vPos);
+	
 	// Removes all placed children of specified parent
-	void RemoveChildrenOf(CPlacedArea* parent);
-	// removes all areas of generation >= nMinGeneration
-	void RemoveGenerations(int nMinGeneration);
-
-	int GetInventoryIdx(CInventoryArea* iarea);
-
+	void						RemoveChildrenOf(CPlacedArea* parent);
+	
+	// Removes all areas of generation >= nMinGeneration
+	void						RemoveGenerations(int nMinGeneration);
+	
+	// Returns the inventory idx for specified pointer to inventory area
+	int							GetInventoryIdx(CInventoryArea* iarea);
+	
 	// returns array of all placed areas of specified generation
-	std::vector<CPlacedArea*> GetShuffledPlacedAreas(int nGeneration);
+	std::vector<CPlacedArea*>	GetShuffledPlacedAreas(int nGeneration);
 
-	// gets a random area that fits the requirements and places it in the level returning reference to it
-	CPlacedArea* PlaceStoryArea(CPlacedArea* parent, CAreaConnector* parentConn, int nGeneration, int nConnectionsMin, int nConnectionsMax, 
-		std::wstring strTagsAny = L"", std::wstring strTagsAll = L"", std::wstring strTagsNone = L"");
+	// Gets a random area that fits the requirements and places it in the level returning reference to it
+	CPlacedArea*				PlaceStoryArea(CPlacedArea* parent, CAreaConnector* parentConn, int nGeneration, int nConnectionsMin, int nConnectionsMax, 
+												std::wstring strTagsAny = L"", std::wstring strTagsAll = L"", std::wstring strTagsNone = L"");
 
 	// Only adds corridors when children can't be placed
-	bool GenerateWithCorridorsWhenNeeded(int maxDepth);
+	bool						GenerateWithCorridorsWhenNeeded(int maxDepth);
+
+	// Only adds corridors when children can't be placed
+	bool						GenerateFromStory(CMissionStory* story);
 };
 
-
+//--- SINGLETON ---
 CMissionGenerator& UTGetMissionGen();

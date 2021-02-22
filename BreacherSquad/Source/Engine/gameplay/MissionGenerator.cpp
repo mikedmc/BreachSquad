@@ -2,18 +2,103 @@
 #include "MissionGenerator.h"
 
 
+std::vector<CAreaConnector*> CPlacedArea::GetAvailableConnectors()
+{
+	std::vector<CAreaConnector*> arrConn;
+	for (int ncon = 0; ncon < arrConnections.size(); ncon++)
+	{
+		// only add not connected connectors
+		if (arrConnections[ncon].pConnectedArea == null)
+			arrConn.push_back(&arrConnections[ncon]);
+	}
+
+	return arrConn;
+}
+
+CPlacedArea::CPlacedArea(CInventoryArea* area, Vec2i vPos)
+{
+	AABB.Set(vPos.x, vPos.y, area->areaSpecs.sizeBL.x, area->areaSpecs.sizeBL.y);
+	nGeneration = -1;
+	nID = -1;
+	strAreaTags = area->areaSpecs.strTags;
+	strAreaFile = area->areaSpecs.strFilename;
+	areaSpecs = area->areaSpecs;
+	arrConnections.clear();
+	// copy connectors
+	for (int kk = 0; kk < area->arrConnectors.size(); kk++)
+	{
+		CAreaConnector nc;
+		nc.pConnectedArea = null;
+		// bring connector position in placed area space:
+		nc.pos.x += vPos.x;
+		nc.pos.y += vPos.y;
+
+		arrConnections.push_back(nc);
+	}
+}
+
+CInventoryArea::CInventoryArea(CAreaSpecs as, int nTotalAvailable)
+{
+	areaSpecs = as;
+	nAvailable = nTotalAvailable;
+	nAreaConnDirFlags = 0;
+	for (int kk = 0; kk < as.strSpecs.length(); kk++)
+	{
+		if (as.strSpecs[kk] == 'L')
+		{
+			nAreaConnDirFlags |= K_DIRFLAG_LEFT;
+			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_LEFT));
+		}
+		else if (as.strSpecs[kk] == 'U')
+		{
+			nAreaConnDirFlags |= K_DIRFLAG_UP;
+			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_UP));
+		}
+		else if (as.strSpecs[kk] == 'R')
+		{
+			nAreaConnDirFlags |= K_DIRFLAG_RIGHT;
+			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_RIGHT));
+		}
+		else if (as.strSpecs[kk] == 'D')
+		{
+			nAreaConnDirFlags |= K_DIRFLAG_DOWN;
+			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_DOWN));
+		}
+	}
+}
+
+
+std::vector<CAreaConnector*> CInventoryArea::GetMatchingConnectors(EDir dir)
+{
+	std::vector<CAreaConnector*> arrRet;
+	for (auto conn : arrConnectors)
+	{
+		if (conn.dir == dir)
+			arrRet.push_back(&conn);
+	}
+	return arrRet;
+}
+
+
 CMissionGenerator::CMissionGenerator()
 {
-
+	m_rand.SetRandSeedTime();
+	m_arrPlaced.clear();
+	m_arrInventory.clear();
+	m_levelAABB.Set(0, 0, 0, 0);
 }
+
 
 CMissionGenerator::~CMissionGenerator()
 {
 	Release();
 }
 
+
 void CMissionGenerator::Release()
 {
+	m_arrPlaced.clear();
+	m_arrInventory.clear();
 }
 
 
@@ -70,6 +155,7 @@ CAreaBlock CMissionGenerator::GetPlacedBlockDescAt(Vec2i vPos)
 	return retab;
 }
 
+
 bool CMissionGenerator::IsZoneClear(CInventoryArea* iarea, Vec2i vPos)
 {
 	RECTXYWH AABBtest(vPos.x, vPos.y, iarea->areaSpecs.sizeBL.x, iarea->areaSpecs.sizeBL.y);
@@ -120,6 +206,7 @@ bool CMissionGenerator::IsZoneClear(CInventoryArea* iarea, Vec2i vPos)
 	}
 	return true;
 }
+	  
 
 void CMissionGenerator::RemoveChildrenOf(CPlacedArea* parent)
 {
@@ -154,6 +241,7 @@ void CMissionGenerator::RemoveChildrenOf(CPlacedArea* parent)
 	}
 }
 
+
 void CMissionGenerator::RemoveGenerations(int nMinGeneration)
 {
 	LOG(L"Removing generations >= %d", nMinGeneration);
@@ -183,6 +271,7 @@ void CMissionGenerator::RemoveGenerations(int nMinGeneration)
 	}
 }
 
+
 int CMissionGenerator::GetInventoryIdx(CInventoryArea* iarea)
 {
 	for (int kk = 0; kk < m_arrInventory.size(); kk++)
@@ -194,6 +283,7 @@ int CMissionGenerator::GetInventoryIdx(CInventoryArea* iarea)
 	return -1;
 }
 
+
 std::vector<CPlacedArea*> CMissionGenerator::GetShuffledPlacedAreas(int nGeneration)
 {
 	std::vector<CPlacedArea*> retArr;
@@ -203,10 +293,11 @@ std::vector<CPlacedArea*> CMissionGenerator::GetShuffledPlacedAreas(int nGenerat
 			retArr.push_back(&placed);
 	}
 
-	m_rnd.ShuffleStdVector(retArr, retArr.size() * 2);
+	m_rand.ShuffleStdVector(retArr, retArr.size() * 2);
 
 	return retArr;
 }
+
 
 CPlacedArea* CMissionGenerator::PlaceStoryArea(CPlacedArea* parent, CAreaConnector* parentConn, int nGeneration, int nConnectionsMin, int nConnectionsMax, std::wstring strTagsAny /*= L""*/, std::wstring strTagsAll /*= L""*/, std::wstring strTagsNone /*= L""*/)
 {
@@ -221,7 +312,7 @@ CPlacedArea* CMissionGenerator::PlaceStoryArea(CPlacedArea* parent, CAreaConnect
 	vStitchPt.x += vDirOff.x; vStitchPt.y += vDirOff.y;
 
 	auto availableList = FilterAreas(nConnectionsMin, nConnectionsMax, nDirFlag, strTagsAny, strTagsAll, strTagsNone);
-	m_rnd.ShuffleStdVector(availableList, availableList.size() * 2);
+	m_rand.ShuffleStdVector(availableList, availableList.size() * 2);
 
 	if (availableList.size() == 0)
 	{
@@ -236,7 +327,7 @@ CPlacedArea* CMissionGenerator::PlaceStoryArea(CPlacedArea* parent, CAreaConnect
 		// we have no connectors that way, try next
 		if (arrConn.size() <= 0)
 			continue;
-		m_rnd.ShuffleStdVector(arrConn, arrConn.size() * 2);
+		m_rand.ShuffleStdVector(arrConn, arrConn.size() * 2);
 		for (auto pconnector : arrConn)
 		{
 			// find position of connection point
@@ -277,6 +368,7 @@ CPlacedArea* CMissionGenerator::PlaceStoryArea(CPlacedArea* parent, CAreaConnect
 	return nullptr;
 }
 
+
 bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
 {
 	LOG(L"Generating level - corridors when needed...");
@@ -288,7 +380,7 @@ bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
 	auto availableList = FilterAreas(1, 1, K_DIRFLAG_ALL, L"start");
 	if (availableList.size() > 0)
 	{
-		m_rnd.ShuffleStdVector(availableList, availableList.size() * 2);
+		m_rand.ShuffleStdVector(availableList, availableList.size() * 2);
 		// place starting area:
 		CInventoryArea* selarea = availableList[0];
 		CPlacedArea pa(selarea, posStart);
@@ -333,7 +425,7 @@ bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
 						bChildrenPlaced = true;
 						// get the shuffled connectors
 						auto arrConn = placed->GetAvailableConnectors();
-						m_rnd.ShuffleStdVector(arrConn, arrConn.size() * 2);
+						m_rand.ShuffleStdVector(arrConn, arrConn.size() * 2);
 
 						// take connectors one by one and try to place random children
 						for (int ncon = 0; ncon < arrConn.size(); ncon++)
@@ -346,7 +438,8 @@ bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
 								nMinConn = 1;
 								nMaxConn = 1;
 							}
-							CPlacedArea* plarea = PlaceStoryArea(placed, curcon, placed->nGeneration + 1, nMinConn, nMaxConn, L"", L"", L"hall,special");
+
+							CPlacedArea* plarea = PlaceStoryArea(placed, curcon, placed->nGeneration + 1, nMinConn, nMaxConn, L"", L"", K_LGEN_TAGS_SPECIAL_AVOID);
 							if (plarea == null)
 							{
 								LOG(L"Could not place children! Removing them! try: %d", childTries);
@@ -355,7 +448,7 @@ bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
 								RemoveChildrenOf(placed);
 
 								// add corridor on this connection
-								CPlacedArea* plhall = PlaceStoryArea(placed, curcon, placed->nGeneration, 2, 2, L"hall");
+								CPlacedArea* plhall = PlaceStoryArea(placed, curcon, placed->nGeneration, 2, 2, K_LGEN_TAGS_HALL_ANY);
 								if (plhall != nullptr)
 								{
 									LOG(L"Corridor placed.");
@@ -432,46 +525,187 @@ bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
 	return bLevelGenerated;
 }
 
-CInventoryArea::CInventoryArea(CAreaSpecs as, int nTotalAvailable)
+
+bool CMissionGenerator::GenerateFromStory(CMissionStory* story)
 {
-	areaSpecs = as;
-	nAvailable = nTotalAvailable;
-	nAreaConnDirFlags = 0;
-	for (int kk = 0; kk < as.strSpecs.length(); kk++)
+	_ASSERT(story != nullptr);
+	Vec2i posStart(10000, 10000);
+	LOG(L"Generating level from story..");
+	m_arrPlaced.clear();
+
+	bool bLevelGenerated = true;
+
+	CStoryRoom* pRoomStart = &story->arrGenerations[0].arrRooms[0];
+	// WARNING! story must have a single starting point!
+	int nStartChildren = pRoomStart->nChildren;
+	//get "start" flags... all of them
+	std:wstring strStartFlags = pRoomStart->tags_any;
+
+	auto availableList = FilterAreas(nStartChildren, nStartChildren, K_DIRFLAG_ALL, strStartFlags);
+	if (availableList.size() > 0)
 	{
-		if (as.strSpecs[kk] == 'L')
+		m_rand.ShuffleStdVector(availableList, availableList.size() * 2);
+		// place starting area:
+		CInventoryArea* selarea = availableList[0];
+		CPlacedArea pa(selarea, posStart);
+		pa.nID = pRoomStart->nID; //usually ID:0
+		selarea->nAvailable--;
+		m_arrPlaced.push_back(pa);
+
+		int nLockWatchdog = K_LGEN_LOCK_WATCHDOG_COUNT;
+		int nCurrGeneration = 0;
+		while (nCurrGeneration < story->arrGenerations.size())
 		{
-			nAreaConnDirFlags |= K_DIRFLAG_LEFT;
-			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_LEFT));
-		}
-		else if (as.strSpecs[kk] == 'U')
-		{
-			nAreaConnDirFlags |= K_DIRFLAG_UP;
-			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_UP));
-		}
-		else if (as.strSpecs[kk] == 'R')
-		{
-			nAreaConnDirFlags |= K_DIRFLAG_RIGHT;
-			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_RIGHT));
-		}
-		else if (as.strSpecs[kk] == 'D')
-		{
-			nAreaConnDirFlags |= K_DIRFLAG_DOWN;
-			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_DOWN));
+			nLockWatchdog--;
+			if (nLockWatchdog < 0)
+			{
+				m_arrPlaced.clear();
+				bLevelGenerated = false;
+				ErrorBox(K_ERR_WARNING, L"Could not generate level! Deadlock!");
+				break;
+			}
+			///--- place actual rooms (corridors must be excluded)
+			_ASSERT(nCurrGeneration < 50);
+			int generationTries = K_LGEN_TRIES_GENERATIONS;
+			bool bGenerationPlaced = false;
+			while ((generationTries > 0) && (bGenerationPlaced == false))
+			{
+				bGenerationPlaced = true;
+				// for each placed area of current generation:
+				auto arrGenAreas = GetShuffledPlacedAreas(nCurrGeneration);
+				for (int kk = 0; kk < arrGenAreas.size(); kk++)
+				{
+					// find placed area
+					CPlacedArea* placed = arrGenAreas[kk];
+					if (placed->nGeneration != nCurrGeneration)
+						continue;
+					// for each area try connecting the children N times
+					int childTries = K_LGEN_TRIES_CHILDREN;
+					bool bChildrenPlaced = false;
+					while ((childTries > 0) && (bChildrenPlaced == false))
+					{
+						bChildrenPlaced = true;
+						// get the shuffled connectors
+						auto arrConn = placed->GetAvailableConnectors();
+						m_rand.ShuffleStdVector(arrConn, arrConn.size() * 2);
+						// take connectors one by one and try to place random children according to story
+						for (int ncon = 0; ncon < arrConn.size(); ncon++)
+						{
+							auto curcon = arrConn[ncon];
+							// get data from story
+							auto entry = story->GetNextAvailableRoom(placed->nGeneration + 1, placed->nID, true);
+							if (entry == nullptr)
+							{
+								ErrorBox(K_ERR_WARNING, L"Failed to get story area! generation=%d", placed->nGeneration + 1);
+								//#TODO: should break level generation...?
+								continue;
+							}
+							// if area does not specify any kind of flag then we avoid special areas by default
+							//#TODO: define special areas as #defines 
+							std::wstring strTagsAvoid = entry->tags_none;
+							if ((entry->tags_none.length() == 0) && (entry->tags_any.length() == 0) && (entry->tags_all.length() == 0))
+								strTagsAvoid = K_LGEN_TAGS_SPECIAL_AVOID;
+
+							// Place random area tries to place all available items with future generation depth
+							CPlacedArea* parea = PlaceStoryArea(placed, curcon, placed->nGeneration + 1, entry->nChildren + 1, entry->nChildren + 1, entry->tags_any, entry->tags_all, strTagsAvoid);
+							if (parea == nullptr)
+							{
+								LOG(L"Could not place children! Removing them! try: %d", childTries);
+								bChildrenPlaced = false;
+								//remove already placed children of this parent area
+								RemoveChildrenOf(placed);
+								// clear "used" flag in story
+								story->ClearChildEntries(placed->nGeneration + 1, placed->nID);
+
+								// add corridor on this connection
+								CPlacedArea* pcorridor = PlaceStoryArea(placed, curcon, placed->nGeneration, 2, 2, K_LGEN_TAGS_HALL_ANY, L"", L"");
+								if (pcorridor != nullptr)
+								{
+									LOG(L"Corridor placed.");
+									// set same ID to corridor as room he's coming from
+									pcorridor->nID = placed->nID;
+									// add corridor as level 6 area too so it gets completed on next pass
+									arrGenAreas.push_back(curcon->pConnectedArea);
+								}
+
+								// exit for
+								break;
+							}
+							else
+							{
+								// set story id to room
+								parea->nID = entry->nID;
+								entry->bUsed = true;
+							}
+						}
+
+						childTries--;
+					}
+					// failed to place children after many tries:
+					if (bChildrenPlaced == false)
+					{
+						LOG(L"Generation failed! try: %d", generationTries);
+						bGenerationPlaced = false;
+						//remove parent generations and all of their children
+						if (nCurrGeneration > 0)
+						{
+							RemoveGenerations(nCurrGeneration);
+							// clear "used" flags for current generation and all children
+							story->ClearEntriesFromGeneration(nCurrGeneration);
+							nCurrGeneration--;
+						}
+						else
+						{
+							// returned to starting point, failed generating level!
+							generationTries = 0;
+						}
+						// exit generations for
+						break;
+					}
+				}
+
+				generationTries--;
+			}
+
+			// AL GOOD, prepare next generation
+			if (bGenerationPlaced == true)
+			{
+				nCurrGeneration++;
+			}
+			else
+			{
+				m_arrPlaced.clear();
+				story->ClearEntriesFromGeneration(0);
+				bLevelGenerated = false;
+				nCurrGeneration = story->arrGenerations.size(); //force exit while
+				ErrorBox(K_ERR_WARNING, L"Could not generate level!");
+				break;
+			}
 		}
 	}
+
+	m_levelAABB.Set(0, 0, 0, 0);
+	if (bLevelGenerated)
+	{
+		// find level AABB
+		Vec2i vMin(1000000, 1000000);
+		Vec2i vMax(-1000000, -1000000);
+		for (auto pa : m_arrPlaced)
+		{
+			if (pa.AABB.x < vMin.x) vMin.x = pa.AABB.x;
+			if (pa.AABB.y < vMin.y) vMin.y = pa.AABB.y;
+			if (pa.AABB.Right() > vMax.x) vMax.x = pa.AABB.Right();
+			if (pa.AABB.Bottom() > vMax.y) vMax.y = pa.AABB.Bottom();
+		}
+
+		m_levelAABB.Set(vMin.x, vMin.y, vMax.x - vMin.x, vMax.y - vMin.y);
+		LOG(L"-- Level generation OK!");
+	}
+
+	return bLevelGenerated;
 }
 
-std::vector<CAreaConnector*> CInventoryArea::GetMatchingConnectors(EDir dir)
-{
-	std::vector<CAreaConnector*> arrRet;
-	for (auto conn : arrConnectors)
-	{
-		if (conn.dir == dir)
-			arrRet.push_back(&conn);
-	}
-	return arrRet;
-}
+
 
 ///----------------------------------------------------------------------------------
 /// SINGLETON
@@ -481,3 +715,4 @@ CMissionGenerator& UTGetMissionGen()
 	static CMissionGenerator g_MissionGen;
 	return g_MissionGen;
 }
+

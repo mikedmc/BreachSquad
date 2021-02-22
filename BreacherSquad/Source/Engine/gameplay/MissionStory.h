@@ -64,6 +64,11 @@ public:
 	CStoryRoom*					GetNextAvailableRoom(int nGeneration, int nParentID, bool bMarkAsUsed = true);
 	// Computes IDs, parent IDs and trims loose children
 	void						ComputeRelationshipsGraph();
+	// clear "used" flag from a generation, for a specific parentID
+	void						ClearChildEntries(int nGeneration, int nParentID);
+	// clear "used" flag fr a full generation and children ones
+	void						ClearEntriesFromGeneration(int nGeneration);
+
 };
 
 
