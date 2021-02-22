@@ -27,6 +27,9 @@ public:
 
 	// Computes necessary connectors data and other necessary data
 	CInventoryArea(CAreaSpecs as, int nTotalAvailable = 1);
+
+	// Copies connector data into new array
+	std::vector<CAreaConnector*> GetMatchingConnectors(EDir dir);
 };
 
 // A single block, used as return type mostly
@@ -43,17 +46,16 @@ struct CAreaBlock
 class CPlacedArea
 {
 public:
-	RECTXYWH AABB;    // world space rectangle in blocks positions
-	CAreaSpecs areaSpecs;
-	//public Form1.CGridCell[, ] blocks = null;    // blocks in matrix of AABB.w/h
-	std::vector<CAreaConnector> arrConnections;
+	RECTXYWH		AABB;				// world space rectangle in blocks positions
+	CAreaSpecs		areaSpecs;
+	int				nInventoryIdx;		// index in inventory. Could replace areaSpecs...
+	std::vector<CAreaConnector> arrConnections;	// array of connections with neghboring areas
 
-	//public CInventoryArea pInventoryArea; // pointer to inventory area needed to decrease inventory usage when removed. Should be index...
-	int nID; // area ID needed for generating from story
-	int nGeneration; // generation of placed area
+	int				nID;				// area ID needed for generating from story
+	int				nGeneration;		// generation of placed area
 
-	std::wstring strAreaTags;
-	std::wstring strAreaName;
+	std::wstring	strAreaTags;
+	std::wstring	strAreaName;		// not useful in final game
 
 public:
 	// returns list of available connectors
@@ -74,40 +76,27 @@ public:
 		return arrConn;
 	}
 
-	/*
-	CPlacedArea(Form1.CAreaDesc area, Point vPos)
+	CPlacedArea(CInventoryArea* area, Vec2i vPos)
 	{
-		AABB = area.AABB;
-		AABB.X = vPos.X; AABB.Y = vPos.Y;
-		nGeneration = 0;
-		strAreaTags = area.strTags;
-		strAreaName = area.strName;
-		// allocate blocks
-		blocks = new Form1.CGridCell[AABB.Width, AABB.Height];
-		for (int yy = 0; yy < AABB.Height; yy++)
-		{
-			for (int xx = 0; xx < AABB.Width; xx++)
-			{
-				// copy active area
-				blocks[xx, yy] = new Form1.CGridCell();
-				blocks[xx, yy].bFilled = area.blocks[area.AABB.X + xx][area.AABB.Y + yy].bFilled;
-				blocks[xx, yy].connectionDir = area.blocks[area.AABB.X + xx][area.AABB.Y + yy].connectionDir;
-			}
-		}
+		AABB.Set(vPos.x, vPos.y, area->areaSpecs.sizeBL.x, area->areaSpecs.sizeBL.y);
+		nGeneration = -1;
+		nID = -1;
+		strAreaTags = area->areaSpecs.strTags;
+		strAreaName = area->areaSpecs.strFilename;
+		areaSpecs = area->areaSpecs;
+		arrConnections.clear();
 		// copy connectors
-		for (int kk = 0; kk < area.arrConnectors.Count; kk++)
+		for (int kk = 0; kk < area->arrConnectors.size(); kk++)
 		{
-			CAreaConnector nc = new CAreaConnector();
-			nc.dir = area.blocks[area.arrConnectors[kk].X][area.arrConnectors[kk].Y].connectionDir;
+			CAreaConnector nc;
 			nc.pConnectedArea = null;
 			// bring connector position in placed area space:
-			nc.pos = area.arrConnectors[kk];
-			nc.pos.X -= area.AABB.X; nc.pos.Y -= area.AABB.Y;
+			nc.pos.x += vPos.x;
+			nc.pos.y += vPos.y;
 
-			arrConnections.Add(nc);
+			arrConnections.push_back(nc);
 		}
 	}
-	*/
 
 };
 
@@ -139,55 +128,93 @@ public:
 	// Returns AreaBlock.filled=false 
 	CAreaBlock GetPlacedBlockDescAt(Vec2i vPos);
 
-	bool IsZoneClear(CInventoryArea* iarea, Vec2i vPos)
+	// Returns true is iarea can be placed and linked correctly with existing areas
+	bool IsZoneClear(CInventoryArea* iarea, Vec2i vPos);
+	// Removes all placed children of specified parent
+	void RemoveChildrenOf(CPlacedArea* parent);
+	// removes all areas of generation >= nMinGeneration
+	void RemoveGenerations(int nMinGeneration);
+
+	int GetInventoryIdx(CInventoryArea* iarea)
 	{
-		RECTXYWH AABBtest(vPos.x, vPos.y, iarea->areaSpecs.sizeBL.x, iarea->areaSpecs.sizeBL.y);
-		// check overlapping blocks
-		for (int xx = 0; xx < AABBtest.w; xx++)
+		for (int kk = 0; kk < m_arrInventory.size(); kk++)
 		{
-			for (int yy = 0; yy < AABBtest.h; yy++)
+			if (iarea == &m_arrInventory[kk])
+				return kk;
+		}
+		ErrorBox(K_ERR_WARNING, L"Inventory entry not found! Should not happen!");
+		return -1;
+	}
+
+	// gets a random area that fits the requirements and places it in the level returning reference to it
+	CPlacedArea* PlaceStoryArea(CPlacedArea* parent, CAreaConnector* parentConn, int nGeneration, int nConnectionsMin, int nConnectionsMax, 
+		std::wstring strTagsAny = L"", std::wstring strTagsAll = L"", std::wstring strTagsNone = L"")
+	{
+		int nDirFlag = K_DIRFLAG_ALL;
+		if (parentConn->dir == K_DIR_LEFT) nDirFlag = K_DIRFLAG_RIGHT;
+		if (parentConn->dir == K_DIR_UP) nDirFlag = K_DIRFLAG_DOWN;
+		if (parentConn->dir == K_DIR_RIGHT) nDirFlag = K_DIRFLAG_LEFT;
+		if (parentConn->dir == K_DIR_DOWN) nDirFlag = K_DIRFLAG_UP;
+
+		Vec2i vDirOff = GetDirVec2i(parentConn->dir);
+		Vec2i vStitchPt(parentConn->pos.x + parent->AABB.x, parentConn->pos.y + parent->AABB.y);
+		vStitchPt.x += vDirOff.x; vStitchPt.y += vDirOff.y;
+
+		auto availableList = FilterAreas(nConnectionsMin, nConnectionsMax, nDirFlag, strTagsAny, strTagsAll, strTagsNone);
+		m_rnd.ShuffleArray(availableList.data(), availableList.size(), availableList.size() * 2);
+
+		if (availableList.size() == 0)
+		{
+			LOG(L"Insufficient rooms in inventory! dirflag: %d", nDirFlag);
+		}
+
+		for(auto iarea : availableList)
+		{
+			EDir tryConnDir = GetDirInverse(parentConn->dir);
+			//gets list of all connectors for a specified direction and shuffles them
+			std::vector<CAreaConnector*> arrConn = iarea->GetMatchingConnectors(tryConnDir);
+			// we have no connectors that way, try next
+			if (arrConn.size() <= 0)
+				continue;
+			m_rnd.ShuffleArray(arrConn.data(), arrConn.size(), arrConn.size() * 2);
+			for (auto pconnector : arrConn)
 			{
-				// check map occupation only on occupied blocks in current test area
-				EDir blockSrcConDir = EDIR_NONE;
-				bool bBlockSrcFilled = iarea->areaSpecs.GetBlockIsSet(Vec2i(xx, yy), blockSrcConDir);
-				if (bBlockSrcFilled)
+				// find position of connection point
+				// then find origin for area to place
+				Vec2i tryPos(vStitchPt.x - pconnector->pos.x, vStitchPt.y - pconnector->pos.y);
+				// see if area is clear 
+				if (IsZoneClear(iarea, tryPos))
 				{
-					CAreaBlock blockDest = GetPlacedBlockDescAt(Vec2i(xx + vPos.x, yy + vPos.y));
-					//Form1.CGridCell blockPlaced = GetPlacedBlockAt(new Point(xx + vPos.X, yy + vPos.Y));
-					if (blockDest.bIsSet)
-						return false;
-					// check on all neighbours in all directions as blocks might overlap
-					for (int kk = 0; kk < EDIRS_COUNT; kk++)
+					// consume from inventory
+					iarea->nAvailable--;
+					// all good, add new area
+					CPlacedArea na(iarea, tryPos);
+					na.nGeneration = nGeneration;
+					// save reference so we can increase available items when removing the placed area
+					na.nInventoryIdx = GetInventoryIdx(iarea);
+					// point parent connection to this
+					parentConn->pConnectedArea = &na;
+					//make child point to parent too
+					Vec2i vStitchLocal(vStitchPt.x - na.AABB.x, vStitchPt.y - na.AABB.y);
+					for(CAreaConnector con : na.arrConnections)
 					{
-						EDir dir = (EDir)kk;
-						Vec2i vOff = GetDirVec2i(dir);
-						CAreaBlock pNeigh = GetPlacedBlockDescAt(Vec2i(xx + vPos.X + vOff.X, yy + vPos.Y + vOff.Y));
-						//Form1.CGridCell pNeigh = GetPlacedBlockAt(new Point(xx + vPos.X + vOff.X, yy + vPos.Y + vOff.Y));
-						// for each neighbour that is alrady placed check if we have the correct connector for random loops
-						if (pNeigh.bIsSet)
+						//#TODO: check for random connections and stitch them! Remove following "break" if doing so or generalize...
+						// IsAreaClear allows random connections but it could have a flag that would not allow that
+						if (con.pos == vStitchLocal)
 						{
-							EDir dir_inv = GetDirInverse(dir);
-							// remote blocked connection
-							if ((pNeigh.eConnectionDir == dir_inv) && (blockSrcConDir != dir))
-								return false;
-							// local block blocked connection
-							if (blockSrcConDir == dir)
-							{
-								// only allowed if remote block has matching connector
-								if (pNeigh.eConnectionDir != dir_inv)
-									return false;
-								else
-								{
-									// check for random connection using the area generations or current stitch point
-									LOG(L"IsZoneClear:: Random connection found!");
-								}
-							}
+							con.pConnectedArea = parent;
+							break;
 						}
 					}
+
+					m_arrPlaced.push_back(na);
+
+					return &na;
 				}
 			}
 		}
-		return true;
+		// no area fits
+		return nullptr;
 	}
 
 

@@ -11,6 +11,24 @@ const DWORD VERT_TL1T::FVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1;
 const DWORD VERT_TL1TS::FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
 const DWORD VERT_TL1TC::FVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE;
 
+
+POINTXY_INT GetDirVec2i(EDir dir)
+{
+	Vec2i dirs[4] = { Vec2i(-1, 0), Vec2i(0, -1), Vec2i(1, 0), Vec2i(0, 1) };
+
+	int idx = (int)dir;
+	if ((idx < 0) || (idx >= EDIRS_COUNT))
+		return Vec2i(0, 0);
+	return dirs[idx];
+}
+
+EDir GetDirInverse(EDir dir)
+{
+	if ((dir < 0) || (dir >= EDIRS_COUNT))
+		return EDIR_NONE;
+	return (EDir)((dir + 2) % EDIRS_COUNT);
+}
+
 void D3DCOLOR_UNPACKTOFLOAT(DWORD color, float & a, float & r, float & g, float & b)
 {
 	unsigned char cnl = color & 0x000000ff;

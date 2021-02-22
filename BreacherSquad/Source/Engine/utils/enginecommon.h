@@ -60,22 +60,6 @@ enum EDir {
 	EDIRS_COUNT = 4,
 };
 
-// Returns an int vector containing the direction vector or 0 if wrong direction
-Vec2i GetDirVec2i(EDir dir)
-{
-	Vec2i dirs[] = { {-1, 0}, {0, -1}, {1, 0}, {0, 1} };
-	int idx = (int)dir;
-	if ((idx < 0) || (idx >= EDIRS_COUNT))
-		return Vec2i(0, 0);
-	return dirs[idx];
-}
-
-EDir GetDirInverse(EDir dir)
-{
-	if ((dir < 0) || (dir >= EDIRS_COUNT))
-		return EDIR_NONE;
-	return (EDir)((dir + 2) % EDIRS_COUNT);
-}
 
 //direction flags used when setting more directions on one int
 #define K_DIRFLAG_NONE 0
@@ -180,6 +164,9 @@ struct POINTXYZ_INT {
 	operator Vec2() { return Vec2((float)x, (float)y); }
 	operator Vec3() { return Vec3((float)x, (float)y, (float)z); }
 };
+
+Vec2i GetDirVec2i(EDir dir);
+EDir GetDirInverse(EDir dir);
 
 class SIZEWH {
 public:

@@ -70,6 +70,119 @@ CAreaBlock CMissionGenerator::GetPlacedBlockDescAt(Vec2i vPos)
 	return retab;
 }
 
+bool CMissionGenerator::IsZoneClear(CInventoryArea* iarea, Vec2i vPos)
+{
+	RECTXYWH AABBtest(vPos.x, vPos.y, iarea->areaSpecs.sizeBL.x, iarea->areaSpecs.sizeBL.y);
+	// check overlapping blocks
+	for (int xx = 0; xx < AABBtest.w; xx++)
+	{
+		for (int yy = 0; yy < AABBtest.h; yy++)
+		{
+			// check map occupation only on occupied blocks in current test area
+			EDir blockSrcConDir = EDIR_NONE;
+			bool bBlockSrcFilled = iarea->areaSpecs.GetBlockIsSet(Vec2i(xx, yy), blockSrcConDir);
+			if (bBlockSrcFilled)
+			{
+				CAreaBlock blockDest = GetPlacedBlockDescAt(Vec2i(xx + vPos.x, yy + vPos.y));
+				//Form1.CGridCell blockPlaced = GetPlacedBlockAt(new Point(xx + vPos.X, yy + vPos.Y));
+				if (blockDest.bIsSet)
+					return false;
+				// check on all neighbours in all directions as blocks might overlap
+				for (int kk = 0; kk < EDIRS_COUNT; kk++)
+				{
+					EDir dir = (EDir)kk;
+					Vec2i vOff = GetDirVec2i(dir);
+					CAreaBlock pNeigh = GetPlacedBlockDescAt(Vec2i(xx + vPos.x + vOff.y, yy + vPos.x + vOff.y));
+					//Form1.CGridCell pNeigh = GetPlacedBlockAt(new Point(xx + vPos.X + vOff.X, yy + vPos.Y + vOff.Y));
+					// for each neighbour that is alrady placed check if we have the correct connector for random loops
+					if (pNeigh.bIsSet)
+					{
+						EDir dir_inv = GetDirInverse(dir);
+						// remote blocked connection
+						if ((pNeigh.eConnectionDir == dir_inv) && (blockSrcConDir != dir))
+							return false;
+						// local block blocked connection
+						if (blockSrcConDir == dir)
+						{
+							// only allowed if remote block has matching connector
+							if (pNeigh.eConnectionDir != dir_inv)
+								return false;
+							else
+							{
+								// check for random connection using the area generations or current stitch point
+								LOG(L"IsZoneClear:: Random connection found!");
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
+void CMissionGenerator::RemoveChildrenOf(CPlacedArea* parent)
+{
+	// unlink parent's children
+	for (auto conn : parent->arrConnections)
+	{
+		// removes only the children (not parents and same generation areas)
+		if ((conn.pConnectedArea != nullptr) && (conn.pConnectedArea->nGeneration > parent->nGeneration))
+			conn.pConnectedArea = null;
+	}
+
+	for (int kk = m_arrPlaced.size() - 1; kk >= 0; kk--)
+	{
+		CPlacedArea* area = &m_arrPlaced[kk];
+		// skip lower generation areas (parents)
+		if (area->nGeneration <= parent->nGeneration)
+			continue;
+
+		for (auto pconn : area->arrConnections)
+		{
+			if (pconn.pConnectedArea == nullptr)
+				continue;
+			if (pconn.pConnectedArea == parent)
+			{
+				// put it back into inventory
+				m_arrInventory[area->nInventoryIdx].nAvailable++;
+				//remove and break
+				m_arrPlaced.erase(m_arrPlaced.begin() + kk);
+				break;
+			}
+		}
+	}
+}
+
+void CMissionGenerator::RemoveGenerations(int nMinGeneration)
+{
+	LOG(L"Removing generations >= %d", nMinGeneration);
+	// unlink remaining generations from useless ones
+	for (auto area : m_arrPlaced)
+	{
+		if (area.nGeneration < nMinGeneration)
+		{
+			for (auto conn : area.arrConnections)
+			{
+				if ((conn.pConnectedArea != null) && (conn.pConnectedArea->nGeneration >= nMinGeneration))
+					conn.pConnectedArea = null;
+			}
+		}
+	}
+	// delete useless generations
+	for (int kk = m_arrPlaced.size() - 1; kk >= 0; kk--)
+	{
+		CPlacedArea* area = &m_arrPlaced[kk];
+		if (area->nGeneration >= nMinGeneration)
+		{
+			// put it back into inventory
+			m_arrInventory[area->nInventoryIdx].nAvailable++;
+			//remove and break
+			m_arrPlaced.erase(m_arrPlaced.begin() + kk);
+		}
+	}
+}
+
 CInventoryArea::CInventoryArea(CAreaSpecs as, int nTotalAvailable)
 {
 	areaSpecs = as;
@@ -98,6 +211,17 @@ CInventoryArea::CInventoryArea(CAreaSpecs as, int nTotalAvailable)
 			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_DOWN));
 		}
 	}
+}
+
+std::vector<CAreaConnector*> CInventoryArea::GetMatchingConnectors(EDir dir)
+{
+	std::vector<CAreaConnector*> arrRet;
+	for (auto conn : arrConnectors)
+	{
+		if (conn.dir == dir)
+			arrRet.push_back(&conn);
+	}
+	return arrRet;
 }
 
 ///----------------------------------------------------------------------------------
