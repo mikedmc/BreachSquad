@@ -51,12 +51,31 @@
 #define K_DIR_DOWN 3
 
 enum EDir {
-	NONE = -1,
-	LEFT = 0,
-	UP = 1,
-	RIGHT = 2,
-	DOWN = 3,
+	EDIR_NONE = -1,
+	EDIR_LEFT = 0,
+	EDIR_UP = 1,
+	EDIR_RIGHT = 2,
+	EDIR_DOWN = 3,
+
+	EDIRS_COUNT = 4,
 };
+
+// Returns an int vector containing the direction vector or 0 if wrong direction
+Vec2i GetDirVec2i(EDir dir)
+{
+	Vec2i dirs[] = { {-1, 0}, {0, -1}, {1, 0}, {0, 1} };
+	int idx = (int)dir;
+	if ((idx < 0) || (idx >= EDIRS_COUNT))
+		return Vec2i(0, 0);
+	return dirs[idx];
+}
+
+EDir GetDirInverse(EDir dir)
+{
+	if ((dir < 0) || (dir >= EDIRS_COUNT))
+		return EDIR_NONE;
+	return (EDir)((dir + 2) % EDIRS_COUNT);
+}
 
 //direction flags used when setting more directions on one int
 #define K_DIRFLAG_NONE 0
@@ -237,6 +256,11 @@ public:
 	inline bool operator!=(const RECTXYWH& rhs)
 	{
 		return ((x != rhs.x) || (y != rhs.y) || (w != rhs.w) || (h != rhs.h));
+	}
+
+	inline bool Contains(Vec2i pt)
+	{
+		return ((pt.x >= x) && (pt.y >= y) && (pt.x < x + w) && (pt.y < y + h));
 	}
 };
 

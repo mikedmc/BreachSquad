@@ -202,7 +202,7 @@ namespace circleEnvelope
                                     else
                                     {
                                         // check for random connection using the area generations or current stitch point
-                                        //MessageBox.Show("Random connection found UP!");
+                                        MessageBox.Show("Random connection found!");
                                     }
                                 }
                             }
@@ -334,6 +334,8 @@ namespace circleEnvelope
                         Point vStitchLocal = new Point(vStitchPt.X - na.AABB.X, vStitchPt.Y - na.AABB.Y);
                         foreach (CPlacedArea.CAreaConnector con in na.arrConnections)
                         {
+                            //#TODO: check for random connections and stitch them! Remove following "break" if doing so or generalize...
+                            // IsAreaClear allows random connections but it could have a flag that would not allow that
                             if (con.pos == vStitchLocal)
                             {
                                 con.pConnectedArea = parent;

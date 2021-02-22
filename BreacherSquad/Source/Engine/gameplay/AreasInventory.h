@@ -24,6 +24,31 @@ public:
 	~CAreaSpecs()
 	{
 	}
+
+	bool GetBlockIsSet(Vec2i pos, EDir & retConnDir)
+	{
+		retConnDir = EDIR_NONE;
+		if ((pos.x < 0) || (pos.y < 0) || (pos.x >= sizeBL.x) || (pos.y >= sizeBL.y))
+		{
+			return false;
+		}
+		WCHAR retchar = strSpecs[pos.y * sizeBL.x + pos.x];
+		if (retchar == '0')
+			return false;
+		if (retchar == '1')
+			return true;
+
+		if (retchar == 'L')
+			retConnDir = EDIR_LEFT;
+		else if (retchar == 'U')
+			retConnDir = EDIR_UP;
+		else if (retchar == 'R')
+			retConnDir = EDIR_RIGHT;
+		else if (retchar == 'D')
+			retConnDir = EDIR_DOWN;
+
+		return true;
+	}
 };
 
 ///--------------------------------------------------------------------------
