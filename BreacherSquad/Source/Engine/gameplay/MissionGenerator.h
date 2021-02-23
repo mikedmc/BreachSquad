@@ -109,7 +109,7 @@ public:
 	CMissionGenerator();
 	~CMissionGenerator();
 	// Builds the inventory from available areas
-	void						BuildInventory();
+	void						BuildInventory(std::vector<CAreaSpecs>& arrAreas);
 	// Releases all areas descriptors
 	void						Release();
 
@@ -147,5 +147,7 @@ public:
 	bool						GenerateFromStory(CMissionStory* story);
 };
 
-//--- SINGLETON ---
+///----------------------------------------------------------------------------------
+/// Handles random missions generation
+///----------------------------------------------------------------------------------
 CMissionGenerator& UTGetMissionGen();

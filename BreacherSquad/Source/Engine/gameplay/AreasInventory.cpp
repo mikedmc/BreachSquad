@@ -42,6 +42,12 @@ void CAreasInventory::Release()
 }
 
 
+std::vector<CAreaSpecs> CAreasInventory::GetAreas()
+{
+	std::vector<CAreaSpecs> retArr(arrAreas);
+	return retArr;
+}
+
 ///----------------------------------------------------------------------------------
 /// SINGLETON
 ///----------------------------------------------------------------------------------

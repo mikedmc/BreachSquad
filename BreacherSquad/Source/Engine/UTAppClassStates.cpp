@@ -148,6 +148,10 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			FileManager::GetMediaPath(L"media/levels/stories/story1.story", xmlpath);
 			if (OP_FAILED(g_level.m_story.LoadStory(xmlpath)))
 				return;
+
+			// build inventory
+			UTGetMissionGen().BuildInventory(UTGetAreasInv().GetAreas());
+			//UTGetMissionGen().GenerateWithCorridorsWhenNeeded(4);
 		}
 		break;
 		case 4:

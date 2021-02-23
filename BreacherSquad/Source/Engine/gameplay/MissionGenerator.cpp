@@ -94,6 +94,15 @@ CMissionGenerator::~CMissionGenerator()
 	Release();
 }
 
+void CMissionGenerator::BuildInventory(std::vector<CAreaSpecs>& arrAreas)
+{
+	m_arrInventory.clear();
+	m_arrInventory.reserve(arrAreas.size());
+	for (auto area : arrAreas)
+	{
+		m_arrInventory.push_back(CInventoryArea(area, 20));
+	}
+}
 
 void CMissionGenerator::Release()
 {
