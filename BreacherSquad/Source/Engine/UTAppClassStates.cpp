@@ -150,7 +150,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				return;
 
 			// build inventory
-			UTGetMissionGen().BuildInventory(UTGetAreasInv().GetAreas());
+			//UTGetMissionGen().BuildInventory(UTGetAreasInv().GetAreas());
 			//UTGetMissionGen().GenerateWithCorridorsWhenNeeded(4);
 		}
 		break;

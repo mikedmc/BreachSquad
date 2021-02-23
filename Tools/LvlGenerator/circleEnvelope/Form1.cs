@@ -122,6 +122,50 @@ namespace circleEnvelope
                 return nCnt;
             }
 
+            // returns a string descriptor of the area
+            public string GetAreaDesc()
+            {
+                string retstr = "";
+                for (int yy = AABB.Y; yy < AABB.Bottom; yy++)
+                {
+                    for (int xx = AABB.X; xx < AABB.Right; xx++)
+                    {
+                        if (!blocks[xx][yy].bFilled)
+                        {
+                            retstr += '0';
+                            continue;
+                        }
+                        if (blocks[xx][yy].connectionDir == Form1.K_DIR_NONE)
+                        {
+                            retstr += '1';
+                            continue;
+                        }
+                        if (blocks[xx][yy].connectionDir == Form1.K_DIR_LEFT)
+                        {
+                            retstr += 'L';
+                            continue;
+                        }
+                        if (blocks[xx][yy].connectionDir == Form1.K_DIR_UP)
+                        {
+                            retstr += 'U';
+                            continue;
+                        }
+                        if (blocks[xx][yy].connectionDir == Form1.K_DIR_RIGHT)
+                        {
+                            retstr += 'R';
+                            continue;
+                        }
+                        if (blocks[xx][yy].connectionDir == Form1.K_DIR_DOWN)
+                        {
+                            retstr += 'D';
+                            continue;
+                        }
+                    }
+                }
+
+                return retstr;
+            }
+
             public void ComputeInternalData()
             {
                 int vMinX = size.Width, vMinY = size.Height;
@@ -1055,6 +1099,46 @@ namespace circleEnvelope
 
             RepaintArea(pbgr);
 
+        }
+
+        private void exportAreasXMLToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog dlg = new SaveFileDialog();
+            dlg.Filter = "XML Areas Inventory (*.xml)|*.xml||";
+            dlg.DefaultExt = "xml";
+            if (dlg.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            string strPath = dlg.FileName;
+            try
+            {
+                XmlTextWriter xw = new XmlTextWriter(strPath, null);
+                xw.Formatting = Formatting.Indented;
+                xw.WriteStartDocument();
+                // write areas
+                xw.WriteStartElement("Areas");
+                foreach (CAreaDesc area in m_arrAreas)
+                {
+                    xw.WriteStartElement("Area");
+
+                    xw.WriteAttributeString("File", area.strName);
+                    xw.WriteAttributeString("BlocksW", area.AABB.Width.ToString());
+                    xw.WriteAttributeString("BlocksH", area.AABB.Height.ToString());
+                    xw.WriteAttributeString("ConnectorsDesc", area.GetAreaDesc());
+                    xw.WriteAttributeString("Tags", area.strTags);
+
+                    xw.WriteEndElement();
+                }
+                xw.WriteEndElement();
+                // end document
+                xw.WriteEndDocument();
+                xw.Flush();
+                xw.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error exporting areas inventory! \n\n" + ex.Message);
+            }
         }
 
         private void saveStoryToolStripMenuItem_Click(object sender, EventArgs e)

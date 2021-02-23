@@ -1,3 +1,48 @@
 <?xml version="1.0"?>
-<Area File="area0" BlocksW="2" BlocksH="2" ConnectorsDesc="1U1R" Tags="hall" />
-<Area File="area1" BlocksW="2" BlocksH="2" ConnectorsDesc="1UL1" Tags="" />
+<Areas>
+  <Area File="stD" BlocksW="3" BlocksH="4" ConnectorsDesc="1111111110D0" Tags="start" />
+  <Area File="stR" BlocksW="4" BlocksH="3" ConnectorsDesc="1110111R1110" Tags="start" />
+  <Area File="stU" BlocksW="3" BlocksH="4" ConnectorsDesc="0U0111111111" Tags="start" />
+  <Area File="stL" BlocksW="4" BlocksH="3" ConnectorsDesc="0111L1110111" Tags="start" />
+  <Area File="cross" BlocksW="5" BlocksH="5" ConnectorsDesc="00U0001110L111R0111000D00" Tags="" />
+  <Area File="rUD" BlocksW="3" BlocksH="4" ConnectorsDesc="0U01111110D0" Tags="" />
+  <Area File="rLR" BlocksW="4" BlocksH="3" ConnectorsDesc="0110L11R0110" Tags="" />
+  <Area File="L_ul" BlocksW="5" BlocksH="5" ConnectorsDesc="000U10001100011L111111111" Tags="" />
+  <Area File="L_ur" BlocksW="5" BlocksH="5" ConnectorsDesc="1U00011000110001111R11111" Tags="" />
+  <Area File="L_dr" BlocksW="5" BlocksH="5" ConnectorsDesc="111111111R11000110001D000" Tags="" />
+  <Area File="L_dl" BlocksW="5" BlocksH="5" ConnectorsDesc="L1111111110001100011000D1" Tags="" />
+  <Area File="A2_23x18" BlocksW="3" BlocksH="1" ConnectorsDesc="L1R" Tags="hall" />
+  <Area File="A3_23x18" BlocksW="1" BlocksH="3" ConnectorsDesc="U1D" Tags="hall" />
+  <Area File="A4_23x18" BlocksW="7" BlocksH="5" ConnectorsDesc="011111R0111110L1111100111110000D000" Tags="" />
+  <Area File="A5_23x18" BlocksW="7" BlocksH="5" ConnectorsDesc="000U00001111100111110011111RL111110" Tags="" />
+  <Area File="A2_23x18" BlocksW="7" BlocksH="3" ConnectorsDesc="11111111111111D10001D" Tags="" />
+  <Area File="A3_23x18" BlocksW="7" BlocksH="3" ConnectorsDesc="U10001U11111111111111" Tags="" />
+  <Area File="A4_23x18" BlocksW="3" BlocksH="7" ConnectorsDesc="11R11111011011011111R" Tags="" />
+  <Area File="A5_23x18" BlocksW="3" BlocksH="7" ConnectorsDesc="L11111011011011111L11" Tags="" />
+  <Area File="A2_23x18" BlocksW="1" BlocksH="2" ConnectorsDesc="UD" Tags="hall" />
+  <Area File="A3_23x18" BlocksW="2" BlocksH="1" ConnectorsDesc="LR" Tags="hall" />
+  <Area File="A4_23x18" BlocksW="3" BlocksH="3" ConnectorsDesc="L1100100D" Tags="hall" />
+  <Area File="A5_23x18" BlocksW="3" BlocksH="3" ConnectorsDesc="11R100D00" Tags="hall" />
+  <Area File="A6_23x18" BlocksW="3" BlocksH="3" ConnectorsDesc="00U001L11" Tags="hall" />
+  <Area File="A7_23x18" BlocksW="3" BlocksH="3" ConnectorsDesc="U0010011R" Tags="hall" />
+  <Area File="A2_23x18" BlocksW="5" BlocksH="5" ConnectorsDesc="01U1011111110111111101D10" Tags="" />
+  <Area File="A2_23x18" BlocksW="5" BlocksH="5" ConnectorsDesc="0111011111L101R1111101110" Tags="" />
+  <Area File="A3_23x18" BlocksW="6" BlocksH="6" ConnectorsDesc="11001U110011111111111111110011D10011" Tags="" />
+  <Area File="A4_23x18" BlocksW="6" BlocksH="6" ConnectorsDesc="U1001111001111111111111111001111001D" Tags="" />
+  <Area File="A2_23x18" BlocksW="6" BlocksH="6" ConnectorsDesc="000U00011111011111L111110111110000D0" Tags="" />
+  <Area File="A3_23x18" BlocksW="6" BlocksH="6" ConnectorsDesc="00U00011111011111R111110111110000D00" Tags="" />
+  <Area File="A4_23x18" BlocksW="8" BlocksH="8" ConnectorsDesc="111111111111111111111111111111111111111101000010010000D00D000000" Tags="" />
+  <Area File="A2_23x18" BlocksW="6" BlocksH="3" ConnectorsDesc="111111L1111R111111" Tags="" />
+  <Area File="A3_23x18" BlocksW="3" BlocksH="6" ConnectorsDesc="1U11111111111111D1" Tags="" />
+  <Area File="A4_23x18" BlocksW="5" BlocksH="6" ConnectorsDesc="01U100111011111111110111001D10" Tags="" />
+  <Area File="A5_23x18" BlocksW="6" BlocksH="5" ConnectorsDesc="001100111111L1111R111111001100" Tags="" />
+  <Area File="A2_23x18" BlocksW="3" BlocksH="3" ConnectorsDesc="1111111D1" Tags="" />
+  <Area File="A3_23x18" BlocksW="3" BlocksH="3" ConnectorsDesc="111L11111" Tags="" />
+  <Area File="A4_23x18" BlocksW="3" BlocksH="3" ConnectorsDesc="1U1111111" Tags="" />
+  <Area File="A5_23x18" BlocksW="3" BlocksH="3" ConnectorsDesc="11111R111" Tags="" />
+  <Area File="A2_23x18" BlocksW="5" BlocksH="5" ConnectorsDesc="0011R11110L1110111100011R" Tags="" />
+  <Area File="RedDoorH" BlocksW="7" BlocksH="3" ConnectorsDesc="0011100L11111R0011100" Tags="red_door,special" />
+  <Area File="RedDoorV" BlocksW="3" BlocksH="7" ConnectorsDesc="0U00101111111110100D0" Tags="red_door,special" />
+  <Area File="RedKeyH" BlocksW="5" BlocksH="3" ConnectorsDesc="01110L101R01110" Tags="red_key,special" />
+  <Area File="RedKeyV" BlocksW="3" BlocksH="5" ConnectorsDesc="0U01111011110D0" Tags="red_key,special" />
+</Areas>

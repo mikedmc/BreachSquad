@@ -21,7 +21,8 @@ OPRESULT CAreasInventory::LoadAreasSpecs(WCHAR* strXMLPath)
 
 	Release();
 
-	for (pugi::xml_node bnode = doc.root().first_child(); bnode; bnode = bnode.next_sibling())
+	pugi::xml_node areasnode = doc.root().child(L"Areas");
+	for (pugi::xml_node bnode = areasnode.first_child(); bnode; bnode = bnode.next_sibling())
 	{
 		CAreaSpecs as;
 		as.sizeBL.x = bnode.attribute(L"BlocksW").as_int();
