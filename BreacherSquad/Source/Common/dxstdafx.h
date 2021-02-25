@@ -516,8 +516,8 @@ using namespace spine;
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 #endif
 ///--- game specific classes ---
-#include "gameplay/AreasInventory.h";
-#include "gameplay/MissionGenerator.h";
+#include "gameplay/AreasInventory.h"
+#include "gameplay/MissionGenerator.h"
 #include "Shop.h"
 #include "PlayerSelScr.h"
 #include "Level.h"

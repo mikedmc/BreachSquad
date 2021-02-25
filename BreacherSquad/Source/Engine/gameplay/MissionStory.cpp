@@ -58,6 +58,7 @@ bool CMissionStory::IsLoaded()
 
 CStoryRoom* CMissionStory::GetNextAvailableRoom(int nGeneration, int nParentID, bool bMarkAsUsed)
 {
+	LOG(L"Get room gen:%d parent:%d", nGeneration, nParentID);
 	if ((nGeneration < 0) || (nGeneration >= arrGenerations.size()))
 		return nullptr;
 	CStoryGeneration* gen = &arrGenerations[nGeneration];
@@ -66,7 +67,10 @@ CStoryRoom* CMissionStory::GetNextAvailableRoom(int nGeneration, int nParentID, 
 		if ((gen->arrRooms[kk].bUsed == false) && (gen->arrRooms[kk].nParentID == nParentID))
 		{
 			if (bMarkAsUsed)
+			{
 				gen->arrRooms[kk].bUsed = true;
+			}
+			LOG(L"ret room children:%d ID:%d", gen->arrRooms[kk].nChildren, gen->arrRooms[kk].nID);
 			return &gen->arrRooms[kk];
 		}
 	}
@@ -114,17 +118,22 @@ void CMissionStory::ComputeRelationshipsGraph()
 
 void CMissionStory::ClearChildEntries(int nGeneration, int nParentID)
 {
+	LOG(L"STORY::Clearing child entries gen:%d parent:%d", nGeneration, nParentID);
 	if ((nGeneration < 0) || (nGeneration >= arrGenerations.size()))
 		return;
 	for (auto room : arrGenerations[nGeneration].arrRooms)
 	{
 		if (room.nParentID == nParentID)
+		{
 			room.bUsed = false;
+			LOG(L"cleared ID:%d", room.nID);
+		}
 	}
 }
 
 void CMissionStory::ClearEntriesFromGeneration(int nGeneration)
 {
+	LOG(L"STORY::Clearing generation entries gen:%d ", nGeneration);
 	if ((nGeneration < 0) || (nGeneration >= arrGenerations.size()))
 		return;
 	for (int gen = nGeneration; gen < arrGenerations.size(); gen++)
@@ -132,6 +141,7 @@ void CMissionStory::ClearEntriesFromGeneration(int nGeneration)
 		for (int kk = 0; kk < arrGenerations[gen].arrRooms.size(); kk++)
 		{
 			arrGenerations[gen].arrRooms[kk].bUsed = false;
+			LOG(L"cleared ID:%d", arrGenerations[gen].arrRooms[kk].nID);
 		}
 	}
 }

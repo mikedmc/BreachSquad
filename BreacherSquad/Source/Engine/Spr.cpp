@@ -93,12 +93,12 @@ void CSpr::Init(CSpriteCollection *sprCollection, CHAR* strAnimID, Vec2 vPos, in
 	rotation = fRotation;
 }
 
-void CSpr::SetAnim(int animIdx, int frameIdx)
+void CSpr::SetAnim(int nAnimIdx, int nFrameIdx)
 {
-	animIdx = animIdx;
+	animIdx = nAnimIdx;
 
 	fTime = 0.0f;
-	frameIdx = frameIdx;
+	frameIdx = nFrameIdx;
 	animStatus = ANIM_JUST_STARTED;
 }
 
@@ -110,20 +110,20 @@ void CSpr::SetFrame(int nFrameIdx)
 }
 
 //seteaza animatia doar daca e alta
-void CSpr::SetAnimOnce(int animIdx, int frameIdx) 
+void CSpr::SetAnimOnce(int nAnimIdx, int nFrameIdx) 
 {
-	if((animIdx == animIdx) || (animIdx < 0))
+	if((animIdx == nAnimIdx) || (nAnimIdx < 0))
 		return;
 
-	animIdx = animIdx;
+	animIdx = nAnimIdx;
 
 	fTime = 0.0f;
-	frameIdx = frameIdx;
+	frameIdx = nFrameIdx;
 	animStatus = ANIM_JUST_STARTED;
 }
 
 
-void CSpr::SetAnim(CHAR* strAnimID, int frameIdx)
+void CSpr::SetAnim(CHAR* strAnimID, int nFrameIdx)
 {
 	animIdx = pSprCol->GetAnimationIdxByName(strAnimID);
 	if (animIdx < 0)
@@ -133,7 +133,7 @@ void CSpr::SetAnim(CHAR* strAnimID, int frameIdx)
 	}
 
 	fTime = 0.0f;
-	frameIdx = frameIdx;
+	frameIdx = nFrameIdx;
 	animStatus = ANIM_JUST_STARTED;
 }
 

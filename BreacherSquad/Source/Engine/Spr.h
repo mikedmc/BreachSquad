@@ -35,10 +35,10 @@ public:
 	void					Init(CSpriteCollection *sprCollection, int nAnimIdx, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
 	void					Init(CSpriteCollection *sprCollection, CHAR* strAnimID, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
 
-	void					SetAnim(int animIdx, int frameIdx = 0);
-	void					SetAnim(CHAR* strAnimID, int frameIdx = 0);
+	void					SetAnim(int nAnimIdx, int nFrameIdx = 0);
+	void					SetAnim(CHAR* strAnimID, int nFrameIdx = 0);
 	// Sets the animation only if it's not the current one
-	void					SetAnimOnce(int animIdx, int frameIdx = 0); 
+	void					SetAnimOnce(int nAnimIdx, int nFrameIdx = 0); 
 	void					SetFrame(int nFrameIdx);
 	
 	//RETURNS: AFrame flag - returns it only once when entering the frame. Used for sending events from the editor on each frame like footsteps and such

@@ -1,8 +1,5 @@
 #pragma once
 
-#define K_AREAINV_BLOCK_W	8
-#define K_AREAINV_BLOCK_H	8
-
 // Area specifications loaded from file
 // Each area is divided in logical blocks of 8x8 tiles 
 // Each block can have "connections" with neighbors. 

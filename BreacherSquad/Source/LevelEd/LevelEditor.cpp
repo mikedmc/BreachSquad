@@ -267,7 +267,7 @@ void CLevelEditor::IMGUI_ShowInterfaces()
 	}
 
 	{
-		ImGuiViewport * vp = ImGui::GetWindowViewport();
+		//ImGuiViewport * vp = ImGui::GetWindowViewport();
 
 		///--- TOOLS WINDOW
 		ImGui::Begin("Tools", null, ImGuiWindowFlags_NoNavInputs);

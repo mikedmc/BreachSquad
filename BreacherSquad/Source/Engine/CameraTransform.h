@@ -27,7 +27,7 @@ private:
 private:
 	RECTXYWH_F		m_Viewport;			//viewport-ul in care face trasformarile
 	float			fLocalTimeLine;
-	D3DXMATRIXA16	m_matView;
+	Mat				m_matView;
 
 	ECamAnimType	m_animType;			//tipul animatiei de look at
 	float			m_k1, m_k2;			//constante folosite la animatiile camerei	
@@ -107,7 +107,7 @@ public:
 	ECamMoveStatus  Update(float dTime, bool userHasInput = false, Vec3 inputDelta = Vec3(0.0f, 0.0f, 0.0f) );
 	///--- GET ---
 	//functiile GET trebuiesc chemate dupa Update
-	FORCEINLINE D3DXMATRIXA16 & GetViewTransform() { return m_matView; }
+	FORCEINLINE Mat & GetViewTransform() { return m_matView; }
 	FORCEINLINE const Vec3 & GetCamPos() const { return m_vecRealLookAt; }
 	/*!
 	 * \brief Gets the visible rectangle in world coordinates

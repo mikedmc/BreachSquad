@@ -473,7 +473,7 @@ bool CSpriteCollection::GetAFrameHitPointFlag(int animIdx, int frameIdx, int poi
 			}
 		}
 	}
-	return E_FAIL;
+	return false;
 }
 
 RECTXYWH CSpriteCollection::GetModuleRect(int animIdx, int frameIdx, int moduleIdx)

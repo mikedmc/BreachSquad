@@ -13,6 +13,10 @@
 // any of these tags will mean it's a hallway
 #define K_LGEN_TAGS_HALL_ANY			L"hall"
 
+#define K_LGEN_BLOCK_W	8
+#define K_LGEN_BLOCK_H	8
+
+
 // announce classes
 class CPlacedArea;
 
@@ -98,9 +102,9 @@ class CMissionGenerator
 {
 private:
 	CRandom						m_rand;				// RNG
-	RECTXYWH					m_levelAABB;		// level AABB after generation
+	RECTXYWH					m_levelAABB;		// level AABB after generation (in tiles)
 	
-	std::vector<CPlacedArea>	m_arrPlaced;		// placed CPlacedArea elements
+	std::vector<CPlacedArea*>	m_arrPlaced;		// placed CPlacedArea elements (keeps pointers as the array is highly dynamic and we need enduring pointers to elements)
 
 public:
 	std::vector<CInventoryArea> m_arrInventory;
@@ -140,11 +144,11 @@ public:
 	CPlacedArea*				PlaceStoryArea(CPlacedArea* parent, CAreaConnector* parentConn, int nGeneration, int nConnectionsMin, int nConnectionsMax, 
 												std::wstring strTagsAny = L"", std::wstring strTagsAll = L"", std::wstring strTagsNone = L"");
 
-	// Only adds corridors when children can't be placed
-	bool						GenerateWithCorridorsWhenNeeded(int maxDepth);
+	// Generates random level; Only adds corridors when children can't be placed
+	bool						GenerateLevelRandomly(int maxDepth);
 
 	// Only adds corridors when children can't be placed
-	bool						GenerateFromStory(CMissionStory* story);
+	bool						GenerateLevelFromStory(CMissionStory* story);
 };
 
 ///----------------------------------------------------------------------------------

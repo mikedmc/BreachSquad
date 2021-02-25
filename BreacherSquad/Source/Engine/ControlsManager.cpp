@@ -2248,7 +2248,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			{
 				float selperc = max(0.0f, 1.0f - fabs((float)ll - fSelectionCursor));
 				int nDisFlag = 1 << ll;
-				bool bDisabled = ((nDisabledFlags & nDisFlag) != 0);
+				bool bDisabledLocal = ((nDisabledFlags & nDisFlag) != 0);
 
 				WCHAR varname[MAX_PATH];
 				StringCchPrintf(varname, MAX_PATH, L"StringID%d", ll);
@@ -2274,7 +2274,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 					//and string
 					D3DXCOLOR exitcol;
 					D3DXColorLerp(&exitcol, &(D3DXCOLOR)dwFontColor, &(D3DXCOLOR)wcol, selperc);
-					if (bDisabled)
+					if (bDisabledLocal)
 						exitcol = D3DCOLOR_COLORALPHA((DWORD)exitcol, 0.5f);
 
 					D3DXVECTOR2 vTextOffset(selperc * 15.0f, 0.0f);
@@ -2445,7 +2445,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				nIconFrame1 = paramsDict.GetVariantByName(L"nIconFrame1")->m_asINT32;
 				nIconFrame2 = paramsDict.GetVariantByName(L"nIconFrame2")->m_asINT32;
 			}
-			DWORD dwColor = D3DCOLOR_FFFA(layer->alpha);
+			DWORD dwCol = D3DCOLOR_FFFA(layer->alpha);
 			//now paint
 			if (fontIdx >= 0)
 			{
@@ -2481,9 +2481,9 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 					RECTXYWH frrct(vPos.x - iconbox.w, vPos.y - iconbox.h / 2, BBox.w, iconbox.h);
 					frrct.Inflate(-1, -1);
 					if(bActive)
-						CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_BLACK4, frrct, dwColor);
+						CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_BLACK4, frrct, dwCol);
 					else
-						CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME6_DARK, frrct, dwColor);
+						CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME6_DARK, frrct, dwCol);
 
 					CSprite::paintFrame(m_pSprMgr, vPos.x - iconbox.w, vPos.y, animIdx, nIconFrame1);
 				}
@@ -2504,9 +2504,9 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 					RECTXYWH frrct(vPos.x - iconbox.w, vPos.y - iconbox.h / 2, BBox.w, iconbox.h);
 					frrct.Inflate(-1, -1);
 					if (bActive)
-						CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_BLACK4, frrct, dwColor);
+						CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_BLACK4, frrct, dwCol);
 					else
-						CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME6_DARK, frrct, dwColor);
+						CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME6_DARK, frrct, dwCol);
 
 					CSprite::paintFrame(m_pSprMgr, vPos.x - iconbox.w, vPos.y, animIdx, nIconFrame2);
 				}
@@ -2548,8 +2548,8 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			
 			if (fTimer < fBlinkTimer)
 			{
-				CVariantComplex* var = paramsDict.GetVariantByName(L"blinkColor");
-				if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
+				CVariantComplex* varc = paramsDict.GetVariantByName(L"blinkColor");
+				if (varc->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
 				{
 					textcol = var->m_asUINT32;
 				}
@@ -2839,8 +2839,8 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			float fAlpha = D3DCOLOR_GETFALPHA(dwColor);
 
 			D3DXMATRIXA16 mattrans;
-			RECTXYWH_F bbox = m_pSprMgr->GetAFrameBBox_real(animIdx, frameIdx);
-			D3DXMatrixAffineTransformation2D(&mattrans, UTGetAppClass().g_rectRender.h / bbox.h, NULL, 0.0f, &D3DXVECTOR2(0.0f, 0.0f));
+			RECTXYWH_F bboxl = m_pSprMgr->GetAFrameBBox_real(animIdx, frameIdx);
+			D3DXMatrixAffineTransformation2D(&mattrans, UTGetAppClass().g_rectRender.h / bboxl.h, NULL, 0.0f, &D3DXVECTOR2(0.0f, 0.0f));
 			layer->pControlsManager->m_pSprite->SetTransform(&mattrans);
 			CSprite::paintFrame(m_pSprMgr, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, frameIdx, D3DCOLOR_COLORALPHA(dwColor, fAlpha * layer->alpha));
 			layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
@@ -4392,9 +4392,9 @@ void CControlsManager::Update(float dTime)
 		if ((layer->statusFlags & CCTRL_STATUS_FLAG_REMOVED) != 0)
 			continue;
 		//update la toate controalele pe rand
-		for (int kk = 0; kk < layer->controls.GetSize(); kk++)
+		for (int ll = 0; ll < layer->controls.GetSize(); ll++)
 		{
-			layer->controls[kk]->Update(dTime, fLocalTimeline);
+			layer->controls[ll]->Update(dTime, fLocalTimeline);
 		}
 		//daca a fost blocant ies 
 		if (layer->bBlocking)

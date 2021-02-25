@@ -20,6 +20,7 @@ CPlacedArea::CPlacedArea(CInventoryArea* area, Vec2i vPos)
 	AABB.Set(vPos.x, vPos.y, area->areaSpecs.sizeBL.x, area->areaSpecs.sizeBL.y);
 	nGeneration = -1;
 	nID = -1;
+	nInventoryIdx = -1;
 	strAreaTags = area->areaSpecs.strTags;
 	strAreaFile = area->areaSpecs.strFilename;
 	areaSpecs = area->areaSpecs;
@@ -28,10 +29,11 @@ CPlacedArea::CPlacedArea(CInventoryArea* area, Vec2i vPos)
 	for (int kk = 0; kk < area->arrConnectors.size(); kk++)
 	{
 		CAreaConnector nc;
+		nc.dir = area->arrConnectors[kk].dir;
 		nc.pConnectedArea = null;
 		// bring connector position in placed area space:
-		nc.pos.x += vPos.x;
-		nc.pos.y += vPos.y;
+		nc.pos.x = area->arrConnectors[kk].pos.x;
+		nc.pos.y = area->arrConnectors[kk].pos.y;
 
 		arrConnections.push_back(nc);
 	}
@@ -47,22 +49,22 @@ CInventoryArea::CInventoryArea(CAreaSpecs as, int nTotalAvailable)
 		if (as.strSpecs[kk] == 'L')
 		{
 			nAreaConnDirFlags |= K_DIRFLAG_LEFT;
-			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_LEFT));
+			arrConnectors.push_back(CAreaConnector(Vec2i(kk % as.sizeBL.x, kk / as.sizeBL.x), EDIR_LEFT));
 		}
 		else if (as.strSpecs[kk] == 'U')
 		{
 			nAreaConnDirFlags |= K_DIRFLAG_UP;
-			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_UP));
+			arrConnectors.push_back(CAreaConnector(Vec2i(kk % as.sizeBL.x, kk / as.sizeBL.x), EDIR_UP));
 		}
 		else if (as.strSpecs[kk] == 'R')
 		{
 			nAreaConnDirFlags |= K_DIRFLAG_RIGHT;
-			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_RIGHT));
+			arrConnectors.push_back(CAreaConnector(Vec2i(kk % as.sizeBL.x, kk / as.sizeBL.x), EDIR_RIGHT));
 		}
 		else if (as.strSpecs[kk] == 'D')
 		{
 			nAreaConnDirFlags |= K_DIRFLAG_DOWN;
-			arrConnectors.push_back(CAreaConnector(Vec2i(kk / as.sizeBL.x, kk % as.sizeBL.y), EDIR_DOWN));
+			arrConnectors.push_back(CAreaConnector(Vec2i(kk % as.sizeBL.x, kk / as.sizeBL.x), EDIR_DOWN));
 		}
 	}
 }
@@ -71,10 +73,11 @@ CInventoryArea::CInventoryArea(CAreaSpecs as, int nTotalAvailable)
 std::vector<CAreaConnector*> CInventoryArea::GetMatchingConnectors(EDir dir)
 {
 	std::vector<CAreaConnector*> arrRet;
-	for (auto conn : arrConnectors)
+	for (int kk = 0; kk < arrConnectors.size(); kk++)
 	{
-		if (conn.dir == dir)
-			arrRet.push_back(&conn);
+		CAreaConnector* conn = &arrConnectors[kk];
+		if (conn->dir == dir)
+			arrRet.push_back(conn);
 	}
 	return arrRet;
 }
@@ -83,7 +86,7 @@ std::vector<CAreaConnector*> CInventoryArea::GetMatchingConnectors(EDir dir)
 CMissionGenerator::CMissionGenerator()
 {
 	m_rand.SetRandSeedTime();
-	m_arrPlaced.clear();
+	SAFE_DELETE_STDVEC(m_arrPlaced);
 	m_arrInventory.clear();
 	m_levelAABB.Set(0, 0, 0, 0);
 }
@@ -106,7 +109,7 @@ void CMissionGenerator::BuildInventory(std::vector<CAreaSpecs>& arrAreas)
 
 void CMissionGenerator::Release()
 {
-	m_arrPlaced.clear();
+	SAFE_DELETE_STDVEC(m_arrPlaced);
 	m_arrInventory.clear();
 }
 
@@ -114,24 +117,25 @@ void CMissionGenerator::Release()
 std::vector<CInventoryArea*> CMissionGenerator::FilterAreas(int nMinConnectors, int nMaxConnectors, int dirFlags, std::wstring strTagsAny /*= L""*/, std::wstring strTagsAll /*= L""*/, std::wstring strTagsNone /*= L""*/)
 {
 	std::vector<CInventoryArea*> retList;
-	for (auto iarea : m_arrInventory)
+	for (int kk = 0; kk < m_arrInventory.size() ; kk++)
 	{
-		if ((iarea.nAvailable > 0) &&
-			(iarea.arrConnectors.size() >= nMinConnectors) &&
-			(iarea.arrConnectors.size() <= nMaxConnectors) &&
-			((iarea.nAreaConnDirFlags & dirFlags) != 0))
+		CInventoryArea* iarea = &m_arrInventory[kk];
+		if ((iarea->nAvailable > 0) &&
+			(iarea->arrConnectors.size() >= nMinConnectors) &&
+			(iarea->arrConnectors.size() <= nMaxConnectors) &&
+			((iarea->nAreaConnDirFlags & dirFlags) != 0))
 		{
 			bool bAdd = true;
 			// check tags
-			if ((strTagsAny.length() > 0) && (!StringContainsAnyToken(iarea.areaSpecs.strTags, strTagsAny, L",")))
+			if ((strTagsAny.length() > 0) && (!StringContainsAnyToken(iarea->areaSpecs.strTags, strTagsAny, L",")))
 				bAdd = false;
-			if ((strTagsAll.length() > 0) && (!StringContainsAllTokens(iarea.areaSpecs.strTags, strTagsAll, L",")))
+			if ((strTagsAll.length() > 0) && (!StringContainsAllTokens(iarea->areaSpecs.strTags, strTagsAll, L",")))
 				bAdd = false;
-			if ((strTagsNone.length() > 0) && (StringContainsAnyToken(iarea.areaSpecs.strTags, strTagsNone, L",")))
+			if ((strTagsNone.length() > 0) && (StringContainsAnyToken(iarea->areaSpecs.strTags, strTagsNone, L",")))
 				bAdd = false;
 
 			if (bAdd)
-				retList.push_back(&iarea);
+				retList.push_back(iarea);
 		}
 	}
 
@@ -145,18 +149,18 @@ CAreaBlock CMissionGenerator::GetPlacedBlockDescAt(Vec2i vPos)
 
 	for (auto pa : m_arrPlaced)
 	{
-		if (!pa.AABB.Contains(vPos))
+		if (!pa->AABB.Contains(vPos))
 			continue;
 		// see if block is set
-		Vec2i vLocal(vPos.x - pa.AABB.x, vPos.y - pa.AABB.y);
+		Vec2i vLocal(vPos.x - pa->AABB.x, vPos.y - pa->AABB.y);
 		EDir retdir = EDIR_NONE;
-		bool bIsSet = pa.areaSpecs.GetBlockIsSet(vLocal, retdir);
+		bool bIsSet = pa->areaSpecs.GetBlockIsSet(vLocal, retdir);
 		// return true if block is set or check all blocks
 		if (bIsSet)
 		{
 			retab.eConnectionDir = retdir;
 			retab.bIsSet = true;
-			retab.pParentArea = &pa;
+			retab.pParentArea = pa;
 			return retab;
 		}
 	}
@@ -219,30 +223,35 @@ bool CMissionGenerator::IsZoneClear(CInventoryArea* iarea, Vec2i vPos)
 
 void CMissionGenerator::RemoveChildrenOf(CPlacedArea* parent)
 {
+	LOG(L"Remove children of %s", parent->strAreaFile.c_str());
 	// unlink parent's children
-	for (auto conn : parent->arrConnections)
+	for (int kk = 0; kk < parent->arrConnections.size() ; kk++)
 	{
+		auto conn = &parent->arrConnections[kk];
 		// removes only the children (not parents and same generation areas)
-		if ((conn.pConnectedArea != nullptr) && (conn.pConnectedArea->nGeneration > parent->nGeneration))
-			conn.pConnectedArea = null;
+		if ((conn->pConnectedArea != nullptr) && (conn->pConnectedArea->nGeneration > parent->nGeneration))
+			conn->pConnectedArea = nullptr;
 	}
 
 	for (int kk = m_arrPlaced.size() - 1; kk >= 0; kk--)
 	{
-		CPlacedArea* area = &m_arrPlaced[kk];
+		CPlacedArea* area = m_arrPlaced[kk];
 		// skip lower generation areas (parents)
 		if (area->nGeneration <= parent->nGeneration)
 			continue;
 
-		for (auto pconn : area->arrConnections)
+		for (int ll = 0; ll < area->arrConnections.size(); ll++)
 		{
-			if (pconn.pConnectedArea == nullptr)
+			auto pconn = &area->arrConnections[ll];
+			if (pconn->pConnectedArea == nullptr)
 				continue;
-			if (pconn.pConnectedArea == parent)
+			if (pconn->pConnectedArea == parent)
 			{
 				// put it back into inventory
+				_ASSERT((area->nInventoryIdx >= 0) && (area->nInventoryIdx < m_arrInventory.size()));
 				m_arrInventory[area->nInventoryIdx].nAvailable++;
 				//remove and break
+				SAFE_DELETE(m_arrPlaced[kk]);
 				m_arrPlaced.erase(m_arrPlaced.begin() + kk);
 				break;
 			}
@@ -257,24 +266,27 @@ void CMissionGenerator::RemoveGenerations(int nMinGeneration)
 	// unlink remaining generations from useless ones
 	for (auto area : m_arrPlaced)
 	{
-		if (area.nGeneration < nMinGeneration)
+		if (area->nGeneration < nMinGeneration)
 		{
-			for (auto conn : area.arrConnections)
+			for (int kk = 0; kk < area->arrConnections.size(); kk++)
 			{
-				if ((conn.pConnectedArea != null) && (conn.pConnectedArea->nGeneration >= nMinGeneration))
-					conn.pConnectedArea = null;
+				CAreaConnector* conn = &area->arrConnections[kk];
+				if ((conn->pConnectedArea != null) && (conn->pConnectedArea->nGeneration >= nMinGeneration))
+					conn->pConnectedArea = null;
 			}
 		}
 	}
 	// delete useless generations
 	for (int kk = m_arrPlaced.size() - 1; kk >= 0; kk--)
 	{
-		CPlacedArea* area = &m_arrPlaced[kk];
+		CPlacedArea* area = m_arrPlaced[kk];
 		if (area->nGeneration >= nMinGeneration)
 		{
 			// put it back into inventory
+			_ASSERT((area->nInventoryIdx >= 0) && (area->nInventoryIdx < m_arrInventory.size()));
 			m_arrInventory[area->nInventoryIdx].nAvailable++;
 			//remove and break
+			SAFE_DELETE(m_arrPlaced[kk]);
 			m_arrPlaced.erase(m_arrPlaced.begin() + kk);
 		}
 	}
@@ -296,10 +308,11 @@ int CMissionGenerator::GetInventoryIdx(CInventoryArea* iarea)
 std::vector<CPlacedArea*> CMissionGenerator::GetShuffledPlacedAreas(int nGeneration)
 {
 	std::vector<CPlacedArea*> retArr;
-	for (auto placed : m_arrPlaced)
+	for (int kk = 0; kk < m_arrPlaced.size(); kk++)
 	{
-		if (placed.nGeneration == nGeneration)
-			retArr.push_back(&placed);
+		CPlacedArea* placed = m_arrPlaced[kk];
+		if (placed->nGeneration == nGeneration)
+			retArr.push_back(placed);
 	}
 
 	m_rand.ShuffleStdVector(retArr, retArr.size() * 2);
@@ -311,10 +324,10 @@ std::vector<CPlacedArea*> CMissionGenerator::GetShuffledPlacedAreas(int nGenerat
 CPlacedArea* CMissionGenerator::PlaceStoryArea(CPlacedArea* parent, CAreaConnector* parentConn, int nGeneration, int nConnectionsMin, int nConnectionsMax, std::wstring strTagsAny /*= L""*/, std::wstring strTagsAll /*= L""*/, std::wstring strTagsNone /*= L""*/)
 {
 	int nDirFlag = K_DIRFLAG_ALL;
-	if (parentConn->dir == K_DIR_LEFT) nDirFlag = K_DIRFLAG_RIGHT;
-	if (parentConn->dir == K_DIR_UP) nDirFlag = K_DIRFLAG_DOWN;
-	if (parentConn->dir == K_DIR_RIGHT) nDirFlag = K_DIRFLAG_LEFT;
-	if (parentConn->dir == K_DIR_DOWN) nDirFlag = K_DIRFLAG_UP;
+	if (parentConn->dir == EDIR_LEFT) nDirFlag = K_DIRFLAG_RIGHT;
+	else if (parentConn->dir == EDIR_UP) nDirFlag = K_DIRFLAG_DOWN;
+	else if (parentConn->dir == EDIR_RIGHT) nDirFlag = K_DIRFLAG_LEFT;
+	else if (parentConn->dir == EDIR_DOWN) nDirFlag = K_DIRFLAG_UP;
 
 	Vec2i vDirOff = GetDirVec2i(parentConn->dir);
 	Vec2i vStitchPt(parentConn->pos.x + parent->AABB.x, parentConn->pos.y + parent->AABB.y);
@@ -348,28 +361,29 @@ CPlacedArea* CMissionGenerator::PlaceStoryArea(CPlacedArea* parent, CAreaConnect
 				// consume from inventory
 				iarea->nAvailable--;
 				// all good, add new area
-				CPlacedArea na(iarea, tryPos);
-				na.nGeneration = nGeneration;
+				CPlacedArea* na = new CPlacedArea(iarea, tryPos);
+				// point parent connection to this after adding it to the array
+				parentConn->pConnectedArea = na;
+				na->nGeneration = nGeneration;
 				// save reference so we can increase available items when removing the placed area
-				na.nInventoryIdx = GetInventoryIdx(iarea);
-				// point parent connection to this
-				parentConn->pConnectedArea = &na;
+				na->nInventoryIdx = GetInventoryIdx(iarea);
 				//make child point to parent too
-				Vec2i vStitchLocal(vStitchPt.x - na.AABB.x, vStitchPt.y - na.AABB.y);
-				for (CAreaConnector con : na.arrConnections)
+				Vec2i vStitchLocal(vStitchPt.x - na->AABB.x, vStitchPt.y - na->AABB.y);
+				for (int kk = 0; kk < na->arrConnections.size(); kk++)
 				{
+					CAreaConnector* con = &na->arrConnections[kk];
 					//#TODO: check for random connections and stitch them! Remove following "break" if doing so or generalize...
 					// IsAreaClear allows random connections but it could have a flag that would not allow that
-					if (con.pos == vStitchLocal)
+					if (con->pos == vStitchLocal)
 					{
-						con.pConnectedArea = parent;
+						con->pConnectedArea = parent;
 						break;
 					}
 				}
 
 				m_arrPlaced.push_back(na);
 
-				return &na;
+				return na;
 			}
 		}
 	}
@@ -378,11 +392,12 @@ CPlacedArea* CMissionGenerator::PlaceStoryArea(CPlacedArea* parent, CAreaConnect
 }
 
 
-bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
+bool CMissionGenerator::GenerateLevelRandomly(int maxDepth)
 {
 	LOG(L"Generating level - corridors when needed...");
 	Vec2i posStart(10000, 10000);
-	m_arrPlaced.clear();
+	SAFE_DELETE_STDVEC(m_arrPlaced);
+	m_arrPlaced.reserve(100);
 
 	bool bLevelGenerated = true;
 
@@ -392,8 +407,11 @@ bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
 		m_rand.ShuffleStdVector(availableList, availableList.size() * 2);
 		// place starting area:
 		CInventoryArea* selarea = availableList[0];
-		CPlacedArea pa(selarea, posStart);
+		CPlacedArea* pa = new CPlacedArea(selarea, posStart);
 		selarea->nAvailable--;
+		pa->nInventoryIdx = GetInventoryIdx(selarea);
+		pa->nGeneration = 0;
+		pa->nID = 0;
 		m_arrPlaced.push_back(pa);
 
 		int nMaxDepth = maxDepth;
@@ -405,7 +423,7 @@ bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
 			nLockWatchdog--;
 			if (nLockWatchdog < 0)
 			{
-				m_arrPlaced.clear();
+				SAFE_DELETE_STDVEC(m_arrPlaced);
 				bLevelGenerated = false;
 				ErrorBox(K_ERR_WARNING, L"Could not generate level! Deadlock!");
 				break;
@@ -440,7 +458,8 @@ bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
 						for (int ncon = 0; ncon < arrConn.size(); ncon++)
 						{
 							auto curcon = arrConn[ncon];
-							// Place random area tries to place all available items with future depth
+							//Place random area tries to place all available items with future depth
+							//#TODO: better min/max connections heuristic (distance from last split, add more splits, weighted randoms)
 							int nMinConn = 2, nMaxConn = 4;
 							if (placed->nGeneration + 1 == nMaxDepth)
 							{
@@ -499,12 +518,12 @@ bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
 			// AL GOOD, prepare next generation
 			if (bGenerationPlaced == true)
 			{
-				LOG(L"Generation placed! gen: %d", nCurrGeneration);
+				LOG(L"-- Generation placed! gen: %d", nCurrGeneration + 1);
 				nCurrGeneration++;
 			}
 			else
 			{
-				m_arrPlaced.clear();
+				SAFE_DELETE_STDVEC(m_arrPlaced);
 				bLevelGenerated = false;
 				nCurrGeneration = maxDepth; //force exit while
 				ErrorBox(K_ERR_WARNING, L"Could not generate level!");
@@ -521,26 +540,37 @@ bool CMissionGenerator::GenerateWithCorridorsWhenNeeded(int maxDepth)
 		Vec2i vMax(-1000000, -1000000);
 		for (auto pa : m_arrPlaced)
 		{
-			if (pa.AABB.x < vMin.x) vMin.x = pa.AABB.x;
-			if (pa.AABB.y < vMin.y) vMin.y = pa.AABB.y;
-			if (pa.AABB.Right() > vMax.x) vMax.x = pa.AABB.Right();
-			if (pa.AABB.Bottom() > vMax.y) vMax.y = pa.AABB.Bottom();
+			if (pa->AABB.x < vMin.x) vMin.x = pa->AABB.x;
+			if (pa->AABB.y < vMin.y) vMin.y = pa->AABB.y;
+			if (pa->AABB.Right() > vMax.x) vMax.x = pa->AABB.Right();
+			if (pa->AABB.Bottom() > vMax.y) vMax.y = pa->AABB.Bottom();
 		}
-
-		m_levelAABB.Set(vMin.x, vMin.y, vMax.x - vMin.x, vMax.y - vMin.y);
-		LOG(L"-- Level generation OK!");
+		// move all blocks to 0
+		for (auto pa : m_arrPlaced)
+		{
+			pa->AABB.Move(-vMin.x, -vMin.y);
+		}
+		vMax.x -= vMin.x; vMax.y -= vMin.y;
+		vMin.x = vMin.y = 0;
+		// compute final level aabb in tiles
+		m_levelAABB.Set(vMin.x * K_LGEN_BLOCK_W, vMin.y * K_LGEN_BLOCK_H, (vMax.x - vMin.x + 1) * K_LGEN_BLOCK_W, (vMax.y - vMin.y + 1) * K_LGEN_BLOCK_H);
+		LOG(L"-- Level generated OK!");
 	}
+
+	m_arrPlaced.shrink_to_fit();
 
 	return bLevelGenerated;
 }
 
 
-bool CMissionGenerator::GenerateFromStory(CMissionStory* story)
+bool CMissionGenerator::GenerateLevelFromStory(CMissionStory* story)
 {
 	_ASSERT(story != nullptr);
 	Vec2i posStart(10000, 10000);
 	LOG(L"Generating level from story..");
-	m_arrPlaced.clear();
+	SAFE_DELETE_STDVEC(m_arrPlaced);
+	//#TODO: reserve up to 100 rooms
+	m_arrPlaced.reserve(100);
 
 	bool bLevelGenerated = true;
 
@@ -548,7 +578,7 @@ bool CMissionGenerator::GenerateFromStory(CMissionStory* story)
 	// WARNING! story must have a single starting point!
 	int nStartChildren = pRoomStart->nChildren;
 	//get "start" flags... all of them
-	std:wstring strStartFlags = pRoomStart->tags_any;
+	std::wstring strStartFlags = pRoomStart->tags_any;
 
 	auto availableList = FilterAreas(nStartChildren, nStartChildren, K_DIRFLAG_ALL, strStartFlags);
 	if (availableList.size() > 0)
@@ -556,9 +586,11 @@ bool CMissionGenerator::GenerateFromStory(CMissionStory* story)
 		m_rand.ShuffleStdVector(availableList, availableList.size() * 2);
 		// place starting area:
 		CInventoryArea* selarea = availableList[0];
-		CPlacedArea pa(selarea, posStart);
-		pa.nID = pRoomStart->nID; //usually ID:0
+		CPlacedArea* pa = new CPlacedArea(selarea, posStart);
 		selarea->nAvailable--;
+		pa->nInventoryIdx = GetInventoryIdx(selarea);
+		pa->nGeneration = 0;
+		pa->nID = pRoomStart->nID; //usually ID:0 for first room
 		m_arrPlaced.push_back(pa);
 
 		int nLockWatchdog = K_LGEN_LOCK_WATCHDOG_COUNT;
@@ -568,13 +600,14 @@ bool CMissionGenerator::GenerateFromStory(CMissionStory* story)
 			nLockWatchdog--;
 			if (nLockWatchdog < 0)
 			{
-				m_arrPlaced.clear();
+				SAFE_DELETE_STDVEC(m_arrPlaced);
 				bLevelGenerated = false;
 				ErrorBox(K_ERR_WARNING, L"Could not generate level! Deadlock!");
 				break;
 			}
 			///--- place actual rooms (corridors must be excluded)
 			_ASSERT(nCurrGeneration < 50);
+
 			int generationTries = K_LGEN_TRIES_GENERATIONS;
 			bool bGenerationPlaced = false;
 			while ((generationTries > 0) && (bGenerationPlaced == false))
@@ -602,7 +635,7 @@ bool CMissionGenerator::GenerateFromStory(CMissionStory* story)
 						{
 							auto curcon = arrConn[ncon];
 							// get data from story
-							auto entry = story->GetNextAvailableRoom(placed->nGeneration + 1, placed->nID, true);
+							CStoryRoom* entry = story->GetNextAvailableRoom(placed->nGeneration + 1, placed->nID, false);
 							if (entry == nullptr)
 							{
 								ErrorBox(K_ERR_WARNING, L"Failed to get story area! generation=%d", placed->nGeneration + 1);
@@ -610,7 +643,6 @@ bool CMissionGenerator::GenerateFromStory(CMissionStory* story)
 								continue;
 							}
 							// if area does not specify any kind of flag then we avoid special areas by default
-							//#TODO: define special areas as #defines 
 							std::wstring strTagsAvoid = entry->tags_none;
 							if ((entry->tags_none.length() == 0) && (entry->tags_any.length() == 0) && (entry->tags_all.length() == 0))
 								strTagsAvoid = K_LGEN_TAGS_SPECIAL_AVOID;
@@ -679,15 +711,16 @@ bool CMissionGenerator::GenerateFromStory(CMissionStory* story)
 			// AL GOOD, prepare next generation
 			if (bGenerationPlaced == true)
 			{
+				LOG(L"-- Generation placed! gen: %d", nCurrGeneration + 1);
 				nCurrGeneration++;
 			}
 			else
 			{
-				m_arrPlaced.clear();
+				SAFE_DELETE_STDVEC(m_arrPlaced);
 				story->ClearEntriesFromGeneration(0);
 				bLevelGenerated = false;
 				nCurrGeneration = story->arrGenerations.size(); //force exit while
-				ErrorBox(K_ERR_WARNING, L"Could not generate level!");
+				ErrorBox(K_ERR_WARNING, L"Could not generate level from story!");
 				break;
 			}
 		}
@@ -696,20 +729,29 @@ bool CMissionGenerator::GenerateFromStory(CMissionStory* story)
 	m_levelAABB.Set(0, 0, 0, 0);
 	if (bLevelGenerated)
 	{
-		// find level AABB
+		// find level min/max coords
 		Vec2i vMin(1000000, 1000000);
 		Vec2i vMax(-1000000, -1000000);
 		for (auto pa : m_arrPlaced)
 		{
-			if (pa.AABB.x < vMin.x) vMin.x = pa.AABB.x;
-			if (pa.AABB.y < vMin.y) vMin.y = pa.AABB.y;
-			if (pa.AABB.Right() > vMax.x) vMax.x = pa.AABB.Right();
-			if (pa.AABB.Bottom() > vMax.y) vMax.y = pa.AABB.Bottom();
+			if (pa->AABB.x < vMin.x) vMin.x = pa->AABB.x;
+			if (pa->AABB.y < vMin.y) vMin.y = pa->AABB.y;
+			if (pa->AABB.Right() > vMax.x) vMax.x = pa->AABB.Right();
+			if (pa->AABB.Bottom() > vMax.y) vMax.y = pa->AABB.Bottom();
 		}
-
-		m_levelAABB.Set(vMin.x, vMin.y, vMax.x - vMin.x, vMax.y - vMin.y);
-		LOG(L"-- Level generation OK!");
+		// move all blocks to 0
+		for (auto pa : m_arrPlaced) 
+		{
+			pa->AABB.Move(-vMin.x, -vMin.y);
+		}
+		vMax.x -= vMin.x; vMax.y -= vMin.y;
+		vMin.x = vMin.y = 0;
+		// compute final level aabb in tiles
+		m_levelAABB.Set(vMin.x * K_LGEN_BLOCK_W, vMin.y * K_LGEN_BLOCK_H, (vMax.x - vMin.x + 1) * K_LGEN_BLOCK_W, (vMax.y - vMin.y + 1) * K_LGEN_BLOCK_H);
+		LOG(L"-- Level generated from story OK!");
 	}
+
+	m_arrPlaced.shrink_to_fit();
 
 	return bLevelGenerated;
 }

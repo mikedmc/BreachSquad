@@ -556,7 +556,7 @@ std::vector<std::wstring> TokenizeString(const std::wstring& str, const std::wst
 bool StringContainsAnyToken(const std::wstring& str, const std::wstring& strTokens, const std::wstring& tokensSeparator)
 {
 	std::vector<std::wstring> arrtokens = TokenizeString(strTokens, tokensSeparator);
-	for (int kk = 0; kk < arrtokens.size(); kk++)
+	for (size_t kk = 0; kk < arrtokens.size(); kk++)
 	{
 		std::size_t found = str.find(arrtokens[kk]);
 		if (found != std::string::npos)
@@ -568,8 +568,8 @@ bool StringContainsAnyToken(const std::wstring& str, const std::wstring& strToke
 bool StringContainsAllTokens(const std::wstring& str, const std::wstring& strTokens, const std::wstring& tokensSeparator)
 {
 	std::vector<std::wstring> arrtokens = TokenizeString(strTokens, tokensSeparator);
-	int nFound = 0;
-	for (int kk = 0; kk < arrtokens.size(); kk++)
+	size_t nFound = 0;
+	for (size_t kk = 0; kk < arrtokens.size(); kk++)
 	{
 		std::size_t found = str.find(arrtokens[kk]);
 		if (found != std::string::npos)
