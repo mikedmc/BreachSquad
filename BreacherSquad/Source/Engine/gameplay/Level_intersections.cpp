@@ -109,199 +109,36 @@ CCollisionShape* CLevel::ColShape_CAABB_Intersect_Arr(CAABB * aabbSrc, CCollisio
 }
 
 
-bool CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i *hitTilePosTL)
+CTile* CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i *hitTilePosTL)
 {
-	return false;
-	// Works by walking from tile to tile on slopes, on X axis and Y axis then finding the closest point
-	//#INFO: when going from right to left and bottom to top, if the end point is on the tile border it doesn't detect the intersection. Might happen to slow moving bullets but it should be fine.
-
-	//#TODO: de pus tileflags options la coliziuni
-	/*
-	Vec2i startTL((int)floor(vStart.x / K_TILE_SIZE), (int)floor(vStart.y / K_TILE_SIZE));
-	Vec2i endTL((int)floor(vEnd.x / K_TILE_SIZE), (int)floor(vEnd.y / K_TILE_SIZE));
-
-	// check if current start is non walkable
-	if (NIS_FLAG_ANY(tiles[startTL.x][startTL.y].flags, K_TILEFLAG_WALKABLE))
-		return false;
-
-	Vec2 vDir = vEnd - vStart;
-	float fDirLen = MUVec2Len(&vDir);
-	Vec2 vDirN = vDir / fDirLen;
-
-	bool bFoundV = false;
-	Vec2 vRetPtV(0.0f, 0.0f);
-	Vec2 vRetNrmV(0.0f, 0.0f);
-	Vec2i chktlV(0, 0);
-
-	if (startTL.x != endTL.x)
+	CAABB segAABB;
+	Vec2 vFrom = vStart;
+	Vec2 vTo = vEnd;
+	// selects all areas that can have positive hits and shortens the vector on collision so we always have the minimal one
+	CTile* rettile = nullptr;
+	for (auto area : m_arrAreas)
 	{
-		// find first vertical grid collisions
-		if (vDir.x < 0.0f)
+		segAABB.Set_Corrected(vFrom, vTo);
+		if (area->AABBbounds.Intersects(&segAABB))
 		{
-			float vLimit = max(0.0f, vEnd.x);
-			// distance to margin
-			float dstX = vStart.x - startTL.x * K_TILE_SIZE;
-			// find first intersection with vertical axes
-			float vecmul = dstX / fabs(vDirN.x);
-			Vec2 vFrom(vStart.x + vDirN.x * vecmul, vStart.y + vDirN.y * vecmul);
-			Vec2 vStep(SIGN(vDirN.x) * K_TILE_SIZE, vDirN.y * (K_TILE_SIZE / fabs(vDirN.x)));
-			// walk from tile to tile horizontally until destination
-			Vec2 vCur = vFrom;
-			// test collisions on left side
-			while (vCur.x >= vLimit)
+			Vec2 hitPt, hitN;
+			Vec2i hitTL;
+			CTile* tl = area->SegmentTilesIntersection(vStart, vEnd, hitPt, hitN, &hitTL);
+			if (tl != nullptr)
 			{
-				chktlV = Vec2i((int)((vCur.x - K_TILE_SIZE / 2.0f) / K_TILE_SIZE), (int)(vCur.y / K_TILE_SIZE));
-				//outside map?
-				if ((chktlV.y < 0) || (chktlV.y >= levelSizeTL.w))
-					break;
-
-				if (NIS_FLAG_ANY(tiles[chktlV.x][chktlV.y].flags, K_TILEFLAG_WALKABLE))
-				{
-					bFoundV = true;
-					vRetPtV = vCur;
-					vRetNrmV = Vec2(1.0f, 0.0f);
-					break;
-				}
-				vCur.x += vStep.x;
-				vCur.y += vStep.y;
-			}
-		}
-		else if (vDir.x > 0.0f)
-		{
-			float vLimit = min(vEnd.x, m_levelAABB.Right());
-			// distance to margin
-			float dstX = (startTL.x + 1) * K_TILE_SIZE - vStart.x;
-			// find first intersection with vertical axes
-			float vecmul = dstX / fabs(vDirN.x);
-			Vec2 vFrom(vStart.x + vDirN.x * vecmul, vStart.y + vDirN.y * vecmul);
-			Vec2 vStep(SIGN(vDirN.x) * K_TILE_SIZE, vDirN.y * (K_TILE_SIZE / fabs(vDirN.x)));
-			// walk from tile to tile horizontally until destination
-			Vec2 vCur = vFrom;
-			// test collisions on right side
-			while (vCur.x <= vLimit)
-			{
-				chktlV = Vec2i((int)((vCur.x + K_TILE_SIZE / 2.0f) / K_TILE_SIZE), (int)(vCur.y / K_TILE_SIZE));
-				//outside map?
-				if ((chktlV.y < 0) || (chktlV.y >= levelSizeTL.w))
-					break;
-				if (NIS_FLAG_ANY(tiles[chktlV.x][chktlV.y].flags, K_TILEFLAG_WALKABLE))
-				{
-					bFoundV = true;
-					vRetPtV = vCur;
-					vRetNrmV = Vec2(-1.0f, 0.0f);
-					break;
-				}
-				vCur.x += vStep.x;
-				vCur.y += vStep.y;
-			}
-		}
-	}
-
-	// Horizontal axes
-	bool	bFoundH = false;
-	Vec2	vRetPtH(0.0f, 0.0f);
-	Vec2	vRetNrmH(0.0f, 0.0f);
-	Vec2i	chktlH(0, 0);			// return hit tile pos
-	if (startTL.y != endTL.y)
-	{
-		// find first vertical grid collisions
-		if (vDir.y < 0.0f)
-		{
-			float vLimit = max(0.0f, vEnd.y);
-			// distance to margin
-			float dstY = vStart.y - startTL.y * K_TILE_SIZE;
-			// find first intersection with vertical axes
-			float vecmul = dstY / fabs(vDirN.y);
-			Vec2 vFrom(vStart.x + vDirN.x * vecmul, vStart.y + vDirN.y * vecmul);
-			Vec2 vStep(vDirN.x * (K_TILE_SIZE / fabs(vDirN.y)), SIGN(vDirN.y) * K_TILE_SIZE);
-			// walk from tile to tile horizontally until destination
-			Vec2 vCur = vFrom;
-			// test collisions on left side
-			while (vCur.y >= vLimit)
-			{	
-				chktlH = Vec2i((int)((vCur.x) / K_TILE_SIZE), (int)((vCur.y - K_TILE_SIZE / 2.0f) / K_TILE_SIZE));
-				//outside map?
-				if ((chktlH.x < 0) || (chktlH.x >= levelSizeTL.h))
-					break;
-				if (NIS_FLAG_ANY(tiles[chktlH.x][chktlH.y].flags, K_TILEFLAG_WALKABLE))
-				{
-					bFoundH = true;
-					vRetPtH = vCur;
-					vRetNrmH = Vec2(0.0f, 1.0f);
-					break;
-				}
-				vCur.x += vStep.x;
-				vCur.y += vStep.y;
-			}
-		}
-		else if (vDir.y > 0.0f)
-		{
-			float vLimit = min(vEnd.y, m_levelAABB.Bottom());
-			// distance to margin
-			float dstY = (startTL.y + 1) * K_TILE_SIZE - vStart.y;
-			// find first intersection with vertical axes
-			float vecmul = dstY / fabs(vDirN.y);
-			Vec2 vFrom(vStart.x + vDirN.x * vecmul, vStart.y + vDirN.y * vecmul);
-			Vec2 vStep(vDirN.x * (K_TILE_SIZE / fabs(vDirN.y)), SIGN(vDirN.y) * K_TILE_SIZE);
-			// walk from tile to tile horizontally until destination
-			Vec2 vCur = vFrom;
-			// test collisions on right side
-			while (vCur.y <= vLimit)
-			{
-				chktlH = Vec2i((int)((vCur.x) / K_TILE_SIZE), (int)((vCur.y + K_TILE_SIZE / 2) / K_TILE_SIZE));
-				//outside map?
-				if ((chktlH.x < 0) || (chktlH.x >= levelSizeTL.h))
-					break;
-				if (NIS_FLAG_ANY(tiles[chktlH.x][chktlH.y].flags, K_TILEFLAG_WALKABLE))
-				{
-					bFoundH = true;
-					vRetPtH = vCur;
-					vRetNrmH = Vec2(0.0f, -1.0f);
-					break;
-				}
-				vCur.x += vStep.x;
-				vCur.y += vStep.y;
+				// on collision shorten the vector so we elimintate areas that are farther away
+				rettile = tl;
+				retPoint = hitPt;
+				retNormal = hitN;
+				if (hitTilePosTL != nullptr)
+					*hitTilePosTL = hitTL;
+				// shorten the vector 
+				vTo = hitPt;
 			}
 		}
 	}
 
 
-	// return closest value
-	if (bFoundH && bFoundV)
-	{
-		float minH = MUVec2LenSq(&(vRetPtH - vStart));
-		float minV = MUVec2LenSq(&(vRetPtV - vStart));
-		if (minV < minH)
-		{
-			retPoint	= vRetPtV;
-			retNormal	= vRetNrmV;
-			if (hitTilePosTL) *hitTilePosTL = chktlV;
-		}
-		else
-		{
-			retPoint	= vRetPtH;
-			retNormal	= vRetNrmH;
-			if (hitTilePosTL) *hitTilePosTL = chktlH;
-		}
-		return true;
-	}
-	else if (bFoundH)
-	{
-		retPoint	= vRetPtH;
-		retNormal	= vRetNrmH;
-		if (hitTilePosTL) *hitTilePosTL = chktlH;
-		return true;
-	}
-	else if (bFoundV)
-	{
-		retPoint	= vRetPtV;
-		retNormal	= vRetNrmV;
-		if (hitTilePosTL) *hitTilePosTL = chktlV;
-		return true;
-	}
-
-	// no collisions
-	return false;
-	*/
+	return rettile;
 }
 

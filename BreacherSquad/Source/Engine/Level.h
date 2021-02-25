@@ -153,6 +153,10 @@ public:
 	OPRESULT				Areas_PaintLayer(eTileLayer layerIdx);
 	// Paints the shadow layer for visible areas
 	OPRESULT				Areas_PaintShadowLayer();
+	// Returns array of areas that intersect aabb
+	vector<CLevelArea*>		Areas_GetInRect(CAABB aabb);
+	// Returns area at point
+	CLevelArea*				Areas_GetAt(Vec2 vPos);
 
 	///--- TEMPLATES ---
 	CGrowableArray<CWeaponTemplate*>		m_arrTemplatesWeapon;
@@ -181,7 +185,7 @@ public:
 	// returns the first intersection of aabbSRC with a Collision Shape
 	CCollisionShape*		ColShape_CAABB_Intersect_Arr(CAABB * aabbSrc, CCollisionShape * arrBoxes[], int nBoxesCnt);
 	// returns segment intersection with tiles, starting form vStart
-	bool					SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i * hitTilePosTL = nullptr);
+	CTile*					SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i * hitTilePosTL = nullptr);
 
 	CGrowableArray<CProp*>	m_arrProps;					// objects list
 	CFixedArray<CProp*, 256>	m_arrPropsPtrInteract;	// array containing objects that you can interact with (for speed checks)
@@ -239,8 +243,6 @@ public:
 	// \returns false when can't be spawned safely
 	// \param rectProposed_ret - the proposed placing rectangle
 	bool					GetBestSpawningPos(Vec2 * vSpawn_ret, CAABB rectStart, CAABB * rectToAvoid = NULL);
-	// Tells you if the bbox overlaps interactive elements (is relatively slow)
-	bool					GetIsAreaNeutral(RECTXYWH_F rectArea);
 	///--- LIGHTS ---
 	CGrowableArray<CLight*> m_arrLights;				//array of lights
 	DWORD					m_colAmbientGlobal;			//global ambient color

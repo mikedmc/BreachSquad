@@ -60,6 +60,241 @@ bool CLevelArea::UpdateVisibility(RECTXYWH_F camRect)
 	return bVisible;
 }
 
+
+CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i *hitTilePosTL)
+{
+	// Works by walking from tile to tile on slopes, on X axis and Y axis then finding the closest point
+	//#INFO: when going from right to left and bottom to top, if the end point is on the tile border it doesn't detect the intersection. Might happen to slow moving bullets but it should be fine.
+
+	//#TODO: de pus tileflags options la coliziuni
+	// bring it in local space
+	Vec2i startTL((int)floor(vStart.x / K_TILE_SIZE), (int)floor(vStart.y / K_TILE_SIZE));
+	Vec2i endTL((int)floor(vEnd.x / K_TILE_SIZE), (int)floor(vEnd.y / K_TILE_SIZE));
+
+	Vec2i vMinTL(AABBbounds_TL.x, AABBbounds_TL.y);
+	Vec2i vMaxTL(AABBbounds_TL.x + AABBbounds_TL.w - 1, AABBbounds_TL.y + AABBbounds_TL.h - 1);
+	// check if current start is non walkable
+	if (AABBbounds_TL.Contains(startTL))
+	{
+		if (NIS_FLAG_ANY(tiles[startTL.x][startTL.y].flags, K_TILEFLAG_WALKABLE))
+			return nullptr;
+	}
+
+	Vec2 vDir = vEnd - vStart;
+	float fDirLen = MUVec2Len(&vDir);
+	Vec2 vDirN = vDir / fDirLen;
+
+	bool bFoundV = false;
+	Vec2 vRetPtV(0.0f, 0.0f);
+	Vec2 vRetNrmV(0.0f, 0.0f);
+	Vec2i chktlV(0, 0);
+
+	if (startTL.x != endTL.x)
+	{
+		// find first vertical grid collisions
+		if (vDir.x < 0.0f)
+		{
+			float vLimit = max(AABBbounds.vMin.x, vEnd.x);
+			// distance to margin
+			float dstX = vStart.x - startTL.x * K_TILE_SIZE;
+			// find first intersection with vertical axes
+			float vecmul = dstX / fabs(vDirN.x);
+			Vec2 vFrom(vStart.x + vDirN.x * vecmul, vStart.y + vDirN.y * vecmul);
+			Vec2 vStep(SIGN(vDirN.x) * K_TILE_SIZE, vDirN.y * (K_TILE_SIZE / fabs(vDirN.x)));
+			// walk from tile to tile horizontally until destination
+			Vec2 vCur = vFrom;
+			// test collisions on left side
+			while (vCur.x >= vLimit)
+			{
+				chktlV = Vec2i((int)((vCur.x - K_TILE_SIZE / 2.0f) / K_TILE_SIZE), (int)(vCur.y / K_TILE_SIZE));
+				//inside area?
+				if ((chktlV.y >= vMinTL.y) && (chktlV.y <= vMaxTL.y))
+				{
+					if (NIS_FLAG_ANY(tiles[chktlV.x - vMinTL.x][chktlV.y - vMinTL.y].flags, K_TILEFLAG_WALKABLE))
+					{
+						bFoundV = true;
+						vRetPtV = vCur;
+						vRetNrmV = Vec2(1.0f, 0.0f);
+						break;
+					}
+				}
+				vCur.x += vStep.x;
+				vCur.y += vStep.y;
+			}
+		}
+		else if (vDir.x > 0.0f)
+		{
+			float vLimit = min(vEnd.x, AABBbounds.vMax.x);
+			// distance to margin
+			float dstX = (startTL.x + 1) * K_TILE_SIZE - vStart.x;
+			// find first intersection with vertical axes
+			float vecmul = dstX / fabs(vDirN.x);
+			Vec2 vFrom(vStart.x + vDirN.x * vecmul, vStart.y + vDirN.y * vecmul);
+			Vec2 vStep(SIGN(vDirN.x) * K_TILE_SIZE, vDirN.y * (K_TILE_SIZE / fabs(vDirN.x)));
+			// walk from tile to tile horizontally until destination
+			Vec2 vCur = vFrom;
+			// test collisions on right side
+			while (vCur.x <= vLimit)
+			{
+				chktlV = Vec2i((int)((vCur.x + K_TILE_SIZE / 2.0f) / K_TILE_SIZE), (int)(vCur.y / K_TILE_SIZE));
+				//inside area?
+				if ((chktlV.y >= vMinTL.y) && (chktlV.y <= vMaxTL.y))
+				{
+					if (NIS_FLAG_ANY(tiles[chktlV.x - vMinTL.x][chktlV.y - vMinTL.y].flags, K_TILEFLAG_WALKABLE))
+					{
+						bFoundV = true;
+						vRetPtV = vCur;
+						vRetNrmV = Vec2(-1.0f, 0.0f);
+						break;
+					}
+				}
+				vCur.x += vStep.x;
+				vCur.y += vStep.y;
+			}
+		}
+	}
+
+	// Horizontal axes
+	bool	bFoundH = false;
+	Vec2	vRetPtH(0.0f, 0.0f);
+	Vec2	vRetNrmH(0.0f, 0.0f);
+	Vec2i	chktlH(0, 0);			// return hit tile pos
+	if (startTL.y != endTL.y)
+	{
+		// find first vertical grid collisions
+		if (vDir.y < 0.0f)
+		{
+			float vLimit = max(AABBbounds.vMin.y, vEnd.y);
+			// distance to margin
+			float dstY = vStart.y - startTL.y * K_TILE_SIZE;
+			// find first intersection with vertical axes
+			float vecmul = dstY / fabs(vDirN.y);
+			Vec2 vFrom(vStart.x + vDirN.x * vecmul, vStart.y + vDirN.y * vecmul);
+			Vec2 vStep(vDirN.x * (K_TILE_SIZE / fabs(vDirN.y)), SIGN(vDirN.y) * K_TILE_SIZE);
+			// walk from tile to tile horizontally until destination
+			Vec2 vCur = vFrom;
+			// test collisions on left side
+			while (vCur.y >= vLimit)
+			{
+				chktlH = Vec2i((int)((vCur.x) / K_TILE_SIZE), (int)((vCur.y - K_TILE_SIZE / 2.0f) / K_TILE_SIZE));
+				//inside area?
+				if ((chktlH.x >= vMinTL.x) && (chktlH.x <= vMaxTL.x))
+				{
+					if (NIS_FLAG_ANY(tiles[chktlH.x - vMinTL.x][chktlH.y - vMinTL.y].flags, K_TILEFLAG_WALKABLE))
+					{
+						bFoundH = true;
+						vRetPtH = vCur;
+						vRetNrmH = Vec2(0.0f, 1.0f);
+						break;
+					}
+				}
+				vCur.x += vStep.x;
+				vCur.y += vStep.y;
+			}
+		}
+		else if (vDir.y > 0.0f)
+		{
+			float vLimit = min(vEnd.y, AABBbounds.vMax.y);
+			// distance to margin
+			float dstY = (startTL.y + 1) * K_TILE_SIZE - vStart.y;
+			// find first intersection with vertical axes
+			float vecmul = dstY / fabs(vDirN.y);
+			Vec2 vFrom(vStart.x + vDirN.x * vecmul, vStart.y + vDirN.y * vecmul);
+			Vec2 vStep(vDirN.x * (K_TILE_SIZE / fabs(vDirN.y)), SIGN(vDirN.y) * K_TILE_SIZE);
+			// walk from tile to tile horizontally until destination
+			Vec2 vCur = vFrom;
+			// test collisions on right side
+			while (vCur.y <= vLimit)
+			{
+				chktlH = Vec2i((int)((vCur.x) / K_TILE_SIZE), (int)((vCur.y + K_TILE_SIZE / 2) / K_TILE_SIZE));
+				//inside area?
+				if ((chktlH.x >= vMinTL.x) && (chktlH.x <= vMaxTL.x))
+				{
+					if (NIS_FLAG_ANY(tiles[chktlH.x - vMinTL.x][chktlH.y - vMinTL.y].flags, K_TILEFLAG_WALKABLE))
+					{
+						bFoundH = true;
+						vRetPtH = vCur;
+						vRetNrmH = Vec2(0.0f, -1.0f);
+						break;
+					}
+				}
+				vCur.x += vStep.x;
+				vCur.y += vStep.y;
+			}
+		}
+	}
+
+
+	// return closest value
+	if (bFoundH && bFoundV)
+	{
+		float minH = MUVec2LenSq(&(vRetPtH - vStart));
+		float minV = MUVec2LenSq(&(vRetPtV - vStart));
+		if (minV < minH)
+		{
+			retPoint	= vRetPtV;
+			retNormal	= vRetNrmV;
+			if (hitTilePosTL) *hitTilePosTL = chktlV;
+			return &tiles[chktlV.x - vMinTL.x][chktlV.y - vMinTL.y];
+		}
+		else
+		{
+			retPoint	= vRetPtH;
+			retNormal	= vRetNrmH;
+			if (hitTilePosTL) *hitTilePosTL = chktlH;
+			return &tiles[chktlH.x - vMinTL.x][chktlH.y - vMinTL.y];
+		}
+	}
+	else if (bFoundH)
+	{
+		retPoint	= vRetPtH;
+		retNormal	= vRetNrmH;
+		if (hitTilePosTL) *hitTilePosTL = chktlH;
+		return &tiles[chktlH.x - vMinTL.x][chktlH.y - vMinTL.y];
+	}
+	else if (bFoundV)
+	{
+		retPoint	= vRetPtV;
+		retNormal	= vRetNrmV;
+		if (hitTilePosTL) *hitTilePosTL = chktlV;
+		return &tiles[chktlV.x - vMinTL.x][chktlV.y - vMinTL.y];
+	}
+
+	// no collisions
+	return nullptr;
+}
+
+
+
+int CLevelArea::GetTilesCollisionBoxes(RECTXYXY srcBoxTL, CAABB* ret_arrAABBs, int nArrCapacity)
+{
+	_ASSERT(ret_arrAABBs != nullptr);
+	int nAdded = 0;
+	// clamp src box to valid area
+	RECTXYXY box = srcBoxTL;
+	if (box.x1 < AABBbounds_TL.x) box.x1 = AABBbounds_TL.x;
+	if (box.y1 < AABBbounds_TL.y) box.y1 = AABBbounds_TL.y;
+	if (box.x2 > AABBbounds_TL.x + AABBbounds_TL.w - 1) box.x2 = AABBbounds_TL.x + AABBbounds_TL.w - 1;
+	if (box.y2 > AABBbounds_TL.y + AABBbounds_TL.h - 1) box.y2 = AABBbounds_TL.y + AABBbounds_TL.h - 1;
+	// bring to local space
+	box.Move(-AABBbounds_TL.x, -AABBbounds_TL.y);
+	//#TODO: should mix consecutive tiles into a single box as optimization, at least on horizontal
+	for (int yy = box.y1; yy <= box.y2; yy++)
+	{
+		for (int xx = box.x1; xx <= box.x2; xx++)
+		{
+			if ((tiles[xx][yy].flags & K_TILEFLAG_WALKABLE) == 0)
+			{
+				//#MAYBE: on release make it exit early  if over capacity
+				_ASSERT(nAdded < nArrCapacity);
+				ret_arrAABBs[nAdded++] = tiles[xx][yy].bbox;
+			}
+		}
+	}
+
+	return nAdded;
+}
+
 OPRESULT CLevelArea::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= NULL*/, void* pUserContext /*= NULL*/)
 {
 	V_OP_RET(areaMesh.OnCreateDevice(pDevice, pBBDesc, pUserContext));

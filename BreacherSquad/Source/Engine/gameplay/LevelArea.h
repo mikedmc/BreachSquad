@@ -39,6 +39,10 @@ public:
 	bool					UpdateVisibility(RECTXYWH_F camRect);
 	// orders building of the buffers
 	OPRESULT				BuildBuffers(PDEVICE pDevice, CSpriteCollection* pLightsSprCol);
+	// intersection of segment with tiles (nullptr if not intersecting)
+	CTile*					SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i *hitTilePosTL);
+	// writes the tiles that collide with the player in the ret_arrAABBs array. Returns number of added elements.
+	int						GetTilesCollisionBoxes(RECTXYXY srcBoxTL, CAABB* ret_arrAABBs, int nArrCapacity);
 
 public: //--- framework methods ---
 	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);

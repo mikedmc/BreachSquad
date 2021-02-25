@@ -140,6 +140,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			}
 
 			///--- level areas inventory ---
+			/*
 			FileManager::GetMediaPath(L"media/levels/areas/areas_list.xml", xmlpath);
 			if (OP_FAILED(UTGetAreasInv().LoadAreasSpecs(xmlpath)))
 				return;
@@ -153,6 +154,8 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			auto arrAreas = UTGetAreasInv().GetAreas();
 			UTGetMissionGen().BuildInventory(arrAreas);
 			UTGetMissionGen().GenerateLevelFromStory(&g_level.m_story);
+			//UTGetMissionGen().GenerateLevelRandomly(3);
+			*/
 		}
 		break;
 		case 4:

@@ -1323,46 +1323,6 @@ bool CLevel::GetBestSpawningPos(Vec2 * vSpawn_ret, CAABB rectStart, CAABB * rect
 	return true;
 }
 
-bool CLevel::GetIsAreaNeutral(RECTXYWH_F rectArea)
-{
-	CAABB bbox(rectArea);
-	//interactible active
-	for (int kk = 0; kk < m_arrProps.GetSize(); kk++)
-	{
-		CProp* pActiv = m_arrProps[kk];
-		if (!pActiv->bCanInteract)
-			continue;
-
-		if (pActiv->bbox.Intersects(&bbox))
-			return false;
-	}
-	//interactible actors
-	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
-	{
-		CActor* pAct = m_arrActors[kk];
-		if (!pAct->bCanInteract)
-			continue;
-
-		if (pAct->bbox.Intersects(&bbox))
-			return false;
-	}
-	//intersection with bboxes
-	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
-	{
-		CCollisionShape* pColl = m_arrColShapes[kk];
-		if ((pColl->type != K_LVL_COLL_TYPE_SOLID) && (pColl->type != K_LVL_COLL_TYPE_LADDER) && (pColl->type != K_LVL_COLL_TYPE_MOVING_PLATFORM))
-			continue;
-
-		if (pColl->bbox.Intersects(&bbox))
-			return false;
-	}
-
-	return true;
-}
-
-
-
-
 
 UINT32 CLevel::GenerateNextID()
 {
@@ -1851,6 +1811,27 @@ OPRESULT CLevel::Areas_PaintShadowLayer()
 		V_OP_RET(area->areaMesh.PaintShadowLayer());
 	}
 	return K_OP_OK;
+}
+
+std::vector<CLevelArea*> CLevel::Areas_GetInRect(CAABB aabb)
+{
+	vector<CLevelArea*> retarr;
+	for (auto area : m_arrAreas)
+	{
+		if (area->AABBbounds.Intersects(&aabb))
+			retarr.push_back(area);
+	}
+	return retarr;
+}
+
+CLevelArea* CLevel::Areas_GetAt(Vec2 vPos)
+{
+	for (auto area : m_arrAreas)
+	{
+		if (area->AABBbounds.PointIn(vPos))
+			return area;
+	}
+	return nullptr;
 }
 
 CWeaponTemplate* CLevel::GetTemplateWeapon(WCHAR * templateName)
@@ -6972,6 +6953,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		// bbox union in tile coords, including every touched tile
 		RECTXYXY boxUnionTiles(floor(boxUnion.vMin.x / K_TILE_SIZE_F), floor(boxUnion.vMin.y / K_TILE_SIZE_F),
 			ceil(boxUnion.vMax.x / K_TILE_SIZE_F), ceil(boxUnion.vMax.y / K_TILE_SIZE_F));
+		RECTXYWH boxUnionTilesWH(boxUnionTiles.x1, boxUnionTiles.y1, boxUnionTiles.x2 - boxUnionTiles.x1 + 1, boxUnionTiles.y2 - boxUnionTiles.y1 + 1);
 		//optional - to include more of the boxes
 		//boxUnion.Inflate(K_TILE_HSIZE, K_TILE_HSIZE);
 
@@ -6997,19 +6979,21 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			}
 		}
 		//add boxes from tiles
-		/*
-		for (int yy = boxUnionTiles.y1; yy <= boxUnionTiles.y2; yy++)
+		//#TODO: if it catches some corners sometimes try enlarging the tiles collision area (boxUnionTiles) by 1 tile in all directions
+		static CAABB retAABBs[64];
+		for (auto area : m_arrAreas)
 		{
-			for (int xx = boxUnionTiles.x1; xx <= boxUnionTiles.x2; xx++)
+			if (!area->AABBbounds_TL.Intersects(boxUnionTilesWH))
+				continue;
+			int nadded = area->GetTilesCollisionBoxes(boxUnionTiles, retAABBs, 64);
+			if (nadded > 0)
 			{
-				CTile* tl = &tiles[xx][yy];
-				if ((tl->flags & K_TILEFLAG_WALKABLE) == 0)
+				for (int oo = 0; oo < nadded; oo++)
 				{
-					tempCollBoxList.Add(tl->bbox);
+					tempCollBoxList.Add(retAABBs[oo]);
 				}
 			}
 		}
-		*/
 
 		/// COLLISION HANDLING
 
@@ -12030,7 +12014,8 @@ int CLevel::BuildLightVolume360(CLight * light, _VERTEX_PNCT4T4 *outVerts, int o
 	{
 		Vec2 vdir(cos(fAng), sin(fAng));
 		Vec2 vTo = vFrom + vdir * fMaxRad;
-		if (SegmentTilesIntersection(vFrom, vTo, vRetPt, vRetNrm, &tilePosTL))
+		CTile* pColTile = SegmentTilesIntersection(vFrom, vTo, vRetPt, vRetNrm, &tilePosTL);
+		if (pColTile)
 		{
 			// are we still on the same tile, same kind of collision? take a step back and overwrite last value
 			
@@ -12399,7 +12384,8 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 				// tiles collision
 				if (point->nFlagsCollision & K_LVL_PHYSP_COLLFLAG_TILES)
 				{
-					if (SegmentTilesIntersection(vFrom, vTo, collisionPoint, collisionNormal))
+					CTile* pColTile = SegmentTilesIntersection(vFrom, vTo, collisionPoint, collisionNormal);
+					if (pColTile)
 					{
 						bCollided = true;
 						contactT = K_COLLTYPE_TILE;

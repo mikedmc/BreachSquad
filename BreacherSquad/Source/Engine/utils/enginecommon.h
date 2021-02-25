@@ -189,7 +189,6 @@ public:
 	bool operator==(const SIZEWH_F &other) const { return (FLOATS_EQUAL(other.w, w, EPS) && FLOATS_EQUAL(other.h, h, EPS)); }
 };
 
-
 class RECTXYWH {
 public:
 	int x, y, w, h;
@@ -248,6 +247,13 @@ public:
 	inline bool Contains(Vec2i pt)
 	{
 		return ((pt.x >= x) && (pt.y >= y) && (pt.x < x + w) && (pt.y < y + h));
+	}
+
+	inline bool Intersects(const RECTXYWH& rhs)
+	{
+		if ((rhs.x >= x + w) || (rhs.x + rhs.w <= x) || (rhs.y >= y + h) || (rhs.y + rhs.h <= y))
+			return false;
+		return true;
 	}
 };
 
@@ -381,6 +387,12 @@ public:
 		CLAMP(x2, xmin, xmax);
 		CLAMP(y1, ymin, ymax);
 		CLAMP(y2, ymin, ymax);
+	}
+
+	void Move(int dx, int dy)
+	{
+		x1 -= dx; x2 -= dx;
+		y1 -= dy; y2 -= dy;
 	}
 };
 
