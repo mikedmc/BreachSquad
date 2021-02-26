@@ -33,8 +33,8 @@ public:
 	~CLevelArea();
 
 	void					Release();
-	// returns null if x,y outside valid area
-	CTile*					GetTile(int x, int y);
+	// returns null if x,y outside valid area. Coords in world space.
+	CTile*					GetTile(int xTL, int yTL);
 	// Updates the level area visibility and blocks visibility
 	bool					UpdateVisibility(RECTXYWH_F camRect);
 	// orders building of the buffers

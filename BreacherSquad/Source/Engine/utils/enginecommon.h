@@ -231,6 +231,29 @@ public:
 			return false;
 		return true;
 	}
+
+	// cuts the area outside of clampToThis
+	inline void Clamp(const RECTXYWH& clampToThis)
+	{
+		Vec2i vmin(x, y);
+		Vec2i vmax(x + w - 1, y + h - 1);
+
+		if (vmin.x < clampToThis.x) vmin.x = clampToThis.x;
+		if (vmin.y < clampToThis.y) vmin.y = clampToThis.y;
+		if (vmax.x >= clampToThis.x + clampToThis.w - 1) vmax.x = clampToThis.x + clampToThis.w - 1;
+		if (vmax.y >= clampToThis.y + clampToThis.h - 1) vmax.y = clampToThis.y + clampToThis.h - 1;
+
+		x = vmin.x; y = vmin.y;
+
+		if (vmax.x < vmin.x)
+			w = 0;
+		else
+			w = vmax.x - vmin.x + 1;
+		if (vmax.y < vmin.y)
+			h = 0;
+		else
+			h = vmax.y - vmin.y + 1;
+	}
 };
 
 class RECTXYWH_F {

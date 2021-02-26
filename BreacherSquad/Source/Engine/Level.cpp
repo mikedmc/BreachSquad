@@ -1687,17 +1687,18 @@ void CLevel::UpdateDirtyRects()
 		{
 			// take border tiles into account:
 			// clamp to smaller size because we check neighbours
-			RECTXYXY lrect = rect;
+			RECTXYWH lrect = rect;
+//			area->AABBbounds_TL.Intersects(
 			// clamp and bring rectangle to local space
-			lrect.Clamp(area->AABBbounds_TL.x, area->AABBbounds_TL.y, area->AABBbounds_TL.Right(), area->AABBbounds_TL.Bottom());
-			lrect.x1 -= area->AABBbounds_TL.x; lrect.x2 -= area->AABBbounds_TL.x;
-			lrect.y1 -= area->AABBbounds_TL.y; lrect.y2 -= area->AABBbounds_TL.y;
-			for (int yy = lrect.y1; yy <= lrect.y2; yy++)
-			{
-				for (int xx = lrect.x1; xx <= lrect.x2; xx++)
-				{
-					CTile* tl = &area->tiles[xx][yy];
+			lrect.Clamp(area->AABBbounds_TL);
+			if ((lrect.w == 0) || (lrect.h == 0))
+				continue;
 
+			for (int yy = lrect.y; yy < lrect.y + lrect.h; yy++)
+			{
+				for (int xx = lrect.x; xx < lrect.x + lrect.w; xx++)
+				{
+					CTile* tl = area->GetTile(xx, yy);
 					// neighbours
 					CTile* tlL = area->GetTile(xx - 1, yy);
 					CTile* tlR = area->GetTile(xx + 1, yy);

@@ -86,11 +86,11 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 	if (OP_SUCCESS(m_Painter.BeginMesh(m_ShadowMeshIdx)))
 	{
 		nCur = 0;
-		for (int yy = 0; yy < m_mapAreaTL.h; yy++)
+		for (int yy = 0; yy < mapSizeTL.h; yy++)
 		{
-			for (int xx = 0; xx < m_mapAreaTL.w; xx++)
+			for (int xx = 0; xx < mapSizeTL.w; xx++)
 			{
-				CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
+				CTile* tl = &map[xx][yy];
 				// skip non shadowed tiles
 				if (tl->nShadowFrame < 0)
 					continue;

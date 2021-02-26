@@ -83,7 +83,6 @@ public:
 		LogResult();
 	}
 
-
 	OPRESULT(eOpResult eCode, eOpSeverity eSeverity, WCHAR* szFormat, ...)
 	{
 		code = eCode;

@@ -137,7 +137,7 @@ public:
 	RECTXYWH_F				m_visibleArea;					// visible area, in pixels, world coords
 	RECTXYWH				m_visibleAreaTL;				// visible area in tiles
 
-	vector<RECTXYXY>		m_arrDirtyRectsTL;				// tiles that need updating
+	vector<RECTXYWH>		m_arrDirtyRectsTL;				// tiles that need updating
 	vector<CLevelArea*>		m_arrAreas;				// loaded areas
 	// Transforms mouse coordinates from screen space to game world (necessary for network play)
 	bool					NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue);
