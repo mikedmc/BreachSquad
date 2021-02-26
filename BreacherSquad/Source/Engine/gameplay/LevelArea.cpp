@@ -38,7 +38,7 @@ void CLevelArea::Release()
 	areaMesh.Release();
 }
 
-CTile* CLevelArea::GetTile(int xTL, int yTL)
+inline CTile* CLevelArea::GetTile(int xTL, int yTL)
 {
 	//#TODO: should return a generic empty tile??
 	if ((xTL < AABBbounds_TL.x) || (yTL < AABBbounds_TL.y) || (xTL >= AABBbounds_TL.x + AABBbounds_TL.w) || (yTL >= AABBbounds_TL.y + AABBbounds_TL.h))
@@ -74,9 +74,10 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 	Vec2i vMinTL(AABBbounds_TL.x, AABBbounds_TL.y);
 	Vec2i vMaxTL(AABBbounds_TL.x + AABBbounds_TL.w - 1, AABBbounds_TL.y + AABBbounds_TL.h - 1);
 	// check if current start is non walkable
-	if (AABBbounds_TL.Contains(startTL))
+	CTile* pstarttl = GetTile(startTL.x, startTL.y);
+	if (pstarttl != nullptr)
 	{
-		if (NIS_FLAG_ANY(tiles[startTL.x][startTL.y].flags, K_TILEFLAG_WALKABLE))
+		if (NIS_FLAG_ANY(pstarttl->flags, K_TILEFLAG_WALKABLE))
 			return nullptr;
 	}
 
@@ -107,17 +108,15 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 			while (vCur.x >= vLimit)
 			{
 				chktlV = Vec2i((int)((vCur.x - K_TILE_SIZE / 2.0f) / K_TILE_SIZE), (int)(vCur.y / K_TILE_SIZE));
-				//inside area?
-				if ((chktlV.y >= vMinTL.y) && (chktlV.y <= vMaxTL.y))
+				CTile* ptl = GetTile(chktlV.x, chktlV.y);
+				if ((ptl != nullptr) && (NIS_FLAG_ANY(ptl->flags, K_TILEFLAG_WALKABLE)))
 				{
-					if (NIS_FLAG_ANY(tiles[chktlV.x - vMinTL.x][chktlV.y - vMinTL.y].flags, K_TILEFLAG_WALKABLE))
-					{
-						bFoundV = true;
-						vRetPtV = vCur;
-						vRetNrmV = Vec2(1.0f, 0.0f);
-						break;
-					}
+					bFoundV = true;
+					vRetPtV = vCur;
+					vRetNrmV = Vec2(1.0f, 0.0f);
+					break;
 				}
+
 				vCur.x += vStep.x;
 				vCur.y += vStep.y;
 			}
@@ -137,16 +136,13 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 			while (vCur.x <= vLimit)
 			{
 				chktlV = Vec2i((int)((vCur.x + K_TILE_SIZE / 2.0f) / K_TILE_SIZE), (int)(vCur.y / K_TILE_SIZE));
-				//inside area?
-				if ((chktlV.y >= vMinTL.y) && (chktlV.y <= vMaxTL.y))
+				CTile* ptl = GetTile(chktlV.x, chktlV.y);
+				if ((ptl != nullptr) && (NIS_FLAG_ANY(ptl->flags, K_TILEFLAG_WALKABLE)))
 				{
-					if (NIS_FLAG_ANY(tiles[chktlV.x - vMinTL.x][chktlV.y - vMinTL.y].flags, K_TILEFLAG_WALKABLE))
-					{
-						bFoundV = true;
-						vRetPtV = vCur;
-						vRetNrmV = Vec2(-1.0f, 0.0f);
-						break;
-					}
+					bFoundV = true;
+					vRetPtV = vCur;
+					vRetNrmV = Vec2(-1.0f, 0.0f);
+					break;
 				}
 				vCur.x += vStep.x;
 				vCur.y += vStep.y;
@@ -177,17 +173,15 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 			while (vCur.y >= vLimit)
 			{
 				chktlH = Vec2i((int)((vCur.x) / K_TILE_SIZE), (int)((vCur.y - K_TILE_SIZE / 2.0f) / K_TILE_SIZE));
-				//inside area?
-				if ((chktlH.x >= vMinTL.x) && (chktlH.x <= vMaxTL.x))
+				CTile* ptl = GetTile(chktlH.x, chktlH.y);
+				if ((ptl != nullptr) && (NIS_FLAG_ANY(ptl->flags, K_TILEFLAG_WALKABLE)))
 				{
-					if (NIS_FLAG_ANY(tiles[chktlH.x - vMinTL.x][chktlH.y - vMinTL.y].flags, K_TILEFLAG_WALKABLE))
-					{
-						bFoundH = true;
-						vRetPtH = vCur;
-						vRetNrmH = Vec2(0.0f, 1.0f);
-						break;
-					}
+					bFoundH = true;
+					vRetPtH = vCur;
+					vRetNrmH = Vec2(0.0f, 1.0f);
+					break;
 				}
+
 				vCur.x += vStep.x;
 				vCur.y += vStep.y;
 			}
@@ -207,17 +201,15 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 			while (vCur.y <= vLimit)
 			{
 				chktlH = Vec2i((int)((vCur.x) / K_TILE_SIZE), (int)((vCur.y + K_TILE_SIZE / 2) / K_TILE_SIZE));
-				//inside area?
-				if ((chktlH.x >= vMinTL.x) && (chktlH.x <= vMaxTL.x))
+				CTile* ptl = GetTile(chktlH.x, chktlH.y);
+				if ((ptl != nullptr) && (NIS_FLAG_ANY(ptl->flags, K_TILEFLAG_WALKABLE)))
 				{
-					if (NIS_FLAG_ANY(tiles[chktlH.x - vMinTL.x][chktlH.y - vMinTL.y].flags, K_TILEFLAG_WALKABLE))
-					{
-						bFoundH = true;
-						vRetPtH = vCur;
-						vRetNrmH = Vec2(0.0f, -1.0f);
-						break;
-					}
+					bFoundH = true;
+					vRetPtH = vCur;
+					vRetNrmH = Vec2(0.0f, -1.0f);
+					break;
 				}
+
 				vCur.x += vStep.x;
 				vCur.y += vStep.y;
 			}

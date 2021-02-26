@@ -222,7 +222,7 @@ public:
 
 	inline bool Contains(Vec2i pt)
 	{
-		return ((pt.x >= x) && (pt.y >= y) && (pt.x < x + w) && (pt.y < y + h));
+		return ((pt.x >= x) && (pt.y >= y) && (pt.x < x + w - 1) && (pt.y < y + h - 1));
 	}
 
 	inline bool Intersects(const RECTXYWH& rhs)
