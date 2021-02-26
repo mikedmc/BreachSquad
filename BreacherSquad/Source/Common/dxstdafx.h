@@ -444,8 +444,8 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 ///--- enumerari ---
 #include "BitPacker.h"
 #include "utils/DataTypes.h"
-#include "utils/enginecommon.h"
 #include "utils/CMathUtil.h"
+#include "utils/enginecommon.h"
 #include "Caabb.h"
 #include "utils/CollisionAABB.h"
 #include "Randoms.h"

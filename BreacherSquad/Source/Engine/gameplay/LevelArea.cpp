@@ -281,8 +281,10 @@ int CLevelArea::GetTilesCollisionBoxes(RECTXYXY srcBoxTL, CAABB* ret_arrAABBs, i
 	//#TODO: should mix consecutive tiles into a single box as optimization, at least on horizontal
 	for (int yy = box.y1; yy <= box.y2; yy++)
 	{
+		_ASSERT((yy < sizeTL.h) && (yy >= 0));
 		for (int xx = box.x1; xx <= box.x2; xx++)
 		{
+			_ASSERT((xx < sizeTL.w) && (xx >= 0));
 			if ((tiles[xx][yy].flags & K_TILEFLAG_WALKABLE) == 0)
 			{
 				//#MAYBE: on release make it exit early  if over capacity

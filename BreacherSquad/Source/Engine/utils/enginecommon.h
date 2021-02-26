@@ -7,34 +7,10 @@
 
 //#define null NULL
 
-// changes a var between 2 limits
-#define inc_limit(var, step, limit) {if(var < (limit)) {var += step; if((var) > (limit)) var = limit;}}
-#define dec_limit(var, step, limit) {if(var > (limit)) {var -= step; if((var) < (limit)) var = limit;}}
-#define SIGN(var) (((var) < 0) ? -1:1)
-// sign or zero
-#define SIGNZ(var) ((var == 0)?0: (((var) < 0) ? -1 : 1))
-// invert a float that'sbetween 0  and 1
-#define INV_UNIT(var) (1.0f - var)
-// checks if floats are almost equal
-#define FLOATS_EQUAL(a, b, threshold) ((fabs((a) - (b)) < threshold)?true:false)
-// finds fractional part of float
-#define FLOAT_FRAC(a) (a - floor(a))
-// Acts like modulo but on float
-#define FLOAT_MOD(a, nModuloValue) ( (((int)floor(a)) % (int)(nModuloValue)) + (a - floor(a)) )
-// rounds a float to closest int value (kind of like casting to int)
-#define ROUND_FLOAT(x) (floor((x) + 0.5f))
-
 #define D3DCOLOR_FFFA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0xffffff)
 #define D3DCOLOR_XXXA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0x000000)
 #define D3DCOLOR_COLORALPHA(hexColor, fAlpha) (DWORD)(((int((fAlpha) * 255.0f)&0xff)<<24) | (hexColor & 0xffffff))
 #define D3DCOLOR_GETFALPHA(hexColor) ((float)((hexColor & 0xff000000) >> 24) / 255.0f)
-
-#define QUARTER_PI 0.7853981633f
-#define HALF_PI 1.57079632f
-#define DOUBLE_PI 6.283185307f
-#define PI 3.1415926536f
-//float minimum
-#define EPS 0.00001f
 
 // generic sides (corresponds to generic directions)
 #define K_SIDE_NONE -1
@@ -391,8 +367,8 @@ public:
 
 	void Move(int dx, int dy)
 	{
-		x1 -= dx; x2 -= dx;
-		y1 -= dy; y2 -= dy;
+		x1 += dx; x2 += dx;
+		y1 += dy; y2 += dy;
 	}
 };
 

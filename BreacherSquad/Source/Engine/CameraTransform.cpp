@@ -146,7 +146,7 @@ void CCameraTransform::ZoomToFitWorld()
 	//TODO: de implementat
 }
 
-Vec2	CCameraTransform::ScreenToWorld(Vec2 inPt, RECTXYWH_F *srcViewportOverride)
+Vec2 CCameraTransform::ScreenToWorld(Vec2 inPt, RECTXYWH_F *srcViewportOverride)
 {
 	RECTXYWH_F *view;
 	if (srcViewportOverride != NULL)
@@ -177,7 +177,7 @@ RECTXYWH_F CCameraTransform::ScreenToWorld(RECTXYWH_F inRect)
 	return RECTXYWH_F(retpos.x, retpos.y, nscale.x, nscale.y);
 }
 
-Vec2	CCameraTransform::WorldToScreen(Vec2 inPT, RECTXYWH_F *srcViewportOverride)
+Vec2 CCameraTransform::WorldToScreen(Vec2 inPT, RECTXYWH_F *srcViewportOverride)
 {
 	RECTXYWH_F *view;
 	if (srcViewportOverride != NULL)
@@ -206,12 +206,12 @@ RECTXYWH_F CCameraTransform::WorldToScreen(RECTXYWH_F inRect)
 	return RECTXYWH_F(vpos.x, vpos.y, percX * m_Viewport.w, percY * m_Viewport.h);
 }
 
-Vec2	CCameraTransform::ScreenToViewport(Vec2 inPt)
+Vec2 CCameraTransform::ScreenToViewport(Vec2 inPt)
 {
 	return Vec2(inPt.x - m_Viewport.x, inPt.y - m_Viewport.y);
 }
 
-Vec2	CCameraTransform::ViewportToScreen(Vec2 inPt)
+Vec2 CCameraTransform::ViewportToScreen(Vec2 inPt)
 {
 	return Vec2(inPt.x + m_Viewport.x, inPt.y + m_Viewport.y);
 }

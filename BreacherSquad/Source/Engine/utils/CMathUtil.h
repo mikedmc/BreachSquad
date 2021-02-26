@@ -1,19 +1,47 @@
 #pragma once
 
+#define			QUARTER_PI 0.7853981633f
+#define			HALF_PI 1.57079632f
+#define			DOUBLE_PI 6.283185307f
+#define			PI 3.1415926536f
+//float	minimum
+#define			EPS 0.00001f
+
 // Is any of the flags set?
-#define		IS_FLAG_ANY(x, flag)		( ((x) & (flag)) != 0 )
+#define			IS_FLAG_ANY(x, flag)		( ((x) & (flag)) != 0 )
 // Are ALL the flags set?
-#define		IS_FLAG_ALL(x, flag)		( ((x) & (flag)) == (flag) )
+#define			IS_FLAG_ALL(x, flag)		( ((x) & (flag)) == (flag) )
 // (NOT IS) make sure no flag is set
-#define		NIS_FLAG_ANY(x, flag)		( ((x) & (flag)) == 0 )
+#define			NIS_FLAG_ANY(x, flag)		( ((x) & (flag)) == 0 )
 // clears by mask
-#define		FLAGOP_CLEAR(x, flagsMask)  (x &= ~flagsMask)
+#define			FLAGOP_CLEAR(x, flagsMask)  (x &= ~flagsMask)
+
+// changes a var between 2 limits
+#define			inc_limit(var, step, limit) {if(var < (limit)) {var += step; if((var) > (limit)) var = limit;}}
+#define			dec_limit(var, step, limit) {if(var > (limit)) {var -= step; if((var) < (limit)) var = limit;}}
+#define			SIGN(var) (((var) < 0) ? -1:1)
+// sign or zero
+#define			SIGNZ(var) ((var == 0)?0: (((var) < 0) ? -1 : 1))
+// invert a float that'sbetween 0  and 1
+#define			INV_UNIT(var) (1.0f - var)
+// checks if floats are almost equal
+#define			FLOATS_EQUAL(a, b, threshold) ((fabs((a) - (b)) < threshold)?true:false)
+// finds fractional part of float
+#define			FLOAT_FRAC(a) (a - floor(a))
+// Acts like modulo but on float
+#define			FLOAT_MOD(a, nModuloValue) ( (((int)floor(a)) % (int)(nModuloValue)) + (a - floor(a)) )
+// rounds a float to closest int value (kind of like casting to int)
+#define			ROUND_FLOAT(x) (floor((x) + 0.5f))
+// clamps float to 1 decimal places
+#define			FLOAT_1DP(x) (floor(x * 10.0f) / 10.0f)
+#define			FLOAT_2DP(x) (floor(x * 100.0f) / 100.0f)
+#define			FLOAT_3DP(x) (floor(x * 1000.0f) / 1000.0f)
 
 // atan2 approximation const values
-#define ATAN2_PI_FLOAT		3.14159265f
-#define ATAN2_PIBY2_FLOAT	1.5707963f
-#define ONEQTR_PI			(M_PI / 4.0f);
-#define THRQTR_PI			(3.0f * M_PI / 4.0f);
+#define			ATAN2_PI_FLOAT		3.14159265f
+#define			ATAN2_PIBY2_FLOAT	1.5707963f
+#define			ONEQTR_PI			(M_PI / 4.0f);
+#define			THRQTR_PI			(3.0f * M_PI / 4.0f);
 
 namespace UTMath
 {
