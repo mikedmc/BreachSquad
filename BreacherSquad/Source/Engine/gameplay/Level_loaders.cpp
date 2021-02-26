@@ -308,7 +308,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 		for (int xx = 0; xx < areaW; xx++)
 		{
 			CTile* tl = &area->tiles[xx][yy];
-			tl->bbox.Set(xx * K_TILE_SIZE_F, yy * K_TILE_SIZE_F, (xx + 1) * K_TILE_SIZE_F, (yy + 1) * K_TILE_SIZE_F);
+			tl->bbox.Set((posTL.x + xx) * K_TILE_SIZE_F, (posTL.y + yy) * K_TILE_SIZE_F, (posTL.x + xx + 1) * K_TILE_SIZE_F, (posTL.y + yy + 1) * K_TILE_SIZE_F);
 			for (int kk = 0; kk < nLayersCnt; kk++)
 			{
 				//nivel

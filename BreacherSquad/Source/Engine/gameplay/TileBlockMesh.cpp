@@ -125,7 +125,7 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 
 	if (bIsEmpty)
 	{
-		return OPRESULT(K_OP_FAILED, K_SEVERITY_LOG, L"Empty block detected! pos:%d,%d ", m_mapAreaTL.x, m_mapAreaTL.y);
+		return OPRESULT(K_OP_OK_WARNING, K_SEVERITY_NONE, L"Empty block detected! pos:%d,%d ", m_mapAreaTL.x, m_mapAreaTL.y);
 	}
 	else
 	{
@@ -225,9 +225,6 @@ int CTileBlockMeshManager::UpdateVisibility(RECTXYWH_F camRect)
 
 OPRESULT CTileBlockMeshManager::PaintLayer(eTileLayer layerIdx)
 {
-	if (arrVisible.Count() <= 0)
-		return OPRESULT(K_OP_FAILED, L"No visible blocks to paint!", K_SEVERITY_NONE);
-
 	for (int kk = 0; kk < arrVisible.Count() ; kk++)
 	{
 		CTileBlockMesh* tbm = arrVisible[kk];
@@ -239,9 +236,6 @@ OPRESULT CTileBlockMeshManager::PaintLayer(eTileLayer layerIdx)
 
 OPRESULT CTileBlockMeshManager::PaintShadowLayer()
 {
-	if (arrVisible.Count() <= 0)
-		return OPRESULT(K_OP_FAILED, L"No visible blocks to paint!", K_SEVERITY_NONE);
-
 	for (int kk = 0; kk < arrVisible.Count(); kk++)
 	{
 		arrVisible[kk]->PaintShadowLayer(true);

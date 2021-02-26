@@ -50,7 +50,7 @@ CTile* CLevelArea::GetTile(int x, int y)
 bool CLevelArea::UpdateVisibility(RECTXYWH_F camRect)
 {
 	CAABB camAABB(camRect);
-	if (camAABB.Intersects(&camAABB))
+	if (AABBbounds.Intersects(&camAABB))
 		bVisible = true;
 	else
 		bVisible = false;

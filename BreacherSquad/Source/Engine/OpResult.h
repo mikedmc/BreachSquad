@@ -24,13 +24,13 @@ enum eOpResult {
 	K_OP_INVALIDARGS = -2,
 	K_OP_FAILED = -1,
 	K_OP_OK = 0,
+	K_OP_OK_WARNING = 1,	// success but with log output (warnings)
 };
 
 enum eOpSeverity {
 	K_SEVERITY_NONE = 0,
-	K_SEVERITY_LOG,
-	K_SEVERITY_WARNING,
-	K_SEVERITY_CRITICAL,
+	K_SEVERITY_WARNING = 1,
+	K_SEVERITY_CRITICAL = 2,
 };
 
 class OPRESULT {
@@ -62,8 +62,7 @@ public:
 		severity = eSeverity;
 		wcscpy_s(message, TEXT("No message"));
 
-		if (severity > K_SEVERITY_NONE)
-			LogResult();
+		LogResult();
 	}
 
 	OPRESULT(eOpResult eCode, const WCHAR * strMessage, eOpSeverity eSeverity = K_SEVERITY_NONE) 
@@ -72,8 +71,7 @@ public:
 		severity = eSeverity;
 		wcscpy_s(message, strMessage);
 
-		if (severity > K_SEVERITY_NONE)
-			LogResult();
+		LogResult();
 	}
 
 	OPRESULT(HRESULT hr, const WCHAR * strMessage, eOpSeverity eSeverity = K_SEVERITY_NONE)
@@ -82,8 +80,7 @@ public:
 		severity = eSeverity;
 		wsprintf(message, L"HRESULT[%d] %s", hr, strMessage);
 
-		if(severity > K_SEVERITY_NONE)
-			LogResult();
+		LogResult();
 	}
 
 
@@ -97,8 +94,7 @@ public:
 		wvsprintf(message, szFormat, marker);
 		va_end(marker);
 
-		if (severity > K_SEVERITY_NONE)
-			LogResult();
+		LogResult();
 	}
 
 
@@ -106,6 +102,10 @@ private:
 	// after setting all vars call this to show the return op onscreen
 	inline void LogResult()
 	{
+		// log nothing on OK codes
+		if (code == K_OP_OK)
+			return;
+
 		int nErrSeverity = K_ERR_LOG;
 		if (severity == K_SEVERITY_WARNING)
 			nErrSeverity = K_ERR_WARNING;

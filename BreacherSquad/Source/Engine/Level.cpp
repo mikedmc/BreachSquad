@@ -6940,6 +6940,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	Vec2 vPosIni = actor->pos;
 	UINT16 unCollFlags = 0;
 
+	///--- collision detection ---
 	{
 		///a.calculezi vectorul de miscare al actorului(viteza * dt + miscare paltforma daca e necesar)
 		Vec2 vNextMove = (actor->speed + actor->vSpeedImpulse) * dTime; // Add connected platform movement if needed
