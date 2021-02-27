@@ -64,6 +64,8 @@
             this.frontLayerGridToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.workshopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uploadSingleLevelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripSeparator();
+            this.playMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.butWndMaterials = new System.Windows.Forms.Button();
@@ -71,6 +73,14 @@
             this.butWndCollision = new System.Windows.Forms.Button();
             this.butWndObjects = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.radio_layer0 = new System.Windows.Forms.RadioButton();
+            this.chk_layer0 = new System.Windows.Forms.CheckBox();
+            this.radio_layer6 = new System.Windows.Forms.RadioButton();
+            this.chk_layer6 = new System.Windows.Forms.CheckBox();
+            this.radio_layer5 = new System.Windows.Forms.RadioButton();
+            this.chk_layer5 = new System.Windows.Forms.CheckBox();
+            this.radio_layer4 = new System.Windows.Forms.RadioButton();
+            this.chk_layer4 = new System.Windows.Forms.CheckBox();
             this.radio_layer3 = new System.Windows.Forms.RadioButton();
             this.chk_layer3 = new System.Windows.Forms.CheckBox();
             this.radio_layer2 = new System.Windows.Forms.RadioButton();
@@ -89,8 +99,6 @@
             this.chk_snapToGrid = new System.Windows.Forms.CheckBox();
             this.butWndPrefabs = new System.Windows.Forms.Button();
             this.timer_autosave = new System.Windows.Forms.Timer(this.components);
-            this.playMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -148,64 +156,64 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.newToolStripMenuItem.Text = "New";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(150, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(151, 6);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.openToolStripMenuItem.Text = "&Open...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.saveToolStripMenuItem.Text = "&Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.saveAsToolStripMenuItem.Text = "Save &As...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem6
             // 
             this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-            this.toolStripMenuItem6.Size = new System.Drawing.Size(150, 6);
+            this.toolStripMenuItem6.Size = new System.Drawing.Size(151, 6);
             // 
             // openPrefabToolStripMenuItem
             // 
             this.openPrefabToolStripMenuItem.Name = "openPrefabToolStripMenuItem";
-            this.openPrefabToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.openPrefabToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.openPrefabToolStripMenuItem.Text = "Edit Prefab...";
             this.openPrefabToolStripMenuItem.Click += new System.EventHandler(this.openPrefabToolStripMenuItem_Click);
             // 
             // exportPrefabToolStripMenuItem
             // 
             this.exportPrefabToolStripMenuItem.Name = "exportPrefabToolStripMenuItem";
-            this.exportPrefabToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.exportPrefabToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.exportPrefabToolStripMenuItem.Text = "Export Prefab...";
             this.exportPrefabToolStripMenuItem.Click += new System.EventHandler(this.exportPrefabToolStripMenuItem_Click);
             // 
             // toolStripMenuItem5
             // 
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(150, 6);
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(151, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -373,6 +381,18 @@
             this.uploadSingleLevelToolStripMenuItem.Text = "Mod Uploader...";
             this.uploadSingleLevelToolStripMenuItem.Click += new System.EventHandler(this.uploadSingleLevelToolStripMenuItem_Click);
             // 
+            // toolStripMenuItem8
+            // 
+            this.toolStripMenuItem8.Name = "toolStripMenuItem8";
+            this.toolStripMenuItem8.Size = new System.Drawing.Size(156, 6);
+            // 
+            // playMapToolStripMenuItem
+            // 
+            this.playMapToolStripMenuItem.Name = "playMapToolStripMenuItem";
+            this.playMapToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.playMapToolStripMenuItem.Text = "Play Map!";
+            this.playMapToolStripMenuItem.Click += new System.EventHandler(this.playMapToolStripMenuItem_Click);
+            // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -434,6 +454,14 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.radio_layer0);
+            this.groupBox1.Controls.Add(this.chk_layer0);
+            this.groupBox1.Controls.Add(this.radio_layer6);
+            this.groupBox1.Controls.Add(this.chk_layer6);
+            this.groupBox1.Controls.Add(this.radio_layer5);
+            this.groupBox1.Controls.Add(this.chk_layer5);
+            this.groupBox1.Controls.Add(this.radio_layer4);
+            this.groupBox1.Controls.Add(this.chk_layer4);
             this.groupBox1.Controls.Add(this.radio_layer3);
             this.groupBox1.Controls.Add(this.chk_layer3);
             this.groupBox1.Controls.Add(this.radio_layer2);
@@ -442,84 +470,180 @@
             this.groupBox1.Controls.Add(this.chk_layer1);
             this.groupBox1.Location = new System.Drawing.Point(3, 121);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(148, 89);
+            this.groupBox1.Size = new System.Drawing.Size(148, 184);
             this.groupBox1.TabIndex = 35;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Layers";
             // 
+            // radio_layer0
+            // 
+            this.radio_layer0.AutoSize = true;
+            this.radio_layer0.Location = new System.Drawing.Point(25, 17);
+            this.radio_layer0.Name = "radio_layer0";
+            this.radio_layer0.Size = new System.Drawing.Size(80, 17);
+            this.radio_layer0.TabIndex = 6;
+            this.radio_layer0.Text = "Below Floor";
+            this.radio_layer0.UseVisualStyleBackColor = true;
+            this.radio_layer0.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
+            // 
+            // chk_layer0
+            // 
+            this.chk_layer0.AutoSize = true;
+            this.chk_layer0.Checked = true;
+            this.chk_layer0.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chk_layer0.Location = new System.Drawing.Point(8, 19);
+            this.chk_layer0.Name = "chk_layer0";
+            this.chk_layer0.Size = new System.Drawing.Size(15, 14);
+            this.chk_layer0.TabIndex = 5;
+            this.chk_layer0.TabStop = false;
+            this.chk_layer0.UseVisualStyleBackColor = true;
+            this.chk_layer0.CheckedChanged += new System.EventHandler(this.chk_layer_CheckedChanged);
+            // 
+            // radio_layer6
+            // 
+            this.radio_layer6.AutoSize = true;
+            this.radio_layer6.Location = new System.Drawing.Point(25, 155);
+            this.radio_layer6.Name = "radio_layer6";
+            this.radio_layer6.Size = new System.Drawing.Size(78, 17);
+            this.radio_layer6.TabIndex = 6;
+            this.radio_layer6.Text = "Ceiling Top";
+            this.radio_layer6.UseVisualStyleBackColor = true;
+            this.radio_layer6.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
+            // 
+            // chk_layer6
+            // 
+            this.chk_layer6.AutoSize = true;
+            this.chk_layer6.Checked = true;
+            this.chk_layer6.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chk_layer6.Location = new System.Drawing.Point(8, 158);
+            this.chk_layer6.Name = "chk_layer6";
+            this.chk_layer6.Size = new System.Drawing.Size(15, 14);
+            this.chk_layer6.TabIndex = 5;
+            this.chk_layer6.TabStop = false;
+            this.chk_layer6.UseVisualStyleBackColor = true;
+            this.chk_layer6.CheckedChanged += new System.EventHandler(this.chk_layer_CheckedChanged);
+            // 
+            // radio_layer5
+            // 
+            this.radio_layer5.AutoSize = true;
+            this.radio_layer5.Location = new System.Drawing.Point(25, 132);
+            this.radio_layer5.Name = "radio_layer5";
+            this.radio_layer5.Size = new System.Drawing.Size(114, 17);
+            this.radio_layer5.TabIndex = 6;
+            this.radio_layer5.Text = "Ceiling Deco (OBJ)";
+            this.radio_layer5.UseVisualStyleBackColor = true;
+            this.radio_layer5.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
+            // 
+            // chk_layer5
+            // 
+            this.chk_layer5.AutoSize = true;
+            this.chk_layer5.Checked = true;
+            this.chk_layer5.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chk_layer5.Location = new System.Drawing.Point(8, 135);
+            this.chk_layer5.Name = "chk_layer5";
+            this.chk_layer5.Size = new System.Drawing.Size(15, 14);
+            this.chk_layer5.TabIndex = 5;
+            this.chk_layer5.TabStop = false;
+            this.chk_layer5.UseVisualStyleBackColor = true;
+            this.chk_layer5.CheckedChanged += new System.EventHandler(this.chk_layer_CheckedChanged);
+            // 
+            // radio_layer4
+            // 
+            this.radio_layer4.AutoSize = true;
+            this.radio_layer4.Location = new System.Drawing.Point(25, 109);
+            this.radio_layer4.Name = "radio_layer4";
+            this.radio_layer4.Size = new System.Drawing.Size(51, 17);
+            this.radio_layer4.TabIndex = 6;
+            this.radio_layer4.Text = "Walls";
+            this.radio_layer4.UseVisualStyleBackColor = true;
+            this.radio_layer4.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
+            // 
+            // chk_layer4
+            // 
+            this.chk_layer4.AutoSize = true;
+            this.chk_layer4.Checked = true;
+            this.chk_layer4.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chk_layer4.Location = new System.Drawing.Point(8, 112);
+            this.chk_layer4.Name = "chk_layer4";
+            this.chk_layer4.Size = new System.Drawing.Size(15, 14);
+            this.chk_layer4.TabIndex = 5;
+            this.chk_layer4.TabStop = false;
+            this.chk_layer4.UseVisualStyleBackColor = true;
+            this.chk_layer4.CheckedChanged += new System.EventHandler(this.chk_layer_CheckedChanged);
+            // 
             // radio_layer3
             // 
             this.radio_layer3.AutoSize = true;
-            this.radio_layer3.Location = new System.Drawing.Point(22, 63);
+            this.radio_layer3.Location = new System.Drawing.Point(25, 86);
             this.radio_layer3.Name = "radio_layer3";
-            this.radio_layer3.Size = new System.Drawing.Size(106, 17);
+            this.radio_layer3.Size = new System.Drawing.Size(84, 17);
             this.radio_layer3.TabIndex = 6;
-            this.radio_layer3.Text = "&3.Front (sections)";
+            this.radio_layer3.Text = "Floor deco 2";
             this.radio_layer3.UseVisualStyleBackColor = true;
-            this.radio_layer3.CheckedChanged += new System.EventHandler(this.radio_layer3_CheckedChanged);
+            this.radio_layer3.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
             // 
             // chk_layer3
             // 
             this.chk_layer3.AutoSize = true;
             this.chk_layer3.Checked = true;
             this.chk_layer3.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chk_layer3.Location = new System.Drawing.Point(5, 66);
+            this.chk_layer3.Location = new System.Drawing.Point(8, 89);
             this.chk_layer3.Name = "chk_layer3";
             this.chk_layer3.Size = new System.Drawing.Size(15, 14);
             this.chk_layer3.TabIndex = 5;
             this.chk_layer3.TabStop = false;
             this.chk_layer3.UseVisualStyleBackColor = true;
-            this.chk_layer3.CheckedChanged += new System.EventHandler(this.chk_layer3_CheckedChanged);
+            this.chk_layer3.CheckedChanged += new System.EventHandler(this.chk_layer_CheckedChanged);
             // 
             // radio_layer2
             // 
             this.radio_layer2.AutoSize = true;
-            this.radio_layer2.Location = new System.Drawing.Point(22, 40);
+            this.radio_layer2.Location = new System.Drawing.Point(25, 63);
             this.radio_layer2.Name = "radio_layer2";
-            this.radio_layer2.Size = new System.Drawing.Size(102, 17);
+            this.radio_layer2.Size = new System.Drawing.Size(84, 17);
             this.radio_layer2.TabIndex = 4;
-            this.radio_layer2.Text = "&2.Mid (no stains)";
+            this.radio_layer2.Text = "Floor deco 1";
             this.radio_layer2.UseVisualStyleBackColor = true;
-            this.radio_layer2.CheckedChanged += new System.EventHandler(this.radio_layer2_CheckedChanged);
+            this.radio_layer2.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
             // 
             // radio_layer1
             // 
             this.radio_layer1.AutoSize = true;
             this.radio_layer1.Checked = true;
-            this.radio_layer1.Location = new System.Drawing.Point(22, 17);
+            this.radio_layer1.Location = new System.Drawing.Point(25, 40);
             this.radio_layer1.Name = "radio_layer1";
-            this.radio_layer1.Size = new System.Drawing.Size(120, 17);
+            this.radio_layer1.Size = new System.Drawing.Size(77, 17);
             this.radio_layer1.TabIndex = 3;
             this.radio_layer1.TabStop = true;
-            this.radio_layer1.Text = "&1.Back (walls,blood)";
+            this.radio_layer1.Text = "Floor (OBJ)";
             this.radio_layer1.UseVisualStyleBackColor = true;
-            this.radio_layer1.CheckedChanged += new System.EventHandler(this.radio_layer1_CheckedChanged);
+            this.radio_layer1.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
             // 
             // chk_layer2
             // 
             this.chk_layer2.AutoSize = true;
             this.chk_layer2.Checked = true;
             this.chk_layer2.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chk_layer2.Location = new System.Drawing.Point(5, 42);
+            this.chk_layer2.Location = new System.Drawing.Point(8, 65);
             this.chk_layer2.Name = "chk_layer2";
             this.chk_layer2.Size = new System.Drawing.Size(15, 14);
             this.chk_layer2.TabIndex = 1;
             this.chk_layer2.TabStop = false;
             this.chk_layer2.UseVisualStyleBackColor = true;
-            this.chk_layer2.CheckedChanged += new System.EventHandler(this.chk_layer2_CheckedChanged);
+            this.chk_layer2.CheckedChanged += new System.EventHandler(this.chk_layer_CheckedChanged);
             // 
             // chk_layer1
             // 
             this.chk_layer1.AutoSize = true;
             this.chk_layer1.Checked = true;
             this.chk_layer1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chk_layer1.Location = new System.Drawing.Point(5, 19);
+            this.chk_layer1.Location = new System.Drawing.Point(8, 42);
             this.chk_layer1.Name = "chk_layer1";
             this.chk_layer1.Size = new System.Drawing.Size(15, 14);
             this.chk_layer1.TabIndex = 0;
             this.chk_layer1.TabStop = false;
             this.chk_layer1.UseVisualStyleBackColor = true;
-            this.chk_layer1.CheckedChanged += new System.EventHandler(this.chk_layer1_CheckedChanged);
+            this.chk_layer1.CheckedChanged += new System.EventHandler(this.chk_layer_CheckedChanged);
             // 
             // chk_showOverlappingTiles
             // 
@@ -619,7 +743,7 @@
             // 
             this.groupBox2.Controls.Add(this.chk_snapToGrid);
             this.groupBox2.Controls.Add(this.chk_showOverlappingTiles);
-            this.groupBox2.Location = new System.Drawing.Point(3, 216);
+            this.groupBox2.Location = new System.Drawing.Point(3, 311);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(148, 66);
             this.groupBox2.TabIndex = 40;
@@ -654,18 +778,6 @@
             this.timer_autosave.Enabled = true;
             this.timer_autosave.Interval = 300000;
             this.timer_autosave.Tick += new System.EventHandler(this.timer_autosave_Tick);
-            // 
-            // playMapToolStripMenuItem
-            // 
-            this.playMapToolStripMenuItem.Name = "playMapToolStripMenuItem";
-            this.playMapToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
-            this.playMapToolStripMenuItem.Text = "Play Map!";
-            this.playMapToolStripMenuItem.Click += new System.EventHandler(this.playMapToolStripMenuItem_Click);
-            // 
-            // toolStripMenuItem8
-            // 
-            this.toolStripMenuItem8.Name = "toolStripMenuItem8";
-            this.toolStripMenuItem8.Size = new System.Drawing.Size(156, 6);
             // 
             // Form1
             // 
@@ -762,6 +874,14 @@
         private System.Windows.Forms.ToolStripMenuItem frontLayerGridToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem8;
         private System.Windows.Forms.ToolStripMenuItem playMapToolStripMenuItem;
+        private System.Windows.Forms.RadioButton radio_layer0;
+        private System.Windows.Forms.CheckBox chk_layer0;
+        private System.Windows.Forms.RadioButton radio_layer6;
+        private System.Windows.Forms.CheckBox chk_layer6;
+        private System.Windows.Forms.RadioButton radio_layer5;
+        private System.Windows.Forms.CheckBox chk_layer5;
+        private System.Windows.Forms.RadioButton radio_layer4;
+        private System.Windows.Forms.CheckBox chk_layer4;
     }
 }
 

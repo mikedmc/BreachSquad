@@ -9,7 +9,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HexxEditor</RootNamespace>
-    <AssemblyName>ActionSquadEd</AssemblyName>
+    <AssemblyName>BreachEd</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ApplicationIcon>KnockEd.ico</ApplicationIcon>

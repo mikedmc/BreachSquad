@@ -36,10 +36,25 @@ namespace HexxEditor
         public const byte K_MISSION_TYPE_ARREST_WARRANT = 3;
 
         //layers
+        /*
         public const int K_LAYER_BACK = 0;
         public const int K_LAYER_MID = 1;
         public const int K_LAYER_FRONT = 2;
         public const int K_LAYERS_CNT = 3;
+        */
+
+        enum ELayer
+        {
+            UNDER_FLOOR = 0,
+            FLOOR = 1,
+            FLOOR_DECO1,
+            FLOOR_DECO2,
+            WALLS,
+            CEILING_DECO,
+            CEILING,
+
+            LAYERS_CNT
+        };
 
         // directii generice
         public const int K_DIR_NONE = 0;
@@ -152,9 +167,10 @@ namespace HexxEditor
             return strExePath;
         }
 
-        public int g_selectedLayer = K_LAYER_BACK;
+        public int g_selectedLayer = (int)ELayer.FLOOR;
         public byte g_missionType = K_MISSION_TYPE_ELIMINATE_ALL;
-        CheckBox[] layers_checkboxes = new CheckBox[K_LAYERS_CNT];
+        CheckBox[] layers_checkboxes;
+        RadioButton[] layers_radios;
         //picturebox data
         Image pbImg;
         Graphics pbGr;
@@ -987,7 +1003,7 @@ namespace HexxEditor
                 flags = 0;
                 animIdx = frameIdx = 0;
                 pos.X = pos.Y = 0;
-                layer = K_LAYER_BACK;
+                layer = (int)ELayer.FLOOR;
 
                 logic = new CBehaviorContainer();
             }
@@ -1306,7 +1322,7 @@ namespace HexxEditor
 
             public bool IsEmpty()
             {
-                for (int kk = 0; kk < K_LAYERS_CNT; kk++)
+                for (int kk = 0; kk < (int)ELayer.LAYERS_CNT; kk++)
                 {
                     if (tileID[kk] >= 0)
                         return false;
@@ -1316,8 +1332,8 @@ namespace HexxEditor
 
             public CTile()
             {
-                tileID = new int[K_LAYERS_CNT];
-                for (int kk = 0; kk < K_LAYERS_CNT; kk++)
+                tileID = new int[(int)ELayer.LAYERS_CNT];
+                for (int kk = 0; kk < (int)ELayer.LAYERS_CNT; kk++)
                 {
                     tileID[kk] = -1;
                 }
@@ -1374,33 +1390,34 @@ namespace HexxEditor
             // returns true if it  has walkable tiles on specified extremity
             public bool HasConnectionOnSide(int eDirection)
             {
+                //#TODO: sa ia in considerare toate layerele de floor nu doar primul (pentru cand ai tranzitii)
                 switch (eDirection)
                 {
                     case K_DIR_UP:
                         for (int kk = 0; kk < BLOCK_W; kk++)
                         {
-                            if (tiles[kk, 0].tileID[K_LAYER_BACK] >= 0)
+                            if (tiles[kk, 0].tileID[(int)ELayer.FLOOR] >= 0)
                                 return true;
                         }
                         break;
                     case K_DIR_DOWN:
                         for (int kk = 0; kk < BLOCK_W; kk++)
                         {
-                            if (tiles[kk, BLOCK_H - 1].tileID[K_LAYER_BACK] >= 0)
+                            if (tiles[kk, BLOCK_H - 1].tileID[(int)ELayer.FLOOR] >= 0)
                                 return true;
                         }
                         break;
                     case K_DIR_LEFT:
                         for (int kk = 0; kk < BLOCK_W; kk++)
                         {
-                            if (tiles[0, kk].tileID[K_LAYER_BACK] >= 0)
+                            if (tiles[0, kk].tileID[(int)ELayer.FLOOR] >= 0)
                                 return true;
                         }
                         break;
                     case K_DIR_RIGHT:
                         for (int kk = 0; kk < BLOCK_W; kk++)
                         {
-                            if (tiles[BLOCK_W - 1, kk].tileID[K_LAYER_BACK] >= 0)
+                            if (tiles[BLOCK_W - 1, kk].tileID[(int)ELayer.FLOOR] >= 0)
                                 return true;
                         }
                         break;
@@ -1421,7 +1438,7 @@ namespace HexxEditor
                     {
                         for (int ll = 0; ll < BLOCK_H; ll++)
                         {
-                            for (int mm = 0; mm < K_LAYERS_CNT; mm++)
+                            for (int mm = 0; mm < (int)ELayer.LAYERS_CNT; mm++)
                             {
                                 tiles_undo[kk, ll].tileID[mm] = tiles[kk, ll].tileID[mm];
                             }
@@ -1445,7 +1462,7 @@ namespace HexxEditor
                     {
                         for (int ll = 0; ll < BLOCK_H; ll++)
                         {
-                            for (int mm = 0; mm < K_LAYERS_CNT; mm++)
+                            for (int mm = 0; mm < (int)ELayer.LAYERS_CNT; mm++)
                             {
                                 tiles[kk, ll].tileID[mm] = tiles_undo[kk, ll].tileID[mm];
                             }
@@ -1599,7 +1616,7 @@ namespace HexxEditor
 
             tb.graphics.Clear(Color.Transparent);
 
-            for (int layer = 0; layer < K_LAYERS_CNT; layer++)
+            for (int layer = 0; layer < (int)ELayer.LAYERS_CNT; layer++)
             {
                 for (int yy = 0; yy < BLOCK_H; yy++)
                 {
@@ -1634,7 +1651,7 @@ namespace HexxEditor
 
         public void MoveSelectionToLayer(Rectangle selRectTL, int toLayer)
         {
-            if ((toLayer < 0) || (toLayer >= K_LAYERS_CNT) || (toLayer == g_selectedLayer))
+            if ((toLayer < 0) || (toLayer >= (int)ELayer.LAYERS_CNT) || (toLayer == g_selectedLayer))
                 return;
             //clear undo state before operation
             gMap.Undo_ClearUndo();
@@ -1690,7 +1707,7 @@ namespace HexxEditor
 
             if (allVisibleLayers)
             {
-                for (int kk = 0; kk < K_LAYERS_CNT; kk++)
+                for (int kk = 0; kk < (int)ELayer.LAYERS_CNT; kk++)
                 {
                     for (int yy = 0; yy < selRectTL.Height; yy++)
                     {
@@ -1732,7 +1749,7 @@ namespace HexxEditor
 
             if (allVisibleLayers)
             {
-                for (int kk = 0; kk < K_LAYERS_CNT; kk++)
+                for (int kk = 0; kk < (int)ELayer.LAYERS_CNT; kk++)
                 {
                     if (!layers_checkboxes[kk].Checked)
                         continue;
@@ -1816,7 +1833,7 @@ namespace HexxEditor
                 {
                     CTileBlock tb = gMap.Blocks[kk] as CTileBlock;
 
-                    for (int layer = 0; layer < K_LAYERS_CNT; layer++)
+                    for (int layer = 0; layer < (int)ELayer.LAYERS_CNT; layer++)
                     {
                         for (int yy = 0; yy < BLOCK_H; yy++)
                         {
@@ -1887,11 +1904,10 @@ namespace HexxEditor
 
             tilesImg = new Bitmap(GetType(), "tiles.png");
 
-            layers_checkboxes[0] = chk_layer1;
-            layers_checkboxes[1] = chk_layer2;
-            layers_checkboxes[2] = chk_layer3;
+            layers_checkboxes = new CheckBox[] { chk_layer0, chk_layer1, chk_layer2, chk_layer3, chk_layer4, chk_layer5, chk_layer6 };
+            layers_radios = new RadioButton[] { radio_layer0, radio_layer1, radio_layer2, radio_layer3, radio_layer4, radio_layer5, radio_layer6 };
 
-            ResetLevel(true);
+            ResetLevel();
             //afisez fereastra
             butWndMaterials_Click(this, null);
 
@@ -4504,7 +4520,7 @@ namespace HexxEditor
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Door Kickers: ActionSquad Levels Editor\nv1.2.2 from 31-Oct-2019\n(c)2019 PixelShard", "About", MessageBoxButtons.OK);
+            MessageBox.Show("BreacherSquad Levels Editor\nv1.2.2 from 31-Oct-2019\n(c)2021 PixelShard", "About", MessageBoxButtons.OK);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4562,7 +4578,7 @@ namespace HexxEditor
                     if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_LEFT)))
                     {
                         strDesc += "L";
-                        MessageBox.Show("Found connection LEFT on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                        //MessageBox.Show("Found connection LEFT on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
                         continue;
                     }
                     //RIGHT
@@ -4570,7 +4586,7 @@ namespace HexxEditor
                     if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_RIGHT)))
                     {
                         strDesc += "R";
-                        MessageBox.Show("Found connection RIGHT on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                        //MessageBox.Show("Found connection RIGHT on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
                         continue;
                     }
                     //UP
@@ -4578,7 +4594,7 @@ namespace HexxEditor
                     if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_UP)))
                     {
                         strDesc += "U";
-                        MessageBox.Show("Found connection UP on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                        //MessageBox.Show("Found connection UP on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
                         continue;
                     }
                     //DOWN
@@ -4586,7 +4602,7 @@ namespace HexxEditor
                     if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_DOWN)))
                     {
                         strDesc += "D";
-                        MessageBox.Show("Found connection DOWN on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
+                        //MessageBox.Show("Found connection DOWN on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
                         continue;
                     }
                     // no connection but set:
@@ -4623,9 +4639,7 @@ namespace HexxEditor
                 MessageBox.Show("Error saving area descriptor! \n\n" + ex.Message);
             }
 
-
-
-            MessageBox.Show(strDesc);
+            //MessageBox.Show(strDesc);
         }
 
         public bool SaveLevel_V2(string strPath, bool bExportPrefab = false, Stream pDestStream = null)
@@ -4796,6 +4810,7 @@ namespace HexxEditor
                     errors++;
                 }
                 //can't save levels without a background
+                /*
                 bool bFoundBg = false;
                 for (int kk = 0; kk < arrMisc.Count; kk++)
                 {
@@ -4808,6 +4823,7 @@ namespace HexxEditor
                     errorstxt += "You can't save a level without setting a background!\n\rGo to Edit->Set Level Background and select one.";
                     errors++;
                 }
+                */
             }
 
             //can't save objects with negative anims/frames
@@ -4886,7 +4902,7 @@ namespace HexxEditor
                         if (tl != null)
                         {
                             //scrie layerele de tiles
-                            for (int kk = 0; kk < K_LAYERS_CNT; kk++)
+                            for (int kk = 0; kk < (int)ELayer.LAYERS_CNT; kk++)
                             {
                                 s4b = tl.tileID[kk];
                                 if (s4b < 0)
@@ -4897,7 +4913,7 @@ namespace HexxEditor
                         else //daca nu e bloc
                         {
                             s4b = -1;
-                            for (int kk = 0; kk < K_LAYERS_CNT; kk++)
+                            for (int kk = 0; kk < (int)ELayer.LAYERS_CNT; kk++)
                             {
                                 bw.Write(s4b);
                             }
@@ -5167,7 +5183,7 @@ namespace HexxEditor
         {
             SaveFileDialog sfd = new SaveFileDialog();
             //fisier binar
-            sfd.Filter = "ActionSquad Level (*.dkas)|*.dkas|All Files (*.*)|*.*";
+            sfd.Filter = "BreacherSquad Area (*.area)|*.area|All Files (*.*)|*.*";
             if (sfd.ShowDialog() == DialogResult.Cancel)
                 return;
 
@@ -5264,7 +5280,7 @@ namespace HexxEditor
                         {
                             if (g_brushMode == BRUSH_MODE_TILES)
                             {
-                                if (g_selectedLayer < K_LAYER_FRONT)
+                                if (g_selectedLayer < (int)ELayer.LAYERS_CNT - 1)
                                     MoveSelectionToLayer(g_SelectedAreaTL, g_selectedLayer + 1);
                                 RepaintAfterChange();
                             }
@@ -5272,7 +5288,7 @@ namespace HexxEditor
                             {
                                 if (g_selectedObject != null)
                                 {
-                                    if (g_selectedObject.layer < K_LAYERS_CNT - 1)
+                                    if (g_selectedObject.layer < (int)ELayer.LAYERS_CNT - 1)
                                         g_selectedObject.layer++;
                                     RepaintAfterChange();
                                 }
@@ -5304,7 +5320,7 @@ namespace HexxEditor
                         {
                             if (g_brushMode == BRUSH_MODE_TILES)
                             {
-                                if (g_selectedLayer > K_LAYER_BACK)
+                                if (g_selectedLayer > 0)
                                     MoveSelectionToLayer(g_SelectedAreaTL, g_selectedLayer - 1);
                                 RepaintAfterChange();
                             }
@@ -5413,7 +5429,7 @@ namespace HexxEditor
                         }
                         else
                         {
-                            radio_layer1.Checked = true;
+                            radio_layer0.Checked = true;
                         }
                     }
                     break;
@@ -5438,7 +5454,7 @@ namespace HexxEditor
                         }
                         else
                         {
-                            radio_layer2.Checked = true;
+                            radio_layer1.Checked = true;
                         }
                     }
                     break;
@@ -5463,7 +5479,107 @@ namespace HexxEditor
                         }
                         else
                         {
+                            radio_layer2.Checked = true;
+                        }
+                    }
+                    break;
+                case Keys.D4:
+                case Keys.NumPad4:
+                    {
+                        if (keyEvent.Control)
+                        {
+                            if (g_brushMode == BRUSH_MODE_TILES)
+                            {
+                                MoveSelectionToLayer(g_SelectedAreaTL, 3);
+                                RepaintAfterChange();
+                            }
+                            else if (g_brushMode == BRUSH_MODE_OBJECTS)
+                            {
+                                if (g_selectedObject != null)
+                                {
+                                    g_selectedObject.layer = 3;
+                                    RepaintAfterChange();
+                                }
+                            }
+                        }
+                        else
+                        {
                             radio_layer3.Checked = true;
+                        }
+                    }
+                    break;
+                case Keys.D5:
+                case Keys.NumPad5:
+                    {
+                        if (keyEvent.Control)
+                        {
+                            if (g_brushMode == BRUSH_MODE_TILES)
+                            {
+                                MoveSelectionToLayer(g_SelectedAreaTL, 4);
+                                RepaintAfterChange();
+                            }
+                            else if (g_brushMode == BRUSH_MODE_OBJECTS)
+                            {
+                                if (g_selectedObject != null)
+                                {
+                                    g_selectedObject.layer = 4;
+                                    RepaintAfterChange();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            radio_layer4.Checked = true;
+                        }
+                    }
+                    break;
+                case Keys.D6:
+                case Keys.NumPad6:
+                    {
+                        if (keyEvent.Control)
+                        {
+                            if (g_brushMode == BRUSH_MODE_TILES)
+                            {
+                                MoveSelectionToLayer(g_SelectedAreaTL, 5);
+                                RepaintAfterChange();
+                            }
+                            else if (g_brushMode == BRUSH_MODE_OBJECTS)
+                            {
+                                if (g_selectedObject != null)
+                                {
+                                    g_selectedObject.layer = 5;
+                                    RepaintAfterChange();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            radio_layer5.Checked = true;
+                        }
+                    }
+                    break;
+                case Keys.D7:
+                case Keys.NumPad7:
+                    {
+                        if (keyEvent.Control)
+                        {
+                            if (g_brushMode == BRUSH_MODE_TILES)
+                            {
+                                MoveSelectionToLayer(g_SelectedAreaTL, 6);
+                                RepaintAfterChange();
+                            }
+                            else if (g_brushMode == BRUSH_MODE_OBJECTS)
+                            {
+                                if (g_selectedObject != null)
+                                {
+                                    g_selectedObject.layer = 6;
+                                    RepaintAfterChange();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            radio_layer6.Checked = true;
                         }
                     }
                     break;
@@ -5869,7 +5985,7 @@ namespace HexxEditor
                 if ((pLocalStream == null) || (bw == null))
                     return false;
 
-                int nLayersCnt = K_LAYERS_CNT;
+                int nLayersCnt = (int)ELayer.LAYERS_CNT;
 
                 Byte ub;
                 Int16 s2b;
@@ -5951,10 +6067,7 @@ namespace HexxEditor
                             Int32 lev = bw.ReadInt32();
                             if (lev < 0)
                                 lev = -1;
-                            if (nLayersCnt == 3) //latest version has 3 layers
-                                gMap.setTile(LOCAL_OFFSET.X + xx, LOCAL_OFFSET.Y + yy, lev, kk);
-                            else //convert older layers to newer ones
-                                gMap.setTile(LOCAL_OFFSET.X + xx, LOCAL_OFFSET.Y + yy, lev, kk * 2); //0,1 becomes 0,2
+                            gMap.setTile(LOCAL_OFFSET.X + xx, LOCAL_OFFSET.Y + yy, lev, kk);
                         }
                     }
                 }
@@ -6405,7 +6518,7 @@ namespace HexxEditor
         {
             OpenFileDialog sfd = new OpenFileDialog();
             //fisier binar
-            sfd.Filter = "ActionSquad Level (*.dkas)|*.dkas|All Files (*.*)|*.*";
+            sfd.Filter = "BreacherSquad Area(*.area)|*.area|All Files (*.*)|*.*";
             if (sfd.ShowDialog() == DialogResult.Cancel)
                 return;
 
@@ -6456,7 +6569,7 @@ namespace HexxEditor
 
             if (bLoadDefaultLevel)
             {
-                LoadLevel_V2("..\\media\\levels\\missions\\editor_new_lvl.dkas");
+                LoadLevel_V2("..\\media\\levels\\missions\\editor_new_area.area");
                 //force file path on empty
                 g_strFilePath = "";
             }
@@ -6795,39 +6908,6 @@ namespace HexxEditor
             PaintMap();
         }
 
-        private void radio_layer1_CheckedChanged(object sender, EventArgs e)
-        {
-            g_selectedLayer = K_LAYER_BACK;
-        }
-
-        private void radio_layer2_CheckedChanged(object sender, EventArgs e)
-        {
-            g_selectedLayer = K_LAYER_MID;
-        }
-
-        private void radio_layer3_CheckedChanged(object sender, EventArgs e)
-        {
-            g_selectedLayer = K_LAYER_FRONT;
-        }
-
-        private void chk_layer1_CheckedChanged(object sender, EventArgs e)
-        {
-            BuildAllBlockImages();
-            PaintMap();
-        }
-
-        private void chk_layer2_CheckedChanged(object sender, EventArgs e)
-        {
-            BuildAllBlockImages();
-            PaintMap();
-        }
-        private void chk_layer3_CheckedChanged(object sender, EventArgs e)
-        {
-            BuildAllBlockImages();
-            PaintMap();
-        }
-
-
         private void chk_showOverlappingTiles_CheckedChanged(object sender, EventArgs e)
         {
             PaintMap();
@@ -7124,7 +7204,7 @@ namespace HexxEditor
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.InitialDirectory = g_wndPrefabs.GetPrefabsFolder();
             //fisier binar
-            sfd.Filter = "ActionSquad Prefab (*.dkas_prefab)|*.dkas_prefab|All Files (*.*)|*.*";
+            sfd.Filter = "BreacherSquad Prefab (*.bs_prefab)|*.bs_prefab|All Files (*.*)|*.*";
             if (sfd.ShowDialog() == DialogResult.Cancel)
                 return;
 
@@ -7180,7 +7260,7 @@ namespace HexxEditor
         {
             OpenFileDialog sfd = new OpenFileDialog();
             //fisier binar
-            sfd.Filter = "ActionSquad Prefab (*.dkas_prefab)|*.dkas_prefab|All Files (*.*)|*.*";
+            sfd.Filter = "BreacherSquad Prefab (*.bs_prefab)|*.bs_prefab|All Files (*.*)|*.*";
             if (sfd.ShowDialog() == DialogResult.Cancel)
                 return;
 
@@ -7223,6 +7303,7 @@ namespace HexxEditor
 
         private void playMapToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            /*
             if (g_strFilePath.Length == 0)
             {
                 MessageBox.Show("Please save your level first! You should save the level in the media/levels/missions folder of the game.", "Warning");
@@ -7241,6 +7322,25 @@ namespace HexxEditor
             startInfo.Arguments = " +map \"" + g_strFilePath + "\"";
 
             Process exeProcess = Process.Start(startInfo);
+            */
+        }
+
+        private void radio_layer_CheckedChanged(object sender, EventArgs e)
+        {
+            for (int kk = 0; kk < (int)ELayer.LAYERS_CNT; kk++)
+            {
+                if (layers_radios[kk] == sender)
+                {
+                    g_selectedLayer = kk;
+                    return;
+                }
+            }
+        }
+
+        private void chk_layer_CheckedChanged(object sender, EventArgs e)
+        {
+            BuildAllBlockImages();
+            PaintMap();
         }
 
         private void butWndActors_Click(object sender, EventArgs e)

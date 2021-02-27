@@ -1,6 +1,7 @@
 #pragma once
 
 ///--- TILE LAYERS ---
+// the ingame layers used for rendering
 enum eTileLayer {
 	// main walkable floor tiles
 	K_TILE_LAYER_FLOOR = 0,
@@ -17,6 +18,10 @@ enum eTileLayer {
 
 	//total number of layers
 	K_TILE_LAYERS_CNT,
+};
+
+//#MAYBE: should be removed after transitioning the editor to the game engine?
+enum eEditorLayer {
 };
 
 //#TEMP: back compatibility, to be removed
