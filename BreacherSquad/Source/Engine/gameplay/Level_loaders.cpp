@@ -322,9 +322,9 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 					SetRect(&srcrect, (tileID % tilesetColumns) * tileW, (tileID / tilesetColumns) * tileH,
 						(tileID % tilesetColumns) * tileW + tileW, (tileID / tilesetColumns) * tileH + tileH);
 					area->tiles[xx][yy].srcRects[layID] = srcrect;
-					//#TODO: aici trebuie sa le scada jumatate de texel daca e DX, si sa verifici ca afiseaza si ultimul pixel din textura
-					tl->vUVmin[layID] = Vec2(srcrect.left / vTilesetSize.x, srcrect.top / vTilesetSize.y);
-					tl->vUVmax[layID] = Vec2(srcrect.right / vTilesetSize.x, srcrect.bottom / vTilesetSize.y);
+					//#HACK: we make the UV rect a little smaller so we don't get UV seams
+					tl->vUVmin[layID] = Vec2((srcrect.left + 0.001f) / vTilesetSize.x, (srcrect.top + 0.001f) / vTilesetSize.y);
+					tl->vUVmax[layID] = Vec2((srcrect.right - 0.001f) / vTilesetSize.x, (srcrect.bottom - 0.001f) / vTilesetSize.y);
 				}
 			}
 			// computes some basic data about tiles

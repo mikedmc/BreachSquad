@@ -3,10 +3,11 @@
 ///--- TILE LAYERS ---
 // the ingame layers used for rendering
 enum eTileLayer {
+	K_TILE_LAYER_UNDER_FLOOR = 0,
 	// main walkable floor tiles
-	K_TILE_LAYER_FLOOR = 0,
+	K_TILE_LAYER_FLOOR = 1,
 	// mainly used for transitions
-	K_TILE_LAYER_FLOOR_DECO1 = 1,
+	K_TILE_LAYER_FLOOR_DECO1,
 	// secondary decorations, over transitions
 	K_TILE_LAYER_FLOOR_DECO2,
 	// vertical walls

@@ -202,7 +202,7 @@ namespace circleEnvelope
                                     else
                                     {
                                         // check for random connection using the area generations or current stitch point
-                                        MessageBox.Show("Random connection found!");
+                                        //MessageBox.Show("Random connection found!");
                                     }
                                 }
                             }

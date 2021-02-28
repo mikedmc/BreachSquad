@@ -9613,11 +9613,12 @@ void CLevel::Update(float dTime_original)
 		{
 			if (pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_DEAD)
 			{
-				avg_live += pPlayerActor[kk]->posHeart + pPlayerActor[kk]->vecCamFollowPos;
+				avg_live += pPlayerActor[kk]->pos_last + pPlayerActor[kk]->m_AIcommands.vAimVec * 0.2f;
 				plcnt_live++;
 			}
 
-			avg_all += pPlayerActor[kk]->posHeart + pPlayerActor[kk]->vecCamFollowPos;
+
+			avg_all += pPlayerActor[kk]->pos_last + pPlayerActor[kk]->m_AIcommands.vAimVec *  0.2f;
 			plcnt_all++;
 		}
 	}
@@ -10812,7 +10813,8 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
 	}
 
-	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
+	//#HACK: we floor the camera pos or we'll get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams
+	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(int(-camrect.x * K_GAME_PIXEL_SIZE_F), int(-camrect.y * K_GAME_PIXEL_SIZE_F)));
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 
@@ -10923,7 +10925,8 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
 	}
 
-	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
+	//#HACK: we floor the camera pos or we'll get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams
+	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(int(-camrect.x * K_GAME_PIXEL_SIZE_F), int(-camrect.y * K_GAME_PIXEL_SIZE_F)));
 
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
@@ -11217,6 +11220,7 @@ OPRESULT CLevel::RenderPass_Composition(Mat* matProj)
 		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
 	}
 
+	// Don't floor the camera position when rendering the composition or we get jagged movement
 	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
