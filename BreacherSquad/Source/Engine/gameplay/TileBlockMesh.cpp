@@ -23,7 +23,8 @@ CTileBlockMesh::~CTileBlockMesh()
 OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZEWH mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr)
 {
 	// allocate maximum possible number per layer plus sentinel
-	_VERTEX_PNCT4T4 arrVerts[K_TBM_BLOCK_W * K_TBM_BLOCK_H * 4 + 16];
+	const size_t arrVertsLen = K_TBM_BLOCK_W * K_TBM_BLOCK_H * 4 + 16;
+	_VERTEX_PNCT4T4 arrVerts[arrVertsLen];
 	int nCur = 0;
 
 	m_mapAreaTL.Set(vBlockPos_TL.x, vBlockPos_TL.y, K_TBM_BLOCK_W, K_TBM_BLOCK_H);
@@ -41,12 +42,15 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 	bool bIsEmpty = true;
 
 	Vec2 vOrig = m_bbox.vMin;
-	//#TODO: create all meshes in a single pass with many open meshes
-	for (int lay = 0; lay < K_TILE_LAYERS_CNT; lay++)
+
+	//#TODO: K_AL_UNDER_FLOOR
+
+	///--- 2. floors (3 tile layers rendered at once) ---
+	if (OP_SUCCESS(m_Painter.BeginMesh(m_arrMeshIdx[K_AL_FLOOR])))
 	{
-		if (OP_SUCCESS(m_Painter.BeginMesh(m_arrMeshIdx[lay])))
+		nCur = 0;
+		for (int lay = K_TILE_LAYER_FLOOR; lay <= K_TILE_LAYER_FLOOR_DECO2; lay++)
 		{
-			nCur = 0;
 			for (int yy = 0; yy < m_mapAreaTL.h; yy++)
 			{
 				for (int xx = 0; xx < m_mapAreaTL.w; xx++)
@@ -68,19 +72,98 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 					SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + (yy + 1) * K_TILE_SIZE, 0.0f),
 						Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
 						Vec4(tl->vUVmin[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+					_ASSERT(nCur < arrVertsLen);
 				}
 			}
-
-			m_Painter.AddQuads(arrVerts, nCur / 4);
-			int nQuads = m_Painter.EndMesh();
-
-			LOG("map lay:%d pos:[%d,%d] WH:[%d,%d] quads:%d", lay, m_mapAreaTL.x, m_mapAreaTL.y, m_mapAreaTL.w, m_mapAreaTL.h, nQuads);
-			if (nQuads > 0)
-				bIsEmpty = false;				// we have at least some tris so block is not empty
-			else
-				m_arrMeshIdx[lay] = -1;			// make sure we don't even call draw if layer is empty
 		}
+
+		m_Painter.AddQuads(arrVerts, nCur / 4);
+		int nQuads = m_Painter.EndMesh();
+		(nQuads > 0) ? bIsEmpty = false : m_arrMeshIdx[K_AL_FLOOR] = -1;
+
+		LOG("map lay:AL_FLOOR pos:[%d,%d] WH:[%d,%d] quads:%d", m_mapAreaTL.x, m_mapAreaTL.y, m_mapAreaTL.w, m_mapAreaTL.h, nQuads);
 	}
+
+
+	///--- WALLS ---
+	if (OP_SUCCESS(m_Painter.BeginMesh(m_arrMeshIdx[K_AL_WALLS])))
+	{
+		nCur = 0;
+		int lay = K_TILE_LAYER_WALLS;
+		for (int yy = 0; yy < m_mapAreaTL.h; yy++)
+		{
+			for (int xx = 0; xx < m_mapAreaTL.w; xx++)
+			{
+				CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
+				// skip empty tiles
+				if (tl->tileIDs[lay] < 0)
+					continue;
+				// add geometry
+				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
+					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
+					Vec4(tl->vUVmin[lay].x, tl->vUVmin[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + (xx + 1) * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
+					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
+					Vec4(tl->vUVmax[lay].x, tl->vUVmin[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + (xx + 1) * K_TILE_SIZE, vOrig.y + (yy + 1) * K_TILE_SIZE, 0.0f),
+					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
+					Vec4(tl->vUVmax[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + (yy + 1) * K_TILE_SIZE, 0.0f),
+					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
+					Vec4(tl->vUVmin[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+				_ASSERT(nCur < arrVertsLen);
+			}
+		}
+
+		m_Painter.AddQuads(arrVerts, nCur / 4);
+		int nQuads = m_Painter.EndMesh();
+		(nQuads > 0) ? bIsEmpty = false : m_arrMeshIdx[K_AL_WALLS] = -1;
+
+		LOG("map lay:AL_WALLS pos:[%d,%d] WH:[%d,%d] quads:%d", m_mapAreaTL.x, m_mapAreaTL.y, m_mapAreaTL.w, m_mapAreaTL.h, nQuads);
+	}
+
+	//#TODO: K_AL_CEIL_DECO
+
+	///--- CEILINGS ---
+	if (OP_SUCCESS(m_Painter.BeginMesh(m_arrMeshIdx[K_AL_CEILINGS])))
+	{
+		nCur = 0;
+		int lay = K_TILE_LAYER_CEILING;
+		for (int yy = 0; yy < m_mapAreaTL.h; yy++)
+		{
+			for (int xx = 0; xx < m_mapAreaTL.w; xx++)
+			{
+				CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
+				// skip empty tiles
+				if (tl->tileIDs[lay] < 0)
+					continue;
+				// add geometry
+				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
+					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
+					Vec4(tl->vUVmin[lay].x, tl->vUVmin[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + (xx + 1) * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
+					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
+					Vec4(tl->vUVmax[lay].x, tl->vUVmin[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + (xx + 1) * K_TILE_SIZE, vOrig.y + (yy + 1) * K_TILE_SIZE, 0.0f),
+					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
+					Vec4(tl->vUVmax[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + (yy + 1) * K_TILE_SIZE, 0.0f),
+					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
+					Vec4(tl->vUVmin[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+				_ASSERT(nCur < arrVertsLen);
+			}
+		}
+
+		m_Painter.AddQuads(arrVerts, nCur / 4);
+		int nQuads = m_Painter.EndMesh();
+		(nQuads > 0) ? bIsEmpty = false : m_arrMeshIdx[K_AL_CEILINGS] = -1;
+
+		LOG("map lay:AL_CEILINGS pos:[%d,%d] WH:[%d,%d] quads:%d", m_mapAreaTL.x, m_mapAreaTL.y, m_mapAreaTL.w, m_mapAreaTL.h, nQuads);
+	}
+
 
 	///--- build shadow buffer ---
 	if (OP_SUCCESS(m_Painter.BeginMesh(m_ShadowMeshIdx)))
@@ -109,6 +192,8 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + (yy + 1) * K_TILE_SIZE, 0.0f),
 					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
 					Vec4(texrect.left, texrect.bottom, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+				_ASSERT(nCur < arrVertsLen);
 			}
 		}
 
@@ -223,12 +308,12 @@ int CTileBlockMeshManager::UpdateVisibility(RECTXYWH_F camRect)
 	return arrVisible.Count();
 }
 
-OPRESULT CTileBlockMeshManager::PaintLayer(eTileLayer layerIdx)
+OPRESULT CTileBlockMeshManager::PaintLayer(int layerIdx)
 {
 	for (int kk = 0; kk < arrVisible.Count() ; kk++)
 	{
 		CTileBlockMesh* tbm = arrVisible[kk];
-		tbm->PaintLayer(layerIdx, true);
+		tbm->PaintLayer((int)layerIdx, true);
 	}
 
 	return K_OP_OK;

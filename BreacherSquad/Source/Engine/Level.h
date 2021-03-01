@@ -150,7 +150,7 @@ public:
 	// Updates areas visibility and returns number of visible areas
 	int						Areas_UpdateVisibility(RECTXYWH_F camRect);
 	// Paints tile layer for visible areas
-	OPRESULT				Areas_PaintLayer(eTileLayer layerIdx);
+	OPRESULT				Areas_PaintLayer(eAreaLayer layerIdx);
 	// Paints the shadow layer for visible areas
 	OPRESULT				Areas_PaintShadowLayer();
 	// Returns array of areas that intersect aabb
@@ -233,7 +233,7 @@ public:
 	// Spawns an actor (NPC)
 	CActor*					SpawnActor(Vec2 spawnPos, WCHAR* strTemplateName, int nLookDirSign, CStringHash* shStateOverride = null);
 	// Spawns a new Active with empty properties
-	CProp*					SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer = K_LVL_LAYER_BACK);
+	CProp*					SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer = K_TILE_LAYER_FLOOR);
 	// Spawns a light
 	CLight*					SpawnLight(Vec3 spawnPos, eLightType eType, DWORD dwColor, float fRadius = 64.0f, int profileID = 0, bool bCastShadows = false);
 	// Gives a score for the user powerups placement 

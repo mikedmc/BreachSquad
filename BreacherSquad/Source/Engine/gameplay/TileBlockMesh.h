@@ -54,8 +54,8 @@ public:
 	// Must be called before PaintLayer.
 	int							UpdateVisibility(RECTXYWH_F camRect);
 
-	// Paints tile layer for visible buffers
-	OPRESULT					PaintLayer(eTileLayer layerIdx);
+	// Paints tile layer for visible buffers (use idx from eAreaLayer)
+	OPRESULT					PaintLayer(int layerIdx);
 	// Paints the shadow layer
 	OPRESULT					PaintShadowLayer();
 

@@ -26,10 +26,12 @@ enum eEditorLayer {
 };
 
 //#TEMP: back compatibility, to be removed
+/*
 #define		K_LVL_LAYER_BACK	K_TILE_LAYER_FLOOR
 #define		K_LVL_LAYER_MIDDLE	K_TILE_LAYER_WALLS
 #define		K_LVL_LAYER_FRONT	K_TILE_LAYER_CEILING
 #define		K_LVL_LAYERS_CNT	3
+*/
 
 ///--- TILE FLAGS ---
 #define		K_TILEFLAG_NONE			0

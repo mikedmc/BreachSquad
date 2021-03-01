@@ -1796,7 +1796,7 @@ int CLevel::Areas_UpdateVisibility(RECTXYWH_F camRect)
 	return nVisible;
 }
 
-OPRESULT CLevel::Areas_PaintLayer(eTileLayer layerIdx)
+OPRESULT CLevel::Areas_PaintLayer(eAreaLayer layerIdx)
 {
 	for (auto area : m_arrAreas)
 	{
@@ -10846,8 +10846,8 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	// paint floors and vertical walls
 	Areas_UpdateVisibility(camrect);
 
-	Areas_PaintLayer(K_TILE_LAYER_FLOOR);
-	Areas_PaintLayer(K_TILE_LAYER_WALLS);
+	Areas_PaintLayer(K_AL_FLOOR);
+	Areas_PaintLayer(K_AL_WALLS);
 
 
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
@@ -10887,7 +10887,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	// top layer of tiles
 	UTGetShaderManager().SetVS(nullptr);
 	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
-	Areas_PaintLayer(K_TILE_LAYER_CEILING);
+	Areas_PaintLayer(K_AL_CEILINGS);
 
 	return K_OP_OK;
 }

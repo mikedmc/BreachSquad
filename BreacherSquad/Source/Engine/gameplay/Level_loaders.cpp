@@ -6,7 +6,6 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	//set last ID on a number that will never get reached from the editor or by adding areas
 	m_unLastID = 10000000;
 	m_unLastAreaID = 1;
-	int nLayersCnt = K_LVL_LAYERS_CNT;
 	int nChapterNumber = g_userData[K_MEMID_SELECTED_CHAPTER];
 	int nLevelNumber = g_userData[K_MEMID_SELECTED_LEVEL];
 	//--- set loaded level flags
@@ -113,9 +112,9 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 
 	///--- LOAD AREAS:
-	FileManager::GetMediaPath(L"media/levels/areas/area0.dkas", Path);
+	FileManager::GetMediaPath(L"media/levels/areas/2start.area", Path);
 	V_OP_RET(LoadArea(Path, Vec2i(0,0)));
-	FileManager::GetMediaPath(L"media/levels/areas/area1.dkas", Path);
+	FileManager::GetMediaPath(L"media/levels/areas/3start.area", Path);
 	V_OP_RET(LoadArea(Path, Vec2i(16, 0)));
 
 
@@ -233,7 +232,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 	// base ID for level elements so we don't overwrite existing IDs
 	UINT32 unBaseID = area->ID * 10000;
 	
-	int nLayersCnt = K_LVL_LAYERS_CNT;
+	int nLayersCnt = K_TILE_LAYERS_CNT;
 
 	WCHAR Path[MAX_PATH] = { 0 };
 
@@ -301,8 +300,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 	{
 		area->tiles[kk] = new CTile[areaH];
 	}
-	//read tiles, not a rare matrix
-	eTileLayer layerIDs[] = { K_TILE_LAYER_FLOOR, K_TILE_LAYER_WALLS, K_TILE_LAYER_CEILING };
+	//read tiles matrix
 	for (int yy = 0; yy < areaH; yy++)
 	{
 		for (int xx = 0; xx < areaW; xx++)
@@ -311,20 +309,20 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 			tl->bbox.Set((posTL.x + xx) * K_TILE_SIZE_F, (posTL.y + yy) * K_TILE_SIZE_F, (posTL.x + xx + 1) * K_TILE_SIZE_F, (posTL.y + yy + 1) * K_TILE_SIZE_F);
 			for (int kk = 0; kk < nLayersCnt; kk++)
 			{
-				//nivel
-				int layID = layerIDs[kk];
+				//tile layer
+				int layer_index = kk;
 
 				int tileID = OS_freadInt32(fl);
-				tl->tileIDs[layID] = tileID;
+				tl->tileIDs[layer_index] = tileID;
 				if (tileID >= 0)
 				{
 					RECT srcrect;
 					SetRect(&srcrect, (tileID % tilesetColumns) * tileW, (tileID / tilesetColumns) * tileH,
 						(tileID % tilesetColumns) * tileW + tileW, (tileID / tilesetColumns) * tileH + tileH);
-					area->tiles[xx][yy].srcRects[layID] = srcrect;
-					//#HACK: we make the UV rect a little smaller so we don't get UV seams
-					tl->vUVmin[layID] = Vec2((srcrect.left + 0.001f) / vTilesetSize.x, (srcrect.top + 0.001f) / vTilesetSize.y);
-					tl->vUVmax[layID] = Vec2((srcrect.right - 0.001f) / vTilesetSize.x, (srcrect.bottom - 0.001f) / vTilesetSize.y);
+					area->tiles[xx][yy].srcRects[layer_index] = srcrect;
+					//#HACK: we make the UV rect a little smaller so we don't get UV seams because of the point filtering
+					tl->vUVmin[layer_index] = Vec2((srcrect.left + 0.001f) / vTilesetSize.x, (srcrect.top + 0.001f) / vTilesetSize.y);
+					tl->vUVmax[layer_index] = Vec2((srcrect.right - 0.001f) / vTilesetSize.x, (srcrect.bottom - 0.001f) / vTilesetSize.y);
 				}
 			}
 			// computes some basic data about tiles
