@@ -197,8 +197,9 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	// compute dirty rects (collisions and walls, wall shadows and other data)
 	UpdateDirtyRects();
 	// create Area meshes after shadows have been computed in UpdateDirtyRects
-	for (auto area : m_arrAreas)
+	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 	{
+		CLevelArea* area = m_arrAreas[ii];
 		V_OP_RET(area->BuildBuffers(m_pDevice, &m_sprLights));
 	}
 
@@ -863,7 +864,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
 
 	LOG(L"Game:: Area loaded:[%s] net.randcheck[%d]", strPathAbs, m_rand.RandInt(60000));
 
-	m_arrAreas.push_back(area);
+	m_arrAreas.Add(area);
 	// enlarge level area and other level data
 	m_levelAABB.Union(area->AABBbounds.to_RECTXYWH_F());
 

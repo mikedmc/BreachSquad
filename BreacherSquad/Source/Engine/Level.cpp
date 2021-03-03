@@ -1683,8 +1683,9 @@ void CLevel::UpdateDirtyRects()
 	///--- compute tile flags ---
 	for (auto rect : m_arrDirtyRectsTL)
 	{
-		for (auto area : m_arrAreas)
+		for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 		{
+			CLevelArea* area = m_arrAreas[ii];
 			// take border tiles into account:
 			// clamp to smaller size because we check neighbours
 			RECTXYWH lrect = rect;
@@ -1788,8 +1789,9 @@ void CLevel::UpdateDirtyRects()
 int CLevel::Areas_UpdateVisibility(RECTXYWH_F camRect)
 {
 	int nVisible = 0;
-	for (auto area : m_arrAreas)
+	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 	{
+		CLevelArea* area = m_arrAreas[ii];
 		if (area->UpdateVisibility(camRect))
 			nVisible++;
 	}
@@ -1798,8 +1800,9 @@ int CLevel::Areas_UpdateVisibility(RECTXYWH_F camRect)
 
 OPRESULT CLevel::Areas_PaintLayer(eAreaLayer layerIdx)
 {
-	for (auto area : m_arrAreas)
+	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 	{
+		CLevelArea* area = m_arrAreas[ii];
 		V_OP_RET(area->areaMesh.PaintLayer(layerIdx));
 	}
 	return K_OP_OK;
@@ -1807,8 +1810,9 @@ OPRESULT CLevel::Areas_PaintLayer(eAreaLayer layerIdx)
 
 OPRESULT CLevel::Areas_PaintShadowLayer()
 {
-	for (auto area : m_arrAreas)
+	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 	{
+		CLevelArea* area = m_arrAreas[ii];
 		V_OP_RET(area->areaMesh.PaintShadowLayer());
 	}
 	return K_OP_OK;
@@ -1817,8 +1821,9 @@ OPRESULT CLevel::Areas_PaintShadowLayer()
 std::vector<CLevelArea*> CLevel::Areas_GetInRect(CAABB aabb)
 {
 	vector<CLevelArea*> retarr;
-	for (auto area : m_arrAreas)
+	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 	{
+		CLevelArea* area = m_arrAreas[ii];
 		if (area->AABBbounds.Intersects(&aabb))
 			retarr.push_back(area);
 	}
@@ -1827,8 +1832,9 @@ std::vector<CLevelArea*> CLevel::Areas_GetInRect(CAABB aabb)
 
 CLevelArea* CLevel::Areas_GetAt(Vec2 vPos)
 {
-	for (auto area : m_arrAreas)
+	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 	{
+		CLevelArea* area = m_arrAreas[ii];
 		if (area->AABBbounds.PointIn(vPos))
 			return area;
 	}
@@ -6983,8 +6989,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		//add boxes from tiles
 		//#TODO: if it catches some corners sometimes try enlarging the tiles collision area (boxUnionTiles) by 1 tile in all directions
 		static CAABB retAABBs[64];
-		for (auto area : m_arrAreas)
+		for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 		{
+			CLevelArea* area = m_arrAreas[ii];
 			if (!area->AABBbounds_TL.Intersects(boxUnionTilesWH))
 				continue;
 			int nadded = area->GetTilesCollisionBoxes(boxUnionTiles, retAABBs, 64);
@@ -11935,7 +11942,8 @@ void CLevel::Release()
 {
 	ClearVisibilityLists();
 
-	SAFE_DELETE_STDVEC(m_arrAreas);
+	SAFE_DELETE_GROWABLE_ARRAY(m_arrAreas);
+
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrColShapes);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrLights);
 	m_arrPropsPtrInteract.Clear();
@@ -12789,8 +12797,9 @@ OPRESULT CLevel::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, vo
 	V_OP_HRTOOP(m_texManager.OnCreateDevice(pDevice));
 	V_OP_RET(m_bufferedPainter.OnCreateDevice(pDevice));
 
-	for (auto area : m_arrAreas)
+	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 	{
+		CLevelArea* area = m_arrAreas[ii];
 		V_OP_RET(area->OnCreateDevice(pDevice));
 	}
 
@@ -12809,8 +12818,9 @@ OPRESULT CLevel::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, voi
 	V_OP_HRTOOP(m_texManager.OnResetDevice(pDevice));
 	V_OP_RET(m_bufferedPainter.OnResetDevice(pDevice));
 
-	for (auto area : m_arrAreas)
+	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 	{
+		CLevelArea* area = m_arrAreas[ii];
 		V_OP_RET(area->OnResetDevice(pDevice));
 	}
 
@@ -12829,8 +12839,9 @@ OPRESULT CLevel::OnLostDevice(void* pUserContext)
 
 	m_bufferedPainter.OnLostDevice();
 
-	for (auto area : m_arrAreas)
+	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 	{
+		CLevelArea* area = m_arrAreas[ii];
 		V_OP_RET(area->OnLostDevice());
 	}
 
@@ -12849,8 +12860,9 @@ OPRESULT CLevel::OnDestroyDevice(void* pUserContext)
 
 	m_bufferedPainter.OnDestroyDevice();
 
-	for (auto area : m_arrAreas)
+	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 	{
+		CLevelArea* area = m_arrAreas[ii];
 		V_OP_RET(area->OnDestroyDevice());
 	}
 
