@@ -9,7 +9,7 @@
 #define K_LGEN_TRIES_CHILDREN		10
 
 // all tags that CAN'T be used for randomly picked rooms
-#define K_LGEN_TAGS_SPECIAL_AVOID		L"special,hall"
+#define K_LGEN_TAGS_SPECIAL_AVOID		L"special,hall,start"
 // any of these tags will mean it's a hallway
 #define K_LGEN_TAGS_HALL_ANY			L"hall"
 
@@ -104,10 +104,10 @@ private:
 	CRandom						m_rand;				// RNG
 	RECTXYWH					m_levelAABB;		// level AABB after generation (in tiles)
 	
-	std::vector<CPlacedArea*>	m_arrPlaced;		// placed CPlacedArea elements (keeps pointers as the array is highly dynamic and we need enduring pointers to elements)
 
 public:
 	std::vector<CInventoryArea> m_arrInventory;
+	std::vector<CPlacedArea*>	m_arrPlaced;		// placed CPlacedArea elements (keeps pointers as the array is highly dynamic and we need enduring pointers to elements)
 
 public:
 	CMissionGenerator();

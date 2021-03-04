@@ -158,7 +158,7 @@ OPRESULT CBufferedPainterQuads::DrawMesh(int meshIdx, bool setFVF)
 	{
 		// this happens often if light touches no shadow casters. Logging not necessary:
 		//LOG(L"!!! WARNING: CBufferedPainterQuads::DrawMesh called with mesh idx = -1\n");
-		return K_OP_INVALIDARGS;
+		return K_OP_OK;
 	}
 
 	if (meshIdx >= m_nMeshesCnt)

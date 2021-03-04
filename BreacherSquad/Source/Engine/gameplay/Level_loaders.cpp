@@ -110,13 +110,36 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		return K_OP_FAILED;
 	}
 
+	//#TODO: release resources on errors (goto ERROR)
+											  
+
+	///--- level areas inventory ---
+	//loading story
+	FileManager::GetMediaPath(L"media/levels/stories/story_small.story", Path);
+	V_OP_RET(m_story.LoadStory(Path));
+
+	// build inventory and generate level
+	auto arrAreas = UTGetAreasInv().GetAreas();
+	UTGetMissionGen().BuildInventory(arrAreas);
+	if (!UTGetMissionGen().GenerateLevelFromStory(&m_story))
+		return K_OP_FAILED;
+	//UTGetMissionGen().GenerateLevelRandomly(3);
 
 	///--- LOAD AREAS:
+	for (auto area : UTGetMissionGen().m_arrPlaced)
+	{
+		wsprintf(Path, L"media/levels/areas/%s.area", area->strAreaFile.c_str());
+		//#TODO: should return added area so we can further process it
+		V_OP_RET(LoadArea(Path, Vec2i(area->AABB.x * K_LGEN_BLOCK_W, area->AABB.y * K_LGEN_BLOCK_H)));
+	}
+
+	//#TODO: UTGetMissionGen().Release();
+/*
 	FileManager::GetMediaPath(L"media/levels/areas/2start.area", Path);
 	V_OP_RET(LoadArea(Path, Vec2i(0,0)));
 	FileManager::GetMediaPath(L"media/levels/areas/3start.area", Path);
 	V_OP_RET(LoadArea(Path, Vec2i(16, 0)));
-
+  */
 
 
 	///--- everything loaded, SetAI here again so it sets all necessary pointers ---
