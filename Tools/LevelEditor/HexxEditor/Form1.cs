@@ -1505,10 +1505,13 @@ namespace HexxEditor
                     {
                         for (int yy = 0; yy < BLOCK_H; yy++)
                         {
-                            if ((tb.tiles[xx, yy].tileID[0] >= 0) || (tb.tiles[xx, yy].tileID[1] >= 0) || (tb.tiles[xx, yy].tileID[2] >= 0))
+                            for (int lay = 0; lay < (int)ELayer.LAYERS_CNT; lay++)
                             {
-                                erase = false;
-                                goto NOTEMPTY;
+                                if (tb.tiles[xx, yy].tileID[lay] >= 0)
+                                {
+                                    erase = false;
+                                    goto NOTEMPTY;
+                                }
                             }
                         }
                     }
@@ -2194,12 +2197,11 @@ namespace HexxEditor
                             for (int xx = 0; xx < BLOCK_W; xx++)
                             {
                                 int cnt = 0;
-                                if (tb.tiles[xx, yy].tileID[0] >= 0)
-                                    cnt++;
-                                if (tb.tiles[xx, yy].tileID[1] >= 0)
-                                    cnt++;
-                                if (tb.tiles[xx, yy].tileID[2] >= 0)
-                                    cnt++;
+                                for (int lay = 0; lay < (int)ELayer.LAYERS_CNT; lay++)
+                                {
+                                    if (tb.tiles[xx, yy].tileID[lay] >= 0)
+                                        cnt++;
+                                }
 
                                 if (cnt > 1)
                                 {

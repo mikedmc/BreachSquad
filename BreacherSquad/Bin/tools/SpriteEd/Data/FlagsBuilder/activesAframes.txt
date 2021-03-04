@@ -1,8 +1,0 @@
-NUMAR TOTAL DE OCTETI [1, 2, 3 sau 4]
-1
-Action signal
-1
-Sound signal
-1
-Reserved
-6

@@ -1,6 +1,0 @@
-NUMAR TOTAL DE OCTETI [1, 2, 3 sau 4]
-1
-Looping
-1
-Reserved
-7
