@@ -72,35 +72,45 @@ void CLevel::BuildVisibilityLists()
 	m_visibleList.visible_lights.Clear();
 	for (int kk = 0; kk < m_arrLights.GetSize(); kk++)
 	{
-		const CLight* light = m_arrLights[kk];
+		CLight* light = m_arrLights[kk];
 		//daca e ascunsa o sare
 		if (light->bHidden)
 			continue;
 
-		if ((light->type == K_LVL_LT_AMBIENTAL) || (light->type == K_LVL_LT_DIRECTIONAL))
+		switch (light->type)
 		{
-			m_visibleList.visible_lights.Add(m_arrLights[kk]);
-			continue;
-		}
-
-		if (camaabb.IntersectsCircle(light->pos, light->fRadius))
-		{
-			if (m_visibleList.visible_lights.Add(m_arrLights[kk]) < 0)
-				break;
-			if (m_arrLights[kk]->castShadows)
+			case K_LVL_LT_AMBIENTAL:
+			case K_LVL_LT_DIRECTIONAL:
 			{
-				CAABB bbox_max(Vec2(light->pos.x - light->fRadius, light->pos.y - light->fRadius), Vec2(light->pos.x + light->fRadius, light->pos.y + light->fRadius));
-				//la prima lumina cu shadow seteaza lightsCommonAABB fix pe bbox-ul luminii
-				if (bFirstShadowingLightSet == false)
+				if (camaabb.Intersects(&light->bbox_ini))
 				{
-					bFirstShadowingLightSet = true;
-					lightsCommonAABB = bbox_max;
-				}
-				else
-				{
-					lightsCommonAABB = AABB_Union(lightsCommonAABB, bbox_max);
+					m_visibleList.visible_lights.Add(m_arrLights[kk]);
 				}
 			}
+			break;
+			default:
+			{
+				if (camaabb.IntersectsCircle(light->pos, light->fRadius))
+				{
+					if (m_visibleList.visible_lights.Add(m_arrLights[kk]) < 0)
+						break;
+					if (m_arrLights[kk]->castShadows)
+					{
+						CAABB bbox_max(Vec2(light->pos.x - light->fRadius, light->pos.y - light->fRadius), Vec2(light->pos.x + light->fRadius, light->pos.y + light->fRadius));
+						//la prima lumina cu shadow seteaza lightsCommonAABB fix pe bbox-ul luminii
+						if (bFirstShadowingLightSet == false)
+						{
+							bFirstShadowingLightSet = true;
+							lightsCommonAABB = bbox_max;
+						}
+						else
+						{
+							lightsCommonAABB = AABB_Union(lightsCommonAABB, bbox_max);
+						}
+					}
+				}
+			}
+			break;
 		}
 	}
 	//toate bbox-urile care intra in actiunea luminilor care fac shadow casting

@@ -41,8 +41,9 @@ public:
 	//Moves AABB with delta vector
 	void Move(Vec2 delta);
 	//Inflates AABB with delta on each axis
-	void Inflate(Vec2 delta);
-	void Inflate(float dX, float dY);
+	void	Inflate(Vec2 delta);
+	void	Inflate(float dX, float dY);
+	float	GetArea();
 	//scales CAABB by percent
 	void Scale(float fScalePercent);
 	//flips AABB around origin

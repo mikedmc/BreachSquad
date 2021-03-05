@@ -3009,7 +3009,6 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 			break;
 
 			case K_LVL_LT_DIRECTIONAL:
-			case K_LVL_LT_AMBIENTAL:
 			{
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
 				vul.pos = Vec3(camAABB.vMin.x, camAABB.vMin.y, 0.0f);
@@ -3028,6 +3027,37 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 				m_bufferedPainter.EndMesh();
 			}
 			break;
+
+			case K_LVL_LT_AMBIENTAL:
+			{
+				// ambiental light only influence the area where they reside, have the bbox the size of the area so we clip to camera rect
+				// use BBOX_INI because bbox gets moved to light position
+				CAABB realbb; 
+				AABB_Intersection(camAABB, nl->bbox_ini, realbb);
+				if (realbb.GetArea() <= 0.0f)
+				{
+					nl->m_nLightMeshIdx = -1;
+					break;
+				}
+
+				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+				vul.pos = Vec3(realbb.vMin.x, realbb.vMin.y, 0.0f);
+				vur.pos = Vec3(realbb.vMax.x, realbb.vMin.y, 0.0f);
+				vdl.pos = Vec3(realbb.vMin.x, realbb.vMax.y, 0.0f);
+				vdr.pos = Vec3(realbb.vMax.x, realbb.vMax.y, 0.0f);
+				//set color
+				vul.color = vur.color = vdl.color = vdr.color = nl->color;
+				//build verts
+				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+				m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
+				m_bufferedPainter.AddTriangles(lightRectV, 2);
+				m_bufferedPainter.EndMesh();
+			}
+			break;
+
 		}
 	}
 
@@ -11016,6 +11046,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 	UTGetShaderManager().SetPS(nullptr);
 
 	///--- directional lights (under shadow)
+	//#TODO: should be completely removed....
 	// directional light without shader, doesn't take into account the object normals
 	m_pDevice->SetTexture(0, nullptr);
 	m_pDevice->SetTexture(1, nullptr);
@@ -11037,17 +11068,16 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 	//#TODO: paint one ambiental per area!
 	UTGetShaderManager().SetVS(nullptr);
 	UTGetShaderManager().SetPS(nullptr);
+
 	m_pDevice->SetTexture(0, nullptr);
 	m_pDevice->SetTexture(1, nullptr);
 	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
-		if (nl->type == K_LVL_LT_AMBIENTAL)
-		{
-			//paint and exit
-			m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
-			break;
-		}
+		if (nl->type != K_LVL_LT_AMBIENTAL)
+			continue;
+		//paint and exit
+		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
 	}
 
 
@@ -11289,6 +11319,7 @@ OPRESULT CLevel::RenderPass_Composition(Mat* matProj)
 
 void CLevel::Paint()
 {
+	return;
 	//daca nu e incarcat ies
 	if ((!m_bLoaded) || (!m_bOneUpdateDone))
 		return;

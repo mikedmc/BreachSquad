@@ -57,12 +57,17 @@ void CLight::UpdateInternalData(CSpriteCollection* pLightsSprCol)
 		}
 		break;
 		case K_LVL_LT_DIRECTIONAL:
-		case K_LVL_LT_AMBIENTAL:
 		{
 			castShadows = false;
 			fVolumeAlpha = 0.0f;
 			bbox_ini.Set(Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f));
 			bbox = bbox_ini;
+		}
+		break;
+		case K_LVL_LT_AMBIENTAL:
+		{
+			castShadows = false;
+			fVolumeAlpha = 0.0f;
 		}
 		break;
 		case K_LVL_LT_PROJECTED_DIR:

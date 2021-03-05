@@ -115,6 +115,11 @@ void CAABB::Inflate(float dX, float dY)
 	Set(vMin, vMax);
 }
 
+float CAABB::GetArea()
+{
+	return vSize.x * vSize.y;
+}
+
 void CAABB::Scale(float fScalePercent)
 {
 	vHalfSize *= fScalePercent;

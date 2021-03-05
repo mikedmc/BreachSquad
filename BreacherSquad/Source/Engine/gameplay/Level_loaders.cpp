@@ -428,7 +428,13 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 
 		//save global ambient light color
 		if (nl->type == K_LVL_LT_AMBIENTAL)
+		{
 			m_colAmbientGlobal = nl->color;
+			// set ambiental bbox the size of the area
+			nl->bbox_ini = area->AABBbounds;
+			nl->bbox = nl->bbox_ini;
+			LOG(L"light: %.2f %.2f", nl->bbox.vMin.x, nl->bbox.vMin.y);
+		}
 
 		//load logic
 		nl->LoadLogic(fl);
@@ -482,7 +488,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	}
 
 
-	///--- objects - decorations ---
+	///--- objects - props ---
 	//read path
 	OS_freadString(fl, charArr);
 
