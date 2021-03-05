@@ -29,17 +29,18 @@ struct CLevelAreaDesc
 class CLevelArea
 {
 private:
-	PDEVICE					m_pDevice;
+	PDEVICE							m_pDevice;
 public:
-	UINT32					ID;								// area ID used for finding the area and for references to it
-	CTile**					tiles;							// actual tilemap
-	CAABB					AABBbounds;						// bounding box in world space
-	RECTXYWH				AABBbounds_TL;					// AABB in tiles, in world space
-	SIZEWH					sizeTL;							// Area size in tiles
-	bool					bVisible;
-	//bool bDiscovered - was it activated?
+	UINT32							ID;						// area ID used for finding the area and for references to it
+	CTile**							tiles;					// actual tilemap
+	CAABB							AABBbounds;				// bounding box in world space
+	RECTXYWH						AABBbounds_TL;			// AABB in tiles, in world space
+	SIZEWH							sizeTL;					// Area size in tiles
+	bool							bVisible;
+	//bool bDiscovered // Was it activated? as soon as an area becomes visible it activates itself and first neighbours
+	CFixedArray<CLevelArea*, 10>	arrNeighbours;
 
-	CTileBlockMeshManager	areaMesh;						// Mesh manager for the map, handles painting and breaking the tiles in smaller patches
+	CTileBlockMeshManager			areaMesh;				// Mesh manager for the map, handles painting and breaking the tiles in smaller patches
 
 public:
 	CLevelArea(UINT32 nID);

@@ -35,6 +35,7 @@ void CLevelArea::Release()
 		SAFE_DELETE_ARRAY(tiles);
 	}
 
+	arrNeighbours.Clear();
 	areaMesh.Release();
 }
 

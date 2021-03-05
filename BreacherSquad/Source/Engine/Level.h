@@ -157,6 +157,8 @@ public:
 	vector<CLevelArea*>		Areas_GetInRect(CAABB aabb);
 	// Returns area at point
 	CLevelArea*				Areas_GetAt(Vec2 vPos);
+	// Returns area with specified ID
+	CLevelArea*				Areas_GetByID(UINT32 nID);
 
 	///--- TEMPLATES ---
 	CGrowableArray<CWeaponTemplate*>		m_arrTemplatesWeapon;
@@ -387,15 +389,13 @@ public:
 	bool					IsLineOfSight(Vec2 pt1, Vec2 pt2, Vec2 * retVecCollisionPt = null, Vec2 * retVecCollisionNormal = null);
 
 	UINT32					m_unLastID;				//Last loaded ID - used to assign unique IDs to runtime spawned elements
-	UINT32					m_unLastAreaID;			//Last area ID - used to generate area IDs
 	//Generates a new ID and increments m_unLastID
 	UINT32					GenerateNextID();		
 	// Loads a level from an absolute path
 	OPRESULT				LoadLevel(WCHAR * strPathAbs);
 	// Loads a new area and adds it to the level (absolute path, real drive path)
 	// Adds all elements to the level arrays too
-	OPRESULT				LoadArea(WCHAR * strPathAbs, Vec2i posTL);
-	OPRESULT				ReleaseArea(int areaID);
+	OPRESULT				LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL);
 	// Releases all level data
 	void					Release();
 	// Gives you a random level from a shuffled list so you play all of them in random order

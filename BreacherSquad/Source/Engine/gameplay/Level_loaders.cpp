@@ -5,7 +5,6 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 {
 	//set last ID on a number that will never get reached from the editor or by adding areas
 	m_unLastID = 10000000;
-	m_unLastAreaID = 1;
 	int nChapterNumber = g_userData[K_MEMID_SELECTED_CHAPTER];
 	int nLevelNumber = g_userData[K_MEMID_SELECTED_LEVEL];
 	//--- set loaded level flags
@@ -130,17 +129,23 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	{
 		wsprintf(Path, L"media/levels/areas/%s.area", area->strAreaFile.c_str());
 		//#TODO: should return added area so we can further process it
-		V_OP_RET(LoadArea(Path, Vec2i(area->AABB.x * K_LGEN_BLOCK_W, area->AABB.y * K_LGEN_BLOCK_H)));
+		V_OP_RET(LoadArea(Path, area->nID, Vec2i(area->AABB.x * K_LGEN_BLOCK_W, area->AABB.y * K_LGEN_BLOCK_H)));
+	}
+	// set areas neighbour pointers
+	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
+	{
+		// order in m_arrAreas SHOULD correspond to the order in m_arrPlaced if area loading didn't fail
+		CLevelArea* plarea = m_arrAreas[ii];
+		CPlacedArea* srcarea = UTGetMissionGen().m_arrPlaced[ii];
+		for (auto conn : srcarea->arrConnections)
+		{
+			CLevelArea* neigh = Areas_GetByID(conn.pConnectedArea->nID);
+			_ASSERT(neigh != nullptr);
+			plarea->arrNeighbours.Add(neigh);
+		}
 	}
 
 	//#TODO: UTGetMissionGen().Release();
-/*
-	FileManager::GetMediaPath(L"media/levels/areas/2start.area", Path);
-	V_OP_RET(LoadArea(Path, Vec2i(0,0)));
-	FileManager::GetMediaPath(L"media/levels/areas/3start.area", Path);
-	V_OP_RET(LoadArea(Path, Vec2i(16, 0)));
-  */
-
 
 	///--- everything loaded, SetAI here again so it sets all necessary pointers ---
 	//setez ai-ul la final ca sa execute functiile de initializare cand avem toate array-urile incarcate (ca sa ma asigur ca gaseste target ID-urile)
@@ -249,10 +254,10 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 }
 
 
-OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, Vec2i posTL)
+OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 {
 	// increment area ID for the next area
-	CLevelArea* area = new CLevelArea(m_unLastAreaID++);
+	CLevelArea* area = new CLevelArea(nAreaID);
 	// base ID for level elements so we don't overwrite existing IDs
 	UINT32 unBaseID = area->ID * 10000;
 	

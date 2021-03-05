@@ -1333,7 +1333,6 @@ UINT32 CLevel::GenerateNextID()
 CLevel::CLevel()
 {
 	m_unLastID = 10000000;
-	m_unLastAreaID = 1;
 
 	m_bufferedPainter.Init(4000);
 		
@@ -1836,6 +1835,17 @@ CLevelArea* CLevel::Areas_GetAt(Vec2 vPos)
 	{
 		CLevelArea* area = m_arrAreas[ii];
 		if (area->AABBbounds.PointIn(vPos))
+			return area;
+	}
+	return nullptr;
+}
+
+CLevelArea* CLevel::Areas_GetByID(UINT32 nID)
+{
+	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
+	{
+		CLevelArea* area = m_arrAreas[ii];
+		if (area->ID == nID)
 			return area;
 	}
 	return nullptr;
