@@ -15,7 +15,6 @@ public:
 	CAABB						m_bbox;						// BBOX in world coords
 
 	int							m_arrMeshIdx[K_TBM_MAX_LAYERS]{};	// Array of mesh indexes per layer, or -1 for empty layers
-	int							m_ShadowMeshIdx;			// The shadow is different because it's painted from the lights texture (triple the resolution)
 
 public:
 	CTileBlockMesh();
@@ -29,7 +28,6 @@ public:
 	void						Clear();
 
 	void						PaintLayer(int nLayer, bool bSetFVF = false);
-	void						PaintShadowLayer(bool bSetFVF = false);
 };
 
 // Keeps an array of tileblocks and manages them
@@ -56,8 +54,6 @@ public:
 
 	// Paints tile layer for visible buffers (use idx from eAreaLayer)
 	OPRESULT					PaintLayer(int layerIdx);
-	// Paints the shadow layer
-	OPRESULT					PaintShadowLayer();
 
 	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
 	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);

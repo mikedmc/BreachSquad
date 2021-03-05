@@ -5,14 +5,12 @@ CTileBlockMesh::CTileBlockMesh()
 {
 	m_Painter.Init(512);
 	memset(m_arrMeshIdx, -1, sizeof(int) * ARRAY_SIZE(m_arrMeshIdx));
-	m_ShadowMeshIdx = -1;
 }
 
 CTileBlockMesh::CTileBlockMesh(PDEVICE pDevice)
 {
 	m_Painter.Init(512, pDevice);
 	memset(m_arrMeshIdx, -1, sizeof(int) * ARRAY_SIZE(m_arrMeshIdx));
-	m_ShadowMeshIdx = -1;
 }
 
 CTileBlockMesh::~CTileBlockMesh()
@@ -166,14 +164,14 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 
 
 	///--- build shadow buffer ---
-	if (OP_SUCCESS(m_Painter.BeginMesh(m_ShadowMeshIdx)))
+	if (OP_SUCCESS(m_Painter.BeginMesh(m_arrMeshIdx[K_AL_WALLSHADOWS])))
 	{
 		nCur = 0;
-		for (int yy = 0; yy < mapSizeTL.h; yy++)
+		for (int yy = 0; yy < m_mapAreaTL.h; yy++)
 		{
-			for (int xx = 0; xx < mapSizeTL.w; xx++)
+			for (int xx = 0; xx < m_mapAreaTL.w; xx++)
 			{
-				CTile* tl = &map[xx][yy];
+				CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
 				// skip non shadowed tiles
 				if (tl->nShadowFrame < 0)
 					continue;
@@ -201,10 +199,7 @@ OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZ
 		int nQuads = m_Painter.EndMesh();
 
 		LOG("shadow quads:%d", nQuads);
-		if (nQuads > 0)
-			bIsEmpty = false;				// we have at least some tris so block is not empty
-		else
-			m_ShadowMeshIdx = -1;			// make sure we don't even call draw if layer is empty
+		(nQuads > 0) ? bIsEmpty = false : m_arrMeshIdx[K_AL_WALLSHADOWS] = -1;
 	}
 
 
@@ -224,18 +219,12 @@ void CTileBlockMesh::Clear()
 {
 	memset(m_arrMeshIdx, -1, sizeof(int) * ARRAY_SIZE(m_arrMeshIdx));
 	m_Painter.ClearBuffers();
-	m_ShadowMeshIdx = -1;
 }
 
 void CTileBlockMesh::PaintLayer(int nLayer, bool bSetFVF /*= false*/)
 {
 	_ASSERT((nLayer >= 0) && (nLayer < K_TBM_MAX_LAYERS));
 	m_Painter.DrawMesh(m_arrMeshIdx[nLayer], bSetFVF);
-}
-
-void CTileBlockMesh::PaintShadowLayer(bool bSetFVF /*= false*/)
-{
-	m_Painter.DrawMesh(m_ShadowMeshIdx, bSetFVF);
 }
 
 ///----------------------------------------------
@@ -314,16 +303,6 @@ OPRESULT CTileBlockMeshManager::PaintLayer(int layerIdx)
 	{
 		CTileBlockMesh* tbm = arrVisible[kk];
 		tbm->PaintLayer((int)layerIdx, true);
-	}
-
-	return K_OP_OK;
-}
-
-OPRESULT CTileBlockMeshManager::PaintShadowLayer()
-{
-	for (int kk = 0; kk < arrVisible.Count(); kk++)
-	{
-		arrVisible[kk]->PaintShadowLayer(true);
 	}
 
 	return K_OP_OK;

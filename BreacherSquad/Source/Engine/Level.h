@@ -151,8 +151,6 @@ public:
 	int						Areas_UpdateVisibility(RECTXYWH_F camRect);
 	// Paints tile layer for visible areas
 	OPRESULT				Areas_PaintLayer(eAreaLayer layerIdx);
-	// Paints the shadow layer for visible areas
-	OPRESULT				Areas_PaintShadowLayer();
 	// Returns array of areas that intersect aabb
 	vector<CLevelArea*>		Areas_GetInRect(CAABB aabb);
 	// Returns area at point

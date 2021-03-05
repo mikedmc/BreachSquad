@@ -127,8 +127,9 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	///--- LOAD AREAS:
 	for (auto area : UTGetMissionGen().m_arrPlaced)
 	{
-		wsprintf(Path, L"media/levels/areas/%s.area", area->strAreaFile.c_str());
-		//#TODO: should return added area so we can further process it
+		WCHAR tmppath[MAX_PATH];
+		wsprintf(tmppath, L"media/levels/areas/%s.area", area->strAreaFile.c_str());
+		FileManager::GetMediaPath(tmppath, Path);
 		V_OP_RET(LoadArea(Path, area->nID, Vec2i(area->AABB.x * K_LGEN_BLOCK_W, area->AABB.y * K_LGEN_BLOCK_H)));
 	}
 	// set areas neighbour pointers
@@ -144,8 +145,6 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			plarea->arrNeighbours.Add(neigh);
 		}
 	}
-
-	//#TODO: UTGetMissionGen().Release();
 
 	///--- everything loaded, SetAI here again so it sets all necessary pointers ---
 	//setez ai-ul la final ca sa execute functiile de initializare cand avem toate array-urile incarcate (ca sa ma asigur ca gaseste target ID-urile)
@@ -217,9 +216,10 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		}
 	}
 
+	// release mission generator data
+	UTGetMissionGen().Release();
 	//clear global script memory (per level instance)
 	UTGetScriptManager().ClearGlobalMemory();
-
 	//reset time multiplier
 	SetTimeMultiplier(1.0f, 0.0f);
 	// compute dirty rects (collisions and walls, wall shadows and other data)
@@ -230,8 +230,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		CLevelArea* area = m_arrAreas[ii];
 		V_OP_RET(area->BuildBuffers(m_pDevice, &m_sprLights));
 	}
-
-	//facem un build visibility lists
+	
 	BuildVisibilityLists();
 
 	//save type of loaded mission

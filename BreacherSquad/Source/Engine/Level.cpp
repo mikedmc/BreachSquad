@@ -1685,6 +1685,8 @@ void CLevel::UpdateDirtyRects()
 		for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 		{
 			CLevelArea* area = m_arrAreas[ii];
+			if (!rect.Intersects(area->AABBbounds_TL))
+				continue;
 			// take border tiles into account:
 			// clamp to smaller size because we check neighbours
 			RECTXYWH lrect = rect;
@@ -1803,16 +1805,6 @@ OPRESULT CLevel::Areas_PaintLayer(eAreaLayer layerIdx)
 	{
 		CLevelArea* area = m_arrAreas[ii];
 		V_OP_RET(area->areaMesh.PaintLayer(layerIdx));
-	}
-	return K_OP_OK;
-}
-
-OPRESULT CLevel::Areas_PaintShadowLayer()
-{
-	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
-	{
-		CLevelArea* area = m_arrAreas[ii];
-		V_OP_RET(area->areaMesh.PaintShadowLayer());
 	}
 	return K_OP_OK;
 }
@@ -10866,7 +10858,6 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	Areas_PaintLayer(K_AL_FLOOR);
 	Areas_PaintLayer(K_AL_WALLS);
 
-
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 	if (pSprVS)
 		UTPainter().Begin(pSprVS, matView * *matProj);
@@ -11039,33 +11030,11 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 		}
 	}
 
-	///----------------------------------------------------------------------------------
-	/// SHADOWS
-	///----------------------------------------------------------------------------------
 
-	///--- precomputed wall shadows over directional lights
 	AdditiveBlendingOFF(m_pDevice, NULL);
-	scTexture* pShadowsTex = m_sprLights.GetTextureByAnim(ANM_LIGHTS_SPR_SHADOWS, 0, 0);
-	if (pShadowsTex)
-		m_pDevice->SetTexture(0, pShadowsTex->pTex);
-	//#HINT: UpdateVisibility is optional as it was done in the previous colors render pass
-	Areas_UpdateVisibility(camrect);
-	Areas_PaintShadowLayer();
-	
-	///----------------------------------------------------------------------------------
-	/// LIGHTS
-	///----------------------------------------------------------------------------------
-	AdditiveBlendingON(m_pDevice, NULL);
-
-	///--- bullet lights
-	// bullet shadows
-	PaintBullets(K_LVL_RP_LIGHTS);
-	UTPainter().Flush();
-	
-
 	///--- ambient light(s)
 	// paint all general ambient lights and area lights here
-	//#TODO: if we only have one ambiental per level then take color from g_wAmbientcolor
+	//#TODO: paint one ambiental per area!
 	UTGetShaderManager().SetVS(nullptr);
 	UTGetShaderManager().SetPS(nullptr);
 	m_pDevice->SetTexture(0, nullptr);
@@ -11080,6 +11049,29 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 			break;
 		}
 	}
+
+
+	///----------------------------------------------------------------------------------
+	/// SHADOWS
+	///----------------------------------------------------------------------------------
+	scTexture* pShadowsTex = m_sprLights.GetTextureByAnim(ANM_LIGHTS_SPR_SHADOWS, 0, 0);
+	if (pShadowsTex)
+		m_pDevice->SetTexture(0, pShadowsTex->pTex);
+	//#HINT: UpdateVisibility is optional as it was done in the previous colors render pass
+	//#TODO: should be called only once on update as it will control the activation of areas
+	Areas_UpdateVisibility(camrect);
+	Areas_PaintLayer(K_AL_WALLSHADOWS);
+	
+	///----------------------------------------------------------------------------------
+	/// LIGHTS
+	///----------------------------------------------------------------------------------
+	AdditiveBlendingON(m_pDevice, NULL);
+
+	///--- bullet lights
+	// bullet shadows
+	PaintBullets(K_LVL_RP_LIGHTS);
+	UTPainter().Flush();
+	
 
 	///--- point lights
 	CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
