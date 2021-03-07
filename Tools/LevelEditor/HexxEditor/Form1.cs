@@ -1778,6 +1778,7 @@ namespace HexxEditor
 
             Undo_SetCurrent(K_UNDO_TILES);
 
+            gMap.ClearEmptyblocks();
             BuildAllBlockImages();
         }
 
@@ -2089,6 +2090,7 @@ namespace HexxEditor
             Pen penDottedGr1 = new Pen(aHatchBrush);
 
             Font arial10b = new Font("Arial", 10, FontStyle.Bold);
+            Rectangle AABBlevel = new Rectangle();
 
             if (invertBackground)
             {
@@ -2146,13 +2148,15 @@ namespace HexxEditor
             ///--- deseneaza nivelul
             if (g_wndMaterials.g_TilesetImg != null)
             {
-                //deseneaza tile-urile vizibile
-                Rectangle srcr = new Rectangle();
-
+                Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;
                 //deseneaza tabla de joc
                 for (int kk = 0; kk < gMap.Blocks.Count; kk++)
                 {
                     CTileBlock tb = gMap.Blocks[kk] as CTileBlock;
+                    if (tb.pos.X < blminx) blminx = tb.pos.X;
+                    if (tb.pos.Y < blminy) blminy = tb.pos.Y;
+                    if (tb.pos.X > blmaxx) blmaxx = tb.pos.X;
+                    if (tb.pos.Y > blmaxy) blmaxy = tb.pos.Y;
 
                     //daca nu sunt in ecran nu le deseneaza
                     if (((tb.pos.X + 1) * BLOCK_W * TILE_WIDTH < cameraPos.X) || ((tb.pos.Y + 1) * BLOCK_H * TILE_HEIGHT < cameraPos.Y) ||
@@ -2162,33 +2166,6 @@ namespace HexxEditor
 
                     //paint block image all at once
                     pbGr.DrawImage(tb.layerImg, tb.pos.X * BLOCK_W * TILE_WIDTH - cameraPos.X, tb.pos.Y * BLOCK_H * TILE_HEIGHT - cameraPos.Y);
-                    
-
-                    /*
-                     * old way: paint tile by tile
-                    for (int layer = 0; layer < K_LAYERS_CNT; layer++)
-                    {
-                        if (!layers_checkboxes[layer].Checked)
-                            continue;
-                        for (int yy = 0; yy < BLOCK_H; yy++)
-                        {
-                            for (int xx = 0; xx < BLOCK_W; xx++)
-                            {
-                                int tileID = tb.tiles[xx, yy].tileID[layer];
-                                if (tileID < 0)
-                                    continue;
-
-                                srcr.X = (tileID % TILESET_COLUMNS) * TILE_WIDTH;
-                                srcr.Y = (tileID / TILESET_COLUMNS) * TILE_HEIGHT;
-                                srcr.Width = TILE_WIDTH; srcr.Height = TILE_HEIGHT;
-
-                                pbGr.DrawImage(g_wndMaterials.g_TilesetImg, tb.pos.X * BLOCK_W * TILE_WIDTH + xx * TILE_WIDTH - cameraPos.X,
-                                    tb.pos.Y * BLOCK_H * TILE_HEIGHT + yy * TILE_HEIGHT - cameraPos.Y, srcr, GraphicsUnit.Pixel);
-
-                            }
-                        }
-                    }
-                    */
                     //deseneaza patratele rosii pe tile-urile care se suprapun
                     if ((chk_showOverlappingTiles.Checked) && (g_brushMode == BRUSH_MODE_TILES))
                     {
@@ -2214,6 +2191,13 @@ namespace HexxEditor
                         }
                     }
                 }
+
+                // set level bbox
+                AABBlevel = new Rectangle(blminx * TILE_WIDTH * BLOCK_W - 1, 
+                    blminy * TILE_HEIGHT * BLOCK_H - 1, 
+                    ((blmaxx - blminx + 1) * TILE_WIDTH * BLOCK_W + 2), 
+                    ((blmaxy - blminy + 1) * TILE_HEIGHT * BLOCK_H + 2));
+
             }
 
 
@@ -2788,7 +2772,7 @@ namespace HexxEditor
             //area selection (selectia deja facuta)
             if (g_brushMode == BRUSH_MODE_TILES)
             {
-                //selectia pe tiles
+                // tiles selection
                 if ((g_SelectedArea.Width > 0.0f) && (g_SelectedArea.Height > 0.0f))
                 {
                     RectangleF rct2 = g_SelectedAreaTL;
@@ -2796,6 +2780,13 @@ namespace HexxEditor
                     rct2.Width = rct2.Width * TILE_WIDTH * zoomLevel; rct2.Height = rct2.Height * TILE_HEIGHT * zoomLevel;
                     pbGr.DrawRectangle(penDottedGr1, RectFtoRect(rct2));
                 }
+
+                // level bounds
+                RectangleF rct3 = AABBlevel;
+                rct3.X = (AABBlevel.X - cameraPos.X) * zoomLevel; rct3.Y = (AABBlevel.Y - cameraPos.Y) * zoomLevel;
+                rct3.Width = AABBlevel.Width * zoomLevel; rct3.Height = AABBlevel.Height * zoomLevel;
+                pbGr.DrawRectangle(Pens.BlueViolet, RectFtoRect(rct3));
+
             }
 
             //gridul in timpul selectiei
@@ -4522,7 +4513,7 @@ namespace HexxEditor
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("BreacherSquad Levels Editor\nv1.2.2 from 31-Oct-2019\n(c)2021 PixelShard", "About", MessageBoxButtons.OK);
+            MessageBox.Show("BreacherSquad Levels Editor\nv1.2.3 from 07-Mar-2020\n(c)2021 PixelShard", "About", MessageBoxButtons.OK);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
