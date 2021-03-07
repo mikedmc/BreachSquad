@@ -1717,7 +1717,8 @@ namespace HexxEditor
                         for (int xx = 0; xx < selRectTL.Width; xx++)
                         {
                             CTile tl = gMap.getTile(selRectTL.X + xx, selRectTL.Y + yy);
-                            gMap.setTile(pastePosTL.X + xx, pastePosTL.Y + yy, tl.tileID[kk], kk);
+                            if(tl != null)
+                                gMap.setTile(pastePosTL.X + xx, pastePosTL.Y + yy, tl.tileID[kk], kk);
                         }
                     }
                 }
