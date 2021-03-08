@@ -10852,8 +10852,8 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
 	}
 
-	//#HACK: we floor the camera pos or we'll get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams
-	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(int(-camrect.x * K_GAME_PIXEL_SIZE_F), int(-camrect.y * K_GAME_PIXEL_SIZE_F)));
+	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams
+	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(/*floor*/(-camrect.x * K_GAME_PIXEL_SIZE_F), (-camrect.y * K_GAME_PIXEL_SIZE_F)));
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 
@@ -10963,8 +10963,8 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
 	}
 
-	//#HACK: we floor the camera pos or we'll get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams
-	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(int(-camrect.x * K_GAME_PIXEL_SIZE_F), int(-camrect.y * K_GAME_PIXEL_SIZE_F)));
+	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams
+	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2((-camrect.x * K_GAME_PIXEL_SIZE_F), (-camrect.y * K_GAME_PIXEL_SIZE_F)));
 
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
@@ -11003,6 +11003,8 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 	// generic VS data so we can automatically find positions
 	float fConstDataVS[][4] = {
 		{ camrect.x, camrect.y, camrect.w, camrect.h } //RTT rect_xywh in world coords
+		//#HACK: if flooring the campos then floor this camrect too that gets sent to the shader, but floor it to submultiples of pixel size (shader view is real space not screen space)
+		//{ floor(camrect.x * K_GAME_PIXEL_SIZE_F) / K_GAME_PIXEL_SIZE_F, floor(camrect.y * K_GAME_PIXEL_SIZE_F) / K_GAME_PIXEL_SIZE_F, camrect.w, camrect.h } //RTT rect_xywh in world coords
 	};
 
 	AdditiveBlendingON(m_pDevice, NULL);
