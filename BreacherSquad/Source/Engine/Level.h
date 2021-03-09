@@ -134,9 +134,6 @@ public:
 	int						m_tilesTexNormIdx;				// tileset normals texture index
 	Vec2					m_vLevelOrigin;					// level origin for the editor (usually around start location)
 
-	RECTXYWH_F				m_visibleArea;					// visible area, in pixels, world coords
-	RECTXYWH				m_visibleAreaTL;				// visible area in tiles
-
 	vector<RECTXYWH>		m_arrDirtyRectsTL;				// tiles that need updating
 	CGrowableArray<CLevelArea*>		m_arrAreas;				// loaded areas
 	// Transforms mouse coordinates from screen space to game world (necessary for network play)
@@ -430,15 +427,6 @@ public:
 ///-- update/paint --	
 	// Main level Update
 	void					Update(float dTime_original);
-
-	//deseneaza in back buffer toate elementele iluminabile
-	HRESULT					PaintOffscreen();
-	//just clears the render targets
-	HRESULT					PaintOffscreen_nothing();
-	//deseneaza in compositing RT varianta finala a jocului, inainte de efectele de apa, foc, explo
-	HRESULT					PaintComposition();
-	//just clears the compositing buffer
-	HRESULT					PaintComposition_nothing();
 
 	//#TODO: to be replaced with generic function that takes a "channel" param
 	OPRESULT				PaintDeferredBuffers();

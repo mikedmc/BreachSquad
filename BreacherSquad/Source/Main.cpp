@@ -2179,40 +2179,26 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	Mat mWorldViewProjection;
 
 
-	///PART1. Here it paints the offscreen surfaces
+	///PART1. Paint the offscreen surfaces before the main render begin/end
 	switch (g_gameState)
 	{
 		case GAME_STATE_GAME:
 		{
 			//game is networked? Don't paint until we sync one frame (fixes bug that showed a frame from last coop game)
+			/*
 			if ((UTGetAppClass().IsGameNetworked()) && (g_nLastSyncedFrame <= 1))
 			{
 				break;
 			}
-
-			//build normal maps and self illumi
-			//g_level.PaintOffscreen();
-			//compose maps into final RT
-			/*
-			//#DMC: asa se foloseste RT manager, vezi rebel strain
-			RECT srcrct;
-			SetRect(&srcrct, gamerect.x, gamerect.y, gamerect.w, gamerect.h);
-			CRTManager::CEngineRenderTarget* pRT = UTGetRenderTargetsManager().GetRTbyUID(K_RTID_FINAL);
-			if (pRT != null)
-				g_pGameSprite->Draw(pRT->m_pRTTexture, &srcrct, NULL, &D3DXVECTOR3(0.0f, 0.0f, 0.0f), 0xffffffff);
 			*/
-
-			//g_level.PaintComposition();
-
-			// this will be called here (the only one)
 			g_level.PaintDeferredBuffers();
 		}
 		break;
 
 		default:  //on all other states just clear the RTT for now
 		{
-			g_level.PaintOffscreen_nothing();
-			g_level.PaintComposition_nothing();
+			//g_level.PaintOffscreen_nothing();
+			//g_level.PaintComposition_nothing();
 		}
 		break;
 	}
@@ -2326,7 +2312,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 					g_pGameSprite->Flush();
 				}
 				// paint game elements above RTT content
-				g_level.PaintUsingFinalRTT();
+				g_level.Paint();
 				
 				//final flush
 				g_pGameSprite->Flush();
