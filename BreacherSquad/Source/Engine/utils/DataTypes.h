@@ -79,6 +79,14 @@ public:
 		assert(nIndex < nMaxSize);
 		return m_pData[nIndex];
 	}
+
+	inline void Sort(int(*compare)(const void *elem1, const void *elem2))
+	{
+		if (nCount <= 0)
+			return;
+		qsort((void*)m_pData, (unsigned int)nCount, sizeof(TYPE), compare);
+	}
+
 };
 
 

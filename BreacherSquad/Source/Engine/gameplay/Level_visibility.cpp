@@ -3,9 +3,11 @@
 #include <algorithm> // std::sort
 
 // function used when sorting the visible elements by Y
-bool VisibleItemsSorter(CVisibleSortable& a, CVisibleSortable& b)
+int VisibleItemsSorter(const void * a, const void * b)
 {
-	return (a.fValue < b.fValue);
+	float fa = ((CVisibleSortable*)a)->fValue;
+	float fb = ((CVisibleSortable*)b)->fValue;
+	return (fa > fb) - (fa < fb);
 }
 
 
@@ -245,14 +247,7 @@ void CLevel::BuildVisibilityLists()
 	}
 
 	///--- sort all visible items
-	std::sort(m_visibleList.vecSorted.begin(), m_visibleList.vecSorted.end(), VisibleItemsSorter);
-
-#if defined(_DEBUG) || defined(DEBUG)
-	if (m_visibleList.vecSorted.size() >= K_VL_MAX_SORTED_VISIBLES)
-	{
-		ErrorBox(K_ERR_WARNING, L"VecSorted too small, speed improvement can be made by enlarging the vector.");
-	}
-#endif
+	m_visibleList.vecSorted.Sort(VisibleItemsSorter);
 }
 
 void CLevel::ClearVisibilityLists()
@@ -272,7 +267,5 @@ void CLevel::ClearVisibilityLists()
 	m_visibleList.logic_colShapesExtended.Clear();
 	m_visibleList.logic_colShapesSpecial.Clear();
 
-	// reserve 100 elements for onscreen sorted elements
-	m_visibleList.vecSorted.clear();
-	m_visibleList.vecSorted.reserve(K_VL_MAX_SORTED_VISIBLES);
+	m_visibleList.vecSorted.Clear();
 }

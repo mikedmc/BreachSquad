@@ -31,7 +31,7 @@ public:
 	CFixedArray<CCollisionShape*, 512> visible_colShapesLights;
 
 	// display elements sorted by Y
-	std::vector<CVisibleSortable> vecSorted;
+	CFixedArray<CVisibleSortable, 256> vecSorted;
 
 	//logic
 public:
