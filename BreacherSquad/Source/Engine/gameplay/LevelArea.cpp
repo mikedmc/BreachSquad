@@ -290,6 +290,34 @@ int CLevelArea::GetTilesCollisionBoxes(RECTXYXY srcBoxTL, CAABB* ret_arrAABBs, i
 	return nAdded;
 }
 
+int CLevelArea::GetTilesByFlag(RECTXYXY srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity)
+{
+	return 0;
+	/*
+	_ASSERT(ret_arrOccluders != nullptr);
+	int nAdded = 0;
+	// clamp src box to valid area
+	RECTXYXY box = srcBoxTL;
+	box.Clamp(AABBbounds_TL.x, AABBbounds_TL.y, AABBbounds_TL.x + AABBbounds_TL.w - 1, AABBbounds_TL.y + AABBbounds_TL.h - 1);
+	// bring to local space
+	box.Move(-AABBbounds_TL.x, -AABBbounds_TL.y);
+	//#TODO: should mix consecutive tiles into a single box as optimization, at least on horizontal
+	for (int yy = box.y1; yy <= box.y2; yy++)
+	{
+		_ASSERT((yy < sizeTL.h) && (yy >= 0));
+		for (int xx = box.x1; xx <= box.x2; xx++)
+		{
+			_ASSERT((xx < sizeTL.w) && (xx >= 0));
+			if ((tiles[xx][yy].flags & K_TILEFLAG_WALKABLE) == 0)
+			{
+			}
+		}
+	}
+
+	return nAdded;
+	*/
+}
+
 OPRESULT CLevelArea::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= NULL*/, void* pUserContext /*= NULL*/)
 {
 	V_OP_RET(areaMesh.OnCreateDevice(pDevice, pBBDesc, pUserContext));

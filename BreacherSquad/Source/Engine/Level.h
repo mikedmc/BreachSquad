@@ -149,11 +149,15 @@ public:
 	// Paints tile layer for visible areas
 	OPRESULT				Areas_PaintLayer(eAreaLayer layerIdx);
 	// Returns array of areas that intersect aabb
-	vector<CLevelArea*>		Areas_GetInRect(CAABB aabb);
+	vector<CLevelArea*>		Areas_GetAreasInRect(CAABB aabb);
 	// Returns area at point
 	CLevelArea*				Areas_GetAt(Vec2 vPos);
 	// Returns area with specified ID
 	CLevelArea*				Areas_GetByID(UINT32 nID);
+	// Adds all the tiles in srcRectTL (in tile coords) from all overlapped areas to arrTiles[x + y * w]. 
+	// srcRectTL will be part of the level bbox in tile coords. Make sure arrTiles is large enough. Array will be cleared inside the function.
+	// arrTiles is an array of CTile pointers
+	void					Areas_GetTilesSnapshot(RECTXYWH srcRectTL, CTile** arrTiles, int arrCapacity);
 
 	///--- TEMPLATES ---
 	CGrowableArray<CWeaponTemplate*>		m_arrTemplatesWeapon;

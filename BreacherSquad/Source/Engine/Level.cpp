@@ -1806,7 +1806,7 @@ OPRESULT CLevel::Areas_PaintLayer(eAreaLayer layerIdx)
 	return K_OP_OK;
 }
 
-std::vector<CLevelArea*> CLevel::Areas_GetInRect(CAABB aabb)
+std::vector<CLevelArea*> CLevel::Areas_GetAreasInRect(CAABB aabb)
 {
 	vector<CLevelArea*> retarr;
 	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
@@ -1838,6 +1838,43 @@ CLevelArea* CLevel::Areas_GetByID(UINT32 nID)
 			return area;
 	}
 	return nullptr;
+}
+
+void CLevel::Areas_GetTilesSnapshot(RECTXYWH srcRectTL, CTile** arrTiles, int arrCapacity)
+{
+	_ASSERT(arrTiles != nullptr);
+	if ((srcRectTL.w * srcRectTL.h) > arrCapacity)
+	{
+		ErrorBox(K_ERR_WARNING, L"Areas_GetTilesSnapshot:: array too small!");
+		return;
+	}
+	// clear array
+	memset(arrTiles, 0, sizeof(CTile*) * arrCapacity);
+	int nCur = 0;
+	// scan all areas one by one
+	for (int ii = 0; ii < m_arrAreas.Count(); ii++)
+	{
+		CLevelArea* area = m_arrAreas[ii];
+		RECTXYWH rectloc = area->AABBbounds_TL;
+		rectloc.Clamp(srcRectTL);
+		if ((rectloc.w <= 0) || (rectloc.h <= 0))
+			continue;
+		// bring to area space
+		rectloc.Move(-area->AABBbounds_TL.x, -area->AABBbounds_TL.y);
+		for (int yy = rectloc.y; yy < rectloc.y + rectloc.h; yy++)
+		{
+			for (int xx = rectloc.x; xx < rectloc.x + rectloc.w; xx++)
+			{
+				// brings tile from world pos to srcRectTL relative pos
+				Vec2i vPosTL(xx + area->AABBbounds_TL.x - srcRectTL.x, yy + area->AABBbounds_TL.y - srcRectTL.y);
+				int nidx = vPosTL.x + vPosTL.y * srcRectTL.w;
+				_ASSERT(nidx < arrCapacity);
+				// debug checkup:
+				//_ASSERT(xx >= 0 && yy >= 0 && xx < area->AABBbounds_TL.w && yy < area->AABBbounds_TL.h);
+				arrTiles[nidx] = &area->tiles[xx][yy];
+			}
+		}
+	}
 }
 
 CWeaponTemplate* CLevel::GetTemplateWeapon(WCHAR * templateName)
@@ -7017,6 +7054,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		}
 		//add boxes from tiles
 		//#TODO: if it catches some corners sometimes try enlarging the tiles collision area (boxUnionTiles) by 1 tile in all directions
+		//#OPTIMIZATION: verifica doar zonele vecine si doar daca moveBounds nu e complet inclusa in area curenta
 		static CAABB retAABBs[64];
 		for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 		{
@@ -11454,6 +11492,8 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 {
 	_ASSERT(pRetArr != nullptr && maxRetArrSize > 0);
 
+	// array to hold the tiles snapshots (linear matrix). Permits a max size of 32x32 tiles.
+	CTile* arrTilesSnapshot[32 * 32];
 	int nCur = 0;
 
 	Vec2 vPos = vEye;
@@ -11499,62 +11539,67 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 	///--- add occluders from tiles, optimizing for same wall lines
 	Vec2i tlmin(floor(bbox.vMin.x / K_TILE_SIZE_F), floor(bbox.vMin.y / K_TILE_SIZE_F));
 	Vec2i tlmax(floor(bbox.vMax.x / K_TILE_SIZE_F), floor(bbox.vMax.y / K_TILE_SIZE_F));
+	// limit to current level aabb in tiles
+	if (tlmin.x < 0) tlmin.x = 0;
+	if (tlmin.y < 0) tlmin.y = 0;
+	if (tlmax.x > m_levelAABB_TL.w - 1) tlmax.x = m_levelAABB_TL.w - 1;
+	if (tlmax.y > m_levelAABB_TL.h - 1) tlmax.y = m_levelAABB_TL.h - 1;
+	RECTXYWH lightAABB_TL(tlmin.x, tlmin.y, tlmax.x - tlmin.x + 1, tlmax.y - tlmin.y + 1);
+	// tiles are returned in the arrTilesetSnapshot as a matrix in linear form, 0 base index (vector[xx + yy * lightAABB_TL.w])
+	Areas_GetTilesSnapshot(lightAABB_TL, arrTilesSnapshot, ARRAY_SIZE(arrTilesSnapshot));
 
-	//#TODO: metoda optimizata care aduce un array de tiles valide din intersectiile cu areas. Decomentez tot dupa ce fac functia respectiva.
-//	if (tlmin.x < 0) tlmin.x = 0;
-//	if (tlmin.y < 0) tlmin.y = 0;
-//	if (tlmax.x > levelSizeTL.w - 1) tlmax.x = levelSizeTL.w - 1;
-//	if (tlmax.y > levelSizeTL.h - 1) tlmax.y = levelSizeTL.h - 1;
-//
-//	for (int yy = tlmin.y; yy <= tlmax.y; yy++)
-//	{
-//		for (int xx = tlmin.x; xx <= tlmax.x; xx++)
-//		{
-//			_ASSERT(nCur < maxRetArrSize - 2);
-//
-//			CTile* tl = &tiles[xx][yy];
-//			CAABB chkbb(xx * K_TILE_SIZE_F, yy * K_TILE_SIZE_F, (xx + 1) * K_TILE_SIZE_F, (yy + 1) * K_TILE_SIZE_F);
-//#ifdef K_CLIP_OCCLUDERS_TO_LIGHT
-//			// clip horizontally, do it in a fast way just so we don't miss wall intersections when colliders go outside the light bbox
-//			if (chkbb.vMax.x > bbox.vMax.x) chkbb.vMax.x = bbox.vMax.x;
-//			if (chkbb.vMin.x < bbox.vMin.x) chkbb.vMin.x = bbox.vMin.x;
-//			// ignore vertically for now, it errors but not so much as to be visible
-//			//if (chkbb.vMax.y > bbox.vMax.y) chkbb.vMax.y = bbox.vMax.y;
-//			//if (chkbb.vMin.y < bbox.vMin.y) chkbb.vMin.y = bbox.vMin.y;
-//#endif
-//
-//			// can the tile cast shadows
-//			if (tl->flags & K_TILEFLAG_HASWALL_MASK)
-//			{
-//				if ((tl->flags & K_TILEFLAG_HASWALL_D) && (vEye.y > chkbb.vMax.y))
-//				{
-//					//optimize same wall: check last wall and if it's the same just make the occluder longer
-//					if ((nCur > 0) && (pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vEnd.x == chkbb.vMin.x))
-//						pRetArr[nCur - 1].MoveEnd(chkbb.vMax, vPos);
-//					else
-//						/*ID is wall Y in tileset plus a value to not collide with the collbox ids */
-//						pRetArr[nCur++].Set(Vec2(chkbb.vMin.x, chkbb.vMax.y), chkbb.vMax, vNYp, vPos, yy, K_WALL_HEIGHT_SCREEN);
-//				}
-//				else if ((tl->flags & K_TILEFLAG_HASWALL_U) && (vEye.y < chkbb.vMin.y))
-//				{
-//					//optimize same wall: check last wall and if it's the same just make the occluder longer
-//					if ((nCur > 0) && (pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vStart.x == chkbb.vMin.x))
-//						pRetArr[nCur - 1].MoveStart(Vec2(chkbb.vMax.x, chkbb.vMin.y), vPos);
-//					else
-//						pRetArr[nCur++].Set(Vec2(chkbb.vMax.x, chkbb.vMin.y), chkbb.vMin, vNYn, vPos, yy, 0.0f);
-//				}
-//
-//				if ((tl->flags & K_TILEFLAG_HASWALL_R) && (vEye.x > chkbb.vMax.x))
-//				{
-//					pRetArr[nCur++].Set(chkbb.vMax, Vec2(chkbb.vMax.x, chkbb.vMin.y), vNXp, vPos);
-//				}
-//				else if ((tl->flags & K_TILEFLAG_HASWALL_L) && (vEye.x < chkbb.vMin.x))
-//				{
-//					pRetArr[nCur++].Set(chkbb.vMin, Vec2(chkbb.vMin.x, chkbb.vMax.y), vNXn, vPos);
-//				}
-//			}
-//		}
-//	}
+	for (int yy = tlmin.y; yy <= tlmax.y; yy++)
+	{
+		for (int xx = tlmin.x; xx <= tlmax.x; xx++)
+		{
+			_ASSERT(nCur < maxRetArrSize - 2);
+
+			CTile* tl = arrTilesSnapshot[xx - tlmin.x + (yy - tlmin.y) * lightAABB_TL.w];
+			if(tl == nullptr)
+				continue;
+
+			CAABB chkbb(xx * K_TILE_SIZE_F, yy * K_TILE_SIZE_F, (xx + 1) * K_TILE_SIZE_F, (yy + 1) * K_TILE_SIZE_F);
+#ifdef K_CLIP_OCCLUDERS_TO_LIGHT
+			// clip horizontally, do it in a fast way just so we don't miss wall intersections when colliders go outside the light bbox
+			if (chkbb.vMax.x > bbox.vMax.x) chkbb.vMax.x = bbox.vMax.x;
+			if (chkbb.vMin.x < bbox.vMin.x) chkbb.vMin.x = bbox.vMin.x;
+			// ignore vertically for now, it errors but not so much as to be visible
+			//if (chkbb.vMax.y > bbox.vMax.y) chkbb.vMax.y = bbox.vMax.y;
+			//if (chkbb.vMin.y < bbox.vMin.y) chkbb.vMin.y = bbox.vMin.y;
+#endif
+
+			// can the tile cast shadows
+			if (tl->flags & K_TILEFLAG_HASWALL_MASK)
+			{
+				if ((tl->flags & K_TILEFLAG_HASWALL_D) && (vEye.y > chkbb.vMax.y))
+				{
+					//optimize same wall: check last wall and if it's the same just make the occluder longer
+					if ((nCur > 0) && (pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vEnd.x == chkbb.vMin.x))
+						pRetArr[nCur - 1].MoveEnd(chkbb.vMax, vPos);
+					else
+						/*ID is wall Y in tileset plus a value to not collide with the collbox ids */
+						pRetArr[nCur++].Set(Vec2(chkbb.vMin.x, chkbb.vMax.y), chkbb.vMax, vNYp, vPos, yy, K_WALL_HEIGHT_SCREEN);
+				}
+				else if ((tl->flags & K_TILEFLAG_HASWALL_U) && (vEye.y < chkbb.vMin.y))
+				{
+					//optimize same wall: check last wall and if it's the same just make the occluder longer
+					if ((nCur > 0) && (pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vStart.x == chkbb.vMin.x))
+						pRetArr[nCur - 1].MoveStart(Vec2(chkbb.vMax.x, chkbb.vMin.y), vPos);
+					else
+						pRetArr[nCur++].Set(Vec2(chkbb.vMax.x, chkbb.vMin.y), chkbb.vMin, vNYn, vPos, yy, 0.0f);
+				}
+
+				if ((tl->flags & K_TILEFLAG_HASWALL_R) && (vEye.x > chkbb.vMax.x))
+				{
+					pRetArr[nCur++].Set(chkbb.vMax, Vec2(chkbb.vMax.x, chkbb.vMin.y), vNXp, vPos);
+				}
+				else if ((tl->flags & K_TILEFLAG_HASWALL_L) && (vEye.x < chkbb.vMin.x))
+				{
+					pRetArr[nCur++].Set(chkbb.vMin, Vec2(chkbb.vMin.x, chkbb.vMax.y), vNXn, vPos);
+				}
+			}
+		}
+	}
 
 	///--- add light range segments (don't set normals so we don't extend the walls on it)
 	// add them last so we prioritize intersecting with the others first

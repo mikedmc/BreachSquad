@@ -1330,8 +1330,10 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 				{
 					//SPINE update animation states
 					g_spineMgr.UpdateAnimationStates(fElapsedTime, fTime);
-
+					
+					// Update level and all spine objects and bones
 					g_level.Update(fElapsedTime);
+
 					//SPINE update final skeleton world positions (no bone changes allowed after this)
 					g_spineMgr.Update(fElapsedTime, fTime);
 

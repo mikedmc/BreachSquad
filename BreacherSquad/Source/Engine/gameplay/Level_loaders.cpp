@@ -36,6 +36,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 	//reset shakes
 	m_camLevel.ShakeScreen(0.0f, 0.0f);
+	m_levelAABB.Set(0, 0, 0, 0);
 	//reset all timers
 	m_Timers.ResetTimers();
 
@@ -132,11 +133,13 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		FileManager::GetMediaPath(tmppath, Path);
 		V_OP_RET(LoadArea(Path, area->nID, Vec2i(area->AABB.x * K_LGEN_BLOCK_W, area->AABB.y * K_LGEN_BLOCK_H)));
 	}
+
 	// set areas neighbour pointers
 	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 	{
 		// order in m_arrAreas SHOULD correspond to the order in m_arrPlaced if area loading didn't fail
 		CLevelArea* plarea = m_arrAreas[ii];
+		// get the same area description from missions generator and find neighbours
 		CPlacedArea* srcarea = UTGetMissionGen().m_arrPlaced[ii];
 		for (auto conn : srcarea->arrConnections)
 		{
@@ -144,7 +147,12 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			_ASSERT(neigh != nullptr);
 			plarea->arrNeighbours.Add(neigh);
 		}
+		// enlarge level area and other level data
+		m_levelAABB.Union(plarea->AABBbounds.to_RECTXYWH_F());
 	}
+	// set level aabb in tiles too
+	m_levelAABB_TL.Set(floor(m_levelAABB.x / K_TILE_SIZE), floor(m_levelAABB.y / K_TILE_SIZE), (int)(m_levelAABB.w / K_TILE_SIZE), (int)(m_levelAABB.h / K_TILE_SIZE));
+
 
 	///--- everything loaded, SetAI here again so it sets all necessary pointers ---
 	//setez ai-ul la final ca sa execute functiile de initializare cand avem toate array-urile incarcate (ca sa ma asigur ca gaseste target ID-urile)
@@ -898,8 +906,6 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	LOG(L"Game:: Area loaded:[%s] net.randcheck[%d]", strPathAbs, m_rand.RandInt(60000));
 
 	m_arrAreas.Add(area);
-	// enlarge level area and other level data
-	m_levelAABB.Union(area->AABBbounds.to_RECTXYWH_F());
 
 	return K_OP_OK;
 }
