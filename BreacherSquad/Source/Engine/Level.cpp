@@ -1689,7 +1689,7 @@ void CLevel::UpdateDirtyRects()
 			RECTXYWH lrect = rect;
 //			area->AABBbounds_TL.Intersects(
 			// clamp and bring rectangle to local space
-			lrect.Clamp(area->AABBbounds_TL);
+			lrect.IntersectWith(area->AABBbounds_TL);
 			if ((lrect.w == 0) || (lrect.h == 0))
 				continue;
 
@@ -1856,7 +1856,7 @@ void CLevel::Areas_GetTilesSnapshot(RECTXYWH srcRectTL, CTile** arrTiles, int ar
 	{
 		CLevelArea* area = m_arrAreas[ii];
 		RECTXYWH rectloc = area->AABBbounds_TL;
-		rectloc.Clamp(srcRectTL);
+		rectloc.IntersectWith(srcRectTL);
 		if ((rectloc.w <= 0) || (rectloc.h <= 0))
 			continue;
 		// bring to area space
@@ -11540,11 +11540,8 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 	Vec2i tlmin(floor(bbox.vMin.x / K_TILE_SIZE_F), floor(bbox.vMin.y / K_TILE_SIZE_F));
 	Vec2i tlmax(floor(bbox.vMax.x / K_TILE_SIZE_F), floor(bbox.vMax.y / K_TILE_SIZE_F));
 	// limit to current level aabb in tiles
-	if (tlmin.x < 0) tlmin.x = 0;
-	if (tlmin.y < 0) tlmin.y = 0;
-	if (tlmax.x > m_levelAABB_TL.w - 1) tlmax.x = m_levelAABB_TL.w - 1;
-	if (tlmax.y > m_levelAABB_TL.h - 1) tlmax.y = m_levelAABB_TL.h - 1;
 	RECTXYWH lightAABB_TL(tlmin.x, tlmin.y, tlmax.x - tlmin.x + 1, tlmax.y - tlmin.y + 1);
+	lightAABB_TL.IntersectWith(m_levelAABB_TL);
 	// tiles are returned in the arrTilesetSnapshot as a matrix in linear form, 0 base index (vector[xx + yy * lightAABB_TL.w])
 	Areas_GetTilesSnapshot(lightAABB_TL, arrTilesSnapshot, ARRAY_SIZE(arrTilesSnapshot));
 

@@ -233,7 +233,7 @@ public:
 	}
 
 	// cuts the area outside of clampToThis
-	inline void Clamp(const RECTXYWH& clampToThis)
+	inline void IntersectWith(const RECTXYWH& clampToThis)
 	{
 		Vec2i vmin(x, y);
 		Vec2i vmax(x + w - 1, y + h - 1);
