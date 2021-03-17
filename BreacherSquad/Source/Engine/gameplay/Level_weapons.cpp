@@ -364,7 +364,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
 		fAimAng += fAimAngError;
 
 		//some weapons force the actor to play a verse when shooting
-		PlayActorSoundVerse(shooter, weapon->WeaponTemplate.sndActorVerse);
+		//PlayActorSoundVerse(shooter, weapon->WeaponTemplate.sndActorVerse);
 
 		//also shoot bullets
 		for (int kk = 0; kk < weapon->WeaponTemplate.nBulletsPerShot; kk++)

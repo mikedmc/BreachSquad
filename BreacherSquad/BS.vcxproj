@@ -348,8 +348,11 @@
     <ClInclude Include="Source\Engine\utils\DataTypes.h" />
     <ClInclude Include="Source\Engine\utils\dbgutil.h" />
     <ClInclude Include="Source\Engine\utils\enginecommon.h" />
+    <ClInclude Include="Source\Engine\utils\HashUtil.h" />
     <ClInclude Include="Source\Engine\utils\ParallaxBg.h" />
     <ClInclude Include="Source\Engine\utils\PlatformTypes.h" />
+    <ClInclude Include="Source\Engine\utils\StringHash.h" />
+    <ClInclude Include="Source\Engine\utils\StringHashA.h" />
     <ClInclude Include="Source\Engine\utils\UTMath.h" />
     <ClInclude Include="Source\LevelEd\LevelEditor.h" />
     <ClInclude Include="Source\resource.h" />
@@ -766,7 +769,10 @@
     <ClCompile Include="Source\Engine\utils\DataTypes.cpp" />
     <ClCompile Include="Source\Engine\utils\dbgutil.cpp" />
     <ClCompile Include="Source\Engine\utils\enginecommon.cpp" />
+    <ClCompile Include="Source\Engine\utils\HashUtil.cpp" />
     <ClCompile Include="Source\Engine\utils\ParallaxBg.cpp" />
+    <ClCompile Include="Source\Engine\utils\StringHash.cpp" />
+    <ClCompile Include="Source\Engine\utils\StringHashA.cpp" />
     <ClCompile Include="Source\Engine\utils\UTMath.cpp" />
     <ClCompile Include="Source\LevelEd\LevelEditor.cpp" />
     <ClCompile Include="Source\Main.cpp" />

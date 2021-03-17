@@ -175,8 +175,6 @@ public:
 	// Randomizes the actor a little so they don't all have the exact same speeds
 	void					RandomizeTemplateActor(CActorTemplate * actTemplate);
 	HRESULT					LoadActorTemplates(WCHAR * xmlPath);
-	// incarca bbox si hitpoints din animatie anume
-	HRESULT					LoadActorBBoxAndPoints(CActor * destAct, EActorAnims eAnim, int nAnimSet = 0);
 	// verifica daca se termina platforma pe care sta actorul, in directia ceruta
 	bool					IsPlatformEnding(CActor* actor, int nDirSign);
 
@@ -209,14 +207,6 @@ public:
 	void					SetActorDoT(CActor* act, CDamageOverTime::EDoTType eType, float fDuration, float fDamagePerSec, EActorClass eExcludedClass, EActorClass eFilterClass, DWORD dwOwnerUID);
 	// Called when changing behaviors (to exit them gracefully)
 	void					OnActorBehaviorFinished(CActor * actor, EAIBehaviorType eOldBehavior);
-	// Seteaza animatia actorului o singura data, in functie de tipul animatiei cerute
-	void					SetActorAnimationOnce(CActor* actor, EActorAnims nAnimType, EActorAnims nAnimTypeFeet = K_LVL_ACT_ANIM_EMPTY, bool bKeepFrame = false);
-	// Gets the current type of animation that the actor is playing
-	EActorAnims				GetActorAnimationType(CActor* actor);
-	// Plays the actor verse from the template. 
-	void					PlayActorSoundVerse(CActor* actor, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly = false);
-	// Tells you if the actor has said animation 
-	FORCEINLINE bool		ActorHasAnimation(CActor* actor, EActorAnims nAnimType);
 	//Kills the actor
 	void					KillActor(CActor * actor, bool bSplatTarget = false);
 	// Use it to damage enemies and player

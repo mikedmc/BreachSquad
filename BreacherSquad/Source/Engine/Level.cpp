@@ -168,10 +168,12 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, Vec2 spa
 	//set position
 	actor->pos = spawnPos;
 	//actor->lookDirXsign = 1;
+	/*
 	if(actor->templateActor.bComposedAnimation)
 		SetActorAnimationOnce(actor, K_LVL_ACT_ANIM_IDLE, K_LVL_ACT_ANIM_FEET_IDLE);
 	else
 		SetActorAnimationOnce(actor, K_LVL_ACT_ANIM_IDLE);
+		*/
 	//randomize frames (advance for a random period)
 	if (m_sprActors.IsLooping(actor->sprite.animationIdx))
 	{
@@ -189,7 +191,7 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, Vec2 spa
 	//setul de animatii selectat
 	actor->SetAnimSet(0);
 	///--- hitpoints initialization ---
-	LoadActorBBoxAndPoints(actor, K_LVL_ACT_ANIM_REF_POSE, 0);
+	//LoadActorBBoxAndPoints(actor, K_LVL_ACT_ANIM_REF_POSE, 0);
 	//set bbox ini
 	actor->UpdateBBoxAndPoints();
 
@@ -404,7 +406,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		actor->nLastDamageTakenFromUID = pBullet->ownerUID;
 		//if he's still alive and you took enough of it's life say verse
 		if ((actor->fLife > 0.0f) && (fLifeTaken >= actor->templateActor.fLife * 0.1f))
-			PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_TAKING_DAMAGE, true);
+//			PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_TAKING_DAMAGE, true);
 
 		//life left in it?
 		if (actor->fLife > 0.0f)
@@ -535,7 +537,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 			CActor* pShooter = GetActorByUID(pBullet->ownerUID);
 			if (pShooter != null)
 			{
-				PlayActorSoundVerse(pShooter, K_LVL_ACT_VERSE_KILL_MADE);
+//				PlayActorSoundVerse(pShooter, K_LVL_ACT_VERSE_KILL_MADE);
 			}
 		}
 
@@ -2250,193 +2252,6 @@ HRESULT CLevel::LoadActorTemplates(WCHAR * xmlPath)
 	return hr;
 }
 
-HRESULT CLevel::LoadActorBBoxAndPoints(CActor * destAct, EActorAnims eAnim, int nAnimSet /*= 0*/)
-{
-	int animSet = LIMIT(nAnimSet, 0, K_LVL_ACT_ANIM_MAX_SETS);
-
-	//sunt 3 frames in REF_POSE: idle, crouch, dead; ia mereu din primul set momentan
-	int refposeAnim = destAct->templateActor.animIDs[eAnim][animSet];
-	int refposeframes = 0;
-	if (refposeAnim >= 0)
-	{
-		refposeframes = m_sprActors.GetAFramesCnt(refposeAnim);
-	}
-	else
-	{
-		ErrorBox(K_ERR_WARNING, L"InitActor::actor %s missing REF_POSE animation set %d!", destAct->templateActor.shName.text, animSet);
-		return E_INVALIDARG;
-	}
-
-	for (int ll = 0; ll < 3; ll++)
-	{
-		destAct->vecWeapon_abs[ll] = Vec2(0.0f, -1.0f); //setez pe -1 ca sa iasa din podea
-		destAct->vecHeart_abs[ll] = Vec2(0.0f, -1.0f);
-		destAct->vecGroundCheck_abs[ll] = Vec2(0.0f, 0.0f);
-		destAct->stateBBoxes[ll].Set(0.0f, 0.0f, 0.0f, 0.0f);
-
-		if (ll >= refposeframes)
-			continue;
-
-		if (refposeAnim >= 0)
-		{
-			POINTXYZ_INT pt;
-			//cautam punct arma
-			if (SUCCEEDED(m_sprActors.GetAFrameHitPointFlag(refposeAnim, ll, 0, K_LVL_ACTOR_HITPOINTFLAG_GUNPOS, &pt)))
-			{
-				destAct->vecWeapon_abs[ll] = Vec2(pt.x, pt.y);
-			}
-			//cautam punct inima
-			if (SUCCEEDED(m_sprActors.GetAFrameHitPointFlag(refposeAnim, ll, 0, K_LVL_ACTOR_HITPOINTFLAG_HEARTPOS, &pt)))
-			{
-				destAct->vecHeart_abs[ll] = Vec2(pt.x, pt.y);
-			}
-			//cautam punct ground check
-			if (SUCCEEDED(m_sprActors.GetAFrameHitPointFlag(refposeAnim, ll, 0, K_LVL_ACTOR_HITPOINTFLAG_GROUND_SWEEP, &pt)))
-			{
-				destAct->vecGroundCheck_abs[ll] = Vec2(pt.x, pt.y);
-			}
-			//BBOX
-			RECTXYWH playerbbox = m_sprActors.GetAFrameBBox(refposeAnim, ll);
-			destAct->stateBBoxes[ll].Set(playerbbox.x, playerbbox.y, playerbbox.w, playerbbox.h);
-		}
-	}
-
-	return S_OK;
-}
-
-void CLevel::SetActorAnimationOnce(CActor* actor, EActorAnims nAnimType, EActorAnims nAnimTypeFeet, bool bKeepFrame /*= false*/)
-{
-	//daca cer aceeasi animatie ies direct
-	if (actor == null)
-		return;
-
-	if (actor->eLastAnimSet != nAnimType)
-	{
-		//default animation set0 - primul set este obligatoriu
-		int anmidx = actor->templateActor.animIDs[nAnimType][0];
-		//select animation based on nAnimSet
-		int nAnimSet = actor->GetAnimSet();
-		if ((nAnimSet < 0) || (nAnimSet >= K_LVL_ACT_ANIM_MAX_SETS)) //random
-		{
-			//decid animatia efectiva dintre cea principala si cea alternativa
-			if ((actor->templateActor.animIDs[nAnimType][1] >= 0) && (m_rand.RandFloat(100.0f) <= 50.0f))
-				anmidx = actor->templateActor.animIDs[nAnimType][1];
-		}
-		else //setul de animatii selectat
-		{
-			//daca am animatie alternativa o setez altfel ramane seul 0
-			if(actor->templateActor.animIDs[nAnimType][nAnimSet] >= 0)
-				anmidx = actor->templateActor.animIDs[nAnimType][nAnimSet];
-		}
-
-		if (anmidx >= 0)
-		{
-			if (bKeepFrame)
-			{
-				actor->sprite.setAnimationOnce_keepFrame(&m_sprActors, anmidx);
-			}
-			else
-			{
-				actor->sprite.setAnimationOnce(anmidx);
-				//randomizare animatii looping care nu sunt compuse (ostateci, etc)
-				if ((!actor->templateActor.bComposedAnimation) && (m_sprActors.IsLooping(anmidx)))
-				{
-					//LOG(L"SetAnimOnce: %s ID %d to anim %d from %d", actor->templateActor.name.text, actor->ID, nAnimType, actor->eLastAnimSet);
-					actor->sprite.currentFrame = m_rand.RandInt(m_sprActors.GetAFramesCnt(anmidx));
-				}
-			}
-		}
-		//salvez animatia setata acum
-		actor->eLastAnimSet = nAnimType;
-
-		//VERSES by animations
-		switch (nAnimType)
-		{
-			case K_LVL_ACT_ANIM_RELOAD:
-			{
-				//only say reloading when out of ammo
-				if((actor->pCurrentWeapon != null) && (actor->pCurrentWeapon->ammoLeft == 0))
-					PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_RELOADING);
-			}
-			break;
-		}
-
-	}
-	//la animatia compusa setam feet animation separat
-	if (actor->templateActor.bComposedAnimation)
-	{
-		if (nAnimTypeFeet == K_LVL_ACT_ANIM_EMPTY)
-		{
-			actor->sprite_feet.animationIdx = -1;
-			actor->eLastAnimSet_feet = nAnimTypeFeet;
-		}
-		else if (actor->eLastAnimSet_feet != nAnimTypeFeet)
-		{
-			//salvez animatia setata acum
-			actor->eLastAnimSet_feet = nAnimTypeFeet;
-			//decid animatia efectiva dintre cea principala si cea alternativa
-			int anmidxfeet = actor->templateActor.animIDs[nAnimTypeFeet][0];
-			//daca am animatie alternativa o alege random
-			if ((actor->templateActor.animIDs[nAnimTypeFeet][1] >= 0) && (m_rand.RandFloat(100.0f) <= 50.0f))
-				anmidxfeet = actor->templateActor.animIDs[nAnimTypeFeet][1];
-
-			if (anmidxfeet >= 0)
-			{
-				if (bKeepFrame)
-					actor->sprite_feet.setAnimationOnce_keepFrame(&m_sprActors, anmidxfeet);
-				else
-					actor->sprite_feet.setAnimationOnce(anmidxfeet);
-			}
-		}
-	}
-
-}
-
-EActorAnims CLevel::GetActorAnimationType(CActor* actor)
-{
-	return actor->eLastAnimSet;
-}
-
-void CLevel::PlayActorSoundVerse(CActor* actor, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly)
-{
-	if ((actor == null) || (sVerse == K_LVL_ACT_VERSE_EMPTY))
-		return;
-	//timeout between same verses
-	if ((actor->fVerseCooldown > 0.0f) && (sVerse == actor->eLastPlayedVerse))
-		return;
-
-	int nVariation = -1;
-	if (actor->templateActor.soundIDs[(int)sVerse][0] >= 0)
-		nVariation = 0;
-	if (actor->templateActor.soundIDs[(int)sVerse][1] >= 0)
-		nVariation = randint(2);
-
-	if (nVariation < 0)
-		return;
-
-	//play only once
-	if (bPlayIfNotPlayingOnly)
-	{
-		if (SND_IS_PLAYING(actor->templateActor.soundIDs[(int)sVerse][nVariation]))
-			return;
-	}
-	//actually play the sound
-	//play only nearby sounds
-	Vec2 vDist(actor->pos.x - m_camLevel.GetCamPos().x, actor->pos.y - m_camLevel.GetCamPos().y);
-	if (MUVec2Len(&vDist) < K_GAME_HALF_HEIGHT * 1.5f)
-	{
-		SND_PLAY_POSITIONAL(actor->templateActor.soundIDs[(int)sVerse][nVariation], actor->posHeart);
-	}
-
-	actor->nLastPlayedVerseSndIdx = actor->templateActor.soundIDs[(int)sVerse][nVariation];
-	actor->eLastPlayedVerse = sVerse;
-	actor->fVerseCooldown = K_LVL_ACT_VERSES_TIMEOUT;
-}
-
-FORCEINLINE bool CLevel::ActorHasAnimation(CActor* actor, EActorAnims nAnimType)
-{
-	return ((actor->templateActor.animIDs[nAnimType][0] >= 0) || (actor->templateActor.animIDs[nAnimType][1] >= 0));
-}
 
 void CLevel::KillActor(CActor * actor, bool bSplatTarget)
 {
@@ -4300,7 +4115,7 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 		pActor->eLastAnimSet_feet = K_LVL_ACT_ANIM_EMPTY;
 	}
 	//set the heart and gun vectors again
-	LoadActorBBoxAndPoints(pActor, K_LVL_ACT_ANIM_REF_POSE, 0);
+	//LoadActorBBoxAndPoints(pActor, K_LVL_ACT_ANIM_REF_POSE, 0);
 
 	///--- PERKS ---
 	//apply perks that change current weapon
@@ -4440,7 +4255,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 				EActorSoundVerse eVerse = (EActorSoundVerse)GetListIndexByNameHash(cvc->m_strArg.getHash(), EActorSoundVerseNames, K_LVL_ACT_VERSES_COUNT);
 				if (eVerse != K_LVL_ACT_VERSE_EMPTY)
 				{
-					PlayActorSoundVerse(actor, eVerse);
+//					PlayActorSoundVerse(actor, eVerse);
 				}
 				else
 				{
@@ -4786,7 +4601,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 				EActorSoundVerse eVerse = (EActorSoundVerse)GetListIndexByNameHash(cvc->m_strArg.getHash(), EActorSoundVerseNames, K_LVL_ACT_VERSES_COUNT);
 				if (eVerse != K_LVL_ACT_VERSE_EMPTY)
 				{
-					PlayActorSoundVerse(actor, eVerse);
+//					PlayActorSoundVerse(actor, eVerse);
 				}
 				else
 				{
@@ -5093,7 +4908,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 
 			//play death verses
 			if ((dcmd == K_LVL_ACT_DEATHCMD_NONE) && (!bSpawnedDead))
-				PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_DIE);
+//				PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_DIE);
 
 			//hostages specials
 			if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_HOSTAGE)
@@ -5760,7 +5575,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						//play the verse only once
 						if (actor->AIsubState == 0)
 						{
-							PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_TAUNT);
+//							PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_TAUNT);
 						}
 
 						Vec2 vDelta = actor->m_AIsensorInfo.pTargetedActor->GetPosHeart() - actor->GetPosHeart();
@@ -6963,7 +6778,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//------------------------------------------------------------------------------------------
 
 	///--- set animations ---
-	SetActorAnimationOnce(actor, K_LVL_ACT_ANIM_IDLE, K_LVL_ACT_ANIM_FEET_IDLE);
+	//SetActorAnimationOnce(actor, K_LVL_ACT_ANIM_IDLE, K_LVL_ACT_ANIM_FEET_IDLE);
 	///--- anim sounds ---
 	if (aframeFlag & K_LVL_ACTIVE_AFRAMEFLAG_SOUND)
 	{
@@ -8096,7 +7911,7 @@ void CLevel::Update(float dTime_original)
 			if ((pPlayerActor[0] != null) && (fLocalTimeline > 0.5f) && (fLocalTimeline - dTime <= 0.5f))
 			{
 				nIntroVerseState = 1;
-				PlayActorSoundVerse(pPlayerActor[0], K_LVL_ACT_VERSE_START_GAME);
+//				PlayActorSoundVerse(pPlayerActor[0], K_LVL_ACT_VERSE_START_GAME);
 			}
 			//check to see when he stopped talking
 			if (nIntroVerseState == 1)
@@ -8109,7 +7924,7 @@ void CLevel::Update(float dTime_original)
 				{
 					if ((m_Timers.Tick(250)) && (pPlayerActor[0] != null) && (!SND_IS_PLAYING(pPlayerActor[0]->nLastPlayedVerseSndIdx)))
 					{
-						PlayActorSoundVerse(pPlayerActor[1], K_LVL_ACT_VERSE_JOIN_GAME);
+//						PlayActorSoundVerse(pPlayerActor[1], K_LVL_ACT_VERSE_JOIN_GAME);
 						nIntroVerseState = 0;
 					}
 				}
@@ -8279,7 +8094,7 @@ void CLevel::Update(float dTime_original)
 										IncreaseLevelStatistics(K_LVL_STATS_PL1_USE_EXTRA_LIFE_CNT + pPlayerActor[plidx]->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT);
 
 									//say spawn verse
-									PlayActorSoundVerse(pPlayerActor[plidx], K_LVL_ACT_VERSE_JOIN_GAME);
+//									PlayActorSoundVerse(pPlayerActor[plidx], K_LVL_ACT_VERSE_JOIN_GAME);
 
 									//scad numarul de vieti si anunt interfata
 									if (m_arrStats[K_LVL_STATS_PL1_LIVES + plidx * K_LVL_STATS_PLAYER_STATS_COUNT] > 0)

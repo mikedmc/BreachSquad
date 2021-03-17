@@ -182,7 +182,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 						CActor* act = GetClosestPlayer(target->pos);
 						if (act)
 						{
-							PlayActorSoundVerse(act, K_LVL_ACT_VERSE_BOMB_DEFUSED);
+							//PlayActorSoundVerse(act, K_LVL_ACT_VERSE_BOMB_DEFUSED);
 							//give points
 							GiveStrategicPoints(2.0f, &Vec2(act->bbox.vCenter.x, act->bbox.vMin.y));
 						}
