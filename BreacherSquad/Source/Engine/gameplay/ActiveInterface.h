@@ -62,7 +62,7 @@ public: //logic
 	float				AItimer1, AItimer2;	//timere folosite la diverse functii
 	float				AIfvar1, AIfvar2, AIfvar3; //diverse variabile folosite in AI
 	int					AIvar1, AIvar2;
-	Vec2			AIvec1;
+	Vec2				AIvec1;
 	bool				AIvarBool1, AIvarBool2;
 	CStringHash			AIstrvar1, AIstrvar2; //variabile string
 	int					AIsubState;			//sub-stare folosita la diferite AI-uri
@@ -73,7 +73,6 @@ public: //logic
 	bool				bHidden;			//DO NOT SET DIRECTLY! (use bSetHidden) flag de hidden. vizibil si din editor
 	bool				bSetHidden;			//flag folosit sa setam hidden in update si nu imediat in script
 	bool				bAnimated;			//este animat? daca da face play la animatie
-	bool				bReleaseIt;			//needs to be released? (not always implemented)
 	bool				bStandsOut;			//if it stands out it should attract attention (used for interactibles)
 	bool				bSkipRender;		//skips render...
 

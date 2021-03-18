@@ -170,11 +170,11 @@ public:
 
 	CGrowableArray<CActorTemplate*> m_arrTemplatesActor;	//actor templates array
 	CGrowableArray<CAITemplate*>	m_arrAItemplates;		//array folosit pentru salvarea template-urilor AI
-	CActorTemplate*			GetTemplateActor(const WCHAR * templateName);
-	CActorTemplate*			GetTemplateActor(const DWORD templateNameHash);
+	CActorTemplate*			Actor_GetTemplate(const WCHAR * templateName);
+	CActorTemplate*			Actor_GetTemplate(const DWORD templateNameHash);
 	// Randomizes the actor a little so they don't all have the exact same speeds
 	void					RandomizeTemplateActor(CActorTemplate * actTemplate);
-	HRESULT					LoadActorTemplates(WCHAR * xmlPath);
+	CActorTemplate*			Actor_LoadTemplate(WCHAR * strTemplateFileName);
 	// verifica daca se termina platforma pe care sta actorul, in directia ceruta
 	bool					IsPlatformEnding(CActor* actor, int nDirSign);
 

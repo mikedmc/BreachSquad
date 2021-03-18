@@ -1,5 +1,11 @@
 #pragma once
 
+// max no of anim sets
+#define K_ACT_ANIM_MAX_SETS 2
+// max no of verse sets
+#define K_ACT_VERSES_MAX_SETS 2
+// max no of animation tracks for the actors
+#define K_ACT_MAX_ANIM_TRACKS 2
 
 ///--------------------------------------------------------------------------
 ///--- ACTORS : clasa principala de inamici si personaje player
@@ -9,6 +15,80 @@
 #define K_LVL_SUSPENDFLAG_NONE 0
 //player suspended - fallen offscreen
 #define K_LVL_SUSPENDFLAG_OUTSIDE_SCREEN 1
+
+
+class CActorTemplate
+{
+public:
+	enum EActorCapabilitiesFlags {
+		K_ACT_CAPS_NONE = 0,
+		K_ACT_CAPS_CAN_COVER = 1,
+		K_ACT_CAPS_CAN_INTERACT,
+		K_ACT_CAPS_CAN_ROLL,
+		K_ACT_CAPS_CAN_CROUCH,
+		//misc flags
+		K_ACT_CAPS_NOT_A_TARGET = 128,		// Literally not a target
+	};
+
+	// Animations descriptor
+	struct CAnimDesc {
+		bool				bLooping;
+		CStringHashA		animNamesA[K_ACT_ANIM_MAX_SETS];
+
+		CAnimDesc() : bLooping(true)
+		{};
+
+		void Reset()
+		{
+			bLooping = true;
+			for (int kk = 0; kk < K_ACT_ANIM_MAX_SETS; kk++)
+			{
+				animNamesA[kk].Reset();
+			}
+		}
+	};
+
+	CStringHash		shID;				// ID: actor template file used as template ID
+	CStringHash		shSkeletonXML;		// skeleton xml file name (not full path)
+	CStringHashA	shSkinName;			// skeleton skin name
+
+	CAnimDesc		arrAnims[K_SD_ANIMS_CNT];										// Array that keeps animation data from actor.xml
+	int				soundIDs[K_LVL_ACT_VERSES_COUNT][K_ACT_VERSES_MAX_SETS];	// Contains sound ids-s mapped on different actions (called verses, see EActorSoundVerse)
+
+	///--- GENERICS: !!! when adding new generics don't forget to edit OverwriteGenericDataFromTemplate !!!
+	EMaterialType	eMaterial;	//type of material
+	EActorClass		actorClass; //class of actor
+	CAITemplate*	AItemplate;	
+	CStringHash		AIdefaultStateName;
+
+	UINT32			eCaps;				//see EActorCapabilitiesFlags
+
+	float			fMass;
+	float			fLife;				//actor life
+	float			fArmorFront;		//actor armor
+	float			fArmorBack;
+	float			fSpeedMove;
+
+	CStringHash		shWeaponDefault;
+
+	CActorTemplate();
+
+	// Fills variables with default values if not set (some templates are missing values)
+	// \brief: We need this because of the upgrade templates that must have a lot of values on K_NOT_SET (0xDEADBEEF)
+	void FillDefaultValuesIfNotSet();
+
+	// Overwrites the current animations with the ones that are set in pTemplate
+	// \returns: true if animations have been changed
+	bool OverwriteAnimsFromTemplate(CActorTemplate* pTemplate, bool bEraseOldAnimations = false);
+
+	//Overwrites "generics" with the ones that are set in pTemplate (only if not K_NOT_SET)
+	void OverwriteGenericDataFromTemplate(CActorTemplate* pTemplate);
+
+	//Adds "GENERIC" data from pTemplate to current template (weapon upgrades and such)
+	void AddGenericDataFromTemplate(CActorTemplate* pTemplate);
+
+};
+
 
 class CActor : public IActiveInterface
 {
@@ -132,15 +212,36 @@ public:
 		}
 	};
 
+	// Animation pointers buffer - keeps animation in sync with actor template declared animations
+	struct CAnimPtr {
+		CStringHashA		animNamesA[K_ACT_ANIM_MAX_SETS];
+		spine::Animation*	pAnim[K_ACT_ANIM_MAX_SETS];
+		bool				bLooping;
+
+		CAnimPtr() : bLooping(true)
+		{
+			for (int kk = 0; kk < K_ACT_ANIM_MAX_SETS; kk++)
+			{
+				pAnim[kk] = null;
+				animNamesA[kk].Reset();
+			}
+		}
+	};
+
 public:
-	CActorTemplate			templateActor;				//datele generale din XML copiate in fiecare actor, datele curente
-	CActorTemplate			templateActor_ini;			//datele initiale, imediat dupa loading si dupa customizarea initiala
+	CSpineManager::CSkeletonTemplate*		pSkelTemplate;	// Pointer to the skeleton template (don't deallocate, managed)
+	CSpineManager::CSkeletonInstance*		pSkeleton;		// Pointer to the skeleton instance (don't deallocate, managed)
+	CAnimPtr								arrAnimsPtr[K_SD_ANIMS_CNT]; // Direct pointer structure to animations declared in actor template (rarely updated)
+
+	CActorTemplate			actTemplate;				//datele generale din XML copiate in fiecare actor, datele curente
+	CActorTemplate			actTemplate_ini;			//datele initiale, imediat dupa loading si dupa customizarea initiala
 	EActorAnims				eLastAnimSet, eLastAnimSet_feet;		//ultima animatie setata  pe actor prin SetActorAnimOnce() (torso si feet)
 
 	EActorSoundVerse		eLastPlayedVerse;			//last played sound verse
+	ESpineAnim				eLastAnim[K_ACT_MAX_ANIM_TRACKS];	// Last anim set with SetActorAnimOnce() (torso and feet)
 	float					fVerseCooldown;				//don't play the same verse if cooldown > 0.0f
 	int						nLastPlayedVerseSndIdx;		//last played sound idx
-protected:
+
 	int			nAnimSet;	//current animation set (-1 for RANDOM); Don't set directly!
 
 public:
@@ -197,11 +298,15 @@ public:
 
 	CSprite		sprite, sprite_feet;
 	CSprite		m_sprOverheadIcon;	//icon shown when interacting with things (doors, objects) or in other circumstances too
-	void		SetAnimSet(int newAnimSet); //sets current animation set (changes immediately)
 
-	FORCEINLINE int GetAnimSet() const {
-		return nAnimSet;
-	}
+	// Sets a Spine skin and returns true if successfull
+	bool					Spine_SetSkin(const char * strSkinName);
+	// Tells you if the actor has said animation 
+	bool					HasAnimation(ESpineAnim nAnimType, int nSet = 0);
+
+	// Sets current animation set (changes immediately)
+	void					SetAnimSet(int newAnimSet);
+	FORCEINLINE int			GetAnimSet() const { return nAnimSet; }
 
 	CWeapon		weapons[K_LVL_ACT_WEAPONS_CNT]; //colectia de arme posibile ale playerului. Efectiv armele care isi fac update.
 	CWeapon*	pCurrentWeapon;				//arma cu care trage acum (poate fi gear, alt, primary, etc). Nu va fi niciodata NULL
@@ -228,10 +333,15 @@ public:
 		m_pAIcurrentState(null), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nTookDamageFrames(0), nLastDamageTakenFromUID(0),
 		pCurrentWeapon(null), nSkinIdx(0),
 		eLastAnimSet(K_LVL_ACT_ANIM_EMPTY), nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), 
-		eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1)
+		eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
+		pSkelTemplate(null), pSkeleton(null)
 	{
 		bAnimated = true;
 		nControllerInstanceID = -1;
+		for (int kk = 0; kk < K_ACT_MAX_ANIM_TRACKS; kk++)
+		{
+			eLastAnim[kk] = K_SD_ANIM_EMPTY;
+		}
 	}
 
 	const eActiveInterfaceType GetClassType() const {
@@ -241,6 +351,24 @@ public:
 	void SetPos(Vec2 newPos) override;
 	void Move(Vec2 delta) override;
 	void SetAngle(float fNewAngle) override; //seteaza unghiul si vAngleDir
+
+	// Initializes CActor with specified template and sets all the data it needs. Returns false if it fails
+	bool					Init(CActorTemplate * pActorTemplate, Vec2 vSpawnPos);
+	// Updates specified Actor AI. Returns busy state TRUE if actor has jobs to do or false if actor is still
+	void					Update(float dTime);
+	// Sets pointers to spine animations from skeleton template (optimization)
+	void					Spine_SaveAnimPointers();
+	// Set actor animation checking if not already set
+	spine::TrackEntry*		SetAnimOnce(int nTrack, ESpineAnim eAnim);
+	// Adds an animation to a track
+	spine::TrackEntry*		AddAnimOnce(int nTrack, ESpineAnim eAnim, float fMixTime = K_SM_DEFAULT_MIX_DURATION, float fDelay = 0.0f);
+	// Plays the actor verse from the template handling the positional attenuation
+	void					PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly = false);
+	// Equips specified weapon and sets template
+	void					EquipWpn(CWeapon * pWeapon);
+	// Sets the actor's weapon and template upgrades and limitations generated by the weapon	
+	void					AddWpnTemplate(CWeapon * pWeapon);
+
 
 	void PostConstructionInit() override;
 	void BeginPlay() override;

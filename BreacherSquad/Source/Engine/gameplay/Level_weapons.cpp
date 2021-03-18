@@ -154,12 +154,7 @@ EnumWeaponStatus CLevel::UpdateWeapon(CWeapon * weapon, float dTime)
 	//suntem inca pe reloading, facem reload
 	if (weapon->status == K_LVL_WPN_STATUS_RELOADING)
 	{
-		//reloading faster when standing still
-		float fSlowingReload = 0.0f;
-		if (fabs(weapon->pOwner->speed.x) != 0.0f)
-			fSlowingReload = (dTime * weapon->WeaponTemplate.fShooterSpeedSlowingPercent) * (1.0f / weapon->pOwner->templateActor.fDexterity);
-
-		weapon->reloadTimer += dTime * weapon->pOwner->templateActor.fDexterity - fSlowingReload;
+		weapon->reloadTimer += dTime;
 
 		if (weapon->reloadTimer >= weapon->WeaponTemplate.fReloadTimePerUnit)
 		{
@@ -263,7 +258,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
 	Vec2 vFinalDir = vDir;
 	Vec2 vShootPos = shooter->GetPosWeapon();
 
-	int nFinalClass = shooter->templateActor.actorClass;
+	int nFinalClass = shooter->actTemplate.actorClass;
 	//bullet has template class, set it to final class
 	if (weapon->WeaponTemplate.bulletTemplate.eClass != K_LVL_ACT_CLASS_ANY)
 		nFinalClass = weapon->WeaponTemplate.bulletTemplate.eClass;
@@ -359,7 +354,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
 
 		fAimAngError *= fMul;
 		//apply template aiming multiplier
-		fAimAngError *= shooter->templateActor.fRecoilModifier;
+		//fAimAngError *= shooter->actTemplate.fRecoilModifier;
 		//add aiming error
 		fAimAng += fAimAngError;
 
@@ -385,7 +380,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
 			LOG_DBG_BUFF(L"= Shot:%s ID:%d =", weapon->WeaponTemplate.name.text, weapon->pOwner->ID);
 			CBullet* bullet = ShootBullet(&tmplBullet, nFinalClass, shooter->GetUID(), vShootPos, vFinalDir);
 			//--- statistics ---
-			if ((bullet != NULL) && ((bullet->nFlags & K_LVL_BULLET_FLAG_NOT_BALLISTIC) == 0) && (weapon->pOwner->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER))
+			if ((bullet != NULL) && ((bullet->nFlags & K_LVL_BULLET_FLAG_NOT_BALLISTIC) == 0) && (weapon->pOwner->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER))
 			{
 				//aici numara si grenadele dar nu prea conteaza pt ca tragi multe gloante in joc
 				m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT + weapon->pOwner->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT]++;
@@ -414,7 +409,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
 			//			AddProp_Light(vShootPos, ANM_LIGHTS_SPR_POINT1, 0.05f, 0.0f, D3DCOLOR_COLORALPHA(0xffFDB727, fPropAlpha), weapon->WeaponTemplate.fMuzzleLightSize);
 		}
 		//adaug eventAI de sunet
-		AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, shooter->GetUID(), shooter->templateActor.actorClass, shooter->posHeart, weapon->WeaponTemplate.fSoundRadius);
+		AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, shooter->GetUID(), shooter->actTemplate.actorClass, shooter->posHeart, weapon->WeaponTemplate.fSoundRadius);
 	}
 	else
 	{

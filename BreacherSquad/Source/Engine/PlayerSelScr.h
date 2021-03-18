@@ -297,8 +297,6 @@ public:
 	void					SetSelectionPrices(CPlayerCharSelection* pSel);
 	// Initializes the current upgrade bars
 	void					InitUpgradeBars(CPlayerCharSelection* pSel);
-	//Gives you a template composed from the XP upgrade bars
-	void					ApplyUpgradesOnActor(CPlayerCharSelection* pSel, CActor* pDestActor);
 	//Fills arrRetValues with perks UIDs
 	int						GetAllActivePerks(CPlayerCharSelection* pSel, UINT32 arrRetValues[], int nRetValuesArrSize);
 	//Returns perk activation status by perk name (activated or not)

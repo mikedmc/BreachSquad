@@ -1920,7 +1920,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 					for (int ll = 0; ll < g_level.m_arrActors.GetSize(); ll++)
 					{
 						CActor* act = g_level.m_arrActors[ll];
-						LOG(L"%s ID %d pos(%.4f, %.4f) decision(%.4f)", act->templateActor.shName.text, act->ID, act->pos.x, act->pos.y, act->AItimerDecision);
+						LOG(L"%s ID %d pos(%.4f, %.4f) decision(%.4f)", act->actTemplate.shID.text, act->ID, act->pos.x, act->pos.y, act->AItimerDecision);
 					}
 
 					//send analytics

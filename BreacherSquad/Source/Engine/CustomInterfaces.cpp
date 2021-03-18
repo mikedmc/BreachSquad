@@ -419,7 +419,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 	}
 
 	///--- paint life ---
-	const int lifeBarW = (int)(K_CI_IGM_LIFE_BAR_MULTIPLIER * playerAct[nPlayerOrdinal]->templateActor.fLife);
+	const int lifeBarW = (int)(K_CI_IGM_LIFE_BAR_MULTIPLIER * playerAct[nPlayerOrdinal]->actTemplate.fLife);
 	algnx = pos.x + facerect.Right() + 2; //offset hardcodat datorita graficii
 	algny = pos.y - 5;
 	spr.Init(ANM_IGM_INTERFACE_SPR_LIFE_BAR, algnx, algny, 0);
@@ -431,7 +431,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 	spr.paint(sprCol);
 
 	//fill life
-	int lifeperc = (int)ceil(lifeBarW * (playerAct[nPlayerOrdinal]->fLife / playerAct[nPlayerOrdinal]->templateActor.fLife));
+	int lifeperc = (int)ceil(lifeBarW * (playerAct[nPlayerOrdinal]->fLife / playerAct[nPlayerOrdinal]->actTemplate.fLife));
 	spr.currentFrame = 2; //red bar to be clipped
 	spr.pos.x = algnx;
 	cliprect.w = algnx + lifeperc;
@@ -442,9 +442,10 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 	spr.paint(sprCol);
 
 	///--- paint shield ---
-	if (playerAct[nPlayerOrdinal]->templateActor.fArmor > 0.0f)
+	/*
+	if (playerAct[nPlayerOrdinal]->actTemplate.fArmor > 0.0f)
 	{
-		const int shieldBarW = (int)(K_CI_IGM_SHIELD_BAR_MULTIPLIER * playerAct[nPlayerOrdinal]->templateActor.fArmor);
+		const int shieldBarW = (int)(K_CI_IGM_SHIELD_BAR_MULTIPLIER * playerAct[nPlayerOrdinal]->actTemplate.fArmor);
 		algnx = pos.x + facerect.Right() + 9 + lifeBarW; //offset hardcodat datorita graficii
 		algny = pos.y - 5;
 		spr.Init(ANM_IGM_INTERFACE_SPR_LIFE_BAR, algnx, algny, 0);
@@ -455,7 +456,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 		spr.pos.x += shieldBarW;
 		spr.paint(sprCol);
 		//fill life
-		int shieldperc = (int)ceil(shieldBarW * (playerAct[nPlayerOrdinal]->fArmor / playerAct[nPlayerOrdinal]->templateActor.fArmor));
+		int shieldperc = (int)ceil(shieldBarW * (playerAct[nPlayerOrdinal]->fArmor / playerAct[nPlayerOrdinal]->actTemplate.fArmor));
 		if (shieldperc > 0.0f)
 		{
 			spr.currentFrame = 4; //blue bar to be clipped
@@ -468,6 +469,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 			spr.paint(sprCol);
 		}
 	}
+	*/
 
 	///--- paint strategic bar ---
 	//se deseneaza mereu fara flip
@@ -803,7 +805,7 @@ void CCustomInterfaceIGM::Init(CSpriteCollection* sprCollection, CActor * player
 	{
 		if (playerAct[kk] != null)
 		{
-			nPortraitFrame[kk] = playerAct[kk]->templateActor.nHUDportraitFrameIdx;
+			nPortraitFrame[kk] = 0;// playerAct[kk]->actTemplate.nHUDportraitFrameIdx;
 			//set same portrait on spawned players
 			nPortraitFrameHotJoin[kk] = nPortraitFrame[kk];
 

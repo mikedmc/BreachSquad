@@ -432,7 +432,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			int nAmmoLeft = active->varAIparams.GetVariantByName(L"n_ammoLeft")->m_asINT32;
 
 			CActor* toucheractor = GetActorByUID(active->GetToucherUID());
-			if ((toucheractor == null) || (toucheractor->templateActor.actorClass != K_LVL_ACT_CLASS_PLAYER))
+			if ((toucheractor == null) || (toucheractor->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER))
 			{
 				LOG(L"SCRIPT::ACTIVE_AMMOBOX_GIVE_AMMO - Could not find Actor Toucher UID or toucher not a player!\n");
 				return true;
@@ -491,7 +491,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			int nHealthLeft = active->varAIparams.GetVariantByName(L"n_healthLeft")->m_asINT32;
 
 			CActor* toucheractor = GetActorByUID(active->GetToucherUID());
-			if ((toucheractor == null) || (toucheractor->templateActor.actorClass != K_LVL_ACT_CLASS_PLAYER))
+			if ((toucheractor == null) || (toucheractor->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER))
 			{
 				LOG(L"SCRIPT::ACTIVE_HEALTHBOX_GIVE_HEALTH - Could not find Actor Toucher UID or toucher not a player!\n");
 				return true;
@@ -499,11 +499,11 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 
 			if (nHealthLeft > 0)
 			{
-				if (toucheractor->fLife < toucheractor->templateActor.fLife)
+				if (toucheractor->fLife < toucheractor->actTemplate.fLife)
 				{
 					g_particlesMgr.GenerateHealEffect(toucheractor->pos, 0xff55ff55, K_PART_LAYER_RT_FRONT_NRM);
 
-					toucheractor->fLife = toucheractor->templateActor.fLife;
+					toucheractor->fLife = toucheractor->actTemplate.fLife;
 					nHealthLeft--;
 					active->varAIparams.SetNamedVarINT32(L"n_healthLeft", nHealthLeft);
 
@@ -1062,12 +1062,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					pGearWpn->ammoLeft += nQty;
 				}
 			}
-			else if (vcPerk->m_strArg.IsEqual(L"DEXTERITY"))
-			{
-				float fQty = vcQty->m_asFloat;
-				CLAMP(fQty, -1.0f, 1.0f);
-				targetAct->templateActor.fDexterity += fQty;
-			}
 			else if (vcPerk->m_strArg.IsEqual(L"SPEED_LOADER"))
 			{
 				int nQty = (int)vcQty->m_asFloat;
@@ -1183,7 +1177,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 
-			CActorTemplate* pTemplate = GetTemplateActor(vcTemplate->m_strArg.textHash);
+			CActorTemplate* pTemplate = Actor_GetTemplate(vcTemplate->m_strArg.textHash);
 			if (pTemplate == null)
 			{
 				LOG(L"SCRIPT::ACTOR_SET_TEMPLATE - sTemplateName: template %s not found!\n", vcTemplate->m_strArg.text);
@@ -1226,7 +1220,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			else
 				vcTemplate = instr->GetArgument(L"sTemplateName2");
 
-			CActorTemplate* pTemplate = GetTemplateActor(vcTemplate->m_strArg.textHash);
+			CActorTemplate* pTemplate = Actor_GetTemplate(vcTemplate->m_strArg.textHash);
 			if (pTemplate == null)
 			{
 				LOG(L"SCRIPT::ACTOR_SET_TEMPLATE_RANDOM - sTemplateName: template [%s] not found for ID:%d!\n", vcTemplate->m_strArg.text, actor->ID);
@@ -1255,11 +1249,11 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			//int AIstate = GetAIStateByNameHash(vcAIstate->m_strArg.getHash());
 			if ((vcAIstate == null) || (vcAIstate->m_type != CVariantComplex::K_ARGTYPE_STRING))
 			{
-				SetActorAIState(actor, actor->templateActor.AItemplate->GetAIStateByName(actor->templateActor.AIdefaultStateName));
+				SetActorAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(actor->actTemplate.AIdefaultStateName));
 			}
 			else
 			{
-				SetActorAIState(actor, actor->templateActor.AItemplate->GetAIStateByName(vcAIstate->m_strArg));
+				SetActorAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(vcAIstate->m_strArg));
 			}
 
 			return true;
@@ -1287,7 +1281,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 
-			CActorTemplate* ntempl = GetTemplateActor(vcTemplate->m_strArg.text);
+			CActorTemplate* ntempl = Actor_GetTemplate(vcTemplate->m_strArg.text);
 			if (ntempl == null)
 			{
 				LOG(L"SCRIPT::ACTOR_SPAWN - template not found [%s] !\n", vcTemplate->m_strArg.text);
@@ -1335,7 +1329,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 
 					CActor* targetact = GetClosestTarget(nact);
 					//scad alerta
-					nact->fFOVPercent = nact->templateActor.fFOVpercent;
+					nact->fFOVPercent = 0.5f;// nact->actTemplate.fFOVpercent;
 
 					if (targetact != null)
 					{

@@ -74,13 +74,13 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, Vec2 spa
 		return E_FAIL;
 	}
 	//copy template data
-	actor->templateActor = *actTemplate;
+	actor->actTemplate = *actTemplate;
 	///!!! DON'T USE actTemplate from now on !!!
 
-	actor->templateActor.FillDefaultValuesIfNotSet();
-	RandomizeTemplateActor(&actor->templateActor);
+	actor->actTemplate.FillDefaultValuesIfNotSet();
+	RandomizeTemplateActor(&actor->actTemplate);
 	//save a copy
-	actor->templateActor_ini = actor->templateActor;
+	actor->actTemplate_ini = actor->actTemplate;
 
 	actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
 	actor->cDamageOverTime.Reset();
@@ -122,7 +122,6 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, Vec2 spa
 
 	actor->vMoveDirN = Vec2(0.0f, 0.0f);
 
-	actor->bReleaseIt = false;
 	actor->speed = Vec2(0.0f, 0.0f);
 	actor->vSpeedImpulse = Vec2(0.0f, 0.0f);
 	actor->vecCamFollowPos = Vec2(0.0f, 0.0f);
@@ -135,16 +134,17 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, Vec2 spa
 	//no closest touchable
 	actor->pClosestTouchable = null;
 
-	actor->fLife = actor->templateActor.fLife;
-	actor->fArmor = actor->templateActor.fArmor;
-	actor->fFOVPercent = actor->templateActor.fFOVpercent;
+	actor->fLife = actor->actTemplate.fLife;
+	actor->fArmor = 0.0f;
+	actor->fFOVPercent = 1.0f;
 
-	Weapon_Init(&actor->weapons[K_LVL_ACT_WEAPON_PRIMARY], actor->templateActor.weaponType.text, actor);
-	Weapon_Init(&actor->weapons[K_LVL_ACT_WEAPON_SECONDARY], actor->templateActor.weaponTypeAlt.text, actor);
-	Weapon_Init(&actor->weapons[K_LVL_ACT_WEAPON_GEAR], actor->templateActor.weaponTypeGear.text, actor);
-	Weapon_Init(&actor->weapons[K_LVL_ACT_WEAPON_MELEE], actor->templateActor.weaponTypeMelee.text, actor);
+	Weapon_Init(&actor->weapons[K_LVL_ACT_WEAPON_PRIMARY], actor->actTemplate.shWeaponDefault.text, actor);
+/*	Weapon_Init(&actor->weapons[K_LVL_ACT_WEAPON_SECONDARY], actor->actTemplate.weaponTypeAlt.text, actor);
+	Weapon_Init(&actor->weapons[K_LVL_ACT_WEAPON_GEAR], actor->actTemplate.weaponTypeGear.text, actor);
+	Weapon_Init(&actor->weapons[K_LVL_ACT_WEAPON_MELEE], actor->actTemplate.weaponTypeMelee.text, actor);
 	//set breach weapon
-	Weapon_Init(&actor->weapons[K_LVL_ACT_WEAPON_BREACH], actor->templateActor.weaponTypeBreach.text, actor);
+	Weapon_Init(&actor->weapons[K_LVL_ACT_WEAPON_BREACH], actor->actTemplate.weaponTypeBreach.text, actor);
+	*/
 	//clear temp weapons
 	actor->weapons[K_LVL_ACT_WEAPON_TEMPORARY].Init();
 	actor->weapons[K_LVL_ACT_WEAPON_TEMPORARY_ALT].Init();
@@ -181,8 +181,6 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, Vec2 spa
 		for (int nn = 0; nn < nTimes; nn++)
 		{
 			actor->sprite.Update(&m_sprActors, 1.0f / 24.0f);
-			if (actor->templateActor.bComposedAnimation)
-				actor->sprite_feet.Update(&m_sprActors, 1.0f / 24.0f);
 		}
 	}
 
@@ -198,7 +196,7 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, Vec2 spa
 	//AI-ul clasic se seteaza pe UNDEFINED dar seteaza celelalte variabile pe 0
 	SetAI(actor, K_AI_STATE_UNDEFINED, null);
 	//seteaza AI-ul pt inference machine din template
-	SetActorAIState(actor, actor->templateActor.AItemplate->GetAIStateByName(actor->templateActor.AIdefaultStateName));
+	SetActorAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(actor->actTemplate.AIdefaultStateName));
 
 	//update all relative data
 	actor->SetPos(actor->pos);
@@ -214,7 +212,7 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, Vec2 spa
 CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvProjectileMomentum)
 {
 	CBulletHitReturnData retData;
- 	retData.eMaterial = actor->templateActor.eMaterial;
+ 	retData.eMaterial = actor->actTemplate.eMaterial;
 	retData.bPenetratedShield = false;
 	retData.bKilledTarget = false;
 	retData.bArmorHit = false;
@@ -270,15 +268,14 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		fLifeTaken = fHitPointsTaken;
 		bool bBulletStopped = false;
 		//decidere directie shield vs directie projectileMomentum daca avem directie pe shield (sau shield all around)		
-		if (((pBullet->nFlags & K_LVL_BULLET_FLAG_IGNORE_ARMOR) == 0) && (pvProjectileMomentum != null) && (actor->fArmor > 0.0f) && 
-			((actor->templateActor.nArmorDir == 0) || (SIGN(actor->lookDirXsign * actor->templateActor.nArmorDir) != SIGN(pvProjectileMomentum->x))) ) 
+		if (((pBullet->nFlags & K_LVL_BULLET_FLAG_IGNORE_ARMOR) == 0) && (pvProjectileMomentum != null) && (actor->fArmor > 0.0f) ) 
 		{
-			int nActorAR = actor->templateActor.nArmorRating;
+			int nActorAR = 1;
 			//melee damage is treated differently
 			if (pBullet->nFlags & K_LVL_BULLET_FLAG_MELEE)
 			{
 				//melee ignores armor usually but if armor hase melee resistance then it takes first from the armor and then from life
-				float fDmgToArmor = fHitPointsTaken * actor->templateActor.fArmorMPP;
+				float fDmgToArmor = fHitPointsTaken * 1;
 				fShieldPointsTaken = min(fDmgToArmor, actor->fArmor);
 				fLifeTaken = fHitPointsTaken - fShieldPointsTaken;
 
@@ -323,15 +320,6 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 					retData.eMaterial = K_LVL_MATERIAL_FLESH;
 				}
 			}
-			//#HACK: pentru human shield schimb materialul pe FLESH. Ar trebui sa am si materialul scutului dar nu are rost momentan
-			if ((retData.eMaterial == K_LVL_MATERIAL_METAL) && (actor->GetCurrentBehavior() == AI_BEHAVIOR_HUMAN_SHIELD_ATTACK))
-				retData.eMaterial = K_LVL_MATERIAL_FLESH;
-
-			//set armor icons (on and off)
-			if ((actor->m_sprOverheadIcon.animationIdx == -1) && (actor->fArmor > 0.0f) && (actor->fArmor == actor->templateActor.fArmor))
-			{
-				actor->m_sprOverheadIcon.setAnimationOnce(ANM_IGM_INTERFACE_SPR_ICON_ARMOR_APPEAR);
-			}
 
 			//scade shield points din armor
 			actor->fArmor -= fShieldPointsTaken;
@@ -340,11 +328,6 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 			{
 				fLifeTaken += -actor->fArmor;
 				actor->fArmor = 0.0f;
-				//armor icon off
-				if ((actor->templateActor.fArmor > 0.0f) && (actor->templateActor.nArmorRating > 0))
-				{
-					actor->m_sprOverheadIcon.setAnimationOnce(ANM_IGM_INTERFACE_SPR_ICON_ARMOR_DISAPPEAR);
-				}
 			}
 
 			//--- calculam energia ramasa in glont ---
@@ -369,19 +352,19 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		//when shooting a dead body take a maximum of 10% energy from the bullet
 		//daca nu luam energia asta in momentul in care glontul tras se duce in cadavru nu il strapunge si timp de mai multe frames sta pe loc si face zgomot de damage
 		if ((actor->fLife <= 0.0f) && (fBulletLostEnergy <= 0.0f))
-			fBulletLostEnergy = actor->templateActor.fLife * 0.1f;
+			fBulletLostEnergy = actor->actTemplate.fLife * 0.1f;
 
 		//transmit bullet momentum daca nu sunt under cover
-		if ((actor->templateActor.fMass > 0.0f) && (pvProjectileMomentum) && (actor->pCover == null))
+		if ((actor->actTemplate.fMass > 0.0f) && (pvProjectileMomentum) && (actor->pCover == null))
 		{
-			actor->vSpeedImpulse += *pvProjectileMomentum / actor->templateActor.fMass;
+			actor->vSpeedImpulse += *pvProjectileMomentum / actor->actTemplate.fMass;
 		}
 		
 		//subtract life	if no invincibility
 		if (actor->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_INVINCIBLE)
 			fLifeTaken = 0.0f;
 
-		if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
+		if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
 		{
 			float fDecLife = fLifeTaken;
 
@@ -405,14 +388,14 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		//save last damager UID
 		actor->nLastDamageTakenFromUID = pBullet->ownerUID;
 		//if he's still alive and you took enough of it's life say verse
-		if ((actor->fLife > 0.0f) && (fLifeTaken >= actor->templateActor.fLife * 0.1f))
+		if ((actor->fLife > 0.0f) && (fLifeTaken >= actor->actTemplate.fLife * 0.1f))
 //			PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_TAKING_DAMAGE, true);
 
 		//life left in it?
 		if (actor->fLife > 0.0f)
 		{
 			//mesaj LOW_HEALTH - la 10% din viata originala
-			float fLifeLowLimit = actor->templateActor.fLife * 0.1f;
+			float fLifeLowLimit = actor->actTemplate.fLife * 0.1f;
 			if ((actor->fLife < fLifeLowLimit) && (actor->fLife + fLifeTaken >= fLifeLowLimit))
 			{
 				AddAIEvent(K_LVL_AI_EVENT_LOW_HEALTH, 0, pBullet->actorClass, actor->posHeart, 10000.0f, 0.6f, actor->GetUID());
@@ -426,35 +409,8 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		}
 	}
 
-	//player hit
-	if ((actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (fActorInitialLife > 0.0f))
-	{
-		//only on non networked players
-		if (!IsNetworkPlayer(actor))
-		{
-			float fDmgPerc = 0.0f;
-			if (fLifeTaken > 0.0f) fDmgPerc += 0.4f;
-			if (fShieldPointsTaken > 0.0f) fDmgPerc += 0.2f;
-		}
-	}
-	else if ((actor->templateActor.actorClass >= K_LVL_ACT_CLASS_HUMAN) && 
-			((pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER) || (pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION)) )
-	{
-		if ((actor->fLife <= 0.0f) && (fOldLife > 0.0f))
-		{
-			//daca moare inamicul pun frag pentru playerul care a lovit
-			CActor* pPlayer = GetPlayerByUID(pBullet->ownerUID);
-			if (pPlayer)
-			{
-				//only count actors that give you strategic points
-				if (actor->templateActor.fStrategicPoints > 0.0f)
-					m_arrStats[K_LVL_STATS_PL1_KILLS + pPlayer->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT]++;
-			}
-		}
-	}
-
 	//event got_hit
-	if ((actor->fLife > 0.0f) && (actor->templateActor.actorClass > K_LVL_ACT_CLASS_PLAYER))
+	if ((actor->fLife > 0.0f) && (actor->actTemplate.actorClass > K_LVL_ACT_CLASS_PLAYER))
 	{
 		//adaug eventuri de GOT_HIT doar pe clasele HUMAN, cand sunt lovite de catre player
 		//find shooter pos. defaults on pos based on bullet speed
@@ -474,24 +430,24 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 	}
 
 	//set dead AI on humans
-	if ((actor->fLife <= 0.0f) && (actor->templateActor.eMaterial == K_LVL_MATERIAL_FLESH))
+	if ((actor->fLife <= 0.0f) && (actor->actTemplate.eMaterial == K_LVL_MATERIAL_FLESH))
 	{
 		//give strategic points on death
-		if ((fOldLife > 0.0f) && (actor->templateActor.actorClass >= K_LVL_ACT_CLASS_HUMAN))
+		if ((fOldLife > 0.0f) && (actor->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN))
 		{
 			//you get points if enemy killed by player or explo
-			if (((pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER) || (pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION)) && (actor->templateActor.actorClass != K_LVL_ACT_CLASS_PLAYER))
+			if (((pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER) || (pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION)) && (actor->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER))
 			{
 				if (actor->UID != pBullet->ownerUID)
 				{
-					GiveStrategicPoints(actor->templateActor.fStrategicPoints, &Vec2(actor->bbox.vCenter.x, actor->bbox.vMin.y));
+					GiveStrategicPoints(1.0f, &Vec2(actor->bbox.vCenter.x, actor->bbox.vMin.y));
 				}
 			}
 		}
 
 		//cadavers get pushed more by kicking them
-		if ((fOldLife > 0.0f) && (actor->templateActor.fMass > 0.0f) && (pvProjectileMomentum != null))
-			actor->vSpeedImpulse += K_LVL_DEAD_BODY_BULLET_MOMENTUM_MULTIPLIER * (*pvProjectileMomentum / actor->templateActor.fMass);
+		if ((fOldLife > 0.0f) && (actor->actTemplate.fMass > 0.0f) && (pvProjectileMomentum != null))
+			actor->vSpeedImpulse += K_LVL_DEAD_BODY_BULLET_MOMENTUM_MULTIPLIER * (*pvProjectileMomentum / actor->actTemplate.fMass);
 
 		//erase shooting flags
 		actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
@@ -499,7 +455,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		bool bSplatActor = false;
 		
 		//very low life from the first hit? splat!
-		if ((pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT) && (actor->GetCurrentBehavior() != AI_BEHAVIOR_DEAD) && (pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER) && (actor->fLife < -actor->templateActor.fLife * 0.5f))
+		if ((pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT) && (actor->GetCurrentBehavior() != AI_BEHAVIOR_DEAD) && (pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER) && (actor->fLife < -actor->actTemplate.fLife * 0.5f))
 		{
 			bSplatActor = true;
 			//if bullets lose power then only splat from close quarters
@@ -507,10 +463,10 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 				bSplatActor = false;
 		}
 		//grenades splat dead bodies
-		if ((actor->GetCurrentBehavior() == AI_BEHAVIOR_DEAD) && (pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION) && (fLifeTaken >= actor->templateActor.fLife))
+		if ((actor->GetCurrentBehavior() == AI_BEHAVIOR_DEAD) && (pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION) && (fLifeTaken >= actor->actTemplate.fLife))
 				bSplatActor = true;
 		//if dead but you keep kicking him it explodes
-		if ((actor->GetCurrentBehavior() == AI_BEHAVIOR_DEAD) && (pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT) && (actor->fLife < -actor->templateActor.fLife))
+		if ((actor->GetCurrentBehavior() == AI_BEHAVIOR_DEAD) && (pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT) && (actor->fLife < -actor->actTemplate.fLife))
 			bSplatActor = true;
 		//if lucky cancel splat
 		if (m_rand.RandInt(100) <= 10)
@@ -520,7 +476,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		}
 
 		//--- generate blood splats on death ---
-		if ((fOldLife > 0.0f) && (actor->templateActor.eMaterial == K_LVL_MATERIAL_FLESH))
+		if ((fOldLife > 0.0f) && (actor->actTemplate.eMaterial == K_LVL_MATERIAL_FLESH))
 		{
 			//splaturile sunt sortate in fn de marime (folosesc posHeart in log de GetPosHeart() pentru ca altfel imi da deja pozitia de dupa moarte, adica prea jos)
 			//splaturile sunt sortate in functie de dimensiune (crescator)
@@ -528,7 +484,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 			{
 				if ((pBullet->nFlags & K_LVL_BULLET_FLAG_NO_DECALS) == 0)
 				{
-					AddDecal_BloodSplat(actor->posHeart, true, actor->templateActor.actorClass);
+					AddDecal_BloodSplat(actor->posHeart, true, actor->actTemplate.actorClass);
 				}
 			}
 
@@ -538,29 +494,6 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 			if (pShooter != null)
 			{
 //				PlayActorSoundVerse(pShooter, K_LVL_ACT_VERSE_KILL_MADE);
-			}
-		}
-
-		//wear explosive vest? if damage is important the explode it too
-		if ((actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_HAS_EXPLOSIVE_VEST) && (fLifeTaken > 10.0f))
-		{
-			if (pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION)
-			{
-				//suicide?
-				if (pBullet->ownerUID != actor->GetUID())
-				{
-					//add explosion
-					actor->varAIparams.SetNamedVarUINT32(L"nExplode", hash_EXPLO_BLOWUP_VEST);
-				}
-				//remove vest flags
-				actor->templateActor.eCaps &= ~CActorTemplate::K_ACT_CAPS_HAS_EXPLOSIVE_VEST;
-				actor->templateActor.eCaps &= ~CActorTemplate::K_ACT_CAPS_CAN_BE_DETONATED;
-				//command splat!
-				if (actor->templateActor.actorClass != K_LVL_ACT_CLASS_PLAYER)
-					actor->varAIparams.SetNamedVarINT32(L"nDeathCommand", K_LVL_ACT_DEATHCMD_SPLAT);
-				//early exit
-				retData.fPointsTaken = fBulletLostEnergy;
-				return retData;
 			}
 		}
 
@@ -608,10 +541,10 @@ CBulletHitReturnData CLevel::HitActor(CActor * actor, float fDamage, UINT32 dwOw
 */
 void CLevel::SetActorStun(CActor* actor, float fStunDuration)
 {
-	if ((actor->templateActor.actorClass != K_LVL_ACT_CLASS_HUMAN) && (actor->templateActor.actorClass != K_LVL_ACT_CLASS_FRIENDLY))
+	if ((actor->actTemplate.actorClass != K_LVL_ACT_CLASS_HUMAN) && (actor->actTemplate.actorClass != K_LVL_ACT_CLASS_FRIENDLY))
 		return;
 
-	if ((actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0)
+	if ((actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0)
 		return;
 
 	//some don't get stunned
@@ -635,7 +568,7 @@ void CLevel::SetActorStun(CActor* actor, float fStunDuration)
 		bInterrupting = true;
 
 		//only count stunned enemies
-		if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_HUMAN)
+		if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_HUMAN)
 			App_IncreaseGamestat(K_MEMID_GAMESTATS_ENEMIES_STUNNED);
 	}
 	//reset actions
@@ -751,9 +684,9 @@ int CLevel::MeleeBlow(int nBulletType, Vec2 vPos, Vec2 vDirection, UINT32 nOwner
 		CActor* act = m_arrActors[kk];
 		Vec2 vTo = act->posHeart - vPos;
 		//ignored class
-		if (act->templateActor.actorClass == eIgnoredClass)
+		if (act->actTemplate.actorClass == eIgnoredClass)
 			continue;
-		if ((act->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0)
+		if ((act->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0)
 			continue;
 		//not in front of player and point not in bbox, skip it
 		if ((SIGN(vTo.x) != SIGN(vDirection.x)) && (!act->bbox.PointIn(vPos)))
@@ -887,7 +820,7 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 
 	//--- see if the selected weapons requested a template overwrite ---
 	CActorTemplate* acttemplate = null;
-	acttemplate = GetTemplateActor(EPSSPlayerTypeTemplate[(int)playersel->eType].text);
+	acttemplate = Actor_GetTemplate(EPSSPlayerTypeTemplate[(int)playersel->eType].text);
 	if (acttemplate == null)
 	{
 		ErrorBox(K_ERR_WARNING, L"SpawnPlayer::Template [%s] not found!", EPSSPlayerTypeTemplate[(int)playersel->eType].text);
@@ -903,7 +836,7 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 	if (namehash != 0)
 	{
 		///ADD EQUIPMENT TEMPLATE
-		CActorTemplate* acttempl = GetTemplateActor(namehash);
+		CActorTemplate* acttempl = Actor_GetTemplate(namehash);
 		if (acttempl != null)
 		{
 			templateLocal.AddGenericDataFromTemplate(acttempl);
@@ -911,6 +844,7 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 		}
 	}
 	//gear
+	/*
 	namehash = g_playerSelScr.GetGearNameHash(playersel);
 	CWeaponTemplate* wGear = GetTemplateWeapon(namehash);
 	if ((wGear != null) && (!wGear->bPassive))
@@ -920,31 +854,14 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 	if ((wGear != null) && (!wGear->shTemplateOverwrite.IsEmpty()))
 	{
 		///ADD GEAR TEMPLATE
-		CActorTemplate* acttempl = GetTemplateActor(wGear->shTemplateOverwrite.getHash());
+		CActorTemplate* acttempl = Actor_GetTemplate(wGear->shTemplateOverwrite.getHash());
 		if (acttempl != null)
 		{
 			templateLocal.AddGenericDataFromTemplate(acttempl);
 			templateLocal.OverwriteAnimsFromTemplate(acttempl);
 		}
 	}
-	
-	///LAST! PRIMARY WEAPON TEMPLATE GETS ADDED WHEN CHANGING WEAPONS (equiping main weapon)
-	/// We don't add it here so it saves the actor->template_ini without the equipped weapons
-	//alt fire from primary weapon
-	namehash = g_playerSelScr.GetALTWeaponNameHash(playersel);
-	CWeaponTemplate* wPrimaryALT = GetTemplateWeapon(namehash);
-	if ((wPrimaryALT != null) && (!wPrimaryALT->bPassive))
-	{
-		templateLocal.weaponTypeAlt = wPrimaryALT->name;
-	}
-	//get selected primary weapon
-	namehash = g_playerSelScr.GetPrimaryWeaponNameHash(playersel);
-	CWeaponTemplate* wPrimary = GetTemplateWeapon(namehash);
-	if ((wPrimary != null) && (!wPrimary->bPassive))
-	{
-		templateLocal.weaponType = wPrimary->name;
-	}
-
+	*/
 
 	//overwrite player if already there
 	if ((pPlayerActor[nPlayerOrdinal] != null) && (pPlayerActor[nPlayerOrdinal]->fLife > 0.0f))
@@ -979,16 +896,16 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 	//save last safe position as spawn position
 	m_arrPlayerLastSafePos[nPlayerOrdinal] = spawnPos;
 
-	///UPGRADE BARS
-	g_playerSelScr.ApplyUpgradesOnActor(playersel, nact);
 	//update backup template
-	nact->templateActor_ini = nact->templateActor;
+	nact->actTemplate_ini = nact->actTemplate;
 
 	//run ON_SPAWN script
+	/*
 	if (!templateLocal.shScript_OnSpawn.IsEmpty())
 	{
 		StartScript(templateLocal.shScript_OnSpawn.getHash(), nact);
 	}
+	*/
 
 	//animate player on spawn (only if told otherwise by nAnimset=-1)
 	if (nAnimset >= 0)
@@ -1037,18 +954,18 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateName, int nLookDirSign, CStringHash* shStateOverride)
 {
 	CActor * nact = new CActor();
-	CActorTemplate* ntempl = GetTemplateActor(strTemplateName);
+	CActorTemplate* ntempl = Actor_GetTemplate(strTemplateName);
 	InitActor(nact, ntempl, spawnPos);
 
 	//setam AI model vechi doar de siguranta
 	//SetAI(nact, K_AI_STATE_UNDEFINED, null);
 	CAIState* pStateOver = null;
 	if (shStateOverride != null)
-		pStateOver = nact->templateActor.AItemplate->GetAIStateByName(*shStateOverride);
+		pStateOver = nact->actTemplate.AItemplate->GetAIStateByName(*shStateOverride);
 	//set the override state only if we did find it
 	if (pStateOver == null)
 	{
-		SetActorAIState(nact, nact->templateActor.AItemplate->GetAIStateByName(nact->templateActor.AIdefaultStateName));
+		SetActorAIState(nact, nact->actTemplate.AItemplate->GetAIStateByName(nact->actTemplate.AIdefaultStateName));
 	}
 	else
 	{
@@ -1075,7 +992,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateName, int nLookDirSi
 	//add actor as target only if not spawned already dead (DEAD behavior)
 	if (nact->GetCurrentBehavior() != AI_BEHAVIOR_DEAD)
 	{
-		if (nact->templateActor.actorClass == K_LVL_ACT_CLASS_HOSTAGE)
+		if (nact->actTemplate.actorClass == K_LVL_ACT_CLASS_HOSTAGE)
 		{
 			//add actor as target only if not spawned already dead (DEAD behavior)
 			m_arrStats[K_LVL_STATS_TARGETS_TOTAL]++;
@@ -1085,11 +1002,11 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateName, int nLookDirSi
 			if (nact->script_hash.IsEmpty())
 				nact->script_hash.Init(L"SAVE_HOSTAGE");
 		}
-		else if (nact->templateActor.actorClass == K_LVL_ACT_CLASS_HUMAN)
+		else if (nact->actTemplate.actorClass == K_LVL_ACT_CLASS_HUMAN)
 		{
 			bCountEnemy = true;
 		}
-		else if (nact->templateActor.actorClass == K_LVL_ACT_CLASS_ZOMBIE)
+		else if (nact->actTemplate.actorClass == K_LVL_ACT_CLASS_ZOMBIE)
 		{
 			m_arrStats[K_LVL_STATS_ZOMBIES_TOTAL]++;
 			bCountEnemy = true;
@@ -1131,7 +1048,6 @@ CProp* CLevel::SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer)
 	obj->flipY = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPY) != 0);
 	//animated
 	obj->bAnimated = ((activFlags & K_EDITOR_ACTIVE_FLAG_ANIMATED) != 0);
-	obj->bReleaseIt = false;
 	//cand e animat selecteaza random frame-ul de pornire
 	if (obj->bAnimated)
 	{
@@ -1958,305 +1874,156 @@ HRESULT	CLevel::Weapon_Init(CWeapon* pWeapon, WCHAR* weaponTemplateName, CActor*
 	return S_OK;
 }
 
-HRESULT CLevel::LoadActorTemplates(WCHAR * xmlPath)
+CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 {
+	// LOAD ACTOR TEMPLATE LoadActorTemplate
 	HRESULT hr = S_OK;
+	char strbuff[MAX_PATH] = { 0 };
 
-	pugi::xml_document doc;
-	if (!doc.load_file(xmlPath))
+	//does it exist?
+	CActorTemplate* templ = Actor_GetTemplate(strTemplateFileName);
+	if (templ != null)
 	{
-		ErrorBox(K_ERR_CRITICAL, L"Unable to load Templates XML:%s\n", xmlPath);
-		return E_FAIL;
+		LOG_DBG(L"ActTemplates_Add - reusing template: %s", strTemplateFileName);
+		return templ;
 	}
 
-	SAFE_DELETE_GROWABLE_ARRAY(m_arrTemplatesActor);
-	SAFE_DELETE_GROWABLE_ARRAY(m_arrAItemplates);
+	// build file path
+	WCHAR Path[MAX_PATH];
+	WCHAR wcsPath[MAX_PATH];
+	StringCchPrintf(wcsPath, MAX_PATH, L"media/levels/data/actors/%s", strTemplateFileName);
+	FileManager::GetMediaPath(wcsPath, Path);
+
+	//does not exist, open xml
+	pugi::xml_document doc;
+	if (!doc.load_file(Path))
+	{
+		ErrorBox(K_ERR_WARNING, L"Unable to load actor template XML:%s\n", strTemplateFileName);
+		return null;
+	}
 
 	//load actor templates
-	pugi::xml_node rootnode = doc.root().child(L"ActorTemplates");
-	for (pugi::xml_node bnode = rootnode.first_child(); bnode; bnode = bnode.next_sibling())
+	pugi::xml_node rootnode = doc.root().child(L"ACTOR");
+
+	templ = new CActorTemplate();
+	templ->shID.Init(strTemplateFileName);
+	templ->shSkeletonXML.Init(rootnode.attribute(L"sSkeletonTemplateXML").value());
+	if (templ->shSkeletonXML.IsEmpty())
 	{
-		CActorTemplate* templ = new CActorTemplate();
-		//name
-		const WCHAR* bType = bnode.name();
-		templ->shName.Init(bType);
-		//constants
-		if (!bnode.attribute(L"jumpSpeed").empty())			{ templ->jumpSpeed = bnode.attribute(L"jumpSpeed").as_float(); }
-		if (!bnode.attribute(L"moveMaxSpeed").empty())		{ templ->moveMaxSpeed = bnode.attribute(L"moveMaxSpeed").as_float(); }
-		if (!bnode.attribute(L"moveBackSpeed").empty())		{ templ->moveBackSpeed = bnode.attribute(L"moveBackSpeed").as_float(); }
-		if (!bnode.attribute(L"moveMinSpeed").empty())		{ templ->moveMinSpeed = bnode.attribute(L"moveMinSpeed").as_float(); }
-		if (!bnode.attribute(L"climbSpeed").empty())		{ templ->climbSpeed = bnode.attribute(L"climbSpeed").as_float(); }
-		if (!bnode.attribute(L"distSee").empty())			{ templ->distSee = bnode.attribute(L"distSee").as_float(); }
-		if (!bnode.attribute(L"distHear").empty())			{ templ->distHear = bnode.attribute(L"distHear").as_float(); }
-		if (!bnode.attribute(L"distAttackMax").empty())		{ templ->distAttackMax = bnode.attribute(L"distAttackMax").as_float(); }
-		if (!bnode.attribute(L"distAttackMin").empty())		{ templ->distAttackMin = bnode.attribute(L"distAttackMin").as_float(); }
-		if (!bnode.attribute(L"fMass").empty())				{ templ->fMass = bnode.attribute(L"fMass").as_float(); }
-		if (!bnode.attribute(L"nHUDPortraitFrame").empty()) { templ->nHUDportraitFrameIdx = bnode.attribute(L"nHUDPortraitFrame").as_int(); }
-		templ->fStrategicPoints = 0.0f;
-		if (!bnode.attribute(L"fStrategicPoints").empty())	{ templ->fStrategicPoints = bnode.attribute(L"fStrategicPoints").as_float(); }
-		//life
-		if (!bnode.attribute(L"Life").empty())
-			templ->fLife = bnode.attribute(L"Life").as_float();
-		if (!bnode.attribute(L"Armor").empty())
-			templ->fArmor = bnode.attribute(L"Armor").as_float();
-		if (!bnode.attribute(L"fArmorMeleeProtectionPercent").empty())
-			templ->fArmorMPP = bnode.attribute(L"fArmorMeleeProtectionPercent").as_float();
-		//default values
-		if(!bnode.attribute(L"fFOVpercent").empty())
-			templ->fFOVpercent = bnode.attribute(L"fFOVpercent").as_float();
-		
-		if (!bnode.attribute(L"fDexterity").empty())
-			templ->fDexterity = bnode.attribute(L"fDexterity").as_float();
-		if (!bnode.attribute(L"fRecoilModifier").empty())
-			templ->fRecoilModifier = bnode.attribute(L"fRecoilModifier").as_float();
+		ErrorBox(K_ERR_WARNING, L"[WARNING] Template skeleton template XML not set!\n%s", templ->shSkeletonXML.text);
+		SAFE_DELETE(templ);
+		return null;
+	}
+	//read skin name (if any)
+	if (!rootnode.attribute(L"sSkin").empty())
+		templ->shSkinName.Init(rootnode.attribute(L"sSkin").value());
 
-		if (!bnode.attribute(L"nArmorDir").empty())
-			templ->nArmorDir = bnode.attribute(L"nArmorDir").as_int();
+	//ACTOR_DATA node
+	pugi::xml_node actnode = rootnode.child(L"ACTOR_DATA");
 
-		if (!bnode.attribute(L"nArmorRating").empty())
-			templ->nArmorRating = bnode.attribute(L"nArmorRating").as_float();
-		//composed animation
-		templ->bComposedAnimation = false;
-		if (!bnode.attribute(L"bComposedAnimation").empty())
-			templ->bComposedAnimation = bnode.attribute(L"bComposedAnimation").as_bool();
-		//caps
-		templ->eCaps = 0;
-		if (bnode.attribute(L"canJump").as_bool())
-			templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_JUMP;
-		if (bnode.attribute(L"canCrouch").as_bool())
-			templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_CROUCH;
-		if (bnode.attribute(L"canCover").as_bool())
-			templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_COVER;
-		if (bnode.attribute(L"canClimb").as_bool())
-			templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_CLIMB;
-		if (bnode.attribute(L"canInteract").as_bool())
-			templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_INTERACT;
-		if (bnode.attribute(L"canRoll").as_bool())
-			templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_ROLL;
-		if (bnode.attribute(L"canRotateView").as_bool())
-			templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_ROTATE_VIEW;
-
-		if (bnode.attribute(L"canBeDetonated").as_bool())
-			templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_BE_DETONATED;
-		if (bnode.attribute(L"hasExplosiveVest").as_bool())
-			templ->eCaps |= CActorTemplate::K_ACT_CAPS_HAS_EXPLOSIVE_VEST;
-
-		//weapons
-		if (!bnode.attribute(L"weapon").empty())
-		{
-			templ->weaponType.Init(bnode.attribute(L"weapon").value());
-		}
-		if (!bnode.attribute(L"weaponAlt").empty())
-		{
-			templ->weaponTypeAlt.Init(bnode.attribute(L"weaponAlt").value());
-		}
-		if (!bnode.attribute(L"weaponGear").empty())
-		{
-			templ->weaponTypeGear.Init(bnode.attribute(L"weaponGear").value());
-		}
-		if (!bnode.attribute(L"weaponMelee").empty())
-		{
-			templ->weaponTypeMelee.Init(bnode.attribute(L"weaponMelee").value());
-		}
-		if (!bnode.attribute(L"weaponBreach").empty())
-		{
-			templ->weaponTypeBreach.Init(bnode.attribute(L"weaponBreach").value());
-		}
-
-		///--- actor scripts ---
-		if (!bnode.attribute(L"sScript_OnSpawn").empty())
-		{
-			templ->shScript_OnSpawn.Init(bnode.attribute(L"sScript_OnSpawn").value());
-		}
-
-		if (!bnode.attribute(L"AIstate").empty())
-		{
-			templ->AIdefaultStateName.Init(bnode.attribute(L"AIstate").value());
-		}
-		if (!bnode.attribute(L"class").empty())
-		{
-			templ->actorClass = (EActorClass)GetListIndexByName(bnode.attribute(L"class").value(), EActorClassNames, K_LVL_ACT_CLASSES_COUNT);
-		}
-		if (!bnode.attribute(L"foeClassFilter1").empty())
-			templ->foeClassFilter1 = (EActorClass)GetListIndexByName(bnode.attribute(L"foeClassFilter1").value(), EActorClassNames, K_LVL_ACT_CLASSES_COUNT);
-		if (!bnode.attribute(L"foeClassFilter2").empty())
-			templ->foeClassFilter2 = (EActorClass)GetListIndexByName(bnode.attribute(L"foeClassFilter2").value(), EActorClassNames, K_LVL_ACT_CLASSES_COUNT);
-		if (!bnode.attribute(L"sMaterial").empty())
-		{
-			templ->eMaterial = (EMaterialType)GetListIndexByName(bnode.attribute(L"sMaterial").value(), EMaterialTypeNames, K_LVL_MATERIALS_COUNT);
-		}
-
-		//anims
-		pugi::xml_node anmnode = bnode.child(L"ANIMS");
-		if (anmnode != NULL)
-		{
-			for (int kk = 0; kk < K_LVL_ACT_ANIMS_CNT; kk++)
-			{
-				pugi::xml_node nmnode = anmnode.child(EActorAnimNames[kk].text);
-				if (nmnode != NULL)
-				{
-					//main animation
-					templ->animIDs[kk][0] = m_sprActors.GetAnimationIdxByName(nmnode.attribute(L"set0").value());
-					if (templ->animIDs[kk][0] == -1)
-					{
-						ErrorBox(K_ERR_WARNING, L"Template set0 animation not found!\n%s", nmnode.attribute(L"set0").value());
-					}
-					//next sets aren't mandatory
-					if (!nmnode.attribute(L"set1").empty())
-					{
-						templ->animIDs[kk][1] = m_sprActors.GetAnimationIdxByName(nmnode.attribute(L"set1").value());
-						if (templ->animIDs[kk][1] == -1)
-						{
-							ErrorBox(K_ERR_WARNING, L"Template variation animation not found!\n%s", nmnode.attribute(L"set1").value());
-						}
-					}
-				}
-			}
-		}
-
-		//sound verses
-		pugi::xml_node versenode = bnode.child(L"VERSES");
-		if (versenode != NULL)
-		{
-			for (int kk = 0; kk < K_LVL_ACT_VERSES_COUNT; kk++)
-			{
-				pugi::xml_node nmnode = versenode.child(EActorSoundVerseNames[kk].text);
-				if (nmnode != NULL)
-				{
-					if (!nmnode.attribute(L"set0").empty())
-					{
-						/*
-						templ->soundIDs[kk][0] = UTGetSoundManager().getSndIdxW(nmnode.attribute(L"set0").value());
-						if ((!nmnode.attribute(L"set0").empty()) && (templ->soundIDs[kk][0] == -1))
-						{
-							ErrorBox(K_ERR_WARNING, L"Template set0 sound not found!\n%s", nmnode.attribute(L"set0").value());
-						}
-						*/
-					}
-					//variation
-					if (!nmnode.attribute(L"set1").empty())
-					{
-						/*
-						templ->soundIDs[kk][1] = UTGetSoundManager().getSndIdxW(nmnode.attribute(L"set1").value());
-						if ((!nmnode.attribute(L"set1").empty()) && (templ->soundIDs[kk][1] == -1))
-						{
-							ErrorBox(K_ERR_WARNING, L"Template set1 sound not found!\n%s", nmnode.attribute(L"set1").value());
-						}
-						*/
-					}
-				}
-			}
-		}
-
-		//create local AI template copy
-		CAITemplate* aitemplate = new CAITemplate();
-
-		//AI ignored events
-		pugi::xml_node aiignorenode = bnode.child(L"AI_IGNORE_EVENTS");
-		if (aiignorenode != NULL)
-		{
-			//parcurg nodurile de stari
-			for (pugi::xml_node statenode = aiignorenode.first_child(); statenode; statenode = statenode.next_sibling())
-			{
-				EAIEventType nevttype = (EAIEventType)GetListIndexByName(statenode.attribute(L"type").value(), EAIEventTypeNames, K_LVL_AI_EVENTS_CNT);
-				if (nevttype >= 0)
-				{
-					aitemplate->m_arrIgnoredEvents.Add(nevttype);
-				}
-			}
-		}
-
-		//AI template
-		pugi::xml_node ainode = bnode.child(L"AI");
-		if (ainode != NULL)
-		{
-			//parcurg nodurile de stari
-			for (pugi::xml_node statenode = ainode.first_child(); statenode; statenode = statenode.next_sibling())
-			{
-				CAIState * nstate = new CAIState();
-				nstate->name.Init(statenode.attribute(L"name").value());
-				nstate->nPriority = statenode.attribute(L"nPriority").as_int();
-				//read probability and set to 100.0 if missing
-				nstate->fProbability = statenode.attribute(L"fProbability").as_float();
-				if (nstate->fProbability == 0.0f)
-					nstate->fProbability = 100.0f;
-				//find triggers
-				pugi::xml_node triggersparent = statenode.child(L"TRIGGERING_EVENTS");
-				if (triggersparent != null)
-				{
-					for (pugi::xml_node eventnode = triggersparent.first_child(); eventnode; eventnode = eventnode.next_sibling())
-					{
-						CStringHash evtTypeStr(eventnode.attribute(L"type").value());
-						EAIEventType nevt = K_LVL_AI_EVENT_NONE;
-						//trateaza keyword "ANY"
-						if (evtTypeStr.textHash == FastHash(L"any"))
-							nevt = K_LVL_AI_EVENT_ANY;
-						else
-							nevt = (EAIEventType)GetListIndexByName(eventnode.attribute(L"type").value(), EAIEventTypeNames, K_LVL_AI_EVENTS_CNT);
-
-						nstate->m_arrTriggeringEventTypes.Add(nevt);
-					}
-				}
-				//find behaviors
-				//#TODO: aici ar trebui sa fie un nod de grup de behaviors iar copiii sa contina behaviors, cu probabilitati pe fiecare copil ca sa pot varia AI-ul random
-				pugi::xml_node behaviorsparent = statenode.child(L"BEHAVIORS");
-				if (behaviorsparent != null)
-				{
-					for (pugi::xml_node behnode = behaviorsparent.first_child(); behnode; behnode = behnode.next_sibling())
-					{
-						CAIBehavior nbeh;
-						nbeh.nType = (EAIBehaviorType)GetListIndexByName(behnode.attribute(L"name").value(), EAIBehaviorTypeNames, AI_BEHAVIORS_CNT);
-						//salvam cativa params generici
-						if (!behnode.attribute(L"bCanInterrupt").empty())
-							nbeh.bCanInterrupt = behnode.attribute(L"bCanInterrupt").as_bool();
-						if (!behnode.attribute(L"bDetectPlatforms").empty())
-							nbeh.bDetectPlatforms = behnode.attribute(L"bDetectPlatforms").as_bool();
-						if (!behnode.attribute(L"bIgnoreEvents").empty())
-							nbeh.bIgnoreEvents = behnode.attribute(L"bIgnoreEvents").as_bool();
-						if (!behnode.attribute(L"fBehaviorDuration").empty())
-							nbeh.fBehaviorDuration = behnode.attribute(L"fBehaviorDuration").as_float();
-						//read all other behavior specific attributes
-						for (pugi::xml_attribute_iterator ait = behnode.attributes_begin(); ait != behnode.attributes_end(); ++ait)
-						{
-							//sarim peste params generici (name, bCanInterrupt)
-							if (ait->internal_object() == behnode.attribute(L"name").internal_object())
-								continue;
-							if (ait->internal_object() == behnode.attribute(L"bCanInterrupt").internal_object())
-								continue;
-							if (ait->internal_object() == behnode.attribute(L"bDetectPlatforms").internal_object())
-								continue;
-							if (ait->internal_object() == behnode.attribute(L"bIgnoreEvents").internal_object())
-								continue;
-							if (ait->internal_object() == behnode.attribute(L"fBehaviorDuration").internal_object())
-								continue;
-
-							WCHAR wval[MAX_PATH];
-							StringCchCopy(wval, MAX_PATH, ait->value());
-							nbeh.m_vcolParams.SetNamedVarAUTO(ait->name(), wval);
-						}
-
-						nstate->m_arrBehaviors.Add(nbeh);
-					}
-				}
-				//adaug state-ul al ai template-ul curent alocat
-				aitemplate->m_arrStates.Add(nstate);
-			}
-		}
-		//adaug in lista si salvez pointer in template-ul actorului catre template-ul de AI
-		m_arrAItemplates.Add(aitemplate);
-		templ->AItemplate = aitemplate;
-		//finished loading template: adaug tempalte-ul actorului in lista
-		m_arrTemplatesActor.Add(templ);
+	if (!actnode.attribute(L"fSpeedMove").empty()) { templ->fSpeedMove = actnode.attribute(L"fSpeedMove").as_float(); }
+	//if (!actnode.attribute(L"fSpeedClimb").empty()) { templ->fSpeedClimb = actnode.attribute(L"fSpeedClimb").as_float(); }
+	//life
+	if (!actnode.attribute(L"fLife").empty())
+		templ->fLife = actnode.attribute(L"fLife").as_float();
+	if (!actnode.attribute(L"fArmorFront").empty())
+		templ->fArmorFront = actnode.attribute(L"fArmorFront").as_float();
+	if (!actnode.attribute(L"fArmorBack").empty())
+		templ->fArmorBack = actnode.attribute(L"fArmorBack").as_float();
+	//caps
+	templ->eCaps = 0;
+	if (actnode.attribute(L"bCanCover").as_bool())
+		templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_COVER;
+	//other
+	if (!actnode.attribute(L"sWeapon").empty())
+	{
+		templ->shWeaponDefault.Init(actnode.attribute(L"sWeapon").value());
 	}
 
-	return hr;
+	//anims
+	pugi::xml_node anmnode = rootnode.child(L"ANIMS");
+	if (anmnode != NULL)
+	{
+		for (int kk = 0; kk < K_SD_ANIMS_CNT; kk++)
+		{
+			pugi::xml_node nmnode = anmnode.child(ESpineAnimNames[kk].text);
+			if (nmnode != NULL)
+			{
+				// read anim names
+				for (int nset = 0; nset < K_ACT_ANIM_MAX_SETS; nset++)
+				{
+					WCHAR strSetName[MAX_PATH];
+					StringCchPrintf(strSetName, MAX_PATH, L"set%d", nset);
+
+					if (!nmnode.attribute(strSetName).empty())
+					{
+						templ->arrAnims[kk].animNamesA[nset].Init(nmnode.attribute(strSetName).value());
+					}
+
+					// first set is mandatory:
+					if (nset == 0)
+					{
+						if (templ->arrAnims[kk].animNamesA[nset].IsEmpty())
+						{
+							ErrorBox(K_ERR_WARNING, L"[WARNING] Template set0 animation not found!\n %s: %s", templ->shSkeletonXML.text, ESpineAnimNames[kk].text);
+						}
+					}
+				}
+				// read looping flag
+				templ->arrAnims[kk].bLooping = true;
+				if (!nmnode.attribute(L"bLoop").empty())
+				{
+					templ->arrAnims[kk].bLooping = nmnode.attribute(L"bLoop").as_bool();
+				}
+			}
+		}
+	}
+
+	//sound verses
+	pugi::xml_node versenode = rootnode.child(L"VERSES");
+	if (versenode != NULL)
+	{
+		for (int kk = 0; kk < K_LVL_ACT_VERSES_COUNT; kk++)
+		{
+			pugi::xml_node nmnode = versenode.child(EActorSoundVerseNames[kk].text);
+			if (nmnode != NULL)
+			{
+				if (!nmnode.attribute(L"set0").empty())
+				{
+					templ->soundIDs[kk][0] = UTGetSoundManager().getSndIdxW(nmnode.attribute(L"set0").value());
+					if ((!nmnode.attribute(L"set0").empty()) && (templ->soundIDs[kk][0] == -1))
+					{
+						//#TEMP: until I change the templates
+						//ErrorBox(K_ERR_WARNING, L"Template set0 sound not found!\n%s", nmnode.attribute(L"set0").value());
+					}
+				}
+				//variation
+				if (!nmnode.attribute(L"set1").empty())
+				{
+					templ->soundIDs[kk][1] = UTGetSoundManager().getSndIdxW(nmnode.attribute(L"set1").value());
+					if ((!nmnode.attribute(L"set1").empty()) && (templ->soundIDs[kk][1] == -1))
+					{
+						//#TEMP: until I change the templates
+						//ErrorBox(K_ERR_WARNING, L"Template set1 sound not found!\n%s", nmnode.attribute(L"set1").value());
+					}
+				}
+			}
+		}
+	}
+
+	LOG_DBG(L"ActTemplates_Add - added template: %s", templ->shSkeletonXML.text);
+
+	//finished loading template
+	m_arrTemplatesActor.Add(templ);
+
+	return templ;
 }
 
 
 void CLevel::KillActor(CActor * actor, bool bSplatTarget)
 {
 	CBullet bullet;
-	bullet.fDamage = actor->templateActor.fLife;
+	bullet.fDamage = actor->actTemplate.fLife;
 	bullet.nFlags |= K_LVL_BULLET_FLAG_IGNORE_ARMOR | K_LVL_BULLET_FLAG_IGNORE_COVER | K_LVL_BULLET_FLAG_NO_IMPACT_PARTICLES | K_LVL_BULLET_FLAG_NOT_BALLISTIC | K_LVL_BULLET_FLAG_NO_DECALS;
 	bullet.actorClass = K_LVL_ACT_CLASS_TRAP;
 
@@ -2265,7 +2032,7 @@ void CLevel::KillActor(CActor * actor, bool bSplatTarget)
 		bullet.nFlags |= K_LVL_BULLET_FLAG_CAN_SPLAT;
 		bullet.nFlags &= ~K_LVL_BULLET_FLAG_NO_DECALS;
 		//very large damage
-		bullet.fDamage = -actor->templateActor.fLife;
+		bullet.fDamage = -actor->actTemplate.fLife;
 	}
 
 	HitActor(actor, &bullet);
@@ -2287,26 +2054,26 @@ bool CLevel::IsPlatformEnding(CActor* actor, int nDirSign)
 	return false;
 }
 
-CActorTemplate* CLevel::GetTemplateActor(const WCHAR * templateName)
+CActorTemplate* CLevel::Actor_GetTemplate(const WCHAR * templateName)
 {
 	UINT32 nameHash = FastHash(templateName);
 	//get template now
 	for (int kk = 0; kk < m_arrTemplatesActor.GetSize(); kk++)
 	{
-		if (m_arrTemplatesActor[kk]->shName.getHash() == nameHash)
+		if (m_arrTemplatesActor[kk]->shID.getHash() == nameHash)
 			return m_arrTemplatesActor[kk];
 	}
 	return NULL;
 }
 
-CActorTemplate* CLevel::GetTemplateActor(const DWORD templateNameHash)
+CActorTemplate* CLevel::Actor_GetTemplate(const DWORD templateNameHash)
 {
 	if (templateNameHash == 0)
 		return NULL;
 
 	for (int kk = 0; kk < m_arrTemplatesActor.GetSize(); kk++)
 	{
-		if (m_arrTemplatesActor[kk]->shName.getHash() == templateNameHash)
+		if (m_arrTemplatesActor[kk]->shID.getHash() == templateNameHash)
 			return m_arrTemplatesActor[kk];
 	}
 
@@ -2315,14 +2082,14 @@ CActorTemplate* CLevel::GetTemplateActor(const DWORD templateNameHash)
 
 void CLevel::RandomizeTemplateActor(CActorTemplate * actTemplate)
 {			   
-	//nu randomizam playerul
+	// don't randomize player
 	if (actTemplate->actorClass == K_LVL_ACT_CLASS_PLAYER)
 		return;
-	//randomizeaza vitezele cu 10%
-	if(actTemplate->moveMaxSpeed > 0.0f)
-		actTemplate->moveMaxSpeed += m_rand.RandFloatSgn(actTemplate->moveMaxSpeed * 0.1f);
-	if (actTemplate->moveMinSpeed > 0.0f)
-		actTemplate->moveMinSpeed += m_rand.RandFloatSgn(actTemplate->moveMinSpeed * 0.1f);
+	////randomizeaza vitezele cu 10%
+	//if(actTemplate->moveMaxSpeed > 0.0f)
+	//	actTemplate->moveMaxSpeed += m_rand.RandFloatSgn(actTemplate->moveMaxSpeed * 0.1f);
+	//if (actTemplate->moveMinSpeed > 0.0f)
+	//	actTemplate->moveMinSpeed += m_rand.RandFloatSgn(actTemplate->moveMinSpeed * 0.1f);
 }
 
 ///--- IACTIVE ---
@@ -3168,8 +2935,8 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 				for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 				{
 					//skip actors that are: hidden, dead, players or not a target
-					if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
-						((m_arrActors[kk]->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
+					if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
+						((m_arrActors[kk]->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
 							continue;
 					if (m_arrActors[kk]->bbox.Intersects(&active->bbox))
 					{
@@ -3376,7 +3143,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 			for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 			{
 				if ((pPlayerActor[kk] == NULL) || (pPlayerActor[kk]->bHidden) || (pPlayerActor[kk]->fLife <= 0.0f) ||
-					((pPlayerActor[kk]->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0) )
+					((pPlayerActor[kk]->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0) )
 					continue;
 				Vec2 vCheckPt(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
 				if (colshape->bbox.PointIn(vCheckPt))
@@ -3389,9 +3156,9 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 			for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 			{
 				//skip actors that are: hidden, dead, players or not a target
-				if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
+				if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
 					(m_arrActors[kk]->fLife <= 0.0f) ||
-					((m_arrActors[kk]->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
+					((m_arrActors[kk]->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
 					continue;
 				Vec2 vCheckPt(m_arrActors[kk]->bbox.vCenter.x, m_arrActors[kk]->bbox.vMin.y);
 				if (colshape->bbox.PointIn(vCheckPt))
@@ -3434,9 +3201,9 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 						for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 						{
 							//skip actors that are: hidden, dead, players or not a target
-							if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
+							if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
 								(m_arrActors[kk]->fLife <= 0.0f) ||
-								((m_arrActors[kk]->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
+								((m_arrActors[kk]->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
 								continue;
 							if (colshape->bbox.PointIn(m_arrActors[kk]->GetPosHeart()))
 							{
@@ -3479,7 +3246,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 						//SND_PLAY_POSITIONAL_RAND2(SNDIDX_WINDOWBREAK1, SNDIDX_WINDOWBREAK2, colshape->bbox.vCenter);
 					}
 					//destroy collision box
-					colshape->bReleaseIt = true;
+					colshape->Kill();
 					colshape->bSetHidden = true;
 					//force hidden here to avoid collisions after death
 					colshape->bHidden = true;
@@ -3597,90 +3364,6 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 					}
 				}
 				*/
-			}
-			break;
-			case K_AI_STATE_COLL_FOG_OF_WAR:
-			{
-				//verifica daca playerul o vede (de cateva ori pe secunda)
-				if (g_timers.Tick(100))
-				{
-					for (int npl = 0; npl < K_MAX_PLAYERS_CNT; npl++)
-					{
-						if (pPlayerActor[npl] == null)
-							continue;
-
-						CActor* pPlayer = pPlayerActor[npl];
-						CAABB aabbPlayerView(Vec2(pPlayer->posHeart.x - pPlayer->templateActor.distSee, pPlayer->posHeart.y - pPlayer->templateActor.distSee),
-							Vec2(pPlayer->posHeart.x + pPlayer->templateActor.distSee, pPlayer->posHeart.y + pPlayer->templateActor.distSee));
-
-						//didn't decide to remove FOW:
-						if (colshape->AIfvar1 >= 1.0f)
-						{
-							if (!aabbPlayerView.Intersects(&colshape->bbox))
-								continue;
-							//vad daca e fereastra verticala sau orizontala
-							bool bCheckH = true;
-							//daca plaeyrul este deasupra sau sub 
-							if ((pPlayer->posHeart.x >= colshape->bbox.vMin.x) && (pPlayer->posHeart.x <= colshape->bbox.vMax.x))
-							{
-								bCheckH = false;
-							}
-
-							Vec2 vfrom = pPlayer->posHeart;
-							Vec2 vto = vfrom;
-							if (bCheckH)
-							{
-								vto.x += SIGN(colshape->bbox.vCenter.x - pPlayer->posHeart.x) * pPlayer->templateActor.distSee;
-							}
-							else
-							{
-								//search on diagonal
-								vto.x += SIGN(colshape->bbox.vCenter.x - pPlayer->posHeart.x) * pPlayer->templateActor.distSee;
-								vto.y += SIGN(colshape->bbox.vCenter.y - pPlayer->posHeart.y) * pPlayer->templateActor.distSee;
-							}
-
-							//do we have FOW collision?
-							Vec2 fowColPt;
-							float fowT = -1.0f;
-							if (AABB_Segment_IntersectionEx(vfrom, vto, colshape->bbox, &fowColPt, fowT))
-							{
-								bool bHasCollidedBefore = false;
-								for (int kk = 0; kk < m_visibleList.logic_colShapesExtended.Count(); kk++)
-								{
-									CCollisionShape *shape = m_visibleList.logic_colShapesExtended.m_pData[kk];
-									if ((shape->type != K_LVL_COLL_TYPE_SOLID) || (!shape->castShadows))
-										continue;
-									float fshapeT = 100.0f;
-									if (AABB_Segment_IntersectionEx(vfrom, vto, shape->bbox, NULL, fshapeT))
-									{
-										if ((fowT >= 0.0f) && (fowT <= 1.0f) && (fshapeT < fowT))
-										{
-											bHasCollidedBefore = true;
-											break;
-										}
-									}
-								}
-								//intersection before?
-								if (!bHasCollidedBefore)
-								{
-									colshape->AIfvar1 = 1.0f - EPS;
-								}
-							}
-						}
-
-					}
-				}
-
-				if (colshape->AIfvar1 < 1.0f)
-					colshape->AIfvar1 -= dTime * 10.0f;
-				if (colshape->AIfvar1 <= 0.0f)
-				{
-					colshape->AIfvar1 = 0.0f;
-					colshape->bSetHidden = true;
-					colshape->bReleaseIt = true;
-				}
-				//set color
-				colshape->color = D3DCOLOR_COLORALPHA(K_LVL_COLL_FOW_COLOR, colshape->AIfvar1);
 			}
 			break;
 			case K_AI_STATE_PARTICLES_GENERATOR:
@@ -3898,7 +3581,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 					prop->AItimer1 -= dTime;
 					if (prop->AItimer1 <= 0.0f)
 					{
-						prop->bReleaseIt = true;
+						prop->Kill();
 					}
 					//color
 					float fAlpha = LIMIT(prop->AItimer1, 0.0f, 1.0f);
@@ -3917,7 +3600,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 					prop->AItimer1 -= dTime;
 					if (prop->AItimer1 <= 0.0f)
 					{
-						prop->bReleaseIt = true;
+						prop->Kill();
 					}
 					//color
 					float fAlpha = LIMIT(prop->AItimer1, 0.0f, 1.0f);
@@ -4081,7 +3764,7 @@ void CLevel::SetActorAIState(CActor * actor, CAIState* pNewState)
 
 bool CLevel::SetActorAIState(CActor * actor, WCHAR * strStateName)
 {
-	CAIState* newstate = actor->templateActor.AItemplate->GetAIStateByName(strStateName);
+	CAIState* newstate = actor->actTemplate.AItemplate->GetAIStateByName(strStateName);
 	if (newstate == null)
 	{
 		LOG(L"CLevel::SetActorAIState - state not found! %s\n", strStateName);
@@ -4097,18 +3780,18 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 	_ASSERT((pWeapon != null) && (pActor != null));
 
 	//reset actor template to initial one
-	pActor->templateActor = pActor->templateActor_ini;
+	pActor->actTemplate = pActor->actTemplate_ini;
 
 	if (!pWeapon->WeaponTemplate.shTemplateOverwrite.IsEmpty())
 	{
-		CActorTemplate* updateTemplate = GetTemplateActor(pWeapon->WeaponTemplate.shTemplateOverwrite.textHash);
+		CActorTemplate* updateTemplate = Actor_GetTemplate(pWeapon->WeaponTemplate.shTemplateOverwrite.textHash);
 		if (updateTemplate == null)
 		{
 			ErrorBox(K_ERR_WARNING, L"SetActorCurrentWeapon failed! Template %s not found for weapon %s!", pWeapon->WeaponTemplate.shTemplateOverwrite.text, pWeapon->WeaponTemplate.name.text);
 		}
 		//set animations from new template
-		pActor->templateActor.AddGenericDataFromTemplate(updateTemplate);
-		pActor->templateActor.OverwriteAnimsFromTemplate(updateTemplate);
+		pActor->actTemplate.AddGenericDataFromTemplate(updateTemplate);
+		pActor->actTemplate.OverwriteAnimsFromTemplate(updateTemplate);
 
 		//reset animations (make sure they get set)
 		pActor->eLastAnimSet = K_LVL_ACT_ANIM_EMPTY;
@@ -4119,7 +3802,7 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 
 	///--- PERKS ---
 	//apply perks that change current weapon
-	if ((pActor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (pActor->nPlayerOrdinal >= 0))
+	if ((pActor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) && (pActor->nPlayerOrdinal >= 0))
 	{
 		switch (g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal].eType)
 		{
@@ -4197,7 +3880,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 	actor->m_fAIbehaviorTimer = 0.0f;
 	
 	actor->m_AIcommands.Reset();
-	actor->fFOVPercent = actor->templateActor.fFOVpercent;
+	actor->fFOVPercent = 1.0f;
 
 	switch (pNewBehavior->nType)
 	{
@@ -4205,81 +3888,6 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 		{
 			//state doesn't need update
 			ret_bFinished = true;
-		}
-		break;
-		case AI_BEHAVIOR_SHOW_ENEMY:
-		{	
-			bool bHasFriends = false;
-			for (int kk = 0; kk < m_visibleList.logic_actors_closeby.Count(); kk++)
-			{
-				CActor* pFriend = m_visibleList.logic_actors_closeby.m_pData[kk];
-				if (pFriend == actor)
-					continue;
-				if ((pFriend->templateActor.actorClass == actor->templateActor.actorClass) && (pFriend->fLife > 0.0f))
-				{
-					if (IsLineOfSight(pFriend->GetPosHeart(), actor->GetPosHeart()))
-					{
-						bHasFriends = true;
-						break;
-					}
-				}
-			}
-
-			if (!bHasFriends)
-			{
-				ret_bFinished = true;
-				break;
-			}
-
-			//look to the event
-			if (actor->m_AIsensorInfo.m_AIcurrentEvent.nType != K_LVL_AI_EVENT_NONE)
-			{
-				actor->m_AIcommands.nLookDirX = SIGN(actor->m_AIsensorInfo.m_AIcurrentEvent.pos.x - actor->pos.x);
-			}
-			//add sound threat event
-			Vec2 vPos = actor->GetPosHeart();
-			if (actor->m_AIsensorInfo.pTargetedActor != NULL)
-			{
-				vPos = actor->m_AIsensorInfo.pTargetedActor->GetPosHeart();
-			}
-			else if (actor->m_AIsensorInfo.m_AIcurrentEvent.nType > K_LVL_AI_EVENT_IDLE_TICK)
-			{
-				vPos = actor->m_AIsensorInfo.m_AIcurrentEvent.pos;
-			}
-			AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, actor->GetUID(), K_LVL_ACT_CLASS_PLAYER, vPos, 256.0f, 1.0f);
-
-			//play verse
-			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName(L"sVerseName");
-			if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
-			{
-				EActorSoundVerse eVerse = (EActorSoundVerse)GetListIndexByNameHash(cvc->m_strArg.getHash(), EActorSoundVerseNames, K_LVL_ACT_VERSES_COUNT);
-				if (eVerse != K_LVL_ACT_VERSE_EMPTY)
-				{
-//					PlayActorSoundVerse(actor, eVerse);
-				}
-				else
-				{
-					ErrorBox(K_ERR_WARNING, L"BEHAVIOR_SHOW_ENEMY - Verse name not found!");
-				}
-			}
-			else
-			{
-				ErrorBox(K_ERR_WARNING, L"BEHAVIOR_SHOW_ENEMY - sVerseName param not found!");
-			}
-			
-			//save animation identifier
-			cvc = pNewBehavior->m_vcolParams.GetVariantByName(L"sAnimIdentifier");
-			if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
-			{
-				actor->AIvar1 = GetListIndexByName(cvc->m_strArg.text, EActorAnimNames, K_LVL_ACT_ANIMS_CNT);
-			}
-			else
-			{
-				//no animation to wait for, then return instantly
-				ret_bFinished = true;
-			}
-
-			actor->fFOVPercent = 1.0f; //disable FOV check while attacking
 		}
 		break;
 		case AI_BEHAVIOR_SET_STATE:
@@ -4291,7 +3899,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 				break;
 			}
 
-			CAIState* newstate = actor->templateActor.AItemplate->GetAIStateByName(vc->m_strArg);
+			CAIState* newstate = actor->actTemplate.AItemplate->GetAIStateByName(vc->m_strArg);
 			if (newstate == null)
 			{
 				LOG(L"AI_BEHAVIOR_SET_STATE - state not found! %s\n", vc->m_strArg.text);
@@ -4372,29 +3980,9 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			{
 				bool bVal = (cvNotATarget->m_asINT32 != 0);
 				if (bVal)
-					actor->templateActor.eCaps |= CActorTemplate::K_ACT_CAPS_NOT_A_TARGET;
+					actor->actTemplate.eCaps |= CActorTemplate::K_ACT_CAPS_NOT_A_TARGET;
 				else
-					actor->templateActor.eCaps &= ~CActorTemplate::K_ACT_CAPS_NOT_A_TARGET;
-			}
-
-			CVariantComplex* cvCanBeDetonated = pNewBehavior->m_vcolParams.GetVariantByName(L"nCanBeDetonated");
-			if (cvCanBeDetonated->m_type != CVariantComplex::K_ARGTYPE_NONE)
-			{
-				bool bVal = (cvCanBeDetonated->m_asINT32 != 0);
-				if (bVal)
-					actor->templateActor.eCaps |= CActorTemplate::K_ACT_CAPS_CAN_BE_DETONATED;
-				else
-					actor->templateActor.eCaps &= ~CActorTemplate::K_ACT_CAPS_CAN_BE_DETONATED;
-			}
-
-			CVariantComplex* cvHasExplosiveVest = pNewBehavior->m_vcolParams.GetVariantByName(L"nHasExplosiveVest");
-			if (cvHasExplosiveVest->m_type != CVariantComplex::K_ARGTYPE_NONE)
-			{
-				bool bVal = (cvHasExplosiveVest->m_asINT32 != 0);
-				if (bVal)
-					actor->templateActor.eCaps |= CActorTemplate::K_ACT_CAPS_HAS_EXPLOSIVE_VEST;
-				else
-					actor->templateActor.eCaps &= ~CActorTemplate::K_ACT_CAPS_HAS_EXPLOSIVE_VEST;
+					actor->actTemplate.eCaps &= ~CActorTemplate::K_ACT_CAPS_NOT_A_TARGET;
 			}
 			//state doesn't need update
 			ret_bFinished = true;
@@ -4413,30 +4001,14 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			actor->varAIparams.SetNamedVarUINT32(L"nExplode", hash_EXPLO_BARREL);
 			//special value that tells the engine that the explosion will have the last damager's UID so we can transmit barrel kills to players
 			actor->varAIparams.SetNamedVarBool(L"bUseDamagerUID", true);
-			//barrels aren't animated if IDLE animation doesn't loop
-			if (!m_sprActors.IsLooping(actor->templateActor.animIDs[K_LVL_ACT_ANIM_IDLE][0]))
-			{
-				actor->bAnimated = false;
-				actor->sprite.currentFrame = m_rand.RandInt(m_sprActors.GetAFramesCnt(actor->templateActor.animIDs[K_LVL_ACT_ANIM_IDLE][0]));
-			}
 		}
 		break;
 		case AI_BEHAVIOR_FLEE:
 		{
-			actor->AItimer1 = 0.0f;
-			//distance to run at
-			actor->AIfvar1 = pNewBehavior->m_vcolParams.GetVariantByName(L"fFleeDistance")->m_asFloat;
-			if (actor->AIfvar1 <= 0.0f)
-				actor->AIfvar1 = actor->templateActor.distHear;
-
-			actor->AIsubState = 0;
 		}
 		break;
 		case AI_BEHAVIOR_BLIND_RUN:
 		{
-			actor->AItimer1 = 0.0f;
-			//save fadeout duration
-			actor->AIfvar1 = pNewBehavior->m_vcolParams.GetVariantByName(L"fFadeOutDuration")->asFloat();
 		}
 		break;
 		case AI_BEHAVIOR_HOLD_POSITION:
@@ -4494,39 +4066,6 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 		break;
 		case AI_BEHAVIOR_DETONATE_NEARBY:
 		{
-			actor->AIvarBool1 = false; //not detonated
-			actor->AIvar1 = -1; //no anim set
-			//salvez identificatorul animatiei
-			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName(L"sAnimIdentifier");
-			if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
-			{
-				actor->AIvar1 = GetListIndexByName(cvc->m_strArg.text, EActorAnimNames, K_LVL_ACT_ANIMS_CNT);
-			}
-			//get nearby target
-
-			actor->AItargetUID = 0;
-			float fDistCurrent = 1000000.0f;
-			//get closest detonation target
-			for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
-			{
-				CActor* tact = m_arrActors[kk];
-				if ((tact->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_BE_DETONATED) == 0)
-					continue;
-				Vec2 vDelta = tact->GetPosHeart() - actor->GetPosHeart();
-				float fDist = MUVec2Len(&vDelta);
-				//too far?
-				if (fDist > actor->templateActor.distSee)
-					continue;
-
-				if (fDist < fDistCurrent)
-				{
-					if (IsLineOfSight(actor->GetPosHeart(), tact->GetPosHeart()))
-					{
-						fDistCurrent = fDist;
-						actor->AItargetUID = tact->GetUID();
-					}
-				}
-			}
 		}
 		break;
 		case AI_BEHAVIOR_CHANGE_COLOR:
@@ -4807,16 +4346,11 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			actor->fStunTimer = 0.0f;
 			//death timer for players or splat timer for others
 			actor->AItimer1 = 0.0f;
-			if (actor->templateActor.actorClass != K_LVL_ACT_CLASS_PLAYER) 
+			if (actor->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER) 
 			{
 				CVariantComplex* cvt = pNewBehavior->m_vcolParams.GetVariantByName(L"fSplatTimer");
 				if (cvt->m_type == CVariantComplex::K_ARGTYPE_FLOAT)
 					actor->AItimer1 = cvt->asFloat();
-				//#ZOMBIE: was biten? make victim explode and turn
-				if ((actor->AItimer1 <= 0.0f) && ((actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_TURN_TO_ZOMBIE) != 0) )
-				{
-					actor->AItimer1 = 3.0f + m_rand.RandFloat(3.0f);
-				}
 			}
 
 			//remove icons
@@ -4850,7 +4384,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 				actor->varAIparams.AddVariant(cvs);
 			}
 
-			if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
+			if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
 			{
 				//timerul este folosit ca sa nu sara camera de pe cadavru prea repede
 				actor->AItimer1 = K_LVL_PLAYER_DEATH_TIMER;
@@ -4869,7 +4403,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 				//dam remove la particles de pe interfata cand moare un player
 				g_particlesMgr.RemoveAllFromLayer(K_PART_LAYER_INTERFACE_LIGHT);
 			}
-			else if (actor->templateActor.actorClass >= K_LVL_ACT_CLASS_HUMAN)
+			else if (actor->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN)
 			{
 				if (!bSpawnedDead)
 				{
@@ -4908,10 +4442,12 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 
 			//play death verses
 			if ((dcmd == K_LVL_ACT_DEATHCMD_NONE) && (!bSpawnedDead))
-//				PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_DIE);
+			{
+				//PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_DIE);
+			}
 
 			//hostages specials
-			if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_HOSTAGE)
+			if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_HOSTAGE)
 			{
 				//save stats for saviour only if deallocating by itself (not killed)
 				if (dcmd == K_LVL_ACT_DEATHCMD_DEALLOCATE)
@@ -4928,9 +4464,9 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 					}
 					
 					App_IncreaseGamestat(K_MEMID_GAMESTATS_HOSTAGES_SAVED);
-					GiveStrategicPoints(actor->templateActor.fStrategicPoints, &Vec2(actor->bbox.vCenter.x, actor->bbox.vMin.y));
+					//GiveStrategicPoints(actor->actTemplate.fStrategicPoints, &Vec2(actor->bbox.vCenter.x, actor->bbox.vMin.y));
 					//make sure we release it on the next frame
-					actor->bReleaseIt = true;
+					actor->Kill();
 				}
 				else //hostage killed
 				{
@@ -4955,7 +4491,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			//make sure we release it on the next frame
 			if (dcmd == K_LVL_ACT_DEATHCMD_DEALLOCATE)
 			{
-				actor->bReleaseIt = true;
+				actor->Kill();
 			}
 		}
 		break;
@@ -4970,16 +4506,16 @@ void CLevel::SetActorDoT(CActor* act, CDamageOverTime::EDoTType eType, float fDu
 {
 	if (act == null)
 		return;
-	if ((eFilterClass > K_LVL_ACT_CLASS_ANY) && (act->templateActor.actorClass != eFilterClass))
+	if ((eFilterClass > K_LVL_ACT_CLASS_ANY) && (act->actTemplate.actorClass != eFilterClass))
 		return;
-	if ((eExcludedClass > K_LVL_ACT_CLASS_ANY) && (act->templateActor.actorClass == eExcludedClass))
+	if ((eExcludedClass > K_LVL_ACT_CLASS_ANY) && (act->actTemplate.actorClass == eExcludedClass))
 		return;
 
 	if ((eType == CDamageOverTime::K_LVL_DoT_INTIMIDATED) && (act->fLife <= 0.0f))
 		return;
 
 	//#HARDCODE: DoT_TARGETED only works on enemies
-	if ((eType == CDamageOverTime::K_LVL_DoT_TARGETED) && (act->templateActor.actorClass < K_LVL_ACT_CLASS_HUMAN))
+	if ((eType == CDamageOverTime::K_LVL_DoT_TARGETED) && (act->actTemplate.actorClass < K_LVL_ACT_CLASS_HUMAN))
 		return;
 
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
@@ -4991,7 +4527,7 @@ void CLevel::SetActorDoT(CActor* act, CDamageOverTime::EDoTType eType, float fDu
 		//pointer to player owner or null if not a player
 		CActor* pPlayerOwner = GetPlayerByUID(dwOwnerUID);
 		//special statistics
-		if ((eType == CDamageOverTime::K_LVL_DoT_FIRE) && (act->templateActor.actorClass >= K_LVL_ACT_CLASS_HUMAN))
+		if ((eType == CDamageOverTime::K_LVL_DoT_FIRE) && (act->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN))
 		{
 			if((pPlayerOwner != null) && (!IsNetworkPlayer(pPlayerOwner)))
 				App_IncreaseGamestat(K_MEMID_GAMESTATS_ENEMIES_SET_ON_FIRE);
@@ -5103,7 +4639,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	///--- ACTOR CAPS ---
 	//--- find closest touchable ---
-	if (actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_INTERACT)
+	if (actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_INTERACT)
 	{
 		IActiveInterface* pLowPrioTouch = null;
 		actor->pClosestTouchable = null;
@@ -5202,13 +4738,13 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		if (actor->m_AIsensorInfo.m_AIcurrentEvent.nType != K_LVL_AI_EVENT_DEAD)
 		{
 			actor->m_AIsensorInfo.b_IsDead = true;
-			actor->m_AIsensorInfo.m_AIcurrentEvent.Set(K_LVL_AI_EVENT_DEAD, actor->GetUID(), actor->templateActor.actorClass, actor->posHeart, -1.0f, 1.0f, actor->GetUID());
+			actor->m_AIsensorInfo.m_AIcurrentEvent.Set(K_LVL_AI_EVENT_DEAD, actor->GetUID(), actor->actTemplate.actorClass, actor->posHeart, -1.0f, 1.0f, actor->GetUID());
 			//save in memory
 			actor->m_AIsensorInfo.m_AIlastEvent = actor->m_AIsensorInfo.m_AIcurrentEvent;
 			//reset targeted actor
 			actor->m_AIsensorInfo.pTargetedActor = null;
 			///THINK: force state decision
-			CAIState* newState = actor->templateActor.AItemplate->GetHighestPriorityState(K_LVL_AI_EVENT_DEAD, &m_rand);
+			CAIState* newState = actor->actTemplate.AItemplate->GetHighestPriorityState(K_LVL_AI_EVENT_DEAD, &m_rand);
 			SetActorAIState(actor, newState);
 		}
 	}
@@ -5236,14 +4772,14 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				actor->m_AIsensorInfo.m_AIlastEvent = actor->m_AIsensorInfo.m_AIcurrentEvent;
 
 			//check for targets or other AI events
-			CActor* targetActor = GetClosestTarget(actor, actor->templateActor.foeClassFilter1, actor->templateActor.foeClassFilter2);
-			if (targetActor != null)
+			CActor* targetActor = nullptr;// GetClosestTarget(actor, actor->actTemplate.foeClassFilter1, actor->actTemplate.foeClassFilter2);
+			if (targetActor != nullptr)
 			{
 				float enemyDst = MUVec2Len(&(targetActor->posHeart - actor->posHeart));
-				AddAIEvent(K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->templateActor.actorClass, targetActor->posHeart, enemyDst, 1.0f, actor->GetUID());
+				AddAIEvent(K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->posHeart, enemyDst, 1.0f, actor->GetUID());
 				//#HACK: alerts the other enemies only if enemy class
-				if(actor->templateActor.actorClass >= K_LVL_ACT_CLASS_HUMAN)
-					AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, targetActor->GetUID(), targetActor->templateActor.actorClass, targetActor->GetPosHeart(), 200.0f, 0.6f);
+				if(actor->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN)
+					AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->GetPosHeart(), 200.0f, 0.6f);
 				//set target pointer
 				actor->m_AIsensorInfo.pTargetedActor = targetActor;
 				//vede daca face overlap
@@ -5254,7 +4790,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				//daca se ating trimit si event de touch enemy, doar daca vede inamicul
 				if (actor->bbox.Intersects(&targetActor->bbox))
 				{
-					AddAIEvent(K_LVL_AI_EVENT_TOUCH_ENEMY, targetActor->GetUID(), targetActor->templateActor.actorClass, targetActor->posHeart, enemyDst, 1.0f, actor->GetUID());
+					AddAIEvent(K_LVL_AI_EVENT_TOUCH_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->posHeart, enemyDst, 1.0f, actor->GetUID());
 				}
 				//scrie ultimul actor cu care a interactionat (nu este vital)
  				actor->m_AIsensorInfo.m_lastInteractingActorUID = targetActor->GetUID();
@@ -5299,7 +4835,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//am comentat verificarea pe behaviorDurationFinished pentru ca mesajul de IDLE_TICK ma scotea dintre behaviors care nu pot fi intrerupte. Ca sa pot intrerupe cand vreau bag un behavior IDLE
 			if ((actor->m_nAIcurrentBehaviorIdx < 0) || (actor->m_pAIcurrentState->m_arrBehaviors[actor->m_nAIcurrentBehaviorIdx].bCanInterrupt) /*|| (bBehaviorDurationFinished)*/)
 			{
-				CAIState* newState = actor->templateActor.AItemplate->GetHighestPriorityState(actor->m_AIsensorInfo.m_AIcurrentEvent.nType, &m_rand);
+				CAIState* newState = actor->actTemplate.AItemplate->GetHighestPriorityState(actor->m_AIsensorInfo.m_AIcurrentEvent.nType, &m_rand);
 				
 				//daca vechea stare a fost setata de acelasi mesaj ca si acum si nu are prioritate mai mica nu ar mai trebui setata alta stare ci cel mult dat restart la starea curenta
 				if ((newState != null) && (actor->m_AIsensorInfo.m_AIlastEvent.nType == actor->m_AIsensorInfo.m_AIcurrentEvent.nType) && (newState->nPriority == actor->m_pAIcurrentState->nPriority))
@@ -5520,7 +5056,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				//when moving it attracts attention
 				if ((m_Timers.Tick(100.0f)) && (fabs(actor->speed.x + actor->vSpeedImpulse.x) > 10.0f))
 				{
-					AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, actor->GetUID(), actor->templateActor.actorClass, actor->GetPosHeart(), 32.0f, 0.5f);
+					AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, actor->GetUID(), actor->actTemplate.actorClass, actor->GetPosHeart(), 32.0f, 0.5f);
 				}
 
 				if (actor->AIvarBool1) //can it burn?
@@ -5531,7 +5067,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						actor->cDamageOverTime.fDuration = actor->cDamageOverTime.fDuration_ini;
 					}
 					//daca are viata mai mica de 90% din viata initiala in mai putin de o secunda explodeaza
-					if ((actor->fLife <= actor->templateActor.fLife * 0.9f) && (actor->AIsubState == 0))
+					if ((actor->fLife <= actor->actTemplate.fLife * 0.9f) && (actor->AIsubState == 0))
 					{
 						//starts to shake
 						actor->AIsubState = 1; 
@@ -5542,7 +5078,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					if (actor->AIsubState == 1)
 					{
 						//when flaming it takes 10% of life
-						actor->fLife -= dTime * actor->templateActor.fLife * 0.5f;
+						actor->fLife -= dTime * actor->actTemplate.fLife * 0.5f;
 						if (actor->fLife > 0.0f) //pana sa moara genereaza particule de foc si vibreaza
 						{
 							//generate particles too
@@ -5565,7 +5101,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			case AI_BEHAVIOR_HOSTAGE:
 			{
 				//always set crouched command if actor can crouch
-				if (actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_CROUCH)
+				if (actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_CROUCH)
 					actor->m_AIcommands.bCrouched = true;
 				//can he follow targets? does it only once
 				if (actor->AIvarBool1)
@@ -5580,7 +5116,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 						Vec2 vDelta = actor->m_AIsensorInfo.pTargetedActor->GetPosHeart() - actor->GetPosHeart();
 						float fDist = fabs(vDelta.x);
-						float fDistMin = max(K_TILE_SIZE, actor->templateActor.distAttackMin);
+						float fDistMin = 32.0f;// max(K_TILE_SIZE, actor->actTemplate.distAttackMin);
 						//see if target is already too close
 						if (fDist <= fDistMin)
 						{
@@ -5631,7 +5167,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			case AI_BEHAVIOR_PLAY_ANIM:
 			{
 				//playerii pot schimba directia si pe play anim
-				if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
+				if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
 				{
 					CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID(actor->nControllerInstanceID);
 					if (pController != null)
@@ -5726,17 +5262,17 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if (actor->m_AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_NONE)
 				{
 					//daca nu am animatie de dead face direct splat daca poate (sau daca am primit param de bSplat din Hit Actor)
-					if ((actor->templateActor.animIDs[K_LVL_ACT_ANIM_DIE][0] == -1) || (actor->varAIparams.GetVariantByName(L"bSplat")->m_asBool))
+					/*if ((actor->actTemplate.animIDs[K_LVL_ACT_ANIM_DIE][0] == -1) || (actor->varAIparams.GetVariantByName(L"bSplat")->m_asBool))
 					{
 						actor->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_SPLAT;
-					}
+					} */
 				}
 				//cauta params particulari de AI setati din Hit Actor
 				CVariantComplex* cvc = actor->varAIparams.GetVariantByName(L"nExplode");
 				if (cvc->m_type != CVariantComplex::K_ARGTYPE_NONE)
 				{
 					//comanda splat on explode daca e clasa care trebuie
-					if ((actor->templateActor.actorClass == K_LVL_ACT_CLASS_HUMAN) || (actor->templateActor.actorClass == K_LVL_ACT_CLASS_HOSTAGE))
+					if ((actor->actTemplate.actorClass == K_LVL_ACT_CLASS_HUMAN) || (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_HOSTAGE))
 						actor->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_SPLAT;
 					//get explo class
 					UINT32 unExploUID = actor->GetUID();
@@ -5750,7 +5286,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 
 				///- when the player dies -
-				if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
+				if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
 				{
 					//actor->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_RESET_TO_ZERO;
 					//actor->varAIparams.SetNamedVarINT32(L"nDeathCommand", K_LVL_ACT_DEATHCMD_RESET_TO_ZERO);
@@ -5781,7 +5317,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					if (m_arrStats[K_LVL_STATS_PL1_LIVES + actor->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT] > 0)
 						bContinue = true;
 					//setam clasa pasiva ca sa putem sa distrugem cadavrul
-					actor->templateActor.actorClass = K_LVL_ACT_CLASS_HUMAN;
+					actor->actTemplate.actorClass = K_LVL_ACT_CLASS_HUMAN;
 
 					//daca avem breaching charges aruncate in nivel le dezalocam
 					ReleaseBullet(K_LVL_BULLET_BREACHING_CHARGE, actor->GetUID());
@@ -5818,7 +5354,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 				else //splat timer - splat corpse if timer is set
 				{
-					if ((actor->templateActor.eMaterial == K_LVL_MATERIAL_FLESH) && (actor->AItimer1 > 0.0f))
+					if ((actor->actTemplate.eMaterial == K_LVL_MATERIAL_FLESH) && (actor->AItimer1 > 0.0f))
 					{
 						actor->AItimer1 -= dTime;
 						if (actor->AItimer1 <= 0.0f)
@@ -5826,29 +5362,10 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 							actor->AItimer1 = 0.0f;
 							actor->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_SPLAT;
 						}
-						//#ZOMBIE: if turning into zombie show it by generating some particles
-						if ((actor->AItimer1 < 2.0f) && ((actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_TURN_TO_ZOMBIE) != 0))
-						{
-							if (m_Timers.Tick(200))
-							{
-								if (UTGetAppClass().m_Settings.bGoreEnabled)
-								{
-									g_particlesMgr.GenerateBulletHitEnemy(Vec2(actor->posHeart.x + randfloatsgn(5.0f), actor->posHeart.y),
-										Vec2((float)randsign(), -1.0f), K_LVL_ACT_CLASS_HUMAN, K_PART_LAYER_RT_FRONT_NRM);
-								}
-								else
-								{
-									//on gore off generate some stars
-									g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_CROSS_SM, true, 0, &Vec2(actor->posHeart.x + randfloatsgn(8.0f), actor->posHeart.y), NULL,
-										&Vec2(0.0f, -30.0f - randfloat(10.0f)), 0.6f, 0.7f, 0.0f, 0.0f, 0.0f, 0.2f, 0.2f, 0xff32a7fa, K_PART_LAYER_RT_FRONT_NRM);
-
-								}
-							}
-						}
 					}
 				}
 				//only flesh can splat
-				if ((actor->m_AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_SPLAT) && (actor->templateActor.eMaterial != K_LVL_MATERIAL_FLESH))
+				if ((actor->m_AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_SPLAT) && (actor->actTemplate.eMaterial != K_LVL_MATERIAL_FLESH))
 				{
 					actor->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_DEALLOCATE;
 				}
@@ -5914,7 +5431,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	if (actor->pCover != null)
 	{
 		//can't roll so stay still
-		if ((actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_ROLL) == 0)
+		if ((actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_ROLL) == 0)
 		{
 			actor->m_AIcommands.bThrustX = false;
 			actor->m_AIcommands.nMoveDirX = 0;
@@ -5944,7 +5461,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	if (actor->bCrouched)
 	{
 		//can he roll?
-		if ((actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_ROLL) && 
+		if ((actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_ROLL) && 
 			(actor->m_AIcommands.bThrustX == true) && (actor->nAttackStatus == K_LVL_ACT_ATTACK_IDLE))
 		{
 			if (actor->nRolling == K_STATE_READY)
@@ -5991,7 +5508,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 
 	//look for cover when entering crouched state
-	if (actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_COVER)
+	if (actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_COVER)
 	{
 		//entering crouch state
 		if ((actor->bCrouched) && (!bCrouchedOldState) && (actor->pCover == null))
@@ -6342,15 +5859,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		}
 	}
 
-	//#HACK: nu se misca pe reload daca nu are animatiile necesare (pe personajele fara animatii compuse sigur nu am reload while moving)
-	if ((!actor->templateActor.bComposedAnimation) && (actor->nAttackStatus == K_LVL_ACT_ATTACK_RELOADING))
-	{
-		actor->m_AIcommands.bThrustX = false;
-		actor->m_AIcommands.nMoveDirX = 0;
-		actor->m_AIcommands.nLookDirX = 0;
-	}
-
-	//#TODO: starile playerului ar trebui separate in stare arma si index arma ca sa nu mai verific mai jos cu >= SHOOTING
 	///--- setam directie look in fn de comanda AI inainte sa tragem cu arma ---
 	if (actor->m_AIcommands.nLookDirX != 0)
 	{
@@ -6567,10 +6075,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	if (actor->m_AIcommands.bThrust)
 	{
 		//add speed
-		float fspeed = actor->templateActor.moveMinSpeed;
-		//daca alearga schimb viteza
-		if (actor->m_AIcommands.bRunning)
-			fspeed = actor->templateActor.moveMaxSpeed;
+		float fspeed = actor->actTemplate.fSpeedMove;
 		//speed penalty
 		fspeed -= fspeed * fWpnSpeedPenaltyPercent;
 
@@ -6675,7 +6180,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				else
 				{
 					//blood splat (sortate crescator in animatie)
-					AddDecal_BloodSplat(actor->GetPosHeart(), true, actor->templateActor.actorClass);
+					AddDecal_BloodSplat(actor->GetPosHeart(), true, actor->actTemplate.actorClass);
 
 					//SND_PLAY_POSITIONAL_RAND2(SNDIDX_BULLET_BODY_GIBBED_01, SNDIDX_BULLET_BODY_GIBBED_02, actor->GetPosHeart());
 					//meat lumps
@@ -6684,11 +6189,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 					CAABB genbox = actor->bbox;
 					genbox.Inflate(-2.0f, -2.0f);
-					if (actor->templateActor.fLife > 10.0f)
+					if (actor->actTemplate.fLife > 10.0f)
 					{
 						DWORD dwCol = 0xff671010;
 						int nSubType = 0;
-						if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_ZOMBIE)
+						if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_ZOMBIE)
 						{
 							dwCol = 0xff82b600;
 							nSubType = 1;
@@ -6713,36 +6218,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					}
 				}
 
-				//#ZOMBIE: human cadavers become zombies so spawn one here
-				if ( (actor->templateActor.eMaterial == K_LVL_MATERIAL_FLESH) && 
-					 ((actor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_TURN_TO_ZOMBIE) != 0) )
-				{
-					//only spawn if on ground and only if turn to zombie countdown finished
-					if (((actor->collisionFlags & K_DIRFLAG_DOWN) != 0) && (actor->AItimer1 <= 0.0f))
-					{
-						CStringHash shTemplate;
-						if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_HOSTAGE)
-						{
-							shTemplate.Init(L"ACTOR_ZOMBIE_HOSTAGE");
-						}
-						else
-						{
-							int prob = m_rand.RandInt(100);
-							if (prob < 30)
-								shTemplate.Init(L"ACTOR_ZOMBIE_TORSO1");
-							else if (prob < 50)
-								shTemplate.Init(L"ACTOR_ZOMBIE_FAST1");
-							else
-								shTemplate.Init(L"ACTOR_ZOMBIE_SLOW1");
-						}
-						//spawn them already aware
-						CStringHash shState(L"AWARE");
-						SpawnActor(actor->pos, shTemplate.text, actor->lookDirXsign, &shState);
-					}
-				}
-
 				//players don't deallocate. They only become invisible.
-				if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
+				if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
 				{
 					actor->fLife = 0.0f;
 					actor->bHasGravity = false;
@@ -6759,14 +6236,14 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 				//deallocate
 				actor->bSetHidden = true;
-				actor->bReleaseIt = true;
+				actor->Kill();
 			}
 			break;
 			case K_LVL_ACT_DEATHCMD_DEALLOCATE:
 			{
 				//dezalocare
 				actor->bSetHidden = true;
-				actor->bReleaseIt = true;
+				actor->Kill();
 			}
 			break;
 		}
@@ -7035,51 +6512,15 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//end phys
 
 	//set camera vector
-	if (actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER)
+	if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
 	{
 		actor->vecCamFollowPos = Vec2(K_LVL_CAM_LOOK_OFFSET * actor->lookDirXsign, 0.0f);
 		if (actor->nAttackStatus == K_LVL_ACT_ATTACK_SHOOTING)
 			actor->vecCamFollowPos.x += actor->lookDirXsign * actor->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]->WeaponTemplate.fCameraRecoil;
 	}
 	//set sprite pos
-	if (!actor->templateActor.bComposedAnimation)
-	{
-		actor->sprite.pos = Vec2((int)ROUND_FLOAT(actor->pos.x), (int)ROUND_FLOAT(actor->pos.y));
-		actor->sprite_feet.pos = actor->sprite.pos;
-	}
-	else
-	{
-		actor->sprite_feet.pos = Vec2((int)ROUND_FLOAT(actor->pos.x), (int)ROUND_FLOAT(actor->pos.y));
-		POINTXYZ_INT stitchpt(0, 0, 0);
-		//find stitch point for torso
-		if (actor->sprite_feet.animationIdx >= 0)
-			m_sprActors.GetAFrameHitPoint(actor->sprite_feet.animationIdx, actor->sprite_feet.currentFrame, 0, &stitchpt);
-		actor->sprite.pos = actor->sprite_feet.pos;
-		actor->sprite.pos.x += stitchpt.x; actor->sprite.pos.y += stitchpt.y;
-	}
-	///--- shield and other overhead icons
-	//shield/armor
-	if ((actor->templateActor.actorClass != K_LVL_ACT_CLASS_PLAYER) && (actor->fArmor > 0.0f) && (actor->fArmor < actor->templateActor.fArmor) && (actor->templateActor.nArmorRating > 0))
-	{
-		bool bCanSet = true;
-		if ((actor->m_sprOverheadIcon.animationIdx == ANM_IGM_INTERFACE_SPR_ICON_ARMOR_APPEAR) && (actor->m_sprOverheadIcon.animStatus != ANIM_STATUS_FRAMELOCK))
-			bCanSet = false;
-
-		if (bCanSet)
-		{
-			int nFrames = m_sprInterface.GetAFramesCnt(ANM_IGM_INTERFACE_SPR_ICON_ARMOR_PROGRESS);
-			int nCurFrame = (int)floor(float(nFrames - 1) * (1.0f - (actor->fArmor / actor->templateActor.fArmor)));
-			CLAMP(nCurFrame, 0, nFrames - 1);
-			actor->m_sprOverheadIcon.animationIdx = ANM_IGM_INTERFACE_SPR_ICON_ARMOR_PROGRESS;
-			actor->m_sprOverheadIcon.currentFrame = nCurFrame;
-		}
-		//clear animation after a time
-		if (/*(actor->m_AIsensorInfo.fTimeSinceHit > 1.0f) || */(actor->fLife <= 0.0f))
-			actor->m_sprOverheadIcon.animationIdx = -1;
-	}
-	//clear armor icon
-	if ((actor->m_sprOverheadIcon.animationIdx == ANM_IGM_INTERFACE_SPR_ICON_ARMOR_DISAPPEAR) && (actor->m_sprOverheadIcon.animStatus == ANIM_STATUS_FRAMELOCK))
-		actor->m_sprOverheadIcon.animationIdx = -1;
+	actor->sprite.pos = Vec2((int)ROUND_FLOAT(actor->pos.x), (int)ROUND_FLOAT(actor->pos.y));
+	actor->sprite_feet.pos = actor->sprite.pos;
 
 	//only update it if set
 	if (actor->m_sprOverheadIcon.animationIdx >= 0)
@@ -7119,8 +6560,8 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 		return null;
 	//save some data about current actor:
 	bool bAlerted = (sourceActor->fFOVPercent >= 0.9f) ? true : false;
-	float fDistSee = sourceActor->templateActor.distSee;
-	float fDistHear = sourceActor->templateActor.distHear;
+	float fDistSee = 100.0f;// sourceActor->actTemplate.distSee;
+	float fDistHear = 100.0f;// sourceActor->actTemplate.distHear;
 	float fDistDown = 1.0f * K_TILE_SIZE; //2
 	float fDistUp = 4.0f * K_TILE_SIZE;	//6
 	if (bAlerted)
@@ -7149,19 +6590,19 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 		if (enemy == sourceActor)
 			continue;
 		//never attack same class
-		if (enemy->templateActor.actorClass == sourceActor->templateActor.actorClass)
+		if (enemy->actTemplate.actorClass == sourceActor->actTemplate.actorClass)
 			continue;
 
-		if (sourceActor->templateActor.actorClass == K_LVL_ACT_CLASS_ZOMBIE)
+		if (sourceActor->actTemplate.actorClass == K_LVL_ACT_CLASS_ZOMBIE)
 		{
 			//zombie classes attack everything that's made from meat
-			if (enemy->templateActor.eMaterial != K_LVL_MATERIAL_FLESH)
+			if (enemy->actTemplate.eMaterial != K_LVL_MATERIAL_FLESH)
 				continue;
 		}
 		else
 		{
 			//don't attack same class enemies or traps and passive classes
-			if (enemy->templateActor.actorClass < K_LVL_ACT_CLASS_PLAYER)
+			if (enemy->actTemplate.actorClass < K_LVL_ACT_CLASS_PLAYER)
 				continue;
 		}
 
@@ -7170,35 +6611,36 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 		if (eTargetClassFilter1 != K_LVL_ACT_CLASS_ANY)
 		{
 			nIgnoreConditions++;
-			if (enemy->templateActor.actorClass != eTargetClassFilter1)
+			if (enemy->actTemplate.actorClass != eTargetClassFilter1)
 				nIgnore++;
 		}
 		if (eTargetClassFilter2 != K_LVL_ACT_CLASS_ANY)
 		{
 			nIgnoreConditions++;
-			if (enemy->templateActor.actorClass != eTargetClassFilter2)
+			if (enemy->actTemplate.actorClass != eTargetClassFilter2)
 				nIgnore++;
 		}
 		if ((nIgnoreConditions > 0) && (nIgnore == nIgnoreConditions))
 			continue;
 		//nu ia in seama inamic cu energie sub 0 sau flag de not a target (setat de limbo)
-		if ((enemy->fLife <= 0.0f) || ((enemy->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
+		if ((enemy->fLife <= 0.0f) || ((enemy->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
 			continue;
 
 		Vec2 enemyDistV = enemy->posHeart - sourceActor->posHeart;
-		float viewDstSq = sourceActor->templateActor.distSee * sourceActor->templateActor.distSee;
+		float viewDstSq = 100.0f * 100.0f;//sourceActor->actTemplate.distSee * sourceActor->actTemplate.distSee;
 		float enemyDistSq = MUVec2LenSq(&enemyDistV);
 
 		bool bPreciseFOV = false; //approximate FOV with rectangle? (good for gameplay)
-		if ((sourceActor->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_CAN_ROTATE_VIEW) != 0)
-			bPreciseFOV = true;
+		//if ((sourceActor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_ROTATE_VIEW) != 0)
+			//bPreciseFOV = true;
 
 		if (bPreciseFOV)
 		{
+			/*
 			//daca inamicul este in spate modifica raza pe cea de auzit, doar daca nu e alertat la maxim. Daca are fov maxim ramane raza vizuala si in spate.
-			if ((sourceActor->fFOVPercent < 1.0f) && (sourceActor->templateActor.distHear > 0.0f) && (SIGN(enemyDistV.x) != SIGN(sourceActor->lookDirXsign)))
+			if ((sourceActor->fFOVPercent < 1.0f) && (sourceActor->actTemplate.distHear > 0.0f) && (SIGN(enemyDistV.x) != SIGN(sourceActor->lookDirXsign)))
 			{
-				viewDstSq = sourceActor->templateActor.distHear * sourceActor->templateActor.distHear;
+				viewDstSq = sourceActor->actTemplate.distHear * sourceActor->actTemplate.distHear;
 				//daca il poate auzi si e in linie directa, il aude
 				if (enemyDistSq <= viewDstSq)
 				{
@@ -7218,6 +6660,7 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 			//verifica daca am linie directa de vedere
 			if (!IsLineOfSight(sourceActor->posHeart, enemy->posHeart))
 				continue;
+				*/
 		}
 		else //Dreptunghi of Vision! such fast! Much optimal!
 		{
@@ -7268,16 +6711,16 @@ CActor * CLevel::GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTa
 	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 	{
 		CActor* enemy = m_arrActors[kk];
-		if ((enemy == null) || (enemy == sourceActor) || (enemy->templateActor.shName.textHash != nTargetNameHash) || (enemy->bHidden))
+		if ((enemy == null) || (enemy == sourceActor) || (enemy->actTemplate.shID.textHash != nTargetNameHash) || (enemy->bHidden))
 			continue;
 		//nu ia in seama inamic cu energie sub 0 sau flag de not a target
-		if ((enemy->fLife <= 0.0f) || ((enemy->templateActor.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
+		if ((enemy->fLife <= 0.0f) || ((enemy->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
 			continue;
 
 		Vec2 enemyDistV = enemy->posHeart - sourceActor->posHeart;
 		float enemyDistSq = MUVec2LenSq(&enemyDistV);
 		//daca e prea departe trece mai departe
-		float fSearchRadiusSq = (fMaxDistance <= 0.0f) ? (sourceActor->templateActor.distSee * sourceActor->templateActor.distSee) : (fMaxDistance * fMaxDistance);
+		float fSearchRadiusSq = (fMaxDistance * fMaxDistance);
 		if (enemyDistSq > fSearchRadiusSq)
 		{
 			continue;
@@ -7394,21 +6837,23 @@ CAIEvent * CLevel::GetMostImportantAIEvent(CActor * callerActor, EAIEventType eT
 		if ((evt->targetUID != 0) && (evt->targetUID != callerUID))
 			continue;
 		//ignore actor if different from class foe filters
+		/*
 		int nIgnore = 0, nIgnoreConditions = 0;
-		if (callerActor->templateActor.foeClassFilter1 != K_LVL_ACT_CLASS_ANY)
+		if (callerActor->actTemplate.foeClassFilter1 != K_LVL_ACT_CLASS_ANY)
 		{
 			nIgnoreConditions++;
-			if (evt->ownerClass != callerActor->templateActor.foeClassFilter1)
+			if (evt->ownerClass != callerActor->actTemplate.foeClassFilter1)
 				nIgnore++;
 		}
-		if (callerActor->templateActor.foeClassFilter2 != K_LVL_ACT_CLASS_ANY)
+		if (callerActor->actTemplate.foeClassFilter2 != K_LVL_ACT_CLASS_ANY)
 		{
 			nIgnoreConditions++;
-			if (evt->ownerClass != callerActor->templateActor.foeClassFilter2)
+			if (evt->ownerClass != callerActor->actTemplate.foeClassFilter2)
 				nIgnore++;
 		}
 		if ((nIgnoreConditions > 0) && (nIgnore == nIgnoreConditions))
 			continue;
+			*/
 		//!!! daca e event targetat il intoarce direct si il consuma, fara sa mai stea pe ganduri, cu exceptia IDLE_TICK
 		if ((evt->targetUID == callerUID) && (evt->nType > K_LVL_AI_EVENT_IDLE_TICK))
 			return evt;
@@ -7434,9 +6879,9 @@ CAIEvent * CLevel::GetMostImportantAIEvent(CActor * callerActor, EAIEventType eT
 			}
 		}
 		//see if we have ignored events
-		if (callerActor->templateActor.AItemplate->m_arrIgnoredEvents.Count() > 0)
+		if (callerActor->actTemplate.AItemplate->m_arrIgnoredEvents.Count() > 0)
 		{
-			if (callerActor->templateActor.AItemplate->m_arrIgnoredEvents.IndexOf(evt->nType) >= 0)
+			if (callerActor->actTemplate.AItemplate->m_arrIgnoredEvents.IndexOf(evt->nType) >= 0)
 				continue;
 		}
 		//dupa ce am exclus eventurile ce se puteau exclude:
@@ -7699,7 +7144,7 @@ void CLevel::CleanupDeadObjects()
 	//check active objects
 	for (int kk = m_arrProps.GetSize() - 1; kk >= 0; kk--)
 	{
-		if (m_arrProps[kk]->bReleaseIt)
+		if (m_arrProps[kk]->IsPendingKill())
 		{
 			SAFE_DELETE(m_arrProps[kk]);
 			m_arrProps.Remove(kk);
@@ -7710,7 +7155,7 @@ void CLevel::CleanupDeadObjects()
 	for (int kk = m_arrActors.GetSize() - 1; kk >= 0; kk--)
 	{
 		///--- must kill actor! - last thing in update - dezalocari finale ---
-		if (m_arrActors[kk]->bReleaseIt)
+		if (m_arrActors[kk]->IsPendingKill())
 		{
 			CActor* act = m_arrActors[kk];
 			// make sure we don't keep pointer to actor
@@ -7791,7 +7236,7 @@ void CLevel::UpdateAI(float dTime, bool bInEditor)
 		//count targets left
 		if (act->GetCurrentBehavior() != EAIBehaviorType::AI_BEHAVIOR_DEAD)
 		{
-			if ((act->templateActor.actorClass >= K_LVL_ACT_CLASS_HUMAN) || (act->templateActor.actorClass == K_LVL_ACT_CLASS_HOSTAGE))
+			if ((act->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN) || (act->actTemplate.actorClass == K_LVL_ACT_CLASS_HOSTAGE))
 			{
 				m_arrStats[K_LVL_STATS_TARGETS_LEFT]++;
 			}
@@ -9805,11 +9250,6 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
 	{
 		CActor* actor = m_visibleList.visible_actors.m_pData[kk];
-
-		if ((actor->templateActor.bComposedAnimation) && (actor->sprite_feet.animationIdx >= 0))
-		{
-			actor->sprite_feet.paintModule_texOverride(&m_sprActors, 0, 0);
-		}																 
 		actor->sprite.paintModule_texOverride(&m_sprActors, 0, 0);
 	}
 
@@ -10311,7 +9751,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	{
 		CActor* act = m_visibleList.visible_actors.m_pData[kk];
 		//shield/overhead icons for non players
-		if ((act->templateActor.actorClass != K_LVL_ACT_CLASS_PLAYER) && (act->m_sprOverheadIcon.animationIdx >= 0))
+		if ((act->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER) && (act->m_sprOverheadIcon.animationIdx >= 0))
 		{
 			act->m_sprOverheadIcon.pos = act->posHeart;
 			act->m_sprOverheadIcon.paint(&m_sprInterface);
@@ -10331,11 +9771,11 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		}
 
 		//energy bars
-		if ((act->templateActor.actorClass == K_LVL_ACT_CLASS_HUMAN) && (act->fLife > 0.0f) &&
-			(act->templateActor.fLife > 100.0f) && (act->m_AIsensorInfo.fTimeSinceHit < 5.0f))
+		if ((act->actTemplate.actorClass == K_LVL_ACT_CLASS_HUMAN) && (act->fLife > 0.0f) &&
+			(act->actTemplate.fLife > 100.0f) && (act->m_AIsensorInfo.fTimeSinceHit < 5.0f))
 		{
-			float fLife = act->fLife / act->templateActor.fLife;
-			float fBarLen = act->templateActor.fLife / 5.0f;
+			float fLife = act->fLife / act->actTemplate.fLife;
+			float fBarLen = act->actTemplate.fLife / 5.0f;
 			CLAMP(fBarLen, 40.0f, 60.0f);
 
 			RECTXYWH barrect(act->bbox.vCenter.x - fBarLen / 2.0f, act->bbox.vMax.y + 3.0f, fBarLen, 8.0f);
@@ -10459,20 +9899,6 @@ HRESULT CLevel::PaintUsingFinalRTT()
 			//too low? don't cover the player
 			if (vpos.y > player->bbox_exported.vMin.y)
 				vpos.y = player->bbox_exported.vMin.y;
-
-			//#HARDCODE: recon lockpicking door - show progress
-			if ((player->templateActor.shName.IsEqual(L"ACTOR_PLAYER_RECON")) && (activ->AIstate == K_AI_STATE_ACTIVE_DOOR_SECTION))
-			{
-				float fDuration = activ->varAIparams.GetVariantByName(L"f_lockpickTime")->m_asFloat;
-				float perc = 1.0f - (activ->fTouchTimer / fabs(fDuration));
-				float barlen = 16.0f;
-
-				if ((perc > 0.0f) && (perc < 1.0f))
-				{
-					RECTXYWH recttemp(vpos.x - barlen / 2.0f, vpos.y - 20.0f, barlen, 6);
-					CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
-				}
-			}
 
 			//change this constants for analog sticks
 			const int ANIM_IDX_INTERACT_ONCE = ANM_IGM_INTERFACE_SPR_INTERACT_ONCE;

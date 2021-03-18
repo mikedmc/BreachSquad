@@ -104,12 +104,6 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		return K_OP_FAILED;
 	}
 
-	FileManager::GetMediaPath(L"media/levels/data/actors_data.xml", Path);
-	if (FAILED(LoadActorTemplates(Path)))
-	{
-		return K_OP_FAILED;
-	}
-
 	//#TODO: release resources on errors (goto ERROR)
 											  
 
@@ -541,7 +535,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		obj->flipY = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPY) != 0);
 		//animated
 		obj->bAnimated = ((activFlags & K_EDITOR_ACTIVE_FLAG_ANIMATED) != 0);
-		obj->bReleaseIt = false;
+		obj->Kill();
 		//animated? select different start frame
 		if (obj->bAnimated)
 		{
@@ -675,7 +669,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		nact->ID = actID; //save actor ID
 		nact->bAnimated = true;  //animated by default
 
-		CActorTemplate* acttempl = GetTemplateActor(shTemplateNameHash.textHash);
+		CActorTemplate* acttempl = Actor_GetTemplate(shTemplateNameHash.textHash);
 		if (acttempl == null)
 		{
 			ErrorBox(K_ERR_WARNING, L"LoadLevel::GetTemplateActor - invalid template name: %s", shTemplateNameHash.text);
@@ -728,7 +722,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		//set state that was set from the editor
 		if (wcslen(stateNameW) > 0)
 		{
-			CAIState* nState = nact->templateActor.AItemplate->GetAIStateByName(stateNameW);
+			CAIState* nState = nact->actTemplate.AItemplate->GetAIStateByName(stateNameW);
 			if (nState == null)
 			{
 				ErrorBox(K_ERR_WARNING, L"[WARNING] LoadLevel: State %s not found on ID:%d", stateNameW, nact->ID);
