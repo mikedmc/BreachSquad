@@ -1249,7 +1249,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			//int AIstate = GetAIStateByNameHash(vcAIstate->m_strArg.getHash());
 			if ((vcAIstate == null) || (vcAIstate->m_type != CVariantComplex::K_ARGTYPE_STRING))
 			{
-				SetActorAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(actor->actTemplate.AIdefaultStateName));
+				SetActorAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(actor->actTemplate.shAIState_ini));
 			}
 			else
 			{

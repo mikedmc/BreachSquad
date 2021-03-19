@@ -51,6 +51,7 @@ public:
 	CStringHash		shID;				// ID: actor template file used as template ID
 	CStringHash		shSkeletonXML;		// skeleton xml file name (not full path)
 	CStringHashA	shSkinName;			// skeleton skin name
+	CStringHash		shAIState_ini;		// initial AI state
 
 	CAnimDesc		arrAnims[K_SD_ANIMS_CNT];										// Array that keeps animation data from actor.xml
 	int				soundIDs[K_LVL_ACT_VERSES_COUNT][K_ACT_VERSES_MAX_SETS];	// Contains sound ids-s mapped on different actions (called verses, see EActorSoundVerse)
@@ -59,14 +60,12 @@ public:
 	EMaterialType	eMaterial;	//type of material
 	EActorClass		actorClass; //class of actor
 	CAITemplate*	AItemplate;	
-	CStringHash		AIdefaultStateName;
 
 	UINT32			eCaps;				//see EActorCapabilitiesFlags
 
 	float			fMass;
-	float			fLife;				//actor life
-	float			fArmorFront;		//actor armor
-	float			fArmorBack;
+	float			fLife;		
+	float			fArmor;		
 	float			fSpeedMove;
 
 	CStringHash		shWeaponDefault;
@@ -120,7 +119,7 @@ public:
 
 		void Reset()
 		{
-			pTargetedActor = null;
+			pTargetedActor = nullptr;
 			b_IsDead = false;
 			m_lastInteractingActorUID = 0;
 			m_bEnabled = true;
@@ -331,7 +330,7 @@ public:
 	//CTOR
 	CActor() :
 		m_pAIcurrentState(null), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nTookDamageFrames(0), nLastDamageTakenFromUID(0),
-		pCurrentWeapon(null), nSkinIdx(0),
+		pCurrentWeapon(null), nSkinIdx(0), pClosestTouchable(nullptr),
 		eLastAnimSet(K_LVL_ACT_ANIM_EMPTY), nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), 
 		eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
 		pSkelTemplate(null), pSkeleton(null)

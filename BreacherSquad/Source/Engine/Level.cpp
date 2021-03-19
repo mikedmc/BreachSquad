@@ -196,14 +196,15 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, Vec2 spa
 	//AI-ul clasic se seteaza pe UNDEFINED dar seteaza celelalte variabile pe 0
 	SetAI(actor, K_AI_STATE_UNDEFINED, null);
 	//seteaza AI-ul pt inference machine din template
-	SetActorAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(actor->actTemplate.AIdefaultStateName));
+	SetActorAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(actor->actTemplate.shAIState_ini));
+	//clear AI input
+	actor->AItimerDecision = K_LVL_AI_DECISION_INTERVAL;
+	actor->m_AIcommands.Reset();
+	actor->m_AIsensorInfo.Reset();
 
 	//update all relative data
 	actor->SetPos(actor->pos);
 
-	//clear AI input
-	actor->m_AIcommands.Reset();
-	actor->m_AIsensorInfo.Reset();
 
 	return S_OK;
 }
@@ -998,7 +999,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, int nLookD
 	nact->ID = GenerateNextID();
 	m_arrActors.Add(nact);
 
-	//set angle
+	//#TODO: set angle - should go away
 	if (nLookDirSign == -1)
 		nact->SetAngle(PI);
 	else
@@ -1006,6 +1007,36 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, int nLookD
 
 	//update backup template
 	nact->actTemplate_ini = nact->actTemplate;
+
+	//#TEMP: initialize weapons	- should be completely changed...
+	Weapon_Init(&nact->weapons[K_LVL_ACT_WEAPON_PRIMARY], nact->actTemplate.shWeaponDefault.text, nact);
+	nact->weapons[K_LVL_ACT_WEAPON_SECONDARY].Init();
+	nact->weapons[K_LVL_ACT_WEAPON_GEAR].Init();
+	nact->weapons[K_LVL_ACT_WEAPON_MELEE].Init();
+	nact->weapons[K_LVL_ACT_WEAPON_BREACH].Init();
+	nact->weapons[K_LVL_ACT_WEAPON_TEMPORARY].Init();
+	nact->weapons[K_LVL_ACT_WEAPON_TEMPORARY_ALT].Init();
+	nact->weapons[K_LVL_ACT_WEAPON_NO_WEAPON].Init();
+
+	nact->pCurrentWeapon = &nact->weapons[K_LVL_ACT_WEAPON_PRIMARY];
+	//set selected weapons
+	nact->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY] = &nact->weapons[K_LVL_ACT_WEAPON_PRIMARY];
+	nact->pSelectedWeapon[K_LVL_ACT_WEAPON_SECONDARY] = &nact->weapons[K_LVL_ACT_WEAPON_SECONDARY];
+	nact->pSelectedWeapon[K_LVL_ACT_WEAPON_GEAR] = &nact->weapons[K_LVL_ACT_WEAPON_GEAR];
+	nact->pSelectedWeapon[K_LVL_ACT_WEAPON_MELEE] = &nact->weapons[K_LVL_ACT_WEAPON_MELEE];
+	nact->pSelectedWeapon[K_LVL_ACT_WEAPON_BREACH] = &nact->weapons[K_LVL_ACT_WEAPON_BREACH];
+	nact->pSelectedWeapon[K_LVL_ACT_WEAPON_TEMPORARY] = null;
+	nact->pSelectedWeapon[K_LVL_ACT_WEAPON_TEMPORARY_ALT] = null;
+	nact->pSelectedWeapon[K_LVL_ACT_WEAPON_NO_WEAPON] = null;
+
+
+	// initialize AI
+	SetActorAIState(nact, nact->actTemplate.AItemplate->GetAIStateByName(nact->actTemplate.shAIState_ini));
+	//clear AI input
+	nact->AItimerDecision = K_LVL_AI_DECISION_INTERVAL;
+	nact->m_AIcommands.Reset();
+	nact->m_AIsensorInfo.Reset();
+
 
 	return nact;
 }
@@ -1910,14 +1941,11 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 	pugi::xml_node actnode = rootnode.child(L"ACTOR_DATA");
 
 	if (!actnode.attribute(L"fSpeedMove").empty()) { templ->fSpeedMove = actnode.attribute(L"fSpeedMove").as_float(); }
-	//if (!actnode.attribute(L"fSpeedClimb").empty()) { templ->fSpeedClimb = actnode.attribute(L"fSpeedClimb").as_float(); }
 	//life
 	if (!actnode.attribute(L"fLife").empty())
 		templ->fLife = actnode.attribute(L"fLife").as_float();
-	if (!actnode.attribute(L"fArmorFront").empty())
-		templ->fArmorFront = actnode.attribute(L"fArmorFront").as_float();
-	if (!actnode.attribute(L"fArmorBack").empty())
-		templ->fArmorBack = actnode.attribute(L"fArmorBack").as_float();
+	if (!actnode.attribute(L"fArmor").empty())
+		templ->fArmor = actnode.attribute(L"fArmor").as_float();
 	//caps
 	templ->eCaps = 0;
 	if (actnode.attribute(L"bCanCover").as_bool())
@@ -1926,6 +1954,10 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 	if (!actnode.attribute(L"sWeapon").empty())
 	{
 		templ->shWeaponDefault.Init(actnode.attribute(L"sWeapon").value());
+	}
+	if (!actnode.attribute(L"sAIstate").empty())
+	{
+		templ->shAIState_ini.Init(actnode.attribute(L"sAIstate").value());
 	}
 
 	//anims
@@ -1998,6 +2030,104 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 			}
 		}
 	}
+
+	//create local AI template copy
+	CAITemplate* aitemplate = new CAITemplate();
+
+	//AI ignored events
+	pugi::xml_node aiignorenode = rootnode.child(L"AI_IGNORE_EVENTS");
+	if (aiignorenode != NULL)
+	{
+		//parcurg nodurile de stari
+		for (pugi::xml_node statenode = aiignorenode.first_child(); statenode; statenode = statenode.next_sibling())
+		{
+			EAIEventType nevttype = (EAIEventType)GetListIndexByName(statenode.attribute(L"type").value(), EAIEventTypeNames, K_LVL_AI_EVENTS_CNT);
+			if (nevttype >= 0)
+			{
+				aitemplate->m_arrIgnoredEvents.Add(nevttype);
+			}
+		}
+	}
+
+	//AI template
+	pugi::xml_node ainode = rootnode.child(L"AI");
+	if (ainode != NULL)
+	{
+		// parse all states
+		for (pugi::xml_node statenode = ainode.first_child(); statenode; statenode = statenode.next_sibling())
+		{
+			CAIState * nstate = new CAIState();
+			nstate->name.Init(statenode.attribute(L"name").value());
+			nstate->nPriority = statenode.attribute(L"nPriority").as_int();
+			// read state probability and set to 100.0 if missing
+			nstate->fProbability = statenode.attribute(L"fProbability").as_float();
+			if (nstate->fProbability == 0.0f)
+				nstate->fProbability = 100.0f;
+			// find triggers
+			pugi::xml_node triggersparent = statenode.child(L"TRIGGERING_EVENTS");
+			if (triggersparent != null)
+			{
+				for (pugi::xml_node eventnode = triggersparent.first_child(); eventnode; eventnode = eventnode.next_sibling())
+				{
+					CStringHash evtTypeStr(eventnode.attribute(L"type").value());
+					EAIEventType nevt = K_LVL_AI_EVENT_NONE;
+					//trateaza keyword "ANY"
+					if (evtTypeStr.textHash == FastHash(L"any"))
+						nevt = K_LVL_AI_EVENT_ANY;
+					else
+						nevt = (EAIEventType)GetListIndexByName(eventnode.attribute(L"type").value(), EAIEventTypeNames, K_LVL_AI_EVENTS_CNT);
+
+					nstate->m_arrTriggeringEventTypes.Add(nevt);
+				}
+			}
+			//find behaviors
+			//#TODO: aici ar trebui sa fie un nod de grup de behaviors iar copiii sa contina behaviors, cu probabilitati pe fiecare copil ca sa pot varia AI-ul random
+			pugi::xml_node behaviorsparent = statenode.child(L"BEHAVIORS");
+			if (behaviorsparent != null)
+			{
+				for (pugi::xml_node behnode = behaviorsparent.first_child(); behnode; behnode = behnode.next_sibling())
+				{
+					CAIBehavior nbeh;
+					nbeh.nType = (EAIBehaviorType)GetListIndexByName(behnode.attribute(L"name").value(), EAIBehaviorTypeNames, AI_BEHAVIORS_CNT);
+					//salvam cativa params generici
+					if (!behnode.attribute(L"bCanInterrupt").empty())
+						nbeh.bCanInterrupt = behnode.attribute(L"bCanInterrupt").as_bool();
+					if (!behnode.attribute(L"bDetectPlatforms").empty())
+						nbeh.bDetectPlatforms = behnode.attribute(L"bDetectPlatforms").as_bool();
+					if (!behnode.attribute(L"bIgnoreEvents").empty())
+						nbeh.bIgnoreEvents = behnode.attribute(L"bIgnoreEvents").as_bool();
+					if (!behnode.attribute(L"fBehaviorDuration").empty())
+						nbeh.fBehaviorDuration = behnode.attribute(L"fBehaviorDuration").as_float();
+					//read all behavior specific attributes
+					for (pugi::xml_attribute_iterator ait = behnode.attributes_begin(); ait != behnode.attributes_end(); ++ait)
+					{
+						// jump over generic params and add all others 
+						if (ait->internal_object() == behnode.attribute(L"name").internal_object())
+							continue;
+						if (ait->internal_object() == behnode.attribute(L"bCanInterrupt").internal_object())
+							continue;
+						if (ait->internal_object() == behnode.attribute(L"bDetectPlatforms").internal_object())
+							continue;
+						if (ait->internal_object() == behnode.attribute(L"bIgnoreEvents").internal_object())
+							continue;
+						if (ait->internal_object() == behnode.attribute(L"fBehaviorDuration").internal_object())
+							continue;
+
+						WCHAR wval[MAX_PATH];
+						StringCchCopy(wval, MAX_PATH, ait->value());
+						nbeh.m_vcolParams.SetNamedVarAUTO(ait->name(), wval);
+					}
+
+					nstate->m_arrBehaviors.Add(nbeh);
+				}
+			}
+
+			aitemplate->m_arrStates.Add(nstate);
+		}
+	}
+	// add the AItemplate to the list and save pointer to it in the actor template
+	m_arrAItemplates.Add(aitemplate);
+	templ->AItemplate = aitemplate;
 
 	LOG_DBG(L"ActTemplates_Add - added template: %s", templ->shSkeletonXML.text);
 
@@ -4709,7 +4839,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	
 	//vedem daca a expirat durata behavior curent si daca da fortam un pas de decizie AI
 	bool bBehaviorDurationFinished = false;
-	/*
 	if (actor->m_pAIcurrentState->m_arrBehaviors[actor->m_nAIcurrentBehaviorIdx].fBehaviorDuration > 0.0f)
 	{
 		actor->m_fAIbehaviorTimer += dTime;
@@ -4719,130 +4848,128 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			actor->AItimerDecision = 0.0f;
 		}
 	}
-	*/
-	//dead
 
-	//if (actor->fLife <= 0.0f)
-	//{
-	//	//ca sa intre doar o singura data:
-	//	if (actor->m_AIsensorInfo.m_AIcurrentEvent.nType != K_LVL_AI_EVENT_DEAD)
-	//	{
-	//		actor->m_AIsensorInfo.b_IsDead = true;
-	//		actor->m_AIsensorInfo.m_AIcurrentEvent.Set(K_LVL_AI_EVENT_DEAD, actor->GetUID(), actor->actTemplate.actorClass, actor->posHeart, -1.0f, 1.0f, actor->GetUID());
-	//		//save in memory
-	//		actor->m_AIsensorInfo.m_AIlastEvent = actor->m_AIsensorInfo.m_AIcurrentEvent;
-	//		//reset targeted actor
-	//		actor->m_AIsensorInfo.pTargetedActor = null;
-	//		///THINK: force state decision
-	//		CAIState* newState = actor->actTemplate.AItemplate->GetHighestPriorityState(K_LVL_AI_EVENT_DEAD, &m_rand);
-	//		SetActorAIState(actor, newState);
-	//	}
-	//}
-	//else //process low freq sensors only if no message from realtime sensors (more important)
-	//{
-	//	bool bIgnoreAIEvents = false;
-	//	if((actor->m_pAIcurrentState != null) && (actor->m_nAIcurrentBehaviorIdx >= 0))
-	//		bIgnoreAIEvents = actor->m_pAIcurrentState->m_arrBehaviors[actor->m_nAIcurrentBehaviorIdx].bIgnoreEvents;
-	//	
-	//	///HIGH FREQUENCY SENSORS
-	//	//hit timer (used in some behaviors)
-	//	actor->m_AIsensorInfo.fTimeSinceHit += dTime;
-	//	//remove target overlap
-	//	actor->m_AIsensorInfo.fTargetOverlapX = 0.0f;
-	//	//did he get hit? reset time since hit 
-	//	if (actor->nTookDamageFrames > 0)
-	//		actor->m_AIsensorInfo.fTimeSinceHit = 0.0f;
+	if (actor->fLife <= 0.0f)
+	{
+		//ca sa intre doar o singura data:
+		if (actor->m_AIsensorInfo.m_AIcurrentEvent.nType != K_LVL_AI_EVENT_DEAD)
+		{
+			actor->m_AIsensorInfo.b_IsDead = true;
+			actor->m_AIsensorInfo.m_AIcurrentEvent.Set(K_LVL_AI_EVENT_DEAD, actor->GetUID(), actor->actTemplate.actorClass, actor->posHeart, -1.0f, 1.0f, actor->GetUID());
+			//save in memory
+			actor->m_AIsensorInfo.m_AIlastEvent = actor->m_AIsensorInfo.m_AIcurrentEvent;
+			//reset targeted actor
+			actor->m_AIsensorInfo.pTargetedActor = null;
+			///THINK: force state decision
+			CAIState* newState = actor->actTemplate.AItemplate->GetHighestPriorityState(K_LVL_AI_EVENT_DEAD, &m_rand);
+			SetActorAIState(actor, newState);
+		}
+	}
+	else //process low freq sensors only if no message from realtime sensors (more important)
+	{
+		bool bIgnoreAIEvents = false;
+		if((actor->m_pAIcurrentState != null) && (actor->m_nAIcurrentBehaviorIdx >= 0))
+			bIgnoreAIEvents = actor->m_pAIcurrentState->m_arrBehaviors[actor->m_nAIcurrentBehaviorIdx].bIgnoreEvents;
+		
+		///HIGH FREQUENCY SENSORS
+		//hit timer (used in some behaviors)
+		actor->m_AIsensorInfo.fTimeSinceHit += dTime;
+		//remove target overlap
+		actor->m_AIsensorInfo.fTargetOverlapX = 0.0f;
+		//did he get hit? reset time since hit 
+		if (actor->nTookDamageFrames > 0)
+			actor->m_AIsensorInfo.fTimeSinceHit = 0.0f;
 
-	//	///LOW FREQUENCY SENSORS
-	//	actor->AItimerDecision -= dTime;
-	//	if ((actor->AItimerDecision <= 0.0f) && (!bIgnoreAIEvents) && (actor->m_AIsensorInfo.m_bEnabled))
-	//	{
-	//		//save previous event in memory only if not IDLE_TICK
-	//		if(actor->m_AIsensorInfo.m_AIcurrentEvent.nType > K_LVL_AI_EVENT_IDLE_TICK)
-	//			actor->m_AIsensorInfo.m_AIlastEvent = actor->m_AIsensorInfo.m_AIcurrentEvent;
+		///LOW FREQUENCY SENSORS
+		actor->AItimerDecision -= dTime;
+		if ((actor->AItimerDecision <= 0.0f) && (!bIgnoreAIEvents) && (actor->m_AIsensorInfo.m_bEnabled))
+		{
+			//save previous event in memory only if not IDLE_TICK
+			if(actor->m_AIsensorInfo.m_AIcurrentEvent.nType > K_LVL_AI_EVENT_IDLE_TICK)
+				actor->m_AIsensorInfo.m_AIlastEvent = actor->m_AIsensorInfo.m_AIcurrentEvent;
 
-	//		//check for targets or other AI events
-	//		CActor* targetActor = nullptr;// GetClosestTarget(actor, actor->actTemplate.foeClassFilter1, actor->actTemplate.foeClassFilter2);
-	//		if (targetActor != nullptr)
-	//		{
-	//			float enemyDst = MUVec2Len(&(targetActor->posHeart - actor->posHeart));
-	//			AddAIEvent(K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->posHeart, enemyDst, 1.0f, actor->GetUID());
-	//			//#HACK: alerts the other enemies only if enemy class
-	//			if(actor->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN)
-	//				AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->GetPosHeart(), 200.0f, 0.6f);
-	//			//set target pointer
-	//			actor->m_AIsensorInfo.pTargetedActor = targetActor;
-	//			//vede daca face overlap
-	//			if (actor->bbox.Intersects(&targetActor->bbox))
-	//			{
-	//				actor->m_AIsensorInfo.fTargetOverlapX = SIGN(actor->pos.x - targetActor->pos.x) * ((actor->bbox.vHalfSize.x + targetActor->bbox.vHalfSize.x) - fabs(actor->pos.x - targetActor->pos.x));
-	//			}
-	//			//daca se ating trimit si event de touch enemy, doar daca vede inamicul
-	//			if (actor->bbox.Intersects(&targetActor->bbox))
-	//			{
-	//				AddAIEvent(K_LVL_AI_EVENT_TOUCH_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->posHeart, enemyDst, 1.0f, actor->GetUID());
-	//			}
-	//			//scrie ultimul actor cu care a interactionat (nu este vital)
- //				actor->m_AIsensorInfo.m_lastInteractingActorUID = targetActor->GetUID();
-	//		}
-	//		else
-	//		{
-	//			//reset targeted actor
-	//			if (actor->m_AIsensorInfo.pTargetedActor != null)
-	//			{
-	//				//sterg mesaj de see enemy pt actorul curent
-	//				DeleteAITargetedEvent(K_LVL_AI_EVENT_SEE_ENEMY, actor->GetUID());
-	//				//Trimit mesaj de LOST_ENEMY
-	//				AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->posHeart + Vec2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 1.0f, actor->GetUID());
-	//				//reset targeting actor
-	//				actor->m_AIsensorInfo.pTargetedActor = null;
-	//			}
+			//check for targets or other AI events
+			CActor* targetActor = nullptr;// GetClosestTarget(actor, actor->actTemplate.foeClassFilter1, actor->actTemplate.foeClassFilter2);
+			if (targetActor != nullptr)
+			{
+				float enemyDst = MUVec2Len(&(targetActor->posHeart - actor->posHeart));
+				AddAIEvent(K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->posHeart, enemyDst, 1.0f, actor->GetUID());
+				//#HACK: alerts the other enemies only if enemy class
+				if(actor->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN)
+					AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->GetPosHeart(), 200.0f, 0.6f);
+				//set target pointer
+				actor->m_AIsensorInfo.pTargetedActor = targetActor;
+				//vede daca face overlap
+				if (actor->bbox.Intersects(&targetActor->bbox))
+				{
+					actor->m_AIsensorInfo.fTargetOverlapX = SIGN(actor->pos.x - targetActor->pos.x) * ((actor->bbox.vHalfSize.x + targetActor->bbox.vHalfSize.x) - fabs(actor->pos.x - targetActor->pos.x));
+				}
+				//daca se ating trimit si event de touch enemy, doar daca vede inamicul
+				if (actor->bbox.Intersects(&targetActor->bbox))
+				{
+					AddAIEvent(K_LVL_AI_EVENT_TOUCH_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->posHeart, enemyDst, 1.0f, actor->GetUID());
+				}
+				//scrie ultimul actor cu care a interactionat (nu este vital)
+ 				actor->m_AIsensorInfo.m_lastInteractingActorUID = targetActor->GetUID();
+			}
+			else
+			{
+				//reset targeted actor
+				if (actor->m_AIsensorInfo.pTargetedActor != null)
+				{
+					//sterg mesaj de see enemy pt actorul curent
+					DeleteAITargetedEvent(K_LVL_AI_EVENT_SEE_ENEMY, actor->GetUID());
+					//Trimit mesaj de LOST_ENEMY
+					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->posHeart + Vec2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 1.0f, actor->GetUID());
+					//reset targeting actor
+					actor->m_AIsensorInfo.pTargetedActor = null;
+				}
 
-	//			//#HACK: uneori e lovit dar nu apuca sa vada inamicul si ramane blocat ca nu primeste LOST_ENEMY asa ca il trimitem acum
-	//			if ((actor->m_AIsensorInfo.pTargetedActor == null) && (actor->m_AIsensorInfo.m_AIlastEvent.nType == K_LVL_AI_EVENT_GOT_HIT))
-	//			{
-	//				//put event behind him
-	//				AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->posHeart - Vec2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 0.5f, actor->GetUID());
-	//			}
-	//		}
+				//#HACK: uneori e lovit dar nu apuca sa vada inamicul si ramane blocat ca nu primeste LOST_ENEMY asa ca il trimitem acum
+				if ((actor->m_AIsensorInfo.pTargetedActor == null) && (actor->m_AIsensorInfo.m_AIlastEvent.nType == K_LVL_AI_EVENT_GOT_HIT))
+				{
+					//put event behind him
+					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->posHeart - Vec2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 0.5f, actor->GetUID());
+				}
+			}
 
-	//		///--- select best event ---
-	//		CAIEvent* evt = GetMostImportantAIEvent(actor);
+			///--- select best event ---
+			CAIEvent* evt = GetMostImportantAIEvent(actor);
 
-	//		if (evt != null)
-	//		{
-	//			actor->m_AIsensorInfo.m_AIcurrentEvent = *evt;
-	//		}
-	//		else
-	//		{
-	//			//nothing important, set idle tick
-	//			actor->m_AIsensorInfo.m_AIcurrentEvent.Set(K_LVL_AI_EVENT_IDLE_TICK, 0, 0, Vec2(0.0f, 0.0f), -1.0f, 1.0f);
-	//		}
-	//		//----------------------------------------
-	//		//	THINK - decide best behavior
-	//		//----------------------------------------
-	//		//daca nu am behavior sau daca behaviorul imi permite sa il intrerup.
-	//		//am comentat verificarea pe behaviorDurationFinished pentru ca mesajul de IDLE_TICK ma scotea dintre behaviors care nu pot fi intrerupte. Ca sa pot intrerupe cand vreau bag un behavior IDLE
-	//		if ((actor->m_nAIcurrentBehaviorIdx < 0) || (actor->m_pAIcurrentState->m_arrBehaviors[actor->m_nAIcurrentBehaviorIdx].bCanInterrupt) /*|| (bBehaviorDurationFinished)*/)
-	//		{
-	//			CAIState* newState = actor->actTemplate.AItemplate->GetHighestPriorityState(actor->m_AIsensorInfo.m_AIcurrentEvent.nType, &m_rand);
-	//			
-	//			//daca vechea stare a fost setata de acelasi mesaj ca si acum si nu are prioritate mai mica nu ar mai trebui setata alta stare ci cel mult dat restart la starea curenta
-	//			if ((newState != null) && (actor->m_AIsensorInfo.m_AIlastEvent.nType == actor->m_AIsensorInfo.m_AIcurrentEvent.nType) && (newState->nPriority == actor->m_pAIcurrentState->nPriority))
-	//			{
-	//				//#MAYBE: reset current behavior if it's the same state?
-	//			}
-	//			else
-	//			{
-	//				//if (newState != null)
-	//				//	DebugPrintW(L"evttype:%d set_state: %s\n", actor->m_AIsensorInfo.m_AIcurrentEvent.nType, newState->name.text);
+			if (evt != null)
+			{
+				actor->m_AIsensorInfo.m_AIcurrentEvent = *evt;
+			}
+			else
+			{
+				//nothing important, set idle tick
+				actor->m_AIsensorInfo.m_AIcurrentEvent.Set(K_LVL_AI_EVENT_IDLE_TICK, 0, 0, Vec2(0.0f, 0.0f), -1.0f, 1.0f);
+			}
+			//----------------------------------------
+			//	THINK - decide best behavior
+			//----------------------------------------
+			//daca nu am behavior sau daca behaviorul imi permite sa il intrerup.
+			//am comentat verificarea pe behaviorDurationFinished pentru ca mesajul de IDLE_TICK ma scotea dintre behaviors care nu pot fi intrerupte. Ca sa pot intrerupe cand vreau bag un behavior IDLE
+			if ((actor->m_nAIcurrentBehaviorIdx < 0) || (actor->m_pAIcurrentState->m_arrBehaviors[actor->m_nAIcurrentBehaviorIdx].bCanInterrupt) /*|| (bBehaviorDurationFinished)*/)
+			{
+				CAIState* newState = actor->actTemplate.AItemplate->GetHighestPriorityState(actor->m_AIsensorInfo.m_AIcurrentEvent.nType, &m_rand);
+				
+				//daca vechea stare a fost setata de acelasi mesaj ca si acum si nu are prioritate mai mica nu ar mai trebui setata alta stare ci cel mult dat restart la starea curenta
+				if ((newState != null) && (actor->m_AIsensorInfo.m_AIlastEvent.nType == actor->m_AIsensorInfo.m_AIcurrentEvent.nType) && (newState->nPriority == actor->m_pAIcurrentState->nPriority))
+				{
+					//#MAYBE: reset current behavior if it's the same state?
+				}
+				else
+				{
+					//if (newState != null)
+					//	DebugPrintW(L"evttype:%d set_state: %s\n", actor->m_AIsensorInfo.m_AIcurrentEvent.nType, newState->name.text);
 
-	//				//state may also be null when no state is associated with an event
-	//				SetActorAIState(actor, newState);
-	//			}
-	//		}
-	//	}
-	//}
+					//state may also be null when no state is associated with an event
+					SetActorAIState(actor, newState);
+				}
+			}
+		}
+	}
 
 
 	//------------------------------------------------------------------------------------------
@@ -4861,9 +4988,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	}
 	//simple way to check if it's time to decide
 	bool bTimeToDecide = (actor->AItimerDecision <= 0.0f);
-
-	//#HACK: force no AI
-	bSkipAI = true;
 
 	if (!bSkipAI) //daca nu am skip AI procesez switch-ul
 	{

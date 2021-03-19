@@ -146,16 +146,12 @@ void CActor::Move(Vec2 delta)
 
 CActorTemplate::CActorTemplate() :
 	//generic params
-	fLife(K_NOT_SET), fArmorFront(K_NOT_SET), fArmorBack(K_NOT_SET), fSpeedMove(K_NOT_SET),
+	fLife(K_NOT_SET), fArmor(K_NOT_SET), fSpeedMove(K_NOT_SET),
 	actorClass(K_LVL_ACT_CLASS_NOT_SET),
 	//more important values
 	eMaterial(K_LVL_MATERIAL_UNKNOWN), eCaps(K_ACT_CAPS_NONE),
 	AItemplate(nullptr), fMass(100.0f)
 {
-	shID.Reset();
-	shSkeletonXML.Reset();
-	shSkinName.Reset();
-
 	//reset anim IDs
 	for (int kk = 0; kk < K_SD_ANIMS_CNT; kk++)
 	{
@@ -176,8 +172,7 @@ void CActorTemplate::FillDefaultValuesIfNotSet()
 	if (eMaterial == K_LVL_MATERIAL_UNKNOWN) { eMaterial = K_LVL_MATERIAL_FLESH; }
 
 	if (fLife == K_NOT_SET) { fLife = 100.0f; }
-	if (fArmorFront == K_NOT_SET) { fArmorFront = 0.0f; }
-	if (fArmorBack == K_NOT_SET) { fArmorBack = 0.0f; }
+	if (fArmor == K_NOT_SET) { fArmor = 0.0f; }
 	if (fSpeedMove == K_NOT_SET) { fSpeedMove = 64.0f; }
 }
 
