@@ -3,22 +3,12 @@
 
 Vec2 CActor::GetPosHeart()
 {
-	//heart pos nu tine cont de flip (ar trebui sa aiba mereu X=0)
-	if (fLife <= 0.0f)
-		return (pos + vecHeart_abs[2]);
-	if (bCrouched)
-		return (pos + vecHeart_abs[1]);
-	return pos + vecHeart_abs[0];
+	return pos;
 }
 
 Vec2 CActor::GetPosWeapon()
 {
-	if (fLife <= 0.0f)
-		return Vec2(pos.x + vecWeapon_abs[2].x * lookDirXsign, pos.y + vecWeapon_abs[2].y);
-	else if (bCrouched)
-		return Vec2(pos.x + vecWeapon_abs[1].x * lookDirXsign, pos.y + vecWeapon_abs[1].y);
-
-	return Vec2(pos.x + vecWeapon_abs[0].x * lookDirXsign, pos.y + vecWeapon_abs[0].y);
+	return Vec2(pos.x, pos.y);
 }
 
 void CActor::UpdateBBoxAndPoints()

@@ -5675,7 +5675,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	
 	///--- Look direction ---
-	/*
 	//trebuie sa avem pointerul mereu setat
 	_ASSERT(actor->pCurrentWeapon != null);
 	///--- Shooting and reloading ---
@@ -5696,7 +5695,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			}
 		}
 	}
-	*/
 
 	//daca nu am foc alternativ anuleaza comanda
 	if ((actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_SHOOTING_ALT) && (actor->pSelectedWeapon[K_LVL_ACT_WEAPON_SECONDARY]->status == K_LVL_WPN_STATUS_UNKNOWN))
@@ -5781,7 +5779,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	}
 
 	//daca arma curenta nu a terminat de tras nu o setez
-	/*
 	CWeapon* pNewWeapon = actor->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]; //defaults on primary default weapon
 	if ((actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_SHOOTING) || (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_RELOADING))
 		pNewWeapon = actor->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY];
@@ -5831,9 +5828,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		if (pNewWeapon != actor->pCurrentWeapon)
 			actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
 	}
-	*/
 
-	/*
 	//verificari diverse ex. daca esti in aer si tragi cu o arma ce nu poate fi trasa din aer se intrerupe
 	if ((actor->m_AIcommands.eAttackCommand >= K_LVL_ACT_ATTACK_SHOOTING) || (actor->nAttackStatus >= K_LVL_ACT_ATTACK_SHOOTING))
 	{
@@ -5943,7 +5938,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			actor->m_AIcommands.nMoveDirX = 0;
 		}
 	}
-	*/
+
 	///--- setam directie look in fn de comanda AI inainte sa tragem cu arma ---
 	if (actor->m_AIcommands.nLookDirX != 0)
 	{
@@ -6132,20 +6127,12 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	}
 
-	/*
-	//opreste laser sight dupa ce a tras sau daca nu trage (a fost intrerupt, nu are ammo, etc)
-	if (actor->pCurrentWeapon->WeaponTemplate.bHasLaserSight)
-	{
-		if((actor->nAttackStatus < K_LVL_ACT_ATTACK_SHOOTING) || (nWeaponShots > 0))
-			actor->pCurrentWeapon->bPaintLaserSight = false;
-	}
 
 	//resetam stari reload la finalul incarcarii sau daca nu face arma reload
 	if ((actor->nAttackStatus == K_LVL_ACT_ATTACK_RELOADING) && (actor->pCurrentWeapon->status != K_LVL_WPN_STATUS_RELOADING))
 	{
 		actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
 	}
-	*/
 
 	///--- set icon ---
 	if (actor->m_AIcommands.nIconType != K_LVL_ACT_ICON_NONE)
@@ -6167,70 +6154,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	{
 		actor->speed = Vec2(0.0f, 0.0f);
 	}
-
-
-	/*
-	if (actor->m_AIcommands.bThrustX)
-	{
-		//add speed
- 		float fspeed = actor->templateActor.moveMinSpeed;
-		//daca alearga schimb viteza
-		if (actor->m_AIcommands.bRunning)
-			fspeed = actor->templateActor.moveMaxSpeed;
-		//mers cu spatele
-		if ((actor->m_AIcommands.nMoveDirX != 0) && (actor->lookDirXsign != actor->m_AIcommands.nMoveDirX))
-			fspeed = actor->templateActor.moveBackSpeed;
-		//roll speed
-		if ((actor->bCrouched) && (actor->nRolling == K_STATE_EXECUTING))
-		{
-			fspeed = actor->templateActor.moveMinSpeed; 
-		}
-
-		//penalizare viteza 
-		fspeed -= fspeed * fWpnSpeedPenaltyPercent;
-		//walk slower when shooting
-		if (actor->nAttackStatus > K_LVL_ACT_ATTACK_RELOADING)
-		{
-			//actioneaza doar cand nu esti in aer
-			if (actor->collisionFlags & K_DIRFLAG_DOWN)
-			{
-				//se scade din viteza procentul setat de arma influentat de inversul dexteritatii
-				float fSpeedDecrease = fspeed * actor->pCurrentWeapon->WeaponTemplate.fShooterSpeedSlowingPercent;
-				fspeed -= LIMIT(fSpeedDecrease, 0.0f, fspeed);
-			}
-		}
-		//CRIPPLED DoT
-		if ((actor->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_CRIPPLED) && (actor->collisionFlags & K_DIRFLAG_DOWN))
-		{
-			fspeed *= 0.3f;
-		}
-		//daca setez directia de move o foloseste pe cea comandata altfel se misca in directia in care se uita
-		if (actor->m_AIcommands.nMoveDirX != 0)
-			fspeed *= actor->m_AIcommands.nMoveDirX;
-		else
-			fspeed *= actor->lookDirXsign;
-		//setam thrust
-		actor->speed.x = fspeed;
-	}
-	else
-	{
-		//daca sunt pe pamant opresc viteza
-		if ((actor->collisionFlags & K_DIRFLAG_DOWN) || (actor->bOnLadder))
-			actor->speed.x = 0.0f;
-		//#HACK:target overlap - pushes the enemy so it doesn't overlap the players (when no thrust or collisions)
-		if ((actor->templateActor.actorClass >= K_LVL_ACT_CLASS_HUMAN) && (actor->m_AIsensorInfo.pTargetedActor != null) && 
-			(actor->m_AIsensorInfo.fTargetOverlapX != 0.0f) && ((actor->collisionFlags & K_DIRFLAG_LEFT_RIGHT) == 0))
-		{
-			float fPushForce = actor->m_AIsensorInfo.fTargetOverlapX * 15.0f;
-			//humans only get pushed back if they can walk backwards (so you can arrest them or at least get close to them)
-			if ((actor->templateActor.actorClass == K_LVL_ACT_CLASS_HUMAN) && (actor->templateActor.moveBackSpeed == 0.0f))
-				fPushForce = 0.0f;
-			//push enemy only if not already pushed
-			if(fabs(actor->vSpeedImpulse.x) < fabs(fPushForce))
-				actor->vSpeedImpulse.x = fPushForce;
-		}
-	}
-	*/
 
 	//comanda culoare
 	if (actor->m_AIcommands.nColor != 0)
@@ -9836,6 +9759,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	}
 								  
 	///--- actors icons and stun stars ---
+	/*
 	for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
 	{
 		CActor* act = m_visibleList.visible_actors.m_pData[kk];
@@ -9871,11 +9795,13 @@ HRESULT CLevel::PaintUsingFinalRTT()
 			CtrlMgrDrawProgress_HeadsOutside(&m_sprInterface, ANM_IGM_INTERFACE_SPR_PROGRESS_HEALTH, barrect, fLife, 0xffffffff);
 		}
 	}
+	*/
 
 	//-- final flush for level space ---
 	m_pSprite->Flush();
 
 	///--- paint Fog Of War ---
+	/*
 	if (m_bufferedPainter.GetTrisCount(m_fogofwarMeshIdx) > 0)
 	{
 		//set textures, states and shaders
@@ -9911,6 +9837,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		m_pDevice->SetVertexShader(null);
 		m_pDevice->SetPixelShader(null);
 	}
+	*/
 
 
 	///--- paint front layer parallax objects with linear blending ---
