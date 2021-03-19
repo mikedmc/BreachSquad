@@ -1409,7 +1409,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 
 				g_level.Update(fElapsedTime);
 				//SPINE update animation states
-				g_spineMgr.UpdateAnimationStates(fElapsedTime, fTime);
+				g_spineMgr.Update(fElapsedTime, fTime);
 				g_bLevelNeedsUpdate = false;
 
 				//check sync by log

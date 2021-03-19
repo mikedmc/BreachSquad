@@ -222,7 +222,7 @@ public:
 	// Spawns a player
 	void					SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset = 0);
 	// Spawns an actor (NPC)
-	CActor*					SpawnActor(Vec2 spawnPos, WCHAR* strTemplateName, int nLookDirSign, CStringHash* shStateOverride = null);
+	CActor*					SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, int nLookDirSign, CStringHash* shStateOverride = null);
 	// Spawns a new Active with empty properties
 	CProp*					SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer = K_TILE_LAYER_FLOOR);
 	// Spawns a light

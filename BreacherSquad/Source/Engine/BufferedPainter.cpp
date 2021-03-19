@@ -284,6 +284,8 @@ void CBufferedSpinePainter::Clear()
 
 void CBufferedSpinePainter::Paint(bool setFVF /*= true*/, ETexChannel eChannel)
 {
+	if (eChannel == K_TEXCHAN_NONE)
+		return;
 	//set FVF if necessary
 	if (setFVF)
 		m_pDevice->SetFVF(_VERTEX_PNCT4T4::FVF);
@@ -319,8 +321,8 @@ void CBufferedSpinePainter::Paint(bool setFVF /*= true*/, ETexChannel eChannel)
 			m_pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture);
 		else if (eChannel == K_TEXCHAN_NORMALMAP)
 			m_pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture_N);
-		else if (eChannel == K_TEXCHAN_SPECULARMAP)
-			m_pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture_S);
+		//else if (eChannel == K_TEXCHAN_SPECULARMAP)
+			//m_pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture_S);
 
 		DrawMesh(arrPasses[kk].nMeshIdx, false);
 	}

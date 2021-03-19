@@ -338,6 +338,8 @@ public:
 	{
 		bAnimated = true;
 		nControllerInstanceID = -1;
+		vSpeedImpulse = Vec2(0.0f, 0.0f);
+		speed = Vec2(0.0f, 0.0f);
 		for (int kk = 0; kk < K_ACT_MAX_ANIM_TRACKS; kk++)
 		{
 			eLastAnim[kk] = K_SD_ANIM_EMPTY;

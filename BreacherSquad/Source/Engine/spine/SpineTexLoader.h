@@ -4,7 +4,7 @@
 // Comment this line if you don't need normal maps. The string gets added to the filename, before the extension
 #define K_TL_LOAD_NORMAL_MAPS_SUFFIX L"_n"
 // Comment this line if you don't need specular data maps. The string gets added to the filename, before the extension
-#define K_TL_LOAD_SPECULAR_MAPS_SUFFIX L"_s"
+//#define K_TL_LOAD_SPECULAR_MAPS_SUFFIX L"_s"
 
 class CSpineTex
 {

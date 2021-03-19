@@ -18,6 +18,8 @@ int K_CI_ANIMIDX_BUTICONS_DN = ANM_CONTROLS_SPR_CTRLR_XBOX_DOWN;
 
 void CCustomInterfaceIGM::UpdateInterfaceForPlayer(int nPlayerOrdinal, D3DXVECTOR2 vPos, bool bFlipped)
 {
+	return;
+
 	if ((nPlayerOrdinal < 0) || (nPlayerOrdinal >= K_MAX_PLAYERS_CNT) || (playerAct[nPlayerOrdinal] == null))
 		return;
 	//skip update for dead players

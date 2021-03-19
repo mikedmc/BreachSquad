@@ -317,11 +317,12 @@ enum ERTIDChannel {
 };
 ///----------------------------------------------------
 /// Texture channels for painting diffuse, normals, etc 
+/// Mainly used by spine painter and manager
 ///----------------------------------------------------
 enum ETexChannel {
+	K_TEXCHAN_NONE,
 	K_TEXCHAN_COLORMAP,
 	K_TEXCHAN_NORMALMAP,
-	K_TEXCHAN_SPECULARMAP
 };
 
 ///--- CONSTANTE JOC ---
@@ -655,6 +656,7 @@ extern void ChangeGameStateTransition(int newState, int param1, int param2, int 
 extern CTimersArray			g_timers;
 extern CParticlesManager	g_particlesMgr;
 extern CPlayerSelScr		g_playerSelScr;
+extern CSpineManager		g_spineMgr;
 
 extern bool     g_bShowHelp;
 extern bool		g_bLevelNeedsUpdate;
