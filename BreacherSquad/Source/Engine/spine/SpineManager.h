@@ -47,6 +47,8 @@ public:
 		Slot*							arrSlots[K_SD_SLOTS_CNT];	// Pointers to slots
 		
 		CSkeletonInstance();
+		// Sets flags for visibility and skeleton updating
+		void							SetEnabled(bool bIsVisible, bool bIsUpdating);
 	};
 
 public:

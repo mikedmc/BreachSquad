@@ -615,3 +615,9 @@ CSpineManager::CSkeletonInstance::CSkeletonInstance() :
 	memset(arrBones, null, sizeof(Bone*));
 	memset(arrSlots, null, sizeof(Slot*));
 }
+
+void CSpineManager::CSkeletonInstance::SetEnabled(bool bIsVisible, bool bIsUpdating)
+{
+	bVisible = bIsVisible;
+	bEnabled = bIsUpdating;
+}
