@@ -1309,11 +1309,11 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 
 			if ((vcAIstate == null) || (vcAIstate->m_type != CVariantComplex::K_ARGTYPE_STRING))
 			{
-				nact = SpawnActor(vSpawnPos, vcTemplate->m_strArg.text, 0);
+				nact = SpawnActor(vSpawnPos, vcTemplate->m_strArg.text);
 			}
 			else
 			{
-				nact = SpawnActor(vSpawnPos, vcTemplate->m_strArg.text, 0, &vcAIstate->m_strArg);
+				nact = SpawnActor(vSpawnPos, vcTemplate->m_strArg.text, &vcAIstate->m_strArg);
 			}
 
 			if (nact != null)

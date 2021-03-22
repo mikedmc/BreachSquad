@@ -4,7 +4,7 @@
 ///  Adds geometry to meshes identified by index and then builds VB and IB and draws them
 ///-----------------------------------------------------------------------------------------------
 #define K_BP_SENTINEL_QUADS		10
-#define K_BP_MAX_MESHES_CNT		100
+#define K_BP_MAX_QMESHES_CNT	100
 
 class CBufferedPainterQuads
 {
@@ -17,8 +17,8 @@ protected:
 	UINT32						m_nVertexCursor;						// Current vertex index in buffer (writing position)
 	_VERTEX_PNCT4T4				*m_verts;								// temp buffer for storing vertices
 	
-	UINT32						m_nQuadsPerMesh[K_BP_MAX_MESHES_CNT]{};	// Triangle count per mesh
-	UINT32						m_nQuadsOffsets[K_BP_MAX_MESHES_CNT]{};	// VB offset per mesh
+	UINT32						m_nQuadsPerMesh[K_BP_MAX_QMESHES_CNT]{};	// Triangle count per mesh
+	UINT32						m_nQuadsOffsets[K_BP_MAX_QMESHES_CNT]{};	// VB offset per mesh
 	int							m_nMeshesCnt;							// Total no of pending meshes
 
 	bool						m_bMeshStarted;							// Did mesh editing start?

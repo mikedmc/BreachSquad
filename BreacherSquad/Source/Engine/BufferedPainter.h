@@ -6,7 +6,7 @@
 ///  Adds geometry to meshes identified by index and then builds VB and IB and draws them
 ///-----------------------------------------------------------------------------------------------
 #define K_BP_SENTINEL_TRIS		10
-#define K_BP_MAX_MESHES_CNT		100
+#define K_BP_MAX_MESHES_CNT		200
 
 class CBufferedPainter
 {

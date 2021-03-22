@@ -462,13 +462,11 @@ void CSpineManager::BatchSkeleton(Skeleton* skel)
 				int nIdx = quadIndices[kk];
 				ScratchDisk_AddVert(arrVertsPos[nIdx], arrUVs[nIdx * 2 + 0], arrUVs[nIdx * 2 + 1], dwSlotColor);
 			}
-
+			//#TODO: bufferMesh should return added pass/mesh idx so we can save starting and count for each skel instance
 			m_Painter.BufferMesh(arrScratchBuff, arrScratchCnt / 3, texture, engineBlendMode);
 		}
 		else if (attachment->getRTTI().isExactly(MeshAttachment::rtti)) 
 		{
-			//ErrorBox(K_ERR_WARNING, L"CSpineManager::PaintSkeleton: Mesh rendering not implemented yet!");
-
 			// Cast to an MeshAttachment so we can get the rendererObject
 			// and compute the world vertices
 			MeshAttachment* mesh = (MeshAttachment*)attachment;
@@ -610,7 +608,7 @@ spine::Animation* CSpineManager::CSkeletonTemplate::GetAnimation(const char * st
 CSpineManager::CSkeletonInstance::CSkeletonInstance() :
 	skel(null), anim(null), 
 	bVisible(true), bEnabled(true),
-	flagsLayer(K_SD_FLAG_LAYER_ACTORS)
+	UID(0) //default id = not used
 {
 	memset(arrBones, null, sizeof(Bone*));
 	memset(arrSlots, null, sizeof(Slot*));

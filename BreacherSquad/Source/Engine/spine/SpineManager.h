@@ -36,7 +36,7 @@ public:
 	// Helper structure for skeleton instances
 	class CSkeletonInstance {
 	public:
-		UINT32							flagsLayer;				// Skeleton layer flags (if we want to split them into layers)
+		UINT32							UID;					// Skeleton ID (can have multiple meshes/passes for one ID depending on skeleton). Use UID=0 if you want to batch all skeletons into one call.
 		bool							bVisible;				// Skeleton visible flag
 		bool							bEnabled;				// Skeleton update enable flag
 

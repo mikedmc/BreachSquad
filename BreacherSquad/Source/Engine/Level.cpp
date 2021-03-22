@@ -819,7 +819,7 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 		return;
 	}
 
-	CActor* nact = SpawnActor(spawnPos, L"act_cowboy1.xml", 1);
+	CActor* nact = SpawnActor(spawnPos, L"act_cowboy1.xml");
 
 	if (nact)
 	{
@@ -897,7 +897,7 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 	}
 }
 
-CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, int nLookDirSign, CStringHash* shStateOverride)
+CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHash* shStateOverride)
 {
 	CActorTemplate* acttemplate = Actor_LoadTemplate(strTemplateFileName);
 	if (acttemplate == null)
@@ -963,8 +963,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, int nLookD
 
 	CActor* nact = new CActor();
 	nact->Init(&templateLocal, spawnPos);
-	//#TODO: SetAI should disappear for actors or it should be handled inside Init
-	//SetAI(nact, K_AI_STATE_ACTOR_ACTIVE, null);
+	nact->ID = GenerateNextID();
 
 	// Load spine skeleton
 	WCHAR Path[MAX_PATH];
@@ -977,6 +976,8 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, int nLookD
 		float fScale = 1.0f;
 		// Create skeleton instance
 		nact->pSkeleton = g_spineMgr.GetSkeletonInstance(nact->pSkelTemplate);
+		// set skeleton ID too so we get them batched in separate meshes:
+		nact->pSkeleton->UID = nact->UID;
 		nact->pSkeleton->skel->setScaleY(-1.0f * fScale);
 		nact->pSkeleton->skel->setScaleX(fScale);
 
@@ -996,14 +997,10 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, int nLookD
 	}
 
 	//finish up adding the actor
-	nact->ID = GenerateNextID();
 	m_arrActors.Add(nact);
 
 	//#TODO: set angle - should go away
-	if (nLookDirSign == -1)
-		nact->SetAngle(PI);
-	else
-		nact->SetAngle(0.0f);
+	nact->SetAngle(0.0f);
 
 	//update backup template
 	nact->actTemplate_ini = nact->actTemplate;

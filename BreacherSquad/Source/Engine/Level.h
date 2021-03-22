@@ -222,7 +222,7 @@ public:
 	// Spawns a player
 	void					SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset = 0);
 	// Spawns an actor (NPC)
-	CActor*					SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, int nLookDirSign, CStringHash* shStateOverride = null);
+	CActor*					SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHash* shStateOverride = null);
 	// Spawns a new Active with empty properties
 	CProp*					SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer = K_TILE_LAYER_FLOOR);
 	// Spawns a light
@@ -378,7 +378,7 @@ public:
 	bool					IsLineOfSight(Vec2 pt1, Vec2 pt2, Vec2 * retVecCollisionPt = null, Vec2 * retVecCollisionNormal = null);
 
 	UINT32					m_unLastID;				//Last loaded ID - used to assign unique IDs to runtime spawned elements
-	//Generates a new ID and increments m_unLastID
+	//Generates a new editor ID and increments m_unLastID (used when appending areas)
 	UINT32					GenerateNextID();		
 	// Loads a level from an absolute path
 	OPRESULT				LoadLevel(WCHAR * strPathAbs);

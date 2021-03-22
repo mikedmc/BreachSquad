@@ -45,12 +45,12 @@ OPRESULT CBufferedPainterQuads::BeginMesh(int &retMeshIdx)
 		// closes the mesh automatically, no return value
 	}
 
-	if (m_nMeshesCnt >= K_BP_MAX_MESHES_CNT)
+	if (m_nMeshesCnt >= K_BP_MAX_QMESHES_CNT)
 	{
 		retMeshIdx = -1;
 		return OPRESULT(K_OP_FAILED, L"CBufferedPainterQuads:: Too many meshes!", K_SEVERITY_WARNING);
 	}
-	//assert(m_nMeshesCnt < K_BP_MAX_MESHES_CNT);
+	//assert(m_nMeshesCnt < K_BP_MAX_QMESHES_CNT);
 	m_bMeshStarted = true;
 
 	//reset mesh data

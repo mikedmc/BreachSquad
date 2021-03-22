@@ -1,13 +1,5 @@
 #pragma once
 
-///----------------------------------------------------
-/// SKELETON LAYERS
-/// - separates spine skeletons into multiple layers so we can paint them separately
-///----------------------------------------------------
-#define K_SD_FLAG_LAYER_ALL			65535
-#define K_SD_FLAG_LAYER_ACTORS		1
-#define K_SD_FLAG_LAYER_EFFECTS		2
-
 
 ///--------------------------------------------------------------------------
 /// ANIMATIONS
