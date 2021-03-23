@@ -83,6 +83,7 @@ private:
 		EBlendMode			eMode;
 		CSpineTex*			pTex;
 		int					nMeshIdx;
+		UINT				dwSkelUID;			// UID of current pass, usually corresponds to skeleton UID but it can be 0 if we don't need to split meshes by UID
 	};
 
 	int						passesCnt;								// total number of "passes" or "mode changes" needed to paint the meshes
@@ -95,7 +96,8 @@ public:
 	using				CBufferedPainter::Init;
 
 	// Adds triangles to the paint buffer (CSpineTex can be replaced with texture pointer)
-	void				BufferMesh(_VERTEX_PNCT4T4 *points, int trisCount, CSpineTex* pTex, EBlendMode eMode);
+	// Returns pass index when starting a new mesh or -1 if using already started mesh
+	int					BufferMesh(_VERTEX_PNCT4T4 *points, int trisCount, CSpineTex* pTex, EBlendMode eMode, UINT dwUID = 0);
 
 	// Creates the actual vertex buffer with the data
 	// Could be called inside Paint, left public for more granular control
@@ -106,6 +108,8 @@ public:
 
 	// Paints all buffered meshes
 	void				Paint(bool setFVF = true, ETexChannel eChannel = K_TEXCHAN_COLORMAP);
+	// Paints one single pass from the passes array, by index
+	OPRESULT			PaintPass(int nPassIdx, bool setFVF = true, ETexChannel eChannel = K_TEXCHAN_COLORMAP);
 
 	//make parent framework methods public with "using"
 	using				CBufferedPainter::OnCreateDevice;

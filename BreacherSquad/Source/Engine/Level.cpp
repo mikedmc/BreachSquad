@@ -9246,7 +9246,10 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	Areas_PaintLayer(K_AL_WALLS);
 
 	// paint spine
-	g_spineMgr.Paint(eTexChannel);
+	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
+	{
+		g_spineMgr.Paint(m_arrActors[kk]->pSkeleton, eTexChannel);
+	}
 
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 	if (pSprVS)

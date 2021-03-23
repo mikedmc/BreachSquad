@@ -39,6 +39,7 @@ public:
 		UINT32							UID;					// Skeleton ID (can have multiple meshes/passes for one ID depending on skeleton). Use UID=0 if you want to batch all skeletons into one call.
 		bool							bVisible;				// Skeleton visible flag
 		bool							bEnabled;				// Skeleton update enable flag
+		CFixedArray<int, 10>			arrPassesIdx;			// Indexes of passes from bufferedPainter needed to fully paint the skeleton
 
 		Skeleton*						skel;					// Skeleton instance
 		AnimationState*					anim;					// Animation state for current skeleton
@@ -90,8 +91,10 @@ public:
 	void								Update(float dTime, float fTimeLine);
 	// Paints all visible skeletons using a specified texture variation (normals or other surfaces)
 	void								Paint(ETexChannel eChannel = K_TEXCHAN_COLORMAP);
+	// Paints one skeletons using a specified texture variation (normals or other surfaces)
+	void								Paint(CSkeletonInstance* ski, ETexChannel eChannel = K_TEXCHAN_COLORMAP);
 	// Sends a skeleton to BufferedTexPainter for drawing (only buffers it, usually best done on Update)
-	void								BatchSkeleton(Skeleton* skel);
+	void								BatchSkeleton(CSkeletonInstance* ski);
 	// Releases everything
 	void								Release();
 private:

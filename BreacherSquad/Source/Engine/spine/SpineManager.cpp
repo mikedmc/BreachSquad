@@ -350,9 +350,12 @@ void CSpineManager::Update(float dTime, float fTimeLine)
 		CSkeletonInstance* ski = arrSkeletonInstances[kk];
 		
 		if (!ski->bVisible)
+		{
+			ski->arrPassesIdx.Clear();
 			continue;
+		}
 
-		BatchSkeleton(ski->skel);
+		BatchSkeleton(ski);
 	}
 
 	m_Painter.BuildBuffers();
@@ -361,6 +364,17 @@ void CSpineManager::Update(float dTime, float fTimeLine)
 void CSpineManager::Paint(ETexChannel eChannel)
 {
 	m_Painter.Paint(true, eChannel);
+}
+
+void CSpineManager::Paint(CSkeletonInstance* ski, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP*/)
+{
+	if (!ski->bVisible)
+		return;
+
+	for (int kk = 0; kk < ski->arrPassesIdx.nCount; kk++)
+	{
+		m_Painter.PaintPass(ski->arrPassesIdx.m_pData[kk], true, eChannel);
+	}
 }
 
 ///--- scratch disk for building mesh triangles ---
@@ -383,10 +397,14 @@ void ScratchDisk_AddVert(Vec2 vPos, float tU, float tV, DWORD dwColor)
 	arrScratchCnt++;
 }
 
-void CSpineManager::BatchSkeleton(Skeleton* skel)
+void CSpineManager::BatchSkeleton(CSkeletonInstance* ski)
 {
+	_ASSERT(ski != nullptr);
+	Skeleton* skel = ski->skel;
 	unsigned short quadIndices[] = { 0, 1, 2, 2, 3, 0 };
 	spine::Vector<Vec2> arrVertsPos;
+
+	ski->arrPassesIdx.Clear();
 	// For each slot in the draw order array of the skeleton
 	for (size_t i = 0, n = skel->getSlots().size(); i < n; ++i) 
 	{
@@ -462,8 +480,10 @@ void CSpineManager::BatchSkeleton(Skeleton* skel)
 				int nIdx = quadIndices[kk];
 				ScratchDisk_AddVert(arrVertsPos[nIdx], arrUVs[nIdx * 2 + 0], arrUVs[nIdx * 2 + 1], dwSlotColor);
 			}
-			//#TODO: bufferMesh should return added pass/mesh idx so we can save starting and count for each skel instance
-			m_Painter.BufferMesh(arrScratchBuff, arrScratchCnt / 3, texture, engineBlendMode);
+			// BufferMesh only returns positive pass index when starting a new mesh so we add it to the passes array necessary for painting the skel
+			int npassidx = m_Painter.BufferMesh(arrScratchBuff, arrScratchCnt / 3, texture, engineBlendMode, ski->UID);
+			if (npassidx >= 0)
+				ski->arrPassesIdx.Add(npassidx);
 		}
 		else if (attachment->getRTTI().isExactly(MeshAttachment::rtti)) 
 		{
@@ -500,10 +520,11 @@ void CSpineManager::BatchSkeleton(Skeleton* skel)
 				int nIdx = arrIndices[j];
 				ScratchDisk_AddVert(arrVertsPos[nIdx], arrUVs[nIdx * 2 + 0], arrUVs[nIdx * 2 + 1], dwSlotColor);
 			}
-
-			m_Painter.BufferMesh(arrScratchBuff, arrScratchCnt / 3, texture, engineBlendMode);
+			// BufferMesh only returns positive pass index when starting a new mesh so we add it to the passes array necessary for painting the skel
+			int npassidx = m_Painter.BufferMesh(arrScratchBuff, arrScratchCnt / 3, texture, engineBlendMode, ski->UID);
+			if (npassidx >= 0)
+				ski->arrPassesIdx.Add(npassidx);
 		}
-
 	}
 }
 
@@ -610,6 +631,7 @@ CSpineManager::CSkeletonInstance::CSkeletonInstance() :
 	bVisible(true), bEnabled(true),
 	UID(0) //default id = not used
 {
+	arrPassesIdx.Clear();
 	memset(arrBones, null, sizeof(Bone*));
 	memset(arrSlots, null, sizeof(Slot*));
 }

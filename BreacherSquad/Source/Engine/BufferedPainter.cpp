@@ -260,20 +260,26 @@ CBufferedSpinePainter::~CBufferedSpinePainter()
 	Clear();
 }
 
-void CBufferedSpinePainter::BufferMesh(_VERTEX_PNCT4T4 *points, int trisCount, CSpineTex* pTex, EBlendMode eMode)
+int CBufferedSpinePainter::BufferMesh(_VERTEX_PNCT4T4 *points, int trisCount, CSpineTex* pTex, EBlendMode eMode, UINT dwUID)
 {
+	int retPassIdx = -1;
 	//if we have no mesh or if last mesh has another mode or texture then we initialize another mesh
-	if ((passesCnt == 0) || (arrPasses[passesCnt - 1].eMode != eMode) || (arrPasses[passesCnt - 1].pTex != pTex))
+	if ((passesCnt == 0) || (arrPasses[passesCnt - 1].dwSkelUID != dwUID) || (arrPasses[passesCnt - 1].eMode != eMode) || (arrPasses[passesCnt - 1].pTex != pTex))
 	{
 		if (!OP_FAILED(BeginMesh(arrPasses[passesCnt].nMeshIdx)))
 		{
 			arrPasses[passesCnt].pTex = pTex;
 			arrPasses[passesCnt].eMode = eMode;
+			arrPasses[passesCnt].dwSkelUID = dwUID;
+			// saves current pass and returns it ONLY when starting a new mesh
+			retPassIdx = passesCnt;
 			passesCnt++;
 		}
 	}
 
 	AddTriangles(points, trisCount);
+
+	return retPassIdx;
 }
 
 void CBufferedSpinePainter::Clear()
@@ -328,4 +334,47 @@ void CBufferedSpinePainter::Paint(bool setFVF /*= true*/, ETexChannel eChannel)
 	}
 }
 
+OPRESULT CBufferedSpinePainter::PaintPass(int nPassIdx, bool setFVF /*= true*/, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP*/)
+{
+	if (eChannel == K_TEXCHAN_NONE)
+		return K_OP_OK;
+	if ((nPassIdx < 0) || (nPassIdx >= passesCnt))
+		return OPRESULT(K_OP_OK_WARNING, L"CBufferedSpinePainter::PaintPass: Pass outside bounds!", K_SEVERITY_WARNING);
+
+	//#TODO: set blending modes
+	switch (arrPasses[nPassIdx].eMode)
+	{
+		case BLEND_NORMAL:
+		{
+		}
+		break;
+		case BLEND_ADDITIVE:
+		{
+		}
+		break;
+		case BLEND_MULTIPLY:
+		{
+		}
+		break;
+		case BLEND_SCREEN:
+		{
+		}
+		break;
+
+		default:
+			break;
+	}
+
+	//set texture
+	if (eChannel == K_TEXCHAN_COLORMAP)
+		m_pDevice->SetTexture(0, arrPasses[nPassIdx].pTex->pTexture);
+	else if (eChannel == K_TEXCHAN_NORMALMAP)
+		m_pDevice->SetTexture(0, arrPasses[nPassIdx].pTex->pTexture_N);
+	//else if (eChannel == K_TEXCHAN_SPECULARMAP)
+		//m_pDevice->SetTexture(0, arrPasses[kk].pTex->pTexture_S);
+
+	DrawMesh(arrPasses[nPassIdx].nMeshIdx, setFVF);
+
+	return K_OP_OK;
+}
 
