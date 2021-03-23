@@ -7,6 +7,7 @@
     <Module ImageIdx="0" X="737" Y="241" W="286" H="222" />
     <Module ImageIdx="0" X="0" Y="241" W="411" H="240" />
     <Module ImageIdx="0" X="551" Y="241" W="181" H="90" />
+    <Module ImageIdx="0" X="573" Y="340" W="137" H="68" />
   </Modules>
   <FrameModules>
     <FrameModule ModuleIdx="0" OX="-471" OY="0" Flags="0" />
@@ -14,6 +15,7 @@
     <FrameModule ModuleIdx="2" OX="-243" OY="19" Flags="0" />
     <FrameModule ModuleIdx="3" OX="-428" OY="0" Flags="0" />
     <FrameModule ModuleIdx="4" OX="5" OY="5" Flags="0" />
+    <FrameModule ModuleIdx="5" OX="5" OY="4" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="-427" BBoxY="0" BBoxW="428" BBoxH="240">
@@ -40,9 +42,15 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="-187" BBoxY="-93" BBoxW="181" BBoxH="90">
+    <Frame BBoxX="5" BBoxY="5" BBoxW="181" BBoxH="90">
       <FModules>
         <FModule Idx="4" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="5" BBoxY="4" BBoxW="137" BBoxH="68">
+      <FModules>
+        <FModule Idx="5" />
       </FModules>
       <Points />
     </Frame>
@@ -53,6 +61,7 @@
     <AnimationFrame FrameIdx="2" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="3" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="4" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="5" Duration="1" DX="0" DY="0" Flags="0" />
   </AnimationFrames>
   <Animations>
     <Animation ID="BACKGROUND" Flags="0">
@@ -63,6 +72,7 @@
     </Animation>
     <Animation ID="LOGO_MM" Flags="0">
       <AFrame Idx="4" />
+      <AFrame Idx="5" />
     </Animation>
   </Animations>
 </SpriteCollection>

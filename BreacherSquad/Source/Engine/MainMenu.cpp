@@ -2528,7 +2528,7 @@ void CMainMenu::PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaint
 	CSprite::paintFrame(&m_sprColNew, worldRect.Right() - 10.0f * sin(fLocalTimeline * 0.15f), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 0, dwColor);
 	//paint logo
 	if(bPaintTitle)
-		CSprite::paintFrame(&m_sprColNew, (int)worldRect.x, (int)worldRect.y, ANM_MENUS0_SPR_LOGO_MM, 0);
+		CSprite::paintFrame(&m_sprColNew, (int)worldRect.x, (int)worldRect.y, ANM_MENUS0_SPR_LOGO_MM, 1);
 	// chars back layer
 	CSprite::paintFrame(&m_sprColNew, (worldRect.Right() + 8.0f * sin(fLocalTimeline * 0.15f)), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 1, dwColor);
 	// chars front layer
