@@ -9210,6 +9210,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(/*floor*/(-camrect.x * K_GAME_PIXEL_SIZE_F), (-camrect.y * K_GAME_PIXEL_SIZE_F)));
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+	UTGetShaderManager().SetVS(nullptr);
 
 	int nTilesTexIdx = g_level.m_tilesTexBaseIdx;
 	// Offset in texture index so we paint from the normals texture when we render the normals pass
@@ -9251,56 +9252,42 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	if (pSprVS)
 		UTPainter().Begin(pSprVS, matView * *matProj);
 
-	/*
 	eVisibleSortableType eLastVis = K_VST_UNKNOWN;
 	for (int kk = 0; kk < m_visibleList.arrSortedItems.nCount; kk++)
 	{
 		CVisibleSortable* vis = &m_visibleList.arrSortedItems.m_pData[kk];
-		// flush if necessary
-		if ((vis->eType != eLastVis) && (eLastVis == K_VST_PROP))
-			UTPainter().Flush();
+
 		switch (vis->eType)
 		{
 			case K_VST_ACTOR:
 			{
+				if (eLastVis != K_VST_ACTOR)
+				{
+					// if last painted element was not an actor then do a flush on UTpainter
+					UTPainter().Flush();
+					// remove shaders that were set
+					UTGetShaderManager().SetVS(nullptr);
+				}
+			
+				CActor* act = static_cast<CActor*>(vis->pPtr);
+				g_spineMgr.Paint(act->pSkeleton, eTexChannel);
 			}
 			break;
 			case K_VST_PROP:
 			{
+				CProp *prop = static_cast<CProp*>(vis->pPtr);
+				prop->sprite.PaintModule_texOverride(0, nTexIdxOffset);
 			}
 			break;
 			default:
 				break;
 		}
-	}
-	*/
 
-	// paint spine
-	/*
-	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
-	{
-		g_spineMgr.Paint(m_arrActors[kk]->pSkeleton, eTexChannel);
+		// save last type of painted item
+		eLastVis = vis->eType;
 	}
 
-	///--- paint actors
-	// old method below, convert to CSpr!!
-	for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
-	{
-		CActor* actor = m_visibleList.visible_actors.m_pData[kk];
-		actor->sprite.paintModule_texOverride(&m_sprActors, 0, 0);
-	}
-	  */
-
-	//UTPainter().Flush();
-
-	///--- props = objects
-	for (int kk = 0; kk < m_visibleList.visible_props.Count(); kk++)
-	{
-		CProp *prop = m_visibleList.visible_props.m_pData[kk];
-		prop->sprite.PaintModule_texOverride(0, nTexIdxOffset);
-	}
 	UTPainter().Flush();
-
 	// now paint the bullets
 	PaintBullets(ePass);
 

@@ -212,7 +212,7 @@ void CLevel::BuildVisibilityLists()
 			{
 				m_visibleList.visible_actors.Add(actor);
 				// add it to the sorted list
-				m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_ACTOR, (void*)&actor, actor->pos.y));
+				m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_ACTOR, actor, actor->pos.y));
 			}
 		}
 	}
@@ -230,7 +230,7 @@ void CLevel::BuildVisibilityLists()
 		{
 			m_visibleList.visible_props.Add(prop);
 			// add it to the sorted list
-			m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_PROP, (void*)&prop, prop->pos.y));
+			m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_PROP, prop, prop->pos.y));
 		}
 		//logical closeby actives
 		if ((propsNearbyAABBs[0].Intersects(&prop->bbox)) || (propsNearbyAABBs[1].Intersects(&prop->bbox)))
