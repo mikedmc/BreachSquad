@@ -6,7 +6,7 @@
 class CProp : public IActiveInterface
 {
 public:
-	CSprite			sprite;
+	CSpr			sprite;
 	int				nAnim_ini, nFrame_ini; //animatie si frame initial
 	int				nLayer; //pe ce layer este obiectul de decor
 

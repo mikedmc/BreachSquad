@@ -49,7 +49,7 @@ Mat							g_matWorld;							//world matrix
 
 CLog*						g_pLog;								//log class
 
-UINT32						g_gameState = GAME_STATE_EMPTY;		//state machine's current state. defined in dxstdafx.h 
+eGameState					g_gameState = GAME_STATE_EMPTY;		//state machine's current state. defined in dxstdafx.h 
 UINT32						g_gameSubstate = 0;					//current state's substate - if needed
 eGameMode					g_gameMode = GAME_MODE_CLASSIC;		//current selected game mode
 
@@ -127,8 +127,8 @@ void	ShutdownApp(void);
 HRESULT	InitSound(void);
 
 // Transition functions
-void ChangeGameState(int newState, int param1 = 0, int param2 = 0); //are parametru default, in caz ca e necesar
-void ChangeGameStateTransition(int newState, int param1 = 0, int param2 = 0, int transitionType = K_TRANSITION_TYPE_SIMPLE);
+void ChangeGameState(eGameState newState, int param1 = 0, int param2 = 0); //are parametru default, in caz ca e necesar
+void ChangeGameStateTransition(eGameState newState, int param1 = 0, int param2 = 0, int transitionType = K_TRANSITION_TYPE_SIMPLE);
 void UpdateTransition(float dTime);
 void PaintTransition(float dTime, float fTimeline, PDEVICE pDevice); 
 
@@ -2589,10 +2589,14 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				//ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
 #if defined(_DEBUG) || defined(DEBUG)
 				ImGui::Separator();
-				ImGui::Text("Sprites: %d", UTPainter().stats_sprites);
-				ImGui::Text("Calls: %d", UTPainter().stats_calls);
-				ImGui::Text("Begin/End: %d", UTPainter().stats_sequences);
-				ImGui::Text("Flush Calls: %d", UTPainter().stats_flushes);
+				if (g_gameState == GAME_STATE_GAME)
+				{
+					ImGui::Text("Sortables: %d", g_level.m_visibleList.arrSortedItems.nCount);
+				}
+				//ImGui::Text("Sprites: %d", UTPainter().stats_sprites);
+				//ImGui::Text("Calls: %d", UTPainter().stats_calls);
+				//ImGui::Text("Begin/End: %d", UTPainter().stats_sequences);
+				//ImGui::Text("Flush Calls: %d", UTPainter().stats_flushes);
 #endif
 
 				ImGui::End();
@@ -3021,7 +3025,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 //--------------------------------------------------------------------------------------
 // GAMESTATE CHANGER
 //--------------------------------------------------------------------------------------
-void ChangeGameState(int newState, int param1, int param2)
+void ChangeGameState(eGameState newState, int param1, int param2)
 {
 	LOG(L"System:: ChangeGameState(%d)", newState);
 	int oldGameState = g_gameState;
@@ -3508,12 +3512,12 @@ void ChangeGameState(int newState, int param1, int param2)
 //variabile tranzitie
 int g_nTransitionStep = 0;
 float g_fTransitionPercent = 0.0f;
-int g_nNextState = 0;
+eGameState g_nNextState = GAME_STATE_EMPTY;
 int g_nSentParameter1 = 0;
 int g_nSentParameter2 = 0;
 int g_nTransitionType = 0;
 
-void ChangeGameStateTransition(int newState, int param1, int param2, int transitionType)
+void ChangeGameStateTransition(eGameState newState, int param1, int param2, int transitionType)
 {
 	g_nTransitionStep = 0;
 	g_fTransitionPercent = 0.0f;

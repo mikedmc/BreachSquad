@@ -723,10 +723,10 @@ const CStringHash EActorSoundVerseNames[K_LVL_ACT_VERSES_COUNT] =
 ///--------------------------------------------------------------------------
 enum EDecalLayer
 {
-	K_LVL_DECAL_LAYER_BACKWALLS = 0,    //blood and stains (apar clipuite la pereti)
-	K_LVL_DECAL_LAYER_BACKOBJECTS = 1,  //shells and such (apar intregi)
-	//ultimul din enum
-	K_LVL_DECAL_LAYERS
+	K_LVL_DECAL_LAYER_FLOOR = 0,  
+	K_LVL_DECAL_LAYER_WALLS = 1,  
+	
+	K_LVL_DECAL_LAYERS_CNT
 };
 
 //IMPORTANT: ca optimizare se pot face 2 arrays de decals in loc sa am param de layer pe fiecare decal!!!

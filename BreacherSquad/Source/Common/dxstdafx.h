@@ -632,15 +632,15 @@ extern Vec3					g_vecGravity;
 //mouse
 extern CMouseData			g_mouse;
 //gamestate
-extern UINT32	g_gameState;	//state machine's current state. defined in dxstdafx.h 
-extern UINT32	g_gameSubstate; //current state's substate - if needed
-extern eGameMode g_gameMode;   //current selected game mode
+extern eGameState			g_gameState;				//state machine's current state. defined in dxstdafx.h 
+extern UINT32				g_gameSubstate;				//current state's substate - if needed
+extern eGameMode			g_gameMode;					//current selected game mode
 
-extern eStartupCommand	g_startupCommand;
-extern CStringHash		g_startupParam;
+extern eStartupCommand		g_startupCommand;
+extern CStringHash			g_startupParam;
 
 extern int		g_gameStateErrorStringIdx;
-extern float	g_gameStateTimer; //timer folosit uneori
+extern float	g_gameStateTimer; 
 
 /*
 * --- transitions ---
@@ -650,8 +650,8 @@ extern float	g_gameStateTimer; //timer folosit uneori
 #define K_TRANSITION_TYPE_PIXELATE 2
 
 extern bool g_bDuringTransition;
-extern void ChangeGameState(int newState, int param1, int param2);
-extern void ChangeGameStateTransition(int newState, int param1, int param2, int transitionType);
+extern void ChangeGameState(eGameState newState, int param1, int param2);
+extern void ChangeGameStateTransition(eGameState newState, int param1, int param2, int transitionType);
 //particles
 extern CTimersArray			g_timers;
 extern CParticlesManager	g_particlesMgr;

@@ -526,7 +526,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 	{
 		if (nEvent.m_eventCommand == CEventCommands::evtC_GAMESTATE_CHANGE)
 		{
-			UINT32 gameState = nEvent.GetArgumentByName(L"newGameState")->m_asUINT32;
+			eGameState gameState = (eGameState)nEvent.GetArgumentByName(L"newGameState")->m_asUINT32;
 			int arg1 = nEvent.GetArgumentByName(L"arg1")->m_asINT32;
 			int arg2 = nEvent.GetArgumentByName(L"arg2")->m_asINT32;
 			int errorTxt = nEvent.GetArgumentByName(L"stateErrorStrIdx")->m_asINT32;
@@ -541,7 +541,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 		}
 		if (nEvent.m_eventCommand == CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION)
 		{
-			UINT32 gameState = nEvent.GetArgumentByName(L"newGameState")->m_asUINT32;
+			eGameState gameState = (eGameState)nEvent.GetArgumentByName(L"newGameState")->m_asUINT32;
 			int transType = nEvent.GetArgumentByName(L"transitionType")->m_asINT32;
 			int arg1 = nEvent.GetArgumentByName(L"arg1")->m_asINT32;
 			int arg2 = nEvent.GetArgumentByName(L"arg2")->m_asINT32;

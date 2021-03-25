@@ -209,7 +209,11 @@ void CLevel::BuildVisibilityLists()
 
 			//adaug in lista de paint doar daca nu sunt sub FOW
 			if (!bUnderFOW)
+			{
 				m_visibleList.visible_actors.Add(actor);
+				// add it to the sorted list
+				m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_ACTOR, (void*)&actor, actor->pos.y));
+			}
 		}
 	}
 	//all props onscreen for rendering
@@ -225,6 +229,8 @@ void CLevel::BuildVisibilityLists()
 		if (propsPaintAABB.Intersects(&prop->bbox))
 		{
 			m_visibleList.visible_props.Add(prop);
+			// add it to the sorted list
+			m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_PROP, (void*)&prop, prop->pos.y));
 		}
 		//logical closeby actives
 		if ((propsNearbyAABBs[0].Intersects(&prop->bbox)) || (propsNearbyAABBs[1].Intersects(&prop->bbox)))
@@ -233,7 +239,7 @@ void CLevel::BuildVisibilityLists()
 		}
 	}
 	//clear all decals layers
-	for (int kk = 0; kk < K_LVL_DECAL_LAYERS; kk++)
+	for (int kk = 0; kk < K_LVL_DECAL_LAYERS_CNT; kk++)
 	{
 		m_visibleList.visible_decals[kk].Clear();
 	}
@@ -247,7 +253,7 @@ void CLevel::BuildVisibilityLists()
 	}
 
 	///--- sort all visible items
-	m_visibleList.vecSorted.Sort(VisibleItemsSorter);
+	m_visibleList.arrSortedItems.Sort(VisibleItemsSorter);
 }
 
 void CLevel::ClearVisibilityLists()
@@ -255,7 +261,7 @@ void CLevel::ClearVisibilityLists()
 	m_visibleList.visible_props.Clear();
 	m_visibleList.logic_props_closeby.Clear();
 
-	for (int kk = 0; kk < K_LVL_DECAL_LAYERS; kk++)
+	for (int kk = 0; kk < K_LVL_DECAL_LAYERS_CNT; kk++)
 		m_visibleList.visible_decals[kk].Clear();
 
 	m_visibleList.visible_actors.Clear();
@@ -267,5 +273,5 @@ void CLevel::ClearVisibilityLists()
 	m_visibleList.logic_colShapesExtended.Clear();
 	m_visibleList.logic_colShapesSpecial.Clear();
 
-	m_visibleList.vecSorted.Clear();
+	m_visibleList.arrSortedItems.Clear();
 }

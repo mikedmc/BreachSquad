@@ -125,6 +125,7 @@ void CSpr::SetAnimOnce(int nAnimIdx, int nFrameIdx)
 
 void CSpr::SetAnim(CHAR* strAnimID, int nFrameIdx)
 {
+	_ASSERT(pSprCol);
 	animIdx = pSprCol->GetAnimationIdxByName(strAnimID);
 	if (animIdx < 0)
 	{

@@ -1050,10 +1050,9 @@ CProp* CLevel::SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer)
 	//anim
 	int animIdx = nAnimIdx;
 	int frameIdx = nFrameIdx;
-	obj->sprite.Init(animIdx, obj->pos.x, obj->pos.y, frameIdx);
+	obj->sprite.Init(&m_sprProps, animIdx, obj->pos, frameIdx,  0xffffffff);
 	obj->nAnim_ini = animIdx;
 	obj->nFrame_ini = frameIdx;
-	obj->color = 0xffffffff;
 	obj->sprite.color = obj->color;
 	//angle
 	obj->fAngle = obj->fAngle_ini = 0.0f;
@@ -1067,7 +1066,7 @@ CProp* CLevel::SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer)
 	//cand e animat selecteaza random frame-ul de pornire
 	if (obj->bAnimated)
 	{
-		obj->sprite.currentFrame = m_rand.RandInt(m_sprProps.GetAFramesCnt(obj->sprite.animationIdx));
+		obj->sprite.frameIdx = m_rand.RandInt(m_sprProps.GetAFramesCnt(obj->sprite.animIdx));
 	}
 	//bbox
 	RECTXYWH bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
@@ -3345,7 +3344,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 							break;
 						}
 
-						winact->sprite.currentFrame++;
+						winact->sprite.frameIdx++;
 						//reset object script and interact
 						winact->script_hash.Reset();
 
@@ -3615,14 +3614,14 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 	//update sprite if animated
 	if (prop->bAnimated)
 	{
-		UINT32 aframeFlag = prop->sprite.Update(&m_sprProps, dTime);
+		UINT32 aframeFlag = prop->sprite.Update(dTime);
 		//cand ajunge la capatul animatiei scoate flagul de animated
 		if (prop->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
 			prop->bAnimated = false;
 		//la obiectele animate luam bbox-ul la fiecare frame
 		if ((prop->sprite.animStatus == ANIM_STATUS_PLAYING_FRAME_ADVANCED) || (prop->sprite.animStatus == ANIM_STATUS_FRAMELOCK))
 		{
-			RECTXYWH frrect = m_sprProps.GetAFrameBBox(prop->sprite.animationIdx, prop->sprite.currentFrame);
+			RECTXYWH frrect = m_sprProps.GetAFrameBBox(prop->sprite.animIdx, prop->sprite.frameIdx);
 			prop->bbox_ini.Set(frrect);
 			//nu pastreaza acelasi bbox la flip deci flipam bboxul
 			if (prop->flipX)
@@ -3679,7 +3678,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 
 					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &Vec2(prop->pos.x, prop->pos.y - 15.0f), NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 
-					prop->sprite.setAnimation("BOMB_EXPLODED", &m_sprProps);
+					prop->sprite.SetAnim("BOMB_EXPLODED");
 
 					SetLevelState(K_LVL_STATE_MISSION_FAILED, STR_BOMB_EXPLODED);
 				}
@@ -3688,7 +3687,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 			case K_AI_STATE_ACTIVE_AMMO_BOX:
 			{
 				int nAmmoLeft = prop->varAIparams.GetVariantByName(L"n_ammoLeft")->m_asINT32;
-				prop->sprite.currentFrame = nAmmoLeft;
+				prop->sprite.frameIdx = nAmmoLeft;
 
 				//fade out
 				if (nAmmoLeft <= 0)
@@ -3707,7 +3706,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 			case K_AI_STATE_ACTIVE_HEALTH_BOX:
 			{
 				int nHealthLeft = prop->varAIparams.GetVariantByName(L"n_healthLeft")->m_asINT32;
-				prop->sprite.currentFrame = nHealthLeft;
+				prop->sprite.frameIdx = nHealthLeft;
 
 				//fade out
 				if (nHealthLeft <= 0)
@@ -3737,7 +3736,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 			case K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE:
 			{
 				//keep door open (AIvar1 contine frame-ul default) - set frame
-				prop->sprite.currentFrame = prop->nFrame_ini;
+				prop->sprite.frameIdx = prop->nFrame_ini;
 				if (prop->AItimer1 > 0.0f)
 				{
 					prop->AItimer1 -= dTime;
@@ -3745,7 +3744,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 					bool bDontChangeFrames = (bool)(prop->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
 					if (!bDontChangeFrames)
 					{
-						prop->sprite.currentFrame++;
+						prop->sprite.frameIdx++;
 					}
 
 					if (prop->AItimer1 < 0.0f)
@@ -9245,39 +9244,67 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	Areas_PaintLayer(K_AL_FLOOR);
 	Areas_PaintLayer(K_AL_WALLS);
 
+	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+
+	/// BEGIN SPRITES PAINTER
+	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
+	if (pSprVS)
+		UTPainter().Begin(pSprVS, matView * *matProj);
+
+	/*
+	eVisibleSortableType eLastVis = K_VST_UNKNOWN;
+	for (int kk = 0; kk < m_visibleList.arrSortedItems.nCount; kk++)
+	{
+		CVisibleSortable* vis = &m_visibleList.arrSortedItems.m_pData[kk];
+		// flush if necessary
+		if ((vis->eType != eLastVis) && (eLastVis == K_VST_PROP))
+			UTPainter().Flush();
+		switch (vis->eType)
+		{
+			case K_VST_ACTOR:
+			{
+			}
+			break;
+			case K_VST_PROP:
+			{
+			}
+			break;
+			default:
+				break;
+		}
+	}
+	*/
+
 	// paint spine
+	/*
 	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 	{
 		g_spineMgr.Paint(m_arrActors[kk]->pSkeleton, eTexChannel);
 	}
 
-	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
-	if (pSprVS)
-		UTPainter().Begin(pSprVS, matView * *matProj);
-
 	///--- paint actors
-	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-
 	// old method below, convert to CSpr!!
 	for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
 	{
 		CActor* actor = m_visibleList.visible_actors.m_pData[kk];
 		actor->sprite.paintModule_texOverride(&m_sprActors, 0, 0);
 	}
+	  */
 
-	// now paint the bullets
-	PaintBullets(ePass);
-
-	UTPainter().Flush();
+	//UTPainter().Flush();
 
 	///--- props = objects
 	for (int kk = 0; kk < m_visibleList.visible_props.Count(); kk++)
 	{
 		CProp *prop = m_visibleList.visible_props.m_pData[kk];
-		prop->sprite.paintModule_texOverride(&m_sprProps, 0, nTexIdxOffset);
+		prop->sprite.PaintModule_texOverride(0, nTexIdxOffset);
 	}
-
 	UTPainter().Flush();
+
+	// now paint the bullets
+	PaintBullets(ePass);
+
+	/// END SPRITES PAINTER
 	UTPainter().End();
 
 	// top layer of tiles

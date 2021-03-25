@@ -519,12 +519,11 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 			ErrorBox(K_ERR_WARNING, L"Active ID:%d without animation!", obj->ID);
 		//frame
 		int frameIdx = OS_freadUInt16(fl);
-		obj->sprite.Init(animIdx, obj->pos.x, obj->pos.y, frameIdx);
+		obj->color = 0xffffffff;
 		obj->nAnim_ini = animIdx;
 		obj->nFrame_ini = frameIdx;
-		obj->color = 0xffffffff;
-		obj->sprite.color = obj->color;
 		obj->bStandsOut = false;
+		obj->sprite.Init(&m_sprProps, animIdx, obj->pos, frameIdx, obj->color);
 		//angle
 		obj->fAngle = 0.0f;
 		obj->fAngle_ini = 0.0f;
@@ -535,11 +534,10 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		obj->flipY = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPY) != 0);
 		//animated
 		obj->bAnimated = ((activFlags & K_EDITOR_ACTIVE_FLAG_ANIMATED) != 0);
-		obj->Kill();
 		//animated? select different start frame
 		if (obj->bAnimated)
 		{
-			obj->sprite.currentFrame = m_rand.RandInt(m_sprProps.GetAFramesCnt(obj->sprite.animationIdx));
+			obj->sprite.frameIdx = m_rand.RandInt(m_sprProps.GetAFramesCnt(obj->sprite.animIdx));
 		}
 		//bbox
 		RECTXYWH bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
@@ -639,30 +637,6 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 
 		///--- RANDOM ENEMIES HERE ---
 		CStringHash shTemplateNameHash(templateNameW);
-		/*
-		if (shTemplateNameHash.textHash == FastHash(L"ACTOR_RANDOM_ENEMY"))
-		{
-			//random enemy should have multiple AI params lines with different templates on them.
-			//will select a random character from the AI specified lines
-			int nTemplatesCnt = arrParams.GetVariantCount();
-			if (nTemplatesCnt == 0)
-			{
-				ErrorBox(K_ERR_CRITICAL, L"Random Enemy (ID:%d) should have more templates! Please specify templates in AI params as strings!", actID);
-			}
-			else
-			{
-				int nRandTemplate = m_rand.RandInt(nTemplatesCnt);
-				shTemplateNameHash = arrParams[nRandTemplate]->m_strArg;
-				if (shTemplateNameHash.textHash == 0)
-				{
-					shTemplateNameHash.Init(L"ACTOR_RANDOM_ENEMY");
-					ErrorBox(K_ERR_CRITICAL, L"Random Enemy (ID:%d) illegal template name: [%s]", actID, arrParams[nRandTemplate]->m_strArg.text);
-				}
-			}
-			//erase AI params
-			arrParams.DeleteAll();
-		}
-		*/
 		//add actor
 		CActor* nact = new CActor();
 

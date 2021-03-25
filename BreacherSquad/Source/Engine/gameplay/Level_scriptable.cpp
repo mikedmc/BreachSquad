@@ -1372,21 +1372,21 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 
-			active->sprite.currentFrame += step;
+			active->sprite.frameIdx += step;
 			if (loop)
 			{
-				int frcnt = m_sprProps.GetAFramesCnt(active->sprite.animationIdx);
-				if (active->sprite.currentFrame < 0)
-					active->sprite.currentFrame += frcnt;
+				int frcnt = m_sprProps.GetAFramesCnt(active->sprite.animIdx);
+				if (active->sprite.frameIdx < 0)
+					active->sprite.frameIdx += frcnt;
 				else
-					active->sprite.currentFrame %= frcnt;
+					active->sprite.frameIdx %= frcnt;
 			}
 			else
 			{
-				CLAMP(active->sprite.currentFrame, 0, m_sprProps.GetAFramesCnt(active->sprite.animationIdx));
+				CLAMP(active->sprite.frameIdx, 0, m_sprProps.GetAFramesCnt(active->sprite.animIdx));
 			}
 			//set new bbox
-			RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
+			RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
 			active->bbox_ini.Set(Vec2(objbox.x, objbox.y), Vec2(objbox.Right(), objbox.Bottom()));
 			if (active->flipX)
 			{
@@ -1425,12 +1425,12 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//get params
-			int anim = active->sprite.animationIdx;
+			int anim = active->sprite.animIdx;
 			if (parAnim)
 				anim = m_sprProps.GetAnimationIdxByNameHash(parAnim->m_strArg.getHash());
 			if (anim == -1)
 			{
-				anim = active->sprite.animationIdx;
+				anim = active->sprite.animIdx;
 			}
 
 			int frame = 0;
@@ -1443,10 +1443,10 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			if (parAnimated)
 				animated = parAnimated->m_asBool;
 
-			active->sprite.Init(anim, active->pos.x, active->pos.y, frame);
+			active->sprite.Init(&m_sprProps, anim, active->pos, frame);
 			active->bAnimated = animated;
 			//set new bbox
-			RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animationIdx, active->sprite.currentFrame);
+			RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
 			active->bbox_ini.Set(Vec2(objbox.x, objbox.y), Vec2(objbox.Right(), objbox.Bottom()));
 			if (active->flipX)
 			{

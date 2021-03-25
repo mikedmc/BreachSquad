@@ -13,6 +13,17 @@ struct CVisibleSortable {
 	eVisibleSortableType	eType;
 	void*					pPtr;		// cast this pointer based on eType
 	float					fValue;		// sorting key1
+
+	CVisibleSortable(eVisibleSortableType neType, void* pnPtr, float fSortValue)
+	{
+		eType = neType;
+		pPtr = pnPtr;
+		fValue = fSortValue;
+	}
+
+	CVisibleSortable() :
+		eType(K_VST_UNKNOWN), pPtr(nullptr), fValue(0.0f)
+	{}
 };
 
 ///--- list of visible/active entities ---
@@ -24,14 +35,14 @@ public:
 	//lista de activi vizibili
 	CFixedArray<CProp*, 512> visible_props;
 	//decals
-	CFixedArray<CDecal*, 512> visible_decals[K_LVL_DECAL_LAYERS];
+	CFixedArray<CDecal*, 512> visible_decals[K_LVL_DECAL_LAYERS_CNT];
 	//visible actors
 	CFixedArray<CActor*, 256> visible_actors;
 	//collision shapes folosite la construierea volumelor de umbra
 	CFixedArray<CCollisionShape*, 512> visible_colShapesLights;
 
 	// display elements sorted by Y
-	CFixedArray<CVisibleSortable, 256> vecSorted;
+	CFixedArray<CVisibleSortable, 256> arrSortedItems;
 
 	//logic
 public:
