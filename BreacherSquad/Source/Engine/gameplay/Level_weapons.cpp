@@ -263,31 +263,6 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
 	if (weapon->WeaponTemplate.bulletTemplate.eClass != K_LVL_ACT_CLASS_ANY)
 		nFinalClass = weapon->WeaponTemplate.bulletTemplate.eClass;
 
-	//#HACK: de pe scara trage cu grenada direct in jos daca mergi in jos doar
-	if (weapon->pOwner->bOnLadder)
-	{
-		if (weapon->WeaponTemplate.bCanShootFromLadders)
-		{
-			vShootPos = shooter->GetPosHeart();
-
-			if (weapon->pOwner->m_AIcommands.nMoveDirY > 0)
-			{
-				vFinalDir.y = 1.0f;
-				vFinalDir.x = 0.0f;
-			}
-			else if (weapon->pOwner->m_AIcommands.nMoveDirY < 0)
-			{
-				//throw a little oblicque when going up the ladder
-				vFinalDir.y = -2.0f;
-				//#HACK: shoot from above the head
-				vShootPos.y -= 5.0f;
-			}
-			else
-			{
-				vFinalDir.y = -1.0f;
-			}
-		}
-	}
 	//melee shoots from heart pos (it checks objects behind shooting point)
 	if (weapon->WeaponTemplate.bulletTemplate.nGroup == K_LVL_BULLGROUP_MELEE)
 	{

@@ -72,8 +72,7 @@ enum ESpineSpecialBone
 	K_SD_BONE_EMPTY = -1,
 
 	K_SD_BONE_AIM_IK,
-	K_SD_BONE_LEFT_FOOT_IK,
-	K_SD_BONE_RIGHT_FOOT_IK,
+	K_SD_BONE_GUN_MOUNT,
 
 	K_SD_BONES_CNT
 };
@@ -81,8 +80,7 @@ enum ESpineSpecialBone
 const CStringHash ESpineSpecialBoneNames[K_SD_BONES_CNT] =
 {
 	L"BONE_AIM_IK",
-	L"BONE_HANDBK_GUN",
-	L"BONE_HANDFR_GUN"
+	L"BONE_GUN_MOUNT",
 };
 
 

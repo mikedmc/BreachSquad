@@ -1,21 +1,17 @@
 <?xml version="1.0"?>
 
-<ACTOR sSkeletonTemplateXML="skel_biped.xml" sSkin="cowboy-01">
+<ACTOR sSkeletonTemplateXML="skel_assaulter1.xml" sSkin="">
 
   <ACTOR_DATA           sAIstate="DEFAULT" sWeapon="WPN_SMG_MP5A3"
 						sMaterial="FLESH" fLife="40.0" fArmorFront="0.0" fArmorBack="0.0" 
                         fSpeedMove="100.0"
                         bCanCover="true" />
 
+<!-- TODO: move anims to skel descriptor xml --->
   <ANIMS>
-    <IDLE 			set0="ramp-not/idle" />
-    <IDLE_CROUCH 	set0="ramp-not/crouch" />
-    <AIM 			set0="aim" bLoop="true" nTrack="1" />
-    <SHOOT 			set0="shoot" bLoop="false" nTrack="1" />
-    <CLIMB_UP 		set0="ramp-not/ladder" />
-    <MOVE_FAST 		set0="ramp-not/jog" />
-    <MOVE 			set0="ramp-not/walk" />
-    <DIE 			set0="ramp-not/death-2" bLoop="false" />
+    <IDLE 			set0="1hand/run-se" />
+    <SHOOT 			set0="1hand/shoot-gun-se" bLoop="true" nTrack="1" />
+    <MOVE 			set0="generic/die-s" />
   </ANIMS>
 
   <VERSES>

@@ -8,7 +8,7 @@ Vec2 CActor::GetPosHeart()
 
 Vec2 CActor::GetPosWeapon()
 {
-	return Vec2(pos.x, pos.y);
+	return Vec2(posWeapon.x, posWeapon.y);
 }
 
 void CActor::UpdateBBoxAndPoints()
@@ -103,7 +103,9 @@ void CActor::PostConstructionInit()
 
 void CActor::BeginPlay()
 {
-
+	// empty tracks
+	this->SetAnimOnce(0, K_SD_ANIM_EMPTY);
+	this->SetAnimOnce(1, K_SD_ANIM_EMPTY);
 }
 
 void CActor::EndPlay()
@@ -387,13 +389,31 @@ void CActor::Update(float dTime)
 	//update timeline
 	this->fTimelineAI += dTime;
 
-	/*
-	this->SetAnimOnce(1, K_SD_ANIM_EMPTY);
-	if (this->bCrouched)
-		this->SetAnimOnce(0, K_SD_ANIM_IDLE_CROUCH);
-	else
-		this->SetAnimOnce(0, K_SD_ANIM_IDLE);
-	*/
+	this->SetAnimOnce(0, K_SD_ANIM_IDLE);
+	//this->SetAnimOnce(1, K_SD_ANIM_SHOOT);
+
+	// aiming IK node must be set each frame or they get reset by the animation
+	//if (bIsAiming)
+	{
+		//#TODO: ar trebui sa setez osul mereu ca sa fie bine setat si pe tranzitii intre animatii
+		// vezi transformul asta ca sa muti din world space in skeleton space:
+		//Vector2 ledgePointLocalSpace = skeletonAnimation.transform.InverseTransformPoint(ledgePoint); // your ledgePoint
+		// find aim bone and move it
+		if (pSkeleton->arrBones[K_SD_BONE_AIM_IK] != null)
+		{
+			spine::Bone* b_aim = pSkeleton->arrBones[K_SD_BONE_AIM_IK];
+
+			Vec2 vAim = m_AIcommands.vAimVec;
+			b_aim->setX(vAim.x);
+			b_aim->setY(-vAim.y);
+		}
+	}
+
+	// get projected 2d gun position and convert to 3d position for bullet spawn
+	spine::Bone* b_gun = pSkeleton->arrBones[K_SD_BONE_GUN_MOUNT];
+	this->posWeapon.x = b_gun->getWorldX();
+	this->posWeapon.y = b_gun->getWorldY();
+
 
 	///--- update weapons ---
 	/*
@@ -533,7 +553,7 @@ spine::TrackEntry* CActor::SetAnimOnce(int nTrack, ESpineAnim eAnim)
 			else
 			{
 				LOG_DBG(L"ACTOR[%s]:SetAnimOnce:", actTemplate.shID.text);
-				LOG_DBG("ANIM NOT FOUND! [%s]", actTemplate.arrAnims[eAnim].animNamesA[this->nAnimSet].text);
+				LOG_DBG("ANIM NOT FOUND! [%s]", actTemplate.arrAnims[(int)eAnim].animNamesA[this->nAnimSet].text);
 			}
 		}
 	}

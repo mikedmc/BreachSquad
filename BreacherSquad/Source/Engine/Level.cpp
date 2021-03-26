@@ -819,7 +819,7 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 		return;
 	}
 
-	CActor* nact = SpawnActor(spawnPos, L"act_cowboy1.xml");
+	CActor* nact = SpawnActor(spawnPos, L"act_assaulter1.xml");
 
 	if (nact)
 	{
@@ -990,10 +990,6 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 		// set pointers to spine animations for fast access
 		nact->Spine_SaveAnimPointers();
 
-		if (nact->bCrouched)
-			nact->SetAnimOnce(0, K_SD_ANIM_IDLE_CROUCH);
-		else
-			nact->SetAnimOnce(0, K_SD_ANIM_IDLE);
 	}
 
 	//finish up adding the actor
@@ -1034,6 +1030,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	nact->m_AIcommands.Reset();
 	nact->m_AIsensorInfo.Reset();
 
+	nact->BeginPlay();
 
 	return nact;
 }
