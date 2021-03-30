@@ -11,17 +11,6 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 		return nullptr;
 	}
 
-	//melee bullets
-	if (bulletTemplate->nGroup == K_LVL_BULLGROUP_MELEE)
-	{
-		//make melee range slightly larger than bullet normal range.
-		float fRangeObjects = (bulletTemplate->fSpeed_ini * bulletTemplate->fLife);
-		float fRange = fRangeObjects * 1.5f; //larger range for humans
-		int nHitActors = MeleeBlow(bulletTemplate->nType, pos, shootDir, nOwnerUID, actorClass, fRange, bulletTemplate->fDamage, bulletTemplate->fMomentum, bulletTemplate->fStunDuration, (EActorClass)actorClass, fRangeObjects, bulletTemplate->fDamageObjects);
-
-		return nullptr;
-	}
-
 	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.HireNode();
 	//set 
 	if (node == null)

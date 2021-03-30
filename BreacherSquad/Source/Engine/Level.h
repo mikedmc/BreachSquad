@@ -217,8 +217,6 @@ public:
 	//hits the actor with other things than bullets
 	CBulletHitReturnData	HitActor(CActor * actor, float fDamage, UINT32 dwOwnerUID, EActorClass eOwnerClass, Vec2 *vDir = null, UINT32 dwBulletFlags = 0, int nArmorPiercingRating = 100, float fStunDuration = 0.0f);
 	void					SetActorStun(CActor* actor, float fStunDuration);
-	//shoots melee blows (bullets)
-	int						MeleeBlow(int nBulletType, Vec2 vPos, Vec2 vDirection, UINT32 nOwnerUID, int nOwnerClass, float fRange, float fDamageActors, float fImpulse, float fStunDurationMax, EActorClass eIgnoredClass, float fRangeObjects, float fDamageObjects );
 	// Spawns a player
 	void					SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset = 0);
 	// Spawns an actor (NPC)
