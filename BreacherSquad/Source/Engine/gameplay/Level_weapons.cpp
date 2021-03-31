@@ -255,7 +255,8 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec3 vDir)
 		return false;
 
 	CActor* shooter = weapon->pOwner;
-	Vec3 vFinalDir = vDir;
+	Vec3 vFinalDir;
+	MUVec3Norm(&vFinalDir, &vDir);
 	Vec3 vShootPos = shooter->GetPosWeapon();
 
 	int nFinalClass = shooter->actTemplate.actorClass;

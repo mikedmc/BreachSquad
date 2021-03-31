@@ -252,7 +252,7 @@ public:
 	Vec2 vecWeapon_abs[3], vecHeart_abs[3], vecGroundCheck_abs[3]; //offseturi relative incarcate din REF_POSE
 	RECTXYWH_F	stateBBoxes[3]; //bboxurile pentru idle, crouch, dead - salvate in InitActor
 	Vec2 GetPosHeart(); //intoarce pozitia exacta a inimii in fn de starea curenta
-	Vec2 GetPosWeapon();	//intoarce pozitia exacta a armei in fn de starea curenta
+	Vec3 GetPosWeapon();	//intoarce pozitia exacta a armei in fn de starea curenta
 
 	Vec3	posHeart, posWeapon;	//pozitii absolute inima si arma presalvate (pentru viteza)
 
@@ -338,6 +338,7 @@ public:
 		nControllerInstanceID = -1;
 		vSpeedImpulse = Vec2(0.0f, 0.0f);
 		speed = Vec2(0.0f, 0.0f);
+		posWeapon = Vec3(0.0f, 0.0f, 0.0f);
 		for (int kk = 0; kk < K_ACT_MAX_ANIM_TRACKS; kk++)
 		{
 			eLastAnim[kk] = K_SD_ANIM_EMPTY;

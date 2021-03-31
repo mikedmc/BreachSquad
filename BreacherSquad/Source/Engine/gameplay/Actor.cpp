@@ -6,7 +6,7 @@ Vec2 CActor::GetPosHeart()
 	return pos;
 }
 
-Vec2 CActor::GetPosWeapon()
+Vec3 CActor::GetPosWeapon()
 {
 	return posWeapon;
 }
@@ -99,11 +99,15 @@ void CActor::SetPos(Vec2 newPos)
 {
 	pos_last = pos;
 	pos = newPos;
+	bbox = bbox_ini;
+	bbox.Move(pos);
 }
 
 void CActor::Move(Vec2 delta)
 {
 	pos += delta;
+	bbox = bbox_ini;
+	bbox.Move(pos);
 }
 
 
@@ -384,6 +388,7 @@ void CActor::Update(float dTime)
 	spine::Bone* b_gun = pSkeleton->arrBones[K_SD_BONE_GUN_MOUNT];
 	this->posWeapon.x = b_gun->getWorldX();
 	this->posWeapon.y = b_gun->getWorldY();
+	this->posWeapon.z = 16.0f;
 
 
 	///--- update weapons ---
