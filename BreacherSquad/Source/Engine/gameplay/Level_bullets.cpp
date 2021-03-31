@@ -2,9 +2,8 @@
 #include "Level_bullets.h"
 
 
-CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec2 pos, Vec2 shootDir)
+CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir)
 {
-	Vec3 vPos = Vec3(pos.x, pos.y, 16.0f);
 	//dull bullets don't actually get spawned (sometimes we need them)
 	if (bulletTemplate->nType == K_LVL_BULLET_DULL)
 	{
@@ -58,8 +57,8 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	bullet->physPt->m_data.pos = vPos;
 	bullet->physPt->m_data.pos_last = vPos;
 	//randomizam viteza glontului cu un procent anume
-	Vec2 dir2d = shootDir * (bulletTemplate->fSpeed_ini + m_rand.RandFloatSgn(bulletTemplate->fSpeed_ini * 0.075f));
-	bullet->physPt->m_data.speed = Vec2ToVec3XY0(dir2d);
+	Vec3 vdir = vShootDir * (bulletTemplate->fSpeed_ini + m_rand.RandFloatSgn(bulletTemplate->fSpeed_ini * 0.075f));
+	bullet->physPt->m_data.speed = vdir;
 	// hardcoded for now
 	bullet->physPt->m_data.accel = g_Vec3Zero;
 	bullet->physPt->m_data.fBounceF = 0.0f;

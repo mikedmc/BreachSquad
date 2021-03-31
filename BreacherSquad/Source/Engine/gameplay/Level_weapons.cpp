@@ -246,7 +246,7 @@ bool CLevel::CanShootWeapon(CWeapon * weapon)
 	return true;
 }
 
-bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
+bool CLevel::ShootWeapon(CWeapon * weapon, Vec3 vDir)
 {
 	if ((weapon == null) || (weapon->pOwner == null) || (weapon->status == K_LVL_WPN_STATUS_UNKNOWN))
 		return false;
@@ -255,19 +255,13 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
 		return false;
 
 	CActor* shooter = weapon->pOwner;
-	Vec2 vFinalDir = vDir;
-	Vec2 vShootPos = shooter->GetPosWeapon();
+	Vec3 vFinalDir = vDir;
+	Vec3 vShootPos = shooter->GetPosWeapon();
 
 	int nFinalClass = shooter->actTemplate.actorClass;
 	//bullet has template class, set it to final class
 	if (weapon->WeaponTemplate.bulletTemplate.eClass != K_LVL_ACT_CLASS_ANY)
 		nFinalClass = weapon->WeaponTemplate.bulletTemplate.eClass;
-
-	//melee shoots from heart pos (it checks objects behind shooting point)
-	if (weapon->WeaponTemplate.bulletTemplate.nGroup == K_LVL_BULLGROUP_MELEE)
-	{
-		vShootPos = shooter->GetPosHeart();
-	}
 
 	//don't shoot too often
 	if (weapon->fireRateTimer > 0.0f)
@@ -312,6 +306,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
 		weapon->m_nBurstBulletsShot++;
 		weapon->m_nBulletsShotSinceCool++;
 		//process aim error
+		/*
 		float fAimAng = UTMath::GetVectorAngle(vFinalDir);
 		float fAimAngError = 0.0f;
 		if (weapon->WeaponTemplate.fAimErrorAddPerShot < 0.0f)
@@ -332,7 +327,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
 		//fAimAngError *= shooter->actTemplate.fRecoilModifier;
 		//add aiming error
 		fAimAng += fAimAngError;
-
+		*/
 		//some weapons force the actor to play a verse when shooting
 		//PlayActorSoundVerse(shooter, weapon->WeaponTemplate.sndActorVerse);
 
@@ -342,9 +337,9 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
 			//add weapon spread
 			float fSpreadAng = m_rand.RandFloatSgn(weapon->WeaponTemplate.fSpreadFOV);
 
-			vFinalDir.x = cos(fAimAng + fSpreadAng);
-			vFinalDir.y = sin(fAimAng + fSpreadAng);
-			D3DXVec2Normalize(&vFinalDir, &vFinalDir);
+			//vFinalDir.x = cos(fAimAng + fSpreadAng);
+			//vFinalDir.y = sin(fAimAng + fSpreadAng);
+			//D3DXVec2Normalize(&vFinalDir, &vFinalDir);
 
 			//apply weapon perk
 			if (weapon->m_activePerk.bEnabled)
@@ -384,7 +379,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec2 vDir)
 			//			AddProp_Light(vShootPos, ANM_LIGHTS_SPR_POINT1, 0.05f, 0.0f, D3DCOLOR_COLORALPHA(0xffFDB727, fPropAlpha), weapon->WeaponTemplate.fMuzzleLightSize);
 		}
 		//adaug eventAI de sunet
-		AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, shooter->GetUID(), shooter->actTemplate.actorClass, shooter->posHeart, weapon->WeaponTemplate.fSoundRadius);
+		AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, shooter->GetUID(), shooter->actTemplate.actorClass, shooter->GetPosHeart(), weapon->WeaponTemplate.fSoundRadius);
 	}
 	else
 	{

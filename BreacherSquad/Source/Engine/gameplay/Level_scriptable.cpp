@@ -929,14 +929,13 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 
 			CVariantComplex* nWeaponIdx = instr->GetArgument(L"nWeaponIdx");
+			Vec3 vShootDir = Vec2ToVec3XY0(targetAct->m_AIcommands.vAimVec);
 			if (nWeaponIdx->m_type == CVariantComplex::K_ARGTYPE_INT32)
 			{
-				Vec2 vShootDir = Vec2(targetAct->lookDirXsign, 0.0f);
 				ShootWeapon(targetAct->pSelectedWeapon[nWeaponIdx->m_asINT32], vShootDir);
 			}
 			else
 			{
-				Vec2 vShootDir = Vec2(targetAct->lookDirXsign, 0.0f);
 				ShootWeapon(targetAct->pCurrentWeapon, vShootDir);
 			}
 

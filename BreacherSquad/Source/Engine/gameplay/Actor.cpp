@@ -8,32 +8,7 @@ Vec2 CActor::GetPosHeart()
 
 Vec2 CActor::GetPosWeapon()
 {
-	return Vec2(posWeapon.x, posWeapon.y);
-}
-
-void CActor::UpdateBBoxAndPoints()
-{
-	posWeapon = GetPosWeapon();
-	posHeart = GetPosHeart();
-
-	int bboxidx = 0;
-	//trece pe bbox de dead doar daca a terminat animatia de dead
-	if (fLife <= 0.0f)
-	{
-		//comenteaza linia de mai jos ca sa ia bbox doar cand a terminat animatia de moarte
-		//if(((eLastAnimSet == K_LVL_ACT_ANIM_DIE) || (eLastAnimSet == K_LVL_ACT_ANIM_DIE_ALT)) && (sprite.animStatus == ANIM_STATUS_FRAMELOCK))
-		bboxidx = 2;
-	}
-	else if (bCrouched)
-		bboxidx = 1;
-
-	bbox_ini.Set(stateBBoxes[bboxidx]);
-	bbox = bbox_ini;
-	bbox.Move(pos);
-
-	bbox_exported_ini.Set(stateBBoxes[0]); //standing
-	bbox_exported = bbox_exported_ini;
-	bbox_exported.Move(pos);
+	return posWeapon;
 }
 
 void CActor::SetIcon(EActorIconTypes iconType, float fDuration)
@@ -124,15 +99,11 @@ void CActor::SetPos(Vec2 newPos)
 {
 	pos_last = pos;
 	pos = newPos;
-
-	UpdateBBoxAndPoints();
 }
 
 void CActor::Move(Vec2 delta)
 {
 	pos += delta;
-
-	UpdateBBoxAndPoints();
 }
 
 

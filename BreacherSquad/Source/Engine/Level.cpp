@@ -188,10 +188,6 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, Vec2 spa
 	actor->sprite_feet.pos = actor->pos;
 	//setul de animatii selectat
 	actor->SetAnimSet(0);
-	///--- hitpoints initialization ---
-	//LoadActorBBoxAndPoints(actor, K_LVL_ACT_ANIM_REF_POSE, 0);
-	//set bbox ini
-	actor->UpdateBBoxAndPoints();
 
 	//AI-ul clasic se seteaza pe UNDEFINED dar seteaza celelalte variabile pe 0
 	SetAI(actor, K_AI_STATE_UNDEFINED, null);
@@ -399,7 +395,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 			float fLifeLowLimit = actor->actTemplate.fLife * 0.1f;
 			if ((actor->fLife < fLifeLowLimit) && (actor->fLife + fLifeTaken >= fLifeLowLimit))
 			{
-				AddAIEvent(K_LVL_AI_EVENT_LOW_HEALTH, 0, pBullet->actorClass, actor->posHeart, 10000.0f, 0.6f, actor->GetUID());
+				AddAIEvent(K_LVL_AI_EVENT_LOW_HEALTH, 0, pBullet->actorClass, actor->GetPosHeart(), 10000.0f, 0.6f, actor->GetUID());
 			}
 
 			//adaugam si stun
@@ -415,19 +411,21 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 	{
 		//adaug eventuri de GOT_HIT doar pe clasele HUMAN, cand sunt lovite de catre player
 		//find shooter pos. defaults on pos based on bullet speed
-		Vec2 evtpos = actor->posHeart;
+		/*
+		Vec3 evtpos = actor->GetPosHeart();
 		if (pvProjectileMomentum != null)
 			evtpos -= *pvProjectileMomentum;
 
 		CActor* pPlayer = GetPlayerByUID(pBullet->ownerUID);
 		if (pPlayer)
-			evtpos = pPlayer->posHeart;
+			evtpos = pPlayer->GetPosHeart();
 		
 		//only add "got hit" events for enemy classes
 		if (pBullet->actorClass >= K_LVL_ACT_CLASS_EXPLOSION)
 		{
 			AddAIEvent(K_LVL_AI_EVENT_GOT_HIT, pBullet->ownerUID, pBullet->actorClass, evtpos, -1.0f, 1.2f, actor->GetUID());
 		}
+		*/
 	}
 
 	//set dead AI on humans
@@ -485,7 +483,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 			{
 				if ((pBullet->nFlags & K_LVL_BULLET_FLAG_NO_DECALS) == 0)
 				{
-					AddDecal_BloodSplat(actor->posHeart, true, actor->actTemplate.actorClass);
+					AddDecal_BloodSplat(actor->GetPosHeart(), true, actor->actTemplate.actorClass);
 				}
 			}
 
@@ -593,6 +591,7 @@ void CLevel::SetActorStun(CActor* actor, float fStunDuration)
 	}
 	*/
 }
+
 
 
 /* \brief Spawns a new player at spawnPos
@@ -2797,7 +2796,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 						continue;
 
 					//verifica sa fie in raza vizuala
-					Vec2 vActPl = pPlayerActor[kk]->posHeart - active->pos;
+					Vec2 vActPl = pPlayerActor[kk]->GetPosHeart() - active->pos;
 					float fActPlLen = MUVec2Len(&vActPl);
 					if (fActPlLen > active->AIfvar3) //radius
 						break;
@@ -4080,7 +4079,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName(L"sEffectType");
 			if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 			{
-				GenerateEffect(cvc->m_strArg, actor->posHeart, fSize);
+				GenerateEffect(cvc->m_strArg, actor->GetPosHeart(), fSize);
 			}
 			else
 			{
@@ -4652,7 +4651,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		if (actor->m_AIsensorInfo.m_AIcurrentEvent.nType != K_LVL_AI_EVENT_DEAD)
 		{
 			actor->m_AIsensorInfo.b_IsDead = true;
-			actor->m_AIsensorInfo.m_AIcurrentEvent.Set(K_LVL_AI_EVENT_DEAD, actor->GetUID(), actor->actTemplate.actorClass, actor->posHeart, -1.0f, 1.0f, actor->GetUID());
+			actor->m_AIsensorInfo.m_AIcurrentEvent.Set(K_LVL_AI_EVENT_DEAD, actor->GetUID(), actor->actTemplate.actorClass, actor->GetPosHeart(), -1.0f, 1.0f, actor->GetUID());
 			//save in memory
 			actor->m_AIsensorInfo.m_AIlastEvent = actor->m_AIsensorInfo.m_AIcurrentEvent;
 			//reset targeted actor
@@ -4689,8 +4688,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			CActor* targetActor = nullptr;// GetClosestTarget(actor, actor->actTemplate.foeClassFilter1, actor->actTemplate.foeClassFilter2);
 			if (targetActor != nullptr)
 			{
-				float enemyDst = MUVec2Len(&(targetActor->posHeart - actor->posHeart));
-				AddAIEvent(K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->posHeart, enemyDst, 1.0f, actor->GetUID());
+				float enemyDst = MUVec2Len(&(targetActor->GetPosHeart() - actor->GetPosHeart()));
+				AddAIEvent(K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->GetPosHeart(), enemyDst, 1.0f, actor->GetUID());
 				//#HACK: alerts the other enemies only if enemy class
 				if(actor->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN)
 					AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->GetPosHeart(), 200.0f, 0.6f);
@@ -4704,7 +4703,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				//daca se ating trimit si event de touch enemy, doar daca vede inamicul
 				if (actor->bbox.Intersects(&targetActor->bbox))
 				{
-					AddAIEvent(K_LVL_AI_EVENT_TOUCH_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->posHeart, enemyDst, 1.0f, actor->GetUID());
+					AddAIEvent(K_LVL_AI_EVENT_TOUCH_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->GetPosHeart(), enemyDst, 1.0f, actor->GetUID());
 				}
 				//scrie ultimul actor cu care a interactionat (nu este vital)
  				actor->m_AIsensorInfo.m_lastInteractingActorUID = targetActor->GetUID();
@@ -4717,7 +4716,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					//sterg mesaj de see enemy pt actorul curent
 					DeleteAITargetedEvent(K_LVL_AI_EVENT_SEE_ENEMY, actor->GetUID());
 					//Trimit mesaj de LOST_ENEMY
-					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->posHeart + Vec2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 1.0f, actor->GetUID());
+					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->GetPosHeart() + Vec2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 1.0f, actor->GetUID());
 					//reset targeting actor
 					actor->m_AIsensorInfo.pTargetedActor = null;
 				}
@@ -4726,7 +4725,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if ((actor->m_AIsensorInfo.pTargetedActor == null) && (actor->m_AIsensorInfo.m_AIlastEvent.nType == K_LVL_AI_EVENT_GOT_HIT))
 				{
 					//put event behind him
-					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->posHeart - Vec2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 0.5f, actor->GetUID());
+					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->GetPosHeart() - Vec2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 0.5f, actor->GetUID());
 				}
 			}
 
@@ -5193,10 +5192,10 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					if (actor->varAIparams.GetVariantByName(L"bUseDamagerUID")->m_asBool)
 						unExploUID = actor->nLastDamageTakenFromUID;
 					//generate explo
-					AddDoofer_Explo(cvc->m_asUINT32, actor->posHeart, unExploUID, K_LVL_ACT_CLASS_EXPLOSION, Vec2(0.0f, 0.0f), &actor->bbox);
+					AddDoofer_Explo(cvc->m_asUINT32, actor->GetPosHeart(), unExploUID, K_LVL_ACT_CLASS_EXPLOSION, Vec2(0.0f, 0.0f), &actor->bbox);
 
 					//decal explo mark
-					//AddDecal(K_LVL_DECAL_LAYER_BACKWALLS, actor->posHeart, ANM_ACTIVES_SPR_DECAL_EXPLOMARKS, randint(3), 0xffffffff);
+					//AddDecal(K_LVL_DECAL_LAYER_BACKWALLS, actor->GetPosHeart(), ANM_ACTIVES_SPR_DECAL_EXPLOMARKS, randint(3), 0xffffffff);
 				}
 
 				///- when the player dies -
@@ -5542,7 +5541,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			{
 				if ((pPlayerActor[kk] != NULL) && (pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_IN_LIMBO) && (pPlayerActor[kk]->nSuspendedFlags == K_LVL_SUSPENDFLAG_NONE))
 				{
-					avg += pPlayerActor[kk]->posHeart + pPlayerActor[kk]->vecCamFollowPos;
+					avg += pPlayerActor[kk]->GetPosHeart() + pPlayerActor[kk]->vecCamFollowPos;
 					plcnt++;
 				}
 			}
@@ -5747,9 +5746,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			actor->SetAngle(PI);
 	}
 
-	///--- set bbox and cover when crouched or dead ---	 
-	actor->UpdateBBoxAndPoints();
-
 	///--- find and save last safe pos for respawn ---
 	/*
 	if (((actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (actor->GetCurrentBehavior() == AI_BEHAVIOR_PLAYER_CONTROL) && 
@@ -5797,11 +5793,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//can we shoot?
 			if (!actor->pCurrentWeapon->WeaponTemplate.bAnimSync)
 			{
-				Vec2 vShootDir;
-				if (actor->m_AIcommands.vAimVec.x != 0.0f)
-					vShootDir = actor->m_AIcommands.vAimVec;
-				else
-					vShootDir = Vec2(actor->lookDirXsign, 0.0f);
+				Vec3 vShootDir;
+				vShootDir = Vec2ToVec3XY0(actor->m_AIcommands.vAimVec);
 
 				//shoot without waiting for a flag (forward or back)
 				if (ShootWeapon(actor->pCurrentWeapon, vShootDir))
@@ -5827,11 +5820,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					if ((actor->bOnLadder) && (bShoot == false))
 						bShoot = true;
 
-					Vec2 vShootDir;
-					if (actor->m_AIcommands.vAimVec.x != 0.0f)
-						vShootDir = actor->m_AIcommands.vAimVec;
-					else
-						vShootDir = Vec2(actor->lookDirXsign, 0.0f);
+					Vec3 vShootDir;
+					vShootDir = Vec2ToVec3XY0(actor->m_AIcommands.vAimVec);
 
 					if (bShoot)
 					{
@@ -6429,7 +6419,7 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 		if ((enemy->fLife <= 0.0f) || ((enemy->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
 			continue;
 
-		Vec2 enemyDistV = enemy->posHeart - sourceActor->posHeart;
+		Vec2 enemyDistV = enemy->GetPosHeart() - sourceActor->GetPosHeart();
 		float viewDstSq = 100.0f * 100.0f;//sourceActor->actTemplate.distSee * sourceActor->actTemplate.distSee;
 		float enemyDistSq = MUVec2LenSq(&enemyDistV);
 
@@ -6447,7 +6437,7 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 				//daca il poate auzi si e in linie directa, il aude
 				if (enemyDistSq <= viewDstSq)
 				{
-					if (!IsLineOfSight(sourceActor->posHeart, enemy->posHeart))
+					if (!IsLineOfSight(sourceActor->GetPosHeart(), enemy->GetPosHeart()))
 						continue;
 					//aici il aude deci e foarte aproape, il returnez direct
 					return enemy;
@@ -6458,19 +6448,19 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 				continue;
 			//daca e destul de aproape
 			//vede daca inamicul este in FOV. Face testul doar daca FOV nu este maxim (adica vede si deasupra)
-			if ((sourceActor->fFOVPercent < 1.0f) && (UTMath::GetAngleBetweenVectors(enemy->posHeart - sourceActor->posHeart, sourceActor->vAngleDir) > (HALF_PI * sourceActor->fFOVPercent)))
+			if ((sourceActor->fFOVPercent < 1.0f) && (UTMath::GetAngleBetweenVectors(enemy->GetPosHeart() - sourceActor->GetPosHeart(), sourceActor->vAngleDir) > (HALF_PI * sourceActor->fFOVPercent)))
 				continue;
 			//verifica daca am linie directa de vedere
-			if (!IsLineOfSight(sourceActor->posHeart, enemy->posHeart))
+			if (!IsLineOfSight(sourceActor->GetPosHeart(), enemy->GetPosHeart()))
 				continue;
 				*/
 		}
 		else //Dreptunghi of Vision! such fast! Much optimal!
 		{
 			//not in view rectangle
-			if (!aabbvision.PointIn(enemy->posHeart))
+			if (!aabbvision.PointIn(enemy->GetPosHeart()))
 				continue;
-			if (!IsLineOfSight(sourceActor->posHeart, enemy->posHeart))
+			if (!IsLineOfSight(sourceActor->GetPosHeart(), enemy->GetPosHeart()))
 				continue;
 		}
 
@@ -6485,7 +6475,7 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 			
 			CAABB smokeAABB;
 			smokeAABB.Set(vBulPos.x - K_TILE_SIZE, vBulPos.y - 4 * K_TILE_SIZE, vBulPos.x + K_TILE_SIZE, vBulPos.y + K_TILE_SIZE);
-			if (AABB_Segment_Intersection(sourceActor->posHeart, enemy->posHeart, smokeAABB))
+			if (AABB_Segment_Intersection(sourceActor->GetPosHeart(), enemy->GetPosHeart(), smokeAABB))
 			{
 				bObscured = true;
 				break;
@@ -6520,7 +6510,7 @@ CActor * CLevel::GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTa
 		if ((enemy->fLife <= 0.0f) || ((enemy->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
 			continue;
 
-		Vec2 enemyDistV = enemy->posHeart - sourceActor->posHeart;
+		Vec2 enemyDistV = enemy->GetPosHeart() - sourceActor->GetPosHeart();
 		float enemyDistSq = MUVec2LenSq(&enemyDistV);
 		//daca e prea departe trece mai departe
 		float fSearchRadiusSq = (fMaxDistance * fMaxDistance);
@@ -6530,11 +6520,11 @@ CActor * CLevel::GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTa
 		}
 		//daca e destul de aproape:
 		//verifica daca am linie directa de vedere
-		if (!IsLineOfSight(sourceActor->posHeart, enemy->posHeart))
+		if (!IsLineOfSight(sourceActor->GetPosHeart(), enemy->GetPosHeart()))
 			continue;
 
 		//daca a trecut toate testele si inamicul curent este mai aproape decat cel selectat initial il setez pe cel nou
-		if ((retvalenemy == null) || (MUVec2LenSq(&(retvalenemy->posHeart - sourceActor->posHeart)) > enemyDistSq))
+		if ((retvalenemy == null) || (MUVec2LenSq(&(retvalenemy->GetPosHeart() - sourceActor->GetPosHeart())) > enemyDistSq))
 			retvalenemy = enemy;
 	}
 
@@ -6664,7 +6654,7 @@ CAIEvent * CLevel::GetMostImportantAIEvent(CActor * callerActor, EAIEventType eT
 		float evtdstsq = 0.0f;
 		if (evt->fRadius > 0.0f)
 		{
-			evtdstsq = MUVec2LenSq(&(callerActor->posHeart - evt->pos));
+			evtdstsq = MUVec2LenSq(&(callerActor->GetPosHeart() - evt->pos));
 			if (evtdstsq > evt->fRadius * evt->fRadius)
 				continue;
 		}
@@ -6689,7 +6679,7 @@ CAIEvent * CLevel::GetMostImportantAIEvent(CActor * callerActor, EAIEventType eT
 		}
 		//dupa ce am exclus eventurile ce se puteau exclude:
 		//verific linie directa, cel mai costisitor test, sau daca e event cu raza infinita (fara pozitie)
-		if ((evt->fRadius < 0.0f) || (IsLineOfSight(callerActor->posHeart, evt->pos)))
+		if ((evt->fRadius < 0.0f) || (IsLineOfSight(callerActor->GetPosHeart(), evt->pos)))
 		{
 			//daca eventul este mai aproape sau daca eventul e mai important decat cel initial
 			if ((evtdstsq < mindistSq) || ((returnEvent != null) && (evt->nType > returnEvent->nType)) )
@@ -9581,13 +9571,13 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		//shield/overhead icons for non players
 		if ((act->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER) && (act->m_sprOverheadIcon.animationIdx >= 0))
 		{
-			act->m_sprOverheadIcon.pos = act->posHeart;
+			act->m_sprOverheadIcon.pos = act->GetPosHeart();
 			act->m_sprOverheadIcon.paint(&m_sprInterface);
 		}
 		//overhead icon !!! only if no overhead icon set (hence the else)
 		else if (act->nIconType != K_LVL_ACT_ICON_NONE)
 		{
-			CSprite::paintFrame(&m_sprInterface, act->posHeart.x, act->posHeart.y, ANM_IGM_INTERFACE_SPR_ACTOR_ICONS, act->nIconType);
+			CSprite::paintFrame(&m_sprInterface, act->GetPosHeart().x, act->GetPosHeart().y, ANM_IGM_INTERFACE_SPR_ACTOR_ICONS, act->nIconType);
 		}
 
 		//STUN STARS
@@ -10466,37 +10456,6 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, Vec2 pos, float fSize, D
 			m_camLevel.ShakeScreen(2.0f, 8.0f, &pos);
 
 //			SND_PLAY_POSITIONAL(SNDIDX_STONE_BREAK1, pos);
-		}
-		break;
-		case K_LVL_EFFECT_EXPLODING_ZOMBIE_DIE:
-		{
-			AddDoofer_Explo(hash_EXPLO_INVISIBLE_EXPLODING_ZOMBIE, pos, 0, K_LVL_ACT_CLASS_ZOMBIE);
-			//throw slimes
-			CWeaponTemplate* wpnTemplate = GetTemplateWeapon(FastHash(L"WPN_GREEN_GOO_EXPLODING_ZOMBIE"));
-			if (wpnTemplate != null)
-			{
-				for (int kk = 0; kk < 6; kk++)
-				{
-					float ang = kk * (PI / 6.0f);
-					Vec2 vdir(cos(ang), -sin(ang));
-
-					ShootBullet(&wpnTemplate->bulletTemplate, K_LVL_ACT_CLASS_ZOMBIE, 0, Vec2(pos.x, pos.y), vdir);
-				}
-			}
-			//gibs
-			//blood splat (sortate crescator in animatie)
-			AddDecal_BloodSplat(pos, true, K_LVL_ACT_CLASS_ZOMBIE);
-//			SND_PLAY_POSITIONAL_RAND2(SNDIDX_BULLET_BODY_GIBBED_01, SNDIDX_BULLET_BODY_GIBBED_02, pos);
-			CAABB genbox(pos.x - 10.0f, pos.y - 15.0f, pos.x + 10.0f, pos.y);
-			for (int ll = 0; ll < 6; ll++)
-			{
-				AddDoofer(K_DOOFER_MEAT, AABB_GetRandomPointInBox(genbox), &Vec2(randfloatsgn(50.0f), -130.0f - randfloat(100.0f)), &g_vecGravityOld, 1);
-			}
-			//goes straight down to stain the floor
-			AddDoofer(K_DOOFER_MEAT, Vec2(pos.x, pos.y - 10.0f), &Vec2(200.0f, 50.0f), &g_vecGravityOld, 1);
-			AddDoofer(K_DOOFER_MEAT, Vec2(pos.x, pos.y - 10.0f), &Vec2(-200.0f, 50.0f), &g_vecGravityOld, 1);
-			//human blood gibs
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff1a3423, K_PART_LAYER_RT_FRONT_NRM);
 		}
 		break;
 		case K_LVL_EFFECT_EXPLO_LARGE:

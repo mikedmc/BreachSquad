@@ -294,7 +294,7 @@ public:
 	bool					CanShootWeapon(CWeapon * weapon);
 	// Trage cu arma specificata
 	// \returns: true daca a putut sa traga sau false daca nu
-	bool					ShootWeapon(CWeapon * weapon, Vec2 vDir);
+	bool					ShootWeapon(CWeapon * weapon, Vec3 vDir);
 	// \returns: weapon status
 	EnumWeaponStatus		UpdateWeapon(CWeapon * weapon, float dTime);
 	
@@ -307,7 +307,7 @@ public:
 
 	///--- BULLETS ---
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.
-	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec2 pos, Vec2 shootDir);
+	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir);
 	// Returns the closest bullet (or null) of nBulletType under fMaxDistance
 	CBullet*				GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float fMaxDistance = 0.0f, int dwOwnerUID = 0);
 	// Releases all bullets of said type from specified owner

@@ -415,10 +415,10 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				if ((act->actTemplate.actorClass == K_LVL_ACT_CLASS_HOSTAGE) && (fMaxStun > 0.0f))
 					continue;
 				//distanta la inamic
-				Vec2 vDir = act->posHeart - pos;
+				Vec2 vDir = act->GetPosHeart() - pos;
 				float fDist = D3DXVec2Length(&vDir);
 
-				bool bDirectLine = IsLineOfSight(act->posHeart, pos);
+				bool bDirectLine = IsLineOfSight(act->GetPosHeart(), pos);
 				//daca am damage over time il setez pe actor
 				if ((bDirectLine) && (explotemplate->cDoT.eType != CDamageOverTime::K_LVL_DoT_NONE) && (fDist < explotemplate->fDoTRadius))
 				{
@@ -463,13 +463,13 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				if (act->actTemplate.actorClass == explotemplate->eIgnoreActorClass)
 					continue;
 				//distanta la inamic
-				Vec2 vDir = act->posHeart - pos;
+				Vec2 vDir = act->GetPosHeart() - pos;
 				float fDist = D3DXVec2Length(&vDir);
 				//daca e prea departe nu il ia in seama
 				if (fDist > fDamageRadius)
 					continue;
 				//daca nu e linie directa nu loveste
-				if (!IsLineOfSight(act->posHeart, pos))
+				if (!IsLineOfSight(act->GetPosHeart(), pos))
 					continue;
 				//loveste liniar
 				float fPercent = 1.0f - (fDist / fDamageRadius);
@@ -478,9 +478,9 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				if (act->pCover != NULL)
 				{
 					Vec2 vIntPos;
-					bool bHitCover = AABB_Segment_Intersection(pos, act->posHeart, act->pCover->bbox, &vIntPos);
+					bool bHitCover = AABB_Segment_Intersection(pos, act->GetPosHeart(), act->pCover->bbox, &vIntPos);
 					//atenueaza doar daca cover e intre om si explo
-					if ((bHitCover) && (D3DXVec2Length(&(vIntPos - act->posHeart)) > 2.0f))
+					if ((bHitCover) && (D3DXVec2Length(&(vIntPos - act->GetPosHeart())) > 2.0f))
 						fPercent = fPercent * (1.0f - K_LVL_COVER_DAMAGE_ABSORBTION);
 				}
 				//add momentum

@@ -254,8 +254,7 @@ public:
 	Vec2 GetPosHeart(); //intoarce pozitia exacta a inimii in fn de starea curenta
 	Vec2 GetPosWeapon();	//intoarce pozitia exacta a armei in fn de starea curenta
 
-	Vec2	posHeart, posWeapon;	//pozitii absolute inima si arma presalvate (pentru viteza)
-	void UpdateBBoxAndPoints();		//aduce la zi variabilele de bbox si posweapon, posheart
+	Vec3	posHeart, posWeapon;	//pozitii absolute inima si arma presalvate (pentru viteza)
 
 	Vec2	vecCamFollowPos;	//pozitia relativa in care se uita camera cand am in focus Actorul curent
 
