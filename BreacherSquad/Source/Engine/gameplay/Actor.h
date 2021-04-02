@@ -146,7 +146,6 @@ public:
 		int					nInteractKeyState;  //stare buton interact (just pressed, not pressed etc)
 		int					nMoveDirX;	//directia de miscare ca si flaguri (-1,0,1)
 		int					nMoveDirY;	//directia de miscare ca si flaguri (-1,0,1)
-		int					nLookDirX;	//directia in care se uita -1/0/1
 		EActorAnims			eOverrideAnim;	//if not empty, overrides actor animation
 
 		EActorDeathCommand	nDeathCommand; //0-not dead, 1-dead, 2-splat, 3-splat+explode
@@ -160,7 +159,7 @@ public:
 
 		CAICommands() :
 			bRunning(false), bThrustX(false), nMoveDirX(0), nMoveDirY(0), bJump(false),
-			nLookDirX(0), bCrouched(false), bClimb(false), nInteractKeyState(K_CM_BUTSTATE_NOTPRESSED), nColor(0),
+			bCrouched(false), bClimb(false), nInteractKeyState(K_CM_BUTSTATE_NOTPRESSED), nColor(0),
 			eAttackCommand(K_LVL_ACT_ATTACK_IDLE), eAttackCommand_last(K_LVL_ACT_ATTACK_IDLE), nDeathCommand(K_LVL_ACT_DEATHCMD_NONE),
 			nIconType(K_LVL_ACT_ICON_NONE), fIconDuration(0.0f), eOverrideAnim(K_LVL_ACT_ANIM_EMPTY),
 			bThrust(false)
@@ -176,7 +175,6 @@ public:
 			bRunning = false;
 			nMoveDirX = 0;
 			nMoveDirY = 0;
-			nLookDirX = 0;
 			vAimVec = Vec2(0.0f, 0.0f);
 
 			bCrouched = false;
@@ -200,7 +198,6 @@ public:
 			bRunning = false;
 			nMoveDirX = 0;
 			nMoveDirY = 0;
-			nLookDirX = 0;
 			vAimVec = Vec2(0.0f, 0.0f);
 
 			bCrouched = false;
@@ -241,31 +238,27 @@ public:
 	float					fVerseCooldown;				//don't play the same verse if cooldown > 0.0f
 	int						nLastPlayedVerseSndIdx;		//last played sound idx
 
-	int			nAnimSet;	//current animation set (-1 for RANDOM); Don't set directly!
+	int						nAnimSet;	//current animation set (-1 for RANDOM); Don't set directly!
 
 public:
 	//collision
 	bool		bHasCollision;			//se calculeaza coliziunea cu nivelul
 	UINT16		collisionFlags;		    //iti spune in ce directii are coliziune (K_DIRFLAG_)
 
-	//puncte de interes	[3] - shooting, crouched, dead
-	Vec2 vecWeapon_abs[3], vecHeart_abs[3], vecGroundCheck_abs[3]; //offseturi relative incarcate din REF_POSE
-	RECTXYWH_F	stateBBoxes[3]; //bboxurile pentru idle, crouch, dead - salvate in InitActor
 	Vec2 GetPosHeart(); //intoarce pozitia exacta a inimii in fn de starea curenta
 	Vec3 GetPosWeapon();	//intoarce pozitia exacta a armei in fn de starea curenta
 
 	Vec3	posHeart, posWeapon;	//pozitii absolute inima si arma presalvate (pentru viteza)
 
-	Vec2	vecCamFollowPos;	//pozitia relativa in care se uita camera cand am in focus Actorul curent
-
 	Vec2		pos_last;		// position on last frame
 	Vec2		speed;
 	Vec2		vSpeedImpulse;	//viteza aplicata extern (cand e impuscat de exemplu). Se va atenua automat.
 
-	Vec2				vMoveDirN;	//normalized movement direction
+	Vec2		vMoveDirN;		//normalized movement direction
 
-	int			lookDirXsign; //directia in care se uita pe X (-1 sau 1)
-	Vec2	vAngleDir;		//directia efectiva a privirii in fn de fAngle (folosita doar de catre unele specii de actori)
+	EAnimAngle	eAnimAngle;		// animation angle (6 possible ways)
+	bool		bAnimFlipX;		// do we need to flip the animation on X?
+
 	float		fLife, fArmor; //cata viata are si cata armura
 	float		fFOVPercent;   //field of view-ul personajului, intre 0 si 1 => 0.5 va fi FOV de 90 de grade. Reprezinta un fel de alertLevel si seteaza si hearing range
 	//flags
@@ -327,23 +320,8 @@ public:
 	EAIBehaviorType GetCurrentBehavior();	//intoarce behavior curent
 
 	//CTOR
-	CActor() :
-		m_pAIcurrentState(null), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nTookDamageFrames(0), nLastDamageTakenFromUID(0),
-		pCurrentWeapon(null), nSkinIdx(0), pClosestTouchable(nullptr),
-		eLastAnimSet(K_LVL_ACT_ANIM_EMPTY), nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), 
-		eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
-		pSkelTemplate(null), pSkeleton(null)
-	{
-		bAnimated = true;
-		nControllerInstanceID = -1;
-		vSpeedImpulse = Vec2(0.0f, 0.0f);
-		speed = Vec2(0.0f, 0.0f);
-		posWeapon = Vec3(0.0f, 0.0f, 0.0f);
-		for (int kk = 0; kk < K_ACT_MAX_ANIM_TRACKS; kk++)
-		{
-			eLastAnim[kk] = K_SD_ANIM_EMPTY;
-		}
-	}
+	CActor();
+	~CActor();
 
 	const eActiveInterfaceType GetClassType() const {
 		return K_LVL_IAI_TYPE_ACTOR;

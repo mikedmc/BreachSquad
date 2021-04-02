@@ -276,8 +276,8 @@ HRESULT CSpineManager::LoadSkeletonDataJSON(WCHAR * wcsPath, Atlas* pTargetAtlas
 
 CSpineManager::CSkeletonInstance* CSpineManager::GetSkeletonInstance(CSkeletonTemplate* skelTemplate)
 {
-	if (skelTemplate == null)
-		return null;
+	if (skelTemplate == nullptr)
+		return nullptr;
 
 	CSkeletonInstance* nSkel = new CSkeletonInstance();
 
@@ -289,20 +289,31 @@ CSpineManager::CSkeletonInstance* CSpineManager::GetSkeletonInstance(CSkeletonTe
 	//find special bones
 	for (int kk = 0; kk < K_SD_BONES_CNT; kk++)
 	{
-		nSkel->arrBones[kk] = null;
+		nSkel->arrBones[kk] = nullptr;
 		if (!skelTemplate->arrBonesNames[kk].empty())
 			nSkel->arrBones[kk] = nSkel->skel->findBone(skelTemplate->arrBonesNames[kk].c_str());
 	}
 	//find slotsbones
 	for (int kk = 0; kk < K_SD_SLOTS_CNT; kk++)
 	{
-		nSkel->arrSlots[kk] = null;
+		nSkel->arrSlots[kk] = nullptr;
 		if (!skelTemplate->arrSlotsNames[kk].empty())
 			nSkel->arrSlots[kk] = nSkel->skel->findSlot(skelTemplate->arrSlotsNames[kk].c_str());
 	}
 
 	arrSkeletonInstances.Add(nSkel);
 	return nSkel;
+}
+
+void CSpineManager::RemoveSkeletonInstance(CSkeletonInstance* pSkelInstance)
+{
+	int idx = arrSkeletonInstances.IndexOf(pSkelInstance);
+	// already removed, no harm done, just exit
+	if (idx < 0)
+		return;
+
+	SAFE_DELETE(arrSkeletonInstances[idx]);
+	arrSkeletonInstances.Remove(idx);
 }
 
 void CSpineManager::SetListenForEvents(CSkeletonInstance* skelInst, bool bListen)
@@ -634,6 +645,12 @@ CSpineManager::CSkeletonInstance::CSkeletonInstance() :
 	arrPassesIdx.Clear();
 	memset(arrBones, null, sizeof(Bone*));
 	memset(arrSlots, null, sizeof(Slot*));
+}
+
+CSpineManager::CSkeletonInstance::~CSkeletonInstance()
+{
+	SAFE_DELETE(skel);
+	SAFE_DELETE(anim);
 }
 
 void CSpineManager::CSkeletonInstance::SetEnabled(bool bIsVisible, bool bIsUpdating)

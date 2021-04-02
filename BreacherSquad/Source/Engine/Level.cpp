@@ -124,7 +124,6 @@ HRESULT CLevel::InitActor(CActor * actor, CActorTemplate * actTemplate, Vec2 spa
 
 	actor->speed = Vec2(0.0f, 0.0f);
 	actor->vSpeedImpulse = Vec2(0.0f, 0.0f);
-	actor->vecCamFollowPos = Vec2(0.0f, 0.0f);
 
 	actor->m_sprOverheadIcon.Init(-1, 0.0f, 0.0f);
 	//set hue
@@ -628,13 +627,6 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 	{
 		pPlayerActor[nPlayerOrdinal] = nact;
 
-		nact->lookDirXsign = 1;
-		//set angle
-		if (nact->lookDirXsign == -1)
-			nact->SetAngle(PI);
-		else
-			nact->SetAngle(0.0f);
-
 		//set controller
 		pPlayerActor[nPlayerOrdinal]->nPlayerOrdinal = nPlayerOrdinal;
 		pPlayerActor[nPlayerOrdinal]->nControllerInstanceID = m_arrPlayerControllersIIDs[nPlayerOrdinal];
@@ -768,42 +760,6 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	nact->Init(&templateLocal, spawnPos);
 	nact->ID = GenerateNextID();
 
-	// Load spine skeleton
-	WCHAR Path[MAX_PATH];
-	WCHAR wcsPath[MAX_PATH];
-	StringCchPrintf(wcsPath, MAX_PATH, L"media/levels/data/actors/%s", acttemplate->shSkeletonXML.text);
-	FileManager::GetMediaPath(wcsPath, Path);
-	nact->pSkelTemplate = g_spineMgr.LoadSkeletonTemplateXML(Path);
-	if (nact->pSkelTemplate != null)
-	{
-		float fScale = 1.0f;
-		// Create skeleton instance
-		nact->pSkeleton = g_spineMgr.GetSkeletonInstance(nact->pSkelTemplate);
-		// set skeleton ID too so we get them batched in separate meshes:
-		nact->pSkeleton->UID = nact->UID;
-		nact->pSkeleton->skel->setScaleY(-1.0f * fScale);
-		nact->pSkeleton->skel->setScaleX(fScale);
-
-		// Set skin
-		if (acttemplate->shSkinName.IsSet())
-		{
-			nact->Spine_SetSkin(acttemplate->shSkinName.text);
-		}
-
-		// set pointers to spine animations for fast access
-		nact->Spine_SaveAnimPointers();
-
-	}
-
-	//finish up adding the actor
-	m_arrActors.Add(nact);
-
-	//#TODO: set angle - should go away
-	nact->SetAngle(0.0f);
-
-	//update backup template
-	nact->actTemplate_ini = nact->actTemplate;
-
 	//#TEMP: initialize weapons	- should be completely changed...
 	Weapon_Init(&nact->weapons[K_LVL_ACT_WEAPON_PRIMARY], nact->actTemplate.shWeaponDefault.text, nact);
 	nact->weapons[K_LVL_ACT_WEAPON_SECONDARY].Init();
@@ -834,6 +790,9 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	nact->m_AIsensorInfo.Reset();
 
 	nact->BeginPlay();
+
+	//finish up adding the actor
+	m_arrActors.Add(nact);
 
 	return nact;
 }
@@ -1950,22 +1909,6 @@ void CLevel::KillActor(CActor * actor, bool bSplatTarget)
 	}
 
 	HitActor(actor, &bullet);
-}
-
-bool CLevel::IsPlatformEnding(CActor* actor, int nDirSign)
-{
-	if (nDirSign == 0)
-		return false;
-	//presupunem ca ai-ul de dead nu cauta platform ends si ca pe crouch nu se misca asa ca folosim mereu datele din standing adica vecGroundCheck[0]
-	Vec2 vChkPos = actor->pos;
-	vChkPos.y += actor->vecGroundCheck_abs[0].y;
-	if(nDirSign < 0)
-		vChkPos.x -= actor->vecGroundCheck_abs[0].x;
-	else
-		vChkPos.x += actor->vecGroundCheck_abs[0].x;
-
-
-	return false;
 }
 
 CActorTemplate* CLevel::Actor_GetTemplate(const WCHAR * templateName)
@@ -4093,6 +4036,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 		case AI_BEHAVIOR_FIND_CLOSEST_PLAYER:
 		{
 			//se intoarce catre player
+			/*
 			CActor* plAct = GetClosestPlayer(actor);
 			if (plAct != null)
 			{
@@ -4102,11 +4046,13 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			actor->fFOVPercent = 1.0f;  //disable FOV check while attacking
 			actor->AIfvar1 = 0.0f;		//teleporter timer
 			actor->AItimer1 = 0.0f;		//forget about target timer (usually 10 sec)
+			*/
 		}
 		break;
 
 		case AI_BEHAVIOR_SURPRISED:
 		{
+			/*
 			//se intoarce catre event
 			if (actor->m_AIsensorInfo.m_AIcurrentEvent.nType > K_LVL_AI_EVENT_IDLE_TICK)
 			{
@@ -4117,7 +4063,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			actor->AIsubState = 0;
 
 			actor->fFOVPercent = 1.0f; //disable FOV check while attacking
-
+			*/
 		}
 		break;
 
@@ -4716,7 +4662,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					//sterg mesaj de see enemy pt actorul curent
 					DeleteAITargetedEvent(K_LVL_AI_EVENT_SEE_ENEMY, actor->GetUID());
 					//Trimit mesaj de LOST_ENEMY
-					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->GetPosHeart() + Vec2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 1.0f, actor->GetUID());
+					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->GetPosHeart() + Vec2(16.0f, 0.0f), 16.0f, 1.0f, actor->GetUID());
 					//reset targeting actor
 					actor->m_AIsensorInfo.pTargetedActor = null;
 				}
@@ -4725,7 +4671,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if ((actor->m_AIsensorInfo.pTargetedActor == null) && (actor->m_AIsensorInfo.m_AIlastEvent.nType == K_LVL_AI_EVENT_GOT_HIT))
 				{
 					//put event behind him
-					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->GetPosHeart() - Vec2(16.0f * actor->lookDirXsign, 0.0f), 16.0f, 0.5f, actor->GetUID());
+					AddAIEvent(K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, actor->GetPosHeart() - Vec2(16.0f, 0.0f), 16.0f, 0.5f, actor->GetUID());
 				}
 			}
 
@@ -4873,7 +4819,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					actor->m_AIcommands.bRunning = true;
 				}
 				Vec2 vAimVec = pController->GetDoubleAxisVector(K_CM_COMMAND_AIM_X, K_CM_COMMAND_AIM_Y, false);
-				DebugPrintA("aim: %.2f, %.2f\n", vAimVec.x, vAimVec.y);
+				//DebugPrintA("aim: %.2f, %.2f\n", vAimVec.x, vAimVec.y);
 				actor->m_AIcommands.vAimVec = vAimVec;
 
 				//reset roll status
@@ -5005,7 +4951,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 							actor->m_AIcommands.bThrustX = true;
 							actor->m_AIcommands.nMoveDirX = m_rand.RandSign();
-							actor->m_AIcommands.nLookDirX = 1;
 						}
 					}
 				}
@@ -5043,7 +4988,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						actor->m_AIcommands.fIconDuration = 0.5f;
 						//run to target
 						actor->m_AIcommands.bThrustX = true;
-						actor->m_AIcommands.nLookDirX = SIGN(vDelta.x);
 						actor->m_AIcommands.bRunning = true;
 						//gets too close
 						bool bHasLateralCollisions = ((actor->collisionFlags & (K_DIRFLAG_RIGHT | K_DIRFLAG_LEFT)) != 0);
@@ -5095,13 +5039,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						if (!bPressedLeft && bPressedRight)
 						{
 							actor->m_AIcommands.bThrustX = false;
-							actor->m_AIcommands.nLookDirX = 1;
 							actor->m_AIcommands.nMoveDirX = 1;
 						}
 						if (bPressedLeft && !bPressedRight)
 						{
 							actor->m_AIcommands.bThrustX = false;
-							actor->m_AIcommands.nLookDirX = -1;
 							actor->m_AIcommands.nMoveDirX = -1;
 						}
 					}
@@ -5352,7 +5294,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		//can roll but looking in the other direction
 		else
 		{
-			if ((actor->m_AIcommands.bThrustX) && (actor->m_AIcommands.nMoveDirX != actor->lookDirXsign))
+			if ((actor->m_AIcommands.bThrustX) /*&& (actor->m_AIcommands.nMoveDirX != actor->lookDirXsign)*/)
 			{
 				actor->m_AIcommands.bThrustX = false;
 				actor->m_AIcommands.nMoveDirX = 0;
@@ -5541,7 +5483,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			{
 				if ((pPlayerActor[kk] != NULL) && (pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_IN_LIMBO) && (pPlayerActor[kk]->nSuspendedFlags == K_LVL_SUSPENDFLAG_NONE))
 				{
-					avg += pPlayerActor[kk]->GetPosHeart() + pPlayerActor[kk]->vecCamFollowPos;
+					avg += pPlayerActor[kk]->GetPosHeart();
 					plcnt++;
 				}
 			}
@@ -5735,17 +5677,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		}
 	}
 
-	///--- setam directie look in fn de comanda AI inainte sa tragem cu arma ---
-	if (actor->m_AIcommands.nLookDirX != 0)
-	{
-		actor->lookDirXsign = actor->m_AIcommands.nLookDirX;
-		//daca primesc comanda de lookDir setez si unghiul. Altfel unghiul ramane cel setat in LoadLevel sau se schimba prin alta comanda de schimbare unghi
-		if (actor->lookDirXsign == 1)
-			actor->SetAngle(0.0f);
-		else
-			actor->SetAngle(PI);
-	}
-
 	///--- find and save last safe pos for respawn ---
 	/*
 	if (((actor->templateActor.actorClass == K_LVL_ACT_CLASS_PLAYER) && (actor->GetCurrentBehavior() == AI_BEHAVIOR_PLAYER_CONTROL) && 
@@ -5800,15 +5731,15 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if (ShootWeapon(actor->pCurrentWeapon, vShootDir))
 					nWeaponShots++;
 
+				/*
 				if (bShootSymmetric)
 				{
-					actor->lookDirXsign = -actor->lookDirXsign;
 					//actor->pCurrentWeapon->fireRateTimer = 0.0f;
 					vShootDir.x *= -1.0f; //mirror shoot dir
 					if (ShootWeapon(actor->pCurrentWeapon, vShootDir))
 						nWeaponShots++;
-					actor->lookDirXsign = -actor->lookDirXsign;
 				}
+				*/
 			}
 			else //daca e sincronizata cu animatia trage cand ajunge pe frame de action
 			{
@@ -5830,15 +5761,10 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					}
 					if (bShootSymmetric)
 					{
-						//swap direction and reset fire rate
-						actor->lookDirXsign = -actor->lookDirXsign;
-						//actor->pCurrentWeapon->fireRateTimer = 0.0f;
 						//shoot
 						vShootDir.x *= -1.0f;
 						if (ShootWeapon(actor->pCurrentWeapon, vShootDir))
 							nWeaponShots++;
-						//look back to where we were
-						actor->lookDirXsign = -actor->lookDirXsign;
 					}
 				}
 			}
@@ -6019,7 +5945,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					//reset physics
 					actor->speed = Vec2(0.0f, 0.0f);
 					actor->vSpeedImpulse = Vec2(0.0f, 0.0f);
-					actor->vecCamFollowPos = Vec2(0.0f, 0.0f);
 					//move invisible body back to last safe pos
 					Vec2 vSpawnPos = m_arrPlayerLastSafePos[actor->nPlayerOrdinal];
 					actor->SetPos(vSpawnPos);
@@ -6302,13 +6227,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	//end phys
 
-	//set camera vector
-	if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
-	{
-		actor->vecCamFollowPos = Vec2(K_LVL_CAM_LOOK_OFFSET * actor->lookDirXsign, 0.0f);
-		if (actor->nAttackStatus == K_LVL_ACT_ATTACK_SHOOTING)
-			actor->vecCamFollowPos.x += actor->lookDirXsign * actor->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]->WeaponTemplate.fCameraRecoil;
-	}
 	//set sprite pos
 	actor->sprite.pos = Vec2((int)ROUND_FLOAT(actor->pos.x), (int)ROUND_FLOAT(actor->pos.y));
 	actor->sprite_feet.pos = actor->sprite.pos;
@@ -6365,8 +6283,8 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 	}
 	CAABB aabbvision;
 	aabbvision.Set_Corrected(
-		Vec2(sourceActor->pos.x + sourceActor->lookDirXsign * fDistSee, sourceActor->pos.y + fDistDown),
-		Vec2(sourceActor->pos.x - sourceActor->lookDirXsign * fDistHear, sourceActor->pos.y - fDistUp)
+		Vec2(sourceActor->pos.x/* + sourceActor->lookDirXsign * fDistSee*/, sourceActor->pos.y + fDistDown),
+		Vec2(sourceActor->pos.x/* - sourceActor->lookDirXsign * fDistHear*/, sourceActor->pos.y - fDistUp)
 	);
 
 	//--- check all actors for enemy ---
@@ -6939,6 +6857,9 @@ void CLevel::CleanupDeadObjects()
 	{
 		if (m_arrProps[kk]->IsPendingKill())
 		{
+			// call framework end play
+			m_arrProps[kk]->EndPlay();
+			// remove from array, call dtor
 			SAFE_DELETE(m_arrProps[kk]);
 			m_arrProps.Remove(kk);
 		}
@@ -6951,7 +6872,9 @@ void CLevel::CleanupDeadObjects()
 		if (m_arrActors[kk]->IsPendingKill())
 		{
 			CActor* act = m_arrActors[kk];
-			// make sure we don't keep pointer to actor
+			// call framework end play
+			act->EndPlay();
+			//#HACK: make sure we don't keep pointer to actor - should be replaced by weak_ptr
 			for (int i = 0; i < m_arrActors.GetSize(); i++)
 			{
 				if (m_arrActors[i]->m_AIsensorInfo.pTargetedActor == act)
@@ -6959,7 +6882,7 @@ void CLevel::CleanupDeadObjects()
 					m_arrActors[i]->m_AIsensorInfo.pTargetedActor = NULL;
 				}
 			}
-			// now release it
+			// now release it (destructor)
 			SAFE_DELETE(m_arrActors[kk]);
 			m_arrActors.Remove(kk);
 		}

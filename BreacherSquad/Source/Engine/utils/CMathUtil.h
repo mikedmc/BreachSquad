@@ -84,10 +84,10 @@ namespace UTMath
 	 */
 	bool			IsPowerOfTwo(unsigned int nVal);
 
-	/* Get angle of vector. Returns -PI..PI */
+	/* Get angle of vector. Returns -PI..PI. ang:0.0 for vec(1.0, 0.0f) */
 	float			GetVectorAngle(Vec2 const &dir);
 
-	/* Get angle of vector. Returns -PI..PI */
+	/* Get angle of vector. Returns -PI..PI. ang:0.0 for vec(1.0, 0.0f) */
 	float			GetVectorAngle(Vec2 start, Vec2 end);
 
 	/* RETURNS: angle in rad between 2 vectors */

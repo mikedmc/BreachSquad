@@ -38,7 +38,7 @@ public:
 	DWORD		color;
 	CAABB		bbox;
 	CAABB		bbox_exported; //bboxul exportat din BSX (mutat la pozitia activului)
-public: //valori initiale ale coordonatelor folositoare la miscari nerelative (unele stari AI le folosesc)
+public: // initial values necessary for some relative movements
 	CAABB		bbox_ini;			//non relative to object position AABB
 	CAABB		bbox_exported_ini; //bboxul exportat din BSX (inital)
 	Vec2		pos_ini;

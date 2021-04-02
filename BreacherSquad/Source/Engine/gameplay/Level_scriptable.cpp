@@ -1117,9 +1117,11 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					if (nModifier != 0)
 					{
 						//#HACK: only used by doors when breaching them so we make sure the actor faces the door
+						/*
 						IActiveInterface* pExecutor = GetIActiveInterfacePtr_byUID(executorUID);
 						if (pExecutor != null)
 							targetAct->m_AIcommands.nLookDirX = SIGN(pExecutor->bbox.vCenter.x - targetAct->bbox.vCenter.x);
+							*/
 						targetAct->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_BREACH;
 					}
 				}
@@ -1313,28 +1315,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			else
 			{
 				nact = SpawnActor(vSpawnPos, vcTemplate->m_strArg.text, &vcAIstate->m_strArg);
-			}
-
-			if (nact != null)
-			{
-				if (vcDirection->m_type == CVariantComplex::K_ARGTYPE_INT32)
-				{
-					nact->lookDirXsign = SIGN(vcDirection->m_asINT32);
-				}
-				else if (vcDirection->m_type == CVariantComplex::K_ARGTYPE_STRING)
-				{
-					nact->lookDirXsign = m_rand.RandSign();
-					nact->fFOVPercent = 1.0f;
-
-					CActor* targetact = GetClosestTarget(nact);
-					//scad alerta
-					nact->fFOVPercent = 0.5f;// nact->actTemplate.fFOVpercent;
-
-					if (targetact != null)
-					{
-						nact->lookDirXsign = SIGN(targetact->pos.x - nact->pos.x);
-					}
-				}
 			}
 
 			return true;

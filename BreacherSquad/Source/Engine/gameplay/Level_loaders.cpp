@@ -650,20 +650,12 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		}
 		InitActor(nact, acttempl, actPos);
 
-		nact->lookDirXsign = (bactLookleft) ? -1 : 1;
 		nact->fAngle = nact->fAngle_ini = fActorAngle;
 		//daca unghiul e setat din editor il las asa cum e, altfel il sincronizez cu lookdirXsign
 		//Unghiul trebuie setat corect pentru ca e folosit la gasirea inamicilor
 		if (bSetActorAngle)
 		{
 			nact->SetAngle(fActorAngle);
-		}
-		else
-		{
-			if (nact->lookDirXsign == -1)
-				nact->SetAngle(PI);
-			else
-				nact->SetAngle(0.0f);
 		}
 
 		nact->bHasCollision = bactCollision;

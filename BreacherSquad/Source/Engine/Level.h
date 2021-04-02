@@ -175,8 +175,6 @@ public:
 	// Randomizes the actor a little so they don't all have the exact same speeds
 	void					RandomizeTemplateActor(CActorTemplate * actTemplate);
 	CActorTemplate*			Actor_LoadTemplate(WCHAR * strTemplateFileName);
-	// verifica daca se termina platforma pe care sta actorul, in directia ceruta
-	bool					IsPlatformEnding(CActor* actor, int nDirSign);
 
 	CGrowableArray<CCollisionShape*>	m_arrColShapes;
 	// returns intersection with a collision shape. Like AABB_Segment_Intersection_Arr but with collision shapes

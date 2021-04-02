@@ -48,6 +48,7 @@ public:
 		Slot*							arrSlots[K_SD_SLOTS_CNT];	// Pointers to slots
 		
 		CSkeletonInstance();
+		~CSkeletonInstance();
 		// Sets flags for visibility and skeleton updating
 		void							SetEnabled(bool bIsVisible, bool bIsUpdating);
 	};
@@ -81,6 +82,8 @@ public:
 
 	// Returns a skeleton instance combo (skeleton and animState)
 	CSkeletonInstance*					GetSkeletonInstance(CSkeletonTemplate* skelTemplate);
+	// Removes a skeleton  instance from the instances array (when an actor dies usually)
+	void								RemoveSkeletonInstance(CSkeletonInstance* pSkelInstance);
 	// Sets an event listener for Spine events (anim end, anim start, custom events, etc)
 	void								SetListenForEvents(CSkeletonInstance* skelInst, bool bListen);
 

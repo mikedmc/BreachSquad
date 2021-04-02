@@ -197,7 +197,7 @@ float UTMath::GetVectorAngle(Vec2 start, Vec2 end)
 	if ((vecdir.x == 0.0f) && (vecdir.y == 0))
 		return 0.0f;
 
-	return((float)(HALF_PI - atan2(vecdir.x, vecdir.y)));
+	return((float)(atan2(vecdir.y, vecdir.x)));
 }
 
 float UTMath::GetVectorAngle(Vec2 const &dir)
@@ -205,7 +205,7 @@ float UTMath::GetVectorAngle(Vec2 const &dir)
 	if ((dir.x == 0.0f) && (dir.y == 0.0f))
 		return 0.0f;
 
-	return((float)(HALF_PI - atan2(dir.x, dir.y)));
+	return((float)(atan2(dir.y, dir.x)));
 }
 
 float UTMath::GetAngleBetweenVectors(Vec2 vec1, Vec2 vec2)

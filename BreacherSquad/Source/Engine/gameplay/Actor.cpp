@@ -68,7 +68,6 @@ void CActor::SetAnimSet(int newAnimSet)
 void CActor::SetAngle(float fNewAngle)
 {
 	fAngle = fNewAngle;
-	vAngleDir = Vec2(cos(fAngle), sin(fAngle));
 }
 
 void CActor::PostConstructionInit()
@@ -85,7 +84,6 @@ void CActor::BeginPlay()
 
 void CActor::EndPlay()
 {
-
 }
 
 EAIBehaviorType CActor::GetCurrentBehavior()
@@ -93,6 +91,31 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 	if ((m_nAIcurrentBehaviorIdx < 0) || (m_pAIcurrentState == null))
 		return AI_BEHAVIOR_EMPTY;
 	return m_pAIcurrentState->m_arrBehaviors[m_nAIcurrentBehaviorIdx].nType;
+}
+
+CActor::CActor() :
+	m_pAIcurrentState(null), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nTookDamageFrames(0), nLastDamageTakenFromUID(0),
+	pCurrentWeapon(null), nSkinIdx(0), pClosestTouchable(nullptr), bAnimFlipX(false), eAnimAngle(EANG_S),
+	eLastAnimSet(K_LVL_ACT_ANIM_EMPTY), nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false),
+	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
+	pSkelTemplate(null), pSkeleton(null)
+{
+	bAnimated = true;
+	nControllerInstanceID = -1;
+	vSpeedImpulse = Vec2(0.0f, 0.0f);
+	speed = Vec2(0.0f, 0.0f);
+	posWeapon = Vec3(0.0f, 0.0f, 0.0f);
+	for (int kk = 0; kk < K_ACT_MAX_ANIM_TRACKS; kk++)
+	{
+		eLastAnim[kk] = K_SD_ANIM_EMPTY;
+	}
+}
+
+CActor::~CActor()
+{
+	// remove used skeleton instance
+	g_spineMgr.RemoveSkeletonInstance(this->pSkeleton);
+	this->pSkeleton = nullptr;
 }
 
 void CActor::SetPos(Vec2 newPos)
@@ -290,8 +313,6 @@ bool CActor::Init(CActorTemplate * pActorTemplate, Vec2 vSpawnPos)
 	this->nLastDamageTakenFromUID = 0;
 	this->nAnimSet = 0;
 
-	this->SetAngle(0.0f);
-
 	this->bSkipRender = false;
 
 	//set hue
@@ -335,14 +356,45 @@ bool CActor::Init(CActorTemplate * pActorTemplate, Vec2 vSpawnPos)
 
 	this->pCurrentWeapon = null;
 
+
+	//#TODO: all spine stuff should be handled in Init
+	// Load spine skeleton
+	WCHAR Path[MAX_PATH];
+	WCHAR wcsPath[MAX_PATH];
+	StringCchPrintf(wcsPath, MAX_PATH, L"media/levels/data/actors/%s", pActorTemplate->shSkeletonXML.text);
+	FileManager::GetMediaPath(wcsPath, Path);
+	this->pSkelTemplate = g_spineMgr.LoadSkeletonTemplateXML(Path);
+
+	if (this->pSkelTemplate != null)
+	{
+		float fScale = 1.0f;
+		// Create skeleton instance
+		this->pSkeleton = g_spineMgr.GetSkeletonInstance(this->pSkelTemplate);
+		// set skeleton ID too so we get them batched in separate meshes:
+		this->pSkeleton->UID = this->UID;
+		this->pSkeleton->skel->setScaleY(-1.0f * fScale);
+		this->pSkeleton->skel->setScaleX(fScale);
+
+		// Set skin
+		if (pActorTemplate->shSkinName.IsSet())
+		{
+			Spine_SetSkin(pActorTemplate->shSkinName.text);
+		}
+
+		// set pointers to spine animations for fast access
+		Spine_SaveAnimPointers();
+
+	}
+
+	//update backup template
+	this->actTemplate_ini = this->actTemplate;
 	//set position
 	this->pos = vSpawnPos;
-
 	// selected animset
 	this->SetAnimSet(0);
 
 	//init bbox too
-	this->bbox_ini.Set(Vec2(-6.0f, -6.0f), Vec2(6.0f, 6.0f));
+	this->bbox_ini.Set(Vec2(-8.0f, -8.0f), Vec2(8.0f, 8.0f));
 	this->bbox = this->bbox_ini;
 	this->bbox_exported_ini = this->bbox_ini;
 	this->bbox_exported = this->bbox_exported_ini;
@@ -367,6 +419,13 @@ void CActor::Update(float dTime)
 	this->SetAnimOnce(0, K_SD_ANIM_IDLE);
 	//this->SetAnimOnce(1, K_SD_ANIM_SHOOT);
 
+	Vec2 vAim = m_AIcommands.vAimVec;
+	// set generic stuff
+	bAnimFlipX = (vAim.x < 0.0f) ? true : false;
+	int nAnimFlipMul = (bAnimFlipX) ? -1 : 1;
+	eAnimAngle = GetEAnimAngle(vAim);
+
+
 	// aiming IK node must be set each frame or they get reset by the animation
 	//if (bIsAiming)
 	{
@@ -378,8 +437,7 @@ void CActor::Update(float dTime)
 		{
 			spine::Bone* b_aim = pSkeleton->arrBones[K_SD_BONE_AIM_IK];
 
-			Vec2 vAim = m_AIcommands.vAimVec;
-			b_aim->setX(vAim.x);
+			b_aim->setX(vAim.x * nAnimFlipMul);
 			b_aim->setY(-vAim.y);
 		}
 	}
@@ -453,16 +511,13 @@ void CActor::Update(float dTime)
 
 	///--- final update step ---
 	//set skeleton data
-	if ((this->pSkeleton != null) && (this->pSkeleton->skel != null))
+	if ((pSkeleton != null) && (pSkeleton->skel != null))
 	{
-		this->pSkeleton->skel->setPosition(this->pos.x, this->pos.y);
-		//flip on X based on looking direction
-		/*
-		if (this->vLookDir.x < 0.0f)
-			this->pSkeleton->skel->setScaleX(1.0f);
-		else
+		pSkeleton->skel->setPosition(pos.x, pos.y);
+		if (bAnimFlipX)
 			this->pSkeleton->skel->setScaleX(-1.0f);
-			*/
+		else
+			this->pSkeleton->skel->setScaleX(1.0f);
 	}
 }
 

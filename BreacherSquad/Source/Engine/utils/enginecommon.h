@@ -36,6 +36,22 @@ enum EDir {
 	EDIRS_COUNT = 4,
 };
 
+// Actor animation angles (6 possible directions)
+// the order of the enum is important as it helps extract the direction from atan2 results (see GetEAnimAngle)
+enum EAnimAngle {
+	EANG_NONE = -1,
+	EANG_NW,
+	EANG_N,
+	EANG_NE,
+	EANG_SE,
+	EANG_S,
+	EANG_SW,
+
+	EANGS_CNT,
+};
+
+// Returns animation angle
+EAnimAngle GetEAnimAngle(Vec2 vDir);
 
 //direction flags used when setting more directions on one int
 #define K_DIRFLAG_NONE 0
@@ -141,7 +157,9 @@ struct POINTXYZ_INT {
 	operator Vec3() { return Vec3((float)x, (float)y, (float)z); }
 };
 
+// Gets direction vector (integer) from EDir
 Vec2i GetDirVec2i(EDir dir);
+// Gets inverse EDir from EDir
 EDir GetDirInverse(EDir dir);
 
 class SIZEWH {

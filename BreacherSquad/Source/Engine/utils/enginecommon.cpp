@@ -29,6 +29,23 @@ EDir GetDirInverse(EDir dir)
 	return (EDir)((dir + 2) % EDIRS_COUNT);
 }
 
+EAnimAngle GetEAnimAngle(Vec2 vDir)
+{
+	if ((vDir.x == 0.0f) && (vDir.y == 0.0f))
+		return EANG_S;
+	// angle between -pi..pi
+	float fang = atan2(vDir.y, vDir.x);
+	int retang = 0;
+	// divide angle in 3 equal parts and convert to EANG_
+	if (fang < 0.0f)
+		retang = ((int)EANG_NE - (int)fabs((fang / PI) * 3.0f));
+	else
+		retang = ((int)EANG_SE + (int)fabs((fang / PI) * 3.0f));
+	// clamp to 6 possible directions
+	CLAMP(retang, 0, 5);
+	return (EAnimAngle)retang;
+}
+
 void D3DCOLOR_UNPACKTOFLOAT(DWORD color, float & a, float & r, float & g, float & b)
 {
 	unsigned char cnl = color & 0x000000ff;

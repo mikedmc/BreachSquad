@@ -361,7 +361,7 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec3 vDir)
 		//adaug shell
 		if (weapon->WeaponTemplate.nDropShellFrame >= 0)
 		{
-			AddDoofer(K_DOOFER_SHELL, weapon->pOwner->GetPosHeart(), &Vec2(-weapon->pOwner->lookDirXsign * (40.0f + randfloat(30.0f)), -50.0f - randfloat(20.0f)), &g_vecGravityOld, weapon->WeaponTemplate.nDropShellFrame);
+			AddDoofer(K_DOOFER_SHELL, weapon->pOwner->GetPosHeart(), &Vec2((40.0f + randfloat(30.0f)), -50.0f - randfloat(20.0f)), &g_vecGravityOld, weapon->WeaponTemplate.nDropShellFrame);
 		}
 
 		float fAimErrorMul = 1.0f;

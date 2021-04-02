@@ -2,7 +2,8 @@
 
 <ACTOR sSkeletonTemplateXML="skel_assaulter1.xml" sSkin="">
 
-  <ACTOR_DATA           sAIstate="DEFAULT" sWeapon="WPN_SMG_MP5A3"
+  <ACTOR_DATA           
+						sAIstate="DEFAULT" sWeapon="WPN_SMG_MP5A3"
 						sMaterial="FLESH" fLife="40.0" fArmorFront="0.0" fArmorBack="0.0" 
                         fSpeedMove="100.0"
                         bCanCover="true" />
