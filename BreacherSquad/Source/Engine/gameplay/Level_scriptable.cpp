@@ -422,6 +422,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_ACTIVE_AMMOBOX_GIVE_AMMO:
 		{
+			/*
 			CProp* active = GetActiveByUID(executorUID);
 			if ((active == null) || (active->AIstate != K_AI_STATE_ACTIVE_AMMO_BOX))
 			{
@@ -475,12 +476,13 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					}
 				}
 			}
-
+			*/
 			return true;
 		}
 		break;
 		case instr_ACTIVE_HEALTHBOX_GIVE_HEALTH:
 		{
+			/*
 			CProp* active = GetActiveByUID(executorUID);
 			if ((active == null) || (active->AIstate != K_AI_STATE_ACTIVE_HEALTH_BOX))
 			{
@@ -522,7 +524,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					m_interfaceTextBubble.ShowLevelHint(&m_camLevel, STR_FULL_HEALTH, FONTIDX_6_NS1, Vec2(active->bbox_exported.vCenter.x, active->bbox_exported.vMin.y), 4.0f);
 				}
 			}
-
+			*/
 			return true;
 		}
 		break;
@@ -807,6 +809,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_ACTOR_SWITCH_WEAPONS:
 		{
+			/*
 			CVariantComplex* vcWho = instr->GetArgument(L"who");
 			int nIdx_src = instr->GetArgument(L"nWpnIdx_src")->m_asINT32;
 			int nIdx_dest = instr->GetArgument(L"nWpnIdx_dest")->m_asINT32;
@@ -844,12 +847,13 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			{
 				SetActorWeaponPerks(targetAct, targetAct->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]);
 			}
-
+			*/
 			return true;
 		}
 		break;
 		case instr_ACTOR_SET_WEAPON:
 		{
+			/*
 			CVariantComplex* vcWho = instr->GetArgument(L"who");
 			int nIdx1 = instr->GetArgument(L"nWpnIdx")->m_asINT32;
 			CStringHash shWpnTemplate = instr->GetArgument(L"sWpnTemplate")->m_strArg;
@@ -876,12 +880,13 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			{
 				SetActorWeaponPerks(targetAct, targetAct->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]);
 			}
-
+			*/
 			return true;
 		}
 		break;
 		case instr_ACTOR_EQUIP_WEAPONS:
 		{
+			/*
 			CVariantComplex* vcWho = instr->GetArgument(L"who");
 
 			CActor* targetAct = static_cast<CActor*>(ScriptGetActiveInterfaceByTargetParam(vcWho, executorUID));
@@ -913,12 +918,13 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			{
 				targetAct->pSelectedWeapon[K_LVL_ACT_WEAPON_GEAR] = &targetAct->weapons[nGearIdx->m_asINT32];
 			}
-
+			*/
 			return true;
 		}
 		break;
 		case instr_ACTOR_SHOOT_WEAPON:
 		{
+			/*
 			CVariantComplex* vcWho = instr->GetArgument(L"who");
 
 			CActor* targetAct = static_cast<CActor*>(ScriptGetActiveInterfaceByTargetParam(vcWho, executorUID));
@@ -938,12 +944,13 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			{
 				ShootWeapon(targetAct->pCurrentWeapon, vShootDir);
 			}
-
+			*/
 			return true;
 		}
 		break;
 		case instr_ACTOR_JAM_WEAPON:
 		{
+			/*
 			CVariantComplex* vcWho = instr->GetArgument(L"who");
 			float fJamTim = instr->GetArgument(L"fJamTimer")->m_asFloat;
 			int nCanReset = instr->GetArgument(L"nCanResetJam")->m_asINT32;
@@ -966,7 +973,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				targetAct->pCurrentWeapon->fJammedTimer = fJamTim;
 				targetAct->pCurrentWeapon->nCanResetJamCount = nCanReset;
 			}
-
+			*/
 			return true;
 		}
 		break;
@@ -1048,7 +1055,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				LOG(L"SCRIPT::ACTOR_PERK_MODIFIER - sPerkName missing or not a string!\n");
 				return true;
 			}
-
+			/*
 			if (vcPerk->m_strArg.IsEqual(L"GEAR_CAPACITY"))
 			{
 				int nQty = (int)floor(vcQty->m_asFloat);
@@ -1076,7 +1083,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			{
 				LOG(L"SCRIPT::ACTOR_PERK_MODIFIER - unknown perk [%s] !\n", vcPerk->m_strArg.text);
 			}
-
+			*/
 			return true;
 		}
 		break;
@@ -1185,7 +1192,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 
-			InitActor(actor, pTemplate, actor->pos);
+			//InitActor(actor, pTemplate, actor->pos);
 
 			return true;
 		}
@@ -1228,7 +1235,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 
-			InitActor(actor, pTemplate, actor->pos);
+			//InitActor(actor, pTemplate, actor->pos);
 			return true;
 		}
 		break;
@@ -1250,11 +1257,11 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			//int AIstate = GetAIStateByNameHash(vcAIstate->m_strArg.getHash());
 			if ((vcAIstate == null) || (vcAIstate->m_type != CVariantComplex::K_ARGTYPE_STRING))
 			{
-				SetActorAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(actor->actTemplate.shAIState_ini));
+				Actor_SetAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(actor->actTemplate.shAIState_ini));
 			}
 			else
 			{
-				SetActorAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(vcAIstate->m_strArg));
+				Actor_SetAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(vcAIstate->m_strArg));
 			}
 
 			return true;

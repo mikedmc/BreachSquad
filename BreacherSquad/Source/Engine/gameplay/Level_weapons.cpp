@@ -2,28 +2,21 @@
 #include "Level_weapons.h"
 
 
+
 ///--------------------------------------------------------------------------
 /// WEAPONS CLASS
 ///--------------------------------------------------------------------------
-void CWeapon::Init()
+
+CWeapon::CWeapon() :	status(K_LVL_WPN_STATUS_UNKNOWN), statusOld(K_LVL_WPN_STATUS_UNKNOWN),
+						fAimErrorFOV(0.0f), fireRateTimer(0.0f), m_nBurstBulletsShot(0), m_nBulletsShotSinceCool(0),
+						reloadTimer(0.0f), ammoLeft(-1), fJammedTimer(0.0f), nCanResetJamCount(0),
+						bTriggerDown(false), bReloadDown(false), bTriggerDownOld(false),
+						pOwner(null), bPaintLaserSight(false), fTimeSinceShot(0.0f)
 {
-	status = K_LVL_WPN_STATUS_UNKNOWN; //not initialized yet
-	fAimErrorFOV = 0.0f;
-	fireRateTimer = 0.0f;
-	m_nBurstBulletsShot = 0;
-	reloadTimer = 0.0f;
-	ammoLeft = -1;
-	fJammedTimer = 0.0f;
-	bPaintLaserSight = false;
 	m_sprMuzzleFlash.animationIdx = -1; //not set
-	fTimeSinceShot = 0.0f;
-
-	bTriggerDown = bTriggerDownOld = false;
-	bReloadDown = false;
-	pOwner = null;
-
 	m_activePerk.Reset();
 }
+
 
 void CWeapon::SetTriggerStates(bool bTriggerPushed, bool bReloadPushed)
 {
@@ -47,7 +40,7 @@ void CWeapon::SetTriggerStates(bool bTriggerPushed, bool bReloadPushed)
 ///----------------------------------------------------------------------------------
 
 
-EnumWeaponStatus CLevel::UpdateWeapon(CWeapon * weapon, float dTime)
+EnumWeaponStatus CLevel::Weapon_Update(CWeapon * weapon, float dTime)
 {
 	//save old status
 	weapon->statusOld = weapon->status;
@@ -188,7 +181,7 @@ EnumWeaponStatus CLevel::UpdateWeapon(CWeapon * weapon, float dTime)
 	return weapon->status;
 }
 
-void CLevel::ResetBurstWeapon(CWeapon * weapon)
+void CLevel::Weapon_ResetBurst(CWeapon * weapon)
 {
 	if (weapon == null)
 		return;
@@ -199,7 +192,7 @@ void CLevel::ResetBurstWeapon(CWeapon * weapon)
 		weapon->fireRateTimer = 0.0f;
 }
 
-bool CLevel::JamWeapon(CWeapon * weapon)
+bool CLevel::Weapon_Jam(CWeapon * weapon)
 {
 	if (weapon == null)
 		return false;
@@ -215,7 +208,7 @@ bool CLevel::JamWeapon(CWeapon * weapon)
 	return true;
 }
 
-void CLevel::StopReloadingWeapon(CWeapon * weapon)
+void CLevel::Weapon_StopReloading(CWeapon * weapon)
 {
 	if (weapon == null)
 		return;
@@ -230,7 +223,7 @@ void CLevel::StopReloadingWeapon(CWeapon * weapon)
 }
 
 
-bool CLevel::CanShootWeapon(CWeapon * weapon)
+bool CLevel::Weapon_CanShoot(CWeapon * weapon)
 {
 	//no weapon or empty weapon?
 	if ((weapon == null) || (weapon->WeaponTemplate.name.IsEmpty()))
@@ -246,7 +239,7 @@ bool CLevel::CanShootWeapon(CWeapon * weapon)
 	return true;
 }
 
-bool CLevel::ShootWeapon(CWeapon * weapon, Vec3 vDir)
+bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 {
 	if ((weapon == null) || (weapon->pOwner == null) || (weapon->status == K_LVL_WPN_STATUS_UNKNOWN))
 		return false;
@@ -286,8 +279,10 @@ bool CLevel::ShootWeapon(CWeapon * weapon, Vec3 vDir)
 	//ammo (-1 infinite)
 	int nAmmoReal = weapon->ammoLeft;
 	//if weapon uses main weapon ammo check that ammo
+	/*
 	if (weapon->WeaponTemplate.bUsesMainWeaponAmmo)
 		nAmmoReal = weapon->pOwner->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]->ammoLeft;
+		*/
 
 	if (nAmmoReal != 0)
 	{

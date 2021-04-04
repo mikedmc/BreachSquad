@@ -148,13 +148,7 @@ public:
 	CActor*	pOwner;					//ownerul armei
 	CSprite	m_sprMuzzleFlash;		//sprite pentru muzzle flash
 	//ctor
-	CWeapon() : status(K_LVL_WPN_STATUS_UNKNOWN), statusOld(K_LVL_WPN_STATUS_UNKNOWN),
-		fAimErrorFOV(0.0f), fireRateTimer(0.0f), m_nBurstBulletsShot(0), m_nBulletsShotSinceCool(0),
-		reloadTimer(0.0f), ammoLeft(-1), fJammedTimer(0.0f), nCanResetJamCount(0),
-		bTriggerDown(false), bReloadDown(false), bTriggerDownOld(false),
-		pOwner(null), bPaintLaserSight(false), fTimeSinceShot(0.0f)
-	{}
+	CWeapon();
 
-	void Init();
 	void SetTriggerStates(bool bTriggerPushed, bool bReloadPushed);
 };

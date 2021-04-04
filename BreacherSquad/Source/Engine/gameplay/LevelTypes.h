@@ -443,22 +443,6 @@ enum EActorAttackState {
 	K_LVL_ACT_ATTACK_BREACH,  //used mostly for breaching doors
 };
 
-enum EActorWeaponsIdx {
-	K_LVL_ACT_WEAPON_PRIMARY = 0,
-	K_LVL_ACT_WEAPON_SECONDARY = 1,
-	K_LVL_ACT_WEAPON_GEAR,
-	K_LVL_ACT_WEAPON_MELEE,
-
-	K_LVL_ACT_WEAPON_TEMPORARY,  //used for special abilities and temporary weapons (can't reload)
-	K_LVL_ACT_WEAPON_TEMPORARY_ALT,  //alt fire for temp
-
-	K_LVL_ACT_WEAPON_NO_WEAPON,  //used for empty weapons so we don't use NULL
-	///--- hardcoded ---
-	K_LVL_ACT_WEAPON_BREACH,	//default breach weapon used when breaching doors
-
-	K_LVL_ACT_WEAPONS_CNT
-};
-
 //iconurile afisate deasupra actorilor
 enum EActorIconTypes
 {

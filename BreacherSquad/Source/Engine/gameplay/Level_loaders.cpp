@@ -634,10 +634,10 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 			}
 		}
 		///--- FINISHED READING DATA ---
-
-		///--- RANDOM ENEMIES HERE ---
 		CStringHash shTemplateNameHash(templateNameW);
 		//add actor
+		//#TODO: #IMPORTANT: use SpawnActor to spawn all new actors
+		/*
 		CActor* nact = new CActor();
 
 		nact->ID = actID; //save actor ID
@@ -648,7 +648,10 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		{
 			ErrorBox(K_ERR_WARNING, L"LoadLevel::GetTemplateActor - invalid template name: %s", shTemplateNameHash.text);
 		}
-		InitActor(nact, acttempl, actPos);
+
+
+		//#TODO: use SpawnActor
+		//InitActor(nact, acttempl, actPos);
 
 		nact->fAngle = nact->fAngle_ini = fActorAngle;
 		//daca unghiul e setat din editor il las asa cum e, altfel il sincronizez cu lookdirXsign
@@ -693,10 +696,11 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 			{
 				ErrorBox(K_ERR_WARNING, L"[WARNING] LoadLevel: State %s not found on ID:%d", stateNameW, nact->ID);
 			}
-			SetActorAIState(nact, nState);
+			Actor_SetAIState(nact, nState);
 		}
 
 		m_arrActors.Add(nact);
+		*/
 	}
 
 	///--- incarca elementele speciale ---

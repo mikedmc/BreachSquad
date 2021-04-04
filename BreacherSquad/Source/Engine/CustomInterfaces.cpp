@@ -20,6 +20,7 @@ void CCustomInterfaceIGM::UpdateInterfaceForPlayer(int nPlayerOrdinal, D3DXVECTO
 {
 	return;
 
+	/*
 	if ((nPlayerOrdinal < 0) || (nPlayerOrdinal >= K_MAX_PLAYERS_CNT) || (playerAct[nPlayerOrdinal] == null))
 		return;
 	//skip update for dead players
@@ -74,6 +75,7 @@ void CCustomInterfaceIGM::UpdateInterfaceForPlayer(int nPlayerOrdinal, D3DXVECTO
 			}
 		}
 	}
+	*/
 }
 
 void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, int nPlayerOrdinal, RECTXYWH_F scrRect, bool bFlipped, int arrStrategic[], int arrStrategicNames[])
@@ -232,15 +234,15 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 
 	/// --- get weapon animation ---
 	//weapon HUD animation format (frames): weapon icon, large bullet bar placeholder, bullet bar cap, magazine bullet placeholder, many bullets bar, single bullet
-	CWeapon* wpn = playerAct[nPlayerOrdinal]->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY];
+	CWeapon* wpn = playerAct[nPlayerOrdinal]->pWeaponMain;
 
 	//#HACK: show weapon cooldown
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
 	if (UTGetAppClass().m_Settings.bShowInterfaceHelp)
 	{
-		if (playerAct[nPlayerOrdinal]->pCurrentWeapon != null)
+		if (playerAct[nPlayerOrdinal]->pWeaponMain != null)
 		{
-			CWeapon* weapon = playerAct[nPlayerOrdinal]->pCurrentWeapon;
+			CWeapon* weapon = playerAct[nPlayerOrdinal]->pWeaponMain;
 			float fPercent = weapon->fAimErrorFOV / weapon->WeaponTemplate.fAimErrorMaxFOV;
 
 			RECTXYWH rect(pos.x + 5, pos.y - 200, 60, 5);
@@ -255,9 +257,9 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 		return;
 	}
 
-	//variabile afisare taste folosite
+	// vars for keys icons on gui
 	/* offsets are relative to the draw pos: x y x y etc */
-	/* daca offsetul ramane pe 0 nu se deseneaza tasta pentru el */
+	/* when offset is 0 we don't paint the key */
 	int arr_offsets[50];
 	memset(arr_offsets, 0, sizeof(int) * 50);
 
@@ -273,6 +275,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 	arr_offsets[0] = facerect.w - 2 + butrectwpn.w / 2; arr_offsets[1] = -facerect.h - 5;
 
 	algnx += butrectwpn.w;
+	/*
 	///--- paint alt fire cooldown ---
 	//frames 0 si 1 sunt iconurile pentru alt fire, din animatia armei de alt fire
 	CWeapon* altwpn = playerAct[nPlayerOrdinal]->pSelectedWeapon[K_LVL_ACT_WEAPON_SECONDARY];
@@ -291,17 +294,6 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 			cliprect.h = (int)floor(cliprect.h * (1.0f - fCooldown));
 			spr.currentFrame = 1;
 			spr.paint(sprCol, &cliprect);
-
-			/*
-			//additive blink
-			if (altwpn->status == K_LVL_WPN_STATUS_READY)
-			{
-				AdditiveBlendingON(pDevice, pSprite);
-				spr.color = dwIconHoverCol;
-				spr.paint(sprCol, &cliprect);
-				AdditiveBlendingOFF(pDevice, pSprite);
-			}
-			*/
 
 			//set offset for second command
 			arr_offsets[2] = arr_offsets[0] + butrectwpn.w / 2 + 8; arr_offsets[3] = arr_offsets[1];
@@ -337,16 +329,6 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 				cliprect.h = (int)floor(cliprect.h * (1.0f - fCooldown));
 				spr.currentFrame = 1;
 				spr.paint(sprCol, &cliprect);
-				/*
-				//additive blink
-				if (gearwpn->status == K_LVL_WPN_STATUS_READY)
-				{
-					AdditiveBlendingON(pDevice, pSprite);
-					spr.color = dwIconHoverCol;
-					spr.paint(sprCol, &cliprect);
-					AdditiveBlendingOFF(pDevice, pSprite);
-				}
-				*/
 			}
 			//ammo left
 			if (gearwpn->ammoLeft >= 0)
@@ -375,7 +357,7 @@ void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3
 
 		}
 	}
-
+	*/
 	///--- paint ammo ---
 	algnx = pos.x + facerect.Right();
 	algny = pos.y - 15;

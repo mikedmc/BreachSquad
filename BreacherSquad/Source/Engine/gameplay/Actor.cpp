@@ -65,6 +65,25 @@ void CActor::SetAnimSet(int newAnimSet)
 	}
 }
 
+void CActor::AddWeapon(CWeapon* wpn, bool bEquip)
+{
+	arrWeapons.Add(wpn);
+	if (bEquip)
+	{
+		pWeaponMain = wpn;
+		AddWpnTemplate(pWeaponMain);
+	}
+}
+
+void CActor::EquipWeapon(int nWeaponIdx)
+{
+	if ((nWeaponIdx < 0) || (nWeaponIdx >= arrWeapons.GetSize()))
+		return;
+
+	pWeaponMain = arrWeapons[nWeaponIdx];
+	AddWpnTemplate(pWeaponMain);
+}
+
 void CActor::SetAngle(float fNewAngle)
 {
 	fAngle = fNewAngle;
@@ -93,13 +112,14 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 	return m_pAIcurrentState->m_arrBehaviors[m_nAIcurrentBehaviorIdx].nType;
 }
 
-CActor::CActor() :
-	m_pAIcurrentState(null), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nTookDamageFrames(0), nLastDamageTakenFromUID(0),
-	pCurrentWeapon(null), nSkinIdx(0), pClosestTouchable(nullptr), bAnimFlipX(false), eAnimAngle(EANG_S),
+CActor::CActor(Vec2 vPos, CActorTemplate* pActorTemplate, int nID) :
+	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nTookDamageFrames(0), nLastDamageTakenFromUID(0),
+	pWeaponMain(nullptr), nSkinIdx(0), pClosestTouchable(nullptr), bAnimFlipX(false), eAnimAngle(EANG_S),
 	eLastAnimSet(K_LVL_ACT_ANIM_EMPTY), nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
-	pSkelTemplate(null), pSkeleton(null)
+	pSkelTemplate(nullptr), pSkeleton(nullptr)
 {
+	ID = nID;
 	bAnimated = true;
 	nControllerInstanceID = -1;
 	vSpeedImpulse = Vec2(0.0f, 0.0f);
@@ -109,6 +129,23 @@ CActor::CActor() :
 	{
 		eLastAnim[kk] = K_SD_ANIM_EMPTY;
 	}
+
+	// init actor template data (loads files and spine skeletons)
+	InitFromTemplate(pActorTemplate);
+	
+	//#TODO: init bbox too from template
+	bbox_ini.Set(Vec2(-8.0f, -8.0f), Vec2(8.0f, 8.0f));
+	bbox = this->bbox_ini;
+	bbox_exported_ini = this->bbox_ini;
+	bbox_exported = this->bbox_exported_ini;
+
+	//clear AI input
+	AItimerDecision = K_LVL_AI_DECISION_INTERVAL;
+	m_AIcommands.Reset();
+	m_AIsensorInfo.Reset();
+
+	//update all relative data
+	SetPos(vPos);
 }
 
 CActor::~CActor()
@@ -116,6 +153,9 @@ CActor::~CActor()
 	// remove used skeleton instance
 	g_spineMgr.RemoveSkeletonInstance(this->pSkeleton);
 	this->pSkeleton = nullptr;
+
+	// release allocated weapons arsenal
+	SAFE_DELETE_GROWABLE_ARRAY(arrWeapons);
 }
 
 void CActor::SetPos(Vec2 newPos)
@@ -288,7 +328,7 @@ void CActorTemplate::AddGenericDataFromTemplate(CActorTemplate* pTemplate)
 }
 
 
-bool CActor::Init(CActorTemplate * pActorTemplate, Vec2 vSpawnPos)
+bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 {
 	if (pActorTemplate == NULL)
 	{
@@ -308,7 +348,6 @@ bool CActor::Init(CActorTemplate * pActorTemplate, Vec2 vSpawnPos)
 	}
 	this->eLastPlayedVerse = K_LVL_ACT_VERSE_EMPTY;
 
-	this->bOnLadder = false;
 	this->bCrouched = false;
 	this->nLastDamageTakenFromUID = 0;
 	this->nAnimSet = 0;
@@ -322,42 +361,16 @@ bool CActor::Init(CActorTemplate * pActorTemplate, Vec2 vSpawnPos)
 
 	this->fLife = this->actTemplate.fLife;
 
+	/*
 	if (!this->actTemplate.shWeaponDefault.IsEmpty())
 	{
 		//weapons[0].Init(this->actTemplate.shWeaponDefault.text, this);
 		weapons[0].Init();
 	}
-
-	/*
-	Weapon_Init(&this->weapons[K_LVL_ACT_WEAPON_SECONDARY], this->templateActor.weaponTypeAlt.text, actor);
-	Weapon_Init(&this->weapons[K_LVL_ACT_WEAPON_GEAR], this->templateActor.weaponTypeGear.text, actor);
-	Weapon_Init(&this->weapons[K_LVL_ACT_WEAPON_MELEE], this->templateActor.weaponTypeMelee.text, actor);
-	//set breach weapon
-	Weapon_Init(&this->weapons[K_LVL_ACT_WEAPON_BREACH], this->templateActor.weaponTypeBreach.text, actor);
-	//clear temp weapons
-	this->weapons[K_LVL_ACT_WEAPON_TEMPORARY].Init();
-	this->weapons[K_LVL_ACT_WEAPON_TEMPORARY_ALT].Init();
-	//clear no weapon weapon
-	this->weapons[K_LVL_ACT_WEAPON_NO_WEAPON].Init();
-
-	this->pCurrentWeapon = &this->weapons[K_LVL_ACT_WEAPON_PRIMARY];
-	//set selected weapons
-	this->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY] = &this->weapons[K_LVL_ACT_WEAPON_PRIMARY];
-	this->pSelectedWeapon[K_LVL_ACT_WEAPON_SECONDARY] = &this->weapons[K_LVL_ACT_WEAPON_SECONDARY];
-	this->pSelectedWeapon[K_LVL_ACT_WEAPON_GEAR] = &this->weapons[K_LVL_ACT_WEAPON_GEAR];
-	this->pSelectedWeapon[K_LVL_ACT_WEAPON_MELEE] = &this->weapons[K_LVL_ACT_WEAPON_MELEE];
-	this->pSelectedWeapon[K_LVL_ACT_WEAPON_BREACH] = &this->weapons[K_LVL_ACT_WEAPON_BREACH];
-	//others are null:
-	this->pSelectedWeapon[K_LVL_ACT_WEAPON_TEMPORARY] = null;
-	this->pSelectedWeapon[K_LVL_ACT_WEAPON_TEMPORARY_ALT] = null;
-	this->pSelectedWeapon[K_LVL_ACT_WEAPON_NO_WEAPON] = null;
 	*/
-	this->AddWpnTemplate(&this->weapons[0]);
 
-	this->pCurrentWeapon = null;
+	this->pWeaponMain = null;
 
-
-	//#TODO: all spine stuff should be handled in Init
 	// Load spine skeleton
 	WCHAR Path[MAX_PATH];
 	WCHAR wcsPath[MAX_PATH];
@@ -388,19 +401,8 @@ bool CActor::Init(CActorTemplate * pActorTemplate, Vec2 vSpawnPos)
 
 	//update backup template
 	this->actTemplate_ini = this->actTemplate;
-	//set position
-	this->pos = vSpawnPos;
 	// selected animset
 	this->SetAnimSet(0);
-
-	//init bbox too
-	this->bbox_ini.Set(Vec2(-8.0f, -8.0f), Vec2(8.0f, 8.0f));
-	this->bbox = this->bbox_ini;
-	this->bbox_exported_ini = this->bbox_ini;
-	this->bbox_exported = this->bbox_exported_ini;
-
-	//update all relative data
-	this->SetPos(this->pos);
 
 	return true;
 }
@@ -663,7 +665,7 @@ void CActor::PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse
 
 void CActor::EquipWpn(CWeapon * pWeapon)
 {
-	pCurrentWeapon = pWeapon;
+	pWeaponMain = pWeapon;
 	if (pWeapon != null)
 	{
 		AddWpnTemplate(pWeapon);
