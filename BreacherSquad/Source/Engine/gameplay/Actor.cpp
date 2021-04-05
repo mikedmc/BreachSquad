@@ -139,11 +139,6 @@ CActor::CActor(Vec2 vPos, CActorTemplate* pActorTemplate, int nID) :
 	bbox_exported_ini = this->bbox_ini;
 	bbox_exported = this->bbox_exported_ini;
 
-	//clear AI input
-	AItimerDecision = K_LVL_AI_DECISION_INTERVAL;
-	m_AIcommands.Reset();
-	m_AIsensorInfo.Reset();
-
 	//update all relative data
 	SetPos(vPos);
 }

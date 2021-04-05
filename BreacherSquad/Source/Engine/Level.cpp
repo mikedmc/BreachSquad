@@ -5,62 +5,6 @@
 //disable warning
 //#pragma warning(disable : 4706)  //assignment within conditional expression
 
-///--- AI STATES/FUNCTIONS ---
-//possible states - must be in editor/Data/behaviors.txt too
-static const CStringHash AI_states[] = {
-	///--- GENERIC FUNCTIONS ---
-	L"AI_FN_POS_ELLIPSE",
-	L"AI_FN_ANG_SIN_TIME",
-	L"AI_FN_ALPHA_SIN_TIME", //face alpha intre min si max in fn de sin(t + dt)
-	L"AI_FN_GET_TARGET_POS",
-	L"AI_FN_GET_TARGET_ANG", //ia unghiul targetului (relativ la cel actual al lui) si pastraza pozitia fata de originea lui
-	L"AI_FN_FOLLOW_TARGET_RAIL",
-	L"AI_FN_TOUCH_WHEN_SEE_PLAYER", //cand vede playerul in unghiul solid setat din params face touch la target
-	///--- LIGHTS ---
-	L"AI_FN_LIGHT_FLICKER1", 
-	L"AI_FN_LIGHT_ANG_CONE_XZ_TIME", //roteste directia luminii pe un con cu varful pe Y si baza pe XZ (doar luminile au directie 3D si doar cele IES o folosesc)
-	///--- TRIGGERS ---
-	L"AI_TRIGGER_IN_OUT", //executa script name pe intrare si pe iesire (face touch la target)
-	///--- PARTICLE SYSTEM ---
-	L"AI_PARTICLES_GENERATOR", //pentru generatoarele de particule
-	///--- COLLISION BOXES ---
-	L"AI_COLL_FOG_OF_WAR",	//pentru fog of war. Dispare cu alpha cand devine vizibila camera
-	L"AI_COLL_BREAKABLE_DOOR", //pentru collShapes care se sparg de la charge si shotgun. va seta automat animatia usii pe cea de distrugere
-	L"AI_COLL_BREAKABLE_WINDOW", //pentru collShapes care se sparg de la gloante. va seta automat frame-ul urmator al animatiei
-	L"AI_COLL_KILL_ACTORS", //kills actors inside of it
-	///--- PROPS ---
-	L"AI_ACTIVE_SWINGING_FRONTOBJ",	//interactioneaza cu grenada si se balanseaza
-	L"AI_ACTIVE_EXPLO_TRAP",	//capcana care explodeaza cand se intersecteaza bboxuul ei cu playerul
-	L"AI_ACTIVE_CHECKPOINT",	//AI special pentru checkpoints - verifica intersectia cu personajul si lanseaza script
-	L"AI_ACTIVE_TEAM_TELEPORTER_2FRAMES", //AI pentru usile de team teleport optional (pot intra toti sau doar cativa)
-	L"AI_ACTIVE_DOORFACE_AUTOCLOSE", //AI pentru usile din fundal care stau deschise cat timp AItimer1>0.0f (ca si TELEPORTER_2FRAMES)
-	L"AI_ACTIVE_DOOR_SECTION", //used for section doors (locked or unlocked)
-
-	L"AI_ACTIVE_AMMO_BOX",	//AI pentru ammo boxes
-	L"AI_ACTIVE_HEALTH_BOX",	//AI pentru ammo boxes
-	L"AI_ACTIVE_BOMB",		//AI pentru bombele ce trebuiesc dezactivate
-	L"AI_ACTIVE_ZOMBIE_SPAWNER", //AI for the zombie spawner
-	///--- ACTORS ---
-	//no ACTOR states (they have special AI class)
-};
-//Don't forget to add the state in AI_STATE enum too (level.h)
-
-//intoarce index stare AI enum in fn de nume string din editor sau STATE_UNDEFINED daca nu gaseste starea specificata
-int GetAIStateByNameHash(UINT32 stateHash)
-{
-	for (int kk = 0; kk < K_AI_STATES_CNT; kk++)
-	{
-		if (stateHash == AI_states[kk].textHash)
-			return kk;
-	}
-
-	if (stateHash != 0)
-	{
-		ErrorBox(K_ERR_WARNING, L"GetAIByStateHash::Unknown AI state!");
-	}
-
-	return K_AI_STATE_UNDEFINED;
-}
 
 CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvProjectileMomentum)
 {
@@ -1674,8 +1618,6 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 					//salvam cativa params generici
 					if (!behnode.attribute(L"bCanInterrupt").empty())
 						nbeh.bCanInterrupt = behnode.attribute(L"bCanInterrupt").as_bool();
-					if (!behnode.attribute(L"bDetectPlatforms").empty())
-						nbeh.bDetectPlatforms = behnode.attribute(L"bDetectPlatforms").as_bool();
 					if (!behnode.attribute(L"bIgnoreEvents").empty())
 						nbeh.bIgnoreEvents = behnode.attribute(L"bIgnoreEvents").as_bool();
 					if (!behnode.attribute(L"fBehaviorDuration").empty())
@@ -6375,7 +6317,7 @@ CAIEvent * CLevel::GetMostImportantAIEvent(CActor * callerActor, EAIEventType eT
 }
 
 
-void CLevel::SetAI(IActiveInterface * active, int AIstate, CVariantCollection * params, INT32 targetID)
+void CLevel::SetAI(IActiveInterface * active, EAIstate AIstate, CVariantCollection * params, INT32 targetID)
 {
 	if (active == null)
 		return;

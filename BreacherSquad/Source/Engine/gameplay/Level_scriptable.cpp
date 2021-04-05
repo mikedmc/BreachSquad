@@ -259,11 +259,11 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			CVariantComplex* vcAIname = instr->GetArgument(L"aiName");
 			CVariantComplex* vcTarget = instr->GetArgument(L"target");
 
-			int aistate = K_AI_STATE_UNDEFINED;
+			EAIstate aistate = K_AI_STATE_UNDEFINED;
 			if (vcAIname != null)
 			{
 				//AI STATE
-				int aistate = GetAIStateByNameHash(vcAIname->m_strArg.getHash());
+				EAIstate aistate = (EAIstate)GetListIndexByNameHash(vcAIname->m_strArg.getHash(), EAIstate_names, K_AI_STATES_CNT);
 				//it is ok if aistate becomes UNDEFINED because we use this instruction to erase the AI too
 			}
 			//AI TARGET

@@ -24,51 +24,6 @@
 #include "CFOVUtil.h"
 
 using namespace std;
-//this enum must be sincronizat with AI_states list (level.cpp)
-enum AI_STATE 
-{
-	K_AI_STATE_UNDEFINED = -1,
-
-	K_AI_STATE_FN_POS_ELLIPSE = 0,			//params: f_radX, f_radY, f_timeMul
-	K_AI_STATE_FN_ANG_SIN_TIME = 1,			//params: f_min, f_max, f_timeMul, f_timeAdd
-	K_AI_STATE_FN_ALPHA_SIN_TIME,			//params: f_min, f_max, f_timeMul, f_timeAdd
-	K_AI_STATE_FN_GET_TARGET_POS,			//params: none
-	K_AI_STATE_FN_GET_TARGET_ANG,			//params: none
-	K_AI_STATE_FN_FOLLOW_TARGET_RAIL,		//params: n_dir=-1/1, f_speedPPS, f_pointPauseSec, b_autoChangeDirection, b_looping
-	K_AI_STATE_FN_TOUCH_WHEN_SEE_PLAYER,	//params: f_angle, f_angleFOV, f_radius, f_cooldownSec
-	//lights
-	K_AI_STATE_FN_LIGHT_FLICKER1,		//params: f_timeMul, f_threshold
-	K_AI_STATE_FN_LIGHT_ANG_CONE_XZ_TIME,	//params: f_coneHeight, f_coneRadius, f_timeMul, f_timeAdd
-	//triggers
-	K_AI_STATE_TRIGGER_IN_OUT,			//params: b_triggerPlayer, b_triggerActor, s_onOutScript
-	//particle generators
-	K_AI_STATE_PARTICLES_GENERATOR,		//params: s_type, s_layer="RT, back, back_light, etc" - tipul generatorului de particule
-	//collision
-	K_AI_STATE_COLL_FOG_OF_WAR,			//no params
-	K_AI_STATE_COLL_BREAKABLE_DOOR,		//params: f_life-can be damaged by bullets, b_reinforced=1 only the SAW can break it
-	K_AI_STATE_COLL_BREAKABLE_WINDOW,	//params: f_life - daca specifici life inseamna ca se poate sparge cu gloante
-	K_AI_STATE_COLL_KILL_ACTORS,		//params: b_killPlayer, b_killOthers
-	///--- actives ---
-	K_AI_STATE_ACTIVE_SWINGING_FRONTOBJ,//no param - se balanseaza cand dai grenada langa ele
-	K_AI_STATE_ACTIVE_EXPLO_TRAP,		//no param
-	K_AI_STATE_ACTIVE_CHECKPOINT,		//param: n_isFirst(0/1) - default first spawn point
-	K_AI_STATE_ACTIVE_TEAM_TELEPORTER_2FRAMES, //param: f_SlowTimeDuration, b_EnterHiddenRoom, b_DontChangeFrames, f_teleportDuration, s_openSnd, s_closeSnd
-	K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE,	//param: s_openSnd, s_closeSnd, b_DontChangeFrames
-	K_AI_STATE_ACTIVE_DOOR_SECTION,			//param: n_locked, f_lockpickTime
-
-	K_AI_STATE_ACTIVE_AMMO_BOX,			//param: n_ammoLeft
-	K_AI_STATE_ACTIVE_HEALTH_BOX,		//param: n_healthLeft
-	K_AI_STATE_ACTIVE_BOMB,				//param: f_explodeTimerSec
-	K_AI_STATE_ACTIVE_ZOMBIE_SPAWNER,	//param: f_spawnFreq, n_maxSpawns
-	///--- ACTORS ---
-	//nu avem stari pentru actori - sunt tratate cu behaviors
-	//states no
-	K_AI_STATES_CNT
-};
-
-
-int GetAIStateByNameHash(UINT32 stateHash);
-
 
 
 enum ELevelState {
@@ -248,7 +203,7 @@ public:
 	void					UpdateAI_actor(CActor* actor, float dTime);
 	void					UpdateAI_collshape(CCollisionShape * colshape, float dTime);
 	//Seteaza AI si face toate setarile initiale din AI
-	void					SetAI(IActiveInterface * active, int AIstate, CVariantCollection * params, INT32 targetID = -1);
+	void					SetAI(IActiveInterface * active, EAIstate AIstate, CVariantCollection * params, INT32 targetID = -1);
 	//Suprascrie parametrii din AI sau adauga params noi
 	void					SetAIparams(IActiveInterface * active, CVariantCollection * params, bool bClearParams = false);
 	//gaseste cel mai apropiat inamic vizibil

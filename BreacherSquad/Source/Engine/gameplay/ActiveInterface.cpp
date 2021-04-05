@@ -7,8 +7,8 @@ IActiveInterface::IActiveInterface() :
 	ID(-1), targetID_ini(-1), bHidden(false), bSetHidden(false), bSkipRender(false), bAnimated(false),
 	fAngle(0.0f), fAngle_ini(0.0f), color(0xffffffff), color_ini(0xffffffff),
 	bTouching(false), nTouchingUID(0), fTouchTimer(0.0f), fTouchDuration(0.0f), fTouchTimerReset(0.0f), bStandsOut(false),
-	pTarget(null), bCanInteract(false), bHideInteractIcon(false), AIstate(-1), AItimerDecision(K_LVL_AI_DECISION_INTERVAL),
-	nRunningScriptUID(0), AItargetUID(0), fTimelineAI(0.0f), AItimerSurprise(0.0f),
+	pTarget(null), bCanInteract(false), bHideInteractIcon(false), AIstate(K_AI_STATE_UNDEFINED), AItimerDecision(K_LVL_AI_DECISION_INTERVAL),
+	nRunningScriptUID(0), AItargetUID(0), fTimelineAI(0.0f), 
 	AItimer1(0.0f), AItimer2(0.0f), AIfvar1(0.0f), AIfvar2(0.0f), AIfvar3(0.0f), AIvar1(0), AIvar2(0), AIvarBool1(true), AIvarBool2(true),
 	bPendingKill(false)
 {
@@ -50,9 +50,9 @@ void IActiveInterface::LoadLogic(FILE* fl)
 
 	OS_freadString(fl, strout);
 	if (strout[0] == 0) //empty
-		AIstate = -1; //undefined state
+		AIstate = K_AI_STATE_UNDEFINED;
 	else
-		AIstate = GetAIStateByNameHash(FastHash(strout));
+		AIstate = (EAIstate)GetListIndexByNameHash(FastHash(strout), EAIstate_names, K_AI_STATES_CNT);
 
 	int nAIparamsCnt = OS_freadByte(fl); //nr params
 	if (nAIparamsCnt > 0)

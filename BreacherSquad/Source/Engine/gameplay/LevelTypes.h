@@ -112,6 +112,90 @@ const CStringHash EMaterialTypeNames[] =
 ///--------------------------------------------------------------------------
 /// BEHAVIORS and AI STATES
 ///--------------------------------------------------------------------------
+
+//this enum must be sincronizat with AI_states list (level.cpp)
+enum EAIstate
+{
+	K_AI_STATE_UNDEFINED = -1,
+
+	K_AI_STATE_FN_POS_ELLIPSE = 0,			//params: f_radX, f_radY, f_timeMul
+	K_AI_STATE_FN_ANG_SIN_TIME = 1,			//params: f_min, f_max, f_timeMul, f_timeAdd
+	K_AI_STATE_FN_ALPHA_SIN_TIME,			//params: f_min, f_max, f_timeMul, f_timeAdd
+	K_AI_STATE_FN_GET_TARGET_POS,			//params: none
+	K_AI_STATE_FN_GET_TARGET_ANG,			//params: none
+	K_AI_STATE_FN_FOLLOW_TARGET_RAIL,		//params: n_dir=-1/1, f_speedPPS, f_pointPauseSec, b_autoChangeDirection, b_looping
+	K_AI_STATE_FN_TOUCH_WHEN_SEE_PLAYER,	//params: f_angle, f_angleFOV, f_radius, f_cooldownSec
+	//lights
+	K_AI_STATE_FN_LIGHT_FLICKER1,		//params: f_timeMul, f_threshold
+	K_AI_STATE_FN_LIGHT_ANG_CONE_XZ_TIME,	//params: f_coneHeight, f_coneRadius, f_timeMul, f_timeAdd
+	//triggers
+	K_AI_STATE_TRIGGER_IN_OUT,			//params: b_triggerPlayer, b_triggerActor, s_onOutScript
+	//particle generators
+	K_AI_STATE_PARTICLES_GENERATOR,		//params: s_type, s_layer="RT, back, back_light, etc" - tipul generatorului de particule
+	//collision
+	K_AI_STATE_COLL_FOG_OF_WAR,			//no params
+	K_AI_STATE_COLL_BREAKABLE_DOOR,		//params: f_life-can be damaged by bullets, b_reinforced=1 only the SAW can break it
+	K_AI_STATE_COLL_BREAKABLE_WINDOW,	//params: f_life - daca specifici life inseamna ca se poate sparge cu gloante
+	K_AI_STATE_COLL_KILL_ACTORS,		//params: b_killPlayer, b_killOthers
+	///--- actives ---
+	K_AI_STATE_ACTIVE_SWINGING_FRONTOBJ,//no param - se balanseaza cand dai grenada langa ele
+	K_AI_STATE_ACTIVE_EXPLO_TRAP,		//no param
+	K_AI_STATE_ACTIVE_CHECKPOINT,		//param: n_isFirst(0/1) - default first spawn point
+	K_AI_STATE_ACTIVE_TEAM_TELEPORTER_2FRAMES, //param: f_SlowTimeDuration, b_EnterHiddenRoom, b_DontChangeFrames, f_teleportDuration, s_openSnd, s_closeSnd
+	K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE,	//param: s_openSnd, s_closeSnd, b_DontChangeFrames
+	K_AI_STATE_ACTIVE_DOOR_SECTION,			//param: n_locked, f_lockpickTime
+
+	K_AI_STATE_ACTIVE_AMMO_BOX,			//param: n_ammoLeft
+	K_AI_STATE_ACTIVE_HEALTH_BOX,		//param: n_healthLeft
+	K_AI_STATE_ACTIVE_BOMB,				//param: f_explodeTimerSec
+	K_AI_STATE_ACTIVE_ZOMBIE_SPAWNER,	//param: f_spawnFreq, n_maxSpawns
+	///--- ACTORS ---
+	//nu avem stari pentru actori - sunt tratate cu behaviors
+	//states no
+	K_AI_STATES_CNT
+};
+
+
+///--- AI STATES/FUNCTIONS ---
+//possible states - must be in editor/Data/behaviors.txt too
+static const CStringHash EAIstate_names[] = {
+	///--- GENERIC FUNCTIONS ---
+	L"AI_FN_POS_ELLIPSE",
+	L"AI_FN_ANG_SIN_TIME",
+	L"AI_FN_ALPHA_SIN_TIME", //face alpha intre min si max in fn de sin(t + dt)
+	L"AI_FN_GET_TARGET_POS",
+	L"AI_FN_GET_TARGET_ANG", //ia unghiul targetului (relativ la cel actual al lui) si pastraza pozitia fata de originea lui
+	L"AI_FN_FOLLOW_TARGET_RAIL",
+	L"AI_FN_TOUCH_WHEN_SEE_PLAYER", //cand vede playerul in unghiul solid setat din params face touch la target
+	///--- LIGHTS ---
+	L"AI_FN_LIGHT_FLICKER1",
+	L"AI_FN_LIGHT_ANG_CONE_XZ_TIME", //roteste directia luminii pe un con cu varful pe Y si baza pe XZ (doar luminile au directie 3D si doar cele IES o folosesc)
+	///--- TRIGGERS ---
+	L"AI_TRIGGER_IN_OUT", //executa script name pe intrare si pe iesire (face touch la target)
+	///--- PARTICLE SYSTEM ---
+	L"AI_PARTICLES_GENERATOR", //pentru generatoarele de particule
+	///--- COLLISION BOXES ---
+	L"AI_COLL_FOG_OF_WAR",	//pentru fog of war. Dispare cu alpha cand devine vizibila camera
+	L"AI_COLL_BREAKABLE_DOOR", //pentru collShapes care se sparg de la charge si shotgun. va seta automat animatia usii pe cea de distrugere
+	L"AI_COLL_BREAKABLE_WINDOW", //pentru collShapes care se sparg de la gloante. va seta automat frame-ul urmator al animatiei
+	L"AI_COLL_KILL_ACTORS", //kills actors inside of it
+	///--- PROPS ---
+	L"AI_ACTIVE_SWINGING_FRONTOBJ",	//interactioneaza cu grenada si se balanseaza
+	L"AI_ACTIVE_EXPLO_TRAP",	//capcana care explodeaza cand se intersecteaza bboxuul ei cu playerul
+	L"AI_ACTIVE_CHECKPOINT",	//AI special pentru checkpoints - verifica intersectia cu personajul si lanseaza script
+	L"AI_ACTIVE_TEAM_TELEPORTER_2FRAMES", //AI pentru usile de team teleport optional (pot intra toti sau doar cativa)
+	L"AI_ACTIVE_DOORFACE_AUTOCLOSE", //AI pentru usile din fundal care stau deschise cat timp AItimer1>0.0f (ca si TELEPORTER_2FRAMES)
+	L"AI_ACTIVE_DOOR_SECTION", //used for section doors (locked or unlocked)
+
+	L"AI_ACTIVE_AMMO_BOX",	//AI pentru ammo boxes
+	L"AI_ACTIVE_HEALTH_BOX",	//AI pentru ammo boxes
+	L"AI_ACTIVE_BOMB",		//AI pentru bombele ce trebuiesc dezactivate
+	L"AI_ACTIVE_ZOMBIE_SPAWNER", //AI for the zombie spawner
+	///--- ACTORS ---
+	//no ACTOR states (they have special AI class)
+};
+//Don't forget to add the state in AI_STATE enum too (level.h)
+
 enum EAIBehaviorType
 {
 	AI_BEHAVIOR_EMPTY = -1,
@@ -221,19 +305,18 @@ const CStringHash EAIBehaviorTypeNames[] = {
 	L"AI_BEHAVIOR_DEAD",
 };
 
-//!!! CLASA CAIBehavior TREBUIE SA POATA FI COPIATA CA VALOARE (vezi initActor unde copiaza template actor in instanta actor)
+//!!! CAIBehavior needs to be copyable. CVariantCollection has copy constructor.
 class CAIBehavior
 {
 public:
 	EAIBehaviorType	nType;
-	bool			bCanInterrupt; //if false it keeps current behavior until finished. Doesn't check sensor info. Ai grija daca moare in timpul asta.
-	bool			bDetectPlatforms; //daca este setat tine cont de capetele platformelor ca sa se intoarca
-	bool			bIgnoreEvents;		//sa ignore eventurile AI (mai putin EVENT_DEAD)
-	float			fBehaviorDuration;	//cat timp dureaza starea, dupa care ii da "finished"; <0.0f means infinite
+	bool			bCanInterrupt;			// if false it keeps current behavior until finished. Doesn't check sensor info. Ai grija daca moare in timpul asta.
+	bool			bIgnoreEvents;			// ignores AI events (apart from EVENT_DEAD)
+	float			fBehaviorDuration;		// for timed states
 
 	CVariantCollection	m_vcolParams;
 
-	CAIBehavior() : nType(AI_BEHAVIOR_EMPTY), bCanInterrupt(true), bDetectPlatforms(true), bIgnoreEvents(false), fBehaviorDuration(-1.0f)
+	CAIBehavior() : nType(AI_BEHAVIOR_EMPTY), bCanInterrupt(true), bIgnoreEvents(false), fBehaviorDuration(-1.0f)
 	{
 		m_vcolParams.DeleteAll();
 	}
@@ -364,12 +447,12 @@ public:
 
 //TODO: de adaugat StateGroups cu probabilitati ca sa poti sa randomizezi AI (sa selecteze starea in fn de un random)
 
-//Template-ul de AI este cel incarcat din xml-ul de AI
+// AI template loaded from the AI xml
 class CAITemplate
 {
 public:
-	CGrowableArray<CAIState*> m_arrStates;  //starile din care selecteaza 
-	CGrowableArray<EAIEventType> m_arrIgnoredEvents;	//list of ignored events
+	CGrowableArray<CAIState*>		m_arrStates;  //starile din care selecteaza 
+	CGrowableArray<EAIEventType>	m_arrIgnoredEvents;	//list of ignored events
 	//CTOR/DTOR
 	~CAITemplate();
 	//Finds best State based on input event and random numbers generator for states probabilities

@@ -109,12 +109,9 @@ public:
 		//sensor memory
 		CAIEvent	m_AIlastEvent;		//eventul cel mai important, ultimul primit. Asta este memoria actorului, deci raman setate pentru o durata mai mare sau pana cand sunt suprascrise
 
-		CAISensorInfo() :
-			pTargetedActor(null), b_IsDead(false), m_lastInteractingActorUID(0),
-			m_bEnabled(true), fTargetOverlapX(0.0f), fTimeSinceHit(1000.0f)
+		CAISensorInfo()
 		{
-			m_AIlastEvent.Reset();
-			m_AIcurrentEvent.Reset();
+			Reset();
 		}
 
 		void Reset()
@@ -157,13 +154,9 @@ public:
 		//color command: !=0 means color command is active
 		DWORD				nColor; 
 
-		CAICommands() :
-			bRunning(false), bThrustX(false), nMoveDirX(0), nMoveDirY(0), bJump(false),
-			bCrouched(false), bClimb(false), nInteractKeyState(K_CM_BUTSTATE_NOTPRESSED), nColor(0),
-			eAttackCommand(K_LVL_ACT_ATTACK_IDLE), eAttackCommand_last(K_LVL_ACT_ATTACK_IDLE), nDeathCommand(K_LVL_ACT_DEATHCMD_NONE),
-			nIconType(K_LVL_ACT_ICON_NONE), fIconDuration(0.0f), eOverrideAnim(K_LVL_ACT_ANIM_EMPTY),
-			bThrust(false)
+		CAICommands()
 		{
+			Reset();
 		}
 
 		void Reset()
@@ -272,7 +265,7 @@ public:
 	eGenericState	nRolling; //0-ready, 1-rolling, 2-finished and waiting reset (direction key up)
 	CCollisionShape* pCover; //daca e diferit de null inseamna ca pe langa crouched e si covered
 	//CMiscObjectRail* pRail;		//pointer catre un rail atunci cand merge pe tiroliana
-	//bool		bInWater; //daca este in apa
+
 	float		fStunTimer; //daca e diferit de 0 personajul este stunned
 	int			nTookDamageFrames; //flag folosit pentru a desena frames aprinse cand lovesti inamic
 	UINT32		nLastDamageTakenFromUID;	//UID that gave actor last damage 

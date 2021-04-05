@@ -51,10 +51,9 @@ public: //logic
 	bool				bCanInteract;	//can interact with it?
 	bool				bHideInteractIcon;	//hide the icon
 
-	int					AIstate;		//state AI (AI_STATE ENUM)
+	EAIstate			AIstate;		//state AI (AI_STATE ENUM)
 	CVariantCollection	varAIparams;	//parametrii state-ului AI
 	float				AItimerDecision;//cand ajunge la 0 ia decizii
-	float				AItimerSurprise;//timer surprindere inamic
 	//diverse pt logica
 	UINT32				AItargetUID;	//enemy UID (not the one set from the editor!!!)
 	double				fTimelineAI;	//timeline local pt AI (folosit mai ales la animatii in fn de timp)
