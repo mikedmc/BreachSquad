@@ -1080,7 +1080,6 @@ HRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 			templ->fReloadTimePerUnit = primnode.attribute(L"fReloadTimePerUnit").as_float();	
 			templ->bResetFireRateOnTriggerUp = primnode.attribute(L"bCanResetFireRate").as_bool();
 			templ->bUsesMainWeaponAmmo = primnode.attribute(L"bUsesMainWeaponAmmo").as_bool();
-			templ->bAnimSync = primnode.attribute(L"bAnimSync").as_bool();
 			templ->bCanShootFromCrouch = primnode.attribute(L"bCanShootFromCrouch").as_bool();
 			templ->bCanShootFromAir = primnode.attribute(L"bCanShootFromAir").as_bool();
 			templ->bCanShootFromCover = primnode.attribute(L"bCanShootFromCover").as_bool();
@@ -4236,28 +4235,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//--- UPDATE ANIMATION ---
 	//get displacement from anim moves
 	Vec2 vAnimMove(0.0f, 0.0f);
-	actor->sprite.pos.x = actor->sprite.pos.y = 0.0f; //resetez pozitia ca oricum se suprascrie la final de update
 	UINT32 aframeFlag = 0; //flagul aframe-ului resetat
 	UINT32 aframeFlag_feet = 0; //flagul aframe-ului resetat
-	//update only if animated flag set
-	if (actor->bAnimated)
-	{
-		aframeFlag = actor->sprite.Update(&m_sprActors, dTime, true);
-		//animate feet if we have animation
-		if (actor->sprite_feet.animationIdx >= 0)
-		{
-			//slow down feet anim too if weapon slows us down
-			float fTimeAdv = dTime;
-			//if ((actor->nAttackStatus > K_LVL_ACT_ATTACK_RELOADING) && (actor->collisionFlags & K_DIRFLAG_DOWN))
-			//{
-			//	fTimeAdv = dTime * (1.0f - actor->pCurrentWeapon->WeaponTemplate.fShooterSpeedSlowingPercent);
-			//}
-
-			aframeFlag_feet = actor->sprite_feet.Update(&m_sprActors, fTimeAdv, false);
-		}
-	}
-	
-
 
 	///--- ACTOR CAPS ---
 	//--- find closest touchable ---
@@ -4517,11 +4496,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//waits animation to play out before exiting
 			case AI_BEHAVIOR_SHOW_ENEMY:
 			{
-				//seteaza comanda de override anim cu valoarea salvata in SetActorAIBehavior din params behavior
-				actor->m_AIcommands.eOverrideAnim = (EActorAnims)actor->AIvar1;
-				//conditii final (sfarsit animatie)
-				if (actor->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
-					bBehaviorFinished = true;
 			}
 			break;
 
@@ -4778,8 +4752,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				//seteaza comanda de override anim cu valoarea salvata in SetActorAIBehavior din params behavior
 				actor->m_AIcommands.eOverrideAnim = (EActorAnims)actor->AIvar1;
 				//conditii final (sfarsit animatie)
-				if (actor->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
-					bBehaviorFinished = true;
+				//if (actor->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
+					//bBehaviorFinished = true;
 				//modificare alpha daca e setat duration
 				if (actor->m_pAIcurrentState->m_arrBehaviors[actor->m_nAIcurrentBehaviorIdx].fBehaviorDuration > 0.0f)
 				{
@@ -5069,7 +5043,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	if (actor->nRolling == K_STATE_EXECUTING)
 	{
 		bool bCanceledByKeys = (actor->m_AIcommands.bThrustX == false) && (actor->m_AIcommands.bCrouched == false);
-		if ((bCanceledByKeys) || (actor->sprite.animStatus == ANIM_STATUS_FRAMELOCK) ||
+		if ((bCanceledByKeys) /*|| (actor->sprite.animStatus == ANIM_STATUS_FRAMELOCK)*/ ||
 			(actor->nAttackStatus != K_LVL_ACT_ATTACK_IDLE) || 
 			((actor->collisionFlags & K_DIRFLAG_DOWN) == 0))
 		{
@@ -5306,35 +5280,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		Weapon_Update(actor->arrWeapons[kk], dTime);
 	}
 
-	// anim synced weapons only shoot when anim ready
-	if (actor->pWeaponMain->WeaponTemplate.bAnimSync)
+	//check before ShootWeapon
+	if (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_IDLE)
 	{
-		if (actor->pWeaponMain->WeaponTemplate.shScript_OnFireALT.IsEmpty())
-		{
-			if ((actor->pWeaponMain->status != K_LVL_WPN_STATUS_READY) && (actor->m_AIcommands.eAttackCommand >= K_LVL_ACT_ATTACK_SHOOTING))
-				actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
-		}
-		else
-		{
-			//daca ai script il lanseaza si daca arma e pe empty dar daca nu ai script trage doar cand e arma gata
-			if ((actor->pWeaponMain->status == K_LVL_WPN_STATUS_NO_AMMO) && (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_SHOOTING_ALT))
-			{
-				actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_SHOOTING_ALT;
-			}
-			else if ((actor->pWeaponMain->status != K_LVL_WPN_STATUS_READY) && (actor->m_AIcommands.eAttackCommand >= K_LVL_ACT_ATTACK_SHOOTING))
-			{
-				actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
-			}
-		}
-	}
-	else //lightweight weapons (non sync), as soon as weapon is ready reset the status
-	{
-		//check before ShootWeapon
-		if (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_IDLE)
-		{
-			if(actor->pWeaponMain->status != K_LVL_WPN_STATUS_COOLING)
-				actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
-		}
+		if(actor->pWeaponMain->status != K_LVL_WPN_STATUS_COOLING)
+			actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
 	}
 
 
@@ -5433,64 +5383,17 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			bool bShootSymmetric = ((aframeFlag & K_LVL_ACTIVE_AFRAMEFLAG_ACTION_SYMMETRIC) != 0);
 
 			//can we shoot?
-			if (!actor->pWeaponMain->WeaponTemplate.bAnimSync)
-			{
-				Vec3 vShootDir;
-				vShootDir = Vec2ToVec3XY0(actor->m_AIcommands.vAimVec);
+			Vec3 vShootDir;
+			vShootDir = Vec2ToVec3XY0(actor->m_AIcommands.vAimVec);
 
-				//shoot without waiting for a flag (forward or back)
-				if (Weapon_Shoot(actor->pWeaponMain, vShootDir))
-					nWeaponShots++;
-
-				/*
-				if (bShootSymmetric)
-				{
-					//actor->pCurrentWeapon->fireRateTimer = 0.0f;
-					vShootDir.x *= -1.0f; //mirror shoot dir
-					if (ShootWeapon(actor->pCurrentWeapon, vShootDir))
-						nWeaponShots++;
-				}
-				*/
-			}
-			else //daca e sincronizata cu animatia trage cand ajunge pe frame de action
-			{
-				bool bActionSignal = (aframeFlag & (K_LVL_ACTIVE_AFRAMEFLAG_ACTION | K_LVL_ACTIVE_AFRAMEFLAG_ACTION_SYMMETRIC));
-				if (bActionSignal)
-				{
-					Vec3 vShootDir;
-					vShootDir = Vec2ToVec3XY0(actor->m_AIcommands.vAimVec);
-
-					if (bShoot)
-					{
-						if (Weapon_Shoot(actor->pWeaponMain, vShootDir))
-							nWeaponShots++;
-					}
-					if (bShootSymmetric)
-					{
-						//shoot
-						vShootDir.x *= -1.0f;
-						if (Weapon_Shoot(actor->pWeaponMain, vShootDir))
-							nWeaponShots++;
-					}
-				}
-			}
+			//shoot without waiting for a flag (forward or back)
+			if (Weapon_Shoot(actor->pWeaponMain, vShootDir))
+				nWeaponShots++;
 		}
 		else  //shoot script
 		{
-			if (!actor->pWeaponMain->WeaponTemplate.bAnimSync)
-			{
-				UTGetScriptManager().StartScript(dwShootScriptUID, actor->UID);
-				actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
-			}
-			else //daca e sincronizata cu animatia trage cand ajunge pe frame de action
-			{
-				bool bActionSignal = (aframeFlag & (K_LVL_ACTIVE_AFRAMEFLAG_ACTION | K_LVL_ACTIVE_AFRAMEFLAG_ACTION_SYMMETRIC));
-				if (bActionSignal)
-				{
-					UTGetScriptManager().StartScript(dwShootScriptUID, actor->UID);
-					actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
-				}
-			}
+			UTGetScriptManager().StartScript(dwShootScriptUID, actor->UID);
+			actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
 		}
 
 		//DK - some weapons share the same magazine
@@ -5509,32 +5412,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		CWeapon* pWpnToCheck = actor->pWeaponMain;
 
 		EnumWeaponStatus gunstat = pWpnToCheck->status;
-		//light weapons
-		if (!actor->pWeaponMain->WeaponTemplate.bAnimSync)
+
+		if ((gunstat == K_LVL_WPN_STATUS_NO_AMMO) || (gunstat == K_LVL_WPN_STATUS_BURST_END) || (gunstat == K_LVL_WPN_STATUS_JAMMED))
 		{
-			if ((gunstat == K_LVL_WPN_STATUS_NO_AMMO) || (gunstat == K_LVL_WPN_STATUS_BURST_END) || (gunstat == K_LVL_WPN_STATUS_JAMMED))
-			{
-				actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
-				bRunScriptOnEmpty = true;
-			}
-		}
-		else //synchronized weapons
-		{
-			//#HACK #TODO: ca sa poata trage de pe scara fara animatie
-			if (actor->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
-			{
-				actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
-				//daca nu am ammo anulez starea de shoot
-				if (gunstat == K_LVL_WPN_STATUS_NO_AMMO)
-				{
-					actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
-				}
-				//run script on empty weapon or after each shot if weapon has infinite ammo
-				if ((gunstat == K_LVL_WPN_STATUS_NO_AMMO) || ((pWpnToCheck->WeaponTemplate.nClipSize < 0) && (pWpnToCheck->ammoLeft <= 0)))
-				{
-					bRunScriptOnEmpty = true;
-				}
-			}
+			actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
+			bRunScriptOnEmpty = true;
 		}
 
 		///--- launch script when weapon runs out of ammo:
@@ -5930,12 +5812,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//#TODO: Speeds and accelerations should be treated here, after the collision detection
 		
 
-	//end phys
-
-	//set sprite pos
-	actor->sprite.pos = Vec2((int)ROUND_FLOAT(actor->pos.x), (int)ROUND_FLOAT(actor->pos.y));
-	actor->sprite_feet.pos = actor->sprite.pos;
-
 	//only update it if set
 	if (actor->m_sprOverheadIcon.animationIdx >= 0)
 	{
@@ -5958,9 +5834,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			fAlpha *= 0.6f;
 		dwCol = D3DCOLOR_COLORALPHA(0xffffffff, fAlpha);
 	}
-
-	actor->sprite.color = dwCol;
-	actor->sprite_feet.color = dwCol;
 
 	// call internal actor update at the end
 	actor->Update(dTime);

@@ -279,7 +279,6 @@ public:
 
 	IActiveInterface*	pClosestTouchable; //cel mai apropiat activ cu can interact
 
-	CSprite		sprite, sprite_feet;
 	CSprite		m_sprOverheadIcon;	//icon shown when interacting with things (doors, objects) or in other circumstances too
 
 	// Sets a Spine skin and returns true if successfull

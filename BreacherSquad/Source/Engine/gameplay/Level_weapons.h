@@ -36,7 +36,6 @@ public:
 	bool			bUsesMainWeaponAmmo;		//for alt fire weapons: este doar un mod de tragere care foloseste aceeasi munitie ca si arma principala (aimed shot, double tap, etc)
 
 	int				nBulletChamberSize;		//daca are bullet chamber sau nu (0 sau 1) - se aduna la bullets left. Nu poti seta chamber size mai mare
-	bool			bAnimSync;				//poate trage doar pe animatii non looping, pe frame cu action flag
 	bool			bCanShootFromCrouch, bCanShootFromAir, bCanShootFromLadders, bCanShootFromCover;
 	int				nDropShellFrame;		//frame number of shell from SHELLS animation (-1 - no shell)
 	int				nBurstSize;				//cate gloante trage intr-un burst (0 pt full automatic)
@@ -66,7 +65,7 @@ public:
 		//generic data
 		fSpeedPenaltyPercent(0.0f),
 		//other data
-		nBulletsPerShot(5), bAnimSync(false),
+		nBulletsPerShot(5), 
 		fFireRateWait(0.0f), fMuzzleLightSize(0.0f), nClipSize(10),
 		fReloadTimePerUnit(1.0f), nReloadUnitSize(1),
 		fAimErrorMaxFOV(0.0f), fAimErrorAddPerShot(0.0f), fAimErrorCooldownPerSecond(1.0f), fSpreadFOV(0.0f), fAimErrorMulPerShot(1.0f),
