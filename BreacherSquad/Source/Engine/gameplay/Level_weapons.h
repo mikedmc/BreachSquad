@@ -1,5 +1,14 @@
 #pragma once
 
+enum EWeaponType {
+	K_WPN_UNKNOWN = -1,
+	K_WPN_PRIMARY = 0,
+	K_WPN_ALT,
+	K_WPN_GEAR,
+
+	K_WPNS_COUNT
+};
+
 ///--------------------------------------------------------------------------
 ///--- weapon class ---
 ///--------------------------------------------------------------------------
@@ -8,12 +17,17 @@ class CWeaponTemplate
 {
 public:
 	CStringHash		name;
+	EWeaponType		eType;
 	//generic data:
 	int				nHUD_AnimIdx;		//animatie INGAME HUD pentru grafica armei (vezi detalii frames in CCustomInterfaceIGM) sau -1 pt empty
 	int				nHUD_AnimIdxALT;	//animatie INGAME HUD when shown as ALT weapon (painted just as small icon)
 	int				nMuzzleFlashAnim;	//animatie muzzle flash sau -1 pt empty
 	CStringHash		shTemplateOverwrite; //name of themplate that the weapon overwrites over the character template
 	float			fSpeedPenaltyPercent;	//what percent of total movement speed is taken by this weapon
+	CStringHash		shScript_OnFire;		//called when shooting a weapon. If not set it just shoots the weapon.
+	CStringHash		shScript_OnFireALT;		//called when shooting ALT mode for weapon. If not set it just shoots the ALT weapon.
+	CStringHash		shScript_OnEmpty;		//called when weapon is empty
+
 	//fire modes data:
 	CBulletTemplate	bulletTemplate;		//datele glontului tras de arma curenta
 	int				nBulletsPerShot;	//nr de gloante trase pt un ammo
@@ -36,7 +50,7 @@ public:
 	bool			bUsesMainWeaponAmmo;		//for alt fire weapons: este doar un mod de tragere care foloseste aceeasi munitie ca si arma principala (aimed shot, double tap, etc)
 
 	int				nBulletChamberSize;		//daca are bullet chamber sau nu (0 sau 1) - se aduna la bullets left. Nu poti seta chamber size mai mare
-	bool			bCanShootFromCrouch, bCanShootFromAir, bCanShootFromLadders, bCanShootFromCover;
+	bool			bCanShootFromCrouch, bCanShootFromCover;
 	int				nDropShellFrame;		//frame number of shell from SHELLS animation (-1 - no shell)
 	int				nBurstSize;				//cate gloante trage intr-un burst (0 pt full automatic)
 	float			fBurstCooldown;			//dupa cat timp de la burst poate trage din nou
@@ -45,14 +59,8 @@ public:
 	float			fMuzzleLightSize;		//size of lighting effect when shooting
 	bool			bHasLaserSight;			//daca are laser sight
 	float			fShooterSpeedSlowingPercent; //procentul cu care scade viteza tragatorului daca se misca in timp ce trage
-	//TODO: camera recoil se va face diferit
-	float			fCameraRecoil;			//recul camera
 	float			fSoundRadius;			//cat de departe se aude?
 	bool			bPassive;				//arma pasiva, nu se foloseste ca si arma normala, se citesc doar proprietatile
-
-	CStringHash		shScript_OnFire;		//called when shooting a weapon. If not set it just shoots the weapon.
-	CStringHash		shScript_OnFireALT;		//called when shooting ALT mode for weapon. If not set it just shoots the ALT weapon.
-	CStringHash		shScript_OnEmpty;		//called when weapon is empty
 
 	//sounds - indexuri de sunete
 	int		sndidxShoot, sndidxReload, sndidxEmpty;
@@ -62,27 +70,19 @@ public:
 	EActorSoundVerse	sndActorVerse;
 
 	CWeaponTemplate() :
-		//generic data
-		fSpeedPenaltyPercent(0.0f),
+		eType(K_WPN_UNKNOWN), fSpeedPenaltyPercent(0.0f),
 		//other data
 		nBulletsPerShot(5), 
 		fFireRateWait(0.0f), fMuzzleLightSize(0.0f), nClipSize(10),
 		fReloadTimePerUnit(1.0f), nReloadUnitSize(1),
 		fAimErrorMaxFOV(0.0f), fAimErrorAddPerShot(0.0f), fAimErrorCooldownPerSecond(1.0f), fSpreadFOV(0.0f), fAimErrorMulPerShot(1.0f),
-		bCanShootFromCrouch(true), bCanShootFromAir(false), bCanShootFromLadders(false), bCanShootFromCover(false), nDropShellFrame(-1),
+		bCanShootFromCrouch(true), bCanShootFromCover(false), nDropShellFrame(-1),
 		nBurstSize(0), bResetFireRateOnTriggerUp(false), bUsesMainWeaponAmmo(false), fShooterSpeedSlowingPercent(0.0f), nBulletChamberSize(0),
 		sndidxShoot(-1), sndidxReload(-1), sndidxEmpty(-1), sndidxShoot2(-1), sndidxReload2(-1), sndidxEmpty2(-1),
 		fJammedDuration(0.0f), fSoundRadius(128.0f), fBurstCooldown(0.0f), bHasLaserSight(false), bPassive(false),
 		nHUD_AnimIdx(-1), nHUD_AnimIdxALT(-1), nMuzzleFlashAnim(-1), fAimFOV(0.0f),
 		sndActorVerse(K_LVL_ACT_VERSE_EMPTY)
 	{
-		fCameraRecoil = 4.0f;
-		name.Reset();
-		shTemplateOverwrite.Reset();
-
-		shScript_OnEmpty.Reset();
-		shScript_OnFire.Reset();
-		shScript_OnFireALT.Reset();
 	}
 };
 
@@ -123,7 +123,6 @@ struct CWeaponPerk {
 class CWeapon
 {
 public:
-	//#TODO #MAYBE:sa am un array de templates pentru modurile de tragere sau poate va fi in template-ul armei.
 	CWeaponTemplate WeaponTemplate;
 public:
 	EnumWeaponStatus		status;					//status arma: ready, reloading

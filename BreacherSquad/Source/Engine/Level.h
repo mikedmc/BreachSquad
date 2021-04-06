@@ -120,7 +120,7 @@ public:
 	CWeaponTemplate*		GetTemplateWeapon(WCHAR * templateName);
 	CWeaponTemplate*		GetTemplateWeapon(DWORD templateNameHash);
 	CExplosionTemplate*		GetTemplateExplosion(UINT32 templateNameHash);
-	HRESULT					LoadWeaponTemplates(WCHAR * xmlPath);
+	OPRESULT				LoadWeaponTemplates(WCHAR * xmlPath);
 	// Creates a weapon and returns pointer to it (does not deallocate)
 	CWeapon*				Weapon_Create(WCHAR* weaponTemplateName, CActor* pParent);
 

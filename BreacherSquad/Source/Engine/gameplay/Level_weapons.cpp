@@ -228,13 +228,15 @@ bool CLevel::Weapon_CanShoot(CWeapon * weapon)
 	//no weapon or empty weapon?
 	if ((weapon == null) || (weapon->WeaponTemplate.name.IsEmpty()))
 		return false;
-
+	/*
+	//#TODO: add more checkups or send this param to the AI input so he knows about it
 	CActor* actor = weapon->pOwner;
 	//shooting from the air?
 	if ((!weapon->WeaponTemplate.bCanShootFromAir) && (actor != null) && ((actor->collisionFlags & K_DIRFLAG_DOWN) == 0))
 	{
 		return false;
 	}
+	*/
 
 	return true;
 }
@@ -399,3 +401,268 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 	return true;
 }
 
+OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
+{
+	HRESULT hr = S_OK;
+
+	pugi::xml_document doc;
+	if (!doc.load_file(xmlPath))
+	{
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Unable to load Weapon Templates XML:%s\n", xmlPath);
+	}
+
+	//load explosion templates
+	SAFE_DELETE_GROWABLE_ARRAY(m_arrTemplatesExplosion);
+	pugi::xml_node rootnodeexplo = doc.root().child(L"WEAPONRY").child(L"ExplosionTemplates");
+	for (pugi::xml_node bnode = rootnodeexplo.first_child(); bnode; bnode = bnode.next_sibling())
+	{
+		CExplosionTemplate* templ = new CExplosionTemplate();
+		templ->cDoT.Set(CDamageOverTime::K_LVL_DoT_NONE);
+		//name
+		const WCHAR* bType = bnode.name();
+		templ->name.Init(bType);
+
+		templ->fDamage = bnode.attribute(L"fDamage").as_float();
+		templ->fDamageRadius = bnode.attribute(L"fDamageRadius").as_float();
+		templ->fStunDuration = bnode.attribute(L"fStunDuration").as_float();
+		templ->fStunRadius = bnode.attribute(L"fStunRadius").as_float();
+		templ->fSoundRadius = bnode.attribute(L"fSoundRadius").as_float();
+		templ->nShrapnelCnt = bnode.attribute(L"nShrapnelCnt").as_int();
+		templ->nNapalmCnt = bnode.attribute(L"nNapalmCnt").as_int();
+		templ->fMaxImpulse = bnode.attribute(L"fMaxImpulse").as_float();
+		if (!bnode.attribute(L"nArmorPiercingRating").empty())
+			templ->nArmorPiercingRating = bnode.attribute(L"nArmorPiercingRating").as_int();
+		if (!bnode.attribute(L"fDamageObjectsMultiplier").empty())
+			templ->fDamageObjectsMultiplier = bnode.attribute(L"fDamageObjectsMultiplier").as_float();
+		//excluded class 
+		templ->eIgnoreActorClass = K_LVL_ACT_CLASS_ANY;
+		if (!bnode.attribute(L"sIgnoredClass").empty())
+			templ->eIgnoreActorClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sIgnoredClass").value(), EActorClassNames, EActorClass::K_LVL_ACT_CLASSES_COUNT);
+
+		//damage over time
+		templ->cDoT.Set(CDamageOverTime::K_LVL_DoT_NONE);
+		templ->fDoTRadius = 0.0f;
+		if (!bnode.attribute(L"sDoTType").empty())
+		{
+			templ->cDoT.eType = (CDamageOverTime::EDoTType)GetListIndexByName(bnode.attribute(L"sDoTType").value(), EDoTTypeNames, CDamageOverTime::K_LVL_DoT_COUNT);
+			//get radius
+			templ->fDoTRadius = bnode.attribute(L"fDoTRadius").as_float();
+			//get duration
+			templ->cDoT.fDuration = bnode.attribute(L"fDoTDuration").as_float();
+			//get damage per sec
+			templ->cDoT.fDamagePerSec = bnode.attribute(L"fDoTDamagePerSec").as_float();
+			//excluded class 
+			templ->cDoT.eExcludedActClass = K_LVL_ACT_CLASS_ANY;
+			if (!bnode.attribute(L"sDoTIgnoredClass").empty())
+				templ->cDoT.eExcludedActClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sDoTIgnoredClass").value(), EActorClassNames, EActorClass::K_LVL_ACT_CLASSES_COUNT);
+			if (!bnode.attribute(L"sDoTClassFilter").empty())
+				templ->cDoT.eFilteredActClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sDoTClassFilter").value(), EActorClassNames, EActorClass::K_LVL_ACT_CLASSES_COUNT);
+		}
+
+		m_arrTemplatesExplosion.Add(templ);
+	}
+	//load weapon templates
+	SAFE_DELETE_GROWABLE_ARRAY(m_arrTemplatesWeapon);
+
+	pugi::xml_node rootnode = doc.root().child(L"WEAPONRY").child(L"WeaponTemplates");
+	for (pugi::xml_node bnode = rootnode.first_child(); bnode; bnode = bnode.next_sibling())
+	{
+		CWeaponTemplate* templ = new CWeaponTemplate();
+		//name
+		const WCHAR* bType = bnode.name();
+		templ->name.Init(bType);
+
+		//load generic weapon data
+		if (!bnode.attribute(L"nType").empty())
+			templ->eType = (EWeaponType)bnode.attribute(L"nType").as_int();
+		templ->nHUD_AnimIdx = -1;
+		if (!bnode.attribute(L"sHUDanimName").empty())
+			templ->nHUD_AnimIdx = m_sprInterface.GetAnimationIdxByName(bnode.attribute(L"sHUDanimName").value());
+		templ->nHUD_AnimIdxALT = -1;
+		if (!bnode.attribute(L"sHUDanimNameIcon").empty())
+			templ->nHUD_AnimIdxALT = m_sprInterface.GetAnimationIdxByName(bnode.attribute(L"sHUDanimNameIcon").value());
+		if (!bnode.attribute(L"fSpeedPenaltyPercent").empty())
+			templ->fSpeedPenaltyPercent = bnode.attribute(L"fSpeedPenaltyPercent").as_float();
+		if (!bnode.attribute(L"bPassive").empty())
+			templ->bPassive = bnode.attribute(L"bPassive").as_bool();
+
+		//muzzle flash anim
+		templ->nMuzzleFlashAnim = -1;
+		if (!bnode.attribute(L"sMuzzleFlashAnim").empty())
+			templ->nMuzzleFlashAnim = m_sprActors.GetAnimationIdxByName(bnode.attribute(L"sMuzzleFlashAnim").value());
+		//template overwrite sTemplateOverwrite - overwrites the actor default template (Adds to it)
+		if (!bnode.attribute(L"sTemplateOverwrite").empty())
+		{
+			templ->shTemplateOverwrite.Init(bnode.attribute(L"sTemplateOverwrite").value());
+		}
+		//weapon scripts
+		if (!bnode.attribute(L"sScript_OnFire").empty())
+		{
+			templ->shScript_OnFire.Init(bnode.attribute(L"sScript_OnFire").value());
+		}
+		if (!bnode.attribute(L"sScript_OnFireALT").empty())
+		{
+			templ->shScript_OnFireALT.Init(bnode.attribute(L"sScript_OnFireALT").value());
+		}
+		if (!bnode.attribute(L"sScript_OnEmpty").empty())
+		{
+			templ->shScript_OnEmpty.Init(bnode.attribute(L"sScript_OnEmpty").value());
+		}
+
+		//load primary mode
+		pugi::xml_node primnode = bnode.child(L"PRIMARY");
+		if (!primnode.empty())
+		{
+			///--- bullet data ---
+			//strings
+			templ->bulletTemplate.nType = K_LVL_BULLET_UNKNOWN;
+			if (!primnode.attribute(L"sBulletType").empty())
+			{
+				templ->bulletTemplate.nType = (EBulletType)GetListIndexByName(primnode.attribute(L"sBulletType").value(), EBulletTypeNames, K_LVL_BULLETS_COUNT);
+			}
+			//#TODO: bullet  group should be loaded from template
+			templ->bulletTemplate.nGroup = K_LVL_BULLGROUP_BULLETS;
+			//bullet explosion template hash (at the end of bullet life)
+			templ->bulletTemplate.nExploTemplateHash = 0;
+			if (!primnode.attribute(L"sBulletExploTemplate").empty())
+			{
+				templ->bulletTemplate.nExploTemplateHash = FastHash(primnode.attribute(L"sBulletExploTemplate").value());
+			}
+			//override bullet class
+			templ->bulletTemplate.eClass = K_LVL_ACT_CLASS_ANY;
+			if (!primnode.attribute(L"sBulletClass").empty())
+			{
+				templ->bulletTemplate.eClass = (EActorClass)GetListIndexByName(primnode.attribute(L"sBulletClass").value(), EActorClassNames, K_LVL_ACT_CLASSES_COUNT);
+			}
+
+			templ->bulletTemplate.fDamage = primnode.attribute(L"fBulletDamage").as_float();
+			templ->bulletTemplate.fDamageLossPPx = primnode.attribute(L"fBulletDamageLossPPx").as_float();
+			templ->bulletTemplate.fLife = primnode.attribute(L"fBulletLife").as_float();
+			templ->bulletTemplate.fStunDuration = primnode.attribute(L"fBulletStunDuration").as_float();
+			templ->bulletTemplate.fSpeed_ini = primnode.attribute(L"fBulletSpeed").as_float();
+			templ->bulletTemplate.nArmorPiercingRating = primnode.attribute(L"nArmorPiercingRating").as_int();
+			templ->bulletTemplate.fDamageObjects = primnode.attribute(L"fBulletDamageObjects").as_float();
+			//bullet momentul (minimum not zero)
+			templ->bulletTemplate.fMomentum = primnode.attribute(L"fBulletMomentum").as_float();
+			if (templ->bulletTemplate.fMomentum == 0.0f)
+				templ->bulletTemplate.fMomentum = 0.1f;
+			//defaults
+			templ->bulletTemplate.fSelfDamageMultiplier = 1.0f;
+			if (!primnode.attribute(L"fBulletSelfDamageMultiplier").empty())
+				templ->bulletTemplate.fSelfDamageMultiplier = primnode.attribute(L"fBulletSelfDamageMultiplier").as_float();
+			templ->bulletTemplate.fCriticalHitChance = 0.0f;
+			if (!primnode.attribute(L"fBulletCriticalChance").empty())
+				templ->bulletTemplate.fCriticalHitChance = primnode.attribute(L"fBulletCriticalChance").as_float();
+			//bullet flags
+			templ->bulletTemplate.nFlags = K_LVL_BULLET_FLAG_NONE;
+			if (templ->bulletTemplate.fDamageObjects > 0.0f)
+				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_BREAKS_DOORS;
+			if (primnode.attribute(L"bBulletIgnoreArmor").as_bool())
+				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_IGNORE_ARMOR;
+			if (primnode.attribute(L"bBulletIgnoreCover").as_bool())
+				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_IGNORE_COVER;
+			if (primnode.attribute(L"bBulletDieOnImpact").as_bool())
+				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_DIE_ON_IMPACT;
+			if (primnode.attribute(L"bBulletCanSplat").as_bool())
+				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_CAN_SPLAT;
+			if (primnode.attribute(L"bBulletDirectional").as_bool())
+				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_DIRECTIONAL;
+			///--- weapon data ---
+			//calculam timpul intre gloante din fire rate per second
+			templ->fFireRateWait = primnode.attribute(L"fFireRatePerSec").as_float();
+			templ->fFireRateWait = 1.0f / templ->fFireRateWait;
+
+			//other constants
+			templ->nBulletsPerShot = primnode.attribute(L"nBulletsPerShot").as_int();
+			templ->fSpreadFOV = primnode.attribute(L"fSpreadFOV").as_float();
+			templ->fAimFOV = primnode.attribute(L"fAimFOV").as_float();
+			templ->fAimErrorMaxFOV = primnode.attribute(L"fAimErrorMaxFOV").as_float();
+			templ->fAimErrorAddPerShot = primnode.attribute(L"fAimErrorAddPerShot").as_float();
+			templ->fAimErrorCooldownPerSecond = primnode.attribute(L"fAimErrorCooldownPerSec").as_float();
+			templ->nClipSize = primnode.attribute(L"nClipSize").as_int();
+			templ->nReloadUnitSize = primnode.attribute(L"nReloadUnitSize").as_int();
+			templ->fReloadTimePerUnit = primnode.attribute(L"fReloadTimePerUnit").as_float();
+			templ->bResetFireRateOnTriggerUp = primnode.attribute(L"bCanResetFireRate").as_bool();
+			templ->bUsesMainWeaponAmmo = primnode.attribute(L"bUsesMainWeaponAmmo").as_bool();
+			templ->bCanShootFromCrouch = primnode.attribute(L"bCanShootFromCrouch").as_bool();
+			templ->bCanShootFromCover = primnode.attribute(L"bCanShootFromCover").as_bool();
+			templ->nBurstSize = primnode.attribute(L"nBurstSize").as_int();
+			templ->fBurstCooldown = primnode.attribute(L"fBurstCooldown").as_float();
+			templ->fMuzzleLightSize = primnode.attribute(L"fMuzzleLightSize").as_float();
+			templ->bHasLaserSight = primnode.attribute(L"bHasLaserSight").as_bool();
+			templ->fJammedDuration = primnode.attribute(L"fJammedDuration").as_float();
+			templ->fSoundRadius = primnode.attribute(L"fSoundRadius").as_float();
+			//rectificate
+			if (!primnode.attribute(L"fAimErrorMulPerShot").empty())
+				templ->fAimErrorMulPerShot = primnode.attribute(L"fAimErrorMulPerShot").as_float();
+			if (!primnode.attribute(L"fShooterSpeedSlowingPercent").empty())
+				templ->fShooterSpeedSlowingPercent = primnode.attribute(L"fShooterSpeedSlowingPercent").as_float();
+			if (!primnode.attribute(L"nDropShellFrame").empty())
+				templ->nDropShellFrame = primnode.attribute(L"nDropShellFrame").as_int();
+
+			templ->nBulletChamberSize = 0;
+			if (!primnode.attribute(L"bBulletChamber").empty())
+				templ->nBulletChamberSize = (primnode.attribute(L"bBulletChamber").as_bool() == true) ? 1 : 0;
+
+			//actor verses for the bullet
+			if (!primnode.attribute(L"sActorShootVerse").empty())
+				templ->sndActorVerse = (EActorSoundVerse)GetListIndexByName(primnode.attribute(L"sActorShootVerse").value(), EActorSoundVerseNames, EActorSoundVerse::K_LVL_ACT_VERSES_COUNT);
+
+			//sounds
+			/*
+			if(!primnode.attribute(L"sSndShoot").empty())
+				templ->sndidxShoot = UTGetSoundManager().getSndIdxW(primnode.attribute(L"sSndShoot").value());
+			if (!primnode.attribute(L"sSndReload").empty())
+				templ->sndidxReload = UTGetSoundManager().getSndIdxW(primnode.attribute(L"sSndReload").value());
+			if (!primnode.attribute(L"sSndEmpty").empty())
+				templ->sndidxEmpty = UTGetSoundManager().getSndIdxW(primnode.attribute(L"sSndEmpty").value());
+			//alternative sounds
+			templ->sndidxShoot2 = templ->sndidxShoot;
+			if (!primnode.attribute(L"sSndShoot2").empty())
+				templ->sndidxShoot2 = UTGetSoundManager().getSndIdxW(primnode.attribute(L"sSndShoot2").value());
+			templ->sndidxReload2 = templ->sndidxReload;
+			if (!primnode.attribute(L"sSndReload2").empty())
+				templ->sndidxReload2 = UTGetSoundManager().getSndIdxW(primnode.attribute(L"sSndReload2").value());
+			templ->sndidxEmpty2 = templ->sndidxEmpty;
+			if (!primnode.attribute(L"sSndEmpty2").empty())
+				templ->sndidxEmpty2 = UTGetSoundManager().getSndIdxW(primnode.attribute(L"sSndEmpty2").value());
+				*/
+		}
+		else
+		{
+			ErrorBox(K_ERR_WARNING, L"PRIMARY weapon mode not found in template!");
+		}
+
+		m_arrTemplatesWeapon.Add(templ);
+	}
+
+	return K_OP_OK;
+}
+
+CWeapon* CLevel::Weapon_Create(WCHAR* weaponTemplateName, CActor* pParent)
+{
+	CWeaponTemplate* wTempl = GetTemplateWeapon(weaponTemplateName);
+
+	if (wTempl == nullptr)
+		return nullptr;
+
+	CWeapon* pWeapon = new CWeapon();
+	// set owner
+	pWeapon->pOwner = pParent;
+	// copy data to local weapon template as we need it later on
+	pWeapon->WeaponTemplate = *wTempl;
+	// signal valid weapon
+	pWeapon->status = K_LVL_WPN_STATUS_READY;
+	pWeapon->ammoLeft = pWeapon->WeaponTemplate.nClipSize + pWeapon->WeaponTemplate.nBulletChamberSize;
+	// make sure infinite ammo is infinite
+	if (pWeapon->WeaponTemplate.nClipSize < 0)
+		pWeapon->ammoLeft = -1;
+	if (wTempl->nMuzzleFlashAnim >= 0)
+	{
+		pWeapon->m_sprMuzzleFlash.Init(wTempl->nMuzzleFlashAnim, 0, 0);
+		// make sure it isn't painted
+		pWeapon->m_sprMuzzleFlash.animStatus = ANIM_STATUS_FRAMELOCK;
+	}
+
+	return pWeapon;
+}
