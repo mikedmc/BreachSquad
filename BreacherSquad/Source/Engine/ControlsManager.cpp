@@ -4380,7 +4380,7 @@ void CControlsManager::Update(float dTime)
 		{
 			CAABB targetrect;
 			targetrect.Set(lay->controls[lay->nFocusedControlIdx]->bbox);
-			AABB_MorphInto_quadratic(&lay->m_focusRect, &targetrect, 20.0f * dTime, 60.0f * dTime);
+			AABB::MorphInto_Quadratic(&lay->m_focusRect, &targetrect, 20.0f * dTime, 60.0f * dTime);
 		}
 	}
 

@@ -56,13 +56,13 @@ void CLevel::BuildVisibilityLists()
 		}
 		//get a 2 screen area around each player's last pos (could be smaller, yes)
 		collisionAreaAABBs[kk].Set(s_vLastPlayerPos[kk] - camaabb.vSize, s_vLastPlayerPos[kk] + camaabb.vSize);
-		AABB_KeepInside(collisionAreaAABBs[kk], lvlAABB);
+		AABB::KeepInside(collisionAreaAABBs[kk], lvlAABB);
 		//double that area to be sure (needed sometimes)
 		collisionAreaAABBs_extended[kk].Set(s_vLastPlayerPos[kk] - camaabb.vSize * 2.0f, s_vLastPlayerPos[kk] + camaabb.vSize * 2.0f);
-		AABB_KeepInside(collisionAreaAABBs_extended[kk], lvlAABB);
+		AABB::KeepInside(collisionAreaAABBs_extended[kk], lvlAABB);
 		//a larger area for events activation and such (slightly smaller area)
 		actorsNearbyAABBs[kk].Set(s_vLastPlayerPos[kk] - camaabb.vHalfSize * 1.5f, s_vLastPlayerPos[kk] + camaabb.vHalfSize * 1.5f);
-		AABB_KeepInside(actorsNearbyAABBs[kk], lvlAABB);
+		AABB::KeepInside(actorsNearbyAABBs[kk], lvlAABB);
 
 		//filter props area
 		propsNearbyAABBs[kk] = actorsNearbyAABBs[kk];
@@ -107,7 +107,7 @@ void CLevel::BuildVisibilityLists()
 						}
 						else
 						{
-							lightsCommonAABB = AABB_Union(lightsCommonAABB, bbox_max);
+							lightsCommonAABB = AABB::Union(lightsCommonAABB, bbox_max);
 						}
 					}
 				}

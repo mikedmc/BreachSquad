@@ -68,6 +68,9 @@ public:
 	float			fArmor;		
 	float			fSpeedMove;
 
+	CAABB			aabb;
+	float			fHeight;
+	float			fShootHeight;
 	CStringHash		shWeaponDefault;
 
 	CActorTemplate();

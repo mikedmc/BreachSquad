@@ -162,7 +162,11 @@ bool CAABB::IntersectsCircle(Vec2 center, float radius)
 
 }
 
-CAABB AABB_Lerp(CAABB &a, CAABB &b, float fFactor)
+///----------------------------------------------------------------------------------
+/// AABB namespace functions
+///----------------------------------------------------------------------------------
+
+CAABB AABB::Lerp(CAABB &a, CAABB &b, float fFactor)
 {
 	float fac = LIMIT(fFactor, 0.0f, 1.0f);
 	float invfac = 1.0f - fac;
@@ -172,7 +176,7 @@ CAABB AABB_Lerp(CAABB &a, CAABB &b, float fFactor)
 	return CAABB(vmin, vmax);
 }
 
-bool AABB_Intersection(CAABB & a, CAABB & b, CAABB & retVal)
+bool AABB::Intersection(CAABB & a, CAABB & b, CAABB & retVal)
 {
 	Vec2 vMax, vMin;
 	vMin.x = max(a.vMin.x, b.vMin.x);
@@ -187,7 +191,7 @@ bool AABB_Intersection(CAABB & a, CAABB & b, CAABB & retVal)
 	return true;
 }
 
-CAABB AABB_Union(CAABB &a, CAABB &b)
+CAABB AABB::Union(CAABB &a, CAABB &b)
 {
 	Vec2 vMax, vMin;
 	vMin.x = min(a.vMin.x, b.vMin.x);
@@ -198,7 +202,7 @@ CAABB AABB_Union(CAABB &a, CAABB &b)
 	return CAABB(vMin, vMax);
 }
 
-CAABB AABB_FromPoints(Vec2 * vecArr, int vecCnt)
+CAABB AABB::FromPoints(Vec2 * vecArr, int vecCnt)
 {
 	CAABB retAABB;
 	if ((vecArr == NULL) || (vecCnt == 0))
@@ -218,7 +222,7 @@ CAABB AABB_FromPoints(Vec2 * vecArr, int vecCnt)
 	return retAABB;
 }
 
-CAABB AABB_FromPoints(Vec3 * vecArr, int vecCnt)
+CAABB AABB::FromPoints(Vec3 * vecArr, int vecCnt)
 {
 	CAABB retAABB;
 	if ((vecArr == NULL) || (vecCnt == 0))
@@ -238,7 +242,7 @@ CAABB AABB_FromPoints(Vec3 * vecArr, int vecCnt)
 	return retAABB;
 }
 
-bool AABB_KeepInside(CAABB & boxSource, CAABB & boxDest)
+bool AABB::KeepInside(CAABB & boxSource, CAABB & boxDest)
 {
 	//can't fit
 	if ((boxSource.vSize.x > boxDest.vSize.x) || (boxSource.vSize.y > boxDest.vSize.y))
@@ -257,7 +261,7 @@ bool AABB_KeepInside(CAABB & boxSource, CAABB & boxDest)
 	return true;
 }
 
-bool AABB_Segment_Intersection(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint)
+bool AABB::Segment_Intersection(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint)
 {
 	//calculeaza termeni segment
 	Vec2 dir = end - start;
@@ -303,7 +307,7 @@ bool AABB_Segment_Intersection(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * ret
 	return true;
 }
 
-bool AABB_Segment_IntersectionEx(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint, float &fRetT)
+bool AABB::Segment_IntersectionEx(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint, float &fRetT)
 {
 	//calculeaza termeni segment
 	Vec2 dir = end - start;
@@ -353,7 +357,7 @@ bool AABB_Segment_IntersectionEx(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * r
 	return true;
 }
 
-bool AABB_Segment_Intersection_NoHeads(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint)
+bool AABB::Segment_Intersection_NoHeads(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint)
 {
 	//calculeaza termeni segment
 	Vec2 dir = end - start;
@@ -402,7 +406,7 @@ bool AABB_Segment_Intersection_NoHeads(Vec2 & start, Vec2 & end, CAABB & box, Ve
 	return true;
 }
 
-CAABB* AABB_Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CAABB * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint, Vec2 * retNormal)
+CAABB* AABB::Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CAABB * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint, Vec2 * retNormal)
 {
 	//verificari initiale
 	assert(arrBoxes != NULL);
@@ -490,7 +494,7 @@ CAABB* AABB_Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CAABB * arrBoxes[
 	return retBox;
 }
 
-CAABB AABB_GetMinkowskiDifference(CAABB &a, CAABB &b)
+CAABB AABB::GetMinkowskiDifference(CAABB &a, CAABB &b)
 {
 	CAABB retaabb;
 
@@ -504,7 +508,7 @@ CAABB AABB_GetMinkowskiDifference(CAABB &a, CAABB &b)
 	return CAABB(topleft, bottomright);
 }
 
-void AABB_MorphInto_linear(CAABB *source, CAABB *target, float fSpeed)
+void AABB::MorphInto_Linear(CAABB *source, CAABB *target, float fSpeed)
 {
 	if ((source == null) || (target == null))
 		return;
@@ -541,7 +545,7 @@ void AABB_MorphInto_linear(CAABB *source, CAABB *target, float fSpeed)
 	source->Set(source->vMin, source->vMax);
 }
 
-void AABB_MorphInto_quadratic(CAABB *source, CAABB *target, float fDistMultiplier, float fMinSpeed)
+void AABB::MorphInto_Quadratic(CAABB *source, CAABB *target, float fDistMultiplier, float fMinSpeed)
 {
 	if ((source == null) || (target == null))
 		return;
@@ -579,7 +583,7 @@ void AABB_MorphInto_quadratic(CAABB *source, CAABB *target, float fDistMultiplie
 
 }
 
-Vec2 AABB_GetRandomPointInBox(CAABB &a)
+Vec2 AABB::GetRandomPointInBox(CAABB &a)
 {
 	return Vec2(a.vMin.x + randfloat(a.vSize.x), a.vMin.y + randfloat(a.vSize.y));
 }

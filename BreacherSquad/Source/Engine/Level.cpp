@@ -1966,7 +1966,7 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 				// ambiental light only influence the area where they reside, have the bbox the size of the area so we clip to camera rect
 				// use BBOX_INI because bbox gets moved to light position
 				CAABB realbb; 
-				AABB_Intersection(camAABB, nl->bbox_ini, realbb);
+				AABB::Intersection(camAABB, nl->bbox_ini, realbb);
 				if (realbb.GetArea() <= 0.0f)
 				{
 					nl->m_nLightMeshIdx = -1;
@@ -2089,7 +2089,7 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 		{
 			CCollisionShape * col = m_visibleList.logic_colShapesSpecial.m_pData[kk];
 			CAABB wbb; //water bbox
-			if (AABB_Intersection(col->bbox, camAABB, wbb))
+			if (AABB::Intersection(col->bbox, camAABB, wbb))
 			{
 				Vec2 texoff = col->bbox.vMin - wbb.vMin;
 				//save water plys in a sigle mesh, clipped to screen rect
@@ -2137,7 +2137,7 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 		{
 			CCollisionShape * col = m_visibleList.logic_colShapesSpecial.m_pData[kk];
 			CAABB wbb; //bbox
-			if (AABB_Intersection(col->bbox, camAABB, wbb))
+			if (AABB::Intersection(col->bbox, camAABB, wbb))
 			{
 				//scriu VS-ul final
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
@@ -2556,7 +2556,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 						float dirx = SIGN(cvar->m_asFloat);
 						for (int ll = 0; ll < 20; ll++)
 						{
-							Vec2 ppos = AABB_GetRandomPointInBox(colshape->bbox);
+							Vec2 ppos = AABB::GetRandomPointInBox(colshape->bbox);
 							g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLASS_SHARDS, false, randint(5), &ppos, &g_vecGravityOld, &Vec2(dirx * (60.0f + randfloat(60.0f)), -40.0f + randfloatsgn(50.0f)), 0.3f + randfloat(0.2f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 						}
 						//sound
@@ -2594,7 +2594,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 					//generate particles
 					for (int ll = 0; ll < 30; ll++)
 					{
-						Vec2 ppos = AABB_GetRandomPointInBox(colshape->bbox);
+						Vec2 ppos = AABB::GetRandomPointInBox(colshape->bbox);
 						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_WOODEN_SPLINTERS, false, randint(6), &ppos, &g_vecGravityOld, &Vec2(dirx * (100.0f + randfloat(60.0f)), -40.0f + randfloatsgn(50.0f)), 0.3f + randfloat(0.2f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 					}
 					//Adauga events de zgomot dincolo de usa
@@ -3947,7 +3947,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				continue;
 			//aici verificam cu bboxul setat in editor
 			CAABB retAABB;
-			if (AABB_Intersection(actor->bbox, activ->bbox_exported, retAABB))
+			if (AABB::Intersection(actor->bbox, activ->bbox_exported, retAABB))
 			{
 				//save low priority toucher if interact icon is hidden
 				if (activ->bHideInteractIcon)
@@ -5176,7 +5176,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						}
 						for (int ll = 0; ll < 6; ll++)
 						{
-							AddDoofer(K_DOOFER_MEAT, AABB_GetRandomPointInBox(genbox), &Vec2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravityOld, nSubType);
+							AddDoofer(K_DOOFER_MEAT, AABB::GetRandomPointInBox(genbox), &Vec2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravityOld, nSubType);
 						}
 						//goes straight down to stain the floor
 						AddDoofer(K_DOOFER_MEAT, actor->GetPosHeart(), &Vec2(200.0f, 50.0f), &g_vecGravityOld, nSubType);
@@ -5188,7 +5188,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					{
 						for (int ll = 0; ll < 2; ll++)
 						{
-							AddDoofer(K_DOOFER_MEAT, AABB_GetRandomPointInBox(genbox), &Vec2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravityOld);
+							AddDoofer(K_DOOFER_MEAT, AABB::GetRandomPointInBox(genbox), &Vec2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravityOld);
 						}
 						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &actor->pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM);
 					}
@@ -5290,7 +5290,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		srcbox = actor->bbox_ini; srcbox.Move(actor->pos);
 		destbox = actor->bbox_ini; destbox.Move(actor->pos + vNextMove);
 		// box unions to check all possible collisions
-		CAABB boxUnion = AABB_Union(destbox, srcbox);
+		CAABB boxUnion = AABB::Union(destbox, srcbox);
 		// bbox union in tile coords, including every touched tile
 		RECTXYXY boxUnionTiles(floor(boxUnion.vMin.x / K_TILE_SIZE_F), floor(boxUnion.vMin.y / K_TILE_SIZE_F),
 			ceil(boxUnion.vMax.x / K_TILE_SIZE_F), ceil(boxUnion.vMax.y / K_TILE_SIZE_F));
@@ -5438,7 +5438,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					newboxsrc.Move(actor->pos);
 					CAABB newboxdest = newboxsrc;
 					newboxdest.Move(vNextMove);
-					CAABB newBoundary = AABB_Union(newboxsrc, newboxdest);
+					CAABB newBoundary = AABB::Union(newboxsrc, newboxdest);
 
 					// call and implement this if you need tile sized boxes to enter tile wide holes
 					//this.fixEqualSizedHoleCollision(hit, potential, time, collisionStack);
@@ -5643,7 +5643,7 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 			
 			CAABB smokeAABB;
 			smokeAABB.Set(vBulPos.x - K_TILE_SIZE, vBulPos.y - 4 * K_TILE_SIZE, vBulPos.x + K_TILE_SIZE, vBulPos.y + K_TILE_SIZE);
-			if (AABB_Segment_Intersection(sourceActor->GetPosHeart(), enemy->GetPosHeart(), smokeAABB))
+			if (AABB::Segment_Intersection(sourceActor->GetPosHeart(), enemy->GetPosHeart(), smokeAABB))
 			{
 				bObscured = true;
 				break;
@@ -8979,7 +8979,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 				Vec2 vpos = Vec2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
 				CAABB localAABB = camAABB;
 				localAABB.Inflate(-K_TILE_SIZE + fabs(3.0f * sin(fLocalTimeline * 4.0f)), -K_TILE_SIZE + fabs(3.0f * sin(fLocalTimeline * 4.0f)));
-				if (AABB_Segment_Intersection(vpos, camAABB.vCenter, localAABB, &vpos))
+				if (AABB::Segment_Intersection(vpos, camAABB.vCenter, localAABB, &vpos))
 				{
 					float fAng = HALF_PI + UTMath::GetVectorAngle(camAABB.vCenter - vpos);
 					Mat matrt;
@@ -9688,7 +9688,7 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 		CAABB retbb;
 		CAABB* chkbb = &retbb;
 		// clipped check (looks better with longer occluders):
-		if (AABB_Intersection(bbox, m_visibleList.visible_colShapesLights.m_pData[kk]->bbox, retbb))
+		if (AABB::Intersection(bbox, m_visibleList.visible_colShapesLights.m_pData[kk]->bbox, retbb))
 #else
 		// if we want the whole bbox:
 		CAABB* chkbb = &m_visibleList.visible_colShapesLights.m_pData[kk]->bbox;

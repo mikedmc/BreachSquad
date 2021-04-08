@@ -1414,7 +1414,7 @@ void CParticlesManager::UpdatePartEmitters(float dTime, RECTXYWH_F screenRect)
 		D3DXVECTOR2 gpos(0.0f, 0.0f);
 		if (generatePart)
 		{
-			gpos = AABB_GetRandomPointInBox(npe->bbox);
+			gpos = AABB::GetRandomPointInBox(npe->bbox);
 			if ((!npe->bGenerateOutsideScreen) && (!PointInRect(gpos, screenRect)))
 				generatePart = false;
 		}

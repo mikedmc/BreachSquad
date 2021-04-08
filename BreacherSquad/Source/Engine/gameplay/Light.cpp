@@ -84,7 +84,7 @@ void CLight::UpdateInternalData(CSpriteCollection* pLightsSprCol)
 			Vec2 vmoveproj = Vec3ProjVec2(vmove);
 			highRect.Move(vmoveproj);
 			lowRect.Move(-vmoveproj);
-			CAABB unionAABB = AABB_Union(lowRect, highRect);
+			CAABB unionAABB = AABB::Union(lowRect, highRect);
 			//clockwise
 			lCorners[0] = Vec3(unionAABB.vMin.x, unionAABB.vMin.y, 0.0f);
 			lCorners[1] = Vec3(unionAABB.vMax.x, unionAABB.vMin.y, 0.0f);

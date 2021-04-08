@@ -932,7 +932,7 @@ void CPlayerSelScr::Update(float dTime)
 		if ((playsel->aabbCursor.vSize.x <= 0.0f) || (playsel->aabbCursor.vSize.y <= 0.0f))
 			playsel->aabbCursor = aabbCursorTarget;
 		//morph to target cursor pos
-		AABB_MorphInto_quadratic(&playsel->aabbCursor, &aabbCursorTarget, 20.0f * dTime, 60.0f * dTime);
+		AABB::MorphInto_Quadratic(&playsel->aabbCursor, &aabbCursorTarget, 20.0f * dTime, 60.0f * dTime);
 
 		//play verse on changing class
 		playsel->fVerseReadyTimer += dTime;

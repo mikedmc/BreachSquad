@@ -602,7 +602,7 @@ void CMainMenu::Update(float dTime)
 					selaabb_from.Set(m_rectSel);
 					selaabb_to.Set(m_rectSelTarget);
 
-					AABB_MorphInto_quadratic(&selaabb_from, &selaabb_to, 20.0f * dTime, 60.0f * dTime);
+					AABB::MorphInto_Quadratic(&selaabb_from, &selaabb_to, 20.0f * dTime, 60.0f * dTime);
 
 					m_rectSel.Set(selaabb_from.vMin.x, selaabb_from.vMin.y, selaabb_from.vSize.x, selaabb_from.vSize.y);
 				}
@@ -877,7 +877,7 @@ void CMainMenu::Update(float dTime)
 			selaabb_from.Set(m_rectSel);
 			selaabb_to.Set(m_rectSelTarget);
 
-			AABB_MorphInto_quadratic(&selaabb_from, &selaabb_to, 20.0f * dTime, 60.0f * dTime);
+			AABB::MorphInto_Quadratic(&selaabb_from, &selaabb_to, 20.0f * dTime, 60.0f * dTime);
 
 			m_rectSel.Set(selaabb_from.vMin.x, selaabb_from.vMin.y, selaabb_from.vSize.x, selaabb_from.vSize.y);
 		}
@@ -1066,7 +1066,7 @@ void CMainMenu::Update(float dTime)
 			selaabb_from.Set(m_rectSel);
 			selaabb_to.Set(m_rectSelTarget);
 
-			AABB_MorphInto_quadratic(&selaabb_from, &selaabb_to, 20.0f * dTime, 60.0f * dTime);
+			AABB::MorphInto_Quadratic(&selaabb_from, &selaabb_to, 20.0f * dTime, 60.0f * dTime);
 
 			m_rectSel.Set(selaabb_from.vMin.x, selaabb_from.vMin.y, selaabb_from.vSize.x, selaabb_from.vSize.y);
 		}
@@ -1371,7 +1371,7 @@ void CMainMenu::Update(float dTime)
 			CAABB selaabb_from, selaabb_to;
 			selaabb_from.Set(m_rectSel);
 			selaabb_to.Set(m_rectSelTarget);
-			AABB_MorphInto_quadratic(&selaabb_from, &selaabb_to, 20.0f * dTime, 60.0f * dTime);
+			AABB::MorphInto_Quadratic(&selaabb_from, &selaabb_to, 20.0f * dTime, 60.0f * dTime);
 
 			m_rectSel.Set(selaabb_from.vMin.x, selaabb_from.vMin.y, selaabb_from.vSize.x, selaabb_from.vSize.y);
 		}
@@ -1619,7 +1619,7 @@ void CMainMenu::Update(float dTime)
 			CAABB selaabb_from, selaabb_to;
 			selaabb_from.Set(m_rectSel);
 			selaabb_to.Set(m_rectSelTarget);
-			AABB_MorphInto_quadratic(&selaabb_from, &selaabb_to, 20.0f * dTime, 60.0f * dTime);
+			AABB::MorphInto_Quadratic(&selaabb_from, &selaabb_to, 20.0f * dTime, 60.0f * dTime);
 
 			m_rectSel.Set(selaabb_from.vMin.x, selaabb_from.vMin.y, selaabb_from.vSize.x, selaabb_from.vSize.y);
 		}
