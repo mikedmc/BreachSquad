@@ -211,8 +211,6 @@ public:
 	// Finds closest visible actor of specified name (inside visibility radius)
 	// @fMaxDistance - if greater than 0 then it overrides seeDistance
 	CActor*					GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTargetTemplateName, float fMaxDistance = 0.0f);
-	// Finds the closest cover box from the level collision boxes list or null if none in range
-	CCollisionShape*		GetClosestCover(Vec2 vPos, float fMaxDistance = 0.0f);
 	//AI events (radius < 0.0f means infinite)
 	void					AddAIEvent(EAIEventType eventType, UINT32 ownerUID, int ownerClass, Vec2 vPos, float radius, float duration = 0.6f, UINT32 targetUID = 0);
 	// Deletes a targeted event

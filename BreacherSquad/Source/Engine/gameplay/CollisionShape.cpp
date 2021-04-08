@@ -122,3 +122,60 @@ bool CCollisionShape::RemoveTouchingActor(CActor* actor)
 {
 	return true;
 }
+
+
+///----------------------------------------------------------------------------------
+/// LEVEL CollShape related methods
+///----------------------------------------------------------------------------------
+
+
+CCollisionShape * CLevel::GetCollisionShapeAt(Vec2 point, int collisionType)
+{
+	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
+	{
+		if ((collisionType != -1) && (m_arrColShapes[kk]->type != collisionType))
+			continue;
+		if (m_arrColShapes[kk]->bbox.PointIn(point))
+			return m_arrColShapes[kk];
+	}
+	return null;
+}
+
+CCollisionShape* CLevel::GetCollisionShapeByUID(UINT32 nUID)
+{
+	if (nUID == 0)
+		return null;
+
+	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
+	{
+		if (m_arrColShapes[kk]->UID == nUID)
+			return m_arrColShapes[kk];
+	}
+	return null;
+}
+
+CCollisionShape* CLevel::SpawnCollisionShape(int nType, Vec2 vMin, Vec2 vMax)
+{
+	CCollisionShape* pCol = new CCollisionShape();
+	pCol->ID = GenerateNextID();
+	pCol->type = nType;
+	pCol->bbox_ini.Set_Corrected(vMin, vMax);
+	pCol->bbox = pCol->bbox_ini;
+	pCol->pos = pCol->bbox_ini.vCenter;
+	pCol->collFlags = K_DIRFLAG_NONE;
+
+	pCol->castShadows = false;
+
+	switch (nType)
+	{
+		case K_LVL_COLL_TYPE_SOLID:
+			pCol->collFlags = K_DIRFLAG_ALL;
+			break;
+		default:
+			pCol->collFlags = K_DIRFLAG_NONE;
+			break;
+	}
+
+	m_arrColShapes.Add(pCol);
+	return pCol;
+}

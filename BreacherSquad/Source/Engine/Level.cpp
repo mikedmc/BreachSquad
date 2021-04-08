@@ -1158,6 +1158,14 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 
 	//ACTOR_DATA node
 	pugi::xml_node actnode = rootnode.child(L"ACTOR_DATA");
+	// bbox and heights
+	float xmin = actnode.attribute(L"bboxMinX").as_float();
+	float ymin = actnode.attribute(L"bboxMinY").as_float();
+	float xmax = actnode.attribute(L"bboxMaxX").as_float();
+	float ymax = actnode.attribute(L"bboxMaxY").as_float();
+	templ->bbox.Set(xmin, ymin, xmax, ymax);
+	templ->fHeight = actnode.attribute(L"nHeight").as_float();
+	templ->fShootH = actnode.attribute(L"nShootHeight").as_float();
 
 	if (!actnode.attribute(L"fSpeedMove").empty()) { templ->fSpeedMove = actnode.attribute(L"fSpeedMove").as_float(); }
 	//life
@@ -2075,9 +2083,8 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 	//inchid meshul
 	m_bufferedPainter.EndMesh();
 
-	//#TODO: should try not clamping water and FOW rects to screen maybe it fixes the texture/pshader issue on some cards
 
-	//3. poligoane apa
+	///--- water ---
 	m_bufferedPainter.BeginMesh(m_waterMeshIdx);
 	//salvez date textura apa	
 	float waterTexScale = 2.0f;
@@ -3109,10 +3116,6 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 		//set animations from new template
 		pActor->actTemplate.AddGenericDataFromTemplate(updateTemplate);
 		pActor->actTemplate.OverwriteAnimsFromTemplate(updateTemplate);
-
-		//reset animations (make sure they get set)
-		pActor->eLastAnimSet = K_LVL_ACT_ANIM_EMPTY;
-		pActor->eLastAnimSet_feet = K_LVL_ACT_ANIM_EMPTY;
 	}
 	//set the heart and gun vectors again
 	//LoadActorBBoxAndPoints(pActor, K_LVL_ACT_ANIM_REF_POSE, 0);
@@ -3403,6 +3406,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 		break;
 		case AI_BEHAVIOR_PLAY_ANIM:
 		{
+			/*
 			//salvez identificatorul animatiei
 			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName(L"sAnimIdentifier");
 			if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
@@ -3422,6 +3426,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			}
 			//save actual alpha
 			actor->AIfvar2 = D3DCOLOR_GETFALPHA(actor->color);
+			*/
 		}
 		break;
 		case AI_BEHAVIOR_RUN_SCRIPT:
@@ -4443,8 +4448,10 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						}
 					}
 				}
+
 				//seteaza comanda de override anim cu valoarea salvata in SetActorAIBehavior din params behavior
-				actor->m_AIcommands.eOverrideAnim = (EActorAnims)actor->AIvar1;
+				//actor->m_AIcommands.eOverrideAnim = (EActorAnims)actor->AIvar1;
+
 				//conditii final (sfarsit animatie)
 				//if (actor->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
 					//bBehaviorFinished = true;
@@ -5225,42 +5232,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		//remove death command after execution
 		actor->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_EMPTY;
 	}
-	//------------------------------------------------------------------------------------------
-	//	ELEMENTE GENERICE GAMEPLAY (arme, jump, ladder etc)
-	//------------------------------------------------------------------------------------------
-
-	///--- set animations ---
-	//SetActorAnimationOnce(actor, K_LVL_ACT_ANIM_IDLE, K_LVL_ACT_ANIM_FEET_IDLE);
-	///--- anim sounds ---
-	if (aframeFlag & K_LVL_ACTIVE_AFRAMEFLAG_SOUND)
-	{
-		switch (actor->eLastAnimSet)
-		{
-			case K_LVL_ACT_ANIM_MOVE:
-			case K_LVL_ACT_ANIM_MOVE_FAST:
-			case K_LVL_ACT_ANIM_MOVE_BK:
-			case K_LVL_ACT_ANIM_MOVE_GUN:
-			case K_LVL_ACT_ANIM_MOVE_FAST_GUN:
-			case K_LVL_ACT_ANIM_MOVE_BK_GUN:
-			{
-				//SND_PLAY_POSITIONAL_RAND2(SNDIDX_FOOTSTEP_GENERIC_01, SNDIDX_FOOTSTEP_GENERIC_02, actor->pos);
-			}
-			break;
-		}
-	}	
-	if (aframeFlag_feet & K_LVL_ACTIVE_AFRAMEFLAG_SOUND)
-	{
-		switch (actor->eLastAnimSet_feet)
-		{
-			case K_LVL_ACT_ANIM_FEET_MOVE:
-			case K_LVL_ACT_ANIM_FEET_MOVE_FAST:
-			{
-				//SND_PLAY_POSITIONAL_RAND2(SNDIDX_FOOTSTEP_GENERIC_01, SNDIDX_FOOTSTEP_GENERIC_02, actor->pos);
-			}
-			break;
-		}
-	}
-	///--- update-uri finale ---
 
 	//------------------------------------------------------------------------------------------
 	//	INTEGRATOR - physics
@@ -5697,32 +5668,6 @@ CActor * CLevel::GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTa
 	}
 
 	return retvalenemy;
-}
-
-
-CCollisionShape* CLevel::GetClosestCover(Vec2 vPos, float fMaxDistance /*= 0.0f*/)
-{
-	float fMaxDstSq = fMaxDistance * fMaxDistance;
-	float fCurrentDist = 0.0f;
-	CCollisionShape* pRetShape = null;
-	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
-	{
-		CCollisionShape* shape = m_arrColShapes[kk];
-		if (shape->type != K_LVL_COLL_TYPE_COVER)
-			continue;
-		float fDstSq = MUVec2LenSq(&(shape->bbox.vCenter - vPos));
-		if((fMaxDistance > 0.0f) && (fDstSq > fMaxDstSq))
-			continue;
-		if (!IsLineOfSight(vPos, shape->bbox.vCenter))
-			continue;
-		if ((fDstSq < fCurrentDist) || (pRetShape == null))
-		{
-			pRetShape = shape;
-			fCurrentDist = fDstSq;
-		}
-	}
-
-	return pRetShape;
 }
 
 void CLevel::AddAIEvent(EAIEventType eventType, UINT32 ownerUID, int ownerClass, Vec2 vPos, float radius, float duration, UINT32 targetUID)
@@ -9789,56 +9734,6 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 	return nCur;
 }
 
-CCollisionShape * CLevel::GetCollisionShapeAt(Vec2 point, int collisionType)
-{
-	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
-	{
-		if ((collisionType != -1) && (m_arrColShapes[kk]->type != collisionType))
-			continue;
-		if (m_arrColShapes[kk]->bbox.PointIn(point))
-			return m_arrColShapes[kk];
-	}
-	return null;
-}
-
-CCollisionShape* CLevel::GetCollisionShapeByUID(UINT32 nUID)
-{
-	if (nUID == 0)
-		return null;
-
-	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
-	{
-		if (m_arrColShapes[kk]->UID == nUID)
-			return m_arrColShapes[kk];
-	}
-	return null;
-}
-
-CCollisionShape* CLevel::SpawnCollisionShape(int nType, Vec2 vMin, Vec2 vMax)
-{
-	CCollisionShape* pCol = new CCollisionShape();
-	pCol->ID = GenerateNextID();
-	pCol->type = nType;
-	pCol->bbox_ini.Set_Corrected(vMin, vMax);
-	pCol->bbox = pCol->bbox_ini;
-	pCol->pos = pCol->bbox_ini.vCenter;
-	pCol->collFlags = K_DIRFLAG_NONE;
-
-	pCol->castShadows = false;
-
-	switch (nType)
-	{
-		case K_LVL_COLL_TYPE_SOLID:
-			pCol->collFlags = K_DIRFLAG_ALL;
-			break;
-		default:
-			pCol->collFlags = K_DIRFLAG_NONE;
-			break;
-	}
-
-	m_arrColShapes.Add(pCol);
-	return pCol;
-}
 
 
 ///--- framework implementations ---

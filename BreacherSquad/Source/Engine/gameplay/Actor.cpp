@@ -115,7 +115,7 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 CActor::CActor(Vec2 vPos, CActorTemplate* pActorTemplate, int nID) :
 	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nTookDamageFrames(0), nLastDamageTakenFromUID(0),
 	pWeaponMain(nullptr), nSkinIdx(0), pClosestTouchable(nullptr), bAnimFlipX(false), eAnimAngle(EANG_S),
-	eLastAnimSet(K_LVL_ACT_ANIM_EMPTY), nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false),
+	nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
 	pSkelTemplate(nullptr), pSkeleton(nullptr)
 {
@@ -133,12 +133,6 @@ CActor::CActor(Vec2 vPos, CActorTemplate* pActorTemplate, int nID) :
 	// init actor template data (loads files and spine skeletons)
 	InitFromTemplate(pActorTemplate);
 	
-	//#TODO: init bbox too from template
-	bbox_ini.Set(Vec2(-8.0f, -8.0f), Vec2(8.0f, 8.0f));
-	bbox = this->bbox_ini;
-	bbox_exported_ini = this->bbox_ini;
-	bbox_exported = this->bbox_exported_ini;
-
 	//update all relative data
 	SetPos(vPos);
 }
@@ -175,7 +169,8 @@ CActorTemplate::CActorTemplate() :
 	actorClass(K_LVL_ACT_CLASS_NOT_SET),
 	//more important values
 	eMaterial(K_LVL_MATERIAL_UNKNOWN), eCaps(K_ACT_CAPS_NONE),
-	AItemplate(nullptr), fMass(100.0f)
+	AItemplate(nullptr), fMass(100.0f),
+	fHeight(32.0f), fShootH(16.0f)
 {
 	//reset anim IDs
 	for (int kk = 0; kk < K_SD_ANIMS_CNT; kk++)
@@ -190,6 +185,8 @@ CActorTemplate::CActorTemplate() :
 			soundIDs[kk][jj] = -1; //default value for missing verse
 		}
 	}
+	// set default aabb
+	bbox.Set(-6.0f, -6.0f, 6.0f, 6.0f);
 }
 
 void CActorTemplate::FillDefaultValuesIfNotSet()
@@ -348,6 +345,12 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 	this->nAnimSet = 0;
 
 	this->bSkipRender = false;
+
+	bbox_ini = actTemplate.bbox;
+	bbox = this->bbox_ini;
+	bbox_exported_ini = this->bbox_ini;
+	bbox_exported = this->bbox_exported_ini;
+
 
 	//set hue
 	byte collvl = 255;

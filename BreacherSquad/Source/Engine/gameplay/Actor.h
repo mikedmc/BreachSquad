@@ -57,20 +57,20 @@ public:
 	int				soundIDs[K_LVL_ACT_VERSES_COUNT][K_ACT_VERSES_MAX_SETS];	// Contains sound ids-s mapped on different actions (called verses, see EActorSoundVerse)
 
 	///--- GENERICS: !!! when adding new generics don't forget to edit OverwriteGenericDataFromTemplate !!!
-	EMaterialType	eMaterial;	//type of material
-	EActorClass		actorClass; //class of actor
+	EMaterialType	eMaterial;			// type of material
+	EActorClass		actorClass;			// class of actor
 	CAITemplate*	AItemplate;	
 
-	UINT32			eCaps;				//see EActorCapabilitiesFlags
+	UINT32			eCaps;				// see EActorCapabilitiesFlags
 
 	float			fMass;
 	float			fLife;		
 	float			fArmor;		
 	float			fSpeedMove;
 
-	CAABB			aabb;
-	float			fHeight;
-	float			fShootHeight;
+	CAABB			bbox;				// 2d bbox on floor plane defined around the character origin (not always centered)
+	float			fHeight;			// height of character
+	float			fShootH;			// height of the weapon nozzle
 	CStringHash		shWeaponDefault;
 
 	CActorTemplate();
@@ -146,7 +146,7 @@ public:
 		int					nInteractKeyState;  //stare buton interact (just pressed, not pressed etc)
 		int					nMoveDirX;	//directia de miscare ca si flaguri (-1,0,1)
 		int					nMoveDirY;	//directia de miscare ca si flaguri (-1,0,1)
-		EActorAnims			eOverrideAnim;	//if not empty, overrides actor animation
+		//EActorAnims			eOverrideAnim;	//if not empty, overrides actor animation
 
 		EActorDeathCommand	nDeathCommand; //0-not dead, 1-dead, 2-splat, 3-splat+explode
 		EActorAttackState	eAttackCommand;
@@ -182,7 +182,7 @@ public:
 			nDeathCommand = K_LVL_ACT_DEATHCMD_NONE;
 			eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
 			eAttackCommand_last = K_LVL_ACT_ATTACK_IDLE;
-			eOverrideAnim = K_LVL_ACT_ANIM_EMPTY;
+			//eOverrideAnim = K_LVL_ACT_ANIM_EMPTY;
 
 			nIconType = K_LVL_ACT_ICON_NONE;
 			fIconDuration = 0.0f;
@@ -225,9 +225,8 @@ public:
 	CSpineManager::CSkeletonInstance*		pSkeleton;		// Pointer to the skeleton instance (don't deallocate, managed)
 	CAnimPtr								arrAnimsPtr[K_SD_ANIMS_CNT]; // Direct pointer structure to animations declared in actor template (rarely updated)
 
-	CActorTemplate			actTemplate;				//datele generale din XML copiate in fiecare actor, datele curente
-	CActorTemplate			actTemplate_ini;			//datele initiale, imediat dupa loading si dupa customizarea initiala
-	EActorAnims				eLastAnimSet, eLastAnimSet_feet;		//ultima animatie setata  pe actor prin SetActorAnimOnce() (torso si feet)
+	CActorTemplate			actTemplate;				// holds data about each actor, copied from source templates (xml) and probably modified by enhancements
+	CActorTemplate			actTemplate_ini;			// holds initial template that we reset to when changing the weapon or adding non permanent enhancements
 
 	EActorSoundVerse		eLastPlayedVerse;			//last played sound verse
 	ESpineAnim				eLastAnim[K_ACT_MAX_ANIM_TRACKS];	// Last anim set with SetActorAnimOnce() (torso and feet)

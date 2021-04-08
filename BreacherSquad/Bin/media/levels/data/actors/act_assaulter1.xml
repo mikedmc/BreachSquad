@@ -8,7 +8,7 @@
 				fSpeedMove="100.0"
 				bCanCover="true" />
 
-<!-- TODO: move anims to skel descriptor xml --->
+<!-- TODO: move anims to skel descriptor xml -->
   <ANIMS>
     <IDLE 			set0="1hand/run-se" />
     <SHOOT 			set0="1hand/shoot-gun-se" bLoop="true" nTrack="1" />
