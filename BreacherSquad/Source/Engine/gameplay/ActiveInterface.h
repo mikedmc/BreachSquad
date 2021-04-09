@@ -37,14 +37,17 @@ public:
 	float		fAngle;
 	DWORD		color;
 	CAABB		bbox;
+	CAABB		bbox_proj;		// projected bbox (combines floor bbox and height)
 	CAABB		bbox_exported; //bboxul exportat din BSX (mutat la pozitia activului)
-public: // initial values necessary for some relative movements
+// initial values necessary for relative movements
+public: 
 	CAABB		bbox_ini;			//non relative to object position AABB
+	CAABB		bbox_proj_ini;		// non relative to pos projected bbox
 	CAABB		bbox_exported_ini; //bboxul exportat din BSX (inital)
 	Vec2		pos_ini;
 	float		fAngle_ini;
 	DWORD		color_ini;
-	INT32		targetID_ini;	//target ID citit din editor
+	INT32		targetID_ini;		//target ID citit din editor
 
 public: //logic
 	IActiveInterface	*pTarget;		//target-ul din editor //TODO:poate trebuie inlocuita cu un UID ca sa nu am probleme cand dezaloc obiecte...? depinde de viteza cu care se cheama la rails

@@ -3,16 +3,15 @@
 <ACTOR sSkeletonTemplateXML="skel_assaulter1.xml" sSkin="">
 
   <ACTOR_DATA   sAIstate="DEFAULT" sWeapon="WPN_SMG_MP5A3"
-				bboxMinX="-8" bboxMinY="-6" bboxMaxX="8" bboxMaxY="2" nHeight="24" nShootHeight="17"
-				sMaterial="FLESH" fLife="40.0" fArmorFront="0.0" fArmorBack="0.0" 
+				bboxMinX="-8" bboxMinY="-6" bboxMaxX="8" bboxMaxY="2" nHeight="24" nShootHeight="10"
+				sMaterial="FLESH" fLife="40.0" fArmor="0.0" 
 				fSpeedMove="100.0"
 				bCanCover="true" />
 
-<!-- TODO: move anims to skel descriptor xml -->
   <ANIMS>
-    <IDLE 			set0="1hand/run-se" />
-    <SHOOT 			set0="1hand/shoot-gun-se" bLoop="true" nTrack="1" />
-    <MOVE 			set0="generic/die-s" />
+    <IDLE 			set0="1hand/idle-se" bLoop="true" />
+    <MOVE 			set0="1hand/run-se" bLoop="true" />
+    <SHOOT 			set0="1hand/shoot-gun-se" bLoop="false" nTrack="1" />
   </ANIMS>
 
   <VERSES>

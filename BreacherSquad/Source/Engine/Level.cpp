@@ -1585,8 +1585,6 @@ CProp* CLevel::GetActiveByUID(UINT32 UID)
 	return NULL;
 }
 
-
-
 void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 {
 	//set actual state

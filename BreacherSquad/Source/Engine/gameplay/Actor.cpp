@@ -151,15 +151,22 @@ void CActor::SetPos(Vec2 newPos)
 {
 	pos_last = pos;
 	pos = newPos;
+
 	bbox = bbox_ini;
 	bbox.Move(pos);
+	bbox_proj = bbox_proj_ini;
+	bbox_proj.Move(pos);
 }
 
 void CActor::Move(Vec2 delta)
 {
+	pos_last = pos;
 	pos += delta;
+
 	bbox = bbox_ini;
 	bbox.Move(pos);
+	bbox_proj = bbox_proj_ini;
+	bbox_proj.Move(pos);
 }
 
 
@@ -345,13 +352,15 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 	this->nAnimSet = 0;
 
 	this->bSkipRender = false;
-
+	// compute bboxes
 	bbox_ini = actTemplate.bbox;
-	bbox = this->bbox_ini;
-	bbox_exported_ini = this->bbox_ini;
-	bbox_exported = this->bbox_exported_ini;
-
-
+	bbox = bbox_ini;
+	bbox_exported_ini = bbox_ini;
+	bbox_exported = bbox_exported_ini;
+	// compute projected bbox
+	bbox_proj_ini.Set(Vec2(bbox.vMin.x, bbox.vMin.y - Z_TO_H(actTemplate.fHeight)), bbox.vMax);
+	bbox_proj = bbox_proj_ini;
+	
 	//set hue
 	byte collvl = 255;
 	this->color_ini = D3DCOLOR_ARGB(255, collvl, collvl, collvl);
@@ -416,7 +425,11 @@ void CActor::Update(float dTime)
 	//update timeline
 	this->fTimelineAI += dTime;
 
-	this->SetAnimOnce(0, K_SD_ANIM_IDLE);
+	if(MUVec2AlmostZero(speed))
+		this->SetAnimOnce(0, K_SD_ANIM_IDLE);
+	else
+		this->SetAnimOnce(0, K_SD_ANIM_MOVE);
+
 	//this->SetAnimOnce(1, K_SD_ANIM_SHOOT);
 
 	Vec2 vAim = m_AIcommands.vAimVec;
@@ -446,8 +459,7 @@ void CActor::Update(float dTime)
 	spine::Bone* b_gun = pSkeleton->arrBones[K_SD_BONE_GUN_MOUNT];
 	this->posWeapon.x = b_gun->getWorldX();
 	this->posWeapon.y = b_gun->getWorldY();
-	this->posWeapon.z = 16.0f;
-
+	this->posWeapon.z = Z_TO_H(actTemplate.fShootH);
 
 	///--- update weapons ---
 	/*
