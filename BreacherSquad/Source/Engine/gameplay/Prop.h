@@ -7,14 +7,13 @@ class CProp : public IActiveInterface
 {
 public:
 	CSpr			sprite;
-	int				nAnim_ini, nFrame_ini; //animatie si frame initial
-	int				nLayer; //pe ce layer este obiectul de decor
+	int				nAnim_ini, nFrame_ini;		// Initial animation and frame
 
 	bool			flipX, flipY; //flip flags
 
 	CProp() :
 		flipX(false), flipY(false),
-		nAnim_ini(-1), nFrame_ini(-1), nLayer(0)
+		nAnim_ini(-1), nFrame_ini(-1)
 	{}
 
 	const eActiveInterfaceType GetClassType() const {

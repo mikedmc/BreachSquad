@@ -502,15 +502,15 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	OS_freadString(fl, charArr);
 
 	//--- props ---
+	//#TODO: de folosit spawnProp
 	int decocnt = (int)OS_freadUInt32(fl);
 	for (int kk = 0; kk < decocnt; kk++)
 	{
 		CProp* obj = new CProp();
 
 		obj->ID = unBaseID + OS_freadUInt32(fl);
-		//convert layer from editor values to game values (editor misses MID layer):
+		//load layer from editor (not used atm)
 		byte nLayer = OS_freadByte(fl);
-		obj->nLayer = nLayer;
 		//position (used to load UINT32)
 		obj->pos.x = (float)OS_freadInt32(fl);
 		obj->pos.y = (float)OS_freadInt32(fl);

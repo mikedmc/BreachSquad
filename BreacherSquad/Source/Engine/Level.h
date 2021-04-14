@@ -171,7 +171,7 @@ public:
 	// Spawns an actor (NPC)
 	CActor*					SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHash* shStateOverride = null);
 	// Spawns a new Active with empty properties
-	CProp*					SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer = K_TILE_LAYER_FLOOR);
+	CProp*					SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFrameIdx);
 	// Spawns a light
 	CLight*					SpawnLight(Vec3 spawnPos, eLightType eType, DWORD dwColor, float fRadius = 64.0f, int profileID = 0, bool bCastShadows = false);
 	// Gives a score for the user powerups placement 

@@ -571,14 +571,13 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	return nact;
 }
 
-CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer)
+CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFrameIdx)
 {
 	_ASSERT(pArea != nullptr);
 
 	CProp* obj = new CProp();
 
 	obj->ID = GenerateNextID();
-	obj->nLayer = nLayer;
 	//pozitia
 	obj->pos = spawnPos;
 	obj->pos_ini = obj->pos;
@@ -632,6 +631,7 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 	obj->script_hash.Reset();
 	obj->AIstate = K_AI_STATE_UNDEFINED;
 	// add to specified area
+	obj->PostConstructionInit();
 	pArea->m_arrProps.Add(obj);
 
 	return obj;
