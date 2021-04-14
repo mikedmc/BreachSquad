@@ -140,9 +140,6 @@ public:
 	// returns segment intersection with tiles, starting form vStart
 	CTile*					SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i * hitTilePosTL = nullptr);
 
-	CGrowableArray<CProp*>	m_arrProps;					// objects list
-	CFixedArray<CProp*, 256>	m_arrPropsPtrInteract;	// array containing objects that you can interact with (for speed checks)
-
 	CGrowableArray<CActor*>	m_arrActors;				// actors list
 	// Seteaza noua stare si are in vedere si incheierea starii precedente
 	void					Actor_SetAIState(CActor * actor, CAIState* pNewState);
@@ -174,7 +171,7 @@ public:
 	// Spawns an actor (NPC)
 	CActor*					SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHash* shStateOverride = null);
 	// Spawns a new Active with empty properties
-	CProp*					SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer = K_TILE_LAYER_FLOOR);
+	CProp*					SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer = K_TILE_LAYER_FLOOR);
 	// Spawns a light
 	CLight*					SpawnLight(Vec3 spawnPos, eLightType eType, DWORD dwColor, float fRadius = 64.0f, int profileID = 0, bool bCastShadows = false);
 	// Gives a score for the user powerups placement 

@@ -220,22 +220,29 @@ void CLevel::BuildVisibilityLists()
 	m_visibleList.visible_props.Clear();
 	m_visibleList.logic_props_closeby.Clear();
 
-	for (int kk = 0; kk < m_arrProps.GetSize(); kk++)
+	for (int ar = 0; ar < m_arrAreas.Count(); ar++)
 	{
-		if (m_arrProps[kk]->bHidden)
+		CLevelArea* area = m_arrAreas[ar];
+		if (!area->bActive)
 			continue;
-		CProp* prop = m_arrProps[kk];
-		//visible props
-		if (propsPaintAABB.Intersects(&prop->bbox))
+
+		for (int kk = 0; kk < area->m_arrProps.GetSize(); kk++)
 		{
-			m_visibleList.visible_props.Add(prop);
-			// add it to the sorted list
-			m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_PROP, prop, prop->pos.y));
-		}
-		//logical closeby actives
-		if ((propsNearbyAABBs[0].Intersects(&prop->bbox)) || (propsNearbyAABBs[1].Intersects(&prop->bbox)))
-		{
-			m_visibleList.logic_props_closeby.Add(prop);
+			if (area->m_arrProps[kk]->bHidden)
+				continue;
+			CProp* prop = area->m_arrProps[kk];
+			//visible props
+			if (propsPaintAABB.Intersects(&prop->bbox))
+			{
+				m_visibleList.visible_props.Add(prop);
+				// add it to the sorted list
+				m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_PROP, prop, prop->pos.y));
+			}
+			//logical closeby actives
+			if ((propsNearbyAABBs[0].Intersects(&prop->bbox)) || (propsNearbyAABBs[1].Intersects(&prop->bbox)))
+			{
+				m_visibleList.logic_props_closeby.Add(prop);
+			}
 		}
 	}
 	//clear all decals layers

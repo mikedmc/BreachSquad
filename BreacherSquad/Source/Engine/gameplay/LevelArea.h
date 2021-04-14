@@ -38,10 +38,13 @@ public:
 	RECTXYWH						AABBbounds_TL;			// AABB in tiles, in world space
 	SIZEWH							sizeTL;					// Area size in tiles
 	bool							bVisible;
-	//bool bDiscovered // Was it activated? as soon as an area becomes visible it activates itself and first neighbours
+	bool							bActive;				// Was it activated? as soon as an area becomes "visible" it activates itself and first neighbours
 	CFixedArray<CLevelArea*, 10>	arrNeighbours;
 
 	CTileBlockMeshManager			areaMesh;				// Mesh manager for the map, handles painting and breaking the tiles in smaller patches
+
+public:
+	CGrowableArray<CProp*>			m_arrProps;				// list of props in this area
 
 public:
 	CLevelArea(UINT32 nID);

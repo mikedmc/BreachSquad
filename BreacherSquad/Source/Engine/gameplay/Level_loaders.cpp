@@ -160,11 +160,18 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		CCollisionShape * shape = m_arrColShapes[kk];
 		SetAI(shape, shape->AIstate, &shape->varAIparams, shape->targetID_ini);
 	}
-	for (int kk = 0; kk < m_arrProps.GetSize(); kk++)
+	
+	for (int ar = 0; ar < m_arrAreas.Count(); ar++)
 	{
-		CProp * activ = m_arrProps[kk];
-		SetAI(activ, activ->AIstate, &activ->varAIparams, activ->targetID_ini);
+		CLevelArea* area = m_arrAreas[ar];
+		for (int kk = 0; kk < area->m_arrProps.GetSize(); kk++)
+		{
+			CProp * activ = area->m_arrProps[kk];
+			SetAI(activ, activ->AIstate, &activ->varAIparams, activ->targetID_ini);
+		}
 	}
+
+	//#TODO: should change this or remove completely!!
 	//ma asigur ca toti actorii au pointerii setati bine chemand inca odata setAI
 	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 	{
@@ -313,7 +320,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	int originX = OS_freadInt16(fl);
 
 	Vec2 vOffset(posTL.x * K_TILE_SIZE_F, posTL.y * K_TILE_SIZE_F);
-	//set level size
+	//area size
 	area->AABBbounds_TL.Set(posTL.x, posTL.y, areaW, areaH);
 	area->AABBbounds.Set(area->AABBbounds_TL.x * tileW, area->AABBbounds_TL.y * tileH, area->AABBbounds_TL.Right() * tileW, area->AABBbounds_TL.Bottom() * tileH);
 	//m_vLevelOrigin.x = (float)originX + m_levelAABB.x;
@@ -495,8 +502,6 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	OS_freadString(fl, charArr);
 
 	//--- props ---
-	CFixedArray<int, 20> arrLocalBombIDs;
-
 	int decocnt = (int)OS_freadUInt32(fl);
 	for (int kk = 0; kk < decocnt; kk++)
 	{
@@ -522,7 +527,6 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		obj->color = 0xffffffff;
 		obj->nAnim_ini = animIdx;
 		obj->nFrame_ini = frameIdx;
-		obj->bStandsOut = false;
 		obj->sprite.Init(&m_sprProps, animIdx, obj->pos, frameIdx, obj->color);
 		//angle
 		obj->fAngle = 0.0f;
@@ -563,11 +567,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 
 		obj->PostConstructionInit();
 
-		m_arrProps.Add(obj);
-
-		//mark and save interactibles
-		if (obj->bCanInteract)
-			m_arrPropsPtrInteract.Add(obj);
+		area->m_arrProps.Add(obj);
 	}
 
 	///--- load actors ---

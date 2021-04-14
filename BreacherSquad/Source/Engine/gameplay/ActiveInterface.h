@@ -73,9 +73,8 @@ public: //logic
 	UINT32				nRunningScriptUID;	//scriptul care ruleaza acum
 
 	bool				bHidden;			//DO NOT SET DIRECTLY! (use bSetHidden) flag de hidden. vizibil si din editor
-	bool				bSetHidden;			//flag folosit sa setam hidden in update si nu imediat in script
+	bool				bSetHidden;			//#TODO: ar trebui inlocuit cu SetHidden(T/F, FORCED)
 	bool				bAnimated;			//este animat? daca da face play la animatie
-	bool				bStandsOut;			//if it stands out it should attract attention (used for interactibles)
 	bool				bSkipRender;		//skips render...
 
 	//CTOR/DTOR

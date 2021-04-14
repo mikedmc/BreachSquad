@@ -571,8 +571,10 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	return nact;
 }
 
-CProp* CLevel::SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer)
+CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer)
 {
+	_ASSERT(pArea != nullptr);
+
 	CProp* obj = new CProp();
 
 	obj->ID = GenerateNextID();
@@ -621,7 +623,6 @@ CProp* CLevel::SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer)
 	//load logic
 	obj->bCanInteract = false;
 	obj->bHideInteractIcon = false;
-	obj->bStandsOut = false;
 	//interact timer
 	obj->fTouchDuration = 0.0f;
 	//start hidden
@@ -630,8 +631,8 @@ CProp* CLevel::SpawnProp(Vec2 spawnPos, int nAnimIdx, int nFrameIdx, int nLayer)
 	obj->targetID_ini = -1;
 	obj->script_hash.Reset();
 	obj->AIstate = K_AI_STATE_UNDEFINED;
-
-	m_arrProps.Add(obj);
+	// add to specified area
+	pArea->m_arrProps.Add(obj);
 
 	return obj;
 }
@@ -1425,10 +1426,14 @@ IActiveInterface* CLevel::GetIActiveInterfacePtr(int ID)
 	if (ID < 0)
 		return null;
 	//check actives
-	for (int kk = 0; kk < m_arrProps.GetSize(); kk++)
+	for (int ar = 0; ar < m_arrAreas.Count(); ar++)
 	{
-		if (m_arrProps[kk]->ID == ID)
-			return m_arrProps[kk];
+		CLevelArea* area = m_arrAreas[ar];
+		for (int kk = 0; kk < area->m_arrProps.GetSize(); kk++)
+		{
+			if (area->m_arrProps[kk]->ID == ID)
+				return area->m_arrProps[kk];
+		}
 	}
 	//check lights
 	for (int kk = 0; kk < m_arrLights.GetSize(); kk++)
@@ -1457,10 +1462,14 @@ IActiveInterface* CLevel::GetIActiveInterfacePtr_byUID(UINT32 UID)
 	if (UID == 0)
 		return null;
 	//check actives
-	for (int kk = 0; kk < m_arrProps.GetSize(); kk++)
+	for (int ar = 0; ar < m_arrAreas.Count(); ar++)
 	{
-		if (m_arrProps[kk]->GetUID() == UID)
-			return m_arrProps[kk];
+		CLevelArea* area = m_arrAreas[ar];
+		for (int kk = 0; kk < area->m_arrProps.GetSize(); kk++)
+		{
+			if (area->m_arrProps[kk]->GetUID() == UID)
+				return area->m_arrProps[kk];
+		}
 	}
 	//verifica si actorii
 	for (int kk = 0; kk < m_arrActors.Count(); kk++)
@@ -1567,7 +1576,7 @@ CActor* CLevel::GetClosestPlayer(Vec2 vSrcPos, bool bIgnoreDead)
 
 bool CLevel::IsNetworkPlayer(CActor* pPlayer)
 {
-	if (pPlayer == null)
+	if (pPlayer == nullptr)
 		return false;
 
 	return (pPlayer->nControllerInstanceID == K_CM_IID_NET1);
@@ -1576,13 +1585,17 @@ bool CLevel::IsNetworkPlayer(CActor* pPlayer)
 CProp* CLevel::GetActiveByUID(UINT32 UID)
 {
 	if (UID == 0)
-		return NULL;
-	for (int kk = 0; kk < m_arrProps.Count(); kk++)
+		return nullptr;
+	for (int ar = 0; ar < m_arrAreas.Count(); ar++)
 	{
-		if (m_arrProps[kk]->GetUID() == UID)
-			return m_arrProps[kk];
+		CLevelArea* area = m_arrAreas[ar];
+		for (int kk = 0; kk < area->m_arrProps.Count(); kk++)
+		{
+			if (area->m_arrProps[kk]->GetUID() == UID)
+				return area->m_arrProps[kk];
+		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
@@ -3936,9 +3949,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	UINT32 aframeFlag_feet = 0; //flagul aframe-ului resetat
 
 	///--- ACTOR CAPS ---
-	//--- find closest touchable ---
+	/*
+
 	if (actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_INTERACT)
 	{
+		// LOOK ONLY IN ACTOR AREA
 		IActiveInterface* pLowPrioTouch = null;
 		actor->pClosestTouchable = null;
 		//find the active that has the biggest bbox intersection surface with our player
@@ -3993,6 +4008,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		if (actor->pClosestTouchable == null)
 			actor->pClosestTouchable = pLowPrioTouch;
 	}
+	*/
 
 	//Stun Timer 
 	if (actor->fLife > 0.0f)
@@ -6046,15 +6062,22 @@ void CLevel::SetAIparams(IActiveInterface * active, CVariantCollection * params,
 void CLevel::CleanupDeadObjects()
 {
 	//check active objects
-	for (int kk = m_arrProps.GetSize() - 1; kk >= 0; kk--)
+	for (int ar = 0; ar < m_arrAreas.Count(); ar++)
 	{
-		if (m_arrProps[kk]->IsPendingKill())
+		CLevelArea* area = m_arrAreas[ar];
+		if(!area->bActive)
+			continue;
+		// check props lifetime
+		for (int kk = area->m_arrProps.GetSize() - 1; kk >= 0; kk--)
 		{
-			// call framework end play
-			m_arrProps[kk]->EndPlay();
-			// remove from array, call dtor
-			SAFE_DELETE(m_arrProps[kk]);
-			m_arrProps.Remove(kk);
+			if (area->m_arrProps[kk]->IsPendingKill())
+			{
+				// call framework end play
+				area->m_arrProps[kk]->EndPlay();
+				// remove from array, call dtor
+				SAFE_DELETE(area->m_arrProps[kk]);
+				area->m_arrProps.Remove(kk);
+			}
 		}
 	}
 
@@ -6109,14 +6132,16 @@ void CLevel::UpdateAI(float dTime, bool bInEditor)
 		}
 	}
 
-	//check active objects and save interactibles
-	m_arrPropsPtrInteract.Clear();
-	for (int kk = m_arrProps.GetSize() - 1; kk >= 0; kk--)
+	//check active objects
+	for (int ar = 0; ar < m_arrAreas.Count(); ar++)
 	{
-		UpdateAI_prop(m_arrProps[kk], dTime);
-		//add interactible?
-		if (m_arrProps[kk]->bCanInteract)
-			m_arrPropsPtrInteract.Add(m_arrProps[kk]);
+		CLevelArea* area = m_arrAreas[ar];
+		if (!area->bActive)
+			continue;
+		for (int kk = area->m_arrProps.GetSize() - 1; kk >= 0; kk--)
+		{
+			UpdateAI_prop(area->m_arrProps[kk], dTime);
+		}
 	}
 
 	//check lights
@@ -8974,8 +8999,7 @@ void CLevel::Release()
 
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrColShapes);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrLights);
-	m_arrPropsPtrInteract.Clear();
-	SAFE_DELETE_GROWABLE_ARRAY(m_arrProps);
+	//SAFE_DELETE_GROWABLE_ARRAY(m_arrProps);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrDecals);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrActors);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrMiscObjects);

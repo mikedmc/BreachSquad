@@ -548,10 +548,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 
 			target->bCanInteract = bInteract;
-			//stands out?		
-			target->bStandsOut = false;
-			if (target->bCanInteract)
-				target->bStandsOut = true;
 
 			return true;
 		}

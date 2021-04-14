@@ -3,6 +3,9 @@
 
 CLevelArea::CLevelArea(UINT32 nID)
 {
+	//#TODO: will default to active=false
+	bActive = true;
+
 	ID = nID;
 	tiles = nullptr;
 	bVisible = false;
@@ -25,6 +28,9 @@ OPRESULT CLevelArea::BuildBuffers(PDEVICE pDevice, CSpriteCollection* pLightsSpr
 
 void CLevelArea::Release()
 {
+	// release area props
+	SAFE_DELETE_GROWABLE_ARRAY(m_arrProps);
+
 	// release tiles
 	if (tiles != nullptr)
 	{
