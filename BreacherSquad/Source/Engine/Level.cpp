@@ -5469,6 +5469,12 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//#TODO: Speeds and accelerations should be treated here, after the collision detection
 		
 
+	// set current area if null or changed
+	if ((actor->pArea == nullptr) || (!actor->pArea->AABBbounds.PointIn(actor->pos.x, actor->pos.y)))
+	{
+		actor->pArea = Areas_GetAt(Vec3ToVec2XY(actor->pos));
+	}
+
 	//only update it if set
 	if (actor->m_sprOverheadIcon.animationIdx >= 0)
 	{
@@ -8999,7 +9005,6 @@ void CLevel::Release()
 
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrColShapes);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrLights);
-	//SAFE_DELETE_GROWABLE_ARRAY(m_arrProps);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrDecals);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrActors);
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrMiscObjects);

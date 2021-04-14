@@ -1,6 +1,8 @@
 #pragma once
 
-//--- clasa din care se deriva clasele active ---
+// declare useful classes
+class CLevelArea;
+
 //perioada standard de decizie pt AI (in secunde) si variatia random a acestuia
 #define	K_LVL_AI_DECISION_INTERVAL				0.25f
 #define	K_LVL_AI_DECISION_INTERVAL_VARIATION	0.05f
@@ -16,6 +18,7 @@ enum eActiveInterfaceType {
 	K_LVL_IAI_TYPE_COLSHAPE,
 };
 
+// Base class for all active elements (actors, objects, etc)
 class IActiveInterface
 {
 protected:
@@ -23,6 +26,7 @@ protected:
 
 public:
 	UINT32				UID;			// ingame UID
+	CLevelArea*			pArea;			// pointer to current area
 	int					ID;				// ID exported from editor (not the same as UID).
 	Vec3				vPos;			// Z coord gets added to Y to simulate 3D when rendering (see Z_TO_H macros)
 	Vec3				vPos_ini;		// initial position needed for relative calculations. Usually only set when spawned.

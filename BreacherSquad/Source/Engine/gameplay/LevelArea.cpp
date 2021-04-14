@@ -3,8 +3,7 @@
 
 CLevelArea::CLevelArea(UINT32 nID)
 {
-	//#TODO: will default to active=false
-	bActive = true;
+	bActive = false;
 
 	ID = nID;
 	tiles = nullptr;
@@ -58,9 +57,15 @@ bool CLevelArea::UpdateVisibility(RECTXYWH_F camRect)
 {
 	CAABB camAABB(camRect);
 	if (AABBbounds.Intersects(&camAABB))
+	{
 		bVisible = true;
+		// we activate the area on first encounter and leave it active forever
+		bActive = true;
+	}
 	else
+	{
 		bVisible = false;
+	}
 	// check mesh visibility (level blocks)
 	areaMesh.UpdateVisibility(camRect);
 
