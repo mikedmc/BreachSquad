@@ -56,7 +56,7 @@ inline CTile* CLevelArea::GetTile(int xTL, int yTL)
 bool CLevelArea::UpdateVisibility(RECTXYWH_F camRect)
 {
 	CAABB camAABB(camRect);
-	if (AABBbounds.Intersects(&camAABB))
+	if (AABBbounds.Intersects(camAABB))
 	{
 		bVisible = true;
 		// we activate the area on first encounter and leave it active forever
@@ -77,6 +77,12 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 {
 	// Works by walking from tile to tile on slopes, on X axis and Y axis then finding the closest point
 	//#INFO: when going from right to left and bottom to top, if the end point is on the tile border it doesn't detect the intersection. Might happen to slow moving bullets but it should be fine.
+
+	// early check if not intersecting
+	CAABB moveBB;
+	moveBB.Set_Corrected(vStart, vEnd);
+	if (!moveBB.Intersects(AABBbounds))
+		return nullptr;
 
 	//#TODO: de pus tileflags options la coliziuni
 	// bring it in local space

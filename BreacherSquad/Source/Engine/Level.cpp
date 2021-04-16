@@ -701,7 +701,7 @@ int CLevel::GetPowerupPlacingScore(CProp* active, Vec2 vPlacerPos)
 		if (pActiv == active)
 			continue;
 
-		if (pActiv->bbox.Intersects(&active->bbox))
+		if (pActiv->bbox.Intersects(active->bbox))
 			nScore--;
 	}
 	//interactible actors
@@ -711,7 +711,7 @@ int CLevel::GetPowerupPlacingScore(CProp* active, Vec2 vPlacerPos)
 		if (!pAct->bCanInteract)
 			continue;
 
-		if (pAct->bbox.Intersects(&active->bbox))
+		if (pAct->bbox.Intersects(active->bbox))
 			nScore--;
 	}
 	//#TODO: check intersection with ladders and walls too
@@ -746,7 +746,7 @@ bool CLevel::GetBestSpawningPos(Vec2 * vSpawn_ret, CAABB rectStart, CAABB * rect
 			continue;
 
 		//try to avoid the other box
-		if ((rectToAvoid != null) && (rectToAvoid->Intersects(&rectCheck)))
+		if ((rectToAvoid != null) && (rectToAvoid->Intersects(rectCheck)))
 			nScore -= 25;
 
 		CCollisionShape* col = null;
@@ -758,7 +758,7 @@ bool CLevel::GetBestSpawningPos(Vec2 * vSpawn_ret, CAABB rectStart, CAABB * rect
 		if (col == null)
 			nScore -= 50;
 		//prefer not intersecting geometry
-		if (ColShape_CAABB_Intersect_Arr(&rectCheck, m_visibleList.logic_colShapes.m_pData, m_visibleList.logic_colShapes.Count()) != null)
+		if (ColShape_CAABB_Intersect_Arr(rectCheck, m_visibleList.logic_colShapes.m_pData, m_visibleList.logic_colShapes.Count()) != null)
 			nScore -= 100;
 
 		if (nScore > nPlaceScore)
@@ -1000,7 +1000,7 @@ std::vector<CLevelArea*> CLevel::Areas_GetAreasInRect(CAABB aabb)
 	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
 	{
 		CLevelArea* area = m_arrAreas[ii];
-		if (area->AABBbounds.Intersects(&aabb))
+		if (area->AABBbounds.Intersects(aabb))
 			retarr.push_back(area);
 	}
 	return retarr;
@@ -2257,7 +2257,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 			{
 				for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 				{
-					if ((pPlayerActor[kk] != NULL) && (!pPlayerActor[kk]->bHidden) && (pPlayerActor[kk]->bbox.Intersects(&active->bbox)))
+					if ((pPlayerActor[kk] != NULL) && (!pPlayerActor[kk]->bHidden) && (pPlayerActor[kk]->bbox.Intersects(active->bbox)))
 					{
 						bTrigger = true;
 						break;
@@ -2273,7 +2273,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 					if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
 						((m_arrActors[kk]->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
 							continue;
-					if (m_arrActors[kk]->bbox.Intersects(&active->bbox))
+					if (m_arrActors[kk]->bbox.Intersects(active->bbox))
 					{
 						bTrigger = true;
 						break;
@@ -3040,7 +3040,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 				{
 					if (pPlayerActor[kk] == null)
 						continue;
-					if (pPlayerActor[kk]->bbox.Intersects(&prop->bbox))
+					if (pPlayerActor[kk]->bbox.Intersects(prop->bbox))
 					{
 						prop->Touch(pPlayerActor[kk]->GetUID(), dTime);
 						//save checkpoint
@@ -4096,12 +4096,12 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				//set target pointer
 				actor->m_AIsensorInfo.pTargetedActor = targetActor;
 				//vede daca face overlap
-				if (actor->bbox.Intersects(&targetActor->bbox))
+				if (actor->bbox.Intersects(targetActor->bbox))
 				{
 					actor->m_AIsensorInfo.fTargetOverlapX = SIGN(actor->pos.x - targetActor->pos.x) * ((actor->bbox.vHalfSize.x + targetActor->bbox.vHalfSize.x) - fabs(actor->pos.x - targetActor->pos.x));
 				}
 				//daca se ating trimit si event de touch enemy, doar daca vede inamicul
-				if (actor->bbox.Intersects(&targetActor->bbox))
+				if (actor->bbox.Intersects(targetActor->bbox))
 				{
 					AddAIEvent(K_LVL_AI_EVENT_TOUCH_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->GetPosHeart(), enemyDst, 1.0f, actor->GetUID());
 				}
@@ -4591,7 +4591,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					actor->actTemplate.actorClass = K_LVL_ACT_CLASS_HUMAN;
 
 					//daca avem breaching charges aruncate in nivel le dezalocam
-					ReleaseBullet(K_LVL_BULLET_BREACHING_CHARGE, actor->GetUID());
+					ReleaseBulletType(K_LVL_BULLET_BREACHING_CHARGE, actor->GetUID());
 
 					//release camera
 					pPlayerActor[actor->nPlayerOrdinal] = null;
@@ -4776,6 +4776,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 
 	//look for cover when entering crouched state
+	/*
 	if (actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_COVER)
 	{
 		//entering crouch state
@@ -4799,13 +4800,10 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						if (actor->bbox.vCenter.x < coverbox->vCenter.x)
 						{
 							actor->pos.x -= actor->bbox.vCenter.x - coverbox->vMin.x + 2.0f;
-							//se uita spre cover mereu chiar daca animatia este invers pt ca atunci cand iesi din cover sa fie cu fatza spre inamic
-							/* actor->lookDirXsign = 1; */
 						}
 						else
 						{
 							actor->pos.x += coverbox->vMax.x - actor->bbox.vCenter.x + 2.0f;
-							/* actor->lookDirXsign = -1; */
 						}
 					}
 				}
@@ -4818,12 +4816,12 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		}
 
 		//daca esti in cover si te-a miscat ceva te scoate automat
-		if ((actor->pCover != null) && (!actor->bbox.Intersects(&actor->pCover->bbox)))
+		if ((actor->pCover != null) && (!actor->bbox.Intersects(actor->pCover->bbox)))
 		{
 			actor->pCover = null;
 		}
 	}
-
+	*/
 	
 	///--- Look direction ---
 	//trebuie sa avem pointerul mereu setat
@@ -4912,7 +4910,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 //				actor->m_AIcommands.bThrustY = false;
 			}
 			//daca actorul a iesit din ecran ii da suspend
-			if (camAABB.Intersects(&actor->bbox))
+			if (camAABB.Intersects(actor->bbox))
 			{
 				actor->nSuspendedFlags &= ~K_LVL_SUSPENDFLAG_OUTSIDE_SCREEN;
 			}
@@ -5295,7 +5293,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				continue;
 
 			//nu am intersectie probabils - trec mai departe
-			if (!boxUnion.Intersects(&m_arrColShapes[kk]->bbox))
+			if (!boxUnion.Intersects(m_arrColShapes[kk]->bbox))
 				continue;
 
 			//adauga bbox in lista de probabile pt intersectie
@@ -5435,7 +5433,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						if (it->bDisabled)
 							continue;
 						// disable non intersecting ones
-						if (!newBoundary.Intersects(it))
+						if (!newBoundary.Intersects(tempCollBoxList.m_pData[kk]))
 							it->bDisabled = true;
 					}
 					// update remaining time and do again
@@ -5468,8 +5466,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	//#TODO: Speeds and accelerations should be treated here, after the collision detection
 		
-
-	// set current area if null or changed
+	// set current area if null or changed after updating the position
 	if ((actor->pArea == nullptr) || (!actor->pArea->AABBbounds.PointIn(actor->pos.x, actor->pos.y)))
 	{
 		actor->pArea = Areas_GetAt(Vec3ToVec2XY(actor->pos));
@@ -8948,7 +8945,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		//paint player numeric icon on multiplayer when peer outside the screen
 		if (UTGetAppClass().IsGameNetworked())
 		{
-			if ((pPlayerActor[kk]->nPlayerOrdinal == g_netlock.Net_GetOtherPlayerIndex()) && (!camAABB.Intersects(&pPlayerActor[kk]->bbox)))
+			if ((pPlayerActor[kk]->nPlayerOrdinal == g_netlock.Net_GetOtherPlayerIndex()) && (!camAABB.Intersects(pPlayerActor[kk]->bbox)))
 			{
 				Vec2 vpos = Vec2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
 				CAABB localAABB = camAABB;
@@ -9455,7 +9452,8 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 				// tiles collision
 				if (point->nFlagsCollision & K_LVL_PHYSP_COLLFLAG_TILES)
 				{
-					CTile* pColTile = SegmentTilesIntersection(vFrom, vTo, collisionPoint, collisionNormal);
+					Vec2i ptHitTilePos(0, 0);
+					CTile* pColTile = SegmentTilesIntersectionEx(vFrom, vTo, collisionPoint, collisionNormal, &ptHitTilePos, point->pArea);
 					if (pColTile)
 					{
 						bCollided = true;
@@ -9545,6 +9543,13 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 			if (bWasContacting == false)
 			{
 				point->bContactStarted = true;
+			}
+
+			//update current area (change only if not static)
+			Vec2 vpos2d = Vec3ToVec2XY(point->pos);
+			if ((point->pArea == nullptr) || (!point->pArea->AABBbounds.PointIn(vpos2d)))
+			{
+				point->pArea = Areas_GetAt(vpos2d);
 			}
 
 			// is it almost stopped?

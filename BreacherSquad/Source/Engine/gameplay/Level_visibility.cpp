@@ -84,7 +84,7 @@ void CLevel::BuildVisibilityLists()
 			case K_LVL_LT_AMBIENTAL:
 			case K_LVL_LT_DIRECTIONAL:
 			{
-				if (camaabb.Intersects(&light->bbox_ini))
+				if (camaabb.Intersects(light->bbox_ini))
 				{
 					m_visibleList.visible_lights.Add(m_arrLights[kk]);
 				}
@@ -134,7 +134,7 @@ void CLevel::BuildVisibilityLists()
 			case K_LVL_COLL_TYPE_COVER:
 			{
 				//le selectez doar pe cele din ecran
-				if ((collisionAreaAABBs[0].Intersects(&m_arrColShapes[kk]->bbox)) || (collisionAreaAABBs[1].Intersects(&m_arrColShapes[kk]->bbox)))
+				if ((collisionAreaAABBs[0].Intersects(m_arrColShapes[kk]->bbox)) || (collisionAreaAABBs[1].Intersects(m_arrColShapes[kk]->bbox)))
 					m_visibleList.logic_colShapesSpecial.Add(m_arrColShapes[kk]);
 			}
 			break;
@@ -154,7 +154,7 @@ void CLevel::BuildVisibilityLists()
 						m_visibleList.logic_colShapesSpecial.Add(m_arrColShapes[kk]);
 					}
 					//gather all important collision boxes (nearby) - check only if included in extended area which is larger but still centered
-					if ((collisionAreaAABBs[0].Intersects(&m_arrColShapes[kk]->bbox)) || (collisionAreaAABBs[1].Intersects(&m_arrColShapes[kk]->bbox)))
+					if ((collisionAreaAABBs[0].Intersects(m_arrColShapes[kk]->bbox)) || (collisionAreaAABBs[1].Intersects(m_arrColShapes[kk]->bbox)))
 					{
 						m_visibleList.logic_colShapes.Add(m_arrColShapes[kk]);
 					}
@@ -168,7 +168,7 @@ void CLevel::BuildVisibilityLists()
 			//bagam doar pe cele care fac umbra
 			if (!m_arrColShapes[kk]->castShadows)
 				continue;
-			if (lightsCommonAABB.Intersects(&m_arrColShapes[kk]->bbox))
+			if (lightsCommonAABB.Intersects(m_arrColShapes[kk]->bbox))
 			{
 				m_visibleList.visible_colShapesLights.Add(m_arrColShapes[kk]);
 			}
@@ -183,12 +183,12 @@ void CLevel::BuildVisibilityLists()
 		if ((actor->bHidden) || (actor->bSkipRender))
 			continue;
 		//is it nearby?
-		if ((actorsNearbyAABBs[0].Intersects(&actor->bbox)) || (actorsNearbyAABBs[1].Intersects(&actor->bbox)))
+		if ((actorsNearbyAABBs[0].Intersects(actor->bbox)) || (actorsNearbyAABBs[1].Intersects(actor->bbox)))
 		{
 			m_visibleList.logic_actors_closeby.Add(actor);
 		}
 		//must be painted?
-		if (actorsPaintAABB.Intersects(&actor->bbox))
+		if (actorsPaintAABB.Intersects(actor->bbox))
 		{
 			//#PERSONALIZARE: don't draw actors under FOW
 			bool bUnderFOW = false;
@@ -232,14 +232,14 @@ void CLevel::BuildVisibilityLists()
 				continue;
 			CProp* prop = area->m_arrProps[kk];
 			//visible props
-			if (propsPaintAABB.Intersects(&prop->bbox))
+			if (propsPaintAABB.Intersects(prop->bbox))
 			{
 				m_visibleList.visible_props.Add(prop);
 				// add it to the sorted list
 				m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_PROP, prop, prop->pos.y));
 			}
 			//logical closeby actives
-			if ((propsNearbyAABBs[0].Intersects(&prop->bbox)) || (propsNearbyAABBs[1].Intersects(&prop->bbox)))
+			if ((propsNearbyAABBs[0].Intersects(prop->bbox)) || (propsNearbyAABBs[1].Intersects(prop->bbox)))
 			{
 				m_visibleList.logic_props_closeby.Add(prop);
 			}
@@ -253,7 +253,7 @@ void CLevel::BuildVisibilityLists()
 
 	for (int kk = 0; kk < m_arrDecals.GetSize(); kk++)
 	{
-		if (propsPaintAABB.Intersects(&m_arrDecals[kk]->aabb))
+		if (propsPaintAABB.Intersects(m_arrDecals[kk]->aabb))
 		{
 			m_visibleList.visible_decals[m_arrDecals[kk]->layer].Add(m_arrDecals[kk]);
 		}

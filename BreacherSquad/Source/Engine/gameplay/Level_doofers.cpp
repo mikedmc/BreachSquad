@@ -69,19 +69,19 @@ void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float
 	Vec3 vPos = Vec2ToVec3XY0(pos);
 	CLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.HireNode();
 	//set 
-	if (node != null)
+	if (node != nullptr)
 	{
 		node->m_data.Reset();
 		//add simulation container
 		node->m_data.physPt = m_poolPhysPts.HireNode();
-		if (node->m_data.physPt == NULL)
+		if (node->m_data.physPt == nullptr)
 		{
 			ErrorBox(K_ERR_WARNING, L"AddProp_Light:We need more physics points!");
 			m_poolDoofers.DismissNode(node);
 			return;
 		}
 		//reset
-		node->m_data.physPt->m_data.Init();
+		node->m_data.physPt->m_data.Reset();
 
 		node->m_data.type = K_DOOFER_LIGHT;
 
@@ -106,24 +106,24 @@ void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float
 void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, int exploOwnerClass, Vec2 vExploDir, CAABB* exploAABB)
 {
 	CExplosionTemplate* explotemplate = GetTemplateExplosion(exploNameHash);
-	if (explotemplate == NULL)
+	if (explotemplate == nullptr)
 		return;
 
 	CLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.HireNode();
 	//set 
-	if (node != null)
+	if (node != nullptr)
 	{
 		node->m_data.Reset();
 		//add simulation container
 		node->m_data.physPt = m_poolPhysPts.HireNode();
-		if (node->m_data.physPt == NULL)
+		if (node->m_data.physPt == nullptr)
 		{
 			ErrorBox(K_ERR_WARNING, L"AddProp_Explo:Need more physics points!");
 			m_poolDoofers.DismissNode(node);
 			return;
 		}
 		//reset
-		node->m_data.physPt->m_data.Init();
+		node->m_data.physPt->m_data.Reset();
 
 		node->m_data.type = K_DOOFER_EXPLOSION;
 		//physics

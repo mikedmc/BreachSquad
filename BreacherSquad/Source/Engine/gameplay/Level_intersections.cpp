@@ -94,10 +94,8 @@ CCollisionShape* CLevel::ColShape_Segment_Intersection_Arr(Vec2 & start, Vec2 & 
 }
 
 
-CCollisionShape* CLevel::ColShape_CAABB_Intersect_Arr(CAABB * aabbSrc, CCollisionShape * arrBoxes[], int nBoxesCnt)
+CCollisionShape* CLevel::ColShape_CAABB_Intersect_Arr(CAABB& aabbSrc, CCollisionShape * arrBoxes[], int nBoxesCnt)
 {
-	if (aabbSrc == null)
-		return null;
 	for (int kk = 0; kk < nBoxesCnt; kk++)
 	{
 		//cursorul prin arrBoxes
@@ -105,7 +103,7 @@ CCollisionShape* CLevel::ColShape_CAABB_Intersect_Arr(CAABB * aabbSrc, CCollisio
 		if (box->Intersects(aabbSrc))
 			return arrBoxes[kk];
 	}
-	return null;
+	return nullptr;
 }
 
 
@@ -120,7 +118,7 @@ CTile* CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint,
 	{
 		CLevelArea* area = m_arrAreas[ii];
 		segAABB.Set_Corrected(vFrom, vTo);
-		if (area->AABBbounds.Intersects(&segAABB))
+		if (area->AABBbounds.Intersects(segAABB))
 		{
 			Vec2 hitPt, hitN;
 			Vec2i hitTL;
@@ -135,6 +133,75 @@ CTile* CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint,
 					*hitTilePosTL = hitTL;
 				// shorten the vector 
 				vTo = hitPt;
+			}
+		}
+	}
+
+
+	return rettile;
+}
+
+CTile* CLevel::SegmentTilesIntersectionEx(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i * hitTilePosTL /*= nullptr*/, CLevelArea* pStartArea /*= nullptr*/)
+{
+	CAABB segAABB;
+	Vec2 vFrom = vStart;
+	Vec2 vTo = vEnd;
+	// see if segment goes outside of startArea and if it does just try the neighbours
+	CLevelArea* pArea = pStartArea;
+	if (pArea == nullptr)
+		pArea = Areas_GetAt(vStart);
+	// no starting area? assume no collision
+	if (pArea == nullptr)
+		return nullptr;
+
+	CTile* rettile = nullptr;
+	// check collision with current area
+	segAABB.Set_Corrected(vFrom, vTo);
+	if (pArea->AABBbounds.Intersects(segAABB))
+	{
+		Vec2 hitPt, hitN;
+		Vec2i hitTL;
+		CTile* tl = pArea->SegmentTilesIntersection(vStart, vEnd, hitPt, hitN, &hitTL);
+		if (tl != nullptr)
+		{
+			// on collision shorten the vector so we elimintate areas that are farther away
+			rettile = tl;
+			retPoint = hitPt;
+			retNormal = hitN;
+			if (hitTilePosTL != nullptr)
+				*hitTilePosTL = hitTL;
+			// shorten the vector 
+			vTo = hitPt;
+		}
+		else
+		{
+			// only test neighbours if segment bbox not completely contained in initial area aabb
+			if (!pArea->AABBbounds.Contains(segAABB))
+			{
+				// no collision with current area? check neighbours now
+				for (int ii = 0; ii < pArea->arrNeighbours.Count(); ii++)
+				{
+					CLevelArea* area = pArea->arrNeighbours[ii];
+					_ASSERT(area != nullptr);
+					segAABB.Set_Corrected(vFrom, vTo);
+					if (area->AABBbounds.Intersects(segAABB))
+					{
+						Vec2 hitPt, hitN;
+						Vec2i hitTL;
+						CTile* tl = area->SegmentTilesIntersection(vStart, vEnd, hitPt, hitN, &hitTL);
+						if (tl != nullptr)
+						{
+							// on collision shorten the vector so we elimintate areas that are farther away
+							rettile = tl;
+							retPoint = hitPt;
+							retNormal = hitN;
+							if (hitTilePosTL != nullptr)
+								*hitTilePosTL = hitTL;
+							// shorten the vector 
+							vTo = hitPt;
+						}
+					}
+				}
 			}
 		}
 	}

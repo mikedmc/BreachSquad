@@ -37,7 +37,9 @@ public:
 
 	bool				PointIn(Vec2 pt1);
 	bool				PointIn(float x, float y);
-	bool				Intersects(CAABB *dest);
+	bool				Intersects(CAABB& dest);
+	// Does it completely contain the dest aabb?
+	bool				Contains(CAABB& dest);
 	bool				IntersectsCircle(Vec2 center, float radius);
 
 	//Moves AABB with delta vector

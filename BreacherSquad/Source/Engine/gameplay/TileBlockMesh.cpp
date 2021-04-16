@@ -291,7 +291,7 @@ int CTileBlockMeshManager::UpdateVisibility(RECTXYWH_F camRect)
 	for (int kk = 0; kk < arrBlocks.GetSize(); kk++)
 	{
 		CAABB camAABB(camRect);
-		if (camAABB.Intersects(&arrBlocks[kk]->m_bbox))
+		if (camAABB.Intersects(arrBlocks[kk]->m_bbox))
 			arrVisible.Add(arrBlocks[kk]);
 	}
 	return arrVisible.Count();

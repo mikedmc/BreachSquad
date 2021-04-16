@@ -2,7 +2,7 @@
 #include "Level_bullets.h"
 
 
-CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir)
+CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir, CLevelArea* pStartArea)
 {
 	//dull bullets don't actually get spawned (sometimes we need them)
 	if (bulletTemplate->nType == K_LVL_BULLET_DULL)
@@ -20,18 +20,19 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 
 	//add simulation container
 	node->m_data.physPt = m_poolPhysPts.HireNode();
-	if (node->m_data.physPt == NULL)
+	if (node->m_data.physPt == nullptr)
 	{
 		ErrorBox(K_ERR_WARNING, L"ShootBullet:We need more physics points!");
 		m_poolBullets.DismissNode(node);
 		return nullptr;
 	}
 	//reset physics data
-	node->m_data.physPt->m_data.Init();
+	node->m_data.physPt->m_data.Reset();
 	//set bullet generic data
 	CBullet* bullet = &node->m_data;
 	bullet->actorClass = actorClass;
 	bullet->ownerUID = nOwnerUID;
+	bullet->pArea = pStartArea;
 	bullet->dwLastTargetUID = 0;
 	bullet->nSubstate = 0;
 
@@ -54,9 +55,10 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	bullet->posProj = Vec3ProjVec2(vPos);
 	bullet->posShadow = Vec3ToVec2XY(vPos);
 	//physics
+	bullet->physPt->m_data.pArea = bullet->pArea;
 	bullet->physPt->m_data.pos = vPos;
 	bullet->physPt->m_data.pos_last = vPos;
-	//randomizam viteza glontului cu un procent anume
+	// randomize bullet speed
 	Vec3 vdir = vShootDir * (bulletTemplate->fSpeed_ini + m_rand.RandFloatSgn(bulletTemplate->fSpeed_ini * 0.075f));
 	bullet->physPt->m_data.speed = vdir;
 	// hardcoded for now
@@ -115,12 +117,11 @@ CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float
 	return pRetBullet;
 }
 
-void CLevel::ReleaseBullet(int nBulletType, UINT32 nOwnerUID)
+void CLevel::ReleaseBulletType(int nBulletType, UINT32 nOwnerUID)
 {
 	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.pListUsed.m_pNext;
 	while (node != &m_poolBullets.pListUsed)
 	{
-		//salvez locatia urmatoare ca sa pot avansa pe ea
 		CLinkedPool<CBullet>::CLinkedPoolNode *nextnode = node->m_pNext;
 		CBullet* bullet = &node->m_data;
 
@@ -128,16 +129,14 @@ void CLevel::ReleaseBullet(int nBulletType, UINT32 nOwnerUID)
 		if ((bullet->eType == nBulletType) && (bullet->ownerUID == nOwnerUID))
 			killbullet = true;
 
-		//ii dam release
 		if (killbullet)
 		{
-			//release la nodul de fizica !!!
+			//release phys point
 			m_poolPhysPts.DismissNode(bullet->physPt);
-			//si eliberez glontul
+			//and bullet
 			m_poolBullets.DismissNode(node);
 		}
 
-		//avansez pointer
 		node = nextnode;
 	}
 }

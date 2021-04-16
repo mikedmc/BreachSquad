@@ -2,6 +2,7 @@
 
 // declare used classes
 class CCollisionShape;
+class CLevelArea;
 
 #define K_LVL_PHYSPT_DEFAULT_FLOOR_FRICTION		10.0f
 #define K_LVL_PHYSPT_DEFAULT_FLOOR_BOUNCE		0.5f
@@ -31,6 +32,7 @@ enum eRetContactType {
 class CPhysicsPoint {
 public:
 	
+	CLevelArea*			pArea;								// Pointer to current area
 	bool				bFlagRotationEnabled;				// Set to enable rotation updates
 	bool				bFlagPhysicsEnabled;				// Set to enable physics (only with FlagCollision Enabled) - bounce, friction etc. false-stops on collision
 
@@ -57,7 +59,7 @@ public:
 	CPhysicsPoint() : contactType(K_COLLTYPE_NONE), bContacting(false), bContactStarted(false), bIsStatic(false), nFlagsCollision(K_LVL_PHYSP_COLLFLAG_ALL),
 		bFlagRotationEnabled(false), bIsStaticZ(false),
 		bFlagPhysicsEnabled(false), fBounceF(K_LVL_PHYSPT_DEFAULT_FLOOR_BOUNCE), fFrictionF(K_LVL_PHYSPT_DEFAULT_FLOOR_FRICTION),
-		bIsDead(false), pContactShape(NULL)
+		bIsDead(false), pContactShape(nullptr), pArea(nullptr)
 	{
 		pos = pos_last = Vec3(0.0f, 0.0f, 0.0f);
 		speed = Vec3(0.0f, 0.0f, 0.0f);
@@ -66,7 +68,8 @@ public:
 		contactPos = Vec3(0.0f, 0.0f, 0.0f);
 	};
 
-	void Init();
+	// Called to reset data when reused
+	void Reset();
 	
 	// Forces a new position for the point, in case of collisions or other situations
 	inline void SetPosForced(Vec3 vecPos) { pos = vecPos; }

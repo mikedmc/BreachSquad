@@ -144,14 +144,18 @@ bool CAABB::PointIn(float x, float y)
 	return true;
 }
 
-bool CAABB::Intersects(CAABB *dest)
+bool CAABB::Intersects(CAABB& dest)
 {
-	assert(dest != null);
 	// if they barely touch (border on border) I don't consider them intersecting
 	// Tiles that have bboxes should not figure as intersecting, that's why I use >= instead of >
-	if ((vMin.x >= dest->vMax.x) || (vMax.x <= dest->vMin.x) || (vMin.y >= dest->vMax.y) || (vMax.y <= dest->vMin.y))
+	if ((vMin.x >= dest.vMax.x) || (vMax.x <= dest.vMin.x) || (vMin.y >= dest.vMax.y) || (vMax.y <= dest.vMin.y))
 		return false;
 	return true;
+}
+
+bool CAABB::Contains(CAABB& dest)
+{
+	return ((dest.vMin.x >= vMin.x) && (dest.vMin.y >= vMin.y) && (dest.vMax.x <= vMax.x) && (dest.vMax.y <= vMax.y));
 }
 
 bool CAABB::IntersectsCircle(Vec2 center, float radius)

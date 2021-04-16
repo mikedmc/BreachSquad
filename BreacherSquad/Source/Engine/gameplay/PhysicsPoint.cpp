@@ -1,8 +1,9 @@
 #include "dxstdafx.h"
 #include "PhysicsPoint.h"
 
-void CPhysicsPoint::Init()
+void CPhysicsPoint::Reset()
 {
+	pArea = nullptr;
 	contactType = K_COLLTYPE_NONE;
 	bContacting = false;
 	bIsStatic = false;

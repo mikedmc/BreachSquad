@@ -136,9 +136,11 @@ public:
 	// returns intersection with a collision shape. Like AABB_Segment_Intersection_Arr but with collision shapes
 	CCollisionShape*		ColShape_Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CCollisionShape * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint, Vec2 * retNormal);
 	// returns the first intersection of aabbSRC with a Collision Shape
-	CCollisionShape*		ColShape_CAABB_Intersect_Arr(CAABB * aabbSrc, CCollisionShape * arrBoxes[], int nBoxesCnt);
+	CCollisionShape*		ColShape_CAABB_Intersect_Arr(CAABB& aabbSrc, CCollisionShape * arrBoxes[], int nBoxesCnt);
 	// returns segment intersection with tiles, starting form vStart
 	CTile*					SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i * hitTilePosTL = nullptr);
+	// optimized version that only checks the neighbours of the starting area (and detects it if not provided)
+	CTile*					SegmentTilesIntersectionEx(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i * hitTilePosTL = nullptr, CLevelArea* pStartArea = nullptr);
 
 	CGrowableArray<CActor*>	m_arrActors;				// actors list
 	// Seteaza noua stare si are in vedere si incheierea starii precedente
@@ -254,11 +256,11 @@ public:
 
 	///--- BULLETS ---
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.
-	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir);
+	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir, CLevelArea* pStartArea = nullptr);
 	// Returns the closest bullet (or null) of nBulletType under fMaxDistance
 	CBullet*				GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float fMaxDistance = 0.0f, int dwOwnerUID = 0);
 	// Releases all bullets of said type from specified owner
-	void					ReleaseBullet(int nBulletType, UINT32 nOwnerUID);
+	void					ReleaseBulletType(int nBulletType, UINT32 nOwnerUID);
 	void					UpdateBullets(float dTime);
 	void					PaintBullets(eLVLRenderPass pass);
 	// Marks bullets as killed and returns how many were marked 

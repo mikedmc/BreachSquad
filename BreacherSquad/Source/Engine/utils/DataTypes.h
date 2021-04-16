@@ -237,34 +237,34 @@ public:
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
 			ErrorBox(K_ERR_WARNING, L"CLinkedPool::GetFreeNode. No more free nodes!");
 #endif
-			return NULL;
+			return nullptr;
 		}
-		//scoatem nodul din lista de FREE
+		// remove node from FREE list
 		pListFree.m_pNext = pListFree.m_pNext->m_pNext;
-		//adaugam nod in lista de ocupate
+		// put it in BUSY list
 		pListUsed.m_pPrev->m_pNext = nod;
 		nod->m_pPrev = pListUsed.m_pPrev;
 		pListUsed.m_pPrev = nod;
 		nod->m_pNext = &pListUsed;
-		//unul folosit in plus
+		
 		m_nUsedCnt++;
-		//returnam nodul
+		// return pointer to node
 		return nod;
 	}
 
 	void DismissNode(CLinkedPoolNode* node)
 	{
-		assert(node != NULL);
+		assert(node != nullptr);
 
-		//leaga vecinii ei intre ei
+		// link neighbours between them
 		node->m_pNext->m_pPrev = node->m_pPrev;
 		node->m_pPrev->m_pNext = node->m_pNext;
-		//adauga particula in lista celor libere, la inceput ca sa o refoloseasca
+		// add it back to free nodes list
 		pListFree.m_pNext->m_pPrev = node;
 		node->m_pNext = pListFree.m_pNext;
 		node->m_pPrev = &pListFree;
 		pListFree.m_pNext = node;
-		//unul folosit in minus
+
 		m_nUsedCnt--;
 	}
 };
@@ -281,21 +281,21 @@ template<typename TYPE> HRESULT CLinkedPool <TYPE>::Init(int nPoolSize)
 	pArrNodes = new CLinkedPoolNode[m_nSize];
 	if (pArrNodes == NULL)
 		return E_OUTOFMEMORY;
-	//pun toate nodurile in lista free
+	// place all nodes in FREE list
 	pListFree.m_pNext = &pArrNodes[0];
 	pListFree.m_pPrev = &pArrNodes[m_nSize - 1];
-	//set first and last nodes
+	// set first and last nodes
 	pArrNodes[0].m_pNext = &pArrNodes[1];
 	pArrNodes[0].m_pPrev = &pListFree;
 	pArrNodes[m_nSize - 1].m_pPrev = &pArrNodes[m_nSize - 2];
 	pArrNodes[m_nSize - 1].m_pNext = &pListFree;
-	//set all other nodes
+	// set all other nodes
 	for (int kk = 1; kk < m_nSize - 1; kk++)
 	{
 		pArrNodes[kk].m_pNext = &pArrNodes[kk + 1];
 		pArrNodes[kk].m_pPrev = &pArrNodes[kk - 1];
 	}
-	//golesc lsita de used
+	// empty BUSY list
 	pListUsed.m_pNext = pListUsed.m_pPrev = &pListUsed;
 
 	m_nUsedCnt = 0;

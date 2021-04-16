@@ -279,7 +279,7 @@ public:
 
 	void SetIcon(EActorIconTypes iconType, float fDuration = 0.0f); //seteaza icon
 
-	IActiveInterface*	pClosestTouchable; //cel mai apropiat activ cu can interact
+	IActiveInterface*	pClosestTouchable; //closest touchable
 
 	CSprite		m_sprOverheadIcon;	//icon shown when interacting with things (doors, objects) or in other circumstances too
 

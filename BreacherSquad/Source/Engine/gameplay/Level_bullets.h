@@ -141,6 +141,7 @@ public:
 	int					actorClass;				// shooter class
 	UINT32				ownerUID;				
 	UINT32				dwLastTargetUID;		// used in order to hit targets only once (penetrating) no matter the framerate
+	CLevelArea*			pArea;					// current bullet area (collision optimization)
 
 public:
 	EBulletType			eType;					// bullet type: rocket, grenade, etc
@@ -158,7 +159,7 @@ public:
 	int					nArmorPiercingRating;	//AP class - bullet vs shield logic (see actor's ArmorRating)
 	UINT32				nExploTemplateHash;		//hash of explosion template at the end or 0 if none
 	
-	Vec3				pos_ini;				//pozitie spawnare
+	Vec3				pos_ini;				// spawning position
 	Vec2				posProj;				// 2D projected position
 	Vec2				posShadow;				// 2D shadow position (Z clamped)
 
@@ -178,9 +179,9 @@ public:
 		fLife(1.0f), fLife_ini(1.0f), actorClass(K_LVL_ACT_CLASS_PLAYER), nSubstate(0),
 		fMomentum(0.0f), nFlags(0), fStunDuration(0.0f), ownerUID(0), dwLastTargetUID(0),
 		nArmorPiercingRating(0), nExploTemplateHash(0), fSelfDamageMultiplier(1.0f), fCriticalHitChance(0.0f),
-		bAnimated(false)
+		bAnimated(false), pArea(nullptr)
 	{
-		physPt = null;
+		physPt = nullptr;
 		pos_ini = Vec3(0.0f, 0.0f, 0.0f);
 
 		szTailSize.w = szTailSize.h = 0.0f;
