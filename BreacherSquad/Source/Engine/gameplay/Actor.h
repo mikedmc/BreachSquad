@@ -265,7 +265,6 @@ public:
 	byte 		nInteractingState;	//0 - not interacting, 1 interacting, 2 lockpicking
 	bool		bCrouched; //daca este crouched
 	eGenericState	nRolling; //0-ready, 1-rolling, 2-finished and waiting reset (direction key up)
-	CCollisionShape* pCover; //daca e diferit de null inseamna ca pe langa crouched e si covered
 	//CMiscObjectRail* pRail;		//pointer catre un rail atunci cand merge pe tiroliana
 
 	float		fStunTimer; //daca e diferit de 0 personajul este stunned

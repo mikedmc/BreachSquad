@@ -474,15 +474,6 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				//loveste liniar
 				float fPercent = 1.0f - (fDist / fDamageRadius);
 				CLAMP(fPercent, 0.0f, 1.0f);
-				//under cover damage
-				if (act->pCover != NULL)
-				{
-					Vec2 vIntPos;
-					bool bHitCover = AABB::Segment_Intersection(pos, act->GetPosHeart(), act->pCover->bbox, &vIntPos);
-					//atenueaza doar daca cover e intre om si explo
-					if ((bHitCover) && (D3DXVec2Length(&(vIntPos - act->GetPosHeart())) > 2.0f))
-						fPercent = fPercent * (1.0f - K_LVL_COVER_DAMAGE_ABSORBTION);
-				}
 				//add momentum
 				D3DXVec2Normalize(&vDir, &vDir);
 				vDir *= fPercent * fMaxImpulse;

@@ -152,7 +152,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 			fBulletLostEnergy = actor->actTemplate.fLife * 0.1f;
 
 		//transmit bullet momentum daca nu sunt under cover
-		if ((actor->actTemplate.fMass > 0.0f) && (pvProjectileMomentum) && (actor->pCover == null))
+		if ((actor->actTemplate.fMass > 0.0f) && (pvProjectileMomentum))
 		{
 			actor->vSpeedImpulse += *pvProjectileMomentum / actor->actTemplate.fMass;
 		}
@@ -1706,17 +1706,6 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 				}
 			}
 
-			//#ACHIEVEMENTS: check achievement ninja
-			for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
-			{
-				if ((pPlayerActor[kk] != null) && (!IsNetworkPlayer(pPlayerActor[kk])) && 
-					(m_arrStats[K_LVL_STATS_PL1_DAMAGE_TAKEN + kk * K_LVL_STATS_PLAYER_STATS_COUNT] == 0) && 
-					(m_arrStats[K_LVL_STATS_PL1_DEATHS + kk * K_LVL_STATS_PLAYER_STATS_COUNT] == 0))
-				{
-					UTGetAchievementManager().UnlockAchievement(ACH_NINJA);
-					break;
-				}
-			}
 		}
 		break;
 		case K_LVL_STATE_MISSION_FAILED:
@@ -3643,7 +3632,6 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 		case AI_BEHAVIOR_SUICIDE:
 		{
 			actor->bCrouched = false;
-			actor->pCover = null;
 			actor->fStunTimer = 0.0f;
 
 			actor->m_AIcommands.nIconType = K_LVL_ACT_ICON_REMOVE_ICON;
@@ -3676,7 +3664,6 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			actor->fArmor = 0.0f;
 
 			actor->bCrouched = false;
-			actor->pCover = null;
 			actor->fStunTimer = 0.0f;
 			//death timer for players or splat timer for others
 			actor->AItimer1 = 0.0f;
@@ -4695,27 +4682,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	//save old crouch state
 	bool bCrouchedOldState = actor->bCrouched;
-
-	//still in cover if can't roll
-	if (actor->pCover != null)
-	{
-		//can't roll so stay still
-		if ((actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_ROLL) == 0)
-		{
-			actor->m_AIcommands.bThrustX = false;
-			actor->m_AIcommands.nMoveDirX = 0;
-		}
-		//can roll but looking in the other direction
-		else
-		{
-			if ((actor->m_AIcommands.bThrustX) /*&& (actor->m_AIcommands.nMoveDirX != actor->lookDirXsign)*/)
-			{
-				actor->m_AIcommands.bThrustX = false;
-				actor->m_AIcommands.nMoveDirX = 0;
-				actor->nRolling = K_STATE_FINISHED;
-			}
-		}
-	}
 
 	//set crouch (not on ladder)
 	actor->bCrouched = actor->m_AIcommands.bCrouched;
@@ -8936,12 +8902,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		}
 
 		//cover shield
-		if (player->pCover != null)
-		{
-			Vec2 vpos = Vec2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
-			CSprite::paintFrame(&UTGetGUI().m_sprCol, vpos.x, vpos.y, ANM_CONTROLS_SPR_PLAYER_ICONS, 0, pPlayerActor[kk]->color);
-		}
-		else if (UTGetAppClass().m_Settings.bShowInterfaceHelp) //player numeric icon (only if shield not visible)
+		if (UTGetAppClass().m_Settings.bShowInterfaceHelp) //player numeric icon (only if shield not visible)
 		{
 			Vec2 vpos = Vec2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y + fabs(3.0f * sin(fLocalTimeline * 4.0f)));
 			CSprite::paintFrame(&m_sprInterface, vpos.x, vpos.y, ANM_IGM_INTERFACE_SPR_PLAYER_NR_ICONS, pPlayerActor[kk]->nPlayerOrdinal);
