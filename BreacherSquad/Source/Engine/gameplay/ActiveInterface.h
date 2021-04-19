@@ -6,80 +6,82 @@ class CLevelArea;
 //perioada standard de decizie pt AI (in secunde) si variatia random a acestuia
 #define	K_LVL_AI_DECISION_INTERVAL				0.25f
 #define	K_LVL_AI_DECISION_INTERVAL_VARIATION	0.05f
-//perioada standard de asteptare inainte sa schimbe starile (de ex daca nu te mai vede timp de N secunde trece pe idle)
-#define K_LVL_AI_STATE_WAIT		3.0f
 
 enum eActiveInterfaceType {
 	K_LVL_IAI_TYPE_UNKNOWN,
-	K_LVL_IAI_TYPE_BASE,		// basinc IActiveInterface
+	K_LVL_IAI_TYPE_BASE,		// basic IActiveInterface
 	K_LVL_IAI_TYPE_LIGHT,
 	K_LVL_IAI_TYPE_PROP,
 	K_LVL_IAI_TYPE_ACTOR,
 	K_LVL_IAI_TYPE_COLSHAPE,
 };
 
-// Base class for all active elements (actors, objects, etc)
+///----------------------------------------------------------------------------------
+/// Base class for all active elements (actors, objects, etc) 
+///----------------------------------------------------------------------------------
 class IActiveInterface
 {
 protected:
-	bool				bPendingKill;	// exited gameplay, waits for garbage collection
+	bool					bPendingKill;			// exited gameplay, waits for garbage collection
 
 public:
-	UINT32				UID;			// ingame UID
-	CLevelArea*			pArea;			// pointer to current area
-	int					ID;				// ID exported from editor (not the same as UID).
-	Vec3				vPos;			// Z coord gets added to Y to simulate 3D when rendering (see Z_TO_H macros)
-	Vec3				vPos_ini;		// initial position needed for relative calculations. Usually only set when spawned.
+	UINT32					UID;					// ingame UID
+	CLevelArea*				pArea;					// pointer to current area
+	int						ID;						// ID exported from editor (not the same as UID).
+	Vec3					vPos;					// Z coord gets added to Y to simulate 3D when rendering (see Z_TO_H macros)
+	Vec3					vPos_ini;				// initial position needed for relative calculations. Usually only set when spawned.
 
-	bool	bTouching;			//folosit ca sa elimine eventuale cicluri infinite.
-	UINT32 	nTouchingUID;   	//Reprezinta UID-ul celui care a facut touch sau 0 pt niciunul
-	float	fTouchTimerReset;	//folosit la resetarea touch timerului
-	float	fTouchTimer;		//pentru cat timp s-a facut touch? sunt obiecte la care trebuie sa faci touch pentru o durata anume
-	float	fTouchDuration;		//durata ceruta pentru touch
-
-	Vec2		pos;		   //pozitie activ
-	float		fAngle;
-	DWORD		color;
-	CAABB		bbox;
-	CAABB		bbox_proj;		// projected bbox (combines floor bbox and height)
-	CAABB		bbox_exported; //bboxul exportat din BSX (mutat la pozitia activului)
+	bool					bTouching;				// folosit ca sa elimine eventuale cicluri infinite.
+	UINT32 					nTouchingUID;   		// Reprezinta UID-ul celui care a facut touch sau 0 pt niciunul
+	float					fTouchTimerReset;		// folosit la resetarea touch timerului
+	float					fTouchTimer;			// pentru cat timp s-a facut touch? sunt obiecte la care trebuie sa faci touch pentru o durata anume
+	float					fTouchDuration;			// durata ceruta pentru touch
+													   
+	Vec2					pos;					
+	float					fAngle;
+	DWORD					color;
+	float					fHeight;				// height in world coords
+	CAABB					bbox;
+	CAABB					bbox_proj;				// projected bbox (combines floor bbox and height)
+	CAABB					bbox_exported;			// bbox exported from BSX (moved at position)
 // initial values necessary for relative movements
 public: 
-	CAABB		bbox_ini;			//non relative to object position AABB
-	CAABB		bbox_proj_ini;		// non relative to pos projected bbox
-	CAABB		bbox_exported_ini; //bboxul exportat din BSX (inital)
-	Vec2		pos_ini;
-	float		fAngle_ini;
-	DWORD		color_ini;
-	INT32		targetID_ini;		//target ID citit din editor
+	CAABB					bbox_ini;				// non relative to object position AABB
+	CAABB					bbox_proj_ini;			// non relative to pos projected bbox
+	CAABB					bbox_exported_ini;		// initial bbox exported from BSX
+	Vec2					pos_ini;
+	float					fAngle_ini;
+	DWORD					color_ini;
+	INT32					targetID_ini;			// target ID citit din editor
 
 public: //logic
-	IActiveInterface	*pTarget;		//target-ul din editor //TODO:poate trebuie inlocuita cu un UID ca sa nu am probleme cand dezaloc obiecte...? depinde de viteza cu care se cheama la rails
-	bool				bCanInteract;	//can interact with it?
-	bool				bHideInteractIcon;	//hide the icon
+	IActiveInterface		*pTarget;				// target-ul din editor //TODO:poate trebuie inlocuita cu un UID ca sa nu am probleme cand dezaloc obiecte...? depinde de viteza cu care se cheama la rails
+	bool					bCanInteract;			// can interact with it?  #TODO: replace with interact-type or actions list
+	bool					bHideInteractIcon;		// hide the icon
 
-	EAIstate			AIstate;		//state AI (AI_STATE ENUM)
-	CVariantCollection	varAIparams;	//parametrii state-ului AI
-	float				AItimerDecision;//cand ajunge la 0 ia decizii
+	EAIstate				AIstate;				// state AI (AI_STATE ENUM)
+	CVariantCollection		varAIparams;			// AIstate params
+	float					AItimerDecision;		// takes decisions when it reaches 0
 	//diverse pt logica
-	UINT32				AItargetUID;	//enemy UID (not the one set from the editor!!!)
-	double				fTimelineAI;	//timeline local pt AI (folosit mai ales la animatii in fn de timp)
-	//variabile locale rapide AI
-	float				AItimer1, AItimer2;	//timere folosite la diverse functii
-	float				AIfvar1, AIfvar2, AIfvar3; //diverse variabile folosite in AI
-	int					AIvar1, AIvar2;
-	Vec2				AIvec1;
-	bool				AIvarBool1, AIvarBool2;
-	CStringHash			AIstrvar1, AIstrvar2; //variabile string
-	int					AIsubState;			//sub-stare folosita la diferite AI-uri
+	UINT32					AItargetUID;			// enemy UID (not the one set from the editor!!!)
+	double					fTimelineAI;			// local timeline for AI 
+	
+	//#TODO: variabile locale rapide AI - ar trebui incluse intr-o structura cu serialize/deserialize eventual
+	float					AItimer1, AItimer2;		
+	float					AIfvar1, AIfvar2, AIfvar3; 
+	int						AIvar1, AIvar2;
+	Vec2					AIvec1;
+	bool					AIvarBool1, AIvarBool2;
+	CStringHash				AIstrvar1, AIstrvar2; 
+	int						AIsubState;				// AI substate used here and there, everywhere
 
-	CStringHash			script_hash;		//hash-ul scriptului
-	UINT32				nRunningScriptUID;	//scriptul care ruleaza acum
+	CStringHash				script_hash;			// script hash
+	UINT32					nRunningScriptUID;		// UID of script that is running now on this element
 
-	bool				bHidden;			//DO NOT SET DIRECTLY! (use bSetHidden) flag de hidden. vizibil si din editor
-	bool				bSetHidden;			//#TODO: ar trebui inlocuit cu SetHidden(T/F, FORCED)
-	bool				bAnimated;			//este animat? daca da face play la animatie
-	bool				bSkipRender;		//skips render...
+	bool					bHidden;				// DO NOT SET DIRECTLY! (use bSetHidden) flag de hidden. vizibil si din editor
+	bool					bSetHidden;				// #TODO: ar trebui inlocuit cu SetHidden(T/F, FORCED)
+	bool					bAnimated;				// este animat? daca da face play la animatie
+	bool					bSkipRender;			// skips render...
 
 	//CTOR/DTOR
 	IActiveInterface();
