@@ -5301,20 +5301,35 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			}
 		}
 		//add boxes from tiles
-		//#TODO: if it catches some corners sometimes try enlarging the tiles collision area (boxUnionTiles) by 1 tile in all directions
-		//#OPTIMIZATION: verifica doar zonele vecine si doar daca moveBounds nu e complet inclusa in area curenta
+		//#MAYBE: if it catches some corners sometimes try enlarging the tiles collision area (boxUnionTiles) by 1 tile in all directions
 		static CAABB retAABBs[64];
-		for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
+		if (actor->pArea != nullptr)
 		{
-			CLevelArea* area = m_arrAreas[ii];
-			if (!area->AABBbounds_TL.Intersects(boxUnionTilesWH))
-				continue;
-			int nadded = area->GetTilesCollisionBoxes(boxUnionTiles, retAABBs, 64);
+			// get collision tiles for current area
+			int nadded = actor->pArea->GetTilesCollisionBoxes(boxUnionTiles, retAABBs, 64);
 			if (nadded > 0)
 			{
 				for (int oo = 0; oo < nadded; oo++)
 				{
 					tempCollBoxList.Add(retAABBs[oo]);
+				}
+			}
+			// if movement bbox is not completely contained in the current area BBox try with the neighbours too
+			if (!actor->pArea->AABBbounds.Contains(boxUnion))
+			{
+				for (int oo = 0; oo < actor->pArea->arrNeighbours.Count(); oo++)
+				{
+					CLevelArea* area = actor->pArea->arrNeighbours.m_pData[oo];
+					if (!area->AABBbounds_TL.Intersects(boxUnionTilesWH))
+						continue;
+					int nadded = area->GetTilesCollisionBoxes(boxUnionTiles, retAABBs, 64);
+					if (nadded > 0)
+					{
+						for (int oo = 0; oo < nadded; oo++)
+						{
+							tempCollBoxList.Add(retAABBs[oo]);
+						}
+					}
 				}
 			}
 		}
