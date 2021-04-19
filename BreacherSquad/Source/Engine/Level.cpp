@@ -3693,8 +3693,6 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			actor->m_AIcommands.ResetMoveCommands();
 			//reset color
 			actor->m_AIcommands.nColor = actor->color_ini;
-			//reset overhead icons
-			actor->m_sprOverheadIcon.animationIdx = -1;
 			//stop weapons
 			Weapon_StopReloading(actor->pWeaponMain);
 			Weapon_Jam(actor->pWeaponMain);
@@ -5472,12 +5470,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		actor->pArea = Areas_GetAt(Vec3ToVec2XY(actor->pos));
 	}
 
-	//only update it if set
-	if (actor->m_sprOverheadIcon.animationIdx >= 0)
-	{
-		actor->m_sprOverheadIcon.Update(&m_sprInterface, dTime);
-	}
-
 	///--- damage taken - paint red frame while taking damage
 	DWORD dwCol = actor->color;
 	//paint red when taking damage
@@ -7007,12 +6999,12 @@ void CLevel::Update(float dTime_original)
 								if (layer != null)
 								{
 									//portrete								
-									if (ctrl = layer->GetControlByName("CTRL_ANIM_PORTRAIT_PL1"))
+									if ((ctrl = layer->GetControlByName("CTRL_ANIM_PORTRAIT_PL1")) != nullptr)
 									{
 										ctrl->paramsDict.SetNamedVarINT32(L"setFrame", (int)g_playerSelScr.m_arrPlayers[0].eType);
 									}
 									//XP bar
-									if (ctrl = layer->GetControlByName("CTRL_XPBAR_PL1"))
+									if ((ctrl = layer->GetControlByName("CTRL_XPBAR_PL1")) != nullptr)
 									{
 										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
 										ctrl->paramsDict.SetNamedVarINT32(L"nOldValue", nXPpl1);
@@ -8852,8 +8844,8 @@ HRESULT CLevel::PaintUsingFinalRTT()
 			*/
 			if (activ->fTouchDuration == 0.0f) //daca nu trebuie sa tina apasat afisez animatie de neapasare
 			{
-				player->m_sprOverheadIcon.setAnimationOnce(ANIM_IDX_INTERACT_ONCE);
-				player->m_sprOverheadIcon.pos = vpos;
+				//player->m_sprOverheadIcon.setAnimationOnce(ANIM_IDX_INTERACT_ONCE);
+				//player->m_sprOverheadIcon.pos = vpos;
 
 				/*
 				DWORD dwcol = 0xff00c0ff;
@@ -8881,17 +8873,15 @@ HRESULT CLevel::PaintUsingFinalRTT()
 						RECTXYWH recttemp(activ->pTarget->pos.x - barlen / 2.0f, activ->pTarget->bbox_exported.vMax.y + 4, barlen, 8);
 						CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
 					}
-					//#HACK: set interact icon position too so it doesn't vibrate when kicking the door
-					player->m_sprOverheadIcon.pos.x = activ->pTarget->bbox_exported.vCenter.x - 1.0f;
 				}
 				//paint interact icon at the end
-				player->m_sprOverheadIcon.paint(&m_sprInterface);
+				//player->m_sprOverheadIcon.paint(&m_sprInterface);
 			}
 			else
 			{
-				player->m_sprOverheadIcon.setAnimationOnce(ANIM_IDX_INTERACT_KEEP_PRESSED);
-				player->m_sprOverheadIcon.pos = vpos;
-				player->m_sprOverheadIcon.paint(&m_sprInterface);
+				//player->m_sprOverheadIcon.setAnimationOnce(ANIM_IDX_INTERACT_KEEP_PRESSED);
+				//player->m_sprOverheadIcon.pos = vpos;
+				//player->m_sprOverheadIcon.paint(&m_sprInterface);
 
 				DWORD dwcol = 0xff00c0ff;
 				if (g_timers.GetTimerValue(600) < 0.3f)

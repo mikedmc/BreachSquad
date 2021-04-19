@@ -159,7 +159,9 @@ void CLevel::UpdateBullets(float dTime)
 		// save link to next node as we might deallocate current node
 		CLinkedPool<CBullet>::CLinkedPoolNode *nextnode = node->m_pNext;
 
-		CBullet* bullet = &node->m_data;
+		CBullet* bullet = &node->m_data;  
+		// copy area pointer from phys pt
+		bullet->pArea = bullet->physPt->m_data.pArea;
 		// animate sprite if necessary
 		if (bullet->bAnimated)
 		{

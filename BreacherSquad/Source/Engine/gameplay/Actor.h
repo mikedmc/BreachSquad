@@ -281,8 +281,6 @@ public:
 
 	IActiveInterface*	pClosestTouchable; //closest touchable
 
-	CSprite		m_sprOverheadIcon;	//icon shown when interacting with things (doors, objects) or in other circumstances too
-
 	// Sets a Spine skin and returns true if successfull
 	bool					Spine_SetSkin(const char * strSkinName);
 	// Tells you if the actor has said animation 
