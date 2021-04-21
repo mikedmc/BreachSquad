@@ -18,11 +18,11 @@
     <Module ImageIdx="0" X="456" Y="41" W="36" H="36" />
   </Modules>
   <FrameModules>
-    <FrameModule ModuleIdx="0" OX="-1" OY="-26" Flags="0" />
+    <FrameModule ModuleIdx="0" OX="-7" OY="-21" Flags="0" />
     <FrameModule ModuleIdx="1" OX="0" OY="-48" Flags="0" />
-    <FrameModule ModuleIdx="2" OX="3" OY="-26" Flags="0" />
+    <FrameModule ModuleIdx="2" OX="-1" OY="-24" Flags="0" />
     <FrameModule ModuleIdx="3" OX="-1" OY="-17" Flags="0" />
-    <FrameModule ModuleIdx="4" OX="2" OY="-32" Flags="0" />
+    <FrameModule ModuleIdx="4" OX="-1" OY="-30" Flags="0" />
     <FrameModule ModuleIdx="5" OX="-14" OY="-31" Flags="0" />
     <FrameModule ModuleIdx="6" OX="-11" OY="-31" Flags="0" />
     <FrameModule ModuleIdx="7" OX="-3" OY="-3" Flags="0" />
@@ -33,31 +33,31 @@
     <FrameModule ModuleIdx="12" OX="-18" OY="-17" Flags="0" />
   </FrameModules>
   <Frames>
-    <Frame BBoxX="-1" BBoxY="-26" BBoxW="26" BBoxH="26">
+    <Frame BBoxX="-6" BBoxY="-7" BBoxW="14" BBoxH="11">
       <FModules>
         <FModule Idx="0" />
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="0" BBoxY="-48" BBoxW="16" BBoxH="48">
+    <Frame BBoxX="0" BBoxY="-16" BBoxW="16" BBoxH="16">
       <FModules>
         <FModule Idx="1" />
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="3" BBoxY="-26" BBoxW="30" BBoxH="25">
+    <Frame BBoxX="0" BBoxY="-14" BBoxW="23" BBoxH="14">
       <FModules>
         <FModule Idx="2" />
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="-1" BBoxY="-17" BBoxW="19" BBoxH="18">
+    <Frame BBoxX="0" BBoxY="-8" BBoxW="14" BBoxH="8">
       <FModules>
         <FModule Idx="3" />
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="2" BBoxY="-32" BBoxW="36" BBoxH="32">
+    <Frame BBoxX="0" BBoxY="-15" BBoxW="23" BBoxH="15">
       <FModules>
         <FModule Idx="4" />
       </FModules>
@@ -113,11 +113,11 @@
     </Frame>
   </Frames>
   <AnimationFrames>
-    <AnimationFrame FrameIdx="0" Duration="1" DX="0" DY="0" Flags="0" />
-    <AnimationFrame FrameIdx="1" Duration="1" DX="0" DY="0" Flags="0" />
-    <AnimationFrame FrameIdx="2" Duration="1" DX="0" DY="0" Flags="0" />
-    <AnimationFrame FrameIdx="3" Duration="1" DX="0" DY="0" Flags="0" />
-    <AnimationFrame FrameIdx="4" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="0" Duration="1" DX="0" DY="0" Flags="63" />
+    <AnimationFrame FrameIdx="1" Duration="1" DX="0" DY="0" Flags="147" />
+    <AnimationFrame FrameIdx="2" Duration="1" DX="0" DY="0" Flags="50" />
+    <AnimationFrame FrameIdx="3" Duration="1" DX="0" DY="0" Flags="32" />
+    <AnimationFrame FrameIdx="4" Duration="1" DX="0" DY="0" Flags="58" />
     <AnimationFrame FrameIdx="5" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="6" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="7" Duration="1" DX="0" DY="0" Flags="0" />

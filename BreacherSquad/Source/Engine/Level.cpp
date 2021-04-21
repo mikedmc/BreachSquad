@@ -565,7 +565,9 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	Actor_SetAIState(nact, nact->actTemplate.AItemplate->GetAIStateByName(nact->actTemplate.shAIState_ini));
 
 	//finish up adding the actor
+	nact->PostConstructionInit();
 	m_arrActors.Add(nact);
+
 	nact->BeginPlay();
 
 	return nact;
@@ -594,7 +596,7 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 	UINT32 activFlags = 0;
 	//flip xy
 	obj->flipX = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPX) != 0);
-	obj->flipY = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPY) != 0);
+	//obj->flipY = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPY) != 0);
 	//animated
 	obj->bAnimated = ((activFlags & K_EDITOR_ACTIVE_FLAG_ANIMATED) != 0);
 	//cand e animat selecteaza random frame-ul de pornire
@@ -606,18 +608,13 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 	RECTXYWH bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
 	RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
 	obj->bbox_ini.Set(objbox);
-	obj->bbox_exported_ini.Set(bbox_set);
+	obj->bbox_floor_ini.Set(bbox_set);
 	//daca e flipat pe X flipez si bbox. Pe Y nu e cazul pt ca se pastreaza in acelasi bbox in paint
 	if (obj->flipX)
 	{
 		obj->bbox_ini.Move(Vec2(-2.0f * obj->bbox_ini.vCenter.x, 0.0f));
-		obj->bbox_exported_ini.Move(Vec2(-2.0f * obj->bbox_exported_ini.vCenter.x, 0.0f));
+		obj->bbox_floor_ini.Move(Vec2(-2.0f * obj->bbox_floor_ini.vCenter.x, 0.0f));
 	}
-	obj->bbox = obj->bbox_ini;
-	obj->bbox.Move(obj->pos.xy);
-
-	obj->bbox_exported = obj->bbox_exported_ini;
-	obj->bbox_exported.Move(obj->pos.xy);
 
 	//load logic
 	obj->bCanInteract = false;
@@ -8789,10 +8786,10 @@ HRESULT CLevel::PaintUsingFinalRTT()
 			IActiveInterface * activ = player->pClosestTouchable;
 			pLastPaintedTarget = player->pClosestTouchable;
 
-			Vec2 vpos(activ->bbox_exported.vCenter.x, activ->bbox_exported.vMin.y);
+			Vec2 vpos(activ->bbox.vCenter.x, activ->bbox.vMin.y);
 			//too low? don't cover the player
-			if (vpos.y > player->bbox_exported.vMin.y)
-				vpos.y = player->bbox_exported.vMin.y;
+			if (vpos.y > player->bbox.vMin.y)
+				vpos.y = player->bbox.vMin.y;
 
 			//change this constants for analog sticks
 			const int ANIM_IDX_INTERACT_ONCE = ANM_IGM_INTERFACE_SPR_INTERACT_ONCE;
@@ -8831,7 +8828,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 					if ((perc > 0.0f) && (perc < 1.0f))
 					{
 						//RECTXYWH recttemp(vpos.x - barlen / 2.0f, activ->bbox_exported.vMax.y + 4, barlen, 8);
-						RECTXYWH recttemp(activ->pTarget->pos.xy_proj.x - barlen / 2.0f, activ->pTarget->bbox_exported.vMax.y + 4, barlen, 8);
+						RECTXYWH recttemp(activ->pTarget->pos.xy_proj.x - barlen / 2.0f, activ->pTarget->bbox.vMax.y + 4, barlen, 8);
 						CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
 					}
 				}

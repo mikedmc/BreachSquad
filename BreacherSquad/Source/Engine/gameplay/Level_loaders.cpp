@@ -476,9 +476,6 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 			colobj->bbox.Set(Vec2(0.0f, 0.0f), Vec2(16.0f, 16.0f));
 		colobj->bbox.Move(vOffset);
 		colobj->bbox_ini = colobj->bbox;
-		//set exported bboxes too
-		colobj->bbox_exported = colobj->bbox;
-		colobj->bbox_exported_ini = colobj->bbox_ini;
 		//setam pos on center
 		colobj->pos = colobj->bbox_ini.vCenter;
 		//type (ub)
@@ -536,7 +533,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		UINT32 activFlags = OS_freadUInt32(fl);
 		//flip xy
 		obj->flipX = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPX) != 0);
-		obj->flipY = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPY) != 0);
+		//obj->flipY = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPY) != 0);
 		//animated
 		obj->bAnimated = ((activFlags & K_EDITOR_ACTIVE_FLAG_ANIMATED) != 0);
 		//animated? select different start frame
@@ -548,18 +545,13 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		RECTXYWH bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
 		RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
 		obj->bbox_ini.Set(objbox);
-		obj->bbox_exported_ini.Set(bbox_set);
-		//daca e flipat pe X flipez si bbox. Pe Y nu e cazul pt ca se pastreaza in acelasi bbox in paint
+		obj->bbox_floor_ini.Set(bbox_set);
+		// when we flip it on X we flip bboxes too
 		if (obj->flipX)
 		{
 			obj->bbox_ini.Move(Vec2(-2.0f * obj->bbox_ini.vCenter.x, 0.0f));
-			obj->bbox_exported_ini.Move(Vec2(-2.0f * obj->bbox_exported_ini.vCenter.x, 0.0f));
+			obj->bbox_floor_ini.Move(Vec2(-2.0f * obj->bbox_floor.vCenter.x, 0.0f));
 		}
-		obj->bbox = obj->bbox_ini;
-		obj->bbox.Move(obj->pos.xy);
-
-		obj->bbox_exported = obj->bbox_exported_ini;
-		obj->bbox_exported.Move(obj->pos.xy);
 
 		//load logic and init data
 		obj->LoadLogic(fl);

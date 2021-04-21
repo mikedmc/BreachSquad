@@ -17,9 +17,6 @@ void CCollisionShape::SetPos(Vec3 newPos)
 	//set relative data
 	bbox = bbox_ini;
 	bbox.Move(pos.xy);
-
-	bbox_exported = bbox;
-	bbox_exported_ini = bbox_ini;
 }
 
 void CCollisionShape::Move(Vec3 delta)
@@ -34,7 +31,6 @@ void CCollisionShape::Move(Vec3 delta)
 	pos.Move(delta);
 	//set relative data
 	bbox.Move(Vec3ToVec2XY(delta));
-	bbox_exported = bbox;
 }
 
 void CCollisionShape::BeginPlay()

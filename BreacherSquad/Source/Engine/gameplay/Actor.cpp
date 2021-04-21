@@ -86,7 +86,9 @@ void CActor::EquipWeapon(int nWeaponIdx)
 
 void CActor::PostConstructionInit()
 {
-
+	// compute bboxes on init
+	bbox.Set(&bbox_ini, pos.xy_proj);
+	bbox_floor.Set(&bbox_floor_ini, pos.xy);
 }
 
 void CActor::BeginPlay()
@@ -147,10 +149,8 @@ void CActor::SetPos(Vec3 newPos)
 	pos_last = pos.xyz;
 	pos = newPos;
 
-	bbox = bbox_ini;
-	bbox.Move(pos.xy);
-	bbox_proj = bbox_proj_ini;
-	bbox_proj.Move(pos.xy);
+	bbox.Set(&bbox_ini, pos.xy_proj);
+	bbox_floor.Set(&bbox_floor_ini, pos.xy);
 }
 
 void CActor::Move(Vec3 delta)
@@ -159,10 +159,8 @@ void CActor::Move(Vec3 delta)
 	Vec3 npos = pos_last + delta;
 	pos = npos;
 
-	bbox = bbox_ini;
-	bbox.Move(pos.xy);
-	bbox_proj = bbox_proj_ini;
-	bbox_proj.Move(pos.xy);
+	bbox.Set(&bbox_ini, pos.xy_proj);
+	bbox_floor.Set(&bbox_floor_ini, pos.xy);
 }
 
 
@@ -331,38 +329,35 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 		return false;
 	}
 	//copy template data
-	this->actTemplate = *pActorTemplate;
+	actTemplate = *pActorTemplate;
 
-	this->actTemplate.FillDefaultValuesIfNotSet();
+	actTemplate.FillDefaultValuesIfNotSet();
 	//save a copy
-	this->actTemplate_ini = this->actTemplate;
+	actTemplate_ini = this->actTemplate;
 
 	for (int kk = 0; kk < K_ACT_MAX_ANIM_TRACKS; kk++)
 	{
-		this->eLastAnim[kk] = K_SD_ANIM_EMPTY;
+		eLastAnim[kk] = K_SD_ANIM_EMPTY;
 	}
-	this->eLastPlayedVerse = K_LVL_ACT_VERSE_EMPTY;
+	eLastPlayedVerse = K_LVL_ACT_VERSE_EMPTY;
 
-	this->bCrouched = false;
-	this->nLastDamageTakenFromUID = 0;
-	this->nAnimSet = 0;
+	bCrouched = false;
+	nLastDamageTakenFromUID = 0;
+	nAnimSet = 0;
 
-	this->bSkipRender = false;
+	bSkipRender = false;
 	// compute bboxes
-	bbox_ini = actTemplate.bbox;
-	bbox = bbox_ini;
-	bbox_exported_ini = bbox_ini;
-	bbox_exported = bbox_exported_ini;
-	// compute projected bbox
-	bbox_proj_ini.Set(Vec2(bbox.vMin.x, bbox.vMin.y - Z_TO_H(actTemplate.fHeight)), bbox.vMax);
-	bbox_proj = bbox_proj_ini;
+	bbox_floor_ini = actTemplate.bbox;
+	//#TODO: should be different
+	bbox_ini = bbox_floor_ini;
+	fHeight = actTemplate.fHeight;
 	
 	//set hue
 	byte collvl = 255;
-	this->color_ini = D3DCOLOR_ARGB(255, collvl, collvl, collvl);
-	this->color = this->color_ini;
+	color_ini = D3DCOLOR_ARGB(255, collvl, collvl, collvl);
+	color = this->color_ini;
 
-	this->fLife = this->actTemplate.fLife;
+	fLife = this->actTemplate.fLife;
 
 	/*
 	if (!this->actTemplate.shWeaponDefault.IsEmpty())

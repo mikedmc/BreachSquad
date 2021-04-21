@@ -647,6 +647,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_IACTIVE_ADD_NOTIFICATION:
 		{
+			/*
 			CVariantComplex* vcTarget = instr->GetArgument(L"target");
 			CVariantComplex* vcStringID = instr->GetArgument(L"sStringID");
 			CVariantComplex* vcDuration = instr->GetArgument(L"fDuration");
@@ -668,6 +669,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			//add notification
 			m_interfaceTextBubble.ShowLevelHint(&m_camLevel, stridx, FONTIDX_6_NS1, Vec2(target->bbox_exported.vCenter.x, target->bbox_exported.vMin.y), fDuration);
 			return true;
+			*/
 		}
 		break;
 		case instr_IACTIVE_GENERATE_EFFECT:

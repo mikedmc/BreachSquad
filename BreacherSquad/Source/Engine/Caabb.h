@@ -10,6 +10,7 @@ public:
 	Vec2 vCenter;			//don't set manually!
 	Vec2 vMin, vMax;		//don't set manually!
 	Vec2 vSize;				//don't set manually!
+
 public:
 	CAABB() :vHalfSize(0.0f, 0.0f), vCenter(0.0f, 0.0f), vMin(0.0f, 0.0f), vSize(0.0f, 0.0f), vMax(0.0f, 0.0f)
 	{}
@@ -111,3 +112,17 @@ namespace AABB {
 	// Returns surface of aabb
 	FORCEINLINE float	GetSurface(CAABB &a) { return a.vSize.x * a.vSize.y; }
 }
+
+// CAABB classs that allows you to save and restore a snapshot of the box
+class CAABBEx : public CAABB
+{
+public:
+	CAABBEx() : vMin_snapshot(0.0f, 0.0f), vMax_snapshot(0.0f, 0.0f)
+	{}
+
+	Vec2 vMin_snapshot;
+	Vec2 vMax_snapshot;
+
+	void SaveSnapshot();
+	void RestoreSnapshot(Vec2 vOffset = { 0.0f, 0.0f });
+};

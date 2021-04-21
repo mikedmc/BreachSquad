@@ -592,3 +592,13 @@ Vec2 AABB::GetRandomPointInBox(CAABB &a)
 	return Vec2(a.vMin.x + randfloat(a.vSize.x), a.vMin.y + randfloat(a.vSize.y));
 }
 
+void CAABBEx::SaveSnapshot()
+{
+	vMin_snapshot = vMin;
+	vMax_snapshot = vMax;
+}
+
+void CAABBEx::RestoreSnapshot(Vec2 vOffset /*= { 0.0f, 0.0f }*/)
+{
+	Set(vMin_snapshot + vOffset, vMax_snapshot + vOffset);
+}

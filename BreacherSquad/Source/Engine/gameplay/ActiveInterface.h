@@ -37,18 +37,14 @@ public:
 	float					fTouchTimer;			// pentru cat timp s-a facut touch? sunt obiecte la care trebuie sa faci touch pentru o durata anume
 	float					fTouchDuration;			// durata ceruta pentru touch
 													   
-	//float					fAngle;
 	DWORD					color;
 	float					fHeight;				// height in world coords
-	CAABB					bbox;
-	CAABB					bbox_proj;				// projected bbox (combines floor bbox and height)
-	CAABB					bbox_exported;			// bbox exported from BSX (moved at position)
+	CAABB					bbox;					// full projected 2d bbox in screen space that surrounds the entire object (for culling mainly)
+	CAABB					bbox_ini;				// non relative to object position AABB used when moving the bbox with absolute values
+	CAABB					bbox_floor;				// bbox of the object projected on the floor
+	CAABB					bbox_floor_ini;			// initial value for bbox
 // initial values necessary for relative movements
 public: 
-	CAABB					bbox_ini;				// non relative to object position AABB
-	CAABB					bbox_proj_ini;			// non relative to pos projected bbox
-	CAABB					bbox_exported_ini;		// initial bbox exported from BSX
-	//float					fAngle_ini;
 	DWORD					color_ini;
 	INT32					targetID_ini;			// target ID citit din editor
 

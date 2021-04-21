@@ -9,10 +9,10 @@ public:
 	CSpr			sprite;
 	int				nAnim_ini, nFrame_ini;		// Initial animation and frame
 
-	bool			flipX, flipY; //flip flags
+	bool			flipX;
 
 	CProp() :
-		flipX(false), flipY(false),
+		flipX(false),
 		nAnim_ini(-1), nFrame_ini(-1)
 	{}
 
