@@ -5,7 +5,7 @@
 
 IActiveInterface::IActiveInterface() : 
 	ID(-1), targetID_ini(-1), bHidden(false), bSetHidden(false), bSkipRender(false), bAnimated(false),
-	fAngle(0.0f), fAngle_ini(0.0f), color(0xffffffff), color_ini(0xffffffff),
+	color(0xffffffff), color_ini(0xffffffff),
 	bTouching(false), nTouchingUID(0), fTouchTimer(0.0f), fTouchDuration(0.0f), fTouchTimerReset(0.0f), 
 	pTarget(null), bCanInteract(false), bHideInteractIcon(false), AIstate(K_AI_STATE_UNDEFINED), AItimerDecision(K_LVL_AI_DECISION_INTERVAL),
 	nRunningScriptUID(0), AItargetUID(0), fTimelineAI(0.0f), 
@@ -14,10 +14,9 @@ IActiveInterface::IActiveInterface() :
 {
 	UID = GenerateUID();
 
-	vPos = Vec3(0.0f, 0.0f, 0.0f);
-	vPos_ini = Vec3(0.0f, 0.0f, 0.0f);
+	pos = Vec3(0.0f, 0.0f, 0.0f);
+	pos_ini = Vec3(0.0f, 0.0f, 0.0f);
 
-	pos = pos_ini = Vec2(0.0f, 0.0f);
 	script_hash.Reset();
 	varAIparams.DeleteAll();
 

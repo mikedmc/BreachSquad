@@ -2,23 +2,19 @@
 #include "Prop.h"
 
 ///--- CACTIVE ---
-void CProp::SetPos(Vec2 newPos)
+void CProp::SetPos(Vec3 newPos)
 {
 	pos = newPos;
-	bbox.Set(&bbox_ini, pos);
-	bbox_exported.Set(&bbox_exported_ini, pos);
+	bbox.Set(&bbox_ini, pos.xy);
+	bbox_exported.Set(&bbox_exported_ini, pos.xy);
 }
 
-void CProp::Move(Vec2 delta)
+void CProp::Move(Vec3 delta)
 {
-	pos += delta;
-	bbox.Set(&bbox_ini, pos);
-	bbox_exported.Set(&bbox_exported_ini, pos);
-}
-
-void CProp::SetAngle(float fnAngle)
-{
-	fAngle = fnAngle;
+	Vec3 npos = pos.xyz + delta;
+	pos = npos;
+	bbox.Set(&bbox_ini, pos.xy);
+	bbox_exported.Set(&bbox_exported_ini, pos.xy);
 }
 
 void CProp::PostConstructionInit()

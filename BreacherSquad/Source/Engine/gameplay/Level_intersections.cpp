@@ -186,13 +186,11 @@ CTile* CLevel::SegmentTilesIntersectionEx(Vec2 vStart, Vec2 vEnd, Vec2 & retPoin
 					segAABB.Set_Corrected(vFrom, vTo);
 					if (area->AABBbounds.Intersects(segAABB))
 					{
-						Vec2 hitPt, hitN;
-						Vec2i hitTL;
-						CTile* tl = area->SegmentTilesIntersection(vStart, vEnd, hitPt, hitN, &hitTL);
-						if (tl != nullptr)
+						CTile* tll = area->SegmentTilesIntersection(vStart, vEnd, hitPt, hitN, &hitTL);
+						if (tll != nullptr)
 						{
 							// on collision shorten the vector so we elimintate areas that are farther away
-							rettile = tl;
+							rettile = tll;
 							retPoint = hitPt;
 							retNormal = hitN;
 							if (hitTilePosTL != nullptr)

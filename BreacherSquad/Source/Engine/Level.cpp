@@ -584,12 +584,12 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 	//anim
 	int animIdx = nAnimIdx;
 	int frameIdx = nFrameIdx;
-	obj->sprite.Init(&m_sprProps, animIdx, obj->pos, frameIdx,  0xffffffff);
+	obj->sprite.Init(&m_sprProps, animIdx, obj->pos.xy_proj, frameIdx,  0xffffffff);
 	obj->nAnim_ini = animIdx;
 	obj->nFrame_ini = frameIdx;
 	obj->sprite.color = obj->color;
 	//angle
-	obj->fAngle = obj->fAngle_ini = 0.0f;
+	//obj->fAngle = obj->fAngle_ini = 0.0f;
 	//load flags and split
 	UINT32 activFlags = 0;
 	//flip xy
@@ -614,10 +614,10 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 		obj->bbox_exported_ini.Move(Vec2(-2.0f * obj->bbox_exported_ini.vCenter.x, 0.0f));
 	}
 	obj->bbox = obj->bbox_ini;
-	obj->bbox.Move(obj->pos);
+	obj->bbox.Move(obj->pos.xy);
 
 	obj->bbox_exported = obj->bbox_exported_ini;
-	obj->bbox_exported.Move(obj->pos);
+	obj->bbox_exported.Move(obj->pos.xy);
 
 	//load logic
 	obj->bCanInteract = false;
@@ -644,9 +644,7 @@ CLight*	CLevel::SpawnLight(Vec3 spawnPos, eLightType eType, DWORD dwColor, float
 	nl->type = eType;
 	nl->fVolumeAlpha = 1.0f;
 	nl->fIntensity = 1.0f;
-	nl->vPos = spawnPos;
-
-	nl->pos = Vec3ToVec2XY(nl->vPos);
+	nl->pos = spawnPos;
 	nl->pos_ini = nl->pos;
 	//animID
 	nl->animID = 0;
@@ -679,7 +677,7 @@ int CLevel::GetPowerupPlacingScore(CProp* active, Vec2 vPlacerPos)
 
 	//is it floating?
 	bool bFloating = true;
-	CCollisionShape* pCol = GetCollisionShapeAt(active->pos);
+	CCollisionShape* pCol = GetCollisionShapeAt(active->pos.xy);
 	if(pCol != null)
 	{
 		if ((pCol->type == K_LVL_COLL_TYPE_SOLID) || (pCol->type == K_LVL_COLL_TYPE_BOX) || (pCol->type == K_LVL_COLL_TYPE_LADDER))
@@ -1544,7 +1542,7 @@ CActor* CLevel::GetClosestPlayer(CActor* sourceActor, bool bIgnoreDead)
 		EAIBehaviorType beh = pPlayerActor[kk]->GetCurrentBehavior();
 		if ((bIgnoreDead) && (beh == AI_BEHAVIOR_DEAD))
 			continue;
-		float fDist = MUVec2Len(&(pPlayerActor[kk]->pos - sourceActor->pos));
+		float fDist = MUVec2Len(&(pPlayerActor[kk]->pos.xy - sourceActor->pos.xy));
 		if (fDist < fMinDist)
 		{
 			plact = pPlayerActor[kk];
@@ -1564,7 +1562,7 @@ CActor* CLevel::GetClosestPlayer(Vec2 vSrcPos, bool bIgnoreDead)
 			continue;
 		if ((bIgnoreDead) && (pPlayerActor[kk]->GetCurrentBehavior() == AI_BEHAVIOR_DEAD))
 			continue;
-		float fDist = MUVec2Len(&(pPlayerActor[kk]->pos - vSrcPos));
+		float fDist = MUVec2Len(&(pPlayerActor[kk]->pos.xy - vSrcPos));
 		if (fDist < fMinDist)
 		{
 			plact = pPlayerActor[kk];
@@ -1803,7 +1801,7 @@ bool CLevel::NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsH
 			{
 				Vec2 retpt = m_camLevel.ScreenToWorld(Vec2(fAxisValue, 0.0f));
 				// make coords relative to player
-				retpt.x -= pPlayer->pos.x;
+				retpt.x -= pPlayer->pos.xyz.x;
 				// set final coords
 				ret_fAxisValue = retpt.x;
 				return true;
@@ -1812,7 +1810,7 @@ bool CLevel::NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsH
 			{
 				Vec2 retpt = m_camLevel.ScreenToWorld(Vec2(0.0f, fAxisValue));
 				// make coords relative to player
-				retpt.y -= pPlayer->pos.y;
+				retpt.y -= pPlayer->pos.xyz.y;
 				// set final coords
 				ret_fAxisValue = retpt.y;
 				return true;
@@ -1847,7 +1845,7 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 				if (nl->castShadows)
 				{
 					// returns a list of segments that will form shadows (from both tiles and collision boxes)
-					int nOccluders = GetOccluderSegments(Vec3ToVec2XY(nl->vPos), nl->bbox, arrOccluders, arrOccludersSize);
+					int nOccluders = GetOccluderSegments(nl->pos.xy, nl->bbox, arrOccluders, arrOccludersSize);
 
 
 					// shows occluders instead of mesh. Checked for consistency.
@@ -1875,7 +1873,7 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 					if (nOccluders > 0)
 					{
 						// sends rays and builds the light FOV as a triangle list mesh
-						int retVerts = FOVUtil::BuildOccludedVolume(Vec3ToVec2XY(nl->vPos), nl->color, arrOccluders, nOccluders, temp_arrVerts, temp_arrVertsSize);
+						int retVerts = FOVUtil::BuildOccludedVolume(nl->pos.xy, nl->color, arrOccluders, nOccluders, temp_arrVerts, temp_arrVertsSize);
 
 						// adaugam triunghiurile ca si mesh
 						if (retVerts > 0)
@@ -1893,10 +1891,10 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 					Vec3 lcorners[4]; //ul, ur, dl, dr
 					memcpy(lcorners, nl->lCorners, 4 * sizeof(Vec3));
 					// move mesh to light position (!z must remain 0!)
-					lcorners[0].x += nl->vPos.x; lcorners[0].y += nl->vPos.y;
-					lcorners[1].x += nl->vPos.x; lcorners[1].y += nl->vPos.y;
-					lcorners[2].x += nl->vPos.x; lcorners[2].y += nl->vPos.y;
-					lcorners[3].x += nl->vPos.x; lcorners[3].y += nl->vPos.y;
+					lcorners[0].x += nl->pos.xy_proj.x; lcorners[0].y += nl->pos.xy_proj.y;
+					lcorners[1].x += nl->pos.xy_proj.x; lcorners[1].y += nl->pos.xy_proj.y;
+					lcorners[2].x += nl->pos.xy_proj.x; lcorners[2].y += nl->pos.xy_proj.y;
+					lcorners[3].x += nl->pos.xy_proj.x; lcorners[3].y += nl->pos.xy_proj.y;
 					//write final VS verts
 					_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
 					vul.pos = lcorners[0];
@@ -1922,10 +1920,10 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 				Vec3 lcorners[4]; //ul, ur, dr, dl
 				memcpy(lcorners, nl->lCorners, 4 * sizeof(Vec3));
 				//move mesh to final pos
-				lcorners[0].x += nl->vPos.x; lcorners[0].y += nl->vPos.y;
-				lcorners[1].x += nl->vPos.x; lcorners[1].y += nl->vPos.y;
-				lcorners[2].x += nl->vPos.x; lcorners[2].y += nl->vPos.y;
-				lcorners[3].x += nl->vPos.x; lcorners[3].y += nl->vPos.y;
+				lcorners[0].x += nl->pos.xy.x; lcorners[0].y += nl->pos.xy.y;
+				lcorners[1].x += nl->pos.xy.x; lcorners[1].y += nl->pos.xy.y;
+				lcorners[2].x += nl->pos.xy.x; lcorners[2].y += nl->pos.xy.y;
+				lcorners[3].x += nl->pos.xy.x; lcorners[3].y += nl->pos.xy.y;
 				//scriu VS-ul final
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
 				vul.pos = lcorners[0];
@@ -2197,36 +2195,6 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 	{
 		case K_AI_STATE_FN_TOUCH_WHEN_SEE_PLAYER:
 		{
-			dec_limit(active->AItimer1, dTime, 0.0f);
-			if ((active->AItimer1 <= 0.0f) && (active->pTarget != null))
-			{
-				for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
-				{
-					if (pPlayerActor[kk] == null)
-						continue;
-
-					//verifica sa fie in raza vizuala
-					Vec2 vActPl = pPlayerActor[kk]->GetPosHeart() - active->pos;
-					float fActPlLen = MUVec2Len(&vActPl);
-					if (fActPlLen > active->AIfvar3) //radius
-						break;
-					//normalize
-					//vActPl /= fActPlLen;
-					float fPlayerAng = UTMath::GetVectorAngle(vActPl);
-					fPlayerAng -= active->AIfvar1; //angle
-					//#TODO: is direct line of sight?
-					//is in fov?
-					if (fabs(fPlayerAng) < active->AIfvar2)
-					{
-						active->AItimer1 = active->varAIparams.GetVariantByName(L"f_cooldownSec")->m_asFloat;
-						//touch itself
-						//active->pTarget->Touch(active->GetUID());
-						active->Touch(pPlayerActor[kk]->GetUID(), dTime);
-						break;
-					}
-
-				}
-			}
 		}
 		break;
 		case K_AI_STATE_TRIGGER_IN_OUT:
@@ -2287,6 +2255,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 
 		case K_AI_STATE_FN_POS_ELLIPSE:	//f_radX, f_radY, f_timeMul
 		{
+			/*
 			//check number of params
 			if (active->varAIparams.GetVariantCount() < 3)
 			{
@@ -2299,10 +2268,12 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 
 			Vec2 delta = Vec2(radX * cos(timeMul * fTimeline), radY * sin(timeMul * fTimeline));
 			active->SetPos(active->pos_ini + delta);
+			*/
 		}
 		break;
 		case K_AI_STATE_FN_ANG_SIN_TIME:
 		{
+			/*
 			//check number of params
 			if (active->varAIparams.GetVariantCount() < 4)
 			{
@@ -2316,6 +2287,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 
 			float dangle = fmin + (fmax - fmin) * ((sin(fLocalTimeline * timeMul + timeAdd) + 1.0f) / 2.0f);
 			active->fAngle = active->fAngle_ini + dangle;
+			*/
 		}
 		break;
 		case K_AI_STATE_FN_ALPHA_SIN_TIME:
@@ -2337,26 +2309,30 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 		break;
 		case K_AI_STATE_FN_GET_TARGET_POS:
 		{
+			/*
 			if (active->pTarget != NULL)
 			{
-				Vec2 targetDelta = active->pTarget->pos - active->pTarget->pos_ini;
+				Vec2 targetDelta = active->pTarget->pos.xy - active->pTarget->pos_ini.xy;
 				//mut obiectul cu delta totala a targetului
 				active->SetPos(active->pos_ini + targetDelta);
 			}
+			*/
 		}
 		break;
 		case K_AI_STATE_FN_GET_TARGET_ANG:
 		{
+			/*
 			if (active->pTarget != NULL)
 			{
-				Vec2 targetVec = active->pos_ini - active->pTarget->pos_ini;
+				Vec2 targetVec = active->pos_ini.xy - active->pTarget->pos_ini.xy;
 				Mat matrot;
 				MuMatRotZ(&matrot, active->pTarget->fAngle - active->pTarget->fAngle_ini);
 				MUVec2TransformCoord(&targetVec, &targetVec, &matrot);
 				//mut obiectul cu delta totala a targetului
-				active->SetPos(active->pTarget->pos_ini + targetVec);
+				active->SetPos(active->pTarget->pos_ini.xy + targetVec);
 				active->SetAngle(active->fAngle_ini + (active->pTarget->fAngle - active->pTarget->fAngle_ini));
 			}
+			*/
 		}
 		break;
 		case K_AI_STATE_FN_FOLLOW_TARGET_RAIL:
@@ -2431,7 +2407,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 				}
 			}
 			Vec2 newpos = rail->GetPos(active->AItimer1);
-			active->SetPos(newpos);
+			active->SetPos(Vec3(newpos.x, newpos.y, active->pos.xyz.z));
 		}
 		break;
 		default:
@@ -2787,7 +2763,7 @@ void CLevel::UpdateAI_light(CLight* light, float dTime)
 	}
 
 	//update-uri finale
-	light->SetPos(light->pos);
+	light->SetPos(light->pos.xyz);
 }
 
 void CLevel::UpdateAI_prop(CProp* prop, float dTime)
@@ -2882,11 +2858,11 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 				{
 					m_interfaceIGM.SetBombTimer(0.0f);
 					//add some explosions so everybody will die
-					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos, prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
-					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos + Vec2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
-					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos - Vec2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
+					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos.xy, prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
+					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos.xy + Vec2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
+					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos.xy - Vec2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
 
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &Vec2(prop->pos.x, prop->pos.y - 15.0f), NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &Vec2(prop->pos.xy.x, prop->pos.xy.y - 15.0f), NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 
 					prop->sprite.SetAnim("BOMB_EXPLODED");
 
@@ -2969,7 +2945,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 					{
 						int sndidx = UTGetSoundManager().getSndIdx(cvc->m_strArg.textHash);
-						SND_PLAY_POSITIONAL(sndidx, prop->pos);
+						SND_PLAY_POSITIONAL(sndidx, prop->pos.xy);
 					}
 					//on open script
 					cvc = prop->varAIparams.GetVariantByName(L"s_ScriptOnOpen");
@@ -2987,7 +2963,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 					{
 						int sndidx = UTGetSoundManager().getSndIdx(cvc->m_strArg.textHash);
-						SND_PLAY_POSITIONAL(sndidx, prop->pos);
+						SND_PLAY_POSITIONAL(sndidx, prop->pos.xy);
 					}
 					//on close script
 					cvc = prop->varAIparams.GetVariantByName(L"s_ScriptOnClose");
@@ -3003,6 +2979,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 
 			case K_AI_STATE_ACTIVE_SWINGING_FRONTOBJ:
 			{
+				/*
 				//implementare balans
 				float fAng = prop->fAngle;
 				float angDelta = prop->fAngle - prop->fAngle_ini;
@@ -3016,6 +2993,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 				CLAMP(fAng, prop->fAngle_ini - 1.4f, prop->fAngle_ini + 1.4f);
 				
 				prop->SetAngle(fAng);
+				*/
 			}
 			break;
 
@@ -3033,7 +3011,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 					{
 						prop->Touch(pPlayerActor[kk]->GetUID(), dTime);
 						//save checkpoint
-						vLastSpawnPoint = prop->pos;
+						vLastSpawnPoint = prop->pos.xy;
 						break;
 					}
 				}
@@ -3050,9 +3028,8 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 		}
 	}
 
-	prop->SetPos(prop->pos);
-	//update-uri finale
-	prop->sprite.pos = prop->pos;
+	//final updates
+	prop->sprite.pos = prop->pos.xy_proj;
 	prop->sprite.color = prop->color;
 }
 
@@ -3240,7 +3217,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			}
 
 			//teleportam playerul pe targetul lui closest touchable. Se presupune ca scriptul de pe touchable ii activeaza starea de SOLO_TELEPORT
-			actor->SetPos(actor->pClosestTouchable->pTarget->pos);
+			actor->SetPos(actor->pClosestTouchable->pTarget->pos.xyz);
 			//set open frame (if necessary) on target
 			IActiveInterface* active = actor->pClosestTouchable->pTarget;
 			if ((active->AIstate == K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE) || (active->AIstate == K_AI_STATE_ACTIVE_TEAM_TELEPORTER_2FRAMES))
@@ -4081,10 +4058,12 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				//set target pointer
 				actor->m_AIsensorInfo.pTargetedActor = targetActor;
 				//vede daca face overlap
+				/*
 				if (actor->bbox.Intersects(targetActor->bbox))
 				{
-					actor->m_AIsensorInfo.fTargetOverlapX = SIGN(actor->pos.x - targetActor->pos.x) * ((actor->bbox.vHalfSize.x + targetActor->bbox.vHalfSize.x) - fabs(actor->pos.x - targetActor->pos.x));
+					actor->m_AIsensorInfo.fTargetOverlapX = SIGN(actor->pos.xy.x - targetActor->pos.xy.x) * ((actor->bbox.vHalfSize.x + targetActor->bbox.vHalfSize.x) - fabs(actor->pos.xy.x - targetActor->pos.x));
 				}
+				*/
 				//daca se ating trimit si event de touch enemy, doar daca vede inamicul
 				if (actor->bbox.Intersects(targetActor->bbox))
 				{
@@ -4823,10 +4802,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if((pOther != null) && (pOther->GetCurrentBehavior() != AI_BEHAVIOR_IN_LIMBO) &&
 					(pOther->nSuspendedFlags == K_LVL_SUSPENDFLAG_NONE) && (pOther->collisionFlags & K_DIRFLAG_DOWN))
 				{
-					Vec2 vTeleportPos = pOther->pos;
-					if (GetBestSpawningPos(&vTeleportPos, pOther->bbox, &pOther->bbox))
+					if (GetBestSpawningPos(&pOther->pos.xy, pOther->bbox, &pOther->bbox))
 					{
-						actor->SetPos(vTeleportPos);
+						actor->SetPos(pOther->pos.xyz);
 						//animate player on spawn (only if told otherwise by nAnimset=-1)
 						actor->SetAnimSet(0);
 						Actor_SetAIState(actor, L"JOIN_GAME");
@@ -5134,7 +5112,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 				if (!UTGetAppClass().m_Settings.bGoreEnabled)
 				{
-					g_particlesMgr.GenerateEnemySoftGib(actor->pos, 0xff32a7fa, K_PART_LAYER_RT_FRONT_NRM);
+					g_particlesMgr.GenerateEnemySoftGib(actor->pos.xy_proj, 0xff32a7fa, K_PART_LAYER_RT_FRONT_NRM);
 				}
 				else
 				{
@@ -5165,7 +5143,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						AddDoofer(K_DOOFER_MEAT, actor->GetPosHeart(), &Vec2(200.0f, 50.0f), &g_vecGravityOld, nSubType);
 						AddDoofer(K_DOOFER_MEAT, actor->GetPosHeart(), &Vec2(-200.0f, 50.0f), &g_vecGravityOld, nSubType);
 						//human blood gibs particle
-						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &actor->pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_FRONT_NRM);
+						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &actor->pos.xy_proj, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_FRONT_NRM);
 					}
 					else //small animals and stuff
 					{
@@ -5173,7 +5151,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						{
 							AddDoofer(K_DOOFER_MEAT, AABB::GetRandomPointInBox(genbox), &Vec2(randfloatsgn(50.0f) + bulletSpeed.x * 50.0f, -130.0f - randfloat(100.0f)), &g_vecGravityOld);
 						}
-						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &actor->pos, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM);
+						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &actor->pos.xy_proj, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM);
 					}
 				}
 
@@ -5189,7 +5167,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					actor->vSpeedImpulse = Vec2(0.0f, 0.0f);
 					//move invisible body back to last safe pos
 					Vec2 vSpawnPos = m_arrPlayerLastSafePos[actor->nPlayerOrdinal];
-					actor->SetPos(vSpawnPos);
+					actor->SetPos(Vec3(vSpawnPos.x, vSpawnPos.y, 0.0f));
 					break;
 				}
 				//deallocate
@@ -5224,7 +5202,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	actor->vSpeedImpulse.x -= actor->vSpeedImpulse.x * impFriction.x * dTime;
 	actor->vSpeedImpulse.y -= actor->vSpeedImpulse.y * impFriction.y * dTime;
 	
-	Vec2 vPosIni = actor->pos;
+	Vec3 vPosIni = actor->pos.xyz;
 	UINT16 unCollFlags = 0;
 
 	///--- collision detection ---
@@ -5234,8 +5212,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		///b.detectezi coliziuni posibile(bbox old + new pos)
 		//1. find bbox start and end union that includes all collisions when moving at high speeds
 		CAABB destbox, srcbox;
-		srcbox = actor->bbox_ini; srcbox.Move(actor->pos);
-		destbox = actor->bbox_ini; destbox.Move(actor->pos + vNextMove);
+		srcbox = actor->bbox_ini; srcbox.Move(actor->pos.xy);
+		destbox = actor->bbox_ini; destbox.Move(actor->pos.xy + vNextMove);
 		// box unions to check all possible collisions
 		CAABB boxUnion = AABB::Union(destbox, srcbox);
 		// bbox union in tile coords, including every touched tile
@@ -5306,7 +5284,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		while (fRemainingTime > 0.0f)
 		{
 			// compute source box
-			srcbox = actor->bbox_ini; srcbox.Move(actor->pos);
+			srcbox = actor->bbox_ini; srcbox.Move(actor->pos.xy);
 			// find closest collider
 			float minDistSq = 100000.0f;
 			float fClosestTime = 100000.0f;
@@ -5347,7 +5325,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				//handled already, disable it
 				pClosestBox->bDisabled = true; 
 
-				actor->pos += vNextMove * hit.fCollisionTime;
+				actor->pos.xy += vNextMove * hit.fCollisionTime;
 
 				// Calculate the correct time of impact for the remaining
 				// collisions or to apply movement
@@ -5397,7 +5375,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					vNextMove = hit.vNormal;
 
 					CAABB newboxsrc = actor->bbox_ini;
-					newboxsrc.Move(actor->pos);
+					newboxsrc.Move(actor->pos.xy);
 					CAABB newboxdest = newboxsrc;
 					newboxdest.Move(vNextMove);
 					CAABB newBoundary = AABB::Union(newboxsrc, newboxdest);
@@ -5422,7 +5400,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			}
 			else
 			{
-				actor->pos += vNextMove;
+				actor->pos.xy += vNextMove;
 				fRemainingTime = 0.0f;
 			}
 		}
@@ -5433,22 +5411,22 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	actor->collisionFlags = unCollFlags;
 
 	//check world bounds for each actor - kill if out
-	if (!PointInRect(actor->pos, m_levelAABB))
+	if (!PointInRect(actor->pos.xy, m_levelAABB))
 	{
 		KillActor(actor);
 	}
 
 	//set final position
-	actor->SetPos(actor->pos);
+	actor->SetPos(Vec3(actor->pos.xy.x, actor->pos.xy.y, 0.0f));
 	// save last position in pos_last (SetPos does but we already altered actor->pos)
 	actor->pos_last = vPosIni;
 
 	//#TODO: Speeds and accelerations should be treated here, after the collision detection
 		
 	// set current area if null or changed after updating the position
-	if ((actor->pArea == nullptr) || (!actor->pArea->AABBbounds.PointIn(actor->pos.x, actor->pos.y)))
+	if ((actor->pArea == nullptr) || (!actor->pArea->AABBbounds.PointIn(actor->pos.xy.x, actor->pos.xy.y)))
 	{
-		actor->pArea = Areas_GetAt(Vec3ToVec2XY(actor->pos));
+		actor->pArea = Areas_GetAt(actor->pos.xy);
 	}
 
 	///--- damage taken - paint red frame while taking damage
@@ -5494,8 +5472,8 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 	}
 	CAABB aabbvision;
 	aabbvision.Set_Corrected(
-		Vec2(sourceActor->pos.x/* + sourceActor->lookDirXsign * fDistSee*/, sourceActor->pos.y + fDistDown),
-		Vec2(sourceActor->pos.x/* - sourceActor->lookDirXsign * fDistHear*/, sourceActor->pos.y - fDistUp)
+		Vec2(sourceActor->pos.xy.x/* + sourceActor->lookDirXsign * fDistSee*/, sourceActor->pos.xy.y + fDistDown),
+		Vec2(sourceActor->pos.xy.x/* - sourceActor->lookDirXsign * fDistHear*/, sourceActor->pos.xy.y - fDistUp)
 	);
 
 	//--- check all actors for enemy ---
@@ -5888,12 +5866,13 @@ void CLevel::SetAI(IActiveInterface * active, EAIstate AIstate, CVariantCollecti
 			{
 				active->Touch(active->GetUID(), 0.0f);
 				//save checkpoint
-				vLastSpawnPoint = active->pos;
+				vLastSpawnPoint = active->pos.xy;
 			}
 		}
 		break;
 		case K_AI_STATE_FN_TOUCH_WHEN_SEE_PLAYER:
 		{
+			/*
 			//unghiul introdus
 			active->AIfvar1 = active->varAIparams.GetVariantByName(L"f_angle")->m_asFloat;
 			//aduc unghiul in -PI...PI
@@ -5905,6 +5884,7 @@ void CLevel::SetAI(IActiveInterface * active, EAIstate AIstate, CVariantCollecti
 			//set angle
 			active->fAngle = active->fAngle_ini = active->AIfvar1;
 			active->AItimer1 = 0.0f; //timer cooldown
+			*/
 		}
 		break;
 		case K_AI_STATE_COLL_FOG_OF_WAR:
@@ -6141,7 +6121,7 @@ void CLevel::UpdateAI(float dTime, bool bInEditor)
 			UpdateAI_actor(act, dTime);
 		}
 		//add some floats to detect network inconsistencies
-		fHashKey += act->pos.x + act->pos.y + act->AItimerDecision + act->fLife + act->fArmor + act->fStunTimer;
+		fHashKey += act->pos.xyz.x + act->pos.xyz.y + act->AItimerDecision + act->fLife + act->fArmor + act->fStunTimer;
 
 		//count targets left
 		if (act->GetCurrentBehavior() != EAIBehaviorType::AI_BEHAVIOR_DEAD)
@@ -6387,7 +6367,7 @@ void CLevel::Update(float dTime_original)
 									EAIBehaviorType eOtherBehave = pPlayerActor[nOtherPlayerIdx]->GetCurrentBehavior();
 									if ((eOtherBehave == AI_BEHAVIOR_PLAYER_CONTROL) || (eOtherBehave == AI_BEHAVIOR_DEAD))
 									{
-										vSpawnPos = pPlayerActor[nOtherPlayerIdx]->pos;
+										vSpawnPos = pPlayerActor[nOtherPlayerIdx]->pos.xy;
 										aabbSpawn = pPlayerActor[nOtherPlayerIdx]->bbox;
 										p_aabbPeer = &pPlayerActor[nOtherPlayerIdx]->bbox;
 										bSpawnIt = true;
@@ -7833,12 +7813,12 @@ void CLevel::Update(float dTime_original)
 		{
 			if (pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_DEAD)
 			{
-				avg_live += pPlayerActor[kk]->pos_last + pPlayerActor[kk]->m_AIcommands.vAimVec * 0.2f;
+				avg_live += Vec3ToVec2XY(pPlayerActor[kk]->pos_last) + pPlayerActor[kk]->m_AIcommands.vAimVec * 0.2f;
 				plcnt_live++;
 			}
 
 
-			avg_all += pPlayerActor[kk]->pos_last + pPlayerActor[kk]->m_AIcommands.vAimVec *  0.2f;
+			avg_all += Vec3ToVec2XY(pPlayerActor[kk]->pos_last) + pPlayerActor[kk]->m_AIcommands.vAimVec *  0.2f;
 			plcnt_all++;
 		}
 	}
@@ -7882,7 +7862,7 @@ void CLevel::Update(float dTime_original)
 		}
 		else
 		{
-			m_camLevel.SetCamPos(&(m_camTargetActive->pos));
+			m_camLevel.SetCamPos(&(m_camTargetActive->pos.xy_proj));
 		}
 	}
 
@@ -8388,7 +8368,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 			// x: game height projection, y: height projection inverse (projected -> real), z: gauss dist atten factor
 			{ ZHSCALE, INV_ZHSCALE, ct_fGaussLen, 0.0f },
 			// xyz: light world position
-			{ nl->vPos.x, nl->vPos.y, nl->vPos.z, 0.0f }
+			{ nl->pos.xyz.x, nl->pos.xyz.y, nl->pos.xyz.z, 0.0f }
 		};
 		UTGetShaderManager().SetPSConstantF(0, (float*)fConstData, ARRAY_SIZE(fConstData));
 		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, false);
@@ -8423,7 +8403,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 			// x: game height projection, y: height projection inverse (projected -> real), z: gauss dist atten factor
 			{ ZHSCALE, INV_ZHSCALE, ct_fGaussLen, 0.0f },
 			// xyz: light world position
-			{ nl->vPos.x, nl->vPos.y, nl->vPos.z, 0.0f },
+			{ nl->pos.xyz.x, nl->pos.xyz.y, nl->pos.xyz.z, 0.0f },
 			// xyz: direction of light, normalized
 			{ nl->vnDir.x, nl->vnDir.y, nl->vnDir.z, 0.0f },
 			// xy: UL tex spot coords; zw: WH spot width height
@@ -8464,7 +8444,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 			// x: game height projection, y: height projection inverse (projected -> real), z: gauss dist atten factor
 			{ ZHSCALE, INV_ZHSCALE, ct_fGaussLen, 0.0f },
 			// xyz: light world position
-			{ nl->vPos.x, nl->vPos.y, nl->vPos.z, 0.0f },
+			{ nl->pos.xyz.x, nl->pos.xyz.y, nl->pos.xyz.z, 0.0f },
 			// light direction normalized
 			{ nl->vnDir.x, nl->vnDir.y, nl->vnDir.z, 0.0f }
 		};
@@ -8652,7 +8632,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 
 		// paint aiming cursor
 		// vAimVec was normalized using last frame data so paint it at last frame actor position
-		Vec2 vto = pPlayerActor[kk]->pos_last + pPlayerActor[kk]->m_AIcommands.vAimVec;
+		Vec2 vto = Vec3ToVec2XY(pPlayerActor[kk]->pos_last) + pPlayerActor[kk]->m_AIcommands.vAimVec;
 		CSprite::paintFrame(&m_sprInterface, vto.x, vto.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffffffff);
 	}
 								  
@@ -8851,7 +8831,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 					if ((perc > 0.0f) && (perc < 1.0f))
 					{
 						//RECTXYWH recttemp(vpos.x - barlen / 2.0f, activ->bbox_exported.vMax.y + 4, barlen, 8);
-						RECTXYWH recttemp(activ->pTarget->pos.x - barlen / 2.0f, activ->pTarget->bbox_exported.vMax.y + 4, barlen, 8);
+						RECTXYWH recttemp(activ->pTarget->pos.xy_proj.x - barlen / 2.0f, activ->pTarget->bbox_exported.vMax.y + 4, barlen, 8);
 						CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
 					}
 				}
@@ -9036,7 +9016,7 @@ int CLevel::BuildLightVolume360(CLight * light, _VERTEX_PNCT4T4 *outVerts, int o
 	float		fAng = 0.0f;
 
 	float fMaxRad = max(light->bbox_ini.vHalfSize.x, light->bbox_ini.vHalfSize.y);
-	Vec2 vFrom = Vec3ToVec2XY(light->vPos);
+	Vec2 vFrom = light->pos.xy;
 	Vec3 vFrom3 = Vec2ToVec3XY0(vFrom);
 	// collision results
 	Vec2 vRetPt(0.0f, 0.0f), vRetNrm(0.0f, 0.0f);

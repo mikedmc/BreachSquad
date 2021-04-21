@@ -386,15 +386,15 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		nl->fVolumeAlpha = 1.0f - (float)nVolumeAttenuationPerc / 100.0f;
 		nl->fIntensity = OS_freadFloat32(fl);
 		CLAMP(nl->fIntensity, 0.0f, 1.0f);
-		nl->vPos.x = (float)OS_freadInt32(fl);
-		nl->vPos.y = (float)OS_freadInt32(fl);
-		nl->vPos.z = (float)OS_freadInt32(fl);
+		Vec3 vpos(0.0f, 0.0f, 0.0f);
+		vpos.x = (float)OS_freadInt32(fl);
+		vpos.y = (float)OS_freadInt32(fl);
+		vpos.z = (float)OS_freadInt32(fl);
 		//#TODO: should load from level file
-		nl->vPos.z = 32.0f;
-		nl->vPos.x += vOffset.x; nl->vPos.y += vOffset.y;
-
-		nl->vPos_ini = nl->vPos;
-		nl->pos_ini = nl->pos = Vec2(nl->vPos.x, nl->vPos.y);
+		vpos.z = 32.0f;
+		vpos.x += vOffset.x; vpos.y += vOffset.y;
+		nl->pos = vpos;
+		nl->pos_ini = nl->pos;
 		//animID
 		CHAR charAnmName[MAX_PATH];
 		OS_freadString(fl, charAnmName);
@@ -419,7 +419,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		//set loaded size (default)
 		nl->bbox.Set_Corrected(bbmin, bbmax);
 		nl->bbox_ini = nl->bbox;
-		nl->bbox_ini.Move(-nl->pos);
+		nl->bbox_ini.Move(-nl->pos.xy);
 		nl->fRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
 		//re-arrange spots (maybe lights image changed)
 		nl->SetLightTexture(&m_sprLights, nl->animID, nl->frameID);
@@ -428,9 +428,8 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		nl->fRadius = 128.0f;
 
 		//read angle and convert to radians
-		nl->fAngle = (float)OS_freadInt16(fl);
-		nl->fAngle = DEG_TO_RAD(nl->fAngle);
-		nl->fAngle_ini = nl->fAngle;
+		float fAngle = (float)OS_freadInt16(fl);
+		fAngle = DEG_TO_RAD(fAngle);
 		//casts shadows
 		UINT16 u2b = OS_freadUInt16(fl);
 		nl->castShadows = ((u2b & K_EDITOR_LIGHT_FLAG_CAST_SHADOWS) != 0);
@@ -512,9 +511,11 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		//load layer from editor (not used atm)
 		byte nLayer = OS_freadByte(fl);
 		//position (used to load UINT32)
-		obj->pos.x = (float)OS_freadInt32(fl);
-		obj->pos.y = (float)OS_freadInt32(fl);
-		obj->pos.x += vOffset.x; obj->pos.y += vOffset.y;
+		Vec3 vpos(0.0f, 0.0f, 0.0f);
+		vpos.x = (float)OS_freadInt32(fl);
+		vpos.y = (float)OS_freadInt32(fl);
+		vpos.x += vOffset.x; vpos.y += vOffset.y;
+		obj->pos = vpos;
 		obj->pos_ini = obj->pos;
 		//animation
 		CHAR charAnmName[MAX_PATH];
@@ -527,10 +528,10 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		obj->color = 0xffffffff;
 		obj->nAnim_ini = animIdx;
 		obj->nFrame_ini = frameIdx;
-		obj->sprite.Init(&m_sprProps, animIdx, obj->pos, frameIdx, obj->color);
+		obj->sprite.Init(&m_sprProps, animIdx, obj->pos.xy_proj, frameIdx, obj->color);
 		//angle
-		obj->fAngle = 0.0f;
-		obj->fAngle_ini = 0.0f;
+		//obj->fAngle = 0.0f;
+		//obj->fAngle_ini = 0.0f;
 		//load flags and split
 		UINT32 activFlags = OS_freadUInt32(fl);
 		//flip xy
@@ -555,10 +556,10 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 			obj->bbox_exported_ini.Move(Vec2(-2.0f * obj->bbox_exported_ini.vCenter.x, 0.0f));
 		}
 		obj->bbox = obj->bbox_ini;
-		obj->bbox.Move(obj->pos);
+		obj->bbox.Move(obj->pos.xy);
 
 		obj->bbox_exported = obj->bbox_exported_ini;
-		obj->bbox_exported.Move(obj->pos);
+		obj->bbox_exported.Move(obj->pos.xy);
 
 		//load logic and init data
 		obj->LoadLogic(fl);
@@ -583,7 +584,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		actPos.x = (float)OS_freadInt32(fl);
 		actPos.y = (float)OS_freadInt32(fl);
 		actPos += vOffset;
-		//boolean SetAngle si unghi
+		//boolean SetAngle and angle
 		bool bSetActorAngle = (OS_freadByte(fl) != 0) ? true : false;
 		float fActorAngle = DEG_TO_RAD(OS_freadInt16(fl));
 		//read template name
@@ -601,8 +602,8 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		bool bactGravity = (OS_freadByte(fl) != 0) ? true : false;
 		//logic
 		byte n1b = OS_freadByte(fl);
-		bool bactCanInteract = (n1b & 0x1);
-		bool bactHideInteract = (n1b & 0x2);
+		bool bactCanInteract = (n1b & 0x1) != 0;
+		bool bactHideInteract = (n1b & 0x2) != 0;
 		float factTouchDuration = (float)OS_freadInt32(fl);
 		bool bactStartHidden = (OS_freadByte(fl) != 0) ? true : false;
 		INT32 nactTargetID = unBaseID + OS_freadInt32(fl);

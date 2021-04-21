@@ -28,8 +28,8 @@ public:
 	UINT32					UID;					// ingame UID
 	CLevelArea*				pArea;					// pointer to current area
 	int						ID;						// ID exported from editor (not the same as UID).
-	Vec3					vPos;					// Z coord gets added to Y to simulate 3D when rendering (see Z_TO_H macros)
-	Vec3					vPos_ini;				// initial position needed for relative calculations. Usually only set when spawned.
+	VecProj					pos;					// Z coord gets added to Y to simulate 3D when rendering (see Z_TO_H macros)
+	VecProj					pos_ini;				// initial position needed for relative calculations. Usually only set when spawned.
 
 	bool					bTouching;				// folosit ca sa elimine eventuale cicluri infinite.
 	UINT32 					nTouchingUID;   		// Reprezinta UID-ul celui care a facut touch sau 0 pt niciunul
@@ -37,8 +37,7 @@ public:
 	float					fTouchTimer;			// pentru cat timp s-a facut touch? sunt obiecte la care trebuie sa faci touch pentru o durata anume
 	float					fTouchDuration;			// durata ceruta pentru touch
 													   
-	Vec2					pos;					
-	float					fAngle;
+	//float					fAngle;
 	DWORD					color;
 	float					fHeight;				// height in world coords
 	CAABB					bbox;
@@ -49,8 +48,7 @@ public:
 	CAABB					bbox_ini;				// non relative to object position AABB
 	CAABB					bbox_proj_ini;			// non relative to pos projected bbox
 	CAABB					bbox_exported_ini;		// initial bbox exported from BSX
-	Vec2					pos_ini;
-	float					fAngle_ini;
+	//float					fAngle_ini;
 	DWORD					color_ini;
 	INT32					targetID_ini;			// target ID citit din editor
 
@@ -62,7 +60,7 @@ public: //logic
 	EAIstate				AIstate;				// state AI (AI_STATE ENUM)
 	CVariantCollection		varAIparams;			// AIstate params
 	float					AItimerDecision;		// takes decisions when it reaches 0
-	//diverse pt logica
+
 	UINT32					AItargetUID;			// enemy UID (not the one set from the editor!!!)
 	double					fTimelineAI;			// local timeline for AI 
 	
@@ -118,10 +116,9 @@ public: //logic
 
 	void UpdateTouchTimerReset(float dTime);
 
-	//functie care seteaza pozitia complet (adica pos, bbox, puncte relative, etc)
-	virtual void SetPos(Vec2 newPos) = 0;
-	virtual void Move(Vec2 delta) = 0;
-	virtual void SetAngle(float fnAngle) = 0;
+	// completely sets position and all related data(pos, bbox, etc)
+	virtual void SetPos(Vec3 newPos) = 0;
+	virtual void Move(Vec3 delta) = 0;
 
 	// Call this to mark it for destruction
 	void Kill();

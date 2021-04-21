@@ -56,12 +56,8 @@ public:
 		return K_LVL_IAI_TYPE_COLSHAPE;
 	}
 
-	void SetPos(Vec2 newPos) override;
-	void Move(Vec2 delta) override;
-	void SetAngle(float fnAngle) override
-	{
-		fAngle = fnAngle;
-	}
+	void SetPos(Vec3 newPos) override;
+	void Move(Vec3 delta) override;
 
 	void PostConstructionInit() override;
 	void BeginPlay() override;

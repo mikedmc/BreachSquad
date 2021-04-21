@@ -15,7 +15,6 @@ CSpineTexLoader::~CSpineTexLoader(void)
 void CSpineTexLoader::load(AtlasPage& page, const String& path)
 {
 	WCHAR wcsFilename[MAX_PATH];
-	WCHAR wcsFullPath[MAX_PATH];
 	mbstowcs(wcsFilename, path.buffer(), MAX_PATH);
 
 	CSpineTex* texture = AddTexture(wcsFilename, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);

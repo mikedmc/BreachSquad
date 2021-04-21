@@ -179,7 +179,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					IActiveInterface* target = GetIActiveInterfacePtr_byUID(executorUID);
 					if (target)
 					{
-						CActor* act = GetClosestPlayer(target->pos);
+						CActor* act = GetClosestPlayer(target->pos.xy);
 						if (act)
 						{
 							//PlayActorSoundVerse(act, K_LVL_ACT_VERSE_BOMB_DEFUSED);
@@ -263,7 +263,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			if (vcAIname != null)
 			{
 				//AI STATE
-				EAIstate aistate = (EAIstate)GetListIndexByNameHash(vcAIname->m_strArg.getHash(), EAIstate_names, K_AI_STATES_CNT);
+				aistate = (EAIstate)GetListIndexByNameHash(vcAIname->m_strArg.getHash(), EAIstate_names, K_AI_STATES_CNT);
 				//it is ok if aistate becomes UNDEFINED because we use this instruction to erase the AI too
 			}
 			//AI TARGET
@@ -363,7 +363,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				if (m_camTargetActive == null)
 					m_camLevel.SetCamPos(&m_vCamPosDefault, 1.0f, true);
 				else
-					m_camLevel.SetCamPos(&m_camTargetActive->pos, 1.0f, true);
+					m_camLevel.SetCamPos(&m_camTargetActive->pos.xy_proj, 1.0f, true);
 			}
 
 			return true;
@@ -414,7 +414,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				if (m_camTargetActive == null)
 					m_camLevel.SetCamPos(&m_vCamPosDefault, 1.0f, true);
 				else
-					m_camLevel.SetCamPos(&m_camTargetActive->pos, 1.0f, true);
+					m_camLevel.SetCamPos(&m_camTargetActive->pos.xy_proj, 1.0f, true);
 			}
 
 			return true;
@@ -683,7 +683,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//add effect
-			GenerateEffect(vcTypeS->m_strArg, target->pos, 1.0f, 0xffffffff);
+			GenerateEffect(vcTypeS->m_strArg, target->pos.xy_proj, 1.0f, 0xffffffff);
 			return true;
 		}
 		break;
@@ -728,7 +728,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					evtClass = retEvtClass;
 			}
 			//add event
-			AddAIEvent(evttype, target->GetUID(), evtClass, target->pos, fRange, fDuration);
+			AddAIEvent(evttype, target->GetUID(), evtClass, target->pos.xy_proj, fRange, fDuration);
 
 			return true;
 		}
@@ -798,7 +798,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//Set final pos
-			toucheractor->SetPos(Vec2(target->pos.x + fOffX, target->pos.y + fOffY));
+			toucheractor->SetPos(Vec3(target->pos.xyz.x + fOffX, target->pos.xyz.y + fOffY, target->pos.xyz.z));
 
 			return true;
 		}
@@ -997,16 +997,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			CDamageOverTime::EDoTType lDoTType = (CDamageOverTime::EDoTType)GetListIndexByNameHash(vcDoT->m_strArg.getHash(), EDoTTypeNames, CDamageOverTime::K_LVL_DoT_COUNT);
 
 			SetActorDoT(targetAct, lDoTType, fDuration, 0.0f, K_LVL_ACT_CLASS_NOT_SET, K_LVL_ACT_CLASS_NOT_SET, 0);
-
-			//customize effects
-			switch (lDoTType)
-			{
-				case CDamageOverTime::K_LVL_DoT_INVINCIBLE:
-				{
-					g_particlesMgr.GenerateTeleportEffect(targetAct->pos, 0xfffdb727, K_PART_LAYER_RT_FRONT_NRM_LIGHT);
-				}
-				break;
-			}
 
 			return true;
 		}
@@ -1305,7 +1295,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			{
 				fOffY = vcOffY->asFloat();
 			}
-			Vec2 vSpawnPos = target->pos;
+			Vec2 vSpawnPos = target->pos.xy;
 			vSpawnPos.x += fOffX;
 			vSpawnPos.y += fOffY;
 
@@ -1375,7 +1365,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				active->bbox_ini.Move(Vec2(-2.0f * active->bbox_ini.vCenter.x, 0.0f));
 			}
 			active->bbox = active->bbox_ini;
-			active->bbox.Move(active->pos);
+			active->bbox.Move(active->pos.xy);
 
 			return true;
 		}
@@ -1425,7 +1415,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			if (parAnimated)
 				animated = parAnimated->m_asBool;
 
-			active->sprite.Init(&m_sprProps, anim, active->pos, frame);
+			active->sprite.Init(&m_sprProps, anim, active->pos.xy_proj, frame);
 			active->bAnimated = animated;
 			//set new bbox
 			RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
@@ -1435,7 +1425,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				active->bbox_ini.Move(Vec2(-2.0f * active->bbox_ini.vCenter.x, 0.0f));
 			}
 			active->bbox = active->bbox_ini;
-			active->bbox.Move(active->pos);
+			active->bbox.Move(active->pos.xy);
 
 			return true;
 		}

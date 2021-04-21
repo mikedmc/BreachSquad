@@ -60,9 +60,8 @@ public:
 public:
 	CLight();
 
-	void				SetPos(Vec2 newPos) override;
-	void				Move(Vec2 delta) override;
-	void				SetAngle(float fnAngle) override;
+	void				SetPos(Vec3 newPos) override;
+	void				Move(Vec3 delta) override;
 
 	// engine callbacks
 	void				PostConstructionInit() override;

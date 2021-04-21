@@ -95,7 +95,7 @@ void CLevelEditor::Update(float dTime)
 		{
 			case K_LED_LIGHT:
 			{
-				if ((pSelected != nullptr) && (MUVec2Len(&(Vec3ProjVec2(pSelected->vPos) - mousepos)) < K_TILE_HSIZE_F))
+				if ((pSelected != nullptr) && (MUVec2Len(&(pSelected->pos.xy_proj - mousepos)) < K_TILE_HSIZE_F))
 				{
 					// move it
 				}
@@ -215,9 +215,9 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 			for (int kk = 0; kk < m_pLevel->m_visibleList.visible_lights.Count(); kk++)
 			{
 				CLight* lg = m_pLevel->m_visibleList.visible_lights[kk];
-				Vec2 lgproj = Vec3ProjVec2(lg->vPos);
+				Vec2 lgproj = lg->pos.xy_proj;
 				Vec2 vpos = m_pLevel->m_camLevel.WorldToScreen(lgproj);
-				Vec2 vposprj = m_pLevel->m_camLevel.WorldToScreen(lg->pos);
+				Vec2 vposprj = m_pLevel->m_camLevel.WorldToScreen(lg->pos.xy);
 				
 				DWORD lcol = (pSelected == lg) ? 0xffff2222 : 0xff22ff22;
 				DrawHRuler(vposprj, vposprj.y - vpos.y, lcol);
@@ -240,11 +240,11 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 				RECTXYWH_F prjrct = m_pLevel->m_camLevel.WorldToScreen(bb);
 				DrawBBox(prjrct, 0xffffffff);
 				// paint origin
-				Vec2 vposprj = m_pLevel->m_camLevel.WorldToScreen(Vec3ToVec2XY(pp->vPos));
+				Vec2 vposprj = m_pLevel->m_camLevel.WorldToScreen(pp->pos.xy);
 				CSprite::paintFrame(&m_sprCol, vposprj.x, vposprj.y, ANM_LVLED_SPR_CROSSHAIRS, 0, 0xffff2222);
 
 				// paint elevation
-				if (pp->vPos.z != 0.0f)
+				if (pp->pos.xyz.z != 0.0f)
 				{
 					//DrawHRuler(vposprj, Z_TO_H(pp->vPos.z), 0xffff2222);
 				}
@@ -340,7 +340,7 @@ IActiveInterface* CLevelEditor::SelectClosest(Vec2 vPoint, float fMaxRadius)
 			for (int kk = 0; kk < m_pLevel->m_visibleList.visible_lights.Count(); kk++)
 			{
 				CLight* lg = m_pLevel->m_visibleList.visible_lights[kk];
-				float dst = MUVec2Len(&(lg->pos - vPoint));
+				float dst = MUVec2Len(&(lg->pos.xy_proj - vPoint));
 				if ((dst < fMaxRadius) && (dst < mindist))
 				{
 					mindist = dst;
@@ -384,11 +384,10 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 		case K_LVL_LT_POINT:
 		{
 			// position
-			float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z };
+			float f3[3] = { light->pos.xyz.x, light->pos.xyz.y, light->pos.xyz.z };
 			if (ImGui::DragFloat3("Pos", f3, 1.0f, -128.0f, 100000.0f, "%.2f"))
 			{
-				light->SetPos(Vec2(f3[0], f3[1]));
-				light->vPos.z = f3[2];
+				light->SetPos(Vec3(f3[0], f3[1], f3[2]));
 			}
 			// radius
 			if (ImGui::DragFloat("Radius", &light->fRadius, 1.0f, 16.0f, 1000.0f, "%.2f"))
@@ -413,11 +412,10 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 		case K_LVL_LT_PROJECTED_DIR:
 		{
 			// position
-			float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z };
+			float f3[3] = { light->pos.xyz.x, light->pos.xyz.y, light->pos.xyz.z };
 			if (ImGui::DragFloat3("Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f"))
 			{
-				light->SetPos(Vec2(f3[0], f3[1]));
-				light->vPos.z = 0.0f;
+				light->SetPos(Vec3(f3[0], f3[1], 0.0f));
 			}
 			// direction
 			float d3[3] = { light->vnDir.x, light->vnDir.y, light->vnDir.z };
@@ -485,11 +483,10 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 		case K_LVL_LT_DIRECTIONAL:
 		{
 			// position
-			float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z };
+			float f3[3] = { light->pos.xyz.x, light->pos.xyz.y, light->pos.xyz.z };
 			if (ImGui::DragFloat3("Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f"))
 			{
-				light->SetPos(Vec2(f3[0], f3[1]));
-				light->vPos.z = 0.0f;
+				light->SetPos(Vec3(f3[0], f3[1], 0.0f));
 			}
 			// direction
 			float d3[3] = { light->vnDir.x, light->vnDir.y, light->vnDir.z };
@@ -514,11 +511,10 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 		case K_LVL_LT_AMBIENTAL:
 		{
 			// position
-			float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z };
+			float f3[3] = { light->pos.xyz.x, light->pos.xyz.y, light->pos.xyz.z };
 			if (ImGui::DragFloat3("Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f"))
 			{
-				light->SetPos(Vec2(f3[0], f3[1]));
-				light->vPos.z = 0.0f;
+				light->SetPos(Vec3(f3[0], f3[1], 0.0f));
 			}
 			// color
 			ImVec4 color;
@@ -534,11 +530,10 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 		case K_LVL_LT_IES:
 		{
 			// position
-			float f3[3] = { light->vPos.x, light->vPos.y, light->vPos.z };
+			float f3[3] = { light->pos.xyz.x, light->pos.xyz.y, light->pos.xyz.z };
 			if (ImGui::DragFloat3("Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f"))
 			{
-				light->SetPos(Vec2(f3[0], f3[1]));
-				light->vPos.z = f3[2];
+				light->SetPos(Vec3(f3[0], f3[1], f3[2]));
 			}
 			// direction
 			float d3[3] = { light->vnDir.x, light->vnDir.y, light->vnDir.z };

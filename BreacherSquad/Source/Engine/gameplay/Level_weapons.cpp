@@ -403,8 +403,6 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 
 OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 {
-	HRESULT hr = S_OK;
-
 	pugi::xml_document doc;
 	if (!doc.load_file(xmlPath))
 	{

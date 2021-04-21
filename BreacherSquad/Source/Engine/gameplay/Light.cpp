@@ -2,13 +2,6 @@
 #include "Light.h"
 
 ///--- CLIGHT ---
-void CLight::SetAngle(float fnAngle)
-{
-	fAngle = fnAngle;
-	//#TODO: IES light-ul ar trebui sa aiba altfel setarea aici ca sa permita miscari si pe alte axe 
-	vnDir = Vec3(-sin(fAngle), cos(fAngle), 0.0f);
-}
-
 void CLight::PostConstructionInit()
 {
 	bPendingKill = false;
@@ -72,7 +65,7 @@ void CLight::UpdateInternalData(CSpriteCollection* pLightsSprCol)
 		break;
 		case K_LVL_LT_PROJECTED_DIR:
 		{
-			vPos.z = vPos_ini.z = 0.0f;
+			pos = Vec3(pos.xyz.x, pos.xyz.y, 0.0f);
 			castShadows = false;
 
 
@@ -109,7 +102,7 @@ void CLight::SetLightTexture(CSpriteCollection* sprCol, int nAnimID, int nFrameI
 		RECTXYWH lrect = sprCol->GetAFrameBBox_real(animID, frameID);
 		bbox_ini.Set(lrect);
 		bbox = bbox_ini;
-		bbox.Move(pos);
+		bbox.Move(pos.xy_proj);
 	}
 
 	UpdateInternalData(sprCol);
@@ -124,21 +117,18 @@ CLight::CLight() :
 	vnDir = Vec3(0.0f, 0.0f, -1.0f); //default direction (looking down)
 }
 
-void CLight::SetPos(Vec2 newPos)
+void CLight::SetPos(Vec3 newPos)
 {
 	pos = newPos;
-	//set relative data
-	vPos.x = pos.x; vPos.y = pos.y;
 	bbox = bbox_ini;
-	bbox.Move(pos);
+	bbox.Move(pos.xy_proj);
 }
 
-void CLight::Move(Vec2 delta)
+void CLight::Move(Vec3 delta)
 {
-	pos += delta;
-	//set relative data
-	vPos.x = pos.x; vPos.y = pos.y;
+	Vec3 npos = pos.xyz + delta;
+	pos = npos;
 	bbox = bbox_ini;
-	bbox.Move(pos);
+	bbox.Move(pos.xy_proj);
 }
 

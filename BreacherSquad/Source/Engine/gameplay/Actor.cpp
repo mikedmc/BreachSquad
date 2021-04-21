@@ -3,7 +3,7 @@
 
 Vec2 CActor::GetPosHeart()
 {
-	return pos;
+	return pos.xy_proj;
 }
 
 Vec3 CActor::GetPosWeapon()
@@ -84,11 +84,6 @@ void CActor::EquipWeapon(int nWeaponIdx)
 	AddWpnTemplate(pWeaponMain);
 }
 
-void CActor::SetAngle(float fNewAngle)
-{
-	fAngle = fNewAngle;
-}
-
 void CActor::PostConstructionInit()
 {
 
@@ -112,7 +107,7 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 	return m_pAIcurrentState->m_arrBehaviors[m_nAIcurrentBehaviorIdx].nType;
 }
 
-CActor::CActor(Vec2 vPos, CActorTemplate* pActorTemplate, int nID) :
+CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID) :
 	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nTookDamageFrames(0), nLastDamageTakenFromUID(0),
 	pWeaponMain(nullptr), nSkinIdx(0), pClosestTouchable(nullptr), bAnimFlipX(false), eAnimAngle(EANG_S),
 	nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false),
@@ -134,7 +129,7 @@ CActor::CActor(Vec2 vPos, CActorTemplate* pActorTemplate, int nID) :
 	InitFromTemplate(pActorTemplate);
 	
 	//update all relative data
-	SetPos(vPos);
+	SetPos(Vec2ToVec3XY0(vnPos));
 }
 
 CActor::~CActor()
@@ -147,26 +142,27 @@ CActor::~CActor()
 	SAFE_DELETE_GROWABLE_ARRAY(arrWeapons);
 }
 
-void CActor::SetPos(Vec2 newPos)
+void CActor::SetPos(Vec3 newPos)
 {
-	pos_last = pos;
+	pos_last = pos.xyz;
 	pos = newPos;
 
 	bbox = bbox_ini;
-	bbox.Move(pos);
+	bbox.Move(pos.xy);
 	bbox_proj = bbox_proj_ini;
-	bbox_proj.Move(pos);
+	bbox_proj.Move(pos.xy);
 }
 
-void CActor::Move(Vec2 delta)
+void CActor::Move(Vec3 delta)
 {
-	pos_last = pos;
-	pos += delta;
+	pos_last = pos.xyz;
+	Vec3 npos = pos_last + delta;
+	pos = npos;
 
 	bbox = bbox_ini;
-	bbox.Move(pos);
+	bbox.Move(pos.xy);
 	bbox_proj = bbox_proj_ini;
-	bbox_proj.Move(pos);
+	bbox_proj.Move(pos.xy);
 }
 
 
@@ -525,7 +521,7 @@ void CActor::Update(float dTime)
 	//set skeleton data
 	if ((pSkeleton != null) && (pSkeleton->skel != null))
 	{
-		pSkeleton->skel->setPosition(pos.x, pos.y);
+		pSkeleton->skel->setPosition(pos.xy_proj.x, pos.xy_proj.y);
 		if (bAnimFlipX)
 			this->pSkeleton->skel->setScaleX(-1.0f);
 		else
@@ -665,10 +661,10 @@ void CActor::PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse
 	eLastPlayedVerse = sVerse;
 	//actually play the sound
 	//play only nearby sounds
-	D3DXVECTOR2 vDist(pos.x - vListenerPos.x, pos.y - vListenerPos.y);
-	if (D3DXVec2Length(&vDist) < K_GAME_WIDTH_MAX * 0.5f * 1.5f)
+	Vec2 vDist(pos.xy.x - vListenerPos.x, pos.xy.y - vListenerPos.y);
+	if (MUVec2Len(&vDist) < K_GAME_WIDTH_MAX * 0.5f * 1.5f)
 	{
-		SND_PLAY_POSITIONAL(actTemplate.soundIDs[(int)sVerse][nVariation], pos);
+		SND_PLAY_POSITIONAL(actTemplate.soundIDs[(int)sVerse][nVariation], pos.xy);
 	}
 
 }

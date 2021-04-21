@@ -20,9 +20,8 @@ public:
 		return K_LVL_IAI_TYPE_PROP;
 	}
 
-	void SetPos(Vec2 newPos) override;
-	void Move(Vec2 delta) override;
-	void SetAngle(float fnAngle) override;
+	void SetPos(Vec3 newPos) override;
+	void Move(Vec3 delta) override;
 
 	// Initializes custom internal data (hardcodes usually)
 	void PostConstructionInit() override;

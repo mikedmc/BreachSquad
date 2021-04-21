@@ -1417,8 +1417,8 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 				double faccum = 0.0f;
 				for (int ll = 0; ll < g_level.m_arrActors.GetSize(); ll++)
 				{
-				faccum += g_level.m_arrActors[ll]->pos.x;
-				faccum += g_level.m_arrActors[ll]->pos.y;
+				faccum += g_level.m_arrActors[ll]->vPos.x;
+				faccum += g_level.m_arrActors[ll]->vPos.y;
 				}
 				LOG(L"-- frame %d faccum %.9g", g_nUpdateFrame, faccum);
 				*/
@@ -1920,7 +1920,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 					for (int ll = 0; ll < g_level.m_arrActors.GetSize(); ll++)
 					{
 						CActor* act = g_level.m_arrActors[ll];
-						LOG(L"%s ID %d pos(%.4f, %.4f) decision(%.4f)", act->actTemplate.shID.text, act->ID, act->pos.x, act->pos.y, act->AItimerDecision);
+						LOG(L"%s ID %d pos(%.4f, %.4f) decision(%.4f)", act->actTemplate.shID.text, act->ID, act->pos.xyz.x, act->pos.xyz.y, act->AItimerDecision);
 					}
 
 					//send analytics

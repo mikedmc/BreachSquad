@@ -52,7 +52,7 @@ void CLevel::BuildVisibilityLists()
 		//saves the last position so it doesn't go crazy when the players get freed
 		if (pPlayerActor[kk] != null)
 		{
-			s_vLastPlayerPos[kk] = pPlayerActor[kk]->pos;
+			s_vLastPlayerPos[kk] = pPlayerActor[kk]->pos.xy;
 		}
 		//get a 2 screen area around each player's last pos (could be smaller, yes)
 		collisionAreaAABBs[kk].Set(s_vLastPlayerPos[kk] - camaabb.vSize, s_vLastPlayerPos[kk] + camaabb.vSize);
@@ -92,13 +92,14 @@ void CLevel::BuildVisibilityLists()
 			break;
 			default:
 			{
-				if (camaabb.IntersectsCircle(light->pos, light->fRadius))
+				if (camaabb.IntersectsCircle(light->pos.xy_proj, light->fRadius))
 				{
 					if (m_visibleList.visible_lights.Add(m_arrLights[kk]) < 0)
 						break;
 					if (m_arrLights[kk]->castShadows)
 					{
-						CAABB bbox_max(Vec2(light->pos.x - light->fRadius, light->pos.y - light->fRadius), Vec2(light->pos.x + light->fRadius, light->pos.y + light->fRadius));
+						CAABB bbox_max(Vec2(light->pos.xy_proj.x - light->fRadius, light->pos.xy_proj.y - light->fRadius), 
+							Vec2(light->pos.xy_proj.x + light->fRadius, light->pos.xy_proj.y + light->fRadius));
 						//la prima lumina cu shadow seteaza lightsCommonAABB fix pe bbox-ul luminii
 						if (bFirstShadowingLightSet == false)
 						{
@@ -190,30 +191,9 @@ void CLevel::BuildVisibilityLists()
 		//must be painted?
 		if (actorsPaintAABB.Intersects(actor->bbox))
 		{
-			//#PERSONALIZARE: don't draw actors under FOW
-			bool bUnderFOW = false;
-			for (int jj = 0; jj < m_visibleList.logic_colShapesSpecial.Count(); jj++)
-			{
-				CCollisionShape* colshape = m_visibleList.logic_colShapesSpecial.m_pData[jj];
-				//daca e alt tip de collision sau daca a fost descoperit
-				if (colshape->type != K_LVL_COLL_TYPE_FOG_OF_WAR)
-					continue;
-				else if (colshape->AIfvar1 < 1.0f)
-					continue;
-
-				if (m_visibleList.logic_colShapesSpecial.m_pData[jj]->bbox.PointIn(actor->GetPosHeart()))
-				{
-					bUnderFOW = true;
-				}
-			}
-
-			//adaug in lista de paint doar daca nu sunt sub FOW
-			if (!bUnderFOW)
-			{
-				m_visibleList.visible_actors.Add(actor);
-				// add it to the sorted list
-				m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_ACTOR, actor, actor->pos.y));
-			}
+			m_visibleList.visible_actors.Add(actor);
+			// add it to the sorted list
+			m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_ACTOR, actor, actor->pos.xyz.y));
 		}
 	}
 	//all props onscreen for rendering
@@ -236,7 +216,7 @@ void CLevel::BuildVisibilityLists()
 			{
 				m_visibleList.visible_props.Add(prop);
 				// add it to the sorted list
-				m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_PROP, prop, prop->pos.y));
+				m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_PROP, prop, prop->pos.xyz.y));
 			}
 			//logical closeby actives
 			if ((propsNearbyAABBs[0].Intersects(prop->bbox)) || (propsNearbyAABBs[1].Intersects(prop->bbox)))

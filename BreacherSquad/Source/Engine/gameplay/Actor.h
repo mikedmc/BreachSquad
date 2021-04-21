@@ -245,7 +245,7 @@ public:
 
 	Vec3	posHeart, posWeapon;	//pozitii absolute inima si arma presalvate (pentru viteza)
 
-	Vec2		pos_last;		// position on last frame
+	Vec3		pos_last;		// position on last frame
 	Vec2		speed;
 	Vec2		vSpeedImpulse;	//viteza aplicata extern (cand e impuscat de exemplu). Se va atenua automat.
 
@@ -312,16 +312,15 @@ public:
 	EAIBehaviorType GetCurrentBehavior();	
 
 	//CTOR
-	CActor(Vec2 vPos, CActorTemplate* pActorTemplate, int nID = -1);
+	CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID = -1);
 	~CActor();
 
 	const eActiveInterfaceType GetClassType() const {
 		return K_LVL_IAI_TYPE_ACTOR;
 	}
 
-	void SetPos(Vec2 newPos) override;
-	void Move(Vec2 delta) override;
-	void SetAngle(float fNewAngle) override; //seteaza unghiul si vAngleDir
+	void SetPos(Vec3 newPos) override;
+	void Move(Vec3 delta) override;
 
 	// Updates specified Actor AI. Returns busy state TRUE if actor has jobs to do or false if actor is still
 	void					Update(float dTime);

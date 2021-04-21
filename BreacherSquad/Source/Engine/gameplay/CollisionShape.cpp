@@ -2,35 +2,38 @@
 #include "CollisionShape.h"
 
 ///--- COLLISION SHAPES ---
-void CCollisionShape::SetPos(Vec2 newPos)
+void CCollisionShape::SetPos(Vec3 newPos)
 {
-	Vec2 delta = newPos - pos;
+	//Vec2 delta = newPos - vPos;
 	//vede daca am actori care stau pe mine si ii mut si pe ei
+	/*
 	for (int kk = 0; kk < touchingActors.GetSize(); kk++)
 	{
 		touchingActors[kk]->Move(delta);
 	}
+	*/
 
 	pos = newPos;
 	//set relative data
 	bbox = bbox_ini;
-	bbox.Move(pos);
+	bbox.Move(pos.xy);
 
 	bbox_exported = bbox;
 	bbox_exported_ini = bbox_ini;
 }
 
-void CCollisionShape::Move(Vec2 delta)
+void CCollisionShape::Move(Vec3 delta)
 {
 	//vede daca am actori care stau pe mine si ii mut si pe ei
+	/*
 	for (int kk = 0; kk < touchingActors.GetSize(); kk++)
 	{
 		touchingActors[kk]->Move(delta);
 	}
-
-	pos += delta;
+	*/
+	pos.Move(delta);
 	//set relative data
-	bbox.Move(delta);
+	bbox.Move(Vec3ToVec2XY(delta));
 	bbox_exported = bbox;
 }
 
