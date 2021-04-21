@@ -7810,12 +7810,12 @@ void CLevel::Update(float dTime_original)
 		{
 			if (pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_DEAD)
 			{
-				avg_live += Vec3ToVec2XY(pPlayerActor[kk]->pos_last) + pPlayerActor[kk]->m_AIcommands.vAimVec * 0.2f;
+				avg_live += Vec3XY(pPlayerActor[kk]->pos_last) + pPlayerActor[kk]->m_AIcommands.vAimVec * 0.2f;
 				plcnt_live++;
 			}
 
 
-			avg_all += Vec3ToVec2XY(pPlayerActor[kk]->pos_last) + pPlayerActor[kk]->m_AIcommands.vAimVec *  0.2f;
+			avg_all += Vec3XY(pPlayerActor[kk]->pos_last) + pPlayerActor[kk]->m_AIcommands.vAimVec *  0.2f;
 			plcnt_all++;
 		}
 	}
@@ -8629,7 +8629,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 
 		// paint aiming cursor
 		// vAimVec was normalized using last frame data so paint it at last frame actor position
-		Vec2 vto = Vec3ToVec2XY(pPlayerActor[kk]->pos_last) + pPlayerActor[kk]->m_AIcommands.vAimVec;
+		Vec2 vto = Vec3XY(pPlayerActor[kk]->pos_last) + pPlayerActor[kk]->m_AIcommands.vAimVec;
 		CSprite::paintFrame(&m_sprInterface, vto.x, vto.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffffffff);
 	}
 								  
@@ -9349,7 +9349,7 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 		//update
 		CPhysicsPoint*	point = &node->m_data;
 		// kill it when it gets outside the play area
-		if (!PointInRect(Vec3ToVec2XY(point->pos), m_levelAABB))
+		if (!PointInRect(Vec3XY(point->pos), m_levelAABB))
 		{
 			point->bIsDead = true;
 			point->bIsStatic = true;
@@ -9380,8 +9380,8 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 		///--- check collisions
 		{
 			Vec2 collisionPoint, collisionNormal;
-			Vec2 vFrom = Vec3ToVec2XY(point->pos_last);
-			Vec2 vTo = Vec3ToVec2XY(point->pos);
+			Vec2 vFrom = Vec3XY(point->pos_last);
+			Vec2 vTo = Vec3XY(point->pos);
 			Vec2 vMove = vTo - vFrom;
 
 			eRetContactType contactT = K_COLLTYPE_NONE;
@@ -9489,7 +9489,7 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 			}
 
 			//update current area (change only if not static)
-			Vec2 vpos2d = Vec3ToVec2XY(point->pos);
+			Vec2 vpos2d = Vec3XY(point->pos);
 			if ((point->pArea == nullptr) || (!point->pArea->AABBbounds.PointIn(vpos2d)))
 			{
 				point->pArea = Areas_GetAt(vpos2d);

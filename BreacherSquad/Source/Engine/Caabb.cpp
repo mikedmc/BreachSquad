@@ -321,7 +321,7 @@ bool AABB::Segment_IntersectionEx(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * 
 	if (dir.y == 0.0f)
 		dir.y = EPS;
 
-	float seglen = D3DXVec2Length(&dir);
+	float seglen = MUVec2Len(&dir);
 	//daca lungimea e 0 iese cu false
 	if (seglen == 0.0f)
 		return false;
@@ -601,4 +601,9 @@ void CAABBEx::SaveSnapshot()
 void CAABBEx::RestoreSnapshot(Vec2 vOffset /*= { 0.0f, 0.0f }*/)
 {
 	Set(vMin_snapshot + vOffset, vMax_snapshot + vOffset);
+}
+
+CAABB CAABBEx::GetSnapshot()
+{
+	return CAABB(vMin_snapshot, vMin_snapshot);
 }

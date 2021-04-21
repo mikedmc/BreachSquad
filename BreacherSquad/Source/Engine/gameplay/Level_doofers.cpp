@@ -719,7 +719,7 @@ void CLevel::UpdateDoofers(float dTime)
 					*/
 				}
 
-				if ((prop->physPt->m_data.bIsStatic) || (!PointInRect(Vec3ToVec2XY(prop->physPt->m_data.pos), camrect_larger)))
+				if ((prop->physPt->m_data.bIsStatic) || (!PointInRect(Vec3XY(prop->physPt->m_data.pos), camrect_larger)))
 				{
 					killprop = true;
 				}

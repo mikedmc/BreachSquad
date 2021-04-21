@@ -53,7 +53,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 
 	bullet->pos_ini = vPos;
 	bullet->posProj = Vec3ProjVec2(vPos);
-	bullet->posShadow = Vec3ToVec2XY(vPos);
+	bullet->posShadow = Vec3XY(vPos);
 	//physics
 	bullet->physPt->m_data.pArea = bullet->pArea;
 	bullet->physPt->m_data.pos = vPos;
@@ -99,7 +99,7 @@ CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float
 			bPassed = false;
 		if (bPassed)
 		{
-			float fDist = MUVec2LenSq(&(vCheckPos - Vec3ToVec2XY(bullet->physPt->m_data.pos)));
+			float fDist = MUVec2LenSq(&(vCheckPos - Vec3XY(bullet->physPt->m_data.pos)));
 			if ((fMaxDistance <= 0.0f) || ((fMaxDistance > 0.0f) && (fDist <= fMaxDistanceSq)))
 			{
 				if (fDist < fMinDist)
@@ -143,6 +143,7 @@ void CLevel::ReleaseBulletType(int nBulletType, UINT32 nOwnerUID)
 
 void CLevel::UpdateBullets(float dTime)
 {
+	CFixedArray<CAABB*, 50> arrBBoxes;
 	//we'll store some important bullets in m_arrBulletsTemp so we can quickly check them later on when updating AIs
 	m_arrBulletsTemp.Clear();
 
@@ -179,11 +180,63 @@ void CLevel::UpdateBullets(float dTime)
 
 		// update position triplets
 		bullet->posProj = Vec3ProjVec2(bullet->physPt->m_data.pos);
-		bullet->posShadow = Vec3ToVec2XY(bullet->physPt->m_data.pos);
+		bullet->posShadow = Vec3XY(bullet->physPt->m_data.pos);
 
 		if (bullet->physPt->m_data.bContacting)
 		{
 			killbullet = true;
+		}
+
+		//--- check collision with objects and actors ---
+		float fMinT = 100000.0f;
+		Vec2 vColP, vColN;
+		CVisibleSortable pRetObj;
+
+		Vec2 vFrom = Vec3XY(bullet->physPt->m_data.pos_last);
+		Vec2 vTo = bullet->posShadow;
+		CAABB aabbBullet;
+		aabbBullet.Set_Corrected(vFrom, vTo);
+		// collision return vars
+		Vec2 vRetPt(0.0f, 0.0f);
+		float fRetT = 100000.0f;
+
+		if (bullet->pArea != nullptr)
+		{
+			//#TODO: collide with neighboring areas too
+			for (int ll = 0; ll < bullet->pArea->m_arrProps.Count(); ll++)
+			{
+				CProp* prop = bullet->pArea->m_arrProps[ll];
+				if (prop->bbox_floor.Intersects(aabbBullet))
+				{
+					if (AABB::Segment_IntersectionEx(vFrom, vTo, prop->bbox_floor, &vRetPt, fRetT))
+					{
+						//#TODO: return material too, interpolate height see if it corresponds (precise collision)
+						//#TODO: check if object is affected by bullets
+						//#TODO: set prop height when loading it (whene spawning)
+						if ((fRetT < fMinT) /*&& (bullet->physPt->m_data.pos.z < prop->fHeight)*/)
+						{
+							fMinT = fRetT;
+							vColP = vRetPt;
+							pRetObj.eType = K_VST_PROP;
+							pRetObj.pPtr = prop;
+						}
+					}
+				}
+			}
+		}
+
+		// check hit object...
+		if (pRetObj.eType != K_VST_UNKNOWN)
+		{
+			if (pRetObj.eType == K_VST_PROP)
+			{
+				CProp* hitprop = static_cast<CProp*>(pRetObj.pPtr);
+				if (hitprop)
+				{
+					hitprop->Kill();
+					killbullet = true;
+				}
+			}
 		}
 
 		//release the bullet

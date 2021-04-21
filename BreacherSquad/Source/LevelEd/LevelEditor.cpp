@@ -63,7 +63,7 @@ void CLevelEditor::Launch(CLevel* level)
 		return;
 	// save pointer to current level
 	m_pLevel = level;
-	m_vCamPos = Vec3ToVec2XY(level->m_camLevel.GetCamPos());
+	m_vCamPos = Vec3XY(level->m_camLevel.GetCamPos());
 	m_vCamPos_ini = m_vCamPos;
 }
 

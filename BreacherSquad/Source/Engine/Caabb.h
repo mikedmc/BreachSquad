@@ -120,9 +120,15 @@ public:
 	CAABBEx() : vMin_snapshot(0.0f, 0.0f), vMax_snapshot(0.0f, 0.0f)
 	{}
 
+	CAABBEx(const CAABB & box) : vMin_snapshot(0.0f, 0.0f), vMax_snapshot(0.0f, 0.0f)
+	{
+		Set(box.vMin, box.vMax);
+	}
+
 	Vec2 vMin_snapshot;
 	Vec2 vMax_snapshot;
 
-	void SaveSnapshot();
-	void RestoreSnapshot(Vec2 vOffset = { 0.0f, 0.0f });
+	void				SaveSnapshot();
+	void				RestoreSnapshot(Vec2 vOffset = { 0.0f, 0.0f });
+	CAABB				GetSnapshot();
 };

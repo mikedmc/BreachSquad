@@ -30,7 +30,7 @@ void CCollisionShape::Move(Vec3 delta)
 	*/
 	pos.Move(delta);
 	//set relative data
-	bbox.Move(Vec3ToVec2XY(delta));
+	bbox.Move(Vec3XY(delta));
 }
 
 void CCollisionShape::BeginPlay()
