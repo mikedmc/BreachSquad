@@ -5249,7 +5249,17 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		if (actor->pArea != nullptr)
 		{
 			// get collision tiles for current area
+			// tiles collboxes
 			int nadded = actor->pArea->GetTilesCollisionBoxes(boxUnionTiles, retAABBs, 64);
+			if (nadded > 0)
+			{
+				for (int oo = 0; oo < nadded; oo++)
+				{
+					tempCollBoxList.Add(retAABBs[oo]);
+				}
+			}
+			// props collboxes
+			nadded = actor->pArea->GetPropsCollisionBoxes(boxUnion, retAABBs, 64);
 			if (nadded > 0)
 			{
 				for (int oo = 0; oo < nadded; oo++)
@@ -5265,7 +5275,17 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					CLevelArea* area = actor->pArea->arrNeighbours.m_pData[oo];
 					if (!area->AABBbounds_TL.Intersects(boxUnionTilesWH))
 						continue;
-					int nadded = area->GetTilesCollisionBoxes(boxUnionTiles, retAABBs, 64);
+					// tiles collboxes
+					nadded = area->GetTilesCollisionBoxes(boxUnionTiles, retAABBs, 64);
+					if (nadded > 0)
+					{
+						for (int oo = 0; oo < nadded; oo++)
+						{
+							tempCollBoxList.Add(retAABBs[oo]);
+						}
+					}
+					// props collboxes
+					nadded = area->GetPropsCollisionBoxes(boxUnion, retAABBs, 64);
 					if (nadded > 0)
 					{
 						for (int oo = 0; oo < nadded; oo++)
@@ -6064,6 +6084,7 @@ void CLevel::CleanupDeadObjects()
 	{
 		if (m_arrLights[kk]->IsPendingKill())
 		{
+			m_arrLights[kk]->EndPlay();
 			SAFE_DELETE(m_arrLights[kk]);
 			m_arrLights.Remove(kk);
 		}

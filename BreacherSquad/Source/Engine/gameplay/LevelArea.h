@@ -59,8 +59,10 @@ public:
 	OPRESULT				BuildBuffers(PDEVICE pDevice, CSpriteCollection* pLightsSprCol);
 	// intersection of segment with tiles (nullptr if not intersecting)
 	CTile*					SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i *hitTilePosTL);
-	// writes the tiles that collide with the player in the ret_arrAABBs array. Returns number of added elements.
+	// writes the tiles that collide with the player in the ret_arrAABBs array. Returns number of added elements. Starts from 0 overwriting the ret_arrAABBs elements.
 	int						GetTilesCollisionBoxes(RECTXYXY srcBoxTL, CAABB* ret_arrAABBs, int nArrCapacity);
+	// writes the bboxes of the props that collide with the srcBoxTL. Starts from 0 overwriting the ret_arrAABBs elements.
+	int						GetPropsCollisionBoxes(CAABB srcBox, CAABB* ret_arrAABBs, int nArrCapacity);
 	// gets all the tiles that 
 	int						GetTilesByFlag(RECTXYXY srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity);
 

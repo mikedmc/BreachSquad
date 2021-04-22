@@ -207,7 +207,7 @@ void CLevel::UpdateBullets(float dTime)
 			for (int ll = 0; ll < bullet->pArea->m_arrProps.Count(); ll++)
 			{
 				CProp* prop = bullet->pArea->m_arrProps[ll];
-				if ((prop->flags & K_PROPFLAG_CAN_BE_SHOT) == 0)
+				if ((prop->bHidden) || ((prop->flags & K_PROPFLAG_CAN_BE_SHOT) == 0) || (prop->IsPendingKill()))
 					continue;
 				if (prop->bbox_floor.Intersects(aabbBullet))
 				{
@@ -237,7 +237,7 @@ void CLevel::UpdateBullets(float dTime)
 					for (int ll = 0; ll < area->m_arrProps.Count(); ll++)
 					{
 						CProp* prop = area->m_arrProps[ll];
-						if ((prop->flags & K_PROPFLAG_CAN_BE_SHOT) == 0)
+						if ((prop->bHidden) || ((prop->flags & K_PROPFLAG_CAN_BE_SHOT) == 0) || (prop->IsPendingKill()))
 							continue;
 						if (prop->bbox_floor.Intersects(aabbBullet))
 						{
@@ -265,6 +265,7 @@ void CLevel::UpdateBullets(float dTime)
 				CProp* hitprop = static_cast<CProp*>(pRetObj.pPtr);
 				if (hitprop)
 				{
+					//#TODO: save targetedUID on bullet to avoid hitting same entity 2 times with penetrating bullets
 					hitprop->Kill();
 					killbullet = true;
 				}

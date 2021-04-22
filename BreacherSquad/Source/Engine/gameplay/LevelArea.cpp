@@ -307,6 +307,24 @@ int CLevelArea::GetTilesCollisionBoxes(RECTXYXY srcBoxTL, CAABB* ret_arrAABBs, i
 	return nAdded;
 }
 
+int CLevelArea::GetPropsCollisionBoxes(CAABB srcBox, CAABB* ret_arrAABBs, int nArrCapacity)
+{
+	int nAdded = 0;
+
+	for (int kk = 0; kk < m_arrProps.Count(); kk++)
+	{
+		CProp* prop = m_arrProps[kk];
+		if ((prop->bHidden) || ((prop->flags & K_PROPFLAG_COLLIDES_ACTOR) == 0))
+			continue;
+		if (prop->bbox_floor.Intersects(srcBox))
+		{
+			ret_arrAABBs[nAdded++] = m_arrProps[kk]->bbox_floor;
+		}
+	}
+
+	return nAdded;
+}
+
 int CLevelArea::GetTilesByFlag(RECTXYXY srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity)
 {
 	return 0;
