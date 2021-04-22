@@ -498,7 +498,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	OS_freadString(fl, charArr);
 
 	//--- props ---
-	//#TODO: de folosit spawnProp
+	//#TODO: de folosit spawnProp peste tot
 	int decocnt = (int)OS_freadUInt32(fl);
 	for (int kk = 0; kk < decocnt; kk++)
 	{
@@ -523,20 +523,27 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		//frame
 		int frameIdx = OS_freadUInt16(fl);
 		obj->color = 0xffffffff;
-		obj->nAnim_ini = animIdx;
-		obj->nFrame_ini = frameIdx;
+		obj->fid_ini.Init(animIdx, frameIdx);
 		obj->sprite.Init(&m_sprProps, animIdx, obj->pos.xy_proj, frameIdx, obj->color);
+		// get AFrame flags
+		UINT32 frame_flags = m_sprProps.GetAFrameFlags(animIdx, frameIdx);
+		obj->flags = 0;
+		// read height and convert from screen to world (usually double the height)
+		obj->fHeight = H_TO_Z((float)(frame_flags & K_FLAG_EDITOR_PROP_HEIGHTMASK));
+		if (frame_flags & K_FLAG_EDITOR_PROP_SKIP_BULLET_H_TEST) obj->flags |= K_PROPFLAG_SKIP_BULLET_H_TEST;
+		if (frame_flags & K_FLAG_EDITOR_PROP_STOPS_BULLET) obj->flags |= K_PROPFLAG_STOPS_BULLET;
+		if (frame_flags & K_FLAG_EDITOR_PROP_COLLIDES_ACTORS) obj->flags |= K_PROPFLAG_COLLIDES_ACTOR;
+
 		//angle
 		//obj->fAngle = 0.0f;
 		//obj->fAngle_ini = 0.0f;
-		//load flags and split
-		UINT32 activFlags = OS_freadUInt32(fl);
+		//load flags that were set by the level editor
+		UINT32 activ_flags = OS_freadUInt32(fl);
 		//flip xy
-		obj->flipX = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPX) != 0);
-		//obj->flipY = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPY) != 0);
+		//obj->flipX = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPX) != 0);
 		//animated
-		obj->bAnimated = ((activFlags & K_EDITOR_ACTIVE_FLAG_ANIMATED) != 0);
 		//animated? select different start frame
+		obj->bAnimated = ((activ_flags & K_EDITOR_ACTIVE_FLAG_ANIMATED) != 0);
 		if (obj->bAnimated)
 		{
 			obj->sprite.frameIdx = m_rand.RandInt(m_sprProps.GetAFramesCnt(obj->sprite.animIdx));
@@ -547,11 +554,13 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		obj->bbox_ini.Set(objbox);
 		obj->bbox_floor_ini.Set(bbox_set);
 		// when we flip it on X we flip bboxes too
-		if (obj->flipX)
+		/*
+		if (IS_FLAG_ALL(obj->flags, K_PROPFLAG_FLIP_X)
 		{
 			obj->bbox_ini.Move(Vec2(-2.0f * obj->bbox_ini.vCenter.x, 0.0f));
 			obj->bbox_floor_ini.Move(Vec2(-2.0f * obj->bbox_floor.vCenter.x, 0.0f));
 		}
+		*/
 
 		//load logic and init data
 		obj->LoadLogic(fl);

@@ -62,11 +62,16 @@
 //when set the weapon shoots backwards (like ACTION flag but backwards)
 #define K_LVL_ACTIVE_AFRAMEFLAG_ACTION_SYMMETRIC 8
 
-//flaguri ale activilor explortate din editor pe 32 bits ca sa nu mai export valori separate pt fiecare. Se descompun la load
+//#TODO: update them: The level editor exports these flags:
 #define K_EDITOR_ACTIVE_FLAG_FLIPX 1
 #define K_EDITOR_ACTIVE_FLAG_FLIPY 2
 #define K_EDITOR_ACTIVE_FLAG_ANIMATED 4
 #define K_EDITOR_ACTIVE_FLAG_IS_COVER 8
+// aframe flags set from the sprites editor, for the props
+#define K_FLAG_EDITOR_PROP_HEIGHTMASK				63
+#define K_FLAG_EDITOR_PROP_COLLIDES_ACTORS			64
+#define K_FLAG_EDITOR_PROP_SKIP_BULLET_H_TEST		128
+#define K_FLAG_EDITOR_PROP_STOPS_BULLET				256
 
 //level file format version from the Editor
 #define K_EDITOR_LEVEL_FILE_FORMAT_VERSION 1015

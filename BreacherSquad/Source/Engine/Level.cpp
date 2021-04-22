@@ -587,18 +587,17 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 	int animIdx = nAnimIdx;
 	int frameIdx = nFrameIdx;
 	obj->sprite.Init(&m_sprProps, animIdx, obj->pos.xy_proj, frameIdx,  0xffffffff);
-	obj->nAnim_ini = animIdx;
-	obj->nFrame_ini = frameIdx;
+	obj->fid_ini.Init(animIdx, frameIdx);
 	obj->sprite.color = obj->color;
 	//angle
 	//obj->fAngle = obj->fAngle_ini = 0.0f;
 	//load flags and split
 	UINT32 activFlags = 0;
 	//flip xy
-	obj->flipX = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPX) != 0);
+	//obj->flipX = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPX) != 0);
 	//obj->flipY = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPY) != 0);
 	//animated
-	obj->bAnimated = ((activFlags & K_EDITOR_ACTIVE_FLAG_ANIMATED) != 0);
+	//obj->bAnimated = ((activFlags & K_EDITOR_ACTIVE_FLAG_ANIMATED) != 0);
 	//cand e animat selecteaza random frame-ul de pornire
 	if (obj->bAnimated)
 	{
@@ -610,11 +609,13 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 	obj->bbox_ini.Set(objbox);
 	obj->bbox_floor_ini.Set(bbox_set);
 	//daca e flipat pe X flipez si bbox. Pe Y nu e cazul pt ca se pastreaza in acelasi bbox in paint
+	/*
 	if (obj->flipX)
 	{
 		obj->bbox_ini.Move(Vec2(-2.0f * obj->bbox_ini.vCenter.x, 0.0f));
 		obj->bbox_floor_ini.Move(Vec2(-2.0f * obj->bbox_floor_ini.vCenter.x, 0.0f));
 	}
+	*/
 
 	//load logic
 	obj->bCanInteract = false;
@@ -2807,10 +2808,12 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 			RECTXYWH frrect = m_sprProps.GetAFrameBBox(prop->sprite.animIdx, prop->sprite.frameIdx);
 			prop->bbox_ini.Set(frrect);
 			//nu pastreaza acelasi bbox la flip deci flipam bboxul
+			/*
 			if (prop->flipX)
 			{
 				prop->bbox_ini.Flip(true, false);
 			}
+			*/
 		}
 	}
 
@@ -2919,7 +2922,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 			case K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE:
 			{
 				//keep door open (AIvar1 contine frame-ul default) - set frame
-				prop->sprite.frameIdx = prop->nFrame_ini;
+				prop->sprite.frameIdx = prop->fid_ini.frameIdx;
 				if (prop->AItimer1 > 0.0f)
 				{
 					prop->AItimer1 -= dTime;

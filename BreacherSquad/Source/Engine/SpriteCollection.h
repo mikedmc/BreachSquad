@@ -115,23 +115,6 @@ public:
 };
 
 
-// Identifier for a frame in an animation
-struct scFrameID
-{
-	int animIdx;
-	int frameIdx;
-
-	scFrameID() : 
-		animIdx(-1), frameIdx(0)
-	{}
-
-	void Init(int nAnimIdx, int nFrameIdx)
-	{
-		animIdx = nAnimIdx;
-		frameIdx = nFrameIdx;
-	}
-};
-
 /*!
  * \class CSpriteCollection
  *
