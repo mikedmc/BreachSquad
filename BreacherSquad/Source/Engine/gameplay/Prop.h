@@ -2,8 +2,7 @@
 
 // prop flags (they initially come from the editor)
 #define K_PROPFLAG_COLLIDES_ACTOR			1
-#define K_PROPFLAG_SKIP_BULLET_H_TEST		2
-#define K_PROPFLAG_STOPS_BULLET				4
+#define K_PROPFLAG_CAN_BE_SHOT				2
 
 ///--------------------------------------------------------------------------
 /// PROPS - all objects that are not players

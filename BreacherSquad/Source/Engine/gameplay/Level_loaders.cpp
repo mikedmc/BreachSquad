@@ -530,9 +530,8 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		obj->flags = 0;
 		// read height and convert from screen to world (usually double the height)
 		obj->fHeight = H_TO_Z((float)(frame_flags & K_FLAG_EDITOR_PROP_HEIGHTMASK));
-		if (frame_flags & K_FLAG_EDITOR_PROP_SKIP_BULLET_H_TEST) obj->flags |= K_PROPFLAG_SKIP_BULLET_H_TEST;
-		if (frame_flags & K_FLAG_EDITOR_PROP_STOPS_BULLET) obj->flags |= K_PROPFLAG_STOPS_BULLET;
 		if (frame_flags & K_FLAG_EDITOR_PROP_COLLIDES_ACTORS) obj->flags |= K_PROPFLAG_COLLIDES_ACTOR;
+		if (frame_flags & K_FLAG_EDITOR_PROP_CAN_BE_SHOT) obj->flags |= K_PROPFLAG_CAN_BE_SHOT;
 
 		//angle
 		//obj->fAngle = 0.0f;

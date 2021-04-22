@@ -43,6 +43,7 @@ public:
 	CAABB					bbox_ini;				// non relative to object position AABB used when moving the bbox with absolute values
 	CAABB					bbox_floor;				// bbox of the object projected on the floor
 	CAABB					bbox_floor_ini;			// initial value for bbox
+	CAABB					bbox_proj;				// projected floor bbox considering height of the object
 // initial values necessary for relative movements
 public: 
 	DWORD					color_ini;

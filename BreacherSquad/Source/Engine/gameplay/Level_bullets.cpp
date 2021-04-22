@@ -192,28 +192,29 @@ void CLevel::UpdateBullets(float dTime)
 		Vec2 vColP, vColN;
 		CVisibleSortable pRetObj;
 
-		Vec2 vFrom = Vec3XY(bullet->physPt->m_data.pos_last);
-		Vec2 vTo = bullet->posShadow;
+		Vec2 vFrom = Vec3ProjVec2(bullet->physPt->m_data.pos_last);
+		Vec2 vTo = bullet->posProj;
 		CAABB aabbBullet;
 		aabbBullet.Set_Corrected(vFrom, vTo);
 		// collision return vars
 		Vec2 vRetPt(0.0f, 0.0f);
 		float fRetT = 100000.0f;
 
+		// checks collisions with objects and actors by testing the already projected bboxes
 		if (bullet->pArea != nullptr)
 		{
-			//#TODO: collide with neighboring areas too
+			//#TODO: collide with neighboring areas too	!!
 			for (int ll = 0; ll < bullet->pArea->m_arrProps.Count(); ll++)
 			{
 				CProp* prop = bullet->pArea->m_arrProps[ll];
-				if (prop->bbox_floor.Intersects(aabbBullet))
+				if ((prop->flags & K_PROPFLAG_CAN_BE_SHOT) == 0)
+					continue;
+				if (prop->bbox_proj.Intersects(aabbBullet))
 				{
-					if (AABB::Segment_IntersectionEx(vFrom, vTo, prop->bbox_floor, &vRetPt, fRetT))
+					if (AABB::Segment_IntersectionEx(vFrom, vTo, prop->bbox_proj, &vRetPt, fRetT))
 					{
-						//#TODO: return material too, interpolate height see if it corresponds (precise collision)
-						//#TODO: check if object is affected by bullets
-						//#TODO: set prop height when loading it (whene spawning)
-						if ((fRetT < fMinT) /*&& (bullet->physPt->m_data.pos.z < prop->fHeight)*/)
+						//#TODO: return material too
+						if (fRetT < fMinT)
 						{
 							fMinT = fRetT;
 							vColP = vRetPt;
