@@ -53,7 +53,7 @@ public:
 	CStringHashA	shSkinName;			// skeleton skin name
 	CStringHash		shAIState_ini;		// initial AI state
 
-	CAnimDesc		arrAnims[K_SD_ANIMS_CNT];										// Array that keeps animation data from actor.xml
+	CAnimDesc		arrAnims[K_SD_ANIMS_CNT];									// Array that keeps animation data from actor.xml
 	int				soundIDs[K_LVL_ACT_VERSES_COUNT][K_ACT_VERSES_MAX_SETS];	// Contains sound ids-s mapped on different actions (called verses, see EActorSoundVerse)
 
 	///--- GENERICS: !!! when adding new generics don't forget to edit OverwriteGenericDataFromTemplate !!!

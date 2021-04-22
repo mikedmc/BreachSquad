@@ -143,7 +143,6 @@ void CLevel::ReleaseBulletType(int nBulletType, UINT32 nOwnerUID)
 
 void CLevel::UpdateBullets(float dTime)
 {
-	CFixedArray<CAABB*, 50> arrBBoxes;
 	//we'll store some important bullets in m_arrBulletsTemp so we can quickly check them later on when updating AIs
 	m_arrBulletsTemp.Clear();
 
@@ -188,7 +187,7 @@ void CLevel::UpdateBullets(float dTime)
 		}
 
 		//--- check collision with objects and actors ---
-		float fMinT = 100000.0f;
+		//float fMinT = 100000.0f;
 		Vec2 vColP, vColN;
 		CVisibleSortable pRetObj;
 
@@ -200,33 +199,65 @@ void CLevel::UpdateBullets(float dTime)
 		Vec2 vRetPt(0.0f, 0.0f);
 		float fRetT = 100000.0f;
 
-		// checks collisions with objects and actors by testing the already projected bboxes
+		///----------------------------------------------------------------------------------
+		/// Check collisions with objects
+		///----------------------------------------------------------------------------------
 		if (bullet->pArea != nullptr)
 		{
-			//#TODO: collide with neighboring areas too	!!
 			for (int ll = 0; ll < bullet->pArea->m_arrProps.Count(); ll++)
 			{
 				CProp* prop = bullet->pArea->m_arrProps[ll];
-				if (((prop->flags & K_PROPFLAG_CAN_BE_SHOT) == 0) /* || (prop->fHeight < K_BULLET_DEFAULT_H)*/)
+				if ((prop->flags & K_PROPFLAG_CAN_BE_SHOT) == 0)
 					continue;
 				if (prop->bbox_floor.Intersects(aabbBullet))
 				{
-					if (AABB::Segment_IntersectionEx(vFrom, vTo, prop->bbox_floor, &vRetPt, fRetT))
+					if (AABB::Segment_Intersection(vFrom, vTo, prop->bbox_floor, &vRetPt))
 					{
 						//#TODO: return material too
-						if (fRetT < fMinT)
+						vColP = vRetPt;
+						pRetObj.eType = K_VST_PROP;
+						pRetObj.pPtr = prop;
+						// shorten bullet vector so we only catch the closest ones
+						vTo = vRetPt;
+						aabbBullet.Set_Corrected(vFrom, vTo);
+					}
+				}
+			}
+			// Collision with props from neighbouring areas
+			// we assume that if we had a collision with prop in current area then there will be no other closer prop in neighbouring areas
+			if (pRetObj.pPtr == nullptr)
+			{
+				for (int oo = 0; oo < bullet->pArea->arrNeighbours.Count(); oo++)
+				{
+					CLevelArea* area = bullet->pArea->arrNeighbours[oo];
+					// eliminate areas that don't intersect bullet movement bbox
+					if (!aabbBullet.Intersects(area->AABBbounds))
+						continue;
+
+					for (int ll = 0; ll < area->m_arrProps.Count(); ll++)
+					{
+						CProp* prop = area->m_arrProps[ll];
+						if ((prop->flags & K_PROPFLAG_CAN_BE_SHOT) == 0)
+							continue;
+						if (prop->bbox_floor.Intersects(aabbBullet))
 						{
-							fMinT = fRetT;
-							vColP = vRetPt;
-							pRetObj.eType = K_VST_PROP;
-							pRetObj.pPtr = prop;
+							if (AABB::Segment_Intersection(vFrom, vTo, prop->bbox_floor, &vRetPt))
+							{
+								//#TODO: return material too
+								vColP = vRetPt;
+								pRetObj.eType = K_VST_PROP;
+								pRetObj.pPtr = prop;
+								// shorten bullet vector so we only catch the closest ones
+								vTo = vRetPt;
+								aabbBullet.Set_Corrected(vFrom, vTo);
+							}
 						}
 					}
 				}
 			}
 		}
 
-		// check hit object...
+		///--- check hit object...
 		if (pRetObj.eType != K_VST_UNKNOWN)
 		{
 			if (pRetObj.eType == K_VST_PROP)
