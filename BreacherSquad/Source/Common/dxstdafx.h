@@ -346,9 +346,9 @@ enum ETexChannel {
 #define ZHSCALE						0.5f
 #define INV_ZHSCALE					(1.0f / 0.5f)
 // Transforms World coord Z in onscreen elevation that we add to Y value (45deg projection)
-#define Z_TO_H(posZ)				(posZ * ZHSCALE)
+#define Z_TO_H(posZ)				((posZ) * ZHSCALE)
 // Transforms onscreen elevation to World coord Z (
-#define H_TO_Z(posZ)				(posZ * INV_ZHSCALE)
+#define H_TO_Z(posZ)				((posZ) * INV_ZHSCALE)
 // Converts Vec3 world space in Vec2 proojected space
 #define Vec3ProjVec2(vec)				(Vec2(vec.x, vec.y - vec.z * ZHSCALE))
 

@@ -70,7 +70,6 @@ public:
 
 	CAABB			bbox;				// 2d bbox on floor plane defined around the character origin (not always centered)
 	float			fHeight;			// height of character
-	float			fShootH;			// height of the weapon nozzle
 	CStringHash		shWeaponDefault;
 
 	CActorTemplate();

@@ -171,7 +171,7 @@ CActorTemplate::CActorTemplate() :
 	//more important values
 	eMaterial(K_LVL_MATERIAL_UNKNOWN), eCaps(K_ACT_CAPS_NONE),
 	AItemplate(nullptr), fMass(100.0f),
-	fHeight(32.0f), fShootH(16.0f)
+	fHeight(32.0f)
 {
 	//reset anim IDs
 	for (int kk = 0; kk < K_SD_ANIMS_CNT; kk++)
@@ -448,9 +448,10 @@ void CActor::Update(float dTime)
 
 	// get projected 2d gun position and convert to 3d position for bullet spawn
 	spine::Bone* b_gun = pSkeleton->arrBones[K_SD_BONE_GUN_MOUNT];
+	// find the position in 3d so that the projected position always matches the default bullet height
 	this->posWeapon.x = b_gun->getWorldX();
-	this->posWeapon.y = b_gun->getWorldY();
-	this->posWeapon.z = Z_TO_H(actTemplate.fShootH);
+	this->posWeapon.y = b_gun->getWorldY() + Z_TO_H(K_BULLET_DEFAULT_Z);
+	this->posWeapon.z = K_BULLET_DEFAULT_Z;
 
 	///--- update weapons ---
 	/*

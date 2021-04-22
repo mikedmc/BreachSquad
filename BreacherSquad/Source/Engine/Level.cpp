@@ -1162,7 +1162,6 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 	float ymax = actnode.attribute(L"bboxMaxY").as_float();
 	templ->bbox.Set(xmin, ymin, xmax, ymax);
 	templ->fHeight = actnode.attribute(L"nHeight").as_float();
-	templ->fShootH = actnode.attribute(L"nShootHeight").as_float();
 
 	if (!actnode.attribute(L"fSpeedMove").empty()) { templ->fSpeedMove = actnode.attribute(L"fSpeedMove").as_float(); }
 	//life

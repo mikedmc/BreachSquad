@@ -192,8 +192,8 @@ void CLevel::UpdateBullets(float dTime)
 		Vec2 vColP, vColN;
 		CVisibleSortable pRetObj;
 
-		Vec2 vFrom = Vec3ProjVec2(bullet->physPt->m_data.pos_last);
-		Vec2 vTo = bullet->posProj;
+		Vec2 vFrom = Vec3XY(bullet->physPt->m_data.pos_last);
+		Vec2 vTo = bullet->posShadow;
 		CAABB aabbBullet;
 		aabbBullet.Set_Corrected(vFrom, vTo);
 		// collision return vars
@@ -207,11 +207,11 @@ void CLevel::UpdateBullets(float dTime)
 			for (int ll = 0; ll < bullet->pArea->m_arrProps.Count(); ll++)
 			{
 				CProp* prop = bullet->pArea->m_arrProps[ll];
-				if ((prop->flags & K_PROPFLAG_CAN_BE_SHOT) == 0)
+				if (((prop->flags & K_PROPFLAG_CAN_BE_SHOT) == 0) /* || (prop->fHeight < K_BULLET_DEFAULT_H)*/)
 					continue;
-				if (prop->bbox_proj.Intersects(aabbBullet))
+				if (prop->bbox_floor.Intersects(aabbBullet))
 				{
-					if (AABB::Segment_IntersectionEx(vFrom, vTo, prop->bbox_proj, &vRetPt, fRetT))
+					if (AABB::Segment_IntersectionEx(vFrom, vTo, prop->bbox_floor, &vRetPt, fRetT))
 					{
 						//#TODO: return material too
 						if (fRetT < fMinT)
@@ -303,6 +303,8 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 				//Vec2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 				//float ang = UTMath::GetVectorAngle(vdir);
 				bullet->sprBullet.pos = bullet->posProj;
+				bullet->sprBullet.PaintModule(0);
+				bullet->sprBullet.pos = bullet->posShadow;
 				bullet->sprBullet.PaintModule(0);
 
 				// advance to next bullet

@@ -4,6 +4,8 @@
 ///--- BULLETS ---
 ///--------------------------------------------------------------------------
 #define K_LVL_BULLETS_MAX_CNT 256
+// hardcoded bullet height based on average main character height
+#define K_BULLET_DEFAULT_Z			24.0f
 
 #define K_LVL_BULLET_FLAG_NONE 0
 #define K_LVL_BULLET_FLAG_IGNORE_COVER 1
