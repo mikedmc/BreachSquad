@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<!-- actions that can be run on different objects -->
+<ACTIONS>
+	<DOOR_KNOCK 		targetClasses="DOOR,DOOR_LOCKED,WINDOW" scriptName="SCRIPT1" strIDname="ACTION_KNOCK" />
+	<DOOR_SET_CHARGE 	targetClasses="DOOR,DOOR_LOCKED" scriptName="SCRIPT_SET_CHARGE" strIDname="ACTION_SET_CHARGE" />
+	<USE_LOCKPICK 		targetClasses="DOOR_LOCKED" scriptName="SCRIPT_USE_LOCKPICK" strIDname="ACTION_USE_LOCKPICK" />
+</ACTIONS>
+
+<!-- inventory objects maybe? 
+<INVENTORY>
+	<LOCKPICK action="USE_LOCKPICK" frame="2" etc />
+-->

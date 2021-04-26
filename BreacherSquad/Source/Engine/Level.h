@@ -114,6 +114,11 @@ public:
 	// arrTiles is an array of CTile pointers
 	void					Areas_GetTilesSnapshot(RECTXYWH srcRectTL, CTile** arrTiles, int arrCapacity);
 
+	///--- LEVEL DEFINES (generic data used ingame) ---
+	vector<CScriptAction>	m_arrActionTemplates;			// list of all possible actions ingame (they get copied on iActives)
+	// Loads actions, inventory objects, etc
+	OPRESULT				LoadLevelDefines(WCHAR* strPath);
+
 	///--- TEMPLATES ---
 	CGrowableArray<CWeaponTemplate*>		m_arrTemplatesWeapon;
 	CGrowableArray<CExplosionTemplate*>		m_arrTemplatesExplosion;

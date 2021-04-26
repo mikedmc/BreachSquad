@@ -8978,6 +8978,7 @@ void CLevel::Release()
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrTemplatesExplosion);
 
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrAIevents);
+	m_arrActionTemplates.clear();
 	//release bullets
 	m_poolBullets.Release();
 	m_poolDoofers.Release();

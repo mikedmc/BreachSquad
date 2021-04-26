@@ -65,6 +65,11 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	WCHAR wcharArr[MAX_PATH];
 	WCHAR wcsMediaAddr[MAX_PATH];
 
+	// Loads level defines (generic data like actions, inventory, etc)
+	FileManager::GetMediaPath(L"media/gameplaydef.xml", Path);
+	V_OP_RET(LoadLevelDefines(Path));
+
+
 	FileManager::GetMediaPath(L"media/levels/data/tileset1.png", Path);
 	if (FAILED(m_texManager.AddTexture(Path, &m_tilesTexBaseIdx, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE)))
 	{
@@ -875,4 +880,34 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	return K_OP_OK;
 }
 
+
+OPRESULT CLevel::LoadLevelDefines(WCHAR* strPath)
+{
+	pugi::xml_document doc;
+	if (!doc.load_file(strPath))
+	{
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Unable to load Level Defines XML:%s\n", strPath);
+	}
+
+	///--- load ACTIONS templates
+	m_arrActionTemplates.clear();
+	m_arrActionTemplates.shrink_to_fit();
+
+	pugi::xml_node rnactions = doc.root().child(L"ACTIONS");
+	for (pugi::xml_node bnode = rnactions.first_child(); bnode; bnode = bnode.next_sibling())
+	{
+		CScriptAction sa;
+		const WCHAR* bType = bnode.name();
+		sa.shID.Init(bType);
+
+		sa.shTargetClasses.Init(bnode.attribute(L"targetClasses").as_string());
+		sa.shScriptName.Init(bnode.attribute(L"scriptName").as_string());
+		sa.strID_name = UTLang().GetStrIdx( bnode.attribute(L"strIDname").as_string() );
+
+		m_arrActionTemplates.push_back(sa);
+	}
+
+	LOG(L"LoadLevelDefines: OK");
+	return K_OP_OK;
+}
 

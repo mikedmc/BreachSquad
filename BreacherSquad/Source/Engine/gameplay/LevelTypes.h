@@ -971,3 +971,19 @@ enum ELevelStats {
 #define K_LVL_LEVEL_FLAG_MODS_ON			2
 
 
+///----------------------------------------------------------------------------------
+/// SCRIPT ACTIONS - used on objects, gathered from object, weapons, inventory objects, actor properties, etc
+/// !! must be copyable - implement copy constructor if needed
+///----------------------------------------------------------------------------------
+class CScriptAction {
+public:
+	CStringHash			shID;					// internal name of the action
+	CStringHash			shTargetClasses;		// comma separated values with TARGETED IActive classes
+	CStringHash			shScriptName;			// name of script to launch on targeted object
+	int					strID_name;				// string ID of name to show when interacting (knock or break or etc)
+
+	CScriptAction() :
+		strID_name(-1)
+	{
+	}
+};
