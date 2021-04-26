@@ -532,12 +532,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		obj->sprite.Init(&m_sprProps, animIdx, obj->pos.xy_proj, frameIdx, obj->color);
 		// get AFrame flags
 		UINT32 frame_flags = m_sprProps.GetAFrameFlags(animIdx, frameIdx);
-		obj->flags = 0;
-		// read height and convert from screen to world (usually double the height)
-		obj->fHeight = H_TO_Z((float)(frame_flags & K_FLAG_EDITOR_PROP_HEIGHTMASK));
-		if (frame_flags & K_FLAG_EDITOR_PROP_COLLIDES_ACTORS) obj->flags |= K_PROPFLAG_COLLIDES_ACTOR;
-		if (frame_flags & K_FLAG_EDITOR_PROP_CAN_BE_SHOT) obj->flags |= K_PROPFLAG_CAN_BE_SHOT;
-
+		obj->InitializeFromAFrameFlags(frame_flags);
 		//angle
 		//obj->fAngle = 0.0f;
 		//obj->fAngle_ini = 0.0f;
@@ -886,7 +881,7 @@ OPRESULT CLevel::LoadLevelDefines(WCHAR* strPath)
 	pugi::xml_document doc;
 	if (!doc.load_file(strPath))
 	{
-		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Unable to load Level Defines XML:%s\n", strPath);
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadLevelDefines:: Unable to load Level Defines XML:%s\n", strPath);
 	}
 
 	///--- load ACTIONS templates
@@ -907,7 +902,7 @@ OPRESULT CLevel::LoadLevelDefines(WCHAR* strPath)
 		m_arrActionTemplates.push_back(sa);
 	}
 
-	LOG(L"LoadLevelDefines: OK");
+	LOG(L"LoadLevelDefines:: OK");
 	return K_OP_OK;
 }
 

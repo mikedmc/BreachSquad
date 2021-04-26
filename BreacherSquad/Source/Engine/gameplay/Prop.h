@@ -25,6 +25,9 @@ public:
 	void SetPos(Vec3 newPos) override;
 	void Move(Vec3 delta) override;
 
+	// sets internal flags reading from the AFrame flags (set in sprite editor)
+	void InitializeFromAFrameFlags(UINT32 AFrameFlags);
+
 	// Initializes custom internal data (hardcodes usually)
 	void PostConstructionInit() override;
 	void BeginPlay() override;

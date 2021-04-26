@@ -17,6 +17,16 @@ void CProp::Move(Vec3 delta)
 	bbox_floor.Set(&bbox_floor_ini, pos.xy);
 }
 
+void CProp::InitializeFromAFrameFlags(UINT32 AFrameFlags)
+{
+	// read height and convert from screen to world (usually double the height)
+	fHeight = H_TO_Z((float)(AFrameFlags & K_FLAG_EDITOR_PROP_HEIGHTMASK));
+	// reset flags
+	flags = 0;
+	if (AFrameFlags & K_FLAG_EDITOR_PROP_COLLIDES_ACTORS) flags |= K_PROPFLAG_COLLIDES_ACTOR;
+	if (AFrameFlags & K_FLAG_EDITOR_PROP_CAN_BE_SHOT) flags |= K_PROPFLAG_CAN_BE_SHOT;
+}
+
 void CProp::PostConstructionInit()
 {
 	// compute bboxes on init
