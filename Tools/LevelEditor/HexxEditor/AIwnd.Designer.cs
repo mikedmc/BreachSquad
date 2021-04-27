@@ -33,17 +33,17 @@
             this.text_AIparams = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.groupScript = new System.Windows.Forms.GroupBox();
+            this.chk_hideInteract = new System.Windows.Forms.CheckBox();
             this.butHelpTimer = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.num_interactTimer = new System.Windows.Forms.NumericUpDown();
             this.chk_startHidden = new System.Windows.Forms.CheckBox();
             this.chk_canInteract = new System.Windows.Forms.CheckBox();
-            this.text_scriptName = new System.Windows.Forms.TextBox();
+            this.text_Actions = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.num_targetID = new System.Windows.Forms.NumericUpDown();
             this.label3 = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.chk_hideInteract = new System.Windows.Forms.CheckBox();
             this.groupBehavior.SuspendLayout();
             this.groupScript.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.num_interactTimer)).BeginInit();
@@ -108,7 +108,7 @@
             this.groupScript.Controls.Add(this.num_interactTimer);
             this.groupScript.Controls.Add(this.chk_startHidden);
             this.groupScript.Controls.Add(this.chk_canInteract);
-            this.groupScript.Controls.Add(this.text_scriptName);
+            this.groupScript.Controls.Add(this.text_Actions);
             this.groupScript.Controls.Add(this.label2);
             this.groupScript.Controls.Add(this.num_targetID);
             this.groupScript.Controls.Add(this.label3);
@@ -119,6 +119,17 @@
             this.groupScript.TabIndex = 11;
             this.groupScript.TabStop = false;
             this.groupScript.Text = "Script";
+            // 
+            // chk_hideInteract
+            // 
+            this.chk_hideInteract.AutoSize = true;
+            this.chk_hideInteract.Location = new System.Drawing.Point(9, 95);
+            this.chk_hideInteract.Name = "chk_hideInteract";
+            this.chk_hideInteract.Size = new System.Drawing.Size(111, 17);
+            this.chk_hideInteract.TabIndex = 12;
+            this.chk_hideInteract.Text = "Hide Interact Icon";
+            this.chk_hideInteract.UseVisualStyleBackColor = true;
+            this.chk_hideInteract.CheckedChanged += new System.EventHandler(this.chk_hideInteract_CheckedChanged);
             // 
             // butHelpTimer
             // 
@@ -175,24 +186,24 @@
             this.chk_canInteract.UseVisualStyleBackColor = true;
             this.chk_canInteract.CheckedChanged += new System.EventHandler(this.chk_canInteract_CheckedChanged);
             // 
-            // text_scriptName
+            // text_Actions
             // 
-            this.text_scriptName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.text_Actions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.text_scriptName.Location = new System.Drawing.Point(64, 19);
-            this.text_scriptName.Name = "text_scriptName";
-            this.text_scriptName.Size = new System.Drawing.Size(312, 20);
-            this.text_scriptName.TabIndex = 4;
-            this.text_scriptName.TextChanged += new System.EventHandler(this.text_scriptName_TextChanged);
+            this.text_Actions.Location = new System.Drawing.Point(64, 19);
+            this.text_Actions.Name = "text_Actions";
+            this.text_Actions.Size = new System.Drawing.Size(312, 20);
+            this.text_Actions.TabIndex = 4;
+            this.text_Actions.TextChanged += new System.EventHandler(this.text_scriptName_TextChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(24, 22);
+            this.label2.Location = new System.Drawing.Point(16, 22);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(34, 13);
+            this.label2.Size = new System.Drawing.Size(42, 13);
             this.label2.TabIndex = 3;
-            this.label2.Text = "Script";
+            this.label2.Text = "Actions";
             // 
             // num_targetID
             // 
@@ -244,17 +255,6 @@
             this.splitContainer1.SplitterDistance = 177;
             this.splitContainer1.TabIndex = 12;
             // 
-            // chk_hideInteract
-            // 
-            this.chk_hideInteract.AutoSize = true;
-            this.chk_hideInteract.Location = new System.Drawing.Point(9, 95);
-            this.chk_hideInteract.Name = "chk_hideInteract";
-            this.chk_hideInteract.Size = new System.Drawing.Size(111, 17);
-            this.chk_hideInteract.TabIndex = 12;
-            this.chk_hideInteract.Text = "Hide Interact Icon";
-            this.chk_hideInteract.UseVisualStyleBackColor = true;
-            this.chk_hideInteract.CheckedChanged += new System.EventHandler(this.chk_hideInteract_CheckedChanged);
-            // 
             // AIwnd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -284,7 +284,7 @@
         private System.Windows.Forms.GroupBox groupBehavior;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.GroupBox groupScript;
-        private System.Windows.Forms.TextBox text_scriptName;
+        private System.Windows.Forms.TextBox text_Actions;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown num_targetID;
         private System.Windows.Forms.Label label3;

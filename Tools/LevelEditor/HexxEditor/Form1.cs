@@ -199,7 +199,7 @@ namespace HexxEditor
         public class CBehaviorContainer
         {
             public int targetID;
-            public string strScriptName;
+            public string strActions;
             public string strAIname;
             public ArrayList listAIparams; //lista de strings de forma [nume param][val param][nume param etc...
             public bool bCanInteract;
@@ -210,7 +210,7 @@ namespace HexxEditor
             public CBehaviorContainer(CBehaviorContainer sourceBehavior)
             {
                 targetID = sourceBehavior.targetID;
-                strScriptName = sourceBehavior.strScriptName;
+                strActions = sourceBehavior.strActions;
                 strAIname = sourceBehavior.strAIname;
                 bCanInteract = sourceBehavior.bCanInteract;
                 bHideInteractIcon = sourceBehavior.bHideInteractIcon;
@@ -223,7 +223,7 @@ namespace HexxEditor
             public CBehaviorContainer()
             {
                 targetID = -1;
-                strScriptName = "";
+                strActions = "";
                 strAIname = "";
                 bCanInteract = false;
                 bHideInteractIcon = false;
@@ -268,7 +268,7 @@ namespace HexxEditor
                 bw.Write(u1b);
 
                 bw.Write((Int32)targetID);
-                bw.Write(strScriptName);
+                bw.Write(strActions);
 
                 bw.Write(strAIname);
                 u1b = (Byte)(listAIparams.Count / 2); //nr de params
@@ -303,7 +303,7 @@ namespace HexxEditor
                 if (targetID >= 0)
                     targetID += dwOffsetID;
 
-                strScriptName = br.ReadString();
+                strActions = br.ReadString();
 
                 strAIname = br.ReadString();
 
@@ -2258,7 +2258,7 @@ namespace HexxEditor
                     //desenez dreptunghiuri colorate pe elementele active
                     if (g_brushMode == BRUSH_MODE_AI)
                     {
-                        if ((obj.logic.bCanInteract) || (obj.logic.strAIname.Length > 0) || (obj.logic.strScriptName.Length > 0) || (obj.logic.targetID >= 0))
+                        if ((obj.logic.bCanInteract) || (obj.logic.strAIname.Length > 0) || (obj.logic.strActions.Length > 0) || (obj.logic.targetID >= 0))
                         {
                             RectangleF objbbox = fr.BBox_real;
                             objbbox.X += obj.pos.X - cameraPos.X; objbbox.Y += obj.pos.Y - cameraPos.Y;
@@ -2349,7 +2349,7 @@ namespace HexxEditor
                         //desenez dreptunghiuri colorate pe elementele active
                         if (g_brushMode == BRUSH_MODE_AI)
                         {
-                            if ((act.logic.bCanInteract) || (act.logic.strAIname.Length > 0) || (act.logic.strScriptName.Length > 0) || (act.logic.targetID >= 0))
+                            if ((act.logic.bCanInteract) || (act.logic.strAIname.Length > 0) || (act.logic.strActions.Length > 0) || (act.logic.targetID >= 0))
                             {
                                 RectangleF objbbox = fr.BBox_real;
                                 objbbox.X += act.pos.X - cameraPos.X; objbbox.Y += act.pos.Y - cameraPos.Y;
@@ -2629,7 +2629,7 @@ namespace HexxEditor
                     //daca are logic part
                     if (g_brushMode == BRUSH_MODE_AI)
                     {
-                        if ((light.logic.bCanInteract) || (light.logic.strAIname.Length > 0) || (light.logic.strScriptName.Length > 0) || (light.logic.targetID >= 0))
+                        if ((light.logic.bCanInteract) || (light.logic.strAIname.Length > 0) || (light.logic.strActions.Length > 0) || (light.logic.targetID >= 0))
                         {
                             Pen np = new Pen(Color.Green, 2);
                             pbGr.DrawRectangle(np, lpos.X - 18, lpos.Y + 14, 36, 16);
@@ -2706,7 +2706,7 @@ namespace HexxEditor
                         continue;
 
                     RectangleF rct = WorldToScreen(coll.rect);
-                    if ((coll.logic.bCanInteract) || (coll.logic.strAIname.Length > 0) || (coll.logic.strScriptName.Length > 0) || (coll.logic.targetID >= 0))
+                    if ((coll.logic.bCanInteract) || (coll.logic.strAIname.Length > 0) || (coll.logic.strActions.Length > 0) || (coll.logic.targetID >= 0))
                     {
                         Brush fillbr = new SolidBrush(Color.FromArgb(128, col));
                         pbGr.FillRectangle(fillbr, rct);
@@ -3188,7 +3188,7 @@ namespace HexxEditor
 
                                 //set door AI
                                 nobj.logic.targetID = (int)coll.ID;
-                                nobj.logic.strScriptName = "ACTIVE_OPEN_DOOR_NO_CLOSE";
+                                nobj.logic.strActions = "ACTIVE_OPEN_DOOR_NO_CLOSE";
                                 nobj.logic.bCanInteract = true;
                                 nobj.logic.bHideInteractIcon = false;
                                 nobj.logic.nInteractTimer = 0;
@@ -3197,7 +3197,7 @@ namespace HexxEditor
                                 //set collbox logic
                                 coll.logic.targetID = (int)nobj.ID;
                                 coll.logic.strAIname = "AI_COLL_BREAKABLE_DOOR";
-                                coll.logic.strScriptName = "TOGGLE_HIDDEN_FLAG";
+                                coll.logic.strActions = "TOGGLE_HIDDEN_FLAG";
                                 //params (name, val, name, val...)
                                 coll.logic.listAIparams.Add("f_life");
                                 coll.logic.listAIparams.Add("9.0");
@@ -3236,7 +3236,7 @@ namespace HexxEditor
 
                                 //set door AI
                                 nobj.logic.targetID = (int)coll.ID;
-                                nobj.logic.strScriptName = "ACTIVE_LOCKED_BREAKABLE";
+                                nobj.logic.strActions = "ACTIVE_LOCKED_BREAKABLE";
                                 nobj.logic.bCanInteract = true;
                                 nobj.logic.bHideInteractIcon = false;
                                 nobj.logic.nInteractTimer = 0;
@@ -3250,7 +3250,7 @@ namespace HexxEditor
                                 //set collbox logic
                                 coll.logic.targetID = (int)nobj.ID;
                                 coll.logic.strAIname = "AI_COLL_BREAKABLE_DOOR";
-                                coll.logic.strScriptName = "TOGGLE_HIDDEN_FLAG";
+                                coll.logic.strActions = "TOGGLE_HIDDEN_FLAG";
                                 //params (name, val, name, val...)
                                 coll.logic.listAIparams.Add("f_life");
                                 coll.logic.listAIparams.Add("90.0");
@@ -3291,7 +3291,7 @@ namespace HexxEditor
                                 //set collbox logic
                                 coll.logic.targetID = (int)nobj.ID;
                                 coll.logic.strAIname = "AI_COLL_BREAKABLE_WINDOW";
-                                coll.logic.strScriptName = "TOGGLE_HIDDEN_FLAG";
+                                coll.logic.strActions = "TOGGLE_HIDDEN_FLAG";
                                 //params (name, val, name, val...)
                                 coll.logic.listAIparams.Add("f_life");
                                 coll.logic.listAIparams.Add("2.0");
@@ -3332,7 +3332,7 @@ namespace HexxEditor
                                 //set collbox logic
                                 coll.logic.targetID = (int)nobj.ID;
                                 coll.logic.strAIname = "AI_COLL_BREAKABLE_WINDOW";
-                                coll.logic.strScriptName = "TOGGLE_HIDDEN_FLAG";
+                                coll.logic.strActions = "TOGGLE_HIDDEN_FLAG";
                                 //params (name, val, name, val...)
                                 coll.logic.listAIparams.Add("f_life");
                                 coll.logic.listAIparams.Add("2.0");
@@ -3371,7 +3371,7 @@ namespace HexxEditor
 
                                 //set door AI
                                 nobj.logic.targetID = (int)coll.ID;
-                                nobj.logic.strScriptName = "SLIDING_DOOR_REDKEY";
+                                nobj.logic.strActions = "SLIDING_DOOR_REDKEY";
                                 nobj.logic.bCanInteract = true;
                                 nobj.logic.bHideInteractIcon = false;
                                 nobj.logic.nInteractTimer = 0;
@@ -3379,7 +3379,7 @@ namespace HexxEditor
                                 //set collbox logic
                                 coll.logic.targetID = (int)nobj.ID;
                                 coll.logic.strAIname = "AI_COLL_BREAKABLE_DOOR";
-                                coll.logic.strScriptName = "TOGGLE_HIDDEN_FLAG";
+                                coll.logic.strActions = "TOGGLE_HIDDEN_FLAG";
                                 //params (name, val, name, val...)
                                 coll.logic.listAIparams.Add("f_life");
                                 coll.logic.listAIparams.Add("400.0");
@@ -3414,7 +3414,7 @@ namespace HexxEditor
                                 SetLightAreaFromAnim(nLight);
 
                                 //logic
-                                nLight.logic.strScriptName = "TOGGLE_HIDDEN_FLAG";
+                                nLight.logic.strActions = "TOGGLE_HIDDEN_FLAG";
 
                                 arrLights.Add(nLight);
 
@@ -3434,7 +3434,7 @@ namespace HexxEditor
 
                                 //set door AI
                                 nobj.logic.targetID = (int)nLight.ID;
-                                nobj.logic.strScriptName = "PICK_RED_KEY";
+                                nobj.logic.strActions = "PICK_RED_KEY";
                                 nobj.logic.bCanInteract = true;
                                 nobj.logic.bHideInteractIcon = false;
                                 nobj.logic.nInteractTimer = 0;
@@ -3466,7 +3466,7 @@ namespace HexxEditor
                                 SetLightAreaFromAnim(nLight);
 
                                 //logic
-                                nLight.logic.strScriptName = "TOGGLE_HIDDEN_FLAG";
+                                nLight.logic.strActions = "TOGGLE_HIDDEN_FLAG";
 
                                 arrLights.Add(nLight);
 
@@ -3486,7 +3486,7 @@ namespace HexxEditor
 
                                 //set door AI
                                 nobj.logic.targetID = (int)nLight.ID;
-                                nobj.logic.strScriptName = "PICK_GOLD_KEY";
+                                nobj.logic.strActions = "PICK_GOLD_KEY";
                                 nobj.logic.bCanInteract = true;
                                 nobj.logic.bHideInteractIcon = false;
                                 nobj.logic.nInteractTimer = 0;
@@ -3517,7 +3517,7 @@ namespace HexxEditor
 
                                 //set door AI
                                 nobj.logic.targetID = -1;
-                                nobj.logic.strScriptName = "PLAYER_SOLO_TELEPORT";
+                                nobj.logic.strActions = "PLAYER_SOLO_TELEPORT";
                                 nobj.logic.bCanInteract = true;
                                 nobj.logic.bHideInteractIcon = false;
                                 nobj.logic.nInteractTimer = 0;
@@ -3556,7 +3556,7 @@ namespace HexxEditor
 
                                 //set door AI
                                 nobj.logic.targetID = -1;
-                                nobj.logic.strScriptName = "PLAYER_SOLO_TELEPORT";
+                                nobj.logic.strActions = "PLAYER_SOLO_TELEPORT";
                                 nobj.logic.bCanInteract = true;
                                 nobj.logic.bHideInteractIcon = false;
                                 nobj.logic.nInteractTimer = 0;
@@ -3598,7 +3598,7 @@ namespace HexxEditor
 
                                 //set door AI
                                 nobj.logic.targetID = -1;
-                                nobj.logic.strScriptName = "ACTIVE_TEAM_TELEPORTER_2FRAMES";
+                                nobj.logic.strActions = "ACTIVE_TEAM_TELEPORTER_2FRAMES";
                                 nobj.logic.bCanInteract = true;
                                 nobj.logic.bHideInteractIcon = false;
                                 nobj.logic.nInteractTimer = 0;
@@ -3642,7 +3642,7 @@ namespace HexxEditor
                                 nobj.logic.listAIparams.Add("1");
 
                                 nobj.logic.targetID = -1;
-                                nobj.logic.strScriptName = "TOUCH_CHECKPOINT";
+                                nobj.logic.strActions = "TOUCH_CHECKPOINT";
                                 nobj.logic.bCanInteract = false;
                                 nobj.logic.bHideInteractIcon = false;
                                 nobj.logic.nInteractTimer = 0;
@@ -6275,9 +6275,9 @@ namespace HexxEditor
                     obj.logic.Load(bw, (int)dwStartID);
 
                     //converteste usile de model vechi in usi de model nou (breach doar cu melee)
-                    if ((obj.logic.strScriptName == "ACTIVE_OPEN_DOOR_NO_CLOSE") && (obj.logic.nInteractTimer > 0))
+                    if ((obj.logic.strActions == "ACTIVE_OPEN_DOOR_NO_CLOSE") && (obj.logic.nInteractTimer > 0))
                     {
-                        obj.logic.strScriptName = "ACTIVE_LOCKED_BREAKABLE";
+                        obj.logic.strActions = "ACTIVE_LOCKED_BREAKABLE";
                         obj.logic.nInteractTimer = 0;
 
                         MessageBox.Show("Updated locked door ID " + obj.ID);

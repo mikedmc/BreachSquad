@@ -197,7 +197,6 @@
   <ItemGroup>
     <EmbeddedResource Include="tiles.png" />
     <Content Include="KnockEd.ico" />
-    <Content Include="todo.txt" />
     <EmbeddedResource Include="toolbar.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

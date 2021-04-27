@@ -124,7 +124,7 @@ namespace HexxEditor
                     text_AIparams.Text += param + " = " + value + ";\r\n";
                 }
 
-                text_scriptName.Text = pLogic.strScriptName;
+                text_Actions.Text = pLogic.strActions;
                 num_targetID.Value = pLogic.targetID;
 
                 chk_canInteract.Checked = pLogic.bCanInteract;
@@ -161,7 +161,7 @@ namespace HexxEditor
         {
             if (pLogic == null)
                 return;
-            pLogic.strScriptName = text_scriptName.Text;
+            pLogic.strActions = text_Actions.Text;
         }
 
         private void combo_AI_SelectedIndexChanged(object sender, EventArgs e)
