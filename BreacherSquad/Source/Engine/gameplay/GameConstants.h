@@ -67,10 +67,6 @@
 #define K_EDITOR_ACTIVE_FLAG_FLIPY 2
 #define K_EDITOR_ACTIVE_FLAG_ANIMATED 4
 #define K_EDITOR_ACTIVE_FLAG_IS_COVER 8
-// aframe flags set from the sprites editor, for the props
-#define K_FLAG_EDITOR_PROP_HEIGHTMASK				63
-#define K_FLAG_EDITOR_PROP_COLLIDES_ACTORS			64
-#define K_FLAG_EDITOR_PROP_CAN_BE_SHOT				128
 
 //level file format version from the Editor
 #define K_EDITOR_LEVEL_FILE_FORMAT_VERSION 1015

@@ -895,7 +895,7 @@ OPRESULT CLevel::LoadLevelDefines(WCHAR* strPath)
 		const WCHAR* bType = bnode.name();
 		sa.shID.Init(bType);
 
-		sa.shTargetClasses.Init(bnode.attribute(L"targetClasses").as_string());
+		sa.strTargetClasses = bnode.attribute(L"targetClasses").as_string();
 		sa.shScriptName.Init(bnode.attribute(L"scriptName").as_string());
 		sa.strID_name = UTLang().GetStrIdx( bnode.attribute(L"strIDname").as_string() );
 

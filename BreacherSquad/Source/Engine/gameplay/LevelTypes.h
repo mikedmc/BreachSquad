@@ -637,8 +637,6 @@ const CStringHash EActorSoundVerseNames[K_LVL_ACT_VERSES_COUNT] =
 };
 
 
-
-
 ///--------------------------------------------------------------------------
 ///--- DECALS : clasa folosita pentru afisarea urmelor pe pereti ---
 ///--------------------------------------------------------------------------
@@ -978,7 +976,7 @@ enum ELevelStats {
 class CScriptAction {
 public:
 	CStringHash			shID;					// internal name of the action
-	CStringHash			shTargetClasses;		// comma separated values with TARGETED IActive classes
+	std::wstring		strTargetClasses;		// comma separated values with TARGETED IActive classes
 	CStringHash			shScriptName;			// name of script to launch on targeted object
 	int					strID_name;				// string ID of name to show when interacting (knock or break or etc)
 

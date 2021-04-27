@@ -21,6 +21,12 @@ void CProp::InitializeFromAFrameFlags(UINT32 AFrameFlags)
 {
 	// read height and convert from screen to world (usually double the height)
 	fHeight = H_TO_Z((float)(AFrameFlags & K_FLAG_EDITOR_PROP_HEIGHTMASK));
+	// read class as int and convert to StrHash
+	int nClass = (AFrameFlags & K_FLAG_EDITOR_PROP_CLASSMASK) >> 8;
+	if ((nClass > 0) && (nClass < ARRAY_SIZE(EPropClassNames)))
+	{
+		shClass = EPropClassNames[nClass - 1];
+	}
 	// reset flags
 	flags = 0;
 	if (AFrameFlags & K_FLAG_EDITOR_PROP_COLLIDES_ACTORS) flags |= K_PROPFLAG_COLLIDES_ACTOR;

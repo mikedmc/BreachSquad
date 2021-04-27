@@ -114,7 +114,7 @@
   </Frames>
   <AnimationFrames>
     <AnimationFrame FrameIdx="0" Duration="1" DX="0" DY="0" Flags="203" />
-    <AnimationFrame FrameIdx="1" Duration="1" DX="0" DY="0" Flags="227" />
+    <AnimationFrame FrameIdx="1" Duration="1" DX="0" DY="0" Flags="483" />
     <AnimationFrame FrameIdx="2" Duration="1" DX="0" DY="0" Flags="203" />
     <AnimationFrame FrameIdx="3" Duration="1" DX="0" DY="0" Flags="8" />
     <AnimationFrame FrameIdx="4" Duration="1" DX="0" DY="0" Flags="207" />
