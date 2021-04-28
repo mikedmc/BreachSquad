@@ -565,6 +565,19 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		obj->LoadLogic(fl);
 		if (obj->targetID_ini >= 0)
 			obj->targetID_ini += unBaseID;
+		// init actions
+		if (obj->shScriptActions.IsSet())
+		{
+			vector<wstring> retarr = TokenizeString(obj->shScriptActions.text, L",");
+			for (int kk = 0; kk < retarr.size(); kk++)
+			{
+				CScriptAction scra;
+				if (OP_SUCCESS(GetScriptAction(retarr[kk].c_str(), scra)))
+				{
+					obj->arrActions.Add(scra);
+				}
+			}
+		}
 
 		obj->PostConstructionInit();
 

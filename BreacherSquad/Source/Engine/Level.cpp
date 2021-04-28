@@ -626,7 +626,6 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 	obj->bHidden = obj->bSetHidden = false;
 
 	obj->targetID_ini = -1;
-	obj->script_hash.Reset();
 	obj->AIstate = K_AI_STATE_UNDEFINED;
 	// add to specified area
 	obj->PostConstructionInit();
@@ -1059,6 +1058,21 @@ void CLevel::Areas_GetTilesSnapshot(RECTXYWH srcRectTL, CTile** arrTiles, int ar
 			}
 		}
 	}
+}
+
+OPRESULT CLevel::GetScriptAction(const WCHAR* strID, CScriptAction& retAction)
+{
+	CStringHash shID(strID);
+	for (auto scra : m_arrActionTemplates)
+	{
+		if (scra.shID == shID)
+		{
+			retAction = scra;
+			return K_OP_OK;
+		}
+	}
+
+	return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"GetScriptAction:: Could not find action: %s", strID);
 }
 
 CWeaponTemplate* CLevel::GetTemplateWeapon(WCHAR * templateName)
@@ -2529,7 +2543,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 
 						winact->sprite.frameIdx++;
 						//reset object script and interact
-						winact->script_hash.Reset();
+						winact->arrActions.Clear();
 
 						//generate particles
 						CVariantComplex* cvar = colshape->varAIparams.GetVariantByName(L"fForceDirX");

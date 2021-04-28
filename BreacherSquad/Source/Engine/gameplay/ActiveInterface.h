@@ -69,7 +69,8 @@ public: //logic
 	CStringHash				AIstrvar1, AIstrvar2; 
 	int						AIsubState;				// AI substate used here and there, everywhere
 
-	CStringHash				script_hash;			// script hash
+	CFixedArray<CScriptAction, 10>	arrActions;		// array of possible actions on this object (does not include actions from inventory and actors)
+	CStringHash				shScriptActions;		// sctring containing script actions names
 	UINT32					nRunningScriptUID;		// UID of script that is running now on this element
 
 	bool					bHidden;				// DO NOT SET DIRECTLY! (use bSetHidden) flag de hidden. vizibil si din editor

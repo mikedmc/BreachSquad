@@ -737,6 +737,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_IACTIVE_SET_SCRIPT:
 		{
+			/*
 			CVariantComplex* vcScriptname = instr->GetArgument(L"scriptName");
 			CVariantComplex* vcTarget = instr->GetArgument(L"target");
 
@@ -762,7 +763,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			{
 				target->script_hash = vcScriptname->m_strArg;
 			}
-
+			  */
 			return true;
 		}
 		break;

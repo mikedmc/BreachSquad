@@ -116,6 +116,8 @@ public:
 
 	///--- LEVEL DEFINES (generic data used ingame) ---
 	vector<CScriptAction>	m_arrActionTemplates;			// list of all possible actions ingame (they get copied on iActives)
+	// returns script action by ID
+	OPRESULT				GetScriptAction(const WCHAR* strID, CScriptAction& retAction);
 	// Loads actions, inventory objects, etc
 	OPRESULT				LoadLevelDefines(WCHAR* strPath);
 

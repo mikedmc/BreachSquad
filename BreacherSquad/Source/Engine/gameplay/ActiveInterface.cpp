@@ -17,7 +17,6 @@ IActiveInterface::IActiveInterface() :
 	pos = Vec3(0.0f, 0.0f, 0.0f);
 	pos_ini = Vec3(0.0f, 0.0f, 0.0f);
 
-	script_hash.Reset();
 	varAIparams.DeleteAll();
 
 	AIvec1 = Vec2(0.0f, 0.0f);
@@ -43,9 +42,9 @@ void IActiveInterface::LoadLogic(FILE* fl)
 	CHAR strout[MAX_PATH];
 	int targetid = OS_freadInt32(fl);
 	targetID_ini = targetid; //save for later
-
+	// read actions list for now, init later
 	OS_freadString(fl, strout);
-	script_hash.Init(strout);
+	shScriptActions.Init(strout);
 
 	OS_freadString(fl, strout);
 	if (strout[0] == 0) //empty
@@ -95,6 +94,7 @@ void IActiveInterface::Touch(UINT32 touchingIActiveUID, float dTime, UINT32 over
 		return;
 	}
 	//override script?
+	/*
 	UINT32 scriptHash = script_hash.textHash;
 	if (overrideScriptHash != 0)
 		scriptHash = overrideScriptHash;
@@ -109,6 +109,7 @@ void IActiveInterface::Touch(UINT32 touchingIActiveUID, float dTime, UINT32 over
 		nRunningScriptUID = UTGetScriptManager().StartScript(scriptHash, UID, &varAIparams);
 	}
 	//touch-ul si bTouching=false le face pe OnScriptFinished
+	*/
 }
 
 void IActiveInterface::UpdateTouchTimerReset(float dTime)
