@@ -8104,8 +8104,9 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
 	}
 
-	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams
-	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(/*floor*/(-camrect.x * K_GAME_PIXEL_SIZE_F), (-camrect.y * K_GAME_PIXEL_SIZE_F)));
+	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams (UV shrinking)
+	// moves from tex pixel to pixel, no half pixels
+	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-floor(camrect.x) * K_GAME_PIXEL_SIZE_F, -floor(camrect.y) * K_GAME_PIXEL_SIZE_F));
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 	UTGetShaderManager().SetVS(nullptr);
@@ -8234,7 +8235,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 	}
 
 	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams
-	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2((-camrect.x * K_GAME_PIXEL_SIZE_F), (-camrect.y * K_GAME_PIXEL_SIZE_F)));
+	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-floor(camrect.x) * K_GAME_PIXEL_SIZE_F, -floor(camrect.y) * K_GAME_PIXEL_SIZE_F));
 
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
@@ -8272,7 +8273,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 
 	// generic VS data so we can automatically find positions
 	float fConstDataVS[][4] = {
-		{ camrect.x, camrect.y, camrect.w, camrect.h } //RTT rect_xywh in world coords
+		{ floor(camrect.x), floor(camrect.y), camrect.w, camrect.h } //RTT rect_xywh in world coords
 		//#HACK: if flooring the campos then floor this camrect too that gets sent to the shader, but floor it to submultiples of pixel size (shader view is real space not screen space)
 		//{ floor(camrect.x * K_GAME_PIXEL_SIZE_F) / K_GAME_PIXEL_SIZE_F, floor(camrect.y * K_GAME_PIXEL_SIZE_F) / K_GAME_PIXEL_SIZE_F, camrect.w, camrect.h } //RTT rect_xywh in world coords
 	};
@@ -8501,9 +8502,6 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 OPRESULT CLevel::RenderPass_Composition(Mat* matProj)
 {
 	Mat				matView;
-
-	RECTXYWH_F		camrect = m_camLevel.GetCamWorldAABB();
-	CAABB			camAABB(camrect.x, camrect.y, camrect.Right(), camrect.Bottom());
 	///----------------------------------------------------
 	/// INITIAL SETUP
 	///----------------------------------------------------
@@ -8530,23 +8528,28 @@ OPRESULT CLevel::RenderPass_Composition(Mat* matProj)
 		m_pDevice->SetRenderState(D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD);
 	}
 
-	// Don't floor the camera position when rendering the composition or we get jagged movement
-	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-camrect.x * K_GAME_PIXEL_SIZE_F, -camrect.y * K_GAME_PIXEL_SIZE_F));
+	MUMatIdentity(&matView);
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 
 	///--- compose scene from normals and color ---
 	PVERTEXSHADER pVShader = null;
 	PPIXELSHADER pPShader = null;
-
 	Mat matWVP = matView * (*matProj);
+
+	CRTManager::CEngineRenderTarget* pRTcolor = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
+	if (pRTcolor != null)
+		m_pDevice->SetTexture(0, pRTcolor->m_pRTTexture);
+	CRTManager::CEngineRenderTarget* pRTlights = UTGetRTManager().GetRTbyUID(K_RTID_COLORDEPTHSTENCIL);
+	if (pRTlights != null)
+		m_pDevice->SetTexture(1, pRTlights->m_pRTTexture);
 
 	//--- build RT rect ---
 	_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-	vul.pos = Vec3(camAABB.vMin.x, camAABB.vMin.y, 0.0f);
-	vur.pos = Vec3(camAABB.vMax.x, camAABB.vMin.y, 0.0f);
-	vdl.pos = Vec3(camAABB.vMin.x, camAABB.vMax.y, 0.0f);
-	vdr.pos = Vec3(camAABB.vMax.x, camAABB.vMax.y, 0.0f);
+	vul.pos = Vec3(0.0f, 0.0f, 0.0f);
+	vur.pos = Vec3((float)pRTcolor->nWidth, 0.0f, 0.0f);
+	vdl.pos = Vec3(0.0f, (float)pRTcolor->nHeight, 0.0f);
+	vdr.pos = Vec3((float)pRTcolor->nWidth, (float)pRTcolor->nHeight, 0.0f);
 
 	vul.tex1 = vul.tex2 = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	vur.tex1 = vur.tex2 = Vec4(1.0f, 0.0f, 0.0f, 0.0f);
@@ -8558,13 +8561,6 @@ OPRESULT CLevel::RenderPass_Composition(Mat* matProj)
 	_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
 	lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 	lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-	CRTManager::CEngineRenderTarget* pRTcolor = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
-	if (pRTcolor != null)
-		m_pDevice->SetTexture(0, pRTcolor->m_pRTTexture);
-	CRTManager::CEngineRenderTarget* pRTlights = UTGetRTManager().GetRTbyUID(K_RTID_COLORDEPTHSTENCIL);
-	if (pRTlights != null)
-		m_pDevice->SetTexture(1, pRTlights->m_pRTTexture);
 
 	pVShader = UTGetShaderManager().GetVShaderByName(L"VS_COMPOSITION");
 	m_pDevice->SetVertexShader(pVShader);

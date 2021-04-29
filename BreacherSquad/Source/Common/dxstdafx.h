@@ -334,8 +334,8 @@ enum ETexChannel {
 // number of vertical visible tiles in a screen
 #define K_GAME_HEIGHT_TL			15
 // game scaling to final RT (pixel size)
-#define K_GAME_PIXEL_SIZE			3
-#define K_GAME_PIXEL_SIZE_F			3.0f
+#define K_GAME_PIXEL_SIZE			2
+#define K_GAME_PIXEL_SIZE_F			2.0f
 
 #define K_GAME_HEIGHT				(K_TILE_SIZE * K_GAME_HEIGHT_TL)
 #define K_GAME_HALF_HEIGHT			(K_GAME_HEIGHT / 2)

@@ -2295,13 +2295,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
 
 				//paint game 
-				/*
-				RECT srcrct;
-				SetRect(&srcrct, gamerect.x, gamerect.y, gamerect.w, gamerect.h);
-				g_pGameSprite->Draw(g_level.m_pRTTexture_final, &srcrct, NULL, &Vec3(0.0f, 0.0f, 0.0f), 0xffffffff);
-				g_pGameSprite->Flush();
-				*/
-
 				CRTManager::CEngineRenderTarget* pRTfinal = UTGetRTManager().GetRTbyUID(K_RTID_FINAL);
 				if (pRTfinal != null)
 				{
@@ -2309,8 +2302,15 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 					CCameraTransform::SetActiveCameraIdentity(pDevice);
 					RECT src;
 					SetRect(&src, 0, 0, pRTfinal->nWidth, pRTfinal->nHeight);
-					g_pGameSprite->SetTransform(&g_matIdentity);
-					g_pGameSprite->Draw(pRTfinal->m_pRTTexture, &src, NULL, &D3DXVECTOR3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
+					float fRTscale = (float)UTGetAppClass().g_rectRender.h / (float)pRTfinal->nHeight;
+					Mat matpaint;
+					// computes sub pixel offsets for smooth scrolling. the RT renders only on tileset pixels, no subpixels, for precision.
+					// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
+					RECTXYWH_F camrect = g_level.m_camLevel.GetCamWorldAABB();
+					Vec2 vSubPxOff(-FLOAT_FRAC(camrect.x) * (fRTscale * K_GAME_PIXEL_SIZE_F), -FLOAT_FRAC(camrect.y) * (fRTscale * K_GAME_PIXEL_SIZE_F));
+					MUMatAffine2D(&matpaint, fRTscale, nullptr, 0.0f, &Vec2(UTGetAppClass().g_rectRender.x + vSubPxOff.x, 0.0f + vSubPxOff.y));
+					g_pGameSprite->SetTransform(&matpaint);
+					g_pGameSprite->Draw(pRTfinal->m_pRTTexture, &src, NULL, &g_Vec3Zero, 0xffffffff);
 					g_pGameSprite->Flush();
 				}
 				// paint game elements above RTT content
@@ -2591,7 +2591,9 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				ImGui::Separator();
 				if (g_gameState == GAME_STATE_GAME)
 				{
-					ImGui::Text("Sortables: %d", g_level.m_visibleList.arrSortedItems.nCount);
+					//ImGui::Text("Sortables: %d", g_level.m_visibleList.arrSortedItems.nCount);
+					RECTXYWH_F		camrect = g_level.m_camLevel.GetCamWorldAABB();
+					ImGui::Text("Cam: X%.4f Y%.4f", FLOAT_FRAC(camrect.x), FLOAT_FRAC(camrect.y));
 				}
 				//ImGui::Text("Sprites: %d", UTPainter().stats_sprites);
 				//ImGui::Text("Calls: %d", UTPainter().stats_calls);
