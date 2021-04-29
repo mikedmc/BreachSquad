@@ -366,7 +366,8 @@ public:
 	///--- pt vizualizare ---
 	IActiveInterface		*m_camTargetActive;		//la ce activ se uita camera sau null cand se uita la players
 	IActiveInterface		*m_camTargetOld;		//tine minte pe ce a fost locked ca sa se poata intoarce
-	CCameraTransform		m_camLevel;
+	CCameraTransform		m_camLevelToRT;			// camera from level to RT
+	CCameraTransform		m_camLevelToScr;		// camera from level to Screen
 	Vec2					m_vCamPosDefault;		//camera position when not locked on special actors (hidden rooms, etc)
 ///--- misc ---
 	// Returns the number of XP points gained after current mission

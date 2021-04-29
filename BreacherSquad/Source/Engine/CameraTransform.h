@@ -8,8 +8,8 @@ enum ECamAxisType {
 
 enum ECamAnimType {
 	K_CAMTRANS_ANIM_NONE = 0,
-	K_CAMTRANS_ANIM_SPRING = 1, //se duce dupa pozitia ceruta ca un arc
-	K_CAMTRANS_ANIM_INERTIAL, //face scroll ca pe iOS cu inertie
+	K_CAMTRANS_ANIM_SPRING = 1,		// sprin animation
+	K_CAMTRANS_ANIM_INERTIAL,		// inertial camera (iOS style)
 };
 
 enum ECamMoveStatus {
@@ -23,30 +23,29 @@ enum ECamMoveStatus {
 class CCameraTransform
 {
 private:
-	static CCameraTransform* g_currentCamera; //camera curenta
+	static CCameraTransform*	g_currentCamera; //camera curenta
 private:
-	RECTXYWH_F		m_Viewport;			//viewport-ul in care face trasformarile
-	float			fLocalTimeLine;
-	Mat				m_matView;
+	RECTXYWH_F					m_Viewport;			// viewport in screen coords (rectangle on screen where we show the contents)
+	float						fLocalTimeLine;
+	Mat							m_matView;
 
-	ECamAnimType	m_animType;			//tipul animatiei de look at
-	float			m_k1, m_k2;			//constante folosite la animatiile camerei	
-	Vec2		m_veck1, m_veck2;	//constante de tip vector
+	ECamAnimType				m_animType;			// type of camera animation
+	float						m_k1, m_k2;			// animation constants
+	Vec2						m_veck1, m_veck2;	// vector anim constants
 
-	RECTXYWH_F		m_worldAABB;		//AABB-ul lumii in coordonate world. daca este 0 inseamna ca nu trebuie luat in seama, ca nu are bounds
+	RECTXYWH_F					m_worldAABB;		// camera world bbox limits in world coords. If 0 then not set.
 	//datele din care se construieste dreptunghiul vizibil pe camera in world coords
 	Vec3		m_vecLookAt;		//(x, y, zoom) punctul unde se doreste pozitionata camera (vine spre acest punct cu animatie)
-	//pentru animatie
 	Vec3		m_vecRealLookAt;	//(x, y, zoom) look at real - punctul spre care priveste acum camera, se duce catre punctul m_vecLookAt cu animatie
 	Vec3		m_vecLookAtSpeed;	//(x, y, zoom) viteza cu care se deplaseaza look at catre destinatie
 
 	Vec2		m_vecHW, m_vecHH;	//vectorii care pornesc din lookat (centru) si se duc pe jumatate din latimea/inaltimea ecranului - world space
 	RECTXYWH_F		m_camWorldAABB;		//camera view rectangle in world coords
-	
+
 	int				m_camScreenSize;	//marimea ecranului virtual vazut de camera. cealalta axa se calculeaza in fn de rezolutia ecranului
 	ECamAxisType	m_camScreenAxis;	//axa pe care e setat ScreenSize
 
-    bool            m_bHardWorldEdges;  //daca este true nu am voie sa vad nimic in afara worldAABB (deci scaleaza ca sa umple ecranul)
+	bool            m_bHardWorldEdges;  //daca este true nu am voie sa vad nimic in afara worldAABB (deci scaleaza ca sa umple ecranul)
 	//axa si dimensiunea minima ce trebuie afisata. ex: la un fundal vei dori sa se vada tot pe inaltime deci se seteaza axa=verticala si limita = inaltimea fundalului in coord world
 	ECamAxisType	m_constraintAxis;
 	float			m_minAxisSize, m_maxAxisSize;

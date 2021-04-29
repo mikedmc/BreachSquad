@@ -127,13 +127,12 @@ public:
 	RECTXYWH_F	g_rectScreen;		//real screen (after letterboxing)
 	RECTXYWH_F	g_rectRender;		//rectangle that we render to (actual final screen resolution)
 	RECTXYWH_F	g_rectRT;			// render target render rectangle
-	RECTXYWH_F	g_rectGameScreen;	//screen rect in game resolution (based on K_GAME_HEIGHT)
 	RECTXYWH_F  g_rect240hWorld;	//world rect for menus
 	RECTXYWH_F  g_rect480hWorld;	//double res menu rect (for system fonts)
 	D3DXMATRIXA16	g_matProj;		//projection matrix
 	//--- screen camera ---
 	CCameraTransform g_camScreen;		//real screen camera
-	CCameraTransform g_camGameScreen;	//game screen camera
+	CCameraTransform g_camRTScreen;		//game screen camera with height of RT targets
 	CCameraTransform g_cam240hScreen;	//240px high camera (scaled up to actual resolution)
 	CCameraTransform g_cam480hScreen;	//480px high camera for controls (scaled up to actual resolution). Double the default resolution of the game.
 public:

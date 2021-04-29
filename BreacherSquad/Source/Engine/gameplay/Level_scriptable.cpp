@@ -361,9 +361,9 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			if (teleport)
 			{
 				if (m_camTargetActive == null)
-					m_camLevel.SetCamPos(&m_vCamPosDefault, 1.0f, true);
+					m_camLevelToRT.SetCamPos(&m_vCamPosDefault, 1.0f, true);
 				else
-					m_camLevel.SetCamPos(&m_camTargetActive->pos.xy_proj, 1.0f, true);
+					m_camLevelToRT.SetCamPos(&m_camTargetActive->pos.xy_proj, 1.0f, true);
 			}
 
 			return true;
@@ -412,9 +412,9 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			if (teleport)
 			{
 				if (m_camTargetActive == null)
-					m_camLevel.SetCamPos(&m_vCamPosDefault, 1.0f, true);
+					m_camLevelToRT.SetCamPos(&m_vCamPosDefault, 1.0f, true);
 				else
-					m_camLevel.SetCamPos(&m_camTargetActive->pos.xy_proj, 1.0f, true);
+					m_camLevelToRT.SetCamPos(&m_camTargetActive->pos.xy_proj, 1.0f, true);
 			}
 
 			return true;

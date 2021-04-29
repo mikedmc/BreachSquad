@@ -657,7 +657,7 @@ HRESULT InitSound(void)
 		return hr;
 	}
 
-	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTGetAppClass().g_rectGameScreen.w * 0.7f, UTGetAppClass().g_rectGameScreen.h * 0.7f));
+	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTGetAppClass().g_rectRT.w * 0.7f, UTGetAppClass().g_rectRT.h * 0.7f));
 	UTGetSoundManager().SetListenerVolumeFadeStart(0.7f);
 
 	return hr;
@@ -879,7 +879,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	//keep render rect always updated - se cheama si prin triggerEvent de mai sus
 	//UTGetAppClass().OnRenderSizeChanged(pBackBufferSurfaceDesc->Width, pBackBufferSurfaceDesc->Height);
 	//se va auzi inca jumatate de ecran in afara ecranului vizibil
-	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTGetAppClass().g_rectGameScreen.w * 0.7f, UTGetAppClass().g_rectGameScreen.h * 0.7f));
+	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTGetAppClass().g_rectRT.w * 0.7f, UTGetAppClass().g_rectRT.h * 0.7f));
 
 	HRESULT hr;
 
@@ -2146,8 +2146,8 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 	///--- check Float rounding mode wasn't changed ---
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
 	#ifdef WIN32
-		assert((_controlfp(0, 0) & _MCW_PC) == _PC_24);
-		assert((_controlfp(0, 0) & _MCW_RC) == _RC_NEAR);
+		_ASSERT((_controlfp(0, 0) & _MCW_PC) == _PC_24);
+		_ASSERT((_controlfp(0, 0) & _MCW_RC) == _RC_NEAR);
 	#elif defined(__linux__)
 		_FPU_GETCW(_oldcw);
 		assert(_oldcw == _cw);
@@ -2287,32 +2287,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				if (!g_level.m_bLoaded)
 					break;
 
-				RECTXYWH_F gamerect(0.0f, 0.0f, UTGetAppClass().g_rectScreen.w, UTGetAppClass().g_rectScreen.h);
-
-				
-
-				//real screen space
-				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
-
-				//paint game 
-				CRTManager::CEngineRenderTarget* pRTfinal = UTGetRTManager().GetRTbyUID(K_RTID_FINAL);
-				if (pRTfinal != null)
-				{
-					g_pGameSprite->Flush();
-					CCameraTransform::SetActiveCameraIdentity(pDevice);
-					RECT src;
-					SetRect(&src, 0, 0, pRTfinal->nWidth, pRTfinal->nHeight);
-					float fRTscale = (float)UTGetAppClass().g_rectRender.h / (float)pRTfinal->nHeight;
-					Mat matpaint;
-					// computes sub pixel offsets for smooth scrolling. the RT renders only on tileset pixels, no subpixels, for precision.
-					// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
-					RECTXYWH_F camrect = g_level.m_camLevel.GetCamWorldAABB();
-					Vec2 vSubPxOff(-FLOAT_FRAC(camrect.x) * (fRTscale * K_GAME_PIXEL_SIZE_F), -FLOAT_FRAC(camrect.y) * (fRTscale * K_GAME_PIXEL_SIZE_F));
-					MUMatAffine2D(&matpaint, fRTscale, nullptr, 0.0f, &Vec2(UTGetAppClass().g_rectRender.x + vSubPxOff.x, 0.0f + vSubPxOff.y));
-					g_pGameSprite->SetTransform(&matpaint);
-					g_pGameSprite->Draw(pRTfinal->m_pRTTexture, &src, NULL, &g_Vec3Zero, 0xffffffff);
-					g_pGameSprite->Flush();
-				}
 				// paint game elements above RTT content
 				g_level.Paint();
 				
@@ -2354,7 +2328,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				//debug stuff
 #if defined(_DEBUG) || defined(DEBUG)
 				//game screen space
-				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camGameScreen);
+				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camRTScreen);
 
 				if (DXUTIsKeyDown('9'))
 				{
@@ -2592,7 +2566,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				if (g_gameState == GAME_STATE_GAME)
 				{
 					//ImGui::Text("Sortables: %d", g_level.m_visibleList.arrSortedItems.nCount);
-					RECTXYWH_F		camrect = g_level.m_camLevel.GetCamWorldAABB();
+					RECTXYWH_F		camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
 					ImGui::Text("Cam: X%.4f Y%.4f", FLOAT_FRAC(camrect.x), FLOAT_FRAC(camrect.y));
 				}
 				//ImGui::Text("Sprites: %d", UTPainter().stats_sprites);

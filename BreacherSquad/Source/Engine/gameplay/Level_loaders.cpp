@@ -35,7 +35,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	Release();
 
 	//reset shakes
-	m_camLevel.ShakeScreen(0.0f, 0.0f);
+	m_camLevelToRT.ShakeScreen(0.0f, 0.0f);
 	m_levelAABB.Set(0, 0, 0, 0);
 	//reset all timers
 	m_Timers.ResetTimers();
@@ -193,14 +193,18 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	//target
 	m_camTargetActive = null; //cand nu am target se uita dupa players
 	m_camTargetOld = null;
-	//cam settings
-	m_camLevel.SetWorldBounds(m_levelAABB, false, K_CAMTRANS_AXIS_NONE);
-	//for the render targets we render 1:1
-	m_vCamPosDefault = vLastSpawnPoint; //spawn pointul este initializat in setAI cand gaseste checkpoint cu bIsFirst
-	m_camLevel.InitCamera(UTGetAppClass().g_rectRT, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault); //initializam pe primul spawn point
-	m_camLevel.SetCamAnimationSpring(K_LVL_CAM_FOLLOW_SPRING_KS, K_LVL_CAM_FOLLOW_DAMPING_KD);
-	//chemam un update ca sa ne asiguram ca am initializat toate variabilele camerei
-	m_camLevel.Update(0.0f);
+	m_vCamPosDefault = vLastSpawnPoint;
+	//level to RT cam settings
+	m_camLevelToRT.SetWorldBounds(m_levelAABB, false, K_CAMTRANS_AXIS_NONE);
+	m_camLevelToRT.InitCamera(UTGetAppClass().g_rectRT, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault);
+	m_camLevelToRT.SetCamAnimationSpring(K_LVL_CAM_FOLLOW_SPRING_KS, K_LVL_CAM_FOLLOW_DAMPING_KD);
+	// level to screen cam settings (copies position of level to RT
+	m_camLevelToScr.SetWorldBounds(m_levelAABB, false, K_CAMTRANS_AXIS_NONE);
+	m_camLevelToScr.InitCamera(UTGetAppClass().g_rectRender, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault);
+	m_camLevelToScr.SetCamAnimationNone();
+	// call one update so we're sure everything is initialized
+	m_camLevelToRT.Update(0.0f);
+	m_camLevelToScr.Update(0.0f);
 	//pools
 	m_poolPhysPts.Init(K_LVL_PHYSP_MAX_CNT);
 	m_poolBullets.Init(K_LVL_BULLETS_MAX_CNT);

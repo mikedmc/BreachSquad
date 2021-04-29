@@ -828,6 +828,9 @@ CLevel::CLevel()
 	m_levelSubState = 0;
 	m_levelStateTimer = 0.0f;
 
+	m_camLevelToRT.SetViewport(UTGetAppClass().g_rectRT);
+	m_camLevelToScr.SetViewport(UTGetAppClass().g_rectRender);
+
 	m_nPlayers = 0;
 	m_nPlayersActive = 0;
 	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
@@ -1810,7 +1813,8 @@ bool CLevel::NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsH
 
 			if (bIsHorizontalAxis)
 			{
-				Vec2 retpt = m_camLevel.ScreenToWorld(Vec2(fAxisValue, 0.0f));
+				// bring real screen to RT screen space
+				Vec2 retpt = m_camLevelToScr.ScreenToWorld(Vec2(fAxisValue, 0.0f));
 				// make coords relative to player
 				retpt.x -= pPlayer->pos.xyz.x;
 				// set final coords
@@ -1819,7 +1823,7 @@ bool CLevel::NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsH
 			}
 			else
 			{
-				Vec2 retpt = m_camLevel.ScreenToWorld(Vec2(0.0f, fAxisValue));
+				Vec2 retpt = m_camLevelToScr.ScreenToWorld(Vec2(0.0f, fAxisValue));
 				// make coords relative to player
 				retpt.y -= pPlayer->pos.xyz.y;
 				// set final coords
@@ -4832,7 +4836,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		//daca am mai multi players intra mereu sau daca playerul curent este suspended (in caz ca celalalt a murit)
 		if ((m_nPlayersActive > 1) || (actor->nSuspendedFlags & K_LVL_SUSPENDFLAG_OUTSIDE_SCREEN))
 		{
-			RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
+			RECTXYWH_F camrect = m_camLevelToRT.GetCamWorldAABB();
 			CAABB camAABB(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));
 
 			camrect.Inflate(-16.0f);
@@ -7871,7 +7875,7 @@ void CLevel::Update(float dTime_original)
 		{
 			avg_live /= plcnt_live;
 			//are they too far apart? 
-			if (MUVec2Len(&(avg_all - avg_live)) > UTGetAppClass().g_rectGameScreen.h * 0.5f)
+			if (MUVec2Len(&(avg_all - avg_live)) > UTGetAppClass().g_rectRT.h * 0.5f)
 			{
 				vPlayersAvg = avg_live;
 			}
@@ -7879,10 +7883,11 @@ void CLevel::Update(float dTime_original)
 	}
 
 	//handles render size changes
-	m_camLevel.SetViewport(UTGetAppClass().g_rectRT); 
+	m_camLevelToRT.SetViewport(UTGetAppClass().g_rectRT); 
+	m_camLevelToScr.SetViewport(UTGetAppClass().g_rectRender);
 	if (g_editor.IsLaunched())
 	{
-		m_camLevel.SetCamPos(&g_editor.m_vCamPos);
+		m_camLevelToRT.SetCamPos(&g_editor.m_vCamPos);
 	}
 	else
 	{
@@ -7892,18 +7897,21 @@ void CLevel::Update(float dTime_original)
 			if (bAvgSet)
 				m_vCamPosDefault = vPlayersAvg;
 
-			m_camLevel.SetCamPos(&m_vCamPosDefault);
+			m_camLevelToRT.SetCamPos(&m_vCamPosDefault);
 		}
 		else
 		{
-			m_camLevel.SetCamPos(&(m_camTargetActive->pos.xy_proj));
+			m_camLevelToRT.SetCamPos(&(m_camTargetActive->pos.xy_proj));
 		}
 	}
 
-	m_camLevel.Update(dTime);
+	m_camLevelToRT.Update(dTime);
+	Vec3 vCamPos = m_camLevelToRT.GetCamPos();
+	m_camLevelToScr.SetCamPos(&Vec2(vCamPos.x, vCamPos.y), vCamPos.z);
+	m_camLevelToScr.Update(dTime);
 
 	//find visible area
-	RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
+	RECTXYWH_F camrect = m_camLevelToRT.GetCamWorldAABB();
 	CAABB camAABB(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));
 
 	//set sounds listener position
@@ -8072,7 +8080,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 
 	Mat	matView;
 
-	RECTXYWH_F		camrect = m_camLevel.GetCamWorldAABB();
+	RECTXYWH_F		camrect = m_camLevelToRT.GetCamWorldAABB();
 	CAABB			camAABB(camrect);
 
 	//locally used temp matrix
@@ -8205,7 +8213,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 {
 	Mat				matView;
 
-	RECTXYWH_F		camrect = m_camLevel.GetCamWorldAABB();
+	RECTXYWH_F		camrect = m_camLevelToRT.GetCamWorldAABB();
 	CAABB			camAABB(camrect);
 
 	///----------------------------------------------------
@@ -8606,15 +8614,41 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	LPDIRECT3DVERTEXSHADER9 pVShader = null;
 	LPDIRECT3DPIXELSHADER9 pPShader = null;
 
-	CCameraTransform::SetActiveCamera(m_pDevice, &m_camLevel);
+
+
+	///--- PAINT LEVEL ---
+	//real screen space
+	CCameraTransform::SetActiveCamera(m_pDevice, &UTGetAppClass().g_camScreen);
+	//paint game 
+	CRTManager::CEngineRenderTarget* pRTfinal = UTGetRTManager().GetRTbyUID(K_RTID_FINAL);
+	if (pRTfinal != null)
+	{
+		CCameraTransform::SetActiveCameraIdentity(m_pDevice);
+		RECT src;
+		SetRect(&src, 0, 0, pRTfinal->nWidth, pRTfinal->nHeight);
+		float fRTscale = (float)UTGetAppClass().g_rectRender.h / (float)pRTfinal->nHeight;
+		Mat matpaint;
+		// computes sub pixel offsets for smooth scrolling. the RT renders only on tileset pixels, no subpixels, for precision.
+		// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
+		RECTXYWH_F camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
+		Vec2 vSubPxOff(-FLOAT_FRAC(camrect.x) * (fRTscale * K_GAME_PIXEL_SIZE_F), -FLOAT_FRAC(camrect.y) * (fRTscale * K_GAME_PIXEL_SIZE_F));
+		MUMatAffine2D(&matpaint, fRTscale, nullptr, 0.0f, &Vec2(UTGetAppClass().g_rectRender.x + vSubPxOff.x, 0.0f + vSubPxOff.y));
+		m_pSprite->SetTransform(&matpaint);
+		m_pSprite->Draw(pRTfinal->m_pRTTexture, &src, NULL, &g_Vec3Zero, 0xffffffff);
+		m_pSprite->Flush();
+		m_pSprite->SetTransform(&g_matIdentity);
+	}
+
+
+	m_pSprite->SetTransform(&g_matIdentity);
+	CCameraTransform::SetActiveCamera(m_pDevice, &m_camLevelToScr);
 	//get camera data
-	RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
-	Mat matCam = m_camLevel.GetViewTransform();
-	//CAABB al camerei
-	CAABB		camAABB;
-	camAABB.Set(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));
+	RECTXYWH_F	camrect = m_camLevelToScr.GetCamWorldAABB();
+	Mat			matCam = m_camLevelToScr.GetViewTransform();
+	CAABB		camAABB(camrect);
 
 	///--- paint water ---
+	/*
 	if (m_bufferedPainter.GetTrisCount(m_waterMeshIdx) > 0)
 	{
 		//set textures, states and shaders
@@ -8653,6 +8687,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		m_pDevice->SetVertexShader(null);
 		m_pDevice->SetPixelShader(null);
 	}
+	*/
 
 	///--- paint crosshairs 
 	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
@@ -9556,7 +9591,7 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, Vec2 pos, float fSize, D
 		case K_LVL_EFFECT_STONE_BREAK:
 		{
 			g_particlesMgr.GenerateSmokePuff(Vec2(pos.x, pos.y - 10.0f), 20.0f, K_PART_LAYER_RT_FRONT_NRM);
-			m_camLevel.ShakeScreen(2.0f, 8.0f, &pos);
+			m_camLevelToRT.ShakeScreen(2.0f, 8.0f, &pos);
 
 //			SND_PLAY_POSITIONAL(SNDIDX_STONE_BREAK1, pos);
 		}

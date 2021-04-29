@@ -208,7 +208,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
 			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
-			m_camLevel.ShakeScreen(4.0f, 8.0f, &pos);
+			m_camLevelToRT.ShakeScreen(4.0f, 8.0f, &pos);
 			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_BARREL_01, SNDIDX_EXPLOSION_BARREL_02, pos);
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_LARGE)
@@ -228,7 +228,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
 			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
-			m_camLevel.ShakeScreen(6.0f, 10.0f, &pos);
+			m_camLevelToRT.ShakeScreen(6.0f, 10.0f, &pos);
 			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FRAG_GRENADE_01, SNDIDX_EXPLOSION_FRAG_GRENADE_02, pos);
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_LARGE_XL)
@@ -248,7 +248,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
 			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
-			m_camLevel.ShakeScreen(4.0f, 8.0f, &pos);
+			m_camLevelToRT.ShakeScreen(4.0f, 8.0f, &pos);
 			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FRAG_GRENADE_01, SNDIDX_EXPLOSION_FRAG_GRENADE_02, pos);
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_MOLOTOV)
@@ -267,7 +267,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
 			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
-			m_camLevel.ShakeScreen(4.0f, 8.0f, &pos);
+			m_camLevelToRT.ShakeScreen(4.0f, 8.0f, &pos);
 			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_MOLOTOV_EXPLOSION_01, SNDIDX_MOLOTOV_EXPLOSION_02, pos);
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_GREEN_GOO)
@@ -321,7 +321,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
 			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
-			m_camLevel.ShakeScreen(4.0f, 8.0f, &pos);
+			m_camLevelToRT.ShakeScreen(4.0f, 8.0f, &pos);
 			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_BREACHING_CHARGE_01, SNDIDX_EXPLOSION_BREACHING_CHARGE_02, pos);
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE)
@@ -359,7 +359,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
 			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
-			m_camLevel.ShakeScreen(4.0f, 8.0f, &pos);
+			m_camLevelToRT.ShakeScreen(4.0f, 8.0f, &pos);
 			//			SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FRAG_GRENADE_01, SNDIDX_EXPLOSION_FRAG_GRENADE_02, pos);
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_GRENADE_GROUND)
@@ -379,7 +379,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
 			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
-			m_camLevel.ShakeScreen(4.0f, 8.0f, &pos);
+			m_camLevelToRT.ShakeScreen(4.0f, 8.0f, &pos);
 			//			SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FRAG_GRENADE_01, SNDIDX_EXPLOSION_FRAG_GRENADE_02, pos);
 		}
 		else if ((explotemplate->name.textHash == hash_EXPLO_FLASHBANG) || (explotemplate->name.textHash == hash_EXPLO_SHIELD_FLASH))
@@ -392,7 +392,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			//add visually stunning stuff
 			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FLASH_AIR, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 
-			m_camLevel.ShakeScreen(3.0f, 4.0f, &pos);
+			m_camLevelToRT.ShakeScreen(3.0f, 4.0f, &pos);
 
 			//			SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FLASHBANG_01, SNDIDX_EXPLOSION_FLASHBANG_02, pos);
 		}
@@ -602,7 +602,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 
 void CLevel::UpdateDoofers(float dTime)
 {
-	RECTXYWH_F camrect = m_camLevel.GetCamWorldAABB();
+	RECTXYWH_F camrect = m_camLevelToRT.GetCamWorldAABB();
 	RECTXYWH_F camrect_larger = camrect;
 	camrect_larger.Inflate(2.0f * K_TILE_SIZE);
 
