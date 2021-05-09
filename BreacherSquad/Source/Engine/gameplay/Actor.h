@@ -277,7 +277,7 @@ public:
 
 	void SetIcon(EActorIconTypes iconType, float fDuration = 0.0f); //seteaza icon
 
-	IActiveInterface*	pClosestTouchable; //closest touchable
+	IActiveInterface*		pClosestTouchable; // currently focused interactible object
 
 	// Sets a Spine skin and returns true if successfull
 	bool					Spine_SetSkin(const char * strSkinName);
@@ -317,6 +317,9 @@ public:
 	const eActiveInterfaceType GetClassType() const {
 		return K_LVL_IAI_TYPE_ACTOR;
 	}
+
+	// tells if actor is alive and not hidden or deallocated, or inactive
+	bool					IsAlive();
 
 	void SetPos(Vec3 newPos) override;
 	void Move(Vec3 delta) override;

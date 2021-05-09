@@ -144,6 +144,11 @@ CActor::~CActor()
 	SAFE_DELETE_GROWABLE_ARRAY(arrWeapons);
 }
 
+bool CActor::IsAlive()
+{
+	return ((IsPendingKill() == false) && (bHidden == true) && (fLife > 0.0f));
+}
+
 void CActor::SetPos(Vec3 newPos)
 {
 	pos_last = pos.xyz;

@@ -620,8 +620,6 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 	//load logic
 	obj->bCanInteract = false;
 	obj->bHideInteractIcon = false;
-	//interact timer
-	obj->fTouchDuration = 0.0f;
 	//start hidden
 	obj->bHidden = obj->bSetHidden = false;
 
@@ -2783,26 +2781,6 @@ void CLevel::UpdateAI_light(CLight* light, float dTime)
 
 void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 {
-	//touch timer reset
-	//daca trebuie actionat de toata echipa verific aici (doar pentru props pentru ca nu voi actiona pe actori sau collisions)
-	bool bResetTouchTimer = false;
-	if (prop->fTouchDuration < 0.0f)
-	{
-		for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
-		{
-			if (pPlayerActor[kk] != null)
-			{
-				//sa fiu sigur ca interactioneaza pe acelasi obiect
-				if ((pPlayerActor[kk]->nInteractingState == 0) || (pPlayerActor[kk]->pClosestTouchable != prop))
-				{
-					prop->fTouchTimer = 0.0f;
-					break;
-				}
-			}
-		}
-	}
-
-	prop->UpdateTouchTimerReset(dTime);
 	//daca am schimbat vizibilitatea
 	prop->bHidden = prop->bSetHidden;
 	//daca este hidden nu mai verifica AI
@@ -3900,9 +3878,6 @@ CFixedArray<SweepAABB, 100> tempCollBoxList;
 
 void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 {
-	//touch timer reset
-	actor->UpdateTouchTimerReset(dTime);
-
 	//daca am schimbat vizibilitatea
 	actor->bHidden = actor->bSetHidden;
 	//daca este hidden nu mai verifica AI
@@ -8868,82 +8843,40 @@ HRESULT CLevel::PaintUsingFinalRTT()
 			const int ANIM_IDX_INTERACT_KEEP_PRESSED = ANM_IGM_INTERFACE_SPR_INTERACT_KEEP_PRESSED_ANALOG;
 			#endif
 			*/
-			if (activ->fTouchDuration == 0.0f) //daca nu trebuie sa tina apasat afisez animatie de neapasare
+
+
+			//player->m_sprOverheadIcon.setAnimationOnce(ANIM_IDX_INTERACT_ONCE);
+			//player->m_sprOverheadIcon.pos = vpos;
+
+			/*
+			DWORD dwcol = 0xff00c0ff;
+			if (g_timers.GetTimerValue(600) < 0.3f)
+			dwcol = 0xff0384af;
+			g_font5ns2->DrawString(STR_TAP, vpos.x, vpos.y - 14, FONTFLAG_ANCHOR_BOTTOMCENTER, dwcol);
+			*/
+			//--- paint progress damage bar ---
+			float perc = 1.0f;
+			int barlen = 12;
+			DWORD dwProgressColor = 0xffffffff;
+			//daca am o usa ca closest touchable si daca se poate sparge afisez progress pe ea
+			if ((activ->pTarget != null) && (activ->pTarget->AIstate == K_AI_STATE_COLL_BREAKABLE_DOOR))
 			{
-				//player->m_sprOverheadIcon.setAnimationOnce(ANIM_IDX_INTERACT_ONCE);
-				//player->m_sprOverheadIcon.pos = vpos;
-
-				/*
-				DWORD dwcol = 0xff00c0ff;
-				if (g_timers.GetTimerValue(600) < 0.3f)
-				dwcol = 0xff0384af;
-				g_font5ns2->DrawString(STR_TAP, vpos.x, vpos.y - 14, FONTFLAG_ANCHOR_BOTTOMCENTER, dwcol);
-				*/
-				//--- paint progress damage bar ---
-				float perc = 1.0f;
-				int barlen = 12;
-				DWORD dwProgressColor = 0xffffffff;
-				//daca am o usa ca closest touchable si daca se poate sparge afisez progress pe ea
-				if ((activ->pTarget != null) && (activ->pTarget->AIstate == K_AI_STATE_COLL_BREAKABLE_DOOR))
-				{
-					perc = activ->pTarget->AIfvar1 / activ->pTarget->AIfvar2;
-					barlen = (int)ceil(activ->pTarget->AIfvar2 * 0.2f); //lungime bara damage la usile care se sparg
-					dwProgressColor = 0xff00c0ff;
-					barlen = (barlen / 2) * 2; //odd length
-											   //limit progress bar size
-					CLAMP(barlen, 6, 20);
-
-					if ((perc > 0.0f) && (perc < 1.0f))
-					{
-						//RECTXYWH recttemp(vpos.x - barlen / 2.0f, activ->bbox_exported.vMax.y + 4, barlen, 8);
-						RECTXYWH recttemp(activ->pTarget->pos.xy_proj.x - barlen / 2.0f, activ->pTarget->bbox.vMax.y + 4, barlen, 8);
-						CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
-					}
-				}
-				//paint interact icon at the end
-				//player->m_sprOverheadIcon.paint(&m_sprInterface);
-			}
-			else
-			{
-				//player->m_sprOverheadIcon.setAnimationOnce(ANIM_IDX_INTERACT_KEEP_PRESSED);
-				//player->m_sprOverheadIcon.pos = vpos;
-				//player->m_sprOverheadIcon.paint(&m_sprInterface);
-
-				DWORD dwcol = 0xff00c0ff;
-				if (g_timers.GetTimerValue(600) < 0.3f)
-					dwcol = 0xff0384af;
-				//g_font5ns2->DrawString(STR_HOLD, vpos.x, vpos.y - 14, FONTFLAG_ANCHOR_BOTTOMCENTER, dwcol);
-				//#HACK: pentru obiectivele unde e necesara toata echipa
-				if ((activ->fTouchDuration < 0.0f) && (m_nPlayersActive > 1)) //daca e negativ inseamna ca e necesara toata echipa deci afisez si controlul cu numarul de players
-				{
-					//se deseneaza o singura data deci testez aici toti actorii sa fie pe interacting
-					int frame = 0;
-					if ((pPlayerActor[0]->nInteractingState != 0) && (pPlayerActor[1]->nInteractingState != 0) && (pPlayerActor[1]->pClosestTouchable == pPlayerActor[0]->pClosestTouchable))
-						frame = 2;
-					else if ((pPlayerActor[0]->nInteractingState != 0) || (pPlayerActor[1]->nInteractingState != 0))
-						frame = 1;
-
-					CSprite::paintFrame(&m_sprInterface, vpos.x, activ->bbox.vMax.y, ANM_IGM_INTERFACE_SPR_TEAM_TELEPORT_ICONS, frame, 0xffffffff);
-				}
-
-				//--- paint progress bar ---
-				float perc = 1.0f;
-				int barlen = 12;
-				DWORD dwProgressColor = 0xffffffff;
-
-				//touch duration
-				perc = 1.0f - (activ->fTouchTimer / fabs(activ->fTouchDuration));
-				barlen = (int)ceil(fabs(activ->fTouchDuration) * 4.0f); //lungime bara la touch normal
-				barlen = (barlen / 2) * 2;
-				//limit progress bar size
-				CLAMP(barlen, 10, 20);
+				perc = activ->pTarget->AIfvar1 / activ->pTarget->AIfvar2;
+				barlen = (int)ceil(activ->pTarget->AIfvar2 * 0.2f); //lungime bara damage la usile care se sparg
+				dwProgressColor = 0xff00c0ff;
+				barlen = (barlen / 2) * 2; //odd length
+											//limit progress bar size
+				CLAMP(barlen, 6, 20);
 
 				if ((perc > 0.0f) && (perc < 1.0f))
 				{
-					RECTXYWH recttemp(vpos.x - barlen / 2.0f, vpos.y - 20.0f, barlen, 6);
+					//RECTXYWH recttemp(vpos.x - barlen / 2.0f, activ->bbox_exported.vMax.y + 4, barlen, 8);
+					RECTXYWH recttemp(activ->pTarget->pos.xy_proj.x - barlen / 2.0f, activ->pTarget->bbox.vMax.y + 4, barlen, 8);
 					CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
 				}
 			}
+			//paint interact icon at the end
+			//player->m_sprOverheadIcon.paint(&m_sprInterface);
 		}
 
 		//cover shield

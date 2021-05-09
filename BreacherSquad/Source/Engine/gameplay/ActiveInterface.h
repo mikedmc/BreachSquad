@@ -33,9 +33,6 @@ public:
 
 	bool					bTouching;				// folosit ca sa elimine eventuale cicluri infinite.
 	UINT32 					nTouchingUID;   		// Reprezinta UID-ul celui care a facut touch sau 0 pt niciunul
-	float					fTouchTimerReset;		// folosit la resetarea touch timerului
-	float					fTouchTimer;			// pentru cat timp s-a facut touch? sunt obiecte la care trebuie sa faci touch pentru o durata anume
-	float					fTouchDuration;			// durata ceruta pentru touch
 													   
 	DWORD					color;
 	float					fHeight;				// height in world coords
@@ -95,11 +92,6 @@ public: //logic
 		return nTouchingUID;
 	}
 
-	// tells if object is still alive or if it is pending kill
-	inline bool IsAlive() {
-		return (!bPendingKill);
-	}
-
 	// Tells if object is waiting to be deallocated
 	inline bool IsPendingKill() {
 		return bPendingKill;
@@ -110,8 +102,6 @@ public: //logic
 
 	//functie care se cheama cand interactionezi cu obiectul sau cand este pTarget
 	void Touch(UINT32 touchingIActiveUID, float dTime, UINT32 overrideScriptHash = 0, bool bTouchTarget = true);
-
-	void UpdateTouchTimerReset(float dTime);
 
 	// completely sets position and all related data(pos, bbox, etc)
 	virtual void SetPos(Vec3 newPos) = 0;

@@ -6,7 +6,7 @@
 IActiveInterface::IActiveInterface() : 
 	ID(-1), targetID_ini(-1), bHidden(false), bSetHidden(false), bSkipRender(false), bAnimated(false),
 	color(0xffffffff), color_ini(0xffffffff),
-	bTouching(false), nTouchingUID(0), fTouchTimer(0.0f), fTouchDuration(0.0f), fTouchTimerReset(0.0f), 
+	bTouching(false), nTouchingUID(0),
 	pTarget(null), bCanInteract(false), bHideInteractIcon(false), AIstate(K_AI_STATE_UNDEFINED), AItimerDecision(K_LVL_AI_DECISION_INTERVAL),
 	nRunningScriptUID(0), AItargetUID(0), fTimelineAI(0.0f), 
 	AItimer1(0.0f), AItimer2(0.0f), AIfvar1(0.0f), AIfvar2(0.0f), AIfvar3(0.0f), AIvar1(0), AIvar2(0), AIvarBool1(true), AIvarBool2(true),
@@ -33,7 +33,7 @@ void IActiveInterface::LoadLogic(FILE* fl)
 	bCanInteract = (n1b & 0x1);
 	bHideInteractIcon = (n1b & 0x2);
 	//interact timer
-	fTouchDuration = (float)OS_freadInt32(fl);
+	INT32 nTouchDuration = (float)OS_freadInt32(fl);
 
 	//start hidden
 	if (OS_freadByte(fl) != 0)
@@ -81,14 +81,6 @@ void IActiveInterface::Touch(UINT32 touchingIActiveUID, float dTime, UINT32 over
 		return;
 	}
 
-	fTouchTimerReset = 0.0f;
-	if (fabs(fTouchDuration) > 0.0f)
-	{
-		inc_limit(fTouchTimer, dTime, fabs(fTouchDuration));
-		if (fTouchTimer < fabs(fTouchDuration))
-			return;
-	}
-
 	if (bTouching)
 	{
 		return;
@@ -112,22 +104,7 @@ void IActiveInterface::Touch(UINT32 touchingIActiveUID, float dTime, UINT32 over
 	*/
 }
 
-void IActiveInterface::UpdateTouchTimerReset(float dTime)
-{
-	if (bCanInteract)
-	{
-		fTouchTimerReset += dTime;
-		if (fTouchTimerReset >= K_LVL_TOUCH_TIMER_RESET_TIME)
-		{
-			fTouchTimer = 0.0f;
-			fTouchTimerReset = K_LVL_TOUCH_TIMER_RESET_TIME;
-		}
-	}
-}
-
 void IActiveInterface::Kill()
 {
 	bPendingKill = true;
-	// let it know he's out!
-	EndPlay();
 }
