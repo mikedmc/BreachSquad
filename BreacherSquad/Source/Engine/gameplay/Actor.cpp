@@ -110,8 +110,8 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 }
 
 CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID) :
-	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nTookDamageFrames(0), nLastDamageTakenFromUID(0),
-	pWeaponMain(nullptr), nSkinIdx(0), pClosestTouchable(nullptr), bAnimFlipX(false), eAnimAngle(EANG_S),
+	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nLastDamageTakenFromUID(0),
+	pWeaponMain(nullptr), pClosestTouchable(nullptr), bAnimFlipX(false), eAnimAngle(EANG_S),
 	nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
 	pSkelTemplate(nullptr), pSkeleton(nullptr)

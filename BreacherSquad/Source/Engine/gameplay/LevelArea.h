@@ -63,6 +63,9 @@ public:
 	int						GetTilesCollisionBoxes(RECTXYXY srcBoxTL, CAABB* ret_arrAABBs, int nArrCapacity);
 	// writes the bboxes of the props that collide with the srcBoxTL. Starts from 0 overwriting the ret_arrAABBs elements.
 	int						GetPropsCollisionBoxes(CAABB srcBox, CAABB* ret_arrAABBs, int nArrCapacity);
+	// gets all props belonging to area, that collide with a bbox
+	int						GetPropsTouchingBox(CAABB srcBox, CProp* ret_arrProps[], int nArrCapacity, bool bOnlyInteractibles = false);
+	int						GetPropsTouchingBox(CAABB srcBox, CGrowableArray<CProp*>& ret_arrProps, bool bOnlyInteractibles = false);
 	// gets all the tiles that 
 	int						GetTilesByFlag(RECTXYXY srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity);
 

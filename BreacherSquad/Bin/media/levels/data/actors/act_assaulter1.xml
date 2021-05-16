@@ -6,7 +6,7 @@
 				bboxMinX="-8" bboxMinY="-6" bboxMaxX="8" bboxMaxY="2" nHeight="24"
 				sMaterial="FLESH" fLife="40.0" fArmor="0.0" 
 				fSpeedMove="150.0"
-				bCanCover="true" />
+				bCanCover="true" bCanInteract="true" />
 
   <ANIMS>
     <IDLE 			set0="1hand/idle-se" bLoop="true" />

@@ -267,9 +267,7 @@ public:
 	//CMiscObjectRail* pRail;		//pointer catre un rail atunci cand merge pe tiroliana
 
 	float		fStunTimer; //daca e diferit de 0 personajul este stunned
-	int			nTookDamageFrames; //flag folosit pentru a desena frames aprinse cand lovesti inamic
 	UINT32		nLastDamageTakenFromUID;	//UID that gave actor last damage 
-	BYTE		nSkinIdx;					//player skin
 
 	UINT32		nSuspendedFlags;	//daca e suspended (AI), folosit de obicei la playerii principali ca sa le tai inputul (cand ies din ecran sau cand vrei sa nu poti sa-i mai controlezi). Flagul specifica motivul
 	float		fSuspendedTimer;	//counts from when suspended flags is set

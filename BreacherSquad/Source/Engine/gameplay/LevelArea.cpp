@@ -325,6 +325,46 @@ int CLevelArea::GetPropsCollisionBoxes(CAABB srcBox, CAABB* ret_arrAABBs, int nA
 	return nAdded;
 }
 
+int CLevelArea::GetPropsTouchingBox(CAABB srcBox, CProp* ret_arrProps[], int nArrCapacity, bool bOnlyInteractibles)
+{
+	int nAdded = 0;
+
+	for (int kk = 0; kk < m_arrProps.Count(); kk++)
+	{
+		CProp* prop = m_arrProps[kk];
+		if (prop->bHidden)
+			continue;
+		if (bOnlyInteractibles && (prop->bCanInteract == false))
+			continue;
+		if (prop->bbox_floor.Intersects(srcBox))
+		{
+			ret_arrProps[nAdded++] = m_arrProps[kk];
+		}
+	}
+
+	return nAdded;
+}
+
+int CLevelArea::GetPropsTouchingBox(CAABB srcBox, CGrowableArray<CProp*>& ret_arrProps, bool bOnlyInteractibles)
+{
+	int nAdded = 0;
+
+	for (int kk = 0; kk < m_arrProps.Count(); kk++)
+	{
+		CProp* prop = m_arrProps[kk];
+		if (prop->bHidden)
+			continue;
+		if (bOnlyInteractibles && (prop->bCanInteract == false))
+			continue;
+		if (prop->bbox_floor.Intersects(srcBox))
+		{
+			ret_arrProps.Add(m_arrProps[kk]);
+		}
+	}
+
+	return nAdded;
+}
+
 int CLevelArea::GetTilesByFlag(RECTXYXY srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity)
 {
 	return 0;

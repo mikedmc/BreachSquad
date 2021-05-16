@@ -44,7 +44,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 	if (fOldLife > 0.0f)
 	{
 		//signal damage made by coloring them in red
-		actor->nTookDamageFrames = 4;
+		//actor->nTookDamageFrames = 4;
 	}
 
 	float fBulletLostEnergy = 0.0f;
@@ -1188,6 +1188,8 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 	templ->eCaps = 0;
 	if (actnode.attribute(L"bCanCover").as_bool())
 		templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_COVER;
+	if (actnode.attribute(L"bCanInteract").as_bool())
+		templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_INTERACT;
 	//other
 	if (!actnode.attribute(L"sWeapon").empty())
 	{
@@ -4027,8 +4029,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		//remove target overlap
 		actor->m_AIsensorInfo.fTargetOverlapX = 0.0f;
 		//did he get hit? reset time since hit 
-		if (actor->nTookDamageFrames > 0)
-			actor->m_AIsensorInfo.fTimeSinceHit = 0.0f;
+		//if (actor->nTookDamageFrames > 0)
+			//actor->m_AIsensorInfo.fTimeSinceHit = 0.0f;
 
 		///LOW FREQUENCY SENSORS
 		actor->AItimerDecision -= dTime;
@@ -5435,27 +5437,44 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	//#TODO: Speeds and accelerations should be treated here, after the collision detection
 		
-	// set current area if null or changed after updating the position
+	///--- set current area if null or changed after updating the position
 	if ((actor->pArea == nullptr) || (!actor->pArea->AABBbounds.PointIn(actor->pos.xy.x, actor->pos.xy.y)))
 	{
 		actor->pArea = Areas_GetAt(actor->pos.xy);
 	}
 
-	///--- damage taken - paint red frame while taking damage
-	DWORD dwCol = actor->color;
-	//paint red when taking damage
-	if (actor->nTookDamageFrames > 0)
+	///--- find closest interactible object in range
+	if (actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_INTERACT)
 	{
-		actor->nTookDamageFrames--;
-		float fAlpha = D3DCOLOR_GETFALPHA(dwCol);
-		dwCol = D3DCOLOR_COLORALPHA(0xffff7777, fAlpha);
-	}
-	else if (actor->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_INVINCIBLE) //invulnerability blink
-	{
-		float fAlpha = D3DCOLOR_GETFALPHA(dwCol);
-		if ((actor->GetCurrentBehavior() != AI_BEHAVIOR_PLAY_ANIM) && (m_Timers.GetTimerValue(300.0f) < 0.2f))
-			fAlpha *= 0.6f;
-		dwCol = D3DCOLOR_COLORALPHA(0xffffffff, fAlpha);
+		CAABB aabbInteract(-K_TILE_SIZE_F, -K_TILE_SIZE_F, K_TILE_SIZE_F, K_TILE_SIZE_F);
+		aabbInteract.Move(actor->pos.xy);
+
+		CGrowableArray<CProp*> arrTouchProps;
+		arrTouchProps.SetSize(16);
+		if (actor->pArea != nullptr)
+		{
+			actor->pArea->GetPropsTouchingBox(aabbInteract, arrTouchProps, true);
+			// if bbox is not completely contained in the current area BBox try with the neighbours too
+			if (!actor->pArea->AABBbounds.Contains(aabbInteract))
+			{
+				for (int oo = 0; oo < actor->pArea->arrNeighbours.Count(); oo++)
+				{
+					CLevelArea* area = actor->pArea->arrNeighbours.m_pData[oo];
+					if (!area->AABBbounds.Intersects(aabbInteract))
+						continue;
+					area->GetPropsTouchingBox(aabbInteract, arrTouchProps, true);
+				}
+			}
+		}
+		//#TODO: see which  is closer to the aim dir
+		if (arrTouchProps.GetSize() > 0)
+		{
+			actor->pClosestTouchable = arrTouchProps[0];
+		}
+		else
+		{
+			actor->pClosestTouchable = nullptr;
+		}
 	}
 
 	// call internal actor update at the end
