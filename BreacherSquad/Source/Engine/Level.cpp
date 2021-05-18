@@ -5446,6 +5446,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	///--- find closest interactible object in range
 	if (actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_INTERACT)
 	{
+		//#TODO: put interact area in special constant
 		CAABB aabbInteract(-K_TILE_SIZE_F, -K_TILE_SIZE_F, K_TILE_SIZE_F, K_TILE_SIZE_F);
 		aabbInteract.Move(actor->pos.xy);
 
@@ -5466,7 +5467,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 			}
 		}
-		//#TODO: see which  is closer to the aim dir
+		//#TODO: see which one is closer to the aim dir
 		if (arrTouchProps.GetSize() > 0)
 		{
 			actor->pClosestTouchable = arrTouchProps[0];
@@ -8682,6 +8683,20 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		m_pDevice->SetPixelShader(null);
 	}
 	*/
+
+	///#TEMP: paint interactible
+	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
+	{
+		if (pPlayerActor[kk] == null)
+			continue;
+		CActor* pPlayer = pPlayerActor[kk];
+		if (pPlayer->pClosestTouchable != nullptr)
+		{
+			Vec2 vpos = pPlayer->pClosestTouchable->pos.xy_proj;
+			CSprite::paintFrame(&m_sprInterface, vpos.x, vpos.y, ANM_IGM_INTERFACE_SPR_INTERACT_ONCE, 0, 0xffffffff);
+		}
+	}
+
 
 	///--- paint crosshairs 
 	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
