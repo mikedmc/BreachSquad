@@ -814,7 +814,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	UTGetEventManager().TriggerEvent(nevent);
 
 	// check minimum requirements and exit if not met
-	if (FAILED(UTGetAppClass().VerifyRequirements()))
+	if (OP_FAILED(UTGetAppClass().VerifyRequirements()))
 	{
 		DXUTShutdown();
 		return S_OK;

@@ -1,6 +1,7 @@
 #pragma once
 
 ///--- CARD FALGS ---
+// render to target caps
 #define K_UT_GFXFLAG_RTT 1
 #define K_UT_GFXFLAG_8BITSTENCIL 2
 #define K_UT_GFXFLAG_SEPARATEALPHABLEND 4
@@ -132,13 +133,13 @@ public:
 	D3DXMATRIXA16	g_matProj;		//projection matrix
 	//--- screen camera ---
 	CCameraTransform g_camScreen;		//real screen camera
-	CCameraTransform g_camRTScreen;		//game screen camera with height of RT targets
+	CCameraTransform g_camRTScreen;		//game screen camera with height of RT targets (RT to screen)
 	CCameraTransform g_cam240hScreen;	//240px high camera (scaled up to actual resolution)
 	CCameraTransform g_cam480hScreen;	//480px high camera for controls (scaled up to actual resolution). Double the default resolution of the game.
 public:
-	static bool IsOnlyInstance(LPCTSTR className);
-	//verifica versiune DX, memorie necesara, etc. Daca da fail se iese din joc
-	static HRESULT VerifyRequirements();
+	static bool			IsOnlyInstance(LPCTSTR className);
+	// checks min requirements
+	static OPRESULT		VerifyRequirements();
 
 	void OnRenderSizeChanged(int newSizeX, int newSizeY);
 

@@ -24,7 +24,7 @@ const char* K_LIGHT_TYPES_NAMES_ARR[] =
 
 CLevelEditor::CLevelEditor() :
 	m_pLevel(nullptr), m_pDevice(nullptr),
-	eTool(K_LED_TILE), fTimeline(0.0)
+	eTool(K_LED_TILE), fTimeline(0.0), m_pCam(nullptr)
 {
 }
 
@@ -63,7 +63,9 @@ void CLevelEditor::Launch(CLevel* level)
 		return;
 	// save pointer to current level
 	m_pLevel = level;
-	m_vCamPos = Vec3XY(level->m_camLevelToRT.GetCamPos());
+	// select proper camera here
+	m_pCam = &m_pLevel->m_camLevelToScr;
+	m_vCamPos = Vec3XY(m_pCam->GetCamPos());
 	m_vCamPos_ini = m_vCamPos;
 }
 
@@ -86,7 +88,7 @@ void CLevelEditor::Update(float dTime)
 		return;
 
 	// mouse pos in level world
-	Vec2 mousepos = m_pLevel->m_camLevelToRT.ScreenToWorld(g_mouse.pos);
+	Vec2 mousepos = m_pCam->ScreenToWorld(g_mouse.pos);
 
 	// left mouse button
 	if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
@@ -216,8 +218,8 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 			{
 				CLight* lg = m_pLevel->m_visibleList.visible_lights[kk];
 				Vec2 lgproj = lg->pos.xy_proj;
-				Vec2 vpos = m_pLevel->m_camLevelToRT.WorldToScreen(lgproj);
-				Vec2 vposprj = m_pLevel->m_camLevelToRT.WorldToScreen(lg->pos.xy);
+				Vec2 vpos = m_pCam->WorldToScreen(lgproj);
+				Vec2 vposprj = m_pCam->WorldToScreen(lg->pos.xy);
 				
 				DWORD lcol = (pSelected == lg) ? 0xffff2222 : 0xff22ff22;
 				DrawHRuler(vposprj, vposprj.y - vpos.y, lcol);
@@ -237,10 +239,10 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 				// paint bbox
 				CProp *pp = static_cast<CProp*>(pSelected);
 				RECTXYWH_F bb(pp->bbox.vMin.x, pp->bbox.vMin.y, pp->bbox.vSize.x, pp->bbox.vSize.y);
-				RECTXYWH_F prjrct = m_pLevel->m_camLevelToRT.WorldToScreen(bb);
+				RECTXYWH_F prjrct = m_pCam->WorldToScreen(bb);
 				DrawBBox(prjrct, 0xffffffff);
 				// paint origin
-				Vec2 vposprj = m_pLevel->m_camLevelToRT.WorldToScreen(pp->pos.xy);
+				Vec2 vposprj = m_pCam->WorldToScreen(pp->pos.xy);
 				CSprite::paintFrame(&m_sprCol, vposprj.x, vposprj.y, ANM_LVLED_SPR_CROSSHAIRS, 0, 0xffff2222);
 
 				// paint elevation

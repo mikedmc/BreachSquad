@@ -31,6 +31,7 @@ private:
 	double				fTimeline;				// used for some animations
 public: 
 	Vec2				m_vCamPos;				// Camera position
+	CCameraTransform*	m_pCam;					// pointer to level camera to screen
 
 public:
 	CLevelEditor();
