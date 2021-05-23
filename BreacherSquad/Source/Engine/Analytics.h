@@ -39,7 +39,7 @@ protected:
 	//multi handle
 	CURLM*  m_pMultiHandle;
 	//array of active easy handles 
-	//CGrowableArray<CURL*> m_arrEasyHandles;
+	//CArray<CURL*> m_arrEasyHandles;
 	//proxy service path - includes clientID and trackingID
 	char m_strServicePath[2048]; 
 	//count total errors and shut down if too many

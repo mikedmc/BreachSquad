@@ -991,7 +991,7 @@ UINT32 App_GetAvailableXPPoints(EPSSPlayerClass eClass)
 ///----- LANGUAGES - LOCALIZATIONS ---
 
 CLocaLanguage g_Language;						//current game language
-CGrowableArray<CLocaLanguage> g_arrLangList;	//list of languages from lang.xml
+CArray<CLocaLanguage> g_arrLangList;	//list of languages from lang.xml
 
 HRESULT App_LocaLoadLangList(CStringHash shSelectedLangAlias)
 {

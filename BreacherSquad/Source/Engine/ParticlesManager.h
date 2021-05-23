@@ -113,7 +113,7 @@ public:
 //Emitter-ul
 class CParticleEmitter {
 public:
-CGrowableArray<CParticleEmitterBrush*> m_arrBrushes;
+CArray<CParticleEmitterBrush*> m_arrBrushes;
 D3DXVECTOR2 pos, speed, dir;
 };
 //managerul de emitori
@@ -271,9 +271,9 @@ public:
 	//sprites collection
 	CSpriteCollection m_sprCol;	
 	//string particles - growable array pentru ca sunt foarte putine mereu
-	CGrowableArray<CStringDummy*> m_vDummies;
+	CArray<CStringDummy*> m_vDummies;
 	//string dummies
-	CGrowableArray<CStringParticle*> m_vStringParticles; //colectie de particule string
+	CArray<CStringParticle*> m_vStringParticles; //colectie de particule string
 
 	void SetSpritePtr(ID3DXSprite* pSprite) {
 		m_pSprite = pSprite;
@@ -347,7 +347,7 @@ public:
 ///-=-=-= PARTICLE_EMITTERS =-=-=-
 	int GetPartEmitterTypeByNameHash(UINT32 generatorNameHash);
 	
-	CGrowableArray<CParticleEmitter*> m_arrPartEmitters;
+	CArray<CParticleEmitter*> m_arrPartEmitters;
 
 	CParticleEmitter* AddPartEmitter(int nType, CAABB * pe_aabb, int nParticleLayer);
 	void ReleasePartEmitter(CParticleEmitter* pEmit);

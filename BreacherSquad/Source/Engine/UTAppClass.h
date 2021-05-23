@@ -79,7 +79,7 @@ class CApplication : public IEventListener
 {
 public: 
 	///--- available resolutions ---
-	CGrowableArray<SIZEWH> g_arrResolutions;  //available resolutions
+	CArray<SIZEWH> g_arrResolutions;  //available resolutions
 	SIZEWH g_szDesktopSize;	//desktop resolution
 public:
 	CApplicationSettings	m_Settings;

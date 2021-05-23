@@ -898,7 +898,7 @@ private:
 public:
 	CStringHash		m_collectionName; //numele colectiei
 	//script arguments
-	CGrowableArray<CVariantComplex*> m_variants;
+	CArray<CVariantComplex*>		m_variants;
 	//ctor
 	CVariantCollection(const WCHAR* strCollectionName);
 	CVariantCollection(CVariantCollection&);

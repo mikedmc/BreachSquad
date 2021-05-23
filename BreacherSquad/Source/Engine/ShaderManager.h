@@ -121,8 +121,8 @@ public:
 
 public:
 	LPDIRECT3DDEVICE9			pDevice;
-	CGrowableArray<VSnode*>		VertexShaders;
-	CGrowableArray<PSnode*>		PixelShaders;
+	CArray<VSnode*>				VertexShaders;
+	CArray<PSnode*>				PixelShaders;
 
 	CShaderManager(void);
 	~CShaderManager(void);

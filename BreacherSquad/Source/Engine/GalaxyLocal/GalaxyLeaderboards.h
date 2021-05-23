@@ -84,7 +84,7 @@ class CGalaxyLeaderboards : public
 		};
 
 	private:
-		CGrowableArray<CJob*>	m_arrJobs;
+		CArray<CJob*>			m_arrJobs;
 			
 	public:	
 		void					Init();

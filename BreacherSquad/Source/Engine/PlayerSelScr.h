@@ -237,7 +237,7 @@ public:
 	CPlayerCharSelection	m_arrPlayers[K_MAX_PLAYERS_CNT];	//contains player selection data	
 	int						m_nPlayersCnt;						//number of actual players
 
-	CGrowableArray<CUpgradeBar*>	m_arrUpgradeBars;				//Upgrades library (holds all unique bars)
+	CArray<CUpgradeBar*>	m_arrUpgradeBars;				//Upgrades library (holds all unique bars)
 	//gets the index of an upgrade bar by its name string hash
 	int						GetUpgradeBarIdx(const WCHAR* sBarName);
 

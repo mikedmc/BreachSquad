@@ -29,7 +29,7 @@ public:
 private:
 	LPDIRECT3DDEVICE9 m_pDevice;
 	
-	CGrowableArray<CTTFont*> m_arrFonts;
+	CArray<CTTFont*> m_arrFonts;
 public:
 	CTTFontsManager();
 	~CTTFontsManager();

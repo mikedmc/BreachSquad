@@ -182,7 +182,7 @@ public:
 
 	CControlsManager*	pControlsManager; //pointer catre parent
 
-	CGrowableArray<CControl*> controls;
+	CArray<CControl*> controls;
 	void FocusInitialize();
 	//focus next control down the list
 	void FocusNextControl();
@@ -223,9 +223,9 @@ public:
 
 	WCHAR loadedFile[MAX_PATH];
 	//contine definitiile layerelor
-	CGrowableArray<CCtrlLayer*> layersDefinitions;
+	CArray<CCtrlLayer*> layersDefinitions;
 	//pointere catre definitii
-	CGrowableArray<CCtrlLayer*> Layers; 
+	CArray<CCtrlLayer*> Layers; 
 	LPDIRECT3DDEVICE9	m_pDevice;
 	ID3DXSprite*		m_pSprite;
 

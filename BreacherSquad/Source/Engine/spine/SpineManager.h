@@ -59,10 +59,10 @@ public:
 	CBufferedSpinePainter				m_Painter;				// buffered painter for skeleton meshes
 	CSpineTexLoader						m_TexMgr;				// custom texture manager for spine
 
-	CGrowableArray<CAtlasContainer*>	arrAtlasses;			// atlasses array
+	CArray<CAtlasContainer*>			arrAtlasses;			// atlasses array
 
-	CGrowableArray<CSkeletonTemplate*>	arrSkeletonTemplates;	// holds all data for skeletons templates
-	CGrowableArray<CSkeletonInstance*>	arrSkeletonInstances;	// holds all skeleton/animState instance pairs
+	CArray<CSkeletonTemplate*>			arrSkeletonTemplates;	// holds all data for skeletons templates
+	CArray<CSkeletonInstance*>			arrSkeletonInstances;	// holds all skeleton/animState instance pairs
 
 	CSpineManager();
 	~CSpineManager();

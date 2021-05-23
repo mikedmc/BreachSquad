@@ -58,10 +58,10 @@ class CEventManager {
 private:
 	//TODO: Sa sorteze eventurile dupa timp si prioritate (daca o fi cazul intr-un engine mai avansat)
 	//lista de listeners si tipul de event ascultat de fiecare
-	CGrowableArray<IEventListener*> m_eventListeners;  //list of event listeners
-	CGrowableArray<CStringHash*> m_eventListenersTypes; //event type pt fiecare listener de deasupra
+	CArray<IEventListener*> m_eventListeners;  //list of event listeners
+	CArray<CStringHash*> m_eventListenersTypes; //event type pt fiecare listener de deasupra
 
-	CGrowableArray<CEvent*> m_eventQueues[K_EVENTMGR_QUEUES]; //cozile de events
+	CArray<CEvent*> m_eventQueues[K_EVENTMGR_QUEUES]; //cozile de events
 	int m_activeQueue;	//coada activa
 public:
 	CEventManager();

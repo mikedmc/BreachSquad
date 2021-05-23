@@ -1,7 +1,7 @@
 #pragma once
 
 //TODO: Sa stie sa schimbe culoarea fontului, daca e necesar
-//TODO: Daca se misca incet getIdx sa nu mai folosesc CGrowableArray ci sa aloc static
+//TODO: Daca se misca incet getIdx sa nu mai folosesc CArray ci sa aloc static
 
 #define K_STRMGR_DEFAULT_STRING	L"![StringNotFound]!"
 //marimea maxima a continutului unui string
@@ -32,7 +32,7 @@ public:
 	WCHAR*						alphabet;					// complete alphabet
 	std::wstring				strLangAlias;				// saves loaded language code/alias/name
 
-	CGrowableArray<CStringDesc*> strings;					// Actual loaded strings
+	CArray<CStringDesc*> strings;					// Actual loaded strings
 
 	CStringsManager();
 	~CStringsManager();

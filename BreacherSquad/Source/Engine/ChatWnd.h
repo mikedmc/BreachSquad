@@ -39,7 +39,7 @@ private:
 		}
 	};
 	//lines of text
-	CGrowableArray<CChatLine*> m_arrLines;
+	CArray<CChatLine*>	m_arrLines;
 	//are we reading text?
 	bool				bReceivingText;
 	//current input line

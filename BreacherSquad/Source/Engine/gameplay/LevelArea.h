@@ -44,7 +44,7 @@ public:
 	CTileBlockMeshManager			areaMesh;				// Mesh manager for the map, handles painting and breaking the tiles in smaller patches
 
 public:
-	CGrowableArray<CProp*>			m_arrProps;				// list of props in this area
+	CArray<CProp*>					m_arrProps;				// list of props in this area
 
 public:
 	CLevelArea(UINT32 nID);
@@ -65,7 +65,7 @@ public:
 	int						GetPropsCollisionBoxes(CAABB srcBox, CAABB* ret_arrAABBs, int nArrCapacity);
 	// gets all props belonging to area, that collide with a bbox
 	int						GetPropsTouchingBox(CAABB srcBox, CProp* ret_arrProps[], int nArrCapacity, bool bOnlyInteractibles = false);
-	int						GetPropsTouchingBox(CAABB srcBox, CGrowableArray<CProp*>& ret_arrProps, bool bOnlyInteractibles = false);
+	int						GetPropsTouchingBox(CAABB srcBox, CArray<CProp*>& ret_arrProps, bool bOnlyInteractibles = false);
 	// gets all the tiles that 
 	int						GetTilesByFlag(RECTXYXY srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity);
 

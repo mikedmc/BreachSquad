@@ -129,13 +129,13 @@ private:
 public:
 	WCHAR							wcsLoadedFile[MAX_PATH];	// Path of currently loaded file
 	short							imageNo;
-	CGrowableArray<scTexture*>		Textures;
+	CArray<scTexture*>				Textures;
 	int								fmoduleNo;
-	CGrowableArray<scFModule*>		FModules;
+	CArray<scFModule*>				FModules;
 	int								aframesNo;
-	CGrowableArray<scAFrame*>		AFrames;
+	CArray<scAFrame*>				AFrames;
 	int								animationNo;
-	CGrowableArray<scAnimation*>	Animations;
+	CArray<scAnimation*>			Animations;
 
 	CSpriteCollection(void);
 	~CSpriteCollection(void);

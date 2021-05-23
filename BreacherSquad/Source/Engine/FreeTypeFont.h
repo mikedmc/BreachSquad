@@ -28,7 +28,7 @@ class CFreeTypeAtlas
 public:
 	PTEXTURE						pTex;
 	SIZEWH							atlasSize;
-	CGrowableArray<sGlyphInfo>		arrGlyphs;
+	CArray<sGlyphInfo>				arrGlyphs;
 	
 	int								nMaxBearingY;	// max distance from baseline to top of all the characters
 

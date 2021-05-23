@@ -90,6 +90,21 @@ public:
 
 };
 
+// Animation pointers buffer - keeps animation in sync with actor template declared animations
+struct CAnimPtr {
+	CStringHashA		animNamesA[K_ACT_ANIM_MAX_SETS];
+	spine::Animation*	pAnim[K_ACT_ANIM_MAX_SETS];
+	bool				bLooping;
+
+	CAnimPtr() : bLooping(true)
+	{
+		for (int kk = 0; kk < K_ACT_ANIM_MAX_SETS; kk++)
+		{
+			pAnim[kk] = null;
+			animNamesA[kk].Reset();
+		}
+	}
+};
 
 class CActor : public IActiveInterface
 {
@@ -98,15 +113,14 @@ public:
 	class CAISensorInfo
 	{
 	public:
-		bool		m_bEnabled;			//senzorii sunt enabled sau disabled
+		bool		m_bEnabled;			// sensors are enabled or disabled?
 		//external sensors
 		CActor*		pTargetedActor;		//inamicul vizibil
-		float		fTargetOverlapX;	//#HACK: cu cat se suprapune peste target (ca sa pot sa-l imping in spate)
 		CAIEvent	m_AIcurrentEvent;	//eventul curent, cel mai actual. Se salveaza si in lastAIevent automat.
-		UINT32		m_lastInteractingActorUID;	//0-not set sau UID pentru ultimul actor cu care a interactionat
+		UINT32		m_lastInteractingActorUID;	//0-not set or UID for last actor that he interacted with
 		float		fTimeSinceHit;		//time passed since got hit
 		//internal sensors
-		bool		b_IsDead;			//daca a murit
+		bool		b_IsDead;			// did I die?
 
 		//sensor memory
 		CAIEvent	m_AIlastEvent;		//eventul cel mai important, ultimul primit. Asta este memoria actorului, deci raman setate pentru o durata mai mare sau pana cand sunt suprascrise
@@ -122,7 +136,6 @@ public:
 			b_IsDead = false;
 			m_lastInteractingActorUID = 0;
 			m_bEnabled = true;
-			fTargetOverlapX = 0.0f;
 			fTimeSinceHit = 1000.0f;
 
 			m_AIlastEvent.Reset();
@@ -134,17 +147,13 @@ public:
 	{
 	public:
 		bool				bThrust;
-		Vec2			vMoveDir;
-		Vec2			vAimVec;		
+		Vec2				vMoveDir;
+		Vec2				vAimVec;		
 
-		bool				bRunning;	//daca alearga
-		bool				bThrustX;	//should be a float (0..1) to replace bRunning
-		bool				bCrouched;	//daca este crouch sau nu
-		bool				bJump;		//comanda de jump
-		bool				bClimb;		//comanda sa se catere
-		int					nInteractKeyState;  //stare buton interact (just pressed, not pressed etc)
-		int					nMoveDirX;	//directia de miscare ca si flaguri (-1,0,1)
-		int					nMoveDirY;	//directia de miscare ca si flaguri (-1,0,1)
+		bool				bRunning;	
+		bool				bCrouched;	
+		bool				bJump;		
+		EControllerButtonState	eInteractKeyState;  //stare buton interact (just pressed, not pressed etc)
 		//EActorAnims			eOverrideAnim;	//if not empty, overrides actor animation
 
 		EActorDeathCommand	nDeathCommand; //0-not dead, 1-dead, 2-splat, 3-splat+explode
@@ -152,7 +161,7 @@ public:
 		EActorAttackState	eAttackCommand_last; //last attack command
 		//set icon commands
 		EActorIconTypes		nIconType;
-		float				fIconDuration;	//daca setez
+		float				fIconDuration;	
 		//color command: !=0 means color command is active
 		DWORD				nColor; 
 
@@ -166,16 +175,12 @@ public:
 			bThrust = false;
 			vMoveDir = Vec2(0.0f, 0.0f);
 			
-			bThrustX = false;
 			bRunning = false;
-			nMoveDirX = 0;
-			nMoveDirY = 0;
 			vAimVec = Vec2(0.0f, 0.0f);
 
 			bCrouched = false;
 			bJump = false;
-			bClimb = false;
-			nInteractKeyState = K_CM_BUTSTATE_NOTPRESSED;
+			eInteractKeyState = K_CM_BUTSTATE_NOTPRESSED;
 			nColor = 0;
 
 			nDeathCommand = K_LVL_ACT_DEATHCMD_NONE;
@@ -189,35 +194,17 @@ public:
 
 		void ResetMoveCommands()
 		{
-			bThrustX = false;
+			bThrust = false;
 			bRunning = false;
-			nMoveDirX = 0;
-			nMoveDirY = 0;
 			vAimVec = Vec2(0.0f, 0.0f);
 
 			bCrouched = false;
 			bJump = false;
-			bClimb = false;
-			nInteractKeyState = K_CM_BUTSTATE_NOTPRESSED;
+			eInteractKeyState = K_CM_BUTSTATE_NOTPRESSED;
 			eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
 		}
 	};
 
-	// Animation pointers buffer - keeps animation in sync with actor template declared animations
-	struct CAnimPtr {
-		CStringHashA		animNamesA[K_ACT_ANIM_MAX_SETS];
-		spine::Animation*	pAnim[K_ACT_ANIM_MAX_SETS];
-		bool				bLooping;
-
-		CAnimPtr() : bLooping(true)
-		{
-			for (int kk = 0; kk < K_ACT_ANIM_MAX_SETS; kk++)
-			{
-				pAnim[kk] = null;
-				animNamesA[kk].Reset();
-			}
-		}
-	};
 
 public:
 	CSpineManager::CSkeletonTemplate*		pSkelTemplate;	// Pointer to the skeleton template (don't deallocate, managed)
@@ -258,10 +245,9 @@ public:
 	//flags
 	bool		bHasGravity; //daca are gravitatie
 
-	CDamageOverTime		cDamageOverTime;	//daca are efect de damage/heal over time
+	CDamageOverTime		cDamageOverTime;	//#TODO: de schimbat in ceva si cu conotatii pozitive (healing, etc)
 	EActorAttackState	nAttackStatus; //aici este statusul legat de arma (shooting, shootalt, reloading, etc)
 
-	byte 		nInteractingState;	//0 - not interacting, 1 interacting, 2 lockpicking
 	bool		bCrouched; //daca este crouched
 	eGenericState	nRolling; //0-ready, 1-rolling, 2-finished and waiting reset (direction key up)
 	//CMiscObjectRail* pRail;		//pointer catre un rail atunci cand merge pe tiroliana
@@ -275,18 +261,20 @@ public:
 
 	void SetIcon(EActorIconTypes iconType, float fDuration = 0.0f); //seteaza icon
 
-	IActiveInterface*		pClosestTouchable; // currently focused interactible object
+	IActiveInterface*			pClosestTouchable;			// currently focused interactible object
+	eGenericState				eInteractState;				// state of interaction
+	CArray<CScriptAction>		arrInteractOptions;			// empty when not interacting. gathers all interaction options from object, character feats, inventory objects, etc
 
 	// Sets a Spine skin and returns true if successfull
-	bool					Spine_SetSkin(const char * strSkinName);
+	bool						Spine_SetSkin(const char * strSkinName);
 	// Tells you if the actor has said animation 
-	bool					HasAnimation(ESpineAnim nAnimType, int nSet = 0);
+	bool						HasAnimation(ESpineAnim nAnimType, int nSet = 0);
 
 	// Sets current animation set (changes immediately)
-	void					SetAnimSet(int newAnimSet);
-	FORCEINLINE int			GetAnimSet() const { return nAnimSet; }
+	void						SetAnimSet(int newAnimSet);
+	FORCEINLINE int				GetAnimSet() const { return nAnimSet; }
 
-	CGrowableArray<CWeapon*>	arrWeapons;		// Collection of weapons available for current actor
+	CArray<CWeapon*>			arrWeapons;		// Collection of weapons available for current actor
 	CWeapon*					pWeaponMain;	// currently selected main weapon (points to arrWeapons)
 	// Adds a weapon to actor's arsenal
 	void						AddWeapon(CWeapon* wpn, bool bEquip);

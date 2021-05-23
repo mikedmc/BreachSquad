@@ -29,7 +29,7 @@ public:
 
 public:
 	//list of chapters
-	CGrowableArray<CChapterDesc*> m_arrChapters;
+	CArray<CChapterDesc*> m_arrChapters;
 
 	CChaptersList();
 	~CChaptersList();

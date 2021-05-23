@@ -97,7 +97,7 @@ OPRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 	imageNo = Textures.GetSize();
 	///--- read modules
 	pugi::xml_node modulesnode = spritenodes.child(L"Modules");
-	CGrowableArray<scModule*> tempModules;
+	CArray<scModule*> tempModules;
     for (pugi::xml_node moduledata = modulesnode.first_child(); moduledata; moduledata = moduledata.next_sibling())
     {
 		scModule *nmod = new scModule();
@@ -146,7 +146,7 @@ OPRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 	tempModules.RemoveAll();
 	///--- load temp frames
 	pugi::xml_node framesnode = spritenodes.child(L"Frames");
-	CGrowableArray<scFrame*> tempFrames;
+	CArray<scFrame*> tempFrames;
     for (pugi::xml_node framedata = framesnode.first_child(); framedata; framedata = framedata.next_sibling())
     {
 		scFrame *nfrm = new scFrame();

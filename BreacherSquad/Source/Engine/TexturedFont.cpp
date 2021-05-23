@@ -125,7 +125,7 @@ HRESULT CTexturedFont::LoadFontXML(WCHAR* XMLpath)
 
 	///--- citeste modulele ---
 	pugi::xml_node modulesnode = spritenodes.child(L"Modules");
-	CGrowableArray<tfModule*> tempModules;
+	CArray<tfModule*> tempModules;
 	for (pugi::xml_node moduledata = modulesnode.first_child(); moduledata; moduledata = moduledata.next_sibling())
     {
 		tfModule *nmod = new tfModule();
@@ -138,11 +138,11 @@ HRESULT CTexturedFont::LoadFontXML(WCHAR* XMLpath)
 	}
 
 	///--- citeste frame modules ---
-	CGrowableArray<tfFModule*> FModules;
+	CArray<tfFModule*> FModules;
 
 	pugi::xml_node framesnode = spritenodes.child(L"Frames");
 	pugi::xml_node fmodulesnode = spritenodes.child(L"FrameModules");
-	CGrowableArray<RECTXYWH*> tempFrameBBox;
+	CArray<RECTXYWH*> tempFrameBBox;
 	for (pugi::xml_node fmoduledata = fmodulesnode.first_child(), framedata = framesnode.first_child();
 		fmoduledata; 
 		fmoduledata = fmoduledata.next_sibling(), framedata = framedata.next_sibling())

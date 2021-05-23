@@ -451,8 +451,8 @@ public:
 class CAITemplate
 {
 public:
-	CGrowableArray<CAIState*>		m_arrStates;  //starile din care selecteaza 
-	CGrowableArray<EAIEventType>	m_arrIgnoredEvents;	//list of ignored events
+	CArray<CAIState*>			m_arrStates;  //starile din care selecteaza 
+	CArray<EAIEventType>		m_arrIgnoredEvents;	//list of ignored events
 	//CTOR/DTOR
 	~CAITemplate();
 	//Finds best State based on input event and random numbers generator for states probabilities

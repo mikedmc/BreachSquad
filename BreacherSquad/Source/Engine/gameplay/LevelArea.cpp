@@ -345,7 +345,7 @@ int CLevelArea::GetPropsTouchingBox(CAABB srcBox, CProp* ret_arrProps[], int nAr
 	return nAdded;
 }
 
-int CLevelArea::GetPropsTouchingBox(CAABB srcBox, CGrowableArray<CProp*>& ret_arrProps, bool bOnlyInteractibles)
+int CLevelArea::GetPropsTouchingBox(CAABB srcBox, CArray<CProp*>& ret_arrProps, bool bOnlyInteractibles)
 {
 	int nAdded = 0;
 

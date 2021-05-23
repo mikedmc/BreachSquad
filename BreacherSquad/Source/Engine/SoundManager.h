@@ -94,7 +94,7 @@ protected:
 	D3DXVECTOR2 m_vListenerExtents;	 //size of hearable area
 	float		m_fListenerVolumeFadeStartPercent; //at what percentage of listener extents the volume starts to linearly fade?
 
-	CGrowableArray<CSound*> sounds;
+	CArray<CSound*> sounds;
 public:	
 
 	CSoundManager() :

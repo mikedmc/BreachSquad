@@ -32,7 +32,7 @@ class CScriptDeclaration
 {
 public:
 	CStringHash	m_scriptName; //numele scriptului incarcat aici
-	CGrowableArray<CScriptInstruction*> m_instructions;	//instructiunile scriptului
+	CArray<CScriptInstruction*> m_instructions;	//instructiunile scriptului
 
 	/*!
 	 * \brief Finds the index of the LABEL instruction with the specified name
@@ -109,13 +109,13 @@ class CScriptManager {
 private:
 	double		m_fTimeline; //game's timeline
 
-	CGrowableArray<CScriptDeclaration*> m_scriptDeclarations;  //list of loaded scripts
-	CGrowableArray<CScript*> m_activeScripts; //scripturile care ruleaza
+	CArray<CScriptDeclaration*> m_scriptDeclarations;  //list of loaded scripts
+	CArray<CScript*> m_activeScripts; //scripturile care ruleaza
 	//executa imediat scriptul dat ca pointer
 	//returns: 0 - script finished/error, UID-script suspended
 	int ExecuteScript(CScript* ns);
 	//array de procesoare de instructiuni (celelalte clase care primesc instructiuni din script)
-	CGrowableArray<IScriptable*>	m_arrProcessors;
+	CArray<IScriptable*>	m_arrProcessors;
 	/*
 	* Replaces instruction args with local and global memory var values where needed
 	* - use "*" before arg value to replace it with local variable value (eg: target="*strLocalVarName")

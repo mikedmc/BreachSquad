@@ -23,18 +23,18 @@ private:
 public:
 	bool				hideBBoxes;
 
-	CGrowableArray<CVariantCollection*>		ctrlTemplates;
+	CArray<CVariantCollection*>		ctrlTemplates;
 	CVariantCollection						layerTemplate;
 
 	CCtrlLayer*			currLayer;		// current layer
 	int					currLayerIdx;	// current layer idx in list
 	CCtrlLayer*			testLayer;
-	CGrowableArray<int>	selectedCtrls;	// lista de controale selectate (pt selectie multipla)
+	CArray<int>	selectedCtrls;	// lista de controale selectate (pt selectie multipla)
 	int					currCtrlIdx;	// tine ultimul control pe care am apasat
 
 	int tool; // moving / resizing controls
 	bool clickedInterface;
-	CGrowableArray<int>	clickedCtrls;
+	CArray<int>	clickedCtrls;
 
 	// offset-ul layer-ului fata de centrul ecranului
 	Vec2 offset;

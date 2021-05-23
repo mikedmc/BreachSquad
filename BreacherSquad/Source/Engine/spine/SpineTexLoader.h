@@ -34,7 +34,7 @@ protected:
 	WCHAR						m_wcsFilesPrefix[MAX_PATH];			//prefix that gets put before file paths
 
 public:
-	CGrowableArray<CSpineTex*>	m_Texs;
+	CArray<CSpineTex*>			m_Texs;
 
 	CSpineTexLoader();
 	~CSpineTexLoader();

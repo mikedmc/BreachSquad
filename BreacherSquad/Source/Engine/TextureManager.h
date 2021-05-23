@@ -40,7 +40,7 @@ public:
 	LPDIRECT3DTEXTURE9	GetTexture(int nTexIdx);
 	Vec2 GetTextureSize(int nTexIdx);
 
-	CGrowableArray<TexNode*>	m_Texs;
+	CArray<TexNode*>	m_Texs;
 	TexNode* GetTextureNode(int nTexIdx);
 
 	int		GetTextureCount(void)	{ return m_Texs.GetSize();	}

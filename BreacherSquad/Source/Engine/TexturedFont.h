@@ -193,7 +193,7 @@ private:
 	CStringsManager *globalStrManager;
 public:
 	CTextureManager m_texManager;
-	CGrowableArray<CTexturedFont*> fonts;
+	CArray<CTexturedFont*> fonts;
 
 	void SetManagersPtr(CStringsManager *pStrManager);
 	//adauga cate un font din fisier XML

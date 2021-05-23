@@ -352,7 +352,7 @@ struct CLocaLanguage {
 };
 
 extern CLocaLanguage g_Language;						//current game language
-extern CGrowableArray<CLocaLanguage> g_arrLangList;		//list of languages from lang.xml
+extern CArray<CLocaLanguage> g_arrLangList;		//list of languages from lang.xml
 //fonts list
 extern CStringHash shTTFID_SZ40;
 extern CStringHash shTTFID_SZ30;

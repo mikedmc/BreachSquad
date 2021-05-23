@@ -33,7 +33,7 @@ public:
 		UINT32							unTime_create;			//time of creation
 		UINT32							unTime_updated;			//last time of update
 
-		CGrowableArray<CStringHash*>	arrAffectedFiles;		//relative paths (including "media") to affected files
+		CArray<CStringHash*>			arrAffectedFiles;		//relative paths (including "media") to affected files
 		//CTOR/DTOR
 		CModDescriptor();
 		~CModDescriptor();
@@ -47,7 +47,7 @@ public:
 	};
 
 public:
-	CGrowableArray<CModDescriptor*>		m_arrMods;			//loaded mods
+	CArray<CModDescriptor*>				m_arrMods;			//loaded mods
 
 public:
 	CModsManager();

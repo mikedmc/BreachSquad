@@ -36,7 +36,7 @@ class CTileBlockMeshManager
 private:
 	PDEVICE							m_pDevice;
 public:
-	CGrowableArray<CTileBlockMesh*> arrBlocks;
+	CArray<CTileBlockMesh*>			arrBlocks;
 	CFixedArray<CTileBlockMesh*, 8> arrVisible;				// array of visible blocks, computed in BuildVisibilityList
 
 	CTileBlockMeshManager();

@@ -44,7 +44,7 @@ public:
 
 	byte	collFlags;		//collision direction flags (de ex la stairs se pune flags = K_DIR_FLAG_DOWN pt ca are coliziune doar la cadere)
 	//lista de actori care stau pe collision shape-ul acesta
-	CGrowableArray<CActor*> touchingActors;
+	CArray<CActor*>			touchingActors;
 	//Removes touching actor from list. Returns: true if found, false if not
 	bool					RemoveTouchingActor(CActor* actor);
 

@@ -997,7 +997,7 @@ void CControlsEditor::Update(float dTime)
 		}	
 		if (g_mouse.Rbut == K_MOUSE_BUTT_JUSTPRESSED)
 		{
-			CGrowableArray<int> newClickedCtrls;
+			CArray<int> newClickedCtrls;
 			for (int kk = currLayer->controls.Count() - 1; kk >= 0; kk--)
 			{
 				RECTXYWH bbox = currLayer->controls[kk]->GetBBox();

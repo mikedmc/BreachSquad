@@ -4026,8 +4026,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		///HIGH FREQUENCY SENSORS
 		//hit timer (used in some behaviors)
 		actor->m_AIsensorInfo.fTimeSinceHit += dTime;
-		//remove target overlap
-		actor->m_AIsensorInfo.fTargetOverlapX = 0.0f;
 		//did he get hit? reset time since hit 
 		//if (actor->nTookDamageFrames > 0)
 			//actor->m_AIsensorInfo.fTimeSinceHit = 0.0f;
@@ -4243,7 +4241,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				/*
 				actor->m_AIcommands.nInteractKeyState = pController->sCommands.keyState[K_CM_COMMAND_UP];
 				*/
-				actor->m_AIcommands.nInteractKeyState = K_CM_BUTSTATE_NOTPRESSED;
+				actor->m_AIcommands.eInteractKeyState = K_CM_BUTSTATE_NOTPRESSED;
 				//FIRE SHOOT
 				if (pController->sCommands.bKeyDown[K_CM_COMMAND_FIRE1])
 				{
@@ -4321,8 +4319,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 								g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, 0, &ppos, NULL, &Vec2(randfloatsgn(1.0f), -10.0f - randfloat(5.0f)), 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 							}
 
-							actor->m_AIcommands.bThrustX = true;
-							actor->m_AIcommands.nMoveDirX = m_rand.RandSign();
+							//actor->m_AIcommands.bThrustX = true;
+							//actor->m_AIcommands.nMoveDirX = m_rand.RandSign();
 						}
 					}
 				}
@@ -4359,7 +4357,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						actor->m_AIcommands.nIconType = K_LVL_ACT_ICON_SURPRISE;
 						actor->m_AIcommands.fIconDuration = 0.5f;
 						//run to target
-						actor->m_AIcommands.bThrustX = true;
+						actor->m_AIcommands.bThrust = true;
 						actor->m_AIcommands.bRunning = true;
 						//gets too close
 						bool bHasLateralCollisions = ((actor->collisionFlags & (K_DIRFLAG_RIGHT | K_DIRFLAG_LEFT)) != 0);
@@ -4410,13 +4408,13 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 						if (!bPressedLeft && bPressedRight)
 						{
-							actor->m_AIcommands.bThrustX = false;
-							actor->m_AIcommands.nMoveDirX = 1;
+							actor->m_AIcommands.bThrust = false;
+							//actor->m_AIcommands.nMoveDirX = 1;
 						}
 						if (bPressedLeft && !bPressedRight)
 						{
-							actor->m_AIcommands.bThrustX = false;
-							actor->m_AIcommands.nMoveDirX = -1;
+							actor->m_AIcommands.bThrust = false;
+							//actor->m_AIcommands.nMoveDirX = -1;
 						}
 					}
 				}
@@ -4650,7 +4648,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//	EXECUTE - process AI output - generalizare/executie comenzi AI
 	//----------------------------------------
 	///--- AI commands ---
-	actor->nInteractingState = 0;
+	actor->eInteractState = K_STATE_READY;
 
 
 	//save old crouch state
@@ -4660,6 +4658,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	actor->bCrouched = actor->m_AIcommands.bCrouched;
 
 	//check crouch conditions when falling or jumping
+	/*
 	if (fabs(actor->speed.y) > 1.0f)
 		actor->bCrouched = false;
 
@@ -4695,7 +4694,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	if (actor->nRolling == K_STATE_EXECUTING)
 	{
 		bool bCanceledByKeys = (actor->m_AIcommands.bThrustX == false) && (actor->m_AIcommands.bCrouched == false);
-		if ((bCanceledByKeys) /*|| (actor->sprite.animStatus == ANIM_STATUS_FRAMELOCK)*/ ||
+		if ((bCanceledByKeys) ||
 			(actor->nAttackStatus != K_LVL_ACT_ATTACK_IDLE) || 
 			((actor->collisionFlags & K_DIRFLAG_DOWN) == 0))
 		{
@@ -4710,7 +4709,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	}
 	if ((actor->nRolling == K_STATE_FINISHED) && (actor->bCrouched == false))
 		actor->nRolling = K_STATE_READY;
-
+	*/
 
 	//look for cover when entering crouched state
 	/*
@@ -4833,6 +4832,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				avg /= plcnt;
 			}
 			//--- gaseste zona in care ai voie sa te misti, limitare miscare multiplayer ---
+			/*
 			RECTXYWH_F lockrect(avg.x - camrect.w / 2.0f, avg.y - camrect.h / 2.0f, camrect.w, camrect.h);
 
 			if (((actor->bbox.vMin.x < lockrect.x) && (actor->m_AIcommands.nMoveDirX < 0)) ||
@@ -4843,8 +4843,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			if (((actor->bbox.vMin.y < lockrect.y) && (actor->m_AIcommands.nMoveDirY < 0)) ||
 				((actor->bbox.vMax.y > lockrect.Bottom()) && (actor->m_AIcommands.nMoveDirY > 0)))
 			{
-//				actor->m_AIcommands.bThrustY = false;
+				actor->m_AIcommands.bThrustY = false;
 			}
+			*/
 			//daca actorul a iesit din ecran ii da suspend
 			if (camAABB.Intersects(actor->bbox))
 			{
@@ -4954,13 +4955,13 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			actor->bCrouched = false;
 	}
 
-	//nu se misca in timp ce trage cu arme care te opresc din mers
+	// weapons that stop you while shooting:
 	if (actor->pWeaponMain->WeaponTemplate.fShooterSpeedSlowingPercent >= 1.0f)
 	{
 		if ((actor->m_AIcommands.eAttackCommand != K_LVL_ACT_ATTACK_IDLE) || (actor->nAttackStatus != K_LVL_ACT_ATTACK_IDLE))
 		{
-			actor->m_AIcommands.bThrustX = false;
-			actor->m_AIcommands.nMoveDirX = 0;
+			actor->m_AIcommands.bThrust = false;
+			//actor->m_AIcommands.nMoveDirX = 0;
 		}
 	}
 
@@ -5450,7 +5451,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		CAABB aabbInteract(-K_TILE_SIZE_F, -K_TILE_SIZE_F, K_TILE_SIZE_F, K_TILE_SIZE_F);
 		aabbInteract.Move(actor->pos.xy);
 
-		CGrowableArray<CProp*> arrTouchProps;
+		CArray<CProp*> arrTouchProps;
 		arrTouchProps.SetSize(16);
 		if (actor->pArea != nullptr)
 		{
