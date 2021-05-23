@@ -32,6 +32,10 @@ CSpritePainter::~CSpritePainter(void)
 OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 flags /*= K_BS_ALPHABLENDING */)
 {
 	_ASSERT(m_pDevice != nullptr);
+	// if already started make sure we do a flush
+	if (bStarted)
+		End();
+
 #if defined(_DEBUG) || defined(DEBUG)
 	stats_sequences++;
 #endif

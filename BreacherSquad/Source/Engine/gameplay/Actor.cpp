@@ -710,3 +710,22 @@ void CActor::AddWpnTemplate(CWeapon * pWeapon)
 	}
 	*/
 }
+
+void CActor::BuildActionsList()
+{
+	arrInteractOptions.Clear();
+	if (pClosestTouchable == nullptr)
+		return;
+	//1. get object specific actions
+	for (int kk = 0; kk < pClosestTouchable->arrActions.Count(); kk++)
+	{
+		arrInteractOptions.Add(pClosestTouchable->arrActions[kk]);
+	}
+	//#TODO: 2. get inventory specific actions for targeted object class
+	//#TODO: 3. get player class specific actions for targeted object class
+}
+
+void CActor::ClearActionsList()
+{
+	arrInteractOptions.Clear();
+}

@@ -4237,11 +4237,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 				*/
 
-				//touch
-				/*
-				actor->m_AIcommands.nInteractKeyState = pController->sCommands.keyState[K_CM_COMMAND_UP];
-				*/
-				actor->m_AIcommands.eInteractKeyState = K_CM_BUTSTATE_NOTPRESSED;
+				//interact
+				if (pController->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTPRESSED)
+				{
+					actor->m_AIcommands.bInteract = true;
+				}
 				//FIRE SHOOT
 				if (pController->sCommands.bKeyDown[K_CM_COMMAND_FIRE1])
 				{
@@ -5444,7 +5444,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		actor->pArea = Areas_GetAt(actor->pos.xy);
 	}
 
-	///--- find closest interactible object in range
+	///--- find closest interactible object in range, aka touchable
 	if (actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_INTERACT)
 	{
 		//#TODO: put interact area in special constant
@@ -5471,15 +5471,30 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		//#TODO: see which one is closer to the aim dir
 		if (arrTouchProps.GetSize() > 0)
 		{
-			actor->pClosestTouchable = arrTouchProps[0];
+			IActiveInterface* pNewTouchable = arrTouchProps[0];
+			if (actor->pClosestTouchable != pNewTouchable)
+			{
+				actor->ClearActionsList();
+			}
+			actor->pClosestTouchable = pNewTouchable;
 		}
 		else
 		{
+			if (actor->pClosestTouchable != nullptr) 
+			{
+				actor->ClearActionsList();
+			}
 			actor->pClosestTouchable = nullptr;
 		}
 	}
 
-	// call internal actor update at the end
+	// check touch/interact
+	if ((actor->m_AIcommands.bInteract) && (actor->pClosestTouchable != nullptr))
+	{
+		actor->BuildActionsList();
+	}
+
+	///--- call internal actor update at the end
 	actor->Update(dTime);
 }
 
@@ -8595,6 +8610,11 @@ void CLevel::Paint()
 		return;
 
 	PaintUsingFinalRTT();
+
+	//ingame interface
+	//m_interfaceIGM.Paint(m_pDevice, g_pGameSprite);
+	//interface particles
+	//g_particlesMgr.PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
 }
 
 HRESULT CLevel::PaintUsingFinalRTT()
