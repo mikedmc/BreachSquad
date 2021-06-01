@@ -2292,10 +2292,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				
 				//final flush
 				g_pGameSprite->Flush();
-				//ingame interface
-				//g_level.m_interfaceIGM.Paint(pDevice, g_pGameSprite);
-				//interface particles
-				//g_particlesMgr.PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
 
 				/*
 				g_pGameSprite->Flush();

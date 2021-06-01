@@ -317,7 +317,7 @@ public:
 	bool Net_SendGameplayCommand(eNetCommandGameplay eCmd);
 
 	///--- GAMEPLAY ---
-	unsigned int Net_GetPlayerIndex() const
+	int Net_GetPlayerIndex() const
 	{
 #ifdef ENABLE_NETWORKING
 		return g_pNetwork->GetCurrentLobby().bIAmOwner ? 0 : 1;
@@ -326,7 +326,7 @@ public:
 #endif
 	}
 
-	unsigned int Net_GetOtherPlayerIndex() const
+	int Net_GetOtherPlayerIndex() const
 	{
 #ifdef ENABLE_NETWORKING
 		return g_pNetwork->GetCurrentLobby().bIAmOwner ? 1 : 0;

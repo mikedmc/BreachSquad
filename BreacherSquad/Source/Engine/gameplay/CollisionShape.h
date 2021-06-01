@@ -33,7 +33,6 @@
 //LEDGE - solid for bullets, like a BOX for actors
 #define K_LVL_COLL_TYPE_LEDGE 10
 
-
 class CCollisionShape : public IActiveInterface
 {
 public:

@@ -9,19 +9,20 @@
 #include "gameplay/Level_scriptable.h"
 
 #include "gameplay/ActiveInterface.h"
-#include "gameplay/CollisionShape.h"
 #include "gameplay/Light.h"
 #include "gameplay/Prop.h"
-#include "gameplay/Level_visibility.h"
 #include "gameplay/Level_bullets.h"
 #include "gameplay/Level_weapons.h"
 #include "gameplay/Actor.h"
+#include "gameplay/Level_visibility.h"
+#include "gameplay/CollisionShape.h"
 
 #include "gameplay/TileBlockMesh.h"
 #include "gameplay/LevelArea.h"
 #include "gameplay/MissionStory.h"
 
 #include "CFOVUtil.h"
+#include "IngameGUI.h"
 
 using namespace std;
 
@@ -393,9 +394,9 @@ public:
 ///--- interfaces ---
 	CSpriteCollection		m_sprInterface;
 	//interfata in sine
-	CCustomInterfaceIGM		m_interfaceIGM;
+	CIngameGUI				m_interfaceIGM;
 	//controlul de ingame hints
-	CCustomInterfaceTextBubble m_interfaceTextBubble;
+	//CCustomInterfaceTextBubble m_interfaceTextBubble;
 
 ///--- SCRIPT ---
 	//activeaza cel mai apropiat obiect, primul gasit

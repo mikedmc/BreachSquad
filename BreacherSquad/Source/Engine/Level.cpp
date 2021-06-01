@@ -465,13 +465,10 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 	//set skin
 	//nact->nSkinIdx = nPlayerOrdinal;
 
-	//set interface pointers
-	m_interfaceIGM.Init(&m_sprInterface, pPlayerActor[0], pPlayerActor[1]);
-	
 	//resetam numarul de puncte strategice si scoatem selectia
 	m_arrStats[K_LVL_STATS_PL1_STRATEGIC_POINTS + nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT] = 0;
-	m_interfaceIGM.SetStrategicPoints(m_arrStats[K_LVL_STATS_PL1_STRATEGIC_POINTS] / 1000.0f, m_arrStats[K_LVL_STATS_PL2_STRATEGIC_POINTS] / 1000.0f);
-	m_interfaceIGM.SetStrategicSelection(nPlayerOrdinal, -1);
+	//m_interfaceIGM.SetStrategicPoints(m_arrStats[K_LVL_STATS_PL1_STRATEGIC_POINTS] / 1000.0f, m_arrStats[K_LVL_STATS_PL2_STRATEGIC_POINTS] / 1000.0f);
+	//m_interfaceIGM.SetStrategicSelection(nPlayerOrdinal, -1);
 	//initialize arrays
 	InitializeStrategicAbilities(nPlayerOrdinal);
 
@@ -839,9 +836,6 @@ CLevel::CLevel()
 		m_arrPlayerSelStrategic[kk] = -1;
 		m_arrPlayerLastSafePos[kk] = Vec2(0.0f, 0.0f);
 	}
-	//init interfaces
-	m_interfaceIGM.Init(&m_sprInterface, pPlayerActor[0], pPlayerActor[1]);
-	m_interfaceTextBubble.Init(&UTGetGUI().m_sprCol);
 
 	vLastSpawnPoint = Vec2(0.0f, 0.0f);
 	m_vCamPosDefault = Vec2(0.0f, 0.0f);
@@ -1704,7 +1698,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 				if (pPlayerActor[kk] != null)
 				{
 					m_arrPlayerSelStrategic[kk] = -1;
-					m_interfaceIGM.SetStrategicSelection(kk, -1);
+					//m_interfaceIGM.SetStrategicSelection(kk, -1);
 					pPlayerActor[kk]->SetIcon(K_LVL_ACT_ICON_NONE);
 
 				}
@@ -1714,7 +1708,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 					m_arrPlayerControllersIIDs[kk] = -1;
 					m_arrPlayerSelHotJoin[kk] = -1;
 					g_playerSelScr.m_arrPlayers[kk].nInstanceID = -1;
-					m_interfaceIGM.SetHotJoinSelection(kk, m_arrPlayerSelHotJoin[kk]);
+					//m_interfaceIGM.SetHotJoinSelection(kk, m_arrPlayerSelHotJoin[kk]);
 				}
 			}
 
@@ -1753,7 +1747,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 				if (pPlayerActor[kk] != null)
 				{
 					m_arrPlayerSelStrategic[kk] = -1;
-					m_interfaceIGM.SetStrategicSelection(kk, -1);
+					//m_interfaceIGM.SetStrategicSelection(kk, -1);
 					pPlayerActor[kk]->SetIcon(K_LVL_ACT_ICON_NONE);
 
 				}
@@ -1762,7 +1756,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 					m_arrPlayerControllersIIDs[kk] = -1;
 					m_arrPlayerSelHotJoin[kk] = -1;
 					g_playerSelScr.m_arrPlayers[kk].nInstanceID = -1;
-					m_interfaceIGM.SetHotJoinSelection(kk, m_arrPlayerSelHotJoin[kk]);
+					//m_interfaceIGM.SetHotJoinSelection(kk, m_arrPlayerSelHotJoin[kk]);
 				}
 			}
 		}
@@ -2495,9 +2489,9 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 				//check only a few times per second
 				if (m_Timers.Tick(200))
 				{
-					bool bKillPlayer = (int)colshape->varAIparams.GetVariantByName(L"b_killPlayer")->m_asINT32;
-					bool bKillOthers = (int)colshape->varAIparams.GetVariantByName(L"b_killOthers")->m_asINT32;
-					bool bSplat = (int)colshape->varAIparams.GetVariantByName(L"b_splat")->m_asINT32;
+					bool bKillPlayer = (bool)colshape->varAIparams.GetVariantByName(L"b_killPlayer")->m_asBool;
+					bool bKillOthers = (bool)colshape->varAIparams.GetVariantByName(L"b_killOthers")->m_asBool;
+					bool bSplat = (bool)colshape->varAIparams.GetVariantByName(L"b_splat")->m_asBool;
 
 					if (bKillPlayer)
 					{
@@ -2833,7 +2827,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 
 				float fOldTimer = prop->AItimer1;
 				prop->AItimer1 -= dTime;
-				m_interfaceIGM.SetBombTimer(prop->AItimer1);
+				//m_interfaceIGM.SetBombTimer(prop->AItimer1);
 
 				//--- sounds ---
 				if (prop->AItimer1 > 15.0f)
@@ -2853,7 +2847,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 
 				if (prop->AItimer1 <= 0.0f)
 				{
-					m_interfaceIGM.SetBombTimer(0.0f);
+					//m_interfaceIGM.SetBombTimer(0.0f);
 					//add some explosions so everybody will die
 					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos.xy, prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
 					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos.xy + Vec2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
@@ -2924,7 +2918,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 				{
 					prop->AItimer1 -= dTime;
 					
-					bool bDontChangeFrames = (bool)(prop->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
+					bool bDontChangeFrames = (bool)(prop->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asBool);
 					if (!bDontChangeFrames)
 					{
 						prop->sprite.frameIdx++;
@@ -3219,7 +3213,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			IActiveInterface* active = actor->pClosestTouchable->pTarget;
 			if ((active->AIstate == K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE) || (active->AIstate == K_AI_STATE_ACTIVE_TEAM_TELEPORTER_2FRAMES))
 			{
-				bool bDontChangeFrames = (bool)(active->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asINT32);
+				bool bDontChangeFrames = (bool)(active->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asBool);
 				if (!bDontChangeFrames)
 					active->AItimer1 = 1.0f;
 			}
@@ -3617,10 +3611,10 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName(L"sDeathCommand");
 			if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 			{
-				int dcmd = GetListIndexByName(cvc->m_strArg.text, EActorDeathCommandNames, K_LVL_ACT_DEATHCMD_CNT);
+				int ndcmd = GetListIndexByName(cvc->m_strArg.text, EActorDeathCommandNames, K_LVL_ACT_DEATHCMD_CNT);
 				//daca avem comanda de death o trimitem mai departe
-				if(dcmd >= 0)
-					actor->varAIparams.SetNamedVarINT32(L"nDeathCommand", dcmd);
+				if(ndcmd >= 0)
+					actor->varAIparams.SetNamedVarINT32(L"nDeathCommand", ndcmd);
 			}
 			//state doesn't need update
 			ret_bFinished = true;
@@ -3687,7 +3681,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 				m_arrStats[K_LVL_STATS_PL1_DEATHS + actor->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT]++;
 
 				m_arrPlayerSelStrategic[actor->nPlayerOrdinal] = -1;
-				m_interfaceIGM.SetStrategicSelection(actor->nPlayerOrdinal, -1);
+				//m_interfaceIGM.SetStrategicSelection(actor->nPlayerOrdinal, -1);
 				//remove icon
 				actor->SetIcon(K_LVL_ACT_ICON_NONE);
 				//dam remove la particles de pe interfata cand moare un player
@@ -4211,7 +4205,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						nSel++;
 
 					m_arrPlayerSelStrategic[actor->nPlayerOrdinal] = nSel;
-					m_interfaceIGM.SetStrategicSelection(actor->nPlayerOrdinal, nSel);
+					//m_interfaceIGM.SetStrategicSelection(actor->nPlayerOrdinal, nSel);
 					//play a sound on opening the interface
 					//SND_PLAY(SNDIDX_CLICK_DENIED);
 				}
@@ -4563,8 +4557,8 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					m_nPlayers--;
 					m_nPlayersActive--;  
 
-					m_interfaceIGM.Init(&m_sprInterface, pPlayerActor[0], pPlayerActor[1]);
-					m_interfaceIGM.SetHotJoinSelection(actor->nPlayerOrdinal, -1);
+					//m_interfaceIGM.Init(&m_sprInterface, pPlayerActor[0], pPlayerActor[1]);
+					//m_interfaceIGM.SetHotJoinSelection(actor->nPlayerOrdinal, -1);
 
 					//on local play check if other player is suspended and move camera on him
 					if ((!UTGetAppClass().IsGameNetworked()) && (!bContinue))
@@ -4648,8 +4642,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//	EXECUTE - process AI output - generalizare/executie comenzi AI
 	//----------------------------------------
 	///--- AI commands ---
-	actor->eInteractState = K_STATE_READY;
-
 
 	//save old crouch state
 	bool bCrouchedOldState = actor->bCrouched;
@@ -5266,9 +5258,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			// if movement bbox is not completely contained in the current area BBox try with the neighbours too
 			if (!actor->pArea->AABBbounds.Contains(boxUnion))
 			{
-				for (int oo = 0; oo < actor->pArea->arrNeighbours.Count(); oo++)
+				for (int kk = 0; kk < actor->pArea->arrNeighbours.Count(); kk++)
 				{
-					CLevelArea* area = actor->pArea->arrNeighbours.m_pData[oo];
+					CLevelArea* area = actor->pArea->arrNeighbours.m_pData[kk];
 					if (!area->AABBbounds_TL.Intersects(boxUnionTilesWH))
 						continue;
 					// tiles collboxes
@@ -5492,6 +5484,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	if ((actor->m_AIcommands.bInteract) && (actor->pClosestTouchable != nullptr))
 	{
 		actor->BuildActionsList();
+		if (actor->arrInteractOptions.Count() > 0)
+		{
+			actor->eInteractState = K_STATE_READY;
+			actor->nInteractOptionsSelIdx = 0;
+		}
 	}
 
 	///--- call internal actor update at the end
@@ -5630,7 +5627,10 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 			
 			CAABB smokeAABB;
 			smokeAABB.Set(vBulPos.x - K_TILE_SIZE, vBulPos.y - 4 * K_TILE_SIZE, vBulPos.x + K_TILE_SIZE, vBulPos.y + K_TILE_SIZE);
-			if (AABB::Segment_Intersection(sourceActor->GetPosHeart(), enemy->GetPosHeart(), smokeAABB))
+
+			Vec2 v2HeartSrc = sourceActor->GetPosHeart();
+			Vec2 v2HeartDst = enemy->GetPosHeart();
+			if (AABB::Segment_Intersection(v2HeartSrc, v2HeartDst, smokeAABB))
 			{
 				bObscured = true;
 				break;
@@ -6302,7 +6302,7 @@ void CLevel::Update(float dTime_original)
 					//if(!bEnableHotJoin)
 						//continue;
 					//HOT JOIN LOGIC
-					for (int ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.size(); ll++)
+					for (size_t ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.size(); ll++)
 					{
 						CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ll];
 						//Shows controller mapping - only when not online
@@ -6380,7 +6380,7 @@ void CLevel::Update(float dTime_original)
 										m_arrPlayerSelHotJoin[plidx] = K_PSS_CLASS_ASSAULTER;
 									}
 
-									m_interfaceIGM.SetHotJoinSelection(plidx, m_arrPlayerSelHotJoin[plidx]);
+									//m_interfaceIGM.SetHotJoinSelection(plidx, m_arrPlayerSelHotJoin[plidx]);
 								}
 							}
 						}
@@ -6460,7 +6460,7 @@ void CLevel::Update(float dTime_original)
 									if (m_arrStats[K_LVL_STATS_PL1_LIVES + plidx * K_LVL_STATS_PLAYER_STATS_COUNT] > 0)
 										m_arrStats[K_LVL_STATS_PL1_LIVES + plidx * K_LVL_STATS_PLAYER_STATS_COUNT]--;
 
-									m_interfaceIGM.SetLivesLeft(m_arrStats[K_LVL_STATS_PL1_LIVES], m_arrStats[K_LVL_STATS_PL2_LIVES]);
+									//m_interfaceIGM.SetLivesLeft(m_arrStats[K_LVL_STATS_PL1_LIVES], m_arrStats[K_LVL_STATS_PL2_LIVES]);
 								}
 								else
 								{
@@ -6500,12 +6500,12 @@ void CLevel::Update(float dTime_original)
 					if ((nOldIID < 0) && (m_arrPlayerControllersIIDs[plidx] >= 0))
 					{
 						//set interface pointers
-						m_interfaceIGM.Init(&m_sprInterface, pPlayerActor[0], pPlayerActor[1]);
+						//m_interfaceIGM.Init(&m_sprInterface, pPlayerActor[0], pPlayerActor[1]);
 					}
 				}
 				else //hot join ingame selection and spawning
 				{
-					m_interfaceIGM.SetHotJoinSelection(plidx, m_arrPlayerSelHotJoin[plidx]);
+					//m_interfaceIGM.SetHotJoinSelection(plidx, m_arrPlayerSelHotJoin[plidx]);
 				}
 
 				///--- updates player selection for strategic points ---
@@ -7035,11 +7035,11 @@ void CLevel::Update(float dTime_original)
 								if (layer != null)
 								{
 									//portrete								
-									if (ctrl = layer->GetControlByName("CTRL_ANIM_PORTRAIT_PL1"))
+									if ((ctrl = layer->GetControlByName("CTRL_ANIM_PORTRAIT_PL1")) != nullptr)
 									{
 										ctrl->paramsDict.SetNamedVarINT32(L"setFrame", (int)g_playerSelScr.m_arrPlayers[0].eType);
 									}
-									if (ctrl = layer->GetControlByName("CTRL_ANIM_PORTRAIT_PL2"))
+									if ((ctrl = layer->GetControlByName("CTRL_ANIM_PORTRAIT_PL2")) != nullptr)
 									{
 										ctrl->paramsDict.SetNamedVarINT32(L"setFrame", (int)g_playerSelScr.m_arrPlayers[1].eType);
 									}
@@ -7048,11 +7048,11 @@ void CLevel::Update(float dTime_original)
 								//network - replace player names with real ones
 								if (UTGetAppClass().IsGameNetworked())
 								{
-									if (ctrl = layer->GetControlByName("CTRL_WND_PL1"))
+									if ((ctrl = layer->GetControlByName("CTRL_WND_PL1")) != nullptr)
 									{
 										ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_NETWORK_HOST_NAME);
 									}
-									if (ctrl = layer->GetControlByName("CTRL_WND_PL2"))
+									if ((ctrl = layer->GetControlByName("CTRL_WND_PL2")) != nullptr)
 									{
 										ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_NETWORK_PEER_NAME);
 									}
@@ -7064,13 +7064,13 @@ void CLevel::Update(float dTime_original)
 										ANALYTICS_EVENT("level_win_2p_net", ctxt, "durationSec", nTimeSpent);
 									}
 									//XP bar - networked
-									if (ctrl = layer->GetControlByName("CTRL_XPBAR_PL1"))
+									if ((ctrl = layer->GetControlByName("CTRL_XPBAR_PL1")) != nullptr)
 									{
 										ctrl->paramsDict.SetNamedVarINT32(L"nOldValue", g_playerSelScr.m_arrPlayers[0].nPlayerXPPts);
 										int nNew = LIMIT(g_playerSelScr.m_arrPlayers[0].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints);
 										ctrl->paramsDict.SetNamedVarINT32(L"nNewValue", nNew);
 									}
-									if (ctrl = layer->GetControlByName("CTRL_XPBAR_PL2"))
+									if ((ctrl = layer->GetControlByName("CTRL_XPBAR_PL2")) != nullptr)
 									{
 										ctrl->paramsDict.SetNamedVarINT32(L"nOldValue", g_playerSelScr.m_arrPlayers[1].nPlayerXPPts);
 										int nNew = LIMIT(g_playerSelScr.m_arrPlayers[1].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints);
@@ -7086,13 +7086,13 @@ void CLevel::Update(float dTime_original)
 										ANALYTICS_EVENT("level_win_2p", ctxt, "durationSec", nTimeSpent);
 									}
 									//XP bar
-									if (ctrl = layer->GetControlByName("CTRL_XPBAR_PL1"))
+									if ((ctrl = layer->GetControlByName("CTRL_XPBAR_PL1")) != nullptr)
 									{
 										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
 										ctrl->paramsDict.SetNamedVarINT32(L"nOldValue", nXPpl1);
 										ctrl->paramsDict.SetNamedVarINT32(L"nNewValue", g_userData[nPlBaseIdx]);
 									}
-									if (ctrl = layer->GetControlByName("CTRL_XPBAR_PL2"))
+									if ((ctrl = layer->GetControlByName("CTRL_XPBAR_PL2")) != nullptr)
 									{
 										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[1].eType;
 										ctrl->paramsDict.SetNamedVarINT32(L"nOldValue", nXPpl2);
@@ -7121,7 +7121,7 @@ void CLevel::Update(float dTime_original)
 									if (layer != null)
 									{
 										CControl* ctrl = null;
-										if (ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY"))
+										if ((ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY")) != nullptr)
 										{
 											ctrl->paramsDict.SetNamedVarINT32(L"nIconFrame1", ((bTask1OK) ? 1 : 0));
 											ctrl->paramsDict.SetNamedVarString(L"stringID1", STRID_WEEK1_TASK);
@@ -7145,7 +7145,7 @@ void CLevel::Update(float dTime_original)
 									if (layer != null)
 									{
 										CControl* ctrl = null;
-										if (ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY"))
+										if ((ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY")) != nullptr)
 										{
 											ctrl->paramsDict.SetNamedVarINT32(L"nIconFrame1", ((bTask1OK) ? 1 : 0));
 											ctrl->paramsDict.SetNamedVarString(L"stringID1", STRID_WEEK2_TASK1);
@@ -7166,7 +7166,7 @@ void CLevel::Update(float dTime_original)
 									if (layer != null)
 									{
 										CControl* ctrl = null;
-										if (ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY"))
+										if ((ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY")) != nullptr)
 										{
 											ctrl->paramsDict.SetNamedVarINT32(L"nIconFrame1", ((bTask1OK) ? 1 : 0));
 											ctrl->paramsDict.SetNamedVarString(L"stringID1", STRID_WEEK2_TASK2); //no snipers
@@ -7192,7 +7192,7 @@ void CLevel::Update(float dTime_original)
 									if (layer != null)
 									{
 										CControl* ctrl = null;
-										if (ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY"))
+										if ((ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY")) != nullptr)
 										{
 											ctrl->paramsDict.SetNamedVarINT32(L"nIconFrame1", ((bTask1OK) ? 1 : 0));
 											ctrl->paramsDict.SetNamedVarString(L"stringID1", STRID_WEEK4_TASK1);
@@ -7219,7 +7219,7 @@ void CLevel::Update(float dTime_original)
 									if (layer != null)
 									{
 										CControl* ctrl = null;
-										if (ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY"))
+										if ((ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY")) != nullptr)
 										{
 											ctrl->paramsDict.SetNamedVarINT32(L"nIconFrame1", ((bTask1OK) ? 1 : 0));
 											ctrl->paramsDict.SetNamedVarString(L"stringID1", STRID_WEEK1_TASK);
@@ -7241,7 +7241,7 @@ void CLevel::Update(float dTime_original)
 									if (layer != null)
 									{
 										CControl* ctrl = null;
-										if (ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY"))
+										if ((ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY")) != nullptr)
 										{
 											ctrl->paramsDict.SetNamedVarINT32(L"nIconFrame1", ((bTask1OK) ? 1 : 0));
 											ctrl->paramsDict.SetNamedVarString(L"stringID1", STRID_WEEK6_TASK1);
@@ -7261,7 +7261,7 @@ void CLevel::Update(float dTime_original)
 									if (layer != null)
 									{
 										CControl* ctrl = null;
-										if (ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY"))
+										if ((ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY")) != nullptr)
 										{
 											ctrl->paramsDict.SetNamedVarINT32(L"nIconFrame1", ((bTask1OK) ? 1 : 0));
 											ctrl->paramsDict.SetNamedVarString(L"stringID1", STRID_WEEK7_TASK1);
@@ -7285,7 +7285,7 @@ void CLevel::Update(float dTime_original)
 									if (layer != null)
 									{
 										CControl* ctrl = null;
-										if (ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY"))
+										if ((ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY")) != nullptr)
 										{
 											ctrl->paramsDict.SetNamedVarINT32(L"nIconFrame1", ((bTask1OK) ? 1 : 0));
 											ctrl->paramsDict.SetNamedVarString(L"stringID1", STRID_WEEK4_TASK1); //no healing
@@ -7312,7 +7312,7 @@ void CLevel::Update(float dTime_original)
 									if (layer != null)
 									{
 										CControl* ctrl = null;
-										if (ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY"))
+										if ((ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY")) != nullptr)
 										{
 											ctrl->paramsDict.SetNamedVarINT32(L"nIconFrame1", ((bTask1OK) ? 1 : 0));
 											ctrl->paramsDict.SetNamedVarString(L"stringID1", STRID_WEEK7_TASK1);
@@ -7334,7 +7334,7 @@ void CLevel::Update(float dTime_original)
 									if (layer != null)
 									{
 										CControl* ctrl = null;
-										if (ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY"))
+										if ((ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY")) != nullptr)
 										{
 											ctrl->paramsDict.SetNamedVarINT32(L"nIconFrame1", ((bTask1OK) ? 1 : 0));
 											ctrl->paramsDict.SetNamedVarString(L"stringID1", STRID_WEEK10_TASK1);
@@ -7354,7 +7354,7 @@ void CLevel::Update(float dTime_original)
 									if (layer != null)
 									{
 										CControl* ctrl = null;
-										if (ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY"))
+										if ((ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY")) != nullptr)
 										{
 											ctrl->paramsDict.SetNamedVarINT32(L"nIconFrame1", ((bTask1OK) ? 1 : 0));
 											ctrl->paramsDict.SetNamedVarString(L"stringID1", STRID_WEEK6_TASK1);
@@ -7373,7 +7373,7 @@ void CLevel::Update(float dTime_original)
 									if (layer != null)
 									{
 										CControl* ctrl = null;
-										if (ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY"))
+										if ((ctrl = layer->GetControlByName("CTRL_TASKLIST_WEEKLY")) != nullptr)
 										{
 											ctrl->paramsDict.SetNamedVarINT32(L"nIconFrame1", ((bTask1OK) ? 1 : 0));
 											ctrl->paramsDict.SetNamedVarString(L"stringID1", STRID_WEEK1_TASK);
@@ -7407,7 +7407,7 @@ void CLevel::Update(float dTime_original)
 							{
 								CControl* ctrl = null;
 								//change label that tells type of leaderboard that is shown
-								if (ctrl = lay->GetControlByName("LABEL_LBTYPE"))
+								if ((ctrl = lay->GetControlByName("LABEL_LBTYPE")) != nullptr)
 								{
 									int nPlayers = m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED] + m_arrStats[K_LVL_STATS_PL2_HAS_PLAYED];
 									if(nPlayers == 1)
@@ -7457,13 +7457,13 @@ void CLevel::Update(float dTime_original)
 				{
 					CControl* ctrl;
 					//vote restart level
-					if (ctrl = layer->GetControlByName("CTRL_NETVOTE_RESTART"))
+					if ((ctrl = layer->GetControlByName("CTRL_NETVOTE_RESTART")) != nullptr)
 					{
 						ctrl->paramsDict.SetNamedVarINT32(L"leftVote", (g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART) ? 1 : 0);
 						ctrl->paramsDict.SetNamedVarINT32(L"rightVote", (g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART) ? 1 : 0);
 					}
 					//vote continue to next level
-					if (ctrl = layer->GetControlByName("CTRL_NETVOTE_CONTINUE"))
+					if ((ctrl = layer->GetControlByName("CTRL_NETVOTE_CONTINUE")) != nullptr)
 					{
 						ctrl->paramsDict.SetNamedVarINT32(L"leftVote", (g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE) ? 1 : 0);
 						ctrl->paramsDict.SetNamedVarINT32(L"rightVote", (g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE) ? 1 : 0);
@@ -7678,7 +7678,7 @@ void CLevel::Update(float dTime_original)
 									ctrl->paramsDict.SetNamedVarINT32(L"setFrame", (int)g_playerSelScr.m_arrPlayers[0].eType);
 								}
 								//XP bar
-								if (ctrl = layer->GetControlByName("CTRL_XPBAR_PL1"))
+								if ((ctrl = layer->GetControlByName("CTRL_XPBAR_PL1")) != nullptr)
 								{
 									int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
 									ctrl->paramsDict.SetNamedVarINT32(L"nOldValue", nXPpl1);
@@ -7707,24 +7707,24 @@ void CLevel::Update(float dTime_original)
 							{
 								CControl* ctrl = null;
 
-								if (ctrl = layer->GetControlByName("CTRL_STARS"))
+								if ((ctrl = layer->GetControlByName("CTRL_STARS")) != nullptr)
 								{
 									ctrl->paramsDict.SetNamedVarINT32(L"nStars", 0);
 								}
 								//reason why
 								if (m_levelStateParam > 0) //if set
 								{
-									if (ctrl = layer->GetControlByName("BLINKER_REASON"))
+									if ((ctrl = layer->GetControlByName("BLINKER_REASON")) != nullptr)
 									{
 										ctrl->paramsDict.SetNamedVarINT32(L"stringID", m_levelStateParam);
 									}
 								}
 								//portrete								
-								if (ctrl = layer->GetControlByName("CTRL_ANIM_PORTRAIT_PL1"))
+								if ((ctrl = layer->GetControlByName("CTRL_ANIM_PORTRAIT_PL1")) != nullptr)
 								{
 									ctrl->paramsDict.SetNamedVarINT32(L"setFrame", (int)g_playerSelScr.m_arrPlayers[0].eType);
 								}
-								if (ctrl = layer->GetControlByName("CTRL_ANIM_PORTRAIT_PL2"))
+								if ((ctrl = layer->GetControlByName("CTRL_ANIM_PORTRAIT_PL2")) != nullptr)
 								{
 									ctrl->paramsDict.SetNamedVarINT32(L"setFrame", (int)g_playerSelScr.m_arrPlayers[1].eType);
 								}
@@ -7732,11 +7732,11 @@ void CLevel::Update(float dTime_original)
 								//network - replace player names with real ones
 								if (UTGetAppClass().IsGameNetworked())
 								{
-									if (ctrl = layer->GetControlByName("CTRL_WND_PL1"))
+									if ((ctrl = layer->GetControlByName("CTRL_WND_PL1")) != nullptr)
 									{
 										ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_NETWORK_HOST_NAME);
 									}
-									if (ctrl = layer->GetControlByName("CTRL_WND_PL2"))
+									if ((ctrl = layer->GetControlByName("CTRL_WND_PL2")) != nullptr)
 									{
 										ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_NETWORK_PEER_NAME);
 									}
@@ -7748,13 +7748,13 @@ void CLevel::Update(float dTime_original)
 										ANALYTICS_EVENT("level_lose_2p_net", ctxt, "durationSec", nTimeSpent);
 									}
 									//XP bar - networked
-									if (ctrl = layer->GetControlByName("CTRL_XPBAR_PL1"))
+									if ((ctrl = layer->GetControlByName("CTRL_XPBAR_PL1")) != nullptr)
 									{
 										ctrl->paramsDict.SetNamedVarINT32(L"nOldValue", g_playerSelScr.m_arrPlayers[0].nPlayerXPPts);
 										int nNew = LIMIT(g_playerSelScr.m_arrPlayers[0].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints);
 										ctrl->paramsDict.SetNamedVarINT32(L"nNewValue", nNew);
 									}
-									if (ctrl = layer->GetControlByName("CTRL_XPBAR_PL2"))
+									if ((ctrl = layer->GetControlByName("CTRL_XPBAR_PL2")) != nullptr)
 									{
 										ctrl->paramsDict.SetNamedVarINT32(L"nOldValue", g_playerSelScr.m_arrPlayers[1].nPlayerXPPts);
 										int nNew = LIMIT(g_playerSelScr.m_arrPlayers[1].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints);
@@ -7771,13 +7771,13 @@ void CLevel::Update(float dTime_original)
 									}
 
 									//XP bar
-									if (ctrl = layer->GetControlByName("CTRL_XPBAR_PL1"))
+									if ((ctrl = layer->GetControlByName("CTRL_XPBAR_PL1")) != nullptr)
 									{
 										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
 										ctrl->paramsDict.SetNamedVarINT32(L"nOldValue", nXPpl1);
 										ctrl->paramsDict.SetNamedVarINT32(L"nNewValue", g_userData[nPlBaseIdx]);
 									}
-									if (ctrl = layer->GetControlByName("CTRL_XPBAR_PL2"))
+									if ((ctrl = layer->GetControlByName("CTRL_XPBAR_PL2")) != nullptr)
 									{
 										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[1].eType;
 										ctrl->paramsDict.SetNamedVarINT32(L"nOldValue", nXPpl2);
@@ -7941,7 +7941,7 @@ void CLevel::Update(float dTime_original)
 
 	///--- update interface ---
 	m_interfaceIGM.Update(dTime);
-	m_interfaceTextBubble.Update(dTime);
+	//m_interfaceTextBubble.Update(dTime);
 
 	//set update done flag
 	m_bOneUpdateDone = true;
@@ -8261,8 +8261,8 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 
 
 	///--- paint lights ---
-	PVERTEXSHADER pVShader = null;
-	PPIXELSHADER pPShader = null;
+	//PVERTEXSHADER pVShader = null;
+	//PPIXELSHADER pPShader = null;
 
 	Mat matWVP = matView * (*matProj);
 	// begin the painter
@@ -8626,11 +8626,6 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	//daca nu am capabilitatea de offscreen ies cu eroare
 	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_RTT) == 0)
 		return E_FAIL;
-	//ps/vs generice
-	LPDIRECT3DVERTEXSHADER9 pVShader = null;
-	LPDIRECT3DPIXELSHADER9 pPShader = null;
-
-
 
 	///--- PAINT LEVEL ---
 	//real screen space
@@ -8944,6 +8939,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		//paint player numeric icon on multiplayer when peer outside the screen
 		if (UTGetAppClass().IsGameNetworked())
 		{
+
 			if ((pPlayerActor[kk]->nPlayerOrdinal == g_netlock.Net_GetOtherPlayerIndex()) && (!camAABB.Intersects(pPlayerActor[kk]->bbox)))
 			{
 				Vec2 vpos = Vec2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
@@ -8966,7 +8962,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	m_pSprite->Flush();
 
 	//paint text bubble
-	m_interfaceTextBubble.Paint(m_pDevice, m_pSprite);
+	//m_interfaceTextBubble.Paint(m_pDevice, m_pSprite);
 
 	//set screen space
 	CCameraTransform::SetActiveCamera(m_pDevice, &UTGetAppClass().g_camScreen);
@@ -9032,7 +9028,7 @@ void CLevel::Release()
 	}
 
 	m_interfaceIGM.Release();
-	m_interfaceTextBubble.Release();
+	//m_interfaceTextBubble.Release();
 
 	g_particlesMgr.RemoveAll();
 
@@ -9215,8 +9211,8 @@ void CLevel::ResetLevelStatistics()
 		m_arrStats[kk] = 0;
 	}
 
-	m_interfaceIGM.SetStrategicPoints(0.0f, 0.0f);
-	m_interfaceIGM.SetLivesLeft(m_arrStats[K_LVL_STATS_PL1_LIVES], m_arrStats[K_LVL_STATS_PL2_LIVES]);
+	//m_interfaceIGM.SetStrategicPoints(0.0f, 0.0f);
+	//m_interfaceIGM.SetLivesLeft(m_arrStats[K_LVL_STATS_PL1_LIVES], m_arrStats[K_LVL_STATS_PL2_LIVES]);
 }
 
 void CLevel::IncreaseLevelStatistics(int K_LVL_STATS_n, int nValueToAdd /*= 1*/)
@@ -9310,7 +9306,7 @@ void CLevel::GiveStrategicPoints(float fPoints, Vec2 * vPos)
 		CLAMP(m_arrStats[nStatIdx], 0, fMaxPoints * 1000);
 	}
 
-	m_interfaceIGM.SetStrategicPoints(m_arrStats[K_LVL_STATS_PL1_STRATEGIC_POINTS] / 1000.0f, m_arrStats[K_LVL_STATS_PL2_STRATEGIC_POINTS] / 1000.0f);
+	//m_interfaceIGM.SetStrategicPoints(m_arrStats[K_LVL_STATS_PL1_STRATEGIC_POINTS] / 1000.0f, m_arrStats[K_LVL_STATS_PL2_STRATEGIC_POINTS] / 1000.0f);
 
 	//add text particle (visuals)
 	if ((vPos != null) && (fPointsGiven > 0.0f))
@@ -9728,7 +9724,7 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 				if ((tl->flags & K_TILEFLAG_HASWALL_D) && (vEye.y > chkbb.vMax.y))
 				{
 					//optimize same wall: check last wall and if it's the same just make the occluder longer
-					if ((nCur > 0) && (pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vEnd.x == chkbb.vMin.x))
+					if ((nCur > 0) && ((int)pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vEnd.x == chkbb.vMin.x))
 						pRetArr[nCur - 1].MoveEnd(chkbb.vMax, vPos);
 					else
 						/*ID is wall Y in tileset plus a value to not collide with the collbox ids */
@@ -9737,7 +9733,7 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 				else if ((tl->flags & K_TILEFLAG_HASWALL_U) && (vEye.y < chkbb.vMin.y))
 				{
 					//optimize same wall: check last wall and if it's the same just make the occluder longer
-					if ((nCur > 0) && (pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vStart.x == chkbb.vMin.x))
+					if ((nCur > 0) && ((int)pRetArr[nCur - 1].dwWallID == yy) && (pRetArr[nCur - 1].vStart.x == chkbb.vMin.x))
 						pRetArr[nCur - 1].MoveStart(Vec2(chkbb.vMax.x, chkbb.vMin.y), vPos);
 					else
 						pRetArr[nCur++].Set(Vec2(chkbb.vMax.x, chkbb.vMin.y), chkbb.vMin, vNYn, vPos, yy, 0.0f);
@@ -9772,7 +9768,6 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 #pragma region FRAMEWORK_IMPL
 OPRESULT CLevel::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, void* pUserContext)
 {
-	HRESULT hr = S_OK;
 	m_pDevice = pDevice;
 
 	V_OP_RET(m_sprLights.OnCreateDevice(pDevice));
@@ -9793,7 +9788,6 @@ OPRESULT CLevel::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, vo
 
 OPRESULT CLevel::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, void* pUserContext)
 {
-	HRESULT hr = S_OK;
 	m_pDevice = pDevice;
 
 	V_OP_RET(m_sprLights.OnResetDevice(pDevice));

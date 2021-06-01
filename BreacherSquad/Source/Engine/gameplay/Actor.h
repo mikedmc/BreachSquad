@@ -262,8 +262,9 @@ public:
 	void SetIcon(EActorIconTypes iconType, float fDuration = 0.0f); //seteaza icon
 
 	IActiveInterface*			pClosestTouchable;			// currently focused interactible object
-	eGenericState				eInteractState;				// state of interaction
-	CFixedArray<CScriptAction, 16>	arrInteractOptions;			// empty when not interacting. gathers all interaction options from object, character feats, inventory objects, etc
+	eGenericState				eInteractState;				// state of interaction (NOTSET=not interacting, READY-selecting action, EXECUTING-started action, FINISHED-interact finished)
+	int							nInteractOptionsSelIdx;		// index in arrInteractOptions
+	CFixedArray<CScriptAction, 16>	arrInteractOptions;		// empty when not interacting. gathers all interaction options from object, character feats, inventory objects, etc
 
 	// Sets a Spine skin and returns true if successfull
 	bool						Spine_SetSkin(const char * strSkinName);

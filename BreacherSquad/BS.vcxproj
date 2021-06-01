@@ -256,7 +256,6 @@
     <ClInclude Include="Source\Engine\Constants\controls_SPR.h" />
     <ClInclude Include="Source\Engine\ControllersManager.h" />
     <ClInclude Include="Source\Engine\ControlsManager.h" />
-    <ClInclude Include="Source\Engine\CustomInterfaces.h" />
     <ClInclude Include="Source\Common\dxstdafx.h" />
     <ClInclude Include="Source\Common\DXUT.h" />
     <ClInclude Include="Source\Common\DXUTenum.h" />
@@ -301,6 +300,7 @@
     <ClInclude Include="Source\Engine\imgui\backends\imgui_impl_dx9.h" />
     <ClInclude Include="Source\Engine\imgui\backends\imgui_impl_win32.h" />
     <ClInclude Include="Source\Engine\imgui\imguiWrapper.h" />
+    <ClInclude Include="Source\Engine\IngameGUI.h" />
     <ClInclude Include="Source\Engine\Level.h" />
     <ClInclude Include="Source\Engine\LibraryManager.h" />
     <ClInclude Include="Source\Engine\List.h" />
@@ -650,9 +650,6 @@
     <ClCompile Include="Source\Engine\ControlsManager.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
-    <ClCompile Include="Source\Engine\CustomInterfaces.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
-    </ClCompile>
     <ClCompile Include="Source\Common\dxstdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
@@ -705,6 +702,7 @@
     <ClCompile Include="Source\Engine\imgui\backends\imgui_impl_dx9.cpp" />
     <ClCompile Include="Source\Engine\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="Source\Engine\imgui\imguiWrapper.cpp" />
+    <ClCompile Include="Source\Engine\IngameGUI.cpp" />
     <ClCompile Include="Source\Engine\Level.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>

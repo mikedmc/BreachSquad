@@ -114,7 +114,8 @@ CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID) :
 	pWeaponMain(nullptr), pClosestTouchable(nullptr), bAnimFlipX(false), eAnimAngle(EANG_S),
 	nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
-	pSkelTemplate(nullptr), pSkeleton(nullptr)
+	pSkelTemplate(nullptr), pSkeleton(nullptr),
+	eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0)
 {
 	ID = nID;
 	bAnimated = true;

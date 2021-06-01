@@ -78,7 +78,7 @@ void CCustomInterfaceIGM::UpdateInterfaceForPlayer(int nPlayerOrdinal, D3DXVECTO
 	*/
 }
 
-void CCustomInterfaceIGM::PaintInterfaceForPlayer(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, int nPlayerOrdinal, RECTXYWH_F scrRect, bool bFlipped, int arrStrategic[], int arrStrategicNames[])
+void CCustomInterfaceIGM::PaintInterfaceForPlayer(PDEVICE pDevice, int nPlayerOrdinal, RECTXYWH_F scrRect, bool bFlipped, int arrStrategic[], int arrStrategicNames[])
 {
 	if ((nPlayerOrdinal < 0) || (nPlayerOrdinal >= K_MAX_PLAYERS_CNT))
 		return;
@@ -922,7 +922,7 @@ bool CCustomInterfaceIGM::Update(float dTime)
 	return false;
 }
 
-void CCustomInterfaceIGM::Paint(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite)
+void CCustomInterfaceIGM::Paint(PDEVICE pDevice)
 {
 	//get current camera screen rect
 	CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam240hScreen);

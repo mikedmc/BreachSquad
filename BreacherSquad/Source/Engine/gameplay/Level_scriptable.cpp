@@ -162,6 +162,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				if (instr->m_arrArgs[ii]->m_name.getHash() == GET_FAST_HASH("nBombDefused"))
 				{
 					App_IncreaseGamestat(K_MEMID_GAMESTATS_BOMBS_DISARMED);
+					/*
 					//ACHIEVEMENTS: In the nick of time - bomb defusal
 					if (m_interfaceIGM.GetBombTimer() <= 3.0f)
 					{
@@ -170,6 +171,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 
 					//clear bomb timer
 					m_interfaceIGM.SetBombTimer(-1.0f);
+					*/
 					//erase level bombs flag
 					m_arrStats[K_LVL_STATS_LEVEL_HAS_BOMBS] = 0;
 					m_arrStats[K_LVL_STATS_BOMBS_DISARMED]++;
@@ -636,7 +638,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_IACTIVE_REMOVE_NOTIFICATION:
 		{
-			m_interfaceTextBubble.Hide();
+			//m_interfaceTextBubble.Hide();
 			return true;
 		}
 		break;

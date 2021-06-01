@@ -54,8 +54,6 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 	m_waterAnimIdx = -1;
 
-	m_interfaceIGM.Reset();
-	m_interfaceIGM.SetBombTimer(-1.0f);
 	//load interface sprites
 	FileManager::GetMediaPath(L"media/interfaces/igm_interface.bsx", Path);
 	V_OP_RET(m_sprInterface.LoadSprites(Path));
@@ -184,11 +182,6 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		SetAI(actor, actor->AIstate, &actor->varAIparams, actor->targetID_ini);
 	}
 
-
-
-	//set interfaces ptrs
-	m_interfaceIGM.Init(&m_sprInterface, pPlayerActor[0], pPlayerActor[1]);
-	m_interfaceTextBubble.Init(&UTGetGUI().m_sprCol);
 	///--- camera ---
 	//target
 	m_camTargetActive = null; //cand nu am target se uita dupa players
@@ -250,9 +243,13 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	}
 	
 	BuildVisibilityLists();
-
 	//save type of loaded mission
 	m_nLoadedLevelType = 0;
+
+	// initialize IGM interface after everything has loaded
+	// the interface will use the RT resolution, scaling to real screen
+	m_interfaceIGM.Init(this, &UTGetAppClass().g_camRTScreen);
+
 	///--- LAST THINGS ---
 	//called after characters spawning
 	SetLevelState(K_LVL_STATE_PLAYING);

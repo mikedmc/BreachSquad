@@ -493,7 +493,6 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "ParticlesManager.h"
 #include "SoundManager.h"
 
-#include "CustomInterfaces.h"
 #include "ControlsManager.h" 
 //main app class
 #include "UTAppClass.h"
