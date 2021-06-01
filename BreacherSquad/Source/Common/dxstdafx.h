@@ -235,13 +235,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 //#define _CRT_NONSTDC_NO_DEPRECATE
 
-#include "../versioning/versioning.h"
-#include "utils/dbgutil.h"
-#include "OpResult.h"
-
-#include "utils/UTMath.h"
-#include "utils/PlatformTypes.h"
-
 #define K_GAME_USERDATA_COMPANY_SUFFIX		L"/PixelShard/"
 #define K_GAME_USERDATA_FOLDER_SUFFIX		L"BreacherSquad/"
 #define K_GAME_USERDATA_MODS_SUFFIX			L"mods/"
@@ -356,7 +349,6 @@ enum ETexChannel {
 #define K_WALL_HEIGHT_WORLD			64.0f
 #define K_WALL_HEIGHT_SCREEN		(K_WALL_HEIGHT_WORLD * ZHSCALE)
 
-///--- CLEAR COLOR ---
 #define K_GAME_CLEAR_COLOR	0x00000044
 // splashscreen show time
 #define K_GAME_SPLASH_SHOW_TIMER 2.5f
@@ -381,6 +373,14 @@ typedef unsigned long long uint64_t;
 #ifndef int64_t
 typedef long long int64_t;
 #endif
+
+//--- include system/engine classes:
+#include "../versioning/versioning.h"
+#include "utils/dbgutil.h"
+#include "OpResult.h"
+#include "utils/UTMath.h"
+#include "utils/PlatformTypes.h"
+
 
 #ifdef ENABLE_GALAXY
 #pragma comment(lib, "Galaxy.lib")

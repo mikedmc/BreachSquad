@@ -770,6 +770,7 @@
     <ClCompile Include="Source\Engine\utils\enginecommon.cpp" />
     <ClCompile Include="Source\Engine\utils\HashUtil.cpp" />
     <ClCompile Include="Source\Engine\utils\ParallaxBg.cpp" />
+    <ClCompile Include="Source\Engine\utils\PlatformTypes.cpp" />
     <ClCompile Include="Source\Engine\utils\StringHash.cpp" />
     <ClCompile Include="Source\Engine\utils\StringHashA.cpp" />
     <ClCompile Include="Source\Engine\utils\UTMath.cpp" />

@@ -1121,7 +1121,6 @@ CExplosionTemplate* CLevel::GetTemplateExplosion(UINT32 templateNameHash)
 CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 {
 	// LOAD ACTOR TEMPLATE LoadActorTemplate
-	HRESULT hr = S_OK;
 	char strbuff[MAX_PATH] = { 0 };
 
 	//does it exist?
@@ -7950,7 +7949,6 @@ void CLevel::Update(float dTime_original)
 
 OPRESULT CLevel::PaintDeferredBuffers()
 {
-	HRESULT hr = S_OK;
 	CRTManager::CEngineRenderTarget* pRT = nullptr;
 	///----------------------------------------------------
 	/// 1. NORMAL MAP AND HEIGHT MAP
@@ -7958,11 +7956,13 @@ OPRESULT CLevel::PaintDeferredBuffers()
 	pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
 	if (pRT != null)
 	{
-		hr = UTGetRTManager().BeginSceneRT(pRT);
-		if (SUCCEEDED(hr))
+		if(OP_SUCCESS(UTGetRTManager().BeginSceneRT(pRT)))
 		{
 			// Clear the render target and the zbuffer 
-			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0));
+			if (FAILED(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0)))
+			{
+				return K_OP_FAILED;
+			}
 			//use sprite
 			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
@@ -7978,8 +7978,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			// end sprite
 			//m_pSprite->End();
 
-			V(UTGetRTManager().EndSceneRT(pRT));
-
+			V_OP_RET(UTGetRTManager().EndSceneRT(pRT));
 		}
 	}
 
@@ -7989,11 +7988,13 @@ OPRESULT CLevel::PaintDeferredBuffers()
 	pRT = UTGetRTManager().GetRTbyUID(K_RTID_COLORDEPTHSTENCIL);
 	if (pRT != null)
 	{
-		hr = UTGetRTManager().BeginSceneRT(pRT);
-		if (SUCCEEDED(hr))
+		if(OP_SUCCESS(UTGetRTManager().BeginSceneRT(pRT)))
 		{
 			// Clear the render target and the zbuffer 
-			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET , 0xff000000, 1.0f, 0));
+			if (FAILED(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, 0xff000000, 1.0f, 0)))
+			{
+				return K_OP_FAILED;
+			}
 			//use sprite
 			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
@@ -8011,7 +8012,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			// end sprite
 			//m_pSprite->End();
 
-			V(UTGetRTManager().EndSceneRT(pRT));
+			V_OP_RET(UTGetRTManager().EndSceneRT(pRT));
 
 		}
 	}
@@ -8022,11 +8023,13 @@ OPRESULT CLevel::PaintDeferredBuffers()
 	pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
 	if (pRT != null)
 	{
-		hr = UTGetRTManager().BeginSceneRT(pRT);
-		if (SUCCEEDED(hr))
+		if(OP_SUCCESS(UTGetRTManager().BeginSceneRT(pRT)))
 		{
 			// Clear the render target and the zbuffer 
-			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0));
+			if (FAILED(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0)))
+			{
+				return K_OP_FAILED;
+			}
 			//use sprite
 			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
@@ -8043,8 +8046,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			// end sprite
 			//m_pSprite->End();
 
-			V(UTGetRTManager().EndSceneRT(pRT));
-
+			V_OP_RET(UTGetRTManager().EndSceneRT(pRT));
 		}
 	}
 
@@ -8054,11 +8056,13 @@ OPRESULT CLevel::PaintDeferredBuffers()
 	pRT = UTGetRTManager().GetRTbyUID(K_RTID_FINAL);
 	if (pRT != null)
 	{
-		hr = UTGetRTManager().BeginSceneRT(pRT);
-		if (SUCCEEDED(hr))
+		if(OP_SUCCESS(UTGetRTManager().BeginSceneRT(pRT)))
 		{
 			// Clear the render target and the zbuffer 
-			V(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, 0xffff0000, 1.0f, 0));
+			if (FAILED(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, 0xffff0000, 1.0f, 0)))
+			{
+				return K_OP_FAILED;
+			}
 			//use sprite
 			m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
 
@@ -8076,7 +8080,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			// end sprite
 			m_pSprite->End();
 
-			V(UTGetRTManager().EndSceneRT(pRT));
+			V_OP_RET(UTGetRTManager().EndSceneRT(pRT));
 
 		}
 	}

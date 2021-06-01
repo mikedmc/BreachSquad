@@ -15,6 +15,13 @@
 #define				TEXTURE_INFO		D3DXIMAGE_INFO
 #define				TEXTURE_LOCKRECT	D3DLOCKED_RECT
 
-
-
 #define				UT3DCreateTexture	D3DXCreateTexture
+
+// Announces beginning of rendering for specified device
+OPRESULT			UT3DBeginScene(PDEVICE pDevice);
+
+// Announces ending of rendering for specified device
+OPRESULT			UT3DEndScene(PDEVICE pDevice);
+
+// Use it to clear the scene. Uses the DX9 format.
+OPRESULT			UT3DClear(PDEVICE pDevice, DWORD Count, CONST D3DRECT* pRects, DWORD Flags, D3DCOLOR Color, float Z, DWORD Stencil);

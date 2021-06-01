@@ -2174,12 +2174,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		return;
 	}
 
-	HRESULT hr;
-	Mat mView;
-	Mat mProj;
-	Mat mWorldView;
-	Mat mWorldViewProjection;
-
 
 	///PART1. Paint the offscreen surfaces before the main render begin/end
 	switch (g_gameState)
@@ -2207,9 +2201,9 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 
 	///PART2. --- Render onscreen - FINAL PASS ---
-	if (SUCCEEDED(pDevice->BeginScene()))
+	if (OP_SUCCESS(UT3DBeginScene(pDevice)))
 	{
-		V(pDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, K_GAME_CLEAR_COLOR, 1.0f, 0));
+		UT3DClear(pDevice, 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, K_GAME_CLEAR_COLOR, 1.0f, 0);
 
 
 		g_pGameSprite->Begin(D3DXSPRITE_ALPHABLEND | /*D3DXSPRITE_OBJECTSPACE |*/ D3DXSPRITE_DONOTSAVESTATE);
@@ -2532,7 +2526,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		pDevice->SetVertexShader(null);
 		pDevice->SetPixelShader(null);
 
-		V(pDevice->EndScene());
+		UT3DEndScene(pDevice);
 	}
 
 	///--- IMGUI UPDATE ---
