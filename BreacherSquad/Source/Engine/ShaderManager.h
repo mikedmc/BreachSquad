@@ -13,28 +13,28 @@
 //-=-=-= VERTEX TYPES =-=-=-
 typedef struct _tagVERTEX_PNCT4T4
 {
-	D3DXVECTOR3 pos;
-	D3DXVECTOR3 n;
+	Vec3 pos;
+	Vec3 n;
 	DWORD color;
-	D3DXVECTOR4 tex1;
-	D3DXVECTOR4 tex2;
+	Vec4 tex1;
+	Vec4 tex2;
 
 	static const DWORD FVF;
 } _VERTEX_PNCT4T4;
 
 typedef struct _tagVERTEX_PT2T2
 {
-	D3DXVECTOR3 pos;
-	D3DXVECTOR2 tex1;
-	D3DXVECTOR2 tex2;
+	Vec3 pos;
+	Vec2 tex1;
+	Vec2 tex2;
 
 	static const DWORD FVF;
 } _VERTEX_PT2T2;
 
 typedef struct _tagVERTEX_PNCT
 {
-	D3DXVECTOR3 pos;
-	D3DXVECTOR3 n;
+	Vec3 pos;
+	Vec3 n;
 	DWORD color;
 	float tu, tv;
 
@@ -43,8 +43,8 @@ typedef struct _tagVERTEX_PNCT
 
 typedef struct _tagVERTEX_PNT
 {
-	D3DXVECTOR3 pos;
-	D3DXVECTOR3 n;
+	Vec3 pos;
+	Vec3 n;
 	float tu, tv;
 
 	static const DWORD FVF;
@@ -52,7 +52,7 @@ typedef struct _tagVERTEX_PNT
 
 typedef struct _tagVERTEX_PTC
 {
-	D3DXVECTOR3 pos;
+	Vec3 pos;
 	DWORD color;
 	float tu, tv;
 
@@ -61,7 +61,7 @@ typedef struct _tagVERTEX_PTC
 
 typedef struct _tagVERTEX_PC
 {
-	D3DXVECTOR3 pos;
+	Vec3 pos;
 	DWORD color;
 
 	static const DWORD FVF;
@@ -83,7 +83,7 @@ struct VSnode
 {
 	WCHAR				szFilename[MAX_PATH];
 	CStringHash			shName;	//friendly name
-	LPDIRECT3DVERTEXSHADER9		pShader;
+	PVERTEXSHADER		pShader;
 
 	VSnode() : pShader(null)
 	{
@@ -96,7 +96,7 @@ struct PSnode
 {
 	WCHAR				szFilename[MAX_PATH];
 	CStringHash			shName; //friendly name
-	LPDIRECT3DPIXELSHADER9		pShader;
+	PPIXELSHADER		pShader;
 
 	PSnode() : pShader(null)
 	{
@@ -115,60 +115,60 @@ class CShaderManager
 {
 public:
 	//all vertex declarations are kept here
-	LPDIRECT3DVERTEXDECLARATION9 _VERTEX_PNCT4T4_decl;
-	LPDIRECT3DVERTEXDECLARATION9 _VERTEX_PNCT4_decl;
-	LPDIRECT3DVERTEXDECLARATION9 _VERTEX_PCT4T4_decl;
+	PVERTEXDECL _VERTEX_PNCT4T4_decl;
+	PVERTEXDECL _VERTEX_PNCT4_decl;
+	PVERTEXDECL _VERTEX_PCT4T4_decl;
 
 public:
-	LPDIRECT3DDEVICE9			pDevice;
-	CArray<VSnode*>				VertexShaders;
-	CArray<PSnode*>				PixelShaders;
+	PDEVICE					pDevice;
+	CArray<VSnode*>			VertexShaders;
+	CArray<PSnode*>			PixelShaders;
 
 	CShaderManager(void);
 	~CShaderManager(void);
 				 
-	HRESULT LoadShaders(WCHAR* sXMLpath);
+	OPRESULT				AddShadersFromXML(WCHAR* sXMLpath);
 
-	HRESULT ClearAllVShaders(void);
-	HRESULT	AddVShader(WCHAR * szPath, WCHAR * szFriendlyName, int * pnShaderIdx = null);
+	OPRESULT				ClearAllVShaders(void);
+	OPRESULT				AddVShader(WCHAR * szPath, WCHAR * szFriendlyName, int* pnShaderIdx = nullptr);
 
-	HRESULT ClearAllPShaders(void);
-	HRESULT	AddPShader(WCHAR * szPath, WCHAR * szFriendlyName, int * pnShaderIdx = null);
+	OPRESULT				ClearAllPShaders(void);
+	OPRESULT				AddPShader(WCHAR * szPath, WCHAR * szFriendlyName, int* pnShaderIdx = nullptr);
 
-	LPDIRECT3DVERTEXSHADER9 GetVShader(int nShaderIdx);
-	LPDIRECT3DVERTEXSHADER9 GetVShaderByName(WCHAR * szName);
-	LPDIRECT3DVERTEXSHADER9 GetVShaderByNameHash(UINT32 nNameHash);
+	PVERTEXSHADER			GetVShader(int nShaderIdx);
+	PVERTEXSHADER			GetVShaderByName(WCHAR * szName);
+	PVERTEXSHADER			GetVShaderByNameHash(UINT32 nNameHash);
 
-	LPDIRECT3DPIXELSHADER9 GetPShader(int nShaderIdx);
-	LPDIRECT3DPIXELSHADER9 GetPShaderByName(WCHAR * szName);
-	LPDIRECT3DPIXELSHADER9 GetPShaderByNameHash(UINT32 nNameHash);
+	PPIXELSHADER			GetPShader(int nShaderIdx);
+	PPIXELSHADER			GetPShaderByName(WCHAR * szName);
+	PPIXELSHADER			GetPShaderByNameHash(UINT32 nNameHash);
 
-	int		GetVShadersCount(void)	{ return VertexShaders.GetSize();	}
-	int		GetPShadersCount(void)	{ return PixelShaders.GetSize();	}
+	int						GetVShadersCount(void)	{ return VertexShaders.GetSize();	}
+	int						GetPShadersCount(void)	{ return PixelShaders.GetSize();	}
 
 	// Reloads all shaders instantly (debug only)
-	void	ReloadAllShaders();
+	void					ReloadAllShaders();
 
 	//vertex declarations are initialised here
-	HRESULT CreateVertexDeclarations();
-	HRESULT ReleaseVertexDeclarations();
+	OPRESULT				CreateVertexDeclarations();
+	OPRESULT				ReleaseVertexDeclarations();
 
 	// sets a VS by name or nullptr if name is null
-	HRESULT SetVS(PVERTEXSHADER pShader);
-	HRESULT SetVSByName(WCHAR* shaderName);
-	HRESULT SetVSConstantF(UINT StartRegister, const float* pConstantData, UINT Vector4fCount);
-	HRESULT SetVertexDeclaration(eVertexDeclarationType vtype);
+	OPRESULT				SetVS(PVERTEXSHADER pShader);
+	OPRESULT				SetVSByName(WCHAR* shaderName);
+	OPRESULT				SetVSConstantF(UINT StartRegister, const float* pConstantData, UINT Vector4fCount);
+	OPRESULT				SetVertexDeclaration(eVertexDeclarationType vtype);
 
 	// sets a PS by name or nullptr if name is null
-	HRESULT SetPS(PPIXELSHADER pShader);
-	HRESULT SetPSByName(WCHAR* shaderName);
-	HRESULT SetPSConstantF(UINT StartRegister, const float* pConstantData, UINT Vector4fCount);
+	OPRESULT				SetPS(PPIXELSHADER pShader);
+	OPRESULT				SetPSByName(WCHAR* shaderName);
+	OPRESULT				SetPSConstantF(UINT StartRegister, const float* pConstantData, UINT Vector4fCount);
 
 
-	HRESULT OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext = NULL);
-	HRESULT OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext = NULL);
-	HRESULT OnLostDevice( void* pUserContext = NULL);
-	HRESULT OnDestroyDevice( void* pUserContext = NULL);
+	OPRESULT				OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc, void* pUserContext = NULL);
+	OPRESULT				OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc, void* pUserContext = NULL);
+	OPRESULT				OnLostDevice( void* pUserContext = NULL);
+	OPRESULT				OnDestroyDevice( void* pUserContext = NULL);
 };
 
 

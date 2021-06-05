@@ -6,7 +6,6 @@
 
 #define OP_FAILED(er) ((((int)er.code)) < 0)
 #define OP_SUCCESS(er) ((((int)er.code)) >= 0)
-#define OPHRFAILED(hr) (hr < 0)
 
 #ifndef V_OP_RETHR
 	#define V_OP_RETHR(x)           { if (OP_FAILED(x)) { return E_FAIL; } }
@@ -15,7 +14,10 @@
 	#define V_OP_RET(x)           { OPRESULT opr = (x); if (OP_FAILED(opr)) { return opr; } }
 #endif
 #ifndef V_OP_HRTOOP
-	#define V_OP_HRTOOP(hr)           { if (hr < 0) { return K_OP_FAILED; } }
+	#define V_OP_HRTOOP(hr)           { if ((hr) < 0) { return K_OP_FAILED; } }
+#endif
+#ifndef V_OP_HRFAILED
+	#define V_OP_HRFAILED(OPseverity, hr)           { if ((hr) < 0) { return OPRESULT(K_OP_FAILED, L"HRESULT OP failed!", OPseverity); } }
 #endif
 
 
@@ -56,6 +58,13 @@ public:
 	}
 	*/
 
+	OPRESULT(HRESULT hr)
+	{
+		code = (hr < 0) ? K_OP_FAILED : K_OP_OK;
+		severity = K_SEVERITY_NONE;
+		wcscpy_s(message, TEXT("HRESULT:%ld", hr));
+	}
+
 	OPRESULT(eOpResult eCode, eOpSeverity eSeverity = K_SEVERITY_NONE) 
 	{
 		code = eCode;
@@ -74,6 +83,7 @@ public:
 		LogResult();
 	}
 
+	/*
 	OPRESULT(HRESULT hr, const WCHAR * strMessage, eOpSeverity eSeverity = K_SEVERITY_NONE)
 	{
 		code = (hr >= 0) ? K_OP_OK : K_OP_FAILED;
@@ -82,6 +92,7 @@ public:
 
 		LogResult();
 	}
+	*/
 
 	OPRESULT(eOpResult eCode, eOpSeverity eSeverity, WCHAR* szFormat, ...)
 	{

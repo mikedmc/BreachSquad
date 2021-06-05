@@ -531,40 +531,6 @@ struct CTest {
 
 HRESULT InitApp(void)
 {
-	/*
-	std::vector<std::shared_ptr<CTest>> vecActors;
-	auto nact = std::make_shared<CTest>();
-	nact->value = 666;
-	ErrorBox(K_ERR_WARNING, L"Value:%d", nact->value);
-	vecActors.push_back(std::move(nact));
-
-	// set weak_ptr to point
-	std::weak_ptr<CTest> pointing;
-	pointing = vecActors[0];
-	{
-		auto test = pointing.lock();
-		if (test) {
-			ErrorBox(K_ERR_WARNING, L"pointing Value:%d", test->value);
-		}
-	}
-
-
-	ErrorBox(K_ERR_WARNING, L"deallocationg");
-	vecActors.clear();
-
-	{
-		auto test = pointing.lock();
-		if (test) {
-			ErrorBox(K_ERR_WARNING, L"pointing Value:%d", test->value);
-		}
-		else 
-		{
-			// goes here!!
-			ErrorBox(K_ERR_WARNING, L"pointing Value was reset!");
-		}
-	}
-	*/
-
 	HRESULT hr = S_OK;
 
 	g_bDuringTransition = false; //nu este in timpul unei tranzitii
@@ -611,11 +577,7 @@ HRESULT InitApp(void)
 	//default to a good game mode
 	g_gameMode = GAME_MODE_CLASSIC;
 
-#if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
-	ChangeGameState(GAME_STATE_LOADING);
-#else
-	ChangeGameState(GAME_STATE_DEVELOPER);
-#endif
+	ChangeGameState(GAME_STATE_PRELOAD);
 
 	return S_OK;
 }
@@ -825,7 +787,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(UTGetAppClass().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(UTGetRTManager().OnCreateDevice(pDevice, pBBDesc));
 	UTimgui().OnCreateDevice(pDevice, pBBDesc);
-	V_RETURN(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(UTPainter().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetFontsManager().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_level.OnCreateDevice(pDevice, pBBDesc));
@@ -903,7 +865,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 		//UTGetRenderTargetsManager().AddRT(K_RTID_SPECULARMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
 
 	UTimgui().OnResetDevice(pDevice, pBBDesc);
-	V_RETURN(UTGetShaderManager().OnResetDevice(pDevice, pBBDesc));
+	V_OP_RETHR(UTGetShaderManager().OnResetDevice(pDevice, pBBDesc));
 	V_OP_RETHR(UTPainter().OnResetDevice(pDevice, pBBDesc));
 
 	UTGetTTFManager().OnResetDevice(pDevice, pBBDesc);
@@ -1061,6 +1023,10 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 
 	switch (g_gameState)
 	{
+		case GAME_STATE_PRELOAD:
+		{
+		}
+		break;
 		case GAME_STATE_DEVELOPER:
 		{
 			UTGetAppClass().App_UpdateState_Developer(pDevice, fTime, fElapsedTime);
@@ -2211,13 +2177,20 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 		pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 
-		PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
-		if (pSprVS)
-			UTPainter().Begin(pSprVS, g_matIdentity);
-
+		// only start and end UTPainter after we preloaded the minimum painter shaders
+		if (g_gameState != GAME_STATE_PRELOAD)
+		{
+			PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
+			if (pSprVS)
+				UTPainter().Begin(pSprVS, g_matIdentity);
+		}
 
 		switch (g_gameState)
 		{
+			case GAME_STATE_PRELOAD:
+			{
+			}
+			break;
 			case GAME_STATE_DEVELOPER:
 			{
 				UTGetAppClass().App_PaintState_Developer(pDevice, g_pGameSprite, fElapsedTime);
@@ -2515,7 +2488,10 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		g_pGameSprite->End();
 
 		// end main painter
-		UTPainter().End();
+		if (g_gameState != GAME_STATE_PRELOAD)
+		{
+			UTPainter().End();
+		}
 
 		//--- CONTROLS EDITOR PAINT ---
 #ifdef K_CONTROLS_EDITOR
@@ -3007,6 +2983,18 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 	///--- from what state is it coming? ---
 	switch (oldGameState)
 	{
+		case GAME_STATE_PRELOAD:
+		{
+			///!!! on leaving the state:
+			// load the minimum necessary to paint something
+			WCHAR shpath[MAX_PATH];
+			StringCchPrintf(shpath, MAX_PATH, L"%s/shaders/vs_sprites2d.vso", UTGetAppClass().g_wszAppResDir);
+			if (OP_FAILED(UTGetShaderManager().AddVShader(shpath, L"VS_SPRITES2D")))
+			{
+				ErrorBox(K_ERR_CRITICAL, L"Could not load SpritesVS!\n%s", shpath);
+			}
+		}
+		break;
 		case GAME_STATE_DEVELOPER:
 		{
 			UTGetAppClass().App_ExitState_Developer();
@@ -3159,6 +3147,21 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 
 	switch (newState)
 	{
+		case GAME_STATE_PRELOAD:
+		{
+			//change state to loading
+			CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
+
+#if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
+			nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LOADING);
+#else
+			nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_DEVELOPER);
+#endif
+
+			nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+			UTGetEventManager().QueueEvent(nevent);
+		}
+		break;
 		case GAME_STATE_DEVELOPER:
 		{
 			UTGetAppClass().App_EnterState_Developer();

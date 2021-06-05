@@ -178,7 +178,7 @@ const int CBufferedPainter::GetTrisCount(int meshIdx) const
 }
 
 //--- framework ---
-OPRESULT CBufferedPainter::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
+OPRESULT CBufferedPainter::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, void* pUserContext)
 {
 	assert(m_nMaxTrisCnt > 0);
 
@@ -208,7 +208,7 @@ OPRESULT CBufferedPainter::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* p
 	return K_OP_OK;
 }
 
-OPRESULT CBufferedPainter::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
+OPRESULT CBufferedPainter::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc, void* pUserContext)
 {
 	assert(m_nMaxTrisCnt > 0);
 

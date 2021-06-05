@@ -179,7 +179,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			// no modding support on shaders!
 			WCHAR mszPath[MAX_PATH];
 			StringCchPrintf(mszPath, MAX_PATH, L"%s/shaders/shaders.xml", UTGetAppClass().g_wszAppResDir);
-			if (FAILED(UTGetShaderManager().LoadShaders(mszPath)))
+			if (FAILED(UTGetShaderManager().AddShadersFromXML(mszPath)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load shaders XML: %s", mszPath);
 				return;

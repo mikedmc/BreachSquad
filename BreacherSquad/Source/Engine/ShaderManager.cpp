@@ -77,7 +77,7 @@ D3DVERTEXELEMENT9 _VERTEX_PNCT4_ve[] =
 */
 
 //-=-=-= functii utile creare shadere =-=-=-
-HRESULT CreateVS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DVERTEXSHADER9 *pVS)
+OPRESULT CreateVS(PDEVICE pd3dDevice, WCHAR *szPath, PVERTEXSHADER *pVS)
 {
 	HRESULT hr = S_OK;
 	HANDLE hFile, hMap;
@@ -94,35 +94,32 @@ HRESULT CreateVS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DVERTEXSH
 			CloseHandle(hFile);
 			WCHAR wszErr[2048];
 			GetErrorMessageW(GetLastError(), wszErr, ARRAY_SIZE(wszErr));
-			ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreateVS] Unable to get vs filesize.\n\t\t%s\n", wszErr);
-			return E_FAIL;		
+			return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"[C3DUtils::CreateVS] Unable to get vs filesize.\n\t\t%s\n", wszErr);
 		}
 	}	
 	else
 	{
 		WCHAR wszErr[2048];
 		GetErrorMessageW(GetLastError(), wszErr, ARRAY_SIZE(wszErr));
-		ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreateVS] Unable to open vs file.\n\t\t%s\n", wszErr);
-		return E_FAIL;	
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"[C3DUtils::CreateVS] Unable to open vs file.\n\t\t%s\n", wszErr);
 	}
 	// maps a view of a file into the address space of the calling process
 	pdwVS = (DWORD*)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
 	if (FAILED(hr = pd3dDevice->CreateVertexShader(pdwVS, pVS)))
 	{
-		ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreateVS] Failed to create vertex shader.\n\t\thresult=%x\n", hr);
-		return hr;
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"[C3DUtils::CreateVS] Failed to create vertex shader.\n\t\tOPRESULT=%x\n", hr);
 	}
 
 	UnmapViewOfFile(pdwVS);
 	CloseHandle(hMap);
 	CloseHandle(hFile);
 
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT CreatePS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DPIXELSHADER9 *pPS)
+OPRESULT CreatePS(PDEVICE pd3dDevice, WCHAR *szPath, PPIXELSHADER *pPS)
 {
-	HRESULT hr = S_OK;
+	OPRESULT hr = S_OK;
 	HANDLE hFile, hMap;
 	DWORD *pdwPS;
 	hFile = CreateFile(szPath, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
@@ -137,30 +134,27 @@ HRESULT CreatePS(LPDIRECT3DDEVICE9 pd3dDevice, WCHAR *szPath, LPDIRECT3DPIXELSHA
 			CloseHandle(hFile);
 			WCHAR wszErr[2048];
 			GetErrorMessageW(GetLastError(), wszErr, ARRAY_SIZE(wszErr));
-			ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreatePS] Unable to get PS filesize.\n\t\t%s\n", wszErr);
-			return E_FAIL;		
+			return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"[C3DUtils::CreatePS] Unable to get PS filesize.\n\t\t%s\n", wszErr);
 		}
 	}	
 	else
 	{
 		WCHAR wszErr[2048];
 		GetErrorMessageW(GetLastError(), wszErr, ARRAY_SIZE(wszErr));
-		ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreatePS] Unable to open PS file.\n\t\t%s\n", wszErr);
-		return E_FAIL;	
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"[C3DUtils::CreatePS] Unable to open PS file.\n\t\t%s\n", wszErr);
 	}
 	// maps a view of a file into the address space of the calling process
 	pdwPS = (DWORD*)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
 	if (FAILED(hr = pd3dDevice->CreatePixelShader(pdwPS, pPS)))
 	{
-		ErrorBox(K_ERR_CRITICAL, L"[C3DUtils::CreatePS] Failed to create vertex shader.\n\t\thresult=%x\n", hr);
-		return hr;
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"[C3DUtils::CreatePS] Failed to create vertex shader.\n\t\tOPRESULT=%x\n", hr);
 	}
 
 	UnmapViewOfFile(pdwPS);
 	CloseHandle(hMap);
 	CloseHandle(hFile);
 
-	return S_OK;
+	return K_OP_OK;
 }
 //=-=-=- pana aici  =-=-=-
 
@@ -187,7 +181,7 @@ CShaderManager::~CShaderManager(void)
 	</PixelShaders>
 </Shaders>
 */
-HRESULT CShaderManager::LoadShaders(WCHAR* sXMLpath)
+OPRESULT CShaderManager::AddShadersFromXML(WCHAR* sXMLpath)
 {
 	//gaseste calea fisierului XML
 	WCHAR wsPathXML[MAX_PATH];
@@ -200,13 +194,11 @@ HRESULT CShaderManager::LoadShaders(WCHAR* sXMLpath)
 	pugi::xml_document doc;
 	if (!doc.load_file(sXMLpath))
 	{
-		ErrorBox(K_ERR_WARNING, L"CShaderManager::Unable to load XML:%s\n", sXMLpath);
-		return(E_FAIL);
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CShaderManager::Unable to load XML:%s\n", sXMLpath);
 	}
 
 	pugi::xml_node shadersNode = doc.root().child(L"Shaders");
 
-	//ia parintele listei de strings
 	pugi::xml_node vsnodeparent = shadersNode.child(L"VertexShaders");
 	if (vsnodeparent != null)
 	{
@@ -216,9 +208,9 @@ HRESULT CShaderManager::LoadShaders(WCHAR* sXMLpath)
 			WCHAR wsName[MAX_PATH];
 			StringCchPrintf(wsPath, MAX_PATH, L"%s%s", wsPathXML, vsnode.attribute(L"path").value());
 			StringCchCopy(wsName, MAX_PATH, vsnode.attribute(L"name").value());
-			if (FAILED(UTGetShaderManager().AddVShader(wsPath, wsName)))
+			if (OP_FAILED(AddVShader(wsPath, wsName)))
 			{
-				ErrorBox(K_ERR_CRITICAL, L"Couldn't load vertex shader: %s", wsPath);
+				return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"Couldn't load vertex shader: %s", wsPath);
 			}
 		}
 	}
@@ -232,17 +224,17 @@ HRESULT CShaderManager::LoadShaders(WCHAR* sXMLpath)
 			WCHAR wsName[MAX_PATH];
 			StringCchPrintf(wsPath, MAX_PATH, L"%s%s", wsPathXML, psnode.attribute(L"path").value());
 			StringCchCopy(wsName, MAX_PATH, psnode.attribute(L"name").value());
-			if (FAILED(UTGetShaderManager().AddPShader(wsPath, wsName)))
+			if (FAILED(AddPShader(wsPath, wsName)))
 			{
-				ErrorBox(K_ERR_CRITICAL, L"Couldn't load pixel shader: %s", wsPath);
+				return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"Couldn't load pixel shader: %s", wsPath);
 			}
 		}
 	}
 
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT CShaderManager::ClearAllVShaders(void)
+OPRESULT CShaderManager::ClearAllVShaders(void)
 {
 	for(int ii=0; ii<VertexShaders.GetSize(); ii++)
 	{
@@ -250,10 +242,10 @@ HRESULT CShaderManager::ClearAllVShaders(void)
 		SAFE_DELETE(VertexShaders[ii]);
 	}
 	VertexShaders.RemoveAll();
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT CShaderManager::ClearAllPShaders(void)
+OPRESULT CShaderManager::ClearAllPShaders(void)
 {
 	for(int ii=0; ii<PixelShaders.GetSize(); ii++)
 	{
@@ -261,16 +253,16 @@ HRESULT CShaderManager::ClearAllPShaders(void)
 		SAFE_DELETE(PixelShaders[ii]);
 	}
 	PixelShaders.RemoveAll();
-	return S_OK;
+	return K_OP_OK;
 }
 
 
-HRESULT	CShaderManager::AddVShader(WCHAR *szPath, WCHAR * szFriendlyName, int * pnShaderIdx)
+OPRESULT CShaderManager::AddVShader(WCHAR *szPath, WCHAR * szFriendlyName, int * pnShaderIdx)
 {
-	HRESULT hr = S_OK;
+	OPRESULT hr = S_OK;
 
 	if (szPath == NULL || wcscmp(szPath, L"") == 0)
-		return S_OK;
+		return K_OP_OK;
 
     for (int i = 0; i < VertexShaders.GetSize(); i++)
 	{
@@ -280,38 +272,37 @@ HRESULT	CShaderManager::AddVShader(WCHAR *szPath, WCHAR * szFriendlyName, int * 
 			// The shader already exists
 			if (pnShaderIdx)
 				*pnShaderIdx = i;
-			return S_OK;
+			return K_OP_OK;
 		}
 	}
 
 	// Add the new shader
 	VSnode *pNewVS = new VSnode();
 	if (pNewVS == NULL)
-		return E_OUTOFMEMORY;
+		return K_OP_FAILED;
 
 	ZeroMemory(pNewVS, sizeof(VSnode));
 	StringCchCopy(pNewVS->szFilename, MAX_PATH, szPath);
-	//shader name
+	// shader name
 	pNewVS->shName.Init(szFriendlyName);
-	//face shaderul
+	// creates shader
 	if (FAILED(hr = CreateVS(pDevice, szPath, &pNewVS->pShader)))
 	{
-		ErrorBox(K_ERR_CRITICAL, L"Failed to create vertex shader.\n\t\t%s\n", szPath);
-		return hr;
+		return K_OP_FAILED;
 	}
 	
 	VertexShaders.Add(pNewVS);
 	if (pnShaderIdx)
 		*pnShaderIdx = VertexShaders.GetSize() - 1;
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT	CShaderManager::AddPShader(WCHAR * szPath, WCHAR * szFriendlyName, int * pnShaderIdx)
+OPRESULT CShaderManager::AddPShader(WCHAR * szPath, WCHAR * szFriendlyName, int * pnShaderIdx)
 {
-	HRESULT hr = S_OK;
+	OPRESULT hr = S_OK;
 
 	if (szPath == NULL || wcscmp(szPath, L"") == 0)
-		return S_OK;
+		return K_OP_OK;
 
     for (int i = 0; i < PixelShaders.GetSize(); i++)
 	{
@@ -321,14 +312,14 @@ HRESULT	CShaderManager::AddPShader(WCHAR * szPath, WCHAR * szFriendlyName, int *
 			// The shader already exists
 			if(pnShaderIdx)
 				*pnShaderIdx = i;
-			return S_OK;
+			return K_OP_OK;
 		}
 	}
 
 	// Add the new shader
 	PSnode *pNewPS = new PSnode();
 	if (pNewPS == NULL)
-		return E_OUTOFMEMORY;
+		return K_OP_FAILED;
 
 	ZeroMemory(pNewPS, sizeof(PSnode));
 	StringCchCopy(pNewPS->szFilename, MAX_PATH, szPath);
@@ -337,25 +328,26 @@ HRESULT	CShaderManager::AddPShader(WCHAR * szPath, WCHAR * szFriendlyName, int *
 	//face shaderul
 	if (FAILED(hr = CreatePS(pDevice, szPath, &pNewPS->pShader)))
 	{
-		ErrorBox(K_ERR_CRITICAL, L"Failed to create pixel shader.\n\t\t%s\n", szPath);
-		return hr;
+		return K_OP_FAILED;
 	}
 	
 	PixelShaders.Add(pNewPS);
 	if (pnShaderIdx)
 		*pnShaderIdx = PixelShaders.GetSize() - 1;
-	return S_OK;
+	return K_OP_OK;
 }
 
 
-LPDIRECT3DVERTEXSHADER9 CShaderManager::GetVShader(int nShaderIdx)
+PVERTEXSHADER CShaderManager::GetVShader(int nShaderIdx)
 {
+	if (nShaderIdx < 0 || nShaderIdx >= VertexShaders.Count())
+		return nullptr;
 	return VertexShaders[nShaderIdx]->pShader;
 }
 
-LPDIRECT3DVERTEXSHADER9 CShaderManager::GetVShaderByName(WCHAR * szName)
+PVERTEXSHADER CShaderManager::GetVShaderByName(WCHAR * szName)
 {
-	if (szName == NULL || wcscmp(szName, L"") == 0)
+	if (szName == nullptr || wcscmp(szName, L"") == 0)
 	{
 		return NULL;
 	}
@@ -371,13 +363,13 @@ LPDIRECT3DVERTEXSHADER9 CShaderManager::GetVShaderByName(WCHAR * szName)
 	}
 
 	ErrorBox(K_ERR_WARNING, L"Vertex Shader not found!\n\t%s", szName);
-	return NULL;
+	return nullptr;
 }
 
-LPDIRECT3DVERTEXSHADER9 CShaderManager::GetVShaderByNameHash(UINT32 nNameHash)
+PVERTEXSHADER CShaderManager::GetVShaderByNameHash(UINT32 nNameHash)
 {
 	if (nNameHash == 0)
-		return NULL;
+		return nullptr;
 
 	for (int i = 0; i < VertexShaders.GetSize(); i++)
 	{
@@ -388,19 +380,21 @@ LPDIRECT3DVERTEXSHADER9 CShaderManager::GetVShaderByNameHash(UINT32 nNameHash)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
-LPDIRECT3DPIXELSHADER9 CShaderManager::GetPShader(int nShaderIdx)
+PPIXELSHADER CShaderManager::GetPShader(int nShaderIdx)
 {
+	if (nShaderIdx < 0 || nShaderIdx >= PixelShaders.Count())
+		return nullptr;
 	return PixelShaders[nShaderIdx]->pShader;
 }
 
-LPDIRECT3DPIXELSHADER9 CShaderManager::GetPShaderByName(WCHAR * szName)
+PPIXELSHADER CShaderManager::GetPShaderByName(WCHAR * szName)
 {
-	if (szName == NULL || wcscmp(szName, L"") == 0)
+	if (szName == nullptr || wcscmp(szName, L"") == 0)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	UINT32 namehash = FastHash(szName);
@@ -414,13 +408,13 @@ LPDIRECT3DPIXELSHADER9 CShaderManager::GetPShaderByName(WCHAR * szName)
 	}
 
 	ErrorBox(K_ERR_WARNING, L"Pixel Shader not found!\n\t%s", szName);
-	return NULL;
+	return nullptr;
 }
 
-LPDIRECT3DPIXELSHADER9 CShaderManager::GetPShaderByNameHash(UINT32 nNameHash)
+PPIXELSHADER CShaderManager::GetPShaderByNameHash(UINT32 nNameHash)
 {
 	if (nNameHash == 0)
-		return NULL;
+		return nullptr;
 
 	for (int i = 0; i < PixelShaders.GetSize(); i++)
 	{
@@ -431,43 +425,44 @@ LPDIRECT3DPIXELSHADER9 CShaderManager::GetPShaderByNameHash(UINT32 nNameHash)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void CShaderManager::ReloadAllShaders()
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	OnLostDevice(pDevice);
-	OnResetDevice(pDevice, null);
+	OnResetDevice(pDevice, nullptr);
 	LOG_DBG(L"-- ALL SHADERS RELOADED!");
 #endif
 }
 
 //-=-=-= vertex declarations =-=-=-
-HRESULT CShaderManager::CreateVertexDeclarations()
+OPRESULT CShaderManager::CreateVertexDeclarations()
 {
-	HRESULT hr = S_OK;
-	V_RETURN(pDevice->CreateVertexDeclaration(_VERTEX_PNCT4T4_ve, &_VERTEX_PNCT4T4_decl));
-	V_RETURN(pDevice->CreateVertexDeclaration(_VERTEX_PNCT4_ve, &_VERTEX_PNCT4_decl));
-	V_RETURN(pDevice->CreateVertexDeclaration(_VERTEX_PCT4T4_ve, &_VERTEX_PCT4T4_decl));
+	V_OP_HRFAILED(K_SEVERITY_CRITICAL, pDevice->CreateVertexDeclaration(_VERTEX_PNCT4T4_ve, &_VERTEX_PNCT4T4_decl));
+	V_OP_HRFAILED(K_SEVERITY_CRITICAL, pDevice->CreateVertexDeclaration(_VERTEX_PNCT4_ve, &_VERTEX_PNCT4_decl));
+	V_OP_HRFAILED(K_SEVERITY_CRITICAL, pDevice->CreateVertexDeclaration(_VERTEX_PCT4T4_ve, &_VERTEX_PCT4T4_decl));
 
-	return S_OK;
+	return K_OP_OK;
 }
-HRESULT CShaderManager::ReleaseVertexDeclarations()
+OPRESULT CShaderManager::ReleaseVertexDeclarations()
 {
 	SAFE_RELEASE(_VERTEX_PNCT4T4_decl);
 	SAFE_RELEASE(_VERTEX_PNCT4_decl);
 	SAFE_RELEASE(_VERTEX_PCT4T4_decl);
 
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT CShaderManager::SetVS(PVERTEXSHADER pShader)
+OPRESULT CShaderManager::SetVS(PVERTEXSHADER pShader)
 {
-	return pDevice->SetVertexShader(pShader);
+	if(FAILED(pDevice->SetVertexShader(pShader)))
+		return OPRESULT(K_OP_FAILED, L"CShaderManager::Failed to set VS!", K_SEVERITY_WARNING);
+	return K_OP_OK;
 }
 
-HRESULT CShaderManager::SetVSByName(WCHAR* shaderName)
+OPRESULT CShaderManager::SetVSByName(WCHAR* shaderName)
 {
 	if (shaderName == nullptr)
 		return pDevice->SetVertexShader(nullptr);
@@ -476,15 +471,15 @@ HRESULT CShaderManager::SetVSByName(WCHAR* shaderName)
 	if (pVShader)
 		return pDevice->SetVertexShader(pVShader);
 
-	return E_FAIL;
+	return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CShaderManager::SetVSByName: VS not found: %s", shaderName);
 }
 
-HRESULT CShaderManager::SetVSConstantF(UINT StartRegister, const float* pConstantData, UINT Vector4fCount)
+OPRESULT CShaderManager::SetVSConstantF(UINT StartRegister, const float* pConstantData, UINT Vector4fCount)
 {
 	return pDevice->SetVertexShaderConstantF(StartRegister, pConstantData, Vector4fCount);
 }
 
-HRESULT CShaderManager::SetVertexDeclaration(eVertexDeclarationType vtype)
+OPRESULT CShaderManager::SetVertexDeclaration(eVertexDeclarationType vtype)
 {
 	switch (vtype)
 	{
@@ -498,17 +493,17 @@ HRESULT CShaderManager::SetVertexDeclaration(eVertexDeclarationType vtype)
 			return pDevice->SetVertexDeclaration(_VERTEX_PNCT4T4_decl);
 			break;
 		default:
-			return E_FAIL;
+			return K_OP_FAILED;
 			break;
 	}
 }
 
-HRESULT CShaderManager::SetPS(PPIXELSHADER pShader)
+OPRESULT CShaderManager::SetPS(PPIXELSHADER pShader)
 {
 	return pDevice->SetPixelShader(pShader);
 }
 
-HRESULT CShaderManager::SetPSByName(WCHAR* shaderName)
+OPRESULT CShaderManager::SetPSByName(WCHAR* shaderName)
 {
 	if (shaderName == nullptr)
 		return pDevice->SetPixelShader(nullptr);
@@ -517,57 +512,51 @@ HRESULT CShaderManager::SetPSByName(WCHAR* shaderName)
 	if (pPShader)
 		return pDevice->SetPixelShader(pPShader);
 
-	return E_FAIL;
+	return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CShaderManager::SetPSByName: PS not found: %s", shaderName);
 }
 
-HRESULT CShaderManager::SetPSConstantF(UINT StartRegister, const float* pConstantData, UINT Vector4fCount)
+OPRESULT CShaderManager::SetPSConstantF(UINT StartRegister, const float* pConstantData, UINT Vector4fCount)
 {
 	return pDevice->SetPixelShaderConstantF(StartRegister, pConstantData, Vector4fCount);
 }
 
 //=-=-=- DEVICE FUNCTIONS -=-=-=
-HRESULT CShaderManager::OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext )
+OPRESULT CShaderManager::OnCreateDevice( PDEVICE pDevice3d, const SURFACE_DESC* pBBDesc, void* pUserContext )
 {
-	pDevice = pd3dDevice;
-	return S_OK;
+	pDevice = pDevice3d;
+	return K_OP_OK;
 }
 
-HRESULT CShaderManager::OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext )
+OPRESULT CShaderManager::OnResetDevice( PDEVICE pDevice3d, const SURFACE_DESC* pBBDesc, void* pUserContext)
 {
-	pDevice = pd3dDevice;
-	HRESULT hr = CreateVertexDeclarations();
-	if(FAILED(hr))
+	pDevice = pDevice3d;
+	OPRESULT opr = CreateVertexDeclarations();
+	if (OP_FAILED(opr))
 	{
-		ErrorBox(K_ERR_CRITICAL, L"CShaderManager::OnResetDevice->Failed to createVertexDeclarations()\n");
-		return   hr;
+		return OPRESULT(K_OP_FAILED, L"CShaderManager::OnResetDevice->Failed to createVertexDeclarations()", K_SEVERITY_CRITICAL);
 	}
 
-	//reface shaderele
-	for(int ii=0; ii<VertexShaders.GetSize(); ii++)
+	HRESULT hr = S_OK;
+	// reloads shaders
+	for (int ii = 0; ii < VertexShaders.GetSize(); ii++)
 	{
 		if (FAILED(hr = CreateVS(pDevice, VertexShaders[ii]->szFilename, &VertexShaders[ii]->pShader)))
 		{
-			ErrorBox(K_ERR_CRITICAL, L"Failed to re-create vertex shader.\n\t\t%s\n", VertexShaders[ii]->szFilename);
-			return hr;
+			return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Failed to re-create vertex shader (HR:%ld).\n\t\t%s\n", hr, VertexShaders[ii]->szFilename);
 		}
 	}
-	for(int ii=0; ii<PixelShaders.GetSize(); ii++)
+	for (int ii = 0; ii < PixelShaders.GetSize(); ii++)
 	{
 		if (FAILED(hr = CreatePS(pDevice, PixelShaders[ii]->szFilename, &PixelShaders[ii]->pShader)))
 		{
-			ErrorBox(K_ERR_CRITICAL, L"Failed to re-create pixel shader.\n\t\t%s\n", PixelShaders[ii]->szFilename);
-			return hr;
+			return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Failed to re-create pixel shader (HR:%ld).\n\t\t%s\n", hr, PixelShaders[ii]->szFilename);
 		}
 	}
 
-	if(FAILED(hr))
-	{
-		return   hr;
-	}
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT CShaderManager::OnLostDevice( void* pUserContext )
+OPRESULT CShaderManager::OnLostDevice( void* pUserContext )
 {
 	ReleaseVertexDeclarations();
 	for(int ii=0; ii<VertexShaders.GetSize(); ii++)
@@ -578,12 +567,12 @@ HRESULT CShaderManager::OnLostDevice( void* pUserContext )
 	{
 		SAFE_RELEASE(PixelShaders[ii]->pShader);
 	}
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT CShaderManager::OnDestroyDevice( void* pUserContext )
+OPRESULT CShaderManager::OnDestroyDevice( void* pUserContext )
 {
-	return S_OK;
+	return K_OP_OK;
 }
 
 
