@@ -2170,12 +2170,11 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 {
 	if(!pDevice)
-	{
 		return;
-	}
 
-
-	///PART1. Paint the offscreen surfaces before the main render begin/end
+	///----------------------------------------------------------------------------------
+	///	PART1. Paint the offscreen surfaces before the main render begin/end 
+	///----------------------------------------------------------------------------------
 	switch (g_gameState)
 	{
 		case GAME_STATE_GAME:
@@ -2187,6 +2186,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				break;
 			}
 			*/
+			// Deferred buffers use their own begin and end for UTPainter();
 			g_level.PaintDeferredBuffers();
 		}
 		break;
@@ -2199,17 +2199,22 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		break;
 	}
 
-
-	///PART2. --- Render onscreen - FINAL PASS ---
+	///----------------------------------------------------------------------------------
+	/// PART2. --- Render onscreen - FINAL PASS ---
+	///----------------------------------------------------------------------------------
 	if (OP_SUCCESS(UT3DBeginScene(pDevice)))
 	{
 		UT3DClear(pDevice, 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, K_GAME_CLEAR_COLOR, 1.0f, 0);
-
 
 		g_pGameSprite->Begin(D3DXSPRITE_ALPHABLEND | /*D3DXSPRITE_OBJECTSPACE |*/ D3DXSPRITE_DONOTSAVESTATE);
 
 		pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 		pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+
+		PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
+		if (pSprVS)
+			UTPainter().Begin(pSprVS, g_matIdentity);
+
 
 		switch (g_gameState)
 		{
@@ -2508,6 +2513,9 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 		//end game sprite
 		g_pGameSprite->End();
+
+		// end main painter
+		UTPainter().End();
 
 		//--- CONTROLS EDITOR PAINT ---
 #ifdef K_CONTROLS_EDITOR

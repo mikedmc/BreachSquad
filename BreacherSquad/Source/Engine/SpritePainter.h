@@ -37,6 +37,7 @@ private:
 	UINT32					m_nTrisOffsets[K_BS_MAX_MODECHANGES_CNT];
 
 	bool					bStarted;										// Begin was called
+	UINT32					m_nFlags;
 
 #if defined(_DEBUG) || defined(DEBUG)
 public:
@@ -50,11 +51,15 @@ public:
 	~CSpritePainter(void);
 
 	// Call before painting anything
-	OPRESULT Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 flags = K_BS_ALPHABLENDING );
+	OPRESULT				Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 flags = K_BS_ALPHABLENDING );
 	
 	// Flushes remaining sprites and ends a scene. Clears shaders, flushes everything
 	OPRESULT				End();
-	
+	// Sets the current view projection matrix for the following sprites. Does a Flush before setting it.
+	OPRESULT				SetViewProjMatrix(Mat matViewProj);
+	// Sets the currently used vertex shader, Does a flush before setting it.
+	OPRESULT				SetShader(PVERTEXSHADER pVShader, Mat* matViewProj = nullptr);
+
 	// Draws a non-transformed sprite
 	// \param: pSrcUV - expects the rectangle in texture coordinates that will be drawn in pDestRect
 	// \param: pDestRect - expects a rectangle where the srcUV will be painter. 

@@ -269,6 +269,7 @@ enum eStartupCommand {
 ///--- GAME STATES ---
 enum eGameState {
 	GAME_STATE_EMPTY = 0,
+	GAME_STATE_PRELOAD,					// loads stuff that don't need painting (like the shaders and strings)
 	GAME_STATE_DEVELOPER,
 	GAME_STATE_LOADING,
 
