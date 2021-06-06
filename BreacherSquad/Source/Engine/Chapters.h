@@ -2,8 +2,6 @@
 
 //fixed number of levels per chapter
 #define K_GAME_LEVELS_PER_CHAPTER 12
-//#TEMP: will disappear after weekly challenge:
-#define K_GAME_WEEKLY_CHALLENGE_CHAPTER_NO 5
 
 class CChaptersList {
 public:

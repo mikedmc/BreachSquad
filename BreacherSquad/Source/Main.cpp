@@ -3463,16 +3463,7 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 
 			//start menu music
 			SND_STOP_GROUP("music", false, true);
-
-			if ((g_userData[K_MEMID_SELECTED_CHAPTER] == K_GAME_WEEKLY_CHALLENGE_CHAPTER_NO) && (g_userData[K_MEMID_SELECTED_LEVEL] == 2))
-			{
-				SND_STOP_GROUP("music", false, true);
-				//SND_PLAY_ONCE(SNDIDX_THEME_HALLOWEEN, DSBPLAY_LOOPING);
-			}
-			else
-			{
-				SND_PLAY_ONCE(SNDIDX_THEME_MENU1, DSBPLAY_LOOPING);
-			}
+			SND_PLAY_ONCE(SNDIDX_THEME_MENU1, DSBPLAY_LOOPING);
 			//analytics
 			ANALYTICS_SCREENVIEW("INGAME");
 		}

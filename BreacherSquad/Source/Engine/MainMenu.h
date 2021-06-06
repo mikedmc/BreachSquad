@@ -20,8 +20,7 @@ enum EMM_State {
 
 //enum necessary for mode selection (corresponds to anim)
 enum EMM_GameModes {
-	K_MM_MODE_WEEKLY_CHALLENGE = 0,
-	K_MM_MODE_CLASSIC = 1,
+	K_MM_MODE_CLASSIC = 0,
 	K_MM_MODE_ZOMBIE_INVASION,
 	K_MM_MODE_VINFINITE,
 
