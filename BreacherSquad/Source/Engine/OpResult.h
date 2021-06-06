@@ -62,14 +62,14 @@ public:
 	{
 		code = (hr < 0) ? K_OP_FAILED : K_OP_OK;
 		severity = K_SEVERITY_NONE;
-		wcscpy_s(message, TEXT("HRESULT:%ld", hr));
+		wsprintf(message, L"HRESULT:%ld", hr);
 	}
 
 	OPRESULT(eOpResult eCode, eOpSeverity eSeverity = K_SEVERITY_NONE) 
 	{
 		code = eCode;
 		severity = eSeverity;
-		wcscpy_s(message, TEXT("No message"));
+		wcscpy_s(message, L"No message");
 
 		LogResult();
 	}

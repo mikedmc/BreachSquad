@@ -122,9 +122,14 @@ void    CALLBACK OnDestroyDevice(void);
 void	CALLBACK MouseProc(bool bLeftButton, bool bRightButton, bool bMiddleButton, bool bSideButton1, bool bSideButton2, int nMouseWheelDelta, int xPos, int yPos);
 
 
-HRESULT InitApp(void);
-void	ShutdownApp(void);
-HRESULT	InitSound(void);
+// Called before window and 3d device get created
+OPRESULT	BeforeMount(void);
+// Called after window and 3d device get created and are ready to be used
+OPRESULT	AfterMount(void);
+// Called after shutting down the device
+void		ShutdownApp(void);
+// Initializes the sound system
+HRESULT		InitSound(void);
 
 // Transition functions
 void ChangeGameState(eGameState newState, int param1 = 0, int param2 = 0); //are parametru default, in caz ca e necesar
@@ -170,17 +175,15 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	//init log system
 	g_pLog = new CLog();
 
-	///--- verificari imediate ---
-	//verifica sa nu poti lansa jocul de mai multe ori
 	if (!UTGetAppClass().IsOnlyInstance(K_GAME_WINDOW_CLASSNAME))
 		return 0;
 
 	HRESULT hr = S_OK;
-	//Init crash dumper
+	// Init crash dumper
 	InitMiniDumper();
-	//initializeaza constante joc gen cai catre executabile samd
+	// init game constants like paths to executable
 	UTGetAppClass().Init();
-	//clear debug file 
+	// clear debug log file 
 	DebugLogClear();
 
 #if defined(ENABLE_STEAM)
@@ -250,10 +253,10 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	//for now it can't pause on losing focus
 	g_bCanPause = false;
 
-	if (FAILED(InitApp()))
+	if (OP_FAILED(BeforeMount()))
 	{
 		WCHAR szResult[MAX_PATH];
-		StringCchPrintf(szResult, MAX_PATH, L"Ooops, couldn't initialize game!\r\nTo fix it, check our support forum or contact us at %s\r\n", K_GAME_EMAIL);
+		StringCchPrintf(szResult, MAX_PATH, L"Ooops, couldn't initialize game (BeforeMount) !\r\nTo fix it, check our support forum or contact us at %s\r\n", K_GAME_EMAIL);
 		MessageBoxW(NULL, szResult, NULL, MB_OK | MB_ICONERROR);
 
 		return -1;
@@ -276,14 +279,6 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 		ErrorBox(K_ERR_CRITICAL, L"[ERROR] Couldn't create window!\r\nTo fix it, check our support forum or contact us at %s\r\n", K_GAME_EMAIL);
 	}
 
-	///--- startup commands (exe params) ---
-#if defined(ENABLE_STEAM_WORKSHOP)
-	if (g_startupCommand == GAME_STARTUP_UPLOAD_MOD)
-	{
-		ChangeGameState(GAME_STATE_UPLOAD_MOD);
-	}
-#endif
-
 	///--- LOG WINDOW ---
 	if (UTGetAppClass().m_Settings.dev_bLogWindowShow)
 	{
@@ -301,6 +296,13 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	LOG(L"GoG Version %s, Savefile Version %d", UTLang().strings[STR_VERSION_NUMBER]->sText, _VERSION_DATAFILE_);
 #endif // ENABLE_GALAXY
 
+	///--- startup commands (exe params) ---
+#if defined(ENABLE_STEAM_WORKSHOP)
+	if (g_startupCommand == GAME_STARTUP_UPLOAD_MOD)
+	{
+		ChangeGameState(GAME_STATE_UPLOAD_MOD);
+	}
+#endif
 
 	//init subsystems
 #ifdef ENABLE_ACHIEVEMENTS
@@ -383,12 +385,21 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	nevent->AddNamedArgUINT32(L"width", UTGetAppClass().m_Settings.nWindowW);
 	nevent->AddNamedArgUINT32(L"height", UTGetAppClass().m_Settings.nWindowH);
 	UTGetEventManager().TriggerEvent(nevent);
-
+	///--- INITIALIZE 3D Device ---
 	if (FAILED(DXUTCreateDevice(D3DADAPTER_DEFAULT, true, UTGetAppClass().m_Settings.nWindowW, UTGetAppClass().m_Settings.nWindowH, IsDeviceAcceptable, ModifyDeviceSettings)))
 	{
 		ErrorBox(K_ERR_CRITICAL, L"[ERROR] Couldn't create device (%dx%d)!\r\nTo fix it, check our support forum or contact us at %s\r\n", UTGetAppClass().m_Settings.nWindowW, UTGetAppClass().m_Settings.nWindowH, K_GAME_EMAIL);
 	}
 	
+	if (OP_FAILED(AfterMount()))
+	{
+		WCHAR szResult[MAX_PATH];
+		StringCchPrintf(szResult, MAX_PATH, L"Ooops, couldn't initialize game (AfterMount) !\r\nTo fix it, check our support forum or contact us at %s\r\n", K_GAME_EMAIL);
+		MessageBoxW(NULL, szResult, NULL, MB_OK | MB_ICONERROR);
+
+		return -1;
+	}
+
 #ifdef ENABLE_DEVMODE_RELEASE
 #if defined(_DEBUG) || defined(DEBUG)
 	LOG(L"!!!----> DevMode Release enabled! Should be off! <----!!!");
@@ -521,31 +532,18 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 //**************************************************************************************
 // Initialize the app - before creating the window
 //**************************************************************************************
-/*
-struct CTest {
-	int value;
-	CTest() { value = 1; ErrorBox(K_ERR_WARNING, L"CTest constructed!"); };
-	~CTest() { ErrorBox(K_ERR_WARNING, L"CTest destructor! val:%d", value); };
-};
-*/
 
-HRESULT InitApp(void)
+OPRESULT BeforeMount(void)
 {
-	HRESULT hr = S_OK;
-
 	g_bDuringTransition = false; //nu este in timpul unei tranzitii
 
  ///--- Load strings here so we can set the window name ---
-	if (FAILED(hr = App_LocaLoadLangList(UTGetAppClass().m_Settings.shLanguageAlias)))
+	if (OP_FAILED(App_LocaLoadLangList(UTGetAppClass().m_Settings.shLanguageAlias)))
 	{
 		ErrorBox(K_ERR_WARNING, L"[ERROR] Error loading strings list [texts/lang.xml]!");
 	}
 	//load strings for current language
-	if (FAILED(hr = App_LocaLoadStrings()))
-	{
-		ErrorBox(K_ERR_CRITICAL, L"Critical Error! Failed loading strings XML.");
-		return hr;
-	}
+	V_OP_RET(App_LocaLoadStrings());
 
 	//--------------------------------------------------------------------------------------
 	// setari initiale
@@ -577,10 +575,24 @@ HRESULT InitApp(void)
 	//default to a good game mode
 	g_gameMode = GAME_MODE_CLASSIC;
 
-	ChangeGameState(GAME_STATE_PRELOAD);
-
-	return S_OK;
+	return K_OP_OK;
 }
+
+
+OPRESULT AfterMount(void)
+{
+	// load the minimum necessary to paint something
+	WCHAR shpath[MAX_PATH];
+	StringCchPrintf(shpath, MAX_PATH, L"%s/shaders/vs_sprites2d.vso", UTGetAppClass().g_wszAppResDir);
+	if (OP_FAILED(UTGetShaderManager().AddVShader(shpath, L"VS_SPRITES2D")))
+	{
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Could not load SpritesVS!\n%s", shpath);
+	}
+
+	ChangeGameState(GAME_STATE_PRELOAD);
+	return K_OP_OK;
+}
+
 
 void ShutdownApp(void)
 {
@@ -2985,14 +2997,6 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 	{
 		case GAME_STATE_PRELOAD:
 		{
-			///!!! on leaving the state:
-			// load the minimum necessary to paint something
-			WCHAR shpath[MAX_PATH];
-			StringCchPrintf(shpath, MAX_PATH, L"%s/shaders/vs_sprites2d.vso", UTGetAppClass().g_wszAppResDir);
-			if (OP_FAILED(UTGetShaderManager().AddVShader(shpath, L"VS_SPRITES2D")))
-			{
-				ErrorBox(K_ERR_CRITICAL, L"Could not load SpritesVS!\n%s", shpath);
-			}
 		}
 		break;
 		case GAME_STATE_DEVELOPER:

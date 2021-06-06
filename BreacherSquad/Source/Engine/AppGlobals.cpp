@@ -993,7 +993,7 @@ UINT32 App_GetAvailableXPPoints(EPSSPlayerClass eClass)
 CLocaLanguage g_Language;						//current game language
 CArray<CLocaLanguage> g_arrLangList;	//list of languages from lang.xml
 
-HRESULT App_LocaLoadLangList(CStringHash shSelectedLangAlias)
+OPRESULT App_LocaLoadLangList(CStringHash shSelectedLangAlias)
 {
 	//if requested language is empty just take the system setting
 	if (shSelectedLangAlias.IsEmpty())
@@ -1009,8 +1009,7 @@ HRESULT App_LocaLoadLangList(CStringHash shSelectedLangAlias)
 	pugi::xml_document doc;
 	if (!doc.load_file(xmlpath))
 	{
-		ErrorBox(K_ERR_WARNING, L"Unable to load languages XML:%s\n", xmlpath);
-		return(E_FAIL);
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Unable to load languages XML:%s\n", xmlpath);
 	}
 
 	bool bLangSet = false;
@@ -1051,12 +1050,11 @@ HRESULT App_LocaLoadLangList(CStringHash shSelectedLangAlias)
 
 	UTGetAppClass().m_Settings.shLanguageAlias = g_Language.shLangAlias;
 
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT App_LocaLoadStrings()
+OPRESULT App_LocaLoadStrings()
 {
-	HRESULT hr = S_OK;
 	WCHAR wcsMediaName[MAX_PATH];
 	StringCchPrintf(wcsMediaName, MAX_PATH, L"media/texts/%s", g_Language.shFileName.text);
 	WCHAR xmlpath[MAX_PATH];
@@ -1064,10 +1062,10 @@ HRESULT App_LocaLoadStrings()
 	LOG(L"[LANG] Loading strings: %s", xmlpath);
 	
 	//load strings and ignore missing characters when using TTF fonts
-	if (FAILED(hr = UTLang().LoadFromXML(xmlpath, g_Language.shLangName.text, &g_Language.strMinAlphabet, g_Language.bUseTTFonts)))
+	int nLoaded = UTLang().LoadFromXML(xmlpath, g_Language.shLangName.text, &g_Language.strMinAlphabet, g_Language.bUseTTFonts);
+	if (nLoaded <= 0)
 	{
-		ErrorBox(K_ERR_WARNING, L"[ERROR] Failed loading strings XML! file:%s", xmlpath);
-		return hr;
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"[ERROR] Failed loading strings XML! file:%s", xmlpath);
 	}
 	//set version number
 	UTLang().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
@@ -1076,7 +1074,7 @@ HRESULT App_LocaLoadStrings()
 	CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 	App_SetSDLTriggersFromUserData(keybd1, keybd2);
 
-	return S_OK;
+	return K_OP_OK;
 }
 
 //generic TTF names (precomputed hash)
@@ -1084,7 +1082,7 @@ CStringHash shTTFID_SZ40(L"TTFID_SZ40"); //large font replacement
 CStringHash shTTFID_SZ30(L"TTFID_SZ30"); //medium fonts
 CStringHash shTTFID_SZ20(L"TTFID_SZ20"); //always loaded (needed for chat)
 
-HRESULT App_LocaLoadFonts(bool bUseTTFonts)
+OPRESULT App_LocaLoadFonts(bool bUseTTFonts)
 {
 	//release all
 	UTGetFontsManager().Release();
@@ -1229,10 +1227,10 @@ HRESULT App_LocaLoadFonts(bool bUseTTFonts)
 		g_font5ns2->SetFontReplacementTTF(null);
 	}
 
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT App_LocaChangeLanguage(CStringHash shSelectedLangAlias)
+OPRESULT App_LocaChangeLanguage(CStringHash shSelectedLangAlias)
 {
 	CLocaLanguage cllLangOld = g_Language;
 	//find alias name
@@ -1252,14 +1250,9 @@ HRESULT App_LocaChangeLanguage(CStringHash shSelectedLangAlias)
 		return E_FAIL;
 	}
 
-	HRESULT hr = S_OK;
 	if (cllLangOld.shLangAlias.textHash != g_Language.shLangAlias.textHash)
 	{
-		if (FAILED(hr = App_LocaLoadStrings()))
-		{
-			ErrorBox(K_ERR_WARNING, L"App_LocaChangeLanguage: Can't load strings !");
-			return hr;
-		}
+		V_OP_RET(App_LocaLoadStrings());
 		//now load the fonts
 		if(cllLangOld.bUseTTFonts != g_Language.bUseTTFonts)
 			App_LocaLoadFonts(g_Language.bUseTTFonts);
@@ -1270,7 +1263,7 @@ HRESULT App_LocaChangeLanguage(CStringHash shSelectedLangAlias)
 	}
 
 	LOG(L"[LANG] Language changed to [%s]", shSelectedLangAlias.text);
-	return S_OK;
+	return K_OP_OK;
 }
 
 CLocaLanguage App_LocaGetCurrentLanguage()

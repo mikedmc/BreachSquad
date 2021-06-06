@@ -56,6 +56,22 @@ OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 f
 		m_nTrisOffsets[kk] = 0;
 	}
 
+	//--- set render flags ---
+	if (m_nFlags & K_BS_ALPHABLENDING)
+	{
+		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
+
+		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		m_pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	}
+	//do we need alpha testing? it accelerates a little
+	if (m_nFlags & K_BS_ALPHATEST)
+	{
+		m_pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, true);
+		m_pDevice->SetRenderState(D3DRS_ALPHAREF, 0x0000000C); //0.05f
+	}
+
 	bStarted = true;
 	return K_OP_OK;
 }
@@ -124,21 +140,6 @@ OPRESULT CSpritePainter::Flush()
 
     m_vb->Unlock();
 
-	//--- set render flags ---
-	m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	if (m_nFlags & K_BS_ALPHABLENDING)
-	{
-		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
-
-		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-	}
-	//do we need alpha testing? it accelerates a little
-	if (m_nFlags & K_BS_ALPHATEST)
-	{
-		m_pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, true);
-		m_pDevice->SetRenderState(D3DRS_ALPHAREF, 0x0000000C); //0.05f
-	}
 
 	//set vertex shader
 	if (m_pVShader)

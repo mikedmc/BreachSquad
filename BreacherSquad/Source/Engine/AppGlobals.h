@@ -358,15 +358,15 @@ extern CStringHash shTTFID_SZ40;
 extern CStringHash shTTFID_SZ30;
 extern CStringHash shTTFID_SZ20;
 
-HRESULT App_LocaLoadLangList(CStringHash shSelectedLangAlias);
-HRESULT App_LocaLoadStrings();
+OPRESULT App_LocaLoadLangList(CStringHash shSelectedLangAlias);
+OPRESULT App_LocaLoadStrings();
 
 // Loads necessary fonts upon language change.
 // \param bUseTTFonts - Asian languages usually need True Type Fonts so we replace bitmap fonts with TTF
-HRESULT App_LocaLoadFonts(bool bUseTTFonts = false);
+OPRESULT App_LocaLoadFonts(bool bUseTTFonts = false);
 
 // Orders language change
-HRESULT App_LocaChangeLanguage(CStringHash shSelectedLangAlias);
+OPRESULT App_LocaChangeLanguage(CStringHash shSelectedLangAlias);
 
 // Returns current set language
 CLocaLanguage App_LocaGetCurrentLanguage();

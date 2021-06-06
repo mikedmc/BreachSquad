@@ -8105,6 +8105,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	/// INITIAL SETUP
 	///----------------------------------------------------
 	m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
+	m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
 	m_pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
 	m_pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
@@ -8238,6 +8239,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 
 	m_pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
 	m_pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+	m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
 	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
@@ -8532,6 +8534,7 @@ OPRESULT CLevel::RenderPass_Composition(Mat* matProj)
 
 	m_pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
 	m_pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+	m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
 	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
