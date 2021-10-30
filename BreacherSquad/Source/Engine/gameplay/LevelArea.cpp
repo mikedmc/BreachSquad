@@ -44,7 +44,7 @@ void CLevelArea::Release()
 	areaMesh.Release();
 }
 
-inline CTile* CLevelArea::GetTile(int xTL, int yTL)
+CTile* CLevelArea::GetTile(int xTL, int yTL)
 {
 	//#TODO: should return a generic empty tile??
 	if ((xTL < AABBbounds_TL.x) || (yTL < AABBbounds_TL.y) || (xTL >= AABBbounds_TL.x + AABBbounds_TL.w) || (yTL >= AABBbounds_TL.y + AABBbounds_TL.h))
