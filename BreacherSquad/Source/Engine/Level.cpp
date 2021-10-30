@@ -554,7 +554,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	}
 	*/
 
-	CActor* nact = new CActor(spawnPos, &templateLocal, GenerateNextID());
+	CActor* nact = new CActor(spawnPos, &templateLocal, GenerateNextID(), new CSpineAnimComponent());
 	// create a weapon and add it to the player's arsenal
 	CWeapon* wpn = Weapon_Create(L"WPN_SMG_MP5A3", nact);
 	nact->AddWeapon(wpn, true);
@@ -7909,7 +7909,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 				}
 			
 				CActor* act = static_cast<CActor*>(vis->pPtr);
-				g_spineMgr.Paint(act->pSkeleton, eTexChannel);
+				act->Paint(eTexChannel);
 			}
 			break;
 			case K_VST_PROP:

@@ -50,7 +50,8 @@ enum EAnimAngle {
 	EANGS_CNT,
 };
 
-// Returns animation angle
+// Characters are animated on 6 directions: see EAnimAngle
+// Returns animation direction as int, starting with top(0)
 EAnimAngle GetEAnimAngle(Vec2 vDir);
 
 //direction flags used when setting more directions on one int

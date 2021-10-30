@@ -27,44 +27,6 @@ void CActor::SetIcon(EActorIconTypes iconType, float fDuration)
 		nIconType = K_LVL_ACT_ICON_NONE;
 }
 
-bool CActor::Spine_SetSkin(const char * strSkinName)
-{
-	if ((pSkeleton == null) || (pSkeleton->skel == null) || (pSkelTemplate == null) || (strSkinName[0] == 0))
-	{
-		ErrorBox(K_ERR_WARNING, L"CActor::Spine_SetSkin: Empty skin name or skeleton data not loaded!");
-		return false;
-	}
-
-	spine::Skin* pSkin = pSkelTemplate->m_skeletonData->findSkin(strSkinName);
-	if (pSkin == null)
-	{
-		ErrorBox(K_ERR_WARNING, L"CActor::Spine_SetSkin: Skin not found!");
-		return false;
-	}
-
-	pSkeleton->skel->setSkin(pSkin);
-	LOG_DBG("Spine_SetSkin: setting skin: %s", strSkinName);
-
-	return true;
-}
-
-bool CActor::HasAnimation(ESpineAnim nAnimType, int nSet)
-{
-	if ((nSet < 0) || (nSet >= K_ACT_ANIM_MAX_SETS))
-		return false;
-
-	bool bHasIt = (this->arrAnimsPtr[nAnimType].pAnim[nSet] != null);
-	return bHasIt;
-}
-
-void CActor::SetAnimSet(int newAnimSet)
-{
-	if (newAnimSet != nAnimSet)
-	{
-		nAnimSet = newAnimSet;
-	}
-}
-
 void CActor::AddWeapon(CWeapon* wpn, bool bEquip)
 {
 	arrWeapons.Add(wpn);
@@ -94,8 +56,8 @@ void CActor::PostConstructionInit()
 void CActor::BeginPlay()
 {
 	// empty tracks
-	this->SetAnimOnce(0, K_SD_ANIM_EMPTY);
-	this->SetAnimOnce(1, K_SD_ANIM_EMPTY);
+	c_graphics->SetAnimOnce(0, K_SD_ANIM_EMPTY);
+	c_graphics->SetAnimOnce(1, K_SD_ANIM_EMPTY);
 }
 
 void CActor::EndPlay()
@@ -109,24 +71,23 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 	return m_pAIcurrentState->m_arrBehaviors[m_nAIcurrentBehaviorIdx].nType;
 }
 
-CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID) :
+CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpineAnimComponent* pComGraphics) :
 	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nLastDamageTakenFromUID(0),
 	pWeaponMain(nullptr), pClosestTouchable(nullptr), bAnimFlipX(false), eAnimAngle(EANG_S),
 	nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
-	pSkelTemplate(nullptr), pSkeleton(nullptr),
 	eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0)
 {
+	_ASSERT(pComGraphics != nullptr);
+	// save pointer to component
+	c_graphics = pComGraphics;
+
 	ID = nID;
 	bAnimated = true;
 	nControllerInstanceID = -1;
 	vSpeedImpulse = Vec2(0.0f, 0.0f);
 	speed = Vec2(0.0f, 0.0f);
 	posWeapon = Vec3(0.0f, 0.0f, 0.0f);
-	for (int kk = 0; kk < K_ACT_MAX_ANIM_TRACKS; kk++)
-	{
-		eLastAnim[kk] = K_SD_ANIM_EMPTY;
-	}
 
 	// init actor template data (loads files and spine skeletons)
 	InitFromTemplate(pActorTemplate);
@@ -137,9 +98,8 @@ CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID) :
 
 CActor::~CActor()
 {
-	// remove used skeleton instance
-	g_spineMgr.RemoveSkeletonInstance(this->pSkeleton);
-	this->pSkeleton = nullptr;
+	// remove used spine component
+	SAFE_DELETE(c_graphics);
 
 	// release allocated weapons arsenal
 	SAFE_DELETE_GROWABLE_ARRAY(arrWeapons);
@@ -336,15 +296,8 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 	}
 	//copy template data
 	actTemplate = *pActorTemplate;
-
 	actTemplate.FillDefaultValuesIfNotSet();
-	//save a copy
-	actTemplate_ini = this->actTemplate;
 
-	for (int kk = 0; kk < K_ACT_MAX_ANIM_TRACKS; kk++)
-	{
-		eLastAnim[kk] = K_SD_ANIM_EMPTY;
-	}
 	eLastPlayedVerse = K_LVL_ACT_VERSE_EMPTY;
 
 	bCrouched = false;
@@ -375,38 +328,15 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 
 	this->pWeaponMain = null;
 
+	///--- finished setting up, now save backup template for initial state ---
+	this->actTemplate_ini = this->actTemplate;
+
 	// Load spine skeleton
 	WCHAR Path[MAX_PATH];
 	WCHAR wcsPath[MAX_PATH];
 	StringCchPrintf(wcsPath, MAX_PATH, L"media/levels/data/actors/%s", pActorTemplate->shSkeletonXML.text);
 	FileManager::GetMediaPath(wcsPath, Path);
-	this->pSkelTemplate = g_spineMgr.LoadSkeletonTemplateXML(Path);
-
-	if (this->pSkelTemplate != null)
-	{
-		float fScale = 1.0f;
-		// Create skeleton instance
-		this->pSkeleton = g_spineMgr.GetSkeletonInstance(this->pSkelTemplate);
-		// set skeleton ID too so we get them batched in separate meshes:
-		this->pSkeleton->UID = this->UID;
-		this->pSkeleton->skel->setScaleY(-1.0f * fScale);
-		this->pSkeleton->skel->setScaleX(fScale);
-
-		// Set skin
-		if (pActorTemplate->shSkinName.IsSet())
-		{
-			Spine_SetSkin(pActorTemplate->shSkinName.text);
-		}
-
-		// set pointers to spine animations for fast access
-		Spine_SaveAnimPointers();
-
-	}
-
-	//update backup template
-	this->actTemplate_ini = this->actTemplate;
-	// selected animset
-	this->SetAnimSet(0);
+	c_graphics->InitFromFile(*this, Path);
 
 	return true;
 }
@@ -418,14 +348,13 @@ void CActor::Update(float dTime)
 	// actor is hidden or not active so ignore it
 	if (this->bHidden)
 		return;
-
 	//update timeline
 	this->fTimelineAI += dTime;
 
 	if(MUVec2AlmostZero(speed))
-		this->SetAnimOnce(0, K_SD_ANIM_IDLE);
+		c_graphics->SetAnimOnce(0, K_SD_ANIM_IDLE);
 	else
-		this->SetAnimOnce(0, K_SD_ANIM_MOVE);
+		c_graphics->SetAnimOnce(0, K_SD_ANIM_MOVE);
 
 	//this->SetAnimOnce(1, K_SD_ANIM_SHOOT);
 
@@ -435,29 +364,19 @@ void CActor::Update(float dTime)
 	int nAnimFlipMul = (bAnimFlipX) ? -1 : 1;
 	eAnimAngle = GetEAnimAngle(vAim);
 
-
 	// aiming IK node must be set each frame or they get reset by the animation
-	//if (bIsAiming)
+	c_graphics->SetAimVecLocal(Vec2(vAim.x * nAnimFlipMul, -vAim.y));
+	Vec2 vGunMount(0.0f, 0.0f);
+	if (c_graphics->GetGunPosWorld(vGunMount))
 	{
-		//#TODO: ar trebui sa setez osul mereu ca sa fie bine setat si pe tranzitii intre animatii
-		// vezi transformul asta ca sa muti din world space in skeleton space:
-		//Vector2 ledgePointLocalSpace = skeletonAnimation.transform.InverseTransformPoint(ledgePoint); // your ledgePoint
-		// find aim bone and move it
-		if (pSkeleton->arrBones[K_SD_BONE_AIM_IK] != null)
-		{
-			spine::Bone* b_aim = pSkeleton->arrBones[K_SD_BONE_AIM_IK];
-
-			b_aim->setX(vAim.x * nAnimFlipMul);
-			b_aim->setY(-vAim.y);
-		}
+		// find the position in 3d so that the projected position always matches the default bullet height
+		this->posWeapon.x = vGunMount.x;
+		this->posWeapon.y = vGunMount.y + Z_TO_H(K_BULLET_DEFAULT_Z);
+		this->posWeapon.z = K_BULLET_DEFAULT_Z;
 	}
 
-	// get projected 2d gun position and convert to 3d position for bullet spawn
-	spine::Bone* b_gun = pSkeleton->arrBones[K_SD_BONE_GUN_MOUNT];
-	// find the position in 3d so that the projected position always matches the default bullet height
-	this->posWeapon.x = b_gun->getWorldX();
-	this->posWeapon.y = b_gun->getWorldY() + Z_TO_H(K_BULLET_DEFAULT_Z);
-	this->posWeapon.z = K_BULLET_DEFAULT_Z;
+	// set new position of the skeleton now before we compute the gun position?
+	c_graphics->Update(*this, dTime);
 
 	///--- update weapons ---
 	/*
@@ -519,124 +438,6 @@ void CActor::Update(float dTime)
 	}
 	*/
 
-	///--- final update step ---
-	//set skeleton data
-	if ((pSkeleton != null) && (pSkeleton->skel != null))
-	{
-		pSkeleton->skel->setPosition(pos.xy_proj.x, pos.xy_proj.y);
-		if (bAnimFlipX)
-			this->pSkeleton->skel->setScaleX(-1.0f);
-		else
-			this->pSkeleton->skel->setScaleX(1.0f);
-	}
-}
-
-void CActor::Spine_SaveAnimPointers()
-{
-	int nAnimsChanged = 0;
-	for (int anm = 0; anm < K_SD_ANIMS_CNT; anm++)
-	{
-		for (int kk = 0; kk < K_ACT_ANIM_MAX_SETS; kk++)
-		{
-			this->arrAnimsPtr[anm].bLooping = this->actTemplate.arrAnims[anm].bLooping;
-			// check for changes in the template
-			if ((this->actTemplate.arrAnims[anm].animNamesA[kk].IsEmpty()) ||
-				(this->arrAnimsPtr[anm].animNamesA[kk] != this->actTemplate.arrAnims[anm].animNamesA[kk]))
-			{
-				this->arrAnimsPtr[anm].animNamesA[kk] = this->actTemplate.arrAnims[anm].animNamesA[kk];
-				// erase outdated anim pointers
-				this->arrAnimsPtr[anm].pAnim[kk] = null;
-			}
-
-			if ((this->arrAnimsPtr[anm].pAnim[kk] == null) && (this->arrAnimsPtr[anm].animNamesA[kk].IsSet()))
-			{
-				// set new anim pointer
-				spine::Animation* anim = pSkelTemplate->GetAnimation(this->arrAnimsPtr[anm].animNamesA[kk].text);
-				if (anim != null)
-				{
-					this->arrAnimsPtr[anm].pAnim[kk] = anim;
-					nAnimsChanged++;
-				}
-				else
-				{
-					LOG_DBG("[WARNING] CActor::UpdateAnimationPointers: Couldn't find animation [%s]", this->arrAnimsPtr[anm].animNamesA[kk].text);
-				}
-			}
-		}
-	}
-
-	LOG_DBG(L"CActor::UpdateAnimationPointers: Updates %d animations", nAnimsChanged);
-}
-
-spine::TrackEntry* CActor::SetAnimOnce(int nTrack, ESpineAnim eAnim)
-{
-	assert((nTrack >= 0) || (nTrack < K_ACT_MAX_ANIM_TRACKS));
-	assert((eAnim >= K_SD_ANIM_EMPTY) && (eAnim < K_SD_ANIMS_CNT));
-
-	spine::TrackEntry* trk = null;
-	if (eAnim != eLastAnim[nTrack])
-	{
-		eLastAnim[nTrack] = eAnim;
-
-		if (eAnim <= K_SD_ANIM_EMPTY)
-		{
-			LOG_DBG(L"ACTOR[%s].SetAnimOnce: Clearing track %d.", actTemplate.shID.text, nTrack);
-			pSkeleton->anim->setEmptyAnimation(nTrack, K_SM_DEFAULT_MIX_DURATION);
-		}
-		else
-		{
-			if (HasAnimation(eAnim))
-			{
-				LOG_DBG(L"ACTOR[%s]:SetAnimOnce:", actTemplate.shID.text);
-				LOG_DBG("track:%d anim:%s", nTrack, actTemplate.arrAnims[(int)eAnim].animNamesA[this->nAnimSet].text);
-				trk = pSkeleton->anim->setAnimation(nTrack, this->arrAnimsPtr[(int)eAnim].pAnim[this->nAnimSet], this->arrAnimsPtr[(int)eAnim].bLooping);
-			}
-			else
-			{
-				LOG_DBG(L"ACTOR[%s]:SetAnimOnce:", actTemplate.shID.text);
-				LOG_DBG("ANIM NOT FOUND! [%s]", actTemplate.arrAnims[(int)eAnim].animNamesA[this->nAnimSet].text);
-			}
-		}
-	}
-
-	return trk;
-}
-
-spine::TrackEntry* CActor::AddAnimOnce(int nTrack, ESpineAnim eAnim, float fMixTime /*= K_SM_DEFAULT_MIX_DURATION*/, float fDelay /*= 0.0f*/)
-{
-	assert((nTrack >= 0) || (nTrack < K_ACT_MAX_ANIM_TRACKS));
-	assert((eAnim >= K_SD_ANIM_EMPTY) && (eAnim < K_SD_ANIMS_CNT));
-
-	spine::TrackEntry* trk = null;
-	if (eAnim != eLastAnim[nTrack])
-	{
-		eLastAnim[nTrack] = eAnim;
-
-		// set the anim on empty => clear the track
-		if (eAnim <= K_SD_ANIM_EMPTY)
-		{
-			LOG_DBG(L"[WARNING] ACTOR[%s].AddAnimOnce: Empty anim on track %d.", actTemplate.shID.text, nTrack);
-			pSkeleton->anim->addEmptyAnimation(nTrack, fMixTime, 0.0f);
-		}
-		else
-		{
-			if (HasAnimation(eAnim))
-			{
-				LOG_DBG(L"ACTOR[%s]:AddAnimOnce:", actTemplate.shID.text);
-				LOG_DBG("track:%d anim:%s fMixtime:%.2f fDelay:%.2f", nTrack, actTemplate.arrAnims[(int)eAnim].animNamesA[this->nAnimSet].text, fMixTime, fDelay);
-				trk = pSkeleton->anim->addAnimation(nTrack, this->arrAnimsPtr[(int)eAnim].pAnim[this->nAnimSet], this->arrAnimsPtr[(int)eAnim].bLooping, fDelay);
-				//set custom mix time
-				trk->setMixTime(fMixTime);
-			}
-			else
-			{
-				LOG_DBG(L"ACTOR[%s]:AddAnimOnce:", actTemplate.shID.text);
-				LOG_DBG("ANIM NOT FOUND! [%s]", actTemplate.arrAnims[eAnim].animNamesA[this->nAnimSet].text);
-			}
-		}
-	}
-
-	return trk;
 }
 
 void CActor::PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly /*= false*/)

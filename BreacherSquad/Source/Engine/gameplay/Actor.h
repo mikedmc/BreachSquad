@@ -1,11 +1,11 @@
 #pragma once
 
+#include "components/SpineAnimComp.h"
+
 // max no of anim sets
 #define K_ACT_ANIM_MAX_SETS 2
 // max no of verse sets
 #define K_ACT_VERSES_MAX_SETS 2
-// max no of animation tracks for the actors
-#define K_ACT_MAX_ANIM_TRACKS 2
 
 ///--------------------------------------------------------------------------
 ///--- ACTORS : clasa principala de inamici si personaje player
@@ -90,24 +90,13 @@ public:
 
 };
 
-// Animation pointers buffer - keeps animation in sync with actor template declared animations
-struct CAnimPtr {
-	CStringHashA		animNamesA[K_ACT_ANIM_MAX_SETS];
-	spine::Animation*	pAnim[K_ACT_ANIM_MAX_SETS];
-	bool				bLooping;
-
-	CAnimPtr() : bLooping(true)
-	{
-		for (int kk = 0; kk < K_ACT_ANIM_MAX_SETS; kk++)
-		{
-			pAnim[kk] = null;
-			animNamesA[kk].Reset();
-		}
-	}
-};
 
 class CActor : public IActiveInterface
 {
+///--- COMPONENTS --- 
+/// Pointer components get deallocated by the actor, referenced ones are global so we don't touch them:
+private:
+	CSpineAnimComponent*		c_graphics;		//graphics component that handles all painting and animation stuff
 public:
 	//ce info primeste de la senzori
 	class CAISensorInfo
@@ -207,15 +196,10 @@ public:
 
 
 public:
-	CSpineManager::CSkeletonTemplate*		pSkelTemplate;	// Pointer to the skeleton template (don't deallocate, managed)
-	CSpineManager::CSkeletonInstance*		pSkeleton;		// Pointer to the skeleton instance (don't deallocate, managed)
-	CAnimPtr								arrAnimsPtr[K_SD_ANIMS_CNT]; // Direct pointer structure to animations declared in actor template (rarely updated)
-
 	CActorTemplate			actTemplate;				// holds data about each actor, copied from source templates (xml) and probably modified by enhancements
 	CActorTemplate			actTemplate_ini;			// holds initial template that we reset to when changing the weapon or adding non permanent enhancements
 
 	EActorSoundVerse		eLastPlayedVerse;			//last played sound verse
-	ESpineAnim				eLastAnim[K_ACT_MAX_ANIM_TRACKS];	// Last anim set with SetActorAnimOnce() (torso and feet)
 	float					fVerseCooldown;				//don't play the same verse if cooldown > 0.0f
 	int						nLastPlayedVerseSndIdx;		//last played sound idx
 
@@ -266,15 +250,6 @@ public:
 	int							nInteractOptionsSelIdx;		// index in arrInteractOptions
 	CFixedArray<CScriptAction, 16>	arrInteractOptions;		// empty when not interacting. gathers all interaction options from object, character feats, inventory objects, etc
 
-	// Sets a Spine skin and returns true if successfull
-	bool						Spine_SetSkin(const char * strSkinName);
-	// Tells you if the actor has said animation 
-	bool						HasAnimation(ESpineAnim nAnimType, int nSet = 0);
-
-	// Sets current animation set (changes immediately)
-	void						SetAnimSet(int newAnimSet);
-	FORCEINLINE int				GetAnimSet() const { return nAnimSet; }
-
 	CArray<CWeapon*>			arrWeapons;		// Collection of weapons available for current actor
 	CWeapon*					pWeaponMain;	// currently selected main weapon (points to arrWeapons)
 	// Adds a weapon to actor's arsenal
@@ -298,7 +273,7 @@ public:
 	EAIBehaviorType GetCurrentBehavior();	
 
 	//CTOR
-	CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID = -1);
+	CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpineAnimComponent* pComGraphics);
 	~CActor();
 
 	const eActiveInterfaceType GetClassType() const {
@@ -313,12 +288,10 @@ public:
 
 	// Updates specified Actor AI. Returns busy state TRUE if actor has jobs to do or false if actor is still
 	void					Update(float dTime);
-	// Sets pointers to spine animations from skeleton template (optimization)
-	void					Spine_SaveAnimPointers();
-	// Set actor animation checking if not already set
-	spine::TrackEntry*		SetAnimOnce(int nTrack, ESpineAnim eAnim);
-	// Adds an animation to a track
-	spine::TrackEntry*		AddAnimOnce(int nTrack, ESpineAnim eAnim, float fMixTime = K_SM_DEFAULT_MIX_DURATION, float fDelay = 0.0f);
+	// Paints the actor on a specific color channel
+	FORCEINLINE void		Paint(ETexChannel eChannel = K_TEXCHAN_COLORMAP) { c_graphics->Paint(*this, eChannel); };
+	// sets graphics anim set
+	void					SetAnimSet(int nAnimSet) { c_graphics->SetAnimSet(nAnimSet); }
 	// Plays the actor verse from the template handling the positional attenuation
 	void					PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly = false);
 	// Equips specified weapon and sets template
