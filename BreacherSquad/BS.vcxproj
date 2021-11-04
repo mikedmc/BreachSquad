@@ -318,6 +318,7 @@
     <ClInclude Include="Source\Engine\OpResult.h" />
     <ClInclude Include="Source\Engine\PlayerSelScr.h" />
     <ClInclude Include="Source\Engine\PolyFOV.h" />
+    <ClInclude Include="Source\Engine\PoolGC.h" />
     <ClInclude Include="Source\Engine\pugixml\pugiconfig.hpp" />
     <ClInclude Include="Source\Engine\pugixml\pugixml.hpp" />
     <ClInclude Include="Source\Engine\Queue.h" />
