@@ -442,7 +442,8 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #endif
 
 #include "MiniDump.h"
-#include "List.h"
+#include "utils/List.h"
+#include "utils/PoolGC.h"
 ///--- enumerari ---
 #include "BitPacker.h"
 #include "utils/DataTypes.h"

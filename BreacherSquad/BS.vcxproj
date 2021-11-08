@@ -305,7 +305,6 @@
     <ClInclude Include="Source\Engine\IngameGUI.h" />
     <ClInclude Include="Source\Engine\Level.h" />
     <ClInclude Include="Source\Engine\LibraryManager.h" />
-    <ClInclude Include="Source\Engine\List.h" />
     <ClInclude Include="Source\Engine\lodepng\lodepng.h" />
     <ClInclude Include="Source\Engine\Log.h" />
     <ClInclude Include="Source\Engine\MainMenu.h" />
@@ -318,7 +317,6 @@
     <ClInclude Include="Source\Engine\OpResult.h" />
     <ClInclude Include="Source\Engine\PlayerSelScr.h" />
     <ClInclude Include="Source\Engine\PolyFOV.h" />
-    <ClInclude Include="Source\Engine\PoolGC.h" />
     <ClInclude Include="Source\Engine\pugixml\pugiconfig.hpp" />
     <ClInclude Include="Source\Engine\pugixml\pugixml.hpp" />
     <ClInclude Include="Source\Engine\Queue.h" />
@@ -352,8 +350,10 @@
     <ClInclude Include="Source\Engine\utils\dbgutil.h" />
     <ClInclude Include="Source\Engine\utils\enginecommon.h" />
     <ClInclude Include="Source\Engine\utils\HashUtil.h" />
+    <ClInclude Include="Source\Engine\utils\List.h" />
     <ClInclude Include="Source\Engine\utils\ParallaxBg.h" />
     <ClInclude Include="Source\Engine\utils\PlatformTypes.h" />
+    <ClInclude Include="Source\Engine\utils\PoolGC.h" />
     <ClInclude Include="Source\Engine\utils\StringHash.h" />
     <ClInclude Include="Source\Engine\utils\StringHashA.h" />
     <ClInclude Include="Source\Engine\utils\UTMath.h" />

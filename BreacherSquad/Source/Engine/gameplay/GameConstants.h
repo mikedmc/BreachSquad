@@ -44,8 +44,8 @@
 #define K_LVL_GRAVITY 1000.0f
 //distanta la care focalizeaza camera
 #define K_LVL_CAM_LOOK_OFFSET 0.0f
-#define K_LVL_CAM_FOLLOW_SPRING_KS 100.0f
-#define K_LVL_CAM_FOLLOW_DAMPING_KD 20.0f
+#define K_LVL_CAM_FOLLOW_SPRING_KS 1200.0f
+#define K_LVL_CAM_FOLLOW_DAMPING_KD 40.0f
 //impulse friction
 #define K_LVL_GROUND_DEFAULT_FRICTION 10.0f
 //multiplier de impuls pe cadavre

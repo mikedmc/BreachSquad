@@ -7575,14 +7575,28 @@ void CLevel::Update(float dTime_original)
 
 		if ((pPlayerActor[kk] != NULL) && (pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_IN_LIMBO) && (pPlayerActor[kk]->nSuspendedFlags == K_LVL_SUSPENDFLAG_NONE))
 		{
+			//#TODO: add constants or special camera class for this wicked camera movement
+			const float fMaxCameraMovement = K_TILE_SIZE_F * 4.0f;
+			const float fMaxAimVecRadius = K_TILE_SIZE_F * 8.0f;
+			const float fCameraDeadRadius = K_TILE_SIZE_F * 1.0f;
+			// find look direction normalized
+			float fLookDist = MUVec2Len( &pPlayerActor[ kk ]->m_AIcommands.vAimVec );
+			Vec2 fLookOff = pPlayerActor[ kk ]->m_AIcommands.vAimVec / fLookDist;
+			// normalize distance and square it so if varies less when cursor is close to character
+			fLookDist -= fCameraDeadRadius;
+			fLookDist /= fMaxAimVecRadius;
+			CLAMP( fLookDist, 0.0f, 1.0f );
+			//fLookDist *= fLookDist;
+			// compute final camera vector
+			fLookOff *= fLookDist * fMaxCameraMovement;
+
 			if (pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_DEAD)
 			{
-				avg_live += Vec3XY(pPlayerActor[kk]->pos_last) + pPlayerActor[kk]->m_AIcommands.vAimVec * 0.2f;
+				avg_live += Vec3XY(pPlayerActor[kk]->pos_last) + fLookOff;
 				plcnt_live++;
 			}
 
-
-			avg_all += Vec3XY(pPlayerActor[kk]->pos_last) + pPlayerActor[kk]->m_AIcommands.vAimVec *  0.2f;
+			avg_all += Vec3XY(pPlayerActor[kk]->pos_last) + fLookOff;
 			plcnt_all++;
 		}
 	}
