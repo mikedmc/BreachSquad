@@ -50,8 +50,6 @@
 #define K_LVL_GROUND_DEFAULT_FRICTION 10.0f
 //multiplier de impuls pe cadavre
 #define K_LVL_DEAD_BODY_BULLET_MOMENTUM_MULTIPLIER 2.0f
-//la cati pixeli de penetrare face squash
-#define K_LVL_MAX_PENETRATION 5
 
 ///--- AFRAMES flags ---
 //flags set from editor and returned from Update(shoot, footsteps, etc)
