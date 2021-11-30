@@ -609,6 +609,7 @@ using namespace spine;
 #endif
 
 #include "AppGlobals.h"
+#include "Game.h"
 
 #ifdef K_CONTROLS_EDITOR
 	#include "../ControlsEd/ControlsEditor.h"

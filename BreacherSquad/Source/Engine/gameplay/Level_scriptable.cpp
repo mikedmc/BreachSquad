@@ -1263,7 +1263,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			CVariantComplex* vcWhere = instr->GetArgument(L"where");
 			CVariantComplex* vcTemplate = instr->GetArgument(L"template");
 			CVariantComplex* vcAIstate = instr->GetArgument(L"AIstate");
-			CVariantComplex* vcDirection = instr->GetArgument(L"direction");
+			//CVariantComplex* vcDirection = instr->GetArgument(L"direction");
 
 			//destination
 			IActiveInterface* target = ScriptGetActiveInterfaceByTargetParam(vcWhere, executorUID);
@@ -1494,4 +1494,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		}
 		break;
 	}
+
+	return false;
 }

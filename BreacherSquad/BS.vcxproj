@@ -268,6 +268,7 @@
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyUtils.h" />
+    <ClInclude Include="Source\Engine\Game.h" />
     <ClInclude Include="Source\Engine\gameplay\AreasInventory.h" />
     <ClInclude Include="Source\Engine\gameplay\components\ComponentInterfaces.h" />
     <ClInclude Include="Source\Engine\gameplay\components\SpineAnimComp.h" />
@@ -675,6 +676,7 @@
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyLeaderboards.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.cpp" />
+    <ClCompile Include="Source\Engine\Game.cpp" />
     <ClCompile Include="Source\Engine\gameplay\AreasInventory.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\SpineAnimComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\LevelArea.cpp" />

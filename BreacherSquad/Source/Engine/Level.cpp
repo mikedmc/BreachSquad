@@ -9367,6 +9367,11 @@ void CLevel::GenerateEffect(CStringHash sEffectName, Vec2 pos, float fSize, DWOR
 	GenerateEffect(effectidx, pos, fSize, color);
 }
 
+void CLevel::GC()
+{
+
+}
+
 void CLevel::TouchClosestActive(CActor * pToucherAct, float dTime)
 {
 	_ASSERT(pToucherAct != null);

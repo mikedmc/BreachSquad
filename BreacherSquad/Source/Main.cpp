@@ -105,6 +105,8 @@ float ct_fGaussLen = 0.35f;
 float ct_fLightMul = 2.0f;
 float ct_fColorDodge = 0.4f;
 
+CGame						g_game;								// main game wrapper
+
 
 //**************************************************************************************
 // Forward declarations 
@@ -1415,6 +1417,8 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 
 	}
 
+	g_game.Update( fElapsedTime );
+
 	///--- ANALYTICS ---
 	UTGetAnalytics().Update();
 
@@ -2153,29 +2157,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	///----------------------------------------------------------------------------------
 	///	PART1. Paint the offscreen surfaces before the main render begin/end 
 	///----------------------------------------------------------------------------------
-	switch (g_gameState)
-	{
-		case GAME_STATE_GAME:
-		{
-			//game is networked? Don't paint until we sync one frame (fixes bug that showed a frame from last coop game)
-			/*
-			if ((UTGetAppClass().IsGameNetworked()) && (g_nLastSyncedFrame <= 1))
-			{
-				break;
-			}
-			*/
-			// Deferred buffers use their own begin and end for UTPainter();
-			g_level.PaintDeferredBuffers();
-		}
-		break;
-
-		default:  //on all other states just clear the RTT for now
-		{
-			//g_level.PaintOffscreen_nothing();
-			//g_level.PaintComposition_nothing();
-		}
-		break;
-	}
+	g_game.BeforePaint();
 
 	///----------------------------------------------------------------------------------
 	/// PART2. --- Render onscreen - FINAL PASS ---
@@ -2197,193 +2179,20 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				UTPainter().Begin(pSprVS, g_matIdentity);
 		}
 
-		switch (g_gameState)
-		{
-			case GAME_STATE_PRELOAD:
-			{
-			}
-			break;
-			case GAME_STATE_DEVELOPER:
-			{
-				UTGetAppClass().App_PaintState_Developer(pDevice, g_pGameSprite, fElapsedTime);
-			}
-			break;
+		///----------------------------------------------------------------------------------
+		/// MAIN GAME PAINT
+		///----------------------------------------------------------------------------------
+		g_game.Paint( pDevice, g_pGameSprite, fElapsedTime );
 
-			case GAME_STATE_LOADING:
-			{
-				UTGetAppClass().App_PaintState_Loading(pDevice, g_pGameSprite, fElapsedTime);
-			}
-			break;
-
-			case GAME_STATE_NET_LOBBY:
-			{
-				g_mainMenu.Paint();
-			}
-			break;
-
-			case GAME_STATE_JOIN_COOP_LIST:
-			case GAME_STATE_WORKSHOP:
-			case GAME_STATE_GAME_MODE_SELECTION:
-			case GAME_STATE_CHAPTER_SELECTION:
-			case GAME_STATE_LEVEL_SELECTION:
-			case GAME_STATE_MAINMENU:
-			{
-				g_mainMenu.Paint();
-
-				/*
-				// show font image
-				if (DXUTIsKeyDown('6'))
-				{
-					if (g_font1.m_atlas.pTex != nullptr)
-					{
-						g_pGameSprite->Flush();
-						CCameraTransform::SetActiveCameraIdentity(pDevice);
-						RECT src;
-						SetRect(&src, 0, 0, g_font1.m_atlas.atlasSize.w, g_font1.m_atlas.atlasSize.h);
-						g_pGameSprite->SetTransform(&g_matIdentity);
-						g_pGameSprite->Draw(g_font1.m_atlas.pTex, &src, NULL, &D3DXVECTOR3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
-						g_pGameSprite->Flush();
-					}
-				}
-
-				UTLang().SetString(STR_TEMP1, L"Play Game now!");
-
-				PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
-				if (pSprVS)
-					UTPainter().Begin(pSprVS, UTGetAppClass().g_matProj);
-
-				g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f, FTFF_LEFT | FTFF_VCENTER, 0xffffffff);
-				g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f + g_font1.rowHeight, FTFF_RIGHT, 0xff88ff88);
-				g_font1.DrawStringLine(UTLang().strings[STR_TEMP1], 400.0f, 200.0f + 2 * g_font1.rowHeight, FTFF_CENTER, 0xff8888ff);
-
-				UTPainter().End();
-				*/
-			}
-			break;
-			case GAME_STATE_PLAYER_SELECTION:
-			{
-				g_playerSelScr.Paint(g_pGameSprite);
-			}
-			break;
-			case GAME_STATE_GAME:
-			{
-				//if level not loaded just skip paint
-				if (!g_level.m_bLoaded)
-					break;
-
-				// paint game elements above RTT content
-				g_level.Paint();
-				
-				//final flush
-				g_pGameSprite->Flush();
-
-				/*
-				g_pGameSprite->Flush();
-				PVERTEXSHADER vsspr = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
-				if (vsspr)
-				{
-					g_SprPainter.Begin(vsspr, UTGetAppClass().g_matProj);
-
-					for (int kk = 0; kk < 5; kk++)
-						CSprite::paintFrameNEW(&g_level.m_sprInterface, Vec3(100.0f + 30.0f * kk, 100.0f + 30.0f * kk, 0.0f), ANM_IGM_INTERFACE_SPR_PORTRAITS, kk, 
-							0xffffffff, fTime, Vec2(1.0f + 0.4f * sin(fTime), 1.0f - 0.4f * sin(fTime)));
-
-
-					g_SprPainter.End();
-				}
-				*/
-
-
-				///--- level editor ---
-				g_editor.Paint(g_pGameSprite);
-
-				///--- string dummies ---
-				g_pGameSprite->SetTransform(&g_matIdentity);
-				//paint string dummies
-				/*
-				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam240hScreen);
-				g_particlesMgr.PaintStringDummies();
-				g_pGameSprite->Flush();
-				 */
-				//debug stuff
-#if defined(_DEBUG) || defined(DEBUG)
-				//game screen space
-				CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camRTScreen);
-
-				if (DXUTIsKeyDown('9'))
-				{
-					CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_COLORDEPTHSTENCIL);
-					if (pRT != null)
-					{
-						g_pGameSprite->Flush();
-						CCameraTransform::SetActiveCameraIdentity(pDevice);
-						RECT src;
-						SetRect(&src, 0, 0, pRT->nWidth, pRT->nHeight);
-						g_pGameSprite->SetTransform(&g_matIdentity);
-						g_pGameSprite->Draw(pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
-						g_pGameSprite->Flush();
-					}
-				}
-				if (DXUTIsKeyDown('8'))
-				{
-					CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
-					if (pRT != null)
-					{
-						g_pGameSprite->Flush();
-						CCameraTransform::SetActiveCameraIdentity(pDevice);
-						RECT src;
-						SetRect(&src, 0, 0, pRT->nWidth, pRT->nHeight);
-						g_pGameSprite->SetTransform(&g_matIdentity);
-						g_pGameSprite->Draw(pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
-						g_pGameSprite->Flush();
-					}
-				}
-				if (DXUTIsKeyDown('0'))
-				{
-					CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_FINAL);
-					if (pRT != null)
-					{
-						g_pGameSprite->Flush();
-						CCameraTransform::SetActiveCameraIdentity(pDevice);
-						RECT src;
-						SetRect(&src, 0, 0, pRT->nWidth, pRT->nHeight);
-						g_pGameSprite->SetTransform(&g_matIdentity);
-						g_pGameSprite->Draw(pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
-						g_pGameSprite->Flush();
-					}
-				}
-				//if (DXUTIsKeyDown('9'))
-				//{
-				//	g_pGameSprite->Flush();
-				//	CCameraTransform::SetActiveCameraIdentity(pDevice);
-				//	RECT src;
-				//	SetRect(&src, 0, 0, 512, 512);
-				//	g_pGameSprite->SetTransform(&g_matIdentity);
-				//	g_pGameSprite->Draw(g_level.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
-				//	g_pGameSprite->Flush();
-				//}
-				//if (DXUTIsKeyDown('0'))
-				//{
-				//	g_pGameSprite->Flush();
-				//	CCameraTransform::SetActiveCameraIdentity(pDevice);
-				//	RECT src;
-				//	SetRect(&src, 512, 0, 1024, 512);
-				//	g_pGameSprite->SetTransform(&g_matIdentity);
-				//	g_pGameSprite->Draw(g_level.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
-				//	g_pGameSprite->Flush();
-				//}
-#endif
-			}
-			break;
 
 #ifdef K_CONTROLS_EDITOR
-			case GAME_STATE_CONTROLSED:
-			{
-				g_ControlsEditor.Paint();
-			}
-			break;
-#endif
+		///--- controls editor paint ---
+		if ( g_gameState == GAME_STATE_CONTROLSED )
+		{
+			g_ControlsEditor.Paint();
 		}
+#endif
+
 
 		///--- chat window ---
 #ifdef ENABLE_CHAT_WINDOW
@@ -2399,7 +2208,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		}
 #endif
 
-		///--- controls paint ---
+		///--- GUI controls paint ---
 #ifdef K_CONTROLS_EDITOR
 		if (g_gameState != GAME_STATE_CONTROLSED)
 		{

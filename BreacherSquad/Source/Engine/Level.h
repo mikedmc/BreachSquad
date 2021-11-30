@@ -398,6 +398,9 @@ public:
 	//controlul de ingame hints
 	//CCustomInterfaceTextBubble m_interfaceTextBubble;
 
+	// garbage collect
+	void					GC();
+
 ///--- SCRIPT ---
 	//activeaza cel mai apropiat obiect, primul gasit
 	void					TouchClosestActive(CActor * pToucherAct, float dTime);
