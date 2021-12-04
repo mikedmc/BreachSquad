@@ -313,6 +313,8 @@ inline void PoolGC<type>::Kill( int index )
 		{
 			m_killed++;
 			m_listFlags[ index ] &= ~PoolGC::FLAG_ALIVE;
+			// Destruct the element to be removed
+			m_listFlags[ index ].~type();
 		}
 	}
 }

@@ -44,6 +44,11 @@ void VecProj::Set(Vec3 & vec)
 	xy_proj = Vec2(xyz.x, xyz.y - proj_h);
 }
 
+void VecProj::Set()
+{
+	Set( Vec3( 0.0f, 0.0f, 0.0f ) );
+}
+
 void VecProj::Move(Vec3 & delta)
 {
 	xyz += delta;

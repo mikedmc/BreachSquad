@@ -66,9 +66,6 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	bullet->physPt->m_data.fBounceF = 0.0f;
 	//default states
 	bullet->physPt->m_data.bFlagPhysicsEnabled = false;
-	//tail
-	bullet->szTailSize.w = 0.0f;
-	bullet->szTailSize.h = 0.0f;
 
 	//bullet visuals
 	bullet->sprBullet.Init(&m_sprProps, ANM_PROPS_SPR_BULLETS_NOANIM, bullet->posProj, 0);
@@ -79,7 +76,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	return &node->m_data;
 }
 
-CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float fMaxDistance, int dwOwnerUID /*= 0*/)
+CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float fMaxDistance, UINT32 dwOwnerUID /*= 0*/)
 {
 	float fMinDist = 100000.0f;
 	float fMaxDistanceSq = fMaxDistance * fMaxDistance;
@@ -143,9 +140,6 @@ void CLevel::ReleaseBulletType(int nBulletType, UINT32 nOwnerUID)
 
 void CLevel::UpdateBullets(float dTime)
 {
-	//we'll store some important bullets in m_arrBulletsTemp so we can quickly check them later on when updating AIs
-	m_arrBulletsTemp.Clear();
-
 	static _VERTEX_PNCT4T4 arrBulletsTris[K_LVL_BULLETS_MAX_CNT * 6];
 	//mesh dinamic pentru gloante
 	m_bulletsMeshIdx = -1;

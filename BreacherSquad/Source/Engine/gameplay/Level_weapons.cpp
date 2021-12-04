@@ -345,14 +345,7 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 				tmplBullet.fDamage += tmplBullet.fDamage * weapon->m_activePerk.fDamage_percAdd;
 			}
 
-			LOG_DBG_BUFF(L"= Shot:%s ID:%d =", weapon->WeaponTemplate.name.text, weapon->pOwner->ID);
 			CBullet* bullet = ShootBullet(&tmplBullet, nFinalClass, shooter->GetUID(), vShootPos, vFinalDir);
-			//--- statistics ---
-			if ((bullet != NULL) && ((bullet->nFlags & K_LVL_BULLET_FLAG_NOT_BALLISTIC) == 0) && (weapon->pOwner->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER))
-			{
-				//aici numara si grenadele dar nu prea conteaza pt ca tragi multe gloante in joc
-				m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT + weapon->pOwner->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT]++;
-			}
 		}
 
 		//adaug shell

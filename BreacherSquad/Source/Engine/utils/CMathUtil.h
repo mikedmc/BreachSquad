@@ -1,5 +1,8 @@
 #pragma once
 
+#include "VecProj.h"
+#include "VecProjPhys.h"
+
 #define			QUARTER_PI 0.7853981633f
 #define			HALF_PI 1.57079632f
 #define			DOUBLE_PI 6.283185307f

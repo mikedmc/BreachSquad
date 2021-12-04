@@ -5615,29 +5615,6 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 				continue;
 		}
 
-		//check smoke grenades
-		bool bObscured = false;
-		for (int ll = 0; ll < m_arrBulletsTemp.Count(); ll++)
-		{
-			CBullet* bul = m_arrBulletsTemp.m_pData[ll];
-			if (bul->eType != K_LVL_BULLET_SMOKE_GRENADE)
-				continue;
-			Vec2 vBulPos = bul->physPt->m_data.pos;
-			
-			CAABB smokeAABB;
-			smokeAABB.Set(vBulPos.x - K_TILE_SIZE, vBulPos.y - 4 * K_TILE_SIZE, vBulPos.x + K_TILE_SIZE, vBulPos.y + K_TILE_SIZE);
-
-			Vec2 v2HeartSrc = sourceActor->GetPosHeart();
-			Vec2 v2HeartDst = enemy->GetPosHeart();
-			if (AABB::Segment_Intersection(v2HeartSrc, v2HeartDst, smokeAABB))
-			{
-				bObscured = true;
-				break;
-			}
-		}
-		if (bObscured)
-			continue;
-
 		//passed all tests and is closer? set ptr on new one
 		if ((retvalenemy == null) || (enemyDistSq < minDistSq))
 		{

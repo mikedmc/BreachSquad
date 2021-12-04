@@ -237,7 +237,6 @@ public:
 	///--- bullets linked pool ---
 	CLinkedPool<CBullet>	m_poolBullets;			//pool-ul de gloante
 	int						m_bulletsMeshIdx;		//idx gloante
-	CFixedArray<CBullet*, 128> m_arrBulletsTemp;	//Temporary bullets list used for misc checks
 
 	///--- water ---
 	int						m_waterMeshIdx;			//idx la meshul apelor vizibile in ecran
@@ -266,7 +265,7 @@ public:
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.
 	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir, CLevelArea* pStartArea = nullptr);
 	// Returns the closest bullet (or null) of nBulletType under fMaxDistance
-	CBullet*				GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float fMaxDistance = 0.0f, int dwOwnerUID = 0);
+	CBullet*				GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float fMaxDistance = 0.0f, UINT32 dwOwnerUID = 0);
 	// Releases all bullets of said type from specified owner
 	void					ReleaseBulletType(int nBulletType, UINT32 nOwnerUID);
 	void					UpdateBullets(float dTime);

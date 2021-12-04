@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utils/VecProj.h"
+
 // declare useful classes
 class CLevelArea;
 
