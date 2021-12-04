@@ -271,6 +271,7 @@
     <ClInclude Include="Source\Engine\Game.h" />
     <ClInclude Include="Source\Engine\gameplay\AreasInventory.h" />
     <ClInclude Include="Source\Engine\gameplay\components\ComponentInterfaces.h" />
+    <ClInclude Include="Source\Engine\gameplay\components\PhysPtComp.h" />
     <ClInclude Include="Source\Engine\gameplay\components\SpineAnimComp.h" />
     <ClInclude Include="Source\Engine\gameplay\LevelArea.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_bullets.h" />
@@ -359,7 +360,6 @@
     <ClInclude Include="Source\Engine\utils\StringHashA.h" />
     <ClInclude Include="Source\Engine\utils\UTMath.h" />
     <ClInclude Include="Source\Engine\utils\VecProj.h" />
-    <ClInclude Include="Source\Engine\utils\VecProjPhys.h" />
     <ClInclude Include="Source\LevelEd\LevelEditor.h" />
     <ClInclude Include="Source\resource.h" />
     <ClInclude Include="Source\resource1.h" />
@@ -679,6 +679,7 @@
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.cpp" />
     <ClCompile Include="Source\Engine\Game.cpp" />
     <ClCompile Include="Source\Engine\gameplay\AreasInventory.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\components\PhysPtComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\SpineAnimComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\LevelArea.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_bullets.cpp" />
@@ -782,7 +783,6 @@
     <ClCompile Include="Source\Engine\utils\StringHashA.cpp" />
     <ClCompile Include="Source\Engine\utils\UTMath.cpp" />
     <ClCompile Include="Source\Engine\utils\VecProj.cpp" />
-    <ClCompile Include="Source\Engine\utils\VecProjPhys.cpp" />
     <ClCompile Include="Source\LevelEd\LevelEditor.cpp" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\Engine\ogg.cpp">

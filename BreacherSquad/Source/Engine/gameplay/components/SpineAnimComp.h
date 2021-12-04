@@ -26,7 +26,7 @@ struct CAnimPtr {
 
 // should be derived from a more complex interface with all the methods below (IRenderItemComponent)
 // this way we can have all kinds of rendering spine, sprite, etc
-class CSpineAnimComponent : public IBaseComponent
+class CSpineAnimComponent : public IBaseAnimComponent
 {
 private:
 	ESpineAnim					eLastAnim[K_SACOMP_MAX_ANIM_TRACKS];	// Last anim set on one track so we don't set it again if already set (for mixing)

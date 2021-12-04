@@ -1,8 +1,5 @@
 #pragma once
 
-#include "VecProj.h"
-#include "VecProjPhys.h"
-
 #define			QUARTER_PI 0.7853981633f
 #define			HALF_PI 1.57079632f
 #define			DOUBLE_PI 6.283185307f
@@ -45,6 +42,7 @@
 #define			ATAN2_PIBY2_FLOAT	1.5707963f
 #define			ONEQTR_PI			(M_PI / 4.0f);
 #define			THRQTR_PI			(3.0f * M_PI / 4.0f);
+
 
 namespace UTMath
 {

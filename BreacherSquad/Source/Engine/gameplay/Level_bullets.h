@@ -161,7 +161,7 @@ public:
 	int					nArmorPiercingRating;	//AP class - bullet vs shield logic (see actor's ArmorRating)
 	UINT32				nExploTemplateHash;		//hash of explosion template at the end or 0 if none
 
-	VecProjPhys			posV;					// position and speed (used by collision components)
+	VecProj				pos;					// position and speed (used by collision components)
 
 	UINT32				nFlags;					// misc flags
 	int					nSubstate;				// bullet state used by some bullet types
