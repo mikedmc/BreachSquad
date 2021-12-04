@@ -51,9 +51,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	bullet->fSelfDamageMultiplier = bulletTemplate->fSelfDamageMultiplier;
 	bullet->fCriticalHitChance = bulletTemplate->fCriticalHitChance;
 
-	bullet->pos_ini = vPos;
-	bullet->posProj = Vec3ProjVec2(vPos);
-	bullet->posShadow = Vec3XY(vPos);
+	bullet->posV.pos.Set( vPos );
 	//physics
 	bullet->physPt->m_data.pArea = bullet->pArea;
 	bullet->physPt->m_data.pos = vPos;
@@ -68,7 +66,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	bullet->physPt->m_data.bFlagPhysicsEnabled = false;
 
 	//bullet visuals
-	bullet->sprBullet.Init(&m_sprProps, ANM_PROPS_SPR_BULLETS_NOANIM, bullet->posProj, 0);
+	bullet->sprBullet.Init(&m_sprProps, ANM_PROPS_SPR_BULLETS_NOANIM, bullet->posV.pos.xy_proj, 0);
 	bullet->fidLight.Init(ANM_PROPS_SPR_BULLETS_LIGHTS, 0);
 	if (m_sprProps.GetAnimFlags(ANM_PROPS_SPR_BULLETS_NOANIM) & K_EDITOR_ANIMATION_FLAG_LOOPED)
 		bullet->bAnimated = true;
@@ -145,8 +143,6 @@ void CLevel::UpdateBullets(float dTime)
 	m_bulletsMeshIdx = -1;
 	int nBulletsTrisCnt = 0;
 
-	bool bGoreEnabled = UTGetAppClass().m_Settings.bGoreEnabled;
-
 	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.pListUsed.m_pNext;
 	while (node != &m_poolBullets.pListUsed)
 	{
@@ -156,6 +152,7 @@ void CLevel::UpdateBullets(float dTime)
 		CBullet* bullet = &node->m_data;  
 		// copy area pointer from phys pt
 		bullet->pArea = bullet->physPt->m_data.pArea;
+		bullet->posV.pos.Set( bullet->physPt->m_data.pos );
 		// animate sprite if necessary
 		if (bullet->bAnimated)
 		{
@@ -171,10 +168,6 @@ void CLevel::UpdateBullets(float dTime)
 		if (bullet->physPt->m_data.bIsDead)
 			killbullet = true;
 
-		// update position triplets
-		bullet->posProj = Vec3ProjVec2(bullet->physPt->m_data.pos);
-		bullet->posShadow = Vec3XY(bullet->physPt->m_data.pos);
-
 		if (bullet->physPt->m_data.bContacting)
 		{
 			killbullet = true;
@@ -186,7 +179,7 @@ void CLevel::UpdateBullets(float dTime)
 		CVisibleSortable pRetObj;
 
 		Vec2 vFrom = Vec3XY(bullet->physPt->m_data.pos_last);
-		Vec2 vTo = bullet->posShadow;
+		Vec2 vTo = bullet->posV.pos.xy;
 		CAABB aabbBullet;
 		aabbBullet.Set_Corrected(vFrom, vTo);
 		// collision return vars
@@ -328,9 +321,9 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 				CBullet* bullet = &node->m_data;
 				//Vec2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 				//float ang = UTMath::GetVectorAngle(vdir);
-				bullet->sprBullet.pos = bullet->posProj;
+				bullet->sprBullet.pos = bullet->posV.pos.xy_proj;
 				bullet->sprBullet.PaintModule(0);
-				bullet->sprBullet.pos = bullet->posShadow;
+				bullet->sprBullet.pos = bullet->posV.pos.xy;
 				bullet->sprBullet.PaintModule(0);
 
 				// advance to next bullet
@@ -345,7 +338,7 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 				CBullet* bullet = &node->m_data;
 				//Vec2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 				//float ang = UTMath::GetVectorAngle(vdir);
-				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->posShadow, bullet->sprBullet.animIdx, bullet->sprBullet.frameIdx, 0, 0xaa000000);
+				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->posV.pos.xy, bullet->sprBullet.animIdx, bullet->sprBullet.frameIdx, 0, 0xaa000000);
 
 				// advance to next bullet
 				node = node->m_pNext;
@@ -357,7 +350,7 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 			while (node != &m_poolBullets.pListUsed)
 			{
 				CBullet* bullet = &node->m_data;
-				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->posProj, bullet->fidLight.animIdx, bullet->fidLight.frameIdx, 0);
+				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->posV.pos.xy_proj, bullet->fidLight.animIdx, bullet->fidLight.frameIdx, 0);
 				// advance to next bullet
 				node = node->m_pNext;
 			}

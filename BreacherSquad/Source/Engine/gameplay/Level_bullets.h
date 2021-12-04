@@ -162,9 +162,6 @@ public:
 	UINT32				nExploTemplateHash;		//hash of explosion template at the end or 0 if none
 
 	VecProjPhys			posV;					// position and speed (used by collision components)
-	Vec3				pos_ini;				// spawning position
-	Vec2				posProj;				// 2D projected position
-	Vec2				posShadow;				// 2D shadow position (Z clamped)
 
 	UINT32				nFlags;					// misc flags
 	int					nSubstate;				// bullet state used by some bullet types
@@ -182,7 +179,6 @@ public:
 		bAnimated(false), pArea(nullptr)
 	{
 		physPt = nullptr;
-		pos_ini = Vec3(0.0f, 0.0f, 0.0f);
 	}
 };
 
