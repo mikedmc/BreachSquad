@@ -192,9 +192,9 @@ public:
 
 
 //--------------------------------------------------------------------------------------
-// Template object linked list pool
+// Template object double linked list pool
 //--------------------------------------------------------------------------------------
-template<typename TYPE> class CLinkedPool
+template<typename TYPE> class CDoubleLinkedPool
 {
 public:
 	class CLinkedPoolNode
@@ -202,25 +202,24 @@ public:
 	public:
 		TYPE m_data;
 	public:
-		//links catre prev si next
 		CLinkedPoolNode* m_pPrev;  //don't mess with me
 		CLinkedPoolNode* m_pNext;  //don't mess with me
 	};
 
 	int m_nSize;		//cate particule sunt folosite in momentul de fata
 	int m_nUsedCnt;		//cate sunt folosite
-	CLinkedPoolNode*	pArrNodes; //aici se aloca nodurile
+	CLinkedPoolNode*	pArrNodes;	// all nodes get allocated as an array and kept as a list through pListFree and pListUsed
 	
-	CLinkedPoolNode		pListFree; //free nodes list (folosim doar next si prev)
-	CLinkedPoolNode		pListUsed; //used nodes list (folosim doar next si prev)
+	CLinkedPoolNode		pListFree; //free nodes list
+	CLinkedPoolNode		pListUsed; //used nodes list
 
-	CLinkedPool() : pArrNodes(NULL), m_nSize(0), m_nUsedCnt(0)
+	CDoubleLinkedPool() : pArrNodes(NULL), m_nSize(0), m_nUsedCnt(0)
 	{
 		pListFree.m_pNext = pListFree.m_pPrev = &pListFree;	//indica spre ele insele
 		pListUsed.m_pNext = pListUsed.m_pPrev = &pListUsed;	//indica spre ele insele
 	}
 
-	~CLinkedPool()
+	~CDoubleLinkedPool()
 	{
 		Release();
 	}
@@ -269,7 +268,7 @@ public:
 	}
 };
 
-template<typename TYPE> HRESULT CLinkedPool <TYPE>::Init(int nPoolSize)
+template<typename TYPE> HRESULT CDoubleLinkedPool <TYPE>::Init(int nPoolSize)
 {
 	m_nSize = nPoolSize;
 	if (m_nSize < 10)
@@ -303,7 +302,7 @@ template<typename TYPE> HRESULT CLinkedPool <TYPE>::Init(int nPoolSize)
 	return S_OK;
 }
 
-template<typename TYPE> void CLinkedPool <TYPE>::Release()
+template<typename TYPE> void CDoubleLinkedPool <TYPE>::Release()
 {
 	m_nSize = 0;
 	m_nUsedCnt = 0;

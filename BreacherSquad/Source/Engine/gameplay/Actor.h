@@ -291,7 +291,7 @@ public:
 	// Paints the actor on a specific color channel
 	FORCEINLINE void		Paint(ETexChannel eChannel = K_TEXCHAN_COLORMAP) { c_graphics->Paint(*this, eChannel); };
 	// sets graphics anim set
-	void					SetAnimSet(int nAnimSet) { c_graphics->SetAnimSet(nAnimSet); }
+	void					SetAnimSet(int n_anim_set) { c_graphics->SetAnimSet(n_anim_set); }
 	// Plays the actor verse from the template handling the positional attenuation
 	void					PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly = false);
 	// Equips specified weapon and sets template

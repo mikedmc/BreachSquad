@@ -67,7 +67,7 @@ void CLevel::AddDoofer(EDooferType type, Vec2 pos, Vec2 * speed, Vec2 * accel, i
 void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float fFadeTime, DWORD color, float fScale)
 {
 	Vec3 vPos = Vec2ToVec3XY0(pos);
-	CLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.HireNode();
+	CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.HireNode();
 	//set 
 	if (node != nullptr)
 	{
@@ -109,7 +109,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 	if (explotemplate == nullptr)
 		return;
 
-	CLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.HireNode();
+	CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.HireNode();
 	//set 
 	if (node != nullptr)
 	{
@@ -606,11 +606,11 @@ void CLevel::UpdateDoofers(float dTime)
 	RECTXYWH_F camrect_larger = camrect;
 	camrect_larger.Inflate(2.0f * K_TILE_SIZE);
 
-	CLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.pListUsed.m_pNext;
+	CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.pListUsed.m_pNext;
 	while (node != &m_poolDoofers.pListUsed)
 	{
 		//salvez locatia urmatoare ca s apot avansa pe ea
-		CLinkedPool<CDoofer>::CLinkedPoolNode *nextnode = node->m_pNext;
+		CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *nextnode = node->m_pNext;
 		CDoofer* prop = &node->m_data;
 
 		bool killprop = false;
@@ -803,11 +803,11 @@ void CLevel::PaintDoofers()
 	m_pSprite->SetTransform(&g_matIdentity);
 	D3DXMATRIXA16 mattrans;
 
-	CLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.pListUsed.m_pNext;
+	CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.pListUsed.m_pNext;
 	while (node != &m_poolDoofers.pListUsed)
 	{
 		//salvez locatia urmatoare ca sa pot avansa pe ea
-		CLinkedPool<CDoofer>::CLinkedPoolNode *nextnode = node->m_pNext;
+		CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *nextnode = node->m_pNext;
 
 		switch (node->m_data.type)
 		{

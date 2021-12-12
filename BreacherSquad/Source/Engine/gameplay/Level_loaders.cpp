@@ -566,15 +566,15 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		if (obj->targetID_ini >= 0)
 			obj->targetID_ini += unBaseID;
 		// init actions
-		if (obj->shScriptActions.IsSet())
+		if ( obj->shScriptActions.IsSet() )
 		{
-			vector<wstring> retarr = TokenizeString(obj->shScriptActions.text, L",");
-			for (int kk = 0; kk < retarr.size(); kk++)
+			vector<wstring> retarr = TokenizeString( obj->shScriptActions.text, L"," );
+			for ( int ll = 0; ll < retarr.size(); ll++ )
 			{
 				CScriptAction scra;
-				if (OP_SUCCESS(GetScriptAction(retarr[kk].c_str(), scra)))
+				if ( OP_SUCCESS( GetScriptAction( retarr[ ll ].c_str(), scra ) ) )
 				{
-					obj->arrActions.Add(scra);
+					obj->arrActions.Add( scra );
 				}
 			}
 		}

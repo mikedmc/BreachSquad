@@ -160,8 +160,8 @@ bool Workshop_UpdatePublished(const WCHAR* strPathToModRoot)
 		SteamParamStringArray_t publishTags;
 		publishTags.m_nNumStrings = sTags.size();
 		publishTags.m_ppStrings = new const char *[publishTags.m_nNumStrings];
-		for (int i = 0; i < publishTags.m_nNumStrings; ++i)
-			publishTags.m_ppStrings[i] = sTags[i].c_str();
+		for ( int jj = 0; jj < publishTags.m_nNumStrings; ++jj )
+			publishTags.m_ppStrings[ jj ] = sTags[ jj ].c_str();
 
 		bResult = SteamRemoteStorage()->UpdatePublishedFileTags(publishedFileUpdateHandle, &publishTags);
 		if( bResult )

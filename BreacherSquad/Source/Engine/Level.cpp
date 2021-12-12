@@ -2014,11 +2014,11 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 	m_propsLightsMeshIdx = -1;
 	m_bufferedPainter.BeginMesh(m_propsLightsMeshIdx);
 
-	CLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.pListUsed.m_pNext;
+	CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.pListUsed.m_pNext;
 	while (node != &m_poolDoofers.pListUsed)
 	{
 		//salvez locatia urmatoare ca s apot avansa pe ea
-		CLinkedPool<CDoofer>::CLinkedPoolNode *nextnode = node->m_pNext;
+		CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *nextnode = node->m_pNext;
 		CDoofer* prop = &node->m_data;
 
 		if (prop->bMakesLight)
@@ -9119,10 +9119,10 @@ void CLevel::AddDecal_BloodSplat(Vec2 pos, bool bLarge, EActorClass eVictimClass
 
 void CLevel::UpdatePhysicsPoints(float dTime)
 {
-	CLinkedPool<CPhysicsPoint>::CLinkedPoolNode *node = m_poolPhysPts.pListUsed.m_pNext;
+	CDoubleLinkedPool<CPhysicsPoint>::CLinkedPoolNode *node = m_poolPhysPts.pListUsed.m_pNext;
 	while (node != &m_poolPhysPts.pListUsed)
 	{
-		CLinkedPool<CPhysicsPoint>::CLinkedPoolNode *nextnode = node->m_pNext;
+		CDoubleLinkedPool<CPhysicsPoint>::CLinkedPoolNode *nextnode = node->m_pNext;
 		//update
 		CPhysicsPoint*	point = &node->m_data;
 		// kill it when it gets outside the play area

@@ -278,12 +278,12 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			// first animation will be the empty animation or not set. Index is -1
 			// not set will be the first
 			arrAnims.push_back("NOT SET");
-			for (int ii = 0; ii < UTGetGUI().m_sprCol.Animations.Count(); ii++)
+			for ( int jj = 0; jj < UTGetGUI().m_sprCol.Animations.Count(); jj++ )
 			{
-				scAnimation *anm = UTGetGUI().m_sprCol.Animations.GetAt(ii);
-				char strName[MAX_PATH];
-				wcstombs(strName, anm->animName.text, MAX_PATH);
-				arrAnims.push_back(strName);
+				scAnimation *anm = UTGetGUI().m_sprCol.Animations.GetAt( jj );
+				char strName[ MAX_PATH ];
+				wcstombs( strName, anm->animName.text, MAX_PATH );
+				arrAnims.push_back( strName );
 			}
 
 			int nRealIndex = (pValue->m_asUINT32 < 0) ? -1 : pValue->m_asUINT32;
@@ -352,12 +352,12 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			// first animation will be the empty animation or not set. Index is -1
 			// not set will be the first
 			arrFonts.push_back("NOT SET");
-			for (int ii = 0; ii < UTGetFontsManager().fonts.Count(); ii++)
+			for ( int jj = 0; jj < UTGetFontsManager().fonts.Count(); jj++ )
 			{
-				CTexturedFont* font = UTGetFontsManager().fonts.GetAt(ii);
-				char strName[MAX_PATH];
-				wcstombs(strName, font->shFontName.text, MAX_PATH);
-				arrFonts.push_back(strName);
+				CTexturedFont* font = UTGetFontsManager().fonts.GetAt( jj );
+				char strName[ MAX_PATH ];
+				wcstombs( strName, font->shFontName.text, MAX_PATH );
+				arrFonts.push_back( strName );
 			}
 
 			int nRealIndex = (pValue->m_asUINT32 < 0) ? -1 : pValue->m_asUINT32;

@@ -352,6 +352,7 @@
     <ClInclude Include="Source\Engine\utils\dbgutil.h" />
     <ClInclude Include="Source\Engine\utils\enginecommon.h" />
     <ClInclude Include="Source\Engine\utils\HashUtil.h" />
+    <ClInclude Include="Source\Engine\utils\LinkedPool.h" />
     <ClInclude Include="Source\Engine\utils\List.h" />
     <ClInclude Include="Source\Engine\utils\ParallaxBg.h" />
     <ClInclude Include="Source\Engine\utils\PlatformTypes.h" />
