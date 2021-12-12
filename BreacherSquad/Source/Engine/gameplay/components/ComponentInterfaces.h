@@ -1,6 +1,7 @@
 #pragma once
 
 class CLevel;
+class CActor;
 
 // interface for generic animation component
 class IBaseAnimComponent
@@ -28,4 +29,6 @@ public:
 	virtual			~IBasePointPhysComponent() {}
 	// updates position based on speed
 	virtual void	Update( VecProj& vPos, float dTime, CLevel & level ) = 0;
+	// sets point speed
+	virtual void	SetSpeed(Vec3 vSpeed) = 0;
 };

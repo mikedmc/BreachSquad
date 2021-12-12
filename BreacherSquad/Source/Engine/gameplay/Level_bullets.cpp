@@ -9,27 +9,8 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	{
 		return nullptr;
 	}
-
-	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.HireNode();
-	//set 
-	if (node == null)
-	{
-		ErrorBox(K_ERR_WARNING, L"ShootBullet:We need more bullets!");
-		return nullptr;
-	}
-
-	//add simulation container
-	node->m_data.physPt = m_poolPhysPts.HireNode();
-	if (node->m_data.physPt == nullptr)
-	{
-		ErrorBox(K_ERR_WARNING, L"ShootBullet:We need more physics points!");
-		m_poolBullets.DismissNode(node);
-		return nullptr;
-	}
-	//reset physics data
-	node->m_data.physPt->m_data.Reset();
 	//set bullet generic data
-	CBullet* bullet = &node->m_data;
+	CBullet* bullet = new CBullet( new CPointPhysComponent(true) );
 	bullet->actorClass = actorClass;
 	bullet->ownerUID = nOwnerUID;
 	bullet->pArea = pStartArea;
@@ -52,18 +33,12 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	bullet->fCriticalHitChance = bulletTemplate->fCriticalHitChance;
 
 	bullet->pos.Set( vPos );
-	//physics
-	bullet->physPt->m_data.pArea = bullet->pArea;
-	bullet->physPt->m_data.pos = vPos;
-	bullet->physPt->m_data.pos_last = vPos;
+	bullet->pos_last = bullet->pos;
 	// randomize bullet speed
 	Vec3 vdir = vShootDir * (bulletTemplate->fSpeed_ini + m_rand.RandFloatSgn(bulletTemplate->fSpeed_ini * 0.075f));
-	bullet->physPt->m_data.speed = vdir;
+	bullet->c_pointPhys->SetSpeed(vdir);
 	// hardcoded for now
-	bullet->physPt->m_data.accel = g_Vec3Zero;
-	bullet->physPt->m_data.fBounceF = 0.0f;
-	//default states
-	bullet->physPt->m_data.bFlagPhysicsEnabled = false;
+	bullet->c_pointPhys->fBounceF = 0.0f;
 
 	//bullet visuals
 	bullet->sprBullet.Init(&m_sprProps, ANM_PROPS_SPR_BULLETS_NOANIM, bullet->pos.xy_proj, 0);
@@ -71,7 +46,9 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, U
 	if (m_sprProps.GetAnimFlags(ANM_PROPS_SPR_BULLETS_NOANIM) & K_EDITOR_ANIMATION_FLAG_LOOPED)
 		bullet->bAnimated = true;
 
-	return &node->m_data;
+	m_arrBullets.Add( bullet );
+
+	return bullet;
 }
 
 CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float fMaxDistance, UINT32 dwOwnerUID /*= 0*/)
@@ -80,12 +57,11 @@ CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float
 	float fMaxDistanceSq = fMaxDistance * fMaxDistance;
 	CBullet* pRetBullet = null;
 
-	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.pListUsed.m_pNext;
-	while (node != &m_poolBullets.pListUsed)
+	for ( int kk = 0; kk < m_arrBullets.GetSize(); kk++ )
 	{
-		//salvez locatia urmatoare ca sa pot avansa pe ea
-		CLinkedPool<CBullet>::CLinkedPoolNode *nextnode = node->m_pNext;
-		CBullet* bullet = &node->m_data;
+		CBullet* bullet = m_arrBullets[ kk ];
+		if ( bullet->bPendingKill )
+			continue;
 
 		bool bPassed = true;
 		if (bullet->eType != nBulletType)
@@ -94,7 +70,7 @@ CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float
 			bPassed = false;
 		if (bPassed)
 		{
-			float fDist = MUVec2LenSq(&(vCheckPos - Vec3XY(bullet->physPt->m_data.pos)));
+			float fDist = MUVec2LenSq(&(vCheckPos - bullet->pos.xy));
 			if ((fMaxDistance <= 0.0f) || ((fMaxDistance > 0.0f) && (fDist <= fMaxDistanceSq)))
 			{
 				if (fDist < fMinDist)
@@ -104,9 +80,6 @@ CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float
 				}
 			}
 		}
-
-		//avansez pointer
-		node = nextnode;
 	}
 
 	return pRetBullet;
@@ -114,25 +87,14 @@ CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float
 
 void CLevel::ReleaseBulletType(int nBulletType, UINT32 nOwnerUID)
 {
-	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.pListUsed.m_pNext;
-	while (node != &m_poolBullets.pListUsed)
+	for ( int kk = 0; kk < m_arrBullets.GetSize(); kk++ )
 	{
-		CLinkedPool<CBullet>::CLinkedPoolNode *nextnode = node->m_pNext;
-		CBullet* bullet = &node->m_data;
+		CBullet* bullet = m_arrBullets[ kk ];
+		if ( bullet->bPendingKill )
+			continue;
 
-		bool killbullet = false;
 		if ((bullet->eType == nBulletType) && (bullet->ownerUID == nOwnerUID))
-			killbullet = true;
-
-		if (killbullet)
-		{
-			//release phys point
-			m_poolPhysPts.DismissNode(bullet->physPt);
-			//and bullet
-			m_poolBullets.DismissNode(node);
-		}
-
-		node = nextnode;
+			bullet->bPendingKill = true;
 	}
 }
 
@@ -143,32 +105,30 @@ void CLevel::UpdateBullets(float dTime)
 	m_bulletsMeshIdx = -1;
 	int nBulletsTrisCnt = 0;
 
-	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.pListUsed.m_pNext;
-	while (node != &m_poolBullets.pListUsed)
+	for ( int kk = 0; kk < m_arrBullets.GetSize(); kk++ )
 	{
-		// save link to next node as we might deallocate current node
-		CLinkedPool<CBullet>::CLinkedPoolNode *nextnode = node->m_pNext;
+		CBullet* bullet = m_arrBullets[ kk ];
+		if ( bullet->bPendingKill )
+			continue;
+		// update bullet point physics component
+		bullet->Update( dTime, ( *this ) );
 
-		CBullet* bullet = &node->m_data;  
-		// copy area pointer from phys pt
-		bullet->pArea = bullet->physPt->m_data.pArea;
-		bullet->pos.Set( bullet->physPt->m_data.pos );
 		// animate sprite if necessary
-		if (bullet->bAnimated)
+		if ( bullet->bAnimated )
 		{
-			bullet->sprBullet.Update(dTime);
+			bullet->sprBullet.Update( dTime );
 		}
 
 		float fBulletOldLife = bullet->fLife;
-		dec_limit(bullet->fLife, dTime, 0.0f);
+		dec_limit( bullet->fLife, dTime, 0.0f );
 
 		bool killbullet = false;
 
 		// exited play area
-		if (bullet->physPt->m_data.bIsDead)
+		if ( bullet->c_pointPhys->bIsDead )
 			killbullet = true;
 
-		if (bullet->physPt->m_data.bContacting)
+		if ( bullet->c_pointPhys->bContacting )
 		{
 			killbullet = true;
 		}
@@ -178,27 +138,27 @@ void CLevel::UpdateBullets(float dTime)
 		Vec2 vColP, vColN;
 		CVisibleSortable pRetObj;
 
-		Vec2 vFrom = Vec3XY(bullet->physPt->m_data.pos_last);
+		Vec2 vFrom = bullet->pos_last.xy;
 		Vec2 vTo = bullet->pos.xy;
 		CAABB aabbBullet;
-		aabbBullet.Set_Corrected(vFrom, vTo);
+		aabbBullet.Set_Corrected( vFrom, vTo );
 		// collision return vars
-		Vec2 vRetPt(0.0f, 0.0f);
+		Vec2 vRetPt( 0.0f, 0.0f );
 		float fRetT = 100000.0f;
 
 		///----------------------------------------------------------------------------------
 		/// Check collisions with objects
 		///----------------------------------------------------------------------------------
-		if (bullet->pArea != nullptr)
+		if ( bullet->pArea != nullptr )
 		{
-			for (int ll = 0; ll < bullet->pArea->m_arrProps.Count(); ll++)
+			for ( int ll = 0; ll < bullet->pArea->m_arrProps.Count(); ll++ )
 			{
-				CProp* prop = bullet->pArea->m_arrProps[ll];
-				if ((prop->bHidden) || ((prop->flags & K_PROPFLAG_CAN_BE_SHOT) == 0) || (prop->IsPendingKill()))
+				CProp* prop = bullet->pArea->m_arrProps[ ll ];
+				if ( ( prop->bHidden ) || ( ( prop->flags & K_PROPFLAG_CAN_BE_SHOT ) == 0 ) || ( prop->IsPendingKill() ) )
 					continue;
-				if (prop->bbox_floor.Intersects(aabbBullet))
+				if ( prop->bbox_floor.Intersects( aabbBullet ) )
 				{
-					if (AABB::Segment_Intersection(vFrom, vTo, prop->bbox_floor, &vRetPt))
+					if ( AABB::Segment_Intersection( vFrom, vTo, prop->bbox_floor, &vRetPt ) )
 					{
 						//#TODO: return material too
 						vColP = vRetPt;
@@ -206,29 +166,29 @@ void CLevel::UpdateBullets(float dTime)
 						pRetObj.pPtr = prop;
 						// shorten bullet vector so we only catch the closest ones
 						vTo = vRetPt;
-						aabbBullet.Set_Corrected(vFrom, vTo);
+						aabbBullet.Set_Corrected( vFrom, vTo );
 					}
 				}
 			}
 			// Collision with props from neighbouring areas
 			// we assume that if we had a collision with prop in current area then there will be no other closer prop in neighbouring areas
-			if (pRetObj.pPtr == nullptr)
+			if ( pRetObj.pPtr == nullptr )
 			{
-				for (int oo = 0; oo < bullet->pArea->arrNeighbours.Count(); oo++)
+				for ( int oo = 0; oo < bullet->pArea->arrNeighbours.Count(); oo++ )
 				{
-					CLevelArea* area = bullet->pArea->arrNeighbours[oo];
+					CLevelArea* area = bullet->pArea->arrNeighbours[ oo ];
 					// eliminate areas that don't intersect bullet movement bbox
-					if (!aabbBullet.Intersects(area->AABBbounds))
+					if ( !aabbBullet.Intersects( area->AABBbounds ) )
 						continue;
 
-					for (int ll = 0; ll < area->m_arrProps.Count(); ll++)
+					for ( int ll = 0; ll < area->m_arrProps.Count(); ll++ )
 					{
-						CProp* prop = area->m_arrProps[ll];
-						if ((prop->bHidden) || ((prop->flags & K_PROPFLAG_CAN_BE_SHOT) == 0) || (prop->IsPendingKill()))
+						CProp* prop = area->m_arrProps[ ll ];
+						if ( ( prop->bHidden ) || ( ( prop->flags & K_PROPFLAG_CAN_BE_SHOT ) == 0 ) || ( prop->IsPendingKill() ) )
 							continue;
-						if (prop->bbox_floor.Intersects(aabbBullet))
+						if ( prop->bbox_floor.Intersects( aabbBullet ) )
 						{
-							if (AABB::Segment_Intersection(vFrom, vTo, prop->bbox_floor, &vRetPt))
+							if ( AABB::Segment_Intersection( vFrom, vTo, prop->bbox_floor, &vRetPt ) )
 							{
 								//#TODO: return material too
 								vColP = vRetPt;
@@ -236,7 +196,7 @@ void CLevel::UpdateBullets(float dTime)
 								pRetObj.pPtr = prop;
 								// shorten bullet vector so we only catch the closest ones
 								vTo = vRetPt;
-								aabbBullet.Set_Corrected(vFrom, vTo);
+								aabbBullet.Set_Corrected( vFrom, vTo );
 							}
 						}
 					}
@@ -245,12 +205,12 @@ void CLevel::UpdateBullets(float dTime)
 		}
 
 		///--- check hit object...
-		if (pRetObj.eType != K_VST_UNKNOWN)
+		if ( pRetObj.eType != K_VST_UNKNOWN )
 		{
-			if (pRetObj.eType == K_VST_PROP)
+			if ( pRetObj.eType == K_VST_PROP )
 			{
-				CProp* hitprop = static_cast<CProp*>(pRetObj.pPtr);
-				if (hitprop)
+				CProp* hitprop = static_cast< CProp* >( pRetObj.pPtr );
+				if ( hitprop )
 				{
 					//#TODO: save targetedUID on bullet to avoid hitting same entity 2 times with penetrating bullets
 					hitprop->Kill();
@@ -260,10 +220,10 @@ void CLevel::UpdateBullets(float dTime)
 		}
 
 		//release the bullet
-		if (killbullet)
+		if ( killbullet )
 		{
 			//some bullets explode at the end
-			if (bullet->nExploTemplateHash != 0)
+			if ( bullet->nExploTemplateHash != 0 )
 			{
 				/*
 				Vec2 vExploDir(0.0f, 0.0f);
@@ -279,15 +239,9 @@ void CLevel::UpdateBullets(float dTime)
 				*/
 			}
 
-			//release phys point
-			m_poolPhysPts.DismissNode(bullet->physPt);
 			//and release the bullet
-			m_poolBullets.DismissNode(node);
+			bullet->bPendingKill = true;
 		}
-
-
-		//advance pointer
-		node = nextnode;
 	}
 
 	if (nBulletsTrisCnt > 0)
@@ -301,8 +255,8 @@ void CLevel::UpdateBullets(float dTime)
 void CLevel::PaintBullets(eLVLRenderPass pass)
 {
 	D3DXMATRIXA16 matbullet;
-	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.pListUsed.m_pNext;
 
+	//#TODO: only paint visible bullets...
 	switch(pass)
 	{
 		case K_LVL_RP_COLORS:
@@ -316,43 +270,35 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 				m_bufferedPainter.DrawMesh(m_bulletsMeshIdx, true);
 			}
 
-			while (node != &m_poolBullets.pListUsed)
+			for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
 			{
-				CBullet* bullet = &node->m_data;
+				CBullet* bullet = m_arrBullets[ kk ];
 				//Vec2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 				//float ang = UTMath::GetVectorAngle(vdir);
 				bullet->sprBullet.pos = bullet->pos.xy_proj;
 				bullet->sprBullet.PaintModule(0);
 				bullet->sprBullet.pos = bullet->pos.xy;
 				bullet->sprBullet.PaintModule(0);
-
-				// advance to next bullet
-				node = node->m_pNext;
 			}
 		}
 		break;
 		case K_LVL_RP_SHADOWS:
 		{
-			while (node != &m_poolBullets.pListUsed)
+			for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
 			{
-				CBullet* bullet = &node->m_data;
+				CBullet* bullet = m_arrBullets[ kk ];
 				//Vec2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 				//float ang = UTMath::GetVectorAngle(vdir);
 				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->pos.xy, bullet->sprBullet.animIdx, bullet->sprBullet.frameIdx, 0, 0xaa000000);
-
-				// advance to next bullet
-				node = node->m_pNext;
 			}
 		}
 		break;
 		case K_LVL_RP_LIGHTS:
 		{
-			while (node != &m_poolBullets.pListUsed)
+			for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
 			{
-				CBullet* bullet = &node->m_data;
+				CBullet* bullet = m_arrBullets[ kk ];
 				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->pos.xy_proj, bullet->fidLight.animIdx, bullet->fidLight.frameIdx, 0);
-				// advance to next bullet
-				node = node->m_pNext;
 			}
 		}
 		break;
@@ -362,23 +308,44 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 int CLevel::KillBulletsOfType(int nBulletType, UINT32 dwOwnerUID)
 {
 	int nRetCnt = 0;
-	//verifica daca ai aruncat deja un charge
-	CLinkedPool<CBullet>::CLinkedPoolNode *node = m_poolBullets.pListUsed.m_pNext;
-	while (node != &m_poolBullets.pListUsed)
+	
+	for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
 	{
-		//salvez locatia urmatoare ca sa pot avansa pe ea
-		CLinkedPool<CBullet>::CLinkedPoolNode *nextnode = node->m_pNext;
-		CBullet* bullet = &node->m_data;
-
+		CBullet* bullet = m_arrBullets[ kk ];
 		if ((bullet->eType == nBulletType) && ((dwOwnerUID == 0) || (bullet->ownerUID == dwOwnerUID)))
 		{
-			//destroy charge
-			bullet->nFlags |= K_LVL_BULLET_FLAG_KILLITNOW;
+			bullet->bPendingKill = true;
 			nRetCnt++;
 		}
-		node = nextnode;
 	}
 
 	return nRetCnt;
 }
 
+CBullet::CBullet( CPointPhysComponent* pComPointPhys ) :
+	eType( K_LVL_BULLET_SHOTGUN ), fDamage( 1.0f ), fDamage_ini( 1.0f ), fDamageLossPPx( 0.0f ),
+	fLife( 1.0f ), fLife_ini( 1.0f ), actorClass( K_LVL_ACT_CLASS_PLAYER ), nSubstate( 0 ),
+	fMomentum( 0.0f ), nFlags( 0 ), fStunDuration( 0.0f ), ownerUID( 0 ), dwLastTargetUID( 0 ),
+	nArmorPiercingRating( 0 ), nExploTemplateHash( 0 ), fSelfDamageMultiplier( 1.0f ), fCriticalHitChance( 0.0f ),
+	bAnimated( false ), pArea( nullptr ), bPendingKill( false )
+{
+	c_pointPhys = pComPointPhys;
+}
+
+CBullet::~CBullet()
+{
+	SAFE_DELETE( c_pointPhys );
+}
+
+void CBullet::Update( float dTime, CLevel & level )
+{
+	if ( bPendingKill )
+		return;
+	// only update physics component if we have one
+	if ( c_pointPhys )
+	{
+		c_pointPhys->Update( pos, dTime, level );
+	}
+
+	pArea = c_pointPhys->pArea;
+}

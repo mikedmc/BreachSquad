@@ -6085,13 +6085,23 @@ void CLevel::CleanupDeadObjects()
 	}
 
 	//check lights
-	for (int kk = 0; kk < m_arrLights.GetSize(); kk++)
+	for ( int kk = m_arrLights.GetSize() - 1; kk >= 0; kk-- )
 	{
-		if (m_arrLights[kk]->IsPendingKill())
+		if ( m_arrLights[ kk ]->IsPendingKill() )
 		{
-			m_arrLights[kk]->EndPlay();
-			SAFE_DELETE(m_arrLights[kk]);
-			m_arrLights.Remove(kk);
+			m_arrLights[ kk ]->EndPlay();
+			SAFE_DELETE( m_arrLights[ kk ] );
+			m_arrLights.Remove( kk );
+		}
+	}
+
+	//check bullets
+	for ( int kk = m_arrBullets.Count(); kk >= 0; kk-- )
+	{
+		if ( m_arrBullets[ kk ]->bPendingKill )
+		{
+			SAFE_DELETE( m_arrBullets[ kk ] );
+			m_arrBullets.Remove( kk );
 		}
 	}
 }
@@ -8723,7 +8733,7 @@ void CLevel::Release()
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrAIevents);
 	m_arrActionTemplates.clear();
 	//release bullets
-	m_poolBullets.Release();
+	SAFE_DELETE_GROWABLE_ARRAY(m_arrBullets);
 	m_poolDoofers.Release();
 	m_poolPhysPts.Release();
 

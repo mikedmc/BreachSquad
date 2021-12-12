@@ -200,7 +200,6 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_camLevelToScr.Update(0.0f);
 	//pools
 	m_poolPhysPts.Init(K_LVL_PHYSP_MAX_CNT);
-	m_poolBullets.Init(K_LVL_BULLETS_MAX_CNT);
 	m_poolDoofers.Init(K_LVL_DOOFERS_MAX_CNT);
 
 	//spawn selected players

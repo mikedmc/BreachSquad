@@ -18,7 +18,7 @@ class CLevelArea;
 
 class CPointPhysComponent : public IBasePointPhysComponent
 {
-private:
+public:
 	CLevelArea*			pArea;								// Pointer to current area
 	bool				bFlagPhysicsEnabled;				// Set to enable physics (only with FlagCollision Enabled) - bounce, friction etc. false-stops on collision
 	int					nFlagsCollision;					// Collision checking flags
@@ -40,8 +40,10 @@ private:
 	float				fFrictionF;							// Floor friction
 
 public:
-	CPointPhysComponent();
+	CPointPhysComponent( bool bPhysicsEnabled, Vec3 vAcceleration = g_Vec3Zero, int nCollFlags = K_PPC_COLLFLAG_ALL );
 	~CPointPhysComponent();
 
-	void Update( VecProj& vPos, float dTime, CLevel & level );
+	void				Update( VecProj& vPos, float dTime, CLevel & level );
+
+	void				SetSpeed( Vec3 vSpeed );
 };

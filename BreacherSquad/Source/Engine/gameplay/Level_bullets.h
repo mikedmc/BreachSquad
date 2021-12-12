@@ -1,5 +1,7 @@
 #pragma once
 
+#include "components/PhysPtComp.h"
+
 ///--------------------------------------------------------------------------
 ///--- BULLETS ---
 ///--------------------------------------------------------------------------
@@ -12,8 +14,6 @@
 #define K_LVL_BULLET_FLAG_IGNORE_ARMOR 2
 //gloantele care pot sparge usile ce se deschid cu charges
 #define K_LVL_BULLET_FLAG_BREAKS_DOORS 4
-//flagul kill it now se seteaza cand vrei sa scapi de un glont
-#define K_LVL_BULLET_FLAG_KILLITNOW 8
 //flag de kill on impact chiar daca mai are energie 
 #define K_LVL_BULLET_FLAG_DIE_ON_IMPACT 16
 //sa nu faca efecte de particule unde loveste
@@ -140,10 +140,13 @@ public:
 
 class CBullet {
 public:
+	CPointPhysComponent*	c_pointPhys;		// point physics component
+public:
 	int					actorClass;				// shooter class
 	UINT32				ownerUID;				
 	UINT32				dwLastTargetUID;		// used in order to hit targets only once (penetrating) no matter the framerate
 	CLevelArea*			pArea;					// current bullet area (collision optimization)
+	bool				bPendingKill;			// it is dead
 
 public:
 	EBulletType			eType;					// bullet type: rocket, grenade, etc
@@ -162,24 +165,20 @@ public:
 	UINT32				nExploTemplateHash;		//hash of explosion template at the end or 0 if none
 
 	VecProj				pos;					// position and speed (used by collision components)
+	VecProj				pos_last;				// last position
 
 	UINT32				nFlags;					// misc flags
 	int					nSubstate;				// bullet state used by some bullet types
 
-	CLinkedPool<CPhysicsPoint>::CLinkedPoolNode *physPt; // attached PhysPoint for collision detection and bounce
-	
 	CSpr				sprBullet;				// bullet sprite
 	bool				bAnimated;				// Sets itself when initialized. If animation is looped then we consider it to be animated.
 	scFrameID			fidLight;				// anim and frame for the light sprite
 
-	CBullet() : eType(K_LVL_BULLET_SHOTGUN), fDamage(1.0f), fDamage_ini(1.0f), fDamageLossPPx(0.0f),
-		fLife(1.0f), fLife_ini(1.0f), actorClass(K_LVL_ACT_CLASS_PLAYER), nSubstate(0),
-		fMomentum(0.0f), nFlags(0), fStunDuration(0.0f), ownerUID(0), dwLastTargetUID(0),
-		nArmorPiercingRating(0), nExploTemplateHash(0), fSelfDamageMultiplier(1.0f), fCriticalHitChance(0.0f),
-		bAnimated(false), pArea(nullptr)
-	{
-		physPt = nullptr;
-	}
+	CBullet( CPointPhysComponent* pComPointPhys = nullptr );
+
+	~CBullet();
+
+	void Update( float dTime, CLevel & level );
 };
 
 

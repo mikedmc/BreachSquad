@@ -226,6 +226,7 @@ public:
 	//Gaseste cel mai apropiat event (de tipul typeFilter daca il specific) cu linie directa de vedere
 	CAIEvent*				GetMostImportantAIEvent(CActor * callerActor, EAIEventType eTypeFilter = K_LVL_AI_EVENT_ANY);
 	///--- decals ---
+	//#TODO: change to poolGC for decals
 	CArray<CDecal*> m_arrDecals;
 	void					AddDecal(EDecalLayer nLayer, Vec2 pos, int animIdx, int frameIdx = 0, DWORD color = 0xffffffff, bool bIsAnimated = false);
 	void					UpdateDecals(float dTime);
@@ -235,7 +236,7 @@ public:
 	CLinkedPool<CPhysicsPoint>	m_poolPhysPts; //pool de obiecte fizice
 	void					UpdatePhysicsPoints(float dTime);
 	///--- bullets linked pool ---
-	CLinkedPool<CBullet>	m_poolBullets;			//pool-ul de gloante
+	CArray<CBullet*>		m_arrBullets;			//pool-ul de gloante
 	int						m_bulletsMeshIdx;		//idx gloante
 
 	///--- water ---

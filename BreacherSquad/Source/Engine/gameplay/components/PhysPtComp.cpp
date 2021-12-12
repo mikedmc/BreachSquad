@@ -1,13 +1,15 @@
 #include "dxstdafx.h"
 #include "PhysPtComp.h"
 
-CPointPhysComponent::CPointPhysComponent():
-	contactType( PCT_NONE ), bContacting( false ), bContactStarted( false ), bIsStatic( false ), nFlagsCollision( K_PPC_COLLFLAG_ALL ),
-	bIsStaticZ( false ), bFlagPhysicsEnabled( false ), fBounceF( K_PPC_DEFAULT_FLOOR_BOUNCE ), fFrictionF( K_PPC_DEFAULT_FLOOR_FRICTION ),
-	bIsDead( false ), pArea( nullptr )
+CPointPhysComponent::CPointPhysComponent( bool bPhysicsEnabled, Vec3 vAcceleration, int nCollFlags ):
+	contactType( PCT_NONE ), bContacting( false ), bContactStarted( false ), bIsStatic( false ),
+	bIsStaticZ( false ), fBounceF( K_PPC_DEFAULT_FLOOR_BOUNCE ), fFrictionF( K_PPC_DEFAULT_FLOOR_FRICTION ),
+	bIsDead( false ), pArea( nullptr ),
+	nFlagsCollision( nCollFlags ), bFlagPhysicsEnabled( bPhysicsEnabled )
 {
+	accel = vAcceleration;
+
 	speed = Vec3( 0.0f, 0.0f, 0.0f );
-	accel = Vec3( 0.0f, 0.0f, 0.0f );
 	contactNormal = Vec3( 0.0f, 0.0f, 0.0f );
 	contactPos = Vec3( 0.0f, 0.0f, 0.0f );
 }
@@ -36,7 +38,11 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 	//pContactShape = nullptr;
 	bContactStarted = false;
 	//save last pos
-	Vec3 pos_last = vPos.xyz;
+	Vec3 vLastPos = vPos.xyz;
+	if ( ( pArea == nullptr ) || ( !pArea->AABBbounds.PointIn( vPos.xy ) ) )
+	{
+		pArea = level.Areas_GetAt( vPos.xy );
+	}
 
 	///--- integrator
 	//integrator
@@ -46,12 +52,12 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 		vecForces.z = 0.0f;
 
 	speed += vecForces * dTime;
-	Vec3 pos = pos_last + speed * dTime;
+	Vec3 pos = vLastPos + speed * dTime;
 
 	///--- check collisions
 	{
 		Vec2 collisionPoint, collisionNormal;
-		Vec2 vFrom = Vec3XY( pos_last );
+		Vec2 vFrom = Vec3XY( vLastPos);
 		Vec2 vTo = Vec3XY( pos );
 		Vec2 vMove = vTo - vFrom;
 
@@ -179,4 +185,9 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 	}
 	// save final position and convert to projected value
 	vPos.Set( pos );
+}
+
+void CPointPhysComponent::SetSpeed( Vec3 vSpeed )
+{
+	speed = vSpeed;
 }
