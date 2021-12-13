@@ -1,12 +1,3 @@
-/*
-	// iterates through contained values (slower, copies value)
-	for ( auto node : m_pool )
-		CPlm plm = *node;
-	// iterates with a pointer, fastest
-	for ( auto node : m_pool )
-		CPlm* plm = node;
-*/
-
 //--------------------------------------------------------------------------------------
 // Template object linked list pool, iterable with pointer iterator
 //--------------------------------------------------------------------------------------
@@ -16,54 +7,71 @@ public:
 	class CLNode
 	{
 	public:
-		TYPE m_data;
-	public:
-		CLNode* m_pPrev;  //don't mess with me
-		CLNode* m_pNext;  //don't mess with me
+		TYPE		m_data;
+	private:
+		friend class IteratorPtr;
+		friend class CLinkedPool;
+
+		CLNode*		m_pPrev;		//don't mess with me
+		CLNode*		m_pNext;		//don't mess with me
 	};
 
 public:
-	// iterates through the USED list and returns POINTERS to elements so it's fast
+	// iterates through the USED list and returns POINTERS 
 	struct IteratorPtr
 	{
 		using iterator_category = std::forward_iterator_tag;
 		using difference_type = std::ptrdiff_t;
-		using value_type = TYPE*;
-		//using pointer = TYPE;
-		using reference = TYPE*;
+		using value_type = CLNode*;
+		using pointer = CLNode**;
+		using reference = CLNode*;
 
-		IteratorPtr( CLNode* ptr ) : m_ptr( ptr ) {}
+		IteratorPtr( CLNode* ptr ) : m_ptr( ptr ), m_ptr_next(ptr->m_pNext) {}
 		// returns pointer to the contents of the node, used when : CType* temp = iterator;
-		reference operator*() const { return &m_ptr->m_data; }
+		reference operator*() const { return m_ptr; }
 		// returns value of the contents when CType temp = *iterator;
 		//pointer operator->() { return m_ptr->m_data; }
-		IteratorPtr& operator++() { m_ptr = m_ptr->m_pNext; return *this; }
-		IteratorPtr operator++( int ) { m_ptr = m_ptr->m_pNext; return *this; }
+		IteratorPtr& operator++() { 
+			m_ptr = m_ptr_next; 
+			if ( m_ptr ) 
+				m_ptr_next = m_ptr->m_pNext; 
+			return *this; 
+		}
+		IteratorPtr operator++( int ) {
+			m_ptr = m_ptr_next;
+			if ( m_ptr )
+				m_ptr_next = m_ptr->m_pNext; 
+			return *this;
+		}
+
 		friend bool operator== ( const IteratorPtr& a, const IteratorPtr& b ) { return a.m_ptr == b.m_ptr; };
 		friend bool operator!= ( const IteratorPtr& a, const IteratorPtr& b ) { return a.m_ptr != b.m_ptr; };
 
 	private:
 		CLNode* m_ptr;
+		CLNode* m_ptr_next;				// save next pointer so we can remove/delete current element if needed
 	};
 
+	// iterator methods
 public:
 	IteratorPtr begin() { return IteratorPtr( pListUsed.m_pNext ); }
 	IteratorPtr end() { return IteratorPtr( &pListUsed ); }
 
-public:
-	int m_nSize;		//cate particule sunt folosite in momentul de fata
-	int m_nUsedCnt;		//cate sunt folosite
-	CLNode*				pArrNodes;	// all nodes get allocated as an array and kept as a list through pListFree and pListUsed
+private:
+	int m_nSize;						// actual pool size
+	int m_nUsedCnt;						// how many are used
 
-	CLNode				pListFree; //free nodes circular list
-	CLNode				pListUsed; //used nodes circular list
+public:
+	CLNode*				pArrNodes;		// all nodes get allocated as an array and kept as a list through pListFree and pListUsed
+
+	CLNode				pListFree;		// free nodes circular list start node (not using his data, kept just to hold the ring)
+	CLNode				pListUsed;		// used nodes circular list start node (not using his data, kept just to hold the ring)
 
 	CLinkedPool() : pArrNodes( NULL ), m_nSize( 0 ), m_nUsedCnt( 0 )
 	{
-		pListFree.m_pNext = pListFree.m_pPrev = &pListFree;	//indica spre ele insele
-		pListUsed.m_pNext = pListUsed.m_pPrev = &pListUsed;	//indica spre ele insele
+		pListFree.m_pNext = pListFree.m_pPrev = &pListFree;	
+		pListUsed.m_pNext = pListUsed.m_pPrev = &pListUsed;	
 	}
-
 	~CLinkedPool()
 	{
 		Release();
@@ -73,9 +81,12 @@ public:
 	bool			Init( int nPoolSize );
 	// Releases all list elements
 	void			Release();
+	// returns number of used elements
+	inline int		Count() { return m_nUsedCnt; }
 
-	//returns null if all nodes are used
-	CLNode* HireNode()
+	// Returns pointer to available list node or null if all nodes are used.
+	// Doesn't call CTOR. Make sure you clear the data before using, nodes are always reused.
+	CLNode* Hire()
 	{
 		CLNode* nod = pListFree.m_pNext;
 		if ( nod == &pListFree )
@@ -98,10 +109,11 @@ public:
 		return nod;
 	}
 
-	void DismissNode( CLNode* node )
+	// Returns node to the "free" list so it can be reused by another call to Hire().
+	// Doesn't call DTOR. 
+	void Dismiss( CLNode* node )
 	{
 		_ASSERT( node != nullptr );
-
 		// link neighbours between them
 		node->m_pNext->m_pPrev = node->m_pPrev;
 		node->m_pPrev->m_pNext = node->m_pNext;
@@ -123,7 +135,7 @@ bool CLinkedPool <TYPE>::Init( int nPoolSize )
 		m_nSize = 10;
 
 	_ASSERT( pArrNodes == nullptr );
-	//aloc array-ul continuu in memorie
+	// Allocate containing array
 	pArrNodes = nullptr;
 	pArrNodes = new CLNode[ m_nSize ];
 	if ( pArrNodes == nullptr )

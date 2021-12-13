@@ -534,18 +534,6 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 //**************************************************************************************
 // Initialize the app - before creating the window
 //**************************************************************************************
-
-struct CPlm {
-	Vec3	vPos;
-	Vec3	vSpeed;
-
-	CPlm() 
-	{
-		vPos = g_Vec3Zero;
-		vSpeed = g_Vec3Zero;
-	}
-};
-
 OPRESULT BeforeMount(void)
 {
 	g_bDuringTransition = false; //nu este in timpul unei tranzitii
