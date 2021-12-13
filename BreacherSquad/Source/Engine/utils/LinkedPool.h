@@ -1,5 +1,7 @@
 //--------------------------------------------------------------------------------------
 // Template object linked list pool, iterable with pointer iterator
+// Contained class DTOR/CTOR only get called on Init and Release when deallocationg the container array.
+// Make sure you reset/construct the data after calling Hire() as nodes are always reused.
 //--------------------------------------------------------------------------------------
 template<typename TYPE> class CLinkedPool
 {
@@ -17,7 +19,7 @@ public:
 	};
 
 public:
-	// iterates through the USED list and returns POINTERS 
+	// iterates through the USED list and returns POINTERS to list nodes.
 	struct IteratorPtr
 	{
 		using iterator_category = std::forward_iterator_tag;
@@ -110,7 +112,7 @@ public:
 	}
 
 	// Returns node to the "free" list so it can be reused by another call to Hire().
-	// Doesn't call DTOR. 
+	// Doesn't call DTOR.
 	void Dismiss( CLNode* node )
 	{
 		_ASSERT( node != nullptr );

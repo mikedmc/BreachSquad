@@ -6096,7 +6096,7 @@ void CLevel::CleanupDeadObjects()
 	}
 
 	//check bullets
-	for ( int kk = m_arrBullets.Count(); kk >= 0; kk-- )
+	for ( int kk = m_arrBullets.Count() - 1; kk >= 0; kk-- )
 	{
 		if ( m_arrBullets[ kk ]->bPendingKill )
 		{
