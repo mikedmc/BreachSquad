@@ -3,6 +3,8 @@
 CGame::CGame()
 {
 	fTimeline = 0.0f;
+	// starts maxed out so it immediately executes an update when starting
+	fFixedStepTimer = K_GAME_FIXED_TIMESTEP_DTIME;
 }
 
 CGame::~CGame()
@@ -13,16 +15,29 @@ CGame::~CGame()
 void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 {
 	float fElapsedTime = dTime;
-
 	fTimeline += dTime;
-	fGCtimer += dTime;
-	// game calls
+	/// EXECTE FIXED TIMESTEP BUSINESS
+	fFixedStepTimer += dTime;
+	int nFixedStepUpdates = 0;
+	while ( fFixedStepTimer >= K_GAME_FIXED_TIMESTEP_DTIME )
+	{
+		float fFixedTime = K_GAME_FIXED_TIMESTEP_DTIME;
+		//SPINE update animation states
+		g_spineMgr.UpdateAnimationStates( fFixedTime );
+		// Update level and all spine objects and bones
+		g_level.UpdateFixedTimestep( fFixedTime );
+		// SPINE update final skeleton world positions (no bone changes allowed after this)
+		g_spineMgr.Update( fFixedTime );
 
+		// remove from accumulator
+		fFixedStepTimer -= K_GAME_FIXED_TIMESTEP_DTIME;
+		nFixedStepUpdates++;
+	}
 
+	g_level.Update( fElapsedTime );
 
-
-
-
+	/*
+	//#DMC: comentat cat timp lucrez, functioneaza corect:
 	if ( !bSyncUpdate ) //not networked or network sync finised even if still during gameplay
 	{
 		//ingame menu on ESC-back
@@ -146,19 +161,8 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 		//SPINE update animation states
 		g_spineMgr.Update( fElapsedTime, fTimeline );
 		g_bLevelNeedsUpdate = false;
-
-		//check sync by log
-		/*
-		double faccum = 0.0f;
-		for (int ll = 0; ll < g_level.m_arrActors.GetSize(); ll++)
-		{
-		faccum += g_level.m_arrActors[ll]->vPos.x;
-		faccum += g_level.m_arrActors[ll]->vPos.y;
-		}
-		LOG(L"-- frame %d faccum %.9g", g_nUpdateFrame, faccum);
-		*/
 	}
-
+	 */
 
 
 
@@ -168,6 +172,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 
 
 	//GC calls at the end
+	fGCtimer += dTime;
 	if ( fGCtimer >= K_GAME_GC_TIMER_S )
 	{
 		fGCtimer = 0.0f;
@@ -205,6 +210,9 @@ void CGame::BeforePaint()
 void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 {
 	_ASSERT( pSpr != nullptr && pDevice != nullptr );
+
+	//#INFO: it uses the fixed timestep remainder to extrapolate the positions into the future inside the paint functions
+	// this allows the game to render smoothly and completely disconnect the update from the render pass
 
 	switch ( g_gameState )
 	{

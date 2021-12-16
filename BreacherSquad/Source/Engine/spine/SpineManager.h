@@ -89,9 +89,9 @@ public:
 
 	
 	// Updates animation states (must be called before moving bones programatically)
-	void								UpdateAnimationStates(float dTime, float fTimeLine);
+	void								UpdateAnimationStates(float dTime);
 	// Updates all necessary stuff for rendering (and IK, bust be called right before paint)
-	void								Update(float dTime, float fTimeLine);
+	void								Update(float dTime);
 	// Paints all visible skeletons using a specified texture variation (normals or other surfaces)
 	void								Paint(ETexChannel eChannel = K_TEXCHAN_COLORMAP);
 	// Paints one skeletons using a specified texture variation (normals or other surfaces)

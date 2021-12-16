@@ -325,7 +325,7 @@ void CSpineManager::SetListenForEvents(CSkeletonInstance* skelInst, bool bListen
 		skelInst->anim->setListener((AnimationStateListener)null);
 }
 
-void CSpineManager::UpdateAnimationStates(float dTime, float fTimeLine)
+void CSpineManager::UpdateAnimationStates(float dTime)
 {
 	//update all animation states and apply them 
 	for (int kk = 0; kk < arrSkeletonInstances.GetSize(); kk++)
@@ -341,7 +341,7 @@ void CSpineManager::UpdateAnimationStates(float dTime, float fTimeLine)
 	}
 }
 
-void CSpineManager::Update(float dTime, float fTimeLine)
+void CSpineManager::Update(float dTime)
 {
 	//update all instances
 	for (int kk = 0; kk < arrSkeletonInstances.GetSize(); kk++)
