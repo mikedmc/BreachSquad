@@ -12,7 +12,10 @@ public:
 	CGame();
 	~CGame();
 
-	void				Update( float dTime );
+	// updates at a fixed timestep
+	void				UpdateFixed( float dTime );
+	// updates at variable timestep
+	void				Update( float dTime, bool bSyncUpdate, int nUpdateFrame );
 	// called before the actual painting the final scene but it is still called inside the paint method. Used to prepare deferred buffers.
 	void				BeforePaint();
 	// paints the actual final game

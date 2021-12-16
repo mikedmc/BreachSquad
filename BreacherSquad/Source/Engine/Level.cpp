@@ -6227,7 +6227,7 @@ int CLevel::Local_ComputeMissionXP(int nStars)
 	return nTotalXPPoints;
 }
 
-void CLevel::Update(float dTime_original)
+void CLevel::UpdateFixedTimestep(float dTime_original)
 {
 	if (!m_bLoaded)
 		return;
@@ -7537,30 +7537,38 @@ void CLevel::Update(float dTime_original)
 		}
 	}
 
+
+	//set update done flag
+	m_bOneUpdateDone = true;
+}
+
+
+void CLevel::Update( float dTime )
+{
 	///--- update camera ---
 	//default camera position following the players
-	Vec2 avg_live(0.0f, 0.0f), avg_all(0.0f, 0.0f);
+	Vec2 avg_live( 0.0f, 0.0f ), avg_all( 0.0f, 0.0f );
 	int plcnt_live = 0, plcnt_all = 0;
-	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
+	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 	{
 		//on networked games ignore the peer and stay locked onto the player
-		if (UTGetAppClass().IsGameNetworked())
+		if ( UTGetAppClass().IsGameNetworked() )
 		{
 			int nIndexToFollow = g_netlock.Net_GetPlayerIndex();
 			// move camera on peer after you die
-			if (pPlayerActor[g_netlock.Net_GetPlayerIndex()] == NULL)
+			if ( pPlayerActor[ g_netlock.Net_GetPlayerIndex() ] == NULL )
 			{
 				nIndexToFollow = g_netlock.Net_GetOtherPlayerIndex();
 				//if other player is dead too, just skip them and look at last spawn pos
-				if (pPlayerActor[nIndexToFollow] == NULL)
+				if ( pPlayerActor[ nIndexToFollow ] == NULL )
 					continue;
 			}
 			//in networked games just ignore the other player
-			if ((UTGetAppClass().IsGameNetworked()) && (kk != nIndexToFollow))
+			if ( ( UTGetAppClass().IsGameNetworked() ) && ( kk != nIndexToFollow ) )
 				continue;
 		}
 
-		if ((pPlayerActor[kk] != NULL) && (pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_IN_LIMBO) && (pPlayerActor[kk]->nSuspendedFlags == K_LVL_SUSPENDFLAG_NONE))
+		if ( ( pPlayerActor[ kk ] != NULL ) && ( pPlayerActor[ kk ]->GetCurrentBehavior() != AI_BEHAVIOR_IN_LIMBO ) && ( pPlayerActor[ kk ]->nSuspendedFlags == K_LVL_SUSPENDFLAG_NONE ) )
 		{
 			//#TODO: add constants or special camera class for this wicked camera movement
 			const float fMaxCameraMovement = K_TILE_SIZE_F * 4.0f;
@@ -7577,32 +7585,32 @@ void CLevel::Update(float dTime_original)
 			// compute final camera vector
 			fLookOff *= fLookDist * fMaxCameraMovement;
 
-			if (pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_DEAD)
+			if ( pPlayerActor[ kk ]->GetCurrentBehavior() != AI_BEHAVIOR_DEAD )
 			{
-				avg_live += Vec3XY(pPlayerActor[kk]->pos_last) + fLookOff;
+				avg_live += Vec3XY( pPlayerActor[ kk ]->pos_last ) + fLookOff;
 				plcnt_live++;
 			}
 
-			avg_all += Vec3XY(pPlayerActor[kk]->pos_last) + fLookOff;
+			avg_all += Vec3XY( pPlayerActor[ kk ]->pos_last ) + fLookOff;
 			plcnt_all++;
 		}
 	}
 
 	//average player positions
 	bool bAvgSet = false;
-	Vec2 vPlayersAvg(0.0f, 0.0f);
-	if (plcnt_all > 0)
+	Vec2 vPlayersAvg( 0.0f, 0.0f );
+	if ( plcnt_all > 0 )
 	{
 		bAvgSet = true;
 
 		avg_all /= plcnt_all;
 		vPlayersAvg = avg_all;
 
-		if (plcnt_live > 0)
+		if ( plcnt_live > 0 )
 		{
 			avg_live /= plcnt_live;
 			//are they too far apart? 
-			if (MUVec2Len(&(avg_all - avg_live)) > UTGetAppClass().g_rectRT.h * 0.5f)
+			if ( MUVec2Len( &( avg_all - avg_live ) ) > UTGetAppClass().g_rectRT.h * 0.5f )
 			{
 				vPlayersAvg = avg_live;
 			}
@@ -7610,61 +7618,57 @@ void CLevel::Update(float dTime_original)
 	}
 
 	//handles render size changes
-	m_camLevelToRT.SetViewport(UTGetAppClass().g_rectRT); 
-	m_camLevelToScr.SetViewport(UTGetAppClass().g_rectRender);
-	if (g_editor.IsLaunched())
+	m_camLevelToRT.SetViewport( UTGetAppClass().g_rectRT );
+	m_camLevelToScr.SetViewport( UTGetAppClass().g_rectRender );
+	if ( g_editor.IsLaunched() )
 	{
-		m_camLevelToRT.SetCamPos(&g_editor.m_vCamPos);
+		m_camLevelToRT.SetCamPos( &g_editor.m_vCamPos );
 	}
 	else
 	{
 		//no target camera object? look at the player pos average
-		if (m_camTargetActive == null)
+		if ( m_camTargetActive == null )
 		{
-			if (bAvgSet)
+			if ( bAvgSet )
 				m_vCamPosDefault = vPlayersAvg;
 
-			m_camLevelToRT.SetCamPos(&m_vCamPosDefault);
+			m_camLevelToRT.SetCamPos( &m_vCamPosDefault );
 		}
 		else
 		{
-			m_camLevelToRT.SetCamPos(&(m_camTargetActive->pos.xy_proj));
+			m_camLevelToRT.SetCamPos( &( m_camTargetActive->pos.xy_proj ) );
 		}
 	}
 
-	m_camLevelToRT.Update(dTime);
+	m_camLevelToRT.Update( dTime );
 	Vec3 vCamPos = m_camLevelToRT.GetCamPos();
-	m_camLevelToScr.SetCamPos(&Vec2(vCamPos.x, vCamPos.y), vCamPos.z);
-	m_camLevelToScr.Update(dTime);
+	m_camLevelToScr.SetCamPos( &Vec2( vCamPos.x, vCamPos.y ), vCamPos.z );
+	m_camLevelToScr.Update( dTime );
 
 	//find visible area
 	RECTXYWH_F camrect = m_camLevelToRT.GetCamWorldAABB();
-	CAABB camAABB(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));
+	CAABB camAABB( Vec2( camrect.x, camrect.y ), Vec2( camrect.Right(), camrect.Bottom() ) );
 
 	//set sounds listener position
-	SND_SET_LISTENER_POS(camrect.Center());
+	SND_SET_LISTENER_POS( camrect.Center() );
 	//--- update particles and emitters ---
-	g_particlesMgr.UpdatePartEmitters(dTime, camrect);
-	g_particlesMgr.Update(dTime);
-	g_particlesMgr.UpdateStringDummies(dTime);
+	g_particlesMgr.UpdatePartEmitters( dTime, camrect );
+	g_particlesMgr.Update( dTime );
+	g_particlesMgr.UpdateStringDummies( dTime );
 
-	Areas_UpdateVisibility(camrect);
+	Areas_UpdateVisibility( camrect );
 	///--- update visibility lists (after update) ---
 	BuildVisibilityLists();
 
 	// builds all dynamic meshes necessary for drawing the next frame
-	BuildDynamicGeometry(camAABB);
+	BuildDynamicGeometry( camAABB );
 
 	///--- update interface ---
-	m_interfaceIGM.Update(dTime);
+	m_interfaceIGM.Update( dTime );
 	//m_interfaceTextBubble.Update(dTime);
-
-	//set update done flag
-	m_bOneUpdateDone = true;
 }
 
-
-OPRESULT CLevel::PaintDeferredBuffers()
+OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 {
 	CRTManager::CEngineRenderTarget* pRT = nullptr;
 	///----------------------------------------------------
@@ -7690,7 +7694,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 			m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
-			RenderPass(K_LVL_RP_NORMALS_HEIGHT, &pRT->matProj);
+			RenderPass(K_LVL_RP_NORMALS_HEIGHT, &pRT->matProj, fBetweenFramesPercent);
 
 			// end sprite
 			//m_pSprite->End();
@@ -7724,7 +7728,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 
 			// special method for rendering lights pass
 			// uses the height/normals render target
-			RenderPass_Lights(&pRT->matProj);
+			RenderPass_Lights(&pRT->matProj, fBetweenFramesPercent);
 
 			// end sprite
 			//m_pSprite->End();
@@ -7758,7 +7762,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 			m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
-			RenderPass(K_LVL_RP_COLORS, &pRT->matProj);
+			RenderPass(K_LVL_RP_COLORS, &pRT->matProj, fBetweenFramesPercent);
 
 			// end sprite
 			//m_pSprite->End();
@@ -7792,7 +7796,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 			m_pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
 			// RT sized quad with tex1 color, tex2 lightmap
-			RenderPass_Composition(&pRT->matProj);
+			RenderPass_Composition(&pRT->matProj, fBetweenFramesPercent);
 
 			// end sprite
 			m_pSprite->End();
@@ -7806,7 +7810,7 @@ OPRESULT CLevel::PaintDeferredBuffers()
 	return K_OP_OK;
 }
 
-OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
+OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFramesPercent )
 {
 	_ASSERT((ePass > K_LVL_RP_NONE) && (ePass < K_LVL_RP_COUNT));
 
@@ -7942,7 +7946,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj)
 	return K_OP_OK;
 }
 
-OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
+OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 {
 	Mat				matView;
 
@@ -8241,7 +8245,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj)
 	return K_OP_OK;
 }
 
-OPRESULT CLevel::RenderPass_Composition(Mat* matProj)
+OPRESULT CLevel::RenderPass_Composition( Mat* matProj, float fBetweenFramesPercent )
 {
 	Mat				matView;
 	///----------------------------------------------------

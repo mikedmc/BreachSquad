@@ -325,9 +325,10 @@ enum ETexChannel {
 #define K_TILE_SIZE_F		16.0f
 #define K_TILE_HSIZE_F		8.0f
 
-// number of vertical visible tiles in a screen
-#define K_GAME_HEIGHT_TL			15
-// game scaling to final RT (pixel size)
+// number of vertical visible tiles in a screen 
+// 23 tiles * 16 = 368 pixels RT height, targeting 360 height for final render target because 360 fits best most modern resolutions
+#define K_GAME_HEIGHT_TL			23
+// game scaling to final RT (pixel size) - this way the RT will be 736 in height
 #define K_GAME_PIXEL_SIZE			2
 #define K_GAME_PIXEL_SIZE_F			2.0f
 

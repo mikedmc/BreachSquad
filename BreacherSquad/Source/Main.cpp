@@ -1269,139 +1269,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 
 		case GAME_STATE_GAME:
 		{
-			if (!bSyncUpdate) //not networked or network sync finised even if still during gameplay
-			{
-				//ingame menu on ESC-back
-				if (g_level.m_levelState == K_LVL_STATE_PLAYING)
-				{
-					CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_IGM_MENU");
-					if ((layer == null) && (!UTGetGUI().bIsBlocking))
-					{
-						for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
-						{
-							//show menu
-							if (UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
-							{
-								SND_PLAY(SNDIDX_CLICK);
-								UTGetGUI().ShowLayerOnce("LAYER_ID_IGM_MENU");
-								break;
-							}
-						}
-					}
-					else if ((layer != null) && (layer == UTGetGUI().GetTopmostInputLayer()))
-					{
-						for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
-						{
-							//remove onscreen menu
-							if ((UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED) ||
-								(UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_RELOAD] == K_CM_BUTSTATE_JUSTPRESSED))
-							{
-								SND_PLAY(SNDIDX_DENIED);
-								UTGetGUI().RemoveLayer("LAYER_ID_IGM_MENU");
-								break;
-							}
-						}
-					}
-				}
-
-				//update game if no blocking window is shown
-				if (!UTGetGUI().bIsBlocking)
-				{
-					//SPINE update animation states
-					g_spineMgr.UpdateAnimationStates(fElapsedTime, fTime);
-					
-					// Update level and all spine objects and bones
-					g_level.Update(fElapsedTime);
-
-					//SPINE update final skeleton world positions (no bone changes allowed after this)
-					g_spineMgr.Update(fElapsedTime, fTime);
-
-					g_bLevelNeedsUpdate = false;
-				}
-				//#HACK: update once after resolution changed so we adjust cameras
-				if (g_bLevelNeedsUpdate)
-				{
-					LOG_DBG(L"> Update called with dtime: 0.0");
-					g_level.Update(0.0f);
-					g_bLevelNeedsUpdate = false;
-				}
-			}
-			else  //networked, syncing update
-			{
-				//ingame menu on ESC-back (if chat is closed)
-				bool bCanOpenMenu = true;
-#ifdef ENABLE_CHAT_WINDOW
-				//because the chat window exits immediately we have to wait a little until we can bring the menu up
-				if ((g_ChatWnd.IsReceivingInput()) || (g_ChatWnd.fTimeSinceLastInput < K_CW_MIN_TIME_BETWEEN_INPUTS))
-					bCanOpenMenu = false;
-#endif
-				if (bCanOpenMenu)
-				{
-					//ingame menu on ESC-back
-					if (g_level.m_levelState == K_LVL_STATE_PLAYING)
-					{
-						CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_IGM_MENU_NET");
-						if ((layer == null) && (!UTGetGUI().bIsBlocking))
-						{
-							for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
-							{
-								CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
-								//ignore network controllers
-								if (ctrlr->eType == K_CM_CT_NET_FRAMELOCK)
-									continue;
-								//show menu
-								if (ctrlr->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
-								{
-									SND_PLAY(SNDIDX_CLICK);
-									UTGetGUI().ShowLayerOnce("LAYER_ID_IGM_MENU_NET");
-									break;
-								}
-							}
-						}
-						else if ((layer != null) && (layer == UTGetGUI().GetTopmostInputLayer()) && (layer->alpha >= 1.0f))
-						{
-							for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
-							{
-								CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
-								//ignore network controllers
-								if (ctrlr->eType == K_CM_CT_NET_FRAMELOCK)
-									continue;
-								//remove onscreen menu
-								if ((ctrlr->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED) ||
-									(ctrlr->sCommands.keyState[K_CM_COMMAND_RELOAD] == K_CM_BUTSTATE_JUSTPRESSED))
-								{
-									SND_PLAY(SNDIDX_DENIED);
-									UTGetGUI().RemoveLayer("LAYER_ID_IGM_MENU_NET");
-									break;
-								}
-							}
-						}
-					}
-				}
-				//sync random seed again here (makes sure we don't get desynced between debug and release versions)
-				//resets the number of random numbers requested
-				g_level.m_rand.SetRandSeed(g_netlock.m_unRandomSeed + g_nUpdateFrame);
-				//LOG(L"--update dT=%.6f T=%.6f rand:%d--", fElapsedTime, fTime, g_level.m_rand.GetRandomSeed());
-
-				//SPINE update animation states
-				g_spineMgr.UpdateAnimationStates(fElapsedTime, fTime);
-
-				g_level.Update(fElapsedTime);
-				//SPINE update animation states
-				g_spineMgr.Update(fElapsedTime, fTime);
-				g_bLevelNeedsUpdate = false;
-
-				//check sync by log
-				/*
-				double faccum = 0.0f;
-				for (int ll = 0; ll < g_level.m_arrActors.GetSize(); ll++)
-				{
-				faccum += g_level.m_arrActors[ll]->vPos.x;
-				faccum += g_level.m_arrActors[ll]->vPos.y;
-				}
-				LOG(L"-- frame %d faccum %.9g", g_nUpdateFrame, faccum);
-				*/
-			}
+			g_game.Update( fElapsedTime, bSyncUpdate, g_nUpdateFrame );
 
 			g_editor.Update(fElapsedTime);
 		}
@@ -1416,7 +1284,6 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 
 	}
 
-	g_game.Update( fElapsedTime );
 
 	///--- ANALYTICS ---
 	UTGetAnalytics().Update();

@@ -375,18 +375,23 @@ public:
 	int						Local_ComputeMissionXP(int nStars);
 
 ///-- update/paint --	
-	// Main level Update
-	void					Update(float dTime_original);
+	// Fixed timestep update - game, physics, simulation dependant things
+	// Called BEFORE the variable step Update
+	void					UpdateFixedTimestep( float dTime_original );
+	// Variable dTime update - camera, non game specific updates
+	void					Update( float dTime );
 
 	//#TODO: to be replaced with generic function that takes a "channel" param
-	OPRESULT				PaintDeferredBuffers();
-	OPRESULT				RenderPass(eLVLRenderPass ePass, Mat* matProj);
+	// fBetweenFramesPercent is the time accumulator remainder after updateing full simulation fixed steps so we can extrapolate positions and eliminate stutter
+	OPRESULT				PaintDeferredBuffers( float fBetweenFramesPercent );
+	// renders level pass
+	OPRESULT				RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenFramesPercent );
 	// the lights pass is so very different that it needs a special function
-	OPRESULT				RenderPass_Lights(Mat* matProj);
+	OPRESULT				RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent );
 	// composes color and lights into one RT
-	OPRESULT				RenderPass_Composition(Mat* matProj);
+	OPRESULT				RenderPass_Composition( Mat* matProj, float fBetweenFramesPercent );
 
-	// level paint into composition texture 
+	// paint level buffers onscreen
 	void					Paint();
 	// paints final res effects (water, distortion, icons, etc)
 	HRESULT					PaintUsingFinalRTT();
