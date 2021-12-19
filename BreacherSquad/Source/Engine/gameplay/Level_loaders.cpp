@@ -193,7 +193,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_camLevelToRT.SetCamAnimationSpring(K_LVL_CAM_FOLLOW_SPRING_KS, K_LVL_CAM_FOLLOW_DAMPING_KD);
 	// level to screen cam settings (copies position of level to RT
 	m_camLevelToScr.SetWorldBounds(m_levelAABB, false, K_CAMTRANS_AXIS_NONE);
-	m_camLevelToScr.InitCamera(UTGetAppClass().g_rectRender, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault);
+	m_camLevelToScr.InitCamera(UTGetAppClass().g_rectRenderPP, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault);
 	m_camLevelToScr.SetCamAnimationNone();
 	// call one update so we're sure everything is initialized
 	m_camLevelToRT.Update(0.0f);

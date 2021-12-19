@@ -465,7 +465,7 @@ void CActor::PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse
 	//actually play the sound
 	//play only nearby sounds
 	Vec2 vDist(pos.xy.x - vListenerPos.x, pos.xy.y - vListenerPos.y);
-	if (MUVec2Len(&vDist) < K_GAME_WIDTH_MAX * 0.5f * 1.5f)
+	if (MUVec2Len(&vDist) < K_GAME_WIDTH * 0.5f * 1.5f)
 	{
 		SND_PLAY_POSITIONAL(actTemplate.soundIDs[(int)sVerse][nVariation], pos.xy);
 	}

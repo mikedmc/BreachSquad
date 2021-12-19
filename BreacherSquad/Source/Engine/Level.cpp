@@ -8355,6 +8355,8 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_RTT) == 0)
 		return E_FAIL;
 
+	RECTXYWH_F rectRender = UTGetAppClass().g_rectRenderPP;
+	int nPixelScaling = UTGetAppClass().g_nPixelSizePP;
 	///--- PAINT LEVEL ---
 	//real screen space
 	CCameraTransform::SetActiveCamera(m_pDevice, &UTGetAppClass().g_camScreen);
@@ -8364,14 +8366,21 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	{
 		CCameraTransform::SetActiveCameraIdentity(m_pDevice);
 		RECT src;
-		SetRect(&src, 0, 0, pRTfinal->nWidth, pRTfinal->nHeight);
-		float fRTscale = (float)UTGetAppClass().g_rectRender.h / (float)pRTfinal->nHeight;
+		SIZEWH_F szSrc( rectRender.w / ( float ) nPixelScaling, rectRender.h / ( float ) nPixelScaling );
+		// display the center part of the source RT that fits the screen
+		Vec2i vUL( ( int ) floor( pRTfinal->nWidth / 2.0f - szSrc.w / 2.0f ), ( int ) floor( pRTfinal->nHeight / 2.0f - szSrc.h / 2.0f ) );
+		Vec2i vDR( vUL.x + ( int ) ceil(szSrc.w), vUL.y + ( int ) ceil(szSrc.h) );
+		SetRect( &src, vUL.x, vUL.y, vDR.x, vDR.y );
+		//use SRC rect for scaling and not the nPixelScaling.
+		float fRTscale = nPixelScaling;
+		//#TODO: when using NON PIXEL PERFECT scaling just scale the whole RT (keeping the aspect ratio)
+		//float fRTscale = (float)rectRender.h / (float)pRTfinal->nHeight;
 		Mat matpaint;
 		// computes sub pixel offsets for smooth scrolling. the RT renders only on tileset pixels, no subpixels, for precision.
 		// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
 		RECTXYWH_F camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
 		Vec2 vSubPxOff(-FLOAT_FRAC(camrect.x) * (fRTscale * K_GAME_PIXEL_SIZE_F), -FLOAT_FRAC(camrect.y) * (fRTscale * K_GAME_PIXEL_SIZE_F));
-		MUMatAffine2D(&matpaint, fRTscale, nullptr, 0.0f, &Vec2(UTGetAppClass().g_rectRender.x + vSubPxOff.x, 0.0f + vSubPxOff.y));
+		MUMatAffine2D(&matpaint, fRTscale, nullptr, 0.0f, &Vec2(rectRender.x + vSubPxOff.x, rectRender.y + vSubPxOff.y));
 		m_pSprite->SetTransform(&matpaint);
 		m_pSprite->Draw(pRTfinal->m_pRTTexture, &src, NULL, &g_Vec3Zero, 0xffffffff);
 		m_pSprite->Flush();
@@ -8704,7 +8713,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		DWORD colEffect = D3DCOLOR_COLORALPHA(0xff000088, 1.0f - m_fTimeMultiplier_real);
 		Mat mattrans;
 		RECTXYWH_F bbox = UTGetGUI().m_sprCol.GetAFrameBBox_real(ANM_CONTROLS_SPR_VIGNETTES, 1);
-		MUMatAffine2D(&mattrans, UTGetAppClass().g_rectRender.h / bbox.h, NULL, 0.0f, &UTGetAppClass().g_rectRender.Center());
+		MUMatAffine2D(&mattrans, rectRender.h / bbox.h, NULL, 0.0f, &rectRender.Center());
 		m_pSprite->SetTransform(&mattrans);
 		CSprite::paintFrame(&UTGetGUI().m_sprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, 1, colEffect);
 		m_pSprite->Flush();

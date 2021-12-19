@@ -866,10 +866,8 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_OP_RETHR(UTGetRTManager().OnResetDevice(pDevice, pBBDesc));
 
 	// Create necessary render targets when device gets reset (created or reset)
-	float fAspectReal = (float)pBBDesc->Width / (float)pBBDesc->Height;
-	float fAspect = LIMIT(fAspectReal, K_WINDOW_ASPECT_RATIO_MIN, K_WINDOW_ASPECT_RATIO_MAX);
 	UINT fGameHpx = K_GAME_HEIGHT * K_GAME_PIXEL_SIZE;
-	UINT fGameWpx = (UINT)ceil(fGameHpx * fAspect);
+	UINT fGameWpx = K_GAME_WIDTH * K_GAME_PIXEL_SIZE;
 	// Create RTs
 	UTGetRTManager().AddRT(K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
 	UTGetRTManager().AddRT(K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);

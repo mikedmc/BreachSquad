@@ -91,8 +91,10 @@ CApplication::CApplication()
 
 	//keep real screen and virtual screen sizes
 	g_rectRender = RECTXYWH_F(0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h);
+	g_nPixelSizePP = 2;
+	g_rectRenderPP = g_rectRender;
 	g_rectScreen = RECTXYWH_F(0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h);
-	g_rectRT = RECTXYWH_F(0.0f, 0.0f, (g_rectRender.w / g_rectRender.h) * K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F, K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F);
+	g_rectRT = RECTXYWH_F(0.0f, 0.0f, K_GAME_WIDTH * K_GAME_PIXEL_SIZE_F, K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F);
 	//dreptunghiul de mai jos aproximeaza rezolutia de W/240 pixeli si e fix ca sa arate interfetele mereu la fel
 	g_rect240hWorld = RECTXYWH_F(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * 240.0f), 240.0f);
 	g_rect480hWorld = RECTXYWH_F(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * 480.0f), 480.0f);
@@ -234,36 +236,63 @@ void CApplication::Init()
 void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 {
 	g_rectScreen = RECTXYWH_F(0.0f, 0.0f, (float)newSizeX, (float)newSizeY);
-	//calculam aspect si limitam la anumite margins (4/3 si 16/9)
+	// limit aspect ratio between min and max (4/3 si 16/9)
 	float fAspectReal = (g_rectScreen.w / g_rectScreen.h);
 	float fAspect = LIMIT(fAspectReal, K_WINDOW_ASPECT_RATIO_MIN, K_WINDOW_ASPECT_RATIO_MAX);
 	float fAspectInv = 1.0f / fAspect;
-	
-	SIZEWH_F szRender(0.0f, 0.0f);
-	if (fAspectReal < K_WINDOW_ASPECT_RATIO_MIN)
+	SIZEWH_F szRender( (float)newSizeX, (float)newSizeY );
+	///--- pixel perfect rendering ---
+	SIZEWH_F szRenderPP;
+	const float ReferenceResolutionY = ( float ) K_GAME_TARGET_RESOLUTION_H;
+	// Calculate the new art scale factor
+	float minDiff = ReferenceResolutionY;
+	// decide best pixel size for pixel perfect results
+	g_nPixelSizePP = 1;
+	for ( int kk = 1; kk < 10; kk++ )
 	{
-		szRender.w = (float)newSizeX;
+		float deltaH = fabs( newSizeY - kk * ReferenceResolutionY );
+		if ( deltaH < minDiff )
+		{
+			minDiff = deltaH;
+			g_nPixelSizePP = kk;
+		}
+	}
+	//#TEMP: force pixel size to 3x to test clipping when source is larger
+	//6g_nPixelSizePP = 3;
+
+	szRenderPP.w = K_GAME_WIDTH * K_GAME_PIXEL_SIZE * g_nPixelSizePP;
+	szRenderPP.h = K_GAME_HEIGHT * K_GAME_PIXEL_SIZE * g_nPixelSizePP;
+	if ( szRenderPP.w > newSizeX )
+		szRenderPP.w = newSizeX;
+	if ( szRenderPP.h > newSizeY )
+		szRenderPP.h = newSizeY;
+	// compute final render rectangle
+	if ( fAspectReal < K_WINDOW_ASPECT_RATIO_MIN )
+	{
+		szRender.w = ( float ) newSizeX;
 		szRender.h = fAspectInv * newSizeX;
 	}
-	else if (fAspectReal > K_WINDOW_ASPECT_RATIO_MAX)
+	else if ( fAspectReal > K_WINDOW_ASPECT_RATIO_MAX )
 	{
-		szRender.h = (float)newSizeY;
+		szRender.h = ( float ) newSizeY;
 		szRender.w = fAspect * newSizeY;
 	}
 	else
 	{
-		szRender.w = (float)newSizeX;
-		szRender.h = (float)newSizeY;
+		szRender.w = ( float ) newSizeX;
+		szRender.h = ( float ) newSizeY;
 	}
 
 	g_letterbox.w = (float)(newSizeX - szRender.w) / 2.0f;
 	g_letterbox.h = (float)(newSizeY - szRender.h) / 2.0f;
 
 	g_rectRender = RECTXYWH_F(g_letterbox.w, g_letterbox.h, szRender.w, szRender.h);
+	g_rectRenderPP = RECTXYWH_F( floor( ( newSizeX - szRenderPP.w ) / 2.0f ), floor( ( newSizeY - szRenderPP.h ) / 2.0f ), szRenderPP.w, szRenderPP.h );
 
 	g_rect240hWorld = RECTXYWH_F(0.0f, 0.0f, (fAspect * 240.0f), 240.0f);
 	g_rect480hWorld = RECTXYWH_F(0.0f, 0.0f, (fAspect * 480.0f), 480.0f);
-	g_rectRT = RECTXYWH_F(0.0f, 0.0f, fAspect * K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F, K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F);
+	//g_rectRT = RECTXYWH_F(0.0f, 0.0f, fAspect * K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F, K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F);
+	g_rectRT = RECTXYWH_F( 0.0f, 0.0f, K_GAME_WIDTH * K_GAME_PIXEL_SIZE_F, K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F );
 	D3DXMatrixOrthoOffCenterLH(&g_matProj, g_rectScreen.x + 0.5f, g_rectScreen.w + 0.5f, g_rectScreen.h + 0.5f, g_rectScreen.y + 0.5f, 0.0f, 1.0f);
 
 	g_camScreen.SetWorldBounds(g_rectScreen, true, K_CAMTRANS_AXIS_V, g_rectScreen.h, g_rectScreen.h);

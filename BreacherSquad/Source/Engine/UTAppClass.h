@@ -124,13 +124,15 @@ public:
 	///--------------------------------------------------------------------------------------
 	/// Variabile globale legate de dimensiunea ecranului
 	///--------------------------------------------------------------------------------------
-	SIZEWH_F	g_letterbox;		//specifica afisare bare negre laterale sau sus/jos. daca w!=0 sunt bare laterale de latimea respectiva. Daca h!=0 sunt bare sus si jos
-	RECTXYWH_F	g_rectScreen;		//real screen (after letterboxing)
-	RECTXYWH_F	g_rectRender;		//rectangle that we render to (actual final screen resolution)
+	SIZEWH_F	g_letterbox;		// specifica afisare bare negre laterale sau sus/jos. daca w!=0 sunt bare laterale de latimea respectiva. Daca h!=0 sunt bare sus si jos
+	RECTXYWH_F	g_rectScreen;		// real screen (after letterboxing)
+	RECTXYWH_F	g_rectRender;		// rectangle that we render to (in actual final screen resolution after letterboxing)
+	RECTXYWH_F	g_rectRenderPP;		// rectangle that the level should render to so it scales with integers (in actual final screen coordinates)
+	float		g_nPixelSizePP;		// pixel size in real pixels for when rendering with perfect pixel
 	RECTXYWH_F	g_rectRT;			// render target render rectangle
-	RECTXYWH_F  g_rect240hWorld;	//world rect for menus
-	RECTXYWH_F  g_rect480hWorld;	//double res menu rect (for system fonts)
-	D3DXMATRIXA16	g_matProj;		//projection matrix
+	RECTXYWH_F  g_rect240hWorld;	// world rect for menus
+	RECTXYWH_F  g_rect480hWorld;	// double res menu rect (for system fonts)
+	Mat			g_matProj;		// projection matrix
 	//--- screen camera ---
 	CCameraTransform g_camScreen;		//real screen camera
 	CCameraTransform g_camRTScreen;		//game screen camera with height of RT targets (RT to screen)

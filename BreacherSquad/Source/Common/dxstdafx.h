@@ -320,22 +320,20 @@ enum ETexChannel {
 };
 
 ///--- CONSTANTE JOC ---
-#define K_TILE_SIZE			16
-#define K_TILE_HSIZE		8
-#define K_TILE_SIZE_F		16.0f
-#define K_TILE_HSIZE_F		8.0f
+#define K_TILE_SIZE					16
+#define K_TILE_HSIZE				8
+#define K_TILE_SIZE_F				16.0f
+#define K_TILE_HSIZE_F				8.0f
 
+// targeted vertical resolution. 360 pixels gives the best results for modern resolutions (were his last words, Jan 2022)
 // number of vertical visible tiles in a screen 
-// 23 tiles * 16 = 368 pixels RT height, targeting 360 height for final render target because 360 fits best most modern resolutions
-#define K_GAME_HEIGHT_TL			23
-// game scaling to final RT (pixel size) - this way the RT will be 736 in height
-#define K_GAME_PIXEL_SIZE			2
-#define K_GAME_PIXEL_SIZE_F			2.0f
-
-#define K_GAME_HEIGHT				(K_TILE_SIZE * K_GAME_HEIGHT_TL)
-#define K_GAME_HALF_HEIGHT			(K_GAME_HEIGHT / 2)
-#define K_GAME_WIDTH_MIN			(K_GAME_HEIGHT * K_WINDOW_ASPECT_RATIO_MIN)
-#define K_GAME_WIDTH_MAX			(K_GAME_HEIGHT * K_WINDOW_ASPECT_RATIO_MAX)
+#define K_GAME_TARGET_RESOLUTION_H	360
+// game scaling to final RT (pixel size) - applied independently of pixel perfect pixel size g_nPixelSizePP
+#define K_GAME_PIXEL_SIZE			1
+#define K_GAME_PIXEL_SIZE_F			1.0f
+// level will always render at 640x360 so this will be the base game resolution
+#define K_GAME_WIDTH				640
+#define K_GAME_HEIGHT				360
 
 // scale to use when transforming Z to H (added to Y, projection)
 #define ZHSCALE						0.5f
@@ -351,16 +349,16 @@ enum ETexChannel {
 #define K_WALL_HEIGHT_WORLD			64.0f
 #define K_WALL_HEIGHT_SCREEN		(K_WALL_HEIGHT_WORLD * ZHSCALE)
 
-#define K_GAME_CLEAR_COLOR	0x00000044
+#define K_GAME_CLEAR_COLOR			0x00000044
 // splashscreen show time
-#define K_GAME_SPLASH_SHOW_TIMER 2.5f
+#define K_GAME_SPLASH_SHOW_TIMER	2.5f
 
 // default resolution for when failing to get supported res list (1360x768) (1920x1080)
-#define	K_WINDOW_WIDTH_SAFE		800
-#define	K_WINDOW_HEIGHT_SAFE	600
+#define	K_WINDOW_WIDTH_SAFE			800
+#define	K_WINDOW_HEIGHT_SAFE		600
 // minimum resolution for the game (res list gets filtered by this)
-#define	K_WINDOW_WIDTH_MIN		640
-#define	K_WINDOW_HEIGHT_MIN		480
+#define	K_WINDOW_WIDTH_MIN			800
+#define	K_WINDOW_HEIGHT_MIN			600
 // aspect ratio limits
 #define K_WINDOW_ASPECT_RATIO_MIN	(4.0f / 3.0f)
 #define K_WINDOW_ASPECT_RATIO_MAX	(16.0f / 9.0f)
