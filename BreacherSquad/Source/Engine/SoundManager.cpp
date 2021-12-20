@@ -423,7 +423,7 @@ HRESULT CSoundManager::LoadSoundsXML(WCHAR* XMLpath)
 		else
 		{
 			UTGetLibraryManager().extractFileToTemp(L"\\Sounds\\sounds.sfp", soundFileIDX);
-			HRESULT hr = AddSound(UTGetAppClass().g_wszTempFilePath, sID, sGroupID, bufCnt, bOnlyLoadPlaying);
+			HRESULT hr = AddSound(UTApp().g_wszTempFilePath, sID, sGroupID, bufCnt, bOnlyLoadPlaying);
 			if(FAILED(hr))
 			{
 				ErrorBox(K_ERR_WARNING, L"Could not load sound: %s\n", path);
@@ -448,7 +448,7 @@ HRESULT CSoundManager::LoadSoundsXML(WCHAR* XMLpath)
 	}
 
 	//--- delete temp file ---
-	_wremove(UTGetAppClass().g_wszTempFilePath);
+	_wremove(UTApp().g_wszTempFilePath);
 
 	LOG(L"Sounds:: %d Sounds Loaded.", count);
 

@@ -817,7 +817,7 @@ void CGalaxyClientP2P::UpdateRichPresenceConnectionInfo()
 
 bool CGalaxyClientP2P::IsUserConnected()
 {
-	if (UTGetAppClass().m_Settings.galaxyFullyLoaded && User() && User()->SignedIn() && User()->IsLoggedOn())
+	if (UTApp().m_Settings.galaxyFullyLoaded && User() && User()->SignedIn() && User()->IsLoggedOn())
 		return true;
 
 	return false;

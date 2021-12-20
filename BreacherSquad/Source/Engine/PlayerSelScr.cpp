@@ -99,7 +99,7 @@ void CPlayerSelScr::OnControllerRemoved(int ctrlrInstanceID)
 	//remove selected characters on local game
 	if (nAffectedIdx >= 0)
 	{
-		if (!UTGetAppClass().IsGameNetworked())
+		if (!UTApp().IsGameNetworked())
 		{
 			g_playerSelScr.ResetSelection(true);
 		}
@@ -157,7 +157,7 @@ void CPlayerSelScr::Update(float dTime)
 	fLocalTimeline += dTime;
 
 	//pentru jocurile multiplayer asteptam de pe retea date de selectie
-	if (UTGetAppClass().IsGameNetworked())
+	if (UTApp().IsGameNetworked())
 	{
 		CNetLock::sPacketPlayerSelection netSel;
 
@@ -312,7 +312,7 @@ void CPlayerSelScr::Update(float dTime)
 
 			///--- ADDING NEW PLAYER ---
 			//networked playerul local il adaugam mereu acolo unde este necesar (0-master, 1-slave)
-			if (UTGetAppClass().IsGameNetworked())
+			if (UTApp().IsGameNetworked())
 			{
 				if ((nPlayerIdx == -1) && (eCommand == K_PSS_COMMAND_SELECT))
 				{
@@ -483,7 +483,7 @@ void CPlayerSelScr::Update(float dTime)
 						{
 							m_arrPlayers[nPlayerIdx].bSelected = false;
 							//when networked play send all commands
-							if (UTGetAppClass().IsGameNetworked())
+							if (UTApp().IsGameNetworked())
 								SendSelectionByNetwork(nPlayerIdx);
 
 							bBackProcessed = true;
@@ -494,7 +494,7 @@ void CPlayerSelScr::Update(float dTime)
 						if (playersel->nCursorPosReal == K_PSS_CURPOS_GEAR)
 							playersel->nCursorPosReal = K_PSS_CURPOS_EQUIPMENT;
 						//when networked play send all commands
-						if (UTGetAppClass().IsGameNetworked())
+						if (UTApp().IsGameNetworked())
 							SendSelectionByNetwork(nPlayerIdx);
 					}
 					else if (eCommand == K_PSS_COMMAND_RIGHT)
@@ -502,7 +502,7 @@ void CPlayerSelScr::Update(float dTime)
 						if (playersel->nCursorPosReal == K_PSS_CURPOS_EQUIPMENT)
 							playersel->nCursorPosReal = K_PSS_CURPOS_GEAR;
 						//when networked play send all commands
-						if (UTGetAppClass().IsGameNetworked())
+						if (UTApp().IsGameNetworked())
 							SendSelectionByNetwork(nPlayerIdx);
 					}
 					else if (eCommand == K_PSS_COMMAND_DOWN)
@@ -518,7 +518,7 @@ void CPlayerSelScr::Update(float dTime)
 							playersel->nCursorPosReal++;
 						}
 						//when networked play send all commands
-						if (UTGetAppClass().IsGameNetworked())
+						if (UTApp().IsGameNetworked())
 							SendSelectionByNetwork(nPlayerIdx);
 					}
 					else if (eCommand == K_PSS_COMMAND_UP)
@@ -536,7 +536,7 @@ void CPlayerSelScr::Update(float dTime)
 							playersel->nCursorPosReal--;
 						}
 						//when networked play send all commands
-						if (UTGetAppClass().IsGameNetworked())
+						if (UTApp().IsGameNetworked())
 							SendSelectionByNetwork(nPlayerIdx);
 					}
 					//select command
@@ -649,7 +649,7 @@ void CPlayerSelScr::Update(float dTime)
 										playersel->nSelection[kk] = 0;
 										SetSelectionPrices(&m_arrPlayers[nPlayerIdx]);
 										//when networked play send all commands
-										if (UTGetAppClass().IsGameNetworked())
+										if (UTApp().IsGameNetworked())
 											SendSelectionByNetwork(nPlayerIdx);
 										break;
 									}
@@ -667,7 +667,7 @@ void CPlayerSelScr::Update(float dTime)
 									m_arrPlayers[nPlayerIdx].bSelected = true;
 
 									//when networked play send all commands
-									if (UTGetAppClass().IsGameNetworked())
+									if (UTApp().IsGameNetworked())
 										SendSelectionByNetwork(nPlayerIdx);
 								}
 							}
@@ -738,7 +738,7 @@ void CPlayerSelScr::Update(float dTime)
 								//m_arrPlayers[nPlayerIdx].fVerseReadyTimer = 0.0f;
 
 								//when networked play send all commands
-								if (UTGetAppClass().IsGameNetworked())
+								if (UTApp().IsGameNetworked())
 									SendSelectionByNetwork(nPlayerIdx);
 							}
 
@@ -755,7 +755,7 @@ void CPlayerSelScr::Update(float dTime)
 								m_arrPlayers[nPlayerIdx].fVerseReadyTimer = 0.0f;
 
 								//when networked play send all commands
-								if (UTGetAppClass().IsGameNetworked())
+								if (UTApp().IsGameNetworked())
 									SendSelectionByNetwork(nPlayerIdx);
 							}
 						}
@@ -816,7 +816,7 @@ void CPlayerSelScr::Update(float dTime)
 							//update lock flag on selections
 							SetSelectionPrices(&m_arrPlayers[nPlayerIdx]);
 							//when networked play send all commands
-							if (UTGetAppClass().IsGameNetworked())
+							if (UTApp().IsGameNetworked())
 								SendSelectionByNetwork(nPlayerIdx);
 							//close details wnd
 							playersel->nCursorMoreReal = -1;
@@ -836,7 +836,7 @@ void CPlayerSelScr::Update(float dTime)
 								playersel->nCursorMoreReal = -1;
 
 								//when networked play send selection
-								if (UTGetAppClass().IsGameNetworked())
+								if (UTApp().IsGameNetworked())
 									SendSelectionByNetwork(nPlayerIdx);
 							}
 							else
@@ -1004,7 +1004,7 @@ void CPlayerSelScr::Update(float dTime)
 	if (m_nPlayersCnt <= 0)
 		bAllSelected = false;
 	//on networked games we need both players to press
-	if (UTGetAppClass().IsGameNetworked())
+	if (UTApp().IsGameNetworked())
 	{
 		if (m_nPlayersCnt < K_MAX_PLAYERS_CNT)
 			bAllSelected = false;
@@ -1023,7 +1023,7 @@ void CPlayerSelScr::Update(float dTime)
 	{
 		SaveSelection();
 
-		if (UTGetAppClass().IsGameNetworked())
+		if (UTApp().IsGameNetworked())
 		{
 			g_gameMode = (eGameMode)g_netlock.m_ucSelMode;
 			g_userData[K_MEMID_SELECTED_CHAPTER] = (int)g_netlock.m_ucSelChapter;
@@ -1036,7 +1036,7 @@ void CPlayerSelScr::Update(float dTime)
 		CHAR ctxt[MAX_PATH];
 		WCHAR wtxt[MAX_PATH];
 		//save network received level selection
-		if (UTGetAppClass().IsGameNetworked())
+		if (UTApp().IsGameNetworked())
 		{
 			StringCchPrintf(wtxt, MAX_PATH, L"%s_%s", EPSSPlayerClassNames[(int)m_arrPlayers[0].eType], EPSSPlayerClassNames[(int)m_arrPlayers[1].eType].text);
 			wcstombs(ctxt, wtxt, MAX_PATH);
@@ -1069,15 +1069,15 @@ void CPlayerSelScr::Update(float dTime)
 void CPlayerSelScr::Paint(ID3DXSprite* pSprite)
 {
 	//setam ecranul standard de 240h inaltime
-	CCameraTransform::SetActiveCamera(m_pDevice, &UTGetAppClass().g_cam240hScreen);
+	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam240hScreen);
 	App_SetWorldTransform(m_pDevice, &g_matIdentity);
 
-	RECTXYWH_F scrrect = UTGetAppClass().g_cam240hScreen.GetCamWorldAABB();
+	RECTXYWH_F scrrect = UTApp().g_cam240hScreen.GetCamWorldAABB();
 	///--- paint background (from mainmenu.cpp, easily changed)
 
 	//#MAYBE: poate ar trebui ca desenarea asta sa fie intr-o functie generica (ca sa nu mai fie in 2 locuri)
 	DWORD dwColor = 0xff4444dd;
-	RECTXYWH_F worldrect = UTGetAppClass().g_rect240hWorld;
+	RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 	//paint back
 	float fbackOffX = 10.0f + 8.0f * sin(fLocalTimeline * 0.4f + M_PI);
 	CSprite::paintFrame(&m_sprCol, worldrect.CenterX() + fbackOffX, worldrect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 0, dwColor);
@@ -1102,7 +1102,7 @@ void CPlayerSelScr::Paint(ID3DXSprite* pSprite)
 	CSprite::paintFrame(&m_sprCol, worldrect.CenterX() - 12.0f + (6.0f * sin(fLocalTimeline * 0.4f)), worldrect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 3, dwColor);
 
 	///--- paint selection windows ---
-	if (!UTGetAppClass().IsGameNetworked())
+	if (!UTApp().IsGameNetworked())
 	{
 		PaintPlayerSelectionWindow(0, D3DXVECTOR2(scrrect.CenterX() - K_PSS_PLAYER_WINDOW_WIDTH - 10.0f, 18.0f));
 		PaintPlayerSelectionWindow(1, D3DXVECTOR2(scrrect.CenterX() + 10.0f, 18.0f));
@@ -1457,7 +1457,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		//available stars
 		CSprite::paintFrame(&m_sprCol, recttemp.CenterX(), recttemp.Bottom() - 2, ANM_MENUS_SPR_CHARSEL_WND_DECO, 1, dwWinColor); //stars placeholder
 		//paint network stars or local stars
-		if((UTGetAppClass().IsGameNetworked()) && (playersel->bIsNetworkPlayer))
+		if((UTApp().IsGameNetworked()) && (playersel->bIsNetworkPlayer))
 			g_font5ns2->DrawString(STR_PEER_STARS_VAL, recttemp.CenterX(), recttemp.Bottom() - 2, FONTFLAG_ANCHOR_BOTTOMLEFT, D3DCOLOR_COLORALPHA(0xfffdb727, fAlpha));
 		else
 			g_font5ns2->DrawString(STR_TOTAL_STARS_VAL, recttemp.CenterX(), recttemp.Bottom() - 2, FONTFLAG_ANCHOR_BOTTOMLEFT, D3DCOLOR_COLORALPHA(0xfffdb727, fAlpha));

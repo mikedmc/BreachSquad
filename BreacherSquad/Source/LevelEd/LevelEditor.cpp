@@ -40,7 +40,7 @@ OPRESULT CLevelEditor::Init()
 {
 	// load necessary sprites from file
 	WCHAR wsPath[MAX_PATH];
-	wsprintf(wsPath, L"%s/interfaces/lvled.bsx", UTGetAppClass().g_wszAppResDir);
+	wsprintf(wsPath, L"%s/interfaces/lvled.bsx", UTApp().g_wszAppResDir);
 
 	V_OP_RET(m_sprCol.LoadSprites(wsPath));
 
@@ -208,7 +208,7 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 		return;
 	_ASSERT(m_pDevice != nullptr);
 
-	CCameraTransform::SetActiveCamera(m_pDevice, &UTGetAppClass().g_camScreen);
+	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_camScreen);
 
 	switch (eTool)
 	{

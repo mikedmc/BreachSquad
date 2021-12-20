@@ -226,7 +226,7 @@ VOID LOG_DBG_BUFF_FLUSH()
 	if (nBuffIdx > 0)
 	{
 		WCHAR szPath[MAX_PATH];
-		StringCchPrintf(szPath, MAX_PATH, L"%serror.log", UTGetAppClass().g_wszUserDataDir);
+		StringCchPrintf(szPath, MAX_PATH, L"%serror.log", UTApp().g_wszUserDataDir);
 		FILE* log = NULL;
 		if ((log = _wfopen(szPath, L"at")) == NULL)
 		{
@@ -248,7 +248,7 @@ VOID LOG_DBG_BUFF_FLUSH()
 void DebugLogFnA(CHAR* szFormat, ...)
 {
 	WCHAR szPath[MAX_PATH];
-	StringCchPrintf(szPath, MAX_PATH, L"%serror.log", UTGetAppClass().g_wszUserDataDir);
+	StringCchPrintf(szPath, MAX_PATH, L"%serror.log", UTApp().g_wszUserDataDir);
 	FILE* log = NULL;
 	if ((log = _wfopen(szPath, L"at")) == NULL)
 	{
@@ -269,7 +269,7 @@ void DebugLogFnA(CHAR* szFormat, ...)
 void DebugLogFnW(WCHAR* szFormat, ...)
 {
 	WCHAR szPath[MAX_PATH];
-	StringCchPrintf(szPath, MAX_PATH, L"%serror.log", UTGetAppClass().g_wszUserDataDir);
+	StringCchPrintf(szPath, MAX_PATH, L"%serror.log", UTApp().g_wszUserDataDir);
 	FILE* log = NULL;
 	if ((log = _wfopen(szPath, L"at")) == NULL)
 	{
@@ -287,7 +287,7 @@ void DebugLogFnW(WCHAR* szFormat, ...)
 VOID DebugLogClear()
 {
 	WCHAR szPath[MAX_PATH];
-	StringCchPrintf(szPath, MAX_PATH, L"%serror.log", UTGetAppClass().g_wszUserDataDir);
+	StringCchPrintf(szPath, MAX_PATH, L"%serror.log", UTApp().g_wszUserDataDir);
 	FILE* log = NULL;
 	if ((log = _wfopen(szPath, L"wt")) == NULL)
 	{
@@ -299,7 +299,7 @@ VOID DebugLogClear()
 
 VOID DebugGetLogFilePath(WCHAR* destStr, int maxLen)
 {
-	StringCchPrintf(destStr, maxLen, L"%serror.log", UTGetAppClass().g_wszUserDataDir);
+	StringCchPrintf(destStr, maxLen, L"%serror.log", UTApp().g_wszUserDataDir);
 }
 
 VOID GetErrorMessageA(DWORD dwError, CHAR *lpszMsgBuf, DWORD dwMaxLen)

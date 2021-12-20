@@ -38,11 +38,11 @@ void CRTManager::AddRT(UINT32 dwID, UINT width, UINT height, UINT mipLevels, FOR
 	{
 		if (OP_SUCCESS(CreateRT(pRT)))
 		{
-			UTGetAppClass().g_gfxFlags |= K_UT_GFXFLAG_RTT;
+			UTApp().g_gfxFlags |= K_UT_GFXFLAG_RTT;
 		}
 		else
 		{
-			UTGetAppClass().g_gfxFlags &= ~K_UT_GFXFLAG_RTT;
+			UTApp().g_gfxFlags &= ~K_UT_GFXFLAG_RTT;
 		}
 	}
 }
@@ -211,12 +211,12 @@ OPRESULT CRTManager::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
 		CEngineRenderTarget * pRT = arrRT.m_pData[kk];
 		if (OP_SUCCESS(CreateRT(pRT)))
 		{
-			UTGetAppClass().g_gfxFlags |= K_UT_GFXFLAG_RTT;
+			UTApp().g_gfxFlags |= K_UT_GFXFLAG_RTT;
 		}
 		else
 		{
 			//#TODO: when it can't create the RTs we should exit the game or try with a smaller pixel size so surfaces are smaller
-			UTGetAppClass().g_gfxFlags &= ~K_UT_GFXFLAG_RTT;
+			UTApp().g_gfxFlags &= ~K_UT_GFXFLAG_RTT;
 		}
 	}
 

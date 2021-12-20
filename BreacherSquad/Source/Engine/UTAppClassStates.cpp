@@ -63,8 +63,8 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			UINT32 unModsCRC = App_GetActiveModsCRC();
 			//add vertical mode CRC
 			//unModsCRC += g_verticalMode.GetFilesCRC(false);
-			UTGetAppClass().m_Settings.dev_unCurrentModsCRC = unModsCRC;
-			LOG(L"--> CRC_BASE [%08x] CRC_MODS [%08x] <--", UTGetAppClass().m_Settings.dev_unCurrentCRC, UTGetAppClass().m_Settings.dev_unCurrentModsCRC);
+			UTApp().m_Settings.dev_unCurrentModsCRC = unModsCRC;
+			LOG(L"--> CRC_BASE [%08x] CRC_MODS [%08x] <--", UTApp().m_Settings.dev_unCurrentCRC, UTApp().m_Settings.dev_unCurrentModsCRC);
 #endif
 			//chapter limiting (last chapter is the modding chapter)
 			if ((g_userData[K_MEMID_SELECTED_CHAPTER] < 0) || (g_userData[K_MEMID_SELECTED_CHAPTER] > UTGetChaptersList().GetChaptersCnt()))
@@ -78,16 +78,16 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			///--- player selection screen items ---
 			g_playerSelScr.LoadItems();
 
-			if (UTGetAppClass().m_Settings.dev_unCurrentCRC != K_GAME_CRC)
+			if (UTApp().m_Settings.dev_unCurrentCRC != K_GAME_CRC)
 			{
 				char strcrc[MAX_PATH];
-				StringCchPrintfA(strcrc, MAX_PATH, "CRC%08x", UTGetAppClass().m_Settings.dev_unCurrentCRC);
+				StringCchPrintfA(strcrc, MAX_PATH, "CRC%08x", UTApp().m_Settings.dev_unCurrentCRC);
 				ANALYTICS_EVENT("loading_modded", _VERSION_CHARSTR_, strcrc, 1);
 			}
 			else
 			{
 				char strcrc[MAX_PATH];
-				StringCchPrintfA(strcrc, MAX_PATH, "CRC%08x", UTGetAppClass().m_Settings.dev_unCurrentCRC);
+				StringCchPrintfA(strcrc, MAX_PATH, "CRC%08x", UTApp().m_Settings.dev_unCurrentCRC);
 				ANALYTICS_EVENT("loading_vanilla", _VERSION_CHARSTR_, strcrc, 1);
 			}
 
@@ -129,7 +129,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 
 			///--- CONTROLS ---
 			UTGetGUI().SetManagersPtr(&UTLang(), &UTGetFontsManager());
-			UTGetGUI().SetCameraTransform(&UTGetAppClass().g_cam240hScreen);
+			UTGetGUI().SetCameraTransform(&UTApp().g_cam240hScreen);
 
 			WCHAR xmlpath[MAX_PATH];
 			FileManager::GetMediaPath(L"media/interfaces/interfaces.xml", xmlpath);
@@ -158,9 +158,9 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				ErrorBox(K_ERR_WARNING, L"Failed INITSOUND->LoadSoundsXML()\n");
 			}
 			//set volumes
-			SND_SET_GROUP_VOLUME("sounds", UTGetAppClass().m_Settings.fSoundsVolume, false);
-			SND_SET_GROUP_VOLUME("ingame", UTGetAppClass().m_Settings.fSoundsVolume, false);
-			SND_SET_GROUP_VOLUME("music", UTGetAppClass().m_Settings.fMusicVolume, false);
+			SND_SET_GROUP_VOLUME("sounds", UTApp().m_Settings.fSoundsVolume, false);
+			SND_SET_GROUP_VOLUME("ingame", UTApp().m_Settings.fSoundsVolume, false);
+			SND_SET_GROUP_VOLUME("music", UTApp().m_Settings.fMusicVolume, false);
 			SND_SET_GROUP_FREQUENCY("ingame", 1.0f, false);
 		}
 		break;
@@ -178,7 +178,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			///--- SHADERS ---
 			// no modding support on shaders!
 			WCHAR mszPath[MAX_PATH];
-			StringCchPrintf(mszPath, MAX_PATH, L"%s/shaders/shaders.xml", UTGetAppClass().g_wszAppResDir);
+			StringCchPrintf(mszPath, MAX_PATH, L"%s/shaders/shaders.xml", UTApp().g_wszAppResDir);
 			if (FAILED(UTGetShaderManager().AddShadersFromXML(mszPath)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load shaders XML: %s", mszPath);
@@ -261,11 +261,11 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline)
 {
 	//setam ecranul standard de 240h inaltime
-	CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam240hScreen);
+	CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam240hScreen);
 	App_SetWorldTransform(pDevice, &g_matIdentity);
 
-	RECTXYWH_F scrrect = UTGetAppClass().g_cam240hScreen.GetCamWorldAABB();
-	RECTXYWH_F worldrect = UTGetAppClass().g_rect240hWorld;
+	RECTXYWH_F scrrect = UTApp().g_cam240hScreen.GetCamWorldAABB();
+	RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 
 	//fonts loaded so write "loading" 
 	if ((g_gameSubstate > 3) && (g_gameSubstate < 6))
@@ -277,7 +277,7 @@ void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite
 	if (g_gameSubstate > 3)
 	{
 		//write title window text
-		if (UTGetAppClass().m_Settings.dev_unCurrentCRC != K_GAME_CRC)
+		if (UTApp().m_Settings.dev_unCurrentCRC != K_GAME_CRC)
 		{
 			g_font10bs1->DrawString(STR_CHANGE_DETECTED, scrrect.CenterX(), 15.0f, FONTFLAG_ANCHOR_TOPCENTER, 0xff963500);
 			g_font6ns1->DrawString(STR_CHANGE_DETECTED_WARNING, scrrect.CenterX(), 27.0f, FONTFLAG_ANCHOR_TOPCENTER, K_COLOR_DEFAULT_TEXT);
@@ -337,11 +337,11 @@ void CApplication::App_EnterState_Developer()
 	g_gameSubstate = 0;
 	g_gameStateTimer = K_GAME_SPLASH_SHOW_TIMER;
 	//make sure we release everything
-	UTGetAppClass().g_texManager.Release();
+	UTApp().g_texManager.Release();
 	//load the texture
 	WCHAR texpath[MAX_PATH];
-	StringCchPrintf(texpath, MAX_PATH, L"%s/interfaces/pixelshard.png", UTGetAppClass().g_wszAppResDir);
-	UTGetAppClass().g_texManager.AddTexture(texpath, null, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
+	StringCchPrintf(texpath, MAX_PATH, L"%s/interfaces/pixelshard.png", UTApp().g_wszAppResDir);
+	UTApp().g_texManager.AddTexture(texpath, null, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
 }
 
 void CApplication::App_UpdateState_Developer(LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime)
@@ -372,11 +372,11 @@ void CApplication::App_UpdateState_Developer(LPDIRECT3DDEVICE9 pDevice, double f
 void CApplication::App_PaintState_Developer(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline)
 {
 	//setam ecranul standard de 240h inaltime
-	CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam240hScreen);
+	CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam240hScreen);
 	App_SetWorldTransform(pDevice, &g_matIdentity);
 
-	RECTXYWH_F scrrect = UTGetAppClass().g_cam240hScreen.GetCamWorldAABB();
-	RECTXYWH_F worldrect = UTGetAppClass().g_rect240hWorld;
+	RECTXYWH_F scrrect = UTApp().g_cam240hScreen.GetCamWorldAABB();
+	RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 	RECT src;
 	//logo
 	LPDIRECT3DTEXTURE9 pTex = g_texManager.GetTexture(0);

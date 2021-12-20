@@ -1830,8 +1830,8 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			//draw strings (left string)
 			//set new transform, bigger resolution
 			layer->pControlsManager->m_pSprite->Flush();
-			layer->pControlsManager->SetCameraTransform(&UTGetAppClass().g_cam480hScreen);
-			CCameraTransform::SetActiveCamera(layer->pControlsManager->m_pDevice, &UTGetAppClass().g_cam480hScreen);
+			layer->pControlsManager->SetCameraTransform(&UTApp().g_cam480hScreen);
+			CCameraTransform::SetActiveCamera(layer->pControlsManager->m_pDevice, &UTApp().g_cam480hScreen);
 			layer->pControlsManager->m_cameraScreenRect = layer->pControlsManager->m_pCamera->GetCamWorldAABB();
 
 			RECTXYWH_F realrect = BBox_inflated;
@@ -1876,8 +1876,8 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 
 			//restore camera
 			layer->pControlsManager->m_pSprite->Flush();
-			layer->pControlsManager->SetCameraTransform(&UTGetAppClass().g_cam240hScreen);
-			CCameraTransform::SetActiveCamera(layer->pControlsManager->m_pDevice, &UTGetAppClass().g_cam240hScreen);
+			layer->pControlsManager->SetCameraTransform(&UTApp().g_cam240hScreen);
+			CCameraTransform::SetActiveCamera(layer->pControlsManager->m_pDevice, &UTApp().g_cam240hScreen);
 			layer->pControlsManager->m_cameraScreenRect = layer->pControlsManager->m_pCamera->GetCamWorldAABB();
 
 			App_SetWorldTransform(layer->pControlsManager->m_pDevice, matWorld);
@@ -1911,8 +1911,8 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 
 			//set new transform, bigger resolution
 			layer->pControlsManager->m_pSprite->Flush();
-			layer->pControlsManager->SetCameraTransform(&UTGetAppClass().g_cam480hScreen);
-			CCameraTransform::SetActiveCamera(layer->pControlsManager->m_pDevice, &UTGetAppClass().g_cam480hScreen);
+			layer->pControlsManager->SetCameraTransform(&UTApp().g_cam480hScreen);
+			CCameraTransform::SetActiveCamera(layer->pControlsManager->m_pDevice, &UTApp().g_cam480hScreen);
 			layer->pControlsManager->m_cameraScreenRect = layer->pControlsManager->m_pCamera->GetCamWorldAABB();
 
 			RECTXYWH_F realrect = BBox_inflated;
@@ -1960,8 +1960,8 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 
 			//restore camera
 			layer->pControlsManager->m_pSprite->Flush();
-			layer->pControlsManager->SetCameraTransform(&UTGetAppClass().g_cam240hScreen);
-			CCameraTransform::SetActiveCamera(layer->pControlsManager->m_pDevice, &UTGetAppClass().g_cam240hScreen);
+			layer->pControlsManager->SetCameraTransform(&UTApp().g_cam240hScreen);
+			CCameraTransform::SetActiveCamera(layer->pControlsManager->m_pDevice, &UTApp().g_cam240hScreen);
 			layer->pControlsManager->m_cameraScreenRect = layer->pControlsManager->m_pCamera->GetCamWorldAABB();
 
 			App_SetWorldTransform(layer->pControlsManager->m_pDevice, matWorld);
@@ -2628,7 +2628,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			int leftVote = paramsDict.GetVariantByName(L"leftVote")->m_asINT32;
 			int rightVote = paramsDict.GetVariantByName(L"rightVote")->m_asINT32;
 
-			if ((UTGetAppClass().IsGameNetworked()) || (g_gameState == GAME_STATE_CONTROLSED))
+			if ((UTApp().IsGameNetworked()) || (g_gameState == GAME_STATE_CONTROLSED))
 			{
 				DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
 				int nFrame = 0;
@@ -2840,7 +2840,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 
 			D3DXMATRIXA16 mattrans;
 			RECTXYWH_F bboxl = m_pSprMgr->GetAFrameBBox_real(animIdx, frameIdx);
-			D3DXMatrixAffineTransformation2D(&mattrans, UTGetAppClass().g_rectRender.h / bboxl.h, NULL, 0.0f, &D3DXVECTOR2(0.0f, 0.0f));
+			D3DXMatrixAffineTransformation2D(&mattrans, UTApp().g_rectRender.h / bboxl.h, NULL, 0.0f, &D3DXVECTOR2(0.0f, 0.0f));
 			layer->pControlsManager->m_pSprite->SetTransform(&mattrans);
 			CSprite::paintFrame(m_pSprMgr, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, frameIdx, D3DCOLOR_COLORALPHA(dwColor, fAlpha * layer->alpha));
 			layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);

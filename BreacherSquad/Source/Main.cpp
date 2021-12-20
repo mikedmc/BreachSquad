@@ -177,14 +177,14 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	//init log system
 	g_pLog = new CLog();
 
-	if (!UTGetAppClass().IsOnlyInstance(K_GAME_WINDOW_CLASSNAME))
+	if (!UTApp().IsOnlyInstance(K_GAME_WINDOW_CLASSNAME))
 		return 0;
 
 	HRESULT hr = S_OK;
 	// Init crash dumper
 	InitMiniDumper();
 	// init game constants like paths to executable
-	UTGetAppClass().Init();
+	UTApp().Init();
 	// clear debug log file 
 	DebugLogClear();
 
@@ -219,11 +219,11 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	const galaxy::api::IError * err = galaxy::api::GetError();
 	if (!err)
 	{
-		UTGetAppClass().m_Settings.galaxyFullyLoaded = true;
+		UTApp().m_Settings.galaxyFullyLoaded = true;
 	}
 	else
 	{
-		UTGetAppClass().m_Settings.galaxyFullyLoaded = false;
+		UTApp().m_Settings.galaxyFullyLoaded = false;
 		ErrorBox(K_ERR_WARNING, L"Galaxy API is not fully loaded. Error: %s", err->GetMsg());
 	}
 
@@ -234,7 +234,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	ImGui_ImplWin32_EnableDpiAwareness();
 
 	//load game settings FIRST AND FOREMOST (includes selected language and so on)
-	UTGetAppClass().LoadSettings();
+	UTApp().LoadSettings();
 	//initialize randomness
 	randseed(GetTickCount());
 
@@ -282,7 +282,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	}
 
 	///--- LOG WINDOW ---
-	if (UTGetAppClass().m_Settings.dev_bLogWindowShow)
+	if (UTApp().m_Settings.dev_bLogWindowShow)
 	{
 		OS_CreateLogWindow();
 	}
@@ -319,7 +319,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 		///--- COMPUTE BASE GAME CRC ---
 		//Chapters should be loaded before everything! Load original chapters list to compute game base CRC.
 		WCHAR wcsPath[MAX_PATH];
-		StringCchPrintf(wcsPath, MAX_PATH, L"%s/levels/missions/missions.xml", UTGetAppClass().g_wszAppResDir);
+		StringCchPrintf(wcsPath, MAX_PATH, L"%s/levels/missions/missions.xml", UTApp().g_wszAppResDir);
 		UTGetChaptersList().LoadChapters(wcsPath);
 		//load infinite tower mode desc
 		//g_verticalMode.Init(&g_level, L"media/levels/mod_prefabs/infinite_tower.xml");
@@ -328,8 +328,8 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 		//we loaded the descriptors
 		//unGameCRC += g_verticalMode.GetFilesCRC(true);
 
-		UTGetAppClass().m_Settings.dev_unCurrentCRC = unGameCRC;
-		UTGetAppClass().m_Settings.dev_unCurrentModsCRC = unGameCRC;
+		UTApp().m_Settings.dev_unCurrentCRC = unGameCRC;
+		UTApp().m_Settings.dev_unCurrentModsCRC = unGameCRC;
 		//check CRC 
 		if (unGameCRC != K_GAME_CRC)
 		{
@@ -384,13 +384,13 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 
 	//trigger resolution change event immediately
 	CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_RESOLUTION_CHANGE);
-	nevent->AddNamedArgUINT32(L"width", UTGetAppClass().m_Settings.nWindowW);
-	nevent->AddNamedArgUINT32(L"height", UTGetAppClass().m_Settings.nWindowH);
+	nevent->AddNamedArgUINT32(L"width", UTApp().m_Settings.nWindowW);
+	nevent->AddNamedArgUINT32(L"height", UTApp().m_Settings.nWindowH);
 	UTGetEventManager().TriggerEvent(nevent);
 	///--- INITIALIZE 3D Device ---
-	if (FAILED(DXUTCreateDevice(D3DADAPTER_DEFAULT, true, UTGetAppClass().m_Settings.nWindowW, UTGetAppClass().m_Settings.nWindowH, IsDeviceAcceptable, ModifyDeviceSettings)))
+	if (FAILED(DXUTCreateDevice(D3DADAPTER_DEFAULT, true, UTApp().m_Settings.nWindowW, UTApp().m_Settings.nWindowH, IsDeviceAcceptable, ModifyDeviceSettings)))
 	{
-		ErrorBox(K_ERR_CRITICAL, L"[ERROR] Couldn't create device (%dx%d)!\r\nTo fix it, check our support forum or contact us at %s\r\n", UTGetAppClass().m_Settings.nWindowW, UTGetAppClass().m_Settings.nWindowH, K_GAME_EMAIL);
+		ErrorBox(K_ERR_CRITICAL, L"[ERROR] Couldn't create device (%dx%d)!\r\nTo fix it, check our support forum or contact us at %s\r\n", UTApp().m_Settings.nWindowW, UTApp().m_Settings.nWindowH, K_GAME_EMAIL);
 	}
 	
 	if (OP_FAILED(AfterMount()))
@@ -412,7 +412,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 
 	//after device creation:
 	///--- init SDL ---
-	UTGetAppClass().InitSDL(DXUTGetHWND());
+	UTApp().InitSDL(DXUTGetHWND());
 	//add keyboard controllers and map keys
 	CController* ctrlrkeys1 = UTGetCtrlrMgr().AddController(K_CM_CT_KBM_SDL, UTLang().strings[STR_KEYBOARD1]->sText);
 	ctrlrkeys1->nSDLInstanceId = K_CM_IID_KBM1; //set keyboard instance ID so it isn't empty
@@ -434,7 +434,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 
 	//send analytics about gfx caps
 	CHAR ctxt[MAX_PATH];
-	StringCchPrintfA(ctxt, MAX_PATH, "GFXflags:%d", UTGetAppClass().g_gfxFlags);
+	StringCchPrintfA(ctxt, MAX_PATH, "GFXflags:%d", UTApp().g_gfxFlags);
 	
 	//send data analytics about controllers
 	/*
@@ -452,23 +452,23 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	*/
 
 	//see if resolution is supported
-	SIZEWH szwh(UTGetAppClass().m_Settings.nWindowW, UTGetAppClass().m_Settings.nWindowH);
-	LOG(L"GFX:: Settings Resolution:%dx%d fullscreen:%d", szwh.w, szwh.h, UTGetAppClass().m_Settings.bFullscreen);
-	if (UTGetAppClass().g_arrResolutions.IndexOf(szwh) < 0)
+	SIZEWH szwh(UTApp().m_Settings.nWindowW, UTApp().m_Settings.nWindowH);
+	LOG(L"GFX:: Settings Resolution:%dx%d fullscreen:%d", szwh.w, szwh.h, UTApp().m_Settings.bFullscreen);
+	if (UTApp().g_arrResolutions.IndexOf(szwh) < 0)
 	{
 		ErrorBox(K_ERR_WARNING, L"Unsupported window size found in settings (%d x %d)! Resetting to SAFE DEFAULTS!", szwh.w, szwh.h);
 		//reset resolution
-		UTGetAppClass().m_Settings.nWindowW = K_WINDOW_WIDTH_SAFE;
-		UTGetAppClass().m_Settings.nWindowH = K_WINDOW_HEIGHT_SAFE;
-		UTGetAppClass().m_Settings.bFullscreen = false;
+		UTApp().m_Settings.nWindowW = K_WINDOW_WIDTH_SAFE;
+		UTApp().m_Settings.nWindowH = K_WINDOW_HEIGHT_SAFE;
+		UTApp().m_Settings.bFullscreen = false;
 
 		SetWindowPos(DXUTGetHWND(), 0, 0, 0, K_WINDOW_WIDTH_SAFE, K_WINDOW_HEIGHT_SAFE, SWP_NOOWNERZORDER | SWP_NOZORDER);
-		UTGetAppClass().SaveSettings();
+		UTApp().SaveSettings();
 	}
 	//--- start fullscreen? ---
-	if (UTGetAppClass().m_Settings.bFullscreen)
+	if (UTApp().m_Settings.bFullscreen)
 	{
-		if (UTGetAppClass().m_Settings.bBorderlessFullscreen)
+		if (UTApp().m_Settings.bBorderlessFullscreen)
 		{
 			LOG(L"GFX:: Switching to borderless fullscreen.");
 			HWND hwndWindowed = DXUTGetHWNDDeviceWindowed();
@@ -488,7 +488,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	}
 
 	//log GFX type
-	LOG(L"GFX [%s] GFXflags [%d]", DXUTGetDeviceStats(), UTGetAppClass().g_gfxFlags);
+	LOG(L"GFX [%s] GFXflags [%d]", DXUTGetDeviceStats(), UTApp().g_gfxFlags);
 
 #ifdef ENABLE_CHAT_WINDOW
 	g_ChatWnd.Init();
@@ -508,7 +508,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	///--- release all controllers ---
 	UTGetCtrlrMgr().ReleaseAllControllers(false);
 	///--- shut down SDL ---
-	UTGetAppClass().CloseSDL();
+	UTApp().CloseSDL();
 
 	// Perform any application-level cleanup here. Direct3D device resources are released within the
 	// appropriate callback functions and therefore don't require any cleanup code here.
@@ -539,7 +539,7 @@ OPRESULT BeforeMount(void)
 	g_bDuringTransition = false; //nu este in timpul unei tranzitii
 
  ///--- Load strings here so we can set the window name ---
-	if (OP_FAILED(App_LocaLoadLangList(UTGetAppClass().m_Settings.shLanguageAlias)))
+	if (OP_FAILED(App_LocaLoadLangList(UTApp().m_Settings.shLanguageAlias)))
 	{
 		ErrorBox(K_ERR_WARNING, L"[ERROR] Error loading strings list [texts/lang.xml]!");
 	}
@@ -560,9 +560,9 @@ OPRESULT BeforeMount(void)
 	// add listeners
 	//--------------------------------------------------------------------------------------
 	//first listener must be UTAppClass
-	UTGetEventManager().AddListener(&UTGetAppClass(), CEventTypes::evtT_SYSTEM);
-	UTGetEventManager().AddListener(&UTGetAppClass(), CEventTypes::evtT_CONTROLS);
-	UTGetEventManager().AddListener(&UTGetAppClass(), CEventTypes::evtT_GAMESTATE);
+	UTGetEventManager().AddListener(&UTApp(), CEventTypes::evtT_SYSTEM);
+	UTGetEventManager().AddListener(&UTApp(), CEventTypes::evtT_CONTROLS);
+	UTGetEventManager().AddListener(&UTApp(), CEventTypes::evtT_GAMESTATE);
 	//managerul de sunet
 	UTGetEventManager().AddListener(&UTGetSoundManager(), CEventTypes::evtT_SOUND);
 
@@ -584,7 +584,7 @@ OPRESULT AfterMount(void)
 {
 	// load the minimum necessary to paint something
 	WCHAR shpath[MAX_PATH];
-	StringCchPrintf(shpath, MAX_PATH, L"%s/shaders/vs_sprites2d.vso", UTGetAppClass().g_wszAppResDir);
+	StringCchPrintf(shpath, MAX_PATH, L"%s/shaders/vs_sprites2d.vso", UTApp().g_wszAppResDir);
 	if (OP_FAILED(UTGetShaderManager().AddVShader(shpath, L"VS_SPRITES2D")))
 	{
 		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Could not load SpritesVS!\n%s", shpath);
@@ -632,7 +632,7 @@ HRESULT InitSound(void)
 		return hr;
 	}
 
-	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTGetAppClass().g_rectRT.w * 0.7f, UTGetAppClass().g_rectRT.h * 0.7f));
+	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTApp().g_rectRT.w * 0.7f, UTApp().g_rectRT.h * 0.7f));
 	UTGetSoundManager().SetListenerVolumeFadeStart(0.7f);
 
 	return hr;
@@ -704,22 +704,22 @@ void CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* pDeviceSettings, const D3
 	{
 		ErrorBox(K_ERR_WARNING, L"Separate Alpha Blending not supported!");
 
-		UTGetAppClass().g_gfxFlags &= ~K_UT_GFXFLAG_SEPARATEALPHABLEND;
+		UTApp().g_gfxFlags &= ~K_UT_GFXFLAG_SEPARATEALPHABLEND;
 	}
 	else
 	{
-		UTGetAppClass().g_gfxFlags |= K_UT_GFXFLAG_SEPARATEALPHABLEND;
+		UTApp().g_gfxFlags |= K_UT_GFXFLAG_SEPARATEALPHABLEND;
 	}
 
 	//--- does it support 2d clipping? ----
 	if ((pCaps->RasterCaps & D3DPRASTERCAPS_SCISSORTEST) == 0)
 	{
 		ErrorBox(K_ERR_WARNING, L"Scissor Test not supported!");
-		UTGetAppClass().g_gfxFlags &= ~K_UT_GFXFLAG_SCISSORTEST;
+		UTApp().g_gfxFlags &= ~K_UT_GFXFLAG_SCISSORTEST;
 	}
 	else
 	{
-		UTGetAppClass().g_gfxFlags |= K_UT_GFXFLAG_SCISSORTEST;
+		UTApp().g_gfxFlags |= K_UT_GFXFLAG_SCISSORTEST;
 	}
 
 	//request stencil buffer
@@ -730,16 +730,16 @@ void CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* pDeviceSettings, const D3
 		//TODO: showld fall back on 1bit stencil 
 		ErrorBox(K_ERR_CRITICAL, L"8bit Stencil not supported!");
 
-		UTGetAppClass().g_gfxFlags &= ~K_UT_GFXFLAG_8BITSTENCIL;
-		UTGetAppClass().g_stencilBits = 0;
+		UTApp().g_gfxFlags &= ~K_UT_GFXFLAG_8BITSTENCIL;
+		UTApp().g_stencilBits = 0;
 	}
 	else
 	{
 		pDeviceSettings->pp.EnableAutoDepthStencil = TRUE;
 		pDeviceSettings->pp.AutoDepthStencilFormat = D3DFMT_D24S8;
 
-		UTGetAppClass().g_gfxFlags |= K_UT_GFXFLAG_8BITSTENCIL;
-		UTGetAppClass().g_stencilBits = 8;
+		UTApp().g_gfxFlags |= K_UT_GFXFLAG_8BITSTENCIL;
+		UTApp().g_stencilBits = 8;
 	}
 
 
@@ -789,7 +789,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	UTGetEventManager().TriggerEvent(nevent);
 
 	// check minimum requirements and exit if not met
-	if (OP_FAILED(UTGetAppClass().VerifyRequirements()))
+	if (OP_FAILED(UTApp().VerifyRequirements()))
 	{
 		DXUTShutdown();
 		return S_OK;
@@ -797,7 +797,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	UTGetTTFManager().OnCreateDevice(pDevice, pBBDesc);
 
-	V_RETURN(UTGetAppClass().OnCreateDevice(pDevice, pBBDesc));
+	V_RETURN(UTApp().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(UTGetRTManager().OnCreateDevice(pDevice, pBBDesc));
 	UTimgui().OnCreateDevice(pDevice, pBBDesc);
 	V_OP_RETHR(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
@@ -854,20 +854,20 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	//keep render rect always updated - se cheama si prin triggerEvent de mai sus
 	//UTGetAppClass().OnRenderSizeChanged(pBackBufferSurfaceDesc->Width, pBackBufferSurfaceDesc->Height);
 	//se va auzi inca jumatate de ecran in afara ecranului vizibil
-	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTGetAppClass().g_rectRT.w * 0.7f, UTGetAppClass().g_rectRT.h * 0.7f));
+	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTApp().g_rectRT.w * 0.7f, UTApp().g_rectRT.h * 0.7f));
 
 	HRESULT hr;
 
 	// Create main game sprite
 	V_RETURN(D3DXCreateSprite(pDevice, &g_pGameSprite));
 	//should be first to be called here
-	V_RETURN(UTGetAppClass().OnResetDevice(pDevice, pBBDesc));
+	V_RETURN(UTApp().OnResetDevice(pDevice, pBBDesc));
 	// Because the render targets and handled globally and are changing in size depending on screen resolution we just release them in OnLostDevice and re-create them in OnResetDevice
 	V_OP_RETHR(UTGetRTManager().OnResetDevice(pDevice, pBBDesc));
 
 	// Create necessary render targets when device gets reset (created or reset)
-	UINT fGameHpx = K_GAME_HEIGHT * K_GAME_PIXEL_SIZE;
-	UINT fGameWpx = K_GAME_WIDTH * K_GAME_PIXEL_SIZE;
+	UINT fGameHpx = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
+	UINT fGameWpx = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
 	// Create RTs
 	UTGetRTManager().AddRT(K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
 	UTGetRTManager().AddRT(K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
@@ -905,13 +905,13 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	///--- write resolution string for use in options screen ---
 	WCHAR wsResStr[1024] = { 0 };
-	for (int kk = 0; kk < UTGetAppClass().g_arrResolutions.GetSize(); kk++)
+	for (int kk = 0; kk < UTApp().g_arrResolutions.GetSize(); kk++)
 	{
 		WCHAR wsRes[MAX_PATH];
-		if (kk < UTGetAppClass().g_arrResolutions.GetSize() - 1)
-			StringCchPrintf(wsRes, MAX_PATH, L"%dx%d\n", UTGetAppClass().g_arrResolutions[kk].w, UTGetAppClass().g_arrResolutions[kk].h);
+		if (kk < UTApp().g_arrResolutions.GetSize() - 1)
+			StringCchPrintf(wsRes, MAX_PATH, L"%dx%d\n", UTApp().g_arrResolutions[kk].w, UTApp().g_arrResolutions[kk].h);
 		else
-			StringCchPrintf(wsRes, MAX_PATH, L"%dx%d", UTGetAppClass().g_arrResolutions[kk].w, UTGetAppClass().g_arrResolutions[kk].h);
+			StringCchPrintf(wsRes, MAX_PATH, L"%dx%d", UTApp().g_arrResolutions[kk].w, UTApp().g_arrResolutions[kk].h);
 
 		StringCchCat(wsResStr, 1024, wsRes);
 	}
@@ -948,7 +948,7 @@ void CALLBACK OnLostDevice(void)
 {
 	DebugPrintA("---On lost device---\n");
 
-	UTGetAppClass().OnLostDevice();
+	UTApp().OnLostDevice();
 	UTimgui().OnLostDevice();
 	UTGetTTFManager().OnLostDevice();
 	UTGetShaderManager().OnLostDevice();
@@ -984,7 +984,7 @@ void CALLBACK OnDestroyDevice(void)
 {
 	g_font1.Release();
 
-	UTGetAppClass().OnDestroyDevice();
+	UTApp().OnDestroyDevice();
 	UTGetRTManager().OnDestroyDevice();
 	UTimgui().OnDestroyDevice();
 	UTGetShaderManager().OnDestroyDevice();
@@ -1015,7 +1015,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 	//--- update global timers ---
 	g_timers.Update(fElapsedTime);
 	//--- update application class ---
-	UTGetAppClass().Update(fElapsedTime);
+	UTApp().Update(fElapsedTime);
 	//--- update clasa sunete pentru fade-uri ---
 	UTGetSoundManager().Update(fElapsedTime);
 	//-=-=-= controllers update =-=-=-
@@ -1040,12 +1040,12 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 		break;
 		case GAME_STATE_DEVELOPER:
 		{
-			UTGetAppClass().App_UpdateState_Developer(pDevice, fTime, fElapsedTime);
+			UTApp().App_UpdateState_Developer(pDevice, fTime, fElapsedTime);
 		}
 		break;
 		case GAME_STATE_LOADING:
 		{
-			UTGetAppClass().App_UpdateState_Loading(pDevice, fTime, fElapsedTime);
+			UTApp().App_UpdateState_Loading(pDevice, fTime, fElapsedTime);
 		}
 		break;
 
@@ -1057,7 +1057,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 			{
 				case 0: //a few settings and checks
 				{
-					UTGetAppClass().m_Settings.dev_bDevMode = true;
+					UTApp().m_Settings.dev_bDevMode = true;
 
 					LOG(L"\nMod Upload/Update Started...");
 					g_gameSubstate++;
@@ -1275,7 +1275,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 
 #ifdef K_CONTROLS_EDITOR
 		case GAME_STATE_CONTROLSED:
-			g_ControlsEditor.SetCameraTransform(&UTGetAppClass().g_cam240hScreen);
+			g_ControlsEditor.SetCameraTransform(&UTApp().g_cam240hScreen);
 			g_ControlsEditor.Update(fElapsedTime);
 			break;
 #endif
@@ -1407,15 +1407,15 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 #else
 	// Lets it run at fullspeed FPS on local games
 	bool bAllowFullspeedUpdate = true;
-	if (UTGetAppClass().IsGameNetworked())
+	if (UTApp().IsGameNetworked())
 		bAllowFullspeedUpdate = false;
 #endif
 
 	///--- networked game requested? reset sync data ---
-	if ((UTGetAppClass().IsGameNetworked()) &&
-		(UTGetAppClass().m_Settings.devnet_eSyncStatus == CApplicationSettings::K_NETGAME_SYNC_GET_READY))
+	if ((UTApp().IsGameNetworked()) &&
+		(UTApp().m_Settings.devnet_eSyncStatus == CApplicationSettings::K_NETGAME_SYNC_GET_READY))
 	{
-		UTGetAppClass().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_SYNCING;
+		UTApp().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_SYNCING;
 
 		g_nUpdateFrame = 0;
 		g_nInputFrame = 0;
@@ -1434,7 +1434,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 		g_netlock.Net_ResetLevelResults();
 	}
 	//easy access
-	bool bSyncUpdate = (UTGetAppClass().m_Settings.devnet_eSyncStatus == CApplicationSettings::K_NETGAME_SYNC_SYNCING);
+	bool bSyncUpdate = (UTApp().m_Settings.devnet_eSyncStatus == CApplicationSettings::K_NETGAME_SYNC_SYNCING);
 
 	if (DXUTIsTimePaused())
 	{
@@ -1490,7 +1490,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			if ((g_netlock.m_arrLvlResPeerStates[0] != CNetLock::sPacketLevelResults::K_LEVRES_STATE_UNDEFINED) &&
 				(g_netlock.m_arrLvlResPeerStates[1] != CNetLock::sPacketLevelResults::K_LEVRES_STATE_UNDEFINED))
 			{
-				UTGetAppClass().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_STOPPED;
+				UTApp().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_STOPPED;
 				LOG(L"COOP:: Peers agree on level finished! Ended network Sync!");
 				//don't exit, let him send pending messages
 				bSyncUpdate = false;
@@ -1625,7 +1625,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 
 			//read SDL ctrlrs only when saving controllers snapshot or it will read from the controllers at different freqs
 			//later we force net values over actual controller
-			UTGetAppClass().PollSDLControllers();
+			UTApp().PollSDLControllers();
 
 			//save actual controller states (not commands because those are secundary byproducts)
 			float arrKeysDown[K_CM_COMMANDS_COUNT] = { 0.0f };
@@ -1716,7 +1716,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 		while (g_fTimeAccumInput >= l_fPeriodInput)
 		{
 			//read SDL controllers data as often as possible
-			UTGetAppClass().PollSDLControllers();
+			UTApp().PollSDLControllers();
 			//accumulator update
 			g_fTimeAccumInput -= l_fPeriodInput;
 			// brute force it to one update per frame
@@ -1772,7 +1772,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 					//send analytics
 					CHAR ctxt[MAX_PATH], ctxt2[MAX_PATH];
 					StringCchPrintfA(ctxt, MAX_PATH, "mission_%d_%d_ver_%s", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1, _VERSION_CHARSTR_);
-					StringCchPrintfA(ctxt2, MAX_PATH, "v%d_CRC[%08x]", _VERSION_INT_, UTGetAppClass().m_Settings.dev_unCurrentCRC);
+					StringCchPrintfA(ctxt2, MAX_PATH, "v%d_CRC[%08x]", _VERSION_INT_, UTApp().m_Settings.dev_unCurrentCRC);
 					ANALYTICS_EVENT("net_desync", ctxt, ctxt2, 0);
 
 					//quit lobby
@@ -1848,7 +1848,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 		UpdateGame(pDevice, fElapsedTime, fTime, bSyncUpdate);
 
 		//!!! make sure we're still syncing the update(net state can change on level finished)
-		bSyncUpdate = (UTGetAppClass().m_Settings.devnet_eSyncStatus == CApplicationSettings::K_NETGAME_SYNC_SYNCING);
+		bSyncUpdate = (UTApp().m_Settings.devnet_eSyncStatus == CApplicationSettings::K_NETGAME_SYNC_SYNCING);
 
 		///--- INCREASE UPDATE FRAME COUNTER ---
 		if (bSyncUpdate)
@@ -2060,13 +2060,13 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 		///--- chat window ---
 #ifdef ENABLE_CHAT_WINDOW
-		if ((UTGetAppClass().IsGameNetworked()) && (g_gameState == GAME_STATE_GAME) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
+		if ((UTApp().IsGameNetworked()) && (g_gameState == GAME_STATE_GAME) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
 		{
 			g_pGameSprite->Flush();
-			CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
-			RECTXYWH_F camrectchat = UTGetAppClass().g_camScreen.GetCamWorldAABB();
+			CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
+			RECTXYWH_F camrectchat = UTApp().g_camScreen.GetCamWorldAABB();
 
-			Vec2 vIgmIntSz = UTGetAppClass().g_cam240hScreen.WorldToScreen(Vec2(0.0f, 56.0f));
+			Vec2 vIgmIntSz = UTApp().g_cam240hScreen.WorldToScreen(Vec2(0.0f, 56.0f));
 			g_ChatWnd.Paint(Vec2(camrectchat.x + 5.0f, camrectchat.Bottom() - vIgmIntSz.y));
 			g_pGameSprite->Flush();
 		}
@@ -2085,8 +2085,8 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 #endif
 
 		//real screen space
-		CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
-		RECTXYWH_F camrect = UTGetAppClass().g_camScreen.GetCamWorldAABB();
+		CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
+		RECTXYWH_F camrect = UTApp().g_camScreen.GetCamWorldAABB();
 
 		//--- TRANSITIONS ---		
 		PaintTransition(fElapsedTime, fTime, pDevice);
@@ -2102,15 +2102,15 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
 			RECT rct;
-			SetRect(&rct, UTGetAppClass().g_rectRender.x, UTGetAppClass().g_rectRender.y, UTGetAppClass().g_rectRender.Right(), UTGetAppClass().g_rectRender.Bottom());
+			SetRect(&rct, UTApp().g_rectRender.x, UTApp().g_rectRender.y, UTApp().g_rectRender.Right(), UTApp().g_rectRender.Bottom());
 			DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
 
-			g_font10b1->DrawString(STR_PAUSED, UTGetAppClass().g_rectRender.CenterX(), UTGetAppClass().g_rectRender.CenterY(), FONTFLAG_ANCHOR_BOTTOMCENTER, 0xffffffff);
+			g_font10b1->DrawString(STR_PAUSED, UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY(), FONTFLAG_ANCHOR_BOTTOMCENTER, 0xffffffff);
 		}
 #endif
 
 		///--- letterbox ---
-		if ((UTGetAppClass().g_letterbox.w != 0.0f) || (UTGetAppClass().g_letterbox.h != 0.0f))
+		if ((UTApp().g_letterbox.w != 0.0f) || (UTApp().g_letterbox.h != 0.0f))
 		{
 			g_pGameSprite->Flush();
 			//black poly over
@@ -2120,18 +2120,18 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
 			RECT rct;
-			if (UTGetAppClass().g_letterbox.w != 0.0f)
+			if (UTApp().g_letterbox.w != 0.0f)
 			{
-				SetRect(&rct, UTGetAppClass().g_rectScreen.x, UTGetAppClass().g_rectScreen.y, UTGetAppClass().g_rectRender.x, UTGetAppClass().g_rectScreen.Bottom());
+				SetRect(&rct, UTApp().g_rectScreen.x, UTApp().g_rectScreen.y, UTApp().g_rectRender.x, UTApp().g_rectScreen.Bottom());
 				DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
-				SetRect(&rct, UTGetAppClass().g_rectRender.Right(), UTGetAppClass().g_rectScreen.y, UTGetAppClass().g_rectScreen.Right(), UTGetAppClass().g_rectScreen.Bottom());
+				SetRect(&rct, UTApp().g_rectRender.Right(), UTApp().g_rectScreen.y, UTApp().g_rectScreen.Right(), UTApp().g_rectScreen.Bottom());
 				DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
 			}
-			else if (UTGetAppClass().g_letterbox.h != 0.0f)
+			else if (UTApp().g_letterbox.h != 0.0f)
 			{
-				SetRect(&rct, UTGetAppClass().g_rectScreen.x, UTGetAppClass().g_rectScreen.y, UTGetAppClass().g_rectScreen.Right(), UTGetAppClass().g_rectRender.y);
+				SetRect(&rct, UTApp().g_rectScreen.x, UTApp().g_rectScreen.y, UTApp().g_rectScreen.Right(), UTApp().g_rectRender.y);
 				DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
-				SetRect(&rct, UTGetAppClass().g_rectScreen.x, UTGetAppClass().g_rectRender.Bottom(), UTGetAppClass().g_rectScreen.Right(), UTGetAppClass().g_rectScreen.Bottom());
+				SetRect(&rct, UTApp().g_rectScreen.x, UTApp().g_rectRender.Bottom(), UTApp().g_rectScreen.Right(), UTApp().g_rectScreen.Bottom());
 				DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
 			}
 		}
@@ -2142,14 +2142,14 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			g_pGameSprite->Flush();
 			////reset transform
 			pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-			CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_camScreen);
+			CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
 			//find a pos so doesn't overlap with the igm interface
-			Vec2 vStartPos = UTGetAppClass().g_cam240hScreen.WorldToScreen(Vec2(0.0f, 25.0f));
+			Vec2 vStartPos = UTApp().g_cam240hScreen.WorldToScreen(Vec2(0.0f, 25.0f));
 			int posY = vStartPos.y;
 			WCHAR todraw[MAX_PATH] = { 0 };
 			CStringDesc strdesc;
 
-			if(UTGetAppClass().m_Settings.dev_bDevMode)
+			if(UTApp().m_Settings.dev_bDevMode)
 			{
 				StringCchPrintf(todraw, MAX_PATH, DXUTGetFrameStats());
 				UTLang().SetStringDesc(&strdesc, todraw);
@@ -2378,7 +2378,7 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 			//set old cursor
 			//::SetCursor(hcurOriginal);
 			//save settings on exit
-			UTGetAppClass().SaveSettings();
+			UTApp().SaveSettings();
 
 			LOG(L"Shutting down!");
 		}
@@ -2391,7 +2391,7 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 		case WM_KILLFOCUS:
 		{
 			//on lost focus reset keypresses (ONLY ON NOT NETWORKED GAMES OR IT WILL DESYNC)
-			if (!UTGetAppClass().IsGameNetworked())
+			if (!UTApp().IsGameNetworked())
 				UTGetCtrlrMgr().ResetAllControllersKeypresses();
 			//cand e pe fullscreen si pierzi focus forteaza minimize ca sa vezi ce se intampla
 			if (!DXUTIsWindowed())
@@ -2487,7 +2487,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			//--- shows debug info ---
 			case VK_F5:
 			{
-				if (UTGetAppClass().m_Settings.dev_bDevMode)
+				if (UTApp().m_Settings.dev_bDevMode)
 				{
 					//SCRIPTS - hot reload
 					if (bAltDown)
@@ -2527,7 +2527,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 				{
 					if (bAltDown)
 					{
-						if (!UTGetAppClass().IsGameNetworked())
+						if (!UTApp().IsGameNetworked())
 						{
 							CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_KEYMAP");
 							if (layer == null)
@@ -2557,7 +2557,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 					}
 					else
 					{
-						UTGetAppClass().m_Settings.bShowInterfaceHelp = !UTGetAppClass().m_Settings.bShowInterfaceHelp;
+						UTApp().m_Settings.bShowInterfaceHelp = !UTApp().m_Settings.bShowInterfaceHelp;
 					}
 				}
 			}
@@ -2568,7 +2568,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			{
 				if ((g_gameState != GAME_STATE_LOADING) && (!g_bDuringTransition))
 				{
-					if (FAILED(UTGetAppClass().SaveScreenshot()))
+					if (FAILED(UTApp().SaveScreenshot()))
 					{
 						SND_PLAY(SNDIDX_DENIED);
 					}								  
@@ -2583,18 +2583,18 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
 			case VK_F7:
 			{
-				g_font12wow->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTGetAppClass().g_cam480hScreen);
-				g_font10b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTGetAppClass().g_cam480hScreen);
-				g_font10bs1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTGetAppClass().g_cam480hScreen);
-				g_font9b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTGetAppClass().g_cam480hScreen);
-				g_font8b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTGetAppClass().g_cam480hScreen);
-				g_font8bs1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTGetAppClass().g_cam480hScreen);
-				g_font6n1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTGetAppClass().g_cam480hScreen);
-				g_font6ns1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTGetAppClass().g_cam480hScreen);
-				g_font6nc1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTGetAppClass().g_cam480hScreen);
-				g_font5n1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTGetAppClass().g_cam480hScreen);
-				g_font5n2->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTGetAppClass().g_cam480hScreen);
-				g_font5ns2->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTGetAppClass().g_cam480hScreen);
+				g_font12wow->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTApp().g_cam480hScreen);
+				g_font10b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTApp().g_cam480hScreen);
+				g_font10bs1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTApp().g_cam480hScreen);
+				g_font9b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTApp().g_cam480hScreen);
+				g_font8b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTApp().g_cam480hScreen);
+				g_font8bs1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTApp().g_cam480hScreen);
+				g_font6n1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
+				g_font6ns1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
+				g_font6nc1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
+				g_font5n1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
+				g_font5n2->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
+				g_font5ns2->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
 			}
 			break;
 			case VK_F8:
@@ -2619,7 +2619,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			case VK_RETURN:
 			{
 				//chat available only when playing networked game and no other interface visible
-				if ((UTGetAppClass().IsGameNetworked()) && (g_gameState == GAME_STATE_GAME) && 
+				if ((UTApp().IsGameNetworked()) && (g_gameState == GAME_STATE_GAME) && 
 					(g_level.m_levelState == K_LVL_STATE_PLAYING) && (UTGetGUI().Layers.GetSize() == 0))
 				{
 					//enable input if not already enabled
@@ -2674,12 +2674,12 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 		break;
 		case GAME_STATE_DEVELOPER:
 		{
-			UTGetAppClass().App_ExitState_Developer();
+			UTApp().App_ExitState_Developer();
 		}
 		break;
 		case GAME_STATE_LOADING:
 		{
-			UTGetAppClass().App_ExitState_Loading();
+			UTApp().App_ExitState_Loading();
 			g_bForceOneUpdatePerFrame = false;
 		}
 		break;
@@ -2745,9 +2745,9 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 			}
 
 			//set volumes
-			SND_SET_GROUP_VOLUME("sounds", UTGetAppClass().m_Settings.fSoundsVolume, false);
-			SND_SET_GROUP_VOLUME("ingame", UTGetAppClass().m_Settings.fSoundsVolume, false);
-			SND_SET_GROUP_VOLUME("music", UTGetAppClass().m_Settings.fMusicVolume, false);
+			SND_SET_GROUP_VOLUME("sounds", UTApp().m_Settings.fSoundsVolume, false);
+			SND_SET_GROUP_VOLUME("ingame", UTApp().m_Settings.fSoundsVolume, false);
+			SND_SET_GROUP_VOLUME("music", UTApp().m_Settings.fMusicVolume, false);
 
 			///--- load main menu ---
 			WCHAR xmlpath[MAX_PATH], xmlpath2[MAX_PATH];
@@ -2765,7 +2765,7 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 			UTGetSoundManager().StopGroup("sounds", false, true);
 			UTGetGUI().RemoveAllLayers(true);
 			//release used textures here:
-			UTGetAppClass().g_texManager.Release();
+			UTApp().g_texManager.Release();
 			//make sure we reload everything that can be modded
 			App_ReloadContentChanges();
 			///compute mods CRC
@@ -2774,8 +2774,8 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 			//g_verticalMode.Init(&g_level, L"media/levels/mod_prefabs/infinite_tower.xml");
 			
 			//unModsCRC += g_verticalMode.GetFilesCRC(false);
-			UTGetAppClass().m_Settings.dev_unCurrentModsCRC = unModsCRC;
-			LOG(L"--> CRC_BASE [%08x] CRC_MODS [%08x] <--", UTGetAppClass().m_Settings.dev_unCurrentCRC, UTGetAppClass().m_Settings.dev_unCurrentModsCRC);
+			UTApp().m_Settings.dev_unCurrentModsCRC = unModsCRC;
+			LOG(L"--> CRC_BASE [%08x] CRC_MODS [%08x] <--", UTApp().m_Settings.dev_unCurrentCRC, UTApp().m_Settings.dev_unCurrentModsCRC);
 			//when returning from the mods screen reload the main menu in case it changed
 			g_mainMenu.Release();
 			
@@ -2806,7 +2806,7 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 			UTGetSoundManager().StopGroup("sounds", false, true);
 			UTGetGUI().RemoveAllLayers(true);
 			//release used textures here:
-			UTGetAppClass().g_texManager.Release();
+			UTApp().g_texManager.Release();
 		}
 		break;
 #ifdef K_CONTROLS_EDITOR
@@ -2841,18 +2841,18 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 		break;
 		case GAME_STATE_DEVELOPER:
 		{
-			UTGetAppClass().App_EnterState_Developer();
+			UTApp().App_EnterState_Developer();
 		}
 		break;
 
 		case GAME_STATE_LOADING:
 		{
 			g_bForceOneUpdatePerFrame = true;
-			UTGetAppClass().App_EnterState_Loading();
+			UTApp().App_EnterState_Loading();
 
 			//on loading disable sync
-			UTGetAppClass().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_NO_NETWORK;
-			UTGetAppClass().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_STOPPED;
+			UTApp().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_NO_NETWORK;
+			UTApp().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_STOPPED;
 		}
 		break;
 
@@ -2861,7 +2861,7 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 			//some initial settings
 			g_gameSubstate = 0;
 			//force creating log window?
-			UTGetAppClass().m_Settings.dev_bLogWindowShow = true;
+			UTApp().m_Settings.dev_bLogWindowShow = true;
 		}
 		break;
 
@@ -2895,8 +2895,8 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 			}
 
 			//mark game as NON networked
-			UTGetAppClass().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_NO_NETWORK;
-			UTGetAppClass().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_STOPPED;
+			UTApp().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_NO_NETWORK;
+			UTApp().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_STOPPED;
 		}
 		break;
 
@@ -2936,7 +2936,7 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 			g_gameSubstate = 0;
 
 			//exit lobby if was in lobby
-			if (UTGetAppClass().m_Settings.devnet_eNetGameType != CApplicationSettings::K_NETGAME_TYPE_NO_NETWORK)
+			if (UTApp().m_Settings.devnet_eNetGameType != CApplicationSettings::K_NETGAME_TYPE_NO_NETWORK)
 			{
 				g_netlock.Net_QuitLobby();
 			}
@@ -2952,10 +2952,10 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 			g_mainMenu.SetState(K_MM_STATE_NET_LOBBY);
 
 			//set correct network game type
-			UTGetAppClass().m_Settings.devnet_eNetGameType = (CApplicationSettings::eNetGameTypes)param1; //param1 contains net match type 
-			UTGetAppClass().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_STOPPED;
+			UTApp().m_Settings.devnet_eNetGameType = (CApplicationSettings::eNetGameTypes)param1; //param1 contains net match type 
+			UTApp().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_STOPPED;
 			//enter lobby
-			switch (UTGetAppClass().m_Settings.devnet_eNetGameType)
+			switch (UTApp().m_Settings.devnet_eNetGameType)
 			{
 				case CApplicationSettings::eNetGameTypes::K_NETGAME_TYPE_QUICK_MATCH:
 				{
@@ -3048,7 +3048,7 @@ void ChangeGameState(eGameState newState, int param1, int param2)
 				g_playerSelScr.ResetSelection(false);
 			}
 			//on networked games send local selection immediately so they sync levels
-			if (UTGetAppClass().IsGameNetworked())
+			if (UTApp().IsGameNetworked())
 			{
 				g_netlock.Net_EnterPlayerSelScreen();
 
@@ -3229,7 +3229,7 @@ void PaintTransition(float dTime, float fTimeline, PDEVICE pDevice)
 			pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
 			RECT rect;
-			SetRect(&rect, UTGetAppClass().g_rectRender.x, UTGetAppClass().g_rectRender.y, UTGetAppClass().g_rectRender.Right(), UTGetAppClass().g_rectRender.Bottom());
+			SetRect(&rect, UTApp().g_rectRender.x, UTApp().g_rectRender.y, UTApp().g_rectRender.Right(), UTApp().g_rectRender.Bottom());
 
 			switch (g_nTransitionStep)
 			{
@@ -3244,8 +3244,8 @@ void PaintTransition(float dTime, float fTimeline, PDEVICE pDevice)
 					//write "loading"
 					if ((UTGetGUI().m_sprCol.IsLoaded()) && (fAlpha >= 0.95f))
 					{
-						CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam240hScreen);
-						RECTXYWH_F scrrect = UTGetAppClass().g_cam240hScreen.GetCamWorldAABB();
+						CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam240hScreen);
+						RECTXYWH_F scrrect = UTApp().g_cam240hScreen.GetCamWorldAABB();
 						CSprite::paintFrame(&UTGetGUI().m_sprCol, scrrect.Right() - 3, scrrect.Bottom() - 3, ANM_CONTROLS_SPR_LOADING_ICONS, 0, 0x88ffffff);
 					}
 				}

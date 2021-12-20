@@ -79,7 +79,7 @@ BOOL CALLBACK MyMiniDumpCallback(PVOID /*pParam*/, const PMINIDUMP_CALLBACK_INPU
 LONG WINAPI CreateMiniDump( struct _EXCEPTION_POINTERS *pep )
 {
 	// send analytics
-	ANALYTICS_EVENT("crashdump", _VERSION_CHARSTR_, "CRC", UTGetAppClass().m_Settings.dev_unCurrentCRC);
+	ANALYTICS_EVENT("crashdump", _VERSION_CHARSTR_, "CRC", UTApp().m_Settings.dev_unCurrentCRC);
 	//force an update
 	UTGetAnalytics().Update();
 
@@ -90,10 +90,10 @@ LONG WINAPI CreateMiniDump( struct _EXCEPTION_POINTERS *pep )
 	StringCchPrintf(szDumpFileName, MAX_PATH, L"CrashDump_%u_%u_%u_%u_%u", systime.wYear, systime.wMonth, systime.wDay, systime.wHour, systime.wMinute);
 
 	WCHAR szDumpFullFileName[MAX_PATH];
-	StringCchPrintf(szDumpFullFileName, MAX_PATH, L"%s%s.dmp", UTGetAppClass().g_wszUserDataDir, szDumpFileName);
+	StringCchPrintf(szDumpFullFileName, MAX_PATH, L"%s%s.dmp", UTApp().g_wszUserDataDir, szDumpFileName);
 	// save log with dump name
 	WCHAR szLogFullFileName[MAX_PATH];
-	StringCchPrintf(szLogFullFileName, MAX_PATH, L"%s%s.log", UTGetAppClass().g_wszUserDataDir, szDumpFileName);
+	StringCchPrintf(szLogFullFileName, MAX_PATH, L"%s%s.log", UTApp().g_wszUserDataDir, szDumpFileName);
 	
 	WCHAR logPath[MAX_PATH];
 	DebugGetLogFilePath(logPath, MAX_PATH);

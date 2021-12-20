@@ -34,7 +34,7 @@ INT32 CLibraryManager::setFilePointer(LPWSTR libName, UINT32 fileID)
 		filePtr = NULL;
 	}
 
-	StringCchPrintf(path, MAX_PATH, L"%s%s", UTGetAppClass().g_wszAppResDir, libName);
+	StringCchPrintf(path, MAX_PATH, L"%s%s", UTApp().g_wszAppResDir, libName);
 	int err = OS_wfopen_s(&filePtr, path, L"rb");
 	if(filePtr == NULL || err != 0)
 		return -1;
@@ -98,7 +98,7 @@ INT32 CLibraryManager::setFilePointer(LPWSTR libName, const char* fileName)
 		filePtr = NULL;
 	}
 
-	StringCchPrintf(path, MAX_PATH, L"%s%s", UTGetAppClass().g_wszAppResDir, libName);
+	StringCchPrintf(path, MAX_PATH, L"%s%s", UTApp().g_wszAppResDir, libName);
 	int err = OS_wfopen_s(&filePtr, path, L"rb");
 	if(filePtr == NULL || err != 0)
 		return -1;
@@ -211,7 +211,7 @@ HRESULT CLibraryManager::extractFileToTemp(LPWSTR libName, UINT32 fileID)
 	//scrie noul fisier
 
 	FILE* temp = NULL;
-	int err = OS_wfopen_s(&temp, UTGetAppClass().g_wszTempFilePath, L"wb");
+	int err = OS_wfopen_s(&temp, UTApp().g_wszTempFilePath, L"wb");
 	if(temp != NULL && err == 0)
 	{
 		OS_fwrite(fileBuffer, sizeof(BYTE), filesize, temp);
@@ -239,7 +239,7 @@ INT32	CLibraryManager::getFileIdByName(LPWSTR libName, const char* fileName)
 		filePtr = NULL;
 	}
 
-	StringCchPrintf(path, MAX_PATH, L"%s%s", UTGetAppClass().g_wszAppResDir, libName);
+	StringCchPrintf(path, MAX_PATH, L"%s%s", UTApp().g_wszAppResDir, libName);
 	int err = OS_wfopen_s(&filePtr, path, L"rb");
 	if(filePtr == NULL || err != 0)
 		return -1;

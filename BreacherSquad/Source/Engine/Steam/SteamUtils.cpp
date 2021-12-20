@@ -63,7 +63,7 @@ bool UploadToCloud( ISteamRemoteStorage* steamRemoteStorage,
 	char szTempStr[MAX_PATH];
 
 	// zip the entire folder
-	wcstombs(szTempStr, UTGetAppClass().g_wszTempFolderPath, MAX_PATH);
+	wcstombs(szTempStr, UTApp().g_wszTempFolderPath, MAX_PATH);
 	std::string sZipName = szTempStr;
 	sZipName += szModUploadFileName;
 	bool result = FileManager::ZipFolder(szModFolderPath, sZipName.c_str(), true);

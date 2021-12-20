@@ -408,7 +408,7 @@ void App_SaveUserData()
 	int g_versionData[10] = { _VERSION_DATAFILE_, _VERSION_INT_, 0, 0, 0, 0, 0, 0, 0, 0 }; //save some empty slots for the version
 
 	WCHAR sPath[MAX_PATH];
-	StringCchPrintf(sPath, MAX_PATH, L"%suserdata.bin", UTGetAppClass().g_wszUserDataDir);
+	StringCchPrintf(sPath, MAX_PATH, L"%suserdata.bin", UTApp().g_wszUserDataDir);
 	FILE *fl = NULL;
 	int err = OS_wfopen_s(&fl, sPath, L"wb");
 	if (fl == NULL || err != 0)
@@ -436,7 +436,7 @@ void App_LoadUserData()
 	int arrVersionData[10];
 
 	WCHAR sPath[MAX_PATH];
-	StringCchPrintf(sPath, MAX_PATH, L"%suserdata.bin", UTGetAppClass().g_wszUserDataDir);
+	StringCchPrintf(sPath, MAX_PATH, L"%suserdata.bin", UTApp().g_wszUserDataDir);
 	FILE *fl = NULL;
 	int err = OS_wfopen_s(&fl, sPath, L"rb");
 	if (fl == NULL || err != 0)
@@ -638,7 +638,7 @@ void App_CenterWindowOnMainDisplay(HWND wndHwnd)
 	RECT wndrect, wndrect_new;
 	GetWindowRect(wndHwnd, &wndrect);
 	SIZEWH szWnd(wndrect.right - wndrect.left, wndrect.bottom - wndrect.top);
-	POINTXY_INT ptWndPos((UTGetAppClass().g_szDesktopSize.w - szWnd.w) / 2, (UTGetAppClass().g_szDesktopSize.h - szWnd.h) / 2);
+	POINTXY_INT ptWndPos((UTApp().g_szDesktopSize.w - szWnd.w) / 2, (UTApp().g_szDesktopSize.h - szWnd.h) / 2);
 	SetRect(&wndrect_new, ptWndPos.x, ptWndPos.y, ptWndPos.x + szWnd.w, ptWndPos.y + szWnd.h);
 	if ((wndrect_new.left != wndrect.left) || (wndrect_new.top != wndrect.top) || (wndrect_new.right != wndrect.right) || (wndrect_new.bottom != wndrect.bottom))
 	{
@@ -655,7 +655,7 @@ void App_ToggleBorderlessFullscreen(HWND wndHwnd)
 		SetWindowLongPtr(wndHwnd, GWL_STYLE, WS_VISIBLE | dwWindowStyle | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_SHOWWINDOW | SWP_NOSIZE);
 		
 		RECT wndrect;
-		SetRect(&wndrect, 0, 0, UTGetAppClass().m_Settings.nWindowW, UTGetAppClass().m_Settings.nWindowH);
+		SetRect(&wndrect, 0, 0, UTApp().m_Settings.nWindowW, UTApp().m_Settings.nWindowH);
 		AdjustWindowRect(&wndrect, dwWindowStyle, FALSE);
 		
 		SetWindowPos(wndHwnd, NULL, 0, 0, wndrect.right - wndrect.left, wndrect.bottom - wndrect.top, SWP_FRAMECHANGED);
@@ -675,7 +675,7 @@ void App_ToggleBorderlessFullscreen(HWND wndHwnd)
 	}
 
 	//save final fullscreen status
-	UTGetAppClass().m_Settings.bFullscreen = (bBorderlessFullscreenOn || !DXUTIsWindowed());
+	UTApp().m_Settings.bFullscreen = (bBorderlessFullscreenOn || !DXUTIsWindowed());
 	//close GFX options window if open
 	CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_GFX_OPTIONS");
 	if (layer != null)
@@ -694,7 +694,7 @@ bool App_TutorialWindowShow(int nTutID)
 	if (g_userData[nTutID] != 0)
 			return false;
 
-	if (UTGetAppClass().IsGameNetworked())
+	if (UTApp().IsGameNetworked())
 		return false;
 	if (UTGetGUI().bIsBlocking)
 		return false;
@@ -806,7 +806,7 @@ UINT32 App_GetGameFilesCRC()
 	///--- hash of important files ---
 	for (int kk = 0; kk < ARRAY_SIZE(arr_wcsImportantFilesCRC); kk++)
 	{
-		StringCchPrintf(strPath, MAX_PATH, L"%s/%s", UTGetAppClass().g_wszExePath, arr_wcsImportantFilesCRC[kk]);
+		StringCchPrintf(strPath, MAX_PATH, L"%s/%s", UTApp().g_wszExePath, arr_wcsImportantFilesCRC[kk]);
 		UINT32 flcrc = GetFileHash(strPath);
 		//add with overflow
 		unRetCRC += flcrc;
@@ -1048,7 +1048,7 @@ OPRESULT App_LocaLoadLangList(CStringHash shSelectedLangAlias)
 		ErrorBox(K_ERR_WARNING, L"The language specified in the options.xml file was not found! Defaulting to English!");
 	}
 
-	UTGetAppClass().m_Settings.shLanguageAlias = g_Language.shLangAlias;
+	UTApp().m_Settings.shLanguageAlias = g_Language.shLangAlias;
 
 	return K_OP_OK;
 }
@@ -1198,18 +1198,18 @@ OPRESULT App_LocaLoadFonts(bool bUseTTFonts)
 	//set font replacements if using TTF
 	if (bUseTTFonts)
 	{
-		g_font12wow->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTGetAppClass().g_cam480hScreen);
-		g_font10b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTGetAppClass().g_cam480hScreen);
-		g_font10bs1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTGetAppClass().g_cam480hScreen);
-		g_font9b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTGetAppClass().g_cam480hScreen);
-		g_font8b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTGetAppClass().g_cam480hScreen);
-		g_font8bs1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTGetAppClass().g_cam480hScreen);
-		g_font6n1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTGetAppClass().g_cam480hScreen);
-		g_font6ns1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTGetAppClass().g_cam480hScreen);
-		g_font6nc1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTGetAppClass().g_cam480hScreen);
-		g_font5n1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTGetAppClass().g_cam480hScreen);
-		g_font5n2->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTGetAppClass().g_cam480hScreen);
-		g_font5ns2->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTGetAppClass().g_cam480hScreen);
+		g_font12wow->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTApp().g_cam480hScreen);
+		g_font10b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTApp().g_cam480hScreen);
+		g_font10bs1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTApp().g_cam480hScreen);
+		g_font9b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTApp().g_cam480hScreen);
+		g_font8b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTApp().g_cam480hScreen);
+		g_font8bs1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTApp().g_cam480hScreen);
+		g_font6n1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
+		g_font6ns1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
+		g_font6nc1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
+		g_font5n1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
+		g_font5n2->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
+		g_font5ns2->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
 	}
 	else
 	{
@@ -1258,8 +1258,8 @@ OPRESULT App_LocaChangeLanguage(CStringHash shSelectedLangAlias)
 			App_LocaLoadFonts(g_Language.bUseTTFonts);
 
 		//save settings 
-		UTGetAppClass().m_Settings.shLanguageAlias = g_Language.shLangAlias;
-		UTGetAppClass().SaveSettings();
+		UTApp().m_Settings.shLanguageAlias = g_Language.shLangAlias;
+		UTApp().SaveSettings();
 	}
 
 	LOG(L"[LANG] Language changed to [%s]", shSelectedLangAlias.text);

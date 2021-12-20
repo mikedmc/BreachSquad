@@ -15,7 +15,7 @@ void FileManager::GetMediaPath(const WCHAR *wsMediaName, WCHAR wsRetPath[MAX_PAT
 
 	if (bIgnoreMods)
 	{
-		StringCchPrintf(wsRetPath, MAX_PATH_STD, L"%s%s", UTGetAppClass().g_wszExePath, wsMediaName);
+		StringCchPrintf(wsRetPath, MAX_PATH_STD, L"%s%s", UTApp().g_wszExePath, wsMediaName);
 	}
 	else
 	{
@@ -27,13 +27,13 @@ void FileManager::GetMediaPath(const WCHAR *wsMediaName, WCHAR wsRetPath[MAX_PAT
 		}
 		else
 		{
-			StringCchPrintf(wsRetPath, MAX_PATH_STD, L"%s%s", UTGetAppClass().g_wszExePath, wsMediaName);
+			StringCchPrintf(wsRetPath, MAX_PATH_STD, L"%s%s", UTApp().g_wszExePath, wsMediaName);
 		}
 	}
 
 #else
 	//no modding? just build full path
-	StringCchPrintf(wsRetPath, MAX_PATH_STD, L"%s%s", UTGetAppClass().g_wszExePath, wsMediaName);
+	StringCchPrintf(wsRetPath, MAX_PATH_STD, L"%s%s", UTApp().g_wszExePath, wsMediaName);
 
 #endif
 }

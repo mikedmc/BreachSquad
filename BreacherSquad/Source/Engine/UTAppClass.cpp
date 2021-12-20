@@ -89,14 +89,13 @@ CApplication::CApplication()
 	gWindow = NULL;
 #endif
 
-	//keep real screen and virtual screen sizes
+	// keep real screen and virtual screen sizes
 	g_rectRender = RECTXYWH_F(0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h);
 	g_nPixelSizePP = 2;
 	g_rectRenderPP = g_rectRender;
 	g_rectScreen = RECTXYWH_F(0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h);
-	g_rectRT = RECTXYWH_F(0.0f, 0.0f, K_GAME_WIDTH * K_GAME_PIXEL_SIZE_F, K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F);
-	//dreptunghiul de mai jos aproximeaza rezolutia de W/240 pixeli si e fix ca sa arate interfetele mereu la fel
-	g_rect240hWorld = RECTXYWH_F(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * 240.0f), 240.0f);
+	g_rectRT = RECTXYWH_F(0.0f, 0.0f, K_GAME_WIDTH * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F);
+	g_rect360hWorld = RECTXYWH_F(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * K_GAME_HEIGHT), K_GAME_HEIGHT);
 	g_rect480hWorld = RECTXYWH_F(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * 480.0f), 480.0f);
 	D3DXMatrixOrthoOffCenterLH(&g_matProj, g_rectRender.x + 0.5f, g_rectRender.w + 0.5f, g_rectRender.h + 0.5f, g_rectRender.y + 0.5f, 0.0f, 1.0f);
 	//clear all resolutions
@@ -128,7 +127,7 @@ HRESULT CApplication::SaveScreenshot()
 	StringCchPrintf(szFileName, MAX_PATH, L"BreacherSquad_%u_%u_%u_%u_%u_%u", systime.wYear, systime.wMonth, systime.wDay, systime.wHour, systime.wMinute, systime.wSecond);
 
 	WCHAR szFullFileName[MAX_PATH];
-	StringCchPrintf(szFullFileName, MAX_PATH, L"%s%s.png", UTGetAppClass().g_wszUserDataDir, szFileName);
+	StringCchPrintf(szFullFileName, MAX_PATH, L"%s%s.png", UTApp().g_wszUserDataDir, szFileName);
 
 	V_RETURN(D3DXSaveSurfaceToFile(szFullFileName, D3DXIFF_PNG, pBackBuffer, NULL, NULL));
 
@@ -260,8 +259,8 @@ void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 	//#TEMP: force pixel size to 3x to test clipping when source is larger
 	//6g_nPixelSizePP = 3;
 
-	szRenderPP.w = K_GAME_WIDTH * K_GAME_PIXEL_SIZE * g_nPixelSizePP;
-	szRenderPP.h = K_GAME_HEIGHT * K_GAME_PIXEL_SIZE * g_nPixelSizePP;
+	szRenderPP.w = K_GAME_WIDTH * K_RT_PIXEL_SIZE * g_nPixelSizePP;
+	szRenderPP.h = K_GAME_HEIGHT * K_RT_PIXEL_SIZE * g_nPixelSizePP;
 	if ( szRenderPP.w > newSizeX )
 		szRenderPP.w = newSizeX;
 	if ( szRenderPP.h > newSizeY )
@@ -289,20 +288,19 @@ void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 	g_rectRender = RECTXYWH_F(g_letterbox.w, g_letterbox.h, szRender.w, szRender.h);
 	g_rectRenderPP = RECTXYWH_F( floor( ( newSizeX - szRenderPP.w ) / 2.0f ), floor( ( newSizeY - szRenderPP.h ) / 2.0f ), szRenderPP.w, szRenderPP.h );
 
-	g_rect240hWorld = RECTXYWH_F(0.0f, 0.0f, (fAspect * 240.0f), 240.0f);
+	g_rect360hWorld = RECTXYWH_F(0.0f, 0.0f, (fAspect * K_GAME_HEIGHT), K_GAME_HEIGHT);
 	g_rect480hWorld = RECTXYWH_F(0.0f, 0.0f, (fAspect * 480.0f), 480.0f);
-	//g_rectRT = RECTXYWH_F(0.0f, 0.0f, fAspect * K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F, K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F);
-	g_rectRT = RECTXYWH_F( 0.0f, 0.0f, K_GAME_WIDTH * K_GAME_PIXEL_SIZE_F, K_GAME_HEIGHT * K_GAME_PIXEL_SIZE_F );
+	g_rectRT = RECTXYWH_F( 0.0f, 0.0f, K_GAME_WIDTH * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F );
 	D3DXMatrixOrthoOffCenterLH(&g_matProj, g_rectScreen.x + 0.5f, g_rectScreen.w + 0.5f, g_rectScreen.h + 0.5f, g_rectScreen.y + 0.5f, 0.0f, 1.0f);
 
 	g_camScreen.SetWorldBounds(g_rectScreen, true, K_CAMTRANS_AXIS_V, g_rectScreen.h, g_rectScreen.h);
 	g_camScreen.InitCamera(g_rectScreen, g_rectScreen.h, K_CAMTRANS_AXIS_V, g_rectScreen.Center());
 
-	g_camRTScreen.SetWorldBounds(g_rectRT, true, K_CAMTRANS_AXIS_V, K_GAME_HEIGHT, K_GAME_HEIGHT);
-	g_camRTScreen.InitCamera(g_rectRender, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, g_rectRT.Center());
+	g_camRTScreen.SetWorldBounds(g_rectRT, true, K_CAMTRANS_AXIS_V, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F);
+	g_camRTScreen.InitCamera(g_rectRender, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F, K_CAMTRANS_AXIS_V, g_rectRT.Center());
 
-	g_cam240hScreen.SetWorldBounds(g_rect240hWorld, true, K_CAMTRANS_AXIS_V, g_rect240hWorld.h, g_rect240hWorld.h);
-	g_cam240hScreen.InitCamera(g_rectRender, g_rect240hWorld.h, K_CAMTRANS_AXIS_V, g_rect240hWorld.Center());
+	g_cam240hScreen.SetWorldBounds(g_rect360hWorld, true, K_CAMTRANS_AXIS_V, g_rect360hWorld.h, g_rect360hWorld.h);
+	g_cam240hScreen.InitCamera(g_rectRender, g_rect360hWorld.h, K_CAMTRANS_AXIS_V, g_rect360hWorld.Center());
 
 	g_cam480hScreen.SetWorldBounds(g_rect480hWorld, true, K_CAMTRANS_AXIS_V, g_rect480hWorld.h, g_rect480hWorld.h);
 	g_cam480hScreen.InitCamera(g_rectRender, g_rect480hWorld.h, K_CAMTRANS_AXIS_V, g_rect480hWorld.Center());
@@ -608,7 +606,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == GET_FAST_HASH("BUT_CLOSE_SETTINGS")) //close settings, save settings
 			{
 				UTGetGUI().RemoveTopmostLayer();
-				UTGetAppClass().SaveSettings();
+				UTApp().SaveSettings();
 				return true;
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_CLOSE_KEYDEF")) //close key redefining
@@ -652,13 +650,13 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			{
 				///--- write resolution string for use in options screen ---
 				WCHAR wsResStr[1024] = { 0 };
-				for (int kk = 0; kk < UTGetAppClass().g_arrResolutions.GetSize(); kk++)
+				for (int kk = 0; kk < UTApp().g_arrResolutions.GetSize(); kk++)
 				{
 					WCHAR wsRes[MAX_PATH];
-					if (kk < UTGetAppClass().g_arrResolutions.GetSize() - 1)
-						StringCchPrintf(wsRes, MAX_PATH, L"%dx%d\n", UTGetAppClass().g_arrResolutions[kk].w, UTGetAppClass().g_arrResolutions[kk].h);
+					if (kk < UTApp().g_arrResolutions.GetSize() - 1)
+						StringCchPrintf(wsRes, MAX_PATH, L"%dx%d\n", UTApp().g_arrResolutions[kk].w, UTApp().g_arrResolutions[kk].h);
 					else
-						StringCchPrintf(wsRes, MAX_PATH, L"%dx%d", UTGetAppClass().g_arrResolutions[kk].w, UTGetAppClass().g_arrResolutions[kk].h);
+						StringCchPrintf(wsRes, MAX_PATH, L"%dx%d", UTApp().g_arrResolutions[kk].w, UTApp().g_arrResolutions[kk].h);
 
 					StringCchCat(wsResStr, 1024, wsRes);
 				}
@@ -869,7 +867,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_QUIT_PLAYERSEL")) //fereastra de exit from player selection
 			{
-				if (UTGetAppClass().IsGameNetworked())
+				if (UTApp().IsGameNetworked())
 				{
 					g_netlock.Net_QuitLobby();
 
@@ -890,7 +888,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_LEVEL_BACK")) //level finished - level failed but back
 			{
-				if (!UTGetAppClass().IsGameNetworked())
+				if (!UTApp().IsGameNetworked())
 				{
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
@@ -915,7 +913,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_LEVEL_BACK_IGM")) //ingame menu - quit level
 			{
-				if (!UTGetAppClass().IsGameNetworked())
+				if (!UTApp().IsGameNetworked())
 				{
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
@@ -943,7 +941,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == GET_FAST_HASH("BUT_QUICK_MATCH"))
 			{
 				//mark game type
-				UTGetAppClass().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH;
+				UTApp().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH;
 				//change state
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
@@ -953,7 +951,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == GET_FAST_HASH("BUT_HOST_PUBLIC"))
 			{
 				//mark game type
-				UTGetAppClass().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_HOST_PUBLIC;
+				UTApp().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_HOST_PUBLIC;
 				//change state
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
@@ -963,7 +961,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == GET_FAST_HASH("BUT_HOST_PRIVATE"))
 			{
 				//mark game type
-				UTGetAppClass().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_HOST_PRIVATE;
+				UTApp().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_HOST_PRIVATE;
 				//change state
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
@@ -1041,7 +1039,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == GET_FAST_HASH("BUT_JOIN_GAME"))
 			{
 				//mark game type as online coop
-				UTGetAppClass().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH;
+				UTApp().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH;
 				//change state
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
@@ -1056,7 +1054,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_LEVEL_WIN")) //fereastra de level finished - level win (continue)
 			{
-				if (!UTGetAppClass().IsGameNetworked()) //not networked
+				if (!UTApp().IsGameNetworked()) //not networked
 				{
 					//avansez pe urmatorul nivel
 					g_userData[K_MEMID_SELECTED_LEVEL]++;
@@ -1077,7 +1075,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_COOPFAIL_CONTINUE")) //fereastra de level failed coop vote next level
 			{
-				if (UTGetAppClass().IsGameNetworked()) //only networked
+				if (UTApp().IsGameNetworked()) //only networked
 				{
 					CNetLock::sPacketLevelResults sPack(CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE);
 					g_netlock.Net_SendLevelResultsCommand(sPack);
@@ -1085,7 +1083,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_LEVEL_RESTART")) //fereastra de level failed - main menu
 			{
-				if (!UTGetAppClass().IsGameNetworked()) //not networked
+				if (!UTApp().IsGameNetworked()) //not networked
 				{
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
@@ -1131,7 +1129,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						//SND_PLAY(SNDIDX_RELOAD_TACTICAL);
 						g_playerSelScr.m_arrPlayers[kk].nCursorMoreReal = -1;
 
-						if (UTGetAppClass().IsGameNetworked())
+						if (UTApp().IsGameNetworked())
 							g_playerSelScr.SendSelectionByNetwork(kk);
 					}
 				}
@@ -1326,7 +1324,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					App_LocaChangeLanguage(g_arrLangList[nLangIdx].shLangAlias);
 					App_UpdateLevelStats();
 
-					UTGetAppClass().SaveSettings();
+					UTApp().SaveSettings();
 					//set version number
 					UTLang().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
 				}
@@ -1721,7 +1719,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					App_LocaChangeLanguage(g_arrLangList[nLangIdx].shLangAlias);
 					App_UpdateLevelStats();
 
-					UTGetAppClass().SaveSettings();
+					UTApp().SaveSettings();
 					//set version number
 					UTLang().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
 				}
@@ -1950,7 +1948,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						{
 							//can ask for restart if alive
 							CActor *pPlayer = g_level.pPlayerActor[g_netlock.Net_GetPlayerIndex()];
-							if ((UTGetAppClass().IsGameNetworked()) && (pPlayer != null) && (pPlayer->fLife > 0.0f))
+							if ((UTApp().IsGameNetworked()) && (pPlayer != null) && (pPlayer->fLife > 0.0f))
 							{
 								//send silent restart command by chat
 								g_ChatWnd.AddLine(K_CW_STR_CMD_NET_ABORT_MISSION, L"SYSTEM", 0xffff0000);
@@ -2285,7 +2283,7 @@ HRESULT CApplication::OnDestroyDevice(void* pUserContext)
 /// Sigleton 
 ///**************************************************************************************
 
-CApplication& UTGetAppClass()
+CApplication& UTApp()
 {
 	static CApplication g_Application;
 	return g_Application;

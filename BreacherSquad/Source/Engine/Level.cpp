@@ -20,7 +20,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		return retData;
 	}
 
-	bool bGoreEnabled = UTGetAppClass().m_Settings.bGoreEnabled;
+	bool bGoreEnabled = UTApp().m_Settings.bGoreEnabled;
 
 	float fHitPointsTaken = pBullet->fDamage;
 	float fActorInitialLife = actor->fLife;
@@ -823,8 +823,8 @@ CLevel::CLevel()
 	m_levelSubState = 0;
 	m_levelStateTimer = 0.0f;
 
-	m_camLevelToRT.SetViewport(UTGetAppClass().g_rectRT);
-	m_camLevelToScr.SetViewport(UTGetAppClass().g_rectRender);
+	m_camLevelToRT.SetViewport(UTApp().g_rectRT);
+	m_camLevelToScr.SetViewport(UTApp().g_rectRender);
 
 	m_nPlayers = 0;
 	m_nPlayersActive = 0;
@@ -1624,10 +1624,10 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 			if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
 				StringCchCatA(ctxt, MAX_PATH, "_zm");
 
-			if (UTGetAppClass().IsGameNetworked())
+			if (UTApp().IsGameNetworked())
 			{
 				//mark sync start here, after loading the game
-				UTGetAppClass().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_GET_READY;
+				UTApp().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_GET_READY;
 				//send loaded level confirmation
 				g_netlock.Net_SendGameplayCommand(g_netlock.K_GAMPLAYCMD_LEVEL_LOADED);
 
@@ -1678,7 +1678,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 
 			g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_MISSION_ACCOMPLISHED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
 			//enter level results sync
-			if (UTGetAppClass().IsGameNetworked())
+			if (UTApp().IsGameNetworked())
 			{
 				LOG(L"Net::Level: Signal mission accomplished.");
 				g_netlock.Net_EnterLevelResults();
@@ -1734,7 +1734,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 
 			g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_MISSION_FAILED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
 			//enter level results sync
-			if (UTGetAppClass().IsGameNetworked())
+			if (UTApp().IsGameNetworked())
 			{
 				LOG(L"Net::Level: Signal mission failed.");
 				g_netlock.Net_EnterLevelResults();
@@ -4560,7 +4560,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					//m_interfaceIGM.SetHotJoinSelection(actor->nPlayerOrdinal, -1);
 
 					//on local play check if other player is suspended and move camera on him
-					if ((!UTGetAppClass().IsGameNetworked()) && (!bContinue))
+					if ((!UTApp().IsGameNetworked()) && (!bContinue))
 					{
 						for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 						{
@@ -4773,7 +4773,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	}
 
 	///--- keep players together, limits movement on couch multiplayer but not on net multiplayer
-	if ((actor->GetCurrentBehavior() == AI_BEHAVIOR_PLAYER_CONTROL) && (!UTGetAppClass().IsGameNetworked()))
+	if ((actor->GetCurrentBehavior() == AI_BEHAVIOR_PLAYER_CONTROL) && (!UTApp().IsGameNetworked()))
 	{
 		//increase suspended timer
 		if (actor->nSuspendedFlags != K_LVL_SUSPENDFLAG_NONE)
@@ -5096,7 +5096,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if (actor->bSkipRender)
 					break;
 
-				if (!UTGetAppClass().m_Settings.bGoreEnabled)
+				if (!UTApp().m_Settings.bGoreEnabled)
 				{
 					g_particlesMgr.GenerateEnemySoftGib(actor->pos.xy_proj, 0xff32a7fa, K_PART_LAYER_RT_FRONT_NRM);
 				}
@@ -6292,7 +6292,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 					{
 						CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ll];
 						//Shows controller mapping - only when not online
-						if ((ctrlr->eType == K_CM_CT_JOYSTICK_SDL) && (!UTGetAppClass().IsGameNetworked()) && (false == UTGetGUI().bIsBlocking) && 
+						if ((ctrlr->eType == K_CM_CT_JOYSTICK_SDL) && (!UTApp().IsGameNetworked()) && (false == UTGetGUI().bIsBlocking) && 
 							(ctrlr->sCommands.keyState[K_CM_COMMAND_SELECT] == K_CM_BUTSTATE_JUSTPRESSED))
 						{
 							UTGetGUI().ShowLayerOnce("LAYER_ID_CONTROLLER_MAP");
@@ -6638,7 +6638,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 		case K_LVL_STATE_MISSION_ACCOMPLISHED:
 		{
 			//wait for network data
-			if (UTGetAppClass().IsGameNetworked())
+			if (UTApp().IsGameNetworked())
 			{
 				g_netlock.Net_UpdateLevelResults(dTime);
 				//show net votes
@@ -6667,7 +6667,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 					if (g_netlock.Net_GetIAmHosting())
 					{
 						//quick match
-						if (UTGetAppClass().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH)
+						if (UTApp().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH)
 						{
 							//random level on quick match
 							int nLevel = GetNextRandomLevel();
@@ -6885,7 +6885,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 							}
 
 							//XP points	save
-							if (!UTGetAppClass().IsGameNetworked())
+							if (!UTApp().IsGameNetworked())
 							{
 								//in local coop you only get half the XP for each player
 								int nPl1BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
@@ -6914,7 +6914,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 							layer = UTGetGUI().ShowLayerOnce("LAYER_ID_LEVELWIN_1P");
 						else
 						{
-							if (!UTGetAppClass().IsGameNetworked())
+							if (!UTApp().IsGameNetworked())
 								layer = UTGetGUI().ShowLayerOnce("LAYER_ID_LEVELWIN_2P");
 							else
 								layer = UTGetGUI().ShowLayerOnce("LAYER_ID_LEVELWIN_2P_COOP");
@@ -7032,7 +7032,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 								}
 
 								//network - replace player names with real ones
-								if (UTGetAppClass().IsGameNetworked())
+								if (UTApp().IsGameNetworked())
 								{
 									if ((ctrl = layer->GetControlByName("CTRL_WND_PL1")) != nullptr)
 									{
@@ -7090,7 +7090,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 
 						// notify level finished for achievements
 						if (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE)						
-							UTGetAppClass().App_OnLevelFinished(g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL]);
+							UTApp().App_OnLevelFinished(g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL]);
 					}
 				}
 				break;
@@ -7150,7 +7150,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 		case K_LVL_STATE_MISSION_FAILED:
 		{
 			//wait for network data
-			if (UTGetAppClass().IsGameNetworked())
+			if (UTApp().IsGameNetworked())
 			{
 				g_netlock.Net_UpdateLevelResults(dTime);
 				//show net votes
@@ -7180,7 +7180,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 					if (g_netlock.Net_GetIAmHosting())
 					{
 						//quick match
-						if (UTGetAppClass().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH)
+						if (UTApp().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH)
 						{
 							//random level on quick match
 							int nLevel = GetNextRandomLevel();
@@ -7330,7 +7330,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 						else
 						{
 							//XP points	save
-							if (!UTGetAppClass().IsGameNetworked())
+							if (!UTApp().IsGameNetworked())
 							{
 								//in local coop you only get half the XP for each player
 								int nPl1BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
@@ -7400,7 +7400,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 							UTGetGUI().RemoveAllLayers();
 
 							CCtrlLayer* layer = null;
-							if(!UTGetAppClass().IsGameNetworked())
+							if(!UTApp().IsGameNetworked())
 								layer = UTGetGUI().ShowLayerOnce("LAYER_ID_LEVELFAIL_2P");
 							else
 								layer = UTGetGUI().ShowLayerOnce("LAYER_ID_LEVELFAIL_2P_COOP");
@@ -7432,7 +7432,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 								}
 
 								//network - replace player names with real ones
-								if (UTGetAppClass().IsGameNetworked())
+								if (UTApp().IsGameNetworked())
 								{
 									if ((ctrl = layer->GetControlByName("CTRL_WND_PL1")) != nullptr)
 									{
@@ -7491,7 +7491,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 						}
 						// notify level finished for achievements
 						if (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE)
-							UTGetAppClass().App_OnLevelFinished(g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL]);
+							UTApp().App_OnLevelFinished(g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL]);
 					}
 				}
 				break;
@@ -7552,7 +7552,7 @@ void CLevel::Update( float dTime )
 	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 	{
 		//on networked games ignore the peer and stay locked onto the player
-		if ( UTGetAppClass().IsGameNetworked() )
+		if ( UTApp().IsGameNetworked() )
 		{
 			int nIndexToFollow = g_netlock.Net_GetPlayerIndex();
 			// move camera on peer after you die
@@ -7564,7 +7564,7 @@ void CLevel::Update( float dTime )
 					continue;
 			}
 			//in networked games just ignore the other player
-			if ( ( UTGetAppClass().IsGameNetworked() ) && ( kk != nIndexToFollow ) )
+			if ( ( UTApp().IsGameNetworked() ) && ( kk != nIndexToFollow ) )
 				continue;
 		}
 
@@ -7610,7 +7610,7 @@ void CLevel::Update( float dTime )
 		{
 			avg_live /= plcnt_live;
 			//are they too far apart? 
-			if ( MUVec2Len( &( avg_all - avg_live ) ) > UTGetAppClass().g_rectRT.h * 0.5f )
+			if ( MUVec2Len( &( avg_all - avg_live ) ) > UTApp().g_rectRT.h * 0.5f )
 			{
 				vPlayersAvg = avg_live;
 			}
@@ -7618,8 +7618,8 @@ void CLevel::Update( float dTime )
 	}
 
 	//handles render size changes
-	m_camLevelToRT.SetViewport( UTGetAppClass().g_rectRT );
-	m_camLevelToScr.SetViewport( UTGetAppClass().g_rectRender );
+	m_camLevelToRT.SetViewport( UTApp().g_rectRT );
+	m_camLevelToScr.SetViewport( UTApp().g_rectRender );
 	if ( g_editor.IsLaunched() )
 	{
 		m_camLevelToRT.SetCamPos( &g_editor.m_vCamPos );
@@ -7838,7 +7838,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 	m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	m_pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
+	if ((UTApp().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
 	{
 		//#IMPORTANT: we need separate alpha blending or it will look bad when blending alpha values between them.
 		//eg: if we blend semitransparent things on top of fully opaque walls, the walls become transparent
@@ -7851,7 +7851,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 
 	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams (UV shrinking)
 	// moves from tex pixel to pixel, no half pixels
-	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-floor(camrect.x) * K_GAME_PIXEL_SIZE_F, -floor(camrect.y) * K_GAME_PIXEL_SIZE_F));
+	MUMatAffine2D(&matView, K_RT_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-floor(camrect.x) * K_RT_PIXEL_SIZE_F, -floor(camrect.y) * K_RT_PIXEL_SIZE_F));
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 	UTGetShaderManager().SetVS(nullptr);
@@ -7969,7 +7969,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 	m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	m_pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
+	if ((UTApp().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
 	{
 		//#IMPORTANT: we need separate alpha blending or it will look bad when blending alpha values between them.
 		//eg: if we blend semitransparent things on top of fully opaque walls, the walls become transparent
@@ -7981,7 +7981,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 	}
 
 	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams
-	MUMatAffine2D(&matView, K_GAME_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-floor(camrect.x) * K_GAME_PIXEL_SIZE_F, -floor(camrect.y) * K_GAME_PIXEL_SIZE_F));
+	MUMatAffine2D(&matView, K_RT_PIXEL_SIZE_F, NULL, 0.0f, &Vec2(-floor(camrect.x) * K_RT_PIXEL_SIZE_F, -floor(camrect.y) * K_RT_PIXEL_SIZE_F));
 
 	m_pDevice->SetTransform(D3DTS_VIEW, &matView);
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
@@ -8264,7 +8264,7 @@ OPRESULT CLevel::RenderPass_Composition( Mat* matProj, float fBetweenFramesPerce
 	m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	m_pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
+	if ((UTApp().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0)
 	{
 		//#IMPORTANT: we need separate alpha blending or it will look bad when blending alpha values between them.
 		//eg: if we blend semitransparent things on top of fully opaque walls, the walls become transparent
@@ -8352,14 +8352,14 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	if ((!m_bLoaded) || (!m_bOneUpdateDone))
 		return E_FAIL;
 	//daca nu am capabilitatea de offscreen ies cu eroare
-	if ((UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_RTT) == 0)
+	if ((UTApp().g_gfxFlags & K_UT_GFXFLAG_RTT) == 0)
 		return E_FAIL;
 
-	RECTXYWH_F rectRender = UTGetAppClass().g_rectRenderPP;
-	int nPixelScaling = UTGetAppClass().g_nPixelSizePP;
+	RECTXYWH_F rectRender = UTApp().g_rectRenderPP;
+	int nPixelScaling = UTApp().g_nPixelSizePP;
 	///--- PAINT LEVEL ---
 	//real screen space
-	CCameraTransform::SetActiveCamera(m_pDevice, &UTGetAppClass().g_camScreen);
+	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_camScreen);
 	//paint game 
 	CRTManager::CEngineRenderTarget* pRTfinal = UTGetRTManager().GetRTbyUID(K_RTID_FINAL);
 	if (pRTfinal != null)
@@ -8379,7 +8379,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		// computes sub pixel offsets for smooth scrolling. the RT renders only on tileset pixels, no subpixels, for precision.
 		// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
 		RECTXYWH_F camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
-		Vec2 vSubPxOff(-FLOAT_FRAC(camrect.x) * (fRTscale * K_GAME_PIXEL_SIZE_F), -FLOAT_FRAC(camrect.y) * (fRTscale * K_GAME_PIXEL_SIZE_F));
+		Vec2 vSubPxOff(-FLOAT_FRAC(camrect.x) * (fRTscale * K_RT_PIXEL_SIZE_F), -FLOAT_FRAC(camrect.y) * (fRTscale * K_RT_PIXEL_SIZE_F));
 		MUMatAffine2D(&matpaint, fRTscale, nullptr, 0.0f, &Vec2(rectRender.x + vSubPxOff.x, rectRender.y + vSubPxOff.y));
 		m_pSprite->SetTransform(&matpaint);
 		m_pSprite->Draw(pRTfinal->m_pRTTexture, &src, NULL, &g_Vec3Zero, 0xffffffff);
@@ -8667,14 +8667,14 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		}
 
 		//cover shield
-		if (UTGetAppClass().m_Settings.bShowInterfaceHelp) //player numeric icon (only if shield not visible)
+		if (UTApp().m_Settings.bShowInterfaceHelp) //player numeric icon (only if shield not visible)
 		{
 			Vec2 vpos = Vec2(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y + fabs(3.0f * sin(fLocalTimeline * 4.0f)));
 			CSprite::paintFrame(&m_sprInterface, vpos.x, vpos.y, ANM_IGM_INTERFACE_SPR_PLAYER_NR_ICONS, pPlayerActor[kk]->nPlayerOrdinal);
 		}
 
 		//paint player numeric icon on multiplayer when peer outside the screen
-		if (UTGetAppClass().IsGameNetworked())
+		if (UTApp().IsGameNetworked())
 		{
 
 			if ((pPlayerActor[kk]->nPlayerOrdinal == g_netlock.Net_GetOtherPlayerIndex()) && (!camAABB.Intersects(pPlayerActor[kk]->bbox)))
@@ -8702,7 +8702,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	//m_interfaceTextBubble.Paint(m_pDevice, m_pSprite);
 
 	//set screen space
-	CCameraTransform::SetActiveCamera(m_pDevice, &UTGetAppClass().g_camScreen);
+	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_camScreen);
 
 	///--- paint time slowdown screen effect ---
 	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);

@@ -36,7 +36,7 @@ bool CModsManager::CModDescriptor::GetFullPathToModImage(WCHAR* strDest, UINT32 
 	std::wostringstream stream;
 	stream << uID;
 
-	StringCchPrintf(strDest, nDestSize, L"%s%s/mod_root/%s", UTGetAppClass().g_wszModsDir, stream.str().c_str(), shImagePath.text);
+	StringCchPrintf(strDest, nDestSize, L"%s%s/mod_root/%s", UTApp().g_wszModsDir, stream.str().c_str(), shImagePath.text);
 	return true;
 }
 
@@ -49,7 +49,7 @@ bool CModsManager::CModDescriptor::GetFullPathToAffectedFile(int nFileIdx, WCHAR
 	std::wostringstream stream;
 	stream << uID;
 
-	StringCchPrintf(strDest, nDestSize, L"%s%s/mod_root/%s", UTGetAppClass().g_wszModsDir, stream.str().c_str(), shFilePath->text);
+	StringCchPrintf(strDest, nDestSize, L"%s%s/mod_root/%s", UTApp().g_wszModsDir, stream.str().c_str(), shFilePath->text);
 	return true;
 }
 
@@ -127,7 +127,7 @@ HRESULT CModsManager::LoadModsFromCacheFile()
 {
 	//load document
 	WCHAR xmlPath[MAX_PATH];
-	StringCchPrintf(xmlPath, MAX_PATH, L"%smods.xml", UTGetAppClass().g_wszModsDir);
+	StringCchPrintf(xmlPath, MAX_PATH, L"%smods.xml", UTApp().g_wszModsDir);
 
 	pugi::xml_document doc;
 	if (!doc.load_file(xmlPath))
@@ -155,7 +155,7 @@ HRESULT CModsManager::LoadModsFromCacheFile()
 
 		//now load mod details (always installed in userdata/mods/MOD_ID folder)
 		WCHAR strModPath[MAX_PATH];
-		StringCchPrintf(strModPath, MAX_PATH, L"%s%s/mod_root", UTGetAppClass().g_wszModsDir, bnode.attribute(L"id").value());
+		StringCchPrintf(strModPath, MAX_PATH, L"%s%s/mod_root", UTApp().g_wszModsDir, bnode.attribute(L"id").value());
 		if (ndesc->LoadModDescriptor(strModPath) != 0)
 		{
 			m_arrMods.Add(ndesc);
@@ -196,7 +196,7 @@ HRESULT CModsManager::SaveModsToCacheFile()
 	}
 
 	WCHAR xmlPath[MAX_PATH];
-	StringCchPrintf(xmlPath, MAX_PATH, L"%smods.xml", UTGetAppClass().g_wszModsDir);
+	StringCchPrintf(xmlPath, MAX_PATH, L"%smods.xml", UTApp().g_wszModsDir);
 
 	FILE* file = OS_wfopen(xmlPath, L"w");
 	if (file)

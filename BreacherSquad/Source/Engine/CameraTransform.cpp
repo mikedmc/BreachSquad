@@ -279,7 +279,7 @@ void CCameraTransform::SetCamAnimationInertial(Vec2 elasticBorderExtension, floa
 ///--- screen shake ---
 void CCameraTransform::ShakeScreen(float maxAmplitude, float attenuationPerSecond, Vec2 * vShakeSource)
 {
-	if (UTGetAppClass().m_Settings.bScreenShakes == false)
+	if (UTApp().m_Settings.bScreenShakes == false)
 		return;
 	if (maxAmplitude == 0.0f)
 	{

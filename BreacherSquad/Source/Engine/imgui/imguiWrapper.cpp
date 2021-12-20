@@ -21,7 +21,7 @@ void CimguiWrapper::Init(PDEVICE pDevice, HWND hwnd)
 {
 	// create ini file path
 	char sTempPath[MAX_PATH];
-	wcstombs(sTempPath, UTGetAppClass().g_wszTempFolderPath, MAX_PATH);
+	wcstombs(sTempPath, UTApp().g_wszTempFolderPath, MAX_PATH);
 	sprintf_s(sIniPath, "%simgui.ini", sTempPath);
 
 	// Setup Dear ImGui context

@@ -51,7 +51,7 @@ void CGalaxyStatsAndAchievements::RequestAchievements()
 {
 	m_bDelayedLoad = false;
 
-	if (UTGetAppClass().m_Settings.galaxyFullyLoaded && galaxy::api::User())
+	if (UTApp().m_Settings.galaxyFullyLoaded && galaxy::api::User())
 	{
 		if (galaxy::api::User()->SignedIn())
 		{

@@ -267,7 +267,7 @@ void CTexturedFont::SetFontReplacementTTF(CTTFont* pReplacementTTF, CCameraTrans
 	fFontReplacementCamScaling = 1.0f;
 	if (pFontReplacementCam != null)
 	{
-		fFontReplacementCamScaling = pFontReplacementCam->GetCamWorldAABB().h / UTGetAppClass().g_cam240hScreen.GetCamWorldAABB().h;
+		fFontReplacementCamScaling = pFontReplacementCam->GetCamWorldAABB().h / UTApp().g_cam240hScreen.GetCamWorldAABB().h;
 	}
 
 	bFontReplacementOn = true;

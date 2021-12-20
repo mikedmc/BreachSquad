@@ -578,7 +578,7 @@ void CControlsEditor::CloneControl(int offx, int offy)
 void CControlsEditor::Launch()
 {
 	WCHAR xmlpath[MAX_PATH];
-	StringCchPrintf(xmlpath, MAX_PATH, L"%sControlsEd/ctrlTemplates.xml", UTGetAppClass().g_wszExePath);
+	StringCchPrintf(xmlpath, MAX_PATH, L"%sControlsEd/ctrlTemplates.xml", UTApp().g_wszExePath);
 	LoadCtrlTemplatesXML(xmlpath);
 
 	tool = TOOL_TYPE_NO_TOOL;
@@ -754,7 +754,7 @@ void CControlsEditor::Close()
 static Vec2 vLastMouse;
 void CControlsEditor::Update(float dTime)
 {
-	Vec2 vecRenderCenter(UTGetAppClass().g_rectRender.CenterX(), UTGetAppClass().g_rectRender.CenterY());
+	Vec2 vecRenderCenter(UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY());
 
 	clickedInterface = false;
 
@@ -969,8 +969,8 @@ void CControlsEditor::Update(float dTime)
 						}
 						break;
 						}
-						CLAMP(BBox.w, 1, (int)UTGetAppClass().g_rectRender.w);
-						CLAMP(BBox.h, 1, (int)UTGetAppClass().g_rectRender.h);
+						CLAMP(BBox.w, 1, (int)UTApp().g_rectRender.w);
+						CLAMP(BBox.h, 1, (int)UTApp().g_rectRender.h);
 
 						// le setez si in dictionar
 						for (int ii = 0; ii < selectedCtrls.Count(); ii++)
@@ -1270,8 +1270,8 @@ void CControlsEditor::CenterElements(bool H, bool V)
 
 		if (selectedCtrls.Count() > 1)
 		{
-			int xmin = UTGetAppClass().g_rectRender.w;
-			int xmax = -UTGetAppClass().g_rectRender.w;
+			int xmin = UTApp().g_rectRender.w;
+			int xmax = -UTApp().g_rectRender.w;
 
 			for (int ii = 0; ii < selectedCtrls.Count(); ii++)
 			{
@@ -1320,8 +1320,8 @@ void CControlsEditor::CenterElements(bool H, bool V)
 
 		if (selectedCtrls.Count() > 1)
 		{
-			int ymin = UTGetAppClass().g_rectRender.h;
-			int ymax = -UTGetAppClass().g_rectRender.h;
+			int ymin = UTApp().g_rectRender.h;
+			int ymax = -UTApp().g_rectRender.h;
 
 			for (int ii = 0; ii < selectedCtrls.Count(); ii++)
 			{
@@ -1381,7 +1381,7 @@ void CControlsEditor::Paint()
 	}
 
 
-	Vec2 vecRenderCenter(UTGetAppClass().g_rectRender.CenterX(), UTGetAppClass().g_rectRender.CenterY());
+	Vec2 vecRenderCenter(UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY());
 	if (currLayer)
 	{
 		POINTXY_INT lpos = currLayer->GetPos();
@@ -1658,10 +1658,10 @@ void CControlsEditor::PaintBBoxes()
 
 	if (hideBBoxes)
 		return;
-	Vec2 vecRenderCenter(UTGetAppClass().g_rectRender.CenterX(), UTGetAppClass().g_rectRender.CenterY());
+	Vec2 vecRenderCenter(UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY());
 	//axis
-	int w = UTGetAppClass().g_rectRender.w;
-	int h = UTGetAppClass().g_rectRender.h;
+	int w = UTApp().g_rectRender.w;
+	int h = UTApp().g_rectRender.h;
 
 	DrawLine(w / 2 + offset.x, 0, w / 2 + offset.x, h);
 	DrawLine(0, h / 2 + offset.y, w, h / 2 + offset.y);

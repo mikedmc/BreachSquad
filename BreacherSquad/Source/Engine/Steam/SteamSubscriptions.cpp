@@ -23,7 +23,7 @@ static bool InstallMod(const char* szFullFileName, CModsManager::CModDescriptor*
 
 	char szDestinationRoot[MAX_PATH_STD];
 	char szModsDir[MAX_PATH_STD];
-	wcstombs(szModsDir, UTGetAppClass().g_wszModsDirTemp, MAX_PATH_STD);
+	wcstombs(szModsDir, UTApp().g_wszModsDirTemp, MAX_PATH_STD);
 
 	std::ostringstream stream;
 	stream << pModInfo->uID; // needed to write int64 as string
@@ -84,7 +84,7 @@ static void DeleteMod(const CModsManager::CModDescriptor* pModInfo)
 {
 	char szPreviousInstallPath[MAX_PATH_STD] = {0};
 	char szModsDir[MAX_PATH_STD];
-	wcstombs(szModsDir, UTGetAppClass().g_wszModsDirTemp, MAX_PATH_STD);
+	wcstombs(szModsDir, UTApp().g_wszModsDirTemp, MAX_PATH_STD);
 
 	// delete new-style folder (including the unique id)
 	std::ostringstream stream;
@@ -183,7 +183,7 @@ void Workshop_CheckSubscriptions()
 {
 	//we create the mods folders in the temp folder so we're (almost) sure we don't have utf8 characters
 	char szModsDir[MAX_PATH_STD];
-	wcstombs(szModsDir, UTGetAppClass().g_wszModsDirTemp, MAX_PATH_STD);
+	wcstombs(szModsDir, UTApp().g_wszModsDirTemp, MAX_PATH_STD);
 
 	UTGetModsManager().LoadModsFromCacheFile();
 
@@ -418,9 +418,9 @@ void Workshop_CheckSubscriptions()
 		WCHAR wcsModDestPath[1024];
 		std::wostringstream stream;
 		stream << pDownloadEntry->uID; // needed to write int64 as string
-		StringCchPrintf(wcsModDestPath, 1024, L"%s%s", UTGetAppClass().g_wszModsDir, stream.str().c_str());
+		StringCchPrintf(wcsModDestPath, 1024, L"%s%s", UTApp().g_wszModsDir, stream.str().c_str());
 		WCHAR wcsModSrcPath[1024];
-		StringCchPrintf(wcsModSrcPath, 1024, L"%s%s", UTGetAppClass().g_wszModsDirTemp, stream.str().c_str());
+		StringCchPrintf(wcsModSrcPath, 1024, L"%s%s", UTApp().g_wszModsDirTemp, stream.str().c_str());
 		//erase dest folder	if it exists
 		OS_DeleteRecursive(wcsModDestPath);
 		//copy downloaded folder to dest mods folder
@@ -451,7 +451,7 @@ void Workshop_CheckSubscriptions()
 		WCHAR wcsModDestPath[1024];
 		std::wostringstream stream;
 		stream << dl->uID; // needed to write int64 as string
-		StringCchPrintf(wcsModDestPath, 1024, L"%s%s", UTGetAppClass().g_wszModsDir, stream.str().c_str());
+		StringCchPrintf(wcsModDestPath, 1024, L"%s%s", UTApp().g_wszModsDir, stream.str().c_str());
 		OS_DeleteRecursive(wcsModDestPath);
 
 		//remove from mods list too

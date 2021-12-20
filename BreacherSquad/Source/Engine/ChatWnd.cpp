@@ -129,7 +129,7 @@ void CChatWnd::AddLine(WCHAR * strText, WCHAR * strAuthor, DWORD dwColor /*= 0xf
 	//abort mission
 	if (wcscmp(strText, K_CW_STR_CMD_NET_ABORT_MISSION) == 0)
 	{
-		if ((UTGetAppClass().IsGameNetworked()) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
+		if ((UTApp().IsGameNetworked()) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
 		{
 			LOG(L"[NET] CChatWnd::AddLine received command [%s]", strText);
 			g_level.SetLevelState(K_LVL_STATE_MISSION_FAILED, STR_MISSION_ABORTED);
@@ -138,7 +138,7 @@ void CChatWnd::AddLine(WCHAR * strText, WCHAR * strAuthor, DWORD dwColor /*= 0xf
 	}
 	if (wcscmp(strText, K_CW_STR_CMD_NET_ASK_ABORT_MISSION) == 0)
 	{
-		if ((UTGetAppClass().IsGameNetworked()) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
+		if ((UTApp().IsGameNetworked()) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
 		{
 			LOG(L"[NET] CChatWnd::AddLine received command [%s]", strText);
 			//add message

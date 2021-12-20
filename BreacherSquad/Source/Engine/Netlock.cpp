@@ -498,7 +498,7 @@ void CNetLock::Net_UpdateEventLoop()
 					nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_PLAYER_LEFT);
 					UTGetEventManager().TriggerEvent(nevent);
 				}
-				else if (UTGetAppClass().IsGameNetworked())
+				else if (UTApp().IsGameNetworked())
 				{
 					//change game state
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
@@ -541,7 +541,7 @@ void CNetLock::Net_UpdateEventLoop()
 				LOG(L"Net: EV_CONNECTION_LOST");
 
 				Net_QuitLobby();
-				if (UTGetAppClass().IsGameNetworked())
+				if (UTApp().IsGameNetworked())
 				{
 					//change game state
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
@@ -567,7 +567,7 @@ void CNetLock::Net_CreateLobby(bool bFriendsOnly)
 {
 	//write CRC string
 	char strCRC[MAX_PATH] = { 0 };
-	StringCchPrintfA(strCRC, MAX_PATH, "%u", UTGetAppClass().m_Settings.dev_unCurrentModsCRC);
+	StringCchPrintfA(strCRC, MAX_PATH, "%u", UTApp().m_Settings.dev_unCurrentModsCRC);
 	char strMode[MAX_PATH] = { 0 };
 	StringCchPrintfA(strMode, MAX_PATH, "%u", (int)g_gameMode);
 
@@ -585,7 +585,7 @@ void CNetLock::Net_RequestLobbyList(int nMaxLobbies /*,bool bMatchCRC*/)
 {
 	//write CRC string
 	char strCRC[MAX_PATH] = { 0 };
-	StringCchPrintfA(strCRC, MAX_PATH, "%u", UTGetAppClass().m_Settings.dev_unCurrentModsCRC);
+	StringCchPrintfA(strCRC, MAX_PATH, "%u", UTApp().m_Settings.dev_unCurrentModsCRC);
 	char strMode[MAX_PATH] = { 0 };
 	StringCchPrintfA(strMode, MAX_PATH, "%u", (int)g_gameMode);
 
@@ -693,7 +693,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 		m_unRandomSeed = GetTickCount();
 
 		//decide map with 
-		if (UTGetAppClass().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH)
+		if (UTApp().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH)
 		{
 			//random level on quick match
 			int nLevel = g_level.GetNextRandomLevel();
@@ -742,7 +742,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 			stream.WriteUChar(m_ucSelMode);
 			stream.WriteUChar(m_ucSelChapter);
 			stream.WriteUChar(m_ucSelLevel);
-			stream.WriteUInt(UTGetAppClass().m_Settings.dev_unCurrentModsCRC);
+			stream.WriteUInt(UTApp().m_Settings.dev_unCurrentModsCRC);
 			//mod data
 			stream.WriteUChar(m_ucModData);
 			if (m_ucModData != 0)
@@ -751,7 +751,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 				stream.WriteString(m_csModID_DwnLvl);
 			}
 
-			LOG(L"Network:: Lobby: MASTER sent seed %d, mode %d, chapter %d, level %d, CRC[%08x]", m_unRandomSeed, m_ucSelMode, m_ucSelChapter, m_ucSelLevel, UTGetAppClass().m_Settings.dev_unCurrentModsCRC);
+			LOG(L"Network:: Lobby: MASTER sent seed %d, mode %d, chapter %d, level %d, CRC[%08x]", m_unRandomSeed, m_ucSelMode, m_ucSelChapter, m_ucSelLevel, UTApp().m_Settings.dev_unCurrentModsCRC);
 			g_pNetwork->SendReliable(stream.GetData(), stream.GetBytesWritten());
 		}
 		else
@@ -762,9 +762,9 @@ void CNetLock::Net_UpdateLobby(float dTime)
 			head.Serialize(stream);
 			//write type of command
 			stream.WriteUChar((BYTE)K_NETCMD_LOBBY_HANDSHAKE);
-			stream.WriteUInt(UTGetAppClass().m_Settings.dev_unCurrentModsCRC);
+			stream.WriteUInt(UTApp().m_Settings.dev_unCurrentModsCRC);
 
-			LOG(L"Network:: Lobby: SLAVE sent empty header and CRC[%08x]", UTGetAppClass().m_Settings.dev_unCurrentModsCRC);
+			LOG(L"Network:: Lobby: SLAVE sent empty header and CRC[%08x]", UTApp().m_Settings.dev_unCurrentModsCRC);
 			g_pNetwork->SendReliable(stream.GetData(), stream.GetBytesWritten());
 		}
 		//flag1 is used to send the messages only once
@@ -831,7 +831,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 				m_ucSelChapter = stream.ReadUChar();
 				m_ucSelLevel = stream.ReadUChar();
 				UINT32 unPeerCRC = stream.ReadUInt();
-				if (unPeerCRC != UTGetAppClass().m_Settings.dev_unCurrentModsCRC)
+				if (unPeerCRC != UTApp().m_Settings.dev_unCurrentModsCRC)
 					bVersionDifferentErr = true;
 				//read mod data
 				m_ucModData = stream.ReadUChar();
@@ -860,7 +860,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 			else //owner reads only CRC from peer
 			{
 				UINT32 unPeerCRC = stream.ReadUInt();
-				if (unPeerCRC != UTGetAppClass().m_Settings.dev_unCurrentModsCRC)
+				if (unPeerCRC != UTApp().m_Settings.dev_unCurrentModsCRC)
 					bVersionDifferentErr = true;
 
 				LOG(L"Network:: Lobby: MASTER received CRC[%08x]", unPeerCRC);

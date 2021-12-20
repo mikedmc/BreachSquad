@@ -13,12 +13,12 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_unLoadedLevelFlags = K_LVL_LEVEL_FLAG_NONE;
 	if (nModIdx_SelectedContent >= 0)
 		m_unLoadedLevelFlags |= K_LVL_LEVEL_FLAG_DOWNLOADED;
-	if (UTGetAppClass().IsGameModded())
+	if (UTApp().IsGameModded())
 		m_unLoadedLevelFlags |= K_LVL_LEVEL_FLAG_MODS_ON;
 
 	WCHAR Path[MAX_PATH] = { 0 };
 
-	if (UTGetAppClass().IsGameNetworked())
+	if (UTApp().IsGameNetworked())
 	{
 		m_rand.SetRandSeed(g_netlock.m_unRandomSeed);
 	}
@@ -189,11 +189,11 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_vCamPosDefault = vLastSpawnPoint;
 	//level to RT cam settings
 	m_camLevelToRT.SetWorldBounds(m_levelAABB, false, K_CAMTRANS_AXIS_NONE);
-	m_camLevelToRT.InitCamera(UTGetAppClass().g_rectRT, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault);
+	m_camLevelToRT.InitCamera(UTApp().g_rectRT, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault);
 	m_camLevelToRT.SetCamAnimationSpring(K_LVL_CAM_FOLLOW_SPRING_KS, K_LVL_CAM_FOLLOW_DAMPING_KD);
 	// level to screen cam settings (copies position of level to RT
 	m_camLevelToScr.SetWorldBounds(m_levelAABB, false, K_CAMTRANS_AXIS_NONE);
-	m_camLevelToScr.InitCamera(UTGetAppClass().g_rectRenderPP, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault);
+	m_camLevelToScr.InitCamera(UTApp().g_rectRenderPP, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault);
 	m_camLevelToScr.SetCamAnimationNone();
 	// call one update so we're sure everything is initialized
 	m_camLevelToRT.Update(0.0f);
@@ -247,7 +247,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 	// initialize IGM interface after everything has loaded
 	// the interface will use the RT resolution, scaling to real screen
-	m_interfaceIGM.Init(this, &UTGetAppClass().g_camRTScreen);
+	m_interfaceIGM.Init(this, &UTApp().g_camRTScreen);
 
 	///--- LAST THINGS ---
 	//called after characters spawning

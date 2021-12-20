@@ -90,12 +90,12 @@ void OS_PrintLog(const WCHAR* szLogLine, int logLineLength)
 	//flush buffered logs 
 	LOG_DBG_BUFF_FLUSH();
 
-	if (UTGetAppClass().m_Settings.dev_bLogWriteToFile)
+	if (UTApp().m_Settings.dev_bLogWriteToFile)
 	{
 		DebugLogW(L"%s", szLogLine);
 	}
 	
-	if (UTGetAppClass().m_Settings.dev_bLogShowInDebugOutput)
+	if (UTApp().m_Settings.dev_bLogShowInDebugOutput)
 	{
 		DebugPrintW(L"LOG:%s", szLogLine);
 		//OutputDebugString(szLogLine);

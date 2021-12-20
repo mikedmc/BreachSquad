@@ -1333,7 +1333,7 @@ HRESULT DXUTToggleFullScreen()
 	{
 		//set window rect
 		RECT nWinRect;
-		SetRect(&nWinRect, 0, 0, UTGetAppClass().m_Settings.nWindowW, UTGetAppClass().m_Settings.nWindowH);
+		SetRect(&nWinRect, 0, 0, UTApp().m_Settings.nWindowW, UTApp().m_Settings.nWindowH);
 		GetDXUTState().SetWindowClientRect(nWinRect);
 
 		rcWindowClient = GetDXUTState().GetWindowClientRect();   
@@ -1344,8 +1344,8 @@ HRESULT DXUTToggleFullScreen()
 	}
 	else //Fullscreen
 	{
-		nWidth = UTGetAppClass().m_Settings.nWindowW;
-		nHeight = UTGetAppClass().m_Settings.nWindowH;
+		nWidth = UTApp().m_Settings.nWindowW;
+		nHeight = UTApp().m_Settings.nWindowH;
 
 		DebugPrintA("ToggleFS():FullScreen nW:%d nH:%d\n", nWidth, nHeight);
 	}
@@ -1412,7 +1412,7 @@ HRESULT DXUTToggleFullScreen()
 	//sometimes it forgets to update the window style:
 	DXUTAdjustWindowStyle(DXUTGetHWND(), DXUTIsWindowed());
 
-	UTGetAppClass().m_Settings.bFullscreen = !DXUTIsWindowed();
+	UTApp().m_Settings.bFullscreen = !DXUTIsWindowed();
 	//daca e fereastra de gfx options pornita o inchid
 	CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_GFX_OPTIONS");
 	if (layer != null)
@@ -1745,8 +1745,8 @@ void DXUTBuildOptimalDeviceSettings(DXUTDeviceSettings* pOptimalDeviceSettings,
 		// If fullscreen, default to the desktop res for quick mode change
 		if (pOptimalDeviceSettings->pp.Windowed)
 		{
-			pOptimalDeviceSettings->pp.BackBufferWidth = UTGetAppClass().m_Settings.nWindowW;
-			pOptimalDeviceSettings->pp.BackBufferHeight = UTGetAppClass().m_Settings.nWindowH;
+			pOptimalDeviceSettings->pp.BackBufferWidth = UTApp().m_Settings.nWindowW;
+			pOptimalDeviceSettings->pp.BackBufferHeight = UTApp().m_Settings.nWindowH;
 		}
 		else
 		{
@@ -2355,8 +2355,8 @@ void DXUTBuildValidDeviceSettings(DXUTDeviceSettings* pValidDeviceSettings,
 			if (pBestDeviceSettingsCombo->Windowed)
 			{
 				// The framework defaults to 640x480 for windowed
-				displayModeIn.Width = UTGetAppClass().m_Settings.nWindowW;
-				displayModeIn.Height = UTGetAppClass().m_Settings.nWindowH;
+				displayModeIn.Width = UTApp().m_Settings.nWindowW;
+				displayModeIn.Height = UTApp().m_Settings.nWindowH;
 			}
 			else
 			{
@@ -3905,11 +3905,11 @@ void DXUTRender3DEnvironment()
 		//DMC: pause the update if it doesn't have focus (or is networked)
 		if((g_bCanPause) && (!DXUTIsTimePaused()) )
 		{
-			if(!UTGetAppClass().IsGameNetworked())
+			if(!UTApp().IsGameNetworked())
 				DXUTPause(true, false);
 		}
 		// Window is not in focus so yield CPU time to other processes (if not networked)
-		if (!UTGetAppClass().IsGameNetworked())
+		if (!UTApp().IsGameNetworked())
 			Sleep(100);
 	}
 	
@@ -4439,7 +4439,7 @@ LRESULT CALLBACK DXUTStaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 				ClipCursor(NULL);
 
 			//#DMC: pause only if not a network game
-			if (!UTGetAppClass().IsGameNetworked())
+			if (!UTApp().IsGameNetworked())
 				DXUTPause(true, true); // Pause while we're minimized
 
 			GetDXUTState().SetMinimized(true);
@@ -4571,7 +4571,7 @@ LRESULT CALLBACK DXUTStaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 			//cateodata intra de 2 ori pe aici si ar pune de 2 ori pauza
 			if((g_bCanPause) && (!DXUTIsTimePaused()) )
 			{
-				if (!UTGetAppClass().IsGameNetworked())
+				if (!UTApp().IsGameNetworked())
 					DXUTPause(true, false);
 			}
 		}
@@ -4652,13 +4652,13 @@ LRESULT CALLBACK DXUTStaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 						{
 							//verifica sa vada daca rezolutia ferestrei nu a ramas cumva de la alt monitor. 
 							//Daca nu e in lista de rezolutii acceptate trece by default pe cea mai mare a monitorului
-							SIZEWH szwh(UTGetAppClass().m_Settings.nWindowW, UTGetAppClass().m_Settings.nWindowH);
-							if (UTGetAppClass().g_arrResolutions.IndexOf(szwh) < 0)
+							SIZEWH szwh(UTApp().m_Settings.nWindowW, UTApp().m_Settings.nWindowH);
+							if (UTApp().g_arrResolutions.IndexOf(szwh) < 0)
 							{
 								//reset resolution to largest
-								SIZEWH szLargest = UTGetAppClass().g_arrResolutions[UTGetAppClass().g_arrResolutions.GetSize() - 1];
-								UTGetAppClass().m_Settings.nWindowW = szLargest.w;
-								UTGetAppClass().m_Settings.nWindowH = szLargest.h;
+								SIZEWH szLargest = UTApp().g_arrResolutions[UTApp().g_arrResolutions.GetSize() - 1];
+								UTApp().m_Settings.nWindowW = szLargest.w;
+								UTApp().m_Settings.nWindowH = szLargest.h;
 
 								ErrorBox(K_ERR_WARNING, L"Unsupported resolution found! Changed it to (%d x %d)!", szLargest.w, szLargest.h);
 							}
@@ -4666,7 +4666,7 @@ LRESULT CALLBACK DXUTStaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 							// Toggle the full screen/window mode
 							DXUTPause(true, true);
 
-							if (UTGetAppClass().m_Settings.bBorderlessFullscreen)
+							if (UTApp().m_Settings.bBorderlessFullscreen)
 							{
 								App_ToggleBorderlessFullscreen(DXUTGetHWNDDeviceWindowed());
 							}

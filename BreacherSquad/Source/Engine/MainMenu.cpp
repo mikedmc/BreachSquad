@@ -127,8 +127,8 @@ void CMainMenu::SetState(EMM_State neState, int nArg1 /*= 0*/)
 			//add the DOWNLOADED LEVELS chapter
 			m_nSelElements += 1;
 			//remove workshop chapter if we're not on HOST PRIVATE
-			bool bIsOnline = (UTGetAppClass().m_Settings.devnet_eNetGameType != CApplicationSettings::K_NETGAME_TYPE_NO_NETWORK);
-			bool bIsHostPrivate = (UTGetAppClass().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_HOST_PRIVATE);
+			bool bIsOnline = (UTApp().m_Settings.devnet_eNetGameType != CApplicationSettings::K_NETGAME_TYPE_NO_NETWORK);
+			bool bIsHostPrivate = (UTApp().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_HOST_PRIVATE);
 			if ((bIsOnline) && (!bIsHostPrivate))
 			{
 				m_nSelElements -= 1;
@@ -146,7 +146,7 @@ void CMainMenu::SetState(EMM_State neState, int nArg1 /*= 0*/)
 		case K_MM_STATE_DOWNLOADED_LEVEL_SELECT:
 		{
 #ifdef ENABLE_STEAM_WORKSHOP
-			UTGetAppClass().g_texManager.Release();
+			UTApp().g_texManager.Release();
 			memset(m_arrSelItems, -1, sizeof(m_arrSelItems));
 			m_nSelElements = 0;
 			//we'll save data in m_arrSelItems like this: 
@@ -172,7 +172,7 @@ void CMainMenu::SetState(EMM_State neState, int nArg1 /*= 0*/)
 				if (mod->GetFullPathToModImage(strPath, MAX_PATH))
 				{
 					//forcing image to be loaded at 16:9 fixed size 
-					HRESULT hr = UTGetAppClass().g_texManager.AddTexture(strPath, &m_arrSelItems[m_nSelElements * 3], D3DFMT_A8R8G8B8, D3DX_FILTER_LINEAR, D3DX_FILTER_LINEAR, 96, 54);
+					HRESULT hr = UTApp().g_texManager.AddTexture(strPath, &m_arrSelItems[m_nSelElements * 3], D3DFMT_A8R8G8B8, D3DX_FILTER_LINEAR, D3DX_FILTER_LINEAR, 96, 54);
 					if (FAILED(hr))
 					{
 						ErrorBox(K_ERR_WARNING, L"[WARNING] SetState::Couldn't load mod image. Mod name: [%s] Image path: [%s]", mod->shName.text, strPath);
@@ -306,7 +306,7 @@ void CMainMenu::Update(float dTime)
 	}
 
 	//save local mouse coords
-	D3DXVECTOR2 vLocalMousePos = UTGetAppClass().g_cam240hScreen.ScreenToWorld(g_mouse.pos);
+	D3DXVECTOR2 vLocalMousePos = UTApp().g_cam240hScreen.ScreenToWorld(g_mouse.pos);
 
 	switch (m_eState)
 	{
@@ -319,7 +319,7 @@ void CMainMenu::Update(float dTime)
 				case 0: 
 				{
 					//we'll need textures for the mods
-					UTGetAppClass().g_texManager.Release();
+					UTApp().g_texManager.Release();
 
 					m_nSubstate++;
 				}
@@ -339,7 +339,7 @@ void CMainMenu::Update(float dTime)
 						if (nmod->GetFullPathToModImage(strImgPath, MAX_PATH))
 						{
 							//forcing image to be loaded at 16:9 fixed size 
-							HRESULT hr = UTGetAppClass().g_texManager.AddTexture(strImgPath, &m_arrSelItems[ll], D3DFMT_A8R8G8B8, D3DX_FILTER_LINEAR, D3DX_FILTER_LINEAR, 96, 54);
+							HRESULT hr = UTApp().g_texManager.AddTexture(strImgPath, &m_arrSelItems[ll], D3DFMT_A8R8G8B8, D3DX_FILTER_LINEAR, D3DX_FILTER_LINEAR, 96, 54);
 							if (FAILED(hr))
 							{
 								ErrorBox(K_ERR_WARNING, L"Couldn't load mod image. Mod name: [%s] Image path: [%s]", nmod->shName.text, strImgPath);
@@ -371,7 +371,7 @@ void CMainMenu::Update(float dTime)
 				{
 					m_fSelTimer += dTime;
 
-					RECTXYWH_F worldrect = UTGetAppClass().g_rect240hWorld;
+					RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 					const int nItemSpacing = 10;
 					SIZEWH szItem(200, 10);
 					RECTXYWH rectItemsList(worldrect.CenterX() - szItem.w / 2, worldrect.Bottom() - 26 - m_nSelRows * (szItem.h + nItemSpacing), szItem.w, m_nSelRows * (szItem.h + nItemSpacing) - nItemSpacing);
@@ -619,7 +619,7 @@ void CMainMenu::Update(float dTime)
 
 		case K_MM_STATE_MAINMENU:
 		{
-			RECTXYWH_F worldrect = UTGetAppClass().g_rect240hWorld;
+			RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 
 			//generare particule bokeh
 			if (g_timers.Tick(400))
@@ -646,9 +646,9 @@ void CMainMenu::Update(float dTime)
 		case K_MM_STATE_GAME_MODE_SELECT:
 		{
 			//special screen mode for quick match online coop
-			bool bIsCoopQM = (UTGetAppClass().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH);
+			bool bIsCoopQM = (UTApp().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH);
 
-			RECTXYWH_F worldrect = UTGetAppClass().g_rect240hWorld;
+			RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 			RECTXYWH picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_GAME_MODE_SPLASHES, 0);
 			picrect.h += 32;
 			int wndSpacing = 24;
@@ -779,7 +779,7 @@ void CMainMenu::Update(float dTime)
 								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
 								nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-								nevent->AddNamedArgINT32(L"arg1", (int)UTGetAppClass().m_Settings.devnet_eNetGameType);
+								nevent->AddNamedArgINT32(L"arg1", (int)UTApp().m_Settings.devnet_eNetGameType);
 								UTGetEventManager().QueueEvent(nevent);
 							}
 						}
@@ -818,7 +818,7 @@ void CMainMenu::Update(float dTime)
 								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
 								nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-								nevent->AddNamedArgINT32(L"arg1", (int)UTGetAppClass().m_Settings.devnet_eNetGameType);
+								nevent->AddNamedArgINT32(L"arg1", (int)UTApp().m_Settings.devnet_eNetGameType);
 								UTGetEventManager().QueueEvent(nevent);
 							}
 						}
@@ -896,7 +896,7 @@ void CMainMenu::Update(float dTime)
 			}
 
 			//--- MOUSE INPUT ---
-			RECTXYWH_F worldrect = UTGetAppClass().g_rect240hWorld;
+			RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 			RECTXYWH picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_CHAPTER_SPLASHES_LG, 0);
 			//facem loc pentru mesajele de sub imagine (trebuie sa corespunda cu cele din paint)
 			RECTXYWH wndrect = picrect;
@@ -1057,7 +1057,7 @@ void CMainMenu::Update(float dTime)
 		case K_MM_STATE_LEVEL_SELECT:
 		{
 			//--- compute useful data ---
-			RECTXYWH_F worldrect = UTGetAppClass().g_rect240hWorld;
+			RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 			int nSelPerPage = m_nSelRows * m_nSelColumns;
 			//dimensiuni ferestre nivel si spacing intre ele
 			SIZEWH wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
@@ -1250,7 +1250,7 @@ void CMainMenu::Update(float dTime)
 						//save selected level
 						g_userData[K_MEMID_SELECTED_LEVEL] = m_nSelection;
 
-						if (!UTGetAppClass().IsGameNetworked())
+						if (!UTApp().IsGameNetworked())
 						{
 							CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 							nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
@@ -1263,7 +1263,7 @@ void CMainMenu::Update(float dTime)
 							CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 							nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
 							nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-							nevent->AddNamedArgINT32(L"arg1", (int)UTGetAppClass().m_Settings.devnet_eNetGameType);
+							nevent->AddNamedArgINT32(L"arg1", (int)UTApp().m_Settings.devnet_eNetGameType);
 							UTGetEventManager().QueueEvent(nevent);
 						}
 					}
@@ -1362,7 +1362,7 @@ void CMainMenu::Update(float dTime)
 		case K_MM_STATE_DOWNLOADED_LEVEL_SELECT:
 		{
 			//--- compute useful data ---
-			RECTXYWH_F worldrect = UTGetAppClass().g_rect240hWorld;
+			RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 			int nSelPerPage = m_nSelRows * m_nSelColumns;
 			//dimensiuni ferestre nivel si spacing intre ele
 			SIZEWH wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
@@ -1548,7 +1548,7 @@ void CMainMenu::Update(float dTime)
 					g_userData[K_MEMID_MOD_DWNLVL_SELECTED] = m_arrSelItems[m_nSelection * 3 + 2];
 
 					//play selected level
-					if (!UTGetAppClass().IsGameNetworked())
+					if (!UTApp().IsGameNetworked())
 					{
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
@@ -1561,7 +1561,7 @@ void CMainMenu::Update(float dTime)
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
 						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-						nevent->AddNamedArgINT32(L"arg1", (int)UTGetAppClass().m_Settings.devnet_eNetGameType);
+						nevent->AddNamedArgINT32(L"arg1", (int)UTApp().m_Settings.devnet_eNetGameType);
 						UTGetEventManager().QueueEvent(nevent);
 					}
 				}
@@ -1617,11 +1617,11 @@ void CMainMenu::Update(float dTime)
 void CMainMenu::Paint()
 {
 	//setam ecranul standard de 240h inaltime
-	CCameraTransform::SetActiveCamera(m_pDevice, &UTGetAppClass().g_cam240hScreen);
+	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam240hScreen);
 	App_SetWorldTransform(m_pDevice, &g_matIdentity);
 
-	RECTXYWH_F scrrect = UTGetAppClass().g_cam240hScreen.GetCamWorldAABB();
-	RECTXYWH_F worldrect = UTGetAppClass().g_rect240hWorld;
+	RECTXYWH_F scrrect = UTApp().g_cam240hScreen.GetCamWorldAABB();
+	RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 
 	switch (m_eState)
 	{
@@ -1694,7 +1694,7 @@ void CMainMenu::Paint()
 						if (m_arrSelItems[m_nSelection] >= 0)
 						{
 							RECT rcImg;
-							TexNode* pTex = UTGetAppClass().g_texManager.GetTextureNode(m_arrSelItems[m_nSelection]);
+							TexNode* pTex = UTApp().g_texManager.GetTextureNode(m_arrSelItems[m_nSelection]);
 							if (pTex)
 							{
 								SetRect(&rcImg, 0, 0, pTex->widthToLoad, pTex->heightToLoad);
@@ -1812,7 +1812,7 @@ void CMainMenu::Paint()
 			PaintBackground(worldrect, 0xff4444dd);
 
 			//show mod enabled message
-			if (UTGetAppClass().IsGameModded())
+			if (UTApp().IsGameModded())
 			{
 				g_font10bs1->DrawString(STR_MOD_ENABLED, scrrect.CenterX(), 15.0f, FONTFLAG_ANCHOR_TOPCENTER, K_COLOR_DEFAULT_TEXT);
 				g_font6ns1->DrawString(STR_MOD_ENABLED_WARNING, scrrect.CenterX(), 27.0f, FONTFLAG_ANCHOR_TOPCENTER, K_COLOR_DEFAULT_TEXT);
@@ -1849,7 +1849,7 @@ void CMainMenu::Paint()
 			CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 			g_font8bs1->DrawString(STR_SELECT_GAME_MODE, worldrect.CenterX(), worldrect.y + 35.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 			//coop string if online game
-			if (UTGetAppClass().IsGameNetworked())
+			if (UTApp().IsGameNetworked())
 				g_font8b1->DrawString(STR_COOP, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
 			else
 				g_font8b1->DrawString(STR_LOCAL_GAME, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
@@ -1929,7 +1929,7 @@ void CMainMenu::Paint()
 			else //classic mode
 				g_font8b1->DrawString(STR_CLASSIC_MODE, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
 			//coop string if online game
-			if (UTGetAppClass().IsGameNetworked())
+			if (UTApp().IsGameNetworked())
 				g_font8b1->DrawString(STR_COOP, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
 			else
 				g_font8b1->DrawString(STR_LOCAL_GAME, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
@@ -2009,7 +2009,7 @@ void CMainMenu::Paint()
 			else //classic mode
 				g_font8b1->DrawString(STR_CLASSIC_MODE, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
 			//coop string if online game
-			if (UTGetAppClass().IsGameNetworked())
+			if (UTApp().IsGameNetworked())
 				g_font8b1->DrawString(STR_COOP, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
 			else
 				g_font8b1->DrawString(STR_LOCAL_GAME, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
@@ -2173,7 +2173,7 @@ void CMainMenu::Paint()
 			else //classic mode
 				g_font8b1->DrawString(STR_CLASSIC_MODE, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
 			//coop string if online game
-			if (UTGetAppClass().IsGameNetworked())
+			if (UTApp().IsGameNetworked())
 				g_font8b1->DrawString(STR_COOP, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
 			else
 				g_font8b1->DrawString(STR_LOCAL_GAME, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
@@ -2243,7 +2243,7 @@ void CMainMenu::Paint()
 				if (m_arrSelItems[m_nSelection * 3] >= 0)
 				{
 					RECT rcImg;
-					TexNode* pTex = UTGetAppClass().g_texManager.GetTextureNode(m_arrSelItems[m_nSelection * 3]);
+					TexNode* pTex = UTApp().g_texManager.GetTextureNode(m_arrSelItems[m_nSelection * 3]);
 					if (pTex)
 					{
 						SetRect(&rcImg, 0, 0, pTex->widthToLoad, pTex->heightToLoad);

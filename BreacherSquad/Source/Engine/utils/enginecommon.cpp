@@ -536,7 +536,7 @@ float EasingOutBackCubic(float t)
 HRESULT SetScissorClip(LPDIRECT3DDEVICE9 pDevice, int clipX, int clipY, int clipW, int clipH)
 {
 	assert(pDevice != null);
-	if (UTGetAppClass().g_gfxFlags & K_UT_GFXFLAG_SCISSORTEST)
+	if (UTApp().g_gfxFlags & K_UT_GFXFLAG_SCISSORTEST)
 	{
 		RECT rect_colorClip;
 		SetRect(&rect_colorClip, clipX, clipY, clipX + clipW, clipY + clipH);

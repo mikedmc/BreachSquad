@@ -131,7 +131,7 @@ bool CSteamLeaderboards::QueueJob(ELBJobType nJobRequest, const char * pchLeader
 	}
 
 	//make sure MODDERS don't upload scores
-	if ((nJobRequest == K_JOB_UPLOAD_SCORE) && (UTGetAppClass().IsGameModified()))
+	if ((nJobRequest == K_JOB_UPLOAD_SCORE) && (UTApp().IsGameModified()))
 	{
 		LOG(L"[Warning] Leaderboards:: can't upload scores to leaderboards when game files are modified !");
 		return false;

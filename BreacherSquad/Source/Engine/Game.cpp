@@ -222,13 +222,13 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 		break;
 		case GAME_STATE_DEVELOPER:
 		{
-			UTGetAppClass().App_PaintState_Developer( pDevice, pSpr, dTime );
+			UTApp().App_PaintState_Developer( pDevice, pSpr, dTime );
 		}
 		break;
 
 		case GAME_STATE_LOADING:
 		{
-			UTGetAppClass().App_PaintState_Loading( pDevice, pSpr, dTime );
+			UTApp().App_PaintState_Loading( pDevice, pSpr, dTime );
 		}
 		break;
 
@@ -325,7 +325,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			 //debug stuff
 #if defined(_DEBUG) || defined(DEBUG)
 				//game screen space
-			CCameraTransform::SetActiveCamera( pDevice, &UTGetAppClass().g_camRTScreen );
+			CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_camRTScreen );
 
 			if ( DXUTIsKeyDown( '9' ) )
 			{
@@ -337,7 +337,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					RECT src;
 					SetRect( &src, 0, 0, pRT->nWidth, pRT->nHeight );
 					pSpr->SetTransform( &g_matIdentity );
-					pSpr->Draw( pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3( UTGetAppClass().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
+					pSpr->Draw( pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3( UTApp().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
 					pSpr->Flush();
 				}
 			}
@@ -351,7 +351,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					RECT src;
 					SetRect( &src, 0, 0, pRT->nWidth, pRT->nHeight );
 					pSpr->SetTransform( &g_matIdentity );
-					pSpr->Draw( pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3( UTGetAppClass().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
+					pSpr->Draw( pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3( UTApp().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
 					pSpr->Flush();
 				}
 			}
@@ -365,7 +365,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					RECT src;
 					SetRect( &src, 0, 0, pRT->nWidth, pRT->nHeight );
 					pSpr->SetTransform( &g_matIdentity );
-					pSpr->Draw( pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3( UTGetAppClass().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
+					pSpr->Draw( pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3( UTApp().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
 					pSpr->Flush();
 				}
 			}
