@@ -131,7 +131,7 @@ OPRESULT	AfterMount(void);
 // Called after shutting down the device
 void		ShutdownApp(void);
 // Initializes the sound system
-HRESULT		InitSound(void);
+OPRESULT	InitSound(void);
 
 // Transition functions
 void ChangeGameState(eGameState newState, int param1 = 0, int param2 = 0); //are parametru default, in caz ca e necesar
@@ -182,7 +182,8 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 
 	HRESULT hr = S_OK;
 	// Init crash dumper
-	InitMiniDumper();
+	///#TODO: needed?
+	//InitMiniDumper();
 	// init game constants like paths to executable
 	UTApp().Init();
 	// clear debug log file 
@@ -251,16 +252,11 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 
 	// Show the cursor and clip it when in full screen
 	DXUTSetCursorSettings(true, true);
-
 	//for now it can't pause on losing focus
 	g_bCanPause = false;
-
 	if (OP_FAILED(BeforeMount()))
 	{
-		WCHAR szResult[MAX_PATH];
-		StringCchPrintf(szResult, MAX_PATH, L"Ooops, couldn't initialize game (BeforeMount) !\r\nTo fix it, check our support forum or contact us at %s\r\n", K_GAME_EMAIL);
-		MessageBoxW(NULL, szResult, NULL, MB_OK | MB_ICONERROR);
-
+		ErrorBox(K_ERR_CRITICAL, L"Ooops, couldn't initialize game (BeforeMount) !\r\nTo fix it, check our support forum or contact us at %s\r\n", K_GAME_EMAIL );
 		return -1;
 	}
 
@@ -380,7 +376,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 #endif
 
 	// Initialize sound
-	V_RETURN(InitSound());
+	V_OP_RET(InitSound());
 
 	//trigger resolution change event immediately
 	CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_RESOLUTION_CHANGE);
@@ -395,10 +391,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	
 	if (OP_FAILED(AfterMount()))
 	{
-		WCHAR szResult[MAX_PATH];
-		StringCchPrintf(szResult, MAX_PATH, L"Ooops, couldn't initialize game (AfterMount) !\r\nTo fix it, check our support forum or contact us at %s\r\n", K_GAME_EMAIL);
-		MessageBoxW(NULL, szResult, NULL, MB_OK | MB_ICONERROR);
-
+		ErrorBox(K_ERR_CRITICAL, L"Couldn't initialize game (AfterMount) !\r\nTo fix it, check our support forum or contact us at %s\r\n", K_GAME_EMAIL );
 		return -1;
 	}
 
@@ -582,7 +575,7 @@ OPRESULT BeforeMount(void)
 
 OPRESULT AfterMount(void)
 {
-	// load the minimum necessary to paint something
+	// load the minimum necessary to paint something (the sprites shader)
 	WCHAR shpath[MAX_PATH];
 	StringCchPrintf(shpath, MAX_PATH, L"%s/shaders/vs_sprites2d.vso", UTApp().g_wszAppResDir);
 	if (OP_FAILED(UTGetShaderManager().AddVShader(shpath, L"VS_SPRITES2D")))
@@ -621,21 +614,19 @@ void ShutdownApp(void)
 // Sound initialization
 //*************************************************************************************************
 
-HRESULT InitSound(void)
+OPRESULT InitSound(void)
 {
-	HRESULT hr = S_OK;
 	// Initialize sound after we have the window
 	//--- init sound system ---
 	if (FAILED(UTGetSoundManager().Init(DXUTGetHWND(), 2, 44100, 16)))
 	{
-		ErrorBox(K_ERR_WARNING, L"Failed INITSOUND->g_pSoundManager->Init()\nSOUNDS WILL BE DISABLED!\n");
-		return hr;
+		return OPRESULT( K_OP_OK_WARNING, L"Failed INITSOUND->g_pSoundManager->Init()\nSOUNDS WILL BE DISABLED!\n", K_SEVERITY_WARNING );
 	}
 
 	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTApp().g_rectRT.w * 0.7f, UTApp().g_rectRT.h * 0.7f));
 	UTGetSoundManager().SetListenerVolumeFadeStart(0.7f);
 
-	return hr;
+	return K_OP_OK;
 }
 
 

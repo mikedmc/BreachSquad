@@ -2337,15 +2337,13 @@ void CMainMenu::Paint()
 
 void CMainMenu::PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles, bool bPaintTitle )
 {
+	const Vec2 vLogoPos( 110.0f, 60.0f );
 	//background
-	CSprite::paintFrame(&m_sprColNew, worldRect.Right() - 10.0f * sin(fLocalTimeline * 0.15f), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 0, dwColor);
-	//paint logo
-	if(bPaintTitle)
-		CSprite::paintFrame(&m_sprColNew, (int)worldRect.x, (int)worldRect.y, ANM_MENUS0_SPR_LOGO_MM, 1);
+	CSprite::paintFrame(&m_sprColNew, worldRect.x - 18.0f * sin(fLocalTimeline * 0.2f), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 0, dwColor);
 	// chars back layer
-	CSprite::paintFrame(&m_sprColNew, (worldRect.Right() + 8.0f * sin(fLocalTimeline * 0.15f)), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 1, dwColor);
+	CSprite::paintFrame(&m_sprColNew, (worldRect.x + 18.0f * sin(fLocalTimeline * 0.2f)), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 1, dwColor);
 	// chars front layer
-	CSprite::paintFrame(&m_sprColNew, (worldRect.Right() + 20.0f * sin(fLocalTimeline * 0.15f)), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 2, dwColor);
+	CSprite::paintFrame(&m_sprColNew, (worldRect.x + 40.0f * sin(fLocalTimeline * 0.2f)), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 2, dwColor);
 	//particles
 	if (bPaintParticles)
 	{
@@ -2361,12 +2359,31 @@ void CMainMenu::PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaint
 		m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 		m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 	}
+
 	//paint character flickering orange light
 	AdditiveBlendingON(m_pDevice, m_pSprite);
-	float alpha = UTPerlin::PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.4f, 0.3f, 2);
+	float alpha = 0.4f + UTPerlin::PerlinNoise1D(fLocalTimeline, 3.0f, 2.0f, 0.4f, 0.5f, 2);
+	CLAMP( alpha, 0.0f, 1.0f );
 	//paint flickering right glow
-	CSprite::paintFrame(&m_sprColNew, (int)worldRect.Right(), (int)worldRect.y, ANM_MENUS0_SPR_BACKGROUND, 3, D3DCOLOR_COLORALPHA(dwColor, alpha));
-	AdditiveBlendingOFF(m_pDevice, m_pSprite);
+	Mat mscale;
+	MUMatAffine2D( &mscale, 1.0f, NULL, 0.0f, &Vec2( ( int ) worldRect.Right(), ( int ) worldRect.Bottom() ));
+	m_pSprite->SetTransform( &mscale );
+	CSprite::paintFrame(&m_sprColNew, 0.0f, 0.0f, ANM_MENUS0_SPR_BACKGROUND, 3, D3DCOLOR_COLORALPHA(dwColor, alpha));
+	m_pSprite->SetTransform( &g_matIdentity );
+	// paint logo bg
+	float alphatitle = 0.8f + sin( fLocalTimeline * 2.0f) * 0.2f;
+	DWORD dwTitleCol = D3DCOLOR_COLORALPHA( dwColor, alphatitle );
+	if ( bPaintTitle )
+	{
+		// rays
+		CSprite::paintFrame( &m_sprColNew, vLogoPos.x, vLogoPos.y, ANM_MENUS0_SPR_LOGO_MM, 2, dwTitleCol );
+		// logo glow
+		CSprite::paintFrame( &m_sprColNew, vLogoPos.x, vLogoPos.y, ANM_MENUS0_SPR_LOGO_MM, 1, dwTitleCol );
+	}
+	AdditiveBlendingOFF( m_pDevice, m_pSprite );
+	// logo normal
+	if ( bPaintTitle )
+		CSprite::paintFrame( &m_sprColNew, vLogoPos.x, vLogoPos.y, ANM_MENUS0_SPR_LOGO_MM, 0 );
 }
 
 void CMainMenu::PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD dwColor)
