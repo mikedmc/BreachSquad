@@ -305,6 +305,7 @@
     <ClInclude Include="Source\Engine\imgui\backends\imgui_impl_win32.h" />
     <ClInclude Include="Source\Engine\imgui\imguiWrapper.h" />
     <ClInclude Include="Source\Engine\IngameGUI.h" />
+    <ClInclude Include="Source\Engine\interfaces\DeviceRes.h" />
     <ClInclude Include="Source\Engine\Level.h" />
     <ClInclude Include="Source\Engine\LibraryManager.h" />
     <ClInclude Include="Source\Engine\lodepng\lodepng.h" />

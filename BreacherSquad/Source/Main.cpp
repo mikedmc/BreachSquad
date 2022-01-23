@@ -2006,7 +2006,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 //**************************************************************************************
 void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 {
-	if(!pDevice)
+	if ( !pDevice )
 		return;
 
 	///----------------------------------------------------------------------------------

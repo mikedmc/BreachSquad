@@ -1,12 +1,13 @@
 #pragma once
+#include "interfaces/DeviceRes.h"
+#include "Menus.h"
 
 // max interval for GC calls
 #define K_GAME_GC_TIMER_S	1.0f
 // fixed timestep
 #define	K_GAME_FIXED_TIMESTEP_DTIME			(1.0f / 60.0f)
 
-
-class CGame {
+class CGame : public IDeviceRes {
 private:
 	double				fTimeline;
 	float				fGCtimer;			// garbage collect timer
@@ -26,4 +27,11 @@ public:
 	void				Release();
 	// force call garbage collect. It gets called periodically after Update();
 	void				GC();
+
+	// Inherited via IDeviceRes
+	virtual OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
+	virtual OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
+	virtual OPRESULT OnLostDevice() override;
+	virtual OPRESULT OnDestroyDevice() override;
 };
+

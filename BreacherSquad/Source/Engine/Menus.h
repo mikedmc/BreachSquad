@@ -1,9 +1,9 @@
 #pragma once
+#include "interfaces/DeviceRes.h"
 
 // Menu class that listens to state changes
-class CMenus : public IEventListener {
+class CMenus : public IEventListener, IDeviceRes {
 private:
-	PDEVICE				m_pDevice;
 	eGameState			m_gameState;		// global gamestate 
 	int					m_nSubstate;		// current sub state
 	double				fLocalTimeline;
@@ -31,9 +31,9 @@ public:
 	void				Release();
 
 public:
-	//--- EVENTS ---
+	// Inherited via IEventListener
 	char const* 		GetListenerName( void ) { return "Menus"; };
-	// the game state event comes in through this and setState gets called
+	// The game state event comes in through this and setState gets called
 	bool				HandleEvent( CEvent &nEvent );
 
 private:
@@ -41,9 +41,10 @@ private:
 	void				SetState( eGameState neState );
 
 public:
-	OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr);
-	OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr);
-	OPRESULT OnLostDevice();
-	OPRESULT OnDestroyDevice();
+	// Inherited via IDeviceRes
+	virtual OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
+	virtual OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
+	virtual OPRESULT OnLostDevice() override;
+	virtual OPRESULT OnDestroyDevice() override;
 };
 

@@ -9,7 +9,7 @@ CGame::CGame()
 
 CGame::~CGame()
 {
-
+	Release();
 }
 
 void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
@@ -405,4 +405,32 @@ void CGame::Release()
 void CGame::GC()
 {
 	g_level.GC();
+}
+
+
+///----------------------------------------------------------------------------------
+/// DEVICE CALLBACKS
+///----------------------------------------------------------------------------------
+OPRESULT CGame::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
+{
+	m_pDevice = pDevice;
+	return K_OP_OK;
+}
+
+OPRESULT CGame::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
+{
+	m_pDevice = pDevice;
+	return K_OP_OK;
+}
+
+OPRESULT CGame::OnLostDevice()
+{
+	m_pDevice = nullptr;
+	return K_OP_OK;
+}
+
+OPRESULT CGame::OnDestroyDevice()
+{
+	m_pDevice = nullptr;
+	return K_OP_OK;
 }

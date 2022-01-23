@@ -16,6 +16,7 @@ CMenus::~CMenus()
 
 OPRESULT CMenus::Init()
 {
+	//TODO: ar trebui totusi numit Load si nu Init pentru ca se va chema pe loading
 	WCHAR xmlpath[ MAX_PATH ];
 	FileManager::GetMediaPath( L"media/interfaces/menus0.bsx", xmlpath );
 	return m_sprCol.LoadSprites( xmlpath );
