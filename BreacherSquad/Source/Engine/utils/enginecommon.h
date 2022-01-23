@@ -7,10 +7,10 @@
 
 //#define null NULL
 
-#define D3DCOLOR_FFFA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0xffffff)
-#define D3DCOLOR_XXXA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0x000000)
-#define D3DCOLOR_COLORALPHA(hexColor, fAlpha) (DWORD)(((int((fAlpha) * 255.0f)&0xff)<<24) | (hexColor & 0xffffff))
-#define D3DCOLOR_GETFALPHA(hexColor) ((float)((hexColor & 0xff000000) >> 24) / 255.0f)
+#define DW_COLOR_FFFA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0xffffff)
+#define DW_COLOR_XXXA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0x000000)
+#define DW_COLORALPHA(hexColor, fAlpha) (DWORD)(((int((fAlpha) * 255.0f)&0xff)<<24) | (hexColor & 0xffffff))
+#define DW_GETFALPHA(hexColor) ((float)((hexColor & 0xff000000) >> 24) / 255.0f)
 
 // generic sides (corresponds to generic directions)
 #define K_SIDE_NONE -1

@@ -129,7 +129,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 
 			///--- CONTROLS ---
 			UTGetGUI().SetManagersPtr(&UTLang(), &UTGetFontsManager());
-			UTGetGUI().SetCameraTransform(&UTApp().g_cam240hScreen);
+			UTGetGUI().SetCameraTransform(&UTApp().g_cam360hScreen);
 
 			WCHAR xmlpath[MAX_PATH];
 			FileManager::GetMediaPath(L"media/interfaces/interfaces.xml", xmlpath);
@@ -261,10 +261,10 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline)
 {
 	//setam ecranul standard de 240h inaltime
-	CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam240hScreen);
+	CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(pDevice, &g_matIdentity);
 
-	RECTXYWH_F scrrect = UTApp().g_cam240hScreen.GetCamWorldAABB();
+	RECTXYWH_F scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
 	RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 
 	//fonts loaded so write "loading" 
@@ -372,10 +372,10 @@ void CApplication::App_UpdateState_Developer(LPDIRECT3DDEVICE9 pDevice, double f
 void CApplication::App_PaintState_Developer(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline)
 {
 	//setam ecranul standard de 240h inaltime
-	CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam240hScreen);
+	CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(pDevice, &g_matIdentity);
 
-	RECTXYWH_F scrrect = UTApp().g_cam240hScreen.GetCamWorldAABB();
+	RECTXYWH_F scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
 	RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 	RECT src;
 	//logo

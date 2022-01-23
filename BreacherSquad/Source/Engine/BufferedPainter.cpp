@@ -118,7 +118,6 @@ OPRESULT CBufferedPainter::BuildBuffers()
 	if (m_nVertexCursor == 0)
 		return K_OP_OK;
 
-	HRESULT hr = S_OK;
 	//write verts to VB
 	_VERTEX_PNCT4T4* pVerts;
 	if (FAILED(m_vb->Lock(0, m_nVertexCursor * sizeof(_VERTEX_PNCT4T4), (void**)&pVerts, D3DLOCK_DISCARD)))
@@ -135,8 +134,6 @@ OPRESULT CBufferedPainter::BuildBuffers()
 
 OPRESULT CBufferedPainter::DrawMesh(int meshIdx, bool setFVF)
 {
-	HRESULT hr = S_OK;
-
 	//empty mesh: exit
 	if (meshIdx < 0)
 	{
@@ -182,8 +179,6 @@ OPRESULT CBufferedPainter::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* p
 {
 	assert(m_nMaxTrisCnt > 0);
 
-	HRESULT hr = S_OK;
-
 	m_pDevice = pDevice;
 	//create index buffer (fixed) - deci va desena numai triunghiuri independente
 	if (FAILED(m_pDevice->CreateIndexBuffer((m_nMaxTrisCnt + K_BP_SENTINEL_TRIS) * 3 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, 0)))
@@ -212,7 +207,6 @@ OPRESULT CBufferedPainter::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pB
 {
 	assert(m_nMaxTrisCnt > 0);
 
-	HRESULT hr = S_OK;
 	m_pDevice = pDevice;
 
 	//create vb and ib

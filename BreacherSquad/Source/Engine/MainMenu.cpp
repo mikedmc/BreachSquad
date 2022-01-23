@@ -306,7 +306,7 @@ void CMainMenu::Update(float dTime)
 	}
 
 	//save local mouse coords
-	D3DXVECTOR2 vLocalMousePos = UTApp().g_cam240hScreen.ScreenToWorld(g_mouse.pos);
+	D3DXVECTOR2 vLocalMousePos = UTApp().g_cam360hScreen.ScreenToWorld(g_mouse.pos);
 
 	switch (m_eState)
 	{
@@ -1617,10 +1617,10 @@ void CMainMenu::Update(float dTime)
 void CMainMenu::Paint()
 {
 	//setam ecranul standard de 240h inaltime
-	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam240hScreen);
+	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(m_pDevice, &g_matIdentity);
 
-	RECTXYWH_F scrrect = UTApp().g_cam240hScreen.GetCamWorldAABB();
+	RECTXYWH_F scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
 	RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 
 	switch (m_eState)
@@ -1750,14 +1750,14 @@ void CMainMenu::Paint()
 						SetRect(&txtrect, rectItem.x, rectItem.y, rectItem.Right(), rectItem.Bottom());
 						//icon
 						if(mod->eType == CModsManager::K_MOD_TYPE_SINGLE_LEVEL)
-							CSprite::paintFrame(&UTGetGUI().m_sprCol, rectItem.x - 2, rectItem.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 4, D3DCOLOR_FFFA(fColor));
+							CSprite::paintFrame(&UTGetGUI().m_sprCol, rectItem.x - 2, rectItem.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 4, DW_COLOR_FFFA(fColor));
 						else
-							CSprite::paintFrame(&UTGetGUI().m_sprCol, rectItem.x - 2, rectItem.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 5, D3DCOLOR_FFFA(fColor));
+							CSprite::paintFrame(&UTGetGUI().m_sprCol, rectItem.x - 2, rectItem.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 5, DW_COLOR_FFFA(fColor));
 
 						CStringDesc sdModName;
 						UTLang().SetStringDesc(&sdModName, mod->shName.text);
 						RECTXYWH recttemp(rectItem.x, rectItem.y - 10, rectItem.w - 30, rectItem.h + 20);
-						g_font8bs1->DrawStringClipped(&sdModName, rectItem.x + 14, rectItem.CenterY(), recttemp, FONTFLAG_ANCHOR_VCENTERLEFT, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, fColor));
+						g_font8bs1->DrawStringClipped(&sdModName, rectItem.x + 14, rectItem.CenterY(), recttemp, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fColor));
 						//enabled?
 						if(mod->bActive)
 							g_font8bs1->DrawString(STR_ON, rectItem.Right(), rectItem.CenterY(), FONTFLAG_ANCHOR_VCENTERRIGHT, 0xff66ff66);
@@ -2044,7 +2044,7 @@ void CMainMenu::Paint()
 				if (wndAlpha <= 0.0f)
 					continue;
 
-				DWORD wndCol = D3DCOLOR_FFFA(wndAlpha);
+				DWORD wndCol = DW_COLOR_FFFA(wndAlpha);
 
 				D3DXVECTOR2 vRefPos(pageRect.x, pageRect.y);
 				vRefPos.x -= m_fSelPageCursor * pageRect.w;
@@ -2070,7 +2070,7 @@ void CMainMenu::Paint()
 						//numar nivel
 						CStringDesc strdesc;
 						UTLang().SetStringDesc(&strdesc, L"%d", kk + 1);
-						g_font6n1->DrawString(&strdesc, lvlrect.x + 7, lvlrect.y + 7, FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, wndAlpha));
+						g_font6n1->DrawString(&strdesc, lvlrect.x + 7, lvlrect.y + 7, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, wndAlpha));
 					}
 				}
 				else
@@ -2208,7 +2208,7 @@ void CMainMenu::Paint()
 				if (wndAlpha <= 0.0f)
 					continue;
 
-				DWORD wndCol = D3DCOLOR_FFFA(wndAlpha);
+				DWORD wndCol = DW_COLOR_FFFA(wndAlpha);
 
 				D3DXVECTOR2 vRefPos(pageRect.x, pageRect.y);
 				vRefPos.x -= m_fSelPageCursor * pageRect.w;
@@ -2368,11 +2368,11 @@ void CMainMenu::PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaint
 	Mat mscale;
 	MUMatAffine2D( &mscale, 1.0f, NULL, 0.0f, &Vec2( ( int ) worldRect.Right(), ( int ) worldRect.Bottom() ));
 	m_pSprite->SetTransform( &mscale );
-	CSprite::paintFrame(&m_sprColNew, 0.0f, 0.0f, ANM_MENUS0_SPR_BACKGROUND, 3, D3DCOLOR_COLORALPHA(dwColor, alpha));
+	CSprite::paintFrame(&m_sprColNew, 0.0f, 0.0f, ANM_MENUS0_SPR_BACKGROUND, 3, DW_COLORALPHA(dwColor, alpha));
 	m_pSprite->SetTransform( &g_matIdentity );
 	// paint logo bg
 	float alphatitle = 0.8f + sin( fLocalTimeline * 2.0f) * 0.2f;
-	DWORD dwTitleCol = D3DCOLOR_COLORALPHA( dwColor, alphatitle );
+	DWORD dwTitleCol = DW_COLORALPHA( dwColor, alphatitle );
 	if ( bPaintTitle )
 	{
 		// rays
@@ -2401,7 +2401,7 @@ void CMainMenu::PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD d
 	wndrectL.x += vCenter.x - picrect.w / 2.0f;
 	wndrectL.y += vCenter.y - wndrect.h / 2.0f;
 
-	float wndAlpha = D3DCOLOR_GETFALPHA(dwColor);
+	float wndAlpha = DW_GETFALPHA(dwColor);
 	//Paint Chapter Window
 	CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, dwColor);
 	//mission image
@@ -2412,10 +2412,10 @@ void CMainMenu::PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD d
 	CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, dwColor);
 	titlerect.Inflate(1, 1);
 	if(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx >= 0)
-		g_font6n1->DrawStringClamped(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx, titlerect.CenterX(), titlerect.y + 13, titlerect.w + 6, FONTFLAG_ANCHOR_TOPCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, wndAlpha));
+		g_font6n1->DrawStringClamped(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx, titlerect.CenterX(), titlerect.y + 13, titlerect.w + 6, FONTFLAG_ANCHOR_TOPCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, wndAlpha));
 
 	UTLang().ReplaceTokenInt(STR_TEMP1, STR_CHAPTER_N, 1, nChapterIdx + 1);
-	g_font6n1->DrawString(STR_TEMP1, titlerect.CenterX(), titlerect.Bottom() - 3, FONTFLAG_ANCHOR_BOTTOMCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, wndAlpha));
+	g_font6n1->DrawString(STR_TEMP1, titlerect.CenterX(), titlerect.Bottom() - 3, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, wndAlpha));
 }
 
 void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, float fAlpha)
@@ -2467,7 +2467,7 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 
 		CStringDesc strdesc;
 		UTLang().SetStringDesc(&strdesc, L"%d/%d", nChapterStars, K_GAME_LEVELS_PER_CHAPTER * 3);
-		g_font6ns1->DrawString(&strdesc, wndrectL.x + picrect.w - 15, wndrectL.y + picrect.h - 6, FONTFLAG_ANCHOR_BOTTOMRIGHT, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
+		g_font6ns1->DrawString(&strdesc, wndrectL.x + picrect.w - 15, wndrectL.y + picrect.h - 6, FONTFLAG_ANCHOR_BOTTOMRIGHT, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
 	}
 	//mission name frame and string
 	RECTXYWH titlerect(wndrectL.x, wndrectL.y + picrect.h + 1, wndrectL.w, 9);
@@ -2476,11 +2476,11 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 	if (!bWorkshopChapter)
 	{
 		if (UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx >= 0)
-			g_font8bs1->DrawStringScaleW(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx, titlerect.CenterX(), titlerect.Bottom() - 3, titlerect.w, FONTFLAG_ANCHOR_BOTTOMCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
+			g_font8bs1->DrawStringScaleW(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx, titlerect.CenterX(), titlerect.Bottom() - 3, titlerect.w, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
 	}
 	else
 	{
-		g_font8bs1->DrawStringScaleW(STR_WORKSHOP, titlerect.CenterX(), titlerect.Bottom() - 3, titlerect.w, FONTFLAG_ANCHOR_BOTTOMCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
+		g_font8bs1->DrawStringScaleW(STR_WORKSHOP, titlerect.CenterX(), titlerect.Bottom() - 3, titlerect.w, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
 	}
 	//second text: completed or necessary stars
 	if (bChapterUnlocked)
@@ -2489,11 +2489,11 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 		{
 			UTLang().ReplaceTokenInt(STR_TEMP1, STR_MISSIONS_COMPLETED_N, 1, nCompletedLevels);
 			UTLang().ReplaceTokenInt(STR_TEMP1, STR_TEMP1, 2, K_GAME_LEVELS_PER_CHAPTER);
-			g_font6n1->DrawString(STR_TEMP1, titlerect.CenterX(), titlerect.y + 20, FONTFLAG_ANCHOR_BOTTOMCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
+			g_font6n1->DrawString(STR_TEMP1, titlerect.CenterX(), titlerect.y + 20, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
 		}
 		else
 		{
-			g_font6n1->DrawString(STR_DOWNLOADED_LEVELS, titlerect.CenterX(), titlerect.y + 20, FONTFLAG_ANCHOR_BOTTOMCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
+			g_font6n1->DrawString(STR_DOWNLOADED_LEVELS, titlerect.CenterX(), titlerect.y + 20, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
 		}
 	}
 	else //show necessary levels to unlock
@@ -2504,7 +2504,7 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 			UTLang().ReplaceTokenInt(STR_TEMP1, STR_TEMP1, 2, g_userData[K_MEMID_MISSIONS_COMPLETED]);
 			UTLang().ReplaceTokenInt(STR_TEMP1, STR_TEMP1, 3, UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterMissionsToUnlock);
 
-			g_font6n1->DrawString(STR_TEMP1, titlerect.CenterX(), titlerect.y + 20, FONTFLAG_ANCHOR_BOTTOMCENTER, D3DCOLOR_COLORALPHA(0xffff8888, fAlpha));
+			g_font6n1->DrawString(STR_TEMP1, titlerect.CenterX(), titlerect.y + 20, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(0xffff8888, fAlpha));
 		}
 	}
 }
@@ -2521,7 +2521,7 @@ void CMainMenu::PaintGameModeWindow(D3DXVECTOR2 vCenter, int nGameModeIdx, float
 	wndrectL.x += vCenter.x - picrect.w / 2.0f;
 	wndrectL.y += vCenter.y - wndrect.h / 2.0f;
 
-	DWORD wcol = D3DCOLOR_FFFA(fAlpha);
+	DWORD wcol = DW_COLOR_FFFA(fAlpha);
 
 	RECTXYWH wndrectL2 = wndrectL;
 	wndrectL2.Inflate(1, 1);
@@ -2559,7 +2559,7 @@ void CMainMenu::PaintGameModeWindow(D3DXVECTOR2 vCenter, int nGameModeIdx, float
 	if(nTitleStrIdx >= 0)
 		g_font8bs1->DrawStringScaleW(nTitleStrIdx, wndrectL.CenterX(), wndrectL.y + picrect.h + 8, wndrect.w, FONTFLAG_ANCHOR_VCENTERHCENTER, wcol);
 	if (nSubtitleStrIdx >= 0)
-		g_font6ns1->DrawStringScaleW(nSubtitleStrIdx, wndrectL.CenterX(), wndrectL.y + picrect.h + 20, wndrect.w, FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
+		g_font6ns1->DrawStringScaleW(nSubtitleStrIdx, wndrectL.CenterX(), wndrectL.y + picrect.h + 20, wndrect.w, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
 }
 
 void CMainMenu::Release()

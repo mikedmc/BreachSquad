@@ -1266,7 +1266,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 
 #ifdef K_CONTROLS_EDITOR
 		case GAME_STATE_CONTROLSED:
-			g_ControlsEditor.SetCameraTransform(&UTApp().g_cam240hScreen);
+			g_ControlsEditor.SetCameraTransform(&UTApp().g_cam360hScreen);
 			g_ControlsEditor.Update(fElapsedTime);
 			break;
 #endif
@@ -2057,7 +2057,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
 			RECTXYWH_F camrectchat = UTApp().g_camScreen.GetCamWorldAABB();
 
-			Vec2 vIgmIntSz = UTApp().g_cam240hScreen.WorldToScreen(Vec2(0.0f, 56.0f));
+			Vec2 vIgmIntSz = UTApp().g_cam360hScreen.WorldToScreen(Vec2(0.0f, 56.0f));
 			g_ChatWnd.Paint(Vec2(camrectchat.x + 5.0f, camrectchat.Bottom() - vIgmIntSz.y));
 			g_pGameSprite->Flush();
 		}
@@ -2135,7 +2135,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 			CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
 			//find a pos so doesn't overlap with the igm interface
-			Vec2 vStartPos = UTApp().g_cam240hScreen.WorldToScreen(Vec2(0.0f, 25.0f));
+			Vec2 vStartPos = UTApp().g_cam360hScreen.WorldToScreen(Vec2(0.0f, 25.0f));
 			int posY = vStartPos.y;
 			WCHAR todraw[MAX_PATH] = { 0 };
 			CStringDesc strdesc;
@@ -3231,12 +3231,12 @@ void PaintTransition(float dTime, float fTimeline, PDEVICE pDevice)
 					pDevice->SetTexture(0, NULL); //textura aiurea
 					//fac ca jumatate din timpul tranzitiei sa stea pe full opac ca sa nu se vada absolut nimic cand schimba starea
 					float fAlpha = LIMIT(1.5f * g_fTransitionPercent, 0.0f, 1.0f);
-					DrawRectUP_TL1T(pDevice, rect, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), D3DCOLOR_XXXA(fAlpha));
+					DrawRectUP_TL1T(pDevice, rect, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), DW_COLOR_XXXA(fAlpha));
 					//write "loading"
 					if ((UTGetGUI().m_sprCol.IsLoaded()) && (fAlpha >= 0.95f))
 					{
-						CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam240hScreen);
-						RECTXYWH_F scrrect = UTApp().g_cam240hScreen.GetCamWorldAABB();
+						CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam360hScreen);
+						RECTXYWH_F scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
 						CSprite::paintFrame(&UTGetGUI().m_sprCol, scrrect.Right() - 3, scrrect.Bottom() - 3, ANM_CONTROLS_SPR_LOADING_ICONS, 0, 0x88ffffff);
 					}
 				}
@@ -3247,7 +3247,7 @@ void PaintTransition(float dTime, float fTimeline, PDEVICE pDevice)
 					//deseneaza poly negru peste
 					pDevice->SetTexture(0, NULL); //textura aiurea
 					float fAlpha = LIMIT((1.5f - 1.5f * g_fTransitionPercent), 0.0f, 1.0f);
-					DrawRectUP_TL1T(pDevice, rect, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), D3DCOLOR_XXXA(fAlpha));
+					DrawRectUP_TL1T(pDevice, rect, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), DW_COLOR_XXXA(fAlpha));
 				}
 				break;
 			}

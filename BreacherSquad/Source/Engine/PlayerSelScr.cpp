@@ -1069,10 +1069,10 @@ void CPlayerSelScr::Update(float dTime)
 void CPlayerSelScr::Paint(ID3DXSprite* pSprite)
 {
 	//setam ecranul standard de 240h inaltime
-	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam240hScreen);
+	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(m_pDevice, &g_matIdentity);
 
-	RECTXYWH_F scrrect = UTApp().g_cam240hScreen.GetCamWorldAABB();
+	RECTXYWH_F scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
 	///--- paint background (from mainmenu.cpp, easily changed)
 
 	//#MAYBE: poate ar trebui ca desenarea asta sa fie intr-o functie generica (ca sa nu mai fie in 2 locuri)
@@ -1087,7 +1087,7 @@ void CPlayerSelScr::Paint(ID3DXSprite* pSprite)
 	//paint character flickering orange light
 	AdditiveBlendingON(m_pDevice, pSprite);
 	float alpha = 0.4f + UTPerlin::PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.4f, 0.5f, 2);
-	CSprite::paintFrame(&m_sprCol, worldrect.CenterX() + fbackOffX, worldrect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 2, D3DCOLOR_COLORALPHA(dwColor, alpha));
+	CSprite::paintFrame(&m_sprCol, worldrect.CenterX() + fbackOffX, worldrect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 2, DW_COLORALPHA(dwColor, alpha));
 	AdditiveBlendingOFF(m_pDevice, pSprite);
 
 	//paint fog layer (w:375)
@@ -1380,15 +1380,15 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 	CPlayerCharSelection* playersel = &m_arrPlayers[nPlayerOrdinal];
 	RECTXYWH winbox(pos.x, pos.y, K_PSS_PLAYER_WINDOW_WIDTH, K_PSS_PLAYER_WINDOW_HEIGHT);
 
-	DWORD dwWinColor = D3DCOLOR_FFFA(fAlpha);
+	DWORD dwWinColor = DW_COLOR_FFFA(fAlpha);
 	//if selection was made or we have shown a details window darken main window
 	if ((playersel->bSelected) || (playersel->nCursorMoreReal >= 0))
 	{
-		dwWinColor = D3DCOLOR_COLORALPHA(0xff333333, fAlpha);
+		dwWinColor = DW_COLORALPHA(0xff333333, fAlpha);
 		fAlpha *= 0.4f;
 	}
-	DWORD dwTextColor = D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha);
-	DWORD dwTitleColor = D3DCOLOR_COLORALPHA(K_COLOR_WINDOW_TITLE, fAlpha);
+	DWORD dwTextColor = DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha);
+	DWORD dwTitleColor = DW_COLORALPHA(K_COLOR_WINDOW_TITLE, fAlpha);
 
 	if (playersel->nInstanceID < 0) //empty slot
 	{
@@ -1458,15 +1458,15 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		CSprite::paintFrame(&m_sprCol, recttemp.CenterX(), recttemp.Bottom() - 2, ANM_MENUS_SPR_CHARSEL_WND_DECO, 1, dwWinColor); //stars placeholder
 		//paint network stars or local stars
 		if((UTApp().IsGameNetworked()) && (playersel->bIsNetworkPlayer))
-			g_font5ns2->DrawString(STR_PEER_STARS_VAL, recttemp.CenterX(), recttemp.Bottom() - 2, FONTFLAG_ANCHOR_BOTTOMLEFT, D3DCOLOR_COLORALPHA(0xfffdb727, fAlpha));
+			g_font5ns2->DrawString(STR_PEER_STARS_VAL, recttemp.CenterX(), recttemp.Bottom() - 2, FONTFLAG_ANCHOR_BOTTOMLEFT, DW_COLORALPHA(0xfffdb727, fAlpha));
 		else
-			g_font5ns2->DrawString(STR_TOTAL_STARS_VAL, recttemp.CenterX(), recttemp.Bottom() - 2, FONTFLAG_ANCHOR_BOTTOMLEFT, D3DCOLOR_COLORALPHA(0xfffdb727, fAlpha));
+			g_font5ns2->DrawString(STR_TOTAL_STARS_VAL, recttemp.CenterX(), recttemp.Bottom() - 2, FONTFLAG_ANCHOR_BOTTOMLEFT, DW_COLORALPHA(0xfffdb727, fAlpha));
 
 		///--- player class
 		recttemp.Set(winbox.x + 52, recttemp.y + 4, winbox.w - 62, 16);
 		CtrlMgrDrawHTilingAnim_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_INPUT_BOX2, 0, recttemp, dwWinColor);
 		recttemp.Set(winbox.x + 44, recttemp.y, winbox.w - 46, 16);
-		g_font9b1->DrawString(STR_PLAYER_CLASS_ASSAULTER + (int)playersel->eType, recttemp.CenterX(), recttemp.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT_LIGHTER, fAlpha));
+		g_font9b1->DrawString(STR_PLAYER_CLASS_ASSAULTER + (int)playersel->eType, recttemp.CenterX(), recttemp.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT_LIGHTER, fAlpha));
 		//player types page dots under the class name
 		//recttemp2 = recttemp; recttemp2.h -= 2;
 		//CtrlMgrDrawPageSelector(&UTGetControlsManager().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR, recttemp2, K_PSS_TYPES_COUNT, (int)playersel->eType, dwWinColor);
@@ -1499,7 +1499,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		//shieldicon and level
 		CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.x, recttemp2.CenterY(), ANM_CONTROLS_SPR_PROGRESS_XP_UPGRADE, 9, dwWinColor);
 		UTLang().SetStringDesc(&strDesc, L"%d", nLevel + 1);
-		g_font6nc1->DrawString(&strDesc, recttemp2.x - 8, recttemp2.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(0xfffdb727, fAlpha));
+		g_font6nc1->DrawString(&strDesc, recttemp2.x - 8, recttemp2.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(0xfffdb727, fAlpha));
 
 		//frame nume abilitate
 		recttemp2.Set(recttemp.x + 4, recttemp.y + 20, recttemp.w - 8, 8);
@@ -1527,7 +1527,7 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		else 
 		{
 			int nWeaponPrice = playersel->nPrice[PSS_ITEMCAT_WEAPON];
-			dwWCol = D3DCOLOR_COLORALPHA(0xff888888, fAlpha);
+			dwWCol = DW_COLORALPHA(0xff888888, fAlpha);
 			//paint lock on locked weapons
 			CSprite::paintFrame(&m_sprCol, recttemp2.CenterX(), recttemp2.CenterY(), ANM_MENUS_SPR_ICONS_WEAPONS, pItem->iconIdx, dwWCol);
 			CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.x + 4, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_LOCKS, 0, dwWinColor);
@@ -1648,9 +1648,9 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 
 	RECTXYWH winbox(pos.x, pos.y, K_PSS_PLAYER_WINDOW_WIDTH, K_PSS_PLAYER_WINDOW_HEIGHT);
 
-	DWORD dwTextColor = D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha);
-	DWORD dwTitleColor = D3DCOLOR_COLORALPHA(K_COLOR_WINDOW_TITLE, fAlpha);
-	DWORD dwWinColor = D3DCOLOR_FFFA(fAlpha);
+	DWORD dwTextColor = DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha);
+	DWORD dwTitleColor = DW_COLORALPHA(K_COLOR_WINDOW_TITLE, fAlpha);
+	DWORD dwWinColor = DW_COLOR_FFFA(fAlpha);
 
 	//each detail window is treated here:
 	switch (playersel->nCursorPosReal)
@@ -1701,7 +1701,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				int nxppts = g_userData[K_MEMID_TOTALXP_PER_CLASS_START + kk];
 				int nlvllocal = App_GetXPLevel(nxppts);
 				UTLang().SetStringDesc(&strDesc, L"%d", nlvllocal + 1);
-				g_font6nc1->DrawString(&strDesc, recttemp.x + 12 - 8, recttemp.Bottom() - 5, FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(0xfffdb727, fAlpha));
+				g_font6nc1->DrawString(&strDesc, recttemp.x + 12 - 8, recttemp.Bottom() - 5, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(0xfffdb727, fAlpha));
 			}
 
 			///--- selected class ---
@@ -1710,17 +1710,17 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 
 			//icon
 			recttemp.Set(localbox.x - 2, localbox.y - 2, 38, 38);
-			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp, D3DCOLOR_COLORALPHA(0xff2A3946, fAlpha));
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp, DW_COLORALPHA(0xff2A3946, fAlpha));
 			int nPortraitAnm = (nPlayerOrdinal == 0) ? ANM_MENUS_SPR_CHAR_PORTRAITS_LARGE : ANM_MENUS_SPR_CHAR_PORTRAITS_LARGE_R;
 			CSprite::paintFrame(&m_sprCol, recttemp.CenterX(), recttemp.y, nPortraitAnm, (int)playersel->eType, dwWinColor);
 			//shieldicon and level
 			CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp.x + 14, recttemp.Bottom() - 7, ANM_CONTROLS_SPR_PROGRESS_XP_UPGRADE, 9, dwWinColor);
 			UTLang().SetStringDesc(&strDesc, L"%d", nLevel + 1);
-			g_font6nc1->DrawString(&strDesc, recttemp.x + 14 - 8, recttemp.Bottom() - 7, FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(0xfffdb727, fAlpha));
+			g_font6nc1->DrawString(&strDesc, recttemp.x + 14 - 8, recttemp.Bottom() - 7, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(0xfffdb727, fAlpha));
 			//class name
 			recttemp2.Set(localbox.x + 48, localbox.y - 1, winbox.w - 62, 16);
 			CtrlMgrDrawHTilingAnim_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_INPUT_BOX2, 0, recttemp2, dwWinColor);
-			g_font9b1->DrawString(STR_PLAYER_CLASS_ASSAULTER + (int)playersel->eType, recttemp2.CenterX(), recttemp2.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT_LIGHTER, fAlpha));
+			g_font9b1->DrawString(STR_PLAYER_CLASS_ASSAULTER + (int)playersel->eType, recttemp2.CenterX(), recttemp2.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT_LIGHTER, fAlpha));
 			//difficulty and XP
 			recttemp2.Set(recttemp.Right() + 6, recttemp.y + 17, localbox.w - recttemp.w - 4, 8);
 			if (nLevel < K_GAME_MAX_UPGRADE_LEVELS)
@@ -1747,7 +1747,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 
 			//description
 			recttemp2.Set(localbox.x, recttemp.Bottom() + 8, localbox.w, 18);
-			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp2, D3DCOLOR_COLORALPHA(0xff1C252E, fAlpha));
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp2, DW_COLORALPHA(0xff1C252E, fAlpha));
 			if (arrItemsByClass[playersel->eType].nStrIdx_desc >= 0)
 			{
 				int texth = g_font6n1->MeasureString(arrItemsByClass[playersel->eType].nStrIdx_desc, recttemp2.w).h;
@@ -1800,7 +1800,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			RECTXYWH localbox(winbox.x + 6, winbox.y + 73, winbox.w - 12, 48);
 			RECTXYWH tempbox(winbox.x + 2, winbox.y + 59, winbox.w - 4, 48 + 18); //selection
 
-			DWORD dwWColDenied = D3DCOLOR_COLORALPHA(0xff887777, fAlpha);
+			DWORD dwWColDenied = DW_COLORALPHA(0xff887777, fAlpha);
 
 			///--- the other items (small portraits) ---
 			for (int kk = 0; kk < nItemsCnt; kk++)
@@ -1853,7 +1853,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			CtrlMgrDrawWindow(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WINDOW1, localbox, dwWinColor, FONTIDX_8_B1, pItem->strIdxScreenName, dwTextColor);
 			//weapon icon
 			recttemp2.Set(localbox.x, localbox.y + 2, 44, 31);
-			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, recttemp2, D3DCOLOR_COLORALPHA(0xff2A3946, fAlpha));
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, recttemp2, DW_COLORALPHA(0xff2A3946, fAlpha));
 			recttemp.Set(localbox.x, localbox.y + 2, 44, 14);
 			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp, dwWinColor);
 			if (playersel->nPrice[(int)eItemCat] <= 0)
@@ -1937,7 +1937,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			RECTXYWH tempbox(winbox.x + 2, winbox.y + 109, winbox.w - 4, 53 + 18);
 			
 			RECTXYWH recttemp, recttemp2, recttemp3;
-			DWORD dwWColDenied = D3DCOLOR_COLORALPHA(0xff887777, fAlpha);
+			DWORD dwWColDenied = DW_COLORALPHA(0xff887777, fAlpha);
 
 			///--- the other items (small portraits) ---
 			for (int kk = 0; kk < nItemsCnt; kk++)
@@ -2012,7 +2012,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 				recttemp.Set(localbox.Right() - 54, localbox.y + 2, 54, 13);
 			}
 
-			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, recttemp2, D3DCOLOR_COLORALPHA(0xff2A3946, fAlpha));
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, recttemp2, DW_COLORALPHA(0xff2A3946, fAlpha));
 			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME6_DARK, recttemp, dwWinColor);
 			DWORD dwWCol = dwWinColor;
 			if (playersel->nPrice[(int)eItemCat] <= 0)
@@ -2035,7 +2035,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 
 			//description frame and text
 			recttemp.Set(localbox.x, recttemp2.Bottom() + 6, localbox.w, 18);
-			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp, D3DCOLOR_COLORALPHA(0xff1C252E, fAlpha));
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp, DW_COLORALPHA(0xff1C252E, fAlpha));
 			if (pItem->strIdxLongDescription >= 0)
 			{
 				int texth = g_font6n1->MeasureString(pItem->strIdxLongDescription, recttemp.w).h;
@@ -2105,7 +2105,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 			//weapon icon and frame
 			RECTXYWH recttemp, recttemp2;
 
-			DWORD dwWColDenied = D3DCOLOR_COLORALPHA(0xff887777, fAlpha);
+			DWORD dwWColDenied = DW_COLORALPHA(0xff887777, fAlpha);
 
 			///--- the other items (small portraits) ---
 			for (int kk = 0; kk < nItemsCnt; kk++)
@@ -2149,7 +2149,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 					CSprite::paintFrame(&UTGetGUI().m_sprCol, recttemp2.x + 2, recttemp2.Bottom() - 3, ANM_CONTROLS_SPR_LOCKS, 3, dwWinColor);
 					//name
 					recttemp2.Set(recttemp.Right() - 72, recttemp.y - 1, 74, 18);
-					g_font6n1->DrawString(pItemSm->strIdxScreenName, recttemp2, FONTFLAG_ANCHOR_TOPRIGHT | FONTFLAG_WRAPTEXT, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT_HALFALPHA, 0.4f));
+					g_font6n1->DrawString(pItemSm->strIdxScreenName, recttemp2, FONTFLAG_ANCHOR_TOPRIGHT | FONTFLAG_WRAPTEXT, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT_HALFALPHA, 0.4f));
 				}
 			}
 
@@ -2187,7 +2187,7 @@ void CPlayerSelScr::PaintDetailsWindow(int nPlayerOrdinal, D3DXVECTOR2 pos, floa
 
 			//description frame and text
 			recttemp.Set(localbox.x, recttemp2.Bottom() + 5, localbox.w, 18);
-			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp, D3DCOLOR_COLORALPHA(0xff1C252E, fAlpha));
+			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, recttemp, DW_COLORALPHA(0xff1C252E, fAlpha));
 			if (pItem->strIdxLongDescription >= 0)
 			{
 				//g_font6n1->DrawString(pItem->strIdxLongDescription, recttemp, FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, dwTextColor);

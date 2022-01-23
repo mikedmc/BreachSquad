@@ -264,7 +264,7 @@ void CChatWnd::Paint(D3DXVECTOR2 vBottomLeft)
 	{
 		CChatLine* cl = m_arrLines[kk];
 		//paint now
-		DWORD color = D3DCOLOR_COLORALPHA(cl->dwColor, fFadePerc);
+		DWORD color = DW_COLORALPHA(cl->dwColor, fFadePerc);
 		pTTFont->DrawTextLine(cl->sText, vStart.x, vStart.y, DT_LEFT | DT_TOP | DT_SINGLELINE, color);
 		vStart.y -= K_CW_LINE_SPACING;
 	}

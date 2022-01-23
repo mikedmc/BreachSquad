@@ -267,7 +267,7 @@ void CTexturedFont::SetFontReplacementTTF(CTTFont* pReplacementTTF, CCameraTrans
 	fFontReplacementCamScaling = 1.0f;
 	if (pFontReplacementCam != null)
 	{
-		fFontReplacementCamScaling = pFontReplacementCam->GetCamWorldAABB().h / UTApp().g_cam240hScreen.GetCamWorldAABB().h;
+		fFontReplacementCamScaling = pFontReplacementCam->GetCamWorldAABB().h / UTApp().g_cam360hScreen.GetCamWorldAABB().h;
 	}
 
 	bFontReplacementOn = true;
@@ -611,7 +611,7 @@ int CTexturedFont::DrawStringLightened(CStringDesc *strDesc, int X, int Y, float
 			if(alpha > 0.0f)
 			{
 				//deseneaza litera
-				s_pSprite->Draw(pTexture, &moduleRect[cod], NULL, &D3DXVECTOR3(posx + fmodule_ox[cod], posy + fmodule_oy[cod], 0.0f), D3DCOLOR_FFFA(alpha));
+				s_pSprite->Draw(pTexture, &moduleRect[cod], NULL, &D3DXVECTOR3(posx + fmodule_ox[cod], posy + fmodule_oy[cod], 0.0f), DW_COLOR_FFFA(alpha));
 			}
 			posx += frameBBox[cod].w + letterSpacing;
 		}

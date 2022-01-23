@@ -222,8 +222,8 @@ void CApplication::Init()
 	g_camRTScreen.SetCamAnimationNone();
 	g_camRTScreen.SetPixelPerfect(true);
 
-	g_cam240hScreen.SetCamAnimationNone();
-	g_cam240hScreen.SetPixelPerfect(true);
+	g_cam360hScreen.SetCamAnimationNone();
+	g_cam360hScreen.SetPixelPerfect(true);
 	
 	g_cam480hScreen.SetCamAnimationNone();
 	g_cam480hScreen.SetPixelPerfect(true);
@@ -299,8 +299,8 @@ void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 	g_camRTScreen.SetWorldBounds(g_rectRT, true, K_CAMTRANS_AXIS_V, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F);
 	g_camRTScreen.InitCamera(g_rectRender, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F, K_CAMTRANS_AXIS_V, g_rectRT.Center());
 
-	g_cam240hScreen.SetWorldBounds(g_rect360hWorld, true, K_CAMTRANS_AXIS_V, g_rect360hWorld.h, g_rect360hWorld.h);
-	g_cam240hScreen.InitCamera(g_rectRender, g_rect360hWorld.h, K_CAMTRANS_AXIS_V, g_rect360hWorld.Center());
+	g_cam360hScreen.SetWorldBounds(g_rect360hWorld, true, K_CAMTRANS_AXIS_V, g_rect360hWorld.h, g_rect360hWorld.h);
+	g_cam360hScreen.InitCamera(g_rectRender, g_rect360hWorld.h, K_CAMTRANS_AXIS_V, g_rect360hWorld.Center());
 
 	g_cam480hScreen.SetWorldBounds(g_rect480hWorld, true, K_CAMTRANS_AXIS_V, g_rect480hWorld.h, g_rect480hWorld.h);
 	g_cam480hScreen.InitCamera(g_rectRender, g_rect480hWorld.h, K_CAMTRANS_AXIS_V, g_rect480hWorld.Center());
@@ -313,7 +313,7 @@ void CApplication::Update(float dTime)
 {
 	g_camScreen.Update(dTime);
 	g_camRTScreen.Update(dTime);
-	g_cam240hScreen.Update(dTime);
+	g_cam360hScreen.Update(dTime);
 	g_cam480hScreen.Update(dTime);
 }
 

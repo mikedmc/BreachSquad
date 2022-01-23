@@ -136,7 +136,7 @@ public:
 	//--- screen camera ---
 	CCameraTransform g_camScreen;		//real screen camera
 	CCameraTransform g_camRTScreen;		//game screen camera with height of RT targets (RT to screen)
-	CCameraTransform g_cam240hScreen;	//240px high camera (scaled up to actual resolution)
+	CCameraTransform g_cam360hScreen;	//360px high camera (scales up to real resolution) - 360px h is default resolution of the game
 	CCameraTransform g_cam480hScreen;	//480px high camera for controls (scaled up to actual resolution). Double the default resolution of the game.
 public:
 	static bool			IsOnlyInstance(LPCTSTR className);

@@ -16,7 +16,7 @@ protected:
 
 	PDEVICE						m_pDevice;
 
-	UINT32						m_nVertexCursor;						// Current vertex index in buffer (writing position)
+	int							m_nVertexCursor;						// Current vertex index in buffer (writing position)
 	_VERTEX_PNCT4T4				*m_verts;								// temp buffer for storing vertices
 	
 	UINT32						m_nTrisPerMesh[K_BP_MAX_MESHES_CNT]{};	// Triangle count per mesh

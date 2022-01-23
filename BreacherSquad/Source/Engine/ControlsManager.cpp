@@ -1574,8 +1574,8 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 		dwFontColor = var->m_asUINT32;
 	}
 	//set font color
-	float fColAlpha = D3DCOLOR_GETFALPHA(dwFontColor);
-	dwFontColor = D3DCOLOR_COLORALPHA(dwFontColor, layer->alpha * fColAlpha);
+	float fColAlpha = DW_GETFALPHA(dwFontColor);
+	dwFontColor = DW_COLORALPHA(dwFontColor, layer->alpha * fColAlpha);
 
 	var = paramsDict.GetVariantByName(L"color");
 	if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
@@ -1588,8 +1588,8 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 		paramsDict.SetNamedVarHEXCOLOR(L"color", 0xffffffff);
 	}
 	//set font color
-	fColAlpha = D3DCOLOR_GETFALPHA(dwColor);
-	dwColor = D3DCOLOR_COLORALPHA(dwColor, layer->alpha * fColAlpha);
+	fColAlpha = DW_GETFALPHA(dwColor);
+	dwColor = DW_COLORALPHA(dwColor, layer->alpha * fColAlpha);
 
 
 	switch (type)
@@ -1676,7 +1676,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			{
 				CStringDesc sdSelection;
 				UTLang().GetSubstring(&sdSelection, stringIdx, nSelectedIdx, L'\n');
-				m_pFontsMgr->fonts[fontIdx]->DrawStringScaleW(&sdSelection, BBox.CenterX(), BBox.CenterY(), BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(dwFontColor, 1.0f - fDisabledPercent * 0.8f));
+				m_pFontsMgr->fonts[fontIdx]->DrawStringScaleW(&sdSelection, BBox.CenterX(), BBox.CenterY(), BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(dwFontColor, 1.0f - fDisabledPercent * 0.8f));
 			}
 			else
 			{
@@ -1699,7 +1699,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			float ffrac = FLOAT_FRAC(fTimer);
 			float ffracinv = 1.0f - ffrac;
 
-			DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
 			RECTXYWH starrect = m_pSprMgr->GetAFrameBBox(animIdx, 0);
 
 			D3DXVECTOR2 vStartPos(BBox_inflated.CenterX(), BBox_inflated.CenterY());
@@ -1720,7 +1720,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				D3DXMATRIXA16 mattrans;
 				D3DXMatrixAffineTransformation2D(&mattrans, 1.0f + ffracinv * 2.0f, NULL, 0.0f, &D3DXVECTOR2(vStartPos.x + fcoeff * starrect.w, vStartPos.y - ffracinv * 20.0f));
 				layer->pControlsManager->m_pSprite->SetTransform(&mattrans);
-				CSprite::paintFrame(m_pSprMgr, 0.0f, 0.0f, animIdx, 1, D3DCOLOR_FFFA(layer->alpha * ffrac));
+				CSprite::paintFrame(m_pSprMgr, 0.0f, 0.0f, animIdx, 1, DW_COLOR_FFFA(layer->alpha * ffrac));
 				layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
 			}
 		}
@@ -1733,7 +1733,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				return;
 			}
 			//desenam
-			DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
 			//background
 			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_BLACK3, BBox_inflated, wcol);
 			//selection
@@ -1767,7 +1767,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 					{
 						dwColorRight = var->m_asUINT32;
 					}
-					dwColorRight = D3DCOLOR_COLORALPHA(dwColorRight, layer->alpha);
+					dwColorRight = DW_COLORALPHA(dwColorRight, layer->alpha);
 					//draw string
 					for (int kk = 0; kk < nOptionsCnt; kk++)
 					{
@@ -1793,7 +1793,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				drawDebugText(BBox.x, BBox.y, L"Left list stringIdx missing!");
 			}
 			
-			DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
 			int nPage = paramsDict.GetVariantByName(L"nPage")->m_asINT32;
 			int nMinPage = paramsDict.GetVariantByName(L"nMinPage")->m_asINT32;
 			int nMaxPage = paramsDict.GetVariantByName(L"nMaxPage")->m_asINT32;
@@ -1868,7 +1868,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 					{
 						dwColorRight = var->m_asUINT32;
 					}
-					dwColorRight = D3DCOLOR_COLORALPHA(dwColorRight, layer->alpha);
+					dwColorRight = DW_COLORALPHA(dwColorRight, layer->alpha);
 					//draw string
 					pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[nStringIdx_right]->sText, -1, &rc, DT_NOCLIP | DT_RIGHT, dwColorRight);
 				}
@@ -1876,8 +1876,8 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 
 			//restore camera
 			layer->pControlsManager->m_pSprite->Flush();
-			layer->pControlsManager->SetCameraTransform(&UTApp().g_cam240hScreen);
-			CCameraTransform::SetActiveCamera(layer->pControlsManager->m_pDevice, &UTApp().g_cam240hScreen);
+			layer->pControlsManager->SetCameraTransform(&UTApp().g_cam360hScreen);
+			CCameraTransform::SetActiveCamera(layer->pControlsManager->m_pDevice, &UTApp().g_cam360hScreen);
 			layer->pControlsManager->m_cameraScreenRect = layer->pControlsManager->m_pCamera->GetCamWorldAABB();
 
 			App_SetWorldTransform(layer->pControlsManager->m_pDevice, matWorld);
@@ -1942,26 +1942,26 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				D3DXFONT_DESCW descW;
 				pTTFont->pFont->GetDesc(&descW);
 				RECTXYWH box(realrect.x - 5, realrect.y + descW.Height * nSelectedIdx, realrect.w + 10, descW.Height);
-				CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME3, box, D3DCOLOR_FFFA(layer->alpha));
+				CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME3, box, DW_COLOR_FFFA(layer->alpha));
 			}
 
 			//paint text
 			if (stringIdx >= 0)
 			{
-				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[stringIdx]->sText, -1, &rc_shadow, DT_NOCLIP, D3DCOLOR_XXXA(layer->alpha * 0.6f));
+				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[stringIdx]->sText, -1, &rc_shadow, DT_NOCLIP, DW_COLOR_XXXA(layer->alpha * 0.6f));
 				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[stringIdx]->sText, -1, &rc, DT_NOCLIP, dwColor);
 			}
 			if (nStringIdx_right >= 0)
 			{
-				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[nStringIdx_right]->sText, -1, &rc_shadow, DT_NOCLIP | DT_RIGHT, D3DCOLOR_XXXA(layer->alpha * 0.6f));
+				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[nStringIdx_right]->sText, -1, &rc_shadow, DT_NOCLIP | DT_RIGHT, DW_COLOR_XXXA(layer->alpha * 0.6f));
 				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[nStringIdx_right]->sText, -1, &rc, DT_NOCLIP | DT_RIGHT, dwFontColor);
 			}
 
 
 			//restore camera
 			layer->pControlsManager->m_pSprite->Flush();
-			layer->pControlsManager->SetCameraTransform(&UTApp().g_cam240hScreen);
-			CCameraTransform::SetActiveCamera(layer->pControlsManager->m_pDevice, &UTApp().g_cam240hScreen);
+			layer->pControlsManager->SetCameraTransform(&UTApp().g_cam360hScreen);
+			CCameraTransform::SetActiveCamera(layer->pControlsManager->m_pDevice, &UTApp().g_cam360hScreen);
 			layer->pControlsManager->m_cameraScreenRect = layer->pControlsManager->m_pCamera->GetCamWorldAABB();
 
 			App_SetWorldTransform(layer->pControlsManager->m_pDevice, matWorld);
@@ -2009,8 +2009,8 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			int nTeamSpentPointsLocal = nTeamSpentPoints + (nSpentPoints[0] + nSpentPoints[1]);
 
 			//desenam
-			DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
-			DWORD wcoldenied = D3DCOLOR_COLORALPHA(0xffff8888, layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
+			DWORD wcoldenied = DW_COLORALPHA(0xffff8888, layer->alpha);
 
 			//row height from blob
 			RECTXYWH rectSz = m_pSprMgr->GetAFrameBBox(animIdx, 0);
@@ -2020,19 +2020,19 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			assert(nClassRows + nTeamRows <= K_PSS_UPGRADE_BARS_CNT);
 			//team group
 			RECTXYWH bbgroup(BBox_inflated.x, BBox_inflated.y, BBox_inflated.w, (rectSz.h + 1) * nClassRows + 1);
-			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE2, bbgroup, D3DCOLOR_COLORALPHA(0xff0f1f2f, layer->alpha));
+			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE2, bbgroup, DW_COLORALPHA(0xff0f1f2f, layer->alpha));
 			bbgroup.Inflate(-6, -1); bbgroup.x += 5;
-			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbgroup, D3DCOLOR_COLORALPHA(0xff102436, layer->alpha));
+			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbgroup, DW_COLORALPHA(0xff102436, layer->alpha));
 			//group name
-			m_pFontsMgr->fonts[fontIdx]->DrawStringTransformed(UTLang().strings[STR_TEAM_UPC], bbgroup.x - 4, bbgroup.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
+			m_pFontsMgr->fonts[fontIdx]->DrawStringTransformed(UTLang().strings[STR_TEAM_UPC], bbgroup.x - 4, bbgroup.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
 
 			//class group
 			RECTXYWH bbteam(BBox_inflated.x, BBox_inflated.y + bbgroup.h + nGroupSpacing, BBox_inflated.w, (rectSz.h + 1) * nTeamRows + 1);
-			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE2, bbteam, D3DCOLOR_COLORALPHA(0xff122426, layer->alpha));
+			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE2, bbteam, DW_COLORALPHA(0xff122426, layer->alpha));
 			bbteam.Inflate(-6, -1); bbteam.x += 5;
-			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbteam, D3DCOLOR_COLORALPHA(0xff1E3538, layer->alpha));
+			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbteam, DW_COLORALPHA(0xff1E3538, layer->alpha));
 			//group name
-			m_pFontsMgr->fonts[fontIdx]->DrawStringTransformed(UTLang().strings[STR_CLASS_UPC], bbteam.x - 4, bbteam.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
+			m_pFontsMgr->fonts[fontIdx]->DrawStringTransformed(UTLang().strings[STR_CLASS_UPC], bbteam.x - 4, bbteam.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
 
 			//enforce player class
 			if ((nPlayerClass < 0) || (nPlayerClass >= K_PSS_CLASSES_COUNT))
@@ -2052,9 +2052,9 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				///paint bar:
 				bbline.Inflate(-2, -2); 
 				if (ll < nClassRows)
-					CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbline, D3DCOLOR_COLORALPHA(0xff0f1f2f, layer->alpha));
+					CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbline, DW_COLORALPHA(0xff0f1f2f, layer->alpha));
 				else
-					CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbline, D3DCOLOR_COLORALPHA(0xff122426, layer->alpha));
+					CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbline, DW_COLORALPHA(0xff122426, layer->alpha));
 				
 				//paint upgrade bar (right aligned)
 				int nBarIdx = g_playerSelScr.arrItemsByClass[nPlayerClass].arrUpgradeBarsIdx[ll];
@@ -2095,7 +2095,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				D3DXVECTOR2 vPos(bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY());
 				//bar text
 				int nStrIdx = g_playerSelScr.m_arrUpgradeBars[nBarIdx]->nStrIdx_name;
-				m_pFontsMgr->fonts[fontIdx]->DrawStringClamped(nStrIdx, bbgroup.x + 1, vPos.y, vPos.x - bbteam.x - 5, FONTFLAG_ANCHOR_VCENTERLEFT, D3DCOLOR_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha));
+				m_pFontsMgr->fonts[fontIdx]->DrawStringClamped(nStrIdx, bbgroup.x + 1, vPos.y, vPos.x - bbteam.x - 5, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha));
 
 				//bar points
 				for (int xx = 0; xx < nDots; xx++)
@@ -2182,7 +2182,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 							dwIconCol = 0xff8ee6e2;
 						if (xx >= nFilled)
 							dwIconCol = 0xff384652;
-						CSprite::paintFrame(m_pSprMgr, vPos.x + xx * rectSz.w, vPos.y, ANM_CONTROLS_SPR_UPGRADE_ICONS, nIcon, D3DCOLOR_COLORALPHA(dwIconCol, layer->alpha));
+						CSprite::paintFrame(m_pSprMgr, vPos.x + xx * rectSz.w, vPos.y, ANM_CONTROLS_SPR_UPGRADE_ICONS, nIcon, DW_COLORALPHA(dwIconCol, layer->alpha));
 					}
 				}
 			}
@@ -2198,7 +2198,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				//paint selection
 				RECTXYWH bbsel = bbline;
 				bbsel.Inflate(-1, -1);
-				CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_HOLLOW1, bbsel, D3DCOLOR_COLORALPHA(0xff254159, layer->alpha));
+				CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_HOLLOW1, bbsel, DW_COLORALPHA(0xff254159, layer->alpha));
 				//paint selected point
 				int nBarIdx = g_playerSelScr.arrItemsByClass[nPlayerClass].arrUpgradeBarsIdx[nSelectedLine];
 				int nPointPrice = g_playerSelScr.m_arrUpgradeBars[nBarIdx]->m_arrPerks[nSelectedPoint].nPointPrice;
@@ -2208,7 +2208,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				DWORD dwLocalCol = wcol;
 				//Can't delete points from the TEAM bars
 				if (bDeniedOperation)
-					dwLocalCol = D3DCOLOR_COLORALPHA(0xffff2222, layer->alpha);
+					dwLocalCol = DW_COLORALPHA(0xffff2222, layer->alpha);
 
 				if (nPointPrice < 0)
 					CSprite::paintFrame(m_pSprMgr, vPos.x + nSelectedPoint * rectSz.w, vPos.y, animIdx, 11, dwLocalCol);
@@ -2237,7 +2237,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			int vSpacing = paramsDict.GetVariantByName(L"Vspacing")->m_asINT32;
 			int nDisabledFlags = paramsDict.GetVariantByName(L"disabledFlags")->m_asINT32;
 			//desenam meniul
-			DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
 			//cursor size
 			RECTXYWH currRect(0, 0, BBox.w, vSpacing);
 			if(animIdx >= 0)
@@ -2268,14 +2268,14 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 						CSprite::paintFrame(m_pSprMgr, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame, wcol);
 						//paint selected cursor
 						if(selperc > 0.0f)
-							CSprite::paintFrame(m_pSprMgr, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame + 1, D3DCOLOR_FFFA(selperc));
+							CSprite::paintFrame(m_pSprMgr, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame + 1, DW_COLOR_FFFA(selperc));
 					}
 
 					//and string
 					D3DXCOLOR exitcol;
 					D3DXColorLerp(&exitcol, &(D3DXCOLOR)dwFontColor, &(D3DXCOLOR)wcol, selperc);
 					if (bDisabledLocal)
-						exitcol = D3DCOLOR_COLORALPHA((DWORD)exitcol, 0.5f);
+						exitcol = DW_COLORALPHA((DWORD)exitcol, 0.5f);
 
 					D3DXVECTOR2 vTextOffset(selperc * 15.0f, 0.0f);
 					if (textAlignFlags & FONTFLAG_ANCHOR_CENTER)
@@ -2393,7 +2393,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				return;
 			}
 
-			DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
 
 			//back frame
 			CtrlMgrDrawFrame(m_pSprMgr, animIdx, BBox_inflated, wcol);
@@ -2445,7 +2445,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				nIconFrame1 = paramsDict.GetVariantByName(L"nIconFrame1")->m_asINT32;
 				nIconFrame2 = paramsDict.GetVariantByName(L"nIconFrame2")->m_asINT32;
 			}
-			DWORD dwCol = D3DCOLOR_FFFA(layer->alpha);
+			DWORD dwCol = DW_COLOR_FFFA(layer->alpha);
 			//now paint
 			if (fontIdx >= 0)
 			{
@@ -2492,7 +2492,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 					if (bActive)
 						m_pFontsMgr->fonts[fontIdx]->DrawString(nStrIdx1, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, dwFontColor);
 					else
-						m_pFontsMgr->fonts[fontIdx]->DrawString(nStrIdx1, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, D3DCOLOR_COLORALPHA(dwFontColor, layer->alpha * 0.5f));
+						m_pFontsMgr->fonts[fontIdx]->DrawString(nStrIdx1, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA(dwFontColor, layer->alpha * 0.5f));
 				}
 
 				vPos.y += iconbox.h + 5;
@@ -2515,7 +2515,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 					if (bActive)
 						m_pFontsMgr->fonts[fontIdx]->DrawString(nStrIdx2, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, dwFontColor);
 					else
-						m_pFontsMgr->fonts[fontIdx]->DrawString(nStrIdx2, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, D3DCOLOR_COLORALPHA(dwFontColor, layer->alpha * 0.5f));
+						m_pFontsMgr->fonts[fontIdx]->DrawString(nStrIdx2, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA(dwFontColor, layer->alpha * 0.5f));
 				}
 			}
 		}
@@ -2591,7 +2591,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			bool bScale = (bool)paramsDict.GetVariantByName(L"scaleImage")->m_asINT32;
 			bool bAnimated = (bool)paramsDict.GetVariantByName(L"Animated")->m_asINT32;
 
-			DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
 			//anim hack for tut arrow
 			float foff = 0.0f;
 			if (bAnimated)
@@ -2630,7 +2630,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 
 			if ((UTApp().IsGameNetworked()) || (g_gameState == GAME_STATE_CONTROLSED))
 			{
-				DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
+				DWORD wcol = DW_COLOR_FFFA(layer->alpha);
 				int nFrame = 0;
 				if ((leftVote > 0) && (rightVote <= 0))
 					nFrame = 1;
@@ -2681,7 +2681,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			{
 				float hoverPercent = butFloat * 0.5f;
 				AdditiveBlendingON(layer->pControlsManager->m_pDevice, layer->pControlsManager->m_pSprite);
-				CSprite::paintFrame(m_pSprMgr, -frameR.w / 2, -frameR.h / 2, animIdx, frameIdx, D3DCOLOR_FFFA(hoverPercent));
+				CSprite::paintFrame(m_pSprMgr, -frameR.w / 2, -frameR.h / 2, animIdx, frameIdx, DW_COLOR_FFFA(hoverPercent));
 				AdditiveBlendingOFF(layer->pControlsManager->m_pDevice, layer->pControlsManager->m_pSprite);
 			}
 
@@ -2719,7 +2719,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 
 			RECTXYWH bboxBar = BBox;
 
-			DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
 
 			CtrlMgrDrawProgress(m_pSprMgr, animIdx, bboxBar, slidePercent, wcol, nSteps);
 			//ticks
@@ -2759,7 +2759,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 
 			RECTXYWH bboxBar = BBox;
 
-			DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
 
 			float offx = 0.0f;
 			if(statusFlags & CCTRL_STATUS_FLAG_HAS_FOCUS)			
@@ -2800,14 +2800,14 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			if (bChecked)
 				frame = 1;
 
-			DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
 			CSprite::paintFrame(m_pSprMgr, BBox.x, BBox.y, animIdx, frame, wcol);
 
 			//hover frame
 			if (hoverPercent > 0.0f)
 			{
 				AdditiveBlendingON(layer->pControlsManager->m_pDevice, layer->pControlsManager->m_pSprite);
-				CSprite::paintFrame(m_pSprMgr, BBox.x, BBox.y, animIdx, frame, D3DCOLOR_FFFA(hoverPercent * 0.5f));
+				CSprite::paintFrame(m_pSprMgr, BBox.x, BBox.y, animIdx, frame, DW_COLOR_FFFA(hoverPercent * 0.5f));
 				AdditiveBlendingOFF(layer->pControlsManager->m_pDevice, layer->pControlsManager->m_pSprite);
 			}
 
@@ -2836,13 +2836,13 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				return;
 			}
 
-			float fAlpha = D3DCOLOR_GETFALPHA(dwColor);
+			float fAlpha = DW_GETFALPHA(dwColor);
 
 			D3DXMATRIXA16 mattrans;
 			RECTXYWH_F bboxl = m_pSprMgr->GetAFrameBBox_real(animIdx, frameIdx);
 			D3DXMatrixAffineTransformation2D(&mattrans, UTApp().g_rectRender.h / bboxl.h, NULL, 0.0f, &D3DXVECTOR2(0.0f, 0.0f));
 			layer->pControlsManager->m_pSprite->SetTransform(&mattrans);
-			CSprite::paintFrame(m_pSprMgr, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, frameIdx, D3DCOLOR_COLORALPHA(dwColor, fAlpha * layer->alpha));
+			CSprite::paintFrame(m_pSprMgr, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, frameIdx, DW_COLORALPHA(dwColor, fAlpha * layer->alpha));
 			layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
 		}
 		break;
@@ -2856,7 +2856,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 
 			int progress = _wtoi(paramsDict.GetVariantByName(L"progress")->m_strArg.text);
 
-			DWORD col = D3DCOLOR_FFFA(layer->alpha);
+			DWORD col = DW_COLOR_FFFA(layer->alpha);
 			if (bDisabled)
 			{
 				col = D3DCOLOR_COLORVALUE(0.6f, 0.6f, 0.6f, layer->alpha);
@@ -2893,7 +2893,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx (min 6 frames)");
 				return;
 			}
-			DWORD col = D3DCOLOR_FFFA(layer->alpha);
+			DWORD col = DW_COLOR_FFFA(layer->alpha);
 			if (bDisabled)
 				col = D3DCOLOR_COLORVALUE(0.6f, 0.6f, 0.6f, layer->alpha);
 
@@ -2934,7 +2934,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				float fcol = 0.2f;
 				if (bFlicker)
 					fcol = 0.4f;
-				CSprite::paintFrameModuleTiled(m_pSprMgr, BBox.x, centerY, animIdx, 5, 0, D3DCOLOR_FFFA(fcol * layer->alpha), tileW, barH);
+				CSprite::paintFrameModuleTiled(m_pSprMgr, BBox.x, centerY, animIdx, 5, 0, DW_COLOR_FFFA(fcol * layer->alpha), tileW, barH);
 				// plus sign
 				CSprite::paintFrame(m_pSprMgr, BBox.Right() + 2, centerY, animIdx, ((bFlicker)?7:6), col);
 			}
@@ -2961,12 +2961,12 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				//points
 				if ((nCurrentLevel >= K_GAME_MAX_UPGRADE_LEVELS) && (fProgress >= 1.0f))
 				{
-					m_pFontsMgr->fonts[fontIdx]->DrawString(STR_MAX_LEVEL, BBox.CenterX(), centerY, FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(K_COLOR_SELECTED_TEXT, layer->alpha));
+					m_pFontsMgr->fonts[fontIdx]->DrawString(STR_MAX_LEVEL, BBox.CenterX(), centerY, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(K_COLOR_SELECTED_TEXT, layer->alpha));
 				}
 				else
 				{
 					UTLang().SetStringDesc(&stringDesc, L"%d/%d", nCurrentVal - nMinXP, nMaxXP - nMinXP);
-					m_pFontsMgr->fonts[fontIdx]->DrawString(&stringDesc, BBox.CenterX(), centerY, FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_COLORALPHA(K_COLOR_SELECTED_TEXT, layer->alpha));
+					m_pFontsMgr->fonts[fontIdx]->DrawString(&stringDesc, BBox.CenterX(), centerY, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(K_COLOR_SELECTED_TEXT, layer->alpha));
 				}
 			}
 			//chevron when gaining a level
@@ -2994,7 +2994,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			WCHAR inputText[MAX_PATH];
 			StringCchPrintf(inputText, MAX_PATH, L"%s", paramsDict.GetVariantByName(L"inputText")->m_strArg.text);
 
-			DWORD wcol = D3DCOLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
 			CtrlMgrDrawHTilingAnim_HeadsOutside(m_pSprMgr, animIdx, 0, BBox_inflated, wcol);
 
 			//textul
@@ -3868,7 +3868,7 @@ void CtrlMgrDrawWindow(CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DW
 
 void CtrlMgrDrawWidebar(CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color)
 {
-	float fAlpha = D3DCOLOR_GETFALPHA(color);
+	float fAlpha = DW_GETFALPHA(color);
 
 	//deseneaza fundal (frames: 0-top bar, 1-bg filler)
 	RECTXYWH_F camrect = CCameraTransform::GetActiveCamera()->GetCamWorldAABB();
@@ -4470,7 +4470,7 @@ void CControlsManager::Paint()
 				{
 					RECTXYWH focusrect;
 					focusrect.Set(lay->m_focusRect.vMin.x, lay->m_focusRect.vMin.y, lay->m_focusRect.vSize.x, lay->m_focusRect.vSize.y);
-					CtrlMgrDrawFrame(&m_sprCol, ANM_CONTROLS_SPR_FRAME5, focusrect, D3DCOLOR_FFFA(lay->alpha), -1);
+					CtrlMgrDrawFrame(&m_sprCol, ANM_CONTROLS_SPR_FRAME5, focusrect, DW_COLOR_FFFA(lay->alpha), -1);
 				}
 			}
 

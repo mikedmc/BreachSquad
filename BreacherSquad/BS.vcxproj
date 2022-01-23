@@ -310,6 +310,7 @@
     <ClInclude Include="Source\Engine\lodepng\lodepng.h" />
     <ClInclude Include="Source\Engine\Log.h" />
     <ClInclude Include="Source\Engine\MainMenu.h" />
+    <ClInclude Include="Source\Engine\Menus.h" />
     <ClInclude Include="Source\Engine\MiniDump.h" />
     <ClInclude Include="Source\Engine\Mods.h" />
     <ClInclude Include="Source\Engine\Netlock.h" />
@@ -729,6 +730,7 @@
     <ClCompile Include="Source\Engine\MainMenu.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Menus.cpp" />
     <ClCompile Include="Source\Engine\MiniDump.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>

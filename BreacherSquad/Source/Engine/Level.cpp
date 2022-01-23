@@ -2060,8 +2060,8 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 						alpha = ((fLife - prop->fLightTimer) / fFadeTime);
 				}
 
-				float fOrigAlpha = D3DCOLOR_GETFALPHA(prop->sprLight.color);
-				vul.color = vur.color = vdl.color = vdr.color = D3DCOLOR_COLORALPHA(prop->sprLight.color, fOrigAlpha * alpha);
+				float fOrigAlpha = DW_GETFALPHA(prop->sprLight.color);
+				vul.color = vur.color = vdl.color = vdr.color = DW_COLORALPHA(prop->sprLight.color, fOrigAlpha * alpha);
 				//setez coordonate textura spot
 				RECTLTRB_F lTexRect = m_sprLights.GetModuleRect_TexCoords(prop->sprLight.animationIdx, 0, 0);
 				//Coord de mapare pe RTT (tex2) se seteaza din shader
@@ -2312,7 +2312,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 			float timeAdd = active->varAIparams[3]->asFloat();
 
 			float falpha = fmin + (fmax - fmin) * ((sin(fLocalTimeline * timeMul + timeAdd) + 1.0f) / 2.0f);
-			active->color = D3DCOLOR_COLORALPHA(active->color_ini, falpha);
+			active->color = DW_COLORALPHA(active->color_ini, falpha);
 		}
 		break;
 		case K_AI_STATE_FN_GET_TARGET_POS:
@@ -2748,7 +2748,7 @@ void CLevel::UpdateAI_light(CLight* light, float dTime)
 				else
 					falpha = falpha / fThreshold;
 				//falpha = (falpha < fThreshold) ? 0.0f : 1.0f;
-				light->color = D3DCOLOR_COLORALPHA(light->color_ini, falpha);
+				light->color = DW_COLORALPHA(light->color_ini, falpha);
 			}
 			break;
 			case K_AI_STATE_FN_LIGHT_ANG_CONE_XZ_TIME:
@@ -2875,7 +2875,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 					}
 					//color
 					float fAlpha = LIMIT(prop->AItimer1, 0.0f, 1.0f);
-					prop->color = D3DCOLOR_COLORALPHA(prop->color_ini, fAlpha);
+					prop->color = DW_COLORALPHA(prop->color_ini, fAlpha);
 				}
 			}
 			break;
@@ -2894,7 +2894,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 					}
 					//color
 					float fAlpha = LIMIT(prop->AItimer1, 0.0f, 1.0f);
-					prop->color = D3DCOLOR_COLORALPHA(prop->color_ini, fAlpha);
+					prop->color = DW_COLORALPHA(prop->color_ini, fAlpha);
 				}
 			}
 			break;
@@ -4379,7 +4379,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					if (fLeftTime <= actor->AIfvar1)
 					{
 						//setam comanda de culoare
-						actor->m_AIcommands.nColor = D3DCOLOR_COLORALPHA(actor->color_ini, fLeftTime / actor->AIfvar1);
+						actor->m_AIcommands.nColor = DW_COLORALPHA(actor->color_ini, fLeftTime / actor->AIfvar1);
 					}
 				}
 			}
@@ -4423,7 +4423,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				{
 					float fPerc = actor->m_fAIbehaviorTimer / actor->m_pAIcurrentState->m_arrBehaviors[actor->m_nAIcurrentBehaviorIdx].fBehaviorDuration;
 					//setam comanda de culoare
-					actor->m_AIcommands.nColor = D3DCOLOR_COLORALPHA(actor->color_ini, (1.0f - fPerc) * actor->AIfvar2 + fPerc * actor->AIfvar1);
+					actor->m_AIcommands.nColor = DW_COLORALPHA(actor->color_ini, (1.0f - fPerc) * actor->AIfvar2 + fPerc * actor->AIfvar1);
 				}
 			}
 			break;
@@ -5914,7 +5914,7 @@ void CLevel::SetAI(IActiveInterface * active, EAIstate AIstate, CVariantCollecti
 		case K_AI_STATE_COLL_FOG_OF_WAR:
 		{
 			active->AIfvar1 = 1.0f; //transparenta (full opaque)
-			active->color = active->color_ini = D3DCOLOR_COLORALPHA(K_LVL_COLL_FOW_COLOR, active->AIfvar1);
+			active->color = active->color_ini = DW_COLORALPHA(K_LVL_COLL_FOW_COLOR, active->AIfvar1);
 		}
 		break;
 		case K_AI_STATE_COLL_BREAKABLE_DOOR:
@@ -8710,7 +8710,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 
 	if (m_fTimeMultiplier_real < 1.0f)
 	{
-		DWORD colEffect = D3DCOLOR_COLORALPHA(0xff000088, 1.0f - m_fTimeMultiplier_real);
+		DWORD colEffect = DW_COLORALPHA(0xff000088, 1.0f - m_fTimeMultiplier_real);
 		Mat mattrans;
 		RECTXYWH_F bbox = UTGetGUI().m_sprCol.GetAFrameBBox_real(ANM_CONTROLS_SPR_VIGNETTES, 1);
 		MUMatAffine2D(&mattrans, rectRender.h / bbox.h, NULL, 0.0f, &rectRender.Center());

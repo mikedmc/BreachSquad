@@ -491,7 +491,7 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 					fonth2 = UTGetFontsManager()[ndum->intParam4]->rowHeight;
 				}
 
-				DWORD dwcol = D3DCOLOR_COLORALPHA(ndum->sprite.color, fAlpha);
+				DWORD dwcol = DW_COLORALPHA(ndum->sprite.color, fAlpha);
 				RECTXYWH ptrect(0, (int)floor(camrect.CenterY() + ndum->pos.y - fonth * 0.75f), 200, fonth * 1.5f + fonth2);
 				CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, ptrect, dwcol);
 
@@ -523,7 +523,7 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 					mat1 *= mat2;
 
 					m_pSprite->SetTransform(&mat1);
-					UTGetFontsManager()[ndum->intPt.x]->DrawString(ndum->intParam, 0, 0, FONTFLAG_ANCHOR_VCENTERHCENTER, D3DCOLOR_FFFA(ndum->timer));
+					UTGetFontsManager()[ndum->intPt.x]->DrawString(ndum->intParam, 0, 0, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLOR_FFFA(ndum->timer));
 					m_pSprite->SetTransform(&g_matIdentity);
 				}
 				else if(ndum->status == 1)
@@ -1299,8 +1299,8 @@ void CParticlesManager::PaintTails(D3DXVECTOR2* offset)
 			verts[ll * 6 + 2].tu = ntail->texPt1.x; verts[ll * 6 + 2].tv = ntail->texPt2.y;
 
 			
-			verts[ll * 6 + 0].color = verts[ll * 6 + 1].color = verts[ll * 6 + 3].color = D3DCOLOR_COLORALPHA(ntail->color, ntail->tailLife[ll]);
-			verts[ll * 6 + 2].color = verts[ll * 6 + 4].color = verts[ll * 6 + 5].color = D3DCOLOR_COLORALPHA(ntail->color, ntail->tailLife[ll + 1]);
+			verts[ll * 6 + 0].color = verts[ll * 6 + 1].color = verts[ll * 6 + 3].color = DW_COLORALPHA(ntail->color, ntail->tailLife[ll]);
+			verts[ll * 6 + 2].color = verts[ll * 6 + 4].color = verts[ll * 6 + 5].color = DW_COLORALPHA(ntail->color, ntail->tailLife[ll + 1]);
 
 			verts[ll * 6 + 3].pos = D3DXVECTOR3(tailPos[ll].x + tangentanear.x*ntail->width, tailPos[ll].y + tangentanear.y*ntail->width, 0.0f) + tableoffset;
 			verts[ll * 6 + 4].pos = D3DXVECTOR3(tailPos[ll + 1].x - tangentafar.x*ntail->width, tailPos[ll + 1].y - tangentafar.y*ntail->width, 0.0f) + tableoffset;
@@ -1566,8 +1566,8 @@ void CParticlesManager::GenerateRaysHemi(D3DXVECTOR2 npos, DWORD dwColor, int nL
 
 void CParticlesManager::GenerateEnemySoftGib(D3DXVECTOR2 npos, DWORD dwColor, int nLayer /*= K_PART_LAYER_NORMAL*/)
 {
-	float fAlpha = D3DCOLOR_GETFALPHA(dwColor);
-	DWORD dwSmokeColor = D3DCOLOR_COLORALPHA(dwColor, fAlpha * 0.6f);
+	float fAlpha = DW_GETFALPHA(dwColor);
+	DWORD dwSmokeColor = DW_COLORALPHA(dwColor, fAlpha * 0.6f);
 	//smoke
 	for (int kk = 0; kk < 6; kk++)
 	{
@@ -1660,7 +1660,7 @@ void CParticlesManager::GenerateHeadshot(D3DXVECTOR2 npos, D3DXVECTOR2 dir, DWOR
 	for (int kk = 0; kk < 5; kk++)
 	{
 		ldir = dir;
-		AddParticle(ANM_PARTICLES_SPR_SMOKE, false, randint(2), &(npos + ldir * (kk * 5.0f + randfloatsgn(5.0f))), NULL, &(ldir * (10.0f + randfloat(20.0f))), 0.6f + randfloat(0.4f), 0.5f + randfloat(0.2f), 0.2f, randfloat(PI), ldir.x * randfloat(0.4f), 0.1f, 0.4f, D3DCOLOR_COLORALPHA(dwColor, 0.45f), nLayer, 2.0f);
+		AddParticle(ANM_PARTICLES_SPR_SMOKE, false, randint(2), &(npos + ldir * (kk * 5.0f + randfloatsgn(5.0f))), NULL, &(ldir * (10.0f + randfloat(20.0f))), 0.6f + randfloat(0.4f), 0.5f + randfloat(0.2f), 0.2f, randfloat(PI), ldir.x * randfloat(0.4f), 0.1f, 0.4f, DW_COLORALPHA(dwColor, 0.45f), nLayer, 2.0f);
 	}
 	//raze
 	for (int kk = 0; kk < 8; kk++)

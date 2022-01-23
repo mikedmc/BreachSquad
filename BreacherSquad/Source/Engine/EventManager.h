@@ -15,6 +15,7 @@ public:
 	//create event
 	CEvent(const WCHAR* strEventType, const WCHAR* strEventCommand, double fEventTime = 0.0f);
 	CEvent(const CStringHash hashEventType, const CStringHash hashEventCommand, double fEventTime = 0.0f);
+	
 	//set event params
 	int AddArgUINT32(UINT32 val);
 	int AddArgINT32(INT32 val);

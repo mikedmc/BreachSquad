@@ -531,6 +531,7 @@ using namespace spine;
 #include "Level.h"
 #include "../LevelEd/LevelEditor.h"
 #include "MainMenu.h"
+#include "Menus.h"
 
 #ifdef ENABLE_GALAXY
 #include "galaxy/GalaxyApi.h"
