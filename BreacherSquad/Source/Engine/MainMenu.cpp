@@ -99,7 +99,7 @@ void CMainMenu::SetState(EMM_State neState, int nArg1 /*= 0*/)
 		case K_MM_STATE_GAME_MODE_SELECT:
 		{
 			//set final target
-			m_eTargetGameState = (eGameState)nArg1;
+			m_eTargetGameState = (EGameState)nArg1;
 			//special screen mode for quick match online coop
 			//bool bIsCoopQM = (UTGetAppClass().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH);
 			m_arrSelItems[0] = K_MM_MODE_VINFINITE;
@@ -445,7 +445,7 @@ void CMainMenu::Update(float dTime)
 
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 					}
 
@@ -532,7 +532,7 @@ void CMainMenu::Update(float dTime)
 
 							CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 							nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
-							nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+							nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 							UTGetEventManager().QueueEvent(nevent);
 
 							SND_PLAY(SNDIDX_DENIED);
@@ -678,7 +678,7 @@ void CMainMenu::Update(float dTime)
 
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
 
@@ -735,7 +735,7 @@ void CMainMenu::Update(float dTime)
 				{
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
-					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					UTGetEventManager().QueueEvent(nevent);
 
 					SND_PLAY(SNDIDX_DENIED);
@@ -757,7 +757,7 @@ void CMainMenu::Update(float dTime)
 							{
 								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_JOIN_COOP_LIST);
-								nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+								nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 								UTGetEventManager().QueueEvent(nevent);
 								break;
 							}
@@ -767,14 +767,14 @@ void CMainMenu::Update(float dTime)
 							{
 								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_CHAPTER_SELECTION);
-								nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+								nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 								UTGetEventManager().QueueEvent(nevent);
 							}
 							else  //networked game
 							{
 								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
-								nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+								nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 								nevent->AddNamedArgINT32(L"arg1", (int)UTApp().m_Settings.devnet_eNetGameType);
 								UTGetEventManager().QueueEvent(nevent);
 							}
@@ -796,7 +796,7 @@ void CMainMenu::Update(float dTime)
 							{
 								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_JOIN_COOP_LIST);
-								nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+								nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 								UTGetEventManager().QueueEvent(nevent);
 								break;
 							}
@@ -805,14 +805,14 @@ void CMainMenu::Update(float dTime)
 							{
 								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_CHAPTER_SELECTION);
-								nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+								nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 								UTGetEventManager().QueueEvent(nevent);
 							}
 							else  //networked quick match
 							{
 								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
-								nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+								nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 								nevent->AddNamedArgINT32(L"arg1", (int)UTApp().m_Settings.devnet_eNetGameType);
 								UTGetEventManager().QueueEvent(nevent);
 							}
@@ -886,7 +886,7 @@ void CMainMenu::Update(float dTime)
 
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
 
@@ -962,7 +962,7 @@ void CMainMenu::Update(float dTime)
 					{
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 
 						SND_PLAY(SNDIDX_DENIED);
@@ -980,7 +980,7 @@ void CMainMenu::Update(float dTime)
 
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 
 						SND_PLAY(SNDIDX_CLICK);
@@ -1000,7 +1000,7 @@ void CMainMenu::Update(float dTime)
 
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 
 						SND_PLAY(SNDIDX_CLICK);
@@ -1203,7 +1203,7 @@ void CMainMenu::Update(float dTime)
 
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_CHAPTER_SELECTION);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
 			else if (eCommand == K_CCTRLMGR_COMMAND_SELECT)
@@ -1217,7 +1217,7 @@ void CMainMenu::Update(float dTime)
 
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_CHAPTER_SELECTION);
-					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					UTGetEventManager().QueueEvent(nevent);
 				}
 				else
@@ -1250,14 +1250,14 @@ void CMainMenu::Update(float dTime)
 							CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 							nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 							nevent->AddNamedArgINT32(L"arg1", 1); //reset player selection
-							nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+							nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 							UTGetEventManager().QueueEvent(nevent);
 						}
 						else  //networked game is hosted 
 						{
 							CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 							nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
-							nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+							nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 							nevent->AddNamedArgINT32(L"arg1", (int)UTApp().m_Settings.devnet_eNetGameType);
 							UTGetEventManager().QueueEvent(nevent);
 						}
@@ -1517,7 +1517,7 @@ void CMainMenu::Update(float dTime)
 
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_CHAPTER_SELECTION);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
 			else if (eCommand == K_CCTRLMGR_COMMAND_SELECT)
@@ -1531,7 +1531,7 @@ void CMainMenu::Update(float dTime)
 
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_CHAPTER_SELECTION);
-					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					UTGetEventManager().QueueEvent(nevent);
 					//reset mod selection
 					g_userData[K_MEMID_MOD_DWNLVL_SELECTED] = -1;
@@ -1548,14 +1548,14 @@ void CMainMenu::Update(float dTime)
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 						nevent->AddNamedArgINT32(L"arg1", 1); //reset player selection
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 					}
 					else  //networked game is hosted 
 					{
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						nevent->AddNamedArgINT32(L"arg1", (int)UTApp().m_Settings.devnet_eNetGameType);
 						UTGetEventManager().QueueEvent(nevent);
 					}
@@ -1649,7 +1649,7 @@ void CMainMenu::Paint()
 
 					//	CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					//	nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
-					//	nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					//	nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					//	UTGetEventManager().QueueEvent(nevent);
 
 					//	break;

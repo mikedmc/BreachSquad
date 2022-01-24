@@ -1060,7 +1060,7 @@ void CPlayerSelScr::Update(float dTime)
 
 		CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 		nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME);
-		nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+		nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 		UTGetEventManager().QueueEvent(nevent);
 	}
 }

@@ -610,18 +610,6 @@ extern CMouseData			g_mouse;
 extern eStartupCommand		g_startupCommand;
 extern CStringHash			g_startupParam;
 
-extern int		g_gameStateErrorStringIdx;
-extern float	g_gameStateTimer; 
-
-/*
-* --- transitions ---
-*/
-#define K_TRANSITION_TYPE_NONE 0
-#define K_TRANSITION_TYPE_SIMPLE 1
-#define K_TRANSITION_TYPE_PIXELATE 2
-
-extern bool g_bDuringTransition;
-extern void ChangeGameStateTransition(eGameState newState, int param1, int param2, int transitionType);
 //particles
 extern CTimersArray			g_timers;
 extern CParticlesManager	g_particlesMgr;

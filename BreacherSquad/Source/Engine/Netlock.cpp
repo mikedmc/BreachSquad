@@ -529,7 +529,7 @@ void CNetLock::Net_UpdateEventLoop()
 				//change state
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				//setting join state
 				nevent->AddNamedArgINT32(L"arg1", (int)CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH);
 				UTGetEventManager().QueueEvent(nevent);
@@ -913,7 +913,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 		CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 		nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 		nevent->AddNamedArgINT32(L"arg1", 1); //reset player selection
-		nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+		nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 		UTGetEventManager().QueueEvent(nevent);
 
 		m_nStep = 3; //next step

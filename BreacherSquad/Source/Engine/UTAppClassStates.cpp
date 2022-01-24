@@ -12,7 +12,7 @@ int nLoadingFrame = 0;
 void CApplication::App_EnterState_Loading()
 {
 	GameState::substate = 0;
-	g_gameStateTimer = 0.0f;
+	GameState::fTimer = 0.0f;
 	//make sure we release everything
 	g_texManager.Release();
 	WCHAR wcsPath[MAX_PATH];
@@ -25,7 +25,7 @@ void CApplication::App_EnterState_Loading()
 
 void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime)
 {
-	if (g_bDuringTransition)
+	if (GameState::isTransitioning())
 		return;
 
 	switch ( GameState::substate )
@@ -35,7 +35,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 		{
 			//next state
 			GameState::substate++;
-			g_gameStateTimer = 0.0f;
+			GameState::fTimer = 0.0f;
 		}
 		break;
 		//animating background
@@ -219,7 +219,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				//when starting the game it will check for the startup command and load specified level 
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 				break;
 			}
@@ -233,7 +233,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				//change state
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				//set joining state
 				nevent->AddNamedArgINT32(L"arg1", (int)CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH);
 				UTGetEventManager().QueueEvent(nevent);
@@ -243,7 +243,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			{
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
 			//from now on we can pause the game
@@ -335,7 +335,7 @@ void CApplication::App_ExitState_Loading()
 void CApplication::App_EnterState_Developer()
 {
 	GameState::substate = 0;
-	g_gameStateTimer = K_GAME_SPLASH_SHOW_TIMER;
+	GameState::fTimer = K_GAME_SPLASH_SHOW_TIMER;
 	//make sure we release everything
 	UTApp().g_texManager.Release();
 	//load the texture
@@ -346,24 +346,24 @@ void CApplication::App_EnterState_Developer()
 
 void CApplication::App_UpdateState_Developer(LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime)
 {
-	if ((!g_bDuringTransition) && (g_gameStateTimer > 0.5f))
+	if ((!GameState::isTransitioning()) && (GameState::fTimer > 0.5f))
 	{
 		if ((g_texManager.GetTexture(0) == null) || (g_mouse.Lbut != K_MOUSE_BUTT_NOTPRESSED) || (g_mouse.Rbut != K_MOUSE_BUTT_NOTPRESSED) || (UTGetCtrlrMgr().KeyPressed()))
 		{
-			g_gameStateTimer = 0.5f;
+			GameState::fTimer = 0.5f;
 		}
 	}
 
 	if (GameState::substate == 0)
 	{
-		g_gameStateTimer -= dTime;
-		if (g_gameStateTimer <= 0.0f)
+		GameState::fTimer -= dTime;
+		if ( GameState::fTimer <= 0.0f)
 		{
 			GameState::substate = 1;
 			//change state to loading
 			CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 			nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LOADING);
-			nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+			nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 			UTGetEventManager().QueueEvent(nevent);
 		}
 	}
@@ -385,7 +385,7 @@ void CApplication::App_PaintState_Developer(LPDIRECT3DDEVICE9 pDevice, ID3DXSpri
 		//7x3 frames 71x86px
 		int nAnimFrames = 21; 
 		SIZEWH recsz(71, 86);
-		int nFrame = (int)floor(nAnimFrames * (1.0f - (g_gameStateTimer / K_GAME_SPLASH_SHOW_TIMER)));
+		int nFrame = (int)floor(nAnimFrames * (1.0f - (GameState::fTimer / K_GAME_SPLASH_SHOW_TIMER)));
 		int nx = nFrame % 7, ny = nFrame / 7;
 
 		SetRect(&src, nx * recsz.w, ny * recsz.h, (nx + 1) * recsz.w, (ny + 1) * recsz.h);

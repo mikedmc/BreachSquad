@@ -552,24 +552,23 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 	{
 		if (nEvent.m_eventCommand == CEventCommands::evtC_GAMESTATE_CHANGE)
 		{
-			eGameState gameState = (eGameState)nEvent.GetArgumentByName(L"newGameState")->m_asUINT32;
+			EGameState gameState = (EGameState)nEvent.GetArgumentByName(L"newGameState")->m_asUINT32;
 
 			GameState::ChangeTo(gameState);
 			return true; //consume event
 		}
 		if (nEvent.m_eventCommand == CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION)
 		{
-			eGameState gameState = (eGameState)nEvent.GetArgumentByName(L"newGameState")->m_asUINT32;
-			int transType = nEvent.GetArgumentByName(L"transitionType")->m_asINT32;
+			EGameState gameState = (EGameState)nEvent.GetArgumentByName(L"newGameState")->m_asUINT32;
+			ETransitionType transType = (ETransitionType)nEvent.GetArgumentByName(L"transitionType")->m_asINT32;
 
-			ChangeGameStateTransition(gameState, 0, 0, transType);
+			GameState::ChangeTo_Transition(gameState, transType);
 			return true; //consume event
 		}
 	}
 
 	//don't process controls messages during transitions
-	//#TODO: constantele de tranzitie ar trebui sa faca parte din UTAppClass
-	if (g_bDuringTransition)
+	if (GameState::isTransitioning())
 		return false;
 	//CONTROLS messages handling
 	if (nEvent.m_eventType == CEventTypes::evtT_CONTROLS)
@@ -856,14 +855,14 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
-					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					UTGetEventManager().QueueEvent(nevent);
 				}
 				else
 				{
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
-					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					UTGetEventManager().QueueEvent(nevent);
 				}
 
@@ -875,7 +874,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				{
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
-					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					UTGetEventManager().QueueEvent(nevent);
 
 					CHAR ctxt[MAX_PATH];
@@ -900,7 +899,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				{
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
-					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					UTGetEventManager().QueueEvent(nevent);
 
 					CHAR ctxt[MAX_PATH];
@@ -911,7 +910,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				{
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
-					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					UTGetEventManager().QueueEvent(nevent);
 
 					CHAR ctxt[MAX_PATH];
@@ -928,7 +927,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				//change state
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_HOST_PUBLIC"))
@@ -938,7 +937,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				//change state
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_HOST_PRIVATE"))
@@ -948,14 +947,14 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				//change state
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_CLOSE_LOBBIES_LIST"))
 			{
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_CANCEL_LOBBY"))
@@ -964,7 +963,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_JOIN_LOBBY"))
@@ -989,7 +988,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					//change state
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
-					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					//set joining state
 					nevent->AddNamedArgINT32(L"arg1", (int)CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH);
 					UTGetEventManager().QueueEvent(nevent);
@@ -1026,7 +1025,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				//change state
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
-				nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				//transmit that we want a special case as the next state (game state mode selection takes arg1 and transmits it to g_mainMenu)
 				nevent->AddNamedArgINT32(L"arg1", GAME_STATE_JOIN_COOP_LIST);
 				UTGetEventManager().QueueEvent(nevent);
@@ -1045,7 +1044,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					//comand schimbarea starii
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
-					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					UTGetEventManager().QueueEvent(nevent);
 				}
 				else //on networked games only send state to peer
@@ -1071,7 +1070,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 					nevent->AddNamedArgINT32(L"arg1", 0); //reset player selection
-					nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					UTGetEventManager().QueueEvent(nevent);
 
 					CHAR ctxt[MAX_PATH];
@@ -1725,7 +1724,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						//change state
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						//set joining state
 						nevent->AddNamedArgINT32(L"arg1", (int)CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH);
 						UTGetEventManager().QueueEvent(nevent);
@@ -1776,7 +1775,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 #ifdef ENABLE_STEAM_WORKSHOP
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_WORKSHOP);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 #endif					
 					}
@@ -1789,7 +1788,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 					}
 					break;
@@ -1860,7 +1859,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 						nevent->AddNamedArgINT32(L"arg1", 0); //reset player selection
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 					}
 					break;

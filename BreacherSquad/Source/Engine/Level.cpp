@@ -6698,12 +6698,12 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 						}
 					}
 
-					if (!g_bDuringTransition)
+					if (!GameState::isTransitioning())
 					{
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 						nevent->AddNamedArgINT32(L"arg1", 0); //reset player selection
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 					}
 					//clear command
@@ -6716,12 +6716,12 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 					g_userData[K_MEMID_SELECTED_CHAPTER] = g_netlock.m_ucSelChapter;
 					g_userData[K_MEMID_SELECTED_LEVEL] = g_netlock.m_ucSelLevel;
 
-					if (!g_bDuringTransition)
+					if (!GameState::isTransitioning())
 					{
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 						nevent->AddNamedArgINT32(L"arg1", 0); //reset player selection
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 					}
 					//clear command
@@ -6732,12 +6732,12 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 				{
 					LOG(L"Game::Level Win: Player chose to exit!");
 
-					if (!g_bDuringTransition)
+					if (!GameState::isTransitioning())
 					{
 						//change game state
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						//check and see if other player requested exit and show message if so
 						if (g_netlock.m_arrLvlResPeerStates[g_netlock.Net_GetOtherPlayerIndex()] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CANCEL)
 							nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_PLAYER_LEFT);
@@ -7204,12 +7204,12 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 						}
 					}
 
-					if (!g_bDuringTransition)
+					if (!GameState::isTransitioning())
 					{
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 						nevent->AddNamedArgINT32(L"arg1", 0); //reset player selection
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 					}
 					//clear command
@@ -7222,12 +7222,12 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 					g_userData[K_MEMID_SELECTED_CHAPTER] = g_netlock.m_ucSelChapter;
 					g_userData[K_MEMID_SELECTED_LEVEL] = g_netlock.m_ucSelLevel;
 
-					if (!g_bDuringTransition)
+					if (!GameState::isTransitioning())
 					{
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 						nevent->AddNamedArgINT32(L"arg1", 0); //reset player selection
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						UTGetEventManager().QueueEvent(nevent);
 					}
 					//clear command
@@ -7239,12 +7239,12 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 				{
 					LOG(L"Game::Level results: Peer left the game! Quit lobby!");
 
-					if (!g_bDuringTransition)
+					if (!GameState::isTransitioning())
 					{
 						//change game state
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
-						nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
+						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						//check and see if other player requested exit and show message if so
 						if (g_netlock.m_arrLvlResPeerStates[g_netlock.Net_GetOtherPlayerIndex()] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CANCEL)
 							nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_PLAYER_LEFT);

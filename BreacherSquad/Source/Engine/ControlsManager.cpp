@@ -1117,7 +1117,7 @@ void CControl::Update(float dTime, float fTimeline)
 
 			RECTXYWH movedBB = BBox;
 
-			if ((!bDisabled) && (!g_bDuringTransition))
+			if ((!bDisabled) && (!GameState::isTransitioning()))
 			{
 				bool bExecuteClick = false;
 				statusFlags &= ~CCTRL_STATUS_FLAG_HOVER;
@@ -1270,7 +1270,7 @@ void CControl::Update(float dTime, float fTimeline)
 				inc_limit(disablePercent, 10.0f * dTime, 1.0f);
 			}
 
-			if ((!bDisabled) && (!g_bDuringTransition))
+			if ((!bDisabled) && (!GameState::isTransitioning()))
 			{
 				statusFlags &= ~CCTRL_STATUS_FLAG_HOVER;
 

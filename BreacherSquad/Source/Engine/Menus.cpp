@@ -91,7 +91,7 @@ bool CMenus::HandleEvent( CEvent &nEvent )
 	{
 		if ( nEvent.m_eventCommand == CEventCommands::evtC_GAMESTATE_CHANGE )
 		{
-			eGameState gameState = ( eGameState ) nEvent.GetArgumentByName( L"newGameState" )->m_asUINT32;
+			EGameState gameState = ( EGameState ) nEvent.GetArgumentByName( L"newGameState" )->m_asUINT32;
 			// set internal state
 			SetState( gameState );
 		}
@@ -100,7 +100,7 @@ bool CMenus::HandleEvent( CEvent &nEvent )
 	return false;
 }
 
-void CMenus::SetState( eGameState neState )
+void CMenus::SetState( EGameState neState )
 {
 	if ( neState == m_gameState )
 		return;

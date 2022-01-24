@@ -100,7 +100,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 
 		case GAME_STATE_PLAYER_SELECTION:
 		{
-			if ( ( !g_bDuringTransition ) && ( !UTGetGUI().bIsBlocking ) )
+			if ( ( !GameState::isTransitioning() ) && ( !UTGetGUI().bIsBlocking ) )
 				g_playerSelScr.Update( fElapsedTime );
 		}
 		break;
@@ -185,14 +185,14 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 		case GAME_STATE_LEVEL_SELECTION:
 		case GAME_STATE_CHAPTER_SELECTION:
 		{
-			if ( ( !g_bDuringTransition ) && ( !UTGetGUI().bIsBlocking ) )
+			if ( ( !GameState::isTransitioning() ) && ( !UTGetGUI().bIsBlocking ) )
 				g_mainMenu.Update( fElapsedTime );
 		}
 		break;
 
 		case GAME_STATE_NET_LOBBY:
 		{
-			if ( g_bDuringTransition )
+			if ( GameState::isTransitioning() )
 				break;
 			//update background
 			if ( !UTGetGUI().bIsBlocking )
@@ -212,7 +212,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 				g_userData[ K_MEMID_OFFER_RESET_USER_DATA ] = 0;
 			}
 
-			if ( ( !g_bDuringTransition ) && ( !UTGetGUI().bIsBlocking ) )
+			if ( ( !GameState::isTransitioning() ) && ( !UTGetGUI().bIsBlocking ) )
 				g_mainMenu.Update( fElapsedTime );
 
 			//always check to see if menu exists

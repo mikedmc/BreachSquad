@@ -4,7 +4,7 @@
 // Menu class that listens to state changes
 class CMenus : public IEventListener, IDeviceRes {
 private:
-	eGameState			m_gameState;		// global gamestate 
+	EGameState			m_gameState;		// global gamestate 
 	int					m_nSubstate;		// current sub state
 	double				fLocalTimeline;
 
@@ -38,7 +38,7 @@ public:
 
 private:
 	// Sets the current menus state to match the gamestate
-	void				SetState( eGameState neState );
+	void				SetState( EGameState neState );
 
 public:
 	// Inherited via IDeviceRes

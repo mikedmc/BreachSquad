@@ -53,7 +53,7 @@ public:
 	LPDIRECT3DDEVICE9	m_pDevice;
 	ID3DXSprite*		m_pSprite; //sprite painter class
 
-	eGameState			m_eTargetGameState; //if set it changes to this state after selecting (used in game mode selection)
+	EGameState			m_eTargetGameState; //if set it changes to this state after selecting (used in game mode selection)
 
 public: 
 	CMainMenu();

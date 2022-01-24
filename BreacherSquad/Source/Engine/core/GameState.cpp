@@ -1,11 +1,21 @@
 #include "dxstdafx.h"
 #include "GameState.h"
 
+///----------------------------------------------------------------------------------
+/// Static Vars initialization
+///----------------------------------------------------------------------------------
+EGameState				GameState::state = GAME_STATE_EMPTY;
+int						GameState::substate = 0;
+float					GameState::fTimer = 0.0f;
 
-eGameState GameState::state = GAME_STATE_EMPTY;
-int GameState::substate = 0;
+bool					GameState::bDuringTransition = false;
+int						GameState::nTransitionStep = 0;
+float					GameState::fTransitionPercent = 0.0f;
+EGameState				GameState::eNextState = GAME_STATE_EMPTY;
+ETransitionType			GameState::nTransitionType = TRANSITION_NONE;
 
-void GameState::ChangeTo( eGameState newState, CVariantCollection * args )
+
+void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 {
 	LOG( L"System:: ChangeGameState(%d)", newState );
 	int oldGameState = GameState::state;
@@ -160,6 +170,7 @@ void GameState::ChangeTo( eGameState newState, CVariantCollection * args )
 	///--- set new game state here ---
 	GameState::state = newState;
 	GameState::substate = 0;
+	GameState::fTimer = 0.0f;
 
 	switch ( newState )
 	{
@@ -174,7 +185,7 @@ void GameState::ChangeTo( eGameState newState, CVariantCollection * args )
 			nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_DEVELOPER );
 #endif
 
-			nevent->AddNamedArgINT32( L"transitionType", K_TRANSITION_TYPE_SIMPLE );
+			nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
 			UTGetEventManager().QueueEvent( nevent );
 		}
 		break;
@@ -419,7 +430,7 @@ void GameState::ChangeTo( eGameState newState, CVariantCollection * args )
 					bool bLevelFound = UTGetChaptersList().GetMissionFilename( nChapterNumber, nLevelNumber, strLevelPath, MAX_PATH );
 					if ( !bLevelFound )
 					{
-						ChangeGameStateTransition( GAME_STATE_LEVEL_SELECTION, 0, 0, K_TRANSITION_TYPE_SIMPLE );
+						ChangeTo_Transition( GAME_STATE_LEVEL_SELECTION, TRANSITION_SIMPLE );
 						break;
 					}
 					//write current mission name and number
@@ -430,7 +441,7 @@ void GameState::ChangeTo( eGameState newState, CVariantCollection * args )
 				if ( FAILED( g_level.LoadLevel( strLevelPath ) ) )
 				{
 					ErrorBox( K_ERR_WARNING, L"Could not load level [%s]!", strLevelPath );
-					ChangeGameStateTransition( GAME_STATE_LEVEL_SELECTION, 0, 0, K_TRANSITION_TYPE_SIMPLE );
+					ChangeTo_Transition( GAME_STATE_LEVEL_SELECTION, TRANSITION_SIMPLE );
 					break;
 				}
 			}
@@ -442,7 +453,7 @@ void GameState::ChangeTo( eGameState newState, CVariantCollection * args )
 				if ( mod == null )
 				{
 					ErrorBox( K_ERR_WARNING, L"Couldn't find custom level!" );
-					ChangeGameStateTransition( GAME_STATE_LEVEL_SELECTION, 0, 0, K_TRANSITION_TYPE_SIMPLE );
+					ChangeTo_Transition( GAME_STATE_LEVEL_SELECTION, TRANSITION_SIMPLE );
 					break;
 				}
 
@@ -454,7 +465,7 @@ void GameState::ChangeTo( eGameState newState, CVariantCollection * args )
 				if ( FAILED( g_level.LoadLevel( wcsLevelPath ) ) )
 				{
 					ErrorBox( K_ERR_WARNING, L"Could not load downloaded level [%s]!", wcsLevelPath );
-					ChangeGameStateTransition( GAME_STATE_LEVEL_SELECTION, 0, 0, K_TRANSITION_TYPE_SIMPLE );
+					ChangeTo_Transition( GAME_STATE_LEVEL_SELECTION, TRANSITION_SIMPLE );
 					break;
 				}
 #endif // ENABLE_STEAM_WORKSHOP
@@ -479,3 +490,108 @@ void GameState::ChangeTo( eGameState newState, CVariantCollection * args )
 #endif
 	}
 }
+
+
+void GameState::ChangeTo_Transition( EGameState newState, ETransitionType transitionType, CVariantCollection * args /*= nullptr */ )
+{
+	//#TODO: save args and feed them to ChangeGameState:
+	//vcArgs = *args;
+	nTransitionStep = 0;
+	fTransitionPercent = 0.0f;
+	bDuringTransition = true;
+	eNextState = newState;
+
+	nTransitionType = transitionType;
+}
+
+
+void GameState::UpdateTransition( float dTime )
+{
+	if ( !bDuringTransition ) return;
+
+	switch ( nTransitionType )
+	{
+		case TRANSITION_SIMPLE:
+		{
+			switch ( nTransitionStep )
+			{
+				case 0: //show full screen black poly
+				{
+					if ( fTransitionPercent >= 1.0f )
+					{
+						fTransitionPercent = 0.0f;
+						nTransitionStep = 1;
+						//full black, change state now
+						GameState::ChangeTo( eNextState );
+					}
+
+					fTransitionPercent += dTime * 6.0f;
+					CLAMP( fTransitionPercent, 0.0f, 1.0f );
+				}
+				break;
+				case 1:
+				{
+					fTransitionPercent += dTime * 6.0f;
+					if ( fTransitionPercent >= 1.0f )
+					{
+						fTransitionPercent = 0.0f;
+						bDuringTransition = false;
+					}
+				}
+				break;
+			}
+		}
+		break;
+	}
+
+}
+
+void GameState::PaintTransition( float dTime, float fTimeline, PDEVICE pDevice )
+{
+	if ( !bDuringTransition ) return;
+
+	switch ( nTransitionType )
+	{
+		//tranzitia neagra simpla
+		case TRANSITION_SIMPLE:
+		{
+			//reset transforms
+			pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+			pDevice->SetTransform( D3DTS_VIEW, &g_matIdentity );
+
+			RECT rect;
+			SetRect( &rect, UTApp().g_rectRender.x, UTApp().g_rectRender.y, UTApp().g_rectRender.Right(), UTApp().g_rectRender.Bottom() );
+
+			switch ( nTransitionStep )
+			{
+				case 0:
+				{
+					//deseneaza poly negru peste
+					pDevice->SetTexture( 0, NULL ); //textura aiurea
+					//fac ca jumatate din timpul tranzitiei sa stea pe full opac ca sa nu se vada absolut nimic cand schimba starea
+					float fAlpha = LIMIT( 1.5f * fTransitionPercent, 0.0f, 1.0f );
+					DrawRectUP_TL1T( pDevice, rect, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ), DW_COLOR_XXXA( fAlpha ) );
+					//write "loading"
+					if ( ( UTGetGUI().m_sprCol.IsLoaded() ) && ( fAlpha >= 0.95f ) )
+					{
+						CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_cam360hScreen );
+						RECTXYWH_F scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
+						CSprite::paintFrame( &UTGetGUI().m_sprCol, scrrect.Right() - 3, scrrect.Bottom() - 3, ANM_CONTROLS_SPR_LOADING_ICONS, 0, 0x88ffffff );
+					}
+				}
+				break;
+				case 1:
+				{
+					//deseneaza poly negru peste
+					pDevice->SetTexture( 0, NULL );
+					float fAlpha = LIMIT( ( 1.5f - 1.5f * fTransitionPercent ), 0.0f, 1.0f );
+					DrawRectUP_TL1T( pDevice, rect, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ), DW_COLOR_XXXA( fAlpha ) );
+				}
+				break;
+			}
+		}
+		break;
+
+	}
+}
+

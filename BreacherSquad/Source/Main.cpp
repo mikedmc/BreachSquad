@@ -49,10 +49,6 @@ Mat							g_matWorld;							//world matrix
 
 CLog*						g_pLog;								//log class
 
-float						g_gameStateTimer;					
-int							g_gameStateErrorStringIdx;			// not 0 => after changing the state shows error box with specified message
-
-bool						g_bDuringTransition = false;		// Is it during transition?
 bool						g_bCanPause = false;				// Global flag: can we pause the game while in background?
 bool						g_bLevelNeedsUpdate = false;		//#HACK: pentru un singur frame ramane true dupa resolution change ca sa faca update chiar daca jocul e pe pauza
 
@@ -129,11 +125,6 @@ void		ShutdownApp(void);
 // Initializes the sound system
 OPRESULT	InitSound(void);
 
-// Transition functions
-void ChangeGameStateTransition(eGameState newState, int param1 = 0, int param2 = 0, int transitionType = K_TRANSITION_TYPE_SIMPLE);
-void UpdateTransition(float dTime);
-void PaintTransition(float dTime, float fTimeline, PDEVICE pDevice); 
-
 ///-----------------------------------------------------
 /// MISC UTILITY FUNCTIONS
 ///-----------------------------------------------------
@@ -145,6 +136,7 @@ spine::SpineExtension *spine::getDefaultExtension() {
 }
 
 // Callback used by ControllersMgr to normalize mouse input from global to ingame player relative
+// Hard to make it a class method and use as a callback so make it global
 void NormalizeIngameMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue)
 {
 	g_level.NormalizeMouseCoords(ControllerIID, fAxisValue, bIsHorizontalAxis, ret_fAxisValue);
@@ -524,8 +516,6 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 //**************************************************************************************
 OPRESULT BeforeMount(void)
 {
-	g_bDuringTransition = false; //nu este in timpul unei tranzitii
-
  ///--- Load strings here so we can set the window name ---
 	if (OP_FAILED(App_LocaLoadLangList(UTApp().m_Settings.shLanguageAlias)))
 	{
@@ -558,9 +548,6 @@ OPRESULT BeforeMount(void)
 	// Script processors
 	//--------------------------------------------------------------------------------------
 	UTGetScriptManager().AddProcessor(&g_level);
-
-	//initial game state
-	g_gameStateErrorStringIdx = -1; //no error message
 
 	return K_OP_OK;
 }
@@ -1602,7 +1589,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 		g_fLastUpdateTimer = 0.0f;
 
 		//--- LAST CALL ---
-		UpdateTransition(fElapsedTime);
+		GameState::UpdateTransition(fElapsedTime);
 
 		///--- FINISH UP ---
 		g_fTimeAccumUpdate -= l_fPeriodUpdate;
@@ -1712,19 +1699,6 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 	}
 #endif
 
-	//show error box if coming from other states
-	if ((!g_bDuringTransition) && (g_gameStateErrorStringIdx >= 0))
-	{
-		//save string idx
-		int stridx = g_gameStateErrorStringIdx;
-		//reset error string
-		g_gameStateErrorStringIdx = -1;
-		//show window after reset
-		UTGetGUI().MessageBoxOK(STR_OOPS, stridx);
-	}
-
-
-
 	///--- check Float rounding mode wasn't changed ---
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
 	#ifdef WIN32
@@ -1825,7 +1799,8 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		RECTXYWH_F camrect = UTApp().g_camScreen.GetCamWorldAABB();
 
 		//--- TRANSITIONS ---		
-		PaintTransition(fElapsedTime, fTime, pDevice);
+		g_pGameSprite->Flush();
+		GameState::PaintTransition(fElapsedTime, fTime, pDevice);
 		//--- if it is paused paints "PAUSE" ---
 #ifdef K_GAME_HAS_PAUSE_SCREEN
 		if ((g_bCanPause) && (DXUTIsTimePaused()) && (g_font10b1 != NULL))
@@ -2302,7 +2277,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			///--- TAKES SCREENSHOTS ---
 			case VK_F10:
 			{
-				if (( GameState::state != GAME_STATE_LOADING) && (!g_bDuringTransition))
+				if (( GameState::state != GAME_STATE_LOADING) && (!GameState::isTransitioning()))
 				{
 					if (FAILED(UTApp().SaveScreenshot()))
 					{
@@ -2393,116 +2368,4 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 }
 
 
-
-//variabile tranzitie
-int g_nTransitionStep = 0;
-float g_fTransitionPercent = 0.0f;
-eGameState g_nNextState = GAME_STATE_EMPTY;
-int g_nSentParameter1 = 0;
-int g_nSentParameter2 = 0;
-int g_nTransitionType = 0;
-
-void ChangeGameStateTransition(eGameState newState, int param1, int param2, int transitionType)
-{
-	g_nTransitionStep = 0;
-	g_fTransitionPercent = 0.0f;
-	g_bDuringTransition = true;
-	g_nNextState = newState;
-	g_nSentParameter1 = param1;
-	g_nSentParameter2 = param2;
-
-	g_nTransitionType = transitionType;
-}
-
-void UpdateTransition(float dTime)
-{
-	if (!g_bDuringTransition) return;
-
-	switch (g_nTransitionType)
-	{
-		case K_TRANSITION_TYPE_SIMPLE:
-		{
-			switch (g_nTransitionStep)
-			{
-				case 0: //show full screen black poly
-				{
-					if (g_fTransitionPercent >= 1.0f)
-					{
-						g_fTransitionPercent = 0.0f;
-						g_nTransitionStep = 1;
-						//full black, change state now
-						GameState::ChangeTo(g_nNextState);
-					}
-
-					g_fTransitionPercent += dTime * 6.0f;
-					CLAMP(g_fTransitionPercent, 0.0f, 1.0f);
-				}
-				break;
-				case 1: 
-				{
-					g_fTransitionPercent += dTime * 6.0f;
-					if (g_fTransitionPercent >= 1.0f)
-					{
-						g_fTransitionPercent = 0.0f;
-						g_bDuringTransition = false;
-					}
-				}
-				break;
-			}
-		}
-		break;
-	}
-
-}
-
-void PaintTransition(float dTime, float fTimeline, PDEVICE pDevice)
-{
-	if (!g_bDuringTransition) return;
-
-	switch (g_nTransitionType)
-	{
-		//tranzitia neagra simpla
-		case K_TRANSITION_TYPE_SIMPLE:
-		{
-			//reset transforms
-			pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-			pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
-
-			RECT rect;
-			SetRect(&rect, UTApp().g_rectRender.x, UTApp().g_rectRender.y, UTApp().g_rectRender.Right(), UTApp().g_rectRender.Bottom());
-
-			switch (g_nTransitionStep)
-			{
-				case 0: 
-				{
-					g_pGameSprite->Flush();
-					//deseneaza poly negru peste
-					pDevice->SetTexture(0, NULL); //textura aiurea
-					//fac ca jumatate din timpul tranzitiei sa stea pe full opac ca sa nu se vada absolut nimic cand schimba starea
-					float fAlpha = LIMIT(1.5f * g_fTransitionPercent, 0.0f, 1.0f);
-					DrawRectUP_TL1T(pDevice, rect, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), DW_COLOR_XXXA(fAlpha));
-					//write "loading"
-					if ((UTGetGUI().m_sprCol.IsLoaded()) && (fAlpha >= 0.95f))
-					{
-						CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam360hScreen);
-						RECTXYWH_F scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
-						CSprite::paintFrame(&UTGetGUI().m_sprCol, scrrect.Right() - 3, scrrect.Bottom() - 3, ANM_CONTROLS_SPR_LOADING_ICONS, 0, 0x88ffffff);
-					}
-				}
-				break;
-				case 1:	
-				{
-					g_pGameSprite->Flush();
-					//deseneaza poly negru peste
-					pDevice->SetTexture(0, NULL); //textura aiurea
-					float fAlpha = LIMIT((1.5f - 1.5f * g_fTransitionPercent), 0.0f, 1.0f);
-					DrawRectUP_TL1T(pDevice, rect, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), DW_COLOR_XXXA(fAlpha));
-				}
-				break;
-			}
-		}
-		break;
-
-	}
-}
 
