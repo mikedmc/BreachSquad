@@ -260,6 +260,7 @@
     <ClInclude Include="Source\Common\DXUT.h" />
     <ClInclude Include="Source\Common\DXUTenum.h" />
     <ClInclude Include="Source\Common\DXUTmisc.h" />
+    <ClInclude Include="Source\Engine\core\GameState.h" />
     <ClInclude Include="Source\Engine\EventManager.h" />
     <ClInclude Include="Source\Engine\Constants\font_ids.h" />
     <ClInclude Include="Source\Engine\FileManager.h" />
@@ -673,6 +674,7 @@
     <ClCompile Include="Source\Common\DXUTmisc.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
+    <ClCompile Include="Source\Engine\core\GameState.cpp" />
     <ClCompile Include="Source\Engine\EventManager.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>

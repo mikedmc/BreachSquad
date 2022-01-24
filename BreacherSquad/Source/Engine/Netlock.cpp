@@ -415,7 +415,7 @@ void CNetLock::Net_UpdateEventLoop()
 		{
 			case INetwork::EV_LOBBY_LIST_RECEIVED:
 			{
-				if (g_gameState != GAME_STATE_NET_LOBBY)
+				if (GameState::state != GAME_STATE_NET_LOBBY)
 					break;
 				//only if not in lobby
 				const INetwork::sLobby& lobby = g_pNetwork->GetCurrentLobby();
@@ -441,7 +441,7 @@ void CNetLock::Net_UpdateEventLoop()
 			// failed to join, try searching again
 			case INetwork::EV_LOBBY_JOIN_FAILED:
 			{
-				if (g_gameState == GAME_STATE_NET_LOBBY)
+				if (GameState::state == GAME_STATE_NET_LOBBY)
 					g_pNetwork->RequestLobbyList(false, 1);
 				else
 					Net_QuitLobby();
@@ -451,7 +451,7 @@ void CNetLock::Net_UpdateEventLoop()
 			// creation failed (?!), try again by first searching and then creating
 			case INetwork::EV_LOBBY_CREATE_FAILED:
 			{
-				if (g_gameState == GAME_STATE_NET_LOBBY)
+				if (GameState::state == GAME_STATE_NET_LOBBY)
 					g_pNetwork->RequestLobbyList(false, 1);
 				else
 					Net_QuitLobby();
@@ -461,7 +461,7 @@ void CNetLock::Net_UpdateEventLoop()
 			// nothing to do, we're ready to go
 			case INetwork::EV_LOBBY_JOIN_SUCCESS:
 			{
-				if (g_gameState == GAME_STATE_NET_LOBBY)
+				if (GameState::state == GAME_STATE_NET_LOBBY)
 				{
 				}
 			}
@@ -489,7 +489,7 @@ void CNetLock::Net_UpdateEventLoop()
 
 				Net_QuitLobby();
 
-				if (g_gameState == GAME_STATE_NET_LOBBY)
+				if (GameState::state == GAME_STATE_NET_LOBBY)
 				{
 					//#TODO: could send you back to older state
 					//change game state
@@ -517,7 +517,7 @@ void CNetLock::Net_UpdateEventLoop()
 			{
 				//triggered after you click accept
 				assert(ev.ullData != 0);
-				if (g_gameState <= GAME_STATE_LOADING)
+				if (GameState::state <= GAME_STATE_LOADING)
 				{
 					LOG(L"Net:: Invitation to lobby ignored. It got accepted too early (loading screen or before)");
 					break;
@@ -569,7 +569,7 @@ void CNetLock::Net_CreateLobby(bool bFriendsOnly)
 	char strCRC[MAX_PATH] = { 0 };
 	StringCchPrintfA(strCRC, MAX_PATH, "%u", UTApp().m_Settings.dev_unCurrentModsCRC);
 	char strMode[MAX_PATH] = { 0 };
-	StringCchPrintfA(strMode, MAX_PATH, "%u", (int)g_gameMode);
+	//StringCchPrintfA(strMode, MAX_PATH, "%u", (int)g_gameMode);
 
 	const char* pKeyDataValues[][2] =
 	{
@@ -587,7 +587,7 @@ void CNetLock::Net_RequestLobbyList(int nMaxLobbies /*,bool bMatchCRC*/)
 	char strCRC[MAX_PATH] = { 0 };
 	StringCchPrintfA(strCRC, MAX_PATH, "%u", UTApp().m_Settings.dev_unCurrentModsCRC);
 	char strMode[MAX_PATH] = { 0 };
-	StringCchPrintfA(strMode, MAX_PATH, "%u", (int)g_gameMode);
+	//StringCchPrintfA(strMode, MAX_PATH, "%u", (int)g_gameMode);
 
 	const char* pKeyDataValues[][2] =
 	{
@@ -608,7 +608,7 @@ void CNetLock::Net_EnterLobby(bool bHostGame, bool bPrivateLobby)
 	//default lobby data
 	m_ucSelChapter = 0;
 	m_ucSelLevel = 0;
-	m_ucSelMode = GAME_MODE_CLASSIC;
+	//m_ucSelMode = GAME_MODE_CLASSIC;
 	m_unRandomSeed = 6661;
 	//names
 	m_sNames[0].Reset();
@@ -706,7 +706,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 			m_ucSelLevel = g_userData[K_MEMID_SELECTED_LEVEL];
 		}
 		//save selected mode
-		m_ucSelMode = (BYTE)g_gameMode;
+		m_ucSelMode = (BYTE)0/*g_gameMode*/;
 		
 		//#MODDING: set data for modding handshake
 		m_ucModData = 0;
@@ -890,7 +890,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 	if (m_nStep == 2)
 	{
 		//set loading levels (important for slave)
-		g_gameMode = (eGameMode)m_ucSelMode;
+		//g_gameMode = (eGameMode)m_ucSelMode;
 		g_userData[K_MEMID_SELECTED_CHAPTER] = m_ucSelChapter;
 		g_userData[K_MEMID_SELECTED_LEVEL] = m_ucSelLevel;
 

@@ -254,9 +254,6 @@ bool CMainMenu::RequestLeaderboardsUpdate(bool bCoop)
 		StringCchPrintfA(pszBoardName, MAX_PATH, strFormat, K_GAME_STR_LEADERBOARDS_PREFIX_SP, nChapterNumber + 1, nLevelNumber + 1);
 	else
 		StringCchPrintfA(pszBoardName, MAX_PATH, strFormat, K_GAME_STR_LEADERBOARDS_PREFIX_COOP, nChapterNumber + 1, nLevelNumber + 1);
-	//on zombie mode leaderboards have an appendix
-	if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
-		StringCchCatA(pszBoardName, MAX_PATH, "_zm");
 	//reset strings too
 	UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
 	UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
@@ -755,7 +752,6 @@ void CMainMenu::Update(float dTime)
 						{
 							SND_PLAY(SNDIDX_CLICK);
 
-							g_gameMode = GAME_MODE_ZOMBIE_INVASION;
 							//special case for target game modes
 							if (m_eTargetGameState == GAME_STATE_JOIN_COOP_LIST)
 							{
@@ -795,7 +791,6 @@ void CMainMenu::Update(float dTime)
 						default:
 						{
 							SND_PLAY(SNDIDX_CLICK);
-							g_gameMode = GAME_MODE_CLASSIC;
 							//special case for target game modes
 							if (m_eTargetGameState == GAME_STATE_JOIN_COOP_LIST)
 							{
@@ -1924,10 +1919,7 @@ void CMainMenu::Paint()
 			CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 			g_font8bs1->DrawString(STR_SELECT_EPISODE, worldrect.CenterX(), worldrect.y + 35.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 			//game mode name (top left)
-			if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
-				g_font8b1->DrawString(STR_ZOMBIE_INVASION, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
-			else //classic mode
-				g_font8b1->DrawString(STR_CLASSIC_MODE, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
+			g_font8b1->DrawString(STR_CLASSIC_MODE, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
 			//coop string if online game
 			if (UTApp().IsGameNetworked())
 				g_font8b1->DrawString(STR_COOP, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
@@ -2004,10 +1996,7 @@ void CMainMenu::Paint()
 
 			PaintBackground(worldrect, 0xff4444dd);
 			//game mode name (top left)
-			if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
-				g_font8b1->DrawString(STR_ZOMBIE_INVASION, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
-			else //classic mode
-				g_font8b1->DrawString(STR_CLASSIC_MODE, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
+			g_font8b1->DrawString(STR_CLASSIC_MODE, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
 			//coop string if online game
 			if (UTApp().IsGameNetworked())
 				g_font8b1->DrawString(STR_COOP, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
@@ -2168,10 +2157,7 @@ void CMainMenu::Paint()
 
 			PaintBackground(worldrect, 0xff4444dd);
 			//game mode name (top left)
-			if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
-				g_font8b1->DrawString(STR_ZOMBIE_INVASION, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
-			else //classic mode
-				g_font8b1->DrawString(STR_CLASSIC_MODE, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
+			g_font8b1->DrawString(STR_CLASSIC_MODE, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
 			//coop string if online game
 			if (UTApp().IsGameNetworked())
 				g_font8b1->DrawString(STR_COOP, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);

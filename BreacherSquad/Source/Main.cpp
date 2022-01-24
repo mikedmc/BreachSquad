@@ -49,10 +49,6 @@ Mat							g_matWorld;							//world matrix
 
 CLog*						g_pLog;								//log class
 
-eGameState					g_gameState = GAME_STATE_EMPTY;		//state machine's current state. defined in dxstdafx.h 
-UINT32						g_gameSubstate = 0;					//current state's substate - if needed
-eGameMode					g_gameMode = GAME_MODE_CLASSIC;		//current selected game mode
-
 float						g_gameStateTimer;					
 int							g_gameStateErrorStringIdx;			// not 0 => after changing the state shows error box with specified message
 
@@ -134,7 +130,6 @@ void		ShutdownApp(void);
 OPRESULT	InitSound(void);
 
 // Transition functions
-void ChangeGameState(eGameState newState, int param1 = 0, int param2 = 0); //are parametru default, in caz ca e necesar
 void ChangeGameStateTransition(eGameState newState, int param1 = 0, int param2 = 0, int transitionType = K_TRANSITION_TYPE_SIMPLE);
 void UpdateTransition(float dTime);
 void PaintTransition(float dTime, float fTimeline, PDEVICE pDevice); 
@@ -298,7 +293,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 #if defined(ENABLE_STEAM_WORKSHOP)
 	if (g_startupCommand == GAME_STARTUP_UPLOAD_MOD)
 	{
-		ChangeGameState(GAME_STATE_UPLOAD_MOD);
+		GameState::ChangeTo(GAME_STATE_UPLOAD_MOD);
 	}
 #endif
 
@@ -566,8 +561,6 @@ OPRESULT BeforeMount(void)
 
 	//initial game state
 	g_gameStateErrorStringIdx = -1; //no error message
-	//default to a good game mode
-	g_gameMode = GAME_MODE_CLASSIC;
 
 	return K_OP_OK;
 }
@@ -583,7 +576,7 @@ OPRESULT AfterMount(void)
 		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Could not load SpritesVS!\n%s", shpath);
 	}
 
-	ChangeGameState(GAME_STATE_PRELOAD);
+	GameState::ChangeTo(GAME_STATE_PRELOAD);
 	return K_OP_OK;
 }
 
@@ -1010,7 +1003,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 	//--- update clasa sunete pentru fade-uri ---
 	UTGetSoundManager().Update(fElapsedTime);
 	//-=-=-= controllers update =-=-=-
-	//--must be called before updates: ca sa corespunda bPressed cu JUST_PRESSED
+	//--must be called before updates
 	g_mouse.Update(fElapsedTime);
 	//hide mouse when not moving (not too often)
 	if (g_mouse.fTimeSinceInput > 5.0f)
@@ -1023,256 +1016,8 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 	//update controls manager
 	UTGetGUI().Update(fElapsedTime);
 
-	switch (g_gameState)
-	{
-		case GAME_STATE_PRELOAD:
-		{
-		}
-		break;
-		case GAME_STATE_DEVELOPER:
-		{
-			UTApp().App_UpdateState_Developer(pDevice, fTime, fElapsedTime);
-		}
-		break;
-		case GAME_STATE_LOADING:
-		{
-			UTApp().App_UpdateState_Loading(pDevice, fTime, fElapsedTime);
-		}
-		break;
-
-		//utility mod uploading to Steam
-		case GAME_STATE_UPLOAD_MOD:
-		{
-#ifdef ENABLE_STEAM_WORKSHOP
-			switch (g_gameSubstate)
-			{
-				case 0: //a few settings and checks
-				{
-					UTApp().m_Settings.dev_bDevMode = true;
-
-					LOG(L"\nMod Upload/Update Started...");
-					g_gameSubstate++;
-				}
-				break;
-				case 1:
-				{
-					LOG(L"[Workshop] Trying to update mod...");
-					//try update
-					if (true == Workshop_UpdatePublished(g_startupParam.text))
-					{
-						g_gameSubstate = 10; //exit
-						LOG(L"Mod UPDATED successfully!");
-						MessageBox(null, L"Mod UPDATED successfully!", L"Info", MB_OK);
-					}
-					else
-					{
-						LOG(L"Mod not found! Uploading as new mod.");
-						g_gameSubstate = 2;
-					}
-				}
-				break;
-				case 2:
-				{
-					LOG(L"--- PUBLISHING NEW MOD ---");
-					//try publish
-					if (true == Workshop_Publish(g_startupParam.text))
-					{
-						LOG(L"Mod UPLOADED successfully as new mod!");
-						MessageBox(null, L"Mod UPLOADED successfully as new mod!", L"Info", MB_OK);
-					}
-					else
-					{
-						LOG(L"Mod upload FAILED! See error.log for details!");
-						MessageBox(null, L"Mod upload FAILED! See error.log for details!", L"Error", MB_OK | MB_ICONERROR);
-					}
-
-					g_gameSubstate++;
-				}
-				break;
-
-				//exit game at the end
-				default:
-				{
-					PostQuitMessage(0);
-				}
-				break;
-			}
-			break;
-#endif
-		}
-		break;
-
-		case GAME_STATE_PLAYER_SELECTION:
-		{
-			if ((!g_bDuringTransition) && (!UTGetGUI().bIsBlocking))
-				g_playerSelScr.Update(fElapsedTime);
-		}
-		break;
-
-		case GAME_STATE_JOIN_COOP_LIST:
-		{
-			//update list on timer
-			if (g_timers.Tick(2000))
-			{
-				CCtrlLayer* lay = UTGetGUI().GetTopmostInputLayer();
-				//disable the refresh button if still working
-				if (lay != null)
-				{
-					CControl* ctrl = lay->GetControlByName("BUT_REFRESH_LOBBIES");
-					if (ctrl)
-					{
-						ctrl->bDisabled = false;
-						if (g_pNetwork->IsRequestingLobby())
-							ctrl->bDisabled = true;
-					}
-				}
-
-				int nLobbiesCnt = g_pNetwork->GetLobbyListEntriesCount();
-				if (nLobbiesCnt == 0)
-				{
-					if (!g_pNetwork->IsRequestingLobby())
-						UTLang().SetString(STR_LOBBIES_LIST_VAL, L"%s", UTLang().strings[STR_NO_LOBBIES]->sText);
-
-					//disable controls (list, join)
-					if (lay != null)
-					{
-						CControl* ctrl = lay->GetControlByName("BUT_JOIN_LOBBY");
-						if (ctrl)
-							ctrl->bDisabled = true;
-						ctrl = lay->GetControlByName("CTRL_LOBBIES_SELECTOR");
-						if (ctrl)
-						{
-							ctrl->bDisabled = true;
-							ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", 1);
-						}
-					}
-				}
-				else
-				{
-					WCHAR	strLobbiesList[2048] = { 0 };
-					for (int kk = 0; kk < nLobbiesCnt; kk++)
-					{
-						CStringDesc sdName;
-						uint64_t iLobbyID = 0;
-						char strLobbyName[250];
-
-						g_pNetwork->GetLobbyListEntry(kk, iLobbyID, strLobbyName);
-						UTLang().SetStringDescUTF8(&sdName, strLobbyName);
-
-						StringCchCat(strLobbiesList, 2048, sdName.sText);
-						if (kk < nLobbiesCnt - 1)
-							StringCchCat(strLobbiesList, 2048, L"\n");
-					}
-
-					UTLang().SetString(STR_LOBBIES_LIST_VAL, strLobbiesList);
-
-					//enable controls (list, join)
-					if (lay != null)
-					{
-						CControl* ctrl = lay->GetControlByName("BUT_JOIN_LOBBY");
-						if (ctrl)
-							ctrl->bDisabled = false;
-						ctrl = lay->GetControlByName("CTRL_LOBBIES_SELECTOR");
-						if (ctrl)
-						{
-							ctrl->bDisabled = false;
-							ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", nLobbiesCnt);
-						}
-					}
-				}
-			}
-		}
-		break;
-
-		case GAME_STATE_WORKSHOP:
-		case GAME_STATE_GAME_MODE_SELECTION:
-		case GAME_STATE_LEVEL_SELECTION:
-		case GAME_STATE_CHAPTER_SELECTION:
-		{
-			if ((!g_bDuringTransition) && (!UTGetGUI().bIsBlocking))
-				g_mainMenu.Update(fElapsedTime);
-		}
-		break;
-
-		case GAME_STATE_NET_LOBBY:
-		{
-			if (g_bDuringTransition)
-				break;
-			//update background
-			if (!UTGetGUI().bIsBlocking)
-				g_mainMenu.Update(fElapsedTime);
-
-			//update lobby
-			g_netlock.Net_UpdateLobby(fElapsedTime);
-		}
-		break;
-
-		case GAME_STATE_MAINMENU:
-		{
-			//offer to reset the user data
-			if (g_userData[K_MEMID_OFFER_RESET_USER_DATA] != 0)
-			{
-				UTGetGUI().ShowLayerOnce("LAYER_ID_RESET_PROGRESS_EA");
-				g_userData[K_MEMID_OFFER_RESET_USER_DATA] = 0;
-			}
-
-			if ((!g_bDuringTransition) && (!UTGetGUI().bIsBlocking))
-				g_mainMenu.Update(fElapsedTime);
-
-			//always check to see if menu exists
-#ifdef ENABLE_STEAM_WORKSHOP
-			if (UTGetGUI().GetLayerByName("LAYER_ID_MAINMENU") == null)
-			{
-				UTGetGUI().ShowLayerOnce("LAYER_ID_MAINMENU");
-			}
-#else
-			if (UTGetGUI().GetLayerByName("LAYER_ID_MAINMENU_NOWORKSHOP") == null)
-			{
-				UTGetGUI().ShowLayerOnce("LAYER_ID_MAINMENU_NOWORKSHOP");
-			}
-#endif
-
-			for (UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
-			{
-				if (UTGetCtrlrMgr().m_arrControllers[kk]->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED)
-				{
-					CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_QUITGAME");
-					if ((layer == null) && (!UTGetGUI().bIsBlocking))
-					{
-						SND_PLAY(SNDIDX_CLICK);
-						UTGetGUI().ShowLayerOnce("LAYER_ID_QUITGAME");
-					}
-					/*
-					//windows close when pressing back
-					else if ((layer != null) && (layer == UTGetControlsManager().GetTopmostInputLayer()))
-					{
-					SND_PLAY(SNDIDX_DENIED);
-					UTGetControlsManager().RemoveLayer("LAYER_ID_QUITGAME");
-					}
-					*/
-					break;
-				}
-			}
-		}
-		break;
-
-		case GAME_STATE_GAME:
-		{
-			g_game.Update( fElapsedTime, bSyncUpdate, g_nUpdateFrame );
-
-			g_editor.Update(fElapsedTime);
-		}
-		break;
-
-#ifdef K_CONTROLS_EDITOR
-		case GAME_STATE_CONTROLSED:
-			g_ControlsEditor.SetCameraTransform(&UTApp().g_cam360hScreen);
-			g_ControlsEditor.Update(fElapsedTime);
-			break;
-#endif
-
-	}
-
+	// update main game engine
+	g_game.Update( fElapsedTime, bSyncUpdate, g_nUpdateFrame );
 
 	///--- ANALYTICS ---
 	UTGetAnalytics().Update();
@@ -2027,7 +1772,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 
 		// only start and end UTPainter after we preloaded the minimum painter shaders
-		if (g_gameState != GAME_STATE_PRELOAD)
+		if (GameState::state != GAME_STATE_PRELOAD)
 		{
 			PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 			if (pSprVS)
@@ -2042,7 +1787,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 #ifdef K_CONTROLS_EDITOR
 		///--- controls editor paint ---
-		if ( g_gameState == GAME_STATE_CONTROLSED )
+		if ( GameState::state == GAME_STATE_CONTROLSED )
 		{
 			g_ControlsEditor.Paint();
 		}
@@ -2051,7 +1796,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 		///--- chat window ---
 #ifdef ENABLE_CHAT_WINDOW
-		if ((UTApp().IsGameNetworked()) && (g_gameState == GAME_STATE_GAME) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
+		if ((UTApp().IsGameNetworked()) && ( GameState::state == GAME_STATE_GAME) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
 		{
 			g_pGameSprite->Flush();
 			CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
@@ -2065,7 +1810,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 		///--- GUI controls paint ---
 #ifdef K_CONTROLS_EDITOR
-		if (g_gameState != GAME_STATE_CONTROLSED)
+		if ( GameState::state != GAME_STATE_CONTROLSED)
 		{
 			UTGetGUI().Paint();
 			g_pGameSprite->Flush();
@@ -2164,14 +1909,14 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		g_pGameSprite->End();
 
 		// end main painter
-		if (g_gameState != GAME_STATE_PRELOAD)
+		if ( GameState::state != GAME_STATE_PRELOAD)
 		{
 			UTPainter().End();
 		}
 
 		//--- CONTROLS EDITOR PAINT ---
 #ifdef K_CONTROLS_EDITOR
-		if (g_gameState == GAME_STATE_CONTROLSED)
+		if ( GameState::state == GAME_STATE_CONTROLSED)
 		{
 			//pd3dDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 			g_ControlsEditor.PaintBBoxes();
@@ -2194,7 +1939,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	if (UTimgui().BeginPaint())
 	{
 		// DEBUG IMGUI WINDOW
-		if (g_gameState == GAME_STATE_GAME)
+		if ( GameState::state == GAME_STATE_GAME)
 		{
 			// non editor windows
 			{
@@ -2213,7 +1958,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				//ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
 #if defined(_DEBUG) || defined(DEBUG)
 				ImGui::Separator();
-				if (g_gameState == GAME_STATE_GAME)
+				if ( GameState::state == GAME_STATE_GAME)
 				{
 					//ImGui::Text("Sortables: %d", g_level.m_visibleList.arrSortedItems.nCount);
 					RECTXYWH_F		camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
@@ -2258,7 +2003,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		ImGui::ShowDemoWindow(&show_demo_window);
 		//--- CONTROLS EDITOR INTERFACES ---
 #ifdef K_CONTROLS_EDITOR
-		if (g_gameState == GAME_STATE_CONTROLSED)
+		if ( GameState::state == GAME_STATE_CONTROLSED)
 		{
 			g_ControlsEditor.IMGUI_ShowInterfaces();
 		}
@@ -2484,7 +2229,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 					if (bAltDown)
 					{
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
-						//if (g_gameState != GAME_STATE_GAME)
+						//if (GameState::state != GAME_STATE_GAME)
 						//{
 						//	UTGetScriptManager().Release();
 
@@ -2514,7 +2259,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			///--- Shows the mey mapping screen ---
 			case VK_F1:
 			{
-				if ((g_gameState == GAME_STATE_GAME) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
+				if (( GameState::state == GAME_STATE_GAME) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
 				{
 					if (bAltDown)
 					{
@@ -2557,7 +2302,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			///--- TAKES SCREENSHOTS ---
 			case VK_F10:
 			{
-				if ((g_gameState != GAME_STATE_LOADING) && (!g_bDuringTransition))
+				if (( GameState::state != GAME_STATE_LOADING) && (!g_bDuringTransition))
 				{
 					if (FAILED(UTApp().SaveScreenshot()))
 					{
@@ -2610,7 +2355,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			case VK_RETURN:
 			{
 				//chat available only when playing networked game and no other interface visible
-				if ((UTApp().IsGameNetworked()) && (g_gameState == GAME_STATE_GAME) && 
+				if ((UTApp().IsGameNetworked()) && ( GameState::state == GAME_STATE_GAME) &&
 					(g_level.m_levelState == K_LVL_STATE_PLAYING) && (UTGetGUI().Layers.GetSize() == 0))
 				{
 					//enable input if not already enabled
@@ -2625,7 +2370,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			case VK_F2:
 			{
 				int nextState = GAME_STATE_CONTROLSED;
-				if (g_gameState == GAME_STATE_CONTROLSED)
+				if ( GameState::state == GAME_STATE_CONTROLSED)
 					nextState = GAME_STATE_MAINMENU;
 
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
@@ -2648,502 +2393,6 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 }
 
 
-//--------------------------------------------------------------------------------------
-// GAMESTATE CHANGER
-//--------------------------------------------------------------------------------------
-void ChangeGameState(eGameState newState, int param1, int param2)
-{
-	LOG(L"System:: ChangeGameState(%d)", newState);
-	int oldGameState = g_gameState;
-
-	///--- from what state is it coming? ---
-	switch (oldGameState)
-	{
-		case GAME_STATE_PRELOAD:
-		{
-		}
-		break;
-		case GAME_STATE_DEVELOPER:
-		{
-			UTApp().App_ExitState_Developer();
-		}
-		break;
-		case GAME_STATE_LOADING:
-		{
-			UTApp().App_ExitState_Loading();
-			g_bForceOneUpdatePerFrame = false;
-		}
-		break;
-
-		case GAME_STATE_PLAYER_SELECTION:
-		{
-			g_playerSelScr.ReleaseSprites();
-			///--- load main menu ---
-			WCHAR xmlpath[MAX_PATH], xmlpath2[MAX_PATH];
-			FileManager::GetMediaPath(L"media/interfaces/menus.bsx", xmlpath);
-			FileManager::GetMediaPath(L"media/interfaces/menus0.bsx", xmlpath2);
-			if (FAILED(g_mainMenu.LoadSprites(xmlpath, xmlpath2)))
-			{
-				ErrorBox(K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath);
-			}
-
-			UTGetGUI().RemoveAllLayers(true);
-		}
-		break;
-		case GAME_STATE_GAME:
-		{
-
-#ifdef ENABLE_CHAT_WINDOW
-			//cancel current input if exited
-			g_ChatWnd.CancelInput();
-			g_ChatWnd.Clear();
-#endif
-
-			//push global scores to leaderboard when returning from the game
-#ifdef ENABLE_LEADERBOARDS
-			//upload multiplayer score
-			if (g_userData[K_MEMID_TOTAL_SCORE_COOP] > 0)
-				UTGetLeaderboards().QueueJob(K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_COOP, g_userData[K_MEMID_TOTAL_SCORE_COOP]);
-			//upload single player score so that current leaderboard remains the single player one
-			if (g_userData[K_MEMID_TOTAL_SCORE_SOLO] > 0)
-				UTGetLeaderboards().QueueJob(K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, g_userData[K_MEMID_TOTAL_SCORE_SOLO]);
-#endif
-			//must be called here to reset controller flags
-			UTGetCtrlrMgr().ResetAllControllersKeypresses();
-			//stop all sounds
-			UTGetSoundManager().StopGroup("sounds", false, true);
-			UTGetSoundManager().StopGroup("ingame", false, true);
-			
-			SND_SET_GROUP_FREQUENCY("ingame", 1.0f, false);
-
-			g_level.Release();
-			// level was unloaded, immediately set the controller pointer to null
-			UTGetCtrlrMgr().SetNormalizeCoordsFunctionPtr(nullptr);
-
-			UTGetGUI().RemoveAllLayers(true);
-
-			UTGetSoundManager().StopGroup("music", false, true);
-			if (newState != GAME_STATE_GAME)
-			{
-				if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
-				{
-					//SND_PLAY_ONCE(SNDIDX_THEME_HALLOWEEN, DSBPLAY_LOOPING);
-				}
-				else
-				{
-					SND_PLAY_ONCE(SNDIDX_THEME_MENU1, DSBPLAY_LOOPING);
-				}
-			}
-
-			//set volumes
-			SND_SET_GROUP_VOLUME("sounds", UTApp().m_Settings.fSoundsVolume, false);
-			SND_SET_GROUP_VOLUME("ingame", UTApp().m_Settings.fSoundsVolume, false);
-			SND_SET_GROUP_VOLUME("music", UTApp().m_Settings.fMusicVolume, false);
-
-			///--- load main menu ---
-			WCHAR xmlpath[MAX_PATH], xmlpath2[MAX_PATH];
-			FileManager::GetMediaPath(L"media/interfaces/menus.bsx", xmlpath);
-			FileManager::GetMediaPath(L"media/interfaces/menus0.bsx", xmlpath2);
-			if (FAILED(g_mainMenu.LoadSprites(xmlpath, xmlpath2)))
-			{
-				ErrorBox(K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath);
-			}
-		}
-		break;
-
-		case GAME_STATE_WORKSHOP:
-		{
-			UTGetSoundManager().StopGroup("sounds", false, true);
-			UTGetGUI().RemoveAllLayers(true);
-			//release used textures here:
-			UTApp().g_texManager.Release();
-			//make sure we reload everything that can be modded
-			App_ReloadContentChanges();
-			///compute mods CRC
-			UINT32 unModsCRC = App_GetActiveModsCRC();
-			//initialize vertical mode after modding
-			//g_verticalMode.Init(&g_level, L"media/levels/mod_prefabs/infinite_tower.xml");
-			
-			//unModsCRC += g_verticalMode.GetFilesCRC(false);
-			UTApp().m_Settings.dev_unCurrentModsCRC = unModsCRC;
-			LOG(L"--> CRC_BASE [%08x] CRC_MODS [%08x] <--", UTApp().m_Settings.dev_unCurrentCRC, UTApp().m_Settings.dev_unCurrentModsCRC);
-			//when returning from the mods screen reload the main menu in case it changed
-			g_mainMenu.Release();
-			
-			WCHAR xmlpath[MAX_PATH];
-			WCHAR xmlpath2[MAX_PATH];
-			FileManager::GetMediaPath(L"media/interfaces/menus.bsx", xmlpath);
-			FileManager::GetMediaPath(L"media/interfaces/menus0.bsx", xmlpath2);
-			if (FAILED(g_mainMenu.LoadSprites(xmlpath, xmlpath2)))
-			{
-				ErrorBox(K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath);
-			}
-		}
-		break;
-
-		case GAME_STATE_JOIN_COOP_LIST:
-		{
-			UTGetSoundManager().StopGroup("sounds", false, true);
-			UTGetGUI().RemoveAllLayers(true);
-		}
-		break;
-
-		case GAME_STATE_NET_LOBBY:
-		case GAME_STATE_GAME_MODE_SELECTION:
-		case GAME_STATE_CHAPTER_SELECTION:
-		case GAME_STATE_LEVEL_SELECTION:
-		case GAME_STATE_MAINMENU:
-		{
-			UTGetSoundManager().StopGroup("sounds", false, true);
-			UTGetGUI().RemoveAllLayers(true);
-			//release used textures here:
-			UTApp().g_texManager.Release();
-		}
-		break;
-#ifdef K_CONTROLS_EDITOR
-		case GAME_STATE_CONTROLSED:
-		{
-			UTimgui().SetGlobalEnabled(false);
-			g_ControlsEditor.Close();
-		}
-		break;
-#endif
-	}
-
-	///--- set new game state here ---
-	g_gameState = newState;
-
-	switch (newState)
-	{
-		case GAME_STATE_PRELOAD:
-		{
-			//change state to loading
-			CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
-
-#if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
-			nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LOADING);
-#else
-			nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_DEVELOPER);
-#endif
-
-			nevent->AddNamedArgINT32(L"transitionType", K_TRANSITION_TYPE_SIMPLE);
-			UTGetEventManager().QueueEvent(nevent);
-		}
-		break;
-		case GAME_STATE_DEVELOPER:
-		{
-			UTApp().App_EnterState_Developer();
-		}
-		break;
-
-		case GAME_STATE_LOADING:
-		{
-			g_bForceOneUpdatePerFrame = true;
-			UTApp().App_EnterState_Loading();
-
-			//on loading disable sync
-			UTApp().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_NO_NETWORK;
-			UTApp().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_STOPPED;
-		}
-		break;
-
-		case GAME_STATE_UPLOAD_MOD:
-		{
-			//some initial settings
-			g_gameSubstate = 0;
-			//force creating log window?
-			UTApp().m_Settings.dev_bLogWindowShow = true;
-		}
-		break;
-
-		case GAME_STATE_MAINMENU:
-		{
-			g_level.GetNextRandomLevel();
-#if defined(_DEBUG) || defined(DEBUG)
-	#if defined(ENABLE_ACHIEVEMENTS_RESET_ON_STARTUP)
-			ErrorBox(K_ERR_ONSCREEN, L"---> [Achievements] Resetting achievements on startup!");
-			SteamUserStats()->ResetAllStats(true);
-	#endif
-#endif
-			g_gameMode = GAME_MODE_CLASSIC;
-			//set menu state
-			g_mainMenu.SetState(K_MM_STATE_MAINMENU);
-
-			//set just started
-			g_netlock.Net_QuitLobby();
-			if (g_bJustStarted)
-			{
-				g_bJustStarted = false;
-
-				//analytics
-				ANALYTICS_SCREENVIEW("main_menu");
-#ifdef ENABLE_STEAM
-				ANALYTICS_EVENT("game_started_STEAM", _VERSION_CHARSTR_, "", 1);
-#endif
-#ifdef ENABLE_GALAXY
-				ANALYTICS_EVENT("game_started_GOG", _VERSION_CHARSTR_, "", 1);
-#endif
-			}
-
-			//mark game as NON networked
-			UTApp().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_NO_NETWORK;
-			UTApp().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_STOPPED;
-		}
-		break;
-
-		case GAME_STATE_JOIN_COOP_LIST:
-		{
-			//set a state that has no update logic (just displays the background)
-			g_mainMenu.SetState(K_MM_STATE_NET_LOBBY);
-
-			//as soon as we enter we ask for the lobbies list and the state will read the lobbies a little later (on a timer job)
-			g_netlock.Net_RequestLobbyList(10);
-
-			UTLang().SetString(STR_LOBBIES_LIST_VAL, L"%s", UTLang().strings[STR_PLEASE_HANG]->sText);
-			//add the window
-			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce("LAYER_ID_LOBBIES_LIST");
-			if (lay != null)
-			{
-				CControl* ctrl = lay->GetControlByName("BUT_JOIN_LOBBY");
-				if (ctrl)
-					ctrl->bDisabled = true;
-
-				ctrl = lay->GetControlByName("CTRL_LOBBIES_SELECTOR");
-				if (ctrl)
-				{
-					ctrl->bDisabled = true;
-					ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", 1);
-				}
-
-				ctrl = lay->GetControlByName("BUT_REFRESH_LOBBIES");
-				if (ctrl)
-					ctrl->bDisabled = true;
-			}
-		}
-		break;
-
-		case GAME_STATE_NET_LOBBY:
-		{
-			g_gameSubstate = 0;
-
-			//exit lobby if was in lobby
-			if (UTApp().m_Settings.devnet_eNetGameType != CApplicationSettings::K_NETGAME_TYPE_NO_NETWORK)
-			{
-				g_netlock.Net_QuitLobby();
-			}
-
-			//show window
-#ifdef ENABLE_STEAM
-			UTGetGUI().ShowLayerOnce("LAYER_ID_QUICK_MATCH_INVITE");
-#endif
-#ifdef ENABLE_GALAXY
-			UTGetGUI().ShowLayerOnce("LAYER_ID_QUICK_MATCH");
-#endif
-			//change menu on net lobby background
-			g_mainMenu.SetState(K_MM_STATE_NET_LOBBY);
-
-			//set correct network game type
-			UTApp().m_Settings.devnet_eNetGameType = (CApplicationSettings::eNetGameTypes)param1; //param1 contains net match type 
-			UTApp().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_STOPPED;
-			//enter lobby
-			switch (UTApp().m_Settings.devnet_eNetGameType)
-			{
-				case CApplicationSettings::eNetGameTypes::K_NETGAME_TYPE_QUICK_MATCH:
-				{
-					g_netlock.Net_EnterLobby(false, false);
-					LOG(L"[NET] Entered lobby Quick Match (game mode: %d)", g_gameMode);
-				}
-				break;
-				case CApplicationSettings::eNetGameTypes::K_NETGAME_TYPE_HOST_PUBLIC:
-				{
-					g_netlock.Net_EnterLobby(true, false);
-					LOG(L"[NET] Entered lobby Host Public (game mode: %d)", g_gameMode);
-				}
-				break;
-				case CApplicationSettings::eNetGameTypes::K_NETGAME_TYPE_HOST_PRIVATE:
-				{
-					g_netlock.Net_EnterLobby(true, true);
-					LOG(L"[NET] Entered lobby Host Private (game mode: %d)", g_gameMode);
-				}
-				break;
-			}
-
-			//analytics
-			ANALYTICS_SCREENVIEW("net_match");
-		}
-		break;
-
-		case GAME_STATE_WORKSHOP:
-		{
-			//save user data here, will load it when exiting the workshop
-			App_SaveUserData();
-			//set state
-			g_mainMenu.SetState(K_MM_STATE_WORKSHOP);
-		}
-		break;
-
-		case GAME_STATE_GAME_MODE_SELECTION:
-		{
-			//reset game mode
-			g_gameMode = GAME_MODE_CLASSIC;
-			//set state (and transmit arg for target game state)
-			g_mainMenu.SetState(K_MM_STATE_GAME_MODE_SELECT, param1);
-		}
-		break;
-
-		case GAME_STATE_CHAPTER_SELECTION:
-		{
-			if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
-			{
-				/*
-				if (!SND_IS_PLAYING(SNDIDX_THEME_HALLOWEEN))
-				{
-					SND_STOP_GROUP("music", false, true);
-					SND_PLAY_ONCE(SNDIDX_THEME_HALLOWEEN, DSBPLAY_LOOPING);
-				}
-				*/
-			}
-
-			g_mainMenu.SetState(K_MM_STATE_CHAPTER_SELECT);
-		}
-		break;
-
-		case GAME_STATE_LEVEL_SELECTION:
-		{
-			g_mainMenu.SetState(K_MM_STATE_LEVEL_SELECT);
-			//reset downloaded mod selection
-			g_userData[K_MEMID_MOD_DWNLVL_SELECTED] = -1;
-		}
-		break;
-
-		case GAME_STATE_PLAYER_SELECTION:
-		{
-			//release main menu sprites
-			g_mainMenu.Release();
-			//just to load them back in the player selection screen
-			WCHAR xmlpath[MAX_PATH];
-			FileManager::GetMediaPath(L"media/interfaces/menus.bsx", xmlpath);
-			if (FAILED(g_playerSelScr.InitSprites(xmlpath)))
-			{
-				ErrorBox(K_ERR_CRITICAL, L"File not found:\n%s", xmlpath);
-				break;
-			}
-
-			//param1: reset instanceIDs - On networked games don't reset instance ids so they appear already selected.
-			if (param1 != 0)
-			{
-				g_playerSelScr.ResetSelection(true);
-			}
-			else
-			{
-				g_playerSelScr.ResetSelection(false);
-			}
-			//on networked games send local selection immediately so they sync levels
-			if (UTApp().IsGameNetworked())
-			{
-				g_netlock.Net_EnterPlayerSelScreen();
-
-				g_playerSelScr.SendSelectionByNetwork(g_netlock.Net_GetPlayerIndex());
-			}
-		}
-		break;
-		case GAME_STATE_GAME:
-		{
-			//increase music counter
-			g_userData[K_MEMID_MUSIC_TRACK_COUNTER]++;
-			//save user data again
-			App_SaveUserData();
-			//release main menu class
-			g_mainMenu.Release();
-			// set the controller pointer normalization function (gets set to nullptr when not in game)
-			UTGetCtrlrMgr().SetNormalizeCoordsFunctionPtr(NormalizeIngameMouseCoords);
-
-			//reset all scripts
-			UTGetScriptManager().StopAllScripts();
-			//clear global memory - nothing stays between levels
-			UTGetScriptManager().ClearGlobalMemory();
-
-			//loads the level
-			if (g_userData[K_MEMID_MOD_DWNLVL_SELECTED] < 0)
-			{
-				//classic levels
-				///--- find chapter and level in levels.xml ---	
-				WCHAR strLevelPath[MAX_PATH] = { 0 };
-				if (g_startupCommand == GAME_STARTUP_LOAD_MAP)
-				{
-					std::wstring sProcessedPath = RemoveQuotationMarks(g_startupParam.text);
-					//starting game with forced map
-					StringCchPrintf(strLevelPath, MAX_PATH, L"%s", sProcessedPath.c_str());
-					//write current mission name and number
-					UTLang().SetString(STR_CURRENT_MISSION_VAL, L"");
-				}
-				else
-				{
-					int nChapterNumber = g_userData[K_MEMID_SELECTED_CHAPTER];
-					int nLevelNumber = g_userData[K_MEMID_SELECTED_LEVEL];
-					bool bLevelFound = UTGetChaptersList().GetMissionFilename(nChapterNumber, nLevelNumber, strLevelPath, MAX_PATH);
-					if (!bLevelFound)
-					{
-						ChangeGameStateTransition(GAME_STATE_LEVEL_SELECTION, 0, 0, K_TRANSITION_TYPE_SIMPLE);
-						break;
-					}
-					//write current mission name and number
-					int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[nChapterNumber]->arrLevelNameStrIdx[nLevelNumber];
-					UTLang().SetString(STR_CURRENT_MISSION_VAL, L"%d.%d %s", nChapterNumber + 1, nLevelNumber + 1, UTLang().strings[nStrIdxLevelName]->sText);
-				}
-
-				if (FAILED(g_level.LoadLevel(strLevelPath)))
-				{
-					ErrorBox(K_ERR_WARNING, L"Could not load level [%s]!", strLevelPath);
-					ChangeGameStateTransition(GAME_STATE_LEVEL_SELECTION, 0, 0, K_TRANSITION_TYPE_SIMPLE);
-					break;
-				}
-			}
-			else
-			{
-				//modded custom levels
-#ifdef ENABLE_STEAM_WORKSHOP
-				CModsManager::CModDescriptor *mod = UTGetModsManager().GetModDescByIndex(g_userData[K_MEMID_MOD_DWNLVL_SELECTED]);
-				if (mod == null)
-				{
-					ErrorBox(K_ERR_WARNING, L"Couldn't find custom level!");
-					ChangeGameStateTransition(GAME_STATE_LEVEL_SELECTION, 0, 0, K_TRANSITION_TYPE_SIMPLE);
-					break;
-				}
-
-				WCHAR wcsLevelPath[MAX_PATH] = { 0 };
-				mod->GetFullPathToAffectedFile(0, wcsLevelPath, MAX_PATH);
-				//write current mission name and number
-				UTLang().SetString(STR_CURRENT_MISSION_VAL, L"%s", mod->shName.text);
-
-				if (FAILED(g_level.LoadLevel(wcsLevelPath)))
-				{
-					ErrorBox(K_ERR_WARNING, L"Could not load downloaded level [%s]!", wcsLevelPath);
-					ChangeGameStateTransition(GAME_STATE_LEVEL_SELECTION, 0, 0, K_TRANSITION_TYPE_SIMPLE);
-					break;
-				}
-#endif // ENABLE_STEAM_WORKSHOP
-			}
-
-			//start menu music
-			SND_STOP_GROUP("music", false, true);
-			SND_PLAY_ONCE(SNDIDX_THEME_MENU1, DSBPLAY_LOOPING);
-			//analytics
-			ANALYTICS_SCREENVIEW("INGAME");
-		}
-		break;
-
-#ifdef K_CONTROLS_EDITOR
-		case GAME_STATE_CONTROLSED:
-		{
-			UTGetGUI().RemoveAllLayers(true);
-			g_ControlsEditor.Launch();
-			UTimgui().SetGlobalEnabled(true);
-		}
-		break;
-#endif
-	}
-}
 
 //variabile tranzitie
 int g_nTransitionStep = 0;
@@ -3182,7 +2431,7 @@ void UpdateTransition(float dTime)
 						g_fTransitionPercent = 0.0f;
 						g_nTransitionStep = 1;
 						//full black, change state now
-						ChangeGameState(g_nNextState, g_nSentParameter1, g_nSentParameter2);
+						GameState::ChangeTo(g_nNextState);
 					}
 
 					g_fTransitionPercent += dTime * 6.0f;

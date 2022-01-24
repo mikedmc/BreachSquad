@@ -266,39 +266,6 @@ enum eStartupCommand {
 	GAME_STARTUP_LOAD_MAP
 };
 
-///--- GAME STATES ---
-enum eGameState {
-	GAME_STATE_EMPTY = 0,
-	GAME_STATE_PRELOAD,					// loads stuff that don't need painting (like the shaders and strings)
-	GAME_STATE_DEVELOPER,
-	GAME_STATE_LOADING,
-
-	GAME_STATE_MAINMENU,
-	//networking
-	GAME_STATE_NET_LOBBY, 
-	GAME_STATE_JOIN_COOP_LIST,			//screen that shows and updates the available lobbies
-
-	GAME_STATE_GAME_MODE_SELECTION,
-	GAME_STATE_CHAPTER_SELECTION,
-	GAME_STATE_LEVEL_SELECTION,
-	GAME_STATE_PLAYER_SELECTION,
-	GAME_STATE_GAME,
-	//workshop - mod selection
-	GAME_STATE_WORKSHOP,
-	//controls editor
-	GAME_STATE_CONTROLSED,
-	//mod uploading to steam
-	GAME_STATE_UPLOAD_MOD
-};
-
-///--- GAME MODES ---
-enum eGameMode {
-	GAME_MODE_CLASSIC = 0,
-	GAME_MODE_ZOMBIE_INVASION,
-
-	GAME_MODES_CNT
-};
-
 ///--- RENDER TARGET IDs ---
 enum ERTIDChannel {
 	K_RTID_NONE = 0,
@@ -462,6 +429,8 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "pugixml/pugixml.hpp"
 #include "FileManager.h"
 #include "Chapters.h"
+
+#include "core/GameState.h"
 
 #include "log.h"
 ///--- analytics class ---
@@ -637,10 +606,6 @@ extern Vec2					g_vecGravityOld;
 extern Vec3					g_vecGravity;
 //mouse
 extern CMouseData			g_mouse;
-//gamestate
-extern eGameState			g_gameState;				//state machine's current state. defined in dxstdafx.h 
-extern UINT32				g_gameSubstate;				//current state's substate - if needed
-extern eGameMode			g_gameMode;					//current selected game mode
 
 extern eStartupCommand		g_startupCommand;
 extern CStringHash			g_startupParam;
@@ -656,7 +621,6 @@ extern float	g_gameStateTimer;
 #define K_TRANSITION_TYPE_PIXELATE 2
 
 extern bool g_bDuringTransition;
-extern void ChangeGameState(eGameState newState, int param1, int param2);
 extern void ChangeGameStateTransition(eGameState newState, int param1, int param2, int transitionType);
 //particles
 extern CTimersArray			g_timers;
@@ -692,11 +656,15 @@ extern CMainMenu					g_mainMenu;
 extern CChatWnd						g_ChatWnd;
 #endif
 
+extern bool						g_bJustStarted;
+extern bool						g_bForceOneUpdatePerFrame;
 
 extern float ct_fGaussLen;
 extern float ct_fLightMul;
 extern float ct_fColorDodge;
 
 extern CFreeTypeFont				g_font1;
+
+extern void NormalizeIngameMouseCoords( int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue );
 
 #endif

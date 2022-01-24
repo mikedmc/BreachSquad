@@ -1,5 +1,6 @@
 #include "dxstdafx.h"
 
+
 CGame::CGame()
 {
 	fTimeline = 0.0f;
@@ -16,156 +17,404 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 {
 	float fElapsedTime = dTime;
 	fTimeline += dTime;
-	/// EXECTE FIXED TIMESTEP BUSINESS
-	fFixedStepTimer += dTime;
-	int nFixedStepUpdates = 0;
-	while ( fFixedStepTimer >= K_GAME_FIXED_TIMESTEP_DTIME )
+
+
+	switch ( GameState::state )
 	{
-		float fFixedTime = K_GAME_FIXED_TIMESTEP_DTIME;
-		//SPINE update animation states
-		g_spineMgr.UpdateAnimationStates( fFixedTime );
-		// Update level and all spine objects and bones
-		g_level.UpdateFixedTimestep( fFixedTime );
-		// SPINE update final skeleton world positions (no bone changes allowed after this)
-		g_spineMgr.Update( fFixedTime );
-
-		// remove from accumulator
-		fFixedStepTimer -= K_GAME_FIXED_TIMESTEP_DTIME;
-		nFixedStepUpdates++;
-	}
-
-	g_level.Update( fElapsedTime );
-
-	/*
-	//#DMC: comentat cat timp lucrez, functioneaza corect:
-	if ( !bSyncUpdate ) //not networked or network sync finised even if still during gameplay
-	{
-		//ingame menu on ESC-back
-		if ( g_level.m_levelState == K_LVL_STATE_PLAYING )
+		case GAME_STATE_PRELOAD:
 		{
-			CCtrlLayer* layer = UTGetGUI().GetLayerByName( "LAYER_ID_IGM_MENU" );
-			if ( ( layer == null ) && ( !UTGetGUI().bIsBlocking ) )
+		}
+		break;
+		case GAME_STATE_DEVELOPER:
+		{
+			UTApp().App_UpdateState_Developer( m_pDevice, fTimeline, fElapsedTime );
+		}
+		break;
+		case GAME_STATE_LOADING:
+		{
+			UTApp().App_UpdateState_Loading( m_pDevice, fTimeline, fElapsedTime );
+		}
+		break;
+
+		//utility mod uploading to Steam
+		case GAME_STATE_UPLOAD_MOD:
+		{
+#ifdef ENABLE_STEAM_WORKSHOP
+			switch ( GameState::substate )
 			{
-				for ( UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++ )
+				case 0: //a few settings and checks
 				{
-					//show menu
-					if ( UTGetCtrlrMgr().m_arrControllers[ kk ]->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED )
+					UTApp().m_Settings.dev_bDevMode = true;
+
+					LOG( L"\nMod Upload/Update Started..." );
+					GameState::substate++;
+				}
+				break;
+				case 1:
+				{
+					LOG( L"[Workshop] Trying to update mod..." );
+					//try update
+					if ( true == Workshop_UpdatePublished( g_startupParam.text ) )
+					{
+						GameState::substate = 10; //exit
+						LOG( L"Mod UPDATED successfully!" );
+						MessageBox( null, L"Mod UPDATED successfully!", L"Info", MB_OK );
+					}
+					else
+					{
+						LOG( L"Mod not found! Uploading as new mod." );
+						GameState::substate = 2;
+					}
+				}
+				break;
+				case 2:
+				{
+					LOG( L"--- PUBLISHING NEW MOD ---" );
+					//try publish
+					if ( true == Workshop_Publish( g_startupParam.text ) )
+					{
+						LOG( L"Mod UPLOADED successfully as new mod!" );
+						MessageBox( null, L"Mod UPLOADED successfully as new mod!", L"Info", MB_OK );
+					}
+					else
+					{
+						LOG( L"Mod upload FAILED! See error.log for details!" );
+						MessageBox( null, L"Mod upload FAILED! See error.log for details!", L"Error", MB_OK | MB_ICONERROR );
+					}
+
+					GameState::substate++;
+				}
+				break;
+
+				//exit game at the end
+				default:
+				{
+					PostQuitMessage( 0 );
+				}
+				break;
+			}
+			break;
+#endif
+		}
+		break;
+
+		case GAME_STATE_PLAYER_SELECTION:
+		{
+			if ( ( !g_bDuringTransition ) && ( !UTGetGUI().bIsBlocking ) )
+				g_playerSelScr.Update( fElapsedTime );
+		}
+		break;
+
+		case GAME_STATE_JOIN_COOP_LIST:
+		{
+			//update list on timer
+			if ( g_timers.Tick( 2000 ) )
+			{
+				CCtrlLayer* lay = UTGetGUI().GetTopmostInputLayer();
+				//disable the refresh button if still working
+				if ( lay != null )
+				{
+					CControl* ctrl = lay->GetControlByName( "BUT_REFRESH_LOBBIES" );
+					if ( ctrl )
+					{
+						ctrl->bDisabled = false;
+						if ( g_pNetwork->IsRequestingLobby() )
+							ctrl->bDisabled = true;
+					}
+				}
+
+				int nLobbiesCnt = g_pNetwork->GetLobbyListEntriesCount();
+				if ( nLobbiesCnt == 0 )
+				{
+					if ( !g_pNetwork->IsRequestingLobby() )
+						UTLang().SetString( STR_LOBBIES_LIST_VAL, L"%s", UTLang().strings[ STR_NO_LOBBIES ]->sText );
+
+					//disable controls (list, join)
+					if ( lay != null )
+					{
+						CControl* ctrl = lay->GetControlByName( "BUT_JOIN_LOBBY" );
+						if ( ctrl )
+							ctrl->bDisabled = true;
+						ctrl = lay->GetControlByName( "CTRL_LOBBIES_SELECTOR" );
+						if ( ctrl )
+						{
+							ctrl->bDisabled = true;
+							ctrl->paramsDict.SetNamedVarINT32( L"nOptionsCnt", 1 );
+						}
+					}
+				}
+				else
+				{
+					WCHAR	strLobbiesList[ 2048 ] = { 0 };
+					for ( int kk = 0; kk < nLobbiesCnt; kk++ )
+					{
+						CStringDesc sdName;
+						uint64_t iLobbyID = 0;
+						char strLobbyName[ 250 ];
+
+						g_pNetwork->GetLobbyListEntry( kk, iLobbyID, strLobbyName );
+						UTLang().SetStringDescUTF8( &sdName, strLobbyName );
+
+						StringCchCat( strLobbiesList, 2048, sdName.sText );
+						if ( kk < nLobbiesCnt - 1 )
+							StringCchCat( strLobbiesList, 2048, L"\n" );
+					}
+
+					UTLang().SetString( STR_LOBBIES_LIST_VAL, strLobbiesList );
+
+					//enable controls (list, join)
+					if ( lay != null )
+					{
+						CControl* ctrl = lay->GetControlByName( "BUT_JOIN_LOBBY" );
+						if ( ctrl )
+							ctrl->bDisabled = false;
+						ctrl = lay->GetControlByName( "CTRL_LOBBIES_SELECTOR" );
+						if ( ctrl )
+						{
+							ctrl->bDisabled = false;
+							ctrl->paramsDict.SetNamedVarINT32( L"nOptionsCnt", nLobbiesCnt );
+						}
+					}
+				}
+			}
+		}
+		break;
+
+		case GAME_STATE_WORKSHOP:
+		case GAME_STATE_GAME_MODE_SELECTION:
+		case GAME_STATE_LEVEL_SELECTION:
+		case GAME_STATE_CHAPTER_SELECTION:
+		{
+			if ( ( !g_bDuringTransition ) && ( !UTGetGUI().bIsBlocking ) )
+				g_mainMenu.Update( fElapsedTime );
+		}
+		break;
+
+		case GAME_STATE_NET_LOBBY:
+		{
+			if ( g_bDuringTransition )
+				break;
+			//update background
+			if ( !UTGetGUI().bIsBlocking )
+				g_mainMenu.Update( fElapsedTime );
+
+			//update lobby
+			g_netlock.Net_UpdateLobby( fElapsedTime );
+		}
+		break;
+
+		case GAME_STATE_MAINMENU:
+		{
+			//offer to reset the user data
+			if ( g_userData[ K_MEMID_OFFER_RESET_USER_DATA ] != 0 )
+			{
+				UTGetGUI().ShowLayerOnce( "LAYER_ID_RESET_PROGRESS_EA" );
+				g_userData[ K_MEMID_OFFER_RESET_USER_DATA ] = 0;
+			}
+
+			if ( ( !g_bDuringTransition ) && ( !UTGetGUI().bIsBlocking ) )
+				g_mainMenu.Update( fElapsedTime );
+
+			//always check to see if menu exists
+#ifdef ENABLE_STEAM_WORKSHOP
+			if ( UTGetGUI().GetLayerByName( "LAYER_ID_MAINMENU" ) == null )
+			{
+				UTGetGUI().ShowLayerOnce( "LAYER_ID_MAINMENU" );
+			}
+#else
+			if ( UTGetGUI().GetLayerByName( "LAYER_ID_MAINMENU_NOWORKSHOP" ) == null )
+			{
+				UTGetGUI().ShowLayerOnce( "LAYER_ID_MAINMENU_NOWORKSHOP" );
+			}
+#endif
+
+			for ( UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++ )
+			{
+				if ( UTGetCtrlrMgr().m_arrControllers[ kk ]->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED )
+				{
+					CCtrlLayer* layer = UTGetGUI().GetLayerByName( "LAYER_ID_QUITGAME" );
+					if ( ( layer == null ) && ( !UTGetGUI().bIsBlocking ) )
 					{
 						SND_PLAY( SNDIDX_CLICK );
-						UTGetGUI().ShowLayerOnce( "LAYER_ID_IGM_MENU" );
-						break;
+						UTGetGUI().ShowLayerOnce( "LAYER_ID_QUITGAME" );
 					}
-				}
-			}
-			else if ( ( layer != null ) && ( layer == UTGetGUI().GetTopmostInputLayer() ) )
-			{
-				for ( UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++ )
-				{
-					//remove onscreen menu
-					if ( ( UTGetCtrlrMgr().m_arrControllers[ kk ]->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED ) ||
-						( UTGetCtrlrMgr().m_arrControllers[ kk ]->sCommands.keyState[ K_CM_COMMAND_RELOAD ] == K_CM_BUTSTATE_JUSTPRESSED ) )
+					/*
+					//windows close when pressing back
+					else if ((layer != null) && (layer == UTGetControlsManager().GetTopmostInputLayer()))
 					{
-						SND_PLAY( SNDIDX_DENIED );
-						UTGetGUI().RemoveLayer( "LAYER_ID_IGM_MENU" );
-						break;
+					SND_PLAY(SNDIDX_DENIED);
+					UTGetControlsManager().RemoveLayer("LAYER_ID_QUITGAME");
 					}
+					*/
+					break;
 				}
 			}
 		}
+		break;
 
-		//update game if no blocking window is shown
-		if ( !UTGetGUI().bIsBlocking )
+		case GAME_STATE_GAME:
 		{
-			//SPINE update animation states
-			g_spineMgr.UpdateAnimationStates( fElapsedTime, fTimeline );
+			/// EXECUTE FIXED TIMESTEP BUSINESS
+			fFixedStepTimer += dTime;
+			int nFixedStepUpdates = 0;
+			while ( fFixedStepTimer >= K_GAME_FIXED_TIMESTEP_DTIME )
+			{
+				float fFixedTime = K_GAME_FIXED_TIMESTEP_DTIME;
+				//SPINE update animation states
+				g_spineMgr.UpdateAnimationStates( fFixedTime );
+				// Update level and all spine objects and bones
+				g_level.UpdateFixedTimestep( fFixedTime );
+				// SPINE update final skeleton world positions (no bone changes allowed after this)
+				g_spineMgr.Update( fFixedTime );
 
-			// Update level and all spine objects and bones
-			g_level.UpdateFixedTimestep( fElapsedTime );
+				// remove from accumulator
+				fFixedStepTimer -= K_GAME_FIXED_TIMESTEP_DTIME;
+				nFixedStepUpdates++;
+			}
+
 			g_level.Update( fElapsedTime );
 
-			//SPINE update final skeleton world positions (no bone changes allowed after this)
-			g_spineMgr.Update( fElapsedTime, fTimeline );
-
-			g_bLevelNeedsUpdate = false;
-		}
-		//#HACK: update once after resolution changed so we adjust cameras
-		if ( g_bLevelNeedsUpdate )
-		{
-			LOG_DBG( L"> Update called with dtime: 0.0" );
-			g_level.UpdateFixedTimestep( 0.0f );
-			g_bLevelNeedsUpdate = false;
-		}
-	}
-	else  //networked, syncing update
-	{
-		//ingame menu on ESC-back (if chat is closed)
-		bool bCanOpenMenu = true;
-#ifdef ENABLE_CHAT_WINDOW
-		//because the chat window exits immediately we have to wait a little until we can bring the menu up
-		if ( ( g_ChatWnd.IsReceivingInput() ) || ( g_ChatWnd.fTimeSinceLastInput < K_CW_MIN_TIME_BETWEEN_INPUTS ) )
-			bCanOpenMenu = false;
-#endif
-		if ( bCanOpenMenu )
-		{
-			//ingame menu on ESC-back
-			if ( g_level.m_levelState == K_LVL_STATE_PLAYING )
+			/*
+			//#DMC: comentat cat timp lucrez, functioneaza corect:
+			if ( !bSyncUpdate ) //not networked or network sync finised even if still during gameplay
 			{
-				CCtrlLayer* layer = UTGetGUI().GetLayerByName( "LAYER_ID_IGM_MENU_NET" );
-				if ( ( layer == null ) && ( !UTGetGUI().bIsBlocking ) )
+				//ingame menu on ESC-back
+				if ( g_level.m_levelState == K_LVL_STATE_PLAYING )
 				{
-					for ( UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++ )
+					CCtrlLayer* layer = UTGetGUI().GetLayerByName( "LAYER_ID_IGM_MENU" );
+					if ( ( layer == null ) && ( !UTGetGUI().bIsBlocking ) )
 					{
-						CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ kk ];
-						//ignore network controllers
-						if ( ctrlr->eType == K_CM_CT_NET_FRAMELOCK )
-							continue;
-						//show menu
-						if ( ctrlr->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED )
+						for ( UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++ )
 						{
-							SND_PLAY( SNDIDX_CLICK );
-							UTGetGUI().ShowLayerOnce( "LAYER_ID_IGM_MENU_NET" );
-							break;
+							//show menu
+							if ( UTGetCtrlrMgr().m_arrControllers[ kk ]->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED )
+							{
+								SND_PLAY( SNDIDX_CLICK );
+								UTGetGUI().ShowLayerOnce( "LAYER_ID_IGM_MENU" );
+								break;
+							}
+						}
+					}
+					else if ( ( layer != null ) && ( layer == UTGetGUI().GetTopmostInputLayer() ) )
+					{
+						for ( UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++ )
+						{
+							//remove onscreen menu
+							if ( ( UTGetCtrlrMgr().m_arrControllers[ kk ]->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED ) ||
+								( UTGetCtrlrMgr().m_arrControllers[ kk ]->sCommands.keyState[ K_CM_COMMAND_RELOAD ] == K_CM_BUTSTATE_JUSTPRESSED ) )
+							{
+								SND_PLAY( SNDIDX_DENIED );
+								UTGetGUI().RemoveLayer( "LAYER_ID_IGM_MENU" );
+								break;
+							}
 						}
 					}
 				}
-				else if ( ( layer != null ) && ( layer == UTGetGUI().GetTopmostInputLayer() ) && ( layer->alpha >= 1.0f ) )
+
+				//update game if no blocking window is shown
+				if ( !UTGetGUI().bIsBlocking )
 				{
-					for ( UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++ )
-					{
-						CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ kk ];
-						//ignore network controllers
-						if ( ctrlr->eType == K_CM_CT_NET_FRAMELOCK )
-							continue;
-						//remove onscreen menu
-						if ( ( ctrlr->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED ) ||
-							( ctrlr->sCommands.keyState[ K_CM_COMMAND_RELOAD ] == K_CM_BUTSTATE_JUSTPRESSED ) )
-						{
-							SND_PLAY( SNDIDX_DENIED );
-							UTGetGUI().RemoveLayer( "LAYER_ID_IGM_MENU_NET" );
-							break;
-						}
-					}
+					//SPINE update animation states
+					g_spineMgr.UpdateAnimationStates( fElapsedTime, fTimeline );
+
+					// Update level and all spine objects and bones
+					g_level.UpdateFixedTimestep( fElapsedTime );
+					g_level.Update( fElapsedTime );
+
+					//SPINE update final skeleton world positions (no bone changes allowed after this)
+					g_spineMgr.Update( fElapsedTime, fTimeline );
+
+					g_bLevelNeedsUpdate = false;
+				}
+				//#HACK: update once after resolution changed so we adjust cameras
+				if ( g_bLevelNeedsUpdate )
+				{
+					LOG_DBG( L"> Update called with dtime: 0.0" );
+					g_level.UpdateFixedTimestep( 0.0f );
+					g_bLevelNeedsUpdate = false;
 				}
 			}
+			else  //networked, syncing update
+			{
+				//ingame menu on ESC-back (if chat is closed)
+				bool bCanOpenMenu = true;
+		#ifdef ENABLE_CHAT_WINDOW
+				//because the chat window exits immediately we have to wait a little until we can bring the menu up
+				if ( ( g_ChatWnd.IsReceivingInput() ) || ( g_ChatWnd.fTimeSinceLastInput < K_CW_MIN_TIME_BETWEEN_INPUTS ) )
+					bCanOpenMenu = false;
+		#endif
+				if ( bCanOpenMenu )
+				{
+					//ingame menu on ESC-back
+					if ( g_level.m_levelState == K_LVL_STATE_PLAYING )
+					{
+						CCtrlLayer* layer = UTGetGUI().GetLayerByName( "LAYER_ID_IGM_MENU_NET" );
+						if ( ( layer == null ) && ( !UTGetGUI().bIsBlocking ) )
+						{
+							for ( UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++ )
+							{
+								CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ kk ];
+								//ignore network controllers
+								if ( ctrlr->eType == K_CM_CT_NET_FRAMELOCK )
+									continue;
+								//show menu
+								if ( ctrlr->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED )
+								{
+									SND_PLAY( SNDIDX_CLICK );
+									UTGetGUI().ShowLayerOnce( "LAYER_ID_IGM_MENU_NET" );
+									break;
+								}
+							}
+						}
+						else if ( ( layer != null ) && ( layer == UTGetGUI().GetTopmostInputLayer() ) && ( layer->alpha >= 1.0f ) )
+						{
+							for ( UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++ )
+							{
+								CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ kk ];
+								//ignore network controllers
+								if ( ctrlr->eType == K_CM_CT_NET_FRAMELOCK )
+									continue;
+								//remove onscreen menu
+								if ( ( ctrlr->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED ) ||
+									( ctrlr->sCommands.keyState[ K_CM_COMMAND_RELOAD ] == K_CM_BUTSTATE_JUSTPRESSED ) )
+								{
+									SND_PLAY( SNDIDX_DENIED );
+									UTGetGUI().RemoveLayer( "LAYER_ID_IGM_MENU_NET" );
+									break;
+								}
+							}
+						}
+					}
+				}
+				//sync random seed again here (makes sure we don't get desynced between debug and release versions)
+				//resets the number of random numbers requested
+				g_level.m_rand.SetRandSeed( g_netlock.m_unRandomSeed + nUpdateFrame );
+				//LOG(L"--update dT=%.6f T=%.6f rand:%d--", fElapsedTime, fTime, g_level.m_rand.GetRandomSeed());
+
+				//SPINE update animation states
+				g_spineMgr.UpdateAnimationStates( fElapsedTime, fTimeline );
+
+				g_level.UpdateFixedTimestep( fElapsedTime );
+				g_level.Update( fElapsedTime );
+				//SPINE update animation states
+				g_spineMgr.Update( fElapsedTime, fTimeline );
+				g_bLevelNeedsUpdate = false;
+			}
+			 */
+			
+			///--- update editor after updating the game ---
+			g_editor.Update( fElapsedTime );
 		}
-		//sync random seed again here (makes sure we don't get desynced between debug and release versions)
-		//resets the number of random numbers requested
-		g_level.m_rand.SetRandSeed( g_netlock.m_unRandomSeed + nUpdateFrame );
-		//LOG(L"--update dT=%.6f T=%.6f rand:%d--", fElapsedTime, fTime, g_level.m_rand.GetRandomSeed());
+		break;
 
-		//SPINE update animation states
-		g_spineMgr.UpdateAnimationStates( fElapsedTime, fTimeline );
+#ifdef K_CONTROLS_EDITOR
+		case GAME_STATE_CONTROLSED:
+			g_ControlsEditor.SetCameraTransform( &UTApp().g_cam360hScreen );
+			g_ControlsEditor.Update( fElapsedTime );
+			break;
+#endif
 
-		g_level.UpdateFixedTimestep( fElapsedTime );
-		g_level.Update( fElapsedTime );
-		//SPINE update animation states
-		g_spineMgr.Update( fElapsedTime, fTimeline );
-		g_bLevelNeedsUpdate = false;
 	}
-	 */
-
-
-
 
 
 
@@ -182,7 +431,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 
 void CGame::BeforePaint()
 {
-	switch ( g_gameState )
+	switch ( GameState::state )
 	{
 		case GAME_STATE_GAME:
 		{
@@ -214,7 +463,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 	//#INFO: it uses the fixed timestep remainder to extrapolate the positions into the future inside the paint functions
 	// this allows the game to render smoothly and completely disconnect the update from the render pass
 
-	switch ( g_gameState )
+	switch ( GameState::state )
 	{
 		case GAME_STATE_PRELOAD:
 		{

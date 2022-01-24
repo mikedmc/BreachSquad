@@ -2628,7 +2628,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			int leftVote = paramsDict.GetVariantByName(L"leftVote")->m_asINT32;
 			int rightVote = paramsDict.GetVariantByName(L"rightVote")->m_asINT32;
 
-			if ((UTApp().IsGameNetworked()) || (g_gameState == GAME_STATE_CONTROLSED))
+			if ((UTApp().IsGameNetworked()) || ( GameState::state == GAME_STATE_CONTROLSED))
 			{
 				DWORD wcol = DW_COLOR_FFFA(layer->alpha);
 				int nFrame = 0;

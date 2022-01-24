@@ -1025,7 +1025,7 @@ void CPlayerSelScr::Update(float dTime)
 
 		if (UTApp().IsGameNetworked())
 		{
-			g_gameMode = (eGameMode)g_netlock.m_ucSelMode;
+			//g_gameMode = (eGameMode)g_netlock.m_ucSelMode;
 			g_userData[K_MEMID_SELECTED_CHAPTER] = (int)g_netlock.m_ucSelChapter;
 			g_userData[K_MEMID_SELECTED_LEVEL] = (int)g_netlock.m_ucSelLevel;
 			//signal exiting player selection

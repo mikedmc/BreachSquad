@@ -553,33 +553,16 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 		if (nEvent.m_eventCommand == CEventCommands::evtC_GAMESTATE_CHANGE)
 		{
 			eGameState gameState = (eGameState)nEvent.GetArgumentByName(L"newGameState")->m_asUINT32;
-			int arg1 = nEvent.GetArgumentByName(L"arg1")->m_asINT32;
-			int arg2 = nEvent.GetArgumentByName(L"arg2")->m_asINT32;
-			int errorTxt = nEvent.GetArgumentByName(L"stateErrorStrIdx")->m_asINT32;
-			if (errorTxt > 0)
-			{
-				g_gameStateErrorStringIdx = errorTxt;
-				nEvent.AddNamedArgINT32(L"stateErrorStrIdx", -1);
-			}
 
-			ChangeGameState(gameState, arg1, arg2);
+			GameState::ChangeTo(gameState);
 			return true; //consume event
 		}
 		if (nEvent.m_eventCommand == CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION)
 		{
 			eGameState gameState = (eGameState)nEvent.GetArgumentByName(L"newGameState")->m_asUINT32;
 			int transType = nEvent.GetArgumentByName(L"transitionType")->m_asINT32;
-			int arg1 = nEvent.GetArgumentByName(L"arg1")->m_asINT32;
-			int arg2 = nEvent.GetArgumentByName(L"arg2")->m_asINT32;
-			//nu voi putea sa trimit strIdx 0 dar nu conteaza. Prin acest argument trimit stari de mesaje de afisat intre ecrane.
-			int errorTxt = nEvent.GetArgumentByName(L"stateErrorStrIdx")->m_asINT32;
-			if (errorTxt > 0)
-			{
-				g_gameStateErrorStringIdx = errorTxt;
-				nEvent.AddNamedArgINT32(L"stateErrorStrIdx", -1);
-			}
 
-			ChangeGameStateTransition(gameState, arg1, arg2, transType);
+			ChangeGameStateTransition(gameState, 0, 0, transType);
 			return true; //consume event
 		}
 	}

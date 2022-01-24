@@ -11,7 +11,7 @@ int nLoadingFrame = 0;
 
 void CApplication::App_EnterState_Loading()
 {
-	g_gameSubstate = 0;
+	GameState::substate = 0;
 	g_gameStateTimer = 0.0f;
 	//make sure we release everything
 	g_texManager.Release();
@@ -28,20 +28,20 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 	if (g_bDuringTransition)
 		return;
 
-	switch (g_gameSubstate)
+	switch ( GameState::substate )
 	{
 		//crc check and splash load
 		case 0:
 		{
 			//next state
-			g_gameSubstate++;
+			GameState::substate++;
 			g_gameStateTimer = 0.0f;
 		}
 		break;
 		//animating background
 		case 1:
 		{
-			g_gameSubstate++;
+			GameState::substate++;
 		}
 		break;
 		//misc
@@ -96,13 +96,13 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			wcstombs(langtxt, g_Language.shLangAlias.text, MAX_PATH);
 			ANALYTICS_EVENT("language", langtxt, "", 0);
 
-			g_gameSubstate++;
+			GameState::substate++;
 		}
 		break;
 		//load fonts
 		case 3:
 		{
-			g_gameSubstate++;
+			GameState::substate++;
 
 			///--- FONTS ---
 			//set strings manager
@@ -147,7 +147,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 		break;
 		case 4:
 		{
-			g_gameSubstate++;
+			GameState::substate++;
 
 			HRESULT hr = S_OK;
 			WCHAR xmlpath[MAX_PATH];
@@ -167,7 +167,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 		//other technical stuff
 		case 5:
 		{
-			g_gameSubstate++;
+			GameState::substate++;
 
 			// load editor sprites
 			g_editor.Init();
@@ -204,14 +204,14 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 		//wait keypress
 		case 6:
 		{
-			g_gameSubstate++;
+			GameState::substate++;
 			Sleep(100);
 		}
 		break;
 		//change gamestate
 		case 7:
 		{
-			g_gameSubstate++;
+			GameState::substate++;
 
 			//start with specified map if requested by editor
 			if (g_startupCommand == GAME_STARTUP_LOAD_MAP)
@@ -268,13 +268,13 @@ void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite
 	RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 
 	//fonts loaded so write "loading" 
-	if ((g_gameSubstate > 3) && (g_gameSubstate < 6))
+	if ((GameState::substate > 3) && (GameState::substate < 6))
 	{
 		RECTXYWH rct(scrrect.x + 25, scrrect.CenterY() - 10, scrrect.w - 50, 15);
 		g_font6ns1->DrawString(STR_LOADING, rct, FONTFLAG_ANCHOR_TOPCENTER, 0xff186582);
 	}
 
-	if (g_gameSubstate > 3)
+	if (GameState::substate > 3)
 	{
 		//write title window text
 		if (UTApp().m_Settings.dev_unCurrentCRC != K_GAME_CRC)
@@ -284,7 +284,7 @@ void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite
 		}
 	}
 	//progress
-	if ((g_gameSubstate >= 0) && (g_gameSubstate < 7))
+	if ((GameState::substate >= 0) && (GameState::substate < 7))
 	{
 		int nlX = 48 * (nLoadingFrame / K_CS_LOADING_WEAPONS_PER_COL) * 2;
 		int nlY = 24 * (nLoadingFrame % K_CS_LOADING_WEAPONS_PER_COL);
@@ -292,7 +292,7 @@ void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite
 		RECT rctSrcEmpty;
 		SetRect(&rctSrcEmpty, nlX + 48, nlY, nlX + 48 + 48, nlY + 24);
 		RECT rctSrcFull;
-		SetRect(&rctSrcFull, nlX, nlY, nlX + 1 + (int)ceil(48 * ((float)g_gameSubstate / 7.0f)), nlY + 24);
+		SetRect(&rctSrcFull, nlX, nlY, nlX + 1 + (int)ceil(48 * ((float)GameState::substate / 7.0f)), nlY + 24);
 		
 		LPDIRECT3DTEXTURE9 pTexLoading = g_texManager.GetTexture(0);
 		if (pTexLoading)
@@ -334,7 +334,7 @@ void CApplication::App_ExitState_Loading()
 
 void CApplication::App_EnterState_Developer()
 {
-	g_gameSubstate = 0;
+	GameState::substate = 0;
 	g_gameStateTimer = K_GAME_SPLASH_SHOW_TIMER;
 	//make sure we release everything
 	UTApp().g_texManager.Release();
@@ -354,12 +354,12 @@ void CApplication::App_UpdateState_Developer(LPDIRECT3DDEVICE9 pDevice, double f
 		}
 	}
 
-	if (g_gameSubstate == 0)
+	if (GameState::substate == 0)
 	{
 		g_gameStateTimer -= dTime;
 		if (g_gameStateTimer <= 0.0f)
 		{
-			g_gameSubstate = 1;
+			GameState::substate = 1;
 			//change state to loading
 			CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 			nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LOADING);

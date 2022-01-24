@@ -1620,9 +1620,6 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 			CHAR ctxt[MAX_PATH];
 			int nLevelIdx = g_userData[K_MEMID_SELECTED_LEVEL] + g_userData[K_MEMID_SELECTED_CHAPTER] * K_GAME_LEVELS_PER_CHAPTER;
 			StringCchPrintfA(ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1);
-			//add zombie mode to level name
-			if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
-				StringCchCatA(ctxt, MAX_PATH, "_zm");
 
 			if (UTApp().IsGameNetworked())
 			{
@@ -6861,7 +6858,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 						if (nPlayers == 1)
 						{
 							//only save best score on classic mode
-							if ((g_gameMode == GAME_MODE_CLASSIC) && (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE))
+							if (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE)
 							{
 								if (g_levelStats[nLevelIdx].nScoreSolo < nTotalLevelScore)
 									g_levelStats[nLevelIdx].nScoreSolo = nTotalLevelScore;
@@ -6876,7 +6873,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 						else
 						{
 							//only save best score on classic mode
-							if ((g_gameMode == GAME_MODE_CLASSIC) && (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE))
+							if (m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE)
 							{
 								if (g_levelStats[nLevelIdx].nScoreCoop < nTotalLevelScore)
 									g_levelStats[nLevelIdx].nScoreCoop = nTotalLevelScore;
@@ -6941,9 +6938,6 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 							{
 								StringCchPrintfA(pszBoardName, MAX_PATH, strFormat, K_GAME_STR_LEADERBOARDS_PREFIX_COOP, m_nLoadedChapter + 1, m_nLoadedLevel + 1);
 							}
-							//on zombie mode leaderboards have an appendix
-							if (g_gameMode == GAME_MODE_ZOMBIE_INVASION)
-								StringCchCatA(pszBoardName, MAX_PATH, "_zm");
 							//reset old scores
 							UTGetLeaderboards().ResetScoresList();
 							//reset strings too
