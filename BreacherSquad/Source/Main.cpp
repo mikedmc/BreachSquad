@@ -97,9 +97,6 @@ float ct_fGaussLen = 0.35f;
 float ct_fLightMul = 2.0f;
 float ct_fColorDodge = 0.4f;
 
-CGame						g_game;								// main game wrapper
-
-
 //**************************************************************************************
 // Forward declarations 
 //**************************************************************************************
@@ -770,6 +767,8 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	V_RETURN(UTApp().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(UTGetRTManager().OnCreateDevice(pDevice, pBBDesc));
+	CGame::instance().OnCreateDevice( pDevice, pBBDesc );
+
 	UTimgui().OnCreateDevice(pDevice, pBBDesc);
 	V_OP_RETHR(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(UTPainter().OnCreateDevice(pDevice, pBBDesc));
@@ -835,7 +834,6 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(UTApp().OnResetDevice(pDevice, pBBDesc));
 	// Because the render targets and handled globally and are changing in size depending on screen resolution we just release them in OnLostDevice and re-create them in OnResetDevice
 	V_OP_RETHR(UTGetRTManager().OnResetDevice(pDevice, pBBDesc));
-
 	// Create necessary render targets when device gets reset (created or reset)
 	UINT fGameHpx = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
 	UINT fGameWpx = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
@@ -845,6 +843,8 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	UTGetRTManager().AddRT(K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
 	//if (UTGetAppClass().m_Settings.nLOD_lights >= K_UT_LOD_MED)
 		//UTGetRenderTargetsManager().AddRT(K_RTID_SPECULARMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
+
+	CGame::instance().OnResetDevice( pDevice, pBBDesc );
 
 	UTimgui().OnResetDevice(pDevice, pBBDesc);
 	V_OP_RETHR(UTGetShaderManager().OnResetDevice(pDevice, pBBDesc));
@@ -928,8 +928,11 @@ void CALLBACK OnLostDevice(void)
 	UTGetFontsManager().OnLostDevice();
 	UTGetGUI().OnLostDevice();
 	//because the render targets and handled globally and are changing in size depending on screen resolution we just release them in OnLostDevice and re-create them in OnResetDevice
+	//#TODO: RTs don't change so we should not deallocate them
 	UTGetRTManager().Release();
 	UTGetRTManager().OnLostDevice();
+
+	CGame::instance().OnLostDevice();
 
 	g_level.OnLostDevice();
 	g_editor.OnLostDevice();
@@ -957,6 +960,8 @@ void CALLBACK OnDestroyDevice(void)
 
 	UTApp().OnDestroyDevice();
 	UTGetRTManager().OnDestroyDevice();
+	CGame::instance().OnDestroyDevice();
+
 	UTimgui().OnDestroyDevice();
 	UTGetShaderManager().OnDestroyDevice();
 	UTPainter().OnDestroyDevice();
@@ -1004,7 +1009,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 	UTGetGUI().Update(fElapsedTime);
 
 	// update main game engine
-	g_game.Update( fElapsedTime, bSyncUpdate, g_nUpdateFrame );
+	CGame::instance().Update( fElapsedTime, bSyncUpdate, g_nUpdateFrame );
 
 	///--- ANALYTICS ---
 	UTGetAnalytics().Update();
@@ -1731,7 +1736,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	///----------------------------------------------------------------------------------
 	///	PART1. Paint the offscreen surfaces before the main render begin/end 
 	///----------------------------------------------------------------------------------
-	g_game.BeforePaint();
+	CGame::instance().BeforePaint();
 
 	///----------------------------------------------------------------------------------
 	/// PART2. --- Render onscreen - FINAL PASS ---
@@ -1756,7 +1761,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		///----------------------------------------------------------------------------------
 		/// MAIN GAME PAINT
 		///----------------------------------------------------------------------------------
-		g_game.Paint( pDevice, g_pGameSprite, fElapsedTime );
+		CGame::instance().Paint( pDevice, g_pGameSprite, fElapsedTime );
 
 
 #ifdef K_CONTROLS_EDITOR
@@ -1884,10 +1889,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		g_pGameSprite->End();
 
 		// end main painter
-		if ( GameState::state != GAME_STATE_PRELOAD)
-		{
-			UTPainter().End();
-		}
+		UTPainter().End();
 
 		//--- CONTROLS EDITOR PAINT ---
 #ifdef K_CONTROLS_EDITOR

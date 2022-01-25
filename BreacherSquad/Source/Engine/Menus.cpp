@@ -4,7 +4,7 @@
 CMenus::CMenus()
 {
 	m_pDevice = nullptr;
-	m_gameState = GAME_STATE_EMPTY;
+	m_state = GAME_STATE_EMPTY;
 	m_nSubstate = 0;
 	fLocalTimeline = 0.0f;
 }
@@ -16,10 +16,11 @@ CMenus::~CMenus()
 
 OPRESULT CMenus::Init()
 {
-	//TODO: ar trebui totusi numit Load si nu Init pentru ca se va chema pe loading
 	WCHAR xmlpath[ MAX_PATH ];
 	FileManager::GetMediaPath( L"media/interfaces/menus0.bsx", xmlpath );
-	return m_sprCol.LoadSprites( xmlpath );
+	V_OP_RET(m_sprCol.LoadSprites( xmlpath ));
+
+	return K_OP_OK;
 }
 
 void CMenus::Update( float dTime )
@@ -29,6 +30,14 @@ void CMenus::Update( float dTime )
 
 void CMenus::Paint()
 {
+	//1. set camera
+	CCameraTransform::SetActiveCamera( m_pDevice, &UTApp().g_cam360hScreen);
+	RECTXYWH_F camrect = UTApp().g_camScreen.GetCamWorldAABB();
+
+	PaintBackground( camrect, 0xffffffff, true, true );
+
+	//3. flush
+	UTPainter().Flush();
 }
 
 void CMenus::PaintBackground( RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles /*= false*/, bool bPaintTitle /*= false*/ )
@@ -87,7 +96,7 @@ void CMenus::Release()
 
 bool CMenus::HandleEvent( CEvent &nEvent )
 {
-	if ( nEvent.m_eventType == CEventTypes::evtT_GAMESTATE )
+	if ( nEvent.m_eventType == CEventTypes::evtT_INFO)
 	{
 		if ( nEvent.m_eventCommand == CEventCommands::evtC_GAMESTATE_CHANGE )
 		{
@@ -102,12 +111,12 @@ bool CMenus::HandleEvent( CEvent &nEvent )
 
 void CMenus::SetState( EGameState neState )
 {
-	if ( neState == m_gameState )
+	if ( neState == m_state )
 		return;
 	//#TODO: we can do stuff based on old state like deallocationg if necessary
 		
 	// reset some data on state change
-	m_gameState = neState;
+	m_state = neState;
 	m_nSubstate = 0;
 	fLocalTimeline = 0.0f;
 
@@ -165,11 +174,13 @@ OPRESULT CMenus::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*=
 OPRESULT CMenus::OnLostDevice()
 {
 	m_pDevice = nullptr;
+	m_sprCol.OnLostDevice();
 	return K_OP_OK;
 }
 
 OPRESULT CMenus::OnDestroyDevice()
 {
 	m_pDevice = nullptr;
+	m_sprCol.OnDestroyDevice();
 	return K_OP_OK;
 }

@@ -12,6 +12,8 @@ private:
 	double				fTimeline;
 	float				fGCtimer;			// garbage collect timer
 	float				fFixedStepTimer;	// time accumulator for fixed timestep
+public:
+	CMenus				gMenus;
 
 public:
 	CGame();
@@ -33,5 +35,12 @@ public:
 	virtual OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
 	virtual OPRESULT OnLostDevice() override;
 	virtual OPRESULT OnDestroyDevice() override;
+
+	// singleton
+	static CGame& instance()
+	{
+		static CGame instance;
+		return instance;
+	}
 };
 

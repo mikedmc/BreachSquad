@@ -4,7 +4,7 @@
 // Menu class that listens to state changes
 class CMenus : public IEventListener, IDeviceRes {
 private:
-	EGameState			m_gameState;		// global gamestate 
+	EGameState			m_state;		// global gamestate 
 	int					m_nSubstate;		// current sub state
 	double				fLocalTimeline;
 
@@ -15,7 +15,7 @@ public:
 	CMenus();
 	~CMenus();
 
-	// Loads necessary sprites
+	// Loads necessary sprites and initializes necessary data (on load)
 	OPRESULT			Init();
 
 	// Updates the scene

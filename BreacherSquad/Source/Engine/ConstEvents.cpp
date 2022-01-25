@@ -6,6 +6,7 @@ CStringHash CEventTypes::evtT_SOUND(L"EVTTYPE_SOUND");
 CStringHash CEventTypes::evtT_CONTROLS(L"EVTTYPE_CONTROLS");
 CStringHash CEventTypes::evtT_GAMESTATE(L"EVTTYPE_GAMESTATE");
 CStringHash CEventTypes::evtT_SYSTEM(L"EVTTYPE_SYSTEM");
+CStringHash CEventTypes::evtT_INFO( L"INFO" );
 ///EVENT COMMANDS
 //--- SOUND ---
 CStringHash CEventCommands::evtC_SOUND_PLAY_IDX(L"SND_PLAY_IDX");				

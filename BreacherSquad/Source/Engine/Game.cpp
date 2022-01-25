@@ -487,12 +487,17 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 		}
 		break;
 
+		case GAME_STATE_MAINMENU:
+		{
+			gMenus.Paint();
+		}
+		break;
+
 		case GAME_STATE_JOIN_COOP_LIST:
 		case GAME_STATE_WORKSHOP:
 		case GAME_STATE_GAME_MODE_SELECTION:
 		case GAME_STATE_CHAPTER_SELECTION:
 		case GAME_STATE_LEVEL_SELECTION:
-		case GAME_STATE_MAINMENU:
 		{
 			g_mainMenu.Paint();
 
@@ -648,7 +653,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 
 void CGame::Release()
 {
-
+	gMenus.Release();
 }
 
 void CGame::GC()
@@ -663,23 +668,35 @@ void CGame::GC()
 OPRESULT CGame::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
 {
 	m_pDevice = pDevice;
+
+	gMenus.OnCreateDevice( pDevice, pBBDesc );
+
 	return K_OP_OK;
 }
 
 OPRESULT CGame::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
 {
 	m_pDevice = pDevice;
+
+	gMenus.OnResetDevice( pDevice, pBBDesc );
+
 	return K_OP_OK;
 }
 
 OPRESULT CGame::OnLostDevice()
 {
 	m_pDevice = nullptr;
+
+	gMenus.OnLostDevice();
+
 	return K_OP_OK;
 }
 
 OPRESULT CGame::OnDestroyDevice()
 {
 	m_pDevice = nullptr;
+
+	gMenus.OnDestroyDevice();
+
 	return K_OP_OK;
 }

@@ -18,7 +18,7 @@ ETransitionType			GameState::nTransitionType = TRANSITION_NONE;
 void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 {
 	LOG( L"System:: ChangeGameState(%d)", newState );
-	int oldGameState = GameState::state;
+	EGameState oldGameState = GameState::state;
 
 	///--- from what state is it coming? ---
 	switch ( oldGameState )
@@ -489,6 +489,12 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 		break;
 #endif
 	}
+
+	// INFO: announce state changed
+	CEvent *nevent = new CEvent( CEventTypes::evtT_INFO, CEventCommands::evtC_GAMESTATE_CHANGE);
+	nevent->AddNamedArgUINT32( L"newGameState", state);
+	nevent->AddNamedArgUINT32( L"oldGameState", oldGameState);
+	UTGetEventManager().QueueEvent( nevent );
 }
 
 

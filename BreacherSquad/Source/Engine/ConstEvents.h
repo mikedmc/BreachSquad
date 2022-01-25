@@ -4,10 +4,11 @@ class CEventTypes
 {
 //EVENT TYPES
 public:
-	static CStringHash		evtT_SOUND;		 //sound event
-	static CStringHash		evtT_CONTROLS;   //interface events - cele legate de ControlsManager
-	static CStringHash		evtT_GAMESTATE;  //mesaje pentru schimbarea came state-ului
-	static CStringHash		evtT_SYSTEM;     //mesaje de system. Poate fi rezolutie, mouse, etc
+	static CStringHash		evtT_SOUND;			// sound commands
+	static CStringHash		evtT_CONTROLS;		// ControlsManager events
+	static CStringHash		evtT_GAMESTATE;		// gamestate change messages
+	static CStringHash		evtT_SYSTEM;		// system commands 
+	static CStringHash		evtT_INFO;			// informational events	- no actions should be done on this kind of event
 };
 
 class CEventCommands

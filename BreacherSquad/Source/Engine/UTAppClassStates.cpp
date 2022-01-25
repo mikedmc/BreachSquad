@@ -199,6 +199,8 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath);
 			}
+
+			V_OP_RET_VOID( CGame::instance().gMenus.Init() );
 		}
 		break;
 		//wait keypress

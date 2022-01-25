@@ -78,6 +78,9 @@ OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 f
 
 OPRESULT CSpritePainter::End()
 {
+	if ( !bStarted )
+		return K_OP_OK;
+
 	V_OP_RET(Flush());
 	m_pDevice->SetIndices(nullptr);
 
@@ -121,6 +124,8 @@ OPRESULT CSpritePainter::Flush()
 #if defined(_DEBUG) || defined(DEBUG)
 	stats_flushes++;
 #endif
+	if ( !bStarted )
+		return K_OP_OK;
 
 	if (m_nVertexCursor == 0)
 		return K_OP_OK;

@@ -19,6 +19,9 @@
 #ifndef V_OP_HRFAILED
 	#define V_OP_HRFAILED(OPseverity, hr)           { if ((hr) < 0) { return OPRESULT(K_OP_FAILED, L"HRESULT OP failed!", OPseverity); } }
 #endif
+#ifndef V_OP_RET_VOID
+	#define V_OP_RET_VOID(x)           { OPRESULT opr = (x); if (OP_FAILED(opr)) { return; } }
+#endif
 
 
 ///--- generic return values
