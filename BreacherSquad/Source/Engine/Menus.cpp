@@ -31,8 +31,12 @@ void CMenus::Update( float dTime )
 void CMenus::Paint()
 {
 	//1. set camera
-	CCameraTransform::SetActiveCamera( m_pDevice, &UTApp().g_cam360hScreen);
+	//CCameraTransform::SetActiveCamera( m_pDevice, &UTApp().g_cam360hScreen);
 	RECTXYWH_F camrect = UTApp().g_camScreen.GetCamWorldAABB();
+	Mat matproj = UTApp().g_matProj;
+	Mat matview = UTApp().g_cam360hScreen.GetViewTransform();
+	Mat matviewproj = matview * matproj;
+	UTPainter().SetViewProjMatrix(matviewproj);
 
 	PaintBackground( camrect, 0xffffffff, true, true );
 
@@ -68,7 +72,7 @@ void CMenus::PaintBackground( RECTXYWH_F worldRect, DWORD dwColor, bool bPaintPa
 	}
 
 	//paint character flickering orange light
-	UTAdditiveBlendingOn( m_pDevice );
+	UTPainter().AdditiveBlendingOn();
 	float alpha = 0.4f + UTPerlin::PerlinNoise1D( fLocalTimeline, 3.0f, 2.0f, 0.4f, 0.5f, 2 );
 	CLAMP( alpha, 0.0f, 1.0f );
 	//paint flickering right glow
@@ -83,7 +87,7 @@ void CMenus::PaintBackground( RECTXYWH_F worldRect, DWORD dwColor, bool bPaintPa
 		// logo glow
 		UTSprite::PaintFrameEx( &m_sprCol, vLogoPos, ANM_MENUS0_SPR_LOGO_MM, 1, dwTitleCol );
 	}
-	UTAdditiveBlendingOff( m_pDevice );
+	UTPainter().AdditiveBlendingOff();
 	// logo normal
 	if ( bPaintTitle )
 		UTSprite::PaintFrameEx( &m_sprCol, vLogoPos, ANM_MENUS0_SPR_LOGO_MM, 0 );

@@ -70,6 +70,10 @@ public:
 	OPRESULT				DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec2 vPos, DWORD color = 0xffffffff, float fRotationZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f }, UINT paintFlags = 0);
 	// #TODO: DRAW version with clip rect
 	// #TODO: version with scissors for scene wide clip rects (setclip/remove clip)
+	// Activates additive blending and flushes
+	void					AdditiveBlendingOn();
+	// Deactivates additive blending and flushes
+	void					AdditiveBlendingOff();
 
 	// Forces flushing of remaining sprites
 	OPRESULT				Flush();

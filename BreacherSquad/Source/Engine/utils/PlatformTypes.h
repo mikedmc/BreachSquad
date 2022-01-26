@@ -26,9 +26,5 @@ OPRESULT			UT3DEndScene(PDEVICE pDevice);
 
 // Use it to clear the scene. Uses the DX9 format.
 OPRESULT			UT3DClear(PDEVICE pDevice, DWORD Count, CONST D3DRECT* pRects, DWORD Flags, D3DCOLOR Color, float Z, DWORD Stencil);
-// Additive blending on 
-void				UTAdditiveBlendingOn( PDEVICE pDevice );
-// Additive blending off 
-void				UTAdditiveBlendingOff( PDEVICE pDevice );
 
 

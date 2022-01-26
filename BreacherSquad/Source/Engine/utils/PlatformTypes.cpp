@@ -31,13 +31,3 @@ OPRESULT UT3DClear(PDEVICE pDevice, DWORD Count, CONST D3DRECT* pRects, DWORD Fl
 	return K_OP_OK;
 }
 
-void UTAdditiveBlendingOn( PDEVICE pDevice )
-{
-	pDevice->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
-	pDevice->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_ONE );
-}
-
-void UTAdditiveBlendingOff( PDEVICE pDevice )
-{
-	pDevice->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
-}

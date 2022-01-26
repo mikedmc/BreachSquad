@@ -767,7 +767,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	V_RETURN(UTApp().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(UTGetRTManager().OnCreateDevice(pDevice, pBBDesc));
-	CGame::instance().OnCreateDevice( pDevice, pBBDesc );
+	V_OP_RETHR(__Game().OnCreateDevice( pDevice, pBBDesc ));
 
 	UTimgui().OnCreateDevice(pDevice, pBBDesc);
 	V_OP_RETHR(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
@@ -844,7 +844,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	//if (UTGetAppClass().m_Settings.nLOD_lights >= K_UT_LOD_MED)
 		//UTGetRenderTargetsManager().AddRT(K_RTID_SPECULARMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
 
-	CGame::instance().OnResetDevice( pDevice, pBBDesc );
+	V_OP_RETHR( __Game().OnResetDevice( pDevice, pBBDesc ) );
 
 	UTimgui().OnResetDevice(pDevice, pBBDesc);
 	V_OP_RETHR(UTGetShaderManager().OnResetDevice(pDevice, pBBDesc));
@@ -932,7 +932,7 @@ void CALLBACK OnLostDevice(void)
 	UTGetRTManager().Release();
 	UTGetRTManager().OnLostDevice();
 
-	CGame::instance().OnLostDevice();
+	__Game().OnLostDevice();
 
 	g_level.OnLostDevice();
 	g_editor.OnLostDevice();
@@ -960,7 +960,7 @@ void CALLBACK OnDestroyDevice(void)
 
 	UTApp().OnDestroyDevice();
 	UTGetRTManager().OnDestroyDevice();
-	CGame::instance().OnDestroyDevice();
+	__Game().OnDestroyDevice();
 
 	UTimgui().OnDestroyDevice();
 	UTGetShaderManager().OnDestroyDevice();
@@ -1009,7 +1009,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 	UTGetGUI().Update(fElapsedTime);
 
 	// update main game engine
-	CGame::instance().Update( fElapsedTime, bSyncUpdate, g_nUpdateFrame );
+	__Game().Update( fElapsedTime, bSyncUpdate, g_nUpdateFrame );
 
 	///--- ANALYTICS ---
 	UTGetAnalytics().Update();
@@ -1736,7 +1736,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	///----------------------------------------------------------------------------------
 	///	PART1. Paint the offscreen surfaces before the main render begin/end 
 	///----------------------------------------------------------------------------------
-	CGame::instance().BeforePaint();
+	__Game().BeforePaint();
 
 	///----------------------------------------------------------------------------------
 	/// PART2. --- Render onscreen - FINAL PASS ---
@@ -1761,10 +1761,11 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		///----------------------------------------------------------------------------------
 		/// MAIN GAME PAINT
 		///----------------------------------------------------------------------------------
-		CGame::instance().Paint( pDevice, g_pGameSprite, fElapsedTime );
+		__Game().Paint( pDevice, g_pGameSprite, fElapsedTime );
 
 
 #ifdef K_CONTROLS_EDITOR
+		//#IMPORTANT: d3dxsprite gets messed by the UTPainter
 		///--- controls editor paint ---
 		if ( GameState::state == GAME_STATE_CONTROLSED )
 		{

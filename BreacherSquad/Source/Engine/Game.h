@@ -36,11 +36,9 @@ public:
 	virtual OPRESULT OnLostDevice() override;
 	virtual OPRESULT OnDestroyDevice() override;
 
-	// singleton
-	static CGame& instance()
-	{
-		static CGame instance;
-		return instance;
-	}
 };
 
+///**************************************************************************************
+/// SINGLETON
+///**************************************************************************************
+CGame& __Game();

@@ -341,6 +341,19 @@ OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_
 	return K_OP_OK;
 }
 
+void CSpritePainter::AdditiveBlendingOn()
+{
+	Flush();
+	m_pDevice->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
+	m_pDevice->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_ONE );
+}
+
+void CSpritePainter::AdditiveBlendingOff()
+{
+	Flush();
+	m_pDevice->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
+}
+
 //--- framework ---
 OPRESULT CSpritePainter::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc )
 {

@@ -205,6 +205,9 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 
 		case GAME_STATE_MAINMENU:
 		{
+			// update menus
+			gMenus.Update( dTime );
+
 			//offer to reset the user data
 			if ( g_userData[ K_MEMID_OFFER_RESET_USER_DATA ] != 0 )
 			{
@@ -700,3 +703,14 @@ OPRESULT CGame::OnDestroyDevice()
 
 	return K_OP_OK;
 }
+
+
+///**************************************************************************************
+/// SINGLETON
+///**************************************************************************************
+CGame& __Game()
+{
+	static CGame __Game;
+	return __Game;
+}
+
