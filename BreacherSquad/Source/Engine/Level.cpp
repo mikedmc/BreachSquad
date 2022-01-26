@@ -7888,7 +7888,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 	/// BEGIN SPRITES PAINTER
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 	if (pSprVS)
-		UTPainter().Begin(pSprVS, matView * *matProj);
+		__Painter().Begin(pSprVS, matView * *matProj);
 
 	eVisibleSortableType eLastVis = K_VST_UNKNOWN;
 	for (int kk = 0; kk < m_visibleList.arrSortedItems.nCount; kk++)
@@ -7902,7 +7902,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 				if (eLastVis != K_VST_ACTOR)
 				{
 					// if last painted element was not an actor then do a flush on UTpainter
-					UTPainter().Flush();
+					__Painter().Flush();
 					// remove shaders that were set
 					UTGetShaderManager().SetVS(nullptr);
 				}
@@ -7925,12 +7925,12 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 		eLastVis = vis->eType;
 	}
 
-	UTPainter().Flush();
+	__Painter().Flush();
 	// now paint the bullets
 	PaintBullets(ePass);
 
 	/// END SPRITES PAINTER
-	UTPainter().End();
+	__Painter().End();
 
 	// top layer of tiles
 	UTGetShaderManager().SetVS(nullptr);
@@ -7989,7 +7989,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 	// begin the painter
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 	if (pSprVS)
-		UTPainter().Begin(pSprVS, matWVP);
+		__Painter().Begin(pSprVS, matWVP);
 
 
 #if defined(_DEBUG) || defined(DEBUG)
@@ -8112,7 +8112,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 	///--- bullet lights
 	// bullet shadows
 	PaintBullets(K_LVL_RP_LIGHTS);
-	UTPainter().Flush();
+	__Painter().Flush();
 	
 
 	///--- point lights
@@ -8233,7 +8233,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 
 	AdditiveBlendingOFF(m_pDevice, NULL);
 	// end sprite painter
-	UTPainter().End();
+	__Painter().End();
 
 
 	return K_OP_OK;

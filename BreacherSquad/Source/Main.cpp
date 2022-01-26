@@ -771,7 +771,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	UTimgui().OnCreateDevice(pDevice, pBBDesc);
 	V_OP_RETHR(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
-	V_OP_RETHR(UTPainter().OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(__Painter().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetFontsManager().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_level.OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnCreateDevice(pDevice, pBBDesc));
@@ -848,7 +848,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	UTimgui().OnResetDevice(pDevice, pBBDesc);
 	V_OP_RETHR(UTGetShaderManager().OnResetDevice(pDevice, pBBDesc));
-	V_OP_RETHR(UTPainter().OnResetDevice(pDevice, pBBDesc));
+	V_OP_RETHR(__Painter().OnResetDevice(pDevice, pBBDesc));
 
 	UTGetTTFManager().OnResetDevice(pDevice, pBBDesc);
 
@@ -869,7 +869,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	g_level.SetSpritePtr(g_pGameSprite);
 	g_particlesMgr.SetSpritePtr(g_pGameSprite);
 	CTexturedFont::SetGlobalSpritePtr(g_pGameSprite);
-	CSprite::SetGlobalSpritePtr(g_pGameSprite, &UTPainter());
+	CSprite::SetGlobalSpritePtr(g_pGameSprite, &__Painter());
 	CTTFontsManager::SetGlobalSpritePtr(g_pGameSprite);
 	UTGetGUI().SetSpritePtr(g_pGameSprite);
 	g_mainMenu.SetSpritePtr(g_pGameSprite);
@@ -923,7 +923,7 @@ void CALLBACK OnLostDevice(void)
 	UTimgui().OnLostDevice();
 	UTGetTTFManager().OnLostDevice();
 	UTGetShaderManager().OnLostDevice();
-	UTPainter().OnLostDevice();
+	__Painter().OnLostDevice();
 
 	UTGetFontsManager().OnLostDevice();
 	UTGetGUI().OnLostDevice();
@@ -964,7 +964,7 @@ void CALLBACK OnDestroyDevice(void)
 
 	UTimgui().OnDestroyDevice();
 	UTGetShaderManager().OnDestroyDevice();
-	UTPainter().OnDestroyDevice();
+	__Painter().OnDestroyDevice();
 	UTGetTTFManager().OnDestroyDevice();
 	UTGetFontsManager().OnDestroyDevice();
 	UTGetGUI().OnDestroyDevice();
@@ -1755,7 +1755,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		{
 			PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 			if (pSprVS)
-				UTPainter().Begin(pSprVS, g_matIdentity);
+				__Painter().Begin(pSprVS, g_matIdentity);
 		}
 
 		///----------------------------------------------------------------------------------
@@ -1890,7 +1890,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		g_pGameSprite->End();
 
 		// end main painter
-		UTPainter().End();
+		__Painter().End();
 
 		//--- CONTROLS EDITOR PAINT ---
 #ifdef K_CONTROLS_EDITOR
@@ -1991,7 +1991,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	}
 
 #if defined(_DEBUG) || defined(DEBUG)
-	UTPainter().ClearStatistics();
+	__Painter().ClearStatistics();
 #endif
 }
 

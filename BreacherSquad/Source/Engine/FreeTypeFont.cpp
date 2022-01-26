@@ -17,7 +17,7 @@ CFreeTypeFont::CFreeTypeFont()
 	rowSpacing = 1;
 	spaceSize = 8;
 	
-	m_pSP = &UTPainter();
+	m_pSP = &__Painter();
 }
 
 CFreeTypeFont::~CFreeTypeFont()
@@ -407,7 +407,7 @@ RECTXYWH CFreeTypeFont::DrawStringLine(CStringDesc *strDesc, float X, float Y, U
 
 		// draws the letter
 		sGlyphInfo* glyph = &m_atlas.arrGlyphs[cod];
-		UTPainter().Draw(m_atlas.pTex, glyph->texRect, glyph->moduleRectOff, vpos, Color);
+		__Painter().Draw(m_atlas.pTex, glyph->texRect, glyph->moduleRectOff, vpos, Color);
 		vpos.x += (float)(glyph->advanceX + letterSpacing);
 		nLineW += glyph->advanceX + letterSpacing;
 	}

@@ -29,7 +29,7 @@ void CIngameGUI::Paint(PDEVICE pDevice)
 
 	///#TODO: --- player 2
 
-	UTPainter().Flush();
+	__Painter().Flush();
 }
 
 void CIngameGUI::Release()

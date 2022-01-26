@@ -423,7 +423,7 @@ OPRESULT CSpritePainter::OnDestroyDevice()
 ///**************************************************************************************
 /// Sigleton 
 ///**************************************************************************************
-CSpritePainter& UTPainter()
+CSpritePainter& __Painter()
 {
 	static CSpritePainter g_SpritePainter;
 	return g_SpritePainter;

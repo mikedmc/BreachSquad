@@ -5,7 +5,7 @@
 #define SPR_ED_TIMELINE 100.0f
 
 ///--- STATIC MEMBERS ---
-CSpritePainter* CSpr::s_pSP = &UTPainter();
+CSpritePainter* CSpr::s_pSP = &__Painter();
 
 CSpr::CSpr() 
 {
@@ -258,7 +258,7 @@ void UTSprite::PaintFrameEx(CSpriteCollection *sprCol, Vec2 vPos, int animID, in
 	{
 		scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[ii]];
 
-		UTPainter().DrawEx(mod->pImg->pTex,
+		__Painter().DrawEx(mod->pImg->pTex,
 			mod->texRect,
 			mod->moduleRectOff,
 			vPos,
@@ -275,7 +275,7 @@ void UTSprite::PaintFrameModule(CSpriteCollection *sprCol, Vec2 vPos, int animID
 	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameID];
 	scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[moduleID]];
 
-	UTPainter().Draw(mod->pImg->pTex,
+	__Painter().Draw(mod->pImg->pTex,
 		mod->texRect,
 		mod->moduleRectOff,
 		vPos, ncolor);

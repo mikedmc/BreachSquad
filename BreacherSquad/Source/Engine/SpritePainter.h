@@ -89,4 +89,4 @@ public:
 };
 
 // Access singleton
-CSpritePainter& UTPainter();
+CSpritePainter& __Painter();
