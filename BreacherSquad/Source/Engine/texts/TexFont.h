@@ -82,7 +82,7 @@ private:
 	bool loaded;
 
 public:
-	int			nFontsMgrTexManagerIDX;		
+	CTexNode*	pTexNode;		
 	WCHAR		strLoadedTexture[MAX_PATH];
 	WCHAR		strLoadedFile[MAX_PATH];
 

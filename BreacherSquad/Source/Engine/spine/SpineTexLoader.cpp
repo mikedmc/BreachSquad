@@ -108,8 +108,6 @@ CSpineTex* CSpineTexLoader::AddTexture(const WCHAR* fileName, D3DFORMAT format, 
 
 	// Add the new texture
 	CSpineTex * pNewTex = new CSpineTex();
-
-	ZeroMemory(pNewTex, sizeof(TexNode));
 	//adds the default prefix before loading
 	StringCchPrintf(pNewTex->fileName, MAX_PATH, L"%s", wcsFinalPath);
 

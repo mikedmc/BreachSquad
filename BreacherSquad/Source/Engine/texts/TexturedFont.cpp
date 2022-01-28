@@ -22,7 +22,7 @@ CTexturedFont::CTexturedFont()
 	loaded = false;
 
 	pDevice	= NULL;
-	nFontsMgrTexManagerIDX = -1;
+	pTexNode = nullptr;
 	strLoadedTexture[0] = 0;
 	strLoadedFile[0] = 0;
 
@@ -225,8 +225,8 @@ HRESULT CTexturedFont::LoadFontXML(WCHAR* XMLpath)
 	const WCHAR* imgname = imagenode.child_value();
 	StringCchPrintf(strLoadedTexture, MAX_PATH, L"%s%s", szwPath, imgname);
 
-	hr = m_pFontsManager->m_texManager.AddTexture(strLoadedTexture, &nFontsMgrTexManagerIDX, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
-	if(FAILED(hr))
+	pTexNode = m_pFontsManager->m_texManager.AddTexture(strLoadedTexture, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
+	if(pTexNode == nullptr)
 	{
 		ErrorBox(K_ERR_CRITICAL, L"CTexturedFont::LoadFontXML -> Could not load texture!\n %s", strLoadedTexture);
 		Release();
@@ -331,7 +331,7 @@ int CTexturedFont::DrawStringClamped(CStringDesc *strDesc, int X, int Y, int max
 	}
 
 
-	LPDIRECT3DTEXTURE9 pTexture = m_pFontsManager->m_texManager.GetTexture(nFontsMgrTexManagerIDX);
+	LPDIRECT3DTEXTURE9 pTexture = pTexNode->pTexture;
 
 	UINT16 length = strDesc->len;
 	UINT16* text = strDesc->codes;
@@ -519,7 +519,7 @@ int CTexturedFont::DrawStringLightened(CStringDesc *strDesc, int X, int Y, float
 	}
 
 
-	LPDIRECT3DTEXTURE9 pTexture = m_pFontsManager->m_texManager.GetTexture(nFontsMgrTexManagerIDX);
+	LPDIRECT3DTEXTURE9 pTexture = pTexNode->pTexture;
 
 	UINT16 length = strDesc->len;
 	UINT16* text = strDesc->codes;
@@ -728,7 +728,7 @@ int CTexturedFont::DrawString(CStringDesc *strDesc, float X, float Y, UINT16 Fla
 	}
 
 
-	LPDIRECT3DTEXTURE9 pTexture = m_pFontsManager->m_texManager.GetTexture(nFontsMgrTexManagerIDX);
+	LPDIRECT3DTEXTURE9 pTexture = pTexNode->pTexture;
 
 	UINT16 length = strDesc->len;
 	UINT16* text = strDesc->codes;
@@ -819,7 +819,7 @@ int CTexturedFont::DrawString(int strIdx, float X, float Y, UINT16 Flags, DWORD 
 	}
 #endif
 
-	LPDIRECT3DTEXTURE9 pTexture = m_pFontsManager->m_texManager.GetTexture(nFontsMgrTexManagerIDX);
+	LPDIRECT3DTEXTURE9 pTexture = pTexNode->pTexture;
 
 	CStringDesc *strDesc = m_pStrManager->strings[strIdx];
 
@@ -898,7 +898,7 @@ int CTexturedFont::DrawStringClipped(CStringDesc *strDesc, float X, float Y, REC
 
 
 
-	LPDIRECT3DTEXTURE9 pTexture = m_pFontsManager->m_texManager.GetTexture(nFontsMgrTexManagerIDX);
+	LPDIRECT3DTEXTURE9 pTexture = pTexNode->pTexture;
 
 	UINT16 length = strDesc->len;
 	UINT16* text = strDesc->codes;
@@ -1014,7 +1014,7 @@ int CTexturedFont::DrawStringClipped(int strIdx, float X, float Y, RECTXYWH clip
 	}
 #endif
 
-	LPDIRECT3DTEXTURE9 pTexture = m_pFontsManager->m_texManager.GetTexture(nFontsMgrTexManagerIDX);
+	LPDIRECT3DTEXTURE9 pTexture = pTexNode->pTexture;
 
 	CStringDesc *strDesc = m_pStrManager->strings[strIdx];
 	return DrawStringClipped(strDesc, X, Y, clipRect, Flags, Color);
@@ -1078,7 +1078,7 @@ void CTexturedFont::DrawString(CStringDesc *strDesc, RECTXYWH rect, UINT16 Flags
 		return;
 	}
 
-	LPDIRECT3DTEXTURE9 pTexture = m_pFontsManager->m_texManager.GetTexture(nFontsMgrTexManagerIDX);
+	LPDIRECT3DTEXTURE9 pTexture = pTexNode->pTexture;
 
 	int textLen = strDesc->len;
 	UINT16* textCodes = strDesc->codes;
@@ -1335,7 +1335,7 @@ void CTexturedFont::DrawStringOffsetY(int strIdx, RECTXYWH rect, int offsetY, UI
 	}
 
 
-	LPDIRECT3DTEXTURE9 pTexture = m_pFontsManager->m_texManager.GetTexture(nFontsMgrTexManagerIDX);
+	LPDIRECT3DTEXTURE9 pTexture = pTexNode->pTexture;
 
 	int textLen = m_pStrManager->strings[strIdx]->len;
 	UINT16* textCodes = m_pStrManager->strings[strIdx]->codes;

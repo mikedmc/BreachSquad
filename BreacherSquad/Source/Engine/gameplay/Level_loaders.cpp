@@ -52,8 +52,6 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_colAmbientGlobal = 0xffffffff;
 	m_fThunderTimer = 0.0f;
 
-	m_waterAnimIdx = -1;
-
 	//load interface sprites
 	FileManager::GetMediaPath(L"media/interfaces/igm_interface.bsx", Path);
 	V_OP_RET(m_sprInterface.LoadSprites(Path));
@@ -69,22 +67,18 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 
 	FileManager::GetMediaPath(L"media/levels/data/tileset1.png", Path);
-	if (FAILED(m_texManager.AddTexture(Path, &m_tilesTexBaseIdx, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE)))
+	m_pTexTilesColor = m_texManager.AddTexture( Path, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE );
+	if (m_pTexTilesColor == nullptr)
 	{
 		ErrorBox(K_ERR_CRITICAL, L"Couldn't load tileset texture: %s", Path);
 		return K_OP_FAILED;
 	}
 
 	FileManager::GetMediaPath(L"media/levels/data/tileset1_nh.png", Path);
-	if (FAILED(m_texManager.AddTexture(Path, &m_tilesTexNormIdx, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE)))
+	m_pTexTilesNorm = m_texManager.AddTexture( Path, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE );
+	if (m_pTexTilesNorm == nullptr)
 	{
 		ErrorBox(K_ERR_CRITICAL, L"Couldn't load tileset normals texture: %s", Path);
-		return K_OP_FAILED;
-	}
-	FileManager::GetMediaPath(L"media/levels/data/water1_n.png", Path);
-	if (FAILED(m_texManager.AddTexture(Path, &m_waterTexIdx, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE)))
-	{
-		ErrorBox(K_ERR_CRITICAL, L"Couldn't load water texture: %s", Path);
 		return K_OP_FAILED;
 	}
 
@@ -335,7 +329,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	m_arrDirtyRectsTL.push_back(RECTXYWH(posTL.x, posTL.y, areaW, areaH));
 
 	// need to know the tileset size
-	Vec2 vTilesetSize = m_texManager.GetTextureSize(m_tilesTexBaseIdx);
+	Vec2 vTilesetSize = m_pTexTilesColor->getSize();
 
 	area->tiles = new CTile*[areaW];
 	for (int kk = 0; kk < areaW; kk++)

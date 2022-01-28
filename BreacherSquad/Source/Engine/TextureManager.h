@@ -1,53 +1,70 @@
 #pragma once
+#include "interfaces/DeviceRes.h"
 
-class TexNode
+class CTexNode
 {
+friend class CTextureManager; 
+
+private:
+	bool				bLoaded;		// is it actually loaded?
 public:
-	UINT				widthToLoad;	//forces texture loading to this width
+	UINT				widthToLoad;	// forces texture loading to this width
 	UINT				heightToLoad;
 
-	WCHAR				fileName[MAX_PATH];
-	LPDIRECT3DTEXTURE9	pTexture;
-	D3DFORMAT			format;
-	D3DXIMAGE_INFO		info;
+	WCHAR				fileName[ MAX_PATH ];
+	PTEXTURE			pTexture;
+	FORMAT3D			format;
+	IMAGE_INFO			info;
 	DWORD				filter, mipFilter;
 	//CTOR
-	TexNode() : widthToLoad(D3DX_DEFAULT), heightToLoad(D3DX_DEFAULT),
-	filter(D3DX_DEFAULT),
-	mipFilter(D3DX_DEFAULT)
-	{}
+	CTexNode() : widthToLoad( D3DX_DEFAULT ), heightToLoad( D3DX_DEFAULT ),
+		filter( D3DX_DEFAULT ),
+		mipFilter( D3DX_DEFAULT )
+	{
+		bLoaded = false;
+		fileName[ 0 ] = 0;
+	}
+
+	inline bool isLoaded() {
+		return bLoaded;
+	}
+
+	Vec2 getSize() {
+		if ( bLoaded == false )
+			return g_Vec2Zero;
+		return Vec2( info.Width, info.Height );
+	}
 };
 
-//TODO: Poate ar fi bine sa fie adresabile si in functie de un hash atunci cand ai de gand sa stergi din ele
-class CTextureManager
+// Keeps collection of active textures.
+class CTextureManager : public IDeviceRes
 {
-protected:
-	LPDIRECT3DDEVICE9		m_pd3dDevice;
-	HRESULT	LoadTexture(const int nTexIdx);
+private:
+	// Internal function that actually does the loading from the file
+	OPRESULT				LoadTexture( const int nTexIdx );
 
 public:
-	CTextureManager(void);
-	~CTextureManager(void);
+	CArray<CTexNode*>		arrTextures;
 
-	/*!
-	 *	Releases all allocated textures
-	 */
-	HRESULT Release(void);
-	HRESULT DeleteTexture(int nTexIdx);
-	HRESULT	AddTexture(const WCHAR* fileName, int *retTexIdx, D3DFORMAT format, DWORD filter, DWORD mipFilter, UINT nSetWidth = D3DX_DEFAULT, UINT nSetHeight = D3DX_DEFAULT);
-	//Replaces a loaded texture with another one. Checks to see if it is the same.
-	HRESULT ReplaceTexture(int texIdx, const WCHAR* fileName, D3DFORMAT format, DWORD filter = D3DX_DEFAULT, DWORD mipFilter = D3DX_DEFAULT);
-	LPDIRECT3DTEXTURE9	GetTexture(int nTexIdx);
-	Vec2 GetTextureSize(int nTexIdx);
+public:
+	CTextureManager( void );
+	~CTextureManager( void );
 
-	CArray<TexNode*>	m_Texs;
-	TexNode* GetTextureNode(int nTexIdx);
+	// Releases a texture but doesn't delete array entry so we don't get dangling pointers
+	void					ReleaseTexture( CTexNode* pTN );
 
-	int		GetTextureCount(void)	{ return m_Texs.GetSize();	}
+	// Adds a new texture and returns a pointer to the texture structure or null if we have errors
+	CTexNode*				AddTexture( const WCHAR* fileName, D3DFORMAT format, DWORD filter, DWORD mipFilter, UINT nSetWidth = D3DX_DEFAULT, UINT nSetHeight = D3DX_DEFAULT );
 
-	//--- system framework ---
-	HRESULT OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL);
-	HRESULT OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL);
-	HRESULT OnLostDevice(void);
-	HRESULT OnDestroyDevice(void);
+	// Use it only when you know what you're doing
+	CTexNode*				GetTextureByIndex( int nIndex );
+
+	// Releases all textures
+	void					Release();
+
+	// Inherited via IDeviceRes
+	virtual OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
+	virtual OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
+	virtual OPRESULT OnLostDevice() override;
+	virtual OPRESULT OnDestroyDevice() override;
 };

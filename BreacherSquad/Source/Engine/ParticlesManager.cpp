@@ -582,7 +582,7 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 					m_pSprite->SetTransform(&mat1);
 					DWORD col = (ndum->sprite.color & 0xffffff) | ((BYTE)(ndum->fPtr[ii] * 255.0f) << 24);
 					//D3DCOLOR_COLORVALUE(1.0f, 1.0f, 1.0f, ndum->fPtr[ii]);
-					m_pSprite->Draw(UTGetFontsManager().m_texManager.GetTexture(UTGetFontsManager()[ndum->intPt.x]->nFontsMgrTexManagerIDX), &letterRect, &center, NULL, col);
+					//m_pSprite->Draw(UTGetFontsManager().m_texManager.GetTexture(UTGetFontsManager()[ndum->intPt.x]->nFontsMgrTexManagerIDX), &letterRect, &center, NULL, col);
 					posx += (UTGetFontsManager()[ndum->intPt.x]->frameBBox[cod].w + UTGetFontsManager()[ndum->intPt.x]->letterSpacing) * ndum->fparam;
 
 				}

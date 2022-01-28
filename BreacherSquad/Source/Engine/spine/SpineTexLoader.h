@@ -11,11 +11,11 @@ class CSpineTex
 public:
 	int					nSetWidth, nSetHeight;
 	WCHAR				fileName[MAX_PATH];
-	LPDIRECT3DTEXTURE9	pTexture;				// Texture
-	LPDIRECT3DTEXTURE9	pTexture_N;				// Normal map
-	LPDIRECT3DTEXTURE9	pTexture_S;				// Specular map
-	D3DFORMAT			format;
-	D3DXIMAGE_INFO		info;
+	PTEXTURE			pTexture;				// Texture
+	PTEXTURE			pTexture_N;				// Normal map
+	PTEXTURE			pTexture_S;				// Specular map
+	FORMAT3D			format;
+	IMAGE_INFO			info;
 	DWORD				filter, mipFilter;
 	//CTOR
 	CSpineTex() :
@@ -30,7 +30,7 @@ public:
 class CSpineTexLoader : public TextureLoader
 {
 protected:
-	LPDIRECT3DDEVICE9			m_pDevice;
+	PDEVICE						m_pDevice;
 	WCHAR						m_wcsFilesPrefix[MAX_PATH];			//prefix that gets put before file paths
 
 public:

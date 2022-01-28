@@ -809,12 +809,8 @@ CLevel::CLevel()
 	m_propsLightsMeshIdx = -1;
 
 	//indexuri texturi
-	m_tilesTexBaseIdx = -1;
-	m_tilesTexNormIdx = -1;
-	//water
-	m_waterMeshIdx = -1;
-	m_waterTexIdx = -1;
-	m_waterAnimIdx = -1;
+	m_pTexTilesNorm = nullptr;
+	m_pTexTilesColor = nullptr;
 	//fog of war
 	m_fogofwarMeshIdx = -1;
 	m_bulletsMeshIdx = -1;
@@ -2088,10 +2084,11 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 
 
 	///--- water ---
+	/*
 	m_bufferedPainter.BeginMesh(m_waterMeshIdx);
 	//salvez date textura apa	
 	float waterTexScale = 2.0f;
-	float waterTexSize = m_texManager.m_Texs[m_waterTexIdx]->info.Width;
+	float waterTexSize = m_texManager.arrTextures[m_waterTexIdx]->info.Width;
 
 	for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
 	{
@@ -2136,7 +2133,7 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 	}
 	//inchid meshul apelor
 	m_bufferedPainter.EndMesh();
-
+	*/
 
 	//4. poligoane fow
 	m_bufferedPainter.BeginMesh(m_fogofwarMeshIdx);
@@ -7850,7 +7847,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 	m_pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 	UTGetShaderManager().SetVS(nullptr);
 
-	int nTilesTexIdx = g_level.m_tilesTexBaseIdx;
+	CTexNode* pTexToUse = m_pTexTilesColor;
 	// Offset in texture index so we paint from the normals texture when we render the normals pass
 	int nTexIdxOffset = 0;		
 	ETexChannel	eTexChannel = K_TEXCHAN_NONE;
@@ -7858,14 +7855,14 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 	{
 		case K_LVL_RP_COLORS:
 		{
-			nTilesTexIdx = g_level.m_tilesTexBaseIdx;
+			pTexToUse = m_pTexTilesColor;
 			nTexIdxOffset = 0;
 			eTexChannel = K_TEXCHAN_COLORMAP;
 		}
 		break;
 		case K_LVL_RP_NORMALS_HEIGHT:
 		{
-			nTilesTexIdx = g_level.m_tilesTexNormIdx;
+			pTexToUse = m_pTexTilesNorm;
 			nTexIdxOffset = 1;
 			eTexChannel = K_TEXCHAN_NORMALMAP;
 		}
@@ -7877,7 +7874,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 		break;
 	}
 
-	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
+	m_pDevice->SetTexture(0, pTexToUse->pTexture);
 	// paint floors and vertical walls
 
 	Areas_PaintLayer(K_AL_FLOOR);
@@ -7934,7 +7931,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 
 	// top layer of tiles
 	UTGetShaderManager().SetVS(nullptr);
-	m_pDevice->SetTexture(0, g_level.m_texManager.GetTexture(nTilesTexIdx));
+	m_pDevice->SetTexture( 0, m_pTexTilesColor->pTexture );
 	Areas_PaintLayer(K_AL_CEILINGS);
 
 	return K_OP_OK;

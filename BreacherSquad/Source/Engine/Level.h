@@ -86,8 +86,8 @@ public:
 	int						tileW, tileH;					// size of tiles
 	RECTXYWH_F				m_levelAABB;					// level AABB in pixels - grows when adding areas
 	RECTXYWH				m_levelAABB_TL;					// level AABB in tiles  - grows when adding areas
-	int						m_tilesTexBaseIdx;				// tileset base texture index
-	int						m_tilesTexNormIdx;				// tileset normals texture index
+	CTexNode*				m_pTexTilesColor;				// tileset base texture 
+	CTexNode*				m_pTexTilesNorm;				// tileset normals texture 
 	Vec2					m_vLevelOrigin;					// level origin for the editor (usually around start location)
 
 	vector<RECTXYWH>		m_arrDirtyRectsTL;				// tiles that need updating
@@ -239,10 +239,6 @@ public:
 	CArray<CBullet*>		m_arrBullets;			//pool-ul de gloante
 	int						m_bulletsMeshIdx;		//idx gloante
 
-	///--- water ---
-	int						m_waterMeshIdx;			//idx la meshul apelor vizibile in ecran
-	int						m_waterTexIdx;			//idx textura normale apa in texManager
-	int						m_waterAnimIdx;			//idx animatie apa din fisierul de fundal
 	///--- room occluders ---
 	int						m_fogofwarMeshIdx;		//idx mesh occludere
 

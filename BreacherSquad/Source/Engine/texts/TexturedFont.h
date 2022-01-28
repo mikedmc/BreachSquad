@@ -91,7 +91,7 @@ private:
 public:
 	static LPDIRECT3DDEVICE9 pDevice;
 
-	int			nFontsMgrTexManagerIDX; //index textura din fonts manager
+	CTexNode*	pTexNode;						// pointer to managed texture node
 	WCHAR		strLoadedTexture[MAX_PATH];
 	WCHAR		strLoadedFile[MAX_PATH];
 	/////////// modules /////////////

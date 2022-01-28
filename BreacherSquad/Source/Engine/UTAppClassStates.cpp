@@ -17,8 +17,7 @@ void CApplication::App_EnterState_Loading()
 	g_texManager.Release();
 	WCHAR wcsPath[MAX_PATH];
 	FileManager::GetMediaPath(L"media/interfaces/loading.png", wcsPath, true);
-	int nTexIdx = -1;
-	g_texManager.AddTexture(wcsPath, &nTexIdx, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
+	g_texManager.AddTexture(wcsPath, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
 	//decide which weapon to show from available 13
 	nLoadingFrame = randint(K_CS_LOADING_WEAPONS);
 }
@@ -296,11 +295,11 @@ void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite
 		RECT rctSrcFull;
 		SetRect(&rctSrcFull, nlX, nlY, nlX + 1 + (int)ceil(48 * ((float)GameState::substate / 7.0f)), nlY + 24);
 		
-		LPDIRECT3DTEXTURE9 pTexLoading = g_texManager.GetTexture(0);
-		if (pTexLoading)
+		CTexNode* pTN = g_texManager.GetTextureByIndex( 0 );
+		if ( pTN && pTN->isLoaded() )
 		{
-			pSprite->Draw(pTexLoading, &rctSrcEmpty, NULL, &D3DXVECTOR3(scrrect.CenterX() - 24.0f, scrrect.CenterY(), 0.0f), 0xffffffff);
-			pSprite->Draw(pTexLoading, &rctSrcFull, NULL, &D3DXVECTOR3(scrrect.CenterX() - 24.0f, scrrect.CenterY(), 0.0f), 0xffffffff);
+			pSprite->Draw( pTN->pTexture, &rctSrcEmpty, NULL, &D3DXVECTOR3( scrrect.CenterX() - 24.0f, scrrect.CenterY(), 0.0f ), 0xffffffff );
+			pSprite->Draw( pTN->pTexture, &rctSrcFull, NULL, &D3DXVECTOR3( scrrect.CenterX() - 24.0f, scrrect.CenterY(), 0.0f ), 0xffffffff );
 		}
 	}
 }
@@ -343,14 +342,14 @@ void CApplication::App_EnterState_Developer()
 	//load the texture
 	WCHAR texpath[MAX_PATH];
 	StringCchPrintf(texpath, MAX_PATH, L"%s/interfaces/pixelshard.png", UTApp().g_wszAppResDir);
-	UTApp().g_texManager.AddTexture(texpath, null, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
+	UTApp().g_texManager.AddTexture(texpath, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
 }
 
 void CApplication::App_UpdateState_Developer(LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime)
 {
 	if ((!GameState::isTransitioning()) && (GameState::fTimer > 0.5f))
 	{
-		if ((g_texManager.GetTexture(0) == null) || (g_mouse.Lbut != K_MOUSE_BUTT_NOTPRESSED) || (g_mouse.Rbut != K_MOUSE_BUTT_NOTPRESSED) || (UTGetCtrlrMgr().KeyPressed()))
+		if ((g_texManager.GetTextureByIndex(0) == null) || (g_mouse.Lbut != K_MOUSE_BUTT_NOTPRESSED) || (g_mouse.Rbut != K_MOUSE_BUTT_NOTPRESSED) || (UTGetCtrlrMgr().KeyPressed()))
 		{
 			GameState::fTimer = 0.5f;
 		}
@@ -381,8 +380,8 @@ void CApplication::App_PaintState_Developer(LPDIRECT3DDEVICE9 pDevice, ID3DXSpri
 	RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
 	RECT src;
 	//logo
-	LPDIRECT3DTEXTURE9 pTex = g_texManager.GetTexture(0);
-	if (pTex != null)
+	CTexNode* pTN = g_texManager.GetTextureByIndex( 0 );
+	if (pTN != nullptr)
 	{
 		//7x3 frames 71x86px
 		int nAnimFrames = 21; 
@@ -391,7 +390,7 @@ void CApplication::App_PaintState_Developer(LPDIRECT3DDEVICE9 pDevice, ID3DXSpri
 		int nx = nFrame % 7, ny = nFrame / 7;
 
 		SetRect(&src, nx * recsz.w, ny * recsz.h, (nx + 1) * recsz.w, (ny + 1) * recsz.h);
-		pSprite->Draw(pTex, &src, &D3DXVECTOR3((src.right - src.left) / 2.0f, (src.bottom - src.top) / 2.0f, 0.0f), &D3DXVECTOR3(scrrect.CenterX(), scrrect.CenterY(), 0.0f), 0xffffffff);
+		pSprite->Draw(pTN->pTexture, &src, &D3DXVECTOR3((src.right - src.left) / 2.0f, (src.bottom - src.top) / 2.0f, 0.0f), &D3DXVECTOR3(scrrect.CenterX(), scrrect.CenterY(), 0.0f), 0xffffffff);
 	}
 }
 

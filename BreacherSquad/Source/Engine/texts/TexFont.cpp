@@ -5,7 +5,7 @@ CTexFont::CTexFont()
 {
 	loaded = false;
 
-	nFontsMgrTexManagerIDX = -1;
+	pTexNode = nullptr;
 	strLoadedTexture[ 0 ] = 0;
 	strLoadedFile[ 0 ] = 0;
 
@@ -152,13 +152,14 @@ OPRESULT CTexFont::LoadFontXML( WCHAR* XMLpath )
 	const WCHAR* imgname = imagenode.child_value();
 	StringCchPrintf( strLoadedTexture, MAX_PATH, L"%s%s", szwPath, imgname );
 
-	if ( FAILED( __TexFonts().m_texManager.AddTexture( strLoadedTexture, &nFontsMgrTexManagerIDX, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE ) ) )
+	pTexNode = __TexFonts().m_texManager.AddTexture( strLoadedTexture, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE );
+	if ( pTexNode = nullptr )
 	{
 		Release();
 		return OPRESULT( K_OP_FAILED, K_SEVERITY_WARNING, L"CTexFont::LoadFontXML -> Could not load texture!\n %s", strLoadedTexture );
 	}
 	// save texture size
-	Vec2 texsz = __TexFonts().m_texManager.GetTextureSize( nFontsMgrTexManagerIDX );
+	Vec2 texsz = pTexNode->getSize();
 
 	///--- acum aloca tot ce ii trebuie ca sa se miste rapid la desenare ---
 	moduleRect = new RECTLTRB_F[ moduleNo ];
@@ -212,7 +213,7 @@ int CTexFont::GetRowHeight( bool bIncludeSpacing )
 
 int CTexFont::DrawStringClamped( CStringDesc *strDesc, int X, int Y, int maxW, UINT16 Flags /*= FONTFLAG_ANCHOR_BOTTOMLEFT*/, DWORD Color /*= 0xffffffff*/ )
 {
-	PTEXTURE pTexture = __TexFonts().m_texManager.GetTexture( nFontsMgrTexManagerIDX );
+	PTEXTURE pTexture = pTexNode->pTexture;
 
 	UINT16 length = strDesc->len;
 	UINT16* text = strDesc->codes;
@@ -377,7 +378,7 @@ int CTexFont::DrawStringScaleW( CStringDesc *strDesc, RECTXYWH rect, UINT16 Flag
 
 void CTexFont::DrawString( CStringDesc *strDesc, RECTXYWH rect, UINT16 Flags, DWORD Color )
 {
-	PTEXTURE pTexture = __TexFonts().m_texManager.GetTexture( nFontsMgrTexManagerIDX );
+	PTEXTURE pTexture = pTexNode->pTexture;
 
 	int textLen = strDesc->len;
 	UINT16* textCodes = strDesc->codes;
@@ -614,7 +615,7 @@ int CTexFont::DrawString( CStringDesc *strDesc, float X, float Y, UINT16 Flags, 
 {
 	_ASSERT( strDesc != nullptr );
 
-	PTEXTURE pTexture = __TexFonts().m_texManager.GetTexture( nFontsMgrTexManagerIDX );
+	PTEXTURE pTexture = pTexNode->pTexture;
 
 	UINT16 length = strDesc->len;
 	UINT16* text = strDesc->codes;
@@ -691,7 +692,7 @@ int CTexFont::DrawString( CStringDesc *strDesc, float X, float Y, UINT16 Flags, 
 
 int CTexFont::DrawString( int strIdx, float X, float Y, UINT16 Flags, DWORD Color )
 {
-	PTEXTURE pTexture = __TexFonts().m_texManager.GetTexture( nFontsMgrTexManagerIDX );
+	PTEXTURE pTexture = pTexNode->pTexture;
 
 	return DrawString( strIdx, X, Y, Flags, Color );
 }

@@ -1,246 +1,168 @@
 #include "dxstdafx.h"
 
-CTextureManager::CTextureManager(void)
+CTextureManager::CTextureManager( void )
 {
-	m_pd3dDevice = NULL;
+	m_pDevice = nullptr;
 }
 
-CTextureManager::~CTextureManager(void)
+CTextureManager::~CTextureManager( void )
 {
 	Release();
 }
 
-
-HRESULT CTextureManager::Release(void)
+void CTextureManager::Release( void )
 {
-	HRESULT hr = S_OK;
 	// Release textures and delete array of textures
-	for (int i = 0; i < m_Texs.GetSize(); i++)
+	for ( int i = 0; i < arrTextures.GetSize(); i++ )
 	{
-		TexNode *pTN = m_Texs.GetAt(i);
-		LOG(L"CTextureManager::Released %s", pTN->fileName);
-		SAFE_RELEASE(pTN->pTexture);
-		SAFE_DELETE(pTN);
+		CTexNode *pTN = arrTextures.GetAt( i );
+		LOG( L"CTextureManager::Released %s", pTN->fileName );
+		SAFE_RELEASE( pTN->pTexture );
+		SAFE_DELETE( pTN );
 	}
-	m_Texs.RemoveAll();
-	
-	return hr;
+	arrTextures.RemoveAll();
 }
 
-LPDIRECT3DTEXTURE9 CTextureManager::GetTexture(int nTexIdx)
-{
-	if (nTexIdx < 0 || nTexIdx >= m_Texs.GetSize())
-		return NULL;
-	return m_Texs.GetAt(nTexIdx)->pTexture;
-}
-
-
-Vec2 CTextureManager::GetTextureSize(int nTexIdx)
-{
-	if (nTexIdx < 0 || nTexIdx >= m_Texs.GetSize())
-		return Vec2(0.0f, 0.0f);
-	return Vec2(m_Texs[nTexIdx]->info.Width, m_Texs[nTexIdx]->info.Height);
-}
-
-HRESULT	CTextureManager::AddTexture(const WCHAR* fileName, int *retTexIdx, D3DFORMAT format, DWORD filter, DWORD mipFilter, UINT nSetWidth, UINT nSetHeight)
+CTexNode* CTextureManager::AddTexture( const WCHAR* fileName, D3DFORMAT format, DWORD filter, DWORD mipFilter, UINT nSetWidth, UINT nSetHeight )
 {
 	int texIdx = -1;
-	if(retTexIdx != NULL)
-		*retTexIdx = -1;
 
-	if(wcslen(fileName) <= 0)
+	if ( wcslen( fileName ) <= 0 )
 	{
-		ErrorBox(K_ERR_WARNING, L"AddTexture:fileName is empty! No texture added.");
-		return S_OK;
+		ErrorBox( K_ERR_WARNING, L"AddTexture:fileName is empty! No texture added." );
+		return nullptr;
 	}
 	//--- check file exists ---
-	if (FILE *file = OS_wfopen(fileName, L"r")) {
-		OS_fclose(file);
+	if ( FILE *file = OS_wfopen( fileName, L"r" ) ) {
+		OS_fclose( file );
 	}
 	else
 	{
-		ErrorBox(K_ERR_WARNING, L"AddTexture:file not found!\n%s", fileName);
-		return E_FAIL;
+		ErrorBox( K_ERR_WARNING, L"AddTexture:file not found!\n%s", fileName );
+		return nullptr;
 	}
 
-    for (int i = 0; i < m_Texs.GetSize(); i++)
+	for ( int i = 0; i < arrTextures.GetSize(); i++ )
 	{
-		TexNode* pTN = m_Texs.GetAt(i);
+		CTexNode* pTN = arrTextures.GetAt( i );
 
-		//TODO: poate ar trebui sa reincarce textura daca difera filtrele?
-		if(wcscmp(pTN->fileName, fileName) == 0)
+		//TODO: maybe it should reload the texture?
+		if ( wcscmp( pTN->fileName, fileName ) == 0 )
 		{
 			// The texture already exists
 			texIdx = i;
-			if(retTexIdx != NULL)
-				*retTexIdx = i;
-			return S_OK;
+			return arrTextures[ texIdx ];
 		}
 	}
 
 	// Add the new texture
-	TexNode *pNewTex = new TexNode();
-	if (pNewTex == NULL)
-		return E_OUTOFMEMORY;
+	CTexNode *pNewTex = new CTexNode();
+	if ( pNewTex == NULL )
+		return nullptr;
+	_ASSERT( pNewTex != nullptr );
 
-	ZeroMemory(pNewTex, sizeof(TexNode));
+	ZeroMemory( pNewTex, sizeof( CTexNode ) );
 
-	StringCchCopy(pNewTex->fileName, MAX_PATH, fileName);
+	StringCchCopy( pNewTex->fileName, MAX_PATH, fileName );
 	pNewTex->format = format;
 	pNewTex->filter = filter;
 	pNewTex->mipFilter = mipFilter;
-	
 	pNewTex->widthToLoad = nSetWidth;
 	pNewTex->heightToLoad = nSetHeight;
 
-	m_Texs.Add(pNewTex);
-	
-	texIdx = m_Texs.GetSize() - 1;
-	if(retTexIdx != NULL)
-		*retTexIdx = texIdx;
+	arrTextures.Add( pNewTex );
+	texIdx = arrTextures.GetSize() - 1;
 
-	// Try to create the new texture
-	if (m_pd3dDevice != NULL)
-		return LoadTexture(texIdx);
-	return S_OK;
-}
-
-
-HRESULT CTextureManager::ReplaceTexture(int texIdx, const WCHAR* fileName, D3DFORMAT format, DWORD filter, DWORD mipFilter)
-{
-	if((texIdx < 0) || (texIdx >= m_Texs.GetSize()))
-		return E_FAIL;
-
-	if(wcslen(fileName) <= 0)
-		return E_FAIL;
-
-	TexNode* pTN = m_Texs.GetAt(texIdx);
-
-	if(wcscmp(pTN->fileName, fileName) == 0)
+	// Try to create the new texture now
+	if ( OP_FAILED( LoadTexture( texIdx ) ) )
 	{
-		// Texture is the same
-		return S_OK;
+		SAFE_DELETE( pNewTex );
+		arrTextures.Remove( texIdx );
+		return nullptr;
 	}
 
-	// Reloads Texture
-	LOG(L"CTextureManager::ReplaceTexture released %s", pTN->fileName);
-	SAFE_RELEASE(pTN->pTexture);
-	
-	StringCchCopy(pTN->fileName, MAX_PATH, fileName);
-	pTN->format = format;
-	pTN->filter = filter;
-	pTN->mipFilter = mipFilter;
-	int nTexIdx = texIdx;
-
-	// Try to create the new texture
-	if (m_pd3dDevice != NULL)
-		return LoadTexture(nTexIdx);
-
-	return S_OK;
+	return arrTextures[ texIdx ];
 }
 
-
-
-HRESULT CTextureManager::DeleteTexture(int nTexIdx)
+CTexNode* CTextureManager::GetTextureByIndex( int nIndex )
 {
-	if (nTexIdx < 0 || nTexIdx >= m_Texs.GetSize())
-		return E_INVALIDARG;
-	HRESULT hr = S_OK;
-	
-	TexNode *pTN = m_Texs.GetAt(nTexIdx);
-	LOG(L"CTextureManager::DeleteTexture released %s", pTN->fileName);
-	SAFE_RELEASE(pTN->pTexture);
-	pTN->fileName[0] = 0;
-	//nu sterge nodul ca sa nu schimbe indecsii salvati
-	return hr;
+	if ( nIndex < 0 || nIndex >= arrTextures.Count() )
+		return nullptr;
+	return arrTextures[ nIndex ];
 }
 
-HRESULT CTextureManager::LoadTexture(const int nTexIdx)
+void CTextureManager::ReleaseTexture( CTexNode* pTN )
 {
-	if (nTexIdx < 0 || nTexIdx >= m_Texs.GetSize())
-		return E_INVALIDARG;
+	_ASSERT( pTN != nullptr );
 
-	HRESULT hr = S_OK;
-	
-	TexNode *pTN = m_Texs.GetAt(nTexIdx);
-	
+	LOG( L"CTextureManager::DeleteTexture released %s", pTN->fileName );
+	SAFE_RELEASE( pTN->pTexture );
+	pTN->fileName[ 0 ] = 0;
+	pTN->bLoaded = false;
+}
+
+OPRESULT CTextureManager::LoadTexture( const int nTexIdx )
+{
+	if ( m_pDevice == nullptr || nTexIdx < 0 || nTexIdx >= arrTextures.GetSize() )
+		return K_OP_INVALIDARGS;
+
+	CTexNode *pTN = arrTextures.GetAt( nTexIdx );
 	// Make sure there's a texture to create
-	if (wcslen(pTN->fileName) == 0)
-		return S_OK;
-	//daca e deja alocata, o dezaloca si o realoca
-	if (pTN->pTexture != NULL)
+	if ( wcslen( pTN->fileName ) == 0 )
+		return K_OP_OK;
+	// Deallocate if already allocated
+	if ( pTN->pTexture != nullptr )
 	{
-		LOG(L"CTextureManager::LoadTexture released %s", pTN->fileName);
-		SAFE_RELEASE(pTN->pTexture);
+		SAFE_RELEASE( pTN->pTexture );
+		pTN->bLoaded = false;
+		LOG( L"CTextureManager::LoadTexture released %s", pTN->fileName );
 	}
 
 	// Create texture (managed)
-	hr = D3DXCreateTextureFromFileEx(m_pd3dDevice, pTN->fileName, pTN->widthToLoad, pTN->heightToLoad, 
-		1, 0, pTN->format, D3DPOOL_MANAGED, 
-		pTN->filter, pTN->mipFilter, 0, 
-		&pTN->info, NULL, &pTN->pTexture);
-
-	if (FAILED(hr))
+	if ( FAILED( D3DXCreateTextureFromFileEx( m_pDevice, pTN->fileName, pTN->widthToLoad, pTN->heightToLoad,
+		1, 0, pTN->format, D3DPOOL_MANAGED,
+		pTN->filter, pTN->mipFilter, 0,
+		&pTN->info, NULL, &pTN->pTexture ) ) )
 	{
-		WCHAR wszMsg[512];
-		StringCchPrintf(wszMsg, ARRAY_SIZE(wszMsg), L"[CTextureManager::LoadTexture] D3DXCreateTextureFromFileEx\n -Could not load texture %s\n", pTN->fileName);
-		ErrorBox(K_ERR_WARNING, L"%s", wszMsg);
-		return E_FAIL;
+		return OPRESULT( K_OP_FAILED, K_SEVERITY_WARNING, L"[CTextureManager::LoadTexture] D3DXCreateTextureFromFileEx\n -Could not load texture %s\n", pTN->fileName );
 	}
 
-	LOG(L"CTextureManager::Loaded %s", pTN->fileName);
-	return S_OK;
+	pTN->bLoaded = true;
+	LOG( L"CTextureManager::Loaded %s", pTN->fileName );
+	return K_OP_OK;
 }
 
 
-TexNode* CTextureManager::GetTextureNode(int nTexIdx)
+OPRESULT CTextureManager::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
 {
-	if (nTexIdx < 0 || nTexIdx >= m_Texs.GetSize())
-		return NULL;
-	return m_Texs.GetAt(nTexIdx);
-}
-
-//-=-=-= SYSTEM / FRAMEWORK =-=-=-
-HRESULT CTextureManager::OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
-{
-	HRESULT hr = S_OK;
-	m_pd3dDevice = pd3dDevice;
-	//le realoca daca s-a schimbat device-ul
-	for(int kk=0; kk<m_Texs.GetSize(); kk++)
+	// the textures are managed, only reallocate if device changed
+	for ( int kk = 0; kk < arrTextures.GetSize(); kk++ )
 	{
-		if(FAILED(hr = LoadTexture(kk)))
-			return hr;
+		V_OP_RET( LoadTexture( kk ) );
+	}
+	return K_OP_OK;
+}
+
+OPRESULT CTextureManager::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
+{
+	m_pDevice = pDevice;
+	return K_OP_OK;
+}
+
+OPRESULT CTextureManager::OnLostDevice()
+{
+	m_pDevice = nullptr;
+	return K_OP_OK;
+}
+
+OPRESULT CTextureManager::OnDestroyDevice()
+{
+	for ( int kk = 0; kk < arrTextures.GetSize(); kk++ )
+	{
+		LOG( L"CTextureManager::OnDestroyDevice released %s", arrTextures[ kk ]->fileName );
+		SAFE_RELEASE( arrTextures[ kk ]->pTexture );
+		arrTextures[ kk ]->bLoaded = false;
 	}
 
-	return hr;
-}
-
-HRESULT CTextureManager::OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
-{
-	m_pd3dDevice = pd3dDevice;
-	return S_OK;
-}
-
-HRESULT CTextureManager::OnLostDevice(void)
-{
-	HRESULT hr = S_OK;
-
-	m_pd3dDevice = NULL;
-
-	return hr;
-}
-
-HRESULT CTextureManager::OnDestroyDevice(void)
-{
-	HRESULT hr = S_OK;
-
-	m_pd3dDevice = NULL;
-	//dezaloca texturile cand se schimba device-ul
-	for(int kk=0; kk<m_Texs.GetSize(); kk++)
-	{
-		LOG(L"CTextureManager::OnDestroyDevice released %s", m_Texs[kk]->fileName);
-		SAFE_RELEASE(m_Texs[kk]->pTexture);
-	}
-	
-	return hr;
+	return K_OP_OK;
 }

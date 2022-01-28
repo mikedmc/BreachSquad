@@ -172,11 +172,13 @@ void CMainMenu::SetState(EMM_State neState, int nArg1 /*= 0*/)
 				if (mod->GetFullPathToModImage(strPath, MAX_PATH))
 				{
 					//forcing image to be loaded at 16:9 fixed size 
+					/*
 					HRESULT hr = UTApp().g_texManager.AddTexture(strPath, &m_arrSelItems[m_nSelElements * 3], D3DFMT_A8R8G8B8, D3DX_FILTER_LINEAR, D3DX_FILTER_LINEAR, 96, 54);
 					if (FAILED(hr))
 					{
 						ErrorBox(K_ERR_WARNING, L"[WARNING] SetState::Couldn't load mod image. Mod name: [%s] Image path: [%s]", mod->shName.text, strPath);
 					}
+					*/
 				}
 
 				//save mod index in mods list
@@ -336,11 +338,13 @@ void CMainMenu::Update(float dTime)
 						if (nmod->GetFullPathToModImage(strImgPath, MAX_PATH))
 						{
 							//forcing image to be loaded at 16:9 fixed size 
+							/*
 							HRESULT hr = UTApp().g_texManager.AddTexture(strImgPath, &m_arrSelItems[ll], D3DFMT_A8R8G8B8, D3DX_FILTER_LINEAR, D3DX_FILTER_LINEAR, 96, 54);
 							if (FAILED(hr))
 							{
 								ErrorBox(K_ERR_WARNING, L"Couldn't load mod image. Mod name: [%s] Image path: [%s]", nmod->shName.text, strImgPath);
 							}
+							*/
 						}
 					}
 
@@ -1689,7 +1693,7 @@ void CMainMenu::Paint()
 						if (m_arrSelItems[m_nSelection] >= 0)
 						{
 							RECT rcImg;
-							TexNode* pTex = UTApp().g_texManager.GetTextureNode(m_arrSelItems[m_nSelection]);
+							CTexNode* pTex = null;// UTApp().g_texManager.GetTextureNode( m_arrSelItems[ m_nSelection ] );
 							if (pTex)
 							{
 								SetRect(&rcImg, 0, 0, pTex->widthToLoad, pTex->heightToLoad);
@@ -2229,7 +2233,7 @@ void CMainMenu::Paint()
 				if (m_arrSelItems[m_nSelection * 3] >= 0)
 				{
 					RECT rcImg;
-					TexNode* pTex = UTApp().g_texManager.GetTextureNode(m_arrSelItems[m_nSelection * 3]);
+					CTexNode* pTex = null;// UTApp().g_texManager.GetTextureNode( m_arrSelItems[ m_nSelection * 3 ] );
 					if (pTex)
 					{
 						SetRect(&rcImg, 0, 0, pTex->widthToLoad, pTex->heightToLoad);
