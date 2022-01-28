@@ -264,7 +264,6 @@
     <ClInclude Include="Source\Engine\EventManager.h" />
     <ClInclude Include="Source\Engine\Constants\font_ids.h" />
     <ClInclude Include="Source\Engine\FileManager.h" />
-    <ClInclude Include="Source\Engine\FreeTypeFont.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyLeaderboards.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.h" />
     <ClInclude Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.h" />
@@ -343,7 +342,11 @@
     <ClInclude Include="Source\Engine\Steam\SteamSubscriptions.h" />
     <ClInclude Include="Source\Engine\Steam\SteamUpdatePublished.h" />
     <ClInclude Include="Source\Engine\Steam\SteamUtils.h" />
-    <ClInclude Include="Source\Engine\TTFont.h" />
+    <ClInclude Include="Source\Engine\texts\FreeTypeFont.h" />
+    <ClInclude Include="Source\Engine\texts\StringsManager.h" />
+    <ClInclude Include="Source\Engine\texts\TexFont.h" />
+    <ClInclude Include="Source\Engine\texts\TexturedFont.h" />
+    <ClInclude Include="Source\Engine\texts\TTFont.h" />
     <ClInclude Include="Source\Engine\UTAppClass.h" />
     <ClInclude Include="Source\Engine\ogg.h" />
     <ClInclude Include="Source\Engine\Constants\particles_SPR.h" />
@@ -374,8 +377,6 @@
     <ClInclude Include="Source\Engine\Sprite.h" />
     <ClInclude Include="Source\Engine\SpriteCollection.h" />
     <ClInclude Include="Source\Engine\Constants\strings.h" />
-    <ClInclude Include="Source\Engine\StringsManager.h" />
-    <ClInclude Include="Source\Engine\TexturedFont.h" />
     <ClInclude Include="Source\Engine\TextureManager.h" />
     <ClInclude Include="Source\Engine\Constants\tiles1_SPR.h" />
     <ClInclude Include="Source\Versioning\versioning.h" />
@@ -679,7 +680,6 @@
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\FileManager.cpp" />
-    <ClCompile Include="Source\Engine\FreeTypeFont.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyLeaderboards.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyMultiplayerClientP2P.cpp" />
     <ClCompile Include="Source\Engine\GalaxyLocal\GalaxyStatsAndAchievements.cpp" />
@@ -773,7 +773,11 @@
     <ClCompile Include="Source\Engine\Steam\SteamSubscriptions.cpp" />
     <ClCompile Include="Source\Engine\Steam\SteamUpdatePublished.cpp" />
     <ClCompile Include="Source\Engine\Steam\SteamUtils.cpp" />
-    <ClCompile Include="Source\Engine\TTFont.cpp" />
+    <ClCompile Include="Source\Engine\texts\FreeTypeFont.cpp" />
+    <ClCompile Include="Source\Engine\texts\StringsManager.cpp" />
+    <ClCompile Include="Source\Engine\texts\TexFont.cpp" />
+    <ClCompile Include="Source\Engine\texts\TexturedFont.cpp" />
+    <ClCompile Include="Source\Engine\texts\TTFont.cpp" />
     <ClCompile Include="Source\Engine\UTAppClass.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
@@ -811,13 +815,6 @@
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\SpriteCollection.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
-    </ClCompile>
-    <ClCompile Include="Source\Engine\StringsManager.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
-    </ClCompile>
-    <ClCompile Include="Source\Engine\TexturedFont.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</MinimalRebuild>
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\TextureManager.cpp">

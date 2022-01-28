@@ -84,9 +84,9 @@ class CTexturedFont
 {
 private:
 	bool loaded;
-	static CStringsManager *m_pStrManager;
-	static CTexturedFontsManager	*m_pFontsManager; //pointer la managerul parinte
-	static ID3DXSprite*				s_pSprite; //sprite folosit la desenare
+	static CStringsManager			*m_pStrManager;
+	static CTexturedFontsManager	*m_pFontsManager; 
+	static ID3DXSprite*              s_pSprite; //sprite folosit la desenare
 
 public:
 	static LPDIRECT3DDEVICE9 pDevice;
@@ -104,12 +104,12 @@ public:
 	int*		moduleH;
 	RECTXYWH*	frameBBox;
 
-	CStringHash shFontName;
+	CStringHash			shFontName;
 	//replacement TTF font (used to replace the bitmap font with a TTF one)
-	CTTFont*			pFontReplacementTTF; //if not null use it to draw instead of using the bitmap
-	CCameraTransform*	pFontReplacementCam; //transform used for replacement font (maybe game has too low resolution and we need another transform)
+	CTTFont*			pFontReplacementTTF;		//if not null use it to draw instead of using the bitmap
+	CCameraTransform*	pFontReplacementCam;		//transform used for replacement font (maybe game has too low resolution and we need another transform)
 	float				fFontReplacementCamScaling; //default scaling between game camera and Font camera
-	bool				bFontReplacementOn; //if on, use font replacement (used to turn off TTF ocasionally)
+	bool				bFontReplacementOn;			//if on, use font replacement (used to turn off TTF ocasionally)
 
 public:
 	UINT32 ID;		//id font

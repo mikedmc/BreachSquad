@@ -51,10 +51,13 @@ public:
 	// Sets string
 	void						SetStringDesc(CStringDesc *desc, WCHAR* szFormat, ...);
 
-	// Returns index of string or -1 if not found
+	// Returns index of string or defaultString if not found
 	int							GetStrIdx(const CHAR* strID);
 	int							GetStrIdx(const WCHAR* strID);
 	int							GetStrIdx(UINT32 strHash);
+
+	// Returns string hash by index
+	CStringDesc*				GetStringDescByIdx( int nIdx );
 
 	// Sets a string based on a printf format
 	// \returns: -1 for error or number of chars not found in alphabet
@@ -86,11 +89,11 @@ public:
 	///--- UTF8 encoding ---
 
 	// Utility that converts UTF8 char to WCHAR
-	static const unsigned int GetCodePointFromUTF8(const char* utf8_4byteChunk, unsigned char& seqLen);
+	static const unsigned int	GetCodePointFromUTF8(const char* utf8_4byteChunk, unsigned char& seqLen);
 
-	int SetStringDescUTF8(CStringDesc *desc, const char* szUTF8string);
+	int							SetStringDescUTF8(CStringDesc *desc, const char* szUTF8string);
 	// Generic conversion from UTF8 to WCHAR
-	static int UTF8toWCHAR(const char* szUTF8string, WCHAR* strDest, int nMaxLenDest);
+	static int					UTF8toWCHAR(const char* szUTF8string, WCHAR* strDest, int nMaxLenDest);
 };
 
 // Access singleton

@@ -445,16 +445,17 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 
 #include "ShaderManager.h"
 #include "LibraryManager.h"
-#include "StringsManager.h"
+#include "texts/StringsManager.h"
 
 #include "ControllersManager.h"
 
 #include "TextureManager.h"
 #include "SpriteCollection.h"
 #include "SpritePainter.h"
-#include "TexturedFont.h"
-#include "FreeTypeFont.h"
-#include "TTFont.h"
+#include "texts/TexturedFont.h"
+#include "texts/TexFont.h"
+#include "texts/FreeTypeFont.h"
+#include "texts/TTFont.h"
 #include "ChatWnd.h"
 
 #include "Sprite.h"

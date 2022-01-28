@@ -210,7 +210,7 @@ int CStringsManager::LoadFromXML(WCHAR* fileName, WCHAR* strLangCode, std::wstri
 		strings.Add(nstr);
     }
 
-	///--- adauga string default pt atunci cand nu gaseste strID cautat ---
+	///--- add a default string at the end so we return that instead of failing ---
 	CStringDesc* fstr = new CStringDesc();
 	StringCchLength(K_STRMGR_DEFAULT_STRING, K_STRMGR_CONTENT_MAX_LEN, &fstr->len);
 	fstr->sText = new WCHAR[fstr->len + 1];
@@ -360,6 +360,14 @@ int CStringsManager::GetStrIdx(UINT32 strHash)
 			return kk;
 	}
 	return defaultStringIdx;
+}
+
+CStringDesc* CStringsManager::GetStringDescByIdx( int nIdx )
+{
+	if ( ( nIdx < 0 ) || ( nIdx >= strings.GetSize() ) )
+		return strings[defaultStringIdx];
+
+	return strings[ nIdx ];
 }
 
 int CStringsManager::SetString(int idx, WCHAR* szFormat, ...)
