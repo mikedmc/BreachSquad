@@ -344,7 +344,7 @@ int CTexturedFont::DrawStringClamped(CStringDesc *strDesc, int X, int Y, int max
 	int maxHeight = rowHeight;
 
 	//measure 3 dots length
-	int dotscode = UTLang().GetLetterIdx('.');
+	int dotscode = __Texts().GetLetterIdx('.');
 	int dotsw = 3 * (frameBBox[dotscode].w + letterSpacing);
 
 	int localLen = 0;

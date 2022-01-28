@@ -910,7 +910,7 @@ OPRESULT CLevel::LoadLevelDefines(WCHAR* strPath)
 
 		sa.strTargetClasses = bnode.attribute(L"targetClasses").as_string();
 		sa.shScriptName.Init(bnode.attribute(L"scriptName").as_string());
-		sa.strID_name = UTLang().GetStrIdx( bnode.attribute(L"strIDname").as_string() );
+		sa.strID_name = __Texts().GetStrIdx( bnode.attribute(L"strIDname").as_string() );
 
 		m_arrActionTemplates.push_back(sa);
 	}

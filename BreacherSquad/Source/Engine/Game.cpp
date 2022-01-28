@@ -127,7 +127,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 				if ( nLobbiesCnt == 0 )
 				{
 					if ( !g_pNetwork->IsRequestingLobby() )
-						UTLang().SetString( STR_LOBBIES_LIST_VAL, L"%s", UTLang().strings[ STR_NO_LOBBIES ]->sText );
+						__Texts().SetString( STR_LOBBIES_LIST_VAL, L"%s", __Texts().strings[ STR_NO_LOBBIES ]->sText );
 
 					//disable controls (list, join)
 					if ( lay != null )
@@ -153,14 +153,14 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 						char strLobbyName[ 250 ];
 
 						g_pNetwork->GetLobbyListEntry( kk, iLobbyID, strLobbyName );
-						UTLang().SetStringDescUTF8( &sdName, strLobbyName );
+						__Texts().SetStringDescUTF8( &sdName, strLobbyName );
 
 						StringCchCat( strLobbiesList, 2048, sdName.sText );
 						if ( kk < nLobbiesCnt - 1 )
 							StringCchCat( strLobbiesList, 2048, L"\n" );
 					}
 
-					UTLang().SetString( STR_LOBBIES_LIST_VAL, strLobbiesList );
+					__Texts().SetString( STR_LOBBIES_LIST_VAL, strLobbiesList );
 
 					//enable controls (list, join)
 					if ( lay != null )

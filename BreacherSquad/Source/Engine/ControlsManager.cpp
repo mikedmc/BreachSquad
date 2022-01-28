@@ -347,7 +347,7 @@ void CControl::Initialize()
 
 			if ((stringIdx >= 0) && (fontIdx >= 0))
 			{
-				int optcnt = UTLang().GetSubstringsCount(stringIdx, L'\n');
+				int optcnt = __Texts().GetSubstringsCount(stringIdx, L'\n');
 				int rowh = (m_pFontsMgr->fonts[fontIdx]->rowHeight + m_pFontsMgr->fonts[fontIdx]->rowSpacing);
 				//save options count
 				paramsDict.SetNamedVarINT32(L"nRowHeight", rowh);
@@ -384,7 +384,7 @@ void CControl::Initialize()
 					rowh = descW.Height;
 				}
 
-				int optcnt = UTLang().GetSubstringsCount(stringIdx, L'\n');
+				int optcnt = __Texts().GetSubstringsCount(stringIdx, L'\n');
 				paramsDict.SetNamedVarINT32(L"nRowHeight", rowh);
 				//save options count
 				paramsDict.SetNamedVarINT32(L"nOptionsCnt", optcnt);
@@ -490,7 +490,7 @@ void CControl::Update(float dTime, float fTimeline)
 				break;
 
 			int nSelectedIdx = paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
-			int nItemsCnt = UTLang().GetSubstringsCount(stringIdx, L'\n');
+			int nItemsCnt = __Texts().GetSubstringsCount(stringIdx, L'\n');
 
 			RECTXYWH bbB = BBox; //bbox bar
 			//heads sizes
@@ -835,7 +835,7 @@ void CControl::Update(float dTime, float fTimeline)
 			int nTeamSpentPointsLocal = nTeamSpentPoints + (nSpentPoints[0] + nSpentPoints[1]);
 
 			//update available points
-			UTLang().SetString(STR_UNUSED_POINTS_VAL, L"%d", nXPPointsLocal);
+			__Texts().SetString(STR_UNUSED_POINTS_VAL, L"%d", nXPPointsLocal);
 
 			int	nSelectedLine = paramsDict.GetVariantByName(L"nSelectedLine")->m_asINT32;
 			int	nSelectedPoint = paramsDict.GetVariantByName(L"nSelectedPoint")->m_asINT32;
@@ -936,9 +936,9 @@ void CControl::Update(float dTime, float fTimeline)
 					nStrIdx = g_playerSelScr.m_arrUpgradeBars[nlBarIdx]->nStrIdx_desc;
 				//update perk description
 				if (nStrIdx >= 0)
-					UTLang().SetString_NoParse(STR_SELECTED_PERK_DESC_VAL, UTLang().strings[nStrIdx]->sText);
+					__Texts().SetString_NoParse(STR_SELECTED_PERK_DESC_VAL, __Texts().strings[nStrIdx]->sText);
 				else
-					UTLang().SetString_NoParse(STR_SELECTED_PERK_DESC_VAL, L" ");
+					__Texts().SetString_NoParse(STR_SELECTED_PERK_DESC_VAL, L" ");
 			}
 
 			//activated (by mouse or SELECT button)
@@ -1089,7 +1089,7 @@ void CControl::Update(float dTime, float fTimeline)
 					CVariantComplex* vc = paramsDict.GetVariantByName(varname);
 					if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 					{
-						nStringIdx = UTLang().GetStrIdx(vc->m_strArg.textHash);
+						nStringIdx = __Texts().GetStrIdx(vc->m_strArg.textHash);
 					}
 					//trimitem string idx
 					nevent->AddNamedArgINT32(L"nSelectedIdx", nStringIdx);
@@ -1675,7 +1675,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			if ((stringIdx >= 0) && (fontIdx >= 0))
 			{
 				CStringDesc sdSelection;
-				UTLang().GetSubstring(&sdSelection, stringIdx, nSelectedIdx, L'\n');
+				__Texts().GetSubstring(&sdSelection, stringIdx, nSelectedIdx, L'\n');
 				m_pFontsMgr->fonts[fontIdx]->DrawStringScaleW(&sdSelection, BBox.CenterX(), BBox.CenterY(), BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(dwFontColor, 1.0f - fDisabledPercent * 0.8f));
 			}
 			else
@@ -1751,14 +1751,14 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			for (int kk = 0; kk < nOptionsCnt; kk++)
 			{
 				CStringDesc strRow;
-				UTLang().GetSubstring(&strRow, stringIdx, kk, '\n');
+				__Texts().GetSubstring(&strRow, stringIdx, kk, '\n');
 				m_pFontsMgr->fonts[fontIdx]->DrawString(&strRow, BBox_inflated.x, BBox_inflated.y + rowH * kk, FONTFLAG_ANCHOR_TOPLEFT, dwFontColor);
 			}
 			//right string
 			CVariantComplex* vc = paramsDict.GetVariantByName(L"StringID_right");
 			if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 			{
-				int nStringIdx_right = UTLang().GetStrIdx(vc->m_strArg.textHash);
+				int nStringIdx_right = __Texts().GetStrIdx(vc->m_strArg.textHash);
 				if (nStringIdx_right >= 0)
 				{
 					DWORD dwColorRight = 0xffffffff;
@@ -1772,7 +1772,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 					for (int kk = 0; kk < nOptionsCnt; kk++)
 					{
 						CStringDesc strRow;
-						UTLang().GetSubstring(&strRow, nStringIdx_right, kk, '\n');
+						__Texts().GetSubstring(&strRow, nStringIdx_right, kk, '\n');
 						m_pFontsMgr->fonts[fontIdx]->DrawString(&strRow, BBox_inflated.Right(), BBox_inflated.y + rowH * kk, FONTFLAG_ANCHOR_TOPRIGHT, dwColorRight);
 					}
 				}
@@ -1853,13 +1853,13 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 
 			if (stringIdx >= 0)
 			{
-				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[stringIdx]->sText, -1, &rc, DT_NOCLIP, dwFontColor);
+				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, __Texts().strings[stringIdx]->sText, -1, &rc, DT_NOCLIP, dwFontColor);
 			}
 			//right string
 			CVariantComplex* vc = paramsDict.GetVariantByName(L"StringID_right");
 			if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 			{
-				int nStringIdx_right = UTLang().GetStrIdx(vc->m_strArg.textHash);
+				int nStringIdx_right = __Texts().GetStrIdx(vc->m_strArg.textHash);
 				if (nStringIdx_right >= 0)
 				{
 					DWORD dwColorRight = 0xffffffff;
@@ -1870,7 +1870,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 					}
 					dwColorRight = DW_COLORALPHA(dwColorRight, layer->alpha);
 					//draw string
-					pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[nStringIdx_right]->sText, -1, &rc, DT_NOCLIP | DT_RIGHT, dwColorRight);
+					pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, __Texts().strings[nStringIdx_right]->sText, -1, &rc, DT_NOCLIP | DT_RIGHT, dwColorRight);
 				}
 			}
 
@@ -1902,7 +1902,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			CVariantComplex* vc = paramsDict.GetVariantByName(L"StringID_right");
 			if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 			{
-				nStringIdx_right = UTLang().GetStrIdx(vc->m_strArg.textHash);
+				nStringIdx_right = __Texts().GetStrIdx(vc->m_strArg.textHash);
 				if (nStringIdx_right < 0)
 				{
 					drawDebugText(BBox.x, BBox.y + 20, L"Right list stringIdx missing!");
@@ -1948,13 +1948,13 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			//paint text
 			if (stringIdx >= 0)
 			{
-				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[stringIdx]->sText, -1, &rc_shadow, DT_NOCLIP, DW_COLOR_XXXA(layer->alpha * 0.6f));
-				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[stringIdx]->sText, -1, &rc, DT_NOCLIP, dwColor);
+				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, __Texts().strings[stringIdx]->sText, -1, &rc_shadow, DT_NOCLIP, DW_COLOR_XXXA(layer->alpha * 0.6f));
+				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, __Texts().strings[stringIdx]->sText, -1, &rc, DT_NOCLIP, dwColor);
 			}
 			if (nStringIdx_right >= 0)
 			{
-				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[nStringIdx_right]->sText, -1, &rc_shadow, DT_NOCLIP | DT_RIGHT, DW_COLOR_XXXA(layer->alpha * 0.6f));
-				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, UTLang().strings[nStringIdx_right]->sText, -1, &rc, DT_NOCLIP | DT_RIGHT, dwFontColor);
+				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, __Texts().strings[nStringIdx_right]->sText, -1, &rc_shadow, DT_NOCLIP | DT_RIGHT, DW_COLOR_XXXA(layer->alpha * 0.6f));
+				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, __Texts().strings[nStringIdx_right]->sText, -1, &rc, DT_NOCLIP | DT_RIGHT, dwFontColor);
 			}
 
 
@@ -2024,7 +2024,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			bbgroup.Inflate(-6, -1); bbgroup.x += 5;
 			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbgroup, DW_COLORALPHA(0xff102436, layer->alpha));
 			//group name
-			m_pFontsMgr->fonts[fontIdx]->DrawStringTransformed(UTLang().strings[STR_TEAM_UPC], bbgroup.x - 4, bbgroup.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
+			m_pFontsMgr->fonts[fontIdx]->DrawStringTransformed(__Texts().strings[STR_TEAM_UPC], bbgroup.x - 4, bbgroup.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
 
 			//class group
 			RECTXYWH bbteam(BBox_inflated.x, BBox_inflated.y + bbgroup.h + nGroupSpacing, BBox_inflated.w, (rectSz.h + 1) * nTeamRows + 1);
@@ -2032,7 +2032,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			bbteam.Inflate(-6, -1); bbteam.x += 5;
 			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbteam, DW_COLORALPHA(0xff1E3538, layer->alpha));
 			//group name
-			m_pFontsMgr->fonts[fontIdx]->DrawStringTransformed(UTLang().strings[STR_CLASS_UPC], bbteam.x - 4, bbteam.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
+			m_pFontsMgr->fonts[fontIdx]->DrawStringTransformed(__Texts().strings[STR_CLASS_UPC], bbteam.x - 4, bbteam.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
 
 			//enforce player class
 			if ((nPlayerClass < 0) || (nPlayerClass >= K_PSS_CLASSES_COUNT))
@@ -2255,7 +2255,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				CVariantComplex* vc = paramsDict.GetVariantByName(varname);
 				if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 				{
-					int nStringIdx = UTLang().GetStrIdx(vc->m_strArg.textHash);
+					int nStringIdx = __Texts().GetStrIdx(vc->m_strArg.textHash);
 					SIZEWH strSz = m_pFontsMgr->fonts[fontIdx]->MeasureString(nStringIdx, BBox_inflated.w);
 
 					//paint cursor
@@ -2376,7 +2376,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				}
 				else
 				{
-					drawDebugText(butC.x, butC.y, UTLang().strings[stringIdx]->sText, wcol);
+					drawDebugText(butC.x, butC.y, __Texts().strings[stringIdx]->sText, wcol);
 				}
 			}
 
@@ -2431,7 +2431,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			{
 				CStringHash* strh = &paramsDict.GetVariantByName(L"sKeyName")->m_strArg;
 				CStringDesc strdesc;
-				UTLang().SetStringDesc(&strdesc, strh->text);
+				__Texts().SetStringDesc(&strdesc, strh->text);
 
 				m_pFontsMgr->fonts[fontIdx]->DrawString(&strdesc, movedB, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor);
 			}
@@ -2452,10 +2452,10 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				int nStrIdx1 = -1, nStrIdx2 = -1;
 				CVariantComplex* vc = paramsDict.GetVariantByName(L"stringID1");
 				if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
-					nStrIdx1 = UTLang().GetStrIdx(vc->m_strArg.textHash);
+					nStrIdx1 = __Texts().GetStrIdx(vc->m_strArg.textHash);
 				vc = paramsDict.GetVariantByName(L"stringID2");
 				if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
-					nStrIdx2 = UTLang().GetStrIdx(vc->m_strArg.textHash);
+					nStrIdx2 = __Texts().GetStrIdx(vc->m_strArg.textHash);
 
 				int nCount = 0;
 				if (nStrIdx1 >= 0)
@@ -2535,7 +2535,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			}
 			else
 			{
-				drawDebugText(BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, UTLang().strings[stringIdx]->sText, dwFontColor);
+				drawDebugText(BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, __Texts().strings[stringIdx]->sText, dwFontColor);
 			}
 		}
 		break;
@@ -2568,7 +2568,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			}
 			else
 			{
-				drawDebugText(BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, UTLang().strings[stringIdx]->sText, textcol);
+				drawDebugText(BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, __Texts().strings[stringIdx]->sText, textcol);
 			}
 		}
 		break;
@@ -2817,7 +2817,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			}
 			else
 			{
-				drawDebugText(BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, UTLang().strings[stringIdx]->sText, 0xffffffff);
+				drawDebugText(BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, __Texts().strings[stringIdx]->sText, 0xffffffff);
 			}
 		}
 		break;
@@ -2956,7 +2956,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			if (fontIdx >= 0)
 			{
 				CStringDesc stringDesc;
-				UTLang().SetStringDesc(&stringDesc, L"%d", nCurrentLevel + 1);
+				__Texts().SetStringDesc(&stringDesc, L"%d", nCurrentLevel + 1);
 				m_pFontsMgr->fonts[fontIdx]->DrawString(&stringDesc, vposLvl.x, vposLvl.y, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor);
 				//points
 				if ((nCurrentLevel >= K_GAME_MAX_UPGRADE_LEVELS) && (fProgress >= 1.0f))
@@ -2965,7 +2965,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				}
 				else
 				{
-					UTLang().SetStringDesc(&stringDesc, L"%d/%d", nCurrentVal - nMinXP, nMaxXP - nMinXP);
+					__Texts().SetStringDesc(&stringDesc, L"%d/%d", nCurrentVal - nMinXP, nMaxXP - nMinXP);
 					m_pFontsMgr->fonts[fontIdx]->DrawString(&stringDesc, BBox.CenterX(), centerY, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(K_COLOR_SELECTED_TEXT, layer->alpha));
 				}
 			}
@@ -3001,7 +3001,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			if (fontIdx >= 0)
 			{
 				CStringDesc stringDesc;
-				UTLang().SetStringDesc(&stringDesc, L"%s", inputText);
+				__Texts().SetStringDesc(&stringDesc, L"%s", inputText);
 				int strw = m_pFontsMgr->fonts[fontIdx]->DrawStringScaleW(&stringDesc, BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor);
 
 				//deseneaza cursorul
@@ -4688,7 +4688,7 @@ void CControl::drawDebugText(int x, int y, const wchar_t* text, DWORD color)
 	if (g_font6ns1 != null)
 	{
 		CStringDesc strdesc;
-		UTLang().SetStringDesc(&strdesc, L"%s", text);
+		__Texts().SetStringDesc(&strdesc, L"%s", text);
 		g_font6ns1->DrawString(&strdesc, x, y, FONTFLAG_ANCHOR_TOPLEFT, color);
 	}
 #endif

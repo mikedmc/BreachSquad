@@ -106,7 +106,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 
 			///--- FONTS ---
 			//set strings manager
-			UTGetFontsManager().SetManagersPtr(&UTLang());
+			UTGetFontsManager().SetManagersPtr(&__Texts());
 			//load fonts based on selected language
 			HRESULT hr = S_OK;
 			if (FAILED(hr = App_LocaLoadFonts(g_Language.bUseTTFonts)))
@@ -128,7 +128,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			*/
 
 			///--- CONTROLS ---
-			UTGetGUI().SetManagersPtr(&UTLang(), &UTGetFontsManager());
+			UTGetGUI().SetManagersPtr(&__Texts(), &UTGetFontsManager());
 			UTGetGUI().SetCameraTransform(&UTApp().g_cam360hScreen);
 
 			WCHAR xmlpath[MAX_PATH];
@@ -314,8 +314,8 @@ void CApplication::App_ExitState_Loading()
 	//start initialize job
 	UTGetLeaderboards().QueueJob(K_JOB_INITIALIZE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 0);
 	//reset strings for scores
-	UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
-	UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
+	__Texts().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
+	__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 	//reset old scores
 	UTGetLeaderboards().ResetScoresList();
 	//upload multiplayer score

@@ -225,7 +225,7 @@ int CTexFont::DrawStringClamped( CStringDesc *strDesc, int X, int Y, int maxW, U
 	int maxHeight = rowHeight;
 
 	//measure 3 dots length
-	int dotscode = UTLang().GetLetterIdx( '.' );
+	int dotscode = __Texts().GetLetterIdx( '.' );
 	int dotsw = 3 * ( frameBBox[ dotscode ].w + letterSpacing );
 
 	int localLen = 0;
@@ -318,7 +318,7 @@ int CTexFont::DrawStringClamped( CStringDesc *strDesc, int X, int Y, int maxW, U
 
 int CTexFont::DrawStringClamped( int strIdx, int X, int Y, int maxW, UINT16 Flags /*= FONTFLAG_ANCHOR_BOTTOMLEFT*/, DWORD Color /*= 0xffffffff*/ )
 {
-	CStringDesc *strDesc = UTLang().strings[ strIdx ];
+	CStringDesc *strDesc = __Texts().strings[ strIdx ];
 	return DrawStringClamped( strDesc, X, Y, maxW, Flags, Color );
 }
 
@@ -352,7 +352,7 @@ int CTexFont::DrawStringScaleW( CStringDesc *strDesc, int X, int Y, int maxW, UI
 
 int CTexFont::DrawStringScaleW( int strIdx, RECTXYWH rect, UINT16 Flags, DWORD Color )
 {
-	CStringDesc *strDesc = UTLang().strings[ strIdx ];
+	CStringDesc *strDesc = __Texts().strings[ strIdx ];
 	return DrawStringScaleW( strDesc, rect, Flags, Color );
 }
 
@@ -897,7 +897,7 @@ SIZEWH CTexFont::MeasureString( CStringDesc *strDesc )
 SIZEWH CTexFont::MeasureString( int strIdx )
 {
 	SIZEWH retsz( 0, rowHeight );
-	CStringDesc *strDesc = UTLang().GetStringDescByIdx(strIdx);
+	CStringDesc *strDesc = __Texts().GetStringDescByIdx(strIdx);
 	return MeasureString( strDesc );
 }
 
@@ -905,7 +905,7 @@ SIZEWH CTexFont::MeasureString( int strIdx, int nMaxWidth )
 {
 	int maxWidth = nMaxWidth;
 	SIZEWH retsz( maxWidth, rowHeight );
-	CStringDesc *strDesc = UTLang().GetStringDescByIdx( strIdx );
+	CStringDesc *strDesc = __Texts().GetStringDescByIdx( strIdx );
 	return MeasureString( strDesc, nMaxWidth );
 }
 
@@ -976,13 +976,13 @@ SIZEWH CTexFont::MeasureString( CStringDesc* strDesc, int nMaxWidth )
 
 int CTexFont::DrawHString( UINT32 strHash, int X, int Y, UINT16 Flags, DWORD Color )
 {
-	int strIdx = UTLang().GetStrIdx( strHash );
+	int strIdx = __Texts().GetStrIdx( strHash );
 	return DrawString( strHash, X, Y, Flags, Color );
 }
 
 void CTexFont::DrawHString( UINT32 strHash, RECTXYWH rect, UINT16 Flags, DWORD Color )
 {
-	int strIdx = UTLang().GetStrIdx( strHash );
+	int strIdx = __Texts().GetStrIdx( strHash );
 	DrawString( strIdx, rect, Flags, Color );
 }
 /*
@@ -994,11 +994,11 @@ void CTexFont::DrawHStringOffsetY(UINT32 strHash, RECTXYWH rect, int offsetY, UI
 */
 SIZEWH CTexFont::MeasureHString( UINT32 strHash )
 {
-	int strIdx = UTLang().GetStrIdx( strHash );
+	int strIdx = __Texts().GetStrIdx( strHash );
 
 	SIZEWH retsz( 0, rowHeight );
 
-	CStringDesc *strDesc = UTLang().GetStringDescByIdx( strIdx );
+	CStringDesc *strDesc = __Texts().GetStringDescByIdx( strIdx );
 	for ( UINT ii = 0; ii < strDesc->len; ii++ )
 	{
 		int cod = strDesc->codes[ ii ];
@@ -1017,10 +1017,10 @@ SIZEWH CTexFont::MeasureHString( UINT32 strHash )
 
 SIZEWH CTexFont::MeasureHString( UINT32 strHash, int maxWidth )
 {
-	int strIdx = UTLang().GetStrIdx( strHash );
+	int strIdx = __Texts().GetStrIdx( strHash );
 	SIZEWH retsz( maxWidth, 0 );
 
-	CStringDesc *strDesc = UTLang().GetStringDescByIdx( strIdx );
+	CStringDesc *strDesc = __Texts().GetStringDescByIdx( strIdx );
 	int textLen = strDesc->len;
 	UINT16* textCodes = strDesc->codes;
 

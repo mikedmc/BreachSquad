@@ -389,13 +389,13 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			char str0[128] = " ";
 			if (pValue->m_type == CVariantComplex::K_ARGTYPE_INT32)
 			{
-				wcstombs(str0, UTLang().strings[pValue->m_asINT32]->shStringName.text, 128);
+				wcstombs(str0, __Texts().strings[pValue->m_asINT32]->shStringName.text, 128);
 			}
 
 			ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
 			if (ImGui::IsItemEdited())
 			{
-				pValue->m_asINT32 = UTLang().GetStrIdx(str0);
+				pValue->m_asINT32 = __Texts().GetStrIdx(str0);
 			}
 		}
 		else // non custom properties get treated by type
@@ -693,10 +693,10 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 							else if (wcscmp(propertyName, L"stringID") == 0)
 							{
 								int strIdx = _wtoi(propertyValue);
-								if((strIdx < 0) || (strIdx == UTLang().defaultStringIdx))
+								if((strIdx < 0) || (strIdx == __Texts().defaultStringIdx))
 									StringCchPrintf(propertyValue, MAX_PATH, L"%s", var->m_strArg.text); //daca nu am pus id text pun ce era in template
 								else
-									StringCchPrintf(propertyValue, MAX_PATH, L"%s", UTLang().strings[strIdx]->shStringName.text);
+									StringCchPrintf(propertyValue, MAX_PATH, L"%s", __Texts().strings[strIdx]->shStringName.text);
 							}
 							else if ((wcscmp(propertyName, L"color") == 0) || (wcscmp(propertyName, L"fontColor") == 0))
 							{

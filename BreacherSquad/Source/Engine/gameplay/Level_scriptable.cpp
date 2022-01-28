@@ -217,8 +217,8 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 #endif
 					UTGetAchievementManager().UnlockAchievement(ACH_LOOKS_INTERESTING);
 					//set string for hint
-					UTLang().ReplaceTokenInt(STR_SECRETS_COLLECTED_VAL, STR_SECRETS_COLLECTED_NN, 1, nCollectedCnt);
-					UTLang().ReplaceTokenInt(STR_SECRETS_COLLECTED_VAL, STR_SECRETS_COLLECTED_VAL, 2, 20);
+					__Texts().ReplaceTokenInt(STR_SECRETS_COLLECTED_VAL, STR_SECRETS_COLLECTED_NN, 1, nCollectedCnt);
+					__Texts().ReplaceTokenInt(STR_SECRETS_COLLECTED_VAL, STR_SECRETS_COLLECTED_VAL, 2, 20);
 				}
 				else if (instr->m_arrArgs[ii]->m_name.getHash() == GET_FAST_HASH("nCopSaved"))
 				{
@@ -246,7 +246,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				{
 					m_arrStats[K_LVL_STATS_LEVEL_VINFINITE_FLOOR]++;
 					//show level number
-					UTLang().ReplaceTokenInt(STR_FLOOR_X_VALUE, STR_FLOOR_X, 1, m_arrStats[K_LVL_STATS_LEVEL_VINFINITE_FLOOR]);
+					__Texts().ReplaceTokenInt(STR_FLOOR_X_VALUE, STR_FLOOR_X, 1, m_arrStats[K_LVL_STATS_LEVEL_VINFINITE_FLOOR]);
 
 					g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_LETTERWAVER, Vec2(0.0f, -50.0f), STR_FLOOR_X_VALUE, FONTIDX_12_WOW, 1.0f, 2.0f, K_COLOR_SELECTED_TEXT);
 				}

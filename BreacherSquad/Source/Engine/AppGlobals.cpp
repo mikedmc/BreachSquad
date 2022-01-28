@@ -17,7 +17,7 @@ void App_UpdateLevelStats()
 		ErrorBox(K_ERR_CRITICAL, L"[ERROR] App_UpdateLevelStats::Array too small!!! Contact support!");
 	}
 
-	UTLang().SetString(STR_TOTAL_STARS_VAL, L"%d", g_userData[K_MEMID_STARS_TOTAL] - g_userData[K_MEMID_STARS_SPENT]);
+	__Texts().SetString(STR_TOTAL_STARS_VAL, L"%d", g_userData[K_MEMID_STARS_TOTAL] - g_userData[K_MEMID_STARS_SPENT]);
 	//count played missions, total scores, etc
 	int nCompletedMissions = 0;
 	g_userData[K_MEMID_TOTAL_SCORE_SOLO] = 0;
@@ -920,7 +920,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 
 		SDL_Scancode commandscan = (SDL_Scancode)pCtrlr->GetKeyMappingForCommand(eCommand);
 		mbstowcs_s(null, strKey, UTGetCtrlrMgr().GetSDLScancodeName(commandscan), MAX_PATH);
-		UTLang().SetStringDesc(&sdKeyName, strKey);
+		__Texts().SetStringDesc(&sdKeyName, strKey);
 	}
 	else if (pCtrlr->eType == K_CM_CT_JOYSTICK_SDL)
 	{
@@ -1062,13 +1062,13 @@ OPRESULT App_LocaLoadStrings()
 	LOG(L"[LANG] Loading strings: %s", xmlpath);
 	
 	//load strings and ignore missing characters when using TTF fonts
-	int nLoaded = UTLang().LoadFromXML(xmlpath, g_Language.shLangName.text, &g_Language.strMinAlphabet, g_Language.bUseTTFonts);
+	int nLoaded = __Texts().LoadFromXML(xmlpath, g_Language.shLangName.text, &g_Language.strMinAlphabet, g_Language.bUseTTFonts);
 	if (nLoaded <= 0)
 	{
 		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"[ERROR] Failed loading strings XML! file:%s", xmlpath);
 	}
 	//set version number
-	UTLang().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
+	__Texts().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
 	//set keyboard strings
 	CController* keybd1 = UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_IID_KBM1);
 	CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);

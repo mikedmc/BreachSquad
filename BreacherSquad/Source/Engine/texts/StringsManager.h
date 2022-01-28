@@ -97,5 +97,5 @@ public:
 };
 
 // Access singleton
-CStringsManager& UTLang();
+CStringsManager& __Texts();
 

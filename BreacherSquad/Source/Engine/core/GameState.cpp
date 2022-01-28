@@ -257,7 +257,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 			//as soon as we enter we ask for the lobbies list and the state will read the lobbies a little later (on a timer job)
 			g_netlock.Net_RequestLobbyList( 10 );
 
-			UTLang().SetString( STR_LOBBIES_LIST_VAL, L"%s", UTLang().strings[ STR_PLEASE_HANG ]->sText );
+			__Texts().SetString( STR_LOBBIES_LIST_VAL, L"%s", __Texts().strings[ STR_PLEASE_HANG ]->sText );
 			//add the window
 			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce( "LAYER_ID_LOBBIES_LIST" );
 			if ( lay != null )
@@ -421,7 +421,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 					//starting game with forced map
 					StringCchPrintf( strLevelPath, MAX_PATH, L"%s", sProcessedPath.c_str() );
 					//write current mission name and number
-					UTLang().SetString( STR_CURRENT_MISSION_VAL, L"" );
+					__Texts().SetString( STR_CURRENT_MISSION_VAL, L"" );
 				}
 				else
 				{
@@ -435,7 +435,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 					}
 					//write current mission name and number
 					int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[ nChapterNumber ]->arrLevelNameStrIdx[ nLevelNumber ];
-					UTLang().SetString( STR_CURRENT_MISSION_VAL, L"%d.%d %s", nChapterNumber + 1, nLevelNumber + 1, UTLang().strings[ nStrIdxLevelName ]->sText );
+					__Texts().SetString( STR_CURRENT_MISSION_VAL, L"%d.%d %s", nChapterNumber + 1, nLevelNumber + 1, __Texts().strings[ nStrIdxLevelName ]->sText );
 				}
 
 				if ( FAILED( g_level.LoadLevel( strLevelPath ) ) )
@@ -460,7 +460,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 				WCHAR wcsLevelPath[ MAX_PATH ] = { 0 };
 				mod->GetFullPathToAffectedFile( 0, wcsLevelPath, MAX_PATH );
 				//write current mission name and number
-				UTLang().SetString( STR_CURRENT_MISSION_VAL, L"%s", mod->shName.text );
+				__Texts().SetString( STR_CURRENT_MISSION_VAL, L"%s", mod->shName.text );
 
 				if ( FAILED( g_level.LoadLevel( wcsLevelPath ) ) )
 				{

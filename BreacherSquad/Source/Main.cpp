@@ -254,7 +254,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	DXUTSetMultimonSettings(true);
 
 	WCHAR windowTitle[MAX_PATH];
-	StringCchPrintf(windowTitle, MAX_PATH, L"%s", UTLang().strings[STR_TITLE]->sText);
+	StringCchPrintf(windowTitle, MAX_PATH, L"%s", __Texts().strings[STR_TITLE]->sText);
 
 	if (FAILED(DXUTCreateWindow(windowTitle, hInst, NULL, NULL /*, 0, 0*/)))
 	{
@@ -272,10 +272,10 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	struct tm tm = *localtime(&t);
 	LOG(L"Log system started. (%d-%d-%d %d:%d:%d)", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 #ifdef ENABLE_STEAM
-	LOG(L"Steam Version %s, Savefile Version %d", UTLang().strings[STR_VERSION_NUMBER]->sText, _VERSION_DATAFILE_);
+	LOG(L"Steam Version %s, Savefile Version %d", __Texts().strings[STR_VERSION_NUMBER]->sText, _VERSION_DATAFILE_);
 #endif // ENABLE_STEAM
 #ifdef ENABLE_GALAXY
-	LOG(L"GoG Version %s, Savefile Version %d", UTLang().strings[STR_VERSION_NUMBER]->sText, _VERSION_DATAFILE_);
+	LOG(L"GoG Version %s, Savefile Version %d", __Texts().strings[STR_VERSION_NUMBER]->sText, _VERSION_DATAFILE_);
 #endif // ENABLE_GALAXY
 
 	///--- startup commands (exe params) ---
@@ -391,7 +391,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	///--- init SDL ---
 	UTApp().InitSDL(DXUTGetHWND());
 	//add keyboard controllers and map keys
-	CController* ctrlrkeys1 = UTGetCtrlrMgr().AddController(K_CM_CT_KBM_SDL, UTLang().strings[STR_KEYBOARD1]->sText);
+	CController* ctrlrkeys1 = UTGetCtrlrMgr().AddController(K_CM_CT_KBM_SDL, __Texts().strings[STR_KEYBOARD1]->sText);
 	ctrlrkeys1->nSDLInstanceId = K_CM_IID_KBM1; //set keyboard instance ID so it isn't empty
 	//ctrlrkeys1->ClearTriggers(); //clear default mapping
 
@@ -402,7 +402,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	//App_SetSDLTriggersFromUserData(ctrlrkeys1, ctrlrkeys2);
 	
 	//add network controller for coop play (used for peer controller simulation)
-	CController* ctrlrnet1 = UTGetCtrlrMgr().AddController(K_CM_CT_NET_FRAMELOCK, UTLang().strings[STR_NETWORK1]->sText);
+	CController* ctrlrnet1 = UTGetCtrlrMgr().AddController(K_CM_CT_NET_FRAMELOCK, __Texts().strings[STR_NETWORK1]->sText);
 	ctrlrnet1->nSDLInstanceId = K_CM_IID_NET1;
 
 
@@ -530,7 +530,7 @@ OPRESULT BeforeMount(void)
 	g_vecGravity = Vec3(0.0f, 0.0f, -K_GRAVITY);
 
 	//set version number
-	UTLang().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
+	__Texts().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
 	//--------------------------------------------------------------------------------------
 	// add listeners
 	//--------------------------------------------------------------------------------------
@@ -568,7 +568,7 @@ OPRESULT AfterMount(void)
 void ShutdownApp(void)
 {
 	g_editor.Release();
-	UTLang().Release();
+	__Texts().Release();
 	g_particlesMgr.Release();
 
 	UTGetSoundManager().Release();
@@ -886,7 +886,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 		StringCchCat(wsResStr, 1024, wsRes);
 	}
-	UTLang().SetString(STR_RESOLUTIONS_LIST, wsResStr);
+	__Texts().SetString(STR_RESOLUTIONS_LIST, wsResStr);
 
 
 	//reface setarile initiale
@@ -1644,7 +1644,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			{
 				//name and rank
 				CStringDesc sdName;
-				UTLang().SetStringDescUTF8(&sdName, scoresList.m_arrNames[kk]);
+				__Texts().SetStringDescUTF8(&sdName, scoresList.m_arrNames[kk]);
 				StringCchPrintf(strLine, MAX_PATH, L"%d.%s\n", scoresList.m_arrRank[kk], sdName.sText);
 				//append
 				StringCchCat(strNames, 1024, strLine);
@@ -1658,21 +1658,21 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			StringCchCat(strNames, 1024, L" ");
 			StringCchCat(strScores, 1024, L" ");
 			//set final strings
-			UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, strNames);
-			UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, strScores);
+			__Texts().SetString(STR_LEADERBOARDS_NAMES_VAL, strNames);
+			__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, strScores);
 
 			//save user score
 			int nUserScore = UTGetLeaderboards().GetUserScore();
 			if(nUserScore == 0)
-				UTLang().SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, UTLang().strings[STR_NOT_AVAILABLE]->sText);
+				__Texts().SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, __Texts().strings[STR_NOT_AVAILABLE]->sText);
 			else
-				UTLang().SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, L"%d", nUserScore);
+				__Texts().SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, L"%d", nUserScore);
 		}
 		else
 		{
 			//no scores
-			UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, UTLang().strings[STR_NOT_AVAILABLE]->sText);
-			UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, UTLang().strings[STR_NOT_AVAILABLE]->sText);
+			__Texts().SetString(STR_LEADERBOARDS_NAMES_VAL, __Texts().strings[STR_NOT_AVAILABLE]->sText);
+			__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, __Texts().strings[STR_NOT_AVAILABLE]->sText);
 		}
 
 		// update the number of selectable items in the leaderboards window
@@ -1869,18 +1869,18 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			if(UTApp().m_Settings.dev_bDevMode)
 			{
 				StringCchPrintf(todraw, MAX_PATH, DXUTGetFrameStats());
-				UTLang().SetStringDesc(&strdesc, todraw);
+				__Texts().SetStringDesc(&strdesc, todraw);
 				g_font10bs1->DrawString(&strdesc, 10, posY, FONTFLAG_ANCHOR_TOPLEFT, 0xffffffff);
 				posY += 15;
 				StringCchPrintf(todraw, MAX_PATH, L"pointer %.2f:%.2f", g_mouse.pos.x, g_mouse.pos.y);
-				UTLang().SetStringDesc(&strdesc, todraw);
+				__Texts().SetStringDesc(&strdesc, todraw);
 				g_font10bs1->DrawString(&strdesc, 10, posY, FONTFLAG_ANCHOR_TOPLEFT, 0xffffffff);
 			}
 			else  //no dev mode show only ping
 			{
 				//FPS and gfx data
 				StringCchPrintf(todraw, MAX_PATH, DXUTGetFrameStats());
-				UTLang().SetStringDesc(&strdesc, todraw);
+				__Texts().SetStringDesc(&strdesc, todraw);
 				g_font10bs1->DrawString(&strdesc, 10, posY, FONTFLAG_ANCHOR_TOPLEFT, 0xffffffff);
 				posY += 15;
 			}

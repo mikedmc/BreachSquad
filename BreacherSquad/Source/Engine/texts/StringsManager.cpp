@@ -760,7 +760,7 @@ int CStringsManager::UTF8toWCHAR(const char* szUTF8string, WCHAR* strDest, int n
 ///**************************************************************************************
 /// Sigleton 
 ///**************************************************************************************
-CStringsManager& UTLang()
+CStringsManager& __Texts()
 {
 	static CStringsManager g_StringsManager;
 	return g_StringsManager;

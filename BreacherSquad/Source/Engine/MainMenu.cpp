@@ -255,9 +255,9 @@ bool CMainMenu::RequestLeaderboardsUpdate(bool bCoop)
 	else
 		StringCchPrintfA(pszBoardName, MAX_PATH, strFormat, K_GAME_STR_LEADERBOARDS_PREFIX_COOP, nChapterNumber + 1, nLevelNumber + 1);
 	//reset strings too
-	UTLang().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
-	UTLang().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
-	UTLang().SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, L"...");
+	__Texts().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
+	__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
+	__Texts().SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, L"...");
 	//request downloading of scores
 	UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, pszBoardName, 1);
 	//request downloading of your own score
@@ -1286,10 +1286,10 @@ void CMainMenu::Update(float dTime)
 							if (UTGetChaptersList().IsValidLevel(nChapter, nLevel))
 							{
 								int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[nChapter]->arrLevelNameStrIdx[nLevel];
-								UTLang().SetString(STR_TEMP10, L"%d.%d %s", nChapter + 1, nLevel + 1, UTLang().strings[nStrIdxLevelName]->sText);
+								__Texts().SetString(STR_TEMP10, L"%d.%d %s", nChapter + 1, nLevel + 1, __Texts().strings[nStrIdxLevelName]->sText);
 							}
 							else
-								UTLang().SetString(STR_TEMP10, L"");
+								__Texts().SetString(STR_TEMP10, L"");
 
 							//reset scroll page and save leaderboard index as a payload in this control
 							// set scores list on empty
@@ -1700,10 +1700,10 @@ void CMainMenu::Paint()
 						CModsManager::CModDescriptor *mod = UTGetModsManager().m_arrMods[m_nSelection];
 						//title again
 						CStringDesc sdModName;
-						UTLang().SetStringDesc(&sdModName, mod->shName.text);
+						__Texts().SetStringDesc(&sdModName, mod->shName.text);
 						WCHAR strCompleteDesc[2048];
 						StringCchPrintf(strCompleteDesc, 2048, L"%s\n- %s", mod->strDescription, mod->strAuthor);
-						UTLang().SetString(STR_TEMP12, strCompleteDesc);
+						__Texts().SetString(STR_TEMP12, strCompleteDesc);
 						rectTemp = rectSelMod; rectTemp.x += 100; rectTemp.w -= 100; rectTemp.y += 20; rectTemp.h -= 18;
 						g_font8bs1->DrawString(&sdModName, rectTemp.x, rectTemp.y - 10, FONTFLAG_ANCHOR_VCENTERLEFT, K_COLOR_SELECTED_TEXT);
 
@@ -1750,7 +1750,7 @@ void CMainMenu::Paint()
 							CSprite::paintFrame(&UTGetGUI().m_sprCol, rectItem.x - 2, rectItem.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 5, DW_COLOR_FFFA(fColor));
 
 						CStringDesc sdModName;
-						UTLang().SetStringDesc(&sdModName, mod->shName.text);
+						__Texts().SetStringDesc(&sdModName, mod->shName.text);
 						RECTXYWH recttemp(rectItem.x, rectItem.y - 10, rectItem.w - 30, rectItem.h + 20);
 						g_font8bs1->DrawStringClipped(&sdModName, rectItem.x + 14, rectItem.CenterY(), recttemp, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fColor));
 						//enabled?
@@ -2058,7 +2058,7 @@ void CMainMenu::Paint()
 						CSprite::paintFrame(&m_sprCol, lvlrect.CenterX(), lvlrect.CenterY(), ANM_MENUS_SPR_LEVEL_TYPE_ICONS, nLevelType, wndCol);
 						//numar nivel
 						CStringDesc strdesc;
-						UTLang().SetStringDesc(&strdesc, L"%d", kk + 1);
+						__Texts().SetStringDesc(&strdesc, L"%d", kk + 1);
 						g_font6n1->DrawString(&strdesc, lvlrect.x + 7, lvlrect.y + 7, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, wndAlpha));
 					}
 				}
@@ -2082,9 +2082,9 @@ void CMainMenu::Paint()
 				CStringDesc sdMission;
 				int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[nSelectedChapter]->arrLevelNameStrIdx[m_nSelection];
 				if(nStrIdxLevelName >= 0)
-					UTLang().SetStringDesc(&sdMission, L"%d. %s", m_nSelection + 1, UTLang().strings[nStrIdxLevelName]->sText);
+					__Texts().SetStringDesc(&sdMission, L"%d. %s", m_nSelection + 1, __Texts().strings[nStrIdxLevelName]->sText);
 				else
-					UTLang().SetStringDesc(&sdMission, L"%d. %s", m_nSelection + 1, UTLang().strings[STR_NOT_AVAILABLE]->sText);
+					__Texts().SetStringDesc(&sdMission, L"%d. %s", m_nSelection + 1, __Texts().strings[STR_NOT_AVAILABLE]->sText);
 
 				g_font8bs1->DrawString(&sdMission, rectRightPanel.CenterX(), rectRightPanel.y + 18, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 				
@@ -2241,10 +2241,10 @@ void CMainMenu::Paint()
 				if (mod != null)
 				{
 					CStringDesc sdModName, sdModDesc;
-					UTLang().SetStringDesc(&sdModName, mod->shName.text);
+					__Texts().SetStringDesc(&sdModName, mod->shName.text);
 					WCHAR strCompleteDesc[2048];
 					StringCchPrintf(strCompleteDesc, 2048, L"%s\n- %s", mod->strDescription, mod->strAuthor);
-					UTLang().SetString(STR_TEMP12, strCompleteDesc);
+					__Texts().SetString(STR_TEMP12, strCompleteDesc);
 					tmprect = rectSelMod; tmprect.x += 100; tmprect.w -= 100; tmprect.y += 20; tmprect.h -= 18;
 					g_font8bs1->DrawString(&sdModName, tmprect.x, tmprect.y - 10, FONTFLAG_ANCHOR_VCENTERLEFT, K_COLOR_SELECTED_TEXT);
 
@@ -2400,7 +2400,7 @@ void CMainMenu::PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD d
 	if(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx >= 0)
 		g_font6n1->DrawStringClamped(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx, titlerect.CenterX(), titlerect.y + 13, titlerect.w + 6, FONTFLAG_ANCHOR_TOPCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, wndAlpha));
 
-	UTLang().ReplaceTokenInt(STR_TEMP1, STR_CHAPTER_N, 1, nChapterIdx + 1);
+	__Texts().ReplaceTokenInt(STR_TEMP1, STR_CHAPTER_N, 1, nChapterIdx + 1);
 	g_font6n1->DrawString(STR_TEMP1, titlerect.CenterX(), titlerect.Bottom() - 3, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, wndAlpha));
 }
 
@@ -2452,7 +2452,7 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 		}
 
 		CStringDesc strdesc;
-		UTLang().SetStringDesc(&strdesc, L"%d/%d", nChapterStars, K_GAME_LEVELS_PER_CHAPTER * 3);
+		__Texts().SetStringDesc(&strdesc, L"%d/%d", nChapterStars, K_GAME_LEVELS_PER_CHAPTER * 3);
 		g_font6ns1->DrawString(&strdesc, wndrectL.x + picrect.w - 15, wndrectL.y + picrect.h - 6, FONTFLAG_ANCHOR_BOTTOMRIGHT, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
 	}
 	//mission name frame and string
@@ -2473,8 +2473,8 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 	{
 		if (!bWorkshopChapter)
 		{
-			UTLang().ReplaceTokenInt(STR_TEMP1, STR_MISSIONS_COMPLETED_N, 1, nCompletedLevels);
-			UTLang().ReplaceTokenInt(STR_TEMP1, STR_TEMP1, 2, K_GAME_LEVELS_PER_CHAPTER);
+			__Texts().ReplaceTokenInt(STR_TEMP1, STR_MISSIONS_COMPLETED_N, 1, nCompletedLevels);
+			__Texts().ReplaceTokenInt(STR_TEMP1, STR_TEMP1, 2, K_GAME_LEVELS_PER_CHAPTER);
 			g_font6n1->DrawString(STR_TEMP1, titlerect.CenterX(), titlerect.y + 20, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
 		}
 		else
@@ -2486,9 +2486,9 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 	{
 		if (!bWorkshopChapter)
 		{
-			UTLang().ReplaceTokenInt(STR_TEMP1, STR_COMPLETE_N_TO_UNLOCK_N, 1, UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterMissionsToUnlock);
-			UTLang().ReplaceTokenInt(STR_TEMP1, STR_TEMP1, 2, g_userData[K_MEMID_MISSIONS_COMPLETED]);
-			UTLang().ReplaceTokenInt(STR_TEMP1, STR_TEMP1, 3, UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterMissionsToUnlock);
+			__Texts().ReplaceTokenInt(STR_TEMP1, STR_COMPLETE_N_TO_UNLOCK_N, 1, UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterMissionsToUnlock);
+			__Texts().ReplaceTokenInt(STR_TEMP1, STR_TEMP1, 2, g_userData[K_MEMID_MISSIONS_COMPLETED]);
+			__Texts().ReplaceTokenInt(STR_TEMP1, STR_TEMP1, 3, UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterMissionsToUnlock);
 
 			g_font6n1->DrawString(STR_TEMP1, titlerect.CenterX(), titlerect.y + 20, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(0xffff8888, fAlpha));
 		}
