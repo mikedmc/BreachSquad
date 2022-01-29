@@ -1637,7 +1637,7 @@ void CMainMenu::Paint()
 				{
 					//title bar
 					RECTXYWH rRect(0, 20, 100, 18);
-					CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
+					GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 					g_font8bs1->DrawString(STR_UPDATING_MODS, worldrect.CenterX(), worldrect.y + 33.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 					//please wait
 					g_font8bs1->DrawString(STR_PLEASE_HANG, worldrect.CenterX(), worldrect.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, K_COLOR_DEFAULT_TEXT);
@@ -1667,13 +1667,13 @@ void CMainMenu::Paint()
 					RECTXYWH rectSelMod(worldrect.CenterX() - 150, worldrect.y + 50, 300, 52);
 					//title
 					RECTXYWH rRect(0, 20, 100, 18);
-					CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
+					GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 					g_font8bs1->DrawString(STR_AVAILABLE_MODS, worldrect.CenterX(), worldrect.y + 33.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 
 					//mod list background
 					RECTXYWH rectTemp = rectItemsList;
 					rectTemp.Inflate(2, 2);
-					CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectTemp, 0x88888888);
+					GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectTemp, 0x88888888);
 
 					//paint selection cursor
 					RECTXYWH selrect;
@@ -1682,11 +1682,11 @@ void CMainMenu::Paint()
 						selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 						selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
 						selrect.Inflate(5, 5);
-						CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+						GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 					}
 
 					///--- SELECTED MOD ---
-					CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectSelMod, 0x88888888);
+					GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectSelMod, 0x88888888);
 					//image
 					if ((m_nSelection >= 0) && (m_nSelection < m_nSelElements))
 					{
@@ -1721,7 +1721,7 @@ void CMainMenu::Paint()
 							float fTmMul = 8.0f / (float)(texth - rectTemp.h);
 							float offy = LIMIT((float)sin((-1.0f + m_fSelTimer) * fTmMul), 0.0f, 1.0f);
 							offy *= -(texth - rectTemp.h);
-							g_font6n1->DrawStringOffsetY(STR_TEMP12, rectTemp, (int)floor(offy), FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT | FONTFLAG_CLIPTEXT, K_COLOR_DEFAULT_TEXT);
+							//g_font6n1->DrawStringOffsetY(STR_TEMP12, rectTemp, (int)floor(offy), FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT | FONTFLAG_CLIPTEXT, K_COLOR_DEFAULT_TEXT);
 						}
 					}
 					///--- MODS LIST ---
@@ -1743,7 +1743,7 @@ void CMainMenu::Paint()
 						float fDark = 1.0f - fabs((float)kk - m_fSelPageCursor);
 						CLAMP(fDark, 0.0f, 1.0f);
 						
-						CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectItem, D3DCOLOR_COLORVALUE(fColor, fColor, fColor, 1.0f));
+						GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectItem, D3DCOLOR_COLORVALUE(fColor, fColor, fColor, 1.0f));
 						//mod name
 						RECT txtrect;
 						SetRect(&txtrect, rectItem.x, rectItem.y, rectItem.Right(), rectItem.Bottom());
@@ -1756,7 +1756,7 @@ void CMainMenu::Paint()
 						CStringDesc sdModName;
 						__Texts().SetStringDesc(&sdModName, mod->shName.text);
 						RECTXYWH recttemp(rectItem.x, rectItem.y - 10, rectItem.w - 30, rectItem.h + 20);
-						g_font8bs1->DrawStringClipped(&sdModName, rectItem.x + 14, rectItem.CenterY(), recttemp, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fColor));
+						//g_font8bs1->DrawStringClipped(&sdModName, rectItem.x + 14, rectItem.CenterY(), recttemp, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fColor));
 						//enabled?
 						if(mod->bActive)
 							g_font8bs1->DrawString(STR_ON, rectItem.Right(), rectItem.CenterY(), FONTFLAG_ANCHOR_VCENTERRIGHT, 0xff66ff66);
@@ -1782,7 +1782,7 @@ void CMainMenu::Paint()
 					{
 						rectTemp = rectItemsList;
 						rectTemp.h += 7; rectTemp.w += 7;
-						CtrlMgrDrawPageSelector(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, rectTemp, m_nSelPagesCnt, m_nSelPage, 0xffffffff, 1);
+						GUIUtils::DrawPageSelector(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, rectTemp, m_nSelPagesCnt, m_nSelPage, 0xffffffff, 1);
 					}
 
 					//buton back
@@ -1794,7 +1794,7 @@ void CMainMenu::Paint()
 						if (m_bSelectionMade)
 							butframe = 6;
 					}
-					CtrlMgrDrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
+					GUIUtils::DrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
 					//textul apasat pe butonul de back
 					if ((!m_bSelectionMade) && (m_nSelection == -1))
 						recttemp.y -= 1;
@@ -1845,7 +1845,7 @@ void CMainMenu::Paint()
 			PaintBackground(worldrect, 0xff4444dd);
 			//title
 			RECTXYWH rRect(0, 22, 100, 18);
-			CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
+			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 			g_font8bs1->DrawString(STR_SELECT_GAME_MODE, worldrect.CenterX(), worldrect.y + 35.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 			//coop string if online game
 			if (UTApp().IsGameNetworked())
@@ -1867,7 +1867,7 @@ void CMainMenu::Paint()
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 				selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
 				selrect.Inflate(5, 5);
-				CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+				GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 			}
 			//paint chapters
 			D3DXVECTOR2 vpos = worldrect.Center();
@@ -1895,7 +1895,7 @@ void CMainMenu::Paint()
 				int nSelPt = m_nSelection;
 				if (m_nSelection < 0)
 					nSelPt = m_nSelectionOld;
-				CtrlMgrDrawPageSelector(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, tmprect, m_nSelElements, nSelPt, 0xffffffff, 0);
+				GUIUtils::DrawPageSelector(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, tmprect, m_nSelElements, nSelPt, 0xffffffff, 0);
 			}
 
 			//buton back
@@ -1907,7 +1907,7 @@ void CMainMenu::Paint()
 				if (m_bSelectionMade)
 					butframe = 6;
 			}
-			CtrlMgrDrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
+			GUIUtils::DrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
 			//textul apasat pe butonul de back
 			if ((!m_bSelectionMade) && (m_nSelection == -1))
 				recttemp.y -= 1;
@@ -1920,7 +1920,7 @@ void CMainMenu::Paint()
 			PaintBackground(worldrect, 0xff4444dd);
 			//title
 			RECTXYWH rRect(0, 22, 100, 18);
-			CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
+			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 			g_font8bs1->DrawString(STR_SELECT_EPISODE, worldrect.CenterX(), worldrect.y + 35.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 			//game mode name (top left)
 			g_font8b1->DrawString(STR_CLASSIC_MODE, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
@@ -1944,7 +1944,7 @@ void CMainMenu::Paint()
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 				selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
 				selrect.Inflate(4, 4);
-				CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+				GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 			}
 			//paint chapters
 			D3DXVECTOR2 vpos = worldrect.Center();
@@ -1974,7 +1974,7 @@ void CMainMenu::Paint()
 				if (m_bSelectionMade)
 					butframe = 6;
 			}
-			CtrlMgrDrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
+			GUIUtils::DrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
 			//textul apasat pe butonul de back
 			if ((!m_bSelectionMade) && (m_nSelection == -1))
 				recttemp.y -= 1;
@@ -2020,7 +2020,7 @@ void CMainMenu::Paint()
 			{
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 				selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
-				CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+				GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 			}
 
 			for (int kk = 0; kk < m_nSelElements; kk++)
@@ -2077,7 +2077,7 @@ void CMainMenu::Paint()
 
 			//--- mission name ---
 			RECTXYWH rRect(0, 19, 400, 30);
-			CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
+			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 
 			g_font6ns1->DrawString(STR_SELECT_MISSION, rectRightPanel.CenterX(), rectRightPanel.y + 6, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_DEFAULT_TEXT);
 			if (m_nSelection >= 0)
@@ -2103,7 +2103,7 @@ void CMainMenu::Paint()
 			tmprect = pageRect; tmprect.h += 3;
 			if (m_nSelPagesCnt > 1)
 			{
-				CtrlMgrDrawPageSelector(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, tmprect, m_nSelPagesCnt, m_nSelPage, 0xffffffff, 1);
+				GUIUtils::DrawPageSelector(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, tmprect, m_nSelPagesCnt, m_nSelPage, 0xffffffff, 1);
 			}
 			//paint scroll arrows - when not on back button
 			if (m_nSelPage >= 0)
@@ -2124,7 +2124,7 @@ void CMainMenu::Paint()
 				if (m_bSelectionMade)
 					butframe = 6;
 			}
-			CtrlMgrDrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
+			GUIUtils::DrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
 			//textul apasat pe butonul de back
 			if ((!m_bSelectionMade) && (m_nSelection == -1))
 				recttemp.y -= 1;
@@ -2181,7 +2181,7 @@ void CMainMenu::Paint()
 			{
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 				selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
-				CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+				GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 			}
 
 			for (int kk = 0; kk < m_nSelElements; kk++)
@@ -2226,7 +2226,7 @@ void CMainMenu::Paint()
 			}
 
 			///--- SELECTED MOD details ---
-			CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectSelMod, 0x88888888);
+			GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectSelMod, 0x88888888);
 			//image
 			if ((m_nSelection >= 0) && (m_nSelection < m_nSelElements))
 			{
@@ -2262,7 +2262,7 @@ void CMainMenu::Paint()
 						float fTmMul = 8.0f / (float)(texth - tmprect.h);
 						float offy = LIMIT((float)sin((-1.0f + m_fSelTimer) * fTmMul), 0.0f, 1.0f);
 						offy *= -(texth - tmprect.h);
-						g_font6n1->DrawStringOffsetY(STR_TEMP12, tmprect, (int)floor(offy), FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT | FONTFLAG_CLIPTEXT, K_COLOR_DEFAULT_TEXT);
+						//g_font6n1->DrawStringOffsetY(STR_TEMP12, tmprect, (int)floor(offy), FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT | FONTFLAG_CLIPTEXT, K_COLOR_DEFAULT_TEXT);
 					}
 				}
 			}
@@ -2270,7 +2270,7 @@ void CMainMenu::Paint()
 
 			//--- title ---
 			RECTXYWH rRect(0, 20, 100, 18);
-			CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
+			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 			g_font8bs1->DrawString(STR_DOWNLOADED_LEVELS, worldrect.CenterX(), worldrect.y + 33.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 
 
@@ -2287,7 +2287,7 @@ void CMainMenu::Paint()
 			tmprect = pageRect; tmprect.h += 1; tmprect.w -= 2;
 			if (m_nSelPagesCnt > 1)
 			{
-				CtrlMgrDrawPageSelector(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, tmprect, m_nSelPagesCnt, m_nSelPage, 0xffffffff, 1);
+				GUIUtils::DrawPageSelector(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, tmprect, m_nSelPagesCnt, m_nSelPage, 0xffffffff, 1);
 			}
 			//paint scroll arrows - when not on back button
 			if (m_nSelPage >= 0)
@@ -2308,7 +2308,7 @@ void CMainMenu::Paint()
 				if (m_bSelectionMade)
 					butframe = 6;
 			}
-			CtrlMgrDrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
+			GUIUtils::DrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
 			//textul apasat pe butonul de back
 			if ((!m_bSelectionMade) && (m_nSelection == -1))
 				recttemp.y -= 1;
@@ -2393,13 +2393,13 @@ void CMainMenu::PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD d
 
 	float wndAlpha = DW_GETFALPHA(dwColor);
 	//Paint Chapter Window
-	CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, dwColor);
+	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, dwColor);
 	//mission image
 	CSprite::paintFrame(&m_sprCol, wndrectL.x - 2, wndrectL.y - 2, ANM_MENUS_SPR_CHAPTER_SPLASHES, UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterImgFrame, dwColor);
 	
 	//mission name frame and string
 	RECTXYWH titlerect(wndrectL.x, wndrectL.y + picrect.h + 1, wndrectL.w, 9);
-	CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, dwColor);
+	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, dwColor);
 	titlerect.Inflate(1, 1);
 	if(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx >= 0)
 		g_font6n1->DrawStringClamped(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx, titlerect.CenterX(), titlerect.y + 13, titlerect.w + 6, FONTFLAG_ANCHOR_TOPCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, wndAlpha));
@@ -2433,7 +2433,7 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 
 	//float wndAlpha = D3DCOLOR_GETFALPHA(dwColor);
 	//Paint Chapter Window
-	CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
+	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 	//mission image
 	if(!bWorkshopChapter)
 		CSprite::paintFrame(&m_sprCol, wndrectL.x - 2, wndrectL.y - 2, ANM_MENUS_SPR_CHAPTER_SPLASHES_LG, UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterImgFrame, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
@@ -2461,7 +2461,7 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 	}
 	//mission name frame and string
 	RECTXYWH titlerect(wndrectL.x, wndrectL.y + picrect.h + 1, wndrectL.w, 9);
-	CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
+	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 	titlerect.Inflate(1, 1);
 	if (!bWorkshopChapter)
 	{
@@ -2515,7 +2515,7 @@ void CMainMenu::PaintGameModeWindow(D3DXVECTOR2 vCenter, int nGameModeIdx, float
 
 	RECTXYWH wndrectL2 = wndrectL;
 	wndrectL2.Inflate(1, 1);
-	CtrlMgrDrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_BLACK1, wndrectL2, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
+	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_BLACK1, wndrectL2, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 
 	CSprite::paintFrame(&m_sprCol, wndrectL.x - 2, wndrectL.y - 2, ANM_MENUS_SPR_GAME_MODE_SPLASHES, nGameModeIdx, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 

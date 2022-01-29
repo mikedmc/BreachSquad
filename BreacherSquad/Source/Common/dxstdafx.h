@@ -452,7 +452,6 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "TextureManager.h"
 #include "SpriteCollection.h"
 #include "SpritePainter.h"
-#include "texts/TexturedFont.h"
 #include "texts/TexFont.h"
 #include "texts/FreeTypeFont.h"
 #include "texts/TTFont.h"
@@ -621,12 +620,12 @@ extern bool     g_bShowHelp;
 extern bool		g_bLevelNeedsUpdate;
 
 //fonts
-extern CTexturedFont	*g_font12wow;
-extern CTexturedFont	*g_font10b1, *g_font10bs1;
-extern CTexturedFont	*g_font8b1, *g_font8bs1;
-extern CTexturedFont	*g_font9b1;
-extern CTexturedFont	*g_font6n1, *g_font6ns1, *g_font6nc1;
-extern CTexturedFont	*g_font5n1, *g_font5n2, *g_font5ns2;
+extern CTexFont	*g_font12wow;
+extern CTexFont	*g_font10b1, *g_font10bs1;
+extern CTexFont	*g_font8b1, *g_font8bs1;
+extern CTexFont	*g_font9b1;
+extern CTexFont	*g_font6n1, *g_font6ns1, *g_font6nc1;
+extern CTexFont	*g_font5n1, *g_font5n2, *g_font5ns2;
 
 #ifdef K_CONTROLS_EDITOR
 extern CControlsEditor				g_ControlsEditor;

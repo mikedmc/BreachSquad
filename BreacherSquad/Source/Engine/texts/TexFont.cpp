@@ -153,7 +153,7 @@ OPRESULT CTexFont::LoadFontXML( WCHAR* XMLpath )
 	StringCchPrintf( strLoadedTexture, MAX_PATH, L"%s%s", szwPath, imgname );
 
 	pTexNode = __TexFonts().m_texManager.AddTexture( strLoadedTexture, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE );
-	if ( pTexNode = nullptr )
+	if ( pTexNode == nullptr )
 	{
 		Release();
 		return OPRESULT( K_OP_FAILED, K_SEVERITY_WARNING, L"CTexFont::LoadFontXML -> Could not load texture!\n %s", strLoadedTexture );
@@ -692,14 +692,14 @@ int CTexFont::DrawString( CStringDesc *strDesc, float X, float Y, UINT16 Flags, 
 
 int CTexFont::DrawString( int strIdx, float X, float Y, UINT16 Flags, DWORD Color )
 {
-	PTEXTURE pTexture = pTexNode->pTexture;
-
-	return DrawString( strIdx, X, Y, Flags, Color );
+	CStringDesc* strdesc = __Texts().GetStringDescByIdx( strIdx );
+	return DrawString( strdesc, X, Y, Flags, Color );
 }
 
 void CTexFont::DrawString( int strIdx, RECTXYWH rect, UINT16 Flags, DWORD Color )
 {
-	DrawString( strIdx, rect, Flags, Color );
+	CStringDesc* strdesc = __Texts().GetStringDescByIdx( strIdx );
+	DrawString( strdesc, rect, Flags, Color );
 }
 
 /*

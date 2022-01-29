@@ -207,7 +207,7 @@ public:
 
 	//pentru particule string
 	CStringDesc		m_stringDesc;
-	CTexturedFont	*m_pFont;	//id-ul fontului bitmap
+	CTexFont		*m_pFont;	//id-ul fontului bitmap
 	DWORD			strColor;
 
 	int				mLayer; //layer particula
@@ -332,7 +332,7 @@ public:
 	void PaintStringParticles(int nLayer, bool paintUsingMultiply = false);
 	void PaintStringParticles(int nLayer, D3DXVECTOR2 offset, bool paintUsingMultiply = false);
 
-	void AddStringParticle(CTexturedFont *pFont, WCHAR* text,
+	void AddStringParticle(CTexFont *pFont, WCHAR* text,
 						D3DXVECTOR2* pos,
 						D3DXVECTOR2* gravity, D3DXVECTOR2* speed,
 						float lifetime,

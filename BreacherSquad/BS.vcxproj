@@ -345,7 +345,6 @@
     <ClInclude Include="Source\Engine\texts\FreeTypeFont.h" />
     <ClInclude Include="Source\Engine\texts\StringsManager.h" />
     <ClInclude Include="Source\Engine\texts\TexFont.h" />
-    <ClInclude Include="Source\Engine\texts\TexturedFont.h" />
     <ClInclude Include="Source\Engine\texts\TTFont.h" />
     <ClInclude Include="Source\Engine\UTAppClass.h" />
     <ClInclude Include="Source\Engine\ogg.h" />
@@ -776,7 +775,6 @@
     <ClCompile Include="Source\Engine\texts\FreeTypeFont.cpp" />
     <ClCompile Include="Source\Engine\texts\StringsManager.cpp" />
     <ClCompile Include="Source\Engine\texts\TexFont.cpp" />
-    <ClCompile Include="Source\Engine\texts\TexturedFont.cpp" />
     <ClCompile Include="Source\Engine\texts\TTFont.cpp" />
     <ClCompile Include="Source\Engine\UTAppClass.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>

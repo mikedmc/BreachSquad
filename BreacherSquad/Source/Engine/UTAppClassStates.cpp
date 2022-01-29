@@ -104,8 +104,6 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			GameState::substate++;
 
 			///--- FONTS ---
-			//set strings manager
-			UTGetFontsManager().SetManagersPtr(&__Texts());
 			//load fonts based on selected language
 			HRESULT hr = S_OK;
 			if (FAILED(hr = App_LocaLoadFonts(g_Language.bUseTTFonts)))
@@ -127,7 +125,6 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			*/
 
 			///--- CONTROLS ---
-			UTGetGUI().SetManagersPtr(&__Texts(), &UTGetFontsManager());
 			UTGetGUI().SetCameraTransform(&UTApp().g_cam360hScreen);
 
 			WCHAR xmlpath[MAX_PATH];

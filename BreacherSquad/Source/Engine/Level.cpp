@@ -8576,9 +8576,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	*/
 
 	///--- paint string particles in level coords ---
-	UTGetFontsManager().SetPauseOnTTFontsReplacement(true);
 	g_particlesMgr.PaintStringParticles(K_PART_LAYER_NORMAL);
-	UTGetFontsManager().SetPauseOnTTFontsReplacement(false);
 	m_pSprite->Flush();
 
 	//--- closest touchable and cover icons ---
@@ -8650,7 +8648,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 				{
 					//RECTXYWH recttemp(vpos.x - barlen / 2.0f, activ->bbox_exported.vMax.y + 4, barlen, 8);
 					RECTXYWH recttemp(activ->pTarget->pos.xy_proj.x - barlen / 2.0f, activ->pTarget->bbox.vMax.y + 4, barlen, 8);
-					CtrlMgrDrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
+					GUIUtils::DrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
 				}
 			}
 			//paint interact icon at the end

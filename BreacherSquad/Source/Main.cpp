@@ -61,12 +61,12 @@ CMouseData					g_mouse;								// Mouse data, global
 CParticlesManager			g_particlesMgr; 
 ///--- Fonts ---
 //fonts pointers
-CTexturedFont				*g_font12wow;
-CTexturedFont				*g_font10b1, *g_font10bs1;
-CTexturedFont				*g_font8b1, *g_font8bs1;
-CTexturedFont				*g_font9b1;
-CTexturedFont				*g_font6n1, *g_font6ns1, *g_font6nc1;
-CTexturedFont				*g_font5n1, *g_font5n2, *g_font5ns2;
+CTexFont				*g_font12wow;
+CTexFont				*g_font10b1, *g_font10bs1;
+CTexFont				*g_font8b1, *g_font8bs1;
+CTexFont				*g_font9b1;
+CTexFont				*g_font6n1, *g_font6ns1, *g_font6nc1;
+CTexFont				*g_font5n1, *g_font5n2, *g_font5ns2;
 
 CTimersArray				g_timers(3000, 10);					//Timers array
 
@@ -772,7 +772,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	UTimgui().OnCreateDevice(pDevice, pBBDesc);
 	V_OP_RETHR(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(__Painter().OnCreateDevice(pDevice, pBBDesc));
-	V_RETURN(UTGetFontsManager().OnCreateDevice(pDevice, pBBDesc));
+	V_RETURN(__TexFonts().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_level.OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_particlesMgr.OnCreateDevice(pDevice, pBBDesc));
@@ -852,7 +852,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	UTGetTTFManager().OnResetDevice(pDevice, pBBDesc);
 
-	V_RETURN(UTGetFontsManager().OnResetDevice(pDevice, pBBDesc));
+	V_RETURN(__TexFonts().OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_level.OnResetDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_particlesMgr.OnResetDevice(pDevice, pBBDesc));
@@ -868,10 +868,8 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	//--- set Sprite painter class pointer ---
 	g_level.SetSpritePtr(g_pGameSprite);
 	g_particlesMgr.SetSpritePtr(g_pGameSprite);
-	CTexturedFont::SetGlobalSpritePtr(g_pGameSprite);
 	CSprite::SetGlobalSpritePtr(g_pGameSprite, &__Painter());
 	CTTFontsManager::SetGlobalSpritePtr(g_pGameSprite);
-	UTGetGUI().SetSpritePtr(g_pGameSprite);
 	g_mainMenu.SetSpritePtr(g_pGameSprite);
 
 	///--- write resolution string for use in options screen ---
@@ -925,7 +923,7 @@ void CALLBACK OnLostDevice(void)
 	UTGetShaderManager().OnLostDevice();
 	__Painter().OnLostDevice();
 
-	UTGetFontsManager().OnLostDevice();
+	__TexFonts().OnLostDevice();
 	UTGetGUI().OnLostDevice();
 	//because the render targets and handled globally and are changing in size depending on screen resolution we just release them in OnLostDevice and re-create them in OnResetDevice
 	//#TODO: RTs don't change so we should not deallocate them
@@ -966,7 +964,7 @@ void CALLBACK OnDestroyDevice(void)
 	UTGetShaderManager().OnDestroyDevice();
 	__Painter().OnDestroyDevice();
 	UTGetTTFManager().OnDestroyDevice();
-	UTGetFontsManager().OnDestroyDevice();
+	__TexFonts().OnDestroyDevice();
 	UTGetGUI().OnDestroyDevice();
 	g_level.OnDestroyDevice();
 	g_editor.OnDestroyDevice();
@@ -2295,38 +2293,6 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			break;
 
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
-			case VK_F7:
-			{
-				g_font12wow->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTApp().g_cam480hScreen);
-				g_font10b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTApp().g_cam480hScreen);
-				g_font10bs1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTApp().g_cam480hScreen);
-				g_font9b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTApp().g_cam480hScreen);
-				g_font8b1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTApp().g_cam480hScreen);
-				g_font8bs1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ30.textHash), &UTApp().g_cam480hScreen);
-				g_font6n1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
-				g_font6ns1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
-				g_font6nc1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
-				g_font5n1->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
-				g_font5n2->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
-				g_font5ns2->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ20.textHash), &UTApp().g_cam480hScreen);
-			}
-			break;
-			case VK_F8:
-			{
-				g_font12wow->SetFontReplacementTTF(null);
-				g_font10b1->SetFontReplacementTTF(null);
-				g_font10bs1->SetFontReplacementTTF(null);
-				g_font9b1->SetFontReplacementTTF(null);
-				g_font8b1->SetFontReplacementTTF(null);
-				g_font8bs1->SetFontReplacementTTF(null);
-				g_font6n1->SetFontReplacementTTF(null);
-				g_font6ns1->SetFontReplacementTTF(null);
-				g_font6nc1->SetFontReplacementTTF(null);
-				g_font5n1->SetFontReplacementTTF(null);
-				g_font5n2->SetFontReplacementTTF(null);
-				g_font5ns2->SetFontReplacementTTF(null);
-			}
-			break;
 #endif
 
 #ifdef ENABLE_CHAT_WINDOW

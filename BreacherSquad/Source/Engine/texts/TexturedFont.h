@@ -52,7 +52,7 @@
 #define FONT_MIN_ROW_HEIGHT 20
 
 //declarare clasa
-class CTexturedFontsManager;
+class CTexFontsManager;
 	
 //MODULE - folosit doar la incarcare
 class tfModule 
@@ -80,12 +80,12 @@ typedef struct _ntfFModule
 	int moduleH;
 } tfFModule;
 
-class CTexturedFont
+class CTexFont
 {
 private:
 	bool loaded;
 	static CStringsManager			*m_pStrManager;
-	static CTexturedFontsManager	*m_pFontsManager; 
+	static CTexFontsManager	*m_pFontsManager; 
 	static ID3DXSprite*              s_pSprite; //sprite folosit la desenare
 
 public:
@@ -118,11 +118,11 @@ public:
 	int rowHeight;  //marimea literelor majuscule
 	int spaceSize;     //marimea caracterului spatiu
 
-	CTexturedFont(void);
-	~CTexturedFont(void);
+	CTexFont(void);
+	~CTexFont(void);
 
 	//se cheama o singura data ca sa se lege de managerul de stringuri
-	static void SetManagersPtr(CStringsManager *strManager, CTexturedFontsManager *fontsManager);
+	static void SetManagersPtr(CStringsManager *strManager, CTexFontsManager *fontsManager);
 	static void SetGlobalSpritePtr(ID3DXSprite* pSprite);
 
 	//returns the row height
@@ -186,14 +186,14 @@ public:
 //***********************************************************
 // Textured Font Manager
 //***********************************************************
-class CTexturedFontsManager 
+class CTexFontsManager 
 {
 private:
 	LPDIRECT3DDEVICE9 pDevice;
 	CStringsManager *globalStrManager;
 public:
 	CTextureManager m_texManager;
-	CArray<CTexturedFont*> fonts;
+	CArray<CTexFont*> fonts;
 
 	void SetManagersPtr(CStringsManager *pStrManager);
 	//adauga cate un font din fisier XML
@@ -201,11 +201,11 @@ public:
 	int GetFontIdx(const CHAR* fontID);
 	int GetFontIdx(const WCHAR* fontID);
 
-	CTexturedFont* operator[] (const CHAR* fontID);
-	CTexturedFont* operator[] (const int fontIdx);
+	CTexFont* operator[] (const CHAR* fontID);
+	CTexFont* operator[] (const int fontIdx);
 
-	CTexturedFontsManager();
-	~CTexturedFontsManager();
+	CTexFontsManager();
+	~CTexFontsManager();
 
 	// Puts pause on using TTFonts (for text particles, small controller buttons, etc)
 	void SetPauseOnTTFontsReplacement(bool bPaused);
@@ -220,5 +220,5 @@ public:
 };
 
 //declar singletonul
-CTexturedFontsManager& UTGetFontsManager();
+CTexFontsManager& __TexFonts();
 

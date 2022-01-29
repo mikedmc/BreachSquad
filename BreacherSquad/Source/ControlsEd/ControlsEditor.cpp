@@ -352,9 +352,9 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			// first animation will be the empty animation or not set. Index is -1
 			// not set will be the first
 			arrFonts.push_back("NOT SET");
-			for ( int jj = 0; jj < UTGetFontsManager().fonts.Count(); jj++ )
+			for ( int jj = 0; jj < __TexFonts().fonts.Count(); jj++ )
 			{
-				CTexturedFont* font = UTGetFontsManager().fonts.GetAt( jj );
+				CTexFont* font = __TexFonts().fonts.GetAt( jj );
 				char strName[ MAX_PATH ];
 				wcstombs( strName, font->shFontName.text, MAX_PATH );
 				arrFonts.push_back( strName );
@@ -686,7 +686,7 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 							{
 								int intVal = _wtoi(propertyValue);
 								if (intVal >= 0 && wcscmp(propertyValue, L"_EMPTY_") != 0)
-									StringCchPrintf(propertyValue, MAX_PATH, L"%s", UTGetFontsManager().fonts[_wtoi(propertyValue)]->shFontName.text);
+									StringCchPrintf(propertyValue, MAX_PATH, L"%s", __TexFonts().fonts[_wtoi(propertyValue)]->shFontName.text);
 								else
 									StringCchPrintf(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
 							}
@@ -1443,7 +1443,9 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.2f, 0.2f, 1.0f));
 		if (ImGui::Button("Save All", ImVec2(80, 0)))
 		{
-			SaveXML(UTGetGUI().loadedFile);
+			WCHAR xmlpath[ MAX_PATH ];
+			FileManager::GetMediaPath( L"media/interfaces/interfaces.xml", xmlpath, true);
+			SaveXML(xmlpath);
 		}
 		ImGui::PopStyleColor(2);
 

@@ -1,22 +1,20 @@
 #include "dxstdafx.h"
 
 //static fn
-CSpriteCollection* CControl::m_pSprMgr = NULL;
-CTexturedFontsManager* CControl::m_pFontsMgr = NULL;
+CSpriteCollection* CControl::m_pSprCol = nullptr;
 
 //controls types
 //params default ID,X,Y,W,H,inflate. 
 enum EControlType {
-	CCTRL_TYPE_WINDOW = 0, 
-	CCTRL_TYPE_FRAME,	
+	CCTRL_TYPE_WINDOW = 0,
+	CCTRL_TYPE_FRAME,
 	CCTRL_TYPE_BUTTON,						//params: fHoverPercent, nMsgParam - nMsgParam is sent to handler for processing
-	CCTRL_TYPE_LABEL,	
-	CCTRL_TYPE_BLINKING_LABEL,	
+	CCTRL_TYPE_LABEL,
+	CCTRL_TYPE_BLINKING_LABEL,
 	CCTRL_TYPE_CHECKBOX,
-	CCTRL_TYPE_SLIDER,	
+	CCTRL_TYPE_SLIDER,
 	CCTRL_TYPE_INPUTBOX,
 	CCTRL_TYPE_TEXTBOX,
-	CCTRL_TYPE_PAINTEDBUTTON,
 	CCTRL_TYPE_ANIMATION,
 	CCTRL_TYPE_DROPDOWN,					//single string, formatted with \n
 	CCTRL_TYPE_LISTBOX,						//(special for usernames)
@@ -25,7 +23,7 @@ enum EControlType {
 	CCTRL_TYPE_SCROLLMENU,					//menu with scroll. On selection sends INDEX STRING for selected string
 	CCTRL_TYPE_WIDEBAR,						//screen wide band for level name (2 frames h tiling: border and filler)
 	CCTRL_TYPE_FILLING_STARS,				//3 filling stars. nStars = number of filled stars
-	
+
 	CCTRL_TYPE_SDL_KEYREADER,				//control that reads scancode SDL and shows the name of the pressed key
 	CCTRL_TYPE_LIST_SELECTOR,				// Shows a list (no pages) (\n formatted string). second string is right aligned. permits selection
 	CCTRL_TYPE_LIST_SELECTOR_TRUETYPE,		// Paged list, TT fonts. params: nSelectedIdx, nOptionsCnt
@@ -54,7 +52,6 @@ CStringHash EControlTypeNames[] =
 	L"Slider",
 	L"Inputbox",
 	L"Textbox",
-	L"PaintedButton",
 	L"Animation",
 	L"Dropdown",
 	L"Listbox",
@@ -75,13 +72,12 @@ CStringHash EControlTypeNames[] =
 	"SliderPages"
 };
 
-void CControl::SetManagersPtr(CTexturedFontsManager* fontsManager, CSpriteCollection* sprCol)
+void CControl::SetManagersPtr( CSpriteCollection* sprCol )
 {
-	m_pFontsMgr = fontsManager;
-	m_pSprMgr = sprCol;
+	m_pSprCol = sprCol;
 }
 
-CControl::CControl(const WCHAR* typeName)
+CControl::CControl( const WCHAR* typeName )
 {
 	statusFlags = 0;
 	bDisabled = false;
@@ -90,11 +86,11 @@ CControl::CControl(const WCHAR* typeName)
 	bCanHaveFocus = false;
 	bShowFocusCursor = true;
 	paramsDict.DeleteAll();
-	bbox.Set(0, 0, 0, 0);
-	type = (EControlType)GetListIndexByName(typeName, EControlTypeNames, CCTRL_TYPES_COUNT);
+	bbox.Set( 0, 0, 0, 0 );
+	type = ( EControlType ) GetListIndexByName( typeName, EControlTypeNames, CCTRL_TYPES_COUNT );
 }
 
-CControl::CControl(CControl* ctrl)
+CControl::CControl( CControl* ctrl )
 {
 	*this = *ctrl;
 	this->paramsDict = ctrl->paramsDict;
@@ -109,28 +105,28 @@ RECTXYWH CControl::GetBBox()
 	return bbox;
 }
 
-void CControl::OnFocused(int nFocusDirection)
+void CControl::OnFocused( int nFocusDirection )
 {
-	switch (type)
+	switch ( type )
 	{
 		case CCTRL_TYPE_LIST_SELECTOR_TRUETYPE:
 		case CCTRL_TYPE_LIST_SELECTOR:
 		{
-			if (nFocusDirection == 0)
+			if ( nFocusDirection == 0 )
 				return;
 
-			bool bUserCanSelect = paramsDict.GetVariantByName(L"bUserCanSelect")->m_asBool;
-			int nOptionsCnt = paramsDict.GetVariantByName(L"nOptionsCnt")->m_asINT32;
+			bool bUserCanSelect = paramsDict.GetVariantByName( L"bUserCanSelect" )->m_asBool;
+			int nOptionsCnt = paramsDict.GetVariantByName( L"nOptionsCnt" )->m_asINT32;
 
-			if ((bUserCanSelect) && (nOptionsCnt > 0))
+			if ( ( bUserCanSelect ) && ( nOptionsCnt > 0 ) )
 			{
-				if (nFocusDirection > 0)
+				if ( nFocusDirection > 0 )
 				{
-					paramsDict.SetNamedVarINT32(L"nSelectedIdx", 0);
+					paramsDict.SetNamedVarINT32( L"nSelectedIdx", 0 );
 				}
 				else
 				{
-					paramsDict.SetNamedVarINT32(L"nSelectedIdx", nOptionsCnt - 1);
+					paramsDict.SetNamedVarINT32( L"nSelectedIdx", nOptionsCnt - 1 );
 				}
 			}
 		}
@@ -148,16 +144,16 @@ void CControl::Reset()
 	//generic params
 	paramsDict.DeleteAll();
 
-	bbox.Set(0, 0, 0, 0);
+	bbox.Set( 0, 0, 0, 0 );
 
 	statusFlags = 0;
-	bDisabled = false; 
+	bDisabled = false;
 	fDisabledPercent = 0.0f;
 	bVisible = true;
 	bCanHaveFocus = false;
 	bShowFocusCursor = true;
 
-	switch (type)
+	switch ( type )
 	{
 		case CCTRL_TYPE_CUSTOM_PAINT:
 		{
@@ -170,13 +166,13 @@ void CControl::Reset()
 			bCanHaveFocus = true;
 			bShowFocusCursor = true;
 
-			paramsDict.SetNamedVarINT32(L"nSelectedIdx", 0);
-			paramsDict.SetNamedVarINT32(L"nItemsCnt", 0); 
+			paramsDict.SetNamedVarINT32( L"nSelectedIdx", 0 );
+			paramsDict.SetNamedVarINT32( L"nItemsCnt", 0 );
 		}
 		break;
 		case CCTRL_TYPE_FILLING_STARS:
 		{
-			paramsDict.SetNamedVarFloat(L"fTimerStars", 0.0f);
+			paramsDict.SetNamedVarFloat( L"fTimerStars", 0.0f );
 		}
 		break;
 		case CCTRL_TYPE_LIST_SELECTOR_TRUETYPE:
@@ -185,11 +181,11 @@ void CControl::Reset()
 			bCanHaveFocus = true;
 			bShowFocusCursor = true;
 
-			paramsDict.SetNamedVarINT32(L"nPage", 0);
-			paramsDict.SetNamedVarINT32(L"nSelectedIdx", -1);
-			paramsDict.SetNamedVarINT32(L"nOptionsCnt", 0);
+			paramsDict.SetNamedVarINT32( L"nPage", 0 );
+			paramsDict.SetNamedVarINT32( L"nSelectedIdx", -1 );
+			paramsDict.SetNamedVarINT32( L"nOptionsCnt", 0 );
 			//can user select rows? on by default
-			paramsDict.SetNamedVarBool(L"bUserCanSelect", true);
+			paramsDict.SetNamedVarBool( L"bUserCanSelect", true );
 		}
 		break;
 		case CCTRL_TYPE_SCORESLIST_TRUETYPE:
@@ -203,17 +199,17 @@ void CControl::Reset()
 			bCanHaveFocus = true;
 			bShowFocusCursor = false;
 
-			paramsDict.SetNamedVarINT32(L"nPlayerOrdinal", -1);   //player ordinal (0 or 1)
-																
-			paramsDict.SetNamedVarINT32(L"nSelectedLine", 0);
-			paramsDict.SetNamedVarINT32(L"nSelectedPoint", 0);
+			paramsDict.SetNamedVarINT32( L"nPlayerOrdinal", -1 );   //player ordinal (0 or 1)
+
+			paramsDict.SetNamedVarINT32( L"nSelectedLine", 0 );
+			paramsDict.SetNamedVarINT32( L"nSelectedPoint", 0 );
 
 			//XP points
-			for (int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++)
+			for ( int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++ )
 			{
-				WCHAR strParamName[MAX_PATH];
-				StringCchPrintf(strParamName, MAX_PATH, L"spent_bar%d", ll); //values can be negative too
-				paramsDict.SetNamedVarINT32(strParamName, 0);
+				WCHAR strParamName[ MAX_PATH ];
+				StringCchPrintf( strParamName, MAX_PATH, L"spent_bar%d", ll ); //values can be negative too
+				paramsDict.SetNamedVarINT32( strParamName, 0 );
 			}
 		}
 		break;
@@ -222,37 +218,37 @@ void CControl::Reset()
 			bCanHaveFocus = true;
 			bShowFocusCursor = false;
 
-			paramsDict.SetNamedVarFloat(L"fSelectionCursor", 0.0f);
-			paramsDict.SetNamedVarINT32(L"nSelectedIdx", 0);
-			paramsDict.SetNamedVarINT32(L"nTextAlignFlags", 0);
-			paramsDict.SetNamedVarINT32(L"Vspacing", 20);
-			paramsDict.SetNamedVarINT32(L"disabledFlags", 0);
+			paramsDict.SetNamedVarFloat( L"fSelectionCursor", 0.0f );
+			paramsDict.SetNamedVarINT32( L"nSelectedIdx", 0 );
+			paramsDict.SetNamedVarINT32( L"nTextAlignFlags", 0 );
+			paramsDict.SetNamedVarINT32( L"Vspacing", 20 );
+			paramsDict.SetNamedVarINT32( L"disabledFlags", 0 );
 		}
 		break;
 		case CCTRL_TYPE_BUTTON:
 		{
 			bCanHaveFocus = true;
 
-			paramsDict.SetNamedVarFloat(L"fHoverPercent", 0.0f);
-			paramsDict.SetNamedVarINT32(L"nMsgParam", 0);
+			paramsDict.SetNamedVarFloat( L"fHoverPercent", 0.0f );
+			paramsDict.SetNamedVarINT32( L"nMsgParam", 0 );
 		}
 		break;
 		case CCTRL_TYPE_BLINKING_LABEL:
 		{
-			paramsDict.SetNamedVarINT32(L"nTextAlignFlags", 0);
-			paramsDict.SetNamedVarFloat(L"fTimer", 0.0f);
+			paramsDict.SetNamedVarINT32( L"nTextAlignFlags", 0 );
+			paramsDict.SetNamedVarFloat( L"fTimer", 0.0f );
 		}
 		break;
 		case CCTRL_TYPE_SDL_KEYREADER:
 		{
-			paramsDict.SetNamedVarString(L"sKeyName", L"?");
+			paramsDict.SetNamedVarString( L"sKeyName", L"?" );
 			//tinem minte selectia anterioara ca sa vedem cand se schimba
-			paramsDict.SetNamedVarINT32(L"nSDLscancode_old", -1);
+			paramsDict.SetNamedVarINT32( L"nSDLscancode_old", -1 );
 		}
 		break;
 		case CCTRL_TYPE_LABEL:
 		{
-			paramsDict.SetNamedVarINT32(L"nTextAlignFlags", 0);
+			paramsDict.SetNamedVarINT32( L"nTextAlignFlags", 0 );
 		}
 		break;
 		case CCTRL_TYPE_NET_VOTE:
@@ -263,59 +259,51 @@ void CControl::Reset()
 		{
 		}
 		break;
-		case CCTRL_TYPE_PAINTEDBUTTON:
-		{
-			bCanHaveFocus = true;
-
-			paramsDict.SetNamedVarFloat(L"fHoverPercent", 0.0f);
-			paramsDict.SetNamedVarINT32(L"nFrameIdx", 0);
-		}
-		break;
 		case CCTRL_TYPE_SLIDER:
 		{
 			bCanHaveFocus = true;
 
-			paramsDict.SetNamedVarFloat(L"fSlidePercent", 0.0f);
+			paramsDict.SetNamedVarFloat( L"fSlidePercent", 0.0f );
 		}
 		break;
 		case CCTRL_TYPE_SLIDER_PAGES:
 		{
 			bCanHaveFocus = true;
 
-			paramsDict.SetNamedVarINT32(L"nPage", 0);
+			paramsDict.SetNamedVarINT32( L"nPage", 0 );
 		}
 		break;
 		case CCTRL_TYPE_CHECKBOX:
 		{
 			bCanHaveFocus = true;
 
-			paramsDict.SetNamedVarBool(L"bChecked", false);
-			paramsDict.SetNamedVarFloat(L"fHoverPercent", 0.0f);
+			paramsDict.SetNamedVarBool( L"bChecked", false );
+			paramsDict.SetNamedVarFloat( L"fHoverPercent", 0.0f );
 		}
 		break;
 		case CCTRL_TYPE_PROGRESS_BAR:
 		{
-			paramsDict.SetNamedVarFloat(L"fProgress", 100.0f);
+			paramsDict.SetNamedVarFloat( L"fProgress", 100.0f );
 		}
 		break;
 		case CCTRL_TYPE_XP_BAR:
 		{
 			//fProgress is used to interpolate from oldXP to newXP (from negative to 0 it just waits)
-			paramsDict.SetNamedVarFloat(L"fProgress", -1.0f);
+			paramsDict.SetNamedVarFloat( L"fProgress", -1.0f );
 		}
 		break;
 		case CCTRL_TYPE_INPUTBOX:
 		{
 			bCanHaveFocus = true;
 
-			paramsDict.SetNamedVarINT32(L"nTextLen", 5);
-			paramsDict.SetNamedVarString(L"sInputText", L"Player");
+			paramsDict.SetNamedVarINT32( L"nTextLen", 5 );
+			paramsDict.SetNamedVarString( L"sInputText", L"Player" );
 		}
 		break;
 		case CCTRL_TYPE_LISTBOX:
 		{
-			paramsDict.SetNamedVarINT32(L"nSelIdx", 0);
-			paramsDict.SetNamedVarINT32(L"nSelIdxMax", 0);
+			paramsDict.SetNamedVarINT32( L"nSelIdx", 0 );
+			paramsDict.SetNamedVarINT32( L"nSelIdxMax", 0 );
 		}
 		break;
 	}
@@ -323,7 +311,7 @@ void CControl::Reset()
 
 void CControl::Initialize()
 {
-	switch (type)
+	switch ( type )
 	{
 		case CCTRL_TYPE_SCORESLIST_TRUETYPE:
 		{
@@ -334,32 +322,32 @@ void CControl::Initialize()
 			//save number of options now
 			int stringIdx = -1;
 			int fontIdx = -1;
-			CVariantComplex * var = paramsDict.GetVariantByName(L"stringID");
-			if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+			CVariantComplex * var = paramsDict.GetVariantByName( L"stringID" );
+			if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
 			{
 				stringIdx = var->m_asINT32;
 			}
-			var = paramsDict.GetVariantByName(L"fontID");
-			if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+			var = paramsDict.GetVariantByName( L"fontID" );
+			if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
 			{
 				fontIdx = var->m_asINT32;
 			}
 
-			if ((stringIdx >= 0) && (fontIdx >= 0))
+			if ( ( stringIdx >= 0 ) && ( fontIdx >= 0 ) )
 			{
-				int optcnt = __Texts().GetSubstringsCount(stringIdx, L'\n');
-				int rowh = (m_pFontsMgr->fonts[fontIdx]->rowHeight + m_pFontsMgr->fonts[fontIdx]->rowSpacing);
+				int optcnt = __Texts().GetSubstringsCount( stringIdx, L'\n' );
+				int rowh = ( __TexFonts().fonts[ fontIdx ]->rowHeight + __TexFonts().fonts[ fontIdx ]->rowSpacing );
 				//save options count
-				paramsDict.SetNamedVarINT32(L"nRowHeight", rowh);
-				paramsDict.SetNamedVarINT32(L"nOptionsCnt", optcnt);
+				paramsDict.SetNamedVarINT32( L"nRowHeight", rowh );
+				paramsDict.SetNamedVarINT32( L"nOptionsCnt", optcnt );
 			}
 			else
 			{
-				paramsDict.SetNamedVarINT32(L"nRowHeight", 10);
-				paramsDict.SetNamedVarINT32(L"nOptionsCnt", 1);
+				paramsDict.SetNamedVarINT32( L"nRowHeight", 10 );
+				paramsDict.SetNamedVarINT32( L"nOptionsCnt", 1 );
 			}
-			paramsDict.SetNamedVarINT32(L"nSelectedIdx", -1);
-			paramsDict.SetNamedVarBool(L"bUserCanSelect", true);
+			paramsDict.SetNamedVarINT32( L"nSelectedIdx", -1 );
+			paramsDict.SetNamedVarBool( L"bUserCanSelect", true );
 		}
 		break;
 		case CCTRL_TYPE_LIST_SELECTOR_TRUETYPE:
@@ -367,35 +355,35 @@ void CControl::Initialize()
 			//save number of options now
 			int stringIdx = -1;
 			int fontIdx = -1;
-			CVariantComplex * var = paramsDict.GetVariantByName(L"stringID");
-			if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+			CVariantComplex * var = paramsDict.GetVariantByName( L"stringID" );
+			if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
 			{
 				stringIdx = var->m_asINT32;
 			}
 
-			if (stringIdx >= 0)
+			if ( stringIdx >= 0 )
 			{
-				CTTFont* pTTFont = UTGetTTFManager().GetFont(shTTFID_SZ20.textHash);
+				CTTFont* pTTFont = UTGetTTFManager().GetFont( shTTFID_SZ20.textHash );
 				int rowh = 10;
-				if ((pTTFont != null) && (pTTFont->pFont))
+				if ( ( pTTFont != null ) && ( pTTFont->pFont ) )
 				{
 					D3DXFONT_DESCW descW;
-					pTTFont->pFont->GetDesc(&descW);
+					pTTFont->pFont->GetDesc( &descW );
 					rowh = descW.Height;
 				}
 
-				int optcnt = __Texts().GetSubstringsCount(stringIdx, L'\n');
-				paramsDict.SetNamedVarINT32(L"nRowHeight", rowh);
+				int optcnt = __Texts().GetSubstringsCount( stringIdx, L'\n' );
+				paramsDict.SetNamedVarINT32( L"nRowHeight", rowh );
 				//save options count
-				paramsDict.SetNamedVarINT32(L"nOptionsCnt", optcnt);
+				paramsDict.SetNamedVarINT32( L"nOptionsCnt", optcnt );
 			}
 			else
 			{
-				paramsDict.SetNamedVarINT32(L"nRowHeight", 10);
-				paramsDict.SetNamedVarINT32(L"nOptionsCnt", 0);
+				paramsDict.SetNamedVarINT32( L"nRowHeight", 10 );
+				paramsDict.SetNamedVarINT32( L"nOptionsCnt", 0 );
 			}
-			paramsDict.SetNamedVarINT32(L"nSelectedIdx", -1);
-			paramsDict.SetNamedVarBool(L"bUserCanSelect", true);
+			paramsDict.SetNamedVarINT32( L"nSelectedIdx", -1 );
+			paramsDict.SetNamedVarBool( L"bUserCanSelect", true );
 		}
 		break;
 
@@ -406,12 +394,12 @@ void CControl::Initialize()
 
 		case CCTRL_TYPE_CUSTOM_PAINT:
 		{
-			CVariantComplex* cvc = paramsDict.GetVariantByName(L"subType");
-			if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
+			CVariantComplex* cvc = paramsDict.GetVariantByName( L"subType" );
+			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
 			{
 				//paints a frame from an animation in menus.bsx (used for drawing weapons animations)
 				//params: nAnimIdx, nFrameIdx
-				if (cvc->m_strArg.IsEqual(L"ST_MENUS_BSX_FRAME"))
+				if ( cvc->m_strArg.IsEqual( L"ST_MENUS_BSX_FRAME" ) )
 				{
 					bCanHaveFocus = false;
 					bShowFocusCursor = false;
@@ -421,7 +409,7 @@ void CControl::Initialize()
 	}
 }
 
-void CControl::Update(float dTime, float fTimeline)
+void CControl::Update( float dTime, float fTimeline )
 {
 	RECTXYWH BBox, BBox_inflated;
 	int inflate = 0; //cu cat apare mai mic sau mai mare grafica fata de bbox
@@ -432,11 +420,11 @@ void CControl::Update(float dTime, float fTimeline)
 	BBox = bbox;
 	BBox_inflated = bbox;
 
-	CVariantComplex* varInflate = paramsDict.GetVariantByName(L"inflate");
-	if (varInflate->m_type != CVariantComplex::K_ARGTYPE_NONE)
+	CVariantComplex* varInflate = paramsDict.GetVariantByName( L"inflate" );
+	if ( varInflate->m_type != CVariantComplex::K_ARGTYPE_NONE )
 	{
 		inflate = varInflate->m_asINT32;
-		if (inflate != 0)
+		if ( inflate != 0 )
 		{
 			BBox_inflated.x += inflate;
 			BBox_inflated.y += inflate;
@@ -445,32 +433,32 @@ void CControl::Update(float dTime, float fTimeline)
 		}
 	}
 
-	CVariantComplex* var = paramsDict.GetVariantByName(L"animID");
-	if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+	CVariantComplex* var = paramsDict.GetVariantByName( L"animID" );
+	if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
 	{
 		animIdx = var->m_asINT32;
 	}
-	var = paramsDict.GetVariantByName(L"fontID");
-	if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+	var = paramsDict.GetVariantByName( L"fontID" );
+	if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
 	{
 		fontIdx = var->m_asINT32;
 	}
-	var = paramsDict.GetVariantByName(L"stringID");
-	if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+	var = paramsDict.GetVariantByName( L"stringID" );
+	if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
 	{
 		stringIdx = var->m_asINT32;
 	}
 	//disabled percentage
-	if (bDisabled)
+	if ( bDisabled )
 	{
-		inc_limit(fDisabledPercent, 10.0f * dTime, 1.0f);
+		inc_limit( fDisabledPercent, 10.0f * dTime, 1.0f );
 	}
 	else
 	{
-		dec_limit(fDisabledPercent, 10.0f * dTime, 0.0f);
+		dec_limit( fDisabledPercent, 10.0f * dTime, 0.0f );
 	}
 
-	switch (type)
+	switch ( type )
 	{
 		case CCTRL_TYPE_ANIMATION:
 		{
@@ -478,223 +466,223 @@ void CControl::Update(float dTime, float fTimeline)
 		break;
 		case CCTRL_TYPE_CUSTOM_PAINT:
 		{
-			CVariantComplex* cvc = paramsDict.GetVariantByName(L"subType");
-			if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
+			CVariantComplex* cvc = paramsDict.GetVariantByName( L"subType" );
+			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
 			{
 			}
 		}
 		break;
 		case CCTRL_TYPE_DROPDOWN:
 		{
-			if (bDisabled)
+			if ( bDisabled )
 				break;
 
-			int nSelectedIdx = paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
-			int nItemsCnt = __Texts().GetSubstringsCount(stringIdx, L'\n');
+			int nSelectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
+			int nItemsCnt = __Texts().GetSubstringsCount( stringIdx, L'\n' );
 
 			RECTXYWH bbB = BBox; //bbox bar
 			//heads sizes
-			int w1 = m_pSprMgr->GetAFrameBBox(animIdx, 0).w;
-			int w2 = m_pSprMgr->GetAFrameBBox(animIdx, 2).w;
+			int w1 = m_pSprCol->GetAFrameBBox( animIdx, 0 ).w;
+			int w2 = m_pSprCol->GetAFrameBBox( animIdx, 2 ).w;
 			bbB.x += w1; bbB.w -= w1 + w2;
 
-			RECTXYWH bbL = m_pSprMgr->GetAFrameBBox(animIdx, 3); //buton stanga
+			RECTXYWH bbL = m_pSprCol->GetAFrameBBox( animIdx, 3 ); //buton stanga
 			bbL.x += BBox.x; bbL.y += BBox.CenterY();
 
-			RECTXYWH bbR = m_pSprMgr->GetAFrameBBox(animIdx, 4); //buton dreapta
+			RECTXYWH bbR = m_pSprCol->GetAFrameBBox( animIdx, 4 ); //buton dreapta
 			bbR.x += BBox.Right(); bbR.y += BBox.CenterY();
 
 			//tratam mai intai inputurile pe flaguri in cazul in care vin din handleCommand
 			int nSelectedIdxNew = nSelectedIdx;
 
 			//setam flaguri noi pentru frame-ul urmator
-			if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
+			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 			{
-				if ((PointInRect(&layer->mouseRelPos, &bbL)) & (nSelectedIdx > 0))
+				if ( ( PointInRect( &layer->mouseRelPos, &bbL ) ) & ( nSelectedIdx > 0 ) )
 				{
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 				}
-				else if ((PointInRect(&layer->mouseRelPos, &bbR)) && (nSelectedIdx < nItemsCnt - 1))
+				else if ( ( PointInRect( &layer->mouseRelPos, &bbR ) ) && ( nSelectedIdx < nItemsCnt - 1 ) )
 				{
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 				}
 			}
 
 			//--- efectuam actiunea in fn de flaguri si facem clear la flags ---
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
 			{
 				nSelectedIdxNew--;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDLEFT;
-				SND_PLAY(SNDIDX_CLICK);
+				SND_PLAY( SNDIDX_CLICK );
 			}
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
 			{
 				nSelectedIdxNew++;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDRIGHT;
-				SND_PLAY(SNDIDX_CLICK);
+				SND_PLAY( SNDIDX_CLICK );
 			}
 
 
-			CLAMP(nSelectedIdxNew, 0, nItemsCnt - 1);
+			CLAMP( nSelectedIdxNew, 0, nItemsCnt - 1 );
 
-			if (nSelectedIdxNew != nSelectedIdx)
+			if ( nSelectedIdxNew != nSelectedIdx )
 			{
 				nSelectedIdx = nSelectedIdxNew;
 
-				CEvent *nevent = new CEvent(CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED);
-				nevent->AddNamedArgUINT32(L"layerID", layer->ID.getHash());
-				CVariantComplex* lvar = paramsDict.GetVariantByName(L"ID");
-				if (lvar->m_type != CVariantComplex::K_ARGTYPE_NONE)
-					nevent->AddNamedArgUINT32(L"ctrlID", lvar->m_strArg.getHash());
+				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
+				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
+				if ( lvar->m_type != CVariantComplex::K_ARGTYPE_NONE )
+					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
-					nevent->AddNamedArgUINT32(L"ctrlID", 0);
+					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
 
 				//add new selection param
-				nevent->AddNamedArgINT32(L"nSelectedIdx", nSelectedIdx);
-				UTGetEventManager().QueueEvent(nevent);
+				nevent->AddNamedArgINT32( L"nSelectedIdx", nSelectedIdx );
+				UTGetEventManager().QueueEvent( nevent );
 			}
 
 			//refresh params
-			paramsDict.SetNamedVarINT32(L"nSelectedIdx", nSelectedIdx);
-			paramsDict.SetNamedVarINT32(L"nItemsCnt", nItemsCnt);
+			paramsDict.SetNamedVarINT32( L"nSelectedIdx", nSelectedIdx );
+			paramsDict.SetNamedVarINT32( L"nItemsCnt", nItemsCnt );
 		}
 		break;
 		case CCTRL_TYPE_FILLING_STARS:
 		{
-			int nStars = paramsDict.GetVariantByName(L"nStars")->m_asINT32;
-			float fTimer = paramsDict.GetVariantByName(L"fTimerStars")->m_asFloat;
-			
-			float fTimerOld = fTimer;
-			inc_limit(fTimer, dTime * 2.0f, (float)nStars);
+			int nStars = paramsDict.GetVariantByName( L"nStars" )->m_asINT32;
+			float fTimer = paramsDict.GetVariantByName( L"fTimerStars" )->m_asFloat;
 
-			if (floor(fTimerOld) != floor(fTimer))
+			float fTimerOld = fTimer;
+			inc_limit( fTimer, dTime * 2.0f, ( float ) nStars );
+
+			if ( floor( fTimerOld ) != floor( fTimer ) )
 			{
-				SND_PLAY(SNDIDX_STARHIT);
+				SND_PLAY( SNDIDX_STARHIT );
 				//generate particles
-				RECTXYWH starrect = m_pSprMgr->GetAFrameBBox(animIdx, 0);
-				D3DXVECTOR2 vStartPos(bbox.CenterX(), bbox.CenterY());
+				RECTXYWH starrect = m_pSprCol->GetAFrameBBox( animIdx, 0 );
+				D3DXVECTOR2 vStartPos( bbox.CenterX(), bbox.CenterY() );
 				vStartPos.x -= starrect.w;
-				vStartPos.x += starrect.w * floor(fTimerOld);
-				g_particlesMgr.GenerateStarEffect(vStartPos, K_PART_LAYER_CONTROLS_LIGHT);
+				vStartPos.x += starrect.w * floor( fTimerOld );
+				g_particlesMgr.GenerateStarEffect( vStartPos, K_PART_LAYER_CONTROLS_LIGHT );
 			}
 
 			//save timer
-			paramsDict.SetNamedVarFloat(L"fTimerStars", fTimer);
+			paramsDict.SetNamedVarFloat( L"fTimerStars", fTimer );
 		}
 		break;
 		case CCTRL_TYPE_XP_BAR:
 		{
-			int nOldVal = paramsDict.GetVariantByName(L"nOldValue")->m_asINT32;
-			int nNewVal = paramsDict.GetVariantByName(L"nNewValue")->m_asINT32;
-			float fProgress = paramsDict.GetVariantByName(L"fProgress")->m_asFloat;
-			if (nOldVal == nNewVal)
+			int nOldVal = paramsDict.GetVariantByName( L"nOldValue" )->m_asINT32;
+			int nNewVal = paramsDict.GetVariantByName( L"nNewValue" )->m_asINT32;
+			float fProgress = paramsDict.GetVariantByName( L"fProgress" )->m_asFloat;
+			if ( nOldVal == nNewVal )
 				fProgress = 1.0f;
 
 			float fProgressOld = fProgress;
-			int nCurrentVal_old = nOldVal + (int)floor(fProgressOld * (nNewVal - nOldVal));
-			int nCurrentLevel_old = App_GetXPLevel(nCurrentVal_old);
+			int nCurrentVal_old = nOldVal + ( int ) floor( fProgressOld * ( nNewVal - nOldVal ) );
+			int nCurrentLevel_old = App_GetXPLevel( nCurrentVal_old );
 
-			inc_limit(fProgress, dTime, 1.0f);
+			inc_limit( fProgress, dTime, 1.0f );
 			//save back timer
-			paramsDict.SetNamedVarFloat(L"fProgress", fProgress);
-			if (fProgress < 0.0f)
+			paramsDict.SetNamedVarFloat( L"fProgress", fProgress );
+			if ( fProgress < 0.0f )
 				break;
 
-			int nCurrentVal = nOldVal + (int)floor(fProgress * (nNewVal - nOldVal));
-			int nCurrentLevel = App_GetXPLevel(nCurrentVal);
+			int nCurrentVal = nOldVal + ( int ) floor( fProgress * ( nNewVal - nOldVal ) );
+			int nCurrentLevel = App_GetXPLevel( nCurrentVal );
 
 			//generate particles
-			if (nCurrentLevel > nCurrentLevel_old)
+			if ( nCurrentLevel > nCurrentLevel_old )
 			{
 				//chevron bbox
-				RECTXYWH rct = m_pSprMgr->GetAFrameBBox(animIdx, 8);
-				D3DXVECTOR2 vStartPos(bbox.x, bbox.y + bbox.h / 2);
+				RECTXYWH rct = m_pSprCol->GetAFrameBBox( animIdx, 8 );
+				D3DXVECTOR2 vStartPos( bbox.x, bbox.y + bbox.h / 2 );
 				vStartPos.x = vStartPos.x + rct.x + rct.w / 2;
 				vStartPos.y = vStartPos.y + rct.y + rct.h / 2;
-				g_particlesMgr.GenerateStarEffect(vStartPos, K_PART_LAYER_CONTROLS_LIGHT);
+				g_particlesMgr.GenerateStarEffect( vStartPos, K_PART_LAYER_CONTROLS_LIGHT );
 
-//				SND_PLAY(SNDIDX_UI_LEVELUP);
+				//				SND_PLAY(SNDIDX_UI_LEVELUP);
 			}
 		}
 		break;
 		case CCTRL_TYPE_SDL_KEYREADER:
 		{
-			int nKeyOld = paramsDict.GetVariantByName(L"nSDLscancode_old")->m_asINT32;
-			int nKeycode = paramsDict.GetVariantByName(L"nSDLscancode")->m_asINT32;
-			if (nKeycode != nKeyOld)
+			int nKeyOld = paramsDict.GetVariantByName( L"nSDLscancode_old" )->m_asINT32;
+			int nKeycode = paramsDict.GetVariantByName( L"nSDLscancode" )->m_asINT32;
+			if ( nKeycode != nKeyOld )
 			{
 				//update inner string
-				CHAR strKeys[MAX_PATH];
-				WCHAR wstrKeys[MAX_PATH];
-				StringCchPrintfA(strKeys, MAX_PATH, "%s", SDL_GetScancodeName((SDL_Scancode)nKeycode));
-				mbstowcs(wstrKeys, strKeys, MAX_PATH);
-				paramsDict.SetNamedVarString(L"sKeyName", wstrKeys);
+				CHAR strKeys[ MAX_PATH ];
+				WCHAR wstrKeys[ MAX_PATH ];
+				StringCchPrintfA( strKeys, MAX_PATH, "%s", SDL_GetScancodeName( ( SDL_Scancode ) nKeycode ) );
+				mbstowcs( wstrKeys, strKeys, MAX_PATH );
+				paramsDict.SetNamedVarString( L"sKeyName", wstrKeys );
 
 				//update old scancode
-				paramsDict.SetNamedVarINT32(L"nSDLscancode_old", nKeycode);
+				paramsDict.SetNamedVarINT32( L"nSDLscancode_old", nKeycode );
 
 				//send message selection changed
-				CEvent *nevent = new CEvent(CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED);
-				nevent->AddNamedArgUINT32(L"layerID", layer->ID.getHash());
-				CVariantComplex* lvar = paramsDict.GetVariantByName(L"ID");
-				if (lvar->m_type != CVariantComplex::K_ARGTYPE_NONE)
-					nevent->AddNamedArgUINT32(L"ctrlID", lvar->m_strArg.getHash());
+				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
+				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
+				if ( lvar->m_type != CVariantComplex::K_ARGTYPE_NONE )
+					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
-					nevent->AddNamedArgUINT32(L"ctrlID", 0);
+					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
 				//add custom data - trimit scancode
-				nevent->AddNamedArgINT32(L"nSDLscancode", nKeycode);
+				nevent->AddNamedArgINT32( L"nSDLscancode", nKeycode );
 				//pass on received params (added when showing the control)
-				nevent->AddNamedArgINT32(L"nKeyboardOrdinal", paramsDict.GetVariantByName(L"nKeyboardOrdinal")->m_asINT32);
-				nevent->AddNamedArgINT32(L"nSDLcommand", paramsDict.GetVariantByName(L"nSDLcommand")->m_asINT32);
+				nevent->AddNamedArgINT32( L"nKeyboardOrdinal", paramsDict.GetVariantByName( L"nKeyboardOrdinal" )->m_asINT32 );
+				nevent->AddNamedArgINT32( L"nSDLcommand", paramsDict.GetVariantByName( L"nSDLcommand" )->m_asINT32 );
 
-				UTGetEventManager().QueueEvent(nevent);
+				UTGetEventManager().QueueEvent( nevent );
 
 			}
 		}
 		break;
 		case CCTRL_TYPE_BLINKING_LABEL:
 		{
-			float fTimer = paramsDict.GetVariantByName(L"fTimer")->m_asFloat;
-			float fLoopTimer = paramsDict.GetVariantByName(L"timerLoop")->m_asFloat;
+			float fTimer = paramsDict.GetVariantByName( L"fTimer" )->m_asFloat;
+			float fLoopTimer = paramsDict.GetVariantByName( L"timerLoop" )->m_asFloat;
 
 			fTimer += dTime;
-			if (fTimer >= fLoopTimer)
+			if ( fTimer >= fLoopTimer )
 				fTimer = 0.0f;
 
-			paramsDict.SetNamedVarFloat(L"fTimer", fTimer);
+			paramsDict.SetNamedVarFloat( L"fTimer", fTimer );
 		}
 		break;
 		case CCTRL_TYPE_LIST_SELECTOR_TRUETYPE:
 		case CCTRL_TYPE_LIST_SELECTOR:
 		{
-			if (bDisabled)
+			if ( bDisabled )
 				break;
 
-			bool bUserCanSelect = paramsDict.GetVariantByName(L"bUserCanSelect")->m_asBool;
-			int	selectedIdx = paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
-			int optcnt = paramsDict.GetVariantByName(L"nOptionsCnt")->m_asINT32;
-			int nMinPage = paramsDict.GetVariantByName(L"nMinPage")->m_asINT32;
-			int nMaxPage = paramsDict.GetVariantByName(L"nMaxPage")->m_asINT32;
-			int nPage = paramsDict.GetVariantByName(L"nPage")->m_asINT32;
+			bool bUserCanSelect = paramsDict.GetVariantByName( L"bUserCanSelect" )->m_asBool;
+			int	selectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
+			int optcnt = paramsDict.GetVariantByName( L"nOptionsCnt" )->m_asINT32;
+			int nMinPage = paramsDict.GetVariantByName( L"nMinPage" )->m_asINT32;
+			int nMaxPage = paramsDict.GetVariantByName( L"nMaxPage" )->m_asINT32;
+			int nPage = paramsDict.GetVariantByName( L"nPage" )->m_asINT32;
 			int nOldPage = nPage;
 
 			int rowh = 10;
-			if(fontIdx >= 0)
-				rowh = (m_pFontsMgr->fonts[fontIdx]->rowHeight + m_pFontsMgr->fonts[fontIdx]->rowSpacing);
+			if ( fontIdx >= 0 )
+				rowh = ( __TexFonts().fonts[ fontIdx ]->rowHeight + __TexFonts().fonts[ fontIdx ]->rowSpacing );
 			//treat controller input
-			if (bUserCanSelect)
+			if ( bUserCanSelect )
 			{
-				if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDUP)
+				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDUP )
 				{
-					if (selectedIdx > 0)
+					if ( selectedIdx > 0 )
 					{
 						selectedIdx--;
 						statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDUP;
 					}
 				}
-				if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDDOWN)
+				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDDOWN )
 				{
-					if (selectedIdx < optcnt - 1)
+					if ( selectedIdx < optcnt - 1 )
 					{
 						selectedIdx++;
 						statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDDOWN;
@@ -702,96 +690,96 @@ void CControl::Update(float dTime, float fTimeline)
 				}
 			}
 			//page shuffling
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
 			{
 				nPage--;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDLEFT;
 			}
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
 			{
 				nPage++;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 			}
 
-			RECTXYWH bbL = m_pSprMgr->GetAFrameBBox(ANM_CONTROLS_SPR_ARROWS3, 0); //left
+			RECTXYWH bbL = m_pSprCol->GetAFrameBBox( ANM_CONTROLS_SPR_ARROWS3, 0 ); //left
 			bbL.x += BBox.x; bbL.y += BBox.CenterY();
 
-			RECTXYWH bbR = m_pSprMgr->GetAFrameBBox(ANM_CONTROLS_SPR_ARROWS3, 2); //right
+			RECTXYWH bbR = m_pSprCol->GetAFrameBBox( ANM_CONTROLS_SPR_ARROWS3, 2 ); //right
 			bbR.x += BBox.Right(); bbR.y += BBox.CenterY();
 
-			if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
+			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 			{
-				if (PointInRect(&layer->mouseRelPos, &BBox_inflated))
+				if ( PointInRect( &layer->mouseRelPos, &BBox_inflated ) )
 				{
 					//request focus
-					layer->FocusControl(this);
+					layer->FocusControl( this );
 
-					if (bUserCanSelect)
+					if ( bUserCanSelect )
 					{
-						int selMouse = (layer->mouseRelPos.y - BBox_inflated.y) / rowh;
-						if (selectedIdx == selMouse) //already selected, engage
+						int selMouse = ( layer->mouseRelPos.y - BBox_inflated.y ) / rowh;
+						if ( selectedIdx == selMouse ) //already selected, engage
 						{
 							statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 						}
 						//reinforce selection
 						selectedIdx = selMouse;
-						CLAMP(selectedIdx, 0, optcnt - 1);
+						CLAMP( selectedIdx, 0, optcnt - 1 );
 					}
 				}
 				//scroll arrows
-				if (PointInRect(&layer->mouseRelPos, &bbL))
+				if ( PointInRect( &layer->mouseRelPos, &bbL ) )
 				{
-					SND_PLAY(SNDIDX_CLICK);
+					SND_PLAY( SNDIDX_CLICK );
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 				}
-				else if (PointInRect(&layer->mouseRelPos, &bbR))
+				else if ( PointInRect( &layer->mouseRelPos, &bbR ) )
 				{
-					SND_PLAY(SNDIDX_CLICK);
+					SND_PLAY( SNDIDX_CLICK );
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 				}
 			}
 
-			CLAMP(nPage, nMinPage, nMaxPage);
+			CLAMP( nPage, nMinPage, nMaxPage );
 
 			//changed page
-			if (nPage != nOldPage)
+			if ( nPage != nOldPage )
 			{
-				CEvent *nevent = new CEvent(CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_PAGE_CHANGED);
-				nevent->AddNamedArgUINT32(L"layerID", layer->ID.getHash());
-				CVariantComplex* lvar = paramsDict.GetVariantByName(L"ID");
-				if (lvar->m_type != CVariantComplex::K_ARGTYPE_NONE)
-					nevent->AddNamedArgUINT32(L"ctrlID", lvar->m_strArg.getHash());
+				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_PAGE_CHANGED );
+				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
+				if ( lvar->m_type != CVariantComplex::K_ARGTYPE_NONE )
+					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
-					nevent->AddNamedArgUINT32(L"ctrlID", 0);
+					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
 
 				//add new selection param
-				nevent->AddNamedArgINT32(L"nPageIdx", nPage);
-				nevent->AddNamedArgINT32(L"nOldIdx", nOldPage);
-				UTGetEventManager().QueueEvent(nevent);
+				nevent->AddNamedArgINT32( L"nPageIdx", nPage );
+				nevent->AddNamedArgINT32( L"nOldIdx", nOldPage );
+				UTGetEventManager().QueueEvent( nevent );
 			}
 
 			//selecting something with fire control 
-			if ((statusFlags & CCTRL_STATUS_FLAG_CLICKED) && (bUserCanSelect))
+			if ( ( statusFlags & CCTRL_STATUS_FLAG_CLICKED ) && ( bUserCanSelect ) )
 			{
-				int	baseIndex = paramsDict.GetVariantByName(L"nBaseIndex")->m_asINT32;
+				int	baseIndex = paramsDict.GetVariantByName( L"nBaseIndex" )->m_asINT32;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
 
-				CEvent *nevent = new CEvent(CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED);
-				nevent->AddNamedArgUINT32(L"layerID", layer->ID.getHash());
-				CVariantComplex* lvar = paramsDict.GetVariantByName(L"ID");
-				if (lvar->m_type != CVariantComplex::K_ARGTYPE_NONE)
-					nevent->AddNamedArgUINT32(L"ctrlID", lvar->m_strArg.getHash());
+				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
+				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
+				if ( lvar->m_type != CVariantComplex::K_ARGTYPE_NONE )
+					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
-					nevent->AddNamedArgUINT32(L"ctrlID", 0);
+					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
 
 				//add new selection param
-				nevent->AddNamedArgINT32(L"nSelectedIdx", selectedIdx + baseIndex);
-				nevent->AddNamedArgINT32(L"nPageIdx", nPage);
-				UTGetEventManager().QueueEvent(nevent);
+				nevent->AddNamedArgINT32( L"nSelectedIdx", selectedIdx + baseIndex );
+				nevent->AddNamedArgINT32( L"nPageIdx", nPage );
+				UTGetEventManager().QueueEvent( nevent );
 			}
 
-			paramsDict.SetNamedVarINT32(L"nSelectedIdx", selectedIdx);
-			paramsDict.SetNamedVarINT32(L"nPage", nPage);
+			paramsDict.SetNamedVarINT32( L"nSelectedIdx", selectedIdx );
+			paramsDict.SetNamedVarINT32( L"nPage", nPage );
 		}
 		break;
 
@@ -802,117 +790,117 @@ void CControl::Update(float dTime, float fTimeline)
 
 		case CCTRL_TYPE_PLAYER_UPGRADE_CONTROL:
 		{
-			int nPlayerOrdinal = paramsDict.GetVariantByName(L"nPlayerOrdinal")->m_asINT32;
-			if ((nPlayerOrdinal < 0) || (nPlayerOrdinal > 1))
+			int nPlayerOrdinal = paramsDict.GetVariantByName( L"nPlayerOrdinal" )->m_asINT32;
+			if ( ( nPlayerOrdinal < 0 ) || ( nPlayerOrdinal > 1 ) )
 				break;
-			int nPlayerClass = (int)g_playerSelScr.m_arrPlayers[nPlayerOrdinal].eType;
-			
+			int nPlayerClass = ( int ) g_playerSelScr.m_arrPlayers[ nPlayerOrdinal ].eType;
+
 			//compute local XP points
-			int nXPPointsReal = App_GetAvailableXPPoints((EPSSPlayerClass)nPlayerClass); //real number of XP points to spend
+			int nXPPointsReal = App_GetAvailableXPPoints( ( EPSSPlayerClass ) nPlayerClass ); //real number of XP points to spend
 			int nXPPointsLocal = nXPPointsReal;
-			int nSpentPoints[K_PSS_UPGRADE_BARS_CNT];
-			for (int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++)
+			int nSpentPoints[ K_PSS_UPGRADE_BARS_CNT ];
+			for ( int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++ )
 			{
-				WCHAR strParamName[MAX_PATH];
-				StringCchPrintf(strParamName, MAX_PATH, L"spent_bar%d", ll);
-				nSpentPoints[ll] = paramsDict.GetVariantByName(strParamName)->m_asINT32;
+				WCHAR strParamName[ MAX_PATH ];
+				StringCchPrintf( strParamName, MAX_PATH, L"spent_bar%d", ll );
+				nSpentPoints[ ll ] = paramsDict.GetVariantByName( strParamName )->m_asINT32;
 				//compute local XP points
-				nXPPointsLocal -= nSpentPoints[ll];
+				nXPPointsLocal -= nSpentPoints[ ll ];
 			}
 
 			//compute number of points spent on own bars (first 2 are the team bars, always)
 			int nOwnBarsSpent = 0;
-			for (int ll = 2; ll < K_PSS_UPGRADE_BARS_CNT; ll++)
+			for ( int ll = 2; ll < K_PSS_UPGRADE_BARS_CNT; ll++ )
 			{
-				int nBarIdx = g_playerSelScr.arrItemsByClass[nPlayerClass].arrUpgradeBarsIdx[ll];
-				int nFilledReal = g_playerSelScr.m_arrPlayers[nPlayerOrdinal].arrUpgradeBarsPts[ll];
+				int nBarIdx = g_playerSelScr.arrItemsByClass[ nPlayerClass ].arrUpgradeBarsIdx[ ll ];
+				int nFilledReal = g_playerSelScr.m_arrPlayers[ nPlayerOrdinal ].arrUpgradeBarsPts[ ll ];
 				nOwnBarsSpent += nFilledReal;
 			}
 
-			int nCurrentLevel = App_GetXPLevel(g_playerSelScr.m_arrPlayers[nPlayerOrdinal].nPlayerXPPts);
+			int nCurrentLevel = App_GetXPLevel( g_playerSelScr.m_arrPlayers[ nPlayerOrdinal ].nPlayerXPPts );
 			int nTotalPoints = K_GAME_XPPOINTS_PER_XPLEVEL * nCurrentLevel;
 			int nTeamSpentPoints = nTotalPoints - nXPPointsReal - nOwnBarsSpent;
-			int nTeamSpentPointsLocal = nTeamSpentPoints + (nSpentPoints[0] + nSpentPoints[1]);
+			int nTeamSpentPointsLocal = nTeamSpentPoints + ( nSpentPoints[ 0 ] + nSpentPoints[ 1 ] );
 
 			//update available points
-			__Texts().SetString(STR_UNUSED_POINTS_VAL, L"%d", nXPPointsLocal);
+			__Texts().SetString( STR_UNUSED_POINTS_VAL, L"%d", nXPPointsLocal );
 
-			int	nSelectedLine = paramsDict.GetVariantByName(L"nSelectedLine")->m_asINT32;
-			int	nSelectedPoint = paramsDict.GetVariantByName(L"nSelectedPoint")->m_asINT32;
+			int	nSelectedLine = paramsDict.GetVariantByName( L"nSelectedLine" )->m_asINT32;
+			int	nSelectedPoint = paramsDict.GetVariantByName( L"nSelectedPoint" )->m_asINT32;
 			int nSelectedLine_old = nSelectedLine;
 			int nSelectedPoint_old = nSelectedPoint;
 
-			int nBarIdx = g_playerSelScr.arrItemsByClass[nPlayerClass].arrUpgradeBarsIdx[nSelectedLine];
-			int nDots = g_playerSelScr.m_arrUpgradeBars[nBarIdx]->nTotalPoints;
+			int nBarIdx = g_playerSelScr.arrItemsByClass[ nPlayerClass ].arrUpgradeBarsIdx[ nSelectedLine ];
+			int nDots = g_playerSelScr.m_arrUpgradeBars[ nBarIdx ]->nTotalPoints;
 			//int nFilledReal = g_userData[K_MEMID_UPGRADE_BAR_POINTS_START + g_playerSelScr.m_arrUpgradeBars[nBarIdx]->nMemSlot];
-			int nFilledReal = g_playerSelScr.m_arrPlayers[nPlayerOrdinal].arrUpgradeBarsPts[nSelectedLine];
-			int nFilledLocal = nFilledReal + nSpentPoints[nSelectedLine];
+			int nFilledReal = g_playerSelScr.m_arrPlayers[ nPlayerOrdinal ].arrUpgradeBarsPts[ nSelectedLine ];
+			int nFilledLocal = nFilledReal + nSpentPoints[ nSelectedLine ];
 
 			//tratare statusuri setate in receive input
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDUP)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDUP )
 			{
 				nSelectedLine--;
-				CLAMP(nSelectedLine, 0, K_PSS_UPGRADE_BARS_CNT - 1);
-				nBarIdx = g_playerSelScr.arrItemsByClass[nPlayerClass].arrUpgradeBarsIdx[nSelectedLine];
+				CLAMP( nSelectedLine, 0, K_PSS_UPGRADE_BARS_CNT - 1 );
+				nBarIdx = g_playerSelScr.arrItemsByClass[ nPlayerClass ].arrUpgradeBarsIdx[ nSelectedLine ];
 				//nFilledReal = g_userData[K_MEMID_UPGRADE_BAR_POINTS_START + g_playerSelScr.m_arrUpgradeBars[nBarIdx]->nMemSlot];
-				nFilledReal = g_playerSelScr.m_arrPlayers[nPlayerOrdinal].arrUpgradeBarsPts[nSelectedLine];
-				nFilledLocal = nFilledReal + nSpentPoints[nSelectedLine];
+				nFilledReal = g_playerSelScr.m_arrPlayers[ nPlayerOrdinal ].arrUpgradeBarsPts[ nSelectedLine ];
+				nFilledLocal = nFilledReal + nSpentPoints[ nSelectedLine ];
 				nSelectedPoint = nFilledLocal - 1;
 
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDUP;
 			}
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDDOWN)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDDOWN )
 			{
 				nSelectedLine++;
-				CLAMP(nSelectedLine, 0, K_PSS_UPGRADE_BARS_CNT - 1);
-				nBarIdx = g_playerSelScr.arrItemsByClass[nPlayerClass].arrUpgradeBarsIdx[nSelectedLine];
+				CLAMP( nSelectedLine, 0, K_PSS_UPGRADE_BARS_CNT - 1 );
+				nBarIdx = g_playerSelScr.arrItemsByClass[ nPlayerClass ].arrUpgradeBarsIdx[ nSelectedLine ];
 				//nFilledReal = g_userData[K_MEMID_UPGRADE_BAR_POINTS_START + g_playerSelScr.m_arrUpgradeBars[nBarIdx]->nMemSlot];
-				nFilledReal = g_playerSelScr.m_arrPlayers[nPlayerOrdinal].arrUpgradeBarsPts[nSelectedLine];
-				nFilledLocal = nFilledReal + nSpentPoints[nSelectedLine];
+				nFilledReal = g_playerSelScr.m_arrPlayers[ nPlayerOrdinal ].arrUpgradeBarsPts[ nSelectedLine ];
+				nFilledLocal = nFilledReal + nSpentPoints[ nSelectedLine ];
 				nSelectedPoint = nFilledLocal - 1;
 
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDDOWN;
 			}
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
 			{
 				nSelectedPoint--;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDLEFT;
 			}
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
 			{
 				nSelectedPoint++;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 			}
 			//mouse selection
-			if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
+			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 			{
-				RECTXYWH rectSz = m_pSprMgr->GetAFrameBBox(animIdx, 0);
+				RECTXYWH rectSz = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 				int nClassRows = 2, nTeamRows = 3; //how many rows for class properties (const)	vs team properties
 				int nGroupSpacing = 9; //spacing after class rows
 				int nTotalRows = nClassRows + nTeamRows;
-				assert(nClassRows + nTeamRows <= K_PSS_UPGRADE_BARS_CNT);
+				assert( nClassRows + nTeamRows <= K_PSS_UPGRADE_BARS_CNT );
 				//team group
-				RECTXYWH bbgroup(BBox_inflated.x, BBox_inflated.y, BBox_inflated.w, (rectSz.h + 1) * nClassRows + 1);
+				RECTXYWH bbgroup( BBox_inflated.x, BBox_inflated.y, BBox_inflated.w, ( rectSz.h + 1 ) * nClassRows + 1 );
 
-				for (int ll = 0; ll < nTotalRows; ll++)
+				for ( int ll = 0; ll < nTotalRows; ll++ )
 				{
 					RECTXYWH bbline = bbgroup;
 					bbline.h = rectSz.h;
-					bbline.y += ll * (rectSz.h + 1);
-					if (ll >= nClassRows)
+					bbline.y += ll * ( rectSz.h + 1 );
+					if ( ll >= nClassRows )
 						bbline.y += nGroupSpacing - 1;
-					bbline.Inflate(-2, -2);
+					bbline.Inflate( -2, -2 );
 					//start of bar
-					D3DXVECTOR2 vPos(bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY());
+					D3DXVECTOR2 vPos( bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY() );
 
-					if (PointInRect(&layer->mouseRelPos, &bbline))
+					if ( PointInRect( &layer->mouseRelPos, &bbline ) )
 					{
 						//request focus
-						layer->FocusControl(this);
+						layer->FocusControl( this );
 
 						int selMouseLine = ll;
-						int selMouseCol = int(layer->mouseRelPos.x + rectSz.w / 2.0f - vPos.x) / rectSz.w;
-						if ((nSelectedLine == selMouseLine) && (nSelectedPoint == selMouseCol)) //already selected, engage
+						int selMouseCol = int( layer->mouseRelPos.x + rectSz.w / 2.0f - vPos.x ) / rectSz.w;
+						if ( ( nSelectedLine == selMouseLine ) && ( nSelectedPoint == selMouseCol ) ) //already selected, engage
 						{
 							statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 						}
@@ -924,44 +912,44 @@ void CControl::Update(float dTime, float fTimeline)
 				}
 			}
 
-			CLAMP(nSelectedLine, 0, K_PSS_UPGRADE_BARS_CNT - 1);
-			CLAMP(nSelectedPoint, 0, nDots - 1);
+			CLAMP( nSelectedLine, 0, K_PSS_UPGRADE_BARS_CNT - 1 );
+			CLAMP( nSelectedPoint, 0, nDots - 1 );
 
 			//selection changed. Write text description:
-			if ((nSelectedLine != nSelectedLine_old) || (nSelectedPoint != nSelectedPoint_old))
+			if ( ( nSelectedLine != nSelectedLine_old ) || ( nSelectedPoint != nSelectedPoint_old ) )
 			{
-				int nlBarIdx = g_playerSelScr.arrItemsByClass[nPlayerClass].arrUpgradeBarsIdx[nSelectedLine];
-				int nStrIdx = g_playerSelScr.m_arrUpgradeBars[nlBarIdx]->m_arrPerks[nSelectedPoint].nStrIdx_desc;
-				if (nStrIdx == -1)
-					nStrIdx = g_playerSelScr.m_arrUpgradeBars[nlBarIdx]->nStrIdx_desc;
+				int nlBarIdx = g_playerSelScr.arrItemsByClass[ nPlayerClass ].arrUpgradeBarsIdx[ nSelectedLine ];
+				int nStrIdx = g_playerSelScr.m_arrUpgradeBars[ nlBarIdx ]->m_arrPerks[ nSelectedPoint ].nStrIdx_desc;
+				if ( nStrIdx == -1 )
+					nStrIdx = g_playerSelScr.m_arrUpgradeBars[ nlBarIdx ]->nStrIdx_desc;
 				//update perk description
-				if (nStrIdx >= 0)
-					__Texts().SetString_NoParse(STR_SELECTED_PERK_DESC_VAL, __Texts().strings[nStrIdx]->sText);
+				if ( nStrIdx >= 0 )
+					__Texts().SetString_NoParse( STR_SELECTED_PERK_DESC_VAL, __Texts().strings[ nStrIdx ]->sText );
 				else
-					__Texts().SetString_NoParse(STR_SELECTED_PERK_DESC_VAL, L" ");
+					__Texts().SetString_NoParse( STR_SELECTED_PERK_DESC_VAL, L" " );
 			}
 
 			//activated (by mouse or SELECT button)
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKED)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKED )
 			{
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
 				//ACTION!
 				int nDeltaPointsLocal = nSelectedPoint + 1 - nFilledLocal;
-				if (nDeltaPointsLocal > nXPPointsLocal)
+				if ( nDeltaPointsLocal > nXPPointsLocal )
 					nDeltaPointsLocal = nXPPointsLocal;
 				//click on top of stack, remove top (so you can remove the first dot too)
-				if ((nDeltaPointsLocal == 0) && (nFilledLocal > 0))
+				if ( ( nDeltaPointsLocal == 0 ) && ( nFilledLocal > 0 ) )
 					nDeltaPointsLocal = -1;
 				//don't remove more than what you added on the team bars
-				if (nSelectedLine <= 1)
+				if ( nSelectedLine <= 1 )
 				{
-					if ((nDeltaPointsLocal < 0) && (-nDeltaPointsLocal > nTeamSpentPointsLocal))
-						nDeltaPointsLocal = -max(0, nTeamSpentPointsLocal);
+					if ( ( nDeltaPointsLocal < 0 ) && ( -nDeltaPointsLocal > nTeamSpentPointsLocal ) )
+						nDeltaPointsLocal = -max( 0, nTeamSpentPointsLocal );
 				}
 
 				//change spent points
-				nSpentPoints[nSelectedLine] = nFilledLocal + nDeltaPointsLocal - nFilledReal;
-				SND_PLAY(SNDIDX_CLICK);
+				nSpentPoints[ nSelectedLine ] = nFilledLocal + nDeltaPointsLocal - nFilledReal;
+				SND_PLAY( SNDIDX_CLICK );
 				/*
 				//Can't delete points from the TEAM bars if they're already commited
 				if ((nFilledLocal + nDeltaPointsLocal - nFilledReal < 0) && (nSelectedLine <= 1))
@@ -987,31 +975,31 @@ void CControl::Update(float dTime, float fTimeline)
 				*/
 			}
 
-			paramsDict.SetNamedVarINT32(L"nSelectedLine", nSelectedLine);
-			paramsDict.SetNamedVarINT32(L"nSelectedPoint", nSelectedPoint);
-			for (int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++)
+			paramsDict.SetNamedVarINT32( L"nSelectedLine", nSelectedLine );
+			paramsDict.SetNamedVarINT32( L"nSelectedPoint", nSelectedPoint );
+			for ( int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++ )
 			{
-				WCHAR strParamName[MAX_PATH];
-				StringCchPrintf(strParamName, MAX_PATH, L"spent_bar%d", ll); //values can be negative too
-				paramsDict.SetNamedVarINT32(strParamName, nSpentPoints[ll]);
+				WCHAR strParamName[ MAX_PATH ];
+				StringCchPrintf( strParamName, MAX_PATH, L"spent_bar%d", ll ); //values can be negative too
+				paramsDict.SetNamedVarINT32( strParamName, nSpentPoints[ ll ] );
 			}
 		}
 		break;
 
 		case CCTRL_TYPE_SCROLLMENU:
 		{
-			float fSelectionCursor = paramsDict.GetVariantByName(L"fSelectionCursor")->m_asFloat;
-			int	selectedIdx = paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
-			int vSpacing = paramsDict.GetVariantByName(L"Vspacing")->m_asINT32;
-			int nDisabledFlags = paramsDict.GetVariantByName(L"disabledFlags")->m_asINT32;
+			float fSelectionCursor = paramsDict.GetVariantByName( L"fSelectionCursor" )->m_asFloat;
+			int	selectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
+			int vSpacing = paramsDict.GetVariantByName( L"Vspacing" )->m_asINT32;
+			int nDisabledFlags = paramsDict.GetVariantByName( L"disabledFlags" )->m_asINT32;
 
 			//tratare statusuri setate in receive input
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDDOWN)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDDOWN )
 			{
 				selectedIdx++;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDDOWN;
 			}
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDUP)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDUP )
 			{
 				selectedIdx--;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDUP;
@@ -1019,21 +1007,21 @@ void CControl::Update(float dTime, float fTimeline)
 
 			//aflu numarul maxim de optiuni
 			int optcnt = 0;
-			for (int ll = 0; ll < 10; ll++)
+			for ( int ll = 0; ll < 10; ll++ )
 			{
-				WCHAR varname[MAX_PATH];
-				StringCchPrintf(varname, MAX_PATH, L"StringID%d", ll);
-				CVariantComplex* vc = paramsDict.GetVariantByName(varname);
-				if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
+				WCHAR varname[ MAX_PATH ];
+				StringCchPrintf( varname, MAX_PATH, L"StringID%d", ll );
+				CVariantComplex* vc = paramsDict.GetVariantByName( varname );
+				if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 				{
-					if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
+					if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 					{
 						int rowh = vSpacing;
-						if (fontIdx >= 0)
-							rowh = UTGetFontsManager().fonts[fontIdx]->rowHeight;
-						
-						RECTXYWH optbb(bbox.x, bbox.y + vSpacing * optcnt, bbox.w, vSpacing);
-						if (PointInRect(&layer->mouseRelPos, &optbb))
+						if ( fontIdx >= 0 )
+							rowh = __TexFonts().fonts[ fontIdx ]->rowHeight;
+
+						RECTXYWH optbb( bbox.x, bbox.y + vSpacing * optcnt, bbox.w, vSpacing );
+						if ( PointInRect( &layer->mouseRelPos, &optbb ) )
 						{
 							//if (selectedIdx == optcnt) //already selected, engage
 							{
@@ -1053,123 +1041,123 @@ void CControl::Update(float dTime, float fTimeline)
 				}
 			}
 			//limitez selectie
-			CLAMP(selectedIdx, 0, optcnt - 1);
+			CLAMP( selectedIdx, 0, optcnt - 1 );
 			//modific cursor selectie sa se duca spre selectia curenta
-			if (fSelectionCursor < (float)selectedIdx)
+			if ( fSelectionCursor < ( float ) selectedIdx )
 			{
 				fSelectionCursor += dTime * 10.0f;
-				if (fSelectionCursor >= (float)selectedIdx)
-					fSelectionCursor = (float)selectedIdx;
+				if ( fSelectionCursor >= ( float ) selectedIdx )
+					fSelectionCursor = ( float ) selectedIdx;
 			}
-			else if (fSelectionCursor > (float)selectedIdx)
+			else if ( fSelectionCursor > ( float )selectedIdx )
 			{
 				fSelectionCursor -= dTime * 10.0f;
-				if (fSelectionCursor <= (float)selectedIdx)
-					fSelectionCursor = (float)selectedIdx;
+				if ( fSelectionCursor <= ( float ) selectedIdx )
+					fSelectionCursor = ( float ) selectedIdx;
 			}
 			//clicked? - deocamdata mesajul de clicked se da direct din ReceiveInput
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKED)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKED )
 			{
 				//see if option is disabled
 				int nOptFlag = 1 << selectedIdx;
-				if ((nDisabledFlags & nOptFlag) == 0)
+				if ( ( nDisabledFlags & nOptFlag ) == 0 )
 				{
-					CEvent *nevent = new CEvent(CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED);
-					nevent->AddNamedArgUINT32(L"layerID", layer->ID.getHash());
-					CVariantComplex* lvar = paramsDict.GetVariantByName(L"ID");
-					if (lvar->m_type != CVariantComplex::K_ARGTYPE_NONE)
-						nevent->AddNamedArgUINT32(L"ctrlID", lvar->m_strArg.getHash());
+					CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
+					nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+					CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
+					if ( lvar->m_type != CVariantComplex::K_ARGTYPE_NONE )
+						nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 					else
-						nevent->AddNamedArgUINT32(L"ctrlID", 0);
+						nevent->AddNamedArgUINT32( L"ctrlID", 0 );
 					//add custom data - trimit index string selectat
 					int nStringIdx = -1;
 					//incercam sa citim string idx selectat
-					WCHAR varname[MAX_PATH];
-					StringCchPrintf(varname, MAX_PATH, L"StringID%d", selectedIdx);
-					CVariantComplex* vc = paramsDict.GetVariantByName(varname);
-					if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
+					WCHAR varname[ MAX_PATH ];
+					StringCchPrintf( varname, MAX_PATH, L"StringID%d", selectedIdx );
+					CVariantComplex* vc = paramsDict.GetVariantByName( varname );
+					if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 					{
-						nStringIdx = __Texts().GetStrIdx(vc->m_strArg.textHash);
+						nStringIdx = __Texts().GetStrIdx( vc->m_strArg.textHash );
 					}
 					//trimitem string idx
-					nevent->AddNamedArgINT32(L"nSelectedIdx", nStringIdx);
-					UTGetEventManager().QueueEvent(nevent);
+					nevent->AddNamedArgINT32( L"nSelectedIdx", nStringIdx );
+					UTGetEventManager().QueueEvent( nevent );
 
-					SND_PLAY(SNDIDX_CLICK);
+					SND_PLAY( SNDIDX_CLICK );
 				}
 				else
 				{
-					SND_PLAY(SNDIDX_DENIED);
+					SND_PLAY( SNDIDX_DENIED );
 				}
-				
+
 				//remove clicked flag
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
 			}
 
 			//save back updated variants 
-			paramsDict.SetNamedVarFloat(L"fSelectionCursor", fSelectionCursor);
-			paramsDict.SetNamedVarINT32(L"nSelectedIdx", selectedIdx);
+			paramsDict.SetNamedVarFloat( L"fSelectionCursor", fSelectionCursor );
+			paramsDict.SetNamedVarINT32( L"nSelectedIdx", selectedIdx );
 		}
 		break;
 		case CCTRL_TYPE_BUTTON:
 		{
-			float	hoverPercent = paramsDict.GetVariantByName(L"fHoverPercent")->m_asFloat;
+			float	hoverPercent = paramsDict.GetVariantByName( L"fHoverPercent" )->m_asFloat;
 
 			RECTXYWH movedBB = BBox;
 
-			if ((!bDisabled) && (!GameState::isTransitioning()))
+			if ( ( !bDisabled ) && ( !GameState::isTransitioning() ) )
 			{
 				bool bExecuteClick = false;
 				statusFlags &= ~CCTRL_STATUS_FLAG_HOVER;
 
-				if (PointInRect(&layer->mouseRelPos, &movedBB))
+				if ( PointInRect( &layer->mouseRelPos, &movedBB ) )
 				{
 					statusFlags |= CCTRL_STATUS_FLAG_HOVER;
-					if (((statusFlags & CCTRL_STATUS_FLAG_CLICKED) == 0) && (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED))
+					if ( ( ( statusFlags & CCTRL_STATUS_FLAG_CLICKED ) == 0 ) && ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED ) )
 					{
-						SND_PLAY(SNDIDX_CLICK);
+						SND_PLAY( SNDIDX_CLICK );
 						statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 					}
 				}
 				//daca nu am hover nu am nici click
-				if ((statusFlags & CCTRL_STATUS_FLAG_HOVER) == 0)
+				if ( ( statusFlags & CCTRL_STATUS_FLAG_HOVER ) == 0 )
 				{
 					statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
 				}
 
-				if (((g_mouse.Lbut == K_MOUSE_BUTT_JUSTRELEASED) || (g_mouse.Lbut == K_MOUSE_BUTT_NOTPRESSED)) && (statusFlags & CCTRL_STATUS_FLAG_CLICKED))
+				if ( ( ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTRELEASED ) || ( g_mouse.Lbut == K_MOUSE_BUTT_NOTPRESSED ) ) && ( statusFlags & CCTRL_STATUS_FLAG_CLICKED ) )
 				{
 					statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
 
 					bExecuteClick = true;
 				}
 				//pentru click din taste
-				if (statusFlags & CCTRL_STATUS_FLAG_CLICKED_ALT)
+				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKED_ALT )
 				{
 					statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED_ALT;
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 
-					SND_PLAY(SNDIDX_CLICK);
+					SND_PLAY( SNDIDX_CLICK );
 					bExecuteClick = true;
 				}
 
-				if (bExecuteClick)
+				if ( bExecuteClick )
 				{
-					CEvent *nevent = new CEvent(CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK);
-					nevent->AddNamedArgUINT32(L"layerID", layer->ID.getHash());
-					CVariantComplex* lvar = paramsDict.GetVariantByName(L"ID");
-					if (lvar->m_type != CVariantComplex::K_ARGTYPE_NONE)
-						nevent->AddNamedArgUINT32(L"ctrlID", lvar->m_strArg.getHash());
+					CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK );
+					nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+					CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
+					if ( lvar->m_type != CVariantComplex::K_ARGTYPE_NONE )
+						nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 					else
-						nevent->AddNamedArgUINT32(L"ctrlID", 0);
+						nevent->AddNamedArgUINT32( L"ctrlID", 0 );
 
 					//add custom message from XML/interfaces editor
-					int		msgParam = paramsDict.GetVariantByName(L"nMsgParamINT32")->m_asINT32;
-					nevent->AddNamedArgINT32(L"nMsgParamINT32", msgParam);
-					UINT32	msgParamU = paramsDict.GetVariantByName(L"nMsgParamUINT32")->m_asUINT32;
-					nevent->AddNamedArgUINT32(L"nMsgParamUINT32", msgParamU);
+					int		msgParam = paramsDict.GetVariantByName( L"nMsgParamINT32" )->m_asINT32;
+					nevent->AddNamedArgINT32( L"nMsgParamINT32", msgParam );
+					UINT32	msgParamU = paramsDict.GetVariantByName( L"nMsgParamUINT32" )->m_asUINT32;
+					nevent->AddNamedArgUINT32( L"nMsgParamUINT32", msgParamU );
 
-					UTGetEventManager().QueueEvent(nevent);
+					UTGetEventManager().QueueEvent( nevent );
 				}
 			}
 			else
@@ -1177,33 +1165,33 @@ void CControl::Update(float dTime, float fTimeline)
 				statusFlags = 0;
 			}
 			//hover
-			if (statusFlags & CCTRL_STATUS_FLAG_HOVER)
+			if ( statusFlags & CCTRL_STATUS_FLAG_HOVER )
 			{
-				inc_limit(hoverPercent, 10.0f * dTime, 1.0f);
+				inc_limit( hoverPercent, 10.0f * dTime, 1.0f );
 			}
 			else
 			{
-				dec_limit(hoverPercent, 10.0f * dTime, 0.0f);
+				dec_limit( hoverPercent, 10.0f * dTime, 0.0f );
 			}
 
 			//save back updated variants 
-			paramsDict.SetNamedVarFloat(L"fHoverPercent", hoverPercent);
+			paramsDict.SetNamedVarFloat( L"fHoverPercent", hoverPercent );
 		}
 		break;
 		case CCTRL_TYPE_CHECKBOX:
 		{
-			bool bChecked = paramsDict.GetVariantByName(L"bChecked")->m_asBool;
-			float hoverPercent = paramsDict.GetVariantByName(L"fHoverPercent")->m_asFloat;
+			bool bChecked = paramsDict.GetVariantByName( L"bChecked" )->m_asBool;
+			float hoverPercent = paramsDict.GetVariantByName( L"fHoverPercent" )->m_asFloat;
 
-			RECTXYWH frameBB = m_pSprMgr->GetAFrameBBox(animIdx, 0);
+			RECTXYWH frameBB = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 			frameBB.x += BBox.x; frameBB.y += BBox.y;
 
 			bool bCheckChanged = false;
 
-			if (PointInRect(&layer->mouseRelPos, &frameBB))
+			if ( PointInRect( &layer->mouseRelPos, &frameBB ) )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_HOVER;
-				if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
+				if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 				{
 					statusFlags &= ~CCTRL_STATUS_FLAG_HOVER;
 					bCheckChanged = true;
@@ -1214,315 +1202,249 @@ void CControl::Update(float dTime, float fTimeline)
 				statusFlags &= ~CCTRL_STATUS_FLAG_HOVER;
 			}
 			//trateaza activarea din taste
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKED)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKED )
 			{
 				bCheckChanged = true;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
 			}
 
-			if (statusFlags & CCTRL_STATUS_FLAG_HOVER)
+			if ( statusFlags & CCTRL_STATUS_FLAG_HOVER )
 			{
-				inc_limit(hoverPercent, dTime * 8.0f, 1.0f);
+				inc_limit( hoverPercent, dTime * 8.0f, 1.0f );
 			}
 			else
 			{
-				dec_limit(hoverPercent, dTime * 8.0f, 0.0f);
+				dec_limit( hoverPercent, dTime * 8.0f, 0.0f );
 			}
 
 			//--- send messaje on check change ---
-			if (bCheckChanged)
+			if ( bCheckChanged )
 			{
-				SND_PLAY(SNDIDX_CLICK);
+				SND_PLAY( SNDIDX_CLICK );
 				//toggle check
 				bChecked = !bChecked;
 
-				CEvent *nevent = new CEvent(CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CHECK_CHANGED);
-				nevent->AddNamedArgUINT32(L"layerID", layer->ID.getHash());
-				CVariantComplex* lvar = paramsDict.GetVariantByName(L"ID");
-				if (lvar != NULL)
-					nevent->AddNamedArgUINT32(L"ctrlID", lvar->m_strArg.getHash());
+				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CHECK_CHANGED );
+				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
+				if ( lvar != NULL )
+					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
-					nevent->AddNamedArgUINT32(L"ctrlID", 0);
-				nevent->AddNamedArgBool(L"bChecked", bChecked);
-				UTGetEventManager().QueueEvent(nevent);
+					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
+				nevent->AddNamedArgBool( L"bChecked", bChecked );
+				UTGetEventManager().QueueEvent( nevent );
 			}
 
-			paramsDict.SetNamedVarFloat(L"fHoverPercent", hoverPercent);
-			paramsDict.SetNamedVarBool(L"bChecked", bChecked);
-		}
-		break;
-		case CCTRL_TYPE_PAINTEDBUTTON:
-		{
-			float	hoverPercent = wcstod(paramsDict.GetVariantByName(L"hoverPercent")->m_strArg.text, NULL);
-			float	butFloat = wcstod(paramsDict.GetVariantByName(L"butFloat")->m_strArg.text, NULL);
-			int		frameIdx = _wtoi(paramsDict.GetVariantByName(L"frameIdx")->m_strArg.text);
-			float	disablePercent = wcstod(paramsDict.GetVariantByName(L"disablePercent")->m_strArg.text, NULL);
-
-			RECTXYWH butLbb = m_pSprMgr->GetAFrameBBox(animIdx, frameIdx);
-			RECTXYWH movedBB(BBox.x, BBox.y + butLbb.y, butLbb.w, butLbb.h);
-
-			if (bDisabled)
-			{
-				dec_limit(disablePercent, 10.0f * dTime, 0.0f);
-			}
-			else
-			{
-				inc_limit(disablePercent, 10.0f * dTime, 1.0f);
-			}
-
-			if ((!bDisabled) && (!GameState::isTransitioning()))
-			{
-				statusFlags &= ~CCTRL_STATUS_FLAG_HOVER;
-
-				if (PointInRect(&layer->mouseRelPos, &movedBB))
-				{
-					statusFlags |= CCTRL_STATUS_FLAG_HOVER;
-					if ((butFloat <= 0.0f) && (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED))
-					{
-						butFloat = 1.0f;
-						SND_PLAY(SNDIDX_CLICK);
-						statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
-					}
-				}
-
-				dec_limit(butFloat, 2.0f * dTime, 0.0f);
-
-				if (((g_mouse.Lbut == K_MOUSE_BUTT_JUSTRELEASED) || (g_mouse.Lbut == K_MOUSE_BUTT_NOTPRESSED) || ((statusFlags & CCTRL_STATUS_FLAG_HOVER) == 0)) && (statusFlags & CCTRL_STATUS_FLAG_CLICKED) && (butFloat <= 0.0f))
-				{
-					statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
-
-					CEvent *nevent = new CEvent(CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK);
-					nevent->AddNamedArgUINT32(L"layerID", layer->ID.getHash());
-					CVariantComplex* lvar = paramsDict.GetVariantByName(L"ID");
-					if (lvar != NULL)
-						nevent->AddNamedArgUINT32(L"ctrlID", lvar->m_strArg.getHash());
-					else
-						nevent->AddNamedArgUINT32(L"ctrlID", 0);
-					UTGetEventManager().QueueEvent(nevent);
-				}
-			}
-			else
-			{
-				statusFlags = 0;
-			}
-
-			WCHAR val[MAX_PATH];
-			StringCchPrintf(val, MAX_PATH, L"%f", hoverPercent);
-			paramsDict.SetNamedVarString(L"hoverPercent", val);
-			StringCchPrintf(val, MAX_PATH, L"%f", butFloat);
-			paramsDict.SetNamedVarString(L"butFloat", val);
-			StringCchPrintf(val, MAX_PATH, L"%d", frameIdx);
-			paramsDict.SetNamedVarString(L"frameIdx", val);
-			StringCchPrintf(val, MAX_PATH, L"%f", disablePercent);
-			paramsDict.SetNamedVarString(L"disablePercent", val);
+			paramsDict.SetNamedVarFloat( L"fHoverPercent", hoverPercent );
+			paramsDict.SetNamedVarBool( L"bChecked", bChecked );
 		}
 		break;
 		case CCTRL_TYPE_SLIDER:
 		{
-			float slidePercent = paramsDict.GetVariantByName(L"fSlidePercent")->m_asFloat;
-			bool hasArrows = paramsDict.GetVariantByName(L"hasArrows")->m_asINT32;
-			int nTicks = paramsDict.GetVariantByName(L"Steps")->m_asINT32;
+			float slidePercent = paramsDict.GetVariantByName( L"fSlidePercent" )->m_asFloat;
+			bool hasArrows = paramsDict.GetVariantByName( L"hasArrows" )->m_asINT32;
+			int nTicks = paramsDict.GetVariantByName( L"Steps" )->m_asINT32;
 
 			float fTickSize = 0.1f;
-			if(nTicks > 0)
+			if ( nTicks > 0 )
 				fTickSize = 1.0f / nTicks;
 
 			RECTXYWH bbB = BBox; //bbox bar
 			//heads sizes
-			int w1 = m_pSprMgr->GetAFrameBBox(animIdx, 0).w;
-			int w2 = m_pSprMgr->GetAFrameBBox(animIdx, 2).w;
+			int w1 = m_pSprCol->GetAFrameBBox( animIdx, 0 ).w;
+			int w2 = m_pSprCol->GetAFrameBBox( animIdx, 2 ).w;
 			bbB.x += w1; bbB.w -= w1 + w2;
 
-			RECTXYWH bbL = m_pSprMgr->GetAFrameBBox(animIdx, 5); //buton stanga
+			RECTXYWH bbL = m_pSprCol->GetAFrameBBox( animIdx, 5 ); //buton stanga
 			bbL.x += BBox.x; bbL.y += BBox.CenterY();
 
-			RECTXYWH bbR = m_pSprMgr->GetAFrameBBox(animIdx, 6); //buton dreapta
+			RECTXYWH bbR = m_pSprCol->GetAFrameBBox( animIdx, 6 ); //buton dreapta
 			bbR.x += BBox.Right(); bbR.y += BBox.CenterY();
 
 			//tratam mai intai inputurile pe flaguri in cazul in care vin din handleCommand
 			float newSlidePercent = slidePercent;
 
 			//setam flaguri noi pentru frame-ul urmator
-			if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
+			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 			{
 				//clickuri
-				if (hasArrows)
+				if ( hasArrows )
 				{
-					if (PointInRect(&layer->mouseRelPos, &bbL))
+					if ( PointInRect( &layer->mouseRelPos, &bbL ) )
 					{
-						SND_PLAY(SNDIDX_CLICK);
+						SND_PLAY( SNDIDX_CLICK );
 						statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 					}
-					else if (PointInRect(&layer->mouseRelPos, &bbR))
+					else if ( PointInRect( &layer->mouseRelPos, &bbR ) )
 					{
-						SND_PLAY(SNDIDX_CLICK);
+						SND_PLAY( SNDIDX_CLICK );
 						statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 					}
 				}
 			}
 
-			if ((g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED) || (g_mouse.Lbut == K_MOUSE_BUTT_DRAG))
+			if ( ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED ) || ( g_mouse.Lbut == K_MOUSE_BUTT_DRAG ) )
 			{
-				if (PointInRect(&layer->mouseRelPos, &bbB))
+				if ( PointInRect( &layer->mouseRelPos, &bbB ) )
 				{
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 
-					if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
-						SND_PLAY(SNDIDX_CLICK);
+					if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
+						SND_PLAY( SNDIDX_CLICK );
 				}
 			}
 
 			//--- efectuam actiunea in fn de flaguri si facem clear la flags ---
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
 			{
 				newSlidePercent -= fTickSize;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDLEFT;
 			}
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
 			{
 				newSlidePercent += fTickSize;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 			}
 			//mutare cursor
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKED)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKED )
 			{
-				newSlidePercent = (float)(layer->mouseRelPos.x - bbB.x) / (float)(bbB.w);
+				newSlidePercent = ( float ) ( layer->mouseRelPos.x - bbB.x ) / ( float ) ( bbB.w );
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
 			}
 
 
-			CLAMP(newSlidePercent, 0.0f, 1.0f);
+			CLAMP( newSlidePercent, 0.0f, 1.0f );
 			//daca avem ticks ne limitam la ele
-			if (nTicks > 0)
+			if ( nTicks > 0 )
 			{
-				int full = (int)ROUND_FLOAT(newSlidePercent / fTickSize);
+				int full = ( int ) ROUND_FLOAT( newSlidePercent / fTickSize );
 				newSlidePercent = full * fTickSize;
-				CLAMP(newSlidePercent, 0.0f, 1.0f);
+				CLAMP( newSlidePercent, 0.0f, 1.0f );
 			}
 
-			if (newSlidePercent != slidePercent)
+			if ( newSlidePercent != slidePercent )
 			{
 				slidePercent = newSlidePercent;
 
-				CEvent *nevent = new CEvent(CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SLIDER_CHANGED);
-				nevent->AddNamedArgUINT32(L"layerID", layer->ID.getHash());
-				CVariantComplex* lvar = paramsDict.GetVariantByName(L"ID");
-				if (lvar != NULL)
-					nevent->AddNamedArgUINT32(L"ctrlID", lvar->m_strArg.getHash());
+				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SLIDER_CHANGED );
+				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
+				if ( lvar != NULL )
+					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
-					nevent->AddNamedArgUINT32(L"ctrlID", 0);
-				nevent->AddNamedArgFloat(L"fSlidePercent", slidePercent);
-				UTGetEventManager().QueueEvent(nevent);
+					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
+				nevent->AddNamedArgFloat( L"fSlidePercent", slidePercent );
+				UTGetEventManager().QueueEvent( nevent );
 			}
 
 			//refresh params
-			paramsDict.SetNamedVarFloat(L"fSlidePercent", slidePercent);
+			paramsDict.SetNamedVarFloat( L"fSlidePercent", slidePercent );
 		}
 		break;
 
 		case CCTRL_TYPE_SLIDER_PAGES:
 		{
-			int nPage = paramsDict.GetVariantByName(L"nPage")->m_asINT32;
-			int nMinPage = paramsDict.GetVariantByName(L"nMinPage")->m_asINT32;
-			int nMaxPage = paramsDict.GetVariantByName(L"nMaxPage")->m_asINT32;
+			int nPage = paramsDict.GetVariantByName( L"nPage" )->m_asINT32;
+			int nMinPage = paramsDict.GetVariantByName( L"nMinPage" )->m_asINT32;
+			int nMaxPage = paramsDict.GetVariantByName( L"nMaxPage" )->m_asINT32;
 
 
 			RECTXYWH bbB = BBox; //bbox bar
 			//heads sizes
-			int w1 = m_pSprMgr->GetAFrameBBox(animIdx, 0).w;
-			int w2 = m_pSprMgr->GetAFrameBBox(animIdx, 2).w;
+			int w1 = m_pSprCol->GetAFrameBBox( animIdx, 0 ).w;
+			int w2 = m_pSprCol->GetAFrameBBox( animIdx, 2 ).w;
 			bbB.x += w1; bbB.w -= w1 + w2;
 
-			RECTXYWH bbL = m_pSprMgr->GetAFrameBBox(animIdx, 5); //buton stanga
+			RECTXYWH bbL = m_pSprCol->GetAFrameBBox( animIdx, 5 ); //buton stanga
 			bbL.x += BBox.x; bbL.y += BBox.CenterY();
 
-			RECTXYWH bbR = m_pSprMgr->GetAFrameBBox(animIdx, 6); //buton dreapta
+			RECTXYWH bbR = m_pSprCol->GetAFrameBBox( animIdx, 6 ); //buton dreapta
 			bbR.x += BBox.Right(); bbR.y += BBox.CenterY();
 
 			//setam flaguri noi pentru frame-ul urmator
-			if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
+			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 			{
-				if (PointInRect(&layer->mouseRelPos, &bbL))
+				if ( PointInRect( &layer->mouseRelPos, &bbL ) )
 				{
-					SND_PLAY(SNDIDX_CLICK);
+					SND_PLAY( SNDIDX_CLICK );
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 				}
-				else if (PointInRect(&layer->mouseRelPos, &bbR))
+				else if ( PointInRect( &layer->mouseRelPos, &bbR ) )
 				{
-					SND_PLAY(SNDIDX_CLICK);
+					SND_PLAY( SNDIDX_CLICK );
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 				}
 			}
 
 			//--- efectuam actiunea in fn de flaguri si facem clear la flags ---
 			int nNewPage = nPage;
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
 			{
 				nNewPage--;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDLEFT;
 			}
-			if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT)
+			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
 			{
 				nNewPage++;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 			}
 
-			if ((nMinPage >= 0) && (nNewPage < nMinPage))
+			if ( ( nMinPage >= 0 ) && ( nNewPage < nMinPage ) )
 				nNewPage = nMinPage;
-			if ((nMaxPage >= 0) && (nNewPage > nMaxPage))
+			if ( ( nMaxPage >= 0 ) && ( nNewPage > nMaxPage ) )
 				nNewPage = nMaxPage;
 
-			if (nNewPage != nPage)
+			if ( nNewPage != nPage )
 			{
 
-				CEvent *nevent = new CEvent(CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_PAGE_CHANGED);
-				nevent->AddNamedArgUINT32(L"layerID", layer->ID.getHash());
-				CVariantComplex* lvar = paramsDict.GetVariantByName(L"ID");
-				if (lvar != NULL)
-					nevent->AddNamedArgUINT32(L"ctrlID", lvar->m_strArg.getHash());
+				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_PAGE_CHANGED );
+				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
+				if ( lvar != NULL )
+					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
-					nevent->AddNamedArgUINT32(L"ctrlID", 0);
-				nevent->AddNamedArgINT32(L"nPageIdx", nNewPage);
-				nevent->AddNamedArgINT32(L"nOldIdx", nPage);
-				UTGetEventManager().QueueEvent(nevent);
+					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
+				nevent->AddNamedArgINT32( L"nPageIdx", nNewPage );
+				nevent->AddNamedArgINT32( L"nOldIdx", nPage );
+				UTGetEventManager().QueueEvent( nevent );
 
 				nPage = nNewPage;
 			}
 
 			//refresh params
-			paramsDict.SetNamedVarINT32(L"nPage", nPage);
+			paramsDict.SetNamedVarINT32( L"nPage", nPage );
 		}
 		break;
 		case CCTRL_TYPE_LISTBOX:
 		{
-			if (fontIdx < 0) return;
+			if ( fontIdx < 0 ) return;
 
-			int selIdx = _wtoi(paramsDict.GetVariantByName(L"selIdx")->m_strArg.text);
-			int selIdxMax = _wtoi(paramsDict.GetVariantByName(L"selIdxMax")->m_strArg.text);
+			int selIdx = _wtoi( paramsDict.GetVariantByName( L"selIdx" )->m_strArg.text );
+			int selIdxMax = _wtoi( paramsDict.GetVariantByName( L"selIdxMax" )->m_strArg.text );
 
-			if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED && PointInRect(&layer->mouseRelPos, &BBox))
+			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED && PointInRect( &layer->mouseRelPos, &BBox ) )
 			{
 				int dy = layer->mouseRelPos.y - BBox.y;
 				int worldY = dy;
 
-				int rowh = m_pFontsMgr->fonts[fontIdx]->rowHeight + m_pFontsMgr->fonts[fontIdx]->rowSpacing;
+				int rowh = __TexFonts().fonts[ fontIdx ]->rowHeight + __TexFonts().fonts[ fontIdx ]->rowSpacing;
 				int clickIdx = worldY / rowh;
 
-				if ((clickIdx >= 0) && (clickIdx <= selIdxMax))
+				if ( ( clickIdx >= 0 ) && ( clickIdx <= selIdxMax ) )
 					selIdx = clickIdx;
 			}
 
-			WCHAR val[MAX_PATH];
-			StringCchPrintf(val, MAX_PATH, L"%d", selIdx);
-			paramsDict.SetNamedVarString(L"selIdx", val);
+			WCHAR val[ MAX_PATH ];
+			StringCchPrintf( val, MAX_PATH, L"%d", selIdx );
+			paramsDict.SetNamedVarString( L"selIdx", val );
 		}
 		break;
 	}
 }
 
-void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
+void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 {
-	if (!bVisible)
+	if ( !bVisible )
 		return;
 
 	RECTXYWH BBox, BBox_inflated;
@@ -1536,11 +1458,11 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 	BBox = bbox;
 	BBox_inflated = bbox;
 
-	CVariantComplex* varInflate = paramsDict.GetVariantByName(L"inflate");
-	if (varInflate->m_type != CVariantComplex::K_ARGTYPE_NONE)
+	CVariantComplex* varInflate = paramsDict.GetVariantByName( L"inflate" );
+	if ( varInflate->m_type != CVariantComplex::K_ARGTYPE_NONE )
 	{
 		inflate = varInflate->m_asINT32;
-		if (inflate != 0)
+		if ( inflate != 0 )
 		{
 			BBox_inflated.x += inflate;
 			BBox_inflated.y += inflate;
@@ -1550,75 +1472,75 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 	}
 
 
-	CVariantComplex* var = paramsDict.GetVariantByName(L"animID");
-	if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+	CVariantComplex* var = paramsDict.GetVariantByName( L"animID" );
+	if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
 	{
 		animIdx = var->m_asINT32;
 	}
 
-	var = paramsDict.GetVariantByName(L"fontID");
-	if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+	var = paramsDict.GetVariantByName( L"fontID" );
+	if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
 	{
 		fontIdx = var->m_asINT32;
 	}
 
-	var = paramsDict.GetVariantByName(L"stringID");
-	if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+	var = paramsDict.GetVariantByName( L"stringID" );
+	if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
 	{
 		stringIdx = var->m_asINT32;
 	}
 
-	var = paramsDict.GetVariantByName(L"fontColor");
-	if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
+	var = paramsDict.GetVariantByName( L"fontColor" );
+	if ( var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR )
 	{
 		dwFontColor = var->m_asUINT32;
 	}
 	//set font color
-	float fColAlpha = DW_GETFALPHA(dwFontColor);
-	dwFontColor = DW_COLORALPHA(dwFontColor, layer->alpha * fColAlpha);
+	float fColAlpha = DW_GETFALPHA( dwFontColor );
+	dwFontColor = DW_COLORALPHA( dwFontColor, layer->alpha * fColAlpha );
 
-	var = paramsDict.GetVariantByName(L"color");
-	if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
+	var = paramsDict.GetVariantByName( L"color" );
+	if ( var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR )
 	{
 		dwColor = var->m_asUINT32;
 	}
 	else
 	{
 		// mandatory param
-		paramsDict.SetNamedVarHEXCOLOR(L"color", 0xffffffff);
+		paramsDict.SetNamedVarHEXCOLOR( L"color", 0xffffffff );
 	}
 	//set font color
-	fColAlpha = DW_GETFALPHA(dwColor);
-	dwColor = DW_COLORALPHA(dwColor, layer->alpha * fColAlpha);
+	fColAlpha = DW_GETFALPHA( dwColor );
+	dwColor = DW_COLORALPHA( dwColor, layer->alpha * fColAlpha );
 
 
-	switch (type)
+	switch ( type )
 	{
 		case CCTRL_TYPE_CUSTOM_PAINT:
 		{
 			bool bFoundType = true;
 
-			CVariantComplex* cvc = paramsDict.GetVariantByName(L"subType");
-			if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
+			CVariantComplex* cvc = paramsDict.GetVariantByName( L"subType" );
+			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
 			{
 				//menus.bsx animation paint
-				if (cvc->m_strArg.IsEqual(L"ST_MENUS_BSX_FRAME"))
+				if ( cvc->m_strArg.IsEqual( L"ST_MENUS_BSX_FRAME" ) )
 				{
-					int nAnimIdx = paramsDict.GetVariantByName(L"nAnimIdx")->m_asINT32;
-					int nFrameIdx = paramsDict.GetVariantByName(L"nFrameIdx")->m_asINT32;
+					int nAnimIdx = paramsDict.GetVariantByName( L"nAnimIdx" )->m_asINT32;
+					int nFrameIdx = paramsDict.GetVariantByName( L"nFrameIdx" )->m_asINT32;
 
-					if ((nAnimIdx < 0) || (nAnimIdx >= g_playerSelScr.m_sprCol.Animations.GetSize()))
+					if ( ( nAnimIdx < 0 ) || ( nAnimIdx >= g_playerSelScr.m_sprCol.Animations.GetSize() ) )
 					{
-						drawDebugText(BBox.x, BBox.y, L"Wrong nAnimIdx");
+						drawDebugText( BBox.x, BBox.y, L"Wrong nAnimIdx" );
 						break;
 					}
-					if ((nFrameIdx < 0) || (nFrameIdx >= g_playerSelScr.m_sprCol.GetAFramesCnt(nAnimIdx)))
+					if ( ( nFrameIdx < 0 ) || ( nFrameIdx >= g_playerSelScr.m_sprCol.GetAFramesCnt( nAnimIdx ) ) )
 					{
-						drawDebugText(BBox.x, BBox.y, L"Wrong nFrameIdx");
+						drawDebugText( BBox.x, BBox.y, L"Wrong nFrameIdx" );
 						break;
 					}
 
-					CSprite::paintFrame(&g_playerSelScr.m_sprCol, BBox.CenterX(), BBox.CenterY(), nAnimIdx, nFrameIdx, dwColor);
+					CSprite::paintFrame( &g_playerSelScr.m_sprCol, BBox.CenterX(), BBox.CenterY(), nAnimIdx, nFrameIdx, dwColor );
 				}
 				else
 				{
@@ -1630,150 +1552,149 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				bFoundType = false;
 			}
 
-			if (!bFoundType)
+			if ( !bFoundType )
 			{
-				drawDebugText(BBox.x, BBox.y, L"subType not found!");
+				drawDebugText( BBox.x, BBox.y, L"subType not found!" );
 				return;
 			}
 		}
 		break;
 		case CCTRL_TYPE_DROPDOWN:
 		{
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo) || (m_pSprMgr->Animations[animIdx]->aframesNo < 5))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 5 ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx or frames count");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx or frames count" );
 				return;
 			}
 
-			int nSelectedIdx = paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
-			int nItemsCnt = paramsDict.GetVariantByName(L"nItemsCnt")->m_asINT32;
+			int nSelectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
+			int nItemsCnt = paramsDict.GetVariantByName( L"nItemsCnt" )->m_asINT32;
 
 			float dCol = 1.0f - 0.4f * fDisabledPercent;
-			DWORD wcol = D3DCOLOR_COLORVALUE(dCol, dCol, dCol, layer->alpha);
+			DWORD wcol = D3DCOLOR_COLORVALUE( dCol, dCol, dCol, layer->alpha );
 
-			D3DXVECTOR2 butC((int)(BBox.x + BBox.w / 2.0f), (int)(BBox.y + BBox.h / 2.0f));
-			CtrlMgrDrawHTilingAnim(m_pSprMgr, animIdx, 0, BBox, wcol);
+			D3DXVECTOR2 butC( ( int ) ( BBox.x + BBox.w / 2.0f ), ( int ) ( BBox.y + BBox.h / 2.0f ) );
+			GUIUtils::DrawHTilingAnim( m_pSprCol, animIdx, 0, BBox, wcol );
 
 			int frame;
-			//buton stanga
-			if (nSelectedIdx > 0)
+			// left button
+			if ( nSelectedIdx > 0 )
 			{
 				frame = 3;
-				if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT)
+				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
 					frame = 3;
-				CSprite::paintFrame(m_pSprMgr, BBox.x, BBox.CenterY(), animIdx, frame, wcol);
+				CSprite::paintFrame( m_pSprCol, BBox.x, BBox.CenterY(), animIdx, frame, wcol );
 			}
-			//buton dreapta
-			if (nSelectedIdx < nItemsCnt - 1)
+			// right button
+			if ( nSelectedIdx < nItemsCnt - 1 )
 			{
 				frame = 4;
-				if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT)
+				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
 					frame = 4;
-				CSprite::paintFrame(m_pSprMgr, BBox.Right(), BBox.CenterY(), animIdx, frame, wcol);
+				CSprite::paintFrame( m_pSprCol, BBox.Right(), BBox.CenterY(), animIdx, frame, wcol );
 			}
-			//text
-			if ((stringIdx >= 0) && (fontIdx >= 0))
+			// text
+			if ( ( stringIdx >= 0 ) && ( fontIdx >= 0 ) )
 			{
 				CStringDesc sdSelection;
-				__Texts().GetSubstring(&sdSelection, stringIdx, nSelectedIdx, L'\n');
-				m_pFontsMgr->fonts[fontIdx]->DrawStringScaleW(&sdSelection, BBox.CenterX(), BBox.CenterY(), BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(dwFontColor, 1.0f - fDisabledPercent * 0.8f));
+				__Texts().GetSubstring( &sdSelection, stringIdx, nSelectedIdx, L'\n' );
+				__TexFonts().fonts[ fontIdx ]->DrawStringScaleW( &sdSelection, BBox.CenterX(), BBox.CenterY(), BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA( dwFontColor, 1.0f - fDisabledPercent * 0.8f ) );
 			}
 			else
 			{
-				drawDebugText(butC.x, butC.y, L"Missing font or stringName", wcol);
+				drawDebugText( butC.x, butC.y, L"Missing font or stringName", wcol );
 			}
-
-			layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
-
 		}
 		break;
 
 		case CCTRL_TYPE_FILLING_STARS:
 		{
-			if (animIdx < 0)
+			if ( animIdx < 0 )
 				break;
 
-			int nStars = paramsDict.GetVariantByName(L"nStars")->m_asINT32;
-			float fTimer = paramsDict.GetVariantByName(L"fTimerStars")->m_asFloat;
-			float fcoeff = floor(fTimer);
-			float ffrac = FLOAT_FRAC(fTimer);
+			int nStars = paramsDict.GetVariantByName( L"nStars" )->m_asINT32;
+			float fTimer = paramsDict.GetVariantByName( L"fTimerStars" )->m_asFloat;
+			float fcoeff = floor( fTimer );
+			float ffrac = FLOAT_FRAC( fTimer );
 			float ffracinv = 1.0f - ffrac;
 
-			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
-			RECTXYWH starrect = m_pSprMgr->GetAFrameBBox(animIdx, 0);
+			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
+			RECTXYWH starrect = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 
-			D3DXVECTOR2 vStartPos(BBox_inflated.CenterX(), BBox_inflated.CenterY());
+			D3DXVECTOR2 vStartPos( BBox_inflated.CenterX(), BBox_inflated.CenterY() );
 			vStartPos.x -= starrect.w;
-			for (int kk = 0; kk < 3; kk++)
+			for ( int kk = 0; kk < 3; kk++ )
 			{
 				//suport stea
-				CSprite::paintFrame(m_pSprMgr, vStartPos.x + kk * starrect.w, vStartPos.y, animIdx, 0, wcol);
-				if ((kk < nStars) && (kk < fcoeff))
+				CSprite::paintFrame( m_pSprCol, vStartPos.x + kk * starrect.w, vStartPos.y, animIdx, 0, wcol );
+				if ( ( kk < nStars ) && ( kk < fcoeff ) )
 				{
-					CSprite::paintFrame(m_pSprMgr, vStartPos.x + kk * starrect.w, vStartPos.y, animIdx, 1, wcol);
+					CSprite::paintFrame( m_pSprCol, vStartPos.x + kk * starrect.w, vStartPos.y, animIdx, 1, wcol );
 				}
 			}
 			//deseneaza steaua care se scaleaza
 			//partea de fractie creste intre 0 si 1 pentru fiecare stea
-			if (ffrac != 0.0f)
+			if ( ffrac != 0.0f )
 			{
+				/*
 				D3DXMATRIXA16 mattrans;
 				D3DXMatrixAffineTransformation2D(&mattrans, 1.0f + ffracinv * 2.0f, NULL, 0.0f, &D3DXVECTOR2(vStartPos.x + fcoeff * starrect.w, vStartPos.y - ffracinv * 20.0f));
 				layer->pControlsManager->m_pSprite->SetTransform(&mattrans);
-				CSprite::paintFrame(m_pSprMgr, 0.0f, 0.0f, animIdx, 1, DW_COLOR_FFFA(layer->alpha * ffrac));
-				layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
+				*/
+				CSprite::paintFrame( m_pSprCol, 0.0f, 0.0f, animIdx, 1, DW_COLOR_FFFA( layer->alpha * ffrac ) );
+				//layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
 			}
 		}
 		break;
 		case CCTRL_TYPE_LIST_SELECTOR:
 		{
-			if (fontIdx < 0)
+			if ( fontIdx < 0 )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid font ID!");
+				drawDebugText( BBox.x, BBox.y, L"Invalid font ID!" );
 				return;
 			}
 			//desenam
-			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 			//background
-			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_BLACK3, BBox_inflated, wcol);
+			GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_BLACK3, BBox_inflated, wcol );
 			//selection
-			int	selectedIdx = paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
-			int rowH = paramsDict.GetVariantByName(L"nRowHeight")->m_asINT32;
-			int nOptionsCnt = paramsDict.GetVariantByName(L"nOptionsCnt")->m_asINT32;
+			int	selectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
+			int rowH = paramsDict.GetVariantByName( L"nRowHeight" )->m_asINT32;
+			int nOptionsCnt = paramsDict.GetVariantByName( L"nOptionsCnt" )->m_asINT32;
 
 			//paint cursor
-			if ((rowH > 0) && (!bDisabled))
+			if ( ( rowH > 0 ) && ( !bDisabled ) )
 			{
-				RECTXYWH selbb(BBox_inflated.x, BBox_inflated.y + rowH * selectedIdx, BBox_inflated.w, rowH - 3);
-				CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME3, selbb, wcol);
+				RECTXYWH selbb( BBox_inflated.x, BBox_inflated.y + rowH * selectedIdx, BBox_inflated.w, rowH - 3 );
+				GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME3, selbb, wcol );
 			}
 			//draw strings (left string); row by row as to keep old spacing
-			for (int kk = 0; kk < nOptionsCnt; kk++)
+			for ( int kk = 0; kk < nOptionsCnt; kk++ )
 			{
 				CStringDesc strRow;
-				__Texts().GetSubstring(&strRow, stringIdx, kk, '\n');
-				m_pFontsMgr->fonts[fontIdx]->DrawString(&strRow, BBox_inflated.x, BBox_inflated.y + rowH * kk, FONTFLAG_ANCHOR_TOPLEFT, dwFontColor);
+				__Texts().GetSubstring( &strRow, stringIdx, kk, '\n' );
+				__TexFonts().fonts[ fontIdx ]->DrawString( &strRow, BBox_inflated.x, BBox_inflated.y + rowH * kk, FONTFLAG_ANCHOR_TOPLEFT, dwFontColor );
 			}
 			//right string
-			CVariantComplex* vc = paramsDict.GetVariantByName(L"StringID_right");
-			if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
+			CVariantComplex* vc = paramsDict.GetVariantByName( L"StringID_right" );
+			if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 			{
-				int nStringIdx_right = __Texts().GetStrIdx(vc->m_strArg.textHash);
-				if (nStringIdx_right >= 0)
+				int nStringIdx_right = __Texts().GetStrIdx( vc->m_strArg.textHash );
+				if ( nStringIdx_right >= 0 )
 				{
 					DWORD dwColorRight = 0xffffffff;
-					var = paramsDict.GetVariantByName(L"FontColor_right");
-					if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
+					var = paramsDict.GetVariantByName( L"FontColor_right" );
+					if ( var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR )
 					{
 						dwColorRight = var->m_asUINT32;
 					}
-					dwColorRight = DW_COLORALPHA(dwColorRight, layer->alpha);
+					dwColorRight = DW_COLORALPHA( dwColorRight, layer->alpha );
 					//draw string
-					for (int kk = 0; kk < nOptionsCnt; kk++)
+					for ( int kk = 0; kk < nOptionsCnt; kk++ )
 					{
 						CStringDesc strRow;
-						__Texts().GetSubstring(&strRow, nStringIdx_right, kk, '\n');
-						m_pFontsMgr->fonts[fontIdx]->DrawString(&strRow, BBox_inflated.Right(), BBox_inflated.y + rowH * kk, FONTFLAG_ANCHOR_TOPRIGHT, dwColorRight);
+						__Texts().GetSubstring( &strRow, nStringIdx_right, kk, '\n' );
+						__TexFonts().fonts[ fontIdx ]->DrawString( &strRow, BBox_inflated.Right(), BBox_inflated.y + rowH * kk, FONTFLAG_ANCHOR_TOPRIGHT, dwColorRight );
 					}
 				}
 			}
@@ -1782,51 +1703,53 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 
 		case CCTRL_TYPE_LIST_SELECTOR_TRUETYPE:
 		{
+			/*
 			CTTFont* pTTFont = UTGetTTFManager().GetFont(shTTFID_SZ20.textHash);
 			if ((pTTFont == null) || (pTTFont->pFont == null))
 			{
 				drawDebugText(BBox.x, BBox.y, L"TrueType font missing!");
 				return;
 			}
-			if (stringIdx < 0)
+			*/
+			if ( stringIdx < 0 )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Left list stringIdx missing!");
+				drawDebugText( BBox.x, BBox.y, L"Left list stringIdx missing!" );
 			}
-			
-			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
-			int nPage = paramsDict.GetVariantByName(L"nPage")->m_asINT32;
-			int nMinPage = paramsDict.GetVariantByName(L"nMinPage")->m_asINT32;
-			int nMaxPage = paramsDict.GetVariantByName(L"nMaxPage")->m_asINT32;
-			int optcnt = paramsDict.GetVariantByName(L"nOptionsCnt")->m_asINT32;
+
+			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
+			int nPage = paramsDict.GetVariantByName( L"nPage" )->m_asINT32;
+			int nMinPage = paramsDict.GetVariantByName( L"nMinPage" )->m_asINT32;
+			int nMaxPage = paramsDict.GetVariantByName( L"nMaxPage" )->m_asINT32;
+			int optcnt = paramsDict.GetVariantByName( L"nOptionsCnt" )->m_asINT32;
 
 			//background
-			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_BLACK3, BBox_inflated, wcol);
+			GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_BLACK3, BBox_inflated, wcol );
 			//paging arrows
-			if (nMinPage != nMaxPage)
+			if ( nMinPage != nMaxPage )
 			{
 				float offx = 1.0f;
-				if (statusFlags & CCTRL_STATUS_FLAG_HAS_FOCUS)
-					offx = 1.0f + 1.0f * sin(layer->pControlsManager->fLocalTimeline * 3.0f);
+				if ( statusFlags & CCTRL_STATUS_FLAG_HAS_FOCUS )
+					offx = 1.0f + 1.0f * sin( layer->pControlsManager->fLocalTimeline * 3.0f );
 				//left but
-				if (nPage > nMinPage)
-					CSprite::paintFrame(m_pSprMgr, BBox.x - offx, BBox.CenterY(), ANM_CONTROLS_SPR_ARROWS3, 0, wcol);
+				if ( nPage > nMinPage )
+					CSprite::paintFrame( m_pSprCol, BBox.x - offx, BBox.CenterY(), ANM_CONTROLS_SPR_ARROWS3, 0, wcol );
 				//right but
-				if (nPage < nMaxPage)
+				if ( nPage < nMaxPage )
 				{
-					CSprite::paintFrame(m_pSprMgr, BBox.Right() + offx, BBox.CenterY(), ANM_CONTROLS_SPR_ARROWS3, 2, wcol);
+					CSprite::paintFrame( m_pSprCol, BBox.Right() + offx, BBox.CenterY(), ANM_CONTROLS_SPR_ARROWS3, 2, wcol );
 				}
 			}
 			//selection
-			int	selectedIdx = paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
-			int rowH = paramsDict.GetVariantByName(L"nRowHeight")->m_asINT32;
+			int	selectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
+			int rowH = paramsDict.GetVariantByName( L"nRowHeight" )->m_asINT32;
 			rowH /= 2; //truetype text is in double the resolution
 
-			if ((rowH > 0) && (optcnt > 0) && (selectedIdx >= 0) && (selectedIdx < optcnt))
+			if ( ( rowH > 0 ) && ( optcnt > 0 ) && ( selectedIdx >= 0 ) && ( selectedIdx < optcnt ) )
 			{
-				RECTXYWH selbb(BBox_inflated.x, BBox_inflated.y + rowH * selectedIdx, BBox_inflated.w, rowH);
-				CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME3, selbb, wcol);
+				RECTXYWH selbb( BBox_inflated.x, BBox_inflated.y + rowH * selectedIdx, BBox_inflated.w, rowH );
+				GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME3, selbb, wcol );
 			}
-
+			/*
 			//draw strings (left string)
 			//set new transform, bigger resolution
 			layer->pControlsManager->m_pSprite->Flush();
@@ -1881,11 +1804,13 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			layer->pControlsManager->m_cameraScreenRect = layer->pControlsManager->m_pCamera->GetCamWorldAABB();
 
 			App_SetWorldTransform(layer->pControlsManager->m_pDevice, matWorld);
+			*/
 		}
 		break;
 
 		case CCTRL_TYPE_SCORESLIST_TRUETYPE:
 		{
+			/*
 			CTTFont* pTTFont = UTGetTTFManager().GetFont(shTTFID_SZ20.textHash);
 			if ((pTTFont == null) || (pTTFont->pFont == null))
 			{
@@ -1896,7 +1821,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			{
 				drawDebugText(BBox.x, BBox.y, L"Left list stringIdx missing!");
 			}
-			
+
 			//get right string idx
 			int nStringIdx_right = -1;
 			CVariantComplex* vc = paramsDict.GetVariantByName(L"StringID_right");
@@ -1942,7 +1867,7 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				D3DXFONT_DESCW descW;
 				pTTFont->pFont->GetDesc(&descW);
 				RECTXYWH box(realrect.x - 5, realrect.y + descW.Height * nSelectedIdx, realrect.w + 10, descW.Height);
-				CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME3, box, DW_COLOR_FFFA(layer->alpha));
+				DrawFrame(m_pSprCol, ANM_CONTROLS_SPR_FRAME3, box, DW_COLOR_FFFA(layer->alpha));
 			}
 
 			//paint text
@@ -1965,113 +1890,113 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 			layer->pControlsManager->m_cameraScreenRect = layer->pControlsManager->m_pCamera->GetCamWorldAABB();
 
 			App_SetWorldTransform(layer->pControlsManager->m_pDevice, matWorld);
-
+			*/
 		}
 		break;
 
 		case CCTRL_TYPE_PLAYER_UPGRADE_CONTROL:
 		{
-			if ((fontIdx < 0) || (animIdx < 0))
+			if ( ( fontIdx < 0 ) || ( animIdx < 0 ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid font ID or AnimID!");
+				drawDebugText( BBox.x, BBox.y, L"Invalid font ID or AnimID!" );
 				return;
 
 			}
-			int nPlayerOrdinal = paramsDict.GetVariantByName(L"nPlayerOrdinal")->m_asINT32;
-			CLAMP(nPlayerOrdinal, 0, 1);
-			int nPlayerClass = (int)g_playerSelScr.m_arrPlayers[nPlayerOrdinal].eType;
-			int nSelectedLine = paramsDict.GetVariantByName(L"nSelectedLine")->m_asINT32;
-			int	nSelectedPoint = paramsDict.GetVariantByName(L"nSelectedPoint")->m_asINT32;
+			int nPlayerOrdinal = paramsDict.GetVariantByName( L"nPlayerOrdinal" )->m_asINT32;
+			CLAMP( nPlayerOrdinal, 0, 1 );
+			int nPlayerClass = ( int ) g_playerSelScr.m_arrPlayers[ nPlayerOrdinal ].eType;
+			int nSelectedLine = paramsDict.GetVariantByName( L"nSelectedLine" )->m_asINT32;
+			int	nSelectedPoint = paramsDict.GetVariantByName( L"nSelectedPoint" )->m_asINT32;
 
-			int nXPPointsReal = App_GetAvailableXPPoints((EPSSPlayerClass)nPlayerClass); //real number of XP points to spend
+			int nXPPointsReal = App_GetAvailableXPPoints( ( EPSSPlayerClass ) nPlayerClass ); //real number of XP points to spend
 			int nXPPointsLocal = nXPPointsReal;
-			int nSpentPoints[K_PSS_UPGRADE_BARS_CNT];
-			for (int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++)
+			int nSpentPoints[ K_PSS_UPGRADE_BARS_CNT ];
+			for ( int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++ )
 			{
-				WCHAR strParamName[MAX_PATH];
-				StringCchPrintf(strParamName, MAX_PATH, L"spent_bar%d", ll);
-				nSpentPoints[ll] = paramsDict.GetVariantByName(strParamName)->m_asINT32;
+				WCHAR strParamName[ MAX_PATH ];
+				StringCchPrintf( strParamName, MAX_PATH, L"spent_bar%d", ll );
+				nSpentPoints[ ll ] = paramsDict.GetVariantByName( strParamName )->m_asINT32;
 				//update local points
-				nXPPointsLocal -= nSpentPoints[ll];
+				nXPPointsLocal -= nSpentPoints[ ll ];
 			}
 
 			//compute number of points spent on own bars (first 2 are the team bars, always)
 			int nOwnBarsSpent = 0;
-			for (int ll = 2; ll < K_PSS_UPGRADE_BARS_CNT; ll++)
+			for ( int ll = 2; ll < K_PSS_UPGRADE_BARS_CNT; ll++ )
 			{
-				int nBarIdx = g_playerSelScr.arrItemsByClass[nPlayerClass].arrUpgradeBarsIdx[ll];
-				int nFilledReal = g_playerSelScr.m_arrPlayers[nPlayerOrdinal].arrUpgradeBarsPts[ll];
+				int nBarIdx = g_playerSelScr.arrItemsByClass[ nPlayerClass ].arrUpgradeBarsIdx[ ll ];
+				int nFilledReal = g_playerSelScr.m_arrPlayers[ nPlayerOrdinal ].arrUpgradeBarsPts[ ll ];
 				nOwnBarsSpent += nFilledReal;
 			}
-			int nCurrentLevel = App_GetXPLevel(g_playerSelScr.m_arrPlayers[nPlayerOrdinal].nPlayerXPPts);
+			int nCurrentLevel = App_GetXPLevel( g_playerSelScr.m_arrPlayers[ nPlayerOrdinal ].nPlayerXPPts );
 			int nTotalPoints = K_GAME_XPPOINTS_PER_XPLEVEL * nCurrentLevel;
 			int nTeamSpentPoints = nTotalPoints - nXPPointsReal - nOwnBarsSpent;
-			int nTeamSpentPointsLocal = nTeamSpentPoints + (nSpentPoints[0] + nSpentPoints[1]);
+			int nTeamSpentPointsLocal = nTeamSpentPoints + ( nSpentPoints[ 0 ] + nSpentPoints[ 1 ] );
 
 			//desenam
-			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
-			DWORD wcoldenied = DW_COLORALPHA(0xffff8888, layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
+			DWORD wcoldenied = DW_COLORALPHA( 0xffff8888, layer->alpha );
 
 			//row height from blob
-			RECTXYWH rectSz = m_pSprMgr->GetAFrameBBox(animIdx, 0);
+			RECTXYWH rectSz = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 			int nClassRows = 2, nTeamRows = 3; //how many rows for class properties (const)	vs team properties
 			int nGroupSpacing = 9; //spacing after class rows
 			int nTotalRows = nClassRows + nTeamRows;
-			assert(nClassRows + nTeamRows <= K_PSS_UPGRADE_BARS_CNT);
+			assert( nClassRows + nTeamRows <= K_PSS_UPGRADE_BARS_CNT );
 			//team group
-			RECTXYWH bbgroup(BBox_inflated.x, BBox_inflated.y, BBox_inflated.w, (rectSz.h + 1) * nClassRows + 1);
-			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE2, bbgroup, DW_COLORALPHA(0xff0f1f2f, layer->alpha));
-			bbgroup.Inflate(-6, -1); bbgroup.x += 5;
-			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbgroup, DW_COLORALPHA(0xff102436, layer->alpha));
+			RECTXYWH bbgroup( BBox_inflated.x, BBox_inflated.y, BBox_inflated.w, ( rectSz.h + 1 ) * nClassRows + 1 );
+			GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, bbgroup, DW_COLORALPHA( 0xff0f1f2f, layer->alpha ) );
+			bbgroup.Inflate( -6, -1 ); bbgroup.x += 5;
+			GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, bbgroup, DW_COLORALPHA( 0xff102436, layer->alpha ) );
 			//group name
-			m_pFontsMgr->fonts[fontIdx]->DrawStringTransformed(__Texts().strings[STR_TEAM_UPC], bbgroup.x - 4, bbgroup.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
+			//__TexFonts().fonts[fontIdx]->DrawStringTransformed(__Texts().strings[STR_TEAM_UPC], bbgroup.x - 4, bbgroup.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
 
 			//class group
-			RECTXYWH bbteam(BBox_inflated.x, BBox_inflated.y + bbgroup.h + nGroupSpacing, BBox_inflated.w, (rectSz.h + 1) * nTeamRows + 1);
-			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE2, bbteam, DW_COLORALPHA(0xff122426, layer->alpha));
-			bbteam.Inflate(-6, -1); bbteam.x += 5;
-			CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbteam, DW_COLORALPHA(0xff1E3538, layer->alpha));
+			RECTXYWH bbteam( BBox_inflated.x, BBox_inflated.y + bbgroup.h + nGroupSpacing, BBox_inflated.w, ( rectSz.h + 1 ) * nTeamRows + 1 );
+			GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, bbteam, DW_COLORALPHA( 0xff122426, layer->alpha ) );
+			bbteam.Inflate( -6, -1 ); bbteam.x += 5;
+			GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, bbteam, DW_COLORALPHA( 0xff1E3538, layer->alpha ) );
 			//group name
-			m_pFontsMgr->fonts[fontIdx]->DrawStringTransformed(__Texts().strings[STR_CLASS_UPC], bbteam.x - 4, bbteam.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
+			//__TexFonts().fonts[fontIdx]->DrawStringTransformed(__Texts().strings[STR_CLASS_UPC], bbteam.x - 4, bbteam.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
 
 			//enforce player class
-			if ((nPlayerClass < 0) || (nPlayerClass >= K_PSS_CLASSES_COUNT))
+			if ( ( nPlayerClass < 0 ) || ( nPlayerClass >= K_PSS_CLASSES_COUNT ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Player class not specified!");
+				drawDebugText( BBox.x, BBox.y, L"Player class not specified!" );
 				return;
 			}
 			//individual bars
 			bool bDeniedOperation = false;
-			for (int ll = 0; ll < nTotalRows; ll++)
+			for ( int ll = 0; ll < nTotalRows; ll++ )
 			{
 				RECTXYWH bbline = bbgroup;
-				bbline.h = rectSz.h; 
-				bbline.y += ll * (rectSz.h + 1);
-				if (ll >= nClassRows) 
+				bbline.h = rectSz.h;
+				bbline.y += ll * ( rectSz.h + 1 );
+				if ( ll >= nClassRows )
 					bbline.y += nGroupSpacing - 1;
 				///paint bar:
-				bbline.Inflate(-2, -2); 
-				if (ll < nClassRows)
-					CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbline, DW_COLORALPHA(0xff0f1f2f, layer->alpha));
+				bbline.Inflate( -2, -2 );
+				if ( ll < nClassRows )
+					GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, bbline, DW_COLORALPHA( 0xff0f1f2f, layer->alpha ) );
 				else
-					CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_WHITE1, bbline, DW_COLORALPHA(0xff122426, layer->alpha));
-				
+					GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, bbline, DW_COLORALPHA( 0xff122426, layer->alpha ) );
+
 				//paint upgrade bar (right aligned)
-				int nBarIdx = g_playerSelScr.arrItemsByClass[nPlayerClass].arrUpgradeBarsIdx[ll];
-				int nDots = g_playerSelScr.m_arrUpgradeBars[nBarIdx]->nTotalPoints;
+				int nBarIdx = g_playerSelScr.arrItemsByClass[ nPlayerClass ].arrUpgradeBarsIdx[ ll ];
+				int nDots = g_playerSelScr.m_arrUpgradeBars[ nBarIdx ]->nTotalPoints;
 
 				//int nFilledReal = g_userData[K_MEMID_UPGRADE_BAR_POINTS_START + g_playerSelScr.m_arrUpgradeBars[nBarIdx]->nMemSlot];
-				int nFilledReal = g_playerSelScr.m_arrPlayers[nPlayerOrdinal].arrUpgradeBarsPts[ll];
-				int nFilledLocal = nFilledReal + nSpentPoints[ll];
+				int nFilledReal = g_playerSelScr.m_arrPlayers[ nPlayerOrdinal ].arrUpgradeBarsPts[ ll ];
+				int nFilledLocal = nFilledReal + nSpentPoints[ ll ];
 				//limit fillers to available points
-				int tmpdelta = (nSelectedPoint + 1) - nFilledLocal;
-				if (tmpdelta > nXPPointsLocal)
+				int tmpdelta = ( nSelectedPoint + 1 ) - nFilledLocal;
+				if ( tmpdelta > nXPPointsLocal )
 					tmpdelta = nXPPointsLocal;
 				//don't remove more than what you added on the team bars
-				if (nSelectedLine <= 1)
+				if ( nSelectedLine <= 1 )
 				{
-					if ((tmpdelta < 0) && (-tmpdelta > nTeamSpentPointsLocal))
-						tmpdelta = -max(0, nTeamSpentPointsLocal);
+					if ( ( tmpdelta < 0 ) && ( -tmpdelta > nTeamSpentPointsLocal ) )
+						tmpdelta = -max( 0, nTeamSpentPointsLocal );
 				}
 				//show filled points
 				int nFilledWished = nFilledLocal + tmpdelta;
@@ -2086,215 +2011,215 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 				}
 				*/
 				//blink points
-				if ((statusFlags & CCTRL_STATUS_FLAG_HAS_FOCUS) && (ll == nSelectedLine))
+				if ( ( statusFlags & CCTRL_STATUS_FLAG_HAS_FOCUS ) && ( ll == nSelectedLine ) )
 				{
-					if (g_timers.GetTimerValue(600) < 0.3f)
+					if ( g_timers.GetTimerValue( 600 ) < 0.3f )
 						nFilled = nFilledWished;
 				}
 
-				D3DXVECTOR2 vPos(bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY());
+				D3DXVECTOR2 vPos( bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY() );
 				//bar text
-				int nStrIdx = g_playerSelScr.m_arrUpgradeBars[nBarIdx]->nStrIdx_name;
-				m_pFontsMgr->fonts[fontIdx]->DrawStringClamped(nStrIdx, bbgroup.x + 1, vPos.y, vPos.x - bbteam.x - 5, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha));
+				int nStrIdx = g_playerSelScr.m_arrUpgradeBars[ nBarIdx ]->nStrIdx_name;
+				__TexFonts().fonts[ fontIdx ]->DrawStringClamped( nStrIdx, bbgroup.x + 1, vPos.y, vPos.x - bbteam.x - 5, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA( K_COLOR_DEFAULT_TEXT, layer->alpha ) );
 
 				//bar points
-				for (int xx = 0; xx < nDots; xx++)
+				for ( int xx = 0; xx < nDots; xx++ )
 				{
-					int nPointPrice = g_playerSelScr.m_arrUpgradeBars[nBarIdx]->m_arrPerks[xx].nPointPrice;
+					int nPointPrice = g_playerSelScr.m_arrUpgradeBars[ nBarIdx ]->m_arrPerks[ xx ].nPointPrice;
 					//skip perks (painted later)
-					if (nPointPrice >= 0)
+					if ( nPointPrice >= 0 )
 						continue;
 					int nframe = 0;
-					if (xx < nFilled)
+					if ( xx < nFilled )
 					{
 						nframe = 5;
-						if (ll >= nClassRows) 
+						if ( ll >= nClassRows )
 							nframe = 8;
 					}
 
 					DWORD pcol = wcol;
 					//paint in different color what you can't remove
-					if ((nSelectedLine <= 1) && (ll == nSelectedLine))
+					if ( ( nSelectedLine <= 1 ) && ( ll == nSelectedLine ) )
 					{
 						int nMinPos = nFilledLocal - nTeamSpentPointsLocal;
-						if (xx < nMinPos)
+						if ( xx < nMinPos )
 							pcol = wcoldenied;
 					}
 
-					CSprite::paintFrame(m_pSprMgr, vPos.x + xx * rectSz.w, vPos.y, animIdx, nframe, pcol);
+					CSprite::paintFrame( m_pSprCol, vPos.x + xx * rectSz.w, vPos.y, animIdx, nframe, pcol );
 				}
 				//links
-				for (int xx = 0; xx < nDots; xx++)
+				for ( int xx = 0; xx < nDots; xx++ )
 				{
-					if (xx < nDots - 1)
+					if ( xx < nDots - 1 )
 					{
 						int nframe = 1;
-						if((xx < nDots - 1) && (xx + 1 < nFilled))
+						if ( ( xx < nDots - 1 ) && ( xx + 1 < nFilled ) )
 						{
 							nframe = 6;
-							if (ll >= nClassRows)
+							if ( ll >= nClassRows )
 								nframe = 9;
 						}
 						DWORD pcol = wcol;
 						//paint in different color what you can't remove
-						if ((nSelectedLine <= 1) && (ll == nSelectedLine))
+						if ( ( nSelectedLine <= 1 ) && ( ll == nSelectedLine ) )
 						{
 							int nMinPos = nFilledLocal - nTeamSpentPointsLocal;
-							if (xx < nMinPos - 1)
+							if ( xx < nMinPos - 1 )
 								pcol = wcoldenied;
 						}
-						CSprite::paintFrame(m_pSprMgr, vPos.x + xx * rectSz.w + rectSz.w / 2, vPos.y, animIdx, nframe, pcol);
+						CSprite::paintFrame( m_pSprCol, vPos.x + xx * rectSz.w + rectSz.w / 2, vPos.y, animIdx, nframe, pcol );
 					}
 				}
 				//large panels and icons
-				for (int xx = 0; xx < nDots; xx++)
+				for ( int xx = 0; xx < nDots; xx++ )
 				{
-					int nPointPrice = g_playerSelScr.m_arrUpgradeBars[nBarIdx]->m_arrPerks[xx].nPointPrice;
-					if (nPointPrice < 0)
+					int nPointPrice = g_playerSelScr.m_arrUpgradeBars[ nBarIdx ]->m_arrPerks[ xx ].nPointPrice;
+					if ( nPointPrice < 0 )
 						continue;
 					int nframe = 3;
-					if (xx == 0) nframe = 2;
-					if (xx == nDots - 1) nframe = 4;
-					CSprite::paintFrame(m_pSprMgr, vPos.x + xx * rectSz.w, vPos.y, animIdx, nframe, wcol);
+					if ( xx == 0 ) nframe = 2;
+					if ( xx == nDots - 1 ) nframe = 4;
+					CSprite::paintFrame( m_pSprCol, vPos.x + xx * rectSz.w, vPos.y, animIdx, nframe, wcol );
 					//paint color filled rectangle
-					if (xx < nFilled)
+					if ( xx < nFilled )
 					{
 						nframe = 7;
-						if (ll >= nClassRows)
+						if ( ll >= nClassRows )
 							nframe = 10;
 
 						DWORD pcol = wcol;
 						//paint in different color what you can't remove
-						if ((nSelectedLine <= 1) && (ll == nSelectedLine))
+						if ( ( nSelectedLine <= 1 ) && ( ll == nSelectedLine ) )
 						{
 							int nMinPos = nFilledLocal - nTeamSpentPointsLocal;
-							if (xx < nMinPos)
+							if ( xx < nMinPos )
 								pcol = wcoldenied;
 						}
-						CSprite::paintFrame(m_pSprMgr, vPos.x + xx * rectSz.w, vPos.y, animIdx, nframe, pcol);
+						CSprite::paintFrame( m_pSprCol, vPos.x + xx * rectSz.w, vPos.y, animIdx, nframe, pcol );
 					}
 					//paint icons:
-					int nIcon = g_playerSelScr.m_arrUpgradeBars[nBarIdx]->m_arrPerks[xx].nIconIdx;
-					if (nIcon >= 0)
+					int nIcon = g_playerSelScr.m_arrUpgradeBars[ nBarIdx ]->m_arrPerks[ xx ].nIconIdx;
+					if ( nIcon >= 0 )
 					{
 						DWORD dwIconCol = 0xff95c7f0;
-						if (ll >= nClassRows)
+						if ( ll >= nClassRows )
 							dwIconCol = 0xff8ee6e2;
-						if (xx >= nFilled)
+						if ( xx >= nFilled )
 							dwIconCol = 0xff384652;
-						CSprite::paintFrame(m_pSprMgr, vPos.x + xx * rectSz.w, vPos.y, ANM_CONTROLS_SPR_UPGRADE_ICONS, nIcon, DW_COLORALPHA(dwIconCol, layer->alpha));
+						CSprite::paintFrame( m_pSprCol, vPos.x + xx * rectSz.w, vPos.y, ANM_CONTROLS_SPR_UPGRADE_ICONS, nIcon, DW_COLORALPHA( dwIconCol, layer->alpha ) );
 					}
 				}
 			}
 
 			//paint selected line
-			if (statusFlags & CCTRL_STATUS_FLAG_HAS_FOCUS)
+			if ( statusFlags & CCTRL_STATUS_FLAG_HAS_FOCUS )
 			{
 				RECTXYWH bbline = bbgroup;
 				bbline.h = rectSz.h;
-				bbline.y += nSelectedLine * (rectSz.h + 1);
-				if (nSelectedLine >= nClassRows)
+				bbline.y += nSelectedLine * ( rectSz.h + 1 );
+				if ( nSelectedLine >= nClassRows )
 					bbline.y += nGroupSpacing - 1;
 				//paint selection
 				RECTXYWH bbsel = bbline;
-				bbsel.Inflate(-1, -1);
-				CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_HOLLOW1, bbsel, DW_COLORALPHA(0xff254159, layer->alpha));
+				bbsel.Inflate( -1, -1 );
+				GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_HOLLOW1, bbsel, DW_COLORALPHA( 0xff254159, layer->alpha ) );
 				//paint selected point
-				int nBarIdx = g_playerSelScr.arrItemsByClass[nPlayerClass].arrUpgradeBarsIdx[nSelectedLine];
-				int nPointPrice = g_playerSelScr.m_arrUpgradeBars[nBarIdx]->m_arrPerks[nSelectedPoint].nPointPrice;
-				int nDots = g_playerSelScr.m_arrUpgradeBars[nBarIdx]->nTotalPoints;
-				bbline.Inflate(-2, -2);
-				D3DXVECTOR2 vPos(bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY());
+				int nBarIdx = g_playerSelScr.arrItemsByClass[ nPlayerClass ].arrUpgradeBarsIdx[ nSelectedLine ];
+				int nPointPrice = g_playerSelScr.m_arrUpgradeBars[ nBarIdx ]->m_arrPerks[ nSelectedPoint ].nPointPrice;
+				int nDots = g_playerSelScr.m_arrUpgradeBars[ nBarIdx ]->nTotalPoints;
+				bbline.Inflate( -2, -2 );
+				D3DXVECTOR2 vPos( bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY() );
 				DWORD dwLocalCol = wcol;
 				//Can't delete points from the TEAM bars
-				if (bDeniedOperation)
-					dwLocalCol = DW_COLORALPHA(0xffff2222, layer->alpha);
+				if ( bDeniedOperation )
+					dwLocalCol = DW_COLORALPHA( 0xffff2222, layer->alpha );
 
-				if (nPointPrice < 0)
-					CSprite::paintFrame(m_pSprMgr, vPos.x + nSelectedPoint * rectSz.w, vPos.y, animIdx, 11, dwLocalCol);
+				if ( nPointPrice < 0 )
+					CSprite::paintFrame( m_pSprCol, vPos.x + nSelectedPoint * rectSz.w, vPos.y, animIdx, 11, dwLocalCol );
 				else
-					CSprite::paintFrame(m_pSprMgr, vPos.x + nSelectedPoint * rectSz.w, vPos.y, animIdx, 12, dwLocalCol);
+					CSprite::paintFrame( m_pSprCol, vPos.x + nSelectedPoint * rectSz.w, vPos.y, animIdx, 12, dwLocalCol );
 			}
 		}
 		break;
 
 		case CCTRL_TYPE_SCROLLMENU:
 		{
-			if (fontIdx < 0)
+			if ( fontIdx < 0 )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid font ID!");
+				drawDebugText( BBox.x, BBox.y, L"Invalid font ID!" );
 				return;
 			}
-			if ((animIdx >= 0) && (m_pSprMgr->Animations[animIdx]->aframesNo < 2))
+			if ( ( animIdx >= 0 ) && ( m_pSprCol->Animations[ animIdx ]->aframesNo < 2 ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx. Needs 2 frames.");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx. Needs 2 frames." );
 				return;
 			}
 
-			float fSelectionCursor = paramsDict.GetVariantByName(L"fSelectionCursor")->m_asFloat;
-			int	selectedIdx = paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
-			int textAlignFlags = paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
-			int vSpacing = paramsDict.GetVariantByName(L"Vspacing")->m_asINT32;
-			int nDisabledFlags = paramsDict.GetVariantByName(L"disabledFlags")->m_asINT32;
+			float fSelectionCursor = paramsDict.GetVariantByName( L"fSelectionCursor" )->m_asFloat;
+			int	selectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
+			int textAlignFlags = paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
+			int vSpacing = paramsDict.GetVariantByName( L"Vspacing" )->m_asINT32;
+			int nDisabledFlags = paramsDict.GetVariantByName( L"disabledFlags" )->m_asINT32;
 			//desenam meniul
-			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 			//cursor size
-			RECTXYWH currRect(0, 0, BBox.w, vSpacing);
-			if(animIdx >= 0)
-				currRect = m_pSprMgr->GetAFrameBBox(animIdx, 0);
+			RECTXYWH currRect( 0, 0, BBox.w, vSpacing );
+			if ( animIdx >= 0 )
+				currRect = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 
 			int curidx = 0;
-			for (int ll = 0; ll < 8; ll++) //max 8 string options
+			for ( int ll = 0; ll < 8; ll++ ) //max 8 string options
 			{
-				float selperc = max(0.0f, 1.0f - fabs((float)ll - fSelectionCursor));
+				float selperc = max( 0.0f, 1.0f - fabs( ( float ) ll - fSelectionCursor ) );
 				int nDisFlag = 1 << ll;
-				bool bDisabledLocal = ((nDisabledFlags & nDisFlag) != 0);
+				bool bDisabledLocal = ( ( nDisabledFlags & nDisFlag ) != 0 );
 
-				WCHAR varname[MAX_PATH];
-				StringCchPrintf(varname, MAX_PATH, L"StringID%d", ll);
-				CVariantComplex* vc = paramsDict.GetVariantByName(varname);
-				if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
+				WCHAR varname[ MAX_PATH ];
+				StringCchPrintf( varname, MAX_PATH, L"StringID%d", ll );
+				CVariantComplex* vc = paramsDict.GetVariantByName( varname );
+				if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 				{
-					int nStringIdx = __Texts().GetStrIdx(vc->m_strArg.textHash);
-					SIZEWH strSz = m_pFontsMgr->fonts[fontIdx]->MeasureString(nStringIdx, BBox_inflated.w);
+					int nStringIdx = __Texts().GetStrIdx( vc->m_strArg.textHash );
+					SIZEWH strSz = __TexFonts().fonts[ fontIdx ]->MeasureString( nStringIdx, BBox_inflated.w );
 
 					//paint cursor
-					if (animIdx >= 0)
+					if ( animIdx >= 0 )
 					{
 						int selFrame = 0; //small button
 
-						RECTXYWH rectButAnim = m_pSprMgr->GetAFrameBBox(animIdx, selFrame);
+						RECTXYWH rectButAnim = m_pSprCol->GetAFrameBBox( animIdx, selFrame );
 
-						CSprite::paintFrame(m_pSprMgr, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame, wcol);
+						CSprite::paintFrame( m_pSprCol, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame, wcol );
 						//paint selected cursor
-						if(selperc > 0.0f)
-							CSprite::paintFrame(m_pSprMgr, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame + 1, DW_COLOR_FFFA(selperc));
+						if ( selperc > 0.0f )
+							CSprite::paintFrame( m_pSprCol, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame + 1, DW_COLOR_FFFA( selperc ) );
 					}
 
 					//and string
 					D3DXCOLOR exitcol;
-					D3DXColorLerp(&exitcol, &(D3DXCOLOR)dwFontColor, &(D3DXCOLOR)wcol, selperc);
-					if (bDisabledLocal)
-						exitcol = DW_COLORALPHA((DWORD)exitcol, 0.5f);
+					D3DXColorLerp( &exitcol, &( D3DXCOLOR ) dwFontColor, &( D3DXCOLOR ) wcol, selperc );
+					if ( bDisabledLocal )
+						exitcol = DW_COLORALPHA( ( DWORD ) exitcol, 0.5f );
 
-					D3DXVECTOR2 vTextOffset(selperc * 15.0f, 0.0f);
-					if (textAlignFlags & FONTFLAG_ANCHOR_CENTER)
-						vTextOffset = D3DXVECTOR2(0.0f, -1.0f * selperc);
+					D3DXVECTOR2 vTextOffset( selperc * 15.0f, 0.0f );
+					if ( textAlignFlags & FONTFLAG_ANCHOR_CENTER )
+						vTextOffset = D3DXVECTOR2( 0.0f, -1.0f * selperc );
 
-					RECTXYWH drawrect(BBox.x + vTextOffset.x, BBox.y + vSpacing * curidx + vTextOffset.y + currRect.y, BBox.w, currRect.h);
-					D3DXVECTOR2 vTextOrigin(drawrect.x, drawrect.CenterY());
-					if (textAlignFlags & FONTFLAG_ANCHOR_CENTER)
-						vTextOrigin = D3DXVECTOR2(drawrect.CenterX(), drawrect.CenterY());
-					else if (textAlignFlags & FONTFLAG_ANCHOR_RIGHT)
-						vTextOrigin = D3DXVECTOR2(drawrect.Right(), drawrect.CenterY());						
+					RECTXYWH drawrect( BBox.x + vTextOffset.x, BBox.y + vSpacing * curidx + vTextOffset.y + currRect.y, BBox.w, currRect.h );
+					D3DXVECTOR2 vTextOrigin( drawrect.x, drawrect.CenterY() );
+					if ( textAlignFlags & FONTFLAG_ANCHOR_CENTER )
+						vTextOrigin = D3DXVECTOR2( drawrect.CenterX(), drawrect.CenterY() );
+					else if ( textAlignFlags & FONTFLAG_ANCHOR_RIGHT )
+						vTextOrigin = D3DXVECTOR2( drawrect.Right(), drawrect.CenterY() );
 					//text rect
-					RECTXYWH butr(BBox_inflated.x, BBox_inflated.y + vSpacing * curidx - ceil(selperc), BBox_inflated.w, vSpacing);
+					RECTXYWH butr( BBox_inflated.x, BBox_inflated.y + vSpacing * curidx - ceil( selperc ), BBox_inflated.w, vSpacing );
 
-					m_pFontsMgr->fonts[fontIdx]->DrawString(nStringIdx, vTextOrigin.x, vTextOrigin.y, textAlignFlags | FONTFLAG_ANCHOR_VCENTER, (DWORD)exitcol);
-					if ((ll == selectedIdx) && (!bDisabled))
+					__TexFonts().fonts[ fontIdx ]->DrawString( nStringIdx, vTextOrigin.x, vTextOrigin.y, textAlignFlags | FONTFLAG_ANCHOR_VCENTER, ( DWORD ) exitcol );
+					if ( ( ll == selectedIdx ) && ( !bDisabled ) )
 					{
-						float fcursor = FLOAT_MOD(layer->pControlsManager->fLocalTimeline * 2.0f, 3) - 1.0f;
-						m_pFontsMgr->fonts[fontIdx]->DrawStringLightened(nStringIdx, vTextOrigin.x, vTextOrigin.y, fcursor, 30.0f, textAlignFlags | FONTFLAG_ANCHOR_VCENTER, (DWORD)exitcol);
+						float fcursor = FLOAT_MOD( layer->pControlsManager->fLocalTimeline * 2.0f, 3 ) - 1.0f;
+						__TexFonts().fonts[ fontIdx ]->DrawString( nStringIdx, vTextOrigin.x, vTextOrigin.y, textAlignFlags | FONTFLAG_ANCHOR_VCENTER, ( DWORD ) exitcol );
 					}
 
 					curidx++;
@@ -2309,702 +2234,640 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 
 		case CCTRL_TYPE_WIDEBAR:
 		{
-			if (animIdx < 0)
+			if ( animIdx < 0 )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid Animation ID!");
+				drawDebugText( BBox.x, BBox.y, L"Invalid Animation ID!" );
 				return;
 			}
 
 			//deseneaza fundal (frames: 0-top bar, 1-bg filler, 2-bottom bar)
 			RECTXYWH_F camrect = pCamera->GetCamWorldAABB();
 			RECTXYWH_F barrect;
-			barrect.x = floor(camrect.x - camrect.w / 2.0f - 10.0f); barrect.w = ceil(camrect.w + 20.0f);
-			barrect.y = BBox_inflated.CenterY() - (BBox_inflated.h / 2.0f) * layer->alpha;
+			barrect.x = floor( camrect.x - camrect.w / 2.0f - 10.0f ); barrect.w = ceil( camrect.w + 20.0f );
+			barrect.y = BBox_inflated.CenterY() - ( BBox_inflated.h / 2.0f ) * layer->alpha;
 			barrect.h = BBox_inflated.h * layer->alpha;
 
-			CSprite bar(animIdx, barrect.x, ROUND_FLOAT(barrect.y));
+			CSprite bar( animIdx, barrect.x, ROUND_FLOAT( barrect.y ) );
 			//back
 			bar.currentFrame = 1;
 			bar.color = dwColor;
-			bar.paintTiled(m_pSprMgr, barrect.w, barrect.h);
+			bar.paintTiled( m_pSprCol, barrect.w, barrect.h );
 			//bars
 			//top
 			bar.currentFrame = 0;
-			bar.paintTiled(m_pSprMgr, barrect.w);
+			bar.paintTiled( m_pSprCol, barrect.w );
 			//bottom
 			bar.currentFrame = 2;
-			bar.pos.y = ROUND_FLOAT(barrect.Bottom());
-			bar.paintTiled(m_pSprMgr, barrect.w);
+			bar.pos.y = ROUND_FLOAT( barrect.Bottom() );
+			bar.paintTiled( m_pSprCol, barrect.w );
 		}
 		break;
 
 
 		case CCTRL_TYPE_BUTTON:
 		{
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo) || (m_pSprMgr->Animations[animIdx]->aframesNo < 3))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 3 ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx or frame count");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx or frame count" );
 				return;
 			}
 
 			float dCol = 1.0f - 0.3f * fDisabledPercent;
-			DWORD wcol = D3DCOLOR_COLORVALUE(dCol, dCol, dCol, layer->alpha);
+			DWORD wcol = D3DCOLOR_COLORVALUE( dCol, dCol, dCol, layer->alpha );
 
-			D3DXVECTOR2 butC((int)(BBox.x + BBox.w / 2.0f), (int)(BBox.y + BBox.h / 2.0f));
+			D3DXVECTOR2 butC( ( int ) ( BBox.x + BBox.w / 2.0f ), ( int ) ( BBox.y + BBox.h / 2.0f ) );
 
-			if ((statusFlags & CCTRL_STATUS_FLAG_CLICKED) != 0)
+			if ( ( statusFlags & CCTRL_STATUS_FLAG_CLICKED ) != 0 )
 			{
-				CtrlMgrDrawHTilingAnim(m_pSprMgr, animIdx, 6, BBox, wcol);
+				GUIUtils::DrawHTilingAnim( m_pSprCol, animIdx, 6, BBox, wcol );
 			}
-			else if ((statusFlags & CCTRL_STATUS_FLAG_HOVER) != 0)
+			else if ( ( statusFlags & CCTRL_STATUS_FLAG_HOVER ) != 0 )
 			{
-				CtrlMgrDrawHTilingAnim(m_pSprMgr, animIdx, 3, BBox, wcol);
+				GUIUtils::DrawHTilingAnim( m_pSprCol, animIdx, 3, BBox, wcol );
 			}
-			else 
-				CtrlMgrDrawHTilingAnim(m_pSprMgr, animIdx, 0, BBox, wcol);
-			
+			else
+				GUIUtils::DrawHTilingAnim( m_pSprCol, animIdx, 0, BBox, wcol );
+
 			//text
-			if (stringIdx >= 0)
+			if ( stringIdx >= 0 )
 			{
-				if (fontIdx >= 0)
+				if ( fontIdx >= 0 )
 				{
 					int offy = 0;
-					if ((statusFlags & CCTRL_STATUS_FLAG_CLICKED) != 0)
+					if ( ( statusFlags & CCTRL_STATUS_FLAG_CLICKED ) != 0 )
 						offy = 1;
 
-					m_pFontsMgr->fonts[fontIdx]->DrawStringScaleW(stringIdx, butC.x, butC.y + offy, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor);
+					__TexFonts().fonts[ fontIdx ]->DrawStringScaleW( stringIdx, butC.x, butC.y + offy, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor );
 				}
 				else
 				{
-					drawDebugText(butC.x, butC.y, __Texts().strings[stringIdx]->sText, wcol);
+					drawDebugText( butC.x, butC.y, __Texts().strings[ stringIdx ]->sText, wcol );
 				}
 			}
-
-			layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
 		}
 		break;
 
 
 		case CCTRL_TYPE_WINDOW:
 		{
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo) || (m_pSprMgr->Animations[animIdx]->aframesNo < 2))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 2 ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid window animIdx");
+				drawDebugText( BBox.x, BBox.y, L"Invalid window animIdx" );
 				return;
 			}
 
-			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 
 			//back frame
-			CtrlMgrDrawFrame(m_pSprMgr, animIdx, BBox_inflated, wcol);
+			GUIUtils::DrawFrame( m_pSprCol, animIdx, BBox_inflated, wcol );
 			//title bar
-			if (stringIdx >= 0 && fontIdx >= 0)
+			if ( stringIdx >= 0 && fontIdx >= 0 )
 			{
-				int fnLen = m_pFontsMgr->fonts[fontIdx]->MeasureString(stringIdx).w;
+				int fnLen = __TexFonts().fonts[ fontIdx ]->MeasureString( stringIdx ).w;
 				//ca sa scaleze title bar-ul daca e fereastra prea ingusta (sa am loc de close button)
-				if (fnLen > BBox_inflated.w)
+				if ( fnLen > BBox_inflated.w )
 					fnLen = BBox_inflated.w;
 				//gasesc centrul title bar-ului (din frame-ul de top center)
-				RECTXYWH topbarbb = m_pSprMgr->GetAFrameBBox(animIdx, 1);
+				RECTXYWH topbarbb = m_pSprCol->GetAFrameBBox( animIdx, 1 );
 
-				D3DXVECTOR2 titleBarCenter(BBox_inflated.x + BBox_inflated.w / 2.0f, BBox_inflated.y - topbarbb.h / 2); //constanta este in fn de grafica, nu se poate scapa de ea
-				m_pFontsMgr->fonts[fontIdx]->DrawStringScaleW(stringIdx, titleBarCenter.x, titleBarCenter.y, fnLen, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor);
+				Vec2 titleBarCenter( BBox_inflated.x + BBox_inflated.w / 2.0f, BBox_inflated.y - topbarbb.h / 2 );
+				__TexFonts().fonts[ fontIdx ]->DrawStringScaleW( stringIdx, titleBarCenter.x, titleBarCenter.y, fnLen, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor );
 			}
 		}
 		break;
 
 		case CCTRL_TYPE_FRAME:
 		{
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo) || (m_pSprMgr->Animations[animIdx]->aframesNo < 8))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 8 ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx" );
 				return;
 			}
 
-			CtrlMgrDrawFrame(m_pSprMgr, animIdx, BBox_inflated, dwColor);
+			GUIUtils::DrawFrame( m_pSprCol, animIdx, BBox_inflated, dwColor );
 		}
 		break;
 		case CCTRL_TYPE_SDL_KEYREADER:
 		{
 			RECTXYWH movedB = BBox;
-			if (fontIdx >= 0)
+			if ( fontIdx >= 0 )
 			{
-				CStringHash* strh = &paramsDict.GetVariantByName(L"sKeyName")->m_strArg;
+				CStringHash* strh = &paramsDict.GetVariantByName( L"sKeyName" )->m_strArg;
 				CStringDesc strdesc;
-				__Texts().SetStringDesc(&strdesc, strh->text);
+				__Texts().SetStringDesc( &strdesc, strh->text );
 
-				m_pFontsMgr->fonts[fontIdx]->DrawString(&strdesc, movedB, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor);
+				__TexFonts().fonts[ fontIdx ]->DrawString( &strdesc, movedB, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor );
 			}
 		}
 		break;
 		case CCTRL_TYPE_TASKS_LIST:
 		{
 			int nIconFrame1 = -1, nIconFrame2 = -1;
-			if (animIdx >= 0)
+			if ( animIdx >= 0 )
 			{
-				nIconFrame1 = paramsDict.GetVariantByName(L"nIconFrame1")->m_asINT32;
-				nIconFrame2 = paramsDict.GetVariantByName(L"nIconFrame2")->m_asINT32;
+				nIconFrame1 = paramsDict.GetVariantByName( L"nIconFrame1" )->m_asINT32;
+				nIconFrame2 = paramsDict.GetVariantByName( L"nIconFrame2" )->m_asINT32;
 			}
-			DWORD dwCol = DW_COLOR_FFFA(layer->alpha);
+			DWORD dwCol = DW_COLOR_FFFA( layer->alpha );
 			//now paint
-			if (fontIdx >= 0)
+			if ( fontIdx >= 0 )
 			{
 				int nStrIdx1 = -1, nStrIdx2 = -1;
-				CVariantComplex* vc = paramsDict.GetVariantByName(L"stringID1");
-				if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
-					nStrIdx1 = __Texts().GetStrIdx(vc->m_strArg.textHash);
-				vc = paramsDict.GetVariantByName(L"stringID2");
-				if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
-					nStrIdx2 = __Texts().GetStrIdx(vc->m_strArg.textHash);
+				CVariantComplex* vc = paramsDict.GetVariantByName( L"stringID1" );
+				if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+					nStrIdx1 = __Texts().GetStrIdx( vc->m_strArg.textHash );
+				vc = paramsDict.GetVariantByName( L"stringID2" );
+				if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+					nStrIdx2 = __Texts().GetStrIdx( vc->m_strArg.textHash );
 
 				int nCount = 0;
-				if (nStrIdx1 >= 0)
+				if ( nStrIdx1 >= 0 )
 					nCount++;
-				if (nStrIdx2 >= 0)
+				if ( nStrIdx2 >= 0 )
 					nCount++;
 
-				RECTXYWH iconbox(0.0f, 0.0f, 0.0f, m_pFontsMgr->fonts[fontIdx]->rowHeight);
-				D3DXVECTOR2 vPos(BBox.x, BBox.Bottom() - iconbox.h / 2.0f - (nCount - 1) * iconbox.h);
+				RECTXYWH iconbox( 0.0f, 0.0f, 0.0f, __TexFonts().fonts[ fontIdx ]->rowHeight );
+				D3DXVECTOR2 vPos( BBox.x, BBox.Bottom() - iconbox.h / 2.0f - ( nCount - 1 ) * iconbox.h );
 				bool bActive = false;
-				if (nIconFrame1 >= 0)
+				if ( nIconFrame1 >= 0 )
 				{
-					if (nIconFrame1 > 0)
+					if ( nIconFrame1 > 0 )
 						bActive = true;
 
-					iconbox = m_pSprMgr->GetAFrameBBox(animIdx, nIconFrame1);
-					vPos.x = BBox.x + iconbox.w; 
+					iconbox = m_pSprCol->GetAFrameBBox( animIdx, nIconFrame1 );
+					vPos.x = BBox.x + iconbox.w;
 					//top align:
 					vPos.y = BBox.y + iconbox.h / 2;
 					//bottom align:
 					//vPos.y = BBox.Bottom() - iconbox.h / 2 - (nCount - 1) * iconbox.h;
-					
-					RECTXYWH frrct(vPos.x - iconbox.w, vPos.y - iconbox.h / 2, BBox.w, iconbox.h);
-					frrct.Inflate(-1, -1);
-					if(bActive)
-						CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_BLACK4, frrct, dwCol);
-					else
-						CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME6_DARK, frrct, dwCol);
 
-					CSprite::paintFrame(m_pSprMgr, vPos.x - iconbox.w, vPos.y, animIdx, nIconFrame1);
-				}
-				if (nStrIdx1 >= 0)
-				{
-					if (bActive)
-						m_pFontsMgr->fonts[fontIdx]->DrawString(nStrIdx1, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, dwFontColor);
+					RECTXYWH frrct( vPos.x - iconbox.w, vPos.y - iconbox.h / 2, BBox.w, iconbox.h );
+					frrct.Inflate( -1, -1 );
+					if ( bActive )
+						GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_BLACK4, frrct, dwCol );
 					else
-						m_pFontsMgr->fonts[fontIdx]->DrawString(nStrIdx1, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA(dwFontColor, layer->alpha * 0.5f));
+						GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME6_DARK, frrct, dwCol );
+
+					CSprite::paintFrame( m_pSprCol, vPos.x - iconbox.w, vPos.y, animIdx, nIconFrame1 );
+				}
+				if ( nStrIdx1 >= 0 )
+				{
+					if ( bActive )
+						__TexFonts().fonts[ fontIdx ]->DrawString( nStrIdx1, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, dwFontColor );
+					else
+						__TexFonts().fonts[ fontIdx ]->DrawString( nStrIdx1, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA( dwFontColor, layer->alpha * 0.5f ) );
 				}
 
 				vPos.y += iconbox.h + 5;
 				bActive = false;
-				if (nIconFrame2 >= 0)
+				if ( nIconFrame2 >= 0 )
 				{
-					if (nIconFrame2 > 0)
+					if ( nIconFrame2 > 0 )
 						bActive = true;
-					RECTXYWH frrct(vPos.x - iconbox.w, vPos.y - iconbox.h / 2, BBox.w, iconbox.h);
-					frrct.Inflate(-1, -1);
-					if (bActive)
-						CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME_BLACK4, frrct, dwCol);
+					RECTXYWH frrct( vPos.x - iconbox.w, vPos.y - iconbox.h / 2, BBox.w, iconbox.h );
+					frrct.Inflate( -1, -1 );
+					if ( bActive )
+						GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_BLACK4, frrct, dwCol );
 					else
-						CtrlMgrDrawFrame(m_pSprMgr, ANM_CONTROLS_SPR_FRAME6_DARK, frrct, dwCol);
+						GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME6_DARK, frrct, dwCol );
 
-					CSprite::paintFrame(m_pSprMgr, vPos.x - iconbox.w, vPos.y, animIdx, nIconFrame2);
+					CSprite::paintFrame( m_pSprCol, vPos.x - iconbox.w, vPos.y, animIdx, nIconFrame2 );
 				}
-				if (nStrIdx2 >= 0)
+				if ( nStrIdx2 >= 0 )
 				{
-					if (bActive)
-						m_pFontsMgr->fonts[fontIdx]->DrawString(nStrIdx2, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, dwFontColor);
+					if ( bActive )
+						__TexFonts().fonts[ fontIdx ]->DrawString( nStrIdx2, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, dwFontColor );
 					else
-						m_pFontsMgr->fonts[fontIdx]->DrawString(nStrIdx2, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA(dwFontColor, layer->alpha * 0.5f));
+						__TexFonts().fonts[ fontIdx ]->DrawString( nStrIdx2, vPos.x, vPos.y, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA( dwFontColor, layer->alpha * 0.5f ) );
 				}
 			}
 		}
 		break;
-		case CCTRL_TYPE_LABEL:										
+		case CCTRL_TYPE_LABEL:
 		{
-			int textAlignFlags = paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+			int textAlignFlags = paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
 
 			RECTXYWH movedB = BBox;
-			if (fontIdx >= 0)
+			if ( fontIdx >= 0 )
 			{
 				int noscaleFlags = FONTFLAG_WRAPTEXT | FONTFLAG_CLIPTEXT | FONTFLAG_JUSTIFY;
-				if ((textAlignFlags & noscaleFlags) != 0)
-					m_pFontsMgr->fonts[fontIdx]->DrawString(stringIdx, movedB, textAlignFlags, dwFontColor);
+				if ( ( textAlignFlags & noscaleFlags ) != 0 )
+					__TexFonts().fonts[ fontIdx ]->DrawString( stringIdx, movedB, textAlignFlags, dwFontColor );
 				else
-					m_pFontsMgr->fonts[fontIdx]->DrawStringScaleW(stringIdx, movedB, textAlignFlags, dwFontColor);
+					__TexFonts().fonts[ fontIdx ]->DrawStringScaleW( stringIdx, movedB, textAlignFlags, dwFontColor );
 			}
 			else
 			{
-				drawDebugText(BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, __Texts().strings[stringIdx]->sText, dwFontColor);
+				drawDebugText( BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, __Texts().strings[ stringIdx ]->sText, dwFontColor );
 			}
 		}
 		break;
 		case CCTRL_TYPE_BLINKING_LABEL:
 		{
-			float fTimer = paramsDict.GetVariantByName(L"fTimer")->m_asFloat;
-			float fBlinkTimer = paramsDict.GetVariantByName(L"timerBlink")->m_asFloat;
+			float fTimer = paramsDict.GetVariantByName( L"fTimer" )->m_asFloat;
+			float fBlinkTimer = paramsDict.GetVariantByName( L"timerBlink" )->m_asFloat;
 
 			DWORD textcol = dwFontColor;
-			
-			if (fTimer < fBlinkTimer)
+
+			if ( fTimer < fBlinkTimer )
 			{
-				CVariantComplex* varc = paramsDict.GetVariantByName(L"blinkColor");
-				if (varc->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
+				CVariantComplex* varc = paramsDict.GetVariantByName( L"blinkColor" );
+				if ( varc->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR )
 				{
 					textcol = var->m_asUINT32;
 				}
 			}
 
-			int textAlignFlags = paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+			int textAlignFlags = paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
 
 			RECTXYWH movedB = BBox;
-			if (fontIdx >= 0)
+			if ( fontIdx >= 0 )
 			{
 				int noscaleFlags = FONTFLAG_WRAPTEXT | FONTFLAG_CLIPTEXT | FONTFLAG_JUSTIFY;
-				if ((textAlignFlags & noscaleFlags) != 0)
-					m_pFontsMgr->fonts[fontIdx]->DrawString(stringIdx, movedB, textAlignFlags, textcol);
+				if ( ( textAlignFlags & noscaleFlags ) != 0 )
+					__TexFonts().fonts[ fontIdx ]->DrawString( stringIdx, movedB, textAlignFlags, textcol );
 				else
-					m_pFontsMgr->fonts[fontIdx]->DrawStringScaleW(stringIdx, movedB, textAlignFlags, textcol);
+					__TexFonts().fonts[ fontIdx ]->DrawStringScaleW( stringIdx, movedB, textAlignFlags, textcol );
 			}
 			else
 			{
-				drawDebugText(BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, __Texts().strings[stringIdx]->sText, textcol);
+				drawDebugText( BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, __Texts().strings[ stringIdx ]->sText, textcol );
 			}
 		}
 		break;
 		case CCTRL_TYPE_ANIMATION:
 		{
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx" );
 				return;
 			}
 
-			int frameIdx = paramsDict.GetVariantByName(L"setFrame")->m_asINT32;
+			int frameIdx = paramsDict.GetVariantByName( L"setFrame" )->m_asINT32;
 
-			if ((frameIdx < 0) || (frameIdx >= m_pSprMgr->Animations[animIdx]->aframesNo))
+			if ( ( frameIdx < 0 ) || ( frameIdx >= m_pSprCol->Animations[ animIdx ]->aframesNo ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid frameIdx");
+				drawDebugText( BBox.x, BBox.y, L"Invalid frameIdx" );
 				return;
 			}
 			//scale the frame?
-			bool bScale = (bool)paramsDict.GetVariantByName(L"scaleImage")->m_asINT32;
-			bool bAnimated = (bool)paramsDict.GetVariantByName(L"Animated")->m_asINT32;
+			bool bScale = ( bool ) paramsDict.GetVariantByName( L"scaleImage" )->m_asINT32;
+			bool bAnimated = ( bool ) paramsDict.GetVariantByName( L"Animated" )->m_asINT32;
 
-			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 			//anim hack for tut arrow
 			float foff = 0.0f;
-			if (bAnimated)
+			if ( bAnimated )
 			{
-				foff = max(0.0f, 5.0f * sin(layer->pControlsManager->fLocalTimeline * 6.0f));
+				foff = max( 0.0f, 5.0f * sin( layer->pControlsManager->fLocalTimeline * 6.0f ) );
 			}
 
-			RECTXYWH animR = m_pSprMgr->GetAFrameBBox_real(animIdx, frameIdx);
+			RECTXYWH animR = m_pSprCol->GetAFrameBBox_real( animIdx, frameIdx );
 
-			D3DXMATRIX mat;
 			float fScaleX = 1.0f, fScaleY = 1.0f;
-			if (bScale)
+			if ( bScale )
 			{
-				fScaleX = BBox.w / (float)animR.w;
-				fScaleY = BBox.h / (float)animR.h;
+				fScaleX = BBox.w / ( float ) animR.w;
+				fScaleY = BBox.h / ( float ) animR.h;
 			}
-			float fScale = min(fScaleX, fScaleY);
+			float fScale = min( fScaleX, fScaleY );
 
+			/*
+			D3DXMATRIX mat;
 			D3DXMatrixAffineTransformation2D(&mat, fScale, NULL, 0.0f, &D3DXVECTOR2((int)BBox.x + foff, (int)BBox.y));
-
 			layer->pControlsManager->m_pSprite->SetTransform(&mat);
-			CSprite::paintFrame(m_pSprMgr, 0, 0, animIdx, frameIdx, wcol);
-			layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
+			*/
+			CSprite::paintFrame( m_pSprCol, 0, 0, animIdx, frameIdx, wcol );
+			//layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
 		}
 		break;
 		case CCTRL_TYPE_NET_VOTE:
 		{
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx" );
 				return;
 			}
 
-			int leftVote = paramsDict.GetVariantByName(L"leftVote")->m_asINT32;
-			int rightVote = paramsDict.GetVariantByName(L"rightVote")->m_asINT32;
+			int leftVote = paramsDict.GetVariantByName( L"leftVote" )->m_asINT32;
+			int rightVote = paramsDict.GetVariantByName( L"rightVote" )->m_asINT32;
 
-			if ((UTApp().IsGameNetworked()) || ( GameState::state == GAME_STATE_CONTROLSED))
+			if ( ( UTApp().IsGameNetworked() ) || ( GameState::state == GAME_STATE_CONTROLSED ) )
 			{
-				DWORD wcol = DW_COLOR_FFFA(layer->alpha);
+				DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 				int nFrame = 0;
-				if ((leftVote > 0) && (rightVote <= 0))
+				if ( ( leftVote > 0 ) && ( rightVote <= 0 ) )
 					nFrame = 1;
-				else if ((leftVote <= 0) && (rightVote > 0))
+				else if ( ( leftVote <= 0 ) && ( rightVote > 0 ) )
 					nFrame = 2;
-				else if ((leftVote > 0) && (rightVote > 0))
+				else if ( ( leftVote > 0 ) && ( rightVote > 0 ) )
 					nFrame = 3;
 				//now paint
-				CSprite::paintFrame(m_pSprMgr, BBox.CenterX(), BBox.CenterY(), animIdx, nFrame, wcol);
+				CSprite::paintFrame( m_pSprCol, BBox.CenterX(), BBox.CenterY(), animIdx, nFrame, wcol );
 			}
 		}
 		break;
-		case CCTRL_TYPE_PAINTEDBUTTON:
-		{
-			int frameIdx = _wtoi(paramsDict.GetVariantByName(L"frameIdx")->m_strArg.text);
 
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo))
-			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx");
-				return;
-			}
-
-			if ((frameIdx < 0) || (frameIdx >= m_pSprMgr->Animations[animIdx]->aframesNo))
-			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid frameIdx");
-				return;
-			}
-
-			float disablePercent = wcstod(paramsDict.GetVariantByName(L"disablePercent")->m_strArg.text, NULL);
-			float butFloat = wcstod(paramsDict.GetVariantByName(L"butFloat")->m_strArg.text, NULL);
-			//float hoverPercent = wcstod(paramsDict.GetVariantByName(L"hoverPercent")->m_strArg.text, NULL);
-
-			float dCol = 0.7f + 0.3f * disablePercent;
-			DWORD wcol = D3DCOLOR_COLORVALUE(dCol, dCol, dCol, layer->alpha);
-
-			RECTXYWH frameR = m_pSprMgr->GetAFrameBBox(animIdx, frameIdx);
-
-			D3DXMATRIX matScale, matTrans;
-			float butscalex = 1.0f + 0.2f * butFloat * sin(butFloat * DOUBLE_PI);
-			float butscaley = 1.0f + 0.3f * butFloat * sin(butFloat * DOUBLE_PI * 2.0f);
-			D3DXMatrixScaling(&matScale, butscalex, butscaley, 1.0f);
-			D3DXMatrixTranslation(&matTrans, BBox.x + frameR.w / 2, BBox.y + frameR.h / 2, 0.0f);
-			matScale *= matTrans;
-			layer->pControlsManager->m_pSprite->SetTransform(&matScale);
-
-			CSprite::paintFrame(m_pSprMgr, -frameR.w / 2, -frameR.h / 2, animIdx, frameIdx, wcol);
-			if (butFloat > 0.0f)
-			{
-				float hoverPercent = butFloat * 0.5f;
-				AdditiveBlendingON(layer->pControlsManager->m_pDevice, layer->pControlsManager->m_pSprite);
-				CSprite::paintFrame(m_pSprMgr, -frameR.w / 2, -frameR.h / 2, animIdx, frameIdx, DW_COLOR_FFFA(hoverPercent));
-				AdditiveBlendingOFF(layer->pControlsManager->m_pDevice, layer->pControlsManager->m_pSprite);
-			}
-
-			//text
-			if ((fontIdx >= 0) && (stringIdx >= 0))
-			{
-				SIZEWH textwh = m_pFontsMgr->fonts[fontIdx]->MeasureString(stringIdx);
-				float textscalew = (float)frameR.w / (float)textwh.w;
-				if (textscalew < 1.0f)
-				{
-					D3DXMatrixScaling(&matScale, butscalex * textscalew, butscaley * textscalew, 1.0f);
-					D3DXMatrixTranslation(&matTrans, BBox.x + (BBox.w >> 1), BBox.y + (BBox.h >> 1), 0);
-					matScale *= matTrans;
-					layer->pControlsManager->m_pSprite->SetTransform(&matScale);
-				}
-
-				m_pFontsMgr->fonts[fontIdx]->DrawString(stringIdx, 0, 0, FONTFLAG_ANCHOR_VCENTERHCENTER, wcol);
-			}
-
-			layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
-		}
-		break;
 		case CCTRL_TYPE_SLIDER:
 		{
 			//pt desenare: head left, center, head right, filler, tick, arr left, arr right
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo) || (m_pSprMgr->Animations[animIdx]->aframesNo < 7))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 7 ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx(needs 7 frames)");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx(needs 7 frames)" );
 				return;
 			}
 
-			bool hasArrows = (bool)paramsDict.GetVariantByName(L"hasArrows")->m_asINT32;
-			float slidePercent = paramsDict.GetVariantByName(L"fSlidePercent")->m_asFloat;
-			int nSteps = paramsDict.GetVariantByName(L"Steps")->m_asINT32;
+			bool hasArrows = ( bool ) paramsDict.GetVariantByName( L"hasArrows" )->m_asINT32;
+			float slidePercent = paramsDict.GetVariantByName( L"fSlidePercent" )->m_asFloat;
+			int nSteps = paramsDict.GetVariantByName( L"Steps" )->m_asINT32;
 
 			RECTXYWH bboxBar = BBox;
 
-			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 
-			CtrlMgrDrawProgress(m_pSprMgr, animIdx, bboxBar, slidePercent, wcol, nSteps);
+			GUIUtils::DrawProgress( m_pSprCol, animIdx, bboxBar, slidePercent, wcol, nSteps );
 			//ticks
-			if (hasArrows)
+			if ( hasArrows )
 			{
 				int frame;
 				//left but
 				frame = 5;
-				if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT)
+				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
 				{
 					frame = 5;
 				}
-				CSprite::paintFrame(m_pSprMgr, BBox.x, BBox.CenterY(), animIdx, frame, wcol);
+				CSprite::paintFrame( m_pSprCol, BBox.x, BBox.CenterY(), animIdx, frame, wcol );
 
 				//right but
 				frame = 6;
-				if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT)
+				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
 				{
 					frame = 6;
 				}
-				CSprite::paintFrame(m_pSprMgr, BBox.Right(), BBox.CenterY(), animIdx, frame, wcol);
+				CSprite::paintFrame( m_pSprCol, BBox.Right(), BBox.CenterY(), animIdx, frame, wcol );
 			}
 		}
 		break;
 		case CCTRL_TYPE_SLIDER_PAGES:
 		{
 			//pt desenare: head left, center, head right, filler, tick, arr left, arr right
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo) || (m_pSprMgr->Animations[animIdx]->aframesNo < 7))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 7 ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx(needs 7 frames)");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx(needs 7 frames)" );
 				return;
 			}
 
-			int nPage = paramsDict.GetVariantByName(L"nPage")->m_asINT32;
-			int nMinPage = paramsDict.GetVariantByName(L"nMinPage")->m_asINT32;
-			int nMaxPage = paramsDict.GetVariantByName(L"nMaxPage")->m_asINT32;
+			int nPage = paramsDict.GetVariantByName( L"nPage" )->m_asINT32;
+			int nMinPage = paramsDict.GetVariantByName( L"nMinPage" )->m_asINT32;
+			int nMaxPage = paramsDict.GetVariantByName( L"nMaxPage" )->m_asINT32;
 
 			RECTXYWH bboxBar = BBox;
 
-			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
+			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 
 			float offx = 0.0f;
-			if(statusFlags & CCTRL_STATUS_FLAG_HAS_FOCUS)			
-				offx = 1.0f + 1.0f * sin(layer->pControlsManager->fLocalTimeline * 3.0f);
+			if ( statusFlags & CCTRL_STATUS_FLAG_HAS_FOCUS )
+				offx = 1.0f + 1.0f * sin( layer->pControlsManager->fLocalTimeline * 3.0f );
 
 			int frame;
 			//left but
-			if ((nMinPage < 0) || (nPage > nMinPage))
+			if ( ( nMinPage < 0 ) || ( nPage > nMinPage ) )
 			{
 				frame = 5;
-				if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT)
+				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
 					frame = 5;
-				CSprite::paintFrame(m_pSprMgr, BBox.x - offx, BBox.CenterY(), animIdx, frame, wcol);
+				CSprite::paintFrame( m_pSprCol, BBox.x - offx, BBox.CenterY(), animIdx, frame, wcol );
 			}
 
 			//right but
-			if ((nMaxPage < 0) || (nPage < nMaxPage))
+			if ( ( nMaxPage < 0 ) || ( nPage < nMaxPage ) )
 			{
 				frame = 6;
-				if (statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT)
+				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
 					frame = 6;
-				CSprite::paintFrame(m_pSprMgr, BBox.Right() + offx, BBox.CenterY(), animIdx, frame, wcol);
+				CSprite::paintFrame( m_pSprCol, BBox.Right() + offx, BBox.CenterY(), animIdx, frame, wcol );
 			}
 		}
 		break;
 		case CCTRL_TYPE_CHECKBOX:
 		{
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx" );
 				return;
 			}
 
-			bool bChecked = paramsDict.GetVariantByName(L"bChecked")->m_asBool;
-			float hoverPercent = paramsDict.GetVariantByName(L"fHoverPercent")->m_asFloat;
+			bool bChecked = paramsDict.GetVariantByName( L"bChecked" )->m_asBool;
+			float hoverPercent = paramsDict.GetVariantByName( L"fHoverPercent" )->m_asFloat;
 
 			int frame = 0;
-			if (bChecked)
+			if ( bChecked )
 				frame = 1;
 
-			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
-			CSprite::paintFrame(m_pSprMgr, BBox.x, BBox.y, animIdx, frame, wcol);
+			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
+			CSprite::paintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, frame, wcol );
 
 			//hover frame
-			if (hoverPercent > 0.0f)
+			if ( hoverPercent > 0.0f )
 			{
-				AdditiveBlendingON(layer->pControlsManager->m_pDevice, layer->pControlsManager->m_pSprite);
-				CSprite::paintFrame(m_pSprMgr, BBox.x, BBox.y, animIdx, frame, DW_COLOR_FFFA(hoverPercent * 0.5f));
-				AdditiveBlendingOFF(layer->pControlsManager->m_pDevice, layer->pControlsManager->m_pSprite);
+				CSprite::paintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, frame, DW_COLOR_FFFA( hoverPercent * 0.5f ) );
 			}
 
-			if (fontIdx >= 0)
+			if ( fontIdx >= 0 )
 			{
-				m_pFontsMgr->fonts[fontIdx]->DrawString(stringIdx, BBox.x + BBox.w + 2, BBox.y + BBox.h / 2.0f, FONTFLAG_ANCHOR_VCENTERLEFT, dwFontColor);
+				__TexFonts().fonts[ fontIdx ]->DrawString( stringIdx, BBox.x + BBox.w + 2, BBox.y + BBox.h / 2.0f, FONTFLAG_ANCHOR_VCENTERLEFT, dwFontColor );
 			}
 			else
 			{
-				drawDebugText(BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, __Texts().strings[stringIdx]->sText, 0xffffffff);
+				drawDebugText( BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, __Texts().strings[ stringIdx ]->sText, 0xffffffff );
 			}
 		}
 		break;
 		case CCTRL_TYPE_VIGNETTE:
 		{
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx" );
 				return;
 			}
 
-			int frameIdx = paramsDict.GetVariantByName(L"frameIdx")->m_asINT32;
-			if ((frameIdx < 0) || (frameIdx > m_pSprMgr->GetAFramesCnt(animIdx)))
+			int frameIdx = paramsDict.GetVariantByName( L"frameIdx" )->m_asINT32;
+			if ( ( frameIdx < 0 ) || ( frameIdx > m_pSprCol->GetAFramesCnt( animIdx ) ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid frameIdx");
+				drawDebugText( BBox.x, BBox.y, L"Invalid frameIdx" );
 				return;
 			}
 
-			float fAlpha = DW_GETFALPHA(dwColor);
+			float fAlpha = DW_GETFALPHA( dwColor );
 
-			D3DXMATRIXA16 mattrans;
-			RECTXYWH_F bboxl = m_pSprMgr->GetAFrameBBox_real(animIdx, frameIdx);
-			D3DXMatrixAffineTransformation2D(&mattrans, UTApp().g_rectRender.h / bboxl.h, NULL, 0.0f, &D3DXVECTOR2(0.0f, 0.0f));
-			layer->pControlsManager->m_pSprite->SetTransform(&mattrans);
-			CSprite::paintFrame(m_pSprMgr, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, frameIdx, DW_COLORALPHA(dwColor, fAlpha * layer->alpha));
-			layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
+			// scale to screen
+			//D3DXMATRIXA16 mattrans;
+			//RECTXYWH_F bboxl = m_pSprCol->GetAFrameBBox_real(animIdx, frameIdx);
+			//D3DXMatrixAffineTransformation2D(&mattrans, UTApp().g_rectRender.h / bboxl.h, NULL, 0.0f, &D3DXVECTOR2(0.0f, 0.0f));
+			//layer->pControlsManager->m_pSprite->SetTransform(&mattrans);
+			CSprite::paintFrame( m_pSprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, frameIdx, DW_COLORALPHA( dwColor, fAlpha * layer->alpha ) );
+			//layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
 		}
 		break;
 		case CCTRL_TYPE_PROGRESS_BAR:
 		{
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo) || (m_pSprMgr->Animations[animIdx]->aframesNo < 8))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 8 ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx" );
 				return;
 			}
 
-			int progress = _wtoi(paramsDict.GetVariantByName(L"progress")->m_strArg.text);
+			int progress = _wtoi( paramsDict.GetVariantByName( L"progress" )->m_strArg.text );
 
-			DWORD col = DW_COLOR_FFFA(layer->alpha);
-			if (bDisabled)
+			DWORD col = DW_COLOR_FFFA( layer->alpha );
+			if ( bDisabled )
 			{
-				col = D3DCOLOR_COLORVALUE(0.6f, 0.6f, 0.6f, layer->alpha);
+				col = D3DCOLOR_COLORVALUE( 0.6f, 0.6f, 0.6f, layer->alpha );
 			}
 
 			int barH = 0;
 
 			// back
-			barH = m_pSprMgr->GetAFrameBBox(animIdx, 1).h;
-			CSprite::paintFrame(m_pSprMgr, BBox.x, BBox.y, animIdx, 0, col);
-			CSprite::paintFrameModuleTiled(m_pSprMgr, BBox.x, BBox.y, animIdx, 1, 0, col, BBox.w, barH);
-			CSprite::paintFrame(m_pSprMgr, BBox.x + BBox.w, BBox.y, animIdx, 2, col);
+			barH = m_pSprCol->GetAFrameBBox( animIdx, 1 ).h;
+			CSprite::paintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, 0, col );
+			CSprite::paintFrameModuleTiled( m_pSprCol, BBox.x, BBox.y, animIdx, 1, 0, col, BBox.w, barH );
+			CSprite::paintFrame( m_pSprCol, BBox.x + BBox.w, BBox.y, animIdx, 2, col );
 
 			// fill
 			float fProg = progress * 0.01f; // progress este maxim 100
 			int tileW = fProg * BBox.w;
-			barH = m_pSprMgr->GetAFrameBBox(animIdx, 4).h;
-			CSprite::paintFrame(m_pSprMgr, BBox.x, BBox.y, animIdx, 3, col);
-			CSprite::paintFrameModuleTiled(m_pSprMgr, BBox.x, BBox.y, animIdx, 4, 0, col, tileW, barH);
-			CSprite::paintFrame(m_pSprMgr, BBox.x + tileW, BBox.y, animIdx, 5, col);
+			barH = m_pSprCol->GetAFrameBBox( animIdx, 4 ).h;
+			CSprite::paintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, 3, col );
+			CSprite::paintFrameModuleTiled( m_pSprCol, BBox.x, BBox.y, animIdx, 4, 0, col, tileW, barH );
+			CSprite::paintFrame( m_pSprCol, BBox.x + tileW, BBox.y, animIdx, 5, col );
 
 			// border
-			barH = m_pSprMgr->GetAFrameBBox(animIdx, 7).h;
-			CSprite::paintFrame(m_pSprMgr, BBox.x, BBox.y, animIdx, 6, col);
-			CSprite::paintFrameModuleTiled(m_pSprMgr, BBox.x, BBox.y, animIdx, 7, 0, col, BBox.w, barH);
-			CSprite::paintFrame(m_pSprMgr, BBox.x + BBox.w, BBox.y, animIdx, 8, col);
+			barH = m_pSprCol->GetAFrameBBox( animIdx, 7 ).h;
+			CSprite::paintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, 6, col );
+			CSprite::paintFrameModuleTiled( m_pSprCol, BBox.x, BBox.y, animIdx, 7, 0, col, BBox.w, barH );
+			CSprite::paintFrame( m_pSprCol, BBox.x + BBox.w, BBox.y, animIdx, 8, col );
 		}
 		break;
 
 		case CCTRL_TYPE_XP_BAR:
 		{
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo) || (m_pSprMgr->Animations[animIdx]->aframesNo < 6))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 6 ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx (min 6 frames)");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx (min 6 frames)" );
 				return;
 			}
-			DWORD col = DW_COLOR_FFFA(layer->alpha);
-			if (bDisabled)
-				col = D3DCOLOR_COLORVALUE(0.6f, 0.6f, 0.6f, layer->alpha);
+			DWORD col = DW_COLOR_FFFA( layer->alpha );
+			if ( bDisabled )
+				col = D3DCOLOR_COLORVALUE( 0.6f, 0.6f, 0.6f, layer->alpha );
 
-			int nOldVal = paramsDict.GetVariantByName(L"nOldValue")->m_asINT32;
-			int nNewVal = paramsDict.GetVariantByName(L"nNewValue")->m_asINT32;
-			float fProgress = paramsDict.GetVariantByName(L"fProgress")->m_asFloat;
-			if (fProgress < 0.0f)
+			int nOldVal = paramsDict.GetVariantByName( L"nOldValue" )->m_asINT32;
+			int nNewVal = paramsDict.GetVariantByName( L"nNewValue" )->m_asINT32;
+			float fProgress = paramsDict.GetVariantByName( L"fProgress" )->m_asFloat;
+			if ( fProgress < 0.0f )
 				fProgress = 0.0f;
 
-			int nCurrentVal = nOldVal + (int)floor(fProgress * (nNewVal - nOldVal));
-			int nCurrentLevel = App_GetXPLevel(nCurrentVal);
-			int nMaxXP = App_GetMaxXP(nCurrentLevel);
-			int nMinXP = App_GetMaxXP(nCurrentLevel - 1);
-			if (nNewVal > nMaxXP)
+			int nCurrentVal = nOldVal + ( int ) floor( fProgress * ( nNewVal - nOldVal ) );
+			int nCurrentLevel = App_GetXPLevel( nCurrentVal );
+			int nMaxXP = App_GetMaxXP( nCurrentLevel );
+			int nMinXP = App_GetMaxXP( nCurrentLevel - 1 );
+			if ( nNewVal > nMaxXP )
 				nNewVal = nMaxXP;
-			if (nOldVal < nMinXP)
+			if ( nOldVal < nMinXP )
 				nOldVal = nMinXP;
 
 			int barH = 0;
 			int centerY = BBox.CenterY();
 			// back
-			barH = m_pSprMgr->GetAFrameBBox(animIdx, 1).h;
-			CSprite::paintFrame(m_pSprMgr, BBox.x, centerY, animIdx, 0, col);
-			CSprite::paintFrameModuleTiled(m_pSprMgr, BBox.x, centerY, animIdx, 1, 0, col, BBox.w, barH);
-			CSprite::paintFrame(m_pSprMgr, BBox.x + BBox.w, centerY, animIdx, 2, col);
+			barH = m_pSprCol->GetAFrameBBox( animIdx, 1 ).h;
+			CSprite::paintFrame( m_pSprCol, BBox.x, centerY, animIdx, 0, col );
+			CSprite::paintFrameModuleTiled( m_pSprCol, BBox.x, centerY, animIdx, 1, 0, col, BBox.w, barH );
+			CSprite::paintFrame( m_pSprCol, BBox.x + BBox.w, centerY, animIdx, 2, col );
 
-			if (fProgress < 1.0f)
+			if ( fProgress < 1.0f )
 			{
 				bool bFlicker = false;
-				if ((g_timers.GetTimerValue(200) < 0.1f) && (fProgress <= 0.0f))
+				if ( ( g_timers.GetTimerValue( 200 ) < 0.1f ) && ( fProgress <= 0.0f ) )
 					bFlicker = true;
 				// fill blinking teaser
-				float fTease = ((float)(nNewVal - nMinXP) / (float)(nMaxXP - nMinXP));
+				float fTease = ( ( float ) ( nNewVal - nMinXP ) / ( float ) ( nMaxXP - nMinXP ) );
 				int tileW = fTease * BBox.w;
-				barH = m_pSprMgr->GetAFrameBBox(animIdx, 3).h;
+				barH = m_pSprCol->GetAFrameBBox( animIdx, 3 ).h;
 				// yellow teaser bar
 				//CSprite::paintFrameModuleTiled(m_pSprMgr, BBox.x, centerY, animIdx, ((bFlicker)?4:3), 0, col, tileW, barH);
 				float fcol = 0.2f;
-				if (bFlicker)
+				if ( bFlicker )
 					fcol = 0.4f;
-				CSprite::paintFrameModuleTiled(m_pSprMgr, BBox.x, centerY, animIdx, 5, 0, DW_COLOR_FFFA(fcol * layer->alpha), tileW, barH);
+				CSprite::paintFrameModuleTiled( m_pSprCol, BBox.x, centerY, animIdx, 5, 0, DW_COLOR_FFFA( fcol * layer->alpha ), tileW, barH );
 				// plus sign
-				CSprite::paintFrame(m_pSprMgr, BBox.Right() + 2, centerY, animIdx, ((bFlicker)?7:6), col);
+				CSprite::paintFrame( m_pSprCol, BBox.Right() + 2, centerY, animIdx, ( ( bFlicker ) ? 7 : 6 ), col );
 			}
 
 			//actual filler
 			float fProg = 1.0f; //filled when full level
-			if((nMaxXP - nMinXP) > 0)
-				fProg = ((float)(nCurrentVal - nMinXP) / (float)(nMaxXP - nMinXP));
-			
+			if ( ( nMaxXP - nMinXP ) > 0 )
+				fProg = ( ( float ) ( nCurrentVal - nMinXP ) / ( float ) ( nMaxXP - nMinXP ) );
+
 			int tileW = fProg * BBox.w;
-			barH = m_pSprMgr->GetAFrameBBox(animIdx, 5).h;
-			CSprite::paintFrameModuleTiled(m_pSprMgr, BBox.x, centerY, animIdx, 5, 0, col, tileW, barH);
+			barH = m_pSprCol->GetAFrameBBox( animIdx, 5 ).h;
+			CSprite::paintFrameModuleTiled( m_pSprCol, BBox.x, centerY, animIdx, 5, 0, col, tileW, barH );
 
 			//level shield
-			CSprite::paintFrame(m_pSprMgr, BBox.x, centerY, animIdx, 9, col);
-			RECTXYWH prct = m_pSprMgr->GetAFrameBBox(animIdx, 9);
-			D3DXVECTOR2 vposLvl(BBox.x + prct.x + prct.w / 2, BBox.CenterY() + prct.y + prct.h / 2);
+			CSprite::paintFrame( m_pSprCol, BBox.x, centerY, animIdx, 9, col );
+			RECTXYWH prct = m_pSprCol->GetAFrameBBox( animIdx, 9 );
+			D3DXVECTOR2 vposLvl( BBox.x + prct.x + prct.w / 2, BBox.CenterY() + prct.y + prct.h / 2 );
 			//current level
-			if (fontIdx >= 0)
+			if ( fontIdx >= 0 )
 			{
 				CStringDesc stringDesc;
-				__Texts().SetStringDesc(&stringDesc, L"%d", nCurrentLevel + 1);
-				m_pFontsMgr->fonts[fontIdx]->DrawString(&stringDesc, vposLvl.x, vposLvl.y, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor);
+				__Texts().SetStringDesc( &stringDesc, L"%d", nCurrentLevel + 1 );
+				__TexFonts().fonts[ fontIdx ]->DrawString( &stringDesc, vposLvl.x, vposLvl.y, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor );
 				//points
-				if ((nCurrentLevel >= K_GAME_MAX_UPGRADE_LEVELS) && (fProgress >= 1.0f))
+				if ( ( nCurrentLevel >= K_GAME_MAX_UPGRADE_LEVELS ) && ( fProgress >= 1.0f ) )
 				{
-					m_pFontsMgr->fonts[fontIdx]->DrawString(STR_MAX_LEVEL, BBox.CenterX(), centerY, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(K_COLOR_SELECTED_TEXT, layer->alpha));
+					__TexFonts().fonts[ fontIdx ]->DrawString( STR_MAX_LEVEL, BBox.CenterX(), centerY, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA( K_COLOR_SELECTED_TEXT, layer->alpha ) );
 				}
 				else
 				{
-					__Texts().SetStringDesc(&stringDesc, L"%d/%d", nCurrentVal - nMinXP, nMaxXP - nMinXP);
-					m_pFontsMgr->fonts[fontIdx]->DrawString(&stringDesc, BBox.CenterX(), centerY, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA(K_COLOR_SELECTED_TEXT, layer->alpha));
+					__Texts().SetStringDesc( &stringDesc, L"%d/%d", nCurrentVal - nMinXP, nMaxXP - nMinXP );
+					__TexFonts().fonts[ fontIdx ]->DrawString( &stringDesc, BBox.CenterX(), centerY, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA( K_COLOR_SELECTED_TEXT, layer->alpha ) );
 				}
 			}
 			//chevron when gaining a level
-			int nInitialLevel = App_GetXPLevel(nOldVal);
-			if (nInitialLevel < nCurrentLevel)
+			int nInitialLevel = App_GetXPLevel( nOldVal );
+			if ( nInitialLevel < nCurrentLevel )
 			{
-				CSprite::paintFrame(m_pSprMgr, BBox.x, centerY, animIdx, 8, col);
+				CSprite::paintFrame( m_pSprCol, BBox.x, centerY, animIdx, 8, col );
 			}
 		}
 		break;
 
 		case CCTRL_TYPE_INPUTBOX:
 		{
-			if ((animIdx < 0) || (animIdx >= m_pSprMgr->animationNo))
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Invalid animIdx");
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx" );
 				return;
 			}
-			if(m_pSprMgr->Animations[animIdx]->aframesNo < 3)
+			if ( m_pSprCol->Animations[ animIdx ]->aframesNo < 3 )
 			{
-				drawDebugText(BBox.x, BBox.y, L"Needs 3 frames!");
+				drawDebugText( BBox.x, BBox.y, L"Needs 3 frames!" );
 				return;
 			}
 
-			WCHAR inputText[MAX_PATH];
-			StringCchPrintf(inputText, MAX_PATH, L"%s", paramsDict.GetVariantByName(L"inputText")->m_strArg.text);
+			WCHAR inputText[ MAX_PATH ];
+			StringCchPrintf( inputText, MAX_PATH, L"%s", paramsDict.GetVariantByName( L"inputText" )->m_strArg.text );
 
-			DWORD wcol = DW_COLOR_FFFA(layer->alpha);
-			CtrlMgrDrawHTilingAnim_HeadsOutside(m_pSprMgr, animIdx, 0, BBox_inflated, wcol);
+			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
+			GUIUtils::DrawHTilingAnim_HeadsOutside( m_pSprCol, animIdx, 0, BBox_inflated, wcol );
 
-			//textul
-			if (fontIdx >= 0)
+			// text
+			if ( fontIdx >= 0 )
 			{
 				CStringDesc stringDesc;
-				__Texts().SetStringDesc(&stringDesc, L"%s", inputText);
-				int strw = m_pFontsMgr->fonts[fontIdx]->DrawStringScaleW(&stringDesc, BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor);
+				__Texts().SetStringDesc( &stringDesc, L"%s", inputText );
+				int strw = __TexFonts().fonts[ fontIdx ]->DrawStringScaleW( &stringDesc, BBox.x + BBox.w / 2, BBox.y + BBox.h / 2, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor );
 
-				//deseneaza cursorul
+				// paint cursor
 				//if (g_timers.GetTimerValue(500) < 0.25f)
 				//{
 				//	CSprite::paintFrame(m_pSprMgr, BBox.x + BBox.w / 2 + strw / 2 + 3, BBox.y + BBox.h / 2 + 8, ANM_CONTROLS_SPR_CTRL_UTILS, 1, wcol);
@@ -3015,36 +2878,36 @@ void CControl::Paint(CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld)
 	}
 }
 
-bool CControl::HandleCommand(ECtrlMgrCommandType cmd, int nSDLinstanceID)
+bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 {
-	switch (type)
+	switch ( type )
 	{
 		case CCTRL_TYPE_CUSTOM_PAINT:
 		{
-			CVariantComplex* cvc = paramsDict.GetVariantByName(L"subType");
-			if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
+			CVariantComplex* cvc = paramsDict.GetVariantByName( L"subType" );
+			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
 			{
 				//selectorul de strategic powerup
-				if (cvc->m_strArg.IsEqual(L"ST_STRATEGIC_SELECTOR"))
+				if ( cvc->m_strArg.IsEqual( L"ST_STRATEGIC_SELECTOR" ) )
 				{
-					if (cmd == K_CCTRLMGR_COMMAND_LEFT)
+					if ( cmd == K_CCTRLMGR_COMMAND_LEFT )
 					{
 						statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 						return true;
 					}
-					else if (cmd == K_CCTRLMGR_COMMAND_RIGHT)
+					else if ( cmd == K_CCTRLMGR_COMMAND_RIGHT )
 					{
 						statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 						return true;
 					}
-					else if (cmd == K_CCTRLMGR_COMMAND_SELECT)
+					else if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
 					{
 						statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 						//save controller instance ID so we can identify it later on
-						paramsDict.SetNamedVarINT32(L"nSDLinstanceID", nSDLinstanceID);
+						paramsDict.SetNamedVarINT32( L"nSDLinstanceID", nSDLinstanceID );
 						return true;
 					}
-					else if (cmd == K_CCTRLMGR_COMMAND_BACK)
+					else if ( cmd == K_CCTRLMGR_COMMAND_BACK )
 					{
 						layer->statusFlags |= CCTRL_STATUS_FLAG_REMOVED;
 						return true;
@@ -3056,58 +2919,58 @@ bool CControl::HandleCommand(ECtrlMgrCommandType cmd, int nSDLinstanceID)
 		case CCTRL_TYPE_LIST_SELECTOR_TRUETYPE:
 		case CCTRL_TYPE_LIST_SELECTOR:
 		{
-			bool bUserCanSelect = paramsDict.GetVariantByName(L"bUserCanSelect")->m_asBool;
-			int	selectedIdx = paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
-			int optcnt = paramsDict.GetVariantByName(L"nOptionsCnt")->m_asINT32;
-			int nMinPage = paramsDict.GetVariantByName(L"nMinPage")->m_asINT32;
-			int nMaxPage = paramsDict.GetVariantByName(L"nMaxPage")->m_asINT32;
+			bool bUserCanSelect = paramsDict.GetVariantByName( L"bUserCanSelect" )->m_asBool;
+			int	selectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
+			int optcnt = paramsDict.GetVariantByName( L"nOptionsCnt" )->m_asINT32;
+			int nMinPage = paramsDict.GetVariantByName( L"nMinPage" )->m_asINT32;
+			int nMaxPage = paramsDict.GetVariantByName( L"nMaxPage" )->m_asINT32;
 
 			int stringIdx = -1;
-			CVariantComplex* var = paramsDict.GetVariantByName(L"stringID");
-			if (var->m_type != CVariantComplex::K_ARGTYPE_NONE)
+			CVariantComplex* var = paramsDict.GetVariantByName( L"stringID" );
+			if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
 			{
 				stringIdx = var->m_asINT32;
 			}
 
 			//control has focus, scroll selection
-			if (cmd == K_CCTRLMGR_COMMAND_LEFT)
+			if ( cmd == K_CCTRLMGR_COMMAND_LEFT )
 			{
-				if (nMinPage == nMaxPage)
+				if ( nMinPage == nMaxPage )
 					return false;
-				
+
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 				return true;
 			}
-			else if (cmd == K_CCTRLMGR_COMMAND_RIGHT)
+			else if ( cmd == K_CCTRLMGR_COMMAND_RIGHT )
 			{
-				if (nMinPage == nMaxPage)
+				if ( nMinPage == nMaxPage )
 					return false;
 
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 				return true;
 			}
 			//allow up/dn/select only if selectable is on
-			if (bUserCanSelect)
+			if ( bUserCanSelect )
 			{
-				if (cmd == K_CCTRLMGR_COMMAND_UP)
+				if ( cmd == K_CCTRLMGR_COMMAND_UP )
 				{
-					if ((optcnt <= 0) || (selectedIdx == 0))
+					if ( ( optcnt <= 0 ) || ( selectedIdx == 0 ) )
 						return false;
 
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDUP;
 					return true;
 				}
-				else if (cmd == K_CCTRLMGR_COMMAND_DOWN)
+				else if ( cmd == K_CCTRLMGR_COMMAND_DOWN )
 				{
-					if ((optcnt <= 0) || (selectedIdx >= optcnt - 1))
+					if ( ( optcnt <= 0 ) || ( selectedIdx >= optcnt - 1 ) )
 						return false;
 
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDDOWN;
 					return true;
 				}
-				else if (cmd == K_CCTRLMGR_COMMAND_SELECT)
+				else if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
 				{
-					if (optcnt <= 0)
+					if ( optcnt <= 0 )
 						return false;
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 					return true;
@@ -3117,36 +2980,36 @@ bool CControl::HandleCommand(ECtrlMgrCommandType cmd, int nSDLinstanceID)
 		break;
 		case CCTRL_TYPE_PLAYER_UPGRADE_CONTROL:
 		{
-			int	nSelectedLine = paramsDict.GetVariantByName(L"nSelectedLine")->m_asINT32;
+			int	nSelectedLine = paramsDict.GetVariantByName( L"nSelectedLine" )->m_asINT32;
 
 			//control has focus, scroll selection
-			if (cmd == K_CCTRLMGR_COMMAND_LEFT)
+			if ( cmd == K_CCTRLMGR_COMMAND_LEFT )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 				return true;
 			}
-			else if (cmd == K_CCTRLMGR_COMMAND_RIGHT)
+			else if ( cmd == K_CCTRLMGR_COMMAND_RIGHT )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 				return true;
 			}
-			else if (cmd == K_CCTRLMGR_COMMAND_UP)
+			else if ( cmd == K_CCTRLMGR_COMMAND_UP )
 			{
-				if (nSelectedLine == 0)
+				if ( nSelectedLine == 0 )
 					return false;
 
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDUP;
 				return true;
 			}
-			if (cmd == K_CCTRLMGR_COMMAND_DOWN)
+			if ( cmd == K_CCTRLMGR_COMMAND_DOWN )
 			{
-				if (nSelectedLine >= K_PSS_UPGRADE_BARS_CNT - 1)
+				if ( nSelectedLine >= K_PSS_UPGRADE_BARS_CNT - 1 )
 					return false;
 
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDDOWN;
 				return true;
 			}
-			else if (cmd == K_CCTRLMGR_COMMAND_SELECT)
+			else if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 				return true;
@@ -3157,12 +3020,12 @@ bool CControl::HandleCommand(ECtrlMgrCommandType cmd, int nSDLinstanceID)
 		case CCTRL_TYPE_SLIDER:
 		case CCTRL_TYPE_SLIDER_PAGES:
 		{
-			if (cmd == K_CCTRLMGR_COMMAND_LEFT)
+			if ( cmd == K_CCTRLMGR_COMMAND_LEFT )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 				return true;
 			}
-			else if (cmd == K_CCTRLMGR_COMMAND_RIGHT)
+			else if ( cmd == K_CCTRLMGR_COMMAND_RIGHT )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 				return true;
@@ -3171,7 +3034,7 @@ bool CControl::HandleCommand(ECtrlMgrCommandType cmd, int nSDLinstanceID)
 		break;
 		case CCTRL_TYPE_BUTTON:
 		{
-			if (cmd == K_CCTRLMGR_COMMAND_SELECT)
+			if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKED_ALT;
 				return true;
@@ -3180,7 +3043,7 @@ bool CControl::HandleCommand(ECtrlMgrCommandType cmd, int nSDLinstanceID)
 		break;
 		case CCTRL_TYPE_CHECKBOX:
 		{
-			if (cmd == K_CCTRLMGR_COMMAND_SELECT)
+			if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 				return true;
@@ -3189,17 +3052,17 @@ bool CControl::HandleCommand(ECtrlMgrCommandType cmd, int nSDLinstanceID)
 		break;
 		case CCTRL_TYPE_SCROLLMENU:
 		{
-			if (cmd == K_CCTRLMGR_COMMAND_DOWN)
+			if ( cmd == K_CCTRLMGR_COMMAND_DOWN )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDDOWN;
 				return true;
 			}
-			else if (cmd == K_CCTRLMGR_COMMAND_UP)
+			else if ( cmd == K_CCTRLMGR_COMMAND_UP )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDUP;
 				return true;
 			}
-			else if (cmd == K_CCTRLMGR_COMMAND_SELECT)
+			else if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 				return true;
@@ -3211,136 +3074,136 @@ bool CControl::HandleCommand(ECtrlMgrCommandType cmd, int nSDLinstanceID)
 	return false;
 }
 
-void CControlsManager::SetParamValue(CControl * pCtrl, const WCHAR * sParamName, WCHAR * sParamValue, bool bIgnoreWarnings)
-{	
-	if (NULL == pCtrl)
+void CControlsManager::SetParamValue( CControl * pCtrl, const WCHAR * sParamName, WCHAR * sParamValue, bool bIgnoreWarnings )
+{
+	if ( NULL == pCtrl )
 		return;
 
-	UINT32 paramNameHash = FastHash(sParamName);
+	UINT32 paramNameHash = FastHash( sParamName );
 	//verifica o serie de variabile generale care au nevoie de traducere
-	if (paramNameHash == FastHash(L"X"))
+	if ( paramNameHash == FastHash( L"X" ) )
 	{
-		pCtrl->bbox.x = _wtoi(sParamValue);
+		pCtrl->bbox.x = _wtoi( sParamValue );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarAUTO(sParamName, sParamValue);
+		pCtrl->paramsDict.SetNamedVarAUTO( sParamName, sParamValue );
 	}
-	else if (paramNameHash == FastHash(L"Y"))
+	else if ( paramNameHash == FastHash( L"Y" ) )
 	{
-		pCtrl->bbox.y = _wtoi(sParamValue);
+		pCtrl->bbox.y = _wtoi( sParamValue );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarAUTO(sParamName, sParamValue);
+		pCtrl->paramsDict.SetNamedVarAUTO( sParamName, sParamValue );
 	}
-	else if (paramNameHash == FastHash(L"W"))
+	else if ( paramNameHash == FastHash( L"W" ) )
 	{
-		pCtrl->bbox.w = _wtoi(sParamValue);
+		pCtrl->bbox.w = _wtoi( sParamValue );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarAUTO(sParamName, sParamValue);
+		pCtrl->paramsDict.SetNamedVarAUTO( sParamName, sParamValue );
 	}
-	else if (paramNameHash == FastHash(L"H"))
+	else if ( paramNameHash == FastHash( L"H" ) )
 	{
-		pCtrl->bbox.h = _wtoi(sParamValue);
+		pCtrl->bbox.h = _wtoi( sParamValue );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarAUTO(sParamName, sParamValue);
+		pCtrl->paramsDict.SetNamedVarAUTO( sParamName, sParamValue );
 	}
-	else if (paramNameHash == FastHash(L"animID"))
+	else if ( paramNameHash == FastHash( L"animID" ) )
 	{
-		int anmIdx = m_sprCol.GetAnimationIdxByName(sParamValue);
-		if ((anmIdx < 0) && (!bIgnoreWarnings))
-			ErrorBox(K_ERR_WARNING, L"CControlsManager::SetParamValue - couldn't find animation [%s]", sParamValue);
-		
-		pCtrl->paramsDict.SetNamedVarINT32(sParamName, anmIdx);
-	}
-	else if (paramNameHash == FastHash(L"fontID"))
-	{
-		int fontIdx = m_pFontsMgr->GetFontIdx(sParamValue);
-		if ((fontIdx < 0) && (!bIgnoreWarnings))
-			ErrorBox(K_ERR_WARNING, L"CControlsManager::SetParamValue - couldn't find font [%s]", sParamValue);
-		
-		pCtrl->paramsDict.SetNamedVarINT32(sParamName, fontIdx);
-	}
-	else if (paramNameHash == FastHash(L"stringID"))
-	{
-		int stringIdx = m_pStrMgr->GetStrIdx(sParamValue);
-		if ((stringIdx < 0) && (!bIgnoreWarnings))
-			ErrorBox(K_ERR_WARNING, L"CControlsManager::SetParamValue - couldn't find string [%s]", sParamValue);
+		int anmIdx = m_sprCol.GetAnimationIdxByName( sParamValue );
+		if ( ( anmIdx < 0 ) && ( !bIgnoreWarnings ) )
+			ErrorBox( K_ERR_WARNING, L"CControlsManager::SetParamValue - couldn't find animation [%s]", sParamValue );
 
-		pCtrl->paramsDict.SetNamedVarINT32(sParamName, stringIdx);
+		pCtrl->paramsDict.SetNamedVarINT32( sParamName, anmIdx );
 	}
-	else if (paramNameHash == FastHash(L"wrapText"))
+	else if ( paramNameHash == FastHash( L"fontID" ) )
 	{
-		int textAlignFlags = pCtrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+		int fontIdx = __TexFonts().GetFontIdx( sParamValue );
+		if ( ( fontIdx < 0 ) && ( !bIgnoreWarnings ) )
+			ErrorBox( K_ERR_WARNING, L"CControlsManager::SetParamValue - couldn't find font [%s]", sParamValue );
+
+		pCtrl->paramsDict.SetNamedVarINT32( sParamName, fontIdx );
+	}
+	else if ( paramNameHash == FastHash( L"stringID" ) )
+	{
+		int stringIdx = __Texts().GetStrIdx( sParamValue );
+		if ( ( stringIdx < 0 ) && ( !bIgnoreWarnings ) )
+			ErrorBox( K_ERR_WARNING, L"CControlsManager::SetParamValue - couldn't find string [%s]", sParamValue );
+
+		pCtrl->paramsDict.SetNamedVarINT32( sParamName, stringIdx );
+	}
+	else if ( paramNameHash == FastHash( L"wrapText" ) )
+	{
+		int textAlignFlags = pCtrl->paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
 		bool wrap = false;
-		if (wcscmp(sParamValue, L"true") == 0)
+		if ( wcscmp( sParamValue, L"true" ) == 0 )
 			wrap = true;
 
-		if (wrap)
+		if ( wrap )
 			textAlignFlags |= FONTFLAG_WRAPTEXT;
 		else
 			textAlignFlags &= ~FONTFLAG_WRAPTEXT;
 
-		pCtrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
+		pCtrl->paramsDict.SetNamedVarINT32( L"nTextAlignFlags", textAlignFlags );
 		//add it in the dictionary so it shows up in the editor
-		pCtrl->paramsDict.SetNamedVarBool(sParamName, wrap);
+		pCtrl->paramsDict.SetNamedVarBool( sParamName, wrap );
 	}
-	else if (paramNameHash == FastHash(L"justify"))
+	else if ( paramNameHash == FastHash( L"justify" ) )
 	{
-		int textAlignFlags = pCtrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+		int textAlignFlags = pCtrl->paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
 
 		bool justify = false;
-		if (wcscmp(sParamValue, L"true") == 0)
+		if ( wcscmp( sParamValue, L"true" ) == 0 )
 			justify = true;
 
-		if (justify)
+		if ( justify )
 			textAlignFlags |= FONTFLAG_JUSTIFY;
 		else
 			textAlignFlags &= ~FONTFLAG_JUSTIFY;
 
-		pCtrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
+		pCtrl->paramsDict.SetNamedVarINT32( L"nTextAlignFlags", textAlignFlags );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarBool(sParamName, justify);
+		pCtrl->paramsDict.SetNamedVarBool( sParamName, justify );
 	}
-	else if (paramNameHash == FastHash(L"align"))
+	else if ( paramNameHash == FastHash( L"align" ) )
 	{
-		int textAlignFlags = pCtrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+		int textAlignFlags = pCtrl->paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
 
-		textAlignFlags &= (~(FONTFLAG_ANCHOR_RIGHT | FONTFLAG_ANCHOR_CENTER | FONTFLAG_ANCHOR_LEFT));
-		int align = _wtoi(sParamValue);
-		if (align == 1)
+		textAlignFlags &= ( ~( FONTFLAG_ANCHOR_RIGHT | FONTFLAG_ANCHOR_CENTER | FONTFLAG_ANCHOR_LEFT ) );
+		int align = _wtoi( sParamValue );
+		if ( align == 1 )
 			textAlignFlags |= FONTFLAG_ANCHOR_RIGHT;
-		else if (align == -1)
+		else if ( align == -1 )
 			textAlignFlags |= FONTFLAG_ANCHOR_LEFT;
 		else
 			textAlignFlags |= FONTFLAG_ANCHOR_CENTER;
 
-		pCtrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
+		pCtrl->paramsDict.SetNamedVarINT32( L"nTextAlignFlags", textAlignFlags );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarINT32(sParamName, align);
+		pCtrl->paramsDict.SetNamedVarINT32( sParamName, align );
 	}
-	else if (paramNameHash == FastHash(L"valign"))
+	else if ( paramNameHash == FastHash( L"valign" ) )
 	{
-		int textAlignFlags = pCtrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+		int textAlignFlags = pCtrl->paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
 
-		textAlignFlags &= (~(FONTFLAG_ANCHOR_TOP | FONTFLAG_ANCHOR_VCENTER | FONTFLAG_ANCHOR_BOTTOM));
-		int valign = _wtoi(sParamValue);
-		if (valign == 1)
+		textAlignFlags &= ( ~( FONTFLAG_ANCHOR_TOP | FONTFLAG_ANCHOR_VCENTER | FONTFLAG_ANCHOR_BOTTOM ) );
+		int valign = _wtoi( sParamValue );
+		if ( valign == 1 )
 			textAlignFlags |= FONTFLAG_ANCHOR_BOTTOM;
-		else if (valign == -1)
+		else if ( valign == -1 )
 			textAlignFlags |= FONTFLAG_ANCHOR_TOP;
 		else
 			textAlignFlags |= FONTFLAG_ANCHOR_VCENTER;
 
-		pCtrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
+		pCtrl->paramsDict.SetNamedVarINT32( L"nTextAlignFlags", textAlignFlags );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarINT32(sParamName, valign);
+		pCtrl->paramsDict.SetNamedVarINT32( sParamName, valign );
 	}
 	else  //daca nu e parametru special de tradus, il salveaza cu auto type
 	{
-		pCtrl->paramsDict.SetNamedVarAUTO(sParamName, sParamValue);
+		pCtrl->paramsDict.SetNamedVarAUTO( sParamName, sParamValue );
 	}
 }
 
-  //**************************************************************************
- //		CCtrlLayer
+//**************************************************************************
+//		CCtrlLayer
 //**************************************************************************
 CCtrlLayer::CCtrlLayer()
 {
@@ -3361,16 +3224,16 @@ CCtrlLayer::CCtrlLayer()
 
 	pControlsManager = NULL;
 
-	for (int kk = 0; kk < controls.GetSize(); kk++)
-		SAFE_DELETE(controls[kk]);
+	for ( int kk = 0; kk < controls.GetSize(); kk++ )
+		SAFE_DELETE( controls[ kk ] );
 	controls.RemoveAll();
 }
 
 CCtrlLayer::~CCtrlLayer()
 {
-	for (int kk = 0; kk < controls.GetSize(); kk++)
+	for ( int kk = 0; kk < controls.GetSize(); kk++ )
 	{
-		SAFE_DELETE(controls[kk]);
+		SAFE_DELETE( controls[ kk ] );
 	}
 	controls.RemoveAll();
 }
@@ -3380,39 +3243,39 @@ void CCtrlLayer::FocusInitialize()
 	nFocusFirstFocusableIdx = -1; //save first focusable control
 	nFocusedControlIdx = -1;
 
-	for (int kk = 0; kk < controls.GetSize(); kk++)
+	for ( int kk = 0; kk < controls.GetSize(); kk++ )
 	{
-		if ((controls[kk]->bCanHaveFocus) && (controls[kk]->bDisabled == false))
+		if ( ( controls[ kk ]->bCanHaveFocus ) && ( controls[ kk ]->bDisabled == false ) )
 		{
-			if (nFocusFirstFocusableIdx < 0)
+			if ( nFocusFirstFocusableIdx < 0 )
 			{
 				nFocusFirstFocusableIdx = kk;
 				nFocusedControlIdx = kk;
 			}
 			//--- selectez controlul specificat ca fiind focusat sau primul buton daca exista ---
 			bool bFocusIt = false;
-			CVariantComplex* lvar = controls[kk]->paramsDict.GetVariantByName(L"ID");
-			if (!shFocusedControlID.IsEmpty())
+			CVariantComplex* lvar = controls[ kk ]->paramsDict.GetVariantByName( L"ID" );
+			if ( !shFocusedControlID.IsEmpty() )
 			{
-				if (lvar->m_strArg.textHash == shFocusedControlID.textHash)
+				if ( lvar->m_strArg.textHash == shFocusedControlID.textHash )
 					bFocusIt = true;
 			}
 			else //no control ID specified in layer
 			{
-				if ((nFocusedControlIdx >= 0) && (controls[kk]->type == CCTRL_TYPE_BUTTON) && (nFocusedControlIdx != kk))
+				if ( ( nFocusedControlIdx >= 0 ) && ( controls[ kk ]->type == CCTRL_TYPE_BUTTON ) && ( nFocusedControlIdx != kk ) )
 				{
 					bFocusIt = true;
 				}
 			}
 
-			if (bFocusIt)
+			if ( bFocusIt )
 			{
-				controls[nFocusedControlIdx]->statusFlags &= ~CCTRL_STATUS_FLAG_HAS_FOCUS;
+				controls[ nFocusedControlIdx ]->statusFlags &= ~CCTRL_STATUS_FLAG_HAS_FOCUS;
 				nFocusedControlIdx = kk;
-				controls[nFocusedControlIdx]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
-				controls[nFocusedControlIdx]->OnFocused();
+				controls[ nFocusedControlIdx ]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
+				controls[ nFocusedControlIdx ]->OnFocused();
 				//init focus rect
-				m_focusRect.Set(controls[nFocusedControlIdx]->bbox);
+				m_focusRect.Set( controls[ nFocusedControlIdx ]->bbox );
 				return;
 			}
 		}
@@ -3422,20 +3285,20 @@ void CCtrlLayer::FocusInitialize()
 void CCtrlLayer::FocusNextControl()
 {
 	//no focus made
-	if (nFocusedControlIdx < 0)
+	if ( nFocusedControlIdx < 0 )
 	{
-		for (int kk = 0; kk < controls.GetSize(); kk++)
+		for ( int kk = 0; kk < controls.GetSize(); kk++ )
 		{
-			if ((controls[kk]->bCanHaveFocus) && (controls[kk]->bDisabled == false))
+			if ( ( controls[ kk ]->bCanHaveFocus ) && ( controls[ kk ]->bDisabled == false ) )
 			{
 				nFocusFirstFocusableIdx = kk; //save first focusable control
 
 				nFocusedControlIdx = kk;
 				//and set focus
-				controls[nFocusedControlIdx]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
-				controls[nFocusedControlIdx]->OnFocused();
+				controls[ nFocusedControlIdx ]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
+				controls[ nFocusedControlIdx ]->OnFocused();
 				//init focus rect
-				m_focusRect.Set(controls[nFocusedControlIdx]->bbox);
+				m_focusRect.Set( controls[ nFocusedControlIdx ]->bbox );
 				return;
 			}
 		}
@@ -3443,27 +3306,27 @@ void CCtrlLayer::FocusNextControl()
 	else //focus next control
 	{
 		int nNextFocusable = nFocusedControlIdx;
-		for (int kk = 1; kk < controls.GetSize(); kk++)
+		for ( int kk = 1; kk < controls.GetSize(); kk++ )
 		{
-			int ctrlidx = (kk + nFocusedControlIdx) % controls.GetSize();
-			if ((controls[ctrlidx]->bCanHaveFocus) && (controls[ctrlidx]->bDisabled == false))
+			int ctrlidx = ( kk + nFocusedControlIdx ) % controls.GetSize();
+			if ( ( controls[ ctrlidx ]->bCanHaveFocus ) && ( controls[ ctrlidx ]->bDisabled == false ) )
 			{
 				nNextFocusable = ctrlidx;
 				break;
 			}
 		}
 		//daca a gasit un alt control il focuseaza pe acela
-		if (nNextFocusable != nFocusedControlIdx)
+		if ( nNextFocusable != nFocusedControlIdx )
 		{
 			int nOldFocusIdx = nFocusedControlIdx;
-			controls[nFocusedControlIdx]->statusFlags &= ~CCTRL_STATUS_FLAG_HAS_FOCUS;
+			controls[ nFocusedControlIdx ]->statusFlags &= ~CCTRL_STATUS_FLAG_HAS_FOCUS;
 			nFocusedControlIdx = nNextFocusable;
 			//and set focus
-			controls[nFocusedControlIdx]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
-			controls[nFocusedControlIdx]->OnFocused(1);
+			controls[ nFocusedControlIdx ]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
+			controls[ nFocusedControlIdx ]->OnFocused( 1 );
 			//set focus rect on new control if old control didn't show the focus cursor
-			if (controls[nOldFocusIdx]->bShowFocusCursor == false)
-				m_focusRect.Set(controls[nFocusedControlIdx]->bbox);
+			if ( controls[ nOldFocusIdx ]->bShowFocusCursor == false )
+				m_focusRect.Set( controls[ nFocusedControlIdx ]->bbox );
 		}
 	}
 }
@@ -3471,20 +3334,20 @@ void CCtrlLayer::FocusNextControl()
 void CCtrlLayer::FocusPreviousControl()
 {
 	//no focus made
-	if (nFocusedControlIdx < 0)
+	if ( nFocusedControlIdx < 0 )
 	{
-		for (int kk = 0; kk < controls.GetSize(); kk++)
+		for ( int kk = 0; kk < controls.GetSize(); kk++ )
 		{
-			if ((controls[kk]->bCanHaveFocus) && (controls[kk]->bDisabled == false))
+			if ( ( controls[ kk ]->bCanHaveFocus ) && ( controls[ kk ]->bDisabled == false ) )
 			{
 				nFocusedControlIdx = kk;
 				//save first focusable control
-				nFocusFirstFocusableIdx = kk; 
+				nFocusFirstFocusableIdx = kk;
 				//and set focus
-				controls[nFocusedControlIdx]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
-				controls[nFocusedControlIdx]->OnFocused();
+				controls[ nFocusedControlIdx ]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
+				controls[ nFocusedControlIdx ]->OnFocused();
 				//init focus rect
-				m_focusRect.Set(controls[nFocusedControlIdx]->bbox);
+				m_focusRect.Set( controls[ nFocusedControlIdx ]->bbox );
 				return;
 			}
 		}
@@ -3492,57 +3355,57 @@ void CCtrlLayer::FocusPreviousControl()
 	else //focus previous control
 	{
 		int nPrevFocusable = nFocusedControlIdx;
-		for (int kk = controls.GetSize() - 1; kk > 0; kk--)
+		for ( int kk = controls.GetSize() - 1; kk > 0; kk-- )
 		{
-			int ctrlidx = (kk + nFocusedControlIdx) % controls.GetSize();
-			if ((controls[ctrlidx]->bCanHaveFocus) && (controls[ctrlidx]->bDisabled == false))
+			int ctrlidx = ( kk + nFocusedControlIdx ) % controls.GetSize();
+			if ( ( controls[ ctrlidx ]->bCanHaveFocus ) && ( controls[ ctrlidx ]->bDisabled == false ) )
 			{
 				nPrevFocusable = ctrlidx;
 				break;
 			}
 		}
 		//found another control? focus that too
-		if (nPrevFocusable != nFocusedControlIdx)
+		if ( nPrevFocusable != nFocusedControlIdx )
 		{
 			int nOldFocusIdx = nFocusedControlIdx;
-			controls[nFocusedControlIdx]->statusFlags &= ~CCTRL_STATUS_FLAG_HAS_FOCUS;
+			controls[ nFocusedControlIdx ]->statusFlags &= ~CCTRL_STATUS_FLAG_HAS_FOCUS;
 			nFocusedControlIdx = nPrevFocusable;
 			//and set focus
-			controls[nFocusedControlIdx]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
-			controls[nFocusedControlIdx]->OnFocused(-1);
+			controls[ nFocusedControlIdx ]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
+			controls[ nFocusedControlIdx ]->OnFocused( -1 );
 			//set focus rect on new control if old control didn't show the focus cursor
-			if (controls[nOldFocusIdx]->bShowFocusCursor == false)
-				m_focusRect.Set(controls[nFocusedControlIdx]->bbox);
+			if ( controls[ nOldFocusIdx ]->bShowFocusCursor == false )
+				m_focusRect.Set( controls[ nFocusedControlIdx ]->bbox );
 		}
 	}
 }
 
-bool CCtrlLayer::FocusControl(CControl* pCtrl)
+bool CCtrlLayer::FocusControl( CControl* pCtrl )
 {
-	if ((pCtrl == null) || (pCtrl->bCanHaveFocus == false))
+	if ( ( pCtrl == null ) || ( pCtrl->bCanHaveFocus == false ) )
 		return false;
 
-	int nCtrlIdx = controls.IndexOf(pCtrl);
-	if (nCtrlIdx < 0)
+	int nCtrlIdx = controls.IndexOf( pCtrl );
+	if ( nCtrlIdx < 0 )
 		return false;
 
 	//daca a gasit un alt control il focuseaza pe acela
-	if (nFocusedControlIdx == nCtrlIdx)
+	if ( nFocusedControlIdx == nCtrlIdx )
 		return false;
-	
+
 	int nOldFocusIdx = nFocusedControlIdx;
-	controls[nFocusedControlIdx]->statusFlags &= ~CCTRL_STATUS_FLAG_HAS_FOCUS;
+	controls[ nFocusedControlIdx ]->statusFlags &= ~CCTRL_STATUS_FLAG_HAS_FOCUS;
 	nFocusedControlIdx = nCtrlIdx;
 	//and set focus
-	controls[nFocusedControlIdx]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
-	controls[nFocusedControlIdx]->OnFocused(SIGN(nFocusedControlIdx - nOldFocusIdx));
+	controls[ nFocusedControlIdx ]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
+	controls[ nFocusedControlIdx ]->OnFocused( SIGN( nFocusedControlIdx - nOldFocusIdx ) );
 	//set focus rect on new control if old control didn't show the focus cursor
-	if (controls[nOldFocusIdx]->bShowFocusCursor == false)
-		m_focusRect.Set(controls[nFocusedControlIdx]->bbox);
+	if ( controls[ nOldFocusIdx ]->bShowFocusCursor == false )
+		m_focusRect.Set( controls[ nFocusedControlIdx ]->bbox );
 	return true;
 }
 
-void CCtrlLayer::SetAnchor(ECtrlAnchor nAnchorX, ECtrlAnchor nAnchorY)
+void CCtrlLayer::SetAnchor( ECtrlAnchor nAnchorX, ECtrlAnchor nAnchorY )
 {
 	anchorX = nAnchorX;
 	anchorY = nAnchorY;
@@ -3550,39 +3413,39 @@ void CCtrlLayer::SetAnchor(ECtrlAnchor nAnchorX, ECtrlAnchor nAnchorY)
 
 POINTXY_INT CCtrlLayer::GetPos()
 {
-	return POINTXY_INT(X, Y);
+	return POINTXY_INT( X, Y );
 }
 
 
-CControl* CCtrlLayer::GetControlByIdx(int nIdx)
+CControl* CCtrlLayer::GetControlByIdx( int nIdx )
 {
-	if((nIdx < 0) || (nIdx >= controls.GetSize()))
+	if ( ( nIdx < 0 ) || ( nIdx >= controls.GetSize() ) )
 		return nullptr;
-	return controls[nIdx];
+	return controls[ nIdx ];
 }
 
-CControl* CCtrlLayer::GetControlByName(char* ctrlName)
+CControl* CCtrlLayer::GetControlByName( char* ctrlName )
 {
-	UINT32 chash = FastHash(ctrlName, strlen(ctrlName));
-	for(int kk=0; kk<controls.GetSize(); kk++)
+	UINT32 chash = FastHash( ctrlName, strlen( ctrlName ) );
+	for ( int kk = 0; kk < controls.GetSize(); kk++ )
 	{
-		if (controls[kk]->paramsDict.GetVariantByName(L"ID") == NULL)
+		if ( controls[ kk ]->paramsDict.GetVariantByName( L"ID" ) == NULL )
 			continue;
 
-		if (controls[kk]->paramsDict.GetVariantByName(L"ID")->m_strArg.getHash() == chash)
-			return controls[kk];
+		if ( controls[ kk ]->paramsDict.GetVariantByName( L"ID" )->m_strArg.getHash() == chash )
+			return controls[ kk ];
 	}
 	return nullptr;
 }
 
-bool CCtrlLayer::ControlSetDisableByName(bool bDisabledValue, char* ctrlName)
+bool CCtrlLayer::ControlSetDisableByName( bool bDisabledValue, char* ctrlName )
 {
-	UINT32 chash = FastHash(ctrlName, strlen(ctrlName));
-	for (int kk = 0; kk < controls.GetSize(); kk++)
+	UINT32 chash = FastHash( ctrlName, strlen( ctrlName ) );
+	for ( int kk = 0; kk < controls.GetSize(); kk++ )
 	{
-		if (controls[kk]->paramsDict.GetVariantByName(L"ID")->m_strArg.getHash() == chash)
+		if ( controls[ kk ]->paramsDict.GetVariantByName( L"ID" )->m_strArg.getHash() == chash )
 		{
-			controls[kk]->bDisabled = bDisabledValue;
+			controls[ kk ]->bDisabled = bDisabledValue;
 			return true;
 		}
 	}
@@ -3606,22 +3469,22 @@ CCtrlLayer* CCtrlLayer::Clone()
 	nlay->nFocusedControlIdx = -1;
 	nlay->nFocusFirstFocusableIdx = -1;
 	nlay->shFocusedControlID = shFocusedControlID;
-	nlay->m_focusRect.Set(0.0f, 0.0f, 0.0f, 0.0f);
-	
-	for (int kk = 0; kk < controls.GetSize(); kk++)
+	nlay->m_focusRect.Set( 0.0f, 0.0f, 0.0f, 0.0f );
+
+	for ( int kk = 0; kk < controls.GetSize(); kk++ )
 	{
-		CControl* nctrl = new CControl(controls[kk]->paramsDict.GetVariantByName(L"Type")->m_strArg.text);
+		CControl* nctrl = new CControl( controls[ kk ]->paramsDict.GetVariantByName( L"Type" )->m_strArg.text );
 		nctrl->layer = nlay;
 		//copy necessary data from templates
-		nctrl->paramsDict = controls[kk]->paramsDict;
-		nctrl->bbox = controls[kk]->bbox;
-		nctrl->bCanHaveFocus = controls[kk]->bCanHaveFocus;
-		nctrl->bShowFocusCursor = controls[kk]->bShowFocusCursor;
+		nctrl->paramsDict = controls[ kk ]->paramsDict;
+		nctrl->bbox = controls[ kk ]->bbox;
+		nctrl->bCanHaveFocus = controls[ kk ]->bCanHaveFocus;
+		nctrl->bShowFocusCursor = controls[ kk ]->bShowFocusCursor;
 
 		//initialize control variables
 		nctrl->Initialize();
 
-		nlay->controls.Add(nctrl);
+		nlay->controls.Add( nctrl );
 	}
 
 	nlay->FocusInitialize();
@@ -3629,284 +3492,272 @@ CCtrlLayer* CCtrlLayer::Clone()
 	return nlay;
 }
 
-  //**************************************************************************
- //		Controls Manager - functii de desenare
-//**************************************************************************
-
-
-void CtrlMgrDrawButtonFromText(CSpriteCollection *sprCol, int animIdx, bool bPressed, CStringDesc *strDesc, CTexturedFont* pFont, D3DXVECTOR2 vButCenter, DWORD color, int nAlignHsign)
+void GUIUtils::DrawButtonFromText( CSpriteCollection *sprCol, int animIdx, bool bPressed, CStringDesc *strDesc, CTexFont* pFont, D3DXVECTOR2 vButCenter, DWORD color, int nAlignHsign )
 {
 	//no text, don't draw
-	if (strDesc->len == 0)
+	if ( strDesc->len == 0 )
 		return;
 
-	UTGetFontsManager().SetPauseOnTTFontsReplacement(true);
-
-	SIZEWH fsz = pFont->MeasureString(strDesc);
-	RECTXYWH sprrect = sprCol->GetAFrameBBox(animIdx, 1);
-	RECTXYWH butrect(vButCenter.x - fsz.w / 2, vButCenter.y - 2, fsz.w, sprrect.h);
-	if (nAlignHsign < 0)
+	SIZEWH fsz = pFont->MeasureString( strDesc );
+	RECTXYWH sprrect = sprCol->GetAFrameBBox( animIdx, 1 );
+	RECTXYWH butrect( vButCenter.x - fsz.w / 2, vButCenter.y - 2, fsz.w, sprrect.h );
+	if ( nAlignHsign < 0 )
 	{
 		butrect.x = vButCenter.x;
 	}
-	else if (nAlignHsign > 0)
+	else if ( nAlignHsign > 0 )
 	{
 		butrect.x = vButCenter.x - fsz.w;
 	}
 
-	if (bPressed)
+	if ( bPressed )
 	{
-		CtrlMgrDrawHTilingAnim_HeadsOutside(sprCol, animIdx, 6, butrect, color);
-		pFont->DrawString(strDesc, butrect.CenterX(), vButCenter.y + 1.0f, FONTFLAG_ANCHOR_VCENTERHCENTER, color);
+		GUIUtils::DrawHTilingAnim_HeadsOutside( sprCol, animIdx, 6, butrect, color );
+		pFont->DrawString( strDesc, butrect.CenterX(), vButCenter.y + 1.0f, FONTFLAG_ANCHOR_VCENTERHCENTER, color );
 	}
 	else
 	{
-		CtrlMgrDrawHTilingAnim_HeadsOutside(sprCol, animIdx, 0, butrect, color);
-		pFont->DrawString(strDesc, butrect.CenterX(), vButCenter.y, FONTFLAG_ANCHOR_VCENTERHCENTER, color);
+		GUIUtils::DrawHTilingAnim_HeadsOutside( sprCol, animIdx, 0, butrect, color );
+		pFont->DrawString( strDesc, butrect.CenterX(), vButCenter.y, FONTFLAG_ANCHOR_VCENTERHCENTER, color );
 	}
-
-	UTGetFontsManager().SetPauseOnTTFontsReplacement(false);
 }
 
-void CtrlMgrDrawHTilingAnim(CSpriteCollection *sprCol, int animIdx, int nStartFrame, RECTXYWH BBox, DWORD color)
+void GUIUtils::DrawHTilingAnim( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RECTXYWH BBox, DWORD color )
 {
-	RECTXYWH leftheadbb = sprCol->GetAFrameBBox(animIdx, nStartFrame);
-	RECTXYWH rightheadbb = sprCol->GetAFrameBBox(animIdx, nStartFrame + 2);
+	RECTXYWH leftheadbb = sprCol->GetAFrameBBox( animIdx, nStartFrame );
+	RECTXYWH rightheadbb = sprCol->GetAFrameBBox( animIdx, nStartFrame + 2 );
 	int centerw = BBox.w - leftheadbb.w - rightheadbb.w;
-	CSprite::paintFrameModuleTiled(sprCol, BBox.x + leftheadbb.w, (int)(BBox.y + BBox.h / 2.0f), animIdx, nStartFrame + 1, 0, color, centerw, -1);
-	CSprite::paintFrame(sprCol, BBox.x, (int)(BBox.y + BBox.h / 2.0f), animIdx, nStartFrame, color);
-	CSprite::paintFrame(sprCol, BBox.x + BBox.w - rightheadbb.w, (int)(BBox.y + BBox.h / 2.0f), animIdx, nStartFrame + 2, color);
+	CSprite::paintFrameModuleTiled( sprCol, BBox.x + leftheadbb.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 1, 0, color, centerw, -1 );
+	CSprite::paintFrame( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame, color );
+	CSprite::paintFrame( sprCol, BBox.x + BBox.w - rightheadbb.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 2, color );
 }
 
-void CtrlMgrDrawHTilingAnim_HeadsOutside(CSpriteCollection *sprCol, int animIdx, int nStartFrame, RECTXYWH BBox, DWORD color)
+void GUIUtils::DrawHTilingAnim_HeadsOutside( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RECTXYWH BBox, DWORD color )
 {
-	CSprite::paintFrameModuleTiled(sprCol, BBox.x, (int)(BBox.y + BBox.h / 2.0f), animIdx, nStartFrame + 1, 0, color, BBox.w, -1);
-	CSprite::paintFrame(sprCol, BBox.x, (int)(BBox.y + BBox.h / 2.0f), animIdx, nStartFrame, color);
-	CSprite::paintFrame(sprCol, BBox.x + BBox.w, (int)(BBox.y + BBox.h / 2.0f), animIdx, nStartFrame + 2, color);
+	CSprite::paintFrameModuleTiled( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 1, 0, color, BBox.w, -1 );
+	CSprite::paintFrame( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame, color );
+	CSprite::paintFrame( sprCol, BBox.x + BBox.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 2, color );
 }
 
-void CtrlMgrDrawProgress(CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/)
+void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
 {
-	RECTXYWH leftheadbb = sprCol->GetAFrameBBox(animIdx, 0);
-	RECTXYWH rightheadbb = sprCol->GetAFrameBBox(animIdx, 2);
-	CtrlMgrDrawHTilingAnim(sprCol, animIdx, 0, BBox, color);
+	RECTXYWH leftheadbb = sprCol->GetAFrameBBox( animIdx, 0 );
+	RECTXYWH rightheadbb = sprCol->GetAFrameBBox( animIdx, 2 );
+	GUIUtils::DrawHTilingAnim( sprCol, animIdx, 0, BBox, color );
 	RECTXYWH cliprect = BBox;
 	cliprect.x += leftheadbb.w;
 	cliprect.w -= leftheadbb.w + rightheadbb.w;
 
-	if (nTicks > 1)
+	if ( nTicks > 1 )
 	{
-		float ticksz = (float)cliprect.w / (float)nTicks;
-		for (int kk = 1; kk < nTicks; kk++)
+		float ticksz = ( float ) cliprect.w / ( float ) nTicks;
+		for ( int kk = 1; kk < nTicks; kk++ )
 		{
-			CSprite::paintFrameModule(sprCol, cliprect.x + ceil(kk * ticksz), cliprect.CenterY(), animIdx, 4, 0, color);
+			CSprite::paintFrameModule( sprCol, cliprect.x + ceil( kk * ticksz ), cliprect.CenterY(), animIdx, 4, 0, color );
 		}
 	}
 
-	cliprect.w = (int)ceil(fPercentFull * cliprect.w);
-	CSprite::paintFrameModuleTiled(sprCol, cliprect.x, cliprect.CenterY(), animIdx, 3, 0, color, cliprect.w);
+	cliprect.w = ( int ) ceil( fPercentFull * cliprect.w );
+	CSprite::paintFrameModuleTiled( sprCol, cliprect.x, cliprect.CenterY(), animIdx, 3, 0, color, cliprect.w );
 }
 
-void CtrlMgrDrawProgress_HeadsOutside(CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/)
+void GUIUtils::DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
 {
-	CtrlMgrDrawHTilingAnim_HeadsOutside(sprCol, animIdx, 0, BBox, color);
+	GUIUtils::DrawHTilingAnim_HeadsOutside( sprCol, animIdx, 0, BBox, color );
 	RECTXYWH cliprect = BBox;
 
-	if (nTicks > 1)
+	if ( nTicks > 1 )
 	{
-		float ticksz = (float)cliprect.w / (float)nTicks;
-		for (int kk = 1; kk < nTicks; kk++)
+		float ticksz = ( float ) cliprect.w / ( float ) nTicks;
+		for ( int kk = 1; kk < nTicks; kk++ )
 		{
-			CSprite::paintFrameModule(sprCol, cliprect.x + ceil(kk * ticksz), cliprect.CenterY(), animIdx, 4, 0, color);
+			CSprite::paintFrameModule( sprCol, cliprect.x + ceil( kk * ticksz ), cliprect.CenterY(), animIdx, 4, 0, color );
 		}
 	}
 
-	cliprect.w = (int)ceil(fPercentFull * cliprect.w);
-	CSprite::paintFrameModuleTiled(sprCol, BBox.x, BBox.CenterY(), animIdx, 3, 0, color, cliprect.w);
+	cliprect.w = ( int ) ceil( fPercentFull * cliprect.w );
+	CSprite::paintFrameModuleTiled( sprCol, BBox.x, BBox.CenterY(), animIdx, 3, 0, color, cliprect.w );
 }
 
-void CtrlMgrDrawPageSelector(CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, int nPagesCnt, int nSelectedPage, DWORD color /*= 0xffffffff*/, int nAlign /*= 0*/)
+void GUIUtils::DrawPageSelector( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, int nPagesCnt, int nSelectedPage, DWORD color /*= 0xffffffff*/, int nAlign /*= 0*/ )
 {
 	//int selpage = LIMIT(nSelectedPage, 0, nPagesCnt - 1);
-	RECTXYWH ptrect = sprCol->GetAFrameBBox(animIdx, 0); //unselected page tick
+	RECTXYWH ptrect = sprCol->GetAFrameBBox( animIdx, 0 ); //unselected page tick
 	int width = nPagesCnt * ptrect.w - 1; //subtract dot spacing (1)
 	int startposx = BBox.CenterX() - width / 2 + ptrect.w / 2;
-	if (nAlign < 0)
+	if ( nAlign < 0 )
 		startposx = BBox.x;
-	else if (nAlign > 0)
+	else if ( nAlign > 0 )
 		startposx = BBox.Right() - width;
 
-	for (int kk = 0; kk < nPagesCnt; kk++)
+	for ( int kk = 0; kk < nPagesCnt; kk++ )
 	{
 		int curframe = 0;
-		if (kk == nSelectedPage)
+		if ( kk == nSelectedPage )
 			curframe = 1;
 
-		CSprite::paintFrame(sprCol, startposx + kk * ptrect.w, BBox.Bottom(), animIdx, curframe, color);
+		CSprite::paintFrame( sprCol, startposx + kk * ptrect.w, BBox.Bottom(), animIdx, curframe, color );
 	}
 }
 
-void CtrlMgrDrawFrameF(CSpriteCollection *sprCol, int animIdx, RECTXYWH_F BBox, DWORD color, float fInflate)
+void GUIUtils::DrawFrameF( CSpriteCollection *sprCol, int animIdx, RECTXYWH_F BBox, DWORD color, float fInflate )
 {
 	RECTXYWH_F BBox_local = BBox;
-	BBox_local.Inflate(fInflate);
+	BBox_local.Inflate( fInflate );
 
 	RECTXYWH frrect;
-	CSprite spr(animIdx, BBox_local.x, BBox_local.y);
+	CSprite spr( animIdx, BBox_local.x, BBox_local.y );
 	spr.color = color;
 
 	//tiling centers
 	//center
 	spr.currentFrame = 4;
-	spr.paintTiled(sprCol, BBox_local.w, BBox_local.h);
+	spr.paintTiled( sprCol, BBox_local.w, BBox_local.h );
 	//top
 	spr.currentFrame = 1;
-	spr.paintTiled(sprCol, BBox_local.w, -1);
+	spr.paintTiled( sprCol, BBox_local.w, -1 );
 	//bottom
 	spr.currentFrame = 7;
 	spr.pos.y += BBox_local.h;
-	spr.paintTiled(sprCol, BBox_local.w, -1);
+	spr.paintTiled( sprCol, BBox_local.w, -1 );
 	//colturile (pot fi desenate peste centru)
 	//cl
 	spr.pos.y = BBox_local.y;
 	spr.currentFrame = 3;
-	spr.paintTiled(sprCol, -1, BBox_local.h);
+	spr.paintTiled( sprCol, -1, BBox_local.h );
 	//ul
 	spr.currentFrame = 0;
-	spr.paint(sprCol);
+	spr.paint( sprCol );
 	//cr
 	spr.pos.x += BBox_local.w;
 	spr.currentFrame = 5;
-	spr.paintTiled(sprCol, -1, BBox_local.h);
+	spr.paintTiled( sprCol, -1, BBox_local.h );
 	//ur
 	spr.currentFrame = 2;
-	spr.paint(sprCol);
+	spr.paint( sprCol );
 	//dl
 	spr.currentFrame = 6;
 	spr.pos.x = BBox_local.x;
 	spr.pos.y += BBox_local.h;
-	spr.paint(sprCol);
+	spr.paint( sprCol );
 	//dr
 	spr.currentFrame = 8;
 	spr.pos.x += BBox_local.w;
-	spr.paint(sprCol);
+	spr.paint( sprCol );
 }
 
 //deseneaza fereastra in exteriorul BBOX, zona BBox fiind in totalitate folosibila
-void CtrlMgrDrawFrame(CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color, int nInflate)
+void GUIUtils::DrawFrame( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color, int nInflate )
 {
 	RECTXYWH BBox_local = BBox;
-	BBox_local.Inflate(nInflate, nInflate);
-	
+	BBox_local.Inflate( nInflate, nInflate );
+
 	RECTXYWH frrect;
-	CSprite spr(animIdx, BBox_local.x, BBox_local.y);
+	CSprite spr( animIdx, BBox_local.x, BBox_local.y );
 	spr.color = color;
 
 	//tiling centers
 	//center
 	spr.currentFrame = 4;
-	spr.paintTiled(sprCol, BBox_local.w, BBox_local.h);
+	spr.paintTiled( sprCol, BBox_local.w, BBox_local.h );
 	//top
 	spr.currentFrame = 1;
-	spr.paintTiled(sprCol, BBox_local.w, -1);
+	spr.paintTiled( sprCol, BBox_local.w, -1 );
 	//bottom
 	spr.currentFrame = 7;
 	spr.pos.y += BBox_local.h;
-	spr.paintTiled(sprCol, BBox_local.w, -1);
+	spr.paintTiled( sprCol, BBox_local.w, -1 );
 	//colturile (pot fi desenate peste centru)
 	//cl
 	spr.pos.y = BBox_local.y;
 	spr.currentFrame = 3;
-	spr.paintTiled(sprCol, -1, BBox_local.h);
+	spr.paintTiled( sprCol, -1, BBox_local.h );
 	//ul
 	spr.currentFrame = 0;
-	spr.paint(sprCol);
+	spr.paint( sprCol );
 	//cr
 	spr.pos.x += BBox_local.w;
 	spr.currentFrame = 5;
-	spr.paintTiled(sprCol, -1, BBox_local.h);
+	spr.paintTiled( sprCol, -1, BBox_local.h );
 	//ur
 	spr.currentFrame = 2;
-	spr.paint(sprCol);
+	spr.paint( sprCol );
 	//dl
 	spr.currentFrame = 6;
 	spr.pos.x = BBox_local.x;
 	spr.pos.y += BBox_local.h;
-	spr.paint(sprCol);
+	spr.paint( sprCol );
 	//dr
 	spr.currentFrame = 8;
 	spr.pos.x += BBox_local.w;
-	spr.paint(sprCol);
+	spr.paint( sprCol );
 }
 
-void CtrlMgrDrawWindow(CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor)
+void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor )
 {
-	CtrlMgrDrawFrame(sprCol, animIdx, BBox, color);
+	DrawFrame( sprCol, animIdx, BBox, color );
 	//paint title
-	if (strTitle != null)
+	if ( strTitle != null )
 	{
 		//gasesc centrul title bar-ului (din frame-ul de top center)
-		RECTXYWH topbarbb = sprCol->GetAFrameBBox(animIdx, 1);
+		RECTXYWH topbarbb = sprCol->GetAFrameBBox( animIdx, 1 );
 
-		D3DXVECTOR2 titleBarCenter(BBox.x + BBox.w / 2.0f, BBox.y - topbarbb.h / 2); //constanta este in fn de grafica, nu se poate scapa de ea
-		UTGetFontsManager().fonts[nFontIdx]->DrawStringScaleW(strTitle, titleBarCenter.x, titleBarCenter.y, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwTitleColor);
+		D3DXVECTOR2 titleBarCenter( BBox.x + BBox.w / 2.0f, BBox.y - topbarbb.h / 2 ); //constanta este in fn de grafica, nu se poate scapa de ea
+		__TexFonts().fonts[ nFontIdx ]->DrawStringScaleW( strTitle, titleBarCenter.x, titleBarCenter.y, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwTitleColor );
 	}
 }
 
-void CtrlMgrDrawWindow(CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor)
+void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor )
 {
-	CtrlMgrDrawFrame(sprCol, animIdx, BBox, color);
+	DrawFrame( sprCol, animIdx, BBox, color );
 	//paint title
 	//gasesc centrul title bar-ului (din frame-ul de top center)
-	RECTXYWH topbarbb = sprCol->GetAFrameBBox(animIdx, 1);
-	if ((nFontIdx >= 0) && (nStrIdxTitle >= 0))
+	RECTXYWH topbarbb = sprCol->GetAFrameBBox( animIdx, 1 );
+	if ( ( nFontIdx >= 0 ) && ( nStrIdxTitle >= 0 ) )
 	{
-		D3DXVECTOR2 titleBarCenter(BBox.x + BBox.w / 2.0f, BBox.y - topbarbb.h / 2); //constanta este in fn de grafica, nu se poate scapa de ea
-		UTGetFontsManager().fonts[nFontIdx]->DrawStringScaleW(nStrIdxTitle, titleBarCenter.x, titleBarCenter.y, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwTitleColor);
+		D3DXVECTOR2 titleBarCenter( BBox.x + BBox.w / 2.0f, BBox.y - topbarbb.h / 2 ); //constanta este in fn de grafica, nu se poate scapa de ea
+		__TexFonts().fonts[ nFontIdx ]->DrawStringScaleW( nStrIdxTitle, titleBarCenter.x, titleBarCenter.y, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwTitleColor );
 	}
 }
 
-void CtrlMgrDrawWidebar(CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color)
+void GUIUtils::DrawWidebar( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color )
 {
-	float fAlpha = DW_GETFALPHA(color);
+	float fAlpha = DW_GETFALPHA( color );
 
 	//deseneaza fundal (frames: 0-top bar, 1-bg filler)
 	RECTXYWH_F camrect = CCameraTransform::GetActiveCamera()->GetCamWorldAABB();
 	RECTXYWH_F barrect;
-	barrect.x = floor(camrect.x /*- camrect.w / 2.0f*/ - 10.0f); barrect.w = ceil(camrect.w + 20.0f);
-	barrect.y = BBox.CenterY() - (BBox.h / 2.0f) * fAlpha;
+	barrect.x = floor( camrect.x /*- camrect.w / 2.0f*/ - 10.0f ); barrect.w = ceil( camrect.w + 20.0f );
+	barrect.y = BBox.CenterY() - ( BBox.h / 2.0f ) * fAlpha;
 	barrect.h = BBox.h * fAlpha;
 
-	CSprite bar(animIdx, barrect.x, ROUND_FLOAT(barrect.y));
+	CSprite bar( animIdx, barrect.x, ROUND_FLOAT( barrect.y ) );
 	//back
 	bar.currentFrame = 1;
 	bar.color = color;// D3DCOLOR_FFFA(fAlpha * 0.5f);
-	bar.paintTiled(sprCol, barrect.w, barrect.h);
+	bar.paintTiled( sprCol, barrect.w, barrect.h );
 	//bars
 	bar.color = color;
 	bar.currentFrame = 0;
-	bar.paintTiled(sprCol, barrect.w);
+	bar.paintTiled( sprCol, barrect.w );
 	bar.currentFrame = 2;
-	bar.pos.y = ROUND_FLOAT(barrect.Bottom());
-	bar.paintTiled(sprCol, barrect.w);
+	bar.pos.y = ROUND_FLOAT( barrect.Bottom() );
+	bar.paintTiled( sprCol, barrect.w );
 
 }
 
-  //**************************************************************************
- //		Controls Manager
+//**************************************************************************
+//		Controls Manager
 //**************************************************************************
 
 CControlsManager::CControlsManager()
 {
-	m_pStrMgr = NULL;
-	m_pFontsMgr = NULL;
-	m_pCamera = null;
-	m_cameraScreenRect.Set(0, 0, 0, 0);
-	m_pSprite = null;
+	m_pCamera = nullptr;
+	m_cameraScreenRect.Set( 0, 0, 0, 0 );
 
 	bIsBlocking = false;
 
-	loaded = false;
+	bLoaded = false;
 
 	//local timeline
 	fLocalTimeline = 0.0f;
@@ -3918,24 +3769,10 @@ CControlsManager::~CControlsManager()
 	Release();
 }
 
-void CControlsManager::SetManagersPtr(CStringsManager* strManager, CTexturedFontsManager *fontsManager)
-{
-	m_pStrMgr = strManager;
-	m_pFontsMgr = fontsManager;
-
-	CControl::SetManagersPtr(fontsManager, &m_sprCol);
-}
-
-
-void CControlsManager::SetSpritePtr(ID3DXSprite *pSprite)
-{
-	m_pSprite = pSprite;
-}
-
-void CControlsManager::SetCameraTransform(CCameraTransform* pCamera)
+void CControlsManager::SetCameraTransform( CCameraTransform* pCamera )
 {
 	m_pCamera = pCamera;
-	if (m_pCamera != null)
+	if ( m_pCamera != null )
 	{
 		m_cameraScreenRect = m_pCamera->GetCamWorldAABB();
 	}
@@ -3943,13 +3780,13 @@ void CControlsManager::SetCameraTransform(CCameraTransform* pCamera)
 
 CCtrlLayer* CControlsManager::GetTopmostLayer()
 {
-	if (Layers.GetSize() <= 0)
+	if ( Layers.GetSize() <= 0 )
 		return nullptr;
-	return Layers[Layers.GetSize() - 1];
+	return Layers[ Layers.GetSize() - 1 ];
 }
 
 
-//FORMAT FISIER INTRARE
+// INPUT FILE FORMAT:
 //<?xml version="1.0"?>
 //<Interfaces Version="1.0" SpriteCollection="controls.bsx">
 //  <Layer ID="LAYER_ID_QUIT" X="0" Y="0"  isBlocking="true" getsInput="false">
@@ -3958,170 +3795,165 @@ CCtrlLayer* CControlsManager::GetTopmostLayer()
 //    <Control Type="Label" FontID="FONT_ID_SMALL" stringID="STR_QUITSURE" wrapText="1" align="center" valign="top" X="-93" Y="-74" W="187" H="83" />
 //  </Layer>
 //</Interfaces>
-HRESULT CControlsManager::LoadControlsXML(WCHAR* XMLpath)
+OPRESULT CControlsManager::LoadControlsXML( WCHAR* XMLpath )
 {
-	if(loaded)
+	if ( bLoaded )
 	{
 		Release();
 	}
 
-	StringCchPrintfW(loadedFile, MAX_PATH, XMLpath);
-
-	HRESULT hr = S_OK;
-
-    pugi::xml_document doc;
-	if (!doc.load_file(XMLpath))
+	pugi::xml_document doc;
+	if ( !doc.load_file( XMLpath ) )
 	{
-		ErrorBox(K_ERR_WARNING, L"Unable to load Interfaces XML:%s\n", XMLpath);
-		return(E_FAIL);
+		ErrorBox( K_ERR_WARNING, L"Unable to load Interfaces XML:%s\n", XMLpath );
+		return( E_FAIL );
 	}
 
-	pugi::xml_attribute ver = doc.root().child(L"Interfaces").attribute(L"Version");
-	if(ver.as_float() != INTERFACES_VERSION)
+	pugi::xml_attribute ver = doc.root().child( L"Interfaces" ).attribute( L"Version" );
+	if ( ver.as_float() != INTERFACES_VERSION )
 	{
-		ErrorBox(K_ERR_WARNING, L"Interfaces XML wrong version:%s\n", XMLpath);
+		ErrorBox( K_ERR_WARNING, L"Interfaces XML wrong version:%s\n", XMLpath );
 		return E_FAIL;
 	}
-	pugi::xml_attribute sprfile = doc.root().child(L"Interfaces").attribute(L"SpriteCollection");
-	if(sprfile.empty())
+	pugi::xml_attribute sprfile = doc.root().child( L"Interfaces" ).attribute( L"SpriteCollection" );
+	if ( sprfile.empty() )
 	{
-		ErrorBox(K_ERR_WARNING, L"Interfaces XML didn't specify SpriteCollection!\n");
+		ErrorBox( K_ERR_WARNING, L"Interfaces XML didn't specify SpriteCollection!\n" );
 		return E_FAIL;
 	}
-	
-	const WCHAR* sprName = doc.root().child(L"Interfaces").attribute(L"SpriteCollection").value();
+
+	const WCHAR* sprName = doc.root().child( L"Interfaces" ).attribute( L"SpriteCollection" ).value();
 	///--- incarca sprite collection ---
-	//gaseste calea fisierului XML de sprite collection
-	WCHAR szwPath[MAX_PATH];
-	StringCchCopy(szwPath, MAX_PATH, XMLpath);
-	int nIdx = (int)wcslen(szwPath);
-	while (--nIdx > 0 && szwPath[nIdx] != '\\' && szwPath[nIdx] != '/');
-	szwPath[nIdx + 1] = '\0';
-	StringCchCat(szwPath, MAX_PATH, sprName);
+	// finds path of sprite collection
+	WCHAR szwPath[ MAX_PATH ];
+	StringCchCopy( szwPath, MAX_PATH, XMLpath );
+	int nIdx = ( int ) wcslen( szwPath );
+	while ( --nIdx > 0 && szwPath[ nIdx ] != '\\' && szwPath[ nIdx ] != '/' );
+	szwPath[ nIdx + 1 ] = '\0';
+	StringCchCat( szwPath, MAX_PATH, sprName );
 
-	V_OP_RETHR(m_sprCol.LoadSprites(szwPath));
+	V_OP_RETHR( m_sprCol.LoadSprites( szwPath ) );
+	// save control sprite ptr (static)
+	CControl::SetManagersPtr( &m_sprCol );
 
-	//acum incarca si lista de controale
-	pugi::xml_node layernodes = doc.root().child(L"Interfaces");
-    for (pugi::xml_node layerdata = layernodes.first_child(); layerdata; layerdata = layerdata.next_sibling())
-    {
+	// loads list of controls
+	pugi::xml_node layernodes = doc.root().child( L"Interfaces" );
+	for ( pugi::xml_node layerdata = layernodes.first_child(); layerdata; layerdata = layerdata.next_sibling() )
+	{
 		CCtrlLayer *nlayer = new CCtrlLayer();
-		if (!layerdata.attribute(L"getsInput").empty())
-			nlayer->bGetsInput = layerdata.attribute(L"getsInput").as_bool();
-		nlayer->bBlocking = layerdata.attribute(L"isBlocking").as_bool();
-		if(!layerdata.attribute(L"isAnimated").empty())
-			nlayer->bAnimate = layerdata.attribute(L"isAnimated").as_bool();
-		int lX = layerdata.attribute(L"X").as_int();
-		int lY = layerdata.attribute(L"Y").as_int();
-		nlayer->SetPos(lX, lY);
+		if ( !layerdata.attribute( L"getsInput" ).empty() )
+			nlayer->bGetsInput = layerdata.attribute( L"getsInput" ).as_bool();
+		nlayer->bBlocking = layerdata.attribute( L"isBlocking" ).as_bool();
+		if ( !layerdata.attribute( L"isAnimated" ).empty() )
+			nlayer->bAnimate = layerdata.attribute( L"isAnimated" ).as_bool();
+		int lX = layerdata.attribute( L"X" ).as_int();
+		int lY = layerdata.attribute( L"Y" ).as_int();
+		nlayer->SetPos( lX, lY );
 
 		nlayer->shFocusedControlID.Reset();
-		if (!layerdata.attribute(L"focusedControlID").empty())
+		if ( !layerdata.attribute( L"focusedControlID" ).empty() )
 		{
-			nlayer->shFocusedControlID.Init(layerdata.attribute(L"focusedControlID").value());
+			nlayer->shFocusedControlID.Init( layerdata.attribute( L"focusedControlID" ).value() );
 		}
 
-		nlayer->fDestroyTimer = layerdata.attribute(L"fTimer").as_float();
+		nlayer->fDestroyTimer = layerdata.attribute( L"fTimer" ).as_float();
 		//layer anchors
-		WCHAR sAnchorValue[MAX_PATH];
+		WCHAR sAnchorValue[ MAX_PATH ];
 		//X anchor
-		nlayer->anchorX =(ECtrlAnchor)layerdata.attribute(L"anchorX").as_int();
+		nlayer->anchorX = ( ECtrlAnchor ) layerdata.attribute( L"anchorX" ).as_int();
 		//Y anchor
-		nlayer->anchorY = (ECtrlAnchor)layerdata.attribute(L"anchorY").as_int();
+		nlayer->anchorY = ( ECtrlAnchor ) layerdata.attribute( L"anchorY" ).as_int();
 
-		if(!layerdata.attribute(L"ID").empty())
+		if ( !layerdata.attribute( L"ID" ).empty() )
 		{
-			WCHAR strID[MAX_PATH];
-			StringCchCopy(strID, MAX_PATH, layerdata.attribute(L"ID").value());
+			WCHAR strID[ MAX_PATH ];
+			StringCchCopy( strID, MAX_PATH, layerdata.attribute( L"ID" ).value() );
 
-			nlayer->ID.Init(strID);
-			
+			nlayer->ID.Init( strID );
+
 		}
 		else
 		{
-			ErrorBox(K_ERR_WARNING, L"Layer ID empty in file: %s", XMLpath);
+			ErrorBox( K_ERR_WARNING, L"Layer ID empty in file: %s", XMLpath );
 			nlayer->ID.Reset();
 		}
 		///--- reads controls ---
-		for (pugi::xml_node controldata = layerdata.first_child(); controldata; controldata = controldata.next_sibling())
+		for ( pugi::xml_node controldata = layerdata.first_child(); controldata; controldata = controldata.next_sibling() )
 		{
-			const WCHAR* cType = controldata.attribute(L"Type").value();
+			const WCHAR* cType = controldata.attribute( L"Type" ).value();
 
-			CControl* nctrl = new CControl(cType);
+			CControl* nctrl = new CControl( cType );
 
 			nctrl->Reset();
 
-			for (pugi::xml_attribute attData = controldata.first_attribute(); attData; attData = attData.next_attribute())
+			for ( pugi::xml_attribute attData = controldata.first_attribute(); attData; attData = attData.next_attribute() )
 			{
-				WCHAR attValue[MAX_PATH];
-				StringCchPrintf(attValue, MAX_PATH, L"%s", attData.value());
+				WCHAR attValue[ MAX_PATH ];
+				StringCchPrintf( attValue, MAX_PATH, L"%s", attData.value() );
 				//set param - translates data from string to binary
-				SetParamValue(nctrl, attData.name(), attValue, true);
+				SetParamValue( nctrl, attData.name(), attValue, true );
 			}
 
 			nctrl->layer = nlayer;
 
-			nlayer->controls.Add(nctrl);
+			nlayer->controls.Add( nctrl );
 		}
-		//adaugam layerul in lista de layere
-		layersDefinitions.Add(nlayer);
+		// now add layer into list of layer templates
+		layersDefinitions.Add( nlayer );
 	}
 
-	loaded = true;
+	bLoaded = true;
 	return S_OK;
 }
 
 //release all resources
 void CControlsManager::Release()
 {
-	if(!loaded)
+	if ( !bLoaded )
 		return;
 
-	for(int kk=0; kk < layersDefinitions.GetSize(); kk++ )
+	for ( int kk = 0; kk < layersDefinitions.GetSize(); kk++ )
 	{
-		SAFE_DELETE(layersDefinitions[kk]);
+		SAFE_DELETE( layersDefinitions[ kk ] );
 	}
 	layersDefinitions.RemoveAll();
 
-	for(int kk=0; kk < Layers.GetSize(); kk++ )
+	for ( int kk = 0; kk < Layers.GetSize(); kk++ )
 	{
-		SAFE_DELETE(Layers[kk]);
+		SAFE_DELETE( Layers[ kk ] );
 	}
 	Layers.RemoveAll();
 
 	m_sprCol.Release();
 
-	m_pStrMgr = NULL;
-	m_pFontsMgr = NULL;
-
 	bIsBlocking = false;
-	loaded = false;
+	bLoaded = false;
 }
 
 /*
 * Treats all input
 */
-void CControlsManager::ReceiveInput(ECtrlMgrInputType eCommandType, UINT32 nCommand, int nCommandParam/*=-1*/)
+void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCommand, int nCommandParam/*=-1*/ )
 {
-	switch (eCommandType)
+	switch ( eCommandType )
 	{
 		case K_CCTRLMGR_INPUT_SDL_KEY:
 		{
 			//ca optimizare, daca layerul nu este blocking ies imediat ca sa nu influenteze in vreun fel inputul
-			if (!bIsBlocking)
+			if ( !bIsBlocking )
 				break;
 			//nCommand va contine 1 pentru keypressed sau 0 pentru key released
 			//nCommandParam contine -1 penttru not set sau SDLscancode pentru tasta 
 			CCtrlLayer *lay = GetTopmostInputLayer();
-			if ((lay != NULL) && (lay->alpha >= 1.0f)) //sa citeasca doar cand e fully visible
+			if ( ( lay != NULL ) && ( lay->alpha >= 1.0f ) ) //sa citeasca doar cand e fully visible
 			{
-				for (int j = 0; j < lay->controls.GetSize(); j++)
+				for ( int j = 0; j < lay->controls.GetSize(); j++ )
 				{
-					CControl *ctrl = lay->controls[j];
+					CControl *ctrl = lay->controls[ j ];
 					//send code on keypress
-					if ((ctrl->type == CCTRL_TYPE_SDL_KEYREADER) && (nCommand != 0))
+					if ( ( ctrl->type == CCTRL_TYPE_SDL_KEYREADER ) && ( nCommand != 0 ) )
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"nSDLscancode", nCommandParam);
+						ctrl->paramsDict.SetNamedVarINT32( L"nSDLscancode", nCommandParam );
 					}
 				}
 			}
@@ -4129,37 +3961,37 @@ void CControlsManager::ReceiveInput(ECtrlMgrInputType eCommandType, UINT32 nComm
 		break;
 		case K_CCTRLMGR_INPUT_CHAR:
 		{
-			WCHAR c = (WCHAR)nCommand;
+			WCHAR c = ( WCHAR ) nCommand;
 
 			CCtrlLayer *lay = GetTopmostInputLayer();
-			if ((lay != NULL) && (lay->alpha >= 1.0f))
+			if ( ( lay != NULL ) && ( lay->alpha >= 1.0f ) )
 			{
-				for (int j = 0; j < lay->controls.GetSize(); j++)
+				for ( int j = 0; j < lay->controls.GetSize(); j++ )
 				{
-					CControl *ctrl = lay->controls[j];
-					if (ctrl->type == CCTRL_TYPE_INPUTBOX)
+					CControl *ctrl = lay->controls[ j ];
+					if ( ctrl->type == CCTRL_TYPE_INPUTBOX )
 					{
-						_locale_t localt = _create_locale(LC_ALL, "");
-						if (!_iswalnum_l(c, localt))
+						_locale_t localt = _create_locale( LC_ALL, "" );
+						if ( !_iswalnum_l( c, localt ) )
 							continue;
 
-						int textLen = _wtoi(ctrl->paramsDict.GetVariantByName(L"textLen")->m_strArg.text);
-						int maxLen = _wtoi(ctrl->paramsDict.GetVariantByName(L"maxLen")->m_strArg.text);
+						int textLen = _wtoi( ctrl->paramsDict.GetVariantByName( L"textLen" )->m_strArg.text );
+						int maxLen = _wtoi( ctrl->paramsDict.GetVariantByName( L"maxLen" )->m_strArg.text );
 
-						if ((m_pStrMgr->GetLetterIdx(c) != K_STRMGR_SPACE) && (textLen < maxLen) && (c >= '0'))
+						if ( ( __Texts().GetLetterIdx( c ) != K_STRMGR_SPACE ) && ( textLen < maxLen ) && ( c >= '0' ) )
 						{
-							WCHAR inputText[MAX_PATH];
-							StringCchPrintf(inputText, MAX_PATH, L"%s", ctrl->paramsDict.GetVariantByName(L"inputText")->m_strArg.text);
-							inputText[textLen] = c;
+							WCHAR inputText[ MAX_PATH ];
+							StringCchPrintf( inputText, MAX_PATH, L"%s", ctrl->paramsDict.GetVariantByName( L"inputText" )->m_strArg.text );
+							inputText[ textLen ] = c;
 							textLen++;
 							//asigura caracterul de end of string
-							inputText[textLen] = 0;
+							inputText[ textLen ] = 0;
 
-							WCHAR val[MAX_PATH];
-							StringCchPrintf(val, MAX_PATH, L"%d", textLen);
-							ctrl->paramsDict.SetNamedVarString(L"textLen", val);
-							ctrl->paramsDict.SetNamedVarString(L"inputText", inputText);
-							SND_PLAY(SNDIDX_CLICK);
+							WCHAR val[ MAX_PATH ];
+							StringCchPrintf( val, MAX_PATH, L"%d", textLen );
+							ctrl->paramsDict.SetNamedVarString( L"textLen", val );
+							ctrl->paramsDict.SetNamedVarString( L"inputText", inputText );
+							SND_PLAY( SNDIDX_CLICK );
 						}
 					}
 				}
@@ -4168,43 +4000,43 @@ void CControlsManager::ReceiveInput(ECtrlMgrInputType eCommandType, UINT32 nComm
 		break;
 		case K_CCTRLMGR_INPUT_KEY:
 		{
-			UINT vk = (UINT)nCommand;
+			UINT vk = ( UINT ) nCommand;
 
 			CCtrlLayer *lay = GetTopmostInputLayer();
-			if ((lay != NULL) && (lay->alpha >= 1.0f))
+			if ( ( lay != NULL ) && ( lay->alpha >= 1.0f ) )
 			{
-				for (int j = 0; j < lay->controls.GetSize(); j++)
+				for ( int j = 0; j < lay->controls.GetSize(); j++ )
 				{
-					CControl *ctrl = lay->controls[j];
-					if (ctrl->type == CCTRL_TYPE_INPUTBOX)
+					CControl *ctrl = lay->controls[ j ];
+					if ( ctrl->type == CCTRL_TYPE_INPUTBOX )
 					{
-						int textLen = _wtoi(ctrl->paramsDict.GetVariantByName(L"textLen")->m_strArg.text);
+						int textLen = _wtoi( ctrl->paramsDict.GetVariantByName( L"textLen" )->m_strArg.text );
 						//int maxLen = _wtoi(ctrl->paramsDict.GetVariantByName(L"maxLen")->m_strArg.text);
-						WCHAR inputText[MAX_PATH];
-						StringCchPrintf(inputText, MAX_PATH, L"%s", ctrl->paramsDict.GetVariantByName(L"inputText")->m_strArg.text);
-						if (vk == VK_BACK)
+						WCHAR inputText[ MAX_PATH ];
+						StringCchPrintf( inputText, MAX_PATH, L"%s", ctrl->paramsDict.GetVariantByName( L"inputText" )->m_strArg.text );
+						if ( vk == VK_BACK )
 						{
-							if (textLen > 0)
+							if ( textLen > 0 )
 							{
 								textLen--;
-								inputText[textLen] = 0;
-								SND_PLAY(SNDIDX_CLICK);
+								inputText[ textLen ] = 0;
+								SND_PLAY( SNDIDX_CLICK );
 							}
 						}
-						else if (vk == VK_RETURN)
+						else if ( vk == VK_RETURN )
 						{
-							CEvent *nevent = new CEvent(CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK);
-							nevent->AddNamedArgUINT32(L"ctrlID", GET_FAST_HASH("BUT_NEW_USER"));
-							UTGetEventManager().QueueEvent(nevent);
+							CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK );
+							nevent->AddNamedArgUINT32( L"ctrlID", GET_FAST_HASH( "BUT_NEW_USER" ) );
+							UTGetEventManager().QueueEvent( nevent );
 
 							//TODO: ce comanda trimite cand faci enter pe inputbox. Poate mesaj de click pe input box?
 							//ProcessInterfaceMessages(lay->ID, GET_FAST_HASH("CTRL_BUT_NEWPLAYER"), CCTRL_MESSAGE_CLICK);
 						}
 
-						WCHAR val[MAX_PATH];
-						StringCchPrintf(val, MAX_PATH, L"%d", textLen);
-						ctrl->paramsDict.SetNamedVarString(L"textLen", val);
-						ctrl->paramsDict.SetNamedVarString(L"inputText", inputText);
+						WCHAR val[ MAX_PATH ];
+						StringCchPrintf( val, MAX_PATH, L"%d", textLen );
+						ctrl->paramsDict.SetNamedVarString( L"textLen", val );
+						ctrl->paramsDict.SetNamedVarString( L"inputText", inputText );
 					}
 				}
 			}
@@ -4212,44 +4044,44 @@ void CControlsManager::ReceiveInput(ECtrlMgrInputType eCommandType, UINT32 nComm
 		break;
 		case K_CCTRLMGR_INPUT_COMMAND:
 		{
-			ECtrlMgrCommandType cmd = (ECtrlMgrCommandType)nCommand;
+			ECtrlMgrCommandType cmd = ( ECtrlMgrCommandType ) nCommand;
 			//aici ar trebui ca controlul selectat sa preia inputul si sa-l trateze singur in loc sa caut un control anume
 			CCtrlLayer *lay = GetTopmostInputLayer();
-			if ((lay != NULL) && (lay->alpha >= 1.0f))
+			if ( ( lay != NULL ) && ( lay->alpha >= 1.0f ) )
 			{
 				//change focused control (if it has any)
-				if (lay->nFocusFirstFocusableIdx >= 0)
+				if ( lay->nFocusFirstFocusableIdx >= 0 )
 				{
 					bool bCommandProcessed = false;
-					if (lay->nFocusedControlIdx >= 0)
+					if ( lay->nFocusedControlIdx >= 0 )
 					{
-						bCommandProcessed = lay->controls[lay->nFocusedControlIdx]->HandleCommand(cmd, nCommandParam);
+						bCommandProcessed = lay->controls[ lay->nFocusedControlIdx ]->HandleCommand( cmd, nCommandParam );
 					}
 					//not processed by focused control? process it by the layer
-					if (!bCommandProcessed)
+					if ( !bCommandProcessed )
 					{
-						if (cmd == K_CCTRLMGR_COMMAND_DOWN)
+						if ( cmd == K_CCTRLMGR_COMMAND_DOWN )
 						{
 							lay->FocusNextControl();
 						}
-						else if (cmd == K_CCTRLMGR_COMMAND_UP)
+						else if ( cmd == K_CCTRLMGR_COMMAND_UP )
 						{
 							lay->FocusPreviousControl();
 						}
-						else if (cmd == K_CCTRLMGR_COMMAND_BACK)
+						else if ( cmd == K_CCTRLMGR_COMMAND_BACK )
 						{
 							//handle back command (close window) - default close IDs
-							CControl *ctrl = lay->GetControlByName("BUT_CLOSE");
-							if (ctrl == null)
-								ctrl = lay->GetControlByName("BUT_CLOSE_FORCED");
-							if (ctrl == null)
-								ctrl = lay->GetControlByName("BUT_CLOSE_SETTINGS");
-							if (ctrl == null)
-								ctrl = lay->GetControlByName("BUT_CANCEL_LOBBY");
-							if (ctrl == null)
-								ctrl = lay->GetControlByName("BUT_CLOSE_KEYDEF");
+							CControl *ctrl = lay->GetControlByName( "BUT_CLOSE" );
+							if ( ctrl == null )
+								ctrl = lay->GetControlByName( "BUT_CLOSE_FORCED" );
+							if ( ctrl == null )
+								ctrl = lay->GetControlByName( "BUT_CLOSE_SETTINGS" );
+							if ( ctrl == null )
+								ctrl = lay->GetControlByName( "BUT_CANCEL_LOBBY" );
+							if ( ctrl == null )
+								ctrl = lay->GetControlByName( "BUT_CLOSE_KEYDEF" );
 							//daca avem buton clasic de close dam comanda de click pe el
-							if (ctrl != null)
+							if ( ctrl != null )
 							{
 								ctrl->statusFlags |= CCTRL_STATUS_FLAG_CLICKED_ALT;
 							}
@@ -4263,219 +4095,219 @@ void CControlsManager::ReceiveInput(ECtrlMgrInputType eCommandType, UINT32 nComm
 
 }
 
-void CControlsManager::MessageBoxOK(int titleStringId, int textStringId)
+void CControlsManager::MessageBoxOK( int titleStringId, int textStringId )
 {
-	CCtrlLayer* tmpLayer = ShowLayerOnce("LAYER_ID_MSGBOX_OK");
+	CCtrlLayer* tmpLayer = ShowLayerOnce( "LAYER_ID_MSGBOX_OK" );
 
-	if(tmpLayer != NULL)
+	if ( tmpLayer != NULL )
 	{
-		CControl* tmpCb = tmpLayer->GetControlByName("WINDOW");
-		if (tmpCb != NULL)
+		CControl* tmpCb = tmpLayer->GetControlByName( "WINDOW" );
+		if ( tmpCb != NULL )
 		{
-			tmpCb->paramsDict.SetNamedVarINT32(L"stringID", titleStringId);
+			tmpCb->paramsDict.SetNamedVarINT32( L"stringID", titleStringId );
 		}
-		tmpCb = tmpLayer->GetControlByName("TEXT_LABEL");
-		if (tmpCb != NULL)
+		tmpCb = tmpLayer->GetControlByName( "TEXT_LABEL" );
+		if ( tmpCb != NULL )
 		{
-			tmpCb->paramsDict.SetNamedVarINT32(L"stringID", textStringId);
+			tmpCb->paramsDict.SetNamedVarINT32( L"stringID", textStringId );
 		}
 	}
 }
 
-void CControlsManager::Update(float dTime)
+void CControlsManager::Update( float dTime )
 {
 	///--- update local timeline ---
 	fLocalTimeline += dTime;
 
-	if (m_pCamera != null)
+	if ( m_pCamera != null )
 	{
 		m_cameraScreenRect = m_pCamera->GetCamWorldAABB();
 	}
 
 	bIsBlocking = false;
 
-	if(Layers.GetSize() <= 0)
+	if ( Layers.GetSize() <= 0 )
 	{
 		return;
 	}
 
 	// check input from all connected controllers and translate to local commands
-	for (CController * ctrlr : UTGetCtrlrMgr().m_arrControllers)
+	for ( CController * ctrlr : UTGetCtrlrMgr().m_arrControllers )
 	{
 		//always skip network controllers
-		if (ctrlr->eType == K_CM_CT_NET_FRAMELOCK)
+		if ( ctrlr->eType == K_CM_CT_NET_FRAMELOCK )
 			continue;
 
-		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_X) < 0.0f))
-			ReceiveInput(K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_LEFT, ctrlr->nSDLInstanceId);
-		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_X) > 0.0f))
-			ReceiveInput(K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_RIGHT, ctrlr->nSDLInstanceId);
-		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_Y) < 0.0f))
-			ReceiveInput(K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_UP, ctrlr->nSDLInstanceId);
-		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_Y) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_Y) > 0.0f))
-			ReceiveInput(K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_DOWN, ctrlr->nSDLInstanceId);
+		if ( ( ctrlr->GetButState( K_CM_COMMAND_MOVE_X ) == K_CM_BUTSTATE_JUSTPRESSED ) && ( ctrlr->GetAxisVal( K_CM_COMMAND_MOVE_X ) < 0.0f ) )
+			ReceiveInput( K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_LEFT, ctrlr->nSDLInstanceId );
+		if ( ( ctrlr->GetButState( K_CM_COMMAND_MOVE_X ) == K_CM_BUTSTATE_JUSTPRESSED ) && ( ctrlr->GetAxisVal( K_CM_COMMAND_MOVE_X ) > 0.0f ) )
+			ReceiveInput( K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_RIGHT, ctrlr->nSDLInstanceId );
+		if ( ( ctrlr->GetButState( K_CM_COMMAND_MOVE_Y ) == K_CM_BUTSTATE_JUSTPRESSED ) && ( ctrlr->GetAxisVal( K_CM_COMMAND_MOVE_Y ) < 0.0f ) )
+			ReceiveInput( K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_UP, ctrlr->nSDLInstanceId );
+		if ( ( ctrlr->GetButState( K_CM_COMMAND_MOVE_Y ) == K_CM_BUTSTATE_JUSTPRESSED ) && ( ctrlr->GetAxisVal( K_CM_COMMAND_MOVE_Y ) > 0.0f ) )
+			ReceiveInput( K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_DOWN, ctrlr->nSDLInstanceId );
 
-		if ((ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTPRESSED) ||
-			(ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTPRESSED) ||
-			(ctrlr->sCommands.keyState[K_CM_COMMAND_SELECT] == K_CM_BUTSTATE_JUSTPRESSED))
+		if ( ( ctrlr->sCommands.keyState[ K_CM_COMMAND_FIRE1 ] == K_CM_BUTSTATE_JUSTPRESSED ) ||
+			( ctrlr->sCommands.keyState[ K_CM_COMMAND_JUMP ] == K_CM_BUTSTATE_JUSTPRESSED ) ||
+			( ctrlr->sCommands.keyState[ K_CM_COMMAND_SELECT ] == K_CM_BUTSTATE_JUSTPRESSED ) )
 		{
-			ReceiveInput(K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_SELECT, ctrlr->nSDLInstanceId);
+			ReceiveInput( K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_SELECT, ctrlr->nSDLInstanceId );
 		}
 
-		if ((ctrlr->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED) ||
-			(ctrlr->sCommands.keyState[K_CM_COMMAND_RELOAD] == K_CM_BUTSTATE_JUSTPRESSED) ||
-			(ctrlr->sCommands.keyState[K_CM_COMMAND_MELEE] == K_CM_BUTSTATE_JUSTPRESSED) )
+		if ( ( ctrlr->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED ) ||
+			( ctrlr->sCommands.keyState[ K_CM_COMMAND_RELOAD ] == K_CM_BUTSTATE_JUSTPRESSED ) ||
+			( ctrlr->sCommands.keyState[ K_CM_COMMAND_MELEE ] == K_CM_BUTSTATE_JUSTPRESSED ) )
 
 		{
-			ReceiveInput(K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_BACK, ctrlr->nSDLInstanceId);
+			ReceiveInput( K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_BACK, ctrlr->nSDLInstanceId );
 		}
 	}
 
 	//vede daca e ceva blocant si face diverse updates
-	for (int kk = 0; kk < Layers.GetSize(); kk++)
+	for ( int kk = 0; kk < Layers.GetSize(); kk++ )
 	{
-		CCtrlLayer *lay = Layers[kk];
+		CCtrlLayer *lay = Layers[ kk ];
 		//set relative mouse pos
 		D3DXVECTOR2 localMousePt = g_mouse.pos;
-		if (m_pCamera != null)
+		if ( m_pCamera != null )
 		{
-			localMousePt = m_pCamera->ScreenToWorld(g_mouse.pos);
+			localMousePt = m_pCamera->ScreenToWorld( g_mouse.pos );
 		}
 		POINTXY_INT lPos = lay->GetPos();
 		POINTXY_INT anchor;
-		anchor.x = m_cameraScreenRect.CenterX() + lay->anchorX * (m_cameraScreenRect.w / 2);
-		anchor.y = m_cameraScreenRect.CenterY() + lay->anchorY * (m_cameraScreenRect.h / 2);
+		anchor.x = m_cameraScreenRect.CenterX() + lay->anchorX * ( m_cameraScreenRect.w / 2 );
+		anchor.y = m_cameraScreenRect.CenterY() + lay->anchorY * ( m_cameraScreenRect.h / 2 );
 
-		lay->mouseRelPos.x = (int)localMousePt.x;
-		lay->mouseRelPos.y = (int)localMousePt.y;
+		lay->mouseRelPos.x = ( int ) localMousePt.x;
+		lay->mouseRelPos.y = ( int ) localMousePt.y;
 
-		lay->mouseRelPos.x -= lPos.x + (int)anchor.x;
-		lay->mouseRelPos.y -= lPos.y + (int)anchor.y;
+		lay->mouseRelPos.x -= lPos.x + ( int ) anchor.x;
+		lay->mouseRelPos.y -= lPos.y + ( int ) anchor.y;
 		//daca are timer de afisare ii da remove cand se termina timerul
-		if (lay->fDestroyTimer > 0.0f)
+		if ( lay->fDestroyTimer > 0.0f )
 		{
 			lay->fDestroyTimer -= dTime;
-			if (lay->fDestroyTimer <= 0.0f)
+			if ( lay->fDestroyTimer <= 0.0f )
 			{
 				lay->fDestroyTimer = 0.0f;
 				lay->statusFlags |= CCTRL_STATUS_FLAG_REMOVED;
 			}
 		}
 		//vede daca e removed
-		if(lay->statusFlags & CCTRL_STATUS_FLAG_REMOVED)
+		if ( lay->statusFlags & CCTRL_STATUS_FLAG_REMOVED )
 		{
-			dec_limit(lay->alpha, dTime * 6.0f, 0.0f);
-			if(lay->statusFlags & CCTRL_STATUS_FLAG_FORCED)
+			dec_limit( lay->alpha, dTime * 6.0f, 0.0f );
+			if ( lay->statusFlags & CCTRL_STATUS_FLAG_FORCED )
 				lay->alpha = 0.0f;
 		}
 		else
 		{
-			inc_limit(lay->alpha, dTime * 6.0f, 1.0f);
+			inc_limit( lay->alpha, dTime * 6.0f, 1.0f );
 		}
 		//set blocking flag
-		if(lay->bBlocking)
+		if ( lay->bBlocking )
 			bIsBlocking = true;
 		//--- focus rect ---
-		if (lay->nFocusedControlIdx >= 0)
+		if ( lay->nFocusedControlIdx >= 0 )
 		{
 			CAABB targetrect;
-			targetrect.Set(lay->controls[lay->nFocusedControlIdx]->bbox);
-			AABB::MorphInto_Quadratic(&lay->m_focusRect, &targetrect, 20.0f * dTime, 60.0f * dTime);
+			targetrect.Set( lay->controls[ lay->nFocusedControlIdx ]->bbox );
+			AABB::MorphInto_Quadratic( &lay->m_focusRect, &targetrect, 20.0f * dTime, 60.0f * dTime );
 		}
 	}
 
 	//face update de sus in jos pana la primul blocant, inclusiv aceluia
-	for (int kk = Layers.GetSize() - 1; kk >= 0; kk--)
+	for ( int kk = Layers.GetSize() - 1; kk >= 0; kk-- )
 	{
-		CCtrlLayer* layer = Layers[kk];
+		CCtrlLayer* layer = Layers[ kk ];
 		//daca i-am dat remove nu mai fac update la controale
-		if ((layer->statusFlags & CCTRL_STATUS_FLAG_REMOVED) != 0)
+		if ( ( layer->statusFlags & CCTRL_STATUS_FLAG_REMOVED ) != 0 )
 			continue;
 		//update la toate controalele pe rand
-		for (int ll = 0; ll < layer->controls.GetSize(); ll++)
+		for ( int ll = 0; ll < layer->controls.GetSize(); ll++ )
 		{
-			layer->controls[ll]->Update(dTime, fLocalTimeline);
+			layer->controls[ ll ]->Update( dTime, fLocalTimeline );
 		}
 		//daca a fost blocant ies 
-		if (layer->bBlocking)
+		if ( layer->bBlocking )
 			break;
 	}
 
 	//a terminat update-ul la controale, acum vede daca e removed layerul in urma actiunilor
-	for(int kk = Layers.GetSize() - 1; kk >= 0; kk--)
+	for ( int kk = Layers.GetSize() - 1; kk >= 0; kk-- )
 	{
 		//sterge layerul doar cand alpha ajunge la 0
-		if((Layers[kk]->statusFlags & CCTRL_STATUS_FLAG_REMOVED) && (Layers[kk]->alpha <= 0.0f))
+		if ( ( Layers[ kk ]->statusFlags & CCTRL_STATUS_FLAG_REMOVED ) && ( Layers[ kk ]->alpha <= 0.0f ) )
 		{
-			SAFE_DELETE(Layers[kk]);
-			Layers.Remove(kk);
+			SAFE_DELETE( Layers[ kk ] );
+			Layers.Remove( kk );
 		}
 	}
 
 
 	//--- update particles ---
-	g_particlesMgr.UpdateLayer(K_PART_LAYER_CONTROLS_LIGHT, dTime);
+	g_particlesMgr.UpdateLayer( K_PART_LAYER_CONTROLS_LIGHT, dTime );
 }
 
 void CControlsManager::Paint()
 {
 	D3DXMATRIXA16 matTransform, mats;
 
-	m_pSprite->Flush(); //necesar pt ca schimbam VIEW
-	m_pSprite->SetTransform(&g_matIdentity);
-	if (m_pCamera)
+	__Painter().Flush();
+	//m_pSprite->SetTransform(&g_matIdentity);
+	if ( m_pCamera )
 	{
-		CCameraTransform::SetActiveCamera(m_pDevice, m_pCamera);
+		CCameraTransform::SetActiveCamera( m_pDevice, m_pCamera );
 		m_cameraScreenRect = m_pCamera->GetCamWorldAABB();
 	}
 
 	//get the layer that gets the input for the focused controls
 	CCtrlLayer* pInputLayer = GetTopmostInputLayer();
 
-	for (int ii = 0; ii < Layers.GetSize(); ii++)
+	for ( int ii = 0; ii < Layers.GetSize(); ii++ )
 	{
-		m_pSprite->Flush(); //necesar pentru schimbarea intre layere
-		CCtrlLayer* lay = Layers[ii];
+		//Flush necessary when changing between layers
+		__Painter().Flush();
+		CCtrlLayer* lay = Layers[ ii ];
 
-		float perc = TimeEasing(lay->alpha);
-		if(!lay->bAnimate)
+		float perc = TimeEasing( lay->alpha );
+		if ( !lay->bAnimate )
 			perc = 1.0f;
 
 		POINTXY_INT lpos = lay->GetPos();
 		POINTXY_INT anchor;
-		anchor.x = m_cameraScreenRect.CenterX() + lay->anchorX * (m_cameraScreenRect.w / 2);
-		anchor.y = m_cameraScreenRect.CenterY() + lay->anchorY * (m_cameraScreenRect.h / 2);
+		anchor.x = m_cameraScreenRect.CenterX() + lay->anchorX * ( m_cameraScreenRect.w / 2 );
+		anchor.y = m_cameraScreenRect.CenterY() + lay->anchorY * ( m_cameraScreenRect.h / 2 );
 		//add anchor
 		lpos.x += anchor.x;
 		lpos.y += anchor.y;
 
-		m_pSprite->Flush();
-		D3DXMatrixScaling(&matTransform, 0.9f + 0.1f * perc, 0.9f + 0.1f * perc, 1.0f);
-		D3DXMatrixTranslation(&mats, lpos.x, lpos.y, 0.0f);
+		MUMatScaling( &matTransform, 0.9f + 0.1f * perc, 0.9f + 0.1f * perc, 1.0f );
+		MUMatTranslation( &mats, lpos.x, lpos.y, 0.0f );
 		matTransform *= mats;
 		//we need transform history so use this method:
-		App_SetWorldTransform(m_pDevice, &matTransform);
+		App_SetWorldTransform( m_pDevice, &matTransform );
 
 		bool bHideTabstop = false;
-		if ((lay->nFocusedControlIdx >= 0) && (lay->controls[lay->nFocusedControlIdx]->bShowFocusCursor == false))
+		if ( ( lay->nFocusedControlIdx >= 0 ) && ( lay->controls[ lay->nFocusedControlIdx ]->bShowFocusCursor == false ) )
 			bHideTabstop = true;
 
-		for (int kk = 0; kk < lay->controls.Count(); kk++)
+		for ( int kk = 0; kk < lay->controls.Count(); kk++ )
 		{
 			//paint focus cursor under first focusable control
-			if ((pInputLayer == lay) && (kk == lay->nFocusFirstFocusableIdx) && ((pInputLayer->statusFlags & CCTRL_STATUS_FLAG_REMOVED) == 0))
+			if ( ( pInputLayer == lay ) && ( kk == lay->nFocusFirstFocusableIdx ) && ( ( pInputLayer->statusFlags & CCTRL_STATUS_FLAG_REMOVED ) == 0 ) )
 			{
 				//daca controlul curent nu arata focus atunci sa nu indic
-				if (!bHideTabstop)
+				if ( !bHideTabstop )
 				{
 					RECTXYWH focusrect;
-					focusrect.Set(lay->m_focusRect.vMin.x, lay->m_focusRect.vMin.y, lay->m_focusRect.vSize.x, lay->m_focusRect.vSize.y);
-					CtrlMgrDrawFrame(&m_sprCol, ANM_CONTROLS_SPR_FRAME5, focusrect, DW_COLOR_FFFA(lay->alpha), -1);
+					focusrect.Set( lay->m_focusRect.vMin.x, lay->m_focusRect.vMin.y, lay->m_focusRect.vSize.x, lay->m_focusRect.vSize.y );
+					GUIUtils::DrawFrame( &m_sprCol, ANM_CONTROLS_SPR_FRAME5, focusrect, DW_COLOR_FFFA( lay->alpha ), -1 );
 				}
 			}
 
 			//paint control
-			lay->controls[kk]->Paint(lay->pControlsManager->m_pCamera, &matTransform);
+			lay->controls[ kk ]->Paint( lay->pControlsManager->m_pCamera, &matTransform );
 		}
 	}
 
@@ -4488,89 +4320,89 @@ void CControlsManager::Paint()
 	//}
 #endif
 	//--- particles ---
-	g_particlesMgr.PaintLayer(K_PART_LAYER_CONTROLS_LIGHT, true);
+	g_particlesMgr.PaintLayer( K_PART_LAYER_CONTROLS_LIGHT, true );
 
-	m_pSprite->Flush();
-	App_SetWorldTransform(m_pDevice, &g_matIdentity);
-	m_pSprite->SetTransform(&g_matIdentity);
+	__Painter().Flush();
+	App_SetWorldTransform( m_pDevice, &g_matIdentity );
+	//m_pSprite->SetTransform(&g_matIdentity);
 
 }
 
-CCtrlLayer* CControlsManager::ShowLayerOnce(CHAR* layerName, float fAlpha, int posX, int posY)
+CCtrlLayer* CControlsManager::ShowLayerOnce( CHAR* layerName, float fAlpha, int posX, int posY )
 {
-	if(GetLayerByName(layerName) == NULL)
-		return ShowLayer(layerName, fAlpha, posX, posY);
-	
+	if ( GetLayerByName( layerName ) == NULL )
+		return ShowLayer( layerName, fAlpha, posX, posY );
+
 	return nullptr;
 }
 
-CCtrlLayer* CControlsManager::ShowLayer(CHAR* layerName, float fAlpha, int posX, int posY)
+CCtrlLayer* CControlsManager::ShowLayer( CHAR* layerName, float fAlpha, int posX, int posY )
 {
-	UINT32 layID = FastHash(layerName, strlen(layerName));
+	UINT32 layID = FastHash( layerName, strlen( layerName ) );
 	int layIdx = -1;
-	for (int kk = 0; kk < layersDefinitions.GetSize(); kk++)
+	for ( int kk = 0; kk < layersDefinitions.GetSize(); kk++ )
 	{
-		if(layersDefinitions[kk]->ID.textHash == layID)
+		if ( layersDefinitions[ kk ]->ID.textHash == layID )
 		{
 			layIdx = kk;
 			break;
 		}
 	}
-	if(layIdx < 0)
+	if ( layIdx < 0 )
 	{
-		WCHAR txtline[MAX_PATH];
-		mbstowcs(txtline, layerName, MAX_PATH);
-		ErrorBox(K_ERR_WARNING, L"Layer definition not found! %s", txtline);
+		WCHAR txtline[ MAX_PATH ];
+		mbstowcs( txtline, layerName, MAX_PATH );
+		ErrorBox( K_ERR_WARNING, L"Layer definition not found! %s", txtline );
 		return nullptr;
 	}
 	//daca am gasit layerul, deci il clonez
-	CCtrlLayer *srclay = layersDefinitions[layIdx]->Clone();
+	CCtrlLayer *srclay = layersDefinitions[ layIdx ]->Clone();
 	srclay->alpha = fAlpha;
-	srclay->MoveLayer(posX, posY);
+	srclay->MoveLayer( posX, posY );
 	srclay->statusFlags = 0;
 	srclay->pControlsManager = this;
-	Layers.Add(srclay);
+	Layers.Add( srclay );
 
 	return srclay;
 }
 
-void CControlsManager::RemoveTopmostLayer(bool forced)
+void CControlsManager::RemoveTopmostLayer( bool forced )
 {
-	if (Layers.GetSize() == 0)
+	if ( Layers.GetSize() == 0 )
 		return;
-	
-	CCtrlLayer* layer = Layers[Layers.GetSize() - 1];
+
+	CCtrlLayer* layer = Layers[ Layers.GetSize() - 1 ];
 	layer->statusFlags |= CCTRL_STATUS_FLAG_REMOVED;
-	
-	if(forced)
+
+	if ( forced )
 		layer->statusFlags |= CCTRL_STATUS_FLAG_FORCED;
 }
 
-void CControlsManager::RemoveLayer(UINT32 layerID, bool forced)
+void CControlsManager::RemoveLayer( UINT32 layerID, bool forced )
 {
-	for(int kk = Layers.GetSize() - 1; kk >= 0; kk-- )
+	for ( int kk = Layers.GetSize() - 1; kk >= 0; kk-- )
 	{
-		if(Layers[kk]->ID.textHash == layerID)
+		if ( Layers[ kk ]->ID.textHash == layerID )
 		{
-			Layers[kk]->statusFlags |= CCTRL_STATUS_FLAG_REMOVED;
-			if(forced)
-				Layers[kk]->statusFlags |= CCTRL_STATUS_FLAG_FORCED;
+			Layers[ kk ]->statusFlags |= CCTRL_STATUS_FLAG_REMOVED;
+			if ( forced )
+				Layers[ kk ]->statusFlags |= CCTRL_STATUS_FLAG_FORCED;
 
 			return;
 		}
 	}
 }
 
-void CControlsManager::RemoveLayer(CHAR* layerName, bool forced)
+void CControlsManager::RemoveLayer( CHAR* layerName, bool forced )
 {
-	UINT32 dwLayerHash = FastHash(layerName);
-	for (int kk = Layers.GetSize() - 1; kk >= 0; kk--)
+	UINT32 dwLayerHash = FastHash( layerName );
+	for ( int kk = Layers.GetSize() - 1; kk >= 0; kk-- )
 	{
-		if (Layers[kk]->ID.textHash == dwLayerHash)
+		if ( Layers[ kk ]->ID.textHash == dwLayerHash )
 		{
-			Layers[kk]->statusFlags |= CCTRL_STATUS_FLAG_REMOVED;
-			if (forced)
-				Layers[kk]->statusFlags |= CCTRL_STATUS_FLAG_FORCED;
+			Layers[ kk ]->statusFlags |= CCTRL_STATUS_FLAG_REMOVED;
+			if ( forced )
+				Layers[ kk ]->statusFlags |= CCTRL_STATUS_FLAG_FORCED;
 
 			return;
 		}
@@ -4578,53 +4410,53 @@ void CControlsManager::RemoveLayer(CHAR* layerName, bool forced)
 }
 
 
-void CControlsManager::RemoveAllLayers(bool forced)
+void CControlsManager::RemoveAllLayers( bool forced )
 {
 	//daca forced==true scade alpha imediat si le da remove imediat
-	for(int kk=0; kk < Layers.GetSize(); kk++ )
+	for ( int kk = 0; kk < Layers.GetSize(); kk++ )
 	{
-		Layers[kk]->statusFlags |= CCTRL_STATUS_FLAG_REMOVED;
-		if(forced)
-			Layers[kk]->statusFlags |= CCTRL_STATUS_FLAG_FORCED;
+		Layers[ kk ]->statusFlags |= CCTRL_STATUS_FLAG_REMOVED;
+		if ( forced )
+			Layers[ kk ]->statusFlags |= CCTRL_STATUS_FLAG_FORCED;
 	}
 
 	return;
 }
 
-CCtrlLayer* CControlsManager::GetLayerByNameHash(UINT32 layerNameHash)
+CCtrlLayer* CControlsManager::GetLayerByNameHash( UINT32 layerNameHash )
 {
-	for(int kk=0; kk < Layers.GetSize(); kk++ )
+	for ( int kk = 0; kk < Layers.GetSize(); kk++ )
 	{
-		if(Layers[kk]->ID.textHash == layerNameHash)
-			return Layers[kk];
+		if ( Layers[ kk ]->ID.textHash == layerNameHash )
+			return Layers[ kk ];
 	}
 	return nullptr;
 }
 
-CCtrlLayer* CControlsManager::GetLayerByName(CHAR* layerName)
+CCtrlLayer* CControlsManager::GetLayerByName( CHAR* layerName )
 {
-	UINT32 layID = FastHash(layerName, strlen(layerName));
-	for (int kk = 0; kk < Layers.GetSize(); kk++)
+	UINT32 layID = FastHash( layerName, strlen( layerName ) );
+	for ( int kk = 0; kk < Layers.GetSize(); kk++ )
 	{
-		if(Layers[kk]->ID.textHash == layID)
-			return Layers[kk];
+		if ( Layers[ kk ]->ID.textHash == layID )
+			return Layers[ kk ];
 	}
 	return nullptr;
 }
 
-CCtrlLayer* CControlsManager::GetLayerByIdx(int layerIdx)
+CCtrlLayer* CControlsManager::GetLayerByIdx( int layerIdx )
 {
-	if((layerIdx < 0) || (layerIdx >= Layers.GetSize()))
+	if ( ( layerIdx < 0 ) || ( layerIdx >= Layers.GetSize() ) )
 		return nullptr;
-	return Layers[layerIdx];
+	return Layers[ layerIdx ];
 }
 
 CCtrlLayer* CControlsManager::GetTopmostInputLayer()
 {
-	for (int kk = Layers.GetSize() - 1; kk >= 0; kk--)
+	for ( int kk = Layers.GetSize() - 1; kk >= 0; kk-- )
 	{
-		if(Layers[kk]->bGetsInput == true)
-			return Layers[kk];
+		if ( Layers[ kk ]->bGetsInput == true )
+			return Layers[ kk ];
 	}
 	return nullptr;
 }
@@ -4632,64 +4464,43 @@ CCtrlLayer* CControlsManager::GetTopmostInputLayer()
 /*----------------------------------*\
 *  System/Framework
 \*----------------------------------*/
-HRESULT CControlsManager::OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
-{
-	m_pDevice = pd3dDevice;
-	HRESULT hr = S_OK;
 
-	V_RETURN(m_sprCol.OnCreateDevice(pd3dDevice));
-	return hr;
+OPRESULT CControlsManager::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
+{
+	m_pDevice = pDevice;
+	V_OP_RET( m_sprCol.OnCreateDevice( pDevice ) );
+	return K_OP_OK;
 }
 
-HRESULT CControlsManager::OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
+OPRESULT CControlsManager::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
 {
-	m_pDevice = pd3dDevice;
-	HRESULT hr = S_OK;
-	V_RETURN(m_sprCol.OnResetDevice(pd3dDevice));
-	return hr;
+	m_pDevice = pDevice;
+	V_OP_RET( m_sprCol.OnResetDevice( pDevice ) );
+	return K_OP_OK;
 }
 
-HRESULT CControlsManager::OnLostDevice(void)
+OPRESULT CControlsManager::OnLostDevice()
 {
-	HRESULT hr = S_OK;
-	m_pDevice = NULL;
-	V_RETURN(m_sprCol.OnLostDevice());
-	return hr;
+	m_pDevice = nullptr;
+	V_OP_RET( m_sprCol.OnLostDevice() );
+	return K_OP_OK;
 }
 
-HRESULT CControlsManager::OnDestroyDevice(void)
+OPRESULT CControlsManager::OnDestroyDevice()
 {
-	m_pDevice = NULL;
-	HRESULT hr = S_OK;
-	V_RETURN(m_sprCol.OnDestroyDevice());
-
-	return hr;
+	m_pDevice = nullptr;
+	V_OP_RET( m_sprCol.OnDestroyDevice() );
+	return K_OP_OK;
 }
 
-void CControlsManager::DrawProgressBar(D3DXVECTOR2 vPos, int nWidth, float fPercent, DWORD nColor)
-{
-	D3DXVECTOR2 startpos = vPos;
-	startpos.x -= (float)(nWidth / 2);
-	//draw back
-	CSprite spr(ANM_CONTROLS_SPR_PROGRESS_SM_3PX, startpos);
-	spr.paintTiled(&m_sprCol, nWidth);
-	//draw filler
-	if (fPercent > 0.0f)
-	{
-		spr.currentFrame = 1;
-		spr.color = nColor;
-		spr.paintTiled(&m_sprCol, (int)floor(fPercent * nWidth));
-	}
-}
-
-void CControl::drawDebugText(int x, int y, const wchar_t* text, DWORD color)
+void CControl::drawDebugText( int x, int y, const wchar_t* text, DWORD color )
 {
 #if defined(_DEBUG) || defined(DEBUG)
-	if (g_font6ns1 != null)
+	if ( g_font6ns1 != null )
 	{
 		CStringDesc strdesc;
-		__Texts().SetStringDesc(&strdesc, L"%s", text);
-		g_font6ns1->DrawString(&strdesc, x, y, FONTFLAG_ANCHOR_TOPLEFT, color);
+		__Texts().SetStringDesc( &strdesc, L"%s", text );
+		g_font6ns1->DrawString( &strdesc, x, y, FONTFLAG_ANCHOR_TOPLEFT, color );
 	}
 #endif
 }

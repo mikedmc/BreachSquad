@@ -52,7 +52,7 @@ CStringParticle::CStringParticle()
 	m_fAlpha = 1.0f;
 }
 
-void CParticlesManager::AddStringParticle(CTexturedFont *pFont, WCHAR* text,
+void CParticlesManager::AddStringParticle(CTexFont *pFont, WCHAR* text,
 						D3DXVECTOR2* pos, 
 						D3DXVECTOR2* gravity, D3DXVECTOR2* speed, 
 						float lifetime, 
@@ -252,7 +252,7 @@ int CParticlesManager::AddStringDummy(int nType, D3DXVECTOR2 np1, int stringID, 
 			ndum->intParam2 = fontID;
 			ndum->timer = 0.0f;
 			ndum->intPt.x = fontID;
-			ndum->intPt.y = size * UTGetFontsManager()[fontID]->MeasureHString(__Texts().strings[stringID]->shStringName.textHash).w;
+			ndum->intPt.y = size * __TexFonts()[fontID]->MeasureHString(__Texts().strings[stringID]->shStringName.textHash).w;
 			ndum->fparam = size;
 			ndum->fparam2 = showTime;
 
@@ -283,7 +283,7 @@ int CParticlesManager::AddStringDummy(int nType, D3DXVECTOR2 np1, int stringID, 
 			ndum->intParam2 = __Texts().strings[stringID]->len;
 			ndum->timer = 0.0f;
 			ndum->intPt.x = fontID;
-			ndum->intPt.y = size * UTGetFontsManager()[fontID]->MeasureHString(__Texts().strings[stringID]->shStringName.textHash).w;
+			ndum->intPt.y = size * __TexFonts()[fontID]->MeasureHString(__Texts().strings[stringID]->shStringName.textHash).w;
 			ndum->fparam = size;
 			ndum->fparam2 = showTime;
 
@@ -484,16 +484,16 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 				else if (ndum->timer < 0.25f)
 					fAlpha = ndum->timer * 4.0f;
 
-				int fonth = UTGetFontsManager()[ndum->intParam2]->rowHeight;
+				int fonth = __TexFonts()[ndum->intParam2]->rowHeight;
 				int fonth2 = 0;
 				if ((ndum->intParam3 >= 0) && (ndum->intParam4 >= 0))
 				{
-					fonth2 = UTGetFontsManager()[ndum->intParam4]->rowHeight;
+					fonth2 = __TexFonts()[ndum->intParam4]->rowHeight;
 				}
 
 				DWORD dwcol = DW_COLORALPHA(ndum->sprite.color, fAlpha);
 				RECTXYWH ptrect(0, (int)floor(camrect.CenterY() + ndum->pos.y - fonth * 0.75f), 200, fonth * 1.5f + fonth2);
-				CtrlMgrDrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, ptrect, dwcol);
+				GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, ptrect, dwcol);
 
 				//paint string
 				float offx = 0.0f;
@@ -503,11 +503,11 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 					offx = -(1.0f - TimeEasing(ndum->timer * 4.0f)) * camrect.w;
 
 
-				UTGetFontsManager()[ndum->intParam2]->DrawString(ndum->intParam, camrect.CenterX() + ndum->pos.x + offx, camrect.CenterY() + ndum->pos.y, FONTFLAG_ANCHOR_VCENTERHCENTER, dwcol);
+				__TexFonts()[ndum->intParam2]->DrawString(ndum->intParam, camrect.CenterX() + ndum->pos.x + offx, camrect.CenterY() + ndum->pos.y, FONTFLAG_ANCHOR_VCENTERHCENTER, dwcol);
 				//second string
 				if ((ndum->intParam3 >= 0) && (ndum->intParam4 >= 0))
 				{
-					UTGetFontsManager()[ndum->intParam4]->DrawString(ndum->intParam3, camrect.CenterX() + ndum->pos.x + offx, camrect.CenterY() + ndum->pos.y + fonth, FONTFLAG_ANCHOR_VCENTERHCENTER, dwcol);
+					__TexFonts()[ndum->intParam4]->DrawString(ndum->intParam3, camrect.CenterX() + ndum->pos.x + offx, camrect.CenterY() + ndum->pos.y + fonth, FONTFLAG_ANCHOR_VCENTERHCENTER, dwcol);
 				}
 			}
 			break;
@@ -523,16 +523,18 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 					mat1 *= mat2;
 
 					m_pSprite->SetTransform(&mat1);
-					UTGetFontsManager()[ndum->intPt.x]->DrawString(ndum->intParam, 0, 0, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLOR_FFFA(ndum->timer));
+					__TexFonts()[ndum->intPt.x]->DrawString(ndum->intParam, 0, 0, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLOR_FFFA(ndum->timer));
 					m_pSprite->SetTransform(&g_matIdentity);
 				}
 				else if(ndum->status == 1)
 				{
+					/*
 					D3DXMatrixAffineTransformation2D(&mat1, ndum->fparam, NULL, 0.0f, &realPos);
-
+	
 					m_pSprite->SetTransform(&mat1);
-					UTGetFontsManager()[ndum->intPt.x]->DrawStringLightened(ndum->intParam, 0, 0, ndum->fparam2 - ndum->timer, 60.0f, FONTFLAG_ANCHOR_VCENTERHCENTER, 0xffffffff);
+					__TexFonts()[ndum->intPt.x]->DrawStringLightened(ndum->intParam, 0, 0, ndum->fparam2 - ndum->timer, 60.0f, FONTFLAG_ANCHOR_VCENTERHCENTER, 0xffffffff);
 					m_pSprite->SetTransform(&g_matIdentity);
+					*/
 				}
 			}
 			break;
@@ -543,7 +545,7 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 				DWORD color = ndum->sprite.color;
 				if (FLOAT_FRAC(ndum->timer) > 0.8f)
 					color = 0x00000000;
-				UTGetFontsManager()[ndum->intParam2]->DrawString(ndum->intParam, realPos.x, realPos.y, FONTFLAG_ANCHOR_VCENTERHCENTER, color);
+				__TexFonts()[ndum->intParam2]->DrawString(ndum->intParam, realPos.x, realPos.y, FONTFLAG_ANCHOR_VCENTERHCENTER, color);
 			}
 			break;
 		case K_PDUMMY_STRING_LETTERWAVER:
@@ -556,7 +558,7 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 				}
 				//deseneaza umbra neagra sub text
 				//CSprite shadowact(ANM_PARTICLES_SPR_TEXT_DECO, 0, 0);
-				//D3DXMatrixAffineTransformation2D(&mat1, ndum->fparam * 2.5f * glowalpha, NULL, 0.0f, &(ndum->pt1 - D3DXVECTOR2(0.0f, UTGetFontsManager()[ndum->intPt.x]->rowSpacing * ndum->fparam * 0.2f)) );
+				//D3DXMatrixAffineTransformation2D(&mat1, ndum->fparam * 2.5f * glowalpha, NULL, 0.0f, &(ndum->pt1 - D3DXVECTOR2(0.0f, __TexFonts()[ndum->intPt.x]->rowSpacing * ndum->fparam * 0.2f)) );
 				//m_pSprite->SetTransform(&mat1);
 				//shadowact.color = D3DCOLOR_COLORVALUE(1.0f, 1.0f, 1.0f, glowalpha * 0.6f);
 				//shadowact.paint(&m_sprCol);
@@ -568,13 +570,13 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 					int cod = __Texts().strings[ndum->intParam]->codes[ii];
 					if((cod == K_STRMGR_SPACE)||(cod == K_STRMGR_RETURN)) 
 					{
-						posx += UTGetFontsManager()[ndum->intPt.x]->spaceSize * ndum->fPtr[ii] * ndum->fparam;
+						posx += __TexFonts()[ndum->intPt.x]->spaceSize * ndum->fPtr[ii] * ndum->fparam;
 						continue;
 					}
+					/*
+					letterRect = __TexFonts()[ndum->intPt.x]->moduleRect[cod];
 
-					letterRect = UTGetFontsManager()[ndum->intPt.x]->moduleRect[cod];
-
-					int posy = camrect.CenterY() + ndum->pt1.y + UTGetFontsManager()[ndum->intPt.x]->fmodule_oy[cod] * ndum->fparam;
+					int posy = camrect.CenterY() + ndum->pt1.y + __TexFonts()[ndum->intPt.x]->fmodule_oy[cod] * ndum->fparam;
 
 					//deseneaza litera
 					D3DXVECTOR3 center((letterRect.right - letterRect.left)/2.0f, (letterRect.bottom - letterRect.top)/2.0f, 0.0f);
@@ -582,9 +584,9 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 					m_pSprite->SetTransform(&mat1);
 					DWORD col = (ndum->sprite.color & 0xffffff) | ((BYTE)(ndum->fPtr[ii] * 255.0f) << 24);
 					//D3DCOLOR_COLORVALUE(1.0f, 1.0f, 1.0f, ndum->fPtr[ii]);
-					//m_pSprite->Draw(UTGetFontsManager().m_texManager.GetTexture(UTGetFontsManager()[ndum->intPt.x]->nFontsMgrTexManagerIDX), &letterRect, &center, NULL, col);
-					posx += (UTGetFontsManager()[ndum->intPt.x]->frameBBox[cod].w + UTGetFontsManager()[ndum->intPt.x]->letterSpacing) * ndum->fparam;
-
+					//m_pSprite->Draw(__TexFonts().m_texManager.GetTexture(__TexFonts()[ndum->intPt.x]->nFontsMgrTexManagerIDX), &letterRect, &center, NULL, col);
+					posx += (__TexFonts()[ndum->intPt.x]->frameBBox[cod].w + __TexFonts()[ndum->intPt.x]->letterSpacing) * ndum->fparam;
+					*/
 				}
 				m_pSprite->SetTransform(&g_matIdentity);
 			}

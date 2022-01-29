@@ -957,7 +957,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 	if (nKeyIcon < 0)
 	{
 		int anmIdx = ANM_CONTROLS_SPR_BUT_SM_GREY2;
-		CtrlMgrDrawButtonFromText(&UTGetGUI().m_sprCol, anmIdx, bPressed, &sdKeyName, g_font5n2, vBP, dwColor, nAlign);
+		GUIUtils::DrawButtonFromText(&UTGetGUI().m_sprCol, anmIdx, bPressed, &sdKeyName, g_font5n2, vBP, dwColor, nAlign);
 	}
 	else //key icons set
 	{
@@ -1085,7 +1085,7 @@ CStringHash shTTFID_SZ20(L"TTFID_SZ20"); //always loaded (needed for chat)
 OPRESULT App_LocaLoadFonts(bool bUseTTFonts)
 {
 	//release all
-	UTGetFontsManager().Release();
+	__TexFonts().Release();
 
 	HRESULT hr = S_OK;
 
@@ -1097,6 +1097,7 @@ OPRESULT App_LocaLoadFonts(bool bUseTTFonts)
 		{
 			ErrorBox(K_ERR_WARNING, L"[WARNING] Couldn't load TrueType font [%s]!", shTTFID_SZ20.text);
 		}
+		/*
 		if (FAILED(hr = UTGetTTFManager().LoadFont(shTTFID_SZ30.text, L"Noto Sans Med", L"media/fonts/NotoSans-Medium.ttf", 30)))
 		{
 			ErrorBox(K_ERR_WARNING, L"[WARNING] Couldn't load TrueType font [%s]!", shTTFID_SZ30.text);
@@ -1105,33 +1106,34 @@ OPRESULT App_LocaLoadFonts(bool bUseTTFonts)
 		{
 			ErrorBox(K_ERR_WARNING, L"[WARNING] Couldn't load TrueType font [%s]!", shTTFID_SZ40.text);
 		}
+		*/
 
 		//needed bitmap fonts (maybe all of them, not a mem problem)
 		WCHAR xmlpath[MAX_PATH];
 		FileManager::GetMediaPath(L"media/fonts/font_12_WOW.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_10_B1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_10_BS1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_9_B1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_8_B1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_8_BS1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_6_N1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_6_NS1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_6_NC1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_5_N1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_5_N2.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_5_NS2.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 	}
 	else
 	{
@@ -1156,46 +1158,47 @@ OPRESULT App_LocaLoadFonts(bool bUseTTFonts)
 		//bitmap fonts
 		WCHAR xmlpath[MAX_PATH];
 		FileManager::GetMediaPath(L"media/fonts/font_12_WOW.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_10_B1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_10_BS1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_9_B1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_8_B1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_8_BS1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_6_N1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_6_NS1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_6_NC1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_5_N1.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_5_N2.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 		FileManager::GetMediaPath(L"media/fonts/font_5_NS2.bsx", xmlpath);
-		UTGetFontsManager().AddFontXML(xmlpath);
+		__TexFonts().AddFontXML(xmlpath);
 	}
 
 	//sets direct pointers to ingame fonts
-	g_font12wow = UTGetFontsManager()["FONT_12_WOW"];
-	g_font10b1 = UTGetFontsManager()["FONT_10_B1"];
-	g_font10bs1 = UTGetFontsManager()["FONT_10_BS1"];
-	g_font9b1 = UTGetFontsManager()["FONT_9_B1"];
-	g_font8b1 = UTGetFontsManager()["FONT_8_B1"];
-	g_font8bs1 = UTGetFontsManager()["FONT_8_BS1"];
-	g_font6n1 = UTGetFontsManager()["FONT_6_N1"];
-	g_font6ns1 = UTGetFontsManager()["FONT_6_NS1"];
-	g_font6nc1 = UTGetFontsManager()["FONT_6_NC1"];
-	g_font5n1 = UTGetFontsManager()["FONT_5_N1"];
-	g_font5n2 = UTGetFontsManager()["FONT_5_N2"];
-	g_font5ns2 = UTGetFontsManager()["FONT_5_NS2"];
+	g_font12wow = __TexFonts()["FONT_12_WOW"];
+	g_font10b1 = __TexFonts()["FONT_10_B1"];
+	g_font10bs1 = __TexFonts()["FONT_10_BS1"];
+	g_font9b1 = __TexFonts()["FONT_9_B1"];
+	g_font8b1 = __TexFonts()["FONT_8_B1"];
+	g_font8bs1 = __TexFonts()["FONT_8_BS1"];
+	g_font6n1 = __TexFonts()["FONT_6_N1"];
+	g_font6ns1 = __TexFonts()["FONT_6_NS1"];
+	g_font6nc1 = __TexFonts()["FONT_6_NC1"];
+	g_font5n1 = __TexFonts()["FONT_5_N1"];
+	g_font5n2 = __TexFonts()["FONT_5_N2"];
+	g_font5ns2 = __TexFonts()["FONT_5_NS2"];
 
 	//set font replacements if using TTF
+	/*
 	if (bUseTTFonts)
 	{
 		g_font12wow->SetFontReplacementTTF(UTGetTTFManager().GetFont(shTTFID_SZ40.textHash), &UTApp().g_cam480hScreen);
@@ -1226,6 +1229,7 @@ OPRESULT App_LocaLoadFonts(bool bUseTTFonts)
 		g_font5n2->SetFontReplacementTTF(null);
 		g_font5ns2->SetFontReplacementTTF(null);
 	}
+	*/
 
 	return K_OP_OK;
 }

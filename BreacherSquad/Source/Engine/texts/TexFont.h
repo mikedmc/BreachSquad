@@ -1,7 +1,6 @@
 #pragma once
 
 //#TODO: Cand face wrap, daca e un cuvand mai lung decat spatiul acordat, se blocheaza in paint in while
-//#TODO: La alinierea pe verticala sa nu mai ia in seama inaltimea efectiva adunata a literelor ci sa se ia dupa rowHeight si rowSpacing doar
 
 ///--- FORMAT ---
 // este acelasi format ca si la sprites dar are o linie in plus, cea cu datele despre font
@@ -19,7 +18,6 @@
 //  <Animations />
 //</SpriteCollection>
 
-/*
 ///--- font anchors ---
 #define FONTFLAG_ANCHOR_LEFT 1
 #define FONTFLAG_ANCHOR_CENTER 2
@@ -50,7 +48,7 @@
 #define FONT_MIN_ROW_SPACING 15
 #define FONT_MIN_SPACE_SIZE 5
 #define FONT_MIN_ROW_HEIGHT 20
-  */
+
 class CTexFontsManager;
 	
 //MODULE - used to load modules data

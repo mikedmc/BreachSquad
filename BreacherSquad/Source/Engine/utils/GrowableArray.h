@@ -44,7 +44,8 @@ public:
 	bool SetAt( int nIndex, const TYPE& value );
 	TYPE& GetAt( int nIndex ) const
 	{
-		assert( nIndex >= 0 && nIndex < m_nSize ); return m_pData[ nIndex ];
+		_ASSERT( nIndex >= 0 && nIndex < m_nSize ); 
+		return m_pData[ nIndex ];
 	}
 	int     GetSize() const
 	{
