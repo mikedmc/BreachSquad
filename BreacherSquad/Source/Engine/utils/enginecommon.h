@@ -11,6 +11,8 @@
 #define DW_COLOR_XXXA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0x000000)
 #define DW_COLORALPHA(hexColor, fAlpha) (DWORD)(((int((fAlpha) * 255.0f)&0xff)<<24) | (hexColor & 0xffffff))
 #define DW_GETFALPHA(hexColor) ((float)((hexColor & 0xff000000) >> 24) / 255.0f)
+#define DW_COLORVALUE(r,g,b,a) \
+    D3DCOLOR_RGBA((DWORD)((r)*255.f),(DWORD)((g)*255.f),(DWORD)((b)*255.f),(DWORD)((a)*255.f))
 
 // generic sides (corresponds to generic directions)
 #define K_SIDE_NONE -1

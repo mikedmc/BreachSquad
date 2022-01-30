@@ -322,7 +322,7 @@ OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_
 	//see if texture changed
 	if (pTexture != m_texPtrs[m_nTexChangesCursor])
 	{
-		if (m_texPtrs[m_nTexChangesCursor] == NULL)
+		if (m_texPtrs[m_nTexChangesCursor] == nullptr)
 		{
 			m_texPtrs[m_nTexChangesCursor] = pTexture;
 			m_nTrisOffsets[m_nTexChangesCursor] = 0;

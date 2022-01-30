@@ -276,9 +276,9 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 				//Vec2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 				//float ang = UTMath::GetVectorAngle(vdir);
 				bullet->sprBullet.pos = bullet->pos.xy_proj;
-				bullet->sprBullet.PaintModule(0);
+				bullet->sprBullet.PaintFModule(0);
 				bullet->sprBullet.pos = bullet->pos.xy;
-				bullet->sprBullet.PaintModule(0);
+				bullet->sprBullet.PaintFModule(0);
 			}
 		}
 		break;
@@ -289,7 +289,7 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 				CBullet* bullet = m_arrBullets[ kk ];
 				//Vec2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 				//float ang = UTMath::GetVectorAngle(vdir);
-				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->pos.xy, bullet->sprBullet.animIdx, bullet->sprBullet.frameIdx, 0, 0xaa000000);
+				UTSprite::PaintFModule(bullet->sprBullet.pSprCol, bullet->pos.xy, bullet->sprBullet.animIdx, bullet->sprBullet.frameIdx, 0, 0xaa000000);
 			}
 		}
 		break;
@@ -298,7 +298,7 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 			for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
 			{
 				CBullet* bullet = m_arrBullets[ kk ];
-				UTSprite::PaintFrameModule(bullet->sprBullet.pSprCol, bullet->pos.xy_proj, bullet->fidLight.animIdx, bullet->fidLight.frameIdx, 0);
+				UTSprite::PaintFModule(bullet->sprBullet.pSprCol, bullet->pos.xy_proj, bullet->fidLight.animIdx, bullet->fidLight.frameIdx, 0);
 			}
 		}
 		break;

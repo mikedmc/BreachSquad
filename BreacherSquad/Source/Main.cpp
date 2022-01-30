@@ -1754,6 +1754,10 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 			if (pSprVS)
 				__Painter().Begin(pSprVS, g_matIdentity);
+
+			Mat matview = UTApp().g_cam360hScreen.GetViewTransform();
+			Mat matviewproj = matview * UTApp().g_matProj;
+			__Painter().SetViewProjMatrix( matviewproj );
 		}
 
 		///----------------------------------------------------------------------------------
@@ -1975,7 +1979,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	
 
 		// IMGUI tutorial window
-		static bool show_demo_window = true;
+		static bool show_demo_window = false;
 		ImGui::ShowDemoWindow(&show_demo_window);
 		//--- CONTROLS EDITOR INTERFACES ---
 #ifdef K_CONTROLS_EDITOR

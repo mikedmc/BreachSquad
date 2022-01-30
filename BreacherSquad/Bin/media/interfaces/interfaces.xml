@@ -263,7 +263,6 @@
 		<Control Type="Window" ID="WND_BUY_WEAPON" animID="WINDOW_BLACK1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="UNLOCK_ITEM" inflate="0" X="-83" Y="-52" W="166" H="105" />
 		<Control Type="Frame" animID="FRAME_WHITE2" color="#FF2A3946" inflate="0" X="-38" Y="-29" W="76" H="35" />
 		<Control Type="Frame" animID="FRAME_WHITE1" color="#FF1C252E" inflate="0" X="-37" Y="-28" W="74" H="18" />
-		<Control Type="CustomPaint" subType="ST_MENUS_BSX_FRAME" ID="CP_WEAPON_ICON" inflate="0" X="-24" Y="-28" W="49" H="18" />
 		<Control Type="Animation" animID="ICONS_MISC" Animated="0" setFrame="1" scaleImage="0" X="26" Y="2" W="25" H="15" />
 		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON2" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="CANCEL" X="-40" Y="34" W="81" H="16" />
 		<Control Type="Button" ID="BUT_UNLOCK_WEAPON" animID="BUTTON1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="CONFIRM" X="-47" Y="14" W="94" H="16" />

@@ -28,7 +28,6 @@ enum EControlType {
 	CCTRL_TYPE_LIST_SELECTOR,				// Shows a list (no pages) (\n formatted string). second string is right aligned. permits selection
 	CCTRL_TYPE_LIST_SELECTOR_TRUETYPE,		// Paged list, TT fonts. params: nSelectedIdx, nOptionsCnt
 
-	CCTRL_TYPE_CUSTOM_PAINT,				//not actually used
 	CCTRL_TYPE_NET_VOTE,					//shows a list with peers selections on networked games (near buttons that need player cooperation)
 
 	CCTRL_TYPE_XP_BAR,						//experience bar (player XP upgrades)
@@ -63,13 +62,12 @@ CStringHash EControlTypeNames[] =
 	L"SDL_KeyReader",
 	L"ListSelector",
 	L"ListSelectorTT",
-	L"CustomPaint",
 	L"NetVote",
 	L"XPBar",
 	L"PlayerUpgradeControl",
 	L"ScoresListTT",
 	L"TasksList",
-	"SliderPages"
+	L"SliderPages"
 };
 
 void CControl::SetManagersPtr( CSpriteCollection* sprCol )
@@ -155,12 +153,6 @@ void CControl::Reset()
 
 	switch ( type )
 	{
-		case CCTRL_TYPE_CUSTOM_PAINT:
-		{
-			bCanHaveFocus = false;
-			bShowFocusCursor = false;
-		}
-		break;
 		case CCTRL_TYPE_DROPDOWN:
 		{
 			bCanHaveFocus = true;
@@ -392,20 +384,6 @@ void CControl::Initialize()
 		}
 		break;
 
-		case CCTRL_TYPE_CUSTOM_PAINT:
-		{
-			CVariantComplex* cvc = paramsDict.GetVariantByName( L"subType" );
-			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
-			{
-				//paints a frame from an animation in menus.bsx (used for drawing weapons animations)
-				//params: nAnimIdx, nFrameIdx
-				if ( cvc->m_strArg.IsEqual( L"ST_MENUS_BSX_FRAME" ) )
-				{
-					bCanHaveFocus = false;
-					bShowFocusCursor = false;
-				}
-			}
-		}
 	}
 }
 
@@ -462,14 +440,6 @@ void CControl::Update( float dTime, float fTimeline )
 	{
 		case CCTRL_TYPE_ANIMATION:
 		{
-		}
-		break;
-		case CCTRL_TYPE_CUSTOM_PAINT:
-		{
-			CVariantComplex* cvc = paramsDict.GetVariantByName( L"subType" );
-			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
-			{
-			}
 		}
 		break;
 		case CCTRL_TYPE_DROPDOWN:
@@ -560,7 +530,7 @@ void CControl::Update( float dTime, float fTimeline )
 				SND_PLAY( SNDIDX_STARHIT );
 				//generate particles
 				RECTXYWH starrect = m_pSprCol->GetAFrameBBox( animIdx, 0 );
-				D3DXVECTOR2 vStartPos( bbox.CenterX(), bbox.CenterY() );
+				Vec2 vStartPos( bbox.CenterX(), bbox.CenterY() );
 				vStartPos.x -= starrect.w;
 				vStartPos.x += starrect.w * floor( fTimerOld );
 				g_particlesMgr.GenerateStarEffect( vStartPos, K_PART_LAYER_CONTROLS_LIGHT );
@@ -596,7 +566,7 @@ void CControl::Update( float dTime, float fTimeline )
 			{
 				//chevron bbox
 				RECTXYWH rct = m_pSprCol->GetAFrameBBox( animIdx, 8 );
-				D3DXVECTOR2 vStartPos( bbox.x, bbox.y + bbox.h / 2 );
+				Vec2 vStartPos( bbox.x, bbox.y + bbox.h / 2 );
 				vStartPos.x = vStartPos.x + rct.x + rct.w / 2;
 				vStartPos.y = vStartPos.y + rct.y + rct.h / 2;
 				g_particlesMgr.GenerateStarEffect( vStartPos, K_PART_LAYER_CONTROLS_LIGHT );
@@ -891,7 +861,7 @@ void CControl::Update( float dTime, float fTimeline )
 						bbline.y += nGroupSpacing - 1;
 					bbline.Inflate( -2, -2 );
 					//start of bar
-					D3DXVECTOR2 vPos( bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY() );
+					Vec2 vPos( bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY() );
 
 					if ( PointInRect( &layer->mouseRelPos, &bbline ) )
 					{
@@ -1516,49 +1486,6 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 
 	switch ( type )
 	{
-		case CCTRL_TYPE_CUSTOM_PAINT:
-		{
-			bool bFoundType = true;
-
-			CVariantComplex* cvc = paramsDict.GetVariantByName( L"subType" );
-			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
-			{
-				//menus.bsx animation paint
-				if ( cvc->m_strArg.IsEqual( L"ST_MENUS_BSX_FRAME" ) )
-				{
-					int nAnimIdx = paramsDict.GetVariantByName( L"nAnimIdx" )->m_asINT32;
-					int nFrameIdx = paramsDict.GetVariantByName( L"nFrameIdx" )->m_asINT32;
-
-					if ( ( nAnimIdx < 0 ) || ( nAnimIdx >= g_playerSelScr.m_sprCol.Animations.GetSize() ) )
-					{
-						drawDebugText( BBox.x, BBox.y, L"Wrong nAnimIdx" );
-						break;
-					}
-					if ( ( nFrameIdx < 0 ) || ( nFrameIdx >= g_playerSelScr.m_sprCol.GetAFramesCnt( nAnimIdx ) ) )
-					{
-						drawDebugText( BBox.x, BBox.y, L"Wrong nFrameIdx" );
-						break;
-					}
-
-					CSprite::paintFrame( &g_playerSelScr.m_sprCol, BBox.CenterX(), BBox.CenterY(), nAnimIdx, nFrameIdx, dwColor );
-				}
-				else
-				{
-					bFoundType = false;
-				}
-			}
-			else
-			{
-				bFoundType = false;
-			}
-
-			if ( !bFoundType )
-			{
-				drawDebugText( BBox.x, BBox.y, L"subType not found!" );
-				return;
-			}
-		}
-		break;
 		case CCTRL_TYPE_DROPDOWN:
 		{
 			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 5 ) )
@@ -1573,7 +1500,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			float dCol = 1.0f - 0.4f * fDisabledPercent;
 			DWORD wcol = D3DCOLOR_COLORVALUE( dCol, dCol, dCol, layer->alpha );
 
-			D3DXVECTOR2 butC( ( int ) ( BBox.x + BBox.w / 2.0f ), ( int ) ( BBox.y + BBox.h / 2.0f ) );
+			Vec2 butC( ( int ) ( BBox.x + BBox.w / 2.0f ), ( int ) ( BBox.y + BBox.h / 2.0f ) );
 			GUIUtils::DrawHTilingAnim( m_pSprCol, animIdx, 0, BBox, wcol );
 
 			int frame;
@@ -1583,7 +1510,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				frame = 3;
 				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
 					frame = 3;
-				CSprite::paintFrame( m_pSprCol, BBox.x, BBox.CenterY(), animIdx, frame, wcol );
+				UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.CenterY(), animIdx, frame, wcol );
 			}
 			// right button
 			if ( nSelectedIdx < nItemsCnt - 1 )
@@ -1591,7 +1518,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				frame = 4;
 				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
 					frame = 4;
-				CSprite::paintFrame( m_pSprCol, BBox.Right(), BBox.CenterY(), animIdx, frame, wcol );
+				UTSprite::PaintFrame( m_pSprCol, BBox.Right(), BBox.CenterY(), animIdx, frame, wcol );
 			}
 			// text
 			if ( ( stringIdx >= 0 ) && ( fontIdx >= 0 ) )
@@ -1621,15 +1548,15 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 			RECTXYWH starrect = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 
-			D3DXVECTOR2 vStartPos( BBox_inflated.CenterX(), BBox_inflated.CenterY() );
+			Vec2 vStartPos( BBox_inflated.CenterX(), BBox_inflated.CenterY() );
 			vStartPos.x -= starrect.w;
 			for ( int kk = 0; kk < 3; kk++ )
 			{
 				//suport stea
-				CSprite::paintFrame( m_pSprCol, vStartPos.x + kk * starrect.w, vStartPos.y, animIdx, 0, wcol );
+				UTSprite::PaintFrame( m_pSprCol, vStartPos.x + kk * starrect.w, vStartPos.y, animIdx, 0, wcol );
 				if ( ( kk < nStars ) && ( kk < fcoeff ) )
 				{
-					CSprite::paintFrame( m_pSprCol, vStartPos.x + kk * starrect.w, vStartPos.y, animIdx, 1, wcol );
+					UTSprite::PaintFrame( m_pSprCol, vStartPos.x + kk * starrect.w, vStartPos.y, animIdx, 1, wcol );
 				}
 			}
 			//deseneaza steaua care se scaleaza
@@ -1638,10 +1565,10 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			{
 				/*
 				D3DXMATRIXA16 mattrans;
-				D3DXMatrixAffineTransformation2D(&mattrans, 1.0f + ffracinv * 2.0f, NULL, 0.0f, &D3DXVECTOR2(vStartPos.x + fcoeff * starrect.w, vStartPos.y - ffracinv * 20.0f));
+				D3DXMatrixAffineTransformation2D(&mattrans, 1.0f + ffracinv * 2.0f, NULL, 0.0f, &Vec2(vStartPos.x + fcoeff * starrect.w, vStartPos.y - ffracinv * 20.0f));
 				layer->pControlsManager->m_pSprite->SetTransform(&mattrans);
 				*/
-				CSprite::paintFrame( m_pSprCol, 0.0f, 0.0f, animIdx, 1, DW_COLOR_FFFA( layer->alpha * ffrac ) );
+				UTSprite::PaintFrame( m_pSprCol, 0.0f, 0.0f, animIdx, 1, DW_COLOR_FFFA( layer->alpha * ffrac ) );
 				//layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
 			}
 		}
@@ -1732,11 +1659,11 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 					offx = 1.0f + 1.0f * sin( layer->pControlsManager->fLocalTimeline * 3.0f );
 				//left but
 				if ( nPage > nMinPage )
-					CSprite::paintFrame( m_pSprCol, BBox.x - offx, BBox.CenterY(), ANM_CONTROLS_SPR_ARROWS3, 0, wcol );
+					UTSprite::PaintFrame( m_pSprCol, BBox.x - offx, BBox.CenterY(), ANM_CONTROLS_SPR_ARROWS3, 0, wcol );
 				//right but
 				if ( nPage < nMaxPage )
 				{
-					CSprite::paintFrame( m_pSprCol, BBox.Right() + offx, BBox.CenterY(), ANM_CONTROLS_SPR_ARROWS3, 2, wcol );
+					UTSprite::PaintFrame( m_pSprCol, BBox.Right() + offx, BBox.CenterY(), ANM_CONTROLS_SPR_ARROWS3, 2, wcol );
 				}
 			}
 			//selection
@@ -2017,7 +1944,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 						nFilled = nFilledWished;
 				}
 
-				D3DXVECTOR2 vPos( bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY() );
+				Vec2 vPos( bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY() );
 				//bar text
 				int nStrIdx = g_playerSelScr.m_arrUpgradeBars[ nBarIdx ]->nStrIdx_name;
 				__TexFonts().fonts[ fontIdx ]->DrawStringClamped( nStrIdx, bbgroup.x + 1, vPos.y, vPos.x - bbteam.x - 5, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA( K_COLOR_DEFAULT_TEXT, layer->alpha ) );
@@ -2046,7 +1973,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 							pcol = wcoldenied;
 					}
 
-					CSprite::paintFrame( m_pSprCol, vPos.x + xx * rectSz.w, vPos.y, animIdx, nframe, pcol );
+					UTSprite::PaintFrame( m_pSprCol, vPos.x + xx * rectSz.w, vPos.y, animIdx, nframe, pcol );
 				}
 				//links
 				for ( int xx = 0; xx < nDots; xx++ )
@@ -2068,7 +1995,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 							if ( xx < nMinPos - 1 )
 								pcol = wcoldenied;
 						}
-						CSprite::paintFrame( m_pSprCol, vPos.x + xx * rectSz.w + rectSz.w / 2, vPos.y, animIdx, nframe, pcol );
+						UTSprite::PaintFrame( m_pSprCol, vPos.x + xx * rectSz.w + rectSz.w / 2, vPos.y, animIdx, nframe, pcol );
 					}
 				}
 				//large panels and icons
@@ -2080,7 +2007,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 					int nframe = 3;
 					if ( xx == 0 ) nframe = 2;
 					if ( xx == nDots - 1 ) nframe = 4;
-					CSprite::paintFrame( m_pSprCol, vPos.x + xx * rectSz.w, vPos.y, animIdx, nframe, wcol );
+					UTSprite::PaintFrame( m_pSprCol, vPos.x + xx * rectSz.w, vPos.y, animIdx, nframe, wcol );
 					//paint color filled rectangle
 					if ( xx < nFilled )
 					{
@@ -2096,7 +2023,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 							if ( xx < nMinPos )
 								pcol = wcoldenied;
 						}
-						CSprite::paintFrame( m_pSprCol, vPos.x + xx * rectSz.w, vPos.y, animIdx, nframe, pcol );
+						UTSprite::PaintFrame( m_pSprCol, vPos.x + xx * rectSz.w, vPos.y, animIdx, nframe, pcol );
 					}
 					//paint icons:
 					int nIcon = g_playerSelScr.m_arrUpgradeBars[ nBarIdx ]->m_arrPerks[ xx ].nIconIdx;
@@ -2107,7 +2034,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 							dwIconCol = 0xff8ee6e2;
 						if ( xx >= nFilled )
 							dwIconCol = 0xff384652;
-						CSprite::paintFrame( m_pSprCol, vPos.x + xx * rectSz.w, vPos.y, ANM_CONTROLS_SPR_UPGRADE_ICONS, nIcon, DW_COLORALPHA( dwIconCol, layer->alpha ) );
+						UTSprite::PaintFrame( m_pSprCol, vPos.x + xx * rectSz.w, vPos.y, ANM_CONTROLS_SPR_UPGRADE_ICONS, nIcon, DW_COLORALPHA( dwIconCol, layer->alpha ) );
 					}
 				}
 			}
@@ -2129,16 +2056,16 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				int nPointPrice = g_playerSelScr.m_arrUpgradeBars[ nBarIdx ]->m_arrPerks[ nSelectedPoint ].nPointPrice;
 				int nDots = g_playerSelScr.m_arrUpgradeBars[ nBarIdx ]->nTotalPoints;
 				bbline.Inflate( -2, -2 );
-				D3DXVECTOR2 vPos( bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY() );
+				Vec2 vPos( bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY() );
 				DWORD dwLocalCol = wcol;
 				//Can't delete points from the TEAM bars
 				if ( bDeniedOperation )
 					dwLocalCol = DW_COLORALPHA( 0xffff2222, layer->alpha );
 
 				if ( nPointPrice < 0 )
-					CSprite::paintFrame( m_pSprCol, vPos.x + nSelectedPoint * rectSz.w, vPos.y, animIdx, 11, dwLocalCol );
+					UTSprite::PaintFrame( m_pSprCol, vPos.x + nSelectedPoint * rectSz.w, vPos.y, animIdx, 11, dwLocalCol );
 				else
-					CSprite::paintFrame( m_pSprCol, vPos.x + nSelectedPoint * rectSz.w, vPos.y, animIdx, 12, dwLocalCol );
+					UTSprite::PaintFrame( m_pSprCol, vPos.x + nSelectedPoint * rectSz.w, vPos.y, animIdx, 12, dwLocalCol );
 			}
 		}
 		break;
@@ -2190,10 +2117,10 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 
 						RECTXYWH rectButAnim = m_pSprCol->GetAFrameBBox( animIdx, selFrame );
 
-						CSprite::paintFrame( m_pSprCol, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame, wcol );
+						UTSprite::PaintFrame( m_pSprCol, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame, wcol );
 						//paint selected cursor
 						if ( selperc > 0.0f )
-							CSprite::paintFrame( m_pSprCol, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame + 1, DW_COLOR_FFFA( selperc ) );
+							UTSprite::PaintFrame( m_pSprCol, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame + 1, DW_COLOR_FFFA( selperc ) );
 					}
 
 					//and string
@@ -2202,16 +2129,16 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 					if ( bDisabledLocal )
 						exitcol = DW_COLORALPHA( ( DWORD ) exitcol, 0.5f );
 
-					D3DXVECTOR2 vTextOffset( selperc * 15.0f, 0.0f );
+					Vec2 vTextOffset( selperc * 15.0f, 0.0f );
 					if ( textAlignFlags & FONTFLAG_ANCHOR_CENTER )
-						vTextOffset = D3DXVECTOR2( 0.0f, -1.0f * selperc );
+						vTextOffset = Vec2( 0.0f, -1.0f * selperc );
 
 					RECTXYWH drawrect( BBox.x + vTextOffset.x, BBox.y + vSpacing * curidx + vTextOffset.y + currRect.y, BBox.w, currRect.h );
-					D3DXVECTOR2 vTextOrigin( drawrect.x, drawrect.CenterY() );
+					Vec2 vTextOrigin( drawrect.x, drawrect.CenterY() );
 					if ( textAlignFlags & FONTFLAG_ANCHOR_CENTER )
-						vTextOrigin = D3DXVECTOR2( drawrect.CenterX(), drawrect.CenterY() );
+						vTextOrigin = Vec2( drawrect.CenterX(), drawrect.CenterY() );
 					else if ( textAlignFlags & FONTFLAG_ANCHOR_RIGHT )
-						vTextOrigin = D3DXVECTOR2( drawrect.Right(), drawrect.CenterY() );
+						vTextOrigin = Vec2( drawrect.Right(), drawrect.CenterY() );
 					//text rect
 					RECTXYWH butr( BBox_inflated.x, BBox_inflated.y + vSpacing * curidx - ceil( selperc ), BBox_inflated.w, vSpacing );
 
@@ -2247,19 +2174,19 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			barrect.y = BBox_inflated.CenterY() - ( BBox_inflated.h / 2.0f ) * layer->alpha;
 			barrect.h = BBox_inflated.h * layer->alpha;
 
-			CSprite bar( animIdx, barrect.x, ROUND_FLOAT( barrect.y ) );
+			CSpr bar( m_pSprCol, animIdx, barrect.x, ROUND_FLOAT( barrect.y ) );
 			//back
-			bar.currentFrame = 1;
+			bar.frameIdx = 1;
 			bar.color = dwColor;
-			bar.paintTiled( m_pSprCol, barrect.w, barrect.h );
+			//bar.paintTiled( m_pSprCol, barrect.w, barrect.h );
 			//bars
 			//top
-			bar.currentFrame = 0;
-			bar.paintTiled( m_pSprCol, barrect.w );
+			bar.frameIdx = 0;
+			//bar.paintTiled( m_pSprCol, barrect.w );
 			//bottom
-			bar.currentFrame = 2;
+			bar.frameIdx = 2;
 			bar.pos.y = ROUND_FLOAT( barrect.Bottom() );
-			bar.paintTiled( m_pSprCol, barrect.w );
+			//bar.paintTiled( m_pSprCol, barrect.w );
 		}
 		break;
 
@@ -2273,9 +2200,9 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			}
 
 			float dCol = 1.0f - 0.3f * fDisabledPercent;
-			DWORD wcol = D3DCOLOR_COLORVALUE( dCol, dCol, dCol, layer->alpha );
+			DWORD wcol = DW_COLORVALUE( dCol, dCol, dCol, layer->alpha );
 
-			D3DXVECTOR2 butC( ( int ) ( BBox.x + BBox.w / 2.0f ), ( int ) ( BBox.y + BBox.h / 2.0f ) );
+			Vec2 butC( ( int ) ( BBox.x + BBox.w / 2.0f ), ( int ) ( BBox.y + BBox.h / 2.0f ) );
 
 			if ( ( statusFlags & CCTRL_STATUS_FLAG_CLICKED ) != 0 )
 			{
@@ -2387,7 +2314,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 					nCount++;
 
 				RECTXYWH iconbox( 0.0f, 0.0f, 0.0f, __TexFonts().fonts[ fontIdx ]->rowHeight );
-				D3DXVECTOR2 vPos( BBox.x, BBox.Bottom() - iconbox.h / 2.0f - ( nCount - 1 ) * iconbox.h );
+				Vec2 vPos( BBox.x, BBox.Bottom() - iconbox.h / 2.0f - ( nCount - 1 ) * iconbox.h );
 				bool bActive = false;
 				if ( nIconFrame1 >= 0 )
 				{
@@ -2408,7 +2335,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 					else
 						GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME6_DARK, frrct, dwCol );
 
-					CSprite::paintFrame( m_pSprCol, vPos.x - iconbox.w, vPos.y, animIdx, nIconFrame1 );
+					UTSprite::PaintFrame( m_pSprCol, Vec2(vPos.x - iconbox.w, vPos.y), animIdx, nIconFrame1 );
 				}
 				if ( nStrIdx1 >= 0 )
 				{
@@ -2431,7 +2358,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 					else
 						GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME6_DARK, frrct, dwCol );
 
-					CSprite::paintFrame( m_pSprCol, vPos.x - iconbox.w, vPos.y, animIdx, nIconFrame2 );
+					UTSprite::PaintFrame( m_pSprCol, vPos.x - iconbox.w, vPos.y, animIdx, nIconFrame2 );
 				}
 				if ( nStrIdx2 >= 0 )
 				{
@@ -2534,10 +2461,10 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 
 			/*
 			D3DXMATRIX mat;
-			D3DXMatrixAffineTransformation2D(&mat, fScale, NULL, 0.0f, &D3DXVECTOR2((int)BBox.x + foff, (int)BBox.y));
+			D3DXMatrixAffineTransformation2D(&mat, fScale, NULL, 0.0f, &Vec2((int)BBox.x + foff, (int)BBox.y));
 			layer->pControlsManager->m_pSprite->SetTransform(&mat);
 			*/
-			CSprite::paintFrame( m_pSprCol, 0, 0, animIdx, frameIdx, wcol );
+			UTSprite::PaintFrame( m_pSprCol, Vec2( (int)BBox.x + foff, (int)BBox.y ), animIdx, frameIdx, wcol );
 			//layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
 		}
 		break;
@@ -2563,7 +2490,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				else if ( ( leftVote > 0 ) && ( rightVote > 0 ) )
 					nFrame = 3;
 				//now paint
-				CSprite::paintFrame( m_pSprCol, BBox.CenterX(), BBox.CenterY(), animIdx, nFrame, wcol );
+				UTSprite::PaintFrame( m_pSprCol, BBox.CenterX(), BBox.CenterY(), animIdx, nFrame, wcol );
 			}
 		}
 		break;
@@ -2596,7 +2523,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				{
 					frame = 5;
 				}
-				CSprite::paintFrame( m_pSprCol, BBox.x, BBox.CenterY(), animIdx, frame, wcol );
+				UTSprite::PaintFrame( m_pSprCol, Vec2(BBox.x, BBox.CenterY()), animIdx, frame, wcol );
 
 				//right but
 				frame = 6;
@@ -2604,7 +2531,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				{
 					frame = 6;
 				}
-				CSprite::paintFrame( m_pSprCol, BBox.Right(), BBox.CenterY(), animIdx, frame, wcol );
+				UTSprite::PaintFrame( m_pSprCol, Vec2(BBox.Right(), BBox.CenterY()), animIdx, frame, wcol );
 			}
 		}
 		break;
@@ -2636,7 +2563,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				frame = 5;
 				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
 					frame = 5;
-				CSprite::paintFrame( m_pSprCol, BBox.x - offx, BBox.CenterY(), animIdx, frame, wcol );
+				UTSprite::PaintFrame( m_pSprCol, BBox.x - offx, BBox.CenterY(), animIdx, frame, wcol );
 			}
 
 			//right but
@@ -2645,7 +2572,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				frame = 6;
 				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
 					frame = 6;
-				CSprite::paintFrame( m_pSprCol, BBox.Right() + offx, BBox.CenterY(), animIdx, frame, wcol );
+				UTSprite::PaintFrame( m_pSprCol, BBox.Right() + offx, BBox.CenterY(), animIdx, frame, wcol );
 			}
 		}
 		break;
@@ -2665,12 +2592,12 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				frame = 1;
 
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
-			CSprite::paintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, frame, wcol );
+			UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, frame, wcol );
 
 			//hover frame
 			if ( hoverPercent > 0.0f )
 			{
-				CSprite::paintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, frame, DW_COLOR_FFFA( hoverPercent * 0.5f ) );
+				UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, frame, DW_COLOR_FFFA( hoverPercent * 0.5f ) );
 			}
 
 			if ( fontIdx >= 0 )
@@ -2703,9 +2630,9 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			// scale to screen
 			//D3DXMATRIXA16 mattrans;
 			//RECTXYWH_F bboxl = m_pSprCol->GetAFrameBBox_real(animIdx, frameIdx);
-			//D3DXMatrixAffineTransformation2D(&mattrans, UTApp().g_rectRender.h / bboxl.h, NULL, 0.0f, &D3DXVECTOR2(0.0f, 0.0f));
+			//D3DXMatrixAffineTransformation2D(&mattrans, UTApp().g_rectRender.h / bboxl.h, NULL, 0.0f, &Vec2(0.0f, 0.0f));
 			//layer->pControlsManager->m_pSprite->SetTransform(&mattrans);
-			CSprite::paintFrame( m_pSprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, frameIdx, DW_COLORALPHA( dwColor, fAlpha * layer->alpha ) );
+			UTSprite::PaintFrame( m_pSprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, frameIdx, DW_COLORALPHA( dwColor, fAlpha * layer->alpha ) );
 			//layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
 		}
 		break;
@@ -2729,23 +2656,23 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 
 			// back
 			barH = m_pSprCol->GetAFrameBBox( animIdx, 1 ).h;
-			CSprite::paintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, 0, col );
-			CSprite::paintFrameModuleTiled( m_pSprCol, BBox.x, BBox.y, animIdx, 1, 0, col, BBox.w, barH );
-			CSprite::paintFrame( m_pSprCol, BBox.x + BBox.w, BBox.y, animIdx, 2, col );
+			UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, 0, col );
+			//UTSprite::PaintFrameModuleTiled( m_pSprCol, BBox.x, BBox.y, animIdx, 1, 0, col, BBox.w, barH );
+			UTSprite::PaintFrame( m_pSprCol, BBox.x + BBox.w, BBox.y, animIdx, 2, col );
 
 			// fill
 			float fProg = progress * 0.01f; // progress este maxim 100
 			int tileW = fProg * BBox.w;
 			barH = m_pSprCol->GetAFrameBBox( animIdx, 4 ).h;
-			CSprite::paintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, 3, col );
-			CSprite::paintFrameModuleTiled( m_pSprCol, BBox.x, BBox.y, animIdx, 4, 0, col, tileW, barH );
-			CSprite::paintFrame( m_pSprCol, BBox.x + tileW, BBox.y, animIdx, 5, col );
+			UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, 3, col );
+			//UTSprite::PaintFrameModuleTiled( m_pSprCol, BBox.x, BBox.y, animIdx, 4, 0, col, tileW, barH );
+			UTSprite::PaintFrame( m_pSprCol, BBox.x + tileW, BBox.y, animIdx, 5, col );
 
 			// border
 			barH = m_pSprCol->GetAFrameBBox( animIdx, 7 ).h;
-			CSprite::paintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, 6, col );
-			CSprite::paintFrameModuleTiled( m_pSprCol, BBox.x, BBox.y, animIdx, 7, 0, col, BBox.w, barH );
-			CSprite::paintFrame( m_pSprCol, BBox.x + BBox.w, BBox.y, animIdx, 8, col );
+			UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, 6, col );
+			//UTSprite::PaintFrameModuleTiled( m_pSprCol, BBox.x, BBox.y, animIdx, 7, 0, col, BBox.w, barH );
+			UTSprite::PaintFrame( m_pSprCol, BBox.x + BBox.w, BBox.y, animIdx, 8, col );
 		}
 		break;
 
@@ -2779,9 +2706,9 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			int centerY = BBox.CenterY();
 			// back
 			barH = m_pSprCol->GetAFrameBBox( animIdx, 1 ).h;
-			CSprite::paintFrame( m_pSprCol, BBox.x, centerY, animIdx, 0, col );
-			CSprite::paintFrameModuleTiled( m_pSprCol, BBox.x, centerY, animIdx, 1, 0, col, BBox.w, barH );
-			CSprite::paintFrame( m_pSprCol, BBox.x + BBox.w, centerY, animIdx, 2, col );
+			UTSprite::PaintFrame( m_pSprCol, BBox.x, centerY, animIdx, 0, col );
+			//UTSprite::PaintFrameModuleTiled( m_pSprCol, BBox.x, centerY, animIdx, 1, 0, col, BBox.w, barH );
+			UTSprite::PaintFrame( m_pSprCol, BBox.x + BBox.w, centerY, animIdx, 2, col );
 
 			if ( fProgress < 1.0f )
 			{
@@ -2793,13 +2720,13 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				int tileW = fTease * BBox.w;
 				barH = m_pSprCol->GetAFrameBBox( animIdx, 3 ).h;
 				// yellow teaser bar
-				//CSprite::paintFrameModuleTiled(m_pSprMgr, BBox.x, centerY, animIdx, ((bFlicker)?4:3), 0, col, tileW, barH);
+				//UTSprite::PaintFrameModuleTiled(m_pSprMgr, BBox.x, centerY, animIdx, ((bFlicker)?4:3), 0, col, tileW, barH);
 				float fcol = 0.2f;
 				if ( bFlicker )
 					fcol = 0.4f;
-				CSprite::paintFrameModuleTiled( m_pSprCol, BBox.x, centerY, animIdx, 5, 0, DW_COLOR_FFFA( fcol * layer->alpha ), tileW, barH );
+				//UTSprite::PaintFrameModuleTiled( m_pSprCol, BBox.x, centerY, animIdx, 5, 0, DW_COLOR_FFFA( fcol * layer->alpha ), tileW, barH );
 				// plus sign
-				CSprite::paintFrame( m_pSprCol, BBox.Right() + 2, centerY, animIdx, ( ( bFlicker ) ? 7 : 6 ), col );
+				UTSprite::PaintFrame( m_pSprCol, BBox.Right() + 2, centerY, animIdx, ( ( bFlicker ) ? 7 : 6 ), col );
 			}
 
 			//actual filler
@@ -2809,12 +2736,12 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 
 			int tileW = fProg * BBox.w;
 			barH = m_pSprCol->GetAFrameBBox( animIdx, 5 ).h;
-			CSprite::paintFrameModuleTiled( m_pSprCol, BBox.x, centerY, animIdx, 5, 0, col, tileW, barH );
+			//UTSprite::PaintFrameModuleTiled( m_pSprCol, BBox.x, centerY, animIdx, 5, 0, col, tileW, barH );
 
 			//level shield
-			CSprite::paintFrame( m_pSprCol, BBox.x, centerY, animIdx, 9, col );
+			UTSprite::PaintFrame( m_pSprCol, BBox.x, centerY, animIdx, 9, col );
 			RECTXYWH prct = m_pSprCol->GetAFrameBBox( animIdx, 9 );
-			D3DXVECTOR2 vposLvl( BBox.x + prct.x + prct.w / 2, BBox.CenterY() + prct.y + prct.h / 2 );
+			Vec2 vposLvl( BBox.x + prct.x + prct.w / 2, BBox.CenterY() + prct.y + prct.h / 2 );
 			//current level
 			if ( fontIdx >= 0 )
 			{
@@ -2836,7 +2763,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			int nInitialLevel = App_GetXPLevel( nOldVal );
 			if ( nInitialLevel < nCurrentLevel )
 			{
-				CSprite::paintFrame( m_pSprCol, BBox.x, centerY, animIdx, 8, col );
+				UTSprite::PaintFrame( m_pSprCol, BBox.x, centerY, animIdx, 8, col );
 			}
 		}
 		break;
@@ -2870,7 +2797,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				// paint cursor
 				//if (g_timers.GetTimerValue(500) < 0.25f)
 				//{
-				//	CSprite::paintFrame(m_pSprMgr, BBox.x + BBox.w / 2 + strw / 2 + 3, BBox.y + BBox.h / 2 + 8, ANM_CONTROLS_SPR_CTRL_UTILS, 1, wcol);
+				//	UTSprite::PaintFrame(m_pSprMgr, BBox.x + BBox.w / 2 + strw / 2 + 3, BBox.y + BBox.h / 2 + 8, ANM_CONTROLS_SPR_CTRL_UTILS, 1, wcol);
 				//}
 			}
 		}
@@ -2882,40 +2809,6 @@ bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 {
 	switch ( type )
 	{
-		case CCTRL_TYPE_CUSTOM_PAINT:
-		{
-			CVariantComplex* cvc = paramsDict.GetVariantByName( L"subType" );
-			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
-			{
-				//selectorul de strategic powerup
-				if ( cvc->m_strArg.IsEqual( L"ST_STRATEGIC_SELECTOR" ) )
-				{
-					if ( cmd == K_CCTRLMGR_COMMAND_LEFT )
-					{
-						statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
-						return true;
-					}
-					else if ( cmd == K_CCTRLMGR_COMMAND_RIGHT )
-					{
-						statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
-						return true;
-					}
-					else if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
-					{
-						statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
-						//save controller instance ID so we can identify it later on
-						paramsDict.SetNamedVarINT32( L"nSDLinstanceID", nSDLinstanceID );
-						return true;
-					}
-					else if ( cmd == K_CCTRLMGR_COMMAND_BACK )
-					{
-						layer->statusFlags |= CCTRL_STATUS_FLAG_REMOVED;
-						return true;
-					}
-				}
-			}
-		}
-		break;
 		case CCTRL_TYPE_LIST_SELECTOR_TRUETYPE:
 		case CCTRL_TYPE_LIST_SELECTOR:
 		{
@@ -3492,7 +3385,7 @@ CCtrlLayer* CCtrlLayer::Clone()
 	return nlay;
 }
 
-void GUIUtils::DrawButtonFromText( CSpriteCollection *sprCol, int animIdx, bool bPressed, CStringDesc *strDesc, CTexFont* pFont, D3DXVECTOR2 vButCenter, DWORD color, int nAlignHsign )
+void GUIUtils::DrawButtonFromText( CSpriteCollection *sprCol, int animIdx, bool bPressed, CStringDesc *strDesc, CTexFont* pFont, Vec2 vButCenter, DWORD color, int nAlignHsign )
 {
 	//no text, don't draw
 	if ( strDesc->len == 0 )
@@ -3527,16 +3420,16 @@ void GUIUtils::DrawHTilingAnim( CSpriteCollection *sprCol, int animIdx, int nSta
 	RECTXYWH leftheadbb = sprCol->GetAFrameBBox( animIdx, nStartFrame );
 	RECTXYWH rightheadbb = sprCol->GetAFrameBBox( animIdx, nStartFrame + 2 );
 	int centerw = BBox.w - leftheadbb.w - rightheadbb.w;
-	CSprite::paintFrameModuleTiled( sprCol, BBox.x + leftheadbb.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 1, 0, color, centerw, -1 );
-	CSprite::paintFrame( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame, color );
-	CSprite::paintFrame( sprCol, BBox.x + BBox.w - rightheadbb.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 2, color );
+	//UTSprite::PaintFrameModuleTiled( sprCol, BBox.x + leftheadbb.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 1, 0, color, centerw, -1 );
+	UTSprite::PaintFrame( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame, color );
+	UTSprite::PaintFrame( sprCol, BBox.x + BBox.w - rightheadbb.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 2, color );
 }
 
 void GUIUtils::DrawHTilingAnim_HeadsOutside( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RECTXYWH BBox, DWORD color )
 {
-	CSprite::paintFrameModuleTiled( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 1, 0, color, BBox.w, -1 );
-	CSprite::paintFrame( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame, color );
-	CSprite::paintFrame( sprCol, BBox.x + BBox.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 2, color );
+	//UTSprite::PaintFrameModuleTiled( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 1, 0, color, BBox.w, -1 );
+	UTSprite::PaintFrame( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame, color );
+	UTSprite::PaintFrame( sprCol, BBox.x + BBox.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 2, color );
 }
 
 void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
@@ -3553,12 +3446,12 @@ void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RECTXYWH BB
 		float ticksz = ( float ) cliprect.w / ( float ) nTicks;
 		for ( int kk = 1; kk < nTicks; kk++ )
 		{
-			CSprite::paintFrameModule( sprCol, cliprect.x + ceil( kk * ticksz ), cliprect.CenterY(), animIdx, 4, 0, color );
+			UTSprite::PaintFModule( sprCol, Vec2(cliprect.x + ceil( kk * ticksz ), cliprect.CenterY()), animIdx, 4, 0, color );
 		}
 	}
 
 	cliprect.w = ( int ) ceil( fPercentFull * cliprect.w );
-	CSprite::paintFrameModuleTiled( sprCol, cliprect.x, cliprect.CenterY(), animIdx, 3, 0, color, cliprect.w );
+	//UTSprite::PaintFrameModuleTiled( sprCol, cliprect.x, cliprect.CenterY(), animIdx, 3, 0, color, cliprect.w );
 }
 
 void GUIUtils::DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
@@ -3571,12 +3464,12 @@ void GUIUtils::DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx
 		float ticksz = ( float ) cliprect.w / ( float ) nTicks;
 		for ( int kk = 1; kk < nTicks; kk++ )
 		{
-			CSprite::paintFrameModule( sprCol, cliprect.x + ceil( kk * ticksz ), cliprect.CenterY(), animIdx, 4, 0, color );
+			UTSprite::PaintFModule( sprCol, Vec2(cliprect.x + ceil( kk * ticksz ), cliprect.CenterY()), animIdx, 4, 0, color );
 		}
 	}
 
 	cliprect.w = ( int ) ceil( fPercentFull * cliprect.w );
-	CSprite::paintFrameModuleTiled( sprCol, BBox.x, BBox.CenterY(), animIdx, 3, 0, color, cliprect.w );
+	//UTSprite::PaintFrameModuleTiled( sprCol, BBox.x, BBox.CenterY(), animIdx, 3, 0, color, cliprect.w );
 }
 
 void GUIUtils::DrawPageSelector( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, int nPagesCnt, int nSelectedPage, DWORD color /*= 0xffffffff*/, int nAlign /*= 0*/ )
@@ -3596,7 +3489,7 @@ void GUIUtils::DrawPageSelector( CSpriteCollection *sprCol, int animIdx, RECTXYW
 		if ( kk == nSelectedPage )
 			curframe = 1;
 
-		CSprite::paintFrame( sprCol, startposx + kk * ptrect.w, BBox.Bottom(), animIdx, curframe, color );
+		UTSprite::PaintFrame( sprCol, startposx + kk * ptrect.w, BBox.Bottom(), animIdx, curframe, color );
 	}
 }
 
@@ -3604,9 +3497,9 @@ void GUIUtils::DrawFrameF( CSpriteCollection *sprCol, int animIdx, RECTXYWH_F BB
 {
 	RECTXYWH_F BBox_local = BBox;
 	BBox_local.Inflate( fInflate );
-
+	/*
 	RECTXYWH frrect;
-	CSprite spr( animIdx, BBox_local.x, BBox_local.y );
+	CSpr spr( m_pSprCol, animIdx, BBox_local.x, BBox_local.y );
 	spr.color = color;
 
 	//tiling centers
@@ -3644,6 +3537,7 @@ void GUIUtils::DrawFrameF( CSpriteCollection *sprCol, int animIdx, RECTXYWH_F BB
 	spr.currentFrame = 8;
 	spr.pos.x += BBox_local.w;
 	spr.paint( sprCol );
+	*/
 }
 
 //deseneaza fereastra in exteriorul BBOX, zona BBox fiind in totalitate folosibila
@@ -3651,9 +3545,9 @@ void GUIUtils::DrawFrame( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox,
 {
 	RECTXYWH BBox_local = BBox;
 	BBox_local.Inflate( nInflate, nInflate );
-
+	/*
 	RECTXYWH frrect;
-	CSprite spr( animIdx, BBox_local.x, BBox_local.y );
+	CSpr spr( animIdx, BBox_local.x, BBox_local.y );
 	spr.color = color;
 
 	//tiling centers
@@ -3691,6 +3585,7 @@ void GUIUtils::DrawFrame( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox,
 	spr.currentFrame = 8;
 	spr.pos.x += BBox_local.w;
 	spr.paint( sprCol );
+	*/
 }
 
 void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor )
@@ -3702,7 +3597,7 @@ void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox
 		//gasesc centrul title bar-ului (din frame-ul de top center)
 		RECTXYWH topbarbb = sprCol->GetAFrameBBox( animIdx, 1 );
 
-		D3DXVECTOR2 titleBarCenter( BBox.x + BBox.w / 2.0f, BBox.y - topbarbb.h / 2 ); //constanta este in fn de grafica, nu se poate scapa de ea
+		Vec2 titleBarCenter( BBox.x + BBox.w / 2.0f, BBox.y - topbarbb.h / 2 ); //constanta este in fn de grafica, nu se poate scapa de ea
 		__TexFonts().fonts[ nFontIdx ]->DrawStringScaleW( strTitle, titleBarCenter.x, titleBarCenter.y, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwTitleColor );
 	}
 }
@@ -3715,7 +3610,7 @@ void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox
 	RECTXYWH topbarbb = sprCol->GetAFrameBBox( animIdx, 1 );
 	if ( ( nFontIdx >= 0 ) && ( nStrIdxTitle >= 0 ) )
 	{
-		D3DXVECTOR2 titleBarCenter( BBox.x + BBox.w / 2.0f, BBox.y - topbarbb.h / 2 ); //constanta este in fn de grafica, nu se poate scapa de ea
+		Vec2 titleBarCenter( BBox.x + BBox.w / 2.0f, BBox.y - topbarbb.h / 2 ); //constanta este in fn de grafica, nu se poate scapa de ea
 		__TexFonts().fonts[ nFontIdx ]->DrawStringScaleW( nStrIdxTitle, titleBarCenter.x, titleBarCenter.y, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwTitleColor );
 	}
 }
@@ -4168,7 +4063,7 @@ void CControlsManager::Update( float dTime )
 	{
 		CCtrlLayer *lay = Layers[ kk ];
 		//set relative mouse pos
-		D3DXVECTOR2 localMousePt = g_mouse.pos;
+		Vec2 localMousePt = g_mouse.pos;
 		if ( m_pCamera != null )
 		{
 			localMousePt = m_pCamera->ScreenToWorld( g_mouse.pos );
@@ -4315,8 +4210,8 @@ void CControlsManager::Paint()
 	//paints test points for pixel alignment
 	//if (m_pCamera)
 	//{
-	//	CSprite::paintFrame(&m_sprCol, m_cameraScreenRect.x, m_cameraScreenRect.y, ANM_CONTROLS_SPR_ICONS_MISC, 2);
-	//	CSprite::paintFrame(&m_sprCol, m_cameraScreenRect.Right(), m_cameraScreenRect.Bottom(), ANM_CONTROLS_SPR_ICONS_MISC, 2);
+	//	UTSprite::PaintFrame(&m_sprCol, m_cameraScreenRect.x, m_cameraScreenRect.y, ANM_CONTROLS_SPR_ICONS_MISC, 2);
+	//	UTSprite::PaintFrame(&m_sprCol, m_cameraScreenRect.Right(), m_cameraScreenRect.Bottom(), ANM_CONTROLS_SPR_ICONS_MISC, 2);
 	//}
 #endif
 	//--- particles ---

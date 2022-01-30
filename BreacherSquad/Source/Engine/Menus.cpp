@@ -30,17 +30,10 @@ void CMenus::Update( float dTime )
 
 void CMenus::Paint()
 {
-	//1. set camera
 	RECTXYWH_F camrect = UTApp().g_camScreen.GetCamWorldAABB();
-	Mat matproj = UTApp().g_matProj;
-	Mat matview = UTApp().g_cam360hScreen.GetViewTransform();
-	Mat matviewproj = matview * matproj;
-	__Painter().SetViewProjMatrix(matviewproj);
 
-	//2. paint scene
 	PaintBackground( camrect, 0xffffffff, true, true );
 
-	//3. flush
 	__Painter().Flush();
 }
 

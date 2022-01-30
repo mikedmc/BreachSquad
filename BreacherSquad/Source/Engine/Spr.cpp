@@ -219,7 +219,7 @@ void CSpr::Paint()
 	}
 }
 
-void CSpr::PaintModule(int moduleIdx)
+void CSpr::PaintFModule(int moduleIdx)
 {
 	_ASSERT(animIdx < pSprCol->Animations.Count());
 	_ASSERT(frameIdx < pSprCol->Animations[animIdx]->aframesNo);
@@ -248,12 +248,12 @@ void CSpr::PaintModule_texOverride(int moduleIdx, int texIdxOffset)
 ///----------------------------------------------------------------------------------
  
 
-void UTSprite::PaintFrameEx(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameID, DWORD ncolor, float fRotZ, Vec2 vScale, UINT unFlags)
+void UTSprite::PaintFrameEx(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, DWORD ncolor, float fRotZ, Vec2 vScale, UINT unFlags)
 {
 	_ASSERT(animID < sprCol->Animations.Count());
-	_ASSERT(frameID < sprCol->Animations[animID]->aframesNo);
+	_ASSERT(frameIdx < sprCol->Animations[animID]->aframesNo);
 
-	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameID];
+	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameIdx];
 	for (int ii = 0; ii < sprCol->AFrames[aframeIdx]->fmodulesNo; ii++)
 	{
 		scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[ii]];
@@ -266,13 +266,13 @@ void UTSprite::PaintFrameEx(CSpriteCollection *sprCol, Vec2 vPos, int animID, in
 	}
 }
 
-void UTSprite::PaintFrameModule(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameID, int moduleID, DWORD ncolor)
+void UTSprite::PaintFModule(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleID, DWORD ncolor)
 {
 	_ASSERT(animID < sprCol->Animations.Count());
-	_ASSERT(frameID < sprCol->Animations[animID]->aframesNo);
-	_ASSERT(moduleID < sprCol->AFrames[sprCol->Animations[animID]->aframesIdx[frameID]]->fmodulesNo);
+	_ASSERT(frameIdx < sprCol->Animations[animID]->aframesNo);
+	_ASSERT(moduleID < sprCol->AFrames[sprCol->Animations[animID]->aframesIdx[frameIdx]]->fmodulesNo);
 
-	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameID];
+	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameIdx];
 	scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[moduleID]];
 
 	__Painter().Draw(mod->pImg->pTex,
@@ -282,10 +282,52 @@ void UTSprite::PaintFrameModule(CSpriteCollection *sprCol, Vec2 vPos, int animID
 }
 
 
-
-DWORD UTSprite::GetFrameFlags(CSpriteCollection* sprCol, int animID, int frameID)
+/*
+void UTSprite::PaintFModuleTiled( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor, int W , int H )
 {
-	if (animID < 0 || frameID < 0) return (DWORD)0;
-	int frameIdx = sprCol->Animations[animID]->aframesIdx[frameID];
-	return sprCol->AFrames[frameIdx]->flags;
+	_ASSERT( animID < sprCol->Animations.Count() );
+	_ASSERT( frameIdx < sprCol->Animations[ animID ]->aframesNo );
+	int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameIdx ];
+	_ASSERT( moduleIdx < sprCol->AFrames[ aframeIdx ]->fmodulesNo );
+
+	scFModule* mod = sprCol->FModules[ sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ moduleIdx ] ];
+
+	__Painter().Draw( mod->pImg->pTex, mod->texRect, mod->moduleRectOff, vPos, ncolor );
+}
+*/
+
+void UTSprite::PaintFrame( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, DWORD ncolor /*= 0xffffffff*/ )
+{
+	_ASSERT( animID < sprCol->Animations.Count() );
+	_ASSERT( frameIdx < sprCol->Animations[ animID ]->aframesNo );
+	//#TODO: no flip flags were taken into account
+	int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameIdx ];
+	for ( int ii = 0; ii < sprCol->AFrames[ aframeIdx ]->fmodulesNo; ii++ )
+	{
+		int fmoduleIdx = sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ ii ];
+		scFModule* mod = sprCol->FModules[ fmoduleIdx ];
+
+		__Painter().Draw( mod->pImg->pTex,
+			mod->texRect,
+			mod->moduleRectOff,
+			vPos, ncolor );
+	}
+}
+
+void UTSprite::PaintFrame( CSpriteCollection *sprCol, float posX, float posY, int animID, int frameIdx, DWORD ncolor /*= 0xffffffff*/ )
+{
+	_ASSERT( animID < sprCol->Animations.Count() );
+	_ASSERT( frameIdx < sprCol->Animations[ animID ]->aframesNo );
+	//#TODO: no flip flags were taken into account
+	int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameIdx ];
+	for ( int ii = 0; ii < sprCol->AFrames[ aframeIdx ]->fmodulesNo; ii++ )
+	{
+		int fmoduleIdx = sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ ii ];
+		scFModule* mod = sprCol->FModules[ fmoduleIdx ];
+
+		__Painter().Draw( mod->pImg->pTex,
+			mod->texRect,
+			mod->moduleRectOff,
+			Vec2(posX, posY), ncolor );
+	}
 }

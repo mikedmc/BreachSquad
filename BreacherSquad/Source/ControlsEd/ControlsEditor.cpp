@@ -740,11 +740,7 @@ void CControlsEditor::Close()
 	ctrlTemplates.RemoveAll();
 
 	// release reference
-	if (currLayer)
-	{
-		currLayer->pControlsManager = NULL;
-		currLayer = NULL;
-	}
+	currLayer = nullptr;
 
 	currCtrlIdx = -1;
 	tool = TOOL_TYPE_NO_TOOL;
@@ -761,7 +757,7 @@ void CControlsEditor::Update(float dTime)
 	if (UTimgui().GetWantCaptureMouse())
 		clickedInterface = true;
 
-	if ((currLayer != NULL) && (!clickedInterface))
+	if ((currLayer != nullptr) && (!clickedInterface))
 	{
 		if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
 		{			
@@ -770,7 +766,7 @@ void CControlsEditor::Update(float dTime)
 			{
 				RECTXYWH bbox = currLayer->controls[currCtrlIdx]->GetBBox();
 				
-				if (m_pCamera != null)
+				if (m_pCamera != nullptr)
 				{
 					bbox.x += currLayer->GetPos().x;
 					bbox.y += currLayer->GetPos().y;
@@ -834,7 +830,7 @@ void CControlsEditor::Update(float dTime)
 		if (g_mouse.Lbut == K_MOUSE_BUTT_DRAG)
 		{
 			SIZEWH_F mousedelta(g_mouse.pos.x - vLastMouse.x, g_mouse.pos.y - vLastMouse.y);
-			if (m_pCamera != null)
+			if (m_pCamera != nullptr)
 			{
 				mousedelta = m_pCamera->ScreenToWorld(mousedelta);
 				if (fabs(mousedelta.w) >= 1.0f)
@@ -1002,7 +998,7 @@ void CControlsEditor::Update(float dTime)
 			{
 				RECTXYWH bbox = currLayer->controls[kk]->GetBBox();
 				
-				if (m_pCamera != null)
+				if (m_pCamera != nullptr)
 				{
 					bbox.x += currLayer->GetPos().x;
 					bbox.y += currLayer->GetPos().y;
@@ -1265,7 +1261,7 @@ void CControlsEditor::CenterElements(bool H, bool V)
 {
 	if (H)
 	{
-		if (currLayer == NULL)
+		if (currLayer == nullptr)
 			return;
 
 		if (selectedCtrls.Count() > 1)
@@ -1315,7 +1311,7 @@ void CControlsEditor::CenterElements(bool H, bool V)
 
 	if (V)
 	{
-		if (currLayer == NULL)
+		if (currLayer == nullptr)
 			return;
 
 		if (selectedCtrls.Count() > 1)
@@ -1375,7 +1371,7 @@ void CControlsEditor::DeleteControl()
 
 void CControlsEditor::Paint()
 {
-	if (m_pCamera != null)
+	if (m_pCamera != nullptr)
 	{
 		CCameraTransform::SetActiveCamera(m_pd3dDevice, m_pCamera);
 	}
@@ -1391,7 +1387,7 @@ void CControlsEditor::Paint()
 			m_pSprite->Flush();
 
 		Vec2 scrCenter(vecRenderCenter.x + offset.x + lpos.x, vecRenderCenter.y + offset.y + lpos.y);
-		if (m_pCamera != null)
+		if (m_pCamera != nullptr)
 		{
 			scrCenter = m_pCamera->ScreenToWorld(scrCenter);
 		}
@@ -1549,7 +1545,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		}
 		if (ImGui::Button("Clone Layer", ImVec2(120, 0)))
 		{
-			if (currLayer == NULL)
+			if (currLayer == nullptr)
 				return;
 
 			CCtrlLayer* nlayer = currLayer->Clone();
@@ -1678,7 +1674,7 @@ void CControlsEditor::PaintBBoxes()
 			rect.x += currLayer->GetPos().x;
 			rect.y += currLayer->GetPos().y;
 
-			if (m_pCamera != null)
+			if (m_pCamera != nullptr)
 			{
 				Vec2 vul(rect.x, rect.y);
 				SIZEWH_F rsz(rect.w, rect.h);
@@ -1716,12 +1712,12 @@ HRESULT CControlsEditor::OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSU
 
 HRESULT CControlsEditor::OnLostDevice()
 {
-	m_pd3dDevice = NULL;
+	m_pd3dDevice = nullptr;
 	return S_OK;
 }
 
 HRESULT CControlsEditor::OnDestroyDevice()
 {
-	m_pd3dDevice = NULL;
+	m_pd3dDevice = nullptr;
 	return S_OK;
 }

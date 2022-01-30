@@ -63,7 +63,7 @@ public:
 
 	void					Paint();
 	// Optimized paint for a single module when we don't have more modules per frame (skips a for)
-	void					PaintModule(int moduleIdx);
+	void					PaintFModule(int moduleIdx);
 	// Optimized paint for a single module when we don't have more modules per frame (skips a for)
 	// Adds texIdxOffset to the texture index (used when loading normals and other textures in the same sprite collection)
 	void					PaintModule_texOverride(int moduleIdx, int texIdxOffset);
@@ -72,16 +72,22 @@ public:
 // generic data
 namespace UTSprite
 {
-	DWORD GetFrameFlags(CSpriteCollection* sprCol, int animID, int frameID);
+	// Paints a single frame from an animation	
+	void PaintFrame( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, DWORD ncolor = 0xffffffff );
+	// Paints a single frame from an animation, position as 2 floats
+	void PaintFrame( CSpriteCollection *sprCol, float posX, float posY, int animID, int frameIdx, DWORD ncolor = 0xffffffff );
+	// Paints a single frame, with transforms
+	void PaintFrameEx( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, DWORD ncolor = 0xffffffff, float fRotZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f }, UINT unFlags = 0 );
+	// Paints single module
+	void PaintFModule( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff );
+
 	/*
-	void PaintFrame(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, DWORD ncolor = 0xffffffff);
 	void PaintFrameModule(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, DWORD ncolor = 0xffffffff);
 	void PaintFrameClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, RECTXYWH& clip, DWORD ncolor = 0xffffffff);
 	void PaintFrameModuleClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, RECTXYWH_F * clip, DWORD ncolor = 0xffffffff);
-	void PaintFrameModuleTiled(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, DWORD ncolor = 0xffffffff, int W = -1, int H = -1);
 	*/
-	void PaintFrameEx(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameID, DWORD ncolor = 0xffffffff, float fRotZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f }, UINT unFlags = 0);
-	void PaintFrameModule(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameID, int moduleID, DWORD ncolor = 0xffffffff);
+	//void PaintFModuleTiled( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff, int W = -1, int H = -1 );
+	//void PaintFModuleStretched( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff, int W = -1, int H = -1 );
 
 	/*
 	//W=-1 inseamna ca pastreaza inaltimea originala
