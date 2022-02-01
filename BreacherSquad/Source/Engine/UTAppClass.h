@@ -132,7 +132,7 @@ public:
 	RECTXYWH_F	g_rectRT;			// render target render rectangle
 	RECTXYWH_F  g_rect360hWorld;	// world rect for menus and interfaces
 	RECTXYWH_F  g_rect480hWorld;	// double res menu rect (for system fonts)
-	Mat			g_matProj;		// projection matrix
+	Mat			g_matProj;			// projection matrix
 	//--- screen camera ---
 	CCameraTransform g_camScreen;		//real screen camera
 	CCameraTransform g_camRTScreen;		//game screen camera with height of RT targets (RT to screen)

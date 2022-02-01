@@ -5,7 +5,9 @@
 CSpritePainter::CSpritePainter(void)
 {
 	m_pVShader = nullptr;
-	MUMatIdentity(&m_matProj);
+	MUMatIdentity( &m_matProj );
+	MUMatIdentity( &m_matView);
+	MUMatIdentity( &m_matWorld );
 
 	m_vb = nullptr;
 	m_ib = nullptr;
@@ -29,7 +31,7 @@ CSpritePainter::~CSpritePainter(void)
 }
 
 
-OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 flags /*= K_BS_ALPHABLENDING */)
+OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat & matView, Mat & matProj, UINT32 flags /*= K_BS_ALPHABLENDING */)
 {
 	_ASSERT(m_pDevice != nullptr);
 	// if already started make sure we do a flush
@@ -41,7 +43,11 @@ OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 f
 #endif
 	// set shader and projection matrix
 	m_pVShader = pVShader;
-	m_matProj = matViewProj;
+	m_matView = matView;
+	m_matProj = matProj;
+	MUMatIdentity( &m_matWorld );
+	m_matWVP = matView * matProj;
+
 	m_nFlags = flags;
 
 	//reset verts
@@ -90,19 +96,47 @@ OPRESULT CSpritePainter::End()
 	return K_OP_OK;
 }
 
-OPRESULT CSpritePainter::SetViewProjMatrix(Mat matViewProj)
+OPRESULT CSpritePainter::SetViewProjMatrix(Mat & matView, Mat & matProj)
 {
 	if (!bStarted)
 		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CSpritePainter::Can't use SetViewProjMatrix without calling Begin first!");
 	
 	V_OP_RET(Flush());
 	// set new matrix
-	m_matProj = matViewProj;
+	m_matView = matView;
+	m_matProj = matProj;
+	// compute final matrix
+	m_matWVP = m_matWorld * m_matView;
+	m_matWVP = m_matWVP * m_matProj;
 
 	return K_OP_OK;
 }
 
-OPRESULT CSpritePainter::SetShader(PVERTEXSHADER pVShader, Mat* matViewProj /*= nullptr*/)
+OPRESULT CSpritePainter::SetTransform( Mat & matWorld )
+{
+	V_OP_RET( Flush() );
+	// set new matrix
+	m_matWorld = matWorld;
+	// compute final matrix
+	m_matWVP = m_matWorld * m_matView;
+	m_matWVP = m_matWVP * m_matProj;
+
+	return K_OP_OK;
+}
+
+OPRESULT CSpritePainter::SetViewTransform( Mat & matView )
+{
+	V_OP_RET( Flush() );
+	// set new matrix
+	m_matView = matView;
+	// compute final matrix
+	m_matWVP = m_matWorld * m_matView;
+	m_matWVP = m_matWVP * m_matProj;
+
+	return K_OP_OK;
+}
+
+OPRESULT CSpritePainter::SetShader(PVERTEXSHADER pVShader)
 {
 	if (!bStarted)
 		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CSpritePainter::Can't use SetViewProjMatrix without calling Begin first!");
@@ -110,13 +144,16 @@ OPRESULT CSpritePainter::SetShader(PVERTEXSHADER pVShader, Mat* matViewProj /*= 
 	V_OP_RET(Flush());
 	// set new shader
 	m_pVShader = pVShader;
-	// set new matrix
-	if (m_matProj != nullptr)
-	{
-		m_matProj = *matViewProj;
-	}
 
 	return K_OP_OK;
+}
+
+void CSpritePainter::GetTransform( Mat * retWorld, Mat * retView /*= nullptr */ )
+{
+	if(retWorld != nullptr)
+		*retWorld = m_matWorld;
+	if ( retView != nullptr )
+		*retView = m_matView;
 }
 
 OPRESULT CSpritePainter::Flush()
@@ -151,7 +188,7 @@ OPRESULT CSpritePainter::Flush()
 	{
 		m_pDevice->SetVertexShader(m_pVShader);
 		m_pDevice->SetVertexDeclaration(UTGetShaderManager()._VERTEX_PNCT4T4_decl);
-		m_pDevice->SetVertexShaderConstantF(0, (float*)&m_matProj, 4);
+		m_pDevice->SetVertexShaderConstantF(0, (float*)&m_matWVP, 4);
 	}
 	else
 	{

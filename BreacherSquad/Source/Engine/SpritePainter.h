@@ -23,7 +23,11 @@ class CSpritePainter
 private:
 	PDEVICE					m_pDevice;
 	PVERTEXSHADER			m_pVShader;										// Vertex shader to use when painting
+	
 	Mat						m_matProj;										// Projection matrix set on Begin
+	Mat						m_matView;										// View matrix
+	Mat						m_matWorld;										// World matrix
+	Mat						m_matWVP;										// Final multiplied matrix sent to shaders
 
 	UINT32					m_nVertexCursor;
 	_VERTEX_PNCT4T4			*m_verts;										// All verts get written here before drawing them
@@ -51,14 +55,20 @@ public:
 	~CSpritePainter(void);
 
 	// Call before painting anything
-	OPRESULT				Begin(PVERTEXSHADER pVShader, Mat matViewProj, UINT32 flags = K_BS_ALPHABLENDING );
+	OPRESULT				Begin(PVERTEXSHADER pVShader, Mat & matView, Mat & matProj, UINT32 flags = K_BS_ALPHABLENDING );
 	
 	// Flushes remaining sprites and ends a scene. Clears shaders, flushes everything
 	OPRESULT				End();
 	// Sets the current view projection matrix for the following sprites. Does a Flush before setting it.
-	OPRESULT				SetViewProjMatrix(Mat matViewProj);
+	OPRESULT				SetViewProjMatrix(Mat & matView, Mat & matProj);
+	// Sets world transform. Does a flush before setting it.
+	OPRESULT				SetTransform( Mat & matWorld );
+	// Sets the view transform. Does a flush before setting it.
+	OPRESULT				SetViewTransform( Mat & matView );
 	// Sets the currently used vertex shader, Does a flush before setting it.
-	OPRESULT				SetShader(PVERTEXSHADER pVShader, Mat* matViewProj = nullptr);
+	OPRESULT				SetShader(PVERTEXSHADER pVShader);
+	// Gets the currently set transform	matrices
+	void					GetTransform( Mat * retWorld, Mat * retView = nullptr );
 
 	// Draws a non-transformed sprite
 	// \param: pSrcUV - expects the rectangle in texture coordinates that will be drawn in pDestRect
@@ -66,7 +76,7 @@ public:
 	// Use together with pPosition if you need rotations as rotations are applied before moving the pDestRect to pPosition 
 	// allowing you to specify origin of rotation by defining pDestRect around the origin.
 	OPRESULT				Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec2 vPos, DWORD color = 0xffffffff, float fRotationZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
-	// Draw version with flip flags (2 if's slower)... 
+	// Draw version with flip flags (2 if's slower because it handles flip flags)... 
 	OPRESULT				DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec2 vPos, DWORD color = 0xffffffff, float fRotationZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f }, UINT paintFlags = 0);
 	// #TODO: DRAW version with clip rect
 	// #TODO: version with scissors for scene wide clip rects (setclip/remove clip)

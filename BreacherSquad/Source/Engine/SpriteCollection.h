@@ -96,7 +96,7 @@ struct scAFrame
 	RECTXYWH			BBox;					// BBox loaded from editor
 	int					PointsNo;				// hitpoints no
 	int*				PointsXYFlag;			// [frame][x1,y1,flag1,x2,y2...]
-	UCHAR				fmodulesNo;  
+	int					fmodulesNo;  
 	int*				fmodulesIdx;
 	
 	RECTXYWH			BBox_real;				// bounding box real, computed from modules

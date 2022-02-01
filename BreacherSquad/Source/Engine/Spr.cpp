@@ -282,6 +282,57 @@ void UTSprite::PaintFModule(CSpriteCollection *sprCol, Vec2 vPos, int animID, in
 }
 
 
+void UTSprite::PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, RECTLTRB_F& clip, DWORD ncolor )
+{
+		_ASSERT( animID < sprCol->Animations.Count() );
+		_ASSERT( frameID < sprCol->Animations[ animID ]->aframesNo );
+
+		int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameID ];
+		for ( int ii = 0; ii < sprCol->AFrames[ aframeIdx ]->fmodulesNo; ii++ )
+		{
+			int fmoduleIdx = sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ ii ];
+			RECTLTRB_F srcrect = sprCol->FModules[ fmoduleIdx ]->moduleRect;
+			D3DXVECTOR3 drawpos( nX + sprCol->FModules[ fmoduleIdx ]->ox, nY + sprCol->FModules[ fmoduleIdx ]->oy, 0.0f );
+
+			RECT destrect;
+			destrect.left = ( int ) ( nX + sprCol->FModules[ fmoduleIdx ]->ox );
+			destrect.top = ( int ) ( nY + sprCol->FModules[ fmoduleIdx ]->oy );
+			destrect.right = destrect.left + srcrect.right - srcrect.left;
+			destrect.bottom = destrect.top + srcrect.bottom - srcrect.top;
+			drawpos = D3DXVECTOR3( destrect.left, destrect.top, 0.0f );
+
+			//vede daca iese detot din dreptunghiul de clip
+			if ( ( destrect.left > cliprect.right ) || ( destrect.top > cliprect.bottom ) || ( destrect.bottom < cliprect.top ) || ( destrect.right < cliprect.left ) )
+				continue;
+			//face clip
+			if ( destrect.right > cliprect.right )
+			{
+				srcrect.right -= destrect.right - cliprect.right;
+			}
+			if ( destrect.bottom > cliprect.bottom )
+			{
+				srcrect.bottom -= destrect.bottom - cliprect.bottom;
+			}
+			if ( destrect.left < cliprect.left )
+			{
+				srcrect.left += cliprect.left - destrect.left;
+				drawpos.x += cliprect.left - destrect.left;
+			}
+			if ( destrect.top < cliprect.top )
+			{
+				srcrect.top += cliprect.top - destrect.top;
+				drawpos.y += cliprect.top - destrect.top;
+			}
+
+			//deseneaza
+			s_pSprite->Draw( sprCol->Textures[ sprCol->FModules[ fmoduleIdx ]->imgIdx ]->pTex,
+				&srcrect,
+				NULL,
+				&drawpos,
+				ncolor );
+		}
+}
+
 /*
 void UTSprite::PaintFModuleTiled( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor, int W , int H )
 {

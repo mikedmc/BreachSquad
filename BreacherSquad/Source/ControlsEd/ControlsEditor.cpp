@@ -9,13 +9,12 @@ using namespace std;
 
 CControlsEditor::CControlsEditor()
 {
-	currLayer = NULL;
+	currLayer = nullptr;
 	currLayerIdx = -1;
 	currCtrlIdx = -1;
 
-	m_pSprite = null;
-	m_pd3dDevice = null;
-	m_pCamera = null;
+	m_pDevice = nullptr;
+	m_pCamera = nullptr;
 }
 
 
@@ -30,8 +29,8 @@ void CControlsEditor::DrawLine(int x1, int y1, int x2, int y2, D3DCOLOR col)
 	vertices[0].pos.x = x1; vertices[0].pos.y = y1; vertices[0].pos.z = 0.0f; vertices[0].pos.w = 1.0f;
 	vertices[1].pos.x = x2; vertices[1].pos.y = y2;	vertices[1].pos.z = 0.0f; vertices[1].pos.w = 1.0f;
 	vertices[0].color = vertices[1].color = col;
-	m_pd3dDevice->SetFVF(VERT_TL1TC::FVF);
-	m_pd3dDevice->DrawPrimitiveUP(D3DPT_LINELIST, 2, &vertices, sizeof(VERT_TL1TC));
+	m_pDevice->SetFVF(VERT_TL1TC::FVF);
+	m_pDevice->DrawPrimitiveUP(D3DPT_LINELIST, 2, &vertices, sizeof(VERT_TL1TC));
 }
 
 void CControlsEditor::SetCameraTransform(CCameraTransform* pCamera)
@@ -63,8 +62,8 @@ void CControlsEditor::DrawBBox(RECTXYWH rect, bool selected)
  
 	vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
 
-	m_pd3dDevice->SetFVF(VERT_TL1TC::FVF);
-	m_pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
+	m_pDevice->SetFVF(VERT_TL1TC::FVF);
+	m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
 
 	if (selected && selectedCtrls.Count() == 1)
 	{
@@ -77,8 +76,8 @@ void CControlsEditor::DrawBBox(RECTXYWH rect, bool selected)
 
 		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
 
-		m_pd3dDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
+		m_pDevice->SetFVF(VERT_TL1TC::FVF);
+		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
 
 	
 		// top-right scalespot
@@ -90,8 +89,8 @@ void CControlsEditor::DrawBBox(RECTXYWH rect, bool selected)
 
 		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
 
-		m_pd3dDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
+		m_pDevice->SetFVF(VERT_TL1TC::FVF);
+		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
 
 		// bottom-right scalespot
 		vertices[0].pos.x = rect.x + rect.w; vertices[0].pos.y = rect.y + rect.h;
@@ -102,8 +101,8 @@ void CControlsEditor::DrawBBox(RECTXYWH rect, bool selected)
 
 		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
 
-		m_pd3dDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
+		m_pDevice->SetFVF(VERT_TL1TC::FVF);
+		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
 
 		// bottom-left scalespot
 		vertices[0].pos.x = rect.x; vertices[0].pos.y = rect.y + rect.h;
@@ -114,8 +113,8 @@ void CControlsEditor::DrawBBox(RECTXYWH rect, bool selected)
 
 		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
 
-		m_pd3dDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
+		m_pDevice->SetFVF(VERT_TL1TC::FVF);
+		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
 
 		// top-mid scalespot
 		vertices[0].pos.x = rect.x + rect.w / 2 - K_BBOX_SCALE_BOX_SIZE / 2; vertices[0].pos.y = rect.y;
@@ -126,8 +125,8 @@ void CControlsEditor::DrawBBox(RECTXYWH rect, bool selected)
 
 		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
 
-		m_pd3dDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
+		m_pDevice->SetFVF(VERT_TL1TC::FVF);
+		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
 
 		// bot-mid scalespot
 		vertices[0].pos.x = rect.x + rect.w / 2 - K_BBOX_SCALE_BOX_SIZE / 2; vertices[0].pos.y = rect.y + rect.h;
@@ -138,8 +137,8 @@ void CControlsEditor::DrawBBox(RECTXYWH rect, bool selected)
 
 		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
 
-		m_pd3dDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
+		m_pDevice->SetFVF(VERT_TL1TC::FVF);
+		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
 
 		// left-mid scalespot
 		vertices[0].pos.x = rect.x; vertices[0].pos.y = rect.y + rect.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2;
@@ -150,8 +149,8 @@ void CControlsEditor::DrawBBox(RECTXYWH rect, bool selected)
 
 		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
 
-		m_pd3dDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
+		m_pDevice->SetFVF(VERT_TL1TC::FVF);
+		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
 
 		// right-mid scalespot
 		vertices[0].pos.x = rect.x + rect.w; vertices[0].pos.y = rect.y + rect.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2;
@@ -162,19 +161,19 @@ void CControlsEditor::DrawBBox(RECTXYWH rect, bool selected)
 
 		vertices[0].color = vertices[1].color = vertices[2].color = vertices[3].color = vertices[4].color = col;
 
-		m_pd3dDevice->SetFVF(VERT_TL1TC::FVF);
-		m_pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
+		m_pDevice->SetFVF(VERT_TL1TC::FVF);
+		m_pDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &vertices, sizeof(VERT_TL1TC));
 	}
 }
 
 
-HRESULT CControlsEditor::LoadCtrlTemplatesXML(WCHAR* XMLpath)
+OPRESULT CControlsEditor::LoadCtrlTemplatesXML(WCHAR* XMLpath)
 {
 	pugi::xml_document doc;
 	if (!doc.load_file(XMLpath))
 	{
 		ErrorBox(K_ERR_WARNING, L"Unable to load Controls XML:%s\n", XMLpath);
-		return(E_FAIL);
+		return K_OP_FAILED;
 	}
 	pugi::xml_node layerNode = doc.root().first_child();
 	for (pugi::xml_attribute atr = layerNode.first_attribute(); atr; atr = atr.next_attribute())
@@ -196,7 +195,7 @@ HRESULT CControlsEditor::LoadCtrlTemplatesXML(WCHAR* XMLpath)
 		ctrlTemplates.Add(nCol);
 	}
 
-	return S_OK;
+	return K_OP_OK;
 }
 
 
@@ -549,12 +548,6 @@ void CControlsEditor::AddControl(CVariantCollection* vcol)
 	selectedCtrls.Add(currCtrlIdx);
 }
 
-
-void CControlsEditor::SetSpritePtr(ID3DXSprite* pSprite)
-{
-	m_pSprite = pSprite;
-}
-
 void CControlsEditor::CloneControl(int offx, int offy)
 {
 	if (currCtrlIdx < 0 || selectedCtrls.Count() > 1)
@@ -573,7 +566,6 @@ void CControlsEditor::CloneControl(int offx, int offy)
 
 	currLayer->controls.Add(nctrl);
 }
-
 
 void CControlsEditor::Launch()
 {
@@ -1373,9 +1365,9 @@ void CControlsEditor::Paint()
 {
 	if (m_pCamera != nullptr)
 	{
-		CCameraTransform::SetActiveCamera(m_pd3dDevice, m_pCamera);
+		Mat mcam = m_pCamera->GetViewTransform();
+		__Painter().SetViewTransform( mcam );
 	}
-
 
 	Vec2 vecRenderCenter(UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY());
 	if (currLayer)
@@ -1383,27 +1375,20 @@ void CControlsEditor::Paint()
 		POINTXY_INT lpos = currLayer->GetPos();
 		D3DXMATRIXA16 mat;
 
-		if(m_pSprite)
-			m_pSprite->Flush();
-
 		Vec2 scrCenter(vecRenderCenter.x + offset.x + lpos.x, vecRenderCenter.y + offset.y + lpos.y);
 		if (m_pCamera != nullptr)
-		{
 			scrCenter = m_pCamera->ScreenToWorld(scrCenter);
-		}
-		D3DXMatrixAffineTransformation2D(&mat, 1.0f, NULL, 0.0f, &scrCenter);
-		//set world matrix and keep history so we can access it from the fonts when painting the controls
-		App_SetWorldTransform(m_pd3dDevice, &mat);
-		// desenare controale
+
+		MUMatAffine2D( &mat, 1.0f, NULL, 0.0f, &scrCenter );
+		__Painter().SetTransform( mat );
+
+		// paint controls
 		for (int kk = 0; kk < currLayer->controls.Count(); kk++)
 		{
 			currLayer->controls[kk]->Paint(currLayer->pControlsManager->m_pCamera, &mat);
 		}
 
-		if (m_pSprite)
-			m_pSprite->Flush();
-
-		App_SetWorldTransform(m_pd3dDevice, &g_matIdentity);
+		__Painter().SetTransform( g_matIdentity );
 	}
 }
 
@@ -1517,8 +1502,8 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		if (ImGui::Button("New Layer", ImVec2(120, 0)))
 		{
 			CCtrlLayer* nlayer = new CCtrlLayer();
-			nlayer->bBlocking = _wtoi(layerTemplate.GetVariantByName(L"isBlocking")->m_strArg.text);
-			nlayer->bGetsInput = _wtoi(layerTemplate.GetVariantByName(L"getsInput")->m_strArg.text);
+			nlayer->bBlocking = (bool)(_wtoi(layerTemplate.GetVariantByName(L"isBlocking")->m_strArg.text) != 0);
+			nlayer->bGetsInput = (bool)(_wtoi(layerTemplate.GetVariantByName(L"getsInput")->m_strArg.text) != 0);
 			int lx = _wtoi(layerTemplate.GetVariantByName(L"X")->m_strArg.text);
 			int ly = _wtoi(layerTemplate.GetVariantByName(L"Y")->m_strArg.text);
 			nlayer->SetPos(lx, ly);
@@ -1540,7 +1525,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 
 			UTGetGUI().layersDefinitions.Add(nlayer);
 
-			int idx = UTGetGUI().layersDefinitions.Count() - 1;
+			//int idx = UTGetGUI().layersDefinitions.Count() - 1;
 			currCtrlIdx = -1;
 		}
 		if (ImGui::Button("Clone Layer", ImVec2(120, 0)))
@@ -1555,7 +1540,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 			nlayer->ID.Init(newName);
 			UTGetGUI().layersDefinitions.Add(nlayer);
 
-			int idx = UTGetGUI().layersDefinitions.Count() - 1;
+			//int idx = UTGetGUI().layersDefinitions.Count() - 1;
 			currCtrlIdx = -1;
 		}
 		ImGui::End();
@@ -1652,7 +1637,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 
 void CControlsEditor::PaintBBoxes()
 {
-	m_pd3dDevice->SetTexture(0, null);
+	m_pDevice->SetTexture(0, null);
 
 	if (hideBBoxes)
 		return;
@@ -1697,27 +1682,26 @@ void CControlsEditor::PaintBBoxes()
 
 }
 
-HRESULT CControlsEditor::OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
+OPRESULT CControlsEditor::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
 {
-	m_pd3dDevice = pd3dDevice;
-	return S_OK;
+	m_pDevice = pDevice;
+	return K_OP_OK;
 }
 
-HRESULT CControlsEditor::OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc)
+OPRESULT CControlsEditor::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
 {
-	m_pd3dDevice = pd3dDevice;
-
-	return S_OK;
+	m_pDevice = pDevice;
+	return K_OP_OK;
 }
 
-HRESULT CControlsEditor::OnLostDevice()
+OPRESULT CControlsEditor::OnLostDevice()
 {
-	m_pd3dDevice = nullptr;
-	return S_OK;
+	m_pDevice = nullptr;
+	return K_OP_OK;
 }
 
-HRESULT CControlsEditor::OnDestroyDevice()
+OPRESULT CControlsEditor::OnDestroyDevice()
 {
-	m_pd3dDevice = nullptr;
-	return S_OK;
+	m_pDevice = nullptr;
+	return K_OP_OK;
 }

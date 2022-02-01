@@ -81,9 +81,8 @@ namespace UTSprite
 	// Paints single module
 	void PaintFModule( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff );
 
+	void PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, RECTLTRB_F& clip, DWORD ncolor = 0xffffffff );
 	/*
-	void PaintFrameModule(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, DWORD ncolor = 0xffffffff);
-	void PaintFrameClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, RECTXYWH& clip, DWORD ncolor = 0xffffffff);
 	void PaintFrameModuleClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, RECTXYWH_F * clip, DWORD ncolor = 0xffffffff);
 	*/
 	//void PaintFModuleTiled( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff, int W = -1, int H = -1 );

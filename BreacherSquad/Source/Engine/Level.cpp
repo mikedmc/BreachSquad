@@ -7885,7 +7885,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 	/// BEGIN SPRITES PAINTER
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 	if (pSprVS)
-		__Painter().Begin(pSprVS, matView * *matProj);
+		__Painter().Begin(pSprVS, matView ,*matProj);
 
 	eVisibleSortableType eLastVis = K_VST_UNKNOWN;
 	for (int kk = 0; kk < m_visibleList.arrSortedItems.nCount; kk++)
@@ -7981,12 +7981,12 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 	///--- paint lights ---
 	//PVERTEXSHADER pVShader = null;
 	//PPIXELSHADER pPShader = null;
-
+	// matWVP is used by level
 	Mat matWVP = matView * (*matProj);
 	// begin the painter
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 	if (pSprVS)
-		__Painter().Begin(pSprVS, matWVP);
+		__Painter().Begin(pSprVS, matView, *matProj);
 
 
 #if defined(_DEBUG) || defined(DEBUG)

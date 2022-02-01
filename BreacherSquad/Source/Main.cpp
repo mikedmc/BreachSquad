@@ -863,7 +863,6 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 #ifdef K_CONTROLS_EDITOR
 	V_RETURN(g_ControlsEditor.OnResetDevice(pDevice, pBBDesc));
-	g_ControlsEditor.SetSpritePtr(g_pGameSprite);
 #endif
 	//--- set Sprite painter class pointer ---
 	g_level.SetSpritePtr(g_pGameSprite);
@@ -1751,13 +1750,11 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		// only start and end UTPainter after we preloaded the minimum painter shaders
 		if (GameState::state != GAME_STATE_PRELOAD)
 		{
+			Mat matview = UTApp().g_cam360hScreen.GetViewTransform();
+
 			PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
 			if (pSprVS)
-				__Painter().Begin(pSprVS, g_matIdentity);
-
-			Mat matview = UTApp().g_cam360hScreen.GetViewTransform();
-			Mat matviewproj = matview * UTApp().g_matProj;
-			__Painter().SetViewProjMatrix( matviewproj );
+				__Painter().Begin(pSprVS, matview, UTApp().g_matProj );
 		}
 
 		///----------------------------------------------------------------------------------
@@ -1979,8 +1976,8 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	
 
 		// IMGUI tutorial window
-		static bool show_demo_window = false;
-		ImGui::ShowDemoWindow(&show_demo_window);
+		//static bool show_demo_window = false;
+		//ImGui::ShowDemoWindow(&show_demo_window);
 		//--- CONTROLS EDITOR INTERFACES ---
 #ifdef K_CONTROLS_EDITOR
 		if ( GameState::state == GAME_STATE_CONTROLSED)
