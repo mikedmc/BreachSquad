@@ -266,14 +266,14 @@ void UTSprite::PaintFrameEx(CSpriteCollection *sprCol, Vec2 vPos, int animID, in
 	}
 }
 
-void UTSprite::PaintFModule(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleID, DWORD ncolor)
+void UTSprite::PaintFModule(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor)
 {
 	_ASSERT(animID < sprCol->Animations.Count());
 	_ASSERT(frameIdx < sprCol->Animations[animID]->aframesNo);
-	_ASSERT(moduleID < sprCol->AFrames[sprCol->Animations[animID]->aframesIdx[frameIdx]]->fmodulesNo);
+	_ASSERT(moduleIdx < sprCol->AFrames[sprCol->Animations[animID]->aframesIdx[frameIdx]]->fmodulesNo);
 
 	int aframeIdx = sprCol->Animations[animID]->aframesIdx[frameIdx];
-	scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[moduleID]];
+	scFModule* mod = sprCol->FModules[sprCol->AFrames[aframeIdx]->fmodulesIdx[moduleIdx]];
 
 	__Painter().Draw(mod->pImg->pTex,
 		mod->texRect,
@@ -282,54 +282,42 @@ void UTSprite::PaintFModule(CSpriteCollection *sprCol, Vec2 vPos, int animID, in
 }
 
 
-void UTSprite::PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, RECTLTRB_F& clip, DWORD ncolor )
+void UTSprite::PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, RECTLTRB_F& clip, DWORD ncolor )
 {
-		_ASSERT( animID < sprCol->Animations.Count() );
-		_ASSERT( frameID < sprCol->Animations[ animID ]->aframesNo );
-
-		int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameID ];
+		int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameIdx ];
 		for ( int ii = 0; ii < sprCol->AFrames[ aframeIdx ]->fmodulesNo; ii++ )
 		{
 			int fmoduleIdx = sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ ii ];
-			RECTLTRB_F srcrect = sprCol->FModules[ fmoduleIdx ]->moduleRect;
-			D3DXVECTOR3 drawpos( nX + sprCol->FModules[ fmoduleIdx ]->ox, nY + sprCol->FModules[ fmoduleIdx ]->oy, 0.0f );
+			scFModule* mod = sprCol->FModules[ sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ ii ] ];
 
-			RECT destrect;
-			destrect.left = ( int ) ( nX + sprCol->FModules[ fmoduleIdx ]->ox );
-			destrect.top = ( int ) ( nY + sprCol->FModules[ fmoduleIdx ]->oy );
-			destrect.right = destrect.left + srcrect.right - srcrect.left;
-			destrect.bottom = destrect.top + srcrect.bottom - srcrect.top;
-			drawpos = D3DXVECTOR3( destrect.left, destrect.top, 0.0f );
-
-			//vede daca iese detot din dreptunghiul de clip
-			if ( ( destrect.left > cliprect.right ) || ( destrect.top > cliprect.bottom ) || ( destrect.bottom < cliprect.top ) || ( destrect.right < cliprect.left ) )
+			RECTLTRB_F destrect = sprCol->FModules[ fmoduleIdx ]->moduleRectOff;
+			destrect.Move( nX, nY );
+			// optimization: if contained, paint in full
+			if ( clip.Contains( destrect ) )
+			{
+				__Painter().Draw( mod->pImg->pTex,
+					mod->texRect,
+					mod->moduleRectOff,
+					Vec2(nX, nY), ncolor );
 				continue;
-			//face clip
-			if ( destrect.right > cliprect.right )
-			{
-				srcrect.right -= destrect.right - cliprect.right;
 			}
-			if ( destrect.bottom > cliprect.bottom )
-			{
-				srcrect.bottom -= destrect.bottom - cliprect.bottom;
-			}
-			if ( destrect.left < cliprect.left )
-			{
-				srcrect.left += cliprect.left - destrect.left;
-				drawpos.x += cliprect.left - destrect.left;
-			}
-			if ( destrect.top < cliprect.top )
-			{
-				srcrect.top += cliprect.top - destrect.top;
-				drawpos.y += cliprect.top - destrect.top;
-			}
-
-			//deseneaza
-			s_pSprite->Draw( sprCol->Textures[ sprCol->FModules[ fmoduleIdx ]->imgIdx ]->pTex,
-				&srcrect,
-				NULL,
-				&drawpos,
-				ncolor );
+			// compute intersection
+			RECTLTRB_F intersection;
+			bool bIntersecting = RECTLTRB_F::Intersection( destrect, clip, intersection );
+			if ( !bIntersecting )
+				continue;
+			// compute texture coords by percenting coords (barycentric)
+			Vec2 posCornerULPerc( (intersection.left - destrect.left) / destrect.Width(), (intersection.top - destrect.top) / destrect.Height() );
+			Vec2 posCornerDRPerc( ( intersection.right - destrect.left ) / destrect.Width(), ( intersection.bottom - destrect.top ) / destrect.Height() );
+			RECTLTRB_F texrect = sprCol->FModules[ fmoduleIdx ]->texRect;
+			Vec2 vTexSz( texrect.Width(), texrect.Height() );
+			RECTLTRB_F finaltex( texrect.left + posCornerULPerc.x * vTexSz.x, texrect.top + posCornerULPerc.y * vTexSz.y,
+				texrect.left + posCornerDRPerc.x * vTexSz.x, texrect.top + posCornerDRPerc.y * vTexSz.y );
+			// paints without offset because the offset is already in the clipped rectangle
+			__Painter().Draw( mod->pImg->pTex,
+				finaltex,
+				intersection,
+				Vec2( 0.0f, 0.0f ), ncolor );
 		}
 }
 

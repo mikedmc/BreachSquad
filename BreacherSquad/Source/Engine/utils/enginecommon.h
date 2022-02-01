@@ -360,6 +360,56 @@ public:
 	{
 		left = nleft; top = ntop; right = nright; bottom = nbottom;
 	}
+
+	void Move( float dx, float dy )
+	{
+		left += dx; 
+		top += dy;
+		right += dx;
+		bottom += dy;
+	}
+
+	// checks if rect intersects dest rect (borders touching are not considered intersections hence we use >= and not >)
+	bool Intersects( RECTLTRB_F & dest)
+	{
+		if ( ( left >= dest.right ) || ( right <= dest.left ) || ( top >= dest.bottom ) || ( bottom <= dest.top ) )
+			return false;
+		return true;
+	}
+
+	// checks if current rect contains dest rect
+	bool Contains( RECTLTRB_F & dest )
+	{
+		if (( dest.left >= left ) && ( dest.top >= top ) && ( dest.right <= right ) && ( dest.bottom <= bottom ))
+			return true;
+		return false;
+	}
+
+	float Width()
+	{
+		return right - left;
+	}
+
+	float Height()
+	{
+		return bottom - top;
+	}
+
+	// finds intersection of two RECTLTRB_F returning true if they intersect
+	static bool Intersection( RECTLTRB_F & a, RECTLTRB_F & b, RECTLTRB_F & retVal )
+	{
+		Vec2 vMax, vMin;
+		vMin.x = max( a.left, b.left );
+		vMin.y = max( a.top, b.top );
+		vMax.x = min( a.right, b.right );
+		vMax.y = min( a.bottom, b.bottom );
+		retVal.Set( vMin.x, vMin.y, vMax.x, vMax.y );
+		//negative means no intersection
+		if ( ( vMax.x < vMin.x ) || ( vMax.y < vMin.y ) )
+			return false;
+		return true;
+	}
+
 };
 
 class RECTXYXY_F {

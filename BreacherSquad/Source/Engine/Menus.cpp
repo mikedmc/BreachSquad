@@ -41,11 +41,11 @@ void CMenus::PaintBackground( RECTXYWH_F worldRect, DWORD dwColor, bool bPaintPa
 {
 	const Vec2 vLogoPos( 110.0f, 60.0f );
 	//background
-	UTSprite::PaintFrameEx( &m_sprCol, Vec2( worldRect.x - 18.0f * sin( fLocalTimeline * 0.2f ), worldRect.y ), ANM_MENUS0_SPR_BACKGROUND, 0, dwColor );
+	UTSprite::PaintFrame( &m_sprCol, Vec2( worldRect.x - 18.0f * sin( fLocalTimeline * 0.2f ), worldRect.y ), ANM_MENUS0_SPR_BACKGROUND, 0, dwColor );
 	// chars back layer
-	UTSprite::PaintFrameEx( &m_sprCol, Vec2( worldRect.x + 18.0f * sin( fLocalTimeline * 0.2f ), worldRect.y ), ANM_MENUS0_SPR_BACKGROUND, 1, dwColor );
+	UTSprite::PaintFrame( &m_sprCol, Vec2( worldRect.x + 18.0f * sin( fLocalTimeline * 0.2f ), worldRect.y ), ANM_MENUS0_SPR_BACKGROUND, 1, dwColor );
 	// chars front layer
-	UTSprite::PaintFrameEx( &m_sprCol, Vec2( worldRect.x + 40.0f * sin( fLocalTimeline * 0.2f ), worldRect.y ), ANM_MENUS0_SPR_BACKGROUND, 2, dwColor );
+	UTSprite::PaintFrame( &m_sprCol, Vec2( worldRect.x + 40.0f * sin( fLocalTimeline * 0.2f ), worldRect.y ), ANM_MENUS0_SPR_BACKGROUND, 2, dwColor );
 	//particles
 	if ( bPaintParticles )
 	{
