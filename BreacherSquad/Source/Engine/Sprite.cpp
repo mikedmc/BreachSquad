@@ -352,7 +352,7 @@ void CSprite::paintFrameModule(CSpriteCollection *sprCol, float nX, float nY, in
 }
 
 
-void CSprite::paintFrameClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, RECTXYWH& clipRct, DWORD ncolor)
+void CSprite::paintFrameClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, RectXYWHi& clipRct, DWORD ncolor)
 {
 	assert(animID < sprCol->Animations.Count());
 	assert(frameID < sprCol->Animations[animID]->aframesNo);
@@ -410,7 +410,7 @@ void CSprite::paintFrameClipped(CSpriteCollection *sprCol, float nX, float nY, i
 	}
 }
 
-void CSprite::paintFrameModuleClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, RECTXYWH_F * clipRct, DWORD ncolor)
+void CSprite::paintFrameModuleClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, RectXYWH * clipRct, DWORD ncolor)
 {
 	assert(animID < sprCol->Animations.Count());
 	assert(frameID < sprCol->Animations[animID]->aframesNo);
@@ -425,11 +425,11 @@ void CSprite::paintFrameModuleClipped(CSpriteCollection *sprCol, float nX, float
 
 	if (clipRct != NULL)
 	{
-		RECTLTRB_F cliprect(clipRct->x, clipRct->y, clipRct->x + clipRct->w, clipRct->y + clipRct->h);
+		RectLTRB cliprect(clipRct->x, clipRct->y, clipRct->x + clipRct->w, clipRct->y + clipRct->h);
 		if ((cliprect.right <= cliprect.left) || (cliprect.bottom <= cliprect.top))
 			return;
 
-		RECTLTRB_F destrect;
+		RectLTRB destrect;
 
 		destrect.left = (nX + sprCol->FModules[fmoduleIdx]->ox);
 		destrect.top = (nY + sprCol->FModules[fmoduleIdx]->oy);
@@ -472,8 +472,8 @@ void CSprite::paintFrameModuleClipped(CSpriteCollection *sprCol, float nX, float
 
 void CSprite::paintFrameModuleTiled(CSpriteCollection *sprCol, float X, float Y, int animID, int frameID, int moduleID, DWORD ncolor, int W, int H)
 {
-	RECTXYWH sprrect = sprCol->GetAFrameBBox_real(animID, frameID);
-	RECTXYWH destrect = sprrect;
+	RectXYWHi sprrect = sprCol->GetAFrameBBox_real(animID, frameID);
+	RectXYWHi destrect = sprrect;
 	if (W >= 0)
 		destrect.w = W;
 	if (H >= 0)
@@ -484,7 +484,7 @@ void CSprite::paintFrameModuleTiled(CSpriteCollection *sprCol, float X, float Y,
 	int restW = destrect.w - (intsX * sprrect.w);
 	int restH = destrect.h - (intsY * sprrect.h);
 
-	RECTXYWH_F destrectRC(destrect.x + X, destrect.y + Y, destrect.w, destrect.h);
+	RectXYWH destrectRC(destrect.x + X, destrect.y + Y, destrect.w, destrect.h);
 
 	if ((intsX <= 0) && (intsY <= 0))
 	{
@@ -579,7 +579,7 @@ void CSprite::paint(CSpriteCollection *sprCol, RECT *cliprect)
 	}
 }
 
-void CSprite::paint(CSpriteCollection *sprCol, RECTXYWH *clipRct)
+void CSprite::paint(CSpriteCollection *sprCol, RectXYWHi *clipRct)
 {
 	RECT cliprect;
 	SetRect(&cliprect, clipRct->x, clipRct->y, clipRct->x + clipRct->w, clipRct->y + clipRct->h);
@@ -591,7 +591,7 @@ void CSprite::paint(CSpriteCollection *sprCol, RECTXYWH *clipRct)
 		int fmoduleIdx = sprCol->AFrames[aframeIdx]->fmodulesIdx[ii];
 		//face clip
 		RECT srcrect = sprCol->FModules[fmoduleIdx]->moduleRect;
-		RECTLTRB_F destrect;
+		RectLTRB destrect;
 
 		destrect.left = pos.x + sprCol->FModules[fmoduleIdx]->ox;
 		destrect.top = pos.y + sprCol->FModules[fmoduleIdx]->oy;
@@ -636,8 +636,8 @@ void CSprite::paintTiledOffset(CSpriteCollection *sprCol, int W, int H, int offs
 	if ((W == 0) || (H == 0))
 		return;
 
-	RECTXYWH sprrect = sprCol->GetAFrameBBox_real(animationIdx, currentFrame);
-	RECTXYWH destrect = sprrect;
+	RectXYWHi sprrect = sprCol->GetAFrameBBox_real(animationIdx, currentFrame);
+	RectXYWHi destrect = sprrect;
 
 	if (W > 0)
 		destrect.w = W;
@@ -685,8 +685,8 @@ void CSprite::paintTiledOffset(CSpriteCollection *sprCol, int W, int H, int offs
 
 void CSprite::paintTiled(CSpriteCollection *sprCol, int W, int H)
 {
-	RECTXYWH sprrect = sprCol->GetAFrameBBox_real(animationIdx, currentFrame);
-	RECTXYWH destrect = sprrect;
+	RectXYWHi sprrect = sprCol->GetAFrameBBox_real(animationIdx, currentFrame);
+	RectXYWHi destrect = sprrect;
 	if(W > 0)
 		destrect.w = W;
 	if(H > 0)
@@ -819,7 +819,7 @@ void CSprite::PaintStretchedXOriented(CSpriteCollection *sprManager, D3DXVECTOR2
 	float len = D3DXVec2Length(&vecdir);
 	if (len > 0.0f)
 	{
-		RECTXYWH bbox = sprManager->GetAFrameBBox_real(animationIdx, currentFrame);
+		RectXYWHi bbox = sprManager->GetAFrameBBox_real(animationIdx, currentFrame);
 		float fstretch = len / bbox.w;
 		float ang = -atan2(vecdir.x, vecdir.y);
 		D3DXMatrixScaling(&matr, fstretch, 1.0f, 1.0f);
@@ -840,7 +840,7 @@ void CSprite::PaintStretchedXOriented_texOverride(CSpriteCollection *sprManager,
 	float len = D3DXVec2Length(&vecdir);
 	if (len > 0.0f)
 	{
-		RECTXYWH bbox = sprManager->GetAFrameBBox_real(animationIdx, currentFrame);
+		RectXYWHi bbox = sprManager->GetAFrameBBox_real(animationIdx, currentFrame);
 		float fstretch = len / bbox.w;
 		float ang = -atan2(vecdir.x, vecdir.y);
 		D3DXMatrixScaling(&matr, fstretch, 1.0f, 1.0f);

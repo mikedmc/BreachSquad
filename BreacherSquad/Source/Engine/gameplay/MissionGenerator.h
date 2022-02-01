@@ -74,7 +74,7 @@ struct CAreaBlock
 class CPlacedArea
 {
 public:
-	RECTXYWH			AABB;				// world space rectangle in blocks positions
+	RectXYWHi			AABB;				// world space rectangle in blocks positions
 	CAreaSpecs			areaSpecs;
 	int					nInventoryIdx;		// index in inventory. Could replace areaSpecs...
 	std::vector<CAreaConnector> arrConnections;	// array of connections with neghboring areas
@@ -102,7 +102,7 @@ class CMissionGenerator
 {
 private:
 	CRandom						m_rand;				// RNG
-	RECTXYWH					m_levelAABB;		// level AABB after generation (in tiles)
+	RectXYWHi					m_levelAABB;		// level AABB after generation (in tiles)
 	
 
 public:

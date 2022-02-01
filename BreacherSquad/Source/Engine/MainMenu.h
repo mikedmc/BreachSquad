@@ -40,8 +40,8 @@ private:
 //variabile folosite intern de catre stari
 	int					m_nSelection;		//selectia curenta 
 	int					m_nSelectionOld;	//vechea selectie folosita la nivele
-	RECTXYWH_F			m_rectSel;			//dreptunghi selectie desenata
-	RECTXYWH_F			m_rectSelTarget;	//dreptunghi spre care tinde selectia (real)
+	RectXYWH			m_rectSel;			//dreptunghi selectie desenata
+	RectXYWH			m_rectSelTarget;	//dreptunghi spre care tinde selectia (real)
 	int					m_nSelRows, m_nSelColumns, m_nSelElements; //cate randuri, coloane si elemente totale avem (pentru paginare)
 	int					m_arrSelItems[256];	//used sometimes when we need special id-s in special order
 	int					m_nSelPage, m_nSelPagesCnt;	//pagina curenta si numar total de pagini
@@ -72,7 +72,7 @@ public:
 	void Paint();
 
 	// Paints the animated background
-	void PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles = false, bool bPaintTitle = false);
+	void PaintBackground(RectXYWH worldRect, DWORD dwColor, bool bPaintParticles = false, bool bPaintTitle = false);
 
 	void PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD dwColor);
 	void PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, float fAlpha);

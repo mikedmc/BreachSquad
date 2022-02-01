@@ -66,11 +66,11 @@ class CCtrlLayer;
 enum EControlType;
 
 namespace GUIUtils {
-	void DrawFrameF( CSpriteCollection *sprCol, int animIdx, RECTXYWH_F BBox, DWORD color = 0xffffffff, float fInflate = 0.0f );
-	void DrawFrame( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color = 0xffffffff, int nInflate = 0 );
-	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor = 0xffffffff );
-	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor = 0xffffffff );
-	void DrawWidebar( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color );
+	void DrawFrameF( CSpriteCollection *sprCol, int animIdx, RectXYWH BBox, DWORD color = 0xffffffff, float fInflate = 0.0f );
+	void DrawFrame( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color = 0xffffffff, int nInflate = 0 );
+	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor = 0xffffffff );
+	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor = 0xffffffff );
+	void DrawWidebar( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color );
 
 	/*
 	* \brief Deseneaza un buton (sau input box, slider, etc) dintr-o animatie cu 3 frames (capat, centru tiling, capat)
@@ -85,26 +85,26 @@ namespace GUIUtils {
 	* capetele butonului se deseneaza in interiorul bboxului. Capatul stanga trebuie aliniat in dreapta axei verticale in editor.
 	* \param nStartFrame - frame-ul de la care incep cele 3 frames utile (daca butonul are mai multe stari in aceeasi anim, cum e si normal)
 	*/
-	void DrawHTilingAnim( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RECTXYWH BBox, DWORD color = 0xffffffff );
+	void DrawHTilingAnim( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color = 0xffffffff );
 	/*
 	* \brief Deseneaza un buton (sau input box, slider, etc) dintr-o animatie cu 3 frames (capat, centru tiling, capat)
 	* capetele butonului se deseneaza in EXTERIORUL bboxului. Capatul stanga trebuie aliniat in stanga axei verticale in editor.
 	* \param nStartFrame - frame-ul de la care incep cele 3 frames utile (daca butonul are mai multe stari in aceeasi anim, cum e si normal)
 	*/
-	void DrawHTilingAnim_HeadsOutside( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RECTXYWH BBox, DWORD color = 0xffffffff );
+	void DrawHTilingAnim_HeadsOutside( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color = 0xffffffff );
 	/*
 	* Draws a progress bar from animation with 4 frames (left, tiling center, right, filler)
 	*/
-	void DrawProgress( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, float fPercentFull, DWORD color = 0xffffffff, int nTicks = 0 );
+	void DrawProgress( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, DWORD color = 0xffffffff, int nTicks = 0 );
 	/*
 	* Draws a progress bar from animation with 4 frames (left, tiling center, right, filler) - heads outside the BBox
 	*/
-	void DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, float fPercentFull, DWORD color = 0xffffffff, int nTicks = 0 );
+	void DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, DWORD color = 0xffffffff, int nTicks = 0 );
 	/*
 	* Draws a page selector control (colored dots)
 	* \param nAlign - 0 centered, -1 left, 1 right
 	*/
-	void DrawPageSelector( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, int nPagesCnt, int nSelectedPage, DWORD color = 0xffffffff, int nAlign = 0 );
+	void DrawPageSelector( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, int nPagesCnt, int nSelectedPage, DWORD color = 0xffffffff, int nAlign = 0 );
 }
 
 class CControl
@@ -118,7 +118,7 @@ public:
 	EControlType		type;				// Type of control CCTRL_TYPE_...
 	CVariantCollection	paramsDict;			// List of controls params. Don't set directly! Use SetParamValue
 	CCtrlLayer*			layer;				// Pointer to parent layer
-	RECTXYWH			bbox;				// Don't set directly! Use SetParamValue(x,y,z,w)
+	RectXYWHi			bbox;				// Don't set directly! Use SetParamValue(x,y,z,w)
 	UINT32				statusFlags;		// CCTRL_STATUS_FLAG_...
 	float				fDisabledPercent;	// disabled controls can have a disabling animation
 	bool				bDisabled;
@@ -142,7 +142,7 @@ public:
 	// Handles input commands
 	bool				HandleCommand(ECtrlMgrCommandType cmd, int nSDLinstanceID = -1);
 	// returns control bbox
-	RECTXYWH			GetBBox();
+	RectXYWHi			GetBBox();
 	// (only for debug to show errors)
 	void				drawDebugText(int x, int y, const wchar_t* text, DWORD color = 0xffff8888);
 };
@@ -204,7 +204,7 @@ private:
 public:
 	float				fLocalTimeline;				// Local timeline
 	CCameraTransform*	m_pCamera;					// Camera used for painting
-	RECTXYWH_F			m_cameraScreenRect;			// Current camera screen rectangle
+	RectXYWH			m_cameraScreenRect;			// Current camera screen rectangle
 	CArray<CCtrlLayer*> layersDefinitions;			// Contains layer definitions
 	CArray<CCtrlLayer*> Layers;						// Contains actual cloned layers
 	CSpriteCollection	m_sprCol;					// Sprite collection for controls sprites

@@ -53,7 +53,7 @@ CTile* CLevelArea::GetTile(int xTL, int yTL)
 	return &tiles[xTL - AABBbounds_TL.x][yTL - AABBbounds_TL.y];
 }
 
-bool CLevelArea::UpdateVisibility(RECTXYWH_F camRect)
+bool CLevelArea::UpdateVisibility(RectXYWH camRect)
 {
 	CAABB camAABB(camRect);
 	if (AABBbounds.Intersects(camAABB))
@@ -276,12 +276,12 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 
 
 
-int CLevelArea::GetTilesCollisionBoxes(RECTXYXY srcBoxTL, CAABB* ret_arrAABBs, int nArrCapacity)
+int CLevelArea::GetTilesCollisionBoxes(RectXYXYi srcBoxTL, CAABB* ret_arrAABBs, int nArrCapacity)
 {
 	_ASSERT(ret_arrAABBs != nullptr);
 	int nAdded = 0;
 	// clamp src box to valid area
-	RECTXYXY box = srcBoxTL;
+	RectXYXYi box = srcBoxTL;
 	if (box.x1 < AABBbounds_TL.x) box.x1 = AABBbounds_TL.x;
 	if (box.y1 < AABBbounds_TL.y) box.y1 = AABBbounds_TL.y;
 	if (box.x2 > AABBbounds_TL.x + AABBbounds_TL.w - 1) box.x2 = AABBbounds_TL.x + AABBbounds_TL.w - 1;
@@ -365,7 +365,7 @@ int CLevelArea::GetPropsTouchingBox(CAABB srcBox, CArray<CProp*>& ret_arrProps, 
 	return nAdded;
 }
 
-int CLevelArea::GetTilesByFlag(RECTXYXY srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity)
+int CLevelArea::GetTilesByFlag(RectXYXYi srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity)
 {
 	return 0;
 	/*

@@ -85,9 +85,9 @@ public:
 	WCHAR		strLoadedFile[MAX_PATH];
 
 	int			moduleNo;
-	RECTLTRB_F*	moduleUV;		// UV coords 
-	RECTLTRB_F* moduleRect;		// default position and size from editor
-	RECTXYWH*	frameBBox;
+	RectLTRB*	moduleUV;		// UV coords 
+	RectLTRB* moduleRect;		// default position and size from editor
+	RectXYWHi*	frameBBox;
 
 	CStringHash			shFontName;
 public:						
@@ -114,12 +114,12 @@ public:
 	int DrawStringScaleW(CStringDesc *strDesc, int X, int Y, int maxW, UINT16 Flags = FONTFLAG_ANCHOR_BOTTOMLEFT, DWORD Color = 0xffffffff);
 	int DrawStringScaleW(int strIdx, int X, int Y, int maxW, UINT16 Flags = FONTFLAG_ANCHOR_BOTTOMLEFT, DWORD Color = 0xffffffff);
 	
-	int DrawStringScaleW(CStringDesc *strDesc, RECTXYWH rect, UINT16 Flags = FONTFLAG_ANCHOR_BOTTOMLEFT, DWORD Color = 0xffffffff);
-	int DrawStringScaleW(int strIdx, RECTXYWH rect, UINT16 Flags = FONTFLAG_ANCHOR_BOTTOMLEFT, DWORD Color = 0xffffffff);
+	int DrawStringScaleW(CStringDesc *strDesc, RectXYWHi rect, UINT16 Flags = FONTFLAG_ANCHOR_BOTTOMLEFT, DWORD Color = 0xffffffff);
+	int DrawStringScaleW(int strIdx, RectXYWHi rect, UINT16 Flags = FONTFLAG_ANCHOR_BOTTOMLEFT, DWORD Color = 0xffffffff);
 
 	int DrawString(int strIdx, float X, float Y, UINT16 Flags = FONTFLAG_ANCHOR_BOTTOMLEFT, DWORD Color = 0xffffffff);
-	void DrawString(int strIdx, RECTXYWH rect, UINT16 Flags = FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, DWORD Color = 0xffffffff);
-	void DrawString(CStringDesc *strDesc, RECTXYWH rect, UINT16 Flags = FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, DWORD Color = 0xffffffff);
+	void DrawString(int strIdx, RectXYWHi rect, UINT16 Flags = FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, DWORD Color = 0xffffffff);
+	void DrawString(CStringDesc *strDesc, RectXYWHi rect, UINT16 Flags = FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, DWORD Color = 0xffffffff);
 	int DrawString( CStringDesc *strDesc, float X, float Y, UINT16 Flags = FONTFLAG_ANCHOR_BOTTOMLEFT, DWORD Color = 0xffffffff );
 	//folosit ca sa poti face scroll pe Y in dreptunghiul rect
 	//face automat WRAP la text
@@ -133,7 +133,7 @@ public:
 	SIZEWH MeasureString(int strIdx, int maxWidth);
 	
 	int DrawHString(UINT32 strHash, int X, int Y, UINT16 Flags = FONTFLAG_ANCHOR_BOTTOMLEFT, DWORD Color = 0xffffffff);
-	void DrawHString(UINT32 strHash, RECTXYWH rect, UINT16 Flags = FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, DWORD Color = 0xffffffff);
+	void DrawHString(UINT32 strHash, RectXYWHi rect, UINT16 Flags = FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, DWORD Color = 0xffffffff);
 	//void DrawHStringOffsetY(UINT32 strHash, RECTXYWH rect, int offsetY, UINT16 Flags = FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, DWORD Color = 0xffffffff);
 	SIZEWH MeasureHString(UINT32 strHash);
 	SIZEWH MeasureHString(UINT32 strHash, int maxWidth);

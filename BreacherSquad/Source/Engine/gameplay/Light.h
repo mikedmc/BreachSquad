@@ -44,7 +44,7 @@ public:
 
 	Vec3				lCorners[4];				// screen space light rectangle (clockwise) relative to light (Z must be 0). Min rect that fits 2d projection of light. Used to accelerate creation of light mesh.
 	Vec3				vnDir;						// normalized direction of light (necessary for some lights)
-	RECTLTRB_F			lTexRect;					// light spot source texture when necessary
+	RectLTRB			lTexRect;					// light spot source texture when necessary
 	float				fRadius;					// radius of light where necessary
 	bool				castShadows;
 	float				fIntensity;					// light intensity

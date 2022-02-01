@@ -15,7 +15,7 @@ public:
 	CAABB() :vHalfSize(0.0f, 0.0f), vCenter(0.0f, 0.0f), vMin(0.0f, 0.0f), vSize(0.0f, 0.0f), vMax(0.0f, 0.0f)
 	{}
 
-	CAABB(RECTXYWH_F &srcRectF)
+	CAABB(RectXYWH &srcRectF)
 	{
 		Set(srcRectF);
 	}
@@ -30,8 +30,8 @@ public:
 
 	void				Set(float xmin, float ymin, float xmax, float ymax);
 	void				Set(Vec2 min, Vec2 max);
-	void				Set(RECTXYWH_F rect);
-	void				Set(RECTLTRB_F rect);
+	void				Set(RectXYWH rect);
+	void				Set(RectLTRB rect);
 	void				Set(CAABB* sourceAABB, Vec2 vOffset);
 	// Correctly sets min/max by sorting the input points
 	void				Set_Corrected(Vec2 pt1, Vec2 pt2);		
@@ -54,9 +54,9 @@ public:
 	//flips AABB around origin
 	void				Flip(bool flipX, bool flipY);
 	//returns AABB as RECTXYWH
-	RECTXYWH			to_RECTXYWH();
+	RectXYWHi			to_RECTXYWH();
 	//returns AABB as RECTXYWH_F
-	RECTXYWH_F			to_RECTXYWH_F();
+	RectXYWH			to_RECTXYWH_F();
 };
 
 namespace AABB {

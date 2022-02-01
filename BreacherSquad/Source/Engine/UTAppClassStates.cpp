@@ -262,13 +262,13 @@ void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite
 	CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(pDevice, &g_matIdentity);
 
-	RECTXYWH_F scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
-	RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
+	RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
+	RectXYWH worldrect = UTApp().g_rect360hWorld;
 
 	//fonts loaded so write "loading" 
 	if ((GameState::substate > 3) && (GameState::substate < 6))
 	{
-		RECTXYWH rct(scrrect.x + 25, scrrect.CenterY() - 10, scrrect.w - 50, 15);
+		RectXYWHi rct(scrrect.x + 25, scrrect.CenterY() - 10, scrrect.w - 50, 15);
 		g_font6ns1->DrawString(STR_LOADING, rct, FONTFLAG_ANCHOR_TOPCENTER, 0xff186582);
 	}
 
@@ -373,8 +373,8 @@ void CApplication::App_PaintState_Developer(LPDIRECT3DDEVICE9 pDevice, ID3DXSpri
 	CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(pDevice, &g_matIdentity);
 
-	RECTXYWH_F scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
-	RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
+	RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
+	RectXYWH worldrect = UTApp().g_rect360hWorld;
 	RECT src;
 	//logo
 	CTexNode* pTN = g_texManager.GetTextureByIndex( 0 );

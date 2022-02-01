@@ -176,7 +176,7 @@ OPRESULT CTileBlockMesh::BuildBuffers(Vec2i vBlockPos_TL, CTile** map, SIZEWH ma
 				if (tl->nShadowFrame < 0)
 					continue;
 				// get shadow tex coords
- 				RECTLTRB_F texrect = pLightsSpr->GetModuleRect_TexCoords(ANM_LIGHTS_SPR_SHADOWS, tl->nShadowFrame, 0);
+ 				RectLTRB texrect = pLightsSpr->GetModuleRect_TexCoords(ANM_LIGHTS_SPR_SHADOWS, tl->nShadowFrame, 0);
 				// add geometry (Clockwise)
 				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
 					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
@@ -285,7 +285,7 @@ OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2
 	return K_OP_OK;
 }
 
-int CTileBlockMeshManager::UpdateVisibility(RECTXYWH_F camRect)
+int CTileBlockMeshManager::UpdateVisibility(RectXYWH camRect)
 {
 	arrVisible.Clear();
 	for (int kk = 0; kk < arrBlocks.GetSize(); kk++)

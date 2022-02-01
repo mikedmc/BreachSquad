@@ -84,13 +84,13 @@ public:
 	CBufferedPainter		m_bufferedPainter;				// used when drawing dynamic meshes
 
 	int						tileW, tileH;					// size of tiles
-	RECTXYWH_F				m_levelAABB;					// level AABB in pixels - grows when adding areas
-	RECTXYWH				m_levelAABB_TL;					// level AABB in tiles  - grows when adding areas
+	RectXYWH				m_levelAABB;					// level AABB in pixels - grows when adding areas
+	RectXYWHi				m_levelAABB_TL;					// level AABB in tiles  - grows when adding areas
 	CTexNode*				m_pTexTilesColor;				// tileset base texture 
 	CTexNode*				m_pTexTilesNorm;				// tileset normals texture 
 	Vec2					m_vLevelOrigin;					// level origin for the editor (usually around start location)
 
-	vector<RECTXYWH>		m_arrDirtyRectsTL;				// tiles that need updating
+	vector<RectXYWHi>		m_arrDirtyRectsTL;				// tiles that need updating
 	CArray<CLevelArea*>		m_arrAreas;				// loaded areas
 	// Transforms mouse coordinates from screen space to game world (necessary for network play)
 	bool					NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue);
@@ -101,7 +101,7 @@ public:
 	// Updates the tiles in the dirty rects (should return if changes were made)
 	void					UpdateDirtyRects();
 	// Updates areas visibility and returns number of visible areas
-	int						Areas_UpdateVisibility(RECTXYWH_F camRect);
+	int						Areas_UpdateVisibility(RectXYWH camRect);
 	// Paints tile layer for visible areas
 	OPRESULT				Areas_PaintLayer(eAreaLayer layerIdx);
 	// Returns array of areas that intersect aabb
@@ -113,7 +113,7 @@ public:
 	// Adds all the tiles in srcRectTL (in tile coords) from all overlapped areas to arrTiles[x + y * w]. 
 	// srcRectTL will be part of the level bbox in tile coords. Make sure arrTiles is large enough. Array will be cleared inside the function.
 	// arrTiles is an array of CTile pointers
-	void					Areas_GetTilesSnapshot(RECTXYWH srcRectTL, CTile** arrTiles, int arrCapacity);
+	void					Areas_GetTilesSnapshot(RectXYWHi srcRectTL, CTile** arrTiles, int arrCapacity);
 
 	///--- LEVEL DEFINES (generic data used ingame) ---
 	vector<CScriptAction>	m_arrActionTemplates;			// list of all possible actions ingame (they get copied on iActives)

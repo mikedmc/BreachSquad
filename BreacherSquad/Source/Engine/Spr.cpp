@@ -276,7 +276,7 @@ void UTSprite::PaintFModule(CSpriteCollection *sprCol, Vec2 vPos, int animID, in
 }
 
 
-void UTSprite::PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, RECTLTRB_F& clip, DWORD ncolor )
+void UTSprite::PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, RectLTRB& clip, DWORD ncolor )
 {
 	int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameIdx ];
 	for ( int ii = 0; ii < sprCol->AFrames[ aframeIdx ]->fmodulesNo; ii++ )
@@ -284,7 +284,7 @@ void UTSprite::PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY,
 		int fmoduleIdx = sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ ii ];
 		scFModule* mod = sprCol->FModules[ fmoduleIdx ];
 
-		RECTLTRB_F destrect = mod->moduleRectOff;
+		RectLTRB destrect = mod->moduleRectOff;
 		destrect.Move( nX, nY );
 		// optimization: if contained, paint in full
 		if ( clip.Contains( destrect ) )
@@ -296,16 +296,16 @@ void UTSprite::PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY,
 			continue;
 		}
 		// compute intersection
-		RECTLTRB_F intersection;
-		bool bIntersecting = RECTLTRB_F::Intersection( destrect, clip, intersection );
+		RectLTRB intersection;
+		bool bIntersecting = RectLTRB::Intersection( destrect, clip, intersection );
 		if ( !bIntersecting )
 			continue;
 		// compute texture coords by percenting coords (barycentric)
 		Vec2 posCornerULPerc( ( intersection.left - destrect.left ) / destrect.Width(), ( intersection.top - destrect.top ) / destrect.Height() );
 		Vec2 posCornerDRPerc( ( intersection.right - destrect.left ) / destrect.Width(), ( intersection.bottom - destrect.top ) / destrect.Height() );
-		RECTLTRB_F texrect = mod->texRect;
+		RectLTRB texrect = mod->texRect;
 		Vec2 vTexSz( texrect.Width(), texrect.Height() );
-		RECTLTRB_F finaltex( texrect.left + posCornerULPerc.x * vTexSz.x, texrect.top + posCornerULPerc.y * vTexSz.y,
+		RectLTRB finaltex( texrect.left + posCornerULPerc.x * vTexSz.x, texrect.top + posCornerULPerc.y * vTexSz.y,
 			texrect.left + posCornerDRPerc.x * vTexSz.x, texrect.top + posCornerDRPerc.y * vTexSz.y );
 		// paints without offset because the offset is already in the clipped rectangle
 		__Painter().Draw( mod->pImg->pTex,
@@ -315,14 +315,14 @@ void UTSprite::PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY,
 	}
 }
 
-void UTSprite::PaintFModuleClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, int moduleIdx, RECTLTRB_F& clip, DWORD ncolor /*= 0xffffffff*/ )
+void UTSprite::PaintFModuleClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, int moduleIdx, RectLTRB& clip, DWORD ncolor /*= 0xffffffff*/ )
 {
 	int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameIdx ];
 
 	int fmoduleIdx = sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ moduleIdx ];
 	scFModule* mod = sprCol->FModules[ fmoduleIdx ];
 
-	RECTLTRB_F destrect = mod->moduleRectOff;
+	RectLTRB destrect = mod->moduleRectOff;
 	destrect.Move( nX, nY );
 	// optimization: if contained, paint in full
 	if ( clip.Contains( destrect ) )
@@ -334,16 +334,16 @@ void UTSprite::PaintFModuleClipped( CSpriteCollection *sprCol, float nX, float n
 		return;
 	}
 	// compute intersection
-	RECTLTRB_F intersection;
-	bool bIntersecting = RECTLTRB_F::Intersection( destrect, clip, intersection );
+	RectLTRB intersection;
+	bool bIntersecting = RectLTRB::Intersection( destrect, clip, intersection );
 	if ( !bIntersecting )
 		return;
 	// compute texture coords by percenting coords (barycentric)
 	Vec2 posCornerULPerc( ( intersection.left - destrect.left ) / destrect.Width(), ( intersection.top - destrect.top ) / destrect.Height() );
 	Vec2 posCornerDRPerc( ( intersection.right - destrect.left ) / destrect.Width(), ( intersection.bottom - destrect.top ) / destrect.Height() );
-	RECTLTRB_F texrect = mod->texRect;
+	RectLTRB texrect = mod->texRect;
 	Vec2 vTexSz( texrect.Width(), texrect.Height() );
-	RECTLTRB_F finaltex( texrect.left + posCornerULPerc.x * vTexSz.x, texrect.top + posCornerULPerc.y * vTexSz.y,
+	RectLTRB finaltex( texrect.left + posCornerULPerc.x * vTexSz.x, texrect.top + posCornerULPerc.y * vTexSz.y,
 		texrect.left + posCornerDRPerc.x * vTexSz.x, texrect.top + posCornerDRPerc.y * vTexSz.y );
 	// paints without offset because the offset is already in the clipped rectangle
 	__Painter().Draw( mod->pImg->pTex,
@@ -359,7 +359,7 @@ void UTSprite::PaintFModuleStretched( CSpriteCollection *sprCol, Vec2 vPos, int 
 
 	int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameIdx ];
 	scFModule* mod = sprCol->FModules[ sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ moduleIdx ] ];
-	RECTLTRB_F destrect = mod->moduleRectOff;
+	RectLTRB destrect = mod->moduleRectOff;
 
 	if ( W > 0.0f )
 		destrect.right = destrect.left + W;

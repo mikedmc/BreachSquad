@@ -11,7 +11,7 @@ class CTileBlockMesh
 public:
 	CBufferedPainterQuads		m_Painter;
 
-	RECTXYWH					m_mapAreaTL;				// map zone that this block renders
+	RectXYWHi					m_mapAreaTL;				// map zone that this block renders
 	CAABB						m_bbox;						// BBOX in world coords
 
 	int							m_arrMeshIdx[K_TBM_MAX_LAYERS]{};	// Array of mesh indexes per layer, or -1 for empty layers
@@ -50,7 +50,7 @@ public:
 
 	// Creates list of visible blocks. camRect is the XY plane of the AABB of the camera frustum.
 	// Must be called before PaintLayer.
-	int							UpdateVisibility(RECTXYWH_F camRect);
+	int							UpdateVisibility(RectXYWH camRect);
 
 	// Paints tile layer for visible buffers (use idx from eAreaLayer)
 	OPRESULT					PaintLayer(int layerIdx);

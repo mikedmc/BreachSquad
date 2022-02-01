@@ -30,14 +30,14 @@ void CMenus::Update( float dTime )
 
 void CMenus::Paint()
 {
-	RECTXYWH_F camrect = UTApp().g_camScreen.GetCamWorldAABB();
+	RectXYWH camrect = UTApp().g_camScreen.GetCamWorldAABB();
 
 	PaintBackground( camrect, 0xffffffff, true, true );
 
 	__Painter().Flush();
 }
 
-void CMenus::PaintBackground( RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles /*= false*/, bool bPaintTitle /*= false*/ )
+void CMenus::PaintBackground( RectXYWH worldRect, DWORD dwColor, bool bPaintParticles /*= false*/, bool bPaintTitle /*= false*/ )
 {
 	const Vec2 vLogoPos( 110.0f, 60.0f );
 	//background

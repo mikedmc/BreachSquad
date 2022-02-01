@@ -602,8 +602,8 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 
 void CLevel::UpdateDoofers(float dTime)
 {
-	RECTXYWH_F camrect = m_camLevelToRT.GetCamWorldAABB();
-	RECTXYWH_F camrect_larger = camrect;
+	RectXYWH camrect = m_camLevelToRT.GetCamWorldAABB();
+	RectXYWH camrect_larger = camrect;
 	camrect_larger.Inflate(2.0f * K_TILE_SIZE);
 
 	CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.pListUsed.m_pNext;

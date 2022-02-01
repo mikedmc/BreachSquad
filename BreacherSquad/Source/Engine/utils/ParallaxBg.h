@@ -22,4 +22,4 @@
 #define K_LVL_BK_AFRAMESHIFT_YBYTIME	25
 #define K_LVL_BK_AFRAMESHIFT_YBYTIMENEG 31
 
-void PaintParallaxBackground(CSpriteCollection* m_sprBack, int m_BackAnimIdx, RECTXYWH_F camRect, D3DXVECTOR2 vLevelOrigin, double fLocalTimeline);
+void PaintParallaxBackground(CSpriteCollection* m_sprBack, int m_BackAnimIdx, RectXYWH camRect, D3DXVECTOR2 vLevelOrigin, double fLocalTimeline);

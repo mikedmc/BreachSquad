@@ -1779,7 +1779,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		{
 			g_pGameSprite->Flush();
 			CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
-			RECTXYWH_F camrectchat = UTApp().g_camScreen.GetCamWorldAABB();
+			RectXYWH camrectchat = UTApp().g_camScreen.GetCamWorldAABB();
 
 			Vec2 vIgmIntSz = UTApp().g_cam360hScreen.WorldToScreen(Vec2(0.0f, 56.0f));
 			g_ChatWnd.Paint(Vec2(camrectchat.x + 5.0f, camrectchat.Bottom() - vIgmIntSz.y));
@@ -1801,7 +1801,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 		//real screen space
 		CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
-		RECTXYWH_F camrect = UTApp().g_camScreen.GetCamWorldAABB();
+		RectXYWH camrect = UTApp().g_camScreen.GetCamWorldAABB();
 
 		//--- TRANSITIONS ---		
 		g_pGameSprite->Flush();
@@ -1938,7 +1938,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				if ( GameState::state == GAME_STATE_GAME)
 				{
 					//ImGui::Text("Sortables: %d", g_level.m_visibleList.arrSortedItems.nCount);
-					RECTXYWH_F		camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
+					RectXYWH		camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
 					ImGui::Text("Cam: X%.4f Y%.4f", FLOAT_FRAC(camrect.x), FLOAT_FRAC(camrect.y));
 				}
 				//ImGui::Text("Sprites: %d", UTPainter().stats_sprites);

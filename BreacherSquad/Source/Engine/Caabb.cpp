@@ -26,7 +26,7 @@ void CAABB::Set(Vec2 min, Vec2 max)
 	vCenter = vMin + vHalfSize;
 }
 
-void CAABB::Set(RECTXYWH_F rect)
+void CAABB::Set(RectXYWH rect)
 {
 	vMin = Vec2(rect.x, rect.y); vMax = Vec2(rect.x + rect.w, rect.y + rect.h);
 	vSize = vMax - vMin;
@@ -34,7 +34,7 @@ void CAABB::Set(RECTXYWH_F rect)
 	vCenter = vMin + vHalfSize;
 }
 
-void CAABB::Set(RECTLTRB_F rect)
+void CAABB::Set(RectLTRB rect)
 {
 	vMin = Vec2(rect.left, rect.top); vMax = Vec2(rect.right, rect.bottom);
 	vSize = vMax - vMin;
@@ -87,16 +87,16 @@ void CAABB::Flip(bool flipX, bool flipY)
 	Set_Corrected(vMin, vMax);
 }
 
-RECTXYWH CAABB::to_RECTXYWH()
+RectXYWHi CAABB::to_RECTXYWH()
 {
-	RECTXYWH retval;
+	RectXYWHi retval;
 	retval.Set(vMin.x, vMin.y, vSize.x, vSize.y);
 	return retval;
 }
 
-RECTXYWH_F CAABB::to_RECTXYWH_F()
+RectXYWH CAABB::to_RECTXYWH_F()
 {
-	RECTXYWH_F retval;
+	RectXYWH retval;
 	retval.Set(vMin.x, vMin.y, vSize.x, vSize.y);
 	return retval;
 }

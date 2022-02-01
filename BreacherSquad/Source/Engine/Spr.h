@@ -82,8 +82,8 @@ namespace UTSprite
 	// Paints single module
 	void PaintFModule( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff );
 
-	void PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, RECTLTRB_F& clip, DWORD ncolor = 0xffffffff );
-	void PaintFModuleClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, int moduleIdx, RECTLTRB_F& clip, DWORD ncolor = 0xffffffff );
+	void PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, RectLTRB& clip, DWORD ncolor = 0xffffffff );
+	void PaintFModuleClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, int moduleIdx, RectLTRB& clip, DWORD ncolor = 0xffffffff );
 	// Stretches the module texture over the resized area replacing width and height with W and H (W/h < 0.0f means width and height stay unchanged)
 	void PaintFModuleStretched( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff, float W = -1.0f, float H = -1.0f );
 

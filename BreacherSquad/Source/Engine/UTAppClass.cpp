@@ -90,13 +90,13 @@ CApplication::CApplication()
 #endif
 
 	// keep real screen and virtual screen sizes
-	g_rectRender = RECTXYWH_F(0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h);
+	g_rectRender = RectXYWH(0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h);
 	g_nPixelSizePP = 2;
 	g_rectRenderPP = g_rectRender;
-	g_rectScreen = RECTXYWH_F(0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h);
-	g_rectRT = RECTXYWH_F(0.0f, 0.0f, K_GAME_WIDTH * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F);
-	g_rect360hWorld = RECTXYWH_F(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * K_GAME_HEIGHT), K_GAME_HEIGHT);
-	g_rect480hWorld = RECTXYWH_F(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * 480.0f), 480.0f);
+	g_rectScreen = RectXYWH(0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h);
+	g_rectRT = RectXYWH(0.0f, 0.0f, K_GAME_WIDTH * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F);
+	g_rect360hWorld = RectXYWH(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * K_GAME_HEIGHT), K_GAME_HEIGHT);
+	g_rect480hWorld = RectXYWH(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * 480.0f), 480.0f);
 	D3DXMatrixOrthoOffCenterLH(&g_matProj, g_rectRender.x + 0.5f, g_rectRender.w + 0.5f, g_rectRender.h + 0.5f, g_rectRender.y + 0.5f, 0.0f, 1.0f);
 	//clear all resolutions
 	g_arrResolutions.RemoveAll();
@@ -234,7 +234,7 @@ void CApplication::Init()
 
 void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 {
-	g_rectScreen = RECTXYWH_F(0.0f, 0.0f, (float)newSizeX, (float)newSizeY);
+	g_rectScreen = RectXYWH(0.0f, 0.0f, (float)newSizeX, (float)newSizeY);
 	// limit aspect ratio between min and max (4/3 si 16/9)
 	float fAspectReal = (g_rectScreen.w / g_rectScreen.h);
 	float fAspect = LIMIT(fAspectReal, K_WINDOW_ASPECT_RATIO_MIN, K_WINDOW_ASPECT_RATIO_MAX);
@@ -285,12 +285,12 @@ void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 	g_letterbox.w = (float)(newSizeX - szRender.w) / 2.0f;
 	g_letterbox.h = (float)(newSizeY - szRender.h) / 2.0f;
 
-	g_rectRender = RECTXYWH_F(g_letterbox.w, g_letterbox.h, szRender.w, szRender.h);
-	g_rectRenderPP = RECTXYWH_F( floor( ( newSizeX - szRenderPP.w ) / 2.0f ), floor( ( newSizeY - szRenderPP.h ) / 2.0f ), szRenderPP.w, szRenderPP.h );
+	g_rectRender = RectXYWH(g_letterbox.w, g_letterbox.h, szRender.w, szRender.h);
+	g_rectRenderPP = RectXYWH( floor( ( newSizeX - szRenderPP.w ) / 2.0f ), floor( ( newSizeY - szRenderPP.h ) / 2.0f ), szRenderPP.w, szRenderPP.h );
 
-	g_rect360hWorld = RECTXYWH_F(0.0f, 0.0f, (fAspect * K_GAME_HEIGHT), K_GAME_HEIGHT);
-	g_rect480hWorld = RECTXYWH_F(0.0f, 0.0f, (fAspect * 480.0f), 480.0f);
-	g_rectRT = RECTXYWH_F( 0.0f, 0.0f, K_GAME_WIDTH * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F );
+	g_rect360hWorld = RectXYWH(0.0f, 0.0f, (fAspect * K_GAME_HEIGHT), K_GAME_HEIGHT);
+	g_rect480hWorld = RectXYWH(0.0f, 0.0f, (fAspect * 480.0f), 480.0f);
+	g_rectRT = RectXYWH( 0.0f, 0.0f, K_GAME_WIDTH * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F );
 	D3DXMatrixOrthoOffCenterLH(&g_matProj, g_rectScreen.x + 0.5f, g_rectScreen.w + 0.5f, g_rectScreen.h + 0.5f, g_rectScreen.y + 0.5f, 0.0f, 1.0f);
 
 	g_camScreen.SetWorldBounds(g_rectScreen, true, K_CAMTRANS_AXIS_V, g_rectScreen.h, g_rectScreen.h);

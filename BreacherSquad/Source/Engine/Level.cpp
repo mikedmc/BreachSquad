@@ -601,8 +601,8 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 		obj->sprite.frameIdx = m_rand.RandInt(m_sprProps.GetAFramesCnt(obj->sprite.animIdx));
 	}
 	//bbox
-	RECTXYWH bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
-	RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
+	RectXYWHi bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
+	RectXYWHi objbox = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
 	obj->bbox_ini.Set(objbox);
 	obj->bbox_floor_ini.Set(bbox_set);
 	//daca e flipat pe X flipez si bbox. Pe Y nu e cazul pt ca se pastreaza in acelasi bbox in paint
@@ -860,7 +860,7 @@ void CLevel::UpdateDirtyRects()
 				continue;
 			// take border tiles into account:
 			// clamp to smaller size because we check neighbours
-			RECTXYWH lrect = rect;
+			RectXYWHi lrect = rect;
 //			area->AABBbounds_TL.Intersects(
 			// clamp and bring rectangle to local space
 			lrect.IntersectWith(area->AABBbounds_TL);
@@ -958,7 +958,7 @@ void CLevel::UpdateDirtyRects()
 	m_arrDirtyRectsTL.clear();
 }
 
-int CLevel::Areas_UpdateVisibility(RECTXYWH_F camRect)
+int CLevel::Areas_UpdateVisibility(RectXYWH camRect)
 {
 	int nVisible = 0;
 	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)
@@ -1014,7 +1014,7 @@ CLevelArea* CLevel::Areas_GetByID(UINT32 nID)
 	return nullptr;
 }
 
-void CLevel::Areas_GetTilesSnapshot(RECTXYWH srcRectTL, CTile** arrTiles, int arrCapacity)
+void CLevel::Areas_GetTilesSnapshot(RectXYWHi srcRectTL, CTile** arrTiles, int arrCapacity)
 {
 	_ASSERT(arrTiles != nullptr);
 	if ((srcRectTL.w * srcRectTL.h) > arrCapacity)
@@ -1029,7 +1029,7 @@ void CLevel::Areas_GetTilesSnapshot(RECTXYWH srcRectTL, CTile** arrTiles, int ar
 	for (int ii = 0; ii < m_arrAreas.Count(); ii++)
 	{
 		CLevelArea* area = m_arrAreas[ii];
-		RECTXYWH rectloc = area->AABBbounds_TL;
+		RectXYWHi rectloc = area->AABBbounds_TL;
 		rectloc.IntersectWith(srcRectTL);
 		if ((rectloc.w <= 0) || (rectloc.h <= 0))
 			continue;
@@ -2019,7 +2019,7 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 			if (prop->sprLight.animationIdx >= 0)
 			{
 				//Creez forma luminii (mesh-ul)
-				RECTLTRB_F realrect = m_sprLights.GetAFrameBBox_real(prop->sprLight.animationIdx, 0);
+				RectLTRB realrect = m_sprLights.GetAFrameBBox_real(prop->sprLight.animationIdx, 0);
 				//Scalez dreptunghi lumina
 				if (prop->fLightScaling != 1.0f)
 				{
@@ -2056,7 +2056,7 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 				float fOrigAlpha = DW_GETFALPHA(prop->sprLight.color);
 				vul.color = vur.color = vdl.color = vdr.color = DW_COLORALPHA(prop->sprLight.color, fOrigAlpha * alpha);
 				//setez coordonate textura spot
-				RECTLTRB_F lTexRect = m_sprLights.GetModuleRect_TexCoords(prop->sprLight.animationIdx, 0, 0);
+				RectLTRB lTexRect = m_sprLights.GetModuleRect_TexCoords(prop->sprLight.animationIdx, 0, 0);
 				//Coord de mapare pe RTT (tex2) se seteaza din shader
 				vul.tex1 = Vec4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
 				vur.tex1 = Vec4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
@@ -2158,7 +2158,7 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 				Vec2 texul = wbb.vMin;
 				Vec2 texdr = wbb.vMax;
 
-				RECTLTRB_F lTexRect(texul.x, texul.y, texdr.x, texdr.y);
+				RectLTRB lTexRect(texul.x, texul.y, texdr.x, texdr.y);
 				//Coord de mapare pe RTT (tex2) se seteaza din shader
 				vul.tex1 = Vec4(lTexRect.left, lTexRect.top, 0.0f, 0.0f);
 				vur.tex1 = Vec4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
@@ -2789,7 +2789,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 		//la obiectele animate luam bbox-ul la fiecare frame
 		if ((prop->sprite.animStatus == ANIM_STATUS_PLAYING_FRAME_ADVANCED) || (prop->sprite.animStatus == ANIM_STATUS_FRAMELOCK))
 		{
-			RECTXYWH frrect = m_sprProps.GetAFrameBBox(prop->sprite.animIdx, prop->sprite.frameIdx);
+			RectXYWHi frrect = m_sprProps.GetAFrameBBox(prop->sprite.animIdx, prop->sprite.frameIdx);
 			prop->bbox_ini.Set(frrect);
 			//nu pastreaza acelasi bbox la flip deci flipam bboxul
 			/*
@@ -4797,7 +4797,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		//daca am mai multi players intra mereu sau daca playerul curent este suspended (in caz ca celalalt a murit)
 		if ((m_nPlayersActive > 1) || (actor->nSuspendedFlags & K_LVL_SUSPENDFLAG_OUTSIDE_SCREEN))
 		{
-			RECTXYWH_F camrect = m_camLevelToRT.GetCamWorldAABB();
+			RectXYWH camrect = m_camLevelToRT.GetCamWorldAABB();
 			CAABB camAABB(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));
 
 			camrect.Inflate(-16.0f);
@@ -5197,9 +5197,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		// box unions to check all possible collisions
 		CAABB boxUnion = AABB::Union(destbox, srcbox);
 		// bbox union in tile coords, including every touched tile
-		RECTXYXY boxUnionTiles(floor(boxUnion.vMin.x / K_TILE_SIZE_F), floor(boxUnion.vMin.y / K_TILE_SIZE_F),
+		RectXYXYi boxUnionTiles(floor(boxUnion.vMin.x / K_TILE_SIZE_F), floor(boxUnion.vMin.y / K_TILE_SIZE_F),
 			ceil(boxUnion.vMax.x / K_TILE_SIZE_F), ceil(boxUnion.vMax.y / K_TILE_SIZE_F));
-		RECTXYWH boxUnionTilesWH(boxUnionTiles.x1, boxUnionTiles.y1, boxUnionTiles.x2 - boxUnionTiles.x1 + 1, boxUnionTiles.y2 - boxUnionTiles.y1 + 1);
+		RectXYWHi boxUnionTilesWH(boxUnionTiles.x1, boxUnionTiles.y1, boxUnionTiles.x2 - boxUnionTiles.x1 + 1, boxUnionTiles.y2 - boxUnionTiles.y1 + 1);
 		//optional - to include more of the boxes
 		//boxUnion.Inflate(K_TILE_HSIZE, K_TILE_HSIZE);
 
@@ -7637,7 +7637,7 @@ void CLevel::Update( float dTime )
 	m_camLevelToScr.Update( dTime );
 
 	//find visible area
-	RECTXYWH_F camrect = m_camLevelToRT.GetCamWorldAABB();
+	RectXYWH camrect = m_camLevelToRT.GetCamWorldAABB();
 	CAABB camAABB( Vec2( camrect.x, camrect.y ), Vec2( camrect.Right(), camrect.Bottom() ) );
 
 	//set sounds listener position
@@ -7807,7 +7807,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 
 	Mat	matView;
 
-	RECTXYWH_F		camrect = m_camLevelToRT.GetCamWorldAABB();
+	RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
 	CAABB			camAABB(camrect);
 
 	//locally used temp matrix
@@ -7941,7 +7941,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 {
 	Mat				matView;
 
-	RECTXYWH_F		camrect = m_camLevelToRT.GetCamWorldAABB();
+	RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
 	CAABB			camAABB(camrect);
 
 	///----------------------------------------------------
@@ -8346,7 +8346,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	if ((UTApp().g_gfxFlags & K_UT_GFXFLAG_RTT) == 0)
 		return E_FAIL;
 
-	RECTXYWH_F rectRender = UTApp().g_rectRenderPP;
+	RectXYWH rectRender = UTApp().g_rectRenderPP;
 	int nPixelScaling = UTApp().g_nPixelSizePP;
 	///--- PAINT LEVEL ---
 	//real screen space
@@ -8369,7 +8369,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		Mat matpaint;
 		// computes sub pixel offsets for smooth scrolling. the RT renders only on tileset pixels, no subpixels, for precision.
 		// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
-		RECTXYWH_F camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
+		RectXYWH camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
 		Vec2 vSubPxOff(-FLOAT_FRAC(camrect.x) * (fRTscale * K_RT_PIXEL_SIZE_F), -FLOAT_FRAC(camrect.y) * (fRTscale * K_RT_PIXEL_SIZE_F));
 		MUMatAffine2D(&matpaint, fRTscale, nullptr, 0.0f, &Vec2(rectRender.x + vSubPxOff.x, rectRender.y + vSubPxOff.y));
 		m_pSprite->SetTransform(&matpaint);
@@ -8382,7 +8382,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	m_pSprite->SetTransform(&g_matIdentity);
 	CCameraTransform::SetActiveCamera(m_pDevice, &m_camLevelToScr);
 	//get camera data
-	RECTXYWH_F	camrect = m_camLevelToScr.GetCamWorldAABB();
+	RectXYWH	camrect = m_camLevelToScr.GetCamWorldAABB();
 	Mat			matCam = m_camLevelToScr.GetViewTransform();
 	CAABB		camAABB(camrect);
 
@@ -8647,7 +8647,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 				if ((perc > 0.0f) && (perc < 1.0f))
 				{
 					//RECTXYWH recttemp(vpos.x - barlen / 2.0f, activ->bbox_exported.vMax.y + 4, barlen, 8);
-					RECTXYWH recttemp(activ->pTarget->pos.xy_proj.x - barlen / 2.0f, activ->pTarget->bbox.vMax.y + 4, barlen, 8);
+					RectXYWHi recttemp(activ->pTarget->pos.xy_proj.x - barlen / 2.0f, activ->pTarget->bbox.vMax.y + 4, barlen, 8);
 					GUIUtils::DrawProgress_HeadsOutside(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PROGRESS_RED_GLOW_HO, recttemp, perc, 0xffffffff);
 				}
 			}
@@ -8701,7 +8701,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	{
 		DWORD colEffect = DW_COLORALPHA(0xff000088, 1.0f - m_fTimeMultiplier_real);
 		Mat mattrans;
-		RECTXYWH_F bbox = UTGetGUI().m_sprCol.GetAFrameBBox_real(ANM_CONTROLS_SPR_VIGNETTES, 1);
+		RectXYWH bbox = UTGetGUI().m_sprCol.GetAFrameBBox_real(ANM_CONTROLS_SPR_VIGNETTES, 1);
 		MUMatAffine2D(&mattrans, rectRender.h / bbox.h, NULL, 0.0f, &rectRender.Center());
 		m_pSprite->SetTransform(&mattrans);
 		CSprite::paintFrame(&UTGetGUI().m_sprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, 1, colEffect);
@@ -9071,7 +9071,7 @@ void CLevel::AddDecal(EDecalLayer nLayer, Vec2 pos, int animIdx, int frameIdx /*
 
 	ndec->layer = nLayer;
 	ndec->sprite.Init(animIdx, (int)pos.x, (int)pos.y, frameIdx, color);
-	RECTLTRB_F framerect = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
+	RectLTRB framerect = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
 	ndec->aabb.Set(Vec2(framerect.left + pos.x, framerect.top + pos.y), Vec2(framerect.right + pos.x, framerect.bottom + pos.y));
 	ndec->bAnimated = bIsAnimated;
 
@@ -9424,7 +9424,7 @@ int CLevel::GetOccluderSegments(Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr
 	Vec2i tlmin(floor(bbox.vMin.x / K_TILE_SIZE_F), floor(bbox.vMin.y / K_TILE_SIZE_F));
 	Vec2i tlmax(floor(bbox.vMax.x / K_TILE_SIZE_F), floor(bbox.vMax.y / K_TILE_SIZE_F));
 	// limit to current level aabb in tiles
-	RECTXYWH lightAABB_TL(tlmin.x, tlmin.y, tlmax.x - tlmin.x + 1, tlmax.y - tlmin.y + 1);
+	RectXYWHi lightAABB_TL(tlmin.x, tlmin.y, tlmax.x - tlmin.x + 1, tlmax.y - tlmin.y + 1);
 	lightAABB_TL.IntersectWith(m_levelAABB_TL);
 	// tiles are returned in the arrTilesetSnapshot as a matrix in linear form, 0 base index (vector[xx + yy * lightAABB_TL.w])
 	Areas_GetTilesSnapshot(lightAABB_TL, arrTilesSnapshot, ARRAY_SIZE(arrTilesSnapshot));

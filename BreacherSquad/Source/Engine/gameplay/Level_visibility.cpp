@@ -20,11 +20,11 @@ void CLevel::BuildVisibilityLists()
 	CAABB lvlAABB;
 	lvlAABB.Set(m_levelAABB);
 	///--- visual stuff - depends only on camaabb ---
-	RECTXYWH_F camrect_old = m_camLevelToRT.GetCamWorldAABB();
+	RectXYWH camrect_old = m_camLevelToRT.GetCamWorldAABB();
 	//build a camera view rectangle constant across different resolutions so it doesn't desync when on multiplayer
 	//it will need intervention if camera constraint changes axis in order to maintain maximum visible area
 	SIZEWH_F camrectsz(K_GAME_WIDTH, K_GAME_HEIGHT);
-	RECTXYWH_F camrect(camrect_old.CenterX() - camrectsz.w * 0.5f, camrect_old.CenterY() - camrectsz.h * 0.5f, camrectsz.w, camrectsz.h);
+	RectXYWH camrect(camrect_old.CenterX() - camrectsz.w * 0.5f, camrect_old.CenterY() - camrectsz.h * 0.5f, camrectsz.w, camrectsz.h);
 	//maximize camrect vertically
 	CAABB camaabb(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));
 	//union of all visible lights AABBs

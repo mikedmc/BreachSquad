@@ -38,14 +38,14 @@ void CCameraTransform::SetActiveCameraIdentity(PDEVICE pDevice)
 
 CCameraTransform::CCameraTransform()
 {
-	m_Viewport = RECTXYWH_F(0.0f, 0.0f, 0.0f, 0.0f);
+	m_Viewport = RectXYWH(0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_animType = K_CAMTRANS_ANIM_NONE;
 
 	fLocalTimeLine = 0.0f;
 	D3DXMatrixIdentity(&m_matView);
 
-	m_worldAABB = RECTXYWH_F(0.0f, 0.0f, 0.0f, 0.0f);
+	m_worldAABB = RectXYWH(0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_camScreenSize = 0;
 	m_camScreenAxis = K_CAMTRANS_AXIS_NONE;
@@ -59,7 +59,7 @@ CCameraTransform::CCameraTransform()
 
 	m_veck1 = m_veck2 = Vec2(0.0f, 0.0f);
 
-	m_camWorldAABB = RECTXYWH_F(0.0f, 0.0f, 0.0f, 0.0f);
+	m_camWorldAABB = RectXYWH(0.0f, 0.0f, 0.0f, 0.0f);
 	m_constraintAxis = K_CAMTRANS_AXIS_NONE;
 	m_minAxisSize = 0.0f;
     m_maxAxisSize = 0.0f;
@@ -78,7 +78,7 @@ void CCameraTransform::SetAxisLock(bool lockXaxis, bool lockYaxis, bool lockZoom
 	m_bAxisLockedZoom = lockZoom;
 }
 
-void CCameraTransform::SetWorldBounds(RECTXYWH_F worldAABB, bool bHardWorldEdges, ECamAxisType constraintAxis, float minAxisSize, float maxAxisSize)
+void CCameraTransform::SetWorldBounds(RectXYWH worldAABB, bool bHardWorldEdges, ECamAxisType constraintAxis, float minAxisSize, float maxAxisSize)
 {
     m_bHardWorldEdges = bHardWorldEdges;
     m_worldAABB = worldAABB;
@@ -127,12 +127,12 @@ void CCameraTransform::MoveCamPos(Vec2 vDelta, bool forced /*= false*/)
 		m_vecRealLookAt.y += vDelta.y;
 }
 
-void CCameraTransform::SetViewport(RECTXYWH_F viewport)
+void CCameraTransform::SetViewport(RectXYWH viewport)
 {
 	m_Viewport = viewport;
 }
 
-void CCameraTransform::InitCamera(RECTXYWH_F viewport, int camScreenSize, ECamAxisType eSizeAxis, Vec2 vecLookAt, float fZoom)
+void CCameraTransform::InitCamera(RectXYWH viewport, int camScreenSize, ECamAxisType eSizeAxis, Vec2 vecLookAt, float fZoom)
 {
 	m_Viewport = viewport;
 	m_camScreenSize = abs(camScreenSize);
@@ -146,9 +146,9 @@ void CCameraTransform::ZoomToFitWorld()
 	//TODO: de implementat
 }
 
-Vec2 CCameraTransform::ScreenToWorld(Vec2 inPt, RECTXYWH_F *srcViewportOverride)
+Vec2 CCameraTransform::ScreenToWorld(Vec2 inPt, RectXYWH *srcViewportOverride)
 {
-	RECTXYWH_F *view;
+	RectXYWH *view;
 	if (srcViewportOverride != NULL)
 		view = srcViewportOverride;
 	else
@@ -162,7 +162,7 @@ Vec2 CCameraTransform::ScreenToWorld(Vec2 inPt, RECTXYWH_F *srcViewportOverride)
 	return vecLookAtXY + Vec2(percX * m_vecHW.x, percX * m_vecHW.y) + Vec2(percY * m_vecHH.x, percY * m_vecHH.y);
 }
 
-RECTXYWH_F CCameraTransform::ScreenToWorld(RECTXYWH_F inRect)
+RectXYWH CCameraTransform::ScreenToWorld(RectXYWH inRect)
 {
 	double percX, percY;
 	//aflu procente intre -1 si 1 pt ca originea este centrul ecranului
@@ -174,12 +174,12 @@ RECTXYWH_F CCameraTransform::ScreenToWorld(RECTXYWH_F inRect)
 	percX = inRect.w / m_Viewport.w;
 	percY = inRect.h / m_Viewport.h;
 	Vec2 nscale = percX * 2.0f * m_vecHW + percY * 2.0f * m_vecHH;
-	return RECTXYWH_F(retpos.x, retpos.y, nscale.x, nscale.y);
+	return RectXYWH(retpos.x, retpos.y, nscale.x, nscale.y);
 }
 
-Vec2 CCameraTransform::WorldToScreen(Vec2 inPT, RECTXYWH_F *srcViewportOverride)
+Vec2 CCameraTransform::WorldToScreen(Vec2 inPT, RectXYWH *srcViewportOverride)
 {
-	RECTXYWH_F *view;
+	RectXYWH *view;
 	if (srcViewportOverride != NULL)
 		view = srcViewportOverride;
 	else
@@ -193,7 +193,7 @@ Vec2 CCameraTransform::WorldToScreen(Vec2 inPT, RECTXYWH_F *srcViewportOverride)
 	return Vec2(view->w / 2.0f + percX * view->w + view->x, view->h / 2.0f + percY * view->h + view->y);
 }
 
-RECTXYWH_F CCameraTransform::WorldToScreen(RECTXYWH_F inRect)
+RectXYWH CCameraTransform::WorldToScreen(RectXYWH inRect)
 {
 	double percX, percY;
 	//procente intre -1 si 1 in fn de lungimea axelor vecHW si vecHH
@@ -203,7 +203,7 @@ RECTXYWH_F CCameraTransform::WorldToScreen(RECTXYWH_F inRect)
 	Vec2 vpos(m_Viewport.w / 2.0f + percX * m_Viewport.w + m_Viewport.x, m_Viewport.h / 2.0f + percY * m_Viewport.h + m_Viewport.y);
 	percX = (inRect.w / m_vecHW.x) / 2.0f;
 	percY = (inRect.h / m_vecHH.y) / 2.0f;
-	return RECTXYWH_F(vpos.x, vpos.y, percX * m_Viewport.w, percY * m_Viewport.h);
+	return RectXYWH(vpos.x, vpos.y, percX * m_Viewport.w, percY * m_Viewport.h);
 }
 
 Vec2 CCameraTransform::ScreenToViewport(Vec2 inPt)
@@ -239,7 +239,7 @@ SIZEWH_F CCameraTransform::WorldToScreen(SIZEWH_F inSZ)
 
 Vec2	CCameraTransform::ViewportToViewport(Vec2 inPt, CCameraTransform &destCam)
 {
-	RECTXYWH_F newView = destCam.GetViewport();
+	RectXYWH newView = destCam.GetViewport();
 	//le aduce in ecranul default dupa care le duce in noul viewport
 	return Vec2(inPt.x + m_Viewport.x - newView.x, inPt.y + m_Viewport.y - newView.y);
 }
@@ -247,7 +247,7 @@ Vec2	CCameraTransform::ViewportToViewport(Vec2 inPt, CCameraTransform &destCam)
 
 Vec2	CCameraTransform::WorldToWorld(Vec2 inPt, CCameraTransform &destCam)
 {
-	RECTXYWH_F newView = destCam.GetViewport();
+	RectXYWH newView = destCam.GetViewport();
 	//aduce punctul in viewport
 	Vec2 viewPos = WorldToScreen(inPt);
 	//trece din destView in destWorld
@@ -287,7 +287,7 @@ void CCameraTransform::ShakeScreen(float maxAmplitude, float attenuationPerSecon
 		m_shakeAttenuationPerSec = 0.0f;
 	}
 	//when source is specified check to see if onscreen
-	RECTXYWH_F bboxExtended = m_camWorldAABB;
+	RectXYWH bboxExtended = m_camWorldAABB;
 	bboxExtended.Inflate(m_camWorldAABB.h / 4.0f);
 	if (vShakeSource != null)
 	{
@@ -375,7 +375,7 @@ ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, Vec3 inp
 	}
 	//TODO: aici se va adauga rotatia vectorilor si se va complica putin la verificarea limitarilor pentru ca va trebui verificat dreptunghiul rotit
 	//verificare sa respecte dimensiunea maxima, adica sa nu iasa cu zoom din ea
-	RECTXYWH_F	limitRect = m_worldAABB;
+	RectXYWH	limitRect = m_worldAABB;
 	if (m_bHardWorldEdges)
 	{
 		if (m_vecHW.x * 2.0f > limitRect.w)
@@ -432,7 +432,7 @@ ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, Vec3 inp
 			//elasticitate limite
 			//TODO: aici probabil va trebui schimbat daca bagam rotatii
 			//calculeaza dreptunghiul in care are voie centrul camerei micsorand aabb-ul lumii cu limita data de noi (extensia elastica)
-			RECTLTRB_F centerRect(m_worldAABB.x + m_vecHW.x + m_veck1.x, m_worldAABB.y + m_vecHH.y + m_veck1.y,
+			RectLTRB centerRect(m_worldAABB.x + m_vecHW.x + m_veck1.x, m_worldAABB.y + m_vecHH.y + m_veck1.y,
 				m_worldAABB.x + m_worldAABB.w - m_vecHW.x - m_veck1.x, m_worldAABB.y + m_worldAABB.h - m_vecHH.y - m_veck1.y);
 
 			Vec2 springOff(0.0f, 0.0f);
@@ -521,7 +521,7 @@ ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, Vec3 inp
 	//calculeaza camera AABB ca sa il limitez si se scot din el din nou vectorii
 	//TODO: aici se schimba cand vom trata si rotatiile. Va trebui verificat dreptunghiul rotit sa intre inapoi in dreptunghiul lumii
 	//se va face AABB-ul camerei dupa dreptunghiul rotit si se va incadra acela in cel al lumii
-	m_camWorldAABB = RECTXYWH_F(m_vecRealLookAt.x - m_vecHW.x, m_vecRealLookAt.y - m_vecHH.y, m_vecHW.x * 2.0f, m_vecHH.y * 2.0f);
+	m_camWorldAABB = RectXYWH(m_vecRealLookAt.x - m_vecHW.x, m_vecRealLookAt.y - m_vecHH.y, m_vecHW.x * 2.0f, m_vecHH.y * 2.0f);
 	//verificare cu outer world bounds doar daca avem hard world edges
 	if (m_bHardWorldEdges)
 	{

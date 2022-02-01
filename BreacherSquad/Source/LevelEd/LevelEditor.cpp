@@ -238,8 +238,8 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 			{
 				// paint bbox
 				CProp *pp = static_cast<CProp*>(pSelected);
-				RECTXYWH_F bb(pp->bbox.vMin.x, pp->bbox.vMin.y, pp->bbox.vSize.x, pp->bbox.vSize.y);
-				RECTXYWH_F prjrct = m_pCam->WorldToScreen(bb);
+				RectXYWH bb(pp->bbox.vMin.x, pp->bbox.vMin.y, pp->bbox.vSize.x, pp->bbox.vSize.y);
+				RectXYWH prjrct = m_pCam->WorldToScreen(bb);
 				DrawBBox(prjrct, 0xffffffff);
 				// paint origin
 				Vec2 vposprj = m_pCam->WorldToScreen(pp->pos.xy);
@@ -454,7 +454,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 
 				for (int n = 0; n < anm->aframesNo; n++)
 				{
-					RECTLTRB_F texrect = m_pLevel->m_sprLights.GetModuleRect_TexCoords(anmID, n, 0);
+					RectLTRB texrect = m_pLevel->m_sprLights.GetModuleRect_TexCoords(anmID, n, 0);
 					ImVec2 tul(texrect.left, texrect.top);
 					ImVec2 tdr(texrect.right, texrect.bottom);
 
@@ -573,19 +573,19 @@ void CLevelEditor::DrawHRuler(Vec2 vBase, float fHeight, DWORD col)
 {
 	if (fHeight >= 0.0f)
 	{
-		RECTXYWH cliprct(vBase.x - 10, vBase.y - fHeight, 20, fHeight + 10);
+		RectXYWHi cliprct(vBase.x - 10, vBase.y - fHeight, 20, fHeight + 10);
 		CSprite::paintFrameClipped(&m_sprCol, vBase.x, vBase.y, ANM_LVLED_SPR_RULERS, 0, cliprct, col);
 	}
 	else
 	{
-		RECTXYWH cliprct(vBase.x - 10, vBase.y - 10, 20, -fHeight + 10);
+		RectXYWHi cliprct(vBase.x - 10, vBase.y - 10, 20, -fHeight + 10);
 		CSprite::paintFrameClipped(&m_sprCol, vBase.x, vBase.y, ANM_LVLED_SPR_RULERS, 1, cliprct, col);
 	}
 }
 
-void CLevelEditor::DrawBBox(RECTXYWH_F bbox, DWORD dwCol)
+void CLevelEditor::DrawBBox(RectXYWH bbox, DWORD dwCol)
 {
-	RECTXYWH cliprect(bbox.x - 1, bbox.y - 1, bbox.w + 2, 3);
+	RectXYWHi cliprect(bbox.x - 1, bbox.y - 1, bbox.w + 2, 3);
 	CSprite::paintFrameClipped(&m_sprCol, bbox.x, bbox.y, ANM_LVLED_SPR_BBOX, 0, cliprect, dwCol);
 	cliprect.y += bbox.h;
 	CSprite::paintFrameClipped(&m_sprCol, bbox.x, bbox.y + bbox.h, ANM_LVLED_SPR_BBOX, 0, cliprect, dwCol);

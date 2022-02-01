@@ -238,7 +238,7 @@ void CSpritePainter::ClearStatistics()
 #endif
 }
 
-OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec2 vPos, DWORD color, float fRotationZ, Vec2 vScale)
+OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RectLTRB &pSrcUV, RectLTRB &pDestRect, Vec2 vPos, DWORD color, float fRotationZ, Vec2 vScale)
 {
 	_ASSERT(pTexture != nullptr);
 	_ASSERT(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4) - 4);
@@ -302,7 +302,7 @@ OPRESULT CSpritePainter::Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F 
 }
 
 
-OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec2 vPos, DWORD color, float fRotationZ, Vec2 vScale, UINT paintFlags)
+OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RectLTRB &pSrcUV, RectLTRB &pDestRect, Vec2 vPos, DWORD color, float fRotationZ, Vec2 vScale, UINT paintFlags)
 {
 	_ASSERT(pTexture != nullptr);
 	_ASSERT(m_nVertexCursor < (K_BS_MAX_QUAD_CNT * 4) - 4);
@@ -315,7 +315,7 @@ OPRESULT CSpritePainter::DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_
 	Vec4 vecScaleRot(vScale.x, vScale.y, fRotationZ, 0.0f);
 
 	// paint flags
-	RECTLTRB_F pUV(pSrcUV);
+	RectLTRB pUV(pSrcUV);
 	if (paintFlags & K_SPRFLAG_FLIP_X)
 	{
 		pUV.left = pSrcUV.right;

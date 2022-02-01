@@ -71,16 +71,16 @@ struct scFModule
 	UINT16				imgIdx;					// image index in texture array
 	scTexture*			pImg;					// pointer to texture for fast access
 	RECT				moduleRect;				// RECT of module
-	RECTXYWH			moduleXYWH;				// XYWH of module
+	RectXYWHi			moduleXYWH;				// XYWH of module
 	
-	RECTLTRB_F			texRect;				// tex coords of module
-	RECTLTRB_F			moduleRectOff;			// module rect offsetted by ox and oy
+	RectLTRB			texRect;				// tex coords of module
+	RectLTRB			moduleRectOff;			// module rect offsetted by ox and oy
 };
 
 //Frame - only used when loading from file (doubled in AFrame)
 struct scFrame 
 {
-	RECTXYWH			BBox;
+	RectXYWHi			BBox;
 	int					frame_hitPtsNo;
 	int*				frame_hitPtsPosXYF;		//written like this: [frame][x1,y1,flag1,x2,y2...]
 	UCHAR				frame_fmodulesNo;  
@@ -93,13 +93,13 @@ struct scAFrame
 	int					dy;
 	UINT32				flags;
 	int					duration;
-	RECTXYWH			BBox;					// BBox loaded from editor
+	RectXYWHi			BBox;					// BBox loaded from editor
 	int					PointsNo;				// hitpoints no
 	int*				PointsXYFlag;			// [frame][x1,y1,flag1,x2,y2...]
 	int					fmodulesNo;  
 	int*				fmodulesIdx;
 	
-	RECTXYWH			BBox_real;				// bounding box real, computed from modules
+	RectXYWHi			BBox_real;				// bounding box real, computed from modules
 };
 
 //Animation
@@ -153,13 +153,13 @@ public:
 	int								GetAnimationIdxByNameHash(const UINT32 animNameHash);
 
 	// Returns BBOX set from editor
-	inline RECTXYWH					GetAFrameBBox(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox; }
+	inline RectXYWHi					GetAFrameBBox(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox; }
 	inline UINT32					GetAFrameFlags(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->flags; }
 	inline UINT32					GetAnimFlags(int animIdx) { return Animations[animIdx]->flags; }
 	// Returns real BBOX computed at load time
-	inline RECTXYWH					GetAFrameBBox_real(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox_real; }
-	RECTXYWH						GetModuleRect(int animIdx, int frameIdx, int moduleIdx);
-	RECTLTRB_F						GetModuleRect_TexCoords(int animIdx, int frameIdx, int moduleIdx);
+	inline RectXYWHi					GetAFrameBBox_real(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox_real; }
+	RectXYWHi						GetModuleRect(int animIdx, int frameIdx, int moduleIdx);
+	RectLTRB						GetModuleRect_TexCoords(int animIdx, int frameIdx, int moduleIdx);
 	SIZEWH							GetTextureSizeByAnim(int animIdx);
 	scTexture*						GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx);
 	// Returns no of aframe hitpoints

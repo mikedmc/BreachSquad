@@ -352,7 +352,7 @@ public:
 	CParticleEmitter* AddPartEmitter(int nType, CAABB * pe_aabb, int nParticleLayer);
 	void ReleasePartEmitter(CParticleEmitter* pEmit);
 	void ReleaseAllPartEmitters();
-	void UpdatePartEmitters(float dTime, RECTXYWH_F screenRect);
+	void UpdatePartEmitters(float dTime, RectXYWH screenRect);
 
 ///-=-=-= HELPER FUNCTIONS =-=-=-
 	void GenerateBulletHitWall(D3DXVECTOR2 npos, D3DXVECTOR2 ndir, int nLayer = K_PART_LAYER_NORMAL);

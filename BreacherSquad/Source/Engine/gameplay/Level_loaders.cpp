@@ -326,7 +326,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	//m_vLevelOrigin.y = (float)originY + m_levelAABB.y;
 
 	// add dirty rect on area so it computes everything (dirty rect is inclusive so we subtract 1 from width and height)
-	m_arrDirtyRectsTL.push_back(RECTXYWH(posTL.x, posTL.y, areaW, areaH));
+	m_arrDirtyRectsTL.push_back(RectXYWHi(posTL.x, posTL.y, areaW, areaH));
 
 	// need to know the tileset size
 	Vec2 vTilesetSize = m_pTexTilesColor->getSize();
@@ -542,8 +542,8 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 			obj->sprite.frameIdx = m_rand.RandInt(m_sprProps.GetAFramesCnt(obj->sprite.animIdx));
 		}
 		//bbox
-		RECTXYWH bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
-		RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
+		RectXYWHi bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
+		RectXYWHi objbox = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
 		obj->bbox_ini.Set(objbox);
 		obj->bbox_floor_ini.Set(bbox_set);
 		// when we flip it on X we flip bboxes too

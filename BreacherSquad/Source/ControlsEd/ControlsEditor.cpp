@@ -38,7 +38,7 @@ void CControlsEditor::SetCameraTransform(CCameraTransform* pCamera)
 	m_pCamera = pCamera;
 }
 
-void CControlsEditor::DrawBBox(RECTXYWH rect, bool selected)
+void CControlsEditor::DrawBBox(RectXYWHi rect, bool selected)
 {
 	VERT_TL1TC vertices[5];
 	//init verts
@@ -756,14 +756,14 @@ void CControlsEditor::Update(float dTime)
 			vLastMouse = g_mouse.pos; //save last mouse
 			if (currCtrlIdx > -1 && selectedCtrls.Count() == 1)
 			{
-				RECTXYWH bbox = currLayer->controls[currCtrlIdx]->GetBBox();
+				RectXYWHi bbox = currLayer->controls[currCtrlIdx]->GetBBox();
 				
 				if (m_pCamera != nullptr)
 				{
 					bbox.x += currLayer->GetPos().x;
 					bbox.y += currLayer->GetPos().y;
 
-					RECTXYWH_F rbbox(bbox);
+					RectXYWH rbbox(bbox);
 					rbbox = m_pCamera->WorldToScreen(rbbox);
 
 					rbbox.x += offset.x + vecRenderCenter.x;
@@ -777,14 +777,14 @@ void CControlsEditor::Update(float dTime)
 				}
 
 				//verific daca dau click pe scale spot-uri
-				RECTXYWH scaleSpotTL(bbox.x, bbox.y, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
-				RECTXYWH scaleSpotTM(bbox.x + bbox.w / 2 - K_BBOX_SCALE_BOX_SIZE / 2, bbox.y, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
-				RECTXYWH scaleSpotTR(bbox.x + bbox.w - K_BBOX_SCALE_BOX_SIZE, bbox.y, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
-				RECTXYWH scaleSpotBR(bbox.x + bbox.w - K_BBOX_SCALE_BOX_SIZE, bbox.y + bbox.h - K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
-				RECTXYWH scaleSpotBM(bbox.x + bbox.w / 2 - K_BBOX_SCALE_BOX_SIZE / 2, bbox.y + bbox.h - K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
-				RECTXYWH scaleSpotBL(bbox.x, bbox.y + bbox.h - K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
-				RECTXYWH scaleSpotLM(bbox.x, bbox.y + bbox.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
-				RECTXYWH scaleSpotRM(bbox.x + bbox.w - K_BBOX_SCALE_BOX_SIZE / 2, bbox.y + bbox.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
+				RectXYWHi scaleSpotTL(bbox.x, bbox.y, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
+				RectXYWHi scaleSpotTM(bbox.x + bbox.w / 2 - K_BBOX_SCALE_BOX_SIZE / 2, bbox.y, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
+				RectXYWHi scaleSpotTR(bbox.x + bbox.w - K_BBOX_SCALE_BOX_SIZE, bbox.y, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
+				RectXYWHi scaleSpotBR(bbox.x + bbox.w - K_BBOX_SCALE_BOX_SIZE, bbox.y + bbox.h - K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
+				RectXYWHi scaleSpotBM(bbox.x + bbox.w / 2 - K_BBOX_SCALE_BOX_SIZE / 2, bbox.y + bbox.h - K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
+				RectXYWHi scaleSpotBL(bbox.x, bbox.y + bbox.h - K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
+				RectXYWHi scaleSpotLM(bbox.x, bbox.y + bbox.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
+				RectXYWHi scaleSpotRM(bbox.x + bbox.w - K_BBOX_SCALE_BOX_SIZE / 2, bbox.y + bbox.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
 				if (Rects::PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotTL))
 				{
 					tool = TOOL_TYPE_RESIZE_TOP_LEFT;
@@ -863,7 +863,7 @@ void CControlsEditor::Update(float dTime)
 						for (int ii = 0; ii < selectedCtrls.Count(); ii++)
 						{
 							int selCtrl = selectedCtrls.GetAt(ii);
-							RECTXYWH bbox = currLayer->controls[selCtrl]->GetBBox();
+							RectXYWHi bbox = currLayer->controls[selCtrl]->GetBBox();
 							bbox.x += mousedelta.w;
 							bbox.y += mousedelta.h;
 
@@ -877,7 +877,7 @@ void CControlsEditor::Update(float dTime)
 					}
 					else
 					{
-						RECTXYWH BBox = currLayer->controls[currCtrlIdx]->GetBBox();
+						RectXYWHi BBox = currLayer->controls[currCtrlIdx]->GetBBox();
 						switch (tool)
 						{
 						case TOOL_TYPE_RESIZE_TOP_LEFT:
@@ -988,14 +988,14 @@ void CControlsEditor::Update(float dTime)
 			CArray<int> newClickedCtrls;
 			for (int kk = currLayer->controls.Count() - 1; kk >= 0; kk--)
 			{
-				RECTXYWH bbox = currLayer->controls[kk]->GetBBox();
+				RectXYWHi bbox = currLayer->controls[kk]->GetBBox();
 				
 				if (m_pCamera != nullptr)
 				{
 					bbox.x += currLayer->GetPos().x;
 					bbox.y += currLayer->GetPos().y;
 
-					RECTXYWH_F rbbox(bbox);
+					RectXYWH rbbox(bbox);
 					rbbox = m_pCamera->WorldToScreen(rbbox);
 
 					rbbox.x += offset.x + vecRenderCenter.x;
@@ -1654,7 +1654,7 @@ void CControlsEditor::PaintBBoxes()
 		// desenare bounding box-uri
 		for (int kk = 0; kk < currLayer->controls.Count(); kk++)
 		{
-			RECTXYWH rect;
+			RectXYWHi rect;
 			rect = currLayer->controls[kk]->GetBBox();
 			rect.x += currLayer->GetPos().x;
 			rect.y += currLayer->GetPos().y;

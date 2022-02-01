@@ -372,10 +372,10 @@ void CMainMenu::Update(float dTime)
 				{
 					m_fSelTimer += dTime;
 
-					RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
+					RectXYWH worldrect = UTApp().g_rect360hWorld;
 					const int nItemSpacing = 10;
 					SIZEWH szItem(200, 10);
-					RECTXYWH rectItemsList(worldrect.CenterX() - szItem.w / 2, worldrect.Bottom() - 26 - m_nSelRows * (szItem.h + nItemSpacing), szItem.w, m_nSelRows * (szItem.h + nItemSpacing) - nItemSpacing);
+					RectXYWHi rectItemsList(worldrect.CenterX() - szItem.w / 2, worldrect.Bottom() - 26 - m_nSelRows * (szItem.h + nItemSpacing), szItem.w, m_nSelRows * (szItem.h + nItemSpacing) - nItemSpacing);
 
 					if (eCommand == K_CCTRLMGR_COMMAND_LEFT)
 					{
@@ -454,16 +454,16 @@ void CMainMenu::Update(float dTime)
 					}
 
 					//back button selection rectangle
-					RECTXYWH rectButBack(worldrect.CenterX() - 35, worldrect.Bottom() - 25, 70, 16);
+					RectXYWHi rectButBack(worldrect.CenterX() - 35, worldrect.Bottom() - 25, 70, 16);
 					//rectangle of currently selected mod
 					int nIdx = m_nSelection - m_nSelPage * m_nSelRows;
-					RECTXYWH rectItem(rectItemsList.x, rectItemsList.y + (szItem.h + nItemSpacing) * nIdx, szItem.w, szItem.h);
+					RectXYWHi rectItem(rectItemsList.x, rectItemsList.y + (szItem.h + nItemSpacing) * nIdx, szItem.w, szItem.h);
 
 					//--- mouse selection on mouse click ---
 					if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
 					{
 						//check chapters click
-						RECTXYWH wndrectL = rectItemsList;
+						RectXYWHi wndrectL = rectItemsList;
 						//adjust for difference between graphics and clicks:
 						wndrectL.y -= 5; wndrectL.h += 10;
 
@@ -620,7 +620,7 @@ void CMainMenu::Update(float dTime)
 
 		case K_MM_STATE_MAINMENU:
 		{
-			RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
+			RectXYWH worldrect = UTApp().g_rect360hWorld;
 
 			//generare particule bokeh
 			if (g_timers.Tick(400))
@@ -649,8 +649,8 @@ void CMainMenu::Update(float dTime)
 			//special screen mode for quick match online coop
 			bool bIsCoopQM = (UTApp().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH);
 
-			RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
-			RECTXYWH picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_GAME_MODE_SPLASHES, 0);
+			RectXYWH worldrect = UTApp().g_rect360hWorld;
+			RectXYWHi picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_GAME_MODE_SPLASHES, 0);
 			picrect.h += 32;
 			int wndSpacing = 24;
 
@@ -687,13 +687,13 @@ void CMainMenu::Update(float dTime)
 			}
 
 			//back button selection rectangle
-			RECTXYWH rectButBack(worldrect.CenterX() - 35, worldrect.Bottom() - 30, 70, 16);
+			RectXYWHi rectButBack(worldrect.CenterX() - 35, worldrect.Bottom() - 30, 70, 16);
 
 			//--- mouse selection on mouse click ---
 			if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
 			{
 				//check chapters click
-				RECTXYWH wndrectL = picrect;
+				RectXYWHi wndrectL = picrect;
 				wndrectL.x += vpos.x - picrect.w / 2.0f;
 				wndrectL.y += vpos.y - picrect.h / 2.0f;
 				if (Rects::PointInRect(vLocalMousePos, wndrectL))
@@ -833,7 +833,7 @@ void CMainMenu::Update(float dTime)
 			//set selection rect
 			if (m_nSelection >= 0)
 			{
-				RECTXYWH wndrectL = picrect; //local wndrect
+				RectXYWHi wndrectL = picrect; //local wndrect
 				wndrectL.x += vpos.x - picrect.w / 2.0f;
 				wndrectL.y += vpos.y - picrect.h / 2.0f;
 				wndrectL.y += 5; wndrectL.h -= 4;
@@ -895,23 +895,23 @@ void CMainMenu::Update(float dTime)
 			}
 
 			//--- MOUSE INPUT ---
-			RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
-			RECTXYWH picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_CHAPTER_SPLASHES_LG, 0);
+			RectXYWH worldrect = UTApp().g_rect360hWorld;
+			RectXYWHi picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_CHAPTER_SPLASHES_LG, 0);
 			//facem loc pentru mesajele de sub imagine (trebuie sa corespunda cu cele din paint)
-			RECTXYWH wndrect = picrect;
+			RectXYWHi wndrect = picrect;
 			wndrect.Inflate(-2, -2);
 			wndrect.h += 24;
 			int	wndSpacing = 24;
 
 			D3DXVECTOR2 vpos = worldrect.Center();
 			//dreptunghiul selectiei de buton back
-			RECTXYWH rectButBack(worldrect.CenterX() - 35, worldrect.Bottom() - 30, 70, 16);
+			RectXYWHi rectButBack(worldrect.CenterX() - 35, worldrect.Bottom() - 30, 70, 16);
 
 			//--- mouse selection on mouse click ---
 			if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
 			{
 				//check chapters click
-				RECTXYWH wndrectL = wndrect;
+				RectXYWHi wndrectL = wndrect;
 				wndrectL.x += vpos.x - picrect.w / 2.0f;
 				wndrectL.y += vpos.y - wndrect.h / 2.0f;
 				if (Rects::PointInRect(vLocalMousePos, wndrectL))
@@ -1024,7 +1024,7 @@ void CMainMenu::Update(float dTime)
 			//set selection rect
 			if (m_nSelection >= 0)
 			{
-				RECTXYWH wndrectL = wndrect; //local wndrect
+				RectXYWHi wndrectL = wndrect; //local wndrect
 				wndrectL.x += worldrect.Center().x - picrect.w / 2.0f; // vpos.x + m_nSelection * (picrect.w + wndSpacing)*/ - picrect.w / 2.0f;
 				wndrectL.y += vpos.y - wndrect.h / 2.0f;
 
@@ -1056,19 +1056,19 @@ void CMainMenu::Update(float dTime)
 		case K_MM_STATE_LEVEL_SELECT:
 		{
 			//--- compute useful data ---
-			RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
+			RectXYWH worldrect = UTApp().g_rect360hWorld;
 			int nSelPerPage = m_nSelRows * m_nSelColumns;
 			//dimensiuni ferestre nivel si spacing intre ele
 			SIZEWH wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
 			int nPage = m_nSelection / nSelPerPage;
 			int nRow = (m_nSelection % nSelPerPage) / m_nSelColumns;
 			int nColumn = (m_nSelection % nSelPerPage) % m_nSelColumns;
-			RECTXYWH rectRightPanel(worldrect.CenterX() - 160 + 100, 20, 220, worldrect.h - 20);
+			RectXYWHi rectRightPanel(worldrect.CenterX() - 160 + 100, 20, 220, worldrect.h - 20);
 
 			//--- mouse input ---
 			if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
 			{
-				RECTXYWH pageRect(rectRightPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectRightPanel.CenterY() - 0.5f * m_nSelRows * wndSzTotal.h - 8, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
+				RectXYWHi pageRect(rectRightPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectRightPanel.CenterY() - 0.5f * m_nSelRows * wndSzTotal.h - 8, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
 				D3DXVECTOR2 vRefPos(pageRect.x, pageRect.y);
 				vRefPos.x -= m_fSelPageCursor * pageRect.w;
 				//verifica nivelele
@@ -1088,7 +1088,7 @@ void CMainMenu::Update(float dTime)
 
 					D3DXVECTOR2 vRefPos(pageRect.x, pageRect.y);
 					vRefPos.x -= m_fSelPageCursor * pageRect.w;
-					RECTXYWH lvlrect(vRefPos.x + nColumn * wndSzTotal.w + nPage * pageRect.w + wndSpacing.w / 2, vRefPos.y + nRow * wndSzTotal.h + wndSpacing.h / 2, wndSz.w, wndSz.h);
+					RectXYWHi lvlrect(vRefPos.x + nColumn * wndSzTotal.w + nPage * pageRect.w + wndSpacing.w / 2, vRefPos.y + nRow * wndSzTotal.h + wndSpacing.h / 2, wndSz.w, wndSz.h);
 
 					if (Rects::PointInRect(vLocalMousePos, lvlrect))
 					{
@@ -1118,7 +1118,7 @@ void CMainMenu::Update(float dTime)
 					}
 				}
 				//back button
-				RECTXYWH recttemp(rectRightPanel.CenterX() - 35, rectRightPanel.Bottom() - 30, 70, 16);
+				RectXYWHi recttemp(rectRightPanel.CenterX() - 35, rectRightPanel.Bottom() - 30, 70, 16);
 				if (Rects::PointInRect(vLocalMousePos, recttemp))
 				{
 					if (m_nSelection == -1)
@@ -1332,7 +1332,7 @@ void CMainMenu::Update(float dTime)
 			//--- update selection ---
 			if (m_nSelection >= 0)
 			{
-				RECTXYWH pageRect(rectRightPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectRightPanel.CenterY() - 0.5f * m_nSelRows * wndSzTotal.h - 8, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
+				RectXYWHi pageRect(rectRightPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectRightPanel.CenterY() - 0.5f * m_nSelRows * wndSzTotal.h - 8, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
 				D3DXVECTOR2 vRefPos(pageRect.x, pageRect.y);
 				vRefPos.x -= m_fSelPageCursor * pageRect.w;
 
@@ -1345,7 +1345,7 @@ void CMainMenu::Update(float dTime)
 			}
 			else  //back button
 			{
-				RECTXYWH recttemp(rectRightPanel.CenterX() - 34, rectRightPanel.Bottom() - 29, 68, 14);
+				RectXYWHi recttemp(rectRightPanel.CenterX() - 34, rectRightPanel.Bottom() - 29, 68, 14);
 				m_rectSelTarget = recttemp;
 			}
 			//--- morph current selection into target selection ---
@@ -1361,21 +1361,21 @@ void CMainMenu::Update(float dTime)
 		case K_MM_STATE_DOWNLOADED_LEVEL_SELECT:
 		{
 			//--- compute useful data ---
-			RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
+			RectXYWH worldrect = UTApp().g_rect360hWorld;
 			int nSelPerPage = m_nSelRows * m_nSelColumns;
 			//dimensiuni ferestre nivel si spacing intre ele
 			SIZEWH wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
 			int nPage = m_nSelection / nSelPerPage;
 			int nRow = (m_nSelection % nSelPerPage) / m_nSelColumns;
 			int nColumn = (m_nSelection % nSelPerPage) % m_nSelColumns;
-			RECTXYWH rectItemsPanel(worldrect.CenterX() - 160, 110, 320, worldrect.h - 110);
+			RectXYWHi rectItemsPanel(worldrect.CenterX() - 160, 110, 320, worldrect.h - 110);
 
 			m_fSelTimer += dTime;
 
 			//--- mouse input ---
 			if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
 			{
-				RECTXYWH pageRect(rectItemsPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectItemsPanel.y, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
+				RectXYWHi pageRect(rectItemsPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectItemsPanel.y, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
 				D3DXVECTOR2 vRefPos(pageRect.x, pageRect.y);
 				vRefPos.x -= m_fSelPageCursor * pageRect.w;
 				//verifica nivelele
@@ -1395,7 +1395,7 @@ void CMainMenu::Update(float dTime)
 
 					D3DXVECTOR2 vRefPos(pageRect.x, pageRect.y);
 					vRefPos.x -= m_fSelPageCursor * pageRect.w;
-					RECTXYWH lvlrect(vRefPos.x + nColumn * wndSzTotal.w + nPage * pageRect.w + wndSpacing.w / 2, vRefPos.y + nRow * wndSzTotal.h + wndSpacing.h / 2, wndSz.w, wndSz.h);
+					RectXYWHi lvlrect(vRefPos.x + nColumn * wndSzTotal.w + nPage * pageRect.w + wndSpacing.w / 2, vRefPos.y + nRow * wndSzTotal.h + wndSpacing.h / 2, wndSz.w, wndSz.h);
 
 					if (Rects::PointInRect(vLocalMousePos, lvlrect))
 					{
@@ -1430,7 +1430,7 @@ void CMainMenu::Update(float dTime)
 					}
 				}
 				//back button
-				RECTXYWH recttemp(rectItemsPanel.CenterX() - 35, rectItemsPanel.Bottom() - 30, 70, 16);
+				RectXYWHi recttemp(rectItemsPanel.CenterX() - 35, rectItemsPanel.Bottom() - 30, 70, 16);
 				if (Rects::PointInRect(vLocalMousePos, recttemp))
 				{
 					if (m_nSelection == -1)
@@ -1580,7 +1580,7 @@ void CMainMenu::Update(float dTime)
 			//--- update selection ---
 			if (m_nSelection >= 0)
 			{
-				RECTXYWH pageRect(rectItemsPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectItemsPanel.y, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
+				RectXYWHi pageRect(rectItemsPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectItemsPanel.y, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
 				D3DXVECTOR2 vRefPos(pageRect.x, pageRect.y);
 				vRefPos.x -= m_fSelPageCursor * pageRect.w;
 
@@ -1588,7 +1588,7 @@ void CMainMenu::Update(float dTime)
 			}
 			else  //back button
 			{
-				RECTXYWH recttemp(rectItemsPanel.CenterX() - 34, rectItemsPanel.Bottom() - 29, 68, 14);
+				RectXYWHi recttemp(rectItemsPanel.CenterX() - 34, rectItemsPanel.Bottom() - 29, 68, 14);
 				m_rectSelTarget = recttemp;
 			}
 			//first selection size time entry check
@@ -1619,8 +1619,8 @@ void CMainMenu::Paint()
 	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(m_pDevice, &g_matIdentity);
 
-	RECTXYWH_F scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
-	RECTXYWH_F worldrect = UTApp().g_rect360hWorld;
+	RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
+	RectXYWH worldrect = UTApp().g_rect360hWorld;
 
 	switch (m_eState)
 	{
@@ -1636,7 +1636,7 @@ void CMainMenu::Paint()
 				case 1:
 				{
 					//title bar
-					RECTXYWH rRect(0, 20, 100, 18);
+					RectXYWHi rRect(0, 20, 100, 18);
 					GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 					g_font8bs1->DrawString(STR_UPDATING_MODS, worldrect.CenterX(), worldrect.y + 33.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 					//please wait
@@ -1662,21 +1662,21 @@ void CMainMenu::Paint()
 					const int nItemSpacing = 10;
 					SIZEWH szItem(200, 10);
 					//items list area
-					RECTXYWH rectItemsList(worldrect.CenterX() - szItem.w / 2, worldrect.Bottom() - 26 - m_nSelRows * (szItem.h + nItemSpacing), szItem.w, m_nSelRows * (szItem.h + nItemSpacing) - nItemSpacing);
+					RectXYWHi rectItemsList(worldrect.CenterX() - szItem.w / 2, worldrect.Bottom() - 26 - m_nSelRows * (szItem.h + nItemSpacing), szItem.w, m_nSelRows * (szItem.h + nItemSpacing) - nItemSpacing);
 					//selected mod details area
-					RECTXYWH rectSelMod(worldrect.CenterX() - 150, worldrect.y + 50, 300, 52);
+					RectXYWHi rectSelMod(worldrect.CenterX() - 150, worldrect.y + 50, 300, 52);
 					//title
-					RECTXYWH rRect(0, 20, 100, 18);
+					RectXYWHi rRect(0, 20, 100, 18);
 					GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 					g_font8bs1->DrawString(STR_AVAILABLE_MODS, worldrect.CenterX(), worldrect.y + 33.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 
 					//mod list background
-					RECTXYWH rectTemp = rectItemsList;
+					RectXYWHi rectTemp = rectItemsList;
 					rectTemp.Inflate(2, 2);
 					GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectTemp, 0x88888888);
 
 					//paint selection cursor
-					RECTXYWH selrect;
+					RectXYWHi selrect;
 					if ((m_rectSel.w > 0.0f) && (m_rectSel.h > 0.0f))
 					{
 						selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
@@ -1738,7 +1738,7 @@ void CMainMenu::Paint()
 
 						float fColor = 1.0f;
 
-						RECTXYWH rectItem(rectItemsList.x, rectItemsList.y + (szItem.h + nItemSpacing) * kk, szItem.w, szItem.h);
+						RectXYWHi rectItem(rectItemsList.x, rectItemsList.y + (szItem.h + nItemSpacing) * kk, szItem.w, szItem.h);
 
 						float fDark = 1.0f - fabs((float)kk - m_fSelPageCursor);
 						CLAMP(fDark, 0.0f, 1.0f);
@@ -1755,7 +1755,7 @@ void CMainMenu::Paint()
 
 						CStringDesc sdModName;
 						__Texts().SetStringDesc(&sdModName, mod->shName.text);
-						RECTXYWH recttemp(rectItem.x, rectItem.y - 10, rectItem.w - 30, rectItem.h + 20);
+						RectXYWHi recttemp(rectItem.x, rectItem.y - 10, rectItem.w - 30, rectItem.h + 20);
 						//g_font8bs1->DrawStringClipped(&sdModName, rectItem.x + 14, rectItem.CenterY(), recttemp, FONTFLAG_ANCHOR_VCENTERLEFT, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fColor));
 						//enabled?
 						if(mod->bActive)
@@ -1786,7 +1786,7 @@ void CMainMenu::Paint()
 					}
 
 					//buton back
-					RECTXYWH recttemp(worldrect.CenterX() - 35, worldrect.Bottom() - 25, 70, 16);
+					RectXYWHi recttemp(worldrect.CenterX() - 35, worldrect.Bottom() - 25, 70, 16);
 					int butframe = 0;
 					if (m_nSelection == -1) //daca am hover pe buton BACK
 					{
@@ -1844,7 +1844,7 @@ void CMainMenu::Paint()
 		{
 			PaintBackground(worldrect, 0xff4444dd);
 			//title
-			RECTXYWH rRect(0, 22, 100, 18);
+			RectXYWHi rRect(0, 22, 100, 18);
 			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 			g_font8bs1->DrawString(STR_SELECT_GAME_MODE, worldrect.CenterX(), worldrect.y + 35.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 			//coop string if online game
@@ -1853,15 +1853,15 @@ void CMainMenu::Paint()
 			else
 				g_font8b1->DrawString(STR_LOCAL_GAME, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
 
-			RECTXYWH picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_GAME_MODE_SPLASHES, 0);
+			RectXYWHi picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_GAME_MODE_SPLASHES, 0);
 			//facem loc pentru mesajele de sub imagine
-			RECTXYWH wndrect = picrect;
+			RectXYWHi wndrect = picrect;
 			wndrect.Inflate(-2, -2);
 			wndrect.h += 32;
 			int	wndSpacing = 24;
 
 			//paint selection cursor
-			RECTXYWH selrect;
+			RectXYWHi selrect;
 			if ((m_rectSel.w > 0.0f) && (m_rectSel.h > 0.0f))
 			{
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
@@ -1888,7 +1888,7 @@ void CMainMenu::Paint()
 					CSprite::paintFrame(&m_sprCol, worldrect.CenterX() + 0.5f * wndrect.w + offx, worldrect.CenterY(), ANM_MENUS_SPR_ARROWS_LARGE, 1, 0xffffffff);
 			}
 			//--- page selector cursor ---
-			RECTXYWH tmprect(worldrect.CenterX() - 20, worldrect.Bottom() - 24, 40, 4);
+			RectXYWHi tmprect(worldrect.CenterX() - 20, worldrect.Bottom() - 24, 40, 4);
 			tmprect.h -= 28;
 			if ((m_nSelElements > 1) && (tmprect.w > 0))
 			{
@@ -1899,7 +1899,7 @@ void CMainMenu::Paint()
 			}
 
 			//buton back
-			RECTXYWH recttemp(worldrect.CenterX() - 35, worldrect.Bottom() - 30, 70, 16);
+			RectXYWHi recttemp(worldrect.CenterX() - 35, worldrect.Bottom() - 30, 70, 16);
 			int butframe = 0;
 			if (m_nSelection == -1) //daca am hover pe buton BACK
 			{
@@ -1919,7 +1919,7 @@ void CMainMenu::Paint()
 		{
 			PaintBackground(worldrect, 0xff4444dd);
 			//title
-			RECTXYWH rRect(0, 22, 100, 18);
+			RectXYWHi rRect(0, 22, 100, 18);
 			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 			g_font8bs1->DrawString(STR_SELECT_EPISODE, worldrect.CenterX(), worldrect.y + 35.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 			//game mode name (top left)
@@ -1930,15 +1930,15 @@ void CMainMenu::Paint()
 			else
 				g_font8b1->DrawString(STR_LOCAL_GAME, worldrect.Right() - 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
 
-			RECTXYWH picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_CHAPTER_SPLASHES_LG, 0);
+			RectXYWHi picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_CHAPTER_SPLASHES_LG, 0);
 			//messages under the image
-			RECTXYWH wndrect = picrect;
+			RectXYWHi wndrect = picrect;
 			wndrect.Inflate(-2, -2);
 			wndrect.h += 24;
 			int	wndSpacing = 24;
 
 			//paint selection cursor
-			RECTXYWH selrect;
+			RectXYWHi selrect;
 			if ((m_rectSel.w > 0.0f) && (m_rectSel.h > 0.0f))
 			{
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
@@ -1966,7 +1966,7 @@ void CMainMenu::Paint()
 			}
 
 			//buton back
-			RECTXYWH recttemp(worldrect.CenterX() - 35, worldrect.Bottom() - 30, 70, 16);
+			RectXYWHi recttemp(worldrect.CenterX() - 35, worldrect.Bottom() - 30, 70, 16);
 			int butframe = 0;
 			if (m_nSelection == -1) //daca am hover pe buton BACK
 			{
@@ -1992,9 +1992,9 @@ void CMainMenu::Paint()
 		case K_MM_STATE_LEVEL_SELECT:
 		{
 			//incadram 2 panels in rezolutia de baza de 320x240
-			RECTXYWH rectLeftPanel(worldrect.CenterX() - 160, 0, 100, worldrect.h);
-			RECTXYWH rectRightPanel(worldrect.CenterX() - 160 + 100, 20, 220, worldrect.h - 20);
-			RECTXYWH tmprect; 
+			RectXYWHi rectLeftPanel(worldrect.CenterX() - 160, 0, 100, worldrect.h);
+			RectXYWHi rectRightPanel(worldrect.CenterX() - 160 + 100, 20, 220, worldrect.h - 20);
+			RectXYWHi tmprect; 
 
 			int nSelectedChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
 
@@ -2012,10 +2012,10 @@ void CMainMenu::Paint()
 			//dimensiuni ferestre nivel si spacing intre ele
 			SIZEWH wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
 			//page rect este offsetat putin (8px) in sus ca sa incapa butonul de back
-			RECTXYWH pageRect(rectRightPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectRightPanel.CenterY() - 0.5f * m_nSelRows * wndSzTotal.h - 8, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
+			RectXYWHi pageRect(rectRightPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectRightPanel.CenterY() - 0.5f * m_nSelRows * wndSzTotal.h - 8, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
 
 			//--- paint selection ---
-			RECTXYWH selrect;
+			RectXYWHi selrect;
 			if ((m_rectSel.w > 0.0f) && (m_rectSel.h > 0.0f))
 			{
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
@@ -2042,7 +2042,7 @@ void CMainMenu::Paint()
 				D3DXVECTOR2 vRefPos(pageRect.x, pageRect.y);
 				vRefPos.x -= m_fSelPageCursor * pageRect.w;
 
-				RECTXYWH lvlrect(vRefPos.x + nColumn * wndSzTotal.w + nPage * pageRect.w + wndSpacing.w / 2, vRefPos.y + nRow * wndSzTotal.h + wndSpacing.h / 2, wndSz.w, wndSz.h);
+				RectXYWHi lvlrect(vRefPos.x + nColumn * wndSzTotal.w + nPage * pageRect.w + wndSpacing.w / 2, vRefPos.y + nRow * wndSzTotal.h + wndSpacing.h / 2, wndSz.w, wndSz.h);
 				int nRealLevelIdx = nSelectedChapter * K_GAME_LEVELS_PER_CHAPTER + kk;
 
 				if (UTGetChaptersList().IsValidLevel(nSelectedChapter, kk))
@@ -2076,7 +2076,7 @@ void CMainMenu::Paint()
 				g_font6ns1->DrawString(STR_MELEE_LEADERBOARDS, pageRect.Right(), pageRect.Bottom() + 6, FONTFLAG_ANCHOR_BOTTOMRIGHT, K_COLOR_SELECTED_TEXT);
 
 			//--- mission name ---
-			RECTXYWH rRect(0, 19, 400, 30);
+			RectXYWHi rRect(0, 19, 400, 30);
 			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 
 			g_font6ns1->DrawString(STR_SELECT_MISSION, rectRightPanel.CenterX(), rectRightPanel.y + 6, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_DEFAULT_TEXT);
@@ -2116,7 +2116,7 @@ void CMainMenu::Paint()
 			}
 
 			//buton back
-			RECTXYWH recttemp(rectRightPanel.CenterX() - 35, rectRightPanel.Bottom() - 30, 70, 16);
+			RectXYWHi recttemp(rectRightPanel.CenterX() - 35, rectRightPanel.Bottom() - 30, 70, 16);
 			int butframe = 0;
 			if (m_nSelection == -1) //daca am hover pe buton BACK
 			{
@@ -2155,9 +2155,9 @@ void CMainMenu::Paint()
 			int nSelectedChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
 
 			//selected level details
-			RECTXYWH rectSelMod(worldrect.CenterX() - 150, worldrect.y + 50, 300, 52);
-			RECTXYWH rectItemsPanel(worldrect.CenterX() - 160, 110, 320, worldrect.h - 110);
-			RECTXYWH tmprect; 
+			RectXYWHi rectSelMod(worldrect.CenterX() - 150, worldrect.y + 50, 300, 52);
+			RectXYWHi rectItemsPanel(worldrect.CenterX() - 160, 110, 320, worldrect.h - 110);
+			RectXYWHi tmprect; 
 
 			PaintBackground(worldrect, 0xff4444dd);
 			//game mode name (top left)
@@ -2173,10 +2173,10 @@ void CMainMenu::Paint()
 			//dimensiuni ferestre nivel si spacing intre ele
 			SIZEWH wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
 			
-			RECTXYWH pageRect(rectItemsPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectItemsPanel.y, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
+			RectXYWHi pageRect(rectItemsPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectItemsPanel.y, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
 
 			//--- paint selection ---
-			RECTXYWH selrect;
+			RectXYWHi selrect;
 			if ((m_rectSel.w > 0.0f) && (m_rectSel.h > 0.0f))
 			{
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
@@ -2203,7 +2203,7 @@ void CMainMenu::Paint()
 				D3DXVECTOR2 vRefPos(pageRect.x, pageRect.y);
 				vRefPos.x -= m_fSelPageCursor * pageRect.w;
 
-				RECTXYWH lvlrect(vRefPos.x + nColumn * wndSzTotal.w + nPage * pageRect.w + wndSpacing.w / 2, vRefPos.y + nRow * wndSzTotal.h + wndSpacing.h / 2, wndSz.w, wndSz.h);
+				RectXYWHi lvlrect(vRefPos.x + nColumn * wndSzTotal.w + nPage * pageRect.w + wndSpacing.w / 2, vRefPos.y + nRow * wndSzTotal.h + wndSpacing.h / 2, wndSz.w, wndSz.h);
 				//BASE PANEL (should not contain stars)
 				CSprite::paintFrame(&m_sprCol, lvlrect.CenterX(), lvlrect.CenterY(), ANM_MENUS_SPR_LEVEL_PANEL_LOCKED, 1, wndCol);
 				//level type icon
@@ -2269,7 +2269,7 @@ void CMainMenu::Paint()
 
 
 			//--- title ---
-			RECTXYWH rRect(0, 20, 100, 18);
+			RectXYWHi rRect(0, 20, 100, 18);
 			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 			g_font8bs1->DrawString(STR_DOWNLOADED_LEVELS, worldrect.CenterX(), worldrect.y + 33.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 
@@ -2300,7 +2300,7 @@ void CMainMenu::Paint()
 			}
 
 			//buton back
-			RECTXYWH recttemp(rectItemsPanel.CenterX() - 35, rectItemsPanel.Bottom() - 30, 70, 16);
+			RectXYWHi recttemp(rectItemsPanel.CenterX() - 35, rectItemsPanel.Bottom() - 30, 70, 16);
 			int butframe = 0;
 			if (m_nSelection == -1) //daca am hover pe buton BACK
 			{
@@ -2325,7 +2325,7 @@ void CMainMenu::Paint()
 	m_pSprite->Flush();
 }
 
-void CMainMenu::PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles, bool bPaintTitle )
+void CMainMenu::PaintBackground(RectXYWH worldRect, DWORD dwColor, bool bPaintParticles, bool bPaintTitle )
 {
 	const Vec2 vLogoPos( 110.0f, 60.0f );
 	//background
@@ -2380,14 +2380,14 @@ void CMainMenu::PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD d
 {
 	bool bChapterUnlocked = UTGetChaptersList().IsChapterUnlocked(nChapterIdx, g_userData[K_MEMID_MISSIONS_COMPLETED]);
 
-	RECTXYWH picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_CHAPTER_SPLASHES, 0);
+	RectXYWHi picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_CHAPTER_SPLASHES, 0);
 	//facem loc pentru mesajele de sub imagine
-	RECTXYWH wndrect = picrect;
+	RectXYWHi wndrect = picrect;
 	wndrect.Inflate(-2, -2);
 	wndrect.h += 24;
 	int	wndSpacing = 24;
 
-	RECTXYWH wndrectL = wndrect; //local wndrect
+	RectXYWHi wndrectL = wndrect; //local wndrect
 	wndrectL.x += vCenter.x - picrect.w / 2.0f;
 	wndrectL.y += vCenter.y - wndrect.h / 2.0f;
 
@@ -2398,7 +2398,7 @@ void CMainMenu::PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD d
 	CSprite::paintFrame(&m_sprCol, wndrectL.x - 2, wndrectL.y - 2, ANM_MENUS_SPR_CHAPTER_SPLASHES, UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterImgFrame, dwColor);
 	
 	//mission name frame and string
-	RECTXYWH titlerect(wndrectL.x, wndrectL.y + picrect.h + 1, wndrectL.w, 9);
+	RectXYWHi titlerect(wndrectL.x, wndrectL.y + picrect.h + 1, wndrectL.w, 9);
 	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, dwColor);
 	titlerect.Inflate(1, 1);
 	if(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx >= 0)
@@ -2420,14 +2420,14 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 		bChapterUnlocked = true;
 #endif
 
-	RECTXYWH picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_CHAPTER_SPLASHES_LG, 0);
+	RectXYWHi picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_CHAPTER_SPLASHES_LG, 0);
 	//facem loc pentru mesajele de sub imagine
-	RECTXYWH wndrect = picrect;
+	RectXYWHi wndrect = picrect;
 	wndrect.Inflate(-2, -2);
 	wndrect.h += 24;
 	int	wndSpacing = 24;
 
-	RECTXYWH wndrectL = wndrect; //local wndrect
+	RectXYWHi wndrectL = wndrect; //local wndrect
 	wndrectL.x += vCenter.x - picrect.w / 2.0f;
 	wndrectL.y += vCenter.y - wndrect.h / 2.0f;
 
@@ -2460,7 +2460,7 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 		g_font6ns1->DrawString(&strdesc, wndrectL.x + picrect.w - 15, wndrectL.y + picrect.h - 6, FONTFLAG_ANCHOR_BOTTOMRIGHT, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, fAlpha));
 	}
 	//mission name frame and string
-	RECTXYWH titlerect(wndrectL.x, wndrectL.y + picrect.h + 1, wndrectL.w, 9);
+	RectXYWHi titlerect(wndrectL.x, wndrectL.y + picrect.h + 1, wndrectL.w, 9);
 	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 	titlerect.Inflate(1, 1);
 	if (!bWorkshopChapter)
@@ -2501,19 +2501,19 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 
 void CMainMenu::PaintGameModeWindow(D3DXVECTOR2 vCenter, int nGameModeIdx, float fAlpha)
 {
-	RECTXYWH picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_GAME_MODE_SPLASHES, 0);
+	RectXYWHi picrect = m_sprCol.GetAFrameBBox(ANM_MENUS_SPR_GAME_MODE_SPLASHES, 0);
 	//facem loc pentru mesajele de sub imagine
-	RECTXYWH wndrect = picrect;
+	RectXYWHi wndrect = picrect;
 	wndrect.Inflate(-2, -2);
 	wndrect.h += 32;
 
-	RECTXYWH wndrectL = wndrect; //local wndrect
+	RectXYWHi wndrectL = wndrect; //local wndrect
 	wndrectL.x += vCenter.x - picrect.w / 2.0f;
 	wndrectL.y += vCenter.y - wndrect.h / 2.0f;
 
 	DWORD wcol = DW_COLOR_FFFA(fAlpha);
 
-	RECTXYWH wndrectL2 = wndrectL;
+	RectXYWHi wndrectL2 = wndrectL;
 	wndrectL2.Inflate(1, 1);
 	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_BLACK1, wndrectL2, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 

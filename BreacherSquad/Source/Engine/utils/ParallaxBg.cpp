@@ -1,7 +1,7 @@
 #include "dxstdafx.h"
 #include "ParallaxBg.h"
 
-void PaintParallaxBackground(CSpriteCollection* m_sprBack, int m_BackAnimIdx, RECTXYWH_F camRect, D3DXVECTOR2 vLevelOrigin, double fLocalTimeline)
+void PaintParallaxBackground(CSpriteCollection* m_sprBack, int m_BackAnimIdx, RectXYWH camRect, D3DXVECTOR2 vLevelOrigin, double fLocalTimeline)
 {
 	if ((!m_sprBack->IsLoaded()) || (m_BackAnimIdx < 0))
 		return;
@@ -27,7 +27,7 @@ void PaintParallaxBackground(CSpriteCollection* m_sprBack, int m_BackAnimIdx, RE
 		ymove_byTime *= fMoveByTimeMultiplier;
 		xmove_byTime *= fMoveByTimeMultiplier;
 
-		RECTXYWH aframeBB = m_sprBack->GetAFrameBBox(m_BackAnimIdx, kk);
+		RectXYWHi aframeBB = m_sprBack->GetAFrameBBox(m_BackAnimIdx, kk);
 		///--- desenarea efectiva ---
 		D3DXVECTOR2 camOffset(vLevelOrigin.x - camRect.x, vLevelOrigin.y - camRect.Bottom());
 		D3DXVECTOR2 paintOffset(camOffset.x * xmove_mul - xmove_byTime * fLocalTimeline, camOffset.y * ymove_mul + ymove_byTime * fLocalTimeline);

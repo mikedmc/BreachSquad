@@ -19,8 +19,8 @@
 
 struct sGlyphInfo {
 	int advanceX;								// cursor advance after glyph
-	RECTLTRB_F			texRect;				// tex coords of module
-	RECTLTRB_F			moduleRectOff;			// module rect offsetted by x_off and y_off. Origin in cursor point.
+	RectLTRB			texRect;				// tex coords of module
+	RectLTRB			moduleRectOff;			// module rect offsetted by x_off and y_off. Origin in cursor point.
 };
 
 class CFreeTypeAtlas
@@ -102,8 +102,8 @@ public:
 	void					Release();
 
 	// Writes a line of texts without breaking it into multiple lines (no justify, no wrap)
-	RECTXYWH				DrawStringLine(CStringDesc *strDesc, float X, float Y, UINT16 Flags = FTFF_BOTTOMLEFT, DWORD Color = 0xffffffff);
-	RECTXYWH				DrawStringLine(int strID, float X, float Y, UINT16 Flags = FTFF_BOTTOMLEFT, DWORD Color = 0xffffffff);
+	RectXYWHi				DrawStringLine(CStringDesc *strDesc, float X, float Y, UINT16 Flags = FTFF_BOTTOMLEFT, DWORD Color = 0xffffffff);
+	RectXYWHi				DrawStringLine(int strID, float X, float Y, UINT16 Flags = FTFF_BOTTOMLEFT, DWORD Color = 0xffffffff);
 };
 
 

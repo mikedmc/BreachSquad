@@ -98,7 +98,7 @@ CControl::~CControl()
 {
 }
 
-RECTXYWH CControl::GetBBox()
+RectXYWHi CControl::GetBBox()
 {
 	return bbox;
 }
@@ -389,7 +389,7 @@ void CControl::Initialize()
 
 void CControl::Update( float dTime, float fTimeline )
 {
-	RECTXYWH BBox, BBox_inflated;
+	RectXYWHi BBox, BBox_inflated;
 	int inflate = 0; //cu cat apare mai mic sau mai mare grafica fata de bbox
 	int animIdx = -1;
 	int stringIdx = -1;
@@ -450,16 +450,16 @@ void CControl::Update( float dTime, float fTimeline )
 			int nSelectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
 			int nItemsCnt = __Texts().GetSubstringsCount( stringIdx, L'\n' );
 
-			RECTXYWH bbB = BBox; //bbox bar
+			RectXYWHi bbB = BBox; //bbox bar
 			//heads sizes
 			int w1 = m_pSprCol->GetAFrameBBox( animIdx, 0 ).w;
 			int w2 = m_pSprCol->GetAFrameBBox( animIdx, 2 ).w;
 			bbB.x += w1; bbB.w -= w1 + w2;
 
-			RECTXYWH bbL = m_pSprCol->GetAFrameBBox( animIdx, 3 ); //buton stanga
+			RectXYWHi bbL = m_pSprCol->GetAFrameBBox( animIdx, 3 ); //buton stanga
 			bbL.x += BBox.x; bbL.y += BBox.CenterY();
 
-			RECTXYWH bbR = m_pSprCol->GetAFrameBBox( animIdx, 4 ); //buton dreapta
+			RectXYWHi bbR = m_pSprCol->GetAFrameBBox( animIdx, 4 ); //buton dreapta
 			bbR.x += BBox.Right(); bbR.y += BBox.CenterY();
 
 			//tratam mai intai inputurile pe flaguri in cazul in care vin din handleCommand
@@ -529,7 +529,7 @@ void CControl::Update( float dTime, float fTimeline )
 			{
 				SND_PLAY( SNDIDX_STARHIT );
 				//generate particles
-				RECTXYWH starrect = m_pSprCol->GetAFrameBBox( animIdx, 0 );
+				RectXYWHi starrect = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 				Vec2 vStartPos( bbox.CenterX(), bbox.CenterY() );
 				vStartPos.x -= starrect.w;
 				vStartPos.x += starrect.w * floor( fTimerOld );
@@ -565,7 +565,7 @@ void CControl::Update( float dTime, float fTimeline )
 			if ( nCurrentLevel > nCurrentLevel_old )
 			{
 				//chevron bbox
-				RECTXYWH rct = m_pSprCol->GetAFrameBBox( animIdx, 8 );
+				RectXYWHi rct = m_pSprCol->GetAFrameBBox( animIdx, 8 );
 				Vec2 vStartPos( bbox.x, bbox.y + bbox.h / 2 );
 				vStartPos.x = vStartPos.x + rct.x + rct.w / 2;
 				vStartPos.y = vStartPos.y + rct.y + rct.h / 2;
@@ -671,10 +671,10 @@ void CControl::Update( float dTime, float fTimeline )
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 			}
 
-			RECTXYWH bbL = m_pSprCol->GetAFrameBBox( ANM_CONTROLS_SPR_ARROWS3, 0 ); //left
+			RectXYWHi bbL = m_pSprCol->GetAFrameBBox( ANM_CONTROLS_SPR_ARROWS3, 0 ); //left
 			bbL.x += BBox.x; bbL.y += BBox.CenterY();
 
-			RECTXYWH bbR = m_pSprCol->GetAFrameBBox( ANM_CONTROLS_SPR_ARROWS3, 2 ); //right
+			RectXYWHi bbR = m_pSprCol->GetAFrameBBox( ANM_CONTROLS_SPR_ARROWS3, 2 ); //right
 			bbR.x += BBox.Right(); bbR.y += BBox.CenterY();
 
 			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
@@ -844,17 +844,17 @@ void CControl::Update( float dTime, float fTimeline )
 			//mouse selection
 			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 			{
-				RECTXYWH rectSz = m_pSprCol->GetAFrameBBox( animIdx, 0 );
+				RectXYWHi rectSz = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 				int nClassRows = 2, nTeamRows = 3; //how many rows for class properties (const)	vs team properties
 				int nGroupSpacing = 9; //spacing after class rows
 				int nTotalRows = nClassRows + nTeamRows;
 				assert( nClassRows + nTeamRows <= K_PSS_UPGRADE_BARS_CNT );
 				//team group
-				RECTXYWH bbgroup( BBox_inflated.x, BBox_inflated.y, BBox_inflated.w, ( rectSz.h + 1 ) * nClassRows + 1 );
+				RectXYWHi bbgroup( BBox_inflated.x, BBox_inflated.y, BBox_inflated.w, ( rectSz.h + 1 ) * nClassRows + 1 );
 
 				for ( int ll = 0; ll < nTotalRows; ll++ )
 				{
-					RECTXYWH bbline = bbgroup;
+					RectXYWHi bbline = bbgroup;
 					bbline.h = rectSz.h;
 					bbline.y += ll * ( rectSz.h + 1 );
 					if ( ll >= nClassRows )
@@ -990,7 +990,7 @@ void CControl::Update( float dTime, float fTimeline )
 						if ( fontIdx >= 0 )
 							rowh = __TexFonts().fonts[ fontIdx ]->rowHeight;
 
-						RECTXYWH optbb( bbox.x, bbox.y + vSpacing * optcnt, bbox.w, vSpacing );
+						RectXYWHi optbb( bbox.x, bbox.y + vSpacing * optcnt, bbox.w, vSpacing );
 						if ( Rects::PointInRect( &layer->mouseRelPos, &optbb ) )
 						{
 							//if (selectedIdx == optcnt) //already selected, engage
@@ -1073,7 +1073,7 @@ void CControl::Update( float dTime, float fTimeline )
 		{
 			float	hoverPercent = paramsDict.GetVariantByName( L"fHoverPercent" )->m_asFloat;
 
-			RECTXYWH movedBB = BBox;
+			RectXYWHi movedBB = BBox;
 
 			if ( ( !bDisabled ) && ( !GameState::isTransitioning() ) )
 			{
@@ -1153,7 +1153,7 @@ void CControl::Update( float dTime, float fTimeline )
 			bool bChecked = paramsDict.GetVariantByName( L"bChecked" )->m_asBool;
 			float hoverPercent = paramsDict.GetVariantByName( L"fHoverPercent" )->m_asFloat;
 
-			RECTXYWH frameBB = m_pSprCol->GetAFrameBBox( animIdx, 0 );
+			RectXYWHi frameBB = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 			frameBB.x += BBox.x; frameBB.y += BBox.y;
 
 			bool bCheckChanged = false;
@@ -1219,16 +1219,16 @@ void CControl::Update( float dTime, float fTimeline )
 			if ( nTicks > 0 )
 				fTickSize = 1.0f / nTicks;
 
-			RECTXYWH bbB = BBox; //bbox bar
+			RectXYWHi bbB = BBox; //bbox bar
 			//heads sizes
 			int w1 = m_pSprCol->GetAFrameBBox( animIdx, 0 ).w;
 			int w2 = m_pSprCol->GetAFrameBBox( animIdx, 2 ).w;
 			bbB.x += w1; bbB.w -= w1 + w2;
 
-			RECTXYWH bbL = m_pSprCol->GetAFrameBBox( animIdx, 5 ); //buton stanga
+			RectXYWHi bbL = m_pSprCol->GetAFrameBBox( animIdx, 5 ); //buton stanga
 			bbL.x += BBox.x; bbL.y += BBox.CenterY();
 
-			RECTXYWH bbR = m_pSprCol->GetAFrameBBox( animIdx, 6 ); //buton dreapta
+			RectXYWHi bbR = m_pSprCol->GetAFrameBBox( animIdx, 6 ); //buton dreapta
 			bbR.x += BBox.Right(); bbR.y += BBox.CenterY();
 
 			//tratam mai intai inputurile pe flaguri in cazul in care vin din handleCommand
@@ -1319,16 +1319,16 @@ void CControl::Update( float dTime, float fTimeline )
 			int nMaxPage = paramsDict.GetVariantByName( L"nMaxPage" )->m_asINT32;
 
 
-			RECTXYWH bbB = BBox; //bbox bar
+			RectXYWHi bbB = BBox; //bbox bar
 			//heads sizes
 			int w1 = m_pSprCol->GetAFrameBBox( animIdx, 0 ).w;
 			int w2 = m_pSprCol->GetAFrameBBox( animIdx, 2 ).w;
 			bbB.x += w1; bbB.w -= w1 + w2;
 
-			RECTXYWH bbL = m_pSprCol->GetAFrameBBox( animIdx, 5 ); //buton stanga
+			RectXYWHi bbL = m_pSprCol->GetAFrameBBox( animIdx, 5 ); //buton stanga
 			bbL.x += BBox.x; bbL.y += BBox.CenterY();
 
-			RECTXYWH bbR = m_pSprCol->GetAFrameBBox( animIdx, 6 ); //buton dreapta
+			RectXYWHi bbR = m_pSprCol->GetAFrameBBox( animIdx, 6 ); //buton dreapta
 			bbR.x += BBox.Right(); bbR.y += BBox.CenterY();
 
 			//setam flaguri noi pentru frame-ul urmator
@@ -1417,7 +1417,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 	if ( !bVisible )
 		return;
 
-	RECTXYWH BBox, BBox_inflated;
+	RectXYWHi BBox, BBox_inflated;
 	int animIdx = -1;
 	int stringIdx = -1;
 	int fontIdx = -1;
@@ -1546,7 +1546,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			float ffracinv = 1.0f - ffrac;
 
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
-			RECTXYWH starrect = m_pSprCol->GetAFrameBBox( animIdx, 0 );
+			RectXYWHi starrect = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 
 			Vec2 vStartPos( BBox_inflated.CenterX(), BBox_inflated.CenterY() );
 			vStartPos.x -= starrect.w;
@@ -1592,7 +1592,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			//paint cursor
 			if ( ( rowH > 0 ) && ( !bDisabled ) )
 			{
-				RECTXYWH selbb( BBox_inflated.x, BBox_inflated.y + rowH * selectedIdx, BBox_inflated.w, rowH - 3 );
+				RectXYWHi selbb( BBox_inflated.x, BBox_inflated.y + rowH * selectedIdx, BBox_inflated.w, rowH - 3 );
 				GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME3, selbb, wcol );
 			}
 			//draw strings (left string); row by row as to keep old spacing
@@ -1673,7 +1673,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 
 			if ( ( rowH > 0 ) && ( optcnt > 0 ) && ( selectedIdx >= 0 ) && ( selectedIdx < optcnt ) )
 			{
-				RECTXYWH selbb( BBox_inflated.x, BBox_inflated.y + rowH * selectedIdx, BBox_inflated.w, rowH );
+				RectXYWHi selbb( BBox_inflated.x, BBox_inflated.y + rowH * selectedIdx, BBox_inflated.w, rowH );
 				GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME3, selbb, wcol );
 			}
 			/*
@@ -1865,13 +1865,13 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			DWORD wcoldenied = DW_COLORALPHA( 0xffff8888, layer->alpha );
 
 			//row height from blob
-			RECTXYWH rectSz = m_pSprCol->GetAFrameBBox( animIdx, 0 );
+			RectXYWHi rectSz = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 			int nClassRows = 2, nTeamRows = 3; //how many rows for class properties (const)	vs team properties
 			int nGroupSpacing = 9; //spacing after class rows
 			int nTotalRows = nClassRows + nTeamRows;
 			assert( nClassRows + nTeamRows <= K_PSS_UPGRADE_BARS_CNT );
 			//team group
-			RECTXYWH bbgroup( BBox_inflated.x, BBox_inflated.y, BBox_inflated.w, ( rectSz.h + 1 ) * nClassRows + 1 );
+			RectXYWHi bbgroup( BBox_inflated.x, BBox_inflated.y, BBox_inflated.w, ( rectSz.h + 1 ) * nClassRows + 1 );
 			GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, bbgroup, DW_COLORALPHA( 0xff0f1f2f, layer->alpha ) );
 			bbgroup.Inflate( -6, -1 ); bbgroup.x += 5;
 			GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, bbgroup, DW_COLORALPHA( 0xff102436, layer->alpha ) );
@@ -1879,7 +1879,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			//__TexFonts().fonts[fontIdx]->DrawStringTransformed(__Texts().strings[STR_TEAM_UPC], bbgroup.x - 4, bbgroup.CenterY(), 1.0f, -HALF_PI, FONTFLAG_ANCHOR_BOTTOMCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, layer->alpha * 0.5f));
 
 			//class group
-			RECTXYWH bbteam( BBox_inflated.x, BBox_inflated.y + bbgroup.h + nGroupSpacing, BBox_inflated.w, ( rectSz.h + 1 ) * nTeamRows + 1 );
+			RectXYWHi bbteam( BBox_inflated.x, BBox_inflated.y + bbgroup.h + nGroupSpacing, BBox_inflated.w, ( rectSz.h + 1 ) * nTeamRows + 1 );
 			GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_WHITE2, bbteam, DW_COLORALPHA( 0xff122426, layer->alpha ) );
 			bbteam.Inflate( -6, -1 ); bbteam.x += 5;
 			GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_WHITE1, bbteam, DW_COLORALPHA( 0xff1E3538, layer->alpha ) );
@@ -1896,7 +1896,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			bool bDeniedOperation = false;
 			for ( int ll = 0; ll < nTotalRows; ll++ )
 			{
-				RECTXYWH bbline = bbgroup;
+				RectXYWHi bbline = bbgroup;
 				bbline.h = rectSz.h;
 				bbline.y += ll * ( rectSz.h + 1 );
 				if ( ll >= nClassRows )
@@ -2042,13 +2042,13 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			//paint selected line
 			if ( statusFlags & CCTRL_STATUS_FLAG_HAS_FOCUS )
 			{
-				RECTXYWH bbline = bbgroup;
+				RectXYWHi bbline = bbgroup;
 				bbline.h = rectSz.h;
 				bbline.y += nSelectedLine * ( rectSz.h + 1 );
 				if ( nSelectedLine >= nClassRows )
 					bbline.y += nGroupSpacing - 1;
 				//paint selection
-				RECTXYWH bbsel = bbline;
+				RectXYWHi bbsel = bbline;
 				bbsel.Inflate( -1, -1 );
 				GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_HOLLOW1, bbsel, DW_COLORALPHA( 0xff254159, layer->alpha ) );
 				//paint selected point
@@ -2091,7 +2091,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			//desenam meniul
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 			//cursor size
-			RECTXYWH currRect( 0, 0, BBox.w, vSpacing );
+			RectXYWHi currRect( 0, 0, BBox.w, vSpacing );
 			if ( animIdx >= 0 )
 				currRect = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 
@@ -2115,7 +2115,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 					{
 						int selFrame = 0; //small button
 
-						RECTXYWH rectButAnim = m_pSprCol->GetAFrameBBox( animIdx, selFrame );
+						RectXYWHi rectButAnim = m_pSprCol->GetAFrameBBox( animIdx, selFrame );
 
 						UTSprite::PaintFrame( m_pSprCol, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame, wcol );
 						//paint selected cursor
@@ -2133,14 +2133,14 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 					if ( textAlignFlags & FONTFLAG_ANCHOR_CENTER )
 						vTextOffset = Vec2( 0.0f, -1.0f * selperc );
 
-					RECTXYWH drawrect( BBox.x + vTextOffset.x, BBox.y + vSpacing * curidx + vTextOffset.y + currRect.y, BBox.w, currRect.h );
+					RectXYWHi drawrect( BBox.x + vTextOffset.x, BBox.y + vSpacing * curidx + vTextOffset.y + currRect.y, BBox.w, currRect.h );
 					Vec2 vTextOrigin( drawrect.x, drawrect.CenterY() );
 					if ( textAlignFlags & FONTFLAG_ANCHOR_CENTER )
 						vTextOrigin = Vec2( drawrect.CenterX(), drawrect.CenterY() );
 					else if ( textAlignFlags & FONTFLAG_ANCHOR_RIGHT )
 						vTextOrigin = Vec2( drawrect.Right(), drawrect.CenterY() );
 					//text rect
-					RECTXYWH butr( BBox_inflated.x, BBox_inflated.y + vSpacing * curidx - ceil( selperc ), BBox_inflated.w, vSpacing );
+					RectXYWHi butr( BBox_inflated.x, BBox_inflated.y + vSpacing * curidx - ceil( selperc ), BBox_inflated.w, vSpacing );
 
 					__TexFonts().fonts[ fontIdx ]->DrawString( nStringIdx, vTextOrigin.x, vTextOrigin.y, textAlignFlags | FONTFLAG_ANCHOR_VCENTER, ( DWORD ) exitcol );
 					if ( ( ll == selectedIdx ) && ( !bDisabled ) )
@@ -2168,8 +2168,8 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			}
 
 			//deseneaza fundal (frames: 0-top bar, 1-bg filler, 2-bottom bar)
-			RECTXYWH_F camrect = pCamera->GetCamWorldAABB();
-			RECTXYWH_F barrect;
+			RectXYWH camrect = pCamera->GetCamWorldAABB();
+			RectXYWH barrect;
 			barrect.x = floor( camrect.x - camrect.w / 2.0f - 10.0f ); barrect.w = ceil( camrect.w + 20.0f );
 			barrect.y = BBox_inflated.CenterY() - ( BBox_inflated.h / 2.0f ) * layer->alpha;
 			barrect.h = BBox_inflated.h * layer->alpha;
@@ -2255,7 +2255,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				if ( fnLen > BBox_inflated.w )
 					fnLen = BBox_inflated.w;
 				//gasesc centrul title bar-ului (din frame-ul de top center)
-				RECTXYWH topbarbb = m_pSprCol->GetAFrameBBox( animIdx, 1 );
+				RectXYWHi topbarbb = m_pSprCol->GetAFrameBBox( animIdx, 1 );
 
 				Vec2 titleBarCenter( BBox_inflated.x + BBox_inflated.w / 2.0f, BBox_inflated.y - topbarbb.h / 2 );
 				__TexFonts().fonts[ fontIdx ]->DrawStringScaleW( stringIdx, titleBarCenter.x, titleBarCenter.y, fnLen, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor );
@@ -2276,7 +2276,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 		break;
 		case CCTRL_TYPE_SDL_KEYREADER:
 		{
-			RECTXYWH movedB = BBox;
+			RectXYWHi movedB = BBox;
 			if ( fontIdx >= 0 )
 			{
 				CStringHash* strh = &paramsDict.GetVariantByName( L"sKeyName" )->m_strArg;
@@ -2313,7 +2313,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				if ( nStrIdx2 >= 0 )
 					nCount++;
 
-				RECTXYWH iconbox( 0.0f, 0.0f, 0.0f, __TexFonts().fonts[ fontIdx ]->rowHeight );
+				RectXYWHi iconbox( 0.0f, 0.0f, 0.0f, __TexFonts().fonts[ fontIdx ]->rowHeight );
 				Vec2 vPos( BBox.x, BBox.Bottom() - iconbox.h / 2.0f - ( nCount - 1 ) * iconbox.h );
 				bool bActive = false;
 				if ( nIconFrame1 >= 0 )
@@ -2328,7 +2328,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 					//bottom align:
 					//vPos.y = BBox.Bottom() - iconbox.h / 2 - (nCount - 1) * iconbox.h;
 
-					RECTXYWH frrct( vPos.x - iconbox.w, vPos.y - iconbox.h / 2, BBox.w, iconbox.h );
+					RectXYWHi frrct( vPos.x - iconbox.w, vPos.y - iconbox.h / 2, BBox.w, iconbox.h );
 					frrct.Inflate( -1, -1 );
 					if ( bActive )
 						GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_BLACK4, frrct, dwCol );
@@ -2351,7 +2351,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				{
 					if ( nIconFrame2 > 0 )
 						bActive = true;
-					RECTXYWH frrct( vPos.x - iconbox.w, vPos.y - iconbox.h / 2, BBox.w, iconbox.h );
+					RectXYWHi frrct( vPos.x - iconbox.w, vPos.y - iconbox.h / 2, BBox.w, iconbox.h );
 					frrct.Inflate( -1, -1 );
 					if ( bActive )
 						GUIUtils::DrawFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_BLACK4, frrct, dwCol );
@@ -2374,7 +2374,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 		{
 			int textAlignFlags = paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
 
-			RECTXYWH movedB = BBox;
+			RectXYWHi movedB = BBox;
 			if ( fontIdx >= 0 )
 			{
 				int noscaleFlags = FONTFLAG_WRAPTEXT | FONTFLAG_CLIPTEXT | FONTFLAG_JUSTIFY;
@@ -2407,7 +2407,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 
 			int textAlignFlags = paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
 
-			RECTXYWH movedB = BBox;
+			RectXYWHi movedB = BBox;
 			if ( fontIdx >= 0 )
 			{
 				int noscaleFlags = FONTFLAG_WRAPTEXT | FONTFLAG_CLIPTEXT | FONTFLAG_JUSTIFY;
@@ -2449,7 +2449,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 				foff = max( 0.0f, 5.0f * sin( layer->pControlsManager->fLocalTimeline * 6.0f ) );
 			}
 
-			RECTXYWH animR = m_pSprCol->GetAFrameBBox_real( animIdx, frameIdx );
+			RectXYWHi animR = m_pSprCol->GetAFrameBBox_real( animIdx, frameIdx );
 
 			float fScaleX = 1.0f, fScaleY = 1.0f;
 			if ( bScale )
@@ -2508,7 +2508,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			float slidePercent = paramsDict.GetVariantByName( L"fSlidePercent" )->m_asFloat;
 			int nSteps = paramsDict.GetVariantByName( L"Steps" )->m_asINT32;
 
-			RECTXYWH bboxBar = BBox;
+			RectXYWHi bboxBar = BBox;
 
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 
@@ -2548,7 +2548,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 			int nMinPage = paramsDict.GetVariantByName( L"nMinPage" )->m_asINT32;
 			int nMaxPage = paramsDict.GetVariantByName( L"nMaxPage" )->m_asINT32;
 
-			RECTXYWH bboxBar = BBox;
+			RectXYWHi bboxBar = BBox;
 
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 
@@ -2740,7 +2740,7 @@ void CControl::Paint( CCameraTransform *pCamera, D3DXMATRIXA16 * matWorld )
 
 			//level shield
 			UTSprite::PaintFrame( m_pSprCol, BBox.x, centerY, animIdx, 9, col );
-			RECTXYWH prct = m_pSprCol->GetAFrameBBox( animIdx, 9 );
+			RectXYWHi prct = m_pSprCol->GetAFrameBBox( animIdx, 9 );
 			Vec2 vposLvl( BBox.x + prct.x + prct.w / 2, BBox.CenterY() + prct.y + prct.h / 2 );
 			//current level
 			if ( fontIdx >= 0 )
@@ -3392,8 +3392,8 @@ void GUIUtils::DrawButtonFromText( CSpriteCollection *sprCol, int animIdx, bool 
 		return;
 
 	SIZEWH fsz = pFont->MeasureString( strDesc );
-	RECTXYWH sprrect = sprCol->GetAFrameBBox( animIdx, 1 );
-	RECTXYWH butrect( vButCenter.x - fsz.w / 2, vButCenter.y - 2, fsz.w, sprrect.h );
+	RectXYWHi sprrect = sprCol->GetAFrameBBox( animIdx, 1 );
+	RectXYWHi butrect( vButCenter.x - fsz.w / 2, vButCenter.y - 2, fsz.w, sprrect.h );
 	if ( nAlignHsign < 0 )
 	{
 		butrect.x = vButCenter.x;
@@ -3415,29 +3415,29 @@ void GUIUtils::DrawButtonFromText( CSpriteCollection *sprCol, int animIdx, bool 
 	}
 }
 
-void GUIUtils::DrawHTilingAnim( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RECTXYWH BBox, DWORD color )
+void GUIUtils::DrawHTilingAnim( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color )
 {
-	RECTXYWH leftheadbb = sprCol->GetAFrameBBox( animIdx, nStartFrame );
-	RECTXYWH rightheadbb = sprCol->GetAFrameBBox( animIdx, nStartFrame + 2 );
+	RectXYWHi leftheadbb = sprCol->GetAFrameBBox( animIdx, nStartFrame );
+	RectXYWHi rightheadbb = sprCol->GetAFrameBBox( animIdx, nStartFrame + 2 );
 	int centerw = BBox.w - leftheadbb.w - rightheadbb.w;
 	//UTSprite::PaintFrameModuleTiled( sprCol, BBox.x + leftheadbb.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 1, 0, color, centerw, -1 );
 	UTSprite::PaintFrame( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame, color );
 	UTSprite::PaintFrame( sprCol, BBox.x + BBox.w - rightheadbb.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 2, color );
 }
 
-void GUIUtils::DrawHTilingAnim_HeadsOutside( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RECTXYWH BBox, DWORD color )
+void GUIUtils::DrawHTilingAnim_HeadsOutside( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color )
 {
 	//UTSprite::PaintFrameModuleTiled( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 1, 0, color, BBox.w, -1 );
 	UTSprite::PaintFrame( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame, color );
 	UTSprite::PaintFrame( sprCol, BBox.x + BBox.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 2, color );
 }
 
-void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
+void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
 {
-	RECTXYWH leftheadbb = sprCol->GetAFrameBBox( animIdx, 0 );
-	RECTXYWH rightheadbb = sprCol->GetAFrameBBox( animIdx, 2 );
+	RectXYWHi leftheadbb = sprCol->GetAFrameBBox( animIdx, 0 );
+	RectXYWHi rightheadbb = sprCol->GetAFrameBBox( animIdx, 2 );
 	GUIUtils::DrawHTilingAnim( sprCol, animIdx, 0, BBox, color );
-	RECTXYWH cliprect = BBox;
+	RectXYWHi cliprect = BBox;
 	cliprect.x += leftheadbb.w;
 	cliprect.w -= leftheadbb.w + rightheadbb.w;
 
@@ -3454,10 +3454,10 @@ void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RECTXYWH BB
 	//UTSprite::PaintFrameModuleTiled( sprCol, cliprect.x, cliprect.CenterY(), animIdx, 3, 0, color, cliprect.w );
 }
 
-void GUIUtils::DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
+void GUIUtils::DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
 {
 	GUIUtils::DrawHTilingAnim_HeadsOutside( sprCol, animIdx, 0, BBox, color );
-	RECTXYWH cliprect = BBox;
+	RectXYWHi cliprect = BBox;
 
 	if ( nTicks > 1 )
 	{
@@ -3472,10 +3472,10 @@ void GUIUtils::DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx
 	//UTSprite::PaintFrameModuleTiled( sprCol, BBox.x, BBox.CenterY(), animIdx, 3, 0, color, cliprect.w );
 }
 
-void GUIUtils::DrawPageSelector( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, int nPagesCnt, int nSelectedPage, DWORD color /*= 0xffffffff*/, int nAlign /*= 0*/ )
+void GUIUtils::DrawPageSelector( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, int nPagesCnt, int nSelectedPage, DWORD color /*= 0xffffffff*/, int nAlign /*= 0*/ )
 {
 	//int selpage = LIMIT(nSelectedPage, 0, nPagesCnt - 1);
-	RECTXYWH ptrect = sprCol->GetAFrameBBox( animIdx, 0 ); //unselected page tick
+	RectXYWHi ptrect = sprCol->GetAFrameBBox( animIdx, 0 ); //unselected page tick
 	int width = nPagesCnt * ptrect.w - 1; //subtract dot spacing (1)
 	int startposx = BBox.CenterX() - width / 2 + ptrect.w / 2;
 	if ( nAlign < 0 )
@@ -3493,9 +3493,9 @@ void GUIUtils::DrawPageSelector( CSpriteCollection *sprCol, int animIdx, RECTXYW
 	}
 }
 
-void GUIUtils::DrawFrameF( CSpriteCollection *sprCol, int animIdx, RECTXYWH_F BBox, DWORD color, float fInflate )
+void GUIUtils::DrawFrameF( CSpriteCollection *sprCol, int animIdx, RectXYWH BBox, DWORD color, float fInflate )
 {
-	RECTXYWH_F BBox_local = BBox;
+	RectXYWH BBox_local = BBox;
 	BBox_local.Inflate( fInflate );
 	/*
 	RECTXYWH frrect;
@@ -3541,9 +3541,9 @@ void GUIUtils::DrawFrameF( CSpriteCollection *sprCol, int animIdx, RECTXYWH_F BB
 }
 
 //deseneaza fereastra in exteriorul BBOX, zona BBox fiind in totalitate folosibila
-void GUIUtils::DrawFrame( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color, int nInflate )
+void GUIUtils::DrawFrame( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nInflate )
 {
-	RECTXYWH BBox_local = BBox;
+	RectXYWHi BBox_local = BBox;
 	BBox_local.Inflate( nInflate, nInflate );
 	/*
 	RECTXYWH frrect;
@@ -3588,26 +3588,26 @@ void GUIUtils::DrawFrame( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox,
 	*/
 }
 
-void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor )
+void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor )
 {
 	DrawFrame( sprCol, animIdx, BBox, color );
 	//paint title
 	if ( strTitle != null )
 	{
 		//gasesc centrul title bar-ului (din frame-ul de top center)
-		RECTXYWH topbarbb = sprCol->GetAFrameBBox( animIdx, 1 );
+		RectXYWHi topbarbb = sprCol->GetAFrameBBox( animIdx, 1 );
 
 		Vec2 titleBarCenter( BBox.x + BBox.w / 2.0f, BBox.y - topbarbb.h / 2 ); //constanta este in fn de grafica, nu se poate scapa de ea
 		__TexFonts().fonts[ nFontIdx ]->DrawStringScaleW( strTitle, titleBarCenter.x, titleBarCenter.y, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwTitleColor );
 	}
 }
 
-void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor )
+void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor )
 {
 	DrawFrame( sprCol, animIdx, BBox, color );
 	//paint title
 	//gasesc centrul title bar-ului (din frame-ul de top center)
-	RECTXYWH topbarbb = sprCol->GetAFrameBBox( animIdx, 1 );
+	RectXYWHi topbarbb = sprCol->GetAFrameBBox( animIdx, 1 );
 	if ( ( nFontIdx >= 0 ) && ( nStrIdxTitle >= 0 ) )
 	{
 		Vec2 titleBarCenter( BBox.x + BBox.w / 2.0f, BBox.y - topbarbb.h / 2 ); //constanta este in fn de grafica, nu se poate scapa de ea
@@ -3615,13 +3615,13 @@ void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox
 	}
 }
 
-void GUIUtils::DrawWidebar( CSpriteCollection *sprCol, int animIdx, RECTXYWH BBox, DWORD color )
+void GUIUtils::DrawWidebar( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color )
 {
 	float fAlpha = DW_GETFALPHA( color );
 
 	//deseneaza fundal (frames: 0-top bar, 1-bg filler)
-	RECTXYWH_F camrect = CCameraTransform::GetActiveCamera()->GetCamWorldAABB();
-	RECTXYWH_F barrect;
+	RectXYWH camrect = CCameraTransform::GetActiveCamera()->GetCamWorldAABB();
+	RectXYWH barrect;
 	barrect.x = floor( camrect.x /*- camrect.w / 2.0f*/ - 10.0f ); barrect.w = ceil( camrect.w + 20.0f );
 	barrect.y = BBox.CenterY() - ( BBox.h / 2.0f ) * fAlpha;
 	barrect.h = BBox.h * fAlpha;
@@ -4195,7 +4195,7 @@ void CControlsManager::Paint()
 				//daca controlul curent nu arata focus atunci sa nu indic
 				if ( !bHideTabstop )
 				{
-					RECTXYWH focusrect;
+					RectXYWHi focusrect;
 					focusrect.Set( lay->m_focusRect.vMin.x, lay->m_focusRect.vMin.y, lay->m_focusRect.vSize.x, lay->m_focusRect.vSize.y );
 					GUIUtils::DrawFrame( &m_sprCol, ANM_CONTROLS_SPR_FRAME5, focusrect, DW_COLOR_FFFA( lay->alpha ), -1 );
 				}

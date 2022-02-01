@@ -75,9 +75,9 @@ public:
 	// \param: pDestRect - expects a rectangle where the srcUV will be painter. 
 	// Use together with pPosition if you need rotations as rotations are applied before moving the pDestRect to pPosition 
 	// allowing you to specify origin of rotation by defining pDestRect around the origin.
-	OPRESULT				Draw(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec2 vPos, DWORD color = 0xffffffff, float fRotationZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
+	OPRESULT				Draw(PTEXTURE pTexture, RectLTRB &pSrcUV, RectLTRB &pDestRect, Vec2 vPos, DWORD color = 0xffffffff, float fRotationZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
 	// Draw version with flip flags (2 if's slower because it handles flip flags)... 
-	OPRESULT				DrawEx(PTEXTURE pTexture, RECTLTRB_F &pSrcUV, RECTLTRB_F &pDestRect, Vec2 vPos, DWORD color = 0xffffffff, float fRotationZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f }, UINT paintFlags = 0);
+	OPRESULT				DrawEx(PTEXTURE pTexture, RectLTRB &pSrcUV, RectLTRB &pDestRect, Vec2 vPos, DWORD color = 0xffffffff, float fRotationZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f }, UINT paintFlags = 0);
 	// #TODO: DRAW version with clip rect
 	// #TODO: version with scissors for scene wide clip rects (setclip/remove clip)
 	// Activates additive blending and flushes

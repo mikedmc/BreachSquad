@@ -25,7 +25,7 @@ class CCameraTransform
 private:
 	static CCameraTransform*	g_currentCamera; //camera curenta
 private:
-	RECTXYWH_F					m_Viewport;			// viewport in screen coords (rectangle on screen where we show the contents)
+	RectXYWH					m_Viewport;			// viewport in screen coords (rectangle on screen where we show the contents)
 	float						fLocalTimeLine;
 	Mat							m_matView;
 
@@ -33,14 +33,14 @@ private:
 	float						m_k1, m_k2;			// animation constants
 	Vec2						m_veck1, m_veck2;	// vector anim constants
 
-	RECTXYWH_F					m_worldAABB;		// camera world bbox limits in world coords. If 0 then not set.
+	RectXYWH					m_worldAABB;		// camera world bbox limits in world coords. If 0 then not set.
 	//datele din care se construieste dreptunghiul vizibil pe camera in world coords
 	Vec3		m_vecLookAt;		//(x, y, zoom) punctul unde se doreste pozitionata camera (vine spre acest punct cu animatie)
 	Vec3		m_vecRealLookAt;	//(x, y, zoom) look at real - punctul spre care priveste acum camera, se duce catre punctul m_vecLookAt cu animatie
 	Vec3		m_vecLookAtSpeed;	//(x, y, zoom) viteza cu care se deplaseaza look at catre destinatie
 
 	Vec2		m_vecHW, m_vecHH;	//vectorii care pornesc din lookat (centru) si se duc pe jumatate din latimea/inaltimea ecranului - world space
-	RECTXYWH_F		m_camWorldAABB;		//camera view rectangle in world coords
+	RectXYWH		m_camWorldAABB;		//camera view rectangle in world coords
 
 	int				m_camScreenSize;	//marimea ecranului virtual vazut de camera. cealalta axa se calculeaza in fn de rezolutia ecranului
 	ECamAxisType	m_camScreenAxis;	//axa pe care e setat ScreenSize
@@ -71,11 +71,11 @@ public:
     //worldAABB - dreptunghiul in care se incadreaza lumea pe care o priveste camera
     //bHardWorldEdges - true - camera nu are voie sa afiseze nimic din afara lumii deci va scala in asa fel incat sa umple ecranul
     //constraintAxis - axa de constrangere la zoom (vertical sau orizontal). Pe axa respectiva nu poti sa vezi mai putin de minAxisSize sau mai mult de maxAxisSize
-	void SetWorldBounds(RECTXYWH_F worldAABB, bool bHardWorldEdges = true, ECamAxisType constraintAxis = K_CAMTRANS_AXIS_NONE, float minAxisSize = 0.0f, float maxAxisSize = 100000.0f);
+	void SetWorldBounds(RectXYWH worldAABB, bool bHardWorldEdges = true, ECamAxisType constraintAxis = K_CAMTRANS_AXIS_NONE, float minAxisSize = 0.0f, float maxAxisSize = 100000.0f);
 	//initializeaza camera
 	//viewport - viewportul in care face transformarile (coordonate ecran)
 	//camScreenSize - dimensiunea ecranului virtual (pe axa eSizeAxis) al camerei raportat la viewport, cand zoom este 1.0f; 0 - size of viewport
-	void InitCamera(RECTXYWH_F viewport, int camScreenSize, ECamAxisType eSizeAxis, Vec2 vecLookAt, float fZoom = 1.0f);
+	void InitCamera(RectXYWH viewport, int camScreenSize, ECamAxisType eSizeAxis, Vec2 vecLookAt, float fZoom = 1.0f);
 	//se cheama dupa initCamera ca sa iti afiseze tot dreptunghiul lumii in dreptunghiul camerei. Seteaza hardWorldEdges pe false
 	void ZoomToFitWorld();
 	
@@ -87,7 +87,7 @@ public:
 	// \param forced - moves immediately, doesn't wait for animation (moves real position too)
 	void MoveCamPos(Vec2 vDelta, bool forced = false);
 
-	void SetViewport(RECTXYWH_F viewport);
+	void SetViewport(RectXYWH viewport);
 	//daca incui o axa nu va mai fi modificata din update. Practic ramane ce setezi in initCamera
 	void SetAxisLock(bool lockXaxis, bool lockYaxis, bool lockZoom);
 	/*!
@@ -111,23 +111,23 @@ public:
 	/*!
 	 * \brief Gets the visible rectangle in world coordinates
 	 */
-	FORCEINLINE const RECTXYWH_F &	GetCamWorldAABB() const { return m_camWorldAABB; }
+	FORCEINLINE const RectXYWH &	GetCamWorldAABB() const { return m_camWorldAABB; }
 	//void				GetCamVectors(Vec2 *LookAtPt, Vec2 *vecRightHW, Vec2 *vecDownHH);
 
-	FORCEINLINE const RECTXYWH_F &	GetWorldAABB() const { return m_worldAABB; }
-	FORCEINLINE const RECTXYWH_F & GetViewport() const { return m_Viewport; }
+	FORCEINLINE const RectXYWH &	GetWorldAABB() const { return m_worldAABB; }
+	FORCEINLINE const RectXYWH & GetViewport() const { return m_Viewport; }
 
 	//trece din coord ecran in coord World
 	//param: inPt - punctul cerut ca input
 	//param: srcViewportOverride - daca inPt este in coordonate diferite de cele ale ecranului real se vor specifica aici. De exemplu touch-ul de la iOS are alte dimensiuni
-	Vec2		ScreenToWorld(Vec2 inPt, RECTXYWH_F *srcViewportOverride = NULL);
-	Vec2		WorldToScreen(Vec2 inPT, RECTXYWH_F *srcViewportOverride = NULL);
+	Vec2		ScreenToWorld(Vec2 inPt, RectXYWH *srcViewportOverride = NULL);
+	Vec2		WorldToScreen(Vec2 inPT, RectXYWH *srcViewportOverride = NULL);
 	Vec2		ViewportToScreen(Vec2 inPt);
 	Vec2		ScreenToViewport(Vec2 inPT);
 	SIZEWH_F		ScreenToWorld(SIZEWH_F inSZ);
 	SIZEWH_F		WorldToScreen(SIZEWH_F inSZ);
-	RECTXYWH_F		ScreenToWorld(RECTXYWH_F inRect);
-	RECTXYWH_F		WorldToScreen(RECTXYWH_F inRect);
+	RectXYWH		ScreenToWorld(RectXYWH inRect);
+	RectXYWH		WorldToScreen(RectXYWH inRect);
 	///--- transformari intre 2 camere ---
 
 	//Transforma un punct din viewportul camerei curente in viewportul camerei destCam

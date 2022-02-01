@@ -476,25 +476,25 @@ bool CSpriteCollection::GetAFrameHitPointFlag(int animIdx, int frameIdx, int poi
 	return false;
 }
 
-RECTXYWH CSpriteCollection::GetModuleRect(int animIdx, int frameIdx, int moduleIdx)
+RectXYWHi CSpriteCollection::GetModuleRect(int animIdx, int frameIdx, int moduleIdx)
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	if ((animIdx >= Animations.GetSize()) || (frameIdx >= Animations[animIdx]->aframesNo) || (moduleIdx >= AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->fmodulesNo))
 	{
 		ErrorBox(K_ERR_WARNING, L"GetModuleRect -> out of bounds!");
-		return RECTXYWH(0, 0, 0, 0);
+		return RectXYWHi(0, 0, 0, 0);
 	}
 #endif;
 	return FModules[AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->fmodulesIdx[moduleIdx]]->moduleXYWH;
 }
 
-RECTLTRB_F CSpriteCollection::GetModuleRect_TexCoords(int animIdx, int frameIdx, int moduleIdx)
+RectLTRB CSpriteCollection::GetModuleRect_TexCoords(int animIdx, int frameIdx, int moduleIdx)
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	if ((animIdx >= Animations.GetSize()) || (frameIdx >= Animations[animIdx]->aframesNo) || (moduleIdx >= AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->fmodulesNo))
 	{
 		ErrorBox(K_ERR_WARNING, L"GetModuleRect -> out of bounds!");
-		return RECTLTRB_F(0.0f, 0.0f, 0.0f, 0.0f);
+		return RectLTRB(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 #endif;
 	scFModule *module = FModules[AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->fmodulesIdx[moduleIdx]];

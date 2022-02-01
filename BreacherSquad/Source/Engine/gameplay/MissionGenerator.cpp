@@ -171,7 +171,7 @@ CAreaBlock CMissionGenerator::GetPlacedBlockDescAt(Vec2i vPos)
 
 bool CMissionGenerator::IsZoneClear(CInventoryArea* iarea, Vec2i vPos)
 {
-	RECTXYWH AABBtest(vPos.x, vPos.y, iarea->areaSpecs.sizeBL.x, iarea->areaSpecs.sizeBL.y);
+	RectXYWHi AABBtest(vPos.x, vPos.y, iarea->areaSpecs.sizeBL.x, iarea->areaSpecs.sizeBL.y);
 	// check overlapping blocks
 	for (int xx = 0; xx < AABBtest.w; xx++)
 	{

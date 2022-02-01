@@ -101,7 +101,7 @@ OPRESULT CTexFont::LoadFontXML( WCHAR* XMLpath )
 
 	pugi::xml_node framesnode = spritenodes.child( L"Frames" );
 	pugi::xml_node fmodulesnode = spritenodes.child( L"FrameModules" );
-	CArray<RECTXYWH*> tempFrameBBox;
+	CArray<RectXYWHi*> tempFrameBBox;
 	for ( pugi::xml_node fmoduledata = fmodulesnode.first_child(), framedata = framesnode.first_child();
 		fmoduledata;
 		fmoduledata = fmoduledata.next_sibling(), framedata = framedata.next_sibling() )
@@ -119,7 +119,7 @@ OPRESULT CTexFont::LoadFontXML( WCHAR* XMLpath )
 		SetRect( &nfmod->moduleRect, tempModules[ midx ]->X, tempModules[ midx ]->Y, tempModules[ midx ]->X + tempModules[ midx ]->W, tempModules[ midx ]->Y + tempModules[ midx ]->H );
 		FModules.Add( nfmod );
 
-		RECTXYWH *frameR = new RECTXYWH();
+		RectXYWHi *frameR = new RectXYWHi();
 		frameR->x = framedata.attribute( L"BBoxX" ).as_int();
 		frameR->y = framedata.attribute( L"BBoxY" ).as_int();
 		frameR->w = framedata.attribute( L"BBoxW" ).as_int();
@@ -162,9 +162,9 @@ OPRESULT CTexFont::LoadFontXML( WCHAR* XMLpath )
 	Vec2 texsz = pTexNode->getSize();
 
 	///--- acum aloca tot ce ii trebuie ca sa se miste rapid la desenare ---
-	moduleRect = new RECTLTRB_F[ moduleNo ];
-	moduleUV = new RECTLTRB_F[ moduleNo ];
-	frameBBox = new RECTXYWH[ moduleNo ];
+	moduleRect = new RectLTRB[ moduleNo ];
+	moduleUV = new RectLTRB[ moduleNo ];
+	frameBBox = new RectXYWHi[ moduleNo ];
 	// copy and compute module data
 	for ( int kk = 0; kk < moduleNo; kk++ )
 	{
@@ -351,13 +351,13 @@ int CTexFont::DrawStringScaleW( CStringDesc *strDesc, int X, int Y, int maxW, UI
 	return 0;
 }
 
-int CTexFont::DrawStringScaleW( int strIdx, RECTXYWH rect, UINT16 Flags, DWORD Color )
+int CTexFont::DrawStringScaleW( int strIdx, RectXYWHi rect, UINT16 Flags, DWORD Color )
 {
 	CStringDesc *strDesc = __Texts().strings[ strIdx ];
 	return DrawStringScaleW( strDesc, rect, Flags, Color );
 }
 
-int CTexFont::DrawStringScaleW( CStringDesc *strDesc, RECTXYWH rect, UINT16 Flags, DWORD Color )
+int CTexFont::DrawStringScaleW( CStringDesc *strDesc, RectXYWHi rect, UINT16 Flags, DWORD Color )
 {
 	SIZEWH strW = MeasureString( strDesc );
 	if ( strW.w > rect.w )
@@ -376,7 +376,7 @@ int CTexFont::DrawStringScaleW( CStringDesc *strDesc, RECTXYWH rect, UINT16 Flag
 }
 
 
-void CTexFont::DrawString( CStringDesc *strDesc, RECTXYWH rect, UINT16 Flags, DWORD Color )
+void CTexFont::DrawString( CStringDesc *strDesc, RectXYWHi rect, UINT16 Flags, DWORD Color )
 {
 	PTEXTURE pTexture = pTexNode->pTexture;
 
@@ -696,7 +696,7 @@ int CTexFont::DrawString( int strIdx, float X, float Y, UINT16 Flags, DWORD Colo
 	return DrawString( strdesc, X, Y, Flags, Color );
 }
 
-void CTexFont::DrawString( int strIdx, RECTXYWH rect, UINT16 Flags, DWORD Color )
+void CTexFont::DrawString( int strIdx, RectXYWHi rect, UINT16 Flags, DWORD Color )
 {
 	CStringDesc* strdesc = __Texts().GetStringDescByIdx( strIdx );
 	DrawString( strdesc, rect, Flags, Color );
@@ -981,7 +981,7 @@ int CTexFont::DrawHString( UINT32 strHash, int X, int Y, UINT16 Flags, DWORD Col
 	return DrawString( strHash, X, Y, Flags, Color );
 }
 
-void CTexFont::DrawHString( UINT32 strHash, RECTXYWH rect, UINT16 Flags, DWORD Color )
+void CTexFont::DrawHString( UINT32 strHash, RectXYWHi rect, UINT16 Flags, DWORD Color )
 {
 	int strIdx = __Texts().GetStrIdx( strHash );
 	DrawString( strIdx, rect, Flags, Color );

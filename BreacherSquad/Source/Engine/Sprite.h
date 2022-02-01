@@ -45,7 +45,7 @@ public:
 
 	void paint(CSpriteCollection *sprCol);
 	void paint(CSpriteCollection *sprCol, RECT *cliprect);
-	void paint(CSpriteCollection *sprCol, RECTXYWH *clipRct);
+	void paint(CSpriteCollection *sprCol, RectXYWHi *clipRct);
 	void paintFlippedInPlace(CSpriteCollection *sprCol, bool flipX, bool flipY);
 	// Optimized paint for the first module only
 	void paint_firstModule(CSpriteCollection *sprCol);
@@ -64,8 +64,8 @@ public:
 	static void paintFrame(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, DWORD ncolor = 0xffffffff);
 	static void paintFrameModule(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, DWORD ncolor = 0xffffffff);
 
-	static void paintFrameClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, RECTXYWH& clip, DWORD ncolor = 0xffffffff);
-	static void paintFrameModuleClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, RECTXYWH_F * clip, DWORD ncolor = 0xffffffff);
+	static void paintFrameClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, RectXYWHi& clip, DWORD ncolor = 0xffffffff);
+	static void paintFrameModuleClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, RectXYWH * clip, DWORD ncolor = 0xffffffff);
 	static void paintFrameModuleTiled(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, DWORD ncolor = 0xffffffff, int W = -1, int H = -1);
 	
 	//void paintTransformed(CSpriteMgr *sprManager, float scale=1.0f, float rot=0.0f);

@@ -35,7 +35,7 @@ public:
 	UINT32							ID;						// area ID used for finding the area and for references to it
 	CTile**							tiles;					// actual tilemap
 	CAABB							AABBbounds;				// bounding box in world space
-	RECTXYWH						AABBbounds_TL;			// AABB in tiles, in world space
+	RectXYWHi						AABBbounds_TL;			// AABB in tiles, in world space
 	SIZEWH							sizeTL;					// Area size in tiles
 	bool							bVisible;
 	bool							bActive;				// Was it activated? as soon as an area becomes "visible" it activates itself and first neighbours
@@ -54,20 +54,20 @@ public:
 	// returns null if x,y outside valid area. Coords in world space.
 	CTile*					GetTile(int xTL, int yTL);
 	// Updates the level area visibility and blocks visibility
-	bool					UpdateVisibility(RECTXYWH_F camRect);
+	bool					UpdateVisibility(RectXYWH camRect);
 	// orders building of the buffers
 	OPRESULT				BuildBuffers(PDEVICE pDevice, CSpriteCollection* pLightsSprCol);
 	// intersection of segment with tiles (nullptr if not intersecting)
 	CTile*					SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i *hitTilePosTL);
 	// writes the tiles that collide with the player in the ret_arrAABBs array. Returns number of added elements. Starts from 0 overwriting the ret_arrAABBs elements.
-	int						GetTilesCollisionBoxes(RECTXYXY srcBoxTL, CAABB* ret_arrAABBs, int nArrCapacity);
+	int						GetTilesCollisionBoxes(RectXYXYi srcBoxTL, CAABB* ret_arrAABBs, int nArrCapacity);
 	// writes the bboxes of the props that collide with the srcBoxTL. Starts from 0 overwriting the ret_arrAABBs elements.
 	int						GetPropsCollisionBoxes(CAABB srcBox, CAABB* ret_arrAABBs, int nArrCapacity);
 	// gets all props belonging to area, that collide with a bbox
 	int						GetPropsTouchingBox(CAABB srcBox, CProp* ret_arrProps[], int nArrCapacity, bool bOnlyInteractibles = false);
 	int						GetPropsTouchingBox(CAABB srcBox, CArray<CProp*>& ret_arrProps, bool bOnlyInteractibles = false);
 	// gets all the tiles that 
-	int						GetTilesByFlag(RECTXYXY srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity);
+	int						GetTilesByFlag(RectXYXYi srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity);
 
 public: //--- framework methods ---
 	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);

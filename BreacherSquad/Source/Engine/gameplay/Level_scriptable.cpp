@@ -1363,7 +1363,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				CLAMP(active->sprite.frameIdx, 0, m_sprProps.GetAFramesCnt(active->sprite.animIdx));
 			}
 			//set new bbox
-			RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
+			RectXYWHi objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
 			active->bbox_ini.Set(Vec2(objbox.x, objbox.y), Vec2(objbox.Right(), objbox.Bottom()));
 			/*
 			if (active->flipX)
@@ -1425,7 +1425,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			active->sprite.Init(&m_sprProps, anim, active->pos.xy_proj, frame);
 			active->bAnimated = animated;
 			//set new bbox
-			RECTXYWH objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
+			RectXYWHi objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
 			active->bbox_ini.Set(Vec2(objbox.x, objbox.y), Vec2(objbox.Right(), objbox.Bottom()));
 			/*
 			if (active->flipX)

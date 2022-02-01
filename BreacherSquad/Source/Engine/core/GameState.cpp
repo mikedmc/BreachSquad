@@ -581,7 +581,7 @@ void GameState::PaintTransition( float dTime, float fTimeline, PDEVICE pDevice )
 					if ( ( UTGetGUI().m_sprCol.IsLoaded() ) && ( fAlpha >= 0.95f ) )
 					{
 						CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_cam360hScreen );
-						RECTXYWH_F scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
+						RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
 						CSprite::paintFrame( &UTGetGUI().m_sprCol, scrrect.Right() - 3, scrrect.Bottom() - 3, ANM_CONTROLS_SPR_LOADING_ICONS, 0, 0x88ffffff );
 					}
 				}

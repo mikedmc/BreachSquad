@@ -471,7 +471,7 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 			continue;
 		}
 
-		RECTXYWH_F camrect = CCameraTransform::GetActiveCamera()->GetCamWorldAABB();
+		RectXYWH camrect = CCameraTransform::GetActiveCamera()->GetCamWorldAABB();
 		D3DXMATRIXA16 mat1, mat2;
 
 		switch(ndum->type)
@@ -492,7 +492,7 @@ void CParticlesManager::PaintStringDummies(UINT8 pflags)
 				}
 
 				DWORD dwcol = DW_COLORALPHA(ndum->sprite.color, fAlpha);
-				RECTXYWH ptrect(0, (int)floor(camrect.CenterY() + ndum->pos.y - fonth * 0.75f), 200, fonth * 1.5f + fonth2);
+				RectXYWHi ptrect(0, (int)floor(camrect.CenterY() + ndum->pos.y - fonth * 0.75f), 200, fonth * 1.5f + fonth2);
 				GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, ptrect, dwcol);
 
 				//paint string
@@ -1395,7 +1395,7 @@ void CParticlesManager::ReleaseAllPartEmitters()
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrPartEmitters);
 }
 
-void CParticlesManager::UpdatePartEmitters(float dTime, RECTXYWH_F screenRect)
+void CParticlesManager::UpdatePartEmitters(float dTime, RectXYWH screenRect)
 {
 	for (int kk = 0; kk < m_arrPartEmitters.GetSize(); kk++)
 	{

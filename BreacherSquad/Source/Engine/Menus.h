@@ -25,7 +25,7 @@ public:
 	void				Paint();
 
 	// Paints the animated background
-	void				PaintBackground(RECTXYWH_F worldRect, DWORD dwColor, bool bPaintParticles = false, bool bPaintTitle = false);
+	void				PaintBackground(RectXYWH worldRect, DWORD dwColor, bool bPaintParticles = false, bool bPaintTitle = false);
 
 	// Releases all resources
 	void				Release();

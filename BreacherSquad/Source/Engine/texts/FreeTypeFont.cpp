@@ -336,9 +336,9 @@ void CFreeTypeFont::Release()
 	m_atlas.Release();
 }
 
-RECTXYWH CFreeTypeFont::DrawStringLine(CStringDesc *strDesc, float X, float Y, UINT16 Flags, DWORD Color)
+RectXYWHi CFreeTypeFont::DrawStringLine(CStringDesc *strDesc, float X, float Y, UINT16 Flags, DWORD Color)
 {
-	RECTXYWH retBB;
+	RectXYWHi retBB;
 	if (strDesc == nullptr)
 		return retBB;
 
@@ -418,7 +418,7 @@ RECTXYWH CFreeTypeFont::DrawStringLine(CStringDesc *strDesc, float X, float Y, U
 	return retBB;
 }
 
-RECTXYWH CFreeTypeFont::DrawStringLine(int strID, float X, float Y, UINT16 Flags /*= FTFF_BOTTOMLEFT*/, DWORD Color /*= 0xffffffff*/)
+RectXYWHi CFreeTypeFont::DrawStringLine(int strID, float X, float Y, UINT16 Flags /*= FTFF_BOTTOMLEFT*/, DWORD Color /*= 0xffffffff*/)
 {
 	int id = __Texts().GetStrIdx(strID);
 	return DrawStringLine(__Texts().strings[id], X, Y, Flags, Color);

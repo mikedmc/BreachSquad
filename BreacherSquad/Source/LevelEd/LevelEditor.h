@@ -68,7 +68,7 @@ private:
 	
 	// draws a ruler to show you the height of an object
 	void				DrawHRuler(Vec2 vBase, float fHeight, DWORD col);
-	void				DrawBBox(RECTXYWH_F bbox, DWORD dwCol);
+	void				DrawBBox(RectXYWH bbox, DWORD dwCol);
 
 
 public: //--- framework methods ---

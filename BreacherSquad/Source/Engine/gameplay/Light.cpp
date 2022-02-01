@@ -99,7 +99,7 @@ void CLight::SetLightTexture(CSpriteCollection* sprCol, int nAnimID, int nFrameI
 	if (animID >= 0)
 	{
 		//lTexRect = sprCol->GetModuleRect_TexCoords(animID, frameID, 0);
-		RECTXYWH lrect = sprCol->GetAFrameBBox_real(animID, frameID);
+		RectXYWHi lrect = sprCol->GetAFrameBBox_real(animID, frameID);
 		bbox_ini.Set(lrect);
 		bbox = bbox_ini;
 		bbox.Move(pos.xy_proj);
