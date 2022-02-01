@@ -139,23 +139,23 @@ struct VERT_TL2T
 	static const DWORD FVF;
 };
 
-struct POINTXY_INT {
+struct PointXYi {
 	int x, y;
-	POINTXY_INT() :x(0), y(0) {}
-	POINTXY_INT(int nx, int ny) :x(nx), y(ny) {}
-	POINTXY_INT(const POINTXY_INT& point) { x = point.x; y = point.y; }
-	bool operator==(const POINTXY_INT &other) const { return ((other.x == x) && (other.y == y)); }
-	bool operator!=(const POINTXY_INT &other) const { return ((other.x != x) || (other.y != y)); }
+	PointXYi() :x(0), y(0) {}
+	PointXYi(int nx, int ny) :x(nx), y(ny) {}
+	PointXYi(const PointXYi& point) { x = point.x; y = point.y; }
+	bool operator==(const PointXYi &other) const { return ((other.x == x) && (other.y == y)); }
+	bool operator!=(const PointXYi &other) const { return ((other.x != x) || (other.y != y)); }
 	operator Vec2() { return Vec2((float)x, (float)y); }
 };
 
-struct POINTXYZ_INT {
+struct PointXYZi {
 	int x, y, z;
-	POINTXYZ_INT() :x(0), y(0), z(0) {}
-	POINTXYZ_INT(int nx, int ny, int nz) { x = nx; y = ny; z = nz; }
-	POINTXYZ_INT(const POINTXYZ_INT& point) { x = point.x; y = point.y; z = point.z; }
-	bool operator==(const POINTXYZ_INT &other) const { return ((other.x == x) && (other.y == y) && (other.z == z)); }
-	bool operator!=(const POINTXYZ_INT &other) const { return ((other.x != x) || (other.y != y) || (other.z != z)); }
+	PointXYZi() :x(0), y(0), z(0) {}
+	PointXYZi(int nx, int ny, int nz) { x = nx; y = ny; z = nz; }
+	PointXYZi(const PointXYZi& point) { x = point.x; y = point.y; z = point.z; }
+	bool operator==(const PointXYZi &other) const { return ((other.x == x) && (other.y == y) && (other.z == z)); }
+	bool operator!=(const PointXYZi &other) const { return ((other.x != x) || (other.y != y) || (other.z != z)); }
 	operator Vec2() { return Vec2((float)x, (float)y); }
 	operator Vec3() { return Vec3((float)x, (float)y, (float)z); }
 };
@@ -186,300 +186,6 @@ public:
 	bool operator==(const SIZEWH_F &other) const { return (FLOATS_EQUAL(other.w, w, EPS) && FLOATS_EQUAL(other.h, h, EPS)); }
 };
 
-class RECTXYWH {
-public:
-	int x, y, w, h;
-	RECTXYWH():
-		x(0), y(0), w(0), h(0) 
-	{}
-	RECTXYWH(int nx, int ny, int nw, int nh):
-		x(nx), y(ny), w(nw), h(nh) 
-	{}
-	RECTXYWH(const RECTXYWH& rectsrc):
-		x(rectsrc.x), y(rectsrc.y), w(rectsrc.w), h(rectsrc.h)
-	{}
-	RECTXYWH(const RECT& rectsrc) :
-		x(rectsrc.left), y(rectsrc.top), w(rectsrc.right - rectsrc.left), h(rectsrc.bottom - rectsrc.top)
-	{}
-	void Inflate(int dx, int dy)
-	{
-		x -= dx; w += 2 * dx;
-		y -= dy; h += 2 * dy;
-	}
-	void Move(int movex, int movey)
-	{
-		x += movex;
-		y += movey;
-	}
-	void Set(int nx, int ny, int nw, int nh)
-	{
-		x = nx; y = ny; w = nw; h = nh;
-	}
-	inline const int Bottom() const {
-		return y + h;
-	}
-	inline const int  Right() const {
-		return x + w;
-	}
-	inline const int CenterX() const {
-		return x + w / 2;
-	}
-	inline const int CenterY() const {
-		return y + h / 2;
-	}
-	inline const POINTXY_INT Center() const {
-		return POINTXY_INT(x + w / 2, y + h / 2);
-	}
-
-	inline bool operator==(const RECTXYWH& rhs) 
-	{ 
-		return ((x == rhs.x) && (y == rhs.y) && (w == rhs.w) && (h == rhs.h));
-	}
-
-	inline bool operator!=(const RECTXYWH& rhs)
-	{
-		return ((x != rhs.x) || (y != rhs.y) || (w != rhs.w) || (h != rhs.h));
-	}
-
-	inline bool Contains(Vec2i pt)
-	{
-		return ((pt.x >= x) && (pt.y >= y) && (pt.x < x + w - 1) && (pt.y < y + h - 1));
-	}
-
-	inline bool Intersects(const RECTXYWH& rhs)
-	{
-		if ((rhs.x >= x + w) || (rhs.x + rhs.w <= x) || (rhs.y >= y + h) || (rhs.y + rhs.h <= y))
-			return false;
-		return true;
-	}
-
-	// cuts the area outside of clampToThis
-	inline void IntersectWith(const RECTXYWH& clampToThis)
-	{
-		Vec2i vmin(x, y);
-		Vec2i vmax(x + w - 1, y + h - 1);
-
-		if (vmin.x < clampToThis.x) vmin.x = clampToThis.x;
-		if (vmin.y < clampToThis.y) vmin.y = clampToThis.y;
-		if (vmax.x >= clampToThis.x + clampToThis.w - 1) vmax.x = clampToThis.x + clampToThis.w - 1;
-		if (vmax.y >= clampToThis.y + clampToThis.h - 1) vmax.y = clampToThis.y + clampToThis.h - 1;
-
-		x = vmin.x; y = vmin.y;
-
-		if (vmax.x < vmin.x)
-			w = 0;
-		else
-			w = vmax.x - vmin.x + 1;
-		if (vmax.y < vmin.y)
-			h = 0;
-		else
-			h = vmax.y - vmin.y + 1;
-	}
-};
-
-class RECTXYWH_F {
-public:
-	float x, y, w, h;
-	RECTXYWH_F():
-	x(0.0f), y(0.0f), w(0.0f), h(0.0f) 
-	{}
-	RECTXYWH_F(float nx, float ny, float nw, float nh):
-	x(nx), y(ny), w(nw), h(nh) 
-	{}
-	RECTXYWH_F(const RECTXYWH_F& rectsrc):
-	x(rectsrc.x), y(rectsrc.y), w(rectsrc.w), h(rectsrc.h)
-	{}
-	RECTXYWH_F(const RECTXYWH rectsrc) :
-		x((float)rectsrc.x), y((float)rectsrc.y), w((float)rectsrc.w), h((float)rectsrc.h)
-	{}
-	// grows to include "other"
-	void Union(RECTXYWH_F other)
-	{
-		Vec2 vMin, vMax;
-		vMin.x = min(x, other.x);
-		vMin.y = min(y, other.y);
-		vMax.x = max(x + w, other.x + other.w);
-		vMax.y = max(y + h, other.y + other.h);
-		x = vMin.x; y = vMin.y;
-		w = vMax.x - vMin.x; h = vMax.y - vMin.y;
-	}
-	void Set(float nx, float ny, float nw, float nh)
-	{
-		x = nx; y = ny; w = nw; h = nh;
-	}
-	void Move(float movex, float movey)
-	{
-		x += movex;
-		y += movey;
-	}
-	void Inflate(float scalar)
-	{
-		x -= scalar;
-		y -= scalar;
-		w += 2.0f * scalar;
-		h += 2.0f * scalar;
-	}
-	inline const float Bottom() const {
-		return y + h;
-	}
-	inline const float Right() const {
-		return x + w;
-	}
-	inline const float CenterX() const {
-		return x + w / 2.0f;
-	}
-	inline const float CenterY() const {
-		return y + h / 2.0f;
-	}
-	inline const Vec2 Center() const {
-		return Vec2(x + w / 2.0f, y + h / 2.0f);
-	}
-};
-
-class RECTLTRB_F {
-public:
-	float left, top, right, bottom;
-	RECTLTRB_F() :
-		left(0.0f), top(0.0f), right(0.0f), bottom(0.0f)
-	{}
-	RECTLTRB_F(RECT& rectSrc) :
-		left((float)rectSrc.left), top((float)rectSrc.top), right((float)rectSrc.right), bottom((float)rectSrc.bottom)
-	{}
-	RECTLTRB_F(float nleft, float ntop, float nright, float nbottom) :
-		left(nleft), top(ntop), right(nright), bottom(nbottom)
-	{}
-	RECTLTRB_F(const RECTLTRB_F& rectsrc) :
-		left (rectsrc.left), right(rectsrc.right), top(rectsrc.top), bottom(rectsrc.bottom)
-	{}
-	RECTLTRB_F(const RECTXYWH_F rectsrc) :
-		left(rectsrc.x), top(rectsrc.y), right(rectsrc.x + rectsrc.w), bottom(rectsrc.y + rectsrc.h)
-	{}
-
-
-	void Set(float nleft, float ntop, float nright, float nbottom)
-	{
-		left = nleft; top = ntop; right = nright; bottom = nbottom;
-	}
-
-	void Move( float dx, float dy )
-	{
-		left += dx; 
-		top += dy;
-		right += dx;
-		bottom += dy;
-	}
-
-	// checks if rect intersects dest rect (borders touching are not considered intersections hence we use >= and not >)
-	bool Intersects( RECTLTRB_F & dest)
-	{
-		if ( ( left >= dest.right ) || ( right <= dest.left ) || ( top >= dest.bottom ) || ( bottom <= dest.top ) )
-			return false;
-		return true;
-	}
-
-	// checks if current rect contains dest rect
-	bool Contains( RECTLTRB_F & dest )
-	{
-		if (( dest.left >= left ) && ( dest.top >= top ) && ( dest.right <= right ) && ( dest.bottom <= bottom ))
-			return true;
-		return false;
-	}
-
-	float Width()
-	{
-		return right - left;
-	}
-
-	float Height()
-	{
-		return bottom - top;
-	}
-
-	// finds intersection of two RECTLTRB_F returning true if they intersect
-	static bool Intersection( RECTLTRB_F & a, RECTLTRB_F & b, RECTLTRB_F & retVal )
-	{
-		Vec2 vMax, vMin;
-		vMin.x = max( a.left, b.left );
-		vMin.y = max( a.top, b.top );
-		vMax.x = min( a.right, b.right );
-		vMax.y = min( a.bottom, b.bottom );
-		retVal.Set( vMin.x, vMin.y, vMax.x, vMax.y );
-		//negative means no intersection
-		if ( ( vMax.x < vMin.x ) || ( vMax.y < vMin.y ) )
-			return false;
-		return true;
-	}
-
-};
-
-class RECTXYXY_F {
-public:
-	float x1, y1, x2, y2;
-	RECTXYXY_F() :
-		x1(0.0f), y1(0.0f), x2(0.0f), y2(0.0f)
-	{}
-	RECTXYXY_F(RECT& rectSrc) :
-		x1((float)rectSrc.left), y1((float)rectSrc.top), x2((float)rectSrc.right), y2((float)rectSrc.bottom)
-	{}
-	RECTXYXY_F(float nx1, float ny1, float nx2, float ny2) :
-		x1(nx1), y1(ny1), x2(nx2), y2(ny2)
-	{}
-	RECTXYXY_F(const RECTXYXY_F& rectsrc) :
-		x1(rectsrc.x1), x2(rectsrc.x2), y1(rectsrc.y1), y2(rectsrc.y2)
-	{}
-	RECTXYXY_F(const RECTXYWH_F rectsrc) :
-		x1(rectsrc.x), y1(rectsrc.y), x2(rectsrc.x + rectsrc.w), y2(rectsrc.y + rectsrc.h)
-	{}
-};
-
-class RECTXYXY {
-public:
-	int x1, y1, x2, y2;
-	RECTXYXY() :
-		x1(0), y1(0), x2(0), y2(0)
-	{}
-	RECTXYXY(RECT& rectSrc) :
-		x1(rectSrc.left), y1(rectSrc.top), x2(rectSrc.right), y2(rectSrc.bottom)
-	{}
-	RECTXYXY(int nx1, int ny1, int nx2, int ny2) :
-		x1(nx1), y1(ny1), x2(nx2), y2(ny2)
-	{}
-	RECTXYXY(const RECTXYXY& rectsrc) :
-		x1(rectsrc.x1), x2(rectsrc.x2), y1(rectsrc.y1), y2(rectsrc.y2)
-	{}
-	RECTXYXY(const RECTXYWH rectsrc) :
-		x1(rectsrc.x), y1(rectsrc.y), x2(rectsrc.x + rectsrc.w), y2(rectsrc.y + rectsrc.h)
-	{}
-
-	void Clamp(int xmin, int ymin, int xmax, int ymax)
-	{
-		CLAMP(x1, xmin, xmax);
-		CLAMP(x2, xmin, xmax);
-		CLAMP(y1, ymin, ymax);
-		CLAMP(y2, ymin, ymax);
-	}
-
-	void Move(int dx, int dy)
-	{
-		x1 += dx; x2 += dx;
-		y1 += dy; y2 += dy;
-	}
-};
-
-
-// barycentric coords for rectangles, changing coords from one to the other
-inline Vec2 FromRectToRect(Vec2 & point, RECTXYWH_F & src, RECTXYWH_F & dest)
-{
-	return Vec2(((point.x - src.x) / src.w) * dest.w + dest.x, ((point.y - src.y) / src.h) * dest.h + dest.y);
-}
-inline Vec2 FromRectToRect(Vec2 & point, RECTXYXY_F & src, RECTXYXY_F & dest)
-{
-	return Vec2(((point.x - src.x1) / (src.x2 - src.x1)) * (dest.x2 - dest.x1) + dest.x1, ((point.y - src.y1) / (src.y2- src.y1)) * (dest.y2 - dest.y1) + dest.y1);
-}
-inline Vec2 FromRectToRect(Vec2 & point, RECTLTRB_F& src, RECTLTRB_F& dest)
-{
-	return Vec2(((point.x - src.left) / (src.right - src.left)) * (dest.right - dest.left) + dest.left, ((point.y - src.top) / (src.bottom - src.top)) * (dest.bottom - dest.top) + dest.top);
-}
 
 //--------------------------------------------------------------------------------------
 // Mouse handling class
@@ -645,13 +351,6 @@ unsigned char		buff_readUByte(void* buff, long &_cursor);
 short				buff_readShort(void* buff, long &_cursor);
 unsigned short		buff_readUShort(void* buff, long &_cursor);
 unsigned int		buff_readUInt(void* buff, long &_cursor);
-
-
-bool				PointInRect(Vec2 pt, RECTXYWH_F rct);
-bool				PointInRect(int x, int y, int rx, int ry, int rw, int rh);
-bool				PointInRect(int x, int y, RECTXYWH *r);
-bool				PointInRect(float x, float y, RECTXYWH_F *r);
-bool				PointInRect(POINT *pt, RECTXYWH *r);
 
 // Formats time in human readable form
 void				OS_FormatTime(WCHAR* dest, int destSize, float timeInSecs);

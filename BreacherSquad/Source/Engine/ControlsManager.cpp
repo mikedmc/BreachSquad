@@ -468,11 +468,11 @@ void CControl::Update( float dTime, float fTimeline )
 			//setam flaguri noi pentru frame-ul urmator
 			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 			{
-				if ( ( PointInRect( &layer->mouseRelPos, &bbL ) ) & ( nSelectedIdx > 0 ) )
+				if ( ( Rects::PointInRect( &layer->mouseRelPos, &bbL ) ) & ( nSelectedIdx > 0 ) )
 				{
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 				}
-				else if ( ( PointInRect( &layer->mouseRelPos, &bbR ) ) && ( nSelectedIdx < nItemsCnt - 1 ) )
+				else if ( ( Rects::PointInRect( &layer->mouseRelPos, &bbR ) ) && ( nSelectedIdx < nItemsCnt - 1 ) )
 				{
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 				}
@@ -679,7 +679,7 @@ void CControl::Update( float dTime, float fTimeline )
 
 			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 			{
-				if ( PointInRect( &layer->mouseRelPos, &BBox_inflated ) )
+				if ( Rects::PointInRect( &layer->mouseRelPos, &BBox_inflated ) )
 				{
 					//request focus
 					layer->FocusControl( this );
@@ -697,12 +697,12 @@ void CControl::Update( float dTime, float fTimeline )
 					}
 				}
 				//scroll arrows
-				if ( PointInRect( &layer->mouseRelPos, &bbL ) )
+				if ( Rects::PointInRect( &layer->mouseRelPos, &bbL ) )
 				{
 					SND_PLAY( SNDIDX_CLICK );
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 				}
-				else if ( PointInRect( &layer->mouseRelPos, &bbR ) )
+				else if ( Rects::PointInRect( &layer->mouseRelPos, &bbR ) )
 				{
 					SND_PLAY( SNDIDX_CLICK );
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
@@ -863,7 +863,7 @@ void CControl::Update( float dTime, float fTimeline )
 					//start of bar
 					Vec2 vPos( bbline.Right() - rectSz.w * nDots + rectSz.w / 2, bbline.CenterY() );
 
-					if ( PointInRect( &layer->mouseRelPos, &bbline ) )
+					if ( Rects::PointInRect( &layer->mouseRelPos, &bbline ) )
 					{
 						//request focus
 						layer->FocusControl( this );
@@ -991,7 +991,7 @@ void CControl::Update( float dTime, float fTimeline )
 							rowh = __TexFonts().fonts[ fontIdx ]->rowHeight;
 
 						RECTXYWH optbb( bbox.x, bbox.y + vSpacing * optcnt, bbox.w, vSpacing );
-						if ( PointInRect( &layer->mouseRelPos, &optbb ) )
+						if ( Rects::PointInRect( &layer->mouseRelPos, &optbb ) )
 						{
 							//if (selectedIdx == optcnt) //already selected, engage
 							{
@@ -1080,7 +1080,7 @@ void CControl::Update( float dTime, float fTimeline )
 				bool bExecuteClick = false;
 				statusFlags &= ~CCTRL_STATUS_FLAG_HOVER;
 
-				if ( PointInRect( &layer->mouseRelPos, &movedBB ) )
+				if ( Rects::PointInRect( &layer->mouseRelPos, &movedBB ) )
 				{
 					statusFlags |= CCTRL_STATUS_FLAG_HOVER;
 					if ( ( ( statusFlags & CCTRL_STATUS_FLAG_CLICKED ) == 0 ) && ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED ) )
@@ -1158,7 +1158,7 @@ void CControl::Update( float dTime, float fTimeline )
 
 			bool bCheckChanged = false;
 
-			if ( PointInRect( &layer->mouseRelPos, &frameBB ) )
+			if ( Rects::PointInRect( &layer->mouseRelPos, &frameBB ) )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_HOVER;
 				if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
@@ -1240,12 +1240,12 @@ void CControl::Update( float dTime, float fTimeline )
 				//clickuri
 				if ( hasArrows )
 				{
-					if ( PointInRect( &layer->mouseRelPos, &bbL ) )
+					if ( Rects::PointInRect( &layer->mouseRelPos, &bbL ) )
 					{
 						SND_PLAY( SNDIDX_CLICK );
 						statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 					}
-					else if ( PointInRect( &layer->mouseRelPos, &bbR ) )
+					else if ( Rects::PointInRect( &layer->mouseRelPos, &bbR ) )
 					{
 						SND_PLAY( SNDIDX_CLICK );
 						statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
@@ -1255,7 +1255,7 @@ void CControl::Update( float dTime, float fTimeline )
 
 			if ( ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED ) || ( g_mouse.Lbut == K_MOUSE_BUTT_DRAG ) )
 			{
-				if ( PointInRect( &layer->mouseRelPos, &bbB ) )
+				if ( Rects::PointInRect( &layer->mouseRelPos, &bbB ) )
 				{
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 
@@ -1334,12 +1334,12 @@ void CControl::Update( float dTime, float fTimeline )
 			//setam flaguri noi pentru frame-ul urmator
 			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 			{
-				if ( PointInRect( &layer->mouseRelPos, &bbL ) )
+				if ( Rects::PointInRect( &layer->mouseRelPos, &bbL ) )
 				{
 					SND_PLAY( SNDIDX_CLICK );
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 				}
-				else if ( PointInRect( &layer->mouseRelPos, &bbR ) )
+				else if ( Rects::PointInRect( &layer->mouseRelPos, &bbR ) )
 				{
 					SND_PLAY( SNDIDX_CLICK );
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
@@ -1392,7 +1392,7 @@ void CControl::Update( float dTime, float fTimeline )
 			int selIdx = _wtoi( paramsDict.GetVariantByName( L"selIdx" )->m_strArg.text );
 			int selIdxMax = _wtoi( paramsDict.GetVariantByName( L"selIdxMax" )->m_strArg.text );
 
-			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED && PointInRect( &layer->mouseRelPos, &BBox ) )
+			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED && Rects::PointInRect( &layer->mouseRelPos, &BBox ) )
 			{
 				int dy = layer->mouseRelPos.y - BBox.y;
 				int worldY = dy;
@@ -3304,9 +3304,9 @@ void CCtrlLayer::SetAnchor( ECtrlAnchor nAnchorX, ECtrlAnchor nAnchorY )
 	anchorY = nAnchorY;
 }
 
-POINTXY_INT CCtrlLayer::GetPos()
+PointXYi CCtrlLayer::GetPos()
 {
-	return POINTXY_INT( X, Y );
+	return PointXYi( X, Y );
 }
 
 
@@ -4068,8 +4068,8 @@ void CControlsManager::Update( float dTime )
 		{
 			localMousePt = m_pCamera->ScreenToWorld( g_mouse.pos );
 		}
-		POINTXY_INT lPos = lay->GetPos();
-		POINTXY_INT anchor;
+		PointXYi lPos = lay->GetPos();
+		PointXYi anchor;
 		anchor.x = m_cameraScreenRect.CenterX() + lay->anchorX * ( m_cameraScreenRect.w / 2 );
 		anchor.y = m_cameraScreenRect.CenterY() + lay->anchorY * ( m_cameraScreenRect.h / 2 );
 
@@ -4169,8 +4169,8 @@ void CControlsManager::Paint()
 		if ( !lay->bAnimate )
 			perc = 1.0f;
 
-		POINTXY_INT lpos = lay->GetPos();
-		POINTXY_INT anchor;
+		PointXYi lpos = lay->GetPos();
+		PointXYi anchor;
 		anchor.x = m_cameraScreenRect.CenterX() + lay->anchorX * ( m_cameraScreenRect.w / 2 );
 		anchor.y = m_cameraScreenRect.CenterY() + lay->anchorY * ( m_cameraScreenRect.h / 2 );
 		//add anchor

@@ -785,35 +785,35 @@ void CControlsEditor::Update(float dTime)
 				RECTXYWH scaleSpotBL(bbox.x, bbox.y + bbox.h - K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
 				RECTXYWH scaleSpotLM(bbox.x, bbox.y + bbox.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
 				RECTXYWH scaleSpotRM(bbox.x + bbox.w - K_BBOX_SCALE_BOX_SIZE / 2, bbox.y + bbox.h / 2 - K_BBOX_SCALE_BOX_SIZE / 2, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
-				if (PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotTL))
+				if (Rects::PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotTL))
 				{
 					tool = TOOL_TYPE_RESIZE_TOP_LEFT;
 				}
-				else if (PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotTM))
+				else if (Rects::PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotTM))
 				{
 					tool = TOOL_TYPE_RESIZE_TOP_MID;
 				}
-				else if (PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotTR))
+				else if (Rects::PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotTR))
 				{
 					tool = TOOL_TYPE_RESIZE_TOP_RIGHT;
 				}
-				else if (PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotBR))
+				else if (Rects::PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotBR))
 				{
 					tool = TOOL_TYPE_RESIZE_BOTT_RIGHT;
 				}
-				else if (PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotBM))
+				else if (Rects::PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotBM))
 				{
 					tool = TOOL_TYPE_RESIZE_BOTT_MID;
 				}
-				else if (PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotBL))
+				else if (Rects::PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotBL))
 				{
 					tool = TOOL_TYPE_RESIZE_BOTT_LEFT;
 				}
-				else if (PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotLM))
+				else if (Rects::PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotLM))
 				{
 					tool = TOOL_TYPE_RESIZE_LEFT_MID;
 				}
-				else if (PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotRM))
+				else if (Rects::PointInRect(g_mouse.pos.x, g_mouse.pos.y, &scaleSpotRM))
 				{
 					tool = TOOL_TYPE_RESIZE_RIGHT_MID;
 				}
@@ -1008,7 +1008,7 @@ void CControlsEditor::Update(float dTime)
 					bbox.y += currLayer->GetPos().y + offset.y + vecRenderCenter.y;
 				}
 
-				if (PointInRect(g_mouse.pos.x, g_mouse.pos.y, &bbox))
+				if (Rects::PointInRect(g_mouse.pos.x, g_mouse.pos.y, &bbox))
 				{
 					newClickedCtrls.Add(kk);
 				}
@@ -1372,7 +1372,7 @@ void CControlsEditor::Paint()
 	Vec2 vecRenderCenter(UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY());
 	if (currLayer)
 	{
-		POINTXY_INT lpos = currLayer->GetPos();
+		PointXYi lpos = currLayer->GetPos();
 		D3DXMATRIXA16 mat;
 
 		Vec2 scrCenter(vecRenderCenter.x + offset.x + lpos.x, vecRenderCenter.y + offset.y + lpos.y);

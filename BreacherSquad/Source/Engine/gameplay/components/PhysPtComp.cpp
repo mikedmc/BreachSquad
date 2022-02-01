@@ -22,7 +22,7 @@ CPointPhysComponent::~CPointPhysComponent()
 void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 {
 	// kill it when it gets outside the play area
-	if ( !PointInRect( vPos.xy, level.m_levelAABB ) )
+	if ( !Rects::PointInRect( vPos.xy, level.m_levelAABB ) )
 	{
 		bIsDead = true;
 		bIsStatic = true;

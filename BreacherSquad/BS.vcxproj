@@ -351,6 +351,7 @@
     <ClInclude Include="Source\Engine\Constants\particles_SPR.h" />
     <ClInclude Include="Source\Engine\ParticlesManager.h" />
     <ClInclude Include="Source\Engine\Randoms.h" />
+    <ClInclude Include="Source\Engine\utils\Boxes.h" />
     <ClInclude Include="Source\Engine\utils\CMathUtil.h" />
     <ClInclude Include="Source\Engine\utils\CollisionAABB.h" />
     <ClInclude Include="Source\Engine\utils\DataTypes.h" />
@@ -780,6 +781,7 @@
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\UTAppClassStates.cpp" />
+    <ClCompile Include="Source\Engine\utils\Boxes.cpp" />
     <ClCompile Include="Source\Engine\utils\CMathUtil.cpp" />
     <ClCompile Include="Source\Engine\utils\CollisionAABB.cpp" />
     <ClCompile Include="Source\Engine\utils\DataTypes.cpp" />

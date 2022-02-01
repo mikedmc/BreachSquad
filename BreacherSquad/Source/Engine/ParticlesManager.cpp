@@ -1417,7 +1417,7 @@ void CParticlesManager::UpdatePartEmitters(float dTime, RECTXYWH_F screenRect)
 		if (generatePart)
 		{
 			gpos = AABB::GetRandomPointInBox(npe->bbox);
-			if ((!npe->bGenerateOutsideScreen) && (!PointInRect(gpos, screenRect)))
+			if ((!npe->bGenerateOutsideScreen) && (!Rects::PointInRect(gpos, screenRect)))
 				generatePart = false;
 		}
 

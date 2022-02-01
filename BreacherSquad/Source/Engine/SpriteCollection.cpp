@@ -415,7 +415,7 @@ int CSpriteCollection::GetAFrameHitPointsCnt(int animIdx, int frameIdx)
 	return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->PointsNo;
 }
 
-bool CSpriteCollection::GetAFrameHitPoint(int animIdx, int frameIdx, int pointIdx, POINTXYZ_INT *outvar)
+bool CSpriteCollection::GetAFrameHitPoint(int animIdx, int frameIdx, int pointIdx, PointXYZi *outvar)
 {
 	if(pointIdx >= AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->PointsNo)
 	{
@@ -435,7 +435,7 @@ bool CSpriteCollection::GetAFrameHitPoint(int animIdx, int frameIdx, int pointId
 	return true;
 }
 
-bool CSpriteCollection::GetAFrameHitPointFlag(int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, POINTXYZ_INT *outvar)
+bool CSpriteCollection::GetAFrameHitPointFlag(int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, PointXYZi *outvar)
 {
 	if(outvar == NULL)
 	{

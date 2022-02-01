@@ -35,7 +35,7 @@
 #define			Vec3XY(vec)				Vec2(vec.x, vec.y)
 #define			Vec2ToVec3XY0(vec)		Vec3(vec.x, vec.y, 0.0f)
 
-#define			Vec2i					POINTXY_INT
+#define			Vec2i					PointXYi
 
 // Is vector almost zero?
 bool			MUVec2AlmostZero(Vec2 vec, float fThreshold = 0.00001f);

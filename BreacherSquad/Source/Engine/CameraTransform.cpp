@@ -291,7 +291,7 @@ void CCameraTransform::ShakeScreen(float maxAmplitude, float attenuationPerSecon
 	bboxExtended.Inflate(m_camWorldAABB.h / 4.0f);
 	if (vShakeSource != null)
 	{
-		if (!PointInRect(vShakeSource->x, vShakeSource->y, &bboxExtended))
+		if (!Rects::PointInRect(vShakeSource->x, vShakeSource->y, &bboxExtended))
 			return;
 	}
 

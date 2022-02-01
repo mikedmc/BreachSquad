@@ -5411,7 +5411,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	actor->collisionFlags = unCollFlags;
 
 	//check world bounds for each actor - kill if out
-	if (!PointInRect(actor->pos.xy, m_levelAABB))
+	if (!Rects::PointInRect(actor->pos.xy, m_levelAABB))
 	{
 		KillActor(actor);
 	}
@@ -8778,7 +8778,7 @@ int CLevel::BuildLightVolume360(CLight * light, _VERTEX_PNCT4T4 *outVerts, int o
 	struct sCollPoint {
 		Vec2 vPos;
 		Vec2 vNorm;
-		POINTXY_INT tlPos;
+		PointXYi tlPos;
 		bool bCollided;
 	};
 
@@ -8796,7 +8796,7 @@ int CLevel::BuildLightVolume360(CLight * light, _VERTEX_PNCT4T4 *outVerts, int o
 	Vec3 vFrom3 = Vec2ToVec3XY0(vFrom);
 	// collision results
 	Vec2 vRetPt(0.0f, 0.0f), vRetNrm(0.0f, 0.0f);
-	POINTXY_INT tilePosTL;
+	PointXYi tilePosTL;
 	// counts how many collisions of the same type (no collision or same tile) were made in order
 	int nSameSince = 0;
 
@@ -9128,7 +9128,7 @@ void CLevel::UpdatePhysicsPoints(float dTime)
 		//update
 		CPhysicsPoint*	point = &node->m_data;
 		// kill it when it gets outside the play area
-		if (!PointInRect(Vec3XY(point->pos), m_levelAABB))
+		if (!Rects::PointInRect(Vec3XY(point->pos), m_levelAABB))
 		{
 			point->bIsDead = true;
 			point->bIsStatic = true;

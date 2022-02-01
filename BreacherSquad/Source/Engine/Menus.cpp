@@ -69,21 +69,21 @@ void CMenus::PaintBackground( RECTXYWH_F worldRect, DWORD dwColor, bool bPaintPa
 	float alpha = 0.4f + UTPerlin::PerlinNoise1D( fLocalTimeline, 3.0f, 2.0f, 0.4f, 0.5f, 2 );
 	CLAMP( alpha, 0.0f, 1.0f );
 	//paint flickering right glow
-	UTSprite::PaintFrameEx( &m_sprCol, Vec2( worldRect.Right(), worldRect.Bottom() ), ANM_MENUS0_SPR_BACKGROUND, 3, DW_COLORALPHA( dwColor, alpha ) );
+	UTSprite::PaintFrame( &m_sprCol, Vec2( worldRect.Right(), worldRect.Bottom() ), ANM_MENUS0_SPR_BACKGROUND, 3, DW_COLORALPHA( dwColor, alpha ) );
 	// paint logo bg
 	float alphatitle = 0.8f + sin( fLocalTimeline * 2.0f ) * 0.2f;
 	DWORD dwTitleCol = DW_COLORALPHA( dwColor, alphatitle );
 	if ( bPaintTitle )
 	{
 		// rays
-		UTSprite::PaintFrameEx( &m_sprCol, vLogoPos, ANM_MENUS0_SPR_LOGO_MM, 2, dwTitleCol );
+		UTSprite::PaintFrame( &m_sprCol, vLogoPos, ANM_MENUS0_SPR_LOGO_MM, 2, dwTitleCol );
 		// logo glow
-		UTSprite::PaintFrameEx( &m_sprCol, vLogoPos, ANM_MENUS0_SPR_LOGO_MM, 1, dwTitleCol );
+		UTSprite::PaintFrame( &m_sprCol, vLogoPos, ANM_MENUS0_SPR_LOGO_MM, 1, dwTitleCol );
 	}
 	__Painter().AdditiveBlendingOff();
 	// logo normal
 	if ( bPaintTitle )
-		UTSprite::PaintFrameEx( &m_sprCol, vLogoPos, ANM_MENUS0_SPR_LOGO_MM, 0 );
+		UTSprite::PaintFrame( &m_sprCol, vLogoPos, ANM_MENUS0_SPR_LOGO_MM, 0 );
 }
 
 void CMenus::Release()

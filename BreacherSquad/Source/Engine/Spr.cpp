@@ -1,6 +1,5 @@
 #include "dxstdafx.h"
 #include "Spr.h"
-
 //--- EDITOR duration per frame (100 = 1 sec) -----
 #define SPR_ED_TIMELINE 100.0f
 
@@ -109,7 +108,6 @@ void CSpr::SetFrame(int nFrameIdx)
 	animStatus = ANIM_PLAYING;
 }
 
-//seteaza animatia doar daca e alta
 void CSpr::SetAnimOnce(int nAnimIdx, int nFrameIdx) 
 {
 	if((animIdx == nAnimIdx) || (nAnimIdx < 0))
@@ -121,7 +119,6 @@ void CSpr::SetAnimOnce(int nAnimIdx, int nFrameIdx)
 	frameIdx = nFrameIdx;
 	animStatus = ANIM_JUST_STARTED;
 }
-
 
 void CSpr::SetAnim(CHAR* strAnimID, int nFrameIdx)
 {
@@ -138,7 +135,6 @@ void CSpr::SetAnim(CHAR* strAnimID, int nFrameIdx)
 	animStatus = ANIM_JUST_STARTED;
 }
 
-//face update la pozitie numai daca e true updatePos
 UINT32 CSpr::Update(float dTime, bool updatePos)
 {
 	UINT32 retAFrameFlag = 0;
@@ -150,10 +146,10 @@ UINT32 CSpr::Update(float dTime, bool updatePos)
 		return retAFrameFlag;
 
 	int aframeID = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
-	//pentru animatiile abia setate imi intoarce aframe flag-ul frame-ului curent
+	// return frame flag for animations that were just set now
 	if (animStatus == ANIM_JUST_STARTED)
 	{
-		//TODO: daca primul frame e foarte scurt pierde primul mesaj retAFrameFlag
+		//#TODO: if first frame is too short the message gets lost retAFrameFlag
 		retAFrameFlag = pSprCol->AFrames[aframeID]->flags;
 	}
 
@@ -162,8 +158,6 @@ UINT32 CSpr::Update(float dTime, bool updatePos)
 
 	if( fTime >= float(pSprCol->AFrames[aframeID]->duration) / SPR_ED_TIMELINE )
 	{
-		//a avansat frame. Modifica si pozitia. Rezulta de aici ca modificarea pozitiei o face la sfarsitul frame-ului.
-		//oricum ar trebui interpolat spline intre pozitii asa ca momentan e bine asa.
 		animStatus = ANIM_PLAYING_FRAME_ADVANCED;
 		if( updatePos )
 		{
@@ -177,14 +171,14 @@ UINT32 CSpr::Update(float dTime, bool updatePos)
 		if (frameIdx >= pSprCol->Animations[animIdx]->aframesNo) 
 		{
 			if ( (pSprCol->Animations[animIdx]->flags & ANIMATION_FLAG_LOOPED) == 0 )
-			{ //daca e play once
-				frameIdx--; //pozitioneaza pe ultimul frame
-				animStatus = ANIM_FRAMELOCK; //face lock pe ultimul frame
+			{ //play once?
+				frameIdx--; // sets on last frame
+				animStatus = ANIM_FRAMELOCK; 
 				//get new flag
 				aframeID = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 			}
 			else 
-			{ //daca e looping
+			{ //looping
 				frameIdx = 0;
 				animStatus = ANIM_LOOPRESET;
 				//get new flag
@@ -195,7 +189,7 @@ UINT32 CSpr::Update(float dTime, bool updatePos)
 		{
 			aframeID = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 		}
-		//set aframe flag for return
+		// set aframe flag for return
 		retAFrameFlag = pSprCol->AFrames[aframeID]->flags;
 	}
 	return retAFrameFlag;
@@ -205,7 +199,7 @@ void CSpr::Paint()
 {
 	_ASSERT(animIdx < pSprCol->Animations.Count());
 	_ASSERT(frameIdx < pSprCol->Animations[animIdx]->aframesNo);
-	//nu am luat in considerare inca flagsurile
+	//#TODO: flip flags not considered yet
 	int aframeIdx = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 	for( int ii = 0; ii < pSprCol->AFrames[aframeIdx]->fmodulesNo; ii++ )
 	{
@@ -284,56 +278,99 @@ void UTSprite::PaintFModule(CSpriteCollection *sprCol, Vec2 vPos, int animID, in
 
 void UTSprite::PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, RECTLTRB_F& clip, DWORD ncolor )
 {
-		int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameIdx ];
-		for ( int ii = 0; ii < sprCol->AFrames[ aframeIdx ]->fmodulesNo; ii++ )
-		{
-			int fmoduleIdx = sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ ii ];
-			scFModule* mod = sprCol->FModules[ sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ ii ] ];
-
-			RECTLTRB_F destrect = sprCol->FModules[ fmoduleIdx ]->moduleRectOff;
-			destrect.Move( nX, nY );
-			// optimization: if contained, paint in full
-			if ( clip.Contains( destrect ) )
-			{
-				__Painter().Draw( mod->pImg->pTex,
-					mod->texRect,
-					mod->moduleRectOff,
-					Vec2(nX, nY), ncolor );
-				continue;
-			}
-			// compute intersection
-			RECTLTRB_F intersection;
-			bool bIntersecting = RECTLTRB_F::Intersection( destrect, clip, intersection );
-			if ( !bIntersecting )
-				continue;
-			// compute texture coords by percenting coords (barycentric)
-			Vec2 posCornerULPerc( (intersection.left - destrect.left) / destrect.Width(), (intersection.top - destrect.top) / destrect.Height() );
-			Vec2 posCornerDRPerc( ( intersection.right - destrect.left ) / destrect.Width(), ( intersection.bottom - destrect.top ) / destrect.Height() );
-			RECTLTRB_F texrect = sprCol->FModules[ fmoduleIdx ]->texRect;
-			Vec2 vTexSz( texrect.Width(), texrect.Height() );
-			RECTLTRB_F finaltex( texrect.left + posCornerULPerc.x * vTexSz.x, texrect.top + posCornerULPerc.y * vTexSz.y,
-				texrect.left + posCornerDRPerc.x * vTexSz.x, texrect.top + posCornerDRPerc.y * vTexSz.y );
-			// paints without offset because the offset is already in the clipped rectangle
-			__Painter().Draw( mod->pImg->pTex,
-				finaltex,
-				intersection,
-				Vec2( 0.0f, 0.0f ), ncolor );
-		}
-}
-
-/*
-void UTSprite::PaintFModuleTiled( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor, int W , int H )
-{
-	_ASSERT( animID < sprCol->Animations.Count() );
-	_ASSERT( frameIdx < sprCol->Animations[ animID ]->aframesNo );
 	int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameIdx ];
-	_ASSERT( moduleIdx < sprCol->AFrames[ aframeIdx ]->fmodulesNo );
+	for ( int ii = 0; ii < sprCol->AFrames[ aframeIdx ]->fmodulesNo; ii++ )
+	{
+		int fmoduleIdx = sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ ii ];
+		scFModule* mod = sprCol->FModules[ fmoduleIdx ];
 
-	scFModule* mod = sprCol->FModules[ sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ moduleIdx ] ];
-
-	__Painter().Draw( mod->pImg->pTex, mod->texRect, mod->moduleRectOff, vPos, ncolor );
+		RECTLTRB_F destrect = mod->moduleRectOff;
+		destrect.Move( nX, nY );
+		// optimization: if contained, paint in full
+		if ( clip.Contains( destrect ) )
+		{
+			__Painter().Draw( mod->pImg->pTex,
+				mod->texRect,
+				mod->moduleRectOff,
+				Vec2( nX, nY ), ncolor );
+			continue;
+		}
+		// compute intersection
+		RECTLTRB_F intersection;
+		bool bIntersecting = RECTLTRB_F::Intersection( destrect, clip, intersection );
+		if ( !bIntersecting )
+			continue;
+		// compute texture coords by percenting coords (barycentric)
+		Vec2 posCornerULPerc( ( intersection.left - destrect.left ) / destrect.Width(), ( intersection.top - destrect.top ) / destrect.Height() );
+		Vec2 posCornerDRPerc( ( intersection.right - destrect.left ) / destrect.Width(), ( intersection.bottom - destrect.top ) / destrect.Height() );
+		RECTLTRB_F texrect = mod->texRect;
+		Vec2 vTexSz( texrect.Width(), texrect.Height() );
+		RECTLTRB_F finaltex( texrect.left + posCornerULPerc.x * vTexSz.x, texrect.top + posCornerULPerc.y * vTexSz.y,
+			texrect.left + posCornerDRPerc.x * vTexSz.x, texrect.top + posCornerDRPerc.y * vTexSz.y );
+		// paints without offset because the offset is already in the clipped rectangle
+		__Painter().Draw( mod->pImg->pTex,
+			finaltex,
+			intersection,
+			Vec2( 0.0f, 0.0f ), ncolor );
+	}
 }
-*/
+
+void UTSprite::PaintFModuleClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, int moduleIdx, RECTLTRB_F& clip, DWORD ncolor /*= 0xffffffff*/ )
+{
+	int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameIdx ];
+
+	int fmoduleIdx = sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ moduleIdx ];
+	scFModule* mod = sprCol->FModules[ fmoduleIdx ];
+
+	RECTLTRB_F destrect = mod->moduleRectOff;
+	destrect.Move( nX, nY );
+	// optimization: if contained, paint in full
+	if ( clip.Contains( destrect ) )
+	{
+		__Painter().Draw( mod->pImg->pTex,
+			mod->texRect,
+			mod->moduleRectOff,
+			Vec2( nX, nY ), ncolor );
+		return;
+	}
+	// compute intersection
+	RECTLTRB_F intersection;
+	bool bIntersecting = RECTLTRB_F::Intersection( destrect, clip, intersection );
+	if ( !bIntersecting )
+		return;
+	// compute texture coords by percenting coords (barycentric)
+	Vec2 posCornerULPerc( ( intersection.left - destrect.left ) / destrect.Width(), ( intersection.top - destrect.top ) / destrect.Height() );
+	Vec2 posCornerDRPerc( ( intersection.right - destrect.left ) / destrect.Width(), ( intersection.bottom - destrect.top ) / destrect.Height() );
+	RECTLTRB_F texrect = mod->texRect;
+	Vec2 vTexSz( texrect.Width(), texrect.Height() );
+	RECTLTRB_F finaltex( texrect.left + posCornerULPerc.x * vTexSz.x, texrect.top + posCornerULPerc.y * vTexSz.y,
+		texrect.left + posCornerDRPerc.x * vTexSz.x, texrect.top + posCornerDRPerc.y * vTexSz.y );
+	// paints without offset because the offset is already in the clipped rectangle
+	__Painter().Draw( mod->pImg->pTex,
+		finaltex,
+		intersection,
+		Vec2( 0.0f, 0.0f ), ncolor );
+}
+
+void UTSprite::PaintFModuleStretched( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor, float W, float H )
+{
+	if ( W == 0.0f || H == 0.0f )
+		return;
+
+	int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameIdx ];
+	scFModule* mod = sprCol->FModules[ sprCol->AFrames[ aframeIdx ]->fmodulesIdx[ moduleIdx ] ];
+	RECTLTRB_F destrect = mod->moduleRectOff;
+
+	if ( W > 0.0f )
+		destrect.right = destrect.left + W;
+	if ( H > 0.0f )
+		destrect.bottom = destrect.top + H;
+
+	__Painter().Draw( mod->pImg->pTex,
+		mod->texRect,
+		destrect,
+		vPos, ncolor );
+}
 
 void UTSprite::PaintFrame( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, DWORD ncolor /*= 0xffffffff*/ )
 {

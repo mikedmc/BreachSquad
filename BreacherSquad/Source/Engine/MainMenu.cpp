@@ -467,7 +467,7 @@ void CMainMenu::Update(float dTime)
 						//adjust for difference between graphics and clicks:
 						wndrectL.y -= 5; wndrectL.h += 10;
 
-						if (PointInRect(vLocalMousePos, wndrectL))
+						if ( Rects::PointInRect(vLocalMousePos, wndrectL))
 						{
 							int nSel = m_nSelPage * m_nSelRows + (vLocalMousePos.y - wndrectL.y) / (szItem.h + nItemSpacing);
 							if ((nSel < 0) || (nSel >= m_nSelElements))
@@ -512,7 +512,7 @@ void CMainMenu::Update(float dTime)
 							m_fSelTimer = 0.0f;
 						}
 						//check buttons
-						if (PointInRect(vLocalMousePos, rectButBack))
+						if ( Rects::PointInRect(vLocalMousePos, rectButBack) )
 						{
 							if (m_nSelection == -1)
 								eCommand = K_CCTRLMGR_COMMAND_SELECT;
@@ -696,7 +696,7 @@ void CMainMenu::Update(float dTime)
 				RECTXYWH wndrectL = picrect;
 				wndrectL.x += vpos.x - picrect.w / 2.0f;
 				wndrectL.y += vpos.y - picrect.h / 2.0f;
-				if (PointInRect(vLocalMousePos, wndrectL))
+				if (Rects::PointInRect(vLocalMousePos, wndrectL))
 				{
 					if (m_nSelection < 0)
 						m_nSelection = m_nSelectionOld;
@@ -718,7 +718,7 @@ void CMainMenu::Update(float dTime)
 						m_nSelection--;
 				}
 				//check buttons
-				if (PointInRect(vLocalMousePos, rectButBack))
+				if (Rects::PointInRect(vLocalMousePos, rectButBack))
 				{
 					if (m_nSelection == -1)
 						eCommand = K_CCTRLMGR_COMMAND_SELECT;
@@ -914,7 +914,7 @@ void CMainMenu::Update(float dTime)
 				RECTXYWH wndrectL = wndrect;
 				wndrectL.x += vpos.x - picrect.w / 2.0f;
 				wndrectL.y += vpos.y - wndrect.h / 2.0f;
-				if (PointInRect(vLocalMousePos, wndrectL))
+				if (Rects::PointInRect(vLocalMousePos, wndrectL))
 				{
 					if (m_nSelection < 0)
 					{
@@ -944,7 +944,7 @@ void CMainMenu::Update(float dTime)
 						m_nSelection--;
 				}
 				//check buttons
-				if (PointInRect(vLocalMousePos, rectButBack))
+				if (Rects::PointInRect(vLocalMousePos, rectButBack))
 				{
 					if (m_nSelection == -1)
 					{
@@ -1090,7 +1090,7 @@ void CMainMenu::Update(float dTime)
 					vRefPos.x -= m_fSelPageCursor * pageRect.w;
 					RECTXYWH lvlrect(vRefPos.x + nColumn * wndSzTotal.w + nPage * pageRect.w + wndSpacing.w / 2, vRefPos.y + nRow * wndSzTotal.h + wndSpacing.h / 2, wndSz.w, wndSz.h);
 
-					if (PointInRect(vLocalMousePos, lvlrect))
+					if (Rects::PointInRect(vLocalMousePos, lvlrect))
 					{
 						if (m_nSelection == kk)
 						{
@@ -1119,7 +1119,7 @@ void CMainMenu::Update(float dTime)
 				}
 				//back button
 				RECTXYWH recttemp(rectRightPanel.CenterX() - 35, rectRightPanel.Bottom() - 30, 70, 16);
-				if (PointInRect(vLocalMousePos, recttemp))
+				if (Rects::PointInRect(vLocalMousePos, recttemp))
 				{
 					if (m_nSelection == -1)
 					{
@@ -1397,7 +1397,7 @@ void CMainMenu::Update(float dTime)
 					vRefPos.x -= m_fSelPageCursor * pageRect.w;
 					RECTXYWH lvlrect(vRefPos.x + nColumn * wndSzTotal.w + nPage * pageRect.w + wndSpacing.w / 2, vRefPos.y + nRow * wndSzTotal.h + wndSpacing.h / 2, wndSz.w, wndSz.h);
 
-					if (PointInRect(vLocalMousePos, lvlrect))
+					if (Rects::PointInRect(vLocalMousePos, lvlrect))
 					{
 						if (m_nSelection == kk)
 						{
@@ -1431,7 +1431,7 @@ void CMainMenu::Update(float dTime)
 				}
 				//back button
 				RECTXYWH recttemp(rectItemsPanel.CenterX() - 35, rectItemsPanel.Bottom() - 30, 70, 16);
-				if (PointInRect(vLocalMousePos, recttemp))
+				if (Rects::PointInRect(vLocalMousePos, recttemp))
 				{
 					if (m_nSelection == -1)
 					{

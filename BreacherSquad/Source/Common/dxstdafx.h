@@ -422,6 +422,7 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "utils/StringHash.h"
 #include "utils/StringHashA.h"
 #include "utils/enginecommon.h"
+#include "utils/Boxes.h"
 #include "Caabb.h"
 #include "utils/CollisionAABB.h"
 #include "Randoms.h"

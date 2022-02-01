@@ -649,7 +649,7 @@ void CLevel::UpdateDoofers(float dTime)
 					*/
 					killprop = true;
 				}
-				else if (!PointInRect(Vec3ProjVec2(prop->physPt->m_data.pos), camrect))
+				else if (!Rects::PointInRect(Vec3ProjVec2(prop->physPt->m_data.pos), camrect))
 				{
 					killprop = true;
 				}
@@ -719,7 +719,7 @@ void CLevel::UpdateDoofers(float dTime)
 					*/
 				}
 
-				if ((prop->physPt->m_data.bIsStatic) || (!PointInRect(Vec3XY(prop->physPt->m_data.pos), camrect_larger)))
+				if ((prop->physPt->m_data.bIsStatic) || (!Rects::PointInRect(Vec3XY(prop->physPt->m_data.pos), camrect_larger)))
 				{
 					killprop = true;
 				}
@@ -755,7 +755,7 @@ void CLevel::UpdateDoofers(float dTime)
 					}
 				}
 
-				if ((prop->physPt->m_data.bIsStatic) || (!PointInRect(prop->physPt->m_data.pos, camrect_larger)))
+				if ((prop->physPt->m_data.bIsStatic) || (!Rects::PointInRect(prop->physPt->m_data.pos, camrect_larger)))
 				{
 					killprop = true;
 					//smoke puff when dead

@@ -18,7 +18,7 @@ CTileBlockMesh::~CTileBlockMesh()
 	Clear();
 }
 
-OPRESULT CTileBlockMesh::BuildBuffers(POINTXY_INT vBlockPos_TL, CTile** map, SIZEWH mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr)
+OPRESULT CTileBlockMesh::BuildBuffers(PointXYi vBlockPos_TL, CTile** map, SIZEWH mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr)
 {
 	// allocate maximum possible number per layer plus sentinel
 	const size_t arrVertsLen = K_TBM_BLOCK_W * K_TBM_BLOCK_H * 4 + 16;
@@ -270,7 +270,7 @@ OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2
 			// block is allocated now so it missed device creation. Set device pointer and create needed buffers now
 			CTileBlockMesh* tbm = new CTileBlockMesh(m_pDevice);
 
-			if (OP_FAILED(tbm->BuildBuffers(POINTXY_INT(blX * K_TBM_BLOCK_W, blY * K_TBM_BLOCK_H), map, mapSizeTL, vOffset, pLightsSpr)))
+			if (OP_FAILED(tbm->BuildBuffers(PointXYi(blX * K_TBM_BLOCK_W, blY * K_TBM_BLOCK_H), map, mapSizeTL, vOffset, pLightsSpr)))
 			{
 				LOG("Block NOT added!");
 				delete tbm;

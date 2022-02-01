@@ -14,7 +14,7 @@ const DWORD VERT_TL1TS::FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
 const DWORD VERT_TL1TC::FVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE;
 
 
-POINTXY_INT GetDirVec2i(EDir dir)
+PointXYi GetDirVec2i(EDir dir)
 {
 	Vec2i dirs[4] = { Vec2i(-1, 0), Vec2i(0, -1), Vec2i(1, 0), Vec2i(0, 1) };
 
@@ -401,40 +401,6 @@ long buff_gets(CHAR* _out, int _maxcount, long &_cursor, void* buff)
 }
 
 
-bool PointInRect(Vec2 pt, RECTXYWH_F rct)
-{
-	if ((pt.x < rct.x) || (pt.y < rct.y) || (pt.x > rct.x + rct.w) || (pt.y > rct.y + rct.h))
-		return false;
-	return true;
-}
-
-bool PointInRect(int x, int y, int rx, int ry, int rw, int rh)
-{
-	if ((x < rx) || (y < ry) || (x > rx + rw) || (y > ry + rh))
-		return false;
-	return true;
-}
-
-bool PointInRect(int x, int y, RECTXYWH *r)
-{
-	if((x<r->x) || (x>r->x + r->w) || (y < r->y) || (y > r->y + r->h))
-		return false;
-	return true;
-}
-
-bool PointInRect(float x, float y, RECTXYWH_F *r)
-{
-	if ((x<r->x) || (x>r->x + r->w) || (y < r->y) || (y > r->y + r->h))
-		return false;
-	return true;
-}
-
-bool PointInRect(POINT *pt, RECTXYWH *r)
-{
-	if((pt->x < r->x) || (pt->x > r->x + r->w) || (pt->y < r->y) || (pt->y > r->y + r->h))
-		return false;
-	return true;
-}
 
 void OS_FormatTime(WCHAR* dest, int destSize, float timeInSecs)
 {
