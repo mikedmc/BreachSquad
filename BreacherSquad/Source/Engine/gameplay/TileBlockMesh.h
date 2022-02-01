@@ -23,7 +23,7 @@ public:
 
 	// Creates meshes for each layer
 	// Receives pointer to map tiles
-	OPRESULT					BuildBuffers(PointXYi vBlockPos_TL, CTile** map, SIZEWH mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr);
+	OPRESULT					BuildBuffers(Vec2i vBlockPos_TL, CTile** map, SIZEWH mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr);
 
 	void						Clear();
 

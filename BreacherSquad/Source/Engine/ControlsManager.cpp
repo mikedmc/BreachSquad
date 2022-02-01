@@ -3304,9 +3304,9 @@ void CCtrlLayer::SetAnchor( ECtrlAnchor nAnchorX, ECtrlAnchor nAnchorY )
 	anchorY = nAnchorY;
 }
 
-PointXYi CCtrlLayer::GetPos()
+Vec2i CCtrlLayer::GetPos()
 {
-	return PointXYi( X, Y );
+	return Vec2i( X, Y );
 }
 
 
@@ -4068,8 +4068,8 @@ void CControlsManager::Update( float dTime )
 		{
 			localMousePt = m_pCamera->ScreenToWorld( g_mouse.pos );
 		}
-		PointXYi lPos = lay->GetPos();
-		PointXYi anchor;
+		Vec2i lPos = lay->GetPos();
+		Vec2i anchor;
 		anchor.x = m_cameraScreenRect.CenterX() + lay->anchorX * ( m_cameraScreenRect.w / 2 );
 		anchor.y = m_cameraScreenRect.CenterY() + lay->anchorY * ( m_cameraScreenRect.h / 2 );
 
@@ -4169,8 +4169,8 @@ void CControlsManager::Paint()
 		if ( !lay->bAnimate )
 			perc = 1.0f;
 
-		PointXYi lpos = lay->GetPos();
-		PointXYi anchor;
+		Vec2i lpos = lay->GetPos();
+		Vec2i anchor;
 		anchor.x = m_cameraScreenRect.CenterX() + lay->anchorX * ( m_cameraScreenRect.w / 2 );
 		anchor.y = m_cameraScreenRect.CenterY() + lay->anchorY * ( m_cameraScreenRect.h / 2 );
 		//add anchor

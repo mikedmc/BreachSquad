@@ -139,13 +139,13 @@ struct VERT_TL2T
 	static const DWORD FVF;
 };
 
-struct PointXYi {
+struct Vec2i {
 	int x, y;
-	PointXYi() :x(0), y(0) {}
-	PointXYi(int nx, int ny) :x(nx), y(ny) {}
-	PointXYi(const PointXYi& point) { x = point.x; y = point.y; }
-	bool operator==(const PointXYi &other) const { return ((other.x == x) && (other.y == y)); }
-	bool operator!=(const PointXYi &other) const { return ((other.x != x) || (other.y != y)); }
+	Vec2i() :x(0), y(0) {}
+	Vec2i(int nx, int ny) :x(nx), y(ny) {}
+	Vec2i(const Vec2i& point) { x = point.x; y = point.y; }
+	bool operator==(const Vec2i &other) const { return ((other.x == x) && (other.y == y)); }
+	bool operator!=(const Vec2i &other) const { return ((other.x != x) || (other.y != y)); }
 	operator Vec2() { return Vec2((float)x, (float)y); }
 };
 

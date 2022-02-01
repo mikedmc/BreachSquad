@@ -14,7 +14,7 @@ const DWORD VERT_TL1TS::FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
 const DWORD VERT_TL1TC::FVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE;
 
 
-PointXYi GetDirVec2i(EDir dir)
+Vec2i GetDirVec2i(EDir dir)
 {
 	Vec2i dirs[4] = { Vec2i(-1, 0), Vec2i(0, -1), Vec2i(1, 0), Vec2i(0, 1) };
 

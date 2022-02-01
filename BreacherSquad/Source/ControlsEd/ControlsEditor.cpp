@@ -1372,7 +1372,7 @@ void CControlsEditor::Paint()
 	Vec2 vecRenderCenter(UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY());
 	if (currLayer)
 	{
-		PointXYi lpos = currLayer->GetPos();
+		Vec2i lpos = currLayer->GetPos();
 		D3DXMATRIXA16 mat;
 
 		Vec2 scrCenter(vecRenderCenter.x + offset.x + lpos.x, vecRenderCenter.y + offset.y + lpos.y);

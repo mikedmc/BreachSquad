@@ -171,7 +171,7 @@ public:
 	D3DXVECTOR2		pos;			//pozitia
 	D3DXVECTOR2		v;				//viteza
 	D3DXVECTOR2		pt1, pt2, pt3;	//ajutatoare pentru animatie
-	PointXYi		intPt;			//coord int
+	Vec2i		intPt;			//coord int
 	float			timer;			//timer propriu pt animatie sau viatza
 	float			fparam;			//parametru float
 	float			fparam2;			//parametru float 2

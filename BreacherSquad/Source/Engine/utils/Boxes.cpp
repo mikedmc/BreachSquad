@@ -77,9 +77,9 @@ const int RECTXYWH::CenterY() const
 	return y + h / 2;
 }
 
-const PointXYi RECTXYWH::Center() const
+const Vec2i RECTXYWH::Center() const
 {
-	return PointXYi( x + w / 2, y + h / 2 );
+	return Vec2i( x + w / 2, y + h / 2 );
 }
 
 bool RECTXYWH::Contains( Vec2i pt )

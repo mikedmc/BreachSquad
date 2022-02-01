@@ -638,7 +638,7 @@ void App_CenterWindowOnMainDisplay(HWND wndHwnd)
 	RECT wndrect, wndrect_new;
 	GetWindowRect(wndHwnd, &wndrect);
 	SIZEWH szWnd(wndrect.right - wndrect.left, wndrect.bottom - wndrect.top);
-	PointXYi ptWndPos((UTApp().g_szDesktopSize.w - szWnd.w) / 2, (UTApp().g_szDesktopSize.h - szWnd.h) / 2);
+	Vec2i ptWndPos((UTApp().g_szDesktopSize.w - szWnd.w) / 2, (UTApp().g_szDesktopSize.h - szWnd.h) / 2);
 	SetRect(&wndrect_new, ptWndPos.x, ptWndPos.y, ptWndPos.x + szWnd.w, ptWndPos.y + szWnd.h);
 	if ((wndrect_new.left != wndrect.left) || (wndrect_new.top != wndrect.top) || (wndrect_new.right != wndrect.right) || (wndrect_new.bottom != wndrect.bottom))
 	{

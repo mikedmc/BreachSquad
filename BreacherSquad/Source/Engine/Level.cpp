@@ -8778,7 +8778,7 @@ int CLevel::BuildLightVolume360(CLight * light, _VERTEX_PNCT4T4 *outVerts, int o
 	struct sCollPoint {
 		Vec2 vPos;
 		Vec2 vNorm;
-		PointXYi tlPos;
+		Vec2i tlPos;
 		bool bCollided;
 	};
 
@@ -8796,7 +8796,7 @@ int CLevel::BuildLightVolume360(CLight * light, _VERTEX_PNCT4T4 *outVerts, int o
 	Vec3 vFrom3 = Vec2ToVec3XY0(vFrom);
 	// collision results
 	Vec2 vRetPt(0.0f, 0.0f), vRetNrm(0.0f, 0.0f);
-	PointXYi tilePosTL;
+	Vec2i tilePosTL;
 	// counts how many collisions of the same type (no collision or same tile) were made in order
 	int nSameSince = 0;
 

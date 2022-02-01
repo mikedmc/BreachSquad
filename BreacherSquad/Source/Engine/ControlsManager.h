@@ -184,7 +184,7 @@ public:
 	void				SetAnchor( ECtrlAnchor nAnchorX, ECtrlAnchor nAnchorY );
 	void				SetPos( int nX, int nY ) { X = nX; Y = nY; }
 	void				MoveLayer( int dX, int dY ) { X += dX; Y += dY; }
-	PointXYi			GetPos();
+	Vec2i			GetPos();
 	CControl*			GetControlByIdx( int nIdx );
 	CControl*			GetControlByName( char* ctrlName );
 	bool				ControlSetDisableByName( bool bDisabledValue, char* ctrlName );

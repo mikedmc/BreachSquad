@@ -18,7 +18,7 @@ public:
 	const int			Right() const;
 	const int			CenterX() const;
 	const int			CenterY() const;
-	const PointXYi		Center() const;
+	const Vec2i		Center() const;
 	bool				Contains( Vec2i pt );
 	bool				Intersects( const RECTXYWH& rhs );
 	// cuts the area outside of clampToThis
