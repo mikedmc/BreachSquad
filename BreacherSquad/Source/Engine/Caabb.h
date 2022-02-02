@@ -31,6 +31,7 @@ public:
 	void				Set(float xmin, float ymin, float xmax, float ymax);
 	void				Set(Vec2 min, Vec2 max);
 	void				Set(RectXYWH rect);
+	void				Set(RectXYWHi rect);
 	void				Set(RectLTRB rect);
 	void				Set(CAABB* sourceAABB, Vec2 vOffset);
 	// Correctly sets min/max by sorting the input points

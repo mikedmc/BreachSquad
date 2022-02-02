@@ -46,6 +46,9 @@ void CMenus::PaintBackground( RectXYWH worldRect, DWORD dwColor, bool bPaintPart
 	UTSprite::PaintFrame( &m_sprCol, Vec2( worldRect.x + 18.0f * sin( fLocalTimeline * 0.2f ), worldRect.y ), ANM_MENUS0_SPR_BACKGROUND, 1, dwColor );
 	// chars front layer
 	UTSprite::PaintFrame( &m_sprCol, Vec2( worldRect.x + 40.0f * sin( fLocalTimeline * 0.2f ), worldRect.y ), ANM_MENUS0_SPR_BACKGROUND, 2, dwColor );
+
+	GUIUtils::DrawWindow( &UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WINDOWS1, RectXYWHi( 200, 100, 300, 200 ), 0xffffffff, FONTIDX_8_BS1, STR_OPTIONS );
+
 	//particles
 	if ( bPaintParticles )
 	{

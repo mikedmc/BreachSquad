@@ -125,10 +125,10 @@ public:
 	//face automat WRAP la text
 	//void DrawStringOffsetY(int strIdx, RECTXYWH rect, int offsetY, UINT16 Flags = FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, DWORD Color = 0xffffffff);
 
-	//masoara lungimea textului pt ca nu are param de latime
+	// only measures width without line breaks
 	SizeWHi MeasureString(int strIdx);
 	SizeWHi MeasureString(CStringDesc *strDesc);
-	//masoara latimea si inaltimea pe care se intinde textul
+	// measures width and height
 	SizeWHi MeasureString(CStringDesc* strDesc, int maxWidth);
 	SizeWHi MeasureString(int strIdx, int maxWidth);
 	

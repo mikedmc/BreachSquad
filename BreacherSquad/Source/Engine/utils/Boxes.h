@@ -52,6 +52,7 @@ public:
 	RectLTRB( float nleft, float ntop, float nright, float nbottom );
 	RectLTRB( const RectLTRB& rectsrc );
 	RectLTRB( const RectXYWH rectsrc );
+	RectLTRB( const RectXYWHi rectsrc );
 
 	void				Set( float nleft, float ntop, float nright, float nbottom );
 	void				Move( float dx, float dy );

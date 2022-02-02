@@ -235,6 +235,12 @@ RectLTRB::RectLTRB( const RectXYWH rectsrc ) :
 
 }
 
+RectLTRB::RectLTRB( const RectXYWHi rectsrc ) :
+	left( rectsrc.x ), top( rectsrc.y ), right( rectsrc.x + rectsrc.w ), bottom( rectsrc.y + rectsrc.h )
+{
+
+}
+
 void RectLTRB::Set( float nleft, float ntop, float nright, float nbottom )
 {
 	left = nleft; top = ntop; right = nright; bottom = nbottom;

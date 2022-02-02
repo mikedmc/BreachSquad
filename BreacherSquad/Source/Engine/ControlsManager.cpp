@@ -3589,29 +3589,33 @@ void GUIUtils::DrawWindowFrame( CSpriteCollection *sprCol, int animIdx, RectXYWH
 
 void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor )
 {
-	DrawWindowFrame( sprCol, animIdx, BBox, color );
+	const DWORD wndBaseColor = 0xff000000;
+	// max half transparency
+	float fAlpha = 0.5f * DW_GETFALPHA( color );
+	Vec2 vUL( BBox.x, BBox.y );
+	RectLTRB clipwin( BBox );
+	// paint base
+	UTSprite::PaintFModuleStretched( sprCol, vUL, animIdx, 0, 0, DW_COLORALPHA(wndBaseColor, fAlpha), BBox.w, BBox.h );
+	// paint titlebar
+	UTSprite::PaintFModuleClipped( sprCol, vUL, animIdx, 1, 0, clipwin, color );
 	//paint title
-	if ( strTitle != null )
+	if ( strTitle != nullptr )
 	{
-		//gasesc centrul title bar-ului (din frame-ul de top center)
-		RectXYWHi topbarbb = sprCol->GetAFrameBBox( animIdx, 1 );
-
-		Vec2 titleBarCenter( BBox.x + BBox.w / 2.0f, BBox.y - topbarbb.h / 2 ); //constanta este in fn de grafica, nu se poate scapa de ea
-		__TexFonts().fonts[ nFontIdx ]->DrawStringScaleW( strTitle, titleBarCenter.x, titleBarCenter.y, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwTitleColor );
+		// get titlebar width for text centering
+		RectXYWHi barSz = sprCol->GetAFrameBBox( animIdx, 1 ); 
+		Vec2 titleBarCenter( BBox.x + barSz.w / 2.0f, BBox.y + 5 );
+		Mat matTitle;
+		MUMatAffine2D( &matTitle, 1.0f, NULL, -HALF_PI, &titleBarCenter );
+		__Painter().SetTransform( matTitle );
+		__TexFonts().fonts[ nFontIdx ]->DrawString( strTitle, 0.0f, 0.0f, FONTFLAG_ANCHOR_VCENTERRIGHT, dwTitleColor );
+		__Painter().SetTransform( g_matIdentity );
 	}
 }
 
 void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor )
 {
-	DrawWindowFrame( sprCol, animIdx, BBox, color );
-	//paint title
-	//gasesc centrul title bar-ului (din frame-ul de top center)
-	RectXYWHi topbarbb = sprCol->GetAFrameBBox( animIdx, 1 );
-	if ( ( nFontIdx >= 0 ) && ( nStrIdxTitle >= 0 ) )
-	{
-		Vec2 titleBarCenter( BBox.x + BBox.w / 2.0f, BBox.y - topbarbb.h / 2 ); //constanta este in fn de grafica, nu se poate scapa de ea
-		__TexFonts().fonts[ nFontIdx ]->DrawStringScaleW( nStrIdxTitle, titleBarCenter.x, titleBarCenter.y, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwTitleColor );
-	}
+	CStringDesc* sdTitle = __Texts().GetStringDescByIdx( nStrIdxTitle );
+	DrawWindow( sprCol, animIdx, BBox, color, nFontIdx, sdTitle, dwTitleColor );
 }
 
 //**************************************************************************

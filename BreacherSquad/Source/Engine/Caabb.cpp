@@ -55,6 +55,15 @@ void CAABB::Set(float xmin, float ymin, float xmax, float ymax)
 	Set(vMin, vMax);
 }
 
+void CAABB::Set( RectXYWHi rect )
+{
+	vMin = Vec2( (float)rect.x, (float)rect.y ); 
+	vMax = Vec2( (float)(rect.x + rect.w), (float)(rect.y + rect.h) );
+	vSize = vMax - vMin;
+	vHalfSize = vSize / 2.0f;
+	vCenter = vMin + vHalfSize;
+}
+
 // checks min and max points before setting the bbox
 void CAABB::Set_Corrected(Vec2 pt1, Vec2 pt2)
 {
