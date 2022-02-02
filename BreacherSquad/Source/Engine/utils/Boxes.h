@@ -61,6 +61,7 @@ public:
 	bool				Contains( RectLTRB & dest );
 	float				Width();
 	float				Height();
+	SizeWH				Size();
 	// finds intersection of two RECTLTRB_F returning true if they intersect
 	static bool			Intersection( RectLTRB & a, RectLTRB & b, RectLTRB & retVal );
 

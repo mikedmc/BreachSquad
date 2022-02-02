@@ -239,9 +239,9 @@ void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 	float fAspectReal = (g_rectScreen.w / g_rectScreen.h);
 	float fAspect = LIMIT(fAspectReal, K_WINDOW_ASPECT_RATIO_MIN, K_WINDOW_ASPECT_RATIO_MAX);
 	float fAspectInv = 1.0f / fAspect;
-	SIZEWH_F szRender( (float)newSizeX, (float)newSizeY );
+	SizeWH szRender( (float)newSizeX, (float)newSizeY );
 	///--- pixel perfect rendering ---
-	SIZEWH_F szRenderPP;
+	SizeWH szRenderPP;
 	const float ReferenceResolutionY = ( float ) K_GAME_TARGET_RESOLUTION_H;
 	// Calculate the new art scale factor
 	float minDiff = ReferenceResolutionY;
@@ -720,7 +720,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 						if ((nSelectedIdx >= 0) && (nSelectedIdx < g_arrResolutions.GetSize()))
 						{
-							SIZEWH szRes = g_arrResolutions[nSelectedIdx];
+							SizeWHi szRes = g_arrResolutions[nSelectedIdx];
 
 							m_Settings.nWindowW = szRes.w;
 							m_Settings.nWindowH = szRes.h;
@@ -2225,7 +2225,7 @@ HRESULT CApplication::OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFA
 
 			if (DisplayMode.Format == eDeviceSettings.AdapterFormat)
 			{
-				SIZEWH szres;
+				SizeWHi szres;
 				szres.w = (int)DisplayMode.Width;
 				szres.h = (int)DisplayMode.Height;
 				//rezolutiile prea mici sunt sarite

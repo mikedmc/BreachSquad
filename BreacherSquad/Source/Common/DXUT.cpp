@@ -4652,11 +4652,11 @@ LRESULT CALLBACK DXUTStaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 						{
 							//verifica sa vada daca rezolutia ferestrei nu a ramas cumva de la alt monitor. 
 							//Daca nu e in lista de rezolutii acceptate trece by default pe cea mai mare a monitorului
-							SIZEWH szwh(UTApp().m_Settings.nWindowW, UTApp().m_Settings.nWindowH);
+							SizeWHi szwh(UTApp().m_Settings.nWindowW, UTApp().m_Settings.nWindowH);
 							if (UTApp().g_arrResolutions.IndexOf(szwh) < 0)
 							{
 								//reset resolution to largest
-								SIZEWH szLargest = UTApp().g_arrResolutions[UTApp().g_arrResolutions.GetSize() - 1];
+								SizeWHi szLargest = UTApp().g_arrResolutions[UTApp().g_arrResolutions.GetSize() - 1];
 								UTApp().m_Settings.nWindowW = szLargest.w;
 								UTApp().m_Settings.nWindowH = szLargest.h;
 

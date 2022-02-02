@@ -36,7 +36,7 @@ public:
 	CTile**							tiles;					// actual tilemap
 	CAABB							AABBbounds;				// bounding box in world space
 	RectXYWHi						AABBbounds_TL;			// AABB in tiles, in world space
-	SIZEWH							sizeTL;					// Area size in tiles
+	SizeWHi							sizeTL;					// Area size in tiles
 	bool							bVisible;
 	bool							bActive;				// Was it activated? as soon as an area becomes "visible" it activates itself and first neighbours
 	CFixedArray<CLevelArea*, 10>	arrNeighbours;

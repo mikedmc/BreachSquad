@@ -126,17 +126,17 @@ public:
 	//void DrawStringOffsetY(int strIdx, RECTXYWH rect, int offsetY, UINT16 Flags = FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, DWORD Color = 0xffffffff);
 
 	//masoara lungimea textului pt ca nu are param de latime
-	SIZEWH MeasureString(int strIdx);
-	SIZEWH MeasureString(CStringDesc *strDesc);
+	SizeWHi MeasureString(int strIdx);
+	SizeWHi MeasureString(CStringDesc *strDesc);
 	//masoara latimea si inaltimea pe care se intinde textul
-	SIZEWH MeasureString(CStringDesc* strDesc, int maxWidth);
-	SIZEWH MeasureString(int strIdx, int maxWidth);
+	SizeWHi MeasureString(CStringDesc* strDesc, int maxWidth);
+	SizeWHi MeasureString(int strIdx, int maxWidth);
 	
 	int DrawHString(UINT32 strHash, int X, int Y, UINT16 Flags = FONTFLAG_ANCHOR_BOTTOMLEFT, DWORD Color = 0xffffffff);
 	void DrawHString(UINT32 strHash, RectXYWHi rect, UINT16 Flags = FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, DWORD Color = 0xffffffff);
 	//void DrawHStringOffsetY(UINT32 strHash, RECTXYWH rect, int offsetY, UINT16 Flags = FONTFLAG_ANCHOR_TOPLEFT | FONTFLAG_WRAPTEXT, DWORD Color = 0xffffffff);
-	SIZEWH MeasureHString(UINT32 strHash);
-	SIZEWH MeasureHString(UINT32 strHash, int maxWidth);
+	SizeWHi MeasureHString(UINT32 strHash);
+	SizeWHi MeasureHString(UINT32 strHash, int maxWidth);
 };
 
 

@@ -124,8 +124,8 @@ public:
 	Vec2		WorldToScreen(Vec2 inPT, RectXYWH *srcViewportOverride = NULL);
 	Vec2		ViewportToScreen(Vec2 inPt);
 	Vec2		ScreenToViewport(Vec2 inPT);
-	SIZEWH_F		ScreenToWorld(SIZEWH_F inSZ);
-	SIZEWH_F		WorldToScreen(SIZEWH_F inSZ);
+	SizeWH		ScreenToWorld(SizeWH inSZ);
+	SizeWH		WorldToScreen(SizeWH inSZ);
 	RectXYWH		ScreenToWorld(RectXYWH inRect);
 	RectXYWH		WorldToScreen(RectXYWH inRect);
 	///--- transformari intre 2 camere ---

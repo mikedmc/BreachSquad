@@ -374,7 +374,7 @@ void CMainMenu::Update(float dTime)
 
 					RectXYWH worldrect = UTApp().g_rect360hWorld;
 					const int nItemSpacing = 10;
-					SIZEWH szItem(200, 10);
+					SizeWHi szItem(200, 10);
 					RectXYWHi rectItemsList(worldrect.CenterX() - szItem.w / 2, worldrect.Bottom() - 26 - m_nSelRows * (szItem.h + nItemSpacing), szItem.w, m_nSelRows * (szItem.h + nItemSpacing) - nItemSpacing);
 
 					if (eCommand == K_CCTRLMGR_COMMAND_LEFT)
@@ -1059,7 +1059,7 @@ void CMainMenu::Update(float dTime)
 			RectXYWH worldrect = UTApp().g_rect360hWorld;
 			int nSelPerPage = m_nSelRows * m_nSelColumns;
 			//dimensiuni ferestre nivel si spacing intre ele
-			SIZEWH wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
+			SizeWHi wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
 			int nPage = m_nSelection / nSelPerPage;
 			int nRow = (m_nSelection % nSelPerPage) / m_nSelColumns;
 			int nColumn = (m_nSelection % nSelPerPage) % m_nSelColumns;
@@ -1364,7 +1364,7 @@ void CMainMenu::Update(float dTime)
 			RectXYWH worldrect = UTApp().g_rect360hWorld;
 			int nSelPerPage = m_nSelRows * m_nSelColumns;
 			//dimensiuni ferestre nivel si spacing intre ele
-			SIZEWH wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
+			SizeWHi wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
 			int nPage = m_nSelection / nSelPerPage;
 			int nRow = (m_nSelection % nSelPerPage) / m_nSelColumns;
 			int nColumn = (m_nSelection % nSelPerPage) % m_nSelColumns;
@@ -1637,7 +1637,7 @@ void CMainMenu::Paint()
 				{
 					//title bar
 					RectXYWHi rRect(0, 20, 100, 18);
-					GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
+					//GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 					g_font8bs1->DrawString(STR_UPDATING_MODS, worldrect.CenterX(), worldrect.y + 33.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 					//please wait
 					g_font8bs1->DrawString(STR_PLEASE_HANG, worldrect.CenterX(), worldrect.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, K_COLOR_DEFAULT_TEXT);
@@ -1660,20 +1660,20 @@ void CMainMenu::Paint()
 					//}
 
 					const int nItemSpacing = 10;
-					SIZEWH szItem(200, 10);
+					SizeWHi szItem(200, 10);
 					//items list area
 					RectXYWHi rectItemsList(worldrect.CenterX() - szItem.w / 2, worldrect.Bottom() - 26 - m_nSelRows * (szItem.h + nItemSpacing), szItem.w, m_nSelRows * (szItem.h + nItemSpacing) - nItemSpacing);
 					//selected mod details area
 					RectXYWHi rectSelMod(worldrect.CenterX() - 150, worldrect.y + 50, 300, 52);
 					//title
 					RectXYWHi rRect(0, 20, 100, 18);
-					GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
+					//GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 					g_font8bs1->DrawString(STR_AVAILABLE_MODS, worldrect.CenterX(), worldrect.y + 33.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 
 					//mod list background
 					RectXYWHi rectTemp = rectItemsList;
 					rectTemp.Inflate(2, 2);
-					GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectTemp, 0x88888888);
+					GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectTemp, 0x88888888);
 
 					//paint selection cursor
 					RectXYWHi selrect;
@@ -1682,11 +1682,11 @@ void CMainMenu::Paint()
 						selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 						selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
 						selrect.Inflate(5, 5);
-						GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+						GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 					}
 
 					///--- SELECTED MOD ---
-					GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectSelMod, 0x88888888);
+					GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectSelMod, 0x88888888);
 					//image
 					if ((m_nSelection >= 0) && (m_nSelection < m_nSelElements))
 					{
@@ -1743,7 +1743,7 @@ void CMainMenu::Paint()
 						float fDark = 1.0f - fabs((float)kk - m_fSelPageCursor);
 						CLAMP(fDark, 0.0f, 1.0f);
 						
-						GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectItem, D3DCOLOR_COLORVALUE(fColor, fColor, fColor, 1.0f));
+						GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectItem, D3DCOLOR_COLORVALUE(fColor, fColor, fColor, 1.0f));
 						//mod name
 						RECT txtrect;
 						SetRect(&txtrect, rectItem.x, rectItem.y, rectItem.Right(), rectItem.Bottom());
@@ -1845,7 +1845,7 @@ void CMainMenu::Paint()
 			PaintBackground(worldrect, 0xff4444dd);
 			//title
 			RectXYWHi rRect(0, 22, 100, 18);
-			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
+//			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 			g_font8bs1->DrawString(STR_SELECT_GAME_MODE, worldrect.CenterX(), worldrect.y + 35.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 			//coop string if online game
 			if (UTApp().IsGameNetworked())
@@ -1867,7 +1867,7 @@ void CMainMenu::Paint()
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 				selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
 				selrect.Inflate(5, 5);
-				GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+				GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 			}
 			//paint chapters
 			D3DXVECTOR2 vpos = worldrect.Center();
@@ -1920,7 +1920,7 @@ void CMainMenu::Paint()
 			PaintBackground(worldrect, 0xff4444dd);
 			//title
 			RectXYWHi rRect(0, 22, 100, 18);
-			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
+//			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 			g_font8bs1->DrawString(STR_SELECT_EPISODE, worldrect.CenterX(), worldrect.y + 35.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 			//game mode name (top left)
 			g_font8b1->DrawString(STR_CLASSIC_MODE, 3.0f, worldrect.y + 13.0f, FONTFLAG_ANCHOR_BOTTOMLEFT, K_COLOR_DEFAULT_TEXT_HALFALPHA);
@@ -1944,7 +1944,7 @@ void CMainMenu::Paint()
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 				selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
 				selrect.Inflate(4, 4);
-				GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+				GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 			}
 			//paint chapters
 			D3DXVECTOR2 vpos = worldrect.Center();
@@ -2010,7 +2010,7 @@ void CMainMenu::Paint()
 			//--- paint levels ---
 			int nSelPerPage = m_nSelRows * m_nSelColumns;
 			//dimensiuni ferestre nivel si spacing intre ele
-			SIZEWH wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
+			SizeWHi wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
 			//page rect este offsetat putin (8px) in sus ca sa incapa butonul de back
 			RectXYWHi pageRect(rectRightPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectRightPanel.CenterY() - 0.5f * m_nSelRows * wndSzTotal.h - 8, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
 
@@ -2020,7 +2020,7 @@ void CMainMenu::Paint()
 			{
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 				selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
-				GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+				GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 			}
 
 			for (int kk = 0; kk < m_nSelElements; kk++)
@@ -2077,7 +2077,7 @@ void CMainMenu::Paint()
 
 			//--- mission name ---
 			RectXYWHi rRect(0, 19, 400, 30);
-			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
+//			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 
 			g_font6ns1->DrawString(STR_SELECT_MISSION, rectRightPanel.CenterX(), rectRightPanel.y + 6, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_DEFAULT_TEXT);
 			if (m_nSelection >= 0)
@@ -2171,7 +2171,7 @@ void CMainMenu::Paint()
 			///--- paint levels ---
 			int nSelPerPage = m_nSelRows * m_nSelColumns;
 			//dimensiuni ferestre nivel si spacing intre ele
-			SIZEWH wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
+			SizeWHi wndSz(48, 36), wndSpacing(8, 8), wndSzTotal(48 + 8, 36 + 8);
 			
 			RectXYWHi pageRect(rectItemsPanel.CenterX() - 0.5f * m_nSelColumns * wndSzTotal.w, rectItemsPanel.y, m_nSelColumns * wndSzTotal.w, m_nSelRows * wndSzTotal.h);
 
@@ -2181,7 +2181,7 @@ void CMainMenu::Paint()
 			{
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 				selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
-				GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+				GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 			}
 
 			for (int kk = 0; kk < m_nSelElements; kk++)
@@ -2226,7 +2226,7 @@ void CMainMenu::Paint()
 			}
 
 			///--- SELECTED MOD details ---
-			GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectSelMod, 0x88888888);
+			GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectSelMod, 0x88888888);
 			//image
 			if ((m_nSelection >= 0) && (m_nSelection < m_nSelElements))
 			{
@@ -2270,7 +2270,7 @@ void CMainMenu::Paint()
 
 			//--- title ---
 			RectXYWHi rRect(0, 20, 100, 18);
-			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
+//			GUIUtils::DrawWidebar(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WIDEBAR2, rRect, 0xffffffff);
 			g_font8bs1->DrawString(STR_DOWNLOADED_LEVELS, worldrect.CenterX(), worldrect.y + 33.0f, FONTFLAG_ANCHOR_BOTTOMCENTER, K_COLOR_SELECTED_TEXT);
 
 
@@ -2393,13 +2393,13 @@ void CMainMenu::PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD d
 
 	float wndAlpha = DW_GETFALPHA(dwColor);
 	//Paint Chapter Window
-	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, dwColor);
+	GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, dwColor);
 	//mission image
 	CSprite::paintFrame(&m_sprCol, wndrectL.x - 2, wndrectL.y - 2, ANM_MENUS_SPR_CHAPTER_SPLASHES, UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterImgFrame, dwColor);
 	
 	//mission name frame and string
 	RectXYWHi titlerect(wndrectL.x, wndrectL.y + picrect.h + 1, wndrectL.w, 9);
-	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, dwColor);
+	GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, dwColor);
 	titlerect.Inflate(1, 1);
 	if(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx >= 0)
 		g_font6n1->DrawStringClamped(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx, titlerect.CenterX(), titlerect.y + 13, titlerect.w + 6, FONTFLAG_ANCHOR_TOPCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, wndAlpha));
@@ -2433,7 +2433,7 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 
 	//float wndAlpha = D3DCOLOR_GETFALPHA(dwColor);
 	//Paint Chapter Window
-	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
+	GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 	//mission image
 	if(!bWorkshopChapter)
 		CSprite::paintFrame(&m_sprCol, wndrectL.x - 2, wndrectL.y - 2, ANM_MENUS_SPR_CHAPTER_SPLASHES_LG, UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterImgFrame, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
@@ -2461,7 +2461,7 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 	}
 	//mission name frame and string
 	RectXYWHi titlerect(wndrectL.x, wndrectL.y + picrect.h + 1, wndrectL.w, 9);
-	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
+	GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 	titlerect.Inflate(1, 1);
 	if (!bWorkshopChapter)
 	{
@@ -2515,7 +2515,7 @@ void CMainMenu::PaintGameModeWindow(D3DXVECTOR2 vCenter, int nGameModeIdx, float
 
 	RectXYWHi wndrectL2 = wndrectL;
 	wndrectL2.Inflate(1, 1);
-	GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_BLACK1, wndrectL2, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
+	GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_BLACK1, wndrectL2, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 
 	CSprite::paintFrame(&m_sprCol, wndrectL.x - 2, wndrectL.y - 2, ANM_MENUS_SPR_GAME_MODE_SPLASHES, nGameModeIdx, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 

@@ -248,7 +248,7 @@ void CChatWnd::Paint(D3DXVECTOR2 vBottomLeft)
 		const int nInputW = 400;
 		//draw input box
 		RectXYWHi rctxywh(vPos.x, vPos.y, max(nInputW, (rct.right - rct.left + 10)), pTTFont->nFontSize);
-		GUIUtils::DrawFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rctxywh, 0xffffffff);
+		GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rctxywh, 0xffffffff);
 		//draw text
 		pTTFont->DrawTextLine(strLine, vPos.x, vPos.y, DT_LEFT | DT_TOP | DT_SINGLELINE, K_CW_LOCAL_COLOR);
 	}

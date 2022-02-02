@@ -61,8 +61,10 @@ public:
 	// RETURNS: AFrame flag - returns it only once when entering the frame. Used for sending events from the editor on each frame like footsteps and such
 	// updates position only if bUpdatePos is true
 	UINT32					Update(float dTime, bool bUpdatePos = false);
-
+	// Paints current frame
 	void					Paint();
+	// Paints current frame clipped to clip rectangle
+	void					Paint( RectLTRB& clip );
 	// Optimized paint for a single module when we don't have more modules per frame (skips a for)
 	void					PaintFModule(int moduleIdx);
 	// Optimized paint for a single module when we don't have more modules per frame (skips a for)
@@ -82,14 +84,15 @@ namespace UTSprite
 	// Paints single module
 	void PaintFModule( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff );
 
-	void PaintFrameClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, RectLTRB& clip, DWORD ncolor = 0xffffffff );
-	void PaintFModuleClipped( CSpriteCollection *sprCol, float nX, float nY, int animID, int frameIdx, int moduleIdx, RectLTRB& clip, DWORD ncolor = 0xffffffff );
+	void PaintFrameClipped( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, RectLTRB& clip, DWORD ncolor = 0xffffffff );
+	void PaintFModuleClipped( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, RectLTRB& clip, DWORD ncolor = 0xffffffff );
 	// Stretches the module texture over the resized area replacing width and height with W and H (W/h < 0.0f means width and height stay unchanged)
 	void PaintFModuleStretched( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff, float W = -1.0f, float H = -1.0f );
+	// fills the rect defined by vPos, W and H by tiling the specified module
+	// assumes that the module is placed in 0,0 (no offset ox,oy)
+	void PaintFModuleTiled( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff, float W = -1.0f, float H = -1.0f );
 
 	/*
-	//#TODO: maybe needed later
-	void PaintFModuleTiled( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff, int W = -1, int H = -1 );
 	void paintTiled(CSpriteCollection *sprCol, int W = -1, int H = -1);
 	void paintTiledOffset(CSpriteCollection *sprCol, int W = -1, int H = -1, int offsX = 0, int offsY = 0);
 	void paintTiledHOriented(CSpriteCollection *sprManager, D3DXVECTOR2 pt1, D3DXVECTOR2 pt2);

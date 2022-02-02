@@ -8357,7 +8357,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	{
 		CCameraTransform::SetActiveCameraIdentity(m_pDevice);
 		RECT src;
-		SIZEWH_F szSrc( rectRender.w / ( float ) nPixelScaling, rectRender.h / ( float ) nPixelScaling );
+		SizeWH szSrc( rectRender.w / ( float ) nPixelScaling, rectRender.h / ( float ) nPixelScaling );
 		// display the center part of the source RT that fits the screen
 		Vec2i vUL( ( int ) floor( pRTfinal->nWidth / 2.0f - szSrc.w / 2.0f ), ( int ) floor( pRTfinal->nHeight / 2.0f - szSrc.h / 2.0f ) );
 		Vec2i vDR( vUL.x + ( int ) ceil(szSrc.w), vUL.y + ( int ) ceil(szSrc.h) );

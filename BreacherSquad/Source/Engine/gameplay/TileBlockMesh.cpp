@@ -18,7 +18,7 @@ CTileBlockMesh::~CTileBlockMesh()
 	Clear();
 }
 
-OPRESULT CTileBlockMesh::BuildBuffers(Vec2i vBlockPos_TL, CTile** map, SIZEWH mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr)
+OPRESULT CTileBlockMesh::BuildBuffers(Vec2i vBlockPos_TL, CTile** map, SizeWHi mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr)
 {
 	// allocate maximum possible number per layer plus sentinel
 	const size_t arrVertsLen = K_TBM_BLOCK_W * K_TBM_BLOCK_H * 4 + 16;
@@ -253,7 +253,7 @@ void CTileBlockMeshManager::Release()
 	SAFE_DELETE_GROWABLE_ARRAY(arrBlocks);
 }
 
-OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SIZEWH mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr)
+OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SizeWHi mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr)
 {
 	_ASSERT(m_pDevice != nullptr);
 	if (map == nullptr)

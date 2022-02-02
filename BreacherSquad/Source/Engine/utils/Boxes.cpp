@@ -272,6 +272,11 @@ float RectLTRB::Height()
 	return bottom - top;
 }
 
+SizeWH RectLTRB::Size()
+{
+	return SizeWH( right - left, bottom - top );
+}
+
 bool RectLTRB::Intersection( RectLTRB & a, RectLTRB & b, RectLTRB & retVal )
 {
 	Vec2 vMax, vMin;

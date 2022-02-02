@@ -217,24 +217,24 @@ Vec2 CCameraTransform::ViewportToScreen(Vec2 inPt)
 }
 
 
-SIZEWH_F CCameraTransform::ScreenToWorld(SIZEWH_F inSZ)
+SizeWH CCameraTransform::ScreenToWorld(SizeWH inSZ)
 {
 	double percX, percY;
 	//aflu procente intre 0 si 1 din jumatatile de vectori de directie
 	percX = inSZ.w / m_Viewport.w;
 	percY = inSZ.h / m_Viewport.h;
 	Vec2 nscale = percX * 2.0f * m_vecHW + percY * 2.0f * m_vecHH;
-	return SIZEWH_F(nscale.x, nscale.y);
+	return SizeWH(nscale.x, nscale.y);
 }
 
-SIZEWH_F CCameraTransform::WorldToScreen(SIZEWH_F inSZ)
+SizeWH CCameraTransform::WorldToScreen(SizeWH inSZ)
 {
 	double percX, percY;
 	//procente intre -1 si 1 in fn de lungimea axelor vecHW si vecHH
 	//TODO: daca adaug rotatie aici trebuie facut cu vectori si proiectii!
 	percX = (inSZ.w / m_vecHW.x) / 2.0f;
 	percY = (inSZ.h / m_vecHH.y) / 2.0f;
-	return SIZEWH_F(percX * m_Viewport.w, percY * m_Viewport.h);
+	return SizeWH(percX * m_Viewport.w, percY * m_Viewport.h);
 }
 
 Vec2	CCameraTransform::ViewportToViewport(Vec2 inPt, CCameraTransform &destCam)

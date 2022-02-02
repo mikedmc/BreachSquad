@@ -429,7 +429,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	*/
 
 	//see if resolution is supported
-	SIZEWH szwh(UTApp().m_Settings.nWindowW, UTApp().m_Settings.nWindowH);
+	SizeWHi szwh(UTApp().m_Settings.nWindowW, UTApp().m_Settings.nWindowH);
 	LOG(L"GFX:: Settings Resolution:%dx%d fullscreen:%d", szwh.w, szwh.h, UTApp().m_Settings.bFullscreen);
 	if (UTApp().g_arrResolutions.IndexOf(szwh) < 0)
 	{

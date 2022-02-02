@@ -160,7 +160,7 @@ public:
 	inline RectXYWHi					GetAFrameBBox_real(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox_real; }
 	RectXYWHi						GetModuleRect(int animIdx, int frameIdx, int moduleIdx);
 	RectLTRB						GetModuleRect_TexCoords(int animIdx, int frameIdx, int moduleIdx);
-	SIZEWH							GetTextureSizeByAnim(int animIdx);
+	SizeWHi							GetTextureSizeByAnim(int animIdx);
 	scTexture*						GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx);
 	// Returns no of aframe hitpoints
 	int								GetAFrameHitPointsCnt(int animIdx, int frameIdx);

@@ -502,17 +502,17 @@ RectLTRB CSpriteCollection::GetModuleRect_TexCoords(int animIdx, int frameIdx, i
 }
 
 
-SIZEWH CSpriteCollection::GetTextureSizeByAnim(int animIdx)
+SizeWHi CSpriteCollection::GetTextureSizeByAnim(int animIdx)
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	if (animIdx >= Animations.GetSize())
 	{
 		ErrorBox(K_ERR_WARNING, L"GetTextureSizeByAnim -> out of bounds!");
-		return SIZEWH(-1, -1);
+		return SizeWHi(-1, -1);
 	}
 #endif;
 	scFModule *module = FModules[AFrames[Animations[animIdx]->aframesIdx[0]]->fmodulesIdx[0]];
-	return SIZEWH(module->pImg->info.Width, module->pImg->info.Height);
+	return SizeWHi(module->pImg->info.Width, module->pImg->info.Height);
 }
 
 scTexture* CSpriteCollection::GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx)

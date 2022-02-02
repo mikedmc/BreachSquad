@@ -66,11 +66,10 @@ class CCtrlLayer;
 enum EControlType;
 
 namespace GUIUtils {
-	void DrawFrameF( CSpriteCollection *sprCol, int animIdx, RectXYWH BBox, DWORD color = 0xffffffff, float fInflate = 0.0f );
-	void DrawFrame( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color = 0xffffffff, int nInflate = 0 );
+	void DrawWindowFrameF( CSpriteCollection *sprCol, int animIdx, RectXYWH BBox, DWORD color = 0xffffffff, float fInflate = 0.0f );
+	void DrawWindowFrame( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color = 0xffffffff, int nInflate = 0 );
 	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor = 0xffffffff );
 	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor = 0xffffffff );
-	void DrawWidebar( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color );
 
 	/*
 	* \brief Deseneaza un buton (sau input box, slider, etc) dintr-o animatie cu 3 frames (capat, centru tiling, capat)
@@ -79,7 +78,7 @@ namespace GUIUtils {
 	* \param strDesc - stringul pe care il masoara pentru a lua dimensiunea butonului
 	* \param nAlignHsign - 0 center, -1 left, 1 right
 	*/
-	void DrawButtonFromText( CSpriteCollection *sprCol, int animIdx, bool bPressed, CStringDesc *strDesc, CTexFont* pFont, D3DXVECTOR2 vButCenter, DWORD color = 0xffffffff, int nAlignHsign = 0 );
+	void DrawButtonFromText( CSpriteCollection *sprCol, int animIdx, bool bPressed, CStringDesc *strDesc, CTexFont* pFont, Vec2 vButCenter, DWORD color = 0xffffffff, int nAlignHsign = 0 );
 	/*
 	* \brief Deseneaza un buton (sau input box, slider, etc) dintr-o animatie cu 3 frames (capat, centru tiling, capat)
 	* capetele butonului se deseneaza in interiorul bboxului. Capatul stanga trebuie aliniat in dreapta axei verticale in editor.
@@ -136,7 +135,7 @@ public:
 	// Initializes specific vars based on control type
 	void				Reset(); 
 	void				Update(float dTime, float fTimeline);
-	void				Paint(CCameraTransform	* pCamera, D3DXMATRIXA16 * matWorld);
+	void				Paint(CCameraTransform	* pCamera, Mat * matWorld);
 	//Initializes the control clone after parameters get set
 	void				Initialize();	
 	// Handles input commands
@@ -153,7 +152,7 @@ public:
 class CCtrlLayer
 {
 public:
-	CStringHash ID;
+	CStringHash			ID;
 	float				alpha;
 	int					X, Y;
 

@@ -821,7 +821,7 @@ void CControlsEditor::Update(float dTime)
 		}
 		if (g_mouse.Lbut == K_MOUSE_BUTT_DRAG)
 		{
-			SIZEWH_F mousedelta(g_mouse.pos.x - vLastMouse.x, g_mouse.pos.y - vLastMouse.y);
+			SizeWH mousedelta(g_mouse.pos.x - vLastMouse.x, g_mouse.pos.y - vLastMouse.y);
 			if (m_pCamera != nullptr)
 			{
 				mousedelta = m_pCamera->ScreenToWorld(mousedelta);
@@ -1662,7 +1662,7 @@ void CControlsEditor::PaintBBoxes()
 			if (m_pCamera != nullptr)
 			{
 				Vec2 vul(rect.x, rect.y);
-				SIZEWH_F rsz(rect.w, rect.h);
+				SizeWH rsz(rect.w, rect.h);
 				vul = m_pCamera->WorldToScreen(vul);
 				//adaug screen space coords
 				vul = vul + vecRenderCenter + offset;

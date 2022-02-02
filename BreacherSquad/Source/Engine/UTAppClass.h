@@ -79,8 +79,8 @@ class CApplication : public IEventListener
 {
 public: 
 	///--- available resolutions ---
-	CArray<SIZEWH> g_arrResolutions;  //available resolutions
-	SIZEWH g_szDesktopSize;	//desktop resolution
+	CArray<SizeWHi> g_arrResolutions;  //available resolutions
+	SizeWHi g_szDesktopSize;	//desktop resolution
 public:
 	CApplicationSettings	m_Settings;
 	HRESULT SaveSettings();
@@ -124,7 +124,7 @@ public:
 	///--------------------------------------------------------------------------------------
 	/// Variabile globale legate de dimensiunea ecranului
 	///--------------------------------------------------------------------------------------
-	SIZEWH_F	g_letterbox;		// specifica afisare bare negre laterale sau sus/jos. daca w!=0 sunt bare laterale de latimea respectiva. Daca h!=0 sunt bare sus si jos
+	SizeWH	g_letterbox;		// specifica afisare bare negre laterale sau sus/jos. daca w!=0 sunt bare laterale de latimea respectiva. Daca h!=0 sunt bare sus si jos
 	RectXYWH	g_rectScreen;		// real screen (after letterboxing)
 	RectXYWH	g_rectRender;		// rectangle that we render to (in actual final screen resolution after letterboxing)
 	RectXYWH	g_rectRenderPP;		// rectangle that the level should render to so it scales with integers (in actual final screen coordinates)

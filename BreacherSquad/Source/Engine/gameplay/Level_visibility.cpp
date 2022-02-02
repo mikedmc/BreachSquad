@@ -23,7 +23,7 @@ void CLevel::BuildVisibilityLists()
 	RectXYWH camrect_old = m_camLevelToRT.GetCamWorldAABB();
 	//build a camera view rectangle constant across different resolutions so it doesn't desync when on multiplayer
 	//it will need intervention if camera constraint changes axis in order to maintain maximum visible area
-	SIZEWH_F camrectsz(K_GAME_WIDTH, K_GAME_HEIGHT);
+	SizeWH camrectsz(K_GAME_WIDTH, K_GAME_HEIGHT);
 	RectXYWH camrect(camrect_old.CenterX() - camrectsz.w * 0.5f, camrect_old.CenterY() - camrectsz.h * 0.5f, camrectsz.w, camrectsz.h);
 	//maximize camrect vertically
 	CAABB camaabb(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));

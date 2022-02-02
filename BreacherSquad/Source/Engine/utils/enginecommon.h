@@ -165,25 +165,25 @@ Vec2i GetDirVec2i(EDir dir);
 // Gets inverse EDir from EDir
 EDir GetDirInverse(EDir dir);
 
-class SIZEWH {
+class SizeWHi {
 public:
 	int w, h;
-	SIZEWH();
-	SIZEWH(int nw, int nh);
-	SIZEWH(const SIZEWH& szsrc);
-	bool operator==(const SIZEWH &other) const { return ((other.w == w) && (other.h == h)); }
+	SizeWHi();
+	SizeWHi(int nw, int nh);
+	SizeWHi(const SizeWHi& szsrc);
+	bool operator==(const SizeWHi &other) const { return ((other.w == w) && (other.h == h)); }
 	void Init(int nw, int nh) {
 		w = nw; h = nh;
 	}
 };
 
-class SIZEWH_F {
+class SizeWH {
 public:
 	float w, h;
-	SIZEWH_F();
-	SIZEWH_F(float nw, float nh);
-	SIZEWH_F(const SIZEWH_F& szsrc);
-	bool operator==(const SIZEWH_F &other) const { return (FLOATS_EQUAL(other.w, w, EPS) && FLOATS_EQUAL(other.h, h, EPS)); }
+	SizeWH();
+	SizeWH(float nw, float nh);
+	SizeWH(const SizeWH& szsrc);
+	bool operator==(const SizeWH &other) const { return (FLOATS_EQUAL(other.w, w, EPS) && FLOATS_EQUAL(other.h, h, EPS)); }
 };
 
 

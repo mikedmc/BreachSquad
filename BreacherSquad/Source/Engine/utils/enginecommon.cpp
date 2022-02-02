@@ -267,30 +267,30 @@ unsigned int buff_readUInt(void* buff, long &_cursor)
 	return(ret);
 }
 
-SIZEWH::SIZEWH()
+SizeWHi::SizeWHi()
 {
 	w = h = 0;
 }
-SIZEWH::SIZEWH(int nw, int nh)
+SizeWHi::SizeWHi(int nw, int nh)
 {
 	w = nw; h = nh;
 }
-SIZEWH::SIZEWH(const SIZEWH& szsrc)
+SizeWHi::SizeWHi(const SizeWHi& szsrc)
 {
 	w = szsrc.w;
 	h = szsrc.h;
 }
 
 
-SIZEWH_F::SIZEWH_F()
+SizeWH::SizeWH()
 {
 	w = h = 0;
 }
-SIZEWH_F::SIZEWH_F(float nw, float nh)
+SizeWH::SizeWH(float nw, float nh)
 {
 	w = nw; h = nh;
 }
-SIZEWH_F::SIZEWH_F(const SIZEWH_F& szsrc)
+SizeWH::SizeWH(const SizeWH& szsrc)
 {
 	w = szsrc.w;
 	h = szsrc.h;

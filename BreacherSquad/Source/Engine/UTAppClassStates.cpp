@@ -382,7 +382,7 @@ void CApplication::App_PaintState_Developer(LPDIRECT3DDEVICE9 pDevice, ID3DXSpri
 	{
 		//7x3 frames 71x86px
 		int nAnimFrames = 21; 
-		SIZEWH recsz(71, 86);
+		SizeWH recsz(71, 86);
 		int nFrame = (int)floor(nAnimFrames * (1.0f - (GameState::fTimer / K_GAME_SPLASH_SHOW_TIMER)));
 		int nx = nFrame % 7, ny = nFrame / 7;
 

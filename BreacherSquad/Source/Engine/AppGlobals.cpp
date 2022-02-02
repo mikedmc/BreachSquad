@@ -626,7 +626,7 @@ void App_CenterRectInRect(RECT *rectSrc, RECT *rectDest)
 	if ((rectSrc == null) || (rectDest == null))
 		return;
 
-	SIZEWH szSrc(rectSrc->right - rectSrc->left, rectSrc->bottom - rectSrc->top);
+	SizeWH szSrc(rectSrc->right - rectSrc->left, rectSrc->bottom - rectSrc->top);
 	rectSrc->left = rectDest->left + ((rectDest->right - rectDest->left) - szSrc.w) / 2;
 	rectSrc->top = rectDest->top + ((rectDest->bottom - rectDest->top) - szSrc.h) / 2;
 	rectSrc->right = rectSrc->left + szSrc.w;
@@ -637,7 +637,7 @@ void App_CenterWindowOnMainDisplay(HWND wndHwnd)
 {
 	RECT wndrect, wndrect_new;
 	GetWindowRect(wndHwnd, &wndrect);
-	SIZEWH szWnd(wndrect.right - wndrect.left, wndrect.bottom - wndrect.top);
+	SizeWHi szWnd(wndrect.right - wndrect.left, wndrect.bottom - wndrect.top);
 	Vec2i ptWndPos((UTApp().g_szDesktopSize.w - szWnd.w) / 2, (UTApp().g_szDesktopSize.h - szWnd.h) / 2);
 	SetRect(&wndrect_new, ptWndPos.x, ptWndPos.y, ptWndPos.x + szWnd.w, ptWndPos.y + szWnd.h);
 	if ((wndrect_new.left != wndrect.left) || (wndrect_new.top != wndrect.top) || (wndrect_new.right != wndrect.right) || (wndrect_new.bottom != wndrect.bottom))
