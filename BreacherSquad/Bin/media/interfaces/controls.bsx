@@ -4690,6 +4690,9 @@
     <AnimationFrame FrameIdx="510" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="512" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="513" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="341" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="338" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="377" Duration="1" DX="0" DY="0" Flags="0" />
   </AnimationFrames>
   <Animations>
     <Animation ID="WINDOW1" Flags="0">
@@ -5433,6 +5436,11 @@
       <AFrame Idx="573" />
       <AFrame Idx="574" />
       <AFrame Idx="575" />
+    </Animation>
+    <Animation ID="PANELICONS" Flags="0">
+      <AFrame Idx="576" />
+      <AFrame Idx="577" />
+      <AFrame Idx="578" />
     </Animation>
   </Animations>
 </SpriteCollection>

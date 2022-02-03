@@ -31,6 +31,25 @@ EDir GetDirInverse(EDir dir)
 	return (EDir)((dir + 2) % EDIRS_COUNT);
 }
 
+void DW_COLOR_GETRBGA( DWORD hexColor, float & r, float & g, float & b, float & a )
+{
+	a = ((float)((hexColor & 0xff000000) >> 24) / 255.0f);
+	r = ((float)((hexColor & 0x00ff0000) >> 16) / 255.0f);
+	g = ((float)((hexColor & 0x0000ff00) >> 8) / 255.0f);
+	b = ((float)(hexColor & 0x000000ff) / 255.0f);
+}
+
+DWORD DW_COLOR_LERP( DWORD dwFrom, DWORD dwTo, float s )
+{
+	float a;
+	Vec4 cFrom, cTo;
+	DW_COLOR_GETRBGA( dwFrom, cFrom.x, cFrom.y, cFrom.z, cFrom.w );
+	DW_COLOR_GETRBGA( dwTo, cTo.x, cTo.y, cTo.z, cTo.w );
+	Vec4 colOut;
+	MUVec4Lerp( &colOut, &cFrom, &cTo, s );
+	return DW_COLORVALUE( colOut.x, colOut.y, colOut.z, colOut.w );
+}
+
 EAnimAngle GetEAnimAngle(Vec2 vDir)
 {
 	if ((vDir.x == 0.0f) && (vDir.y == 0.0f))

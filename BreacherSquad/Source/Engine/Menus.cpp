@@ -48,6 +48,9 @@ void CMenus::PaintBackground( RectXYWH worldRect, DWORD dwColor, bool bPaintPart
 	UTSprite::PaintFrame( &m_sprCol, Vec2( worldRect.x + 40.0f * sin( fLocalTimeline * 0.2f ), worldRect.y ), ANM_MENUS0_SPR_BACKGROUND, 2, dwColor );
 
 	GUIUtils::DrawWindow( &UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_WINDOWS1, RectXYWHi( 200, 100, 300, 200 ), 0xffffffff, FONTIDX_8_BS1, STR_OPTIONS );
+	float ft = fabs( sin( fLocalTimeline ) );
+	GUIUtils::DrawPanel( &UTGetGUI().m_sprCol, RectXYWHi( 250, 130, 200, 50 ), 0.0f, ft, ANM_CONTROLS_SPR_PANELICONS, 0 );
+	GUIUtils::DrawPanel( &UTGetGUI().m_sprCol, RectXYWHi( 250, 190, 200, 50 ), 1.0f, ft, ANM_CONTROLS_SPR_PANELICONS, 0 );
 
 	//particles
 	if ( bPaintParticles )

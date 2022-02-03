@@ -66,10 +66,18 @@ class CCtrlLayer;
 enum EControlType;
 
 namespace GUIUtils {
+	// colors for different elements
+	const DWORD colPanelIdle = 0xff151515;
+	const DWORD colPanelFocused = 0xff323232;
+	const DWORD colPanelIconIdle = 0xff606e1f;
+	const DWORD colPanelIconFocused = 0xff85962e;
+
 	void DrawWindowFrameF( CSpriteCollection *sprCol, int animIdx, RectXYWH BBox, DWORD color = 0xffffffff, float fInflate = 0.0f );
 	void DrawWindowFrame( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color = 0xffffffff, int nInflate = 0 );
 	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor = 0xffffffff );
 	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor = 0xffffffff );
+	// draws a container panel used for all selectable controls
+	void DrawPanel( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha, int nIconAnimIdx = -1, int nIconFrame = 0 );
 
 	/*
 	* \brief Deseneaza un buton (sau input box, slider, etc) dintr-o animatie cu 3 frames (capat, centru tiling, capat)

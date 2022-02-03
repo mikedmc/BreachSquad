@@ -31,6 +31,8 @@
 #define			MUVec3Cross				D3DXVec3Cross
 #define			MUVec3Norm				D3DXVec3Normalize
 
+#define			MUVec4Lerp				D3DXVec4Lerp
+
 // macros
 #define			Vec3XY(vec)				Vec2(vec.x, vec.y)
 #define			Vec2ToVec3XY0(vec)		Vec3(vec.x, vec.y, 0.0f)

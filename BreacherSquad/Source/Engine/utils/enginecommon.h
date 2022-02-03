@@ -11,8 +11,13 @@
 #define DW_COLOR_XXXA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0x000000)
 #define DW_COLORALPHA(hexColor, fAlpha) (DWORD)(((int((fAlpha) * 255.0f)&0xff)<<24) | (hexColor & 0xffffff))
 #define DW_GETFALPHA(hexColor) ((float)((hexColor & 0xff000000) >> 24) / 255.0f)
+// channels are float between 0 and 1
 #define DW_COLORVALUE(r,g,b,a) \
     D3DCOLOR_RGBA((DWORD)((r)*255.f),(DWORD)((g)*255.f),(DWORD)((b)*255.f),(DWORD)((a)*255.f))
+// returns colors on channels between 0 and 1
+void DW_COLOR_GETRBGA(DWORD hexColor, float & r, float & g, float & b, float & a);
+// interpolates between 2 colors returning DWORD value
+DWORD DW_COLOR_LERP( DWORD dwFrom, DWORD dwTo, float s );
 
 // generic sides (corresponds to generic directions)
 #define K_SIDE_NONE -1
