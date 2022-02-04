@@ -8,6 +8,7 @@ CSpriteCollection* CControl::m_pSprCol = nullptr;
 enum EControlType {
 	CCTRL_TYPE_WINDOW = 0,
 	CCTRL_TYPE_PANEL,
+	CCTRL_TYPE_PANELSM,						// panel without focus rect and icon
 	CCTRL_TYPE_BUTTON,						//params: fHoverPercent, nMsgParam - nMsgParam is sent to handler for processing
 	CCTRL_TYPE_LABEL,
 	CCTRL_TYPE_BLINKING_LABEL,
@@ -44,6 +45,7 @@ CStringHash EControlTypeNames[] =
 {
 	L"Window",
 	L"Panel",
+	L"PanelSM",
 	L"Button",
 	L"Label",
 	L"BlinkingLabel",
@@ -975,7 +977,7 @@ void CControl::Update( float dTime, float fTimeline )
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDUP;
 			}
 
-			//aflu numarul maxim de optiuni
+			// get number of options
 			int optcnt = 0;
 			for ( int ll = 0; ll < 10; ll++ )
 			{
@@ -2077,9 +2079,9 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				drawDebugText( BBox.x, BBox.y, L"Invalid font ID!" );
 				return;
 			}
-			if ( ( animIdx >= 0 ) && ( m_pSprCol->Animations[ animIdx ]->aframesNo < 2 ) )
+			if ( ( animIdx >= 0 ) && ( m_pSprCol->Animations[ animIdx ]->aframesNo < 3 ) )
 			{
-				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx. Needs 2 frames." );
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx. Needs 3 frames." );
 				return;
 			}
 
@@ -2092,13 +2094,12 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 			//cursor size
 			RectXYWHi currRect( 0, 0, BBox.w, vSpacing );
-			if ( animIdx >= 0 )
-				currRect = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 
 			int curidx = 0;
 			for ( int ll = 0; ll < 8; ll++ ) //max 8 string options
 			{
 				float selperc = max( 0.0f, 1.0f - fabs( ( float ) ll - fSelectionCursor ) );
+				float invselperc = 1.0f - selperc;
 				int nDisFlag = 1 << ll;
 				bool bDisabledLocal = ( ( nDisabledFlags & nDisFlag ) != 0 );
 
@@ -2113,21 +2114,22 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 					//paint cursor
 					if ( animIdx >= 0 )
 					{
-						int selFrame = 0; //small button
-
-						RectXYWHi rectButAnim = m_pSprCol->GetAFrameBBox( animIdx, selFrame );
-
-						UTSprite::PaintFrame( m_pSprCol, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame, wcol );
-						//paint selected cursor
 						if ( selperc > 0.0f )
-							UTSprite::PaintFrame( m_pSprCol, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx, animIdx, selFrame + 1, DW_COLOR_FFFA( selperc ) );
+						{
+							// paint filler under the selection
+							DWORD bgcol = DW_COLORALPHA( GUIUtils::colPanelIdle, layer->alpha * selperc );
+							UTSprite::PaintFModuleStretched( m_pSprCol, Vec2( BBox_inflated.x - invselperc * 10.0f, BBox_inflated.y + vSpacing * curidx ), animIdx, 0, 0, bgcol, BBox_inflated.w + invselperc * 20.0f, currRect.h );
+							//paint selected cursor
+							UTSprite::PaintFrame( m_pSprCol, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx + currRect.h / 2, animIdx, 1, DW_COLOR_FFFA( selperc ) );
+							UTSprite::PaintFrame( m_pSprCol, BBox_inflated.Right() - selperc * 15.0f, BBox_inflated.y + vSpacing * curidx + currRect.h / 2, animIdx, 2, DW_COLOR_FFFA( selperc ) );
+						}
 					}
 
 					//and string
-					D3DXCOLOR exitcol;
-					D3DXColorLerp( &exitcol, &( D3DXCOLOR ) dwFontColor, &( D3DXCOLOR ) wcol, selperc );
+					DWORD exitcol;
+					exitcol = DW_COLOR_LERP( dwFontColor, wcol, selperc );
 					if ( bDisabledLocal )
-						exitcol = DW_COLORALPHA( ( DWORD ) exitcol, 0.5f );
+						exitcol = DW_COLORALPHA( exitcol, 0.5f );
 
 					Vec2 vTextOffset( selperc * 15.0f, 0.0f );
 					if ( textAlignFlags & FONTFLAG_ANCHOR_CENTER )
@@ -2193,7 +2195,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 
 		case CCTRL_TYPE_BUTTON:
 		{
-			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 3 ) )
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 5 ) )
 			{
 				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx or frame count" );
 				return;
@@ -2203,17 +2205,14 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			DWORD wcol = DW_COLORVALUE( dCol, dCol, dCol, layer->alpha );
 
 			Vec2 butC( ( int ) ( BBox.x + BBox.w / 2.0f ), ( int ) ( BBox.y + BBox.h / 2.0f ) );
-
-			if ( ( statusFlags & CCTRL_STATUS_FLAG_CLICKED ) != 0 )
+			bool bPressed = ((statusFlags & CCTRL_STATUS_FLAG_CLICKED) != 0);
+			bool bHover = ((statusFlags & CCTRL_STATUS_FLAG_HOVER) != 0);
+			float hoverPerc = 0.0f;
+			if ( bHover )
 			{
-				GUIUtils::DrawHTilingAnim( m_pSprCol, animIdx, 6, BBox, wcol );
+				hoverPerc = paramsDict.GetVariantByName( L"fHoverPercent" )->m_asFloat;
 			}
-			else if ( ( statusFlags & CCTRL_STATUS_FLAG_HOVER ) != 0 )
-			{
-				GUIUtils::DrawHTilingAnim( m_pSprCol, animIdx, 3, BBox, wcol );
-			}
-			else
-				GUIUtils::DrawHTilingAnim( m_pSprCol, animIdx, 0, BBox, wcol );
+			GUIUtils::DrawButton( m_pSprCol, animIdx, BBox, bPressed, hoverPerc, 1.0f, layer->alpha );
 
 			//text
 			if ( stringIdx >= 0 )
@@ -2224,7 +2223,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 					if ( ( statusFlags & CCTRL_STATUS_FLAG_CLICKED ) != 0 )
 						offy = 1;
 
-					__TexFonts().fonts[ fontIdx ]->DrawStringScaleW( stringIdx, butC.x, butC.y + offy, BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor );
+					__TexFonts().fonts[ fontIdx ]->DrawString( stringIdx, butC.x, butC.y + offy, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor );
 				}
 				else
 				{
@@ -2260,6 +2259,20 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			GUIUtils::DrawPanel( m_pSprCol, BBox_inflated, 1.0f, layer->alpha, ANM_CONTROLS_SPR_PANELICONS, iconFrame );
 		}
 		break;
+
+		case CCTRL_TYPE_PANELSM:
+		{
+			if ( (animIdx < 0) || (animIdx >= m_pSprCol->animationNo) || (m_pSprCol->Animations[ animIdx ]->aframesNo < 2) )
+			{
+				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx" );
+				return;
+			}
+
+			int iconFrame = paramsDict.GetVariantByName( L"iconFrame" )->m_asINT32;
+			GUIUtils::DrawPanelSM( m_pSprCol, BBox_inflated, 1.0f, layer->alpha );
+		}
+		break;
+
 		case CCTRL_TYPE_SDL_KEYREADER:
 		{
 			RectXYWHi movedB = BBox;
@@ -2579,18 +2592,18 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			if ( bChecked )
 				frame = 1;
 
-			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
-			UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, frame, wcol );
-
-			//hover frame
-			if ( hoverPercent > 0.0f )
-			{
-				UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, frame, DW_COLOR_FFFA( hoverPercent * 0.5f ) );
-			}
+			// actual checkbox
+			UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, frame, dwColor );
+			// panel
+			RectXYWHi checkrct = m_pSprCol->GetAFrameBBox( animIdx, 0 );
+			RectXYWHi panelrect( BBox );
+			panelrect.x += checkrct.w + 2; 
+			panelrect.w -= checkrct.w + 2;
+			GUIUtils::DrawPanelSM( m_pSprCol, panelrect, 1.0f, layer->alpha );
 
 			if ( fontIdx >= 0 )
 			{
-				__TexFonts().fonts[ fontIdx ]->DrawString( stringIdx, BBox.x + BBox.w + 2, BBox.y + BBox.h / 2.0f, FONTFLAG_ANCHOR_VCENTERLEFT, dwFontColor );
+				__TexFonts().fonts[ fontIdx ]->DrawString( stringIdx, panelrect.x + 5, panelrect.CenterY(), FONTFLAG_ANCHOR_VCENTERLEFT, dwFontColor );
 			}
 			else
 			{
@@ -3425,6 +3438,54 @@ void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RectXYWHi B
 	RectXYWHi cliprect = BBox;
 	cliprect.w = ( int ) ceil( fPercentFull * cliprect.w );
 	UTSprite::PaintFModuleStretched( sprCol, Vec2( BBox.x, BBox.CenterY() ), animIdx, 2, 0, DW_COLOR_FFFA( fAlpha ), cliprect.w );
+}
+
+void GUIUtils::DrawPanelSM( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha /*= 1.0f */ )
+{
+	// default panel anim
+	int animIdx = ANM_CONTROLS_SPR_PANEL1;
+	// get thin bar width
+	RectXYWHi leftSz1 = sprCol->GetAFrameBBox( animIdx, 1 );
+	// extend box to the left
+	int nLeftSize = leftSz1.w;
+	RectLTRB clipwin( BBox );
+	clipwin.left -= nLeftSize;
+	Vec2 vUL( clipwin.left, clipwin.top );
+
+	DWORD dwPanelColor = DW_COLOR_LERP( colPanelIdle, colPanelFocused, fFocusPercent );
+	DWORD dwFocusAlpha = DW_COLOR_FFFA( fFocusPercent * fAlpha );
+	DWORD dwAlpha = DW_COLOR_FFFA( fAlpha );
+	// paint base
+	UTSprite::PaintFModuleStretched( sprCol, Vec2(BBox.x, BBox.y), animIdx, 0, 0, DW_COLORALPHA( dwPanelColor, fAlpha ), BBox.w, BBox.h );
+	// paint thin bar
+	UTSprite::PaintFModuleClipped( sprCol, vUL, animIdx, 2, 0, clipwin, dwAlpha );
+	UTSprite::PaintFModuleClipped( sprCol, vUL, animIdx, 1, 0, clipwin, dwFocusAlpha );
+}
+
+void GUIUtils::DrawButton( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, bool bPressed, float fHoverPercent, float fFocusPercent, float fAlpha /*= 1.0f*/ )
+{
+	// get thin bar width
+	RectXYWHi leftSz1 = sprCol->GetAFrameBBox_real( animIdx, 3 );
+	// extend box to the left
+	int nLeftSize = leftSz1.w;
+	RectLTRB clipwin( BBox );
+	clipwin.left -= nLeftSize; 
+	Vec2 vUL( clipwin.left, clipwin.top );
+
+	DWORD dwFocusAlpha = DW_COLOR_FFFA( fFocusPercent * fAlpha );
+	DWORD dwHoverAlpha = DW_COLOR_FFFA( fHoverPercent * fFocusPercent * fAlpha );
+	DWORD dwAlpha = DW_COLOR_FFFA( fAlpha );
+	// paint base
+	int nframe = 0;
+	if ( bPressed )
+		nframe = 2;
+	RectLTRB clipbut( BBox );
+	UTSprite::PaintFModuleClipped( sprCol, Vec2(BBox.x, BBox.y), animIdx, 0, 0, clipbut, dwAlpha );
+	if(!bPressed)
+		UTSprite::PaintFModuleClipped( sprCol, Vec2( BBox.x, BBox.y ), animIdx, 1, 0, clipbut, dwHoverAlpha );
+	// paint thin bar
+	UTSprite::PaintFModuleClipped( sprCol, Vec2( vUL.x, vUL.y ), animIdx, 4, 0, clipwin, dwAlpha );
+	UTSprite::PaintFModuleClipped( sprCol, Vec2( vUL.x, vUL.y ), animIdx, 3, 0, clipwin, dwFocusAlpha );
 }
 
 void GUIUtils::DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )

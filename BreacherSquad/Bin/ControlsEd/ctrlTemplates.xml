@@ -14,12 +14,13 @@ CONTROLS:
 - inflate: cu cat se modifica dimensiunile grafice fata de bbox (in special la frame, listbox, dar si buton si altele)
 -->
 <Layer ID="LAYER_ID_" X="0" Y="0" isBlocking="1" getsInput="false" anchorX="center" anchorY="center" fTimer="0.0" focusedControlID="empty" >
-	<Control Type="Window" ID="empty" animID="ANM_" fontID="FONT_" fontColor="#ffffffff" stringID="STR_" inflate="0" X="-50" Y="-50" W="100" H="100" />
-	<Control Type="Panel" ID="empty" animID="ANM_" color="#ffffffff" inflate="0" iconFrame="-1" X="-50" Y="-50" W="100" H="100" />
-	<Control Type="Button" ID="CTRL_BUT_" animID="BUTTON" fontID="FONT_" fontColor="#ffffffff" stringID="STR_" X="10" Y="10" W="60" H="16" />
+	<Control Type="Window" ID="empty" animID="ANM_" fontID="FONT_" fontColor="#fff2b33c" stringID="STR_" inflate="0" X="-50" Y="-50" W="100" H="100" />
+	<Control Type="Panel" ID="empty" animID="ANM_" inflate="0" iconFrame="-1" X="-50" Y="-50" W="100" H="100" />
+	<Control Type="PanelSM" ID="empty" animID="ANM_" inflate="0" X="-50" Y="-50" W="100" H="100" />
+	<Control Type="Button" ID="CTRL_BUT_" animID="BUTTON" fontID="FONT_" fontColor="#ffffffff" stringID="STR_" X="10" Y="10" W="120" H="18" />
 	<Control Type="Label" ID="empty" fontID="FONT_" fontColor="#ffffffff" stringID="STR_" wrapText="false" justify="false" align="-1" valign="0" X="10" Y="10" W="100" H="16" />
 	<Control Type="BlinkingLabel" ID="empty" fontID="FONT_" fontColor="#ffffffff" blinkcolor="#ffff0000" timerLoop="1.0" timerBlink="0.5" stringID="STR_" wrapText="false" justify="false" align="-1" valign="0" X="10" Y="10" W="100" H="16" />
-	<Control Type="Checkbox" ID="CTRL_CHECK_" animID="ANM_" fontID="FONT_" fontColor="#ffffffff" stringID="STR_" X="0" Y="0" W="13" H="13" />
+	<Control Type="Checkbox" ID="CTRL_CHECK_" animID="ANM_" fontID="FONT_" fontColor="#ffffffff" stringID="STR_" X="0" Y="0" W="165" H="16" />
 	<Control Type="Slider" ID="CTRL_SLIDER_" animID="ANM_" steps="0" hasArrows="1" X="10" Y="10" W="180" H="35" inflate="0" fontID="" stringID="" iconFrame="0" />
 	<Control Type="Inputbox" ID="CTRL_INPUT_" animID="ANM_" fontID="FONT_" fontColor="#ffffffff" maxLen="10" X="10" Y="10" W="60" H="16" />
 	<Control Type="Textbox" ID="empty" animID="ANM_" fontID="FONT_" fontColor="#ffffffff" stringID="STR_" align="-1" valign="-1" inflate="0" X="10" Y="10" W="200" H="100" />

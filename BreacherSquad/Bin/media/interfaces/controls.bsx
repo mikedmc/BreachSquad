@@ -510,6 +510,14 @@
     <Module ImageIdx="0" X="24" Y="628" W="223" H="9" />
     <Module ImageIdx="0" X="153" Y="605" W="7" H="11" />
     <Module ImageIdx="0" X="163" Y="605" W="7" H="11" />
+    <Module ImageIdx="0" X="27" Y="649" W="220" H="18" />
+    <Module ImageIdx="0" X="27" Y="669" W="220" H="18" />
+    <Module ImageIdx="0" X="27" Y="689" W="220" H="18" />
+    <Module ImageIdx="0" X="27" Y="709" W="220" H="18" />
+    <Module ImageIdx="0" X="27" Y="729" W="220" H="18" />
+    <Module ImageIdx="0" X="27" Y="749" W="220" H="18" />
+    <Module ImageIdx="0" X="172" Y="605" W="7" H="11" />
+    <Module ImageIdx="0" X="182" Y="605" W="7" H="11" />
   </Modules>
   <FrameModules>
     <FrameModule ModuleIdx="0" OX="0" OY="0" Flags="0" />
@@ -1026,6 +1034,14 @@
     <FrameModule ModuleIdx="504" OX="0" OY="-4" Flags="0" />
     <FrameModule ModuleIdx="505" OX="-9" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="506" OX="2" OY="-5" Flags="0" />
+    <FrameModule ModuleIdx="507" OX="0" OY="0" Flags="0" />
+    <FrameModule ModuleIdx="508" OX="0" OY="0" Flags="0" />
+    <FrameModule ModuleIdx="509" OX="0" OY="0" Flags="0" />
+    <FrameModule ModuleIdx="510" OX="0" OY="0" Flags="0" />
+    <FrameModule ModuleIdx="511" OX="0" OY="0" Flags="0" />
+    <FrameModule ModuleIdx="512" OX="0" OY="0" Flags="0" />
+    <FrameModule ModuleIdx="513" OX="-9" OY="-5" Flags="0" />
+    <FrameModule ModuleIdx="514" OX="2" OY="-5" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="0" BBoxY="0" BBoxW="13" BBoxH="13">
@@ -4052,13 +4068,13 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="0" BBoxY="0" BBoxW="4" BBoxH="102">
+    <Frame BBoxX="0" BBoxY="0" BBoxW="3" BBoxH="102">
       <FModules>
         <FModule Idx="504" />
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="0" BBoxY="0" BBoxW="4" BBoxH="102">
+    <Frame BBoxX="0" BBoxY="0" BBoxW="3" BBoxH="102">
       <FModules>
         <FModule Idx="505" />
       </FModules>
@@ -4109,6 +4125,54 @@
     <Frame BBoxX="0" BBoxY="-6" BBoxW="10" BBoxH="13">
       <FModules>
         <FModule Idx="513" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="220" BBoxH="18">
+      <FModules>
+        <FModule Idx="514" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="220" BBoxH="18">
+      <FModules>
+        <FModule Idx="515" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="220" BBoxH="18">
+      <FModules>
+        <FModule Idx="516" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="220" BBoxH="18">
+      <FModules>
+        <FModule Idx="517" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="220" BBoxH="18">
+      <FModules>
+        <FModule Idx="518" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="220" BBoxH="18">
+      <FModules>
+        <FModule Idx="519" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-9" BBoxY="-5" BBoxW="7" BBoxH="11">
+      <FModules>
+        <FModule Idx="520" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="2" BBoxY="-5" BBoxW="7" BBoxH="11">
+      <FModules>
+        <FModule Idx="521" />
       </FModules>
       <Points />
     </Frame>
@@ -4683,8 +4747,8 @@
     <AnimationFrame FrameIdx="504" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="505" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="506" Duration="1" DX="0" DY="0" Flags="0" />
-    <AnimationFrame FrameIdx="508" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="507" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="508" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="509" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="511" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="510" Duration="1" DX="0" DY="0" Flags="0" />
@@ -4695,6 +4759,19 @@
     <AnimationFrame FrameIdx="341" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="338" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="377" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="514" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="516" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="515" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="504" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="505" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="517" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="519" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="518" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="504" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="505" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="503" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="521" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="520" Duration="1" DX="0" DY="0" Flags="0" />
   </AnimationFrames>
   <Animations>
     <Animation ID="WINDOW1" Flags="0">
@@ -5445,6 +5522,25 @@
       <AFrame Idx="578" />
       <AFrame Idx="579" />
       <AFrame Idx="580" />
+    </Animation>
+    <Animation ID="BUTTON_GREEN" Flags="0">
+      <AFrame Idx="581" />
+      <AFrame Idx="582" />
+      <AFrame Idx="583" />
+      <AFrame Idx="584" />
+      <AFrame Idx="585" />
+    </Animation>
+    <Animation ID="BUTTON_RED" Flags="0">
+      <AFrame Idx="586" />
+      <AFrame Idx="587" />
+      <AFrame Idx="588" />
+      <AFrame Idx="589" />
+      <AFrame Idx="590" />
+    </Animation>
+    <Animation ID="VERTICAL_MENU" Flags="0">
+      <AFrame Idx="591" />
+      <AFrame Idx="592" />
+      <AFrame Idx="593" />
     </Animation>
   </Animations>
 </SpriteCollection>

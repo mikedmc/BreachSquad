@@ -493,7 +493,6 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 		case GAME_STATE_MAINMENU:
 		{
 			gMenus.Paint();
-			g_font12wow->DrawString( STR_TITLE, 100, 100 );
 		}
 		break;
 

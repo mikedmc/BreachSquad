@@ -78,7 +78,12 @@ namespace GUIUtils {
 	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor = 0xffffffff );
 	// draws a container panel used for all selectable controls
 	void DrawPanel( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha, int nIconAnimIdx = -1, int nIconFrame = -1 );
-
+	// Draws a progress bar from animation with specific frames, without buttons
+	void DrawProgress( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, float fFocus, float fAlpha = 1.0f, int nSteps = 0 );
+	// Paints a smaller panel without icon, with just the focus line on the left
+	void DrawPanelSM( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha = 1.0f );
+	// Draws a button centered on the specified bbox
+	void DrawButton(CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, bool bPressed, float fHoverPercent, float fFocusPercent, float fAlpha = 1.0f);
 	/*
 	* \brief Deseneaza un buton (sau input box, slider, etc) dintr-o animatie cu 3 frames (capat, centru tiling, capat)
 	* capetele butonului se deseneaza in interiorul bboxului. Capatul stanga trebuie aliniat in dreapta axei verticale in editor.
@@ -99,8 +104,6 @@ namespace GUIUtils {
 	* \param nStartFrame - frame-ul de la care incep cele 3 frames utile (daca butonul are mai multe stari in aceeasi anim, cum e si normal)
 	*/
 	void DrawHTilingAnim_HeadsOutside( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color = 0xffffffff );
-	// Draws a progress bar from animation with specific frames, without buttons
-	void DrawProgress( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, float fFocus, float fAlpha = 1.0f, int nSteps = 0 );
 	/*
 	* Draws a progress bar from animation with 4 frames (left, tiling center, right, filler) - heads outside the BBox
 	*/
