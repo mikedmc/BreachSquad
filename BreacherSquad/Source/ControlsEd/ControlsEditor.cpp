@@ -408,7 +408,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 					D3DCOLOR_UNPACKTOFLOAT(pValue->m_asUINT32, color.w, color.x, color.y, color.z);
 					
 					// small color button
-					ImGui::ColorEdit4("sVarName", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);
+					ImGui::ColorEdit4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);
 
 					// full fledged color picker
 					//ImGui::ColorPicker4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);
@@ -1363,32 +1363,31 @@ void CControlsEditor::DeleteControl()
 
 void CControlsEditor::Paint()
 {
-	if (m_pCamera != nullptr)
-	{
-		Mat mcam = m_pCamera->GetViewTransform();
-		__Painter().SetViewTransform( mcam );
-	}
-
-	Vec2 vecRenderCenter(UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY());
+	// #TODO: the editor should have own camera to allow us panning and zooming
 	if (currLayer)
 	{
 		Vec2i lpos = currLayer->GetPos();
-		D3DXMATRIXA16 mat;
+		Vec2 vecRenderCenter( UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY() );
 
-		Vec2 scrCenter(vecRenderCenter.x + offset.x + lpos.x, vecRenderCenter.y + offset.y + lpos.y);
-		if (m_pCamera != nullptr)
-			scrCenter = m_pCamera->ScreenToWorld(scrCenter);
-
-		MUMatAffine2D( &mat, 1.0f, NULL, 0.0f, &scrCenter );
-		__Painter().SetTransform( mat );
-
-		// paint controls
-		for (int kk = 0; kk < currLayer->controls.Count(); kk++)
+		if ( m_pCamera != nullptr )
 		{
-			currLayer->controls[kk]->Paint(currLayer->pControlsManager->m_pCamera, &mat);
+			Mat mcam = m_pCamera->GetViewTransform();
+			Mat matscroll;
+			Vec2 scrCenter( vecRenderCenter.x + offset.x + lpos.x, vecRenderCenter.y + offset.y + lpos.y );
+			if ( m_pCamera != nullptr )
+				scrCenter = m_pCamera->ScreenToWorld( scrCenter );
+			MUMatAffine2D( &matscroll, 1.0f, NULL, 0.0f, &scrCenter );
+			mcam = matscroll * mcam;
+
+			__Painter().SetViewTransform( mcam );
 		}
 
 		__Painter().SetTransform( g_matIdentity );
+		// paint controls
+		for (int kk = 0; kk < currLayer->controls.Count(); kk++)
+		{
+			currLayer->controls[kk]->Paint(currLayer->pControlsManager->m_pCamera, &g_matIdentity);
+		}
 	}
 }
 

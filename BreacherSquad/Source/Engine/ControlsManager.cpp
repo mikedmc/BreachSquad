@@ -7,7 +7,7 @@ CSpriteCollection* CControl::m_pSprCol = nullptr;
 //params default ID,X,Y,W,H,inflate. 
 enum EControlType {
 	CCTRL_TYPE_WINDOW = 0,
-	CCTRL_TYPE_FRAME,
+	CCTRL_TYPE_PANEL,
 	CCTRL_TYPE_BUTTON,						//params: fHoverPercent, nMsgParam - nMsgParam is sent to handler for processing
 	CCTRL_TYPE_LABEL,
 	CCTRL_TYPE_BLINKING_LABEL,
@@ -43,7 +43,7 @@ enum EControlType {
 CStringHash EControlTypeNames[] =
 {
 	L"Window",
-	L"Frame",
+	L"Panel",
 	L"Button",
 	L"Label",
 	L"BlinkingLabel",
@@ -390,7 +390,7 @@ void CControl::Initialize()
 void CControl::Update( float dTime, float fTimeline )
 {
 	RectXYWHi BBox, BBox_inflated;
-	int inflate = 0; //cu cat apare mai mic sau mai mare grafica fata de bbox
+	int inflate = 0; 
 	int animIdx = -1;
 	int stringIdx = -1;
 	int fontIdx = -1;
@@ -2243,35 +2243,21 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 
-			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
-
 			//back frame
-			GUIUtils::DrawWindowFrame( m_pSprCol, animIdx, BBox_inflated, wcol );
-			//title bar
-			if ( stringIdx >= 0 && fontIdx >= 0 )
-			{
-				int fnLen = __TexFonts().fonts[ fontIdx ]->MeasureString( stringIdx ).w;
-				//ca sa scaleze title bar-ul daca e fereastra prea ingusta (sa am loc de close button)
-				if ( fnLen > BBox_inflated.w )
-					fnLen = BBox_inflated.w;
-				//gasesc centrul title bar-ului (din frame-ul de top center)
-				RectXYWHi topbarbb = m_pSprCol->GetAFrameBBox( animIdx, 1 );
-
-				Vec2 titleBarCenter( BBox_inflated.x + BBox_inflated.w / 2.0f, BBox_inflated.y - topbarbb.h / 2 );
-				__TexFonts().fonts[ fontIdx ]->DrawStringScaleW( stringIdx, titleBarCenter.x, titleBarCenter.y, fnLen, FONTFLAG_ANCHOR_VCENTERHCENTER, dwFontColor );
-			}
+			GUIUtils::DrawWindow( m_pSprCol, animIdx, BBox_inflated, dwColor, fontIdx, stringIdx, dwFontColor );
 		}
 		break;
 
-		case CCTRL_TYPE_FRAME:
+		case CCTRL_TYPE_PANEL:
 		{
-			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 8 ) )
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 2 ) )
 			{
 				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx" );
 				return;
 			}
 
-			GUIUtils::DrawWindowFrame( m_pSprCol, animIdx, BBox_inflated, dwColor );
+			int iconFrame = paramsDict.GetVariantByName( L"iconFrame" )->m_asINT32;
+			GUIUtils::DrawPanel( m_pSprCol, BBox_inflated, 1.0f, layer->alpha, ANM_CONTROLS_SPR_PANELICONS, iconFrame );
 		}
 		break;
 		case CCTRL_TYPE_SDL_KEYREADER:
@@ -2505,15 +2491,21 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 
 			bool hasArrows = ( bool ) paramsDict.GetVariantByName( L"hasArrows" )->m_asINT32;
 			float slidePercent = paramsDict.GetVariantByName( L"fSlidePercent" )->m_asFloat;
-			int nSteps = paramsDict.GetVariantByName( L"Steps" )->m_asINT32;
-
-			RectXYWHi bboxBar = BBox;
-
+			int nSteps = paramsDict.GetVariantByName( L"steps" )->m_asINT32;
+			int nIconFrame = paramsDict.GetVariantByName( L"iconFrame" )->m_asINT32;
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 
-			GUIUtils::DrawPanel( m_pSprCol, bboxBar, 1.0f, layer->alpha );
-			GUIUtils::DrawProgress( m_pSprCol, animIdx, bboxBar, slidePercent, wcol, nSteps );
-			//ticks
+			// containing panel
+			GUIUtils::DrawPanel( m_pSprCol, BBox_inflated, 1.0f, layer->alpha, ANM_CONTROLS_SPR_PANELICONS, nIconFrame);
+			if ( (stringIdx >= 0) && (fontIdx >= 0) ) 
+			{
+				__TexFonts().fonts[ fontIdx ]->DrawString( stringIdx, BBox.CenterX(), BBox.y + 1, FONTFLAG_ANCHOR_TOPCENTER, wcol);
+			}
+			// get arrows sizes (left arrow)
+			RectXYWHi arrRect = m_pSprCol->GetAFrameBBox( animIdx, 3 );
+			RectXYWHi bboxBar( BBox.x + arrRect.w, BBox.Bottom() - arrRect.h, BBox.w - arrRect.w * 2, arrRect.h );
+			GUIUtils::DrawProgress( m_pSprCol, animIdx, bboxBar, slidePercent, layer->alpha, 1.0f, nSteps );
+			
 			if ( hasArrows )
 			{
 				int frame;
@@ -2521,13 +2513,13 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				frame = 3;
 				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
 					frame = 3;
-				UTSprite::PaintFrame( m_pSprCol, Vec2(BBox.x, BBox.CenterY()), animIdx, frame, wcol );
+				UTSprite::PaintFrame( m_pSprCol, Vec2(bboxBar.x, bboxBar.CenterY()), animIdx, frame, wcol );
 
 				//right but
 				frame = 4;
 				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
 					frame = 4;
-				UTSprite::PaintFrame( m_pSprCol, Vec2(BBox.Right(), BBox.CenterY()), animIdx, frame, wcol );
+				UTSprite::PaintFrame( m_pSprCol, Vec2(bboxBar.Right(), bboxBar.CenterY()), animIdx, frame, wcol );
 			}
 		}
 		break;
@@ -3085,7 +3077,7 @@ void CControlsManager::SetParamValue( CControl * pCtrl, const WCHAR * sParamName
 		//adaug si parametru in dictionar ca sa apara in editor
 		pCtrl->paramsDict.SetNamedVarINT32( sParamName, valign );
 	}
-	else  //daca nu e parametru special de tradus, il salveaza cu auto type
+	else  //auto type converts based on value
 	{
 		pCtrl->paramsDict.SetNamedVarAUTO( sParamName, sParamValue );
 	}
@@ -3427,24 +3419,12 @@ void GUIUtils::DrawHTilingAnim_HeadsOutside( CSpriteCollection *sprCol, int anim
 	UTSprite::PaintFrame( sprCol, BBox.x + BBox.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 2, color );
 }
 
-void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
+void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, float fFocus, float fAlpha, int nSteps )
 {
-	UTSprite::PaintFModuleStretched( sprCol, Vec2(BBox.x, BBox.CenterY()), animIdx, 0, 0, color, BBox.w );
+	UTSprite::PaintFModuleStretched( sprCol, Vec2( BBox.x, BBox.CenterY() ), animIdx, 0, 0, DW_COLOR_FFFA( fAlpha ), BBox.w );
 	RectXYWHi cliprect = BBox;
-
-	if ( nTicks > 1 )
-	{
-		/*
-		float ticksz = ( float ) cliprect.w / ( float ) nTicks;
-		for ( int kk = 1; kk < nTicks; kk++ )
-		{
-			UTSprite::PaintFModule( sprCol, Vec2(cliprect.x + ceil( kk * ticksz ), cliprect.CenterY()), animIdx, 4, 0, color );
-		}
-		*/
-	}
-
 	cliprect.w = ( int ) ceil( fPercentFull * cliprect.w );
-	UTSprite::PaintFModuleStretched( sprCol, Vec2( BBox.x, BBox.CenterY() ), animIdx, 2, 0, color, cliprect.w );
+	UTSprite::PaintFModuleStretched( sprCol, Vec2( BBox.x, BBox.CenterY() ), animIdx, 2, 0, DW_COLOR_FFFA( fAlpha ), cliprect.w );
 }
 
 void GUIUtils::DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
@@ -3593,7 +3573,7 @@ void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBo
 	// paint titlebar
 	UTSprite::PaintFModuleClipped( sprCol, vUL, animIdx, 1, 0, clipwin, color );
 	//paint title
-	if ( strTitle != nullptr )
+	if ( strTitle != nullptr && nFontIdx >= 0 )
 	{
 		// get titlebar width for text centering
 		RectXYWHi barSz = sprCol->GetAFrameBBox( animIdx, 1 ); 
@@ -3612,7 +3592,7 @@ void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBo
 	DrawWindow( sprCol, animIdx, BBox, color, nFontIdx, sdTitle, dwTitleColor );
 }
 
-void GUIUtils::DrawPanel( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha, int nIconAnimIdx /*= -1*/, int nIconFrame /*= 0 */ )
+void GUIUtils::DrawPanel( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha, int nIconAnimIdx /*= -1*/, int nIconFrame /*= -1 */ )
 {
 	// default panel anim
 	int animIdx = ANM_CONTROLS_SPR_PANEL1;
@@ -3621,7 +3601,7 @@ void GUIUtils::DrawPanel( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocu
 	// get thin bar width
 	RectXYWHi leftSz2 = sprCol->GetAFrameBBox_real( animIdx, 1 );
 	// extend box to the left
-	int nLeftSize = leftSz1.w + leftSz2.w + 1;
+	int nLeftSize = leftSz1.w + leftSz2.w;
 	Vec2 vUL( BBox.x - nLeftSize, BBox.y );
 	RectLTRB clipwin( BBox );
 	clipwin.left -= nLeftSize;
@@ -3640,10 +3620,10 @@ void GUIUtils::DrawPanel( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocu
 	UTSprite::PaintFModuleClipped( sprCol, Vec2( vUL.x + leftSz1.w, vUL.y ), animIdx, 2, 0, clipwin, dwAlpha );
 	UTSprite::PaintFModuleClipped( sprCol, Vec2( vUL.x + leftSz1.w, vUL.y ), animIdx, 1, 0, clipwin, dwFocusAlpha );
 	// paint icon
-	if ( nIconAnimIdx >= 0 )
+	if (( nIconAnimIdx >= 0 ) && (nIconFrame >= 0) && (nIconFrame < sprCol->GetAFramesCnt(nIconAnimIdx)) )
 	{
 		DWORD dwIconColor = DW_COLOR_LERP( colPanelIconIdle, colPanelIconFocused, fFocusPercent );
-		UTSprite::PaintFModule( sprCol, Vec2( vUL.x + leftSz1.w / 2, vUL.y + 5 ), nIconAnimIdx, nIconFrame, 0, DW_COLORALPHA(dwIconColor, fAlpha));
+		UTSprite::PaintFModule( sprCol, Vec2( vUL.x + leftSz1.w / 2, vUL.y ), nIconAnimIdx, nIconFrame, 0, DW_COLORALPHA(dwIconColor, fAlpha));
 	}
 }
 

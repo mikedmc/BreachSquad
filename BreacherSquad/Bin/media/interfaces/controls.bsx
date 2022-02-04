@@ -850,10 +850,10 @@
     <FrameModule ModuleIdx="329" OX="-7" OY="-4" Flags="0" />
     <FrameModule ModuleIdx="330" OX="-6" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="331" OX="-7" OY="-5" Flags="0" />
-    <FrameModule ModuleIdx="332" OX="-6" OY="-5" Flags="0" />
+    <FrameModule ModuleIdx="332" OX="-6" OY="2" Flags="0" />
     <FrameModule ModuleIdx="333" OX="-6" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="334" OX="-6" OY="-4" Flags="0" />
-    <FrameModule ModuleIdx="335" OX="-5" OY="-4" Flags="0" />
+    <FrameModule ModuleIdx="335" OX="-5" OY="2" Flags="0" />
     <FrameModule ModuleIdx="336" OX="-7" OY="-4" Flags="0" />
     <FrameModule ModuleIdx="337" OX="-7" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="338" OX="-7" OY="-4" Flags="0" />
@@ -889,7 +889,7 @@
     <FrameModule ModuleIdx="367" OX="-7" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="368" OX="-7" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="369" OX="-7" OY="-3" Flags="0" />
-    <FrameModule ModuleIdx="370" OX="-7" OY="-5" Flags="0" />
+    <FrameModule ModuleIdx="370" OX="-7" OY="2" Flags="0" />
     <FrameModule ModuleIdx="371" OX="-7" OY="-4" Flags="0" />
     <FrameModule ModuleIdx="372" OX="-7" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="373" OX="-6" OY="-5" Flags="0" />
@@ -913,9 +913,9 @@
     <FrameModule ModuleIdx="391" OX="-7" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="392" OX="-7" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="393" OX="-7" OY="-5" Flags="0" />
-    <FrameModule ModuleIdx="394" OX="-2" OY="-4" Flags="0" />
+    <FrameModule ModuleIdx="394" OX="-2" OY="2" Flags="0" />
     <FrameModule ModuleIdx="395" OX="-7" OY="-5" Flags="0" />
-    <FrameModule ModuleIdx="396" OX="-7" OY="-5" Flags="0" />
+    <FrameModule ModuleIdx="396" OX="-7" OY="2" Flags="0" />
     <FrameModule ModuleIdx="397" OX="-6" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="398" OX="-5" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="399" OX="-7" OY="-5" Flags="0" />
@@ -3056,7 +3056,7 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="-6" BBoxY="-5" BBoxW="13" BBoxH="10">
+    <Frame BBoxX="-6" BBoxY="2" BBoxW="13" BBoxH="10">
       <FModules>
         <FModule Idx="338" />
       </FModules>
@@ -3074,7 +3074,7 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="-5" BBoxY="-4" BBoxW="11" BBoxH="9">
+    <Frame BBoxX="-5" BBoxY="2" BBoxW="11" BBoxH="9">
       <FModules>
         <FModule Idx="341" />
       </FModules>
@@ -3290,7 +3290,7 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="-7" BBoxY="-5" BBoxW="14" BBoxH="10">
+    <Frame BBoxX="-7" BBoxY="2" BBoxW="14" BBoxH="10">
       <FModules>
         <FModule Idx="377" />
       </FModules>
@@ -3434,7 +3434,7 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="-2" BBoxY="-4" BBoxW="4" BBoxH="9">
+    <Frame BBoxX="-2" BBoxY="2" BBoxW="4" BBoxH="9">
       <FModules>
         <FModule Idx="401" />
       </FModules>
@@ -3446,7 +3446,7 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="-7" BBoxY="-5" BBoxW="14" BBoxH="10">
+    <Frame BBoxX="-7" BBoxY="2" BBoxW="14" BBoxH="10">
       <FModules>
         <FModule Idx="403" />
       </FModules>
@@ -4100,13 +4100,13 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="-10" BBoxY="-6" BBoxW="9" BBoxH="13">
+    <Frame BBoxX="-10" BBoxY="-6" BBoxW="10" BBoxH="13">
       <FModules>
         <FModule Idx="512" />
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="1" BBoxY="-6" BBoxW="9" BBoxH="13">
+    <Frame BBoxX="0" BBoxY="-6" BBoxW="10" BBoxH="13">
       <FModules>
         <FModule Idx="513" />
       </FModules>
@@ -4690,6 +4690,8 @@
     <AnimationFrame FrameIdx="510" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="512" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="513" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="403" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="401" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="341" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="338" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="377" Duration="1" DX="0" DY="0" Flags="0" />
@@ -5441,6 +5443,8 @@
       <AFrame Idx="576" />
       <AFrame Idx="577" />
       <AFrame Idx="578" />
+      <AFrame Idx="579" />
+      <AFrame Idx="580" />
     </Animation>
   </Animations>
 </SpriteCollection>

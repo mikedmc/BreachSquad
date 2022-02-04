@@ -53,7 +53,7 @@ public:
 	void				IMGUI_AddCurControlProps();
 	//--- IMGUI adds controls for current layer
 	void				IMGUI_AddLayerProps();
-
+	// Loads control templates
 	OPRESULT			LoadCtrlTemplatesXML( WCHAR* XMLpath );
 	void				DrawBBox(RectXYWHi rect, bool selected);
 	void				DrawLine(int x1, int y1, int x2, int y2, D3DCOLOR col = 0xff0000ff);
