@@ -1221,19 +1221,17 @@ void CControl::Update( float dTime, float fTimeline )
 			if ( nTicks > 0 )
 				fTickSize = 1.0f / nTicks;
 
-			RectXYWHi bbB = BBox; //bbox bar
-			//heads sizes
-			int w1 = m_pSprCol->GetAFrameBBox( animIdx, 0 ).w;
-			int w2 = m_pSprCol->GetAFrameBBox( animIdx, 2 ).w;
-			bbB.x += w1; bbB.w -= w1 + w2;
+			//left button
+			RectXYWHi bbL = m_pSprCol->GetAFrameBBox( animIdx, 3 ); 
+			bbL.x = BBox.x; bbL.y = BBox.Bottom() - bbL.h;
+			//right button
+			RectXYWHi bbR = m_pSprCol->GetAFrameBBox( animIdx, 4 ); 
+			bbR.x = BBox.Right() - bbR.w; bbR.y = BBox.Bottom() - bbR.h;
 
-			RectXYWHi bbL = m_pSprCol->GetAFrameBBox( animIdx, 5 ); //buton stanga
-			bbL.x += BBox.x; bbL.y += BBox.CenterY();
+			RectXYWHi bbB( BBox.x + bbL.w, BBox.Bottom() - bbL.h, BBox.w - bbL.w - bbR.w, bbL.h );
 
-			RectXYWHi bbR = m_pSprCol->GetAFrameBBox( animIdx, 6 ); //buton dreapta
-			bbR.x += BBox.Right(); bbR.y += BBox.CenterY();
 
-			//tratam mai intai inputurile pe flaguri in cazul in care vin din handleCommand
+			// treat flag input first maybe they come from handleCommand
 			float newSlidePercent = slidePercent;
 
 			//setam flaguri noi pentru frame-ul urmator
@@ -2092,8 +2090,6 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			int nDisabledFlags = paramsDict.GetVariantByName( L"disabledFlags" )->m_asINT32;
 			//desenam meniul
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
-			//cursor size
-			RectXYWHi currRect( 0, 0, BBox.w, vSpacing );
 
 			int curidx = 0;
 			for ( int ll = 0; ll < 8; ll++ ) //max 8 string options
@@ -2109,7 +2105,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 				{
 					int nStringIdx = __Texts().GetStrIdx( vc->m_strArg.textHash );
-					SizeWHi strSz = __TexFonts().fonts[ fontIdx ]->MeasureString( nStringIdx, BBox_inflated.w );
+					SizeWHi strSz = __TexFonts().fonts[ fontIdx ]->MeasureString( nStringIdx, BBox.w );
+					RectXYWHi currRect( BBox.CenterX() - strSz.w / 2 - 20, BBox.y + vSpacing * curidx - 1, strSz.w + 40, vSpacing );
 
 					//paint cursor
 					if ( animIdx >= 0 )
@@ -2117,17 +2114,17 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 						if ( selperc > 0.0f )
 						{
 							// paint filler under the selection
-							DWORD bgcol = DW_COLORALPHA( GUIUtils::colPanelIdle, layer->alpha * selperc );
-							UTSprite::PaintFModuleStretched( m_pSprCol, Vec2( BBox_inflated.x - invselperc * 10.0f, BBox_inflated.y + vSpacing * curidx ), animIdx, 0, 0, bgcol, BBox_inflated.w + invselperc * 20.0f, currRect.h );
+							DWORD bgcol = DW_COLORALPHA( GUIUtils::colPanelIdle, layer->alpha * selperc * 0.7f );
+							UTSprite::PaintFModuleStretched( m_pSprCol, Vec2( currRect.x, currRect.y ), animIdx, 0, 0, bgcol, currRect.w, currRect.h );
 							//paint selected cursor
-							UTSprite::PaintFrame( m_pSprCol, BBox_inflated.x + selperc * 15.0f, BBox_inflated.y + vSpacing * curidx + currRect.h / 2, animIdx, 1, DW_COLOR_FFFA( selperc ) );
-							UTSprite::PaintFrame( m_pSprCol, BBox_inflated.Right() - selperc * 15.0f, BBox_inflated.y + vSpacing * curidx + currRect.h / 2, animIdx, 2, DW_COLOR_FFFA( selperc ) );
+							UTSprite::PaintFrame( m_pSprCol, currRect.x - invselperc * 15.0f, currRect.CenterY(), animIdx, 1, DW_COLOR_FFFA( selperc ) );
+							UTSprite::PaintFrame( m_pSprCol, currRect.Right() + invselperc * 15.0f, currRect.CenterY(), animIdx, 2, DW_COLOR_FFFA( selperc ) );
 						}
 					}
 
 					//and string
 					DWORD exitcol;
-					exitcol = DW_COLOR_LERP( dwFontColor, wcol, selperc );
+					exitcol = DW_COLOR_LERP( wcol, dwFontColor, selperc );
 					if ( bDisabledLocal )
 						exitcol = DW_COLORALPHA( exitcol, 0.5f );
 
@@ -2135,7 +2132,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 					if ( textAlignFlags & FONTFLAG_ANCHOR_CENTER )
 						vTextOffset = Vec2( 0.0f, -1.0f * selperc );
 
-					RectXYWHi drawrect( BBox.x + vTextOffset.x, BBox.y + vSpacing * curidx + vTextOffset.y + currRect.y, BBox.w, currRect.h );
+					RectXYWHi drawrect( BBox.x + vTextOffset.x, BBox.y + vSpacing * curidx + vTextOffset.y, BBox.w, currRect.h );
 					Vec2 vTextOrigin( drawrect.x, drawrect.CenterY() );
 					if ( textAlignFlags & FONTFLAG_ANCHOR_CENTER )
 						vTextOrigin = Vec2( drawrect.CenterX(), drawrect.CenterY() );
@@ -4206,8 +4203,6 @@ void CControlsManager::Paint()
 
 	for ( int ii = 0; ii < Layers.GetSize(); ii++ )
 	{
-		//Flush necessary when changing between layers
-		__Painter().Flush();
 		CCtrlLayer* lay = Layers[ ii ];
 
 		float perc = TimeEasing( lay->alpha );
@@ -4225,8 +4220,11 @@ void CControlsManager::Paint()
 		MUMatScaling( &matTransform, 0.9f + 0.1f * perc, 0.9f + 0.1f * perc, 1.0f );
 		MUMatTranslation( &mats, lpos.x, lpos.y, 0.0f );
 		matTransform *= mats;
-		//we need transform history so use this method:
-		App_SetWorldTransform( m_pDevice, &matTransform );
+		if ( m_pCamera )
+		{
+			matTransform *= m_pCamera->GetViewTransform();
+		}
+		__Painter().SetViewTransform( matTransform );
 
 		bool bHideTabstop = false;
 		if ( ( lay->nFocusedControlIdx >= 0 ) && ( lay->controls[ lay->nFocusedControlIdx ]->bShowFocusCursor == false ) )
@@ -4262,10 +4260,7 @@ void CControlsManager::Paint()
 	//--- particles ---
 	g_particlesMgr.PaintLayer( K_PART_LAYER_CONTROLS_LIGHT, true );
 
-	__Painter().Flush();
-	App_SetWorldTransform( m_pDevice, &g_matIdentity );
-	//m_pSprite->SetTransform(&g_matIdentity);
-
+	__Painter().SetViewTransform( g_matIdentity );
 }
 
 CCtrlLayer* CControlsManager::ShowLayerOnce( CHAR* layerName, float fAlpha, int posX, int posY )
