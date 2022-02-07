@@ -93,10 +93,10 @@ const CStringHash EControllerCommandNames[] = {
 // Input trigger for commands
 class CControllerTrigger {
 public:
-	EControllerTriggerType	eType;						//button or axisor pointer
-	EControllerCommand		eTargetCommand;				//comanda pe care o efectueaza triggerul
-	float					fTriggerMin, fTriggerMax;	//valorile min si max intre care se face trigger
-	int						keyMapping;					//valoare ce activeaza trigger //when using SDL_KEYBOARD map with SDL scancodes, WIN_KEYBOARD with VK_ codes and Joysticks with SDL_CONTROLLER_AXIS_ and SDL_CONTROLLER_BUTTON_
+	EControllerTriggerType	eType;						// button or axis or pointer
+	EControllerCommand		eTargetCommand;				// action that the trigger does
+	float					fTriggerMin, fTriggerMax;	// trigger min max values
+	int						keyMapping;					// trigger value(specific to command): When using SDL_KEYBOARD map with SDL scancodes, WIN_KEYBOARD with VK_ codes and Joysticks with SDL_CONTROLLER_AXIS_ and SDL_CONTROLLER_BUTTON_
 
 	float					fTriggerActivatedPercent;	//procentul de activare a triggerului
 };

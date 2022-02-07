@@ -74,8 +74,8 @@ namespace GUIUtils {
 
 	void DrawWindowFrameF( CSpriteCollection *sprCol, int animIdx, RectXYWH BBox, DWORD color = 0xffffffff, float fInflate = 0.0f );
 	void DrawWindowFrame( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color = 0xffffffff, int nInflate = 0 );
-	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor = 0xffffffff );
-	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor = 0xffffffff );
+	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float alpha, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor = 0xffffffff );
+	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float alpha, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor = 0xffffffff );
 	// draws a container panel used for all selectable controls
 	void DrawPanel( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha, int nIconAnimIdx = -1, int nIconFrame = -1 );
 	// Draws a progress bar from animation with specific frames, without buttons
@@ -133,6 +133,7 @@ public:
 	bool				bVisible;
 	bool				bCanHaveFocus;		// can control hold focus?
 	bool				bShowFocusCursor;	// focus for keyboard input and paiting of focus
+	float				fFocusPercent;		// visual 0..1 for focus painting. Updated by the layer and not by the control itself
 
 	CControl( const WCHAR* typeName );
 	CControl( CControl* ctrl );
@@ -169,7 +170,7 @@ public:
 	int					nFocusFirstFocusableIdx;	// First focusable control so we know where to put the focus when creating the layer
 	int					nFocusedControlIdx;			// Controls index that receives the keyboard input
 	CStringHash			shFocusedControlID;			// hash ID of focused control
-	CAABB				m_focusRect;				// rectangle of focus
+
 	POINT				mouseRelPos;				// local pointer position
 	bool				bAnimate;					// has show/hide animation
 	bool				bBlocking;

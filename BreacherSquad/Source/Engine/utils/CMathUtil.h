@@ -16,7 +16,6 @@
 // clears by mask
 #define			FLAGOP_CLEAR(x, flagsMask)  (x &= ~flagsMask)
 
-// changes a var between 2 limits
 #define			inc_limit(var, step, limit) {if(var < (limit)) {var += step; if((var) > (limit)) var = limit;}}
 #define			dec_limit(var, step, limit) {if(var > (limit)) {var -= step; if((var) < (limit)) var = limit;}}
 #define			SIGN(var) (((var) < 0) ? -1:1)

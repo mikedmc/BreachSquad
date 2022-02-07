@@ -85,6 +85,7 @@ CControl::CControl( const WCHAR* typeName )
 	bVisible = true;
 	bCanHaveFocus = false;
 	bShowFocusCursor = true;
+	fFocusPercent = 0.0f;
 	paramsDict.DeleteAll();
 	bbox.Set( 0, 0, 0, 0 );
 	type = ( EControlType ) GetListIndexByName( typeName, EControlTypeNames, CCTRL_TYPES_COUNT );
@@ -428,8 +429,8 @@ void CControl::Update( float dTime, float fTimeline )
 	{
 		stringIdx = var->m_asINT32;
 	}
-	//disabled percentage
-	if ( bDisabled )
+	// disabled percentage
+	if ( bDisabled ) 
 	{
 		inc_limit( fDisabledPercent, 10.0f * dTime, 1.0f );
 	}
@@ -1091,7 +1092,7 @@ void CControl::Update( float dTime, float fTimeline )
 						statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 					}
 				}
-				//daca nu am hover nu am nici click
+
 				if ( ( statusFlags & CCTRL_STATUS_FLAG_HOVER ) == 0 )
 				{
 					statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
@@ -1103,7 +1104,7 @@ void CControl::Update( float dTime, float fTimeline )
 
 					bExecuteClick = true;
 				}
-				//pentru click din taste
+				// for controller click
 				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKED_ALT )
 				{
 					statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED_ALT;
@@ -1115,6 +1116,8 @@ void CControl::Update( float dTime, float fTimeline )
 
 				if ( bExecuteClick )
 				{
+					layer->FocusControl( this );
+
 					CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK );
 					nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
 					CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
@@ -1192,6 +1195,7 @@ void CControl::Update( float dTime, float fTimeline )
 			//--- send messaje on check change ---
 			if ( bCheckChanged )
 			{
+				layer->FocusControl( this );
 				SND_PLAY( SNDIDX_CLICK );
 				//toggle check
 				bChecked = !bChecked;
@@ -1227,14 +1231,11 @@ void CControl::Update( float dTime, float fTimeline )
 			//right button
 			RectXYWHi bbR = m_pSprCol->GetAFrameBBox( animIdx, 4 ); 
 			bbR.x = BBox.Right() - bbR.w; bbR.y = BBox.Bottom() - bbR.h;
-
 			RectXYWHi bbB( BBox.x + bbL.w, BBox.Bottom() - bbL.h, BBox.w - bbL.w - bbR.w, bbL.h );
-
 
 			// treat flag input first maybe they come from handleCommand
 			float newSlidePercent = slidePercent;
 
-			//setam flaguri noi pentru frame-ul urmator
 			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 			{
 				//clickuri
@@ -1275,7 +1276,7 @@ void CControl::Update( float dTime, float fTimeline )
 				newSlidePercent += fTickSize;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 			}
-			//mutare cursor
+			// cursor moved
 			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKED )
 			{
 				newSlidePercent = ( float ) ( layer->mouseRelPos.x - bbB.x ) / ( float ) ( bbB.w );
@@ -1294,6 +1295,8 @@ void CControl::Update( float dTime, float fTimeline )
 
 			if ( newSlidePercent != slidePercent )
 			{
+				layer->FocusControl( this );
+
 				slidePercent = newSlidePercent;
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SLIDER_CHANGED );
@@ -1421,7 +1424,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 	int animIdx = -1;
 	int stringIdx = -1;
 	int fontIdx = -1;
-	int inflate = 0; //cu cat apare mai mic sau mai mare grafica fata de bbox
+	int inflate = 0; 
 	DWORD dwFontColor = 0xffffffff;
 	DWORD dwColor = 0xffffffff;
 
@@ -2209,7 +2212,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			{
 				hoverPerc = paramsDict.GetVariantByName( L"fHoverPercent" )->m_asFloat;
 			}
-			GUIUtils::DrawButton( m_pSprCol, animIdx, BBox, bPressed, hoverPerc, 1.0f, layer->alpha );
+			GUIUtils::DrawButton( m_pSprCol, animIdx, BBox, bPressed, hoverPerc, fFocusPercent, layer->alpha );
 
 			//text
 			if ( stringIdx >= 0 )
@@ -2240,7 +2243,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			}
 
 			//back frame
-			GUIUtils::DrawWindow( m_pSprCol, animIdx, BBox_inflated, dwColor, fontIdx, stringIdx, dwFontColor );
+			GUIUtils::DrawWindow( m_pSprCol, animIdx, BBox_inflated, layer->alpha, fontIdx, stringIdx, dwFontColor );
 		}
 		break;
 
@@ -2506,7 +2509,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 
 			// containing panel
-			GUIUtils::DrawPanel( m_pSprCol, BBox_inflated, 1.0f, layer->alpha, ANM_CONTROLS_SPR_PANELICONS, nIconFrame);
+			GUIUtils::DrawPanel( m_pSprCol, BBox_inflated, fFocusPercent, layer->alpha, ANM_CONTROLS_SPR_PANELICONS, nIconFrame);
 			if ( (stringIdx >= 0) && (fontIdx >= 0) ) 
 			{
 				__TexFonts().fonts[ fontIdx ]->DrawString( stringIdx, BBox.CenterX(), BBox.y + 1, FONTFLAG_ANCHOR_TOPCENTER, wcol);
@@ -2514,7 +2517,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			// get arrows sizes (left arrow)
 			RectXYWHi arrRect = m_pSprCol->GetAFrameBBox( animIdx, 3 );
 			RectXYWHi bboxBar( BBox.x + arrRect.w, BBox.Bottom() - arrRect.h, BBox.w - arrRect.w * 2, arrRect.h );
-			GUIUtils::DrawProgress( m_pSprCol, animIdx, bboxBar, slidePercent, layer->alpha, 1.0f, nSteps );
+			GUIUtils::DrawProgress( m_pSprCol, animIdx, bboxBar, slidePercent, fFocusPercent, layer->alpha, nSteps );
 			
 			if ( hasArrows )
 			{
@@ -2596,7 +2599,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			RectXYWHi panelrect( BBox );
 			panelrect.x += checkrct.w + 2; 
 			panelrect.w -= checkrct.w + 2;
-			GUIUtils::DrawPanelSM( m_pSprCol, panelrect, 1.0f, layer->alpha );
+			GUIUtils::DrawPanelSM( m_pSprCol, panelrect, fFocusPercent, layer->alpha );
 
 			if ( fontIdx >= 0 )
 			{
@@ -3165,8 +3168,6 @@ void CCtrlLayer::FocusInitialize()
 				nFocusedControlIdx = kk;
 				controls[ nFocusedControlIdx ]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
 				controls[ nFocusedControlIdx ]->OnFocused();
-				//init focus rect
-				m_focusRect.Set( controls[ nFocusedControlIdx ]->bbox );
 				return;
 			}
 		}
@@ -3188,8 +3189,6 @@ void CCtrlLayer::FocusNextControl()
 				//and set focus
 				controls[ nFocusedControlIdx ]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
 				controls[ nFocusedControlIdx ]->OnFocused();
-				//init focus rect
-				m_focusRect.Set( controls[ nFocusedControlIdx ]->bbox );
 				return;
 			}
 		}
@@ -3215,9 +3214,6 @@ void CCtrlLayer::FocusNextControl()
 			//and set focus
 			controls[ nFocusedControlIdx ]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
 			controls[ nFocusedControlIdx ]->OnFocused( 1 );
-			//set focus rect on new control if old control didn't show the focus cursor
-			if ( controls[ nOldFocusIdx ]->bShowFocusCursor == false )
-				m_focusRect.Set( controls[ nFocusedControlIdx ]->bbox );
 		}
 	}
 }
@@ -3237,8 +3233,6 @@ void CCtrlLayer::FocusPreviousControl()
 				//and set focus
 				controls[ nFocusedControlIdx ]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
 				controls[ nFocusedControlIdx ]->OnFocused();
-				//init focus rect
-				m_focusRect.Set( controls[ nFocusedControlIdx ]->bbox );
 				return;
 			}
 		}
@@ -3264,9 +3258,6 @@ void CCtrlLayer::FocusPreviousControl()
 			//and set focus
 			controls[ nFocusedControlIdx ]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
 			controls[ nFocusedControlIdx ]->OnFocused( -1 );
-			//set focus rect on new control if old control didn't show the focus cursor
-			if ( controls[ nOldFocusIdx ]->bShowFocusCursor == false )
-				m_focusRect.Set( controls[ nFocusedControlIdx ]->bbox );
 		}
 	}
 }
@@ -3290,9 +3281,6 @@ bool CCtrlLayer::FocusControl( CControl* pCtrl )
 	//and set focus
 	controls[ nFocusedControlIdx ]->statusFlags |= CCTRL_STATUS_FLAG_HAS_FOCUS;
 	controls[ nFocusedControlIdx ]->OnFocused( SIGN( nFocusedControlIdx - nOldFocusIdx ) );
-	//set focus rect on new control if old control didn't show the focus cursor
-	if ( controls[ nOldFocusIdx ]->bShowFocusCursor == false )
-		m_focusRect.Set( controls[ nFocusedControlIdx ]->bbox );
 	return true;
 }
 
@@ -3359,7 +3347,6 @@ CCtrlLayer* CCtrlLayer::Clone()
 	nlay->nFocusedControlIdx = -1;
 	nlay->nFocusFirstFocusableIdx = -1;
 	nlay->shFocusedControlID = shFocusedControlID;
-	nlay->m_focusRect.Set( 0.0f, 0.0f, 0.0f, 0.0f );
 
 	for ( int kk = 0; kk < controls.GetSize(); kk++ )
 	{
@@ -3435,6 +3422,7 @@ void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RectXYWHi B
 	RectXYWHi cliprect = BBox;
 	cliprect.w = ( int ) ceil( fPercentFull * cliprect.w );
 	UTSprite::PaintFModuleStretched( sprCol, Vec2( BBox.x, BBox.CenterY() ), animIdx, 2, 0, DW_COLOR_FFFA( fAlpha ), cliprect.w );
+	UTSprite::PaintFModuleStretched( sprCol, Vec2( BBox.x, BBox.CenterY() ), animIdx, 1, 0, DW_COLOR_FFFA( fAlpha * fFocus ), cliprect.w );
 }
 
 void GUIUtils::DrawPanelSM( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha /*= 1.0f */ )
@@ -3470,7 +3458,8 @@ void GUIUtils::DrawButton( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBo
 	Vec2 vUL( clipwin.left, clipwin.top );
 
 	DWORD dwFocusAlpha = DW_COLOR_FFFA( fFocusPercent * fAlpha );
-	DWORD dwHoverAlpha = DW_COLOR_FFFA( fHoverPercent * fFocusPercent * fAlpha );
+	float fHC = LIMIT( (fHoverPercent * 0.6f + fFocusPercent * 0.9f), 0.0f, 1.0f );
+	DWORD dwHoverAlpha = DW_COLOR_FFFA( fHC * fAlpha );
 	DWORD dwAlpha = DW_COLOR_FFFA( fAlpha );
 	// paint base
 	int nframe = 0;
@@ -3482,7 +3471,8 @@ void GUIUtils::DrawButton( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBo
 		UTSprite::PaintFModuleClipped( sprCol, Vec2( BBox.x, BBox.y ), animIdx, 1, 0, clipbut, dwHoverAlpha );
 	// paint thin bar
 	UTSprite::PaintFModuleClipped( sprCol, Vec2( vUL.x, vUL.y ), animIdx, 4, 0, clipwin, dwAlpha );
-	UTSprite::PaintFModuleClipped( sprCol, Vec2( vUL.x, vUL.y ), animIdx, 3, 0, clipwin, dwFocusAlpha );
+	if(fFocusPercent > 0.0f)
+		UTSprite::PaintFModuleClipped( sprCol, Vec2( vUL.x, vUL.y ), animIdx, 3, 0, clipwin, dwFocusAlpha );
 }
 
 void GUIUtils::DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
@@ -3619,17 +3609,16 @@ void GUIUtils::DrawWindowFrame( CSpriteCollection *sprCol, int animIdx, RectXYWH
 	*/
 }
 
-void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor )
+void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float alpha, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor )
 {
-	const DWORD wndBaseColor = 0xff000000;
-	// max half transparency
-	float fAlpha = 0.5f * DW_GETFALPHA( color );
+	DWORD wndBaseColor = DW_COLORALPHA( 0xff000000, 0.8f * alpha );
+
 	Vec2 vUL( BBox.x, BBox.y );
 	RectLTRB clipwin( BBox );
 	// paint base
-	UTSprite::PaintFModuleStretched( sprCol, vUL, animIdx, 0, 0, DW_COLORALPHA(wndBaseColor, fAlpha), BBox.w, BBox.h );
+	UTSprite::PaintFModuleStretched( sprCol, vUL, animIdx, 0, 0, wndBaseColor, BBox.w, BBox.h );
 	// paint titlebar
-	UTSprite::PaintFModuleClipped( sprCol, vUL, animIdx, 1, 0, clipwin, color );
+	UTSprite::PaintFModuleClipped( sprCol, vUL, animIdx, 1, 0, clipwin, DW_COLOR_FFFA(alpha));
 	//paint title
 	if ( strTitle != nullptr && nFontIdx >= 0 )
 	{
@@ -3644,10 +3633,10 @@ void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBo
 	}
 }
 
-void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor )
+void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float alpha, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor )
 {
 	CStringDesc* sdTitle = __Texts().GetStringDescByIdx( nStrIdxTitle );
-	DrawWindow( sprCol, animIdx, BBox, color, nFontIdx, sdTitle, dwTitleColor );
+	DrawWindow( sprCol, animIdx, BBox, alpha, nFontIdx, sdTitle, dwTitleColor );
 }
 
 void GUIUtils::DrawPanel( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha, int nIconAnimIdx /*= -1*/, int nIconFrame /*= -1 */ )
@@ -3876,13 +3865,13 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 	{
 		case K_CCTRLMGR_INPUT_SDL_KEY:
 		{
-			//ca optimizare, daca layerul nu este blocking ies imediat ca sa nu influenteze in vreun fel inputul
+			// non blocking layers don't get input
 			if ( !bIsBlocking )
 				break;
-			//nCommand va contine 1 pentru keypressed sau 0 pentru key released
-			//nCommandParam contine -1 penttru not set sau SDLscancode pentru tasta 
+			// nCommand: 1 keypressed, 0 key released
+			// nCommandParam: -1 not set or SDLscancode for key
 			CCtrlLayer *lay = GetTopmostInputLayer();
-			if ( ( lay != NULL ) && ( lay->alpha >= 1.0f ) ) //sa citeasca doar cand e fully visible
+			if ( ( lay != NULL ) && ( lay->alpha >= 1.0f ) ) // only read if fully visible
 			{
 				for ( int j = 0; j < lay->controls.GetSize(); j++ )
 				{
@@ -3982,9 +3971,9 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 		case K_CCTRLMGR_INPUT_COMMAND:
 		{
 			ECtrlMgrCommandType cmd = ( ECtrlMgrCommandType ) nCommand;
-			//aici ar trebui ca controlul selectat sa preia inputul si sa-l trateze singur in loc sa caut un control anume
+			//#TODO: aici ar trebui ca controlul selectat sa preia inputul si sa-l trateze singur in loc sa caut un control anume
 			CCtrlLayer *lay = GetTopmostInputLayer();
-			if ( ( lay != NULL ) && ( lay->alpha >= 1.0f ) )
+			if ( (lay != NULL) && (lay->alpha >= 1.0f) )
 			{
 				//change focused control (if it has any)
 				if ( lay->nFocusFirstFocusableIdx >= 0 )
@@ -4017,8 +4006,8 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 								ctrl = lay->GetControlByName( "BUT_CANCEL_LOBBY" );
 							if ( ctrl == null )
 								ctrl = lay->GetControlByName( "BUT_CLOSE_KEYDEF" );
-							//daca avem buton clasic de close dam comanda de click pe el
-							if ( ctrl != null )
+							// daca avem buton clasic de close dam comanda de click pe el
+							if ( ctrl != nullptr )
 							{
 								ctrl->statusFlags |= CCTRL_STATUS_FLAG_CLICKED_ALT;
 							}
@@ -4056,16 +4045,15 @@ void CControlsManager::Update( float dTime )
 	///--- update local timeline ---
 	fLocalTimeline += dTime;
 
-	if ( m_pCamera != null )
-	{
-		m_cameraScreenRect = m_pCamera->GetCamWorldAABB();
-	}
-
 	bIsBlocking = false;
 
 	if ( Layers.GetSize() <= 0 )
 	{
 		return;
+	}
+	if ( m_pCamera != nullptr )
+	{
+		m_cameraScreenRect = m_pCamera->GetCamWorldAABB();
 	}
 
 	// check input from all connected controllers and translate to local commands
@@ -4084,23 +4072,30 @@ void CControlsManager::Update( float dTime )
 		if ( ( ctrlr->GetButState( K_CM_COMMAND_MOVE_Y ) == K_CM_BUTSTATE_JUSTPRESSED ) && ( ctrlr->GetAxisVal( K_CM_COMMAND_MOVE_Y ) > 0.0f ) )
 			ReceiveInput( K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_DOWN, ctrlr->nSDLInstanceId );
 
-		if ( ( ctrlr->sCommands.keyState[ K_CM_COMMAND_FIRE1 ] == K_CM_BUTSTATE_JUSTPRESSED ) ||
-			( ctrlr->sCommands.keyState[ K_CM_COMMAND_JUMP ] == K_CM_BUTSTATE_JUSTPRESSED ) ||
-			( ctrlr->sCommands.keyState[ K_CM_COMMAND_SELECT ] == K_CM_BUTSTATE_JUSTPRESSED ) )
+		// send select commands
+		EControllerCommand arrSelectCommands[] = { K_CM_COMMAND_FIRE1, K_CM_COMMAND_JUMP, K_CM_COMMAND_SELECT };
+		for each(auto a in arrSelectCommands)
 		{
-			ReceiveInput( K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_SELECT, ctrlr->nSDLInstanceId );
+			if ( ctrlr->sCommands.keyState[ a ] == K_CM_BUTSTATE_JUSTPRESSED )
+			{
+				// always ignore pointer buttons as they are treated directly inside the controls and allowing them would break things
+				CControllerTrigger* trig = ctrlr->GetTriggerForCommand( a );
+				if ( (trig != nullptr) && (trig->eType == K_CM_POINTER_BUTTON) )
+					continue;
+
+				ReceiveInput( K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_SELECT, ctrlr->nSDLInstanceId );
+				break;
+			}
 		}
 
 		if ( ( ctrlr->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED ) ||
 			( ctrlr->sCommands.keyState[ K_CM_COMMAND_RELOAD ] == K_CM_BUTSTATE_JUSTPRESSED ) ||
 			( ctrlr->sCommands.keyState[ K_CM_COMMAND_MELEE ] == K_CM_BUTSTATE_JUSTPRESSED ) )
-
 		{
 			ReceiveInput( K_CCTRLMGR_INPUT_COMMAND, K_CCTRLMGR_COMMAND_BACK, ctrlr->nSDLInstanceId );
 		}
 	}
 
-	//vede daca e ceva blocant si face diverse updates
 	for ( int kk = 0; kk < Layers.GetSize(); kk++ )
 	{
 		CCtrlLayer *lay = Layers[ kk ];
@@ -4120,7 +4115,7 @@ void CControlsManager::Update( float dTime )
 
 		lay->mouseRelPos.x -= lPos.x + ( int ) anchor.x;
 		lay->mouseRelPos.y -= lPos.y + ( int ) anchor.y;
-		//daca are timer de afisare ii da remove cand se termina timerul
+		// updates destroy timer
 		if ( lay->fDestroyTimer > 0.0f )
 		{
 			lay->fDestroyTimer -= dTime;
@@ -4130,7 +4125,7 @@ void CControlsManager::Update( float dTime )
 				lay->statusFlags |= CCTRL_STATUS_FLAG_REMOVED;
 			}
 		}
-		//vede daca e removed
+		// was it removed?
 		if ( lay->statusFlags & CCTRL_STATUS_FLAG_REMOVED )
 		{
 			dec_limit( lay->alpha, dTime * 6.0f, 0.0f );
@@ -4144,36 +4139,39 @@ void CControlsManager::Update( float dTime )
 		//set blocking flag
 		if ( lay->bBlocking )
 			bIsBlocking = true;
-		//--- focus rect ---
-		if ( lay->nFocusedControlIdx >= 0 )
-		{
-			CAABB targetrect;
-			targetrect.Set( lay->controls[ lay->nFocusedControlIdx ]->bbox );
-			AABB::MorphInto_Quadratic( &lay->m_focusRect, &targetrect, 20.0f * dTime, 60.0f * dTime );
-		}
 	}
 
-	//face update de sus in jos pana la primul blocant, inclusiv aceluia
+	// updates all layers and controls, bottop to top until blocking
 	for ( int kk = Layers.GetSize() - 1; kk >= 0; kk-- )
 	{
 		CCtrlLayer* layer = Layers[ kk ];
-		//daca i-am dat remove nu mai fac update la controale
+		// was it removed? don't update anymore
 		if ( ( layer->statusFlags & CCTRL_STATUS_FLAG_REMOVED ) != 0 )
 			continue;
-		//update la toate controalele pe rand
+		// update all controls
 		for ( int ll = 0; ll < layer->controls.GetSize(); ll++ )
 		{
-			layer->controls[ ll ]->Update( dTime, fLocalTimeline );
+			// update visual focus percent in each control
+			CControl* ctrl = layer->controls[ ll ];
+			if ( !ctrl->bCanHaveFocus || ctrl->bDisabled || layer->nFocusedControlIdx != ll )
+			{
+				dec_limit( ctrl->fFocusPercent, 6.0f * dTime, 0.0f );
+			}
+			else if ( layer->nFocusedControlIdx == ll )
+			{
+				inc_limit( ctrl->fFocusPercent, 6.0f * dTime, 1.0f );
+			}
+			// update control now
+			ctrl->Update( dTime, fLocalTimeline );
 		}
-		//daca a fost blocant ies 
+		// was this layer blocking? stop updating layers
 		if ( layer->bBlocking )
 			break;
 	}
 
-	//a terminat update-ul la controale, acum vede daca e removed layerul in urma actiunilor
+	// controls were updated, see if layer needs removing
 	for ( int kk = Layers.GetSize() - 1; kk >= 0; kk-- )
 	{
-		//sterge layerul doar cand alpha ajunge la 0
 		if ( ( Layers[ kk ]->statusFlags & CCTRL_STATUS_FLAG_REMOVED ) && ( Layers[ kk ]->alpha <= 0.0f ) )
 		{
 			SAFE_DELETE( Layers[ kk ] );
@@ -4191,7 +4189,7 @@ void CControlsManager::Paint()
 	Mat matTransform, mats;
 
 	__Painter().Flush();
-	//m_pSprite->SetTransform(&g_matIdentity);
+
 	if ( m_pCamera )
 	{
 		CCameraTransform::SetActiveCamera( m_pDevice, m_pCamera );
@@ -4232,18 +4230,6 @@ void CControlsManager::Paint()
 
 		for ( int kk = 0; kk < lay->controls.Count(); kk++ )
 		{
-			//paint focus cursor under first focusable control
-			if ( ( pInputLayer == lay ) && ( kk == lay->nFocusFirstFocusableIdx ) && ( ( pInputLayer->statusFlags & CCTRL_STATUS_FLAG_REMOVED ) == 0 ) )
-			{
-				//daca controlul curent nu arata focus atunci sa nu indic
-				if ( !bHideTabstop )
-				{
-					RectXYWHi focusrect;
-					focusrect.Set( lay->m_focusRect.vMin.x, lay->m_focusRect.vMin.y, lay->m_focusRect.vSize.x, lay->m_focusRect.vSize.y );
-					GUIUtils::DrawWindowFrame( &m_sprCol, ANM_CONTROLS_SPR_FRAME5, focusrect, DW_COLOR_FFFA( lay->alpha ), -1 );
-				}
-			}
-
 			//paint control
 			lay->controls[ kk ]->Paint( lay->pControlsManager->m_pCamera, &matTransform );
 		}
