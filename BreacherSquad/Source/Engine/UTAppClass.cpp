@@ -1405,30 +1405,6 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 
 #endif
-			else if (ctrlID == GET_FAST_HASH("BUT_JOKE1_OK"))
-			{
-				UTGetGUI().RemoveLayer("LAYER_ID_JOKE1");
-				UTGetGUI().ShowLayerOnce("LAYER_ID_JOKE2");
-			}
-			else if (ctrlID == GET_FAST_HASH("BUT_JOKE2_OK"))
-			{
-				UTGetGUI().RemoveLayer("LAYER_ID_JOKE2");
-				UTGetGUI().ShowLayerOnce("LAYER_ID_JOKE3");
-			}
-			else if (ctrlID == GET_FAST_HASH("BUT_JOKE3_OK"))
-			{
-				UTGetGUI().RemoveLayer("LAYER_ID_JOKE3");
-				UTGetGUI().ShowLayerOnce("LAYER_ID_JOKE4");
-			}
-			else if (ctrlID == GET_FAST_HASH("BUT_JOKE4_OK"))
-			{
-				UTGetGUI().RemoveLayer("LAYER_ID_JOKE4");
-				UTGetGUI().ShowLayerOnce("LAYER_ID_JOKE5");
-			}
-			else if (ctrlID == GET_FAST_HASH("BUT_JOKE5_OK"))
-			{
-				UTGetGUI().RemoveLayer("LAYER_ID_JOKE5");
-			}
 
 			else if (ctrlID == GET_FAST_HASH("BUT_RESET_KEYS")) //resets player keys
 			{
@@ -1535,27 +1511,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			UINT32 ctrlID = nEvent.GetArgumentByName(L"ctrlID")->m_asUINT32;
 			bool bCheck = nEvent.GetArgumentByName(L"bChecked")->m_asBool;
 
-			if (ctrlID == GET_FAST_HASH("CTRL_CHECK_ANTIALIAS"))
-			{
-				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
-				if (layer != null)
-				{
-					CControl* ctrl;
-					if (ctrl = layer->GetControlByName("CTRL_CHECK_ANTIALIAS"))
-					{
-						ctrl->paramsDict.SetNamedVarBool(L"bChecked", false);
-					}
-				}
-
-				UTGetGUI().RemoveLayer("LAYER_ID_OPTIONS_MM");
-				UTGetGUI().ShowLayerOnce("LAYER_ID_JOKE1");
-				
-				//analytics
-				ANALYTICS_SCREENVIEW("antialias_joke");
-
-				return true;
-			}
-			else if ((ctrlID == GET_FAST_HASH("CTRL_CHECK_BORDERLESS")) ||
+			if ((ctrlID == GET_FAST_HASH("CTRL_CHECK_BORDERLESS")) ||
 					 (ctrlID == GET_FAST_HASH("CTRL_CHECK_FULLSCREEN"))	)
 			{
 				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();

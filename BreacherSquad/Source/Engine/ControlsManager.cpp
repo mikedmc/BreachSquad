@@ -451,19 +451,20 @@ void CControl::Update( float dTime, float fTimeline )
 				break;
 
 			int nSelectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
-			int nItemsCnt = __Texts().GetSubstringsCount( stringIdx, L'\n' );
-
-			RectXYWHi bbB = BBox; //bbox bar
-			//heads sizes
-			int w1 = m_pSprCol->GetAFrameBBox( animIdx, 0 ).w;
-			int w2 = m_pSprCol->GetAFrameBBox( animIdx, 2 ).w;
-			bbB.x += w1; bbB.w -= w1 + w2;
-
-			RectXYWHi bbL = m_pSprCol->GetAFrameBBox( animIdx, 3 ); //buton stanga
-			bbL.x += BBox.x; bbL.y += BBox.CenterY();
-
-			RectXYWHi bbR = m_pSprCol->GetAFrameBBox( animIdx, 4 ); //buton dreapta
-			bbR.x += BBox.Right(); bbR.y += BBox.CenterY();
+			int nItemsCnt = 0;
+			CVariantComplex* vc = paramsDict.GetVariantByName( L"stringID_list" );
+			if ( (vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()) )
+			{
+				int nStringIdx_list = __Texts().GetStrIdx( vc->m_strArg.textHash );
+				nItemsCnt = __Texts().GetSubstringsCount( nStringIdx_list, L'\n' );
+			}
+			//left button
+			RectXYWHi bbL = m_pSprCol->GetAFrameBBox( animIdx, 1 );
+			bbL.x = BBox.x; bbL.y = BBox.Bottom() - bbL.h;
+			//right button
+			RectXYWHi bbR = m_pSprCol->GetAFrameBBox( animIdx, 2 );
+			bbR.x = BBox.Right() - bbR.w; bbR.y = BBox.Bottom() - bbR.h;
+			RectXYWHi bbB( BBox.x + bbL.w, BBox.Bottom() - bbL.h, BBox.w - bbL.w - bbR.w, bbL.h );
 
 			//tratam mai intai inputurile pe flaguri in cazul in care vin din handleCommand
 			int nSelectedIdxNew = nSelectedIdx;
@@ -500,6 +501,7 @@ void CControl::Update( float dTime, float fTimeline )
 
 			if ( nSelectedIdxNew != nSelectedIdx )
 			{
+				layer->FocusControl( this );
 				nSelectedIdx = nSelectedIdxNew;
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
@@ -1491,7 +1493,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 	{
 		case CCTRL_TYPE_DROPDOWN:
 		{
-			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 5 ) )
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 3 ) )
 			{
 				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx or frames count" );
 				return;
@@ -1499,40 +1501,51 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 
 			int nSelectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
 			int nItemsCnt = paramsDict.GetVariantByName( L"nItemsCnt" )->m_asINT32;
+			int nIconFrame = paramsDict.GetVariantByName( L"iconFrame" )->m_asINT32;
 
 			float dCol = 1.0f - 0.4f * fDisabledPercent;
 			DWORD wcol = D3DCOLOR_COLORVALUE( dCol, dCol, dCol, layer->alpha );
 
-			Vec2 butC( ( int ) ( BBox.x + BBox.w / 2.0f ), ( int ) ( BBox.y + BBox.h / 2.0f ) );
-			GUIUtils::DrawHTilingAnim( m_pSprCol, animIdx, 0, BBox, wcol );
+			// containing panel
+			GUIUtils::DrawPanel( m_pSprCol, BBox_inflated, fFocusPercent, layer->alpha, ANM_CONTROLS_SPR_PANELICONS, nIconFrame );
+			if ( (stringIdx >= 0) && (fontIdx >= 0) )
+			{
+				__TexFonts().fonts[ fontIdx ]->DrawString( stringIdx, BBox.CenterX(), BBox.y + 1, FONTFLAG_ANCHOR_TOPCENTER, wcol );
+			}
+			// get arrows sizes (left arrow)
+			RectXYWHi arrRect = m_pSprCol->GetAFrameBBox( animIdx, 1 );
+			RectXYWHi bboxBar( BBox.x + arrRect.w, BBox.Bottom() - arrRect.h, BBox.w - arrRect.w * 2, arrRect.h );
+			UTSprite::PaintFModuleStretched( m_pSprCol, Vec2( bboxBar.x, bboxBar.CenterY() ), animIdx, 0, 0, DW_COLOR_FFFA( layer->alpha ), bboxBar.w );
 
 			int frame;
 			// left button
 			if ( nSelectedIdx > 0 )
 			{
-				frame = 3;
+				frame = 1;
 				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
-					frame = 3;
-				UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.CenterY(), animIdx, frame, wcol );
+					frame = 1;
+				UTSprite::PaintFrame( m_pSprCol, Vec2( bboxBar.x, bboxBar.CenterY() ), animIdx, frame, wcol );
 			}
 			// right button
 			if ( nSelectedIdx < nItemsCnt - 1 )
 			{
-				frame = 4;
+				frame = 2;
 				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
-					frame = 4;
-				UTSprite::PaintFrame( m_pSprCol, BBox.Right(), BBox.CenterY(), animIdx, frame, wcol );
+					frame = 2;
+				UTSprite::PaintFrame( m_pSprCol, Vec2( bboxBar.Right(), bboxBar.CenterY() ), animIdx, frame, wcol );
 			}
 			// text
-			if ( ( stringIdx >= 0 ) && ( fontIdx >= 0 ) )
+			CVariantComplex* vc = paramsDict.GetVariantByName( L"stringID_list" );
+			if ( (vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()) && (fontIdx >= 0) )
 			{
+				int nStringIdx_list = __Texts().GetStrIdx( vc->m_strArg.textHash );
 				CStringDesc sdSelection;
-				__Texts().GetSubstring( &sdSelection, stringIdx, nSelectedIdx, L'\n' );
-				__TexFonts().fonts[ fontIdx ]->DrawStringScaleW( &sdSelection, BBox.CenterX(), BBox.CenterY(), BBox.w, FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA( dwFontColor, 1.0f - fDisabledPercent * 0.8f ) );
+				__Texts().GetSubstring( &sdSelection, nStringIdx_list, nSelectedIdx, L'\n' );
+				__TexFonts().fonts[ fontIdx ]->DrawString( &sdSelection, bboxBar.CenterX(), bboxBar.CenterY(), FONTFLAG_ANCHOR_VCENTERHCENTER, DW_COLORALPHA( dwFontColor, layer->alpha * (1.0f - fDisabledPercent * 0.8f) ) );
 			}
 			else
 			{
-				drawDebugText( butC.x, butC.y, L"Missing font or stringName", wcol );
+				drawDebugText( bboxBar.x, bboxBar.y, L"Missing list font or stringID_list", 0xffff0000 );
 			}
 		}
 		break;
@@ -2592,14 +2605,14 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			if ( bChecked )
 				frame = 1;
 
-			// actual checkbox
-			UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.y, animIdx, frame, dwColor );
 			// panel
-			RectXYWHi checkrct = m_pSprCol->GetAFrameBBox( animIdx, 0 );
-			RectXYWHi panelrect( BBox );
-			panelrect.x += checkrct.w + 2; 
-			panelrect.w -= checkrct.w + 2;
-			GUIUtils::DrawPanelSM( m_pSprCol, panelrect, fFocusPercent, layer->alpha );
+			//RectXYWHi checkrct = m_pSprCol->GetAFrameBBox( animIdx, 0 );
+			RectXYWHi panelrect( BBox_inflated );
+			//panelrect.x += checkrct.w + 2; 
+			//panelrect.w -= checkrct.w + 2;
+			GUIUtils::DrawPanel( m_pSprCol, panelrect, fFocusPercent, layer->alpha );
+			// actual checkbox
+			UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.CenterY(), animIdx, frame, dwColor );
 
 			if ( fontIdx >= 0 )
 			{
@@ -2629,12 +2642,9 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			float fAlpha = DW_GETFALPHA( dwColor );
 
 			// scale to screen
-			//D3DXMATRIXA16 mattrans;
-			//RECTXYWH_F bboxl = m_pSprCol->GetAFrameBBox_real(animIdx, frameIdx);
-			//D3DXMatrixAffineTransformation2D(&mattrans, UTApp().g_rectRender.h / bboxl.h, NULL, 0.0f, &Vec2(0.0f, 0.0f));
-			//layer->pControlsManager->m_pSprite->SetTransform(&mattrans);
-			UTSprite::PaintFrame( m_pSprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, frameIdx, DW_COLORALPHA( dwColor, fAlpha * layer->alpha ) );
-			//layer->pControlsManager->m_pSprite->SetTransform(&g_matIdentity);
+			RectXYWH camRect = pCamera->GetWorldAABB();
+			camRect.Inflate( 20.0f );
+			UTSprite::PaintFModuleStretched( m_pSprCol, Vec2(-camRect.w/2.0f, -camRect.h/2.0f), animIdx, frameIdx, 0, DW_COLORALPHA( dwColor, fAlpha * layer->alpha ), camRect.w, camRect.h );
 		}
 		break;
 		case CCTRL_TYPE_PROGRESS_BAR:
@@ -3424,6 +3434,7 @@ void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RectXYWHi B
 	UTSprite::PaintFModuleStretched( sprCol, Vec2( BBox.x, BBox.CenterY() ), animIdx, 2, 0, DW_COLOR_FFFA( fAlpha ), cliprect.w );
 	UTSprite::PaintFModuleStretched( sprCol, Vec2( BBox.x, BBox.CenterY() ), animIdx, 1, 0, DW_COLOR_FFFA( fAlpha * fFocus ), cliprect.w );
 }
+
 
 void GUIUtils::DrawPanelSM( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha /*= 1.0f */ )
 {

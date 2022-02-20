@@ -503,8 +503,8 @@
     <Module ImageIdx="0" X="127" Y="515" W="4" H="102" />
     <Module ImageIdx="0" X="131" Y="515" W="4" H="102" />
     <Module ImageIdx="0" X="136" Y="515" W="15" H="102" />
-    <Module ImageIdx="0" X="153" Y="515" W="16" H="16" />
-    <Module ImageIdx="0" X="153" Y="532" W="16" H="16" />
+    <Module ImageIdx="0" X="154" Y="516" W="14" H="14" />
+    <Module ImageIdx="0" X="154" Y="533" W="14" H="14" />
     <Module ImageIdx="0" X="24" Y="638" W="223" H="9" />
     <Module ImageIdx="0" X="24" Y="618" W="223" H="9" />
     <Module ImageIdx="0" X="24" Y="628" W="223" H="9" />
@@ -518,6 +518,7 @@
     <Module ImageIdx="0" X="27" Y="749" W="220" H="18" />
     <Module ImageIdx="0" X="172" Y="605" W="7" H="11" />
     <Module ImageIdx="0" X="182" Y="605" W="7" H="11" />
+    <Module ImageIdx="0" X="24" Y="769" W="223" H="13" />
   </Modules>
   <FrameModules>
     <FrameModule ModuleIdx="0" OX="0" OY="0" Flags="0" />
@@ -1027,8 +1028,8 @@
     <FrameModule ModuleIdx="497" OX="0" OY="0" Flags="0" />
     <FrameModule ModuleIdx="498" OX="0" OY="0" Flags="0" />
     <FrameModule ModuleIdx="499" OX="0" OY="0" Flags="0" />
-    <FrameModule ModuleIdx="500" OX="0" OY="0" Flags="0" />
-    <FrameModule ModuleIdx="501" OX="0" OY="0" Flags="0" />
+    <FrameModule ModuleIdx="500" OX="-19" OY="-7" Flags="0" />
+    <FrameModule ModuleIdx="501" OX="-19" OY="-7" Flags="0" />
     <FrameModule ModuleIdx="502" OX="0" OY="-4" Flags="0" />
     <FrameModule ModuleIdx="503" OX="0" OY="-4" Flags="0" />
     <FrameModule ModuleIdx="504" OX="0" OY="-4" Flags="0" />
@@ -1042,6 +1043,7 @@
     <FrameModule ModuleIdx="512" OX="0" OY="0" Flags="0" />
     <FrameModule ModuleIdx="513" OX="-9" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="514" OX="2" OY="-5" Flags="0" />
+    <FrameModule ModuleIdx="515" OX="0" OY="-6" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="0" BBoxY="0" BBoxW="13" BBoxH="13">
@@ -4086,13 +4088,13 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="0" BBoxY="0" BBoxW="16" BBoxH="16">
+    <Frame BBoxX="-20" BBoxY="-8" BBoxW="16" BBoxH="16">
       <FModules>
         <FModule Idx="507" />
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="0" BBoxY="0" BBoxW="16" BBoxH="16">
+    <Frame BBoxX="-20" BBoxY="-8" BBoxW="16" BBoxH="16">
       <FModules>
         <FModule Idx="508" />
       </FModules>
@@ -4173,6 +4175,12 @@
     <Frame BBoxX="2" BBoxY="-5" BBoxW="7" BBoxH="11">
       <FModules>
         <FModule Idx="521" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="-6" BBoxW="223" BBoxH="13">
+      <FModules>
+        <FModule Idx="522" />
       </FModules>
       <Points />
     </Frame>
@@ -4772,6 +4780,9 @@
     <AnimationFrame FrameIdx="503" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="521" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="520" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="522" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="512" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="513" Duration="1" DX="0" DY="0" Flags="0" />
   </AnimationFrames>
   <Animations>
     <Animation ID="WINDOW1" Flags="0">
@@ -5541,6 +5552,11 @@
       <AFrame Idx="591" />
       <AFrame Idx="592" />
       <AFrame Idx="593" />
+    </Animation>
+    <Animation ID="DROPDOWN" Flags="0">
+      <AFrame Idx="594" />
+      <AFrame Idx="595" />
+      <AFrame Idx="596" />
     </Animation>
   </Animations>
 </SpriteCollection>

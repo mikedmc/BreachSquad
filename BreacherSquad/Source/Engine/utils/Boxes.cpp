@@ -172,6 +172,7 @@ void RectXYWH::Move( float movex, float movey )
 	y += movey;
 }
 
+// grows the rectangle with the specified scalar in all directions
 void RectXYWH::Inflate( float scalar )
 {
 	x -= scalar;
