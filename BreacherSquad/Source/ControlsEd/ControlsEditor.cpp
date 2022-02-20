@@ -14,7 +14,6 @@ CControlsEditor::CControlsEditor()
 	currCtrlIdx = -1;
 
 	m_pDevice = nullptr;
-	m_pCamera = nullptr;
 }
 
 
@@ -31,11 +30,6 @@ void CControlsEditor::DrawLine(int x1, int y1, int x2, int y2, D3DCOLOR col)
 	vertices[0].color = vertices[1].color = col;
 	m_pDevice->SetFVF(VERT_TL1TC::FVF);
 	m_pDevice->DrawPrimitiveUP(D3DPT_LINELIST, 2, &vertices, sizeof(VERT_TL1TC));
-}
-
-void CControlsEditor::SetCameraTransform(CCameraTransform* pCamera)
-{
-	m_pCamera = pCamera;
 }
 
 void CControlsEditor::DrawBBox(RectXYWHi rect, bool selected)
@@ -573,6 +567,12 @@ void CControlsEditor::Launch()
 	StringCchPrintf(xmlpath, MAX_PATH, L"%sControlsEd/ctrlTemplates.xml", UTApp().g_wszExePath);
 	LoadCtrlTemplatesXML(xmlpath);
 
+	RectXYWH worldrect = UTApp().g_rect360hWorld;
+	camera.SetWorldBounds( worldrect, true, K_CAMTRANS_AXIS_V, worldrect.h, worldrect.h );
+	camera.InitCamera( UTApp().g_rectRender, worldrect.h, K_CAMTRANS_AXIS_V, worldrect.Center() );
+	camera.SetCamAnimationNone();
+	camera.Update( 0.0f );
+
 	tool = TOOL_TYPE_NO_TOOL;
 	hideBBoxes = false;
 	offset = Vec2(0, 0);
@@ -742,6 +742,11 @@ void CControlsEditor::Close()
 static Vec2 vLastMouse;
 void CControlsEditor::Update(float dTime)
 {
+	// update camera first
+	camera.SetViewport( UTApp().g_rectRender );
+	camera.Update( dTime );
+	const RectXYWH camScreenRect = camera.GetCamWorldAABB();
+
 	Vec2 vecRenderCenter(UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY());
 
 	clickedInterface = false;
@@ -758,23 +763,15 @@ void CControlsEditor::Update(float dTime)
 			{
 				RectXYWHi bbox = currLayer->controls[currCtrlIdx]->GetBBox();
 				
-				if (m_pCamera != nullptr)
-				{
-					bbox.x += currLayer->GetPos().x;
-					bbox.y += currLayer->GetPos().y;
+				bbox.x += currLayer->GetPos().x;
+				bbox.y += currLayer->GetPos().y;
 
-					RectXYWH rbbox(bbox);
-					rbbox = m_pCamera->WorldToScreen(rbbox);
+				RectXYWH rbbox(bbox);
+				rbbox = camera.WorldToScreen(rbbox);
 
-					rbbox.x += offset.x + vecRenderCenter.x;
-					rbbox.y += offset.y + vecRenderCenter.y;
-					bbox.Set(rbbox.x, rbbox.y, rbbox.w, rbbox.h);
-				}
-				else
-				{
-					bbox.x += currLayer->GetPos().x +offset.x + vecRenderCenter.x;
-					bbox.y += currLayer->GetPos().y +offset.y + vecRenderCenter.y;
-				}
+				rbbox.x += offset.x + vecRenderCenter.x;
+				rbbox.y += offset.y + vecRenderCenter.y;
+				bbox.Set(rbbox.x, rbbox.y, rbbox.w, rbbox.h);
 
 				//verific daca dau click pe scale spot-uri
 				RectXYWHi scaleSpotTL(bbox.x, bbox.y, K_BBOX_SCALE_BOX_SIZE, K_BBOX_SCALE_BOX_SIZE);
@@ -822,31 +819,25 @@ void CControlsEditor::Update(float dTime)
 		if (g_mouse.Lbut == K_MOUSE_BUTT_DRAG)
 		{
 			SizeWH mousedelta(g_mouse.pos.x - vLastMouse.x, g_mouse.pos.y - vLastMouse.y);
-			if (m_pCamera != nullptr)
+
+			mousedelta = camera.ScreenToWorld(mousedelta);
+			if (fabs(mousedelta.w) >= 1.0f)
 			{
-				mousedelta = m_pCamera->ScreenToWorld(mousedelta);
-				if (fabs(mousedelta.w) >= 1.0f)
-				{
-					vLastMouse.x = g_mouse.pos.x;
-					mousedelta.w = (int)mousedelta.w;
-				}
-				else
-				{
-					mousedelta.w = 0.0f;
-				}
-				if (fabs(mousedelta.h) >= 1.0f)
-				{
-					vLastMouse.y = g_mouse.pos.y;
-					mousedelta.h = (int)mousedelta.h;
-				}
-				else
-				{
-					mousedelta.h = 0.0f;
-				}
+				vLastMouse.x = g_mouse.pos.x;
+				mousedelta.w = (int)mousedelta.w;
 			}
 			else
 			{
-				vLastMouse = g_mouse.pos;
+				mousedelta.w = 0.0f;
+			}
+			if (fabs(mousedelta.h) >= 1.0f)
+			{
+				vLastMouse.y = g_mouse.pos.y;
+				mousedelta.h = (int)mousedelta.h;
+			}
+			else
+			{
+				mousedelta.h = 0.0f;
 			}
 
 			if (DXUTIsKeyDown(VK_SPACE))
@@ -990,23 +981,15 @@ void CControlsEditor::Update(float dTime)
 			{
 				RectXYWHi bbox = currLayer->controls[kk]->GetBBox();
 				
-				if (m_pCamera != nullptr)
-				{
 					bbox.x += currLayer->GetPos().x;
 					bbox.y += currLayer->GetPos().y;
 
 					RectXYWH rbbox(bbox);
-					rbbox = m_pCamera->WorldToScreen(rbbox);
+					rbbox = camera.WorldToScreen(rbbox);
 
 					rbbox.x += offset.x + vecRenderCenter.x;
 					rbbox.y += offset.y + vecRenderCenter.y;
 					bbox.Set(rbbox.x, rbbox.y, rbbox.w, rbbox.h);
-				}
-				else
-				{
-					bbox.x += currLayer->GetPos().x + offset.x + vecRenderCenter.x;
-					bbox.y += currLayer->GetPos().y + offset.y + vecRenderCenter.y;
-				}
 
 				if (Rects::PointInRect(g_mouse.pos.x, g_mouse.pos.y, &bbox))
 				{
@@ -1369,24 +1352,19 @@ void CControlsEditor::Paint()
 		Vec2i lpos = currLayer->GetPos();
 		Vec2 vecRenderCenter( UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY() );
 
-		if ( m_pCamera != nullptr )
-		{
-			Mat mcam = m_pCamera->GetViewTransform();
-			Mat matscroll;
-			Vec2 scrCenter( vecRenderCenter.x + offset.x + lpos.x, vecRenderCenter.y + offset.y + lpos.y );
-			if ( m_pCamera != nullptr )
-				scrCenter = m_pCamera->ScreenToWorld( scrCenter );
-			MUMatAffine2D( &matscroll, 1.0f, NULL, 0.0f, &scrCenter );
-			mcam = matscroll * mcam;
+		Mat mcam = camera.GetViewTransform();
+		Mat matscroll;
+		Vec2 scrCenter( vecRenderCenter.x + offset.x + lpos.x, vecRenderCenter.y + offset.y + lpos.y );
+		scrCenter = camera.ScreenToWorld( scrCenter );
+		MUMatAffine2D( &matscroll, 1.0f, NULL, 0.0f, &scrCenter );
+		mcam = matscroll * mcam;
 
-			__Painter().SetViewTransform( mcam );
-		}
-
+		__Painter().SetViewTransform( mcam );
 		__Painter().SetTransform( g_matIdentity );
 		// paint controls
 		for (int kk = 0; kk < currLayer->controls.Count(); kk++)
 		{
-			currLayer->controls[kk]->Paint(currLayer->pControlsManager->m_pCamera, &g_matIdentity);
+			currLayer->controls[kk]->Paint(&UTGetGUI().camera, &g_matIdentity);
 		}
 	}
 }
@@ -1658,19 +1636,15 @@ void CControlsEditor::PaintBBoxes()
 			rect.x += currLayer->GetPos().x;
 			rect.y += currLayer->GetPos().y;
 
-			if (m_pCamera != nullptr)
-			{
-				Vec2 vul(rect.x, rect.y);
-				SizeWH rsz(rect.w, rect.h);
-				vul = m_pCamera->WorldToScreen(vul);
-				//adaug screen space coords
-				vul = vul + vecRenderCenter + offset;
+			Vec2 vul(rect.x, rect.y);
+			SizeWH rsz(rect.w, rect.h);
+			vul = camera.WorldToScreen(vul);
+			//add screen space coords
+			vul = vul + vecRenderCenter + offset;
 
-				rsz = m_pCamera->WorldToScreen(rsz);
-				rect.x = vul.x; rect.y = vul.y;
-				rect.w = rsz.w; rect.h = rsz.h;
-
-			}
+			rsz = camera.WorldToScreen(rsz);
+			rect.x = vul.x; rect.y = vul.y;
+			rect.w = rsz.w; rect.h = rsz.h;
 
 			if (selectedCtrls.Contains(kk))
 				DrawBBox(rect, true);

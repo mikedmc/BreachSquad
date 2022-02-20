@@ -18,7 +18,7 @@ enum eCtrlEdTool
 class CControlsEditor : public IDeviceRes
 {
 private:
-	CCameraTransform*	m_pCamera;
+	CCameraTransform	camera;
 
 public:
 	bool				hideBBoxes;
@@ -57,7 +57,6 @@ public:
 	OPRESULT			LoadCtrlTemplatesXML( WCHAR* XMLpath );
 	void				DrawBBox(RectXYWHi rect, bool selected);
 	void				DrawLine(int x1, int y1, int x2, int y2, D3DCOLOR col = 0xff0000ff);
-	void				SetCameraTransform(CCameraTransform* pCamera);
 	void				AddControl(CVariantCollection* vcol);
 	void				CloneControl(int offx, int offy);
 	void				DeleteControl();

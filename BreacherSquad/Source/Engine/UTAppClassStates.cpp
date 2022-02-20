@@ -125,7 +125,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			*/
 
 			///--- CONTROLS ---
-			UTGetGUI().SetCameraTransform(&UTApp().g_cam360hScreen);
+			UTGetGUI().Init();
 
 			WCHAR xmlpath[MAX_PATH];
 			FileManager::GetMediaPath(L"media/interfaces/interfaces.xml", xmlpath);

@@ -412,7 +412,6 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 
 #ifdef K_CONTROLS_EDITOR
 		case GAME_STATE_CONTROLSED:
-			g_ControlsEditor.SetCameraTransform( &UTApp().g_cam360hScreen );
 			g_ControlsEditor.Update( fElapsedTime );
 			break;
 #endif

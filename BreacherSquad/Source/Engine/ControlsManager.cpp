@@ -3692,16 +3692,11 @@ void GUIUtils::DrawPanel( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocu
 
 CControlsManager::CControlsManager()
 {
-	m_pCamera = nullptr;
-	m_cameraScreenRect.Set( 0, 0, 0, 0 );
-
 	bIsBlocking = false;
-
 	bLoaded = false;
 
 	//local timeline
 	fLocalTimeline = 0.0f;
-
 }
 
 CControlsManager::~CControlsManager()
@@ -3709,13 +3704,13 @@ CControlsManager::~CControlsManager()
 	Release();
 }
 
-void CControlsManager::SetCameraTransform( CCameraTransform* pCamera )
+void CControlsManager::Init()
 {
-	m_pCamera = pCamera;
-	if ( m_pCamera != null )
-	{
-		m_cameraScreenRect = m_pCamera->GetCamWorldAABB();
-	}
+	RectXYWH worldrect = UTApp().g_rect360hWorld;
+	camera.SetWorldBounds( worldrect, true, K_CAMTRANS_AXIS_V, worldrect.h, worldrect.h );
+	camera.InitCamera( UTApp().g_rectRender, worldrect.h, K_CAMTRANS_AXIS_V, worldrect.Center() );
+	camera.SetCamAnimationNone();
+	camera.Update( 0.0f );
 }
 
 CCtrlLayer* CControlsManager::GetTopmostLayer()
@@ -4055,16 +4050,16 @@ void CControlsManager::Update( float dTime )
 {
 	///--- update local timeline ---
 	fLocalTimeline += dTime;
+	// make sure we always have the updated render rect (it gets updated in UTApp) and update camera
+	camera.SetViewport( UTApp().g_rectRender );
+	camera.Update( dTime );
+	const RectXYWH camScreenRect = camera.GetCamWorldAABB();
 
 	bIsBlocking = false;
 
 	if ( Layers.GetSize() <= 0 )
 	{
 		return;
-	}
-	if ( m_pCamera != nullptr )
-	{
-		m_cameraScreenRect = m_pCamera->GetCamWorldAABB();
 	}
 
 	// check input from all connected controllers and translate to local commands
@@ -4112,14 +4107,12 @@ void CControlsManager::Update( float dTime )
 		CCtrlLayer *lay = Layers[ kk ];
 		//set relative mouse pos
 		Vec2 localMousePt = g_mouse.pos;
-		if ( m_pCamera != null )
-		{
-			localMousePt = m_pCamera->ScreenToWorld( g_mouse.pos );
-		}
+		localMousePt = camera.ScreenToWorld( g_mouse.pos );
+
 		Vec2i lPos = lay->GetPos();
 		Vec2i anchor;
-		anchor.x = m_cameraScreenRect.CenterX() + lay->anchorX * ( m_cameraScreenRect.w / 2 );
-		anchor.y = m_cameraScreenRect.CenterY() + lay->anchorY * ( m_cameraScreenRect.h / 2 );
+		anchor.x = camScreenRect.CenterX() + lay->anchorX * ( camScreenRect.w / 2 );
+		anchor.y = camScreenRect.CenterY() + lay->anchorY * ( camScreenRect.h / 2 );
 
 		lay->mouseRelPos.x = ( int ) localMousePt.x;
 		lay->mouseRelPos.y = ( int ) localMousePt.y;
@@ -4198,14 +4191,9 @@ void CControlsManager::Update( float dTime )
 void CControlsManager::Paint()
 {
 	Mat matTransform, mats;
+	const RectXYWH camScreenRect = camera.GetCamWorldAABB();
 
 	__Painter().Flush();
-
-	if ( m_pCamera )
-	{
-		CCameraTransform::SetActiveCamera( m_pDevice, m_pCamera );
-		m_cameraScreenRect = m_pCamera->GetCamWorldAABB();
-	}
 
 	//get the layer that gets the input for the focused controls
 	CCtrlLayer* pInputLayer = GetTopmostInputLayer();
@@ -4220,19 +4208,17 @@ void CControlsManager::Paint()
 
 		Vec2i lpos = lay->GetPos();
 		Vec2i anchor;
-		anchor.x = m_cameraScreenRect.CenterX() + lay->anchorX * ( m_cameraScreenRect.w / 2 );
-		anchor.y = m_cameraScreenRect.CenterY() + lay->anchorY * ( m_cameraScreenRect.h / 2 );
+		anchor.x = camScreenRect.CenterX() + lay->anchorX * ( camScreenRect.w / 2 );
+		anchor.y = camScreenRect.CenterY() + lay->anchorY * ( camScreenRect.h / 2 );
 		//add anchor
 		lpos.x += anchor.x;
 		lpos.y += anchor.y;
-
+		// compute matrices
 		MUMatScaling( &matTransform, 0.9f + 0.1f * perc, 0.9f + 0.1f * perc, 1.0f );
 		MUMatTranslation( &mats, lpos.x, lpos.y, 0.0f );
 		matTransform *= mats;
-		if ( m_pCamera )
-		{
-			matTransform *= m_pCamera->GetViewTransform();
-		}
+		matTransform *= camera.GetViewTransform();
+
 		__Painter().SetViewTransform( matTransform );
 
 		bool bHideTabstop = false;
@@ -4242,7 +4228,7 @@ void CControlsManager::Paint()
 		for ( int kk = 0; kk < lay->controls.Count(); kk++ )
 		{
 			//paint control
-			lay->controls[ kk ]->Paint( lay->pControlsManager->m_pCamera, &matTransform );
+			lay->controls[ kk ]->Paint( &camera, &matTransform );
 		}
 	}
 

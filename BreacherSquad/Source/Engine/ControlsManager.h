@@ -208,24 +208,23 @@ public:
 class CControlsManager : public IDeviceRes
 {
 private:
-	bool bLoaded;
+	bool				bLoaded;					// Are controls loaded?
 
 public:
 	float				fLocalTimeline;				// Local timeline
-	CCameraTransform*	m_pCamera;					// Camera used for painting
-	RectXYWH			m_cameraScreenRect;			// Current camera screen rectangle
 	CArray<CCtrlLayer*> layersDefinitions;			// Contains layer definitions
 	CArray<CCtrlLayer*> Layers;						// Contains actual cloned layers
 	CSpriteCollection	m_sprCol;					// Sprite collection for controls sprites
 	bool				bIsBlocking;				// Does it block user input?
+	CCameraTransform	camera;						// Camera transform for controls
 
 	CControlsManager();
 	~CControlsManager();
 
+	// Initializes internal stuff
+	void				Init();
 	// Loads controls templates (loads sprite file name too)
 	OPRESULT			LoadControlsXML( WCHAR* XMLpath );
-	// Sets currently used camera
-	void				SetCameraTransform(CCameraTransform* pCamera);
 	// Sets a control parameter value and automatically converts to necessary value
 	void				SetParamValue(CControl * pCtrl, const WCHAR * sParamName, WCHAR * sParamValue, bool bIgnoreWarnings = false);
 	// Releases everything
