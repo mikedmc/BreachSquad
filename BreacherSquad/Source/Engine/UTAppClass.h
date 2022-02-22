@@ -36,6 +36,7 @@ public:
 	float	fMusicVolume;
 	float	fSoundsVolume;
 	bool	bFullscreen;
+	bool	bPixelPerfect;
 	bool    bBorderlessFullscreen;
 	bool	bScreenShakes; //shake screen on explosions
 	bool	bGoreEnabled;
@@ -73,7 +74,7 @@ public:
 
 /*!
  * \brief Main Game Class
- * asculta mesajele din pipe si tine unele variabile ale jocului
+ * #TODO: could/should be moved to Game.cpp
  */
 class CApplication : public IEventListener
 {
@@ -124,15 +125,14 @@ public:
 	///--------------------------------------------------------------------------------------
 	/// Variabile globale legate de dimensiunea ecranului
 	///--------------------------------------------------------------------------------------
-	SizeWH	g_letterbox;		// specifica afisare bare negre laterale sau sus/jos. daca w!=0 sunt bare laterale de latimea respectiva. Daca h!=0 sunt bare sus si jos
-	RectXYWH	g_rectScreen;		// real screen (after letterboxing)
-	RectXYWH	g_rectRender;		// rectangle that we render to (in actual final screen resolution after letterboxing)
-	RectXYWH	g_rectRenderPP;		// rectangle that the level should render to so it scales with integers (in actual final screen coordinates)
-	float		g_nPixelSizePP;		//#TODO: change to float for when not using pixel perfect. Pixel size in real pixels for when rendering with perfect pixel
-	RectXYWH	g_rectRT;			// render target render rectangle
-	RectXYWH  g_rect360hWorld;	// world rect for menus and interfaces
-	RectXYWH  g_rect480hWorld;	// double res menu rect (for system fonts)
-	Mat			g_matProj;			// projection matrix
+	RectXYWH		g_rectScreen;		// real screen (after letterboxing)
+	RectXYWH		g_rectRender;		// rectangle that we render to (in actual final screen resolution after letterboxing)
+	RectXYWH		g_rectRenderPP;		// rectangle that the level should render to so it scales with integers (in actual final screen coordinates)
+	float			g_nPixelSizePP;		//#TODO: change to float for when not using pixel perfect. Pixel size in real pixels for when rendering with perfect pixel
+	RectXYWH		g_rectRT;			// render target render rectangle
+	RectXYWH		g_rect360hWorld;	// world rect for menus and interfaces. W Computed depending on screen spect ratio.
+	RectXYWH		g_rect480hWorld;	// double res menu rect (for system fonts)
+	Mat				g_matProj;			// projection matrix
 	//--- screen camera ---
 	CCameraTransform g_camScreen;		//real screen camera
 	CCameraTransform g_camRTScreen;		//game screen camera with height of RT targets (RT to screen)

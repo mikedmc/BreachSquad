@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PSTexts Version="1.0">
-  <Texts>
+  <Alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/?¡¢£¥§©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº\АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя</Alphabet>
+  <Texts Lang="EN" Count="661">
     <Text ID="TITLE">Breacher Squad</Text>
     <Text ID="VERSION_NUMBER">empty</Text>
     <Text ID="MSGBOX">empty</Text>
@@ -113,6 +114,7 @@ All players will be disconnected and progress will be lost!</Text>
     <Text ID="NOT_AVAILABLE">N/A</Text>
     <Text ID="BORDERLESS_WND">Borderless Window</Text>
     <Text ID="FULLSCREEN">Fullscreen</Text>
+    <Text ID="PIXELPERFECT">Pixel Perfect!</Text>
     <Text ID="COOP_ONLINE">Coop / Online</Text>
     <Text ID="SINGLE_PLAYER">Single Player</Text>
     <Text ID="OK">OK</Text>
@@ -724,18 +726,8 @@ Reset your profile now?
     <Text ID="SELECT_GAME_MODE">Select Game Mode</Text>
     <Text ID="CLASSIC_MODE">Classic Mode</Text>
     <Text ID="CLASSIC_MODE_DESC">Standard Police Work</Text>
-    <Text ID="WEEKLY_CHALLENGE">Challenges Vol.1</Text>
-    <Text ID="WEEKLY_CHALLENGE_DESC">Missions designed to test your skills</Text>
     <Text ID="ZOMBIE_INVASION">Zombie Invasion Mode</Text>
     <Text ID="ZOMBIE_INVASION_DESC">Strange times in Nowhere City</Text>
-    <Text ID="WEEK1_TASK">Win in 3min</Text>
-    <Text ID="WEEK2_TASK1">Win in 4min</Text>
-    <Text ID="WEEK2_TASK2">No snipers</Text>
-    <Text ID="WEEK4_TASK1">No Healing</Text>
-    <Text ID="WEEK4_TASK2">Win as Shield</Text>
-    <Text ID="WEEK5_TASK1">Win as Breacher</Text>
-    <Text ID="WEEK6_TASK1">Win as Fergie</Text>
-    <Text ID="WEEK7_TASK1">Win as Assaulter</Text>
     <Text ID="WORKSHOP">Workshop</Text>
     <Text ID="AVAILABLE_MODS">Available Mods</Text>
     <Text ID="UPDATING_MODS">Updating Mods...</Text>

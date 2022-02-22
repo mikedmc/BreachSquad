@@ -5,6 +5,8 @@
 @copy strings.h ..\..\..\Source\Engine\Constants /y
 @copy strings.xml ..\..\..\Bin\Media\texts /y
 
+goto comment
+
 @ECHO --- Building other languages ---
 @ECHO -- Russian
 @TextsCompiler.exe REWRITE localized/strings_ru_src.xml localized/strings_ru.xml
@@ -26,6 +28,8 @@
 @TextsCompiler.exe REWRITE localized/strings_ptbr_src.xml localized/strings_ptbr.xml
 @ECHO -- Italian
 @TextsCompiler.exe REWRITE localized/strings_it_src.xml localized/strings_it.xml
+
+:comment
 
 @cd ..\..
 

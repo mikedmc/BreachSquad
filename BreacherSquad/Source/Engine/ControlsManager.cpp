@@ -1161,7 +1161,7 @@ void CControl::Update( float dTime, float fTimeline )
 			float hoverPercent = paramsDict.GetVariantByName( L"fHoverPercent" )->m_asFloat;
 
 			RectXYWHi frameBB = m_pSprCol->GetAFrameBBox( animIdx, 0 );
-			frameBB.x += BBox.x; frameBB.y += BBox.y;
+			frameBB.x += BBox.x; frameBB.y += BBox.CenterY();
 
 			bool bCheckChanged = false;
 
@@ -2606,10 +2606,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				frame = 1;
 
 			// panel
-			//RectXYWHi checkrct = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 			RectXYWHi panelrect( BBox_inflated );
-			//panelrect.x += checkrct.w + 2; 
-			//panelrect.w -= checkrct.w + 2;
 			GUIUtils::DrawPanel( m_pSprCol, panelrect, fFocusPercent, layer->alpha );
 			// actual checkbox
 			UTSprite::PaintFrame( m_pSprCol, BBox.x, BBox.CenterY(), animIdx, frame, dwColor );
@@ -3709,6 +3706,8 @@ void CControlsManager::Init()
 	RectXYWH worldrect = UTApp().g_rect360hWorld;
 	camera.SetWorldBounds( worldrect, true, K_CAMTRANS_AXIS_V, worldrect.h, worldrect.h );
 	camera.InitCamera( UTApp().g_rectRender, worldrect.h, K_CAMTRANS_AXIS_V, worldrect.Center() );
+
+
 	camera.SetCamAnimationNone();
 	camera.Update( 0.0f );
 }

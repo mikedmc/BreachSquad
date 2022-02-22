@@ -14,6 +14,7 @@ CApplicationSettings::CApplicationSettings()
 
 	bFullscreen = true;
 	bBorderlessFullscreen = true;
+	bPixelPerfect = true;
 	bScreenShakes = true;
 	bGoreEnabled = true;
 	bShowInterfaceHelp = false;
@@ -216,7 +217,6 @@ void CApplication::Init()
 
 
 	//-- set cam animation ---
-	g_letterbox.w = g_letterbox.h = 0.0f;
 	//camera
 	g_camScreen.SetCamAnimationNone();
 	g_camRTScreen.SetCamAnimationNone();
@@ -282,10 +282,9 @@ void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 		szRender.h = ( float ) newSizeY;
 	}
 
-	g_letterbox.w = (float)(newSizeX - szRender.w) / 2.0f;
-	g_letterbox.h = (float)(newSizeY - szRender.h) / 2.0f;
+	SizeWH letterbox( (float)(newSizeX - szRender.w) / 2.0f, (float)(newSizeY - szRender.h) / 2.0f );
 
-	g_rectRender = RectXYWH(g_letterbox.w, g_letterbox.h, szRender.w, szRender.h);
+	g_rectRender = RectXYWH(letterbox.w, letterbox.h, szRender.w, szRender.h);
 	g_rectRenderPP = RectXYWH( floor( ( newSizeX - szRenderPP.w ) / 2.0f ), floor( ( newSizeY - szRenderPP.h ) / 2.0f ), szRenderPP.w, szRenderPP.h );
 
 	g_rect360hWorld = RectXYWH(0.0f, 0.0f, (fAspect * K_GAME_HEIGHT), K_GAME_HEIGHT);
@@ -400,6 +399,8 @@ HRESULT CApplication::SaveSettings()
 
 	graphicsNode.append_attribute(L"bFullscreen");
 	graphicsNode.attribute(L"bFullscreen").set_value(m_Settings.bFullscreen);
+	graphicsNode.append_attribute( L"bPixelPerfect" );
+	graphicsNode.attribute( L"bPixelPerfect" ).set_value( m_Settings.bPixelPerfect);
 	graphicsNode.append_attribute(L"bBorderless");
 	graphicsNode.attribute(L"bBorderless").set_value(m_Settings.bBorderlessFullscreen);
 	graphicsNode.append_attribute(L"bScreenShakes");
@@ -495,6 +496,7 @@ HRESULT CApplication::LoadSettings()
 
 	//misc
 	m_Settings.bFullscreen = graphicsNode.attribute(L"bFullscreen").as_bool();
+	m_Settings.bPixelPerfect = graphicsNode.attribute( L"bPixelPerfect" ).as_bool();
 	m_Settings.bBorderlessFullscreen = graphicsNode.attribute(L"bBorderless").as_bool();
 	m_Settings.bScreenShakes = graphicsNode.attribute(L"bScreenShakes").as_bool();
 	m_Settings.bGoreEnabled = graphicsNode.attribute(L"bGoreEnabled").as_bool();
@@ -652,6 +654,10 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					{
 						ctrl->paramsDict.SetNamedVarBool(L"bChecked", m_Settings.bFullscreen);
 					}
+					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_PIXELPERFECT" ) )
+					{
+						ctrl->paramsDict.SetNamedVarBool( L"bChecked", m_Settings.bPixelPerfect);
+					}
 					if (ctrl = layer->GetControlByName("CTRL_CHECK_BORDERLESS"))
 					{
 						ctrl->paramsDict.SetNamedVarBool(L"bChecked", m_Settings.bBorderlessFullscreen);
@@ -700,6 +706,10 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					if (ctrl = layer->GetControlByName("CTRL_CHECK_FULLSCREEN"))
 					{
 						m_Settings.bFullscreen = ctrl->paramsDict.GetVariantByName(L"bChecked")->m_asBool;
+					}
+					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_PIXELPERFECT" ) )
+					{
+						m_Settings.bPixelPerfect = ctrl->paramsDict.GetVariantByName( L"bChecked" )->m_asBool;
 					}
 					if (ctrl = layer->GetControlByName("CTRL_CHECK_BORDERLESS"))
 					{

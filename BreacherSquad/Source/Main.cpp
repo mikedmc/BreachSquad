@@ -1825,33 +1825,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		}
 #endif
 
-		///--- letterbox ---
-		if ((UTApp().g_letterbox.w != 0.0f) || (UTApp().g_letterbox.h != 0.0f))
-		{
-			g_pGameSprite->Flush();
-			//black poly over
-			DWORD color = D3DCOLOR_COLORVALUE(0.0f, 0.0f, 0.0f, 1.0f);
-			pDevice->SetTexture(0, NULL); //textura aiurea
-			pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-			pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
-
-			RECT rct;
-			if (UTApp().g_letterbox.w != 0.0f)
-			{
-				SetRect(&rct, UTApp().g_rectScreen.x, UTApp().g_rectScreen.y, UTApp().g_rectRender.x, UTApp().g_rectScreen.Bottom());
-				DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
-				SetRect(&rct, UTApp().g_rectRender.Right(), UTApp().g_rectScreen.y, UTApp().g_rectScreen.Right(), UTApp().g_rectScreen.Bottom());
-				DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
-			}
-			else if (UTApp().g_letterbox.h != 0.0f)
-			{
-				SetRect(&rct, UTApp().g_rectScreen.x, UTApp().g_rectScreen.y, UTApp().g_rectScreen.Right(), UTApp().g_rectRender.y);
-				DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
-				SetRect(&rct, UTApp().g_rectScreen.x, UTApp().g_rectRender.Bottom(), UTApp().g_rectScreen.Right(), UTApp().g_rectScreen.Bottom());
-				DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
-			}
-		}
-
 		///----- debug info -----
 		if (g_bShowDebugStats)
 		{

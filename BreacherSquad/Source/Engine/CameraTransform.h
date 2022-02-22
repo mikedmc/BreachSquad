@@ -34,7 +34,7 @@ private:
 	Vec2						m_veck1, m_veck2;	// vector anim constants
 
 	RectXYWH					m_worldAABB;		// camera world bbox limits in world coords. If 0 then not set.
-	//datele din care se construieste dreptunghiul vizibil pe camera in world coords
+	// datele din care se construieste dreptunghiul vizibil pe camera in world coords
 	Vec3		m_vecLookAt;		//(x, y, zoom) punctul unde se doreste pozitionata camera (vine spre acest punct cu animatie)
 	Vec3		m_vecRealLookAt;	//(x, y, zoom) look at real - punctul spre care priveste acum camera, se duce catre punctul m_vecLookAt cu animatie
 	Vec3		m_vecLookAtSpeed;	//(x, y, zoom) viteza cu care se deplaseaza look at catre destinatie
@@ -66,10 +66,11 @@ public:
 	static void SetActiveCameraIdentity(PDEVICE pDevice);
 	static void SetActiveCamera(PDEVICE pDevice, CCameraTransform *camera);
 	static CCameraTransform* GetActiveCamera();
+	
 	///--- SET ---
-    //Params SetWorldBounds
+
     //worldAABB - dreptunghiul in care se incadreaza lumea pe care o priveste camera
-    //bHardWorldEdges - true - camera nu are voie sa afiseze nimic din afara lumii deci va scala in asa fel incat sa umple ecranul
+    //bHardWorldEdges - true - camera can't show anything outside world rect. 
     //constraintAxis - axa de constrangere la zoom (vertical sau orizontal). Pe axa respectiva nu poti sa vezi mai putin de minAxisSize sau mai mult de maxAxisSize
 	void SetWorldBounds(RectXYWH worldAABB, bool bHardWorldEdges = true, ECamAxisType constraintAxis = K_CAMTRANS_AXIS_NONE, float minAxisSize = 0.0f, float maxAxisSize = 100000.0f);
 	//initializeaza camera
@@ -108,9 +109,7 @@ public:
 	//functiile GET trebuiesc chemate dupa Update
 	FORCEINLINE Mat & GetViewTransform() { return m_matView; }
 	FORCEINLINE const Vec3 & GetCamPos() const { return m_vecRealLookAt; }
-	/*!
-	 * \brief Gets the visible rectangle in world coordinates
-	 */
+	// Gets the visible rectangle in world coordinates
 	FORCEINLINE const RectXYWH &	GetCamWorldAABB() const { return m_camWorldAABB; }
 	//void				GetCamVectors(Vec2 *LookAtPt, Vec2 *vecRightHW, Vec2 *vecDownHH);
 
