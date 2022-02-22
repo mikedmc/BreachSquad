@@ -143,7 +143,7 @@
 		<Control Type="TasksList" ID="CTRL_TASKLIST_WEEKLY" animID="MEDAL1" fontID="FONT_6_NS1" fontColor="#FFFFFFFF" nIconFrame1="-1" stringID1="" nIconFrame2="-1" stringID2="" X="45" Y="-44" W="100" H="29" />
 	</Layer>
 	<Layer ID="LAYER_ID_OPTIONS_MM" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_CLOSE_SETTINGS">
-		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" color="#88000000" />
+		<Control Type="Vignette" animID="WND_VIGNETTES" frameIdx="0" color="#88000000" />
 		<Control Type="Window" animID="WINDOWS1" fontID="FONT_8_BS1" fontColor="#FFF7A609" stringID="OPTIONS" inflate="0" X="-102" Y="-79" W="205" H="175" />
 		<Control Type="Slider" ID="CTRL_SLIDER_SOUNDVOL" animID="SLIDER1" steps="0" hasArrows="1" X="-65" Y="-75" W="164" H="23" inflate="-1" fontID="FONT_8_BS1" stringID="SOUND_VOL" iconFrame="0" />
 		<Control Type="Slider" ID="CTRL_SLIDER_MUSICVOL" animID="SLIDER1" steps="0" hasArrows="1" X="-65" Y="-49" W="164" H="23" inflate="-1" fontID="FONT_8_BS1" stringID="MUSIC_VOL" iconFrame="0" />

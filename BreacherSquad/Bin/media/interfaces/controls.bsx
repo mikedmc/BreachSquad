@@ -1044,6 +1044,7 @@
     <FrameModule ModuleIdx="513" OX="-9" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="514" OX="2" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="515" OX="0" OY="-6" Flags="0" />
+    <FrameModule ModuleIdx="121" OX="0" OY="0" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="0" BBoxY="0" BBoxW="13" BBoxH="13">
@@ -4184,6 +4185,12 @@
       </FModules>
       <Points />
     </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="80" BBoxH="40">
+      <FModules>
+        <FModule Idx="523" />
+      </FModules>
+      <Points />
+    </Frame>
   </Frames>
   <AnimationFrames>
     <AnimationFrame FrameIdx="43" Duration="1" DX="0" DY="0" Flags="0" />
@@ -4783,6 +4790,7 @@
     <AnimationFrame FrameIdx="522" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="512" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="513" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="523" Duration="1" DX="0" DY="0" Flags="0" />
   </AnimationFrames>
   <Animations>
     <Animation ID="WINDOW1" Flags="0">
@@ -5557,6 +5565,9 @@
       <AFrame Idx="594" />
       <AFrame Idx="595" />
       <AFrame Idx="596" />
+    </Animation>
+    <Animation ID="WND_VIGNETTES" Flags="0">
+      <AFrame Idx="597" />
     </Animation>
   </Animations>
 </SpriteCollection>

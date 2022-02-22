@@ -2643,8 +2643,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 
 			// scale to screen
 			RectXYWH camRect = pCamera->GetWorldAABB();
-			camRect.Inflate( 20.0f );
-			UTSprite::PaintFModuleStretched( m_pSprCol, Vec2(-camRect.w/2.0f, -camRect.h/2.0f), animIdx, frameIdx, 0, DW_COLORALPHA( dwColor, fAlpha * layer->alpha ), camRect.w, camRect.h );
+			camRect.Inflate( 10.0f );
+			UTSprite::PaintFModuleStretched( m_pSprCol, Vec2( -camRect.w / 2.0f, -camRect.h / 2.0f ), animIdx, frameIdx, 0, DW_COLORALPHA( dwColor, fAlpha * layer->alpha ), camRect.w, camRect.h );
 		}
 		break;
 		case CCTRL_TYPE_PROGRESS_BAR:

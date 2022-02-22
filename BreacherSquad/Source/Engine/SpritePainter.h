@@ -61,6 +61,8 @@ public:
 	OPRESULT				End();
 	// Sets the current view projection matrix for the following sprites. Does a Flush before setting it.
 	OPRESULT				SetViewProjMatrix(Mat & matView, Mat & matProj);
+	// Sets world transform on identity
+	OPRESULT				SetTransformIdentity();
 	// Sets world transform. Does a flush before setting it.
 	OPRESULT				SetTransform( Mat & matWorld );
 	// Sets the view transform. Does a flush before setting it.

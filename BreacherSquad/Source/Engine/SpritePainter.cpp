@@ -112,6 +112,18 @@ OPRESULT CSpritePainter::SetViewProjMatrix(Mat & matView, Mat & matProj)
 	return K_OP_OK;
 }
 
+OPRESULT CSpritePainter::SetTransformIdentity()
+{
+	V_OP_RET( Flush() );
+	// set new matrix
+	m_matWorld = g_matIdentity;
+	// compute final matrix
+	m_matWVP = m_matWorld * m_matView;
+	m_matWVP = m_matWVP * m_matProj;
+
+	return K_OP_OK;
+}
+
 OPRESULT CSpritePainter::SetTransform( Mat & matWorld )
 {
 	V_OP_RET( Flush() );
