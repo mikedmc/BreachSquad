@@ -97,7 +97,6 @@ CApplication::CApplication()
 	g_rectScreen = RectXYWH(0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h);
 	g_rectRT = RectXYWH(0.0f, 0.0f, K_GAME_WIDTH * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F);
 	g_rect360hWorld = RectXYWH(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * K_GAME_HEIGHT), K_GAME_HEIGHT);
-	g_rect480hWorld = RectXYWH(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * 480.0f), 480.0f);
 	D3DXMatrixOrthoOffCenterLH(&g_matProj, g_rectRender.x + 0.5f, g_rectRender.w + 0.5f, g_rectRender.h + 0.5f, g_rectRender.y + 0.5f, 0.0f, 1.0f);
 	//clear all resolutions
 	g_arrResolutions.RemoveAll();
@@ -224,9 +223,6 @@ void CApplication::Init()
 
 	g_cam360hScreen.SetCamAnimationNone();
 	g_cam360hScreen.SetPixelPerfect(true);
-	
-	g_cam480hScreen.SetCamAnimationNone();
-	g_cam480hScreen.SetPixelPerfect(true);
 
 	//-- resolutions --
 	g_arrResolutions.RemoveAll();
@@ -283,12 +279,11 @@ void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 	}
 
 	SizeWH letterbox( (float)(newSizeX - szRender.w) / 2.0f, (float)(newSizeY - szRender.h) / 2.0f );
-
+	//#TODO: must set rectRender to whatever we need (pixel perfect or stretched)
 	g_rectRender = RectXYWH(letterbox.w, letterbox.h, szRender.w, szRender.h);
 	g_rectRenderPP = RectXYWH( floor( ( newSizeX - szRenderPP.w ) / 2.0f ), floor( ( newSizeY - szRenderPP.h ) / 2.0f ), szRenderPP.w, szRenderPP.h );
 
 	g_rect360hWorld = RectXYWH(0.0f, 0.0f, (fAspect * K_GAME_HEIGHT), K_GAME_HEIGHT);
-	g_rect480hWorld = RectXYWH(0.0f, 0.0f, (fAspect * 480.0f), 480.0f);
 	g_rectRT = RectXYWH( 0.0f, 0.0f, K_GAME_WIDTH * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F );
 	D3DXMatrixOrthoOffCenterLH(&g_matProj, g_rectScreen.x + 0.5f, g_rectScreen.w + 0.5f, g_rectScreen.h + 0.5f, g_rectScreen.y + 0.5f, 0.0f, 1.0f);
 
@@ -301,9 +296,6 @@ void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 	g_cam360hScreen.SetWorldBounds(g_rect360hWorld, true, K_CAMTRANS_AXIS_V, g_rect360hWorld.h, g_rect360hWorld.h);
 	g_cam360hScreen.InitCamera(g_rectRender, g_rect360hWorld.h, K_CAMTRANS_AXIS_V, g_rect360hWorld.Center());
 
-	g_cam480hScreen.SetWorldBounds(g_rect480hWorld, true, K_CAMTRANS_AXIS_V, g_rect480hWorld.h, g_rect480hWorld.h);
-	g_cam480hScreen.InitCamera(g_rectRender, g_rect480hWorld.h, K_CAMTRANS_AXIS_V, g_rect480hWorld.Center());
-
 	//#HACK: set main flag for resolution change 
 	g_bLevelNeedsUpdate = true;
 }
@@ -313,7 +305,13 @@ void CApplication::Update(float dTime)
 	g_camScreen.Update(dTime);
 	g_camRTScreen.Update(dTime);
 	g_cam360hScreen.Update(dTime);
-	g_cam480hScreen.Update(dTime);
+}
+
+RectXYWH CApplication::getRenderRect()
+{
+	if ( m_Settings.bPixelPerfect )
+		return g_rectRenderPP;
+	return g_rectRender;
 }
 
 bool CApplication::IsOnlyInstance(LPCTSTR className)
@@ -662,18 +660,6 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					{
 						ctrl->paramsDict.SetNamedVarBool(L"bChecked", m_Settings.bBorderlessFullscreen);
 					}
-					if (ctrl = layer->GetControlByName("CTRL_CHECK_SHAKES"))
-					{
-						ctrl->paramsDict.SetNamedVarBool(L"bChecked", m_Settings.bScreenShakes);
-					}
-					if (ctrl = layer->GetControlByName("CTRL_CHECK_GORE"))
-					{
-						ctrl->paramsDict.SetNamedVarBool(L"bChecked", m_Settings.bGoreEnabled);
-					}
-					if (ctrl = layer->GetControlByName("CTRL_CHECK_ANTIALIAS"))
-					{
-						ctrl->paramsDict.SetNamedVarBool(L"bChecked", false);
-					}
 					//set selected resolution
 					int nSelIdx = g_arrResolutions.GetSize() - 1; //by default largest res possible
 					for (int kk = g_arrResolutions.GetSize() - 1; kk >= 0; kk--)
@@ -714,14 +700,6 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					if (ctrl = layer->GetControlByName("CTRL_CHECK_BORDERLESS"))
 					{
 						m_Settings.bBorderlessFullscreen = ctrl->paramsDict.GetVariantByName(L"bChecked")->m_asBool;
-					}
-					if (ctrl = layer->GetControlByName("CTRL_CHECK_SHAKES"))
-					{
-						m_Settings.bScreenShakes = ctrl->paramsDict.GetVariantByName(L"bChecked")->m_asBool;
-					}
-					if (ctrl = layer->GetControlByName("CTRL_CHECK_GORE"))
-					{
-						m_Settings.bGoreEnabled = ctrl->paramsDict.GetVariantByName(L"bChecked")->m_asBool;
 					}
 					//set selected resolution
 					if (ctrl = layer->GetControlByName("CTRL_DROP_RES"))
@@ -1155,7 +1133,12 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_MORE_OPTIONS"))
 			{
-				UTGetGUI().ShowLayerOnce("LAYER_ID_MORE_OPTIONS");
+				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_MORE_OPTIONS");
+				if ( layer != null )
+				{
+					layer->SetControlParam( "CTRL_CHECK_SHAKES", L"bChecked", m_Settings.bScreenShakes );
+					layer->SetControlParam( "CTRL_CHECK_GORE", L"bChecked", m_Settings.bGoreEnabled);
+				}
 			}
 			else if (ctrlID == GET_FAST_HASH("BUT_CREDITS_MORE"))
 			{
@@ -1525,7 +1508,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					 (ctrlID == GET_FAST_HASH("CTRL_CHECK_FULLSCREEN"))	)
 			{
 				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
-				if (layer != null)
+				if (layer != nullptr)
 				{
 					bool bFS = false, bBorderless = false;
 					CControl* ctrl;
@@ -1543,6 +1526,24 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 				}
 				return true;
+			}
+			else if (ctrlID == GET_FAST_HASH( "CTRL_CHECK_SHAKES" )) {
+				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
+				if ( layer != nullptr )
+				{
+					CControl* ctrl;
+					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_SHAKES" ) )
+						m_Settings.bScreenShakes = ctrl->paramsDict.GetVariantByName( L"bChecked" )->m_asBool;
+				}
+			}
+			else if (ctrlID == GET_FAST_HASH( "CTRL_CHECK_GORE" )) {
+				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
+				if ( layer != nullptr )
+				{
+					CControl* ctrl;
+					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_GORE" ) )
+						m_Settings.bGoreEnabled = ctrl->paramsDict.GetVariantByName( L"bChecked" )->m_asBool;
+				}
 			}
 		}
 		else if (nEvent.m_eventCommand == CEventCommands::evtC_CONTROLS_PAGE_CHANGED)

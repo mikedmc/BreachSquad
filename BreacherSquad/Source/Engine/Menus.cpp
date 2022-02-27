@@ -30,9 +30,9 @@ void CMenus::Update( float dTime )
 
 void CMenus::Paint()
 {
-	RectXYWH camrect = UTApp().g_camScreen.GetCamWorldAABB();
+	RectXYWH camrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
 
-	PaintBackground( camrect, 0xffffffff, true, true );
+	PaintBackground( UTApp().g_rect360hWorld, 0xffffffff, true, true );
 
 	__Painter().Flush();
 }

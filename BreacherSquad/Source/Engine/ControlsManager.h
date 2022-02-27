@@ -197,6 +197,8 @@ public:
 	CControl*			GetControlByIdx( int nIdx );
 	CControl*			GetControlByName( char* ctrlName );
 	bool				ControlSetDisableByName( bool bDisabledValue, char* ctrlName );
+	// sets a parameter in the control paramsDict, if control is found
+	bool				SetControlParam( char* controlName, WCHAR* paramName, bool bValue );
 	// Clones a control returning a pointer to the cloned control
 	CCtrlLayer*			Clone();
 };

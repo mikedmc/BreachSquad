@@ -2639,8 +2639,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			float fAlpha = DW_GETFALPHA( dwColor );
 
 			// scale to screen
-			RectXYWH camRect = pCamera->GetWorldAABB();
-			camRect.Inflate( 10.0f );
+			RectXYWH camRect = pCamera->ScreenToWorld(UTApp().g_rectScreen);
+			camRect.Inflate( 20.0f );
 			UTSprite::PaintFModuleStretched( m_pSprCol, Vec2( -camRect.w / 2.0f, -camRect.h / 2.0f ), animIdx, frameIdx, 0, DW_COLORALPHA( dwColor, fAlpha * layer->alpha ), camRect.w, camRect.h );
 		}
 		break;
@@ -3338,6 +3338,17 @@ bool CCtrlLayer::ControlSetDisableByName( bool bDisabledValue, char* ctrlName )
 	return false;
 }
 
+bool CCtrlLayer::SetControlParam( char* controlName, WCHAR* paramName, bool bValue )
+{
+	CControl* ctrl = GetControlByName( controlName );
+	if ( ctrl == nullptr ) {
+		ErrorBox( K_ERR_WARNING, L"Control not found!");
+		return false;
+	}
+	ctrl->paramsDict.SetNamedVarBool( paramName, bValue );
+	return true;
+}
+
 CCtrlLayer* CCtrlLayer::Clone()
 {
 	CCtrlLayer* nlay = new CCtrlLayer();
@@ -3705,7 +3716,9 @@ void CControlsManager::Init()
 {
 	RectXYWH worldrect = UTApp().g_rect360hWorld;
 	camera.SetWorldBounds( worldrect, true, K_CAMTRANS_AXIS_V, worldrect.h, worldrect.h );
-	camera.InitCamera( UTApp().g_rectRender, worldrect.h, K_CAMTRANS_AXIS_V, worldrect.Center() );
+	//#TODO: if we decide that PP rect should go outside the screen on some resolutions 
+	// then create a special UTApp().getControlsPPRect that returns a PP rectangle that stays inside the screen or default to non PP rect
+	camera.InitCamera( UTApp().getRenderRect(), worldrect.h, K_CAMTRANS_AXIS_V, worldrect.Center() );
 
 
 	camera.SetCamAnimationNone();
@@ -4050,7 +4063,7 @@ void CControlsManager::Update( float dTime )
 	///--- update local timeline ---
 	fLocalTimeline += dTime;
 	// make sure we always have the updated render rect (it gets updated in UTApp) and update camera
-	camera.SetViewport( UTApp().g_rectRender );
+	camera.SetViewport( UTApp().getRenderRect() );
 	camera.Update( dTime );
 	const RectXYWH camScreenRect = camera.GetCamWorldAABB();
 
@@ -4104,9 +4117,10 @@ void CControlsManager::Update( float dTime )
 	for ( int kk = 0; kk < Layers.GetSize(); kk++ )
 	{
 		CCtrlLayer *lay = Layers[ kk ];
-		//set relative mouse pos
+		//set relative mouse pos. 
 		Vec2 localMousePt = g_mouse.pos;
-		localMousePt = camera.ScreenToWorld( g_mouse.pos );
+		// mouse coords are always in real screen coords but camera might have other viewport
+		localMousePt = camera.ScreenToWorld( g_mouse.pos, &UTApp().getRenderRect());
 
 		Vec2i lPos = lay->GetPos();
 		Vec2i anchor;

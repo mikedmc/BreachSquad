@@ -125,19 +125,17 @@ public:
 	///--------------------------------------------------------------------------------------
 	/// Variabile globale legate de dimensiunea ecranului
 	///--------------------------------------------------------------------------------------
-	RectXYWH		g_rectScreen;		// real screen (after letterboxing)
+	RectXYWH		g_rectScreen;		// real screen size
 	RectXYWH		g_rectRender;		// rectangle that we render to (in actual final screen resolution after letterboxing)
 	RectXYWH		g_rectRenderPP;		// rectangle that the level should render to so it scales with integers (in actual final screen coordinates)
 	float			g_nPixelSizePP;		//#TODO: change to float for when not using pixel perfect. Pixel size in real pixels for when rendering with perfect pixel
 	RectXYWH		g_rectRT;			// render target render rectangle
 	RectXYWH		g_rect360hWorld;	// world rect for menus and interfaces. W Computed depending on screen spect ratio.
-	RectXYWH		g_rect480hWorld;	// double res menu rect (for system fonts)
 	Mat				g_matProj;			// projection matrix
 	//--- screen camera ---
 	CCameraTransform g_camScreen;		//real screen camera
 	CCameraTransform g_camRTScreen;		//game screen camera with height of RT targets (RT to screen)
 	CCameraTransform g_cam360hScreen;	//360px high camera (scales up to real resolution) - 360px h is default resolution of the game
-	CCameraTransform g_cam480hScreen;	//480px high camera for controls (scaled up to actual resolution). Double the default resolution of the game.
 public:
 	static bool			IsOnlyInstance(LPCTSTR className);
 	// checks min requirements
@@ -147,6 +145,10 @@ public:
 
 	void Init();
 	void Update(float dTime); 
+
+	// returns rectangle where rendering should be made to considering the pixel perfect setting
+	// you get g_rectRender or g_rectRenderPP
+	RectXYWH getRenderRect();
 
 //--- SDL data ---
 #if defined(K_GLOBAL_ENABLE_SDL)

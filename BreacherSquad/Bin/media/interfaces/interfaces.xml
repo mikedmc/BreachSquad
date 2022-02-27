@@ -147,11 +147,11 @@
 		<Control Type="Window" animID="WINDOWS1" fontID="FONT_8_BS1" fontColor="#FFF7A609" stringID="OPTIONS" inflate="0" X="-102" Y="-81" W="205" H="162" />
 		<Control Type="Slider" ID="CTRL_SLIDER_SOUNDVOL" animID="SLIDER1" steps="0" hasArrows="1" X="-65" Y="-77" W="164" H="23" inflate="-1" fontID="FONT_8_BS1" stringID="SOUND_VOL" iconFrame="0" />
 		<Control Type="Slider" ID="CTRL_SLIDER_MUSICVOL" animID="SLIDER1" steps="0" hasArrows="1" X="-65" Y="-51" W="164" H="23" inflate="-1" fontID="FONT_8_BS1" stringID="MUSIC_VOL" iconFrame="0" />
-		<Control Type="Button" ID="BUT_GFX_OPTIONS" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="GFX_OPTIONS" X="-66" Y="-17" W="130" H="16" />
-		<Control Type="Button" ID="BUT_REDEFINE_KEYS" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="REDEFINE_KEYS" X="-66" Y="0" W="130" H="16" />
-		<Control Type="Button" ID="BUT_CREDITS" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="CREDITS" X="-66" Y="17" W="130" H="16" />
-		<Control Type="Button" ID="BUT_MORE_OPTIONS" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="MORE_OPTIONS" X="-66" Y="34" W="130" H="16" />
-		<Control Type="Button" ID="BUT_CLOSE_SETTINGS" animID="BUTTON_RED" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="OK" X="-66" Y="60" W="130" H="16" />
+		<Control Type="Button" ID="BUT_GFX_OPTIONS" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="GFX_OPTIONS" X="-66" Y="-17" W="140" H="16" />
+		<Control Type="Button" ID="BUT_REDEFINE_KEYS" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="REDEFINE_KEYS" X="-66" Y="0" W="140" H="16" />
+		<Control Type="Button" ID="BUT_CREDITS" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="CREDITS" X="-66" Y="17" W="140" H="16" />
+		<Control Type="Button" ID="BUT_MORE_OPTIONS" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="MORE_OPTIONS" X="-66" Y="34" W="140" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE_SETTINGS" animID="BUTTON_RED" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="OK" X="-66" Y="60" W="139" H="16" />
 	</Layer>
 	<Layer ID="LAYER_ID_LEVELFAIL_1P" X="0" Y="0" isBlocking="false" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_LEVEL_RESTART">
 		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" color="#CC000000" />
@@ -299,7 +299,7 @@
 		<Control Type="Label" fontID="FONT_6_NS1" fontColor="#FF5A8DBA" stringID="CREDITS_PROGRAMMING" wrapText="false" justify="false" align="0" valign="-1" X="-146" Y="-35" W="142" H="13" />
 	</Layer>
 	<Layer ID="LAYER_ID_QUITGAME" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_EXIT_GAME">
-		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" color="#88000000" />
+		<Control Type="Vignette" animID="WND_VIGNETTES" frameIdx="0" color="#88000000" />
 		<Control Type="Window" animID="WINDOWS1" fontID="FONT_8_BS1" fontColor="#FFF9C56D" stringID="EXIT_GAME" inflate="0" X="-100" Y="-44" W="200" H="111" />
 		<Control Type="PanelSM" animID="PANEL1" inflate="0" X="-82" Y="-43" W="179" H="44" />
 		<Control Type="Label" fontID="FONT_8_B1" fontColor="#FF5A8DBA" stringID="QUIT_GAME" wrapText="false" justify="false" align="-1" valign="-1" X="-80" Y="-41" W="204" H="40" />
@@ -363,15 +363,13 @@
 	</Layer>
 	<Layer ID="LAYER_ID_GFX_OPTIONS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_CLOSE">
 		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" color="#88000000" />
-		<Control Type="Window" ID="WINDOW" animID="WINDOWS1" fontID="FONT_8_BS1" fontColor="#FFF7A609" stringID="GFX_OPTIONS" inflate="0" X="-88" Y="-86" W="176" H="172" />
-		<Control Type="DropDown" ID="CTRL_DROP_RES" fontID="FONT_8_BS1" stringID="RESOLUTION" fontColor="#FFFFFFFF" stringID_list="RESOLUTIONS_LIST" animID="DROPDOWN" inflate="-1" iconFrame="0" X="-52" Y="-82" W="136" H="28" />
-		<Control Type="Checkbox" ID="CTRL_CHECK_BORDERLESS" animID="CHECKBOX1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="BORDERLESS_WND" inflate="-1" X="-52" Y="-51" W="136" H="14" />
-		<Control Type="Checkbox" ID="CTRL_CHECK_FULLSCREEN" animID="CHECKBOX1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="FULLSCREEN" inflate="-1" X="-52" Y="-34" W="136" H="14" />
-		<Control Type="Checkbox" ID="CTRL_CHECK_PIXELPERFECT" animID="CHECKBOX1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="PIXELPERFECT" inflate="-1" X="-52" Y="-17" W="136" H="14" />
-		<Control Type="Checkbox" ID="CTRL_CHECK_SHAKES" animID="CHECKBOX1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="SCREEN_SHAKE" inflate="-1" X="-52" Y="5" W="136" H="14" />
-		<Control Type="Checkbox" ID="CTRL_CHECK_GORE" animID="CHECKBOX1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="GORE_ENABLED" inflate="-1" X="-52" Y="22" W="136" H="14" />
-		<Control Type="Button" ID="BUT_GFX_APPLY" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="APPLY" X="-53" Y="48" W="114" H="16" />
-		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON_RED" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="CANCEL" X="-53" Y="66" W="114" H="16" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOWS1" fontID="FONT_8_BS1" fontColor="#FFF7A609" stringID="GFX_OPTIONS" inflate="0" X="-88" Y="-64" W="176" H="129" />
+		<Control Type="DropDown" ID="CTRL_DROP_RES" fontID="FONT_8_BS1" stringID="RESOLUTION" fontColor="#FFFFFFFF" stringID_list="RESOLUTIONS_LIST" animID="DROPDOWN" inflate="-1" iconFrame="0" X="-52" Y="-60" W="136" H="28" />
+		<Control Type="Checkbox" ID="CTRL_CHECK_BORDERLESS" animID="CHECKBOX1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="BORDERLESS_WND" inflate="-1" X="-52" Y="-29" W="136" H="14" />
+		<Control Type="Checkbox" ID="CTRL_CHECK_FULLSCREEN" animID="CHECKBOX1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="FULLSCREEN" inflate="-1" X="-52" Y="-12" W="136" H="14" />
+		<Control Type="Checkbox" ID="CTRL_CHECK_PIXELPERFECT" animID="CHECKBOX1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="PIXELPERFECT" inflate="-1" X="-52" Y="5" W="136" H="14" />
+		<Control Type="Button" ID="BUT_GFX_APPLY" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="APPLY" X="-53" Y="25" W="114" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON_RED" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="CANCEL" X="-53" Y="43" W="114" H="16" />
 	</Layer>
 	<Layer ID="LAYER_ID_COOP_WND" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_QUICK_MATCH">
 		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" color="#88000000" />
@@ -463,12 +461,14 @@
 		<Control Type="Label" ID="LABEL_YOUR_SCORE" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="LEADERBOARDS_PLAYERSCORE_VAL" wrapText="false" justify="false" align="1" valign="0" X="21" Y="60" W="74" H="11" />
 	</Layer>
 	<Layer ID="LAYER_ID_MORE_OPTIONS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_CLOSE">
-		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" color="#88000000" />
-		<Control Type="Window" ID="WINDOW" animID="WINDOWS1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="MORE_OPTIONS" inflate="0" X="-90" Y="-35" W="180" H="89" />
-		<Control Type="Button" ID="BUT_RESET_PROGRESS" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="RESET_PROGRESS" X="-71" Y="-32" W="159" H="16" />
-		<Control Type="Button" ID="BUT_LANGUAGE" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="LANGUAGE" X="-71" Y="-14" W="159" H="16" />
-		<Control Type="Button" ID="BUT_CLOSE" animID="BUTTON_RED" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="CLOSE" X="-71" Y="36" W="86" H="16" />
-		<Control Type="Animation" animID="ICONS_MISC" Animated="0" setFrame="3" scaleImage="0" X="61" Y="-13" W="25" H="15" />
+		<Control Type="Vignette" animID="WND_VIGNETTES" frameIdx="0" color="#88000000" />
+		<Control Type="Window" ID="WINDOW" animID="WINDOWS1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="MORE_OPTIONS" inflate="0" X="-96" Y="-53" W="192" H="106" />
+		<Control Type="Checkbox" ID="CTRL_CHECK_SHAKES" animID="CHECKBOX1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="SCREEN_SHAKE" inflate="-1" X="-60" Y="-50" W="154" H="14" />
+		<Control Type="Checkbox" ID="CTRL_CHECK_GORE" animID="CHECKBOX1" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="GORE_ENABLED" inflate="-1" X="-60" Y="-33" W="154" H="14" />
+		<Control Type="Button" ID="BUT_RESET_PROGRESS" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="RESET_PROGRESS" X="-61" Y="-9" W="137" H="16" />
+		<Control Type="Button" ID="BUT_LANGUAGE" animID="BUTTON_GREEN" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="LANGUAGE" X="-61" Y="8" W="137" H="16" />
+		<Control Type="Button" ID="BUT_CLOSE_SETTINGS" animID="BUTTON_RED" fontID="FONT_8_BS1" fontColor="#FFFFFFFF" stringID="CLOSE" X="-61" Y="34" W="137" H="16" />
+		<Control Type="Animation" animID="ICONS_MISC" Animated="0" setFrame="3" scaleImage="0" X="51" Y="9" W="25" H="15" />
 	</Layer>
 	<Layer ID="LAYER_ID_RESET_PROGRESS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_CLOSE">
 		<Control Type="Vignette" animID="VIGNETTES" frameIdx="0" color="#88000000" />
