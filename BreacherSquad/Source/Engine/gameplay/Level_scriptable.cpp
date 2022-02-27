@@ -1,22 +1,17 @@
 #pragma once
 #include "dxstdafx.h"
 
-//porneste scriptul, salveaza UID-urile, face tot
 void CLevel::StartScript(WCHAR* scriptName, IActiveInterface* active)
 {
-	//daca ruleaza deja un script nu mai lanseaza altul
 	if (active->nRunningScriptUID > 0)
 		return;
-	//start script now
 	active->nRunningScriptUID = UTGetScriptManager().StartScript(scriptName, active->GetUID(), &active->varAIparams);
 }
 
 void CLevel::StartScript(UINT32 scriptNameHash, IActiveInterface* active)
 {
-	//daca ruleaza deja un script nu mai lanseaza altul
 	if (active->nRunningScriptUID > 0)
 		return;
-	//start script now
 	active->nRunningScriptUID = UTGetScriptManager().StartScript(scriptNameHash, active->GetUID(), &active->varAIparams);
 }
 
@@ -159,7 +154,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			//trece prin toti params si face verificarile de notificari
 			for (int ii = 0; ii < instr->m_arrArgs.GetVariantCount(); ii++)
 			{
-				if (instr->m_arrArgs[ii]->m_name.getHash() == GET_FAST_HASH("nBombDefused"))
+				if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nBombDefused"))
 				{
 					App_IncreaseGamestat(K_MEMID_GAMESTATS_BOMBS_DISARMED);
 					/*
@@ -196,7 +191,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					}
 
 				}
-				else if (instr->m_arrArgs[ii]->m_name.getHash() == GET_FAST_HASH("nSecretItem"))
+				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nSecretItem"))
 				{
 					int idx = instr->m_arrArgs[ii]->m_asINT32;
 					if ((idx < 1) || (idx >= 32))
@@ -220,15 +215,15 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					__Texts().ReplaceTokenInt(STR_SECRETS_COLLECTED_VAL, STR_SECRETS_COLLECTED_NN, 1, nCollectedCnt);
 					__Texts().ReplaceTokenInt(STR_SECRETS_COLLECTED_VAL, STR_SECRETS_COLLECTED_VAL, 2, 20);
 				}
-				else if (instr->m_arrArgs[ii]->m_name.getHash() == GET_FAST_HASH("nCopSaved"))
+				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nCopSaved"))
 				{
 					App_IncreaseGamestat(K_MEMID_GAMESTATS_POLICE_SAVED);
 				}
-				else if (instr->m_arrArgs[ii]->m_name.getHash() == GET_FAST_HASH("nZombieSpawnerDisabled"))
+				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nZombieSpawnerDisabled"))
 				{
 					m_arrStats[K_LVL_STATS_ZOMBIE_PORTALS_DESTROYED]++;
 				}
-				else if (instr->m_arrArgs[ii]->m_name.getHash() == GET_FAST_HASH("nArrestedTargets"))
+				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nArrestedTargets"))
 				{
 					//let level know we arrested a target
 					m_arrStats[K_LVL_STATS_LEVEL_ARREST_TARGETS_ARRESTED]++;
@@ -237,12 +232,12 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					//success message
 					g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_TARGET_ARRESTED, FONTIDX_12_WOW, 1.0f, 3.0f, K_COLOR_SELECTED_TEXT);
 				}
-				else if (instr->m_arrArgs[ii]->m_name.getHash() == GET_FAST_HASH("nArrestedCivilians"))
+				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nArrestedCivilians"))
 				{
 					m_arrStats[K_LVL_STATS_CIVILIANS_ARRESTED]++;
 				}
 				//door closed behind player in vertical infinite mode
-				else if (instr->m_arrArgs[ii]->m_name.getHash() == GET_FAST_HASH("nVInfiniteDoorUsed"))
+				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nVInfiniteDoorUsed"))
 				{
 					m_arrStats[K_LVL_STATS_LEVEL_VINFINITE_FLOOR]++;
 					//show level number

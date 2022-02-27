@@ -3970,7 +3970,7 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 						else if ( vk == VK_RETURN )
 						{
 							CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK );
-							nevent->AddNamedArgUINT32( L"ctrlID", GET_FAST_HASH( "BUT_NEW_USER" ) );
+							nevent->AddNamedArgUINT32( L"ctrlID", HASH( "BUT_NEW_USER" ) );
 							UTGetEventManager().QueueEvent( nevent );
 
 							//TODO: ce comanda trimite cand faci enter pe inputbox. Poate mesaj de click pe input box?

@@ -580,18 +580,18 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			bool locked = nEvent.GetArgumentByName(L"locked")->m_asBool;
 
 			//ID-uri generice butoane (remove layer, etc)
-			if (ctrlID == GET_FAST_HASH("BUT_CLOSE")) //close normal la orice fereastra
+			if (ctrlID == HASH("BUT_CLOSE")) //close normal la orice fereastra
 			{
 				UTGetGUI().RemoveTopmostLayer();
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_CLOSE_SETTINGS")) //close settings, save settings
+			else if (ctrlID == HASH("BUT_CLOSE_SETTINGS")) //close settings, save settings
 			{
 				UTGetGUI().RemoveTopmostLayer();
 				UTApp().SaveSettings();
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_CLOSE_KEYDEF")) //close key redefining
+			else if (ctrlID == HASH("BUT_CLOSE_KEYDEF")) //close key redefining
 			{
 				UTGetGUI().RemoveTopmostLayer();
 				//save user data (including keys)
@@ -613,22 +613,22 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_CLOSE_FORCED")) //face close la fereastra fara sa mai faca fade-out
+			else if (ctrlID == HASH("BUT_CLOSE_FORCED")) //face close la fereastra fara sa mai faca fade-out
 			{
 				UTGetGUI().RemoveTopmostLayer(true);
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_EXIT_GAME"))
+			else if (ctrlID == HASH("BUT_EXIT_GAME"))
 			{
 				PostQuitMessage(0);
 				//save states/options on exit?
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_SEND_FEEDBACK")) 
+			else if (ctrlID == HASH("BUT_SEND_FEEDBACK")) 
 			{
 				WEBSITE_OPEN(K_GAME_CONTACT_URL);
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_GFX_OPTIONS"))
+			else if (ctrlID == HASH("BUT_GFX_OPTIONS"))
 			{
 				///--- write resolution string for use in options screen ---
 				WCHAR wsResStr[1024] = { 0 };
@@ -680,7 +680,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_GFX_APPLY"))
+			else if (ctrlID == HASH("BUT_GFX_APPLY"))
 			{
 				//save old settings so we can see what's changed
 				CApplicationSettings m_SettingsOld = m_Settings;
@@ -835,7 +835,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					SaveSettings();
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_QUIT_PLAYERSEL")) //fereastra de exit from player selection
+			else if (ctrlID == HASH("BUT_QUIT_PLAYERSEL")) //fereastra de exit from player selection
 			{
 				if (UTApp().IsGameNetworked())
 				{
@@ -856,7 +856,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_LEVEL_BACK")) //level finished - level failed but back
+			else if (ctrlID == HASH("BUT_LEVEL_BACK")) //level finished - level failed but back
 			{
 				if (!UTApp().IsGameNetworked())
 				{
@@ -881,7 +881,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_LEVEL_BACK_IGM")) //ingame menu - quit level
+			else if (ctrlID == HASH("BUT_LEVEL_BACK_IGM")) //ingame menu - quit level
 			{
 				if (!UTApp().IsGameNetworked())
 				{
@@ -908,7 +908,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_QUICK_MATCH"))
+			else if (ctrlID == HASH("BUT_QUICK_MATCH"))
 			{
 				//mark game type
 				UTApp().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH;
@@ -918,7 +918,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_HOST_PUBLIC"))
+			else if (ctrlID == HASH("BUT_HOST_PUBLIC"))
 			{
 				//mark game type
 				UTApp().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_HOST_PUBLIC;
@@ -928,7 +928,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_HOST_PRIVATE"))
+			else if (ctrlID == HASH("BUT_HOST_PRIVATE"))
 			{
 				//mark game type
 				UTApp().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_HOST_PRIVATE;
@@ -938,14 +938,14 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_CLOSE_LOBBIES_LIST"))
+			else if (ctrlID == HASH("BUT_CLOSE_LOBBIES_LIST"))
 			{
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_CANCEL_LOBBY"))
+			else if (ctrlID == HASH("BUT_CANCEL_LOBBY"))
 			{
 				g_netlock.Net_QuitLobby();
 
@@ -954,7 +954,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_JOIN_LOBBY"))
+			else if (ctrlID == HASH("BUT_JOIN_LOBBY"))
 			{
 				int nLobbyIdx = -1;
 				CCtrlLayer* lay = UTGetGUI().GetTopmostInputLayer();
@@ -982,7 +982,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					UTGetEventManager().QueueEvent(nevent);
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_REFRESH_LOBBIES"))
+			else if (ctrlID == HASH("BUT_REFRESH_LOBBIES"))
 			{
 				//as soon as we enter we ask for the lobbies list and the state will read the lobbies a little later (on a timer job)
 				g_netlock.Net_RequestLobbyList(10);
@@ -1006,7 +1006,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_JOIN_GAME"))
+			else if (ctrlID == HASH("BUT_JOIN_GAME"))
 			{
 				//mark game type as online coop
 				UTApp().m_Settings.devnet_eNetGameType = CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH;
@@ -1018,11 +1018,11 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				nevent->AddNamedArgINT32(L"arg1", GAME_STATE_JOIN_COOP_LIST);
 				UTGetEventManager().QueueEvent(nevent);
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_INVITE_TO_LOBBY"))
+			else if (ctrlID == HASH("BUT_INVITE_TO_LOBBY"))
 			{
 				g_pNetwork->ShowInviteToLobbyUI();
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_LEVEL_WIN")) //fereastra de level finished - level win (continue)
+			else if (ctrlID == HASH("BUT_LEVEL_WIN")) //fereastra de level finished - level win (continue)
 			{
 				if (!UTApp().IsGameNetworked()) //not networked
 				{
@@ -1043,7 +1043,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_COOPFAIL_CONTINUE")) //fereastra de level failed coop vote next level
+			else if (ctrlID == HASH("BUT_COOPFAIL_CONTINUE")) //fereastra de level failed coop vote next level
 			{
 				if (UTApp().IsGameNetworked()) //only networked
 				{
@@ -1051,7 +1051,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					g_netlock.Net_SendLevelResultsCommand(sPack);
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_LEVEL_RESTART")) //fereastra de level failed - main menu
+			else if (ctrlID == HASH("BUT_LEVEL_RESTART")) //fereastra de level failed - main menu
 			{
 				if (!UTApp().IsGameNetworked()) //not networked
 				{
@@ -1073,7 +1073,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_UNLOCK_WEAPON"))
+			else if (ctrlID == HASH("BUT_UNLOCK_WEAPON"))
 			{
 				UINT32 dwWeaponHash = nEvent.GetArgumentByName(L"nMsgParamUINT32")->m_asUINT32;
 				//buy weapon and mark spent money
@@ -1108,7 +1108,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_RESET_KEYS_SURE"))
+			else if (ctrlID == HASH("BUT_RESET_KEYS_SURE"))
 			{
 				int nKeybdIdx = nEvent.GetArgumentByName(L"nMsgParamINT32")->m_asINT32;
 				//trimitem mai departe indexul tastaturii selectate
@@ -1119,19 +1119,19 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					ctrl->paramsDict.SetNamedVarINT32(L"nMsgParamINT32", nKeybdIdx);
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_REDEFINE_KEYS"))
+			else if (ctrlID == HASH("BUT_REDEFINE_KEYS"))
 			{
 				UTGetGUI().ShowLayerOnce("LAYER_ID_REDEFINE_KEYS");
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_CREDITS"))
+			else if (ctrlID == HASH("BUT_CREDITS"))
 			{
 				UTGetGUI().ShowLayerOnce("LAYER_ID_CREDITS");
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_KEYS_LAYOUT"))
+			else if (ctrlID == HASH("BUT_KEYS_LAYOUT"))
 			{
 				UTGetGUI().ShowLayerOnce("LAYER_ID_KEYMAP");
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_MORE_OPTIONS"))
+			else if (ctrlID == HASH("BUT_MORE_OPTIONS"))
 			{
 				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_MORE_OPTIONS");
 				if ( layer != null )
@@ -1140,20 +1140,20 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					layer->SetControlParam( "CTRL_CHECK_GORE", L"bChecked", m_Settings.bGoreEnabled);
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_CREDITS_MORE"))
+			else if (ctrlID == HASH("BUT_CREDITS_MORE"))
 			{
 				//remove credits layer
 				UTGetGUI().RemoveLayer("LAYER_ID_CREDITS");
 				//add additional credits
 				UTGetGUI().ShowLayerOnce("LAYER_ID_CREDITS_MORE");
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_RESET_PROGRESS"))
+			else if (ctrlID == HASH("BUT_RESET_PROGRESS"))
 			{
 				UTGetGUI().RemoveLayer("LAYER_ID_MORE_OPTIONS");
 				UTGetGUI().ShowLayerOnce("LAYER_ID_RESET_PROGRESS");
 			}
 			//reset XP upgrades
-			else if (ctrlID == GET_FAST_HASH("BUT_RESET_UPGRADES"))
+			else if (ctrlID == HASH("BUT_RESET_UPGRADES"))
 			{
 				CCtrlLayer* lay = UTGetGUI().GetLayerByName("LAYER_ID_PLAYER_UPGRADE");
 				if (lay != null)
@@ -1180,7 +1180,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				}
 			}
 			//apply XP upgrades
-			else if (ctrlID == GET_FAST_HASH("BUT_ACCEPT_UPGRADE"))
+			else if (ctrlID == HASH("BUT_ACCEPT_UPGRADE"))
 			{
 				CCtrlLayer* lay = UTGetGUI().GetLayerByName("LAYER_ID_PLAYER_UPGRADE");
 				if (lay != null)
@@ -1227,7 +1227,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_RESET_PROGRESS_SURE"))
+			else if (ctrlID == HASH("BUT_RESET_PROGRESS_SURE"))
 			{
 				LOG(L"Progress Reset asked!");
 				
@@ -1236,7 +1236,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				UTGetGUI().RemoveLayer("LAYER_ID_RESET_PROGRESS");
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_RESET_PROGRESS_SURE_EA")) //early access version
+			else if (ctrlID == HASH("BUT_RESET_PROGRESS_SURE_EA")) //early access version
 			{
 				LOG(L"Progress Reset EA asked!");
 
@@ -1245,7 +1245,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				UTGetGUI().RemoveLayer("LAYER_ID_RESET_PROGRESS_EA");
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_LANGUAGE"))
+			else if (ctrlID == HASH("BUT_LANGUAGE"))
 			{
 				//build strings list before adding the control so it can get the lines count
 				WCHAR txt[1024] = { 0 };
@@ -1277,7 +1277,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_SELECT_LANGUAGE"))
+			else if (ctrlID == HASH("BUT_SELECT_LANGUAGE"))
 			{
 				int nLangIdx = -1;
 				CCtrlLayer *pLay = UTGetGUI().GetLayerByName("LAYER_ID_LANGUAGE");
@@ -1304,13 +1304,13 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					__Texts().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_CTRLR_LAYOUT"))
+			else if (ctrlID == HASH("BUT_CTRLR_LAYOUT"))
 			{
 				UTGetGUI().ShowLayerOnce("LAYER_ID_CONTROLLER_MAP");
 			}
 #ifdef ENABLE_LEADERBOARDS
 			//leaderboards from main menu, global ones
-			else if (ctrlID == GET_FAST_HASH("BUT_BOARDS_SINGLE"))
+			else if (ctrlID == HASH("BUT_BOARDS_SINGLE"))
 			{
 				__Texts().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
 				__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
@@ -1334,7 +1334,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_BOARDS_COOP"))
+			else if (ctrlID == HASH("BUT_BOARDS_COOP"))
 			{
 				__Texts().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
 				__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
@@ -1358,7 +1358,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				}
 			}
 			//leaderboards in level selection screen
-			else if (ctrlID == GET_FAST_HASH("BUT_BOARDS_SINGLE_LVL"))
+			else if (ctrlID == HASH("BUT_BOARDS_SINGLE_LVL"))
 			{
 				//reset scroll page and save leaderboard index as a payload in this control
 				CCtrlLayer *pLay = UTGetGUI().GetTopmostLayer();
@@ -1377,7 +1377,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				g_mainMenu.RequestLeaderboardsUpdate(false);
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_BOARDS_COOP_LVL"))
+			else if (ctrlID == HASH("BUT_BOARDS_COOP_LVL"))
 			{
 				//reset scroll page and save leaderboard index as a payload in this control
 				CCtrlLayer *pLay = UTGetGUI().GetTopmostLayer();
@@ -1399,7 +1399,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 #endif
 
-			else if (ctrlID == GET_FAST_HASH("BUT_RESET_KEYS")) //resets player keys
+			else if (ctrlID == HASH("BUT_RESET_KEYS")) //resets player keys
 			{
 				int nKeybdIdx = nEvent.GetArgumentByName(L"nMsgParamINT32")->m_asINT32;
 				if (nKeybdIdx == 0) //first keyboard
@@ -1425,7 +1425,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					return true;
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_REDEFINE_KEY1"))
+			else if (ctrlID == HASH("BUT_REDEFINE_KEY1"))
 			{
 				UTGetGUI().RemoveLayer("LAYER_ID_REDEFINE_KEYS");
 				UTGetGUI().RemoveLayer("LAYER_ID_OPTIONS_MM");
@@ -1450,7 +1450,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH("BUT_REDEFINE_KEY2"))
+			else if (ctrlID == HASH("BUT_REDEFINE_KEY2"))
 			{
 				UTGetGUI().RemoveLayer("LAYER_ID_REDEFINE_KEYS");
 				UTGetGUI().RemoveLayer("LAYER_ID_OPTIONS_MM");
@@ -1484,14 +1484,14 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			UINT32 ctrlID = nEvent.GetArgumentByName(L"ctrlID")->m_asUINT32;
 			float slidePercent = nEvent.GetArgumentByName(L"fSlidePercent")->m_asFloat;
 
-			if (ctrlID == GET_FAST_HASH("CTRL_SLIDER_SOUNDVOL"))
+			if (ctrlID == HASH("CTRL_SLIDER_SOUNDVOL"))
 			{
 				m_Settings.fSoundsVolume = slidePercent;
 				SND_SET_GROUP_VOLUME("sounds", slidePercent, false);
 				SND_SET_GROUP_VOLUME("ingame", slidePercent, false);
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("CTRL_SLIDER_MUSICVOL"))
+			else if (ctrlID == HASH("CTRL_SLIDER_MUSICVOL"))
 			{
 				m_Settings.fMusicVolume = slidePercent;
 				SND_SET_GROUP_VOLUME("music", slidePercent, false);
@@ -1504,8 +1504,8 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			UINT32 ctrlID = nEvent.GetArgumentByName(L"ctrlID")->m_asUINT32;
 			bool bCheck = nEvent.GetArgumentByName(L"bChecked")->m_asBool;
 
-			if ((ctrlID == GET_FAST_HASH("CTRL_CHECK_BORDERLESS")) ||
-					 (ctrlID == GET_FAST_HASH("CTRL_CHECK_FULLSCREEN"))	)
+			if ((ctrlID == HASH("CTRL_CHECK_BORDERLESS")) ||
+					 (ctrlID == HASH("CTRL_CHECK_FULLSCREEN"))	)
 			{
 				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
 				if (layer != nullptr)
@@ -1527,7 +1527,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				}
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH( "CTRL_CHECK_SHAKES" )) {
+			else if (ctrlID == HASH( "CTRL_CHECK_SHAKES" )) {
 				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
 				if ( layer != nullptr )
 				{
@@ -1536,7 +1536,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						m_Settings.bScreenShakes = ctrl->paramsDict.GetVariantByName( L"bChecked" )->m_asBool;
 				}
 			}
-			else if (ctrlID == GET_FAST_HASH( "CTRL_CHECK_GORE" )) {
+			else if (ctrlID == HASH( "CTRL_CHECK_GORE" )) {
 				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
 				if ( layer != nullptr )
 				{
@@ -1554,7 +1554,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			int nOldIdx = nEvent.GetArgumentByName(L"nOldIdx")->m_asINT32;
 
 			// highscores paging control
-			if (ctrlID == GET_FAST_HASH("CTRL_SCORESLIST_TT"))
+			if (ctrlID == HASH("CTRL_SCORESLIST_TT"))
 			{
 				int nLeaderboardID = 0;
 				CCtrlLayer* pLay = UTGetGUI().GetLayerByNameHash(layerID);
@@ -1595,7 +1595,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			int selection = nEvent.GetArgumentByName(L"nSelectedIdx")->m_asINT32;
 
 			//redefine keys control for key capture
-			if (ctrlID == GET_FAST_HASH("CTRL_KEYGRABBER"))
+			if (ctrlID == HASH("CTRL_KEYGRABBER"))
 			{
 				//save controller instance ID and command that need redefining
 				int nKeyboardOrdinal = nEvent.GetArgumentByName(L"nKeyboardOrdinal")->m_asINT32;
@@ -1633,7 +1633,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("CTRL_SCORESLIST_TT"))
+			else if (ctrlID == HASH("CTRL_SCORESLIST_TT"))
 			{
 				int nSelIdx = nEvent.GetArgumentByName(L"nSelectedIdx")->m_asUINT32;
 				int nSelPage = nEvent.GetArgumentByName(L"nPageIdx")->m_asUINT32;
@@ -1643,7 +1643,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 #endif
 			}
 			//control custom paint selectie ability
-			else if (ctrlID == GET_FAST_HASH("CTRL_STRATEGIC_BAR"))
+			else if (ctrlID == HASH("CTRL_STRATEGIC_BAR"))
 			{
 				int nSDLinstanceID = nEvent.GetArgumentByName(L"nSDLinstanceID")->m_asINT32;
 				int nSelectedIdx = nEvent.GetArgumentByName(L"nSelectedIdx")->m_asINT32;
@@ -1655,7 +1655,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("CTRL_LANGLIST_TT"))
+			else if (ctrlID == HASH("CTRL_LANGLIST_TT"))
 			{
 				int nLangIdx = nEvent.GetArgumentByName(L"nSelectedIdx")->m_asINT32;
 				//remove layer
@@ -1674,7 +1674,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				}
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("CTRL_LOBBIES_SELECTOR"))
+			else if (ctrlID == HASH("CTRL_LOBBIES_SELECTOR"))
 			{
 				int nLobbyIdx = nEvent.GetArgumentByName(L"nSelectedIdx")->m_asINT32;
 				//change language
@@ -1700,7 +1700,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				return true;
 			}
 			//redefine keys
-			else if (ctrlID == GET_FAST_HASH("CTRL_KEYS_SELECTOR"))
+			else if (ctrlID == HASH("CTRL_KEYS_SELECTOR"))
 			{
 				int nKeysOff = K_MEMID_KEYS2_FIRSTITEM - K_MEMID_KEYS1_FIRSTITEM;
 				//selectia se trimite ca si comanda + nKeysCnt * keyboardOrdinal
@@ -1725,7 +1725,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("CTRL_SCROLL_MAINMENU"))
+			else if (ctrlID == HASH("CTRL_SCROLL_MAINMENU"))
 			{
 				switch (selection)
 				{
@@ -1817,7 +1817,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				}
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("CTRL_SCROLL_IGMMENU"))
+			else if (ctrlID == HASH("CTRL_SCROLL_IGMMENU"))
 			{
 				switch (selection)
 				{
@@ -1863,7 +1863,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				return true;
 			}
-			else if (ctrlID == GET_FAST_HASH("CTRL_SCROLL_IGMMENU_NET"))
+			else if (ctrlID == HASH("CTRL_SCROLL_IGMMENU_NET"))
 			{
 				switch (selection)
 				{
