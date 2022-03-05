@@ -72,18 +72,18 @@ namespace GUIUtils {
 	const DWORD colPanelIconIdle = 0xff606e1f;
 	const DWORD colPanelIconFocused = 0xff85962e;
 
-	void DrawWindowFrameF( CSpriteCollection *sprCol, int animIdx, RectXYWH BBox, DWORD color = 0xffffffff, float fInflate = 0.0f );
-	void DrawWindowFrame( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color = 0xffffffff, int nInflate = 0 );
-	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float alpha, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor = 0xffffffff );
-	void DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float alpha, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor = 0xffffffff );
+	void DrawWindowFrameF( CSpriteLib *sprCol, int animIdx, RectXYWH BBox, DWORD color = 0xffffffff, float fInflate = 0.0f );
+	void DrawWindowFrame( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, DWORD color = 0xffffffff, int nInflate = 0 );
+	void DrawWindow( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, float alpha, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor = 0xffffffff );
+	void DrawWindow( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, float alpha, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor = 0xffffffff );
 	// draws a container panel used for all selectable controls
-	void DrawPanel( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha, int nIconAnimIdx = -1, int nIconFrame = -1 );
+	void DrawPanel( CSpriteLib *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha, int nIconAnimIdx = -1, int nIconFrame = -1 );
 	// Draws a progress bar from animation with specific frames, without buttons
-	void DrawProgress( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, float fFocus, float fAlpha = 1.0f, int nSteps = 0 );
+	void DrawProgress( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, float fFocus, float fAlpha = 1.0f, int nSteps = 0 );
 	// Paints a smaller panel without icon, with just the focus line on the left
-	void DrawPanelSM( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha = 1.0f );
+	void DrawPanelSM( CSpriteLib *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha = 1.0f );
 	// Draws a button centered on the specified bbox
-	void DrawButton(CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, bool bPressed, float fHoverPercent, float fFocusPercent, float fAlpha = 1.0f);
+	void DrawButton(CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, bool bPressed, float fHoverPercent, float fFocusPercent, float fAlpha = 1.0f);
 	/*
 	* \brief Deseneaza un buton (sau input box, slider, etc) dintr-o animatie cu 3 frames (capat, centru tiling, capat)
 	* capetele butonului se deseneaza in interiorul bboxului. Capatul stanga trebuie aliniat in dreapta axei verticale in editor.
@@ -91,37 +91,37 @@ namespace GUIUtils {
 	* \param strDesc - stringul pe care il masoara pentru a lua dimensiunea butonului
 	* \param nAlignHsign - 0 center, -1 left, 1 right
 	*/
-	void DrawButtonFromText( CSpriteCollection *sprCol, int animIdx, bool bPressed, CStringDesc *strDesc, CTexFont* pFont, Vec2 vButCenter, DWORD color = 0xffffffff, int nAlignHsign = 0 );
+	void DrawButtonFromText( CSpriteLib *sprCol, int animIdx, bool bPressed, CStringDesc *strDesc, CTexFont* pFont, Vec2 vButCenter, DWORD color = 0xffffffff, int nAlignHsign = 0 );
 	/*
 	* \brief Deseneaza un buton (sau input box, slider, etc) dintr-o animatie cu 3 frames (capat, centru tiling, capat)
 	* capetele butonului se deseneaza in interiorul bboxului. Capatul stanga trebuie aliniat in dreapta axei verticale in editor.
 	* \param nStartFrame - frame-ul de la care incep cele 3 frames utile (daca butonul are mai multe stari in aceeasi anim, cum e si normal)
 	*/
-	void DrawHTilingAnim( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color = 0xffffffff );
+	void DrawHTilingAnim( CSpriteLib *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color = 0xffffffff );
 	/*
 	* \brief Deseneaza un buton (sau input box, slider, etc) dintr-o animatie cu 3 frames (capat, centru tiling, capat)
 	* capetele butonului se deseneaza in EXTERIORUL bboxului. Capatul stanga trebuie aliniat in stanga axei verticale in editor.
 	* \param nStartFrame - frame-ul de la care incep cele 3 frames utile (daca butonul are mai multe stari in aceeasi anim, cum e si normal)
 	*/
-	void DrawHTilingAnim_HeadsOutside( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color = 0xffffffff );
+	void DrawHTilingAnim_HeadsOutside( CSpriteLib *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color = 0xffffffff );
 	/*
 	* Draws a progress bar from animation with 4 frames (left, tiling center, right, filler) - heads outside the BBox
 	*/
-	void DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, DWORD color = 0xffffffff, int nTicks = 0 );
+	void DrawProgress_HeadsOutside( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, DWORD color = 0xffffffff, int nTicks = 0 );
 	/*
 	* Draws a page selector control (colored dots)
 	* \param nAlign - 0 centered, -1 left, 1 right
 	*/
-	void DrawPageSelector( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, int nPagesCnt, int nSelectedPage, DWORD color = 0xffffffff, int nAlign = 0 );
+	void DrawPageSelector( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, int nPagesCnt, int nSelectedPage, DWORD color = 0xffffffff, int nAlign = 0 );
 }
 
 class CControl
 {
 //protected:
-	static CSpriteCollection *m_pSprCol;		// Pointer to sprite collection from the manager
+	static CSpriteLib *m_pSprCol;		// Pointer to sprite collection from the manager
 public:
 	// Sets useful static data (used by all controls)
-	static void			SetManagersPtr(CSpriteCollection* sprCol);
+	static void			SetManagersPtr(CSpriteLib* sprCol);
 
 	EControlType		type;				// Type of control CCTRL_TYPE_...
 	CVariantCollection	paramsDict;			// List of controls params. Don't set directly! Use SetParamValue
@@ -216,7 +216,7 @@ public:
 	float				fLocalTimeline;				// Local timeline
 	CArray<CCtrlLayer*> layersDefinitions;			// Contains layer definitions
 	CArray<CCtrlLayer*> Layers;						// Contains actual cloned layers
-	CSpriteCollection	m_sprCol;					// Sprite collection for controls sprites
+	CSpriteLib	m_sprCol;					// Sprite collection for controls sprites
 	bool				bIsBlocking;				// Does it block user input?
 	CCameraTransform	camera;						// Camera transform for controls
 

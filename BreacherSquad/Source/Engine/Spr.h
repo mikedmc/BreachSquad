@@ -33,7 +33,7 @@ public:
 	static CSpritePainter*	s_pSP;						
 
 public:
-	CSpriteCollection*		pSprCol;					// Pointer to sprite collection
+	CSpriteLib*		pSprCol;					// Pointer to sprite collection
 	int						animIdx;						// Animation index
 	int						frameIdx;					// Frame index in sprite collection
 	Vec2					pos;	
@@ -46,11 +46,11 @@ public:
 
 	CSpr();
 	CSpr(const CSpr& sprite);
-	CSpr(CSpriteCollection* pSpriteColl, int animIdx, float pX, float pY);
-	CSpr(CSpriteCollection* pSpriteColl, int animIdx, Vec2 vPos);
+	CSpr(CSpriteLib* pSpriteColl, int animIdx, float pX, float pY);
+	CSpr(CSpriteLib* pSpriteColl, int animIdx, Vec2 vPos);
 
-	void					Init(CSpriteCollection *sprCollection, int nAnimIdx, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
-	void					Init(CSpriteCollection *sprCollection, CHAR* strAnimID, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
+	void					Init(CSpriteLib *sprCollection, int nAnimIdx, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
+	void					Init(CSpriteLib *sprCollection, CHAR* strAnimID, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
 
 	void					SetAnim(int nAnimIdx, int nFrameIdx = 0);
 	void					SetAnim(CHAR* strAnimID, int nFrameIdx = 0);
@@ -76,21 +76,21 @@ public:
 namespace UTSprite
 {
 	// Paints a single frame from an animation	
-	void PaintFrame( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, DWORD ncolor = 0xffffffff );
+	void PaintFrame( CSpriteLib *sprCol, Vec2 vPos, int animID, int frameIdx, DWORD ncolor = 0xffffffff );
 	// Paints a single frame from an animation, position as 2 floats
-	void PaintFrame( CSpriteCollection *sprCol, float posX, float posY, int animID, int frameIdx, DWORD ncolor = 0xffffffff );
+	void PaintFrame( CSpriteLib *sprCol, float posX, float posY, int animID, int frameIdx, DWORD ncolor = 0xffffffff );
 	// Paints a single frame, with transforms
-	void PaintFrameEx( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, DWORD ncolor = 0xffffffff, float fRotZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f }, UINT unFlags = 0 );
+	void PaintFrameEx( CSpriteLib *sprCol, Vec2 vPos, int animID, int frameIdx, DWORD ncolor = 0xffffffff, float fRotZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f }, UINT unFlags = 0 );
 	// Paints single module
-	void PaintFModule( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff );
+	void PaintFModule( CSpriteLib *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff );
 
-	void PaintFrameClipped( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, RectLTRB& clip, DWORD ncolor = 0xffffffff );
-	void PaintFModuleClipped( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, RectLTRB& clip, DWORD ncolor = 0xffffffff );
+	void PaintFrameClipped( CSpriteLib *sprCol, Vec2 vPos, int animID, int frameIdx, RectLTRB& clip, DWORD ncolor = 0xffffffff );
+	void PaintFModuleClipped( CSpriteLib *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, RectLTRB& clip, DWORD ncolor = 0xffffffff );
 	// Stretches the module texture over the resized area replacing width and height with W and H (W/h < 0.0f means width and height stay unchanged)
-	void PaintFModuleStretched( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff, float W = -1.0f, float H = -1.0f );
+	void PaintFModuleStretched( CSpriteLib *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff, float W = -1.0f, float H = -1.0f );
 	// fills the rect defined by vPos, W and H by tiling the specified module
 	// assumes that the module is placed in 0,0 (no offset ox,oy)
-	void PaintFModuleTiled( CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff, float W = -1.0f, float H = -1.0f );
+	void PaintFModuleTiled( CSpriteLib *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, DWORD ncolor = 0xffffffff, float W = -1.0f, float H = -1.0f );
 
 	/*
 	void paintTiled(CSpriteCollection *sprCol, int W = -1, int H = -1);

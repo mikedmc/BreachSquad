@@ -22,7 +22,7 @@ private:
 	PDEVICE				m_pDevice;
 	CLevel*				m_pLevel;
 
-	CSpriteCollection	m_sprCol;				// Sprite collection to hold editor only graphics
+	CSpriteLib	m_sprCol;				// Sprite collection to hold editor only graphics
 
 	eLvlEdTool			eTool;					// Current tool
 	IActiveInterface*	pSelected;				// Selected item

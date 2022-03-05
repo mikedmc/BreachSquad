@@ -28,7 +28,7 @@ void CLight::SetDir(Vec3 nDir)
 	MUVec3Norm(&vnDir, &nDir);
 }
 
-void CLight::UpdateInternalData(CSpriteCollection* pLightsSprCol)
+void CLight::UpdateInternalData(CSpriteLib* pLightsSprCol)
 {
 	switch (type)
 	{
@@ -92,7 +92,7 @@ void CLight::UpdateInternalData(CSpriteCollection* pLightsSprCol)
 
 }
 
-void CLight::SetLightTexture(CSpriteCollection* sprCol, int nAnimID, int nFrameID)
+void CLight::SetLightTexture(CSpriteLib* sprCol, int nAnimID, int nFrameID)
 {
 	animID = nAnimID;
 	frameID = nFrameID;

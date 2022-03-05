@@ -23,7 +23,7 @@ public:
 
 	// Creates meshes for each layer
 	// Receives pointer to map tiles
-	OPRESULT					BuildBuffers(Vec2i vBlockPos_TL, CTile** map, SizeWHi mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr);
+	OPRESULT					BuildBuffers(Vec2i vBlockPos_TL, CTile** map, SizeWHi mapSizeTL, Vec2 vOffset, CSpriteLib* pLightsSpr);
 
 	void						Clear();
 
@@ -46,7 +46,7 @@ public:
 	void						Release();
 
 	// Builds all buffers for specified map, called after loading a level and when we have changes
-	OPRESULT					BuildBuffers(CTile** map, SizeWHi mapSizeTL, Vec2 vOffset, CSpriteCollection* pLightsSpr);
+	OPRESULT					BuildBuffers(CTile** map, SizeWHi mapSizeTL, Vec2 vOffset, CSpriteLib* pLightsSpr);
 
 	// Creates list of visible blocks. camRect is the XY plane of the AABB of the camera frustum.
 	// Must be called before PaintLayer.

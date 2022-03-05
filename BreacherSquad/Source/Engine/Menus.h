@@ -9,7 +9,7 @@ private:
 	double				fLocalTimeline;
 
 public: 
-	CSpriteCollection	m_sprCol;			
+	CSpriteLib	m_sprCol;			
 
 public:
 	CMenus();

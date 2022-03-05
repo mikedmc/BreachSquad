@@ -10,7 +10,7 @@ protected:
 	double					fLocalTimeline;				// local timeline for animations
 	CLevel*					m_pLevel;					// pointer to level to get data from
 	CCameraTransform*		m_pCamera;					// camera used for transformations and display size
-	CSpriteCollection*		m_pSprite;					// sprite collection to paint from
+	CSpriteLib*		m_pSprite;					// sprite collection to paint from
 public:
 	// Initialize internal pointers
 	void					Init(CLevel* pLevel, CCameraTransform* pCamera);

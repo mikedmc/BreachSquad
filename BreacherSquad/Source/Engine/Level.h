@@ -72,9 +72,9 @@ public:
 	}
 
 	CTextureManager			m_texManager;					// General texture manager for misc needed textures
-	CSpriteCollection		m_sprLights;					// light animations/sprites
-	CSpriteCollection		m_sprProps;						// decorations
-	CSpriteCollection		m_sprActors;					// animations for the actors (main characters, enemies etc)
+	CSpriteLib		m_sprLights;					// light animations/sprites
+	CSpriteLib		m_sprProps;						// decorations
+	CSpriteLib		m_sprActors;					// animations for the actors (main characters, enemies etc)
 	CMissionStory			m_story;						// mission story
 
 	CVisibilityLists		m_visibleList;					// list of visible/active entities
@@ -393,7 +393,7 @@ public:
 	HRESULT					PaintUsingFinalRTT();
 	
 ///--- interfaces ---
-	CSpriteCollection		m_sprInterface;
+	CSpriteLib		m_sprInterface;
 	//interfata in sine
 	CIngameGUI				m_interfaceIGM;
 	//controlul de ingame hints

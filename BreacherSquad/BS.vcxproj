@@ -375,7 +375,7 @@
     <ClInclude Include="Source\Engine\SoundManager.h" />
     <ClInclude Include="Source\Engine\Constants\sounds.h" />
     <ClInclude Include="Source\Engine\Sprite.h" />
-    <ClInclude Include="Source\Engine\SpriteCollection.h" />
+    <ClInclude Include="Source\Engine\SpriteLib.h" />
     <ClInclude Include="Source\Engine\Constants\strings.h" />
     <ClInclude Include="Source\Engine\TextureManager.h" />
     <ClInclude Include="Source\Engine\Constants\tiles1_SPR.h" />
@@ -814,7 +814,7 @@
     <ClCompile Include="Source\Engine\Sprite.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
-    <ClCompile Include="Source\Engine\SpriteCollection.cpp">
+    <ClCompile Include="Source\Engine\SpriteLib.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\TextureManager.cpp">

@@ -1,7 +1,7 @@
 #include "dxstdafx.h"
 
 //static fn
-CSpriteCollection* CControl::m_pSprCol = nullptr;
+CSpriteLib* CControl::m_pSprCol = nullptr;
 
 //controls types
 //params default ID,X,Y,W,H,inflate. 
@@ -72,7 +72,7 @@ CStringHash EControlTypeNames[] =
 	L"SliderPages"
 };
 
-void CControl::SetManagersPtr( CSpriteCollection* sprCol )
+void CControl::SetManagersPtr( CSpriteLib* sprCol )
 {
 	m_pSprCol = sprCol;
 }
@@ -3387,7 +3387,7 @@ CCtrlLayer* CCtrlLayer::Clone()
 	return nlay;
 }
 
-void GUIUtils::DrawButtonFromText( CSpriteCollection *sprCol, int animIdx, bool bPressed, CStringDesc *strDesc, CTexFont* pFont, Vec2 vButCenter, DWORD color, int nAlignHsign )
+void GUIUtils::DrawButtonFromText( CSpriteLib *sprCol, int animIdx, bool bPressed, CStringDesc *strDesc, CTexFont* pFont, Vec2 vButCenter, DWORD color, int nAlignHsign )
 {
 	//no text, don't draw
 	if ( strDesc->len == 0 )
@@ -3417,7 +3417,7 @@ void GUIUtils::DrawButtonFromText( CSpriteCollection *sprCol, int animIdx, bool 
 	}
 }
 
-void GUIUtils::DrawHTilingAnim( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color )
+void GUIUtils::DrawHTilingAnim( CSpriteLib *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color )
 {
 	RectXYWHi leftheadbb = sprCol->GetAFrameBBox( animIdx, nStartFrame );
 	RectXYWHi rightheadbb = sprCol->GetAFrameBBox( animIdx, nStartFrame + 2 );
@@ -3427,14 +3427,14 @@ void GUIUtils::DrawHTilingAnim( CSpriteCollection *sprCol, int animIdx, int nSta
 	UTSprite::PaintFrame( sprCol, BBox.x + BBox.w - rightheadbb.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 2, color );
 }
 
-void GUIUtils::DrawHTilingAnim_HeadsOutside( CSpriteCollection *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color )
+void GUIUtils::DrawHTilingAnim_HeadsOutside( CSpriteLib *sprCol, int animIdx, int nStartFrame, RectXYWHi BBox, DWORD color )
 {
 	//UTSprite::PaintFrameModuleTiled( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 1, 0, color, BBox.w, -1 );
 	UTSprite::PaintFrame( sprCol, BBox.x, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame, color );
 	UTSprite::PaintFrame( sprCol, BBox.x + BBox.w, ( int ) ( BBox.y + BBox.h / 2.0f ), animIdx, nStartFrame + 2, color );
 }
 
-void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, float fFocus, float fAlpha, int nSteps )
+void GUIUtils::DrawProgress( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, float fFocus, float fAlpha, int nSteps )
 {
 	UTSprite::PaintFModuleStretched( sprCol, Vec2( BBox.x, BBox.CenterY() ), animIdx, 0, 0, DW_COLOR_FFFA( fAlpha ), BBox.w );
 	RectXYWHi cliprect = BBox;
@@ -3444,7 +3444,7 @@ void GUIUtils::DrawProgress( CSpriteCollection *sprCol, int animIdx, RectXYWHi B
 }
 
 
-void GUIUtils::DrawPanelSM( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha /*= 1.0f */ )
+void GUIUtils::DrawPanelSM( CSpriteLib *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha /*= 1.0f */ )
 {
 	// default panel anim
 	int animIdx = ANM_CONTROLS_SPR_PANEL1;
@@ -3466,7 +3466,7 @@ void GUIUtils::DrawPanelSM( CSpriteCollection *sprCol, RectXYWHi BBox, float fFo
 	UTSprite::PaintFModuleClipped( sprCol, vUL, animIdx, 1, 0, clipwin, dwFocusAlpha );
 }
 
-void GUIUtils::DrawButton( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, bool bPressed, float fHoverPercent, float fFocusPercent, float fAlpha /*= 1.0f*/ )
+void GUIUtils::DrawButton( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, bool bPressed, float fHoverPercent, float fFocusPercent, float fAlpha /*= 1.0f*/ )
 {
 	// get thin bar width
 	RectXYWHi leftSz1 = sprCol->GetAFrameBBox_real( animIdx, 3 );
@@ -3494,7 +3494,7 @@ void GUIUtils::DrawButton( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBo
 		UTSprite::PaintFModuleClipped( sprCol, Vec2( vUL.x, vUL.y ), animIdx, 3, 0, clipwin, dwFocusAlpha );
 }
 
-void GUIUtils::DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
+void GUIUtils::DrawProgress_HeadsOutside( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, float fPercentFull, DWORD color /*= 0xffffffff*/, int nTicks /*= 0*/ )
 {
 	GUIUtils::DrawHTilingAnim_HeadsOutside( sprCol, animIdx, 0, BBox, color );
 	RectXYWHi cliprect = BBox;
@@ -3512,7 +3512,7 @@ void GUIUtils::DrawProgress_HeadsOutside( CSpriteCollection *sprCol, int animIdx
 	//UTSprite::PaintFrameModuleTiled( sprCol, BBox.x, BBox.CenterY(), animIdx, 3, 0, color, cliprect.w );
 }
 
-void GUIUtils::DrawPageSelector( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, int nPagesCnt, int nSelectedPage, DWORD color /*= 0xffffffff*/, int nAlign /*= 0*/ )
+void GUIUtils::DrawPageSelector( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, int nPagesCnt, int nSelectedPage, DWORD color /*= 0xffffffff*/, int nAlign /*= 0*/ )
 {
 	//int selpage = LIMIT(nSelectedPage, 0, nPagesCnt - 1);
 	RectXYWHi ptrect = sprCol->GetAFrameBBox( animIdx, 0 ); //unselected page tick
@@ -3533,7 +3533,7 @@ void GUIUtils::DrawPageSelector( CSpriteCollection *sprCol, int animIdx, RectXYW
 	}
 }
 
-void GUIUtils::DrawWindowFrameF( CSpriteCollection *sprCol, int animIdx, RectXYWH BBox, DWORD color, float fInflate )
+void GUIUtils::DrawWindowFrameF( CSpriteLib *sprCol, int animIdx, RectXYWH BBox, DWORD color, float fInflate )
 {
 	RectXYWH BBox_local = BBox;
 	BBox_local.Inflate( fInflate );
@@ -3581,7 +3581,7 @@ void GUIUtils::DrawWindowFrameF( CSpriteCollection *sprCol, int animIdx, RectXYW
 }
 
 //deseneaza fereastra in exteriorul BBOX, zona BBox fiind in totalitate folosibila
-void GUIUtils::DrawWindowFrame( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nInflate )
+void GUIUtils::DrawWindowFrame( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, DWORD color, int nInflate )
 {
 	RectXYWHi BBox_local = BBox;
 	BBox_local.Inflate( nInflate, nInflate );
@@ -3628,7 +3628,7 @@ void GUIUtils::DrawWindowFrame( CSpriteCollection *sprCol, int animIdx, RectXYWH
 	*/
 }
 
-void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float alpha, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor )
+void GUIUtils::DrawWindow( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, float alpha, int nFontIdx, CStringDesc* strTitle, DWORD dwTitleColor )
 {
 	DWORD wndBaseColor = DW_COLORALPHA( 0xff000000, 0.8f * alpha );
 
@@ -3652,13 +3652,13 @@ void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBo
 	}
 }
 
-void GUIUtils::DrawWindow( CSpriteCollection *sprCol, int animIdx, RectXYWHi BBox, float alpha, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor )
+void GUIUtils::DrawWindow( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, float alpha, int nFontIdx, int nStrIdxTitle, DWORD dwTitleColor )
 {
 	CStringDesc* sdTitle = __Texts().GetStringDescByIdx( nStrIdxTitle );
 	DrawWindow( sprCol, animIdx, BBox, alpha, nFontIdx, sdTitle, dwTitleColor );
 }
 
-void GUIUtils::DrawPanel( CSpriteCollection *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha, int nIconAnimIdx /*= -1*/, int nIconFrame /*= -1 */ )
+void GUIUtils::DrawPanel( CSpriteLib *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha, int nIconAnimIdx /*= -1*/, int nIconFrame /*= -1 */ )
 {
 	// default panel anim
 	int animIdx = ANM_CONTROLS_SPR_PANEL1;

@@ -269,7 +269,7 @@ private:
 	void UpdateStringParticles(float dTime);
 public:
 	//sprites collection
-	CSpriteCollection m_sprCol;	
+	CSpriteLib m_sprCol;	
 	//string particles - growable array pentru ca sunt foarte putine mereu
 	CArray<CStringDummy*> m_vDummies;
 	//string dummies

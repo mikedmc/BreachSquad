@@ -1,7 +1,7 @@
 #include "dxstdafx.h"
 #include "ParallaxBg.h"
 
-void PaintParallaxBackground(CSpriteCollection* m_sprBack, int m_BackAnimIdx, RectXYWH camRect, D3DXVECTOR2 vLevelOrigin, double fLocalTimeline)
+void PaintParallaxBackground(CSpriteLib* m_sprBack, int m_BackAnimIdx, RectXYWH camRect, D3DXVECTOR2 vLevelOrigin, double fLocalTimeline)
 {
 	if ((!m_sprBack->IsLoaded()) || (m_BackAnimIdx < 0))
 		return;

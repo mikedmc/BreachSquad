@@ -73,8 +73,8 @@ public:
 
 	// Initializes internal data for rendering
 	// Make sure all basic light data is set before calling it (or call inside PostConstructionInit)
-	void				UpdateInternalData(CSpriteCollection* pLightsSprCol = nullptr);
+	void				UpdateInternalData(CSpriteLib* pLightsSprCol = nullptr);
 
 	// Sets the light's texture, if necessary
-	void				SetLightTexture(CSpriteCollection* sprCol, int nAnimID, int nFrameID);
+	void				SetLightTexture(CSpriteLib* sprCol, int nAnimID, int nFrameID);
 };

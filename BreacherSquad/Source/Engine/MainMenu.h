@@ -59,8 +59,8 @@ public:
 	CMainMenu();
 	~CMainMenu();
 
-	CSpriteCollection	m_sprCol;
-	CSpriteCollection	m_sprColNew;
+	CSpriteLib	m_sprCol;
+	CSpriteLib	m_sprColNew;
 	HRESULT LoadSprites(WCHAR * strSpritePath, WCHAR * strSprPath);
 
 	void SetSpritePtr(ID3DXSprite* pSprite);

@@ -120,7 +120,7 @@ public:
  *
  * \brief Loads a bsx sprites file including textures
  */
-class CSpriteCollection
+class CSpriteLib
 {
 private:
 	bool							bIsLoaded;
@@ -137,8 +137,8 @@ public:
 	int								animationNo;
 	CArray<scAnimation*>			Animations;
 
-	CSpriteCollection(void);
-	~CSpriteCollection(void);
+	CSpriteLib(void);
+	~CSpriteLib(void);
 
 public:
 	// Loads the specified sprites collection.

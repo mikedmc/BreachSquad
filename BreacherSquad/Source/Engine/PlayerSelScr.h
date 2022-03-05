@@ -258,7 +258,7 @@ public:
 	// Loads player selection from local repo for specified ordinal (or panel)
 	void					LoadSelectionForPanel(int nPlayerOrdinal);
 	
-	CSpriteCollection		m_sprCol;
+	CSpriteLib		m_sprCol;
 	HRESULT					InitSprites(WCHAR * strPath);
 	void					ReleaseSprites();
 	

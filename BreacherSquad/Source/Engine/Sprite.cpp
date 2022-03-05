@@ -16,7 +16,7 @@ void CSprite::SetGlobalSpritePtr(ID3DXSprite* pSprite, CSpritePainter* pSP)
 ///--- end STATIC ---
 
 
-DWORD GetFlags(CSpriteCollection* sprCol, int anim, int frame)
+DWORD GetFlags(CSpriteLib* sprCol, int anim, int frame)
 {
 	if (anim < 0 || frame < 0) return (DWORD)0;
 	int frameIdx = sprCol->Animations[anim]->aframesIdx[frame];
@@ -77,7 +77,7 @@ void CSprite::Init(int animIdx, float pX, float pY, int nframeIdx, DWORD nColor)
 	color = nColor;
 }
 
-void CSprite::Init(CHAR* animID, CSpriteCollection *sprCollection, float pX, float pY, int nframeIdx, DWORD nColor)
+void CSprite::Init(CHAR* animID, CSpriteLib *sprCollection, float pX, float pY, int nframeIdx, DWORD nColor)
 {
 	animationIdx = sprCollection->GetAnimationIdxByName(animID);
 	assert((animationIdx >= 0) && (animationIdx < sprCollection->animationNo));
@@ -119,7 +119,7 @@ void CSprite::setAnimationOnce(int animIdx, int frameIdx)
 	animStatus = ANIM_STATUS_JUST_STARTED;
 }
 
-void CSprite::setAnimationOnce_keepFrame(CSpriteCollection *sprCol, int animIdx)
+void CSprite::setAnimationOnce_keepFrame(CSpriteLib *sprCol, int animIdx)
 {
 	if (animIdx == animationIdx)
 		return;
@@ -133,7 +133,7 @@ void CSprite::setAnimationOnce_keepFrame(CSpriteCollection *sprCol, int animIdx)
 }
 
 
-void CSprite::setAnimation(CHAR* animID, CSpriteCollection *sprCollection)
+void CSprite::setAnimation(CHAR* animID, CSpriteLib *sprCollection)
 {
 	animationIdx = sprCollection->GetAnimationIdxByName(animID);
 	assert((animationIdx >= 0) && (animationIdx < sprCollection->animationNo));
@@ -144,7 +144,7 @@ void CSprite::setAnimation(CHAR* animID, CSpriteCollection *sprCollection)
 }
 
 //face update la pozitie numai daca e true updatePos
-UINT32 CSprite::Update(CSpriteCollection *sprCollection, float dTime, bool updatePos)
+UINT32 CSprite::Update(CSpriteLib *sprCollection, float dTime, bool updatePos)
 {
 	UINT32 retAFrameFlag = 0;
 
@@ -206,7 +206,7 @@ UINT32 CSprite::Update(CSpriteCollection *sprCollection, float dTime, bool updat
 	return retAFrameFlag;
 }
 
-void CSprite::paint(CSpriteCollection* sprCol)
+void CSprite::paint(CSpriteLib* sprCol)
 {
 	assert(animationIdx < sprCol->Animations.Count());
 	assert(currentFrame < sprCol->Animations[animationIdx]->aframesNo);
@@ -224,7 +224,7 @@ void CSprite::paint(CSpriteCollection* sprCol)
 	}
 }
 
-void CSprite::paint_firstModule(CSpriteCollection* sprCol)
+void CSprite::paint_firstModule(CSpriteLib* sprCol)
 {
 	assert(animationIdx < sprCol->Animations.Count());
 	assert(currentFrame < sprCol->Animations[animationIdx]->aframesNo);
@@ -240,7 +240,7 @@ void CSprite::paint_firstModule(CSpriteCollection* sprCol)
 		color);
 }
 
-void CSprite::paint_firstModuleColorized(CSpriteCollection *sprCol, DWORD dwCol)
+void CSprite::paint_firstModuleColorized(CSpriteLib *sprCol, DWORD dwCol)
 {
 	assert(animationIdx < sprCol->Animations.Count());
 	assert(currentFrame < sprCol->Animations[animationIdx]->aframesNo);
@@ -255,7 +255,7 @@ void CSprite::paint_firstModuleColorized(CSpriteCollection *sprCol, DWORD dwCol)
 		dwCol);
 }
 
-void CSprite::paint_texOverride(CSpriteCollection *sprCol, int texIdxOffset, float fOffX /*= 0.0f*/, float fOffy /*= 0.0f*/)
+void CSprite::paint_texOverride(CSpriteLib *sprCol, int texIdxOffset, float fOffX /*= 0.0f*/, float fOffy /*= 0.0f*/)
 {
 	assert(animationIdx < sprCol->Animations.Count());
 	assert(currentFrame < sprCol->Animations[animationIdx]->aframesNo);
@@ -273,7 +273,7 @@ void CSprite::paint_texOverride(CSpriteCollection *sprCol, int texIdxOffset, flo
 	}
 }
 
-void CSprite::paint_firstModule_texOverride(CSpriteCollection *sprCol, int texIdxOffset, float fOffX /*= 0.0f*/, float fOffy /*= 0.0f*/)
+void CSprite::paint_firstModule_texOverride(CSpriteLib *sprCol, int texIdxOffset, float fOffX /*= 0.0f*/, float fOffy /*= 0.0f*/)
 {
 	assert(animationIdx < sprCol->Animations.Count());
 	assert(currentFrame < sprCol->Animations[animationIdx]->aframesNo);
@@ -292,7 +292,7 @@ void CSprite::paint_firstModule_texOverride(CSpriteCollection *sprCol, int texId
 
 
 
-void CSprite::paintFlippedInPlace(CSpriteCollection *sprCol, bool flipX, bool flipY)
+void CSprite::paintFlippedInPlace(CSpriteLib *sprCol, bool flipX, bool flipY)
 {
 	assert(animationIdx < sprCol->Animations.Count());
 	assert(currentFrame < sprCol->Animations[animationIdx]->aframesNo);
@@ -316,7 +316,7 @@ void CSprite::paintFlippedInPlace(CSpriteCollection *sprCol, bool flipX, bool fl
 }
 
 
-void CSprite::paintFrame(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, DWORD ncolor)
+void CSprite::paintFrame(CSpriteLib *sprCol, float nX, float nY, int animID, int frameID, DWORD ncolor)
 {
 	assert(animID < sprCol->Animations.Count());
 	assert(frameID < sprCol->Animations[animID]->aframesNo);
@@ -334,7 +334,7 @@ void CSprite::paintFrame(CSpriteCollection *sprCol, float nX, float nY, int anim
 	}
 }
 
-void CSprite::paintFrameModule(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, DWORD ncolor)
+void CSprite::paintFrameModule(CSpriteLib *sprCol, float nX, float nY, int animID, int frameID, int moduleID, DWORD ncolor)
 {
 	assert(animID < sprCol->Animations.Count());
 	assert(frameID < sprCol->Animations[animID]->aframesNo);
@@ -352,7 +352,7 @@ void CSprite::paintFrameModule(CSpriteCollection *sprCol, float nX, float nY, in
 }
 
 
-void CSprite::paintFrameClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, RectXYWHi& clipRct, DWORD ncolor)
+void CSprite::paintFrameClipped(CSpriteLib *sprCol, float nX, float nY, int animID, int frameID, RectXYWHi& clipRct, DWORD ncolor)
 {
 	assert(animID < sprCol->Animations.Count());
 	assert(frameID < sprCol->Animations[animID]->aframesNo);
@@ -410,7 +410,7 @@ void CSprite::paintFrameClipped(CSpriteCollection *sprCol, float nX, float nY, i
 	}
 }
 
-void CSprite::paintFrameModuleClipped(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, RectXYWH * clipRct, DWORD ncolor)
+void CSprite::paintFrameModuleClipped(CSpriteLib *sprCol, float nX, float nY, int animID, int frameID, int moduleID, RectXYWH * clipRct, DWORD ncolor)
 {
 	assert(animID < sprCol->Animations.Count());
 	assert(frameID < sprCol->Animations[animID]->aframesNo);
@@ -470,7 +470,7 @@ void CSprite::paintFrameModuleClipped(CSpriteCollection *sprCol, float nX, float
 		ncolor);
 }
 
-void CSprite::paintFrameModuleTiled(CSpriteCollection *sprCol, float X, float Y, int animID, int frameID, int moduleID, DWORD ncolor, int W, int H)
+void CSprite::paintFrameModuleTiled(CSpriteLib *sprCol, float X, float Y, int animID, int frameID, int moduleID, DWORD ncolor, int W, int H)
 {
 	RectXYWHi sprrect = sprCol->GetAFrameBBox_real(animID, frameID);
 	RectXYWHi destrect = sprrect;
@@ -529,7 +529,7 @@ void CSprite::paintFrameModuleTiled(CSpriteCollection *sprCol, float X, float Y,
 	}
 }
 
-void CSprite::paint(CSpriteCollection *sprCol, RECT *cliprect)
+void CSprite::paint(CSpriteLib *sprCol, RECT *cliprect)
 {
 	if((cliprect->right <= cliprect->left) || (cliprect->bottom <= cliprect->top))
 		return;
@@ -579,7 +579,7 @@ void CSprite::paint(CSpriteCollection *sprCol, RECT *cliprect)
 	}
 }
 
-void CSprite::paint(CSpriteCollection *sprCol, RectXYWHi *clipRct)
+void CSprite::paint(CSpriteLib *sprCol, RectXYWHi *clipRct)
 {
 	RECT cliprect;
 	SetRect(&cliprect, clipRct->x, clipRct->y, clipRct->x + clipRct->w, clipRct->y + clipRct->h);
@@ -631,7 +631,7 @@ void CSprite::paint(CSpriteCollection *sprCol, RectXYWHi *clipRct)
 	}
 }
 
-void CSprite::paintTiledOffset(CSpriteCollection *sprCol, int W, int H, int offsX, int offsY)
+void CSprite::paintTiledOffset(CSpriteLib *sprCol, int W, int H, int offsX, int offsY)
 {
 	if ((W == 0) || (H == 0))
 		return;
@@ -683,7 +683,7 @@ void CSprite::paintTiledOffset(CSpriteCollection *sprCol, int W, int H, int offs
 }
 
 
-void CSprite::paintTiled(CSpriteCollection *sprCol, int W, int H)
+void CSprite::paintTiled(CSpriteLib *sprCol, int W, int H)
 {
 	RectXYWHi sprrect = sprCol->GetAFrameBBox_real(animationIdx, currentFrame);
 	RectXYWHi destrect = sprrect;
@@ -782,7 +782,7 @@ void CSprite::paintTransformed(CSpriteMgr *sprManager, float scale, float rot)
 	s_pSprite->SetTransform(&g_matIdentity);
 }
 */
-void CSprite::paintTiledHOriented(CSpriteCollection *sprManager, D3DXVECTOR2 pt1, D3DXVECTOR2 pt2)
+void CSprite::paintTiledHOriented(CSpriteLib *sprManager, D3DXVECTOR2 pt1, D3DXVECTOR2 pt2)
 {
 	D3DXMATRIXA16 matr;
 	D3DXVECTOR2 vecdir = pt2 - pt1;
@@ -797,7 +797,7 @@ void CSprite::paintTiledHOriented(CSpriteCollection *sprManager, D3DXVECTOR2 pt1
 	}
 }
 
-void CSprite::paintTiledHOrientedOffset(CSpriteCollection *sprManager, D3DXVECTOR2 pt1, D3DXVECTOR2 pt2, int offsetX)
+void CSprite::paintTiledHOrientedOffset(CSpriteLib *sprManager, D3DXVECTOR2 pt1, D3DXVECTOR2 pt2, int offsetX)
 {
 	D3DXMATRIXA16 matr;
 	D3DXVECTOR2 vecdir = pt2 - pt1;
@@ -812,7 +812,7 @@ void CSprite::paintTiledHOrientedOffset(CSpriteCollection *sprManager, D3DXVECTO
 	}
 }
 
-void CSprite::PaintStretchedXOriented(CSpriteCollection *sprManager, D3DXVECTOR2 pt1, D3DXVECTOR2 pt2)
+void CSprite::PaintStretchedXOriented(CSpriteLib *sprManager, D3DXVECTOR2 pt1, D3DXVECTOR2 pt2)
 {
 	D3DXMATRIXA16 matr, matr2;
 	D3DXVECTOR2 vecdir = pt2 - pt1;
@@ -833,7 +833,7 @@ void CSprite::PaintStretchedXOriented(CSpriteCollection *sprManager, D3DXVECTOR2
 	}
 }
 
-void CSprite::PaintStretchedXOriented_texOverride(CSpriteCollection *sprManager, D3DXVECTOR2 pt1, D3DXVECTOR2 pt2, int texIdxOffset)
+void CSprite::PaintStretchedXOriented_texOverride(CSpriteLib *sprManager, D3DXVECTOR2 pt1, D3DXVECTOR2 pt2, int texIdxOffset)
 {
 	D3DXMATRIXA16 matr, matr2;
 	D3DXVECTOR2 vecdir = pt2 - pt1;
@@ -854,7 +854,7 @@ void CSprite::PaintStretchedXOriented_texOverride(CSpriteCollection *sprManager,
 	}
 }
 
-void CSprite::paintModule_texOverride(CSpriteCollection *sprCol, int nModuleIdx, int texIdxOffset)
+void CSprite::paintModule_texOverride(CSpriteLib *sprCol, int nModuleIdx, int texIdxOffset)
 {
 	_ASSERT(animationIdx < sprCol->Animations.Count());
 	_ASSERT(currentFrame < sprCol->Animations[animationIdx]->aframesNo);
@@ -871,7 +871,7 @@ void CSprite::paintModule_texOverride(CSpriteCollection *sprCol, int nModuleIdx,
 		color);
 }
 
-void CSprite::paintFrameNEW(CSpriteCollection *sprCol, Vec2 vPos, int animID, int frameID, DWORD ncolor, float fRotZ, Vec2 vScale)
+void CSprite::paintFrameNEW(CSpriteLib *sprCol, Vec2 vPos, int animID, int frameID, DWORD ncolor, float fRotZ, Vec2 vScale)
 {
 	_ASSERT(animID < sprCol->Animations.Count());
 	_ASSERT(frameID < sprCol->Animations[animID]->aframesNo);
@@ -890,7 +890,7 @@ void CSprite::paintFrameNEW(CSpriteCollection *sprCol, Vec2 vPos, int animID, in
 }
 
 //?? this is bad...
-void CSprite::paintFrameModuleNEW(CSpriteCollection *sprCol, float nX, float nY, int animID, int frameID, int moduleID, DWORD ncolor)
+void CSprite::paintFrameModuleNEW(CSpriteLib *sprCol, float nX, float nY, int animID, int frameID, int moduleID, DWORD ncolor)
 {
 	_ASSERT(animID < sprCol->Animations.Count());
 	_ASSERT(frameID < sprCol->Animations[animID]->aframesNo);

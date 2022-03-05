@@ -56,7 +56,7 @@ public:
 	// Updates the level area visibility and blocks visibility
 	bool					UpdateVisibility(RectXYWH camRect);
 	// orders building of the buffers
-	OPRESULT				BuildBuffers(PDEVICE pDevice, CSpriteCollection* pLightsSprCol);
+	OPRESULT				BuildBuffers(PDEVICE pDevice, CSpriteLib* pLightsSprCol);
 	// intersection of segment with tiles (nullptr if not intersecting)
 	CTile*					SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i *hitTilePosTL);
 	// writes the tiles that collide with the player in the ret_arrAABBs array. Returns number of added elements. Starts from 0 overwriting the ret_arrAABBs elements.

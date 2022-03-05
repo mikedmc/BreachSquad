@@ -1,21 +1,21 @@
 #include "dxstdafx.h"
-#include "spriteCollection.h"
+#include "spriteLib.h"
 
 
 //clasa CSpriteCollection
-CSpriteCollection::CSpriteCollection(void)
+CSpriteLib::CSpriteLib(void)
 {
 	m_pDevice = NULL;
 	bIsLoaded = false;
 }
 
-CSpriteCollection::~CSpriteCollection(void)
+CSpriteLib::~CSpriteLib(void)
 {
 	Release();
 }
 
 
-OPRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
+OPRESULT CSpriteLib::LoadSprites(WCHAR* wcsFullPath)
 {
 	if(bIsLoaded)
 	{
@@ -311,7 +311,7 @@ OPRESULT CSpriteCollection::LoadSprites(WCHAR* wcsFullPath)
 }
 
 
-void CSpriteCollection::Release()
+void CSpriteLib::Release()
 {
 	for(int kk=0; kk < Textures.GetSize(); kk++)
 	{
@@ -348,7 +348,7 @@ void CSpriteCollection::Release()
 //--- utilities ---
 
 //RETURNS: animIdx or -1 if animation wasn't found
-int CSpriteCollection::GetAnimationIdxByName(const CHAR* animName)
+int CSpriteLib::GetAnimationIdxByName(const CHAR* animName)
 {
 	UINT32 strHash = FastHash(animName, strlen(animName));
 
@@ -362,7 +362,7 @@ int CSpriteCollection::GetAnimationIdxByName(const CHAR* animName)
 }
 
 //RETURNS: animIdx or -1 if animation wasn't found
-int CSpriteCollection::GetAnimationIdxByName(const WCHAR* animName)
+int CSpriteLib::GetAnimationIdxByName(const WCHAR* animName)
 {
 	UINT32 strHash = FastHash(animName, wcslen(animName));
 
@@ -380,7 +380,7 @@ int CSpriteCollection::GetAnimationIdxByName(const WCHAR* animName)
  *
  * @return animation index or -1 if not found
  */
-int CSpriteCollection::GetAnimationIdxByNameHash(const UINT32 animNameHash)
+int CSpriteLib::GetAnimationIdxByNameHash(const UINT32 animNameHash)
 {
 	for (int kk = 0; kk < Animations.GetSize(); kk++)
 	{
@@ -391,7 +391,7 @@ int CSpriteCollection::GetAnimationIdxByNameHash(const UINT32 animNameHash)
 	return -1;
 }
 
-int CSpriteCollection::GetAFrameHitPointsCntFlag(int animIdx, int frameIdx, DWORD flagFilter)
+int CSpriteLib::GetAFrameHitPointsCntFlag(int animIdx, int frameIdx, DWORD flagFilter)
 {
 	if(animIdx >= Animations.GetSize())
 		return 0;
@@ -406,7 +406,7 @@ int CSpriteCollection::GetAFrameHitPointsCntFlag(int animIdx, int frameIdx, DWOR
 	return flcnt;
 }
 
-int CSpriteCollection::GetAFrameHitPointsCnt(int animIdx, int frameIdx)
+int CSpriteLib::GetAFrameHitPointsCnt(int animIdx, int frameIdx)
 {
 	if(animIdx >= Animations.GetSize())
 		return 0;
@@ -415,7 +415,7 @@ int CSpriteCollection::GetAFrameHitPointsCnt(int animIdx, int frameIdx)
 	return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->PointsNo;
 }
 
-bool CSpriteCollection::GetAFrameHitPoint(int animIdx, int frameIdx, int pointIdx, PointXYZi *outvar)
+bool CSpriteLib::GetAFrameHitPoint(int animIdx, int frameIdx, int pointIdx, PointXYZi *outvar)
 {
 	if(pointIdx >= AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->PointsNo)
 	{
@@ -435,7 +435,7 @@ bool CSpriteCollection::GetAFrameHitPoint(int animIdx, int frameIdx, int pointId
 	return true;
 }
 
-bool CSpriteCollection::GetAFrameHitPointFlag(int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, PointXYZi *outvar)
+bool CSpriteLib::GetAFrameHitPointFlag(int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, PointXYZi *outvar)
 {
 	if(outvar == NULL)
 	{
@@ -476,7 +476,7 @@ bool CSpriteCollection::GetAFrameHitPointFlag(int animIdx, int frameIdx, int poi
 	return false;
 }
 
-RectXYWHi CSpriteCollection::GetModuleRect(int animIdx, int frameIdx, int moduleIdx)
+RectXYWHi CSpriteLib::GetModuleRect(int animIdx, int frameIdx, int moduleIdx)
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	if ((animIdx >= Animations.GetSize()) || (frameIdx >= Animations[animIdx]->aframesNo) || (moduleIdx >= AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->fmodulesNo))
@@ -488,7 +488,7 @@ RectXYWHi CSpriteCollection::GetModuleRect(int animIdx, int frameIdx, int module
 	return FModules[AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->fmodulesIdx[moduleIdx]]->moduleXYWH;
 }
 
-RectLTRB CSpriteCollection::GetModuleRect_TexCoords(int animIdx, int frameIdx, int moduleIdx)
+RectLTRB CSpriteLib::GetModuleRect_TexCoords(int animIdx, int frameIdx, int moduleIdx)
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	if ((animIdx >= Animations.GetSize()) || (frameIdx >= Animations[animIdx]->aframesNo) || (moduleIdx >= AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->fmodulesNo))
@@ -502,7 +502,7 @@ RectLTRB CSpriteCollection::GetModuleRect_TexCoords(int animIdx, int frameIdx, i
 }
 
 
-SizeWHi CSpriteCollection::GetTextureSizeByAnim(int animIdx)
+SizeWHi CSpriteLib::GetTextureSizeByAnim(int animIdx)
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	if (animIdx >= Animations.GetSize())
@@ -515,7 +515,7 @@ SizeWHi CSpriteCollection::GetTextureSizeByAnim(int animIdx)
 	return SizeWHi(module->pImg->info.Width, module->pImg->info.Height);
 }
 
-scTexture* CSpriteCollection::GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx)
+scTexture* CSpriteLib::GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx)
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	if ((animIdx >= Animations.GetSize()) || (frameIdx >= Animations[animIdx]->aframesNo) || (moduleIdx >= AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->fmodulesNo))
@@ -529,7 +529,7 @@ scTexture* CSpriteCollection::GetTextureByAnim(int animIdx, int frameIdx, int mo
 }
 
 //-=-=-= SYSTEM / FRAMEWORK =-=-=-
-OPRESULT CSpriteCollection::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
+OPRESULT CSpriteLib::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
 {
 	m_pDevice = pDevice;
 	// Reload textures when device is lost
@@ -551,19 +551,19 @@ OPRESULT CSpriteCollection::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* 
 	return K_OP_OK;
 }
 
-OPRESULT CSpriteCollection::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
+OPRESULT CSpriteLib::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
 {
 	m_pDevice = pDevice;
 	return K_OP_OK;
 }
 
-OPRESULT CSpriteCollection::OnLostDevice(void)
+OPRESULT CSpriteLib::OnLostDevice(void)
 {
 	m_pDevice = NULL;
 	return K_OP_OK;
 }
 
-OPRESULT CSpriteCollection::OnDestroyDevice(void)
+OPRESULT CSpriteLib::OnDestroyDevice(void)
 {
 	m_pDevice = NULL;
 	//cand se pierde device-ul dezaloca texturile alocate pe device
