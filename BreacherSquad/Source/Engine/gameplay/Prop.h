@@ -28,7 +28,7 @@ class CProp : public IActiveInterface
 {
 public:
 	CSpr			sprite;
-	scFrameID		fid_ini;				// Initial animation and frame id
+	SprFrameId		fid_ini;				// Initial animation and frame id
 	DWORD			flags;
 	CStringHash		shClass;				// class of prop kept as string for max flexibility
 

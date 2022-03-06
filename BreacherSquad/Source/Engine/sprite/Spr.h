@@ -1,12 +1,15 @@
 #pragma once
 
+//--- EDITOR duration per frame (1000 = 1 sec) -----
+#define SPR_ED_TIMELINE 1000.0f
+
 // Identifier for a frame in an animation
-struct scFrameID
+struct SprFrameId
 {
 	int animIdx;
 	int frameIdx;
 
-	scFrameID() :
+	SprFrameId() :
 		animIdx(-1), frameIdx(0)
 	{}
 
@@ -16,6 +19,26 @@ struct scFrameID
 		frameIdx = nFrameIdx;
 	}
 };
+
+// Identifier for a frame in an animation. Use this instead of keeping separate anim and frame idx
+struct SprFrameIdEx
+{
+	int				spriteLibIdx;				// index of sprite lib in multi sprite lib configuration
+	int				animIdx;
+	int				frameIdx;
+
+	SprFrameIdEx() :
+		animIdx( -1 ), frameIdx( 0 ), spriteLibIdx( 0 )
+	{}
+
+	void Init( int nAnimIdx, int nFrameIdx, int nSpriteLibIdx = 0 )
+	{
+		animIdx = nAnimIdx;
+		frameIdx = nFrameIdx;
+		spriteLibIdx = nSpriteLibIdx;
+	}
+};
+
 
 enum eSpriteAnimState {
 	ANIM_STOPPED = 0,

@@ -47,7 +47,7 @@ public:
 	WCHAR				imagePath[MAX_PATH];
 	//CTOR
 	scTexture() :
-		pTex(NULL)
+		pTex(nullptr)
 	{
 	}
 };
@@ -137,7 +137,7 @@ public:
 	int								animationNo;
 	CArray<scAnimation*>			Animations;
 
-	CSpriteLib(void);
+	CSpriteLib();
 	~CSpriteLib(void);
 
 public:
@@ -153,11 +153,11 @@ public:
 	int								GetAnimationIdxByNameHash(const UINT32 animNameHash);
 
 	// Returns BBOX set from editor
-	inline RectXYWHi					GetAFrameBBox(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox; }
+	inline RectXYWHi				GetAFrameBBox(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox; }
 	inline UINT32					GetAFrameFlags(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->flags; }
 	inline UINT32					GetAnimFlags(int animIdx) { return Animations[animIdx]->flags; }
 	// Returns real BBOX computed at load time
-	inline RectXYWHi					GetAFrameBBox_real(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox_real; }
+	inline RectXYWHi				GetAFrameBBox_real(int animIdx, int frameIdx) { return AFrames[Animations[animIdx]->aframesIdx[frameIdx]]->BBox_real; }
 	RectXYWHi						GetModuleRect(int animIdx, int frameIdx, int moduleIdx);
 	RectLTRB						GetModuleRect_TexCoords(int animIdx, int frameIdx, int moduleIdx);
 	SizeWHi							GetTextureSizeByAnim(int animIdx);
@@ -173,13 +173,10 @@ public:
 	// Returns no of frames from an anim
 	inline const int				GetAFramesCnt(int anmIdx) const { return Animations[anmIdx]->aframesNo; }
 	
-	inline bool IsLooping(int animIdx)
-	{
-		return ((Animations[animIdx]->flags & K_EDITOR_ANIMATION_FLAG_LOOPED) != 0);
-	}
+	bool							IsLooping(int animIdx);
 
-	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
-	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
+	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr);
+	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr);
 	OPRESULT OnLostDevice(void);
 	OPRESULT OnDestroyDevice(void);
 };

@@ -331,8 +331,11 @@
     <ClInclude Include="Source\Engine\spine\SpineEventsListener.h" />
     <ClInclude Include="Source\Engine\spine\SpineManager.h" />
     <ClInclude Include="Source\Engine\spine\SpineTexLoader.h" />
-    <ClInclude Include="Source\Engine\Spr.h" />
-    <ClInclude Include="Source\Engine\SpritePainter.h" />
+    <ClInclude Include="Source\Engine\sprite\MultiSpriteLib.h" />
+    <ClInclude Include="Source\Engine\sprite\Spr.h" />
+    <ClInclude Include="Source\Engine\sprite\Sprite.h" />
+    <ClInclude Include="Source\Engine\sprite\SpriteLib.h" />
+    <ClInclude Include="Source\Engine\sprite\SpritePainter.h" />
     <ClInclude Include="Source\Engine\Steam.h" />
     <ClInclude Include="Source\Engine\Steam\SteamAchievements.h" />
     <ClInclude Include="Source\Engine\Steam\SteamLeaderboards.h" />
@@ -361,7 +364,6 @@
     <ClInclude Include="Source\Engine\utils\HashUtil.h" />
     <ClInclude Include="Source\Engine\utils\LinkedPool.h" />
     <ClInclude Include="Source\Engine\utils\List.h" />
-    <ClInclude Include="Source\Engine\utils\ParallaxBg.h" />
     <ClInclude Include="Source\Engine\utils\PlatformTypes.h" />
     <ClInclude Include="Source\Engine\utils\PoolGC.h" />
     <ClInclude Include="Source\Engine\utils\StringHash.h" />
@@ -374,8 +376,6 @@
     <ClInclude Include="Source\Engine\ScriptManager.h" />
     <ClInclude Include="Source\Engine\SoundManager.h" />
     <ClInclude Include="Source\Engine\Constants\sounds.h" />
-    <ClInclude Include="Source\Engine\Sprite.h" />
-    <ClInclude Include="Source\Engine\SpriteLib.h" />
     <ClInclude Include="Source\Engine\Constants\strings.h" />
     <ClInclude Include="Source\Engine\TextureManager.h" />
     <ClInclude Include="Source\Engine\Constants\tiles1_SPR.h" />
@@ -759,8 +759,11 @@
     <ClCompile Include="Source\Engine\spine\SpineEventsListener.cpp" />
     <ClCompile Include="Source\Engine\spine\SpineManager.cpp" />
     <ClCompile Include="Source\Engine\spine\SpineTexLoader.cpp" />
-    <ClCompile Include="Source\Engine\Spr.cpp" />
-    <ClCompile Include="Source\Engine\SpritePainter.cpp" />
+    <ClCompile Include="Source\Engine\sprite\MultiSpriteLib.cpp" />
+    <ClCompile Include="Source\Engine\sprite\Spr.cpp" />
+    <ClCompile Include="Source\Engine\sprite\Sprite.cpp" />
+    <ClCompile Include="Source\Engine\sprite\SpriteLib.cpp" />
+    <ClCompile Include="Source\Engine\sprite\SpritePainter.cpp" />
     <ClCompile Include="Source\Engine\Steam.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
@@ -788,7 +791,6 @@
     <ClCompile Include="Source\Engine\utils\dbgutil.cpp" />
     <ClCompile Include="Source\Engine\utils\enginecommon.cpp" />
     <ClCompile Include="Source\Engine\utils\HashUtil.cpp" />
-    <ClCompile Include="Source\Engine\utils\ParallaxBg.cpp" />
     <ClCompile Include="Source\Engine\utils\PlatformTypes.cpp" />
     <ClCompile Include="Source\Engine\utils\StringHash.cpp" />
     <ClCompile Include="Source\Engine\utils\StringHashA.cpp" />
@@ -809,12 +811,6 @@
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\SoundManager.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
-    </ClCompile>
-    <ClCompile Include="Source\Engine\Sprite.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
-    </ClCompile>
-    <ClCompile Include="Source\Engine\SpriteLib.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\TextureManager.cpp">

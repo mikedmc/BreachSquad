@@ -1239,21 +1239,21 @@ unsigned char* OS_readFileToBufferUC(const WCHAR* wcsPath, int &nRetSize)
 }
 
 
-int OS_GetFileNameWithoutExtension(WCHAR * destPath, int destSize, WCHAR * srcPath)
+int OS_GetFileNameWithoutExtension(WCHAR * destBuffer, int destSize, WCHAR * srcPath)
 {
 	if (srcPath == null)
 		return -1;
 	if ((int)wcslen(srcPath) == 0)
 		return 0;
 
-	StringCchCopy(destPath, destSize, srcPath);
+	StringCchCopy(destBuffer, destSize, srcPath);
 
-	int nIdx = (int)wcslen(destPath);
-	while (--nIdx > 0 && destPath[nIdx] != '.');
+	int nIdx = (int)wcslen(destBuffer);
+	while (--nIdx > 0 && destBuffer[nIdx] != '.');
 	if (nIdx <= 0)
 		return 0;
 
-	destPath[nIdx] = '\0';
+	destBuffer[nIdx] = '\0';
 	return nIdx;
 }
 

@@ -792,7 +792,7 @@ FORCEINLINE size_t		OS_fwrite(const void * _Str, size_t _Size, size_t _Count, FI
 char*					OS_readFileToBuffer(const WCHAR* wcsPath, int &nRetSize);
 unsigned char*			OS_readFileToBufferUC(const WCHAR* wcsPath, int &nRetSize);
 // Writes the path without extension in destPath and returns the length of the string 
-int						OS_GetFileNameWithoutExtension(WCHAR * destPath, int destSize, WCHAR * srcPath);
+int						OS_GetFileNameWithoutExtension(WCHAR * destBuffer, int destSize, WCHAR * srcPath);
 // Writes the extension in destStr (without the dot) and returns the length of the string or 0 on error or no dot found
 int						OS_GetFileNameExtension(WCHAR * destStr, int destSize, WCHAR * srcPath);
 

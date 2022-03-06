@@ -1,3 +1,6 @@
+#ifndef SAFE_DELETE_CArray
+#define SAFE_DELETE_CArray(p) { for(int xkx = 0; xkx < p.GetSize(); xkx++) { SAFE_DELETE(p[xkx]); } p.RemoveAll(); }
+#endif
 
 ///----------------------------------------------------------------------------------
 /// CArray - replaces CGrowableArray from dxut

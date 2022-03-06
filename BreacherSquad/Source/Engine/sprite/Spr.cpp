@@ -1,7 +1,5 @@
 #include "dxstdafx.h"
 #include "Spr.h"
-//--- EDITOR duration per frame (100 = 1 sec) -----
-#define SPR_ED_TIMELINE 100.0f
 
 ///--- STATIC MEMBERS ---
 CSpritePainter* CSpr::s_pSP = &__Painter();

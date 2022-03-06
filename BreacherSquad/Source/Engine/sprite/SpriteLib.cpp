@@ -528,6 +528,11 @@ scTexture* CSpriteLib::GetTextureByAnim(int animIdx, int frameIdx, int moduleIdx
 	return Textures[module->imgIdx];
 }
 
+inline bool CSpriteLib::IsLooping( int animIdx )
+{
+	return ((Animations[ animIdx ]->flags & K_EDITOR_ANIMATION_FLAG_LOOPED) != 0);
+}
+
 //-=-=-= SYSTEM / FRAMEWORK =-=-=-
 OPRESULT CSpriteLib::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
 {

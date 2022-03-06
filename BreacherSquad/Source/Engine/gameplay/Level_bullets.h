@@ -172,7 +172,7 @@ public:
 
 	CSpr				sprBullet;				// bullet sprite
 	bool				bAnimated;				// Sets itself when initialized. If animation is looped then we consider it to be animated.
-	scFrameID			fidLight;				// anim and frame for the light sprite
+	SprFrameId			fidLight;				// anim and frame for the light sprite
 
 	CBullet( CPointPhysComponent* pComPointPhys = nullptr );
 
