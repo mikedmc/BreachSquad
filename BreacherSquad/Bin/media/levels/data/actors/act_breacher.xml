@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+
+<ACTOR file="breacher.bsx">
+	<ACTOR_DATA sAIstate="DEFAULT" sWeapon="WPN_SMG_MP5A3"
+				bboxMinX="-8" bboxMinY="-6" bboxMaxX="8" bboxMaxY="2" nHeight="24"
+				sMaterial="FLESH" fLife="40.0" fArmor="0.0" 
+				fSpeedMove="150.0"
+				bCanCover="true" bCanInteract="true" />
+
+	<SKINS>
+	<!-- 
+	layerVisibilityMask number - each bit is 0 or 1 where least important bit is layerIdx 1
+	example: we have 6 layers and layer 1, 3 and 4 are visible in this skin => 1101 in binary is 13
+	Skins have quick access layer indexes to the hands layers as we need to be able to hide and show them depending on weapon loadout
+	-->
+		<SKIN name="default" layerVisibilityMask="23" handR_layerIdx="4" handL_layerIdx="0" />
+		<SKIN name="alt" layerVisibilityMask="27" handR_layerIdx="4" handL_layerIdx="0" />
+	</SKINS>
+
+	<ANIMS>
+		<!-- setting "set0" fills N,NE,SE,S with specified value -->
+		<REFPOSE		set0="REFPOSE" />
+		<IDLE			set0_N="IDLE" set0_NE="IDLE" set0_SE="IDLE" set0_S="IDLE" />	
+		<RUN 			set0_N="IDLE" set0_NE="IDLE" set0_SE="IDLE" set0_S="IDLE" />
+		<KICK			set0_N="IDLE" set0_NE="IDLE" set0_SE="IDLE" set0_S="IDLE" />
+		<DIE			set0_N="DEATH_N" set0_NE="DEATH_N" set0_SE="DEATH_S" set0_S="DEATH_S" />
+		<CROUCH			set0_N="CROUCH_N" set0_NE="CROUCH_NE" set0_SE="CROUCH_SE" set0_S="CROUCH_S" />
+	</ANIMS>
+
+	<VERSES>
+    <!--
+    <DIE set0="VOICE_ASSAULTER_DYING" set1="VOICE_ASSAULTER_DYING2" />
+    <TAKING_DAMAGE set0="VOICE_ASSAULTER_WOUNDED" set1="VOICE_ASSAULTER_WOUNDED2" />
+	-->
+	</VERSES>
+
+	<AI>
+		<STATE name="DEFAULT">
+			<TRIGGERING_EVENTS>
+				<AI_EVENT type="any" />
+			</TRIGGERING_EVENTS>
+
+			<BEHAVIORS>
+				<BEHAVIOR name="AI_BEHAVIOR_SET_ANIMSET" nSet="0" />
+				<BEHAVIOR name="AI_BEHAVIOR_PLAYER_CONTROL" bCanInterrupt="false" bDetectPlatforms="false" bIgnoreEvents="true" />
+			</BEHAVIORS>
+		</STATE>
+
+		<STATE name="DEAD" nPriority="10">
+			<TRIGGERING_EVENTS>
+				<AI_EVENT type="AI_EVENT_DEAD" />
+			</TRIGGERING_EVENTS>
+			<BEHAVIORS>
+				<BEHAVIOR name="AI_BEHAVIOR_DEAD" />
+			</BEHAVIORS>
+		</STATE>
+	</AI>
+
+</ACTOR>
+
