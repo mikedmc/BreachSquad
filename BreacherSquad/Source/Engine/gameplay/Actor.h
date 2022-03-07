@@ -7,13 +7,9 @@
 // max no of verse sets
 #define K_ACT_VERSES_MAX_SETS 2
 
-///--------------------------------------------------------------------------
-///--- ACTORS : clasa principala de inamici si personaje player
-///--------------------------------------------------------------------------
-
-//--> suspend flags used on actor->nSuspendedFlag 
+// suspend flags used on actor->nSuspendedFlag 
 #define K_LVL_SUSPENDFLAG_NONE 0
-//player suspended - fallen offscreen
+// player suspended - fallen offscreen
 #define K_LVL_SUSPENDFLAG_OUTSIDE_SCREEN 1
 
 
