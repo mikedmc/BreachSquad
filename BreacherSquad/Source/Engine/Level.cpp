@@ -422,7 +422,7 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 		return;
 	}
 
-	CActor* nact = SpawnActor(spawnPos, L"act_assaulter1.xml");
+	CActor* nact = SpawnActor(spawnPos, L"act_breacher.xml");
 
 	if (nact)
 	{
@@ -554,7 +554,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	}
 	*/
 
-	CActor* nact = new CActor(spawnPos, &templateLocal, GenerateNextID(), new CSpineAnimComponent());
+	CActor* nact = new CActor(spawnPos, &templateLocal, GenerateNextID(), new CSpriteAnimComponent());
 	// create a weapon and add it to the player's arsenal
 	CWeapon* wpn = Weapon_Create(L"WPN_SMG_MP5A3", nact);
 	nact->AddWeapon(wpn, true);
@@ -1121,7 +1121,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 
 	//does it exist?
 	CActorTemplate* templ = Actor_GetTemplate(strTemplateFileName);
-	if (templ != null)
+	if (templ != nullptr)
 	{
 		LOG_DBG(L"ActTemplates_Add - reusing template: %s", strTemplateFileName);
 		return templ;
@@ -1146,16 +1146,13 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 
 	templ = new CActorTemplate();
 	templ->shID.Init(strTemplateFileName);
-	templ->shSkeletonXML.Init(rootnode.attribute(L"sSkeletonTemplateXML").value());
-	if (templ->shSkeletonXML.IsEmpty())
+	templ->shSourceXML.Init(rootnode.attribute(L"file").value());
+	if (templ->shSourceXML.IsEmpty())
 	{
-		ErrorBox(K_ERR_WARNING, L"[WARNING] Template skeleton template XML not set!\n%s", templ->shSkeletonXML.text);
+		ErrorBox(K_ERR_WARNING, L"[WARNING] ActorTemplate source XML not set!\n%s", templ->shSourceXML.text);
 		SAFE_DELETE(templ);
-		return null;
+		return nullptr;
 	}
-	//read skin name (if any)
-	if (!rootnode.attribute(L"sSkin").empty())
-		templ->shSkinName.Init(rootnode.attribute(L"sSkin").value());
 
 	//ACTOR_DATA node
 	pugi::xml_node actnode = rootnode.child(L"ACTOR_DATA");
@@ -1189,40 +1186,57 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 		templ->shAIState_ini.Init(actnode.attribute(L"sAIstate").value());
 	}
 
-	//anims
+	// skins
+	pugi::xml_node skinsnode = rootnode.child( L"SKINS" );
+	int skinidx = 0;
+	if ( skinsnode != NULL )
+	{
+		for each(auto& nodeskin in skinsnode.children())
+		{
+			templ->arrSkins[ skinidx ].name.Init( nodeskin.attribute( L"name" ).value() );
+			templ->arrSkins[ skinidx ].layerVisibilityMask = nodeskin.attribute( L"layerVisibilityMask" ).as_uint();
+			templ->arrSkins[ skinidx ].hand_L = nodeskin.attribute( L"leftHandLayer" ).as_int();
+			templ->arrSkins[ skinidx ].hand_R = nodeskin.attribute( L"rightHandLayer" ).as_int();
+			skinidx++;
+		}
+	}
+	// create default skin if none present (all layers visible)
+	if ( skinidx == 0 )
+	{
+		templ->arrSkins[ skinidx ].name.Init( "default" );
+		ErrorBox( K_ERR_WARNING, L"No skin found in template:%s", strTemplateFileName );
+	}
+
+	// anims
 	pugi::xml_node anmnode = rootnode.child(L"ANIMS");
 	if (anmnode != NULL)
 	{
-		for (int kk = 0; kk < K_SD_ANIMS_CNT; kk++)
+		for (int kk = 0; kk < K_ACT_ANIMS_CNT; kk++)
 		{
-			pugi::xml_node nmnode = anmnode.child(ESpineAnimNames[kk].text);
+			pugi::xml_node nmnode = anmnode.child(EActorAnimNames[kk].text);
 			if (nmnode != NULL)
 			{
 				// read anim names
 				for (int nset = 0; nset < K_ACT_ANIM_MAX_SETS; nset++)
 				{
-					WCHAR strSetName[MAX_PATH];
-					StringCchPrintf(strSetName, MAX_PATH, L"set%d", nset);
-
-					if (!nmnode.attribute(strSetName).empty())
+					WCHAR strSetName[ MAX_PATH ];
+					swprintf_s(strSetName, MAX_PATH, L"set%d", nset );
+					// read set0 or set1 and set for all angles
+					if ( !nmnode.attribute( strSetName ).empty() )
 					{
-						templ->arrAnims[kk].animNamesA[nset].Init(nmnode.attribute(strSetName).value());
+						for ( int ang = 0; ang < EANGS_CNT; ang++ )
+							templ->arrAnims[ kk ].animNamesA[ nset ][ ang ].Init( nmnode.attribute( strSetName ).value() );
 					}
-
-					// first set is mandatory:
-					if (nset == 0)
+					// read all angles for every set and overwrite
+					for ( int ang = 0; ang < EANGS_CNT; ang++ )
 					{
-						if (templ->arrAnims[kk].animNamesA[nset].IsEmpty())
+						WCHAR strAnim[ MAX_PATH ];
+						swprintf_s( strAnim, MAX_PATH, L"%s_", strSetName, EAnimAngleNames[ang] );
+						if ( !nmnode.attribute( strAnim ).empty() )
 						{
-							ErrorBox(K_ERR_WARNING, L"[WARNING] Template set0 animation not found!\n %s: %s", templ->shSkeletonXML.text, ESpineAnimNames[kk].text);
+							templ->arrAnims[ kk ].animNamesA[ nset ][ ang ].Init( nmnode.attribute( strSetName ).value() );
 						}
 					}
-				}
-				// read looping flag
-				templ->arrAnims[kk].bLooping = true;
-				if (!nmnode.attribute(L"bLoop").empty())
-				{
-					templ->arrAnims[kk].bLooping = nmnode.attribute(L"bLoop").as_bool();
 				}
 			}
 		}
@@ -1356,7 +1370,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 	m_arrAItemplates.Add(aitemplate);
 	templ->AItemplate = aitemplate;
 
-	LOG_DBG(L"ActTemplates_Add - added template: %s", templ->shSkeletonXML.text);
+	LOG_DBG(L"ActTemplates_Add - added template: %s", templ->shSourceXML.text);
 
 	//finished loading template
 	m_arrTemplatesActor.Add(templ);
@@ -1392,13 +1406,13 @@ CActorTemplate* CLevel::Actor_GetTemplate(const WCHAR * templateName)
 		if (m_arrTemplatesActor[kk]->shID.getHash() == nameHash)
 			return m_arrTemplatesActor[kk];
 	}
-	return NULL;
+	return nullptr;
 }
 
 CActorTemplate* CLevel::Actor_GetTemplate(const DWORD templateNameHash)
 {
 	if (templateNameHash == 0)
-		return NULL;
+		return nullptr;
 
 	for (int kk = 0; kk < m_arrTemplatesActor.GetSize(); kk++)
 	{
@@ -1406,7 +1420,7 @@ CActorTemplate* CLevel::Actor_GetTemplate(const DWORD templateNameHash)
 			return m_arrTemplatesActor[kk];
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void CLevel::RandomizeTemplateActor(CActorTemplate * actTemplate)

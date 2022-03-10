@@ -4092,7 +4092,7 @@ void CControlsManager::Update( float dTime )
 
 		// send select commands
 		EControllerCommand arrSelectCommands[] = { K_CM_COMMAND_FIRE1, K_CM_COMMAND_JUMP, K_CM_COMMAND_SELECT };
-		for each(auto a in arrSelectCommands)
+		for each(auto & a in arrSelectCommands)
 		{
 			if ( ctrlr->sCommands.keyState[ a ] == K_CM_BUTSTATE_JUSTPRESSED )
 			{

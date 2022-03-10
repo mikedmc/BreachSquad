@@ -29,14 +29,14 @@ struct CAnimPtr {
 class CSpineAnimComponent : public IBaseAnimComponent
 {
 private:
-	ESpineAnim					eLastAnim[K_SACOMP_MAX_ANIM_TRACKS];	// Last anim set on one track so we don't set it again if already set (for mixing)
+	EActorAnim					eLastAnim[K_SACOMP_MAX_ANIM_TRACKS];	// Last anim set on one track so we don't set it again if already set (for mixing)
 	CStringHash					shParentName;							// Name of owner (optional)
 	int							nAnimSet;								// Selected ainmation set
 
 public:
 	CSpineManager::CSkeletonTemplate*		pSkelTemplate;	// Pointer to the skeleton template (don't deallocate, managed)
 	CSpineManager::CSkeletonInstance*		pSkeleton;		// Pointer to the skeleton instance (don't deallocate, managed)
-	CAnimPtr								arrAnimsPtr[K_SD_ANIMS_CNT]; // Direct pointer structure to animations declared in actor template (rarely updated)
+	CAnimPtr								arrAnimsPtr[K_ACT_ANIMS_CNT]; // Direct pointer structure to animations declared in actor template (rarely updated)
 
 public:
 	CSpineAnimComponent();
@@ -51,15 +51,15 @@ public:
 	void						SaveAnimationPointers(CActor& act);
 	bool						SetSkin(const char * strSkinName);
 	// Checks to see if specified animation is present (we should never have it on set 1 and not have it on set 0)
-	bool						HasAnimation(ESpineAnim nAnimType, int nSet = 0);
+	bool						HasAnimation(EActorAnim nAnimType, int nSet = 0);
 	// Loads all necessary data for specified actor
 	OPRESULT					InitFromFile(CActor& act, WCHAR * Path);
 
 	void						SetAnimSet(int newAnimSet);
 	FORCEINLINE int				GetAnimSet() const { return nAnimSet; }
 
-	spine::TrackEntry*			SetAnimOnce(int nTrack, ESpineAnim eAnim);
-	spine::TrackEntry*			AddAnimOnce(int nTrack, ESpineAnim eAnim, float fMixTime = K_SM_DEFAULT_MIX_DURATION, float fDelay = 0.0f);
+	spine::TrackEntry*			SetAnimOnce(int nTrack, EActorAnim eAnim);
+	spine::TrackEntry*			AddAnimOnce(int nTrack, EActorAnim eAnim, float fMixTime = K_SM_DEFAULT_MIX_DURATION, float fDelay = 0.0f);
 
 	void						SetAimVecLocal(Vec2 vLocalAim);
 	bool						GetGunPosWorld(Vec2 &retVec);

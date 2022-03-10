@@ -55,7 +55,7 @@ public:
 	{
 		code = (hr >= 0) ? K_OP_OK : K_OP_FAILED;
 		severity = eSeverity;
-		wsprintf(message, L"HRESULT: %d", hr);
+		swprintf_s(message, 256, L"HRESULT: %d", hr);
 
 		LogResult();
 	}
@@ -65,7 +65,7 @@ public:
 	{
 		code = (hr < 0) ? K_OP_FAILED : K_OP_OK;
 		severity = K_SEVERITY_NONE;
-		wsprintf(message, L"HRESULT:%ld", hr);
+		swprintf_s(message, 256, L"HRESULT:%ld", hr);
 	}
 
 	OPRESULT(eOpResult eCode, eOpSeverity eSeverity = K_SEVERITY_NONE) 
@@ -91,7 +91,7 @@ public:
 	{
 		code = (hr >= 0) ? K_OP_OK : K_OP_FAILED;
 		severity = eSeverity;
-		wsprintf(message, L"HRESULT[%d] %s", hr, strMessage);
+		swprintf_s(message, 256, L"HRESULT[%d] %s", hr, strMessage);
 
 		LogResult();
 	}

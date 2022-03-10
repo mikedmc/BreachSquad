@@ -419,7 +419,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 				{
 					std::wstring sProcessedPath = RemoveQuotationMarks( g_startupParam.text );
 					//starting game with forced map
-					StringCchPrintf( strLevelPath, MAX_PATH, L"%s", sProcessedPath.c_str() );
+					swprintf_s( strLevelPath, MAX_PATH, L"%s", sProcessedPath.c_str() );
 					//write current mission name and number
 					__Texts().SetString( STR_CURRENT_MISSION_VAL, L"" );
 				}

@@ -56,8 +56,8 @@ public:
 	static CSpritePainter*	s_pSP;						
 
 public:
-	CSpriteLib*		pSprCol;					// Pointer to sprite collection
-	int						animIdx;						// Animation index
+	CSpriteLib*				pSprCol;					// Pointer to sprite collection
+	int						animIdx;					// Animation index
 	int						frameIdx;					// Frame index in sprite collection
 	Vec2					pos;	
 	float					rotation;

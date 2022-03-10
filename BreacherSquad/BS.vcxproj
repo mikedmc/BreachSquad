@@ -272,8 +272,9 @@
     <ClInclude Include="Source\Engine\gameplay\AreasInventory.h" />
     <ClInclude Include="Source\Engine\gameplay\components\ComponentInterfaces.h" />
     <ClInclude Include="Source\Engine\gameplay\components\PhysPtComp.h" />
-    <ClInclude Include="Source\Engine\gameplay\components\SpineAnimComp.h" />
+    <ClInclude Include="Source\Engine\gameplay\components\SpriteAnimComp.h" />
     <ClInclude Include="Source\Engine\gameplay\LevelArea.h" />
+    <ClInclude Include="Source\Engine\gameplay\LevelDefines.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_bullets.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_doofers.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_visibility.h" />
@@ -686,7 +687,7 @@
     <ClCompile Include="Source\Engine\Game.cpp" />
     <ClCompile Include="Source\Engine\gameplay\AreasInventory.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\PhysPtComp.cpp" />
-    <ClCompile Include="Source\Engine\gameplay\components\SpineAnimComp.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\components\SpriteAnimComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\LevelArea.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_bullets.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_doofers.cpp" />

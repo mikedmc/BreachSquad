@@ -2000,7 +2000,7 @@ bool CApplication::InitSDL(HWND hWnd)
 	// load custom mappings (might not work on chinese paths)
 	/*
 	WCHAR dbpath[MAX_PATH];
-	wsprintf(dbpath, L"%sgamecontrollerdb.txt", g_wszExePath);
+	swprintf_s(dbpath, MAX_PATH, L"%sgamecontrollerdb.txt", g_wszExePath);
 	CHAR txtpath[1024] = { 0 };
 	WCHARtoUTF8(txtpath, dbpath, 1024);
 	*/

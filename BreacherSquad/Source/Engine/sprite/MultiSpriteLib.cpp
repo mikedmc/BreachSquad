@@ -53,6 +53,13 @@ int CMultiSpriteLib::GetLibIndex( WCHAR* wcsFullPath )
 	return -1;
 }
 
+CSpriteLib* CMultiSpriteLib::GetLib( int nLibIdx )
+{
+	if ((nLibIdx < 0) || (nLibIdx >= arrLibs.Count()))
+		return nullptr;
+	return &arrLibs[ nLibIdx ]->spriteLib;
+}
+
 OPRESULT CMultiSpriteLib::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= nullptr */ )
 {
 	m_pDevice = pDevice;

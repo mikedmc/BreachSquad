@@ -55,9 +55,7 @@ void CActor::PostConstructionInit()
 
 void CActor::BeginPlay()
 {
-	// empty tracks
-	c_graphics->SetAnimOnce(0, K_SD_ANIM_EMPTY);
-	c_graphics->SetAnimOnce(1, K_SD_ANIM_EMPTY);
+	c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE, eAngle);
 }
 
 void CActor::EndPlay()
@@ -71,9 +69,9 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 	return m_pAIcurrentState->m_arrBehaviors[m_nAIcurrentBehaviorIdx].nType;
 }
 
-CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpineAnimComponent* pComGraphics) :
+CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteAnimComponent* pComGraphics) :
 	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nLastDamageTakenFromUID(0),
-	pWeaponMain(nullptr), pClosestTouchable(nullptr), bAnimFlipX(false), eAnimAngle(EANG_S),
+	pWeaponMain(nullptr), pClosestTouchable(nullptr), bAnimFlipX(false), eAngle(EANG_S),
 	nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
 	eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0)
@@ -140,7 +138,7 @@ CActorTemplate::CActorTemplate() :
 	fHeight(32.0f)
 {
 	//reset anim IDs
-	for (int kk = 0; kk < K_SD_ANIMS_CNT; kk++)
+	for (int kk = 0; kk < K_ACT_ANIMS_CNT; kk++)
 	{
 		arrAnims[kk].Reset();
 	}
@@ -167,13 +165,13 @@ void CActorTemplate::FillDefaultValuesIfNotSet()
 
 bool CActorTemplate::OverwriteAnimsFromTemplate(CActorTemplate* pTemplate, bool bEraseOldAnimations /*= false*/)
 {
-	if (pTemplate == null)
+	if (pTemplate == NULL)
 	{
 		return false;
 	}
 
 	bool bChanged = false;
-	for (int kk = 0; kk < K_SD_ANIMS_CNT; kk++)
+	for (int kk = 0; kk < K_ACT_ANIMS_CNT; kk++)
 	{
 		if (bEraseOldAnimations)
 		{
@@ -183,12 +181,14 @@ bool CActorTemplate::OverwriteAnimsFromTemplate(CActorTemplate* pTemplate, bool 
 
 		for (int jj = 0; jj < K_ACT_ANIM_MAX_SETS; jj++)
 		{
-			//overwrite if existing
-			if (pTemplate->arrAnims[kk].animNamesA[jj].IsSet())
+			for ( int ang = 0; ang < EANGS_CNT; ang++ )
 			{
-				arrAnims[kk].animNamesA[jj] = pTemplate->arrAnims[kk].animNamesA[jj];
-				arrAnims[kk].bLooping = pTemplate->arrAnims[kk].bLooping;
-				bChanged = true;
+				//overwrite if existing
+				if ( pTemplate->arrAnims[ kk ].animNamesA[ jj ][ ang ].IsSet() )
+				{
+					arrAnims[ kk ].animNamesA[ jj ][ ang ] = pTemplate->arrAnims[ kk ].animNamesA[ jj ][ ang ];
+					bChanged = true;
+				}
 			}
 		}
 	}
@@ -287,6 +287,16 @@ void CActorTemplate::AddGenericDataFromTemplate(CActorTemplate* pTemplate)
 }
 
 
+UINT32 CActorTemplate::GetSkinMaskValue( char* skinName )
+{
+	for ( int kk = 0; kk < K_ACT_SKINS_MAX_SETS; kk++ )
+	{
+		if ( arrSkins[ kk ].name.IsEqual( skinName ) )
+			return arrSkins[kk].layerVisibilityMask;
+	}
+	return 0xfffffff;
+}
+
 bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 {
 	if (pActorTemplate == NULL)
@@ -334,7 +344,7 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 	// Load spine skeleton
 	WCHAR Path[MAX_PATH];
 	WCHAR wcsPath[MAX_PATH];
-	StringCchPrintf(wcsPath, MAX_PATH, L"media/levels/data/actors/%s", pActorTemplate->shSkeletonXML.text);
+	swprintf_s(wcsPath, MAX_PATH, L"media/levels/data/actors/%s", pActorTemplate->shSourceXML);
 	FileManager::GetMediaPath(wcsPath, Path);
 	c_graphics->InitFromFile(*this, Path);
 
@@ -352,9 +362,9 @@ void CActor::Update(float dTime)
 	this->fTimelineAI += dTime;
 
 	if(MUVec2AlmostZero(speed))
-		c_graphics->SetAnimOnce(0, K_SD_ANIM_IDLE);
+		c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE, eAngle);
 	else
-		c_graphics->SetAnimOnce(0, K_SD_ANIM_MOVE);
+		c_graphics->SetAnimOnce(K_ACT_ANIM_MOVE, eAngle);
 
 	//this->SetAnimOnce(1, K_SD_ANIM_SHOOT);
 
@@ -362,7 +372,7 @@ void CActor::Update(float dTime)
 	// set generic stuff
 	bAnimFlipX = (vAim.x < 0.0f) ? true : false;
 	int nAnimFlipMul = (bAnimFlipX) ? -1 : 1;
-	eAnimAngle = GetEAnimAngle(vAim);
+	eAngle = GetEAnimAngle(vAim);
 
 	// aiming IK node must be set each frame or they get reset by the animation
 	c_graphics->SetAimVecLocal(Vec2(vAim.x * nAnimFlipMul, -vAim.y));

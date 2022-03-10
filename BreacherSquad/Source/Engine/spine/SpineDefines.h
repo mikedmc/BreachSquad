@@ -1,48 +1,6 @@
 #pragma once
 
 
-///--------------------------------------------------------------------------
-/// ANIMATIONS
-///--------------------------------------------------------------------------
-
-// Specifies animation indexes for quick access
-enum ESpineAnim
-{
-	K_SD_ANIM_NOT_SET = -2,
-	K_SD_ANIM_EMPTY = -1,
-
-	K_SD_ANIM_IDLE,
-	K_SD_ANIM_IDLE_CROUCH,
-	K_SD_ANIM_MOVE,
-	K_SD_ANIM_MOVE_FAST,
-	K_SD_ANIM_MOVE_BK,
-	K_SD_ANIM_JUMP,
-	K_SD_ANIM_FALL,
-	K_SD_ANIM_AIM,
-	K_SD_ANIM_SHOOT,
-	K_SD_ANIM_SHOOT_ALT,
-	K_SD_ANIM_CLIMB_UP,
-	K_SD_ANIM_DIE,
-
-	K_SD_ANIMS_CNT
-};
-// must be same order as EAnims 
-const CStringHash ESpineAnimNames[K_SD_ANIMS_CNT] =
-{
-	L"IDLE",
-	L"IDLE_CROUCH",
-	L"MOVE",
-	L"MOVE_FAST",
-	L"MOVE_BK",
-	L"JUMP",
-	L"FALL",
-	L"AIM",
-	L"SHOOT",
-	L"SHOOT_ALT",
-	L"CLIMB_UP",
-	L"DIE",
-};
-
 
 ///----------------------------------------------------
 /// SPINE EVENTS

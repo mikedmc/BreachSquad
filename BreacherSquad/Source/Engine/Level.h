@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gameplay/GameConstants.h"
+#include "gameplay/LevelDefines.h"
 #include "gameplay/Tile.h"
 
 #include "gameplay/PhysicsPoint.h"

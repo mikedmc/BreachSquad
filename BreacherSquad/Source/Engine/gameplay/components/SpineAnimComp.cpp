@@ -52,7 +52,7 @@ void CSpineAnimComponent::UpdateTransform(CActor& act)
 void CSpineAnimComponent::SaveAnimationPointers(CActor& act)
 {
 	int nAnimsChanged = 0;
-	for (int anm = 0; anm < K_SD_ANIMS_CNT; anm++)
+	for (int anm = 0; anm < K_ACT_ANIMS_CNT; anm++)
 	{
 		for (int kk = 0; kk < K_SACOMP_ANIM_MAX_SETS; kk++)
 		{
@@ -108,7 +108,7 @@ bool CSpineAnimComponent::SetSkin(const char * strSkinName)
 	return true;
 }
 
-bool CSpineAnimComponent::HasAnimation(ESpineAnim nAnimType, int nSet)
+bool CSpineAnimComponent::HasAnimation(EActorAnim nAnimType, int nSet)
 {
 	if ((nSet < 0) || (nSet >= K_SACOMP_ANIM_MAX_SETS))
 		return false;
@@ -136,9 +136,9 @@ OPRESULT CSpineAnimComponent::InitFromFile(CActor& act, WCHAR * Path)
 	pSkeleton->skel->setScaleX(fScale);
 
 	// Set skin
-	if (act.actTemplate.shSkinName.IsSet())
+	if (act.actTemplate.shSourceXML.IsSet())
 	{
-		SetSkin(act.actTemplate.shSkinName.text);
+		SetSkin(act.actTemplate.shSourceXML.text);
 	}
 
 	// set pointers to spine animations for fast access
@@ -156,17 +156,17 @@ void CSpineAnimComponent::SetAnimSet(int newAnimSet)
 	}
 }
 
-spine::TrackEntry* CSpineAnimComponent::SetAnimOnce(int nTrack, ESpineAnim eAnim)
+spine::TrackEntry* CSpineAnimComponent::SetAnimOnce(int nTrack, EActorAnim eAnim)
 {
 	assert((nTrack >= 0) || (nTrack < K_SACOMP_MAX_ANIM_TRACKS));
-	assert((eAnim >= K_SD_ANIM_EMPTY) && (eAnim < K_SD_ANIMS_CNT));
+	assert((eAnim >= K_ACT_ANIM_EMPTY) && (eAnim < K_ACT_ANIMS_CNT));
 
 	spine::TrackEntry* trk = null;
 	if (eAnim != eLastAnim[nTrack])
 	{
 		eLastAnim[nTrack] = eAnim;
 
-		if (eAnim <= K_SD_ANIM_EMPTY)
+		if (eAnim <= K_ACT_ANIM_EMPTY)
 		{
 			LOG_DBG(L"ACTOR[%s].SetAnimOnce: Clearing track %d.", shParentName.text, nTrack);
 			pSkeleton->anim->setEmptyAnimation(nTrack, K_SM_DEFAULT_MIX_DURATION);
@@ -181,7 +181,7 @@ spine::TrackEntry* CSpineAnimComponent::SetAnimOnce(int nTrack, ESpineAnim eAnim
 			}
 			else
 			{
-				LOG_DBG(L"ACTOR[%s]:SetAnimOnce: ANIM NOT FOUND: %s", shParentName.text, ESpineAnimNames[(int)eAnim]);
+				LOG_DBG(L"ACTOR[%s]:SetAnimOnce: ANIM NOT FOUND: %s", shParentName.text, EActorAnimNames[(int)eAnim]);
 				//LOG_DBG("ANIM NOT FOUND! [%s]", actTemplate.arrAnims[(int)eAnim].animNamesA[this->nAnimSet].text);
 			}
 		}

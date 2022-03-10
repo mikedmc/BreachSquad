@@ -56,6 +56,8 @@ enum EAnimAngle {
 
 	EANGS_CNT,
 };
+// names of the animation directions
+CStringHash EAnimAngleNames[] = {L"NW", L"N", L"NE", L"SE", L"S", L"SW"};
 
 // Characters are animated on 6 directions: see EAnimAngle
 // Returns animation direction as int, starting with top(0)

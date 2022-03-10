@@ -1,11 +1,14 @@
 #pragma once
 
-#include "components/SpineAnimComp.h"
+#include "LevelDefines.h"
+#include "components/SpriteAnimComp.h"
 
 // max no of anim sets
 #define K_ACT_ANIM_MAX_SETS 2
 // max no of verse sets
 #define K_ACT_VERSES_MAX_SETS 2
+// max number of skins
+#define K_ACT_SKINS_MAX_SETS 5
 
 // suspend flags used on actor->nSuspendedFlag 
 #define K_LVL_SUSPENDFLAG_NONE 0
@@ -26,42 +29,52 @@ public:
 		K_ACT_CAPS_NOT_A_TARGET = 128,		// Literally not a target
 	};
 
-	// Animations descriptor
-	struct CAnimDesc {
-		bool				bLooping;
-		CStringHashA		animNamesA[K_ACT_ANIM_MAX_SETS];
+	// descriptor for skins array
+	struct CSkinDesc {
+		CStringHashA		name;
+		DWORD				layerVisibilityMask;	// layer visibility bit mask that gets applied (less important bit is layer index 0)
+		int					hand_L;					// left hand layer id
+		int					hand_R;					// right hand layer id
 
-		CAnimDesc() : bLooping(true)
-		{};
+		CSkinDesc() : layerVisibilityMask( 0xffffffff ), hand_L( -1 ), hand_R( -1 )
+		{}
+	};
+
+	// Animations descriptor (keeps animation names for each of the 6 angles, for every set)
+	struct CAnimDesc {
+		// Holds animation names [animSet][angle]
+		CStringHashA		animNamesA[ K_ACT_ANIM_MAX_SETS ][ EANGS_CNT ];
+
+		CAnimDesc()
+		{
+		};
 
 		void Reset()
 		{
-			bLooping = true;
-			for (int kk = 0; kk < K_ACT_ANIM_MAX_SETS; kk++)
-			{
-				animNamesA[kk].Reset();
-			}
+			for ( int sets = 0; sets < K_ACT_ANIM_MAX_SETS; sets++ )
+				for ( int ang = 0; ang < EANGS_CNT; ang++ )
+					animNamesA[ sets ][ ang ].Reset(); //not set
 		}
 	};
 
 	CStringHash		shID;				// ID: actor template file used as template ID
-	CStringHash		shSkeletonXML;		// skeleton xml file name (not full path)
-	CStringHashA	shSkinName;			// skeleton skin name
+	CStringHash		shSourceXML;		// skeleton xml file name (not full path)
 	CStringHash		shAIState_ini;		// initial AI state
 
-	CAnimDesc		arrAnims[K_SD_ANIMS_CNT];									// Array that keeps animation data from actor.xml
-	int				soundIDs[K_LVL_ACT_VERSES_COUNT][K_ACT_VERSES_MAX_SETS];	// Contains sound ids-s mapped on different actions (called verses, see EActorSoundVerse)
+	CSkinDesc		arrSkins[ K_ACT_SKINS_MAX_SETS ];							// Array that contains skin names and descriptions
+	CAnimDesc		arrAnims[ K_ACT_ANIMS_CNT ];									// Array that keeps animation data from actor.xml
+	int				soundIDs[ K_LVL_ACT_VERSES_COUNT ][ K_ACT_VERSES_MAX_SETS ];	// Contains sound ids-s mapped on different actions (called verses, see EActorSoundVerse)
 
 	///--- GENERICS: !!! when adding new generics don't forget to edit OverwriteGenericDataFromTemplate !!!
 	EMaterialType	eMaterial;			// type of material
 	EActorClass		actorClass;			// class of actor
-	CAITemplate*	AItemplate;	
+	CAITemplate*	AItemplate;
 
 	UINT32			eCaps;				// see EActorCapabilitiesFlags
 
 	float			fMass;
-	float			fLife;		
-	float			fArmor;		
+	float			fLife;
+	float			fArmor;
 	float			fSpeedMove;
 
 	CAABB			bbox;				// 2d bbox on floor plane defined around the character origin (not always centered)
@@ -76,23 +89,25 @@ public:
 
 	// Overwrites the current animations with the ones that are set in pTemplate
 	// \returns: true if animations have been changed
-	bool OverwriteAnimsFromTemplate(CActorTemplate* pTemplate, bool bEraseOldAnimations = false);
+	bool OverwriteAnimsFromTemplate( CActorTemplate* pTemplate, bool bEraseOldAnimations = false );
 
 	//Overwrites "generics" with the ones that are set in pTemplate (only if not K_NOT_SET)
-	void OverwriteGenericDataFromTemplate(CActorTemplate* pTemplate);
+	void OverwriteGenericDataFromTemplate( CActorTemplate* pTemplate );
 
 	//Adds "GENERIC" data from pTemplate to current template (weapon upgrades and such)
-	void AddGenericDataFromTemplate(CActorTemplate* pTemplate);
-
+	void AddGenericDataFromTemplate( CActorTemplate* pTemplate );
+	
+	// returns skin layer visibility flag or 0xffffffff if skin not found
+	UINT32 GetSkinMaskValue( char* skinName );
 };
 
 
 class CActor : public IActiveInterface
 {
-///--- COMPONENTS --- 
-/// Pointer components get deallocated by the actor, referenced ones are global so we don't touch them:
+	///--- COMPONENTS --- 
+	/// Pointer components get deallocated by the actor, referenced ones are global so we don't touch them:
 private:
-	CSpineAnimComponent*		c_graphics;		//graphics component that handles all painting and animation stuff
+	CSpriteAnimComponent*		c_graphics;		//graphics component that handles all painting and animation stuff
 public:
 	//ce info primeste de la senzori
 	class CAISensorInfo
@@ -133,11 +148,11 @@ public:
 	public:
 		bool				bThrust;  //#TODO: thrust might as well be a float (low precision float) and remove bRunning
 		Vec2				vMoveDir;
-		Vec2				vAimVec;		
+		Vec2				vAimVec;
 
-		bool				bRunning;	
-		bool				bCrouched;	
-		bool				bJump;		
+		bool				bRunning;
+		bool				bCrouched;
+		bool				bJump;
 		bool				bInteract;				// interact command
 		//EActorAnims			eOverrideAnim;	//if not empty, overrides actor animation
 
@@ -146,9 +161,9 @@ public:
 		EActorAttackState	eAttackCommand_last; //last attack command
 		//set icon commands
 		EActorIconTypes		nIconType;
-		float				fIconDuration;	
+		float				fIconDuration;
 		//color command: !=0 means color command is active
-		DWORD				nColor; 
+		DWORD				nColor;
 
 		CAICommands()
 		{
@@ -158,10 +173,10 @@ public:
 		void Reset()
 		{
 			bThrust = false;
-			vMoveDir = Vec2(0.0f, 0.0f);
-			
+			vMoveDir = Vec2( 0.0f, 0.0f );
+
 			bRunning = false;
-			vAimVec = Vec2(0.0f, 0.0f);
+			vAimVec = Vec2( 0.0f, 0.0f );
 
 			bCrouched = false;
 			bJump = false;
@@ -181,7 +196,7 @@ public:
 		{
 			bThrust = false;
 			bRunning = false;
-			vAimVec = Vec2(0.0f, 0.0f);
+			vAimVec = Vec2( 0.0f, 0.0f );
 
 			bCrouched = false;
 			bJump = false;
@@ -217,7 +232,7 @@ public:
 
 	Vec2		vMoveDirN;		//normalized movement direction
 
-	EAnimAngle	eAnimAngle;		// animation angle (6 possible ways)
+	EAnimAngle	eAngle;			// animation angle (6 possible ways)
 	bool		bAnimFlipX;		// do we need to flip the animation on X?
 
 	float		fLife, fArmor; //cata viata are si cata armura
@@ -239,7 +254,7 @@ public:
 	float		fSuspendedTimer;	//counts from when suspended flags is set
 	bool		bSuspendInput;		//if set keyboard input is ignored
 
-	void SetIcon(EActorIconTypes iconType, float fDuration = 0.0f); //seteaza icon
+	void SetIcon( EActorIconTypes iconType, float fDuration = 0.0f ); //seteaza icon
 
 	IActiveInterface*			pClosestTouchable;			// currently focused interactible object
 	eGenericState				eInteractState;				// state of interaction (NOTSET=not interacting, READY-selecting action, EXECUTING-started action, FINISHED-interact finished)
@@ -249,10 +264,10 @@ public:
 	CArray<CWeapon*>			arrWeapons;		// Collection of weapons available for current actor
 	CWeapon*					pWeaponMain;	// currently selected main weapon (points to arrWeapons)
 	// Adds a weapon to actor's arsenal
-	void						AddWeapon(CWeapon* wpn, bool bEquip);
+	void						AddWeapon( CWeapon* wpn, bool bEquip );
 	// Equips weapon from arsenal
-	void						EquipWeapon(int nWeaponIdx);
-	
+	void						EquipWeapon( int nWeaponIdx );
+
 	//player control and controller data
 	int			nPlayerOrdinal;	//player index (0-max_players_cnt)
 	int			nControllerInstanceID; //player controller ID (-1 for empty)
@@ -263,13 +278,13 @@ public:
 	CAISensorInfo	m_AIsensorInfo;	// AI sensory information
 	CAICommands		m_AIcommands;	// Commands issued by AI
 
-	CAIState*		m_pAIcurrentState; 
+	CAIState*		m_pAIcurrentState;
 	int				m_nAIcurrentBehaviorIdx; // current behaviour index (in current state) or -1 when not set
 	float			m_fAIbehaviorTimer;		// timer used for timed behaviors
-	EAIBehaviorType GetCurrentBehavior();	
+	EAIBehaviorType GetCurrentBehavior();
 
 	//CTOR
-	CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpineAnimComponent* pComGraphics);
+	CActor( Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteAnimComponent* pComGraphics );
 	~CActor();
 
 	const eActiveInterfaceType GetClassType() const {
@@ -279,21 +294,21 @@ public:
 	// tells if actor is alive and not hidden or deallocated, or inactive
 	bool					IsAlive();
 
-	void SetPos(Vec3 newPos) override;
-	void Move(Vec3 delta) override;
+	void SetPos( Vec3 newPos ) override;
+	void Move( Vec3 delta ) override;
 
 	// Updates specified Actor AI. Returns busy state TRUE if actor has jobs to do or false if actor is still
-	void					Update(float dTime);
+	void					Update( float dTime );
 	// Paints the actor on a specific color channel
-	FORCEINLINE void		Paint(ETexChannel eChannel = K_TEXCHAN_COLORMAP) { c_graphics->Paint(*this, eChannel); };
+	FORCEINLINE void		Paint( ETexChannel eChannel = K_TEXCHAN_COLORMAP ) { c_graphics->Paint( *this, eChannel ); };
 	// sets graphics anim set
-	void					SetAnimSet(int n_anim_set) { c_graphics->SetAnimSet(n_anim_set); }
+	void					SetAnimSet( int n_anim_set ) { c_graphics->SetAnimSet( n_anim_set ); }
 	// Plays the actor verse from the template handling the positional attenuation
-	void					PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly = false);
+	void					PlaySoundVersePos( D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly = false );
 	// Equips specified weapon and sets template
-	void					EquipWpn(CWeapon * pWeapon);
+	void					EquipWpn( CWeapon * pWeapon );
 	// Sets the actor's weapon and template upgrades and limitations generated by the weapon, adding them to actor initial template (after spawning, without weapons)
-	void					AddWpnTemplate(CWeapon * pWeapon);
+	void					AddWpnTemplate( CWeapon * pWeapon );
 	// Updates possible actions list when interacting with something
 	// Looks into the inventory, the touchable and the actor specs/template for specific actions
 	void					BuildActionsList();
@@ -306,5 +321,5 @@ public:
 
 private:
 	// Initializes CActor with specified template and sets all the data it needs. Returns false if it fails
-	bool					InitFromTemplate(CActorTemplate * pActorTemplate);
+	bool					InitFromTemplate( CActorTemplate * pActorTemplate );
 };

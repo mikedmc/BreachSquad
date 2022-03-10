@@ -11,10 +11,10 @@
 	<!-- 
 	layerVisibilityMask number - each bit is 0 or 1 where least important bit is layerIdx 1
 	example: we have 6 layers and layer 1, 3 and 4 are visible in this skin => 1101 in binary is 13
-	Skins have quick access layer indexes to the hands layers as we need to be able to hide and show them depending on weapon loadout
+	on top of the skin mask we show or hide the hands that we need (hence the hand layer idx
 	-->
-		<SKIN name="default" layerVisibilityMask="23" handR_layerIdx="4" handL_layerIdx="0" />
-		<SKIN name="alt" layerVisibilityMask="27" handR_layerIdx="4" handL_layerIdx="0" />
+		<SKIN name="one_handed_wpn" layerVisibilityMask="23" rightHandLayer="1" leftHandLayer="2" />
+		<SKIN name="two_handed_wpn" layerVisibilityMask="27" rightHandLayer="1" leftHandLayer="2" />
 	</SKINS>
 
 	<ANIMS>

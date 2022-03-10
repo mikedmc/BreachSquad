@@ -217,7 +217,8 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 
 	// declare that we're DPI aware (even with imgui off)
 	ImGui_ImplWin32_EnableDpiAwareness();
-
+	// useful setting the locale?
+	setlocale( LC_ALL, "en_US.utf8" );
 	//load game settings FIRST AND FOREMOST (includes selected language and so on)
 	UTApp().LoadSettings();
 	//initialize randomness

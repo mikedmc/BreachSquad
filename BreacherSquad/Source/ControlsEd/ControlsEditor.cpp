@@ -173,7 +173,7 @@ OPRESULT CControlsEditor::LoadCtrlTemplatesXML(WCHAR* XMLpath)
 	for (pugi::xml_attribute atr = layerNode.first_attribute(); atr; atr = atr.next_attribute())
 	{
 		WCHAR atrval[MAX_PATH];
-		StringCchPrintf(atrval, MAX_PATH, atr.value());
+		swprintf_s(atrval, MAX_PATH, atr.value());
 		layerTemplate.SetNamedVarString(atr.name(), atrval);
 	}
 	pugi::xml_node controlsNodes = doc.root().child(L"Layer");
@@ -183,7 +183,7 @@ OPRESULT CControlsEditor::LoadCtrlTemplatesXML(WCHAR* XMLpath)
 		for (pugi::xml_attribute atr = ctrlNode.first_attribute(); atr; atr = atr.next_attribute())
 		{
 			WCHAR atrval[MAX_PATH];
-			StringCchPrintf(atrval, MAX_PATH, atr.value());
+			swprintf_s(atrval, MAX_PATH, atr.value());
 			nCol->SetNamedVarString(atr.name(), atrval);
 		}
 		ctrlTemplates.Add(nCol);
@@ -201,7 +201,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 
 	int ctrlIdx = -1;
 	WCHAR type[MAX_PATH];
-	StringCchPrintf(type, MAX_PATH, currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByName(L"Type")->m_strArg.text);
+	swprintf_s(type, MAX_PATH, currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByName(L"Type")->m_strArg.text);
 	UINT id = FastHash(type);
 	for (int ii = 0; ii < ctrlTemplates.Count(); ii++)
 	{
@@ -516,7 +516,7 @@ void CControlsEditor::AddControl(CVariantCollection* vcol)
 		return;
 
 	WCHAR cType[MAX_PATH];
-	StringCchPrintfW(cType, MAX_PATH, vcol->GetVariantByName(L"Type")->m_strArg.text);
+	swprintf_s(cType, MAX_PATH, vcol->GetVariantByName(L"Type")->m_strArg.text);
 
 	CControl* nctrl = new CControl(cType);
 	nctrl->Initialize();
@@ -526,8 +526,8 @@ void CControlsEditor::AddControl(CVariantCollection* vcol)
 		WCHAR propertyName[MAX_PATH];
 		WCHAR propertyValue[MAX_PATH];
 
-		StringCchPrintf(propertyName, MAX_PATH, L"%s", var->m_name.text);
-		StringCchPrintf(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
+		swprintf_s(propertyName, MAX_PATH, L"%s", var->m_name.text);
+		swprintf_s(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
 		//If template has "empty" as ID then don't add the ID key
 		if ((wcscmp(propertyName, L"ID") == 0) && (wcscmp(propertyValue, L"empty") == 0))
 			continue;
@@ -553,9 +553,9 @@ void CControlsEditor::CloneControl(int offx, int offy)
 
 	// move it a little
 	WCHAR val[MAX_PATH];
-	StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->bbox.x + offx);
+	swprintf_s(val, MAX_PATH, L"%d", ctrl->bbox.x + offx);
 	UTGetGUI().SetParamValue(nctrl, L"X", val);
-	StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->bbox.y + offy);
+	swprintf_s(val, MAX_PATH, L"%d", ctrl->bbox.y + offy);
 	UTGetGUI().SetParamValue(nctrl, L"Y", val);
 
 	currLayer->controls.Add(nctrl);
@@ -564,7 +564,7 @@ void CControlsEditor::CloneControl(int offx, int offy)
 void CControlsEditor::Launch()
 {
 	WCHAR xmlpath[MAX_PATH];
-	StringCchPrintf(xmlpath, MAX_PATH, L"%sControlsEd/ctrlTemplates.xml", UTApp().g_wszExePath);
+	swprintf_s(xmlpath, MAX_PATH, L"%sControlsEd/ctrlTemplates.xml", UTApp().g_wszExePath);
 	LoadCtrlTemplatesXML(xmlpath);
 
 	RectXYWH worldrect = UTApp().g_rect360hWorld;
@@ -641,7 +641,7 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 
 			// tipul de control (Frame, Button, etc)
 			WCHAR ctrlType[MAX_PATH];
-			StringCchPrintfW(ctrlType, MAX_PATH, ctrlCol->GetVariantByName(L"Type")->m_strArg.text);
+			swprintf_s(ctrlType, MAX_PATH, ctrlCol->GetVariantByName(L"Type")->m_strArg.text);
 
 			// parcurg ctrlTemplates ca sa scriu atributele exact in ordinea din templates
 			for (int ll = 0; ll < ctrlTemplates.Count(); ll++)
@@ -657,7 +657,7 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 						{
 							WCHAR propertyName[MAX_PATH];
 							WCHAR propertyValue[MAX_PATH];
-							StringCchPrintf(propertyName, MAX_PATH, var->m_name.text);
+							swprintf_s(propertyName, MAX_PATH, var->m_name.text);
 							ctrlCol->GetVariantByName(propertyName)->asString(propertyValue, MAX_PATH);
 
 							// ID is empty string or equals the one in templates then we skip it
@@ -670,32 +670,32 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 							{
 								int intVal = _wtoi(propertyValue);
 								if (intVal >= 0 && wcscmp(propertyValue, L"_EMPTY_") != 0)
-									StringCchPrintf(propertyValue, MAX_PATH, L"%s", UTGetGUI().m_sprCol.Animations[intVal]->animName.text);
+									swprintf_s(propertyValue, MAX_PATH, L"%s", UTGetGUI().m_sprCol.Animations[intVal]->animName.text);
 								else
-									StringCchPrintf(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
+									swprintf_s(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
 							}
 							else if (wcscmp(propertyName, L"fontID") == 0)
 							{
 								int intVal = _wtoi(propertyValue);
 								if (intVal >= 0 && wcscmp(propertyValue, L"_EMPTY_") != 0)
-									StringCchPrintf(propertyValue, MAX_PATH, L"%s", __TexFonts().fonts[_wtoi(propertyValue)]->shFontName.text);
+									swprintf_s(propertyValue, MAX_PATH, L"%s", __TexFonts().fonts[_wtoi(propertyValue)]->shFontName.text);
 								else
-									StringCchPrintf(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
+									swprintf_s(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
 							}
 							else if (wcscmp(propertyName, L"stringID") == 0)
 							{
 								int strIdx = _wtoi(propertyValue);
 								if((strIdx < 0) || (strIdx == __Texts().defaultStringIdx))
-									StringCchPrintf(propertyValue, MAX_PATH, L"%s", var->m_strArg.text); //daca nu am pus id text pun ce era in template
+									swprintf_s(propertyValue, MAX_PATH, L"%s", var->m_strArg.text); //daca nu am pus id text pun ce era in template
 								else
-									StringCchPrintf(propertyValue, MAX_PATH, L"%s", __Texts().strings[strIdx]->shStringName.text);
+									swprintf_s(propertyValue, MAX_PATH, L"%s", __Texts().strings[strIdx]->shStringName.text);
 							}
 							else if ((wcscmp(propertyName, L"color") == 0) || (wcscmp(propertyName, L"fontColor") == 0))
 							{
 								// too short? save solid white. Otherwise the color has been converted to #xxxxxxxx already
 								if ((wcscmp(propertyValue, L"0") == 0) || (wcslen(propertyValue) < 2))
 								{
-									StringCchPrintf(propertyValue, MAX_PATH, L"#ffffffff");
+									swprintf_s(propertyValue, MAX_PATH, L"#ffffffff");
 								}
 							}
 
@@ -860,9 +860,9 @@ void CControlsEditor::Update(float dTime)
 
 							WCHAR val[MAX_PATH];
 							CControl* ctrl = currLayer->controls[selCtrl];
-							StringCchPrintfW(val, MAX_PATH, L"%d", bbox.x);
+							swprintf_s(val, MAX_PATH, L"%d", bbox.x);
 							UTGetGUI().SetParamValue(ctrl, L"X", val);
-							StringCchPrintfW(val, MAX_PATH, L"%d", bbox.y);
+							swprintf_s(val, MAX_PATH, L"%d", bbox.y);
 							UTGetGUI().SetParamValue(ctrl, L"Y", val);
 						}
 					}
@@ -957,13 +957,13 @@ void CControlsEditor::Update(float dTime)
 							int selCtrl = selectedCtrls.GetAt(ii);
 							CControl* ctrl = currLayer->controls[selCtrl];
 							WCHAR val[MAX_PATH];
-							StringCchPrintfW(val, MAX_PATH, L"%d", BBox.x);
+							swprintf_s(val, MAX_PATH, L"%d", BBox.x);
 							UTGetGUI().SetParamValue(ctrl, L"X", val);
-							StringCchPrintfW(val, MAX_PATH, L"%d", BBox.y);
+							swprintf_s(val, MAX_PATH, L"%d", BBox.y);
 							UTGetGUI().SetParamValue(ctrl, L"Y", val);
-							StringCchPrintfW(val, MAX_PATH, L"%d", BBox.w);
+							swprintf_s(val, MAX_PATH, L"%d", BBox.w);
 							UTGetGUI().SetParamValue(ctrl, L"W", val);
-							StringCchPrintfW(val, MAX_PATH, L"%d", BBox.h);
+							swprintf_s(val, MAX_PATH, L"%d", BBox.h);
 							UTGetGUI().SetParamValue(ctrl, L"H", val);
 						}
 					}
@@ -1093,12 +1093,12 @@ void CControlsEditor::ReceiveKeys(UINT key)
 				WCHAR val[MAX_PATH];
 				if (DXUTIsKeyDown(VK_MENU))
 				{
-					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().h - dY);
+					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().h - dY);
 					UTGetGUI().SetParamValue(ctrl, L"H", val);
 				}
 				else
 				{
-					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().y - dY);
+					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().y - dY);
 					UTGetGUI().SetParamValue(ctrl, L"Y", val);
 				}
 			}
@@ -1119,12 +1119,12 @@ void CControlsEditor::ReceiveKeys(UINT key)
 				WCHAR val[MAX_PATH];
 				if (DXUTIsKeyDown(VK_MENU))
 				{
-					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().h + dY);
+					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().h + dY);
 					UTGetGUI().SetParamValue(ctrl, L"H", val);
 				}
 				else
 				{
-					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().y + dY);
+					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().y + dY);
 					UTGetGUI().SetParamValue(ctrl, L"Y", val);
 				}
 			}
@@ -1145,12 +1145,12 @@ void CControlsEditor::ReceiveKeys(UINT key)
 				WCHAR val[MAX_PATH];
 				if (DXUTIsKeyDown(VK_MENU))
 				{
-					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().w - dX);
+					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().w - dX);
 					UTGetGUI().SetParamValue(ctrl, L"W", val);
 				}
 				else
 				{
-					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().x - dX);
+					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().x - dX);
 					UTGetGUI().SetParamValue(ctrl, L"X", val);
 				}
 			}
@@ -1171,12 +1171,12 @@ void CControlsEditor::ReceiveKeys(UINT key)
 				WCHAR val[MAX_PATH];
 				if (DXUTIsKeyDown(VK_MENU))
 				{
-					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().w + dX);
+					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().w + dX);
 					UTGetGUI().SetParamValue(ctrl, L"W", val);
 				}
 				else
 				{
-					StringCchPrintfW(val, MAX_PATH, L"%d", ctrl->GetBBox().x + dX);
+					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().x + dX);
 					UTGetGUI().SetParamValue(ctrl, L"X", val);
 				}
 			}
@@ -1262,7 +1262,7 @@ void CControlsEditor::CenterElements(bool H, bool V)
 				int ctrlX = ctrl->bbox.x;
 				WCHAR val[MAX_PATH];
 				int intVal = -(xmin - ctrlX) - dx;
-				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
+				swprintf_s(val, MAX_PATH, L"%d", intVal);
 				UTGetGUI().SetParamValue(ctrl, L"X", val);
 			}
 		}
@@ -1274,7 +1274,7 @@ void CControlsEditor::CenterElements(bool H, bool V)
 				CControl* lCtrl = currLayer->controls[currCtrlIdx];
 				int ctrlW = lCtrl->bbox.w;
 				int intVal = -(ctrlW / 2);
-				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
+				swprintf_s(val, MAX_PATH, L"%d", intVal);
 				UTGetGUI().SetParamValue(lCtrl, L"X", val);
 			}
 		}
@@ -1312,7 +1312,7 @@ void CControlsEditor::CenterElements(bool H, bool V)
 				WCHAR val[MAX_PATH];
 				int ctrlY = ctrl->bbox.y;
 				int intVal = -(ymin - ctrlY) - dy;
-				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
+				swprintf_s(val, MAX_PATH, L"%d", intVal);
 				UTGetGUI().SetParamValue(ctrl, L"Y", val);
 			}
 		}
@@ -1324,7 +1324,7 @@ void CControlsEditor::CenterElements(bool H, bool V)
 				CControl* lCtrl = currLayer->controls[currCtrlIdx];
 				int ctrlH = lCtrl->bbox.h;
 				int intVal = -(ctrlH / 2);
-				StringCchPrintfW(val, MAX_PATH, L"%d", intVal);
+				swprintf_s(val, MAX_PATH, L"%d", intVal);
 				UTGetGUI().SetParamValue(currLayer->controls[currCtrlIdx], L"Y", val);
 			}
 		}
@@ -1513,7 +1513,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 			CCtrlLayer* nlayer = currLayer->Clone();
 			testLayer = currLayer;
 			WCHAR newName[MAX_PATH];
-			StringCchPrintfW(newName, MAX_PATH, L"%s_%d", currLayer->ID.text, randint(100));
+			swprintf_s(newName, MAX_PATH, L"%s_%d", currLayer->ID.text, randint(100));
 			nlayer->ID.Init(newName);
 			UTGetGUI().layersDefinitions.Add(nlayer);
 

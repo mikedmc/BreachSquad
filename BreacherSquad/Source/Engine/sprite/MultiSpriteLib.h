@@ -23,16 +23,7 @@ public:
 	void							Release();
 	// Returns index of library or -1 if not found. strLibId is the lib path
 	int								GetLibIndex( WCHAR* wcsFullPath );
-
-	const CSpriteLib& operator[]( int nIndex ) const
-	{
-		return arrLibs[nIndex]->spriteLib;
-	}
-
-	CSpriteLib& operator[]( int nIndex )
-	{
-		return arrLibs[ nIndex ]->spriteLib;
-	}
+	CSpriteLib*						GetLib( int nLibIdx );
 
 
 public:

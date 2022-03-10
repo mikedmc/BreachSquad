@@ -1439,7 +1439,7 @@ bool OS_DeleteRecursive(WCHAR r_szPath[1024])
 			{
 				if (wcscmp(FindFileData.cFileName, L".."))
 				{
-					wsprintf(l_szNewPath, L"%s/%s", l_szPath, FindFileData.cFileName);
+					swprintf_s(l_szNewPath, 1025, L"%s/%s", l_szPath, FindFileData.cFileName);
 					OS_DeleteRecursive(l_szNewPath);
 				}
 			}
@@ -1447,7 +1447,7 @@ bool OS_DeleteRecursive(WCHAR r_szPath[1024])
 		else
 		{
 			WCHAR l_szFile[1025] = { 0 };
-			wsprintf(l_szFile, L"%s/%s", l_szPath, FindFileData.cFileName);
+			swprintf_s(l_szFile, 1025, L"%s/%s", l_szPath, FindFileData.cFileName);
 			if (!DeleteFile(l_szFile))
 			{
 				LOG(L"OS_DeleteRecursive could not DeleteFile: %s", l_szFile);
@@ -1512,8 +1512,8 @@ bool OS_CopyRecursive(WCHAR r_szSrcPath[1024], WCHAR r_szDesPath[1024])
 			{
 				if (wcscmp(FindFileData.cFileName, L".."))
 				{
-					wsprintf(l_szNewDesPath, L"%s/%s", l_szDesPath, FindFileData.cFileName);
-					wsprintf(l_szNewSrcPath, L"%s/%s", l_szSrcPath, FindFileData.cFileName);
+					swprintf_s(l_szNewDesPath, 1025, L"%s/%s", l_szDesPath, FindFileData.cFileName);
+					swprintf_s(l_szNewSrcPath, 1025, L"%s/%s", l_szSrcPath, FindFileData.cFileName);
 					CreateDirectory(l_szNewDesPath, NULL);
 					OS_CopyRecursive(l_szNewSrcPath, l_szNewDesPath);
 				}
@@ -1523,8 +1523,8 @@ bool OS_CopyRecursive(WCHAR r_szSrcPath[1024], WCHAR r_szDesPath[1024])
 		{
 			WCHAR l_szSrcFile[1025] = { 0 };
 			WCHAR l_szDesFile[1025] = { 0 };
-			wsprintf(l_szDesFile, L"%s/%s", l_szDesPath, FindFileData.cFileName);
-			wsprintf(l_szSrcFile, L"%s/%s", l_szSrcPath, FindFileData.cFileName);
+			swprintf_s(l_szDesFile, 1025, L"%s/%s", l_szDesPath, FindFileData.cFileName);
+			swprintf_s(l_szSrcFile, 1025, L"%s/%s", l_szSrcPath, FindFileData.cFileName);
 			BOOL l_bRet = CopyFile(l_szSrcFile, l_szDesFile, FALSE); //overwrites existing files
 			if (!l_bRet) 
 			{

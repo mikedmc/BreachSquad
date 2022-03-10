@@ -40,7 +40,7 @@ OPRESULT CLevelEditor::Init()
 {
 	// load necessary sprites from file
 	WCHAR wsPath[MAX_PATH];
-	wsprintf(wsPath, L"%s/interfaces/lvled.bsx", UTApp().g_wszAppResDir);
+	swprintf_s(wsPath, MAX_PATH, L"%s/interfaces/lvled.bsx", UTApp().g_wszAppResDir);
 
 	V_OP_RET(m_sprCol.LoadSprites(wsPath));
 

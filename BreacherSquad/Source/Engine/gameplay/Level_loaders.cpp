@@ -120,7 +120,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	for (auto area : UTGetMissionGen().m_arrPlaced)
 	{
 		WCHAR tmppath[MAX_PATH];
-		wsprintf(tmppath, L"media/levels/areas/%s.area", area->strAreaFile.c_str());
+		swprintf_s(tmppath, MAX_PATH, L"media/levels/areas/%s.area", area->strAreaFile.c_str());
 		FileManager::GetMediaPath(tmppath, Path);
 		V_OP_RET(LoadArea(Path, area->nID, Vec2i(area->AABB.x * K_LGEN_BLOCK_W, area->AABB.y * K_LGEN_BLOCK_H)));
 	}
