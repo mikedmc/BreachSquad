@@ -75,7 +75,7 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 			padL = max(padL, 1);
 			padU = max(padU, 1);
 			padD = max(padD, 1);
-			D3DCOLOR_UNPACKTOBYTE(pStyle->dwOutlineColor, outlineA, outlineR, outlineG, outlineB);
+			DW_COLOR_GETBYTES(pStyle->dwOutlineColor, outlineA, outlineR, outlineG, outlineB);
 			fOutlineA = (float)outlineA / 255.0f;
 		}
 	}

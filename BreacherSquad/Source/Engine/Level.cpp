@@ -422,7 +422,7 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 		return;
 	}
 
-	CActor* nact = SpawnActor(spawnPos, L"act_breacher.xml");
+	CActor* nact = SpawnActor(spawnPos, L"act_shield.xml");
 
 	if (nact)
 	{
@@ -554,7 +554,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	}
 	*/
 
-	CActor* nact = new CActor(spawnPos, &templateLocal, GenerateNextID(), new CSpriteAnimComponent());
+	CActor* nact = new CActor(spawnPos, &templateLocal, GenerateNextID(), new CSpriteAnimComponent(&m_sprActors));
 	// create a weapon and add it to the player's arsenal
 	CWeapon* wpn = Weapon_Create(L"WPN_SMG_MP5A3", nact);
 	nact->AddWeapon(wpn, true);
@@ -1194,9 +1194,9 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 		for each(auto& nodeskin in skinsnode.children())
 		{
 			templ->arrSkins[ skinidx ].name.Init( nodeskin.attribute( L"name" ).value() );
-			templ->arrSkins[ skinidx ].layerVisibilityMask = nodeskin.attribute( L"layerVisibilityMask" ).as_uint();
-			templ->arrSkins[ skinidx ].hand_L = nodeskin.attribute( L"leftHandLayer" ).as_int();
-			templ->arrSkins[ skinidx ].hand_R = nodeskin.attribute( L"rightHandLayer" ).as_int();
+			templ->arrSkins[ skinidx ].layersVisMask = nodeskin.attribute( L"layersVisibilityMask" ).as_uint();
+			templ->arrSkins[ skinidx ].hand_L = nodeskin.attribute( L"leftHandLayer" ).as_uint();
+			templ->arrSkins[ skinidx ].hand_R = nodeskin.attribute( L"rightHandLayer" ).as_uint();
 			skinidx++;
 		}
 	}
@@ -1224,14 +1224,14 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 					// read set0 or set1 and set for all angles
 					if ( !nmnode.attribute( strSetName ).empty() )
 					{
-						for ( int ang = 0; ang < EANGS_CNT; ang++ )
+						for ( int ang = 0; ang < EDIR6S_CNT; ang++ )
 							templ->arrAnims[ kk ].animNamesA[ nset ][ ang ].Init( nmnode.attribute( strSetName ).value() );
 					}
 					// read all angles for every set and overwrite
-					for ( int ang = 0; ang < EANGS_CNT; ang++ )
+					for ( int ang = 0; ang < EDIR6S_CNT; ang++ )
 					{
 						WCHAR strAnim[ MAX_PATH ];
-						swprintf_s( strAnim, MAX_PATH, L"%s_", strSetName, EAnimAngleNames[ang] );
+						swprintf_s( strAnim, MAX_PATH, L"%s_", strSetName, EDir6Names[ang] );
 						if ( !nmnode.attribute( strAnim ).empty() )
 						{
 							templ->arrAnims[ kk ].animNamesA[ nset ][ ang ].Init( nmnode.attribute( strSetName ).value() );
@@ -8029,7 +8029,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 		//{ floor(camrect.x * K_GAME_PIXEL_SIZE_F) / K_GAME_PIXEL_SIZE_F, floor(camrect.y * K_GAME_PIXEL_SIZE_F) / K_GAME_PIXEL_SIZE_F, camrect.w, camrect.h } //RTT rect_xywh in world coords
 	};
 
-	AdditiveBlendingON(m_pDevice, NULL);
+	DeviceAdditiveON(m_pDevice);
 	
 	/*
 	// directional light with shader, more expensive, harder to control
@@ -8086,7 +8086,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 	}
 
 
-	AdditiveBlendingOFF(m_pDevice, NULL);
+	DeviceAdditiveOFF(m_pDevice);
 	///--- ambient light(s)
 	// paint all general ambient lights and area lights here
 	//#TODO: paint one ambiental per area!
@@ -8118,7 +8118,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 	///----------------------------------------------------------------------------------
 	/// LIGHTS
 	///----------------------------------------------------------------------------------
-	AdditiveBlendingON(m_pDevice, NULL);
+	DeviceAdditiveON(m_pDevice);
 
 	///--- bullet lights
 	// bullet shadows
@@ -8242,7 +8242,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 	UTGetShaderManager().SetPS(nullptr);
 
 
-	AdditiveBlendingOFF(m_pDevice, NULL);
+	DeviceAdditiveOFF(m_pDevice);
 	// end sprite painter
 	__Painter().End();
 

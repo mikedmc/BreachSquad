@@ -412,7 +412,7 @@ int CSpriteLib::GetAFrameHitPointsCnt( int animIdx, int frameIdx )
 	return AFrames[ Animations[ animIdx ]->aframesIdx[ frameIdx ] ]->PointsNo;
 }
 
-bool CSpriteLib::GetAFrameHitPoint( int animIdx, int frameIdx, int pointIdx, PointXYZi *outvar )
+bool CSpriteLib::GetAFrameHitPoint( int animIdx, int frameIdx, int pointIdx, Vec3i *outvar )
 {
 	if ( pointIdx >= AFrames[ Animations[ animIdx ]->aframesIdx[ frameIdx ] ]->PointsNo )
 	{
@@ -432,7 +432,7 @@ bool CSpriteLib::GetAFrameHitPoint( int animIdx, int frameIdx, int pointIdx, Poi
 	return true;
 }
 
-bool CSpriteLib::GetAFrameHitPointFlag( int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, PointXYZi *outvar )
+bool CSpriteLib::GetAFrameHitPointFlag( int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, Vec3i *outvar )
 {
 	if ( outvar == nullptr )
 	{

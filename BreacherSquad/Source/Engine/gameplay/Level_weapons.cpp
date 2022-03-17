@@ -59,10 +59,12 @@ EnumWeaponStatus CLevel::Weapon_Update(CWeapon * weapon, float dTime)
 	}
 
 	//update muzzle flash
+	/*
 	if (weapon->m_sprMuzzleFlash.animationIdx >= 0)
 	{
 		weapon->m_sprMuzzleFlash.Update(&m_sprActors, dTime);
 	}
+	*/
 
 	//update aiming errors
 	weapon->fTimeSinceShot += dTime;
@@ -479,8 +481,10 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 
 		//muzzle flash anim
 		templ->nMuzzleFlashAnim = -1;
+		/*
 		if (!bnode.attribute(L"sMuzzleFlashAnim").empty())
 			templ->nMuzzleFlashAnim = m_sprActors.GetAnimationIdxByName(bnode.attribute(L"sMuzzleFlashAnim").value());
+			*/
 		//template overwrite sTemplateOverwrite - overwrites the actor default template (Adds to it)
 		if (!bnode.attribute(L"sTemplateOverwrite").empty())
 		{

@@ -50,24 +50,24 @@ DWORD DW_COLOR_LERP( DWORD dwFrom, DWORD dwTo, float s )
 	return DW_COLORVALUE( colOut.x, colOut.y, colOut.z, colOut.w );
 }
 
-EAnimAngle GetEAnimAngle(Vec2 vDir)
+EDir6 GetDir6FromVec(Vec2 vDir)
 {
 	if ((vDir.x == 0.0f) && (vDir.y == 0.0f))
-		return EANG_S;
+		return EDIR6_S;
 	// angle between -pi..pi
 	float fang = atan2(vDir.y, vDir.x);
 	int retang = 0;
 	// divide angle in 3 equal parts and convert to EANG_
 	if (fang < 0.0f)
-		retang = ((int)EANG_NE - (int)fabs((fang / PI) * 3.0f));
+		retang = ((int)EDIR6_NE - (int)fabs((fang / PI) * 3.0f));
 	else
-		retang = ((int)EANG_SE + (int)fabs((fang / PI) * 3.0f));
+		retang = ((int)EDIR6_SE + (int)fabs((fang / PI) * 3.0f));
 	// clamp to 6 possible directions
 	CLAMP(retang, 0, 5);
-	return (EAnimAngle)retang;
+	return (EDir6)retang;
 }
 
-void D3DCOLOR_UNPACKTOFLOAT(DWORD color, float & a, float & r, float & g, float & b)
+void DW_COLOR_GETARGB(DWORD color, float & a, float & r, float & g, float & b)
 {
 	unsigned char cnl = color & 0x000000ff;
 	b = (float)cnl / 255.0f;
@@ -79,7 +79,7 @@ void D3DCOLOR_UNPACKTOFLOAT(DWORD color, float & a, float & r, float & g, float 
 	a = (float)cnl / 255.0f;
 }
 
-void D3DCOLOR_UNPACKTOBYTE(DWORD color, unsigned char & a, unsigned char & r, unsigned char & g, unsigned char & b)
+void DW_COLOR_GETBYTES(DWORD color, unsigned char & a, unsigned char & r, unsigned char & g, unsigned char & b)
 {
 	b = color & 0x000000ff;
 	g = (color >> 8) & 0x000000ff;

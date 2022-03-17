@@ -167,9 +167,9 @@ public:
 	// Returns no of hitpoints where (flag & flagFilter != 0)
 	int								GetAFrameHitPointsCntFlag(int animIdx, int frameIdx, DWORD flagFilter = 0xffffffff);
 	// Get actual hitpoint data. Returns TRUE if success
-	bool							GetAFrameHitPoint(int animIdx, int frameIdx, int pointIdx, PointXYZi *outvar);
+	bool							GetAFrameHitPoint(int animIdx, int frameIdx, int pointIdx, Vec3i *outvar);
 	// Returns Nth hitpoint where (flag & flagFilter != 0)
-	bool							GetAFrameHitPointFlag(int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, PointXYZi *outvar);
+	bool							GetAFrameHitPointFlag(int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, Vec3i *outvar);
 	// Returns no of frames from an anim
 	inline const int				GetAFramesCnt(int anmIdx) const { return Animations[anmIdx]->aframesNo; }
 	

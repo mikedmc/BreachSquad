@@ -18,6 +18,10 @@
 void DW_COLOR_GETRBGA(DWORD hexColor, float & r, float & g, float & b, float & a);
 // interpolates between 2 colors returning DWORD value
 DWORD DW_COLOR_LERP( DWORD dwFrom, DWORD dwTo, float s );
+// Unpacks DWORD color to float channels
+void DW_COLOR_GETARGB( DWORD color, float & a, float & r, float & g, float & b );
+// Unpacks DWORD color to byte channels
+void DW_COLOR_GETBYTES( DWORD color, unsigned char & a, unsigned char & r, unsigned char & g, unsigned char & b );
 
 // generic sides (corresponds to generic directions)
 #define K_SIDE_NONE -1
@@ -45,23 +49,24 @@ enum EDir {
 
 // Actor animation angles (6 possible directions)
 // the order of the enum is important as it helps extract the direction from atan2 results (see GetEAnimAngle)
-enum EAnimAngle {
-	EANG_NONE = -1,
-	EANG_NW,
-	EANG_N,
-	EANG_NE,
-	EANG_SE,
-	EANG_S,
-	EANG_SW,
+enum EDir6 {
+	EDIR6_NONE = -1,
 
-	EANGS_CNT,
+	EDIR6_NW = 0,
+	EDIR6_N,
+	EDIR6_NE,
+	EDIR6_SE,
+	EDIR6_S,
+	EDIR6_SW,
+
+	EDIR6S_CNT,
 };
 // names of the animation directions
-CStringHash EAnimAngleNames[] = {L"NW", L"N", L"NE", L"SE", L"S", L"SW"};
+const CStringHash EDir6Names[ EDIR6S_CNT ] = {L"NW", L"N", L"NE", L"SE", L"S", L"SW"};
 
 // Characters are animated on 6 directions: see EAnimAngle
 // Returns animation direction as int, starting with top(0)
-EAnimAngle GetEAnimAngle(Vec2 vDir);
+EDir6 GetDir6FromVec(Vec2 vDir);
 
 //direction flags used when setting more directions on one int
 #define K_DIRFLAG_NONE 0
@@ -79,11 +84,6 @@ EAnimAngle GetEAnimAngle(Vec2 vDir);
 
 #define DEG_TO_RAD(a) ((a / 360.0f) * DOUBLE_PI)
 #define RAD_TO_DEG(a) ((a / DOUBLE_PI) * 360.0f)
-
-// Unpacks DWORD color to float channels
-void D3DCOLOR_UNPACKTOFLOAT(DWORD color, float & a, float & r, float & g, float & b);
-// Unpacks DWORD color to byte channels
-void D3DCOLOR_UNPACKTOBYTE(DWORD color, unsigned char & a, unsigned char & r, unsigned char & g, unsigned char & b);
 
 template <class anyType>
 __inline void CLAMP(anyType &var, anyType min, anyType max)
@@ -156,13 +156,13 @@ struct Vec2i {
 	operator Vec2() { return Vec2((float)x, (float)y); }
 };
 
-struct PointXYZi {
+struct Vec3i {
 	int x, y, z;
-	PointXYZi() :x(0), y(0), z(0) {}
-	PointXYZi(int nx, int ny, int nz) { x = nx; y = ny; z = nz; }
-	PointXYZi(const PointXYZi& point) { x = point.x; y = point.y; z = point.z; }
-	bool operator==(const PointXYZi &other) const { return ((other.x == x) && (other.y == y) && (other.z == z)); }
-	bool operator!=(const PointXYZi &other) const { return ((other.x != x) || (other.y != y) || (other.z != z)); }
+	Vec3i() :x(0), y(0), z(0) {}
+	Vec3i(int nx, int ny, int nz) { x = nx; y = ny; z = nz; }
+	Vec3i(const Vec3i& point) { x = point.x; y = point.y; z = point.z; }
+	bool operator==(const Vec3i &other) const { return ((other.x == x) && (other.y == y) && (other.z == z)); }
+	bool operator!=(const Vec3i &other) const { return ((other.x != x) || (other.y != y) || (other.z != z)); }
 	operator Vec2() { return Vec2((float)x, (float)y); }
 	operator Vec3() { return Vec3((float)x, (float)y, (float)z); }
 };
@@ -398,7 +398,7 @@ enum eVarTypes {
 //RETURNS: type specified by *str: int, float or string
 eVarTypes GetTypeFromString(const WCHAR *str);
 
-//clasa care primeste orice tip de date (Variant + string)
+// Class that holds multiple types of values
 class CVariantComplex 
 {
 public:
@@ -759,20 +759,13 @@ int GetListIndexByName(const WCHAR* strName, const CStringHash *arrNamesList, in
 int GetListIndexByNameHash(const UINT32 nameHash, const CStringHash *arrNamesList, int arrNamesListSize);
 
 ///--- ADDITIVE BLENDING ---
-inline void AdditiveBlendingON(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite)
+inline void DeviceAdditiveON(PDEVICE pDevice)
 {
-	if(pSprite)
-		pSprite->Flush();
-
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 }
-inline void AdditiveBlendingOFF(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite)
+inline void DeviceAdditiveOFF(PDEVICE pDevice)
 {
-	//activates blending
-	if(pSprite)
-		pSprite->Flush();
-
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 }
 

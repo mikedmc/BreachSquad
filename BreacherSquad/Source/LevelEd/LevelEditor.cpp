@@ -400,7 +400,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			ImGui::DragFloat("Intensity", &light->fIntensity, 0.01f, 0.1f, 5.0f, "%.2f");
 			// color
 			ImVec4 color;
-			D3DCOLOR_UNPACKTOFLOAT(light->color, color.w, color.x, color.y, color.z);
+			DW_COLOR_GETARGB(light->color, color.w, color.x, color.y, color.z);
 			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
 			if (ImGui::IsItemEdited())
 			{
@@ -430,7 +430,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			ImGui::DragFloat("Intensity", &light->fIntensity, 0.01f, 0.1f, 5.0f, "%.2f");
 			// color
 			ImVec4 color;
-			D3DCOLOR_UNPACKTOFLOAT(light->color, color.w, color.x, color.y, color.z);
+			DW_COLOR_GETARGB(light->color, color.w, color.x, color.y, color.z);
 			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
 			if (ImGui::IsItemEdited())
 			{
@@ -501,7 +501,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			ImGui::DragFloat("Intensity", &light->fIntensity, 0.01f, 0.1f, 5.0f, "%.2f");
 			// color
 			ImVec4 color;
-			D3DCOLOR_UNPACKTOFLOAT(light->color, color.w, color.x, color.y, color.z);
+			DW_COLOR_GETARGB(light->color, color.w, color.x, color.y, color.z);
 			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
 			if (ImGui::IsItemEdited())
 			{
@@ -520,7 +520,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			}
 			// color
 			ImVec4 color;
-			D3DCOLOR_UNPACKTOFLOAT(light->color, color.w, color.x, color.y, color.z);
+			DW_COLOR_GETARGB(light->color, color.w, color.x, color.y, color.z);
 			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
 			if (ImGui::IsItemEdited())
 			{
@@ -555,7 +555,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			ImGui::DragFloat("Intensity", &light->fIntensity, 0.01f, 0.1f, 5.0f, "%.2f");
 			// color
 			ImVec4 color;
-			D3DCOLOR_UNPACKTOFLOAT(light->color, color.w, color.x, color.y, color.z);
+			DW_COLOR_GETARGB(light->color, color.w, color.x, color.y, color.z);
 			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
 			if (ImGui::IsItemEdited())
 			{

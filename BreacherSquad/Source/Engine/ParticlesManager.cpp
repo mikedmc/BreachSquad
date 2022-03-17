@@ -155,7 +155,7 @@ void CParticlesManager::PaintStringParticles(int nLayer, bool paintUsingMultiply
 
 	if(paintUsingMultiply)
 	{
-		AdditiveBlendingON(m_pDevice, m_pSprite);
+		DeviceAdditiveON(m_pDevice);
 	}
 
 	for(int ii=0; ii<m_vStringParticles.GetSize(); ii++)
@@ -171,7 +171,7 @@ void CParticlesManager::PaintStringParticles(int nLayer, bool paintUsingMultiply
 
 	if(paintUsingMultiply)
 	{
-		AdditiveBlendingOFF(m_pDevice, m_pSprite);
+		DeviceAdditiveOFF(m_pDevice);
 	}
 
 	m_pSprite->SetTransform(&g_matIdentity);
@@ -184,7 +184,7 @@ void CParticlesManager::PaintStringParticles(int nLayer, D3DXVECTOR2 offset, boo
 
 	if (paintUsingMultiply)
 	{
-		AdditiveBlendingON(m_pDevice, m_pSprite);
+		DeviceAdditiveON(m_pDevice);
 	}
 
 	for (int ii = 0; ii<m_vStringParticles.GetSize(); ii++)
@@ -200,7 +200,7 @@ void CParticlesManager::PaintStringParticles(int nLayer, D3DXVECTOR2 offset, boo
 
 	if (paintUsingMultiply)
 	{
-		AdditiveBlendingOFF(m_pDevice, m_pSprite);
+		DeviceAdditiveOFF(m_pDevice);
 	}
 
 	m_pSprite->SetTransform(&g_matIdentity);
@@ -872,7 +872,7 @@ void CParticlesManager::PaintLayerOffset(int nLayer, D3DXVECTOR2 offset, bool ad
 		return;
 
 	if (additiveBlending)
-		AdditiveBlendingON(m_pDevice, m_pSprite);
+		DeviceAdditiveON(m_pDevice);
 
 	CParticle *part = pList[nLayer].pNext;
 	while (part != &pList[nLayer])
@@ -891,7 +891,7 @@ void CParticlesManager::PaintLayerOffset(int nLayer, D3DXVECTOR2 offset, bool ad
 	m_pSprite->SetTransform(&g_matIdentity);
 
 	if (additiveBlending)
-		AdditiveBlendingOFF(m_pDevice, m_pSprite);
+		DeviceAdditiveOFF(m_pDevice);
 }
 
 void CParticlesManager::PaintLayerOffset_texOverride(int nLayer, D3DXVECTOR2 offset, bool additiveBlending, int texIdxOffset)
@@ -904,7 +904,7 @@ void CParticlesManager::PaintLayerOffset_texOverride(int nLayer, D3DXVECTOR2 off
 		return;
 
 	if (additiveBlending)
-		AdditiveBlendingON(m_pDevice, m_pSprite);
+		DeviceAdditiveON(m_pDevice);
 
 	CParticle *part = pList[nLayer].pNext;
 	while (part != &pList[nLayer])
@@ -923,7 +923,7 @@ void CParticlesManager::PaintLayerOffset_texOverride(int nLayer, D3DXVECTOR2 off
 	m_pSprite->SetTransform(&g_matIdentity);
 
 	if (additiveBlending)
-		AdditiveBlendingOFF(m_pDevice, m_pSprite);
+		DeviceAdditiveOFF(m_pDevice);
 }
 
 
@@ -937,7 +937,7 @@ void CParticlesManager::PaintLayer(int nLayer, bool additiveBlending)
 		return;
 
 	if(additiveBlending)
-		AdditiveBlendingON(m_pDevice, m_pSprite);
+		DeviceAdditiveON(m_pDevice);
 
 	CParticle *part = pList[nLayer].pNext;
 	while(part != &pList[nLayer])
@@ -956,7 +956,7 @@ void CParticlesManager::PaintLayer(int nLayer, bool additiveBlending)
 	m_pSprite->SetTransform(&g_matIdentity);
 
 	if(additiveBlending)
-		AdditiveBlendingOFF(m_pDevice, m_pSprite);
+		DeviceAdditiveOFF(m_pDevice);
 }
 
 void CParticlesManager::RemoveAllFromLayer(ParticleLayers ePartLayer)
@@ -1232,7 +1232,7 @@ void CParticlesManager::UpdateTails(float dTime)
 
 void CParticlesManager::PaintTails(D3DXVECTOR2* offset)
 {
-	AdditiveBlendingON(m_pDevice, m_pSprite);
+	DeviceAdditiveON(m_pDevice);
 
 	m_pDevice->SetFVF(VERT_TL1TS::FVF);
 	//TODO: aici ar trebui sa ia textura efectiva salvata in prealabil in tail
@@ -1315,7 +1315,7 @@ void CParticlesManager::PaintTails(D3DXVECTOR2* offset)
 		m_pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, polyc * 2, verts, sizeof(VERT_TL1TS));
 	}
 
-	AdditiveBlendingOFF(m_pDevice, m_pSprite);
+	DeviceAdditiveOFF(m_pDevice);
 }
 
 //-=-=-= PARTICLE EMITTERS =-=-=-

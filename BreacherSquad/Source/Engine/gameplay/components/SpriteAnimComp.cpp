@@ -33,7 +33,7 @@ void CSpriteAnimComponent::CacheAnimations(CActor& act)
 	{
 		for (int kk = 0; kk < K_SPCOMP_ANIM_MAX_SETS; kk++)
 		{
-			for ( int ang = 0; ang < EANGS_CNT; ang++ )
+			for ( int ang = 0; ang < EDIR6S_CNT; ang++ )
 			{
 				CStringHashA *animname = &act.actTemplate.arrAnims[ anm ].animNamesA[ kk ][ ang ];
 				if ( animname->IsSet() )
@@ -87,7 +87,7 @@ OPRESULT CSpriteAnimComponent::InitFromFile(CActor& act, WCHAR * Path)
 	// init sprites
 	sprite.Init( pSprLib, 0 );
 	//Set skin (first skin by default)
-	dwLayersMask = act.actTemplate.arrSkins[ 0 ].layerVisibilityMask; //#0xffffffff maybe is better
+	dwLayersMask = act.actTemplate.arrSkins[ 0 ].layersVisMask; //#0xffffffff maybe is better
 	// set base animation
 	SetAnimSet( 0 );
 	SetAnimOnce( K_ACT_ANIM_IDLE, act.eAngle );
@@ -103,7 +103,7 @@ void CSpriteAnimComponent::SetAnimSet(int newAnimSet)
 	}
 }
 
-void CSpriteAnimComponent::SetAnimOnce( EActorAnim eAnim, EAnimAngle eAngle )
+void CSpriteAnimComponent::SetAnimOnce( EActorAnim eAnim, EDir6 eAngle )
 {
 	_ASSERT( (eAnim >= K_ACT_ANIM_EMPTY) && (eAnim < K_ACT_ANIMS_CNT) );
 	sprite.SetAnimOnce( arrAnims[ (int)eAnim ].animIdx[ nAnimSet ][ (int)eAngle ] );

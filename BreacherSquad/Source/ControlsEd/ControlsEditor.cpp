@@ -399,7 +399,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 				case CVariantComplex::K_ARGTYPE_HEXCOLOR:
 				{
 					ImVec4 color;
-					D3DCOLOR_UNPACKTOFLOAT(pValue->m_asUINT32, color.w, color.x, color.y, color.z);
+					DW_COLOR_GETARGB(pValue->m_asUINT32, color.w, color.x, color.y, color.z);
 					
 					// small color button
 					ImGui::ColorEdit4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);

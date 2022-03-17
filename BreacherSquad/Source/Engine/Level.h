@@ -73,9 +73,9 @@ public:
 	}
 
 	CTextureManager			m_texManager;					// General texture manager for misc needed textures
-	CSpriteLib		m_sprLights;					// light animations/sprites
-	CSpriteLib		m_sprProps;						// decorations
-	CSpriteLib		m_sprActors;					// animations for the actors (main characters, enemies etc)
+	CSpriteLib				m_sprLights;					// light animations/sprites
+	CSpriteLib				m_sprProps;						// decorations
+	CMultiSpriteLib			m_sprActors;					// animations for the actors (main characters, enemies etc) appended from different bsx files
 	CMissionStory			m_story;						// mission story
 
 	CVisibilityLists		m_visibleList;					// list of visible/active entities

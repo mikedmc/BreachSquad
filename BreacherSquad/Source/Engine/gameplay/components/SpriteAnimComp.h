@@ -8,12 +8,12 @@
 
 struct CAnimData {
 	// keeps animation indexes for each animation [set][angle]
-	int					animIdx[ K_SPCOMP_ANIM_MAX_SETS ][ EANGS_CNT ];
+	int					animIdx[ K_SPCOMP_ANIM_MAX_SETS ][ EDIR6S_CNT ];
 
 	CAnimData()
 	{
 		for ( int kk = 0; kk < K_SPCOMP_ANIM_MAX_SETS; kk++ )
-			for ( int ang = 0; ang < EANGS_CNT; ang++ )
+			for ( int ang = 0; ang < EDIR6S_CNT; ang++ )
 				animIdx[ kk ][ ang ] = -1;
 	}
 };
@@ -53,7 +53,7 @@ public:
 	void						SetAnimSet(int newAnimSet);
 	inline int					GetAnimSet() const { return nAnimSet; }
 
-	void						SetAnimOnce( EActorAnim eAnim, EAnimAngle eAngle );
+	void						SetAnimOnce( EActorAnim eAnim, EDir6 eAngle );
 
 	void						SetAimVecLocal(Vec2 vLocalAim);
 	bool						GetGunPosWorld(Vec2 &retVec);

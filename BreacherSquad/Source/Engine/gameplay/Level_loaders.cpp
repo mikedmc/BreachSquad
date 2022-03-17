@@ -90,10 +90,6 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	FileManager::GetMediaPath(L"media/levels/data/props.bsx", Path);
 	V_OP_RET(m_sprProps.LoadSprites(Path));
 
-	///--- load actors ---
-	FileManager::GetMediaPath(L"media/levels/data/actors.bsx", Path);
-	V_OP_RET(m_sprActors.LoadSprites(Path));
-
 	//--- load actors templates and weaponry right after props sprite ---
 	FileManager::GetMediaPath(L"media/levels/data/weapons_data.xml", Path);
 	if (FAILED(LoadWeaponTemplates(Path)))

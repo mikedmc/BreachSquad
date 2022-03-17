@@ -32,18 +32,18 @@ public:
 	// descriptor for skins array
 	struct CSkinDesc {
 		CStringHashA		name;
-		DWORD				layerVisibilityMask;	// layer visibility bit mask that gets applied (less important bit is layer index 0)
-		int					hand_L;					// left hand layer id
-		int					hand_R;					// right hand layer id
+		DWORD				layersVisMask;			// layer visibility bit mask that gets applied (less important bit is layer index 0)
+		DWORD				hand_L;					// left hand layer mask
+		DWORD				hand_R;					// right hand layer mask
 
-		CSkinDesc() : layerVisibilityMask( 0xffffffff ), hand_L( -1 ), hand_R( -1 )
+		CSkinDesc() : layersVisMask( 0xffffffff ), hand_L( 0 ), hand_R( 0 )
 		{}
 	};
 
 	// Animations descriptor (keeps animation names for each of the 6 angles, for every set)
 	struct CAnimDesc {
 		// Holds animation names [animSet][angle]
-		CStringHashA		animNamesA[ K_ACT_ANIM_MAX_SETS ][ EANGS_CNT ];
+		CStringHashA		animNamesA[ K_ACT_ANIM_MAX_SETS ][ EDIR6S_CNT ];
 
 		CAnimDesc()
 		{
@@ -52,7 +52,7 @@ public:
 		void Reset()
 		{
 			for ( int sets = 0; sets < K_ACT_ANIM_MAX_SETS; sets++ )
-				for ( int ang = 0; ang < EANGS_CNT; ang++ )
+				for ( int ang = 0; ang < EDIR6S_CNT; ang++ )
 					animNamesA[ sets ][ ang ].Reset(); //not set
 		}
 	};
@@ -232,7 +232,7 @@ public:
 
 	Vec2		vMoveDirN;		//normalized movement direction
 
-	EAnimAngle	eAngle;			// animation angle (6 possible ways)
+	EDir6	eAngle;			// animation angle (6 possible ways)
 	bool		bAnimFlipX;		// do we need to flip the animation on X?
 
 	float		fLife, fArmor; //cata viata are si cata armura

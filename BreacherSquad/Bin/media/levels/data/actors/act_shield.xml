@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<ACTOR file="breacher.bsx">
+<ACTOR file="shield.bsx">
 	<ACTOR_DATA sAIstate="DEFAULT" sWeapon="WPN_SMG_MP5A3"
 				bboxMinX="-8" bboxMinY="-6" bboxMaxX="8" bboxMaxY="2" nHeight="24"
 				sMaterial="FLESH" fLife="40.0" fArmor="0.0" 
@@ -9,21 +9,26 @@
 
 	<SKINS>
 	<!-- 
-	layerVisibilityMask number - each bit is 0 or 1 where least important bit is layerIdx 1
+	layersVisibilityMask number - each bit is 0 or 1 where least important bit is first layer
 	example: we have 6 layers and layer 1, 3 and 4 are visible in this skin => 1101 in binary is 13
-	on top of the skin mask we show or hide the hands that we need (hence the hand layer idx
+	Skins have quick access layer indexes to the hands layers as we need to be able to hide and show them depending on weapon loadout
+	SHIELD: skins mask already hide left hand
 	-->
-		<SKIN name="one_handed_wpn" layerVisibilityMask="23" rightHandLayer="1" leftHandLayer="2" />
-		<SKIN name="two_handed_wpn" layerVisibilityMask="27" rightHandLayer="1" leftHandLayer="2" />
+		<SKIN name="skin1shield1" layersVisibilityMask="1228" handR_layerMask="3" handL_layerMask="4" />
+		<SKIN name="skin1shield2" layersVisibilityMask="714" handR_layerMask="3" handL_layerMask="4" />
+		<SKIN name="skin1shield3" layersVisibilityMask="457" handR_layerMask="3" handL_layerMask="4" />
+		<SKIN name="skin2shield1" layersVisibilityMask="1196" handR_layerMask="3" handL_layerMask="4" />
+		<SKIN name="skin2shield2" layersVisibilityMask="684" handR_layerMask="3" handL_layerMask="4" />
+		<SKIN name="skin2shield3" layersVisibilityMask="425" handR_layerMask="3" handL_layerMask="4" />
 	</SKINS>
 
 	<ANIMS>
 		<!-- setting "set0" fills N,NE,SE,S with specified value -->
 		<REFPOSE		set0="REFPOSE" />
-		<IDLE			set0_N="IDLE" set0_NE="IDLE" set0_SE="IDLE" set0_S="IDLE" />	
-		<RUN 			set0_N="IDLE" set0_NE="IDLE" set0_SE="IDLE" set0_S="IDLE" />
-		<KICK			set0_N="IDLE" set0_NE="IDLE" set0_SE="IDLE" set0_S="IDLE" />
-		<DIE			set0_N="DEATH_N" set0_NE="DEATH_N" set0_SE="DEATH_S" set0_S="DEATH_S" />
+		<IDLE			set0_N="IDLE_N" set0_NE="IDLE_NE" set0_SE="IDLE_SE" set0_S="IDLE_S" />	
+		<RUN 			set0_N="RUN_N" set0_NE="RUN_NE" set0_SE="RUN_SE" set0_S="RUN_S" />
+		<KICK			set0_N="KICK_N" set0_NE="KICK_NE" set0_SE="KICK_SE" set0_S="KICK_S" />
+		<DIE			set0_N="DIE_N" set0_NE="DIE_N" set0_SE="DIE_S" set0_S="DIE_S" />
 		<CROUCH			set0_N="CROUCH_N" set0_NE="CROUCH_NE" set0_SE="CROUCH_SE" set0_S="CROUCH_S" />
 	</ANIMS>
 

@@ -71,7 +71,7 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 
 CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteAnimComponent* pComGraphics) :
 	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nLastDamageTakenFromUID(0),
-	pWeaponMain(nullptr), pClosestTouchable(nullptr), bAnimFlipX(false), eAngle(EANG_S),
+	pWeaponMain(nullptr), pClosestTouchable(nullptr), bAnimFlipX(false), eAngle(EDIR6_S),
 	nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
 	eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0)
@@ -181,7 +181,7 @@ bool CActorTemplate::OverwriteAnimsFromTemplate(CActorTemplate* pTemplate, bool 
 
 		for (int jj = 0; jj < K_ACT_ANIM_MAX_SETS; jj++)
 		{
-			for ( int ang = 0; ang < EANGS_CNT; ang++ )
+			for ( int ang = 0; ang < EDIR6S_CNT; ang++ )
 			{
 				//overwrite if existing
 				if ( pTemplate->arrAnims[ kk ].animNamesA[ jj ][ ang ].IsSet() )
@@ -292,7 +292,7 @@ UINT32 CActorTemplate::GetSkinMaskValue( char* skinName )
 	for ( int kk = 0; kk < K_ACT_SKINS_MAX_SETS; kk++ )
 	{
 		if ( arrSkins[ kk ].name.IsEqual( skinName ) )
-			return arrSkins[kk].layerVisibilityMask;
+			return arrSkins[kk].layersVisMask;
 	}
 	return 0xfffffff;
 }
@@ -372,7 +372,7 @@ void CActor::Update(float dTime)
 	// set generic stuff
 	bAnimFlipX = (vAim.x < 0.0f) ? true : false;
 	int nAnimFlipMul = (bAnimFlipX) ? -1 : 1;
-	eAngle = GetEAnimAngle(vAim);
+	eAngle = GetDir6FromVec(vAim);
 
 	// aiming IK node must be set each frame or they get reset by the animation
 	c_graphics->SetAimVecLocal(Vec2(vAim.x * nAnimFlipMul, -vAim.y));

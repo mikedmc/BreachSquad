@@ -1085,10 +1085,10 @@ void CPlayerSelScr::Paint(ID3DXSprite* pSprite)
 	fbackOffX = 4.0f + 4.0f * sin(fLocalTimeline * 0.4f + M_PI);
 	CSprite::paintFrame(&m_sprCol, worldrect.CenterX() + fbackOffX, worldrect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 1, dwColor);
 	//paint character flickering orange light
-	AdditiveBlendingON(m_pDevice, pSprite);
+	DeviceAdditiveON(m_pDevice);
 	float alpha = 0.4f + UTPerlin::PerlinNoise1D(fLocalTimeline, 5.0f, 2.0f, 0.4f, 0.5f, 2);
 	CSprite::paintFrame(&m_sprCol, worldrect.CenterX() + fbackOffX, worldrect.CenterY(), ANM_MENUS_SPR_BACK_LAYERS, 2, DW_COLORALPHA(dwColor, alpha));
-	AdditiveBlendingOFF(m_pDevice, pSprite);
+	DeviceAdditiveOFF(m_pDevice);
 
 	//paint fog layer (w:375)
 	float fogoffx = -375.0f * FLOAT_FRAC(fLocalTimeline * 2.0f / 375.0f) + (2.0f * sin(fLocalTimeline * 0.4f + M_PI));
