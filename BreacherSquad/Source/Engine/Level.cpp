@@ -343,7 +343,7 @@ void CLevel::SetActorStun(CActor* actor, float fStunDuration)
 	if ((actor->actTemplate.actorClass != K_LVL_ACT_CLASS_HUMAN) && (actor->actTemplate.actorClass != K_LVL_ACT_CLASS_FRIENDLY))
 		return;
 
-	if ((actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0)
+	if ((actor->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0)
 		return;
 
 	//some don't get stunned
@@ -1173,9 +1173,9 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 	//caps
 	templ->eCaps = 0;
 	if (actnode.attribute(L"bCanCover").as_bool())
-		templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_COVER;
+		templ->eCaps |= K_ACT_CAPS_CAN_COVER;
 	if (actnode.attribute(L"bCanInteract").as_bool())
-		templ->eCaps |= CActorTemplate::K_ACT_CAPS_CAN_INTERACT;
+		templ->eCaps |= K_ACT_CAPS_CAN_INTERACT;
 	//other
 	if (!actnode.attribute(L"sWeapon").empty())
 	{
@@ -1707,7 +1707,6 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 				{
 					m_arrPlayerSelStrategic[kk] = -1;
 					//m_interfaceIGM.SetStrategicSelection(kk, -1);
-					pPlayerActor[kk]->SetIcon(K_LVL_ACT_ICON_NONE);
 
 				}
 
@@ -1756,7 +1755,6 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 				{
 					m_arrPlayerSelStrategic[kk] = -1;
 					//m_interfaceIGM.SetStrategicSelection(kk, -1);
-					pPlayerActor[kk]->SetIcon(K_LVL_ACT_ICON_NONE);
 
 				}
 				if ((m_arrPlayerSelHotJoin[kk] != -1) && (pPlayerActor[kk] == null))
@@ -2246,7 +2244,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 				{
 					//skip actors that are: hidden, dead, players or not a target
 					if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
-						((m_arrActors[kk]->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
+						((m_arrActors[kk]->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
 							continue;
 					if (m_arrActors[kk]->bbox.Intersects(active->bbox))
 					{
@@ -2461,7 +2459,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 			for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 			{
 				if ((pPlayerActor[kk] == NULL) || (pPlayerActor[kk]->bHidden) || (pPlayerActor[kk]->fLife <= 0.0f) ||
-					((pPlayerActor[kk]->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0) )
+					((pPlayerActor[kk]->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0) )
 					continue;
 				Vec2 vCheckPt(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
 				if (colshape->bbox.PointIn(vCheckPt))
@@ -2476,7 +2474,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 				//skip actors that are: hidden, dead, players or not a target
 				if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
 					(m_arrActors[kk]->fLife <= 0.0f) ||
-					((m_arrActors[kk]->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
+					((m_arrActors[kk]->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
 					continue;
 				Vec2 vCheckPt(m_arrActors[kk]->bbox.vCenter.x, m_arrActors[kk]->bbox.vMin.y);
 				if (colshape->bbox.PointIn(vCheckPt))
@@ -2521,7 +2519,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 							//skip actors that are: hidden, dead, players or not a target
 							if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
 								(m_arrActors[kk]->fLife <= 0.0f) ||
-								((m_arrActors[kk]->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
+								((m_arrActors[kk]->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
 								continue;
 							if (colshape->bbox.PointIn(m_arrActors[kk]->GetPosHeart()))
 							{
@@ -3277,9 +3275,9 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			{
 				bool bVal = (cvNotATarget->m_asINT32 != 0);
 				if (bVal)
-					actor->actTemplate.eCaps |= CActorTemplate::K_ACT_CAPS_NOT_A_TARGET;
+					actor->actTemplate.eCaps |= K_ACT_CAPS_NOT_A_TARGET;
 				else
-					actor->actTemplate.eCaps &= ~CActorTemplate::K_ACT_CAPS_NOT_A_TARGET;
+					actor->actTemplate.eCaps &= ~K_ACT_CAPS_NOT_A_TARGET;
 			}
 			//state doesn't need update
 			ret_bFinished = true;
@@ -3611,9 +3609,6 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			actor->bCrouched = false;
 			actor->fStunTimer = 0.0f;
 
-			actor->m_AIcommands.nIconType = K_LVL_ACT_ICON_REMOVE_ICON;
-			actor->m_AIcommands.fIconDuration = -1.0f;
-
 			actor->fLife = 0.0f; //kill it
 			//trateaza death commands din script
 			EActorDeathCommand dcmd = K_LVL_ACT_DEATHCMD_NONE;
@@ -3652,8 +3647,6 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			}
 
 			//remove icons
-			actor->m_AIcommands.nIconType = K_LVL_ACT_ICON_REMOVE_ICON;
-			actor->m_AIcommands.fIconDuration = -1.0f;
 			actor->m_AIcommands.ResetMoveCommands();
 			//reset color
 			actor->m_AIcommands.nColor = actor->color_ini;
@@ -3691,8 +3684,6 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 
 				m_arrPlayerSelStrategic[actor->nPlayerOrdinal] = -1;
 				//m_interfaceIGM.SetStrategicSelection(actor->nPlayerOrdinal, -1);
-				//remove icon
-				actor->SetIcon(K_LVL_ACT_ICON_NONE);
 				//dam remove la particles de pe interfata cand moare un player
 				g_particlesMgr.RemoveAllFromLayer(K_PART_LAYER_INTERFACE_LIGHT);
 			}
@@ -3825,9 +3816,6 @@ void CLevel::SetActorDoT(CActor* act, CDamageOverTime::EDoTType eType, float fDu
 			if((pPlayerOwner != null) && (!IsNetworkPlayer(pPlayerOwner)))
 				App_IncreaseGamestat(K_MEMID_GAMESTATS_ENEMIES_SET_ON_FIRE);
 		}
-		//intimidated icon
-		if (eType == CDamageOverTime::K_LVL_DoT_INTIMIDATED)
-			act->SetIcon(K_LVL_ACT_ICON_SCARED, fDuration);
 	}
 }
 
@@ -3891,15 +3879,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 	//update timeline
 	actor->fTimelineAI += dTime;
-	//update icon timers
-	if (actor->fIconTimer > 0.0f)
-	{
-		actor->fIconTimer -= dTime;
-		if (actor->fIconTimer <= 0.0f)
-		{
-			actor->SetIcon(K_LVL_ACT_ICON_NONE);
-		}
-	}
 
 	//--- UPDATE ANIMATION ---
 	//get displacement from anim moves
@@ -4204,8 +4183,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				{
 					int nStatIdx = K_LVL_STATS_PL1_STRATEGIC_POINTS + actor->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT;
 
-					//set icon for long duration
-					actor->SetIcon(K_LVL_ACT_ICON_THINKING, 120.0f);
 					//aici se seteaza pleayerselStrategic pe cea mai mare optiune
 					//float fPoints = m_arrStats[nStatIdx] / 1000.0f;
 					//set selection on first valid
@@ -4332,7 +4309,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			case AI_BEHAVIOR_HOSTAGE:
 			{
 				//always set crouched command if actor can crouch
-				if (actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_CROUCH)
+				if (actor->actTemplate.eCaps & K_ACT_CAPS_CAN_CROUCH)
 					actor->m_AIcommands.bCrouched = true;
 				//can he follow targets? does it only once
 				if (actor->AIvarBool1)
@@ -4357,8 +4334,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 						actor->AIsubState = 1; //followed target
 						actor->m_AIcommands.bCrouched = false;
-						actor->m_AIcommands.nIconType = K_LVL_ACT_ICON_SURPRISE;
-						actor->m_AIcommands.fIconDuration = 0.5f;
 						//run to target
 						actor->m_AIcommands.bThrust = true;
 						actor->m_AIcommands.bRunning = true;
@@ -4444,8 +4419,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if (actor->AIsubState == 0)
 				{
 					actor->AIsubState = 1;
-					actor->m_AIcommands.nIconType = K_LVL_ACT_ICON_SURPRISE;
-					actor->m_AIcommands.fIconDuration = 0.5f + actor->AItimer1;
 				}
 
 				actor->AItimer1 -= dTime;
@@ -5063,12 +5036,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
 	}
 
-	///--- set icon ---
-	if (actor->m_AIcommands.nIconType != K_LVL_ACT_ICON_NONE)
-	{
-		actor->SetIcon(actor->m_AIcommands.nIconType, actor->m_AIcommands.fIconDuration);
-	}
-	
 	///--- speed ---
 
 	if (actor->m_AIcommands.bThrust)
@@ -5446,7 +5413,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	}
 
 	///--- find closest interactible object in range, aka touchable
-	if (actor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_INTERACT)
+	if (actor->actTemplate.eCaps & K_ACT_CAPS_CAN_INTERACT)
 	{
 		//#TODO: put interact area in special constant
 		CAABB aabbInteract(-K_TILE_SIZE_F, -K_TILE_SIZE_F, K_TILE_SIZE_F, K_TILE_SIZE_F);
@@ -5577,7 +5544,7 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 		if ((nIgnoreConditions > 0) && (nIgnore == nIgnoreConditions))
 			continue;
 		//nu ia in seama inamic cu energie sub 0 sau flag de not a target (setat de limbo)
-		if ((enemy->fLife <= 0.0f) || ((enemy->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
+		if ((enemy->fLife <= 0.0f) || ((enemy->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
 			continue;
 
 		Vec2 enemyDistV = enemy->GetPosHeart() - sourceActor->GetPosHeart();
@@ -5648,7 +5615,7 @@ CActor * CLevel::GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTa
 		if ((enemy == null) || (enemy == sourceActor) || (enemy->actTemplate.shID.textHash != nTargetNameHash) || (enemy->bHidden))
 			continue;
 		//nu ia in seama inamic cu energie sub 0 sau flag de not a target
-		if ((enemy->fLife <= 0.0f) || ((enemy->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_NOT_A_TARGET) != 0))
+		if ((enemy->fLife <= 0.0f) || ((enemy->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
 			continue;
 
 		Vec2 enemyDistV = enemy->GetPosHeart() - sourceActor->GetPosHeart();

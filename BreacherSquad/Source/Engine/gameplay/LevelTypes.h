@@ -52,6 +52,39 @@ const CStringHash eStrategicAbilityNames[] = {
 };
 
 
+// Class of the actor to define foe and enemy
+//--- ORDER IS VERY IMPORTANT ---
+enum EActorClass
+{
+	K_LVL_ACT_CLASS_NOT_SET = -2,	//usually not used (only in initializations)
+	K_LVL_ACT_CLASS_ANY = -1,		//folosita ca filtru la GetClosestTarget sau param gen NONE
+
+	K_LVL_ACT_CLASS_PASSIVE = 0,	//butoaie, elemente care se sparg, etc
+	K_LVL_ACT_CLASS_HOSTAGE = 1,	//special class for hostages
+	K_LVL_ACT_CLASS_TRAP,		//clasa separata care distruge orice
+	K_LVL_ACT_CLASS_EXPLOSION,		//clasa speciala de explozii pentru exploziile care distrug orice
+	//from here only human-blood-stun classes (sorted by love from near to far) that kill each other
+	K_LVL_ACT_CLASS_PLAYER,			//clasa player
+	K_LVL_ACT_CLASS_FRIENDLY,		//main player friendly class
+	//from here on you get SP on kills and they get pushed when too close (usually enemies)
+	K_LVL_ACT_CLASS_HUMAN,			//human enemies
+	K_LVL_ACT_CLASS_ZOMBIE,			//special zombie class
+	//count
+	K_LVL_ACT_CLASSES_COUNT
+};
+
+const CStringHash EActorClassNames[ K_LVL_ACT_CLASSES_COUNT ] =
+{
+	L"PASSIVE",
+	L"HOSTAGE",
+	L"TRAP",
+	L"EXPLOSION",
+	L"PLAYER",
+	L"FRIENDLY",
+	L"HUMAN",
+	L"ZOMBIE"
+};
+
 ///--------------------------------------------------------------------------
 /// EFFECT TYPES
 ///--------------------------------------------------------------------------
@@ -461,120 +494,6 @@ public:
 	CAIState* GetAIStateByName(CStringHash strName);
 };
 
-//clasa folosita in actori si incapsuleaza toate variabilele necesare pentru definirea totala a unui state
-//aici se declara variabile locale necesare per actor, cum ar fi behaviorTimer 
-//momentan sunt toate declarate in actor
-/*
-class CAIStateInstance
-{
-public:
-	CAIState*		m_pAIcurrentState; //starea curenta de AI
-	int				m_nAIcurrentBehaviorIdx; //indexul curent al behaviorului din state-ul curent (sau -1 cand nu e setat)
-	float			m_fAIBehaviorTimer; //timer folosit la behaviors cu durata
-
-	CAIStateInstance()
-	{
-		m_pAIcurrentState = null;
-		m_nAIcurrentBehaviorIdx = -1;
-		m_fAIBehaviorTimer = 0.0f;
-	}
-};
-*/
-
-///--------------------------------------------------------------------------
-/// ACTORS
-///--------------------------------------------------------------------------
-
-///--- HITPOINT values filter ---
-//pozitii relative heart, gun
-#define K_LVL_ACTOR_HITPOINTFLAG_HEARTPOS 1
-#define K_LVL_ACTOR_HITPOINTFLAG_GUNPOS 2
-//ground sweep este punctul in care verifica daca are platforma in fatza (de obicei inamicii il au)
-#define K_LVL_ACTOR_HITPOINTFLAG_GROUND_SWEEP 4
-
-///--- constants ---
-#define K_LVL_COVER_DAMAGE_ABSORBTION 0.8f
-
-enum EActorDeathCommand {
-	K_LVL_ACT_DEATHCMD_EMPTY = -1,
-
-	K_LVL_ACT_DEATHCMD_NONE = 0,
-	K_LVL_ACT_DEATHCMD_RESET_TO_ZERO = 1,
-	K_LVL_ACT_DEATHCMD_RUNSCRIPT,
-	K_LVL_ACT_DEATHCMD_SPLAT,
-	K_LVL_ACT_DEATHCMD_DEALLOCATE,
-	//list size
-	K_LVL_ACT_DEATHCMD_CNT
-};
-
-const CStringHash EActorDeathCommandNames[] = {
-	L"ACT_DEATHCMD_NONE",
-	L"ACT_DEATHCMD_RESET_TO_ZERO",
-	L"ACT_DEATHCMD_RUNSCRIPT",
-	L"ACT_DEATHCMD_SPLAT",
-	L"ACT_DEATHCMD_DEALLOCATE"
-};
-
-//ordinea e importanta:
-enum EActorAttackState {
-	K_LVL_ACT_ATTACK_IDLE,
-	K_LVL_ACT_ATTACK_RELOADING,
-	K_LVL_ACT_ATTACK_SHOOTING,
-	K_LVL_ACT_ATTACK_SHOOTING_ALT,
-	K_LVL_ACT_ATTACK_USING_GEAR,
-	K_LVL_ACT_ATTACK_MELEE, 
-	K_LVL_ACT_ATTACK_BREACH,  //used mostly for breaching doors
-};
-
-//iconurile afisate deasupra actorilor
-enum EActorIconTypes
-{
-	K_LVL_ACT_ICON_REMOVE_ICON = -2, //folosit ca sa scoti iconul curent
-	K_LVL_ACT_ICON_NONE = -1,
-
-	K_LVL_ACT_ICON_SURPRISE = 0,
-	K_LVL_ACT_ICON_QUESTION,
-	K_LVL_ACT_ICON_THINKING,
-	K_LVL_ACT_ICON_ARREST_ME,
-	K_LVL_ACT_ICON_SCARED,
-
-	K_LVL_ACT_ICONS_CNT
-};
-
-
-///--- ORDER IS VERY IMPORTANT ---
-enum EActorClass
-{
-	K_LVL_ACT_CLASS_NOT_SET = -2,	//usually not used (only in initializations)
-	K_LVL_ACT_CLASS_ANY = -1,		//folosita ca filtru la GetClosestTarget sau param gen NONE
-
-	K_LVL_ACT_CLASS_PASSIVE = 0,	//butoaie, elemente care se sparg, etc
-	K_LVL_ACT_CLASS_HOSTAGE = 1,	//special class for hostages
-	K_LVL_ACT_CLASS_TRAP,		//clasa separata care distruge orice
-	K_LVL_ACT_CLASS_EXPLOSION,		//clasa speciala de explozii pentru exploziile care distrug orice
-	//from here only human-blood-stun classes (sorted by love from near to far) that kill each other
-	K_LVL_ACT_CLASS_PLAYER,			//clasa player
-	K_LVL_ACT_CLASS_FRIENDLY,		//main player friendly class
-	//from here on you get SP on kills and they get pushed when too close (usually enemies)
-	K_LVL_ACT_CLASS_HUMAN,			//human enemies
-	K_LVL_ACT_CLASS_ZOMBIE,			//special zombie class
-	//count
-	K_LVL_ACT_CLASSES_COUNT
-};
-
-const CStringHash EActorClassNames[K_LVL_ACT_CLASSES_COUNT] =
-{
-	L"PASSIVE",
-	L"HOSTAGE",
-	L"TRAP",
-	L"EXPLOSION",
-	L"PLAYER",
-	L"FRIENDLY",
-	L"HUMAN",
-	L"ZOMBIE"
-};
-
-
 
 
 ///--------------------------------------------------------------------------
@@ -597,7 +516,6 @@ public:
 	CAABB			aabb;
 	bool			bAnimated;	//for animated decals
 };
-
 
 
 
