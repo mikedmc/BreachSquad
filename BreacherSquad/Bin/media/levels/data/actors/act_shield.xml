@@ -2,7 +2,7 @@
 
 <ACTOR file="shield.bsx">
 	<ACTOR_DATA sAIstate="DEFAULT" sWeapon="WPN_SMG_MP5A3"
-				bboxMinX="-8" bboxMinY="-6" bboxMaxX="8" bboxMaxY="2" nHeight="24"
+				bboxMinX="-8" bboxMinY="-12" bboxMaxX="8" bboxMaxY="4" nHeight="24"
 				sMaterial="FLESH" fLife="40.0" fArmor="0.0" 
 				fSpeedMove="150.0"
 				bCanCover="true" bCanInteract="true" />

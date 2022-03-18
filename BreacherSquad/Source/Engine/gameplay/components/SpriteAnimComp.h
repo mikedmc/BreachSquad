@@ -29,7 +29,7 @@ private:
 	int							nAnimSet;								// Selected ainmation set
 	CSpr						sprite;									// sprite used for frames keeping. Don't use it for painting directly (does not support layers)
 	UINT32						dwLayersMask;							// least important byte is layer id 1 from FModule flags. Use this to hise or to show parts depending on skin
-	CStringHashA				shSkin;									// current set skin (useless?)
+	CStringHashA				shSkin;									// currently set skin (useless?)
 	Vec2						vAim;									// aim vector
 
 public:

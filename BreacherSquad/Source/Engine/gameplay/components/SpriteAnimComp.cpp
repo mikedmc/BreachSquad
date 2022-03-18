@@ -15,6 +15,10 @@ CSpriteAnimComponent::~CSpriteAnimComponent()
 void CSpriteAnimComponent::Update(CActor& act, float dTime)
 {
 	sprite.pos = act.pos.xy_proj;
+	// round up to eliminate viual artefacts
+	sprite.pos.x = ROUND_FLOAT( sprite.pos.x );
+	sprite.pos.y = ROUND_FLOAT( sprite.pos.y );
+
 	sprite.Update( dTime );
 	//#TODO: provide access to animation status and frame events (status through getter, events through callback)
 }
