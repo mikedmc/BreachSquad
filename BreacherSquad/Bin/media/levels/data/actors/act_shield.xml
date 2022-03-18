@@ -14,12 +14,12 @@
 	Skins have quick access layer indexes to the hands layers as we need to be able to hide and show them depending on weapon loadout
 	SHIELD: skins mask already hide left hand
 	-->
-		<SKIN name="skin1shield1" layersVisibilityMask="1228" handR_layerMask="8" handL_layerMask="16" />
-		<SKIN name="skin1shield2" layersVisibilityMask="714" handR_layerMask="8" handL_layerMask="16" />
-		<SKIN name="skin1shield3" layersVisibilityMask="457" handR_layerMask="8" handL_layerMask="16" />
-		<SKIN name="skin2shield1" layersVisibilityMask="1196" handR_layerMask="8" handL_layerMask="16" />
-		<SKIN name="skin2shield2" layersVisibilityMask="684" handR_layerMask="8" handL_layerMask="16" />
-		<SKIN name="skin2shield3" layersVisibilityMask="425" handR_layerMask="8" handL_layerMask="16" />
+		<SKIN name="skin1shield1" layersVisibilityMask="409" handR_layerMask="128" handL_layerMask="64" />
+		<SKIN name="skin1shield2" layersVisibilityMask="666" handR_layerMask="128" handL_layerMask="64" />
+		<SKIN name="skin1shield3" layersVisibilityMask="1180" handR_layerMask="128" handL_layerMask="64" />
+		<SKIN name="skin2shield1" layersVisibilityMask="425" handR_layerMask="128" handL_layerMask="64" />
+		<SKIN name="skin2shield2" layersVisibilityMask="682" handR_layerMask="128" handL_layerMask="64" />
+		<SKIN name="skin2shield3" layersVisibilityMask="2254" handR_layerMask="128" handL_layerMask="64" />
 	</SKINS>
 
 	<ANIMS>

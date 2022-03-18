@@ -1195,8 +1195,8 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 		{
 			templ->arrSkins[ templ->arrSkinsCnt ].name.Init( nodeskin.attribute( L"name" ).value() );
 			templ->arrSkins[ templ->arrSkinsCnt ].layersVisMask = nodeskin.attribute( L"layersVisibilityMask" ).as_uint();
-			templ->arrSkins[ templ->arrSkinsCnt ].hand_L = nodeskin.attribute( L"handL_layerMask" ).as_uint();
-			templ->arrSkins[ templ->arrSkinsCnt ].hand_R = nodeskin.attribute( L"handR_layerMask" ).as_uint();
+			templ->arrSkins[ templ->arrSkinsCnt ].hand2Mask = nodeskin.attribute( L"handL_layerMask" ).as_uint();
+			templ->arrSkins[ templ->arrSkinsCnt ].hand1Mask = nodeskin.attribute( L"handR_layerMask" ).as_uint();
 			templ->arrSkinsCnt++;
 			_ASSERT( templ->arrSkinsCnt < K_ACT_SKINS_MAX_SETS );
 		}

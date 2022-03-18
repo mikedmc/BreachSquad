@@ -375,7 +375,7 @@ void CActor::Update(float dTime)
 	eAngle = GetDir6FromVec(vAim);
 
 	// aiming IK node must be set each frame or they get reset by the animation
-	c_graphics->SetAimVecLocal(Vec2(vAim.x * nAnimFlipMul, -vAim.y));
+	c_graphics->SetAimVecLocal(Vec2(vAim.x, vAim.y));
 	Vec2 vGunMount(0.0f, 0.0f);
 	if (c_graphics->GetGunPosWorld(vGunMount))
 	{

@@ -21,6 +21,9 @@ void CSpriteAnimComponent::Update(CActor& act, float dTime)
 
 void CSpriteAnimComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP*/ )
 {
+	Vec2 scale( 1.0f, 1.0f );
+	if ( vAim.x < 0.0f )
+		scale.x = -1.0f;
 	// CUSTOM MASKED SPRITE PAINTER
 	//sprite.Paint();
 	CSpriteLib* pSpr = sprite.pSprCol;
@@ -32,15 +35,16 @@ void CSpriteAnimComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHA
 	{
 		scFModule* mod = pSpr->FModules[ pSpr->AFrames[ aframeIdx ]->fmodulesIdx[ ii ] ];
 		// shift module flag 2 bits to the right to erase the flipX and flipY flags
-		// layer flags start from bit index 2
-		if ( NIS_FLAG_ANY( (mod->flags >> 2), dwLayersMask ) )
+		// find layer index 1..N = (flags>>2), convert to layer mask by shifting to the left with index-1
+		UINT32 flagmask = 1 << ((mod->flags >> 2) - 1);
+		if ( NIS_FLAG_ANY( flagmask, dwLayersMask ) )
 			continue;
 
 		CSpr::s_pSP->Draw( mod->pImg->pTex,
 			mod->texRect,
 			mod->moduleRectOff,
 			sprite.pos,
-			sprite.color );
+			sprite.color, 0.0f, scale );
 	}
 }
 
@@ -94,14 +98,14 @@ void CSpriteAnimComponent::SetSkin( CActor& act, WCHAR* skinName, bool bShowPrim
 			skinNamesh = act.actTemplate.arrSkins[ kk ].name;
 			// show hands
 			if ( bShowPrimaryHand )
-				dwLayersMask |= act.actTemplate.arrSkins[ kk ].hand_R;
+				dwLayersMask |= act.actTemplate.arrSkins[ kk ].hand1Mask;
 			else 
-				dwLayersMask &= ~act.actTemplate.arrSkins[ kk ].hand_R;
+				dwLayersMask &= ~act.actTemplate.arrSkins[ kk ].hand1Mask;
 
 			if ( bShowSecondaryHand )
-				dwLayersMask |= act.actTemplate.arrSkins[ kk ].hand_L;
+				dwLayersMask |= act.actTemplate.arrSkins[ kk ].hand2Mask;
 			else
-				dwLayersMask &= ~act.actTemplate.arrSkins[ kk ].hand_L;
+				dwLayersMask &= ~act.actTemplate.arrSkins[ kk ].hand2Mask;
 
 			return;
 			
@@ -167,20 +171,12 @@ void CSpriteAnimComponent::SetAnimOnce( EActorAnim eAnim, EDir6 eAngle )
 
 void CSpriteAnimComponent::SetAimVecLocal(Vec2 vLocalAim)
 {
-	//#TODO: vezi transformul asta ca sa muti din world space in skeleton space:
-	//Vector2 ledgePointLocalSpace = skeletonAnimation.transform.InverseTransformPoint(ledgePoint); // your ledgePoint
-	/*
-	spine::Bone* b_aim = pSkeleton->arrBones[K_SD_BONE_AIM_IK];
-	if (b_aim)
-	{
-		b_aim->setX(vLocalAim.x);
-		b_aim->setY(vLocalAim.y);
-	}
-	*/
+	vAim = vLocalAim;
 }
 
 bool CSpriteAnimComponent::GetGunPosWorld(Vec2 &retVec)
 {
+	retVec = sprite.pos;
 	/*
 	spine::Bone* bone = pSkeleton->arrBones[K_SD_BONE_GUN_MOUNT];
 	if (bone)

@@ -33,10 +33,10 @@ public:
 	struct CSkinDesc {
 		CStringHash			name;
 		DWORD				layersVisMask;			// layer visibility bit mask that gets applied (less important bit is layer index 0)
-		DWORD				hand_L;					// left hand layer mask
-		DWORD				hand_R;					// right hand layer mask
+		DWORD				hand2Mask;				// secondary hand layer mask
+		DWORD				hand1Mask;				// main hand layer mask
 
-		CSkinDesc() : layersVisMask( 0xffffffff ), hand_L( 0 ), hand_R( 0 )
+		CSkinDesc() : layersVisMask( 0xffffffff ), hand2Mask( 0 ), hand1Mask( 0 )
 		{}
 	};
 
