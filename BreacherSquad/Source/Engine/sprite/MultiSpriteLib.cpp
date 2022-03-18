@@ -29,6 +29,7 @@ OPRESULT CMultiSpriteLib::AddSprites( WCHAR* wcsFullPath, int & retLibIdx )
 		SAFE_DELETE( sli );
 		return err;
 	}
+	sli->shID.Init( wcsFullPath );
 
 	arrLibs.Add( sli );
 	// return lib index

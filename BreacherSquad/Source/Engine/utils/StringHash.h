@@ -6,7 +6,7 @@ class CStringHash //string-hash pair
 {
 public:
 	WCHAR text[K_MAX_STRINGHASH_LEN];
-	UINT32 textHash;  //hash-ul numelui
+	UINT32 textHash;  //hash of the string
 
 	FORCEINLINE const UINT32 getHash() const { return textHash; }
 
@@ -21,7 +21,7 @@ public:
 			return;
 		}
 
-		StringCchCopy(text, K_MAX_STRINGHASH_LEN, strText);
+		wcscpy_s(text, K_MAX_STRINGHASH_LEN, strText);
 		textHash = FastHash(text, wcslen(text));
 	}
 

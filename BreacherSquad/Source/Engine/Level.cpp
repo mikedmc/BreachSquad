@@ -477,7 +477,7 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 	m_nPlayersActive = 0;
 	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 	{
-		if (pPlayerActor[kk] != null)
+		if (pPlayerActor[kk] != nullptr)
 		{
 			m_nPlayers++;
 			//HAS_PLAYED needs to be 0 or 1
@@ -493,10 +493,10 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHash* shStateOverride)
 {
 	CActorTemplate* acttemplate = Actor_LoadTemplate(strTemplateFileName);
-	if (acttemplate == null)
+	if (acttemplate == nullptr)
 	{
 		ErrorBox(K_ERR_WARNING, L"LoadLevel::Actor_GetTemplate - invalid template name: %s", strTemplateFileName);
-		return null;
+		return nullptr;
 	}
 
 	//copy template locally and customize it based on gear selection
@@ -560,9 +560,9 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	nact->AddWeapon(wpn, true);
 	// initialize AI
 	Actor_SetAIState(nact, nact->actTemplate.AItemplate->GetAIStateByName(nact->actTemplate.shAIState_ini));
-
-	//finish up adding the actor
+	// prepare actor for play after everything is loaded and set up
 	nact->PostConstructionInit();
+	//finish up adding the actor
 	m_arrActors.Add(nact);
 
 	nact->BeginPlay();
@@ -1188,22 +1188,24 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 
 	// skins
 	pugi::xml_node skinsnode = rootnode.child( L"SKINS" );
-	int skinidx = 0;
+	templ->arrSkinsCnt = 0;
 	if ( skinsnode != NULL )
 	{
 		for each(auto& nodeskin in skinsnode.children())
 		{
-			templ->arrSkins[ skinidx ].name.Init( nodeskin.attribute( L"name" ).value() );
-			templ->arrSkins[ skinidx ].layersVisMask = nodeskin.attribute( L"layersVisibilityMask" ).as_uint();
-			templ->arrSkins[ skinidx ].hand_L = nodeskin.attribute( L"leftHandLayer" ).as_uint();
-			templ->arrSkins[ skinidx ].hand_R = nodeskin.attribute( L"rightHandLayer" ).as_uint();
-			skinidx++;
+			templ->arrSkins[ templ->arrSkinsCnt ].name.Init( nodeskin.attribute( L"name" ).value() );
+			templ->arrSkins[ templ->arrSkinsCnt ].layersVisMask = nodeskin.attribute( L"layersVisibilityMask" ).as_uint();
+			templ->arrSkins[ templ->arrSkinsCnt ].hand_L = nodeskin.attribute( L"handL_layerMask" ).as_uint();
+			templ->arrSkins[ templ->arrSkinsCnt ].hand_R = nodeskin.attribute( L"handR_layerMask" ).as_uint();
+			templ->arrSkinsCnt++;
+			_ASSERT( templ->arrSkinsCnt < K_ACT_SKINS_MAX_SETS );
 		}
 	}
 	// create default skin if none present (all layers visible)
-	if ( skinidx == 0 )
+	if ( templ->arrSkinsCnt == 0 )
 	{
-		templ->arrSkins[ skinidx ].name.Init( "default" );
+		templ->arrSkins[ templ->arrSkinsCnt ].name.Init( "default" );
+		templ->arrSkinsCnt++;
 		ErrorBox( K_ERR_WARNING, L"No skin found in template:%s", strTemplateFileName );
 	}
 
@@ -1231,10 +1233,10 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 					for ( int ang = 0; ang < EDIR6S_CNT; ang++ )
 					{
 						WCHAR strAnim[ MAX_PATH ];
-						swprintf_s( strAnim, MAX_PATH, L"%s_", strSetName, EDir6Names[ang] );
+						swprintf_s( strAnim, MAX_PATH, L"%s_%s", strSetName, EDir6Names[ang].text );
 						if ( !nmnode.attribute( strAnim ).empty() )
 						{
-							templ->arrAnims[ kk ].animNamesA[ nset ][ ang ].Init( nmnode.attribute( strSetName ).value() );
+							templ->arrAnims[ kk ].animNamesA[ nset ][ ang ].Init( nmnode.attribute( strAnim ).value() );
 						}
 					}
 				}
@@ -1297,7 +1299,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 	if (ainode != NULL)
 	{
 		// parse all states
-		for (pugi::xml_node statenode = ainode.first_child(); statenode; statenode = statenode.next_sibling())
+		for each(auto& statenode in ainode.children())
 		{
 			CAIState * nstate = new CAIState();
 			nstate->name.Init(statenode.attribute(L"name").value());
@@ -1314,7 +1316,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 				{
 					CStringHash evtTypeStr(eventnode.attribute(L"type").value());
 					EAIEventType nevt = K_LVL_AI_EVENT_NONE;
-					//trateaza keyword "ANY"
+					// handle "ANY" keyword
 					if (evtTypeStr.textHash == FastHash(L"any"))
 						nevt = K_LVL_AI_EVENT_ANY;
 					else

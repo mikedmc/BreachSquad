@@ -19,28 +19,48 @@ void CSpriteAnimComponent::Update(CActor& act, float dTime)
 	//#TODO: provide access to animation status and frame events (status through getter, events through callback)
 }
 
-void CSpriteAnimComponent::Paint(CActor& act, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP*/)
+void CSpriteAnimComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP*/ )
 {
-	sprite.Paint();
+	// CUSTOM MASKED SPRITE PAINTER
+	//sprite.Paint();
+	CSpriteLib* pSpr = sprite.pSprCol;
+	_ASSERT( sprite.animIdx < pSpr->Animations.Count() );
+	_ASSERT( sprite.frameIdx < pSpr->Animations[ sprite.animIdx ]->aframesNo );
+
+	int aframeIdx = pSpr->Animations[ sprite.animIdx ]->aframesIdx[ sprite.frameIdx ];
+	for ( int ii = 0; ii < pSpr->AFrames[ aframeIdx ]->fmodulesNo; ii++ )
+	{
+		scFModule* mod = pSpr->FModules[ pSpr->AFrames[ aframeIdx ]->fmodulesIdx[ ii ] ];
+		// shift module flag 2 bits to the right to erase the flipX and flipY flags
+		// layer flags start from bit index 2
+		if ( NIS_FLAG_ANY( (mod->flags >> 2), dwLayersMask ) )
+			continue;
+
+		CSpr::s_pSP->Draw( mod->pImg->pTex,
+			mod->texRect,
+			mod->moduleRectOff,
+			sprite.pos,
+			sprite.color );
+	}
 }
 
-void CSpriteAnimComponent::CacheAnimations(CActor& act)
+void CSpriteAnimComponent::CacheAnimations( CActor& act )
 {
 	_ASSERT( pSprLib != nullptr );
 
 	int nAnimsChanged = 0;
-	for (int anm = 0; anm < K_ACT_ANIMS_CNT; anm++)
+	for ( int anm = 0; anm < K_ACT_ANIMS_CNT; anm++ )
 	{
-		for (int kk = 0; kk < K_SPCOMP_ANIM_MAX_SETS; kk++)
+		for ( int kk = 0; kk < K_SPCOMP_ANIM_MAX_SETS; kk++ )
 		{
 			for ( int ang = 0; ang < EDIR6S_CNT; ang++ )
 			{
-				CStringHashA *animname = &act.actTemplate.arrAnims[ anm ].animNamesA[ kk ][ ang ];
+				CStringHash *animname = &act.actTemplate.arrAnims[ anm ].animNamesA[ kk ][ ang ];
 				if ( animname->IsSet() )
 				{
 					int anmidx = pSprLib->GetAnimationIdxByName( animname->text );
 					arrAnims[ anm ].animIdx[ kk ][ ang ] = anmidx;
-					if ( anmidx < 0 ) 
+					if ( anmidx < 0 )
 					{
 						ErrorBox( K_ERR_WARNING, L"SpriteAnimComponent::CacheAnimations: Could not find anim:%s in template: %s", animname->text, act.actTemplate.shID.text );
 					}
@@ -48,14 +68,49 @@ void CSpriteAnimComponent::CacheAnimations(CActor& act)
 				else
 					arrAnims[ anm ].animIdx[ kk ][ ang ] = -1;
 			}
+			// overwrite SW and NW with SE and NE as we use the same anims (if not specifically set in template)
+			if ( arrAnims[ anm ].animIdx[ kk ][ EDIR6_NW ] < 0 )
+				arrAnims[ anm ].animIdx[ kk ][ EDIR6_NW ] = arrAnims[ anm ].animIdx[ kk ][ EDIR6_NE ];
+			if ( arrAnims[ anm ].animIdx[ kk ][ EDIR6_SW ] < 0 )
+				arrAnims[ anm ].animIdx[ kk ][ EDIR6_SW ] = arrAnims[ anm ].animIdx[ kk ][ EDIR6_SE ];
 		}
 	}
 
-	LOG_DBG(L"CActor::UpdateAnimationPointers: Updates %d animations", nAnimsChanged);
-
+	LOG_DBG( L"CActor::UpdateAnimationPointers: Updates %d animations", nAnimsChanged );
 }
 
-void CSpriteAnimComponent::SetLayersVisibility( DWORD layersMask )
+void CSpriteAnimComponent::SetSkin( CActor& act, WCHAR* skinName, bool bShowPrimaryHand, bool bShowSecondaryHand )
+{
+	CStringHash skinNamesh;
+	if ( skinName == nullptr )
+		skinNamesh = act.actTemplate.arrSkins[ 0 ].name;
+	else
+		skinNamesh.Init( skinName );
+
+	for ( int kk = 0; kk < act.actTemplate.arrSkinsCnt; kk++ ) {
+		if ( act.actTemplate.arrSkins[ kk ].name == skinNamesh )
+		{
+			dwLayersMask = act.actTemplate.arrSkins[ kk ].layersVisMask;
+			skinNamesh = act.actTemplate.arrSkins[ kk ].name;
+			// show hands
+			if ( bShowPrimaryHand )
+				dwLayersMask |= act.actTemplate.arrSkins[ kk ].hand_R;
+			else 
+				dwLayersMask &= ~act.actTemplate.arrSkins[ kk ].hand_R;
+
+			if ( bShowSecondaryHand )
+				dwLayersMask |= act.actTemplate.arrSkins[ kk ].hand_L;
+			else
+				dwLayersMask &= ~act.actTemplate.arrSkins[ kk ].hand_L;
+
+			return;
+			
+		}
+	}
+	ErrorBox( K_ERR_WARNING, L"Couldn't find skin named: %s", skinName );
+}
+
+void CSpriteAnimComponent::SetLayersVisibilityMask( DWORD layersMask )
 {
 	dwLayersMask = layersMask;
 }
@@ -87,7 +142,7 @@ OPRESULT CSpriteAnimComponent::InitFromFile(CActor& act, WCHAR * Path)
 	// init sprites
 	sprite.Init( pSprLib, 0 );
 	//Set skin (first skin by default)
-	dwLayersMask = act.actTemplate.arrSkins[ 0 ].layersVisMask; //#0xffffffff maybe is better
+	SetSkin( act, nullptr, true, false );
 	// set base animation
 	SetAnimSet( 0 );
 	SetAnimOnce( K_ACT_ANIM_IDLE, act.eAngle );

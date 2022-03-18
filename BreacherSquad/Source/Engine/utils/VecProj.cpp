@@ -46,7 +46,8 @@ void VecProj::Set(Vec3 & vec)
 
 void VecProj::Set()
 {
-	Set( Vec3( 0.0f, 0.0f, 0.0f ) );
+	Vec3 v( 0.0f, 0.0f, 0.0f );
+	Set( v );
 }
 
 void VecProj::Move(Vec3 & delta)

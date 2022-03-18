@@ -127,15 +127,15 @@ void CActor::Move(Vec3 delta)
 	bbox_floor.Set(&bbox_floor_ini, pos.xy);
 }
 
-
 CActorTemplate::CActorTemplate() :
+	arrSkinsCnt( 0 ),
 	//generic params
-	fLife(K_NOT_SET), fArmor(K_NOT_SET), fSpeedMove(K_NOT_SET),
-	actorClass(K_LVL_ACT_CLASS_NOT_SET),
+	fLife( K_NOT_SET ), fArmor( K_NOT_SET ), fSpeedMove( K_NOT_SET ),
+	actorClass( K_LVL_ACT_CLASS_NOT_SET ),
 	//more important values
-	eMaterial(K_LVL_MATERIAL_UNKNOWN), eCaps(K_ACT_CAPS_NONE),
-	AItemplate(nullptr), fMass(100.0f),
-	fHeight(32.0f)
+	eMaterial( K_LVL_MATERIAL_UNKNOWN ), eCaps( K_ACT_CAPS_NONE ),
+	AItemplate( nullptr ), fMass( 100.0f ),
+	fHeight( 32.0f )
 {
 	//reset anim IDs
 	for (int kk = 0; kk < K_ACT_ANIMS_CNT; kk++)
@@ -287,14 +287,14 @@ void CActorTemplate::AddGenericDataFromTemplate(CActorTemplate* pTemplate)
 }
 
 
-UINT32 CActorTemplate::GetSkinMaskValue( char* skinName )
+UINT32 CActorTemplate::GetSkinMaskValue( WCHAR* skinName )
 {
 	for ( int kk = 0; kk < K_ACT_SKINS_MAX_SETS; kk++ )
 	{
 		if ( arrSkins[ kk ].name.IsEqual( skinName ) )
 			return arrSkins[kk].layersVisMask;
 	}
-	return 0xfffffff;
+	return 0xffffffff;
 }
 
 bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
@@ -336,15 +336,15 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 	}
 	*/
 
-	this->pWeaponMain = null;
+	pWeaponMain = null;
 
 	///--- finished setting up, now save backup template for initial state ---
-	this->actTemplate_ini = this->actTemplate;
+	actTemplate_ini = actTemplate;
 
 	// Load spine skeleton
 	WCHAR Path[MAX_PATH];
 	WCHAR wcsPath[MAX_PATH];
-	swprintf_s(wcsPath, MAX_PATH, L"media/levels/data/actors/%s", pActorTemplate->shSourceXML);
+	swprintf_s(wcsPath, MAX_PATH, L"media/levels/data/actors/%s", actTemplate.shSourceXML.text);
 	FileManager::GetMediaPath(wcsPath, Path);
 	c_graphics->InitFromFile(*this, Path);
 
@@ -364,7 +364,7 @@ void CActor::Update(float dTime)
 	if(MUVec2AlmostZero(speed))
 		c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE, eAngle);
 	else
-		c_graphics->SetAnimOnce(K_ACT_ANIM_MOVE, eAngle);
+		c_graphics->SetAnimOnce(K_ACT_ANIM_RUN, eAngle);
 
 	//this->SetAnimOnce(1, K_SD_ANIM_SHOOT);
 

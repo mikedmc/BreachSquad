@@ -8,7 +8,7 @@
 // max no of verse sets
 #define K_ACT_VERSES_MAX_SETS 2
 // max number of skins
-#define K_ACT_SKINS_MAX_SETS 5
+#define K_ACT_SKINS_MAX_SETS 20
 
 // suspend flags used on actor->nSuspendedFlag 
 #define K_LVL_SUSPENDFLAG_NONE 0
@@ -31,7 +31,7 @@ public:
 
 	// descriptor for skins array
 	struct CSkinDesc {
-		CStringHashA		name;
+		CStringHash			name;
 		DWORD				layersVisMask;			// layer visibility bit mask that gets applied (less important bit is layer index 0)
 		DWORD				hand_L;					// left hand layer mask
 		DWORD				hand_R;					// right hand layer mask
@@ -41,12 +41,14 @@ public:
 	};
 
 	// Animations descriptor (keeps animation names for each of the 6 angles, for every set)
+	// We only use N, NE, SE, S and flip them for the left quadrant but still we try and load all directions
 	struct CAnimDesc {
 		// Holds animation names [animSet][angle]
-		CStringHashA		animNamesA[ K_ACT_ANIM_MAX_SETS ][ EDIR6S_CNT ];
+		CStringHash			animNamesA[ K_ACT_ANIM_MAX_SETS ][ EDIR6S_CNT ];
 
 		CAnimDesc()
 		{
+			Reset();
 		};
 
 		void Reset()
@@ -61,7 +63,8 @@ public:
 	CStringHash		shSourceXML;		// skeleton xml file name (not full path)
 	CStringHash		shAIState_ini;		// initial AI state
 
-	CSkinDesc		arrSkins[ K_ACT_SKINS_MAX_SETS ];							// Array that contains skin names and descriptions
+	CSkinDesc		arrSkins[ K_ACT_SKINS_MAX_SETS ];								// Array that contains skin names and descriptions
+	int				arrSkinsCnt;
 	CAnimDesc		arrAnims[ K_ACT_ANIMS_CNT ];									// Array that keeps animation data from actor.xml
 	int				soundIDs[ K_LVL_ACT_VERSES_COUNT ][ K_ACT_VERSES_MAX_SETS ];	// Contains sound ids-s mapped on different actions (called verses, see EActorSoundVerse)
 
@@ -98,7 +101,7 @@ public:
 	void AddGenericDataFromTemplate( CActorTemplate* pTemplate );
 	
 	// returns skin layer visibility flag or 0xffffffff if skin not found
-	UINT32 GetSkinMaskValue( char* skinName );
+	UINT32 GetSkinMaskValue( WCHAR* skinName );
 };
 
 

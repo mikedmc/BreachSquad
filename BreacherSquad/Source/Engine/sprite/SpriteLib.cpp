@@ -78,16 +78,18 @@ OPRESULT CSpriteLib::LoadSprites( WCHAR* wcsFullPath )
 		if ( m_pDevice != nullptr )
 		{
 			//tries to create textures here
-			HRESULT hr = D3DXCreateTextureFromFileEx( m_pDevice, ntex->imagePath, D3DX_DEFAULT, D3DX_DEFAULT,
+			HRESULT hr = D3DXCreateTextureFromFileEx( m_pDevice, ntex->imagePath, D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
 				1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED,
 				D3DX_FILTER_NONE, D3DX_FILTER_NONE, 0,
-				&ntex->info, NULL, &ntex->pTex );
+				NULL, NULL, &ntex->pTex );
 
 			if ( FAILED( hr ) )
 			{
 				Release();
 				return OPRESULT( K_OP_FAILED, K_SEVERITY_CRITICAL, L"SpriteCollection::loadSpriteXML->createTextures\n%s", ntex->imagePath );
 			}
+			// get real texture size from first level of the texture
+			ntex->pTex->GetLevelDesc( 0, &ntex->info );
 		}
 		Textures.Add( ntex );
 	}
@@ -539,15 +541,17 @@ OPRESULT CSpriteLib::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDes
 	{
 		scTexture *ntex = Textures[ kk ];
 
-		HRESULT hr = D3DXCreateTextureFromFileEx( m_pDevice, ntex->imagePath, D3DX_DEFAULT, D3DX_DEFAULT,
+		HRESULT hr = D3DXCreateTextureFromFileEx( m_pDevice, ntex->imagePath, D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
 			1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED,
 			D3DX_FILTER_NONE, D3DX_FILTER_NONE, 0,
-			&ntex->info, NULL, &ntex->pTex );
+			NULL, NULL, &ntex->pTex );
 
 		if ( FAILED( hr ) )
 		{
 			return OPRESULT( K_OP_FAILED, K_SEVERITY_CRITICAL, L"SpriteCollection::OnCreateDevice->createTextures\n%s", ntex->imagePath );
 		}
+		// get real texture size from first level of the texture
+		ntex->pTex->GetLevelDesc( 0, &ntex->info );
 	}
 
 	return K_OP_OK;
