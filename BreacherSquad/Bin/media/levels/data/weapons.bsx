@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<SpriteCollection Version="2.0" AtlasJSON="">
+  <Image>weapons.png</Image>
+  <Modules>
+    <Module ImageIdx="0" X="2" Y="126" W="14" H="9" strName="" />
+    <Module ImageIdx="0" X="66" Y="65" W="28" H="10" strName="" />
+    <Module ImageIdx="0" X="200" Y="78" W="33" H="10" strName="" />
+  </Modules>
+  <FrameModules>
+    <FrameModule ModuleIdx="0" OX="5" OY="-3" Flags="0" />
+    <FrameModule ModuleIdx="1" OX="-10" OY="-5" Flags="0" />
+    <FrameModule ModuleIdx="2" OX="-8" OY="-12" Flags="0" />
+  </FrameModules>
+  <Frames>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="0" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="1" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="2" />
+      </FModules>
+      <Points />
+    </Frame>
+  </Frames>
+  <AnimationFrames>
+    <AnimationFrame FrameIdx="0" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="1" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="2" Duration="1" DX="0" DY="0" Flags="" />
+  </AnimationFrames>
+  <Animations>
+    <Animation ID="PISTOL" Flags="0">
+      <AFrame Idx="0" />
+    </Animation>
+    <Animation ID="SHOTGUN" Flags="0">
+      <AFrame Idx="1" />
+    </Animation>
+    <Animation ID="SNIPER" Flags="0">
+      <AFrame Idx="2" />
+    </Animation>
+  </Animations>
+</SpriteCollection>

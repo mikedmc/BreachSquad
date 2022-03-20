@@ -7,7 +7,8 @@ class CMultiSpriteLib : public IDeviceRes
 private:
 	struct SpriteLibInstance 
 	{
-		CStringHash					shID;
+		CStringHash					shNickname;				// Nickname can be used instead of lib index so we don't store lib index if not necessary
+		CStringHash					shFullPath;
 		CSpriteLib					spriteLib;
 	};
 
@@ -18,11 +19,13 @@ public:
 	CMultiSpriteLib();
 	~CMultiSpriteLib();
 	// Adds a new sprite
-	OPRESULT						AddSprites( WCHAR* wcsFullPath, int & retLibIdx );
+	OPRESULT						AddSprites( WCHAR* wcsFullPath, int & retLibIdx, WCHAR* nickname = nullptr );
 	// Releases all sprite libs
 	void							Release();
-	// Returns index of library or -1 if not found. strLibId is the lib path
+	// Returns index of library or -1 if not found. wcsFullPath is the lib full path.
 	int								GetLibIndex( WCHAR* wcsFullPath );
+	// Returns index of library or -1 if not found. Searches by nickname given on loading.
+	int								GetLibIndexByNick( WCHAR* nickname );
 	CSpriteLib*						GetLib( int nLibIdx );
 
 

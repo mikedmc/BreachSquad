@@ -11,7 +11,7 @@ CMultiSpriteLib::~CMultiSpriteLib()
 	Release();
 }
 
-OPRESULT CMultiSpriteLib::AddSprites( WCHAR* wcsFullPath, int & retLibIdx )
+OPRESULT CMultiSpriteLib::AddSprites( WCHAR* wcsFullPath, int & retLibIdx, WCHAR* nickname )
 {
 	retLibIdx = GetLibIndex( wcsFullPath );
 	//already loaded?
@@ -29,7 +29,12 @@ OPRESULT CMultiSpriteLib::AddSprites( WCHAR* wcsFullPath, int & retLibIdx )
 		SAFE_DELETE( sli );
 		return err;
 	}
-	sli->shID.Init( wcsFullPath );
+	sli->shFullPath.Init( wcsFullPath );
+	// init nickname
+	if ( nickname != nullptr )
+		sli->shNickname.Init( nickname );
+	else
+		sli->shNickname = sli->shFullPath;
 
 	arrLibs.Add( sli );
 	// return lib index
@@ -48,7 +53,18 @@ int CMultiSpriteLib::GetLibIndex( WCHAR* wcsFullPath )
 	UINT32 shID = HASHW( wcsFullPath );
 	for ( int kk = 0; kk < arrLibs.Count(); kk++ )
 	{
-		if ( arrLibs[ kk ]->shID.textHash == shID )
+		if ( arrLibs[ kk ]->shFullPath.textHash == shID )
+			return kk;
+	}
+	return -1;
+}
+
+int CMultiSpriteLib::GetLibIndexByNick( WCHAR* nickname )
+{
+	UINT32 shID = HASHW( nickname );
+	for ( int kk = 0; kk < arrLibs.Count(); kk++ )
+	{
+		if ( arrLibs[ kk ]->shNickname.textHash == shID )
 			return kk;
 	}
 	return -1;

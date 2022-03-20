@@ -396,6 +396,8 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 	return true;
 }
 
+#define K_LIBNICK_WEAPONS L"SPRLIB_WEAPONS"
+
 OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 {
 	pugi::xml_document doc;
@@ -404,9 +406,17 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Unable to load Weapon Templates XML:%s\n", xmlPath);
 	}
 
+	// load weapons sprites
+	int m_libidxWeapons;
+	WCHAR wcsPath[ MAX_PATH ];
+	WCHAR Path[ MAX_PATH ];
+	swprintf_s( wcsPath, MAX_PATH, L"media/levels/data/%s", doc.root().child( L"WEAPONS" ).attribute( L"file" ).value());
+	FileManager::GetMediaPath( wcsPath, Path );
+	V_OP_RET( m_sprActors.AddSprites( Path, m_libidxWeapons, K_LIBNICK_WEAPONS ) );
+
 	//load explosion templates
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrTemplatesExplosion);
-	pugi::xml_node rootnodeexplo = doc.root().child(L"WEAPONRY").child(L"ExplosionTemplates");
+	pugi::xml_node rootnodeexplo = doc.root().child(L"WEAPONS").child(L"ExplosionTemplates");
 	for (pugi::xml_node bnode = rootnodeexplo.first_child(); bnode; bnode = bnode.next_sibling())
 	{
 		CExplosionTemplate* templ = new CExplosionTemplate();
@@ -457,7 +467,7 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 	//load weapon templates
 	SAFE_DELETE_GROWABLE_ARRAY(m_arrTemplatesWeapon);
 
-	pugi::xml_node rootnode = doc.root().child(L"WEAPONRY").child(L"WeaponTemplates");
+	pugi::xml_node rootnode = doc.root().child(L"WEAPONS").child(L"WeaponTemplates");
 	for (pugi::xml_node bnode = rootnode.first_child(); bnode; bnode = bnode.next_sibling())
 	{
 		CWeaponTemplate* templ = new CWeaponTemplate();

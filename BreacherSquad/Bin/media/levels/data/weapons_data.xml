@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<WEAPONRY>
+<WEAPONS file="weapons.bsx">
   <!--
 generic weapon data:
 ********************
@@ -92,4 +92,4 @@ sDoTClassFilter="PLAYER/HUMAN/TRAP/PASSIVE" - only affects specified class
     <EXPLO_BURN_DOT fDamage="0.0" nArmorPiercingRating="5" fDamageRadius="8.0" fStunDuration="12.0" fStunRadius="0.5" fSoundRadius="320.0" fMaxImpulse="0.0" sDoTType="DoT_FIRE" fDoTRadius="32.0" fDoTDuration="4.0" fDoTDamagePerSec="45.0" sDoTIgnoredClass="PLAYER" />
   </ExplosionTemplates>
 
-</WEAPONRY>
+</WEAPONS>
