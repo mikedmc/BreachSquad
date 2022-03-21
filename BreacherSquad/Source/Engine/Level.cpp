@@ -422,7 +422,7 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 		return;
 	}
 
-	CActor* nact = SpawnActor(spawnPos, L"act_shield.xml");
+	CActor* nact = SpawnActor(spawnPos, L"act_breacher.xml");
 
 	if (nact)
 	{

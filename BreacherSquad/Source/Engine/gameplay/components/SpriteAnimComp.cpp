@@ -150,7 +150,7 @@ OPRESULT CSpriteAnimComponent::InitFromFile(CActor& act, WCHAR * Path)
 	// init sprites
 	sprite.Init( pSprLib, 0 );
 	//Set skin (first skin by default)
-	SetSkin( act, nullptr, true, false );
+	SetSkin( act, nullptr, true, true);
 	// set base animation
 	SetAnimSet( 0 );
 	SetAnimOnce( K_ACT_ANIM_IDLE, act.eAngle );
