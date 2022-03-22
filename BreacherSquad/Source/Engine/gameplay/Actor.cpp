@@ -39,7 +39,7 @@ void CActor::PostConstructionInit()
 
 void CActor::BeginPlay()
 {
-	c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE, eAngle);
+	c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE);
 }
 
 void CActor::EndPlay()
@@ -55,7 +55,7 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 
 CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteAnimComponent* pComGraphics) :
 	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nLastDamageTakenFromUID(0),
-	pWeaponMain(nullptr), pClosestTouchable(nullptr), bAnimFlipX(false), eAngle(EDIR6_S),
+	pWeaponMain(nullptr), pClosestTouchable(nullptr), 
 	nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), bHasGravity(true),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
 	eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0)
@@ -178,19 +178,12 @@ void CActor::Update(float dTime)
 	this->fTimelineAI += dTime;
 
 	if(MUVec2AlmostZero(speed))
-		c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE, eAngle);
+		c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE);
 	else
-		c_graphics->SetAnimOnce(K_ACT_ANIM_RUN, eAngle);
-
-	//this->SetAnimOnce(1, K_SD_ANIM_SHOOT);
+		c_graphics->SetAnimOnce(K_ACT_ANIM_RUN);
 
 	Vec2 vAim = m_AIcommands.vAimVec;
-	// set generic stuff
-	bAnimFlipX = (vAim.x < 0.0f) ? true : false;
-	int nAnimFlipMul = (bAnimFlipX) ? -1 : 1;
-	eAngle = GetDir6FromVec(vAim);
 
-	// aiming IK node must be set each frame or they get reset by the animation
 	c_graphics->SetAimVecLocal(Vec2(vAim.x, vAim.y));
 	/*
 	Vec2 vGunMount(0.0f, 0.0f);

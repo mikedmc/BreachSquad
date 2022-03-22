@@ -31,6 +31,7 @@ private:
 	UINT32						dwLayersMask;							// least important byte is layer id 1 from FModule flags. Use this to hise or to show parts depending on skin
 	CStringHashA				shSkin;									// currently set skin (useless?)
 	Vec2						vAim;									// aim vector
+	EDir6						eAngle;									// animation angle (6 possible ways) - computed from vAnim
 
 public:
 	CAnimData					arrAnims[ K_ACT_ANIMS_CNT ];			// data about animations
@@ -58,9 +59,9 @@ public:
 	void						SetAnimSet( int newAnimSet );
 	inline int					GetAnimSet() const { return nAnimSet; }
 
-	void						SetAnimOnce( EActorAnim eAnim, EDir6 eAngle );
+	void						SetAnimOnce( EActorAnim eAnim );
 	// Returns mount position for weapons in local space (pointFlag represents the mount position)
-	Vec2						GetGunMountPos( EDir6 eAngle, UINT32 pointflag );
+	Vec2						GetGunMountPos( UINT32 pointflag );
 
 	//#TODO: useless??
 	void						SetAimVecLocal( Vec2 vLocalAim );

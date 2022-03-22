@@ -28,7 +28,6 @@ public:
 
 public:
 	VecProj					vHeart;						// 3d heart position used for visibility tests and weapon direction
-	EDir6					eAngle;						// animation angle (6 possible ways)
 	UINT16					collisionFlags;				// tells us where we have collisions
 	bool					bHasGravity;				// does it have gravity?
 
@@ -41,8 +40,6 @@ public:
 	Vec2		speed;
 	Vec2		vSpeedImpulse;	//viteza aplicata extern (cand e impuscat de exemplu). Se va atenua automat.
 	Vec2		vMoveDirN;		//normalized movement direction
-
-	bool		bAnimFlipX;		// do we need to flip the animation on X?
 
 	float		fLife, fArmor; //cata viata are si cata armura
 	float		fFOVPercent;   //field of view-ul personajului, intre 0 si 1 => 0.5 va fi FOV de 90 de grade. Reprezinta un fel de alertLevel si seteaza si hearing range

@@ -3,6 +3,7 @@
 
 CSpriteAnimComponent::CSpriteAnimComponent( CMultiSpriteLib* pSpriteLib )
 {
+	eAngle = EDIR6_S;
 	nAnimSet = 0;
 	pLib = pSpriteLib;
 	pSpriteLib = nullptr;
@@ -10,6 +11,8 @@ CSpriteAnimComponent::CSpriteAnimComponent( CMultiSpriteLib* pSpriteLib )
 
 CSpriteAnimComponent::~CSpriteAnimComponent()
 {
+	pLib = nullptr;
+	pSprLib = nullptr;
 }
 
 void CSpriteAnimComponent::Update(CActor& act, float dTime)
@@ -153,7 +156,7 @@ OPRESULT CSpriteAnimComponent::InitFromFile(CActor& act, WCHAR * Path)
 	SetSkin( act, nullptr, true, true);
 	// set base animation
 	SetAnimSet( 0 );
-	SetAnimOnce( K_ACT_ANIM_IDLE, act.eAngle );
+	SetAnimOnce( K_ACT_ANIM_IDLE );
 
 	return K_OP_OK;
 }
@@ -166,14 +169,14 @@ void CSpriteAnimComponent::SetAnimSet(int newAnimSet)
 	}
 }
 
-void CSpriteAnimComponent::SetAnimOnce( EActorAnim eAnim, EDir6 eAngle )
+void CSpriteAnimComponent::SetAnimOnce( EActorAnim eAnim )
 {
 	_ASSERT( (eAnim >= K_ACT_ANIM_EMPTY) && (eAnim < K_ACT_ANIMS_CNT) );
 	sprite.SetAnimOnce( arrAnims[ (int)eAnim ].animIdx[ nAnimSet ][ (int)eAngle ] );
 }
 
 
-Vec2 CSpriteAnimComponent::GetGunMountPos( EDir6 eAngle, UINT32 pointflag )
+Vec2 CSpriteAnimComponent::GetGunMountPos( UINT32 pointflag )
 {
 	int anmidx = arrAnims[ K_ACT_ANIM_REFPOSE ].animIdx[ nAnimSet ][ (int)eAngle ];
 	_ASSERT( anmidx >= 0 );
@@ -189,6 +192,7 @@ Vec2 CSpriteAnimComponent::GetGunMountPos( EDir6 eAngle, UINT32 pointflag )
 void CSpriteAnimComponent::SetAimVecLocal(Vec2 vLocalAim)
 {
 	vAim = vLocalAim;
+	eAngle = GetDir6FromVec( vAim );
 }
 
 bool CSpriteAnimComponent::GetGunPosWorld( CActor& act, Vec2 &retVec )
