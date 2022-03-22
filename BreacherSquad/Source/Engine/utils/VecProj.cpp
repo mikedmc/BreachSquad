@@ -44,6 +44,16 @@ void VecProj::Set(Vec3 & vec)
 	xy_proj = Vec2(xyz.x, xyz.y - proj_h);
 }
 
+void VecProj::Set( float x, float y, float z )
+{
+	xyz = Vec3(x, y, z);
+	// compute other components
+	xy.x = xyz.x; xy.y = xyz.y;
+	proj_h = Z_TO_H( xyz.z );
+	xy_proj = Vec2( xyz.x, xyz.y - proj_h );
+}
+
+
 void VecProj::Set()
 {
 	Vec3 v( 0.0f, 0.0f, 0.0f );

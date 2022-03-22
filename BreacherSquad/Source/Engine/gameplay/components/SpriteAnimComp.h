@@ -59,7 +59,10 @@ public:
 	inline int					GetAnimSet() const { return nAnimSet; }
 
 	void						SetAnimOnce( EActorAnim eAnim, EDir6 eAngle );
+	// Returns mount position for weapons in local space (pointFlag represents the mount position)
+	Vec2						GetGunMountPos( EDir6 eAngle, UINT32 pointflag );
 
+	//#TODO: useless??
 	void						SetAimVecLocal( Vec2 vLocalAim );
-	bool						GetGunPosWorld( Vec2 &retVec );
+	bool						GetGunPosWorld( CActor& act, Vec2 &retVec );
 };

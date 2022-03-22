@@ -10,7 +10,7 @@ CActorTemplate::CActorTemplate() :
 	//more important values
 	eMaterial( K_LVL_MATERIAL_UNKNOWN ), eCaps( K_ACT_CAPS_NONE ),
 	AItemplate( nullptr ), fMass( 100.0f ),
-	fHeight( 32.0f )
+	heightZ( 32.0f ), heartZ ( 24.0f )
 {
 	//reset anim IDs
 	for (int kk = 0; kk < K_ACT_ANIMS_CNT; kk++)

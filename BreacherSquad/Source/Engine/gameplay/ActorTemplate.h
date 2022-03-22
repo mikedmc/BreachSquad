@@ -73,7 +73,8 @@ public:
 	float			fSpeedMove;
 
 	CAABB			bbox;				// 2d bbox on floor plane defined around the character origin (not always centered)
-	float			fHeight;			// height of character
+	float			heightZ;			// height of character on Z 
+	float			heartZ;				// Z coord of heart position
 	CStringHash		shWeaponDefault;
 
 	CActorTemplate();

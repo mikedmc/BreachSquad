@@ -37,7 +37,7 @@ public:
 	UINT32 					nTouchingUID;   		// Reprezinta UID-ul celui care a facut touch sau 0 pt niciunul
 													   
 	DWORD					color;
-	float					fHeight;				// height in world coords
+	float					heightZ;				// height in world coords
 	CAABB					bbox;					// full projected 2d bbox in screen space that surrounds the entire object (for culling mainly)
 	CAABB					bbox_ini;				// non relative to object position AABB used when moving the bbox with absolute values
 	CAABB					bbox_floor;				// bbox of the object projected on the floor

@@ -1016,7 +1016,7 @@
       <Points>
         <Point X="5" Y="-13" Flags="1" />
         <Point X="-7" Y="-13" Flags="2" />
-        <Point X="0" Y="-11" Flags="3" />
+        <Point X="0" Y="-11" Flags="4" />
       </Points>
     </Frame>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
@@ -1030,7 +1030,7 @@
       <Points>
         <Point X="5" Y="-13" Flags="1" />
         <Point X="-6" Y="-13" Flags="2" />
-        <Point X="0" Y="-11" Flags="3" />
+        <Point X="0" Y="-11" Flags="4" />
       </Points>
     </Frame>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
@@ -1044,7 +1044,7 @@
       <Points>
         <Point X="5" Y="-13" Flags="1" />
         <Point X="-6" Y="-13" Flags="2" />
-        <Point X="0" Y="-11" Flags="3" />
+        <Point X="0" Y="-11" Flags="4" />
       </Points>
     </Frame>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
@@ -1058,7 +1058,7 @@
       <Points>
         <Point X="6" Y="-13" Flags="1" />
         <Point X="-5" Y="-13" Flags="2" />
-        <Point X="0" Y="-11" Flags="3" />
+        <Point X="0" Y="-11" Flags="4" />
       </Points>
     </Frame>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
@@ -1072,7 +1072,7 @@
       <Points>
         <Point X="-5" Y="-13" Flags="2" />
         <Point X="6" Y="-13" Flags="1" />
-        <Point X="0" Y="-11" Flags="3" />
+        <Point X="0" Y="-11" Flags="4" />
       </Points>
     </Frame>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
@@ -1086,7 +1086,7 @@
       <Points>
         <Point X="-5" Y="-13" Flags="2" />
         <Point X="6" Y="-13" Flags="1" />
-        <Point X="0" Y="-11" Flags="3" />
+        <Point X="0" Y="-11" Flags="4" />
       </Points>
     </Frame>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">

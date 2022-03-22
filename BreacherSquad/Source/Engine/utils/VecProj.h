@@ -17,6 +17,7 @@ public:
 	VecProj(const Vec2 & vec);
 
 	void		Set(Vec3 & vec);
+	void		Set( float x, float y, float z );
 	// Resets vector components to 0.0f
 	void		Set();
 	void		Move(Vec3 & delta);

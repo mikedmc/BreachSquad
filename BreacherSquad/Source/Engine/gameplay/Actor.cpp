@@ -56,7 +56,7 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteAnimComponent* pComGraphics) :
 	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nLastDamageTakenFromUID(0),
 	pWeaponMain(nullptr), pClosestTouchable(nullptr), bAnimFlipX(false), eAngle(EDIR6_S),
-	nAnimSet(0), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false),
+	nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), bHasGravity(true),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
 	eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0)
 {
@@ -96,6 +96,7 @@ void CActor::SetPos(Vec3 newPos)
 {
 	pos_last = pos.xyz;
 	pos = newPos;
+	vHeart.Set( pos.xyz.x, pos.xyz.y, pos.xyz.z + actTemplate.heartZ );
 
 	bbox.Set(&bbox_ini, pos.xy_proj);
 	bbox_floor.Set(&bbox_floor_ini, pos.xy);
@@ -106,6 +107,7 @@ void CActor::Move(Vec3 delta)
 	pos_last = pos.xyz;
 	Vec3 npos = pos_last + delta;
 	pos = npos;
+	vHeart.Set( pos.xyz.x, pos.xyz.y, pos.xyz.z + actTemplate.heartZ );
 
 	bbox.Set(&bbox_ini, pos.xy_proj);
 	bbox_floor.Set(&bbox_floor_ini, pos.xy);
@@ -127,14 +129,13 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 
 	bCrouched = false;
 	nLastDamageTakenFromUID = 0;
-	nAnimSet = 0;
 
 	bSkipRender = false;
 	// compute bboxes
 	bbox_floor_ini = actTemplate.bbox;
 	//#TODO: should be different
 	bbox_ini = bbox_floor_ini;
-	fHeight = actTemplate.fHeight;
+	heightZ = actTemplate.heightZ;
 	
 	//set hue
 	byte collvl = 255;
@@ -191,6 +192,7 @@ void CActor::Update(float dTime)
 
 	// aiming IK node must be set each frame or they get reset by the animation
 	c_graphics->SetAimVecLocal(Vec2(vAim.x, vAim.y));
+	/*
 	Vec2 vGunMount(0.0f, 0.0f);
 	if (c_graphics->GetGunPosWorld(vGunMount))
 	{
@@ -199,6 +201,7 @@ void CActor::Update(float dTime)
 		this->posWeapon.y = vGunMount.y + Z_TO_H(K_BULLET_DEFAULT_Z);
 		this->posWeapon.z = K_BULLET_DEFAULT_Z;
 	}
+	*/
 
 	// set new position of the skeleton now before we compute the gun position?
 	c_graphics->Update(*this, dTime);
@@ -336,6 +339,11 @@ void CActor::AddWpnTemplate(CWeapon * pWeapon)
 		}
 	}
 	*/
+}
+
+const CWeapon* CActor::GetCurrentWeapon()
+{
+	return pWeaponMain;
 }
 
 void CActor::BuildActionsList()

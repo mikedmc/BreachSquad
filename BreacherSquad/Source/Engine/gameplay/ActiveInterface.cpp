@@ -10,7 +10,7 @@ IActiveInterface::IActiveInterface() :
 	pTarget(null), bCanInteract(false), bHideInteractIcon(false), AIstate(K_AI_STATE_UNDEFINED), AItimerDecision(K_LVL_AI_DECISION_INTERVAL),
 	nRunningScriptUID(0), AItargetUID(0), fTimelineAI(0.0f), 
 	AItimer1(0.0f), AItimer2(0.0f), AIfvar1(0.0f), AIfvar2(0.0f), AIfvar3(0.0f), AIvar1(0), AIvar2(0), AIvarBool1(true), AIvarBool2(true),
-	bPendingKill(false), pArea(nullptr), fHeight(K_WALL_HEIGHT_WORLD)
+	bPendingKill(false), pArea(nullptr), heightZ(K_WALL_HEIGHT_WORLD)
 {
 	UID = GenerateUID();
 

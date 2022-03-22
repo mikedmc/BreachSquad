@@ -173,13 +173,30 @@ void CSpriteAnimComponent::SetAnimOnce( EActorAnim eAnim, EDir6 eAngle )
 }
 
 
+Vec2 CSpriteAnimComponent::GetGunMountPos( EDir6 eAngle, UINT32 pointflag )
+{
+	int anmidx = arrAnims[ K_ACT_ANIM_REFPOSE ].animIdx[ nAnimSet ][ (int)eAngle ];
+	_ASSERT( anmidx >= 0 );
+
+	Vec3i ptval( 0, 0, 0 );
+	if ( pSprLib->GetAFrameHitPointFlag( anmidx, 0, 0, pointflag, &ptval ) )
+	{
+		return Vec2( (float)ptval.x, (float)ptval.y );
+	}
+	return Vec2(0.0f, 0.0f);
+}
+
 void CSpriteAnimComponent::SetAimVecLocal(Vec2 vLocalAim)
 {
 	vAim = vLocalAim;
 }
 
-bool CSpriteAnimComponent::GetGunPosWorld(Vec2 &retVec)
+bool CSpriteAnimComponent::GetGunPosWorld( CActor& act, Vec2 &retVec )
 {
+	//#TODO: functia asta e inutila si ar trebui inlocuita cu ceva care iti da weapon mount (left, right, 2handed)
+	// componenta de weapons ar trebui sa aiba paint separat
+
+
 	retVec = sprite.pos;
 	/*
 	spine::Bone* bone = pSkeleton->arrBones[K_SD_BONE_GUN_MOUNT];

@@ -1162,7 +1162,8 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 	float xmax = actnode.attribute(L"bboxMaxX").as_float();
 	float ymax = actnode.attribute(L"bboxMaxY").as_float();
 	templ->bbox.Set(xmin, ymin, xmax, ymax);
-	templ->fHeight = actnode.attribute(L"nHeight").as_float();
+	templ->heightZ = actnode.attribute(L"heightZ").as_float();
+	templ->heartZ = actnode.attribute( L"heartZ" ).as_float();
 
 	if (!actnode.attribute(L"fSpeedMove").empty()) { templ->fSpeedMove = actnode.attribute(L"fSpeedMove").as_float(); }
 	//life
@@ -1816,7 +1817,7 @@ bool CLevel::NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsH
 				// bring real screen to RT screen space
 				Vec2 retpt = m_camLevelToScr.ScreenToWorld(Vec2(fAxisValue, 0.0f));
 				// make coords relative to player
-				retpt.x -= pPlayer->pos.xyz.x;
+				retpt.x -= pPlayer->vHeart.xy_proj.x;
 				// set final coords
 				ret_fAxisValue = retpt.x;
 				return true;
@@ -1825,7 +1826,7 @@ bool CLevel::NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsH
 			{
 				Vec2 retpt = m_camLevelToScr.ScreenToWorld(Vec2(0.0f, fAxisValue));
 				// make coords relative to player
-				retpt.y -= pPlayer->pos.xyz.y;
+				retpt.y -= pPlayer->vHeart.xy_proj.y;
 				// set final coords
 				ret_fAxisValue = retpt.y;
 				return true;
@@ -5122,8 +5123,6 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
 				{
 					actor->fLife = 0.0f;
-					actor->bHasGravity = false;
-					actor->bHasCollision = false;
 					actor->bSkipRender = true;
 					//reset physics
 					actor->speed = Vec2(0.0f, 0.0f);
@@ -8433,7 +8432,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 
 		// paint aiming cursor
 		// vAimVec was normalized using last frame data so paint it at last frame actor position
-		Vec2 vto = Vec3XY(pPlayerActor[kk]->pos_last) + pPlayerActor[kk]->m_AIcommands.vAimVec;
+		Vec2 vto = Vec3XY(pPlayerActor[kk]->pos_last) - Vec2(0.0f, pPlayerActor[ kk ]->vHeart.proj_h) + pPlayerActor[kk]->m_AIcommands.vAimVec;
 		CSprite::paintFrame(&m_sprInterface, vto.x, vto.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffffffff);
 	}
 								  
