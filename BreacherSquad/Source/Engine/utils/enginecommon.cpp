@@ -67,6 +67,18 @@ EDir6 GetDir6FromVec(Vec2 vDir)
 	return (EDir6)retang;
 }
 
+Vec2 GetDir6VecN( EDir6 eDir )
+{
+	// normalized vectors for every dir
+	const Vec2 retvec[ EDIR6S_CNT ] = { 
+		/*NW*/{-0.70710678118f, -0.70710678118f}, /*N*/{-1.0f, 0.0f}, /*NE*/{0.70710678118f, -0.70710678118f}, 
+		/*SE*/{0.70710678118f, 0.70710678118f}, /*S*/{1.0f, 0.0f}, /*SW*/{-0.70710678118f, 0.70710678118f} 
+	};
+
+	_ASSERT( eDir > EDIR6_NONE && eDir < EDIR6S_CNT );
+	return retvec[ (int)eDir ];
+}
+
 void DW_COLOR_GETARGB(DWORD color, float & a, float & r, float & g, float & b)
 {
 	unsigned char cnl = color & 0x000000ff;
@@ -730,31 +742,31 @@ eVarTypes GetTypeFromString(const WCHAR *str)
  * @param char * r_string The replace string
  * @return void The o_string passed is modified
  */
-void str_replace(char * o_string, char * s_string, char * r_string) 
+void str_replace( char * o_string, char * s_string, char * r_string )
 {
 	//a buffer variable to do all replace things
-	char buffer[MAX_PATH];
+	char buffer[ MAX_PATH ];
 	//to store the pointer returned from strstr
-	char * ch;
+	char * ch = strstr( o_string, s_string );
 
 	//first exit condition
-	if(!(ch = strstr(o_string, s_string)))
+	if ( !(ch) )
 		return;
 
 	//copy all the content to buffer before the first occurrence of the search string
-	strncpy(buffer, o_string, ch-o_string);
+	strncpy( buffer, o_string, ch - o_string );
 
 	//prepare the buffer for appending by adding a null to the end of it
-	buffer[ch-o_string] = 0;
+	buffer[ ch - o_string ] = 0;
 
 	//append using sprintf function
-	sprintf(buffer+(ch - o_string), "%s%s", r_string, ch + strlen(s_string));
+	sprintf( buffer + (ch - o_string), "%s%s", r_string, ch + strlen( s_string ) );
 
 	//empty o_string for copying
-	o_string[0] = 0;
-	strcpy(o_string, buffer);
+	o_string[ 0 ] = 0;
+	strcpy( o_string, buffer );
 	//pass recursively to replace other occurrences
-	return str_replace(o_string, s_string, r_string);
+	return str_replace( o_string, s_string, r_string );
 }
 
 /**
@@ -767,32 +779,32 @@ void str_replace(char * o_string, char * s_string, char * r_string)
  * @param wchar * r_string The replace string
  * @return void The o_string passed is modified
  */
-void wcs_replace(WCHAR* o_string, WCHAR* s_string, WCHAR* r_string) 
+void wcs_replace( WCHAR* o_string, WCHAR* s_string, WCHAR* r_string )
 {
 	//a buffer variable to do all replace things
-	WCHAR buffer[4096];
+	WCHAR buffer[ 4096 ];
 	//to store the pointer returned from strstr
-	WCHAR* ch;
+	WCHAR* ch = wcsstr( o_string, s_string );
 
 	//first exit condition
-	if(!(ch = wcsstr(o_string, s_string)))
+	if ( !(ch) )
 		return;
 
 	//copy all the content to buffer before the first occurrence of the search string
-	wcsncpy(buffer, o_string, ch-o_string);
+	wcsncpy( buffer, o_string, ch - o_string );
 
 	//prepare the buffer for appending by adding a null to the end of it
-	buffer[ch-o_string] = 0;
+	buffer[ ch - o_string ] = 0;
 
 	//append using sprintf function
-	StringCchPrintf(buffer+(ch - o_string), MAX_PATH, L"%s%s", r_string, ch + wcslen(s_string));
+	StringCchPrintf( buffer + (ch - o_string), MAX_PATH, L"%s%s", r_string, ch + wcslen( s_string ) );
 
 	//empty o_string for copying
-	o_string[0] = 0;
-	wcscpy(o_string, buffer);
+	o_string[ 0 ] = 0;
+	wcscpy( o_string, buffer );
 	//pass recursively to replace other occurrences
-	return wcs_replace(o_string, s_string, r_string);
- }
+	return wcs_replace( o_string, s_string, r_string );
+}
 
 void CVariantComplex::Serialize(FILE *f)
 {

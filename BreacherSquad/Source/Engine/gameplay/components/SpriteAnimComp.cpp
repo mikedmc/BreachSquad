@@ -176,7 +176,7 @@ void CSpriteAnimComponent::SetAnimOnce( EActorAnim eAnim )
 }
 
 
-Vec2 CSpriteAnimComponent::GetGunMountPos( UINT32 pointflag )
+Vec2 CSpriteAnimComponent::GetMountPoint( EHitPtFlag pointflag )
 {
 	int anmidx = arrAnims[ K_ACT_ANIM_REFPOSE ].animIdx[ nAnimSet ][ (int)eAngle ];
 	_ASSERT( anmidx >= 0 );

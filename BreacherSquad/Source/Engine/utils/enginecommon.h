@@ -62,11 +62,13 @@ enum EDir6 {
 	EDIR6S_CNT,
 };
 // names of the animation directions
-const CStringHash EDir6Names[ EDIR6S_CNT ] = {L"NW", L"N", L"NE", L"SE", L"S", L"SW"};
+const CStringHash EDir6Names[ EDIR6S_CNT ] = { L"NW", L"N", L"NE", L"SE", L"S", L"SW" };
 
 // Characters are animated on 6 directions: see EAnimAngle
 // Returns animation direction as int, starting with top(0)
-EDir6 GetDir6FromVec(Vec2 vDir);
+EDir6 GetDir6FromVec( Vec2 vDir );
+// returns a direction vector for specified direction
+Vec2 GetDir6VecN( EDir6 eDir );
 
 //direction flags used when setting more directions on one int
 #define K_DIRFLAG_NONE 0

@@ -21,6 +21,14 @@ struct CAnimData {
 //#TODO: should be named SpriteActorComponent
 class CSpriteAnimComponent : public IBaseAnimComponent
 {
+public:
+	// hitpoint flags for frames
+	enum EHitPtFlag {
+		K_HITPTFLAG_MOUNT_PRIMARY = 1,			// frame hitpoint flag for primary weapon mount
+		K_HITPTFLAG_MOUNT_SECONDARY = 2,		// frame hitpoint flag for secondary weapon mount
+		K_HITPTFLAG_MOUNT_TWOHANDED = 4,		// frame hitpoint flag for two handed weapons
+	};
+
 private:
 	CMultiSpriteLib*			pLib;									// pointer to sprites library
 	CSpriteLib*					pSprLib;								// pointer to sprite library from pLib
@@ -58,10 +66,12 @@ public:
 
 	void						SetAnimSet( int newAnimSet );
 	inline int					GetAnimSet() const { return nAnimSet; }
+	// returns current animation angle
+	inline EDir6				GetEAngle() const { return eAngle; };
 
 	void						SetAnimOnce( EActorAnim eAnim );
-	// Returns mount position for weapons in local space (pointFlag represents the mount position)
-	Vec2						GetGunMountPos( UINT32 pointflag );
+	// Returns mount position for weapons in local projected space for current EAngle
+	Vec2						GetMountPoint( EHitPtFlag pointflag );
 
 	//#TODO: useless??
 	void						SetAimVecLocal( Vec2 vLocalAim );

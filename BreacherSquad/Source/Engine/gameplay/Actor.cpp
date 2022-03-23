@@ -261,6 +261,23 @@ void CActor::Update(float dTime)
 
 }
 
+void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
+{
+	EDir6 actang = c_graphics->GetEAngle();
+	bool bFacingS = GetDir6VecN( actang ).y > 0 ? true : false;
+	
+	if ( bFacingS )
+	{
+		c_graphics->Paint( *this, eChannel );
+		// paint weapon after
+	}
+	else
+	{
+		// paint weapon before
+		c_graphics->Paint( *this, eChannel );
+	}
+}
+
 void CActor::PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly /*= false*/)
 {
 	if (sVerse == K_LVL_ACT_VERSE_EMPTY)

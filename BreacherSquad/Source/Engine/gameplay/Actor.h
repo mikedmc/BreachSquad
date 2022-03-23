@@ -99,7 +99,7 @@ public:
 	// Updates specified Actor AI. Returns busy state TRUE if actor has jobs to do or false if actor is still
 	void					Update( float dTime );
 	// Paints the actor on a specific color channel
-	FORCEINLINE void		Paint( ETexChannel eChannel = K_TEXCHAN_COLORMAP ) { c_graphics->Paint( *this, eChannel ); };
+	void					Paint( ETexChannel eChannel = K_TEXCHAN_COLORMAP );
 	// sets graphics anim set
 	void					SetAnimSet( int n_anim_set ) { c_graphics->SetAnimSet( n_anim_set ); }
 	// Plays the actor verse from the template handling the positional attenuation
