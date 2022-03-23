@@ -1,7 +1,7 @@
 #include "dxstdafx.h"
-#include "SpriteAnimComp.h"
+#include "SpriteActorComp.h"
 
-CSpriteAnimComponent::CSpriteAnimComponent( CMultiSpriteLib* pSpriteLib )
+CSpriteActorComponent::CSpriteActorComponent( CMultiSpriteLib* pSpriteLib )
 {
 	eAngle = EDIR6_S;
 	nAnimSet = 0;
@@ -9,24 +9,26 @@ CSpriteAnimComponent::CSpriteAnimComponent( CMultiSpriteLib* pSpriteLib )
 	pSpriteLib = nullptr;
 }
 
-CSpriteAnimComponent::~CSpriteAnimComponent()
+CSpriteActorComponent::~CSpriteActorComponent()
 {
 	pLib = nullptr;
 	pSprLib = nullptr;
 }
 
-void CSpriteAnimComponent::Update(CActor& act, float dTime)
+void CSpriteActorComponent::Update(CActor& act, float dTime)
 {
+	// get necessary data from the actor
+	vAim = act.GetAimVec();
+	eAngle = GetDir6FromVec( vAim );
 	sprite.pos = act.pos.xy_proj;
 	// round up to eliminate viual artefacts
-	sprite.pos.x = ROUND_FLOAT( sprite.pos.x );
-	sprite.pos.y = ROUND_FLOAT( sprite.pos.y );
+	UTMath::RoundVec2( sprite.pos );
 
 	sprite.Update( dTime );
 	//#TODO: provide access to animation status and frame events (status through getter, events through callback)
 }
 
-void CSpriteAnimComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP*/ )
+void CSpriteActorComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP*/ )
 {
 	Vec2 scale( 1.0f, 1.0f );
 	if ( vAim.x < 0.0f )
@@ -55,7 +57,7 @@ void CSpriteAnimComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHA
 	}
 }
 
-void CSpriteAnimComponent::CacheAnimations( CActor& act )
+void CSpriteActorComponent::CacheAnimations( CActor& act )
 {
 	_ASSERT( pSprLib != nullptr );
 
@@ -90,7 +92,7 @@ void CSpriteAnimComponent::CacheAnimations( CActor& act )
 	LOG_DBG( L"CActor::UpdateAnimationPointers: Updates %d animations", nAnimsChanged );
 }
 
-void CSpriteAnimComponent::SetSkin( CActor& act, WCHAR* skinName, bool bShowPrimaryHand, bool bShowSecondaryHand )
+void CSpriteActorComponent::SetSkin( CActor& act, WCHAR* skinName, bool bShowPrimaryHand, bool bShowSecondaryHand )
 {
 	CStringHash skinNamesh;
 	if ( skinName == nullptr )
@@ -121,12 +123,12 @@ void CSpriteAnimComponent::SetSkin( CActor& act, WCHAR* skinName, bool bShowPrim
 	ErrorBox( K_ERR_WARNING, L"Couldn't find skin named: %s", skinName );
 }
 
-void CSpriteAnimComponent::SetLayersVisibilityMask( DWORD layersMask )
+void CSpriteActorComponent::SetLayersVisibilityMask( DWORD layersMask )
 {
 	dwLayersMask = layersMask;
 }
 
-bool CSpriteAnimComponent::HasAnimation(EActorAnim nAnimType, int nSet)
+bool CSpriteActorComponent::HasAnimation(EActorAnim nAnimType, int nSet)
 {
 	if ((nSet < 0) || (nSet >= K_SPCOMP_ANIM_MAX_SETS))
 		return false;
@@ -135,7 +137,7 @@ bool CSpriteAnimComponent::HasAnimation(EActorAnim nAnimType, int nSet)
 	return bHasIt;
 }
 
-OPRESULT CSpriteAnimComponent::InitFromFile(CActor& act, WCHAR * Path)
+OPRESULT CSpriteActorComponent::InitFromFile(CActor& act, WCHAR * Path)
 {
 	int nLibIdx = 0;
 	if ( OP_FAILED( pLib->AddSprites( Path, nLibIdx ) ) )
@@ -161,7 +163,7 @@ OPRESULT CSpriteAnimComponent::InitFromFile(CActor& act, WCHAR * Path)
 	return K_OP_OK;
 }
 
-void CSpriteAnimComponent::SetAnimSet(int newAnimSet)
+void CSpriteActorComponent::SetAnimSet(int newAnimSet)
 {
 	if (newAnimSet != nAnimSet)
 	{
@@ -169,14 +171,14 @@ void CSpriteAnimComponent::SetAnimSet(int newAnimSet)
 	}
 }
 
-void CSpriteAnimComponent::SetAnimOnce( EActorAnim eAnim )
+void CSpriteActorComponent::SetAnimOnce( EActorAnim eAnim )
 {
 	_ASSERT( (eAnim >= K_ACT_ANIM_EMPTY) && (eAnim < K_ACT_ANIMS_CNT) );
 	sprite.SetAnimOnce( arrAnims[ (int)eAnim ].animIdx[ nAnimSet ][ (int)eAngle ] );
 }
 
 
-Vec2 CSpriteAnimComponent::GetMountPoint( EHitPtFlag pointflag )
+Vec2 CSpriteActorComponent::GetMountPoint( EHitPtFlag pointflag )
 {
 	int anmidx = arrAnims[ K_ACT_ANIM_REFPOSE ].animIdx[ nAnimSet ][ (int)eAngle ];
 	_ASSERT( anmidx >= 0 );
@@ -189,27 +191,3 @@ Vec2 CSpriteAnimComponent::GetMountPoint( EHitPtFlag pointflag )
 	return Vec2(0.0f, 0.0f);
 }
 
-void CSpriteAnimComponent::SetAimVecLocal(Vec2 vLocalAim)
-{
-	vAim = vLocalAim;
-	eAngle = GetDir6FromVec( vAim );
-}
-
-bool CSpriteAnimComponent::GetGunPosWorld( CActor& act, Vec2 &retVec )
-{
-	//#TODO: functia asta e inutila si ar trebui inlocuita cu ceva care iti da weapon mount (left, right, 2handed)
-	// componenta de weapons ar trebui sa aiba paint separat
-
-
-	retVec = sprite.pos;
-	/*
-	spine::Bone* bone = pSkeleton->arrBones[K_SD_BONE_GUN_MOUNT];
-	if (bone)
-	{
-		retVec = { bone->getWorldX(), bone->getWorldY() };
-		return true;
-	}
-	return false;
-	*/
-	return true;
-}

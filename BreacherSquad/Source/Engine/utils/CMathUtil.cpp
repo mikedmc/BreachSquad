@@ -322,3 +322,9 @@ float UTMath::Interpolate_lin(float a, float b, float t)
 {
 	return a * (1.0f - t) + b * t;
 }
+
+void UTMath::RoundVec2( Vec2 & v )
+{
+	v.x = (floor( (v.x) + 0.5f ));
+	v.y = (floor( (v.y) + 0.5f ));
+}

@@ -553,8 +553,12 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	templateLocal.weaponType = wPrimary->name;
 	}
 	*/
-
-	CActor* nact = new CActor(spawnPos, &templateLocal, GenerateNextID(), new CSpriteAnimComponent(&m_sprActors));
+	// get weapons sprite lib and send it to the weapons component
+	CSpriteLib* pSprWpn = m_sprActors.GetLibByNick( K_LIBNICK_WEAPONS );
+	CActor* nact = new CActor(spawnPos, &templateLocal, GenerateNextID(), 
+		new CSpriteActorComponent(&m_sprActors), 
+		new CWeaponsComponent(pSprWpn)
+	);
 	// create a weapon and add it to the player's arsenal
 	CWeapon* wpn = Weapon_Create(L"WPN_SMG_MP5A3", nact);
 	nact->AddWeapon(wpn, true);

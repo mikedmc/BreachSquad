@@ -18,8 +18,8 @@ struct CAnimData {
 	}
 };
 
-//#TODO: should be named SpriteActorComponent
-class CSpriteAnimComponent : public IBaseAnimComponent
+// Sprite component for painting actors
+class CSpriteActorComponent : public IBaseAnimComponent
 {
 public:
 	// hitpoint flags for frames
@@ -46,8 +46,8 @@ public:
 
 public:
 	// receives pointer to global sprites library where resources are to be loaded
-	CSpriteAnimComponent( CMultiSpriteLib* pSpriteLib );
-	~CSpriteAnimComponent();
+	CSpriteActorComponent( CMultiSpriteLib* pSpriteLib );
+	~CSpriteActorComponent();
 	// Updates all skeleton positions and processes needed animations
 	virtual void				Update( CActor& act, float dTime );
 	// Paints skeleton
@@ -72,8 +72,4 @@ public:
 	void						SetAnimOnce( EActorAnim eAnim );
 	// Returns mount position for weapons in local projected space for current EAngle
 	Vec2						GetMountPoint( EHitPtFlag pointflag );
-
-	//#TODO: useless??
-	void						SetAimVecLocal( Vec2 vLocalAim );
-	bool						GetGunPosWorld( CActor& act, Vec2 &retVec );
 };

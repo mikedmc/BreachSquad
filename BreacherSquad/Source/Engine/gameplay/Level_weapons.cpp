@@ -396,7 +396,6 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 	return true;
 }
 
-#define K_LIBNICK_WEAPONS L"SPRLIB_WEAPONS"
 
 OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 {

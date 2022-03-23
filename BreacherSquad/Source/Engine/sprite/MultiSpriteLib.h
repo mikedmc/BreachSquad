@@ -26,7 +26,10 @@ public:
 	int								GetLibIndex( WCHAR* wcsFullPath );
 	// Returns index of library or -1 if not found. Searches by nickname given on loading.
 	int								GetLibIndexByNick( WCHAR* nickname );
+	// Returns lib by index
 	CSpriteLib*						GetLib( int nLibIdx );
+	// Returns lib by nickname
+	CSpriteLib*						GetLibByNick( WCHAR* nickname );
 
 
 public:

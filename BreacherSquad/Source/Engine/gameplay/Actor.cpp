@@ -53,7 +53,7 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 	return m_pAIcurrentState->m_arrBehaviors[m_nAIcurrentBehaviorIdx].nType;
 }
 
-CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteAnimComponent* pComGraphics) :
+CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteActorComponent* pComGraphics, CWeaponsComponent* pComWpn ) :
 	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nLastDamageTakenFromUID(0),
 	pWeaponMain(nullptr), pClosestTouchable(nullptr), 
 	nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), bHasGravity(true),
@@ -63,6 +63,7 @@ CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteAnimC
 	_ASSERT(pComGraphics != nullptr);
 	// save pointer to component
 	c_graphics = pComGraphics;
+	c_weapon = pComWpn;
 
 	ID = nID;
 	bAnimated = true;
@@ -80,11 +81,12 @@ CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteAnimC
 
 CActor::~CActor()
 {
-	// remove used spine component
-	SAFE_DELETE(c_graphics);
+	// remove used components received as pointers 
+	SAFE_DELETE( c_graphics );
+	SAFE_DELETE( c_weapon );
 
 	// release allocated weapons arsenal
-	SAFE_DELETE_GROWABLE_ARRAY(arrWeapons);
+	SAFE_DELETE_GROWABLE_ARRAY( arrWeapons );
 }
 
 bool CActor::IsAlive()
@@ -184,7 +186,7 @@ void CActor::Update(float dTime)
 
 	Vec2 vAim = m_AIcommands.vAimVec;
 
-	c_graphics->SetAimVecLocal(Vec2(vAim.x, vAim.y));
+	//c_graphics->SetAimVecLocal(Vec2(vAim.x, vAim.y));
 	/*
 	Vec2 vGunMount(0.0f, 0.0f);
 	if (c_graphics->GetGunPosWorld(vGunMount))
@@ -196,8 +198,10 @@ void CActor::Update(float dTime)
 	}
 	*/
 
-	// set new position of the skeleton now before we compute the gun position?
+	//#TODO: update all components after we have the final player position
 	c_graphics->Update(*this, dTime);
+	// update weapon after updating the body because it depends on mount points
+	c_weapon->Update( *this, dTime );
 
 	///--- update weapons ---
 	/*
@@ -269,11 +273,11 @@ void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 	if ( bFacingS )
 	{
 		c_graphics->Paint( *this, eChannel );
-		// paint weapon after
+		c_weapon->Paint( *this, eChannel );
 	}
 	else
 	{
-		// paint weapon before
+		c_weapon->Paint( *this, eChannel );
 		c_graphics->Paint( *this, eChannel );
 	}
 }

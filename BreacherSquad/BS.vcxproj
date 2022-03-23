@@ -274,7 +274,8 @@
     <ClInclude Include="Source\Engine\gameplay\AreasInventory.h" />
     <ClInclude Include="Source\Engine\gameplay\components\ComponentInterfaces.h" />
     <ClInclude Include="Source\Engine\gameplay\components\PhysPtComp.h" />
-    <ClInclude Include="Source\Engine\gameplay\components\SpriteAnimComp.h" />
+    <ClInclude Include="Source\Engine\gameplay\components\SpriteActorComp.h" />
+    <ClInclude Include="Source\Engine\gameplay\components\WeaponsComp.h" />
     <ClInclude Include="Source\Engine\gameplay\LevelArea.h" />
     <ClInclude Include="Source\Engine\gameplay\LevelDefines.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_bullets.h" />
@@ -690,7 +691,8 @@
     <ClCompile Include="Source\Engine\gameplay\ActorTemplate.cpp" />
     <ClCompile Include="Source\Engine\gameplay\AreasInventory.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\PhysPtComp.cpp" />
-    <ClCompile Include="Source\Engine\gameplay\components\SpriteAnimComp.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\components\SpriteActorComp.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\components\WeaponsComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\LevelArea.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_bullets.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_doofers.cpp" />

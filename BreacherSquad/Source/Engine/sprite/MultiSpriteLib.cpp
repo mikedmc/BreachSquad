@@ -77,6 +77,17 @@ CSpriteLib* CMultiSpriteLib::GetLib( int nLibIdx )
 	return &arrLibs[ nLibIdx ]->spriteLib;
 }
 
+CSpriteLib* CMultiSpriteLib::GetLibByNick( WCHAR* nickname )
+{
+	UINT32 shID = HASHW( nickname );
+	for ( int kk = 0; kk < arrLibs.Count(); kk++ )
+	{
+		if ( arrLibs[ kk ]->shNickname.textHash == shID )
+			return &arrLibs[kk]->spriteLib;
+	}
+	return nullptr;
+}
+
 OPRESULT CMultiSpriteLib::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= nullptr */ )
 {
 	m_pDevice = pDevice;

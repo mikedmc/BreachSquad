@@ -3,7 +3,8 @@
 #include "LevelDefines.h"
 #include "ActorTypes.h"
 #include "ActorTemplate.h"
-#include "components/SpriteAnimComp.h"
+#include "components/SpriteActorComp.h"
+#include "components/WeaponsComp.h"
 
 // suspend flags used on actor->nSuspendedFlag 
 #define K_LVL_SUSPENDFLAG_NONE 0
@@ -15,7 +16,8 @@ class CActor : public IActiveInterface
 	///--- COMPONENTS --- 
 	/// Pointer components get deallocated by the actor, referenced ones are global so we don't touch them:
 private:
-	CSpriteAnimComponent*	c_graphics;					//graphics component that handles all painting and animation stuff
+	CSpriteActorComponent*	c_graphics;					// graphics component that handles all painting and animation stuff
+	CWeaponsComponent*		c_weapon;					// graphics and logic component that handles the weapons
 
 public:
 	CActorTemplate			actTemplate;				// holds data about each actor, copied from source templates (xml) and probably modified by enhancements
@@ -83,7 +85,7 @@ public:
 	EAIBehaviorType GetCurrentBehavior();
 
 	//CTOR
-	CActor( Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteAnimComponent* pComGraphics );
+	CActor( Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteActorComponent* pComGraphics, CWeaponsComponent* pComWpn );
 	~CActor();
 
 	const eActiveInterfaceType GetClassType() const {
@@ -100,6 +102,8 @@ public:
 	void					Update( float dTime );
 	// Paints the actor on a specific color channel
 	void					Paint( ETexChannel eChannel = K_TEXCHAN_COLORMAP );
+	// returns aim vector
+	inline Vec2				GetAimVec() { return m_AIcommands.vAimVec; };
 	// sets graphics anim set
 	void					SetAnimSet( int n_anim_set ) { c_graphics->SetAnimSet( n_anim_set ); }
 	// Plays the actor verse from the template handling the positional attenuation
