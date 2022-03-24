@@ -48,12 +48,13 @@ public:
 	int				nReloadUnitSize;		//cate gloante incarca odata sau 0 daca nu se poate incarca
 	float			fReloadTimePerUnit;		//cat timp dureaza sa incarce o unitate de glont
 
-	float			fFireRateWait;			//fire rate  - cat timp trebuie sa treaca intre gloante
-	bool			bResetFireRateOnTriggerUp;	//cand ridici de pe fire reseteaza fire rate
-	bool			bUsesMainWeaponAmmo;		//for alt fire weapons: este doar un mod de tragere care foloseste aceeasi munitie ca si arma principala (aimed shot, double tap, etc)
+	float			fFireRateWait;			//fire rate  - time between bullets
+	bool			bResetFireRateOnTriggerUp;	// resets fire rate
+	bool			bUsesMainWeaponAmmo;		// for alt fire weapons: este doar un mod de tragere care foloseste aceeasi munitie ca si arma principala (aimed shot, double tap, etc)
 
 	int				nBulletChamberSize;		//daca are bullet chamber sau nu (0 sau 1) - se aduna la bullets left. Nu poti seta chamber size mai mare
-	bool			bCanShootFromCrouch, bCanShootFromCover;
+	bool			bCanShootFromCrouch;
+	bool			bCanShootFromCover;
 	int				nDropShellFrame;		//frame number of shell from SHELLS animation (-1 - no shell)
 	int				nBurstSize;				//cate gloante trage intr-un burst (0 pt full automatic)
 	float			fBurstCooldown;			//dupa cat timp de la burst poate trage din nou
@@ -65,12 +66,16 @@ public:
 	float			fSoundRadius;			//cat de departe se aude?
 	bool			bPassive;				//arma pasiva, nu se foloseste ca si arma normala, se citesc doar proprietatile
 
-	//sounds - indexuri de sunete
+	Vec2			vMountOffset;			// vector showing the offset from the mount to the gun rotating position
+	bool			bSingleHanded;			// can be used with a single hand
+	bool			bDualWielding;			// only for single handed weapons. if true it gets doubled in the second mount position.
+
+	//sound indices to play
 	int		sndidxShoot, sndidxReload, sndidxEmpty;
 	//alternatives
 	int		sndidxShoot2, sndidxReload2, sndidxEmpty2;
-	//bullets can trigger a sound action (verse) on the actor (grenades trigger "FIRE IN THE HOLE" verse)
-	EActorSoundVerse	sndActorVerse;
+	
+	EActorSoundVerse	sndActorVerse;		// bullets can trigger a sound action (verse) on the actor (grenades trigger "FIRE IN THE HOLE" verse)
 
 	CWeaponTemplate() :
 		eType(K_WPN_UNKNOWN), fSpeedPenaltyPercent(0.0f),
@@ -86,43 +91,26 @@ public:
 		nHUD_AnimIdx(-1), nHUD_AnimIdxALT(-1), nMuzzleFlashAnim(-1), fAimFOV(0.0f),
 		sndActorVerse(K_LVL_ACT_VERSE_EMPTY)
 	{
+		bSingleHanded = true;
+		bDualWielding = false;
+		vMountOffset = Vec2( 0.0f, 0.0f );
 	}
 };
 
 enum EnumWeaponStatus {
-	K_LVL_WPN_STATUS_UNKNOWN = -1,		//not initialized!
+	K_LVL_WPN_STATUS_UNKNOWN = -1,	//not initialized!
 
-	K_LVL_WPN_STATUS_READY = 0,		//ready to shoot
-	K_LVL_WPN_STATUS_COOLING,		//waiting between shots
-	K_LVL_WPN_STATUS_JUST_SHOT,		//status setat dupa fiecare glont tras
-	//--- de aici sunt stari in care CanShootWeapon intoarce false ---
-	K_LVL_WPN_STATUS_RELOADING,		//reloading
-	K_LVL_WPN_STATUS_JAMMED,		//cand se blocheaza arma (de ex cand isi ia stun parentul)
-	K_LVL_WPN_STATUS_BURST_END,		//la capat de burst
-	K_LVL_WPN_STATUS_NO_AMMO,		//cand ramane fara gloante
+	K_LVL_WPN_STATUS_READY = 0,		// ready to shoot
+	K_LVL_WPN_STATUS_COOLING,		// waiting between shots
+	K_LVL_WPN_STATUS_JUST_SHOT,		// status setat dupa fiecare glont tras
+	//--- CanShootWeapon=false states from here on ---
+	K_LVL_WPN_STATUS_RELOADING,		// reloading
+	K_LVL_WPN_STATUS_JAMMED,		// jammed weapon (maybe stunned owner)
+	K_LVL_WPN_STATUS_BURST_END,		// burst ended, we must wait cooldown
+	K_LVL_WPN_STATUS_NO_AMMO,		// no more ammo
 };
 
-//consumable perks that can be set on weapons
-struct CWeaponPerk {
-	bool	bEnabled;			//is it enabled?
-	float	fDamage_percAdd;	//damage that gets added from original (0.0f default)
-	float	fROF_percAdd;		//rate of fire percent added (0.0f default)
-	int		nDurationShots;		//how many shots is it active?
-	float	fDurationTime;		//how much time is it active?
-
-	CWeaponPerk() : fDamage_percAdd(0.0f), fROF_percAdd(0.0f), fDurationTime(0.0f), nDurationShots(0), bEnabled(false)
-	{}
-
-	void Reset()
-	{
-		bEnabled = false;
-		fDamage_percAdd = 0.0f;
-		fROF_percAdd = 0.0f;
-		nDurationShots = 0;
-		fDurationTime = 0.0f;
-	}
-};
-
+// weapon fire mode (usually we have 2 on a weapon)
 class CWeapon
 {
 public:
@@ -141,15 +129,16 @@ public:
 	int		nCanResetJamCount;		//can reset jam timer a few times (used usually when changing from one weapon to another so it doesn't shoot right away)
 	bool	bPaintLaserSight;		//daca sa deseneze laser sight
 	float	fTimeSinceShot;			//timpul de la ultimul glont tras
-	//perks
-	CWeaponPerk		m_activePerk;	//active weapon perk (could be an array if needed)
+
 	//controls
-	bool	bTriggerDown, bTriggerDownOld;	//e apasat tragaciul? (si starea anterioara)
-	bool	bReloadDown;			//e apasat reload-ul?
-	CActor*	pOwner;					//ownerul armei
-	CSprite	m_sprMuzzleFlash;		//sprite pentru muzzle flash
+	bool	bTriggerDown, bTriggerDownOld;	// state of trigger and old state of trigger
+	bool	bReloadDown;			// reload trigger state
+	CActor*	pOwner;					// weapon owner
 	//ctor
 	CWeapon();
 
-	void SetTriggerStates(bool bTriggerPushed, bool bReloadPushed);
+	void	SetTriggerStates(bool bTriggerPushed, bool bReloadPushed);
 };
+
+
+

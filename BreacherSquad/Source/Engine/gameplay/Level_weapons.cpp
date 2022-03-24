@@ -13,8 +13,6 @@ CWeapon::CWeapon() :	status(K_LVL_WPN_STATUS_UNKNOWN), statusOld(K_LVL_WPN_STATU
 						bTriggerDown(false), bReloadDown(false), bTriggerDownOld(false),
 						pOwner(null), bPaintLaserSight(false), fTimeSinceShot(0.0f)
 {
-	m_sprMuzzleFlash.animationIdx = -1; //not set
-	m_activePerk.Reset();
 }
 
 
@@ -48,15 +46,6 @@ EnumWeaponStatus CLevel::Weapon_Update(CWeapon * weapon, float dTime)
 	if ((weapon == null) || (weapon->status == K_LVL_WPN_STATUS_UNKNOWN))
 		return K_LVL_WPN_STATUS_UNKNOWN;
 
-	//wpn perks
-	if (weapon->m_activePerk.bEnabled)
-	{
-		if (weapon->m_activePerk.fDurationTime > 0.0f)
-			weapon->m_activePerk.fDurationTime -= dTime;
-		//perk off if durations expired
-		if ((weapon->m_activePerk.fDurationTime <= 0.0f) && (weapon->m_activePerk.nDurationShots <= 0))
-			weapon->m_activePerk.bEnabled = false;
-	}
 
 	//update muzzle flash
 	/*
@@ -276,10 +265,6 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 
 	//init fire rate timer
 	weapon->fireRateTimer = weapon->WeaponTemplate.fFireRateWait;
-	if (weapon->m_activePerk.bEnabled)
-	{
-		weapon->fireRateTimer += weapon->WeaponTemplate.fFireRateWait * weapon->m_activePerk.fROF_percAdd;
-	}
 	//ammo (-1 infinite)
 	int nAmmoReal = weapon->ammoLeft;
 	//if weapon uses main weapon ammo check that ammo
@@ -341,12 +326,6 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 			//vFinalDir.y = sin(fAimAng + fSpreadAng);
 			//D3DXVec2Normalize(&vFinalDir, &vFinalDir);
 
-			//apply weapon perk
-			if (weapon->m_activePerk.bEnabled)
-			{
-				tmplBullet.fDamage += tmplBullet.fDamage * weapon->m_activePerk.fDamage_percAdd;
-			}
-
 			CBullet* bullet = ShootBullet(&tmplBullet, nFinalClass, shooter->GetUID(), vShootPos, vFinalDir);
 		}
 
@@ -383,15 +362,6 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 		return false;
 	}
 
-	//animate muzzle flash
-	weapon->m_sprMuzzleFlash.SetFrame(0);
-
-	//update perk (times shot)
-	if (weapon->m_activePerk.bEnabled)
-	{
-		if (weapon->m_activePerk.nDurationShots > 0)
-			weapon->m_activePerk.nDurationShots--;
-	}
 
 	return true;
 }
@@ -661,12 +631,6 @@ CWeapon* CLevel::Weapon_Create(WCHAR* weaponTemplateName, CActor* pParent)
 	// make sure infinite ammo is infinite
 	if (pWeapon->WeaponTemplate.nClipSize < 0)
 		pWeapon->ammoLeft = -1;
-	if (wTempl->nMuzzleFlashAnim >= 0)
-	{
-		pWeapon->m_sprMuzzleFlash.Init(wTempl->nMuzzleFlashAnim, 0, 0);
-		// make sure it isn't painted
-		pWeapon->m_sprMuzzleFlash.animStatus = ANIM_STATUS_FRAMELOCK;
-	}
 
 	return pWeapon;
 }
