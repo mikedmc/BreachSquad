@@ -48,27 +48,24 @@ fBulletCriticalChance="0.0" - values between 0.0 and 1.0 - chance for a bullet t
 
   <WeaponTemplates>
 
-    <WPN_SMG_MP5A3 nType="0" sHUDanimName="WEAPON_SMG_MP5A3" fSpeedPenaltyPercent="0.0" singleHanded="1" dualWielding="1" sScript_OnFireALT="WPNSCRIPT_ALT_ONLY">
-      <PRIMARY 	mountOffX="0" mountOffY="0" 
-				bBulletChamber="true" fShooterSpeedSlowingPercent="0.2" fMuzzleLightSize="1.0" sMuzzleFlashAnim="MUZZLE_SMG1" 
-				fSpreadFOV="0.05" fAimErrorMaxFOV="0.28" fAimErrorAddPerShot="0.015" fAimErrorMulPerShot="1.12" fAimErrorCooldownPerSec="0.74" 
-				nClipSize="30" nReloadUnitSize="30" fReloadTimePerUnit="1.6" 
-				fFireRatePerSec="13.0" bCanResetFireRate="false" 
-				bCanShootFromCrouch="true" bCanShootFromCover="false" nDropShellFrame="0"
-				fSoundRadius="240.0" sSndShoot="GUN_MP5_01" sSndShoot2="GUN_MP5_02" sSndReload="RELOAD_TACTICAL" sSndReload2="RELOAD_EMERGENCY" sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02" 
-				sBulletType="BULLET_TRACER1" nBulletsPerShot="1" nBurstSize="0" nArmorPiercingRating="1" 
-				fBulletDamage="20.0" fBulletDamageLossPPx="0.0" fBulletLife="0.25" fBulletMomentum="0.02" fBulletCriticalChance="0.0" fBulletStunDuration="0.025" fBulletSpeed="400.0" bBulletIgnoreArmor="false" bBulletIgnoreCover="false" bBulletDieOnImpact="true" 
-			   />
-      <ALTFIRE 	mountOffX="0" mountOffY="0" 
+    <WPN_SMG_MP5A3 nType="0" sHUDanimName="WEAPON_SMG_MP5A3" fSpeedPenaltyPercent="0.0" singleHanded="0" dualWielding="1" 
+				mountOffX="0" mountOffY="0"
 				bBulletChamber="true" fShooterSpeedSlowingPercent="0.2" fMuzzleLightSize="1.0" sMuzzleFlashAnim="MUZZLE_SMG1"
-				fSpreadFOV="0.05" fAimErrorMaxFOV="0.28" fAimErrorAddPerShot="0.015" fAimErrorMulPerShot="1.12" fAimErrorCooldownPerSec="0.74" 
-				nClipSize="30" nReloadUnitSize="30" fReloadTimePerUnit="1.6" 
-				fFireRatePerSec="13.0" bCanResetFireRate="false" 
+				fSpreadFOV="0.05" fAimErrorMaxFOV="0.28" fAimErrorAddPerShot="0.015" fAimErrorMulPerShot="1.12" fAimErrorCooldownPerSec="0.74"
+				nClipSize="30" nReloadUnitSize="30" fReloadTimePerUnit="1.6"
+				fFireRatePerSec="13.0" bCanResetFireRate="false"
 				bCanShootFromCrouch="true" bCanShootFromCover="false" nDropShellFrame="0"
-				fSoundRadius="240.0" sSndShoot="GUN_MP5_01" sSndShoot2="GUN_MP5_02" sSndReload="RELOAD_TACTICAL" sSndReload2="RELOAD_EMERGENCY" sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02" 
-				sBulletType="BULLET_TRACER1" nBulletsPerShot="1" nBurstSize="0" fBulletDamage="20.0" nArmorPiercingRating="1" fBulletDamageLossPPx="0.0" fBulletLife="0.25" fBulletMomentum="0.02" fBulletCriticalChance="0.0" fBulletStunDuration="0.025" fBulletSpeed="400.0" bBulletIgnoreArmor="false" bBulletIgnoreCover="false" bBulletDieOnImpact="true" 
-			   />
-    </WPN_SMG_MP5A3>
+				fSoundRadius="240.0" sSndShoot="GUN_MP5_01" sSndShoot2="GUN_MP5_02" sSndReload="RELOAD_TACTICAL" sSndReload2="RELOAD_EMERGENCY" sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02"
+				sBulletType="BULLET_TRACER1" nBulletsPerShot="1" nBurstSize="0" nArmorPiercingRating="1"
+				fBulletDamage="20.0" fBulletDamageLossPPx="0.0" fBulletLife="0.25" fBulletMomentum="0.02" fBulletCriticalChance="0.0" fBulletStunDuration="0.025" fBulletSpeed="400.0" bBulletIgnoreArmor="false" bBulletIgnoreCover="false" bBulletDieOnImpact="true"
+	  />
+
+    <WPN_SUBMACHINE_STEADY sHUDanimNameIcon="WPNALT_AIMED"
+        bAnimSync="true" fShooterSpeedSlowingPercent="100.0" fMuzzleLightSize="1.0" bHasLaserSight="true" fSpreadFOV="0.0" fAimErrorMaxFOV="0.0" fAimErrorAddPerShot="0.0" fAimErrorCooldownPerSec="1.0" nClipSize="-1" fFireRatePerSec="0.5" bCanResetFireRate="false" nBurstSize="0"
+        sSndShoot="GUN_MP5_01" sSndReload="RELOAD_TACTICAL"  sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02"
+        bCanShootFromCrouch="true" bCanShootFromCover="false" bCanShootFromAir="false" bCanShootFromLadders="false" nDropShellFrame="0" bUsesMainWeaponAmmo="true"
+        sBulletType="BULLET_TRACER_AIMED_SHOT" nBulletsPerShot="1" fBulletDamage="150.0" nArmorPiercingRating="5" fBulletDamageLossPPx="0.0" fBulletLife="0.3" fBulletMomentum="0.5" fBulletCriticalChance="0.0" fBulletStunDuration="0.05" fBulletSpeed="1000.0" bBulletIgnoreArmor="false" bBulletIgnoreCover="false" bBulletDieOnImpact="true" fSoundRadius="240.0" 
+    />
 
   </WeaponTemplates>
 

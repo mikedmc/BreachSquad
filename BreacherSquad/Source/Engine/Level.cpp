@@ -3086,12 +3086,12 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 	//reset actor template to initial one
 	pActor->actTemplate = pActor->actTemplate_ini;
 
-	if (!pWeapon->WeaponTemplate.shTemplateOverwrite.IsEmpty())
+	if (!pWeapon->_template.shTemplateOverwrite.IsEmpty())
 	{
-		CActorTemplate* updateTemplate = Actor_GetTemplate(pWeapon->WeaponTemplate.shTemplateOverwrite.textHash);
+		CActorTemplate* updateTemplate = Actor_GetTemplate(pWeapon->_template.shTemplateOverwrite.textHash);
 		if (updateTemplate == null)
 		{
-			ErrorBox(K_ERR_WARNING, L"SetActorCurrentWeapon failed! Template %s not found for weapon %s!", pWeapon->WeaponTemplate.shTemplateOverwrite.text, pWeapon->WeaponTemplate.name.text);
+			ErrorBox(K_ERR_WARNING, L"SetActorCurrentWeapon failed! Template %s not found for weapon %s!", pWeapon->_template.shTemplateOverwrite.text, pWeapon->_template.name.text);
 		}
 		//set animations from new template
 		pActor->actTemplate.AddGenericDataFromTemplate(updateTemplate);
@@ -3108,37 +3108,37 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 		{
 			case K_PSS_CLASS_ASSAULTER:
 			{
-				if (pWeapon->WeaponTemplate.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS)
+				if (pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS)
 				{
 					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent(&g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"A1_ACCURACY");
-					pWeapon->WeaponTemplate.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+					pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
 				}
 			}
 			break;
 			case K_PSS_CLASS_RECON:
 			{
-				if (pWeapon->WeaponTemplate.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS)
+				if (pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS)
 				{
 					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent(&g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"R1_GUNPLAY");
-					pWeapon->WeaponTemplate.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+					pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
 				}
 			}
 			break;
 			case K_PSS_CLASS_FBI_AGENT:
 			{
-				if (pWeapon->WeaponTemplate.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS)
+				if (pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS)
 				{
 					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent(&g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"F1_HANDGUN");
-					pWeapon->WeaponTemplate.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+					pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
 				}
 			}
 			break;
 			case K_PSS_CLASS_SHIELD:
 			{
-				if (pWeapon->WeaponTemplate.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS)
+				if (pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS)
 				{
 					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent(&g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"S1_HANDGUN");
-					pWeapon->WeaponTemplate.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+					pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
 				}
 			}
 			break;
@@ -3148,10 +3148,10 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 			break;
 			case K_PSS_CLASS_OFFDUTYGUY:
 			{
-				if (pWeapon->WeaponTemplate.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS)
+				if (pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS)
 				{
 					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent(&g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"O1_SHOOTING");
-					pWeapon->WeaponTemplate.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+					pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
 				}
 			}
 			break;
@@ -4745,7 +4745,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	if (actor->pWeaponMain->status == K_LVL_WPN_STATUS_RELOADING)
 	{
 		//can't shoot until you reload on weapons with bullets clip
-		if (actor->pWeaponMain->WeaponTemplate.nReloadUnitSize >= actor->pWeaponMain->WeaponTemplate.nClipSize)
+		if (actor->pWeaponMain->_template.nReloadUnitSize >= actor->pWeaponMain->_template.nClipSize)
 		{
 			//poti intrerupe reload cu urmatoarele comenzi:
 			if (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_MELEE)
@@ -4852,7 +4852,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	  */
 	//daca sunt cu arma care incarca glont cu glont pot schimba si in timp ce incarca
 	if ((pNewWeapon != null) && (pNewWeapon != actor->pWeaponMain) &&
-		(actor->pWeaponMain->WeaponTemplate.nReloadUnitSize < actor->pWeaponMain->WeaponTemplate.nClipSize) && 
+		(actor->pWeaponMain->_template.nReloadUnitSize < actor->pWeaponMain->_template.nClipSize) && 
 		(actor->nAttackStatus == K_LVL_ACT_ATTACK_RELOADING))
 	{
 		Weapon_StopReloading(actor->pWeaponMain);
@@ -4895,7 +4895,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	}
 	else if (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_RELOADING)
 	{
-		if(actor->pWeaponMain->WeaponTemplate.nReloadUnitSize != 0)
+		if(actor->pWeaponMain->_template.nReloadUnitSize != 0)
 			actor->pWeaponMain->SetTriggerStates(false, true);
 	}
 	else
@@ -4918,7 +4918,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 
 	//daca are laser sight o activeaza acum, o singura data cand se da comanda de shoot
-	if ((actor->pWeaponMain->WeaponTemplate.bHasLaserSight) && (actor->nAttackStatus != actor->m_AIcommands.eAttackCommand) && (actor->m_AIcommands.eAttackCommand >= K_LVL_ACT_ATTACK_SHOOTING))
+	if ((actor->pWeaponMain->_template.bHasLaserSight) && (actor->nAttackStatus != actor->m_AIcommands.eAttackCommand) && (actor->m_AIcommands.eAttackCommand >= K_LVL_ACT_ATTACK_SHOOTING))
 	{
 		actor->pWeaponMain->bPaintLaserSight = true;
 	}
@@ -4928,14 +4928,14 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		actor->nAttackStatus = actor->m_AIcommands.eAttackCommand;
 
 	//daca arma curenta nu poate trage din crouch scot crouch
-	if ((actor->bCrouched == true) && (!actor->pWeaponMain->WeaponTemplate.bCanShootFromCrouch))
+	if ((actor->bCrouched == true) && (!actor->pWeaponMain->_template.bCanShootFromCrouch))
 	{
 		if (actor->nAttackStatus >= K_LVL_ACT_ATTACK_SHOOTING)
 			actor->bCrouched = false;
 	}
 
 	// weapons that stop you while shooting:
-	if (actor->pWeaponMain->WeaponTemplate.fShooterSpeedSlowingPercent >= 1.0f)
+	if (actor->pWeaponMain->_template.fShooterSpeedSlowingPercent >= 1.0f)
 	{
 		if ((actor->m_AIcommands.eAttackCommand != K_LVL_ACT_ATTACK_IDLE) || (actor->nAttackStatus != K_LVL_ACT_ATTACK_IDLE))
 		{
@@ -4966,9 +4966,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	{
 		UINT32 dwShootScriptUID = 0;
 		//shooting weapon that has shoot script
-		if (actor->pWeaponMain->WeaponTemplate.shScript_OnFire.IsSet())
+		if (actor->pWeaponMain->_template.shScript_OnFire.IsSet())
 		{
-			dwShootScriptUID = actor->pWeaponMain->WeaponTemplate.shScript_OnFire.getHash();
+			dwShootScriptUID = actor->pWeaponMain->_template.shScript_OnFire.getHash();
 		}
 		//Shooting ALT fire and primary weapon ALTfire script is set? then run it.
 		/*
@@ -5027,9 +5027,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		}
 
 		///--- launch script when weapon runs out of ammo:
-		if ((bRunScriptOnEmpty) && (pWpnToCheck->WeaponTemplate.shScript_OnEmpty.IsSet()) && (pWpnToCheck->ammoLeft <= 0))
+		if ((bRunScriptOnEmpty) && (pWpnToCheck->_template.shScript_OnEmpty.IsSet()) && (pWpnToCheck->ammoLeft <= 0))
 		{
-			UTGetScriptManager().StartScript(actor->pWeaponMain->WeaponTemplate.shScript_OnEmpty.getHash(), actor->GetUID());
+			UTGetScriptManager().StartScript(actor->pWeaponMain->_template.shScript_OnEmpty.getHash(), actor->GetUID());
 		}
 
 	}

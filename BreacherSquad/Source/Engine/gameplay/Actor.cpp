@@ -355,11 +355,6 @@ void CActor::AddWpnTemplate(CWeapon * pWeapon)
 	*/
 }
 
-const CWeapon* CActor::GetCurrentWeapon()
-{
-	return pWeaponMain;
-}
-
 void CActor::BuildActionsList()
 {
 	arrInteractOptions.Clear();

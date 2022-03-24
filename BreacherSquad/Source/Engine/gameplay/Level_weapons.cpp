@@ -11,10 +11,24 @@ CWeapon::CWeapon() :	status(K_LVL_WPN_STATUS_UNKNOWN), statusOld(K_LVL_WPN_STATU
 						fAimErrorFOV(0.0f), fireRateTimer(0.0f), m_nBurstBulletsShot(0), m_nBulletsShotSinceCool(0),
 						reloadTimer(0.0f), ammoLeft(-1), fJammedTimer(0.0f), nCanResetJamCount(0),
 						bTriggerDown(false), bReloadDown(false), bTriggerDownOld(false),
-						pOwner(null), bPaintLaserSight(false), fTimeSinceShot(0.0f)
+						pOwner(nullptr), bPaintLaserSight(false), fTimeSinceShot(0.0f)
 {
 }
 
+
+void CWeapon::Init( CWeaponTemplate * templ )
+{
+	// copy template
+	_template = *templ;
+	// set owner
+	//#TODO: is parent needed??
+	//pWeapon->pOwner = &act;
+	status = K_LVL_WPN_STATUS_READY;
+	ammoLeft = _template.nClipSize + _template.nBulletChamberSize;
+	// make sure infinite ammo is infinite
+	if ( _template.nClipSize < 0 )
+		ammoLeft = -1;
+}
 
 void CWeapon::SetTriggerStates(bool bTriggerPushed, bool bReloadPushed)
 {
@@ -60,7 +74,7 @@ EnumWeaponStatus CLevel::Weapon_Update(CWeapon * weapon, float dTime)
 	//face cooldown doar dupa ce a incetat sa traga de ceva timp:
 	if (weapon->fTimeSinceShot > 0.1f) //approx 2 frames la 24 fps
 	{
-		dec_limit(weapon->fAimErrorFOV, weapon->WeaponTemplate.fAimErrorCooldownPerSecond * dTime, 0.0f);
+		dec_limit(weapon->fAimErrorFOV, weapon->_template.fAimErrorCooldownPerSecond * dTime, 0.0f);
 	}
 	//scade fire rate timer
 	dec_limit(weapon->fireRateTimer, dTime, 0.0f);
@@ -69,21 +83,21 @@ EnumWeaponStatus CLevel::Weapon_Update(CWeapon * weapon, float dTime)
 	{
 		weapon->m_nBurstBulletsShot = 0;
 		//jam weapon for burst cooldown
-		weapon->fJammedTimer = weapon->WeaponTemplate.fBurstCooldown;
+		weapon->fJammedTimer = weapon->_template.fBurstCooldown;
 	}
 	if ((weapon->bTriggerDown == false) && (weapon->fTimeSinceShot > 0.25f) && (weapon->fAimErrorFOV <= 0.0f))
 	{
 		weapon->m_nBulletsShotSinceCool = 0;
 	}
 	//reset timer on trigger up
-	if ((weapon->bTriggerDown == false) && (weapon->WeaponTemplate.bResetFireRateOnTriggerUp))
+	if ((weapon->bTriggerDown == false) && (weapon->_template.bResetFireRateOnTriggerUp))
 		weapon->fireRateTimer = 0.0f;
 
 	//on trigger down play emty sound 
 	if ((weapon->bTriggerDownOld == false) && (weapon->bTriggerDown == true))
 	{
-		if ((weapon->ammoLeft == 0) && (weapon->WeaponTemplate.sndidxEmpty >= 0))
-			SND_PLAY_POSITIONAL(weapon->WeaponTemplate.sndidxEmpty, weapon->pOwner->GetPosHeart());
+		if ((weapon->ammoLeft == 0) && (weapon->_template.sndidxEmpty >= 0))
+			SND_PLAY_POSITIONAL(weapon->_template.sndidxEmpty, weapon->pOwner->GetPosHeart());
 	}
 	//update old trigger state
 	weapon->bTriggerDownOld = weapon->bTriggerDown;
@@ -97,9 +111,9 @@ EnumWeaponStatus CLevel::Weapon_Update(CWeapon * weapon, float dTime)
 		return weapon->status;
 	}
 
-	if ((weapon->status != K_LVL_WPN_STATUS_RELOADING) && (weapon->bReloadDown) && (!weapon->bTriggerDown) && (weapon->ammoLeft < weapon->WeaponTemplate.nClipSize + weapon->WeaponTemplate.nBulletChamberSize))
+	if ((weapon->status != K_LVL_WPN_STATUS_RELOADING) && (weapon->bReloadDown) && (!weapon->bTriggerDown) && (weapon->ammoLeft < weapon->_template.nClipSize + weapon->_template.nBulletChamberSize))
 	{
-		SND_PLAY_POSITIONAL_RAND2(weapon->WeaponTemplate.sndidxReload, weapon->WeaponTemplate.sndidxReload2, weapon->pOwner->GetPosHeart());
+		SND_PLAY_POSITIONAL_RAND2(weapon->_template.sndidxReload, weapon->_template.sndidxReload2, weapon->pOwner->GetPosHeart());
 
 		weapon->reloadTimer = 0.0f;
 		weapon->status = K_LVL_WPN_STATUS_RELOADING;
@@ -119,7 +133,7 @@ EnumWeaponStatus CLevel::Weapon_Update(CWeapon * weapon, float dTime)
 		}
 	}
 	//burst lock
-	if ((weapon->WeaponTemplate.nBurstSize > 0) && (weapon->m_nBurstBulletsShot >= weapon->WeaponTemplate.nBurstSize))
+	if ((weapon->_template.nBurstSize > 0) && (weapon->m_nBurstBulletsShot >= weapon->_template.nBurstSize))
 	{
 		weapon->status = K_LVL_WPN_STATUS_BURST_END;
 	}
@@ -127,7 +141,7 @@ EnumWeaponStatus CLevel::Weapon_Update(CWeapon * weapon, float dTime)
 	if (weapon->bTriggerDown)
 	{
 		//stop reloading if possible (for shotgun type weapons)
-		if ((weapon->status == K_LVL_WPN_STATUS_RELOADING) && (weapon->WeaponTemplate.nReloadUnitSize < weapon->WeaponTemplate.nClipSize + weapon->WeaponTemplate.nBulletChamberSize) &&
+		if ((weapon->status == K_LVL_WPN_STATUS_RELOADING) && (weapon->_template.nReloadUnitSize < weapon->_template.nClipSize + weapon->_template.nBulletChamberSize) &&
 			(weapon->ammoLeft > 0) && (weapon->fireRateTimer <= 0.0f))
 		{
 			weapon->status = K_LVL_WPN_STATUS_READY;
@@ -140,25 +154,25 @@ EnumWeaponStatus CLevel::Weapon_Update(CWeapon * weapon, float dTime)
 	{
 		weapon->reloadTimer += dTime;
 
-		if (weapon->reloadTimer >= weapon->WeaponTemplate.fReloadTimePerUnit)
+		if (weapon->reloadTimer >= weapon->_template.fReloadTimePerUnit)
 		{
-			weapon->ammoLeft += weapon->WeaponTemplate.nReloadUnitSize;
-			weapon->reloadTimer -= weapon->WeaponTemplate.fReloadTimePerUnit;
+			weapon->ammoLeft += weapon->_template.nReloadUnitSize;
+			weapon->reloadTimer -= weapon->_template.fReloadTimePerUnit;
 
-			int nMaxBullets = weapon->WeaponTemplate.nClipSize;
+			int nMaxBullets = weapon->_template.nClipSize;
 			//#HACK: la shotguns sa incarce automat pana la capat
-			if (weapon->WeaponTemplate.nReloadUnitSize == 1)
-				nMaxBullets = weapon->WeaponTemplate.nClipSize + weapon->WeaponTemplate.nBulletChamberSize;
+			if (weapon->_template.nReloadUnitSize == 1)
+				nMaxBullets = weapon->_template.nClipSize + weapon->_template.nBulletChamberSize;
 			if (weapon->ammoLeft >= nMaxBullets)
 			{
-				CLAMP(weapon->ammoLeft, 0, weapon->WeaponTemplate.nClipSize + weapon->WeaponTemplate.nBulletChamberSize);
+				CLAMP(weapon->ammoLeft, 0, weapon->_template.nClipSize + weapon->_template.nBulletChamberSize);
 				weapon->reloadTimer = 0.0f;
 
 				weapon->status = K_LVL_WPN_STATUS_READY;
 			}
 			else //daca incarca in mai multe secvente face play din nou la reload
 			{
-				SND_PLAY_POSITIONAL_RAND2(weapon->WeaponTemplate.sndidxReload, weapon->WeaponTemplate.sndidxReload2, weapon->pOwner->GetPosHeart());
+				SND_PLAY_POSITIONAL_RAND2(weapon->_template.sndidxReload, weapon->_template.sndidxReload2, weapon->pOwner->GetPosHeart());
 			}
 		}
 	}
@@ -179,7 +193,7 @@ void CLevel::Weapon_ResetBurst(CWeapon * weapon)
 
 	weapon->m_nBurstBulletsShot = 0;
 
-	if (weapon->WeaponTemplate.bResetFireRateOnTriggerUp)
+	if (weapon->_template.bResetFireRateOnTriggerUp)
 		weapon->fireRateTimer = 0.0f;
 }
 
@@ -189,11 +203,11 @@ bool CLevel::Weapon_Jam(CWeapon * weapon)
 		return false;
 	if ((weapon->status == K_LVL_WPN_STATUS_RELOADING) || (weapon->status == K_LVL_WPN_STATUS_UNKNOWN))
 		return false;
-	if (weapon->WeaponTemplate.fJammedDuration <= 0.0f)
+	if (weapon->_template.fJammedDuration <= 0.0f)
 		return false;
 
-	if (weapon->fJammedTimer < weapon->WeaponTemplate.fJammedDuration)
-		weapon->fJammedTimer = weapon->WeaponTemplate.fJammedDuration;
+	if (weapon->fJammedTimer < weapon->_template.fJammedDuration)
+		weapon->fJammedTimer = weapon->_template.fJammedDuration;
 
 	weapon->bTriggerDown = false;
 	return true;
@@ -217,7 +231,7 @@ void CLevel::Weapon_StopReloading(CWeapon * weapon)
 bool CLevel::Weapon_CanShoot(CWeapon * weapon)
 {
 	//no weapon or empty weapon?
-	if ((weapon == null) || (weapon->WeaponTemplate.name.IsEmpty()))
+	if ((weapon == null) || (weapon->_template.name.IsEmpty()))
 		return false;
 	/*
 	//#TODO: add more checkups or send this param to the AI input so he knows about it
@@ -247,24 +261,24 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 
 	int nFinalClass = shooter->actTemplate.actorClass;
 	//bullet has template class, set it to final class
-	if (weapon->WeaponTemplate.bulletTemplate.eClass != K_LVL_ACT_CLASS_ANY)
-		nFinalClass = weapon->WeaponTemplate.bulletTemplate.eClass;
+	if (weapon->_template.bulletTemplate.eClass != K_LVL_ACT_CLASS_ANY)
+		nFinalClass = weapon->_template.bulletTemplate.eClass;
 
 	//don't shoot too often
 	if (weapon->fireRateTimer > 0.0f)
 		return false;
 	//ended burst => stop shooting
-	if ((weapon->WeaponTemplate.nBurstSize > 0) && (weapon->m_nBurstBulletsShot >= weapon->WeaponTemplate.nBurstSize))
+	if ((weapon->_template.nBurstSize > 0) && (weapon->m_nBurstBulletsShot >= weapon->_template.nBurstSize))
 	{
 		weapon->status = K_LVL_WPN_STATUS_BURST_END;
 		return false;
 	}
 
 	//save local bullet template copy
-	CBulletTemplate tmplBullet = weapon->WeaponTemplate.bulletTemplate;
+	CBulletTemplate tmplBullet = weapon->_template.bulletTemplate;
 
 	//init fire rate timer
-	weapon->fireRateTimer = weapon->WeaponTemplate.fFireRateWait;
+	weapon->fireRateTimer = weapon->_template.fFireRateWait;
 	//ammo (-1 infinite)
 	int nAmmoReal = weapon->ammoLeft;
 	//if weapon uses main weapon ammo check that ammo
@@ -276,9 +290,9 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 	if (nAmmoReal != 0)
 	{
 		//shooting sound (only if set). verific doar sndidx pentru ca vvarianta 2 contine cel putin valoarea primului
-		if (weapon->WeaponTemplate.sndidxShoot >= 0)
+		if (weapon->_template.sndidxShoot >= 0)
 		{
-			SND_PLAY_POSITIONAL_RAND2(weapon->WeaponTemplate.sndidxShoot, weapon->WeaponTemplate.sndidxShoot2, weapon->pOwner->GetPosHeart());
+			SND_PLAY_POSITIONAL_RAND2(weapon->_template.sndidxShoot, weapon->_template.sndidxShoot2, weapon->pOwner->GetPosHeart());
 			weapon->fTimeSinceShot = 0.0f;
 		}
 
@@ -317,10 +331,10 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 		//PlayActorSoundVerse(shooter, weapon->WeaponTemplate.sndActorVerse);
 
 		//also shoot bullets
-		for (int kk = 0; kk < weapon->WeaponTemplate.nBulletsPerShot; kk++)
+		for (int kk = 0; kk < weapon->_template.nBulletsPerShot; kk++)
 		{
 			//add weapon spread
-			float fSpreadAng = m_rand.RandFloatSgn(weapon->WeaponTemplate.fSpreadFOV);
+			float fSpreadAng = m_rand.RandFloatSgn(weapon->_template.fSpreadFOV);
 
 			//vFinalDir.x = cos(fAimAng + fSpreadAng);
 			//vFinalDir.y = sin(fAimAng + fSpreadAng);
@@ -330,33 +344,33 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 		}
 
 		//adaug shell
-		if (weapon->WeaponTemplate.nDropShellFrame >= 0)
+		if (weapon->_template.nDropShellFrame >= 0)
 		{
-			AddDoofer(K_DOOFER_SHELL, weapon->pOwner->GetPosHeart(), &Vec2((40.0f + randfloat(30.0f)), -50.0f - randfloat(20.0f)), &g_vecGravityOld, weapon->WeaponTemplate.nDropShellFrame);
+			AddDoofer(K_DOOFER_SHELL, weapon->pOwner->GetPosHeart(), &Vec2((40.0f + randfloat(30.0f)), -50.0f - randfloat(20.0f)), &g_vecGravityOld, weapon->_template.nDropShellFrame);
 		}
 
 		float fAimErrorMul = 1.0f;
 
-		weapon->fAimErrorFOV += fabs(weapon->WeaponTemplate.fAimErrorAddPerShot); //add aim error (can be negative too)
-		weapon->fAimErrorFOV *= weapon->WeaponTemplate.fAimErrorMulPerShot; //add non linear error
+		weapon->fAimErrorFOV += fabs(weapon->_template.fAimErrorAddPerShot); //add aim error (can be negative too)
+		weapon->fAimErrorFOV *= weapon->_template.fAimErrorMulPerShot; //add non linear error
 		weapon->fAimErrorFOV *= fAimErrorMul; //scale aiming error from perks
-		CLAMP(weapon->fAimErrorFOV, 0.0f, weapon->WeaponTemplate.fAimErrorMaxFOV); //limit max error fov
+		CLAMP(weapon->fAimErrorFOV, 0.0f, weapon->_template.fAimErrorMaxFOV); //limit max error fov
 
 		//make light
-		if (weapon->WeaponTemplate.fMuzzleLightSize > 0.0f)
+		if (weapon->_template.fMuzzleLightSize > 0.0f)
 		{
 			//prop - nozzle light
-			float fPropAlpha = 0.8f * weapon->WeaponTemplate.fMuzzleLightSize;
+			float fPropAlpha = 0.8f * weapon->_template.fMuzzleLightSize;
 			CLAMP(fPropAlpha, 0.0f, 1.0f);
 			//			AddProp_Light(vShootPos, ANM_LIGHTS_SPR_POINT1, 0.05f, 0.0f, D3DCOLOR_COLORALPHA(0xffFDB727, fPropAlpha), weapon->WeaponTemplate.fMuzzleLightSize);
 		}
 		//adaug eventAI de sunet
-		AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, shooter->GetUID(), shooter->actTemplate.actorClass, shooter->GetPosHeart(), weapon->WeaponTemplate.fSoundRadius);
+		AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, shooter->GetUID(), shooter->actTemplate.actorClass, shooter->GetPosHeart(), weapon->_template.fSoundRadius);
 	}
 	else
 	{
 		//empty clip sound
-		SND_PLAY_POSITIONAL_RAND2(weapon->WeaponTemplate.sndidxEmpty, weapon->WeaponTemplate.sndidxEmpty2, weapon->pOwner->GetPosHeart());
+		SND_PLAY_POSITIONAL_RAND2(weapon->_template.sndidxEmpty, weapon->_template.sndidxEmpty2, weapon->pOwner->GetPosHeart());
 		weapon->status = K_LVL_WPN_STATUS_NO_AMMO;
 
 		return false;
@@ -624,12 +638,12 @@ CWeapon* CLevel::Weapon_Create(WCHAR* weaponTemplateName, CActor* pParent)
 	// set owner
 	pWeapon->pOwner = pParent;
 	// copy data to local weapon template as we need it later on
-	pWeapon->WeaponTemplate = *wTempl;
+	pWeapon->_template = *wTempl;
 	// signal valid weapon
 	pWeapon->status = K_LVL_WPN_STATUS_READY;
-	pWeapon->ammoLeft = pWeapon->WeaponTemplate.nClipSize + pWeapon->WeaponTemplate.nBulletChamberSize;
+	pWeapon->ammoLeft = pWeapon->_template.nClipSize + pWeapon->_template.nBulletChamberSize;
 	// make sure infinite ammo is infinite
-	if (pWeapon->WeaponTemplate.nClipSize < 0)
+	if (pWeapon->_template.nClipSize < 0)
 		pWeapon->ammoLeft = -1;
 
 	return pWeapon;

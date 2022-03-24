@@ -6,6 +6,8 @@ CWeaponsComponent::CWeaponsComponent( CSpriteLib* pSpriteLib )
 	pSprLib = pSpriteLib;
 
 	weapon = nullptr;
+	weaponIdx = -1;
+
 	vAim = Vec2( 0.0f, 1.0f );
 	vMount1 = g_Vec2Zero;
 	vMount2 = g_Vec2Zero;
@@ -31,25 +33,29 @@ void CWeaponsComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_C
 	sprite.Paint();
 }
 
-void CWeaponsComponent::AddWeapon( CWeaponTemplate & wpnTemplate )
+void CWeaponsComponent::AddWeapon( CWeaponTemplate * primary, CWeaponTemplate * altfire )
 {
-	CWeapon* pWeapon = new CWeapon();
-	// set owner
-	//#TODO: is parent needed??
-	//pWeapon->pOwner = &act;
-	// copy data to local weapon template as we need it later on
-	pWeapon->WeaponTemplate = wpnTemplate;
-	// signal valid weapon
-	pWeapon->status = K_LVL_WPN_STATUS_READY;
-	pWeapon->ammoLeft = pWeapon->WeaponTemplate.nClipSize + pWeapon->WeaponTemplate.nBulletChamberSize;
-	// make sure infinite ammo is infinite
-	if ( pWeapon->WeaponTemplate.nClipSize < 0 )
-		pWeapon->ammoLeft = -1;
+	CWeaponGroup* pWeapon = new CWeaponGroup();
+	if ( primary )
+	{
+		pWeapon->modes[ K_WPNGRP_IDX_PRIMARY ].Init( primary );
+	}
+
+	if ( altfire )
+	{
+		pWeapon->modes[ K_WPNGRP_IDX_ALTFIRE ].Init( altfire );
+	}
 
 	return;
 }
 
-void CWeaponsComponent::Equip( int weaponIdx )
+void CWeaponsComponent::Equip( int wpnIdx )
 {
-
+	if ( weaponIdx == wpnIdx )
+		return;
+	if ( weaponIdx < 0 || weaponIdx >= arrWeapons.Count() )
+		return;
+	// equip primary mode
+	weapon = &arrWeapons[ wpnIdx ]->modes[ K_WPNGRP_IDX_PRIMARY ];
+	weaponIdx = wpnIdx;
 }

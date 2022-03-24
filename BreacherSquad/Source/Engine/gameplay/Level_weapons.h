@@ -110,11 +110,11 @@ enum EnumWeaponStatus {
 	K_LVL_WPN_STATUS_NO_AMMO,		// no more ammo
 };
 
-// weapon fire mode (usually we have 2 on a weapon)
+// weapon fire mode (usually we have 2 on a real weapon)
 class CWeapon
 {
 public:
-	CWeaponTemplate WeaponTemplate;
+	CWeaponTemplate _template;
 public:
 	EnumWeaponStatus		status;					//status arma: ready, reloading
 	EnumWeaponStatus		statusOld;				//status vechi arma: ca sa stim cand abia s-a schimbat
@@ -137,8 +137,7 @@ public:
 	//ctor
 	CWeapon();
 
+	void	Init( CWeaponTemplate * templ );
 	void	SetTriggerStates(bool bTriggerPushed, bool bReloadPushed);
 };
-
-
 
