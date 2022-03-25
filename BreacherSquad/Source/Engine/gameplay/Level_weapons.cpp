@@ -16,18 +16,142 @@ CWeapon::CWeapon() :	status(K_LVL_WPN_STATUS_UNKNOWN), statusOld(K_LVL_WPN_STATU
 }
 
 
-void CWeapon::Init( CWeaponTemplate * templ )
+void CWeapon::Init( CActor* pOwnerActor, CWeaponTemplate * templ )
 {
 	// copy template
 	_template = *templ;
 	// set owner
-	//#TODO: is parent needed??
-	//pWeapon->pOwner = &act;
+	pOwner = pOwnerActor;
 	status = K_LVL_WPN_STATUS_READY;
 	ammoLeft = _template.nClipSize + _template.nBulletChamberSize;
 	// make sure infinite ammo is infinite
 	if ( _template.nClipSize < 0 )
 		ammoLeft = -1;
+}
+
+EWeaponStatus CWeapon::Update( float dTime )
+{
+	//save old status
+	statusOld = status;
+
+	if ( status == K_LVL_WPN_STATUS_UNKNOWN )
+		return K_LVL_WPN_STATUS_UNKNOWN;
+
+	//update aiming errors
+	fTimeSinceShot += dTime;
+	//face cooldown doar dupa ce a incetat sa traga de ceva timp:
+	if ( fTimeSinceShot > 0.1f ) //approx 2 frames la 24 fps
+	{
+		dec_limit( fAimErrorFOV, _template.fAimErrorCooldownPerSecond * dTime, 0.0f );
+	}
+	//scade fire rate timer
+	dec_limit( fireRateTimer, dTime, 0.0f );
+	//reset burst and other data on trigger up
+	if ( (bTriggerDown == false) && (status == K_LVL_WPN_STATUS_BURST_END) )
+	{
+		m_nBurstBulletsShot = 0;
+		//jam weapon for burst cooldown
+		fJammedTimer = _template.fBurstCooldown;
+	}
+	if ( (bTriggerDown == false) && (fTimeSinceShot > 0.25f) && (fAimErrorFOV <= 0.0f) )
+	{
+		m_nBulletsShotSinceCool = 0;
+	}
+	//reset timer on trigger up
+	if ( (bTriggerDown == false) && (_template.bResetFireRateOnTriggerUp) )
+		fireRateTimer = 0.0f;
+
+	//on trigger down play emty sound 
+	if ( (bTriggerDownOld == false) && (bTriggerDown == true) )
+	{
+		if ( (ammoLeft == 0) && (_template.sndidxEmpty >= 0) )
+			SND_PLAY_POSITIONAL( _template.sndidxEmpty, pOwner->GetPosHeart() );
+	}
+	//update old trigger state
+	bTriggerDownOld = bTriggerDown;
+
+	//if jammed can't reload, can't shoot
+	if ( fJammedTimer > 0.0f )
+	{
+		dec_limit( fJammedTimer, dTime, 0.0f );
+		status = K_LVL_WPN_STATUS_JAMMED;
+
+		return status;
+	}
+
+	if ( (status != K_LVL_WPN_STATUS_RELOADING) && (bReloadDown) && (!bTriggerDown) && (ammoLeft < _template.nClipSize + _template.nBulletChamberSize) )
+	{
+		SND_PLAY_POSITIONAL_RAND2( _template.sndidxReload, _template.sndidxReload2, pOwner->GetPosHeart() );
+
+		reloadTimer = 0.0f;
+		status = K_LVL_WPN_STATUS_RELOADING;
+	}
+
+	//fire rate timer
+	if ( status != K_LVL_WPN_STATUS_RELOADING )
+	{
+		if ( fireRateTimer <= 0.0f )
+		{
+			fireRateTimer = 0.0f;
+			status = K_LVL_WPN_STATUS_READY;
+		}
+		else
+		{
+			status = K_LVL_WPN_STATUS_COOLING;
+		}
+	}
+	//burst lock
+	if ( (_template.nBurstSize > 0) && (m_nBurstBulletsShot >= _template.nBurstSize) )
+	{
+		status = K_LVL_WPN_STATUS_BURST_END;
+	}
+
+	if ( bTriggerDown )
+	{
+		//stop reloading if possible (for shotgun type weapons)
+		if ( (status == K_LVL_WPN_STATUS_RELOADING) && (_template.nReloadUnitSize < _template.nClipSize + _template.nBulletChamberSize) &&
+			(ammoLeft > 0) && (fireRateTimer <= 0.0f) )
+		{
+			status = K_LVL_WPN_STATUS_READY;
+			fireRateTimer = 0.0f;
+			reloadTimer = 0.0f;
+		}
+	}
+	//suntem inca pe reloading, facem reload
+	if ( status == K_LVL_WPN_STATUS_RELOADING )
+	{
+		reloadTimer += dTime;
+
+		if ( reloadTimer >= _template.fReloadTimePerUnit )
+		{
+			ammoLeft += _template.nReloadUnitSize;
+			reloadTimer -= _template.fReloadTimePerUnit;
+
+			int nMaxBullets = _template.nClipSize;
+			//#HACK: la shotguns sa incarce automat pana la capat
+			if ( _template.nReloadUnitSize == 1 )
+				nMaxBullets = _template.nClipSize + _template.nBulletChamberSize;
+			if ( ammoLeft >= nMaxBullets )
+			{
+				CLAMP( ammoLeft, 0, _template.nClipSize + _template.nBulletChamberSize );
+				reloadTimer = 0.0f;
+
+				status = K_LVL_WPN_STATUS_READY;
+			}
+			else //daca incarca in mai multe secvente face play din nou la reload
+			{
+				SND_PLAY_POSITIONAL_RAND2( _template.sndidxReload, _template.sndidxReload2, pOwner->GetPosHeart() );
+			}
+		}
+	}
+	//daca e cooling dar no ammo pun status pe no ammo
+	if ( ammoLeft == 0 )
+	{
+		if ( status <= K_LVL_WPN_STATUS_COOLING )
+			status = K_LVL_WPN_STATUS_NO_AMMO;
+	}
+
+	return status;
 }
 
 void CWeapon::SetTriggerStates(bool bTriggerPushed, bool bReloadPushed)
@@ -47,184 +171,38 @@ void CWeapon::SetTriggerStates(bool bTriggerPushed, bool bReloadPushed)
 	}
 }
 
-///----------------------------------------------------------------------------------
-/// LEVEL WEAPON METHODS
-///----------------------------------------------------------------------------------
-
-
-EnumWeaponStatus CLevel::Weapon_Update(CWeapon * weapon, float dTime)
+void CWeapon::ResetBurst()
 {
-	//save old status
-	weapon->statusOld = weapon->status;
+	m_nBurstBulletsShot = 0;
 
-	if ((weapon == null) || (weapon->status == K_LVL_WPN_STATUS_UNKNOWN))
-		return K_LVL_WPN_STATUS_UNKNOWN;
-
-
-	//update muzzle flash
-	/*
-	if (weapon->m_sprMuzzleFlash.animationIdx >= 0)
-	{
-		weapon->m_sprMuzzleFlash.Update(&m_sprActors, dTime);
-	}
-	*/
-
-	//update aiming errors
-	weapon->fTimeSinceShot += dTime;
-	//face cooldown doar dupa ce a incetat sa traga de ceva timp:
-	if (weapon->fTimeSinceShot > 0.1f) //approx 2 frames la 24 fps
-	{
-		dec_limit(weapon->fAimErrorFOV, weapon->_template.fAimErrorCooldownPerSecond * dTime, 0.0f);
-	}
-	//scade fire rate timer
-	dec_limit(weapon->fireRateTimer, dTime, 0.0f);
-	//reset burst and other data on trigger up
-	if ((weapon->bTriggerDown == false) && (weapon->status == K_LVL_WPN_STATUS_BURST_END))
-	{
-		weapon->m_nBurstBulletsShot = 0;
-		//jam weapon for burst cooldown
-		weapon->fJammedTimer = weapon->_template.fBurstCooldown;
-	}
-	if ((weapon->bTriggerDown == false) && (weapon->fTimeSinceShot > 0.25f) && (weapon->fAimErrorFOV <= 0.0f))
-	{
-		weapon->m_nBulletsShotSinceCool = 0;
-	}
-	//reset timer on trigger up
-	if ((weapon->bTriggerDown == false) && (weapon->_template.bResetFireRateOnTriggerUp))
-		weapon->fireRateTimer = 0.0f;
-
-	//on trigger down play emty sound 
-	if ((weapon->bTriggerDownOld == false) && (weapon->bTriggerDown == true))
-	{
-		if ((weapon->ammoLeft == 0) && (weapon->_template.sndidxEmpty >= 0))
-			SND_PLAY_POSITIONAL(weapon->_template.sndidxEmpty, weapon->pOwner->GetPosHeart());
-	}
-	//update old trigger state
-	weapon->bTriggerDownOld = weapon->bTriggerDown;
-
-	//if jammed can't reload, can't shoot
-	if (weapon->fJammedTimer > 0.0f)
-	{
-		dec_limit(weapon->fJammedTimer, dTime, 0.0f);
-		weapon->status = K_LVL_WPN_STATUS_JAMMED;
-
-		return weapon->status;
-	}
-
-	if ((weapon->status != K_LVL_WPN_STATUS_RELOADING) && (weapon->bReloadDown) && (!weapon->bTriggerDown) && (weapon->ammoLeft < weapon->_template.nClipSize + weapon->_template.nBulletChamberSize))
-	{
-		SND_PLAY_POSITIONAL_RAND2(weapon->_template.sndidxReload, weapon->_template.sndidxReload2, weapon->pOwner->GetPosHeart());
-
-		weapon->reloadTimer = 0.0f;
-		weapon->status = K_LVL_WPN_STATUS_RELOADING;
-	}
-
-	//fire rate timer
-	if (weapon->status != K_LVL_WPN_STATUS_RELOADING)
-	{
-		if (weapon->fireRateTimer <= 0.0f)
-		{
-			weapon->fireRateTimer = 0.0f;
-			weapon->status = K_LVL_WPN_STATUS_READY;
-		}
-		else
-		{
-			weapon->status = K_LVL_WPN_STATUS_COOLING;
-		}
-	}
-	//burst lock
-	if ((weapon->_template.nBurstSize > 0) && (weapon->m_nBurstBulletsShot >= weapon->_template.nBurstSize))
-	{
-		weapon->status = K_LVL_WPN_STATUS_BURST_END;
-	}
-
-	if (weapon->bTriggerDown)
-	{
-		//stop reloading if possible (for shotgun type weapons)
-		if ((weapon->status == K_LVL_WPN_STATUS_RELOADING) && (weapon->_template.nReloadUnitSize < weapon->_template.nClipSize + weapon->_template.nBulletChamberSize) &&
-			(weapon->ammoLeft > 0) && (weapon->fireRateTimer <= 0.0f))
-		{
-			weapon->status = K_LVL_WPN_STATUS_READY;
-			weapon->fireRateTimer = 0.0f;
-			weapon->reloadTimer = 0.0f;
-		}
-	}
-	//suntem inca pe reloading, facem reload
-	if (weapon->status == K_LVL_WPN_STATUS_RELOADING)
-	{
-		weapon->reloadTimer += dTime;
-
-		if (weapon->reloadTimer >= weapon->_template.fReloadTimePerUnit)
-		{
-			weapon->ammoLeft += weapon->_template.nReloadUnitSize;
-			weapon->reloadTimer -= weapon->_template.fReloadTimePerUnit;
-
-			int nMaxBullets = weapon->_template.nClipSize;
-			//#HACK: la shotguns sa incarce automat pana la capat
-			if (weapon->_template.nReloadUnitSize == 1)
-				nMaxBullets = weapon->_template.nClipSize + weapon->_template.nBulletChamberSize;
-			if (weapon->ammoLeft >= nMaxBullets)
-			{
-				CLAMP(weapon->ammoLeft, 0, weapon->_template.nClipSize + weapon->_template.nBulletChamberSize);
-				weapon->reloadTimer = 0.0f;
-
-				weapon->status = K_LVL_WPN_STATUS_READY;
-			}
-			else //daca incarca in mai multe secvente face play din nou la reload
-			{
-				SND_PLAY_POSITIONAL_RAND2(weapon->_template.sndidxReload, weapon->_template.sndidxReload2, weapon->pOwner->GetPosHeart());
-			}
-		}
-	}
-	//daca e cooling dar no ammo pun status pe no ammo
-	if (weapon->ammoLeft == 0)
-	{
-		if (weapon->status <= K_LVL_WPN_STATUS_COOLING)
-			weapon->status = K_LVL_WPN_STATUS_NO_AMMO;
-	}
-
-	return weapon->status;
+	if ( _template.bResetFireRateOnTriggerUp )
+		fireRateTimer = 0.0f;
 }
 
-void CLevel::Weapon_ResetBurst(CWeapon * weapon)
+bool CWeapon::Jam()
 {
-	if (weapon == null)
-		return;
-
-	weapon->m_nBurstBulletsShot = 0;
-
-	if (weapon->_template.bResetFireRateOnTriggerUp)
-		weapon->fireRateTimer = 0.0f;
-}
-
-bool CLevel::Weapon_Jam(CWeapon * weapon)
-{
-	if (weapon == null)
+	if ( (status == K_LVL_WPN_STATUS_RELOADING) || (status == K_LVL_WPN_STATUS_UNKNOWN) )
 		return false;
-	if ((weapon->status == K_LVL_WPN_STATUS_RELOADING) || (weapon->status == K_LVL_WPN_STATUS_UNKNOWN))
-		return false;
-	if (weapon->_template.fJammedDuration <= 0.0f)
+	if ( _template.fJammedDuration <= 0.0f )
 		return false;
 
-	if (weapon->fJammedTimer < weapon->_template.fJammedDuration)
-		weapon->fJammedTimer = weapon->_template.fJammedDuration;
+	if ( fJammedTimer < _template.fJammedDuration )
+		fJammedTimer = _template.fJammedDuration;
 
-	weapon->bTriggerDown = false;
+	bTriggerDown = false;
 	return true;
 }
 
-void CLevel::Weapon_StopReloading(CWeapon * weapon)
+void CWeapon::StopReloading()
 {
-	if (weapon == null)
-		return;
-	if (weapon->status != K_LVL_WPN_STATUS_RELOADING)
+	if ( status != K_LVL_WPN_STATUS_RELOADING )
 		return;
 
-	weapon->bReloadDown = false;
-	weapon->fireRateTimer = 0.0f;
-	weapon->reloadTimer = 0.0f;
+	bReloadDown = false;
+	fireRateTimer = 0.0f;
+	reloadTimer = 0.0f;
 
-	weapon->status = K_LVL_WPN_STATUS_READY;
+	status = K_LVL_WPN_STATUS_READY;
 }
 
 
@@ -398,7 +376,7 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 	V_OP_RET( m_sprActors.AddSprites( Path, m_libidxWeapons, K_LIBNICK_WEAPONS ) );
 
 	//load explosion templates
-	SAFE_DELETE_GROWABLE_ARRAY(m_arrTemplatesExplosion);
+	SAFE_DELETE_CArray(m_arrTemplatesExplosion);
 	pugi::xml_node rootnodeexplo = doc.root().child(L"WEAPONS").child(L"ExplosionTemplates");
 	for (pugi::xml_node bnode = rootnodeexplo.first_child(); bnode; bnode = bnode.next_sibling())
 	{
@@ -448,7 +426,7 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		m_arrTemplatesExplosion.Add(templ);
 	}
 	//load weapon templates
-	SAFE_DELETE_GROWABLE_ARRAY(m_arrTemplatesWeapon);
+	SAFE_DELETE_CArray(m_arrTemplatesWeapon);
 
 	pugi::xml_node rootnode = doc.root().child(L"WEAPONS").child(L"WeaponTemplates");
 	for (pugi::xml_node bnode = rootnode.first_child(); bnode; bnode = bnode.next_sibling())
@@ -459,8 +437,8 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		templ->name.Init(bType);
 
 		//load generic weapon data
-		if (!bnode.attribute(L"nType").empty())
-			templ->eType = (EWeaponType)bnode.attribute(L"nType").as_int();
+		//if (!bnode.attribute(L"nType").empty())
+//			templ->eType = (EWeaponType)bnode.attribute(L"nType").as_int();
 		templ->nHUD_AnimIdx = -1;
 		if (!bnode.attribute(L"sHUDanimName").empty())
 			templ->nHUD_AnimIdx = m_sprInterface.GetAnimationIdxByName(bnode.attribute(L"sHUDanimName").value());
@@ -497,129 +475,123 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 			templ->shScript_OnEmpty.Init(bnode.attribute(L"sScript_OnEmpty").value());
 		}
 
-		//load primary mode
-		pugi::xml_node primnode = bnode.child(L"PRIMARY");
-		if (!primnode.empty())
 		{
 			///--- bullet data ---
 			//strings
 			templ->bulletTemplate.nType = K_LVL_BULLET_UNKNOWN;
-			if (!primnode.attribute(L"sBulletType").empty())
+			if (!bnode.attribute(L"sBulletType").empty())
 			{
-				templ->bulletTemplate.nType = (EBulletType)GetListIndexByName(primnode.attribute(L"sBulletType").value(), EBulletTypeNames, K_LVL_BULLETS_COUNT);
+				templ->bulletTemplate.nType = (EBulletType)GetListIndexByName(bnode.attribute(L"sBulletType").value(), EBulletTypeNames, K_LVL_BULLETS_COUNT);
 			}
 			//#TODO: bullet  group should be loaded from template
 			templ->bulletTemplate.nGroup = K_LVL_BULLGROUP_BULLETS;
 			//bullet explosion template hash (at the end of bullet life)
 			templ->bulletTemplate.nExploTemplateHash = 0;
-			if (!primnode.attribute(L"sBulletExploTemplate").empty())
+			if (!bnode.attribute(L"sBulletExploTemplate").empty())
 			{
-				templ->bulletTemplate.nExploTemplateHash = FastHash(primnode.attribute(L"sBulletExploTemplate").value());
+				templ->bulletTemplate.nExploTemplateHash = FastHash(bnode.attribute(L"sBulletExploTemplate").value());
 			}
 			//override bullet class
 			templ->bulletTemplate.eClass = K_LVL_ACT_CLASS_ANY;
-			if (!primnode.attribute(L"sBulletClass").empty())
+			if (!bnode.attribute(L"sBulletClass").empty())
 			{
-				templ->bulletTemplate.eClass = (EActorClass)GetListIndexByName(primnode.attribute(L"sBulletClass").value(), EActorClassNames, K_LVL_ACT_CLASSES_COUNT);
+				templ->bulletTemplate.eClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sBulletClass").value(), EActorClassNames, K_LVL_ACT_CLASSES_COUNT);
 			}
 
-			templ->bulletTemplate.fDamage = primnode.attribute(L"fBulletDamage").as_float();
-			templ->bulletTemplate.fDamageLossPPx = primnode.attribute(L"fBulletDamageLossPPx").as_float();
-			templ->bulletTemplate.fLife = primnode.attribute(L"fBulletLife").as_float();
-			templ->bulletTemplate.fStunDuration = primnode.attribute(L"fBulletStunDuration").as_float();
-			templ->bulletTemplate.fSpeed_ini = primnode.attribute(L"fBulletSpeed").as_float();
-			templ->bulletTemplate.nArmorPiercingRating = primnode.attribute(L"nArmorPiercingRating").as_int();
-			templ->bulletTemplate.fDamageObjects = primnode.attribute(L"fBulletDamageObjects").as_float();
+			templ->bulletTemplate.fDamage = bnode.attribute(L"fBulletDamage").as_float();
+			templ->bulletTemplate.fDamageLossPPx = bnode.attribute(L"fBulletDamageLossPPx").as_float();
+			templ->bulletTemplate.fLife = bnode.attribute(L"fBulletLife").as_float();
+			templ->bulletTemplate.fStunDuration = bnode.attribute(L"fBulletStunDuration").as_float();
+			templ->bulletTemplate.fSpeed_ini = bnode.attribute(L"fBulletSpeed").as_float();
+			templ->bulletTemplate.nArmorPiercingRating = bnode.attribute(L"nArmorPiercingRating").as_int();
+			templ->bulletTemplate.fDamageObjects = bnode.attribute(L"fBulletDamageObjects").as_float();
 			//bullet momentul (minimum not zero)
-			templ->bulletTemplate.fMomentum = primnode.attribute(L"fBulletMomentum").as_float();
+			templ->bulletTemplate.fMomentum = bnode.attribute(L"fBulletMomentum").as_float();
 			if (templ->bulletTemplate.fMomentum == 0.0f)
 				templ->bulletTemplate.fMomentum = 0.1f;
 			//defaults
 			templ->bulletTemplate.fSelfDamageMultiplier = 1.0f;
-			if (!primnode.attribute(L"fBulletSelfDamageMultiplier").empty())
-				templ->bulletTemplate.fSelfDamageMultiplier = primnode.attribute(L"fBulletSelfDamageMultiplier").as_float();
+			if (!bnode.attribute(L"fBulletSelfDamageMultiplier").empty())
+				templ->bulletTemplate.fSelfDamageMultiplier = bnode.attribute(L"fBulletSelfDamageMultiplier").as_float();
 			templ->bulletTemplate.fCriticalHitChance = 0.0f;
-			if (!primnode.attribute(L"fBulletCriticalChance").empty())
-				templ->bulletTemplate.fCriticalHitChance = primnode.attribute(L"fBulletCriticalChance").as_float();
+			if (!bnode.attribute(L"fBulletCriticalChance").empty())
+				templ->bulletTemplate.fCriticalHitChance = bnode.attribute(L"fBulletCriticalChance").as_float();
 			//bullet flags
 			templ->bulletTemplate.nFlags = K_LVL_BULLET_FLAG_NONE;
 			if (templ->bulletTemplate.fDamageObjects > 0.0f)
 				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_BREAKS_DOORS;
-			if (primnode.attribute(L"bBulletIgnoreArmor").as_bool())
+			if (bnode.attribute(L"bBulletIgnoreArmor").as_bool())
 				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_IGNORE_ARMOR;
-			if (primnode.attribute(L"bBulletIgnoreCover").as_bool())
+			if (bnode.attribute(L"bBulletIgnoreCover").as_bool())
 				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_IGNORE_COVER;
-			if (primnode.attribute(L"bBulletDieOnImpact").as_bool())
+			if (bnode.attribute(L"bBulletDieOnImpact").as_bool())
 				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_DIE_ON_IMPACT;
-			if (primnode.attribute(L"bBulletCanSplat").as_bool())
+			if (bnode.attribute(L"bBulletCanSplat").as_bool())
 				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_CAN_SPLAT;
-			if (primnode.attribute(L"bBulletDirectional").as_bool())
+			if (bnode.attribute(L"bBulletDirectional").as_bool())
 				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_DIRECTIONAL;
 			///--- weapon data ---
 			//calculam timpul intre gloante din fire rate per second
-			templ->fFireRateWait = primnode.attribute(L"fFireRatePerSec").as_float();
+			templ->fFireRateWait = bnode.attribute(L"fFireRatePerSec").as_float();
 			templ->fFireRateWait = 1.0f / templ->fFireRateWait;
 
 			//other constants
-			templ->nBulletsPerShot = primnode.attribute(L"nBulletsPerShot").as_int();
-			templ->fSpreadFOV = primnode.attribute(L"fSpreadFOV").as_float();
-			templ->fAimFOV = primnode.attribute(L"fAimFOV").as_float();
-			templ->fAimErrorMaxFOV = primnode.attribute(L"fAimErrorMaxFOV").as_float();
-			templ->fAimErrorAddPerShot = primnode.attribute(L"fAimErrorAddPerShot").as_float();
-			templ->fAimErrorCooldownPerSecond = primnode.attribute(L"fAimErrorCooldownPerSec").as_float();
-			templ->nClipSize = primnode.attribute(L"nClipSize").as_int();
-			templ->nReloadUnitSize = primnode.attribute(L"nReloadUnitSize").as_int();
-			templ->fReloadTimePerUnit = primnode.attribute(L"fReloadTimePerUnit").as_float();
-			templ->bResetFireRateOnTriggerUp = primnode.attribute(L"bCanResetFireRate").as_bool();
-			templ->bUsesMainWeaponAmmo = primnode.attribute(L"bUsesMainWeaponAmmo").as_bool();
-			templ->bCanShootFromCrouch = primnode.attribute(L"bCanShootFromCrouch").as_bool();
-			templ->bCanShootFromCover = primnode.attribute(L"bCanShootFromCover").as_bool();
-			templ->nBurstSize = primnode.attribute(L"nBurstSize").as_int();
-			templ->fBurstCooldown = primnode.attribute(L"fBurstCooldown").as_float();
-			templ->fMuzzleLightSize = primnode.attribute(L"fMuzzleLightSize").as_float();
-			templ->bHasLaserSight = primnode.attribute(L"bHasLaserSight").as_bool();
-			templ->fJammedDuration = primnode.attribute(L"fJammedDuration").as_float();
-			templ->fSoundRadius = primnode.attribute(L"fSoundRadius").as_float();
+			templ->nBulletsPerShot = bnode.attribute(L"nBulletsPerShot").as_int();
+			templ->fSpreadFOV = bnode.attribute(L"fSpreadFOV").as_float();
+			templ->fAimFOV = bnode.attribute(L"fAimFOV").as_float();
+			templ->fAimErrorMaxFOV = bnode.attribute(L"fAimErrorMaxFOV").as_float();
+			templ->fAimErrorAddPerShot = bnode.attribute(L"fAimErrorAddPerShot").as_float();
+			templ->fAimErrorCooldownPerSecond = bnode.attribute(L"fAimErrorCooldownPerSec").as_float();
+			templ->nClipSize = bnode.attribute(L"nClipSize").as_int();
+			templ->nReloadUnitSize = bnode.attribute(L"nReloadUnitSize").as_int();
+			templ->fReloadTimePerUnit = bnode.attribute(L"fReloadTimePerUnit").as_float();
+			templ->bResetFireRateOnTriggerUp = bnode.attribute(L"bCanResetFireRate").as_bool();
+			templ->bUsesMainWeaponAmmo = bnode.attribute(L"bUsesMainWeaponAmmo").as_bool();
+			templ->bCanShootFromCrouch = bnode.attribute(L"bCanShootFromCrouch").as_bool();
+			templ->bCanShootFromCover = bnode.attribute(L"bCanShootFromCover").as_bool();
+			templ->nBurstSize = bnode.attribute(L"nBurstSize").as_int();
+			templ->fBurstCooldown = bnode.attribute(L"fBurstCooldown").as_float();
+			templ->fMuzzleLightSize = bnode.attribute(L"fMuzzleLightSize").as_float();
+			templ->bHasLaserSight = bnode.attribute(L"bHasLaserSight").as_bool();
+			templ->fJammedDuration = bnode.attribute(L"fJammedDuration").as_float();
+			templ->fSoundRadius = bnode.attribute(L"fSoundRadius").as_float();
 			//rectificate
-			if (!primnode.attribute(L"fAimErrorMulPerShot").empty())
-				templ->fAimErrorMulPerShot = primnode.attribute(L"fAimErrorMulPerShot").as_float();
-			if (!primnode.attribute(L"fShooterSpeedSlowingPercent").empty())
-				templ->fShooterSpeedSlowingPercent = primnode.attribute(L"fShooterSpeedSlowingPercent").as_float();
-			if (!primnode.attribute(L"nDropShellFrame").empty())
-				templ->nDropShellFrame = primnode.attribute(L"nDropShellFrame").as_int();
+			if (!bnode.attribute(L"fAimErrorMulPerShot").empty())
+				templ->fAimErrorMulPerShot = bnode.attribute(L"fAimErrorMulPerShot").as_float();
+			if (!bnode.attribute(L"fShooterSpeedSlowingPercent").empty())
+				templ->fShooterSpeedSlowingPercent = bnode.attribute(L"fShooterSpeedSlowingPercent").as_float();
+			if (!bnode.attribute(L"nDropShellFrame").empty())
+				templ->nDropShellFrame = bnode.attribute(L"nDropShellFrame").as_int();
 
 			templ->nBulletChamberSize = 0;
-			if (!primnode.attribute(L"bBulletChamber").empty())
-				templ->nBulletChamberSize = (primnode.attribute(L"bBulletChamber").as_bool() == true) ? 1 : 0;
+			if (!bnode.attribute(L"bBulletChamber").empty())
+				templ->nBulletChamberSize = (bnode.attribute(L"bBulletChamber").as_bool() == true) ? 1 : 0;
 
 			//actor verses for the bullet
-			if (!primnode.attribute(L"sActorShootVerse").empty())
-				templ->sndActorVerse = (EActorSoundVerse)GetListIndexByName(primnode.attribute(L"sActorShootVerse").value(), EActorSoundVerseNames, EActorSoundVerse::K_LVL_ACT_VERSES_COUNT);
+			if (!bnode.attribute(L"sActorShootVerse").empty())
+				templ->sndActorVerse = (EActorSoundVerse)GetListIndexByName(bnode.attribute(L"sActorShootVerse").value(), EActorSoundVerseNames, EActorSoundVerse::K_LVL_ACT_VERSES_COUNT);
 
 			//sounds
 			/*
-			if(!primnode.attribute(L"sSndShoot").empty())
-				templ->sndidxShoot = UTGetSoundManager().getSndIdxW(primnode.attribute(L"sSndShoot").value());
-			if (!primnode.attribute(L"sSndReload").empty())
-				templ->sndidxReload = UTGetSoundManager().getSndIdxW(primnode.attribute(L"sSndReload").value());
-			if (!primnode.attribute(L"sSndEmpty").empty())
-				templ->sndidxEmpty = UTGetSoundManager().getSndIdxW(primnode.attribute(L"sSndEmpty").value());
+			if(!bnode.attribute(L"sSndShoot").empty())
+				templ->sndidxShoot = UTGetSoundManager().getSndIdxW(bnode.attribute(L"sSndShoot").value());
+			if (!bnode.attribute(L"sSndReload").empty())
+				templ->sndidxReload = UTGetSoundManager().getSndIdxW(bnode.attribute(L"sSndReload").value());
+			if (!bnode.attribute(L"sSndEmpty").empty())
+				templ->sndidxEmpty = UTGetSoundManager().getSndIdxW(bnode.attribute(L"sSndEmpty").value());
 			//alternative sounds
 			templ->sndidxShoot2 = templ->sndidxShoot;
-			if (!primnode.attribute(L"sSndShoot2").empty())
-				templ->sndidxShoot2 = UTGetSoundManager().getSndIdxW(primnode.attribute(L"sSndShoot2").value());
+			if (!bnode.attribute(L"sSndShoot2").empty())
+				templ->sndidxShoot2 = UTGetSoundManager().getSndIdxW(bnode.attribute(L"sSndShoot2").value());
 			templ->sndidxReload2 = templ->sndidxReload;
-			if (!primnode.attribute(L"sSndReload2").empty())
-				templ->sndidxReload2 = UTGetSoundManager().getSndIdxW(primnode.attribute(L"sSndReload2").value());
+			if (!bnode.attribute(L"sSndReload2").empty())
+				templ->sndidxReload2 = UTGetSoundManager().getSndIdxW(bnode.attribute(L"sSndReload2").value());
 			templ->sndidxEmpty2 = templ->sndidxEmpty;
-			if (!primnode.attribute(L"sSndEmpty2").empty())
-				templ->sndidxEmpty2 = UTGetSoundManager().getSndIdxW(primnode.attribute(L"sSndEmpty2").value());
+			if (!bnode.attribute(L"sSndEmpty2").empty())
+				templ->sndidxEmpty2 = UTGetSoundManager().getSndIdxW(bnode.attribute(L"sSndEmpty2").value());
 				*/
 		}
-		else
-		{
-			ErrorBox(K_ERR_WARNING, L"PRIMARY weapon mode not found in template!");
-		}
+
 
 		m_arrTemplatesWeapon.Add(templ);
 	}

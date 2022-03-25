@@ -11,25 +11,6 @@ Vec3 CActor::GetPosWeapon()
 	return posWeapon;
 }
 
-void CActor::AddWeapon(CWeapon* wpn, bool bEquip)
-{
-	arrWeapons.Add(wpn);
-	if (bEquip)
-	{
-		pWeaponMain = wpn;
-		AddWpnTemplate(pWeaponMain);
-	}
-}
-
-void CActor::EquipWeapon(int nWeaponIdx)
-{
-	if ((nWeaponIdx < 0) || (nWeaponIdx >= arrWeapons.GetSize()))
-		return;
-
-	pWeaponMain = arrWeapons[nWeaponIdx];
-	AddWpnTemplate(pWeaponMain);
-}
-
 void CActor::PostConstructionInit()
 {
 	// compute bboxes on init
@@ -55,15 +36,14 @@ EAIBehaviorType CActor::GetCurrentBehavior()
 
 CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteActorComponent* pComGraphics, CWeaponsComponent* pComWpn ) :
 	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nLastDamageTakenFromUID(0),
-	pWeaponMain(nullptr), pClosestTouchable(nullptr), 
-	nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), bHasGravity(true),
+	pClosestTouchable(nullptr), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), bHasGravity(true),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
 	eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0)
 {
 	_ASSERT(pComGraphics != nullptr);
 	// save pointer to component
 	c_graphics = pComGraphics;
-	c_weapon = pComWpn;
+	c_weapons = pComWpn;
 
 	ID = nID;
 	bAnimated = true;
@@ -83,10 +63,7 @@ CActor::~CActor()
 {
 	// remove used components received as pointers 
 	SAFE_DELETE( c_graphics );
-	SAFE_DELETE( c_weapon );
-
-	// release allocated weapons arsenal
-	SAFE_DELETE_GROWABLE_ARRAY( arrWeapons );
+	SAFE_DELETE( c_weapons );
 }
 
 bool CActor::IsAlive()
@@ -154,12 +131,10 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 	}
 	*/
 
-	pWeaponMain = null;
-
 	///--- finished setting up, now save backup template for initial state ---
 	actTemplate_ini = actTemplate;
 
-	// Load spine skeleton
+	// Load actor graphics
 	WCHAR Path[MAX_PATH];
 	WCHAR wcsPath[MAX_PATH];
 	swprintf_s(wcsPath, MAX_PATH, L"media/levels/data/actors/%s", actTemplate.shSourceXML.text);
@@ -201,7 +176,7 @@ void CActor::Update(float dTime)
 	//#TODO: update all components after we have the final player position
 	c_graphics->Update(*this, dTime);
 	// update weapon after updating the body because it depends on mount points
-	c_weapon->Update( *this, dTime );
+	c_weapons->Update( *this, dTime );
 
 	///--- update weapons ---
 	/*
@@ -273,11 +248,11 @@ void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 	if ( bFacingS )
 	{
 		c_graphics->Paint( *this, eChannel );
-		c_weapon->Paint( *this, eChannel );
+		c_weapons->Paint( *this, eChannel );
 	}
 	else
 	{
-		c_weapon->Paint( *this, eChannel );
+		c_weapons->Paint( *this, eChannel );
 		c_graphics->Paint( *this, eChannel );
 	}
 }
@@ -314,27 +289,12 @@ void CActor::PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse
 
 }
 
-void CActor::EquipWpn(CWeapon * pWeapon)
-{
-	pWeaponMain = pWeapon;
-	if (pWeapon != null)
-	{
-		AddWpnTemplate(pWeapon);
-
-		//vAimPos = posHeart + vLookDir * 100.0f;
-	}
-	else
-	{
-		AddWpnTemplate(null);
-	}
-}
-
-void CActor::AddWpnTemplate(CWeapon * pWeapon)
+void CActor::ApplyWeaponTemplate(CWeapon * pWeapon)
 {
 	//reset actor template to initial one
 	actTemplate = actTemplate_ini;
 	/*
-	if ((pWeapon != null) && (!pWeapon->m_template.shTemplateOverwrite.IsEmpty()))
+	if ((pWeapon != null) && (!pWeapon->_template.shTemplateOverwrite.IsEmpty()))
 	{
 		CActorTemplate* updateTemplate = GetSim().Actor_GetTemplate(pWeapon->m_template.shTemplateOverwrite.textHash);
 		if (updateTemplate == null)

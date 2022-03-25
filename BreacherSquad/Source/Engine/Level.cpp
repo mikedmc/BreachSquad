@@ -346,14 +346,6 @@ void CLevel::SetActorStun(CActor* actor, float fStunDuration)
 	if ((actor->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0)
 		return;
 
-	//some don't get stunned
-	if ((actor->GetCurrentBehavior() == AI_BEHAVIOR_SHIELDBOSS_ATTACK) || (actor->GetCurrentBehavior() == AI_BEHAVIOR_TATTOOBOSS_ATTACK))
-		return;
-
-#if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
-	//LOG(L"- Stunned %s for %.4f", actor->templateActor.shName.text, fStunDuration);
-#endif
-
 	if (fStunDuration > actor->fStunTimer)
 	{
 		actor->fStunTimer = fStunDuration;
@@ -363,17 +355,12 @@ void CLevel::SetActorStun(CActor* actor, float fStunDuration)
 	//reset actions
 	if (actor->fStunTimer >= K_LVL_MIN_STUN_DIZZY_DURATION)
 	{
-		Weapon_StopReloading(actor->pWeaponMain);
+		actor->Weapons()->StopReloading();
 		bInterrupting = true;
-
-		//only count stunned enemies
-		if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_HUMAN)
-			App_IncreaseGamestat(K_MEMID_GAMESTATS_ENEMIES_STUNNED);
 	}
 	//reset actions
 	actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
-	//blochez arma principala la orice fel de stun (ca sa nu traga nici cand are stun mic)
-	Weapon_Jam(actor->pWeaponMain);
+	actor->Weapons()->JamWeapon();
 	//stop moving
 	if (actor->collisionFlags & K_DIRFLAG_DOWN)
 		actor->speed.x = 0.0f;
@@ -560,8 +547,10 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 		new CWeaponsComponent(pSprWpn)
 	);
 	// create a weapon and add it to the player's arsenal
-	CWeapon* wpn = Weapon_Create(L"WPN_SMG_MP5A3", nact);
-	nact->AddWeapon(wpn, true);
+	//#TODO: create actor::AddWeapon that handles this:
+	CWeaponTemplate* wpntMain = GetTemplateWeapon( L"WPN_SMG_MP5A3" );
+	nact->Weapons()->AddWeapon( *nact, wpntMain, nullptr );
+	nact->Weapons()->Equip( 0 );
 	// initialize AI
 	Actor_SetAIState(nact, nact->actTemplate.AItemplate->GetAIStateByName(nact->actTemplate.shAIState_ini));
 	// prepare actor for play after everything is loaded and set up
@@ -3656,8 +3645,8 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			//reset color
 			actor->m_AIcommands.nColor = actor->color_ini;
 			//stop weapons
-			Weapon_StopReloading(actor->pWeaponMain);
-			Weapon_Jam(actor->pWeaponMain);
+			actor->Weapons()->StopReloading();
+			actor->Weapons()->JamWeapon();
 			//trateaza death commands din script
 			EActorDeathCommand dcmd = K_LVL_ACT_DEATHCMD_NONE;
 			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName(L"sDeathCommand");
@@ -4246,10 +4235,12 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_MELEE;
 				}
 				//RELOAD ON SHOOT - overwrites previous commands
+				/*
 				if ((pController->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTPRESSED) && (actor->pWeaponMain->ammoLeft == 0))
 				{
 					actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_RELOADING;
 				}
+				*/
 
 				//when selecting strategic ability only crouch
 				if (m_arrPlayerSelStrategic[actor->nPlayerOrdinal] >= 0)
@@ -4739,18 +4730,19 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	*/
 	
 	///--- Look direction ---
-	//trebuie sa avem pointerul mereu setat
-	_ASSERT(actor->pWeaponMain != null);
+
+	CWeapon* pWeaponMain = actor->Weapons()->GetCurrentWeapon();
+	_ASSERT(pWeaponMain != nullptr);
 	///--- Shooting and reloading ---
-	if (actor->pWeaponMain->status == K_LVL_WPN_STATUS_RELOADING)
+	if (pWeaponMain->status == K_LVL_WPN_STATUS_RELOADING)
 	{
 		//can't shoot until you reload on weapons with bullets clip
-		if (actor->pWeaponMain->_template.nReloadUnitSize >= actor->pWeaponMain->_template.nClipSize)
+		if (pWeaponMain->_template.nReloadUnitSize >= pWeaponMain->_template.nClipSize)
 		{
 			//poti intrerupe reload cu urmatoarele comenzi:
 			if (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_MELEE)
 			{
-				Weapon_StopReloading(actor->pWeaponMain);
+				actor->Weapons()->StopReloading();
 				actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
 			}
 			else
@@ -4837,10 +4829,13 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		}
 	}
 
-	CWeapon* pNewWeapon = actor->pWeaponMain; //defaults on primary default weapon
+	CWeapon* pNewWeapon = actor->Weapons()->GetCurrentWeapon(); //defaults on primary default weapon
+
+	/*
+	// swwitches weapon based on commands
 	if ((actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_SHOOTING) || (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_RELOADING))
 		pNewWeapon = actor->pWeaponMain;
-	/*
+	
 	else if (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_SHOOTING_ALT)
 		pNewWeapon = actor->pSelectedWeapon[K_LVL_ACT_WEAPON_SECONDARY];
 	else if (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_USING_GEAR)
@@ -4851,6 +4846,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		pNewWeapon = actor->pSelectedWeapon[K_LVL_ACT_WEAPON_BREACH];
 	  */
 	//daca sunt cu arma care incarca glont cu glont pot schimba si in timp ce incarca
+	/*
 	if ((pNewWeapon != null) && (pNewWeapon != actor->pWeaponMain) &&
 		(actor->pWeaponMain->_template.nReloadUnitSize < actor->pWeaponMain->_template.nClipSize) && 
 		(actor->nAttackStatus == K_LVL_ACT_ATTACK_RELOADING))
@@ -4858,8 +4854,10 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		Weapon_StopReloading(actor->pWeaponMain);
 		actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
 	}
+	*/
 
 	//change weapon
+	/*
 	if ((pNewWeapon != null) && (actor->nAttackStatus == K_LVL_ACT_ATTACK_IDLE) && (pNewWeapon != actor->pWeaponMain) &&
 		((actor->pWeaponMain->status <= K_LVL_WPN_STATUS_COOLING) || (actor->pWeaponMain->status == K_LVL_WPN_STATUS_NO_AMMO)) )
 	{
@@ -4877,11 +4875,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		if (pNewWeapon != actor->pWeaponMain)
 			actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
 	}
-
+	*/
 	//verificari diverse ex. daca esti in aer si tragi cu o arma ce nu poate fi trasa din aer se intrerupe
 	if ((actor->m_AIcommands.eAttackCommand >= K_LVL_ACT_ATTACK_SHOOTING) || (actor->nAttackStatus >= K_LVL_ACT_ATTACK_SHOOTING))
 	{
-		if (!Weapon_CanShoot(actor->pWeaponMain))
+		if (!Weapon_CanShoot(pWeaponMain))
 		{
 			actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
 			actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
@@ -4891,50 +4889,50 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	//command weapon
 	if (actor->m_AIcommands.eAttackCommand >= K_LVL_ACT_ATTACK_SHOOTING)
 	{
-		actor->pWeaponMain->SetTriggerStates(true, false);
+		pWeaponMain->SetTriggerStates(true, false);
 	}
 	else if (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_RELOADING)
 	{
-		if(actor->pWeaponMain->_template.nReloadUnitSize != 0)
-			actor->pWeaponMain->SetTriggerStates(false, true);
+		if(pWeaponMain->_template.nReloadUnitSize != 0)
+			pWeaponMain->SetTriggerStates(false, true);
 	}
 	else
 	{
-		actor->pWeaponMain->SetTriggerStates(false, false);
+		pWeaponMain->SetTriggerStates(false, false);
 	}
 
 	///--- update weapons ---
-	for (int kk = 0; kk < actor->arrWeapons.Count(); kk++)
-	{
-		Weapon_Update(actor->arrWeapons[kk], dTime);
-	}
+	actor->Weapons()->Update( *actor, dTime );
 
 	//check before ShootWeapon
 	if (actor->m_AIcommands.eAttackCommand == K_LVL_ACT_ATTACK_IDLE)
 	{
-		if(actor->pWeaponMain->status != K_LVL_WPN_STATUS_COOLING)
+		if(pWeaponMain->status != K_LVL_WPN_STATUS_COOLING)
 			actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
 	}
 
 
 	//daca are laser sight o activeaza acum, o singura data cand se da comanda de shoot
-	if ((actor->pWeaponMain->_template.bHasLaserSight) && (actor->nAttackStatus != actor->m_AIcommands.eAttackCommand) && (actor->m_AIcommands.eAttackCommand >= K_LVL_ACT_ATTACK_SHOOTING))
+	/*
+	if ((pWeaponMain->_template.bHasLaserSight) && (actor->nAttackStatus != actor->m_AIcommands.eAttackCommand) && (actor->m_AIcommands.eAttackCommand >= K_LVL_ACT_ATTACK_SHOOTING))
 	{
-		actor->pWeaponMain->bPaintLaserSight = true;
+		pWeaponMain->bPaintLaserSight = true;
 	}
+	*/
 
 	///--- set actor attack status from command
 	if(actor->m_AIcommands.eAttackCommand != K_LVL_ACT_ATTACK_IDLE)
 		actor->nAttackStatus = actor->m_AIcommands.eAttackCommand;
 
 	//daca arma curenta nu poate trage din crouch scot crouch
-	if ((actor->bCrouched == true) && (!actor->pWeaponMain->_template.bCanShootFromCrouch))
+	if ((actor->bCrouched == true) && (!pWeaponMain->_template.bCanShootFromCrouch))
 	{
 		if (actor->nAttackStatus >= K_LVL_ACT_ATTACK_SHOOTING)
 			actor->bCrouched = false;
 	}
 
 	// weapons that stop you while shooting:
+	/*
 	if (actor->pWeaponMain->_template.fShooterSpeedSlowingPercent >= 1.0f)
 	{
 		if ((actor->m_AIcommands.eAttackCommand != K_LVL_ACT_ATTACK_IDLE) || (actor->nAttackStatus != K_LVL_ACT_ATTACK_IDLE))
@@ -4943,6 +4941,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//actor->m_AIcommands.nMoveDirX = 0;
 		}
 	}
+	*/
 
 	///--- find and save last safe pos for respawn ---
 	/*
@@ -4966,9 +4965,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	{
 		UINT32 dwShootScriptUID = 0;
 		//shooting weapon that has shoot script
-		if (actor->pWeaponMain->_template.shScript_OnFire.IsSet())
+		if (pWeaponMain->_template.shScript_OnFire.IsSet())
 		{
-			dwShootScriptUID = actor->pWeaponMain->_template.shScript_OnFire.getHash();
+			dwShootScriptUID = pWeaponMain->_template.shScript_OnFire.getHash();
 		}
 		//Shooting ALT fire and primary weapon ALTfire script is set? then run it.
 		/*
@@ -4983,7 +4982,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		{
 			//#PERSONALIZARE: check animation firerate reset and other weapon info
 			if (aframeFlag & K_LVL_ACTIVE_AFRAMEFLAG_RESET_FIRE_RATE)
-				actor->pWeaponMain->fireRateTimer = 0.0f;
+				pWeaponMain->fireRateTimer = 0.0f;
 			
 			//#PERSONALIZARE: ca sa traga si in spate uneori (AKIMBO DUAL YELD)
 			bool bShoot = ((aframeFlag & K_LVL_ACTIVE_AFRAMEFLAG_ACTION) != 0);
@@ -4994,7 +4993,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			vShootDir = Vec2ToVec3XY0(actor->m_AIcommands.vAimVec);
 
 			//shoot without waiting for a flag (forward or back)
-			if (Weapon_Shoot(actor->pWeaponMain, vShootDir))
+			if (Weapon_Shoot(pWeaponMain, vShootDir))
 				nWeaponShots++;
 		}
 		else  //shoot script
@@ -5016,9 +5015,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		}
 		*/
 		///--- check weapon script on empty ---
-		CWeapon* pWpnToCheck = actor->pWeaponMain;
+		CWeapon* pWpnToCheck = pWeaponMain;
 
-		EnumWeaponStatus gunstat = pWpnToCheck->status;
+		EWeaponStatus gunstat = pWpnToCheck->status;
 
 		if ((gunstat == K_LVL_WPN_STATUS_NO_AMMO) || (gunstat == K_LVL_WPN_STATUS_BURST_END) || (gunstat == K_LVL_WPN_STATUS_JAMMED))
 		{
@@ -5029,14 +5028,14 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		///--- launch script when weapon runs out of ammo:
 		if ((bRunScriptOnEmpty) && (pWpnToCheck->_template.shScript_OnEmpty.IsSet()) && (pWpnToCheck->ammoLeft <= 0))
 		{
-			UTGetScriptManager().StartScript(actor->pWeaponMain->_template.shScript_OnEmpty.getHash(), actor->GetUID());
+			UTGetScriptManager().StartScript(pWeaponMain->_template.shScript_OnEmpty.getHash(), actor->GetUID());
 		}
 
 	}
 
 
 	//resetam stari reload la finalul incarcarii sau daca nu face arma reload
-	if ((actor->nAttackStatus == K_LVL_ACT_ATTACK_RELOADING) && (actor->pWeaponMain->status != K_LVL_WPN_STATUS_RELOADING))
+	if ((actor->nAttackStatus == K_LVL_ACT_ATTACK_RELOADING) && (pWeaponMain->status != K_LVL_WPN_STATUS_RELOADING))
 	{
 		actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
 	}

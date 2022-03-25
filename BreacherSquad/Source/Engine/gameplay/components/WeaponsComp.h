@@ -39,15 +39,21 @@ public:
 	virtual void				Update( CActor& act, float dTime );
 	// Paints weapons
 	virtual void				Paint( CActor& act, ETexChannel eChannel = K_TEXCHAN_COLORMAP );
-	// adds a weapon to the inventory 
-	void						AddWeapon( CWeaponTemplate * primary, CWeaponTemplate * altfire );
-	// equips new weapon by index
-	void						Equip( int weaponIdx );
+	// Adds a weapon to the inventory 
+	void						AddWeapon( CActor& act, CWeaponTemplate * primary, CWeaponTemplate * altfire );
+	// Equips new weapon by index and returns pointer to weapon
+	const CWeapon*				Equip( int weaponIdx );
 	// sets the triggers for currently used weapon
 	void						SetTriggerStates( bool bTriggerPushed, bool bReloadPushed );
-	// returns current weapon
-	const inline CWeapon*		GetCurrentWeapon() const { return weapon; };
-	
+	// Returns current weapon
+	inline CWeapon*				GetCurrentWeapon() { return weapon; };
+	// Stops reloading current weapon		
+	void						StopReloading();
+	// Jams current weapon
+	void						JamWeapon();
+
+
+
 	//addweapon(template)
 	//equipWeapon
 

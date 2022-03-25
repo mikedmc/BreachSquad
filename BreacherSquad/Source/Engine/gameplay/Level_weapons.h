@@ -1,14 +1,5 @@
 #pragma once
 
-enum EWeaponType {
-	K_WPN_UNKNOWN = -1,
-	K_WPN_PRIMARY = 0,
-	K_WPN_ALT,
-	K_WPN_GEAR,
-
-	K_WPNS_COUNT
-};
-
 // declare classes
 class CActor;
 
@@ -20,7 +11,6 @@ class CWeaponTemplate
 {
 public:
 	CStringHash		name;
-	EWeaponType		eType;
 	//generic data:
 	int				nHUD_AnimIdx;		//animatie INGAME HUD pentru grafica armei (vezi detalii frames in CCustomInterfaceIGM) sau -1 pt empty
 	int				nHUD_AnimIdxALT;	//animatie INGAME HUD when shown as ALT weapon (painted just as small icon)
@@ -78,7 +68,7 @@ public:
 	EActorSoundVerse	sndActorVerse;		// bullets can trigger a sound action (verse) on the actor (grenades trigger "FIRE IN THE HOLE" verse)
 
 	CWeaponTemplate() :
-		eType(K_WPN_UNKNOWN), fSpeedPenaltyPercent(0.0f),
+		fSpeedPenaltyPercent(0.0f),
 		//other data
 		nBulletsPerShot(5), 
 		fFireRateWait(0.0f), fMuzzleLightSize(0.0f), nClipSize(10),
@@ -97,7 +87,7 @@ public:
 	}
 };
 
-enum EnumWeaponStatus {
+enum EWeaponStatus {
 	K_LVL_WPN_STATUS_UNKNOWN = -1,	//not initialized!
 
 	K_LVL_WPN_STATUS_READY = 0,		// ready to shoot
@@ -116,28 +106,38 @@ class CWeapon
 public:
 	CWeaponTemplate _template;
 public:
-	EnumWeaponStatus		status;					//status arma: ready, reloading
-	EnumWeaponStatus		statusOld;				//status vechi arma: ca sa stim cand abia s-a schimbat
+	EWeaponStatus		status;					// weapon state: ready, reloading
+	EWeaponStatus		statusOld;				// old status so we know when it changes
 	//consumabile
-	float	fAimErrorFOV;			//FOV-ul curent de eroare aim
-	int		m_nBurstBulletsShot;	//cate gloante s-au tras din burst 
-	int		m_nBulletsShotSinceCool; //how many bullets were shot in a burst since weapon was cool
-	int		ammoLeft;				//-1 pt nr infinit de gloante
-	float	fireRateTimer;			//timer de fire rate
-	float	reloadTimer;			//timer reload
-	float	fJammedTimer;			//timer jammed weapon
-	int		nCanResetJamCount;		//can reset jam timer a few times (used usually when changing from one weapon to another so it doesn't shoot right away)
-	bool	bPaintLaserSight;		//daca sa deseneze laser sight
-	float	fTimeSinceShot;			//timpul de la ultimul glont tras
+	float	fAimErrorFOV;						// FOV-ul curent de eroare aim
+	int		m_nBurstBulletsShot;				// cate gloante s-au tras din burst 
+	int		m_nBulletsShotSinceCool;			// how many bullets were shot in a burst since weapon was cool
+	int		ammoLeft;							// -1 pt nr infinit de gloante
+	float	fireRateTimer;						// timer de fire rate
+	float	reloadTimer;						// timer reload
+	float	fJammedTimer;						// timer jammed weapon
+	int		nCanResetJamCount;					// can reset jam timer a few times (used usually when changing from one weapon to another so it doesn't shoot right away)
+	bool	bPaintLaserSight;					// daca sa deseneze laser sight
+	float	fTimeSinceShot;						// timpul de la ultimul glont tras
 
 	//controls
-	bool	bTriggerDown, bTriggerDownOld;	// state of trigger and old state of trigger
-	bool	bReloadDown;			// reload trigger state
-	CActor*	pOwner;					// weapon owner
+	bool	bTriggerDown, bTriggerDownOld;		// state of trigger and old state of trigger
+	bool	bReloadDown;						// reload trigger state
+	CActor*	pOwner;								// weapon owner
 	//ctor
 	CWeapon();
 
-	void	Init( CWeaponTemplate * templ );
-	void	SetTriggerStates(bool bTriggerPushed, bool bReloadPushed);
+	// Initializez weapon from a weapon template
+	void				Init( CActor* pOwnerActor, CWeaponTemplate * templ );
+	// Updates weapon internal data
+	EWeaponStatus		Update( float dTime );
+	// Communicates the states of the trigger and reload trigger to the weapon
+	void				SetTriggerStates(bool bTriggerPushed, bool bReloadPushed);
+	// Resets the burst counter for weapons that shoot in bursts
+	void				ResetBurst();
+	// Jams the weapon (when receiving damage for example)
+	bool				Jam();
+	// Stops reloading current weapon
+	void				StopReloading();
 };
 

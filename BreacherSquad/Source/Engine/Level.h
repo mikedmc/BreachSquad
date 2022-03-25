@@ -133,8 +133,8 @@ public:
 	// Creates a weapon and returns pointer to it (does not deallocate)
 	CWeapon*				Weapon_Create(WCHAR* weaponTemplateName, CActor* pParent);
 
-	CArray<CActorTemplate*> m_arrTemplatesActor;	//actor templates array
-	CArray<CAITemplate*>	m_arrAItemplates;		//array folosit pentru salvarea template-urilor AI
+	CArray<CActorTemplate*> m_arrTemplatesActor;	// Actor Templates array
+	CArray<CAITemplate*>	m_arrAItemplates;		// AI behavior templates
 	CActorTemplate*			Actor_GetTemplate(const WCHAR * templateName);
 	CActorTemplate*			Actor_GetTemplate(const DWORD templateNameHash);
 	// Randomizes the actor a little so they don't all have the exact same speeds
@@ -249,15 +249,6 @@ public:
 	// Trage cu arma specificata
 	// \returns: true daca a putut sa traga sau false daca nu
 	bool					Weapon_Shoot(CWeapon * weapon, Vec3 vDir);
-	// \returns: weapon status
-	EnumWeaponStatus		Weapon_Update(CWeapon * weapon, float dTime);
-	
-	// \returns: true if started reloading, false if already full or no ammo
-	bool					Weapon_Jam(CWeapon * weapon);
-	// stops reloading the weapon
-	void					Weapon_StopReloading(CWeapon * weapon);
-	// seteaza comenzi arma
-	void					Weapon_ResetBurst(CWeapon * weapon);
 
 	///--- BULLETS ---
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.

@@ -33,29 +33,53 @@ void CWeaponsComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_C
 	sprite.Paint();
 }
 
-void CWeaponsComponent::AddWeapon( CWeaponTemplate * primary, CWeaponTemplate * altfire )
+void CWeaponsComponent::AddWeapon( CActor& act, CWeaponTemplate * primary, CWeaponTemplate * altfire )
 {
 	CWeaponGroup* pWeapon = new CWeaponGroup();
 	if ( primary )
 	{
-		pWeapon->modes[ K_WPNGRP_IDX_PRIMARY ].Init( primary );
+		pWeapon->modes[ K_WPNGRP_IDX_PRIMARY ].Init( &act, primary );
 	}
 
 	if ( altfire )
 	{
-		pWeapon->modes[ K_WPNGRP_IDX_ALTFIRE ].Init( altfire );
+		pWeapon->modes[ K_WPNGRP_IDX_ALTFIRE ].Init( &act, altfire );
 	}
+	// add to weapons inventory
+	arrWeapons.Add( pWeapon );
 
 	return;
 }
 
-void CWeaponsComponent::Equip( int wpnIdx )
+const CWeapon* CWeaponsComponent::Equip( int wpnIdx )
 {
 	if ( weaponIdx == wpnIdx )
-		return;
-	if ( weaponIdx < 0 || weaponIdx >= arrWeapons.Count() )
-		return;
+		return weapon;
+	if ( wpnIdx < 0 || wpnIdx >= arrWeapons.Count() )
+		return weapon;
 	// equip primary mode
-	weapon = &arrWeapons[ wpnIdx ]->modes[ K_WPNGRP_IDX_PRIMARY ];
 	weaponIdx = wpnIdx;
+	weapon = &arrWeapons[ wpnIdx ]->modes[ K_WPNGRP_IDX_PRIMARY ];
+	return weapon;
+}
+
+void CWeaponsComponent::SetTriggerStates( bool bTriggerPushed, bool bReloadPushed )
+{
+	if ( !weapon ) 
+		return;
+	weapon->SetTriggerStates( bTriggerPushed, bReloadPushed );
+}
+
+void CWeaponsComponent::StopReloading()
+{
+	if ( !weapon )
+		return;
+	weapon->StopReloading();
+}
+
+void CWeaponsComponent::JamWeapon()
+{
+	if ( !weapon )
+		return;
+	weapon->Jam();
 }
