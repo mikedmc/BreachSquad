@@ -460,7 +460,7 @@ bool CSpriteLib::GetAFrameHitPointFlag( int animIdx, int frameIdx, int pointIdx,
 				outvar->x = aframe->PointsXYFlag[ kk * 3 ];
 				outvar->y = aframe->PointsXYFlag[ kk * 3 + 1 ];
 				outvar->z = aframe->PointsXYFlag[ kk * 3 + 2 ];
-				return S_OK;
+				return true;
 			}
 			else
 			{

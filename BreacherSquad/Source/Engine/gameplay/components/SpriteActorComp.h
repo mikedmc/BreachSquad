@@ -40,6 +40,7 @@ private:
 	CStringHashA				shSkin;									// currently set skin (useless?)
 	Vec2						vAim;									// aim vector
 	EDir6						eAngle;									// animation angle (6 possible ways) - computed from vAnim
+	int							nFlipDirX;								// -1 when flipped and 1 when not flipped
 
 public:
 	CAnimData					arrAnims[ K_ACT_ANIMS_CNT ];			// data about animations
@@ -68,7 +69,8 @@ public:
 	inline int					GetAnimSet() const { return nAnimSet; }
 	// returns current animation angle
 	inline EDir6				GetEAngle() const { return eAngle; };
-
+	inline const int			GetFlipDirX() const { return nFlipDirX; }
+	// sets animation once, skips if same animation already set
 	void						SetAnimOnce( EActorAnim eAnim );
 	// Returns mount position for weapons in local projected space for current EAngle
 	Vec2						GetMountPoint( EHitPtFlag pointflag );

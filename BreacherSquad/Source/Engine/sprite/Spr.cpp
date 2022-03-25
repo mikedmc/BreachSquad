@@ -197,7 +197,7 @@ void CSpr::Paint()
 {
 	_ASSERT(animIdx < pSprCol->Animations.Count());
 	_ASSERT(frameIdx < pSprCol->Animations[animIdx]->aframesNo);
-	//#TODO: flip flags not considered yet
+	// editor flip flags not considered yet, probably not needed
 	int aframeIdx = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 	for( int ii = 0; ii < pSprCol->AFrames[aframeIdx]->fmodulesNo; ii++ )
 	{
@@ -207,12 +207,14 @@ void CSpr::Paint()
 			mod->texRect,
 			mod->moduleRectOff,
 			pos,
-			color);
+			color,
+			rotation, scale);
 	}
 }
 
 void CSpr::Paint( RectLTRB& clip )
 {
+	// clipped paint doesn't handle rotation and scaling
 	int aframeIdx = pSprCol->Animations[ animIdx ]->aframesIdx[ frameIdx ];
 	for ( int ii = 0; ii < pSprCol->AFrames[ aframeIdx ]->fmodulesNo; ii++ )
 	{
@@ -249,6 +251,26 @@ void CSpr::Paint( RectLTRB& clip )
 			Vec2( 0.0f, 0.0f ), color );
 	}
 
+}
+
+void CSpr::PaintEx( UINT texFlipFlags )
+{
+	_ASSERT( animIdx < pSprCol->Animations.Count() );
+	_ASSERT( frameIdx < pSprCol->Animations[ animIdx ]->aframesNo );
+	// editor flip flags not considered yet, probably not needed
+	int aframeIdx = pSprCol->Animations[ animIdx ]->aframesIdx[ frameIdx ];
+	for ( int ii = 0; ii < pSprCol->AFrames[ aframeIdx ]->fmodulesNo; ii++ )
+	{
+		scFModule* mod = pSprCol->FModules[ pSprCol->AFrames[ aframeIdx ]->fmodulesIdx[ ii ] ];
+
+		s_pSP->DrawEx( mod->pImg->pTex,
+			mod->texRect,
+			mod->moduleRectOff,
+			pos,
+			color,
+			rotation, scale, 
+			texFlipFlags );
+	}
 }
 
 void CSpr::PaintFModule(int moduleIdx)

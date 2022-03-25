@@ -41,7 +41,6 @@ void DW_COLOR_GETRBGA( DWORD hexColor, float & r, float & g, float & b, float & 
 
 DWORD DW_COLOR_LERP( DWORD dwFrom, DWORD dwTo, float s )
 {
-	float a;
 	Vec4 cFrom, cTo;
 	DW_COLOR_GETRBGA( dwFrom, cFrom.x, cFrom.y, cFrom.z, cFrom.w );
 	DW_COLOR_GETRBGA( dwTo, cTo.x, cTo.y, cTo.z, cTo.w );
@@ -71,8 +70,8 @@ Vec2 GetDir6VecN( EDir6 eDir )
 {
 	// normalized vectors for every dir
 	const Vec2 retvec[ EDIR6S_CNT ] = { 
-		/*NW*/{-0.70710678118f, -0.70710678118f}, /*N*/{-1.0f, 0.0f}, /*NE*/{0.70710678118f, -0.70710678118f}, 
-		/*SE*/{0.70710678118f, 0.70710678118f}, /*S*/{1.0f, 0.0f}, /*SW*/{-0.70710678118f, 0.70710678118f} 
+		/*NW*/{-0.70710678118f, -0.70710678118f}, /*N*/{0.0f, -1.0f}, /*NE*/{0.70710678118f, -0.70710678118f}, 
+		/*SE*/{0.70710678118f, 0.70710678118f}, /*S*/{0.0f, 1.0f}, /*SW*/{-0.70710678118f, 0.70710678118f} 
 	};
 
 	_ASSERT( eDir > EDIR6_NONE && eDir < EDIR6S_CNT );

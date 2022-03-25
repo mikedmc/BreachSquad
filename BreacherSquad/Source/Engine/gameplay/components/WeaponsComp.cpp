@@ -24,13 +24,19 @@ CWeaponsComponent::~CWeaponsComponent()
 
 void CWeaponsComponent::Update( CActor& act, float dTime )
 {
-	//#TODO: ar putea sa-si ia singur din actor tot ce ii trebuie sa nu astepte actorul sa o updateze...
 }
 
 void CWeaponsComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 {
-	sprite.pos = act.vHeart.xy_proj;
-	sprite.Paint();
+	Vec2 vAim = act.GetAimVec();
+	float fang = UTMath::GetVectorAngle( vAim );
+	VecProj vpMount = act.GetWeaponMountWorld( false );
+
+	UINT tex_flip_flags = (act.GetVisualFlipDirX() < 0) ? K_SPRFLAG_FLIP_Y : 0;
+
+	sprite.rotation = -fang;
+	sprite.pos = vpMount.xy_proj;
+	sprite.PaintEx(tex_flip_flags);
 }
 
 void CWeaponsComponent::AddWeapon( CActor& act, CWeaponTemplate * primary, CWeaponTemplate * altfire )

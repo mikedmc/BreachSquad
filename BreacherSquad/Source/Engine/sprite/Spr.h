@@ -88,6 +88,8 @@ public:
 	void					Paint();
 	// Paints current frame clipped to clip rectangle
 	void					Paint( RectLTRB& clip );
+	// Paints current frame flipping the texture coords if instructed to do so (K_SPRFLAG_FLIP_X, K_SPRFLAG_FLIP_Y)
+	void					PaintEx( UINT texFlipFlags );
 	// Optimized paint for a single module when we don't have more modules per frame (skips a for)
 	void					PaintFModule(int moduleIdx);
 	// Optimized paint for a single module when we don't have more modules per frame (skips a for)

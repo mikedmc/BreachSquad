@@ -4,6 +4,7 @@
 CSpriteActorComponent::CSpriteActorComponent( CMultiSpriteLib* pSpriteLib )
 {
 	eAngle = EDIR6_S;
+	nFlipDirX = 1;
 	nAnimSet = 0;
 	pLib = pSpriteLib;
 	pSpriteLib = nullptr;
@@ -20,8 +21,18 @@ void CSpriteActorComponent::Update(CActor& act, float dTime)
 	// get necessary data from the actor
 	vAim = act.GetAimVec();
 	eAngle = GetDir6FromVec( vAim );
+	Vec2 vAimN( 0.0f, 0.0f );
+	MUVec2Norm( &vAimN, &vAim );
+	// flips a little later on the angle so we don't get jitter when looking N and S
+	if ( nFlipDirX > 0 ) {
+		if ( vAimN.x < -0.2f ) nFlipDirX = -1;
+	}
+	else {
+		if ( vAimN.x > 0.2f ) nFlipDirX = 1;
+	}
+ 	
 	sprite.pos = act.pos.xy_proj;
-	// round up to eliminate viual artefacts
+	// round up to eliminate visual artefacts
 	UTMath::RoundVec2( sprite.pos );
 
 	sprite.Update( dTime );
@@ -30,9 +41,7 @@ void CSpriteActorComponent::Update(CActor& act, float dTime)
 
 void CSpriteActorComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP*/ )
 {
-	Vec2 scale( 1.0f, 1.0f );
-	if ( vAim.x < 0.0f )
-		scale.x = -1.0f;
+	Vec2 scale( (float)nFlipDirX, 1.0f );
 	// CUSTOM MASKED SPRITE PAINTER
 	//sprite.Paint();
 	CSpriteLib* pSpr = sprite.pSprCol;
@@ -186,7 +195,8 @@ Vec2 CSpriteActorComponent::GetMountPoint( EHitPtFlag pointflag )
 	Vec3i ptval( 0, 0, 0 );
 	if ( pSprLib->GetAFrameHitPointFlag( anmidx, 0, 0, pointflag, &ptval ) )
 	{
-		return Vec2( (float)ptval.x, (float)ptval.y );
+		// when graphics flip then we flip the mount points too
+		return Vec2( (float)(ptval.x * nFlipDirX), (float)ptval.y );
 	}
 	return Vec2(0.0f, 0.0f);
 }

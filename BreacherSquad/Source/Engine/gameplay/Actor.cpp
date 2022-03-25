@@ -242,6 +242,7 @@ void CActor::Update(float dTime)
 
 void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 {
+	// get angle from actual animation and not aim vector because they might differ
 	EDir6 actang = c_graphics->GetEAngle();
 	bool bFacingS = GetDir6VecN( actang ).y > 0 ? true : false;
 	
@@ -255,6 +256,21 @@ void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 		c_weapons->Paint( *this, eChannel );
 		c_graphics->Paint( *this, eChannel );
 	}
+}
+
+VecProj CActor::GetWeaponMountWorld( bool bDualHanded, int mountIndex /*= 0 */ )
+{
+	CSpriteActorComponent::EHitPtFlag flag = CSpriteActorComponent::K_HITPTFLAG_MOUNT_TWOHANDED;
+	if ( !bDualHanded )
+	{
+		flag = (mountIndex == 0) ? CSpriteActorComponent::K_HITPTFLAG_MOUNT_PRIMARY : CSpriteActorComponent::K_HITPTFLAG_MOUNT_SECONDARY;
+	}
+
+	// get mount position in screen space (from editor)
+	Vec2 vMount = c_graphics->GetMountPoint( flag );
+	VecProj vpRet = pos;
+	vpRet.Set( pos.xyz.x + vMount.x, pos.xyz.y, pos.xyz.z - H_TO_Z( vMount.y ));
+	return vpRet;
 }
 
 void CActor::PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly /*= false*/)
