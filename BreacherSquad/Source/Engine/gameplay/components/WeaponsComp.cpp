@@ -31,12 +31,11 @@ void CWeaponsComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_C
 	Vec2 vAim = act.GetAimVec();
 	float fang = UTMath::GetVectorAngle( vAim );
 	VecProj vpMount = act.GetWeaponMountWorld( false );
-
-	UINT tex_flip_flags = (act.GetVisualFlipDirX() < 0) ? K_SPRFLAG_FLIP_Y : 0;
-
+	// weapons need flipping when animation gets flipped to the left if we want to keep the unified angle of rotation
+	sprite.scale.y = (act.GetVisualFlipDirX() < 0) ? -1.0f : 1.0f;
 	sprite.rotation = -fang;
 	sprite.pos = vpMount.xy_proj;
-	sprite.PaintEx(tex_flip_flags);
+	sprite.Paint();
 }
 
 void CWeaponsComponent::AddWeapon( CActor& act, CWeaponTemplate * primary, CWeaponTemplate * altfire )
@@ -94,7 +93,6 @@ Vec2 CWeaponsComponent::GetWeaponMuzzlePoint()
 {
 	int anmidx = 0; //#TODO: shoot animation, frame 0
 	_ASSERT( anmidx >= 0 );
-
 	Vec3i ptval( 0, 0, 0 );
 	if ( pSprLib->GetAFrameHitPointFlag( anmidx, 0, 0, K_HITPTFLAG_MUZZLE, &ptval ) )
 	{

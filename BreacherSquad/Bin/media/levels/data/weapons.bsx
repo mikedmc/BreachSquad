@@ -7,7 +7,7 @@
     <Module ImageIdx="0" X="200" Y="78" W="33" H="10" strName="" />
   </Modules>
   <FrameModules>
-    <FrameModule ModuleIdx="0" OX="5" OY="-3" Flags="0" />
+    <FrameModule ModuleIdx="0" OX="5" OY="-6" Flags="0" />
     <FrameModule ModuleIdx="1" OX="-10" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="2" OX="-8" OY="-12" Flags="0" />
   </FrameModules>
@@ -17,7 +17,7 @@
         <FModule Idx="0" />
       </FModules>
       <Points>
-        <Point X="16" Y="-1" Flags="1" />
+        <Point X="16" Y="-4" Flags="1" />
       </Points>
     </Frame>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">

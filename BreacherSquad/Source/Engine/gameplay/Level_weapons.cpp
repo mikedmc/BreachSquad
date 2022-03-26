@@ -367,7 +367,10 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Unable to load Weapon Templates XML:%s\n", xmlPath);
 	}
 
-	// load weapons sprites
+	///----------------------------------------------------------------------------------
+	/// load weapons sprites
+	///----------------------------------------------------------------------------------
+	 
 	int m_libidxWeapons;
 	WCHAR wcsPath[ MAX_PATH ];
 	WCHAR Path[ MAX_PATH ];
@@ -375,7 +378,10 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 	FileManager::GetMediaPath( wcsPath, Path );
 	V_OP_RET( m_sprActors.AddSprites( Path, m_libidxWeapons, K_LIBNICK_WEAPONS ) );
 
-	//load explosion templates
+	///----------------------------------------------------------------------------------
+	/// LOAD EXPLOSION TEMPLATES
+	///----------------------------------------------------------------------------------
+
 	SAFE_DELETE_CArray(m_arrTemplatesExplosion);
 	pugi::xml_node rootnodeexplo = doc.root().child(L"WEAPONS").child(L"ExplosionTemplates");
 	for (pugi::xml_node bnode = rootnodeexplo.first_child(); bnode; bnode = bnode.next_sibling())
@@ -425,6 +431,11 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 
 		m_arrTemplatesExplosion.Add(templ);
 	}
+
+	///----------------------------------------------------------------------------------
+	/// LOAD WEPAON TEMPLATES
+	///----------------------------------------------------------------------------------
+
 	//load weapon templates
 	SAFE_DELETE_CArray(m_arrTemplatesWeapon);
 
@@ -439,6 +450,11 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		//load generic weapon data
 		//if (!bnode.attribute(L"nType").empty())
 //			templ->eType = (EWeaponType)bnode.attribute(L"nType").as_int();
+		templ->bSingleHanded = bnode.attribute( L"singleHanded" ).as_bool();
+		templ->bDualWielding = bnode.attribute( L"dualWielding" ).as_bool();
+		templ->vMountOffset.x = bnode.attribute( L"mountOffX" ).as_int();
+		templ->vMountOffset.y = bnode.attribute( L"mountOffY" ).as_int();
+
 		templ->nHUD_AnimIdx = -1;
 		if (!bnode.attribute(L"sHUDanimName").empty())
 			templ->nHUD_AnimIdx = m_sprInterface.GetAnimationIdxByName(bnode.attribute(L"sHUDanimName").value());

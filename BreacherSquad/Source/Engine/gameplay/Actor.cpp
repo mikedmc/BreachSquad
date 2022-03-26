@@ -268,6 +268,11 @@ VecProj CActor::GetWeaponMountWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 
 	// get mount position in screen space (from editor)
 	Vec2 vMount = c_graphics->GetMountPoint( flag );
+	// add weapon mount offset
+	Vec2 vWpnOff = c_weapons->GetCurrentWeapon()->_template.vMountOffset;
+	vWpnOff.x *= (float)c_graphics->GetFlipDirX();
+	vMount += vWpnOff;
+
 	VecProj vpRet = pos;
 	vpRet.Set( pos.xyz.x + vMount.x, pos.xyz.y, pos.xyz.z - H_TO_Z( vMount.y ));
 	return vpRet;
@@ -278,6 +283,8 @@ VecProj CActor::GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 	// get mount position in screen space (from editor)
 	Vec2 vMuzzleVec = c_weapons->GetWeaponMuzzlePoint();
 	VecProj vpMount = GetWeaponMountWorld( bTwoHanded, mountIndex );
+	// if animations are flipped we need to also flip the weapon vectors
+	vMuzzleVec.y *= (float)c_graphics->GetFlipDirX();
 	// rotate weapon muzzle vector and add it to the projected position of the mount
 	Mat mrot;
 	float aim_angle = UTMath::GetVectorAngle( m_AIcommands.vAimVec );
