@@ -75,7 +75,7 @@ void CActor::SetPos(Vec3 newPos)
 {
 	pos_last = pos.xyz;
 	pos = newPos;
-	vHeart.Set( pos.xyz.x, pos.xyz.y, pos.xyz.z + actTemplate.heartZ );
+	vHeart.Set( pos.xyz.x, pos.xyz.y, pos.xyz.z + _template.heartZ );
 
 	bbox.Set(&bbox_ini, pos.xy_proj);
 	bbox_floor.Set(&bbox_floor_ini, pos.xy);
@@ -86,7 +86,7 @@ void CActor::Move(Vec3 delta)
 	pos_last = pos.xyz;
 	Vec3 npos = pos_last + delta;
 	pos = npos;
-	vHeart.Set( pos.xyz.x, pos.xyz.y, pos.xyz.z + actTemplate.heartZ );
+	vHeart.Set( pos.xyz.x, pos.xyz.y, pos.xyz.z + _template.heartZ );
 
 	bbox.Set(&bbox_ini, pos.xy_proj);
 	bbox_floor.Set(&bbox_floor_ini, pos.xy);
@@ -101,8 +101,8 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 		return false;
 	}
 	//copy template data
-	actTemplate = *pActorTemplate;
-	actTemplate.FillDefaultValuesIfNotSet();
+	_template = *pActorTemplate;
+	_template.FillDefaultValuesIfNotSet();
 
 	eLastPlayedVerse = K_LVL_ACT_VERSE_EMPTY;
 
@@ -111,17 +111,17 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 
 	bSkipRender = false;
 	// compute bboxes
-	bbox_floor_ini = actTemplate.bbox;
+	bbox_floor_ini = _template.bbox;
 	//#TODO: should be different
 	bbox_ini = bbox_floor_ini;
-	heightZ = actTemplate.heightZ;
+	heightZ = _template.heightZ;
 	
 	//set hue
 	byte collvl = 255;
 	color_ini = D3DCOLOR_ARGB(255, collvl, collvl, collvl);
 	color = this->color_ini;
 
-	fLife = this->actTemplate.fLife;
+	fLife = this->_template.fLife;
 
 	/*
 	if (!this->actTemplate.shWeaponDefault.IsEmpty())
@@ -132,12 +132,12 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 	*/
 
 	///--- finished setting up, now save backup template for initial state ---
-	actTemplate_ini = actTemplate;
+	_template_ini = _template;
 
 	// Load actor graphics
 	WCHAR Path[MAX_PATH];
 	WCHAR wcsPath[MAX_PATH];
-	swprintf_s(wcsPath, MAX_PATH, L"media/levels/data/actors/%s", actTemplate.shSourceXML.text);
+	swprintf_s(wcsPath, MAX_PATH, L"media/levels/data/actors/%s", _template.shSourceXML.text);
 	FileManager::GetMediaPath(wcsPath, Path);
 	c_graphics->InitFromFile(*this, Path);
 
@@ -258,10 +258,10 @@ void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 	}
 }
 
-VecProj CActor::GetWeaponMountWorld( bool bDualHanded, int mountIndex /*= 0 */ )
+VecProj CActor::GetWeaponMountWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 {
 	CSpriteActorComponent::EHitPtFlag flag = CSpriteActorComponent::K_HITPTFLAG_MOUNT_TWOHANDED;
-	if ( !bDualHanded )
+	if ( !bTwoHanded )
 	{
 		flag = (mountIndex == 0) ? CSpriteActorComponent::K_HITPTFLAG_MOUNT_PRIMARY : CSpriteActorComponent::K_HITPTFLAG_MOUNT_SECONDARY;
 	}
@@ -273,15 +273,30 @@ VecProj CActor::GetWeaponMountWorld( bool bDualHanded, int mountIndex /*= 0 */ )
 	return vpRet;
 }
 
+VecProj CActor::GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
+{
+	// get mount position in screen space (from editor)
+	Vec2 vMuzzleVec = c_weapons->GetWeaponMuzzlePoint();
+	VecProj vpMount = GetWeaponMountWorld( bTwoHanded, mountIndex );
+	// rotate weapon muzzle vector and add it to the projected position of the mount
+	Mat mrot;
+	float aim_angle = UTMath::GetVectorAngle( m_AIcommands.vAimVec );
+	MUMatRotZ( &mrot, aim_angle );
+	MUVec2TransformCoord( &vMuzzleVec, &vMuzzleVec, &mrot );
+	Vec2 muzzle_proj = vpMount.xy_proj + vMuzzleVec;
+	// transform mount position from projected to 3d, knowing that it shoots at the heart height
+	return VecProj( muzzle_proj.x, muzzle_proj.y + Z_TO_H(_template.heartZ), _template.heartZ );
+}
+
 void CActor::PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly /*= false*/)
 {
 	if (sVerse == K_LVL_ACT_VERSE_EMPTY)
 		return;
 
 	int nVariation = -1;
-	if (actTemplate.soundIDs[(int)sVerse][0] >= 0)
+	if (_template.soundIDs[(int)sVerse][0] >= 0)
 		nVariation = 0;
-	if (actTemplate.soundIDs[(int)sVerse][1] >= 0)
+	if (_template.soundIDs[(int)sVerse][1] >= 0)
 		nVariation = randint(2);
 
 	if (nVariation < 0)
@@ -290,7 +305,7 @@ void CActor::PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse
 	//play only once
 	if (bPlayIfNotPlayingOnly)
 	{
-		if (SND_IS_PLAYING(actTemplate.soundIDs[(int)sVerse][nVariation]))
+		if (SND_IS_PLAYING(_template.soundIDs[(int)sVerse][nVariation]))
 			return;
 	}
 	// save last played verse
@@ -300,7 +315,7 @@ void CActor::PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse
 	Vec2 vDist(pos.xy.x - vListenerPos.x, pos.xy.y - vListenerPos.y);
 	if (MUVec2Len(&vDist) < K_GAME_WIDTH * 0.5f * 1.5f)
 	{
-		SND_PLAY_POSITIONAL(actTemplate.soundIDs[(int)sVerse][nVariation], pos.xy);
+		SND_PLAY_POSITIONAL(_template.soundIDs[(int)sVerse][nVariation], pos.xy);
 	}
 
 }
@@ -308,7 +323,7 @@ void CActor::PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse
 void CActor::ApplyWeaponTemplate(CWeapon * pWeapon)
 {
 	//reset actor template to initial one
-	actTemplate = actTemplate_ini;
+	_template = _template_ini;
 	/*
 	if ((pWeapon != null) && (!pWeapon->_template.shTemplateOverwrite.IsEmpty()))
 	{

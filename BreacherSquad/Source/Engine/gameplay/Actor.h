@@ -20,8 +20,8 @@ private:
 	CWeaponsComponent*		c_weapons;					// graphics and logic component that handles the weapons
 
 public:
-	CActorTemplate			actTemplate;				// holds data about each actor, copied from source templates (xml) and probably modified by enhancements
-	CActorTemplate			actTemplate_ini;			// holds initial template that we reset to when changing the weapon or adding non permanent enhancements
+	CActorTemplate			_template;				// holds data about each actor, copied from source templates (xml) and probably modified by enhancements
+	CActorTemplate			_template_ini;			// holds initial template that we reset to when changing the weapon or adding non permanent enhancements
 
 	//#TODO: convert to verse/voice component:
 	EActorSoundVerse		eLastPlayedVerse;			//last played sound verse
@@ -102,7 +102,10 @@ public:
 	inline int				GetVisualFlipDirX() { return c_graphics->GetFlipDirX(); }
 	// Returns the gun mount position. bDualHanded tells if we are looking for the dual handed mount or single handed mount.
 	// mountIndex is usually used when looking for the position of single handed weapons in dualWield mode (hand on the left)
-	VecProj					GetWeaponMountWorld( bool bDualHanded, int mountIndex = 0 );
+	VecProj					GetWeaponMountWorld( bool bTwoHanded, int mountIndex = 0 );
+	// Returns the gun muzzle position in World coordinates.
+	// \param mountIndex - 0 for most weapons, 1 for second weapon in dual wielding stances
+	VecProj					GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ );
 	// sets graphics anim set
 	void					SetAnimSet( int n_anim_set ) { c_graphics->SetAnimSet( n_anim_set ); }
 	// Plays the actor verse from the template handling the positional attenuation

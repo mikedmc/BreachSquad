@@ -77,14 +77,14 @@ void CSpriteActorComponent::CacheAnimations( CActor& act )
 		{
 			for ( int ang = 0; ang < EDIR6S_CNT; ang++ )
 			{
-				CStringHash *animname = &act.actTemplate.arrAnims[ anm ].animNamesA[ kk ][ ang ];
+				CStringHash *animname = &act._template.arrAnims[ anm ].animNamesA[ kk ][ ang ];
 				if ( animname->IsSet() )
 				{
 					int anmidx = pSprLib->GetAnimationIdxByName( animname->text );
 					arrAnims[ anm ].animIdx[ kk ][ ang ] = anmidx;
 					if ( anmidx < 0 )
 					{
-						ErrorBox( K_ERR_WARNING, L"SpriteAnimComponent::CacheAnimations: Could not find anim:%s in template: %s", animname->text, act.actTemplate.shID.text );
+						ErrorBox( K_ERR_WARNING, L"SpriteAnimComponent::CacheAnimations: Could not find anim:%s in template: %s", animname->text, act._template.shID.text );
 					}
 				}
 				else
@@ -105,25 +105,25 @@ void CSpriteActorComponent::SetSkin( CActor& act, WCHAR* skinName, bool bShowPri
 {
 	CStringHash skinNamesh;
 	if ( skinName == nullptr )
-		skinNamesh = act.actTemplate.arrSkins[ 0 ].name;
+		skinNamesh = act._template.arrSkins[ 0 ].name;
 	else
 		skinNamesh.Init( skinName );
 
-	for ( int kk = 0; kk < act.actTemplate.arrSkinsCnt; kk++ ) {
-		if ( act.actTemplate.arrSkins[ kk ].name == skinNamesh )
+	for ( int kk = 0; kk < act._template.arrSkinsCnt; kk++ ) {
+		if ( act._template.arrSkins[ kk ].name == skinNamesh )
 		{
-			dwLayersMask = act.actTemplate.arrSkins[ kk ].layersVisMask;
-			skinNamesh = act.actTemplate.arrSkins[ kk ].name;
+			dwLayersMask = act._template.arrSkins[ kk ].layersVisMask;
+			skinNamesh = act._template.arrSkins[ kk ].name;
 			// show hands
 			if ( bShowPrimaryHand )
-				dwLayersMask |= act.actTemplate.arrSkins[ kk ].hand1Mask;
+				dwLayersMask |= act._template.arrSkins[ kk ].hand1Mask;
 			else 
-				dwLayersMask &= ~act.actTemplate.arrSkins[ kk ].hand1Mask;
+				dwLayersMask &= ~act._template.arrSkins[ kk ].hand1Mask;
 
 			if ( bShowSecondaryHand )
-				dwLayersMask |= act.actTemplate.arrSkins[ kk ].hand2Mask;
+				dwLayersMask |= act._template.arrSkins[ kk ].hand2Mask;
 			else
-				dwLayersMask &= ~act.actTemplate.arrSkins[ kk ].hand2Mask;
+				dwLayersMask &= ~act._template.arrSkins[ kk ].hand2Mask;
 
 			return;
 			
@@ -159,7 +159,7 @@ OPRESULT CSpriteActorComponent::InitFromFile(CActor& act, WCHAR * Path)
 	// cache animations for fast access
 	CacheAnimations( act );
 	// save parent name
-	shParentName = act.actTemplate.shID;
+	shParentName = act._template.shID;
 
 	// init sprites
 	sprite.Init( pSprLib, 0 );

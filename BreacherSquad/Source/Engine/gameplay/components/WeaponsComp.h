@@ -2,10 +2,10 @@
 
 #include "ComponentInterfaces.h"
 
-
 // index in weapon group
 #define K_WPNGRP_IDX_PRIMARY 0
 #define K_WPNGRP_IDX_ALTFIRE 1
+
 // weapons with 2 firing modes used by actors
 class CWeaponGroup
 {
@@ -18,6 +18,12 @@ public:
 
 class CWeaponsComponent : public IBaseAnimComponent
 {
+public:
+	// hitpoint flags for frames
+	enum EHitPtFlag {
+		K_HITPTFLAG_MUZZLE = 1,								// frame hitpoint flag for muzzle
+	};
+
 private:
 	CSpriteLib*					pSprLib;					// pointer to sprite library from pLib
 	CStringHash					shParentName;				// Name of owner (optional)
@@ -52,13 +58,12 @@ public:
 	// Jams current weapon
 	void						JamWeapon();
 
+	//#TODO:
+	// Returns the local offset of the gun muzzle from the gun origin
+	Vec2						GetWeaponMuzzlePoint();
+	// saves pointers to animations from actor template and muzzle positions 
+	void						CacheAnimations( CActor& act );
 
-
-	//addweapon(template)
-	//equipWeapon
-
-	// saves pointers to animations from actor template
-	//void						CacheAnimations( CActor& act );
 	// Loads all necessary data for specified actor
 	//OPRESULT					InitFromFile( CActor& act, WCHAR * Path );
 	//void						SetAnimOnce( EActorAnim eAnim );

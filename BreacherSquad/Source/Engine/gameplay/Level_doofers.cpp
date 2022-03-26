@@ -409,10 +409,10 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			{
 				CActor* act = m_arrActors[kk];
 				//sar actorii ascunsi
-				if ((act->bHidden) || (act->fLife < 0.0f) || (act->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET))
+				if ((act->bHidden) || (act->fLife < 0.0f) || (act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET))
 					continue;
 				//never stun the hostages
-				if ((act->actTemplate.actorClass == K_LVL_ACT_CLASS_HOSTAGE) && (fMaxStun > 0.0f))
+				if ((act->_template.actorClass == K_LVL_ACT_CLASS_HOSTAGE) && (fMaxStun > 0.0f))
 					continue;
 				//distanta la inamic
 				Vec2 vDir = act->GetPosHeart() - pos;
@@ -427,7 +427,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				}
 
 				//evit friendly stun
-				if (act->actTemplate.actorClass != K_LVL_ACT_CLASS_HUMAN)
+				if (act->_template.actorClass != K_LVL_ACT_CLASS_HUMAN)
 					continue;
 				//daca e prea departe nu il ia in seama
 				if (fDist > fStunRadius)
@@ -457,10 +457,10 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			{
 				CActor* act = m_arrActors[kk];
 				//sar actorii ascunsi
-				if ((act->bHidden) || (act->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET))
+				if ((act->bHidden) || (act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET))
 					continue;
 				//ignores specified classes
-				if (act->actTemplate.actorClass == explotemplate->eIgnoreActorClass)
+				if (act->_template.actorClass == explotemplate->eIgnoreActorClass)
 					continue;
 				//distanta la inamic
 				Vec2 vDir = act->GetPosHeart() - pos;
@@ -484,11 +484,11 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				CBulletHitReturnData retdata;
 				retdata = HitActor(act, fPercent * fMaxDamage, dwOwnerUID, K_LVL_ACT_CLASS_EXPLOSION, &vDir, K_LVL_BULLET_FLAG_CAN_SPLAT, explotemplate->nArmorPiercingRating);
 				//count only enemies
-				if ((retdata.bKilledTarget) && (act->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN))
+				if ((retdata.bKilledTarget) && (act->_template.actorClass >= K_LVL_ACT_CLASS_HUMAN))
 					nBombFrags++;
 
 				//#ACHIEVEMENTS: darwin award - player died from his own explosive
-				if ((act->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) && (!IsNetworkPlayer(act)) && (act->fLife <= 0.0f) && (dwOwnerUID == act->UID) &&
+				if ((act->_template.actorClass == K_LVL_ACT_CLASS_PLAYER) && (!IsNetworkPlayer(act)) && (act->fLife <= 0.0f) && (dwOwnerUID == act->UID) &&
 					((explotemplate->name.textHash == hash_EXPLO_GRENADE_GROUND) || (explotemplate->name.textHash == hash_EXPLO_GRENADE) ||
 					(explotemplate->name.textHash == hash_EXPLO_CHARGE) || (explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE)))
 				{

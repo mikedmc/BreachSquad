@@ -237,7 +237,7 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 	MUVec3Norm(&vFinalDir, &vDir);
 	Vec3 vShootPos = shooter->GetPosWeapon();
 
-	int nFinalClass = shooter->actTemplate.actorClass;
+	int nFinalClass = shooter->_template.actorClass;
 	//bullet has template class, set it to final class
 	if (weapon->_template.bulletTemplate.eClass != K_LVL_ACT_CLASS_ANY)
 		nFinalClass = weapon->_template.bulletTemplate.eClass;
@@ -343,7 +343,7 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 			//			AddProp_Light(vShootPos, ANM_LIGHTS_SPR_POINT1, 0.05f, 0.0f, D3DCOLOR_COLORALPHA(0xffFDB727, fPropAlpha), weapon->WeaponTemplate.fMuzzleLightSize);
 		}
 		//adaug eventAI de sunet
-		AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, shooter->GetUID(), shooter->actTemplate.actorClass, shooter->GetPosHeart(), weapon->_template.fSoundRadius);
+		AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, shooter->GetUID(), shooter->_template.actorClass, shooter->GetPosHeart(), weapon->_template.fSoundRadius);
 	}
 	else
 	{

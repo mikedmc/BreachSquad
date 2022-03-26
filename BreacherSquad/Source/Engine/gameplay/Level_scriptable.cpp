@@ -1243,11 +1243,11 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			//int AIstate = GetAIStateByNameHash(vcAIstate->m_strArg.getHash());
 			if ((vcAIstate == null) || (vcAIstate->m_type != CVariantComplex::K_ARGTYPE_STRING))
 			{
-				Actor_SetAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(actor->actTemplate.shAIState_ini));
+				Actor_SetAIState(actor, actor->_template.AItemplate->GetAIStateByName(actor->_template.shAIState_ini));
 			}
 			else
 			{
-				Actor_SetAIState(actor, actor->actTemplate.AItemplate->GetAIStateByName(vcAIstate->m_strArg));
+				Actor_SetAIState(actor, actor->_template.AItemplate->GetAIStateByName(vcAIstate->m_strArg));
 			}
 
 			return true;

@@ -89,3 +89,17 @@ void CWeaponsComponent::JamWeapon()
 		return;
 	weapon->Jam();
 }
+
+Vec2 CWeaponsComponent::GetWeaponMuzzlePoint()
+{
+	int anmidx = 0; //#TODO: shoot animation, frame 0
+	_ASSERT( anmidx >= 0 );
+
+	Vec3i ptval( 0, 0, 0 );
+	if ( pSprLib->GetAFrameHitPointFlag( anmidx, 0, 0, K_HITPTFLAG_MUZZLE, &ptval ) )
+	{
+		// when graphics flip then we flip the mount points too
+		return Vec2( (float)ptval.x, (float)ptval.y );
+	}
+	return Vec2( 0.0f, 0.0f );
+}

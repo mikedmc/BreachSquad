@@ -9,7 +9,7 @@
 CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvProjectileMomentum)
 {
 	CBulletHitReturnData retData;
- 	retData.eMaterial = actor->actTemplate.eMaterial;
+ 	retData.eMaterial = actor->_template.eMaterial;
 	retData.bPenetratedShield = false;
 	retData.bKilledTarget = false;
 	retData.bArmorHit = false;
@@ -149,19 +149,19 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		//when shooting a dead body take a maximum of 10% energy from the bullet
 		//daca nu luam energia asta in momentul in care glontul tras se duce in cadavru nu il strapunge si timp de mai multe frames sta pe loc si face zgomot de damage
 		if ((actor->fLife <= 0.0f) && (fBulletLostEnergy <= 0.0f))
-			fBulletLostEnergy = actor->actTemplate.fLife * 0.1f;
+			fBulletLostEnergy = actor->_template.fLife * 0.1f;
 
 		//transmit bullet momentum daca nu sunt under cover
-		if ((actor->actTemplate.fMass > 0.0f) && (pvProjectileMomentum))
+		if ((actor->_template.fMass > 0.0f) && (pvProjectileMomentum))
 		{
-			actor->vSpeedImpulse += *pvProjectileMomentum / actor->actTemplate.fMass;
+			actor->vSpeedImpulse += *pvProjectileMomentum / actor->_template.fMass;
 		}
 		
 		//subtract life	if no invincibility
 		if (actor->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_INVINCIBLE)
 			fLifeTaken = 0.0f;
 
-		if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
+		if (actor->_template.actorClass == K_LVL_ACT_CLASS_PLAYER)
 		{
 			float fDecLife = fLifeTaken;
 
@@ -185,14 +185,14 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		//save last damager UID
 		actor->nLastDamageTakenFromUID = pBullet->ownerUID;
 		//if he's still alive and you took enough of it's life say verse
-		if ((actor->fLife > 0.0f) && (fLifeTaken >= actor->actTemplate.fLife * 0.1f))
+		if ((actor->fLife > 0.0f) && (fLifeTaken >= actor->_template.fLife * 0.1f))
 //			PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_TAKING_DAMAGE, true);
 
 		//life left in it?
 		if (actor->fLife > 0.0f)
 		{
 			//mesaj LOW_HEALTH - la 10% din viata originala
-			float fLifeLowLimit = actor->actTemplate.fLife * 0.1f;
+			float fLifeLowLimit = actor->_template.fLife * 0.1f;
 			if ((actor->fLife < fLifeLowLimit) && (actor->fLife + fLifeTaken >= fLifeLowLimit))
 			{
 				AddAIEvent(K_LVL_AI_EVENT_LOW_HEALTH, 0, pBullet->actorClass, actor->GetPosHeart(), 10000.0f, 0.6f, actor->GetUID());
@@ -207,7 +207,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 	}
 
 	//event got_hit
-	if ((actor->fLife > 0.0f) && (actor->actTemplate.actorClass > K_LVL_ACT_CLASS_PLAYER))
+	if ((actor->fLife > 0.0f) && (actor->_template.actorClass > K_LVL_ACT_CLASS_PLAYER))
 	{
 		//adaug eventuri de GOT_HIT doar pe clasele HUMAN, cand sunt lovite de catre player
 		//find shooter pos. defaults on pos based on bullet speed
@@ -229,13 +229,13 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 	}
 
 	//set dead AI on humans
-	if ((actor->fLife <= 0.0f) && (actor->actTemplate.eMaterial == K_LVL_MATERIAL_FLESH))
+	if ((actor->fLife <= 0.0f) && (actor->_template.eMaterial == K_LVL_MATERIAL_FLESH))
 	{
 		//give strategic points on death
-		if ((fOldLife > 0.0f) && (actor->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN))
+		if ((fOldLife > 0.0f) && (actor->_template.actorClass >= K_LVL_ACT_CLASS_HUMAN))
 		{
 			//you get points if enemy killed by player or explo
-			if (((pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER) || (pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION)) && (actor->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER))
+			if (((pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER) || (pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION)) && (actor->_template.actorClass != K_LVL_ACT_CLASS_PLAYER))
 			{
 				if (actor->UID != pBullet->ownerUID)
 				{
@@ -245,8 +245,8 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		}
 
 		//cadavers get pushed more by kicking them
-		if ((fOldLife > 0.0f) && (actor->actTemplate.fMass > 0.0f) && (pvProjectileMomentum != null))
-			actor->vSpeedImpulse += K_LVL_DEAD_BODY_BULLET_MOMENTUM_MULTIPLIER * (*pvProjectileMomentum / actor->actTemplate.fMass);
+		if ((fOldLife > 0.0f) && (actor->_template.fMass > 0.0f) && (pvProjectileMomentum != null))
+			actor->vSpeedImpulse += K_LVL_DEAD_BODY_BULLET_MOMENTUM_MULTIPLIER * (*pvProjectileMomentum / actor->_template.fMass);
 
 		//erase shooting flags
 		actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
@@ -254,7 +254,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		bool bSplatActor = false;
 		
 		//very low life from the first hit? splat!
-		if ((pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT) && (actor->GetCurrentBehavior() != AI_BEHAVIOR_DEAD) && (pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER) && (actor->fLife < -actor->actTemplate.fLife * 0.5f))
+		if ((pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT) && (actor->GetCurrentBehavior() != AI_BEHAVIOR_DEAD) && (pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER) && (actor->fLife < -actor->_template.fLife * 0.5f))
 		{
 			bSplatActor = true;
 			//if bullets lose power then only splat from close quarters
@@ -262,10 +262,10 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 				bSplatActor = false;
 		}
 		//grenades splat dead bodies
-		if ((actor->GetCurrentBehavior() == AI_BEHAVIOR_DEAD) && (pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION) && (fLifeTaken >= actor->actTemplate.fLife))
+		if ((actor->GetCurrentBehavior() == AI_BEHAVIOR_DEAD) && (pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION) && (fLifeTaken >= actor->_template.fLife))
 				bSplatActor = true;
 		//if dead but you keep kicking him it explodes
-		if ((actor->GetCurrentBehavior() == AI_BEHAVIOR_DEAD) && (pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT) && (actor->fLife < -actor->actTemplate.fLife))
+		if ((actor->GetCurrentBehavior() == AI_BEHAVIOR_DEAD) && (pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT) && (actor->fLife < -actor->_template.fLife))
 			bSplatActor = true;
 		//if lucky cancel splat
 		if (m_rand.RandInt(100) <= 10)
@@ -275,7 +275,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 		}
 
 		//--- generate blood splats on death ---
-		if ((fOldLife > 0.0f) && (actor->actTemplate.eMaterial == K_LVL_MATERIAL_FLESH))
+		if ((fOldLife > 0.0f) && (actor->_template.eMaterial == K_LVL_MATERIAL_FLESH))
 		{
 			//splaturile sunt sortate in fn de marime (folosesc posHeart in log de GetPosHeart() pentru ca altfel imi da deja pozitia de dupa moarte, adica prea jos)
 			//splaturile sunt sortate in functie de dimensiune (crescator)
@@ -283,7 +283,7 @@ CBulletHitReturnData CLevel::HitActor(CActor* actor, CBullet *pBullet, Vec2* pvP
 			{
 				if ((pBullet->nFlags & K_LVL_BULLET_FLAG_NO_DECALS) == 0)
 				{
-					AddDecal_BloodSplat(actor->GetPosHeart(), true, actor->actTemplate.actorClass);
+					AddDecal_BloodSplat(actor->GetPosHeart(), true, actor->_template.actorClass);
 				}
 			}
 
@@ -340,10 +340,10 @@ CBulletHitReturnData CLevel::HitActor(CActor * actor, float fDamage, UINT32 dwOw
 */
 void CLevel::SetActorStun(CActor* actor, float fStunDuration)
 {
-	if ((actor->actTemplate.actorClass != K_LVL_ACT_CLASS_HUMAN) && (actor->actTemplate.actorClass != K_LVL_ACT_CLASS_FRIENDLY))
+	if ((actor->_template.actorClass != K_LVL_ACT_CLASS_HUMAN) && (actor->_template.actorClass != K_LVL_ACT_CLASS_FRIENDLY))
 		return;
 
-	if ((actor->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0)
+	if ((actor->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0)
 		return;
 
 	if (fStunDuration > actor->fStunTimer)
@@ -424,7 +424,7 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 	m_arrPlayerLastSafePos[nPlayerOrdinal] = spawnPos;
 
 	//update backup template
-	nact->actTemplate_ini = nact->actTemplate;
+	nact->_template_ini = nact->_template;
 
 	//run ON_SPAWN script
 	/*
@@ -552,7 +552,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	nact->Weapons()->AddWeapon( *nact, wpntMain, nullptr );
 	nact->Weapons()->Equip( 0 );
 	// initialize AI
-	Actor_SetAIState(nact, nact->actTemplate.AItemplate->GetAIStateByName(nact->actTemplate.shAIState_ini));
+	Actor_SetAIState(nact, nact->_template.AItemplate->GetAIStateByName(nact->_template.shAIState_ini));
 	// prepare actor for play after everything is loaded and set up
 	nact->PostConstructionInit();
 	//finish up adding the actor
@@ -1378,7 +1378,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate(WCHAR * strTemplateFileName)
 void CLevel::KillActor(CActor * actor, bool bSplatTarget)
 {
 	CBullet bullet;
-	bullet.fDamage = actor->actTemplate.fLife;
+	bullet.fDamage = actor->_template.fLife;
 	bullet.nFlags |= K_LVL_BULLET_FLAG_IGNORE_ARMOR | K_LVL_BULLET_FLAG_IGNORE_COVER | K_LVL_BULLET_FLAG_NO_IMPACT_PARTICLES | K_LVL_BULLET_FLAG_NOT_BALLISTIC | K_LVL_BULLET_FLAG_NO_DECALS;
 	bullet.actorClass = K_LVL_ACT_CLASS_TRAP;
 
@@ -1387,7 +1387,7 @@ void CLevel::KillActor(CActor * actor, bool bSplatTarget)
 		bullet.nFlags |= K_LVL_BULLET_FLAG_CAN_SPLAT;
 		bullet.nFlags &= ~K_LVL_BULLET_FLAG_NO_DECALS;
 		//very large damage
-		bullet.fDamage = -actor->actTemplate.fLife;
+		bullet.fDamage = -actor->_template.fLife;
 	}
 
 	HitActor(actor, &bullet);
@@ -2237,8 +2237,8 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 				for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 				{
 					//skip actors that are: hidden, dead, players or not a target
-					if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
-						((m_arrActors[kk]->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
+					if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->_template.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
+						((m_arrActors[kk]->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
 							continue;
 					if (m_arrActors[kk]->bbox.Intersects(active->bbox))
 					{
@@ -2453,7 +2453,7 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 			for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 			{
 				if ((pPlayerActor[kk] == NULL) || (pPlayerActor[kk]->bHidden) || (pPlayerActor[kk]->fLife <= 0.0f) ||
-					((pPlayerActor[kk]->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0) )
+					((pPlayerActor[kk]->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0) )
 					continue;
 				Vec2 vCheckPt(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
 				if (colshape->bbox.PointIn(vCheckPt))
@@ -2466,9 +2466,9 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 			for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 			{
 				//skip actors that are: hidden, dead, players or not a target
-				if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
+				if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->_template.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
 					(m_arrActors[kk]->fLife <= 0.0f) ||
-					((m_arrActors[kk]->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
+					((m_arrActors[kk]->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
 					continue;
 				Vec2 vCheckPt(m_arrActors[kk]->bbox.vCenter.x, m_arrActors[kk]->bbox.vMin.y);
 				if (colshape->bbox.PointIn(vCheckPt))
@@ -2511,9 +2511,9 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 						for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 						{
 							//skip actors that are: hidden, dead, players or not a target
-							if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
+							if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->_template.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
 								(m_arrActors[kk]->fLife <= 0.0f) ||
-								((m_arrActors[kk]->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
+								((m_arrActors[kk]->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
 								continue;
 							if (colshape->bbox.PointIn(m_arrActors[kk]->GetPosHeart()))
 							{
@@ -3057,7 +3057,7 @@ void CLevel::Actor_SetAIState(CActor * actor, CAIState* pNewState)
 
 bool CLevel::Actor_SetAIState(CActor * actor, WCHAR * strStateName)
 {
-	CAIState* newstate = actor->actTemplate.AItemplate->GetAIStateByName(strStateName);
+	CAIState* newstate = actor->_template.AItemplate->GetAIStateByName(strStateName);
 	if (newstate == null)
 	{
 		LOG(L"CLevel::SetActorAIState - state not found! %s\n", strStateName);
@@ -3073,7 +3073,7 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 	_ASSERT((pWeapon != null) && (pActor != null));
 
 	//reset actor template to initial one
-	pActor->actTemplate = pActor->actTemplate_ini;
+	pActor->_template = pActor->_template_ini;
 
 	if (!pWeapon->_template.shTemplateOverwrite.IsEmpty())
 	{
@@ -3083,15 +3083,15 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 			ErrorBox(K_ERR_WARNING, L"SetActorCurrentWeapon failed! Template %s not found for weapon %s!", pWeapon->_template.shTemplateOverwrite.text, pWeapon->_template.name.text);
 		}
 		//set animations from new template
-		pActor->actTemplate.AddGenericDataFromTemplate(updateTemplate);
-		pActor->actTemplate.OverwriteAnimsFromTemplate(updateTemplate);
+		pActor->_template.AddGenericDataFromTemplate(updateTemplate);
+		pActor->_template.OverwriteAnimsFromTemplate(updateTemplate);
 	}
 	//set the heart and gun vectors again
 	//LoadActorBBoxAndPoints(pActor, K_LVL_ACT_ANIM_REF_POSE, 0);
 
 	///--- PERKS ---
 	//apply perks that change current weapon
-	if ((pActor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER) && (pActor->nPlayerOrdinal >= 0))
+	if ((pActor->_template.actorClass == K_LVL_ACT_CLASS_PLAYER) && (pActor->nPlayerOrdinal >= 0))
 	{
 		switch (g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal].eType)
 		{
@@ -3188,7 +3188,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 				break;
 			}
 
-			CAIState* newstate = actor->actTemplate.AItemplate->GetAIStateByName(vc->m_strArg);
+			CAIState* newstate = actor->_template.AItemplate->GetAIStateByName(vc->m_strArg);
 			if (newstate == null)
 			{
 				LOG(L"AI_BEHAVIOR_SET_STATE - state not found! %s\n", vc->m_strArg.text);
@@ -3269,9 +3269,9 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			{
 				bool bVal = (cvNotATarget->m_asINT32 != 0);
 				if (bVal)
-					actor->actTemplate.eCaps |= K_ACT_CAPS_NOT_A_TARGET;
+					actor->_template.eCaps |= K_ACT_CAPS_NOT_A_TARGET;
 				else
-					actor->actTemplate.eCaps &= ~K_ACT_CAPS_NOT_A_TARGET;
+					actor->_template.eCaps &= ~K_ACT_CAPS_NOT_A_TARGET;
 			}
 			//state doesn't need update
 			ret_bFinished = true;
@@ -3633,7 +3633,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			actor->fStunTimer = 0.0f;
 			//death timer for players or splat timer for others
 			actor->AItimer1 = 0.0f;
-			if (actor->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER) 
+			if (actor->_template.actorClass != K_LVL_ACT_CLASS_PLAYER) 
 			{
 				CVariantComplex* cvt = pNewBehavior->m_vcolParams.GetVariantByName(L"fSplatTimer");
 				if (cvt->m_type == CVariantComplex::K_ARGTYPE_FLOAT)
@@ -3664,7 +3664,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 				actor->varAIparams.AddVariant(cvs);
 			}
 
-			if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
+			if (actor->_template.actorClass == K_LVL_ACT_CLASS_PLAYER)
 			{
 				//timerul este folosit ca sa nu sara camera de pe cadavru prea repede
 				actor->AItimer1 = K_LVL_PLAYER_DEATH_TIMER;
@@ -3681,7 +3681,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 				//dam remove la particles de pe interfata cand moare un player
 				g_particlesMgr.RemoveAllFromLayer(K_PART_LAYER_INTERFACE_LIGHT);
 			}
-			else if (actor->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN)
+			else if (actor->_template.actorClass >= K_LVL_ACT_CLASS_HUMAN)
 			{
 				if (!bSpawnedDead)
 				{
@@ -3725,7 +3725,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 			}
 
 			//hostages specials
-			if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_HOSTAGE)
+			if (actor->_template.actorClass == K_LVL_ACT_CLASS_HOSTAGE)
 			{
 				//save stats for saviour only if deallocating by itself (not killed)
 				if (dcmd == K_LVL_ACT_DEATHCMD_DEALLOCATE)
@@ -3784,16 +3784,16 @@ void CLevel::SetActorDoT(CActor* act, CDamageOverTime::EDoTType eType, float fDu
 {
 	if (act == null)
 		return;
-	if ((eFilterClass > K_LVL_ACT_CLASS_ANY) && (act->actTemplate.actorClass != eFilterClass))
+	if ((eFilterClass > K_LVL_ACT_CLASS_ANY) && (act->_template.actorClass != eFilterClass))
 		return;
-	if ((eExcludedClass > K_LVL_ACT_CLASS_ANY) && (act->actTemplate.actorClass == eExcludedClass))
+	if ((eExcludedClass > K_LVL_ACT_CLASS_ANY) && (act->_template.actorClass == eExcludedClass))
 		return;
 
 	if ((eType == CDamageOverTime::K_LVL_DoT_INTIMIDATED) && (act->fLife <= 0.0f))
 		return;
 
 	//#HARDCODE: DoT_TARGETED only works on enemies
-	if ((eType == CDamageOverTime::K_LVL_DoT_TARGETED) && (act->actTemplate.actorClass < K_LVL_ACT_CLASS_HUMAN))
+	if ((eType == CDamageOverTime::K_LVL_DoT_TARGETED) && (act->_template.actorClass < K_LVL_ACT_CLASS_HUMAN))
 		return;
 
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
@@ -3805,7 +3805,7 @@ void CLevel::SetActorDoT(CActor* act, CDamageOverTime::EDoTType eType, float fDu
 		//pointer to player owner or null if not a player
 		CActor* pPlayerOwner = GetPlayerByUID(dwOwnerUID);
 		//special statistics
-		if ((eType == CDamageOverTime::K_LVL_DoT_FIRE) && (act->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN))
+		if ((eType == CDamageOverTime::K_LVL_DoT_FIRE) && (act->_template.actorClass >= K_LVL_ACT_CLASS_HUMAN))
 		{
 			if((pPlayerOwner != null) && (!IsNetworkPlayer(pPlayerOwner)))
 				App_IncreaseGamestat(K_MEMID_GAMESTATS_ENEMIES_SET_ON_FIRE);
@@ -3983,13 +3983,13 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		if (actor->m_AIsensorInfo.m_AIcurrentEvent.nType != K_LVL_AI_EVENT_DEAD)
 		{
 			actor->m_AIsensorInfo.b_IsDead = true;
-			actor->m_AIsensorInfo.m_AIcurrentEvent.Set(K_LVL_AI_EVENT_DEAD, actor->GetUID(), actor->actTemplate.actorClass, actor->GetPosHeart(), -1.0f, 1.0f, actor->GetUID());
+			actor->m_AIsensorInfo.m_AIcurrentEvent.Set(K_LVL_AI_EVENT_DEAD, actor->GetUID(), actor->_template.actorClass, actor->GetPosHeart(), -1.0f, 1.0f, actor->GetUID());
 			//save in memory
 			actor->m_AIsensorInfo.m_AIlastEvent = actor->m_AIsensorInfo.m_AIcurrentEvent;
 			//reset targeted actor
 			actor->m_AIsensorInfo.pTargetedActor = null;
 			///THINK: force state decision
-			CAIState* newState = actor->actTemplate.AItemplate->GetHighestPriorityState(K_LVL_AI_EVENT_DEAD, &m_rand);
+			CAIState* newState = actor->_template.AItemplate->GetHighestPriorityState(K_LVL_AI_EVENT_DEAD, &m_rand);
 			Actor_SetAIState(actor, newState);
 		}
 	}
@@ -4019,10 +4019,10 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			if (targetActor != nullptr)
 			{
 				float enemyDst = MUVec2Len(&(targetActor->GetPosHeart() - actor->GetPosHeart()));
-				AddAIEvent(K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->GetPosHeart(), enemyDst, 1.0f, actor->GetUID());
+				AddAIEvent(K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), enemyDst, 1.0f, actor->GetUID());
 				//#HACK: alerts the other enemies only if enemy class
-				if(actor->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN)
-					AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->GetPosHeart(), 200.0f, 0.6f);
+				if(actor->_template.actorClass >= K_LVL_ACT_CLASS_HUMAN)
+					AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), 200.0f, 0.6f);
 				//set target pointer
 				actor->m_AIsensorInfo.pTargetedActor = targetActor;
 				//vede daca face overlap
@@ -4035,7 +4035,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				//daca se ating trimit si event de touch enemy, doar daca vede inamicul
 				if (actor->bbox.Intersects(targetActor->bbox))
 				{
-					AddAIEvent(K_LVL_AI_EVENT_TOUCH_ENEMY, targetActor->GetUID(), targetActor->actTemplate.actorClass, targetActor->GetPosHeart(), enemyDst, 1.0f, actor->GetUID());
+					AddAIEvent(K_LVL_AI_EVENT_TOUCH_ENEMY, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), enemyDst, 1.0f, actor->GetUID());
 				}
 				//scrie ultimul actor cu care a interactionat (nu este vital)
  				actor->m_AIsensorInfo.m_lastInteractingActorUID = targetActor->GetUID();
@@ -4080,7 +4080,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			//am comentat verificarea pe behaviorDurationFinished pentru ca mesajul de IDLE_TICK ma scotea dintre behaviors care nu pot fi intrerupte. Ca sa pot intrerupe cand vreau bag un behavior IDLE
 			if ((actor->m_nAIcurrentBehaviorIdx < 0) || (actor->m_pAIcurrentState->m_arrBehaviors[actor->m_nAIcurrentBehaviorIdx].bCanInterrupt) /*|| (bBehaviorDurationFinished)*/)
 			{
-				CAIState* newState = actor->actTemplate.AItemplate->GetHighestPriorityState(actor->m_AIsensorInfo.m_AIcurrentEvent.nType, &m_rand);
+				CAIState* newState = actor->_template.AItemplate->GetHighestPriorityState(actor->m_AIsensorInfo.m_AIcurrentEvent.nType, &m_rand);
 				
 				//daca vechea stare a fost setata de acelasi mesaj ca si acum si nu are prioritate mai mica nu ar mai trebui setata alta stare ci cel mult dat restart la starea curenta
 				if ((newState != null) && (actor->m_AIsensorInfo.m_AIlastEvent.nType == actor->m_AIsensorInfo.m_AIcurrentEvent.nType) && (newState->nPriority == actor->m_pAIcurrentState->nPriority))
@@ -4261,7 +4261,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				//when moving it attracts attention
 				if ((m_Timers.Tick(100.0f)) && (fabs(actor->speed.x + actor->vSpeedImpulse.x) > 10.0f))
 				{
-					AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, actor->GetUID(), actor->actTemplate.actorClass, actor->GetPosHeart(), 32.0f, 0.5f);
+					AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, actor->GetUID(), actor->_template.actorClass, actor->GetPosHeart(), 32.0f, 0.5f);
 				}
 
 				if (actor->AIvarBool1) //can it burn?
@@ -4272,7 +4272,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 						actor->cDamageOverTime.fDuration = actor->cDamageOverTime.fDuration_ini;
 					}
 					//daca are viata mai mica de 90% din viata initiala in mai putin de o secunda explodeaza
-					if ((actor->fLife <= actor->actTemplate.fLife * 0.9f) && (actor->AIsubState == 0))
+					if ((actor->fLife <= actor->_template.fLife * 0.9f) && (actor->AIsubState == 0))
 					{
 						//starts to shake
 						actor->AIsubState = 1; 
@@ -4283,7 +4283,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					if (actor->AIsubState == 1)
 					{
 						//when flaming it takes 10% of life
-						actor->fLife -= dTime * actor->actTemplate.fLife * 0.5f;
+						actor->fLife -= dTime * actor->_template.fLife * 0.5f;
 						if (actor->fLife > 0.0f) //pana sa moara genereaza particule de foc si vibreaza
 						{
 							//generate particles too
@@ -4305,7 +4305,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			case AI_BEHAVIOR_HOSTAGE:
 			{
 				//always set crouched command if actor can crouch
-				if (actor->actTemplate.eCaps & K_ACT_CAPS_CAN_CROUCH)
+				if (actor->_template.eCaps & K_ACT_CAPS_CAN_CROUCH)
 					actor->m_AIcommands.bCrouched = true;
 				//can he follow targets? does it only once
 				if (actor->AIvarBool1)
@@ -4368,7 +4368,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 			case AI_BEHAVIOR_PLAY_ANIM:
 			{
 				//playerii pot schimba directia si pe play anim
-				if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
+				if (actor->_template.actorClass == K_LVL_ACT_CLASS_PLAYER)
 				{
 					CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID(actor->nControllerInstanceID);
 					if (pController != null)
@@ -4471,7 +4471,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				if (cvc->m_type != CVariantComplex::K_ARGTYPE_NONE)
 				{
 					//comanda splat on explode daca e clasa care trebuie
-					if ((actor->actTemplate.actorClass == K_LVL_ACT_CLASS_HUMAN) || (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_HOSTAGE))
+					if ((actor->_template.actorClass == K_LVL_ACT_CLASS_HUMAN) || (actor->_template.actorClass == K_LVL_ACT_CLASS_HOSTAGE))
 						actor->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_SPLAT;
 					//get explo class
 					UINT32 unExploUID = actor->GetUID();
@@ -4485,7 +4485,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 
 				///- when the player dies -
-				if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
+				if (actor->_template.actorClass == K_LVL_ACT_CLASS_PLAYER)
 				{
 					//actor->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_RESET_TO_ZERO;
 					//actor->varAIparams.SetNamedVarINT32(L"nDeathCommand", K_LVL_ACT_DEATHCMD_RESET_TO_ZERO);
@@ -4516,7 +4516,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					if (m_arrStats[K_LVL_STATS_PL1_LIVES + actor->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT] > 0)
 						bContinue = true;
 					//setam clasa pasiva ca sa putem sa distrugem cadavrul
-					actor->actTemplate.actorClass = K_LVL_ACT_CLASS_HUMAN;
+					actor->_template.actorClass = K_LVL_ACT_CLASS_HUMAN;
 
 					//daca avem breaching charges aruncate in nivel le dezalocam
 					ReleaseBulletType(K_LVL_BULLET_BREACHING_CHARGE, actor->GetUID());
@@ -4553,7 +4553,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 				else //splat timer - splat corpse if timer is set
 				{
-					if ((actor->actTemplate.eMaterial == K_LVL_MATERIAL_FLESH) && (actor->AItimer1 > 0.0f))
+					if ((actor->_template.eMaterial == K_LVL_MATERIAL_FLESH) && (actor->AItimer1 > 0.0f))
 					{
 						actor->AItimer1 -= dTime;
 						if (actor->AItimer1 <= 0.0f)
@@ -4564,7 +4564,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					}
 				}
 				//only flesh can splat
-				if ((actor->m_AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_SPLAT) && (actor->actTemplate.eMaterial != K_LVL_MATERIAL_FLESH))
+				if ((actor->m_AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_SPLAT) && (actor->_template.eMaterial != K_LVL_MATERIAL_FLESH))
 				{
 					actor->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_DEALLOCATE;
 				}
@@ -5045,7 +5045,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	if (actor->m_AIcommands.bThrust)
 	{
 		//add speed
-		float fspeed = actor->actTemplate.fSpeedMove;
+		float fspeed = actor->_template.fSpeedMove;
 
 		// set final speed
 		actor->speed = actor->m_AIcommands.vMoveDir * fspeed;
@@ -5084,7 +5084,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				else
 				{
 					//blood splat (sortate crescator in animatie)
-					AddDecal_BloodSplat(actor->GetPosHeart(), true, actor->actTemplate.actorClass);
+					AddDecal_BloodSplat(actor->GetPosHeart(), true, actor->_template.actorClass);
 
 					//SND_PLAY_POSITIONAL_RAND2(SNDIDX_BULLET_BODY_GIBBED_01, SNDIDX_BULLET_BODY_GIBBED_02, actor->GetPosHeart());
 					//meat lumps
@@ -5093,11 +5093,11 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 
 					CAABB genbox = actor->bbox;
 					genbox.Inflate(-2.0f, -2.0f);
-					if (actor->actTemplate.fLife > 10.0f)
+					if (actor->_template.fLife > 10.0f)
 					{
 						DWORD dwCol = 0xff671010;
 						int nSubType = 0;
-						if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_ZOMBIE)
+						if (actor->_template.actorClass == K_LVL_ACT_CLASS_ZOMBIE)
 						{
 							dwCol = 0xff82b600;
 							nSubType = 1;
@@ -5123,7 +5123,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 				}
 
 				//players don't deallocate. They only become invisible.
-				if (actor->actTemplate.actorClass == K_LVL_ACT_CLASS_PLAYER)
+				if (actor->_template.actorClass == K_LVL_ACT_CLASS_PLAYER)
 				{
 					actor->fLife = 0.0f;
 					actor->bSkipRender = true;
@@ -5415,7 +5415,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 	}
 
 	///--- find closest interactible object in range, aka touchable
-	if (actor->actTemplate.eCaps & K_ACT_CAPS_CAN_INTERACT)
+	if (actor->_template.eCaps & K_ACT_CAPS_CAN_INTERACT)
 	{
 		//#TODO: put interact area in special constant
 		CAABB aabbInteract(-K_TILE_SIZE_F, -K_TILE_SIZE_F, K_TILE_SIZE_F, K_TILE_SIZE_F);
@@ -5513,19 +5513,19 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 		if (enemy == sourceActor)
 			continue;
 		//never attack same class
-		if (enemy->actTemplate.actorClass == sourceActor->actTemplate.actorClass)
+		if (enemy->_template.actorClass == sourceActor->_template.actorClass)
 			continue;
 
-		if (sourceActor->actTemplate.actorClass == K_LVL_ACT_CLASS_ZOMBIE)
+		if (sourceActor->_template.actorClass == K_LVL_ACT_CLASS_ZOMBIE)
 		{
 			//zombie classes attack everything that's made from meat
-			if (enemy->actTemplate.eMaterial != K_LVL_MATERIAL_FLESH)
+			if (enemy->_template.eMaterial != K_LVL_MATERIAL_FLESH)
 				continue;
 		}
 		else
 		{
 			//don't attack same class enemies or traps and passive classes
-			if (enemy->actTemplate.actorClass < K_LVL_ACT_CLASS_PLAYER)
+			if (enemy->_template.actorClass < K_LVL_ACT_CLASS_PLAYER)
 				continue;
 		}
 
@@ -5534,19 +5534,19 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 		if (eTargetClassFilter1 != K_LVL_ACT_CLASS_ANY)
 		{
 			nIgnoreConditions++;
-			if (enemy->actTemplate.actorClass != eTargetClassFilter1)
+			if (enemy->_template.actorClass != eTargetClassFilter1)
 				nIgnore++;
 		}
 		if (eTargetClassFilter2 != K_LVL_ACT_CLASS_ANY)
 		{
 			nIgnoreConditions++;
-			if (enemy->actTemplate.actorClass != eTargetClassFilter2)
+			if (enemy->_template.actorClass != eTargetClassFilter2)
 				nIgnore++;
 		}
 		if ((nIgnoreConditions > 0) && (nIgnore == nIgnoreConditions))
 			continue;
 		//nu ia in seama inamic cu energie sub 0 sau flag de not a target (setat de limbo)
-		if ((enemy->fLife <= 0.0f) || ((enemy->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
+		if ((enemy->fLife <= 0.0f) || ((enemy->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
 			continue;
 
 		Vec2 enemyDistV = enemy->GetPosHeart() - sourceActor->GetPosHeart();
@@ -5614,10 +5614,10 @@ CActor * CLevel::GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTa
 	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 	{
 		CActor* enemy = m_arrActors[kk];
-		if ((enemy == null) || (enemy == sourceActor) || (enemy->actTemplate.shID.textHash != nTargetNameHash) || (enemy->bHidden))
+		if ((enemy == null) || (enemy == sourceActor) || (enemy->_template.shID.textHash != nTargetNameHash) || (enemy->bHidden))
 			continue;
 		//nu ia in seama inamic cu energie sub 0 sau flag de not a target
-		if ((enemy->fLife <= 0.0f) || ((enemy->actTemplate.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
+		if ((enemy->fLife <= 0.0f) || ((enemy->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
 			continue;
 
 		Vec2 enemyDistV = enemy->GetPosHeart() - sourceActor->GetPosHeart();
@@ -5756,9 +5756,9 @@ CAIEvent * CLevel::GetMostImportantAIEvent(CActor * callerActor, EAIEventType eT
 			}
 		}
 		//see if we have ignored events
-		if (callerActor->actTemplate.AItemplate->m_arrIgnoredEvents.Count() > 0)
+		if (callerActor->_template.AItemplate->m_arrIgnoredEvents.Count() > 0)
 		{
-			if (callerActor->actTemplate.AItemplate->m_arrIgnoredEvents.IndexOf(evt->nType) >= 0)
+			if (callerActor->_template.AItemplate->m_arrIgnoredEvents.IndexOf(evt->nType) >= 0)
 				continue;
 		}
 		//dupa ce am exclus eventurile ce se puteau exclude:
@@ -6140,7 +6140,7 @@ void CLevel::UpdateAI(float dTime, bool bInEditor)
 		//count targets left
 		if (act->GetCurrentBehavior() != EAIBehaviorType::AI_BEHAVIOR_DEAD)
 		{
-			if ((act->actTemplate.actorClass >= K_LVL_ACT_CLASS_HUMAN) || (act->actTemplate.actorClass == K_LVL_ACT_CLASS_HOSTAGE))
+			if ((act->_template.actorClass >= K_LVL_ACT_CLASS_HUMAN) || (act->_template.actorClass == K_LVL_ACT_CLASS_HOSTAGE))
 			{
 				m_arrStats[K_LVL_STATS_TARGETS_LEFT]++;
 			}
@@ -8437,6 +8437,11 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		// vAimVec was normalized using last frame data so paint it at last frame actor position
 		Vec2 vto = Vec3XY(pPlayerActor[kk]->pos_last) - Vec2(0.0f, pPlayerActor[ kk ]->vHeart.proj_h) + pPlayerActor[kk]->m_AIcommands.vAimVec;
 		CSprite::paintFrame(&m_sprInterface, vto.x, vto.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffffffff);
+
+		// paint muzzle pos and shadow
+		VecProj vpMuzz = pPlayerActor[ kk ]->GetWeaponMuzzleWorld( false, 0 );
+		CSprite::paintFrame( &m_sprInterface, vpMuzz.xy.x, vpMuzz.xy.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffff0000 );
+		CSprite::paintFrame( &m_sprInterface, vpMuzz.xy_proj.x, vpMuzz.xy_proj.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xff00ff00 );
 	}
 								  
 	///--- actors icons and stun stars ---

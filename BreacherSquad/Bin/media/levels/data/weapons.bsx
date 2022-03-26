@@ -16,19 +16,25 @@
       <FModules>
         <FModule Idx="0" />
       </FModules>
-      <Points />
+      <Points>
+        <Point X="16" Y="-1" Flags="1" />
+      </Points>
     </Frame>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
       <FModules>
         <FModule Idx="1" />
       </FModules>
-      <Points />
+      <Points>
+        <Point X="17" Y="-2" Flags="1" />
+      </Points>
     </Frame>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
       <FModules>
         <FModule Idx="2" />
       </FModules>
-      <Points />
+      <Points>
+        <Point X="25" Y="-8" Flags="1" />
+      </Points>
     </Frame>
   </Frames>
   <AnimationFrames>
