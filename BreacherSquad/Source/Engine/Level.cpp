@@ -548,7 +548,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	);
 	// create a weapon and add it to the player's arsenal
 	//#TODO: create actor::AddWeapon that handles this:
-	CWeaponTemplate* wpntMain = GetTemplateWeapon( L"WPN_SMG_MP5A3" );
+	CWeaponTemplate* wpntMain = GetTemplateWeapon( L"PISTOLET" );
 	nact->Weapons()->AddWeapon( *nact, wpntMain, nullptr );
 	nact->Weapons()->Equip( 0 );
 	// initialize AI

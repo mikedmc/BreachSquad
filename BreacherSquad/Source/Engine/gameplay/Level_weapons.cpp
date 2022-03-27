@@ -447,7 +447,7 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		const WCHAR* bType = bnode.name();
 		templ->name.Init(bType);
 
-		//load generic weapon data
+		//#TODO: type of weapon should be string
 		//if (!bnode.attribute(L"nType").empty())
 //			templ->eType = (EWeaponType)bnode.attribute(L"nType").as_int();
 		templ->bSingleHanded = bnode.attribute( L"singleHanded" ).as_bool();
@@ -461,6 +461,25 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		templ->nHUD_AnimIdxALT = -1;
 		if (!bnode.attribute(L"sHUDanimNameIcon").empty())
 			templ->nHUD_AnimIdxALT = m_sprInterface.GetAnimationIdxByName(bnode.attribute(L"sHUDanimNameIcon").value());
+		// get weapons animation idices
+		templ->animIdx_reload = -1;
+		templ->animIdx_shoot = -1;
+		CSpriteLib* pSprWpn = m_sprActors.GetLibByNick( K_LIBNICK_WEAPONS );
+		if ( pSprWpn )
+		{
+			if ( !bnode.attribute( L"animShoot" ).empty() ) {
+				templ->animIdx_shoot = pSprWpn->GetAnimationIdxByName( bnode.attribute( L"animShoot" ).value() );
+				if ( templ->animIdx_shoot == -1 )
+					ErrorBox( K_ERR_WARNING, L"Could not find weapon shoot anim:%s", bnode.attribute( L"animShoot" ).value() );
+			}
+			if ( !bnode.attribute( L"animReload" ).empty() )
+			{
+				templ->animIdx_reload = pSprWpn->GetAnimationIdxByName( bnode.attribute( L"animReload" ).value() );
+				if ( templ->animIdx_reload == -1 )
+					ErrorBox( K_ERR_WARNING, L"Could not find weapon reload anim:%s", bnode.attribute( L"animReload" ).value() );
+			}
+		}
+
 		if (!bnode.attribute(L"fSpeedPenaltyPercent").empty())
 			templ->fSpeedPenaltyPercent = bnode.attribute(L"fSpeedPenaltyPercent").as_float();
 		if (!bnode.attribute(L"bPassive").empty())
@@ -473,23 +492,11 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 			templ->nMuzzleFlashAnim = m_sprActors.GetAnimationIdxByName(bnode.attribute(L"sMuzzleFlashAnim").value());
 			*/
 		//template overwrite sTemplateOverwrite - overwrites the actor default template (Adds to it)
-		if (!bnode.attribute(L"sTemplateOverwrite").empty())
-		{
-			templ->shTemplateOverwrite.Init(bnode.attribute(L"sTemplateOverwrite").value());
-		}
+		templ->shTemplateOverwrite.Init(bnode.attribute(L"sTemplateOverwrite").value());
 		//weapon scripts
-		if (!bnode.attribute(L"sScript_OnFire").empty())
-		{
-			templ->shScript_OnFire.Init(bnode.attribute(L"sScript_OnFire").value());
-		}
-		if (!bnode.attribute(L"sScript_OnFireALT").empty())
-		{
-			templ->shScript_OnFireALT.Init(bnode.attribute(L"sScript_OnFireALT").value());
-		}
-		if (!bnode.attribute(L"sScript_OnEmpty").empty())
-		{
-			templ->shScript_OnEmpty.Init(bnode.attribute(L"sScript_OnEmpty").value());
-		}
+		templ->shScript_OnFire.Init(bnode.attribute(L"sScript_OnFire").value());
+		templ->shScript_OnFireALT.Init(bnode.attribute(L"sScript_OnFireALT").value());
+		templ->shScript_OnEmpty.Init(bnode.attribute(L"sScript_OnEmpty").value());
 
 		{
 			///--- bullet data ---

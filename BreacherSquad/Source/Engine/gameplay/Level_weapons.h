@@ -12,18 +12,20 @@ class CWeaponTemplate
 public:
 	CStringHash		name;
 	//generic data:
-	int				nHUD_AnimIdx;		//animatie INGAME HUD pentru grafica armei (vezi detalii frames in CCustomInterfaceIGM) sau -1 pt empty
-	int				nHUD_AnimIdxALT;	//animatie INGAME HUD when shown as ALT weapon (painted just as small icon)
-	int				nMuzzleFlashAnim;	//animatie muzzle flash sau -1 pt empty
-	CStringHash		shTemplateOverwrite; //name of themplate that the weapon overwrites over the character template
+	CStringHash		shTemplateOverwrite;	//name of themplate that the weapon overwrites over the character template
 	float			fSpeedPenaltyPercent;	//what percent of total movement speed is taken by this weapon
 	CStringHash		shScript_OnFire;		//called when shooting a weapon. If not set it just shoots the weapon.
 	CStringHash		shScript_OnFireALT;		//called when shooting ALT mode for weapon. If not set it just shoots the ALT weapon.
 	CStringHash		shScript_OnEmpty;		//called when weapon is empty
+	int				animIdx_shoot;
+	int				animIdx_reload;
+	int				nHUD_AnimIdx;			//animatie INGAME HUD pentru grafica armei (vezi detalii frames in CCustomInterfaceIGM) sau -1 pt empty
+	int				nHUD_AnimIdxALT;		//animatie INGAME HUD when shown as ALT weapon (painted just as small icon)
+	int				nMuzzleFlashAnim;		//animatie muzzle flash sau -1 pt empty
 
 	//fire modes data:
-	CBulletTemplate	bulletTemplate;		//datele glontului tras de arma curenta
-	int				nBulletsPerShot;	//nr de gloante trase pt un ammo
+	CBulletTemplate	bulletTemplate;			//datele glontului tras de arma curenta
+	int				nBulletsPerShot;		//nr de gloante trase pt un ammo
 
 	//aiming data - toate FOV-urile de mai jos sunt half FOV de fapt
 	float			fSpreadFOV;							//spread default arma
@@ -51,9 +53,9 @@ public:
 
 	float			fJammedDuration;		//durata de blocare a armei cand ia damage
 	float			fMuzzleLightSize;		//size of lighting effect when shooting
-	bool			bHasLaserSight;			//daca are laser sight
+	bool			bHasLaserSight;			
 	float			fShooterSpeedSlowingPercent; //procentul cu care scade viteza tragatorului daca se misca in timp ce trage
-	float			fSoundRadius;			//cat de departe se aude?
+	float			fSoundRadius;			// how far can the weapon be heared (in pixels)
 	bool			bPassive;				//arma pasiva, nu se foloseste ca si arma normala, se citesc doar proprietatile
 
 	Vec2			vMountOffset;			// vector showing the offset from the mount to the gun rotating position
@@ -77,8 +79,8 @@ public:
 		bCanShootFromCrouch(true), bCanShootFromCover(false), nDropShellFrame(-1),
 		nBurstSize(0), bResetFireRateOnTriggerUp(false), bUsesMainWeaponAmmo(false), fShooterSpeedSlowingPercent(0.0f), nBulletChamberSize(0),
 		sndidxShoot(-1), sndidxReload(-1), sndidxEmpty(-1), sndidxShoot2(-1), sndidxReload2(-1), sndidxEmpty2(-1),
-		fJammedDuration(0.0f), fSoundRadius(128.0f), fBurstCooldown(0.0f), bHasLaserSight(false), bPassive(false),
-		nHUD_AnimIdx(-1), nHUD_AnimIdxALT(-1), nMuzzleFlashAnim(-1), fAimFOV(0.0f),
+		fJammedDuration(0.0f), fSoundRadius(128.0f), fBurstCooldown(0.0f), bHasLaserSight(false), bPassive(false), fAimFOV( 0.0f ),
+		nHUD_AnimIdx(-1), nHUD_AnimIdxALT(-1), nMuzzleFlashAnim(-1), animIdx_shoot(-1), animIdx_reload(-1),
 		sndActorVerse(K_LVL_ACT_VERSE_EMPTY)
 	{
 		bSingleHanded = true;

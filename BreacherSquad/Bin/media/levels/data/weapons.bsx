@@ -7,7 +7,7 @@
     <Module ImageIdx="0" X="200" Y="78" W="33" H="10" strName="" />
   </Modules>
   <FrameModules>
-    <FrameModule ModuleIdx="0" OX="5" OY="-6" Flags="0" />
+    <FrameModule ModuleIdx="0" OX="3" OY="-4" Flags="0" />
     <FrameModule ModuleIdx="1" OX="-10" OY="-5" Flags="0" />
     <FrameModule ModuleIdx="2" OX="-8" OY="-12" Flags="0" />
   </FrameModules>
@@ -17,7 +17,7 @@
         <FModule Idx="0" />
       </FModules>
       <Points>
-        <Point X="16" Y="-4" Flags="1" />
+        <Point X="14" Y="-2" Flags="1" />
       </Points>
     </Frame>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
@@ -38,19 +38,49 @@
     </Frame>
   </Frames>
   <AnimationFrames>
-    <AnimationFrame FrameIdx="0" Duration="1" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="1" Duration="1" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="2" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="0" Duration="100" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="0" Duration="100" DX="0" DY="0" Flags="1" />
+    <AnimationFrame FrameIdx="0" Duration="100" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="0" Duration="100" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="0" Duration="100" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="0" Duration="200" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="0" Duration="200" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="0" Duration="300" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="0" Duration="200" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="1" Duration="100" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="1" Duration="100" DX="0" DY="0" Flags="1" />
+    <AnimationFrame FrameIdx="1" Duration="100" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="1" Duration="100" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="1" Duration="200" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="1" Duration="200" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="1" Duration="300" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="1" Duration="200" DX="0" DY="0" Flags="" />
   </AnimationFrames>
   <Animations>
     <Animation ID="PISTOL" Flags="0">
       <AFrame Idx="0" />
+      <AFrame Idx="1" />
+      <AFrame Idx="2" />
+      <AFrame Idx="3" />
+      <AFrame Idx="4" />
+    </Animation>
+    <Animation ID="PISTOL_R" Flags="0">
+      <AFrame Idx="5" />
+      <AFrame Idx="6" />
+      <AFrame Idx="7" />
+      <AFrame Idx="8" />
     </Animation>
     <Animation ID="SHOTGUN" Flags="0">
-      <AFrame Idx="1" />
+      <AFrame Idx="9" />
+      <AFrame Idx="10" />
+      <AFrame Idx="11" />
+      <AFrame Idx="12" />
     </Animation>
-    <Animation ID="SNIPER" Flags="0">
-      <AFrame Idx="2" />
+    <Animation ID="SHOTGUN_R" Flags="0">
+      <AFrame Idx="13" />
+      <AFrame Idx="14" />
+      <AFrame Idx="15" />
+      <AFrame Idx="16" />
     </Animation>
   </Animations>
 </SpriteCollection>

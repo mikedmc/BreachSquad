@@ -73,5 +73,5 @@ public:
 	// sets animation once, skips if same animation already set
 	void						SetAnimOnce( EActorAnim eAnim );
 	// Returns mount position for weapons in local projected space for current EAngle
-	Vec2						GetMountPoint( EHitPtFlag pointflag );
+	Vec2						GetMountPoint( bool bTwoHanded, int mountIndex );
 };

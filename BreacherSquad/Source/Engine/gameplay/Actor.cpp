@@ -260,14 +260,8 @@ void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 
 VecProj CActor::GetWeaponMountWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 {
-	CSpriteActorComponent::EHitPtFlag flag = CSpriteActorComponent::K_HITPTFLAG_MOUNT_TWOHANDED;
-	if ( !bTwoHanded )
-	{
-		flag = (mountIndex == 0) ? CSpriteActorComponent::K_HITPTFLAG_MOUNT_PRIMARY : CSpriteActorComponent::K_HITPTFLAG_MOUNT_SECONDARY;
-	}
-
 	// get mount position in screen space (from editor)
-	Vec2 vMount = c_graphics->GetMountPoint( flag );
+	Vec2 vMount = c_graphics->GetMountPoint( bTwoHanded, mountIndex );
 	// add weapon mount offset
 	Vec2 vWpnOff = c_weapons->GetCurrentWeapon()->_template.vMountOffset;
 	vWpnOff.x *= (float)c_graphics->GetFlipDirX();

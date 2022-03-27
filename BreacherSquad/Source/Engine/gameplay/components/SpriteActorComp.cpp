@@ -187,8 +187,16 @@ void CSpriteActorComponent::SetAnimOnce( EActorAnim eAnim )
 }
 
 
-Vec2 CSpriteActorComponent::GetMountPoint( EHitPtFlag pointflag )
+Vec2 CSpriteActorComponent::GetMountPoint( bool bTwoHanded, int mountIndex /*= 0 */ )
 {
+	// decide flag for received settings
+	EHitPtFlag pointflag = K_HITPTFLAG_MOUNT_TWOHANDED;
+	if ( !bTwoHanded )
+	{
+		pointflag = (mountIndex == 0) ? K_HITPTFLAG_MOUNT_PRIMARY : K_HITPTFLAG_MOUNT_SECONDARY;
+	}
+
+
 	int anmidx = arrAnims[ K_ACT_ANIM_REFPOSE ].animIdx[ nAnimSet ][ (int)eAngle ];
 	_ASSERT( anmidx >= 0 );
 
