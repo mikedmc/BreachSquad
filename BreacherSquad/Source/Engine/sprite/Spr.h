@@ -40,12 +40,11 @@ struct SprFrameIdEx
 };
 
 
-enum eSpriteAnimState {
-	ANIM_STOPPED = 0,
+enum ESpriteAnimState {
 	ANIM_JUST_STARTED = 1,
 	ANIM_PLAYING,
 	ANIM_PLAYING_FRAME_ADVANCED,
-	ANIM_FRAMELOCK,
+	ANIM_FRAMELOCK,		// animation reached end
 	ANIM_LOOPRESET,
 };
 
@@ -63,9 +62,8 @@ public:
 	float					rotation;
 	Vec2					scale;
 	DWORD					color;
-
 	float					fTime;						// Animation time
-	eSpriteAnimState		animStatus;
+	ESpriteAnimState		animStatus;					// animation status
 
 	CSpr();
 	CSpr(const CSpr& sprite);
@@ -95,6 +93,10 @@ public:
 	// Optimized paint for a single module when we don't have more modules per frame (skips a for)
 	// Adds texIdxOffset to the texture index (used when loading normals and other textures in the same sprite collection)
 	void					PaintModule_texOverride(int moduleIdx, int texIdxOffset);
+	// Stops the playing animation
+	void					StopAnimation();
+	// resumes/restarts playing of animation
+	void					Play( bool bReset = false );
 };
 
 // generic data

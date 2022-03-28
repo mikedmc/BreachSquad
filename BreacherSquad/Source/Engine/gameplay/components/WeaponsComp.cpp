@@ -9,8 +9,7 @@ CWeaponsComponent::CWeaponsComponent( CSpriteLib* pSpriteLib )
 	weaponIdx = -1;
 
 	vAim = Vec2( 0.0f, 1.0f );
-	vMount1 = g_Vec2Zero;
-	vMount2 = g_Vec2Zero;
+	vMuzzleVec = Vec2(1.0f, 0.0f);
 
 	sprite.Init( pSprLib, 0 );
 }
@@ -24,11 +23,16 @@ CWeaponsComponent::~CWeaponsComponent()
 
 void CWeaponsComponent::Update( CActor& act, float dTime )
 {
+	MUVec2Norm(&vAim, &act.GetAimVec());
+	for ( int kk = 0; kk < arrWeapons.Count(); kk++ )
+	{
+		arrWeapons[ kk ]->modes[ K_WPNGRP_IDX_PRIMARY ].Update( dTime );
+		arrWeapons[ kk ]->modes[ K_WPNGRP_IDX_ALTFIRE ].Update( dTime );
+	}
 }
 
 void CWeaponsComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 {
-	Vec2 vAim = act.GetAimVec();
 	float fang = UTMath::GetVectorAngle( vAim );
 	VecProj vpMount = act.GetWeaponMountWorld( false );
 	// weapons need flipping when animation gets flipped to the left if we want to keep the unified angle of rotation
@@ -65,6 +69,14 @@ const CWeapon* CWeaponsComponent::Equip( int wpnIdx )
 	// equip primary mode
 	weaponIdx = wpnIdx;
 	weapon = &arrWeapons[ wpnIdx ]->modes[ K_WPNGRP_IDX_PRIMARY ];
+	// initialize sprite
+	sprite.SetAnim( weapon->_template.animIdx_shoot );
+	sprite.StopAnimation();
+	// save/init muzzle point (frame 0 from shooting animation)
+	Vec3i ptval;
+	pSprLib->GetAFrameHitPointFlag( weapon->_template.animIdx_shoot, 0, 0, K_HITPTFLAG_MUZZLE, &ptval );
+	vMuzzleVec.x = (float)ptval.x; vMuzzleVec.y = (float)ptval.y;
+
 	return weapon;
 }
 
@@ -89,15 +101,3 @@ void CWeaponsComponent::JamWeapon()
 	weapon->Jam();
 }
 
-Vec2 CWeaponsComponent::GetWeaponMuzzlePoint()
-{
-	int anmidx = 0; //#TODO: shoot animation, frame 0
-	_ASSERT( anmidx >= 0 );
-	Vec3i ptval( 0, 0, 0 );
-	if ( pSprLib->GetAFrameHitPointFlag( anmidx, 0, 0, K_HITPTFLAG_MUZZLE, &ptval ) )
-	{
-		// when graphics flip then we flip the mount points too
-		return Vec2( (float)ptval.x, (float)ptval.y );
-	}
-	return Vec2( 0.0f, 0.0f );
-}

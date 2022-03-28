@@ -19,7 +19,7 @@ CSpriteActorComponent::~CSpriteActorComponent()
 void CSpriteActorComponent::Update(CActor& act, float dTime)
 {
 	// get necessary data from the actor
-	vAim = act.GetAimVec();
+	MUVec2Norm(&vAim, &act.GetAimVec());
 	eAngle = GetDir6FromVec( vAim );
 	Vec2 vAimN( 0.0f, 0.0f );
 	MUVec2Norm( &vAimN, &vAim );

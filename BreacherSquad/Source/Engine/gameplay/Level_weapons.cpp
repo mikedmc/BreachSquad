@@ -39,12 +39,12 @@ EWeaponStatus CWeapon::Update( float dTime )
 
 	//update aiming errors
 	fTimeSinceShot += dTime;
-	//face cooldown doar dupa ce a incetat sa traga de ceva timp:
+	// cooldown starts after a while if you stop shooting
 	if ( fTimeSinceShot > 0.1f ) //approx 2 frames la 24 fps
 	{
 		dec_limit( fAimErrorFOV, _template.fAimErrorCooldownPerSecond * dTime, 0.0f );
 	}
-	//scade fire rate timer
+	
 	dec_limit( fireRateTimer, dTime, 0.0f );
 	//reset burst and other data on trigger up
 	if ( (bTriggerDown == false) && (status == K_LVL_WPN_STATUS_BURST_END) )
@@ -117,7 +117,7 @@ EWeaponStatus CWeapon::Update( float dTime )
 			reloadTimer = 0.0f;
 		}
 	}
-	//suntem inca pe reloading, facem reload
+	// we're still reloading
 	if ( status == K_LVL_WPN_STATUS_RELOADING )
 	{
 		reloadTimer += dTime;
@@ -232,10 +232,14 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 	if (weapon->status == K_LVL_WPN_STATUS_JAMMED)
 		return false;
 
+	bool bTwoHanded = !weapon->_template.bSingleHanded;
+	bool bDualWielding = weapon->_template.bDualWielding;
+
 	CActor* shooter = weapon->pOwner;
 	Vec3 vFinalDir;
 	MUVec3Norm(&vFinalDir, &vDir);
-	Vec3 vShootPos = shooter->GetPosWeapon();
+	//#TODO: add support for dual wielding
+	VecProj vShootPos = shooter->GetWeaponMuzzleWorld(bTwoHanded, 0);
 
 	int nFinalClass = shooter->_template.actorClass;
 	//bullet has template class, set it to final class
@@ -318,7 +322,7 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 			//vFinalDir.y = sin(fAimAng + fSpreadAng);
 			//D3DXVec2Normalize(&vFinalDir, &vFinalDir);
 
-			CBullet* bullet = ShootBullet(&tmplBullet, nFinalClass, shooter->GetUID(), vShootPos, vFinalDir);
+			CBullet* bullet = ShootBullet(&tmplBullet, nFinalClass, shooter->GetUID(), vShootPos.xyz, vFinalDir);
 		}
 
 		//adaug shell

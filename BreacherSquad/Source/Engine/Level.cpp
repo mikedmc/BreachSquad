@@ -547,7 +547,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 		new CWeaponsComponent(pSprWpn)
 	);
 	// create a weapon and add it to the player's arsenal
-	//#TODO: create actor::AddWeapon that handles this:
+	//#TODO: create actor::AddWeapon and EquipWeapon that handles this plua AddWeaponTemplate
 	CWeaponTemplate* wpntMain = GetTemplateWeapon( L"PISTOLET" );
 	nact->Weapons()->AddWeapon( *nact, wpntMain, nullptr );
 	nact->Weapons()->Equip( 0 );
@@ -7891,6 +7891,11 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 			
 				CActor* act = static_cast<CActor*>(vis->pPtr);
 				act->Paint(eTexChannel);
+
+				//#TEMP: paint muzzle pos and shadow
+				VecProj vpMuzz = act->GetWeaponMuzzleWorld( false, 0 );
+				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy.x, vpMuzz.xy.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x88ff0000 );
+				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy_proj.x, vpMuzz.xy_proj.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x8800ff00 );
 			}
 			break;
 			case K_VST_PROP:
@@ -8439,9 +8444,11 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		CSprite::paintFrame(&m_sprInterface, vto.x, vto.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffffffff);
 
 		// paint muzzle pos and shadow
+		/*
 		VecProj vpMuzz = pPlayerActor[ kk ]->GetWeaponMuzzleWorld( false, 0 );
-		CSprite::paintFrame( &m_sprInterface, vpMuzz.xy.x, vpMuzz.xy.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffff0000 );
-		CSprite::paintFrame( &m_sprInterface, vpMuzz.xy_proj.x, vpMuzz.xy_proj.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xff00ff00 );
+		CSprite::paintFrame( &m_sprInterface, vpMuzz.xy.x, vpMuzz.xy.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x88ff0000 );
+		CSprite::paintFrame( &m_sprInterface, vpMuzz.xy_proj.x, vpMuzz.xy_proj.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x8800ff00 );
+		*/
 	}
 								  
 	///--- actors icons and stun stars ---

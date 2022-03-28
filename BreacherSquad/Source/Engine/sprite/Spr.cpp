@@ -103,7 +103,6 @@ void CSpr::SetFrame(int nFrameIdx)
 {
 	frameIdx = nFrameIdx;
 	fTime = 0.0f;
-	animStatus = ANIM_PLAYING;
 }
 
 void CSpr::SetAnimOnce(int nAnimIdx, int nFrameIdx) 
@@ -295,6 +294,18 @@ void CSpr::PaintModule_texOverride(int moduleIdx, int texIdxOffset)
 	scFModule* mod = pSprCol->FModules[pSprCol->AFrames[aframeIdx]->fmodulesIdx[moduleIdx]];
 
 	s_pSP->Draw(pSprCol->Textures[mod->imgIdx + texIdxOffset]->pTex, mod->texRect, mod->moduleRectOff, pos, color, rotation, scale);
+}
+
+void CSpr::StopAnimation()
+{
+	animStatus = ANIM_FRAMELOCK;
+}
+
+void CSpr::Play( bool bReset /*= false */ )
+{
+	animStatus = ANIM_JUST_STARTED;
+	if ( bReset )
+		frameIdx = 0;
 }
 
 ///----------------------------------------------------------------------------------

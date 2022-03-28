@@ -130,16 +130,18 @@ public:
 	CWeapon();
 
 	// Initializez weapon from a weapon template
-	void				Init( CActor* pOwnerActor, CWeaponTemplate * templ );
+	void					Init( CActor* pOwnerActor, CWeaponTemplate * templ );
+	// returns weapon state
+	inline EWeaponStatus	GetState() { return status; }
 	// Updates weapon internal data
-	EWeaponStatus		Update( float dTime );
+	EWeaponStatus			Update( float dTime );
 	// Communicates the states of the trigger and reload trigger to the weapon
-	void				SetTriggerStates(bool bTriggerPushed, bool bReloadPushed);
+	void					SetTriggerStates(bool bTriggerPushed, bool bReloadPushed);
 	// Resets the burst counter for weapons that shoot in bursts
-	void				ResetBurst();
+	void					ResetBurst();
 	// Jams the weapon (when receiving damage for example)
-	bool				Jam();
+	bool					Jam();
 	// Stops reloading current weapon
-	void				StopReloading();
+	void					StopReloading();
 };
 

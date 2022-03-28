@@ -30,8 +30,7 @@ private:
 
 	CSpr						sprite;						// Weapon sprite
 	Vec2						vAim;						// aiming direction
-	Vec2						vMount1;					// weapon mounting origin
-	Vec2						vMount2;					// weapon mounting origin secondary weapon
+	Vec2						vMuzzleVec;					// weapon muzzle vector (from weapon origin, local space)
 
 	CArray<CWeaponGroup*>		arrWeapons;					// array of weapon instances in current loadout
 	CWeapon*					weapon;						// currently equipped weapon mode
@@ -57,14 +56,9 @@ public:
 	void						StopReloading();
 	// Jams current weapon
 	void						JamWeapon();
-
-	//#TODO:
 	// Returns the local offset of the gun muzzle from the gun origin
-	Vec2						GetWeaponMuzzlePoint();
-	// saves pointers to animations from actor template and muzzle positions 
-	void						CacheAnimations( CActor& act );
-
-	// Loads all necessary data for specified actor
-	//OPRESULT					InitFromFile( CActor& act, WCHAR * Path );
+	inline Vec2					GetWeaponMuzzlePoint() const { return vMuzzleVec; }
+	// returns weapons aim vector
+	inline Vec2					GetWeaponAimVec() const { return vAim; }
 	//void						SetAnimOnce( EActorAnim eAnim );
 };

@@ -2748,12 +2748,12 @@ HRESULT DXUTFindValidResolution(CD3DEnumDeviceSettingsCombo* pBestDeviceSettings
 		MultiByteToWideChar(CP_ACP, 0, pAdapterInfo->AdapterIdentifier.DeviceName, -1, strDeviceName, 256);
 		strDeviceName[255] = 0;
 		EnumDisplaySettings(strDeviceName, ENUM_REGISTRY_SETTINGS, &devMode);
-		UINT nMonitorWidth = devMode.dmPelsWidth;
-		UINT nMonitorHeight = devMode.dmPelsHeight;
 
 		// For windowed mode, just keep it something reasonable within the size 
 		// of the working area of the desktop
 		/*
+		UINT nMonitorWidth = devMode.dmPelsWidth;
+		UINT nMonitorHeight = devMode.dmPelsHeight;
 		if (displayModeIn.Width > nMonitorWidth - 20)
 			displayModeIn.Width = nMonitorWidth - 20;
 		if (displayModeIn.Height > nMonitorHeight - 100)

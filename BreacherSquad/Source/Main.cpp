@@ -1915,6 +1915,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 					RectXYWH		camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
 					ImGui::Text("Cam: X%.4f Y%.4f", FLOAT_FRAC(camrect.x), FLOAT_FRAC(camrect.y));
 				}
+
 				//ImGui::Text("Sprites: %d", UTPainter().stats_sprites);
 				//ImGui::Text("Calls: %d", UTPainter().stats_calls);
 				//ImGui::Text("Begin/End: %d", UTPainter().stats_sequences);
