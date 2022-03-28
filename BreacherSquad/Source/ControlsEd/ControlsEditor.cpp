@@ -692,7 +692,7 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 							}
 							else if ((wcscmp(propertyName, L"color") == 0) || (wcscmp(propertyName, L"fontColor") == 0))
 							{
-								// too short? save solid white. Otherwise the color has been converted to #xxxxxxxx already
+								// too short? save solid white. Otherwise the color has been converted to hexa already
 								if ((wcscmp(propertyValue, L"0") == 0) || (wcslen(propertyValue) < 2))
 								{
 									swprintf_s(propertyValue, MAX_PATH, L"#ffffffff");

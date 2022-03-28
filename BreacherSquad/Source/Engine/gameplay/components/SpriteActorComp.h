@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ComponentInterfaces.h"
+#include "ActorCompCommon.h"
 
 // number of maximum animations for one action (multiple idle animations or multiple death animations etc)
 // must be the same as K_ACT_ANIM_MAX_SETS
@@ -74,4 +75,6 @@ public:
 	void						SetAnimOnce( EActorAnim eAnim );
 	// Returns mount position for weapons in local projected space for current EAngle
 	Vec2						GetMountPoint( bool bTwoHanded, int mountIndex );
+	// Returns current frame event from sprite. Only supports one event per frame atm, update if needed.
+	EAnimEvent					GetAnimFrameEvent();
 };

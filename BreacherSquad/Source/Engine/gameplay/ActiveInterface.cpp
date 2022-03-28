@@ -31,7 +31,7 @@ void IActiveInterface::LoadLogic(FILE* fl)
 {
 	byte n1b = OS_freadByte(fl);
 	bCanInteract = (n1b & 0x1);
-	bHideInteractIcon = (n1b & 0x2);
+	bHideInteractIcon = (n1b & 0x2) ? true : false;
 	//interact timer
 	INT32 nTouchDuration = (float)OS_freadInt32(fl);
 

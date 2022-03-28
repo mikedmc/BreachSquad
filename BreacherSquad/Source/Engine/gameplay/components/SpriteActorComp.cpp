@@ -30,13 +30,10 @@ void CSpriteActorComponent::Update(CActor& act, float dTime)
 	else {
 		if ( vAimN.x > 0.2f ) nFlipDirX = 1;
 	}
- 	
 	sprite.pos = act.pos.xy_proj;
 	// round up to eliminate visual artefacts
 	UTMath::RoundVec2( sprite.pos );
-
 	sprite.Update( dTime );
-	//#TODO: provide access to animation status and frame events (status through getter, events through callback)
 }
 
 void CSpriteActorComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP*/ )
@@ -207,5 +204,20 @@ Vec2 CSpriteActorComponent::GetMountPoint( bool bTwoHanded, int mountIndex /*= 0
 		return Vec2( (float)(ptval.x * nFlipDirX), (float)ptval.y );
 	}
 	return Vec2(0.0f, 0.0f);
+}
+
+EAnimEvent CSpriteActorComponent::GetAnimFrameEvent()
+{
+	// event flags from the editor
+	const UINT32 FLAG_SOUND_EVENT = 0x1;
+	const UINT32 FLAG_SHOOT_EVENT = 0x2;
+
+	UINT32 aframef = sprite.GetAFrameFlag();
+	if ( aframef & FLAG_SOUND_EVENT )
+		return FEVT_SOUND;
+	if ( aframef & FLAG_SHOOT_EVENT)
+		return FEVT_SHOOT;
+
+	return FEVT_NONE;
 }
 

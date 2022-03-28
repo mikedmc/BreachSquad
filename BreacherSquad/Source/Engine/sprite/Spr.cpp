@@ -132,22 +132,22 @@ void CSpr::SetAnim(CHAR* strAnimID, int nFrameIdx)
 	animStatus = ANIM_JUST_STARTED;
 }
 
-UINT32 CSpr::Update(float dTime, bool updatePos)
+void CSpr::Update(float dTime, bool updatePos)
 {
-	UINT32 retAFrameFlag = 0;
+	curFrameFlag = 0;
 
 	_ASSERT(animIdx < pSprCol->Animations.Count());
 	_ASSERT(frameIdx < pSprCol->Animations[animIdx]->aframesNo);
 
 	if (animStatus == ANIM_FRAMELOCK)
-		return retAFrameFlag;
+		return;
 
 	int aframeID = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 	// return frame flag for animations that were just set now
 	if (animStatus == ANIM_JUST_STARTED)
 	{
 		//#TODO: if first frame is too short the message gets lost retAFrameFlag
-		retAFrameFlag = pSprCol->AFrames[aframeID]->flags;
+		curFrameFlag = pSprCol->AFrames[aframeID]->flags;
 	}
 
 	animStatus = ANIM_PLAYING;
@@ -187,9 +187,8 @@ UINT32 CSpr::Update(float dTime, bool updatePos)
 			aframeID = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 		}
 		// set aframe flag for return
-		retAFrameFlag = pSprCol->AFrames[aframeID]->flags;
+		curFrameFlag = pSprCol->AFrames[aframeID]->flags;
 	}
-	return retAFrameFlag;
 }
 
 void CSpr::Paint()

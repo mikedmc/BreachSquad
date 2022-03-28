@@ -2790,7 +2790,7 @@ void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 	//update sprite if animated
 	if (prop->bAnimated)
 	{
-		UINT32 aframeFlag = prop->sprite.Update(dTime);
+		prop->sprite.Update(dTime);
 		//cand ajunge la capatul animatiei scoate flagul de animated
 		if (prop->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
 			prop->bAnimated = false;

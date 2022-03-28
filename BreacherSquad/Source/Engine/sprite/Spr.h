@@ -53,7 +53,8 @@ class CSpr
 public:
 	// Pointer to global sprite painter, for speed...
 	static CSpritePainter*	s_pSP;						
-
+private:
+	UINT32					curFrameFlag;				// contains current frame flag for a single frame, when entering the frame. Used for editor driven events.
 public:
 	CSpriteLib*				pSprCol;					// Pointer to sprite collection
 	int						animIdx;					// Animation index
@@ -78,10 +79,8 @@ public:
 	// Sets the animation only if it's not the current one
 	void					SetAnimOnce(int nAnimIdx, int nFrameIdx = 0); 
 	void					SetFrame(int nFrameIdx);
-	
-	// RETURNS: AFrame flag - returns it only once when entering the frame. Used for sending events from the editor on each frame like footsteps and such
 	// updates position only if bUpdatePos is true
-	UINT32					Update(float dTime, bool bUpdatePos = false);
+	void					Update(float dTime, bool bUpdatePos = false);
 	// Paints current frame
 	void					Paint();
 	// Paints current frame clipped to clip rectangle
@@ -97,9 +96,11 @@ public:
 	void					StopAnimation();
 	// resumes/restarts playing of animation
 	void					Play( bool bReset = false );
+	// returns current AFrame flag (only valid for one update loop, cleared if frame takes longer)
+	FORCEINLINE UINT32		GetAFrameFlag() { return curFrameFlag; }
 };
 
-// generic data
+//#TODO: finish implementing all methods!
 namespace UTSprite
 {
 	// Paints a single frame from an animation	
