@@ -4,9 +4,8 @@
 ///--- STATIC MEMBERS ---
 CSpritePainter* CSpr::s_pSP = &__Painter();
 
-CSpr::CSpr() 
+void CSpr::Reset()
 {
-	pSprCol = nullptr;
 	animIdx = 0;
 	pos.x = 0.0f;
 	pos.y = 0.0f;
@@ -14,35 +13,33 @@ CSpr::CSpr()
 	frameIdx = 0;
 	animStatus = ANIM_JUST_STARTED;
 	color = 0xffffffff;
-	scale = Vec2(1.0f, 1.0f);
+	scale = Vec2( 1.0f, 1.0f );
 	rotation = 0.0f;
+	fTimeScale = 1.0f;
+	animDirection = 1;
+}
+
+CSpr::CSpr() 
+{
+	Reset();
+	pSprCol = nullptr;
 }
 
 CSpr::CSpr(CSpriteLib* pSpriteColl, int animIdx, float pX, float pY)
 {
+	Reset();
 	pSprCol = pSpriteColl;
 	animIdx = animIdx;
 	pos.x = pX;
 	pos.y = pY;
-	fTime = 0.0f;
-	frameIdx = 0;
-	animStatus = ANIM_JUST_STARTED;
-	color=0xffffffff;
-	rotation = 0.0f;
-	scale = Vec2(1.0f, 1.0f);
 }
 
 CSpr::CSpr(CSpriteLib* pSpriteColl, int animIdx, Vec2 vPos)
 {
+	Reset();
 	pSprCol = pSpriteColl;
 	animIdx = animIdx;
 	pos = vPos;
-	fTime = 0.0f;
-	frameIdx = 0;
-	animStatus = ANIM_JUST_STARTED;
-	color = 0xffffffff;
-	rotation = 0.0f;
-	scale = Vec2(1.0f, 1.0f);
 }
 
 CSpr::CSpr(const CSpr& sprite)
@@ -56,16 +53,16 @@ CSpr::CSpr(const CSpr& sprite)
 	color = sprite.color;
 	scale = sprite.scale;
 	rotation = sprite.rotation;
+	fTimeScale = sprite.fTimeScale;
+	animDirection = sprite.animDirection;
 }
 
 void CSpr::Init(CSpriteLib *sprCollection, int nAnimIdx, Vec2 vPos, int nframeIdx, DWORD nColor, float fRotation, Vec2 vScale)
 {
+	Reset();
 	pSprCol = sprCollection;
 	animIdx = nAnimIdx;
 	pos = vPos;
-	fTime = 0.0f;
-	frameIdx = nframeIdx;
-	animStatus = ANIM_JUST_STARTED;
 	color = nColor;
 	scale = vScale;
 	rotation = fRotation;
@@ -80,11 +77,9 @@ void CSpr::Init(CSpriteLib *sprCollection, CHAR* strAnimID, Vec2 vPos, int nfram
 		return;
 	}
 
+	Reset();
 	pSprCol = sprCollection;
 	pos = vPos;
-	fTime = 0.0f;
-	frameIdx = nframeIdx;
-	animStatus = ANIM_JUST_STARTED;
 	color = nColor;
 	scale = vScale;
 	rotation = fRotation;
@@ -95,6 +90,8 @@ void CSpr::SetAnim(int nAnimIdx, int nFrameIdx)
 	animIdx = nAnimIdx;
 
 	fTime = 0.0f;
+	fTimeScale = 1.0f;
+	animDirection = 1;
 	frameIdx = nFrameIdx;
 	animStatus = ANIM_JUST_STARTED;
 }
@@ -113,6 +110,8 @@ void CSpr::SetAnimOnce(int nAnimIdx, int nFrameIdx)
 	animIdx = nAnimIdx;
 
 	fTime = 0.0f;
+	fTimeScale = 1.0f;
+	animDirection = 1;
 	frameIdx = nFrameIdx;
 	animStatus = ANIM_JUST_STARTED;
 }
@@ -128,6 +127,8 @@ void CSpr::SetAnim(CHAR* strAnimID, int nFrameIdx)
 	}
 
 	fTime = 0.0f;
+	fTimeScale = 1.0f;
+	animDirection = 1;
 	frameIdx = nFrameIdx;
 	animStatus = ANIM_JUST_STARTED;
 }
@@ -151,7 +152,7 @@ void CSpr::Update(float dTime, bool updatePos)
 	}
 
 	animStatus = ANIM_PLAYING;
-	fTime += dTime;
+	fTime += dTime * fTimeScale;
 
 	if( fTime >= float(pSprCol->AFrames[aframeID]->duration) / SPR_ED_TIMELINE )
 	{
@@ -298,6 +299,37 @@ void CSpr::PaintModule_texOverride(int moduleIdx, int texIdxOffset)
 void CSpr::StopAnimation()
 {
 	animStatus = ANIM_FRAMELOCK;
+}
+
+void CSpr::ScaleAnimTime( float target_duration_sec )
+{
+	_ASSERT( animIdx < pSprCol->Animations.Count() );
+	float fAnimDuration = 0.0f;
+
+	for ( int kk = 0; kk < pSprCol->Animations[ animIdx ]->aframesNo; kk++ )
+	{
+		int aframeID = pSprCol->Animations[ animIdx ]->aframesIdx[ frameIdx ];
+		fAnimDuration += float( pSprCol->AFrames[ aframeID ]->duration ) / SPR_ED_TIMELINE;
+	}
+	// scale total duration by changing the time multiplier
+	fTimeScale = fAnimDuration / target_duration_sec;
+}
+
+void CSpr::SetAnimSpeed( float time_multiplier )
+{
+	fTimeScale = time_multiplier;
+}
+
+void CSpr::SetAnimDirection( bool bReverseAnimation, bool bRewind /*= false */ )
+{
+	animDirection = (bReverseAnimation == true) ? -1 : 1;
+	if ( bRewind )
+	{
+		if ( bReverseAnimation )
+			frameIdx = pSprCol->Animations[ animIdx ]->aframesNo - 1;
+		else
+			frameIdx = 0;
+	}
 }
 
 void CSpr::Play( bool bReset /*= false */ )

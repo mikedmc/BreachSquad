@@ -55,6 +55,9 @@ public:
 	static CSpritePainter*	s_pSP;						
 private:
 	UINT32					curFrameFlag;				// contains current frame flag for a single frame, when entering the frame. Used for editor driven events.
+	float					fTimeScale;					// used for scaling the timeline
+	int						animDirection;				// direction for animation playback
+
 public:
 	CSpriteLib*				pSprCol;					// Pointer to sprite collection
 	int						animIdx;					// Animation index
@@ -94,10 +97,20 @@ public:
 	void					PaintModule_texOverride(int moduleIdx, int texIdxOffset);
 	// Stops the playing animation
 	void					StopAnimation();
+	// scales the current animation duration to the desired target_duration_sec
+	void					ScaleAnimTime( float target_duration_sec );
+	// sets the animation speed multiplier. Gets reset when changing the animation.
+	void					SetAnimSpeed( float time_multiplier );
+	// Sets animation play direction. bRewind=true sets the frame on first or last frame depending on the direction.	
+	void					SetAnimDirection( bool bReverseAnimation, bool bRewind = false );
 	// resumes/restarts playing of animation
 	void					Play( bool bReset = false );
 	// returns current AFrame flag (only valid for one update loop, cleared if frame takes longer)
 	FORCEINLINE UINT32		GetAFrameFlag() { return curFrameFlag; }
+
+private:
+	// resets everything to defaults (without resetting the lib pointers)
+	void					Reset();
 };
 
 //#TODO: finish implementing all methods!
