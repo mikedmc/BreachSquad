@@ -20,10 +20,13 @@ CSpriteActorComponent::~CSpriteActorComponent()
 void CSpriteActorComponent::Update(CActor& act, float dTime)
 {
 	// get necessary data from the actor
+	Vec2 vSpeed = act.GetSpeedVec();
 	MUVec2Norm(&vAim, &act.GetAimVec());
 	eAngle = GetDir6FromVec( vAim );
 	Vec2 vAimN( 0.0f, 0.0f );
 	MUVec2Norm( &vAimN, &vAim );
+	// see if he's walking backwards
+	float fSpeedDot = MUVec2Dot( &vAim, &vSpeed );
 	// flips a little later on the angle so we don't get jitter when looking N and S
 	if ( nFlipDirX > 0 ) {
 		if ( vAimN.x < -0.2f ) nFlipDirX = -1;
@@ -34,6 +37,12 @@ void CSpriteActorComponent::Update(CActor& act, float dTime)
 	sprite.pos = act.pos.xy_proj;
 	// round up to eliminate visual artefacts
 	UTMath::RoundVec2( sprite.pos );
+	// change animation duration if walking back
+	if ( fSpeedDot < 0.0f )
+		sprite.SetAnimDirection( true );
+	else
+		sprite.SetAnimDirection( false );
+	// now update the sprite
 	sprite.Update( dTime );
 }
 

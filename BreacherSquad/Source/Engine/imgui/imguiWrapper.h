@@ -7,8 +7,10 @@ class CimguiWrapper
 private:
 	char				sIniPath[MAX_PATH]{};	// Path of ini file
 	bool				bInitialized;			// Is IMGUI initialized?
+
 public:
-	bool				bEnabled;			// Enables all updating and rendering
+	bool				bEnabled;				// Enables all updating and rendering
+	CVariantCollection  arrDebugVars;			// List of debug vars that get shown in the debug window
 
 public:
 	// Enables or disables imgui
@@ -28,6 +30,11 @@ public:
 	bool				BeginPaint();
 	// Paints controls
 	void				EndPaint(PDEVICE pDevice);
+	// Add debug vars that are shown in the debug window
+	void				AddWatch_Int( WCHAR* varname, int value );
+	void				AddWatch_Float( WCHAR* varname, float value );
+	// Adds the debug vars to the render list
+	void				PaintDebugVars();
 
 public:
 	CimguiWrapper();

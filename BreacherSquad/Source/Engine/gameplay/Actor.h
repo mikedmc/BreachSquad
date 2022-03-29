@@ -33,11 +33,9 @@ public:
 	UINT16					collisionFlags;				// tells us where we have collisions
 	bool					bHasGravity;				// does it have gravity?
 
-	Vec3		posHeart, posWeapon;	//pozitii absolute inima si arma presalvate (pentru viteza)
 	Vec3		pos_last;		// position on last frame
 	Vec2		speed;
 	Vec2		vSpeedImpulse;	//viteza aplicata extern (cand e impuscat de exemplu). Se va atenua automat.
-	Vec2		vMoveDirN;		//normalized movement direction
 
 	float		fLife, fArmor; //cata viata are si cata armura
 	float		fFOVPercent;   //field of view-ul personajului, intre 0 si 1 => 0.5 va fi FOV de 90 de grade. Reprezinta un fel de alertLevel si seteaza si hearing range
@@ -106,6 +104,8 @@ public:
 
 	// returns aim vector
 	inline Vec2				GetAimVec() { return m_AIcommands.vAimVec; };
+	// returns speed vector
+	inline Vec2				GetSpeedVec() { return speed; };
 	// returns animation direction on X (flipped or not, decided by the graphics component)
 	inline int				GetVisualFlipDirX() { return c_graphics->GetFlipDirX(); }
 	// Returns the gun mount position. bDualHanded tells if we are looking for the dual handed mount or single handed mount.

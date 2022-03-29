@@ -62,6 +62,7 @@ void CSpr::Init(CSpriteLib *sprCollection, int nAnimIdx, Vec2 vPos, int nframeId
 	Reset();
 	pSprCol = sprCollection;
 	animIdx = nAnimIdx;
+	frameIdx = nframeIdx;
 	pos = vPos;
 	color = nColor;
 	scale = vScale;
@@ -70,8 +71,8 @@ void CSpr::Init(CSpriteLib *sprCollection, int nAnimIdx, Vec2 vPos, int nframeId
 
 void CSpr::Init(CSpriteLib *sprCollection, CHAR* strAnimID, Vec2 vPos, int nframeIdx, DWORD nColor, float fRotation, Vec2 vScale)
 {
-	animIdx = sprCollection->GetAnimationIdxByName(strAnimID);
-	if (animIdx < 0)
+	int newAnim = sprCollection->GetAnimationIdxByName( strAnimID );
+	if (newAnim < 0)
 	{
 		LOG("Sprite::Init: Animation [%s] not found!", strAnimID);
 		return;
@@ -79,10 +80,12 @@ void CSpr::Init(CSpriteLib *sprCollection, CHAR* strAnimID, Vec2 vPos, int nfram
 
 	Reset();
 	pSprCol = sprCollection;
+	animIdx = newAnim;
+	frameIdx = nframeIdx;
 	pos = vPos;
 	color = nColor;
-	scale = vScale;
 	rotation = fRotation;
+	scale = vScale;
 }
 
 void CSpr::SetAnim(int nAnimIdx, int nFrameIdx)
@@ -164,20 +167,27 @@ void CSpr::Update(float dTime, bool updatePos)
 		}
 
 		fTime -= float(pSprCol->AFrames[aframeID]->duration) / SPR_ED_TIMELINE;
-		frameIdx++;
+		// animDir must always be -1 or 1
+		frameIdx += animDirection;
+		bool bReachedEnd = false;
+		if ( ((animDirection > 0) && (frameIdx >= pSprCol->Animations[ animIdx ]->aframesNo)) ||
+			((animDirection < 0) && (frameIdx < 0)) ) {
+			bReachedEnd = true;
+		}
 
-		if (frameIdx >= pSprCol->Animations[animIdx]->aframesNo) 
+		if (bReachedEnd) 
 		{
-			if ( (pSprCol->Animations[animIdx]->flags & ANIMATION_FLAG_LOOPED) == 0 )
+			if ( (pSprCol->Animations[animIdx]->flags & ANIMATION_FLAG_LOOPED) == 0 ) 
 			{ //play once?
-				frameIdx--; // sets on last frame
+				// return on last frame and stop
+				frameIdx -= animDirection; 
 				animStatus = ANIM_FRAMELOCK; 
 				//get new flag
 				aframeID = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 			}
 			else 
-			{ //looping
-				frameIdx = 0;
+			{ //looping (depending on direction of playback)
+				frameIdx = (animDirection > 0) ? 0 : pSprCol->Animations[ animIdx ]->aframesNo - 1;
 				animStatus = ANIM_LOOPRESET;
 				//get new flag
 				aframeID = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
@@ -296,7 +306,7 @@ void CSpr::PaintModule_texOverride(int moduleIdx, int texIdxOffset)
 	s_pSP->Draw(pSprCol->Textures[mod->imgIdx + texIdxOffset]->pTex, mod->texRect, mod->moduleRectOff, pos, color, rotation, scale);
 }
 
-void CSpr::StopAnimation()
+void CSpr::Stop()
 {
 	animStatus = ANIM_FRAMELOCK;
 }

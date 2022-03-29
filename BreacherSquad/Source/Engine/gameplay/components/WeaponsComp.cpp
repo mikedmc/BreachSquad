@@ -71,7 +71,7 @@ const CWeapon* CWeaponsComponent::Equip( int wpnIdx )
 	weapon = &arrWeapons[ wpnIdx ]->modes[ K_WPNGRP_IDX_PRIMARY ];
 	// initialize sprite
 	sprite.SetAnim( weapon->_template.animIdx_shoot );
-	sprite.StopAnimation();
+	sprite.Stop();
 	// save/init muzzle point (frame 0 from shooting animation)
 	Vec3i ptval;
 	pSprLib->GetAFrameHitPointFlag( weapon->_template.animIdx_shoot, 0, 0, K_HITPTFLAG_MUZZLE, &ptval );

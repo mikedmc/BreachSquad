@@ -1906,15 +1906,18 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				ImGui::SliderFloat("final multiplier", &ct_fLightMul, 0.0, 10.0);
 				ImGui::SliderFloat("dodge", &ct_fColorDodge, 0.0, 1.0);
 
-				//ImGui::Text("Visible Blocks %d", g_level.mapMesh.arrVisible.Count());
-#if defined(_DEBUG) || defined(DEBUG)
 				ImGui::Separator();
-				if ( GameState::state == GAME_STATE_GAME)
-				{
+				///--- show watch debug values from the debug list ---
+				UTimgui().PaintDebugVars();
+
+#if defined(_DEBUG) || defined(DEBUG)
+
+				//if ( GameState::state == GAME_STATE_GAME)
+				//{
 					//ImGui::Text("Sortables: %d", g_level.m_visibleList.arrSortedItems.nCount);
-					RectXYWH		camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
-					ImGui::Text("Cam: X%.4f Y%.4f", FLOAT_FRAC(camrect.x), FLOAT_FRAC(camrect.y));
-				}
+					//RectXYWH		camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
+					//ImGui::Text("Cam: X%.4f Y%.4f", FLOAT_FRAC(camrect.x), FLOAT_FRAC(camrect.y));
+				//}
 
 				//ImGui::Text("Sprites: %d", UTPainter().stats_sprites);
 				//ImGui::Text("Calls: %d", UTPainter().stats_calls);

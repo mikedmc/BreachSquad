@@ -40,7 +40,6 @@ CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteActor
 	nControllerInstanceID = -1;
 	vSpeedImpulse = Vec2(0.0f, 0.0f);
 	speed = Vec2(0.0f, 0.0f);
-	posWeapon = Vec3(0.0f, 0.0f, 0.0f);
 
 	// init actor template data (loads files and spine skeletons)
 	InitFromTemplate(pActorTemplate);
@@ -144,6 +143,7 @@ void CActor::Update(float dTime)
 	//update timeline
 	this->fTimelineAI += dTime;
 
+	//#TODO: oare ar trebui sa isi ia singur datele din actor componenta si sa seteze singura animatiile??
 	if(MUVec2AlmostZero(speed))
 		c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE);
 	else

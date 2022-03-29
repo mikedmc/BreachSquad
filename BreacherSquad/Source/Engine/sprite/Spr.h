@@ -56,7 +56,6 @@ public:
 private:
 	UINT32					curFrameFlag;				// contains current frame flag for a single frame, when entering the frame. Used for editor driven events.
 	float					fTimeScale;					// used for scaling the timeline
-	int						animDirection;				// direction for animation playback
 
 public:
 	CSpriteLib*				pSprCol;					// Pointer to sprite collection
@@ -67,6 +66,7 @@ public:
 	Vec2					scale;
 	DWORD					color;
 	float					fTime;						// Animation time
+	int						animDirection;				// direction for animation playback
 	ESpriteAnimState		animStatus;					// animation status
 
 	CSpr();
@@ -96,11 +96,11 @@ public:
 	// Adds texIdxOffset to the texture index (used when loading normals and other textures in the same sprite collection)
 	void					PaintModule_texOverride(int moduleIdx, int texIdxOffset);
 	// Stops the playing animation
-	void					StopAnimation();
+	void					Stop();
 	// scales the current animation duration to the desired target_duration_sec
 	void					ScaleAnimTime( float target_duration_sec );
 	// sets the animation speed multiplier. Gets reset when changing the animation.
-	void					SetAnimSpeed( float time_multiplier );
+	void					SetAnimSpeed( float time_multiplier = 1.0f );
 	// Sets animation play direction. bRewind=true sets the frame on first or last frame depending on the direction.	
 	void					SetAnimDirection( bool bReverseAnimation, bool bRewind = false );
 	// resumes/restarts playing of animation
