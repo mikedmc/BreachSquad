@@ -33,7 +33,8 @@ private:
 	Vec2						vMuzzleVec;					// weapon muzzle vector (from weapon origin, local space)
 
 	CArray<CWeaponGroup*>		arrWeapons;					// array of weapon instances in current loadout
-	CWeapon*					weapon;						// currently equipped weapon mode
+	//#TODO: maybe we should keep pointers to primary and alt fire???
+	CWeapon*					weapon;						// currently equipped weapon MODE 
 	int							weaponIdx;					// currently weapon goup
 
 public:

@@ -1,16 +1,6 @@
 #include "dxstdafx.h"
 #include "Actor.h"
 
-Vec2 CActor::GetPosHeart()
-{
-	return pos.xy_proj;
-}
-
-Vec3 CActor::GetPosWeapon()
-{
-	return posWeapon;
-}
-
 void CActor::PostConstructionInit()
 {
 	// compute bboxes on init
@@ -287,6 +277,18 @@ VecProj CActor::GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 	Vec2 muzzle_proj = vpMount.xy_proj + vMuzzleVec;
 	// transform mount position from projected to 3d, knowing that it shoots at the heart height
 	return VecProj( muzzle_proj.x, muzzle_proj.y + Z_TO_H(_template.heartZ), _template.heartZ );
+}
+
+void CActor::EquipWeapon( int wpnIdx )
+{
+	const CWeapon* wpn = c_weapons->Equip( wpnIdx );
+	// hide hands corresponding to current weapon mode
+	if ( wpn == nullptr )
+		c_graphics->SetSkinFlags( *this, true, true );
+	else if ( wpn->_template.bSingleHanded == false || wpn->_template.bDualWielding == true )
+		c_graphics->SetSkinFlags( *this, false, false );
+	else
+		c_graphics->SetSkinFlags( *this, false, true );
 }
 
 void CActor::PlaySoundVersePos(D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly /*= false*/)

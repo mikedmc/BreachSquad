@@ -38,7 +38,7 @@ private:
 	int							nAnimSet;								// Selected ainmation set
 	CSpr						sprite;									// sprite used for frames keeping. Don't use it for painting directly (does not support layers)
 	UINT32						dwLayersMask;							// least important byte is layer id 1 from FModule flags. Use this to hise or to show parts depending on skin
-	CStringHashA				shSkin;									// currently set skin (useless?)
+	int							nSkinIdx;								// index of skin in actor template
 	Vec2						vAim;									// aim vector
 	EDir6						eAngle;									// animation angle (6 possible ways) - computed from vAnim
 	int							nFlipDirX;								// -1 when flipped and 1 when not flipped
@@ -60,7 +60,7 @@ public:
 	// use skinName=nullptr to set the default first skin
 	void						SetSkin( CActor& act, WCHAR* skinName, bool bShowPrimaryHand = false, bool bShowSecondaryHand = true );
 	// sets the internal layer visibility flags (see dwLayersMask)
-	void						SetLayersVisibilityMask( DWORD layersMask );
+	void						SetSkinFlags( CActor& act, bool bShowPrimaryHand, bool bShowSecondaryHand );
 	// Checks to see if specified animation is present (we should never have it on set 1 and not have it on set 0)
 	bool						HasAnimation( EActorAnim nAnimType, int nSet = 0 );
 	// Loads all necessary data for specified actor

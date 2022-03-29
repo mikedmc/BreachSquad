@@ -547,10 +547,14 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 		new CWeaponsComponent(pSprWpn)
 	);
 	// create a weapon and add it to the player's arsenal
-	//#TODO: create actor::AddWeapon and EquipWeapon that handles this plua AddWeaponTemplate
+	//#TODO: create actor::AddWeapon and EquipWeapon that handles this plus AddWeaponTemplate
 	CWeaponTemplate* wpntMain = GetTemplateWeapon( L"PISTOLET" );
-	nact->Weapons()->AddWeapon( *nact, wpntMain, nullptr );
-	nact->Weapons()->Equip( 0 );
+	CWeaponTemplate* wpnAlt = nullptr;
+	if ( wpntMain->shAltFireTemplate.IsSet() )
+		wpnAlt = GetTemplateWeapon( wpntMain->shAltFireTemplate.text );
+	nact->Weapons()->AddWeapon( *nact, wpntMain, wpnAlt );
+
+	nact->EquipWeapon( 0 );
 	// initialize AI
 	Actor_SetAIState(nact, nact->_template.AItemplate->GetAIStateByName(nact->_template.shAIState_ini));
 	// prepare actor for play after everything is loaded and set up

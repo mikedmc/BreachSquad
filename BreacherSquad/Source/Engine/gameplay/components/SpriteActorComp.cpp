@@ -8,6 +8,7 @@ CSpriteActorComponent::CSpriteActorComponent( CMultiSpriteLib* pSpriteLib )
 	nAnimSet = 0;
 	pLib = pSpriteLib;
 	pSpriteLib = nullptr;
+	nSkinIdx = 0;
 }
 
 CSpriteActorComponent::~CSpriteActorComponent()
@@ -100,15 +101,23 @@ void CSpriteActorComponent::CacheAnimations( CActor& act )
 
 void CSpriteActorComponent::SetSkin( CActor& act, WCHAR* skinName, bool bShowPrimaryHand, bool bShowSecondaryHand )
 {
+	nSkinIdx = 0;
 	CStringHash skinNamesh;
 	if ( skinName == nullptr )
+	{
 		skinNamesh = act._template.arrSkins[ 0 ].name;
+	}
 	else
+	{
 		skinNamesh.Init( skinName );
+	}
 
 	for ( int kk = 0; kk < act._template.arrSkinsCnt; kk++ ) {
 		if ( act._template.arrSkins[ kk ].name == skinNamesh )
 		{
+			// only save skin index if found
+			nSkinIdx = kk;
+
 			dwLayersMask = act._template.arrSkins[ kk ].layersVisMask;
 			skinNamesh = act._template.arrSkins[ kk ].name;
 			// show hands
@@ -129,9 +138,23 @@ void CSpriteActorComponent::SetSkin( CActor& act, WCHAR* skinName, bool bShowPri
 	ErrorBox( K_ERR_WARNING, L"Couldn't find skin named: %s", skinName );
 }
 
-void CSpriteActorComponent::SetLayersVisibilityMask( DWORD layersMask )
+void CSpriteActorComponent::SetSkinFlags( CActor& act, bool bShowPrimaryHand, bool bShowSecondaryHand )
 {
-	dwLayersMask = layersMask;
+	if ( nSkinIdx < 0 || nSkinIdx >= act._template.arrSkinsCnt )
+	{
+		ErrorBox( K_ERR_WARNING, L"SetSkinFlags:: Illegal skin index! Resetting to 0" );
+		nSkinIdx = 0;
+	}
+	// show hands
+	if ( bShowPrimaryHand )
+		dwLayersMask |= act._template.arrSkins[ nSkinIdx ].hand1Mask;
+	else
+		dwLayersMask &= ~act._template.arrSkins[ nSkinIdx ].hand1Mask;
+
+	if ( bShowSecondaryHand )
+		dwLayersMask |= act._template.arrSkins[ nSkinIdx ].hand2Mask;
+	else
+		dwLayersMask &= ~act._template.arrSkins[ nSkinIdx ].hand2Mask;
 }
 
 bool CSpriteActorComponent::HasAnimation(EActorAnim nAnimType, int nSet)

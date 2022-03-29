@@ -12,13 +12,15 @@ class CWeaponTemplate
 public:
 	CStringHash		name;
 	//generic data:
-	CStringHash		shTemplateOverwrite;	//name of themplate that the weapon overwrites over the character template
-	float			fSpeedPenaltyPercent;	//what percent of total movement speed is taken by this weapon
-	CStringHash		shScript_OnFire;		//called when shooting a weapon. If not set it just shoots the weapon.
-	CStringHash		shScript_OnFireALT;		//called when shooting ALT mode for weapon. If not set it just shoots the ALT weapon.
-	CStringHash		shScript_OnEmpty;		//called when weapon is empty
+	CStringHash		shAltFireTemplate;		// weapon template for alt fire mode of the weapon
+	CStringHash		shTemplateOverwrite;	// name of themplate that the weapon overwrites over the character template
+	float			fSpeedPenaltyPercent;	// what percent of total movement speed is taken by this weapon
+	CStringHash		shScript_OnFire;		// called when shooting a weapon. If not set it just shoots the weapon.
+	CStringHash		shScript_OnFireALT;		// called when shooting ALT mode for weapon. If not set it just shoots the ALT weapon.
+	CStringHash		shScript_OnEmpty;		// called when weapon is empty
 	int				animIdx_shoot;
 	int				animIdx_reload;
+
 	int				nHUD_AnimIdx;			//animatie INGAME HUD pentru grafica armei (vezi detalii frames in CCustomInterfaceIGM) sau -1 pt empty
 	int				nHUD_AnimIdxALT;		//animatie INGAME HUD when shown as ALT weapon (painted just as small icon)
 	int				nMuzzleFlashAnim;		//animatie muzzle flash sau -1 pt empty

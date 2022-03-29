@@ -459,12 +459,10 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		templ->vMountOffset.x = bnode.attribute( L"mountOffX" ).as_int();
 		templ->vMountOffset.y = bnode.attribute( L"mountOffY" ).as_int();
 
-		templ->nHUD_AnimIdx = -1;
-		if (!bnode.attribute(L"sHUDanimName").empty())
-			templ->nHUD_AnimIdx = m_sprInterface.GetAnimationIdxByName(bnode.attribute(L"sHUDanimName").value());
-		templ->nHUD_AnimIdxALT = -1;
-		if (!bnode.attribute(L"sHUDanimNameIcon").empty())
-			templ->nHUD_AnimIdxALT = m_sprInterface.GetAnimationIdxByName(bnode.attribute(L"sHUDanimNameIcon").value());
+		templ->nHUD_AnimIdx = m_sprInterface.GetAnimationIdxByName( bnode.attribute( L"sHUDanimName" ).value() );
+		templ->nHUD_AnimIdxALT = m_sprInterface.GetAnimationIdxByName( bnode.attribute( L"sHUDanimNameIcon" ).value() );
+		// alt fire template
+		templ->shAltFireTemplate.Init( bnode.attribute( L"altFire" ).value() );
 		// get weapons animation idices
 		templ->animIdx_reload = -1;
 		templ->animIdx_shoot = -1;
