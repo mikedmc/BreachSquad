@@ -4929,11 +4929,13 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		actor->nAttackStatus = actor->m_AIcommands.eAttackCommand;
 
 	//daca arma curenta nu poate trage din crouch scot crouch
+	/*
 	if ((actor->bCrouched == true) && (!pWeaponMain->_template.bCanShootFromCrouch))
 	{
 		if (actor->nAttackStatus >= K_LVL_ACT_ATTACK_SHOOTING)
 			actor->bCrouched = false;
 	}
+	*/
 
 	// weapons that stop you while shooting:
 	/*
@@ -5156,9 +5158,9 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		actor->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_EMPTY;
 	}
 
-	//------------------------------------------------------------------------------------------
-	//	INTEGRATOR - physics
-	//------------------------------------------------------------------------------------------
+	///------------------------------------------------------------------------------------------
+	///	INTEGRATOR - physics
+	///------------------------------------------------------------------------------------------
 	//#TODO: check speed limits - should be done on the speed vector, normalized
 	CLAMP(actor->speed.x, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED);
 	CLAMP(actor->speed.y, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED);

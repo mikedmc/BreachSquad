@@ -7,6 +7,7 @@ CWeaponsComponent::CWeaponsComponent( CSpriteLib* pSpriteLib )
 
 	weapon = nullptr;
 	weaponIdx = -1;
+	bVisible = true;
 
 	vAim = Vec2( 0.0f, 1.0f );
 	vMuzzleVec = Vec2(1.0f, 0.0f);
@@ -33,6 +34,9 @@ void CWeaponsComponent::Update( CActor& act, float dTime )
 
 void CWeaponsComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 {
+	if ( !bVisible )
+		return;
+
 	float fang = UTMath::GetVectorAngle( vAim );
 	VecProj vpMount = act.GetWeaponMountWorld( false );
 	// weapons need flipping when animation gets flipped to the left if we want to keep the unified angle of rotation

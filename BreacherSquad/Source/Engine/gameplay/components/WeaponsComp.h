@@ -31,6 +31,7 @@ private:
 	CSpr						sprite;						// Weapon sprite
 	Vec2						vAim;						// aiming direction
 	Vec2						vMuzzleVec;					// weapon muzzle vector (from weapon origin, local space)
+	bool						bVisible;					// if not visible then it doesn't render
 
 	CArray<CWeaponGroup*>		arrWeapons;					// array of weapon instances in current loadout
 	//#TODO: maybe we should keep pointers to primary and alt fire???
@@ -61,5 +62,6 @@ public:
 	inline Vec2					GetWeaponMuzzlePoint() const { return vMuzzleVec; }
 	// returns weapons aim vector
 	inline Vec2					GetWeaponAimVec() const { return vAim; }
-	//void						SetAnimOnce( EActorAnim eAnim );
+	// sets component visibility
+	inline void					SetVisible( bool visible ) { bVisible = visible; }
 };
