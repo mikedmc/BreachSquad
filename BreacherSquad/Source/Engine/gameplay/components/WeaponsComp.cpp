@@ -5,8 +5,7 @@ CWeaponsComponent::CWeaponsComponent( CSpriteLib* pSpriteLib )
 {
 	pSprLib = pSpriteLib;
 
-	weapon = nullptr;
-	weaponIdx = -1;
+	eActiveSlot = K_WPNSLOT_NONE;
 	bVisible = true;
 
 	vAim = Vec2( 0.0f, 1.0f );
@@ -17,7 +16,10 @@ CWeaponsComponent::CWeaponsComponent( CSpriteLib* pSpriteLib )
 
 CWeaponsComponent::~CWeaponsComponent()
 {
-	SAFE_DELETE_CArray( arrWeapons );
+	for ( int kk = 0; kk < K_WPNSLOTS_CNT; kk++ )
+	{
+		arrWeapons[ kk ].SetTriggerStates( false, false );
+	}
 
 	pSprLib = nullptr;
 }
@@ -25,10 +27,9 @@ CWeaponsComponent::~CWeaponsComponent()
 void CWeaponsComponent::Update( CActor& act, float dTime )
 {
 	MUVec2Norm(&vAim, &act.GetAimVec());
-	for ( int kk = 0; kk < arrWeapons.Count(); kk++ )
+	for ( int kk = 0; kk < K_WPNSLOTS_CNT; kk++ )
 	{
-		arrWeapons[ kk ]->modes[ K_WPNGRP_IDX_PRIMARY ].Update( dTime );
-		arrWeapons[ kk ]->modes[ K_WPNGRP_IDX_ALTFIRE ].Update( dTime );
+		arrWeapons[ kk ].Update( dTime );
 	}
 }
 
@@ -46,33 +47,23 @@ void CWeaponsComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_C
 	sprite.Paint();
 }
 
-void CWeaponsComponent::AddWeapon( CActor& act, CWeaponTemplate * primary, CWeaponTemplate * altfire )
+void CWeaponsComponent::AddWeapon( CActor& act, CWeaponTemplate * primary, EWpnSlot slot )
 {
-	CWeaponGroup* pWeapon = new CWeaponGroup();
 	if ( primary )
 	{
-		pWeapon->modes[ K_WPNGRP_IDX_PRIMARY ].Init( &act, primary );
+		arrWeapons[slot].Init( &act, primary );
 	}
-
-	if ( altfire )
-	{
-		pWeapon->modes[ K_WPNGRP_IDX_ALTFIRE ].Init( &act, altfire );
-	}
-	// add to weapons inventory
-	arrWeapons.Add( pWeapon );
 
 	return;
 }
 
-const CWeapon* CWeaponsComponent::Equip( int wpnIdx )
+const CWeapon* CWeaponsComponent::Equip( EWpnSlot slot )
 {
-	if ( weaponIdx == wpnIdx )
-		return weapon;
-	if ( wpnIdx < 0 || wpnIdx >= arrWeapons.Count() )
-		return weapon;
+	if ( slot == eActiveSlot )
+		return &arrWeapons[eActiveSlot];
 	// equip primary mode
-	weaponIdx = wpnIdx;
-	weapon = &arrWeapons[ wpnIdx ]->modes[ K_WPNGRP_IDX_PRIMARY ];
+	eActiveSlot = slot;
+	CWeapon* weapon = &arrWeapons[ eActiveSlot ];
 	// initialize sprite
 	sprite.SetAnim( weapon->_template.animIdx_shoot );
 	sprite.Stop();
@@ -86,22 +77,16 @@ const CWeapon* CWeaponsComponent::Equip( int wpnIdx )
 
 void CWeaponsComponent::SetTriggerStates( bool bTriggerPushed, bool bReloadPushed )
 {
-	if ( !weapon ) 
-		return;
-	weapon->SetTriggerStates( bTriggerPushed, bReloadPushed );
+	arrWeapons[eActiveSlot].SetTriggerStates( bTriggerPushed, bReloadPushed );
 }
 
 void CWeaponsComponent::StopReloading()
 {
-	if ( !weapon )
-		return;
-	weapon->StopReloading();
+	arrWeapons[eActiveSlot].StopReloading();
 }
 
 void CWeaponsComponent::JamWeapon()
 {
-	if ( !weapon )
-		return;
-	weapon->Jam();
+	arrWeapons[eActiveSlot].Jam();
 }
 

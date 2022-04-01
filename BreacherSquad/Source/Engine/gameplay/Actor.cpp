@@ -281,7 +281,7 @@ VecProj CActor::GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 
 void CActor::EquipWeapon( int wpnIdx )
 {
-	const CWeapon* wpn = c_weapons->Equip( wpnIdx );
+	const CWeapon* wpn = c_weapons->Equip( CWeaponsComponent::K_WPNSLOT_PRIMARY );
 	// hide hands corresponding to current weapon mode
 	//#TODO: ar trebui facuta o functie separata care sa ia in considerare si behaviour curent daca ascunde arme sau nu?
 	if ( wpn == nullptr )
