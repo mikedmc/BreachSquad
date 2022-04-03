@@ -8,7 +8,6 @@ nType = 0-primary, 1-gear, 2-etc
 sHUDanimName="ANM_NAME" - name of the animation that contains all necessary weapon graphics for the HUD
 sHUDanimNameIcon="ANM_NAME" - name of the animation that contains the small icon for the alternative fire modes and gear
 fSpeedPenaltyPercent="0.0" - percent of moving speed that you pay for having this weapon. Gets summed from all equipped weapons/gear.
-bPassive="false" - not used as a weapon but only reading properties from it
 sMuzzleFlashAnim="no muzzle flash" - animation from actives.bsx to be displayed when shooting (if looping it's always displayed)
 sTemplateOverwrite="" - name of template from actors_data.xml that gets overwritten/added over the original actor template
 
@@ -30,7 +29,6 @@ math: new recoil = (old recoil + fAimErrorAddPerShot) * fAimErrorMulPerShot; so 
 fAimErrorMulPerShot must be >1.0 or it will make your recoil actually get lower
 fAimErrorAddPerShot - if you set this on negative value it starts with max AIM error and goes to min aim error (see MAC IVIL)
 
-fJammedDuration - weapon jam duration on received hit
 bBulletChamber=false - Does it have a bullet chamber?
 bUsesMainWeaponAmmo=false - for alt weapons only: uses the magazine from the main weapon
 
@@ -49,11 +47,12 @@ fBulletCriticalChance="0.0" - values between 0.0 and 1.0 - chance for a bullet t
   <WeaponTemplates>
 
     <PISTOLET 	nType="0" sHUDanimName="WEAPON_SMG_MP5A3" fSpeedPenaltyPercent="0.0" singleHanded="1" dualWielding="0" mountOffX="0" mountOffY="0" altFire="WPN_SUBMACHINE_STEADY"
+				fCooldownT="1.0"
 				animShoot="PISTOL" animReload="PISTOL_R"
 				bBulletChamber="true" fShooterSpeedSlowingPercent="0.2" fMuzzleLightSize="1.0" sMuzzleFlashAnim="MUZZLE_SMG1"
 				fSpreadFOV="0.05" fAimErrorMaxFOV="0.28" fAimErrorAddPerShot="0.015" fAimErrorMulPerShot="1.12" fAimErrorCooldownPerSec="0.74"
 				nClipSize="30" nReloadUnitSize="30" fReloadTimePerUnit="1.6"
-				fFireRatePerSec="13.0" bCanResetFireRate="false"
+				bCanResetFireRate="false"
 				bCanShootFromCrouch="true" bCanShootFromCover="false" nDropShellFrame="0"
 				fSoundRadius="240.0" sSndShoot="GUN_MP5_01" sSndShoot2="GUN_MP5_02" sSndReload="RELOAD_TACTICAL" sSndReload2="RELOAD_EMERGENCY" sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02"
 				sBulletType="BULLET_TRACER1" nBulletsPerShot="1" nBurstSize="0" nArmorPiercingRating="1"
@@ -66,7 +65,7 @@ fBulletCriticalChance="0.0" - values between 0.0 and 1.0 - chance for a bullet t
 				bBulletChamber="true" fShooterSpeedSlowingPercent="0.2" fMuzzleLightSize="1.0" sMuzzleFlashAnim="MUZZLE_SMG1"
 				fSpreadFOV="0.05" fAimErrorMaxFOV="0.28" fAimErrorAddPerShot="0.015" fAimErrorMulPerShot="1.12" fAimErrorCooldownPerSec="0.74"
 				nClipSize="30" nReloadUnitSize="30" fReloadTimePerUnit="1.6"
-				fFireRatePerSec="13.0" bCanResetFireRate="false"
+				bCanResetFireRate="false"
 				bCanShootFromCrouch="true" bCanShootFromCover="false" nDropShellFrame="0"
 				fSoundRadius="240.0" sSndShoot="GUN_MP5_01" sSndShoot2="GUN_MP5_02" sSndReload="RELOAD_TACTICAL" sSndReload2="RELOAD_EMERGENCY" sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02"
 				sBulletType="BULLET_TRACER1" nBulletsPerShot="1" nBurstSize="0" nArmorPiercingRating="1"
@@ -79,7 +78,7 @@ fBulletCriticalChance="0.0" - values between 0.0 and 1.0 - chance for a bullet t
 				bBulletChamber="true" fShooterSpeedSlowingPercent="0.2" fMuzzleLightSize="1.0" sMuzzleFlashAnim="MUZZLE_SMG1"
 				fSpreadFOV="0.05" fAimErrorMaxFOV="0.28" fAimErrorAddPerShot="0.015" fAimErrorMulPerShot="1.12" fAimErrorCooldownPerSec="0.74"
 				nClipSize="30" nReloadUnitSize="30" fReloadTimePerUnit="1.6"
-				fFireRatePerSec="13.0" bCanResetFireRate="false"
+				bCanResetFireRate="false"
 				bCanShootFromCrouch="true" bCanShootFromCover="false" nDropShellFrame="0"
 				fSoundRadius="240.0" sSndShoot="GUN_MP5_01" sSndShoot2="GUN_MP5_02" sSndReload="RELOAD_TACTICAL" sSndReload2="RELOAD_EMERGENCY" sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02"
 				sBulletType="BULLET_TRACER1" nBulletsPerShot="1" nBurstSize="0" nArmorPiercingRating="1"
@@ -87,11 +86,13 @@ fBulletCriticalChance="0.0" - values between 0.0 and 1.0 - chance for a bullet t
 	  />
 
     <WPN_SUBMACHINE_STEADY sHUDanimNameIcon="WPNALT_AIMED" singleHanded="0" dualWielding="0" mountOffX="0" mountOffY="0"
+				fChargeUpT="1.0" fWindDownT="1.0" fCooldownT="8.0"
+				bCanResetFireRate="false"
 				animShoot="SHOTGUN" animReload="SHOTGUN_R"
-        bAnimSync="true" fShooterSpeedSlowingPercent="100.0" fMuzzleLightSize="1.0" bHasLaserSight="true" fSpreadFOV="0.0" fAimErrorMaxFOV="0.0" fAimErrorAddPerShot="0.0" fAimErrorCooldownPerSec="1.0" nClipSize="-1" fFireRatePerSec="0.5" bCanResetFireRate="false" nBurstSize="0"
-        sSndShoot="GUN_MP5_01" sSndReload="RELOAD_TACTICAL"  sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02"
-        bCanShootFromCrouch="true" bCanShootFromCover="false" bCanShootFromAir="false" bCanShootFromLadders="false" nDropShellFrame="0" bUsesMainWeaponAmmo="true"
-        sBulletType="BULLET_TRACER_AIMED_SHOT" nBulletsPerShot="1" fBulletDamage="150.0" nArmorPiercingRating="5" fBulletDamageLossPPx="0.0" fBulletLife="0.3" fBulletMomentum="0.5" fBulletCriticalChance="0.0" fBulletStunDuration="0.05" fBulletSpeed="1000.0" bBulletIgnoreArmor="false" bBulletIgnoreCover="false" bBulletDieOnImpact="true" fSoundRadius="240.0" 
+				bAnimSync="true" fShooterSpeedSlowingPercent="100.0" fMuzzleLightSize="1.0" bHasLaserSight="true" fSpreadFOV="0.0" fAimErrorMaxFOV="0.0" fAimErrorAddPerShot="0.0" fAimErrorCooldownPerSec="1.0" nClipSize="-1"  nBurstSize="0"
+				sSndShoot="GUN_MP5_01" sSndReload="RELOAD_TACTICAL"  sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02"
+				bCanShootFromCrouch="true" bCanShootFromCover="false" bCanShootFromAir="false" bCanShootFromLadders="false" nDropShellFrame="0" bUsesMainWeaponAmmo="true"
+				sBulletType="BULLET_TRACER_AIMED_SHOT" nBulletsPerShot="1" fBulletDamage="150.0" nArmorPiercingRating="5" fBulletDamageLossPPx="0.0" fBulletLife="0.3" fBulletMomentum="0.5" fBulletCriticalChance="0.0" fBulletStunDuration="0.05" fBulletSpeed="1000.0" bBulletIgnoreArmor="false" bBulletIgnoreCover="false" bBulletDieOnImpact="true" fSoundRadius="240.0" 
     />
 
   </WeaponTemplates>

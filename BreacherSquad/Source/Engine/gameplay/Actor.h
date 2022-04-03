@@ -115,7 +115,7 @@ public:
 	// \param mountIndex - 0 for most weapons, 1 for second weapon in dual wielding stances
 	VecProj					GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ );
 	// Equips a weapon by index in weapons component
-	void					EquipWeapon( int wpnIdx );
+	void					EquipWeapon( EWpnSlot wpnSlot );
 
 	// sets graphics anim set
 	void					SetAnimSet( int n_anim_set ) { c_graphics->SetAnimSet( n_anim_set ); }

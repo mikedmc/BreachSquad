@@ -7,11 +7,11 @@
 /// WEAPONS CLASS
 ///--------------------------------------------------------------------------
 
-CWeapon::CWeapon() :	status(K_LVL_WPN_STATUS_UNKNOWN), statusOld(K_LVL_WPN_STATUS_UNKNOWN),
-						fAimErrorFOV(0.0f), fireRateTimer(0.0f), m_nBurstBulletsShot(0), m_nBulletsShotSinceCool(0),
-						reloadTimer(0.0f), ammoLeft(-1), fJammedTimer(0.0f), nCanResetJamCount(0),
+CWeapon::CWeapon() :	status(K_WPN_STATUS_UNKNOWN), statusOld(K_WPN_STATUS_UNKNOWN),
+						fAimErrorFOV(0.0f), nBurstBulletsShot(0), ammoLeft(-1), 
 						bTriggerDown(false), bReloadDown(false), bTriggerDownOld(false),
-						pOwner(nullptr), bPaintLaserSight(false), fTimeSinceShot(0.0f)
+						pOwner(nullptr), bPaintLaserSight(false), fTimeSinceShot(0.0f),
+						fStateT(0.0f)
 {
 }
 
@@ -22,134 +22,222 @@ void CWeapon::Init( CActor* pOwnerActor, CWeaponTemplate * templ )
 	_template = *templ;
 	// set owner
 	pOwner = pOwnerActor;
-	status = K_LVL_WPN_STATUS_READY;
+	status = K_WPN_STATUS_READY;
 	ammoLeft = _template.nClipSize + _template.nBulletChamberSize;
 	// make sure infinite ammo is infinite
 	if ( _template.nClipSize < 0 )
 		ammoLeft = -1;
 }
 
-EWeaponStatus CWeapon::Update( float dTime )
+EWpnStatus CWeapon::Update( float dTime )
 {
-	//save old status
+	// weapons that are not set should not update
+	if ( status == K_WPN_STATUS_UNKNOWN )
+		return K_WPN_STATUS_UNKNOWN;
+	_ASSERT( pOwner != nullptr );
+
 	statusOld = status;
 
-	if ( status == K_LVL_WPN_STATUS_UNKNOWN )
-		return K_LVL_WPN_STATUS_UNKNOWN;
+	switch ( status )
+	{
+		case K_WPN_STATUS_READY:
+		{
+			if ( bTriggerDown )
+			{
+				fStateT = 0.0f;
+				if ( _template.fChargeUpT > 0.0f )
+					status = K_WPN_STATUS_CHARGING_UP;
+				else
+					status = K_WPN_STATUS_JUST_SHOT;
+			}
+			else if ( bReloadDown )
+			{
+				fStateT = 0.0f;
+				status = K_WPN_STATUS_RELOADING;
+			}
+		}
+		break;
+		case K_WPN_STATUS_CHARGING_UP:
+		{
+			fStateT += dTime;
+			if ( fStateT >= _template.fChargeUpT )
+			{
+				fStateT -= _template.fChargeUpT;
+				// set this state for a single frame
+				status = K_WPN_STATUS_JUST_SHOT;
+			}
+		}
+		break;
+		case K_WPN_STATUS_JUST_SHOT:
+		{
+			// JUST_SHOT only stays on for a single frame.
+			// The classes above do the actual shooting when this state is reached
+			fTimeSinceShot = 0.0f;
+			if ( _template.fWindDownT > 0.0f )
+				status = K_WPN_STATUS_WINDING_DOWN;
+			else
+				status = K_WPN_STATUS_COOLING;
+			// update ammo and stuff
+			//shooting sound (only if set). verific doar sndidx pentru ca vvarianta 2 contine cel putin valoarea primului
+			if ( _template.sndidxShoot >= 0 )
+			{
+				SND_PLAY_POSITIONAL_RAND2( _template.sndidxShoot, _template.sndidxShoot2, pOwner->GetPosHeart() );
+			}
 
-	//update aiming errors
+			nBurstBulletsShot++;
+			if ( ammoLeft > 0 )
+				ammoLeft--;
+
+			float fAimErrorMul = 1.0f;
+			fAimErrorFOV += fabs( _template.fAimErrorAddPerShot ); //add aim error (can be negative too)
+			fAimErrorFOV *= _template.fAimErrorMulPerShot; //add non linear error
+			fAimErrorFOV *= fAimErrorMul; //scale aiming error from perks
+			CLAMP( fAimErrorFOV, 0.0f, _template.fAimErrorMaxFOV ); //limit max error fov
+
+			//process aim error
+			/*
+			float fAimAng = UTMath::GetVectorAngle(vFinalDir);
+			float fAimAngError = 0.0f;
+			if (weapon->WeaponTemplate.fAimErrorAddPerShot < 0.0f)
+			{
+				fAimAngError = m_rand.RandFloatSgn(weapon->WeaponTemplate.fAimErrorMaxFOV - weapon->fAimErrorFOV);
+			}
+			else
+			{
+				fAimAngError = m_rand.RandFloatSgn(weapon->fAimErrorFOV);
+			}
+			//better aiming when crouched or in cover
+			float fMul = 1.0f;
+			if (shooter->bCrouched)
+				fMul = K_LVL_CROUCH_ERROR_MULTIPLIER;
+
+			fAimAngError *= fMul;
+			//apply template aiming multiplier
+			//fAimAngError *= shooter->actTemplate.fRecoilModifier;
+			//add aiming error
+			fAimAng += fAimAngError;
+			*/
+			//some weapons force the actor to play a verse when shooting
+			//PlayActorSoundVerse(shooter, weapon->WeaponTemplate.sndActorVerse);
+		}
+		break;
+		case K_WPN_STATUS_WINDING_DOWN:
+		{
+			fStateT += dTime;
+			if ( fStateT >= _template.fWindDownT )
+			{
+				fStateT -= _template.fWindDownT;
+				status = K_WPN_STATUS_COOLING;
+			}
+		}
+		break;
+		case K_WPN_STATUS_COOLING:
+		{
+			fStateT += dTime;
+			//reset timer on trigger up
+			if ( (bTriggerDown == false) && (_template.bResetFireRateOnTriggerUp) )
+				fStateT = _template.fCooldownT;
+
+			if ( fStateT >= _template.fCooldownT )
+			{
+				fStateT = 0.0f;
+				status = K_WPN_STATUS_READY;
+				//burst lock
+				if ( (_template.nBurstSize > 0) && (nBurstBulletsShot >= _template.nBurstSize) )
+				{
+					nBurstBulletsShot = 0;
+					status = K_WPN_STATUS_BURST_END;
+				}
+
+				if ( ammoLeft == 0 )
+					status = K_WPN_STATUS_NO_AMMO;
+			}
+		}
+		break;
+		case K_WPN_STATUS_RELOADING:
+		{
+			if ( bTriggerDown )
+			{
+				fStateT += dTime;
+
+				if ( fStateT >= _template.fReloadTimePerUnit )
+				{
+					ammoLeft += _template.nReloadUnitSize;
+					fStateT -= _template.fReloadTimePerUnit;
+
+					int nMaxBullets = _template.nClipSize;
+					//#HACK: shotguns load everything to the end
+					if ( _template.nReloadUnitSize == 1 )
+						nMaxBullets = _template.nClipSize + _template.nBulletChamberSize;
+					if ( ammoLeft >= nMaxBullets )
+					{
+						CLAMP( ammoLeft, 0, _template.nClipSize + _template.nBulletChamberSize );
+						fStateT = 0.0f;
+						status = K_WPN_STATUS_READY;
+					}
+					else // we have more to load so we play the sound again
+					{
+						SND_PLAY_POSITIONAL_RAND2( _template.sndidxReload, _template.sndidxReload2, pOwner->GetPosHeart() );
+					}
+				}
+
+				//stop reloading if possible (for shotgun type weapons)
+				if ( (status == K_WPN_STATUS_RELOADING) && (_template.nReloadUnitSize < _template.nClipSize + _template.nBulletChamberSize) && (ammoLeft > 0) )
+				{
+					status = K_WPN_STATUS_READY;
+					fStateT = 0.0f;
+				}
+			}
+		}
+		break;
+		case K_WPN_STATUS_BURST_END:
+		{
+			nBurstBulletsShot = 0;
+			fStateT = 0.0f;
+			status = K_WPN_STATUS_BURST_COOLDOWN;
+		}
+		break;
+		case K_WPN_STATUS_BURST_COOLDOWN:
+		{
+			fStateT += dTime;
+			if ( fStateT <= _template.fBurstCooldown )
+			{
+				fStateT = 0.0f;
+				status = K_WPN_STATUS_READY;
+				if ( ammoLeft == 0 )
+					status = K_WPN_STATUS_NO_AMMO;
+			}
+		}
+		break;
+		case K_WPN_STATUS_NO_AMMO:
+		{
+			//empty clip sound
+			if ( bTriggerDown && !bTriggerDownOld )
+			{
+				SND_PLAY_POSITIONAL_RAND2( _template.sndidxEmpty, _template.sndidxEmpty2, pOwner->GetPosHeart() );
+			}
+		}
+		break;
+		default:
+			break;
+	}
+	
 	fTimeSinceShot += dTime;
 	// cooldown starts after a while if you stop shooting
-	if ( fTimeSinceShot > 0.1f ) //approx 2 frames la 24 fps
+	if ( fTimeSinceShot > 0.2f ) 
 	{
 		dec_limit( fAimErrorFOV, _template.fAimErrorCooldownPerSecond * dTime, 0.0f );
 	}
-	
-	dec_limit( fireRateTimer, dTime, 0.0f );
-	//reset burst and other data on trigger up
-	if ( (bTriggerDown == false) && (status == K_LVL_WPN_STATUS_BURST_END) )
-	{
-		m_nBurstBulletsShot = 0;
-		//jam weapon for burst cooldown
-		fJammedTimer = _template.fBurstCooldown;
-	}
-	if ( (bTriggerDown == false) && (fTimeSinceShot > 0.25f) && (fAimErrorFOV <= 0.0f) )
-	{
-		m_nBulletsShotSinceCool = 0;
-	}
-	//reset timer on trigger up
-	if ( (bTriggerDown == false) && (_template.bResetFireRateOnTriggerUp) )
-		fireRateTimer = 0.0f;
-
-	//on trigger down play emty sound 
-	if ( (bTriggerDownOld == false) && (bTriggerDown == true) )
-	{
-		if ( (ammoLeft == 0) && (_template.sndidxEmpty >= 0) )
-			SND_PLAY_POSITIONAL( _template.sndidxEmpty, pOwner->GetPosHeart() );
-	}
-	//update old trigger state
-	bTriggerDownOld = bTriggerDown;
-
-	//if jammed can't reload, can't shoot
-	if ( fJammedTimer > 0.0f )
-	{
-		dec_limit( fJammedTimer, dTime, 0.0f );
-		status = K_LVL_WPN_STATUS_JAMMED;
-
-		return status;
-	}
-
-	if ( (status != K_LVL_WPN_STATUS_RELOADING) && (bReloadDown) && (!bTriggerDown) && (ammoLeft < _template.nClipSize + _template.nBulletChamberSize) )
+	//#TODO: the reload when shooting should be moved on proper states
+	if ( (status != K_WPN_STATUS_RELOADING) && (bReloadDown) && (!bTriggerDown) && (ammoLeft < _template.nClipSize + _template.nBulletChamberSize) )
 	{
 		SND_PLAY_POSITIONAL_RAND2( _template.sndidxReload, _template.sndidxReload2, pOwner->GetPosHeart() );
 
-		reloadTimer = 0.0f;
-		status = K_LVL_WPN_STATUS_RELOADING;
+		fStateT = 0.0f;
+		status = K_WPN_STATUS_RELOADING;
 	}
 
-	//fire rate timer
-	if ( status != K_LVL_WPN_STATUS_RELOADING )
-	{
-		if ( fireRateTimer <= 0.0f )
-		{
-			fireRateTimer = 0.0f;
-			status = K_LVL_WPN_STATUS_READY;
-		}
-		else
-		{
-			status = K_LVL_WPN_STATUS_COOLING;
-		}
-	}
-	//burst lock
-	if ( (_template.nBurstSize > 0) && (m_nBurstBulletsShot >= _template.nBurstSize) )
-	{
-		status = K_LVL_WPN_STATUS_BURST_END;
-	}
-
-	if ( bTriggerDown )
-	{
-		//stop reloading if possible (for shotgun type weapons)
-		if ( (status == K_LVL_WPN_STATUS_RELOADING) && (_template.nReloadUnitSize < _template.nClipSize + _template.nBulletChamberSize) &&
-			(ammoLeft > 0) && (fireRateTimer <= 0.0f) )
-		{
-			status = K_LVL_WPN_STATUS_READY;
-			fireRateTimer = 0.0f;
-			reloadTimer = 0.0f;
-		}
-	}
-	// we're still reloading
-	if ( status == K_LVL_WPN_STATUS_RELOADING )
-	{
-		reloadTimer += dTime;
-
-		if ( reloadTimer >= _template.fReloadTimePerUnit )
-		{
-			ammoLeft += _template.nReloadUnitSize;
-			reloadTimer -= _template.fReloadTimePerUnit;
-
-			int nMaxBullets = _template.nClipSize;
-			//#HACK: la shotguns sa incarce automat pana la capat
-			if ( _template.nReloadUnitSize == 1 )
-				nMaxBullets = _template.nClipSize + _template.nBulletChamberSize;
-			if ( ammoLeft >= nMaxBullets )
-			{
-				CLAMP( ammoLeft, 0, _template.nClipSize + _template.nBulletChamberSize );
-				reloadTimer = 0.0f;
-
-				status = K_LVL_WPN_STATUS_READY;
-			}
-			else //daca incarca in mai multe secvente face play din nou la reload
-			{
-				SND_PLAY_POSITIONAL_RAND2( _template.sndidxReload, _template.sndidxReload2, pOwner->GetPosHeart() );
-			}
-		}
-	}
-	//daca e cooling dar no ammo pun status pe no ammo
-	if ( ammoLeft == 0 )
-	{
-		if ( status <= K_LVL_WPN_STATUS_COOLING )
-			status = K_LVL_WPN_STATUS_NO_AMMO;
-	}
+	bTriggerDownOld = bTriggerDown;
 
 	return status;
 }
@@ -162,75 +250,56 @@ void CWeapon::SetTriggerStates(bool bTriggerPushed, bool bReloadPushed)
 	bTriggerDown = bTriggerPushed;
 	//set reload trigger
 	bReloadDown = bReloadPushed;
-
-	//can reset jam timer
-	if ((nCanResetJamCount > 0) && (fJammedTimer > 0.0f) && (bTriggerDown == false) && (bTriggerDownOld == false))
-	{
-		fJammedTimer = 0.0f;
-		nCanResetJamCount--;
-	}
 }
 
 void CWeapon::ResetBurst()
 {
-	m_nBurstBulletsShot = 0;
-
-	if ( _template.bResetFireRateOnTriggerUp )
-		fireRateTimer = 0.0f;
-}
-
-bool CWeapon::Jam()
-{
-	if ( (status == K_LVL_WPN_STATUS_RELOADING) || (status == K_LVL_WPN_STATUS_UNKNOWN) )
-		return false;
-	if ( _template.fJammedDuration <= 0.0f )
-		return false;
-
-	if ( fJammedTimer < _template.fJammedDuration )
-		fJammedTimer = _template.fJammedDuration;
-
-	bTriggerDown = false;
-	return true;
+	if ( status == K_WPN_STATUS_BURST_COOLDOWN )
+	{
+		if ( _template.bResetFireRateOnTriggerUp )
+			fStateT = _template.fBurstCooldown;
+	}
 }
 
 void CWeapon::StopReloading()
 {
-	if ( status != K_LVL_WPN_STATUS_RELOADING )
+	if ( status != K_WPN_STATUS_RELOADING )
 		return;
 
 	bReloadDown = false;
-	fireRateTimer = 0.0f;
-	reloadTimer = 0.0f;
-
-	status = K_LVL_WPN_STATUS_READY;
+	fStateT = 0.0f;
+	if ( ammoLeft > 0 )
+		status = K_WPN_STATUS_READY;
+	else
+		status = K_WPN_STATUS_NO_AMMO;
 }
 
-
-bool CLevel::Weapon_CanShoot(CWeapon * weapon)
+void CWeapon::StopShootingCycle()
 {
-	//no weapon or empty weapon?
-	if ((weapon == null) || (weapon->_template.name.IsEmpty()))
-		return false;
-	/*
-	//#TODO: add more checkups or send this param to the AI input so he knows about it
-	CActor* actor = weapon->pOwner;
-	//shooting from the air?
-	if ((!weapon->WeaponTemplate.bCanShootFromAir) && (actor != null) && ((actor->collisionFlags & K_DIRFLAG_DOWN) == 0))
+	if ( IsShootingBullet() )
 	{
-		return false;
+		status = K_WPN_STATUS_READY;
+		fStateT = 0.0f;
 	}
-	*/
-
-	return true;
 }
 
-bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
+bool CWeapon::IsShootingBullet()
 {
-	if ((weapon == null) || (weapon->pOwner == null) || (weapon->status == K_LVL_WPN_STATUS_UNKNOWN))
+	if ( status == K_WPN_STATUS_JUST_SHOT || status == K_WPN_STATUS_CHARGING_UP || status == K_WPN_STATUS_WINDING_DOWN )
+		return true;
+	// all other states mean that the bullet cycle is not on
+	return false;
+}
+
+bool CLevel::Weapon_CheckShoot(CWeapon * weapon, Vec3 vDir)
+{
+	if ((weapon == nullptr) || (weapon->pOwner == nullptr) || (weapon->status == K_WPN_STATUS_UNKNOWN))
 		return false;
-	//make sure we don't shoot a jammed weapon
-	if (weapon->status == K_LVL_WPN_STATUS_JAMMED)
+
+	// only shoot on JUST_SHOT
+	if ( weapon->status != K_WPN_STATUS_JUST_SHOT )
 		return false;
+
 
 	bool bTwoHanded = !weapon->_template.bSingleHanded;
 	bool bDualWielding = weapon->_template.bDualWielding;
@@ -246,21 +315,8 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 	if (weapon->_template.bulletTemplate.eClass != K_LVL_ACT_CLASS_ANY)
 		nFinalClass = weapon->_template.bulletTemplate.eClass;
 
-	//don't shoot too often
-	if (weapon->fireRateTimer > 0.0f)
-		return false;
-	//ended burst => stop shooting
-	if ((weapon->_template.nBurstSize > 0) && (weapon->m_nBurstBulletsShot >= weapon->_template.nBurstSize))
-	{
-		weapon->status = K_LVL_WPN_STATUS_BURST_END;
-		return false;
-	}
-
 	//save local bullet template copy
 	CBulletTemplate tmplBullet = weapon->_template.bulletTemplate;
-
-	//init fire rate timer
-	weapon->fireRateTimer = weapon->_template.fFireRateWait;
 	//ammo (-1 infinite)
 	int nAmmoReal = weapon->ammoLeft;
 	//if weapon uses main weapon ammo check that ammo
@@ -271,48 +327,9 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 
 	if (nAmmoReal != 0)
 	{
-		//shooting sound (only if set). verific doar sndidx pentru ca vvarianta 2 contine cel putin valoarea primului
-		if (weapon->_template.sndidxShoot >= 0)
-		{
-			SND_PLAY_POSITIONAL_RAND2(weapon->_template.sndidxShoot, weapon->_template.sndidxShoot2, weapon->pOwner->GetPosHeart());
-			weapon->fTimeSinceShot = 0.0f;
-		}
 
-		if (weapon->ammoLeft > 0)
-			weapon->ammoLeft--;
 
-		//set status
-		weapon->status = K_LVL_WPN_STATUS_JUST_SHOT;
-
-		weapon->m_nBurstBulletsShot++;
-		weapon->m_nBulletsShotSinceCool++;
-		//process aim error
-		/*
-		float fAimAng = UTMath::GetVectorAngle(vFinalDir);
-		float fAimAngError = 0.0f;
-		if (weapon->WeaponTemplate.fAimErrorAddPerShot < 0.0f)
-		{
-			fAimAngError = m_rand.RandFloatSgn(weapon->WeaponTemplate.fAimErrorMaxFOV - weapon->fAimErrorFOV);
-		}
-		else
-		{
-			fAimAngError = m_rand.RandFloatSgn(weapon->fAimErrorFOV);
-		}
-		//better aiming when crouched or in cover
-		float fMul = 1.0f;
-		if (shooter->bCrouched)
-			fMul = K_LVL_CROUCH_ERROR_MULTIPLIER;
-
-		fAimAngError *= fMul;
-		//apply template aiming multiplier
-		//fAimAngError *= shooter->actTemplate.fRecoilModifier;
-		//add aiming error
-		fAimAng += fAimAngError;
-		*/
-		//some weapons force the actor to play a verse when shooting
-		//PlayActorSoundVerse(shooter, weapon->WeaponTemplate.sndActorVerse);
-
-		//also shoot bullets
+		// shoot bullets
 		for (int kk = 0; kk < weapon->_template.nBulletsPerShot; kk++)
 		{
 			//add weapon spread
@@ -325,20 +342,14 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 			CBullet* bullet = ShootBullet(&tmplBullet, nFinalClass, shooter->GetUID(), vShootPos.xyz, vFinalDir);
 		}
 
-		//adaug shell
+		// add shell
 		if (weapon->_template.nDropShellFrame >= 0)
 		{
 			AddDoofer(K_DOOFER_SHELL, weapon->pOwner->GetPosHeart(), &Vec2((40.0f + randfloat(30.0f)), -50.0f - randfloat(20.0f)), &g_vecGravityOld, weapon->_template.nDropShellFrame);
 		}
 
-		float fAimErrorMul = 1.0f;
 
-		weapon->fAimErrorFOV += fabs(weapon->_template.fAimErrorAddPerShot); //add aim error (can be negative too)
-		weapon->fAimErrorFOV *= weapon->_template.fAimErrorMulPerShot; //add non linear error
-		weapon->fAimErrorFOV *= fAimErrorMul; //scale aiming error from perks
-		CLAMP(weapon->fAimErrorFOV, 0.0f, weapon->_template.fAimErrorMaxFOV); //limit max error fov
-
-		//make light
+		// make light
 		if (weapon->_template.fMuzzleLightSize > 0.0f)
 		{
 			//prop - nozzle light
@@ -346,18 +357,9 @@ bool CLevel::Weapon_Shoot(CWeapon * weapon, Vec3 vDir)
 			CLAMP(fPropAlpha, 0.0f, 1.0f);
 			//			AddProp_Light(vShootPos, ANM_LIGHTS_SPR_POINT1, 0.05f, 0.0f, D3DCOLOR_COLORALPHA(0xffFDB727, fPropAlpha), weapon->WeaponTemplate.fMuzzleLightSize);
 		}
-		//adaug eventAI de sunet
+		// add AI sound event
 		AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, shooter->GetUID(), shooter->_template.actorClass, shooter->GetPosHeart(), weapon->_template.fSoundRadius);
 	}
-	else
-	{
-		//empty clip sound
-		SND_PLAY_POSITIONAL_RAND2(weapon->_template.sndidxEmpty, weapon->_template.sndidxEmpty2, weapon->pOwner->GetPosHeart());
-		weapon->status = K_LVL_WPN_STATUS_NO_AMMO;
-
-		return false;
-	}
-
 
 	return true;
 }
@@ -484,8 +486,6 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 
 		if (!bnode.attribute(L"fSpeedPenaltyPercent").empty())
 			templ->fSpeedPenaltyPercent = bnode.attribute(L"fSpeedPenaltyPercent").as_float();
-		if (!bnode.attribute(L"bPassive").empty())
-			templ->bPassive = bnode.attribute(L"bPassive").as_bool();
 
 		//muzzle flash anim
 		templ->nMuzzleFlashAnim = -1;
@@ -556,9 +556,9 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 			if (bnode.attribute(L"bBulletDirectional").as_bool())
 				templ->bulletTemplate.nFlags |= K_LVL_BULLET_FLAG_DIRECTIONAL;
 			///--- weapon data ---
-			//calculam timpul intre gloante din fire rate per second
-			templ->fFireRateWait = bnode.attribute(L"fFireRatePerSec").as_float();
-			templ->fFireRateWait = 1.0f / templ->fFireRateWait;
+			templ->fCooldownT = bnode.attribute(L"fCooldownT").as_float();
+			templ->fChargeUpT = bnode.attribute( L"fChargeUpT" ).as_float();
+			templ->fWindDownT = bnode.attribute( L"fWindDownT" ).as_float();
 
 			//other constants
 			templ->nBulletsPerShot = bnode.attribute(L"nBulletsPerShot").as_int();
@@ -578,7 +578,6 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 			templ->fBurstCooldown = bnode.attribute(L"fBurstCooldown").as_float();
 			templ->fMuzzleLightSize = bnode.attribute(L"fMuzzleLightSize").as_float();
 			templ->bHasLaserSight = bnode.attribute(L"bHasLaserSight").as_bool();
-			templ->fJammedDuration = bnode.attribute(L"fJammedDuration").as_float();
 			templ->fSoundRadius = bnode.attribute(L"fSoundRadius").as_float();
 			//rectificate
 			if (!bnode.attribute(L"fAimErrorMulPerShot").empty())
@@ -637,7 +636,7 @@ CWeapon* CLevel::Weapon_Create(WCHAR* weaponTemplateName, CActor* pParent)
 	// copy data to local weapon template as we need it later on
 	pWeapon->_template = *wTempl;
 	// signal valid weapon
-	pWeapon->status = K_LVL_WPN_STATUS_READY;
+	pWeapon->status = K_WPN_STATUS_READY;
 	pWeapon->ammoLeft = pWeapon->_template.nClipSize + pWeapon->_template.nBulletChamberSize;
 	// make sure infinite ammo is infinite
 	if (pWeapon->_template.nClipSize < 0)

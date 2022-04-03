@@ -251,38 +251,40 @@ void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 VecProj CActor::GetWeaponMountWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 {
 	// get mount position in screen space (from editor)
-	Vec2 vMount = c_graphics->GetMountPoint( bTwoHanded, mountIndex );
+	Vec2 v_mount = c_graphics->GetMountPoint( bTwoHanded, mountIndex );
 	// add weapon mount offset
-	Vec2 vWpnOff = c_weapons->GetCurrentWeapon()->_template.vMountOffset;
-	vWpnOff.x *= (float)c_graphics->GetFlipDirX();
-	vMount += vWpnOff;
+	Vec2 v_wpn_off = c_weapons->GetCurWeapon()->_template.vMountOffset;
+	v_wpn_off.x *= (float)c_graphics->GetFlipDirX();
+	v_mount += v_wpn_off;
 
 	VecProj vpRet = pos;
-	vpRet.Set( pos.xyz.x + vMount.x, pos.xyz.y, pos.xyz.z - H_TO_Z( vMount.y ));
+	vpRet.Set( pos.xyz.x + v_mount.x, pos.xyz.y, pos.xyz.z - H_TO_Z( v_mount.y ));
 	return vpRet;
 }
 
 VecProj CActor::GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 {
 	// get mount position in screen space (from editor)
-	Vec2 vMuzzleVec = c_weapons->GetWeaponMuzzlePoint();
-	VecProj vpMount = GetWeaponMountWorld( bTwoHanded, mountIndex );
+	Vec2 v_muzzle_vec = c_weapons->GetWeaponMuzzlePoint();
+	VecProj vp_mount = GetWeaponMountWorld( bTwoHanded, mountIndex );
 	// if animations are flipped we need to also flip the weapon vectors
-	vMuzzleVec.y *= (float)c_graphics->GetFlipDirX();
+	v_muzzle_vec.y *= (float)c_graphics->GetFlipDirX();
 	// rotate weapon muzzle vector and add it to the projected position of the mount
 	Mat mrot;
 	float aim_angle = UTMath::GetVectorAngle( m_AIcommands.vAimVec );
 	MUMatRotZ( &mrot, aim_angle );
-	MUVec2TransformCoord( &vMuzzleVec, &vMuzzleVec, &mrot );
-	Vec2 muzzle_proj = vpMount.xy_proj + vMuzzleVec;
+	MUVec2TransformCoord( &v_muzzle_vec, &v_muzzle_vec, &mrot );
+	Vec2 muzzle_proj = vp_mount.xy_proj + v_muzzle_vec;
 	// transform mount position from projected to 3d, knowing that it shoots at the heart height
 	return VecProj( muzzle_proj.x, muzzle_proj.y + Z_TO_H(_template.heartZ), _template.heartZ );
 }
 
-void CActor::EquipWeapon( int wpnIdx )
+void CActor::EquipWeapon( EWpnSlot wpnSlot )
 {
-	const CWeapon* wpn = c_weapons->Equip( CWeaponsComponent::K_WPNSLOT_PRIMARY );
+	LOG( "Equipped slot: %d", wpnSlot );
+	const CWeapon* wpn = c_weapons->Equip( wpnSlot );
 	// hide hands corresponding to current weapon mode
+	// it always does the full thing even if already on the same weapon
 	//#TODO: ar trebui facuta o functie separata care sa ia in considerare si behaviour curent daca ascunde arme sau nu?
 	if ( wpn == nullptr )
 		c_graphics->SetSkinFlags( *this, true, true );

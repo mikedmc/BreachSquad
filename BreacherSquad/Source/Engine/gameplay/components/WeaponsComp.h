@@ -9,24 +9,13 @@ public:
 	enum EHitPtFlag {
 		K_HITPTFLAG_MUZZLE = 1,								// frame hitpoint flag for muzzle
 	};
-	// equipped weapons 
-	enum EWpnSlot {
-		K_WPNSLOT_NONE = -1,
-
-		K_WPNSLOT_PRIMARY = 0,
-		K_WPNSLOT_ALTFIRE = 1,
-		K_WPNSLOT_GEAR,
-		K_WPNSLOT_MELEE,
-
-		K_WPNSLOTS_CNT
-	};
 
 private:
 	CSpriteLib*					pSprLib;					// pointer to sprite library from pLib
 	CStringHash					shParentName;				// Name of owner (optional)
 
 	CSpr						sprite;						// Weapon sprite
-	Vec2						vAim;						// aiming direction
+	Vec3						vAim;						// aiming direction
 	Vec2						vMuzzleVec;					// weapon muzzle vector (from weapon origin, local space)
 	bool						bVisible;					// if not visible then it doesn't render
 
@@ -43,20 +32,24 @@ public:
 	virtual void				Paint( CActor& act, ETexChannel eChannel = K_TEXCHAN_COLORMAP );
 	// Adds a weapon to the inventory 
 	void						AddWeapon( CActor& act, CWeaponTemplate * primary, EWpnSlot slot );
+	// returns weapon on slot
+	inline CWeapon*				GetWeapon( EWpnSlot slot ) { return &arrWeapons[ eActiveSlot ]; }
 	// Equips new weapon by index and returns pointer to weapon
 	const CWeapon*				Equip( EWpnSlot slot );
 	// sets the triggers for currently used weapon
 	void						SetTriggerStates( bool bTriggerPushed, bool bReloadPushed );
 	// Returns current weapon
-	inline CWeapon*				GetCurrentWeapon() { return &arrWeapons[eActiveSlot]; };
+	inline CWeapon*				GetCurWeapon() { return &arrWeapons[eActiveSlot]; };
+	// Returns current/active weapon slot
+	inline EWpnSlot				GetCurWeaponSlot() { return eActiveSlot; }
 	// Stops reloading current weapon		
 	void						StopReloading();
-	// Jams current weapon
-	void						JamWeapon();
 	// Returns the local offset of the gun muzzle from the gun origin
 	inline Vec2					GetWeaponMuzzlePoint() const { return vMuzzleVec; }
 	// returns weapons aim vector
-	inline Vec2					GetWeaponAimVec() const { return vAim; }
+	inline Vec3					GetWeaponAimVec() const { return vAim; }
 	// sets component visibility
 	inline void					SetVisible( bool visible ) { bVisible = visible; }
+	// is slot ready to shoot? returns true even if already shooting.
+	bool						CanShoot( EWpnSlot slot );
 };

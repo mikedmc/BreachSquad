@@ -47,7 +47,7 @@ CController* CControllersManager::AddController(EControllerType neType, WCHAR * 
 
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_JUMP, SDL_SCANCODE_SPACE, 0.0f, 1.0f);
 			ctrl->AddTrigger(K_CM_POINTER_BUTTON, K_CM_COMMAND_FIRE1, SDL_BUTTON_LEFT, 0.0f, 1.0f);
-			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_FIRE2, SDL_SCANCODE_LSHIFT, 0.0f, 1.0f);
+			ctrl->AddTrigger(K_CM_POINTER_BUTTON, K_CM_COMMAND_FIRE2, SDL_BUTTON_RIGHT, 0.0f, 1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_USE_GEAR, SDL_SCANCODE_E, 0.0f, 1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_RELOAD, SDL_SCANCODE_R, 0.0f, 1.0f);
 			ctrl->AddTrigger(K_CM_BUTTON, K_CM_COMMAND_MELEE, SDL_SCANCODE_C, 0.0f, 1.0f);

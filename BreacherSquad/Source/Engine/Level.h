@@ -244,11 +244,9 @@ public:
 	int						m_fogofwarMeshIdx;		//idx mesh occludere
 
 	///--- WEAPONS ---
-	// can we shoot the weapon? some weapons have pre-shoot conditions (maybe not working underWATER)
-	bool					Weapon_CanShoot(CWeapon * weapon);
-	// Trage cu arma specificata
-	// \returns: true daca a putut sa traga sau false daca nu
-	bool					Weapon_Shoot(CWeapon * weapon, Vec3 vDir);
+	// checks weapon states to see if we must generate the bullets
+	// \returns: true if shotm false if it didn't
+	bool					Weapon_CheckShoot(CWeapon * weapon, Vec3 vDir);
 
 	///--- BULLETS ---
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.

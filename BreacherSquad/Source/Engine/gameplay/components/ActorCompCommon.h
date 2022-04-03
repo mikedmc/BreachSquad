@@ -9,3 +9,15 @@ enum EAnimEvent {
 
 	FEVTS_COUNT
 };
+
+// available active weapon slots on current actor
+enum EWpnSlot {
+	K_WPNSLOT_NONE = -1,
+
+	K_WPNSLOT_PRIMARY = 0,
+	K_WPNSLOT_ALTFIRE = 1,
+	K_WPNSLOT_GEAR,
+	K_WPNSLOT_MELEE,
+
+	K_WPNSLOTS_CNT
+};
