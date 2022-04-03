@@ -1105,7 +1105,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			{
 				case K_CM_COMMAND_MELEE:
 				{
-					targetAct->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_MELEE;
+					targetAct->m_AIcommands.eAttackCommand = K_ACT_ATTACK_MELEE;
 					//breach door if ordered so
 					if (nModifier != 0)
 					{
@@ -1115,7 +1115,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 						if (pExecutor != null)
 							targetAct->m_AIcommands.nLookDirX = SIGN(pExecutor->bbox.vCenter.x - targetAct->bbox.vCenter.x);
 							*/
-						targetAct->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_BREACH;
+						targetAct->m_AIcommands.eAttackCommand = K_ACT_ATTACK_BREACH;
 					}
 				}
 				break;

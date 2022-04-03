@@ -33,7 +33,7 @@ public:
 	// Adds a weapon to the inventory 
 	void						AddWeapon( CActor& act, CWeaponTemplate * primary, EWpnSlot slot );
 	// returns weapon on slot
-	inline CWeapon*				GetWeapon( EWpnSlot slot ) { return &arrWeapons[ eActiveSlot ]; }
+	inline CWeapon*				GetWeapon( EWpnSlot slot ) { return &arrWeapons[ slot ]; }
 	// Equips new weapon by index and returns pointer to weapon
 	const CWeapon*				Equip( EWpnSlot slot );
 	// sets the triggers for currently used weapon

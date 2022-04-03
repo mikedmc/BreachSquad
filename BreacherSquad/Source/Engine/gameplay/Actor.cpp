@@ -28,7 +28,7 @@ CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteActor
 	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nLastDamageTakenFromUID(0),
 	pClosestTouchable(nullptr), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), bHasGravity(true),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
-	eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0)
+	eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0), eAttackStatus(K_ACT_ATTACK_IDLE)
 {
 	_ASSERT(pComGraphics != nullptr);
 	// save pointer to component
@@ -163,8 +163,12 @@ void CActor::Update(float dTime)
 	}
 	*/
 
+
 	//#TODO: update all components after we have the final player position
 	c_graphics->Update(*this, dTime);
+
+	// compute stuff linked to the weapons before updating the weapons
+	ComputeAttackStatus();
 	// update weapon after updating the body because it depends on mount points
 	c_weapons->Update( *this, dTime );
 
@@ -350,6 +354,172 @@ void CActor::ApplyWeaponTemplate(CWeapon * pWeapon)
 		}
 	}
 	*/
+}
+
+void CActor::ComputeAttackStatus()
+{
+	switch ( eAttackStatus )
+	{
+		case K_ACT_ATTACK_IDLE:
+		{
+			eAttackStatus = m_AIcommands.eAttackCommand;
+			// only switch to alt weapon if we can shoot
+			if ( m_AIcommands.eAttackCommand == K_ACT_ATTACK_SHOOTING_ALT )
+			{
+				CWeapon* wpn = c_weapons->GetWeapon( K_WPNSLOT_ALTFIRE );
+				if ( !wpn->IsReadyToShoot() )
+					eAttackStatus = K_ACT_ATTACK_IDLE;
+			}
+		}
+		break;
+		case K_ACT_ATTACK_SHOOTING:
+		{
+			CWeapon* wpn = c_weapons->GetWeapon( K_WPNSLOT_PRIMARY );
+			if ( wpn->IsShootingBullet() == false )
+				eAttackStatus = K_ACT_ATTACK_IDLE;
+		}
+		break;
+		case K_ACT_ATTACK_SHOOTING_ALT:
+		{
+			CWeapon* wpn = c_weapons->GetWeapon( K_WPNSLOT_ALTFIRE );
+			if ( wpn->IsShootingBullet() == false )
+				eAttackStatus = K_ACT_ATTACK_IDLE;
+		}
+		break;
+		case K_ACT_ATTACK_RELOADING:
+		{
+			CWeapon* wpn = c_weapons->GetCurWeapon();
+			/// loading can only be interrupted by nome actions
+			if ( wpn->status == K_WPN_STATUS_RELOADING )
+			{
+				//can't shoot until you reload on weapons with bullets clip
+				if ( wpn->_template.nReloadUnitSize >= wpn->_template.nClipSize )
+				{
+					// reloading can be interrupted by the following commands
+					if ( m_AIcommands.eAttackCommand == K_ACT_ATTACK_MELEE )
+					{
+						wpn->StopReloading();
+						eAttackStatus = K_ACT_ATTACK_IDLE;
+					}
+				}
+			}
+			else
+			{
+				eAttackStatus = K_ACT_ATTACK_IDLE;
+			}
+		}
+		break;
+		default:
+			eAttackStatus = K_ACT_ATTACK_IDLE;
+			break;
+	}
+
+
+	//daca sunt cu arma care incarca glont cu glont pot schimba si in timp ce incarca
+	/*
+	if ((pNewWeapon != null) && (pNewWeapon != actor->pWeaponMain) &&
+		(actor->pWeaponMain->_template.nReloadUnitSize < actor->pWeaponMain->_template.nClipSize) &&
+		(actor->nAttackStatus == K_LVL_ACT_ATTACK_RELOADING))
+	{
+		Weapon_StopReloading(actor->pWeaponMain);
+		actor->nAttackStatus = K_LVL_ACT_ATTACK_IDLE;
+	}
+	*/
+
+	//change weapon
+	/*
+	if ((pNewWeapon != null) && (actor->nAttackStatus == K_LVL_ACT_ATTACK_IDLE) && (pNewWeapon != actor->pWeaponMain) &&
+		((actor->pWeaponMain->status <= K_LVL_WPN_STATUS_COOLING) || (actor->pWeaponMain->status == K_LVL_WPN_STATUS_NO_AMMO)) )
+	{
+		//raise triggers
+		actor->pWeaponMain->SetTriggerStates(false, false);
+		//stop reloading if was reloading
+		Weapon_StopReloading(actor->pWeaponMain);
+		//switch to new weapon
+		actor->pWeaponMain = pNewWeapon;
+		SetActorWeaponPerks(actor, pNewWeapon);
+	}
+	else
+	{
+		// non valid weapon change
+		if (pNewWeapon != actor->pWeaponMain)
+			actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
+	}
+	*/
+	//verificari diverse ex. daca esti in aer si tragi cu o arma ce nu poate fi trasa din aer se intrerupe
+	/*
+	if ((actor->m_AIcommands.eAttackCommand >= K_LVL_ACT_ATTACK_SHOOTING) || (actor->eAttackStatus >= K_LVL_ACT_ATTACK_SHOOTING))
+	{
+		if ( !actor->Weapons()->CanShoot( eCurSlot ) )
+		{
+			actor->m_AIcommands.eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
+			actor->eAttackStatus = K_LVL_ACT_ATTACK_IDLE;
+		}
+	}
+	*/
+
+
+	/// decide necessary weapon based on command
+	EWpnSlot eCurSlot = K_WPNSLOT_PRIMARY;
+	// switches weapon based on commands
+	if ( (eAttackStatus == K_ACT_ATTACK_SHOOTING) || (eAttackStatus == K_ACT_ATTACK_RELOADING) )
+		eCurSlot = K_WPNSLOT_PRIMARY;
+	else if ( eAttackStatus == K_ACT_ATTACK_SHOOTING_ALT )
+		eCurSlot = K_WPNSLOT_ALTFIRE;
+
+	//see if weapon needs to be changed
+	if ( eCurSlot != c_weapons->GetCurWeaponSlot() )
+	{
+		EquipWeapon( eCurSlot );
+	}
+	CWeapon* pWeapon = c_weapons->GetCurWeapon();
+
+	if ( eAttackStatus >= K_ACT_ATTACK_SHOOTING )
+	{
+		pWeapon->SetTriggerStates( true, false );
+	}
+	else if ( eAttackStatus == K_ACT_ATTACK_RELOADING )
+	{
+		if ( pWeapon->_template.nReloadUnitSize != 0 )
+			pWeapon->SetTriggerStates( false, true );
+	}
+	else
+	{
+		pWeapon->SetTriggerStates( false, false );
+	}
+
+
+
+	//daca are laser sight o activeaza acum, o singura data cand se da comanda de shoot
+	/*
+	if ((pWeaponMain->_template.bHasLaserSight) && (actor->nAttackStatus != actor->m_AIcommands.eAttackCommand) && (actor->m_AIcommands.eAttackCommand >= K_LVL_ACT_ATTACK_SHOOTING))
+	{
+		pWeaponMain->bPaintLaserSight = true;
+	}
+	*/
+
+
+	//daca arma curenta nu poate trage din crouch scot crouch
+	/*
+	if ((actor->bCrouched == true) && (!pWeaponMain->_template.bCanShootFromCrouch))
+	{
+		if (actor->nAttackStatus >= K_LVL_ACT_ATTACK_SHOOTING)
+			actor->bCrouched = false;
+	}
+	*/
+
+	// weapons that stop you while shooting:
+	/*
+	if (actor->pWeaponMain->_template.fShooterSpeedSlowingPercent >= 1.0f)
+	{
+		if ((actor->m_AIcommands.eAttackCommand != K_LVL_ACT_ATTACK_IDLE) || (actor->nAttackStatus != K_LVL_ACT_ATTACK_IDLE))
+		{
+			actor->m_AIcommands.bThrust = false;
+			//actor->m_AIcommands.nMoveDirX = 0;
+		}
+	}
+	*/
+
 }
 
 void CActor::BuildActionsList()

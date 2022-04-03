@@ -151,5 +151,7 @@ public:
 	void					StopShootingCycle();
 	// returns true if it is during the shooting cycle
 	bool					IsShootingBullet();
+	// returns true if weapon will shoot a bullet (ALL CONDITIONS)
+	bool					IsReadyToShoot();
 };
 

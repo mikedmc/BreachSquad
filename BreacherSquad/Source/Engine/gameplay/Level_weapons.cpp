@@ -291,6 +291,16 @@ bool CWeapon::IsShootingBullet()
 	return false;
 }
 
+bool CWeapon::IsReadyToShoot()
+{
+	//#TODO: should account for the owner complying with the conditions (nod on ladder, not mid-flight)
+	//#TODO: should account for main weapon ammo if consuming from there
+	if (( ammoLeft == 0) || (status != K_WPN_STATUS_READY ))
+		return false;
+
+	return true;
+}
+
 bool CLevel::Weapon_CheckShoot(CWeapon * weapon, Vec3 vDir)
 {
 	if ((weapon == nullptr) || (weapon->pOwner == nullptr) || (weapon->status == K_WPN_STATUS_UNKNOWN))

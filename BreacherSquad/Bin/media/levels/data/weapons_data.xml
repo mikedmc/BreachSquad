@@ -47,7 +47,7 @@ fBulletCriticalChance="0.0" - values between 0.0 and 1.0 - chance for a bullet t
   <WeaponTemplates>
 
     <PISTOLET 	nType="0" sHUDanimName="WEAPON_SMG_MP5A3" fSpeedPenaltyPercent="0.0" singleHanded="1" dualWielding="0" mountOffX="0" mountOffY="0" altFire="WPN_SUBMACHINE_STEADY"
-				fCooldownT="1.0"
+				fCooldownT="0.4"
 				animShoot="PISTOL" animReload="PISTOL_R"
 				bBulletChamber="true" fShooterSpeedSlowingPercent="0.2" fMuzzleLightSize="1.0" sMuzzleFlashAnim="MUZZLE_SMG1"
 				fSpreadFOV="0.05" fAimErrorMaxFOV="0.28" fAimErrorAddPerShot="0.015" fAimErrorMulPerShot="1.12" fAimErrorCooldownPerSec="0.74"

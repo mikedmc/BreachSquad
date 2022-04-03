@@ -44,13 +44,13 @@ const CStringHash EActorDeathCommandNames[] = {
 // Actor attack states
 //--- ORDER IS VERY IMPORTANT ---
 enum EActorAttackState {
-	K_LVL_ACT_ATTACK_IDLE,
-	K_LVL_ACT_ATTACK_RELOADING,
-	K_LVL_ACT_ATTACK_SHOOTING,
-	K_LVL_ACT_ATTACK_SHOOTING_ALT,
-	K_LVL_ACT_ATTACK_USING_GEAR,
-	K_LVL_ACT_ATTACK_MELEE,
-	K_LVL_ACT_ATTACK_BREACH,  //used mostly for breaching doors
+	K_ACT_ATTACK_IDLE,
+	K_ACT_ATTACK_RELOADING,
+	K_ACT_ATTACK_SHOOTING,
+	K_ACT_ATTACK_SHOOTING_ALT,
+	K_ACT_ATTACK_USING_GEAR,
+	K_ACT_ATTACK_MELEE,
+	K_ACT_ATTACK_BREACH,  //used mostly for breaching doors
 };
 
 
@@ -128,8 +128,8 @@ public:
 		nColor = 0;
 
 		nDeathCommand = K_LVL_ACT_DEATHCMD_NONE;
-		eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
-		eAttackCommand_last = K_LVL_ACT_ATTACK_IDLE;
+		eAttackCommand = K_ACT_ATTACK_IDLE;
+		eAttackCommand_last = K_ACT_ATTACK_IDLE;
 		//eOverrideAnim = K_LVL_ACT_ANIM_EMPTY;
 	}
 
@@ -142,7 +142,7 @@ public:
 		bCrouched = false;
 		bJump = false;
 		bInteract = false;
-		eAttackCommand = K_LVL_ACT_ATTACK_IDLE;
+		eAttackCommand = K_ACT_ATTACK_IDLE;
 	}
 };
 
