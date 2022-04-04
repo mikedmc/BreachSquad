@@ -767,7 +767,8 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	UTGetTTFManager().OnCreateDevice(pDevice, pBBDesc);
 
 	V_RETURN(UTApp().OnCreateDevice(pDevice, pBBDesc));
-	V_OP_RETHR(UTGetRTManager().OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(__RTManager().OnCreateDevice(pDevice, pBBDesc));
+
 	V_OP_RETHR(__Game().OnCreateDevice( pDevice, pBBDesc ));
 
 	UTimgui().OnCreateDevice(pDevice, pBBDesc);
@@ -833,17 +834,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(D3DXCreateSprite(pDevice, &g_pGameSprite));
 	//should be first to be called here
 	V_RETURN(UTApp().OnResetDevice(pDevice, pBBDesc));
-	// Because the render targets and handled globally and are changing in size depending on screen resolution we just release them in OnLostDevice and re-create them in OnResetDevice
-	V_OP_RETHR(UTGetRTManager().OnResetDevice(pDevice, pBBDesc));
-	// Create necessary render targets when device gets reset (created or reset)
-	UINT fGameHpx = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
-	UINT fGameWpx = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
-	// Create RTs
-	UTGetRTManager().AddRT(K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
-	UTGetRTManager().AddRT(K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
-	UTGetRTManager().AddRT(K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
-	//if (UTGetAppClass().m_Settings.nLOD_lights >= K_UT_LOD_MED)
-		//UTGetRenderTargetsManager().AddRT(K_RTID_SPECULARMAP, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false);
+	V_OP_RETHR(__RTManager().OnResetDevice(pDevice, pBBDesc));
 
 	V_OP_RETHR( __Game().OnResetDevice( pDevice, pBBDesc ) );
 
@@ -925,10 +916,7 @@ void CALLBACK OnLostDevice(void)
 
 	__TexFonts().OnLostDevice();
 	UTGetGUI().OnLostDevice();
-	//because the render targets and handled globally and are changing in size depending on screen resolution we just release them in OnLostDevice and re-create them in OnResetDevice
-	//#TODO: RTs don't change so we should not deallocate them
-	UTGetRTManager().Release();
-	UTGetRTManager().OnLostDevice();
+	__RTManager().OnLostDevice();
 
 	__Game().OnLostDevice();
 
@@ -957,7 +945,7 @@ void CALLBACK OnDestroyDevice(void)
 	g_font1.Release();
 
 	UTApp().OnDestroyDevice();
-	UTGetRTManager().OnDestroyDevice();
+	__RTManager().OnDestroyDevice();
 	__Game().OnDestroyDevice();
 
 	UTimgui().OnDestroyDevice();

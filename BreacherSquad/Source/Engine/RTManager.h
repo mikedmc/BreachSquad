@@ -71,4 +71,4 @@ public: //--- framework methods ---
 };
 
 ///--- SINGLETON ---
-CRTManager& UTGetRTManager();
+CRTManager& __RTManager();

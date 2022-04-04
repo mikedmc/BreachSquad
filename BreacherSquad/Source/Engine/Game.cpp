@@ -585,7 +585,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 
 			if ( DXUTIsKeyDown( '9' ) )
 			{
-				CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
 				if ( pRT != null )
 				{
 					pSpr->Flush();
@@ -599,7 +599,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			}
 			if ( DXUTIsKeyDown( '8' ) )
 			{
-				CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID( K_RTID_TEMP1 );
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
 				if ( pRT != null )
 				{
 					pSpr->Flush();
@@ -613,7 +613,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			}
 			if ( DXUTIsKeyDown( '0' ) )
 			{
-				CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID( K_RTID_FINAL );
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );
 				if ( pRT != null )
 				{
 					pSpr->Flush();

@@ -7517,10 +7517,10 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 1. NORMAL MAP AND HEIGHT MAP
 	///----------------------------------------------------
-	pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
+	pRT = __RTManager().GetRTbyUID(K_RTID_TEMP1);
 	if (pRT != null)
 	{
-		if(OP_SUCCESS(UTGetRTManager().BeginSceneRT(pRT)))
+		if(OP_SUCCESS(__RTManager().BeginSceneRT(pRT)))
 		{
 			// Clear the render target and the zbuffer 
 			if (FAILED(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0)))
@@ -7542,17 +7542,17 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			// end sprite
 			//m_pSprite->End();
 
-			V_OP_RET(UTGetRTManager().EndSceneRT(pRT));
+			V_OP_RET(__RTManager().EndSceneRT(pRT));
 		}
 	}
 
 	///----------------------------------------------------
 	/// 2. LIGHT MAP
 	///----------------------------------------------------
-	pRT = UTGetRTManager().GetRTbyUID(K_RTID_COLORDEPTHSTENCIL);
+	pRT = __RTManager().GetRTbyUID(K_RTID_COLORDEPTHSTENCIL);
 	if (pRT != null)
 	{
-		if(OP_SUCCESS(UTGetRTManager().BeginSceneRT(pRT)))
+		if(OP_SUCCESS(__RTManager().BeginSceneRT(pRT)))
 		{
 			// Clear the render target and the zbuffer 
 			if (FAILED(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, 0xff000000, 1.0f, 0)))
@@ -7576,7 +7576,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			// end sprite
 			//m_pSprite->End();
 
-			V_OP_RET(UTGetRTManager().EndSceneRT(pRT));
+			V_OP_RET(__RTManager().EndSceneRT(pRT));
 
 		}
 	}
@@ -7584,10 +7584,10 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 3. COLOR MAP - overwrites the normal map as we don't need it anymore
 	///----------------------------------------------------
-	pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
+	pRT = __RTManager().GetRTbyUID(K_RTID_TEMP1);
 	if (pRT != null)
 	{
-		if(OP_SUCCESS(UTGetRTManager().BeginSceneRT(pRT)))
+		if(OP_SUCCESS(__RTManager().BeginSceneRT(pRT)))
 		{
 			// Clear the render target and the zbuffer 
 			if (FAILED(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0)))
@@ -7610,17 +7610,17 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			// end sprite
 			//m_pSprite->End();
 
-			V_OP_RET(UTGetRTManager().EndSceneRT(pRT));
+			V_OP_RET(__RTManager().EndSceneRT(pRT));
 		}
 	}
 
 	///----------------------------------------------------
 	/// 4. COMPOSITION - composes buffers into one
 	///----------------------------------------------------
-	pRT = UTGetRTManager().GetRTbyUID(K_RTID_FINAL);
+	pRT = __RTManager().GetRTbyUID(K_RTID_FINAL);
 	if (pRT != null)
 	{
-		if(OP_SUCCESS(UTGetRTManager().BeginSceneRT(pRT)))
+		if(OP_SUCCESS(__RTManager().BeginSceneRT(pRT)))
 		{
 			// Clear the render target and the zbuffer 
 			if (FAILED(m_pDevice->Clear(0, NULL, D3DCLEAR_TARGET, 0xffff0000, 1.0f, 0)))
@@ -7644,7 +7644,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			// end sprite
 			m_pSprite->End();
 
-			V_OP_RET(UTGetRTManager().EndSceneRT(pRT));
+			V_OP_RET(__RTManager().EndSceneRT(pRT));
 
 		}
 	}
@@ -7970,7 +7970,7 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 	
 
 	///--- point lights
-	CRTManager::CEngineRenderTarget* pRT = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
+	CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID(K_RTID_TEMP1);
 	if (pRT != null)
 	{
 		m_pDevice->SetTexture(0, pRT->m_pRTTexture);
@@ -8132,10 +8132,10 @@ OPRESULT CLevel::RenderPass_Composition( Mat* matProj, float fBetweenFramesPerce
 	PPIXELSHADER pPShader = null;
 	Mat matWVP = matView * (*matProj);
 
-	CRTManager::CEngineRenderTarget* pRTcolor = UTGetRTManager().GetRTbyUID(K_RTID_TEMP1);
+	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID(K_RTID_TEMP1);
 	if (pRTcolor != null)
 		m_pDevice->SetTexture(0, pRTcolor->m_pRTTexture);
-	CRTManager::CEngineRenderTarget* pRTlights = UTGetRTManager().GetRTbyUID(K_RTID_COLORDEPTHSTENCIL);
+	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID(K_RTID_COLORDEPTHSTENCIL);
 	if (pRTlights != null)
 		m_pDevice->SetTexture(1, pRTlights->m_pRTTexture);
 
@@ -8209,7 +8209,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	//real screen space
 	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_camScreen);
 	//paint game 
-	CRTManager::CEngineRenderTarget* pRTfinal = UTGetRTManager().GetRTbyUID(K_RTID_FINAL);
+	CRTManager::CEngineRenderTarget* pRTfinal = __RTManager().GetRTbyUID(K_RTID_FINAL);
 	if (pRTfinal != null)
 	{
 		CCameraTransform::SetActiveCameraIdentity(m_pDevice);

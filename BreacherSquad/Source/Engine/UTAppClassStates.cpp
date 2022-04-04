@@ -11,6 +11,15 @@ int nLoadingFrame = 0;
 
 void CApplication::App_EnterState_Loading()
 {
+	// Create necessary render targets when device gets reset (created or reset)
+	UINT fGameHpx = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
+	UINT fGameWpx = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
+	// Create RTs
+	__RTManager().AddRT( K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
+
+
 	GameState::substate = 0;
 	GameState::fTimer = 0.0f;
 	//make sure we release everything

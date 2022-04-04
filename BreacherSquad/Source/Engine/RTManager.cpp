@@ -249,7 +249,7 @@ OPRESULT CRTManager::OnDestroyDevice()
 ///**************************************************************************************
 /// Sigleton 
 ///**************************************************************************************
-CRTManager& UTGetRTManager()
+CRTManager& __RTManager()
 {
 	static CRTManager g_RTmgr;
 	return g_RTmgr;
