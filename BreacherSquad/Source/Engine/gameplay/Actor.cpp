@@ -292,7 +292,7 @@ void CActor::EquipWeapon( EWpnSlot wpnSlot )
 	//#TODO: ar trebui facuta o functie separata care sa ia in considerare si behaviour curent daca ascunde arme sau nu?
 	if ( wpn == nullptr )
 		c_graphics->SetSkinFlags( *this, true, true );
-	else if ( wpn->_template.bSingleHanded == false || wpn->_template.bDualWielding == true )
+	else if ( wpn->_template.bTwoHanded == true || wpn->_template.bDualWielding == true )
 		c_graphics->SetSkinFlags( *this, false, false );
 	else
 		c_graphics->SetSkinFlags( *this, false, true );

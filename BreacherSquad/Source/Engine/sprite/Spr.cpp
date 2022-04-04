@@ -105,10 +105,10 @@ void CSpr::SetFrame(int nFrameIdx)
 	fTime = 0.0f;
 }
 
-void CSpr::SetAnimOnce(int nAnimIdx, int nFrameIdx) 
+bool CSpr::SetAnimOnce(int nAnimIdx, int nFrameIdx) 
 {
 	if((animIdx == nAnimIdx) || (nAnimIdx < 0))
-		return;
+		return false;
 
 	animIdx = nAnimIdx;
 
@@ -117,6 +117,8 @@ void CSpr::SetAnimOnce(int nAnimIdx, int nFrameIdx)
 	animDirection = 1;
 	frameIdx = nFrameIdx;
 	animStatus = ANIM_JUST_STARTED;
+
+	return true;
 }
 
 void CSpr::SetAnim(CHAR* strAnimID, int nFrameIdx)

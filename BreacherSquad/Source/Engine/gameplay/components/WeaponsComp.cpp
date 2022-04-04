@@ -29,19 +29,50 @@ void CWeaponsComponent::Update( CActor& act, float dTime )
 	Vec2 v_aim;
 	MUVec2Norm(&v_aim, &act.GetAimVec());
 	vAim = Vec3( v_aim.x, v_aim.y, 0.0f );
+	///--- update weapons ---
 	for ( int kk = 0; kk < K_WPNSLOTS_CNT; kk++ )
 	{
 		arrWeapons[ kk ].Update( dTime );
 	}
+
+	// set animations based on weapon stats
+	EWpnStatus wpn_stat		= arrWeapons[ eActiveSlot ].status;
+	EWpnStatus wpn_stat_old = arrWeapons[ eActiveSlot ].statusOld;
+
+	if ( (wpn_stat_old == K_WPN_STATUS_RELOADING) && (wpn_stat != K_WPN_STATUS_RELOADING) )
+	{
+		sprite.SetAnimOnce( arrWeapons[ eActiveSlot ]._template.animIdx_shoot );
+		sprite.Stop();
+	}
+	if ( wpn_stat == K_WPN_STATUS_JUST_SHOT )
+	{
+		sprite.Play( true );
+	}
+	else if ( wpn_stat == K_WPN_STATUS_RELOADING )
+	{
+		if ( sprite.SetAnimOnce( arrWeapons[ eActiveSlot ]._template.animIdx_reload ) )
+		{
+			//#TODO: set animation duration for reload (based on template)
+		}
+	}
+
+	// update sprite animation
+	sprite.Update( dTime );	
+	if ( sprite.animStatus == ANIM_FRAMELOCK )
+		sprite.SetFrame( 0 );
 }
 
 void CWeaponsComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 {
 	if ( !bVisible )
 		return;
+	CWeapon* wpn = GetCurWeapon();
+	if ( wpn == nullptr || wpn->status == K_WPN_STATUS_UNKNOWN )
+		return;
 
 	float fang = UTMath::GetVectorAngle( Vec3XY(vAim) );
-	VecProj vpMount = act.GetWeaponMountWorld( false );
+	//#TODO: add support for dual yelding weapons
+	VecProj vpMount = act.GetWeaponMountWorld( wpn->_template.bTwoHanded, 0 );
 	// weapons need flipping when animation gets flipped to the left if we want to keep the unified angle of rotation
 	sprite.scale.y = (act.GetVisualFlipDirX() < 0) ? -1.0f : 1.0f;
 	sprite.rotation = -fang;
@@ -92,6 +123,7 @@ void CWeaponsComponent::SetTriggerStates( bool bTriggerPushed, bool bReloadPushe
 void CWeaponsComponent::StopReloading()
 {
 	arrWeapons[eActiveSlot].StopReloading();
+	sprite.SetAnim( arrWeapons[ eActiveSlot ]._template.animIdx_shoot );
 }
 
 bool CWeaponsComponent::CanShoot( EWpnSlot slot )

@@ -91,7 +91,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	V_OP_RET(m_sprProps.LoadSprites(Path));
 
 	//--- load actors templates and weaponry right after props sprite ---
-	FileManager::GetMediaPath(L"media/levels/data/weapons_data.xml", Path);
+	FileManager::GetMediaPath(L"media/levels/data/weapons/weapons_data.xml", Path);
 	if (FAILED(LoadWeaponTemplates(Path)))
 	{
 		return K_OP_FAILED;

@@ -156,33 +156,33 @@ EWpnStatus CWeapon::Update( float dTime )
 		break;
 		case K_WPN_STATUS_RELOADING:
 		{
+			fStateT += dTime;
+
+			if ( fStateT >= _template.fReloadTimePerUnit )
+			{
+				ammoLeft += _template.nReloadUnitSize;
+				fStateT -= _template.fReloadTimePerUnit;
+
+				int nMaxBullets = _template.nClipSize;
+				//#HACK: shotguns load everything to the end
+				if ( _template.nReloadUnitSize == 1 )
+					nMaxBullets = _template.nClipSize + _template.nBulletChamberSize;
+				if ( ammoLeft >= nMaxBullets )
+				{
+					CLAMP( ammoLeft, 0, _template.nClipSize + _template.nBulletChamberSize );
+					fStateT = 0.0f;
+					status = K_WPN_STATUS_READY;
+				}
+				else // we have more to load so we play the sound again
+				{
+					SND_PLAY_POSITIONAL_RAND2( _template.sndidxReload, _template.sndidxReload2, pOwner->GetPosHeart() );
+				}
+			}
+
+			//stop reloading if you want to shoot (for shotgun type weapons)
 			if ( bTriggerDown )
 			{
-				fStateT += dTime;
-
-				if ( fStateT >= _template.fReloadTimePerUnit )
-				{
-					ammoLeft += _template.nReloadUnitSize;
-					fStateT -= _template.fReloadTimePerUnit;
-
-					int nMaxBullets = _template.nClipSize;
-					//#HACK: shotguns load everything to the end
-					if ( _template.nReloadUnitSize == 1 )
-						nMaxBullets = _template.nClipSize + _template.nBulletChamberSize;
-					if ( ammoLeft >= nMaxBullets )
-					{
-						CLAMP( ammoLeft, 0, _template.nClipSize + _template.nBulletChamberSize );
-						fStateT = 0.0f;
-						status = K_WPN_STATUS_READY;
-					}
-					else // we have more to load so we play the sound again
-					{
-						SND_PLAY_POSITIONAL_RAND2( _template.sndidxReload, _template.sndidxReload2, pOwner->GetPosHeart() );
-					}
-				}
-
-				//stop reloading if possible (for shotgun type weapons)
-				if ( (status == K_WPN_STATUS_RELOADING) && (_template.nReloadUnitSize < _template.nClipSize + _template.nBulletChamberSize) && (ammoLeft > 0) )
+				if ( (_template.nReloadUnitSize < _template.nClipSize + _template.nBulletChamberSize) && (ammoLeft > 0) )
 				{
 					status = K_WPN_STATUS_READY;
 					fStateT = 0.0f;
@@ -293,7 +293,7 @@ bool CWeapon::IsShootingBullet()
 
 bool CWeapon::IsReadyToShoot()
 {
-	//#TODO: should account for the owner complying with the conditions (nod on ladder, not mid-flight)
+	//#TODO: should account for the owner complying with the conditions (not jumping for example)
 	//#TODO: should account for main weapon ammo if consuming from there
 	if (( ammoLeft == 0) || (status != K_WPN_STATUS_READY ))
 		return false;
@@ -311,7 +311,7 @@ bool CLevel::Weapon_CheckShoot(CWeapon * weapon, Vec3 vDir)
 		return false;
 
 
-	bool bTwoHanded = !weapon->_template.bSingleHanded;
+	bool bTwoHanded = weapon->_template.bTwoHanded;
 	bool bDualWielding = weapon->_template.bDualWielding;
 
 	CActor* shooter = weapon->pOwner;
@@ -390,7 +390,7 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 	int m_libidxWeapons;
 	WCHAR wcsPath[ MAX_PATH ];
 	WCHAR Path[ MAX_PATH ];
-	swprintf_s( wcsPath, MAX_PATH, L"media/levels/data/%s", doc.root().child( L"WEAPONS" ).attribute( L"file" ).value());
+	swprintf_s( wcsPath, MAX_PATH, L"media/levels/data/weapons/%s", doc.root().child( L"WEAPONS" ).attribute( L"file" ).value());
 	FileManager::GetMediaPath( wcsPath, Path );
 	V_OP_RET( m_sprActors.AddSprites( Path, m_libidxWeapons, K_LIBNICK_WEAPONS ) );
 
@@ -466,7 +466,7 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		//#TODO: type of weapon should be string
 		//if (!bnode.attribute(L"nType").empty())
 //			templ->eType = (EWeaponType)bnode.attribute(L"nType").as_int();
-		templ->bSingleHanded = bnode.attribute( L"singleHanded" ).as_bool();
+		templ->bTwoHanded = bnode.attribute( L"twoHanded" ).as_bool();
 		templ->bDualWielding = bnode.attribute( L"dualWielding" ).as_bool();
 		templ->vMountOffset.x = bnode.attribute( L"mountOffX" ).as_int();
 		templ->vMountOffset.y = bnode.attribute( L"mountOffY" ).as_int();

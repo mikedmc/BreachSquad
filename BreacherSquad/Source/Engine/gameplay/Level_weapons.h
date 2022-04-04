@@ -11,6 +11,7 @@ class CWeaponTemplate
 {
 public:
 	CStringHash		name;
+	//CStringHash		filePath;					// path to bsx file to load (each weapon has it's own image)
 	//generic data:
 	CStringHash		shAltFireTemplate;			// weapon template for alt fire mode of the weapon
 	CStringHash		shTemplateOverwrite;		// name of themplate that the weapon overwrites over the character template
@@ -60,7 +61,7 @@ public:
 	float			fSoundRadius;			// how far can the weapon be heared (in pixels)
 
 	Vec2			vMountOffset;			// vector showing the offset from the mount to the gun rotating position
-	bool			bSingleHanded;			// can be used with a single hand
+	bool			bTwoHanded;			// can be used with a single hand
 	bool			bDualWielding;			// only for single handed weapons. if true it gets doubled in the second mount position.
 
 	//sound indices to play
@@ -84,7 +85,7 @@ public:
 		nHUD_AnimIdx(-1), nHUD_AnimIdxALT(-1), nMuzzleFlashAnim(-1), animIdx_shoot(-1), animIdx_reload(-1),
 		sndActorVerse(K_LVL_ACT_VERSE_EMPTY)
 	{
-		bSingleHanded = true;
+		bTwoHanded = true;
 		bDualWielding = false;
 		vMountOffset = Vec2( 0.0f, 0.0f );
 	}

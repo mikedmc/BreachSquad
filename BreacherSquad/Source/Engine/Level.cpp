@@ -548,7 +548,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 
 	// create a weapon and add it to the player's arsenal
 	//#TODO: create actor::AddWeapon and EquipWeapon that handles this plus AddWeaponTemplate
-	CWeaponTemplate* wpntMain = GetTemplateWeapon( L"PISTOLET" );
+	CWeaponTemplate* wpntMain = GetTemplateWeapon( L"WPN_SMG_MP5A3" );
 	CWeaponTemplate* wpntAlt = nullptr;
 	if ( wpntMain->shAltFireTemplate.IsSet() )
 		wpntAlt = GetTemplateWeapon( wpntMain->shAltFireTemplate.text );
@@ -7760,7 +7760,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 				act->Paint(eTexChannel);
 
 				//#TEMP: paint muzzle pos and shadow
-				VecProj vpMuzz = act->GetWeaponMuzzleWorld( false, 0 );
+				VecProj vpMuzz = act->GetWeaponMuzzleWorld( true, 0 );
 				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy.x, vpMuzz.xy.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x88ff0000 );
 				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy_proj.x, vpMuzz.xy_proj.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x8800ff00 );
 			}
@@ -8310,12 +8310,6 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		Vec2 vto = Vec3XY(pPlayerActor[kk]->pos_last) - Vec2(0.0f, pPlayerActor[ kk ]->vHeart.proj_h) + pPlayerActor[kk]->m_AIcommands.vAimVec;
 		CSprite::paintFrame(&m_sprInterface, vto.x, vto.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffffffff);
 
-		// paint muzzle pos and shadow
-		/*
-		VecProj vpMuzz = pPlayerActor[ kk ]->GetWeaponMuzzleWorld( false, 0 );
-		CSprite::paintFrame( &m_sprInterface, vpMuzz.xy.x, vpMuzz.xy.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x88ff0000 );
-		CSprite::paintFrame( &m_sprInterface, vpMuzz.xy_proj.x, vpMuzz.xy_proj.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x8800ff00 );
-		*/
 	}
 								  
 	///--- actors icons and stun stars ---

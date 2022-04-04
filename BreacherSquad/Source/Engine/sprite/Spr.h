@@ -79,8 +79,8 @@ public:
 
 	void					SetAnim(int nAnimIdx, int nFrameIdx = 0);
 	void					SetAnim(CHAR* strAnimID, int nFrameIdx = 0);
-	// Sets the animation only if it's not the current one
-	void					SetAnimOnce(int nAnimIdx, int nFrameIdx = 0); 
+	// Sets the animation only if it's not the current one. Returns true if set, false if not set
+	bool					SetAnimOnce(int nAnimIdx, int nFrameIdx = 0); 
 	void					SetFrame(int nFrameIdx);
 	// updates position only if bUpdatePos is true
 	void					Update(float dTime, bool bUpdatePos = false);
