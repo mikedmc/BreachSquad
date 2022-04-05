@@ -44,7 +44,7 @@ public:
 	EActorAttackState	eAttackStatus; //aici este statusul legat de arma (shooting, shootalt, reloading, etc)
 
 	bool			bCrouched; //daca este crouched
-	eGenericState	nRolling; //0-ready, 1-rolling, 2-finished and waiting reset (direction key up)
+	EGenericState	nRolling; //0-ready, 1-rolling, 2-finished and waiting reset (direction key up)
 	//CMiscObjectRail* pRail;		//pointer catre un rail atunci cand merge pe tiroliana
 
 	float		fStunTimer; //daca e diferit de 0 personajul este stunned
@@ -55,13 +55,13 @@ public:
 	bool		bSuspendInput;		//if set keyboard input is ignored
 
 	IActiveInterface*			pClosestTouchable;			// currently focused interactible object
-	eGenericState				eInteractState;				// state of interaction (NOTSET=not interacting, READY-selecting action, EXECUTING-started action, FINISHED-interact finished)
+	EGenericState				eInteractState;				// state of interaction (NOTSET=not interacting, READY-selecting action, EXECUTING-started action, FINISHED-interact finished)
 	int							nInteractOptionsSelIdx;		// index in arrInteractOptions
 	CFixedArray<CScriptAction, 16>	arrInteractOptions;		// empty when not interacting. gathers all interaction options from object, character feats, inventory objects, etc
 
 	//player control and controller data
-	int			nPlayerOrdinal;	//player index (0-max_players_cnt)
-	int			nControllerInstanceID; //player controller ID (-1 for empty)
+	int				nPlayerOrdinal;	//player index (0-max_players_cnt)
+	int				nControllerInstanceID; //player controller ID (-1 for empty)
 
 	CAISensorInfo	m_AIsensorInfo;	// AI sensory information
 	CAICommands		m_AIcommands;	// Commands issued by AI
@@ -86,7 +86,7 @@ private:
 
 public:
 
-	inline const eActiveInterfaceType	GetClassType() const { return K_LVL_IAI_TYPE_ACTOR; }
+	inline const EActiveInterfaceType	GetClassType() const { return K_LVL_IAI_TYPE_ACTOR; }
 	// Gets pointer to weapons component
 	inline CWeaponsComponent*			Weapons() { return c_weapons; }
 

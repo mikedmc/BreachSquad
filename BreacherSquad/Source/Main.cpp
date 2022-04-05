@@ -25,7 +25,7 @@ double						g_fTimeAccumUpdate = 0.0f;			// Time accumulator for fixed timestep 
 double						g_fTimeAccumSend = 0.0f;			// Time accumulator for coop input sending
 
 ///--- startup commands ---
-eStartupCommand				g_startupCommand = GAME_STARTUP_NONE;	// Startup command set usually by command line params
+EStartupCommand				g_startupCommand = GAME_STARTUP_NONE;	// Startup command set usually by command line params
 CStringHash					g_startupParam;							// Parameter used for startup commands
 
 ///--- network data ---

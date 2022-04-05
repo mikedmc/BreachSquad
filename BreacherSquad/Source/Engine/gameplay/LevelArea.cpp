@@ -314,7 +314,7 @@ int CLevelArea::GetPropsCollisionBoxes(CAABB srcBox, CAABB* ret_arrAABBs, int nA
 	for (int kk = 0; kk < m_arrProps.Count(); kk++)
 	{
 		CProp* prop = m_arrProps[kk];
-		if ((prop->bHidden) || ((prop->flags & K_PROPFLAG_COLLIDES_ACTOR) == 0))
+		if ((!prop->IsVisible()) || ((prop->flags & K_PROPFLAG_COLLIDES_ACTOR) == 0))
 			continue;
 		if (prop->bbox_floor.Intersects(srcBox))
 		{
@@ -332,7 +332,7 @@ int CLevelArea::GetPropsTouchingBox(CAABB srcBox, CProp* ret_arrProps[], int nAr
 	for (int kk = 0; kk < m_arrProps.Count(); kk++)
 	{
 		CProp* prop = m_arrProps[kk];
-		if (prop->bHidden)
+		if (!prop->IsVisible())
 			continue;
 		if (bOnlyInteractibles && (prop->bCanInteract == false))
 			continue;
@@ -352,7 +352,7 @@ int CLevelArea::GetPropsTouchingBox(CAABB srcBox, CArray<CProp*>& ret_arrProps, 
 	for (int kk = 0; kk < m_arrProps.Count(); kk++)
 	{
 		CProp* prop = m_arrProps[kk];
-		if (prop->bHidden)
+		if (!prop->IsVisible())
 			continue;
 		if (bOnlyInteractibles && (prop->bCanInteract == false))
 			continue;

@@ -9,7 +9,7 @@ class CLevelArea;
 #define	K_LVL_AI_DECISION_INTERVAL				0.25f
 #define	K_LVL_AI_DECISION_INTERVAL_VARIATION	0.05f
 
-enum eActiveInterfaceType {
+enum EActiveInterfaceType {
 	K_LVL_IAI_TYPE_UNKNOWN,
 	K_LVL_IAI_TYPE_BASE,		// basic IActiveInterface
 	K_LVL_IAI_TYPE_LIGHT,
@@ -25,6 +25,7 @@ class IActiveInterface
 {
 protected:
 	bool					bPendingKill;			// exited gameplay, waits for garbage collection
+	bool					bVisible;				// is it visible? final flag
 
 public:
 	UINT32					UID;					// ingame UID
@@ -72,8 +73,7 @@ public: //logic
 	CStringHash				shScriptActions;		// sctring containing script actions names
 	UINT32					nRunningScriptUID;		// UID of script that is running now on this element
 
-	bool					bHidden;				// DO NOT SET DIRECTLY! (use bSetHidden) flag de hidden. vizibil si din editor
-	bool					bSetHidden;				// #TODO: ar trebui inlocuit cu SetHidden(T/F, FORCED)
+	bool					bSetVisible;			// commanding flag for bVisible. Will dump the value into bVisible when needed.
 	bool					bAnimated;				// este animat? daca da face play la animatie
 	bool					bSkipRender;			// skips render...
 
@@ -81,41 +81,31 @@ public: //logic
 	IActiveInterface();
 	virtual ~IActiveInterface();
 
-	virtual const eActiveInterfaceType GetClassType() const {
-		return K_LVL_IAI_TYPE_BASE;
-	}
+	virtual const EActiveInterfaceType GetClassType() const { return K_LVL_IAI_TYPE_BASE; }
 
-	inline UINT32 GetUID() const {
-		return UID;
-	}
-
+	inline UINT32	GetUID() const { return UID; }
 	//Returns: UID of activ that interacted with it
-	inline UINT32 GetToucherUID() const {
-		return nTouchingUID;
-	}
-
+	inline UINT32	GetToucherUID() const { return nTouchingUID; }
 	// Tells if object is waiting to be deallocated
-	inline bool IsPendingKill() {
-		return bPendingKill;
-	}	
-
+	inline bool		IsPendingKill() { return bPendingKill; }	
 	// Loads logic from binary file (editor exported logic)
-	void LoadLogic(FILE* fl);
-
+	void			LoadLogic(FILE* fl);
 	//functie care se cheama cand interactionezi cu obiectul sau cand este pTarget
-	void Touch(UINT32 touchingIActiveUID, float dTime, UINT32 overrideScriptHash = 0, bool bTouchTarget = true);
+	void			Touch(UINT32 touchingIActiveUID, float dTime, UINT32 overrideScriptHash = 0, bool bTouchTarget = true);
+	// sets the visible flag on/off
+	void			SetVisible( bool visible, bool forced = false );
+	// is it visible?
+	inline bool		IsVisible() { return bVisible; }
+	// Call this to mark it for destruction
+	void			Kill();
 
 	// completely sets position and all related data(pos, bbox, etc)
-	virtual void SetPos(Vec3 newPos) = 0;
-	virtual void Move(Vec3 delta) = 0;
-
-	// Call this to mark it for destruction
-	void Kill();
-
+	virtual void	SetPos(Vec3 newPos) = 0;
+	virtual void	Move(Vec3 delta) = 0;
 	// Gets called after active was added to the actives array, after being fully initialized (end of loading or spawn)
-	virtual void PostConstructionInit() = 0;
+	virtual void	PostConstructionInit() = 0;
 	// Gets called by the engine as soon as the object gets initialized
-	virtual void BeginPlay() = 0;
+	virtual void	BeginPlay() = 0;
 	// Gets called when gets killed
-	virtual void EndPlay() = 0;
+	virtual void	EndPlay() = 0;
 };

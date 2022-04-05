@@ -251,7 +251,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 
 ///--- generic states used for state machines ---
-enum eGenericState {
+enum EGenericState {
 	K_STATE_NOTSET = -1,
 	K_STATE_READY = 0,
 	K_STATE_EXECUTING = 1,
@@ -259,7 +259,7 @@ enum eGenericState {
 };
 
 ///--- STARTUP COMMANDS ---
-enum eStartupCommand {
+enum EStartupCommand {
 	GAME_STARTUP_NONE = 0,
 	GAME_STARTUP_UPLOAD_MOD = 1,
 	GAME_STARTUP_JOIN_LOBBY,
@@ -609,7 +609,7 @@ extern Vec3					g_vecGravity;
 //mouse
 extern CMouseData			g_mouse;
 
-extern eStartupCommand		g_startupCommand;
+extern EStartupCommand		g_startupCommand;
 extern CStringHash			g_startupParam;
 
 //particles

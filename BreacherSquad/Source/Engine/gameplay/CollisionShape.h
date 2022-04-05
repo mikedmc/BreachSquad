@@ -51,7 +51,7 @@ public:
 	CCollisionShape() : type(K_LVL_COLL_TYPE_SOLID), castShadows(false), stairSize(0.0f), collFlags(K_DIRFLAG_ALL), ubFlags(K_LVL_COLLFLAG_SOLID)
 	{}
 
-	const eActiveInterfaceType GetClassType() const {
+	const EActiveInterfaceType GetClassType() const {
 		return K_LVL_IAI_TYPE_COLSHAPE;
 	}
 

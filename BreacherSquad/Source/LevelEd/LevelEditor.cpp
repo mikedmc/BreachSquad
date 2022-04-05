@@ -262,10 +262,10 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 void CLevelEditor::IMGUI_ShowInterfaces()
 {
 	// get type of selected element
-	eActiveInterfaceType selType = K_LVL_IAI_TYPE_UNKNOWN;
+	EActiveInterfaceType selType = K_LVL_IAI_TYPE_UNKNOWN;
 	if (pSelected)
 	{
-		selType = (eActiveInterfaceType)pSelected->GetClassType();
+		selType = (EActiveInterfaceType)pSelected->GetClassType();
 	}
 
 	{

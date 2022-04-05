@@ -57,7 +57,7 @@ CActor::~CActor()
 
 bool CActor::IsAlive()
 {
-	return ((IsPendingKill() == false) && (bHidden == true) && (fLife > 0.0f));
+	return ((IsPendingKill() == false) && (bVisible == false) && (fLife > 0.0f));
 }
 
 void CActor::SetPos(Vec3 newPos)
@@ -136,9 +136,9 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 void CActor::Update(float dTime)
 {
 	//change visibility
-	this->bHidden = this->bSetHidden;
+	this->bVisible = this->bSetVisible;
 	// actor is hidden or not active so ignore it
-	if (this->bHidden)
+	if (!this->bVisible)
 		return;
 	//update timeline
 	this->fTimelineAI += dTime;
@@ -151,87 +151,12 @@ void CActor::Update(float dTime)
 
 	Vec2 vAim = m_AIcommands.vAimVec;
 
-	//c_graphics->SetAimVecLocal(Vec2(vAim.x, vAim.y));
-	/*
-	Vec2 vGunMount(0.0f, 0.0f);
-	if (c_graphics->GetGunPosWorld(vGunMount))
-	{
-		// find the position in 3d so that the projected position always matches the default bullet height
-		this->posWeapon.x = vGunMount.x;
-		this->posWeapon.y = vGunMount.y + Z_TO_H(K_BULLET_DEFAULT_Z);
-		this->posWeapon.z = K_BULLET_DEFAULT_Z;
-	}
-	*/
-
-
-	//#TODO: update all components after we have the final player position
+	//update all components after we have the final player position
 	c_graphics->Update(*this, dTime);
-
 	// compute stuff linked to the weapons before updating the weapons
 	ComputeAttackStatus();
 	// update weapon after updating the body because it depends on mount points
 	c_weapons->Update( *this, dTime );
-
-	///--- update weapons ---
-	/*
-	//aiming hand error
-	if (this->pCurrentWeapon != null)
-	{
-		if (this->pCurrentWeapon->eStatus != K_LVL_WPN_STATUS_SHOOTING)
-		{
-			this->fAimTimer += dTime;
-		}
-
-		D3DXVECTOR2 vAimFinal = this->GetAimDir();
-		this->pCurrentWeapon->SetAimDir(vAimFinal);
-	}
-	//actual shooting
-	for (int kk = 0; kk < K_LVL_ACT_WEAPONS_CNT; kk++)
-	{
-		this->weapons[kk].Update(dTime);
-	}
-	*/
-
-	/*
-	switch (this->AIstate)
-	{
-		case K_AI_STATE_ACTOR_DEAD:
-		{
-			this->SetAnimOnce(0, K_SD_ANIM_DIE);
-			this->SetAnimOnce(1, K_SD_ANIM_EMPTY);
-			//busy dying
-			//#TODO: see when anim or sym ends
-			//if (this->sprite.animStatus != ANIM_STATUS_FRAMELOCK)
-			//this->bIsBusy = true;
-		}
-		break;
-		case K_AI_STATE_ACTOR_ACTIVE:
-		{
-			if ((!this->bIsBusy) && (this->bCrouched) && (this->eLastAnim[0] != K_SD_ANIM_IDLE_CROUCH))
-				this->SetAnimOnce(0, K_SD_ANIM_IDLE_CROUCH);
-
-			// aiming IK node must be set each frame or they get reset by the animation
-			if (bIsAiming)
-			{
-				//#TODO: ar trebui sa setez osul mereu ca sa fie bine setat si pe tranzitii intre animatii
-				// vezi transformul asta ca sa muti din world space in skeleton space:
-				//Vector2 ledgePointLocalSpace = skeletonAnimation.transform.InverseTransformPoint(ledgePoint); // your ledgePoint
-				// find aim bone and move it
-				if (pSkeleton->arrBones[K_SD_BONE_AIM_IK] != null)
-				{
-					spine::Bone* b_aim = pSkeleton->arrBones[K_SD_BONE_AIM_IK];
-
-					D3DXVECTOR2 vAim = this->GetAimDir();
-					b_aim->setX(SIGN(this->vLookDir.x) * vAim.x * -100.0f);
-					b_aim->setY(-vAim.y * 100.0f);
-				}
-			}
-
-		}
-		break;
-	}
-	*/
-
 }
 
 void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )

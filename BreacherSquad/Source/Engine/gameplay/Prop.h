@@ -36,7 +36,7 @@ public:
 		flags(0)
 	{}
 
-	const eActiveInterfaceType GetClassType() const {
+	const EActiveInterfaceType GetClassType() const {
 		return K_LVL_IAI_TYPE_PROP;
 	}
 

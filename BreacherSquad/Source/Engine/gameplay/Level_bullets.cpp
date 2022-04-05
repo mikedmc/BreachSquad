@@ -154,7 +154,7 @@ void CLevel::UpdateBullets(float dTime)
 			for ( int ll = 0; ll < bullet->pArea->m_arrProps.Count(); ll++ )
 			{
 				CProp* prop = bullet->pArea->m_arrProps[ ll ];
-				if ( ( prop->bHidden ) || ( ( prop->flags & K_PROPFLAG_CAN_BE_SHOT ) == 0 ) || ( prop->IsPendingKill() ) )
+				if ( ( !prop->IsVisible() ) || ( ( prop->flags & K_PROPFLAG_CAN_BE_SHOT ) == 0 ) || ( prop->IsPendingKill() ) )
 					continue;
 				if ( prop->bbox_floor.Intersects( aabbBullet ) )
 				{
@@ -184,7 +184,7 @@ void CLevel::UpdateBullets(float dTime)
 					for ( int ll = 0; ll < area->m_arrProps.Count(); ll++ )
 					{
 						CProp* prop = area->m_arrProps[ ll ];
-						if ( ( prop->bHidden ) || ( ( prop->flags & K_PROPFLAG_CAN_BE_SHOT ) == 0 ) || ( prop->IsPendingKill() ) )
+						if ( ( !prop->IsVisible() ) || ( ( prop->flags & K_PROPFLAG_CAN_BE_SHOT ) == 0 ) || ( prop->IsPendingKill() ) )
 							continue;
 						if ( prop->bbox_floor.Intersects( aabbBullet ) )
 						{

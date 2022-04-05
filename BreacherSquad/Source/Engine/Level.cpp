@@ -618,8 +618,8 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 	//load logic
 	obj->bCanInteract = false;
 	obj->bHideInteractIcon = false;
-	//start hidden
-	obj->bHidden = obj->bSetHidden = false;
+	
+	obj->SetVisible(true, true);
 
 	obj->targetID_ini = -1;
 	obj->AIstate = K_AI_STATE_UNDEFINED;
@@ -2232,7 +2232,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 			{
 				for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 				{
-					if ((pPlayerActor[kk] != NULL) && (!pPlayerActor[kk]->bHidden) && (pPlayerActor[kk]->bbox.Intersects(active->bbox)))
+					if ((pPlayerActor[kk] != nullptr) && (pPlayerActor[kk]->IsVisible()) && (pPlayerActor[kk]->bbox.Intersects(active->bbox)))
 					{
 						bTrigger = true;
 						break;
@@ -2245,7 +2245,7 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 				for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 				{
 					//skip actors that are: hidden, dead, players or not a target
-					if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->_template.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
+					if ((!m_arrActors[kk]->IsVisible()) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->_template.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
 						((m_arrActors[kk]->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
 							continue;
 					if (m_arrActors[kk]->bbox.Intersects(active->bbox))
@@ -2436,57 +2436,28 @@ bool CLevel::UpdateAI_base(IActiveInterface* active, float dTime, double fTimeli
 	return bProcessedState;
 }
 
-//updates AI for derived classes (particulare)
-//aici sunt implementate functiile particulare fiecarei clase
 void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 {
 	//touch timer reset (nu este necesar)
 	//colshape->UpdateTouchTimerReset(dTime);
 
-	//daca am schimbat vizibilitatea
-	colshape->bHidden = colshape->bSetHidden;
+	colshape->SetVisible( colshape->bSetVisible, true );
 	//daca este hidden nu mai verifica AI
-	if (colshape->bHidden)
+	if (!colshape->IsVisible())
 		return;
 
 	//update timeline
 	colshape->fTimelineAI += dTime;
 
-	///--- generic water mechanics ---
+	//--- generic water mechanics ---
+	/*
 	if (m_Timers.Tick(500))
 	{
 		if (colshape->type == K_LVL_COLL_TYPE_WATER)
 		{
-			//players
-			for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
-			{
-				if ((pPlayerActor[kk] == NULL) || (pPlayerActor[kk]->bHidden) || (pPlayerActor[kk]->fLife <= 0.0f) ||
-					((pPlayerActor[kk]->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0) )
-					continue;
-				Vec2 vCheckPt(pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y);
-				if (colshape->bbox.PointIn(vCheckPt))
-				{
-					HitActor(pPlayerActor[kk], 50.0f, 0, K_LVL_ACT_CLASS_TRAP, null,
-						K_LVL_BULLET_FLAG_NO_IMPACT_PARTICLES | K_LVL_BULLET_FLAG_NOT_BALLISTIC | K_LVL_BULLET_FLAG_IGNORE_ARMOR | K_LVL_BULLET_FLAG_IGNORE_COVER | K_LVL_BULLET_FLAG_NO_DECALS, 10, 0.0f);
-				}
-			}
-			//other enemies
-			for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
-			{
-				//skip actors that are: hidden, dead, players or not a target
-				if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->_template.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
-					(m_arrActors[kk]->fLife <= 0.0f) ||
-					((m_arrActors[kk]->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
-					continue;
-				Vec2 vCheckPt(m_arrActors[kk]->bbox.vCenter.x, m_arrActors[kk]->bbox.vMin.y);
-				if (colshape->bbox.PointIn(vCheckPt))
-				{
-					HitActor(m_arrActors[kk], 50.0f, 0, K_LVL_ACT_CLASS_TRAP, null,
-						K_LVL_BULLET_FLAG_NO_IMPACT_PARTICLES | K_LVL_BULLET_FLAG_NOT_BALLISTIC | K_LVL_BULLET_FLAG_IGNORE_ARMOR | K_LVL_BULLET_FLAG_IGNORE_COVER | K_LVL_BULLET_FLAG_NO_DECALS, 10, 0.0f);
-				}
-			}
 		}
 	}
+	*/
 	//AI states
 	if (colshape->AIstate != K_AI_STATE_UNDEFINED)
 	{
@@ -2495,41 +2466,6 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 		{
 			case K_AI_STATE_COLL_KILL_ACTORS:
 			{
-				//check only a few times per second
-				if (m_Timers.Tick(200))
-				{
-					bool bKillPlayer = (bool)colshape->varAIparams.GetVariantByName(L"b_killPlayer")->m_asBool;
-					bool bKillOthers = (bool)colshape->varAIparams.GetVariantByName(L"b_killOthers")->m_asBool;
-					bool bSplat = (bool)colshape->varAIparams.GetVariantByName(L"b_splat")->m_asBool;
-
-					if (bKillPlayer)
-					{
-						for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
-						{
-							if ((pPlayerActor[kk] != NULL) && (!pPlayerActor[kk]->bHidden) && (pPlayerActor[kk]->fLife > 0.0f) &&
-								(colshape->bbox.PointIn(pPlayerActor[kk]->GetPosHeart())))
-							{
-								KillActor(pPlayerActor[kk], bSplat);
-							}
-						}
-					}
-
-					if (bKillOthers)
-					{
-						for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
-						{
-							//skip actors that are: hidden, dead, players or not a target
-							if ((m_arrActors[kk]->bHidden) || (m_arrActors[kk]->fLife <= 0.0f) || (m_arrActors[kk]->_template.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
-								(m_arrActors[kk]->fLife <= 0.0f) ||
-								((m_arrActors[kk]->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))
-								continue;
-							if (colshape->bbox.PointIn(m_arrActors[kk]->GetPosHeart()))
-							{
-								KillActor(m_arrActors[kk], bSplat);
-							}
-						}
-					}
-				}
 			}
 			break;
 
@@ -2565,9 +2501,8 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 					}
 					//destroy collision box
 					colshape->Kill();
-					colshape->bSetHidden = true;
 					//force hidden here to avoid collisions after death
-					colshape->bHidden = true;
+					colshape->SetVisible(false, false);
 				}
 			}
 			break;
@@ -2732,10 +2667,9 @@ void CLevel::UpdateAI_light(CLight* light, float dTime)
 	//touch timer reset (nu e necesar pe lights)
 	//light->UpdateTouchTimerReset(dTime);
 
-	//daca am schimbat vizibilitatea
-	light->bHidden = light->bSetHidden;
+	light->SetVisible(light->bSetVisible, true);
 	//daca este hidden nu mai verifica AI
-	if (light->bHidden)
+	if (!light->IsVisible())
 		return;
 
 	//update timeline
@@ -2787,9 +2721,9 @@ void CLevel::UpdateAI_light(CLight* light, float dTime)
 void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 {
 	//daca am schimbat vizibilitatea
-	prop->bHidden = prop->bSetHidden;
+	prop->SetVisible(prop->bSetVisible, true);
 	//daca este hidden nu mai verifica AI
-	if (prop->bHidden)
+	if (!prop->IsVisible())
 		return;
 
 	//update timeline
@@ -3837,30 +3771,6 @@ void CLevel::OnActorBehaviorFinished(CActor * actor, EAIBehaviorType eOldBehavio
 
 		case AI_BEHAVIOR_HUMAN_SHIELD_ATTACK:
 		{
-			//verifica sa dea release la ostatec daca l-ai omorat pe posesorul lui moare si ostatecul
-			if (actor->AItargetUID != 0)
-			{
-				CActor * pHostage = GetActorByUID(actor->AItargetUID);
-				if ((pHostage != null) && (pHostage->bHidden))
-				{
-					pHostage->bSetHidden = false;
-					//daca mai are armura inseamna ca mai traieste ostatecul. daca nu, inseamna ca a murit si el
-					if (actor->fArmor > 0.0f)
-					{
-						pHostage->fLife = actor->fArmor;
-						actor->fArmor = 0.0f;
-					}
-					else
-					{
-						pHostage->fLife = 0.0f;
-						pHostage->nLastDamageTakenFromUID = actor->nLastDamageTakenFromUID;
-					}
-				}
-			}
-
-			actor->AItargetUID = 0;
-			actor->SetAnimSet(0); //revin la animatiile normale
-			actor->fArmor = 0.0f;//resetez armura
 		}
 		break;
 	}
@@ -3872,10 +3782,7 @@ CFixedArray<SweepAABB, 100> tempCollBoxList;
 
 void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 {
-	//daca am schimbat vizibilitatea
-	actor->bHidden = actor->bSetHidden;
-	//daca este hidden nu mai verifica AI
-	if (actor->bHidden)
+	if (!actor->IsVisible())
 		return;
 
 	//update timeline
@@ -5003,14 +4910,14 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 					break;
 				}
 				//deallocate
-				actor->bSetHidden = true;
+				actor->SetVisible(false);
 				actor->Kill();
 			}
 			break;
 			case K_LVL_ACT_DEATHCMD_DEALLOCATE:
 			{
 				//dezalocare
-				actor->bSetHidden = true;
+				actor->SetVisible(false);
 				actor->Kill();
 			}
 			break;
@@ -5063,7 +4970,7 @@ void CLevel::UpdateAI_actor(CActor* actor, float dTime)
 		//add boxes from collision shapes
 		for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
 		{
-			if (m_arrColShapes[kk]->bHidden)
+			if (!m_arrColShapes[kk]->IsVisible())
 				continue;
 
 			//nu am intersectie probabils - trec mai departe
@@ -5481,7 +5388,7 @@ CActor * CLevel::GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTa
 	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 	{
 		CActor* enemy = m_arrActors[kk];
-		if ((enemy == null) || (enemy == sourceActor) || (enemy->_template.shID.textHash != nTargetNameHash) || (enemy->bHidden))
+		if ((enemy == nullptr) || (enemy == sourceActor) || (enemy->_template.shID.textHash != nTargetNameHash) || (!enemy->IsVisible()))
 			continue;
 		//nu ia in seama inamic cu energie sub 0 sau flag de not a target
 		if ((enemy->fLife <= 0.0f) || ((enemy->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0))

@@ -408,8 +408,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 			{
 				CActor* act = m_arrActors[kk];
-				//sar actorii ascunsi
-				if ((act->bHidden) || (act->fLife < 0.0f) || (act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET))
+				if ((!act->IsVisible()) || (act->fLife < 0.0f) || (act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET))
 					continue;
 				//never stun the hostages
 				if ((act->_template.actorClass == K_LVL_ACT_CLASS_HOSTAGE) && (fMaxStun > 0.0f))
@@ -456,8 +455,8 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 			{
 				CActor* act = m_arrActors[kk];
-				//sar actorii ascunsi
-				if ((act->bHidden) || (act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET))
+				
+				if ((!act->IsVisible()) || (act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET))
 					continue;
 				//ignores specified classes
 				if (act->_template.actorClass == explotemplate->eIgnoreActorClass)

@@ -4,7 +4,7 @@
 
 
 IActiveInterface::IActiveInterface() : 
-	ID(-1), targetID_ini(-1), bHidden(false), bSetHidden(false), bSkipRender(false), bAnimated(false),
+	ID(-1), targetID_ini(-1), bVisible(true), bSetVisible(true), bSkipRender(false), bAnimated(false),
 	color(0xffffffff), color_ini(0xffffffff),
 	bTouching(false), nTouchingUID(0),
 	pTarget(null), bCanInteract(false), bHideInteractIcon(false), AIstate(K_AI_STATE_UNDEFINED), AItimerDecision(K_LVL_AI_DECISION_INTERVAL),
@@ -37,7 +37,7 @@ void IActiveInterface::LoadLogic(FILE* fl)
 
 	//start hidden
 	if (OS_freadByte(fl) != 0)
-		bHidden = bSetHidden = true;
+		bVisible = bSetVisible = false;
 
 	CHAR strout[MAX_PATH];
 	int targetid = OS_freadInt32(fl);
@@ -102,6 +102,13 @@ void IActiveInterface::Touch(UINT32 touchingIActiveUID, float dTime, UINT32 over
 	}
 	//touch-ul si bTouching=false le face pe OnScriptFinished
 	*/
+}
+
+void IActiveInterface::SetVisible( bool visible, bool forced /*= false */ )
+{
+	bSetVisible = visible;
+	if ( forced )
+		bVisible = bSetVisible;
 }
 
 void IActiveInterface::Kill()
