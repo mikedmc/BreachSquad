@@ -751,7 +751,7 @@ void CControlsEditor::Update(float dTime)
 
 	clickedInterface = false;
 
-	if (UTimgui().GetWantCaptureMouse())
+	if (__ImGui().GetWantCaptureMouse())
 		clickedInterface = true;
 
 	if ((currLayer != nullptr) && (!clickedInterface))
@@ -1067,7 +1067,7 @@ void CControlsEditor::Update(float dTime)
 
 void CControlsEditor::ReceiveKeys(UINT key)
 {
-	if (UTimgui().GetWantCaptureKeyboard())
+	if (__ImGui().GetWantCaptureKeyboard())
 		return;
 
 	switch (key)

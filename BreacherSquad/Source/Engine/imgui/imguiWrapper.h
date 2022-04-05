@@ -47,4 +47,4 @@ public:
 };
 
 //declare singleton
-CimguiWrapper& UTimgui();
+CimguiWrapper& __ImGui();

@@ -126,16 +126,16 @@ void CimguiWrapper::AddWatch_Float( WCHAR* varname, float value )
 
 void CimguiWrapper::PaintDebugVars()
 {
-	if ( UTimgui().arrDebugVars.m_variants.Count() == 0 )
+	if ( __ImGui().arrDebugVars.m_variants.Count() == 0 )
 	{
 		ImGui::Text( "No Debug Watch Vars!" );
 		return;
 	}
 
 	CStringHashA cname;
-	for ( int kk = 0; kk < UTimgui().arrDebugVars.m_variants.Count(); kk++ )
+	for ( int kk = 0; kk < __ImGui().arrDebugVars.m_variants.Count(); kk++ )
 	{
-		CVariantComplex* cvc = UTimgui().arrDebugVars[ kk ];
+		CVariantComplex* cvc = __ImGui().arrDebugVars[ kk ];
 		switch ( cvc->m_type )
 		{
 			case CVariantComplex::K_ARGTYPE_INT32:
@@ -197,7 +197,7 @@ HRESULT CimguiWrapper::OnDestroyDevice(void)
 /// Sigleton
 ///**************************************************************************************
 
-CimguiWrapper& UTimgui()
+CimguiWrapper& __ImGui()
 {
 	static CimguiWrapper g_imguiWrapper;
 	return g_imguiWrapper;

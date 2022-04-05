@@ -160,7 +160,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 #ifdef K_CONTROLS_EDITOR
 		case GAME_STATE_CONTROLSED:
 		{
-			UTimgui().SetGlobalEnabled( false );
+			__ImGui().SetGlobalEnabled( false );
 			g_ControlsEditor.Close();
 		}
 		break;
@@ -484,7 +484,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 		{
 			UTGetGUI().RemoveAllLayers( true );
 			g_ControlsEditor.Launch();
-			UTimgui().SetGlobalEnabled( true );
+			__ImGui().SetGlobalEnabled( true );
 		}
 		break;
 #endif

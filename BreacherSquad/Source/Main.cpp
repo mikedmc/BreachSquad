@@ -771,7 +771,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	V_OP_RETHR(__Game().OnCreateDevice( pDevice, pBBDesc ));
 
-	UTimgui().OnCreateDevice(pDevice, pBBDesc);
+	__ImGui().OnCreateDevice(pDevice, pBBDesc);
 	V_OP_RETHR(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(__Painter().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(__TexFonts().OnCreateDevice(pDevice, pBBDesc));
@@ -838,7 +838,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	V_OP_RETHR( __Game().OnResetDevice( pDevice, pBBDesc ) );
 
-	UTimgui().OnResetDevice(pDevice, pBBDesc);
+	__ImGui().OnResetDevice(pDevice, pBBDesc);
 	V_OP_RETHR(UTGetShaderManager().OnResetDevice(pDevice, pBBDesc));
 	V_OP_RETHR(__Painter().OnResetDevice(pDevice, pBBDesc));
 
@@ -909,7 +909,7 @@ void CALLBACK OnLostDevice(void)
 	DebugPrintA("---On lost device---\n");
 
 	UTApp().OnLostDevice();
-	UTimgui().OnLostDevice();
+	__ImGui().OnLostDevice();
 	UTGetTTFManager().OnLostDevice();
 	UTGetShaderManager().OnLostDevice();
 	__Painter().OnLostDevice();
@@ -948,7 +948,7 @@ void CALLBACK OnDestroyDevice(void)
 	__RTManager().OnDestroyDevice();
 	__Game().OnDestroyDevice();
 
-	UTimgui().OnDestroyDevice();
+	__ImGui().OnDestroyDevice();
 	UTGetShaderManager().OnDestroyDevice();
 	__Painter().OnDestroyDevice();
 	UTGetTTFManager().OnDestroyDevice();
@@ -1875,7 +1875,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 	///--- IMGUI UPDATE ---
 	// must be last as it will enable and disable on user input
-	if (UTimgui().BeginPaint())
+	if (__ImGui().BeginPaint())
 	{
 		// DEBUG IMGUI WINDOW
 		if ( GameState::state == GAME_STATE_GAME)
@@ -1896,7 +1896,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 				ImGui::Separator();
 				///--- show watch debug values from the debug list ---
-				UTimgui().PaintDebugVars();
+				__ImGui().PaintDebugVars();
 
 #if defined(_DEBUG) || defined(DEBUG)
 
@@ -1952,7 +1952,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		}
 #endif
 		// Last but not least, paint
-		UTimgui().EndPaint(pDevice);
+		__ImGui().EndPaint(pDevice);
 	}
 
 #if defined(_DEBUG) || defined(DEBUG)
@@ -2295,7 +2295,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			// IMGUI show/hide
 			case VK_F3:
 			{
-				UTimgui().SetGlobalEnabled(!UTimgui().bEnabled);
+				__ImGui().SetGlobalEnabled(!__ImGui().bEnabled);
 			}
 			break;
 #endif

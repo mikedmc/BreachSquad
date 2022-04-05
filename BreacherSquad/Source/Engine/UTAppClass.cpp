@@ -2041,7 +2041,7 @@ void CApplication::PollSDLControllers()
 	// when using imGUI check if it wants exclusive control
 	bool bIgnoreMouse = false;
 #if defined(K_ENABLE_IMGUI)
-	if (UTimgui().bEnabled && UTimgui().GetWantCaptureMouse())
+	if (__ImGui().bEnabled && __ImGui().GetWantCaptureMouse())
 		bIgnoreMouse = true;
 #endif
 

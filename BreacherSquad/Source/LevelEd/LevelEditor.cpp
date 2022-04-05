@@ -84,7 +84,7 @@ void CLevelEditor::Update(float dTime)
 	fTimeline += dTime;
 
 	// don't do any processing if clicked on imgui
-	if (UTimgui().GetWantCaptureMouse())
+	if (__ImGui().GetWantCaptureMouse())
 		return;
 
 	// mouse pos in level world
@@ -149,7 +149,7 @@ void CLevelEditor::ReceiveKeys(UINT key)
 	if (!IsLaunched())
 		return;
 
-	if (UTimgui().GetWantCaptureKeyboard())
+	if (__ImGui().GetWantCaptureKeyboard())
 		return;
 
 	switch (key)
