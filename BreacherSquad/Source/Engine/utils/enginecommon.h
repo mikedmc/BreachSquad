@@ -52,17 +52,17 @@ enum EDir {
 enum EDir6 {
 	EDIR6_NONE = -1,
 
-	EDIR6_NW = 0,
-	EDIR6_N,
+	EDIR6_N = 0,
 	EDIR6_NE,
 	EDIR6_SE,
 	EDIR6_S,
 	EDIR6_SW,
+	EDIR6_NW,
 
 	EDIR6S_CNT,
 };
 // names of the animation directions
-const CStringHash EDir6Names[ EDIR6S_CNT ] = { L"NW", L"N", L"NE", L"SE", L"S", L"SW" };
+const CStringHash EDir6Names[ EDIR6S_CNT ] = { L"N", L"NE", L"SE", L"S", L"SW", L"NW" };
 
 // Characters are animated on 6 directions: see EAnimAngle
 // Returns animation direction as int, starting with top(0)

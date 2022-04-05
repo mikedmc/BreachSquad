@@ -7760,9 +7760,11 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 				act->Paint(eTexChannel);
 
 				//#TEMP: paint muzzle pos and shadow
+				/*
 				VecProj vpMuzz = act->GetWeaponMuzzleWorld( true, 0 );
 				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy.x, vpMuzz.xy.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x88ff0000 );
 				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy_proj.x, vpMuzz.xy_proj.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x8800ff00 );
+				*/
 			}
 			break;
 			case K_VST_PROP:

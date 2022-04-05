@@ -54,24 +54,28 @@ EDir6 GetDir6FromVec(Vec2 vDir)
 	if ((vDir.x == 0.0f) && (vDir.y == 0.0f))
 		return EDIR6_S;
 	// angle between -pi..pi
-	float fang = atan2(vDir.y, vDir.x);
-	int retang = 0;
-	// divide angle in 3 equal parts and convert to EANG_
-	if (fang < 0.0f)
-		retang = ((int)EDIR6_NE - (int)fabs((fang / PI) * 3.0f));
-	else
-		retang = ((int)EDIR6_SE + (int)fabs((fang / PI) * 3.0f));
-	// clamp to 6 possible directions
-	CLAMP(retang, 0, 5);
+	float fang = atan2(vDir.x, vDir.y);
+	float f_halfarc = fabs(fang);
+	// angles are not divided equally because it looks better this way
+	int adder = 0; 
+	if ( f_halfarc > 2.5f ) adder = 3;
+	else if ( f_halfarc > 1.8f ) adder = 2;
+	else if ( f_halfarc > 0.5f ) adder = 1;
+	// modulo value so we don't get outside
+	int retang = (EDIR6S_CNT + EDIR6_S + adder * SIGN( fang )) % EDIR6S_CNT;
 	return (EDir6)retang;
 }
 
 Vec2 GetDir6VecN( EDir6 eDir )
 {
-	// normalized vectors for every dir
+	// normalized vectors for every dir in the correct order
 	const Vec2 retvec[ EDIR6S_CNT ] = { 
-		/*NW*/{-0.70710678118f, -0.70710678118f}, /*N*/{0.0f, -1.0f}, /*NE*/{0.70710678118f, -0.70710678118f}, 
-		/*SE*/{0.70710678118f, 0.70710678118f}, /*S*/{0.0f, 1.0f}, /*SW*/{-0.70710678118f, 0.70710678118f} 
+		/*N*/	{0.0f, -1.0f},
+		/*NE*/	{0.70710678118f, -0.70710678118f},
+		/*SE*/	{0.70710678118f, 0.70710678118f},
+		/*S*/	{0.0f, 1.0f},
+		/*SW*/	{-0.70710678118f, 0.70710678118f},
+		/*NW*/	{ -0.70710678118f, -0.70710678118f }
 	};
 
 	_ASSERT( eDir > EDIR6_NONE && eDir < EDIR6S_CNT );
