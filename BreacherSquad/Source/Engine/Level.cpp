@@ -3629,7 +3629,7 @@ bool CLevel::SetActorAIBehaviorIdx(CActor * actor, int nBehaviorIdx, bool &ret_b
 					//counts online coop victims too but keeps achievements separated (steam counter)
 					App_IncreaseGamestat(K_MEMID_GAMESTATS_ENEMIES_KILLED, 1);
 					//statistics for each class
-					CActor* pPlayer = g_level.GetPlayerByUID(actor->m_AIsensorInfo.m_lastInteractingActorUID);
+					CActor* pPlayer = GetPlayerByUID(actor->m_AIsensorInfo.m_lastInteractingActorUID);
 					if ((pPlayer != null) && (!IsNetworkPlayer(pPlayer)))
 					{
 						switch (g_playerSelScr.m_arrPlayers[pPlayer->nPlayerOrdinal].eType)
@@ -8134,7 +8134,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		Mat matpaint;
 		// computes sub pixel offsets for smooth scrolling. the RT renders only on tileset pixels, no subpixels, for precision.
 		// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
-		RectXYWH camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
+		RectXYWH camrect = m_camLevelToRT.GetCamWorldAABB();
 		Vec2 vSubPxOff(-FLOAT_FRAC(camrect.x) * (fRTscale * K_RT_PIXEL_SIZE_F), -FLOAT_FRAC(camrect.y) * (fRTscale * K_RT_PIXEL_SIZE_F));
 		MUMatAffine2D(&matpaint, fRTscale, nullptr, 0.0f, &Vec2(rectRender.x + vSubPxOff.x, rectRender.y + vSubPxOff.y));
 		m_pSprite->SetTransform(&matpaint);

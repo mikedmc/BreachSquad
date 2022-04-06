@@ -1648,7 +1648,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				int nSDLinstanceID = nEvent.GetArgumentByName(L"nSDLinstanceID")->m_asINT32;
 				int nSelectedIdx = nEvent.GetArgumentByName(L"nSelectedIdx")->m_asINT32;
 
-				if (g_level.ActivateSpecialAbility(nSelectedIdx, nSDLinstanceID))
+				if (__Sim().ActivateSpecialAbility(nSelectedIdx, nSDLinstanceID))
 				{
 					UTGetGUI().RemoveTopmostLayer();
 				}
@@ -1893,10 +1893,10 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 					case STR_ABORT_MISSION:
 					{
-						if (g_level.m_levelState == K_LVL_STATE_PLAYING)
+						if (__Sim().m_levelState == K_LVL_STATE_PLAYING)
 						{
 							//can ask for restart if alive
-							CActor *pPlayer = g_level.pPlayerActor[g_netlock.Net_GetPlayerIndex()];
+							CActor *pPlayer = __Sim().pPlayerActor[g_netlock.Net_GetPlayerIndex()];
 							if ((UTApp().IsGameNetworked()) && (pPlayer != null) && (pPlayer->fLife > 0.0f))
 							{
 								//send silent restart command by chat

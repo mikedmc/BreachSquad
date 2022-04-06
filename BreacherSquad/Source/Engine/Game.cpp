@@ -266,7 +266,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 				//SPINE update animation states
 				g_spineMgr.UpdateAnimationStates( fFixedTime );
 				// Update level and all spine objects and bones
-				g_level.UpdateFixedTimestep( fFixedTime );
+				gLevel.UpdateFixedTimestep( fFixedTime );
 				// SPINE update final skeleton world positions (no bone changes allowed after this)
 				g_spineMgr.Update( fFixedTime );
 
@@ -275,14 +275,14 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 				nFixedStepUpdates++;
 			}
 
-			g_level.Update( fElapsedTime );
+			gLevel.Update( fElapsedTime );
 
 			/*
 			//#DMC: comentat cat timp lucrez, functioneaza corect:
 			if ( !bSyncUpdate ) //not networked or network sync finised even if still during gameplay
 			{
 				//ingame menu on ESC-back
-				if ( g_level.m_levelState == K_LVL_STATE_PLAYING )
+				if ( gLevel.m_levelState == K_LVL_STATE_PLAYING )
 				{
 					CCtrlLayer* layer = UTGetGUI().GetLayerByName( "LAYER_ID_IGM_MENU" );
 					if ( ( layer == null ) && ( !UTGetGUI().bIsBlocking ) )
@@ -321,8 +321,8 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 					g_spineMgr.UpdateAnimationStates( fElapsedTime, fTimeline );
 
 					// Update level and all spine objects and bones
-					g_level.UpdateFixedTimestep( fElapsedTime );
-					g_level.Update( fElapsedTime );
+					gLevel.UpdateFixedTimestep( fElapsedTime );
+					gLevel.Update( fElapsedTime );
 
 					//SPINE update final skeleton world positions (no bone changes allowed after this)
 					g_spineMgr.Update( fElapsedTime, fTimeline );
@@ -333,7 +333,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 				if ( g_bLevelNeedsUpdate )
 				{
 					LOG_DBG( L"> Update called with dtime: 0.0" );
-					g_level.UpdateFixedTimestep( 0.0f );
+					gLevel.UpdateFixedTimestep( 0.0f );
 					g_bLevelNeedsUpdate = false;
 				}
 			}
@@ -349,7 +349,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 				if ( bCanOpenMenu )
 				{
 					//ingame menu on ESC-back
-					if ( g_level.m_levelState == K_LVL_STATE_PLAYING )
+					if ( gLevel.m_levelState == K_LVL_STATE_PLAYING )
 					{
 						CCtrlLayer* layer = UTGetGUI().GetLayerByName( "LAYER_ID_IGM_MENU_NET" );
 						if ( ( layer == null ) && ( !UTGetGUI().bIsBlocking ) )
@@ -391,14 +391,14 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 				}
 				//sync random seed again here (makes sure we don't get desynced between debug and release versions)
 				//resets the number of random numbers requested
-				g_level.m_rand.SetRandSeed( g_netlock.m_unRandomSeed + nUpdateFrame );
-				//LOG(L"--update dT=%.6f T=%.6f rand:%d--", fElapsedTime, fTime, g_level.m_rand.GetRandomSeed());
+				gLevel.m_rand.SetRandSeed( g_netlock.m_unRandomSeed + nUpdateFrame );
+				//LOG(L"--update dT=%.6f T=%.6f rand:%d--", fElapsedTime, fTime, gLevel.m_rand.GetRandomSeed());
 
 				//SPINE update animation states
 				g_spineMgr.UpdateAnimationStates( fElapsedTime, fTimeline );
 
-				g_level.UpdateFixedTimestep( fElapsedTime );
-				g_level.Update( fElapsedTime );
+				gLevel.UpdateFixedTimestep( fElapsedTime );
+				gLevel.Update( fElapsedTime );
 				//SPINE update animation states
 				g_spineMgr.Update( fElapsedTime, fTimeline );
 				g_bLevelNeedsUpdate = false;
@@ -445,14 +445,14 @@ void CGame::BeforePaint()
 			}
 			*/
 			// Deferred buffers use their own begin and end for UTPainter();
-			g_level.PaintDeferredBuffers(0.0f);
+			gLevel.PaintDeferredBuffers(0.0f);
 		}
 		break;
 
 		default:  //on all other states just clear the RTT for now
 		{
-			//g_level.PaintOffscreen_nothing();
-			//g_level.PaintComposition_nothing();
+			//gLevel.PaintOffscreen_nothing();
+			//gLevel.PaintComposition_nothing();
 		}
 		break;
 	}
@@ -541,11 +541,11 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 		case GAME_STATE_GAME:
 		{
 			//if level not loaded just skip paint
-			if ( !g_level.m_bLoaded )
+			if ( !gLevel.m_bLoaded )
 				break;
 
 			// paint game elements above RTT content
-			g_level.Paint();
+			gLevel.Paint();
 
 			//final flush
 			pSpr->Flush();
@@ -558,7 +558,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 				g_SprPainter.Begin(vsspr, UTGetAppClass().g_matProj);
 
 				for (int kk = 0; kk < 5; kk++)
-					CSprite::paintFrameNEW(&g_level.m_sprInterface, Vec3(100.0f + 30.0f * kk, 100.0f + 30.0f * kk, 0.0f), ANM_IGM_INTERFACE_SPR_PORTRAITS, kk,
+					CSprite::paintFrameNEW(&gLevel.m_sprInterface, Vec3(100.0f + 30.0f * kk, 100.0f + 30.0f * kk, 0.0f), ANM_IGM_INTERFACE_SPR_PORTRAITS, kk,
 						0xffffffff, fTime, Vec2(1.0f + 0.4f * sin(fTime), 1.0f - 0.4f * sin(fTime)));
 
 
@@ -632,7 +632,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			//	RECT src;
 			//	SetRect(&src, 0, 0, 512, 512);
 			//	pSpr->SetTransform(&g_matIdentity);
-			//	pSpr->Draw(g_level.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
+			//	pSpr->Draw(gLevel.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
 			//	pSpr->Flush();
 			//}
 			//if (DXUTIsKeyDown('0'))
@@ -642,7 +642,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			//	RECT src;
 			//	SetRect(&src, 512, 0, 1024, 512);
 			//	pSpr->SetTransform(&g_matIdentity);
-			//	pSpr->Draw(g_level.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
+			//	pSpr->Draw(gLevel.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
 			//	pSpr->Flush();
 			//}
 #endif
@@ -660,7 +660,7 @@ void CGame::Release()
 
 void CGame::GC()
 {
-	g_level.GC();
+	gLevel.GC();
 }
 
 
@@ -671,7 +671,8 @@ OPRESULT CGame::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
 {
 	m_pDevice = pDevice;
 
-	gMenus.OnCreateDevice( pDevice, pBBDesc );
+	V_OP_RET( gMenus.OnCreateDevice( pDevice, pBBDesc ) );
+	V_OP_RET( gLevel.OnCreateDevice( pDevice, pBBDesc ) );
 
 	return K_OP_OK;
 }
@@ -680,7 +681,8 @@ OPRESULT CGame::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
 {
 	m_pDevice = pDevice;
 
-	gMenus.OnResetDevice( pDevice, pBBDesc );
+	V_OP_RET( gMenus.OnResetDevice( pDevice, pBBDesc ) );
+	V_OP_RET( gLevel.OnResetDevice( pDevice, pBBDesc ) );
 
 	return K_OP_OK;
 }
@@ -690,6 +692,7 @@ OPRESULT CGame::OnLostDevice()
 	m_pDevice = nullptr;
 
 	gMenus.OnLostDevice();
+	gLevel.OnLostDevice();
 
 	return K_OP_OK;
 }
@@ -699,6 +702,7 @@ OPRESULT CGame::OnDestroyDevice()
 	m_pDevice = nullptr;
 
 	gMenus.OnDestroyDevice();
+	gLevel.OnDestroyDevice();
 
 	return K_OP_OK;
 }
@@ -713,3 +717,7 @@ CGame& __Game()
 	return __Game;
 }
 
+CLevel& __Sim()
+{
+	return __Game().gLevel;
+}

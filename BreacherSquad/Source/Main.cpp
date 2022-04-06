@@ -73,7 +73,6 @@ CTimersArray				g_timers(3000, 10);					//Timers array
 ///--- Game classes ---
 CPlayerSelScr				g_playerSelScr;						// Player selection screen
 CMainMenu					g_mainMenu;							// Main menu class
-CLevel						g_level;							// Current Level
 CLevelEditor				g_editor;							// Level editor - defined global, initialized on loading, destroyed on app shutdown
 
 #ifdef K_CONTROLS_EDITOR
@@ -136,7 +135,7 @@ spine::SpineExtension *spine::getDefaultExtension() {
 // Hard to make it a class method and use as a callback so make it global
 void NormalizeIngameMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue)
 {
-	g_level.NormalizeMouseCoords(ControllerIID, fAxisValue, bIsHorizontalAxis, ret_fAxisValue);
+	__Sim().NormalizeMouseCoords(ControllerIID, fAxisValue, bIsHorizontalAxis, ret_fAxisValue);
 	//DebugPrintA("coords: axis:%d %.2f -> %.2f\n", bIsHorizontalAxis, fAxisValue, ret_fAxisValue);
 }
 
@@ -303,7 +302,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 		StringCchPrintf(wcsPath, MAX_PATH, L"%s/levels/missions/missions.xml", UTApp().g_wszAppResDir);
 		UTGetChaptersList().LoadChapters(wcsPath);
 		//load infinite tower mode desc
-		//g_verticalMode.Init(&g_level, L"media/levels/mod_prefabs/infinite_tower.xml");
+		//g_verticalMode.Init(&__Sim(), L"media/levels/mod_prefabs/infinite_tower.xml");
 		//check CRC after loading chapters (levels needed)
 		UINT32 unGameCRC = App_GetGameFilesCRC();
 		//we loaded the descriptors
@@ -545,7 +544,7 @@ OPRESULT BeforeMount(void)
 	//--------------------------------------------------------------------------------------
 	// Script processors
 	//--------------------------------------------------------------------------------------
-	UTGetScriptManager().AddProcessor(&g_level);
+	UTGetScriptManager().AddProcessor(&__Sim());
 
 	return K_OP_OK;
 }
@@ -775,7 +774,6 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_OP_RETHR(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(__Painter().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(__TexFonts().OnCreateDevice(pDevice, pBBDesc));
-	V_RETURN(g_level.OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_particlesMgr.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetGUI().OnCreateDevice(pDevice, pBBDesc));
@@ -845,7 +843,6 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	UTGetTTFManager().OnResetDevice(pDevice, pBBDesc);
 
 	V_RETURN(__TexFonts().OnResetDevice(pDevice, pBBDesc));
-	V_RETURN(g_level.OnResetDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_particlesMgr.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetGUI().OnResetDevice(pDevice, pBBDesc));
@@ -857,7 +854,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(g_ControlsEditor.OnResetDevice(pDevice, pBBDesc));
 #endif
 	//--- set Sprite painter class pointer ---
-	g_level.SetSpritePtr(g_pGameSprite);
+	__Sim().SetSpritePtr(g_pGameSprite);
 	g_particlesMgr.SetSpritePtr(g_pGameSprite);
 	CSprite::SetGlobalSpritePtr(g_pGameSprite, &__Painter());
 	CTTFontsManager::SetGlobalSpritePtr(g_pGameSprite);
@@ -920,7 +917,6 @@ void CALLBACK OnLostDevice(void)
 
 	__Game().OnLostDevice();
 
-	g_level.OnLostDevice();
 	g_editor.OnLostDevice();
 	g_particlesMgr.OnLostDevice();
 	g_playerSelScr.OnLostDevice();
@@ -954,7 +950,6 @@ void CALLBACK OnDestroyDevice(void)
 	UTGetTTFManager().OnDestroyDevice();
 	__TexFonts().OnDestroyDevice();
 	UTGetGUI().OnDestroyDevice();
-	g_level.OnDestroyDevice();
 	g_editor.OnDestroyDevice();
 	g_particlesMgr.OnDestroyDevice();
 	g_playerSelScr.OnDestroyDevice();
@@ -1199,7 +1194,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 		}
 #endif
 		///--- LAST: make sure we stop syncing/sending frame data only after peer finished level too (both peers agree) ---
-		if (g_level.m_levelState > K_LVL_STATE_PLAYING)
+		if (__Sim().m_levelState > K_LVL_STATE_PLAYING)
 		{
 			if ((g_netlock.m_arrLvlResPeerStates[0] != CNetLock::sPacketLevelResults::K_LEVRES_STATE_UNDEFINED) &&
 				(g_netlock.m_arrLvlResPeerStates[1] != CNetLock::sPacketLevelResults::K_LEVRES_STATE_UNDEFINED))
@@ -1344,7 +1339,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			//save actual controller states (not commands because those are secundary byproducts)
 			float arrKeysDown[K_CM_COMMANDS_COUNT] = { 0.0f };
 
-			int nInstanceLocal = g_level.m_arrPlayerControllersIIDs[g_netlock.Net_GetPlayerIndex()];
+			int nInstanceLocal = __Sim().m_arrPlayerControllersIIDs[g_netlock.Net_GetPlayerIndex()];
 			CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(nInstanceLocal);
 			if (ctrlr != null)
 				ctrlr->GetKeysDownPercents(arrKeysDown);
@@ -1476,10 +1471,10 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 #if defined(K_NET_DISCONNECT_ON_DESYNC)
 					g_netlock.Net_LogFrameData(10);
 
-					LOG(L"-- scene actors %d --", g_level.m_arrActors.GetSize());
-					for (int ll = 0; ll < g_level.m_arrActors.GetSize(); ll++)
+					LOG(L"-- scene actors %d --", __Sim().m_arrActors.GetSize());
+					for (int ll = 0; ll < __Sim().m_arrActors.GetSize(); ll++)
 					{
-						CActor* act = g_level.m_arrActors[ll];
+						CActor* act = __Sim().m_arrActors[ll];
 						LOG(L"%s ID %d pos(%.4f, %.4f) decision(%.4f)", act->_template.shID.text, act->ID, act->pos.xyz.x, act->pos.xyz.y, act->AItimerDecision);
 					}
 
@@ -1501,8 +1496,8 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 				}
 			}
 			// Write controllers data from network
-			int nInstanceLocal = g_level.m_arrPlayerControllersIIDs[g_netlock.Net_GetPlayerIndex()];
-			int nInstancePeer = g_level.m_arrPlayerControllersIIDs[g_netlock.Net_GetOtherPlayerIndex()];
+			int nInstanceLocal = __Sim().m_arrPlayerControllersIIDs[g_netlock.Net_GetPlayerIndex()];
+			int nInstancePeer = __Sim().m_arrPlayerControllersIIDs[g_netlock.Net_GetOtherPlayerIndex()];
 
 			CController* ctrlr_local = null;
 			ctrlr_local = UTGetCtrlrMgr().GetControllerByInstanceID(nInstanceLocal);
@@ -1572,7 +1567,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			//frame was simulated
 			g_nLastSyncedFrame = g_nUpdateFrame;
 			//compute sync check for this frame
-			g_nLastSyncHash = g_level.m_dwSyncCheckHash + g_level.m_rand.GetRandomCallsCount();
+			g_nLastSyncHash = __Sim().m_dwSyncCheckHash + __Sim().m_rand.GetRandomCallsCount();
 		}
 
 		g_nUpdateFrame++;
@@ -1764,7 +1759,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 		///--- chat window ---
 #ifdef ENABLE_CHAT_WINDOW
-		if ((UTApp().IsGameNetworked()) && ( GameState::state == GAME_STATE_GAME) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
+		if ((UTApp().IsGameNetworked()) && ( GameState::state == GAME_STATE_GAME) && (__Sim().m_levelState == K_LVL_STATE_PLAYING))
 		{
 			g_pGameSprite->Flush();
 			CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
@@ -1902,8 +1897,8 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 				//if ( GameState::state == GAME_STATE_GAME)
 				//{
-					//ImGui::Text("Sortables: %d", g_level.m_visibleList.arrSortedItems.nCount);
-					//RectXYWH		camrect = g_level.m_camLevelToRT.GetCamWorldAABB();
+					//ImGui::Text("Sortables: %d", __Sim().m_visibleList.arrSortedItems.nCount);
+					//RectXYWH		camrect = __Sim().m_camLevelToRT.GetCamWorldAABB();
 					//ImGui::Text("Cam: X%.4f Y%.4f", FLOAT_FRAC(camrect.x), FLOAT_FRAC(camrect.y));
 				//}
 
@@ -1923,7 +1918,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				{
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.8f, 0.2f, 1.0f));
 					if (ImGui::Button("Start Editor", ImVec2(120, 0)))
-						g_editor.Launch(&g_level);
+						g_editor.Launch(&__Sim());
 					ImGui::PopStyleColor(1);
 				}
 				else
@@ -2202,7 +2197,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			///--- Shows the mey mapping screen ---
 			case VK_F1:
 			{
-				if (( GameState::state == GAME_STATE_GAME) && (g_level.m_levelState == K_LVL_STATE_PLAYING))
+				if (( GameState::state == GAME_STATE_GAME) && (__Sim().m_levelState == K_LVL_STATE_PLAYING))
 				{
 					if (bAltDown)
 					{
@@ -2267,7 +2262,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			{
 				//chat available only when playing networked game and no other interface visible
 				if ((UTApp().IsGameNetworked()) && ( GameState::state == GAME_STATE_GAME) &&
-					(g_level.m_levelState == K_LVL_STATE_PLAYING) && (UTGetGUI().Layers.GetSize() == 0))
+					(__Sim().m_levelState == K_LVL_STATE_PLAYING) && (UTGetGUI().Layers.GetSize() == 0))
 				{
 					//enable input if not already enabled
 					if (!g_ChatWnd.IsReceivingInput())

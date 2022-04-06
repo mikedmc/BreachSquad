@@ -80,7 +80,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 
 			SND_SET_GROUP_FREQUENCY( "ingame", 1.0f, false );
 
-			g_level.Release();
+			__Sim().Release();
 			// level was unloaded, immediately set the controller pointer to null
 			UTGetCtrlrMgr().SetNormalizeCoordsFunctionPtr( nullptr );
 
@@ -119,7 +119,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 			///compute mods CRC
 			UINT32 unModsCRC = App_GetActiveModsCRC();
 			//initialize vertical mode after modding
-			//g_verticalMode.Init(&g_level, L"media/levels/mod_prefabs/infinite_tower.xml");
+			//g_verticalMode.Init(&__Sim(), L"media/levels/mod_prefabs/infinite_tower.xml");
 
 			//unModsCRC += g_verticalMode.GetFilesCRC(false);
 			UTApp().m_Settings.dev_unCurrentModsCRC = unModsCRC;
@@ -217,7 +217,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 
 		case GAME_STATE_MAINMENU:
 		{
-			g_level.GetNextRandomLevel();
+			__Sim().GetNextRandomLevel();
 #if defined(_DEBUG) || defined(DEBUG)
 #if defined(ENABLE_ACHIEVEMENTS_RESET_ON_STARTUP)
 			ErrorBox( K_ERR_ONSCREEN, L"---> [Achievements] Resetting achievements on startup!" );
@@ -438,7 +438,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 					__Texts().SetString( STR_CURRENT_MISSION_VAL, L"%d.%d %s", nChapterNumber + 1, nLevelNumber + 1, __Texts().strings[ nStrIdxLevelName ]->sText );
 				}
 
-				if ( FAILED( g_level.LoadLevel( strLevelPath ) ) )
+				if ( FAILED( __Sim().LoadLevel( strLevelPath ) ) )
 				{
 					ErrorBox( K_ERR_WARNING, L"Could not load level [%s]!", strLevelPath );
 					ChangeTo_Transition( GAME_STATE_LEVEL_SELECTION, TRANSITION_SIMPLE );
@@ -462,7 +462,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 				//write current mission name and number
 				__Texts().SetString( STR_CURRENT_MISSION_VAL, L"%s", mod->shName.text );
 
-				if ( FAILED( g_level.LoadLevel( wcsLevelPath ) ) )
+				if ( FAILED( __Sim().LoadLevel( wcsLevelPath ) ) )
 				{
 					ErrorBox( K_ERR_WARNING, L"Could not load downloaded level [%s]!", wcsLevelPath );
 					ChangeTo_Transition( GAME_STATE_LEVEL_SELECTION, TRANSITION_SIMPLE );

@@ -479,10 +479,10 @@ void CNetLock::Net_UpdateEventLoop()
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE) || defined(K_SYNC_ENGINE_DBG_VERBOSE)
 				// show last input and scene actors on disconnects
 				Net_LogFrameData(10);
-				LOG(L"-- scene actors %d --", g_level.m_arrActors.GetSize());
-				for (int ll = 0; ll < g_level.m_arrActors.GetSize(); ll++)
+				LOG(L"-- scene actors %d --", __Sim().m_arrActors.GetSize());
+				for (int ll = 0; ll < __Sim().m_arrActors.GetSize(); ll++)
 				{
-					CActor* act = g_level.m_arrActors[ll];
+					CActor* act = __Sim().m_arrActors[ll];
 					LOG(L"%s ID %d pos(%.4f, %.4f) decision(%.4f)", act->_template.shID.text, act->ID, act->pos.xyz.x, act->pos.xyz.y, act->AItimerDecision);
 				}
 #endif
@@ -696,7 +696,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 		if (UTApp().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH)
 		{
 			//random level on quick match
-			int nLevel = g_level.GetNextRandomLevel();
+			int nLevel = __Sim().GetNextRandomLevel();
 			m_ucSelChapter = nLevel / K_GAME_LEVELS_PER_CHAPTER;
 			m_ucSelLevel = nLevel % K_GAME_LEVELS_PER_CHAPTER;
 		}

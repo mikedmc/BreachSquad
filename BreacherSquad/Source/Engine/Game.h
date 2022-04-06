@@ -14,6 +14,7 @@ private:
 	float				fFixedStepTimer;	// time accumulator for fixed timestep
 public:
 	CMenus				gMenus;
+	CLevel				gLevel;				// instance of level
 
 public:
 	CGame();
@@ -42,3 +43,5 @@ public:
 /// SINGLETON
 ///**************************************************************************************
 CGame& __Game();
+// returns the instance of the level, like a singleton
+CLevel& __Sim();
