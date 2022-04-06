@@ -1447,7 +1447,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//toggle hidden flag
-			target->SetVisible(!target->IsVisible());
+			target->ToggleEnabled();
 			return true;
 		}
 		break;

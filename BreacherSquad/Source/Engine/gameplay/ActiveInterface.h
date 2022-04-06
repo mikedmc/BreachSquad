@@ -25,7 +25,7 @@ class IActiveInterface
 {
 protected:
 	bool					bPendingKill;			// exited gameplay, waits for garbage collection
-	bool					bVisible;				// is it visible? final flag
+	bool					bEnabled;				// sometimes the actives need to be disabled ( eg: after being killed )
 
 public:
 	UINT32					UID;					// ingame UID
@@ -73,7 +73,7 @@ public: //logic
 	CStringHash				shScriptActions;		// sctring containing script actions names
 	UINT32					nRunningScriptUID;		// UID of script that is running now on this element
 
-	bool					bSetVisible;			// commanding flag for bVisible. Will dump the value into bVisible when needed.
+	bool					bSetEnabled;			// commanding flag for bVisible. Will dump the value into bVisible when needed.
 	bool					bAnimated;				// este animat? daca da face play la animatie
 	bool					bSkipRender;			// skips render...
 
@@ -92,10 +92,12 @@ public: //logic
 	void			LoadLogic(FILE* fl);
 	//functie care se cheama cand interactionezi cu obiectul sau cand este pTarget
 	void			Touch(UINT32 touchingIActiveUID, float dTime, UINT32 overrideScriptHash = 0, bool bTouchTarget = true);
-	// sets the visible flag on/off
-	void			SetVisible( bool visible, bool forced = false );
-	// is it visible?
-	inline bool		IsVisible() { return bVisible; }
+	// sets the enabled flag on/off
+	void			SetEnabled( bool enabled, bool forced = false );
+	// toggles the enabled state
+	inline void		ToggleEnabled() { bSetEnabled = !bSetEnabled; }
+	// true if not pending kill and not disabled
+	bool			IsAlive();
 	// Call this to mark it for destruction
 	void			Kill();
 

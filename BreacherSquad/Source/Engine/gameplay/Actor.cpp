@@ -57,7 +57,12 @@ CActor::~CActor()
 
 bool CActor::IsAlive()
 {
-	return ((IsPendingKill() == false) && (bVisible == false) && (fLife > 0.0f));
+	return ((bPendingKill == false) && (bEnabled == true) && (fLife > 0.0f));
+}
+
+bool CActor::IsEnabled()
+{
+	return bEnabled;
 }
 
 void CActor::SetPos(Vec3 newPos)
@@ -136,9 +141,9 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 void CActor::Update(float dTime)
 {
 	//change visibility
-	this->bVisible = this->bSetVisible;
+	this->bEnabled = this->bSetEnabled;
 	// actor is hidden or not active so ignore it
-	if (!this->bVisible)
+	if (!this->bEnabled)
 		return;
 	//update timeline
 	this->fTimelineAI += dTime;

@@ -90,8 +90,10 @@ public:
 	// Gets pointer to weapons component
 	inline CWeaponsComponent*			Weapons() { return c_weapons; }
 
-	// tells if actor is alive and not hidden or deallocated, or inactive
+	// tells if actor is alive (health > 0) and not hidden or deallocated, or inactive
 	bool					IsAlive();
+	// returns the enabled flag (ignored by updates and all)
+	bool					IsEnabled();
 
 	void					SetPos( Vec3 newPos ) override;
 	void					Move( Vec3 delta ) override;

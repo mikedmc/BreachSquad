@@ -75,8 +75,8 @@ void CLevel::BuildVisibilityLists()
 	for (int kk = 0; kk < m_arrLights.GetSize(); kk++)
 	{
 		CLight* light = m_arrLights[kk];
-		//daca e ascunsa o sare
-		if (!light->IsVisible())
+		
+		if (!light->IsAlive() || light->bSkipRender)
 			continue;
 
 		switch (light->type)
@@ -124,7 +124,7 @@ void CLevel::BuildVisibilityLists()
 	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
 	{
 		//selectez bboxurile pt coliziune (cele din ecran momentan)
-		if (!m_arrColShapes[kk]->IsVisible())
+		if (!m_arrColShapes[kk]->IsAlive())
 			continue;
 
 		switch (m_arrColShapes[kk]->type)
@@ -181,7 +181,7 @@ void CLevel::BuildVisibilityLists()
 	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 	{
 		CActor* actor = m_arrActors[kk];
-		if ((!actor->IsVisible()) || (actor->bSkipRender))
+		if ((!actor->IsAlive()) || (actor->bSkipRender))
 			continue;
 		//is it nearby?
 		if ((actorsNearbyAABBs[0].Intersects(actor->bbox)) || (actorsNearbyAABBs[1].Intersects(actor->bbox)))
@@ -208,9 +208,9 @@ void CLevel::BuildVisibilityLists()
 
 		for (int kk = 0; kk < area->m_arrProps.GetSize(); kk++)
 		{
-			if (!area->m_arrProps[kk]->IsVisible())
+			CProp* prop = area->m_arrProps[ kk ];
+			if ((!prop->IsAlive()) || prop->bSkipRender)
 				continue;
-			CProp* prop = area->m_arrProps[kk];
 			//visible props
 			if (propsPaintAABB.Intersects(prop->bbox))
 			{
