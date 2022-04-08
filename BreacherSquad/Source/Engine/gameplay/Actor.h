@@ -5,6 +5,7 @@
 #include "ActorTemplate.h"
 #include "components/SpriteActorComp.h"
 #include "components/WeaponsComp.h"
+#include "components/ActorAIComp.h"
 
 // suspend flags used on actor->nSuspendedFlag 
 #define K_LVL_SUSPENDFLAG_NONE 0
@@ -18,6 +19,7 @@ class CActor : public IActiveInterface
 private:
 	CSpriteActorComponent*	c_graphics;					// graphics component that handles all painting and animation stuff
 	CWeaponsComponent*		c_weapons;					// graphics and logic component that handles the weapons
+	CActorAIComponent*		c_AI;						// AI component that handles actor controlling (player or computer)
 
 public:
 	CActorTemplate			_template;				// holds data about each actor, copied from source templates (xml) and probably modified by enhancements
@@ -63,16 +65,11 @@ public:
 	int				nPlayerOrdinal;	//player index (0-max_players_cnt)
 	int				nControllerInstanceID; //player controller ID (-1 for empty)
 
-	CAISensorInfo	m_AIsensorInfo;	// AI sensory information
-	CAICommands		m_AIcommands;	// Commands issued by AI
-
-	CAIState*		m_pAIcurrentState;
-	int				m_nAIcurrentBehaviorIdx; // current behaviour index (in current state) or -1 when not set
-	float			m_fAIbehaviorTimer;		// timer used for timed behaviors
-	EAIBehaviorType GetCurrentBehavior();
-
 	// CTOR. Allocate the components when calling the constructor. They will get deallocated by CActor.
-	CActor( Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteActorComponent* pComGraphics, CWeaponsComponent* pComWpn );
+	CActor( Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, 
+		CSpriteActorComponent* pComGraphics, 
+		CWeaponsComponent* pComWpn,
+		CActorAIComponent* pComAI);
 	// DTOR
 	~CActor();
 
@@ -103,12 +100,12 @@ public:
 	inline VecProj			GetPosHeart3D() const { return vHeart; }
 
 	// Updates specified Actor AI. Returns busy state TRUE if actor has jobs to do or false if actor is still
-	void					Update( float dTime );
+	void					Update( float dTime, CLevel& level );
 	// Paints the actor on a specific color channel
 	void					Paint( ETexChannel eChannel = K_TEXCHAN_COLORMAP );
 
 	// returns aim vector
-	inline Vec2				GetAimVec() { return m_AIcommands.vAimVec; };
+	inline Vec2				GetAimVec() { return c_AI->m_AIcommands.vAimVec; };
 	// returns speed vector
 	inline Vec2				GetSpeedVec() { return speed; };
 	// returns animation direction on X (flipped or not, decided by the graphics component)
@@ -126,7 +123,9 @@ public:
 	void					SetAnimSet( int n_anim_set ) { c_graphics->SetAnimSet( n_anim_set ); }
 	// Plays the actor verse from the template handling the positional attenuation
 	void					PlaySoundVersePos( D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly = false );
-	
+
+	inline EAIBehaviorType	GetCurrentBehavior() { return c_AI->GetCurrentBehavior(); };
+
 	// Updates possible actions list when interacting with something
 	// Looks into the inventory, the touchable and the actor specs/template for specific actions
 	void					BuildActionsList();

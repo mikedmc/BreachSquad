@@ -6,6 +6,7 @@
 
 #include "gameplay/PhysicsPoint.h"
 #include "gameplay/LevelTypes.h"
+#include "gameplay/components/ActorAICompTypes.h"
 #include "gameplay/Level_doofers.h"
 #include "gameplay/Level_scriptable.h"
 

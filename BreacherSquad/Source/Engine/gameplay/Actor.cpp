@@ -17,23 +17,18 @@ void CActor::EndPlay()
 {
 }
 
-EAIBehaviorType CActor::GetCurrentBehavior()
-{
-	if ((m_nAIcurrentBehaviorIdx < 0) || (m_pAIcurrentState == null))
-		return AI_BEHAVIOR_EMPTY;
-	return m_pAIcurrentState->m_arrBehaviors[m_nAIcurrentBehaviorIdx].nType;
-}
-
-CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CSpriteActorComponent* pComGraphics, CWeaponsComponent* pComWpn ) :
-	m_pAIcurrentState(nullptr), m_nAIcurrentBehaviorIdx(-1), m_fAIbehaviorTimer(0.0f), nLastDamageTakenFromUID(0),
+CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID,
+	CSpriteActorComponent* pComGraphics, CWeaponsComponent* pComWpn, CActorAIComponent* pComAI ) :
+	 nLastDamageTakenFromUID(0),
 	pClosestTouchable(nullptr), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), bHasGravity(true),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
 	eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0), eAttackStatus(K_ACT_ATTACK_IDLE)
 {
-	_ASSERT(pComGraphics != nullptr);
+	_ASSERT(pComGraphics != nullptr && pComAI != nullptr && pComWpn != nullptr);
 	// save pointer to component
 	c_graphics = pComGraphics;
 	c_weapons = pComWpn;
+	c_AI = pComAI;
 
 	ID = nID;
 	bAnimated = true;
@@ -53,6 +48,7 @@ CActor::~CActor()
 	// remove used components received as pointers 
 	SAFE_DELETE( c_graphics );
 	SAFE_DELETE( c_weapons );
+	SAFE_DELETE( c_AI );
 }
 
 bool CActor::IsAlive()
@@ -138,15 +134,16 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 	return true;
 }
 
-void CActor::Update(float dTime)
+void CActor::Update(float dTime, CLevel& level )
 {
 	//change visibility
 	this->bEnabled = this->bSetEnabled;
 	// actor is hidden or not active so ignore it
 	if (!this->bEnabled)
 		return;
-	//update timeline
-	this->fTimelineAI += dTime;
+
+	//verse timer
+	dec_limit( fVerseCooldown, dTime, 0.0f );
 
 	//#TODO: oare ar trebui sa isi ia singur datele din actor componenta si sa seteze singura animatiile??
 	if(MUVec2AlmostZero(speed))
@@ -154,8 +151,9 @@ void CActor::Update(float dTime)
 	else
 		c_graphics->SetAnimOnce(K_ACT_ANIM_RUN);
 
-	Vec2 vAim = m_AIcommands.vAimVec;
+	Vec2 vAim = c_AI->m_AIcommands.vAimVec;
 
+	c_AI->Update( *this, dTime, __Sim() );
 	//update all components after we have the final player position
 	c_graphics->Update(*this, dTime);
 	// compute stuff linked to the weapons before updating the weapons
@@ -205,7 +203,7 @@ VecProj CActor::GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 	v_muzzle_vec.y *= (float)c_graphics->GetFlipDirX();
 	// rotate weapon muzzle vector and add it to the projected position of the mount
 	Mat mrot;
-	float aim_angle = UTMath::GetVectorAngle( m_AIcommands.vAimVec );
+	float aim_angle = UTMath::GetVectorAngle( c_AI->m_AIcommands.vAimVec );
 	MUMatRotZ( &mrot, aim_angle );
 	MUVec2TransformCoord( &v_muzzle_vec, &v_muzzle_vec, &mrot );
 	Vec2 muzzle_proj = vp_mount.xy_proj + v_muzzle_vec;
@@ -292,9 +290,9 @@ void CActor::ComputeAttackStatus()
 	{
 		case K_ACT_ATTACK_IDLE:
 		{
-			eAttackStatus = m_AIcommands.eAttackCommand;
+			eAttackStatus = c_AI->m_AIcommands.eAttackCommand;
 			// only switch to alt weapon if we can shoot
-			if ( m_AIcommands.eAttackCommand == K_ACT_ATTACK_SHOOTING_ALT )
+			if ( c_AI->m_AIcommands.eAttackCommand == K_ACT_ATTACK_SHOOTING_ALT )
 			{
 				CWeapon* wpn = c_weapons->GetWeapon( K_WPNSLOT_ALTFIRE );
 				if ( !wpn->IsReadyToShoot() )
@@ -326,7 +324,7 @@ void CActor::ComputeAttackStatus()
 				if ( wpn->_template.nReloadUnitSize >= wpn->_template.nClipSize )
 				{
 					// reloading can be interrupted by the following commands
-					if ( m_AIcommands.eAttackCommand == K_ACT_ATTACK_MELEE )
+					if ( c_AI->m_AIcommands.eAttackCommand == K_ACT_ATTACK_MELEE )
 					{
 						wpn->StopReloading();
 						eAttackStatus = K_ACT_ATTACK_IDLE;

@@ -48,27 +48,6 @@ public:
 	DWORD					color_ini;
 	INT32					targetID_ini;			// target ID citit din editor
 
-public: //logic
-	IActiveInterface		*pTarget;				// target-ul din editor //TODO:poate trebuie inlocuita cu un UID ca sa nu am probleme cand dezaloc obiecte...? depinde de viteza cu care se cheama la rails
-	bool					bCanInteract;			// can interact with it?  #TODO: replace with interact-type or actions list
-	bool					bHideInteractIcon;		// hide the icon
-
-	EAIstate				AIstate;				// state AI (AI_STATE ENUM)
-	CVariantCollection		varAIparams;			// AIstate params
-	float					AItimerDecision;		// takes decisions when it reaches 0
-
-	UINT32					AItargetUID;			// enemy UID (not the one set from the editor!!!)
-	double					fTimelineAI;			// local timeline for AI 
-	
-	//#TODO: variabile locale rapide AI - ar trebui incluse intr-o structura cu serialize/deserialize eventual
-	float					AItimer1, AItimer2;		
-	float					AIfvar1, AIfvar2, AIfvar3; 
-	int						AIvar1, AIvar2;
-	Vec2					AIvec1;
-	bool					AIvarBool1, AIvarBool2;
-	CStringHash				AIstrvar1, AIstrvar2; 
-	int						AIsubState;				// AI substate used here and there, everywhere
-
 	CFixedArray<CScriptAction, 10>	arrActions;		// array of possible actions on this object (does not include actions from inventory and actors)
 	CStringHash				shScriptActions;		// sctring containing script actions names
 	UINT32					nRunningScriptUID;		// UID of script that is running now on this element

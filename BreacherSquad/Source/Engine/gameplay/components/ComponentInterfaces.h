@@ -1,9 +1,10 @@
 #pragma once
+#include "ActorAICompTypes.h"					  
 
 class CLevel;
 class CActor;
 
-// interface for generic animation component
+///--- interface for generic animation component
 class IBaseAnimComponent
 {
 public:
@@ -20,7 +21,7 @@ enum ePPCContactType {
 	PCT_BOX,
 	PCT_FLOOR,
 };
-// interface for generic point physics component
+///--- interface for generic point physics component
 class IBasePointPhysComponent
 {
 public:
@@ -31,4 +32,15 @@ public:
 	virtual void	Update( VecProj& vPos, float dTime, CLevel & level ) = 0;
 	// sets point speed
 	virtual void	SetSpeed(Vec3 vSpeed) = 0;
+};
+
+///--- interface for generic AI component
+class IBaseAIComponent
+{
+public:
+	CAICommands		m_AIcommands;	// Commands issued by AI to be executed by the actor
+public:
+	virtual			~IBaseAIComponent() {}
+	// AI components need access to the level to get data about the enemies and what not
+	virtual void	Update( CActor& act, float dTime, CLevel & level ) = 0;
 };
