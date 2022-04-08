@@ -3,14 +3,12 @@
 
 class CActorAIComponent : public IBaseAIComponent
 {
+private:
+	CLevel&					level;					// reference to level for accessing global data
 public: 
-	//#TODO: de mutat in ibaseAIcomponent variabilele comune
-	IActiveInterface		*pTarget;				// target-ul din editor //TODO:poate trebuie inlocuita cu un UID ca sa nu am probleme cand dezaloc obiecte...? depinde de viteza cu care se cheama la rails
-	bool					bCanInteract;			// can interact with it?  #TODO: replace with interact-type or actions list
-	bool					bHideInteractIcon;		// hide the icon
 
 	EAIstate				AIstate;				// state AI (AI_STATE ENUM)
-	CVariantCollection		varAIparams;			// AIstate params
+	int						AIsubState;				// AI substate used here and there, everywhere
 	float					AItimerDecision;		// takes decisions when it reaches 0
 
 	UINT32					AItargetUID;			// enemy UID (not the one set from the editor!!!)
@@ -23,7 +21,6 @@ public:
 	Vec2					AIvec1;
 	bool					AIvarBool1, AIvarBool2;
 	CStringHash				AIstrvar1, AIstrvar2;
-	int						AIsubState;				// AI substate used here and there, everywhere
 
 public:
 	CAISensorInfo	m_AIsensorInfo;				// AI sensory information
@@ -32,13 +29,27 @@ public:
 	float			m_fAIbehaviorTimer;			// timer used for timed behaviors
 
 public:
-	CActorAIComponent();
+	CActorAIComponent( CLevel& levelref );
 	~CActorAIComponent();
 
-	void Update( CActor& act, float dTime, CLevel & level ) override;
+	void					Update( CActor& act, float dTime ) override;
 	//#TODO: should show AI state visually (text) for easy debugging, only on debug builds
 	//void Paint( CActor& act );
 	
 	// Returns current behaviour
-	EAIBehaviorType GetCurrentBehavior();
+	EAIBehaviorType			GetCurrentBehavior();
+
+	// Seteaza noua stare si are in vedere si incheierea starii precedente
+	void					Actor_SetAIState( CActor& actor, CAIState* pNewState );
+	// Seteaza noua stare si are in vedere si incheierea starii precedente
+	// \returns true:success false:state not found
+	bool					Actor_SetAIState( CActor& actor, WCHAR * strStateName );
+	// Sets behavior by idx, from current state behaviors array
+	// \param: ret_bFinished - set to true if current behavior doesn't need an update (like set_animation or set_flag, etc)
+	// \returns: true if set, false if error
+	bool					SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, bool &ret_bFinished );
+	// Called when changing behaviors (to exit them gracefully)
+	void					OnActorBehaviorFinished( CActor& actor, EAIBehaviorType eOldBehavior );
+	// Finds closest valid AI event of typeFilter (if specified)
+	CAIEvent*				GetMostImportantAIEvent( CActor& act, EAIEventType eTypeFilter = K_LVL_AI_EVENT_ANY );
 };

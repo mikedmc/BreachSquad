@@ -41,6 +41,6 @@ public:
 	CAICommands		m_AIcommands;	// Commands issued by AI to be executed by the actor
 public:
 	virtual			~IBaseAIComponent() {}
-	// AI components need access to the level to get data about the enemies and what not
-	virtual void	Update( CActor& act, float dTime, CLevel & level ) = 0;
+
+	virtual void	Update( CActor& act, float dTime ) = 0;
 };

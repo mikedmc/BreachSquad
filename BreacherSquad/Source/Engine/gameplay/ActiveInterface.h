@@ -48,6 +48,11 @@ public:
 	DWORD					color_ini;
 	INT32					targetID_ini;			// target ID citit din editor
 
+	IActiveInterface		*pTarget;				// target coming from the editor. Source of loose pointers!
+	bool					bCanInteract;			// can interact with it?  #TODO: replace with interact-type or actions list
+	bool					bHideInteractIcon;		// hide the icon //#TODO: remove this flag
+	CVariantCollection		varAIparams;			// AIstate params (partially coming from the editor)
+
 	CFixedArray<CScriptAction, 10>	arrActions;		// array of possible actions on this object (does not include actions from inventory and actors)
 	CStringHash				shScriptActions;		// sctring containing script actions names
 	UINT32					nRunningScriptUID;		// UID of script that is running now on this element
@@ -62,31 +67,36 @@ public:
 
 	virtual const EActiveInterfaceType GetClassType() const { return K_LVL_IAI_TYPE_BASE; }
 
-	inline UINT32	GetUID() const { return UID; }
+	inline UINT32			GetUID() const { return UID; }
 	//Returns: UID of activ that interacted with it
-	inline UINT32	GetToucherUID() const { return nTouchingUID; }
+	inline UINT32			GetToucherUID() const { return nTouchingUID; }
 	// Tells if object is waiting to be deallocated
-	inline bool		IsPendingKill() { return bPendingKill; }	
+	inline bool				IsPendingKill() { return bPendingKill; }	
 	// Loads logic from binary file (editor exported logic)
-	void			LoadLogic(FILE* fl);
+	void					LoadLogic(FILE* fl);
 	//functie care se cheama cand interactionezi cu obiectul sau cand este pTarget
-	void			Touch(UINT32 touchingIActiveUID, float dTime, UINT32 overrideScriptHash = 0, bool bTouchTarget = true);
+	void					Touch(UINT32 touchingIActiveUID, float dTime, UINT32 overrideScriptHash = 0, bool bTouchTarget = true);
 	// sets the enabled flag on/off
-	void			SetEnabled( bool enabled, bool forced = false );
+	void					SetEnabled( bool enabled, bool forced = false );
 	// toggles the enabled state
-	inline void		ToggleEnabled() { bSetEnabled = !bSetEnabled; }
+	inline void				ToggleEnabled() { bSetEnabled = !bSetEnabled; }
 	// true if not pending kill and not disabled
-	bool			IsAlive();
+	bool					IsAlive();
 	// Call this to mark it for destruction
-	void			Kill();
-
+	void					Kill();
+	// Starts a script sending AI params as script local vars
+	void					StartScript( WCHAR* scriptName );
+	void					StartScript( UINT32 scriptNameHash );
+	// Sets varAIparams. params = nullptr just clears the params
+	void					SetAIparams( CVariantCollection * params, bool bClearParams );
+public: 
 	// completely sets position and all related data(pos, bbox, etc)
-	virtual void	SetPos(Vec3 newPos) = 0;
-	virtual void	Move(Vec3 delta) = 0;
+	virtual void			SetPos(Vec3 newPos) = 0;
+	virtual void			Move(Vec3 delta) = 0;
 	// Gets called after active was added to the actives array, after being fully initialized (end of loading or spawn)
-	virtual void	PostConstructionInit() = 0;
+	virtual void			PostConstructionInit() = 0;
 	// Gets called by the engine as soon as the object gets initialized
-	virtual void	BeginPlay() = 0;
+	virtual void			BeginPlay() = 0;
 	// Gets called when gets killed
-	virtual void	EndPlay() = 0;
+	virtual void			EndPlay() = 0;
 };

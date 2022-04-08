@@ -142,6 +142,17 @@ void CActor::Update(float dTime, CLevel& level )
 	if (!this->bEnabled)
 		return;
 
+	//#TODO: Stun Timer ar trebui sa fie parte din componenta de AI ca si input
+	if ( fLife > 0.0f )
+	{
+		if ( fStunTimer > 0.0f )
+		{
+			fStunTimer -= dTime;
+			//#TODO: cand a terminat stun il anunt ca a fost lovit
+		}
+	}
+	else
+		fStunTimer = 0.0f;
 	//verse timer
 	dec_limit( fVerseCooldown, dTime, 0.0f );
 
@@ -151,14 +162,20 @@ void CActor::Update(float dTime, CLevel& level )
 	else
 		c_graphics->SetAnimOnce(K_ACT_ANIM_RUN);
 
+	// Update actor AI
+	c_AI->Update( *this, dTime );
 	Vec2 vAim = c_AI->m_AIcommands.vAimVec;
-
-	c_AI->Update( *this, dTime, __Sim() );
-	//update all components after we have the final player position
+	// now process the AI commands
+	ProcessAICommands( level );
+	// Move based on speeds
+	DoMove( dTime, level );
+	// Processes extra stuff before painting
+	ProcessExtras( level );
+	// Update all components after we have the final player position
 	c_graphics->Update(*this, dTime);
-	// compute stuff linked to the weapons before updating the weapons
+	// compute weapon control before updating the weapons
 	ComputeAttackStatus();
-	// update weapon after updating the body because it depends on mount points
+	// update weapon after updating the graphics component because it depends on mount points
 	c_weapons->Update( *this, dTime );
 }
 
@@ -447,6 +464,458 @@ void CActor::ComputeAttackStatus()
 		}
 	}
 	*/
+
+}
+
+void CActor::ProcessAICommands( CLevel& level )
+{
+	//----------------------------------------
+	//	EXECUTE - process AI output  
+	//----------------------------------------
+	///--- AI commands ---
+
+	//save old crouch state
+	bool bCrouchedOldState = bCrouched;
+
+	//set crouch
+	bCrouched = c_AI->m_AIcommands.bCrouched;
+
+	///--- speed and movement ---
+	if ( c_AI->m_AIcommands.bThrust )
+	{
+		//add speed
+		float fspeed = _template.fSpeedMove;
+
+		// set final speed
+		speed = c_AI->m_AIcommands.vMoveDir * fspeed;
+	}
+	else
+	{
+		speed = Vec2( 0.0f, 0.0f );
+	}
+
+	//comanda culoare
+	if ( c_AI->m_AIcommands.nColor != 0 )
+	{
+		color = c_AI->m_AIcommands.nColor;
+	}
+
+	//death elements (intra doar daca e declarat mort in senzor sau daca i se forteaza starea de dead)
+	if ( (c_AI->m_AIsensorInfo.b_IsDead) || (GetCurrentBehavior() == AI_BEHAVIOR_DEAD) )
+	{
+		switch ( c_AI->m_AIcommands.nDeathCommand )
+		{
+			case K_LVL_ACT_DEATHCMD_RESET_TO_ZERO:
+			{
+				fLife = 0.0f;
+			}
+			break;
+			case K_LVL_ACT_DEATHCMD_SPLAT:
+			{
+				//don't explode hidden actors
+				if ( bSkipRender )
+					break;
+
+				if ( !UTApp().m_Settings.bGoreEnabled )
+				{
+					g_particlesMgr.GenerateEnemySoftGib( pos.xy_proj, 0xff32a7fa, K_PART_LAYER_RT_FRONT_NRM );
+				}
+				else
+				{
+					//blood splat (sortate crescator in animatie)
+					level.AddDecal_BloodSplat( GetPosHeart(), true, _template.actorClass );
+
+					//SND_PLAY_POSITIONAL_RAND2(SNDIDX_BULLET_BODY_GIBBED_01, SNDIDX_BULLET_BODY_GIBBED_02, actor->GetPosHeart());
+					//meat lumps
+					Vec2 bulletSpeed;
+					MUVec2Norm( &bulletSpeed, &vSpeedImpulse );
+
+					CAABB genbox = bbox;
+					genbox.Inflate( -2.0f, -2.0f );
+					if ( _template.fLife > 10.0f )
+					{
+						DWORD dwCol = 0xff671010;
+						int nSubType = 0;
+						if ( _template.actorClass == K_LVL_ACT_CLASS_ZOMBIE )
+						{
+							dwCol = 0xff82b600;
+							nSubType = 1;
+						}
+						for ( int ll = 0; ll < 6; ll++ )
+						{
+							level.AddDoofer( K_DOOFER_MEAT, AABB::GetRandomPointInBox( genbox ), &Vec2( randfloatsgn( 50.0f ) + bulletSpeed.x * 50.0f, -130.0f - randfloat( 100.0f ) ), &g_vecGravityOld, nSubType );
+						}
+						//goes straight down to stain the floor
+						level.AddDoofer( K_DOOFER_MEAT, GetPosHeart(), &Vec2( 200.0f, 50.0f ), &g_vecGravityOld, nSubType );
+						level.AddDoofer( K_DOOFER_MEAT, GetPosHeart(), &Vec2( -200.0f, 50.0f ), &g_vecGravityOld, nSubType );
+						//human blood gibs particle
+						g_particlesMgr.AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &pos.xy_proj, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_FRONT_NRM );
+					}
+					else //small animals and stuff
+					{
+						for ( int ll = 0; ll < 2; ll++ )
+						{
+							level.AddDoofer( K_DOOFER_MEAT, AABB::GetRandomPointInBox( genbox ), &Vec2( randfloatsgn( 50.0f ) + bulletSpeed.x * 50.0f, -130.0f - randfloat( 100.0f ) ), &g_vecGravityOld );
+						}
+						g_particlesMgr.AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &pos.xy_proj, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM );
+					}
+				}
+
+				//players don't deallocate. They only become invisible.
+				if ( _template.actorClass == K_LVL_ACT_CLASS_PLAYER )
+				{
+					fLife = 0.0f;
+					bSkipRender = true;
+					//reset physics
+					speed = Vec2( 0.0f, 0.0f );
+					vSpeedImpulse = Vec2( 0.0f, 0.0f );
+					//move invisible body back to last safe pos
+					Vec2 vSpawnPos = level.m_arrPlayerLastSafePos[ nPlayerOrdinal ];
+					SetPos( Vec3( vSpawnPos.x, vSpawnPos.y, 0.0f ) );
+					break;
+				}
+				//deallocate
+				SetEnabled( false );
+				Kill();
+			}
+			break;
+			case K_LVL_ACT_DEATHCMD_DEALLOCATE:
+			{
+				//dezalocare
+				SetEnabled( false );
+				Kill();
+			}
+			break;
+		}
+		//remove death command after execution
+		c_AI->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_EMPTY;
+	}
+
+
+}
+
+void CActor::DoMove( float dTime, CLevel& level )
+{
+	// temp list for collisions
+	static CFixedArray<SweepAABB, 100> tempCollBoxList;
+	///------------------------------------------------------------------------------------------
+	///	INTEGRATOR - physics
+	///------------------------------------------------------------------------------------------
+	//#TODO: check speed limits - should be done on the speed vector, normalized
+	CLAMP( speed.x, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED );
+	CLAMP( speed.y, -K_LVL_ACTOR_MAX_SPEED, K_LVL_ACTOR_MAX_SPEED );
+	//update impulse
+	Vec2 impFriction( K_LVL_GROUND_DEFAULT_FRICTION, K_LVL_GROUND_DEFAULT_FRICTION );
+	//limit impulse
+	CLAMP( vSpeedImpulse.y, -K_LVL_ACTOR_MAX_IMPULSE, K_LVL_ACTOR_MAX_IMPULSE );
+	CLAMP( vSpeedImpulse.x, -K_LVL_ACTOR_MAX_IMPULSE, K_LVL_ACTOR_MAX_IMPULSE );
+
+	vSpeedImpulse.x -= vSpeedImpulse.x * impFriction.x * dTime;
+	vSpeedImpulse.y -= vSpeedImpulse.y * impFriction.y * dTime;
+
+	Vec3 vPosIni = pos.xyz;
+	UINT16 unCollFlags = 0;
+
+	///--- collision detection ---
+	{
+		///a.calculezi vectorul de miscare al actorului(viteza * dt + miscare paltforma daca e necesar)
+		Vec2 vNextMove = (speed + vSpeedImpulse) * dTime; // Add connected platform movement if needed
+		///b.detectezi coliziuni posibile(bbox old + new pos)
+		//1. find bbox start and end union that includes all collisions when moving at high speeds
+		CAABB destbox, srcbox;
+		srcbox = bbox_ini; srcbox.Move( pos.xy );
+		destbox = bbox_ini; destbox.Move( pos.xy + vNextMove );
+		// box unions to check all possible collisions
+		CAABB boxUnion = AABB::Union( destbox, srcbox );
+		// bbox union in tile coords, including every touched tile
+		RectXYXYi boxUnionTiles( floor( boxUnion.vMin.x / K_TILE_SIZE_F ), floor( boxUnion.vMin.y / K_TILE_SIZE_F ),
+			ceil( boxUnion.vMax.x / K_TILE_SIZE_F ), ceil( boxUnion.vMax.y / K_TILE_SIZE_F ) );
+		RectXYWHi boxUnionTilesWH( boxUnionTiles.x1, boxUnionTiles.y1, boxUnionTiles.x2 - boxUnionTiles.x1 + 1, boxUnionTiles.y2 - boxUnionTiles.y1 + 1 );
+		//optional - to include more of the boxes
+		//boxUnion.Inflate(K_TILE_HSIZE, K_TILE_HSIZE);
+
+		// keeps a list of all boxes that might be colliding
+		tempCollBoxList.Clear();
+
+		/// BROAD PHASE SWEEP (find all POSSIBLE collision objects)
+
+		//add boxes from collision shapes
+		for ( int kk = 0; kk < level.m_arrColShapes.GetSize(); kk++ )
+		{
+			if ( !level.m_arrColShapes[ kk ]->IsAlive() )
+				continue;
+
+			//nu am intersectie probabils - trec mai departe
+			if ( !boxUnion.Intersects( level.m_arrColShapes[ kk ]->bbox ) )
+				continue;
+
+			//adauga bbox in lista de probabile pt intersectie
+			if ( level.m_arrColShapes[ kk ]->collFlags != K_DIRFLAG_NONE )
+			{
+				tempCollBoxList.Add( level.m_arrColShapes[ kk ]->bbox );
+			}
+		}
+		//add boxes from tiles
+		//#MAYBE: if it catches some corners sometimes try enlarging the tiles collision area (boxUnionTiles) by 1 tile in all directions
+		static CAABB retAABBs[ 64 ];
+		if ( pArea != nullptr )
+		{
+			// get collision tiles for current area
+			// tiles collboxes
+			int nadded = pArea->GetTilesCollisionBoxes( boxUnionTiles, retAABBs, 64 );
+			if ( nadded > 0 )
+			{
+				for ( int oo = 0; oo < nadded; oo++ )
+				{
+					tempCollBoxList.Add( retAABBs[ oo ] );
+				}
+			}
+			// props collboxes
+			nadded = pArea->GetPropsCollisionBoxes( boxUnion, retAABBs, 64 );
+			if ( nadded > 0 )
+			{
+				for ( int oo = 0; oo < nadded; oo++ )
+				{
+					tempCollBoxList.Add( retAABBs[ oo ] );
+				}
+			}
+			// if movement bbox is not completely contained in the current area BBox try with the neighbours too
+			if ( !pArea->AABBbounds.Contains( boxUnion ) )
+			{
+				for ( int kk = 0; kk < pArea->arrNeighbours.Count(); kk++ )
+				{
+					CLevelArea* area = pArea->arrNeighbours.m_pData[ kk ];
+					if ( !area->AABBbounds_TL.Intersects( boxUnionTilesWH ) )
+						continue;
+					// tiles collboxes
+					nadded = area->GetTilesCollisionBoxes( boxUnionTiles, retAABBs, 64 );
+					if ( nadded > 0 )
+					{
+						for ( int oo = 0; oo < nadded; oo++ )
+						{
+							tempCollBoxList.Add( retAABBs[ oo ] );
+						}
+					}
+					// props collboxes
+					nadded = area->GetPropsCollisionBoxes( boxUnion, retAABBs, 64 );
+					if ( nadded > 0 )
+					{
+						for ( int oo = 0; oo < nadded; oo++ )
+						{
+							tempCollBoxList.Add( retAABBs[ oo ] );
+						}
+					}
+				}
+			}
+		}
+
+		/// COLLISION HANDLING
+
+		float fRemainingTime = 1.0f;
+		while ( fRemainingTime > 0.0f )
+		{
+			// compute source box
+			srcbox = bbox_ini; srcbox.Move( pos.xy );
+			// find closest collider
+			float minDistSq = 100000.0f;
+			float fClosestTime = 100000.0f;
+			SweepAABB* pClosestBox = nullptr;
+			for ( int kk = 0; kk < tempCollBoxList.Count(); kk++ )
+			{
+				SweepAABB* tmpbox = &tempCollBoxList[ kk ];
+				// skip boxes that have been handled this step
+				if ( tmpbox->bDisabled )
+					continue;
+
+				SweepData sdata = AABBSweep::CalculateSweepData( srcbox, vNextMove, *tmpbox );
+				// computes even if no valid collision. needs flag to eliminate them
+				if ( sdata.bIsValid == false )
+					continue;
+
+				if ( sdata.fCollisionTime < fClosestTime )
+				{
+					fClosestTime = sdata.fCollisionTime;
+					minDistSq = sdata.fDistance;
+					pClosestBox = tmpbox;
+				}
+				else if ( sdata.fCollisionTime == fClosestTime )
+				{
+					if ( sdata.fDistance < minDistSq )
+					{
+						fClosestTime = sdata.fCollisionTime;
+						minDistSq = sdata.fDistance;
+						pClosestBox = tmpbox;
+					}
+				}
+			}
+
+			// do we have a collider?
+			if ( pClosestBox != nullptr )
+			{
+				SweepData hit = AABBSweep::CalculateSweepData( srcbox, vNextMove, *pClosestBox );
+				//handled already, disable it
+				pClosestBox->bDisabled = true;
+
+				pos.xy += vNextMove * hit.fCollisionTime;
+
+				// Calculate the correct time of impact for the remaining
+				// collisions or to apply movement
+				float ftime = fRemainingTime - hit.fCollisionTime;
+
+				// Calculate the collision normal (vector used to slide the object that collided)
+				// normala e tangenta de fapt...
+				float dotProduct = MUVec2Dot( &vNextMove, &hit.vNormal ) * ftime;
+				hit.vNormal *= dotProduct;
+
+				// Handle events after each respective side that collided
+				//DMC: could implement OnCollision(hit.eSide) if needed
+				switch ( hit.eSide )
+				{
+					case K_SIDE_BOTTOM:
+					{
+						speed.y = 0.0f;
+						vSpeedImpulse.y = 0.0f;
+						unCollFlags |= K_DIRFLAG_DOWN;
+					}
+					break;
+					case K_SIDE_TOP:
+					{
+						speed.y = 0.0f;
+						vSpeedImpulse.y = 0.0f;
+						unCollFlags |= K_DIRFLAG_UP;
+					}
+					break;
+					case K_SIDE_LEFT:
+					{
+						speed.x = 0.0f;
+						vSpeedImpulse.x = 0.0f;
+						unCollFlags |= K_DIRFLAG_LEFT;
+					}
+					break;
+					case K_SIDE_RIGHT:
+					{
+						speed.x = 0.0f;
+						vSpeedImpulse.x = 0.0f;
+						unCollFlags |= K_DIRFLAG_RIGHT;
+					}
+					break;
+				}
+
+				if ( ftime > 0.0f )
+				{
+					vNextMove = hit.vNormal;
+
+					CAABB newboxsrc = bbox_ini;
+					newboxsrc.Move( pos.xy );
+					CAABB newboxdest = newboxsrc;
+					newboxdest.Move( vNextMove );
+					CAABB newBoundary = AABB::Union( newboxsrc, newboxdest );
+
+					// call and implement this if you need tile sized boxes to enter tile wide holes
+					//this.fixEqualSizedHoleCollision(hit, potential, time, collisionStack);
+
+					//DMC: deactivate those boxes that don't fit the new boundary
+					for ( int kk = 0; kk < tempCollBoxList.Count(); kk++ )
+					{
+						SweepAABB* it = &tempCollBoxList.m_pData[ kk ];
+						if ( it->bDisabled )
+							continue;
+						// disable non intersecting ones
+						if ( !newBoundary.Intersects( tempCollBoxList.m_pData[ kk ] ) )
+							it->bDisabled = true;
+					}
+					// update remaining time and do again
+					fRemainingTime = ftime;
+				}
+
+			}
+			else
+			{
+				pos.xy += vNextMove;
+				fRemainingTime = 0.0f;
+			}
+		}
+
+		//#TODO: could use a penetration resolution round. Maybe after solving each collision so we make sure boxes don't actually touch? TBD
+	}
+
+	collisionFlags = unCollFlags;
+
+	//check world bounds for each actor - kill if out
+	if ( !Rects::PointInRect( pos.xy, level.m_levelAABB ) )
+	{
+		level.KillActor( this );
+	}
+
+	//set final position
+	SetPos( Vec3( pos.xy.x, pos.xy.y, 0.0f ) );
+	// save last position in pos_last (SetPos does but we already altered pos)
+	pos_last = vPosIni;
+
+}
+
+void CActor::ProcessExtras( CLevel& level )
+{
+	///--- set current area if null or changed after updating the position
+	if ( (pArea == nullptr) || (!pArea->AABBbounds.PointIn( pos.xy )) )
+	{
+		pArea = level.Areas_GetAt( pos.xy );
+	}
+
+	///--- find closest interactible object in range, aka touchable
+	if ( _template.eCaps & K_ACT_CAPS_CAN_INTERACT )
+	{
+		//#TODO: put interact area in special constant
+		CAABB aabbInteract( -K_TILE_SIZE_F, -K_TILE_SIZE_F, K_TILE_SIZE_F, K_TILE_SIZE_F );
+		aabbInteract.Move( pos.xy );
+
+		CArray<CProp*> arrTouchProps;
+		arrTouchProps.SetSize( 16 );
+		if ( pArea != nullptr )
+		{
+			pArea->GetPropsTouchingBox( aabbInteract, arrTouchProps, true );
+			// if bbox is not completely contained in the current area BBox try with the neighbours too
+			if ( !pArea->AABBbounds.Contains( aabbInteract ) )
+			{
+				for ( int oo = 0; oo < pArea->arrNeighbours.Count(); oo++ )
+				{
+					CLevelArea* area = pArea->arrNeighbours.m_pData[ oo ];
+					if ( !area->AABBbounds.Intersects( aabbInteract ) )
+						continue;
+					area->GetPropsTouchingBox( aabbInteract, arrTouchProps, true );
+				}
+			}
+		}
+		//#TODO: see which one is closer to the aim dir
+		if ( arrTouchProps.GetSize() > 0 )
+		{
+			IActiveInterface* pNewTouchable = arrTouchProps[ 0 ];
+			if ( pClosestTouchable != pNewTouchable )
+			{
+				ClearActionsList();
+			}
+			pClosestTouchable = pNewTouchable;
+		}
+		else
+		{
+			if ( pClosestTouchable != nullptr )
+			{
+				ClearActionsList();
+			}
+			pClosestTouchable = nullptr;
+		}
+	}
+
+	// check touch/interact
+	if ( (c_AI->m_AIcommands.bInteract) && (pClosestTouchable != nullptr) )
+	{
+		BuildActionsList();
+		if ( arrInteractOptions.Count() > 0 )
+		{
+			eInteractState = K_STATE_READY;
+			nInteractOptionsSelIdx = 0;
+		}
+	}
 
 }
 

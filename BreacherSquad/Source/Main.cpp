@@ -1475,7 +1475,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 					for (int ll = 0; ll < __Sim().m_arrActors.GetSize(); ll++)
 					{
 						CActor* act = __Sim().m_arrActors[ll];
-						LOG(L"%s ID %d pos(%.4f, %.4f) decision(%.4f)", act->_template.shID.text, act->ID, act->pos.xyz.x, act->pos.xyz.y, act->AItimerDecision);
+						//LOG(L"%s ID %d pos(%.4f, %.4f) decision(%.4f)", act->_template.shID.text, act->ID, act->pos.xyz.x, act->pos.xyz.y, act->AItimerDecision);
 					}
 
 					//send analytics

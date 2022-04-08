@@ -80,6 +80,12 @@ private:
 	void					ApplyWeaponTemplate( CWeapon * pWeapon );
 	// decides the current attack state of the actor based on AI commands and weapon status
 	void					ComputeAttackStatus();
+	// Processes the commands from the AI component. Needs access to level for effects.
+	void					ProcessAICommands( CLevel& level );
+	// Physics Integrator, converts speeds to movement and handles collisions
+	void					DoMove( float dTime, CLevel& level );
+	// Processes extra stuff after moving (interactibles, pArea ownership, etc)
+	void					ProcessExtras( CLevel& level );
 
 public:
 

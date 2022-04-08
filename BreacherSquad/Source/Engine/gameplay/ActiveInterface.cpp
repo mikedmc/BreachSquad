@@ -120,3 +120,32 @@ void IActiveInterface::Kill()
 {
 	bPendingKill = true;
 }
+
+void IActiveInterface::StartScript( WCHAR* scriptName )
+{
+	if ( nRunningScriptUID > 0 )
+		return;
+	nRunningScriptUID = UTGetScriptManager().StartScript( scriptName, GetUID(), &varAIparams );
+}
+
+void IActiveInterface::StartScript( UINT32 scriptNameHash )
+{
+	if ( nRunningScriptUID > 0 )
+		return;
+	nRunningScriptUID = UTGetScriptManager().StartScript( scriptNameHash, GetUID(), &varAIparams );
+}
+
+void IActiveInterface::SetAIparams( CVariantCollection * params, bool bClearParams )
+{
+	if ( (params == nullptr) || (bClearParams) )
+		varAIparams.DeleteAll();
+
+	if ( params != null )
+	{
+		for ( int kk = 0; kk < params->GetVariantCount(); kk++ )
+		{
+			varAIparams.AddVariant( *params->m_variants[ kk ] );
+		}
+	}
+}
+

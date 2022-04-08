@@ -1,20 +1,6 @@
 #pragma once
 #include "dxstdafx.h"
 
-void CLevel::StartScript(WCHAR* scriptName, IActiveInterface* active)
-{
-	if (active->nRunningScriptUID > 0)
-		return;
-	active->nRunningScriptUID = UTGetScriptManager().StartScript(scriptName, active->GetUID(), &active->varAIparams);
-}
-
-void CLevel::StartScript(UINT32 scriptNameHash, IActiveInterface* active)
-{
-	if (active->nRunningScriptUID > 0)
-		return;
-	active->nRunningScriptUID = UTGetScriptManager().StartScript(scriptNameHash, active->GetUID(), &active->varAIparams);
-}
-
 IActiveInterface* CLevel::ScriptGetActiveInterfaceByTargetParam(CVariantComplex* vcTarget, UINT32 executorUID)
 {
 	//AI TARGET
