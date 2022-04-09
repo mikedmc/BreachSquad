@@ -177,6 +177,8 @@ void CActor::Update(float dTime, CLevel& level )
 	ComputeAttackStatus();
 	// update weapon after updating the graphics component because it depends on mount points
 	c_weapons->Update( *this, dTime );
+	// now we check if the weapon shot and generate the bullets
+	CheckShoot( level );
 }
 
 void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
@@ -917,6 +919,81 @@ void CActor::ProcessExtras( CLevel& level )
 		}
 	}
 
+}
+
+bool CActor::CheckShoot( CLevel& level )
+{
+	//#TODO: must add support for weapon scripts on shoot and empty
+	CWeapon* weapon = c_weapons->GetCurWeapon();
+	if ( (weapon == nullptr) || (weapon->pOwner == nullptr) || (weapon->status == K_WPN_STATUS_UNKNOWN) )
+		return false;
+
+	// only shoot on JUST_SHOT
+	if ( weapon->status != K_WPN_STATUS_JUST_SHOT )
+		return false;
+
+
+	bool bTwoHanded = weapon->_template.bTwoHanded;
+	bool bDualWielding = weapon->_template.bDualWielding;
+
+	CActor* shooter = weapon->pOwner;
+	Vec3 vFinalDir;
+	MUVec3Norm( &vFinalDir, &c_weapons->GetWeaponAimVec() );
+	//#TODO: add support for dual wielding
+	VecProj vShootPos = shooter->GetWeaponMuzzleWorld( bTwoHanded, 0 );
+
+	int nFinalClass = shooter->_template.actorClass;
+	//bullet has template class, set it to final class
+	if ( weapon->_template.bulletTemplate.eClass != K_LVL_ACT_CLASS_ANY )
+		nFinalClass = weapon->_template.bulletTemplate.eClass;
+
+	//save local bullet template copy
+	CBulletTemplate tmplBullet = weapon->_template.bulletTemplate;
+	//ammo (-1 infinite)
+	int nAmmoReal = weapon->ammoLeft;
+	//if weapon uses main weapon ammo check that ammo
+	/*
+	if (weapon->WeaponTemplate.bUsesMainWeaponAmmo)
+		nAmmoReal = weapon->pOwner->pSelectedWeapon[K_LVL_ACT_WEAPON_PRIMARY]->ammoLeft;
+		*/
+
+	if ( nAmmoReal != 0 )
+	{
+
+
+		// shoot bullets
+		for ( int kk = 0; kk < weapon->_template.nBulletsPerShot; kk++ )
+		{
+			//add weapon spread
+			float fSpreadAng = level.m_rand.RandFloatSgn( weapon->_template.fSpreadFOV );
+
+			//vFinalDir.x = cos(fAimAng + fSpreadAng);
+			//vFinalDir.y = sin(fAimAng + fSpreadAng);
+			//D3DXVec2Normalize(&vFinalDir, &vFinalDir);
+
+			CBullet* bullet = level.ShootBullet( &tmplBullet, nFinalClass, shooter->GetUID(), vShootPos.xyz, vFinalDir );
+		}
+
+		// add shell
+		if ( weapon->_template.nDropShellFrame >= 0 )
+		{
+			level.AddDoofer( K_DOOFER_SHELL, weapon->pOwner->GetPosHeart(), &Vec2( (40.0f + randfloat( 30.0f )), -50.0f - randfloat( 20.0f ) ), &g_vecGravityOld, weapon->_template.nDropShellFrame );
+		}
+
+
+		// make light
+		if ( weapon->_template.fMuzzleLightSize > 0.0f )
+		{
+			//prop - nozzle light
+			float fPropAlpha = 0.8f * weapon->_template.fMuzzleLightSize;
+			CLAMP( fPropAlpha, 0.0f, 1.0f );
+			//			AddProp_Light(vShootPos, ANM_LIGHTS_SPR_POINT1, 0.05f, 0.0f, D3DCOLOR_COLORALPHA(0xffFDB727, fPropAlpha), weapon->WeaponTemplate.fMuzzleLightSize);
+		}
+		// add AI sound event
+		level.AddAIEvent( K_LVL_AI_EVENT_SOUND_THREAT, shooter->GetUID(), shooter->_template.actorClass, shooter->GetPosHeart(), weapon->_template.fSoundRadius );
+	}
+
+	return true;
 }
 
 void CActor::BuildActionsList()

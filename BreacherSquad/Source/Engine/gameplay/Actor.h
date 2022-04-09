@@ -86,6 +86,9 @@ private:
 	void					DoMove( float dTime, CLevel& level );
 	// Processes extra stuff after moving (interactibles, pArea ownership, etc)
 	void					ProcessExtras( CLevel& level );
+	// checks weapon states to see if we must generate the bullets
+	// \returns: true if shot, false if it didn't
+	bool					CheckShoot( CLevel& level );
 
 public:
 

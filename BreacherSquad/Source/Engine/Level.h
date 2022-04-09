@@ -229,10 +229,6 @@ public:
 	///--- room occluders ---
 	int						m_fogofwarMeshIdx;		//idx mesh occludere
 
-	///--- WEAPONS ---
-	// checks weapon states to see if we must generate the bullets
-	// \returns: true if shot, false if it didn't
-	bool					Weapon_CheckShoot(CWeapon * weapon, Vec3 vDir);
 
 	///--- BULLETS ---
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.
@@ -275,7 +271,6 @@ public:
 	CActor*					pPlayerActor[K_MAX_PLAYERS_CNT];				//direct pointers to player controllers
 	int						m_arrPlayerControllersIIDs[K_MAX_PLAYERS_CNT];	//used to save player controllers IIDs for each player
 	int						m_arrPlayerSelHotJoin[K_MAX_PLAYERS_CNT];		//hot join selection
-	Vec2					m_arrPlayerLastSafePos[K_MAX_PLAYERS_CNT];
 	///------ sync check ------
 	DWORD					m_dwSyncCheckHash;		//used to sync network players by adding float actor data, hashing it and sending it over the network
 	//strategic abilities
