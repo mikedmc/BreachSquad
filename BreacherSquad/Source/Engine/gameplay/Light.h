@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gameplay/components/LightAIComp.h"
+
 //  Light Type
 enum eLightType {
 	K_LVL_LT_UNKNOWN = -1,
@@ -40,6 +42,8 @@ public:
 	}
 
 public:
+	CLightAIComponent*	c_AI;						// AI component for lights
+public:
 	eLightType			type;
 
 	Vec3				lCorners[4];				// screen space light rectangle (clockwise) relative to light (Z must be 0). Min rect that fits 2d projection of light. Used to accelerate creation of light mesh.
@@ -58,23 +62,23 @@ public:
 	float				fVolumeAlpha;				// light's atmospheric volume alpha
 
 public:
-	CLight();
+	CLight(CLightAIComponent* pLightAIComp);
+	~CLight();
 
 	void				SetPos(Vec3 newPos) override;
 	void				Move(Vec3 delta) override;
-
-	// engine callbacks
 	void				PostConstructionInit() override;
 	void				BeginPlay() override;
 	void				EndPlay() override;
+	void				SetAI( EAIstate newstate ) override;
+
+	void				Update( float dTime );
 
 	// sets light direction with fallback for empty vectors
 	void				SetDir(Vec3 nDir);
-
 	// Initializes internal data for rendering
 	// Make sure all basic light data is set before calling it (or call inside PostConstructionInit)
 	void				UpdateInternalData(CSpriteLib* pLightsSprCol = nullptr);
-
 	// Sets the light's texture, if necessary
 	void				SetLightTexture(CSpriteLib* sprCol, int nAnimID, int nFrameID);
 };

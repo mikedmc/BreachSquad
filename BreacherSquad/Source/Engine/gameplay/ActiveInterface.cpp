@@ -5,11 +5,10 @@
 
 IActiveInterface::IActiveInterface() : 
 	ID(-1), targetID_ini(-1), bEnabled(true), bSetEnabled(true), bSkipRender(false), bAnimated(false),
+	AIstate(K_AI_STATE_UNDEFINED), AIsubState(0), fTimelineAI(0.0f),
 	color(0xffffffff), color_ini(0xffffffff),
 	bTouching(false), nTouchingUID(0),
-	pTarget(null), bCanInteract(false), bHideInteractIcon(false), AIstate(K_AI_STATE_UNDEFINED), AItimerDecision(K_LVL_AI_DECISION_INTERVAL),
-	nRunningScriptUID(0), AItargetUID(0), fTimelineAI(0.0f), 
-	AItimer1(0.0f), AItimer2(0.0f), AIfvar1(0.0f), AIfvar2(0.0f), AIfvar3(0.0f), AIvar1(0), AIvar2(0), AIvarBool1(true), AIvarBool2(true),
+	pTarget(null), bCanInteract(false), bHideInteractIcon(false),
 	bPendingKill(false), pArea(nullptr), heightZ(K_WALL_HEIGHT_WORLD)
 {
 	UID = GenerateUID();
@@ -18,8 +17,6 @@ IActiveInterface::IActiveInterface() :
 	pos_ini = Vec3(0.0f, 0.0f, 0.0f);
 
 	varAIparams.DeleteAll();
-
-	AIvec1 = Vec2(0.0f, 0.0f);
 }
 
 IActiveInterface::~IActiveInterface()

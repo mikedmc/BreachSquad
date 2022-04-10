@@ -1,6 +1,17 @@
 #include "dxstdafx.h"
 #include "Prop.h"
 
+CProp::CProp( CPropAIComponent* pAIcomp ) :
+	flags( 0 ), c_AI( pAIcomp )
+{
+
+}
+
+CProp::~CProp()
+{
+	SAFE_DELETE( c_AI );
+}
+
 ///--- CACTIVE ---
 void CProp::SetPos(Vec3 newPos)
 {
@@ -31,6 +42,35 @@ void CProp::InitializeFromAFrameFlags(UINT32 AFrameFlags)
 	flags = 0;
 	if (AFrameFlags & K_FLAG_EDITOR_PROP_COLLIDES_ACTORS) flags |= K_PROPFLAG_COLLIDES_ACTOR;
 	if (AFrameFlags & K_FLAG_EDITOR_PROP_CAN_BE_SHOT) flags |= K_PROPFLAG_CAN_BE_SHOT;
+}
+
+void CProp::Update( float dTime )
+{
+	//check visibility change
+	bEnabled = bSetEnabled;
+	if ( !IsAlive() )
+		return;
+
+	//update sprite if animated
+	if ( bAnimated )
+	{
+		sprite.Update( dTime );
+		//cand ajunge la capatul animatiei scoate flagul de animated
+		if ( sprite.animStatus == ANIM_STATUS_FRAMELOCK )
+			bAnimated = false;
+		// refresh bbox on each frame change
+		if ( (sprite.animStatus == ANIM_STATUS_PLAYING_FRAME_ADVANCED) || (sprite.animStatus == ANIM_STATUS_FRAMELOCK) )
+		{
+			RectXYWHi frrect = sprite.pSprCol->GetAFrameBBox( sprite.animIdx, sprite.frameIdx );
+			bbox_ini.Set( frrect );
+		}
+	}
+
+	// Update AI 
+	c_AI->Update( *this, dTime );
+	//final updates
+	sprite.pos = pos.xy_proj;
+	sprite.color = color;
 }
 
 void CProp::PostConstructionInit()

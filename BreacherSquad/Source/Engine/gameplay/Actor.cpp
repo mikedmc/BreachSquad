@@ -51,6 +51,16 @@ CActor::~CActor()
 	SAFE_DELETE( c_AI );
 }
 
+void CActor::SetAIState( CAIState* pNewState )
+{
+	return c_AI->Actor_SetAIState( *this, pNewState );
+}
+
+bool CActor::SetAIState( WCHAR * strStateName )
+{
+	return c_AI->Actor_SetAIState( *this, strStateName );
+}
+
 bool CActor::IsAlive()
 {
 	return ((bPendingKill == false) && (bEnabled == true) && (fLife > 0.0f));
@@ -572,8 +582,8 @@ void CActor::ProcessAICommands( CLevel& level )
 					speed = Vec2( 0.0f, 0.0f );
 					vSpeedImpulse = Vec2( 0.0f, 0.0f );
 					//move invisible body back to last safe pos
-					Vec2 vSpawnPos = level.m_arrPlayerLastSafePos[ nPlayerOrdinal ];
-					SetPos( Vec3( vSpawnPos.x, vSpawnPos.y, 0.0f ) );
+					//Vec2 vSpawnPos = level.m_arrPlayerLastSafePos[ nPlayerOrdinal ];
+					//SetPos( Vec3( vSpawnPos.x, vSpawnPos.y, 0.0f ) );
 					break;
 				}
 				//deallocate

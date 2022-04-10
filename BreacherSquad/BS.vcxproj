@@ -272,11 +272,15 @@
     <ClInclude Include="Source\Engine\gameplay\ActorTemplate.h" />
     <ClInclude Include="Source\Engine\gameplay\ActorTypes.h" />
     <ClInclude Include="Source\Engine\gameplay\AreasInventory.h" />
+    <ClInclude Include="Source\Engine\gameplay\components\ActiveAIComp.h" />
     <ClInclude Include="Source\Engine\gameplay\components\ActorAIComp.h" />
     <ClInclude Include="Source\Engine\gameplay\components\ActorAICompTypes.h" />
     <ClInclude Include="Source\Engine\gameplay\components\ActorCompCommon.h" />
+    <ClInclude Include="Source\Engine\gameplay\components\AICompCommon.h" />
     <ClInclude Include="Source\Engine\gameplay\components\ComponentInterfaces.h" />
+    <ClInclude Include="Source\Engine\gameplay\components\LightAIComp.h" />
     <ClInclude Include="Source\Engine\gameplay\components\PhysPtComp.h" />
+    <ClInclude Include="Source\Engine\gameplay\components\PropAIComp.h" />
     <ClInclude Include="Source\Engine\gameplay\components\SpriteActorComp.h" />
     <ClInclude Include="Source\Engine\gameplay\components\WeaponsComp.h" />
     <ClInclude Include="Source\Engine\gameplay\LevelArea.h" />
@@ -694,8 +698,11 @@
     <ClCompile Include="Source\Engine\Game.cpp" />
     <ClCompile Include="Source\Engine\gameplay\ActorTemplate.cpp" />
     <ClCompile Include="Source\Engine\gameplay\AreasInventory.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\components\ActiveAIComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\ActorAIComp.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\components\LightAIComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\PhysPtComp.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\components\PropAIComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\SpriteActorComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\WeaponsComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\LevelArea.cpp" />

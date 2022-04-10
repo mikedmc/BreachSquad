@@ -1,5 +1,7 @@
 #pragma once
 
+#include "components/PropAIComp.h"
+
 ///----------------------------------------------------------------------------------
 /// List of possible classes for props (set from sprites editor but not only)
 ///----------------------------------------------------------------------------------
@@ -27,27 +29,28 @@ const CStringHash EPropClassNames[] =
 class CProp : public IActiveInterface
 {
 public:
-	CSpr			sprite;
-	SprFrameId		fid_ini;				// Initial animation and frame id
-	DWORD			flags;
-	CStringHash		shClass;				// class of prop kept as string for max flexibility
+	CPropAIComponent*	c_AI;					// AI component for prop
+public:
+	CSpr				sprite;
+	SprFrameId			fid_ini;				// Initial animation and frame id
+	DWORD				flags;
+	CStringHash			shClass;				// class of prop kept as string for max flexibility
 
-	CProp() :
-		flags(0)
-	{}
+	CProp( CPropAIComponent* pAIcomp );
+	~CProp();
 
 	const EActiveInterfaceType GetClassType() const {
 		return K_LVL_IAI_TYPE_PROP;
 	}
 
-	void SetPos(Vec3 newPos) override;
-	void Move(Vec3 delta) override;
+	void				SetPos(Vec3 newPos) override;
+	void				Move(Vec3 delta) override;
+	void				PostConstructionInit() override;
+	void				BeginPlay() override;
+	void				EndPlay() override;
 
 	// sets internal flags reading from the AFrame flags (set in sprite editor)
-	void InitializeFromAFrameFlags(UINT32 AFrameFlags);
-
-	// Initializes custom internal data (hardcodes usually)
-	void PostConstructionInit() override;
-	void BeginPlay() override;
-	void EndPlay() override;
+	void				InitializeFromAFrameFlags( UINT32 AFrameFlags );
+	// Updates everything
+	void				Update( float dTime );
 };

@@ -28,6 +28,10 @@ protected:
 	bool					bEnabled;				// sometimes the actives need to be disabled ( eg: after being killed )
 
 public:
+	EAIstate				AIstate;				// state AI (AI_STATE ENUM)
+	CVariantCollection		varAIparams;			// AIstate params (partially coming from the editor)
+
+public:
 	UINT32					UID;					// ingame UID
 	CLevelArea*				pArea;					// pointer to current area
 	int						ID;						// ID exported from editor (not the same as UID).
@@ -46,15 +50,14 @@ public:
 // initial values necessary for relative movements
 public: 
 	DWORD					color_ini;
-	INT32					targetID_ini;			// target ID citit din editor
+	INT32					targetID_ini;			// target ID read from the editor
 
 	IActiveInterface		*pTarget;				// target coming from the editor. Source of loose pointers!
 	bool					bCanInteract;			// can interact with it?  #TODO: replace with interact-type or actions list
 	bool					bHideInteractIcon;		// hide the icon //#TODO: remove this flag
-	CVariantCollection		varAIparams;			// AIstate params (partially coming from the editor)
 
 	CFixedArray<CScriptAction, 10>	arrActions;		// array of possible actions on this object (does not include actions from inventory and actors)
-	CStringHash				shScriptActions;		// sctring containing script actions names
+	CStringHash				shScriptActions;		// string containing script actions names for matching (eg. BREACH,LOCKPICK)
 	UINT32					nRunningScriptUID;		// UID of script that is running now on this element
 
 	bool					bSetEnabled;			// commanding flag for bVisible. Will dump the value into bVisible when needed.
@@ -99,4 +102,6 @@ public:
 	virtual void			BeginPlay() = 0;
 	// Gets called when gets killed
 	virtual void			EndPlay() = 0;
+	// Sets the AI state (useless for actors)
+	virtual void			SetAI( EAIstate newstate ) = 0;
 };

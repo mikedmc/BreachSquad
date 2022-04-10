@@ -1441,9 +1441,9 @@ void CLevel::RandomizeTemplateActor(CActorTemplate * actTemplate)
 }
 
 ///--- IACTIVE ---
-IActiveInterface* CLevel::GetIActiveInterfacePtr(int ID)
+IActiveInterface* CLevel::GetIActiveInterfacePtr(int editorID)
 {
-	if (ID < 0)
+	if (editorID < 0)
 		return null;
 	//check actives
 	for (int ar = 0; ar < m_arrAreas.Count(); ar++)
@@ -1451,26 +1451,26 @@ IActiveInterface* CLevel::GetIActiveInterfacePtr(int ID)
 		CLevelArea* area = m_arrAreas[ar];
 		for (int kk = 0; kk < area->m_arrProps.GetSize(); kk++)
 		{
-			if (area->m_arrProps[kk]->ID == ID)
+			if (area->m_arrProps[kk]->ID == editorID)
 				return area->m_arrProps[kk];
 		}
 	}
 	//check lights
 	for (int kk = 0; kk < m_arrLights.GetSize(); kk++)
 	{
-		if (m_arrLights[kk]->ID == ID)
+		if (m_arrLights[kk]->ID == editorID)
 			return m_arrLights[kk];
 	}
 	//check collision boxes
 	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
 	{
-		if (m_arrColShapes[kk]->ID == ID)
+		if (m_arrColShapes[kk]->ID == editorID)
 			return m_arrColShapes[kk];
 	}
 	//verifica si actorii
 	for (int kk = 0; kk < m_arrActors.Count(); kk++)
 	{
-		if (m_arrActors[kk]->ID == ID)
+		if (m_arrActors[kk]->ID == editorID)
 			return m_arrActors[kk];
 	}
 
@@ -2665,309 +2665,13 @@ void CLevel::UpdateAI_collshape(CCollisionShape * colshape, float dTime)
 
 void CLevel::UpdateAI_light(CLight* light, float dTime)
 {
-	//touch timer reset (nu e necesar pe lights)
-	//light->UpdateTouchTimerReset(dTime);
-
-	light->SetEnabled(light->bSetEnabled, true);
-	//daca este hidden nu mai verifica AI
-	if (!light->IsAlive())
-		return;
-
-	//update timeline
-	light->fTimelineAI += dTime;
-
-	//daca nu a fost tratata starea curenta inseamna ca este particulara pt clasa asta
-	if (light->AIstate != K_AI_STATE_UNDEFINED)
-	{
-		//stari particulare lumini (se pot suprascrie cele default)
-		switch (light->AIstate)
-		{
-			case K_AI_STATE_FN_LIGHT_FLICKER1:
-			{
-				//params: f_timeMul, f_threshold
-				float timeMul = light->varAIparams.GetVariantByName(L"f_timeMul")->m_asFloat;
-				float fThreshold = light->varAIparams.GetVariantByName(L"f_threshold")->asFloat();
-				float falpha = UTPerlin::PerlinNoise1D(light->fTimelineAI * timeMul, 2.0f, 3.0f, 0.8f, 0.25f, 2);
-				if (falpha > fThreshold)
-					falpha = 1.0f;
-				else
-					falpha = falpha / fThreshold;
-				//falpha = (falpha < fThreshold) ? 0.0f : 1.0f;
-				light->color = DW_COLORALPHA(light->color_ini, falpha);
-			}
-			break;
-			case K_AI_STATE_FN_LIGHT_ANG_CONE_XZ_TIME:
-			{
-				//fvar1 - height, fvar2 - radius, timer1 - timeMul, timer2 - timeAdd
-				Vec3 conepoint(0.0f, -light->AIfvar1, 0.0f);
-				Vec3 ppos = Vec3(light->AIfvar2 * sin((light->fTimelineAI + light->AItimer2) * light->AItimer1), 0.0f, light->AIfvar2 * cos((light->fTimelineAI + light->AItimer2) * light->AItimer1));
-				MUVec3Norm(&light->vnDir, &(ppos - conepoint));
-			}
-			break;
-			default:
-			{
-				if (!UpdateAI_base(light, dTime, light->fTimelineAI))
-				{
-					ErrorBox(K_ERR_WARNING, L"CLevel::UpdateAI_light - AIstate not handled: %d", light->AIstate);
-				}
-			}
-			break;
-		}
-	}
-
-	//update-uri finale
-	light->SetPos(light->pos.xyz);
+	light->Update( dTime );
 }
 
 void CLevel::UpdateAI_prop(CProp* prop, float dTime)
 {
-	//daca am schimbat vizibilitatea
-	prop->SetEnabled(prop->bSetEnabled, true);
-	//daca este hidden nu mai verifica AI
-	if (!prop->IsAlive())
-		return;
-
-	//update timeline
-	prop->fTimelineAI += dTime;
-
-	//update sprite if animated
-	if (prop->bAnimated)
-	{
-		prop->sprite.Update(dTime);
-		//cand ajunge la capatul animatiei scoate flagul de animated
-		if (prop->sprite.animStatus == ANIM_STATUS_FRAMELOCK)
-			prop->bAnimated = false;
-		//la obiectele animate luam bbox-ul la fiecare frame
-		if ((prop->sprite.animStatus == ANIM_STATUS_PLAYING_FRAME_ADVANCED) || (prop->sprite.animStatus == ANIM_STATUS_FRAMELOCK))
-		{
-			RectXYWHi frrect = m_sprProps.GetAFrameBBox(prop->sprite.animIdx, prop->sprite.frameIdx);
-			prop->bbox_ini.Set(frrect);
-			//nu pastreaza acelasi bbox la flip deci flipam bboxul
-			/*
-			if (prop->flipX)
-			{
-				prop->bbox_ini.Flip(true, false);
-			}
-			*/
-		}
-	}
-
-	//daca nu a fost tratata starea curenta inseamna ca este particulara pt clasa asta
-	if (prop->AIstate != K_AI_STATE_UNDEFINED)
-	{
-		//stari particulare obiectelor (se pot suprascrie cele default)
-		switch (prop->AIstate)
-		{
-			case K_AI_STATE_ACTIVE_ZOMBIE_SPAWNER:
-			{
-			}
-			break;
-
-			case K_AI_STATE_ACTIVE_BOMB:
-			{
-				//daca nu esti pe playing nu mai scade counterul la bomba
-				if (m_levelState != K_LVL_STATE_PLAYING)
-					break;
-
-				float fOldTimer = prop->AItimer1;
-				prop->AItimer1 -= dTime;
-				//m_interfaceIGM.SetBombTimer(prop->AItimer1);
-
-				//--- sounds ---
-				if (prop->AItimer1 > 15.0f)
-				{
-					if (floor(fOldTimer) > floor(prop->AItimer1))
-					{
-						//SND_PLAY(SNDIDX_BOMBBEEP);
-					}
-				}
-				else
-				{
-					if (m_Timers.Tick(250))
-					{
-						//SND_PLAY(SNDIDX_BOMBBEEP);
-					}
-				}
-
-				if (prop->AItimer1 <= 0.0f)
-				{
-					//m_interfaceIGM.SetBombTimer(0.0f);
-					//add some explosions so everybody will die
-					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos.xy, prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
-					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos.xy + Vec2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
-					AddDoofer_Explo(hash_EXPLO_LARGE_XL, prop->pos.xy - Vec2(32.0f, 0.0f), prop->UID, K_LVL_ACT_CLASS_EXPLOSION);
-
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &Vec2(prop->pos.xy.x, prop->pos.xy.y - 15.0f), NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
-
-					prop->sprite.SetAnim("BOMB_EXPLODED");
-
-					SetLevelState(K_LVL_STATE_MISSION_FAILED, STR_BOMB_EXPLODED);
-				}
-			}
-			break;
-			case K_AI_STATE_ACTIVE_AMMO_BOX:
-			{
-				int nAmmoLeft = prop->varAIparams.GetVariantByName(L"n_ammoLeft")->m_asINT32;
-				prop->sprite.frameIdx = nAmmoLeft;
-
-				//fade out
-				if (nAmmoLeft <= 0)
-				{
-					prop->AItimer1 -= dTime;
-					if (prop->AItimer1 <= 0.0f)
-					{
-						prop->Kill();
-					}
-					//color
-					float fAlpha = LIMIT(prop->AItimer1, 0.0f, 1.0f);
-					prop->color = DW_COLORALPHA(prop->color_ini, fAlpha);
-				}
-			}
-			break;
-			case K_AI_STATE_ACTIVE_HEALTH_BOX:
-			{
-				int nHealthLeft = prop->varAIparams.GetVariantByName(L"n_healthLeft")->m_asINT32;
-				prop->sprite.frameIdx = nHealthLeft;
-
-				//fade out
-				if (nHealthLeft <= 0)
-				{
-					prop->AItimer1 -= dTime;
-					if (prop->AItimer1 <= 0.0f)
-					{
-						prop->Kill();
-					}
-					//color
-					float fAlpha = LIMIT(prop->AItimer1, 0.0f, 1.0f);
-					prop->color = DW_COLORALPHA(prop->color_ini, fAlpha);
-				}
-			}
-			break;
-			case K_AI_STATE_ACTIVE_TEAM_TELEPORTER_2FRAMES:
-			{
-			}
-			break;
-
-			case K_AI_STATE_ACTIVE_DOOR_SECTION:
-			{
-				prop->AItimer1 = 0.0f;
-			}
-			break;
-
-			case K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE:
-			{
-				//keep door open (AIvar1 contine frame-ul default) - set frame
-				prop->sprite.frameIdx = prop->fid_ini.frameIdx;
-				if (prop->AItimer1 > 0.0f)
-				{
-					prop->AItimer1 -= dTime;
-					
-					bool bDontChangeFrames = (bool)(prop->varAIparams.GetVariantByName(L"b_DontChangeFrames")->m_asBool);
-					if (!bDontChangeFrames)
-					{
-						prop->sprite.frameIdx++;
-					}
-
-					if (prop->AItimer1 < 0.0f)
-						prop->AItimer1 = 0.0f;
-				}
-
-				//open/close sounds
-				if ((prop->AIvarBool1 == false) && (prop->AItimer1 > 0.0f))
-				{
-					//just opened
-					CVariantComplex* cvc = prop->varAIparams.GetVariantByName(L"s_openSnd");
-					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
-					{
-						int sndidx = UTGetSoundManager().getSndIdx(cvc->m_strArg.textHash);
-						SND_PLAY_POSITIONAL(sndidx, prop->pos.xy);
-					}
-					//on open script
-					cvc = prop->varAIparams.GetVariantByName(L"s_ScriptOnOpen");
-					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
-					{
-						UTGetScriptManager().StartScript(cvc->m_strArg.textHash, prop->UID);
-					}
-
-					prop->AIvarBool1 = true;
-				}
-				else if ((prop->AIvarBool1 == true) && (prop->AItimer1 <= 0.0f))
-				{
-					//just closed
-					CVariantComplex* cvc = prop->varAIparams.GetVariantByName(L"s_closeSnd");
-					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
-					{
-						int sndidx = UTGetSoundManager().getSndIdx(cvc->m_strArg.textHash);
-						SND_PLAY_POSITIONAL(sndidx, prop->pos.xy);
-					}
-					//on close script
-					cvc = prop->varAIparams.GetVariantByName(L"s_ScriptOnClose");
-					if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
-					{
-						UTGetScriptManager().StartScript(cvc->m_strArg.textHash, prop->UID);
-					}
-					prop->AIvarBool1 = false;
-				}
-
-			}
-			break;
-
-			case K_AI_STATE_ACTIVE_SWINGING_FRONTOBJ:
-			{
-				/*
-				//implementare balans
-				float fAng = prop->fAngle;
-				float angDelta = prop->fAngle - prop->fAngle_ini;
-				
-				float fFriction = 0.4f;
-				//ca sa se miste incet scot frecarea la viteze mici
-				if (fabs(prop->AIfvar1) <= 0.04f)
-					fFriction = 0.0f;
-				prop->AIfvar1 -= angDelta * dTime * 20.0f + prop->AIfvar1 * dTime * fFriction;
-				fAng += prop->AIfvar1 * dTime;
-				CLAMP(fAng, prop->fAngle_ini - 1.4f, prop->fAngle_ini + 1.4f);
-				
-				prop->SetAngle(fAng);
-				*/
-			}
-			break;
-
-			case K_AI_STATE_ACTIVE_EXPLO_TRAP:
-			{
-			}
-			break;
-			case K_AI_STATE_ACTIVE_CHECKPOINT:
-			{
-				for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
-				{
-					if (pPlayerActor[kk] == null)
-						continue;
-					if (pPlayerActor[kk]->bbox.Intersects(prop->bbox))
-					{
-						prop->Touch(pPlayerActor[kk]->GetUID(), dTime);
-						//save checkpoint
-						vLastSpawnPoint = prop->pos.xy;
-						break;
-					}
-				}
-			}
-			break;
-			default:
-			{
-				if (!UpdateAI_base(prop, dTime, prop->fTimelineAI))
-				{
-					ErrorBox(K_ERR_WARNING, L"CLevel::UpdateAI_prop - AIstate not handled: %d", prop->AIstate);
-				}
-			}
-			break;
-		}
-	}
-
-	//final updates
-	prop->sprite.pos = prop->pos.xy_proj;
-	prop->sprite.color = prop->color;
+	prop->Update( dTime );
 }
-
 
 
 void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
@@ -3305,231 +3009,19 @@ void CLevel::DeleteAITargetedEvent(EAIEventType eEvtType, UINT32 targetUID /*= 0
 
 
 
-void CLevel::SetAI(IActiveInterface * active, EAIstate AIstate, CVariantCollection * params, INT32 targetID)
+void CLevel::SetAI(IActiveInterface & active, EAIstate AIstate, CVariantCollection * params, INT32 targetID)
 {
-	if ( active->GetClassType() == K_LVL_IAI_TYPE_ACTOR )
+	//#TODO: functia asta trebuie sa dispara complet
+	if ( active.GetClassType() == K_LVL_IAI_TYPE_ACTOR )
 	{
 		ErrorBox( K_ERR_WARNING, L"SetAI should not be called on Actors!" );
 		return;
 	}
+	active.targetID_ini = targetID;
+	active.pTarget = GetIActiveInterfacePtr(targetID);
 
-	if (active == null)
-		return;
-	active->targetID_ini = targetID;
-	active->pTarget = GetIActiveInterfacePtr(targetID);
-
-	//daca am null la params nu seteaza params, doar le da clear
-	if(params != null)
-		active->varAIparams = *params; //aici sterge automat params vechi
-	else  //daca este null sterg parametrii
-		active->varAIparams.DeleteAll();
-
-	active->AIstate = AIstate;
-	//generice
-	active->AItargetUID = 0;	//?? trebuie resetat?
-	active->fTimelineAI = 0.0f; //?? trebuie resetat?
-	active->AItimer1 = 0.0f; active->AItimer2 = 0.0f;
-	active->AIfvar1 = 0.0f; active->AIfvar2 = 0.0f; active->AIfvar3 = 0.0f;
-	active->AIsubState = 0;
-	active->AIstrvar1.Reset(); active->AIstrvar2.Reset();
-	//setari initiale particulare
-	switch (AIstate)
-	{
-		case K_AI_STATE_ACTIVE_ZOMBIE_SPAWNER:
-		{
-			//spawn timer
-			active->AItimer1 = 0.0f; 
-			active->AItimer2 = active->varAIparams.GetVariantByName(L"f_spawnFreq")->m_asFloat;
-			//spawns count
-			active->AIvar1 = 0;
-			active->AIvar2 = active->varAIparams.GetVariantByName(L"n_maxSpawns")->m_asINT32;
-			//spawner state: 0-not enabled yet, 1-appearing, 2-active, 3-disabled
-			active->AIsubState = 0;
-		}
-		break;
-		case K_AI_STATE_ACTIVE_SWINGING_FRONTOBJ:
-		{
-			active->AIfvar1 = randsign() * (0.06f + randfloat(0.14f)); //viteza unghiulara
-		}
-		break;
-		case K_AI_STATE_ACTIVE_HEALTH_BOX:
-		case K_AI_STATE_ACTIVE_AMMO_BOX:
-		{
-			//wait 5 seconds before disappearing when empty
-			active->AItimer1 = 5.0f;
-		}
-		break;
-		case K_AI_STATE_ACTIVE_BOMB:
-		{
-			active->AItimer1 = active->varAIparams.GetVariantByName(L"f_explodeTimerSec")->m_asFloat;
-			if (active->AItimer1 <= 0.0f)
-			{
-				ErrorBox(K_ERR_WARNING, L"Bomb without timer! ID:%d", active->ID);
-				active->AItimer1 = 60.0f;
-			}
-		}
-		break;
-		case K_AI_STATE_FN_LIGHT_ANG_CONE_XZ_TIME:
-		{
-			active->AIfvar1 = active->varAIparams.GetVariantByName(L"f_coneHeight")->m_asFloat;
-			active->AIfvar2 = active->varAIparams.GetVariantByName(L"f_coneRadius")->m_asFloat;
-			active->AItimer1 = active->varAIparams.GetVariantByName(L"f_timeMul")->m_asFloat;
-			active->AItimer2 = active->varAIparams.GetVariantByName(L"f_timeAdd")->m_asFloat;
-		}
-		break;
-		case K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE:
-		{
-			//door timer (cat timp sta usa deschisa) il tinem in AItimer1
-			active->AItimer1 = 0.0f;
-			//este deschisa sau inchisa acum?
-			active->AIvarBool1 = false;
-		}
-		break;
-		case K_AI_STATE_ACTIVE_TEAM_TELEPORTER_2FRAMES:
-		{
-			active->varAIparams.SetNamedVarUINT32(L"nToucherUID", 0);
-			//door timer (cat timp sta usa deschisa) il tinem in AItimer1
-			active->AItimer1 = 0.0f;
-			//este deschisa sau inchisa acum?
-			active->AIvarBool1 = false;
-		}
-		break;
-		case K_AI_STATE_ACTIVE_CHECKPOINT:
-		{
-			bool bIsFirst = (active->varAIparams.GetVariantByName(L"n_isFirst")->m_asUINT32 != 0);
-			//daca este primul ii dau touch automat
-			if (bIsFirst)
-			{
-				active->Touch(active->GetUID(), 0.0f);
-				//save checkpoint
-				vLastSpawnPoint = active->pos.xy;
-			}
-		}
-		break;
-		case K_AI_STATE_FN_TOUCH_WHEN_SEE_PLAYER:
-		{
-			/*
-			//unghiul introdus
-			active->AIfvar1 = active->varAIparams.GetVariantByName(L"f_angle")->m_asFloat;
-			//aduc unghiul in -PI...PI
-			//active->AIfvar1 -= PI; //aici ar trebui facuta o functie care sa trateze asta
-			//FOV
-			active->AIfvar2 = active->varAIparams.GetVariantByName(L"f_angleFOV")->m_asFloat;
-			//range
-			active->AIfvar3 = active->varAIparams.GetVariantByName(L"f_radius")->m_asFloat;
-			//set angle
-			active->fAngle = active->fAngle_ini = active->AIfvar1;
-			active->AItimer1 = 0.0f; //timer cooldown
-			*/
-		}
-		break;
-		case K_AI_STATE_COLL_FOG_OF_WAR:
-		{
-			active->AIfvar1 = 1.0f; //transparenta (full opaque)
-			active->color = active->color_ini = DW_COLORALPHA(K_LVL_COLL_FOW_COLOR, active->AIfvar1);
-		}
-		break;
-		case K_AI_STATE_COLL_BREAKABLE_DOOR:
-		{
-			//was hit flag
-			active->AIvarBool1 = false;
-			//viata usii (poate fi sparta de unele gloante)
-			active->AIfvar1 = 100000.0f; //by default nu poate fi distrusa de shotgun (sau foarte greu)
-			active->AIfvar2 = active->AIfvar1; //viata initiala
-			CVariantComplex *cvar = active->varAIparams.GetVariantByName(L"f_life");
-			if (cvar->m_type == CVariantComplex::K_ARGTYPE_FLOAT)
-			{
-				active->AIfvar1 = cvar->m_asFloat;
-				//salvam si energia initiala
-				active->AIfvar2 = active->AIfvar1;
-			}
-			//flag for when it gets hit
-			active->AIvarBool1 = false;
-			//timer for when it shakes
-			active->AItimer1 = 0.0f;
-		}
-		break;
-		case K_AI_STATE_COLL_BREAKABLE_WINDOW:
-		{
-			//was hit flag
-			active->AIvarBool1 = false;
-			//viata 
-			active->AIfvar1 = 2.0f; //by default se sparge usor
-			active->AIfvar2 = active->AIfvar1; //viata initiala
-			CVariantComplex *cvar = active->varAIparams.GetVariantByName(L"f_life");
-			if (cvar->m_type == CVariantComplex::K_ARGTYPE_FLOAT)
-			{
-				active->AIfvar1 = cvar->m_asFloat;
-				//salvam si energia initiala
-				active->AIfvar2 = active->AIfvar1;
-			}
-		}
-		break;
-		case K_AI_STATE_PARTICLES_GENERATOR:
-		{
-			//tipul generatorului il ia din params
-			int genType = g_particlesMgr.GetPartEmitterTypeByNameHash(active->varAIparams.GetVariantByName(L"s_Type")->m_strArg.textHash);
-			int partLayer = g_particlesMgr.GetParticleLayerByName(active->varAIparams.GetVariantByName(L"s_Layer")->m_strArg.textHash);
-			//ca sa nu intre de mai multe ori si sa aloce de mai multe ori. Daca se intampla trebuie dezalocat mai intai
-			_ASSERT(active->varAIparams.GetVariantByName(L"emitterPtr")->m_type == CVariantComplex::K_ARGTYPE_NONE);
-
-			CParticleEmitter * pe = g_particlesMgr.AddPartEmitter(genType, &active->bbox, partLayer);
-			//salveaza aici pointer la ParticleEmitter-ul alocat si il controlez din update sa ii dau stop si play cand iese din ecran
-			active->varAIparams.SetNamedVarVoidP(L"emitterPtr", pe);
-		}
-		break;
-		case K_AI_STATE_TRIGGER_IN_OUT:
-		{
-			//b_triggerPlayer 
-			active->AIfvar1 = (float)active->varAIparams.GetVariantByName(L"b_triggerPlayer")->m_asINT32;
-			//b_triggerActor
-			active->AIfvar2 = (float)active->varAIparams.GetVariantByName(L"b_triggerActor")->m_asINT32;
-			if (active->AIfvar2 != 0.0f)
-			{
-				DebugPrintA("TRIGGER_IN_OUT - all actors flag enabled! don't use too much of these\n");
-			}
-			//s_onOutScript
-			active->AIstrvar1.Init(active->varAIparams.GetVariantByName(L"s_onOutScript")->m_strArg.text);
-			//last state:
-			active->AIvar1 = 0; //deactivated
-		}
-		break;
-		case K_AI_STATE_FN_FOLLOW_TARGET_RAIL:
-		{
-			CMiscObjectRail* rail = null;
-			//find rail
-			for (int kk = 0; kk < m_arrMiscObjects.Count(); kk++)
-			{
-				if (m_arrMiscObjects[kk]->ID == active->targetID_ini)
-				{
-					rail = dynamic_cast<CMiscObjectRail*>(m_arrMiscObjects[kk]);
-				}
-			}
-			if (rail == NULL)
-			{
-				ErrorBox(K_ERR_WARNING, L"Rail id %d not found for object ID %d!", active->targetID_ini, active->ID);
-				break;
-			}
-			//save rail ptr
-			active->varAIparams.SetNamedVarVoidP(L"railPtr", rail);
-			//this is first time initialization
-			float fPos = active->varAIparams.GetVariantByName(L"f_positionPercent")->asFloat();
-			CLAMP(fPos, 0.0f, 1.0f);
-			//cursor pozitie rail
-			active->AItimer1 = fPos * rail->fLength;
-			//salvez si viteza
-			active->AIfvar1 = 0.0f; //viteza
-			active->AIfvar1 = active->varAIparams.GetVariantByName(L"f_speedPPS")->asFloat();
-			//wait timerul de capat de rail
-			active->AItimer2 = active->varAIparams.GetVariantByName(L"f_pointPauseSec")->asFloat();
-			//looping rail?
-			active->AIvarBool1 = (active->varAIparams.GetVariantByName(L"b_looping")->m_asINT32 != 0);
-		}
-		break;
-		//unknown or no AI state
-		default:
-			break;
-	}
+	active.SetAIparams( params, true );
+	active.SetAI( AIstate );
 }
 
 void CLevel::CleanupDeadObjects()

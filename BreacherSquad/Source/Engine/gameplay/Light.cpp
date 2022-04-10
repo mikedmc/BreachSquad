@@ -17,6 +17,23 @@ void CLight::EndPlay()
 
 }
 
+void CLight::SetAI( EAIstate newstate )
+{
+	c_AI->SetAI( *this, newstate );
+}
+
+void CLight::Update( float dTime )
+{
+	bEnabled = bSetEnabled;
+	// hidden? skip update
+	if ( !IsAlive() )
+		return;
+
+	c_AI->Update( *this, dTime );
+	// enforce position updating after UI pass
+	SetPos( pos.xyz );
+}
+
 void CLight::SetDir(Vec3 nDir)
 {
 	if (MUVec3AlmostZero(nDir))
@@ -108,13 +125,19 @@ void CLight::SetLightTexture(CSpriteLib* sprCol, int nAnimID, int nFrameID)
 	UpdateInternalData(sprCol);
 }
 
-CLight::CLight() :
-	m_nLightMeshIdx(-1), m_nShadowMeshIdx(-1),
-	type(K_LVL_LT_UNKNOWN), animID(-1), frameID(0),
-	fRadius(0.0f), fVolumeAlpha(1.0f), castShadows(false),
-	nProfileID(0)
+CLight::CLight( CLightAIComponent* pLightAIComp ) :
+	m_nLightMeshIdx( -1 ), m_nShadowMeshIdx( -1 ),
+	type( K_LVL_LT_UNKNOWN ), animID( -1 ), frameID( 0 ),
+	fRadius( 0.0f ), fVolumeAlpha( 1.0f ), castShadows( false ),
+	nProfileID( 0 ),
+	c_AI( pLightAIComp )
 {
 	vnDir = Vec3(0.0f, 0.0f, -1.0f); //default direction (looking down)
+}
+
+CLight::~CLight()
+{
+	SAFE_DELETE( c_AI );
 }
 
 void CLight::SetPos(Vec3 newPos)

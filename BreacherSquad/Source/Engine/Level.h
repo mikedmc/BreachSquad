@@ -11,6 +11,7 @@
 #include "gameplay/Level_scriptable.h"
 
 #include "gameplay/ActiveInterface.h"
+#include "gameplay/components/ActiveAIComp.h"
 #include "gameplay/Light.h"
 #include "gameplay/Prop.h"
 #include "gameplay/Level_bullets.h"
@@ -200,8 +201,8 @@ public:
 	void					UpdateAI_prop(CProp* prop, float dTime);
 	void					UpdateAI_actor(CActor* actor, float dTime);
 	void					UpdateAI_collshape(CCollisionShape * colshape, float dTime);
-	//Seteaza AI si face toate setarile initiale din AI
-	void					SetAI(IActiveInterface * active, EAIstate AIstate, CVariantCollection * params, INT32 targetID = -1);
+	// Sets the AI for all smart elements (Actors excluded)
+	void					SetAI(IActiveInterface& active, EAIstate AIstate, CVariantCollection * params, INT32 targetID = -1);
 	//gaseste cel mai apropiat inamic vizibil
 	CActor*					GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassFilter1 = K_LVL_ACT_CLASS_ANY, EActorClass eTargetClassFilter2 = K_LVL_ACT_CLASS_ANY);
 	// Finds closest visible actor of specified name (inside visibility radius)
@@ -311,8 +312,8 @@ public:
 	void					Release();
 	// Gives you a random level from a shuffled list so you play all of them in random order
 	int						GetNextRandomLevel();
-	//intoarce pointer catre activul cu id-ul (din editor) respectiv - derivate din CActiveInterface
-	IActiveInterface*		GetIActiveInterfacePtr(int ID);
+	// Returns pointer to active 
+	IActiveInterface*		GetIActiveInterfacePtr(int editorID);
 	IActiveInterface*		GetIActiveInterfacePtr_byUID(UINT32 UID);
 	//Intoarce pointer la CActive cu UID-ul respectiv
 	CProp*					GetActiveByUID(UINT32 UID);

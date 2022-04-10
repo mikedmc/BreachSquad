@@ -27,12 +27,10 @@ enum EAIstate
 	//particle generators
 	K_AI_STATE_PARTICLES_GENERATOR,		//params: s_type, s_layer="RT, back, back_light, etc" - tipul generatorului de particule
 	//collision
-	K_AI_STATE_COLL_FOG_OF_WAR,			//no params
 	K_AI_STATE_COLL_BREAKABLE_DOOR,		//params: f_life-can be damaged by bullets, b_reinforced=1 only the SAW can break it
 	K_AI_STATE_COLL_BREAKABLE_WINDOW,	//params: f_life - daca specifici life inseamna ca se poate sparge cu gloante
 	K_AI_STATE_COLL_KILL_ACTORS,		//params: b_killPlayer, b_killOthers
 	///--- actives ---
-	K_AI_STATE_ACTIVE_SWINGING_FRONTOBJ,//no param - se balanseaza cand dai grenada langa ele
 	K_AI_STATE_ACTIVE_EXPLO_TRAP,		//no param
 	K_AI_STATE_ACTIVE_CHECKPOINT,		//param: n_isFirst(0/1) - default first spawn point
 	K_AI_STATE_ACTIVE_TEAM_TELEPORTER_2FRAMES, //param: f_SlowTimeDuration, b_EnterHiddenRoom, b_DontChangeFrames, f_teleportDuration, s_openSnd, s_closeSnd
@@ -42,7 +40,6 @@ enum EAIstate
 	K_AI_STATE_ACTIVE_AMMO_BOX,			//param: n_ammoLeft
 	K_AI_STATE_ACTIVE_HEALTH_BOX,		//param: n_healthLeft
 	K_AI_STATE_ACTIVE_BOMB,				//param: f_explodeTimerSec
-	K_AI_STATE_ACTIVE_ZOMBIE_SPAWNER,	//param: f_spawnFreq, n_maxSpawns
 	///--- ACTORS ---
 	//nu avem stari pentru actori - sunt tratate cu behaviors
 	//states no
@@ -69,12 +66,10 @@ static const CStringHash EAIstate_names[] = {
 	///--- PARTICLE SYSTEM ---
 	L"AI_PARTICLES_GENERATOR", //pentru generatoarele de particule
 	///--- COLLISION BOXES ---
-	L"AI_COLL_FOG_OF_WAR",	//pentru fog of war. Dispare cu alpha cand devine vizibila camera
 	L"AI_COLL_BREAKABLE_DOOR", //pentru collShapes care se sparg de la charge si shotgun. va seta automat animatia usii pe cea de distrugere
 	L"AI_COLL_BREAKABLE_WINDOW", //pentru collShapes care se sparg de la gloante. va seta automat frame-ul urmator al animatiei
 	L"AI_COLL_KILL_ACTORS", //kills actors inside of it
 	///--- PROPS ---
-	L"AI_ACTIVE_SWINGING_FRONTOBJ",	//interactioneaza cu grenada si se balanseaza
 	L"AI_ACTIVE_EXPLO_TRAP",	//capcana care explodeaza cand se intersecteaza bboxuul ei cu playerul
 	L"AI_ACTIVE_CHECKPOINT",	//AI special pentru checkpoints - verifica intersectia cu personajul si lanseaza script
 	L"AI_ACTIVE_TEAM_TELEPORTER_2FRAMES", //AI pentru usile de team teleport optional (pot intra toti sau doar cativa)
@@ -84,7 +79,6 @@ static const CStringHash EAIstate_names[] = {
 	L"AI_ACTIVE_AMMO_BOX",	//AI pentru ammo boxes
 	L"AI_ACTIVE_HEALTH_BOX",	//AI pentru ammo boxes
 	L"AI_ACTIVE_BOMB",		//AI pentru bombele ce trebuiesc dezactivate
-	L"AI_ACTIVE_ZOMBIE_SPAWNER", //AI for the zombie spawner
 	///--- ACTORS ---
 	//no ACTOR states (they have special AI class)
 };

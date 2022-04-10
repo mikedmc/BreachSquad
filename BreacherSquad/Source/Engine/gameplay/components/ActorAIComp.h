@@ -1,20 +1,16 @@
 #pragma once
 #include "ComponentInterfaces.h"
 
-class CActorAIComponent : public IBaseAIComponent
+class CActorAIComponent : public IBaseActorAIComponent
 {
 private:
 	CLevel&					level;					// reference to level for accessing global data
 public: 
 
-	EAIstate				AIstate;				// state AI (AI_STATE ENUM)
-	int						AIsubState;				// AI substate used here and there, everywhere
 	float					AItimerDecision;		// takes decisions when it reaches 0
-
-	UINT32					AItargetUID;			// enemy UID (not the one set from the editor!!!)
-	double					fTimelineAI;			// local timeline for AI 
-
+	//#TODO: must initialize these!!!
 	//#TODO: variabile locale rapide AI - ar trebui incluse intr-o structura cu serialize/deserialize eventual
+	UINT32					AItargetUID;			// enemy UID (not the one set from the editor!!!)
 	float					AItimer1, AItimer2;
 	float					AIfvar1, AIfvar2, AIfvar3;
 	int						AIvar1, AIvar2;
@@ -23,6 +19,7 @@ public:
 	CStringHash				AIstrvar1, AIstrvar2;
 
 public:
+	CAICommands		m_AIcommands;				// Commands issued by AI to be executed by the actor
 	CAISensorInfo	m_AIsensorInfo;				// AI sensory information
 	CAIState*		m_pAIcurrentState;
 	int				m_nAIcurrentBehaviorIdx;	// current behaviour index (in current state) or -1 when not set
@@ -38,10 +35,9 @@ public:
 	
 	// Returns current behaviour
 	EAIBehaviorType			GetCurrentBehavior();
-
-	// Seteaza noua stare si are in vedere si incheierea starii precedente
+	// Sets a new AI state
 	void					Actor_SetAIState( CActor& actor, CAIState* pNewState );
-	// Seteaza noua stare si are in vedere si incheierea starii precedente
+	// Sets a new AI state
 	// \returns true:success false:state not found
 	bool					Actor_SetAIState( CActor& actor, WCHAR * strStateName );
 	// Sets behavior by idx, from current state behaviors array

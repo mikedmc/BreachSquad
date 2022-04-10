@@ -91,7 +91,16 @@ private:
 	bool					CheckShoot( CLevel& level );
 
 public:
+	// Sets a new AI state
+	void					SetAIState( CAIState* pNewState );
+	// Sets a new AI state
+	bool					SetAIState( WCHAR * strStateName );
+	// Returns current behavior in current AI state
+	inline EAIBehaviorType	GetCurrentBehavior() { return c_AI->GetCurrentBehavior(); };
 
+
+
+public:
 	inline const EActiveInterfaceType	GetClassType() const { return K_LVL_IAI_TYPE_ACTOR; }
 	// Gets pointer to weapons component
 	inline CWeaponsComponent*			Weapons() { return c_weapons; }
@@ -133,7 +142,6 @@ public:
 	// Plays the actor verse from the template handling the positional attenuation
 	void					PlaySoundVersePos( D3DXVECTOR2 vListenerPos, EActorSoundVerse sVerse, bool bPlayIfNotPlayingOnly = false );
 
-	inline EAIBehaviorType	GetCurrentBehavior() { return c_AI->GetCurrentBehavior(); };
 
 	// Updates possible actions list when interacting with something
 	// Looks into the inventory, the touchable and the actor specs/template for specific actions

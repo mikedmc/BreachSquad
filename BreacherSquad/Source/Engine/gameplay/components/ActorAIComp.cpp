@@ -588,6 +588,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			}
 			break;
 			default:
+				ErrorBox( K_ERR_WARNING, L"ActorAIComp::Update: Illegal behaviour!" );
 				break;
 		}
 
@@ -1306,6 +1307,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		}
 		break;
 		default:
+			ErrorBox( K_ERR_WARNING, L"CActorAIComponent::SetActorAIBehaviorIdx: Illegal behaviour!" );
 			break;
 	}
 

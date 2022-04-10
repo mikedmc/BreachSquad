@@ -1,5 +1,6 @@
 #pragma once
-#include "ActorAICompTypes.h"					  
+#include "ActorAICompTypes.h"		
+#include "AICompCommon.h"
 
 class CLevel;
 class CActor;
@@ -34,13 +35,30 @@ public:
 	virtual void	SetSpeed(Vec3 vSpeed) = 0;
 };
 
-///--- interface for generic AI component
-class IBaseAIComponent
+///--- interface for generic AI component (actors mainly)
+class IBaseActorAIComponent
 {
 public:
-	CAICommands		m_AIcommands;	// Commands issued by AI to be executed by the actor
+	int				AIsubState;				// AI substate used here and there, everywhere
+	double			fTimelineAI;			// local timeline for AI 
 public:
-	virtual			~IBaseAIComponent() {}
+	virtual			~IBaseActorAIComponent() {}
 
 	virtual void	Update( CActor& act, float dTime ) = 0;
+};
+
+///--- base AI component for non actors
+class IBaseAIComponent
+{
+protected:
+	int				AIsubState;				// AI substate used here and there, everywhere
+	double			fTimelineAI;			// local timeline for AI 
+	AImem			mem;					// memory that holds AI vars
+public:
+	IBaseAIComponent() : AIsubState( 0 ), fTimelineAI( 0.0f ) {}
+	virtual			~IBaseAIComponent() {}
+	// updates and returns true if state was handled (so we can call another one in the chain if not)
+	virtual bool	Update( IActiveInterface& active, float dTime ) = 0;
+	// call this to set the AI state
+	virtual void	SetAI( IActiveInterface& active, EAIstate newstate ) = 0;
 };
