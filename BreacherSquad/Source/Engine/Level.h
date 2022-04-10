@@ -190,17 +190,10 @@ public:
 	
 	///--- AI ---
 	CArray<CAIEvent*> m_arrAIevents;
-	/* Releases all dead objects (bReleaseIt flag set) on a separate step so they don't get deallocated when still in visibility lists */
+	// Releases all dead objects (bReleaseIt flag set) on a separate step so they don't get deallocated when still in visibility lists 
 	void					CleanupDeadObjects();
-	/*--- updates all IActiveInterface implementations ---*/
+	// Updates all IActiveInterface implementations
 	void					UpdateAI(float dTime, bool bInEditor = false);
-	//updates AI for base class (common AIs)
-	bool					UpdateAI_base(IActiveInterface* active, float dTime, double fTimeline);
-	//updates AI for derived classes (particulare)
-	void					UpdateAI_light(CLight* light, float dTime);
-	void					UpdateAI_prop(CProp* prop, float dTime);
-	void					UpdateAI_actor(CActor* actor, float dTime);
-	void					UpdateAI_collshape(CCollisionShape * colshape, float dTime);
 	// Sets the AI for all smart elements (Actors excluded)
 	void					SetAI(IActiveInterface& active, EAIstate AIstate, CVariantCollection * params, INT32 targetID = -1);
 	//gaseste cel mai apropiat inamic vizibil
@@ -221,6 +214,7 @@ public:
 	//adds a blood decal (bLarge when enemy was splattered)
 	void					AddDecal_BloodSplat(Vec2 pos, bool bLarge, EActorClass eVictimClass = K_LVL_ACT_CLASS_ANY);
 	///--- physics points ---
+	//#TODO: remove?
 	CDoubleLinkedPool<CPhysicsPoint>	m_poolPhysPts; //pool de obiecte fizice
 	void					UpdatePhysicsPoints(float dTime);
 	///--- bullets linked pool ---
@@ -331,7 +325,7 @@ public:
 	//gets a collision shape by UID
 	CCollisionShape*		GetCollisionShapeByUID(UINT32 nUID);
 	//spawn a new collision box
-	CCollisionShape*		SpawnCollisionShape(int nType, Vec2 vMin, Vec2 vMax);
+	CCollisionShape*		SpawnCollisionShape(ECollType newType, Vec2 vMin, Vec2 vMax);
 	///--- pt vizualizare ---
 	IActiveInterface		*m_camTargetActive;		//la ce activ se uita camera sau null cand se uita la players
 	IActiveInterface		*m_camTargetOld;		//tine minte pe ce a fost locked ca sa se poata intoarce

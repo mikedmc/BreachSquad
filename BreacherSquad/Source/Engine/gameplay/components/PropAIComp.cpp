@@ -18,23 +18,22 @@ bool CPropAIComponent::Update( CProp& active, float dTime )
 	//update timeline
 	fTimelineAI += dTime;
 
-	//stari particulare lumini (se pot suprascrie cele default)
 	switch ( active.AIstate )
 	{
 		case K_AI_STATE_ACTIVE_BOMB:
 		{
-			//daca nu esti pe playing nu mai scade counterul la bomba
+			// only decrease bomb timer if playing (not on level results)
 			if ( m_levelState != K_LVL_STATE_PLAYING )
 				break;
 
-			float fOldTimer = prop->AItimer1;
-			prop->AItimer1 -= dTime;
-			//m_interfaceIGM.SetBombTimer(prop->AItimer1);
+			float fOldTimer = mem.AItimer1;
+			mem.AItimer1 -= dTime;
+			//m_interfaceIGM.SetBombTimer(mem.AItimer1);
 
 			//--- sounds ---
-			if ( prop->AItimer1 > 15.0f )
+			if ( mem.AItimer1 > 15.0f )
 			{
-				if ( floor( fOldTimer ) > floor( prop->AItimer1 ) )
+				if ( floor( fOldTimer ) > floor( mem.AItimer1 ) )
 				{
 					//SND_PLAY(SNDIDX_BOMBBEEP);
 				}
@@ -47,17 +46,17 @@ bool CPropAIComponent::Update( CProp& active, float dTime )
 				}
 			}
 
-			if ( prop->AItimer1 <= 0.0f )
+			if ( mem.AItimer1 <= 0.0f )
 			{
 				//m_interfaceIGM.SetBombTimer(0.0f);
 				//add some explosions so everybody will die
-				AddDoofer_Explo( hash_EXPLO_LARGE_XL, prop->pos.xy, prop->UID, K_LVL_ACT_CLASS_EXPLOSION );
-				AddDoofer_Explo( hash_EXPLO_LARGE_XL, prop->pos.xy + Vec2( 32.0f, 0.0f ), prop->UID, K_LVL_ACT_CLASS_EXPLOSION );
-				AddDoofer_Explo( hash_EXPLO_LARGE_XL, prop->pos.xy - Vec2( 32.0f, 0.0f ), prop->UID, K_LVL_ACT_CLASS_EXPLOSION );
+				AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy, active.UID, K_LVL_ACT_CLASS_EXPLOSION );
+				AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy + Vec2( 32.0f, 0.0f ), active.UID, K_LVL_ACT_CLASS_EXPLOSION );
+				AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy - Vec2( 32.0f, 0.0f ), active.UID, K_LVL_ACT_CLASS_EXPLOSION );
 
-				g_particlesMgr.AddParticle( ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &Vec2( prop->pos.xy.x, prop->pos.xy.y - 15.0f ), NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM );
+				g_particlesMgr.AddParticle( ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &active.pos.xy, NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM );
 
-				prop->sprite.SetAnim( "BOMB_EXPLODED" );
+				active.sprite.SetAnim( "BOMB_EXPLODED" );
 
 				SetLevelState( K_LVL_STATE_MISSION_FAILED, STR_BOMB_EXPLODED );
 			}
@@ -65,39 +64,39 @@ bool CPropAIComponent::Update( CProp& active, float dTime )
 		break;
 		case K_AI_STATE_ACTIVE_AMMO_BOX:
 		{
-			int nAmmoLeft = prop->varAIparams.GetVariantByName( L"n_ammoLeft" )->m_asINT32;
-			prop->sprite.frameIdx = nAmmoLeft;
+			int nAmmoLeft = active.varAIparams.GetVariantByName( L"n_ammoLeft" )->m_asINT32;
+			active.sprite.frameIdx = nAmmoLeft;
 
 			//fade out
 			if ( nAmmoLeft <= 0 )
 			{
-				prop->AItimer1 -= dTime;
-				if ( prop->AItimer1 <= 0.0f )
+				mem.AItimer1 -= dTime;
+				if ( mem.AItimer1 <= 0.0f )
 				{
-					prop->Kill();
+					active.Kill();
 				}
 				//color
-				float fAlpha = LIMIT( prop->AItimer1, 0.0f, 1.0f );
-				prop->color = DW_COLORALPHA( prop->color_ini, fAlpha );
+				float fAlpha = LIMIT( mem.AItimer1, 0.0f, 1.0f );
+				active.color = DW_COLORALPHA( active.color_ini, fAlpha );
 			}
 		}
 		break;
 		case K_AI_STATE_ACTIVE_HEALTH_BOX:
 		{
-			int nHealthLeft = prop->varAIparams.GetVariantByName( L"n_healthLeft" )->m_asINT32;
-			prop->sprite.frameIdx = nHealthLeft;
+			int nHealthLeft = active.varAIparams.GetVariantByName( L"n_healthLeft" )->m_asINT32;
+			active.sprite.frameIdx = nHealthLeft;
 
 			//fade out
 			if ( nHealthLeft <= 0 )
 			{
-				prop->AItimer1 -= dTime;
-				if ( prop->AItimer1 <= 0.0f )
+				mem.AItimer1 -= dTime;
+				if ( mem.AItimer1 <= 0.0f )
 				{
-					prop->Kill();
+					active.Kill();
 				}
 				//color
-				float fAlpha = LIMIT( prop->AItimer1, 0.0f, 1.0f );
-				prop->color = DW_COLORALPHA( prop->color_ini, fAlpha );
+				float fAlpha = LIMIT( mem.AItimer1, 0.0f, 1.0f );
+				active.color = DW_COLORALPHA( active.color_ini, fAlpha );
 			}
 		}
 		break;
@@ -108,63 +107,63 @@ bool CPropAIComponent::Update( CProp& active, float dTime )
 
 		case K_AI_STATE_ACTIVE_DOOR_SECTION:
 		{
-			prop->AItimer1 = 0.0f;
+			mem.AItimer1 = 0.0f;
 		}
 		break;
 
 		case K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE:
 		{
 			//keep door open (AIvar1 contine frame-ul default) - set frame
-			prop->sprite.frameIdx = prop->fid_ini.frameIdx;
-			if ( prop->AItimer1 > 0.0f )
+			active.sprite.frameIdx = active.fid_ini.frameIdx;
+			if ( mem.AItimer1 > 0.0f )
 			{
-				prop->AItimer1 -= dTime;
+				mem.AItimer1 -= dTime;
 
-				bool bDontChangeFrames = (bool)(prop->varAIparams.GetVariantByName( L"b_DontChangeFrames" )->m_asBool);
+				bool bDontChangeFrames = (bool)(active.varAIparams.GetVariantByName( L"b_DontChangeFrames" )->m_asBool);
 				if ( !bDontChangeFrames )
 				{
-					prop->sprite.frameIdx++;
+					active.sprite.frameIdx++;
 				}
 
-				if ( prop->AItimer1 < 0.0f )
-					prop->AItimer1 = 0.0f;
+				if ( mem.AItimer1 < 0.0f )
+					mem.AItimer1 = 0.0f;
 			}
 
 			//open/close sounds
-			if ( (prop->AIvarBool1 == false) && (prop->AItimer1 > 0.0f) )
+			if ( (mem.AIvarBool1 == false) && (mem.AItimer1 > 0.0f) )
 			{
 				//just opened
-				CVariantComplex* cvc = prop->varAIparams.GetVariantByName( L"s_openSnd" );
+				CVariantComplex* cvc = active.varAIparams.GetVariantByName( L"s_openSnd" );
 				if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
 				{
 					int sndidx = UTGetSoundManager().getSndIdx( cvc->m_strArg.textHash );
-					SND_PLAY_POSITIONAL( sndidx, prop->pos.xy );
+					SND_PLAY_POSITIONAL( sndidx, active.pos.xy );
 				}
 				//on open script
-				cvc = prop->varAIparams.GetVariantByName( L"s_ScriptOnOpen" );
+				cvc = active.varAIparams.GetVariantByName( L"s_ScriptOnOpen" );
 				if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
 				{
-					UTGetScriptManager().StartScript( cvc->m_strArg.textHash, prop->UID );
+					UTGetScriptManager().StartScript( cvc->m_strArg.textHash, active.UID );
 				}
 
-				prop->AIvarBool1 = true;
+				mem.AIvarBool1 = true;
 			}
-			else if ( (prop->AIvarBool1 == true) && (prop->AItimer1 <= 0.0f) )
+			else if ( (mem.AIvarBool1 == true) && (mem.AItimer1 <= 0.0f) )
 			{
 				//just closed
-				CVariantComplex* cvc = prop->varAIparams.GetVariantByName( L"s_closeSnd" );
+				CVariantComplex* cvc = active.varAIparams.GetVariantByName( L"s_closeSnd" );
 				if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
 				{
 					int sndidx = UTGetSoundManager().getSndIdx( cvc->m_strArg.textHash );
-					SND_PLAY_POSITIONAL( sndidx, prop->pos.xy );
+					SND_PLAY_POSITIONAL( sndidx, active.pos.xy );
 				}
 				//on close script
-				cvc = prop->varAIparams.GetVariantByName( L"s_ScriptOnClose" );
+				cvc = active.varAIparams.GetVariantByName( L"s_ScriptOnClose" );
 				if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
 				{
-					UTGetScriptManager().StartScript( cvc->m_strArg.textHash, prop->UID );
+					UTGetScriptManager().StartScript( cvc->m_strArg.textHash, active.UID );
 				}
-				prop->AIvarBool1 = false;
+				mem.AIvarBool1 = false;
 			}
 
 		}
@@ -180,11 +179,11 @@ bool CPropAIComponent::Update( CProp& active, float dTime )
 			{
 				if ( pPlayerActor[ kk ] == null )
 					continue;
-				if ( pPlayerActor[ kk ]->bbox.Intersects( prop->bbox ) )
+				if ( pPlayerActor[ kk ]->bbox.Intersects( active.bbox ) )
 				{
-					prop->Touch( pPlayerActor[ kk ]->GetUID(), dTime );
+					active.Touch( pPlayerActor[ kk ]->GetUID(), dTime );
 					//save checkpoint
-					vLastSpawnPoint = prop->pos.xy;
+					vLastSpawnPoint = active.pos.xy;
 					break;
 				}
 			}

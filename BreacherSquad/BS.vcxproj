@@ -277,6 +277,7 @@
     <ClInclude Include="Source\Engine\gameplay\components\ActorAICompTypes.h" />
     <ClInclude Include="Source\Engine\gameplay\components\ActorCompCommon.h" />
     <ClInclude Include="Source\Engine\gameplay\components\AICompCommon.h" />
+    <ClInclude Include="Source\Engine\gameplay\components\CollAIComp.h" />
     <ClInclude Include="Source\Engine\gameplay\components\ComponentInterfaces.h" />
     <ClInclude Include="Source\Engine\gameplay\components\LightAIComp.h" />
     <ClInclude Include="Source\Engine\gameplay\components\PhysPtComp.h" />
@@ -700,6 +701,7 @@
     <ClCompile Include="Source\Engine\gameplay\AreasInventory.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\ActiveAIComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\ActorAIComp.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\components\CollAIComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\LightAIComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\PhysPtComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\PropAIComp.cpp" />

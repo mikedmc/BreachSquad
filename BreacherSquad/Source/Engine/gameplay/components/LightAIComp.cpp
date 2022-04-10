@@ -18,7 +18,6 @@ bool CLightAIComponent::Update( CLight& active, float dTime )
 	//update timeline
 	fTimelineAI += dTime;
 
-	//stari particulare lumini (se pot suprascrie cele default)
 	switch ( active.AIstate )
 	{
 		case K_AI_STATE_FN_LIGHT_FLICKER1:
