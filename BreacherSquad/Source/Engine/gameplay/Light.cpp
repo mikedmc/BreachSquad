@@ -22,14 +22,14 @@ void CLight::SetAI( EAIstate newstate )
 	c_AI->SetAI( *this, newstate );
 }
 
-void CLight::Update( float dTime )
+void CLight::Update( float dTime, CLevel& level )
 {
 	bEnabled = bSetEnabled;
 	// hidden? skip update
 	if ( !IsAlive() )
 		return;
 
-	c_AI->Update( *this, dTime );
+	c_AI->Update( *this, dTime, level );
 	// enforce position updating after UI pass
 	SetPos( pos.xyz );
 }

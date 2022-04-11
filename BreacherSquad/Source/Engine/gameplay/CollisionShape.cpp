@@ -2,7 +2,7 @@
 #include "CollisionShape.h"
 
 CCollisionShape::CCollisionShape( CCollAIComponent* AIcomponent ) : 
-	eType( K_COLLTYPE_SOLID ), castShadows( false ), 
+	eType( K_SHAPE_SOLID ), castShadows( false ), 
 	collFlags( K_DIRFLAG_ALL ), ubFlags( K_LVL_COLLFLAG_SOLID ), 
 	c_AI( AIcomponent )
 {
@@ -29,6 +29,11 @@ void CCollisionShape::Move(Vec3 delta)
 	bbox.Move(Vec3XY(delta));
 }
 
+void CCollisionShape::SetAI( EAIstate newstate )
+{
+	c_AI->SetAI( *this, newstate );
+}
+
 void CCollisionShape::BeginPlay()
 {
 
@@ -39,31 +44,34 @@ void CCollisionShape::EndPlay()
 
 }
 
-void CCollisionShape::Update( float dTime )
+void CCollisionShape::Update( float dTime, CLevel& level )
 {
 	bEnabled = bSetEnabled;
 	if ( !IsAlive() )
 		return;
 
-	c_AI->Update( *this, dTime );
+	c_AI->Update( *this, dTime, level );
 }
 
 void CCollisionShape::PostConstructionInit()
 {
-	switch (eType)
+	switch ( eType )
 	{
-	case K_COLLTYPE_TRIGGER:
-		collFlags = K_DIRFLAG_NONE;
-		castShadows = false;
-		break;
-	case K_COLLTYPE_PARTICLEGEN:
-		collFlags = K_DIRFLAG_NONE;
-		castShadows = false;
-		break;
-	default:
-		collFlags = K_DIRFLAG_ALL;
-		castShadows = true;
-		break;
+		case K_SHAPE_SOLID:
+			collFlags = K_DIRFLAG_ALL;
+			break;
+		case K_SHAPE_TRIGGER:
+			collFlags = K_DIRFLAG_NONE;
+			castShadows = false;
+			break;
+		case K_SHAPE_PARTICLEGEN:
+			collFlags = K_DIRFLAG_NONE;
+			castShadows = false;
+			break;
+		default:
+			collFlags = K_DIRFLAG_ALL;
+			castShadows = true;
+			break;
 	}
 }
 
@@ -100,26 +108,19 @@ CCollisionShape* CLevel::GetCollisionShapeByUID(UINT32 nUID)
 
 CCollisionShape* CLevel::SpawnCollisionShape( ECollType newType, Vec2 vMin, Vec2 vMax)
 {
-	CCollisionShape* pCol = new CCollisionShape();
+	CCollisionShape* pCol = new CCollisionShape(new CCollAIComponent());
 	pCol->ID = GenerateNextID();
 	pCol->eType = newType;
 	pCol->bbox_ini.Set_Corrected(vMin, vMax);
 	pCol->bbox = pCol->bbox_ini;
 	pCol->pos = pCol->bbox_ini.vCenter;
-	pCol->collFlags = K_DIRFLAG_NONE;
 
+	pCol->collFlags = K_DIRFLAG_NONE;
 	pCol->castShadows = false;
 
-	switch (nType)
-	{
-		case K_LVL_COLL_TYPE_SOLID:
-			pCol->collFlags = K_DIRFLAG_ALL;
-			break;
-		default:
-			pCol->collFlags = K_DIRFLAG_NONE;
-			break;
-	}
-
+	pCol->PostConstructionInit();
 	m_arrColShapes.Add(pCol);
+	pCol->BeginPlay();
+
 	return pCol;
 }

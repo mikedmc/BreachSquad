@@ -2534,23 +2534,6 @@ void CLevel::DeleteAITargetedEvent(EAIEventType eEvtType, UINT32 targetUID /*= 0
 
 }
 
-
-
-void CLevel::SetAI(IActiveInterface & active, EAIstate AIstate, CVariantCollection * params, INT32 targetID)
-{
-	//#TODO: functia asta trebuie sa dispara complet
-	if ( active.GetClassType() == K_LVL_IAI_TYPE_ACTOR )
-	{
-		ErrorBox( K_ERR_WARNING, L"SetAI should not be called on Actors!" );
-		return;
-	}
-	active.targetID_ini = targetID;
-	active.pTarget = GetIActiveInterfacePtr(targetID);
-
-	active.SetAIparams( params, true );
-	active.SetAI( AIstate );
-}
-
 void CLevel::CleanupDeadObjects()
 {
 	//check active objects

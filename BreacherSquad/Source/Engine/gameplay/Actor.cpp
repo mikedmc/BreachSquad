@@ -93,6 +93,11 @@ void CActor::Move(Vec3 delta)
 }
 
 
+void CActor::SetAI( EAIstate newstate )
+{
+	ErrorBox( K_ERR_WARNING, L"CActor::SetAI should not be used! Use SetAIState instead!" );
+}
+
 bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 {
 	if (pActorTemplate == NULL)

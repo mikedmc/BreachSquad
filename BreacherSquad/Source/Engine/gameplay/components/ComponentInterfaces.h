@@ -42,6 +42,7 @@ public:
 	int				AIsubState;				// AI substate used here and there, everywhere
 	double			fTimelineAI;			// local timeline for AI 
 public:
+	IBaseActorAIComponent() : AIsubState( 0 ), fTimelineAI( 0.0f ) {}
 	virtual			~IBaseActorAIComponent() {}
 
 	virtual void	Update( CActor& act, float dTime ) = 0;
@@ -58,7 +59,7 @@ public:
 	IBaseAIComponent() : AIsubState( 0 ), fTimelineAI( 0.0f ) {}
 	virtual			~IBaseAIComponent() {}
 	// updates and returns true if state was handled (so we can call another one in the chain if not)
-	virtual bool	Update( IActiveInterface& active, float dTime ) = 0;
+	virtual bool	Update( IActiveInterface& active, float dTime, CLevel& level ) = 0;
 	// call this to set the AI state
 	virtual void	SetAI( IActiveInterface& active, EAIstate newstate ) = 0;
 };

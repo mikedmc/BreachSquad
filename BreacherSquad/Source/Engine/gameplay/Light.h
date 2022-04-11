@@ -72,7 +72,7 @@ public:
 	void				EndPlay() override;
 	void				SetAI( EAIstate newstate ) override;
 
-	void				Update( float dTime );
+	void				Update( float dTime, CLevel& level );
 
 	// sets light direction with fallback for empty vectors
 	void				SetDir(Vec3 nDir);

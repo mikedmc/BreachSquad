@@ -511,6 +511,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			}
 
 			///--- check doors and windows breaking ---
+			/*
 			if ((fMaxDamage > 0.0f) && (fDamageRadius > 0.0f))
 			{
 				for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
@@ -564,6 +565,8 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 					}
 				}
 			}
+			*/
+
 			//check grenade interaction AIs
 			/*
 			if ((fMaxDamage > 0.0f) && (bInteractAI) && (fDamageRadius > 0.0f))

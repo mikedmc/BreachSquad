@@ -12,10 +12,10 @@
 #define K_LVL_COLLFLAG_SOLID			2 
 
 enum ECollType {
-	K_COLLTYPE_NOTSET = 0,
-	K_COLLTYPE_SOLID,
-	K_COLLTYPE_TRIGGER,
-	K_COLLTYPE_PARTICLEGEN,
+	K_SHAPE_NOTSET = 0,
+	K_SHAPE_SOLID,
+	K_SHAPE_TRIGGER,
+	K_SHAPE_PARTICLEGEN,
 };
 
 class CCollisionShape : public IActiveInterface
@@ -37,10 +37,11 @@ public:
 
 	void					SetPos(Vec3 newPos) override;
 	void					Move(Vec3 delta) override;
+	void					SetAI( EAIstate newstate ) override;
 
 	void					PostConstructionInit() override;
 	void					BeginPlay() override;
 	void					EndPlay() override;
 
-	void					Update( float dTime );
+	void					Update( float dTime, CLevel& level );
 };

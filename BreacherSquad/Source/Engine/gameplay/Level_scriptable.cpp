@@ -267,7 +267,8 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				}
 			}
 			//set state too
-			SetAI(target, aistate, &varcol);
+			target->SetAI( aistate );
+			target->SetAIparams( &varcol, true );
 
 			return true;
 		}
@@ -293,7 +294,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				}
 			}
 			//set state too
-			SetAIparams(target, &varcol);
+			target->SetAIparams(&varcol, false);
 
 			return true;
 		}
@@ -316,10 +317,12 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				dir *= -1;
 			else //daca e la capat, vad la care capat este
 			{
+				/*
 				if (target->AItimer1 <= 0.0f) //e la inceput
 					dir = 1;
 				else
 					dir = -1;
+					*/
 			}
 
 			//setam la loc
@@ -1061,6 +1064,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_ACTOR_SET_COMMAND:
 		{
+			/*
 			CVariantComplex* vcWho = instr->GetArgument(L"who");
 			CVariantComplex* vcCommand = instr->GetArgument(L"sCommand");
 			CVariantComplex* vcModifier = instr->GetArgument(L"nCommandModifier");
@@ -1096,11 +1100,9 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					if (nModifier != 0)
 					{
 						//#HACK: only used by doors when breaching them so we make sure the actor faces the door
-						/*
 						IActiveInterface* pExecutor = GetIActiveInterfacePtr_byUID(executorUID);
 						if (pExecutor != null)
 							targetAct->m_AIcommands.nLookDirX = SIGN(pExecutor->bbox.vCenter.x - targetAct->bbox.vCenter.x);
-							*/
 						targetAct->m_AIcommands.eAttackCommand = K_ACT_ATTACK_BREACH;
 					}
 				}
@@ -1112,7 +1114,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				}
 				break;
 			}
-
+		*/
 			return true;
 		}
 		break;
@@ -1229,11 +1231,11 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			//int AIstate = GetAIStateByNameHash(vcAIstate->m_strArg.getHash());
 			if ((vcAIstate == null) || (vcAIstate->m_type != CVariantComplex::K_ARGTYPE_STRING))
 			{
-				Actor_SetAIState(actor, actor->_template.AItemplate->GetAIStateByName(actor->_template.shAIState_ini));
+				actor->SetAIState( actor->_template.AItemplate->GetAIStateByName( actor->_template.shAIState_ini ) );
 			}
 			else
 			{
-				Actor_SetAIState(actor, actor->_template.AItemplate->GetAIStateByName(vcAIstate->m_strArg));
+				actor->SetAIState( actor->_template.AItemplate->GetAIStateByName( vcAIstate->m_strArg ) );
 			}
 
 			return true;
@@ -1439,6 +1441,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_ACTIVE_DOORFACE_SET_OPEN_TIMER:
 		{
+			/*
 			CVariantComplex* vcTarget = instr->GetArgument(L"target");
 			CVariantComplex* vcDuration = instr->GetArgument(L"fDuration");
 			IActiveInterface* target = ScriptGetActiveInterfaceByTargetParam(vcTarget, executorUID);
@@ -1449,6 +1452,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 			//toggle hidden flag
 			target->AItimer1 = vcDuration->m_asFloat;
+			*/
 			return true;
 		}
 		break;

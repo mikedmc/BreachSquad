@@ -44,7 +44,7 @@ void CProp::InitializeFromAFrameFlags(UINT32 AFrameFlags)
 	if (AFrameFlags & K_FLAG_EDITOR_PROP_CAN_BE_SHOT) flags |= K_PROPFLAG_CAN_BE_SHOT;
 }
 
-void CProp::Update( float dTime )
+void CProp::Update( float dTime, CLevel& level )
 {
 	//check visibility change
 	bEnabled = bSetEnabled;
@@ -67,7 +67,7 @@ void CProp::Update( float dTime )
 	}
 
 	// Update AI 
-	c_AI->Update( *this, dTime );
+	c_AI->Update( *this, dTime, level );
 	//final updates
 	sprite.pos = pos.xy_proj;
 	sprite.color = color;
@@ -88,4 +88,9 @@ void CProp::BeginPlay()
 void CProp::EndPlay()
 {
 
+}
+
+void CProp::SetAI( EAIstate newstate )
+{
+	c_AI->SetAI( *this, newstate );
 }

@@ -11,7 +11,7 @@ CPropAIComponent::~CPropAIComponent()
 
 }
 
-bool CPropAIComponent::Update( CProp& active, float dTime )
+bool CPropAIComponent::Update( CProp& active, float dTime, CLevel& level )
 {
 	if ( active.AIstate == K_AI_STATE_UNDEFINED )
 		return true;
@@ -23,7 +23,7 @@ bool CPropAIComponent::Update( CProp& active, float dTime )
 		case K_AI_STATE_ACTIVE_BOMB:
 		{
 			// only decrease bomb timer if playing (not on level results)
-			if ( m_levelState != K_LVL_STATE_PLAYING )
+			if ( level.m_levelState != K_LVL_STATE_PLAYING )
 				break;
 
 			float fOldTimer = mem.AItimer1;
@@ -40,7 +40,7 @@ bool CPropAIComponent::Update( CProp& active, float dTime )
 			}
 			else
 			{
-				if ( m_Timers.Tick( 250 ) )
+				if ( level.m_Timers.Tick( 250 ) )
 				{
 					//SND_PLAY(SNDIDX_BOMBBEEP);
 				}
@@ -50,15 +50,15 @@ bool CPropAIComponent::Update( CProp& active, float dTime )
 			{
 				//m_interfaceIGM.SetBombTimer(0.0f);
 				//add some explosions so everybody will die
-				AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy, active.UID, K_LVL_ACT_CLASS_EXPLOSION );
-				AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy + Vec2( 32.0f, 0.0f ), active.UID, K_LVL_ACT_CLASS_EXPLOSION );
-				AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy - Vec2( 32.0f, 0.0f ), active.UID, K_LVL_ACT_CLASS_EXPLOSION );
+				level.AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy, active.UID, K_LVL_ACT_CLASS_EXPLOSION );
+				level.AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy + Vec2( 32.0f, 0.0f ), active.UID, K_LVL_ACT_CLASS_EXPLOSION );
+				level.AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy - Vec2( 32.0f, 0.0f ), active.UID, K_LVL_ACT_CLASS_EXPLOSION );
 
 				g_particlesMgr.AddParticle( ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &active.pos.xy, NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM );
 
 				active.sprite.SetAnim( "BOMB_EXPLODED" );
 
-				SetLevelState( K_LVL_STATE_MISSION_FAILED, STR_BOMB_EXPLODED );
+				level.SetLevelState( K_LVL_STATE_MISSION_FAILED, STR_BOMB_EXPLODED );
 			}
 		}
 		break;
@@ -177,13 +177,13 @@ bool CPropAIComponent::Update( CProp& active, float dTime )
 		{
 			for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 			{
-				if ( pPlayerActor[ kk ] == null )
+				if ( level.pPlayerActor[ kk ] == null )
 					continue;
-				if ( pPlayerActor[ kk ]->bbox.Intersects( active.bbox ) )
+				if ( level.pPlayerActor[ kk ]->bbox.Intersects( active.bbox ) )
 				{
-					active.Touch( pPlayerActor[ kk ]->GetUID(), dTime );
+					active.Touch( level.pPlayerActor[ kk ]->GetUID(), dTime );
 					//save checkpoint
-					vLastSpawnPoint = active.pos.xy;
+					level.vLastSpawnPoint = active.pos.xy;
 					break;
 				}
 			}
@@ -192,7 +192,7 @@ bool CPropAIComponent::Update( CProp& active, float dTime )
 		default:
 		{
 			// call base update if not handled
-			if ( !CActiveAIComponent::Update( active, dTime ) )
+			if ( !CActiveAIComponent::Update( active, dTime, level ) )
 			{
 				ErrorBox( K_ERR_WARNING, L"PropAIComp::Update - AIstate not handled: %d", EAIstate_names[ active.AIstate ] );
 			}

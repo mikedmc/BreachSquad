@@ -112,6 +112,9 @@ public:
 
 	void					SetPos( Vec3 newPos ) override;
 	void					Move( Vec3 delta ) override;
+	// Useless for actors
+	void					SetAI( EAIstate newstate ) override;
+
 	// returns projected position of the central point
 	inline Vec2				GetPosHeart() const { return vHeart.xy_proj; }
 	// returns 3d position of the heart central point

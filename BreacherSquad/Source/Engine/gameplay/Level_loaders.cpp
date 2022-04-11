@@ -146,12 +146,14 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	for (int kk = 0; kk < m_arrLights.GetSize(); kk++)
 	{
 		CLight * light = m_arrLights[kk];
-		SetAI(light, light->AIstate, &light->varAIparams, light->targetID_ini);
+		light->pTarget = GetIActiveInterfacePtr( light->targetID_ini );
+		light->SetAI( light->AIstate );
 	}
 	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
 	{
 		CCollisionShape * shape = m_arrColShapes[kk];
-		SetAI(shape, shape->AIstate, &shape->varAIparams, shape->targetID_ini);
+		shape->pTarget = GetIActiveInterfacePtr( shape->targetID_ini );
+		shape->SetAI( shape->AIstate );
 	}
 	
 	for (int ar = 0; ar < m_arrAreas.Count(); ar++)
@@ -160,16 +162,14 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		for (int kk = 0; kk < area->m_arrProps.GetSize(); kk++)
 		{
 			CProp * activ = area->m_arrProps[kk];
-			SetAI(activ, activ->AIstate, &activ->varAIparams, activ->targetID_ini);
+			activ->pTarget = GetIActiveInterfacePtr( activ->targetID_ini );
+			activ->SetAI( activ->AIstate );
 		}
 	}
-
-	//#TODO: should change this or remove completely!!
-	//ma asigur ca toti actorii au pointerii setati bine chemand inca odata setAI
 	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 	{
 		CActor* actor = m_arrActors[kk];
-		SetAI(actor, actor->AIstate, &actor->varAIparams, actor->targetID_ini);
+		actor->pTarget = GetIActiveInterfacePtr( actor->targetID_ini );
 	}
 
 	///--- camera ---
@@ -371,7 +371,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	// Data for each light 
 	for (int kk = 0; kk < lightsCnt; kk++)
 	{
-		CLight *nl = new CLight();
+		CLight *nl = new CLight(new CLightAIComponent());
 		nl->m_nLightMeshIdx = -1;
 		nl->m_nShadowMeshIdx = -1;
 
@@ -458,7 +458,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	//date fiecare element
 	for (int kk = 0; kk < colCnt; kk++)
 	{
-		CCollisionShape* colobj = new CCollisionShape();
+		CCollisionShape* colobj = new CCollisionShape(new CCollAIComponent());
 		colobj->ID = unBaseID + OS_freadUInt32(fl);
 
 		Vec2 cmin, cmax;
@@ -474,7 +474,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		//setam pos on center
 		colobj->pos = colobj->bbox_ini.vCenter;
 		//type (ub)
-		colobj->type = OS_freadUByte(fl);
+		colobj->eType = (ECollType)OS_freadUByte(fl);
 		//cast shadows
 		colobj->castShadows = (OS_freadByte(fl) != 0) ? true : false;
 
@@ -497,7 +497,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	int decocnt = (int)OS_freadUInt32(fl);
 	for (int kk = 0; kk < decocnt; kk++)
 	{
-		CProp* obj = new CProp();
+		CProp* obj = new CProp( new CPropAIComponent() );
 
 		obj->ID = unBaseID + OS_freadUInt32(fl);
 		//load layer from editor (not used atm)

@@ -9,5 +9,5 @@ public:
 	CLightAIComponent();
 	~CLightAIComponent();
 
-	bool					Update( CLight& active, float dTime );
+	bool					Update( CLight& active, float dTime, CLevel& level );
 };

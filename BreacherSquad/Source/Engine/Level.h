@@ -194,8 +194,6 @@ public:
 	void					CleanupDeadObjects();
 	// Updates all IActiveInterface implementations
 	void					UpdateAI(float dTime, bool bInEditor = false);
-	// Sets the AI for all smart elements (Actors excluded)
-	void					SetAI(IActiveInterface& active, EAIstate AIstate, CVariantCollection * params, INT32 targetID = -1);
 	//gaseste cel mai apropiat inamic vizibil
 	CActor*					GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassFilter1 = K_LVL_ACT_CLASS_ANY, EActorClass eTargetClassFilter2 = K_LVL_ACT_CLASS_ANY);
 	// Finds closest visible actor of specified name (inside visibility radius)

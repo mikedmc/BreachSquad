@@ -127,10 +127,11 @@ void CLevel::BuildVisibilityLists()
 		if (!m_arrColShapes[kk]->IsAlive())
 			continue;
 
-		switch (m_arrColShapes[kk]->type)
+		switch (m_arrColShapes[kk]->eType)
 		{
 			//case K_LVL_COLL_TYPE_TRIGGER:
-			case K_LVL_COLL_TYPE_FOG_OF_WAR:
+			/*
+			case K_SHAPE_SOLID:
 			case K_LVL_COLL_TYPE_WATER:
 			case K_LVL_COLL_TYPE_COVER:
 			{
@@ -139,8 +140,8 @@ void CLevel::BuildVisibilityLists()
 					m_visibleList.logic_colShapesSpecial.Add(m_arrColShapes[kk]);
 			}
 			break;
-			case K_LVL_COLL_TYPE_LEDGE:
-			case K_LVL_COLL_TYPE_SOLID:
+			*/
+			case K_SHAPE_SOLID:
 			{
 
 				//commented intersection with larger area so we add them all

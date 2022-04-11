@@ -9,5 +9,5 @@ public:
 	CCollAIComponent();
 	~CCollAIComponent();
 
-	bool					Update( CCollisionShape& active, float dTime );
+	bool					Update( CCollisionShape& active, float dTime, CLevel& level );
 };

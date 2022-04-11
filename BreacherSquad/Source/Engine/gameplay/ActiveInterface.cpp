@@ -5,7 +5,7 @@
 
 IActiveInterface::IActiveInterface() : 
 	ID(-1), targetID_ini(-1), bEnabled(true), bSetEnabled(true), bSkipRender(false), bAnimated(false),
-	AIstate(K_AI_STATE_UNDEFINED), AIsubState(0), fTimelineAI(0.0f),
+	AIstate(K_AI_STATE_UNDEFINED), 
 	color(0xffffffff), color_ini(0xffffffff),
 	bTouching(false), nTouchingUID(0),
 	pTarget(null), bCanInteract(false), bHideInteractIcon(false),

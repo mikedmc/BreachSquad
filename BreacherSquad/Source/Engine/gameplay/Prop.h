@@ -48,9 +48,10 @@ public:
 	void				PostConstructionInit() override;
 	void				BeginPlay() override;
 	void				EndPlay() override;
+	void				SetAI( EAIstate newstate ) override;
 
 	// sets internal flags reading from the AFrame flags (set in sprite editor)
 	void				InitializeFromAFrameFlags( UINT32 AFrameFlags );
 	// Updates everything
-	void				Update( float dTime );
+	void				Update( float dTime, CLevel& level );
 };

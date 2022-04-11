@@ -11,7 +11,7 @@ CActiveAIComponent::~CActiveAIComponent()
 
 }
 
-bool CActiveAIComponent::Update( IActiveInterface& active, float dTime )
+bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& level )
 {
 	bool bProcessedState = true;
 	if ( active.AIstate == K_AI_STATE_UNDEFINED )
@@ -294,7 +294,7 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 			{
 				active.Touch( active.GetUID(), 0.0f );
 				//save checkpoint
-				vLastSpawnPoint = mem.pos.xy;
+				__Sim().vLastSpawnPoint = active.pos.xy;
 			}
 		}
 		break;
@@ -384,14 +384,14 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 		{
 			CMiscObjectRail* rail = null;
 			//find rail
-			for ( int kk = 0; kk < m_arrMiscObjects.Count(); kk++ )
+			for ( int kk = 0; kk < __Sim().m_arrMiscObjects.Count(); kk++ )
 			{
-				if ( m_arrMiscObjects[ kk ]->ID == mem.targetID_ini )
+				if ( __Sim().m_arrMiscObjects[ kk ]->ID == active.targetID_ini )
 				{
-					rail = dynamic_cast<CMiscObjectRail*>(m_arrMiscObjects[ kk ]);
+					rail = dynamic_cast<CMiscObjectRail*>(__Sim().m_arrMiscObjects[ kk ]);
 				}
 			}
-			if ( rail == NULL )
+			if ( rail == nullptr )
 			{
 				ErrorBox( K_ERR_WARNING, L"Rail id %d not found for object ID %d!", active.targetID_ini, active.ID );
 				break;

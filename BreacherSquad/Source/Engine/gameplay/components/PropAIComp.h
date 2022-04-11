@@ -9,5 +9,5 @@ public:
 	CPropAIComponent();
 	~CPropAIComponent();
 
-	bool					Update( CProp& active, float dTime );
+	bool					Update( CProp& active, float dTime, CLevel& level );
 };

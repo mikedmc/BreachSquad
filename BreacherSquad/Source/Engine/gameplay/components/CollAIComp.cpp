@@ -11,7 +11,7 @@ CCollAIComponent::~CCollAIComponent()
 
 }
 
-bool CCollAIComponent::Update( CCollisionShape& active, float dTime )
+bool CCollAIComponent::Update( CCollisionShape& active, float dTime, CLevel& level )
 {
 	if ( active.AIstate == K_AI_STATE_UNDEFINED )
 		return true;
@@ -209,7 +209,7 @@ bool CCollAIComponent::Update( CCollisionShape& active, float dTime )
 		default:
 		{
 			// call base update if not handled
-			if ( !CActiveAIComponent::Update( active, dTime ) )
+			if ( !CActiveAIComponent::Update( active, dTime, level ) )
 			{
 				ErrorBox( K_ERR_WARNING, L"CollAIComp::Update - AIstate not handled: %d", EAIstate_names[ active.AIstate ] );
 			}
