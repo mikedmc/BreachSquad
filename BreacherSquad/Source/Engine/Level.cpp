@@ -1339,14 +1339,14 @@ IActiveInterface* CLevel::GetIActiveInterfacePtr(int editorID)
 		if (m_arrColShapes[kk]->ID == editorID)
 			return m_arrColShapes[kk];
 	}
-	//verifica si actorii
+	// check actors
 	for (int kk = 0; kk < m_arrActors.Count(); kk++)
 	{
 		if (m_arrActors[kk]->ID == editorID)
 			return m_arrActors[kk];
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 IActiveInterface* CLevel::GetIActiveInterfacePtr_byUID(UINT32 UID)
@@ -2421,6 +2421,7 @@ void CLevel::CleanupDeadObjects()
 			if (area->m_arrProps[kk]->GetCanBeReleased())
 			{
 				// remove from array, call dtor
+				LOG(L"Released Prop: %d", area->m_arrProps[kk]->ID);
 				SAFE_DELETE(area->m_arrProps[kk]);
 				area->m_arrProps.Remove(kk);
 			}

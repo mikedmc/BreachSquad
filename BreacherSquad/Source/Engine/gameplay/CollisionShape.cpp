@@ -46,6 +46,13 @@ void CCollisionShape::EndPlay()
 
 void CCollisionShape::Update( float dTime, CLevel& level )
 {
+	// clean target pointer (should be done by AI?)
+	if ( (pTarget != nullptr) && pTarget->IsPendingKill() )
+	{
+		pTarget->FreeRef();
+		pTarget = nullptr;
+	}
+
 	bEnabled = bSetEnabled;
 	if ( !IsAlive() )
 		return;

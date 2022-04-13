@@ -133,8 +133,16 @@ void IActiveInterface::Kill()
 {
 	if ( bPendingKill == false )
 	{
+		// mark as ready to be deallocated
 		bPendingKill = true;
+		// call end play
 		EndPlay();
+		// release target pointers
+		if ( pTarget != nullptr )
+		{
+			pTarget->FreeRef();
+			pTarget = nullptr;
+		}
 	}
 }
 

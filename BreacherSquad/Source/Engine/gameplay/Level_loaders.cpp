@@ -146,13 +146,17 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	for (int kk = 0; kk < m_arrLights.GetSize(); kk++)
 	{
 		CLight * light = m_arrLights[kk];
-		light->pTarget = GetIActiveInterfacePtr( light->targetID_ini );
+		IActiveInterface* pt = GetIActiveInterfacePtr( light->targetID_ini );
+		if(pt != nullptr)
+			light->pTarget = pt->GetRef();
 		light->SetAI( light->AIstate );
 	}
 	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
 	{
 		CCollisionShape * shape = m_arrColShapes[kk];
-		shape->pTarget = GetIActiveInterfacePtr( shape->targetID_ini );
+		IActiveInterface* pt = GetIActiveInterfacePtr( shape->targetID_ini );
+		if ( pt != nullptr )
+			shape->pTarget = pt->GetRef();
 		shape->SetAI( shape->AIstate );
 	}
 	
@@ -162,14 +166,18 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		for (int kk = 0; kk < area->m_arrProps.GetSize(); kk++)
 		{
 			CProp * activ = area->m_arrProps[kk];
-			activ->pTarget = GetIActiveInterfacePtr( activ->targetID_ini );
+			IActiveInterface* pt = GetIActiveInterfacePtr( activ->targetID_ini );
+			if ( pt != nullptr )
+				activ->pTarget = pt->GetRef();
 			activ->SetAI( activ->AIstate );
 		}
 	}
 	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 	{
 		CActor* actor = m_arrActors[kk];
-		actor->pTarget = GetIActiveInterfacePtr( actor->targetID_ini );
+		IActiveInterface* pt = GetIActiveInterfacePtr( actor->targetID_ini );
+		if ( pt != nullptr )
+			actor->pTarget = pt->GetRef();
 	}
 
 	///--- camera ---

@@ -54,7 +54,7 @@ public:
 	DWORD					color_ini;
 	INT32					targetID_ini;			// target ID read from the editor
 
-	IActiveInterface		*pTarget;				// target coming from the editor. Only get pointers through GetPtr()
+	IActiveInterface*		pTarget;				// target coming from the editor. Only get pointers through GetPtr()
 	bool					bCanInteract;			// can interact with it?  #TODO: replace with interact-type or actions list
 	bool					bHideInteractIcon;		// hide the icon //#TODO: remove this flag
 

@@ -151,6 +151,12 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 
 void CActor::Update(float dTime, CLevel& level )
 {
+	// clean target pointer (should be done by AI?)
+	if ( (pTarget != nullptr) && pTarget->IsPendingKill() )
+	{
+		pTarget->FreeRef();
+		pTarget = nullptr;
+	}
 	//change visibility
 	this->bEnabled = this->bSetEnabled;
 	// actor is hidden or not active so ignore it

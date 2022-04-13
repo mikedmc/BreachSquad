@@ -24,8 +24,6 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 	//			PERCEIVE			
 	//----------------------------------------
 
-	//#TODO: make sure all targeted actors are still alive and reset hanging pointers
-
 	//vedem daca a expirat durata behavior curent si daca da fortam un pas de decizie AI
 	bool bBehaviorDurationFinished = false;
 	if ( m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ].fBehaviorDuration > 0.0f )

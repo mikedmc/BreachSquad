@@ -561,7 +561,9 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 			///set new target now
 			target->targetID_ini = targetID;
-			target->pTarget = GetIActiveInterfacePtr(targetID);
+			IActiveInterface* pt = GetIActiveInterfacePtr( targetID );
+			if ( pt != nullptr )
+				target->pTarget = pt->GetRef();
 
 			return true;
 		}

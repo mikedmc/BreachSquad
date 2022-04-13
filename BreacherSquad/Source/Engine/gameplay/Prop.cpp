@@ -46,6 +46,12 @@ void CProp::InitializeFromAFrameFlags(UINT32 AFrameFlags)
 
 void CProp::Update( float dTime, CLevel& level )
 {
+	// clean target pointer (should be done by AI?)
+	if ( (pTarget != nullptr) && pTarget->IsPendingKill() )
+	{
+		pTarget->FreeRef();
+		pTarget = nullptr;
+	}
 	//check visibility change
 	bEnabled = bSetEnabled;
 	if ( !IsAlive() )
