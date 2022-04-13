@@ -27,6 +27,9 @@ protected:
 	bool					bPendingKill;			// exited gameplay, waits for garbage collection
 	bool					bEnabled;				// sometimes the actives need to be disabled ( eg: after being killed )
 	int						_refCntP;				// pointers reference count. Don't deallocate until zero!
+#if defined(_DEBUG) || defined(DEBUG)
+	float					fPendingKillTimer;		//#TEMP: checks time since killed to make sure it's deallocating them
+#endif
 
 public:
 	EAIstate				AIstate;				// state AI (AI_STATE ENUM)

@@ -157,6 +157,19 @@ void CActor::Update(float dTime, CLevel& level )
 		pTarget->FreeRef();
 		pTarget = nullptr;
 	}
+
+//#TEMP: watchdog for hanging actors
+#if defined(_DEBUG) || defined(DEBUG)
+	if ( bPendingKill )
+	{
+		fPendingKillTimer += dTime;
+		if ( fPendingKillTimer > 10.0f )
+		{
+			ErrorBox( K_ERR_WARNING, L"Actor hanged!" );
+		}
+	}
+
+#endif
 	//change visibility
 	this->bEnabled = this->bSetEnabled;
 	// actor is hidden or not active so ignore it

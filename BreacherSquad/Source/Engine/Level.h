@@ -177,7 +177,7 @@ public:
 	// Spawns a light
 	CLight*					SpawnLight(Vec3 spawnPos, eLightType eType, DWORD dwColor, float fRadius = 64.0f, int profileID = 0, bool bCastShadows = false);
 	///--- LIGHTS ---
-	CArray<CLight*> m_arrLights;				//array of lights
+	CArray<CLight*>			m_arrLights;				//array of lights
 	DWORD					m_colAmbientGlobal;			//global ambient color
 	float					m_fThunderTimer;			//pentru desenarea efectului de thunder/lightning (0.0f - stopped)
 	
@@ -198,7 +198,7 @@ public:
 	// @targetUID - if not set it deletes all events of said type
 	void					DeleteAITargetedEvent(EAIEventType eEvtType, UINT32 targetUID = 0);
 	///--- decals ---
-	//#TODO: change to poolGC for decals
+	//#TODO: move decals arrays on areas
 	CArray<CDecal*>			m_arrDecals;
 	void					AddDecal(EDecalLayer nLayer, Vec2 pos, int animIdx, int frameIdx = 0, DWORD color = 0xffffffff, bool bIsAnimated = false);
 	void					UpdateDecals(float dTime);

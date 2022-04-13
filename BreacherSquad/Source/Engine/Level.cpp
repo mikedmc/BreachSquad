@@ -1906,10 +1906,10 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 		if (prop->bMakesLight)
 		{
 			if (prop->sprLight.animationIdx >= 0)
-			{
-				//Creez forma luminii (mesh-ul)
+			{	   
+				// create mesh shape of light
 				RectLTRB realrect = m_sprLights.GetAFrameBBox_real(prop->sprLight.animationIdx, 0);
-				//Scalez dreptunghi lumina
+				
 				if (prop->fLightScaling != 1.0f)
 				{
 					CAABB realaabb;
@@ -1918,7 +1918,7 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 					realrect.left = realaabb.vMin.x; realrect.top = realaabb.vMin.y;
 					realrect.right = realaabb.vMax.x; realrect.bottom = realaabb.vMax.y;
 				}
-				//scriu VS-ul final
+				
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
 				Vec2 bpos2D = node->m_data.physPt->m_data.pos;
 				Vec3 bpos(node->m_data.physPt->m_data.pos.x, node->m_data.physPt->m_data.pos.y, 50.0f);
@@ -1926,12 +1926,11 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 				vur.pos = Vec3(bpos.x + realrect.right, bpos.y + realrect.top, 0.0f);
 				vdl.pos = Vec3(bpos.x + realrect.left, bpos.y + realrect.bottom, 0.0f);
 				vdr.pos = Vec3(bpos.x + realrect.right, bpos.y + realrect.bottom, 0.0f);
-				//setez culoarea
+				
 				float fLife = prop->fLightDuration;
 				float fFadeTime = prop->fLightFadeOut;
 
 				float alpha = 1.0f;
-				//la unele nu setez fLife deci ma intereseaza sa se vada
 				if (fLife > 0.0f)
 				{
 					if (prop->fLightTimer < fFadeTime)
@@ -1951,13 +1950,13 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 				vur.tex1 = Vec4(lTexRect.right, lTexRect.top, 0.0f, 0.0f);
 				vdl.tex1 = Vec4(lTexRect.left, lTexRect.bottom, 0.0f, 0.0f);
 				vdr.tex1 = Vec4(lTexRect.right, lTexRect.bottom, 0.0f, 0.0f);
-				//setez normalele finale
+
 				vul.n = bpos - vul.pos;
 				vur.n = bpos - vur.pos;
 				vdl.n = bpos - vdl.pos;
 				vdr.n = bpos - vdr.pos;
-				//construiesc VB-ul exact
-				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+
+				_VERTEX_PNCT4T4 lightRectV[6]; //tex2 - back buffer mapping, tex1-light spot
 				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
@@ -1965,7 +1964,7 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 			}
 		}
 
-		//get to next node
+		// get to next node
 		node = nextnode;
 	}
 	//inchid meshul
@@ -2078,7 +2077,7 @@ void CLevel::SetActorWeaponPerks(CActor * pActor, CWeapon * pWeapon)
 {
 	_ASSERT((pWeapon != null) && (pActor != null));
 
-	//reset actor template to initial one
+	// reset actor template to initial one
 	pActor->_template = pActor->_template_ini;
 
 	if (!pWeapon->_template.shTemplateOverwrite.IsEmpty())
@@ -2359,11 +2358,11 @@ CActor * CLevel::GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTa
 
 void CLevel::AddAIEvent(EAIEventType eventType, UINT32 ownerUID, int ownerClass, Vec2 vPos, float radius, float duration, UINT32 targetUID)
 {
-	//raza negativa inseamna infinita
+	// negative radius = infinite radius
 	if ((radius == 0.0f) || (duration <= 0.0f))
 		return; 
 	//vad daca am deja un event cu acelasi owner si acelasi event il suprascriu pe cel vechi ca sa nu fie mai multe
-	CAIEvent* nevt = null;
+	CAIEvent* nevt = nullptr;
 	//if owner is 0 means generic AI event (alert sounds)
 	if (ownerUID != 0)
 	{
@@ -2377,11 +2376,10 @@ void CLevel::AddAIEvent(EAIEventType eventType, UINT32 ownerUID, int ownerClass,
 			}
 		}
 	}
-	//daca nu am gasit atunci adaug unul nou
-	if (nevt == null)
+	// only add event if new
+	if (nevt == nullptr)
 	{
 		nevt = new CAIEvent();
-		//adaug eventul doar daca este unul nou
 		m_arrAIevents.Add(nevt);
 	}
 	//set event data

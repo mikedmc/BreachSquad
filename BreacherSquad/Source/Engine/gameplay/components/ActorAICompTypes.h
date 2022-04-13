@@ -256,17 +256,14 @@ const CStringHash EAIEventTypeNames[] = {
 class CAIEvent
 {
 public:
-	UINT32	ownerUID;  //cel care a lansat eventul. 0 - invalid/not set;
-	UINT32  targetUID;	// 0 -not set; folosit pentru eventuri targetate (GOT_SHOT, STUNNED, etc)
-	int		ownerClass;	//clasa celui care a facut eventul
-
-	EAIEventType	nType;		//tipul eventului, include si cat de grav este
+	UINT32			ownerUID;   // UID of event raiser. 0 - invalid/not set;
+	UINT32			targetUID;	// 0 -not set; some events are targeted (GOT_SHOT, STUNNED, etc)
+	int				ownerClass;	// class of event raiser
+	EAIEventType	nType;		// event type
 	float			fRadius;
-	float			fDuration;	//durata event
+	float			fDuration;	
+	Vec2			pos;	
 
-	Vec2		pos;		//pozitia eventului
-
-	//CTOR/DTOR
 	CAIEvent() :
 		nType( K_LVL_AI_EVENT_NONE ),
 		ownerUID( 0 ), ownerClass( -1 ), targetUID( 0 ),
@@ -287,6 +284,7 @@ public:
 		fDuration = duration;
 		targetUID = evtTargetUID;
 	}
+
 	void Reset()
 	{
 		nType = K_LVL_AI_EVENT_NONE;
