@@ -414,6 +414,7 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 		break;
 		//unknown or no AI state
 		default:
+			// no need for alerts
 			break;
 	}
 

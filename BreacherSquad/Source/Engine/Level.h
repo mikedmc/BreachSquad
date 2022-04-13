@@ -176,13 +176,6 @@ public:
 	CProp*					SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFrameIdx);
 	// Spawns a light
 	CLight*					SpawnLight(Vec3 spawnPos, eLightType eType, DWORD dwColor, float fRadius = 64.0f, int profileID = 0, bool bCastShadows = false);
-	// Gives a score for the user powerups placement 
-	// \brief: used to move player spawned objects away from intersections with other interactibles and walls
-	int						GetPowerupPlacingScore(CProp * active, Vec2 vPlacerPos);
-	// Finds the best spawning rect for a proposed position
-	// \returns false when can't be spawned safely
-	// \param rectProposed_ret - the proposed placing rectangle
-	bool					GetBestSpawningPos(Vec2 * vSpawn_ret, CAABB rectStart, CAABB * rectToAvoid = NULL);
 	///--- LIGHTS ---
 	CArray<CLight*> m_arrLights;				//array of lights
 	DWORD					m_colAmbientGlobal;			//global ambient color

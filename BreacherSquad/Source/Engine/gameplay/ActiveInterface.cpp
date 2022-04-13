@@ -3,13 +3,14 @@
 
 
 
-IActiveInterface::IActiveInterface() : 
-	ID(-1), targetID_ini(-1), bEnabled(true), bSetEnabled(true), bSkipRender(false), bAnimated(false),
-	AIstate(K_AI_STATE_UNDEFINED), 
-	color(0xffffffff), color_ini(0xffffffff),
-	bTouching(false), nTouchingUID(0),
-	pTarget(null), bCanInteract(false), bHideInteractIcon(false),
-	bPendingKill(false), pArea(nullptr), heightZ(K_WALL_HEIGHT_WORLD)
+IActiveInterface::IActiveInterface() :
+	ID( -1 ), targetID_ini( -1 ), bEnabled( true ), bSetEnabled( true ), bSkipRender( false ), bAnimated( false ),
+	AIstate( K_AI_STATE_UNDEFINED ),
+	color( 0xffffffff ), color_ini( 0xffffffff ),
+	bTouching( false ), nTouchingUID( 0 ),
+	pTarget( nullptr ), bCanInteract( false ), bHideInteractIcon( false ),
+	bPendingKill( false ), pArea( nullptr ), heightZ( K_WALL_HEIGHT_WORLD ),
+	_refCntP( 0 )
 {
 	UID = GenerateUID();
 
@@ -22,6 +23,21 @@ IActiveInterface::IActiveInterface() :
 IActiveInterface::~IActiveInterface()
 {
 	varAIparams.DeleteAll();
+}
+
+IActiveInterface* IActiveInterface::GetRef()
+{
+	++_refCntP; return this;
+}
+
+void IActiveInterface::FreeRef()
+{
+	if ( _refCntP > 0 ) _refCntP--;
+}
+
+bool IActiveInterface::GetCanBeReleased()
+{				   
+	return ((_refCntP == 0) && (bPendingKill == true));
 }
 
 void IActiveInterface::LoadLogic(FILE* fl)
@@ -115,7 +131,11 @@ bool IActiveInterface::IsAlive()
 
 void IActiveInterface::Kill()
 {
-	bPendingKill = true;
+	if ( bPendingKill == false )
+	{
+		bPendingKill = true;
+		EndPlay();
+	}
 }
 
 void IActiveInterface::StartScript( WCHAR* scriptName )

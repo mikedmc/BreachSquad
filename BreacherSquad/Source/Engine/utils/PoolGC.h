@@ -1,4 +1,5 @@
 #pragma once
+#include "dxstdafx.h"
 // Author: DMC
 
 template< class type >

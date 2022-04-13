@@ -419,9 +419,6 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 		pPlayerActor[nPlayerOrdinal]->nControllerInstanceID = m_arrPlayerControllersIIDs[nPlayerOrdinal];
 	}
 
-	//save last safe position as spawn position
-	m_arrPlayerLastSafePos[nPlayerOrdinal] = spawnPos;
-
 	//update backup template
 	nact->_template_ini = nact->_template;
 
@@ -561,7 +558,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 
 	nact->EquipWeapon( K_WPNSLOT_PRIMARY );
 	// initialize AI
-	Actor_SetAIState(nact, nact->_template.AItemplate->GetAIStateByName(nact->_template.shAIState_ini));
+	nact->SetAIState( nact->_template.AItemplate->GetAIStateByName( nact->_template.shAIState_ini ) );
 	// prepare actor for play after everything is loaded and set up
 	nact->PostConstructionInit();
 	//finish up adding the actor
@@ -576,7 +573,7 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 {
 	_ASSERT(pArea != nullptr);
 
-	CProp* obj = new CProp();
+	CProp* obj = new CProp(new CPropAIComponent());
 
 	obj->ID = GenerateNextID();
 	//pozitia
@@ -627,13 +624,13 @@ CProp* CLevel::SpawnProp(CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFr
 	// add to specified area
 	obj->PostConstructionInit();
 	pArea->m_arrProps.Add(obj);
-
+	obj->BeginPlay();
 	return obj;
 }
 
 CLight*	CLevel::SpawnLight(Vec3 spawnPos, eLightType eType, DWORD dwColor, float fRadius, int profileID, bool bCastShadows)
 {
-	CLight *nl = new CLight();
+	CLight *nl = new CLight(new CLightAIComponent());
 	nl->ID = GenerateNextID();
 	nl->type = eType;
 	nl->fVolumeAlpha = 1.0f;
@@ -654,132 +651,8 @@ CLight*	CLevel::SpawnLight(Vec3 spawnPos, eLightType eType, DWORD dwColor, float
 	nl->PostConstructionInit();
 	//add light and return it
 	m_arrLights.Add(nl);
+	nl->BeginPlay();
 	return nl;
-}
-
-int CLevel::GetPowerupPlacingScore(CProp* active, Vec2 vPlacerPos)
-{
-	//find a new position if necessary
-	int nScore = 0;
-
-	//no lign of sight
-	if (!IsLineOfSight(vPlacerPos, active->bbox.vCenter))
-	{
-		nScore -= 100;
-		return nScore;
-	}
-
-	//is it floating?
-	bool bFloating = true;
-	CCollisionShape* pCol = GetCollisionShapeAt(active->pos.xy);
-	if(pCol != null)
-	{
-		if ((pCol->type == K_LVL_COLL_TYPE_SOLID) || (pCol->type == K_LVL_COLL_TYPE_BOX) || (pCol->type == K_LVL_COLL_TYPE_LADDER))
-		{
-			bFloating = false;
-		}
-	}
-	if (bFloating)
-	{
-		nScore -= 100;
-		return nScore;
-	}
-	//interactible active
-	for (int kk = 0; kk < m_visibleList.logic_props_closeby.nCount; kk++)
-	{
-		CProp* pActiv = m_visibleList.logic_props_closeby.m_pData[kk];
-		if (!pActiv->bCanInteract)
-			continue;
-		if (pActiv == active)
-			continue;
-
-		if (pActiv->bbox.Intersects(active->bbox))
-			nScore--;
-	}
-	//interactible actors
-	for (int kk = 0; kk < m_visibleList.logic_actors_closeby.nCount; kk++)
-	{
-		CActor* pAct = m_visibleList.logic_actors_closeby.m_pData[kk];
-		if (!pAct->bCanInteract)
-			continue;
-
-		if (pAct->bbox.Intersects(active->bbox))
-			nScore--;
-	}
-	//#TODO: check intersection with ladders and walls too
-
-	return nScore;
-}
-
-bool CLevel::GetBestSpawningPos(Vec2 * vSpawn_ret, CAABB rectStart, CAABB * rectToAvoid)
-{
-	if (vSpawn_ret == null)
-		return false;
-
-	//#TODO: make sure we don't spawn under an elevator and return false if all spawn positions return under the elevator
-
-	///--- find best spawn position ---
-	Vec2 vSpawnFinal(rectStart.vCenter.x, rectStart.vMax.y);
-	Vec2 spawnPos = vSpawnFinal;
-	//try a few times to the left and right and compute score
-	int nPlaceScore = -100000;
-	for (int kk = 0; kk < 8; kk++)
-	{
-		int nScore = 0;
-		int offx = ((kk / 2) * (((kk % 2) * 2) - 1)) * K_TILE_HSIZE;
-		Vec2 vCheck(spawnPos.x + (float)offx, spawnPos.y);
-		CAABB rectCheck = rectStart;
-		rectCheck.Move(Vec2((float)offx, 0.0f));
-		//deform it a little
-		rectCheck.Inflate(4.0f, -2.0f);
-
-		//not direct line of sight? fail
-		if (!IsLineOfSight(rectCheck.vCenter, rectStart.vCenter))
-			continue;
-
-		//try to avoid the other box
-		if ((rectToAvoid != null) && (rectToAvoid->Intersects(rectCheck)))
-			nScore -= 25;
-
-		CCollisionShape* col = null;
-		//prefer both feet on ground
-		col = GetCollisionShapeAt(Vec2(vCheck.x + 6.0f, vCheck.y + 1.0f));
-		if (col == null)
-			nScore -= 50;
-		col = GetCollisionShapeAt(Vec2(vCheck.x - 6.0f, vCheck.y + 1.0f));
-		if (col == null)
-			nScore -= 50;
-		//prefer not intersecting geometry
-		if (ColShape_CAABB_Intersect_Arr(rectCheck, m_visibleList.logic_colShapes.m_pData, m_visibleList.logic_colShapes.Count()) != null)
-			nScore -= 100;
-
-		if (nScore > nPlaceScore)
-		{
-			nPlaceScore = nScore;
-			vSpawnFinal = vCheck;
-		}
-	}
-
-	//make sure we have both feet on solid ground
-	CCollisionShape* col = GetCollisionShapeAt(Vec2(vSpawnFinal.x + 5.0f, vSpawnFinal.y + 1.0f));
-	if (col == null)
-		col = GetCollisionShapeAt(Vec2(vSpawnFinal.x - 5.0f, vSpawnFinal.y + 1.0f));
-	if ((col != null) && (col->type == K_LVL_COLL_TYPE_SOLID))
-	{
-		//very narrow bbox, center on it
-		if (col->bbox.vSize.x < K_TILE_SIZE)
-			vSpawnFinal.x = col->bbox.vCenter.x;
-		else
-		{
-			if (vSpawnFinal.x < col->bbox.vMin.x + 5.0f)
-				vSpawnFinal.x = col->bbox.vMin.x + 5.0f;
-			else if (vSpawnFinal.x > col->bbox.vMax.x - 5.0f)
-				vSpawnFinal.x = col->bbox.vMax.x - 5.0f;
-		}
-	}
-	//return position
-	*vSpawn_ret = vSpawnFinal;
-	return true;
 }
 
 
@@ -832,7 +705,6 @@ CLevel::CLevel()
 		m_arrPlayerControllersIIDs[kk] = -1; //init player controllers array on no controller
 		m_arrPlayerSelHotJoin[kk] = -1;
 		m_arrPlayerSelStrategic[kk] = -1;
-		m_arrPlayerLastSafePos[kk] = Vec2(0.0f, 0.0f);
 	}
 
 	vLastSpawnPoint = Vec2(0.0f, 0.0f);
@@ -2152,12 +2024,13 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 	m_bufferedPainter.EndMesh();
 	*/
 
-	//4. poligoane fow
+	//4. FOW Fog of War
+	/*
 	m_bufferedPainter.BeginMesh(m_fogofwarMeshIdx);
 
 	for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
 	{
-		if (m_visibleList.logic_colShapesSpecial.m_pData[kk]->type == K_LVL_COLL_TYPE_FOG_OF_WAR)
+		if (m_visibleList.logic_colShapesSpecial.m_pData[kk]->nType == K_LVL_COLL_TYPE_FOG_OF_WAR)
 		{
 			CCollisionShape * col = m_visibleList.logic_colShapesSpecial.m_pData[kk];
 			CAABB wbb; //bbox
@@ -2194,7 +2067,7 @@ void CLevel::BuildDynamicGeometry(CAABB camAABB)
 	}
 	//inchid meshul apelor
 	m_bufferedPainter.EndMesh();
-
+	*/
 	///--- build buffered painter buffers ---
 	m_bufferedPainter.BuildBuffers();
 
@@ -2545,10 +2418,8 @@ void CLevel::CleanupDeadObjects()
 		// check props lifetime
 		for (int kk = area->m_arrProps.GetSize() - 1; kk >= 0; kk--)
 		{
-			if (area->m_arrProps[kk]->IsPendingKill())
+			if (area->m_arrProps[kk]->GetCanBeReleased())
 			{
-				// call framework end play
-				area->m_arrProps[kk]->EndPlay();
 				// remove from array, call dtor
 				SAFE_DELETE(area->m_arrProps[kk]);
 				area->m_arrProps.Remove(kk);
@@ -2559,20 +2430,8 @@ void CLevel::CleanupDeadObjects()
 	//check actors
 	for (int kk = m_arrActors.GetSize() - 1; kk >= 0; kk--)
 	{
-		///--- must kill actor! - last thing in update - dezalocari finale ---
-		if (m_arrActors[kk]->IsPendingKill())
+		if ( m_arrActors[ kk ]->GetCanBeReleased())
 		{
-			CActor* act = m_arrActors[kk];
-			// call framework end play
-			act->EndPlay();
-			//#HACK: make sure we don't keep pointer to actor - should be replaced by weak_ptr
-			for (int i = 0; i < m_arrActors.GetSize(); i++)
-			{
-				if (m_arrActors[i]->m_AIsensorInfo.pTargetedActor == act)
-				{
-					m_arrActors[i]->m_AIsensorInfo.pTargetedActor = NULL;
-				}
-			}
 			// now release it (destructor)
 			SAFE_DELETE(m_arrActors[kk]);
 			m_arrActors.Remove(kk);
@@ -2582,9 +2441,8 @@ void CLevel::CleanupDeadObjects()
 	//check lights
 	for ( int kk = m_arrLights.GetSize() - 1; kk >= 0; kk-- )
 	{
-		if ( m_arrLights[ kk ]->IsPendingKill() )
+		if ( m_arrLights[ kk ]->GetCanBeReleased() )
 		{
-			m_arrLights[ kk ]->EndPlay();
 			SAFE_DELETE( m_arrLights[ kk ] );
 			m_arrLights.Remove( kk );
 		}
@@ -2626,19 +2484,19 @@ void CLevel::UpdateAI(float dTime, bool bInEditor)
 			continue;
 		for (int kk = area->m_arrProps.GetSize() - 1; kk >= 0; kk--)
 		{
-			area->m_arrProps[ kk ]->Update( dTime );
+			area->m_arrProps[ kk ]->Update( dTime, *this );
 		}
 	}
 	//#TODO: only update lights and col shapes in activated areas
 	//check lights
 	for ( int kk = 0; kk < m_arrLights.GetSize(); kk++ )
 	{
-		m_arrLights[ kk ]->Update( dTime );
+		m_arrLights[ kk ]->Update( dTime, *this );
 	}
 	//check collision boxes
 	for ( int kk = m_arrColShapes.GetSize() - 1; kk >= 0; kk-- )
 	{
-		m_arrColShapes[ kk ]->Update( dTime );
+		m_arrColShapes[ kk ]->Update( dTime, *this );
 	}
 
 	//check actors - must be done after moving platforms (usually last is best)
@@ -2883,15 +2741,15 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 							if (bCheckSpawn)
 							{
 								//spawn pos
-								Vec2 vSpawnPos = m_arrPlayerLastSafePos[plidx];
+								Vec2 vSpawnPos = pPlayerActor[ plidx ]->pos.xy;
 								CAABB aabbSpawn;
-								CAABB* p_aabbPeer = null;
+								CAABB* p_aabbPeer = nullptr;
 								aabbSpawn.Set(vSpawnPos.x - 5.0f, vSpawnPos.y - 22.0f, vSpawnPos.x + 5.0f, vSpawnPos.y);
 
 								int nOtherPlayerIdx = (plidx + 1) % K_MAX_PLAYERS_CNT;
 								bool bSpawnIt = false;
 								//always spawn near the other player when COOP
-								if ((pPlayerActor[nOtherPlayerIdx] != null) && (pPlayerActor[nOtherPlayerIdx]->collisionFlags & K_DIRFLAG_DOWN))
+								if ((pPlayerActor[nOtherPlayerIdx] != nullptr) && (pPlayerActor[nOtherPlayerIdx]->collisionFlags & K_DIRFLAG_DOWN))
 								{
 									//only spawn if player is there
 									EAIBehaviorType eOtherBehave = pPlayerActor[nOtherPlayerIdx]->GetCurrentBehavior();
@@ -2903,7 +2761,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 										bSpawnIt = true;
 									}
 								}
-								else if (pPlayerActor[nOtherPlayerIdx] == null)
+								else if (pPlayerActor[nOtherPlayerIdx] == nullptr)
 								{
 									bSpawnIt = true;
 								}
@@ -2925,7 +2783,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 										bNeverPlayed = true;
 									
 									//spawn it
-									if (GetBestSpawningPos(&vSpawnPos, aabbSpawn, p_aabbPeer))
+									//if (GetBestSpawningPos(&vSpawnPos, aabbSpawn, p_aabbPeer))
 									{
 										SpawnPlayer(vSpawnPos, plidx);
 									}
@@ -4012,9 +3870,6 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 	///--- ACTIVES ---
 	UpdateAI(dTime, g_editor.IsLaunched());
 
-	///--- release dead objects all at once here ---
-	//(called before BuildVisibilityLists but after bullets,physics updates because it deallocates stuff from visibility lists)
-	CleanupDeadObjects();
 
 	///--- STATISTICS ---
 	//active players
@@ -5092,16 +4947,6 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	IActiveInterface * pLastPaintedTarget = null; //pointer la ultimul activ caruia i-am desenat interfata ca sa nu o desenez de 2 ori
 	for (int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++)
 	{
-
-#if defined(_DEBUG) || defined(DEBUG)
-		//respawn point painting
-		if ((pPlayerActor[kk] != null) && (pPlayerActor[kk]->fLife <= 0.0f))
-		{
-			if (m_arrStats[K_LVL_STATS_PL1_LIVES + pPlayerActor[kk]->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT] > 0)
-				CSprite::paintFrame(&m_sprInterface, m_arrPlayerLastSafePos[kk].x, m_arrPlayerLastSafePos[kk].y - 10.0f - 5.0f * sin(fLocalTimeline * 4.0f), ANM_IGM_INTERFACE_SPR_PLAYER_NR_ICONS, kk);
-		}
-#endif
-
 		if ((pPlayerActor[kk] == null) || (pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_PLAYER_CONTROL))
 			continue;
 
@@ -5869,7 +5714,9 @@ void CLevel::GenerateEffect(CStringHash sEffectName, Vec2 pos, float fSize, DWOR
 
 void CLevel::GC()
 {
-
+	// called just once in a while, maybe every 2 seconds
+	///--- release dead objects all at once here ---
+	CleanupDeadObjects();
 }
 
 void CLevel::TouchClosestActive(CActor * pToucherAct, float dTime)

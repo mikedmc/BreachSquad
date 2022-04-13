@@ -101,7 +101,7 @@ void CLevel::ReleaseBulletType(int nBulletType, UINT32 nOwnerUID)
 void CLevel::UpdateBullets(float dTime)
 {
 	static _VERTEX_PNCT4T4 arrBulletsTris[K_LVL_BULLETS_MAX_CNT * 6];
-	//mesh dinamic pentru gloante
+	// builds a dynamic mesh for the bullets
 	m_bulletsMeshIdx = -1;
 	int nBulletsTrisCnt = 0;
 
@@ -273,6 +273,9 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 			for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
 			{
 				CBullet* bullet = m_arrBullets[ kk ];
+				if ( bullet->bPendingKill )
+					continue;
+
 				//Vec2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 				//float ang = UTMath::GetVectorAngle(vdir);
 				bullet->sprBullet.pos = bullet->pos.xy_proj;
@@ -287,6 +290,8 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 			for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
 			{
 				CBullet* bullet = m_arrBullets[ kk ];
+				if ( bullet->bPendingKill )
+					continue;
 				//Vec2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
 				//float ang = UTMath::GetVectorAngle(vdir);
 				UTSprite::PaintFModule(bullet->sprBullet.pSprCol, bullet->pos.xy, bullet->sprBullet.animIdx, bullet->sprBullet.frameIdx, 0, 0xaa000000);
@@ -298,6 +303,8 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 			for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
 			{
 				CBullet* bullet = m_arrBullets[ kk ];
+				if ( bullet->bPendingKill )
+					continue;
 				UTSprite::PaintFModule(bullet->sprBullet.pSprCol, bullet->pos.xy_proj, bullet->fidLight.animIdx, bullet->fidLight.frameIdx, 0);
 			}
 		}

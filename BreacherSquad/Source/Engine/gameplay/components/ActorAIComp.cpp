@@ -48,7 +48,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			//save in memory
 			m_AIsensorInfo.m_AIlastEvent = m_AIsensorInfo.m_AIcurrentEvent;
 			//reset targeted actor
-			m_AIsensorInfo.pTargetedActor = null;
+			m_AIsensorInfo.pTargetedActor = nullptr;
 			///THINK: force state decision
 			CAIState* newState = act._template.AItemplate->GetHighestPriorityState( K_LVL_AI_EVENT_DEAD, &level.m_rand );
 			Actor_SetAIState( act, newState );
@@ -57,7 +57,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 	else //process low freq sensors only if no message from realtime sensors (more important)
 	{
 		bool bIgnoreAIEvents = false;
-		if ( (m_pAIcurrentState != null) && (m_nAIcurrentBehaviorIdx >= 0) )
+		if ( (m_pAIcurrentState != nullptr) && (m_nAIcurrentBehaviorIdx >= 0) )
 			bIgnoreAIEvents = m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ].bIgnoreEvents;
 
 		///HIGH FREQUENCY SENSORS
@@ -86,7 +86,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					level.AddAIEvent( K_LVL_AI_EVENT_SOUND_THREAT, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), 200.0f, 0.6f );
 				//set target pointer
 				m_AIsensorInfo.pTargetedActor = targetActor;
-				//vede daca face overlap
+				// enemies overlapping
 				/*
 				if (act.bbox.Intersects(targetActor->bbox))
 				{
@@ -104,18 +104,18 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			else
 			{
 				//reset targeted actor
-				if ( m_AIsensorInfo.pTargetedActor != null )
+				if ( m_AIsensorInfo.pTargetedActor != nullptr )
 				{
 					//sterg mesaj de see enemy pt actorul curent
 					level.DeleteAITargetedEvent( K_LVL_AI_EVENT_SEE_ENEMY, act.GetUID() );
 					//Trimit mesaj de LOST_ENEMY
 					level.AddAIEvent( K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, act.GetPosHeart() + Vec2( 16.0f, 0.0f ), 16.0f, 1.0f, act.GetUID() );
 					//reset targeting actor
-					m_AIsensorInfo.pTargetedActor = null;
+					m_AIsensorInfo.pTargetedActor = nullptr;
 				}
 
 				//#HACK: uneori e lovit dar nu apuca sa vada inamicul si ramane blocat ca nu primeste LOST_ENEMY asa ca il trimitem acum
-				if ( (m_AIsensorInfo.pTargetedActor == null) && (m_AIsensorInfo.m_AIlastEvent.nType == K_LVL_AI_EVENT_GOT_HIT) )
+				if ( (m_AIsensorInfo.pTargetedActor == nullptr) && (m_AIsensorInfo.m_AIlastEvent.nType == K_LVL_AI_EVENT_GOT_HIT) )
 				{
 					//put event behind him
 					level.AddAIEvent( K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, act.GetPosHeart() - Vec2( 16.0f, 0.0f ), 16.0f, 0.5f, act.GetUID() );
@@ -125,7 +125,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			///--- select best event ---
 			CAIEvent* evt = GetMostImportantAIEvent( act );
 
-			if ( evt != null )
+			if ( evt != nullptr )
 			{
 				m_AIsensorInfo.m_AIcurrentEvent = *evt;
 			}
@@ -144,7 +144,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				CAIState* newState = act._template.AItemplate->GetHighestPriorityState( m_AIsensorInfo.m_AIcurrentEvent.nType, &level.m_rand );
 
 				//daca vechea stare a fost setata de acelasi mesaj ca si acum si nu are prioritate mai mica nu ar mai trebui setata alta stare ci cel mult dat restart la starea curenta
-				if ( (newState != null) && (m_AIsensorInfo.m_AIlastEvent.nType == m_AIsensorInfo.m_AIcurrentEvent.nType) && (newState->nPriority == m_pAIcurrentState->nPriority) )
+				if ( (newState != nullptr) && (m_AIsensorInfo.m_AIlastEvent.nType == m_AIsensorInfo.m_AIcurrentEvent.nType) && (newState->nPriority == m_pAIcurrentState->nPriority) )
 				{
 					//#MAYBE: reset current behavior if it's the same state?
 				}
@@ -167,7 +167,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 	bool bBehaviorFinished = false;
 
 	bool bSkipAI = false;
-	if ( (m_pAIcurrentState == null) || (m_nAIcurrentBehaviorIdx < 0) || (act.fStunTimer > 0.0f) )
+	if ( (m_pAIcurrentState == nullptr) || (m_nAIcurrentBehaviorIdx < 0) || (act.fStunTimer > 0.0f) )
 		bSkipAI = true;
 
 	if ( bBehaviorDurationFinished )
@@ -209,7 +209,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			{
 				CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID( act.nControllerInstanceID );
 				//controller not set or removed, skipping AI
-				if ( (pController == null) || (pController->nFlags & K_CM_CTRLR_FLAG_PAUSED) || (act.bSuspendInput) )
+				if ( (pController == nullptr) || (pController->nFlags & K_CM_CTRLR_FLAG_PAUSED) || (act.bSuspendInput) )
 				{
 					//HitActor(actor, -1.0f, 0, 100, K_LVL_ACT_CLASS_TRAP);
 					break;
@@ -316,7 +316,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				//can he follow targets? does it only once
 				if ( AIvarBool1 )
 				{
-					if ( m_AIsensorInfo.pTargetedActor != null )
+					if ( m_AIsensorInfo.pTargetedActor != nullptr )
 					{
 						//play the verse only once
 						if ( AIsubState == 0 )
@@ -377,7 +377,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				if ( act._template.actorClass == K_LVL_ACT_CLASS_PLAYER )
 				{
 					CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID( act.nControllerInstanceID );
-					if ( pController != null )
+					if ( pController != nullptr )
 					{
 						//daca apesi st/dr se intoarce cu fatza in directia respectiva
 						bool bPressedRight = (pController->GetAxisVal( K_CM_COMMAND_MOVE_X ) > 0.0f);
@@ -772,19 +772,16 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 {
 	//by default all states need update
 	ret_bFinished = false;
-	//daca starea e null sau index negativ, sau daca starea nu are behaviors
-	if ( (nBehaviorIdx < 0) || (m_pAIcurrentState == null) || (m_pAIcurrentState->m_arrBehaviors.nCount <= 0) )
+	if ( (nBehaviorIdx < 0) || (m_pAIcurrentState == nullptr) || (m_pAIcurrentState->m_arrBehaviors.nCount <= 0) )
 	{
 		m_nAIcurrentBehaviorIdx = -1;
 		ret_bFinished = true;
 		return false;
 	}
 
-	//daca e valida
 	m_nAIcurrentBehaviorIdx = nBehaviorIdx % m_pAIcurrentState->m_arrBehaviors.nCount;
-	//setari initiale behavior
 	CAIBehavior* pNewBehavior = &m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ];
-	//reset behavior timer
+	// reset behavior timer
 	m_fAIbehaviorTimer = 0.0f;
 
 	m_AIcommands.Reset();
@@ -1306,9 +1303,6 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			}
 		}
 		break;
-		default:
-			ErrorBox( K_ERR_WARNING, L"CActorAIComponent::SetActorAIBehaviorIdx: Illegal behaviour!" );
-			break;
 	}
 
 	return true;

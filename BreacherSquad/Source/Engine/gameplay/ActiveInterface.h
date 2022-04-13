@@ -26,6 +26,7 @@ class IActiveInterface
 protected:
 	bool					bPendingKill;			// exited gameplay, waits for garbage collection
 	bool					bEnabled;				// sometimes the actives need to be disabled ( eg: after being killed )
+	int						_refCntP;				// pointers reference count. Don't deallocate until zero!
 
 public:
 	EAIstate				AIstate;				// state AI (AI_STATE ENUM)
@@ -42,6 +43,7 @@ public:
 	UINT32 					nTouchingUID;   		// Reprezinta UID-ul celui care a facut touch sau 0 pt niciunul
 													   
 	DWORD					color;
+	//#TODO: needs some kind of 3d bbox that has all these inside
 	float					heightZ;				// height in world coords
 	CAABB					bbox;					// full projected 2d bbox in screen space that surrounds the entire object (for culling mainly)
 	CAABB					bbox_ini;				// non relative to object position AABB used when moving the bbox with absolute values
@@ -52,7 +54,7 @@ public:
 	DWORD					color_ini;
 	INT32					targetID_ini;			// target ID read from the editor
 
-	IActiveInterface		*pTarget;				// target coming from the editor. Source of loose pointers!
+	IActiveInterface		*pTarget;				// target coming from the editor. Only get pointers through GetPtr()
 	bool					bCanInteract;			// can interact with it?  #TODO: replace with interact-type or actions list
 	bool					bHideInteractIcon;		// hide the icon //#TODO: remove this flag
 
@@ -69,30 +71,38 @@ public:
 	virtual ~IActiveInterface();
 
 	virtual const EActiveInterfaceType GetClassType() const { return K_LVL_IAI_TYPE_BASE; }
-
-	inline UINT32			GetUID() const { return UID; }
+	
+	inline UINT32				GetUID() const { return UID; }
 	//Returns: UID of activ that interacted with it
-	inline UINT32			GetToucherUID() const { return nTouchingUID; }
+	inline UINT32				GetToucherUID() const { return nTouchingUID; }
 	// Tells if object is waiting to be deallocated
-	inline bool				IsPendingKill() { return bPendingKill; }	
+	inline bool					IsPendingKill() { return bPendingKill; }
+	// Gets pointer to object and increases ref count
+	IActiveInterface*			GetRef();
+	// Decreases reference count so active can be freed
+	void						FreeRef();
+	// Returns true if object can be released
+	bool						GetCanBeReleased();
 	// Loads logic from binary file (editor exported logic)
-	void					LoadLogic(FILE* fl);
+	void						LoadLogic(FILE* fl);
 	//functie care se cheama cand interactionezi cu obiectul sau cand este pTarget
-	void					Touch(UINT32 touchingIActiveUID, float dTime, UINT32 overrideScriptHash = 0, bool bTouchTarget = true);
+	void						Touch(UINT32 touchingIActiveUID, float dTime, UINT32 overrideScriptHash = 0, bool bTouchTarget = true);
 	// sets the enabled flag on/off
-	void					SetEnabled( bool enabled, bool forced = false );
+	void						SetEnabled( bool enabled, bool forced = false );
 	// toggles the enabled state
-	inline void				ToggleEnabled() { bSetEnabled = !bSetEnabled; }
+	inline void					ToggleEnabled() { bSetEnabled = !bSetEnabled; }
 	// true if not pending kill and not disabled
-	bool					IsAlive();
+	bool						IsAlive();
 	// Call this to mark it for destruction
-	void					Kill();
+	void						Kill();
 	// Starts a script sending AI params as script local vars
-	void					StartScript( WCHAR* scriptName );
-	void					StartScript( UINT32 scriptNameHash );
+	void						StartScript( WCHAR* scriptName );
+	void						StartScript( UINT32 scriptNameHash );
 	// Sets varAIparams. params = nullptr just clears the params
-	void					SetAIparams( CVariantCollection * params, bool bClearParams );
+	void						SetAIparams( CVariantCollection * params, bool bClearParams );
 public: 
+	// Sets the AI state (useless for actors)
+	virtual void			SetAI( EAIstate newstate ) = 0;
 	// completely sets position and all related data(pos, bbox, etc)
 	virtual void			SetPos(Vec3 newPos) = 0;
 	virtual void			Move(Vec3 delta) = 0;
@@ -102,6 +112,4 @@ public:
 	virtual void			BeginPlay() = 0;
 	// Gets called when gets killed
 	virtual void			EndPlay() = 0;
-	// Sets the AI state (useless for actors)
-	virtual void			SetAI( EAIstate newstate ) = 0;
 };
