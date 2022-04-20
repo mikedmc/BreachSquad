@@ -809,50 +809,89 @@ void wcs_replace( WCHAR* o_string, WCHAR* s_string, WCHAR* r_string )
 	return wcs_replace( o_string, s_string, r_string );
 }
 
-void CVariantComplex::Serialize(FILE *f)
+bool CVariantComplex::Serialize(FILE *fl)
 {
-	OS_fwrite(&m_type, sizeof(m_type), 1, f);
-	OS_fwriteWString(f, m_name.text);
+	OS_fwrite(&m_type, sizeof(m_type), 1, fl);
+	OS_fwriteWString(fl, m_name.text);
 
 	switch (m_type)
 	{
 	case CVariantComplex::K_ARGTYPE_INT32:
-		OS_fwrite(&m_asINT32, sizeof(INT32), 1, f);
+		OS_fwrite(&m_asINT32, sizeof(INT32), 1, fl);
 		break;
 
 	case CVariantComplex::K_ARGTYPE_FLOAT:
-		OS_fwrite(&m_asFloat, sizeof(FLOAT), 1, f);
+		OS_fwrite(&m_asFloat, sizeof(FLOAT), 1, fl);
 		break;
 
 	case CVariantComplex::K_ARGTYPE_BOOL:
-		OS_fwrite(&m_asBool, sizeof(bool), 1, f);
+		OS_fwrite(&m_asBool, sizeof(bool), 1, fl);
 		break;
 
 	case CVariantComplex::K_ARGTYPE_UINT32:
-		OS_fwrite(&m_asUINT32, sizeof(UINT32), 1, f);
+		OS_fwrite(&m_asUINT32, sizeof(UINT32), 1, fl);
 		break;
 
 	case CVariantComplex::K_ARGTYPE_STRING:
-		OS_fwriteWString(f, m_strArg.text);
+		OS_fwriteWString(fl, m_strArg.text);
 		break;
 	}
+
+	return true;
 }
 
-CVariantComplex* CVariantComplex::Deserialize(FILE *f)
+bool CVariantComplex::Deserialize(FILE* fl)
 {
 	WCHAR name[K_MAX_STRINGHASH_LEN];
 	WCHAR strVal[K_MAX_STRINGHASH_LEN];
 	CVariantComplex::ArgumentType t;
 
-	OS_fread(&t, sizeof(t), 1, f);
-	OS_freadWString(f, name);
+	OS_fread(&t, sizeof(t), 1, fl);
+	OS_freadWString(fl, name);
+
+	switch ( t )
+	{
+	case CVariantComplex::K_ARGTYPE_INT32:
+		Set_INT32(name, OS_freadInt32(fl));
+		return true;
+
+	case CVariantComplex::K_ARGTYPE_FLOAT:
+		Set_FLOAT(name, OS_freadFloat32(fl));
+		return true;
+
+	case CVariantComplex::K_ARGTYPE_BOOL:
+		Set_BOOL(name, OS_freadBool(fl));
+		return true;
+
+	case CVariantComplex::K_ARGTYPE_UINT32:
+		Set_UINT32(name, OS_freadUInt32(fl));
+		return true;
+
+	case CVariantComplex::K_ARGTYPE_STRING:
+		OS_freadWString(fl, strVal);
+		Set_STRING(name, strVal);
+		return true;
+	}
+
+	return false;
+}
+
+
+CVariantComplex* CVariantComplex::DeserializeAlloc(FILE *fl)
+{
+	WCHAR name[K_MAX_STRINGHASH_LEN];
+	WCHAR strVal[K_MAX_STRINGHASH_LEN];
+	CVariantComplex::ArgumentType t;
+
+	OS_fread(&t, sizeof(t), 1, fl);
+	OS_freadWString(fl, name);
 
 	switch (t)
 	{
 		case CVariantComplex::K_ARGTYPE_INT32:
 		{
 			CVariantComplex *nvc = new CVariantComplex();
-			nvc->Set_INT32(name, OS_freadInt32(f));
+			nvc->Set_INT32(name, OS_freadInt32(fl));
 			return nvc;
 		}
 		break;
@@ -860,7 +899,7 @@ CVariantComplex* CVariantComplex::Deserialize(FILE *f)
 		case CVariantComplex::K_ARGTYPE_FLOAT:
 		{
 			CVariantComplex *nvc = new CVariantComplex();
-			nvc->Set_FLOAT(name, OS_freadFloat32(f));
+			nvc->Set_FLOAT(name, OS_freadFloat32(fl));
 			return nvc;
 		}
 		break;
@@ -868,7 +907,7 @@ CVariantComplex* CVariantComplex::Deserialize(FILE *f)
 		case CVariantComplex::K_ARGTYPE_BOOL:
 		{
 			CVariantComplex *nvc = new CVariantComplex();
-			nvc->Set_BOOL(name, OS_freadBool(f));
+			nvc->Set_BOOL(name, OS_freadBool(fl));
 			return nvc;
 		}
 		break;
@@ -876,7 +915,7 @@ CVariantComplex* CVariantComplex::Deserialize(FILE *f)
 		case CVariantComplex::K_ARGTYPE_UINT32:
 		{
 			CVariantComplex *nvc = new CVariantComplex();
-			nvc->Set_UINT32(name, OS_freadUInt32(f));
+			nvc->Set_UINT32(name, OS_freadUInt32(fl));
 			return nvc;
 		}
 		break;
@@ -884,7 +923,7 @@ CVariantComplex* CVariantComplex::Deserialize(FILE *f)
 		case CVariantComplex::K_ARGTYPE_STRING:
 		{
 			CVariantComplex *nvc = new CVariantComplex();
-			OS_freadWString(f, strVal);
+			OS_freadWString(fl, strVal);
 			nvc->Set_STRING(name, strVal);
 			return nvc;
 		}
@@ -893,6 +932,7 @@ CVariantComplex* CVariantComplex::Deserialize(FILE *f)
 
 	return nullptr;
 }
+
 
 ///--- CComplexVariant NAMED COLLECTION ---
 //colectie cu nume pentru variants nume+valoare generala
@@ -997,7 +1037,7 @@ void CVariantCollection::Deserialize(CVariantCollection* vc, FILE *f)
 
 	for (int ii = 0; ii < nvars; ii++)
 	{
-		CVariantComplex* v = CVariantComplex::Deserialize(f);
+		CVariantComplex* v = CVariantComplex::DeserializeAlloc(f);
 		assert(v != NULL);
 		vc->m_variants.Add(v);
 	}
@@ -1134,7 +1174,6 @@ int CVariantCollection::SetNamedVarAUTO(const WCHAR* argName, WCHAR* strVal)
 #if defined(_DEBUG) || defined(DEBUG)
 void CVariantCollection::DumpDataToOutputWindow()
 {
-	//#TODO: aici ar trebui sa ia in considerare tipul variantului pentru output
 	for (int kk = 0; kk < m_variants.GetSize(); kk++)
 	{
 		DebugPrintFnW(L"%s=%d\n", m_variants[kk]->m_name.text, m_variants[kk]->m_asUINT32);

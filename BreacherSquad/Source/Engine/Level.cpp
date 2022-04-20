@@ -418,6 +418,11 @@ void CLevel::SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset)
 		pPlayerActor[nPlayerOrdinal]->nPlayerOrdinal = nPlayerOrdinal;
 		pPlayerActor[nPlayerOrdinal]->nControllerInstanceID = m_arrPlayerControllersIIDs[nPlayerOrdinal];
 	}
+	else 
+	{
+		ErrorBox(K_ERR_WARNING, L"Could not spawn actor!");
+		return;
+	}
 
 	//update backup template
 	nact->_template_ini = nact->_template;
@@ -483,8 +488,9 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	}
 
 	//copy template locally and customize it based on gear selection
-	CActorTemplate templateLocal = *acttemplate;
-	templateLocal.FillDefaultValuesIfNotSet();
+	CActorTemplate* templateLocal = new CActorTemplate();
+	*templateLocal = *acttemplate;
+	templateLocal->FillDefaultValuesIfNotSet();
 	///--- set weapons and gear modifiers ---
 	UINT32 namehash = 0;
 	//equipment	- add equipment template
@@ -538,7 +544,7 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	*/
 	// get weapons sprite lib and send it to the weapons component
 	CSpriteLib* pSprWpn = m_sprActors.GetLibByNick( K_LIBNICK_WEAPONS );
-	CActor* nact = new CActor(spawnPos, &templateLocal, GenerateNextID(), 
+	CActor* nact = new CActor(spawnPos, templateLocal, GenerateNextID(), 
 		new CSpriteActorComponent(&m_sprActors), 
 		new CWeaponsComponent(pSprWpn),
 		new CActorAIComponent(__Sim())
@@ -565,6 +571,8 @@ CActor* CLevel::SpawnActor(Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHas
 	m_arrActors.Add(nact);
 
 	nact->BeginPlay();
+
+	SAFE_DELETE(templateLocal);
 
 	return nact;
 }
@@ -2324,7 +2332,9 @@ CActor* CLevel::GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassF
 
 CActor * CLevel::GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTargetTemplateName, float fMaxDistance)
 {
-	CActor* retvalenemy = null;
+	_ASSERT(sourceActor != nullptr);
+
+	CActor* retvalenemy = nullptr;
 	UINT32 nTargetNameHash = FastHash(sTargetTemplateName);
 
 	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
@@ -2693,7 +2703,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 						}
 					}
 				}
-				else //daca nu e empty verific daca mai exista controllerul respectiv
+				else // controller not empty, check it
 				{
 					CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(m_arrPlayerControllersIIDs[plidx]);
 					if (ctrlr == null)
@@ -2722,7 +2732,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 								}
 							}
 						}
-						else if ((m_arrPlayerSelHotJoin[plidx] != -1) && (pPlayerActor[plidx] == null))
+						else if ((m_arrPlayerSelHotJoin[plidx] != -1) && (pPlayerActor[plidx] == nullptr))
 						{
 							bool bCheckSpawn = false;
 							//played before: spawn it immediately
@@ -2740,7 +2750,7 @@ void CLevel::UpdateFixedTimestep(float dTime_original)
 							if (bCheckSpawn)
 							{
 								//spawn pos
-								Vec2 vSpawnPos = pPlayerActor[ plidx ]->pos.xy;
+								Vec2 vSpawnPos = vLastSpawnPoint;
 								CAABB aabbSpawn;
 								CAABB* p_aabbPeer = nullptr;
 								aabbSpawn.Set(vSpawnPos.x - 5.0f, vSpawnPos.y - 22.0f, vSpawnPos.x + 5.0f, vSpawnPos.y);
@@ -4550,8 +4560,8 @@ OPRESULT CLevel::RenderPass_Lights(Mat* matProj, float fBetweenFramesPercent )
 
 	///--- IES lights without shadow
 	scTexture* pIESTex = m_sprLights.GetTextureByAnim(ANM_LIGHTS_SPR_IES, 0, 0);
-	if(pIESTex)
-		m_pDevice->SetTexture(1, pIESTex->pTex);
+	_ASSERT(pIESTex != nullptr);
+	m_pDevice->SetTexture(1, pIESTex->pTex);
 	m_pDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 	m_pDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 	// VS
@@ -4638,11 +4648,10 @@ OPRESULT CLevel::RenderPass_Composition( Mat* matProj, float fBetweenFramesPerce
 	Mat matWVP = matView * (*matProj);
 
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID(K_RTID_TEMP1);
-	if (pRTcolor != null)
-		m_pDevice->SetTexture(0, pRTcolor->m_pRTTexture);
 	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID(K_RTID_COLORDEPTHSTENCIL);
-	if (pRTlights != null)
-		m_pDevice->SetTexture(1, pRTlights->m_pRTTexture);
+	_ASSERT(pRTcolor != nullptr && pRTlights != nullptr);
+	m_pDevice->SetTexture(0, pRTcolor->m_pRTTexture);
+	m_pDevice->SetTexture(1, pRTlights->m_pRTTexture);
 
 	//--- build RT rect ---
 	_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
@@ -5164,7 +5173,7 @@ int CLevel::BuildLightVolume360(CLight * light, _VERTEX_PNCT4T4 *outVerts, int o
 		{
 			// are we still on the same tile, same kind of collision? take a step back and overwrite last value
 			
-			if ((tilePosTL == arrColl[arrCollCur - 1].tlPos) && (vRetNrm == arrColl[arrCollCur - 1].vNorm))
+			if ((arrCollCur == 0) || ((tilePosTL == arrColl[arrCollCur - 1].tlPos) && (vRetNrm == arrColl[arrCollCur - 1].vNorm)))
 				nSameSince++;
 			else
 				nSameSince = 0;

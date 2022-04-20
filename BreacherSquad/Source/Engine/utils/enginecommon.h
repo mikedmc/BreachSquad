@@ -440,9 +440,12 @@ public:
 		m_name.Init(o.m_name.text);
 		m_strArg.Init(o.m_strArg.text);
 	}
-
-	void Serialize(FILE *f);
-	static CVariantComplex* Deserialize(FILE *f);
+	// serializes to file and returns true for success
+	bool Serialize(FILE *fl);
+	// Deserializes variant from file and returns true for success
+	bool Deserialize(FILE* fl);
+	// Deserializes from file and returns allocated variant or nullptr
+	static CVariantComplex* DeserializeAlloc(FILE *f);
 
 	//constructors
 	CVariantComplex():
@@ -475,7 +478,7 @@ public:
 			m_asFloat = cv->m_asFloat;
 			m_strArg.Reset();
 		}
-		//defaults on UINT32 valabil pentru toate celelalte
+		//defaults on UINT32 which contains all the other ones
 		else
 		{
 			m_asUINT32 = cv->m_asUINT32;
@@ -648,7 +651,6 @@ public:
 };
 
 
-
 ///--- CComplexVariant NAMED COLLECTION ---
 //colectie cu nume de variants nume+valoare
 //TODO: oare ar fi bine sa folosesc Boost::CAny pt lista de variants ?
@@ -657,7 +659,7 @@ class CVariantCollection
 private:
 	CVariantComplex defaultVariant;
 public:
-	CStringHash		m_collectionName; //numele colectiei
+	CStringHash		m_collectionName; 
 	//script arguments
 	CArray<CVariantComplex*>		m_variants;
 	//ctor
@@ -748,7 +750,7 @@ public:
 	void DeleteAll();
 
 #if defined(_DEBUG) || defined(DEBUG)
-	//Scrie in fereastra de output toti params
+	// outputs all contents to console
 	void DumpDataToOutputWindow();
 #endif
 	//returneaza pointer la param default daca nu gasesc ce cauti
