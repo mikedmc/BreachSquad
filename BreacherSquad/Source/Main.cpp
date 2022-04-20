@@ -513,7 +513,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 //**************************************************************************************
 OPRESULT BeforeMount(void)
 {
- ///--- Load strings here so we can set the window name ---
+	///--- Load strings here so we can set the window name ---
 	if (OP_FAILED(App_LocaLoadLangList(UTApp().m_Settings.shLanguageAlias)))
 	{
 		ErrorBox(K_ERR_WARNING, L"[ERROR] Error loading strings list [texts/lang.xml]!");

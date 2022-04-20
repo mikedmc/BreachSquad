@@ -8,10 +8,43 @@
 ///----------------------------------------------------------------------------------
 template<typename TYPE> class CArray
 {
+	struct IteratorPtr
+	{
+		using iterator_category = std::forward_iterator_tag;
+		using difference_type = std::ptrdiff_t;
+		using value_type = TYPE;
+		using pointer = TYPE*;
+		using reference = TYPE&;
+
+		IteratorPtr(TYPE* ptr) : m_ptr(ptr) {}
+		reference operator*() const { return *m_ptr; }
+		// returns value of the contents when CType temp = *iterator;
+		pointer operator->() { return m_ptr; }
+		IteratorPtr& operator++() {
+			m_ptr++;
+			return *this;
+		}
+		IteratorPtr operator++(int) {
+			Iterator tmp = *this; ++( *this ); return tmp;
+		}
+
+		friend bool operator== (const IteratorPtr& a, const IteratorPtr& b) { return a.m_ptr == b.m_ptr; };
+		friend bool operator!= (const IteratorPtr& a, const IteratorPtr& b) { return a.m_ptr != b.m_ptr; };
+
+	private:
+		TYPE* m_ptr;
+	};
+
+	// iterator methods
+public:
+	IteratorPtr begin() { return IteratorPtr(&m_pData[0]); }
+	IteratorPtr end() { return IteratorPtr(&m_pData[m_nSize]); }
+
+
 public:
 	CArray()
 	{
-		m_pData = NULL; m_nSize = 0; m_nMaxSize = 0;
+		m_pData = nullptr; m_nSize = 0; m_nMaxSize = 0;
 	}
 	CArray( const CArray <TYPE>& a )
 	{
