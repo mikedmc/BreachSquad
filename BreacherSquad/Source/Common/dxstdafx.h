@@ -614,7 +614,6 @@ extern CStringHash			g_startupParam;
 
 //particles
 extern CTimersArray			g_timers;
-extern CParticlesManager	g_particlesMgr;
 extern CPlayerSelScr		g_playerSelScr;
 extern CSpineManager		g_spineMgr;
 

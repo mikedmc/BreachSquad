@@ -575,7 +575,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			//paint string dummies
 			/*
 			CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam240hScreen);
-			g_particlesMgr.PaintStringDummies();
+			__Particles().PaintStringDummies();
 			pSpr->Flush();
 			 */
 			 //debug stuff
@@ -713,8 +713,8 @@ OPRESULT CGame::OnDestroyDevice()
 ///**************************************************************************************
 CGame& __Game()
 {
-	static CGame __Game;
-	return __Game;
+	static CGame g_Game;
+	return g_Game;
 }
 
 CLevel& __Sim()

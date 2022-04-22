@@ -101,7 +101,9 @@ public:
 
 
 public:
-	inline const EActiveInterfaceType	GetClassType() const { return K_LVL_IAI_TYPE_ACTOR; }
+	inline const EActiveInterfaceType	GetClassType() const override { 
+		return K_LVL_IAI_TYPE_ACTOR; 
+	}
 	// Gets pointer to weapons component
 	inline CWeaponsComponent*			Weapons() { return c_weapons; }
 

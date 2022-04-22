@@ -37,7 +37,7 @@ enum eLightType {
 class CLight : public IActiveInterface
 {
 public:
-	const EActiveInterfaceType GetClassType() const {
+	const EActiveInterfaceType GetClassType() const override {
 		return K_LVL_IAI_TYPE_LIGHT;
 	}
 

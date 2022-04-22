@@ -296,7 +296,7 @@ void CSpr::PaintFModule(int moduleIdx)
 	s_pSP->Draw(mod->pImg->pTex, mod->texRect, mod->moduleRectOff, pos, color, rotation, scale);
 }
 
-void CSpr::PaintModule_texOverride(int moduleIdx, int texIdxOffset)
+void CSpr::PaintFModule_texOverride(int moduleIdx, int texIdxOffset)
 {
 	_ASSERT(animIdx < pSprCol->Animations.Count());
 	_ASSERT(frameIdx < pSprCol->Animations[animIdx]->aframesNo);

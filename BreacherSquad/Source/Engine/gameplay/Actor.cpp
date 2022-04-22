@@ -100,7 +100,7 @@ void CActor::SetAI( EAIstate newstate )
 
 bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 {
-	if (pActorTemplate == NULL)
+	if (pActorTemplate == nullptr)
 	{
 		ErrorBox(K_ERR_CRITICAL, L"Actor template is null for ID:%d!", this->ID);
 		return false;
@@ -261,7 +261,7 @@ VecProj CActor::GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 	MUVec2TransformCoord( &v_muzzle_vec, &v_muzzle_vec, &mrot );
 	Vec2 muzzle_proj = vp_mount.xy_proj + v_muzzle_vec;
 	// transform mount position from projected to 3d, knowing that it shoots at the heart height
-	return VecProj( muzzle_proj.x, muzzle_proj.y + Z_TO_H(_template.heartZ), _template.heartZ );
+	return { muzzle_proj.x, muzzle_proj.y + Z_TO_H(_template.heartZ), _template.heartZ };
 }
 
 void CActor::EquipWeapon( EWpnSlot wpnSlot )
@@ -554,7 +554,7 @@ void CActor::ProcessAICommands( CLevel& level )
 
 				if ( !UTApp().m_Settings.bGoreEnabled )
 				{
-					g_particlesMgr.GenerateEnemySoftGib( pos.xy_proj, 0xff32a7fa, K_PART_LAYER_RT_FRONT_NRM );
+					//__Particles().GenerateEnemySoftGib( pos.xy_proj, 0xff32a7fa, K_PART_LAYER_RT_FRONT_NRM );
 				}
 				else
 				{
@@ -585,7 +585,7 @@ void CActor::ProcessAICommands( CLevel& level )
 						level.AddDoofer( K_DOOFER_MEAT, GetPosHeart(), &Vec2( 200.0f, 50.0f ), &g_vecGravityOld, nSubType );
 						level.AddDoofer( K_DOOFER_MEAT, GetPosHeart(), &Vec2( -200.0f, 50.0f ), &g_vecGravityOld, nSubType );
 						//human blood gibs particle
-						g_particlesMgr.AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &pos.xy_proj, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_FRONT_NRM );
+						__Particles().AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &pos.xy_proj, nullptr, nullptr, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_FRONT_NRM );
 					}
 					else //small animals and stuff
 					{
@@ -593,7 +593,7 @@ void CActor::ProcessAICommands( CLevel& level )
 						{
 							level.AddDoofer( K_DOOFER_MEAT, AABB::GetRandomPointInBox( genbox ), &Vec2( randfloatsgn( 50.0f ) + bulletSpeed.x * 50.0f, -130.0f - randfloat( 100.0f ) ), &g_vecGravityOld );
 						}
-						g_particlesMgr.AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &pos.xy_proj, NULL, NULL, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM );
+						__Particles().AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &pos.xy_proj, nullptr, nullptr, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM );
 					}
 				}
 

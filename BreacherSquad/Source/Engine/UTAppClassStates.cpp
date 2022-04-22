@@ -191,7 +191,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			}
 			///--- particles ---
 			FileManager::GetMediaPath(L"media/particles/particles.bsx", xmlpath);
-			if (FAILED(g_particlesMgr.Init(xmlpath, 5000)))
+			if (FAILED(__Particles().Init(xmlpath, 5000)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load particles!");
 				return;

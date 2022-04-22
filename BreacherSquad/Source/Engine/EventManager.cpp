@@ -323,7 +323,7 @@ void CEventManager::Update(float dTime, float fTimeLine)
 #if defined(_DEBUG) || defined(DEBUG)
 		if(!eventHandled)
 		{
-			ErrorBox(K_ERR_LOG, L"event not handled!\nType: %s Command: %s", pEvent->m_eventType.text, pEvent->m_eventCommand.text);
+			LOG(L"EventManager::Event not handled!\nType: %s Command: %s\n", pEvent->m_eventType.text, pEvent->m_eventCommand.text);
 		}
 #endif
 		//don't need the event anymore so delete event data

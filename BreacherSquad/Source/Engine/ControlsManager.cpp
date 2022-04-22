@@ -538,7 +538,7 @@ void CControl::Update( float dTime, float fTimeline )
 				Vec2 vStartPos( bbox.CenterX(), bbox.CenterY() );
 				vStartPos.x -= starrect.w;
 				vStartPos.x += starrect.w * floor( fTimerOld );
-				g_particlesMgr.GenerateStarEffect( vStartPos, K_PART_LAYER_CONTROLS_LIGHT );
+				//__Particles().GenerateStarEffect( vStartPos, K_PART_LAYER_CONTROLS_LIGHT );
 			}
 
 			//save timer
@@ -574,7 +574,7 @@ void CControl::Update( float dTime, float fTimeline )
 				Vec2 vStartPos( bbox.x, bbox.y + bbox.h / 2 );
 				vStartPos.x = vStartPos.x + rct.x + rct.w / 2;
 				vStartPos.y = vStartPos.y + rct.y + rct.h / 2;
-				g_particlesMgr.GenerateStarEffect( vStartPos, K_PART_LAYER_CONTROLS_LIGHT );
+				//__Particles().GenerateStarEffect( vStartPos, K_PART_LAYER_CONTROLS_LIGHT );
 
 				//				SND_PLAY(SNDIDX_UI_LEVELUP);
 			}
@@ -1205,7 +1205,7 @@ void CControl::Update( float dTime, float fTimeline )
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CHECK_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
 				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
-				if ( lvar != NULL )
+				if ( lvar != nullptr )
 					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
 					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
@@ -1304,7 +1304,7 @@ void CControl::Update( float dTime, float fTimeline )
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SLIDER_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
 				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
-				if ( lvar != NULL )
+				if ( lvar != nullptr )
 					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
 					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
@@ -1375,7 +1375,7 @@ void CControl::Update( float dTime, float fTimeline )
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_PAGE_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
 				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
-				if ( lvar != NULL )
+				if ( lvar != nullptr )
 					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
 					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
@@ -2288,7 +2288,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 
 		case CCTRL_TYPE_SDL_KEYREADER:
 		{
-			RectXYWHi movedB = BBox;
+			const RectXYWHi& movedB = BBox;
 			if ( fontIdx >= 0 )
 			{
 				CStringHash* strh = &paramsDict.GetVariantByName( L"sKeyName" )->m_strArg;
@@ -2842,7 +2842,7 @@ bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 				return true;
 			}
-			else if ( cmd == K_CCTRLMGR_COMMAND_RIGHT )
+			if ( cmd == K_CCTRLMGR_COMMAND_RIGHT )
 			{
 				if ( nMinPage == nMaxPage )
 					return false;
@@ -2861,7 +2861,7 @@ bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDUP;
 					return true;
 				}
-				else if ( cmd == K_CCTRLMGR_COMMAND_DOWN )
+				if ( cmd == K_CCTRLMGR_COMMAND_DOWN )
 				{
 					if ( ( optcnt <= 0 ) || ( selectedIdx >= optcnt - 1 ) )
 						return false;
@@ -2869,7 +2869,7 @@ bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 					statusFlags |= CCTRL_STATUS_FLAG_CLICKEDDOWN;
 					return true;
 				}
-				else if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
+				if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
 				{
 					if ( optcnt <= 0 )
 						return false;
@@ -2889,12 +2889,12 @@ bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 				return true;
 			}
-			else if ( cmd == K_CCTRLMGR_COMMAND_RIGHT )
+			if ( cmd == K_CCTRLMGR_COMMAND_RIGHT )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 				return true;
 			}
-			else if ( cmd == K_CCTRLMGR_COMMAND_UP )
+			if ( cmd == K_CCTRLMGR_COMMAND_UP )
 			{
 				if ( nSelectedLine == 0 )
 					return false;
@@ -2910,7 +2910,7 @@ bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDDOWN;
 				return true;
 			}
-			else if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
+			if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 				return true;
@@ -2926,7 +2926,7 @@ bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDLEFT;
 				return true;
 			}
-			else if ( cmd == K_CCTRLMGR_COMMAND_RIGHT )
+			if ( cmd == K_CCTRLMGR_COMMAND_RIGHT )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDRIGHT;
 				return true;
@@ -2958,12 +2958,12 @@ bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDDOWN;
 				return true;
 			}
-			else if ( cmd == K_CCTRLMGR_COMMAND_UP )
+			if ( cmd == K_CCTRLMGR_COMMAND_UP )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKEDUP;
 				return true;
 			}
-			else if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
+			if ( cmd == K_CCTRLMGR_COMMAND_SELECT )
 			{
 				statusFlags |= CCTRL_STATUS_FLAG_CLICKED;
 				return true;
@@ -2977,7 +2977,7 @@ bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 
 void CControlsManager::SetParamValue( CControl * pCtrl, const WCHAR * sParamName, WCHAR * sParamValue, bool bIgnoreWarnings )
 {
-	if ( NULL == pCtrl )
+	if ( nullptr == pCtrl )
 		return;
 
 	UINT32 paramNameHash = FastHash( sParamName );
@@ -3123,7 +3123,7 @@ CCtrlLayer::CCtrlLayer()
 
 	bAnimate = true;
 
-	pControlsManager = NULL;
+	pControlsManager = nullptr;
 
 	for ( int kk = 0; kk < controls.GetSize(); kk++ )
 		SAFE_DELETE( controls[ kk ] );
@@ -3315,7 +3315,7 @@ CControl* CCtrlLayer::GetControlByName( char* ctrlName )
 	UINT32 chash = FastHash( ctrlName, strlen( ctrlName ) );
 	for ( int kk = 0; kk < controls.GetSize(); kk++ )
 	{
-		if ( controls[ kk ]->paramsDict.GetVariantByName( L"ID" ) == NULL )
+		if ( controls[ kk ]->paramsDict.GetVariantByName( L"ID" ) == nullptr )
 			continue;
 
 		if ( controls[ kk ]->paramsDict.GetVariantByName( L"ID" )->m_strArg.getHash() == chash )
@@ -3645,7 +3645,7 @@ void GUIUtils::DrawWindow( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, floa
 		RectXYWHi barSz = sprCol->GetAFrameBBox( animIdx, 1 ); 
 		Vec2 titleBarCenter( BBox.x + barSz.w / 2.0f, BBox.y + 5 );
 		Mat matTitle;
-		MUMatAffine2D( &matTitle, 1.0f, NULL, -HALF_PI, &titleBarCenter );
+		MUMatAffine2D( &matTitle, 1.0f, nullptr, -HALF_PI, &titleBarCenter );
 		__Painter().SetTransform( matTitle );
 		__TexFonts().fonts[ nFontIdx ]->DrawString( strTitle, 0.0f, 0.0f, FONTFLAG_ANCHOR_VCENTERRIGHT, dwTitleColor );
 		__Painter().SetTransform( g_matIdentity );
@@ -3889,7 +3889,7 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 			// nCommand: 1 keypressed, 0 key released
 			// nCommandParam: -1 not set or SDLscancode for key
 			CCtrlLayer *lay = GetTopmostInputLayer();
-			if ( ( lay != NULL ) && ( lay->alpha >= 1.0f ) ) // only read if fully visible
+			if ( ( lay != nullptr ) && ( lay->alpha >= 1.0f ) ) // only read if fully visible
 			{
 				for ( int j = 0; j < lay->controls.GetSize(); j++ )
 				{
@@ -3908,7 +3908,7 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 			WCHAR c = ( WCHAR ) nCommand;
 
 			CCtrlLayer *lay = GetTopmostInputLayer();
-			if ( ( lay != NULL ) && ( lay->alpha >= 1.0f ) )
+			if ( ( lay != nullptr ) && ( lay->alpha >= 1.0f ) )
 			{
 				for ( int j = 0; j < lay->controls.GetSize(); j++ )
 				{
@@ -3947,7 +3947,7 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 			UINT vk = ( UINT ) nCommand;
 
 			CCtrlLayer *lay = GetTopmostInputLayer();
-			if ( ( lay != NULL ) && ( lay->alpha >= 1.0f ) )
+			if ( ( lay != nullptr ) && ( lay->alpha >= 1.0f ) )
 			{
 				for ( int j = 0; j < lay->controls.GetSize(); j++ )
 				{
@@ -3991,7 +3991,7 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 			ECtrlMgrCommandType cmd = ( ECtrlMgrCommandType ) nCommand;
 			//#TODO: aici ar trebui ca controlul selectat sa preia inputul si sa-l trateze singur in loc sa caut un control anume
 			CCtrlLayer *lay = GetTopmostInputLayer();
-			if ( (lay != NULL) && (lay->alpha >= 1.0f) )
+			if ( (lay != nullptr) && (lay->alpha >= 1.0f) )
 			{
 				//change focused control (if it has any)
 				if ( lay->nFocusFirstFocusableIdx >= 0 )
@@ -4043,15 +4043,15 @@ void CControlsManager::MessageBoxOK( int titleStringId, int textStringId )
 {
 	CCtrlLayer* tmpLayer = ShowLayerOnce( "LAYER_ID_MSGBOX_OK" );
 
-	if ( tmpLayer != NULL )
+	if ( tmpLayer != nullptr )
 	{
 		CControl* tmpCb = tmpLayer->GetControlByName( "WINDOW" );
-		if ( tmpCb != NULL )
+		if ( tmpCb != nullptr )
 		{
 			tmpCb->paramsDict.SetNamedVarINT32( L"stringID", titleStringId );
 		}
 		tmpCb = tmpLayer->GetControlByName( "TEXT_LABEL" );
-		if ( tmpCb != NULL )
+		if ( tmpCb != nullptr )
 		{
 			tmpCb->paramsDict.SetNamedVarINT32( L"stringID", textStringId );
 		}
@@ -4198,7 +4198,7 @@ void CControlsManager::Update( float dTime )
 
 
 	//--- update particles ---
-	g_particlesMgr.UpdateLayer( K_PART_LAYER_CONTROLS_LIGHT, dTime );
+	__Particles().UpdateLayer( K_PART_LAYER_CONTROLS_LIGHT, dTime );
 }
 
 void CControlsManager::Paint()
@@ -4254,14 +4254,14 @@ void CControlsManager::Paint()
 	//}
 #endif
 	//--- particles ---
-	g_particlesMgr.PaintLayer( K_PART_LAYER_CONTROLS_LIGHT, true );
+	__Particles().PaintLayer( K_PART_LAYER_CONTROLS_LIGHT, true );
 
 	__Painter().SetViewTransform( g_matIdentity );
 }
 
 CCtrlLayer* CControlsManager::ShowLayerOnce( CHAR* layerName, float fAlpha, int posX, int posY )
 {
-	if ( GetLayerByName( layerName ) == NULL )
+	if ( GetLayerByName( layerName ) == nullptr )
 		return ShowLayer( layerName, fAlpha, posX, posY );
 
 	return nullptr;
@@ -4343,15 +4343,13 @@ void CControlsManager::RemoveLayer( CHAR* layerName, bool forced )
 
 void CControlsManager::RemoveAllLayers( bool forced )
 {
-	//daca forced==true scade alpha imediat si le da remove imediat
+	// forced==true => removes immediately
 	for ( int kk = 0; kk < Layers.GetSize(); kk++ )
 	{
 		Layers[ kk ]->statusFlags |= CCTRL_STATUS_FLAG_REMOVED;
 		if ( forced )
 			Layers[ kk ]->statusFlags |= CCTRL_STATUS_FLAG_FORCED;
 	}
-
-	return;
 }
 
 CCtrlLayer* CControlsManager::GetLayerByNameHash( UINT32 layerNameHash )

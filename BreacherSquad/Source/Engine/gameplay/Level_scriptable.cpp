@@ -157,7 +157,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					m_arrStats[K_LVL_STATS_LEVEL_HAS_BOMBS] = 0;
 					m_arrStats[K_LVL_STATS_BOMBS_DISARMED]++;
 					//message bomb defused
-					g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_BOMB_DEFUSED, FONTIDX_12_WOW, 1.0f, 3.0f, K_COLOR_SELECTED_TEXT);
+					//__Particles().AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_BOMB_DEFUSED, FONTIDX_12_WOW, 1.0f, 3.0f, K_COLOR_SELECTED_TEXT);
 					//sound verse - bomb defused
 					IActiveInterface* target = GetIActiveInterfacePtr_byUID(executorUID);
 					if (target)
@@ -216,7 +216,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 
 					App_IncreaseGamestat(K_MEMID_GAMESTATS_ARREST_TARGETS_ARRESTED);
 					//success message
-					g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_TARGET_ARRESTED, FONTIDX_12_WOW, 1.0f, 3.0f, K_COLOR_SELECTED_TEXT);
+					//__Particles().AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_TARGET_ARRESTED, FONTIDX_12_WOW, 1.0f, 3.0f, K_COLOR_SELECTED_TEXT);
 				}
 				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nArrestedCivilians"))
 				{
@@ -229,7 +229,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					//show level number
 					__Texts().ReplaceTokenInt(STR_FLOOR_X_VALUE, STR_FLOOR_X, 1, m_arrStats[K_LVL_STATS_LEVEL_VINFINITE_FLOOR]);
 
-					g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_LETTERWAVER, Vec2(0.0f, -50.0f), STR_FLOOR_X_VALUE, FONTIDX_12_WOW, 1.0f, 2.0f, K_COLOR_SELECTED_TEXT);
+					//__Particles().AddStringDummy(K_PDUMMY_STRING_LETTERWAVER, Vec2(0.0f, -50.0f), STR_FLOOR_X_VALUE, FONTIDX_12_WOW, 1.0f, 2.0f, K_COLOR_SELECTED_TEXT);
 				}
 
 			}
@@ -433,9 +433,9 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					(toucheractor->weapons[K_LVL_ACT_WEAPON_GEAR].WeaponTemplate.bulletTemplate.nType != K_LVL_BULLET_DULL))
 				{
 					//					SND_PLAY_POSITIONAL(SNDIDX_RELOAD_EMERGENCY, active->pos);
-					g_particlesMgr.GenerateHealEffect(toucheractor->pos, 0xff5555ff, K_PART_LAYER_RT_FRONT_NRM);
+					__Particles().GenerateHealEffect(toucheractor->pos, 0xff5555ff, K_PART_LAYER_RT_FRONT_NRM);
 
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_INTERFACE_ELEMENTS, false, 0, &toucheractor->GetPosHeart(), NULL, &Vec2(0.0f, -10.0f), 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xffffffff, K_PART_LAYER_FRONT);
+					__Particles().AddParticle(ANM_PARTICLES_SPR_INTERFACE_ELEMENTS, false, 0, &toucheractor->GetPosHeart(), NULL, &Vec2(0.0f, -10.0f), 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xffffffff, K_PART_LAYER_FRONT);
 
 					toucheractor->weapons[K_LVL_ACT_WEAPON_GEAR].ammoLeft++;
 					nAmmoLeft--;
@@ -489,7 +489,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			{
 				if (toucheractor->fLife < toucheractor->actTemplate.fLife)
 				{
-					g_particlesMgr.GenerateHealEffect(toucheractor->pos, 0xff55ff55, K_PART_LAYER_RT_FRONT_NRM);
+					__Particles().GenerateHealEffect(toucheractor->pos, 0xff55ff55, K_PART_LAYER_RT_FRONT_NRM);
 
 					toucheractor->fLife = toucheractor->actTemplate.fLife;
 					nHealthLeft--;

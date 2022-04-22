@@ -1189,7 +1189,7 @@ CVariantComplex* CVariantCollection::GetVariantByName(const WCHAR* argName)
 	UINT32 argNameHash = FastHash(argName);
 
 	register int kk = 0;
-	//optimizare de viteza
+	
 	for(kk=0; kk<m_variants.GetSize(); kk++)
 	{
 		if(m_variants[kk]->m_name.textHash == argNameHash)

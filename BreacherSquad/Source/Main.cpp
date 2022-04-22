@@ -43,7 +43,7 @@ bool						g_bForceOneUpdatePerFrame = false;	// flag used to force only one upda
 Vec2						g_vecGravityOld;					//gravity
 Vec3						g_vecGravity;						//gravity
 
-ID3DXSprite*				g_pGameSprite = NULL;				//Main Sprite class 
+ID3DXSprite*				g_pGameSprite = nullptr;				//Main Sprite class 
 Mat							g_matIdentity;						//identity matrix
 Mat							g_matWorld;							//world matrix
 
@@ -57,8 +57,6 @@ EControllerCommand			g_keydef_command = K_CM_COMMAND_NONE;	//command to redefine
 int							g_keydef_scancode = -1;					//scancode for command (SDL scancodes for now)
 
 CMouseData					g_mouse;								// Mouse data, global
-
-CParticlesManager			g_particlesMgr; 
 ///--- Fonts ---
 //fonts pointers
 CTexFont				*g_font12wow;
@@ -113,13 +111,13 @@ void	CALLBACK MouseProc(bool bLeftButton, bool bRightButton, bool bMiddleButton,
 
 
 // Called before window and 3d device get created
-OPRESULT	BeforeMount(void);
+OPRESULT	BeforeMount();
 // Called after window and 3d device get created and are ready to be used
-OPRESULT	AfterMount(void);
+OPRESULT	AfterMount();
 // Called after shutting down the device
-void		ShutdownApp(void);
+void		ShutdownApp();
 // Initializes the sound system
-OPRESULT	InitSound(void);
+OPRESULT	InitSound();
 
 ///-----------------------------------------------------
 /// MISC UTILITY FUNCTIONS
@@ -187,7 +185,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 
 	if (!SteamAPI_Init())
 	{
-		MessageBox(NULL, L"Steam must be running in order to play this game! Please (re)start the Steam Client!", L"Error", MB_OK);
+		MessageBox(nullptr, L"Steam must be running in order to play this game! Please (re)start the Steam Client!", L"Error", MB_OK);
 		LOG(L"Steam Client not started! Shutting down!");
 		return -1;
 	}
@@ -256,7 +254,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	WCHAR windowTitle[MAX_PATH];
 	StringCchPrintf(windowTitle, MAX_PATH, L"%s", __Texts().strings[STR_TITLE]->sText);
 
-	if (FAILED(DXUTCreateWindow(windowTitle, hInst, NULL, NULL /*, 0, 0*/)))
+	if (FAILED(DXUTCreateWindow(windowTitle, hInst, nullptr, nullptr /*, 0, 0*/)))
 	{
 		ErrorBox(K_ERR_CRITICAL, L"[ERROR] Couldn't create window!\r\nTo fix it, check our support forum or contact us at %s\r\n", K_GAME_EMAIL);
 	}
@@ -268,7 +266,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	}
 
 	//Log current time too
-	time_t t = time(NULL);
+	time_t t = time(nullptr);
 	struct tm tm = *localtime(&t);
 	LOG(L"Log system started. (%d-%d-%d %d:%d:%d)", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 #ifdef ENABLE_STEAM
@@ -439,7 +437,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 		UTApp().m_Settings.nWindowH = K_WINDOW_HEIGHT_SAFE;
 		UTApp().m_Settings.bFullscreen = false;
 
-		SetWindowPos(DXUTGetHWND(), 0, 0, 0, K_WINDOW_WIDTH_SAFE, K_WINDOW_HEIGHT_SAFE, SWP_NOOWNERZORDER | SWP_NOZORDER);
+		SetWindowPos(DXUTGetHWND(), nullptr, 0, 0, K_WINDOW_WIDTH_SAFE, K_WINDOW_HEIGHT_SAFE, SWP_NOOWNERZORDER | SWP_NOZORDER);
 		UTApp().SaveSettings();
 	}
 	//--- start fullscreen? ---
@@ -511,7 +509,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 //**************************************************************************************
 // Initialize the app - before creating the window
 //**************************************************************************************
-OPRESULT BeforeMount(void)
+OPRESULT BeforeMount()
 {
 	///--- Load strings here so we can set the window name ---
 	if (OP_FAILED(App_LocaLoadLangList(UTApp().m_Settings.shLanguageAlias)))
@@ -550,7 +548,7 @@ OPRESULT BeforeMount(void)
 }
 
 
-OPRESULT AfterMount(void)
+OPRESULT AfterMount()
 {
 	// load the minimum necessary to paint something (the sprites shader)
 	WCHAR shpath[MAX_PATH];
@@ -565,11 +563,11 @@ OPRESULT AfterMount(void)
 }
 
 
-void ShutdownApp(void)
+void ShutdownApp()
 {
 	g_editor.Release();
 	__Texts().Release();
-	g_particlesMgr.Release();
+	__Particles().Release();
 
 	UTGetSoundManager().Release();
 	UTGetScriptManager().Release();
@@ -591,7 +589,7 @@ void ShutdownApp(void)
 // Sound initialization
 //*************************************************************************************************
 
-OPRESULT InitSound(void)
+OPRESULT InitSound()
 {
 	// Initialize sound after we have the window
 	//--- init sound system ---
@@ -775,7 +773,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_OP_RETHR(__Painter().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(__TexFonts().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnCreateDevice(pDevice, pBBDesc));
-	V_RETURN(g_particlesMgr.OnCreateDevice(pDevice, pBBDesc));
+	V_RETURN(__Particles().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetGUI().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnCreateDevice(pDevice, pBBDesc));
@@ -844,7 +842,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	V_RETURN(__TexFonts().OnResetDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnResetDevice(pDevice, pBBDesc));
-	V_RETURN(g_particlesMgr.OnResetDevice(pDevice, pBBDesc));
+	V_RETURN(__Particles().OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(UTGetGUI().OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnResetDevice(pDevice, pBBDesc));
@@ -855,7 +853,6 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 #endif
 	//--- set Sprite painter class pointer ---
 	__Sim().SetSpritePtr(g_pGameSprite);
-	g_particlesMgr.SetSpritePtr(g_pGameSprite);
 	CSprite::SetGlobalSpritePtr(g_pGameSprite, &__Painter());
 	CTTFontsManager::SetGlobalSpritePtr(g_pGameSprite);
 	g_mainMenu.SetSpritePtr(g_pGameSprite);
@@ -918,7 +915,7 @@ void CALLBACK OnLostDevice(void)
 	__Game().OnLostDevice();
 
 	g_editor.OnLostDevice();
-	g_particlesMgr.OnLostDevice();
+	__Particles().OnLostDevice();
 	g_playerSelScr.OnLostDevice();
 	g_mainMenu.OnLostDevice();
 	g_spineMgr.OnLostDevice();
@@ -951,7 +948,7 @@ void CALLBACK OnDestroyDevice(void)
 	__TexFonts().OnDestroyDevice();
 	UTGetGUI().OnDestroyDevice();
 	g_editor.OnDestroyDevice();
-	g_particlesMgr.OnDestroyDevice();
+	__Particles().OnDestroyDevice();
 	g_playerSelScr.OnDestroyDevice();
 	g_mainMenu.OnDestroyDevice();
 	g_spineMgr.OnDestroyDevice();
@@ -1472,11 +1469,13 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 					g_netlock.Net_LogFrameData(10);
 
 					LOG(L"-- scene actors %d --", __Sim().m_arrActors.GetSize());
+					/*
 					for (int ll = 0; ll < __Sim().m_arrActors.GetSize(); ll++)
 					{
 						CActor* act = __Sim().m_arrActors[ll];
-						//LOG(L"%s ID %d pos(%.4f, %.4f) decision(%.4f)", act->_template.shID.text, act->ID, act->pos.xyz.x, act->pos.xyz.y, act->AItimerDecision);
+						LOG(L"%s ID %d pos(%.4f, %.4f) decision(%.4f)", act->_template.shID.text, act->ID, act->pos.xyz.x, act->pos.xyz.y, act->AItimerDecision);
 					}
+					*/
 
 					//send analytics
 					CHAR ctxt[MAX_PATH], ctxt2[MAX_PATH];

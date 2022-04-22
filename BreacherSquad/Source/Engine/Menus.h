@@ -9,7 +9,7 @@ private:
 	double				fLocalTimeline;
 
 public: 
-	CSpriteLib	m_sprCol;			
+	CSpriteLib			m_sprCol;			
 
 public:
 	CMenus();
@@ -32,9 +32,9 @@ public:
 
 public:
 	// Inherited via IEventListener
-	char const* 		GetListenerName( void ) { return "Menus"; };
+	char const* 		GetListenerName() override { return "Menus"; };
 	// The game state event comes in through this and setState gets called
-	bool				HandleEvent( CEvent &nEvent );
+	bool				HandleEvent( CEvent &nEvent ) override;
 
 private:
 	// Sets the current menus state to match the gamestate
@@ -42,9 +42,9 @@ private:
 
 public:
 	// Inherited via IDeviceRes
-	virtual OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
-	virtual OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
-	virtual OPRESULT OnLostDevice() override;
-	virtual OPRESULT OnDestroyDevice() override;
+	OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
+	OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
+	OPRESULT OnLostDevice() override;
+	OPRESULT OnDestroyDevice() override;
 };
 

@@ -625,19 +625,19 @@ void CMainMenu::Update(float dTime)
 			//generare particule bokeh
 			if (g_timers.Tick(400))
 			{
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_BOKEH_L, false, randint(2), &D3DXVECTOR2(worldrect.Right() + randfloatsgn(50.0f), worldrect.h + 30.0f),
+				__Particles().AddParticle(ANM_PARTICLES_SPR_BOKEH_L, false, randint(2), &D3DXVECTOR2(worldrect.Right() + randfloatsgn(50.0f), worldrect.h + 30.0f),
 					&D3DXVECTOR2(-10.0f, -5.0f), &D3DXVECTOR2(-randfloat(20.0f), -20.0f - randfloat(10.0f)), 3.0f + randfloat(2.0f), 0.6f, 0.0f, 0.0f, 0.0f, 0.1f, 1.0f, 0x88ffffff, K_PART_LAYER_FRONT_LIGHT);
 			}
 			//particule foc
 			if (g_timers.Tick(90))
 			{
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRE_REAL, false, randint(12), &D3DXVECTOR2(worldrect.Right() + 10.0f, randfloat(worldrect.h / 2.0f) + worldrect.h * 0.25f),
+				__Particles().AddParticle(ANM_PARTICLES_SPR_FIRE_REAL, false, randint(12), &D3DXVECTOR2(worldrect.Right() + 10.0f, randfloat(worldrect.h / 2.0f) + worldrect.h * 0.25f),
 					&D3DXVECTOR2(-4.0f, -8.0f), &D3DXVECTOR2(-40.0f - randfloat(20.0f), -10.0f - randfloat(10.0f)), 3.0f + randfloat(2.0f), 0.6f - randfloat(0.2f), -0.05f, 0.0f, randfloatsgn(PI), 0.1f, 1.0f, 0xffffffff, K_PART_LAYER_FRONT_LIGHT);
 			}
 			//particule foc spate
 			if (g_timers.Tick(60))
 			{
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRE_REAL, false, randint(12), &D3DXVECTOR2(worldrect.Right() + 10.0f, randfloat(worldrect.h / 2.0f) + worldrect.h * 0.25f),
+				__Particles().AddParticle(ANM_PARTICLES_SPR_FIRE_REAL, false, randint(12), &D3DXVECTOR2(worldrect.Right() + 10.0f, randfloat(worldrect.h / 2.0f) + worldrect.h * 0.25f),
 					&D3DXVECTOR2(-8.0f, -4.0f), &D3DXVECTOR2(-40.0f - randfloat(20.0f), -10.0f - randfloat(10.0f)), 3.0f + randfloat(2.0f), 0.5f - randfloat(0.2f), -0.05f, 0.0f, randfloatsgn(PI), 0.1f, 1.0f, 0xaaffffff, K_PART_LAYER_NORMAL_LIGHT);
 			}
 
@@ -1609,7 +1609,7 @@ void CMainMenu::Update(float dTime)
 	}
 
 	//now update particles
-	g_particlesMgr.Update(dTime);
+	__Particles().Update(dTime);
 }
 
 
@@ -1829,7 +1829,7 @@ void CMainMenu::Paint()
 			m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
 			//fire particles
-			g_particlesMgr.PaintLayer(K_PART_LAYER_FRONT_LIGHT, true);
+			__Particles().PaintLayer(K_PART_LAYER_FRONT_LIGHT, true);
 
 			m_pSprite->Flush();
 			m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
@@ -2343,7 +2343,7 @@ void CMainMenu::PaintBackground(RectXYWH worldRect, DWORD dwColor, bool bPaintPa
 		m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
 		//particule foc
-		g_particlesMgr.PaintLayer(K_PART_LAYER_NORMAL_LIGHT, true);
+		__Particles().PaintLayer(K_PART_LAYER_NORMAL_LIGHT, true);
 
 		m_pSprite->Flush();
 		m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);

@@ -354,12 +354,12 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 		case K_AI_STATE_PARTICLES_GENERATOR:
 		{
 			//tipul generatorului il ia din params
-			int genType = g_particlesMgr.GetPartEmitterTypeByNameHash( active.varAIparams.GetVariantByName( L"s_Type" )->m_strArg.textHash );
-			int partLayer = g_particlesMgr.GetParticleLayerByName( active.varAIparams.GetVariantByName( L"s_Layer" )->m_strArg.textHash );
+			int genType = __Particles().GetPartEmitterTypeByNameHash( active.varAIparams.GetVariantByName( L"s_Type" )->m_strArg.textHash );
+			int partLayer = __Particles().GetParticleLayerByName( active.varAIparams.GetVariantByName( L"s_Layer" )->m_strArg.textHash );
 			//ca sa nu intre de mai multe ori si sa aloce de mai multe ori. Daca se intampla trebuie dezalocat mai intai
 			_ASSERT( active.varAIparams.GetVariantByName( L"emitterPtr" )->m_type == CVariantComplex::K_ARGTYPE_NONE );
 
-			CParticleEmitter * pe = g_particlesMgr.AddPartEmitter( genType, &active.bbox, partLayer );
+			CParticleEmitter * pe = __Particles().AddPartEmitter( genType, &active.bbox, partLayer );
 			//salveaza aici pointer la ParticleEmitter-ul alocat si il controlez din update sa ii dau stop si play cand iese din ecran
 			active.varAIparams.SetNamedVarVoidP( L"emitterPtr", pe );
 		}

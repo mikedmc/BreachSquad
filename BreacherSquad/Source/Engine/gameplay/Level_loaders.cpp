@@ -45,7 +45,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 	m_dwSyncCheckHash = 0;
 	//get rid of all particles
-	g_particlesMgr.RemoveAll();
+	__Particles().ClearParticles();
 	//--- setari initiale ---
 	ResetLevelStatistics();
 

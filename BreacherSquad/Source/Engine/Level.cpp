@@ -1568,7 +1568,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 			m_levelSubState = 0;
 			m_levelStateTimer = 0.0f;
 
-			g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_MISSION_ACCOMPLISHED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
+			//__Particles().AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_MISSION_ACCOMPLISHED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
 			//enter level results sync
 			if (UTApp().IsGameNetworked())
 			{
@@ -1623,7 +1623,7 @@ void CLevel::SetLevelState(ELevelState eNewState, int nLevelStateParam)
 			m_levelSubState = 0;
 			m_levelStateTimer = 0.0f;
 
-			g_particlesMgr.AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_MISSION_FAILED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
+			//__Particles().AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_MISSION_FAILED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
 			//enter level results sync
 			if (UTApp().IsGameNetworked())
 			{
@@ -4008,9 +4008,9 @@ void CLevel::Update( float dTime )
 	//set sounds listener position
 	SND_SET_LISTENER_POS( camrect.Center() );
 	//--- update particles and emitters ---
-	g_particlesMgr.UpdatePartEmitters( dTime, camrect );
-	g_particlesMgr.Update( dTime );
-	g_particlesMgr.UpdateStringDummies( dTime );
+	__Particles().UpdatePartEmitters( dTime, camrect );
+	__Particles().Update( dTime );
+	//__Particles().UpdateStringDummies( dTime );
 
 	Areas_UpdateVisibility( camrect );
 	///--- update visibility lists (after update) ---
@@ -4283,7 +4283,7 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 			case K_VST_PROP:
 			{
 				CProp *prop = static_cast<CProp*>(vis->pPtr);
-				prop->sprite.PaintModule_texOverride(0, nTexIdxOffset);
+				prop->sprite.PaintFModule_texOverride(0, nTexIdxOffset);
 			}
 			break;
 			default:
@@ -4704,7 +4704,7 @@ void CLevel::Paint()
 	//ingame interface
 	//m_interfaceIGM.Paint(m_pDevice, g_pGameSprite);
 	//interface particles
-	//g_particlesMgr.PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
+	//__Particles().PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
 }
 
 HRESULT CLevel::PaintUsingFinalRTT()
@@ -4846,9 +4846,9 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		//STUN STARS
 		if (act->fStunTimer >= K_LVL_MIN_STUN_DIZZY_DURATION)
 		{
-			int curframe = int(fLocalTimeline * 25.0f) % g_particlesMgr.m_sprCol.GetAFramesCnt(ANM_PARTICLES_SPR_STUN_STARS);
+			int curframe = int(fLocalTimeline * 25.0f) % __Particles().m_sprCol.GetAFramesCnt(ANM_PARTICLES_SPR_STUN_STARS);
 			Vec2 vStarsPos = act->GetPosHeart();
-			CSprite::paintFrameModule(&g_particlesMgr.m_sprCol, vStarsPos.x, vStarsPos.y - 10.0f, ANM_PARTICLES_SPR_STUN_STARS, curframe, 0, act->color);
+			CSprite::paintFrameModule(&__Particles().m_sprCol, vStarsPos.x, vStarsPos.y - 10.0f, ANM_PARTICLES_SPR_STUN_STARS, curframe, 0, act->color);
 		}
 
 		//energy bars
@@ -4948,7 +4948,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	*/
 
 	///--- paint string particles in level coords ---
-	g_particlesMgr.PaintStringParticles(K_PART_LAYER_NORMAL);
+	//__Particles().PaintStringParticles(K_PART_LAYER_NORMAL);
 	m_pSprite->Flush();
 
 	//--- closest touchable and cover icons ---
@@ -5120,7 +5120,7 @@ void CLevel::Release()
 	m_interfaceIGM.Release();
 	//m_interfaceTextBubble.Release();
 
-	g_particlesMgr.RemoveAll();
+	__Particles().ClearParticles();
 
 	if (m_bLoaded)
 	{
@@ -5399,6 +5399,7 @@ void CLevel::GiveStrategicPoints(float fPoints, Vec2 * vPos)
 	//m_interfaceIGM.SetStrategicPoints(m_arrStats[K_LVL_STATS_PL1_STRATEGIC_POINTS] / 1000.0f, m_arrStats[K_LVL_STATS_PL2_STRATEGIC_POINTS] / 1000.0f);
 
 	//add text particle (visuals)
+	/*
 	if ((vPos != null) && (fPointsGiven > 0.0f))
 	{
 		WCHAR strPart[MAX_PATH];
@@ -5408,9 +5409,9 @@ void CLevel::GiveStrategicPoints(float fPoints, Vec2 * vPos)
 		else
 			StringCchPrintf(strPart, MAX_PATH, L"+%d SP", (int)fVal);
 
-		g_particlesMgr.AddStringParticle(g_font5ns2, strPart, vPos, NULL, &Vec2(0.0f, -20.0f), 1.2f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xcc21aec2, K_PART_LAYER_NORMAL);
+		__Particles().AddStringParticle(g_font5ns2, strPart, vPos, NULL, &Vec2(0.0f, -20.0f), 1.2f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.4f, 0xcc21aec2, K_PART_LAYER_NORMAL);
 	}
-
+	  */
 }
 
 
@@ -5664,7 +5665,7 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, Vec2 pos, float fSize, D
 	{
 		case K_LVL_EFFECT_STONE_BREAK:
 		{
-			g_particlesMgr.GenerateSmokePuff(Vec2(pos.x, pos.y - 10.0f), 20.0f, K_PART_LAYER_RT_FRONT_NRM);
+			//__Particles().GenerateSmokePuff(Vec2(pos.x, pos.y - 10.0f), 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 			m_camLevelToRT.ShakeScreen(2.0f, 8.0f, &pos);
 
 //			SND_PLAY_POSITIONAL(SNDIDX_STONE_BREAK1, pos);
@@ -5681,7 +5682,7 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, Vec2 pos, float fSize, D
 			//particule sparkle
 			for (int kk = 0; kk < 20; kk++)
 			{
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, randint(2), &Vec2(pos.x + randfloatsgn(fSize), pos.y + randfloatsgn(fSize)), &g_vecGravityOld, &Vec2(randfloatsgn(60.0f), -10.0f - randfloat(40.0f)), 0.2f + randfloat(0.4f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 1.5f, kk * 0.025f);
+				__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, randint(2), &Vec2(pos.x + randfloatsgn(fSize), pos.y + randfloatsgn(fSize)), &g_vecGravityOld, &Vec2(randfloatsgn(60.0f), -10.0f - randfloat(40.0f)), 0.2f + randfloat(0.4f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 1.5f, kk * 0.025f);
 			}
 		}
 		break;
@@ -5694,18 +5695,18 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, Vec2 pos, float fSize, D
 				float ang = randfloat(DOUBLE_PI);
 				Vec2 vdir(cos(ang), sin(ang));
 				if (randompercent(50.0f))
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK1, true, randint(2), &(pos + vdir * 10.0f), NULL, &(vdir * (40.0f + randfloat(20.0f))), 1.0f + randfloat(0.5f), 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 2.0f);
+					__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK1, true, randint(2), &(pos + vdir * 10.0f), NULL, &(vdir * (40.0f + randfloat(20.0f))), 1.0f + randfloat(0.5f), 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 2.0f);
 				else
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, 0, &(pos + vdir * 10.0f), NULL, &(vdir * (40.0f + randfloat(20.0f))), 1.0f + randfloat(0.5f), 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 2.0f);
+					__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, 0, &(pos + vdir * 10.0f), NULL, &(vdir * (40.0f + randfloat(20.0f))), 1.0f + randfloat(0.5f), 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 2.0f);
 			}
 
 			//linii verticale
 			for (int kk = 0; kk < 6; kk++)
 			{
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_TELEPORT, false, 5 + randint(2), &Vec2(pos.x + randfloatsgn(8.0f), pos.y - 3), NULL, &Vec2(0.0f, -60.0f - randfloat(20.0f)), 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 0.0f, kk * 0.1f);
+				__Particles().AddParticle(ANM_PARTICLES_SPR_TELEPORT, false, 5 + randint(2), &Vec2(pos.x + randfloatsgn(8.0f), pos.y - 3), NULL, &Vec2(0.0f, -60.0f - randfloat(20.0f)), 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 0.0f, kk * 0.1f);
 			}
 			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.2f, 0.2f, 10.0f, 0.0f, 0.0f, 0.1f, 0.3f, 0x55ffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.2f, 0.2f, 10.0f, 0.0f, 0.0f, 0.1f, 0.3f, 0x55ffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT);
 		}
 		break;
 		default:

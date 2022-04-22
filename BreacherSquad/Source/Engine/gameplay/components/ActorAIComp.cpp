@@ -1205,7 +1205,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				level.m_arrPlayerSelStrategic[ actor.nPlayerOrdinal ] = -1;
 				//m_interfaceIGM.SetStrategicSelection(actor->nPlayerOrdinal, -1);
 				//dam remove la particles de pe interfata cand moare un player
-				g_particlesMgr.RemoveAllFromLayer( K_PART_LAYER_INTERFACE_LIGHT );
+				__Particles().RemoveAllFromLayer( K_PART_LAYER_INTERFACE_LIGHT );
 			}
 			else if ( actor._template.actorClass >= K_LVL_ACT_CLASS_HUMAN )
 			{

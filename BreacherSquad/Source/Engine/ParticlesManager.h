@@ -1,60 +1,36 @@
 #pragma once
+#include "sprite/Spr.h"
+#include "interfaces/DeviceRes.h"
 
-
-///--- constante coada grafica ---
-#define K_PART_TAIL_MAX_SIZE  15
-#define	K_PART_TAIL_MAX_COUNT	200
-
-class CTail {
-public:
-	int				status; //0 nefolosita, !=1 folosita -> arata si textura pe care o foloseste
-	D3DXVECTOR2		tailPos[K_PART_TAIL_MAX_SIZE];
-	float			tailLife[K_PART_TAIL_MAX_SIZE]; //cat traieste un nod de coada
-	//variabile updatate per frame
-	float			width; //latimea curenta 
-
-	float			timer; //la cat timp pune un punct in lista
-	float			timerDropSpeed; //viteza cu care scade timer-ul de la 1.0f in jos
-	float			tailDropSpeed;	//viteza cu care scade transparenta la coada
-	D3DXVECTOR2		texPt1;	//top left in textura
-	D3DXVECTOR2		texPt2;	//bottom right in textura
-
-	DWORD			color;
-
-	CTail();
-};
-
-///--- new particles manager ----
 class CParticle {
 public:
-	float m_fLife;					//viata actuala
-	float m_fAlpha;
-	//pointeri catre vecini
+	float			m_fLife;					
+	float			m_fAlpha;
+	//pointers to neighbours in list
 	CParticle*		pNext;
 	CParticle*		pPrev;   
 public:
-	D3DXVECTOR2		m_vPos;
-	D3DXVECTOR2		m_vSpeed;		  //directia particulei (modificabila de update)
-	float			m_fRotAngle;	  //unghiul de rotatie
-	float			m_fRotSpeed;	  // viteza de rotatie
+	Vec2			m_vPos;
+	Vec2			m_vSpeed;		  
+	float			m_fRotAngle;	  
+	float			m_fRotSpeed;	  
 	DWORD			m_Color;	
-	float			m_fWaitTimer;		// cat asteapta intainte sa faca update	(spawning intarziat)
-	float			m_fLifetime;	  //cat traieste particula in timp
-	float			m_fFadeOut_Duration; //0.0f nu face fade, 
-	float			m_fFadeIn_Duration;	//daca e 0 nu face fade-in; daca e diferit, face fade in pana cand viata ajunge la LIFE_END
-	D3DXVECTOR2		m_vGravity;			//gravitatia particulei
-	float			m_fSize;		   //marime
-	float			m_fScaleSpeed;	   //viteza de variatie a marimii
-	bool			bAnimated;			//daca face update la sprite sau nu
-	float			m_fAirFriction;		//frecarea cu aerul
-	//pentru desenare
-	CSprite			sprite;
+	float			m_fWaitTimer;		// will be spawned later if we want to spawn them in a row
+	float			m_fLifetime;		// original life
+	float			m_fFadeOut_Duration; // time to fade in
+	float			m_fFadeIn_Duration;	// time to fade out (ends when life ends)
+	Vec2			m_vGravity;			
+	float			m_fSize;			
+	float			m_fScaleSpeed;		// scaling speed
+	bool			bAnimated;			// updates sprite? If so then it dies when animation ends
+	float			m_fAirFriction;		// Air friction coefficient
+	
+	CSpr			sprite;
 
 	CParticle();
 };
 
 ///--- emitoare de particule ---
-
 const CStringHash ParticleEmitter_names[] = {
 	L"FOG",
 	L"FIRE",
@@ -93,8 +69,8 @@ public:
 	float			m_spawnStartTime, m_spawnEndTime; //-1 -> emite mereu
 
 	//TODO: aici se vor specifica domeniile pe care pot varia toti parametrii particulelor. Daca vrei sa ii corelezi e mai trist. De exemplu marimea cu viteza
-	D3DXVECTOR2		m_vPos;
-	D3DXVECTOR2		m_vSpeed;		  //directia particulei (modificabila de update)
+	Vec2		m_vPos;
+	Vec2		m_vSpeed;		  //directia particulei (modificabila de update)
 	float			m_fRotAngle;	  //unghiul de rotatie
 	float			m_fRotSpeed;	  // viteza de rotatie
 	DWORD			m_Color;
@@ -102,7 +78,7 @@ public:
 	float			m_fLifetime;	  //cat traieste particula in timp
 	float			m_fFadeOut_Duration; //0.0f nu face fade, 
 	float			m_fFadeIn_Duration;	//daca e 0 nu face fade-in; daca e diferit, face fade in pana cand viata ajunge la LIFE_END
-	D3DXVECTOR2		m_vGravity;			//gravitatia particulei
+	Vec2		m_vGravity;			//gravitatia particulei
 	float			m_fSize;		   //marime
 	float			m_fScaleSpeed;	   //viteza de variatie a marimii
 	bool			bAnimated;			//daca face update la sprite sau nu
@@ -114,7 +90,7 @@ public:
 class CParticleEmitter {
 public:
 CArray<CParticleEmitterBrush*> m_arrBrushes;
-D3DXVECTOR2 pos, speed, dir;
+Vec2 pos, speed, dir;
 };
 //managerul de emitori
 class CParticleEmitterManager {
@@ -156,69 +132,6 @@ public:
 	}
 };
 
-
-///--- string dummies ---
-#define K_PDUMMY_STRING_BLINKER			0
-#define K_PDUMMY_STRING_LETTERWAVER		1
-#define K_PDUMMY_STRING_WOBBLER			2
-//pozitia este offset fata de centru:
-#define K_PDUMMY_STRING_WIDEBAR			3
-
-class CStringDummy {
-public:
-	int				type;
-	int 			status;
-	D3DXVECTOR2		pos;			//pozitia
-	D3DXVECTOR2		v;				//viteza
-	D3DXVECTOR2		pt1, pt2, pt3;	//ajutatoare pentru animatie
-	Vec2i		intPt;			//coord int
-	float			timer;			//timer propriu pt animatie sau viatza
-	float			fparam;			//parametru float
-	float			fparam2;			//parametru float 2
-	float			angle;			//generic angle
-	int				intParam;		//parametru int
-	int				intParam2;		//alt param int
-	int				intParam3;		//parametru int
-	int				intParam4;		//alt param int
-	float			fShowDelay;		//hidden while delayed
-
-	UINT8			flag;			//folosit cand vreau sa desenez pe layere separate
-	CSprite			sprite;
-
-	float*			fPtr;
-
-	CStringDummy() : fShowDelay(0.0f), fPtr(NULL), intParam3(-1), intParam4(-1)
-	{
-	}
-};
-
-class CStringParticle {
-public:
-	D3DXVECTOR2		m_vPos;
-	D3DXVECTOR2		m_vSpeed;		  //directia particulei (modificabila de update)
-	float			m_fRotAngle;	  //unghiul de rotatie
-	float			m_fRotSpeed;	  // viteza de rotatie
-	float			m_fLifetime;	  //cat traieste particula in timp
-	float			m_fFadeOut_Duration; //0.0f nu face fade, 
-	float			m_fFadeIn_Duration;	//daca e 0 nu face fade-in; daca e diferit, face fade in pana cand viata ajunge la LIFE_END
-	D3DXVECTOR2		m_vGravity;			//gravitatia particulei
-	float			m_fSize;		   //marime
-	float			m_fScaleSpeed;	   //viteza de variatie a marimii
-
-	//pentru particule string
-	CStringDesc		m_stringDesc;
-	CTexFont		*m_pFont;	//id-ul fontului bitmap
-	DWORD			strColor;
-
-	int				mLayer; //layer particula
-
-	CStringParticle();
-//private:
-	float m_fLife;					//viata actuala
-	float m_fAlpha;
-};
-
-
 const CStringHash ParticleLayers_names[] = {
 	L"RT_BACK_NRM",
 	L"RT_BACK_NRM_LIGHT",
@@ -252,62 +165,38 @@ enum ParticleLayers{
 	K_PART_LAYERS_CNT
 };
 
-class CParticlesManager {
+class CParticlesManager : public IDeviceRes {
 private:
-	bool			bInitialized;
-	int				nParticlesCnt;	//numarul total de particule folosite
-	CParticle*		pParticles;		//array-ul alocat dintr-o bucata cu toate particulele
-	//listele circulare de particule libere si folosite
-	CParticle pListFree;	//free particles list (folosim doar pointerii pNext si pPrev)
-	CParticle pList[K_PART_LAYERS_CNT]; //used particles (folosim doar pointerii pNext si pPrev)
+	bool				bInitialized;
+	int					nParticlesCnt;					// total number of particles
+	CParticle*			pParticles;						// particles pool of nParticlesCnt size
+	CParticle			pListFree;						// available particles circular list list (only using pNext and pPrev)
+	CParticle			pList[K_PART_LAYERS_CNT];		// used particles are kept in rings, one for each layer
+	float				fLocalTimeline;
 
-	float fLocalTimeline;
-	LPDIRECT3DDEVICE9	m_pDevice;
-	ID3DXSprite*		m_pSprite;  //pointer la sprite
-
-	//update chemate din update-ul particles manager
-	void UpdateStringParticles(float dTime);
 public:
-	//sprites collection
-	CSpriteLib m_sprCol;	
-	//string particles - growable array pentru ca sunt foarte putine mereu
-	CArray<CStringDummy*> m_vDummies;
-	//string dummies
-	CArray<CStringParticle*> m_vStringParticles; //colectie de particule string
+	CSpriteLib			m_sprCol;						//sprites collection for particles
 
-	void SetSpritePtr(ID3DXSprite* pSprite) {
-		m_pSprite = pSprite;
-	}
-	///-=-=-= TAILS =-=-=-
-	CTail tails[K_PART_TAIL_MAX_COUNT];
-	int GetFreeTail(int AnimIDx, int frameIDx, float timerDropPerSec, float tailDropPerSec, DWORD nColor = 0xffffffff);
-	void UpdateTailData(int tailIdx, D3DXVECTOR2 newPos, float newWidth);
-	void UpdateTails(float dTime);
-	void PaintTails(D3DXVECTOR2* offset = NULL);
-	///-=-= PARTICLES =-=-
+public:
 	CParticlesManager();
 	~CParticlesManager();
-	//Initialize
-	HRESULT Init(WCHAR* XMLpath, int nMaxParticlesCnt = 1000);
-	void Release();			//releases everything
 
-	void Update(float dtime);
-	void UpdateLayer(int nLayer, float dtime);
-	void PaintLayer(int nLayer, bool additiveBlending = false);
-	void PaintLayerOffset(int nLayer, D3DXVECTOR2 offset, bool additiveBlending = false);
-	void PaintLayerOffset_texOverride(int nLayer, D3DXVECTOR2 offset, bool additiveBlending = false, int texIdxOffset = 0);
+	OPRESULT			Init(WCHAR* XMLpath, int nMaxParticlesCnt = 1000);
+	void				Release();			
+	void				Update(float dtime);
+	void				UpdateLayer(int nLayer, float dtime);
+	void				PaintLayer(int nLayer, bool additiveBlending = false);
 	//moves all particles to the "FREE" list
-	void RemoveAll();	
+	void				ClearParticles();	
 	//removes all particles from a layer
-	void RemoveAllFromLayer(ParticleLayers ePartLayer);
-
+	void				RemoveAllFromLayer(ParticleLayers ePartLayer);
 	//returns particle layer idx or -1 if not found
-	int GetParticleLayerByName(WCHAR * layerName);
-	int GetParticleLayerByName(UINT32 layerNameHash);
+	int					GetParticleLayerByName(WCHAR * layerName);
+	int					GetParticleLayerByName(UINT32 layerNameHash);
 
 	//--- particles functions ---
-	void AddParticle(int animID, bool animated, int currentFrame, D3DXVECTOR2* pos, 
-						D3DXVECTOR2* gravity, D3DXVECTOR2* speed, 
+	void AddParticle(int animID, bool animated, int currentFrame, Vec2* pos, 
+						Vec2* gravity, Vec2* speed, 
 						float lifetime, 
 						float size, float scalespeed, 
 						float rotangle, float rotspeed, 
@@ -318,64 +207,23 @@ public:
 						float airFriction = 0.0f,
 						float waitTimer = 0.0f);
 
-///-=-=-= STRING DUMMIES =-=-=-
-
-	int AddStringDummy(int nType, D3DXVECTOR2 np1, int stringID, int fontID, float size = 1.0f, float showTime = 1.0f, DWORD color = 0xffffffff, float fDelay = 0.0f);
-	CStringDummy* GetStringDummy(int nType);
-	void UpdateStringDummies(float dTime);
-	void PaintStringDummies(UINT8 pflags = 0);
-	void RemoveStringDummies();	 
-	CStringDummy* GetDummy(int nType);
-
-///-=-= STRING PARTICLES =-=-
-
-	void PaintStringParticles(int nLayer, bool paintUsingMultiply = false);
-	void PaintStringParticles(int nLayer, D3DXVECTOR2 offset, bool paintUsingMultiply = false);
-
-	void AddStringParticle(CTexFont *pFont, WCHAR* text,
-						D3DXVECTOR2* pos,
-						D3DXVECTOR2* gravity, D3DXVECTOR2* speed,
-						float lifetime,
-						float size, float scalespeed,
-						float rotangle, float rotspeed,
-						float fadeInDuration,
-						float fadeOutDuration,
-						DWORD nColor = 0xffffffff,
-						int nLayer = K_PART_LAYER_NORMAL);
-	void RemoveStringParticles();
-
-///-=-=-= PARTICLE_EMITTERS =-=-=-
-	int GetPartEmitterTypeByNameHash(UINT32 generatorNameHash);
-	
+///#TODO: remake this part:
 	CArray<CParticleEmitter*> m_arrPartEmitters;
-
 	CParticleEmitter* AddPartEmitter(int nType, CAABB * pe_aabb, int nParticleLayer);
+	int GetPartEmitterTypeByNameHash(UINT32 generatorNameHash);
 	void ReleasePartEmitter(CParticleEmitter* pEmit);
 	void ReleaseAllPartEmitters();
 	void UpdatePartEmitters(float dTime, RectXYWH screenRect);
 
-///-=-=-= HELPER FUNCTIONS =-=-=-
-	void GenerateBulletHitWall(D3DXVECTOR2 npos, D3DXVECTOR2 ndir, int nLayer = K_PART_LAYER_NORMAL);
-	void GenerateBulletHitEnemy(D3DXVECTOR2 npos, D3DXVECTOR2 ndir, int eVictimClass, int nLayer = K_PART_LAYER_NORMAL);
-	void GenerateBulletHitMetal(D3DXVECTOR2 npos, D3DXVECTOR2 ndir, int nLayer = K_PART_LAYER_NORMAL);
-	void GenerateFireRing(D3DXVECTOR2 npos, int nPartCnt, float fSpeedMin, float fSpeedMax, int nLayer = K_PART_LAYER_NORMAL);
-	void GenerateTeleportEffect(D3DXVECTOR2 npos, DWORD dwColor, int nLayer = K_PART_LAYER_NORMAL);
-	void GenerateHealEffect(D3DXVECTOR2 npos, DWORD dwColor, int nLayer = K_PART_LAYER_NORMAL);
-	void GenerateZombieSpawn(D3DXVECTOR2 npos, DWORD dwColor, int nLayer = K_PART_LAYER_NORMAL);
-	void GenerateRaysHemi(D3DXVECTOR2 npos, DWORD dwColor, int nLayer = K_PART_LAYER_NORMAL);
-	void GenerateEnemySoftGib(D3DXVECTOR2 npos, DWORD dwColor, int nLayer = K_PART_LAYER_NORMAL);
-	//folosit cand apar stelele pe fereastra
-	void GenerateStarEffect(D3DXVECTOR2 npos, int nLayer = K_PART_LAYER_NORMAL);
-	//folosit cand spargi o usa
-	void GenerateDoorBreak(D3DXVECTOR2 npos, D3DXVECTOR2 dir, int nLayer = K_PART_LAYER_NORMAL);
-	void GenerateSmokePuff(D3DXVECTOR2 npos, float fRadius, int nLayer = K_PART_LAYER_NORMAL);
-	void GenerateHeadshot(D3DXVECTOR2 npos, D3DXVECTOR2 dir, DWORD dwColor, int nLayer = K_PART_LAYER_NORMAL);
-
-///-=-=-= framework stuff =-=-=-
-	HRESULT OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL);
-	HRESULT OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL);
-	HRESULT OnLostDevice(void);
-	HRESULT OnDestroyDevice(void);
+///-=-= platform stuff =-=-
+	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr) override;
+	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr) override;
+	OPRESULT OnLostDevice() override;
+	OPRESULT OnDestroyDevice() override;
 };
 
 
+///**************************************************************************************
+/// SINGLETON
+///**************************************************************************************
+CParticlesManager& __Particles();

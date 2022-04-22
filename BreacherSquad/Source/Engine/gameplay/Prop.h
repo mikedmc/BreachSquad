@@ -39,7 +39,7 @@ public:
 	CProp( CPropAIComponent* pAIcomp );
 	~CProp();
 
-	const EActiveInterfaceType GetClassType() const {
+	const EActiveInterfaceType GetClassType() const override {
 		return K_LVL_IAI_TYPE_PROP;
 	}
 

@@ -189,7 +189,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 
 		if (explotemplate->name.textHash == hash_EXPLO_INVISIBLE_EXPLODING_ZOMBIE)
 		{
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_GREEN_FATZOMBIE, true, 0, &Vec2(pos.x, pos.y + 6.0f), NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_EXPLO_GREEN_FATZOMBIE, true, 0, &Vec2(pos.x, pos.y + 6.0f), NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_BARREL)
 		{
@@ -203,10 +203,10 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			//prop - light
 //			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 1.0f, 0.2f, 0xffFDB727, 2.0f);
 			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &pos, NULL, &Vec2(0.0f, -20.0f), 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &pos, NULL, &Vec2(0.0f, -20.0f), 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
+			//__Particles().GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
 			m_camLevelToRT.ShakeScreen(4.0f, 8.0f, &pos);
 			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_BARREL_01, SNDIDX_EXPLOSION_BARREL_02, pos);
@@ -223,10 +223,10 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			//prop - light
 //			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.8f, 0.2f, 0xffFDB727, 1.6f);
 			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_LG1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_LG1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
+			//__Particles().GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
 			m_camLevelToRT.ShakeScreen(6.0f, 10.0f, &pos);
 			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FRAG_GRENADE_01, SNDIDX_EXPLOSION_FRAG_GRENADE_02, pos);
@@ -243,10 +243,10 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			//prop - light
 //			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.8f, 0.2f, 0xffFDB727, 1.6f);
 			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_LG2, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_LG2, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
+			//__Particles().GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
 			m_camLevelToRT.ShakeScreen(4.0f, 8.0f, &pos);
 			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FRAG_GRENADE_01, SNDIDX_EXPLOSION_FRAG_GRENADE_02, pos);
@@ -262,10 +262,10 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			//prop - light
 //			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.8f, 0.2f, 0xffFDB727, 1.6f);
 			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ATOMIC1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_EXPLO_ATOMIC1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
+			//__Particles().GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
 			m_camLevelToRT.ShakeScreen(4.0f, 8.0f, &pos);
 			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_MOLOTOV_EXPLOSION_01, SNDIDX_MOLOTOV_EXPLOSION_02, pos);
@@ -286,9 +286,9 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 
 			//add visually stunning stuff
 			if (randompercent(50.0f))
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRECRACKER1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+				__Particles().AddParticle(ANM_PARTICLES_SPR_FIRECRACKER1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			else
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRECRACKER2, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+				__Particles().AddParticle(ANM_PARTICLES_SPR_FIRECRACKER2, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_FLAME_JET)
 		{
@@ -300,9 +300,9 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 
 			//add visually stunning stuff
 			if (randompercent(50.0f))
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRECRACKER1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+				__Particles().AddParticle(ANM_PARTICLES_SPR_FIRECRACKER1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			else
-				g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRECRACKER2, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+				__Particles().AddParticle(ANM_PARTICLES_SPR_FIRECRACKER2, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 		}
 		else if (explotemplate->name.textHash == hash_EXPLO_CHARGE)
 		{
@@ -316,10 +316,10 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			//prop - light
 //			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xffFDB727, 1.6f);
 			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_CHARGE1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_EXPLO_CHARGE1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
+			//__Particles().GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
 			m_camLevelToRT.ShakeScreen(4.0f, 8.0f, &pos);
 			//SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_BREACHING_CHARGE_01, SNDIDX_EXPLOSION_BREACHING_CHARGE_02, pos);
@@ -354,10 +354,10 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			//prop - light
 //			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xffFDB727, 1.6f);
 			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_SM1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_EXPLO_ROUND_SM1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
+			//__Particles().GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
 			m_camLevelToRT.ShakeScreen(4.0f, 8.0f, &pos);
 			//			SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FRAG_GRENADE_01, SNDIDX_EXPLOSION_FRAG_GRENADE_02, pos);
@@ -374,10 +374,10 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			//prop - light
 //			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0xffFDB727, 1.6f);
 			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_EXPLO_GROUND1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_EXPLO_GROUND1, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 			//add ring
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
-			g_particlesMgr.GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.15f, 1.0f, 16.0f, 0.0f, 0.0f, 0.05f, 0.1f, 0x55fdb727, K_PART_LAYER_FRONT_LIGHT);
+			//__Particles().GenerateSmokePuff(pos, 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 
 			m_camLevelToRT.ShakeScreen(4.0f, 8.0f, &pos);
 			//			SND_PLAY_POSITIONAL_RAND2(SNDIDX_EXPLOSION_FRAG_GRENADE_01, SNDIDX_EXPLOSION_FRAG_GRENADE_02, pos);
@@ -390,7 +390,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 			//prop - light
 //			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 1.0f, 0.2f, 0xffffffff, 1.5f);
 			//add visually stunning stuff
-			g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FLASH_AIR, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
+			__Particles().AddParticle(ANM_PARTICLES_SPR_FLASH_AIR, true, 0, &pos, NULL, NULL, 1.0f, node->m_data.fSize, 0.0f, fExploAng, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 
 			m_camLevelToRT.ShakeScreen(3.0f, 4.0f, &pos);
 
@@ -664,7 +664,7 @@ void CLevel::UpdateDoofers(float dTime)
 				{
 					if (m_Timers.Tick(50))
 					{
-						g_particlesMgr.GenerateFireRing(prop->physPt->m_data.pos, 5, 10.0f, 15.0f, K_PART_LAYER_RT_FRONT_NRM);
+						__Particles().GenerateFireRing(prop->physPt->m_data.pos, 5, 10.0f, 15.0f, K_PART_LAYER_RT_FRONT_NRM);
 					}
 				}
 				//genereaza particula de lava
@@ -673,7 +673,7 @@ void CLevel::UpdateDoofers(float dTime)
 					int anmidx = ANM_PARTICLES_SPR_MELTING_LAVA1;
 					if (randint(100) < 60)
 						anmidx = ANM_PARTICLES_SPR_MELTING_LAVA2;
-					g_particlesMgr.AddParticle(anmidx, true, 0, &prop->physPt->m_data.contactPos, NULL, NULL, 4.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_BACK_NRM);
+					__Particles().AddParticle(anmidx, true, 0, &prop->physPt->m_data.contactPos, NULL, NULL, 4.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_BACK_NRM);
 				}
 				//genereaza damage pana inainte de ultima secunda
 				if ((m_Timers.Tick(500.0f)) && (prop->physPt->m_data.bIsStatic) && (prop->fTimer > 1.0f))
@@ -700,7 +700,7 @@ void CLevel::UpdateDoofers(float dTime)
 				/*
 				if (m_Timers.Tick(50))
 				{
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_BLOOD, false, randint(5), &Vec2(prop->physPt->m_data.pos.x + randfloatsgn(5.0f), prop->physPt->m_data.pos.y + randfloatsgn(5.0f)),
+					__Particles().AddParticle(ANM_PARTICLES_SPR_BLOOD, false, randint(5), &Vec2(prop->physPt->m_data.pos.x + randfloatsgn(5.0f), prop->physPt->m_data.pos.y + randfloatsgn(5.0f)),
 						&Vec2(0.0f, 20.0f), &(prop->physPt->m_data.speed / (5.0f + randfloat(4.0f))), 0.6f, 1.0f, 0.0f, randfloat(PI), randfloatsgn(2.0f), 0.1f, 0.1f, dwCol, K_PART_LAYER_RT_BACK_NRM);
 				}
 				*/
@@ -737,7 +737,7 @@ void CLevel::UpdateDoofers(float dTime)
 				{
 					float fAng = randfloat(DOUBLE_PI);
 					Vec2 vDir(sin(fAng), cos(fAng));
-					g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_PUFF_XS1 + randint(3), true, 0, &Vec2(prop->physPt->m_data.pos.x + randfloatsgn(2.0f), prop->physPt->m_data.pos.y + randfloatsgn(2.0f)),
+					__Particles().AddParticle(ANM_PARTICLES_SPR_PUFF_XS1 + randint(3), true, 0, &Vec2(prop->physPt->m_data.pos.x + randfloatsgn(2.0f), prop->physPt->m_data.pos.y + randfloatsgn(2.0f)),
 						NULL, &(vDir * (5.0f + randfloat(5.0f))), 1.0f, 1.0f, 0.0f, fAng, 0.0f, 0.0f, 0.0f, 0xaaffffff, K_PART_LAYER_RT_FRONT_NRM);
 				}
 				//genereaza particule de foc doar cat e roshu
@@ -747,12 +747,12 @@ void CLevel::UpdateDoofers(float dTime)
 					node->m_data.fTimer -= dTime;
 					if ((m_Timers.Tick(80)) && (!prop->physPt->m_data.bContacting))
 					{
-						g_particlesMgr.GenerateFireRing(prop->physPt->m_data.pos, 2, 8.0f, 10.0f, K_PART_LAYER_RT_FRONT_NRM);
+						__Particles().GenerateFireRing(prop->physPt->m_data.pos, 2, 8.0f, 10.0f, K_PART_LAYER_RT_FRONT_NRM);
 					}
 					//some secondary explosions too
 					if ((m_Timers.Tick(120)) && (randompercent(50.0f)))
 					{
-						g_particlesMgr.AddParticle(ANM_PARTICLES_SPR_FIRECRACKER1 + randint(2), true, 0, &prop->physPt->m_data.pos,
+						__Particles().AddParticle(ANM_PARTICLES_SPR_FIRECRACKER1 + randint(2), true, 0, &prop->physPt->m_data.pos,
 							NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM);
 					}
 				}
@@ -765,7 +765,7 @@ void CLevel::UpdateDoofers(float dTime)
 					if (randompercent(50.0f))
 						nAnmId = ANM_PARTICLES_SPR_PUFF_S_XXS;
 
-					g_particlesMgr.AddParticle(nAnmId, true, 0, &prop->physPt->m_data.pos,
+					__Particles().AddParticle(nAnmId, true, 0, &prop->physPt->m_data.pos,
 						NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xaaffffff, K_PART_LAYER_RT_FRONT_NRM);
 				}
 				*/

@@ -94,7 +94,7 @@ public:
 	void					PaintFModule(int moduleIdx);
 	// Optimized paint for a single module when we don't have more modules per frame (skips a for)
 	// Adds texIdxOffset to the texture index (used when loading normals and other textures in the same sprite collection)
-	void					PaintModule_texOverride(int moduleIdx, int texIdxOffset);
+	void					PaintFModule_texOverride(int moduleIdx, int texIdxOffset);
 	// Stops the playing animation
 	void					Stop();
 	// scales the current animation duration to the desired target_duration_sec
