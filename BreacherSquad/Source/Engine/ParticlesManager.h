@@ -132,36 +132,23 @@ public:
 	}
 };
 
-const CStringHash ParticleLayers_names[] = {
-	L"RT_BACK_NRM",
-	L"RT_BACK_NRM_LIGHT",
-	L"RT_FRONT_NRM",
-	L"RT_FRONT_NRM_LIGHT",
+const CStringHash EParticleLayer_names[] = {
 	L"NORMAL",
 	L"NORMAL_LIGHT",
 	L"FRONT",
 	L"FRONT_LIGHT",
 	L"INTERFACE",
 	L"INTERFACE_LIGHT",
-	L"CONTROLS",
-	L"CONTROLS_LIGHT"
 };
 
-enum ParticleLayers{
-	K_PART_LAYER_RT_BACK_NRM = 0, //in spatele poersonajului; deseneaza si normalele si self illumination
-	K_PART_LAYER_RT_BACK_NRM_LIGHT = 1, //in spatele poersonajului; deseneaza si normalele si self illumination - additive blending
-	K_PART_LAYER_RT_FRONT_NRM, //in fata personajului; deseneaza si normalele si self illumination
-	K_PART_LAYER_RT_FRONT_NRM_LIGHT, //in fata personajului; deseneaza si normalele si self illumination - additive blending
+enum EParticleLayer {
 	K_PART_LAYER_NORMAL,
 	K_PART_LAYER_NORMAL_LIGHT,
-	K_PART_LAYER_FRONT,	//deasupra intregii scene
-	K_PART_LAYER_FRONT_LIGHT, //deasupra intregii scene, cu additive
-	//paint-ul layerelor de mai jos este administrat de interfete_custom/controale specifice. Nu se cheama in main, generic
+	K_PART_LAYER_FRONT,
+	K_PART_LAYER_FRONT_LIGHT,
 	K_PART_LAYER_INTERFACE,
 	K_PART_LAYER_INTERFACE_LIGHT,							   
-	K_PART_LAYER_CONTROLS,
-	K_PART_LAYER_CONTROLS_LIGHT,
-
+	// layers count
 	K_PART_LAYERS_CNT
 };
 
@@ -184,12 +171,12 @@ public:
 	OPRESULT			Init(WCHAR* XMLpath, int nMaxParticlesCnt = 1000);
 	void				Release();			
 	void				Update(float dtime);
-	void				UpdateLayer(int nLayer, float dtime);
-	void				PaintLayer(int nLayer, bool additiveBlending = false);
+	void				UpdateLayer(EParticleLayer eLayer, float dtime);
+	void				PaintLayer(EParticleLayer eLayer, bool additiveBlending = false);
 	//moves all particles to the "FREE" list
 	void				ClearParticles();	
 	//removes all particles from a layer
-	void				RemoveAllFromLayer(ParticleLayers ePartLayer);
+	void				RemoveAllFromLayer(EParticleLayer ePartLayer);
 	//returns particle layer idx or -1 if not found
 	int					GetParticleLayerByName(WCHAR * layerName);
 	int					GetParticleLayerByName(UINT32 layerNameHash);

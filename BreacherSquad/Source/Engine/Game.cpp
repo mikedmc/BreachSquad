@@ -231,9 +231,9 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 			}
 #endif
 
-			for ( UINT kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++ )
+			for (auto & arrController : UTGetCtrlrMgr().m_arrControllers)
 			{
-				if ( UTGetCtrlrMgr().m_arrControllers[ kk ]->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED )
+				if ( arrController->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED )
 				{
 					CCtrlLayer* layer = UTGetGUI().GetLayerByName( "LAYER_ID_QUITGAME" );
 					if ( ( layer == null ) && ( !UTGetGUI().bIsBlocking ) )
@@ -593,7 +593,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					RECT src;
 					SetRect( &src, 0, 0, pRT->nWidth, pRT->nHeight );
 					pSpr->SetTransform( &g_matIdentity );
-					pSpr->Draw( pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3( UTApp().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
+					pSpr->Draw( pRT->m_pRTTexture, &src, nullptr, &D3DXVECTOR3( UTApp().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
 					pSpr->Flush();
 				}
 			}
@@ -607,7 +607,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					RECT src;
 					SetRect( &src, 0, 0, pRT->nWidth, pRT->nHeight );
 					pSpr->SetTransform( &g_matIdentity );
-					pSpr->Draw( pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3( UTApp().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
+					pSpr->Draw( pRT->m_pRTTexture, &src, nullptr, &D3DXVECTOR3( UTApp().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
 					pSpr->Flush();
 				}
 			}
@@ -621,7 +621,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					RECT src;
 					SetRect( &src, 0, 0, pRT->nWidth, pRT->nHeight );
 					pSpr->SetTransform( &g_matIdentity );
-					pSpr->Draw( pRT->m_pRTTexture, &src, NULL, &D3DXVECTOR3( UTApp().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
+					pSpr->Draw( pRT->m_pRTTexture, &src, nullptr, &D3DXVECTOR3( UTApp().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
 					pSpr->Flush();
 				}
 			}

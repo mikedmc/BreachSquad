@@ -4198,7 +4198,7 @@ void CControlsManager::Update( float dTime )
 
 
 	//--- update particles ---
-	__Particles().UpdateLayer( K_PART_LAYER_CONTROLS_LIGHT, dTime );
+	__Particles().UpdateLayer( K_PART_LAYER_INTERFACE_LIGHT, dTime );
 }
 
 void CControlsManager::Paint()
@@ -4254,7 +4254,7 @@ void CControlsManager::Paint()
 	//}
 #endif
 	//--- particles ---
-	__Particles().PaintLayer( K_PART_LAYER_CONTROLS_LIGHT, true );
+	__Particles().PaintLayer( K_PART_LAYER_INTERFACE_LIGHT, true );
 
 	__Painter().SetViewTransform( g_matIdentity );
 }

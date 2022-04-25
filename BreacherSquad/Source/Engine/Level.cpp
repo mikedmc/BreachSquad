@@ -4298,6 +4298,11 @@ OPRESULT CLevel::RenderPass(eLVLRenderPass ePass, Mat* matProj, float fBetweenFr
 	// now paint the bullets
 	PaintBullets(ePass);
 
+	if ( ePass == K_LVL_RP_COLORS )
+	{
+		__Particles().PaintLayer(K_PART_LAYER_NORMAL);
+	}
+
 	/// END SPRITES PAINTER
 	__Painter().End();
 
@@ -4695,7 +4700,6 @@ OPRESULT CLevel::RenderPass_Composition( Mat* matProj, float fBetweenFramesPerce
 
 void CLevel::Paint()
 {
-	//daca nu e incarcat ies
 	if ((!m_bLoaded) || (!m_bOneUpdateDone))
 		return;
 
@@ -5680,16 +5684,19 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, Vec2 pos, float fSize, D
 		{
 //			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.4f, 0.1f, 0x88FDB727, 1.0f);
 			//particule sparkle
+			/*
 			for (int kk = 0; kk < 20; kk++)
 			{
 				__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, randint(2), &Vec2(pos.x + randfloatsgn(fSize), pos.y + randfloatsgn(fSize)), &g_vecGravityOld, &Vec2(randfloatsgn(60.0f), -10.0f - randfloat(40.0f)), 0.2f + randfloat(0.4f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 1.5f, kk * 0.025f);
 			}
+			*/
 		}
 		break;
 		case K_LVL_EFFECT_STARS_CONFETTI:
 		{
 //			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0x88FDB727, 3.0f * fSize);
 			//fire ring
+			/*
 			for (int kk = 0; kk < 30; kk++)
 			{
 				float ang = randfloat(DOUBLE_PI);
@@ -5707,6 +5714,7 @@ void CLevel::GenerateEffect(ELVLEffectType nEffectType, Vec2 pos, float fSize, D
 			}
 			//add ring
 			__Particles().AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.2f, 0.2f, 10.0f, 0.0f, 0.0f, 0.1f, 0.3f, 0x55ffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT);
+			*/
 		}
 		break;
 		default:

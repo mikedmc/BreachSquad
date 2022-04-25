@@ -585,7 +585,7 @@ void CActor::ProcessAICommands( CLevel& level )
 						level.AddDoofer( K_DOOFER_MEAT, GetPosHeart(), &Vec2( 200.0f, 50.0f ), &g_vecGravityOld, nSubType );
 						level.AddDoofer( K_DOOFER_MEAT, GetPosHeart(), &Vec2( -200.0f, 50.0f ), &g_vecGravityOld, nSubType );
 						//human blood gibs particle
-						__Particles().AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &pos.xy_proj, nullptr, nullptr, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_FRONT_NRM );
+//						__Particles().AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &pos.xy_proj, nullptr, nullptr, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_FRONT_NRM );
 					}
 					else //small animals and stuff
 					{
@@ -593,7 +593,7 @@ void CActor::ProcessAICommands( CLevel& level )
 						{
 							level.AddDoofer( K_DOOFER_MEAT, AABB::GetRandomPointInBox( genbox ), &Vec2( randfloatsgn( 50.0f ) + bulletSpeed.x * 50.0f, -130.0f - randfloat( 100.0f ) ), &g_vecGravityOld );
 						}
-						__Particles().AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &pos.xy_proj, nullptr, nullptr, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM );
+//						__Particles().AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &pos.xy_proj, nullptr, nullptr, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM );
 					}
 				}
 

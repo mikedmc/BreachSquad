@@ -50,7 +50,7 @@ bool CCollAIComponent::Update( CCollisionShape& active, float dTime, CLevel& lev
 					for ( int ll = 0; ll < 20; ll++ )
 					{
 						Vec2 ppos = AABB::GetRandomPointInBox( active.bbox );
-						__Particles().AddParticle( ANM_PARTICLES_SPR_GLASS_SHARDS, false, randint( 5 ), &ppos, &g_vecGravityOld, &Vec2( dirx * (60.0f + randfloat( 60.0f )), -40.0f + randfloatsgn( 50.0f ) ), 0.3f + randfloat( 0.2f ), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM );
+						//__Particles().AddParticle( ANM_PARTICLES_SPR_GLASS_SHARDS, false, randint( 5 ), &ppos, &g_vecGravityOld, &Vec2( dirx * (60.0f + randfloat( 60.0f )), -40.0f + randfloatsgn( 50.0f ) ), 0.3f + randfloat( 0.2f ), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM );
 					}
 					//sound
 					//SND_PLAY_POSITIONAL_RAND2(SNDIDX_WINDOWBREAK1, SNDIDX_WINDOWBREAK2, colshape->bbox.vCenter);
@@ -87,7 +87,7 @@ bool CCollAIComponent::Update( CCollisionShape& active, float dTime, CLevel& lev
 				for ( int ll = 0; ll < 30; ll++ )
 				{
 					Vec2 ppos = AABB::GetRandomPointInBox( active.bbox );
-					__Particles().AddParticle( ANM_PARTICLES_SPR_WOODEN_SPLINTERS, false, randint( 6 ), &ppos, &g_vecGravityOld, &Vec2( dirx * (100.0f + randfloat( 60.0f )), -40.0f + randfloatsgn( 50.0f ) ), 0.3f + randfloat( 0.2f ), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM );
+					//__Particles().AddParticle( ANM_PARTICLES_SPR_WOODEN_SPLINTERS, false, randint( 6 ), &ppos, &g_vecGravityOld, &Vec2( dirx * (100.0f + randfloat( 60.0f )), -40.0f + randfloatsgn( 50.0f ) ), 0.3f + randfloat( 0.2f ), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM );
 				}
 				// add noise event behind the door
 				Vec2 sndpos1 = Vec2( active.bbox.vCenter.x + dirx * (active.bbox.vHalfSize.x + 2.0f), active.bbox.vCenter.y );

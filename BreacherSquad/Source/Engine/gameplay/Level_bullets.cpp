@@ -147,7 +147,7 @@ void CLevel::UpdateBullets(float dTime)
 		float fRetT = 100000.0f;
 
 		///----------------------------------------------------------------------------------
-		/// Check collisions with objects
+		/// Check collisions with objects and see which one is closer
 		///----------------------------------------------------------------------------------
 		if ( bullet->pArea != nullptr )
 		{
@@ -156,7 +156,7 @@ void CLevel::UpdateBullets(float dTime)
 				CProp* prop = bullet->pArea->m_arrProps[ ll ];
 				if ( ( !prop->IsAlive() ) || ( ( prop->flags & K_PROPFLAG_CAN_BE_SHOT ) == 0 ) )
 					continue;
-				if ( prop->bbox_floor.Intersects( aabbBullet ) )
+				if ( prop->bbox_floor.Intersects(aabbBullet) )
 				{
 					if ( AABB::Segment_Intersection( vFrom, vTo, prop->bbox_floor, &vRetPt ) )
 					{
@@ -215,7 +215,20 @@ void CLevel::UpdateBullets(float dTime)
 					//#TODO: save targetedUID on bullet to avoid hitting same entity 2 times with penetrating bullets
 					hitprop->Kill();
 					killbullet = true;
+					float fang = UTMath::GetVectorAngle( Vec3XY(-bullet->c_pointPhys->speed) );
+					__Particles().AddParticle(ANM_PARTICLES_SPR_IMPACT_FIRE1, true, 0, &vRetPt, nullptr,
+						&Vec2(bullet->c_pointPhys->contactNormal * 20.0f), 5.0f, 1.0f, 0.0f, -fang, 0.0f, 0.0f, 0.0f);
 				}
+			}
+		}
+		else
+		{
+			//#TEMP: assume wall hit
+			if ( bullet->c_pointPhys->bContacting )
+			{
+				float fang = UTMath::GetVectorAngle(Vec3XY(bullet->c_pointPhys->contactNormal));
+				__Particles().AddParticle(ANM_PARTICLES_SPR_IMPACT_SMOKE1, true, 0, &Vec3ProjVec2(bullet->c_pointPhys->contactPos), nullptr, 
+					&Vec2(bullet->c_pointPhys->contactNormal * 20.0f), 5.0f, 1.0f, 0.0f, -fang, 0.0f, 0.0f, 0.0f);
 			}
 		}
 
@@ -262,6 +275,7 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 		case K_LVL_RP_COLORS:
 		{
 			////bullet tails and other geometry
+			/*
 			if (m_bulletsMeshIdx >= 0)
 			{
 				//#HARDCODE: set first texture which contains color info
@@ -269,6 +283,7 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 				//draw textured bullets (actives texture, just like the bullets)
 				m_bufferedPainter.DrawMesh(m_bulletsMeshIdx, true);
 			}
+			*/
 
 			for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
 			{

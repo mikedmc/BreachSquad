@@ -77,12 +77,12 @@ namespace AABB {
 	 * \brief Calculeaza intersectia unui segment start-end cu toate aabb-urile din lista si intoarce pe cel cu care s-a intersectat (cel mai apropiat).
 	 * Atentie! Daca segmentul pleaca din bbox punctul de coliziune va fi in spatele primului punct (ca sa nu poti trage prin pereti)
 	 */
-	CAABB*				Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CAABB * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint = NULL, Vec2 * retNormal = NULL);
+	CAABB*				Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CAABB * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint = nullptr, Vec2 * retNormal = nullptr);
 	/*!
 	 * \brief AABB segment start-end intersection.
 	 * \warning Daca segmentul pleaca din bbox punctul de coliziune va fi in spatele primului punct (ca sa nu poti trage prin pereti)
 	 */
-	bool				Segment_Intersection(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint = NULL);
+	bool				Segment_Intersection(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint = nullptr);
 	/*!
 	* \brief AABB segment start-end intersection.
 	* fRetT is the intersection factor between 0 and 1 where 1 is segment len

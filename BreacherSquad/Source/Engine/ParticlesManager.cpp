@@ -119,14 +119,14 @@ void CParticlesManager::Update(float dTime)
 	// follows all rings in all layers and updates the particles
 	for (int oo = 0; oo < K_PART_LAYERS_CNT; oo++)
 	{
-		UpdateLayer(oo, dTime);
+		UpdateLayer((EParticleLayer)oo, dTime);
 	}
 }
 
-void CParticlesManager::UpdateLayer(int nLayer, float dtime)
+void CParticlesManager::UpdateLayer(EParticleLayer eLayer, float dtime)
 {
-	CParticle *part = pList[nLayer].pNext;
-	while (part != &pList[nLayer])
+	CParticle *part = pList[eLayer].pNext;
+	while (part != &pList[eLayer])
 	{
 		if (part->m_fWaitTimer > 0.0f)
 		{
@@ -189,20 +189,20 @@ void CParticlesManager::UpdateLayer(int nLayer, float dtime)
 	}
 }
 
-void CParticlesManager::PaintLayer(int nLayer, bool additiveBlending)
+void CParticlesManager::PaintLayer(EParticleLayer eLayer, bool additiveBlending)
 {
-	_ASSERT((nLayer >= 0) && (nLayer < K_PART_LAYERS_CNT));
+	_ASSERT((eLayer >= 0) && (eLayer < K_PART_LAYERS_CNT));
 	Mat mattrans;
 
 	// empty layer, early exit
-	if(pList[nLayer].pNext == &pList[nLayer])
+	if(pList[eLayer].pNext == &pList[eLayer])
 		return;
 
 	if(additiveBlending)
 		DeviceAdditiveON(m_pDevice);
 
-	CParticle *part = pList[nLayer].pNext;
-	while(part != &pList[nLayer])
+	CParticle *part = pList[eLayer].pNext;
+	while(part != &pList[eLayer])
 	{
 		if (part->m_fWaitTimer <= 0.0f)
 		{
@@ -215,9 +215,9 @@ void CParticlesManager::PaintLayer(int nLayer, bool additiveBlending)
 		DeviceAdditiveOFF(m_pDevice);
 }
 
-void CParticlesManager::RemoveAllFromLayer(ParticleLayers ePartLayer)
+void CParticlesManager::RemoveAllFromLayer(EParticleLayer ePartLayer)
 {
-	if ((ePartLayer < 0) || (ePartLayer >= ParticleLayers::K_PART_LAYERS_CNT))
+	if ((ePartLayer < 0) || (ePartLayer >= EParticleLayer::K_PART_LAYERS_CNT))
 		return;
 
 	CParticle *part = pList[ePartLayer].pNext;
@@ -270,7 +270,7 @@ int CParticlesManager::GetParticleLayerByName(WCHAR * layerName)
 	UINT32 layerNameHash = FastHash(layerName);
 	for (int kk = 0; kk < K_PART_LAYERS_CNT; kk++)
 	{
-		if (layerNameHash == ParticleLayers_names[kk].textHash)
+		if (layerNameHash == EParticleLayer_names[kk].textHash)
 			return kk;
 	}
 
@@ -281,7 +281,7 @@ int CParticlesManager::GetParticleLayerByName(UINT32 layerNameHash)
 {
 	for (int kk = 0; kk < K_PART_LAYERS_CNT; kk++)
 	{
-		if (layerNameHash == ParticleLayers_names[kk].textHash)
+		if (layerNameHash == EParticleLayer_names[kk].textHash)
 			return kk;
 	}
 
@@ -456,22 +456,22 @@ void CParticlesManager::UpdatePartEmitters(float dTime, RectXYWH screenRect)
 			{
 				case K_PART_PE_TYPE_FOG:
 				{
-					AddParticle(ANM_PARTICLES_SPR_SMOKE, false, randint(3), &gpos, nullptr, &Vec2(randfloatsgn(8.0f), 0.0f), 6.0f, 0.7f, 0.2f, randfloat(PI), 0.0f, 1.0f, 2.0f, 0x22ffffff, npe->particleLayer);
+					//AddParticle(ANM_PARTICLES_SPR_SMOKE, false, randint(3), &gpos, nullptr, &Vec2(randfloatsgn(8.0f), 0.0f), 6.0f, 0.7f, 0.2f, randfloat(PI), 0.0f, 1.0f, 2.0f, 0x22ffffff, npe->particleLayer);
 				}
 				break;
 				case K_PART_PE_TYPE_FIRE:
 				{
-					AddParticle(ANM_PARTICLES_SPR_FLAME_SM, false, randint(5), &gpos, &Vec2(0.0f, -100.0f), &Vec2(randfloatsgn(1.0f), randfloatsgn(1.0f)), 1.0f, 1.0f, -0.4f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, npe->particleLayer);
+					//AddParticle(ANM_PARTICLES_SPR_FLAME_SM, false, randint(5), &gpos, &Vec2(0.0f, -100.0f), &Vec2(randfloatsgn(1.0f), randfloatsgn(1.0f)), 1.0f, 1.0f, -0.4f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, npe->particleLayer);
 				}
 				break;
 				case K_PART_PE_TYPE_FLARE:
 				{
-					AddParticle(ANM_PARTICLES_SPR_SMOKE, false, randint(3), &gpos, &Vec2(0.0f, -100.0f), &Vec2(randfloatsgn(50.0f), -randfloat(40.0f)), 2.0f + randfloat(1.0f), 0.5f, 0.2f, randfloat(DOUBLE_PI), randfloatsgn(1.0f), 0.1f, 0.5f, 0x66ff8888, npe->particleLayer, 5.0f);
+					//AddParticle(ANM_PARTICLES_SPR_SMOKE, false, randint(3), &gpos, &Vec2(0.0f, -100.0f), &Vec2(randfloatsgn(50.0f), -randfloat(40.0f)), 2.0f + randfloat(1.0f), 0.5f, 0.2f, randfloat(DOUBLE_PI), randfloatsgn(1.0f), 0.1f, 0.5f, 0x66ff8888, npe->particleLayer, 5.0f);
 				}
 				break;
 				case K_PART_PE_TYPE_RAINDROPS:
 				{
-					AddParticle(ANM_PARTICLES_SPR_RAINDROP1, true, 0, &gpos, nullptr, nullptr, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, npe->particleLayer);
+					//AddParticle(ANM_PARTICLES_SPR_RAINDROP1, true, 0, &gpos, nullptr, nullptr, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, npe->particleLayer);
 				}
 				break;
 			}
