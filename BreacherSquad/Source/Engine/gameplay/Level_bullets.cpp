@@ -138,8 +138,8 @@ void CLevel::UpdateBullets(float dTime)
 		Vec2 vColP, vColN;
 		CVisibleSortable pRetObj;
 
-		Vec2 vFrom = bullet->pos_last.xy;
-		Vec2 vTo = bullet->pos.xy;
+		Vec2 vFrom = bullet->pos_last.xy_proj;
+		Vec2 vTo = bullet->pos.xy_proj;
 		CAABB aabbBullet;
 		aabbBullet.Set_Corrected( vFrom, vTo );
 		// collision return vars
@@ -157,9 +157,9 @@ void CLevel::UpdateBullets(float dTime)
 				CProp* prop = bullet->pArea->m_arrProps[ ll ];
 				if ( ( !prop->IsAlive() ) || ( ( prop->flags & K_PROPFLAG_CAN_BE_SHOT ) == 0 ) )
 					continue;
-				if ( prop->bbox_floor.Intersects(aabbBullet) )
+				if ( prop->bbox.Intersects(aabbBullet) )
 				{
-					if ( AABB::Segment_Intersection( vFrom, vTo, prop->bbox_floor, &vRetPt ) )
+					if ( AABB::Segment_Intersection( vFrom, vTo, prop->bbox, &vRetPt ) )
 					{
 						//#TODO: return material too
 						vColP = vRetPt;
@@ -187,9 +187,9 @@ void CLevel::UpdateBullets(float dTime)
 						CProp* prop = area->m_arrProps[ ll ];
 						if ( ( !prop->IsAlive() ) || ( ( prop->flags & K_PROPFLAG_CAN_BE_SHOT ) == 0 ) )
 							continue;
-						if ( prop->bbox_floor.Intersects( aabbBullet ) )
+						if ( prop->bbox.Intersects( aabbBullet ) )
 						{
-							if ( AABB::Segment_Intersection( vFrom, vTo, prop->bbox_floor, &vRetPt ) )
+							if ( AABB::Segment_Intersection( vFrom, vTo, prop->bbox, &vRetPt ) )
 							{
 								//#TODO: return material too
 								vColP = vRetPt;
@@ -296,8 +296,11 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 				//float ang = UTMath::GetVectorAngle(vdir);
 				bullet->sprBullet.pos = bullet->pos.xy_proj;
 				bullet->sprBullet.PaintFModule(0);
+				// paints shadow so we see where it falls:
+				/*
 				bullet->sprBullet.pos = bullet->pos.xy;
 				bullet->sprBullet.PaintFModule(0);
+				*/
 			}
 		}
 		break;

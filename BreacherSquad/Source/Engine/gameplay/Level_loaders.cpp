@@ -128,7 +128,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		CLevelArea* plarea = m_arrAreas[ii];
 		// get the same area description from missions generator and find neighbours
 		CPlacedArea* srcarea = UTGetMissionGen().m_arrPlaced[ii];
-		for (auto conn : srcarea->arrConnections)
+		for (const auto& conn : srcarea->arrConnections)
 		{
 			CLevelArea* neigh = Areas_GetByID(conn.pConnectedArea->nID);
 			_ASSERT(neigh != nullptr);
@@ -277,10 +277,10 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	WCHAR Path[MAX_PATH] = { 0 };
 
 	//load level
-	FILE *fl = NULL;
+	FILE *fl = nullptr;
 	int err = OS_wfopen_s(&fl, strPathAbs, L"rb");
 
-	if (fl == NULL || err != 0)
+	if (fl == nullptr || err != 0)
 	{
 		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Could not open area file:%s", strPathAbs);
 	}
@@ -330,7 +330,8 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	//m_vLevelOrigin.y = (float)originY + m_levelAABB.y;
 
 	// add dirty rect on area so it computes everything (dirty rect is inclusive so we subtract 1 from width and height)
-	m_arrDirtyRectsTL.push_back(RectXYWHi(posTL.x, posTL.y, areaW, areaH));
+	//m_arrDirtyRectsTL.push_back(RectXYWHi(posTL.x, posTL.y, areaW, areaH));
+	m_arrDirtyRectsTL.emplace_back( RectXYWHi( posTL.x, posTL.y, areaW, areaH ) );
 
 	// need to know the tileset size
 	Vec2 vTilesetSize = m_pTexTilesColor->getSize();
@@ -567,10 +568,10 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		if ( obj->shScriptActions.IsSet() )
 		{
 			vector<wstring> retarr = TokenizeString( obj->shScriptActions.text, L"," );
-			for ( int ll = 0; ll < retarr.size(); ll++ )
+			for (auto & token : retarr)
 			{
 				CScriptAction scra;
-				if ( OP_SUCCESS( GetScriptAction( retarr[ ll ].c_str(), scra ) ) )
+				if ( OP_SUCCESS( GetScriptAction( token.c_str(), scra ) ) )
 				{
 					obj->arrActions.Add( scra );
 				}
@@ -859,7 +860,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 			break;
 		}
 	}
-	//set animation data at the end (some front objs need bg to be loaded)
+	//#TEMP: set animation data at the end (some front objs need bg to be loaded)
 	for (UINT32 kk = 0; kk < m_arrMiscObjects.GetSize(); kk++)
 	{
 		CMiscObjectBase* mob = m_arrMiscObjects[kk];
