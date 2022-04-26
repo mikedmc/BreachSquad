@@ -149,6 +149,7 @@ void CLevel::UpdateBullets(float dTime)
 		///----------------------------------------------------------------------------------
 		/// Check collisions with objects and see which one is closer
 		///----------------------------------------------------------------------------------
+		_ASSERT( bullet->pArea );
 		if ( bullet->pArea != nullptr )
 		{
 			for ( int ll = 0; ll < bullet->pArea->m_arrProps.Count(); ll++ )
@@ -367,7 +368,6 @@ void CBullet::Update( float dTime, CLevel & level )
 	if ( c_pointPhys )
 	{
 		c_pointPhys->Update( pos, dTime, level );
+		pArea = c_pointPhys->pArea;
 	}
-
-	pArea = c_pointPhys->pArea;
 }

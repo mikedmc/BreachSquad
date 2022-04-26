@@ -43,7 +43,7 @@ public:
 	CPointPhysComponent( bool bPhysicsEnabled, Vec3 vAcceleration = g_Vec3Zero, int nCollFlags = K_PPC_COLLFLAG_ALL );
 	~CPointPhysComponent();
 
-	void				Update( VecProj& vPos, float dTime, CLevel & level );
+	void				Update( VecProj& vPos, float dTime, CLevel & level ) override;
 
-	void				SetSpeed( Vec3 vSpeed );
+	void				SetSpeed( Vec3 vSpeed ) override;
 };

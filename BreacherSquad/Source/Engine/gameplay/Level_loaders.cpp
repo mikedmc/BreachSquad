@@ -463,7 +463,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 
 	//read level collision boxes
 	int colCnt = (int)OS_freadUInt32(fl);
-	//date fiecare element
+	
 	for (int kk = 0; kk < colCnt; kk++)
 	{
 		CCollisionShape* colobj = new CCollisionShape(new CCollAIComponent());
@@ -617,7 +617,9 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		bool bactHideInteract = (n1b & 0x2) != 0;
 		float factTouchDuration = (float)OS_freadInt32(fl);
 		bool bactStartHidden = (OS_freadByte(fl) != 0) ? true : false;
-		INT32 nactTargetID = unBaseID + OS_freadInt32(fl);
+		INT32 nactTargetID = OS_freadInt32(fl);
+		if ( nactTargetID >= 0 )
+			nactTargetID += unBaseID;
 		//read script AI name
 		CHAR strScriptName[MAX_PATH];
 		CHAR strAIname[MAX_PATH];

@@ -39,11 +39,11 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 	bContactStarted = false;
 	//save last pos
 	Vec3 vLastPos = vPos.xyz;
-	if ( ( pArea == nullptr ) || ( !pArea->AABBbounds.PointIn( vPos.xy ) ) )
+	if ( pArea == nullptr )
 	{
 		pArea = level.Areas_GetAt( vPos.xy );
 	}
-
+	_ASSERT( pArea != nullptr );
 	///--- integrator
 	//integrator
 	if ( bIsStatic )
