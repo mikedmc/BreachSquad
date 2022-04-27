@@ -35,6 +35,8 @@
 
 // macros
 #define			Vec3XY(vec)				Vec2(vec.x, vec.y)
+#define			Vec3XZ(vec)				Vec2(vec.x, vec.z)
+#define			Vec3YZ(vec)				Vec2(vec.y, vec.z)
 #define			Vec2ToVec3XY0(vec)		Vec3(vec.x, vec.y, 0.0f)
 
 // Is vector almost zero?

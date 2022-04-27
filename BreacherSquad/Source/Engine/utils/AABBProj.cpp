@@ -1,16 +1,52 @@
 #include "dxstdafx.h"
 #include "AABBProj.h"
 
-CAABBProj::CAABBProj( const CAABBProj& src )
+CAABBProj::CAABBProj() : 
+	vHalfSize( 0.0f, 0.0f, 0.0f ), vCenter( 0.0f, 0.0f, 0.0f ), 
+	vMin( 0.0f, 0.0f, 0.0f ), vSize( 0.0f, 0.0f, 0.0f ), vMax( 0.0f, 0.0f, 0.0f )
 {
-	box_proj = src.box_proj;
-	box_floor = src.box_floor;
-	height = src.height;
 }
 
-CAABBProj::CAABBProj( Vec2 min, Vec2 max, float heightZ )
+CAABBProj::CAABBProj( Vec3 min, Vec3 max )
 {
-	box_floor.Set( min, max );
-	height = heightZ;
-	box_proj.Set( Vec2(min.x, min.y - Z_TO_H(height)), max );
+	Set( min, max );
+}
+
+CAABBProj::CAABBProj( CAABBProj& src )
+{
+	Set( src.vMin, src.vMax );
+}
+
+void CAABBProj::Set( Vec3 min, Vec3 max )
+{
+	vMin = min;
+	vMax = max;
+
+	vSize = vMax - vMin;
+	vHalfSize = vSize / 2.0f;
+	vCenter = vMin + vHalfSize;
+}
+
+CAABBProjEx::CAABBProjEx( const CAABBProj & box )
+{
+	Set( box.vMin, box.vMax );
+	vMin_ini = box.vMin;
+	vMax_ini = box.vMax;
+}
+
+CAABBProjEx::CAABBProjEx()
+{
+	vMin_ini = { 0.0f, 0.0f, 0.0f };
+	vMax_ini = { 0.0f, 0.0f, 0.0f };
+}
+
+void CAABBProjEx::SaveSnapshot()
+{
+	vMin_ini = vMin;
+	vMax_ini = vMax;
+}
+
+void CAABBProjEx::RestoreSnapshot( Vec3 vOffset /*= { 0.0f, 0.0f, 0.0f } */ )
+{
+	Set( vMin_ini + vOffset, vMax_ini + vOffset );
 }

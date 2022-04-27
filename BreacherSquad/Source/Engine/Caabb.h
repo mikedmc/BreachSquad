@@ -118,18 +118,19 @@ namespace AABB {
 class CAABBEx : public CAABB
 {
 public:
-	CAABBEx() : vMin_snapshot(0.0f, 0.0f), vMax_snapshot(0.0f, 0.0f)
-	{}
-
-	CAABBEx(const CAABB & box) : vMin_snapshot(0.0f, 0.0f), vMax_snapshot(0.0f, 0.0f)
-	{
-		Set(box.vMin, box.vMax);
-	}
-
 	Vec2 vMin_snapshot;
 	Vec2 vMax_snapshot;
 
+	CAABBEx() : vMin_snapshot( 0.0f, 0.0f ), vMax_snapshot( 0.0f, 0.0f )
+	{}
+	CAABBEx( const CAABB & box ) : vMin_snapshot( box.vMin ), vMax_snapshot( box.vMax )
+	{
+		Set( box.vMin, box.vMax );
+	}
+	// saves a snapshot of the current box
 	void				SaveSnapshot();
+	// restores from snapshot into current box data (offset is optional)
 	void				RestoreSnapshot(Vec2 vOffset = { 0.0f, 0.0f });
+	// returns saved snapshot without changing current box
 	CAABB				GetSnapshot();
 };
