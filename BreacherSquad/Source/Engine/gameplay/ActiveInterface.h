@@ -46,8 +46,9 @@ public:
 	UINT32 					nTouchingUID;   		// Reprezinta UID-ul celui care a facut touch sau 0 pt niciunul
 													   
 	DWORD					color;
-
-	CAABBProjEx				bbox;					// bbox in 3d space, with backup copy inside
+	int						heightZ;				// height of object, same as in bbox Z axis
+	CAABBEx					bbox;					// bbox in projected screen space, with backup copy inside.
+	CAABBEx					bbox_floor;				// bbox that represents the floor rectangle. has backup copy.
 
 public: 
 	DWORD					color_ini;

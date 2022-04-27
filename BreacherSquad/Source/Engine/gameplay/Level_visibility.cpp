@@ -84,7 +84,8 @@ void CLevel::BuildVisibilityLists()
 			case K_LVL_LT_AMBIENTAL:
 			case K_LVL_LT_DIRECTIONAL:
 			{
-				if (camaabb.Intersects(light->bbox_ini))
+				// use initial value because current box is moved with light position
+				if (camaabb.Intersects(light->bbox.GetSnapshot()))
 				{
 					m_visibleList.visible_lights.Add(m_arrLights[kk]);
 				}

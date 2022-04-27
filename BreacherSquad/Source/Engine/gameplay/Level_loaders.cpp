@@ -422,8 +422,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		bbmax.y = bbmin.y + (float)OS_freadInt32(fl);
 		//set loaded size (default)
 		nl->bbox.Set_Corrected(bbmin, bbmax);
-		nl->bbox_ini = nl->bbox;
-		nl->bbox_ini.Move(-nl->pos.xy);
+		nl->bbox.SaveSnapshot( -nl->pos.xy );
 		nl->fRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
 		//re-arrange spots (maybe lights image changed)
 		nl->SetLightTexture(&m_sprLights, nl->animID, nl->frameID);
@@ -443,8 +442,8 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		{
 			m_colAmbientGlobal = nl->color;
 			// set ambiental bbox the size of the area
-			nl->bbox_ini = area->AABBbounds;
-			nl->bbox = nl->bbox_ini;
+			nl->bbox = area->AABBbounds;
+			nl->bbox.SaveSnapshot();
 			LOG(L"light: %.2f %.2f", nl->bbox.vMin.x, nl->bbox.vMin.y);
 		}
 
@@ -479,9 +478,9 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		if ((colobj->bbox.vSize.x <= 0.0f) || (colobj->bbox.vSize.y <= 0.0f))
 			colobj->bbox.Set(Vec2(0.0f, 0.0f), Vec2(16.0f, 16.0f));
 		colobj->bbox.Move(vOffset);
-		colobj->bbox_ini = colobj->bbox;
-		//setam pos on center
-		colobj->pos = colobj->bbox_ini.vCenter;
+		colobj->bbox.SaveSnapshot();
+		//set pos on center
+		colobj->pos = colobj->bbox.vCenter;
 		//type (ub)
 		colobj->eType = (ECollType)OS_freadUByte(fl);
 		//cast shadows
@@ -549,8 +548,10 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		//bbox
 		RectXYWHi bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
 		RectXYWHi objbox = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
-		obj->bbox_ini.Set(objbox);
-		obj->bbox_floor_ini.Set(bbox_set);
+		obj->bbox.Set(objbox);
+		obj->bbox.SaveSnapshot();
+		obj->bbox_floor.Set(bbox_set);
+		obj->bbox_floor.SaveSnapshot();
 		// when we flip it on X we flip bboxes too
 		/*
 		if (IS_FLAG_ALL(obj->flags, K_PROPFLAG_FLIP_X)

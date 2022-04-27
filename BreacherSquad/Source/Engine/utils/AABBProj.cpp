@@ -25,7 +25,11 @@ void CAABBProj::Set( Vec3 min, Vec3 max )
 	vSize = vMax - vMin;
 	vHalfSize = vSize / 2.0f;
 	vCenter = vMin + vHalfSize;
+
+	box_xy.Set( vMin.x, vMin.y, vMax.x, vMax.y );
 }
+
+
 
 CAABBProjEx::CAABBProjEx( const CAABBProj & box )
 {
@@ -44,6 +48,12 @@ void CAABBProjEx::SaveSnapshot()
 {
 	vMin_ini = vMin;
 	vMax_ini = vMax;
+}
+
+void CAABBProjEx::SetSnapshot( Vec3 min, Vec3 max )
+{
+	vMin_ini = min;
+	vMax_ini = max;
 }
 
 void CAABBProjEx::RestoreSnapshot( Vec3 vOffset /*= { 0.0f, 0.0f, 0.0f } */ )

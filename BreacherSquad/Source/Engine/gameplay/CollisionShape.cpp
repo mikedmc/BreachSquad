@@ -1,9 +1,9 @@
 #include "dxstdafx.h"
 #include "CollisionShape.h"
 
-CCollisionShape::CCollisionShape( CCollAIComponent* AIcomponent ) : 
-	eType( K_SHAPE_SOLID ), castShadows( false ), 
-	collFlags( K_DIRFLAG_ALL ), ubFlags( K_LVL_COLLFLAG_SOLID ), 
+CCollisionShape::CCollisionShape( CCollAIComponent* AIcomponent ) :
+	eType( K_SHAPE_SOLID ), castShadows( false ),
+	collFlags( K_DIRFLAG_ALL ), ubFlags( K_LVL_COLLFLAG_SOLID ),
 	c_AI( AIcomponent )
 {
 }
@@ -14,19 +14,18 @@ CCollisionShape::~CCollisionShape()
 }
 
 ///--- COLLISION SHAPES ---
-void CCollisionShape::SetPos(Vec3 newPos)
+void CCollisionShape::SetPos( Vec3 newPos )
 {
 	pos = newPos;
 	//set relative data
-	bbox = bbox_ini;
-	bbox.Move(pos.xy);
+	bbox.RestoreSnapshot( pos.xy );
 }
 
-void CCollisionShape::Move(Vec3 delta)
+void CCollisionShape::Move( Vec3 delta )
 {
-	pos.Move(delta);
+	pos.Move( delta );
 	//set relative data
-	bbox.Move(Vec3XY(delta));
+	bbox.Move( Vec3XY( delta ) );
 }
 
 void CCollisionShape::SetAI( EAIstate newstate )
@@ -47,7 +46,7 @@ void CCollisionShape::EndPlay()
 void CCollisionShape::Update( float dTime, CLevel& level )
 {
 	// clean target pointer (should be done by AI?)
-	if ( (pTarget != nullptr) && pTarget->IsPendingKill() )
+	if ( ( pTarget != nullptr ) && pTarget->IsPendingKill() )
 	{
 		pTarget->FreeRef();
 		pTarget = nullptr;
@@ -64,21 +63,21 @@ void CCollisionShape::PostConstructionInit()
 {
 	switch ( eType )
 	{
-		case K_SHAPE_SOLID:
-			collFlags = K_DIRFLAG_ALL;
-			break;
-		case K_SHAPE_TRIGGER:
-			collFlags = K_DIRFLAG_NONE;
-			castShadows = false;
-			break;
-		case K_SHAPE_PARTICLEGEN:
-			collFlags = K_DIRFLAG_NONE;
-			castShadows = false;
-			break;
-		default:
-			collFlags = K_DIRFLAG_ALL;
-			castShadows = true;
-			break;
+	case K_SHAPE_SOLID:
+		collFlags = K_DIRFLAG_ALL;
+		break;
+	case K_SHAPE_TRIGGER:
+		collFlags = K_DIRFLAG_NONE;
+		castShadows = false;
+		break;
+	case K_SHAPE_PARTICLEGEN:
+		collFlags = K_DIRFLAG_NONE;
+		castShadows = false;
+		break;
+	default:
+		collFlags = K_DIRFLAG_ALL;
+		castShadows = true;
+		break;
 	}
 }
 
@@ -87,46 +86,46 @@ void CCollisionShape::PostConstructionInit()
 ///----------------------------------------------------------------------------------
 
 
-CCollisionShape * CLevel::GetCollisionShapeAt(Vec2 point, int collisionType)
+CCollisionShape * CLevel::GetCollisionShapeAt( Vec2 point, int collisionType )
 {
 	//#TODO: to optimize! only search in area pointed by the point
-	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
+	for ( int kk = 0; kk < m_arrColShapes.GetSize(); kk++ )
 	{
-		if ((collisionType != -1) && (m_arrColShapes[kk]->eType != collisionType))
+		if ( ( collisionType != -1 ) && ( m_arrColShapes[kk]->eType != collisionType ) )
 			continue;
-		if (m_arrColShapes[kk]->bbox.PointIn(point))
+		if ( m_arrColShapes[kk]->bbox.PointIn( point ) )
 			return m_arrColShapes[kk];
 	}
 	return nullptr;
 }
 
-CCollisionShape* CLevel::GetCollisionShapeByUID(UINT32 nUID)
+CCollisionShape* CLevel::GetCollisionShapeByUID( UINT32 nUID )
 {
-	if (nUID == 0)
+	if ( nUID == 0 )
 		return nullptr;
 
-	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
+	for ( int kk = 0; kk < m_arrColShapes.GetSize(); kk++ )
 	{
-		if (m_arrColShapes[kk]->UID == nUID)
+		if ( m_arrColShapes[kk]->UID == nUID )
 			return m_arrColShapes[kk];
 	}
 	return nullptr;
 }
 
-CCollisionShape* CLevel::SpawnCollisionShape( ECollType newType, Vec2 vMin, Vec2 vMax)
+CCollisionShape* CLevel::SpawnCollisionShape( ECollType newType, Vec2 vMin, Vec2 vMax )
 {
-	CCollisionShape* pCol = new CCollisionShape(new CCollAIComponent());
+	CCollisionShape* pCol = new CCollisionShape( new CCollAIComponent() );
 	pCol->ID = GenerateNextID();
 	pCol->eType = newType;
-	pCol->bbox_ini.Set_Corrected(vMin, vMax);
-	pCol->bbox = pCol->bbox_ini;
-	pCol->pos = pCol->bbox_ini.vCenter;
+	pCol->bbox.Set_Corrected( vMin, vMax );
+	pCol->bbox.SaveSnapshot();
+	pCol->pos = pCol->bbox.vCenter;
 
 	pCol->collFlags = K_DIRFLAG_NONE;
 	pCol->castShadows = false;
 
 	pCol->PostConstructionInit();
-	m_arrColShapes.Add(pCol);
+	m_arrColShapes.Add( pCol );
 	pCol->BeginPlay();
 
 	return pCol;

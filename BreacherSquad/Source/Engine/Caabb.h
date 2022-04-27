@@ -127,8 +127,13 @@ public:
 	{
 		Set( box.vMin, box.vMax );
 	}
-	// saves a snapshot of the current box
-	void				SaveSnapshot();
+	// saves a snapshot of the current box adding the specified offset if needed
+	void				SaveSnapshot( Vec2 vOffset = { 0.0f, 0.0f } );
+	// Forcefully overwrites the backup data
+	void				SetSnapshot( RectXYWH & rect );
+	void				SetSnapshot( RectXYWHi & rect );
+	void				SetSnapshot( float xmin, float ymin, float xmax, float ymax );
+	void				SetSnapshot( CAABB& rect );
 	// restores from snapshot into current box data (offset is optional)
 	void				RestoreSnapshot(Vec2 vOffset = { 0.0f, 0.0f });
 	// returns saved snapshot without changing current box

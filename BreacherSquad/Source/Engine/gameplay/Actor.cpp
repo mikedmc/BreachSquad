@@ -3,9 +3,10 @@
 
 void CActor::PostConstructionInit()
 {
-	// compute bboxes on init
-	bbox.Set(&bbox_ini, pos.xy_proj);
-	bbox_floor.Set(&bbox_floor_ini, pos.xy);
+	// compute bboxes from backup on init (might not be necessary but it doesn't hurt)
+	//#TODO: see if they're already initialized when spawned
+	bbox.RestoreSnapshot(pos.xy_proj);
+	bbox_floor.RestoreSnapshot(pos.xy);
 }
 
 void CActor::BeginPlay()
@@ -77,8 +78,8 @@ void CActor::SetPos(Vec3 newPos)
 	pos = newPos;
 	vHeart.Set( pos.xyz.x, pos.xyz.y, pos.xyz.z + _template.heartZ );
 
-	bbox.Set(&bbox_ini, pos.xy_proj);
-	bbox_floor.Set(&bbox_floor_ini, pos.xy);
+	bbox.RestoreSnapshot(pos.xy_proj);
+	bbox_floor.RestoreSnapshot(pos.xy);
 }
 
 void CActor::Move(Vec3 delta)
@@ -88,8 +89,8 @@ void CActor::Move(Vec3 delta)
 	pos = npos;
 	vHeart.Set( pos.xyz.x, pos.xyz.y, pos.xyz.z + _template.heartZ );
 
-	bbox.Set(&bbox_ini, pos.xy_proj);
-	bbox_floor.Set(&bbox_floor_ini, pos.xy);
+	bbox.RestoreSnapshot(pos.xy_proj);
+	bbox_floor.RestoreSnapshot(pos.xy);
 }
 
 
@@ -116,9 +117,9 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 
 	bSkipRender = false;
 	// compute bboxes
-	bbox_floor_ini = _template.bbox;
+	bbox_floor.SetSnapshot(_template.bbox);
 	//#TODO: should be different
-	bbox_ini = bbox_floor_ini;
+	bbox.SetSnapshot( bbox_floor );
 	heightZ = _template.heightZ;
 	
 	//set hue
@@ -659,8 +660,10 @@ void CActor::DoMove( float dTime, CLevel& level )
 		///b.detectezi coliziuni posibile(bbox old + new pos)
 		//1. find bbox start and end union that includes all collisions when moving at high speeds
 		CAABB destbox, srcbox;
-		srcbox = bbox_ini; srcbox.Move( pos.xy );
-		destbox = bbox_ini; destbox.Move( pos.xy + vNextMove );
+		srcbox = bbox.GetSnapshot();
+		destbox = srcbox; 
+		srcbox.Move( pos.xy );
+		destbox.Move( pos.xy + vNextMove );
 		// box unions to check all possible collisions
 		CAABB boxUnion = AABB::Union( destbox, srcbox );
 		// bbox union in tile coords, including every touched tile
@@ -751,7 +754,8 @@ void CActor::DoMove( float dTime, CLevel& level )
 		while ( fRemainingTime > 0.0f )
 		{
 			// compute source box
-			srcbox = bbox_ini; srcbox.Move( pos.xy );
+			srcbox = bbox.GetSnapshot();
+			srcbox.Move( pos.xy );
 			// find closest collider
 			float minDistSq = 100000.0f;
 			float fClosestTime = 100000.0f;
@@ -841,9 +845,9 @@ void CActor::DoMove( float dTime, CLevel& level )
 				{
 					vNextMove = hit.vNormal;
 
-					CAABB newboxsrc = bbox_ini;
-					newboxsrc.Move( pos.xy );
+					CAABB newboxsrc = bbox.GetSnapshot();
 					CAABB newboxdest = newboxsrc;
+					newboxsrc.Move( pos.xy );
 					newboxdest.Move( vNextMove );
 					CAABB newBoundary = AABB::Union( newboxsrc, newboxdest );
 

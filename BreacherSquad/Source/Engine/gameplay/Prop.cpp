@@ -13,41 +13,41 @@ CProp::~CProp()
 }
 
 ///--- CACTIVE ---
-void CProp::SetPos(Vec3 newPos)
+void CProp::SetPos( Vec3 newPos )
 {
 	pos = newPos;
-	bbox.Set(&bbox_ini, pos.xy_proj);
-	bbox_floor.Set(&bbox_floor_ini, pos.xy);
+	bbox.RestoreSnapshot( pos.xy_proj );
+	bbox_floor.RestoreSnapshot( pos.xy );
 }
 
-void CProp::Move(Vec3 delta)
+void CProp::Move( Vec3 delta )
 {
 	Vec3 npos = pos.xyz + delta;
 	pos = npos;
-	bbox.Set(&bbox_ini, pos.xy_proj);
-	bbox_floor.Set(&bbox_floor_ini, pos.xy);
+	bbox.RestoreSnapshot( pos.xy_proj );
+	bbox_floor.RestoreSnapshot( pos.xy );
 }
 
-void CProp::InitializeFromAFrameFlags(UINT32 AFrameFlags)
+void CProp::InitializeFromAFrameFlags( UINT32 AFrameFlags )
 {
 	// read height and convert from screen to world (usually double the height)
-	heightZ = H_TO_Z((float)(AFrameFlags & K_FLAG_EDITOR_PROP_HEIGHTMASK));
+	heightZ = H_TO_Z( ( float ) ( AFrameFlags & K_FLAG_EDITOR_PROP_HEIGHTMASK ) );
 	// read class as int and convert to StrHash
-	int nClass = (AFrameFlags & K_FLAG_EDITOR_PROP_CLASSMASK) >> 8;
-	if ((nClass > 0) && (nClass < ARRAY_SIZE(EPropClassNames)))
+	int nClass = ( AFrameFlags & K_FLAG_EDITOR_PROP_CLASSMASK ) >> 8;
+	if ( ( nClass > 0 ) && ( nClass < ARRAY_SIZE( EPropClassNames ) ) )
 	{
 		shClass = EPropClassNames[nClass - 1];
 	}
 	// reset flags
 	flags = 0;
-	if (AFrameFlags & K_FLAG_EDITOR_PROP_COLLIDES_ACTORS) flags |= K_PROPFLAG_COLLIDES_ACTOR;
-	if (AFrameFlags & K_FLAG_EDITOR_PROP_CAN_BE_SHOT) flags |= K_PROPFLAG_CAN_BE_SHOT;
+	if ( AFrameFlags & K_FLAG_EDITOR_PROP_COLLIDES_ACTORS ) flags |= K_PROPFLAG_COLLIDES_ACTOR;
+	if ( AFrameFlags & K_FLAG_EDITOR_PROP_CAN_BE_SHOT ) flags |= K_PROPFLAG_CAN_BE_SHOT;
 }
 
 void CProp::Update( float dTime, CLevel& level )
 {
 	// clean target pointer (should be done by AI?)
-	if ( (pTarget != nullptr) && pTarget->IsPendingKill() )
+	if ( ( pTarget != nullptr ) && pTarget->IsPendingKill() )
 	{
 		pTarget->FreeRef();
 		pTarget = nullptr;
@@ -65,10 +65,10 @@ void CProp::Update( float dTime, CLevel& level )
 		if ( sprite.animStatus == ANIM_STATUS_FRAMELOCK )
 			bAnimated = false;
 		// refresh bbox on each frame change
-		if ( (sprite.animStatus == ANIM_STATUS_PLAYING_FRAME_ADVANCED) || (sprite.animStatus == ANIM_STATUS_FRAMELOCK) )
+		if ( ( sprite.animStatus == ANIM_STATUS_PLAYING_FRAME_ADVANCED ) || ( sprite.animStatus == ANIM_STATUS_FRAMELOCK ) )
 		{
 			RectXYWHi frrect = sprite.pSprCol->GetAFrameBBox( sprite.animIdx, sprite.frameIdx );
-			bbox_ini.Set( frrect );
+			bbox.SetSnapshot( frrect );
 		}
 	}
 
@@ -82,8 +82,8 @@ void CProp::Update( float dTime, CLevel& level )
 void CProp::PostConstructionInit()
 {
 	// compute bboxes on init
-	bbox.Set(&bbox_ini, pos.xy_proj);
-	bbox_floor.Set(&bbox_floor_ini, pos.xy);
+	bbox.RestoreSnapshot( pos.xy_proj );
+	bbox_floor.RestoreSnapshot( pos.xy );
 }
 
 void CProp::BeginPlay()

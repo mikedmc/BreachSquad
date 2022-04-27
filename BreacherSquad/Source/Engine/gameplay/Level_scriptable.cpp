@@ -1349,14 +1349,14 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 			//set new bbox
 			RectXYWHi objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
-			active->bbox_ini.Set(Vec2(objbox.x, objbox.y), Vec2(objbox.Right(), objbox.Bottom()));
+			active->bbox.Set(Vec2(objbox.x, objbox.y), Vec2(objbox.Right(), objbox.Bottom()));
+			active->bbox.SaveSnapshot();
 			/*
 			if (active->flipX)
 			{
 				active->bbox_ini.Move(Vec2(-2.0f * active->bbox_ini.vCenter.x, 0.0f));
 			}
 			*/
-			active->bbox = active->bbox_ini;
 			active->bbox.Move(active->pos.xy);
 
 			return true;
@@ -1411,14 +1411,14 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			active->bAnimated = animated;
 			//set new bbox
 			RectXYWHi objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
-			active->bbox_ini.Set(Vec2(objbox.x, objbox.y), Vec2(objbox.Right(), objbox.Bottom()));
+			active->bbox.Set(Vec2(objbox.x, objbox.y), Vec2(objbox.Right(), objbox.Bottom()));
+			active->bbox.SaveSnapshot();
 			/*
 			if (active->flipX)
 			{
 				active->bbox_ini.Move(Vec2(-2.0f * active->bbox_ini.vCenter.x, 0.0f));
 			}
 			*/
-			active->bbox = active->bbox_ini;
 			active->bbox.Move(active->pos.xy);
 
 			return true;
