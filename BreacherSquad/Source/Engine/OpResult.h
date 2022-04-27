@@ -49,23 +49,12 @@ public:
 	{
 		return (code >= 0) ? S_OK : E_FAIL;
 	}
-	/*
-	// converts HRESULT to OPRESULT
-	OPRESULT(HRESULT hr, eOpSeverity eSeverity = K_SEVERITY_FORGET)
-	{
-		code = (hr >= 0) ? K_OP_OK : K_OP_FAILED;
-		severity = eSeverity;
-		swprintf_s(message, 256, L"HRESULT: %d", hr);
 
-		LogResult();
-	}
-	*/
-
-	OPRESULT(HRESULT hr)
+	OPRESULT( HRESULT hr )
 	{
-		code = (hr < 0) ? K_OP_FAILED : K_OP_OK;
+		code = ( hr < 0 ) ? K_OP_FAILED : K_OP_OK;
 		severity = K_SEVERITY_NONE;
-		swprintf_s(message, 256, L"HRESULT:%ld", hr);
+		swprintf_s( message, 256, L"HRESULT:%ld", hr );
 	}
 
 	OPRESULT(eOpResult eCode, eOpSeverity eSeverity = K_SEVERITY_NONE) 
@@ -86,17 +75,6 @@ public:
 		LogResult();
 	}
 
-	/*
-	OPRESULT(HRESULT hr, const WCHAR * strMessage, eOpSeverity eSeverity = K_SEVERITY_NONE)
-	{
-		code = (hr >= 0) ? K_OP_OK : K_OP_FAILED;
-		severity = eSeverity;
-		swprintf_s(message, 256, L"HRESULT[%d] %s", hr, strMessage);
-
-		LogResult();
-	}
-	*/
-
 	OPRESULT(eOpResult eCode, eOpSeverity eSeverity, WCHAR* szFormat, ...)
 	{
 		code = eCode;
@@ -110,6 +88,13 @@ public:
 		LogResult();
 	}
 
+	static OPRESULT FromHRESULT( HRESULT hr )
+	{
+		return OPRESULT(
+		( hr >= 0 ) ? K_OP_OK : K_OP_FAILED,
+		( hr >= 0 ) ? K_SEVERITY_NONE : K_SEVERITY_WARNING,
+		L"HRESULT[%d] %s", hr );
+	}
 
 private:
 	// after setting all vars call this to show the return op onscreen
@@ -127,5 +112,29 @@ private:
 
 		ErrorBox(nErrSeverity, TEXT("OPRESULT[%d] %s"), code, message);
 	}
+
+
+	/*
+OPRESULT(HRESULT hr, const WCHAR * strMessage, eOpSeverity eSeverity = K_SEVERITY_NONE)
+{
+	code = (hr >= 0) ? K_OP_OK : K_OP_FAILED;
+	severity = eSeverity;
+	swprintf_s(message, 256, L"HRESULT[%d] %s", hr, strMessage);
+
+	LogResult();
+}
+*/
+/*
+// converts HRESULT to OPRESULT
+OPRESULT(HRESULT hr, eOpSeverity eSeverity = K_SEVERITY_FORGET)
+{
+	code = (hr >= 0) ? K_OP_OK : K_OP_FAILED;
+	severity = eSeverity;
+	swprintf_s(message, 256, L"HRESULT: %d", hr);
+
+	LogResult();
+}
+*/
+
 };
 

@@ -3752,21 +3752,18 @@ OPRESULT CControlsManager::LoadControlsXML( WCHAR* XMLpath )
 	pugi::xml_document doc;
 	if ( !doc.load_file( XMLpath ) )
 	{
-		ErrorBox( K_ERR_WARNING, L"Unable to load Interfaces XML:%s\n", XMLpath );
-		return( E_FAIL );
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"Unable to load Interfaces XML:%s\n", XMLpath );
 	}
 
 	pugi::xml_attribute ver = doc.root().child( L"Interfaces" ).attribute( L"Version" );
 	if ( ver.as_float() != INTERFACES_VERSION )
 	{
-		ErrorBox( K_ERR_WARNING, L"Interfaces XML wrong version:%s\n", XMLpath );
-		return E_FAIL;
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"Interfaces XML wrong version:%s\n", XMLpath );
 	}
 	pugi::xml_attribute sprfile = doc.root().child( L"Interfaces" ).attribute( L"SpriteCollection" );
 	if ( sprfile.empty() )
 	{
-		ErrorBox( K_ERR_WARNING, L"Interfaces XML didn't specify SpriteCollection!\n" );
-		return E_FAIL;
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"Interfaces XML didn't specify SpriteCollection!\n" );
 	}
 
 	const WCHAR* sprName = doc.root().child( L"Interfaces" ).attribute( L"SpriteCollection" ).value();
@@ -3779,7 +3776,7 @@ OPRESULT CControlsManager::LoadControlsXML( WCHAR* XMLpath )
 	szwPath[ nIdx + 1 ] = '\0';
 	StringCchCat( szwPath, MAX_PATH, sprName );
 
-	V_OP_RETHR( m_sprCol.LoadSprites( szwPath ) );
+	V_OP_RET( m_sprCol.LoadSprites( szwPath ) );
 	// save control sprite ptr (static)
 	CControl::SetManagersPtr( &m_sprCol );
 
@@ -3850,7 +3847,7 @@ OPRESULT CControlsManager::LoadControlsXML( WCHAR* XMLpath )
 	}
 
 	bLoaded = true;
-	return S_OK;
+	return K_OP_OK;
 }
 
 //release all resources

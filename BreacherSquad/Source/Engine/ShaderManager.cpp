@@ -119,7 +119,6 @@ OPRESULT CreateVS(PDEVICE pd3dDevice, WCHAR *szPath, PVERTEXSHADER *pVS)
 
 OPRESULT CreatePS(PDEVICE pd3dDevice, WCHAR *szPath, PPIXELSHADER *pPS)
 {
-	OPRESULT hr = S_OK;
 	HANDLE hFile, hMap;
 	DWORD *pdwPS;
 	hFile = CreateFile(szPath, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
@@ -145,6 +144,7 @@ OPRESULT CreatePS(PDEVICE pd3dDevice, WCHAR *szPath, PPIXELSHADER *pPS)
 	}
 	// maps a view of a file into the address space of the calling process
 	pdwPS = (DWORD*)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
+	HRESULT hr = S_OK;
 	if (FAILED(hr = pd3dDevice->CreatePixelShader(pdwPS, pPS)))
 	{
 		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"[C3DUtils::CreatePS] Failed to create vertex shader.\n\t\tOPRESULT=%x\n", hr);
@@ -259,8 +259,6 @@ OPRESULT CShaderManager::ClearAllPShaders(void)
 
 OPRESULT CShaderManager::AddVShader(WCHAR *szPath, WCHAR * szFriendlyName, int * pnShaderIdx)
 {
-	OPRESULT hr = S_OK;
-
 	if (szPath == NULL || wcscmp(szPath, L"") == 0)
 		return K_OP_OK;
 
@@ -286,6 +284,7 @@ OPRESULT CShaderManager::AddVShader(WCHAR *szPath, WCHAR * szFriendlyName, int *
 	// shader name
 	pNewVS->shName.Init(szFriendlyName);
 	// creates shader
+	HRESULT hr = S_OK;
 	if (FAILED(hr = CreateVS(pDevice, szPath, &pNewVS->pShader)))
 	{
 		return K_OP_FAILED;
@@ -299,8 +298,6 @@ OPRESULT CShaderManager::AddVShader(WCHAR *szPath, WCHAR * szFriendlyName, int *
 
 OPRESULT CShaderManager::AddPShader(WCHAR * szPath, WCHAR * szFriendlyName, int * pnShaderIdx)
 {
-	OPRESULT hr = S_OK;
-
 	if (szPath == NULL || wcscmp(szPath, L"") == 0)
 		return K_OP_OK;
 
@@ -325,7 +322,8 @@ OPRESULT CShaderManager::AddPShader(WCHAR * szPath, WCHAR * szFriendlyName, int 
 	StringCchCopy(pNewPS->szFilename, MAX_PATH, szPath);
 	//set friendly name
 	pNewPS->shName.Init(szFriendlyName);
-	//face shaderul
+	
+	HRESULT hr = S_OK;
 	if (FAILED(hr = CreatePS(pDevice, szPath, &pNewPS->pShader)))
 	{
 		return K_OP_FAILED;

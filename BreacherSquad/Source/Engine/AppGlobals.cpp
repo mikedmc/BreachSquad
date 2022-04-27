@@ -1250,8 +1250,7 @@ OPRESULT App_LocaChangeLanguage(CStringHash shSelectedLangAlias)
 
 	if (!bLangFound)
 	{
-		ErrorBox(K_ERR_WARNING, L"App_LocaChangeLanguage: Language alias not found [%s] !", shSelectedLangAlias.text);
-		return E_FAIL;
+		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"App_LocaChangeLanguage: Language alias not found [%s] !", shSelectedLangAlias.text );
 	}
 
 	if (cllLangOld.shLangAlias.textHash != g_Language.shLangAlias.textHash)

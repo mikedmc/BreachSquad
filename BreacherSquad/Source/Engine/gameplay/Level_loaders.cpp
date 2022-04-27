@@ -422,7 +422,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		bbmax.y = bbmin.y + (float)OS_freadInt32(fl);
 		//set loaded size (default)
 		nl->bbox.Set_Corrected(bbmin, bbmax);
-		nl->bbox.SaveSnapshot( -nl->pos.xy );
+		nl->bbox.SaveSnapshotOff( -nl->pos.xy );
 		nl->fRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
 		//re-arrange spots (maybe lights image changed)
 		nl->SetLightTexture(&m_sprLights, nl->animID, nl->frameID);
