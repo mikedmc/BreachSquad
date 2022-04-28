@@ -244,7 +244,7 @@ EAnimEvent CSpriteActorComponent::GetAnimFrameEvent()
 	const UINT32 FLAG_SOUND_EVENT = 0x1;
 	const UINT32 FLAG_SHOOT_EVENT = 0x2;
 
-	UINT32 aframef = sprite.GetAFrameFlag();
+	UINT32 aframef = sprite.GetCurFrameEvent();
 	if ( aframef & FLAG_SOUND_EVENT )
 		return FEVT_SOUND;
 	if ( aframef & FLAG_SHOOT_EVENT)

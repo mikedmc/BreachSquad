@@ -6,6 +6,7 @@ CSpritePainter* CSpr::s_pSP = &__Painter();
 
 void CSpr::Reset()
 {
+	curFrameEvent = 0;
 	animIdx = 0;
 	pos.x = 0.0f;
 	pos.y = 0.0f;
@@ -44,6 +45,7 @@ CSpr::CSpr(CSpriteLib* pSpriteColl, int animIdx, Vec2 vPos)
 
 CSpr::CSpr(const CSpr& sprite)
 {
+	curFrameEvent = sprite.curFrameEvent;
 	pSprCol = sprite.pSprCol;
 	animIdx = sprite.animIdx;
 	pos = sprite.pos;
@@ -91,7 +93,7 @@ void CSpr::Init(CSpriteLib *sprCollection, CHAR* strAnimID, Vec2 vPos, int nfram
 void CSpr::SetAnim(int nAnimIdx, int nFrameIdx)
 {
 	animIdx = nAnimIdx;
-
+	curFrameEvent = 0;
 	fTime = 0.0f;
 	fTimeScale = 1.0f;
 	animDirection = 1;
@@ -102,6 +104,7 @@ void CSpr::SetAnim(int nAnimIdx, int nFrameIdx)
 void CSpr::SetFrame(int nFrameIdx)
 {
 	frameIdx = nFrameIdx;
+	curFrameEvent = 0;
 	fTime = 0.0f;
 }
 
@@ -112,6 +115,7 @@ bool CSpr::SetAnimOnce(int nAnimIdx, int nFrameIdx)
 
 	animIdx = nAnimIdx;
 
+	curFrameEvent = 0;
 	fTime = 0.0f;
 	fTimeScale = 1.0f;
 	animDirection = 1;
@@ -131,6 +135,7 @@ void CSpr::SetAnim(CHAR* strAnimID, int nFrameIdx)
 		return;
 	}
 
+	curFrameEvent = 0;
 	fTime = 0.0f;
 	fTimeScale = 1.0f;
 	animDirection = 1;
@@ -140,7 +145,7 @@ void CSpr::SetAnim(CHAR* strAnimID, int nFrameIdx)
 
 void CSpr::Update(float dTime, bool updatePos)
 {
-	curFrameFlag = 0;
+	curFrameEvent = 0;
 
 	_ASSERT(animIdx < pSprCol->Animations.Count());
 	_ASSERT(frameIdx < pSprCol->Animations[animIdx]->aframesNo);
@@ -153,7 +158,7 @@ void CSpr::Update(float dTime, bool updatePos)
 	if (animStatus == ANIM_JUST_STARTED)
 	{
 		//#TODO: if first frame is too short the message gets lost retAFrameFlag
-		curFrameFlag = pSprCol->AFrames[aframeID]->flags;
+		curFrameEvent = pSprCol->AFrames[aframeID]->flags;
 	}
 
 	animStatus = ANIM_PLAYING;
@@ -200,7 +205,7 @@ void CSpr::Update(float dTime, bool updatePos)
 			aframeID = pSprCol->Animations[animIdx]->aframesIdx[frameIdx];
 		}
 		// set aframe flag for return
-		curFrameFlag = pSprCol->AFrames[aframeID]->flags;
+		curFrameEvent = pSprCol->AFrames[aframeID]->flags;
 	}
 }
 
@@ -349,6 +354,18 @@ void CSpr::Play( bool bReset /*= false */ )
 	animStatus = ANIM_JUST_STARTED;
 	if ( bReset )
 		frameIdx = 0;
+}
+
+RectXYWHi CSpr::GetAFrameBBox()
+{
+	_ASSERT( pSprCol != nullptr );
+	return pSprCol->GetAFrameBBox( animIdx, frameIdx );
+}
+
+UINT32 CSpr::GetAframeFlags()
+{
+	_ASSERT( pSprCol != nullptr );
+	return pSprCol->GetAFrameFlags( animIdx, frameIdx );
 }
 
 ///----------------------------------------------------------------------------------

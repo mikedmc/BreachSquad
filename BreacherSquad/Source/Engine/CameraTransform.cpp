@@ -193,17 +193,21 @@ Vec2 CCameraTransform::WorldToScreen(Vec2 inPT, RectXYWH *srcViewportOverride)
 	return Vec2(view->w / 2.0f + percX * view->w + view->x, view->h / 2.0f + percY * view->h + view->y);
 }
 
-RectXYWH CCameraTransform::WorldToScreen(RectXYWH inRect)
+RectXYWH CCameraTransform::WorldToScreen(RectXYWH inRect, RectXYWH *srcViewportOverride )
 {
+	RectXYWH *view = &m_Viewport;
+	if ( srcViewportOverride != nullptr )
+		view = srcViewportOverride;
+
 	double percX, percY;
 	//procente intre -1 si 1 in fn de lungimea axelor vecHW si vecHH
 	//TODO: daca adaug rotatie aici trebuie facut cu vectori si proiectii!
 	percX = ((inRect.x - m_vecRealLookAt.x) / m_vecHW.x) / 2.0f;
 	percY = ((inRect.y - m_vecRealLookAt.y) / m_vecHH.y) / 2.0f;
-	Vec2 vpos(m_Viewport.w / 2.0f + percX * m_Viewport.w + m_Viewport.x, m_Viewport.h / 2.0f + percY * m_Viewport.h + m_Viewport.y);
+	Vec2 vpos(view->w / 2.0f + percX * view->w + view->x, view->h / 2.0f + percY * view->h + view->y);
 	percX = (inRect.w / m_vecHW.x) / 2.0f;
 	percY = (inRect.h / m_vecHH.y) / 2.0f;
-	return RectXYWH(vpos.x, vpos.y, percX * m_Viewport.w, percY * m_Viewport.h);
+	return RectXYWH(vpos.x, vpos.y, percX * view->w, percY * view->h);
 }
 
 Vec2 CCameraTransform::ScreenToViewport(Vec2 inPt)

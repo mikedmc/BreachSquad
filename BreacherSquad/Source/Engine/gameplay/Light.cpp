@@ -43,7 +43,7 @@ void CLight::Update( float dTime, CLevel& level )
 
 void CLight::SetDir( Vec3 nDir )
 {
-	if ( MUVec3AlmostZero( nDir ) )
+	if ( UTMath::Vec3AlmostZero( nDir ) )
 	{
 		vnDir = Vec3( 0.0f, 0.0f, -1.0f ); //looking down
 		return;

@@ -54,7 +54,7 @@ public:
 	// Pointer to global sprite painter, for speed...
 	static CSpritePainter*	s_pSP;						
 private:
-	UINT32					curFrameFlag;				// contains current frame flag for a single frame, when entering the frame. Used for editor driven events.
+	UINT32					curFrameEvent;				// contains current frame animation flag for a single frame, when entering the frame. It contains the AFrameFlag but gets reset to 0 after a single frame.
 	float					fTimeScale;					// used for scaling the timeline
 
 public:
@@ -105,8 +105,13 @@ public:
 	void					SetAnimDirection( bool bReverseAnimation, bool bRewind = false );
 	// resumes/restarts playing of animation
 	void					Play( bool bReset = false );
+
 	// returns current AFrame flag (only valid for one update loop, cleared if frame takes longer)
-	FORCEINLINE UINT32		GetAFrameFlag() { return curFrameFlag; }
+	FORCEINLINE UINT32		GetCurFrameEvent() { return curFrameEvent; }
+	// returns current frame bbox
+	RectXYWHi				GetAFrameBBox();
+	// returns current frame flags
+	UINT32					GetAframeFlags();
 
 private:
 	// resets everything to defaults (without resetting the lib pointers)

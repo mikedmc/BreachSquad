@@ -528,38 +528,21 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		obj->color = 0xffffffff;
 		obj->fid_ini.Init(animIdx, frameIdx);
 		obj->sprite.Init(&m_sprProps, animIdx, obj->pos.xy_proj, frameIdx, obj->color);
-		// get AFrame flags
-		UINT32 frame_flags = m_sprProps.GetAFrameFlags(animIdx, frameIdx);
-		obj->InitializeFromAFrameFlags(frame_flags);
 		//angle
 		//obj->fAngle = 0.0f;
 		//obj->fAngle_ini = 0.0f;
 		//load flags that were set by the level editor
 		UINT32 activ_flags = OS_freadUInt32(fl);
-		//flip xy
+		//#TODO: flip xy
 		//obj->flipX = ((activFlags & K_EDITOR_ACTIVE_FLAG_FLIPX) != 0);
 		//animated
 		//animated? select different start frame
 		obj->bAnimated = ((activ_flags & K_EDITOR_ACTIVE_FLAG_ANIMATED) != 0);
 		if (obj->bAnimated)
 		{
+			// randomize starting frame if object is animated (loping usually)
 			obj->sprite.frameIdx = m_rand.RandInt(m_sprProps.GetAFramesCnt(obj->sprite.animIdx));
 		}
-		//bbox
-		RectXYWHi bbox_set = m_sprProps.GetAFrameBBox(animIdx, frameIdx);
-		RectXYWHi objbox = m_sprProps.GetAFrameBBox_real(animIdx, frameIdx);
-		obj->bbox.Set(objbox);
-		obj->bbox.SaveSnapshot();
-		obj->bbox_floor.Set(bbox_set);
-		obj->bbox_floor.SaveSnapshot();
-		// when we flip it on X we flip bboxes too
-		/*
-		if (IS_FLAG_ALL(obj->flags, K_PROPFLAG_FLIP_X)
-		{
-			obj->bbox_ini.Move(Vec2(-2.0f * obj->bbox_ini.vCenter.x, 0.0f));
-			obj->bbox_floor_ini.Move(Vec2(-2.0f * obj->bbox_floor.vCenter.x, 0.0f));
-		}
-		*/
 
 		//load logic and init data
 		obj->LoadLogic(fl);

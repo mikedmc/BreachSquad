@@ -39,10 +39,6 @@
 #define			Vec3YZ(vec)				Vec2(vec.y, vec.z)
 #define			Vec2ToVec3XY0(vec)		Vec3(vec.x, vec.y, 0.0f)
 
-// Is vector almost zero?
-bool			MUVec2AlmostZero(Vec2 vec, float fThreshold = 0.00001f);
-// Is vector almost zero?
-bool			MUVec3AlmostZero(Vec3 vec, float fThreshold = 0.00001f);
 // Zero vector
 #define			g_Vec3Zero		D3DXVECTOR3(0.0f, 0.0f, 0.0f)
 // Zero vector

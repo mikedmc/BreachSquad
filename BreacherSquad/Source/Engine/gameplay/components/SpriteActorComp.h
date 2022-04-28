@@ -51,9 +51,9 @@ public:
 	CSpriteActorComponent( CMultiSpriteLib* pSpriteLib );
 	~CSpriteActorComponent();
 	// Updates all skeleton positions and processes needed animations
-	virtual void				Update( CActor& act, float dTime );
+	void						Update( CActor& act, float dTime ) override;
 	// Paints skeleton
-	virtual void				Paint( CActor& act, ETexChannel eChannel = K_TEXCHAN_COLORMAP );
+	void						Paint( CActor& act, ETexChannel eChannel = K_TEXCHAN_COLORMAP ) override;
 	// saves pointers to animations from actor template
 	void						CacheAnimations( CActor& act );
 	// sets a skin and hides or shows the hands. If skin isn't found it defaults to first skin in template.

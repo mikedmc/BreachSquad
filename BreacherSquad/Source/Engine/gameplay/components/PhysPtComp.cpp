@@ -173,7 +173,7 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 		}
 
 		// is it almost stopped?
-		if ( MUVec3AlmostZero( speed * dTime, 0.5f ) )
+		if ( UTMath::Vec3AlmostZero( speed * dTime, 0.5f ) )
 		{
 			bIsStatic = true;
 			speed = g_Vec3Zero;

@@ -81,7 +81,30 @@ void CProp::Update( float dTime, CLevel& level )
 
 void CProp::PostConstructionInit()
 {
-	// compute bboxes on init
+	UINT32 frameflag = sprite.GetAframeFlags();
+	InitializeFromAFrameFlags( frameflag );
+
+	// initialize secondary data
+	RectXYWHi bb_floor = sprite.GetAFrameBBox();
+	RectXYWHi bb_proj = bb_floor;
+	// move box up
+	bb_proj.Move( 0.0f, -Z_TO_H( heightZ ) );
+	bb_proj.h = bb_floor.Bottom() - bb_proj.y;
+
+	bbox_floor.Set( bb_floor );
+	bbox_floor.SaveSnapshot();
+	bbox.Set( bb_proj );
+	bbox.SaveSnapshot();
+	// when we flip it on X we flip bboxes too
+	/*
+	if (IS_FLAG_ALL(obj->flags, K_PROPFLAG_FLIP_X)
+	{
+		obj->bbox_ini.Move(Vec2(-2.0f * obj->bbox_ini.vCenter.x, 0.0f));
+		obj->bbox_floor_ini.Move(Vec2(-2.0f * obj->bbox_floor.vCenter.x, 0.0f));
+	}
+	*/
+
+	// place snapshot into box, at object position
 	bbox.RestoreSnapshot( pos.xy_proj );
 	bbox_floor.RestoreSnapshot( pos.xy );
 }

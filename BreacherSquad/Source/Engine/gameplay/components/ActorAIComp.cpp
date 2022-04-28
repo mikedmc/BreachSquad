@@ -176,9 +176,10 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 	//simple way to check if it's time to decide
 	bool bTimeToDecide = (AItimerDecision <= 0.0f);
 
-	if ( !bSkipAI ) //daca nu am skip AI procesez switch-ul
+	if ( !bSkipAI ) 
 	{
-		switch ( m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ].nType )
+		const EAIBehaviorType eBehaviour = m_pAIcurrentState->m_arrBehaviors[m_nAIcurrentBehaviorIdx].nType;
+		switch ( eBehaviour )
 		{
 			//------------------------------------------------------------------------------------------
 			//	this switch only progesses AIcommands for movement
@@ -197,7 +198,11 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			}
 			break;
 
-			//waits animation to play out before exiting
+			case AI_BEHAVIOR_IDLE:
+			{
+			}
+			break;
+
 			case AI_BEHAVIOR_SHOW_ENEMY:
 			{
 			}
@@ -865,6 +870,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		break;
 		case AI_BEHAVIOR_IDLE:
 		{
+			m_AIcommands.vAimVec = { -100.0f, -100.0f };
 		}
 		break;
 		case AI_BEHAVIOR_SET_ANIMSET:

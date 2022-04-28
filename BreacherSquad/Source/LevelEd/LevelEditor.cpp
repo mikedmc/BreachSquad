@@ -88,7 +88,7 @@ void CLevelEditor::Update(float dTime)
 		return;
 
 	// mouse pos in level world
-	Vec2 mousepos = m_pCam->ScreenToWorld(g_mouse.pos);
+	Vec2 mousepos = m_pCam->ScreenToWorld(g_mouse.pos, &UTApp().g_rectRenderPP );
 
 	// left mouse button
 	if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
@@ -218,11 +218,11 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 			{
 				CLight* lg = m_pLevel->m_visibleList.visible_lights[kk];
 				Vec2 lgproj = lg->pos.xy_proj;
-				Vec2 vpos = m_pCam->WorldToScreen(lgproj);
-				Vec2 vposprj = m_pCam->WorldToScreen(lg->pos.xy);
+				Vec2 vpos = m_pCam->WorldToScreen(lgproj, &UTApp().g_rectRenderPP );
+				Vec2 vposprj = m_pCam->WorldToScreen(lg->pos.xy, &UTApp().g_rectRenderPP );
 				
 				DWORD lcol = (pSelected == lg) ? 0xffff2222 : 0xff22ff22;
-				DrawHRuler(vposprj, vposprj.y - vpos.y, lcol);
+				DrawVRuler(vposprj, vposprj.y - vpos.y, lcol);
 
 				int anm = (pSelected == lg) ? ANM_LVLED_SPR_ICONS_BASE_SEL : ANM_LVLED_SPR_ICONS_BASE;
 				int iconIdx = (int)lg->type;
@@ -238,11 +238,16 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 			{
 				// paint bbox
 				CProp *pp = static_cast<CProp*>(pSelected);
-				RectXYWH bb(pp->bbox.vMin.x, pp->bbox.vMin.y, pp->bbox.vSize.x, pp->bbox.vSize.y);
-				RectXYWH prjrct = m_pCam->WorldToScreen(bb);
+				RectXYWH bb( pp->bbox.vMin.x, pp->bbox.vMin.y, pp->bbox.vSize.x, pp->bbox.vSize.y );
+				RectXYWH bbfloor( pp->bbox_floor.vMin.x, pp->bbox_floor.vMin.y, pp->bbox_floor.vSize.x, pp->bbox_floor.vSize.y );
+
+				RectXYWH prjrct_floor = m_pCam->WorldToScreen( bbfloor, &UTApp().g_rectRenderPP );
+				DrawBBox( prjrct_floor, 0xffff8888 );
+				RectXYWH prjrct = m_pCam->WorldToScreen(bb, &UTApp().g_rectRenderPP );
 				DrawBBox(prjrct, 0xffffffff);
+
 				// paint origin
-				Vec2 vposprj = m_pCam->WorldToScreen(pp->pos.xy);
+				Vec2 vposprj = m_pCam->WorldToScreen(pp->pos.xy, &UTApp().g_rectRenderPP );
 				CSprite::paintFrame(&m_sprCol, vposprj.x, vposprj.y, ANM_LVLED_SPR_CROSSHAIRS, 0, 0xffff2222);
 
 				// paint elevation
@@ -569,7 +574,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 
 }
 
-void CLevelEditor::DrawHRuler(Vec2 vBase, float fHeight, DWORD col)
+void CLevelEditor::DrawVRuler(Vec2 vBase, float fHeight, DWORD col)
 {
 	if (fHeight >= 0.0f)
 	{
@@ -594,6 +599,13 @@ void CLevelEditor::DrawBBox(RectXYWH bbox, DWORD dwCol)
 	cliprect.x += bbox.w;
 	CSprite::paintFrameClipped(&m_sprCol, bbox.x + bbox.w, bbox.y, ANM_LVLED_SPR_BBOX, 1, cliprect, dwCol);
 }
+
+void CLevelEditor::DrawHLine( Vec2 vStart, int length, DWORD dwCol )
+{
+	RectXYWHi cliprect( vStart.x, vStart.y - 5, vStart.x + length, vStart.y + 5 );
+	CSprite::paintFrameClipped( &m_sprCol, vStart.x, vStart.y, ANM_LVLED_SPR_BBOX, 0, cliprect, dwCol );
+}
+
 
 OPRESULT CLevelEditor::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
 {

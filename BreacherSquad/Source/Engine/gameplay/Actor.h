@@ -36,6 +36,7 @@ public:
 	bool					bHasGravity;				// does it have gravity?
 
 	Vec3		pos_last;		// position on last frame
+	Vec2		vAim;			// final aim vector
 	Vec2		speed;
 	Vec2		vSpeedImpulse;	//viteza aplicata extern (cand e impuscat de exemplu). Se va atenua automat.
 
@@ -128,7 +129,7 @@ public:
 	void					Paint( ETexChannel eChannel = K_TEXCHAN_COLORMAP );
 
 	// returns aim vector
-	inline Vec2				GetAimVec() { return c_AI->m_AIcommands.vAimVec; };
+	inline Vec2				GetAimVec() { return vAim; };
 	// returns speed vector
 	inline Vec2				GetSpeedVec() { return speed; };
 	// returns animation direction on X (flipped or not, decided by the graphics component)

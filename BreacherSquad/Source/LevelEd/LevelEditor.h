@@ -3,7 +3,7 @@
 #define K_LED_CAMSPEED				256.0f
 
 enum eLvlEdTool {
-	K_LED_TILE = 0,		
+	K_LED_TILE = 0,
 	// selectable objects from here
 	K_LED_LIGHT = 1,		// lights, go figure
 	K_LED_PROP,				// all other objects, static or active
@@ -29,7 +29,7 @@ private:
 
 	Vec2				m_vCamPos_ini;			// saved initial camera position (HOME)
 	double				fTimeline;				// used for some animations
-public: 
+public:
 	Vec2				m_vCamPos;				// Camera position
 	CCameraTransform*	m_pCam;					// pointer to level camera to screen
 
@@ -43,37 +43,40 @@ public:
 	void				Release();
 
 	// Launch it on a level to start editing	
-	void				Launch(CLevel* level);
+	void				Launch( CLevel* level );
 	// Closes the level editor
 	void				Close();
 
-	void				Update(float dTime);
-	void				Paint(ID3DXSprite* pSpr);
-	
+	void				Update( float dTime );
+	void				Paint( ID3DXSprite* pSpr );
+
 	inline bool			IsLaunched() {
-		return (m_pLevel != nullptr);
+		return ( m_pLevel != nullptr );
 	}
 
-	void				ReceiveKeys(UINT key);
-	OPRESULT			SaveLevel(WCHAR* strPath);
+	void				ReceiveKeys( UINT key );
+	OPRESULT			SaveLevel( WCHAR* strPath );
 
 	//--- IMGUI paint all interfaces
 	void				IMGUI_ShowInterfaces();
 
 	// selects closest active depending on selected tool
-	IActiveInterface*	SelectClosest(Vec2 vPoint, float fMaxRadius = 32.0f);
+	IActiveInterface*	SelectClosest( Vec2 vPoint, float fMaxRadius = 32.0f );
 private:
 	//--- IMGUI adds controls specific to selected light
-	void				IMGUI_AddLightProps(CLight* light);
-	
+	void				IMGUI_AddLightProps( CLight* light );
+
 	// draws a ruler to show you the height of an object
-	void				DrawHRuler(Vec2 vBase, float fHeight, DWORD col);
-	void				DrawBBox(RectXYWH bbox, DWORD dwCol);
+	void				DrawVRuler( Vec2 vBase, float fHeight, DWORD col );
+	// draws a bounding box
+	void				DrawBBox( RectXYWH bbox, DWORD dwCol );
+	// draws a horizontal dotted line
+	void				DrawHLine( Vec2 vStart, int length, DWORD dwCol );
 
 
 public: //--- framework methods ---
-	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
-	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
+	OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr );
+	OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr );
 	OPRESULT OnLostDevice();
 	OPRESULT OnDestroyDevice();
 };

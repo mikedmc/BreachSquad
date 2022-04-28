@@ -36,6 +36,7 @@ CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID,
 	nControllerInstanceID = -1;
 	vSpeedImpulse = Vec2(0.0f, 0.0f);
 	speed = Vec2(0.0f, 0.0f);
+	vAim = Vec2( 0.0f, -10.0f );
 
 	// init actor template data (loads files and spine skeletons)
 	InitFromTemplate(pActorTemplate);
@@ -192,14 +193,13 @@ void CActor::Update(float dTime, CLevel& level )
 	dec_limit( fVerseCooldown, dTime, 0.0f );
 
 	//#TODO: oare ar trebui sa isi ia singur datele din actor componenta si sa seteze singura animatiile??
-	if(MUVec2AlmostZero(speed))
+	if(UTMath::Vec2AlmostZero(speed))
 		c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE);
 	else
 		c_graphics->SetAnimOnce(K_ACT_ANIM_RUN);
 
 	// Update actor AI
 	c_AI->Update( *this, dTime );
-	Vec2 vAim = c_AI->m_AIcommands.vAimVec;
 	// now process the AI commands
 	ProcessAICommands( level );
 	// Move based on speeds
@@ -516,6 +516,10 @@ void CActor::ProcessAICommands( CLevel& level )
 
 	//set crouch
 	bCrouched = c_AI->m_AIcommands.bCrouched;
+	///--- aiming ---
+	// get aim vector from AI commands, if set
+	if ( !UTMath::Vec2IsZero( c_AI->m_AIcommands.vAimVec ) )
+		vAim = c_AI->m_AIcommands.vAimVec;
 
 	///--- speed and movement ---
 	if ( c_AI->m_AIcommands.bThrust )

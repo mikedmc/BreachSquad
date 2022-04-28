@@ -110,4 +110,10 @@ namespace UTMath
 	float			Interpolate_lin(float a, float b, float t);
 	
 	void			RoundVec2( Vec2 & v );
+	// True if vector is zero
+	bool			Vec2IsZero( Vec2 & vec );
+	// Is vector almost zero?
+	bool			Vec2AlmostZero( Vec2 vec, float fThreshold = 0.00001f );
+	// Is vector almost zero?
+	bool			Vec3AlmostZero( Vec3 vec, float fThreshold = 0.00001f );
 }

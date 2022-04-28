@@ -580,6 +580,8 @@ CActor* CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHa
 CProp* CLevel::SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFrameIdx )
 {
 	_ASSERT( pArea != nullptr );
+	ErrorBox( K_ERR_WARNING, L"Not implemented! See level_loaders when loading props!" );
+	return nullptr;
 
 	CProp* obj = new CProp( new CPropAIComponent() );
 
@@ -593,6 +595,7 @@ CProp* CLevel::SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nF
 	obj->sprite.Init( &m_sprProps, animIdx, obj->pos.xy_proj, frameIdx, 0xffffffff );
 	obj->fid_ini.Init( animIdx, frameIdx );
 	obj->sprite.color = obj->color;
+	//#TODO: de mutat initializari de height si flags in PostConstructionInit
 	//angle
 	//obj->fAngle = obj->fAngle_ini = 0.0f;
 	//load flags and split
@@ -705,7 +708,7 @@ CLevel::CLevel()
 	m_levelStateTimer = 0.0f;
 
 	m_camLevelToRT.SetViewport( UTApp().g_rectRT );
-	m_camLevelToScr.SetViewport( UTApp().g_rectRender );
+	m_camLevelToScr.SetViewport( UTApp().g_rectRenderPP );
 
 	m_nPlayers = 0;
 	m_nPlayersActive = 0;
@@ -5649,7 +5652,7 @@ void CLevel::UpdatePhysicsPoints( float dTime )
 			}
 
 			// is it almost stopped?
-			if ( MUVec3AlmostZero( point->speed * dTime, 0.5f ) )
+			if ( UTMath::Vec3AlmostZero( point->speed * dTime, 0.5f ) )
 			{
 				point->bIsStatic = true;
 				point->speed = g_Vec3Zero;

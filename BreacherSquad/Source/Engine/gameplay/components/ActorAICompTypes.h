@@ -375,7 +375,7 @@ class CAICommands
 public:
 	bool				bThrust;  //#TODO: thrust might as well be a float (low precision float) and remove bRunning
 	Vec2				vMoveDir;
-	Vec2				vAimVec;
+	Vec2				vAimVec;	// set on 0.0 for no aim command (old aim vec will be kept)
 
 	bool				bRunning;
 	bool				bCrouched;
@@ -397,10 +397,10 @@ public:
 	void Reset()
 	{
 		bThrust = false;
-		vMoveDir = Vec2( 0.0f, 0.0f );
+		vMoveDir = { 0.0f, 0.0f };
+		vAimVec = { 0.0f, 0.0f };
 
 		bRunning = false;
-		vAimVec = Vec2( 0.0f, 0.0f );
 
 		bCrouched = false;
 		bJump = false;
@@ -417,7 +417,7 @@ public:
 	{
 		bThrust = false;
 		bRunning = false;
-		vAimVec = Vec2( 0.0f, 0.0f );
+		vMoveDir = { 0.0f, 0.0f };
 
 		bCrouched = false;
 		bJump = false;

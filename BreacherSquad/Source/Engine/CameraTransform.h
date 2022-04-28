@@ -126,7 +126,7 @@ public:
 	SizeWH		ScreenToWorld(SizeWH inSZ);
 	SizeWH		WorldToScreen(SizeWH inSZ);
 	RectXYWH		ScreenToWorld(RectXYWH inRect);
-	RectXYWH		WorldToScreen(RectXYWH inRect);
+	RectXYWH		WorldToScreen(RectXYWH inRect, RectXYWH *srcViewportOverride = nullptr );
 	///--- transformari intre 2 camere ---
 
 	//Transforma un punct din viewportul camerei curente in viewportul camerei destCam

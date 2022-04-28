@@ -2254,6 +2254,15 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			break;
 
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
+			case VK_F6:
+			{
+				if ( GameState::state == GAME_STATE_GAME )
+				{
+					Vec2 vpos = __Sim().pPlayerActor[0]->pos.xy;
+					__Sim().SpawnActor( vpos, L"act_blowup_bart.xml" );
+				}
+			}
+			break;
 #endif
 
 #ifdef ENABLE_CHAT_WINDOW
