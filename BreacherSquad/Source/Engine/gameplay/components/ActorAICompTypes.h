@@ -300,38 +300,33 @@ public:
 ///--- AI STATES ---
 #define K_LVL_MAX_STATE_BEHAVIORS_CNT 32
 #define K_LVL_MAX_STATE_EVENTS_CNT 32
-//#TODO: starile AI pot fi mai multe intr-un AI group
 class CAIState
 {
 public:
-	CStringHash name;	//numele starii
-	int	nPriority;  //prioritatea state-ului in cazul in care sunt mai multe activabile
+	CStringHash		name;				// name of state
+	int				nPriority;			// state priority if more states get triggered by the same events
+	float			fProbability;		// state probability if we have state variation on same priority
 
-	float fProbability; //probabilitatea state-ului cand sunt selectate mai multe de aceeasi prioritate
-	CFixedArray<CAIBehavior, K_LVL_MAX_STATE_BEHAVIORS_CNT> m_arrBehaviors; //comportamentele din state, executate secvential
-	CFixedArray<EAIEventType, K_LVL_MAX_STATE_EVENTS_CNT> m_arrTriggeringEventTypes; //tipurile de events care triggeruiesc starea curenta
+	CFixedArray<CAIBehavior, K_LVL_MAX_STATE_BEHAVIORS_CNT> m_arrBehaviors;				// state behaviors, executed in a loop
+	CFixedArray<EAIEventType, K_LVL_MAX_STATE_EVENTS_CNT> m_arrTriggeringEventTypes;	// types of events triggering the current state
 
 	CAIState();
 	~CAIState();
 };
 
-//TODO: de adaugat StateGroups cu probabilitati ca sa poti sa randomizezi AI (sa selecteze starea in fn de un random)
-
 // AI template loaded from the AI xml
 class CAITemplate
 {
 public:
-	CArray<CAIState*>			m_arrStates;  //starile din care selecteaza 
-	CArray<EAIEventType>		m_arrIgnoredEvents;	//list of ignored events
+	CArray<CAIState*>			m_arrStates;			// all states in AI
+	CArray<EAIEventType>		m_arrIgnoredEvents;		// list of ignored events
 	//CTOR/DTOR
 	~CAITemplate();
-	//Finds best State based on input event and random numbers generator for states probabilities
+	// Finds best State based on input event and random numbers generator for states probabilities
 	CAIState* GetHighestPriorityState( EAIEventType evtType, CRandom* pRandomGen );
-	//Finds AI state with name
+	// Finds AI state with name
 	CAIState* GetAIStateByName( CStringHash strName );
 };
-
-
 
 
 // Holds all info that comes into the actor sensors

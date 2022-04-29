@@ -1,8 +1,6 @@
 #include "dxstdafx.h"
 #include "ActiveInterface.h"
 
-
-
 IActiveInterface::IActiveInterface() :
 	ID( -1 ), targetID_ini( -1 ), bEnabled( true ), bSetEnabled( true ), bSkipRender( false ), bAnimated( false ),
 	AIstate( K_AI_STATE_UNDEFINED ),
@@ -23,6 +21,9 @@ IActiveInterface::IActiveInterface() :
 IActiveInterface::~IActiveInterface()
 {
 	varAIparams.DeleteAll();
+	// already released in Kill() but we make it double
+	if ( pTarget != nullptr )
+		pTarget->FreeRef();
 }
 
 IActiveInterface* IActiveInterface::GetRef()
@@ -35,7 +36,12 @@ void IActiveInterface::FreeRef()
 	if ( _refCntP > 0 ) _refCntP--;
 }
 
-bool IActiveInterface::GetCanBeReleased()
+int IActiveInterface::GetRefCount()
+{
+	return _refCntP;
+}
+
+bool IActiveInterface::CanBeReleased()
 {				   
 	return ((_refCntP == 0) && (bPendingKill == true));
 }
@@ -166,7 +172,7 @@ void IActiveInterface::SetAIparams( CVariantCollection * params, bool bClearPara
 	if ( (params == nullptr) || (bClearParams) )
 		varAIparams.DeleteAll();
 
-	if ( params != null )
+	if ( params != nullptr )
 	{
 		for ( int kk = 0; kk < params->GetVariantCount(); kk++ )
 		{

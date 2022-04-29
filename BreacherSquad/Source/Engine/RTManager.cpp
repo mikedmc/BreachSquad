@@ -50,10 +50,10 @@ void CRTManager::AddRT(UINT32 dwID, UINT width, UINT height, UINT mipLevels, FOR
 OPRESULT CRTManager::BeginSceneRT(UINT32 dwID)
 {
 	HRESULT hr = S_OK;
-	CEngineRenderTarget* pTarget = GetRTbyUID(dwID);
-	if ((pTarget != null) && (pTarget->bReady) && (pTarget->m_pRenderToSurface != null))
+	CEngineRenderTarget* pRTarget = GetRTbyUID(dwID);
+	if ((pRTarget != null) && (pRTarget->bReady) && (pRTarget->m_pRenderToSurface != null))
 	{
-		if (FAILED(pTarget->m_pRenderToSurface->BeginScene(pTarget->m_pRTSurface, NULL)))
+		if (FAILED(pRTarget->m_pRenderToSurface->BeginScene(pRTarget->m_pRTSurface, NULL)))
 		{
 			return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"[WARNING]CRTManager: BeginScene failed on RT:%d", dwID);
 		}

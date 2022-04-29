@@ -2432,7 +2432,7 @@ void CLevel::CleanupDeadObjects()
 		// check props lifetime
 		for ( int kk = area->m_arrProps.GetSize() - 1; kk >= 0; kk-- )
 		{
-			if ( area->m_arrProps[kk]->GetCanBeReleased() )
+			if ( area->m_arrProps[kk]->CanBeReleased() )
 			{
 				// remove from array, call dtor
 				LOG( L"Released Prop: %d", area->m_arrProps[kk]->ID );
@@ -2445,7 +2445,7 @@ void CLevel::CleanupDeadObjects()
 	//check actors
 	for ( int kk = m_arrActors.GetSize() - 1; kk >= 0; kk-- )
 	{
-		if ( m_arrActors[kk]->GetCanBeReleased() )
+		if ( m_arrActors[kk]->CanBeReleased() )
 		{
 			// now release it (destructor)
 			SAFE_DELETE( m_arrActors[kk] );
@@ -2456,7 +2456,7 @@ void CLevel::CleanupDeadObjects()
 	//check lights
 	for ( int kk = m_arrLights.GetSize() - 1; kk >= 0; kk-- )
 	{
-		if ( m_arrLights[kk]->GetCanBeReleased() )
+		if ( m_arrLights[kk]->CanBeReleased() )
 		{
 			SAFE_DELETE( m_arrLights[kk] );
 			m_arrLights.Remove( kk );

@@ -153,7 +153,7 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 
 void CActor::Update(float dTime, CLevel& level )
 {
-	// clean target pointer (should be done by AI?)
+	// clean target pointer when target dies (should be done by AI?)
 	if ( (pTarget != nullptr) && pTarget->IsPendingKill() )
 	{
 		pTarget->FreeRef();

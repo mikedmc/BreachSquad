@@ -81,8 +81,10 @@ public:
 	IActiveInterface*			GetRef();
 	// Decreases reference count so active can be freed
 	void						FreeRef();
+	// Returns number of pointer references given out
+	int							GetRefCount();
 	// Returns true if object can be released
-	bool						GetCanBeReleased();
+	bool						CanBeReleased();
 	// Loads logic from binary file (editor exported logic)
 	void						LoadLogic(FILE* fl);
 	//functie care se cheama cand interactionezi cu obiectul sau cand este pTarget
@@ -102,14 +104,14 @@ public:
 	void						SetAIparams( CVariantCollection * params, bool bClearParams );
 public: 
 	// Sets the AI state (useless for actors)
-	virtual void			SetAI( EAIstate newstate ) = 0;
+	virtual void				SetAI( EAIstate newstate ) = 0;
 	// completely sets position and all related data(pos, bbox, etc)
-	virtual void			SetPos(Vec3 newPos) = 0;
-	virtual void			Move(Vec3 delta) = 0;
+	virtual void				SetPos(Vec3 newPos) = 0;
+	virtual void				Move(Vec3 delta) = 0;
 	// Gets called after active was added to the actives array, after being fully initialized (end of loading or spawn)
-	virtual void			PostConstructionInit() = 0;
+	virtual void				PostConstructionInit() = 0;
 	// Gets called by the engine as soon as the object gets initialized
-	virtual void			BeginPlay() = 0;
+	virtual void				BeginPlay() = 0;
 	// Gets called when gets killed
-	virtual void			EndPlay() = 0;
+	virtual void				EndPlay() = 0;
 };
