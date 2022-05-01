@@ -124,7 +124,7 @@ public:
 	static void			SetManagersPtr(CSpriteLib* sprCol);
 
 	EControlType		type;				// Type of control CCTRL_TYPE_...
-	CVariantCollection	paramsDict;			// List of controls params. Don't set directly! Use SetParamValue
+	CVariantMap			paramsDict;			// List of controls params. Don't set directly! Use SetParamValue
 	CCtrlLayer*			layer;				// Pointer to parent layer
 	RectXYWHi			bbox;				// Don't set directly! Use SetParamValue(x,y,z,w)
 	UINT32				statusFlags;		// CCTRL_STATUS_FLAG_...

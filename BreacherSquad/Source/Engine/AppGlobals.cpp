@@ -719,13 +719,13 @@ bool App_TutorialWindowShow(int nTutID)
 			{
 				CControl* ctrl = lay->GetControlByName("WINDOW");
 				if (ctrl)
-					ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_VINFINITE_MODE);
+					ctrl->paramsDict.SetVarINT32(L"stringID", STR_VINFINITE_MODE);
 				ctrl = lay->GetControlByName("TEXT_LABEL");
 				if (ctrl)
-					ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_TUTORIAL_VINFINITE_TEXT);
+					ctrl->paramsDict.SetVarINT32(L"stringID", STR_TUTORIAL_VINFINITE_TEXT);
 				ctrl = lay->GetControlByName("ANIMATION");
 				if (ctrl)
-					ctrl->paramsDict.SetNamedVarINT32(L"setFrame", 3);
+					ctrl->paramsDict.SetVarINT32(L"setFrame", 3);
 			}
 		}
 		break;
@@ -736,13 +736,13 @@ bool App_TutorialWindowShow(int nTutID)
 			{
 				CControl* ctrl = lay->GetControlByName("WINDOW");
 				if(ctrl)
-					ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_MISSION_TYPE4);
+					ctrl->paramsDict.SetVarINT32(L"stringID", STR_MISSION_TYPE4);
 				ctrl = lay->GetControlByName("TEXT_LABEL");
 				if (ctrl)
-					ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_TUTORIAL_ARREST_TEXT);
+					ctrl->paramsDict.SetVarINT32(L"stringID", STR_TUTORIAL_ARREST_TEXT);
 				ctrl = lay->GetControlByName("ANIMATION");
 				if (ctrl)
-					ctrl->paramsDict.SetNamedVarINT32(L"setFrame", 0);
+					ctrl->paramsDict.SetVarINT32(L"setFrame", 0);
 			}
 		}
 		break;
@@ -753,13 +753,13 @@ bool App_TutorialWindowShow(int nTutID)
 			{
 				CControl* ctrl = lay->GetControlByName("WINDOW");
 				if (ctrl)
-					ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_MISSION_TYPE3);
+					ctrl->paramsDict.SetVarINT32(L"stringID", STR_MISSION_TYPE3);
 				ctrl = lay->GetControlByName("TEXT_LABEL");
 				if (ctrl)
-					ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_TUTORIAL_BOMB_TEXT);
+					ctrl->paramsDict.SetVarINT32(L"stringID", STR_TUTORIAL_BOMB_TEXT);
 				ctrl = lay->GetControlByName("ANIMATION");
 				if (ctrl)
-					ctrl->paramsDict.SetNamedVarINT32(L"setFrame", 2);
+					ctrl->paramsDict.SetVarINT32(L"setFrame", 2);
 			}
 		}
 		break;
@@ -770,13 +770,13 @@ bool App_TutorialWindowShow(int nTutID)
 			{
 				CControl* ctrl = lay->GetControlByName("WINDOW");
 				if (ctrl)
-					ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_MISSION_TYPE2);
+					ctrl->paramsDict.SetVarINT32(L"stringID", STR_MISSION_TYPE2);
 				ctrl = lay->GetControlByName("TEXT_LABEL");
 				if (ctrl)
-					ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_TUTORIAL_HOSTAGE_TEXT);
+					ctrl->paramsDict.SetVarINT32(L"stringID", STR_TUTORIAL_HOSTAGE_TEXT);
 				ctrl = lay->GetControlByName("ANIMATION");
 				if (ctrl)
-					ctrl->paramsDict.SetNamedVarINT32(L"setFrame", 1);
+					ctrl->paramsDict.SetVarINT32(L"setFrame", 1);
 			}
 		}
 		break;

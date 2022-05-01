@@ -4,7 +4,7 @@
 ///--- SCRIPT ---
 CScript::~CScript()
 {
-	m_localMemory.DeleteAll();
+	m_localMemory.Clear();
 
 	m_executorUID = 0;
 	m_status = K_SCRIPT_STATUS_NOTINITIALIZED;
@@ -53,7 +53,7 @@ HRESULT CScriptManager::AddScripts(WCHAR* XMLpath)
 						WCHAR *stopstr;
 
 						INT32 val = (INT32)wcstol(str, &stopstr, 10);
-						si->m_arrArgs.SetNamedVarINT32(ait->name(), val);
+						si->m_arrArgs.SetVarINT32(ait->name(), val);
 					}
 					break;
 				case K_RETTYPE_FLOAT:
@@ -62,7 +62,7 @@ HRESULT CScriptManager::AddScripts(WCHAR* XMLpath)
 						WCHAR *stopstr;
 
 						float val = (float)wcstod(str, &stopstr);
-						si->m_arrArgs.SetNamedVarFloat(ait->name(), val);
+						si->m_arrArgs.SetVarFloat(ait->name(), val);
 					}
 					break;
 				default:
@@ -71,7 +71,7 @@ HRESULT CScriptManager::AddScripts(WCHAR* XMLpath)
 						const WCHAR* argval = ait->value();
 						WCHAR wargval[MAX_PATH];
 						StringCchPrintf(wargval, MAX_PATH, argval);
-						si->m_arrArgs.SetNamedVarString(argname, wargval);
+						si->m_arrArgs.SetVarString(argname, wargval);
 					}
 					break;
 				}
@@ -92,7 +92,7 @@ HRESULT CScriptManager::AddScripts(WCHAR* XMLpath)
 }
 
 //RETURNS: scriptUID - id unic script daca e inca valabil, 0 daca s-a terminat deja scriptul si -1 daca scriptul a dat eroare
-UINT32 CScriptManager::StartScript(UINT32 scriptNameHash, const UINT32 executorUID, CVariantCollection* cvcInitialLocalMemory)
+UINT32 CScriptManager::StartScript(UINT32 scriptNameHash, const UINT32 executorUID, CVariantMap* cvcInitialLocalMemory)
 {
 	//exista scriptul cu acest nume?
 	int declIDX = -1;
@@ -119,8 +119,8 @@ UINT32 CScriptManager::StartScript(UINT32 scriptNameHash, const UINT32 executorU
 	ns->m_fStartTime = m_fTimeline; //save start time
 	ns->m_fSuspendedTimer = 0.0f; //reset suspended timer
 	//initialize local memory
-	if (cvcInitialLocalMemory == null)
-		ns->m_localMemory.DeleteAll(); //clear local memory
+	if ( cvcInitialLocalMemory == nullptr )
+		ns->m_localMemory.Clear(); //clear local memory
 	else
 		ns->m_localMemory = *cvcInitialLocalMemory; //copy local memory from parameter
 
@@ -179,7 +179,7 @@ HRESULT CScriptManager::StopAllScripts()
 }
 
 //RETURNS: scriptUID - id unic script daca e inca valabil, 0 daca s-a terminat deja scriptul si -1 daca scriptul a dat eroare
-UINT32 CScriptManager::StartScript(WCHAR* scriptName, const UINT32 executorUID, CVariantCollection* cvcInitialLocalMemory)
+UINT32 CScriptManager::StartScript(WCHAR* scriptName, const UINT32 executorUID, CVariantMap* cvcInitialLocalMemory)
 {
 	UINT32 scrNameHash = FastHash(scriptName, wcslen(scriptName));
 	//exista scriptul cu acest nume?
@@ -247,7 +247,7 @@ void CScriptManager::Release()
 	}
 	m_scriptDeclarations.RemoveAll();
 	//release global memory
-	m_globalMemory.DeleteAll();
+	m_globalMemory.Clear();
 
 	LOG(L"CScriptManager:: Script Engine stopped.");
 }
@@ -266,40 +266,55 @@ CScript* CScriptManager::GetActiveScript(UINT32 scriptUID)
 
 void CScriptManager::ClearGlobalMemory()
 {
-	m_globalMemory.DeleteAll();
+	m_globalMemory.Clear();
 }
 
 void CScriptManager::SetGlobalVar(CVariantComplex* varValue)
 {
-	if (varValue == null)
+	if (varValue == nullptr)
 		return;
 
-	m_globalMemory.AddVariant(*varValue);
+	m_globalMemory.AddVariant(varValue);
 }
 
 //memory functions
 void CScriptManager::SetGlobalVar_INT32(WCHAR * varName, INT32 varValue)
 {
-	m_globalMemory.SetNamedVarINT32(varName, varValue);
+	m_globalMemory.SetVarINT32(varName, varValue);
 }
 
-HRESULT CScriptManager::SetLocalVar(UINT32 scriptUID, CVariantComplex* varValue)
+void CScriptManager::SetGlobalVars( CVariantMap & inputVariants )
+{
+	m_globalMemory.AppendMap( inputVariants );
+}
+
+void CScriptManager::SetLocalVars( UINT32 scriptUID, CVariantMap & inputVariants )
+{
+	CScript* as = GetActiveScript( scriptUID );
+	if ( !as )
+	{
+		ErrorBox( K_ERR_WARNING, L"ScriptManager::SetLocalVars->Active script not found! (UID: %d)", scriptUID );
+		return;
+	}
+
+	as->m_localMemory.AppendMap( inputVariants );
+}
+
+void CScriptManager::SetLocalVar(UINT32 scriptUID, CVariantComplex* varValue)
 {
 	CScript* as = GetActiveScript(scriptUID);
 	if(!as)
 	{
 		ErrorBox(K_ERR_WARNING, L"ScriptManager::SetLocalVar->Active script not found! (UID: %d)", scriptUID);
-		return S_FALSE;
+		return;
 	}
 
-	as->m_localMemory.AddVariant(*varValue);
-
-	return S_OK;
+	as->m_localMemory.AddVariant(varValue);
 }
 
 CVariantComplex* CScriptManager::GetGlobalVar(WCHAR* varName)
 {
-	return m_globalMemory.GetVariantByName(varName);
+	return &m_globalMemory[varName];
 }
 
 CVariantComplex* CScriptManager::GetLocalVar(UINT32 scriptUID, WCHAR* varName)
@@ -308,10 +323,10 @@ CVariantComplex* CScriptManager::GetLocalVar(UINT32 scriptUID, WCHAR* varName)
 	if(!as)
 	{
 		ErrorBox(K_ERR_WARNING, L"ScriptManager::GetLocalVar->Active script not fond! (UID: %d)", scriptUID);
-		return NULL;
+		return nullptr;
 	}
 
-	return as->m_localMemory.GetVariantByName(varName);
+	return &as->m_localMemory[varName];
 }
 
 
@@ -322,8 +337,8 @@ int CScriptManager::GetRunningScriptsCount()
 
 ///--- SCRIPT INSTRUCTIONS - prehashed ---
 static UINT32 instr_DEBUG_PRINT = FastHash(L"DEBUG_PRINT");
-static UINT32 instr_SET_GLOBAL_VAR = FastHash(L"SET_GLOBAL_VAR");
-static UINT32 instr_SET_LOCAL_VAR = FastHash(L"SET_LOCAL_VAR");
+static UINT32 instr_SET_GLOBAL_VARS = FastHash(L"SET_GLOBAL_VARS");
+static UINT32 instr_SET_LOCAL_VARS = FastHash(L"SET_LOCAL_VARS");
 static UINT32 instr_MATH_LOCAL_VAR_MUL = FastHash(L"MATH_LOCAL_VAR_MUL");;//params: var - name = "numeVarLocala" factor = "3.0"
 static UINT32 instr_RAND_INT_GLOBAL = FastHash(L"RAND_INT_GLOBAL"); //params: var_name="varName" nMin="0" nMax="100"
 static UINT32 instr_WAIT_LOCAL_VAR = FastHash(L"WAIT_LOCAL_VAR");
@@ -362,9 +377,9 @@ int CScriptManager::ExecuteScript(CScript* ns)
 		///--- GLOBAL INSTRUCTIONS ---
 		if (instr.m_instruction.textHash == instr_DEBUG_PRINT)
 		{
-			for (int kk = 0; kk < instr.m_arrArgs.GetVariantCount(); kk++)
+			for(auto & argu : instr.m_arrArgs.m_variants)
 			{
-				LOG(L"%s::%s\n", scrd->m_scriptName.text, instr.m_arrArgs[kk]->m_strArg.text);
+				LOG(L"%s::%s\n", scrd->m_scriptName.text, argu.second.m_strArg.text);
 			}
 			executed = true;
 		}
@@ -377,7 +392,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 			CVariantComplex* label = instr.GetArgument(L"label");
 			int labelIdx = -1;
 
-			if ((label->m_type != CVariantComplex::K_ARGTYPE_NONE) && (!label->m_strArg.IsEmpty()))
+			if ((label->eType != CVariantComplex::K_ARGTYPE_NONE) && (!label->m_strArg.IsEmpty()))
 			{
 				labelIdx = scrd->GetLabelInstrIndex(label->m_strArg);
 			}
@@ -399,7 +414,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 			CVariantComplex* check_value = instr.GetArgument(L"check_value");
 			CVariantComplex* label_goto = instr.GetArgument(L"goto");
 
-			if ((var_name->m_type == CVariantComplex::K_ARGTYPE_NONE) || (check_value->m_type == CVariantComplex::K_ARGTYPE_NONE) || (label_goto->m_type == CVariantComplex::K_ARGTYPE_NONE))
+			if ((var_name->eType == CVariantComplex::K_ARGTYPE_NONE) || (check_value->eType == CVariantComplex::K_ARGTYPE_NONE) || (label_goto->eType == CVariantComplex::K_ARGTYPE_NONE))
 			{
 				LOG(L"SCRIPT::IF_EQUAL_GLOBAL - missing params!\n");
 			}
@@ -435,7 +450,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 			CVariantComplex* vmin = instr.GetArgument(L"nMin");
 			CVariantComplex* vmax = instr.GetArgument(L"nMax");
 
-			if ((var_name->m_type == CVariantComplex::K_ARGTYPE_NONE) || (vmin->m_type != CVariantComplex::K_ARGTYPE_INT32) || (vmax->m_type != CVariantComplex::K_ARGTYPE_INT32))
+			if ((var_name->eType == CVariantComplex::K_ARGTYPE_NONE) || (vmin->eType != CVariantComplex::K_ARGTYPE_INT32) || (vmax->eType != CVariantComplex::K_ARGTYPE_INT32))
 			{
 				LOG(L"SCRIPT::RAND_INT_GLOBAL - missing params or wrong types! [var_name, nMin, nMax]\n");
 			}
@@ -453,7 +468,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 			CVariantComplex* check_value = instr.GetArgument(L"check_value");
 			CVariantComplex* label_goto = instr.GetArgument(L"goto");
 
-			if ((var_name->m_type == CVariantComplex::K_ARGTYPE_NONE) || (check_value->m_type == CVariantComplex::K_ARGTYPE_NONE) || (label_goto->m_type == CVariantComplex::K_ARGTYPE_NONE))
+			if ((var_name->eType == CVariantComplex::K_ARGTYPE_NONE) || (check_value->eType == CVariantComplex::K_ARGTYPE_NONE) || (label_goto->eType == CVariantComplex::K_ARGTYPE_NONE))
 			{
 				LOG(L"SCRIPT::IF_LOWER_GLOBAL - missing params!\n");
 			}
@@ -517,14 +532,14 @@ int CScriptManager::ExecuteScript(CScript* ns)
 
 			executed = true;
 		}
-		else if(instr.m_instruction.textHash == instr_SET_GLOBAL_VAR)
+		else if(instr.m_instruction.textHash == instr_SET_GLOBAL_VARS)
 		{
-			SetGlobalVar(instr.m_arrArgs.m_variants[0]);
+			SetGlobalVars(instr.m_arrArgs);
 			executed = true;
 		}
-		else if(instr.m_instruction.textHash == instr_SET_LOCAL_VAR)
+		else if(instr.m_instruction.textHash == instr_SET_LOCAL_VARS)
 		{
-			SetLocalVar(ns->GetUID(), instr.m_arrArgs.m_variants[0]);
+			SetLocalVars(ns->GetUID(), instr.m_arrArgs );
 			executed = true;
 		}
 		else if (instr.m_instruction.textHash == instr_MATH_LOCAL_VAR_MUL)
@@ -532,7 +547,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 			CVariantComplex* param1 = instr.GetArgument(L"var-name");
 			CVariantComplex* param2 = instr.GetArgument(L"factor");
 
-			if ((param1 == null) || (param2 == null) || (param1->m_type != CVariantComplex::K_ARGTYPE_STRING))
+			if ((param1 == null) || (param2 == null) || (param1->eType != CVariantComplex::K_ARGTYPE_STRING))
 			{
 				LOG(L"SCRIPT::MATH_LOCAL_VAR_MUL - var-name or factor are empty or var-name isn't string");
 			}
@@ -570,7 +585,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 				running = false;
 				retval = K_EXECUTE_SUSPENDED;
 
-				float fTimeWait = instr.m_arrArgs[0]->m_asFloat;
+				float fTimeWait = instr.m_arrArgs[L"duration"].m_asFloat;
 
 				if (ns->m_fSuspendedTimer >= fTimeWait)
 				{
@@ -585,18 +600,20 @@ int CScriptManager::ExecuteScript(CScript* ns)
 		}
 		else if (instr.m_instruction.textHash == instr_WAIT_LOCAL_VAR)
 		{
-			if(instr.m_arrArgs.GetVariantCount() > 0)
+			if(instr.m_arrArgs.GetSize() > 0)
 			{
 				bool equal = true;
-				CVariantComplex* lv = GetLocalVar(ns->GetUID(), instr.m_arrArgs[0]->m_name.text);
-				if(lv == NULL) 
+				// gets first argument				
+				auto it = instr.m_arrArgs.m_variants.begin();
+				CVariantComplex* lv = GetLocalVar(ns->GetUID(), it->second.shName.text);
+				if(lv == nullptr) 
 				{
 					equal = false;
 				}
 				else
 				{
 					equal = false;
-					if(*lv == *instr.m_arrArgs.m_variants[0])
+					if(*lv == it->second)
 						equal = true;
 				}
 				
@@ -608,7 +625,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 						running = false;
 						retval = K_EXECUTE_SUSPENDED;
 
-						LOG(L"SCRIPT::WAIT_LOCAL_VAR %s", instr.m_arrArgs[0]->m_name.text);
+						LOG(L"SCRIPT::WAIT_LOCAL_VAR %s", it->second.shName.text );
 					}
 				}
 				else if(ns->m_status == K_SCRIPT_STATUS_SUSPENDED)
@@ -621,7 +638,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 						running = true;
 						retval = K_EXECUTE_FINISHED;
 
-						LOG(L"SCRIPT::WAIT_LOCAL_VAR %s FINISHED!", instr.m_arrArgs[0]->m_name.text);
+						LOG(L"SCRIPT::WAIT_LOCAL_VAR %s FINISHED!", it->second.shName.text );
 					}
 				}
 			}
@@ -634,18 +651,20 @@ int CScriptManager::ExecuteScript(CScript* ns)
 		}
 		else if(instr.m_instruction.textHash == instr_WAIT_GLOBAL_VAR)
 		{
-			if(instr.m_arrArgs.GetVariantCount() > 0)
+			if(instr.m_arrArgs.GetSize() > 0)
 			{
 				bool equal = true;
-				CVariantComplex* lv = GetGlobalVar(instr.m_arrArgs[0]->m_name.text);
-				if(lv == NULL) 
+				// gets first argument				
+				auto it = instr.m_arrArgs.m_variants.begin();
+				CVariantComplex* lv = GetGlobalVar(it->second.shName.text);
+				if(lv == nullptr) 
 				{
 					equal = false;
 				}
 				else
 				{
 					equal = false;
-					if(*lv == *instr.m_arrArgs.m_variants[0])
+					if(*lv == it->second)
 						equal = true;
 				}
 				
@@ -721,14 +740,14 @@ int CScriptManager::ExecuteScript(CScript* ns)
 
 void CScriptManager::PreprocessScriptInstruction(CScript* pOwnerScript, CScriptInstruction* instr)
 {
-	if ((pOwnerScript == null) || (instr == null))
+	if ((pOwnerScript == nullptr) || (instr == nullptr))
 		return;
-	for (int kk = 0; kk < instr->m_arrArgs.GetVariantCount(); kk++)
+	for(auto & it : instr->m_arrArgs.m_variants)
 	{
-		if (instr->m_arrArgs.m_variants[kk]->m_type != CVariantComplex::K_ARGTYPE_STRING)
+		if ( it.second.eType != CVariantComplex::K_ARGTYPE_STRING)
 			continue;
 
-		CVariantComplex* cvar = instr->m_arrArgs.m_variants[kk];
+		CVariantComplex* cvar = &it.second;
 		//daca primul caracter este * fac replace cu variabila locala cu numele respectiv
 		if (cvar->m_strArg.text[0] == '*')
 		{
@@ -738,7 +757,7 @@ void CScriptManager::PreprocessScriptInstruction(CScript* pOwnerScript, CScriptI
 				WCHAR sLocalVarName[MAX_PATH] = { 0 };
 				memcpy(sLocalVarName, cvar->m_strArg.text + 1, varlen * sizeof(WCHAR));
 				//get local memory variant
-				CVariantComplex* cvLocal = pOwnerScript->m_localMemory.GetVariantByName(sLocalVarName);
+				CVariantComplex* cvLocal = &pOwnerScript->m_localMemory[sLocalVarName];
 				//copy value from that one
 				cvar->CopyValueFrom(cvLocal);
 			}
@@ -749,7 +768,7 @@ void CScriptManager::PreprocessScriptInstruction(CScript* pOwnerScript, CScriptI
 
 bool CScriptManager::AddProcessor(IScriptable * pScriptable)
 {
-	if (pScriptable == null)
+	if (pScriptable == nullptr)
 		return false;
 
 	m_arrProcessors.Add(pScriptable);

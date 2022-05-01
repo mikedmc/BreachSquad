@@ -296,7 +296,7 @@ struct CVariant
 		VOID*	m_asVoid;
 	};
 
-	//--- functii conversie ---
+	//--- conversion fn ---
 	int asString(WCHAR *destStr, int maxLen)
 	{
 		switch (m_type)
@@ -329,7 +329,7 @@ struct CVariant
 		switch (m_type)
 		{
 			case K_VTYPE_FLOAT:
-				return (int)m_asFloat;
+				return m_asFloat;
 			case K_VTYPE_UINT32:
 				return (float)m_asUINT32;
 			default:
@@ -384,13 +384,32 @@ bool StringContainsAllTokens(const std::wstring& str, const std::wstring& strTok
 // Splits version string into major, minor, patch. Expects "1.6.12"
 bool GetVersionFromString(WCHAR * inStr, int & outMajor, int & outMinor, int & outPatch);
 
-//replaces a string with a substring
+/**
+ * CHAR CASE SENSITIVE replace function
+ *
+ * Searches all of the occurrences using recursion
+ * and replaces with the given string
+ * @param char * o_string The original string. Must be large enough!
+ * @param char * s_string The string to search for
+ * @param char * r_string The replace string
+ * @return void The o_string passed is modified
+ */
 void str_replace(char * o_string, char * s_string, char * r_string);
+/**
+ * WCHAR CASE SENSITIVE replace function
+ *
+ * Searches all of the occurrences using recursion
+ * and replaces with the given string
+ * @param wchar * o_string The original string. Must be large enough!
+ * @param wchar * s_string The string to search for
+ * @param wchar * r_string The replace string
+ * @return void The o_string passed is modified
+ */
 void wcs_replace(WCHAR* o_string, WCHAR* s_string, WCHAR* r_string);
 
 UINT32 GenerateUID(void); //generates a UID based on timestamp and 3 random floats
 
-enum eVarTypes {
+enum EVarTypes {
 	K_RETTYPE_EMPTY = -1,
 	K_RETTYPE_INT = 0,
 	K_RETTYPE_FLOAT = 1,
@@ -398,28 +417,27 @@ enum eVarTypes {
 	K_RETTYPE_HEXCOLOR = 3,
 };
 //RETURNS: type specified by *str: int, float or string
-eVarTypes GetTypeFromString(const WCHAR *str);
+EVarTypes GetTypeFromString(const WCHAR *str);
 
 // Class that holds multiple types of values
 class CVariantComplex 
 {
 public:
-	enum ArgumentType 
+	enum VariantType 
 	{
+		K_ARGTYPE_NONE = 0,	// default, not set
+
 		K_ARGTYPE_INT32,
 		K_ARGTYPE_FLOAT,
 		K_ARGTYPE_BOOL,
 		K_ARGTYPE_UINT32,
 		K_ARGTYPE_HEXCOLOR,	//DWORD
 		K_ARGTYPE_VOIDP,
-
+		// special
 		K_ARGTYPE_STRING,
-
-		K_ARGTYPE_NONE,
-		K_ARGTYPE_COUNT
 	};
-	ArgumentType	m_type; //tipul argumentului
-	CStringHash		m_name; //numele argumentului (nu este obligatoriu. argumentul se poate trata si in functie de numarul de ordine)
+	VariantType		eType; // arg type
+	CStringHash		shName; // arg name 
 
 	union 
 	{
@@ -430,14 +448,18 @@ public:
 		VOID*	m_asVoid;
 	};
 	CStringHash		m_strArg; //argument string
-	//exemplu tipuri speciale: 
+	// special types if needed:
 	//Vec3	m_argVec3; //argument vector, daca va fi nevoie de el
 
+	inline bool IsSet() {
+		return eType != K_ARGTYPE_NONE;
+	}
+
 	CVariantComplex( const CVariantComplex &o):
-		m_type(o.m_type),
+		eType(o.eType),
 		m_asUINT32(o.m_asUINT32)
 	{
-		m_name.Init(o.m_name.text);
+		shName.Init(o.shName.text);
 		m_strArg.Init(o.m_strArg.text);
 	}
 	// serializes to file and returns true for success
@@ -449,7 +471,7 @@ public:
 
 	//constructors
 	CVariantComplex():
-	m_type(K_ARGTYPE_NONE),
+	eType(K_ARGTYPE_NONE),
 	m_asUINT32(0)
 	{
 		m_strArg.Reset();
@@ -457,9 +479,9 @@ public:
 
 	bool operator== (CVariantComplex const & o) const
 	{
-		if(m_type == K_ARGTYPE_STRING)
+		if(eType == K_ARGTYPE_STRING)
 			return (m_strArg.textHash == o.m_strArg.textHash);
-		if(m_type == K_ARGTYPE_FLOAT)
+		if(eType == K_ARGTYPE_FLOAT)
 			return (m_asFloat == o.m_asFloat);
 		//defaults on UINT32 valabil pentru toate celelalte
 		return (m_asUINT32 == o.m_asUINT32);
@@ -467,13 +489,13 @@ public:
 
 	void CopyValueFrom(CVariantComplex *cv)
 	{
-		m_type = cv->m_type;
-		if (cv->m_type == K_ARGTYPE_STRING)
+		eType = cv->eType;
+		if (cv->eType == K_ARGTYPE_STRING)
 		{
 			m_asUINT32 = 0;
 			m_strArg = cv->m_strArg;
 		}
-		else if (m_type == K_ARGTYPE_FLOAT)
+		else if (eType == K_ARGTYPE_FLOAT)
 		{
 			m_asFloat = cv->m_asFloat;
 			m_strArg.Reset();
@@ -486,14 +508,14 @@ public:
 		}
 	}
 
-	void Set_INT32(const WCHAR* argName, INT32 int32Val) { m_name.Init(argName); m_asINT32 = int32Val; m_type = K_ARGTYPE_INT32;}
-	void Set_UINT32(const WCHAR* argName, UINT32 uint32Val) { m_name.Init(argName); m_asUINT32 = uint32Val; m_type = K_ARGTYPE_UINT32;}
-	void Set_HEXCOLOR(const WCHAR* argName, UINT32 uint32Val) { m_name.Init(argName); m_asUINT32 = uint32Val; m_type = K_ARGTYPE_HEXCOLOR; }
-	void Set_BOOL(const WCHAR* argName, bool boolVal) { m_name.Init(argName); m_asBool = boolVal; m_type = K_ARGTYPE_BOOL;}
-	void Set_FLOAT(const WCHAR* argName, float floatVal) { m_name.Init(argName); m_asFloat = floatVal; m_type = K_ARGTYPE_FLOAT;}
-	void Set_STRING(const WCHAR* argName, WCHAR* strVal) { m_name.Init(argName); m_strArg.Init(strVal); m_asUINT32 = 0.0f; m_type = K_ARGTYPE_STRING;}
-	void Set_STRING(const WCHAR* argName, CHAR* strVal) { m_name.Init(argName); m_strArg.Init(strVal); m_asUINT32 = 0.0f; m_type = K_ARGTYPE_STRING; }
-	void Set_VOIDP(const WCHAR* argName, void* voidP) { m_name.Init(argName); m_asVoid = voidP; m_type = K_ARGTYPE_VOIDP; }
+	void Set_INT32(const WCHAR* argName, INT32 int32Val) { shName.Init(argName); m_asINT32 = int32Val; eType = K_ARGTYPE_INT32;}
+	void Set_UINT32(const WCHAR* argName, UINT32 uint32Val) { shName.Init(argName); m_asUINT32 = uint32Val; eType = K_ARGTYPE_UINT32;}
+	void Set_HEXCOLOR(const WCHAR* argName, UINT32 uint32Val) { shName.Init(argName); m_asUINT32 = uint32Val; eType = K_ARGTYPE_HEXCOLOR; }
+	void Set_BOOL(const WCHAR* argName, bool boolVal) { shName.Init(argName); m_asBool = boolVal; eType = K_ARGTYPE_BOOL;}
+	void Set_FLOAT(const WCHAR* argName, float floatVal) { shName.Init(argName); m_asFloat = floatVal; eType = K_ARGTYPE_FLOAT;}
+	void Set_STRING(const WCHAR* argName, WCHAR* strVal) { shName.Init(argName); m_strArg.Init(strVal); m_asUINT32 = 0.0f; eType = K_ARGTYPE_STRING;}
+	void Set_STRING(const WCHAR* argName, CHAR* strVal) { shName.Init(argName); m_strArg.Init(strVal); m_asUINT32 = 0.0f; eType = K_ARGTYPE_STRING; }
+	void Set_VOIDP(const WCHAR* argName, void* voidP) { shName.Init(argName); m_asVoid = voidP; eType = K_ARGTYPE_VOIDP; }
 
 	void Set_AUTO(const WCHAR* argName, WCHAR* strVal)
 	{
@@ -538,7 +560,7 @@ public:
 
 	int asString(WCHAR *destStr, int maxLen)
 	{
-		switch (m_type)
+		switch (eType)
 		{
 			case K_ARGTYPE_STRING:
 				StringCchCopy(destStr, maxLen, m_strArg.text);
@@ -568,7 +590,7 @@ public:
 
 	int asString(CHAR *destStr, int maxLen)
 	{
-		switch (m_type)
+		switch (eType)
 		{
 			case K_ARGTYPE_STRING:
 				wcstombs(destStr, m_strArg.text, maxLen);
@@ -599,7 +621,7 @@ public:
 
 	INT32 asInt32() 
 	{
-		switch (m_type)
+		switch (eType)
 		{
 			case K_ARGTYPE_STRING:
 				return _wtoi(m_strArg.text);
@@ -611,7 +633,7 @@ public:
 	};
 
 	float asFloat() {
-		switch (m_type)
+		switch (eType)
 		{
 			case K_ARGTYPE_STRING:
 				return _wtof(m_strArg.text);
@@ -627,7 +649,6 @@ public:
 };
 
 ///--- TIMERS CLASS ---
-/// se face un array de marimea max_period / min_period
 class CTimersArray {
 private:
 	float fMinPeriod;
@@ -650,113 +671,6 @@ public:
 	void ResetTimers();
 };
 
-
-///--- CComplexVariant NAMED COLLECTION ---
-//colectie cu nume de variants nume+valoare
-//TODO: oare ar fi bine sa folosesc Boost::CAny pt lista de variants ?
-class CVariantCollection 
-{
-private:
-	CVariantComplex defaultVariant;
-public:
-	CStringHash		m_collectionName; 
-	//script arguments
-	CArray<CVariantComplex*>		m_variants;
-	//ctor
-	CVariantCollection(const WCHAR* strCollectionName);
-	CVariantCollection(CVariantCollection&);
-	CVariantCollection();
-	~CVariantCollection();
-
-	inline int GetVariantCount() { return m_variants.GetSize(); }
-
-	const CVariantComplex* operator[] (const int varIdx) const
-	{
-		assert(varIdx < m_variants.GetSize());
-		return m_variants[varIdx];
-	}
-	CVariantComplex* operator[] (const int varIdx)
-	{
-		assert(varIdx < m_variants.GetSize());
-		return m_variants[varIdx];
-	}
-
-	CVariantCollection& operator=(const CVariantCollection& other) // copy assignment
-	{
-		if (this != &other) // self-assignment check expected
-		{ 
-			DeleteAll();
-			m_collectionName.Init(other.m_collectionName.text);
-			for (int ii = 0; ii < other.m_variants.Count(); ii++)
-			{
-				m_variants.Add(new CVariantComplex(*other.m_variants[ii]));
-			}
-		}
-		return *this;
-	}
-
-	void AppendCollection(const CVariantCollection& sourceCollection)
-	{
-		if (this != &sourceCollection) // self-assignment check expected
-		{
-			for (int ii = 0; ii < sourceCollection.m_variants.Count(); ii++)
-			{
-				m_variants.Add(new CVariantComplex(*sourceCollection.m_variants[ii]));
-			}
-		}
-	}
-
-	//HACK: doesn't compile on older compilers - not always necessary:
-	//CVariantCollection& operator=(CVariantCollection&& other) // move assignment
-	//{
-	//	assert(this != &other); // self-assignment check not required
-	//	DeleteAll();
-	//	//"move" everything
-	//	m_collectionName.Init(other.m_collectionName.text);
-	//	for (int ii = 0; ii < other.m_variants.Count(); ii++)
-	//	{
-	//		m_variants.Add(new CVariantComplex(*other.m_variants[ii]));
-	//	}
-
-	//	SAFE_DELETE_GROWABLE_ARRAY(other.m_variants); // leave moved-from in valid state
-	//	return *this;
-	//}
-
-	//set params - verifica daca exista deja si suprascrie daca exista cu acelasi nume
-	int AddVarUINT32(UINT32 val);
-	int AddVarINT32(INT32 val);
-	int AddVarFloat(float val);
-	int AddVarBool(bool val);
-	int AddVarVoidP(void* val);
-	int AddVarString(WCHAR* strVal);
-
-	int AddVariant(CVariantComplex variant);
-	int AddVariant(CVariantComplex * variant);
-
-	int SetNamedVarUINT32(const WCHAR* varName, UINT32 val);
-	int SetNamedVarHEXCOLOR(const WCHAR* varName, UINT32 val);
-	int SetNamedVarINT32(const WCHAR* varName, INT32 val);
-	int SetNamedVarFloat(const WCHAR* varName, float val);
-	int SetNamedVarBool(const WCHAR* varName, bool val);
-	int SetNamedVarVoidP(const WCHAR* varName, void* val);
-	int SetNamedVarString(const WCHAR* varName, WCHAR* strVal);
-	int SetNamedVarAUTO(const WCHAR* varName, WCHAR* strVal);
-
-	void Serialize(FILE *f);
-	static void Deserialize(CVariantCollection* cv, FILE *f);
-
-	void DeleteVar(const UINT32 varHash);
-	void DeleteVar(const WCHAR* varName);
-	void DeleteAll();
-
-#if defined(_DEBUG) || defined(DEBUG)
-	// outputs all contents to console
-	void DumpDataToOutputWindow();
-#endif
-	//returneaza pointer la param default daca nu gasesc ce cauti
-	CVariantComplex* GetVariantByName(const WCHAR* varName);
-	CVariantComplex* GetVariantByNameHash(const UINT32 varNameHash);
-};
 
 //enum/name list index finder
 int GetListIndexByName(const WCHAR* strName, const CStringHash *arrNamesList, int arrNamesListSize);

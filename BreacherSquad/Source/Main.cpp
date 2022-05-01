@@ -84,7 +84,7 @@ CChatWnd					g_ChatWnd;							// Ingame chat window for networked matches
 ///--- Lockstep networking class ---
 CNetLock					g_netlock;
 ///-- spine manager --
-CSpineManager				g_spineMgr;
+//CSpineManager				g_spineMgr;
 
 CFreeTypeFont				g_font1;
 
@@ -128,7 +128,6 @@ spine::SpineExtension *spine::getDefaultExtension() {
 	static spine::DefaultSpineExtension g_spineExtension;
 	return &g_spineExtension;
 }
-
 // Callback used by ControllersMgr to normalize mouse input from global to ingame player relative
 // Hard to make it a class method and use as a callback so make it global
 void NormalizeIngameMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue)
@@ -580,7 +579,7 @@ void ShutdownApp()
 #ifdef ENABLE_LEADERBOARDS
 	UTGetLeaderboards().Release();
 #endif
-	g_spineMgr.Release();
+	//g_spineMgr.Release();
 
 }
 
@@ -777,7 +776,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(UTGetGUI().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnCreateDevice(pDevice, pBBDesc));
-	V_RETURN(g_spineMgr.OnCreateDevice(pDevice, pBBDesc));
+	//V_RETURN(g_spineMgr.OnCreateDevice(pDevice, pBBDesc));
 
 #ifdef K_CONTROLS_EDITOR
 	V_RETURN(g_ControlsEditor.OnCreateDevice(pDevice, pBBDesc));
@@ -846,7 +845,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_RETURN(UTGetGUI().OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnResetDevice(pDevice, pBBDesc));
-	V_RETURN(g_spineMgr.OnResetDevice(pDevice, pBBDesc));
+	//V_RETURN(g_spineMgr.OnResetDevice(pDevice, pBBDesc));
 
 #ifdef K_CONTROLS_EDITOR
 	V_RETURN(g_ControlsEditor.OnResetDevice(pDevice, pBBDesc));
@@ -918,7 +917,7 @@ void CALLBACK OnLostDevice(void)
 	__Particles().OnLostDevice();
 	g_playerSelScr.OnLostDevice();
 	g_mainMenu.OnLostDevice();
-	g_spineMgr.OnLostDevice();
+	//g_spineMgr.OnLostDevice();
 
 	SAFE_RELEASE(g_pGameSprite);
 
@@ -951,7 +950,7 @@ void CALLBACK OnDestroyDevice(void)
 	__Particles().OnDestroyDevice();
 	g_playerSelScr.OnDestroyDevice();
 	g_mainMenu.OnDestroyDevice();
-	g_spineMgr.OnDestroyDevice();
+	//g_spineMgr.OnDestroyDevice();
 
 #ifdef K_CONTROLS_EDITOR
 	g_ControlsEditor.OnDestroyDevice();
@@ -1663,19 +1662,19 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			if (ctrl != null)
 			{
 				int nPlIdx = UTGetLeaderboards().GetDownloadedScores_PlayerIndex();
-				ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", nScores);
+				ctrl->paramsDict.SetVarINT32(L"nOptionsCnt", nScores);
 				//set selection on valid item if we are allowed to select
-				bool bUserCanSelect = ctrl->paramsDict.GetVariantByName(L"bUserCanSelect")->m_asBool;
-				int nSelIdx = ctrl->paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
+				bool bUserCanSelect = ctrl->paramsDict[L"bUserCanSelect"].m_asBool;
+				int nSelIdx = ctrl->paramsDict[L"nSelectedIdx"].m_asINT32;
 				if (bUserCanSelect)
 				{
 					if ((nScores > 0) && (nSelIdx < 0))
-						ctrl->paramsDict.SetNamedVarINT32(L"nSelectedIdx", max(0, nPlIdx));
+						ctrl->paramsDict.SetVarINT32(L"nSelectedIdx", max(0, nPlIdx));
 				}
 				else
 				{
 					if(nPlIdx >= 0)
-						ctrl->paramsDict.SetNamedVarINT32(L"nSelectedIdx", nPlIdx);
+						ctrl->paramsDict.SetVarINT32(L"nSelectedIdx", nPlIdx);
 				}
 				//re-enable the control (was disabled while asking for the scores so you can't scroll)
 				ctrl->bDisabled = false;

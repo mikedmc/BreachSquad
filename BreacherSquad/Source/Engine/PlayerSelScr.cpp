@@ -567,18 +567,18 @@ void CPlayerSelScr::Update(float dTime)
 									ctrl = layer->GetControlByName("CTRL_ANIM_PORTRAIT");
 									if (ctrl)
 									{
-										ctrl->paramsDict.SetNamedVarINT32(L"setFrame", nPlayerType);
+										ctrl->paramsDict.SetVarINT32(L"setFrame", nPlayerType);
 										//change portrait animation depending on player slot (left vs right)
 										if(nPlayerIdx == 0)
-											ctrl->paramsDict.SetNamedVarINT32(L"animID", ANM_CONTROLS_SPR_PLAYER_PORTRAITS);
+											ctrl->paramsDict.SetVarINT32(L"animID", ANM_CONTROLS_SPR_PLAYER_PORTRAITS);
 										else
-											ctrl->paramsDict.SetNamedVarINT32(L"animID", ANM_CONTROLS_SPR_PLAYER_PORTRAITS_R);
+											ctrl->paramsDict.SetVarINT32(L"animID", ANM_CONTROLS_SPR_PLAYER_PORTRAITS_R);
 									}
 									//class name
 									ctrl = layer->GetControlByName("CTRL_LABEL_CLASS");
 									if (ctrl)
 									{
-										ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_PLAYER_CLASS_ASSAULTER + nPlayerType);
+										ctrl->paramsDict.SetVarINT32(L"stringID", STR_PLAYER_CLASS_ASSAULTER + nPlayerType);
 									}
 									
 									//XP bar to fixed value
@@ -586,8 +586,8 @@ void CPlayerSelScr::Update(float dTime)
 									if (ctrl)
 									{
 										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + nPlayerType;
-										ctrl->paramsDict.SetNamedVarINT32(L"nOldValue", g_userData[nPlBaseIdx]);
-										ctrl->paramsDict.SetNamedVarINT32(L"nNewValue", g_userData[nPlBaseIdx]);
+										ctrl->paramsDict.SetVarINT32(L"nOldValue", g_userData[nPlBaseIdx]);
+										ctrl->paramsDict.SetVarINT32(L"nNewValue", g_userData[nPlBaseIdx]);
 									}
 									//Upgrade ctrl
 									ctrl = layer->GetControlByName("CTRLID_UPGRADE_PLAYER");
@@ -600,9 +600,9 @@ void CPlayerSelScr::Update(float dTime)
 										int nSelectedPoint = nFilled - 1;
 										CLAMP(nSelectedPoint, 0, nDots - 1);
 
-										ctrl->paramsDict.SetNamedVarINT32(L"nPlayerOrdinal", nPlayerIdx);
-										ctrl->paramsDict.SetNamedVarINT32(L"nSelectedLine", nSelectedLine);
-										ctrl->paramsDict.SetNamedVarINT32(L"nSelectedPoint", nSelectedPoint);
+										ctrl->paramsDict.SetVarINT32(L"nPlayerOrdinal", nPlayerIdx);
+										ctrl->paramsDict.SetVarINT32(L"nSelectedLine", nSelectedLine);
+										ctrl->paramsDict.SetVarINT32(L"nSelectedPoint", nSelectedPoint);
 									}
 								}
 							}
@@ -859,7 +859,7 @@ void CPlayerSelScr::Update(float dTime)
 
 										if (ctrl = layer->GetControlByName("LABEL_WPN_NAME"))
 										{
-											ctrl->paramsDict.SetNamedVarINT32(L"stringID", wpnNameIdx);
+											ctrl->paramsDict.SetVarINT32(L"stringID", wpnNameIdx);
 										}
 										//weapon picture
 										if (ctrl = layer->GetControlByName("CP_WEAPON_ICON"))
@@ -872,13 +872,13 @@ void CPlayerSelScr::Update(float dTime)
 											else if (itemtype == PSS_ITEMCAT_ULTIMATE)
 												nAnmIdx = ANM_MENUS_SPR_ICONS_ULTIMATE;
 
-											ctrl->paramsDict.SetNamedVarINT32(L"nAnimIdx", nAnmIdx);
-											ctrl->paramsDict.SetNamedVarINT32(L"nFrameIdx", pItem->iconIdx);
+											ctrl->paramsDict.SetVarINT32(L"nAnimIdx", nAnmIdx);
+											ctrl->paramsDict.SetVarINT32(L"nFrameIdx", pItem->iconIdx);
 										}
 										//save weapon name hash as button param
 										if (ctrl = layer->GetControlByName("BUT_UNLOCK_WEAPON"))
 										{
-											ctrl->paramsDict.SetNamedVarUINT32(L"nMsgParamUINT32", wpnNameHash);
+											ctrl->paramsDict.SetVarUINT32(L"nMsgParamUINT32", wpnNameHash);
 										}
 										//disable UNLOCK button
 										if (wpnPrice > g_userData[K_MEMID_STARS_TOTAL] - g_userData[K_MEMID_STARS_SPENT])
@@ -890,7 +890,7 @@ void CPlayerSelScr::Update(float dTime)
 											//red price when no money
 											if (ctrl = layer->GetControlByName("CTRL_LABEL_PRICE"))
 											{
-												ctrl->paramsDict.SetNamedVarString(L"fontColor", L"0xffff0000");
+												ctrl->paramsDict.SetVarString(L"fontColor", L"0xffff0000");
 											}
 										}
 									}

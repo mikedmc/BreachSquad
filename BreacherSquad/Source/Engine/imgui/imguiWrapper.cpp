@@ -116,34 +116,34 @@ void CimguiWrapper::EndPaint(PDEVICE pDevice)
 
 void CimguiWrapper::AddWatch_Int( WCHAR* varname, int value )
 {
-	arrDebugVars.SetNamedVarINT32( varname, value );
+	arrDebugVars.SetVarINT32( varname, value );
 }
 
 void CimguiWrapper::AddWatch_Float( WCHAR* varname, float value )
 {
-	arrDebugVars.SetNamedVarFloat( varname, value );
+	arrDebugVars.SetVarFloat( varname, value );
 }
 
 void CimguiWrapper::PaintDebugVars()
 {
-	if ( __ImGui().arrDebugVars.m_variants.Count() == 0 )
+	if ( __ImGui().arrDebugVars.GetSize() == 0 )
 	{
 		ImGui::Text( "No Debug Watch Vars!" );
 		return;
 	}
 
 	CStringHashA cname;
-	for ( int kk = 0; kk < __ImGui().arrDebugVars.m_variants.Count(); kk++ )
+	for(auto & elem : __ImGui().arrDebugVars.m_variants)
 	{
-		CVariantComplex* cvc = __ImGui().arrDebugVars[ kk ];
-		switch ( cvc->m_type )
+		CVariantComplex* cvc = &elem.second;
+		switch ( cvc->eType )
 		{
 			case CVariantComplex::K_ARGTYPE_INT32:
-				cname = cvc->m_name;
+				cname = cvc->shName;
 				ImGui::Text( "%s: %d", cname.text, cvc->m_asINT32 );
 				break;
 			case CVariantComplex::K_ARGTYPE_FLOAT:
-				cname = cvc->m_name;
+				cname = cvc->shName;
 				ImGui::Text( "%s: %.2f", cname.text, cvc->m_asFloat );
 				break;
 			default:

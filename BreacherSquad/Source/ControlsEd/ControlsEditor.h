@@ -23,8 +23,8 @@ private:
 public:
 	bool				hideBBoxes;
 
-	CArray<CVariantCollection*>		ctrlTemplates;
-	CVariantCollection				layerTemplate;
+	CArray<CVariantMap*>		ctrlTemplates;
+	CVariantMap				layerTemplate;
 
 	CCtrlLayer*			currLayer;			// current layer
 	int					currLayerIdx;		// current layer idx in list
@@ -57,7 +57,7 @@ public:
 	OPRESULT			LoadCtrlTemplatesXML( WCHAR* XMLpath );
 	void				DrawBBox(RectXYWHi rect, bool selected);
 	void				DrawLine(int x1, int y1, int x2, int y2, D3DCOLOR col = 0xff0000ff);
-	void				AddControl(CVariantCollection* vcol);
+	void				AddControl(CVariantMap* vcol);
 	void				CloneControl(int offx, int offy);
 	void				DeleteControl();
 	void				DeleteLayer();

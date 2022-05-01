@@ -23,8 +23,8 @@ bool CLightAIComponent::Update( CLight& active, float dTime, CLevel& level )
 		case K_AI_STATE_FN_LIGHT_FLICKER1:
 		{
 			//params: f_timeMul, f_threshold
-			float timeMul = active.varAIparams.GetVariantByName( L"f_timeMul" )->m_asFloat;
-			float fThreshold = active.varAIparams.GetVariantByName( L"f_threshold" )->asFloat();
+			float timeMul = active.varAIparams[ L"f_timeMul" ].m_asFloat;
+			float fThreshold = active.varAIparams[ L"f_threshold" ].asFloat();
 			float falpha = UTPerlin::PerlinNoise1D( fTimelineAI * timeMul, 2.0f, 3.0f, 0.8f, 0.25f, 2 );
 			if ( falpha > fThreshold )
 				falpha = 1.0f;

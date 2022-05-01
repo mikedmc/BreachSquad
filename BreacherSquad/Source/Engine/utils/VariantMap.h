@@ -1,5 +1,9 @@
 #pragma once
 
+#include <iostream>
+#include <string>
+#include <map>
+
 class CVariantMap
 {
 private:
@@ -18,7 +22,7 @@ public:
 		return m_variants[key];
 	}
 
-	void AddVariant(CVariantComplex variant);
+	void AddVariant(CVariantComplex & variant);
 	void AddVariant(CVariantComplex * variant);
 
 	void SetVarUINT32(const std::wstring varName, UINT32 val);
@@ -35,6 +39,7 @@ public:
 
 	void DeleteVar(const std::wstring varName);
 	void DeleteVar(const UINT32 varHash);
+	// Clears all variants from map
 	void Clear();
 
 public:

@@ -174,17 +174,17 @@ OPRESULT CControlsEditor::LoadCtrlTemplatesXML(WCHAR* XMLpath)
 	{
 		WCHAR atrval[MAX_PATH];
 		swprintf_s(atrval, MAX_PATH, atr.value());
-		layerTemplate.SetNamedVarString(atr.name(), atrval);
+		layerTemplate.SetVarString(atr.name(), atrval);
 	}
 	pugi::xml_node controlsNodes = doc.root().child(L"Layer");
 	for (pugi::xml_node ctrlNode = controlsNodes.child(L"Control"); ctrlNode; ctrlNode = ctrlNode.next_sibling(L"Control"))
 	{
-		CVariantCollection *nCol = new CVariantCollection();
+		CVariantMap *nCol = new CVariantMap();
 		for (pugi::xml_attribute atr = ctrlNode.first_attribute(); atr; atr = atr.next_attribute())
 		{
 			WCHAR atrval[MAX_PATH];
 			swprintf_s(atrval, MAX_PATH, atr.value());
-			nCol->SetNamedVarString(atr.name(), atrval);
+			nCol->SetVarString(atr.name(), atrval);
 		}
 		ctrlTemplates.Add(nCol);
 	}
@@ -201,13 +201,13 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 
 	int ctrlIdx = -1;
 	WCHAR type[MAX_PATH];
-	swprintf_s(type, MAX_PATH, currLayer->controls[currCtrlIdx]->paramsDict.GetVariantByName(L"Type")->m_strArg.text);
+	swprintf_s(type, MAX_PATH, currLayer->controls[currCtrlIdx]->paramsDict[L"Type"].m_strArg.text);
 	UINT id = FastHash(type);
 	for (int ii = 0; ii < ctrlTemplates.Count(); ii++)
 	{
-		CVariantCollection* ctrl = ctrlTemplates.GetAt(ii);
-		CVariantComplex* ctrlType = ctrl->m_variants.GetAt(0);
-		if (id == ctrlType->m_strArg.getHash())
+		CVariantMap* ctrl = ctrlTemplates.GetAt(ii);
+		CVariantComplex ctrlType = ctrl->m_variants[L"Type"];
+		if (id == ctrlType.m_strArg.getHash())
 		{
 			ctrlIdx = ii;
 			break;
@@ -217,7 +217,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		return;
 
 	CControl* ctrl = currLayer->controls[currCtrlIdx];
-	CVariantCollection* ctrlTemplate = ctrlTemplates.GetAt(ctrlIdx);
+	CVariantMap* ctrlTemplate = ctrlTemplates.GetAt(ctrlIdx);
 
 	if ((selectedCtrls.GetSize() == 1) && (currCtrlIdx >= 0))
 	{
@@ -233,20 +233,19 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 	ImGui::TextDisabled("Control properties");
 
 	bool bNeedsUpdate = false;
-	for (int ii = 1; ii < ctrlTemplate->m_variants.Count(); ii++)
+	for(auto & pVar : ctrlTemplate->m_variants)
 	{
-		// variable name from template
-		CVariantComplex* pVarName = ctrlTemplate->m_variants[ii];
+		CVariantComplex* pVarName = &pVar.second;
 		// actual value from control
-		CVariantComplex* pValue = ctrl->paramsDict.GetVariantByNameHash(pVarName->m_name.getHash());
+		CVariantComplex* pValue = &ctrl->paramsDict[pVarName->shName.text];
 		char sVarName[MAX_PATH];
-		wcstombs(sVarName, pVarName->m_name.text, MAX_PATH);
+		wcstombs(sVarName, pVarName->shName.text, MAX_PATH);
 		// hardcoded controls properties
 		if (strcmp(sVarName, "ID") == 0)
 		{
 			char str0[MAX_PATH] = { 0 };
 			// ID set? show it!
-			if (pValue->m_type != CVariantComplex::K_ARGTYPE_NONE)
+			if (pValue->eType != CVariantComplex::K_ARGTYPE_NONE)
 			{
 				pValue->asString(str0, MAX_PATH);
 			}
@@ -254,11 +253,11 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
 			if (ImGui::IsItemEdited())
 			{
-				if (pValue->m_type == CVariantComplex::K_ARGTYPE_NONE)
+				if (pValue->eType == CVariantComplex::K_ARGTYPE_NONE)
 				{
-					int varidx = ctrl->paramsDict.SetNamedVarString(L"ID", L"");
+					ctrl->paramsDict.SetVarString(L"ID", L"");
 					// set pointer on new var
-					pValue = ctrl->paramsDict[varidx];
+					pValue = &ctrl->paramsDict[L"ID"];
 				}
 				
 				pValue->m_strArg.Init(str0);
@@ -313,11 +312,11 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			{
 				const int anchor_values[] = { FONTFLAG_ANCHOR_LEFT, FONTFLAG_ANCHOR_CENTER, FONTFLAG_ANCHOR_RIGHT };
 				// erase old flags
-				int textAlignFlags = ctrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+				int textAlignFlags = ctrl->paramsDict[L"nTextAlignFlags"].m_asINT32;
 				textAlignFlags &= (~(FONTFLAG_ANCHOR_RIGHT | FONTFLAG_ANCHOR_CENTER | FONTFLAG_ANCHOR_LEFT ));
 				// save new ones
 				textAlignFlags |= anchor_values[pValue->m_asINT32 + 1];
-				ctrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
+				ctrl->paramsDict.SetVarINT32(L"nTextAlignFlags", textAlignFlags);
 				LOG("changed align %d", pValue->m_asINT32);
 			}
 		}
@@ -331,11 +330,11 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			{
 				const int anchor_values[] = { FONTFLAG_ANCHOR_TOP, FONTFLAG_ANCHOR_VCENTER, FONTFLAG_ANCHOR_BOTTOM};
 				// erase old flags
-				int textAlignFlags = ctrl->paramsDict.GetVariantByName(L"nTextAlignFlags")->m_asINT32;
+				int textAlignFlags = ctrl->paramsDict[L"nTextAlignFlags"].m_asINT32;
 				textAlignFlags &= (~(FONTFLAG_ANCHOR_TOP| FONTFLAG_ANCHOR_VCENTER | FONTFLAG_ANCHOR_BOTTOM));
 				// save new ones
 				textAlignFlags |= anchor_values[pValue->m_asINT32 + 1];
-				ctrl->paramsDict.SetNamedVarINT32(L"nTextAlignFlags", textAlignFlags);
+				ctrl->paramsDict.SetVarINT32(L"nTextAlignFlags", textAlignFlags);
 				LOG("changed valign %d", pValue->m_asINT32);
 			}
 		}
@@ -380,7 +379,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		{
 			// main string is kept as an integer (for speed) so we convert it to string to use it
 			char str0[128] = " ";
-			if (pValue->m_type == CVariantComplex::K_ARGTYPE_INT32)
+			if (pValue->eType == CVariantComplex::K_ARGTYPE_INT32)
 			{
 				wcstombs(str0, __Texts().strings[pValue->m_asINT32]->shStringName.text, 128);
 			}
@@ -394,7 +393,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		else // non custom properties get treated by type
 		{
 			// generic control properties
-			switch (pValue->m_type)
+			switch (pValue->eType)
 			{
 				case CVariantComplex::K_ARGTYPE_HEXCOLOR:
 				{
@@ -510,23 +509,23 @@ void CControlsEditor::IMGUI_AddLayerProps()
 	}
 }
 
-void CControlsEditor::AddControl(CVariantCollection* vcol)
+void CControlsEditor::AddControl(CVariantMap* vcol)
 {
-	if (currLayer == NULL)
+	if (currLayer == nullptr)
 		return;
 
 	WCHAR cType[MAX_PATH];
-	swprintf_s(cType, MAX_PATH, vcol->GetVariantByName(L"Type")->m_strArg.text);
+	swprintf_s(cType, MAX_PATH, vcol->m_variants[L"Type"].m_strArg.text);
 
 	CControl* nctrl = new CControl(cType);
 	nctrl->Initialize();
-	for (int ii = 0; ii < vcol->m_variants.Count(); ii++)
+	for(auto & elem : vcol->m_variants)
 	{
-		CVariantComplex *var = vcol->m_variants.GetAt(ii);
+		CVariantComplex* var = &elem.second;
 		WCHAR propertyName[MAX_PATH];
 		WCHAR propertyValue[MAX_PATH];
 
-		swprintf_s(propertyName, MAX_PATH, L"%s", var->m_name.text);
+		swprintf_s(propertyName, MAX_PATH, L"%s", var->shName.text);
 		swprintf_s(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
 		//If template has "empty" as ID then don't add the ID key
 		if ((wcscmp(propertyName, L"ID") == 0) && (wcscmp(propertyValue, L"empty") == 0))
@@ -633,37 +632,37 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 		for (int jj = 0; jj < layer->controls.Count(); jj++)
 		{
 			// dictionarul de date al controlului
-			CVariantCollection* ctrlCol = &layer->controls[jj]->paramsDict;
+			CVariantMap* ctrlCol = &layer->controls[jj]->paramsDict;
 
 
 			pugi::xml_node ctrlNode;
 			ctrlNode = layerNode.append_child(L"Control");
 
-			// tipul de control (Frame, Button, etc)
+			// control type (Frame, Button, etc)
 			WCHAR ctrlType[MAX_PATH];
-			swprintf_s(ctrlType, MAX_PATH, ctrlCol->GetVariantByName(L"Type")->m_strArg.text);
+			swprintf_s(ctrlType, MAX_PATH, ctrlCol->m_variants[L"Type"].m_strArg.text);
 
 			// parcurg ctrlTemplates ca sa scriu atributele exact in ordinea din templates
 			for (int ll = 0; ll < ctrlTemplates.Count(); ll++)
 			{
-				CVariantCollection* lvcol = ctrlTemplates.GetAt(ll);
-				if (wcscmp(ctrlType, lvcol->GetVariantByName(L"Type")->m_strArg.text) == 0)
+				CVariantMap* lvcol = ctrlTemplates.GetAt(ll);
+				if (wcscmp(ctrlType, lvcol->m_variants[L"Type"].m_strArg.text) == 0)
 				{
-					for (int kk = 0; kk < lvcol->m_variants.Count(); kk++)
+					for(auto & it : lvcol->m_variants)
 					{
 						pugi::xml_attribute ctrlAttribute;
-						CVariantComplex* var = lvcol->m_variants.GetAt(kk);
-						if (ctrlCol->GetVariantByName(var->m_name.text))
+						CVariantComplex* var = &it.second;
+						if (ctrlCol->m_variants[var->shName.text].IsSet())
 						{
 							WCHAR propertyName[MAX_PATH];
 							WCHAR propertyValue[MAX_PATH];
-							swprintf_s(propertyName, MAX_PATH, var->m_name.text);
-							ctrlCol->GetVariantByName(propertyName)->asString(propertyValue, MAX_PATH);
+							swprintf_s(propertyName, MAX_PATH, var->shName.text);
+							ctrlCol->m_variants[propertyName].asString(propertyValue, MAX_PATH);
 
 							// ID is empty string or equals the one in templates then we skip it
 							if (wcscmp(propertyName, L"ID") == 0)
-								if (wcslen(ctrlCol->GetVariantByName(L"ID")->m_strArg.text) == 0
-									|| wcscmp(ctrlCol->GetVariantByName(L"ID")->m_strArg.text, var->m_strArg.text) == 0)
+								if (wcslen(ctrlCol->m_variants[L"ID"].m_strArg.text) == 0
+									|| wcscmp(ctrlCol->m_variants[L"ID"].m_strArg.text, var->m_strArg.text) == 0)
 									continue;
 							//cazuri speciale ce trebuiesc traduse
 							if (wcscmp(propertyName, L"animID") == 0)
@@ -725,8 +724,8 @@ void CControlsEditor::Close()
 	// control templates
 	for (int ii = 0; ii < ctrlTemplates.Count(); ii++)
 	{
-		CVariantCollection *col = ctrlTemplates.GetAt(ii);
-		col->DeleteAll();
+		CVariantMap *col = ctrlTemplates.GetAt(ii);
+		col->Clear();
 		SAFE_DELETE(col);
 	}
 	ctrlTemplates.RemoveAll();
@@ -1200,12 +1199,12 @@ void CControlsEditor::DeleteLayer()
 	SAFE_DELETE(currLayer);
 }
 
-void CControlsEditor::UpdateControlDisplayProps(CControl* ctrl)
+void CControlsEditor::UpdateControlDisplayProps( CControl* ctrl )
 {
-	ctrl->bbox.x = ctrl->paramsDict.GetVariantByName(L"X")->m_asINT32;
-	ctrl->bbox.y = ctrl->paramsDict.GetVariantByName(L"Y")->m_asINT32;
-	ctrl->bbox.w = ctrl->paramsDict.GetVariantByName(L"W")->m_asINT32;
-	ctrl->bbox.h = ctrl->paramsDict.GetVariantByName(L"H")->m_asINT32;
+	ctrl->bbox.x = ctrl->paramsDict[L"X"].m_asINT32;
+	ctrl->bbox.y = ctrl->paramsDict[L"Y"].m_asINT32;
+	ctrl->bbox.w = ctrl->paramsDict[L"W"].m_asINT32;
+	ctrl->bbox.h = ctrl->paramsDict[L"H"].m_asINT32;
 }
 
 void CControlsEditor::ChangeControlPaintOrder(int dir)
@@ -1418,10 +1417,10 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		vector<string> arrItems;
 		for (int ii = 0; ii < ctrlTemplates.Count(); ii++)
 		{
-			CVariantCollection *col = ctrlTemplates.GetAt(ii);
-			CVariantComplex* var = col->m_variants.GetAt(0);
+			CVariantMap *col = ctrlTemplates.GetAt(ii);
+
 			char strName[MAX_PATH];
-			wcstombs(strName, var->m_strArg.text, MAX_PATH);
+			wcstombs(strName, col->m_variants[L"Type"].m_strArg.text, MAX_PATH);
 			arrItems.push_back(strName);
 		}
 
@@ -1434,7 +1433,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 				{
 					if (ImGui::IsMouseDoubleClicked(0))
 					{
-						CVariantCollection* vcol = ctrlTemplates.GetAt(kk);
+						CVariantMap* vcol = ctrlTemplates.GetAt(kk);
 						AddControl(vcol);
 					}
 				}
@@ -1479,25 +1478,25 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		if (ImGui::Button("New Layer", ImVec2(120, 0)))
 		{
 			CCtrlLayer* nlayer = new CCtrlLayer();
-			nlayer->bBlocking = (bool)(_wtoi(layerTemplate.GetVariantByName(L"isBlocking")->m_strArg.text) != 0);
-			nlayer->bGetsInput = (bool)(_wtoi(layerTemplate.GetVariantByName(L"getsInput")->m_strArg.text) != 0);
-			int lx = _wtoi(layerTemplate.GetVariantByName(L"X")->m_strArg.text);
-			int ly = _wtoi(layerTemplate.GetVariantByName(L"Y")->m_strArg.text);
+			nlayer->bBlocking = (bool)(_wtoi(layerTemplate[L"isBlocking"].m_strArg.text) != 0);
+			nlayer->bGetsInput = (bool)(_wtoi(layerTemplate[L"getsInput"].m_strArg.text) != 0);
+			int lx = _wtoi(layerTemplate[L"X"].m_strArg.text);
+			int ly = _wtoi(layerTemplate[L"Y"].m_strArg.text);
 			nlayer->SetPos(lx, ly);
-			nlayer->ID.Init(layerTemplate.GetVariantByName(L"ID")->m_strArg.text);
-			nlayer->fDestroyTimer = layerTemplate.GetVariantByName(L"fTimer")->asFloat();
+			nlayer->ID.Init(layerTemplate[L"ID"].m_strArg.text);
+			nlayer->fDestroyTimer = layerTemplate[L"fTimer"].asFloat();
 			nlayer->shFocusedControlID.Reset();
 
 			nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_CENTER;
-			if (layerTemplate.GetVariantByName(L"anchorX")->m_strArg.getHash() == FastHash(L"min"))
+			if (layerTemplate[L"anchorX"].m_strArg.getHash() == FastHash(L"min"))
 				nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_MIN;
-			else if (layerTemplate.GetVariantByName(L"anchorX")->m_strArg.getHash() == FastHash(L"max"))
+			else if (layerTemplate[L"anchorX"].m_strArg.getHash() == FastHash(L"max"))
 				nlayer->anchorX = K_CCTRL_LAYER_ANCHOR_MAX;
 
 			nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_CENTER;
-			if (layerTemplate.GetVariantByName(L"anchorY")->m_strArg.getHash() == FastHash(L"min"))
+			if (layerTemplate[L"anchorY"].m_strArg.getHash() == FastHash(L"min"))
 				nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_MIN;
-			else if (layerTemplate.GetVariantByName(L"anchorY")->m_strArg.getHash() == FastHash(L"max"))
+			else if (layerTemplate[L"anchorY"].m_strArg.getHash() == FastHash(L"max"))
 				nlayer->anchorY = K_CCTRL_LAYER_ANCHOR_MAX;
 
 			UTGetGUI().layersDefinitions.Add(nlayer);
@@ -1531,11 +1530,11 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 			for (int ii = 0; ii < layer->controls.Count(); ii++)
 			{
 				CControl* ctrl = layer->controls.GetAt(ii);
-				wstring itemName = ctrl->paramsDict.GetVariantByName(L"Type")->m_strArg.text;
-				if (ctrl->paramsDict.GetVariantByName(L"ID") && wcslen(ctrl->paramsDict.GetVariantByName(L"ID")->m_strArg.text) > 0)
+				wstring itemName = ctrl->paramsDict[L"Type"].m_strArg.text;
+				if (ctrl->paramsDict[L"ID"].IsSet() && wcslen(ctrl->paramsDict[L"ID"].m_strArg.text) > 0)
 				{
 					itemName.append(L":");
-					itemName.append(ctrl->paramsDict.GetVariantByName(L"ID")->m_strArg.text);
+					itemName.append(ctrl->paramsDict[L"ID"].m_strArg.text);
 				}
 				char strName[MAX_PATH];
 				wcstombs(strName, itemName.c_str(), MAX_PATH);

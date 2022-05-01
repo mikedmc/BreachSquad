@@ -7,7 +7,7 @@ IActiveInterface* CLevel::ScriptGetActiveInterfaceByTargetParam(CVariantComplex*
 	IActiveInterface* target = null;
 	if (vcTarget)
 	{
-		if (vcTarget->m_type == CVariantComplex::K_ARGTYPE_STRING)
+		if (vcTarget->eType == CVariantComplex::K_ARGTYPE_STRING)
 		{
 			if (vcTarget->m_strArg.getHash() == FastHash("self"))
 			{
@@ -48,13 +48,13 @@ IActiveInterface* CLevel::ScriptGetActiveInterfaceByTargetParam(CVariantComplex*
 				target = GetIActiveInterfacePtr_byUID(toucherUID);
 			}
 		}
-		else if (vcTarget->m_type == CVariantComplex::K_ARGTYPE_INT32)
+		else if (vcTarget->eType == CVariantComplex::K_ARGTYPE_INT32)
 		{
 			target = GetIActiveInterfacePtr(vcTarget->m_asINT32);
 		}
 		else //daca nu e setat inseamna ca e SELF
 		{
-			if (vcTarget->m_type == CVariantComplex::K_ARGTYPE_NONE)
+			if (vcTarget->eType == CVariantComplex::K_ARGTYPE_NONE)
 			{
 				target = GetIActiveInterfacePtr_byUID(executorUID);
 			}
@@ -75,13 +75,13 @@ IActiveInterface* CLevel::ScriptGetActiveInterfaceByTargetParam(CVariantComplex*
 
 
 ///--- SCRIPT CALLBACKS ---
-bool CLevel::OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantCollection * pArrScriptVars)
+bool CLevel::OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantMap * pArrScriptVars)
 {
 	IActiveInterface* active = GetIActiveInterfacePtr_byUID(executorUID);
 	if (active != null)
 	{
 		//2. daca are target si script vars nRunTargetScript este diferit de 0 face touch la target
-		if ((active->pTarget != null) && (pArrScriptVars->GetVariantByName(L"nRunTargetScript")->m_asINT32 != 0))
+		if ((active->pTarget != null) && (pArrScriptVars->m_variants[L"nRunTargetScript"].m_asINT32 != 0))
 		{
 			active->pTarget->Touch(active->GetUID(), 0.0f);
 		}
@@ -117,7 +117,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_LEVEL_GIVE_STRATEGIC_POINTS:
 		{
-			float fPts = instr->m_arrArgs.GetVariantByName(L"fPoints")->m_asFloat;
+			float fPts = instr->m_arrArgs[L"fPoints"].m_asFloat;
 			if (fPts < 0.0f)
 				fPts = 0.0f;
 
@@ -138,21 +138,12 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		case instr_LEVEL_NOTIFY_ENGINE:
 		{
 			//trece prin toti params si face verificarile de notificari
-			for (int ii = 0; ii < instr->m_arrArgs.GetVariantCount(); ii++)
+			for (auto & arg : instr->m_arrArgs.m_variants)
 			{
-				if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nBombDefused"))
+				UINT32 namehash = arg.second.shName.getHash();
+				if (namehash == HASH("nBombDefused"))
 				{
 					App_IncreaseGamestat(K_MEMID_GAMESTATS_BOMBS_DISARMED);
-					/*
-					//ACHIEVEMENTS: In the nick of time - bomb defusal
-					if (m_interfaceIGM.GetBombTimer() <= 3.0f)
-					{
-						UTGetAchievementManager().UnlockAchievement(ACH_NICK_OF_TIME);
-					}
-
-					//clear bomb timer
-					m_interfaceIGM.SetBombTimer(-1.0f);
-					*/
 					//erase level bombs flag
 					m_arrStats[K_LVL_STATS_LEVEL_HAS_BOMBS] = 0;
 					m_arrStats[K_LVL_STATS_BOMBS_DISARMED]++;
@@ -177,9 +168,9 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					}
 
 				}
-				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nSecretItem"))
+				else if (namehash == HASH("nSecretItem"))
 				{
-					int idx = instr->m_arrArgs[ii]->m_asINT32;
+					int idx = arg.second.m_asINT32;
 					if ((idx < 1) || (idx >= 32))
 					{
 						ErrorBox(K_ERR_WARNING, L"SCRIPT::LEVEL_NOTIFY_ENGINE nSecretItem index out of range!");
@@ -201,15 +192,15 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					__Texts().ReplaceTokenInt(STR_SECRETS_COLLECTED_VAL, STR_SECRETS_COLLECTED_NN, 1, nCollectedCnt);
 					__Texts().ReplaceTokenInt(STR_SECRETS_COLLECTED_VAL, STR_SECRETS_COLLECTED_VAL, 2, 20);
 				}
-				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nCopSaved"))
+				else if (namehash == HASH("nCopSaved"))
 				{
 					App_IncreaseGamestat(K_MEMID_GAMESTATS_POLICE_SAVED);
 				}
-				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nZombieSpawnerDisabled"))
+				else if (namehash == HASH("nZombieSpawnerDisabled"))
 				{
 					m_arrStats[K_LVL_STATS_ZOMBIE_PORTALS_DESTROYED]++;
 				}
-				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nArrestedTargets"))
+				else if (namehash == HASH("nArrestedTargets"))
 				{
 					//let level know we arrested a target
 					m_arrStats[K_LVL_STATS_LEVEL_ARREST_TARGETS_ARRESTED]++;
@@ -218,12 +209,12 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					//success message
 					//__Particles().AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_TARGET_ARRESTED, FONTIDX_12_WOW, 1.0f, 3.0f, K_COLOR_SELECTED_TEXT);
 				}
-				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nArrestedCivilians"))
+				else if (namehash == HASH("nArrestedCivilians"))
 				{
 					m_arrStats[K_LVL_STATS_CIVILIANS_ARRESTED]++;
 				}
 				//door closed behind player in vertical infinite mode
-				else if (instr->m_arrArgs[ii]->m_name.getHash() == HASH("nVInfiniteDoorUsed"))
+				else if (namehash == HASH("nVInfiniteDoorUsed"))
 				{
 					m_arrStats[K_LVL_STATS_LEVEL_VINFINITE_FLOOR]++;
 					//show level number
@@ -257,15 +248,11 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//AI PARAMS
-			CVariantCollection varcol;
-			//toti parametrii instructiunii, in afara de target si aiName se duc direct in varAIparams
-			for (int ii = 0; ii < instr->m_arrArgs.GetVariantCount(); ii++)
-			{
-				if ((instr->m_arrArgs[ii]->m_name.getHash() != FastHash("target")) && (instr->m_arrArgs[ii]->m_name.getHash() != FastHash("aiName")))
-				{
-					varcol.AddVariant(instr->m_arrArgs[ii]);
-				}
-			}
+			CVariantMap varcol;
+			// all instruction params (apart from target and aiName) go to varAIparams
+			varcol = instr->m_arrArgs;
+			varcol.DeleteVar( L"target" );
+			varcol.DeleteVar( L"aiName" );
 			//set state too
 			target->SetAI( aistate );
 			target->SetAIparams( &varcol, true );
@@ -284,15 +271,10 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//AI PARAMS
-			CVariantCollection varcol;
-			//toti parametrii instructiunii, in afara de target si aiName se duc direct in varAIparams
-			for (int ii = 0; ii < instr->m_arrArgs.GetVariantCount(); ii++)
-			{
-				if (instr->m_arrArgs[ii]->m_name.getHash() != FastHash("target"))
-				{
-					varcol.AddVariant(instr->m_arrArgs[ii]);
-				}
-			}
+			// all instruction params go to varAIparams
+			CVariantMap varcol;
+			varcol = instr->m_arrArgs;
+			varcol.DeleteVar( L"target" );
 			//set state too
 			target->SetAIparams(&varcol, false);
 
@@ -310,8 +292,8 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 
-			CVariantComplex* stepdir = target->varAIparams.GetVariantByName(L"n_dir");
-			float dir = stepdir->m_asINT32;
+			CVariantComplex stepdir = target->varAIparams[L"n_dir"];
+			float dir = stepdir.m_asINT32;
 
 			if (dir != 0) //daca e in mers schimba direct
 				dir *= -1;
@@ -326,9 +308,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 
 			//setam la loc
-			target->varAIparams.SetNamedVarINT32(L"n_dir", dir);
-			// aici suprascria parametrul default, nu era bine, asa ca am pus linia de mai sus
-			//stepdir->Set_INT32(stepdir->m_name.text, dir);
+			target->varAIparams.SetVarINT32(L"n_dir", dir);
 
 			return true;
 		}
@@ -360,11 +340,11 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			CVariantComplex* vcValue = instr->GetArgument(L"fValue");
 			CVariantComplex* vcDuration = instr->GetArgument(L"fDuration");
 			float fDuration = 5.0f, fMultiplier = 1.0f;
-			if ((vcValue) && (vcValue->m_type == CVariantComplex::K_ARGTYPE_FLOAT))
+			if ((vcValue) && (vcValue->eType == CVariantComplex::K_ARGTYPE_FLOAT))
 			{
 				fMultiplier = vcValue->m_asFloat;
 			}
-			if ((vcDuration) && (vcDuration->m_type == CVariantComplex::K_ARGTYPE_FLOAT))
+			if ((vcDuration) && (vcDuration->eType == CVariantComplex::K_ARGTYPE_FLOAT))
 			{
 				fDuration = vcDuration->m_asFloat;
 			}
@@ -416,7 +396,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//check ammo left
-			int nAmmoLeft = active->varAIparams.GetVariantByName(L"n_ammoLeft")->m_asINT32;
+			int nAmmoLeft = active->varAIparams[L"n_ammoLeft")->m_asINT32;
 
 			CActor* toucheractor = GetActorByUID(active->GetToucherUID());
 			if ((toucheractor == null) || (toucheractor->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER))
@@ -439,7 +419,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 
 					toucheractor->weapons[K_LVL_ACT_WEAPON_GEAR].ammoLeft++;
 					nAmmoLeft--;
-					active->varAIparams.SetNamedVarINT32(L"n_ammoLeft", nAmmoLeft);
+					active->varAIparams.SetVarINT32(L"n_ammoLeft", nAmmoLeft);
 
 					//					SND_PLAY_POSITIONAL(SNDIDX_PLAYER_REPLENISH_AMMO, toucheractor->posHeart);
 
@@ -476,7 +456,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//check ammo left
-			int nHealthLeft = active->varAIparams.GetVariantByName(L"n_healthLeft")->m_asINT32;
+			int nHealthLeft = active->varAIparams[L"n_healthLeft")->m_asINT32;
 
 			CActor* toucheractor = GetActorByUID(active->GetToucherUID());
 			if ((toucheractor == null) || (toucheractor->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER))
@@ -493,7 +473,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 
 					toucheractor->fLife = toucheractor->actTemplate.fLife;
 					nHealthLeft--;
-					active->varAIparams.SetNamedVarINT32(L"n_healthLeft", nHealthLeft);
+					active->varAIparams.SetVarINT32(L"n_healthLeft", nHealthLeft);
 
 					if (nHealthLeft <= 0)
 					{
@@ -585,7 +565,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			CVariantComplex* vcParamName = instr->GetArgument(L"paramName");
 			CVariantComplex* vcLocalVar = instr->GetArgument(L"destLocalVarName");
 
-			if ((vcParamName == null) || (vcLocalVar == null) || (vcParamName->m_type != CVariantComplex::K_ARGTYPE_STRING) || (vcLocalVar->m_type != CVariantComplex::K_ARGTYPE_STRING))
+			if ((vcParamName == null) || (vcLocalVar == null) || (vcParamName->eType != CVariantComplex::K_ARGTYPE_STRING) || (vcLocalVar->eType != CVariantComplex::K_ARGTYPE_STRING))
 			{
 				LOG(L"SCRIPT::IACTIVE_GET_AIPARAM - paramName or destLocalVarName not specified or not string!\n");
 				return true;
@@ -596,10 +576,10 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			//AI PARAM
 			if (target != null)
 			{
-				CVariantComplex* AIparam = target->varAIparams.GetVariantByNameHash(vcParamName->m_strArg.getHash());
-				if (AIparam == null)
+				CVariantComplex AIparam = target->varAIparams[vcParamName->m_strArg.text];
+				if (AIparam.IsSet() == false)
 				{
-					//daca nu gaseste param AI seteaza 0
+					// set on 0 if not found
 					CVariantComplex* narg = new CVariantComplex();
 					narg->Set_INT32(vcLocalVar->m_strArg.text, 0);
 					UTGetScriptManager().SetLocalVar(scriptUID, narg);
@@ -609,7 +589,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				//daca am gasit setam varabila locala
 				CVariantComplex* narg = new CVariantComplex();
 				WCHAR AIparamValue[MAX_PATH];
-				AIparam->asString(AIparamValue, MAX_PATH);
+				AIparam.asString(AIparamValue, MAX_PATH);
 
 				narg->Set_AUTO(vcLocalVar->m_strArg.text, AIparamValue);
 				UTGetScriptManager().SetLocalVar(scriptUID, narg);
@@ -693,7 +673,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//evt type
-			if (vcEvtType->m_type != CVariantComplex::K_ARGTYPE_STRING)
+			if (vcEvtType->eType != CVariantComplex::K_ARGTYPE_STRING)
 			{
 				LOG(L"SCRIPT::IACTIVE_ADD_AI_EVENT - event type param missing!\n");
 				return true;
@@ -706,12 +686,12 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 			float fRange = 128.0f;
 			float fDuration = 1.0f;
-			if (vcEvtRange->m_type == CVariantComplex::K_ARGTYPE_FLOAT)
+			if (vcEvtRange->eType == CVariantComplex::K_ARGTYPE_FLOAT)
 				fRange = vcEvtRange->m_asFloat;
-			if (vcEvtDuration->m_type == CVariantComplex::K_ARGTYPE_FLOAT)
+			if (vcEvtDuration->eType == CVariantComplex::K_ARGTYPE_FLOAT)
 				fDuration = vcEvtDuration->m_asFloat;
 			int evtClass = K_LVL_ACT_CLASS_PASSIVE;
-			if (vcEvtClass->m_type == CVariantComplex::K_ARGTYPE_STRING)
+			if (vcEvtClass->eType == CVariantComplex::K_ARGTYPE_STRING)
 			{
 				int retEvtClass = GetListIndexByNameHash(vcEvtClass->m_strArg.textHash, EActorClassNames, K_LVL_ACT_CLASSES_COUNT);
 				if (retEvtClass >= 0)
@@ -979,7 +959,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 			if (fDuration <= 0.0f)
 				fDuration = 1.0f;
-			if (vcDoT->m_type != CVariantComplex::K_ARGTYPE_STRING)
+			if (vcDoT->eType != CVariantComplex::K_ARGTYPE_STRING)
 			{
 				LOG(L"SCRIPT::ACTOR_SET_DOT - sDoT: missing param or not string!\n");
 				return true;
@@ -1022,12 +1002,12 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				LOG(L"SCRIPT::ACTOR_PERK_MODIFIER - who: missing param!\n");
 				return true;
 			}
-			if (vcQty->m_type == CVariantComplex::K_ARGTYPE_NONE)
+			if (vcQty->eType == CVariantComplex::K_ARGTYPE_NONE)
 			{
 				LOG(L"SCRIPT::ACTOR_PERK_MODIFIER - fQtyAdded param not specified!\n");
 				return true;
 			}
-			if (vcPerk->m_type != CVariantComplex::K_ARGTYPE_STRING)
+			if (vcPerk->eType != CVariantComplex::K_ARGTYPE_STRING)
 			{
 				LOG(L"SCRIPT::ACTOR_PERK_MODIFIER - sPerkName missing or not a string!\n");
 				return true;
@@ -1137,7 +1117,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				LOG(L"SCRIPT::IACTIVE_SAVE_TOUCHER_UID - toucher UID is 0\n");
 			}
 			//Set final pos
-			executor->varAIparams.SetNamedVarUINT32(vcVarname->m_strArg.text, toucherUID);
+			executor->varAIparams.SetVarUINT32(vcVarname->m_strArg.text, toucherUID);
 
 			return true;
 		}
@@ -1155,7 +1135,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 
-			if (vcTemplate->m_type != CVariantComplex::K_ARGTYPE_STRING)
+			if (vcTemplate->eType != CVariantComplex::K_ARGTYPE_STRING)
 			{
 				LOG(L"SCRIPT::ACTOR_SET_TEMPLATE - sTemplateName: missing param or not a string!\n");
 				return true;
@@ -1188,7 +1168,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			CVariantComplex* vcprob1 = instr->GetArgument(L"fProbability1");
 			CVariantComplex* vcprob2 = instr->GetArgument(L"fProbability2");
 
-			if ((vcprob1->m_type != CVariantComplex::K_ARGTYPE_FLOAT) || (vcprob2->m_type != CVariantComplex::K_ARGTYPE_FLOAT))
+			if ((vcprob1->eType != CVariantComplex::K_ARGTYPE_FLOAT) || (vcprob2->eType != CVariantComplex::K_ARGTYPE_FLOAT))
 			{
 				LOG(L"SCRIPT::ACTOR_SET_TEMPLATE_RANDOM - missing fProbability1/fProbability2 or not float on ID:%d\n", actor->ID);
 				return true;
@@ -1231,7 +1211,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 
 			//asa era pe modelul vechi de AI
 			//int AIstate = GetAIStateByNameHash(vcAIstate->m_strArg.getHash());
-			if ((vcAIstate == null) || (vcAIstate->m_type != CVariantComplex::K_ARGTYPE_STRING))
+			if ((vcAIstate == null) || (vcAIstate->eType != CVariantComplex::K_ARGTYPE_STRING))
 			{
 				actor->SetAIState( actor->_template.AItemplate->GetAIStateByName( actor->_template.shAIState_ini ) );
 			}
@@ -1259,7 +1239,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 
 			//get template and state
-			if ((vcTemplate == null) || (vcTemplate->m_type != CVariantComplex::K_ARGTYPE_STRING))
+			if ((vcTemplate == null) || (vcTemplate->eType != CVariantComplex::K_ARGTYPE_STRING))
 			{
 				LOG(L"SCRIPT::ACTOR_SPAWN - template name missing or wrong\n");
 				return true;
@@ -1291,7 +1271,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 
 			CActor* nact = null;
 
-			if ((vcAIstate == null) || (vcAIstate->m_type != CVariantComplex::K_ARGTYPE_STRING))
+			if ((vcAIstate == null) || (vcAIstate->eType != CVariantComplex::K_ARGTYPE_STRING))
 			{
 				nact = SpawnActor(vSpawnPos, vcTemplate->m_strArg.text);
 			}
@@ -1366,7 +1346,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		{
 			CVariantComplex* parAnim = instr->GetArgument(L"anim");
 			CVariantComplex* parFrame = instr->GetArgument(L"frame");
-			CVariantComplex* parAnimated = instr->m_arrArgs.GetVariantByName(L"animated");
+			CVariantComplex parAnimated = instr->m_arrArgs[L"animated"];
 			CVariantComplex* vcTarget = instr->GetArgument(L"target");
 			//AI TARGET
 			IActiveInterface* target = ScriptGetActiveInterfaceByTargetParam(vcTarget, executorUID);
@@ -1404,8 +1384,8 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				CLAMP(frame, 0, m_sprProps.GetAFramesCnt(anim) - 1);
 			}
 			bool animated = active->bAnimated;
-			if (parAnimated)
-				animated = parAnimated->m_asBool;
+			if (parAnimated.IsSet())
+				animated = parAnimated.m_asBool;
 
 			active->sprite.Init(&m_sprProps, anim, active->pos.xy_proj, frame);
 			active->bAnimated = animated;

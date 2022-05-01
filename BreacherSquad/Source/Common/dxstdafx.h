@@ -422,6 +422,8 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "utils/StringHash.h"
 #include "utils/StringHashA.h"
 #include "utils/enginecommon.h"
+#include "utils/VariantMap.h"
+
 #include "utils/Boxes.h"
 #include "Caabb.h"
 #include "utils/CollisionAABB.h"
@@ -615,7 +617,7 @@ extern CStringHash			g_startupParam;
 //particles
 extern CTimersArray			g_timers;
 extern CPlayerSelScr		g_playerSelScr;
-extern CSpineManager		g_spineMgr;
+//extern CSpineManager		g_spineMgr;
 
 extern bool     g_bShowHelp;
 extern bool		g_bLevelNeedsUpdate;

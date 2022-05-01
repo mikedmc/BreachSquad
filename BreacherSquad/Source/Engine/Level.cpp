@@ -56,7 +56,7 @@ CBulletHitReturnData CLevel::HitActor( CActor* actor, CBullet *pBullet, Vec2* pv
 		fLifeTaken = fBulletLostEnergy;
 		//daca am valoare negativa la hitpoints setam direct viata la valoarea respectiva
 		actor->fLife = fHitPointsTaken;
-		actor->varAIparams.SetNamedVarINT32( L"nDeathCommand", K_LVL_ACT_DEATHCMD_SPLAT );
+		actor->varAIparams.SetVarINT32( L"nDeathCommand", K_LVL_ACT_DEATHCMD_SPLAT );
 
 		actor->fArmor = 0.0f;
 	}
@@ -299,7 +299,7 @@ CBulletHitReturnData CLevel::HitActor( CActor* actor, CBullet *pBullet, Vec2* pv
 		//set splat command
 		if ( bSplatActor )
 		{
-			actor->varAIparams.SetNamedVarINT32( L"nDeathCommand", K_LVL_ACT_DEATHCMD_SPLAT );
+			actor->varAIparams.SetVarINT32( L"nDeathCommand", K_LVL_ACT_DEATHCMD_SPLAT );
 		}
 	}
 
@@ -1246,7 +1246,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 
 						WCHAR wval[MAX_PATH];
 						StringCchCopy( wval, MAX_PATH, ait->value() );
-						nbeh.m_vcolParams.SetNamedVarAUTO( ait->name(), wval );
+						nbeh.m_vcolParams.SetVarAUTO( ait->name(), wval );
 					}
 
 					nstate->m_arrBehaviors.Add( nbeh );
@@ -3016,13 +3016,13 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 				CControl* ctrl;
 				if ( ( ctrl = layer->GetControlByName( "CTRL_NETVOTE_RESTART" ) ) != nullptr )
 				{
-					ctrl->paramsDict.SetNamedVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
-					ctrl->paramsDict.SetNamedVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
+					ctrl->paramsDict.SetVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
+					ctrl->paramsDict.SetVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
 				}
 				if ( ( ctrl = layer->GetControlByName( "CTRL_NETVOTE_CONTINUE" ) ) != nullptr )
 				{
-					ctrl->paramsDict.SetNamedVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
-					ctrl->paramsDict.SetNamedVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
+					ctrl->paramsDict.SetVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
+					ctrl->paramsDict.SetVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
 				}
 			}
 
@@ -3329,21 +3329,21 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 					CControl* ctrltop = null;
 					if ( ( ctrltop = layer->GetControlByName( "CTRL_STARS" ) ) != nullptr )
 					{
-						ctrltop->paramsDict.SetNamedVarINT32( L"nStars", nStars );
+						ctrltop->paramsDict.SetVarINT32( L"nStars", nStars );
 					}
 					//red labels for conditions that aren't satisfied						   
 					if ( m_arrStats[K_LVL_STATS_HOSTAGES_KILLED] > 0 )
 					{
 						if ( ( ctrltop = layer->GetControlByName( "LABEL_HOSTAGES" ) ) != nullptr )
 						{
-							ctrltop->paramsDict.SetNamedVarString( L"fontColor", L"0xffff0000" );
+							ctrltop->paramsDict.SetVarString( L"fontColor", L"0xffff0000" );
 						}
 					}
 					if ( m_arrStats[K_LVL_STATS_PL1_DEATHS] + m_arrStats[K_LVL_STATS_PL2_DEATHS] > 0 )
 					{
 						if ( ( ctrltop = layer->GetControlByName( "LABEL_CASUALTIES" ) ) != nullptr )
 						{
-							ctrltop->paramsDict.SetNamedVarString( L"fontColor", L"0xffff0000" );
+							ctrltop->paramsDict.SetVarString( L"fontColor", L"0xffff0000" );
 						}
 					}
 
@@ -3351,7 +3351,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 					if ( m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_DOWNLOADED )
 					{
 						if ( ( ctrltop = layer->GetControlByName( "LABEL_LEADERBOARDS" ) ) != nullptr )
-							ctrltop->paramsDict.SetNamedVarString( L"fontColor", L"0x00000000" );
+							ctrltop->paramsDict.SetVarString( L"fontColor", L"0x00000000" );
 					}
 
 					if ( nPlayers == 1 )
@@ -3362,14 +3362,14 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 							//portrete								
 							if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" ) ) != nullptr )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
+								ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
 							}
 							//XP bar
 							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
 							{
 								int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
-								ctrl->paramsDict.SetNamedVarINT32( L"nOldValue", nXPpl1 );
-								ctrl->paramsDict.SetNamedVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+								ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
+								ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
 							}
 						}
 
@@ -3388,11 +3388,11 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 							//portrete								
 							if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" ) ) != nullptr )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
+								ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
 							}
 							if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL2" ) ) != nullptr )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[1].eType );
+								ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[1].eType );
 							}
 						}
 
@@ -3401,11 +3401,11 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						{
 							if ( ( ctrl = layer->GetControlByName( "CTRL_WND_PL1" ) ) != nullptr )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"stringID", STR_NETWORK_HOST_NAME );
+								ctrl->paramsDict.SetVarINT32( L"stringID", STR_NETWORK_HOST_NAME );
 							}
 							if ( ( ctrl = layer->GetControlByName( "CTRL_WND_PL2" ) ) != nullptr )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"stringID", STR_NETWORK_PEER_NAME );
+								ctrl->paramsDict.SetVarINT32( L"stringID", STR_NETWORK_PEER_NAME );
 							}
 
 							if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
@@ -3417,15 +3417,15 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 							//XP bar - networked
 							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[0].nPlayerXPPts );
+								ctrl->paramsDict.SetVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[0].nPlayerXPPts );
 								int nNew = LIMIT( g_playerSelScr.m_arrPlayers[0].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints );
-								ctrl->paramsDict.SetNamedVarINT32( L"nNewValue", nNew );
+								ctrl->paramsDict.SetVarINT32( L"nNewValue", nNew );
 							}
 							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[1].nPlayerXPPts );
+								ctrl->paramsDict.SetVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[1].nPlayerXPPts );
 								int nNew = LIMIT( g_playerSelScr.m_arrPlayers[1].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints );
-								ctrl->paramsDict.SetNamedVarINT32( L"nNewValue", nNew );
+								ctrl->paramsDict.SetVarINT32( L"nNewValue", nNew );
 							}
 						}
 						else
@@ -3440,14 +3440,14 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
 							{
 								int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
-								ctrl->paramsDict.SetNamedVarINT32( L"nOldValue", nXPpl1 );
-								ctrl->paramsDict.SetNamedVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+								ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
+								ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
 							}
 							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
 							{
 								int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
-								ctrl->paramsDict.SetNamedVarINT32( L"nOldValue", nXPpl2 );
-								ctrl->paramsDict.SetNamedVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+								ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl2 );
+								ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
 							}
 						}
 					}
@@ -3478,9 +3478,9 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						{
 							int nPlayers = m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED] + m_arrStats[K_LVL_STATS_PL2_HAS_PLAYED];
 							if ( nPlayers == 1 )
-								ctrl->paramsDict.SetNamedVarINT32( L"stringID", STR_SINGLE_PLAYER );
+								ctrl->paramsDict.SetVarINT32( L"stringID", STR_SINGLE_PLAYER );
 							else
-								ctrl->paramsDict.SetNamedVarINT32( L"stringID", STR_COOP_ONLINE );
+								ctrl->paramsDict.SetVarINT32( L"stringID", STR_COOP_ONLINE );
 							//level name in STR_TEMP10
 							int nChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
 							int nLevel = g_userData[K_MEMID_SELECTED_LEVEL];
@@ -3495,11 +3495,11 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						if ( ctrl != null )
 						{
 							int nPlIdx = UTGetLeaderboards().GetDownloadedScores_PlayerIndex();
-							ctrl->paramsDict.SetNamedVarINT32( L"nSelectedIdx", nPlIdx );
-							ctrl->paramsDict.SetNamedVarINT32( L"nOptionsCnt", UTGetLeaderboards().GetDownloadedScoresCount() );
+							ctrl->paramsDict.SetVarINT32( L"nSelectedIdx", nPlIdx );
+							ctrl->paramsDict.SetVarINT32( L"nOptionsCnt", UTGetLeaderboards().GetDownloadedScoresCount() );
 #ifndef ENABLE_LEADERBOARDS_NAMES_SELECTION
 							ctrl->bCanHaveFocus = false;
-							ctrl->paramsDict.SetNamedVarBool( L"bUserCanSelect", false );
+							ctrl->paramsDict.SetVarBool( L"bUserCanSelect", false );
 #endif
 						}
 					}
@@ -3526,14 +3526,14 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 				//vote restart level
 				if ( ( ctrl = layer->GetControlByName( "CTRL_NETVOTE_RESTART" ) ) != nullptr )
 				{
-					ctrl->paramsDict.SetNamedVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
-					ctrl->paramsDict.SetNamedVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
+					ctrl->paramsDict.SetVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
+					ctrl->paramsDict.SetVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
 				}
 				//vote continue to next level
 				if ( ( ctrl = layer->GetControlByName( "CTRL_NETVOTE_CONTINUE" ) ) != nullptr )
 				{
-					ctrl->paramsDict.SetNamedVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
-					ctrl->paramsDict.SetNamedVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
+					ctrl->paramsDict.SetVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
+					ctrl->paramsDict.SetVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
 				}
 			}
 			///check presses
@@ -3727,7 +3727,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						CControl* ctrl = layer->GetControlByName( "CTRL_STARS" );
 						if ( ctrl )
 						{
-							ctrl->paramsDict.SetNamedVarINT32( L"nStars", 0 );
+							ctrl->paramsDict.SetVarINT32( L"nStars", 0 );
 						}
 						//reason why
 						if ( m_levelStateParam > 0 ) //if set
@@ -3735,21 +3735,21 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 							ctrl = layer->GetControlByName( "BLINKER_REASON" );
 							if ( ctrl )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"stringID", m_levelStateParam );
+								ctrl->paramsDict.SetVarINT32( L"stringID", m_levelStateParam );
 							}
 						}
 						//portrete								
 						ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" );
 						if ( ctrl )
 						{
-							ctrl->paramsDict.SetNamedVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
+							ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
 						}
 						//XP bar
 						if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
 						{
 							int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
-							ctrl->paramsDict.SetNamedVarINT32( L"nOldValue", nXPpl1 );
-							ctrl->paramsDict.SetNamedVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+							ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
+							ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
 						}
 					}
 
@@ -3776,24 +3776,24 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 
 						if ( ( ctrl = layer->GetControlByName( "CTRL_STARS" ) ) != nullptr )
 						{
-							ctrl->paramsDict.SetNamedVarINT32( L"nStars", 0 );
+							ctrl->paramsDict.SetVarINT32( L"nStars", 0 );
 						}
 						//reason why
 						if ( m_levelStateParam > 0 ) //if set
 						{
 							if ( ( ctrl = layer->GetControlByName( "BLINKER_REASON" ) ) != nullptr )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"stringID", m_levelStateParam );
+								ctrl->paramsDict.SetVarINT32( L"stringID", m_levelStateParam );
 							}
 						}
 						//portrete								
 						if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" ) ) != nullptr )
 						{
-							ctrl->paramsDict.SetNamedVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
+							ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
 						}
 						if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL2" ) ) != nullptr )
 						{
-							ctrl->paramsDict.SetNamedVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[1].eType );
+							ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[1].eType );
 						}
 
 						//network - replace player names with real ones
@@ -3801,11 +3801,11 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						{
 							if ( ( ctrl = layer->GetControlByName( "CTRL_WND_PL1" ) ) != nullptr )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"stringID", STR_NETWORK_HOST_NAME );
+								ctrl->paramsDict.SetVarINT32( L"stringID", STR_NETWORK_HOST_NAME );
 							}
 							if ( ( ctrl = layer->GetControlByName( "CTRL_WND_PL2" ) ) != nullptr )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"stringID", STR_NETWORK_PEER_NAME );
+								ctrl->paramsDict.SetVarINT32( L"stringID", STR_NETWORK_PEER_NAME );
 							}
 
 							if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
@@ -3817,15 +3817,15 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 							//XP bar - networked
 							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[0].nPlayerXPPts );
+								ctrl->paramsDict.SetVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[0].nPlayerXPPts );
 								int nNew = LIMIT( g_playerSelScr.m_arrPlayers[0].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints );
-								ctrl->paramsDict.SetNamedVarINT32( L"nNewValue", nNew );
+								ctrl->paramsDict.SetVarINT32( L"nNewValue", nNew );
 							}
 							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
 							{
-								ctrl->paramsDict.SetNamedVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[1].nPlayerXPPts );
+								ctrl->paramsDict.SetVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[1].nPlayerXPPts );
 								int nNew = LIMIT( g_playerSelScr.m_arrPlayers[1].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints );
-								ctrl->paramsDict.SetNamedVarINT32( L"nNewValue", nNew );
+								ctrl->paramsDict.SetVarINT32( L"nNewValue", nNew );
 							}
 						}
 						else
@@ -3841,14 +3841,14 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
 							{
 								int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
-								ctrl->paramsDict.SetNamedVarINT32( L"nOldValue", nXPpl1 );
-								ctrl->paramsDict.SetNamedVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+								ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
+								ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
 							}
 							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
 							{
 								int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
-								ctrl->paramsDict.SetNamedVarINT32( L"nOldValue", nXPpl2 );
-								ctrl->paramsDict.SetNamedVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+								ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl2 );
+								ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
 							}
 						}
 

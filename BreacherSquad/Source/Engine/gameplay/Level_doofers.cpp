@@ -524,7 +524,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 					//breaks doors?
 					if ((explotemplate->fDamageObjectsMultiplier > 0.0f) && (shape->AIstate == K_AI_STATE_COLL_BREAKABLE_DOOR))
 					{
-						if (shape->varAIparams.GetVariantByName(L"b_reinforced")->m_asINT32 != 0)
+						if (shape->varAIparams[L"b_reinforced")->m_asINT32 != 0)
 							continue;
 
 						//loveste liniar
@@ -546,8 +546,8 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 						//was hit
 						shape->AIvarBool1 = true;
 						//save door explo direction
-						shape->varAIparams.SetNamedVarFloat(L"fForceDirX", SIGN(vDist.x));
-						shape->varAIparams.SetNamedVarINT32(L"bExploded", 1);
+						shape->varAIparams.SetVarFloat(L"fForceDirX", SIGN(vDist.x));
+						shape->varAIparams.SetVarINT32(L"bExploded", 1);
 					}
 
 					//windows?
@@ -563,7 +563,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 							//door destroyed - save direction applied by explo
 							if (shape->AIfvar1 <= 0.0f)
 							{
-								shape->varAIparams.SetNamedVarFloat(L"fForceDirX", 1000.0f * SIGN(shape->bbox.vCenter.x - pos.x));
+								shape->varAIparams.SetVarFloat(L"fForceDirX", 1000.0f * SIGN(shape->bbox.vCenter.x - pos.x));
 							}
 						}
 					}

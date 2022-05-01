@@ -10,7 +10,7 @@ private:
 
 public:
 	bool				bEnabled;				// Enables all updating and rendering
-	CVariantCollection  arrDebugVars;			// List of debug vars that get shown in the debug window
+	CVariantMap  arrDebugVars;			// List of debug vars that get shown in the debug window
 
 public:
 	// Enables or disables imgui

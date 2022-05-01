@@ -112,15 +112,16 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 		case K_AI_STATE_FN_ALPHA_SIN_TIME:
 		{
 			//check number of params
-			if ( active.varAIparams.GetVariantCount() < 3 )
+			if ( active.varAIparams.GetSize() < 3 )
 			{
 				LOG( L"UpdateAI_base::ID:%d class:%d needs more AI params", active.ID, active.GetClassType() );
 				break;
 			}
-			float fmin = active.varAIparams[ 0 ]->asFloat();
-			float fmax = active.varAIparams[ 1 ]->asFloat();
-			float timeMul = active.varAIparams[ 2 ]->asFloat();
-			float timeAdd = active.varAIparams[ 3 ]->asFloat();
+			//f_min, f_max, f_timeMul, f_timeAdd
+			float fmin = active.varAIparams[ L"f_min" ].asFloat();
+			float fmax = active.varAIparams[ L"f_max" ].asFloat();
+			float timeMul = active.varAIparams[ L"f_timeMul" ].asFloat();
+			float timeAdd = active.varAIparams[ L"f_timeAdd" ].asFloat();
 
 			float falpha = fmin + (fmax - fmin) * ((sin( fTimelineAI * timeMul + timeAdd ) + 1.0f) / 2.0f);
 			active.color = DW_COLORALPHA( active.color_ini, falpha );
@@ -156,21 +157,19 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 		break;
 		case K_AI_STATE_FN_FOLLOW_TARGET_RAIL:
 		{
-			static const UINT32 hash_v_railPtr = FastHash( L"railPtr" );
-			static const UINT32 hash_n_dir = FastHash( L"n_dir" );
 			static const UINT32 hash_f_pointPauseSec = FastHash( L"f_pointPauseSec" );
 			static const UINT32 hash_b_autoChangeDirection = FastHash( L"b_autoChangeDirection" );
 			
 			CMiscObjectRail* rail = null;
 			
-			CVariantComplex* railvc = active.varAIparams.GetVariantByNameHash( hash_v_railPtr );
-			if ( railvc->m_type == CVariantComplex::K_ARGTYPE_NONE )
+			CVariantComplex railvc = active.varAIparams[L"railPtr"];
+			if ( railvc.eType != CVariantComplex::K_ARGTYPE_VOIDP)
 			{
 				ErrorBox( K_ERR_WARNING, L"Rail pointer not found!", active.targetID_ini );
 				break;
 			}
 			//get rail pointer
-			rail = static_cast<CMiscObjectRail*>(railvc->m_asVoid);
+			rail = static_cast<CMiscObjectRail*>(railvc.m_asVoid);
 			// advances without pause at the ends (for now)
 			if ( mem.AItimer2 > 0.0f )
 			{
@@ -179,7 +178,7 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 			else
 			{
 				//move 
-				int movedir = active.varAIparams.GetVariantByNameHash( hash_n_dir )->m_asINT32;
+				int movedir = active.varAIparams[L"n_dir"].m_asINT32;
 				if ( movedir != 0 ) //movedir == 0 inseamna ca sta pe loc
 				{
 					// rail pos perc	    //speed
@@ -196,14 +195,13 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 						else
 						{
 							//inverseaza directia daca e pe auto
-							if ( active.varAIparams.GetVariantByNameHash( hash_b_autoChangeDirection )->m_asINT32 != 0 )
+							if ( active.varAIparams[L"b_autoChangeDirection"].m_asINT32 != 0 )
 							{
-								active.varAIparams.SetNamedVarINT32( L"n_dir", -movedir );
+								active.varAIparams.SetVarINT32( L"n_dir", -movedir );
 							}
 						}
 
-						CVariantComplex* waitTimer = active.varAIparams.GetVariantByNameHash( hash_f_pointPauseSec );
-						mem.AItimer2 = waitTimer->asFloat();
+						mem.AItimer2 = active.varAIparams[L"f_pointPauseSec"].asFloat();
 					}
 					else if ( mem.AItimer1 <= 0.0f )
 					{
@@ -215,12 +213,11 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 						else
 						{
 							//reverse direction only if not looping
-							if ( active.varAIparams.GetVariantByNameHash( hash_b_autoChangeDirection )->m_asINT32 != 0 )
-								active.varAIparams.SetNamedVarINT32( L"n_dir", -movedir ); //inversam directia
+							if ( active.varAIparams[L"b_autoChangeDirection"].m_asINT32 != 0 )
+								active.varAIparams.SetVarINT32( L"n_dir", -movedir ); //reverse dir
 						}
 						//reset wait timer
-						CVariantComplex* waitTimer = active.varAIparams.GetVariantByNameHash( hash_f_pointPauseSec );
-						mem.AItimer2 = waitTimer->asFloat();
+						mem.AItimer2 = active.varAIparams[L"f_pointPauseSec"].asFloat();
 					}
 				}
 			}
@@ -253,7 +250,7 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 		break;
 		case K_AI_STATE_ACTIVE_BOMB:
 		{
-			mem.AItimer1 = active.varAIparams.GetVariantByName( L"f_explodeTimerSec" )->m_asFloat;
+			mem.AItimer1 = active.varAIparams[ L"f_explodeTimerSec" ].m_asFloat;
 			if ( mem.AItimer1 <= 0.0f )
 			{
 				ErrorBox( K_ERR_WARNING, L"Bomb without timer! ID:%d", active.ID );
@@ -263,10 +260,10 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 		break;
 		case K_AI_STATE_FN_LIGHT_ANG_CONE_XZ_TIME:
 		{
-			mem.AIfvar1 = active.varAIparams.GetVariantByName( L"f_coneHeight" )->m_asFloat;
-			mem.AIfvar2 = active.varAIparams.GetVariantByName( L"f_coneRadius" )->m_asFloat;
-			mem.AItimer1 = active.varAIparams.GetVariantByName( L"f_timeMul" )->m_asFloat;
-			mem.AItimer2 = active.varAIparams.GetVariantByName( L"f_timeAdd" )->m_asFloat;
+			mem.AIfvar1 = active.varAIparams[ L"f_coneHeight" ].m_asFloat;
+			mem.AIfvar2 = active.varAIparams[ L"f_coneRadius" ].m_asFloat;
+			mem.AItimer1 = active.varAIparams[ L"f_timeMul" ].m_asFloat;
+			mem.AItimer2 = active.varAIparams[ L"f_timeAdd" ].m_asFloat;
 		}
 		break;
 		case K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE:
@@ -279,7 +276,7 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 		break;
 		case K_AI_STATE_ACTIVE_TEAM_TELEPORTER_2FRAMES:
 		{
-			active.varAIparams.SetNamedVarUINT32( L"nToucherUID", 0 );
+			active.varAIparams.SetVarUINT32( L"nToucherUID", 0 );
 			//door timer (cat timp sta usa deschisa) il tinem in AItimer1
 			mem.AItimer1 = 0.0f;
 			//este deschisa sau inchisa acum?
@@ -288,7 +285,7 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 		break;
 		case K_AI_STATE_ACTIVE_CHECKPOINT:
 		{
-			bool bIsFirst = (active.varAIparams.GetVariantByName( L"n_isFirst" )->m_asUINT32 != 0);
+			bool bIsFirst = (active.varAIparams[ L"n_isFirst" ].m_asUINT32 != 0);
 			//daca este primul ii dau touch automat
 			if ( bIsFirst )
 			{
@@ -302,13 +299,13 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 		{
 			/*
 			//unghiul introdus
-			mem.AIfvar1 = active.varAIparams.GetVariantByName(L"f_angle")->m_asFloat;
+			mem.AIfvar1 = active.varAIparams[L"f_angle")->m_asFloat;
 			//aduc unghiul in -PI...PI
 			//mem.AIfvar1 -= PI; //aici ar trebui facuta o functie care sa trateze asta
 			//FOV
-			mem.AIfvar2 = active.varAIparams.GetVariantByName(L"f_angleFOV")->m_asFloat;
+			mem.AIfvar2 = active.varAIparams[L"f_angleFOV")->m_asFloat;
 			//range
-			mem.AIfvar3 = active.varAIparams.GetVariantByName(L"f_radius")->m_asFloat;
+			mem.AIfvar3 = active.varAIparams[L"f_radius")->m_asFloat;
 			//set angle
 			mem.fAngle = mem.fAngle_ini = mem.AIfvar1;
 			mem.AItimer1 = 0.0f; //timer cooldown
@@ -322,8 +319,8 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 			//viata usii (poate fi sparta de unele gloante)
 			mem.AIfvar1 = 100000.0f; //by default nu poate fi distrusa de shotgun (sau foarte greu)
 			mem.AIfvar2 = mem.AIfvar1; //viata initiala
-			CVariantComplex *cvar = active.varAIparams.GetVariantByName( L"f_life" );
-			if ( cvar->m_type == CVariantComplex::K_ARGTYPE_FLOAT )
+			CVariantComplex *cvar = &active.varAIparams[ L"f_life" ];
+			if ( cvar->eType == CVariantComplex::K_ARGTYPE_FLOAT )
 			{
 				mem.AIfvar1 = cvar->m_asFloat;
 				//salvam si energia initiala
@@ -342,8 +339,8 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 			//viata 
 			mem.AIfvar1 = 2.0f; //by default se sparge usor
 			mem.AIfvar2 = mem.AIfvar1; //viata initiala
-			CVariantComplex *cvar = active.varAIparams.GetVariantByName( L"f_life" );
-			if ( cvar->m_type == CVariantComplex::K_ARGTYPE_FLOAT )
+			CVariantComplex *cvar = &active.varAIparams[ L"f_life" ];
+			if ( cvar->eType == CVariantComplex::K_ARGTYPE_FLOAT )
 			{
 				mem.AIfvar1 = cvar->m_asFloat;
 				//salvam si energia initiala
@@ -353,29 +350,29 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 		break;
 		case K_AI_STATE_PARTICLES_GENERATOR:
 		{
-			//tipul generatorului il ia din params
-			int genType = __Particles().GetPartEmitterTypeByNameHash( active.varAIparams.GetVariantByName( L"s_Type" )->m_strArg.textHash );
-			int partLayer = __Particles().GetParticleLayerByName( active.varAIparams.GetVariantByName( L"s_Layer" )->m_strArg.textHash );
+			// tipul generatorului il ia din params
+			int genType = __Particles().GetPartEmitterTypeByNameHash( active.varAIparams[ L"s_Type" ].m_strArg.textHash );
+			int partLayer = __Particles().GetParticleLayerByName( active.varAIparams[ L"s_Layer" ].m_strArg.textHash );
 			//ca sa nu intre de mai multe ori si sa aloce de mai multe ori. Daca se intampla trebuie dezalocat mai intai
-			_ASSERT( active.varAIparams.GetVariantByName( L"emitterPtr" )->m_type == CVariantComplex::K_ARGTYPE_NONE );
+			//_ASSERT( active.varAIparams[ L"emitterPtr" ]->m_type == CVariantComplex::K_ARGTYPE_NONE );
 
 			CParticleEmitter * pe = __Particles().AddPartEmitter( genType, &active.bbox, partLayer );
 			//salveaza aici pointer la ParticleEmitter-ul alocat si il controlez din update sa ii dau stop si play cand iese din ecran
-			active.varAIparams.SetNamedVarVoidP( L"emitterPtr", pe );
+			active.varAIparams.SetVarVoidP( L"emitterPtr", pe );
 		}
 		break;
 		case K_AI_STATE_TRIGGER_IN_OUT:
 		{
 			//b_triggerPlayer 
-			mem.AIfvar1 = (float)active.varAIparams.GetVariantByName( L"b_triggerPlayer" )->m_asINT32;
+			mem.AIfvar1 = (float)active.varAIparams[ L"b_triggerPlayer" ].m_asINT32;
 			//b_triggerActor
-			mem.AIfvar2 = (float)active.varAIparams.GetVariantByName( L"b_triggerActor" )->m_asINT32;
+			mem.AIfvar2 = (float)active.varAIparams[ L"b_triggerActor" ].m_asINT32;
 			if ( mem.AIfvar2 != 0.0f )
 			{
 				DebugPrintA( "TRIGGER_IN_OUT - all actors flag enabled! don't use too much of these\n" );
 			}
 			//s_onOutScript
-			mem.AIstrvar1.Init( active.varAIparams.GetVariantByName( L"s_onOutScript" )->m_strArg.text );
+			mem.AIstrvar1.Init( active.varAIparams[ L"s_onOutScript" ].m_strArg.text );
 			//last state:
 			mem.AIvar1 = 0; //deactivated
 		}
@@ -397,19 +394,19 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 				break;
 			}
 			//save rail ptr
-			active.varAIparams.SetNamedVarVoidP( L"railPtr", rail );
+			active.varAIparams.SetVarVoidP( L"railPtr", rail );
 			//this is first time initialization
-			float fPos = active.varAIparams.GetVariantByName( L"f_positionPercent" )->asFloat();
+			float fPos = active.varAIparams[ L"f_positionPercent" ].asFloat();
 			CLAMP( fPos, 0.0f, 1.0f );
 			//cursor pozitie rail
 			mem.AItimer1 = fPos * rail->fLength;
 			//salvez si viteza
 			mem.AIfvar1 = 0.0f; //viteza
-			mem.AIfvar1 = active.varAIparams.GetVariantByName( L"f_speedPPS" )->asFloat();
+			mem.AIfvar1 = active.varAIparams[ L"f_speedPPS" ].asFloat();
 			//wait timerul de capat de rail
-			mem.AItimer2 = active.varAIparams.GetVariantByName( L"f_pointPauseSec" )->asFloat();
+			mem.AItimer2 = active.varAIparams[ L"f_pointPauseSec" ].asFloat();
 			//looping rail?
-			mem.AIvarBool1 = (active.varAIparams.GetVariantByName( L"b_looping" )->m_asINT32 != 0);
+			mem.AIvarBool1 = (active.varAIparams[ L"b_looping" ].m_asINT32 != 0);
 		}
 		break;
 		//unknown or no AI state

@@ -8,22 +8,28 @@
 class CScriptInstruction {
 public:
 	CStringHash		m_instruction;
-	CVariantCollection m_arrArgs; //instruction arguments
+	CVariantMap		m_arrArgs; //instruction arguments
 	//create event
 	CScriptInstruction(const WCHAR* strInstruction)
 	{
 		m_instruction.Init(strInstruction);
-		m_arrArgs.DeleteAll();
+		m_arrArgs.Clear();
 	}
 
 	FORCEINLINE CVariantComplex* GetArgument(WCHAR* strArgName)
 	{
-		return m_arrArgs.GetVariantByName(strArgName);
+		return &m_arrArgs[strArgName];
 	}
+	/*
 	FORCEINLINE CVariantComplex* GetArgument(UINT32 dwArgNameHash)
 	{
-		return m_arrArgs.GetVariantByNameHash(dwArgNameHash);
+		for ( auto & element : m_arrArgs.m_variants )
+		{
+			if(element.second.
+		}
+		return &m_arrArgs.GetVariantByNameHash(dwArgNameHash);
 	}
+	*/
 };
 
 ///--- Script Definition ---
@@ -71,7 +77,7 @@ public:
 
 	//in memoria locala se vor inregistra variabile cu nume si valoare. Vor functiona si ca flaguri pr instructiuni de genul WAIT_FOR_LOCALMEM("nume", valoare)
 	//flagurile(variabilele) vor putea fi setate si din afara scriptului pentru a semnaliza scriptul sa continue
-	CVariantCollection m_localMemory;  //sloturi locale de memorie pentru fiecare script
+	CVariantMap m_localMemory;  //sloturi locale de memorie pentru fiecare script
 
 	FORCEINLINE const UINT32 GetUID() {return UID;}
 	
@@ -101,7 +107,7 @@ public:
 	//RETURNS: consumed instruction? true - consumed, false - can propagate
 	virtual bool ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executorUID, UINT32 scriptUID) = 0;
 	//RETURNS: consumed event - if consumed don't pass it on to the rest of the listeners chain
-	virtual bool OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantCollection * pCollScriptVars) = 0;
+	virtual bool OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantMap * pCollScriptVars) = 0;
 };
 
 ///--- Script Manager ---
@@ -125,7 +131,7 @@ public:
 	//Adauga clase de listenere care proceseaza instructiuni de script
 	bool AddProcessor(IScriptable* pScriptable);
 	//#TODO: ar trebui sa fie si un fisier de constante pe care sa il incarce automat la inceput? pentru unele chestii specifice scriptului
-	CVariantCollection m_globalMemory; //memorie globala folosita de toate scripturile pentru a se sincroniza intre ele
+	CVariantMap m_globalMemory; //memorie globala folosita de toate scripturile pentru a se sincroniza intre ele
 	
 	CScriptManager():
 	m_fTimeline(0.0f)
@@ -147,8 +153,8 @@ public:
 	* Porneste un script si transmite UID catre cel care l-a pornit
 	*@cvcInitialLocalMemory - colectie de variants pentru initializarea memoriei locale
 	*/
-	UINT32 StartScript(WCHAR* scriptName, const UINT32 executorUID = 0, CVariantCollection* cvcInitialLocalMemory = null);
-	UINT32 StartScript(UINT32 scriptNameHash, const UINT32 executorUID = 0, CVariantCollection* cvcInitialLocalMemory = null);
+	UINT32 StartScript(WCHAR* scriptName, const UINT32 executorUID = 0, CVariantMap* cvcInitialLocalMemory = null);
+	UINT32 StartScript(UINT32 scriptNameHash, const UINT32 executorUID = 0, CVariantMap* cvcInitialLocalMemory = null);
 	HRESULT StopScript(UINT32 scriptUID);
 
 	HRESULT StopAllScripts();
@@ -164,8 +170,11 @@ public:
 	void ClearGlobalMemory();
 	void SetGlobalVar(CVariantComplex* varValue);
 	void SetGlobalVar_INT32(WCHAR * varName, INT32 varValue);
+
+	void SetGlobalVars( CVariantMap & inputVariants );
+	void SetLocalVars( UINT32 scriptUID, CVariantMap & inputVariants );
 	
-	HRESULT SetLocalVar(UINT32 scriptUID, CVariantComplex* varValue);
+	void SetLocalVar(UINT32 scriptUID, CVariantComplex* varValue);
 
 	CVariantComplex* GetGlobalVar(WCHAR* varName);
 	CVariantComplex* GetLocalVar(UINT32 scriptUID, WCHAR* varName);

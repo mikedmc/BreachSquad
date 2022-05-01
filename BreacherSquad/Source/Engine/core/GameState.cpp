@@ -15,7 +15,7 @@ EGameState				GameState::eNextState = GAME_STATE_EMPTY;
 ETransitionType			GameState::nTransitionType = TRANSITION_NONE;
 
 
-void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
+void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 {
 	LOG( L"System:: ChangeGameState(%d)", newState );
 	EGameState oldGameState = GameState::state;
@@ -270,7 +270,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 				if ( ctrl )
 				{
 					ctrl->bDisabled = true;
-					ctrl->paramsDict.SetNamedVarINT32( L"nOptionsCnt", 1 );
+					ctrl->paramsDict.SetVarINT32( L"nOptionsCnt", 1 );
 				}
 
 				ctrl = lay->GetControlByName( "BUT_REFRESH_LOBBIES" );
@@ -498,7 +498,7 @@ void GameState::ChangeTo( EGameState newState, CVariantCollection * args )
 }
 
 
-void GameState::ChangeTo_Transition( EGameState newState, ETransitionType transitionType, CVariantCollection * args /*= nullptr */ )
+void GameState::ChangeTo_Transition( EGameState newState, ETransitionType transitionType, CVariantMap * args /*= nullptr */ )
 {
 	//#TODO: save args and feed them to ChangeGameState:
 	//vcArgs = *args;

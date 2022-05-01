@@ -177,7 +177,7 @@ const CStringHash EAIBehaviorTypeNames[] = {
 	L"AI_BEHAVIOR_DEAD",
 };
 
-//!!! CAIBehavior needs to be copyable. CVariantCollection has copy constructor.
+//!!! CAIBehavior needs to be copyable. CVariantMap has copy constructor.
 class CAIBehavior
 {
 public:
@@ -186,11 +186,11 @@ public:
 	bool			bIgnoreEvents;			// ignores AI events (apart from EVENT_DEAD)
 	float			fBehaviorDuration;		// for timed states
 
-	CVariantCollection	m_vcolParams;
+	CVariantMap	m_vcolParams;
 
 	CAIBehavior() : nType( AI_BEHAVIOR_EMPTY ), bCanInterrupt( true ), bIgnoreEvents( false ), fBehaviorDuration( -1.0f )
 	{
-		m_vcolParams.DeleteAll();
+		m_vcolParams.Clear();
 	}
 };
 

@@ -46,10 +46,10 @@ public:
 	static float				fTimer;						// timer sometimes used for the state
 
 	// Changes current game state
-	static void ChangeTo( EGameState newState, CVariantCollection * args = nullptr );
+	static void ChangeTo( EGameState newState, CVariantMap * args = nullptr );
 
 	// Changes current game state playing a transition 
-	static void ChangeTo_Transition( EGameState newState, ETransitionType transitionType, CVariantCollection * args = nullptr );
+	static void ChangeTo_Transition( EGameState newState, ETransitionType transitionType, CVariantMap * args = nullptr );
 	
 	// Tells if state is transitioning to another state (usually animated)
 	static bool isTransitioning() {

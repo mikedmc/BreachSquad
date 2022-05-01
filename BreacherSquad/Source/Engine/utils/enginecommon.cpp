@@ -702,7 +702,7 @@ void CTimersArray::ResetTimers()
 }
 
 //RETURNS: guesses the type of a string variable
-eVarTypes GetTypeFromString(const WCHAR *str)
+EVarTypes GetTypeFromString(const WCHAR *str)
 {
 	int hasdot = 0;
 	int len = wcslen(str);
@@ -735,16 +735,6 @@ eVarTypes GetTypeFromString(const WCHAR *str)
 	return K_RETTYPE_INT;
 }
 
-/**
- * CHAR CASE SENSITIVE replace function
- *
- * Searches all of the occurrences using recursion
- * and replaces with the given string
- * @param char * o_string The original string. Must be large enough!
- * @param char * s_string The string to search for
- * @param char * r_string The replace string
- * @return void The o_string passed is modified
- */
 void str_replace( char * o_string, char * s_string, char * r_string )
 {
 	//a buffer variable to do all replace things
@@ -772,16 +762,6 @@ void str_replace( char * o_string, char * s_string, char * r_string )
 	return str_replace( o_string, s_string, r_string );
 }
 
-/**
- * WCHAR CASE SENSITIVE replace function
- *
- * Searches all of the occurrences using recursion
- * and replaces with the given string
- * @param wchar * o_string The original string. Must be large enough!
- * @param wchar * s_string The string to search for
- * @param wchar * r_string The replace string
- * @return void The o_string passed is modified
- */
 void wcs_replace( WCHAR* o_string, WCHAR* s_string, WCHAR* r_string )
 {
 	//a buffer variable to do all replace things
@@ -811,10 +791,10 @@ void wcs_replace( WCHAR* o_string, WCHAR* s_string, WCHAR* r_string )
 
 bool CVariantComplex::Serialize(FILE *fl)
 {
-	OS_fwrite(&m_type, sizeof(m_type), 1, fl);
-	OS_fwriteWString(fl, m_name.text);
+	OS_fwrite(&eType, sizeof(eType), 1, fl);
+	OS_fwriteWString(fl, shName.text);
 
-	switch (m_type)
+	switch (eType)
 	{
 	case CVariantComplex::K_ARGTYPE_INT32:
 		OS_fwrite(&m_asINT32, sizeof(INT32), 1, fl);
@@ -844,7 +824,7 @@ bool CVariantComplex::Deserialize(FILE* fl)
 {
 	WCHAR name[K_MAX_STRINGHASH_LEN];
 	WCHAR strVal[K_MAX_STRINGHASH_LEN];
-	CVariantComplex::ArgumentType t;
+	CVariantComplex::VariantType t;
 
 	OS_fread(&t, sizeof(t), 1, fl);
 	OS_freadWString(fl, name);
@@ -881,7 +861,7 @@ CVariantComplex* CVariantComplex::DeserializeAlloc(FILE *fl)
 {
 	WCHAR name[K_MAX_STRINGHASH_LEN];
 	WCHAR strVal[K_MAX_STRINGHASH_LEN];
-	CVariantComplex::ArgumentType t;
+	CVariantComplex::VariantType t;
 
 	OS_fread(&t, sizeof(t), 1, fl);
 	OS_freadWString(fl, name);
@@ -933,286 +913,6 @@ CVariantComplex* CVariantComplex::DeserializeAlloc(FILE *fl)
 	return nullptr;
 }
 
-
-///--- CComplexVariant NAMED COLLECTION ---
-//colectie cu nume pentru variants nume+valoare generala
-CVariantCollection::CVariantCollection(CVariantCollection& collection)
-{
-	DeleteAll();
-	m_collectionName.Init(collection.m_collectionName.text);
-	
-	for (int ii = 0; ii < collection.m_variants.Count(); ii++)
-	{
-		m_variants.Add(new CVariantComplex(*collection.m_variants[ii]));
-	}
-}
-CVariantCollection::CVariantCollection(const WCHAR* strCollectionName)
-{
-	m_collectionName.Init(strCollectionName);
-}
-CVariantCollection::CVariantCollection()
-{
-	m_collectionName.Init(L"NO_NAME_COLLECTION");
-}
-
-CVariantCollection::~CVariantCollection()
-{
-	for(int kk=0; kk<m_variants.GetSize(); kk++)
-	{
-		SAFE_DELETE(m_variants[kk]);
-	}
-	m_variants.RemoveAll();
-}
-
-int CVariantCollection::AddVarUINT32(UINT32 val)
-{
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_UINT32(NULL, val);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::AddVarINT32(INT32 val)
-{
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_INT32(NULL, val);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::AddVarFloat(float val)
-{
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_FLOAT(NULL, val);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::AddVarBool(bool val)
-{
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_BOOL(NULL, val);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::AddVarVoidP(void* val)
-{
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_VOIDP(NULL, val);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::AddVarString(WCHAR* strVal)
-{
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_STRING(NULL, strVal);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-//
-// named functions
-//
-void CVariantCollection::Serialize(FILE *f)
-{
-	if (f == NULL) return;
-
-	int nvars = m_variants.GetSize();
-
-	OS_fwrite(&nvars, sizeof(nvars), 1, f);
-	for (int ii = 0; ii < nvars; ii++)
-	{
-		m_variants[ii]->Serialize(f);
-	}
-}
-
-void CVariantCollection::Deserialize(CVariantCollection* vc, FILE *f)
-{
-	if ((f == NULL) || (vc == NULL)) return;
-
-	int nvars = 0;
-	OS_fread(&nvars, sizeof(nvars), 1, f);
-
-	for (int ii = 0; ii < nvars; ii++)
-	{
-		CVariantComplex* v = CVariantComplex::DeserializeAlloc(f);
-		assert(v != NULL);
-		vc->m_variants.Add(v);
-	}
-}
-
-void CVariantCollection::DeleteVar(const WCHAR* varName)
-{
-	CStringHash argNameH(varName);
-	DeleteVar(argNameH.getHash());
-}
-
-void CVariantCollection::DeleteVar(const UINT32 varHash)
-{
-	for (int kk = 0; kk<m_variants.GetSize(); kk++)
-	{
-		if (m_variants[kk]->m_name.getHash() == varHash)
-		{
-			SAFE_DELETE(m_variants[kk]);
-			m_variants.Remove(kk);
-			break;
-		}
-	}
-}
-
-void CVariantCollection::DeleteAll()
-{
-	for(int kk=0; kk<m_variants.GetSize(); kk++)
-	{
-		SAFE_DELETE(m_variants[kk]);
-	}
-	m_variants.RemoveAll();
-}
-
-int CVariantCollection::AddVariant(CVariantComplex variant)
-{
-	DeleteVar(variant.m_name.getHash());
-
-	CVariantComplex* nvar = new CVariantComplex();
-	*nvar = variant;
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::AddVariant(CVariantComplex * variant)
-{
-	DeleteVar(variant->m_name.getHash());
-
-	CVariantComplex* nvar = new CVariantComplex();
-	*nvar = *variant;
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::SetNamedVarUINT32(const WCHAR* argName, UINT32 val)
-{
-	DeleteVar(argName);
-
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_UINT32(argName, val);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::SetNamedVarHEXCOLOR(const WCHAR* argName, UINT32 val)
-{
-	DeleteVar(argName);
-
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_HEXCOLOR(argName, val);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::SetNamedVarINT32(const WCHAR* argName, INT32 val)
-{
-	DeleteVar(argName);
-
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_INT32(argName, val);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::SetNamedVarFloat(const WCHAR* argName, float val)
-{
-	DeleteVar(argName);
-
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_FLOAT(argName, val);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::SetNamedVarBool(const WCHAR* argName, bool val)
-{
-	DeleteVar(argName);
-
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_BOOL(argName, val);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::SetNamedVarVoidP(const WCHAR* argName, void* val)
-{
-	DeleteVar(argName);
-
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_VOIDP(argName, val);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::SetNamedVarString(const WCHAR* argName, WCHAR* strVal)
-{
-	DeleteVar(argName);
-
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_STRING(argName, strVal);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-int CVariantCollection::SetNamedVarAUTO(const WCHAR* argName, WCHAR* strVal)
-{
-	DeleteVar(argName);
-
-	CVariantComplex* nvar = new CVariantComplex();
-	nvar->Set_AUTO(argName, strVal);
-	m_variants.Add(nvar);
-	return m_variants.GetSize() - 1;
-}
-
-#if defined(_DEBUG) || defined(DEBUG)
-void CVariantCollection::DumpDataToOutputWindow()
-{
-	for (int kk = 0; kk < m_variants.GetSize(); kk++)
-	{
-		DebugPrintFnW(L"%s=%d\n", m_variants[kk]->m_name.text, m_variants[kk]->m_asUINT32);
-	}
-}
-#endif
-
-//
-// get argument
-//
-CVariantComplex* CVariantCollection::GetVariantByName(const WCHAR* argName)
-{
-	UINT32 argNameHash = FastHash(argName);
-
-	register int kk = 0;
-	
-	for(kk=0; kk<m_variants.GetSize(); kk++)
-	{
-		if(m_variants[kk]->m_name.textHash == argNameHash)
-			return m_variants[kk];
-	}
-	
-	return &defaultVariant;
-}
-
-CVariantComplex* CVariantCollection::GetVariantByNameHash(const UINT32 varNameHash)
-{
-	register int kk = 0;
-	//exit if not initialized
-	if(varNameHash == 0)
-		return &defaultVariant;
-	//optimizare de viteza
-	for( kk = 0; kk < m_variants.GetSize(); kk++ )
-	{
-		if(m_variants[kk]->m_name.textHash == varNameHash)
-			return m_variants[kk];
-	}
-	return &defaultVariant;
-}
 
 //functie generica de cautat un string intr-o lista de CStringHash si intors indexul lui. Folositor la parsarea xml-urilor pt conversie in valori
 int GetListIndexByName(const WCHAR * strName, const CStringHash *arrNamesList, int arrNamesListSize)

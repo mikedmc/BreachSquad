@@ -456,11 +456,11 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			case AI_BEHAVIOR_DEAD:
 			{
 				//get inherited death command from other states
-				CVariantComplex* cvdeath = act.varAIparams.GetVariantByName( L"nDeathCommand" );
+				CVariantComplex cvdeath = act.varAIparams[ L"nDeathCommand" ];
 
-				if ( cvdeath->m_type != CVariantComplex::K_ARGTYPE_NONE )
+				if ( cvdeath.IsSet() )
 				{
-					m_AIcommands.nDeathCommand = (EActorDeathCommand)cvdeath->m_asINT32;
+					m_AIcommands.nDeathCommand = (EActorDeathCommand)cvdeath.m_asINT32;
 					//delete the death value after saving it to local var
 					act.varAIparams.DeleteVar( L"nDeathCommand" );
 				}
@@ -469,24 +469,24 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				if ( m_AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_NONE )
 				{
 					//daca nu am animatie de dead face direct splat daca poate (sau daca am primit param de bSplat din Hit Actor)
-					/*if ((act.actTemplate.animIDs[K_LVL_ACT_ANIM_DIE][0] == -1) || (act.varAIparams.GetVariantByName(L"bSplat")->m_asBool))
+					/*if ((act.actTemplate.animIDs[K_LVL_ACT_ANIM_DIE][0] == -1) || (act.varAIparams[L"bSplat")->m_asBool))
 					{
 						m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_SPLAT;
 					} */
 				}
 				//cauta params particulari de AI setati din Hit Actor
-				CVariantComplex* cvc = act.varAIparams.GetVariantByName( L"nExplode" );
-				if ( cvc->m_type != CVariantComplex::K_ARGTYPE_NONE )
+				CVariantComplex cvc = act.varAIparams[ L"nExplode" ];
+				if ( cvc.IsSet() )
 				{
 					//comanda splat on explode daca e clasa care trebuie
 					if ( (act._template.actorClass == K_LVL_ACT_CLASS_HUMAN) || (act._template.actorClass == K_LVL_ACT_CLASS_HOSTAGE) )
 						m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_SPLAT;
 					//get explo class
 					UINT32 unExploUID = act.GetUID();
-					if ( act.varAIparams.GetVariantByName( L"bUseDamagerUID" )->m_asBool )
+					if ( act.varAIparams[ L"bUseDamagerUID" ].m_asBool )
 						unExploUID = act.nLastDamageTakenFromUID;
 					//generate explo
-					level.AddDoofer_Explo( cvc->m_asUINT32, act.GetPosHeart(), unExploUID, K_LVL_ACT_CLASS_EXPLOSION, Vec2( 0.0f, 0.0f ), &act.bbox );
+					level.AddDoofer_Explo( cvc.m_asUINT32, act.GetPosHeart(), unExploUID, K_LVL_ACT_CLASS_EXPLOSION, Vec2( 0.0f, 0.0f ), &act.bbox );
 
 					//decal explo mark
 					//AddDecal(K_LVL_DECAL_LAYER_BACKWALLS, act.GetPosHeart(), ANM_ACTIVES_SPR_DECAL_EXPLOMARKS, randint(3), 0xffffffff);
@@ -496,7 +496,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				if ( act._template.actorClass == K_LVL_ACT_CLASS_PLAYER )
 				{
 					//m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_RESET_TO_ZERO;
-					//act.varAIparams.SetNamedVarINT32(L"nDeathCommand", K_LVL_ACT_DEATHCMD_RESET_TO_ZERO);
+					//act.varAIparams.SetVarINT32(L"nDeathCommand", K_LVL_ACT_DEATHCMD_RESET_TO_ZERO);
 					//#HACK: death timer - waits for the timer before executing the state, only for players
 					//press fire to reset timer
 					CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID( act.nControllerInstanceID );
@@ -579,10 +579,10 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				//execute script on death if no other important command issued
 				if ( m_AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_RUNSCRIPT )
 				{
-					CVariantComplex* cvc2 = act.varAIparams.GetVariantByName( L"sDeathScript" );
-					if ( cvc2->m_type == CVariantComplex::K_ARGTYPE_STRING )
+					CVariantComplex cvc2 = act.varAIparams[ L"sDeathScript" ];
+					if ( cvc2.eType == CVariantComplex::K_ARGTYPE_STRING )
 					{
-						act.StartScript( cvc2->m_strArg.text );
+						act.StartScript( cvc2.m_strArg.text );
 						//clear script and death command
 						act.varAIparams.DeleteVar( L"sDeathScript" );
 						m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_NONE;
@@ -800,8 +800,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		break;
 		case AI_BEHAVIOR_SET_STATE:
 		{
-			CVariantComplex* vc = pNewBehavior->m_vcolParams.GetVariantByName( L"sState" );
-			if ( vc->m_type != CVariantComplex::K_ARGTYPE_STRING )
+			CVariantComplex* vc = &pNewBehavior->m_vcolParams[ L"sState" ];
+			if ( vc->eType != CVariantComplex::K_ARGTYPE_STRING )
 			{
 				ErrorBox( K_ERR_WARNING, L"AI_BEHAVIOR_SET_STATE: sState arg not set or wrong type!" );
 				break;
@@ -834,7 +834,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			IActiveInterface* active = actor->pClosestTouchable->pTarget;
 			if ( (active->AIstate == K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE) || (active->AIstate == K_AI_STATE_ACTIVE_TEAM_TELEPORTER_2FRAMES) )
 			{
-				bool bDontChangeFrames = (bool)(active->act.varAIparams.GetVariantByName( L"b_DontChangeFrames" )->m_asBool);
+				bool bDontChangeFrames = (bool)(active->act.varAIparams[ L"b_DontChangeFrames" )->m_asBool);
 				if ( !bDontChangeFrames )
 					active->AItimer1 = 1.0f;
 			}
@@ -846,7 +846,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		case AI_BEHAVIOR_IDLE_CROUCHED:
 		{
 			//save fadeout duration
-			AIfvar1 = pNewBehavior->m_vcolParams.GetVariantByName( L"fFadeOutDuration" )->asFloat();
+			AIfvar1 = pNewBehavior->m_vcolParams[ L"fFadeOutDuration" ].asFloat();
 		}
 		break;
 		case AI_BEHAVIOR_HOSTAGE:
@@ -855,7 +855,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			//actor doesn't try to escape:
 			AIvarBool1 = false;
 			//can hostage escape?
-			float fProbability = pNewBehavior->m_vcolParams.GetVariantByName( L"fRunProbability" )->asFloat();
+			float fProbability = pNewBehavior->m_vcolParams[ L"fRunProbability" ].asFloat();
 			if ( level.m_rand.RandFloat( 100.0f ) < fProbability * 100.0f )
 			{
 				//we have a runner!
@@ -875,15 +875,15 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		break;
 		case AI_BEHAVIOR_SET_ANIMSET:
 		{
-			actor.SetAnimSet( pNewBehavior->m_vcolParams.GetVariantByName( L"nSet" )->m_asINT32 );
+			actor.SetAnimSet( pNewBehavior->m_vcolParams[ L"nSet" ].m_asINT32 );
 			//state doesn't need update
 			ret_bFinished = true;
 		}
 		break;
 		case AI_BEHAVIOR_SET_CAPS:
 		{
-			CVariantComplex* cvNotATarget = pNewBehavior->m_vcolParams.GetVariantByName( L"nNotATarget" );
-			if ( cvNotATarget->m_type != CVariantComplex::K_ARGTYPE_NONE )
+			CVariantComplex* cvNotATarget = &pNewBehavior->m_vcolParams[ L"nNotATarget" ];
+			if ( cvNotATarget->eType != CVariantComplex::K_ARGTYPE_NONE )
 			{
 				bool bVal = (cvNotATarget->m_asINT32 != 0);
 				if ( bVal )
@@ -898,16 +898,16 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		case AI_BEHAVIOR_BARREL_EXPLODING:
 		{
 			//burns with flame?
-			CVariantComplex* cve = pNewBehavior->m_vcolParams.GetVariantByName( L"nCanBurn" );
+			CVariantComplex* cve = &pNewBehavior->m_vcolParams[ L"nCanBurn" ];
 			AIvarBool1 = true;
-			if ( (cve->m_type != CVariantComplex::K_ARGTYPE_NONE) && (cve->asInt32() == 0) )
+			if ( (cve->eType != CVariantComplex::K_ARGTYPE_NONE) && (cve->asInt32() == 0) )
 				AIvarBool1 = false;
 
 			AIsubState = 0;
 			//setez din start comanda de explode ca atunci cand trece in dead sa explodeze
-			actor.varAIparams.SetNamedVarUINT32( L"nExplode", hash_EXPLO_BARREL );
+			actor.varAIparams.SetVarUINT32( L"nExplode", hash_EXPLO_BARREL );
 			//special value that tells the engine that the explosion will have the last damager's UID so we can transmit barrel kills to players
-			actor.varAIparams.SetNamedVarBool( L"bUseDamagerUID", true );
+			actor.varAIparams.SetVarBool( L"bUseDamagerUID", true );
 		}
 		break;
 		case AI_BEHAVIOR_FLEE:
@@ -925,25 +925,25 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		case AI_BEHAVIOR_PATROL:
 		{
 			//save wait timer
-			AIfvar1 = pNewBehavior->m_vcolParams.GetVariantByName( L"fWaitTimer" )->asFloat();
+			AIfvar1 = pNewBehavior->m_vcolParams[ L"fWaitTimer" ].asFloat();
 			AItimer1 = 0.0f;
 			//patrol faster?
-			AIvarBool1 = (pNewBehavior->m_vcolParams.GetVariantByName( L"nRun" )->asInt32() != 0);
+			AIvarBool1 = (pNewBehavior->m_vcolParams[ L"nRun" ].asInt32() != 0);
 			//can he open doors?
-			AIvarBool2 = (pNewBehavior->m_vcolParams.GetVariantByName( L"nOpenUnlockedDoors" )->asInt32() != 0);
+			AIvarBool2 = (pNewBehavior->m_vcolParams[ L"nOpenUnlockedDoors" ].asInt32() != 0);
 		}
 		break;
 		case AI_BEHAVIOR_PATROL_BREAK_DOORS:
 		{
 			//save wait timer
-			AIfvar1 = pNewBehavior->m_vcolParams.GetVariantByName( L"fWaitTimer" )->asFloat();
+			AIfvar1 = pNewBehavior->m_vcolParams[ L"fWaitTimer" ].asFloat();
 			AItimer1 = 0.0f;
 			//patrol faster?
-			AIvarBool1 = (pNewBehavior->m_vcolParams.GetVariantByName( L"nRun" )->asInt32() != 0);
+			AIvarBool1 = (pNewBehavior->m_vcolParams[ L"nRun" ].asInt32() != 0);
 			//set on patroling
 			AIsubState = 0;
 			//break door probability
-			AIfvar2 = pNewBehavior->m_vcolParams.GetVariantByName( L"fBreakProb" )->asFloat();
+			AIfvar2 = pNewBehavior->m_vcolParams[ L"fBreakProb" ].asFloat();
 		}
 		break;
 		case AI_BEHAVIOR_RUN_AWAY:
@@ -951,13 +951,13 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			//running direction - to be set later on
 			AIvar1 = 0;
 			//can he open doors?
-			AIvarBool2 = (pNewBehavior->m_vcolParams.GetVariantByName( L"nOpenUnlockedDoors" )->asInt32() != 0);
+			AIvarBool2 = (pNewBehavior->m_vcolParams[ L"nOpenUnlockedDoors" ].asInt32() != 0);
 		}
 		break;
 		case AI_BEHAVIOR_WAIT_FOR_ACTION:
 		{
 			//var that tells the enemy when he can shoot
-			AIfvar1 = pNewBehavior->m_vcolParams.GetVariantByName( L"fShootPeriod" )->asFloat();
+			AIfvar1 = pNewBehavior->m_vcolParams[ L"fShootPeriod" ].asFloat();
 			//timer that keeps actual time
 			AItimer1 = AIfvar1;
 		}
@@ -968,12 +968,12 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		break;
 		case AI_BEHAVIOR_CHANGE_COLOR:
 		{
-			float fDuration = pNewBehavior->m_vcolParams.GetVariantByName( L"fTotalDuration" )->m_asFloat;
+			float fDuration = pNewBehavior->m_vcolParams[ L"fTotalDuration" ].m_asFloat;
 			CLAMP( fDuration, 0.0f, 60.0f );
 
 			float fAlpha = 0.0f;
-			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName( L"fAlpha" );
-			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_FLOAT )
+			CVariantComplex* cvc = &pNewBehavior->m_vcolParams[ L"fAlpha" ];
+			if ( cvc->eType == CVariantComplex::K_ARGTYPE_FLOAT )
 				fAlpha = cvc->m_asFloat;
 			CLAMP( fAlpha, 0.0f, 1.0f );
 
@@ -986,7 +986,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		{
 			/*
 			//salvez identificatorul animatiei
-			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName(L"sAnimIdentifier");
+			CVariantComplex* cvc = pNewBehavior->m_vcolParams[L"sAnimIdentifier");
 			if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
 			{
 				actor->AIvar1 = GetListIndexByName(cvc->m_strArg.text, EActorAnimNames, K_LVL_ACT_ANIMS_CNT);
@@ -998,9 +998,9 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 
 			//save dest alpha param (defaults on 1.0)
 			actor->AIfvar1 = 1.0f;
-			if (pNewBehavior->m_vcolParams.GetVariantByName(L"fDestAlpha")->m_type != CVariantComplex::K_ARGTYPE_NONE)
+			if (pNewBehavior->m_vcolParams[L"fDestAlpha")->m_type != CVariantComplex::K_ARGTYPE_NONE)
 			{
-				actor->AIfvar1 = pNewBehavior->m_vcolParams.GetVariantByName(L"fDestAlpha")->asFloat();
+				actor->AIfvar1 = pNewBehavior->m_vcolParams[L"fDestAlpha")->asFloat();
 			}
 			//save actual alpha
 			actor->AIfvar2 = D3DCOLOR_GETFALPHA(actor->color);
@@ -1010,21 +1010,21 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		case AI_BEHAVIOR_RUN_SCRIPT:
 		{
 			bool bWaitScriptEnd = false;
-			CVariantComplex* cve = pNewBehavior->m_vcolParams.GetVariantByName( L"bWaitScriptEnd" );
-			if ( cve->m_type != CVariantComplex::K_ARGTYPE_NONE )
+			CVariantComplex* cve = &pNewBehavior->m_vcolParams[ L"bWaitScriptEnd" ];
+			if ( cve->IsSet() )
 				bWaitScriptEnd = cve->m_asBool;
 			AIvar1 = 0;
 			if ( bWaitScriptEnd )
 				AIvar1 = 1;
 
 			bool bTouchTarget = false;
-			CVariantComplex* cvb = pNewBehavior->m_vcolParams.GetVariantByName( L"bTouchTarget" );
-			if ( cvb->m_type != CVariantComplex::K_ARGTYPE_NONE )
+			CVariantComplex* cvb = &pNewBehavior->m_vcolParams[ L"bTouchTarget" ];
+			if ( cvb->IsSet() )
 				bTouchTarget = cvb->m_asBool;
 
 			UINT32 nScriptOverride = 0;
-			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName( L"sScriptOverride" );
-			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
+			CVariantComplex* cvc = &pNewBehavior->m_vcolParams[ L"sScriptOverride" ];
+			if ( cvc->IsSet() )
 			{
 				nScriptOverride = cvc->m_strArg.textHash;
 			}
@@ -1034,8 +1034,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		break;
 		case AI_BEHAVIOR_PLAY_VERSE:
 		{
-			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName( L"sVerseName" );
-			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
+			CVariantComplex* cvc = &pNewBehavior->m_vcolParams[ L"sVerseName" ];
+			if ( cvc->eType == CVariantComplex::K_ARGTYPE_STRING )
 			{
 				EActorSoundVerse eVerse = (EActorSoundVerse)GetListIndexByNameHash( cvc->m_strArg.getHash(), EActorSoundVerseNames, K_LVL_ACT_VERSES_COUNT );
 				if ( eVerse != K_LVL_ACT_VERSE_EMPTY )
@@ -1058,12 +1058,12 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		case AI_BEHAVIOR_GENERATE_EFFECT:
 		{
 			float fSize = 1.0f;
-			CVariantComplex* cvb = pNewBehavior->m_vcolParams.GetVariantByName( L"fSize" );
-			if ( cvb->m_type != CVariantComplex::K_ARGTYPE_NONE )
+			CVariantComplex* cvb = &pNewBehavior->m_vcolParams[ L"fSize" ];
+			if ( cvb->IsSet() )
 				fSize = cvb->m_asFloat;
 
-			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName( L"sEffectType" );
-			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
+			CVariantComplex* cvc = &pNewBehavior->m_vcolParams[ L"sEffectType" ];
+			if ( cvc->eType == CVariantComplex::K_ARGTYPE_STRING )
 			{
 				level.GenerateEffect( cvc->m_strArg, actor.GetPosHeart(), fSize );
 			}
@@ -1085,7 +1085,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				actor->m_AIcommands.nLookDirX = SIGN(actor->m_AIsensorInfo.m_AIcurrentEvent.pos.x - actor->pos.x);
 			}
 			//set wait timer
-			actor->AItimer1 = pNewBehavior->m_vcolParams.GetVariantByName(L"fWaitTimer")->asFloat();
+			actor->AItimer1 = pNewBehavior->m_vcolParams[L"fWaitTimer")->asFloat();
 			actor->AIsubState = 0;
 
 			*/
@@ -1109,7 +1109,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		{
 			AIsubState = 0;
 			//save execute delay
-			AIfvar1 = pNewBehavior->m_vcolParams.GetVariantByName( L"fExecuteDelay" )->asFloat();
+			AIfvar1 = pNewBehavior->m_vcolParams[ L"fExecuteDelay" ].asFloat();
 			if ( AIfvar1 <= 0.0f )
 				AIfvar1 = 2.0f; //defaults on 0
 		}
@@ -1138,13 +1138,13 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			actor.fLife = 0.0f; //kill it
 			//trateaza death commands din script
 			EActorDeathCommand dcmd = K_LVL_ACT_DEATHCMD_NONE;
-			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName( L"sDeathCommand" );
-			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
+			CVariantComplex* cvc = &pNewBehavior->m_vcolParams[ L"sDeathCommand" ];
+			if ( cvc->eType == CVariantComplex::K_ARGTYPE_STRING )
 			{
 				int ndcmd = GetListIndexByName( cvc->m_strArg.text, EActorDeathCommandNames, K_LVL_ACT_DEATHCMD_CNT );
 				//daca avem comanda de death o trimitem mai departe
 				if ( ndcmd >= 0 )
-					actor.varAIparams.SetNamedVarINT32( L"nDeathCommand", ndcmd );
+					actor.varAIparams.SetVarINT32( L"nDeathCommand", ndcmd );
 			}
 			//state doesn't need update
 			ret_bFinished = true;
@@ -1170,8 +1170,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			AItimer1 = 0.0f;
 			if ( actor._template.actorClass != K_LVL_ACT_CLASS_PLAYER )
 			{
-				CVariantComplex* cvt = pNewBehavior->m_vcolParams.GetVariantByName( L"fSplatTimer" );
-				if ( cvt->m_type == CVariantComplex::K_ARGTYPE_FLOAT )
+				CVariantComplex* cvt = &pNewBehavior->m_vcolParams[ L"fSplatTimer" ];
+				if ( cvt->eType == CVariantComplex::K_ARGTYPE_FLOAT )
 					AItimer1 = cvt->asFloat();
 			}
 
@@ -1183,17 +1183,17 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			actor.Weapons()->StopReloading();
 			//trateaza death commands din script
 			EActorDeathCommand dcmd = K_LVL_ACT_DEATHCMD_NONE;
-			CVariantComplex* cvc = pNewBehavior->m_vcolParams.GetVariantByName( L"sDeathCommand" );
-			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
+			CVariantComplex* cvc = &pNewBehavior->m_vcolParams[ L"sDeathCommand" ];
+			if ( cvc->eType == CVariantComplex::K_ARGTYPE_STRING )
 			{
 				dcmd = (EActorDeathCommand)GetListIndexByName( cvc->m_strArg.text, EActorDeathCommandNames, K_LVL_ACT_DEATHCMD_CNT );
 				//daca avem comanda de death o trimitem mai departe
 				if ( dcmd >= K_LVL_ACT_DEATHCMD_NONE )
-					actor.varAIparams.SetNamedVarINT32( L"nDeathCommand", (int)dcmd );
+					actor.varAIparams.SetVarINT32( L"nDeathCommand", (int)dcmd );
 			}
 			//trateaza death script
-			CVariantComplex* cvs = pNewBehavior->m_vcolParams.GetVariantByName( L"sDeathScript" );
-			if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
+			CVariantComplex* cvs = &pNewBehavior->m_vcolParams[ L"sDeathScript" ];
+			if ( cvc->eType == CVariantComplex::K_ARGTYPE_STRING )
 			{
 				actor.varAIparams.AddVariant( cvs );
 			}
@@ -1206,7 +1206,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				if ( level.m_arrStats[ K_LVL_STATS_PL1_LIVES + actor.nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT ] <= 0 )
 					AItimer1 = K_LVL_PLAYER_DEATH_TIMER * 0.25f;
 
-				//actor->act.varAIparams.SetNamedVarINT32(L"nDeathCommand", K_LVL_ACT_DEATHCMD_RESET_TO_ZERO);
+				//actor->act.varAIparams.SetVarINT32(L"nDeathCommand", K_LVL_ACT_DEATHCMD_RESET_TO_ZERO);
 
 				level.m_arrPlayerSelStrategic[ actor.nPlayerOrdinal ] = -1;
 				//m_interfaceIGM.SetStrategicSelection(actor->nPlayerOrdinal, -1);
@@ -1263,7 +1263,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				//save stats for saviour only if deallocating by itself (not killed)
 				if ( dcmd == K_LVL_ACT_DEATHCMD_DEALLOCATE )
 				{
-					UINT32 nToucherUID = actor->act.varAIparams.GetVariantByName( L"nToucherUID" )->m_asUINT32;
+					UINT32 nToucherUID = actor->act.varAIparams[ L"nToucherUID" )->m_asUINT32;
 					CActor* pact = GetPlayerByUID( nToucherUID );
 					if ( pact )
 					{

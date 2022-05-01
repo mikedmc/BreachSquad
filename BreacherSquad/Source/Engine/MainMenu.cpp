@@ -1303,12 +1303,12 @@ void CMainMenu::Update(float dTime)
 							CControl *ctrl = lay->GetControlByName("CTRL_SCORESLIST_TT");
 							if (ctrl != null)
 							{
-								ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", 0);
-								ctrl->paramsDict.SetNamedVarINT32(L"nPage", 0);
-								ctrl->paramsDict.SetNamedVarINT32(L"nLeaderboardID", 1); //Multiplayer
+								ctrl->paramsDict.SetVarINT32(L"nOptionsCnt", 0);
+								ctrl->paramsDict.SetVarINT32(L"nPage", 0);
+								ctrl->paramsDict.SetVarINT32(L"nLeaderboardID", 1); //Multiplayer
 #ifndef ENABLE_LEADERBOARDS_NAMES_SELECTION
 								ctrl->bCanHaveFocus = false;
-								ctrl->paramsDict.SetNamedVarBool(L"bUserCanSelect", false);
+								ctrl->paramsDict.SetVarBool(L"bUserCanSelect", false);
 #endif
 							}
 						}

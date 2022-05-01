@@ -603,11 +603,11 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CControl* ctrl;
 					if (ctrl = layer->GetControlByName("CTRL_SLIDER_SOUNDVOL"))
 					{
-						ctrl->paramsDict.SetNamedVarFloat(L"fSlidePercent", m_Settings.fSoundsVolume);
+						ctrl->paramsDict.SetVarFloat(L"fSlidePercent", m_Settings.fSoundsVolume);
 					}
 					if (ctrl = layer->GetControlByName("CTRL_SLIDER_MUSICVOL"))
 					{
-						ctrl->paramsDict.SetNamedVarFloat(L"fSlidePercent", m_Settings.fMusicVolume);
+						ctrl->paramsDict.SetVarFloat(L"fSlidePercent", m_Settings.fMusicVolume);
 					}
 				}
 
@@ -650,15 +650,15 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CControl* ctrl = null;
 					if (ctrl = layer->GetControlByName("CTRL_CHECK_FULLSCREEN"))
 					{
-						ctrl->paramsDict.SetNamedVarBool(L"bChecked", m_Settings.bFullscreen);
+						ctrl->paramsDict.SetVarBool(L"bChecked", m_Settings.bFullscreen);
 					}
 					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_PIXELPERFECT" ) )
 					{
-						ctrl->paramsDict.SetNamedVarBool( L"bChecked", m_Settings.bPixelPerfect);
+						ctrl->paramsDict.SetVarBool( L"bChecked", m_Settings.bPixelPerfect);
 					}
 					if (ctrl = layer->GetControlByName("CTRL_CHECK_BORDERLESS"))
 					{
-						ctrl->paramsDict.SetNamedVarBool(L"bChecked", m_Settings.bBorderlessFullscreen);
+						ctrl->paramsDict.SetVarBool(L"bChecked", m_Settings.bBorderlessFullscreen);
 					}
 					//set selected resolution
 					int nSelIdx = g_arrResolutions.GetSize() - 1; //by default largest res possible
@@ -672,7 +672,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 					if (ctrl = layer->GetControlByName("CTRL_DROP_RES"))
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"nSelectedIdx", nSelIdx);
+						ctrl->paramsDict.SetVarINT32(L"nSelectedIdx", nSelIdx);
 						//disable if fullscreen and borderless
 						if (m_Settings.bFullscreen && m_Settings.bBorderlessFullscreen)
 							ctrl->bDisabled = true;
@@ -691,20 +691,20 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CControl* ctrl;
 					if (ctrl = layer->GetControlByName("CTRL_CHECK_FULLSCREEN"))
 					{
-						m_Settings.bFullscreen = ctrl->paramsDict.GetVariantByName(L"bChecked")->m_asBool;
+						m_Settings.bFullscreen = ctrl->paramsDict[L"bChecked"].m_asBool;
 					}
 					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_PIXELPERFECT" ) )
 					{
-						m_Settings.bPixelPerfect = ctrl->paramsDict.GetVariantByName( L"bChecked" )->m_asBool;
+						m_Settings.bPixelPerfect = ctrl->paramsDict[ L"bChecked" ].m_asBool;
 					}
 					if (ctrl = layer->GetControlByName("CTRL_CHECK_BORDERLESS"))
 					{
-						m_Settings.bBorderlessFullscreen = ctrl->paramsDict.GetVariantByName(L"bChecked")->m_asBool;
+						m_Settings.bBorderlessFullscreen = ctrl->paramsDict[L"bChecked"].m_asBool;
 					}
 					//set selected resolution
 					if (ctrl = layer->GetControlByName("CTRL_DROP_RES"))
 					{
-						int nSelectedIdx = ctrl->paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
+						int nSelectedIdx = ctrl->paramsDict[L"nSelectedIdx"].m_asINT32;
 
 						if ((nSelectedIdx >= 0) && (nSelectedIdx < g_arrResolutions.GetSize()))
 						{
@@ -962,7 +962,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				{
 					CControl *ctrl = lay->GetControlByName("CTRL_LOBBIES_SELECTOR");
 					if (ctrl != null)
-						nLobbyIdx = ctrl->paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
+						nLobbyIdx = ctrl->paramsDict[L"nSelectedIdx"].m_asINT32;
 				}
 
 				uint64_t iLobbyID = 0;
@@ -1002,7 +1002,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					if (ctrl)
 					{
 						ctrl->bDisabled = true;
-						ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", 1);
+						ctrl->paramsDict.SetVarINT32(L"nOptionsCnt", 1);
 					}
 				}
 			}
@@ -1116,7 +1116,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				CControl* ctrl = null;
 				if (ctrl = layer->GetControlByName("BUT_RESET_KEYS"))
 				{
-					ctrl->paramsDict.SetNamedVarINT32(L"nMsgParamINT32", nKeybdIdx);
+					ctrl->paramsDict.SetVarINT32(L"nMsgParamINT32", nKeybdIdx);
 				}
 			}
 			else if (ctrlID == HASH("BUT_REDEFINE_KEYS"))
@@ -1161,7 +1161,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CControl* ctrl = lay->GetControlByName("CTRLID_UPGRADE_PLAYER");
 					if (ctrl != null)
 					{
-						int nPlayerOrdinal = ctrl->paramsDict.GetVariantByName(L"nPlayerOrdinal")->m_asINT32;
+						int nPlayerOrdinal = ctrl->paramsDict[L"nPlayerOrdinal"].m_asINT32;
 						int nPlayerClass = (int)g_playerSelScr.m_arrPlayers[nPlayerOrdinal].eType;
 						for (int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++)
 						{
@@ -1173,7 +1173,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 							//reset team bars to initial values
 							if (ll <= 1)
 								nValue = 0;
-							ctrl->paramsDict.SetNamedVarINT32(strParamName, nValue);
+							ctrl->paramsDict.SetVarINT32(strParamName, nValue);
 						}
 
 					}
@@ -1188,7 +1188,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CControl* ctrl = lay->GetControlByName("CTRLID_UPGRADE_PLAYER");
 					if (ctrl != null)
 					{
-						int nPlayerOrdinal = ctrl->paramsDict.GetVariantByName(L"nPlayerOrdinal")->m_asINT32;
+						int nPlayerOrdinal = ctrl->paramsDict[L"nPlayerOrdinal"].m_asINT32;
 						int nPlayerClass = (int)g_playerSelScr.m_arrPlayers[nPlayerOrdinal].eType;
 						//sum all spending here
 						int nTotalSpentPoints = 0;
@@ -1196,7 +1196,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						{
 							WCHAR strParamName[MAX_PATH];
 							StringCchPrintf(strParamName, MAX_PATH, L"spent_bar%d", ll);
-							int nSpentPoints = ctrl->paramsDict.GetVariantByName(strParamName)->m_asINT32;
+							int nSpentPoints = ctrl->paramsDict[strParamName].m_asINT32;
 							//save points back to memory
 							int nBarIdx = g_playerSelScr.arrItemsByClass[nPlayerClass].arrUpgradeBarsIdx[ll];
 							int nDataIdx = K_MEMID_UPGRADE_BAR_POINTS_START + g_playerSelScr.m_arrUpgradeBars[nBarIdx]->nMemSlot;
@@ -1210,7 +1210,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 							//update total spent points
 							nTotalSpentPoints += nSpentPoints;
 							//reset control spent points so it doesn't show more (while closing)
-							ctrl->paramsDict.SetNamedVarINT32(strParamName, 0);
+							ctrl->paramsDict.SetVarINT32(strParamName, 0);
 						}
 						//update spent points
 						g_userData[K_MEMID_POINTS_SPENT_PER_CLASS_START + nPlayerClass] += nTotalSpentPoints;
@@ -1270,7 +1270,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						{
 							if (g_arrLangList[kk].shLangAlias == g_Language.shLangAlias)
 							{
-								ctrl->paramsDict.SetNamedVarINT32(L"nSelectedIdx", kk);
+								ctrl->paramsDict.SetVarINT32(L"nSelectedIdx", kk);
 								break;
 							}
 						}
@@ -1286,7 +1286,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CControl *ctrl = pLay->GetControlByName("CTRL_LANGLIST_TT");
 					if (ctrl != null)
 					{
-						nLangIdx = ctrl->paramsDict.GetVariantByName(L"nSelectedIdx")->m_asINT32;
+						nLangIdx = ctrl->paramsDict[L"nSelectedIdx"].m_asINT32;
 					}
 				}
 				//remove layer
@@ -1327,10 +1327,10 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CControl *ctrl = pLay->GetControlByName("CTRL_SCORESLIST_TT");
 					if (ctrl != null)
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", 0);
-						ctrl->paramsDict.SetNamedVarINT32(L"nPage", 0);
-						ctrl->paramsDict.SetNamedVarINT32(L"nLeaderboardID", 0); //Single Player
-						ctrl->paramsDict.SetNamedVarINT32(L"nSelectedIdx", -1);
+						ctrl->paramsDict.SetVarINT32(L"nOptionsCnt", 0);
+						ctrl->paramsDict.SetVarINT32(L"nPage", 0);
+						ctrl->paramsDict.SetVarINT32(L"nLeaderboardID", 0); //Single Player
+						ctrl->paramsDict.SetVarINT32(L"nSelectedIdx", -1);
 					}
 				}
 			}
@@ -1350,10 +1350,10 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CControl *ctrl = pLay->GetControlByName("CTRL_SCORESLIST_TT");
 					if (ctrl != null)
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", 0);
-						ctrl->paramsDict.SetNamedVarINT32(L"nPage", 0);
-						ctrl->paramsDict.SetNamedVarINT32(L"nLeaderboardID", 1); //Multiplayer
-						ctrl->paramsDict.SetNamedVarINT32(L"nSelectedIdx", -1);
+						ctrl->paramsDict.SetVarINT32(L"nOptionsCnt", 0);
+						ctrl->paramsDict.SetVarINT32(L"nPage", 0);
+						ctrl->paramsDict.SetVarINT32(L"nLeaderboardID", 1); //Multiplayer
+						ctrl->paramsDict.SetVarINT32(L"nSelectedIdx", -1);
 					}
 				}
 			}
@@ -1368,10 +1368,10 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CControl *ctrl = pLay->GetControlByName("CTRL_SCORESLIST_TT");
 					if (ctrl != null)
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", 0);
-						ctrl->paramsDict.SetNamedVarINT32(L"nPage", 0);
-						ctrl->paramsDict.SetNamedVarINT32(L"nLeaderboardID", 1); //Multiplayer
-						ctrl->paramsDict.SetNamedVarINT32(L"nSelectedIdx", -1);
+						ctrl->paramsDict.SetVarINT32(L"nOptionsCnt", 0);
+						ctrl->paramsDict.SetVarINT32(L"nPage", 0);
+						ctrl->paramsDict.SetVarINT32(L"nLeaderboardID", 1); //Multiplayer
+						ctrl->paramsDict.SetVarINT32(L"nSelectedIdx", -1);
 					}
 				}
 
@@ -1387,10 +1387,10 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CControl *ctrl = pLay->GetControlByName("CTRL_SCORESLIST_TT");
 					if (ctrl != null)
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", 0);
-						ctrl->paramsDict.SetNamedVarINT32(L"nPage", 0);
-						ctrl->paramsDict.SetNamedVarINT32(L"nLeaderboardID", 1); //Multiplayer
-						ctrl->paramsDict.SetNamedVarINT32(L"nSelectedIdx", -1);
+						ctrl->paramsDict.SetVarINT32(L"nOptionsCnt", 0);
+						ctrl->paramsDict.SetVarINT32(L"nPage", 0);
+						ctrl->paramsDict.SetVarINT32(L"nLeaderboardID", 1); //Multiplayer
+						ctrl->paramsDict.SetVarINT32(L"nSelectedIdx", -1);
 					}
 				}
 
@@ -1436,17 +1436,17 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CControl* ctrl = null;
 					if (ctrl = layer->GetControlByName("CTRL_KEYS_SELECTOR"))
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"nBaseIndex", 0);
-						ctrl->paramsDict.SetNamedVarString(L"StringID_right", STRID_KEYS1_VAL);
-						ctrl->paramsDict.SetNamedVarString(L"nSelectedIdx", 0);
+						ctrl->paramsDict.SetVarINT32(L"nBaseIndex", 0);
+						ctrl->paramsDict.SetVarString(L"StringID_right", STRID_KEYS1_VAL);
+						ctrl->paramsDict.SetVarString(L"nSelectedIdx", 0);
 					}
 					if (ctrl = layer->GetControlByName("WINDOW_REDEFINE"))
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_KEYBOARD1);
+						ctrl->paramsDict.SetVarINT32(L"stringID", STR_KEYBOARD1);
 					}
 					if (ctrl = layer->GetControlByName("BUT_RESET_KEYS_SURE"))
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"nMsgParamINT32", 0); //keyboard index 
+						ctrl->paramsDict.SetVarINT32(L"nMsgParamINT32", 0); //keyboard index 
 					}
 				}
 			}
@@ -1463,17 +1463,17 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					{
 						//base indexul este folosit ca sa detectez in mesajul de selectie daca sunt primele N comenzi sau urmatoarele N (keyboard 2)
 						int nBaseIndex = K_MEMID_KEYS2_FIRSTITEM - K_MEMID_KEYS1_FIRSTITEM;
-						ctrl->paramsDict.SetNamedVarINT32(L"nBaseIndex", nBaseIndex);
-						ctrl->paramsDict.SetNamedVarString(L"StringID_right", STRID_KEYS2_VAL);
-						ctrl->paramsDict.SetNamedVarString(L"nSelectedIdx", 0);
+						ctrl->paramsDict.SetVarINT32(L"nBaseIndex", nBaseIndex);
+						ctrl->paramsDict.SetVarString(L"StringID_right", STRID_KEYS2_VAL);
+						ctrl->paramsDict.SetVarString(L"nSelectedIdx", 0);
 					}
 					if (ctrl = layer->GetControlByName("WINDOW_REDEFINE"))
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_KEYBOARD2);
+						ctrl->paramsDict.SetVarINT32(L"stringID", STR_KEYBOARD2);
 					}
 					if (ctrl = layer->GetControlByName("BUT_RESET_KEYS_SURE"))
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"nMsgParamINT32", 1); //keyboard index
+						ctrl->paramsDict.SetVarINT32(L"nMsgParamINT32", 1); //keyboard index
 					}
 				}
 			}
@@ -1513,9 +1513,9 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					bool bFS = false, bBorderless = false;
 					CControl* ctrl;
 					if (ctrl = layer->GetControlByName("CTRL_CHECK_BORDERLESS"))
-						bBorderless = ctrl->paramsDict.GetVariantByName(L"bChecked")->m_asBool;
+						bBorderless = ctrl->paramsDict[L"bChecked"].m_asBool;
 					if (ctrl = layer->GetControlByName("CTRL_CHECK_FULLSCREEN"))
-						bFS = ctrl->paramsDict.GetVariantByName(L"bChecked")->m_asBool;
+						bFS = ctrl->paramsDict[L"bChecked"].m_asBool;
 
 					if (ctrl = layer->GetControlByName("CTRL_DROP_RES"))
 					{
@@ -1533,7 +1533,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				{
 					CControl* ctrl;
 					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_SHAKES" ) )
-						m_Settings.bScreenShakes = ctrl->paramsDict.GetVariantByName( L"bChecked" )->m_asBool;
+						m_Settings.bScreenShakes = ctrl->paramsDict[ L"bChecked" ].m_asBool;
 				}
 			}
 			else if (ctrlID == HASH( "CTRL_CHECK_GORE" )) {
@@ -1542,7 +1542,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				{
 					CControl* ctrl;
 					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_GORE" ) )
-						m_Settings.bGoreEnabled = ctrl->paramsDict.GetVariantByName( L"bChecked" )->m_asBool;
+						m_Settings.bGoreEnabled = ctrl->paramsDict[ L"bChecked" ].m_asBool;
 				}
 			}
 		}
@@ -1564,13 +1564,13 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CControl *ctrl = pLay->GetControlByName("CTRL_SCORESLIST_TT");
 					if (ctrl != null)
 					{
-						nLeaderboardID = ctrl->paramsDict.GetVariantByName(L"nLeaderboardID")->m_asINT32;
-						bool bUserCanSelect = ctrl->paramsDict.GetVariantByName(L"bUserCanSelect")->m_asBool;
+						nLeaderboardID = ctrl->paramsDict[L"nLeaderboardID"].m_asINT32;
+						bool bUserCanSelect = ctrl->paramsDict[L"bUserCanSelect"].m_asBool;
 
 						ctrl->bDisabled = true;
 						
-						ctrl->paramsDict.SetNamedVarINT32(L"nSelectedIdx", -1);
-						ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", 0);
+						ctrl->paramsDict.SetVarINT32(L"nSelectedIdx", -1);
+						ctrl->paramsDict.SetVarINT32(L"nOptionsCnt", 0);
 					}
 				}
 				if (!UTGetLeaderboards().IsBusy())
@@ -1713,13 +1713,13 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				{
 					if (ctrl = layer->GetControlByName("LABEL_COMMAND"))
 					{
-						ctrl->paramsDict.SetNamedVarINT32(L"stringID", STR_KEY_LEFT + command);
+						ctrl->paramsDict.SetVarINT32(L"stringID", STR_KEY_LEFT + command);
 					}
 					if (ctrl = layer->GetControlByName("CTRL_KEYGRABBER"))
 					{
 						//save keyboard ordinal (0 or 1 for Keyboard1 and Keyboard2) and the command that need redefining
-						ctrl->paramsDict.SetNamedVarINT32(L"nKeyboardOrdinal", keyboardOrdinal);
-						ctrl->paramsDict.SetNamedVarINT32(L"nSDLcommand", command);
+						ctrl->paramsDict.SetVarINT32(L"nKeyboardOrdinal", keyboardOrdinal);
+						ctrl->paramsDict.SetVarINT32(L"nSDLcommand", command);
 					}
 				}
 
@@ -1778,11 +1778,11 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 							CControl *ctrl = pLay->GetControlByName("CTRL_SCORESLIST_TT");
 							if (ctrl != null)
 							{
-								ctrl->paramsDict.SetNamedVarINT32(L"nOptionsCnt", 0);
-								ctrl->paramsDict.SetNamedVarINT32(L"nPage", 0);
-								ctrl->paramsDict.SetNamedVarINT32(L"nLeaderboardID", 0); //Single Player
+								ctrl->paramsDict.SetVarINT32(L"nOptionsCnt", 0);
+								ctrl->paramsDict.SetVarINT32(L"nPage", 0);
+								ctrl->paramsDict.SetVarINT32(L"nLeaderboardID", 0); //Single Player
 #ifndef ENABLE_LEADERBOARDS_NAMES_SELECTION
-								ctrl->paramsDict.SetNamedVarBool(L"bUserCanSelect", false);
+								ctrl->paramsDict.SetVarBool(L"bUserCanSelect", false);
 #endif
 							}
 						}
@@ -1802,11 +1802,11 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 							CControl* ctrl;
 							if (ctrl = layer->GetControlByName("CTRL_SLIDER_SOUNDVOL"))
 							{
-								ctrl->paramsDict.SetNamedVarFloat(L"fSlidePercent", m_Settings.fSoundsVolume);
+								ctrl->paramsDict.SetVarFloat(L"fSlidePercent", m_Settings.fSoundsVolume);
 							}
 							if (ctrl = layer->GetControlByName("CTRL_SLIDER_MUSICVOL"))
 							{
-								ctrl->paramsDict.SetNamedVarFloat(L"fSlidePercent", m_Settings.fMusicVolume);
+								ctrl->paramsDict.SetVarFloat(L"fSlidePercent", m_Settings.fMusicVolume);
 							}
 						}
 					}
@@ -1843,11 +1843,11 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 							CControl* ctrl;
 							if (ctrl = layer->GetControlByName("CTRL_SLIDER_SOUNDVOL"))
 							{
-								ctrl->paramsDict.SetNamedVarFloat(L"fSlidePercent", m_Settings.fSoundsVolume);
+								ctrl->paramsDict.SetVarFloat(L"fSlidePercent", m_Settings.fSoundsVolume);
 							}
 							if (ctrl = layer->GetControlByName("CTRL_SLIDER_MUSICVOL"))
 							{
-								ctrl->paramsDict.SetNamedVarFloat(L"fSlidePercent", m_Settings.fMusicVolume);
+								ctrl->paramsDict.SetVarFloat(L"fSlidePercent", m_Settings.fMusicVolume);
 							}
 						}
 					}
@@ -1881,11 +1881,11 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 							CControl* ctrl;
 							if (ctrl = layer->GetControlByName("CTRL_SLIDER_SOUNDVOL"))
 							{
-								ctrl->paramsDict.SetNamedVarFloat(L"fSlidePercent", m_Settings.fSoundsVolume);
+								ctrl->paramsDict.SetVarFloat(L"fSlidePercent", m_Settings.fSoundsVolume);
 							}
 							if (ctrl = layer->GetControlByName("CTRL_SLIDER_MUSICVOL"))
 							{
-								ctrl->paramsDict.SetNamedVarFloat(L"fSlidePercent", m_Settings.fMusicVolume);
+								ctrl->paramsDict.SetVarFloat(L"fSlidePercent", m_Settings.fMusicVolume);
 							}
 						}
 					}

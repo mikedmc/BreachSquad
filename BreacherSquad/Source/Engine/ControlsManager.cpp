@@ -86,7 +86,7 @@ CControl::CControl( const WCHAR* typeName )
 	bCanHaveFocus = false;
 	bShowFocusCursor = true;
 	fFocusPercent = 0.0f;
-	paramsDict.DeleteAll();
+	paramsDict.Clear();
 	bbox.Set( 0, 0, 0, 0 );
 	type = ( EControlType ) GetListIndexByName( typeName, EControlTypeNames, CCTRL_TYPES_COUNT );
 }
@@ -116,18 +116,18 @@ void CControl::OnFocused( int nFocusDirection )
 			if ( nFocusDirection == 0 )
 				return;
 
-			bool bUserCanSelect = paramsDict.GetVariantByName( L"bUserCanSelect" )->m_asBool;
-			int nOptionsCnt = paramsDict.GetVariantByName( L"nOptionsCnt" )->m_asINT32;
+			bool bUserCanSelect = paramsDict[ L"bUserCanSelect" ].m_asBool;
+			int nOptionsCnt = paramsDict[ L"nOptionsCnt" ].m_asINT32;
 
 			if ( ( bUserCanSelect ) && ( nOptionsCnt > 0 ) )
 			{
 				if ( nFocusDirection > 0 )
 				{
-					paramsDict.SetNamedVarINT32( L"nSelectedIdx", 0 );
+					paramsDict.SetVarINT32( L"nSelectedIdx", 0 );
 				}
 				else
 				{
-					paramsDict.SetNamedVarINT32( L"nSelectedIdx", nOptionsCnt - 1 );
+					paramsDict.SetVarINT32( L"nSelectedIdx", nOptionsCnt - 1 );
 				}
 			}
 		}
@@ -143,7 +143,7 @@ void CControl::OnFocused( int nFocusDirection )
 void CControl::Reset()
 {
 	//generic params
-	paramsDict.DeleteAll();
+	paramsDict.Clear();
 
 	bbox.Set( 0, 0, 0, 0 );
 
@@ -161,13 +161,13 @@ void CControl::Reset()
 			bCanHaveFocus = true;
 			bShowFocusCursor = true;
 
-			paramsDict.SetNamedVarINT32( L"nSelectedIdx", 0 );
-			paramsDict.SetNamedVarINT32( L"nItemsCnt", 0 );
+			paramsDict.SetVarINT32( L"nSelectedIdx", 0 );
+			paramsDict.SetVarINT32( L"nItemsCnt", 0 );
 		}
 		break;
 		case CCTRL_TYPE_FILLING_STARS:
 		{
-			paramsDict.SetNamedVarFloat( L"fTimerStars", 0.0f );
+			paramsDict.SetVarFloat( L"fTimerStars", 0.0f );
 		}
 		break;
 		case CCTRL_TYPE_LIST_SELECTOR_TRUETYPE:
@@ -176,11 +176,11 @@ void CControl::Reset()
 			bCanHaveFocus = true;
 			bShowFocusCursor = true;
 
-			paramsDict.SetNamedVarINT32( L"nPage", 0 );
-			paramsDict.SetNamedVarINT32( L"nSelectedIdx", -1 );
-			paramsDict.SetNamedVarINT32( L"nOptionsCnt", 0 );
+			paramsDict.SetVarINT32( L"nPage", 0 );
+			paramsDict.SetVarINT32( L"nSelectedIdx", -1 );
+			paramsDict.SetVarINT32( L"nOptionsCnt", 0 );
 			//can user select rows? on by default
-			paramsDict.SetNamedVarBool( L"bUserCanSelect", true );
+			paramsDict.SetVarBool( L"bUserCanSelect", true );
 		}
 		break;
 		case CCTRL_TYPE_SCORESLIST_TRUETYPE:
@@ -194,17 +194,17 @@ void CControl::Reset()
 			bCanHaveFocus = true;
 			bShowFocusCursor = false;
 
-			paramsDict.SetNamedVarINT32( L"nPlayerOrdinal", -1 );   //player ordinal (0 or 1)
+			paramsDict.SetVarINT32( L"nPlayerOrdinal", -1 );   //player ordinal (0 or 1)
 
-			paramsDict.SetNamedVarINT32( L"nSelectedLine", 0 );
-			paramsDict.SetNamedVarINT32( L"nSelectedPoint", 0 );
+			paramsDict.SetVarINT32( L"nSelectedLine", 0 );
+			paramsDict.SetVarINT32( L"nSelectedPoint", 0 );
 
 			//XP points
 			for ( int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++ )
 			{
 				WCHAR strParamName[ MAX_PATH ];
-				StringCchPrintf( strParamName, MAX_PATH, L"spent_bar%d", ll ); //values can be negative too
-				paramsDict.SetNamedVarINT32( strParamName, 0 );
+				swprintf_s( strParamName, MAX_PATH, L"spent_bar%d", ll ); //values can be negative too
+				paramsDict.SetVarINT32( strParamName, 0 );
 			}
 		}
 		break;
@@ -213,37 +213,37 @@ void CControl::Reset()
 			bCanHaveFocus = true;
 			bShowFocusCursor = false;
 
-			paramsDict.SetNamedVarFloat( L"fSelectionCursor", 0.0f );
-			paramsDict.SetNamedVarINT32( L"nSelectedIdx", 0 );
-			paramsDict.SetNamedVarINT32( L"nTextAlignFlags", 0 );
-			paramsDict.SetNamedVarINT32( L"Vspacing", 20 );
-			paramsDict.SetNamedVarINT32( L"disabledFlags", 0 );
+			paramsDict.SetVarFloat( L"fSelectionCursor", 0.0f );
+			paramsDict.SetVarINT32( L"nSelectedIdx", 0 );
+			paramsDict.SetVarINT32( L"nTextAlignFlags", 0 );
+			paramsDict.SetVarINT32( L"Vspacing", 20 );
+			paramsDict.SetVarINT32( L"disabledFlags", 0 );
 		}
 		break;
 		case CCTRL_TYPE_BUTTON:
 		{
 			bCanHaveFocus = true;
 
-			paramsDict.SetNamedVarFloat( L"fHoverPercent", 0.0f );
-			paramsDict.SetNamedVarINT32( L"nMsgParam", 0 );
+			paramsDict.SetVarFloat( L"fHoverPercent", 0.0f );
+			paramsDict.SetVarINT32( L"nMsgParam", 0 );
 		}
 		break;
 		case CCTRL_TYPE_BLINKING_LABEL:
 		{
-			paramsDict.SetNamedVarINT32( L"nTextAlignFlags", 0 );
-			paramsDict.SetNamedVarFloat( L"fTimer", 0.0f );
+			paramsDict.SetVarINT32( L"nTextAlignFlags", 0 );
+			paramsDict.SetVarFloat( L"fTimer", 0.0f );
 		}
 		break;
 		case CCTRL_TYPE_SDL_KEYREADER:
 		{
-			paramsDict.SetNamedVarString( L"sKeyName", L"?" );
+			paramsDict.SetVarString( L"sKeyName", L"?" );
 			//tinem minte selectia anterioara ca sa vedem cand se schimba
-			paramsDict.SetNamedVarINT32( L"nSDLscancode_old", -1 );
+			paramsDict.SetVarINT32( L"nSDLscancode_old", -1 );
 		}
 		break;
 		case CCTRL_TYPE_LABEL:
 		{
-			paramsDict.SetNamedVarINT32( L"nTextAlignFlags", 0 );
+			paramsDict.SetVarINT32( L"nTextAlignFlags", 0 );
 		}
 		break;
 		case CCTRL_TYPE_NET_VOTE:
@@ -258,47 +258,47 @@ void CControl::Reset()
 		{
 			bCanHaveFocus = true;
 
-			paramsDict.SetNamedVarFloat( L"fSlidePercent", 0.0f );
+			paramsDict.SetVarFloat( L"fSlidePercent", 0.0f );
 		}
 		break;
 		case CCTRL_TYPE_SLIDER_PAGES:
 		{
 			bCanHaveFocus = true;
 
-			paramsDict.SetNamedVarINT32( L"nPage", 0 );
+			paramsDict.SetVarINT32( L"nPage", 0 );
 		}
 		break;
 		case CCTRL_TYPE_CHECKBOX:
 		{
 			bCanHaveFocus = true;
 
-			paramsDict.SetNamedVarBool( L"bChecked", false );
-			paramsDict.SetNamedVarFloat( L"fHoverPercent", 0.0f );
+			paramsDict.SetVarBool( L"bChecked", false );
+			paramsDict.SetVarFloat( L"fHoverPercent", 0.0f );
 		}
 		break;
 		case CCTRL_TYPE_PROGRESS_BAR:
 		{
-			paramsDict.SetNamedVarFloat( L"fProgress", 100.0f );
+			paramsDict.SetVarFloat( L"fProgress", 100.0f );
 		}
 		break;
 		case CCTRL_TYPE_XP_BAR:
 		{
 			//fProgress is used to interpolate from oldXP to newXP (from negative to 0 it just waits)
-			paramsDict.SetNamedVarFloat( L"fProgress", -1.0f );
+			paramsDict.SetVarFloat( L"fProgress", -1.0f );
 		}
 		break;
 		case CCTRL_TYPE_INPUTBOX:
 		{
 			bCanHaveFocus = true;
 
-			paramsDict.SetNamedVarINT32( L"nTextLen", 5 );
-			paramsDict.SetNamedVarString( L"sInputText", L"Player" );
+			paramsDict.SetVarINT32( L"nTextLen", 5 );
+			paramsDict.SetVarString( L"sInputText", L"Player" );
 		}
 		break;
 		case CCTRL_TYPE_LISTBOX:
 		{
-			paramsDict.SetNamedVarINT32( L"nSelIdx", 0 );
-			paramsDict.SetNamedVarINT32( L"nSelIdxMax", 0 );
+			paramsDict.SetVarINT32( L"nSelIdx", 0 );
+			paramsDict.SetVarINT32( L"nSelIdxMax", 0 );
 		}
 		break;
 	}
@@ -317,13 +317,13 @@ void CControl::Initialize()
 			//save number of options now
 			int stringIdx = -1;
 			int fontIdx = -1;
-			CVariantComplex * var = paramsDict.GetVariantByName( L"stringID" );
-			if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
+			CVariantComplex * var = &paramsDict[ L"stringID" ];
+			if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
 			{
 				stringIdx = var->m_asINT32;
 			}
-			var = paramsDict.GetVariantByName( L"fontID" );
-			if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
+			var = &paramsDict[ L"fontID" ];
+			if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
 			{
 				fontIdx = var->m_asINT32;
 			}
@@ -333,16 +333,16 @@ void CControl::Initialize()
 				int optcnt = __Texts().GetSubstringsCount( stringIdx, L'\n' );
 				int rowh = ( __TexFonts().fonts[ fontIdx ]->rowHeight + __TexFonts().fonts[ fontIdx ]->rowSpacing );
 				//save options count
-				paramsDict.SetNamedVarINT32( L"nRowHeight", rowh );
-				paramsDict.SetNamedVarINT32( L"nOptionsCnt", optcnt );
+				paramsDict.SetVarINT32( L"nRowHeight", rowh );
+				paramsDict.SetVarINT32( L"nOptionsCnt", optcnt );
 			}
 			else
 			{
-				paramsDict.SetNamedVarINT32( L"nRowHeight", 10 );
-				paramsDict.SetNamedVarINT32( L"nOptionsCnt", 1 );
+				paramsDict.SetVarINT32( L"nRowHeight", 10 );
+				paramsDict.SetVarINT32( L"nOptionsCnt", 1 );
 			}
-			paramsDict.SetNamedVarINT32( L"nSelectedIdx", -1 );
-			paramsDict.SetNamedVarBool( L"bUserCanSelect", true );
+			paramsDict.SetVarINT32( L"nSelectedIdx", -1 );
+			paramsDict.SetVarBool( L"bUserCanSelect", true );
 		}
 		break;
 		case CCTRL_TYPE_LIST_SELECTOR_TRUETYPE:
@@ -350,8 +350,8 @@ void CControl::Initialize()
 			//save number of options now
 			int stringIdx = -1;
 			int fontIdx = -1;
-			CVariantComplex * var = paramsDict.GetVariantByName( L"stringID" );
-			if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
+			CVariantComplex * var = &paramsDict[ L"stringID" ];
+			if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
 			{
 				stringIdx = var->m_asINT32;
 			}
@@ -360,7 +360,7 @@ void CControl::Initialize()
 			{
 				CTTFont* pTTFont = UTGetTTFManager().GetFont( shTTFID_SZ20.textHash );
 				int rowh = 10;
-				if ( ( pTTFont != null ) && ( pTTFont->pFont ) )
+				if ( ( pTTFont != nullptr ) && ( pTTFont->pFont ) )
 				{
 					D3DXFONT_DESCW descW;
 					pTTFont->pFont->GetDesc( &descW );
@@ -368,17 +368,17 @@ void CControl::Initialize()
 				}
 
 				int optcnt = __Texts().GetSubstringsCount( stringIdx, L'\n' );
-				paramsDict.SetNamedVarINT32( L"nRowHeight", rowh );
+				paramsDict.SetVarINT32( L"nRowHeight", rowh );
 				//save options count
-				paramsDict.SetNamedVarINT32( L"nOptionsCnt", optcnt );
+				paramsDict.SetVarINT32( L"nOptionsCnt", optcnt );
 			}
 			else
 			{
-				paramsDict.SetNamedVarINT32( L"nRowHeight", 10 );
-				paramsDict.SetNamedVarINT32( L"nOptionsCnt", 0 );
+				paramsDict.SetVarINT32( L"nRowHeight", 10 );
+				paramsDict.SetVarINT32( L"nOptionsCnt", 0 );
 			}
-			paramsDict.SetNamedVarINT32( L"nSelectedIdx", -1 );
-			paramsDict.SetNamedVarBool( L"bUserCanSelect", true );
+			paramsDict.SetVarINT32( L"nSelectedIdx", -1 );
+			paramsDict.SetVarBool( L"bUserCanSelect", true );
 		}
 		break;
 
@@ -401,8 +401,8 @@ void CControl::Update( float dTime, float fTimeline )
 	BBox = bbox;
 	BBox_inflated = bbox;
 
-	CVariantComplex* varInflate = paramsDict.GetVariantByName( L"inflate" );
-	if ( varInflate->m_type != CVariantComplex::K_ARGTYPE_NONE )
+	CVariantComplex* varInflate = &paramsDict[ L"inflate" ];
+	if ( varInflate->eType != CVariantComplex::K_ARGTYPE_NONE )
 	{
 		inflate = varInflate->m_asINT32;
 		if ( inflate != 0 )
@@ -414,18 +414,18 @@ void CControl::Update( float dTime, float fTimeline )
 		}
 	}
 
-	CVariantComplex* var = paramsDict.GetVariantByName( L"animID" );
-	if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
+	CVariantComplex* var = &paramsDict[ L"animID" ];
+	if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
 	{
 		animIdx = var->m_asINT32;
 	}
-	var = paramsDict.GetVariantByName( L"fontID" );
-	if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
+	var = &paramsDict[ L"fontID" ];
+	if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
 	{
 		fontIdx = var->m_asINT32;
 	}
-	var = paramsDict.GetVariantByName( L"stringID" );
-	if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
+	var = &paramsDict[ L"stringID" ];
+	if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
 	{
 		stringIdx = var->m_asINT32;
 	}
@@ -450,10 +450,10 @@ void CControl::Update( float dTime, float fTimeline )
 			if ( bDisabled )
 				break;
 
-			int nSelectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
+			int nSelectedIdx = paramsDict[ L"nSelectedIdx" ].m_asINT32;
 			int nItemsCnt = 0;
-			CVariantComplex* vc = paramsDict.GetVariantByName( L"stringID_list" );
-			if ( (vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()) )
+			CVariantComplex* vc = &paramsDict[ L"stringID_list" ];
+			if ( (vc->eType == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()) )
 			{
 				int nStringIdx_list = __Texts().GetStrIdx( vc->m_strArg.textHash );
 				nItemsCnt = __Texts().GetSubstringsCount( nStringIdx_list, L'\n' );
@@ -506,8 +506,8 @@ void CControl::Update( float dTime, float fTimeline )
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
-				if ( lvar->m_type != CVariantComplex::K_ARGTYPE_NONE )
+				CVariantComplex* lvar = &paramsDict[ L"ID" ];
+				if ( lvar->eType != CVariantComplex::K_ARGTYPE_NONE )
 					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
 					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
@@ -518,14 +518,14 @@ void CControl::Update( float dTime, float fTimeline )
 			}
 
 			//refresh params
-			paramsDict.SetNamedVarINT32( L"nSelectedIdx", nSelectedIdx );
-			paramsDict.SetNamedVarINT32( L"nItemsCnt", nItemsCnt );
+			paramsDict.SetVarINT32( L"nSelectedIdx", nSelectedIdx );
+			paramsDict.SetVarINT32( L"nItemsCnt", nItemsCnt );
 		}
 		break;
 		case CCTRL_TYPE_FILLING_STARS:
 		{
-			int nStars = paramsDict.GetVariantByName( L"nStars" )->m_asINT32;
-			float fTimer = paramsDict.GetVariantByName( L"fTimerStars" )->m_asFloat;
+			int nStars = paramsDict[ L"nStars" ].m_asINT32;
+			float fTimer = paramsDict[ L"fTimerStars" ].m_asFloat;
 
 			float fTimerOld = fTimer;
 			inc_limit( fTimer, dTime * 2.0f, ( float ) nStars );
@@ -542,14 +542,14 @@ void CControl::Update( float dTime, float fTimeline )
 			}
 
 			//save timer
-			paramsDict.SetNamedVarFloat( L"fTimerStars", fTimer );
+			paramsDict.SetVarFloat( L"fTimerStars", fTimer );
 		}
 		break;
 		case CCTRL_TYPE_XP_BAR:
 		{
-			int nOldVal = paramsDict.GetVariantByName( L"nOldValue" )->m_asINT32;
-			int nNewVal = paramsDict.GetVariantByName( L"nNewValue" )->m_asINT32;
-			float fProgress = paramsDict.GetVariantByName( L"fProgress" )->m_asFloat;
+			int nOldVal = paramsDict[ L"nOldValue" ].m_asINT32;
+			int nNewVal = paramsDict[ L"nNewValue" ].m_asINT32;
+			float fProgress = paramsDict[ L"fProgress" ].m_asFloat;
 			if ( nOldVal == nNewVal )
 				fProgress = 1.0f;
 
@@ -559,7 +559,7 @@ void CControl::Update( float dTime, float fTimeline )
 
 			inc_limit( fProgress, dTime, 1.0f );
 			//save back timer
-			paramsDict.SetNamedVarFloat( L"fProgress", fProgress );
+			paramsDict.SetVarFloat( L"fProgress", fProgress );
 			if ( fProgress < 0.0f )
 				break;
 
@@ -582,33 +582,33 @@ void CControl::Update( float dTime, float fTimeline )
 		break;
 		case CCTRL_TYPE_SDL_KEYREADER:
 		{
-			int nKeyOld = paramsDict.GetVariantByName( L"nSDLscancode_old" )->m_asINT32;
-			int nKeycode = paramsDict.GetVariantByName( L"nSDLscancode" )->m_asINT32;
+			int nKeyOld = paramsDict[ L"nSDLscancode_old" ].m_asINT32;
+			int nKeycode = paramsDict[ L"nSDLscancode" ].m_asINT32;
 			if ( nKeycode != nKeyOld )
 			{
 				//update inner string
 				CHAR strKeys[ MAX_PATH ];
 				WCHAR wstrKeys[ MAX_PATH ];
-				StringCchPrintfA( strKeys, MAX_PATH, "%s", SDL_GetScancodeName( ( SDL_Scancode ) nKeycode ) );
+				sprintf_s( strKeys, MAX_PATH, "%s", SDL_GetScancodeName( ( SDL_Scancode ) nKeycode ) );
 				mbstowcs( wstrKeys, strKeys, MAX_PATH );
-				paramsDict.SetNamedVarString( L"sKeyName", wstrKeys );
+				paramsDict.SetVarString( L"sKeyName", wstrKeys );
 
 				//update old scancode
-				paramsDict.SetNamedVarINT32( L"nSDLscancode_old", nKeycode );
+				paramsDict.SetVarINT32( L"nSDLscancode_old", nKeycode );
 
 				//send message selection changed
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
-				if ( lvar->m_type != CVariantComplex::K_ARGTYPE_NONE )
+				CVariantComplex* lvar = &paramsDict[ L"ID" ];
+				if ( lvar->eType != CVariantComplex::K_ARGTYPE_NONE )
 					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
 					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
 				//add custom data - trimit scancode
 				nevent->AddNamedArgINT32( L"nSDLscancode", nKeycode );
 				//pass on received params (added when showing the control)
-				nevent->AddNamedArgINT32( L"nKeyboardOrdinal", paramsDict.GetVariantByName( L"nKeyboardOrdinal" )->m_asINT32 );
-				nevent->AddNamedArgINT32( L"nSDLcommand", paramsDict.GetVariantByName( L"nSDLcommand" )->m_asINT32 );
+				nevent->AddNamedArgINT32( L"nKeyboardOrdinal", paramsDict[ L"nKeyboardOrdinal" ].m_asINT32 );
+				nevent->AddNamedArgINT32( L"nSDLcommand", paramsDict[ L"nSDLcommand" ].m_asINT32 );
 
 				UTGetEventManager().QueueEvent( nevent );
 
@@ -617,14 +617,14 @@ void CControl::Update( float dTime, float fTimeline )
 		break;
 		case CCTRL_TYPE_BLINKING_LABEL:
 		{
-			float fTimer = paramsDict.GetVariantByName( L"fTimer" )->m_asFloat;
-			float fLoopTimer = paramsDict.GetVariantByName( L"timerLoop" )->m_asFloat;
+			float fTimer = paramsDict[ L"fTimer" ].m_asFloat;
+			float fLoopTimer = paramsDict[ L"timerLoop" ].m_asFloat;
 
 			fTimer += dTime;
 			if ( fTimer >= fLoopTimer )
 				fTimer = 0.0f;
 
-			paramsDict.SetNamedVarFloat( L"fTimer", fTimer );
+			paramsDict.SetVarFloat( L"fTimer", fTimer );
 		}
 		break;
 		case CCTRL_TYPE_LIST_SELECTOR_TRUETYPE:
@@ -633,12 +633,12 @@ void CControl::Update( float dTime, float fTimeline )
 			if ( bDisabled )
 				break;
 
-			bool bUserCanSelect = paramsDict.GetVariantByName( L"bUserCanSelect" )->m_asBool;
-			int	selectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
-			int optcnt = paramsDict.GetVariantByName( L"nOptionsCnt" )->m_asINT32;
-			int nMinPage = paramsDict.GetVariantByName( L"nMinPage" )->m_asINT32;
-			int nMaxPage = paramsDict.GetVariantByName( L"nMaxPage" )->m_asINT32;
-			int nPage = paramsDict.GetVariantByName( L"nPage" )->m_asINT32;
+			bool bUserCanSelect = paramsDict[ L"bUserCanSelect" ].m_asBool;
+			int	selectedIdx = paramsDict[ L"nSelectedIdx" ].m_asINT32;
+			int optcnt = paramsDict[ L"nOptionsCnt" ].m_asINT32;
+			int nMinPage = paramsDict[ L"nMinPage" ].m_asINT32;
+			int nMaxPage = paramsDict[ L"nMaxPage" ].m_asINT32;
+			int nPage = paramsDict[ L"nPage" ].m_asINT32;
 			int nOldPage = nPage;
 
 			int rowh = 10;
@@ -721,8 +721,8 @@ void CControl::Update( float dTime, float fTimeline )
 			{
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_PAGE_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
-				if ( lvar->m_type != CVariantComplex::K_ARGTYPE_NONE )
+				CVariantComplex* lvar = &paramsDict[ L"ID" ];
+				if ( lvar->eType != CVariantComplex::K_ARGTYPE_NONE )
 					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
 					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
@@ -736,13 +736,13 @@ void CControl::Update( float dTime, float fTimeline )
 			//selecting something with fire control 
 			if ( ( statusFlags & CCTRL_STATUS_FLAG_CLICKED ) && ( bUserCanSelect ) )
 			{
-				int	baseIndex = paramsDict.GetVariantByName( L"nBaseIndex" )->m_asINT32;
+				int	baseIndex = paramsDict[ L"nBaseIndex" ].m_asINT32;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
-				if ( lvar->m_type != CVariantComplex::K_ARGTYPE_NONE )
+				CVariantComplex* lvar = &paramsDict[ L"ID" ];
+				if ( lvar->eType != CVariantComplex::K_ARGTYPE_NONE )
 					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
 					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
@@ -753,8 +753,8 @@ void CControl::Update( float dTime, float fTimeline )
 				UTGetEventManager().QueueEvent( nevent );
 			}
 
-			paramsDict.SetNamedVarINT32( L"nSelectedIdx", selectedIdx );
-			paramsDict.SetNamedVarINT32( L"nPage", nPage );
+			paramsDict.SetVarINT32( L"nSelectedIdx", selectedIdx );
+			paramsDict.SetVarINT32( L"nPage", nPage );
 		}
 		break;
 
@@ -765,7 +765,7 @@ void CControl::Update( float dTime, float fTimeline )
 
 		case CCTRL_TYPE_PLAYER_UPGRADE_CONTROL:
 		{
-			int nPlayerOrdinal = paramsDict.GetVariantByName( L"nPlayerOrdinal" )->m_asINT32;
+			int nPlayerOrdinal = paramsDict[ L"nPlayerOrdinal" ].m_asINT32;
 			if ( ( nPlayerOrdinal < 0 ) || ( nPlayerOrdinal > 1 ) )
 				break;
 			int nPlayerClass = ( int ) g_playerSelScr.m_arrPlayers[ nPlayerOrdinal ].eType;
@@ -777,8 +777,8 @@ void CControl::Update( float dTime, float fTimeline )
 			for ( int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++ )
 			{
 				WCHAR strParamName[ MAX_PATH ];
-				StringCchPrintf( strParamName, MAX_PATH, L"spent_bar%d", ll );
-				nSpentPoints[ ll ] = paramsDict.GetVariantByName( strParamName )->m_asINT32;
+				swprintf_s( strParamName, MAX_PATH, L"spent_bar%d", ll );
+				nSpentPoints[ ll ] = paramsDict[ strParamName ].m_asINT32;
 				//compute local XP points
 				nXPPointsLocal -= nSpentPoints[ ll ];
 			}
@@ -800,8 +800,8 @@ void CControl::Update( float dTime, float fTimeline )
 			//update available points
 			__Texts().SetString( STR_UNUSED_POINTS_VAL, L"%d", nXPPointsLocal );
 
-			int	nSelectedLine = paramsDict.GetVariantByName( L"nSelectedLine" )->m_asINT32;
-			int	nSelectedPoint = paramsDict.GetVariantByName( L"nSelectedPoint" )->m_asINT32;
+			int	nSelectedLine = paramsDict[ L"nSelectedLine" ].m_asINT32;
+			int	nSelectedPoint = paramsDict[ L"nSelectedPoint" ].m_asINT32;
 			int nSelectedLine_old = nSelectedLine;
 			int nSelectedPoint_old = nSelectedPoint;
 
@@ -950,23 +950,23 @@ void CControl::Update( float dTime, float fTimeline )
 				*/
 			}
 
-			paramsDict.SetNamedVarINT32( L"nSelectedLine", nSelectedLine );
-			paramsDict.SetNamedVarINT32( L"nSelectedPoint", nSelectedPoint );
+			paramsDict.SetVarINT32( L"nSelectedLine", nSelectedLine );
+			paramsDict.SetVarINT32( L"nSelectedPoint", nSelectedPoint );
 			for ( int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++ )
 			{
 				WCHAR strParamName[ MAX_PATH ];
-				StringCchPrintf( strParamName, MAX_PATH, L"spent_bar%d", ll ); //values can be negative too
-				paramsDict.SetNamedVarINT32( strParamName, nSpentPoints[ ll ] );
+				swprintf_s( strParamName, MAX_PATH, L"spent_bar%d", ll ); //values can be negative too
+				paramsDict.SetVarINT32( strParamName, nSpentPoints[ ll ] );
 			}
 		}
 		break;
 
 		case CCTRL_TYPE_SCROLLMENU:
 		{
-			float fSelectionCursor = paramsDict.GetVariantByName( L"fSelectionCursor" )->m_asFloat;
-			int	selectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
-			int vSpacing = paramsDict.GetVariantByName( L"Vspacing" )->m_asINT32;
-			int nDisabledFlags = paramsDict.GetVariantByName( L"disabledFlags" )->m_asINT32;
+			float fSelectionCursor = paramsDict[ L"fSelectionCursor" ].m_asFloat;
+			int	selectedIdx = paramsDict[ L"nSelectedIdx" ].m_asINT32;
+			int vSpacing = paramsDict[ L"Vspacing" ].m_asINT32;
+			int nDisabledFlags = paramsDict[ L"disabledFlags" ].m_asINT32;
 
 			//tratare statusuri setate in receive input
 			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDDOWN )
@@ -985,9 +985,9 @@ void CControl::Update( float dTime, float fTimeline )
 			for ( int ll = 0; ll < 10; ll++ )
 			{
 				WCHAR varname[ MAX_PATH ];
-				StringCchPrintf( varname, MAX_PATH, L"StringID%d", ll );
-				CVariantComplex* vc = paramsDict.GetVariantByName( varname );
-				if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+				swprintf_s( varname, MAX_PATH, L"stringID%d", ll );
+				CVariantComplex* vc = &paramsDict[ varname ];
+				if ( ( vc->eType == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 				{
 					if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 					{
@@ -1039,18 +1039,18 @@ void CControl::Update( float dTime, float fTimeline )
 				{
 					CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
 					nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-					CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
-					if ( lvar->m_type != CVariantComplex::K_ARGTYPE_NONE )
+					CVariantComplex* lvar = &paramsDict[ L"ID" ];
+					if ( lvar->eType != CVariantComplex::K_ARGTYPE_NONE )
 						nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 					else
 						nevent->AddNamedArgUINT32( L"ctrlID", 0 );
 					//add custom data - trimit index string selectat
 					int nStringIdx = -1;
-					//incercam sa citim string idx selectat
+					// read selected string idx
 					WCHAR varname[ MAX_PATH ];
-					StringCchPrintf( varname, MAX_PATH, L"StringID%d", selectedIdx );
-					CVariantComplex* vc = paramsDict.GetVariantByName( varname );
-					if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+					swprintf_s( varname, MAX_PATH, L"stringID%d", selectedIdx );
+					CVariantComplex* vc = &paramsDict[ varname ];
+					if ( ( vc->eType == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 					{
 						nStringIdx = __Texts().GetStrIdx( vc->m_strArg.textHash );
 					}
@@ -1070,13 +1070,13 @@ void CControl::Update( float dTime, float fTimeline )
 			}
 
 			//save back updated variants 
-			paramsDict.SetNamedVarFloat( L"fSelectionCursor", fSelectionCursor );
-			paramsDict.SetNamedVarINT32( L"nSelectedIdx", selectedIdx );
+			paramsDict.SetVarFloat( L"fSelectionCursor", fSelectionCursor );
+			paramsDict.SetVarINT32( L"nSelectedIdx", selectedIdx );
 		}
 		break;
 		case CCTRL_TYPE_BUTTON:
 		{
-			float	hoverPercent = paramsDict.GetVariantByName( L"fHoverPercent" )->m_asFloat;
+			float	hoverPercent = paramsDict[ L"fHoverPercent" ].m_asFloat;
 
 			RectXYWHi movedBB = BBox;
 
@@ -1122,16 +1122,16 @@ void CControl::Update( float dTime, float fTimeline )
 
 					CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK );
 					nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-					CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
-					if ( lvar->m_type != CVariantComplex::K_ARGTYPE_NONE )
+					CVariantComplex* lvar = &paramsDict[ L"ID" ];
+					if ( lvar->eType != CVariantComplex::K_ARGTYPE_NONE )
 						nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 					else
 						nevent->AddNamedArgUINT32( L"ctrlID", 0 );
 
 					//add custom message from XML/interfaces editor
-					int		msgParam = paramsDict.GetVariantByName( L"nMsgParamINT32" )->m_asINT32;
+					int		msgParam = paramsDict[ L"nMsgParamINT32" ].m_asINT32;
 					nevent->AddNamedArgINT32( L"nMsgParamINT32", msgParam );
-					UINT32	msgParamU = paramsDict.GetVariantByName( L"nMsgParamUINT32" )->m_asUINT32;
+					UINT32	msgParamU = paramsDict[ L"nMsgParamUINT32" ].m_asUINT32;
 					nevent->AddNamedArgUINT32( L"nMsgParamUINT32", msgParamU );
 
 					UTGetEventManager().QueueEvent( nevent );
@@ -1152,13 +1152,13 @@ void CControl::Update( float dTime, float fTimeline )
 			}
 
 			//save back updated variants 
-			paramsDict.SetNamedVarFloat( L"fHoverPercent", hoverPercent );
+			paramsDict.SetVarFloat( L"fHoverPercent", hoverPercent );
 		}
 		break;
 		case CCTRL_TYPE_CHECKBOX:
 		{
-			bool bChecked = paramsDict.GetVariantByName( L"bChecked" )->m_asBool;
-			float hoverPercent = paramsDict.GetVariantByName( L"fHoverPercent" )->m_asFloat;
+			bool bChecked = paramsDict[ L"bChecked" ].m_asBool;
+			float hoverPercent = paramsDict[ L"fHoverPercent" ].m_asFloat;
 
 			RectXYWHi frameBB = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 			frameBB.x += BBox.x; frameBB.y += BBox.CenterY();
@@ -1203,25 +1203,22 @@ void CControl::Update( float dTime, float fTimeline )
 				bChecked = !bChecked;
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CHECK_CHANGED );
+				CVariantComplex* lvar = &paramsDict[ L"ID" ];
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
-				if ( lvar != nullptr )
-					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
-				else
-					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
+				nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				nevent->AddNamedArgBool( L"bChecked", bChecked );
 				UTGetEventManager().QueueEvent( nevent );
 			}
 
-			paramsDict.SetNamedVarFloat( L"fHoverPercent", hoverPercent );
-			paramsDict.SetNamedVarBool( L"bChecked", bChecked );
+			paramsDict.SetVarFloat( L"fHoverPercent", hoverPercent );
+			paramsDict.SetVarBool( L"bChecked", bChecked );
 		}
 		break;
 		case CCTRL_TYPE_SLIDER:
 		{
-			float slidePercent = paramsDict.GetVariantByName( L"fSlidePercent" )->m_asFloat;
-			bool hasArrows = paramsDict.GetVariantByName( L"hasArrows" )->m_asINT32;
-			int nTicks = paramsDict.GetVariantByName( L"Steps" )->m_asINT32;
+			float slidePercent = paramsDict[ L"fSlidePercent" ].m_asFloat;
+			bool hasArrows = paramsDict[ L"hasArrows" ].m_asINT32;
+			int nTicks = paramsDict[ L"Steps" ].m_asINT32;
 
 			float fTickSize = 0.1f;
 			if ( nTicks > 0 )
@@ -1303,25 +1300,22 @@ void CControl::Update( float dTime, float fTimeline )
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SLIDER_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
-				if ( lvar != nullptr )
-					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
-				else
-					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
+				CVariantComplex* lvar = &paramsDict[ L"ID" ];
+				nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				nevent->AddNamedArgFloat( L"fSlidePercent", slidePercent );
 				UTGetEventManager().QueueEvent( nevent );
 			}
 
 			//refresh params
-			paramsDict.SetNamedVarFloat( L"fSlidePercent", slidePercent );
+			paramsDict.SetVarFloat( L"fSlidePercent", slidePercent );
 		}
 		break;
 
 		case CCTRL_TYPE_SLIDER_PAGES:
 		{
-			int nPage = paramsDict.GetVariantByName( L"nPage" )->m_asINT32;
-			int nMinPage = paramsDict.GetVariantByName( L"nMinPage" )->m_asINT32;
-			int nMaxPage = paramsDict.GetVariantByName( L"nMaxPage" )->m_asINT32;
+			int nPage = paramsDict[ L"nPage" ].m_asINT32;
+			int nMinPage = paramsDict[ L"nMinPage" ].m_asINT32;
+			int nMaxPage = paramsDict[ L"nMaxPage" ].m_asINT32;
 
 
 			RectXYWHi bbB = BBox; //bbox bar
@@ -1374,11 +1368,8 @@ void CControl::Update( float dTime, float fTimeline )
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_PAGE_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = paramsDict.GetVariantByName( L"ID" );
-				if ( lvar != nullptr )
-					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
-				else
-					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
+				CVariantComplex* lvar = &paramsDict[ L"ID" ];
+				nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				nevent->AddNamedArgINT32( L"nPageIdx", nNewPage );
 				nevent->AddNamedArgINT32( L"nOldIdx", nPage );
 				UTGetEventManager().QueueEvent( nevent );
@@ -1387,15 +1378,15 @@ void CControl::Update( float dTime, float fTimeline )
 			}
 
 			//refresh params
-			paramsDict.SetNamedVarINT32( L"nPage", nPage );
+			paramsDict.SetVarINT32( L"nPage", nPage );
 		}
 		break;
 		case CCTRL_TYPE_LISTBOX:
 		{
 			if ( fontIdx < 0 ) return;
 
-			int selIdx = _wtoi( paramsDict.GetVariantByName( L"selIdx" )->m_strArg.text );
-			int selIdxMax = _wtoi( paramsDict.GetVariantByName( L"selIdxMax" )->m_strArg.text );
+			int selIdx = _wtoi( paramsDict[ L"selIdx" ].m_strArg.text );
+			int selIdxMax = _wtoi( paramsDict[ L"selIdxMax" ].m_strArg.text );
 
 			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED && Rects::PointInRect( &layer->mouseRelPos, &BBox ) )
 			{
@@ -1410,8 +1401,8 @@ void CControl::Update( float dTime, float fTimeline )
 			}
 
 			WCHAR val[ MAX_PATH ];
-			StringCchPrintf( val, MAX_PATH, L"%d", selIdx );
-			paramsDict.SetNamedVarString( L"selIdx", val );
+			swprintf_s( val, MAX_PATH, L"%d", selIdx );
+			paramsDict.SetVarString( L"selIdx", val );
 		}
 		break;
 	}
@@ -1433,8 +1424,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 	BBox = bbox;
 	BBox_inflated = bbox;
 
-	CVariantComplex* varInflate = paramsDict.GetVariantByName( L"inflate" );
-	if ( varInflate->m_type != CVariantComplex::K_ARGTYPE_NONE )
+	CVariantComplex* varInflate = &paramsDict[ L"inflate" ];
+	if ( varInflate->IsSet() )
 	{
 		inflate = varInflate->m_asINT32;
 		if ( inflate != 0 )
@@ -1447,26 +1438,26 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 	}
 
 
-	CVariantComplex* var = paramsDict.GetVariantByName( L"animID" );
-	if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
+	CVariantComplex* var = &paramsDict[ L"animID" ];
+	if ( var->IsSet() )
 	{
 		animIdx = var->m_asINT32;
 	}
 
-	var = paramsDict.GetVariantByName( L"fontID" );
-	if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
+	var = &paramsDict[ L"fontID" ];
+	if ( var->IsSet() )
 	{
 		fontIdx = var->m_asINT32;
 	}
 
-	var = paramsDict.GetVariantByName( L"stringID" );
-	if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
+	var = &paramsDict[ L"stringID" ];
+	if ( var->IsSet() )
 	{
 		stringIdx = var->m_asINT32;
 	}
 
-	var = paramsDict.GetVariantByName( L"fontColor" );
-	if ( var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR )
+	var = &paramsDict[ L"fontColor" ];
+	if ( var->eType == CVariantComplex::K_ARGTYPE_HEXCOLOR )
 	{
 		dwFontColor = var->m_asUINT32;
 	}
@@ -1474,15 +1465,15 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 	float fColAlpha = DW_GETFALPHA( dwFontColor );
 	dwFontColor = DW_COLORALPHA( dwFontColor, layer->alpha * fColAlpha );
 
-	var = paramsDict.GetVariantByName( L"color" );
-	if ( var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR )
+	var = &paramsDict[ L"color" ];
+	if ( var->eType == CVariantComplex::K_ARGTYPE_HEXCOLOR )
 	{
 		dwColor = var->m_asUINT32;
 	}
 	else
 	{
 		// mandatory param
-		paramsDict.SetNamedVarHEXCOLOR( L"color", 0xffffffff );
+		paramsDict.SetVarHEXCOLOR( L"color", 0xffffffff );
 	}
 	//set font color
 	fColAlpha = DW_GETFALPHA( dwColor );
@@ -1499,9 +1490,9 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 
-			int nSelectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
-			int nItemsCnt = paramsDict.GetVariantByName( L"nItemsCnt" )->m_asINT32;
-			int nIconFrame = paramsDict.GetVariantByName( L"iconFrame" )->m_asINT32;
+			int nSelectedIdx = paramsDict[ L"nSelectedIdx" ].m_asINT32;
+			int nItemsCnt = paramsDict[ L"nItemsCnt" ].m_asINT32;
+			int nIconFrame = paramsDict[ L"iconFrame" ].m_asINT32;
 
 			float dCol = 1.0f - 0.4f * fDisabledPercent;
 			DWORD wcol = D3DCOLOR_COLORVALUE( dCol, dCol, dCol, layer->alpha );
@@ -1535,8 +1526,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				UTSprite::PaintFrame( m_pSprCol, Vec2( bboxBar.Right(), bboxBar.CenterY() ), animIdx, frame, wcol );
 			}
 			// text
-			CVariantComplex* vc = paramsDict.GetVariantByName( L"stringID_list" );
-			if ( (vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()) && (fontIdx >= 0) )
+			CVariantComplex* vc = &paramsDict[ L"stringID_list" ];
+			if ( (vc->eType == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()) && (fontIdx >= 0) )
 			{
 				int nStringIdx_list = __Texts().GetStrIdx( vc->m_strArg.textHash );
 				CStringDesc sdSelection;
@@ -1555,8 +1546,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			if ( animIdx < 0 )
 				break;
 
-			int nStars = paramsDict.GetVariantByName( L"nStars" )->m_asINT32;
-			float fTimer = paramsDict.GetVariantByName( L"fTimerStars" )->m_asFloat;
+			int nStars = paramsDict[ L"nStars" ].m_asINT32;
+			float fTimer = paramsDict[ L"fTimerStars" ].m_asFloat;
 			float fcoeff = floor( fTimer );
 			float ffrac = FLOAT_FRAC( fTimer );
 			float ffracinv = 1.0f - ffrac;
@@ -1601,9 +1592,9 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			//background
 			GUIUtils::DrawWindowFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_BLACK3, BBox_inflated, wcol );
 			//selection
-			int	selectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
-			int rowH = paramsDict.GetVariantByName( L"nRowHeight" )->m_asINT32;
-			int nOptionsCnt = paramsDict.GetVariantByName( L"nOptionsCnt" )->m_asINT32;
+			int	selectedIdx = paramsDict[ L"nSelectedIdx" ].m_asINT32;
+			int rowH = paramsDict[ L"nRowHeight" ].m_asINT32;
+			int nOptionsCnt = paramsDict[ L"nOptionsCnt" ].m_asINT32;
 
 			//paint cursor
 			if ( ( rowH > 0 ) && ( !bDisabled ) )
@@ -1619,15 +1610,15 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				__TexFonts().fonts[ fontIdx ]->DrawString( &strRow, BBox_inflated.x, BBox_inflated.y + rowH * kk, FONTFLAG_ANCHOR_TOPLEFT, dwFontColor );
 			}
 			//right string
-			CVariantComplex* vc = paramsDict.GetVariantByName( L"StringID_right" );
-			if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+			CVariantComplex* vc = &paramsDict[ L"StringID_right" ];
+			if ( ( vc->eType == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 			{
 				int nStringIdx_right = __Texts().GetStrIdx( vc->m_strArg.textHash );
 				if ( nStringIdx_right >= 0 )
 				{
 					DWORD dwColorRight = 0xffffffff;
-					var = paramsDict.GetVariantByName( L"FontColor_right" );
-					if ( var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR )
+					var = &paramsDict[ L"FontColor_right" ];
+					if ( var->eType == CVariantComplex::K_ARGTYPE_HEXCOLOR )
 					{
 						dwColorRight = var->m_asUINT32;
 					}
@@ -1660,10 +1651,10 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			}
 
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
-			int nPage = paramsDict.GetVariantByName( L"nPage" )->m_asINT32;
-			int nMinPage = paramsDict.GetVariantByName( L"nMinPage" )->m_asINT32;
-			int nMaxPage = paramsDict.GetVariantByName( L"nMaxPage" )->m_asINT32;
-			int optcnt = paramsDict.GetVariantByName( L"nOptionsCnt" )->m_asINT32;
+			int nPage = paramsDict[ L"nPage" ].m_asINT32;
+			int nMinPage = paramsDict[ L"nMinPage" ].m_asINT32;
+			int nMaxPage = paramsDict[ L"nMaxPage" ].m_asINT32;
+			int optcnt = paramsDict[ L"nOptionsCnt" ].m_asINT32;
 
 			//background
 			GUIUtils::DrawWindowFrame( m_pSprCol, ANM_CONTROLS_SPR_FRAME_BLACK3, BBox_inflated, wcol );
@@ -1683,8 +1674,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				}
 			}
 			//selection
-			int	selectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
-			int rowH = paramsDict.GetVariantByName( L"nRowHeight" )->m_asINT32;
+			int	selectedIdx = paramsDict[ L"nSelectedIdx" ].m_asINT32;
+			int rowH = paramsDict[ L"nRowHeight" ].m_asINT32;
 			rowH /= 2; //truetype text is in double the resolution
 
 			if ( ( rowH > 0 ) && ( optcnt > 0 ) && ( selectedIdx >= 0 ) && ( selectedIdx < optcnt ) )
@@ -1722,14 +1713,14 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, __Texts().strings[stringIdx]->sText, -1, &rc, DT_NOCLIP, dwFontColor);
 			}
 			//right string
-			CVariantComplex* vc = paramsDict.GetVariantByName(L"StringID_right");
+			CVariantComplex* vc = paramsDict[L"StringID_right");
 			if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 			{
 				int nStringIdx_right = __Texts().GetStrIdx(vc->m_strArg.textHash);
 				if (nStringIdx_right >= 0)
 				{
 					DWORD dwColorRight = 0xffffffff;
-					var = paramsDict.GetVariantByName(L"FontColor_right");
+					var = paramsDict[L"FontColor_right");
 					if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
 					{
 						dwColorRight = var->m_asUINT32;
@@ -1767,7 +1758,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 
 			//get right string idx
 			int nStringIdx_right = -1;
-			CVariantComplex* vc = paramsDict.GetVariantByName(L"StringID_right");
+			CVariantComplex* vc = paramsDict[L"StringID_right");
 			if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 			{
 				nStringIdx_right = __Texts().GetStrIdx(vc->m_strArg.textHash);
@@ -1802,7 +1793,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 
 			//paint arrow towards player name
 			int nSelectedIdx = -1;
-			vc = paramsDict.GetVariantByName(L"nSelectedIdx");
+			vc = paramsDict[L"nSelectedIdx");
 			if (vc->m_type == CVariantComplex::K_ARGTYPE_INT32)
 				nSelectedIdx = vc->m_asINT32;
 			if (nSelectedIdx >= 0)
@@ -1845,11 +1836,11 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 
 			}
-			int nPlayerOrdinal = paramsDict.GetVariantByName( L"nPlayerOrdinal" )->m_asINT32;
+			int nPlayerOrdinal = paramsDict[ L"nPlayerOrdinal" ].m_asINT32;
 			CLAMP( nPlayerOrdinal, 0, 1 );
 			int nPlayerClass = ( int ) g_playerSelScr.m_arrPlayers[ nPlayerOrdinal ].eType;
-			int nSelectedLine = paramsDict.GetVariantByName( L"nSelectedLine" )->m_asINT32;
-			int	nSelectedPoint = paramsDict.GetVariantByName( L"nSelectedPoint" )->m_asINT32;
+			int nSelectedLine = paramsDict[ L"nSelectedLine" ].m_asINT32;
+			int	nSelectedPoint = paramsDict[ L"nSelectedPoint" ].m_asINT32;
 
 			int nXPPointsReal = App_GetAvailableXPPoints( ( EPSSPlayerClass ) nPlayerClass ); //real number of XP points to spend
 			int nXPPointsLocal = nXPPointsReal;
@@ -1857,8 +1848,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			for ( int ll = 0; ll < K_PSS_UPGRADE_BARS_CNT; ll++ )
 			{
 				WCHAR strParamName[ MAX_PATH ];
-				StringCchPrintf( strParamName, MAX_PATH, L"spent_bar%d", ll );
-				nSpentPoints[ ll ] = paramsDict.GetVariantByName( strParamName )->m_asINT32;
+				swprintf_s( strParamName, MAX_PATH, L"spent_bar%d", ll );
+				nSpentPoints[ ll ] = paramsDict[ strParamName ].m_asINT32;
 				//update local points
 				nXPPointsLocal -= nSpentPoints[ ll ];
 			}
@@ -2099,11 +2090,11 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 
-			float fSelectionCursor = paramsDict.GetVariantByName( L"fSelectionCursor" )->m_asFloat;
-			int	selectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
-			int textAlignFlags = paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
-			int vSpacing = paramsDict.GetVariantByName( L"Vspacing" )->m_asINT32;
-			int nDisabledFlags = paramsDict.GetVariantByName( L"disabledFlags" )->m_asINT32;
+			float fSelectionCursor = paramsDict[ L"fSelectionCursor" ].m_asFloat;
+			int	selectedIdx = paramsDict[ L"nSelectedIdx" ].m_asINT32;
+			int textAlignFlags = paramsDict[ L"nTextAlignFlags" ].m_asINT32;
+			int vSpacing = paramsDict[ L"Vspacing" ].m_asINT32;
+			int nDisabledFlags = paramsDict[ L"disabledFlags" ].m_asINT32;
 			//desenam meniul
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 
@@ -2116,9 +2107,9 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				bool bDisabledLocal = ( ( nDisabledFlags & nDisFlag ) != 0 );
 
 				WCHAR varname[ MAX_PATH ];
-				StringCchPrintf( varname, MAX_PATH, L"StringID%d", ll );
-				CVariantComplex* vc = paramsDict.GetVariantByName( varname );
-				if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+				swprintf_s( varname, MAX_PATH, L"stringID%d", ll );
+				CVariantComplex* vc = &paramsDict[ varname ];
+				if ( ( vc->eType == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 				{
 					int nStringIdx = __Texts().GetStrIdx( vc->m_strArg.textHash );
 					SizeWHi strSz = __TexFonts().fonts[ fontIdx ]->MeasureString( nStringIdx, BBox.w );
@@ -2223,7 +2214,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			float hoverPerc = 0.0f;
 			if ( bHover )
 			{
-				hoverPerc = paramsDict.GetVariantByName( L"fHoverPercent" )->m_asFloat;
+				hoverPerc = paramsDict[ L"fHoverPercent" ].m_asFloat;
 			}
 			GUIUtils::DrawButton( m_pSprCol, animIdx, BBox, bPressed, hoverPerc, fFocusPercent, layer->alpha );
 
@@ -2268,7 +2259,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 
-			int iconFrame = paramsDict.GetVariantByName( L"iconFrame" )->m_asINT32;
+			int iconFrame = paramsDict[ L"iconFrame" ].m_asINT32;
 			GUIUtils::DrawPanel( m_pSprCol, BBox_inflated, 1.0f, layer->alpha, ANM_CONTROLS_SPR_PANELICONS, iconFrame );
 		}
 		break;
@@ -2281,7 +2272,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 
-			int iconFrame = paramsDict.GetVariantByName( L"iconFrame" )->m_asINT32;
+			int iconFrame = paramsDict[ L"iconFrame" ].m_asINT32;
 			GUIUtils::DrawPanelSM( m_pSprCol, BBox_inflated, 1.0f, layer->alpha );
 		}
 		break;
@@ -2291,7 +2282,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			const RectXYWHi& movedB = BBox;
 			if ( fontIdx >= 0 )
 			{
-				CStringHash* strh = &paramsDict.GetVariantByName( L"sKeyName" )->m_strArg;
+				CStringHash* strh = &paramsDict[ L"sKeyName" ].m_strArg;
 				CStringDesc strdesc;
 				__Texts().SetStringDesc( &strdesc, strh->text );
 
@@ -2304,19 +2295,19 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			int nIconFrame1 = -1, nIconFrame2 = -1;
 			if ( animIdx >= 0 )
 			{
-				nIconFrame1 = paramsDict.GetVariantByName( L"nIconFrame1" )->m_asINT32;
-				nIconFrame2 = paramsDict.GetVariantByName( L"nIconFrame2" )->m_asINT32;
+				nIconFrame1 = paramsDict[ L"nIconFrame1" ].m_asINT32;
+				nIconFrame2 = paramsDict[ L"nIconFrame2" ].m_asINT32;
 			}
 			DWORD dwCol = DW_COLOR_FFFA( layer->alpha );
 			//now paint
 			if ( fontIdx >= 0 )
 			{
 				int nStrIdx1 = -1, nStrIdx2 = -1;
-				CVariantComplex* vc = paramsDict.GetVariantByName( L"stringID1" );
-				if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+				CVariantComplex* vc = &paramsDict[ L"stringID1" ];
+				if ( ( vc->eType == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 					nStrIdx1 = __Texts().GetStrIdx( vc->m_strArg.textHash );
-				vc = paramsDict.GetVariantByName( L"stringID2" );
-				if ( ( vc->m_type == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+				vc = &paramsDict[ L"stringID2" ];
+				if ( ( vc->eType == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 					nStrIdx2 = __Texts().GetStrIdx( vc->m_strArg.textHash );
 
 				int nCount = 0;
@@ -2384,7 +2375,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 		break;
 		case CCTRL_TYPE_LABEL:
 		{
-			int textAlignFlags = paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
+			int textAlignFlags = paramsDict[ L"nTextAlignFlags" ].m_asINT32;
 
 			RectXYWHi movedB = BBox;
 			if ( fontIdx >= 0 )
@@ -2403,21 +2394,21 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 		break;
 		case CCTRL_TYPE_BLINKING_LABEL:
 		{
-			float fTimer = paramsDict.GetVariantByName( L"fTimer" )->m_asFloat;
-			float fBlinkTimer = paramsDict.GetVariantByName( L"timerBlink" )->m_asFloat;
+			float fTimer = paramsDict[ L"fTimer" ].m_asFloat;
+			float fBlinkTimer = paramsDict[ L"timerBlink" ].m_asFloat;
 
 			DWORD textcol = dwFontColor;
 
 			if ( fTimer < fBlinkTimer )
 			{
-				CVariantComplex* varc = paramsDict.GetVariantByName( L"blinkColor" );
-				if ( varc->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR )
+				CVariantComplex* varc = &paramsDict[ L"blinkColor" ];
+				if ( varc->eType == CVariantComplex::K_ARGTYPE_HEXCOLOR )
 				{
 					textcol = var->m_asUINT32;
 				}
 			}
 
-			int textAlignFlags = paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
+			int textAlignFlags = paramsDict[ L"nTextAlignFlags" ].m_asINT32;
 
 			RectXYWHi movedB = BBox;
 			if ( fontIdx >= 0 )
@@ -2442,7 +2433,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 
-			int frameIdx = paramsDict.GetVariantByName( L"setFrame" )->m_asINT32;
+			int frameIdx = paramsDict[ L"setFrame" ].m_asINT32;
 
 			if ( ( frameIdx < 0 ) || ( frameIdx >= m_pSprCol->Animations[ animIdx ]->aframesNo ) )
 			{
@@ -2450,8 +2441,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 			//scale the frame?
-			bool bScale = ( bool ) paramsDict.GetVariantByName( L"scaleImage" )->m_asINT32;
-			bool bAnimated = ( bool ) paramsDict.GetVariantByName( L"Animated" )->m_asINT32;
+			bool bScale = ( bool ) paramsDict[ L"scaleImage" ].m_asINT32;
+			bool bAnimated = ( bool ) paramsDict[ L"Animated" ].m_asINT32;
 
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 			//anim hack for tut arrow
@@ -2488,8 +2479,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 
-			int leftVote = paramsDict.GetVariantByName( L"leftVote" )->m_asINT32;
-			int rightVote = paramsDict.GetVariantByName( L"rightVote" )->m_asINT32;
+			int leftVote = paramsDict[ L"leftVote" ].m_asINT32;
+			int rightVote = paramsDict[ L"rightVote" ].m_asINT32;
 
 			if ( ( UTApp().IsGameNetworked() ) || ( GameState::state == GAME_STATE_CONTROLSED ) )
 			{
@@ -2515,10 +2506,10 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 
-			bool hasArrows = ( bool ) paramsDict.GetVariantByName( L"hasArrows" )->m_asINT32;
-			float slidePercent = paramsDict.GetVariantByName( L"fSlidePercent" )->m_asFloat;
-			int nSteps = paramsDict.GetVariantByName( L"steps" )->m_asINT32;
-			int nIconFrame = paramsDict.GetVariantByName( L"iconFrame" )->m_asINT32;
+			bool hasArrows = ( bool ) paramsDict[ L"hasArrows" ].m_asINT32;
+			float slidePercent = paramsDict[ L"fSlidePercent" ].m_asFloat;
+			int nSteps = paramsDict[ L"steps" ].m_asINT32;
+			int nIconFrame = paramsDict[ L"iconFrame" ].m_asINT32;
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 
 			// containing panel
@@ -2558,9 +2549,9 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 
-			int nPage = paramsDict.GetVariantByName( L"nPage" )->m_asINT32;
-			int nMinPage = paramsDict.GetVariantByName( L"nMinPage" )->m_asINT32;
-			int nMaxPage = paramsDict.GetVariantByName( L"nMaxPage" )->m_asINT32;
+			int nPage = paramsDict[ L"nPage" ].m_asINT32;
+			int nMinPage = paramsDict[ L"nMinPage" ].m_asINT32;
+			int nMaxPage = paramsDict[ L"nMaxPage" ].m_asINT32;
 
 			RectXYWHi bboxBar = BBox;
 
@@ -2598,8 +2589,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 
-			bool bChecked = paramsDict.GetVariantByName( L"bChecked" )->m_asBool;
-			float hoverPercent = paramsDict.GetVariantByName( L"fHoverPercent" )->m_asFloat;
+			bool bChecked = paramsDict[ L"bChecked" ].m_asBool;
+			float hoverPercent = paramsDict[ L"fHoverPercent" ].m_asFloat;
 
 			int frame = 0;
 			if ( bChecked )
@@ -2629,7 +2620,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 
-			int frameIdx = paramsDict.GetVariantByName( L"frameIdx" )->m_asINT32;
+			int frameIdx = paramsDict[ L"frameIdx" ].m_asINT32;
 			if ( ( frameIdx < 0 ) || ( frameIdx > m_pSprCol->GetAFramesCnt( animIdx ) ) )
 			{
 				drawDebugText( BBox.x, BBox.y, L"Invalid frameIdx" );
@@ -2652,7 +2643,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				return;
 			}
 
-			int progress = _wtoi( paramsDict.GetVariantByName( L"progress" )->m_strArg.text );
+			int progress = _wtoi( paramsDict[ L"progress" ].m_strArg.text );
 
 			DWORD col = DW_COLOR_FFFA( layer->alpha );
 			if ( bDisabled )
@@ -2695,9 +2686,9 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			if ( bDisabled )
 				col = D3DCOLOR_COLORVALUE( 0.6f, 0.6f, 0.6f, layer->alpha );
 
-			int nOldVal = paramsDict.GetVariantByName( L"nOldValue" )->m_asINT32;
-			int nNewVal = paramsDict.GetVariantByName( L"nNewValue" )->m_asINT32;
-			float fProgress = paramsDict.GetVariantByName( L"fProgress" )->m_asFloat;
+			int nOldVal = paramsDict[ L"nOldValue" ].m_asINT32;
+			int nNewVal = paramsDict[ L"nNewValue" ].m_asINT32;
+			float fProgress = paramsDict[ L"fProgress" ].m_asFloat;
 			if ( fProgress < 0.0f )
 				fProgress = 0.0f;
 
@@ -2790,7 +2781,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			}
 
 			WCHAR inputText[ MAX_PATH ];
-			StringCchPrintf( inputText, MAX_PATH, L"%s", paramsDict.GetVariantByName( L"inputText" )->m_strArg.text );
+			swprintf_s( inputText, MAX_PATH, L"%s", paramsDict[ L"inputText" ].m_strArg.text );
 
 			DWORD wcol = DW_COLOR_FFFA( layer->alpha );
 			GUIUtils::DrawHTilingAnim_HeadsOutside( m_pSprCol, animIdx, 0, BBox_inflated, wcol );
@@ -2820,15 +2811,15 @@ bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 		case CCTRL_TYPE_LIST_SELECTOR_TRUETYPE:
 		case CCTRL_TYPE_LIST_SELECTOR:
 		{
-			bool bUserCanSelect = paramsDict.GetVariantByName( L"bUserCanSelect" )->m_asBool;
-			int	selectedIdx = paramsDict.GetVariantByName( L"nSelectedIdx" )->m_asINT32;
-			int optcnt = paramsDict.GetVariantByName( L"nOptionsCnt" )->m_asINT32;
-			int nMinPage = paramsDict.GetVariantByName( L"nMinPage" )->m_asINT32;
-			int nMaxPage = paramsDict.GetVariantByName( L"nMaxPage" )->m_asINT32;
+			bool bUserCanSelect = paramsDict[ L"bUserCanSelect" ].m_asBool;
+			int	selectedIdx = paramsDict[ L"nSelectedIdx" ].m_asINT32;
+			int optcnt = paramsDict[ L"nOptionsCnt" ].m_asINT32;
+			int nMinPage = paramsDict[ L"nMinPage" ].m_asINT32;
+			int nMaxPage = paramsDict[ L"nMaxPage" ].m_asINT32;
 
 			int stringIdx = -1;
-			CVariantComplex* var = paramsDict.GetVariantByName( L"stringID" );
-			if ( var->m_type != CVariantComplex::K_ARGTYPE_NONE )
+			CVariantComplex* var = &paramsDict[ L"stringID" ];
+			if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
 			{
 				stringIdx = var->m_asINT32;
 			}
@@ -2881,7 +2872,7 @@ bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 		break;
 		case CCTRL_TYPE_PLAYER_UPGRADE_CONTROL:
 		{
-			int	nSelectedLine = paramsDict.GetVariantByName( L"nSelectedLine" )->m_asINT32;
+			int	nSelectedLine = paramsDict[ L"nSelectedLine" ].m_asINT32;
 
 			//control has focus, scroll selection
 			if ( cmd == K_CCTRLMGR_COMMAND_LEFT )
@@ -2986,25 +2977,25 @@ void CControlsManager::SetParamValue( CControl * pCtrl, const WCHAR * sParamName
 	{
 		pCtrl->bbox.x = _wtoi( sParamValue );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarAUTO( sParamName, sParamValue );
+		pCtrl->paramsDict.SetVarAUTO( sParamName, sParamValue );
 	}
 	else if ( paramNameHash == FastHash( L"Y" ) )
 	{
 		pCtrl->bbox.y = _wtoi( sParamValue );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarAUTO( sParamName, sParamValue );
+		pCtrl->paramsDict.SetVarAUTO( sParamName, sParamValue );
 	}
 	else if ( paramNameHash == FastHash( L"W" ) )
 	{
 		pCtrl->bbox.w = _wtoi( sParamValue );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarAUTO( sParamName, sParamValue );
+		pCtrl->paramsDict.SetVarAUTO( sParamName, sParamValue );
 	}
 	else if ( paramNameHash == FastHash( L"H" ) )
 	{
 		pCtrl->bbox.h = _wtoi( sParamValue );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarAUTO( sParamName, sParamValue );
+		pCtrl->paramsDict.SetVarAUTO( sParamName, sParamValue );
 	}
 	else if ( paramNameHash == FastHash( L"animID" ) )
 	{
@@ -3012,7 +3003,7 @@ void CControlsManager::SetParamValue( CControl * pCtrl, const WCHAR * sParamName
 		if ( ( anmIdx < 0 ) && ( !bIgnoreWarnings ) )
 			ErrorBox( K_ERR_WARNING, L"CControlsManager::SetParamValue - couldn't find animation [%s]", sParamValue );
 
-		pCtrl->paramsDict.SetNamedVarINT32( sParamName, anmIdx );
+		pCtrl->paramsDict.SetVarINT32( sParamName, anmIdx );
 	}
 	else if ( paramNameHash == FastHash( L"fontID" ) )
 	{
@@ -3020,7 +3011,7 @@ void CControlsManager::SetParamValue( CControl * pCtrl, const WCHAR * sParamName
 		if ( ( fontIdx < 0 ) && ( !bIgnoreWarnings ) )
 			ErrorBox( K_ERR_WARNING, L"CControlsManager::SetParamValue - couldn't find font [%s]", sParamValue );
 
-		pCtrl->paramsDict.SetNamedVarINT32( sParamName, fontIdx );
+		pCtrl->paramsDict.SetVarINT32( sParamName, fontIdx );
 	}
 	else if ( paramNameHash == FastHash( L"stringID" ) )
 	{
@@ -3028,11 +3019,11 @@ void CControlsManager::SetParamValue( CControl * pCtrl, const WCHAR * sParamName
 		if ( ( stringIdx < 0 ) && ( !bIgnoreWarnings ) )
 			ErrorBox( K_ERR_WARNING, L"CControlsManager::SetParamValue - couldn't find string [%s]", sParamValue );
 
-		pCtrl->paramsDict.SetNamedVarINT32( sParamName, stringIdx );
+		pCtrl->paramsDict.SetVarINT32( sParamName, stringIdx );
 	}
 	else if ( paramNameHash == FastHash( L"wrapText" ) )
 	{
-		int textAlignFlags = pCtrl->paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
+		int textAlignFlags = pCtrl->paramsDict[ L"nTextAlignFlags" ].m_asINT32;
 		bool wrap = false;
 		if ( wcscmp( sParamValue, L"true" ) == 0 )
 			wrap = true;
@@ -3042,13 +3033,13 @@ void CControlsManager::SetParamValue( CControl * pCtrl, const WCHAR * sParamName
 		else
 			textAlignFlags &= ~FONTFLAG_WRAPTEXT;
 
-		pCtrl->paramsDict.SetNamedVarINT32( L"nTextAlignFlags", textAlignFlags );
+		pCtrl->paramsDict.SetVarINT32( L"nTextAlignFlags", textAlignFlags );
 		//add it in the dictionary so it shows up in the editor
-		pCtrl->paramsDict.SetNamedVarBool( sParamName, wrap );
+		pCtrl->paramsDict.SetVarBool( sParamName, wrap );
 	}
 	else if ( paramNameHash == FastHash( L"justify" ) )
 	{
-		int textAlignFlags = pCtrl->paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
+		int textAlignFlags = pCtrl->paramsDict[ L"nTextAlignFlags" ].m_asINT32;
 
 		bool justify = false;
 		if ( wcscmp( sParamValue, L"true" ) == 0 )
@@ -3059,13 +3050,13 @@ void CControlsManager::SetParamValue( CControl * pCtrl, const WCHAR * sParamName
 		else
 			textAlignFlags &= ~FONTFLAG_JUSTIFY;
 
-		pCtrl->paramsDict.SetNamedVarINT32( L"nTextAlignFlags", textAlignFlags );
+		pCtrl->paramsDict.SetVarINT32( L"nTextAlignFlags", textAlignFlags );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarBool( sParamName, justify );
+		pCtrl->paramsDict.SetVarBool( sParamName, justify );
 	}
 	else if ( paramNameHash == FastHash( L"align" ) )
 	{
-		int textAlignFlags = pCtrl->paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
+		int textAlignFlags = pCtrl->paramsDict[ L"nTextAlignFlags" ].m_asINT32;
 
 		textAlignFlags &= ( ~( FONTFLAG_ANCHOR_RIGHT | FONTFLAG_ANCHOR_CENTER | FONTFLAG_ANCHOR_LEFT ) );
 		int align = _wtoi( sParamValue );
@@ -3076,13 +3067,13 @@ void CControlsManager::SetParamValue( CControl * pCtrl, const WCHAR * sParamName
 		else
 			textAlignFlags |= FONTFLAG_ANCHOR_CENTER;
 
-		pCtrl->paramsDict.SetNamedVarINT32( L"nTextAlignFlags", textAlignFlags );
+		pCtrl->paramsDict.SetVarINT32( L"nTextAlignFlags", textAlignFlags );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarINT32( sParamName, align );
+		pCtrl->paramsDict.SetVarINT32( sParamName, align );
 	}
 	else if ( paramNameHash == FastHash( L"valign" ) )
 	{
-		int textAlignFlags = pCtrl->paramsDict.GetVariantByName( L"nTextAlignFlags" )->m_asINT32;
+		int textAlignFlags = pCtrl->paramsDict[ L"nTextAlignFlags" ].m_asINT32;
 
 		textAlignFlags &= ( ~( FONTFLAG_ANCHOR_TOP | FONTFLAG_ANCHOR_VCENTER | FONTFLAG_ANCHOR_BOTTOM ) );
 		int valign = _wtoi( sParamValue );
@@ -3093,13 +3084,13 @@ void CControlsManager::SetParamValue( CControl * pCtrl, const WCHAR * sParamName
 		else
 			textAlignFlags |= FONTFLAG_ANCHOR_VCENTER;
 
-		pCtrl->paramsDict.SetNamedVarINT32( L"nTextAlignFlags", textAlignFlags );
+		pCtrl->paramsDict.SetVarINT32( L"nTextAlignFlags", textAlignFlags );
 		//adaug si parametru in dictionar ca sa apara in editor
-		pCtrl->paramsDict.SetNamedVarINT32( sParamName, valign );
+		pCtrl->paramsDict.SetVarINT32( sParamName, valign );
 	}
 	else  //auto type converts based on value
 	{
-		pCtrl->paramsDict.SetNamedVarAUTO( sParamName, sParamValue );
+		pCtrl->paramsDict.SetVarAUTO( sParamName, sParamValue );
 	}
 }
 
@@ -3155,7 +3146,7 @@ void CCtrlLayer::FocusInitialize()
 			}
 			//--- selectez controlul specificat ca fiind focusat sau primul buton daca exista ---
 			bool bFocusIt = false;
-			CVariantComplex* lvar = controls[ kk ]->paramsDict.GetVariantByName( L"ID" );
+			CVariantComplex* lvar = &controls[ kk ]->paramsDict[ L"ID" ];
 			if ( !shFocusedControlID.IsEmpty() )
 			{
 				if ( lvar->m_strArg.textHash == shFocusedControlID.textHash )
@@ -3315,10 +3306,10 @@ CControl* CCtrlLayer::GetControlByName( char* ctrlName )
 	UINT32 chash = FastHash( ctrlName, strlen( ctrlName ) );
 	for ( int kk = 0; kk < controls.GetSize(); kk++ )
 	{
-		if ( controls[ kk ]->paramsDict.GetVariantByName( L"ID" ) == nullptr )
+		if ( controls[ kk ]->paramsDict[ L"ID" ].IsSet() == false )
 			continue;
 
-		if ( controls[ kk ]->paramsDict.GetVariantByName( L"ID" )->m_strArg.getHash() == chash )
+		if ( controls[ kk ]->paramsDict[ L"ID" ].m_strArg.getHash() == chash )
 			return controls[ kk ];
 	}
 	return nullptr;
@@ -3329,7 +3320,7 @@ bool CCtrlLayer::ControlSetDisableByName( bool bDisabledValue, char* ctrlName )
 	UINT32 chash = FastHash( ctrlName, strlen( ctrlName ) );
 	for ( int kk = 0; kk < controls.GetSize(); kk++ )
 	{
-		if ( controls[ kk ]->paramsDict.GetVariantByName( L"ID" )->m_strArg.getHash() == chash )
+		if ( controls[ kk ]->paramsDict[ L"ID" ].m_strArg.getHash() == chash )
 		{
 			controls[ kk ]->bDisabled = bDisabledValue;
 			return true;
@@ -3345,7 +3336,7 @@ bool CCtrlLayer::SetControlParam( char* controlName, WCHAR* paramName, bool bVal
 		ErrorBox( K_ERR_WARNING, L"Control not found!");
 		return false;
 	}
-	ctrl->paramsDict.SetNamedVarBool( paramName, bValue );
+	ctrl->paramsDict.SetVarBool( paramName, bValue );
 	return true;
 }
 
@@ -3368,7 +3359,7 @@ CCtrlLayer* CCtrlLayer::Clone()
 
 	for ( int kk = 0; kk < controls.GetSize(); kk++ )
 	{
-		CControl* nctrl = new CControl( controls[ kk ]->paramsDict.GetVariantByName( L"Type" )->m_strArg.text );
+		CControl* nctrl = new CControl( controls[ kk ]->paramsDict[ L"Type" ].m_strArg.text );
 		nctrl->layer = nlay;
 		//copy necessary data from templates
 		nctrl->paramsDict = controls[ kk ]->paramsDict;
@@ -3833,7 +3824,7 @@ OPRESULT CControlsManager::LoadControlsXML( WCHAR* XMLpath )
 			for ( pugi::xml_attribute attData = controldata.first_attribute(); attData; attData = attData.next_attribute() )
 			{
 				WCHAR attValue[ MAX_PATH ];
-				StringCchPrintf( attValue, MAX_PATH, L"%s", attData.value() );
+				swprintf_s( attValue, MAX_PATH, L"%s", attData.value() );
 				//set param - translates data from string to binary
 				SetParamValue( nctrl, attData.name(), attValue, true );
 			}
@@ -3894,7 +3885,7 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 					//send code on keypress
 					if ( ( ctrl->type == CCTRL_TYPE_SDL_KEYREADER ) && ( nCommand != 0 ) )
 					{
-						ctrl->paramsDict.SetNamedVarINT32( L"nSDLscancode", nCommandParam );
+						ctrl->paramsDict.SetVarINT32( L"nSDLscancode", nCommandParam );
 					}
 				}
 			}
@@ -3916,22 +3907,22 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 						if ( !_iswalnum_l( c, localt ) )
 							continue;
 
-						int textLen = _wtoi( ctrl->paramsDict.GetVariantByName( L"textLen" )->m_strArg.text );
-						int maxLen = _wtoi( ctrl->paramsDict.GetVariantByName( L"maxLen" )->m_strArg.text );
+						int textLen = _wtoi( ctrl->paramsDict[ L"textLen" ].m_strArg.text );
+						int maxLen = _wtoi( ctrl->paramsDict[ L"maxLen" ].m_strArg.text );
 
 						if ( ( __Texts().GetLetterIdx( c ) != K_STRMGR_SPACE ) && ( textLen < maxLen ) && ( c >= '0' ) )
 						{
 							WCHAR inputText[ MAX_PATH ];
-							StringCchPrintf( inputText, MAX_PATH, L"%s", ctrl->paramsDict.GetVariantByName( L"inputText" )->m_strArg.text );
+							swprintf_s( inputText, MAX_PATH, L"%s", ctrl->paramsDict[ L"inputText" ].m_strArg.text );
 							inputText[ textLen ] = c;
 							textLen++;
 							//asigura caracterul de end of string
 							inputText[ textLen ] = 0;
 
 							WCHAR val[ MAX_PATH ];
-							StringCchPrintf( val, MAX_PATH, L"%d", textLen );
-							ctrl->paramsDict.SetNamedVarString( L"textLen", val );
-							ctrl->paramsDict.SetNamedVarString( L"inputText", inputText );
+							swprintf_s( val, MAX_PATH, L"%d", textLen );
+							ctrl->paramsDict.SetVarString( L"textLen", val );
+							ctrl->paramsDict.SetVarString( L"inputText", inputText );
 							SND_PLAY( SNDIDX_CLICK );
 						}
 					}
@@ -3951,10 +3942,10 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 					CControl *ctrl = lay->controls[ j ];
 					if ( ctrl->type == CCTRL_TYPE_INPUTBOX )
 					{
-						int textLen = _wtoi( ctrl->paramsDict.GetVariantByName( L"textLen" )->m_strArg.text );
-						//int maxLen = _wtoi(ctrl->paramsDict.GetVariantByName(L"maxLen")->m_strArg.text);
+						int textLen = _wtoi( ctrl->paramsDict[ L"textLen" ].m_strArg.text );
+						//int maxLen = _wtoi(ctrl->paramsDict[L"maxLen"].m_strArg.text);
 						WCHAR inputText[ MAX_PATH ];
-						StringCchPrintf( inputText, MAX_PATH, L"%s", ctrl->paramsDict.GetVariantByName( L"inputText" )->m_strArg.text );
+						swprintf_s( inputText, MAX_PATH, L"%s", ctrl->paramsDict[ L"inputText" ].m_strArg.text );
 						if ( vk == VK_BACK )
 						{
 							if ( textLen > 0 )
@@ -3975,9 +3966,9 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 						}
 
 						WCHAR val[ MAX_PATH ];
-						StringCchPrintf( val, MAX_PATH, L"%d", textLen );
-						ctrl->paramsDict.SetNamedVarString( L"textLen", val );
-						ctrl->paramsDict.SetNamedVarString( L"inputText", inputText );
+						swprintf_s( val, MAX_PATH, L"%d", textLen );
+						ctrl->paramsDict.SetVarString( L"textLen", val );
+						ctrl->paramsDict.SetVarString( L"inputText", inputText );
 					}
 				}
 			}
@@ -4045,12 +4036,12 @@ void CControlsManager::MessageBoxOK( int titleStringId, int textStringId )
 		CControl* tmpCb = tmpLayer->GetControlByName( "WINDOW" );
 		if ( tmpCb != nullptr )
 		{
-			tmpCb->paramsDict.SetNamedVarINT32( L"stringID", titleStringId );
+			tmpCb->paramsDict.SetVarINT32( L"stringID", titleStringId );
 		}
 		tmpCb = tmpLayer->GetControlByName( "TEXT_LABEL" );
 		if ( tmpCb != nullptr )
 		{
-			tmpCb->paramsDict.SetNamedVarINT32( L"stringID", textStringId );
+			tmpCb->paramsDict.SetVarINT32( L"stringID", textStringId );
 		}
 	}
 }

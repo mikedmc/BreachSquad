@@ -139,7 +139,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 						if ( ctrl )
 						{
 							ctrl->bDisabled = true;
-							ctrl->paramsDict.SetNamedVarINT32( L"nOptionsCnt", 1 );
+							ctrl->paramsDict.SetVarINT32( L"nOptionsCnt", 1 );
 						}
 					}
 				}
@@ -172,7 +172,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 						if ( ctrl )
 						{
 							ctrl->bDisabled = false;
-							ctrl->paramsDict.SetNamedVarINT32( L"nOptionsCnt", nLobbiesCnt );
+							ctrl->paramsDict.SetVarINT32( L"nOptionsCnt", nLobbiesCnt );
 						}
 					}
 				}
@@ -264,11 +264,11 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 			{
 				float fFixedTime = K_GAME_FIXED_TIMESTEP_DTIME;
 				//SPINE update animation states
-				g_spineMgr.UpdateAnimationStates( fFixedTime );
+				//g_spineMgr.UpdateAnimationStates( fFixedTime );
 				// Update level and all spine objects and bones
 				gLevel.UpdateFixedTimestep( fFixedTime );
 				// SPINE update final skeleton world positions (no bone changes allowed after this)
-				g_spineMgr.Update( fFixedTime );
+				//g_spineMgr.Update( fFixedTime );
 
 				// remove from accumulator
 				fFixedStepTimer -= K_GAME_FIXED_TIMESTEP_DTIME;

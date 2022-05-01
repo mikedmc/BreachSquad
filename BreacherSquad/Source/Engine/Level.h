@@ -364,7 +364,7 @@ public:
 	void					TouchClosestActive(CActor * pToucherAct, float dTime);
 	// RETURNS: true - instr processed, false - not processed
 	bool					ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executorUID, UINT32 scriptUID);
-	bool					OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantCollection * pArrScriptVars);
+	bool					OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantMap * pArrScriptVars);
 	char const *			GetScriptProcessorName(void) { return "CLevel"; }
 	// functie ajutatoare pentru procesare instructiuni. Gaseste activ in fn de valoare parametru: SELF pt caller, TARGET pentru targetID si numar pt ID efectiv
 	IActiveInterface*		ScriptGetActiveInterfaceByTargetParam(CVariantComplex* vcTarget, UINT32 executorUID);

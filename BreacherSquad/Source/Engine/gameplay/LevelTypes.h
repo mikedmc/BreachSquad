@@ -339,7 +339,7 @@ enum EMiscObjectType
 	K_LVL_MISC_TYPES
 };
 
-//clasa generica de baza
+// base class for generic editor objects (rails and other stuff)
 class CMiscObjectBase
 {
 private:
@@ -349,21 +349,20 @@ public:
 	int		ID; //id din editor
 	EMiscObjectType type; //tipul obiectului
 
-	CVariantCollection	varParams;	//parametrii primiti din editor, specifici fiecarui tip (vezi comentarii EMiscObjectTypes)
+	CVariantMap	varParams;	//parametrii primiti din editor, specifici fiecarui tip (vezi comentarii EMiscObjectTypes)
 
 	//CTOR/DTOR
 	CMiscObjectBase() : ID(-1), type(K_LVL_MISC_UNDEFINED)
 	{
 		UID = GenerateUID();
-		varParams.DeleteAll();
+		varParams.Clear();
 	}
 	virtual ~CMiscObjectBase() //virtual - cheama constructorul claselor derivate daca dezaloci prin pointer de baseClass
 	{
-		varParams.DeleteAll();
+		varParams.Clear();
 	}
 };
 
-//clase specifice fiecarui tip
 class CMiscObjectRail : public CMiscObjectBase
 {
 public:
@@ -477,6 +476,7 @@ enum ELevelStats {
 ///----------------------------------------------------------------------------------
 /// SCRIPT ACTIONS - used on objects, gathered from object, weapons, inventory objects, actor properties, etc
 /// !! must be copyable - implement copy constructor if needed
+/// All these actions are collected from all elements when action list gets created (when interacting)
 ///----------------------------------------------------------------------------------
 class CScriptAction {
 public:

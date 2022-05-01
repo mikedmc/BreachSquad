@@ -45,8 +45,7 @@ bool CCollAIComponent::Update( CCollisionShape& active, float dTime, CLevel& lev
 					winact->arrActions.Clear();
 
 					//generate particles
-					CVariantComplex* cvar = active.varAIparams.GetVariantByName( L"fForceDirX" );
-					float dirx = SIGN( cvar->m_asFloat );
+					float dirx = SIGN( active.varAIparams[L"fForceDirX"].m_asFloat );
 					for ( int ll = 0; ll < 20; ll++ )
 					{
 						Vec2 ppos = AABB::GetRandomPointInBox( active.bbox );
@@ -72,10 +71,10 @@ bool CCollAIComponent::Update( CCollisionShape& active, float dTime, CLevel& lev
 				//set shake timer
 				mem.AItimer1 = 1.0f;
 				//just set fForeceDirX to something in order to make it get hit
-				CVariantComplex* cvar = active.varAIparams.GetVariantByName( L"fForceDirX" );
-				if ( cvar->m_type == CVariantComplex::K_ARGTYPE_FLOAT )
+				CVariantComplex cvar = active.varAIparams[ L"fForceDirX" ];
+				if ( cvar.eType == CVariantComplex::K_ARGTYPE_FLOAT )
 				{
-					fForceDirX = cvar->m_asFloat;
+					fForceDirX = cvar.m_asFloat;
 					active.varAIparams.DeleteVar( L"fForceDirX" );
 				}
 			}
@@ -140,7 +139,7 @@ bool CCollAIComponent::Update( CCollisionShape& active, float dTime, CLevel& lev
 					//sound
 					//SND_PLAY_POSITIONAL(SNDIDX_DOOR_BREAK, colshape->bbox.vCenter);
 					//analytics locale
-					CVariantComplex* cvexploded = active.varAIparams.GetVariantByName(L"bExploded");
+					CVariantComplex* cvexploded = active.varAIparams[L"bExploded");
 					if ((cvexploded->m_type == CVariantComplex::K_ARGTYPE_INT32) && (cvexploded->m_asINT32 != 0))
 					{
 						App_IncreaseGamestat(K_MEMID_GAMESTATS_DOORS_EXPLODED);

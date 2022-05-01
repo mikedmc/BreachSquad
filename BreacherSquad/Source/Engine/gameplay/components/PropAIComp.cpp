@@ -64,7 +64,7 @@ bool CPropAIComponent::Update( CProp& active, float dTime, CLevel& level )
 		break;
 		case K_AI_STATE_ACTIVE_AMMO_BOX:
 		{
-			int nAmmoLeft = active.varAIparams.GetVariantByName( L"n_ammoLeft" )->m_asINT32;
+			int nAmmoLeft = active.varAIparams[ L"n_ammoLeft" ].m_asINT32;
 			active.sprite.frameIdx = nAmmoLeft;
 
 			//fade out
@@ -83,7 +83,7 @@ bool CPropAIComponent::Update( CProp& active, float dTime, CLevel& level )
 		break;
 		case K_AI_STATE_ACTIVE_HEALTH_BOX:
 		{
-			int nHealthLeft = active.varAIparams.GetVariantByName( L"n_healthLeft" )->m_asINT32;
+			int nHealthLeft = active.varAIparams[ L"n_healthLeft" ].m_asINT32;
 			active.sprite.frameIdx = nHealthLeft;
 
 			//fade out
@@ -119,7 +119,7 @@ bool CPropAIComponent::Update( CProp& active, float dTime, CLevel& level )
 			{
 				mem.AItimer1 -= dTime;
 
-				bool bDontChangeFrames = (bool)(active.varAIparams.GetVariantByName( L"b_DontChangeFrames" )->m_asBool);
+				bool bDontChangeFrames = (bool)(active.varAIparams[ L"b_DontChangeFrames" ].m_asBool);
 				if ( !bDontChangeFrames )
 				{
 					active.sprite.frameIdx++;
@@ -133,17 +133,17 @@ bool CPropAIComponent::Update( CProp& active, float dTime, CLevel& level )
 			if ( (mem.AIvarBool1 == false) && (mem.AItimer1 > 0.0f) )
 			{
 				//just opened
-				CVariantComplex* cvc = active.varAIparams.GetVariantByName( L"s_openSnd" );
-				if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
+				CVariantComplex cvc = active.varAIparams[ L"s_openSnd" ];
+				if ( cvc.eType == CVariantComplex::K_ARGTYPE_STRING )
 				{
-					int sndidx = UTGetSoundManager().getSndIdx( cvc->m_strArg.textHash );
+					int sndidx = UTGetSoundManager().getSndIdx( cvc.m_strArg.textHash );
 					SND_PLAY_POSITIONAL( sndidx, active.pos.xy );
 				}
 				//on open script
-				cvc = active.varAIparams.GetVariantByName( L"s_ScriptOnOpen" );
-				if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
+				cvc = active.varAIparams[ L"s_ScriptOnOpen" ];
+				if ( cvc.eType == CVariantComplex::K_ARGTYPE_STRING )
 				{
-					UTGetScriptManager().StartScript( cvc->m_strArg.textHash, active.UID );
+					UTGetScriptManager().StartScript( cvc.m_strArg.textHash, active.UID );
 				}
 
 				mem.AIvarBool1 = true;
@@ -151,17 +151,17 @@ bool CPropAIComponent::Update( CProp& active, float dTime, CLevel& level )
 			else if ( (mem.AIvarBool1 == true) && (mem.AItimer1 <= 0.0f) )
 			{
 				//just closed
-				CVariantComplex* cvc = active.varAIparams.GetVariantByName( L"s_closeSnd" );
-				if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
+				CVariantComplex cvc = active.varAIparams[ L"s_closeSnd" ];
+				if ( cvc.eType == CVariantComplex::K_ARGTYPE_STRING )
 				{
-					int sndidx = UTGetSoundManager().getSndIdx( cvc->m_strArg.textHash );
+					int sndidx = UTGetSoundManager().getSndIdx( cvc.m_strArg.textHash );
 					SND_PLAY_POSITIONAL( sndidx, active.pos.xy );
 				}
 				//on close script
-				cvc = active.varAIparams.GetVariantByName( L"s_ScriptOnClose" );
-				if ( cvc->m_type == CVariantComplex::K_ARGTYPE_STRING )
+				cvc = active.varAIparams[ L"s_ScriptOnClose" ];
+				if ( cvc.eType == CVariantComplex::K_ARGTYPE_STRING )
 				{
-					UTGetScriptManager().StartScript( cvc->m_strArg.textHash, active.UID );
+					UTGetScriptManager().StartScript( cvc.m_strArg.textHash, active.UID );
 				}
 				mem.AIvarBool1 = false;
 			}

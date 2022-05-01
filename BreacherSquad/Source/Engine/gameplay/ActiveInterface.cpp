@@ -14,13 +14,10 @@ IActiveInterface::IActiveInterface() :
 
 	pos = Vec3(0.0f, 0.0f, 0.0f);
 	pos_ini = Vec3(0.0f, 0.0f, 0.0f);
-
-	varAIparams.DeleteAll();
 }
 
 IActiveInterface::~IActiveInterface()
 {
-	varAIparams.DeleteAll();
 	// already released in Kill() but we make it double
 	if ( pTarget != nullptr )
 		pTarget->FreeRef();
@@ -87,7 +84,7 @@ void IActiveInterface::LoadLogic(FILE* fl)
 			mbstowcs_s(&convnr, wvarname, varname, MAX_PATH);
 			mbstowcs_s(&convnr, wvarval, varval, MAX_PATH);
 
-			varAIparams.SetNamedVarAUTO(wvarname, wvarval);
+			varAIparams.SetVarAUTO(wvarname, wvarval);
 		}
 	}
 }
@@ -167,17 +164,14 @@ void IActiveInterface::StartScript( UINT32 scriptNameHash )
 	nRunningScriptUID = UTGetScriptManager().StartScript( scriptNameHash, GetUID(), &varAIparams );
 }
 
-void IActiveInterface::SetAIparams( CVariantCollection * params, bool bClearParams )
+void IActiveInterface::SetAIparams( CVariantMap * params, bool bClearParams )
 {
-	if ( (params == nullptr) || (bClearParams) )
-		varAIparams.DeleteAll();
+	if ( ( params == nullptr ) || ( bClearParams ) )
+		varAIparams.Clear();
 
 	if ( params != nullptr )
 	{
-		for ( int kk = 0; kk < params->GetVariantCount(); kk++ )
-		{
-			varAIparams.AddVariant( *params->m_variants[ kk ] );
-		}
+		varAIparams = *params;
 	}
 }
 

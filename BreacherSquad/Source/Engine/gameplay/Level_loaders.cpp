@@ -611,7 +611,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		OS_freadString(fl, strScriptName);
 		OS_freadString(fl, strAIname);
 		//read AI params
-		CVariantCollection arrParams;
+		CVariantMap arrParams;
 		int nAIparamsCnt = OS_freadByte(fl); //nr params
 		if (nAIparamsCnt > 0)
 		{
@@ -629,7 +629,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 				mbstowcs_s(&convnr, wvarname, varname, MAX_PATH);
 				mbstowcs_s(&convnr, wvarval, varval, MAX_PATH);
 
-				arrParams.SetNamedVarAUTO(wvarname, wvarval);
+				arrParams.SetVarAUTO(wvarname, wvarval);
 			}
 		}
 		///--- FINISHED READING DATA ---
@@ -732,7 +732,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 						mbstowcs_s(&convnr, wvarval, varval, MAX_PATH);
 						mbstowcs_s(&convnr, wvarname, varname, MAX_PATH);
 
-						frontobj->varParams.SetNamedVarAUTO(wvarname, wvarval);
+						frontobj->varParams.SetVarAUTO(wvarname, wvarval);
 					}
 				}
 				//specific data 
@@ -801,7 +801,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 						mbstowcs_s(&convnr, wvarname, varval, MAX_PATH);
 						mbstowcs_s(&convnr, wvarval, varval, MAX_PATH);
 
-						rail->varParams.SetNamedVarAUTO(wvarname, wvarval);
+						rail->varParams.SetVarAUTO(wvarname, wvarval);
 					}
 				}
 				//specific data 
@@ -854,9 +854,9 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 			if (frontobj != null)
 			{
 				//anim name
-				UINT32 animHash = frontobj->varParams.GetVariantByName(L"strAnim")->m_strArg.getHash();
+				UINT32 animHash = frontobj->varParams[L"strAnim"].m_strArg.getHash();
 				frontobj->sprite.animationIdx = -1;// m_sprBack.getAnimationIdxByNameHash(animHash);
-				frontobj->sprite.currentFrame = frontobj->varParams.GetVariantByName(L"nFrame")->m_asUINT32;
+				frontobj->sprite.currentFrame = frontobj->varParams[L"nFrame"].m_asUINT32;
 				//set bbox
 				//frontobj->aabb_ini.Set(m_sprBack.GetAFrameBBox(frontobj->sprite.animationIdx, frontobj->sprite.currentFrame));
 			}

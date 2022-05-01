@@ -33,7 +33,7 @@ protected:
 
 public:
 	EAIstate				AIstate;				// state AI (AI_STATE ENUM)
-	CVariantCollection		varAIparams;			// AIstate params (partially coming from the editor)
+	CVariantMap				varAIparams;			// AIstate params (partially coming from the editor)
 
 public:
 	UINT32					UID;					// ingame UID
@@ -101,7 +101,7 @@ public:
 	void						StartScript( WCHAR* scriptName );
 	void						StartScript( UINT32 scriptNameHash );
 	// Sets varAIparams. params = nullptr just clears the params
-	void						SetAIparams( CVariantCollection * params, bool bClearParams );
+	void						SetAIparams( CVariantMap * params, bool bClearParams );
 public: 
 	// Sets the AI state (useless for actors)
 	virtual void				SetAI( EAIstate newstate ) = 0;

@@ -68,7 +68,7 @@ void CVariantMap::Deserialize(FILE *f)
 	{
 		temp.Deserialize(f);
 		// add to map
-		m_variants[temp.m_name.text] = temp;
+		m_variants[temp.shName.text] = temp;
 	}
 }
 
@@ -80,7 +80,7 @@ void CVariantMap::DeleteVar(const std::wstring varName)
 void CVariantMap::DeleteVar(const UINT32 varHash)
 {
 	for ( auto it = m_variants.begin(); it != m_variants.end(); ) {
-		if ( it->second.m_name.textHash == varHash)
+		if ( it->second.shName.textHash == varHash)
 			it = m_variants.erase(it);
 		else
 			++it;
@@ -92,16 +92,16 @@ void CVariantMap::Clear()
 	m_variants.clear();
 }
 
-void CVariantMap::AddVariant(CVariantComplex variant)
+void CVariantMap::AddVariant(CVariantComplex & variant)
 {
-	m_variants[variant.m_name.text] = variant;
+	m_variants[variant.shName.text] = variant;
 }
 
 void CVariantMap::AddVariant(CVariantComplex * variant)
 {
 	if ( variant == nullptr )
 		return;
-	m_variants[variant->m_name.text] = *variant;
+	m_variants[variant->shName.text] = *variant;
 }
 
 void CVariantMap::SetVarUINT32(const std::wstring varName, UINT32 val)
