@@ -135,14 +135,14 @@ void CimguiWrapper::PaintDebugVars()
 	CStringHashA cname;
 	for(auto & elem : __ImGui().arrDebugVars.m_variants)
 	{
-		CVariantComplex* cvc = &elem.second;
+		CVariant* cvc = &elem.second;
 		switch ( cvc->eType )
 		{
-			case CVariantComplex::K_ARGTYPE_INT32:
+			case CVariant::K_ARGTYPE_INT32:
 				cname = cvc->shName;
 				ImGui::Text( "%s: %d", cname.text, cvc->m_asINT32 );
 				break;
-			case CVariantComplex::K_ARGTYPE_FLOAT:
+			case CVariant::K_ARGTYPE_FLOAT:
 				cname = cvc->shName;
 				ImGui::Text( "%s: %.2f", cname.text, cvc->m_asFloat );
 				break;

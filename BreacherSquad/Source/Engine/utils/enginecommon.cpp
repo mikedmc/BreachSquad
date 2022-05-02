@@ -789,30 +789,30 @@ void wcs_replace( WCHAR* o_string, WCHAR* s_string, WCHAR* r_string )
 	return wcs_replace( o_string, s_string, r_string );
 }
 
-bool CVariantComplex::Serialize(FILE *fl)
+bool CVariant::Serialize(FILE *fl)
 {
 	OS_fwrite(&eType, sizeof(eType), 1, fl);
 	OS_fwriteWString(fl, shName.text);
 
 	switch (eType)
 	{
-	case CVariantComplex::K_ARGTYPE_INT32:
+	case CVariant::K_ARGTYPE_INT32:
 		OS_fwrite(&m_asINT32, sizeof(INT32), 1, fl);
 		break;
 
-	case CVariantComplex::K_ARGTYPE_FLOAT:
+	case CVariant::K_ARGTYPE_FLOAT:
 		OS_fwrite(&m_asFloat, sizeof(FLOAT), 1, fl);
 		break;
 
-	case CVariantComplex::K_ARGTYPE_BOOL:
+	case CVariant::K_ARGTYPE_BOOL:
 		OS_fwrite(&m_asBool, sizeof(bool), 1, fl);
 		break;
 
-	case CVariantComplex::K_ARGTYPE_UINT32:
+	case CVariant::K_ARGTYPE_UINT32:
 		OS_fwrite(&m_asUINT32, sizeof(UINT32), 1, fl);
 		break;
 
-	case CVariantComplex::K_ARGTYPE_STRING:
+	case CVariant::K_ARGTYPE_STRING:
 		OS_fwriteWString(fl, m_strArg.text);
 		break;
 	}
@@ -820,34 +820,34 @@ bool CVariantComplex::Serialize(FILE *fl)
 	return true;
 }
 
-bool CVariantComplex::Deserialize(FILE* fl)
+bool CVariant::Deserialize(FILE* fl)
 {
 	WCHAR name[K_MAX_STRINGHASH_LEN];
 	WCHAR strVal[K_MAX_STRINGHASH_LEN];
-	CVariantComplex::VariantType t;
+	CVariant::VariantType t;
 
 	OS_fread(&t, sizeof(t), 1, fl);
 	OS_freadWString(fl, name);
 
 	switch ( t )
 	{
-	case CVariantComplex::K_ARGTYPE_INT32:
+	case CVariant::K_ARGTYPE_INT32:
 		Set_INT32(name, OS_freadInt32(fl));
 		return true;
 
-	case CVariantComplex::K_ARGTYPE_FLOAT:
+	case CVariant::K_ARGTYPE_FLOAT:
 		Set_FLOAT(name, OS_freadFloat32(fl));
 		return true;
 
-	case CVariantComplex::K_ARGTYPE_BOOL:
+	case CVariant::K_ARGTYPE_BOOL:
 		Set_BOOL(name, OS_freadBool(fl));
 		return true;
 
-	case CVariantComplex::K_ARGTYPE_UINT32:
+	case CVariant::K_ARGTYPE_UINT32:
 		Set_UINT32(name, OS_freadUInt32(fl));
 		return true;
 
-	case CVariantComplex::K_ARGTYPE_STRING:
+	case CVariant::K_ARGTYPE_STRING:
 		OS_freadWString(fl, strVal);
 		Set_STRING(name, strVal);
 		return true;
@@ -857,52 +857,52 @@ bool CVariantComplex::Deserialize(FILE* fl)
 }
 
 
-CVariantComplex* CVariantComplex::DeserializeAlloc(FILE *fl)
+CVariant* CVariant::DeserializeAlloc(FILE *fl)
 {
 	WCHAR name[K_MAX_STRINGHASH_LEN];
 	WCHAR strVal[K_MAX_STRINGHASH_LEN];
-	CVariantComplex::VariantType t;
+	CVariant::VariantType t;
 
 	OS_fread(&t, sizeof(t), 1, fl);
 	OS_freadWString(fl, name);
 
 	switch (t)
 	{
-		case CVariantComplex::K_ARGTYPE_INT32:
+		case CVariant::K_ARGTYPE_INT32:
 		{
-			CVariantComplex *nvc = new CVariantComplex();
+			CVariant *nvc = new CVariant();
 			nvc->Set_INT32(name, OS_freadInt32(fl));
 			return nvc;
 		}
 		break;
 
-		case CVariantComplex::K_ARGTYPE_FLOAT:
+		case CVariant::K_ARGTYPE_FLOAT:
 		{
-			CVariantComplex *nvc = new CVariantComplex();
+			CVariant *nvc = new CVariant();
 			nvc->Set_FLOAT(name, OS_freadFloat32(fl));
 			return nvc;
 		}
 		break;
 
-		case CVariantComplex::K_ARGTYPE_BOOL:
+		case CVariant::K_ARGTYPE_BOOL:
 		{
-			CVariantComplex *nvc = new CVariantComplex();
+			CVariant *nvc = new CVariant();
 			nvc->Set_BOOL(name, OS_freadBool(fl));
 			return nvc;
 		}
 		break;
 
-		case CVariantComplex::K_ARGTYPE_UINT32:
+		case CVariant::K_ARGTYPE_UINT32:
 		{
-			CVariantComplex *nvc = new CVariantComplex();
+			CVariant *nvc = new CVariant();
 			nvc->Set_UINT32(name, OS_freadUInt32(fl));
 			return nvc;
 		}
 		break;
 
-		case CVariantComplex::K_ARGTYPE_STRING:
+		case CVariant::K_ARGTYPE_STRING:
 		{
-			CVariantComplex *nvc = new CVariantComplex();
+			CVariant *nvc = new CVariant();
 			OS_freadWString(fl, strVal);
 			nvc->Set_STRING(name, strVal);
 			return nvc;

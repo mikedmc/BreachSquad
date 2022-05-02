@@ -269,7 +269,7 @@ void CScriptManager::ClearGlobalMemory()
 	m_globalMemory.Clear();
 }
 
-void CScriptManager::SetGlobalVar(CVariantComplex* varValue)
+void CScriptManager::SetGlobalVar(CVariant* varValue)
 {
 	if (varValue == nullptr)
 		return;
@@ -300,7 +300,7 @@ void CScriptManager::SetLocalVars( UINT32 scriptUID, CVariantMap & inputVariants
 	as->m_localMemory.AppendMap( inputVariants );
 }
 
-void CScriptManager::SetLocalVar(UINT32 scriptUID, CVariantComplex* varValue)
+void CScriptManager::SetLocalVar(UINT32 scriptUID, CVariant* varValue)
 {
 	CScript* as = GetActiveScript(scriptUID);
 	if(!as)
@@ -312,12 +312,12 @@ void CScriptManager::SetLocalVar(UINT32 scriptUID, CVariantComplex* varValue)
 	as->m_localMemory.AddVariant(varValue);
 }
 
-CVariantComplex* CScriptManager::GetGlobalVar(WCHAR* varName)
+CVariant* CScriptManager::GetGlobalVar(WCHAR* varName)
 {
 	return &m_globalMemory[varName];
 }
 
-CVariantComplex* CScriptManager::GetLocalVar(UINT32 scriptUID, WCHAR* varName)
+CVariant* CScriptManager::GetLocalVar(UINT32 scriptUID, WCHAR* varName)
 {
 	CScript* as = GetActiveScript(scriptUID);
 	if(!as)
@@ -389,10 +389,10 @@ int CScriptManager::ExecuteScript(CScript* ns)
 		}
 		else if (instr.m_instruction.textHash == instr_GOTO)
 		{
-			CVariantComplex* label = instr.GetArgument(L"label");
+			CVariant* label = instr.GetArgument(L"label");
 			int labelIdx = -1;
 
-			if ((label->eType != CVariantComplex::K_ARGTYPE_NONE) && (!label->m_strArg.IsEmpty()))
+			if ((label->eType != CVariant::K_ARGTYPE_NONE) && (!label->m_strArg.IsEmpty()))
 			{
 				labelIdx = scrd->GetLabelInstrIndex(label->m_strArg);
 			}
@@ -410,11 +410,11 @@ int CScriptManager::ExecuteScript(CScript* ns)
 		}
 		else if (instr.m_instruction.textHash == instr_IF_EQUAL_GLOBAL)
 		{
-			CVariantComplex* var_name = instr.GetArgument(L"var_name");
-			CVariantComplex* check_value = instr.GetArgument(L"check_value");
-			CVariantComplex* label_goto = instr.GetArgument(L"goto");
+			CVariant* var_name = instr.GetArgument(L"var_name");
+			CVariant* check_value = instr.GetArgument(L"check_value");
+			CVariant* label_goto = instr.GetArgument(L"goto");
 
-			if ((var_name->eType == CVariantComplex::K_ARGTYPE_NONE) || (check_value->eType == CVariantComplex::K_ARGTYPE_NONE) || (label_goto->eType == CVariantComplex::K_ARGTYPE_NONE))
+			if ((var_name->eType == CVariant::K_ARGTYPE_NONE) || (check_value->eType == CVariant::K_ARGTYPE_NONE) || (label_goto->eType == CVariant::K_ARGTYPE_NONE))
 			{
 				LOG(L"SCRIPT::IF_EQUAL_GLOBAL - missing params!\n");
 			}
@@ -425,7 +425,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 				if (labelIdx >= 0)
 				{
 					//find global var
-					CVariantComplex* global_var = GetGlobalVar(var_name->m_strArg.text);
+					CVariant* global_var = GetGlobalVar(var_name->m_strArg.text);
 					if (*global_var == *check_value)
 					{
 						ns->m_currentInstruction = labelIdx; //nu scad 1 pentru ca oricum se sare instructiunea label (mai jos se creste automat currentInstr)
@@ -446,11 +446,11 @@ int CScriptManager::ExecuteScript(CScript* ns)
 		}
 		else if (instr.m_instruction.textHash == instr_RAND_INT_GLOBAL)
 		{
-			CVariantComplex* var_name = instr.GetArgument(L"var_name");
-			CVariantComplex* vmin = instr.GetArgument(L"nMin");
-			CVariantComplex* vmax = instr.GetArgument(L"nMax");
+			CVariant* var_name = instr.GetArgument(L"var_name");
+			CVariant* vmin = instr.GetArgument(L"nMin");
+			CVariant* vmax = instr.GetArgument(L"nMax");
 
-			if ((var_name->eType == CVariantComplex::K_ARGTYPE_NONE) || (vmin->eType != CVariantComplex::K_ARGTYPE_INT32) || (vmax->eType != CVariantComplex::K_ARGTYPE_INT32))
+			if ((var_name->eType == CVariant::K_ARGTYPE_NONE) || (vmin->eType != CVariant::K_ARGTYPE_INT32) || (vmax->eType != CVariant::K_ARGTYPE_INT32))
 			{
 				LOG(L"SCRIPT::RAND_INT_GLOBAL - missing params or wrong types! [var_name, nMin, nMax]\n");
 			}
@@ -464,11 +464,11 @@ int CScriptManager::ExecuteScript(CScript* ns)
 		}
 		else if (instr.m_instruction.textHash == instr_IF_LOWER_GLOBAL)
 		{
-			CVariantComplex* var_name = instr.GetArgument(L"var_name");
-			CVariantComplex* check_value = instr.GetArgument(L"check_value");
-			CVariantComplex* label_goto = instr.GetArgument(L"goto");
+			CVariant* var_name = instr.GetArgument(L"var_name");
+			CVariant* check_value = instr.GetArgument(L"check_value");
+			CVariant* label_goto = instr.GetArgument(L"goto");
 
-			if ((var_name->eType == CVariantComplex::K_ARGTYPE_NONE) || (check_value->eType == CVariantComplex::K_ARGTYPE_NONE) || (label_goto->eType == CVariantComplex::K_ARGTYPE_NONE))
+			if ((var_name->eType == CVariant::K_ARGTYPE_NONE) || (check_value->eType == CVariant::K_ARGTYPE_NONE) || (label_goto->eType == CVariant::K_ARGTYPE_NONE))
 			{
 				LOG(L"SCRIPT::IF_LOWER_GLOBAL - missing params!\n");
 			}
@@ -479,7 +479,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 				if (labelIdx >= 0)
 				{
 					//find global var
-					CVariantComplex* global_var = GetGlobalVar(var_name->m_strArg.text);
+					CVariant* global_var = GetGlobalVar(var_name->m_strArg.text);
 					float fVar1 = global_var->asFloat();
 					float fVar2 = check_value->asFloat();
 					if (fVar1 < fVar2)
@@ -503,8 +503,8 @@ int CScriptManager::ExecuteScript(CScript* ns)
 		//TODO: daca apar mai multe instructiuni de sunet ar trbeui procesate in procesor separat de sunet (cume cel din clevel)
 		else if(instr.m_instruction.textHash == instr_PLAY_SOUND)
 		{
-			CVariantComplex* param1 = instr.GetArgument(L"ID");
-			CVariantComplex* param2 = instr.GetArgument(L"looping");
+			CVariant* param1 = instr.GetArgument(L"ID");
+			CVariant* param2 = instr.GetArgument(L"looping");
 			//check looping
 			UINT32 sndflags = 0;
 			if (param2 && (param2->m_asBool == true))
@@ -519,8 +519,8 @@ int CScriptManager::ExecuteScript(CScript* ns)
 		}
 		else if (instr.m_instruction.textHash == instr_STOP_SOUND)
 		{
-			CVariantComplex* param1 = instr.GetArgument(L"ID");
-			CVariantComplex* param2 = instr.GetArgument(L"fadeOut");
+			CVariant* param1 = instr.GetArgument(L"ID");
+			CVariant* param2 = instr.GetArgument(L"fadeOut");
 			bool bFadeOut = false;
 			if (param2 && param2->m_asBool)
 				bFadeOut = true;
@@ -544,10 +544,10 @@ int CScriptManager::ExecuteScript(CScript* ns)
 		}
 		else if (instr.m_instruction.textHash == instr_MATH_LOCAL_VAR_MUL)
 		{
-			CVariantComplex* param1 = instr.GetArgument(L"var-name");
-			CVariantComplex* param2 = instr.GetArgument(L"factor");
+			CVariant* param1 = instr.GetArgument(L"var-name");
+			CVariant* param2 = instr.GetArgument(L"factor");
 
-			if ((param1 == null) || (param2 == null) || (param1->eType != CVariantComplex::K_ARGTYPE_STRING))
+			if ((param1 == null) || (param2 == null) || (param1->eType != CVariant::K_ARGTYPE_STRING))
 			{
 				LOG(L"SCRIPT::MATH_LOCAL_VAR_MUL - var-name or factor are empty or var-name isn't string");
 			}
@@ -555,7 +555,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 			{
 				float value = 0.0f;
 
-				CVariantComplex* localVar = GetLocalVar(ns->GetUID(), param1->m_strArg.text);
+				CVariant* localVar = GetLocalVar(ns->GetUID(), param1->m_strArg.text);
 				if (localVar != null)
 				{
 					value = localVar->asFloat();
@@ -563,7 +563,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 				
 				float mulval = param2->asFloat();
 
-				CVariantComplex* narg = new CVariantComplex();
+				CVariant* narg = new CVariant();
 				narg->Set_FLOAT(param1->m_strArg.text, value * mulval);
 				SetLocalVar(ns->GetUID(), narg);
 			}
@@ -605,7 +605,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 				bool equal = true;
 				// gets first argument				
 				auto it = instr.m_arrArgs.m_variants.begin();
-				CVariantComplex* lv = GetLocalVar(ns->GetUID(), it->second.shName.text);
+				CVariant* lv = GetLocalVar(ns->GetUID(), it->second.shName.text);
 				if(lv == nullptr) 
 				{
 					equal = false;
@@ -656,7 +656,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 				bool equal = true;
 				// gets first argument				
 				auto it = instr.m_arrArgs.m_variants.begin();
-				CVariantComplex* lv = GetGlobalVar(it->second.shName.text);
+				CVariant* lv = GetGlobalVar(it->second.shName.text);
 				if(lv == nullptr) 
 				{
 					equal = false;
@@ -744,10 +744,10 @@ void CScriptManager::PreprocessScriptInstruction(CScript* pOwnerScript, CScriptI
 		return;
 	for(auto & it : instr->m_arrArgs.m_variants)
 	{
-		if ( it.second.eType != CVariantComplex::K_ARGTYPE_STRING)
+		if ( it.second.eType != CVariant::K_ARGTYPE_STRING)
 			continue;
 
-		CVariantComplex* cvar = &it.second;
+		CVariant* cvar = &it.second;
 		//daca primul caracter este * fac replace cu variabila locala cu numele respectiv
 		if (cvar->m_strArg.text[0] == '*')
 		{
@@ -757,7 +757,7 @@ void CScriptManager::PreprocessScriptInstruction(CScript* pOwnerScript, CScriptI
 				WCHAR sLocalVarName[MAX_PATH] = { 0 };
 				memcpy(sLocalVarName, cvar->m_strArg.text + 1, varlen * sizeof(WCHAR));
 				//get local memory variant
-				CVariantComplex* cvLocal = &pOwnerScript->m_localMemory[sLocalVarName];
+				CVariant* cvLocal = &pOwnerScript->m_localMemory[sLocalVarName];
 				//copy value from that one
 				cvar->CopyValueFrom(cvLocal);
 			}

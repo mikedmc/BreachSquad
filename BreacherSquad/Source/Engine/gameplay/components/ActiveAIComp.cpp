@@ -162,8 +162,8 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 			
 			CMiscObjectRail* rail = null;
 			
-			CVariantComplex railvc = active.varAIparams[L"railPtr"];
-			if ( railvc.eType != CVariantComplex::K_ARGTYPE_VOIDP)
+			CVariant railvc = active.varAIparams[L"railPtr"];
+			if ( railvc.eType != CVariant::K_ARGTYPE_VOIDP)
 			{
 				ErrorBox( K_ERR_WARNING, L"Rail pointer not found!", active.targetID_ini );
 				break;
@@ -319,8 +319,8 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 			//viata usii (poate fi sparta de unele gloante)
 			mem.AIfvar1 = 100000.0f; //by default nu poate fi distrusa de shotgun (sau foarte greu)
 			mem.AIfvar2 = mem.AIfvar1; //viata initiala
-			CVariantComplex *cvar = &active.varAIparams[ L"f_life" ];
-			if ( cvar->eType == CVariantComplex::K_ARGTYPE_FLOAT )
+			CVariant *cvar = &active.varAIparams[ L"f_life" ];
+			if ( cvar->eType == CVariant::K_ARGTYPE_FLOAT )
 			{
 				mem.AIfvar1 = cvar->m_asFloat;
 				//salvam si energia initiala
@@ -339,8 +339,8 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 			//viata 
 			mem.AIfvar1 = 2.0f; //by default se sparge usor
 			mem.AIfvar2 = mem.AIfvar1; //viata initiala
-			CVariantComplex *cvar = &active.varAIparams[ L"f_life" ];
-			if ( cvar->eType == CVariantComplex::K_ARGTYPE_FLOAT )
+			CVariant *cvar = &active.varAIparams[ L"f_life" ];
+			if ( cvar->eType == CVariant::K_ARGTYPE_FLOAT )
 			{
 				mem.AIfvar1 = cvar->m_asFloat;
 				//salvam si energia initiala
@@ -354,7 +354,7 @@ void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 			int genType = __Particles().GetPartEmitterTypeByNameHash( active.varAIparams[ L"s_Type" ].m_strArg.textHash );
 			int partLayer = __Particles().GetParticleLayerByName( active.varAIparams[ L"s_Layer" ].m_strArg.textHash );
 			//ca sa nu intre de mai multe ori si sa aloce de mai multe ori. Daca se intampla trebuie dezalocat mai intai
-			//_ASSERT( active.varAIparams[ L"emitterPtr" ]->m_type == CVariantComplex::K_ARGTYPE_NONE );
+			//_ASSERT( active.varAIparams[ L"emitterPtr" ]->m_type == CVariant::K_ARGTYPE_NONE );
 
 			CParticleEmitter * pe = __Particles().AddPartEmitter( genType, &active.bbox, partLayer );
 			//salveaza aici pointer la ParticleEmitter-ul alocat si il controlez din update sa ii dau stop si play cand iese din ecran

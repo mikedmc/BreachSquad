@@ -47,7 +47,7 @@ void CVariantMap::Deserialize(CVariantMap& vc, FILE *f)
 
 	for ( int ii = 0; ii < nvars; ii++ )
 	{
-		CVariantComplex v;
+		CVariant v;
 		v.Deserialize(f);
 
 		vc.AddVariant(v);
@@ -63,7 +63,7 @@ void CVariantMap::Deserialize(FILE *f)
 	int nvars = 0;
 	OS_fread(&nvars, sizeof(nvars), 1, f);
 
-	CVariantComplex temp;
+	CVariant temp;
 	for ( int ii = 0; ii < nvars; ii++ )
 	{
 		temp.Deserialize(f);
@@ -92,12 +92,12 @@ void CVariantMap::Clear()
 	m_variants.clear();
 }
 
-void CVariantMap::AddVariant(CVariantComplex & variant)
+void CVariantMap::AddVariant(CVariant & variant)
 {
 	m_variants[variant.shName.text] = variant;
 }
 
-void CVariantMap::AddVariant(CVariantComplex * variant)
+void CVariantMap::AddVariant(CVariant * variant)
 {
 	if ( variant == nullptr )
 		return;

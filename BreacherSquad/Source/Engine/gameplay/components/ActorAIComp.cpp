@@ -456,7 +456,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			case AI_BEHAVIOR_DEAD:
 			{
 				//get inherited death command from other states
-				CVariantComplex cvdeath = act.varAIparams[ L"nDeathCommand" ];
+				CVariant cvdeath = act.varAIparams[ L"nDeathCommand" ];
 
 				if ( cvdeath.IsSet() )
 				{
@@ -475,7 +475,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					} */
 				}
 				//cauta params particulari de AI setati din Hit Actor
-				CVariantComplex cvc = act.varAIparams[ L"nExplode" ];
+				CVariant cvc = act.varAIparams[ L"nExplode" ];
 				if ( cvc.IsSet() )
 				{
 					//comanda splat on explode daca e clasa care trebuie
@@ -579,8 +579,8 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				//execute script on death if no other important command issued
 				if ( m_AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_RUNSCRIPT )
 				{
-					CVariantComplex cvc2 = act.varAIparams[ L"sDeathScript" ];
-					if ( cvc2.eType == CVariantComplex::K_ARGTYPE_STRING )
+					CVariant cvc2 = act.varAIparams[ L"sDeathScript" ];
+					if ( cvc2.eType == CVariant::K_ARGTYPE_STRING )
 					{
 						act.StartScript( cvc2.m_strArg.text );
 						//clear script and death command
@@ -800,8 +800,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		break;
 		case AI_BEHAVIOR_SET_STATE:
 		{
-			CVariantComplex* vc = &pNewBehavior->m_vcolParams[ L"sState" ];
-			if ( vc->eType != CVariantComplex::K_ARGTYPE_STRING )
+			CVariant* vc = &pNewBehavior->m_vcolParams[ L"sState" ];
+			if ( vc->eType != CVariant::K_ARGTYPE_STRING )
 			{
 				ErrorBox( K_ERR_WARNING, L"AI_BEHAVIOR_SET_STATE: sState arg not set or wrong type!" );
 				break;
@@ -882,8 +882,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		break;
 		case AI_BEHAVIOR_SET_CAPS:
 		{
-			CVariantComplex* cvNotATarget = &pNewBehavior->m_vcolParams[ L"nNotATarget" ];
-			if ( cvNotATarget->eType != CVariantComplex::K_ARGTYPE_NONE )
+			CVariant* cvNotATarget = &pNewBehavior->m_vcolParams[ L"nNotATarget" ];
+			if ( cvNotATarget->eType != CVariant::K_ARGTYPE_NONE )
 			{
 				bool bVal = (cvNotATarget->m_asINT32 != 0);
 				if ( bVal )
@@ -898,9 +898,9 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		case AI_BEHAVIOR_BARREL_EXPLODING:
 		{
 			//burns with flame?
-			CVariantComplex* cve = &pNewBehavior->m_vcolParams[ L"nCanBurn" ];
+			CVariant* cve = &pNewBehavior->m_vcolParams[ L"nCanBurn" ];
 			AIvarBool1 = true;
-			if ( (cve->eType != CVariantComplex::K_ARGTYPE_NONE) && (cve->asInt32() == 0) )
+			if ( (cve->eType != CVariant::K_ARGTYPE_NONE) && (cve->asInt32() == 0) )
 				AIvarBool1 = false;
 
 			AIsubState = 0;
@@ -972,8 +972,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			CLAMP( fDuration, 0.0f, 60.0f );
 
 			float fAlpha = 0.0f;
-			CVariantComplex* cvc = &pNewBehavior->m_vcolParams[ L"fAlpha" ];
-			if ( cvc->eType == CVariantComplex::K_ARGTYPE_FLOAT )
+			CVariant* cvc = &pNewBehavior->m_vcolParams[ L"fAlpha" ];
+			if ( cvc->eType == CVariant::K_ARGTYPE_FLOAT )
 				fAlpha = cvc->m_asFloat;
 			CLAMP( fAlpha, 0.0f, 1.0f );
 
@@ -986,8 +986,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		{
 			/*
 			//salvez identificatorul animatiei
-			CVariantComplex* cvc = pNewBehavior->m_vcolParams[L"sAnimIdentifier");
-			if (cvc->m_type == CVariantComplex::K_ARGTYPE_STRING)
+			CVariant* cvc = pNewBehavior->m_vcolParams[L"sAnimIdentifier");
+			if (cvc->m_type == CVariant::K_ARGTYPE_STRING)
 			{
 				actor->AIvar1 = GetListIndexByName(cvc->m_strArg.text, EActorAnimNames, K_LVL_ACT_ANIMS_CNT);
 			}
@@ -998,7 +998,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 
 			//save dest alpha param (defaults on 1.0)
 			actor->AIfvar1 = 1.0f;
-			if (pNewBehavior->m_vcolParams[L"fDestAlpha")->m_type != CVariantComplex::K_ARGTYPE_NONE)
+			if (pNewBehavior->m_vcolParams[L"fDestAlpha")->m_type != CVariant::K_ARGTYPE_NONE)
 			{
 				actor->AIfvar1 = pNewBehavior->m_vcolParams[L"fDestAlpha")->asFloat();
 			}
@@ -1010,7 +1010,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		case AI_BEHAVIOR_RUN_SCRIPT:
 		{
 			bool bWaitScriptEnd = false;
-			CVariantComplex* cve = &pNewBehavior->m_vcolParams[ L"bWaitScriptEnd" ];
+			CVariant* cve = &pNewBehavior->m_vcolParams[ L"bWaitScriptEnd" ];
 			if ( cve->IsSet() )
 				bWaitScriptEnd = cve->m_asBool;
 			AIvar1 = 0;
@@ -1018,12 +1018,12 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				AIvar1 = 1;
 
 			bool bTouchTarget = false;
-			CVariantComplex* cvb = &pNewBehavior->m_vcolParams[ L"bTouchTarget" ];
+			CVariant* cvb = &pNewBehavior->m_vcolParams[ L"bTouchTarget" ];
 			if ( cvb->IsSet() )
 				bTouchTarget = cvb->m_asBool;
 
 			UINT32 nScriptOverride = 0;
-			CVariantComplex* cvc = &pNewBehavior->m_vcolParams[ L"sScriptOverride" ];
+			CVariant* cvc = &pNewBehavior->m_vcolParams[ L"sScriptOverride" ];
 			if ( cvc->IsSet() )
 			{
 				nScriptOverride = cvc->m_strArg.textHash;
@@ -1034,8 +1034,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		break;
 		case AI_BEHAVIOR_PLAY_VERSE:
 		{
-			CVariantComplex* cvc = &pNewBehavior->m_vcolParams[ L"sVerseName" ];
-			if ( cvc->eType == CVariantComplex::K_ARGTYPE_STRING )
+			CVariant* cvc = &pNewBehavior->m_vcolParams[ L"sVerseName" ];
+			if ( cvc->eType == CVariant::K_ARGTYPE_STRING )
 			{
 				EActorSoundVerse eVerse = (EActorSoundVerse)GetListIndexByNameHash( cvc->m_strArg.getHash(), EActorSoundVerseNames, K_LVL_ACT_VERSES_COUNT );
 				if ( eVerse != K_LVL_ACT_VERSE_EMPTY )
@@ -1058,12 +1058,12 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		case AI_BEHAVIOR_GENERATE_EFFECT:
 		{
 			float fSize = 1.0f;
-			CVariantComplex* cvb = &pNewBehavior->m_vcolParams[ L"fSize" ];
+			CVariant* cvb = &pNewBehavior->m_vcolParams[ L"fSize" ];
 			if ( cvb->IsSet() )
 				fSize = cvb->m_asFloat;
 
-			CVariantComplex* cvc = &pNewBehavior->m_vcolParams[ L"sEffectType" ];
-			if ( cvc->eType == CVariantComplex::K_ARGTYPE_STRING )
+			CVariant* cvc = &pNewBehavior->m_vcolParams[ L"sEffectType" ];
+			if ( cvc->eType == CVariant::K_ARGTYPE_STRING )
 			{
 				level.GenerateEffect( cvc->m_strArg, actor.GetPosHeart(), fSize );
 			}
@@ -1138,8 +1138,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			actor.fLife = 0.0f; //kill it
 			//trateaza death commands din script
 			EActorDeathCommand dcmd = K_LVL_ACT_DEATHCMD_NONE;
-			CVariantComplex* cvc = &pNewBehavior->m_vcolParams[ L"sDeathCommand" ];
-			if ( cvc->eType == CVariantComplex::K_ARGTYPE_STRING )
+			CVariant* cvc = &pNewBehavior->m_vcolParams[ L"sDeathCommand" ];
+			if ( cvc->eType == CVariant::K_ARGTYPE_STRING )
 			{
 				int ndcmd = GetListIndexByName( cvc->m_strArg.text, EActorDeathCommandNames, K_LVL_ACT_DEATHCMD_CNT );
 				//daca avem comanda de death o trimitem mai departe
@@ -1170,8 +1170,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			AItimer1 = 0.0f;
 			if ( actor._template.actorClass != K_LVL_ACT_CLASS_PLAYER )
 			{
-				CVariantComplex* cvt = &pNewBehavior->m_vcolParams[ L"fSplatTimer" ];
-				if ( cvt->eType == CVariantComplex::K_ARGTYPE_FLOAT )
+				CVariant* cvt = &pNewBehavior->m_vcolParams[ L"fSplatTimer" ];
+				if ( cvt->eType == CVariant::K_ARGTYPE_FLOAT )
 					AItimer1 = cvt->asFloat();
 			}
 
@@ -1183,8 +1183,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			actor.Weapons()->StopReloading();
 			//trateaza death commands din script
 			EActorDeathCommand dcmd = K_LVL_ACT_DEATHCMD_NONE;
-			CVariantComplex* cvc = &pNewBehavior->m_vcolParams[ L"sDeathCommand" ];
-			if ( cvc->eType == CVariantComplex::K_ARGTYPE_STRING )
+			CVariant* cvc = &pNewBehavior->m_vcolParams[ L"sDeathCommand" ];
+			if ( cvc->eType == CVariant::K_ARGTYPE_STRING )
 			{
 				dcmd = (EActorDeathCommand)GetListIndexByName( cvc->m_strArg.text, EActorDeathCommandNames, K_LVL_ACT_DEATHCMD_CNT );
 				//daca avem comanda de death o trimitem mai departe
@@ -1192,8 +1192,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 					actor.varAIparams.SetVarINT32( L"nDeathCommand", (int)dcmd );
 			}
 			//trateaza death script
-			CVariantComplex* cvs = &pNewBehavior->m_vcolParams[ L"sDeathScript" ];
-			if ( cvc->eType == CVariantComplex::K_ARGTYPE_STRING )
+			CVariant* cvs = &pNewBehavior->m_vcolParams[ L"sDeathScript" ];
+			if ( cvc->eType == CVariant::K_ARGTYPE_STRING )
 			{
 				actor.varAIparams.AddVariant( cvs );
 			}

@@ -382,6 +382,7 @@
     <ClInclude Include="Source\Engine\utils\StringHash.h" />
     <ClInclude Include="Source\Engine\utils\StringHashA.h" />
     <ClInclude Include="Source\Engine\utils\UTMath.h" />
+    <ClInclude Include="Source\Engine\utils\Variant.h" />
     <ClInclude Include="Source\Engine\utils\VariantMap.h" />
     <ClInclude Include="Source\Engine\utils\VecProj.h" />
     <ClInclude Include="Source\LevelEd\LevelEditor.h" />
@@ -817,6 +818,7 @@
     <ClCompile Include="Source\Engine\utils\StringHash.cpp" />
     <ClCompile Include="Source\Engine\utils\StringHashA.cpp" />
     <ClCompile Include="Source\Engine\utils\UTMath.cpp" />
+    <ClCompile Include="Source\Engine\utils\Variant.cpp" />
     <ClCompile Include="Source\Engine\utils\VariantMap.cpp" />
     <ClCompile Include="Source\Engine\utils\VecProj.cpp" />
     <ClCompile Include="Source\LevelEd\LevelEditor.cpp" />

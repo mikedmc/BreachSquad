@@ -206,7 +206,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 	for (int ii = 0; ii < ctrlTemplates.Count(); ii++)
 	{
 		CVariantMap* ctrl = ctrlTemplates.GetAt(ii);
-		CVariantComplex ctrlType = ctrl->m_variants[L"Type"];
+		CVariant ctrlType = ctrl->m_variants[L"Type"];
 		if (id == ctrlType.m_strArg.getHash())
 		{
 			ctrlIdx = ii;
@@ -235,9 +235,9 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 	bool bNeedsUpdate = false;
 	for(auto & pVar : ctrlTemplate->m_variants)
 	{
-		CVariantComplex* pVarName = &pVar.second;
+		CVariant* pVarName = &pVar.second;
 		// actual value from control
-		CVariantComplex* pValue = &ctrl->paramsDict[pVarName->shName.text];
+		CVariant* pValue = &ctrl->paramsDict[pVarName->shName.text];
 		char sVarName[MAX_PATH];
 		wcstombs(sVarName, pVarName->shName.text, MAX_PATH);
 		// hardcoded controls properties
@@ -245,7 +245,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		{
 			char str0[MAX_PATH] = { 0 };
 			// ID set? show it!
-			if (pValue->eType != CVariantComplex::K_ARGTYPE_NONE)
+			if (pValue->eType != CVariant::K_ARGTYPE_NONE)
 			{
 				pValue->asString(str0, MAX_PATH);
 			}
@@ -253,7 +253,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
 			if (ImGui::IsItemEdited())
 			{
-				if (pValue->eType == CVariantComplex::K_ARGTYPE_NONE)
+				if (pValue->eType == CVariant::K_ARGTYPE_NONE)
 				{
 					ctrl->paramsDict.SetVarString(L"ID", L"");
 					// set pointer on new var
@@ -379,7 +379,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		{
 			// main string is kept as an integer (for speed) so we convert it to string to use it
 			char str0[128] = " ";
-			if (pValue->eType == CVariantComplex::K_ARGTYPE_INT32)
+			if (pValue->eType == CVariant::K_ARGTYPE_INT32)
 			{
 				wcstombs(str0, __Texts().strings[pValue->m_asINT32]->shStringName.text, 128);
 			}
@@ -395,7 +395,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			// generic control properties
 			switch (pValue->eType)
 			{
-				case CVariantComplex::K_ARGTYPE_HEXCOLOR:
+				case CVariant::K_ARGTYPE_HEXCOLOR:
 				{
 					ImVec4 color;
 					DW_COLOR_GETARGB(pValue->m_asUINT32, color.w, color.x, color.y, color.z);
@@ -413,7 +413,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 					}
 				}
 				break;
-				case CVariantComplex::K_ARGTYPE_BOOL:
+				case CVariant::K_ARGTYPE_BOOL:
 				{
 					ImGui::Checkbox(sVarName, &pValue->m_asBool);
 					if (ImGui::IsItemEdited())
@@ -422,7 +422,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 					}
 				}
 				break;
-				case CVariantComplex::K_ARGTYPE_INT32:
+				case CVariant::K_ARGTYPE_INT32:
 				{
 					ImGui::InputInt(sVarName, &pValue->m_asINT32);
 					if (ImGui::IsItemEdited())
@@ -431,7 +431,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 					}
 				}
 				break;
-				case CVariantComplex::K_ARGTYPE_FLOAT:
+				case CVariant::K_ARGTYPE_FLOAT:
 				{
 					ImGui::InputFloat(sVarName, &pValue->m_asFloat);
 					if (ImGui::IsItemEdited())
@@ -441,7 +441,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 				}
 				break;
 				// string and all other types get treated as string
-				case CVariantComplex::K_ARGTYPE_STRING:
+				case CVariant::K_ARGTYPE_STRING:
 				default:
 				{
 					char str0[MAX_PATH];
@@ -521,7 +521,7 @@ void CControlsEditor::AddControl(CVariantMap* vcol)
 	nctrl->Initialize();
 	for(auto & elem : vcol->m_variants)
 	{
-		CVariantComplex* var = &elem.second;
+		CVariant* var = &elem.second;
 		WCHAR propertyName[MAX_PATH];
 		WCHAR propertyValue[MAX_PATH];
 
@@ -651,7 +651,7 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 					for(auto & it : lvcol->m_variants)
 					{
 						pugi::xml_attribute ctrlAttribute;
-						CVariantComplex* var = &it.second;
+						CVariant* var = &it.second;
 						if (ctrlCol->m_variants[var->shName.text].IsSet())
 						{
 							WCHAR propertyName[MAX_PATH];

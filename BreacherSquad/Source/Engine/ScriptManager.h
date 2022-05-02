@@ -16,12 +16,12 @@ public:
 		m_arrArgs.Clear();
 	}
 
-	FORCEINLINE CVariantComplex* GetArgument(WCHAR* strArgName)
+	FORCEINLINE CVariant* GetArgument(WCHAR* strArgName)
 	{
 		return &m_arrArgs[strArgName];
 	}
 	/*
-	FORCEINLINE CVariantComplex* GetArgument(UINT32 dwArgNameHash)
+	FORCEINLINE CVariant* GetArgument(UINT32 dwArgNameHash)
 	{
 		for ( auto & element : m_arrArgs.m_variants )
 		{
@@ -168,16 +168,16 @@ public:
 	CScript* GetActiveScript(UINT32 scriptUID);
 	//memory functions
 	void ClearGlobalMemory();
-	void SetGlobalVar(CVariantComplex* varValue);
+	void SetGlobalVar(CVariant* varValue);
 	void SetGlobalVar_INT32(WCHAR * varName, INT32 varValue);
 
 	void SetGlobalVars( CVariantMap & inputVariants );
 	void SetLocalVars( UINT32 scriptUID, CVariantMap & inputVariants );
 	
-	void SetLocalVar(UINT32 scriptUID, CVariantComplex* varValue);
+	void SetLocalVar(UINT32 scriptUID, CVariant* varValue);
 
-	CVariantComplex* GetGlobalVar(WCHAR* varName);
-	CVariantComplex* GetLocalVar(UINT32 scriptUID, WCHAR* varName);
+	CVariant* GetGlobalVar(WCHAR* varName);
+	CVariant* GetLocalVar(UINT32 scriptUID, WCHAR* varName);
 
 	/* Gets the total number of running scripts */
 	int GetRunningScriptsCount();

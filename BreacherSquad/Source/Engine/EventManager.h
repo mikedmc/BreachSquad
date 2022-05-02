@@ -4,14 +4,14 @@
 
 class CEvent {
 public:
-	//static CVariantComplex	m_ArgZero; //argument intors cand nu gaseste argumentul cautat dupa nume
+	//static CVariant	m_ArgZero; //argument intors cand nu gaseste argumentul cautat dupa nume
 
 	CStringHash		m_eventType;
 	CStringHash		m_eventCommand;
 	float			m_fEventTime;  //time of execution (mai mic decat fTimeline pt activare imediata sau mai mare pt activare in viitor)
 	//event arguments
 	int				m_argsCnt; //nr parametri event
-	CVariantComplex m_args[K_MAX_EVENT_ARGS]; //daca merge incet cu VariantComplex revin la CVariant simplu
+	CVariant m_args[K_MAX_EVENT_ARGS]; //daca merge incet cu VariantComplex revin la CVariant simplu
 	//create event
 	CEvent(const WCHAR* strEventType, const WCHAR* strEventCommand, double fEventTime = 0.0f);
 	CEvent(const CStringHash hashEventType, const CStringHash hashEventCommand, double fEventTime = 0.0f);
@@ -31,7 +31,7 @@ public:
 	int AddNamedArgVoidP(const WCHAR* argName, void* val);
 	int AddNamedArgString(const WCHAR* argName, const WCHAR* strVal);
 
-	CVariantComplex* GetArgumentByName(const WCHAR* argName);
+	CVariant* GetArgumentByName(const WCHAR* argName);
 };
 
 

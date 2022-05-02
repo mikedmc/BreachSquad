@@ -3,13 +3,14 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include "Variant.h"
 
 class CVariantMap
 {
 private:
-	CVariantComplex				defaultVariant;
+	CVariant				defaultVariant;
 public:
-	std::map<std::wstring, CVariantComplex>		m_variants;
+	std::map<std::wstring, CVariant>		m_variants;
 	
 	CVariantMap(CVariantMap&);
 	CVariantMap();
@@ -18,12 +19,12 @@ public:
 	inline int					GetSize() { return m_variants.size(); }
 	void						AppendMap(const CVariantMap& sourceMap);
 
-	inline CVariantComplex& operator[](const std::wstring key) {
+	inline CVariant& operator[](const std::wstring key) {
 		return m_variants[key];
 	}
 
-	void AddVariant(CVariantComplex & variant);
-	void AddVariant(CVariantComplex * variant);
+	void AddVariant(CVariant & variant);
+	void AddVariant(CVariant * variant);
 
 	void SetVarUINT32(const std::wstring varName, UINT32 val);
 	void SetVarHEXCOLOR(const std::wstring varName, UINT32 val);

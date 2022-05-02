@@ -1,7 +1,7 @@
 #include "dxstdafx.h"
 
 ///--- EVENT ---
-static CVariantComplex m_ArgZero;
+static CVariant m_ArgZero;
 
 CEvent::CEvent(const WCHAR *strEventType, const WCHAR *strEventCommand, double fEventTime)
 {
@@ -26,7 +26,7 @@ int CEvent::AddArgUINT32(UINT32 val)
 {
 	assert(m_argsCnt < K_MAX_EVENT_ARGS);
 
-	m_args[m_argsCnt].eType = CVariantComplex::K_ARGTYPE_UINT32;
+	m_args[m_argsCnt].eType = CVariant::K_ARGTYPE_UINT32;
 	m_args[m_argsCnt].m_asUINT32 = val;
 	m_argsCnt++;
 	return m_argsCnt;
@@ -36,7 +36,7 @@ int CEvent::AddArgINT32(INT32 val)
 {
 	assert(m_argsCnt < K_MAX_EVENT_ARGS);
 
-	m_args[m_argsCnt].eType = CVariantComplex::K_ARGTYPE_INT32;
+	m_args[m_argsCnt].eType = CVariant::K_ARGTYPE_INT32;
 	m_args[m_argsCnt].m_asINT32 = val;
 	m_argsCnt++;
 	return m_argsCnt;
@@ -46,7 +46,7 @@ int CEvent::AddArgFloat(float val)
 {
 	assert(m_argsCnt < K_MAX_EVENT_ARGS);
 
-	m_args[m_argsCnt].eType = CVariantComplex::K_ARGTYPE_FLOAT;
+	m_args[m_argsCnt].eType = CVariant::K_ARGTYPE_FLOAT;
 	m_args[m_argsCnt].m_asFloat = val;
 	m_argsCnt++;
 	return m_argsCnt;
@@ -56,7 +56,7 @@ int CEvent::AddArgBool(bool val)
 {
 	assert(m_argsCnt < K_MAX_EVENT_ARGS);
 
-	m_args[m_argsCnt].eType = CVariantComplex::K_ARGTYPE_BOOL;
+	m_args[m_argsCnt].eType = CVariant::K_ARGTYPE_BOOL;
 	m_args[m_argsCnt].m_asBool = val;
 	m_argsCnt++;
 	return m_argsCnt;
@@ -66,7 +66,7 @@ int CEvent::AddArgVoidP(void* val)
 {
 	assert(m_argsCnt < K_MAX_EVENT_ARGS);
 
-	m_args[m_argsCnt].eType = CVariantComplex::K_ARGTYPE_VOIDP;
+	m_args[m_argsCnt].eType = CVariant::K_ARGTYPE_VOIDP;
 	m_args[m_argsCnt].m_asVoid = val;
 	m_argsCnt++;
 	return m_argsCnt;
@@ -76,7 +76,7 @@ int CEvent::AddArgString(const WCHAR* strVal)
 {
 	assert(m_argsCnt < K_MAX_EVENT_ARGS);
 
-	m_args[m_argsCnt].eType = CVariantComplex::K_ARGTYPE_STRING;
+	m_args[m_argsCnt].eType = CVariant::K_ARGTYPE_STRING;
 	m_args[m_argsCnt].m_asUINT32 = 0;
 	m_args[m_argsCnt].m_strArg.Init(strVal);
 	m_argsCnt++;
@@ -89,7 +89,7 @@ int CEvent::AddArgString(const WCHAR* strVal)
 int CEvent::AddNamedArgUINT32(const WCHAR* argName, UINT32 val)
 {
 	m_args[m_argsCnt].shName.Init(argName);
-	m_args[m_argsCnt].eType = CVariantComplex::K_ARGTYPE_UINT32;
+	m_args[m_argsCnt].eType = CVariant::K_ARGTYPE_UINT32;
 	m_args[m_argsCnt].m_asUINT32 = val;
 	m_argsCnt++;
 	return m_argsCnt;
@@ -100,7 +100,7 @@ int CEvent::AddNamedArgINT32(const WCHAR* argName, INT32 val)
 	assert(m_argsCnt < K_MAX_EVENT_ARGS);
 
 	m_args[m_argsCnt].shName.Init(argName);
-	m_args[m_argsCnt].eType = CVariantComplex::K_ARGTYPE_INT32;
+	m_args[m_argsCnt].eType = CVariant::K_ARGTYPE_INT32;
 	m_args[m_argsCnt].m_asINT32 = val;
 	m_argsCnt++;
 	return m_argsCnt;
@@ -111,7 +111,7 @@ int CEvent::AddNamedArgFloat(const WCHAR* argName, float val)
 	assert(m_argsCnt < K_MAX_EVENT_ARGS);
 
 	m_args[m_argsCnt].shName.Init(argName);
-	m_args[m_argsCnt].eType = CVariantComplex::K_ARGTYPE_FLOAT;
+	m_args[m_argsCnt].eType = CVariant::K_ARGTYPE_FLOAT;
 	m_args[m_argsCnt].m_asFloat = val;
 	m_argsCnt++;
 	return m_argsCnt;
@@ -122,7 +122,7 @@ int CEvent::AddNamedArgBool(const WCHAR* argName, UINT32 val)
 	assert(m_argsCnt < K_MAX_EVENT_ARGS);
 
 	m_args[m_argsCnt].shName.Init(argName);
-	m_args[m_argsCnt].eType = CVariantComplex::K_ARGTYPE_BOOL;
+	m_args[m_argsCnt].eType = CVariant::K_ARGTYPE_BOOL;
 	m_args[m_argsCnt].m_asBool = (val != 0);
 	m_argsCnt++;
 	return m_argsCnt;
@@ -133,7 +133,7 @@ int CEvent::AddNamedArgVoidP(const WCHAR* argName, void* val)
 	assert(m_argsCnt < K_MAX_EVENT_ARGS);
 
 	m_args[m_argsCnt].shName.Init(argName);
-	m_args[m_argsCnt].eType = CVariantComplex::K_ARGTYPE_VOIDP;
+	m_args[m_argsCnt].eType = CVariant::K_ARGTYPE_VOIDP;
 	m_args[m_argsCnt].m_asVoid = val;
 	m_argsCnt++;
 	return m_argsCnt;
@@ -144,7 +144,7 @@ int CEvent::AddNamedArgString(const WCHAR* argName, const WCHAR* strVal)
 	assert(m_argsCnt < K_MAX_EVENT_ARGS);
 
 	m_args[m_argsCnt].shName.Init(argName);
-	m_args[m_argsCnt].eType = CVariantComplex::K_ARGTYPE_STRING;
+	m_args[m_argsCnt].eType = CVariant::K_ARGTYPE_STRING;
 	m_args[m_argsCnt].m_asUINT32 = 0;
 	m_args[m_argsCnt].m_strArg.Init(strVal);
 	m_argsCnt++;
@@ -155,12 +155,12 @@ int CEvent::AddNamedArgString(const WCHAR* argName, const WCHAR* strVal)
 // get argument
 // daca nu gaseste argumentul intoarce unul default setat pe 0
 //
-CVariantComplex* CEvent::GetArgumentByName(const WCHAR* argName)
+CVariant* CEvent::GetArgumentByName(const WCHAR* argName)
 {
 	UINT32 argNameHash = FastHash(argName, wcslen(argName));
 	register int kk = 0;
 	//optimizare de viteza
-	CVariantComplex *pArg = &m_args[0];
+	CVariant *pArg = &m_args[0];
 	while(kk < m_argsCnt)
 	{
 		if(pArg->shName.textHash == argNameHash)

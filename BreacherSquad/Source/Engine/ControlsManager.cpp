@@ -317,13 +317,13 @@ void CControl::Initialize()
 			//save number of options now
 			int stringIdx = -1;
 			int fontIdx = -1;
-			CVariantComplex * var = &paramsDict[ L"stringID" ];
-			if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
+			CVariant * var = &paramsDict[ L"stringID" ];
+			if ( var->eType != CVariant::K_ARGTYPE_NONE )
 			{
 				stringIdx = var->m_asINT32;
 			}
 			var = &paramsDict[ L"fontID" ];
-			if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
+			if ( var->eType != CVariant::K_ARGTYPE_NONE )
 			{
 				fontIdx = var->m_asINT32;
 			}
@@ -350,8 +350,8 @@ void CControl::Initialize()
 			//save number of options now
 			int stringIdx = -1;
 			int fontIdx = -1;
-			CVariantComplex * var = &paramsDict[ L"stringID" ];
-			if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
+			CVariant * var = &paramsDict[ L"stringID" ];
+			if ( var->eType != CVariant::K_ARGTYPE_NONE )
 			{
 				stringIdx = var->m_asINT32;
 			}
@@ -401,8 +401,8 @@ void CControl::Update( float dTime, float fTimeline )
 	BBox = bbox;
 	BBox_inflated = bbox;
 
-	CVariantComplex* varInflate = &paramsDict[ L"inflate" ];
-	if ( varInflate->eType != CVariantComplex::K_ARGTYPE_NONE )
+	CVariant* varInflate = &paramsDict[ L"inflate" ];
+	if ( varInflate->eType != CVariant::K_ARGTYPE_NONE )
 	{
 		inflate = varInflate->m_asINT32;
 		if ( inflate != 0 )
@@ -414,18 +414,18 @@ void CControl::Update( float dTime, float fTimeline )
 		}
 	}
 
-	CVariantComplex* var = &paramsDict[ L"animID" ];
-	if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
+	CVariant* var = &paramsDict[ L"animID" ];
+	if ( var->eType != CVariant::K_ARGTYPE_NONE )
 	{
 		animIdx = var->m_asINT32;
 	}
 	var = &paramsDict[ L"fontID" ];
-	if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
+	if ( var->eType != CVariant::K_ARGTYPE_NONE )
 	{
 		fontIdx = var->m_asINT32;
 	}
 	var = &paramsDict[ L"stringID" ];
-	if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
+	if ( var->eType != CVariant::K_ARGTYPE_NONE )
 	{
 		stringIdx = var->m_asINT32;
 	}
@@ -452,8 +452,8 @@ void CControl::Update( float dTime, float fTimeline )
 
 			int nSelectedIdx = paramsDict[ L"nSelectedIdx" ].m_asINT32;
 			int nItemsCnt = 0;
-			CVariantComplex* vc = &paramsDict[ L"stringID_list" ];
-			if ( (vc->eType == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()) )
+			CVariant* vc = &paramsDict[ L"stringID_list" ];
+			if ( (vc->eType == CVariant::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()) )
 			{
 				int nStringIdx_list = __Texts().GetStrIdx( vc->m_strArg.textHash );
 				nItemsCnt = __Texts().GetSubstringsCount( nStringIdx_list, L'\n' );
@@ -506,8 +506,8 @@ void CControl::Update( float dTime, float fTimeline )
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = &paramsDict[ L"ID" ];
-				if ( lvar->eType != CVariantComplex::K_ARGTYPE_NONE )
+				CVariant* lvar = &paramsDict[ L"ID" ];
+				if ( lvar->eType != CVariant::K_ARGTYPE_NONE )
 					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
 					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
@@ -599,8 +599,8 @@ void CControl::Update( float dTime, float fTimeline )
 				//send message selection changed
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = &paramsDict[ L"ID" ];
-				if ( lvar->eType != CVariantComplex::K_ARGTYPE_NONE )
+				CVariant* lvar = &paramsDict[ L"ID" ];
+				if ( lvar->eType != CVariant::K_ARGTYPE_NONE )
 					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
 					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
@@ -721,8 +721,8 @@ void CControl::Update( float dTime, float fTimeline )
 			{
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_PAGE_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = &paramsDict[ L"ID" ];
-				if ( lvar->eType != CVariantComplex::K_ARGTYPE_NONE )
+				CVariant* lvar = &paramsDict[ L"ID" ];
+				if ( lvar->eType != CVariant::K_ARGTYPE_NONE )
 					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
 					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
@@ -741,8 +741,8 @@ void CControl::Update( float dTime, float fTimeline )
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = &paramsDict[ L"ID" ];
-				if ( lvar->eType != CVariantComplex::K_ARGTYPE_NONE )
+				CVariant* lvar = &paramsDict[ L"ID" ];
+				if ( lvar->eType != CVariant::K_ARGTYPE_NONE )
 					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				else
 					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
@@ -986,8 +986,8 @@ void CControl::Update( float dTime, float fTimeline )
 			{
 				WCHAR varname[ MAX_PATH ];
 				swprintf_s( varname, MAX_PATH, L"stringID%d", ll );
-				CVariantComplex* vc = &paramsDict[ varname ];
-				if ( ( vc->eType == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+				CVariant* vc = &paramsDict[ varname ];
+				if ( ( vc->eType == CVariant::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 				{
 					if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 					{
@@ -1039,8 +1039,8 @@ void CControl::Update( float dTime, float fTimeline )
 				{
 					CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
 					nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-					CVariantComplex* lvar = &paramsDict[ L"ID" ];
-					if ( lvar->eType != CVariantComplex::K_ARGTYPE_NONE )
+					CVariant* lvar = &paramsDict[ L"ID" ];
+					if ( lvar->eType != CVariant::K_ARGTYPE_NONE )
 						nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 					else
 						nevent->AddNamedArgUINT32( L"ctrlID", 0 );
@@ -1049,8 +1049,8 @@ void CControl::Update( float dTime, float fTimeline )
 					// read selected string idx
 					WCHAR varname[ MAX_PATH ];
 					swprintf_s( varname, MAX_PATH, L"stringID%d", selectedIdx );
-					CVariantComplex* vc = &paramsDict[ varname ];
-					if ( ( vc->eType == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+					CVariant* vc = &paramsDict[ varname ];
+					if ( ( vc->eType == CVariant::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 					{
 						nStringIdx = __Texts().GetStrIdx( vc->m_strArg.textHash );
 					}
@@ -1122,8 +1122,8 @@ void CControl::Update( float dTime, float fTimeline )
 
 					CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK );
 					nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-					CVariantComplex* lvar = &paramsDict[ L"ID" ];
-					if ( lvar->eType != CVariantComplex::K_ARGTYPE_NONE )
+					CVariant* lvar = &paramsDict[ L"ID" ];
+					if ( lvar->eType != CVariant::K_ARGTYPE_NONE )
 						nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 					else
 						nevent->AddNamedArgUINT32( L"ctrlID", 0 );
@@ -1203,7 +1203,7 @@ void CControl::Update( float dTime, float fTimeline )
 				bChecked = !bChecked;
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CHECK_CHANGED );
-				CVariantComplex* lvar = &paramsDict[ L"ID" ];
+				CVariant* lvar = &paramsDict[ L"ID" ];
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
 				nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				nevent->AddNamedArgBool( L"bChecked", bChecked );
@@ -1300,7 +1300,7 @@ void CControl::Update( float dTime, float fTimeline )
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SLIDER_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = &paramsDict[ L"ID" ];
+				CVariant* lvar = &paramsDict[ L"ID" ];
 				nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				nevent->AddNamedArgFloat( L"fSlidePercent", slidePercent );
 				UTGetEventManager().QueueEvent( nevent );
@@ -1368,7 +1368,7 @@ void CControl::Update( float dTime, float fTimeline )
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_PAGE_CHANGED );
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				CVariantComplex* lvar = &paramsDict[ L"ID" ];
+				CVariant* lvar = &paramsDict[ L"ID" ];
 				nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				nevent->AddNamedArgINT32( L"nPageIdx", nNewPage );
 				nevent->AddNamedArgINT32( L"nOldIdx", nPage );
@@ -1424,7 +1424,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 	BBox = bbox;
 	BBox_inflated = bbox;
 
-	CVariantComplex* varInflate = &paramsDict[ L"inflate" ];
+	CVariant* varInflate = &paramsDict[ L"inflate" ];
 	if ( varInflate->IsSet() )
 	{
 		inflate = varInflate->m_asINT32;
@@ -1438,7 +1438,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 	}
 
 
-	CVariantComplex* var = &paramsDict[ L"animID" ];
+	CVariant* var = &paramsDict[ L"animID" ];
 	if ( var->IsSet() )
 	{
 		animIdx = var->m_asINT32;
@@ -1457,7 +1457,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 	}
 
 	var = &paramsDict[ L"fontColor" ];
-	if ( var->eType == CVariantComplex::K_ARGTYPE_HEXCOLOR )
+	if ( var->eType == CVariant::K_ARGTYPE_HEXCOLOR )
 	{
 		dwFontColor = var->m_asUINT32;
 	}
@@ -1466,7 +1466,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 	dwFontColor = DW_COLORALPHA( dwFontColor, layer->alpha * fColAlpha );
 
 	var = &paramsDict[ L"color" ];
-	if ( var->eType == CVariantComplex::K_ARGTYPE_HEXCOLOR )
+	if ( var->eType == CVariant::K_ARGTYPE_HEXCOLOR )
 	{
 		dwColor = var->m_asUINT32;
 	}
@@ -1526,8 +1526,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				UTSprite::PaintFrame( m_pSprCol, Vec2( bboxBar.Right(), bboxBar.CenterY() ), animIdx, frame, wcol );
 			}
 			// text
-			CVariantComplex* vc = &paramsDict[ L"stringID_list" ];
-			if ( (vc->eType == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()) && (fontIdx >= 0) )
+			CVariant* vc = &paramsDict[ L"stringID_list" ];
+			if ( (vc->eType == CVariant::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()) && (fontIdx >= 0) )
 			{
 				int nStringIdx_list = __Texts().GetStrIdx( vc->m_strArg.textHash );
 				CStringDesc sdSelection;
@@ -1610,15 +1610,15 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				__TexFonts().fonts[ fontIdx ]->DrawString( &strRow, BBox_inflated.x, BBox_inflated.y + rowH * kk, FONTFLAG_ANCHOR_TOPLEFT, dwFontColor );
 			}
 			//right string
-			CVariantComplex* vc = &paramsDict[ L"StringID_right" ];
-			if ( ( vc->eType == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+			CVariant* vc = &paramsDict[ L"StringID_right" ];
+			if ( ( vc->eType == CVariant::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 			{
 				int nStringIdx_right = __Texts().GetStrIdx( vc->m_strArg.textHash );
 				if ( nStringIdx_right >= 0 )
 				{
 					DWORD dwColorRight = 0xffffffff;
 					var = &paramsDict[ L"FontColor_right" ];
-					if ( var->eType == CVariantComplex::K_ARGTYPE_HEXCOLOR )
+					if ( var->eType == CVariant::K_ARGTYPE_HEXCOLOR )
 					{
 						dwColorRight = var->m_asUINT32;
 					}
@@ -1713,15 +1713,15 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 				pTTFont->pFont->DrawTextW(layer->pControlsManager->m_pSprite, __Texts().strings[stringIdx]->sText, -1, &rc, DT_NOCLIP, dwFontColor);
 			}
 			//right string
-			CVariantComplex* vc = paramsDict[L"StringID_right");
-			if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
+			CVariant* vc = paramsDict[L"StringID_right");
+			if ((vc->m_type == CVariant::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 			{
 				int nStringIdx_right = __Texts().GetStrIdx(vc->m_strArg.textHash);
 				if (nStringIdx_right >= 0)
 				{
 					DWORD dwColorRight = 0xffffffff;
 					var = paramsDict[L"FontColor_right");
-					if (var->m_type == CVariantComplex::K_ARGTYPE_HEXCOLOR)
+					if (var->m_type == CVariant::K_ARGTYPE_HEXCOLOR)
 					{
 						dwColorRight = var->m_asUINT32;
 					}
@@ -1758,8 +1758,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 
 			//get right string idx
 			int nStringIdx_right = -1;
-			CVariantComplex* vc = paramsDict[L"StringID_right");
-			if ((vc->m_type == CVariantComplex::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
+			CVariant* vc = paramsDict[L"StringID_right");
+			if ((vc->m_type == CVariant::K_ARGTYPE_STRING) && (!vc->m_strArg.IsEmpty()))
 			{
 				nStringIdx_right = __Texts().GetStrIdx(vc->m_strArg.textHash);
 				if (nStringIdx_right < 0)
@@ -1794,7 +1794,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			//paint arrow towards player name
 			int nSelectedIdx = -1;
 			vc = paramsDict[L"nSelectedIdx");
-			if (vc->m_type == CVariantComplex::K_ARGTYPE_INT32)
+			if (vc->m_type == CVariant::K_ARGTYPE_INT32)
 				nSelectedIdx = vc->m_asINT32;
 			if (nSelectedIdx >= 0)
 			{
@@ -2108,8 +2108,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 
 				WCHAR varname[ MAX_PATH ];
 				swprintf_s( varname, MAX_PATH, L"stringID%d", ll );
-				CVariantComplex* vc = &paramsDict[ varname ];
-				if ( ( vc->eType == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+				CVariant* vc = &paramsDict[ varname ];
+				if ( ( vc->eType == CVariant::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 				{
 					int nStringIdx = __Texts().GetStrIdx( vc->m_strArg.textHash );
 					SizeWHi strSz = __TexFonts().fonts[ fontIdx ]->MeasureString( nStringIdx, BBox.w );
@@ -2303,11 +2303,11 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			if ( fontIdx >= 0 )
 			{
 				int nStrIdx1 = -1, nStrIdx2 = -1;
-				CVariantComplex* vc = &paramsDict[ L"stringID1" ];
-				if ( ( vc->eType == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+				CVariant* vc = &paramsDict[ L"stringID1" ];
+				if ( ( vc->eType == CVariant::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 					nStrIdx1 = __Texts().GetStrIdx( vc->m_strArg.textHash );
 				vc = &paramsDict[ L"stringID2" ];
-				if ( ( vc->eType == CVariantComplex::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
+				if ( ( vc->eType == CVariant::K_ARGTYPE_STRING ) && ( !vc->m_strArg.IsEmpty() ) )
 					nStrIdx2 = __Texts().GetStrIdx( vc->m_strArg.textHash );
 
 				int nCount = 0;
@@ -2401,8 +2401,8 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 
 			if ( fTimer < fBlinkTimer )
 			{
-				CVariantComplex* varc = &paramsDict[ L"blinkColor" ];
-				if ( varc->eType == CVariantComplex::K_ARGTYPE_HEXCOLOR )
+				CVariant* varc = &paramsDict[ L"blinkColor" ];
+				if ( varc->eType == CVariant::K_ARGTYPE_HEXCOLOR )
 				{
 					textcol = var->m_asUINT32;
 				}
@@ -2818,8 +2818,8 @@ bool CControl::HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID )
 			int nMaxPage = paramsDict[ L"nMaxPage" ].m_asINT32;
 
 			int stringIdx = -1;
-			CVariantComplex* var = &paramsDict[ L"stringID" ];
-			if ( var->eType != CVariantComplex::K_ARGTYPE_NONE )
+			CVariant* var = &paramsDict[ L"stringID" ];
+			if ( var->eType != CVariant::K_ARGTYPE_NONE )
 			{
 				stringIdx = var->m_asINT32;
 			}
@@ -3146,7 +3146,7 @@ void CCtrlLayer::FocusInitialize()
 			}
 			//--- selectez controlul specificat ca fiind focusat sau primul buton daca exista ---
 			bool bFocusIt = false;
-			CVariantComplex* lvar = &controls[ kk ]->paramsDict[ L"ID" ];
+			CVariant* lvar = &controls[ kk ]->paramsDict[ L"ID" ];
 			if ( !shFocusedControlID.IsEmpty() )
 			{
 				if ( lvar->m_strArg.textHash == shFocusedControlID.textHash )

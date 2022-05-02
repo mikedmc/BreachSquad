@@ -367,7 +367,7 @@ public:
 	bool					OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantMap * pArrScriptVars);
 	char const *			GetScriptProcessorName(void) { return "CLevel"; }
 	// functie ajutatoare pentru procesare instructiuni. Gaseste activ in fn de valoare parametru: SELF pt caller, TARGET pentru targetID si numar pt ID efectiv
-	IActiveInterface*		ScriptGetActiveInterfaceByTargetParam(CVariantComplex* vcTarget, UINT32 executorUID);
+	IActiveInterface*		ScriptGetActiveInterfaceByTargetParam(CVariant* vcTarget, UINT32 executorUID);
 
 	// Gets all occluders for a specific light
 	// includes tile segments, light range bbox segments and objects aabb segments. vEye MUST be inside bbox!

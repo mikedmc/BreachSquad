@@ -71,8 +71,8 @@ bool CCollAIComponent::Update( CCollisionShape& active, float dTime, CLevel& lev
 				//set shake timer
 				mem.AItimer1 = 1.0f;
 				//just set fForeceDirX to something in order to make it get hit
-				CVariantComplex cvar = active.varAIparams[ L"fForceDirX" ];
-				if ( cvar.eType == CVariantComplex::K_ARGTYPE_FLOAT )
+				CVariant cvar = active.varAIparams[ L"fForceDirX" ];
+				if ( cvar.eType == CVariant::K_ARGTYPE_FLOAT )
 				{
 					fForceDirX = cvar.m_asFloat;
 					active.varAIparams.DeleteVar( L"fForceDirX" );
@@ -139,8 +139,8 @@ bool CCollAIComponent::Update( CCollisionShape& active, float dTime, CLevel& lev
 					//sound
 					//SND_PLAY_POSITIONAL(SNDIDX_DOOR_BREAK, colshape->bbox.vCenter);
 					//analytics locale
-					CVariantComplex* cvexploded = active.varAIparams[L"bExploded");
-					if ((cvexploded->m_type == CVariantComplex::K_ARGTYPE_INT32) && (cvexploded->m_asINT32 != 0))
+					CVariant* cvexploded = active.varAIparams[L"bExploded");
+					if ((cvexploded->m_type == CVariant::K_ARGTYPE_INT32) && (cvexploded->m_asINT32 != 0))
 					{
 						App_IncreaseGamestat(K_MEMID_GAMESTATS_DOORS_EXPLODED);
 					}
@@ -182,8 +182,8 @@ bool CCollAIComponent::Update( CCollisionShape& active, float dTime, CLevel& lev
 			//get params
 			CParticleEmitter* pe = null;
 			//continuam cu procesarea
-			CVariantComplex* emittervc = active.varAIparams.GetVariantByNameHash(hash_v_emitterPtr);
-			if (emittervc->m_type == CVariantComplex::K_ARGTYPE_NONE)
+			CVariant* emittervc = active.varAIparams.GetVariantByNameHash(hash_v_emitterPtr);
+			if (emittervc->m_type == CVariant::K_ARGTYPE_NONE)
 			{
 				ErrorBox(K_ERR_WARNING, L"ParticleEmitter pointer not found!");
 				break;
