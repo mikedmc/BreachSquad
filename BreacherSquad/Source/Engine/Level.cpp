@@ -1435,7 +1435,7 @@ CActor* CLevel::GetPlayerByUID( UINT32 UID )
 			return pPlayerActor[kk];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 CActor* CLevel::GetClosestPlayer( CActor* sourceActor, bool bIgnoreDead )
@@ -3918,11 +3918,11 @@ void CLevel::Update( float dTime )
 		{
 			int nIndexToFollow = g_netlock.Net_GetPlayerIndex();
 			// move camera on peer after you die
-			if ( pPlayerActor[g_netlock.Net_GetPlayerIndex()] == NULL )
+			if ( pPlayerActor[g_netlock.Net_GetPlayerIndex()] == nullptr )
 			{
 				nIndexToFollow = g_netlock.Net_GetOtherPlayerIndex();
 				//if other player is dead too, just skip them and look at last spawn pos
-				if ( pPlayerActor[nIndexToFollow] == NULL )
+				if ( pPlayerActor[nIndexToFollow] == nullptr )
 					continue;
 			}
 			//in networked games just ignore the other player
@@ -3930,7 +3930,7 @@ void CLevel::Update( float dTime )
 				continue;
 		}
 
-		if ( ( pPlayerActor[kk] != NULL ) && ( pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_IN_LIMBO ) && ( pPlayerActor[kk]->nSuspendedFlags == K_LVL_SUSPENDFLAG_NONE ) )
+		if ( ( pPlayerActor[kk] != nullptr ) && ( pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_IN_LIMBO ) && ( pPlayerActor[kk]->nSuspendedFlags == K_LVL_SUSPENDFLAG_NONE ) )
 		{
 			//#TODO: add constants or special camera class for this wicked camera movement
 			const float fMaxCameraMovement = K_TILE_SIZE_F * 4.0f;
@@ -4042,7 +4042,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
 			// Clear the render target and the zbuffer 
-			if ( FAILED( m_pDevice->Clear( 0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0 ) ) )
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0 ) ) )
 			{
 				return K_OP_FAILED;
 			}
@@ -4074,7 +4074,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
 			// Clear the render target and the zbuffer 
-			if ( FAILED( m_pDevice->Clear( 0, NULL, D3DCLEAR_TARGET, 0xff000000, 1.0f, 0 ) ) )
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0xff000000, 1.0f, 0 ) ) )
 			{
 				return K_OP_FAILED;
 			}
@@ -4109,7 +4109,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
 			// Clear the render target and the zbuffer 
-			if ( FAILED( m_pDevice->Clear( 0, NULL, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0 ) ) )
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, K_GAME_CLEAR_COLOR, 1.0f, 0 ) ) )
 			{
 				return K_OP_FAILED;
 			}
@@ -4142,7 +4142,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
 			// Clear the render target and the zbuffer 
-			if ( FAILED( m_pDevice->Clear( 0, NULL, D3DCLEAR_TARGET, 0xffff0000, 1.0f, 0 ) ) )
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0xffff0000, 1.0f, 0 ) ) )
 			{
 				return K_OP_FAILED;
 			}
@@ -4213,7 +4213,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 
 	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams (UV shrinking)
 	// moves from tex pixel to pixel, no half pixels
-	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, NULL, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
+	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 	UTGetShaderManager().SetVS( nullptr );
@@ -4355,7 +4355,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	}
 
 	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams
-	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, NULL, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
+	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
 
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
@@ -4755,7 +4755,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		Vec2 vSubPxOff( -FLOAT_FRAC( camrect.x ) * ( fRTscale * K_RT_PIXEL_SIZE_F ), -FLOAT_FRAC( camrect.y ) * ( fRTscale * K_RT_PIXEL_SIZE_F ) );
 		MUMatAffine2D( &matpaint, fRTscale, nullptr, 0.0f, &Vec2( rectRender.x + vSubPxOff.x, rectRender.y + vSubPxOff.y ) );
 		m_pSprite->SetTransform( &matpaint );
-		m_pSprite->Draw( pRTfinal->m_pRTTexture, &src, NULL, &g_Vec3Zero, 0xffffffff );
+		m_pSprite->Draw( pRTfinal->m_pRTTexture, &src, nullptr, &g_Vec3Zero, 0xffffffff );
 		m_pSprite->Flush();
 		m_pSprite->SetTransform( &g_matIdentity );
 	}
@@ -4963,7 +4963,8 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	m_pSprite->Flush();
 
 	//--- closest touchable and cover icons ---
-	IActiveInterface * pLastPaintedTarget = null; //pointer la ultimul activ caruia i-am desenat interfata ca sa nu o desenez de 2 ori
+	 //pointer to last painted active interface so we don't draw it twice
+	IActiveInterface * pLastPaintedTarget = null;
 	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 	{
 		if ( ( pPlayerActor[kk] == null ) || ( pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_PLAYER_CONTROL ) )
@@ -5050,7 +5051,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 				{
 					float fAng = HALF_PI + UTMath::GetVectorAngle( camAABB.vCenter - vpos );
 					Mat matrt;
-					MUMatAffine2D( &matrt, 1.0f, NULL, fAng, &vpos );
+					MUMatAffine2D( &matrt, 1.0f, nullptr, fAng, &vpos );
 					m_pSprite->SetTransform( &matrt );
 					CSprite::paintFrame( &m_sprInterface, 0.0f, 0.0f, ANM_IGM_INTERFACE_SPR_PLAYER_NR_ICONS, 2 + pPlayerActor[kk]->nPlayerOrdinal );
 					m_pSprite->SetTransform( &g_matIdentity );
@@ -5077,7 +5078,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		DWORD colEffect = DW_COLORALPHA( 0xff000088, 1.0f - m_fTimeMultiplier_real );
 		Mat mattrans;
 		RectXYWH bbox = UTGetGUI().m_sprCol.GetAFrameBBox_real( ANM_CONTROLS_SPR_VIGNETTES, 1 );
-		MUMatAffine2D( &mattrans, rectRender.h / bbox.h, NULL, 0.0f, &rectRender.Center() );
+		MUMatAffine2D( &mattrans, rectRender.h / bbox.h, nullptr, 0.0f, &rectRender.Center() );
 		m_pSprite->SetTransform( &mattrans );
 		CSprite::paintFrame( &UTGetGUI().m_sprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, 1, colEffect );
 		m_pSprite->Flush();
@@ -5432,7 +5433,7 @@ bool CLevel::IsLineOfSight( Vec2 pt1, Vec2 pt2, Vec2 * retVecCollisionPt /*= nul
 	Vec2 collisionPoint, collisionNormal;
 	//before enemies attacked each other too, here was checking with closeby collisions
 	CCollisionShape* colShape = ColShape_Segment_Intersection_Arr( pt1, pt2, m_visibleList.logic_colShapesExtended.m_pData, m_visibleList.logic_colShapesExtended.Count(), retVecCollisionPt, retVecCollisionNormal );
-	if ( colShape != NULL )
+	if ( colShape != nullptr )
 	{
 		return false;
 	}
@@ -5517,7 +5518,7 @@ void CLevel::UpdatePhysicsPoints( float dTime )
 
 		point->contactType = K_COLLTYPE_NONE;
 		point->bContacting = false;
-		point->pContactShape = NULL;
+		point->pContactShape = nullptr;
 		point->bContactStarted = false;
 		//save last pos
 		point->pos_last = point->pos;
@@ -5746,9 +5747,9 @@ void CLevel::GC()
 
 void CLevel::TouchClosestActive( CActor * pToucherAct, float dTime )
 {
-	_ASSERT( pToucherAct != null );
+	_ASSERT( pToucherAct != nullptr );
 
-	if ( pToucherAct->pClosestTouchable != null )
+	if ( pToucherAct->pClosestTouchable != nullptr )
 	{
 		pToucherAct->pClosestTouchable->Touch( pToucherAct->GetUID(), dTime );
 	}
@@ -5922,7 +5923,7 @@ OPRESULT CLevel::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc, vo
 
 OPRESULT CLevel::OnLostDevice( void* pUserContext )
 {
-	m_pDevice = NULL;
+	m_pDevice = nullptr;
 
 	m_sprLights.OnLostDevice();
 	m_sprProps.OnLostDevice();
@@ -5943,7 +5944,7 @@ OPRESULT CLevel::OnLostDevice( void* pUserContext )
 
 OPRESULT CLevel::OnDestroyDevice( void* pUserContext )
 {
-	m_pDevice = NULL;
+	m_pDevice = nullptr;
 
 	m_sprLights.OnDestroyDevice();
 	m_sprProps.OnDestroyDevice();

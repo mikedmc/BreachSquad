@@ -47,6 +47,11 @@ CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID,
 
 CActor::~CActor()
 {
+	if ( pClosestTouchable )
+	{
+		pClosestTouchable->FreeRef();
+		pClosestTouchable = nullptr;
+	}
 	// remove used components received as pointers 
 	SAFE_DELETE( c_graphics );
 	SAFE_DELETE( c_weapons );
@@ -119,7 +124,7 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 	bSkipRender = false;
 	// compute bboxes
 	bbox_floor.SetSnapshot(_template.bbox);
-	//#TODO: should be different
+	//#TODO: boxes should be different (to include height)
 	bbox.SetSnapshot( bbox_floor );
 	heightZ = _template.heightZ;
 	
@@ -909,6 +914,12 @@ void CActor::ProcessExtras( CLevel& level )
 	///--- find closest interactible object in range, aka touchable
 	if ( _template.eCaps & K_ACT_CAPS_CAN_INTERACT )
 	{
+		if ( pClosestTouchable != nullptr && pClosestTouchable->IsPendingKill() )
+		{
+			pClosestTouchable->FreeRef();
+			pClosestTouchable = nullptr;
+		}
+
 		//#TODO: put interact area in special constant
 		CAABB aabbInteract( -K_TILE_SIZE_F, -K_TILE_SIZE_F, K_TILE_SIZE_F, K_TILE_SIZE_F );
 		aabbInteract.Move( pos.xy );
@@ -933,9 +944,10 @@ void CActor::ProcessExtras( CLevel& level )
 		//#TODO: see which one is closer to the aim dir
 		if ( arrTouchProps.GetSize() > 0 )
 		{
-			IActiveInterface* pNewTouchable = arrTouchProps[ 0 ];
+			IActiveInterface* pNewTouchable = arrTouchProps[ 0 ]->GetRef();
 			if ( pClosestTouchable != pNewTouchable )
 			{
+				pClosestTouchable->FreeRef();
 				ClearActionsList();
 			}
 			pClosestTouchable = pNewTouchable;
@@ -944,22 +956,24 @@ void CActor::ProcessExtras( CLevel& level )
 		{
 			if ( pClosestTouchable != nullptr )
 			{
+				pClosestTouchable->FreeRef();
 				ClearActionsList();
 			}
 			pClosestTouchable = nullptr;
 		}
-	}
 
-	// check touch/interact
-	if ( (c_AI->m_AIcommands.bInteract) && (pClosestTouchable != nullptr) )
-	{
-		BuildActionsList();
-		if ( arrInteractOptions.Count() > 0 )
+		// check touch/interact
+		if ( ( c_AI->m_AIcommands.bInteract ) && ( pClosestTouchable != nullptr ) )
 		{
-			eInteractState = K_STATE_READY;
-			nInteractOptionsSelIdx = 0;
+			BuildActionsList();
+			if ( arrInteractOptions.Count() > 0 )
+			{
+				eInteractState = K_STATE_READY;
+				nInteractOptionsSelIdx = 0;
+			}
 		}
 	}
+
 
 }
 
