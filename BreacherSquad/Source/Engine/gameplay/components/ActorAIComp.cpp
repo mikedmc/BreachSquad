@@ -49,7 +49,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			m_AIsensorInfo.pTargetedActor = nullptr;
 			///THINK: force state decision
 			CAIState* newState = act._template.AItemplate->GetHighestPriorityState( K_LVL_AI_EVENT_DEAD, &level.m_rand );
-			Actor_SetAIState( act, newState );
+			SetAIState( act, newState );
 		}
 	}
 	else //process low freq sensors only if no message from realtime sensors (more important)
@@ -152,7 +152,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					//	DebugPrintW(L"evttype:%d set_state: %s\n", m_AIsensorInfo.m_AIcurrentEvent.nType, newState->name.text);
 
 					//state may also be null when no state is associated with an event
-					Actor_SetAIState( act, newState );
+					SetAIState( act, newState );
 				}
 			}
 		}
@@ -729,7 +729,7 @@ CAIEvent* CActorAIComponent::GetMostImportantAIEvent( CActor& act, EAIEventType 
 	return returnEvent;
 }
 
-void CActorAIComponent::Actor_SetAIState( CActor& actor, CAIState* pNewState )
+void CActorAIComponent::SetAIState( CActor& actor, CAIState* pNewState )
 {
 	if ( (m_pAIcurrentState == pNewState) || (pNewState == nullptr) )
 		return;
@@ -757,7 +757,7 @@ void CActorAIComponent::Actor_SetAIState( CActor& actor, CAIState* pNewState )
 
 }
 
-bool CActorAIComponent::Actor_SetAIState( CActor& actor, WCHAR * strStateName )
+bool CActorAIComponent::SetAIState( CActor& actor, WCHAR * strStateName )
 {
 	CAIState* newstate = actor._template.AItemplate->GetAIStateByName( strStateName );
 	if ( newstate == null )
@@ -766,7 +766,7 @@ bool CActorAIComponent::Actor_SetAIState( CActor& actor, WCHAR * strStateName )
 		return false;
 	}
 	//everything ok, set state
-	Actor_SetAIState( actor, newstate );
+	SetAIState( actor, newstate );
 	return true;
 }
 
@@ -814,7 +814,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				break;
 			}
 			//everything ok, set state
-			Actor_SetAIState( actor, newstate );
+			SetAIState( actor, newstate );
 			//!!! make sure we stay:
 			ret_bFinished = false;
 		}

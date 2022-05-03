@@ -94,7 +94,7 @@ public:
 	// toggles the enabled state
 	inline void					ToggleEnabled() { bSetEnabled = !bSetEnabled; }
 	// true if not pending kill and not disabled
-	bool						IsAlive();
+	virtual bool				IsAlive();
 	// Call this to mark it for destruction
 	void						Kill();
 	// Starts a script sending AI params as script local vars

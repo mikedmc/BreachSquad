@@ -60,12 +60,12 @@ CActor::~CActor()
 
 void CActor::SetAIState( CAIState* pNewState )
 {
-	return c_AI->Actor_SetAIState( *this, pNewState );
+	return c_AI->SetAIState( *this, pNewState );
 }
 
 bool CActor::SetAIState( WCHAR * strStateName )
 {
-	return c_AI->Actor_SetAIState( *this, strStateName );
+	return c_AI->SetAIState( *this, strStateName );
 }
 
 bool CActor::IsAlive()
