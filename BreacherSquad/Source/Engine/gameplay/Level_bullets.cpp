@@ -350,7 +350,7 @@ int CLevel::KillBulletsOfType(int nBulletType, UINT32 dwOwnerUID)
 
 CBullet::CBullet( CPointPhysComponent* pComPointPhys ) :
 	eType( K_LVL_BULLET_SHOTGUN ), fDamage( 1.0f ), fDamage_ini( 1.0f ), fDamageLossPPx( 0.0f ),
-	fLife( 1.0f ), fLife_ini( 1.0f ), actorClass( K_LVL_ACT_CLASS_PLAYER ), nSubstate( 0 ),
+	fLife( 1.0f ), fLife_ini( 1.0f ), actorClass( K_ACT_CLASS_PLAYER ), nSubstate( 0 ),
 	fMomentum( 0.0f ), nFlags( 0 ), fStunDuration( 0.0f ), ownerUID( 0 ), dwLastTargetUID( 0 ),
 	nArmorPiercingRating( 0 ), nExploTemplateHash( 0 ), fSelfDamageMultiplier( 1.0f ), fCriticalHitChance( 0.0f ),
 	bAnimated( false ), pArea( nullptr ), bPendingKill( false )

@@ -341,11 +341,11 @@ public:
 	CActor*		pTargetedActor;		// visible enemy, set by internal sensors
 	UINT32		m_lastInteractingActorUID;	//0-not set or UID for last actor that he interacted with
 	float		fTimeSinceHit;		//time passed since got hit
-	CAIEvent	evtInternal;		// internal event given by sensors (see enemy, got shot etc)
+	CAIEvent	evtInternal;		// internal event given by sensors (see enemy, got shot etc). Don't use for decisions.
 	//internal sensors
 	bool		b_IsDead;			//#TODO: remove this!
 
-	CAIEvent	m_AIevent;			// current event on which actor is making decisions (chosen between evtInternal and evtExternal)
+	CAIEvent	evt;				// current event on which actor is making decisions (chosen between evtInternal and level AI events)
 
 	CAISensorInfo()
 	{
@@ -360,7 +360,7 @@ public:
 		m_bEnabled = true;
 		fTimeSinceHit = 1000.0f;
 
-		m_AIevent.Reset();
+		evt.Reset();
 		evtInternal.Reset();
 	}
 };

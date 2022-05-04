@@ -132,7 +132,7 @@ public:
 	CBulletTemplate() :
 		fDamage(1.0f), fDamageObjects(0.0f), fDamageLossPPx(0.0f), fLife(1.0f), fMomentum(0.0f), nArmorPiercingRating(0),
 		fStunDuration(0.0f), nFlags(K_LVL_BULLET_FLAG_NONE), nType(K_LVL_BULLET_UNKNOWN), nGroup(K_LVL_BULLGROUP_NONE),
-		fSpeed_ini(0.0f), nExploTemplateHash(0), eClass(K_LVL_ACT_CLASS_ANY),
+		fSpeed_ini(0.0f), nExploTemplateHash(0), eClass(K_ACT_CLASS_ANY),
 		fSelfDamageMultiplier(1.0f), fCriticalHitChance(0.0f)
 	{
 	}

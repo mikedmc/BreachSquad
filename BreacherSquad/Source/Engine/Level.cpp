@@ -71,7 +71,7 @@ void CLevel::SpawnPlayer( Vec2 spawnPos, int nPlayerOrdinal, int nAnimset )
 		//AddProp_Light(nact->GetPosHeart(), ANM_LIGHTS_SPR_POINT1, 0.5f, 0.1f, 0x8888ff00, 1.0f);
 
 		//set invulnerability
-		SetActorDoT(nact, CDamageOverTime::K_LVL_DoT_INVINCIBLE, 2.0f, 0.0f, K_LVL_ACT_CLASS_ANY, K_LVL_ACT_CLASS_ANY, 0);
+		SetActorDoT(nact, CDamageOverTime::K_LVL_DoT_INVINCIBLE, 2.0f, 0.0f, K_ACT_CLASS_ANY, K_ACT_CLASS_ANY, 0);
 
 		//SND_PLAY(SNDIDX_UI_PLAYER_JOIN);
 	}
@@ -692,14 +692,12 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 	if ( actnode.attribute( L"bCanInteract" ).as_bool() )
 		templ->eCaps |= K_ACT_CAPS_CAN_INTERACT;
 	//other
+	if ( !actnode.attribute( L"class" ).empty() )
+		templ->actorClass = (EActorClass)GetListIndexByName( actnode.attribute( L"class" ).value(), EActorClassNames, ARRAY_SIZE(EActorClassNames) );
 	if ( !actnode.attribute( L"sWeapon" ).empty() )
-	{
 		templ->shWeaponDefault.Init( actnode.attribute( L"sWeapon" ).value() );
-	}
 	if ( !actnode.attribute( L"sAIstate" ).empty() )
-	{
 		templ->shAIState_ini.Init( actnode.attribute( L"sAIstate" ).value() );
-	}
 
 	// skins
 	pugi::xml_node skinsnode = rootnode.child( L"SKINS" );
@@ -801,7 +799,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 		//parcurg nodurile de stari
 		for ( pugi::xml_node statenode = aiignorenode.first_child(); statenode; statenode = statenode.next_sibling() )
 		{
-			EAIEventType nevttype = ( EAIEventType ) GetListIndexByName( statenode.attribute( L"type" ).value(), EAIEventTypeNames, K_LVL_AI_EVENTS_CNT );
+			EAIEventType nevttype = ( EAIEventType ) GetListIndexByName( statenode.attribute( L"type" ).value(), EAIEventTypeNames, ARRAY_SIZE(EAIEventTypeNames) );
 			if ( nevttype >= 0 )
 			{
 				aitemplate->m_arrIgnoredEvents.Add( nevttype );
@@ -835,7 +833,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 					if ( evtTypeStr.textHash == FastHash( L"any" ) )
 						nevt = K_LVL_AI_EVENT_ANY;
 					else
-						nevt = ( EAIEventType ) GetListIndexByName( eventnode.attribute( L"type" ).value(), EAIEventTypeNames, K_LVL_AI_EVENTS_CNT );
+						nevt = ( EAIEventType ) GetListIndexByName( eventnode.attribute( L"type" ).value(), EAIEventTypeNames, ARRAY_SIZE(EAIEventTypeNames) );
 
 					nstate->m_arrTriggeringEventTypes.Add( nevt );
 				}
@@ -847,7 +845,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 				for ( pugi::xml_node behnode = behaviorsparent.first_child(); behnode; behnode = behnode.next_sibling() )
 				{
 					CAIBehavior nbeh;
-					nbeh.nType = ( EAIBehaviorType ) GetListIndexByName( behnode.attribute( L"name" ).value(), EAIBehaviorTypeNames, AI_BEHAVIORS_CNT );
+					nbeh.nType = ( EAIBehaviorType ) GetListIndexByName( behnode.attribute( L"name" ).value(), EAIBehaviorTypeNames, ARRAY_SIZE(EAIBehaviorTypeNames) );
 					//salvam cativa params generici
 					if ( !behnode.attribute( L"bCanInterrupt" ).empty() )
 						nbeh.bCanInterrupt = behnode.attribute( L"bCanInterrupt" ).as_bool();
@@ -898,7 +896,7 @@ void CLevel::KillActor( CActor * actor, bool bSplatTarget )
 	CBullet bullet;
 	bullet.fDamage = actor->_template.fLife;
 	bullet.nFlags |= K_LVL_BULLET_FLAG_IGNORE_ARMOR | K_LVL_BULLET_FLAG_IGNORE_COVER | K_LVL_BULLET_FLAG_NO_IMPACT_PARTICLES | K_LVL_BULLET_FLAG_NOT_BALLISTIC | K_LVL_BULLET_FLAG_NO_DECALS;
-	bullet.actorClass = K_LVL_ACT_CLASS_TRAP;
+	bullet.actorClass = K_ACT_CLASS_TRAP;
 
 	if ( bSplatTarget )
 	{
@@ -940,7 +938,7 @@ CActorTemplate* CLevel::Actor_GetTemplate( const DWORD templateNameHash )
 void CLevel::RandomizeTemplateActor( CActorTemplate * actTemplate )
 {
 	// don't randomize player
-	if ( actTemplate->actorClass == K_LVL_ACT_CLASS_PLAYER )
+	if ( actTemplate->actorClass == K_ACT_CLASS_PLAYER )
 		return;
 	////randomizeaza vitezele cu 10%
 	//if(actTemplate->moveMaxSpeed > 0.0f)
@@ -1734,7 +1732,7 @@ void CLevel::SetActorWeaponPerks( CActor * pActor, CWeapon * pWeapon )
 
 	///--- PERKS ---
 	//apply perks that change current weapon
-	if ( ( pActor->_template.actorClass == K_LVL_ACT_CLASS_PLAYER ) && ( pActor->nPlayerOrdinal >= 0 ) )
+	if ( ( pActor->_template.actorClass == K_ACT_CLASS_PLAYER ) && ( pActor->nPlayerOrdinal >= 0 ) )
 	{
 		switch ( g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal].eType )
 		{
@@ -1797,16 +1795,16 @@ void CLevel::SetActorDoT( CActor* act, CDamageOverTime::EDoTType eType, float fD
 {
 	if ( act == null )
 		return;
-	if ( ( eFilterClass > K_LVL_ACT_CLASS_ANY ) && ( act->_template.actorClass != eFilterClass ) )
+	if ( ( eFilterClass > K_ACT_CLASS_ANY ) && ( act->_template.actorClass != eFilterClass ) )
 		return;
-	if ( ( eExcludedClass > K_LVL_ACT_CLASS_ANY ) && ( act->_template.actorClass == eExcludedClass ) )
+	if ( ( eExcludedClass > K_ACT_CLASS_ANY ) && ( act->_template.actorClass == eExcludedClass ) )
 		return;
 
 	if ( ( eType == CDamageOverTime::K_LVL_DoT_INTIMIDATED ) && ( act->fLife <= 0.0f ) )
 		return;
 
 	//#HARDCODE: DoT_TARGETED only works on enemies
-	if ( ( eType == CDamageOverTime::K_LVL_DoT_TARGETED ) && ( act->_template.actorClass < K_LVL_ACT_CLASS_HUMAN ) )
+	if ( ( eType == CDamageOverTime::K_LVL_DoT_TARGETED ) && ( act->_template.actorClass < K_ACT_CLASS_ENEMY ) )
 		return;
 
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
@@ -1818,7 +1816,7 @@ void CLevel::SetActorDoT( CActor* act, CDamageOverTime::EDoTType eType, float fD
 		//pointer to player owner or null if not a player
 		CActor* pPlayerOwner = GetPlayerByUID( dwOwnerUID );
 		//special statistics
-		if ( ( eType == CDamageOverTime::K_LVL_DoT_FIRE ) && ( act->_template.actorClass >= K_LVL_ACT_CLASS_HUMAN ) )
+		if ( ( eType == CDamageOverTime::K_LVL_DoT_FIRE ) && ( act->_template.actorClass >= K_ACT_CLASS_ENEMY ) )
 		{
 			if ( ( pPlayerOwner != null ) && ( !IsNetworkPlayer( pPlayerOwner ) ) )
 				App_IncreaseGamestat( K_MEMID_GAMESTATS_ENEMIES_SET_ON_FIRE );
@@ -1870,28 +1868,19 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 		if ( enemy->_template.actorClass == sourceActor->_template.actorClass )
 			continue;
 
-		if ( sourceActor->_template.actorClass == K_LVL_ACT_CLASS_ZOMBIE )
-		{
-			//zombie classes attack everything that's made from meat
-			if ( enemy->_template.eMaterial != K_LVL_MATERIAL_FLESH )
-				continue;
-		}
-		else
-		{
-			//don't attack same class enemies or traps and passive classes
-			if ( enemy->_template.actorClass < K_LVL_ACT_CLASS_PLAYER )
-				continue;
-		}
+		//don't attack same class enemies or traps and passive classes
+		if ( enemy->_template.actorClass < K_ACT_CLASS_PLAYER )
+			continue;
 
 		//daca am filtru pe clasele de inamici verific clasa mai intai
 		int nIgnore = 0, nIgnoreConditions = 0;
-		if ( eTargetClassFilter1 != K_LVL_ACT_CLASS_ANY )
+		if ( eTargetClassFilter1 != K_ACT_CLASS_ANY )
 		{
 			nIgnoreConditions++;
 			if ( enemy->_template.actorClass != eTargetClassFilter1 )
 				nIgnore++;
 		}
-		if ( eTargetClassFilter2 != K_LVL_ACT_CLASS_ANY )
+		if ( eTargetClassFilter2 != K_ACT_CLASS_ANY )
 		{
 			nIgnoreConditions++;
 			if ( enemy->_template.actorClass != eTargetClassFilter2 )
@@ -2139,7 +2128,7 @@ void CLevel::UpdateAI( float dTime, bool bInEditor )
 		//count targets left
 		if ( act->GetCurrentBehavior() != EAIBehaviorType::AI_BEHAVIOR_DEAD )
 		{
-			if ( ( act->_template.actorClass >= K_LVL_ACT_CLASS_HUMAN ) || ( act->_template.actorClass == K_LVL_ACT_CLASS_HOSTAGE ) )
+			if ( ( act->_template.actorClass >= K_ACT_CLASS_ENEMY ) || ( act->_template.actorClass == K_ACT_CLASS_HOSTAGE ) )
 			{
 				m_arrStats[K_LVL_STATS_TARGETS_LEFT]++;
 			}
@@ -4453,7 +4442,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	{
 		CActor* act = m_visibleList.visible_actors.m_pData[kk];
 		//shield/overhead icons for non players
-		if ((act->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER) && (act->m_sprOverheadIcon.animationIdx >= 0))
+		if ((act->actTemplate.actorClass != K_ACT_CLASS_PLAYER) && (act->m_sprOverheadIcon.animationIdx >= 0))
 		{
 			act->m_sprOverheadIcon.pos = act->GetPosHeart();
 			act->m_sprOverheadIcon.paint(&m_sprInterface);
@@ -4473,7 +4462,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		}
 
 		//energy bars
-		if ((act->actTemplate.actorClass == K_LVL_ACT_CLASS_HUMAN) && (act->fLife > 0.0f) &&
+		if ((act->actTemplate.actorClass == K_ACT_CLASS_HUMAN) && (act->fLife > 0.0f) &&
 			(act->actTemplate.fLife > 100.0f) && (act->m_AIsensorInfo.fTimeSinceHit < 5.0f))
 		{
 			float fLife = act->fLife / act->actTemplate.fLife;
@@ -5296,7 +5285,7 @@ void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, 
 	break;
 	case K_LVL_EFFECT_EXPLO_LARGE:
 	{
-		AddDoofer_Explo( hash_EXPLO_LARGE_XL, pos, 0, K_LVL_ACT_CLASS_EXPLOSION );
+		AddDoofer_Explo( hash_EXPLO_LARGE_XL, pos, 0, K_ACT_CLASS_EXPLOSION );
 	}
 	break;
 	case K_LVL_EFFECT_ELECTRIC_BREAK_SPARKS:
@@ -5344,7 +5333,7 @@ void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, 
 
 void CLevel::GenerateEffect( CStringHash sEffectName, Vec2 pos, float fSize, DWORD color )
 {
-	ELVLEffectType effectidx = ( ELVLEffectType ) GetListIndexByNameHash( sEffectName.textHash, ELVLEffectTypeNames, K_LVL_EFFECTS_CNT );
+	ELVLEffectType effectidx = ( ELVLEffectType ) GetListIndexByNameHash( sEffectName.textHash, ELVLEffectTypeNames, ARRAY_SIZE(ELVLEffectTypeNames) );
 	GenerateEffect( effectidx, pos, fSize, color );
 }
 

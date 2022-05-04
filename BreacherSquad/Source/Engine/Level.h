@@ -181,7 +181,7 @@ public:
 	// Updates all IActiveInterface implementations
 	void					UpdateAI(float dTime, bool bInEditor = false);
 	//gaseste cel mai apropiat inamic vizibil
-	CActor*					GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassFilter1 = K_LVL_ACT_CLASS_ANY, EActorClass eTargetClassFilter2 = K_LVL_ACT_CLASS_ANY);
+	CActor*					GetClosestTarget(CActor * sourceActor, EActorClass eTargetClassFilter1 = K_ACT_CLASS_ANY, EActorClass eTargetClassFilter2 = K_ACT_CLASS_ANY);
 	// Finds closest visible actor of specified name (inside visibility radius)
 	// @fMaxDistance - if greater than 0 then it overrides seeDistance
 	CActor*					GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTargetTemplateName, float fMaxDistance = 0.0f);
@@ -193,7 +193,7 @@ public:
 	void					AddDecal(EDecalLayer nLayer, Vec2 pos, int animIdx, int frameIdx = 0, DWORD color = 0xffffffff, bool bIsAnimated = false);
 	void					UpdateDecals(float dTime);
 	//adds a blood decal (bLarge when enemy was splattered)
-	void					AddDecal_BloodSplat(Vec2 pos, bool bLarge, EActorClass eVictimClass = K_LVL_ACT_CLASS_ANY);
+	void					AddDecal_BloodSplat(Vec2 pos, bool bLarge, EActorClass eVictimClass = K_ACT_CLASS_ANY);
 	///--- physics points ---
 	//#TODO: remove?
 	CDoubleLinkedPool<CPhysicsPoint>	m_poolPhysPts; //pool de obiecte fizice
@@ -230,7 +230,7 @@ public:
 	// \brief helper fn: adds an explosion (logic and visual)
 	// \param vDir - for directional explosions like breaching charges
 	// \param hash_EXPLO_name - predefined constants for explosion params
-	void					AddDoofer_Explo(UINT32 hash_EXPLO_name, Vec2 pos, UINT32 dwOwnerUID, int exploOwnerClass = K_LVL_ACT_CLASS_PLAYER, Vec2 vExploDir = { 0.0f, 0.0f }, CAABB* exploAABB = null);
+	void					AddDoofer_Explo(UINT32 hash_EXPLO_name, Vec2 pos, UINT32 dwOwnerUID, int exploOwnerClass = K_ACT_CLASS_PLAYER, Vec2 vExploDir = { 0.0f, 0.0f }, CAABB* exploAABB = null);
 	// Updates all doofers
 	void					UpdateDoofers(float dTime);
 	// Paints all doofers

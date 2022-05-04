@@ -348,9 +348,9 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		if (!bnode.attribute(L"fDamageObjectsMultiplier").empty())
 			templ->fDamageObjectsMultiplier = bnode.attribute(L"fDamageObjectsMultiplier").as_float();
 		//excluded class 
-		templ->eIgnoreActorClass = K_LVL_ACT_CLASS_ANY;
+		templ->eIgnoreActorClass = K_ACT_CLASS_ANY;
 		if (!bnode.attribute(L"sIgnoredClass").empty())
-			templ->eIgnoreActorClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sIgnoredClass").value(), EActorClassNames, EActorClass::K_LVL_ACT_CLASSES_COUNT);
+			templ->eIgnoreActorClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sIgnoredClass").value(), EActorClassNames, ARRAY_SIZE(EActorClassNames));
 
 		//damage over time
 		templ->cDoT.Set(CDamageOverTime::K_LVL_DoT_NONE);
@@ -365,11 +365,11 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 			//get damage per sec
 			templ->cDoT.fDamagePerSec = bnode.attribute(L"fDoTDamagePerSec").as_float();
 			//excluded class 
-			templ->cDoT.eExcludedActClass = K_LVL_ACT_CLASS_ANY;
+			templ->cDoT.eExcludedActClass = K_ACT_CLASS_ANY;
 			if (!bnode.attribute(L"sDoTIgnoredClass").empty())
-				templ->cDoT.eExcludedActClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sDoTIgnoredClass").value(), EActorClassNames, EActorClass::K_LVL_ACT_CLASSES_COUNT);
+				templ->cDoT.eExcludedActClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sDoTIgnoredClass").value(), EActorClassNames, ARRAY_SIZE(EActorClassNames));
 			if (!bnode.attribute(L"sDoTClassFilter").empty())
-				templ->cDoT.eFilteredActClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sDoTClassFilter").value(), EActorClassNames, EActorClass::K_LVL_ACT_CLASSES_COUNT);
+				templ->cDoT.eFilteredActClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sDoTClassFilter").value(), EActorClassNames, ARRAY_SIZE(EActorClassNames));
 		}
 
 		m_arrTemplatesExplosion.Add(templ);
@@ -454,10 +454,10 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 				templ->bulletTemplate.nExploTemplateHash = FastHash(bnode.attribute(L"sBulletExploTemplate").value());
 			}
 			//override bullet class
-			templ->bulletTemplate.eClass = K_LVL_ACT_CLASS_ANY;
+			templ->bulletTemplate.eClass = K_ACT_CLASS_ANY;
 			if (!bnode.attribute(L"sBulletClass").empty())
 			{
-				templ->bulletTemplate.eClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sBulletClass").value(), EActorClassNames, K_LVL_ACT_CLASSES_COUNT);
+				templ->bulletTemplate.eClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sBulletClass").value(), EActorClassNames, ARRAY_SIZE(EActorClassNames));
 			}
 
 			templ->bulletTemplate.fDamage = bnode.attribute(L"fBulletDamage").as_float();

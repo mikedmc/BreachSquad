@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <ACTOR file="shield.bsx">
-	<ACTOR_DATA sAIstate="DEFAULT" sWeapon="WPN_SMG_MP5A3"
+	<ACTOR_DATA sAIstate="DEFAULT" sWeapon="WPN_SMG_MP5A3" class="PLAYER"
 				bboxMinX="-8" bboxMinY="-12" bboxMaxX="8" bboxMaxY="4" heightZ="48" heartZ="36"
 				sMaterial="FLESH" fLife="40.0" fArmor="0.0" 
 				fSpeedMove="150.0"

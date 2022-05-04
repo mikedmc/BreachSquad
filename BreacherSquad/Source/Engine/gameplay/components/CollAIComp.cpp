@@ -124,7 +124,7 @@ bool CCollAIComponent::Update( CCollisionShape& active, float dTime, CLevel& lev
 						dooract->flipX = true;
 
 						Vec2 secondExploPos(colshape->bbox.vCenter.x - (colshape->bbox.vHalfSize.x + 1.0f), colshape->bbox.vCenter.y);
-						AddProp_Explo(hash_EXPLO_STUN_INVISIBLE, secondExploPos, 0, K_LVL_ACT_CLASS_PLAYER);
+						AddProp_Explo(hash_EXPLO_STUN_INVISIBLE, secondExploPos, 0, K_ACT_CLASS_PLAYER);
 					}
 					else
 					{
@@ -132,7 +132,7 @@ bool CCollAIComponent::Update( CCollisionShape& active, float dTime, CLevel& lev
 						dooract->flipX = false;
 
 						Vec2 secondExploPos(colshape->bbox.vCenter.x + (colshape->bbox.vHalfSize.x + 1.0f), colshape->bbox.vCenter.y);
-						AddProp_Explo(hash_EXPLO_STUN_INVISIBLE, secondExploPos, 0, K_LVL_ACT_CLASS_PLAYER);
+						AddProp_Explo(hash_EXPLO_STUN_INVISIBLE, secondExploPos, 0, K_ACT_CLASS_PLAYER);
 					}
 
 					__Particles().GenerateDoorBreak(colshape->bbox.vCenter, Vec2(dirx, 0.0f), K_PART_LAYER_RT_FRONT_NRM);

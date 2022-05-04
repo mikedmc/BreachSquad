@@ -2258,6 +2258,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 				if ( GameState::state == GAME_STATE_GAME )
 				{
 					Vec2 vpos = __Sim().pPlayerActor[0]->pos.xy;
+					vpos.x += 48.0f;
 					__Sim().SpawnActor( vpos, L"act_blowup_bart.xml" );
 				}
 			}

@@ -186,14 +186,14 @@ public:
 		fDuration = 0.0f;
 		fDuration_ini = 0.0f;
 		fDamagePerSec = 0.0f;
-		eExcludedActClass = K_LVL_ACT_CLASS_ANY; //nu exclude nimic. Putin fortat ANY asta dar merge
-		eFilteredActClass = K_LVL_ACT_CLASS_ANY; //don't filter anything
+		eExcludedActClass = K_ACT_CLASS_ANY; //nu exclude nimic. Putin fortat ANY asta dar merge
+		eFilteredActClass = K_ACT_CLASS_ANY; //don't filter anything
 		nOwnerUID = 0;
 
 		fVar1 = 0.0f;
 	}
 
-	bool Set(EDoTType eDoTType, float nfDuration = 0.0f, float nfDamagePerSec = 0.0f, EActorClass eExcludedClass = K_LVL_ACT_CLASS_ANY, EActorClass eFilterClass = K_LVL_ACT_CLASS_ANY, UINT32 unOwnerUID = 0)
+	bool Set(EDoTType eDoTType, float nfDuration = 0.0f, float nfDamagePerSec = 0.0f, EActorClass eExcludedClass = K_ACT_CLASS_ANY, EActorClass eFilterClass = K_ACT_CLASS_ANY, UINT32 unOwnerUID = 0)
 	{
 		if (nfDuration <= 0.0f)
 		{
@@ -231,8 +231,8 @@ public:
 		fDuration = 0.0f;
 		fDuration_ini = 0.0f;
 		fDamagePerSec = 0.0f;
-		eExcludedActClass = K_LVL_ACT_CLASS_ANY;
-		eFilteredActClass = K_LVL_ACT_CLASS_ANY; //don't filter anything
+		eExcludedActClass = K_ACT_CLASS_ANY;
+		eFilteredActClass = K_ACT_CLASS_ANY; //don't filter anything
 		nOwnerUID = 0;
 	}
 };
@@ -285,7 +285,7 @@ public:
 
 	CExplosionTemplate() : 
 		fDamage(0.0f), fDamageRadius(0.0f), fStunRadius(0.0f), fStunDuration(0.0f),	fDamageObjectsMultiplier(0.0f),
-		fSoundRadius(64.0f), nShrapnelCnt(0), nNapalmCnt(0), fMaxImpulse(0.0f), fDoTRadius(0.0f), nArmorPiercingRating(1), eIgnoreActorClass(K_LVL_ACT_CLASS_ANY)
+		fSoundRadius(64.0f), nShrapnelCnt(0), nNapalmCnt(0), fMaxImpulse(0.0f), fDoTRadius(0.0f), nArmorPiercingRating(1), eIgnoreActorClass(K_ACT_CLASS_ANY)
 	{
 		name.Reset();
 		cDoT.Set(CDamageOverTime::K_LVL_DoT_NONE);

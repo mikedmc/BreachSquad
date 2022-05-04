@@ -414,7 +414,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				if ((!act->IsAlive()) || (act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET))
 					continue;
 				//never stun the hostages
-				if ((act->_template.actorClass == K_LVL_ACT_CLASS_HOSTAGE) && (fMaxStun > 0.0f))
+				if ((act->_template.actorClass == K_ACT_CLASS_HOSTAGE) && (fMaxStun > 0.0f))
 					continue;
 				
 				Vec2 vDir = act->GetPosHeart() - pos;
@@ -429,7 +429,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				}
 
 				//no friendly stun
-				if (act->_template.actorClass != K_LVL_ACT_CLASS_HUMAN)
+				if (act->_template.actorClass != K_ACT_CLASS_ENEMY)
 					continue;
 				//daca e prea departe nu il ia in seama
 				if (fDist > fStunRadius)
@@ -481,13 +481,13 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 					vDir.y = 0.0f;
 
 				CBulletHitReturnData retdata;
-				retdata = act->HitActor(fPercent * fMaxDamage, dwOwnerUID, K_LVL_ACT_CLASS_EXPLOSION, &vDir, K_LVL_BULLET_FLAG_CAN_SPLAT, explotemplate->nArmorPiercingRating);
+				retdata = act->HitActor(fPercent * fMaxDamage, dwOwnerUID, K_ACT_CLASS_EXPLOSION, &vDir, K_LVL_BULLET_FLAG_CAN_SPLAT, explotemplate->nArmorPiercingRating);
 				//count only enemies
-				if ((retdata.bKilledTarget) && (act->_template.actorClass >= K_LVL_ACT_CLASS_HUMAN))
+				if ((retdata.bKilledTarget) && (act->_template.actorClass >= K_ACT_CLASS_ENEMY))
 					nBombFrags++;
 
 				//#ACHIEVEMENTS: darwin award - player died from his own explosive
-				if ((act->_template.actorClass == K_LVL_ACT_CLASS_PLAYER) && (!IsNetworkPlayer(act)) && (act->fLife <= 0.0f) && (dwOwnerUID == act->UID) &&
+				if ((act->_template.actorClass == K_ACT_CLASS_PLAYER) && (!IsNetworkPlayer(act)) && (act->fLife <= 0.0f) && (dwOwnerUID == act->UID) &&
 					((explotemplate->name.textHash == hash_EXPLO_GRENADE_GROUND) || (explotemplate->name.textHash == hash_EXPLO_GRENADE) ||
 					(explotemplate->name.textHash == hash_EXPLO_CHARGE) || (explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE)))
 				{
@@ -680,7 +680,7 @@ void CLevel::UpdateDoofers(float dTime)
 				{
 					CWeaponTemplate* wtempl = GetTemplateWeapon(L"WPN_LAVA_MELEE");
 					Vec2 normal(0.0f, -1.0f);
-					ShootBullet(&wtempl->bulletTemplate, K_LVL_ACT_CLASS_TRAP, 0, prop->physPt->m_data.pos + normal, normal);
+					ShootBullet(&wtempl->bulletTemplate, K_ACT_CLASS_TRAP, 0, prop->physPt->m_data.pos + normal, normal);
 				}
 				*/
 

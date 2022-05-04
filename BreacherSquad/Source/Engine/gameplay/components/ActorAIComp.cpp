@@ -19,7 +19,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 	fTimelineAI += dTime;
 
 	//reset previous commands
-	m_AIcommands.Reset();
+	AIcommands.Reset();
 	//----------------------------------------
 	//			PERCEIVE			
 	//----------------------------------------
@@ -39,15 +39,15 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 	if ( act.fLife <= 0.0f )
 	{
 		// only enters once
-		if ( m_AIsensorInfo.m_AIevent.nType != K_LVL_AI_EVENT_DEAD )
+		if ( AIsensor.evt.nType != K_LVL_AI_EVENT_DEAD )
 		{
-			m_AIsensorInfo.b_IsDead = true;
-			m_AIsensorInfo.m_AIevent.Set( K_LVL_AI_EVENT_DEAD, act.GetUID(), act._template.actorClass, act.GetPosHeart(), -1.0f, 1.0f );
+			AIsensor.b_IsDead = true;
+			AIsensor.evt.Set( K_LVL_AI_EVENT_DEAD, act.GetUID(), act._template.actorClass, act.GetPosHeart(), -1.0f, 1.0f );
 			//reset targeted actor
-			if ( m_AIsensorInfo.pTargetedActor != nullptr )
+			if ( AIsensor.pTargetedActor != nullptr )
 			{
-				m_AIsensorInfo.pTargetedActor->FreeRef();
-				m_AIsensorInfo.pTargetedActor = nullptr;
+				AIsensor.pTargetedActor->FreeRef();
+				AIsensor.pTargetedActor = nullptr;
 			}
 			///THINK: force state decision
 			CAIState* newState = act._template.AItemplate->GetHighestPriorityState( K_LVL_AI_EVENT_DEAD, &level.m_rand );
@@ -62,29 +62,29 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 
 		///HIGH FREQUENCY SENSORS
 		//hit timer (used in some behaviors)
-		m_AIsensorInfo.fTimeSinceHit += dTime;
+		AIsensor.fTimeSinceHit += dTime;
 		//did he get hit? reset time since hit 
 		//if (act.nTookDamageFrames > 0)
 			//m_AIsensorInfo.fTimeSinceHit = 0.0f;
 
 		///LOW FREQUENCY SENSORS
 		AItimerDecision -= dTime;
-		if ( (AItimerDecision <= 0.0f) && (!bIgnoreAIEvents) && (m_AIsensorInfo.m_bEnabled) )
+		if ( (AItimerDecision <= 0.0f) && (!bIgnoreAIEvents) && (AIsensor.m_bEnabled) )
 		{
 			// reset internal event
-			m_AIsensorInfo.evtInternal.Reset();
+			AIsensor.evtInternal.Reset();
 			//check for targets or other AI events
 			CActor* targetActor = __Sim().GetClosestTarget(&act /*, act._template.foeClassFilter1, act.actTemplate.foeClassFilter2*/);
 			if ( targetActor != nullptr )
 			{
 				//float enemyDst = MUVec2Len( &(targetActor->GetPosHeart() - act.GetPosHeart()) );
-				m_AIsensorInfo.evtInternal.Set( K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), 0.0f, 1.0f );
+				AIsensor.evtInternal.Set( K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), 0.0f, 1.0f );
 				//#HACK: alerts the other enemies only if enemy class
-				if ( act._template.actorClass >= K_LVL_ACT_CLASS_HUMAN )
+				if ( act._template.actorClass >= K_ACT_CLASS_ENEMY )
 					level.AddAIEvent( K_LVL_AI_EVENT_SOUND_THREAT, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), 200.0f, 0.6f );
 				// set target pointer and increase ref
 				targetActor->GetRef();
-				m_AIsensorInfo.pTargetedActor = targetActor;
+				AIsensor.pTargetedActor = targetActor;
 				// enemies overlapping
 				/*
 				if (act.bbox.Intersects(targetActor->bbox))
@@ -101,42 +101,42 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				}
 				*/
 				// write last interacting actor just for the sake of it. It will be rewritten later.
-				m_AIsensorInfo.m_lastInteractingActorUID = targetActor->GetUID();
+				AIsensor.m_lastInteractingActorUID = targetActor->GetUID();
 			}
 			else
 			{
 				//reset targeted actor
-				if ( m_AIsensorInfo.pTargetedActor != nullptr )
+				if ( AIsensor.pTargetedActor != nullptr )
 				{
-					m_AIsensorInfo.evtInternal.Set( K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, m_AIsensorInfo.pTargetedActor->pos.xy, 16.0f, 1.0f );
+					AIsensor.evtInternal.Set( K_LVL_AI_EVENT_LOST_ENEMY, 0, K_ACT_CLASS_ANY, AIsensor.pTargetedActor->pos.xy, 16.0f, 1.0f );
 					//reset targeting actor
-					m_AIsensorInfo.pTargetedActor->FreeRef();
-					m_AIsensorInfo.pTargetedActor = nullptr;
+					AIsensor.pTargetedActor->FreeRef();
+					AIsensor.pTargetedActor = nullptr;
 				}
 				// sometimes it doesn't see the enemy when it gets hit so we force the lost enemy onto him
-				else if ( m_AIsensorInfo.m_AIevent.nType == K_LVL_AI_EVENT_GOT_HIT )
+				else if ( AIsensor.evt.nType == K_LVL_AI_EVENT_GOT_HIT )
 				{
-					m_AIsensorInfo.evtInternal.Set( K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, m_AIsensorInfo.m_AIevent.pos, 16.0f, 0.5f );
+					AIsensor.evtInternal.Set( K_LVL_AI_EVENT_LOST_ENEMY, 0, K_ACT_CLASS_ANY, AIsensor.evt.pos, 16.0f, 0.5f );
 				}
 			}
 
 			///--- select best event ---
 			CAIEvent* evt = GetMostImportantAIEvent( act );
-			CAIEvent evtFinal = m_AIsensorInfo.evtInternal;
+			CAIEvent evtFinal = AIsensor.evtInternal;
 			if ( ( evt != nullptr ) && ( evt->nType > evtFinal.nType ) )
 				evtFinal = *evt;
 
 			if ( evtFinal.nType == K_LVL_AI_EVENT_NONE )
 			{
 				//nothing important, set idle tick
-				m_AIsensorInfo.m_AIevent.Set( K_LVL_AI_EVENT_IDLE_TICK, 0, 0, Vec2( 0.0f, 0.0f ), -1.0f, 1.0f );
+				AIsensor.evt.Set( K_LVL_AI_EVENT_IDLE_TICK, 0, 0, Vec2( 0.0f, 0.0f ), -1.0f, 1.0f );
 			}
 			// see if event changed to check for new state
-			if ( m_AIsensorInfo.m_AIevent != evtFinal )
+			if ( AIsensor.evt != evtFinal )
 			{
-				m_AIsensorInfo.m_AIevent = evtFinal;
-				if(m_AIsensorInfo.m_AIevent.nType >= 0)
-					LOG( L"%s checks event: %s \n",act._template.shID.text , EAIEventTypeNames[m_AIsensorInfo.m_AIevent.nType].text );
+				AIsensor.evt = evtFinal;
+				if(AIsensor.evt.nType >= 0)
+					LOG( L"%s checks event: %s \n",act._template.shID.text , EAIEventTypeNames[AIsensor.evt.nType].text );
 				else 
 					LOG( L"%s checks event: NONE \n", act._template.shID.text );
 
@@ -147,17 +147,17 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				//am comentat verificarea pe behaviorDurationFinished pentru ca mesajul de IDLE_TICK ma scotea dintre behaviors care nu pot fi intrerupte. Ca sa pot intrerupe cand vreau bag un behavior IDLE
 				if ( ( m_nAIcurrentBehaviorIdx < 0 ) || ( m_pAIcurrentState->m_arrBehaviors[m_nAIcurrentBehaviorIdx].bCanInterrupt ) /*|| (bBehaviorDurationFinished)*/ )
 				{
-					CAIState* newState = act._template.AItemplate->GetHighestPriorityState( m_AIsensorInfo.m_AIevent.nType, &level.m_rand );
+					CAIState* newState = act._template.AItemplate->GetHighestPriorityState( AIsensor.evt.nType, &level.m_rand );
 
 					//daca vechea stare a fost setata de acelasi mesaj ca si acum si nu are prioritate mai mica nu ar mai trebui setata alta stare ci cel mult dat restart la starea curenta
-					if ( ( newState != nullptr ) && ( m_AIsensorInfo.m_AIevent.nType == m_AIsensorInfo.m_AIevent.nType ) && ( newState->nPriority == m_pAIcurrentState->nPriority ) )
+					if ( ( newState != nullptr ) && ( AIsensor.evt.nType == AIsensor.evt.nType ) && ( newState->nPriority == m_pAIcurrentState->nPriority ) )
 					{
 						//#MAYBE: reset current behavior if it's the same state?
 					}
 					else
 					{
 						if (newState != nullptr)
-							LOG(L"evttype:%d set_state: %s\n", m_AIsensorInfo.m_AIevent.nType, newState->name.text);
+							LOG(L"evttype:%d set_state: %s\n", AIsensor.evt.nType, newState->name.text);
 
 						//state may also be null when no state is associated with an event
 						SetAIState( act, newState );
@@ -212,6 +212,24 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			}
 			break;
 
+			case AI_BEHAVIOR_ATTACK:
+			{
+
+				if ( ( AIsensor.pTargetedActor == nullptr ) || ( !AIsensor.pTargetedActor->IsAlive() ) )
+				{
+					bBehaviorFinished = true;
+					break;
+				}
+				
+				act.vAim = AIsensor.pTargetedActor->pos.xy - act.pos.xy;
+			}
+			break;
+
+			case AI_BEHAVIOR_PATROL:
+			{
+			}
+			break;
+
 			case AI_BEHAVIOR_SHOW_ENEMY:
 			{
 			}
@@ -223,7 +241,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				//controller not set or removed, skipping AI
 				if ( (pController == nullptr) || (pController->nFlags & K_CM_CTRLR_FLAG_PAUSED) || (act.bSuspendInput) )
 				{
-					//HitActor(actor, -1.0f, 0, 100, K_LVL_ACT_CLASS_TRAP);
+					//HitActor(actor, -1.0f, 0, 100, K_ACT_CLASS_TRAP);
 					break;
 				}
 				//if suspended or other don't process input
@@ -252,13 +270,13 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				Vec2 vMoveDir = pController->GetDoubleAxisVector( K_CM_COMMAND_MOVE_X, K_CM_COMMAND_MOVE_Y, true );
 				if ( MUVec2LenSq( &vMoveDir ) > 0.0f )
 				{
-					m_AIcommands.bThrust = true;
-					m_AIcommands.vMoveDir = vMoveDir;
-					m_AIcommands.bRunning = true;
+					AIcommands.bThrust = true;
+					AIcommands.vMoveDir = vMoveDir;
+					AIcommands.bRunning = true;
 				}
 				Vec2 vAimVec = pController->GetDoubleAxisVector( K_CM_COMMAND_AIM_X, K_CM_COMMAND_AIM_Y, false );
 				//DebugPrintA("aim: %.2f, %.2f\n", vAimVec.x, vAimVec.y);
-				m_AIcommands.vAimVec = vAimVec;
+				AIcommands.vAimVec = vAimVec;
 
 				//reset roll status
 				/*
@@ -273,25 +291,25 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				//interact
 				if ( pController->sCommands.keyState[ K_CM_COMMAND_JUMP ] == K_CM_BUTSTATE_JUSTPRESSED )
 				{
-					m_AIcommands.bInteract = true;
+					AIcommands.bInteract = true;
 				}
 				//FIRE SHOOT
 				if ( pController->sCommands.bKeyDown[ K_CM_COMMAND_FIRE1 ] )
 				{
-					m_AIcommands.eAttackCommand = K_ACT_ATTACK_SHOOTING;
+					AIcommands.eAttackCommand = K_ACT_ATTACK_SHOOTING;
 				}
 				else if ( pController->sCommands.keyState[ K_CM_COMMAND_RELOAD ] == K_CM_BUTSTATE_JUSTPRESSED )
 				{
-					m_AIcommands.eAttackCommand = K_ACT_ATTACK_RELOADING;
+					AIcommands.eAttackCommand = K_ACT_ATTACK_RELOADING;
 				}
 				else if ( pController->sCommands.bKeyDown[ K_CM_COMMAND_FIRE2 ] )
 				{
-					m_AIcommands.eAttackCommand = K_ACT_ATTACK_SHOOTING_ALT;
+					AIcommands.eAttackCommand = K_ACT_ATTACK_SHOOTING_ALT;
 				}
 				//lets you use MELEE while holding fire or reloading
 				if ( pController->sCommands.keyState[ K_CM_COMMAND_MELEE ] == K_CM_BUTSTATE_JUSTPRESSED )
 				{
-					m_AIcommands.eAttackCommand = K_ACT_ATTACK_MELEE;
+					AIcommands.eAttackCommand = K_ACT_ATTACK_MELEE;
 				}
 				//RELOAD ON SHOOT - overwrites previous commands
 				/*
@@ -324,11 +342,11 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			{
 				//always set crouched command if actor can crouch
 				if ( act._template.eCaps & K_ACT_CAPS_CAN_CROUCH )
-					m_AIcommands.bCrouched = true;
+					AIcommands.bCrouched = true;
 				//can he follow targets? does it only once
 				if ( AIvarBool1 )
 				{
-					if ( m_AIsensorInfo.pTargetedActor != nullptr )
+					if ( AIsensor.pTargetedActor != nullptr )
 					{
 						//play the verse only once
 						if ( AIsubState == 0 )
@@ -336,7 +354,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 							//PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_TAUNT);
 						}
 
-						Vec2 vDelta = m_AIsensorInfo.pTargetedActor->GetPosHeart() - act.GetPosHeart();
+						Vec2 vDelta = AIsensor.pTargetedActor->GetPosHeart() - act.GetPosHeart();
 						float fDist = fabs( vDelta.x );
 						float fDistMin = 32.0f;// max(K_TILE_SIZE, act.actTemplate.distAttackMin);
 						//see if target is already too close
@@ -347,10 +365,10 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 						}
 
 						AIsubState = 1; //followed target
-						m_AIcommands.bCrouched = false;
+						AIcommands.bCrouched = false;
 						//run to target
-						m_AIcommands.bThrust = true;
-						m_AIcommands.bRunning = true;
+						AIcommands.bThrust = true;
+						AIcommands.bRunning = true;
 						//gets too close
 						bool bHasLateralCollisions = ((act.collisionFlags & (K_DIRFLAG_RIGHT | K_DIRFLAG_LEFT)) != 0);
 						if ( (fDist <= fDistMin) || (bHasLateralCollisions) )
@@ -370,7 +388,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			break;
 			case AI_BEHAVIOR_IDLE_CROUCHED:
 			{
-				m_AIcommands.bCrouched = true;
+				AIcommands.bCrouched = true;
 				//handle fade out duration
 				if ( (m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ].fBehaviorDuration > 0.0f) && (AIfvar1 > 0.0f) )
 				{
@@ -378,7 +396,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					if ( fLeftTime <= AIfvar1 )
 					{
 						//setam comanda de culoare
-						m_AIcommands.nColor = DW_COLORALPHA( act.color_ini, fLeftTime / AIfvar1 );
+						AIcommands.nColor = DW_COLORALPHA( act.color_ini, fLeftTime / AIfvar1 );
 					}
 				}
 			}
@@ -386,7 +404,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			case AI_BEHAVIOR_PLAY_ANIM:
 			{
 				//playerii pot schimba directia si pe play anim
-				if ( act._template.actorClass == K_LVL_ACT_CLASS_PLAYER )
+				if ( act._template.actorClass == K_ACT_CLASS_PLAYER )
 				{
 					CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID( act.nControllerInstanceID );
 					if ( pController != nullptr )
@@ -400,12 +418,12 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 
 						if ( !bPressedLeft && bPressedRight )
 						{
-							m_AIcommands.bThrust = false;
+							AIcommands.bThrust = false;
 							//m_AIcommands.nMoveDirX = 1;
 						}
 						if ( bPressedLeft && !bPressedRight )
 						{
-							m_AIcommands.bThrust = false;
+							AIcommands.bThrust = false;
 							//m_AIcommands.nMoveDirX = -1;
 						}
 					}
@@ -422,7 +440,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				{
 					float fPerc = m_fAIbehaviorTimer / m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ].fBehaviorDuration;
 					//setam comanda de culoare
-					m_AIcommands.nColor = DW_COLORALPHA( act.color_ini, (1.0f - fPerc) * AIfvar2 + fPerc * AIfvar1 );
+					AIcommands.nColor = DW_COLORALPHA( act.color_ini, (1.0f - fPerc) * AIfvar2 + fPerc * AIfvar1 );
 				}
 			}
 			break;
@@ -446,7 +464,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			case AI_BEHAVIOR_WAIT:
 			{
 				//keep old crouch state
-				m_AIcommands.bCrouched = act.bCrouched;
+				AIcommands.bCrouched = act.bCrouched;
 			}
 			break;
 			case AI_BEHAVIOR_RUN_SCRIPT:
@@ -469,13 +487,13 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 
 				if ( cvdeath.IsSet() )
 				{
-					m_AIcommands.nDeathCommand = (EActorDeathCommand)cvdeath.m_asINT32;
+					AIcommands.nDeathCommand = (EActorDeathCommand)cvdeath.m_asINT32;
 					//delete the death value after saving it to local var
 					act.varAIparams.DeleteVar( L"nDeathCommand" );
 				}
 
 				///--- enforce death commands ---
-				if ( m_AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_NONE )
+				if ( AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_NONE )
 				{
 					//daca nu am animatie de dead face direct splat daca poate (sau daca am primit param de bSplat din Hit Actor)
 					/*if ((act.actTemplate.animIDs[K_LVL_ACT_ANIM_DIE][0] == -1) || (act.varAIparams[L"bSplat")->m_asBool))
@@ -488,21 +506,21 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				if ( cvc.IsSet() )
 				{
 					//comanda splat on explode daca e clasa care trebuie
-					if ( (act._template.actorClass == K_LVL_ACT_CLASS_HUMAN) || (act._template.actorClass == K_LVL_ACT_CLASS_HOSTAGE) )
-						m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_SPLAT;
+					if ( (act._template.actorClass == K_ACT_CLASS_ENEMY) || (act._template.actorClass == K_ACT_CLASS_HOSTAGE) )
+						AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_SPLAT;
 					//get explo class
 					UINT32 unExploUID = act.GetUID();
 					if ( act.varAIparams[ L"bUseDamagerUID" ].m_asBool )
 						unExploUID = act.nLastDamageTakenFromUID;
 					//generate explo
-					level.AddDoofer_Explo( cvc.m_asUINT32, act.GetPosHeart(), unExploUID, K_LVL_ACT_CLASS_EXPLOSION, Vec2( 0.0f, 0.0f ), &act.bbox );
+					level.AddDoofer_Explo( cvc.m_asUINT32, act.GetPosHeart(), unExploUID, K_ACT_CLASS_EXPLOSION, Vec2( 0.0f, 0.0f ), &act.bbox );
 
 					//decal explo mark
 					//AddDecal(K_LVL_DECAL_LAYER_BACKWALLS, act.GetPosHeart(), ANM_ACTIVES_SPR_DECAL_EXPLOMARKS, randint(3), 0xffffffff);
 				}
 
 				///- when the player dies -
-				if ( act._template.actorClass == K_LVL_ACT_CLASS_PLAYER )
+				if ( act._template.actorClass == K_ACT_CLASS_PLAYER )
 				{
 					//m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_RESET_TO_ZERO;
 					//act.varAIparams.SetVarINT32(L"nDeathCommand", K_LVL_ACT_DEATHCMD_RESET_TO_ZERO);
@@ -533,7 +551,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					if ( level.m_arrStats[ K_LVL_STATS_PL1_LIVES + act.nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT ] > 0 )
 						bContinue = true;
 					//setam clasa pasiva ca sa putem sa distrugem cadavrul
-					act._template.actorClass = K_LVL_ACT_CLASS_HUMAN;
+					act._template.actorClass = K_ACT_CLASS_ENEMY;
 
 					//daca avem breaching charges aruncate in nivel le dezalocam
 					level.ReleaseBulletType( K_LVL_BULLET_BREACHING_CHARGE, act.GetUID() );
@@ -576,17 +594,17 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 						if ( AItimer1 <= 0.0f )
 						{
 							AItimer1 = 0.0f;
-							m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_SPLAT;
+							AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_SPLAT;
 						}
 					}
 				}
 				//only flesh can splat
-				if ( (m_AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_SPLAT) && (act._template.eMaterial != K_LVL_MATERIAL_FLESH) )
+				if ( (AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_SPLAT) && (act._template.eMaterial != K_LVL_MATERIAL_FLESH) )
 				{
-					m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_DEALLOCATE;
+					AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_DEALLOCATE;
 				}
 				//execute script on death if no other important command issued
-				if ( m_AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_RUNSCRIPT )
+				if ( AIcommands.nDeathCommand == K_LVL_ACT_DEATHCMD_RUNSCRIPT )
 				{
 					CVariant cvc2 = act.varAIparams[ L"sDeathScript" ];
 					if ( cvc2.eType == CVariant::K_ARGTYPE_STRING )
@@ -594,7 +612,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 						act.StartScript( cvc2.m_strArg.text );
 						//clear script and death command
 						act.varAIparams.DeleteVar( L"sDeathScript" );
-						m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_NONE;
+						AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_NONE;
 					}
 				}
 			}
@@ -613,7 +631,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 		//!!! keep old crouched state if short stun so it doesn't jitter when shot
 		if ( act.fStunTimer < K_LVL_MIN_STUN_DIZZY_DURATION )
 		{
-			m_AIcommands.bCrouched = act.bCrouched;
+			AIcommands.bCrouched = act.bCrouched;
 		}
 	}
 
@@ -674,13 +692,13 @@ CAIEvent* CActorAIComponent::GetMostImportantAIEvent( CActor& act, EAIEventType 
 		//ignore actor if different from class foe filters
 		/*
 		int nIgnore = 0, nIgnoreConditions = 0;
-		if (callerActor->actTemplate.foeClassFilter1 != K_LVL_ACT_CLASS_ANY)
+		if (callerActor->actTemplate.foeClassFilter1 != K_ACT_CLASS_ANY)
 		{
 			nIgnoreConditions++;
 			if (evt->ownerClass != callerActor->actTemplate.foeClassFilter1)
 				nIgnore++;
 		}
-		if (callerActor->actTemplate.foeClassFilter2 != K_LVL_ACT_CLASS_ANY)
+		if (callerActor->actTemplate.foeClassFilter2 != K_ACT_CLASS_ANY)
 		{
 			nIgnoreConditions++;
 			if (evt->ownerClass != callerActor->actTemplate.foeClassFilter2)
@@ -742,7 +760,7 @@ void CActorAIComponent::SetAIState( CActor& actor, CAIState* pNewState )
 	///1. clean exit old state:
 	OnActorBehaviorFinished( actor, actor.GetCurrentBehavior() );
 	///2. sets the new behavior
-	m_AIsensorInfo.m_bEnabled = true; //enable sensors on new state
+	AIsensor.m_bEnabled = true; //enable sensors on new state
 	m_pAIcurrentState = pNewState;
 	int newBehaviorIdx = -1; //defaults on no behavior
 							 //daca am stare not null si are behaviors il setez pe primul
@@ -792,7 +810,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 	// reset behavior timer
 	m_fAIbehaviorTimer = 0.0f;
 
-	m_AIcommands.Reset();
+	AIcommands.Reset();
 	actor.fFOVPercent = 1.0f;
 
 	switch ( pNewBehavior->nType )
@@ -875,7 +893,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		break;
 		case AI_BEHAVIOR_IDLE:
 		{
-			m_AIcommands.vAimVec = { -100.0f, -100.0f };
+			AIcommands.vAimVec = { -100.0f, -100.0f };
 		}
 		break;
 		case AI_BEHAVIOR_SET_ANIMSET:
@@ -1173,7 +1191,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			actor.fStunTimer = 0.0f;
 			//death timer for players or splat timer for others
 			AItimer1 = 0.0f;
-			if ( actor._template.actorClass != K_LVL_ACT_CLASS_PLAYER )
+			if ( actor._template.actorClass != K_ACT_CLASS_PLAYER )
 			{
 				CVariant* cvt = &pNewBehavior->m_vcolParams[ L"fSplatTimer" ];
 				if ( cvt->eType == CVariant::K_ARGTYPE_FLOAT )
@@ -1181,9 +1199,9 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			}
 
 			//remove icons
-			m_AIcommands.ResetMoveCommands();
+			AIcommands.ResetMoveCommands();
 			//reset color
-			m_AIcommands.nColor = actor.color_ini;
+			AIcommands.nColor = actor.color_ini;
 			//stop weapons
 			actor.Weapons()->StopReloading();
 			//trateaza death commands din script
@@ -1203,7 +1221,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				actor.varAIparams.AddVariant( cvs );
 			}
 
-			if ( actor._template.actorClass == K_LVL_ACT_CLASS_PLAYER )
+			if ( actor._template.actorClass == K_ACT_CLASS_PLAYER )
 			{
 				//timerul este folosit ca sa nu sara camera de pe cadavru prea repede
 				AItimer1 = K_LVL_PLAYER_DEATH_TIMER;
@@ -1218,14 +1236,14 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				//dam remove la particles de pe interfata cand moare un player
 				__Particles().RemoveAllFromLayer( K_PART_LAYER_INTERFACE_LIGHT );
 			}
-			else if ( actor._template.actorClass >= K_LVL_ACT_CLASS_HUMAN )
+			else if ( actor._template.actorClass >= K_ACT_CLASS_ENEMY )
 			{
 				if ( !bSpawnedDead )
 				{
 					//counts online coop victims too but keeps achievements separated (steam counter)
 					App_IncreaseGamestat( K_MEMID_GAMESTATS_ENEMIES_KILLED, 1 );
 					//statistics for each class
-					CActor* pPlayer = level.GetPlayerByUID( m_AIsensorInfo.m_lastInteractingActorUID );
+					CActor* pPlayer = level.GetPlayerByUID( AIsensor.m_lastInteractingActorUID );
 					if ( (pPlayer != null) && (!level.IsNetworkPlayer( pPlayer )) )
 					{
 						switch ( g_playerSelScr.m_arrPlayers[ pPlayer->nPlayerOrdinal ].eType )
@@ -1263,7 +1281,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 
 			//hostages specials
 			/*
-			if ( actor->_template.actorClass == K_LVL_ACT_CLASS_HOSTAGE )
+			if ( actor->_template.actorClass == K_ACT_CLASS_HOSTAGE )
 			{
 				//save stats for saviour only if deallocating by itself (not killed)
 				if ( dcmd == K_LVL_ACT_DEATHCMD_DEALLOCATE )
@@ -1289,7 +1307,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 					CActor* pPlayer = GetPlayerByUID( actor->nLastDamageTakenFromUID );
 					if ( pPlayer != null )
 					{
-						HitActor( pPlayer, pPlayer->fLife * 0.25f, 0, K_LVL_ACT_CLASS_TRAP, null,
+						HitActor( pPlayer, pPlayer->fLife * 0.25f, 0, K_ACT_CLASS_TRAP, null,
 							K_LVL_BULLET_FLAG_NO_IMPACT_PARTICLES | K_LVL_BULLET_FLAG_NOT_BALLISTIC | K_LVL_BULLET_FLAG_IGNORE_ARMOR | K_LVL_BULLET_FLAG_IGNORE_COVER | K_LVL_BULLET_FLAG_NO_DECALS, 10, 0.0f );
 						if ( !IsNetworkPlayer( pPlayer ) )
 						{

@@ -263,7 +263,7 @@ VecProj CActor::GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 	v_muzzle_vec.y *= (float)c_graphics->GetFlipDirX();
 	// rotate weapon muzzle vector and add it to the projected position of the mount
 	Mat mrot;
-	float aim_angle = UTMath::GetVectorAngle( c_AI->m_AIcommands.vAimVec );
+	float aim_angle = UTMath::GetVectorAngle( c_AI->AIcommands.vAimVec );
 	MUMatRotZ( &mrot, aim_angle );
 	MUVec2TransformCoord( &v_muzzle_vec, &v_muzzle_vec, &mrot );
 	Vec2 muzzle_proj = vp_mount.xy_proj + v_muzzle_vec;
@@ -350,9 +350,9 @@ void CActor::ComputeAttackStatus()
 	{
 		case K_ACT_ATTACK_IDLE:
 		{
-			eAttackStatus = c_AI->m_AIcommands.eAttackCommand;
+			eAttackStatus = c_AI->AIcommands.eAttackCommand;
 			// only switch to alt weapon if we can shoot
-			if ( c_AI->m_AIcommands.eAttackCommand == K_ACT_ATTACK_SHOOTING_ALT )
+			if ( c_AI->AIcommands.eAttackCommand == K_ACT_ATTACK_SHOOTING_ALT )
 			{
 				CWeapon* wpn = c_weapons->GetWeapon( K_WPNSLOT_ALTFIRE );
 				if ( !wpn->IsReadyToShoot() )
@@ -384,7 +384,7 @@ void CActor::ComputeAttackStatus()
 				if ( wpn->_template.nReloadUnitSize >= wpn->_template.nClipSize )
 				{
 					// reloading can be interrupted by the following commands
-					if ( c_AI->m_AIcommands.eAttackCommand == K_ACT_ATTACK_MELEE )
+					if ( c_AI->AIcommands.eAttackCommand == K_ACT_ATTACK_MELEE )
 					{
 						wpn->StopReloading();
 						eAttackStatus = K_ACT_ATTACK_IDLE;
@@ -521,20 +521,20 @@ void CActor::ProcessAICommands( CLevel& level )
 	bool bCrouchedOldState = bCrouched;
 
 	//set crouch
-	bCrouched = c_AI->m_AIcommands.bCrouched;
+	bCrouched = c_AI->AIcommands.bCrouched;
 	///--- aiming ---
 	// get aim vector from AI commands, if set
-	if ( !UTMath::Vec2IsZero( c_AI->m_AIcommands.vAimVec ) )
-		vAim = c_AI->m_AIcommands.vAimVec;
+	if ( !UTMath::Vec2IsZero( c_AI->AIcommands.vAimVec ) )
+		vAim = c_AI->AIcommands.vAimVec;
 
 	///--- speed and movement ---
-	if ( c_AI->m_AIcommands.bThrust )
+	if ( c_AI->AIcommands.bThrust )
 	{
 		//add speed
 		float fspeed = _template.fSpeedMove;
 
 		// set final speed
-		speed = c_AI->m_AIcommands.vMoveDir * fspeed;
+		speed = c_AI->AIcommands.vMoveDir * fspeed;
 	}
 	else
 	{
@@ -542,15 +542,15 @@ void CActor::ProcessAICommands( CLevel& level )
 	}
 
 	//comanda culoare
-	if ( c_AI->m_AIcommands.nColor != 0 )
+	if ( c_AI->AIcommands.nColor != 0 )
 	{
-		color = c_AI->m_AIcommands.nColor;
+		color = c_AI->AIcommands.nColor;
 	}
 
 	//death elements (intra doar daca e declarat mort in senzor sau daca i se forteaza starea de dead)
-	if ( (c_AI->m_AIsensorInfo.b_IsDead) || (GetCurrentBehavior() == AI_BEHAVIOR_DEAD) )
+	if ( (c_AI->AIsensor.b_IsDead) || (GetCurrentBehavior() == AI_BEHAVIOR_DEAD) )
 	{
-		switch ( c_AI->m_AIcommands.nDeathCommand )
+		switch ( c_AI->AIcommands.nDeathCommand )
 		{
 			case K_LVL_ACT_DEATHCMD_RESET_TO_ZERO:
 			{
@@ -583,11 +583,6 @@ void CActor::ProcessAICommands( CLevel& level )
 					{
 						DWORD dwCol = 0xff671010;
 						int nSubType = 0;
-						if ( _template.actorClass == K_LVL_ACT_CLASS_ZOMBIE )
-						{
-							dwCol = 0xff82b600;
-							nSubType = 1;
-						}
 						for ( int ll = 0; ll < 6; ll++ )
 						{
 							level.AddDoofer( K_DOOFER_MEAT, AABB::GetRandomPointInBox( genbox ), &Vec2( randfloatsgn( 50.0f ) + bulletSpeed.x * 50.0f, -130.0f - randfloat( 100.0f ) ), &g_vecGravityOld, nSubType );
@@ -609,7 +604,7 @@ void CActor::ProcessAICommands( CLevel& level )
 				}
 
 				//players don't deallocate. They only become invisible.
-				if ( _template.actorClass == K_LVL_ACT_CLASS_PLAYER )
+				if ( _template.actorClass == K_ACT_CLASS_PLAYER )
 				{
 					fLife = 0.0f;
 					bSkipRender = true;
@@ -635,7 +630,7 @@ void CActor::ProcessAICommands( CLevel& level )
 			break;
 		}
 		//remove death command after execution
-		c_AI->m_AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_EMPTY;
+		c_AI->AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_EMPTY;
 	}
 
 
@@ -967,7 +962,7 @@ void CActor::ProcessExtras( CLevel& level )
 		}
 
 		// check touch/interact
-		if ( ( c_AI->m_AIcommands.bInteract ) && ( pClosestTouchable != nullptr ) )
+		if ( ( c_AI->AIcommands.bInteract ) && ( pClosestTouchable != nullptr ) )
 		{
 			BuildActionsList();
 			if ( arrInteractOptions.Count() > 0 )
@@ -1004,7 +999,7 @@ bool CActor::CheckShoot( CLevel& level )
 
 	EActorClass nFinalClass = shooter->_template.actorClass;
 	//bullet has template class, set it to final class
-	if ( weapon->_template.bulletTemplate.eClass != K_LVL_ACT_CLASS_ANY )
+	if ( weapon->_template.bulletTemplate.eClass != K_ACT_CLASS_ANY )
 		nFinalClass = weapon->_template.bulletTemplate.eClass;
 
 	//save local bullet template copy
@@ -1097,7 +1092,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 	//recon targeted enemies die 30% faster
 	if ( this->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_TARGETED )
 	{
-		if ( ( pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER ) || ( pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION ) )
+		if ( ( pBullet->actorClass == K_ACT_CLASS_PLAYER ) || ( pBullet->actorClass == K_ACT_CLASS_EXPLOSION ) )
 		{
 			//fVar1 contains the actual damage multiplier
 			fHitPointsTaken += fHitPointsTaken * this->cDamageOverTime.fVar1;
@@ -1106,7 +1101,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 	//recon targeted allies take less damage
 	if ( this->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_TARGETED_ALLY )
 	{
-		if ( pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER )
+		if ( pBullet->actorClass == K_ACT_CLASS_PLAYER )
 			fHitPointsTaken -= fHitPointsTaken * 0.5f;
 	}
 
@@ -1231,7 +1226,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 		if ( this->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_INVINCIBLE )
 			fLifeTaken = 0.0f;
 
-		if ( this->_template.actorClass == K_LVL_ACT_CLASS_PLAYER )
+		if ( this->_template.actorClass == K_ACT_CLASS_PLAYER )
 		{
 			float fDecLife = fLifeTaken;
 
@@ -1279,7 +1274,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 	}
 
 	//event got_hit
-	if ( ( this->fLife > 0.0f ) && ( this->_template.actorClass > K_LVL_ACT_CLASS_PLAYER ) )
+	if ( ( this->fLife > 0.0f ) && ( this->_template.actorClass > K_ACT_CLASS_PLAYER ) )
 	{
 		//adaug eventuri de GOT_HIT doar pe clasele HUMAN, cand sunt lovite de catre player
 		//find shooter pos. defaults on pos based on bullet speed
@@ -1293,7 +1288,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 			evtpos = pPlayer->GetPosHeart();
 
 		//only add "got hit" events for enemy classes
-		if (pBullet->actorClass >= K_LVL_ACT_CLASS_EXPLOSION)
+		if (pBullet->actorClass >= K_ACT_CLASS_EXPLOSION)
 		{
 			AddAIEvent(K_LVL_AI_EVENT_GOT_HIT, pBullet->ownerUID, pBullet->actorClass, evtpos, -1.0f, 1.2f, this->GetUID());
 		}
@@ -1304,10 +1299,10 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 	if ( ( this->fLife <= 0.0f ) && ( this->_template.eMaterial == K_LVL_MATERIAL_FLESH ) )
 	{
 		//give strategic points on death
-		if ( ( fOldLife > 0.0f ) && ( this->_template.actorClass >= K_LVL_ACT_CLASS_HUMAN ) )
+		if ( ( fOldLife > 0.0f ) && ( this->_template.actorClass >= K_ACT_CLASS_ENEMY ) )
 		{
 			//you get points if enemy killed by player or explo
-			if ( ( ( pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER ) || ( pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION ) ) && ( this->_template.actorClass != K_LVL_ACT_CLASS_PLAYER ) )
+			if ( ( ( pBullet->actorClass == K_ACT_CLASS_PLAYER ) || ( pBullet->actorClass == K_ACT_CLASS_EXPLOSION ) ) && ( this->_template.actorClass != K_ACT_CLASS_PLAYER ) )
 			{
 				if ( this->UID != pBullet->ownerUID )
 				{
@@ -1326,7 +1321,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 		bool bSplatActor = false;
 
 		//very low life from the first hit? splat!
-		if ( ( pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT ) && ( this->GetCurrentBehavior() != AI_BEHAVIOR_DEAD ) && ( pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER ) && ( this->fLife < -this->_template.fLife * 0.5f ) )
+		if ( ( pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT ) && ( this->GetCurrentBehavior() != AI_BEHAVIOR_DEAD ) && ( pBullet->actorClass == K_ACT_CLASS_PLAYER ) && ( this->fLife < -this->_template.fLife * 0.5f ) )
 		{
 			bSplatActor = true;
 			//if bullets lose power then only splat from close quarters
@@ -1334,7 +1329,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 				bSplatActor = false;
 		}
 		//grenades splat dead bodies
-		if ( ( this->GetCurrentBehavior() == AI_BEHAVIOR_DEAD ) && ( pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION ) && ( fLifeTaken >= this->_template.fLife ) )
+		if ( ( this->GetCurrentBehavior() == AI_BEHAVIOR_DEAD ) && ( pBullet->actorClass == K_ACT_CLASS_EXPLOSION ) && ( fLifeTaken >= this->_template.fLife ) )
 			bSplatActor = true;
 		//if dead but you keep kicking him it explodes
 		if ( ( this->GetCurrentBehavior() == AI_BEHAVIOR_DEAD ) && ( pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT ) && ( this->fLife < -this->_template.fLife ) )
@@ -1412,7 +1407,7 @@ CBulletHitReturnData CActor::HitActor( float fDamage, UINT32 dwOwnerUID, EActorC
 */
 void CActor::SetStun( float fStunDuration )
 {
-	if ( ( this->_template.actorClass != K_LVL_ACT_CLASS_HUMAN ) && ( this->_template.actorClass != K_LVL_ACT_CLASS_FRIENDLY ) )
+	if ( ( this->_template.actorClass != K_ACT_CLASS_ENEMY ) && ( this->_template.actorClass != K_ACT_CLASS_FRIENDLY ) )
 		return;
 
 	if ( ( this->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET ) != 0 )

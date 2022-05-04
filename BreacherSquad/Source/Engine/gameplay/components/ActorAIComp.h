@@ -19,8 +19,8 @@ public:
 	CStringHash				AIstrvar1, AIstrvar2;
 
 public:
-	CAICommands				m_AIcommands;				// Commands issued by AI to be executed by the actor
-	CAISensorInfo			m_AIsensorInfo;				// AI sensory information
+	CAICommands				AIcommands;					// Commands issued by AI to be executed by the actor
+	CAISensorInfo			AIsensor;					// AI sensory information
 	CAIState*				m_pAIcurrentState;
 	int						m_nAIcurrentBehaviorIdx;	// current behaviour index (in current state) or -1 when not set
 	float					m_fAIbehaviorTimer;			// timer used for timed behaviors

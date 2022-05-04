@@ -45,7 +45,7 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 				for ( int kk = 0; kk < m_arrActors.GetSize(); kk++ )
 				{
 					//skip actors that are: hidden, dead, players or not a target
-					if ( (!m_arrActors[ kk ]->IsAlive()) || (m_arrActors[ kk ]->_template.actorClass == K_LVL_ACT_CLASS_PLAYER) ||
+					if ( (!m_arrActors[ kk ]->IsAlive()) || (m_arrActors[ kk ]->_template.actorClass == K_ACT_CLASS_PLAYER) ||
 						((m_arrActors[ kk ]->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET) != 0) )
 						continue;
 					if ( m_arrActors[ kk ]->bbox.Intersects( bbox ) )

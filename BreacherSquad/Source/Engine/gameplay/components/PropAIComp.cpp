@@ -50,9 +50,9 @@ bool CPropAIComponent::Update( CProp& active, float dTime, CLevel& level )
 			{
 				//m_interfaceIGM.SetBombTimer(0.0f);
 				//add some explosions so everybody will die
-				level.AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy, active.UID, K_LVL_ACT_CLASS_EXPLOSION );
-				level.AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy + Vec2( 32.0f, 0.0f ), active.UID, K_LVL_ACT_CLASS_EXPLOSION );
-				level.AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy - Vec2( 32.0f, 0.0f ), active.UID, K_LVL_ACT_CLASS_EXPLOSION );
+				level.AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy, active.UID, K_ACT_CLASS_EXPLOSION );
+				level.AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy + Vec2( 32.0f, 0.0f ), active.UID, K_ACT_CLASS_EXPLOSION );
+				level.AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy - Vec2( 32.0f, 0.0f ), active.UID, K_ACT_CLASS_EXPLOSION );
 
 				//__Particles().AddParticle( ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &active.pos.xy, NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM );
 

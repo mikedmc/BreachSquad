@@ -100,7 +100,7 @@ bool CLevel::OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantMap 
 bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executorUID, UINT32 scriptUID)
 {
 	//get script instruction
-	eLVLScriptInstruction eInstruction = (eLVLScriptInstruction)GetListIndexByNameHash(instr->m_instruction.textHash, eLVLScriptInstructionNames, instr_COUNT);
+	eLVLScriptInstruction eInstruction = (eLVLScriptInstruction)GetListIndexByNameHash(instr->m_instruction.textHash, eLVLScriptInstructionNames, ARRAY_SIZE(eLVLScriptInstructionNames));
 	if (eInstruction == -1)
 	{
 		return false;
@@ -237,7 +237,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			if (vcAIname != null)
 			{
 				//AI STATE
-				aistate = (EAIstate)GetListIndexByNameHash(vcAIname->m_strArg.getHash(), EAIstate_names, K_AI_STATES_CNT);
+				aistate = (EAIstate)GetListIndexByNameHash(vcAIname->m_strArg.getHash(), EAIstate_names, ARRAY_SIZE(EAIstate_names));
 				//it is ok if aistate becomes UNDEFINED because we use this instruction to erase the AI too
 			}
 			//AI TARGET
@@ -399,7 +399,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			int nAmmoLeft = active->varAIparams[L"n_ammoLeft")->m_asINT32;
 
 			CActor* toucheractor = GetActorByUID(active->GetToucherUID());
-			if ((toucheractor == null) || (toucheractor->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER))
+			if ((toucheractor == null) || (toucheractor->actTemplate.actorClass != K_ACT_CLASS_PLAYER))
 			{
 				LOG(L"SCRIPT::ACTIVE_AMMOBOX_GIVE_AMMO - Could not find Actor Toucher UID or toucher not a player!\n");
 				return true;
@@ -459,7 +459,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			int nHealthLeft = active->varAIparams[L"n_healthLeft")->m_asINT32;
 
 			CActor* toucheractor = GetActorByUID(active->GetToucherUID());
-			if ((toucheractor == null) || (toucheractor->actTemplate.actorClass != K_LVL_ACT_CLASS_PLAYER))
+			if ((toucheractor == null) || (toucheractor->actTemplate.actorClass != K_ACT_CLASS_PLAYER))
 			{
 				LOG(L"SCRIPT::ACTIVE_HEALTHBOX_GIVE_HEALTH - Could not find Actor Toucher UID or toucher not a player!\n");
 				return true;
@@ -678,7 +678,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				LOG(L"SCRIPT::IACTIVE_ADD_AI_EVENT - event type param missing!\n");
 				return true;
 			}
-			EAIEventType evttype = (EAIEventType)GetListIndexByNameHash(vcEvtType->m_strArg.textHash, EAIEventTypeNames, K_LVL_AI_EVENTS_CNT);
+			EAIEventType evttype = (EAIEventType)GetListIndexByNameHash(vcEvtType->m_strArg.textHash, EAIEventTypeNames, ARRAY_SIZE(EAIEventTypeNames));
 			if (evttype < 0)
 			{
 				LOG(L"SCRIPT::IACTIVE_ADD_AI_EVENT - event type [%s] not found!\n", vcEvtType->m_strArg.text);
@@ -690,10 +690,10 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				fRange = vcEvtRange->m_asFloat;
 			if (vcEvtDuration->eType == CVariant::K_ARGTYPE_FLOAT)
 				fDuration = vcEvtDuration->m_asFloat;
-			EActorClass evtClass = K_LVL_ACT_CLASS_PASSIVE;
+			EActorClass evtClass = K_ACT_CLASS_PASSIVE;
 			if (vcEvtClass->eType == CVariant::K_ARGTYPE_STRING)
 			{
-				EActorClass retEvtClass = (EActorClass)GetListIndexByNameHash(vcEvtClass->m_strArg.textHash, EActorClassNames, K_LVL_ACT_CLASSES_COUNT);
+				EActorClass retEvtClass = (EActorClass)GetListIndexByNameHash(vcEvtClass->m_strArg.textHash, EActorClassNames, ARRAY_SIZE(EActorClassNames));
 				if (retEvtClass >= 0)
 					evtClass = retEvtClass;
 			}
@@ -965,9 +965,9 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 
-			CDamageOverTime::EDoTType lDoTType = (CDamageOverTime::EDoTType)GetListIndexByNameHash(vcDoT->m_strArg.getHash(), EDoTTypeNames, CDamageOverTime::K_LVL_DoT_COUNT);
+			CDamageOverTime::EDoTType lDoTType = (CDamageOverTime::EDoTType)GetListIndexByNameHash(vcDoT->m_strArg.getHash(), EDoTTypeNames, ARRAY_SIZE(EDoTTypeNames));
 
-			SetActorDoT(targetAct, lDoTType, fDuration, 0.0f, K_LVL_ACT_CLASS_NOT_SET, K_LVL_ACT_CLASS_NOT_SET, 0);
+			SetActorDoT(targetAct, lDoTType, fDuration, 0.0f, K_ACT_CLASS_NOT_SET, K_ACT_CLASS_NOT_SET, 0);
 
 			return true;
 		}
@@ -985,7 +985,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//#TODO: add more params to the script
-			targetAct->HitActor(fDamage, 0, K_LVL_ACT_CLASS_TRAP, NULL, K_LVL_BULLET_FLAG_IGNORE_ARMOR, 5, 5.0f);
+			targetAct->HitActor(fDamage, 0, K_ACT_CLASS_TRAP, NULL, K_LVL_BULLET_FLAG_IGNORE_ARMOR, 5, 5.0f);
 
 			return true;
 		}

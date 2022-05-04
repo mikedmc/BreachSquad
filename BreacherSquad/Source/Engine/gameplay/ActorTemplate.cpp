@@ -6,7 +6,7 @@ CActorTemplate::CActorTemplate() :
 	arrSkinsCnt( 0 ),
 	//generic params
 	fLife( K_NOT_SET ), fArmor( K_NOT_SET ), fSpeedMove( K_NOT_SET ),
-	actorClass( K_LVL_ACT_CLASS_NOT_SET ),
+	actorClass( K_ACT_CLASS_NOT_SET ),
 	//more important values
 	eMaterial( K_LVL_MATERIAL_UNKNOWN ), eCaps( K_ACT_CAPS_NONE ),
 	AItemplate( nullptr ), fMass( 100.0f ),
@@ -79,9 +79,9 @@ void CActorTemplate::OverwriteGenericDataFromTemplate(CActorTemplate* pTemplate)
 	}
 	//#TEMP: cand am templates aproape gata
 	/*
-	if (pTemplate->actorClass != K_LVL_ACT_CLASS_NOT_SET) { actorClass = pTemplate->actorClass; }
-	if (pTemplate->foeClassFilter1 != K_LVL_ACT_CLASS_ANY) { foeClassFilter1 = pTemplate->foeClassFilter1; }
-	if (pTemplate->foeClassFilter2 != K_LVL_ACT_CLASS_ANY) { foeClassFilter2 = pTemplate->foeClassFilter2; }
+	if (pTemplate->actorClass != K_ACT_CLASS_NOT_SET) { actorClass = pTemplate->actorClass; }
+	if (pTemplate->foeClassFilter1 != K_ACT_CLASS_ANY) { foeClassFilter1 = pTemplate->foeClassFilter1; }
+	if (pTemplate->foeClassFilter2 != K_ACT_CLASS_ANY) { foeClassFilter2 = pTemplate->foeClassFilter2; }
 	if (pTemplate->eMaterial != K_LVL_MATERIAL_UNKNOWN) { eMaterial = pTemplate->eMaterial; }
 	//add new caps (should XOR if need to disable them)
 	if(pTemplate->eCaps != 0) eCaps = pTemplate->eCaps;
@@ -119,9 +119,9 @@ void CActorTemplate::AddGenericDataFromTemplate(CActorTemplate* pTemplate)
 
 	//#TEMP: cand am templates aproape gata
 	/*
-	if (pTemplate->actorClass != K_LVL_ACT_CLASS_NOT_SET) { actorClass = pTemplate->actorClass; }
-	if (pTemplate->foeClassFilter1 != K_LVL_ACT_CLASS_ANY) { foeClassFilter1 = pTemplate->foeClassFilter1; }
-	if (pTemplate->foeClassFilter2 != K_LVL_ACT_CLASS_ANY) { foeClassFilter2 = pTemplate->foeClassFilter2; }
+	if (pTemplate->actorClass != K_ACT_CLASS_NOT_SET) { actorClass = pTemplate->actorClass; }
+	if (pTemplate->foeClassFilter1 != K_ACT_CLASS_ANY) { foeClassFilter1 = pTemplate->foeClassFilter1; }
+	if (pTemplate->foeClassFilter2 != K_ACT_CLASS_ANY) { foeClassFilter2 = pTemplate->foeClassFilter2; }
 	if (pTemplate->eMaterial != K_LVL_MATERIAL_UNKNOWN) { eMaterial = pTemplate->eMaterial; }
 	//XOR in new caps:
 	eCaps ^= pTemplate->eCaps;
