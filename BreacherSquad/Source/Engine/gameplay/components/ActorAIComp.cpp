@@ -74,7 +74,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			// reset internal event
 			m_AIsensorInfo.evtInternal.Reset();
 			//check for targets or other AI events
-			CActor* targetActor = nullptr;// GetClosestTarget(actor, act.actTemplate.foeClassFilter1, act.actTemplate.foeClassFilter2);
+			CActor* targetActor = __Sim().GetClosestTarget(&act /*, act._template.foeClassFilter1, act.actTemplate.foeClassFilter2*/);
 			if ( targetActor != nullptr )
 			{
 				//float enemyDst = MUVec2Len( &(targetActor->GetPosHeart() - act.GetPosHeart()) );
@@ -135,6 +135,10 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			if ( m_AIsensorInfo.m_AIevent != evtFinal )
 			{
 				m_AIsensorInfo.m_AIevent = evtFinal;
+				if(m_AIsensorInfo.m_AIevent.nType >= 0)
+					LOG( L"%s checks event: %s \n",act._template.shID.text , EAIEventTypeNames[m_AIsensorInfo.m_AIevent.nType].text );
+				else 
+					LOG( L"%s checks event: NONE \n", act._template.shID.text );
 
 				//----------------------------------------
 				//	THINK - decide best behavior
@@ -153,7 +157,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					else
 					{
 						if (newState != nullptr)
-							DebugPrintW(L"evttype:%d set_state: %s\n", m_AIsensorInfo.m_AIevent.nType, newState->name.text);
+							LOG(L"evttype:%d set_state: %s\n", m_AIsensorInfo.m_AIevent.nType, newState->name.text);
 
 						//state may also be null when no state is associated with an event
 						SetAIState( act, newState );
@@ -732,6 +736,8 @@ void CActorAIComponent::SetAIState( CActor& actor, CAIState* pNewState )
 {
 	if ( (m_pAIcurrentState == pNewState) || (pNewState == nullptr) )
 		return;
+
+	LOG( L"->SetState: %s - %s", actor._template.shID.text, pNewState->name.text );
 
 	///1. clean exit old state:
 	OnActorBehaviorFinished( actor, actor.GetCurrentBehavior() );

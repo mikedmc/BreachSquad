@@ -5,6 +5,7 @@
 #include "gameplay/Tile.h"
 
 #include "gameplay/PhysicsPoint.h"
+#include "gameplay/ActorTypes.h"
 #include "gameplay/LevelTypes.h"
 #include "gameplay/components/ActorAICompTypes.h"
 #include "gameplay/Level_doofers.h"
@@ -160,14 +161,6 @@ public:
 	void					SetActorDoT(CActor* act, CDamageOverTime::EDoTType eType, float fDuration, float fDamagePerSec, EActorClass eExcludedClass, EActorClass eFilterClass, DWORD dwOwnerUID);
 	//Kills the actor
 	void					KillActor(CActor * actor, bool bSplatTarget = false);
-	// Use it to damage enemies and player
-	// @fHitPointsTaken - negative value - kills it immediately
-	// RETURNS: damage made, type of material hit.
-	CBulletHitReturnData	HitActor(CActor * actor, CBullet * pBullet, Vec2 * pvProjectileMomentum = NULL);
-	
-	//hits the actor with other things than bullets
-	CBulletHitReturnData	HitActor(CActor * actor, float fDamage, UINT32 dwOwnerUID, EActorClass eOwnerClass, Vec2 *vDir = null, UINT32 dwBulletFlags = 0, int nArmorPiercingRating = 100, float fStunDuration = 0.0f);
-	void					SetActorStun(CActor* actor, float fStunDuration);
 	// Spawns a player
 	void					SpawnPlayer(Vec2 spawnPos, int nPlayerOrdinal, int nAnimset = 0);
 	// Spawns an actor (NPC)
@@ -206,11 +199,11 @@ public:
 	CDoubleLinkedPool<CPhysicsPoint>	m_poolPhysPts; //pool de obiecte fizice
 	void					UpdatePhysicsPoints(float dTime);
 	///--- bullets linked pool ---
-	CArray<CBullet*>		m_arrBullets;			//pool-ul de gloante
-	int						m_bulletsMeshIdx;		//idx gloante
+	CArray<CBullet*>		m_arrBullets;			// bullets pool
+	int						m_bulletsMeshIdx;		// idx mesh bullets
 
 	///--- room occluders ---
-	int						m_fogofwarMeshIdx;		//idx mesh occludere
+	int						m_fogofwarMeshIdx;		//idx mesh occluders
 
 
 	///--- BULLETS ---
@@ -345,9 +338,13 @@ public:
 	void					Paint();
 	// paints final res effects (water, distortion, icons, etc)
 	HRESULT					PaintUsingFinalRTT();
-	
+	// returns pointer to synced RNG
+	inline CRandom&	RNG() {
+		return m_rand;
+	}
+
 ///--- interfaces ---
-	CSpriteLib		m_sprInterface;
+	CSpriteLib				m_sprInterface;
 	//interfata in sine
 	CIngameGUI				m_interfaceIGM;
 	//controlul de ingame hints
@@ -360,9 +357,9 @@ public:
 	//activeaza cel mai apropiat obiect, primul gasit
 	void					TouchClosestActive(CActor * pToucherAct, float dTime);
 	// RETURNS: true - instr processed, false - not processed
-	bool					ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executorUID, UINT32 scriptUID);
-	bool					OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantMap * pArrScriptVars);
-	char const *			GetScriptProcessorName(void) { return "CLevel"; }
+	bool					ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executorUID, UINT32 scriptUID) override;
+	bool					OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantMap * pArrScriptVars) override;
+	char const *			GetScriptProcessorName() override { return "CLevel"; }
 	// functie ajutatoare pentru procesare instructiuni. Gaseste activ in fn de valoare parametru: SELF pt caller, TARGET pentru targetID si numar pt ID efectiv
 	IActiveInterface*		ScriptGetActiveInterfaceByTargetParam(CVariant* vcTarget, UINT32 executorUID);
 
@@ -376,8 +373,8 @@ private:
 	int						BuildLightVolume360(CLight * light, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt);
 
 public: //--- framework methods ---
-	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
-	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
-	OPRESULT OnLostDevice(void* pUserContext = NULL);
-	OPRESULT OnDestroyDevice(void* pUserContext = NULL);
+	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr);
+	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr);
+	OPRESULT OnLostDevice(void* pUserContext = nullptr);
+	OPRESULT OnDestroyDevice(void* pUserContext = nullptr);
 };

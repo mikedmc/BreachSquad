@@ -703,6 +703,7 @@
     <ClCompile Include="Source\Engine\gameplay\AreasInventory.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\ActiveAIComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\ActorAIComp.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\components\ActorAICompTypes.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\CollAIComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\LightAIComp.cpp" />
     <ClCompile Include="Source\Engine\gameplay\components\PhysPtComp.cpp" />

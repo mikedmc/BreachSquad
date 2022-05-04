@@ -6,381 +6,6 @@
 //#pragma warning(disable : 4706)  //assignment within conditional expression
 
 
-CBulletHitReturnData CLevel::HitActor( CActor* actor, CBullet *pBullet, Vec2* pvProjectileMomentum )
-{
-	CBulletHitReturnData retData;
-	retData.eMaterial = actor->_template.eMaterial;
-	retData.bPenetratedShield = false;
-	retData.bKilledTarget = false;
-	retData.bArmorHit = false;
-
-	if ( ( actor == null ) || ( pBullet == null ) )
-	{
-		ErrorBox( K_ERR_WARNING, L"CLevel::HitActor invalid params!" );
-		return retData;
-	}
-
-	bool bGoreEnabled = UTApp().m_Settings.bGoreEnabled;
-
-	float fHitPointsTaken = pBullet->fDamage;
-	float fActorInitialLife = actor->fLife;
-	//recon targeted enemies die 30% faster
-	if ( actor->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_TARGETED )
-	{
-		if ( ( pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER ) || ( pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION ) )
-		{
-			//fVar1 contains the actual damage multiplier
-			fHitPointsTaken += fHitPointsTaken * actor->cDamageOverTime.fVar1;
-		}
-	}
-	//recon targeted allies take less damage
-	if ( actor->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_TARGETED_ALLY )
-	{
-		if ( pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER )
-			fHitPointsTaken -= fHitPointsTaken * 0.5f;
-	}
-
-	float fOldLife = actor->fLife;
-	if ( fOldLife > 0.0f )
-	{
-		//signal damage made by coloring them in red
-		//actor->nTookDamageFrames = 4;
-	}
-
-	float fBulletLostEnergy = 0.0f;
-	float fLifeTaken = 0.0f; //cata viata ia din actor. Se foloseste doar local.
-	float fShieldPointsTaken = 0.0f; //shield taken
-	if ( fHitPointsTaken < 0.0f )	//kill actor command
-	{
-		fBulletLostEnergy = actor->fLife + actor->fArmor;
-		fLifeTaken = fBulletLostEnergy;
-		//daca am valoare negativa la hitpoints setam direct viata la valoarea respectiva
-		actor->fLife = fHitPointsTaken;
-		actor->varAIparams.SetVarINT32( L"nDeathCommand", K_LVL_ACT_DEATHCMD_SPLAT );
-
-		actor->fArmor = 0.0f;
-	}
-	else
-	{
-		fLifeTaken = fHitPointsTaken;
-		bool bBulletStopped = false;
-		//decidere directie shield vs directie projectileMomentum daca avem directie pe shield (sau shield all around)		
-		if ( ( ( pBullet->nFlags & K_LVL_BULLET_FLAG_IGNORE_ARMOR ) == 0 ) && ( pvProjectileMomentum != null ) && ( actor->fArmor > 0.0f ) )
-		{
-			int nActorAR = 1;
-			//melee damage is treated differently
-			if ( pBullet->nFlags & K_LVL_BULLET_FLAG_MELEE )
-			{
-				//melee ignores armor usually but if armor hase melee resistance then it takes first from the armor and then from life
-				float fDmgToArmor = fHitPointsTaken * 1;
-				fShieldPointsTaken = min( fDmgToArmor, actor->fArmor );
-				fLifeTaken = fHitPointsTaken - fShieldPointsTaken;
-
-				bBulletStopped = true;
-				retData.bPenetratedShield = true;
-				retData.eMaterial = K_LVL_MATERIAL_FLESH;
-			}
-			else
-			{
-				if ( nActorAR < 0 ) //special case for human shield (hostage)
-				{
-					fShieldPointsTaken = min( actor->fArmor, fHitPointsTaken );
-					fLifeTaken = max( 0.0f, fHitPointsTaken - fShieldPointsTaken );
-					bBulletStopped = false;
-					retData.eMaterial = K_LVL_MATERIAL_FLESH;
-				}
-				else if ( pBullet->nArmorPiercingRating < nActorAR )
-				{
-					fLifeTaken = 0.0f;
-
-					float fShieldPerc = max( 0.25f, 1.0f - ( nActorAR - pBullet->nArmorPiercingRating ) * 0.25f );
-					fShieldPointsTaken = fHitPointsTaken * fShieldPerc;
-					bBulletStopped = true;
-					retData.eMaterial = K_LVL_MATERIAL_METAL;
-					retData.bArmorHit = true;
-				}
-				else if ( pBullet->nArmorPiercingRating == nActorAR )
-				{
-					fLifeTaken = 0.0f;
-					fShieldPointsTaken = fHitPointsTaken;
-					bBulletStopped = true;
-					retData.bPenetratedShield = true;
-					retData.eMaterial = K_LVL_MATERIAL_METAL;
-				}
-				else
-				{
-					float fLifePerc = max( 1.0f, ( ( pBullet->nArmorPiercingRating - nActorAR ) * 0.25f ) );
-					fLifeTaken = fHitPointsTaken * fLifePerc;
-					fShieldPointsTaken = fHitPointsTaken;
-					bBulletStopped = false;
-					retData.bPenetratedShield = true;
-					retData.eMaterial = K_LVL_MATERIAL_FLESH;
-				}
-			}
-
-			//scade shield points din armor
-			actor->fArmor -= fShieldPointsTaken;
-			//took too much armor? get extra armor taken from life
-			if ( actor->fArmor <= 0.0f )
-			{
-				fLifeTaken += -actor->fArmor;
-				actor->fArmor = 0.0f;
-			}
-
-			//--- calculam energia ramasa in glont ---
-			if ( bBulletStopped )
-			{
-				//bullet loses all its energy so it dies
-				fBulletLostEnergy = pBullet->fDamage;
-			}
-			else
-			{
-				fBulletLostEnergy = fShieldPointsTaken + min( fLifeTaken, max( actor->fLife, 0.0f ) );
-			}
-		}
-		else //no shield
-		{
-			//already dead bodies stop bullets
-			if ( ( actor->fLife <= 0.0f ) && ( actor->GetCurrentBehavior() == AI_BEHAVIOR_DEAD ) )
-				bBulletStopped = true;
-
-			fBulletLostEnergy = fShieldPointsTaken + min( fLifeTaken, max( actor->fLife, 0.0f ) );
-		}
-		//when shooting a dead body take a maximum of 10% energy from the bullet
-		//daca nu luam energia asta in momentul in care glontul tras se duce in cadavru nu il strapunge si timp de mai multe frames sta pe loc si face zgomot de damage
-		if ( ( actor->fLife <= 0.0f ) && ( fBulletLostEnergy <= 0.0f ) )
-			fBulletLostEnergy = actor->_template.fLife * 0.1f;
-
-		//transmit bullet momentum daca nu sunt under cover
-		if ( ( actor->_template.fMass > 0.0f ) && ( pvProjectileMomentum ) )
-		{
-			actor->vSpeedImpulse += *pvProjectileMomentum / actor->_template.fMass;
-		}
-
-		//subtract life	if no invincibility
-		if ( actor->cDamageOverTime.eType == CDamageOverTime::K_LVL_DoT_INVINCIBLE )
-			fLifeTaken = 0.0f;
-
-		if ( actor->_template.actorClass == K_LVL_ACT_CLASS_PLAYER )
-		{
-			float fDecLife = fLifeTaken;
-
-#if defined(ENABLE_PLAYER_INVINCIBILITY)
-			fDecLife = 0.0f;
-#endif
-
-			actor->fLife -= fDecLife;
-			//analytics
-			m_arrStats[K_LVL_STATS_PL1_DAMAGE_TAKEN + actor->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT] += ( int ) ceil( fDecLife );
-		}
-		else
-		{
-			actor->fLife -= fLifeTaken;
-
-
-#if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
-			//LOG(L"--> Damaged %s: fLifeTaken:%.2f fArmorTaken:%.2f(AR:%d) bIgnoreArmor:%d <--", actor->templateActor.shName.text, fLifeTaken, fShieldPointsTaken, actor->templateActor.nArmorRating, (pBullet->nFlags & K_LVL_BULLET_FLAG_IGNORE_ARMOR));
-#endif
-		}
-		//save last damager UID
-		actor->nLastDamageTakenFromUID = pBullet->ownerUID;
-		//if he's still alive and you took enough of it's life say verse
-		if ( ( actor->fLife > 0.0f ) && ( fLifeTaken >= actor->_template.fLife * 0.1f ) )
-			//			PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_TAKING_DAMAGE, true);
-
-					//life left in it?
-			if ( actor->fLife > 0.0f )
-			{
-				//mesaj LOW_HEALTH - la 10% din viata originala
-				/*
-				float fLifeLowLimit = actor->_template.fLife * 0.1f;
-				if ( ( actor->fLife < fLifeLowLimit ) && ( actor->fLife + fLifeTaken >= fLifeLowLimit ) )
-				{
-					AddAIEvent( K_LVL_AI_EVENT_LOW_HEALTH, 0, pBullet->actorClass, actor->GetPosHeart(), 10000.0f, 0.6f, actor->GetUID() );
-				}
-				*/
-
-				//adaugam si stun
-				if ( actor->fStunTimer < pBullet->fStunDuration )
-				{
-					SetActorStun( actor, pBullet->fStunDuration );
-				}
-			}
-	}
-
-	//event got_hit
-	if ( ( actor->fLife > 0.0f ) && ( actor->_template.actorClass > K_LVL_ACT_CLASS_PLAYER ) )
-	{
-		//adaug eventuri de GOT_HIT doar pe clasele HUMAN, cand sunt lovite de catre player
-		//find shooter pos. defaults on pos based on bullet speed
-		/*
-		Vec3 evtpos = actor->GetPosHeart();
-		if (pvProjectileMomentum != null)
-			evtpos -= *pvProjectileMomentum;
-
-		CActor* pPlayer = GetPlayerByUID(pBullet->ownerUID);
-		if (pPlayer)
-			evtpos = pPlayer->GetPosHeart();
-
-		//only add "got hit" events for enemy classes
-		if (pBullet->actorClass >= K_LVL_ACT_CLASS_EXPLOSION)
-		{
-			AddAIEvent(K_LVL_AI_EVENT_GOT_HIT, pBullet->ownerUID, pBullet->actorClass, evtpos, -1.0f, 1.2f, actor->GetUID());
-		}
-		*/
-	}
-
-	//set dead AI on humans
-	if ( ( actor->fLife <= 0.0f ) && ( actor->_template.eMaterial == K_LVL_MATERIAL_FLESH ) )
-	{
-		//give strategic points on death
-		if ( ( fOldLife > 0.0f ) && ( actor->_template.actorClass >= K_LVL_ACT_CLASS_HUMAN ) )
-		{
-			//you get points if enemy killed by player or explo
-			if ( ( ( pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER ) || ( pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION ) ) && ( actor->_template.actorClass != K_LVL_ACT_CLASS_PLAYER ) )
-			{
-				if ( actor->UID != pBullet->ownerUID )
-				{
-					GiveStrategicPoints( 1.0f, &Vec2( actor->bbox.vCenter.x, actor->bbox.vMin.y ) );
-				}
-			}
-		}
-
-		//cadavers get pushed more by kicking them
-		if ( ( fOldLife > 0.0f ) && ( actor->_template.fMass > 0.0f ) && ( pvProjectileMomentum != null ) )
-			actor->vSpeedImpulse += K_LVL_DEAD_BODY_BULLET_MOMENTUM_MULTIPLIER * ( *pvProjectileMomentum / actor->_template.fMass );
-
-		//erase shooting flags
-		actor->eAttackStatus = K_ACT_ATTACK_IDLE;
-
-		bool bSplatActor = false;
-
-		//very low life from the first hit? splat!
-		if ( ( pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT ) && ( actor->GetCurrentBehavior() != AI_BEHAVIOR_DEAD ) && ( pBullet->actorClass == K_LVL_ACT_CLASS_PLAYER ) && ( actor->fLife < -actor->_template.fLife * 0.5f ) )
-		{
-			bSplatActor = true;
-			//if bullets lose power then only splat from close quarters
-			if ( ( pBullet->fDamageLossPPx > 0.0f ) && ( ( pBullet->fLife / pBullet->fLife_ini ) < 0.9f ) )
-				bSplatActor = false;
-		}
-		//grenades splat dead bodies
-		if ( ( actor->GetCurrentBehavior() == AI_BEHAVIOR_DEAD ) && ( pBullet->actorClass == K_LVL_ACT_CLASS_EXPLOSION ) && ( fLifeTaken >= actor->_template.fLife ) )
-			bSplatActor = true;
-		//if dead but you keep kicking him it explodes
-		if ( ( actor->GetCurrentBehavior() == AI_BEHAVIOR_DEAD ) && ( pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT ) && ( actor->fLife < -actor->_template.fLife ) )
-			bSplatActor = true;
-		//if lucky cancel splat
-		if ( m_rand.RandInt( 100 ) <= 10 )
-		{
-			bSplatActor = false;
-			actor->fLife = 0.0f;
-		}
-
-		//--- generate blood splats on death ---
-		if ( ( fOldLife > 0.0f ) && ( actor->_template.eMaterial == K_LVL_MATERIAL_FLESH ) )
-		{
-			//splaturile sunt sortate in fn de marime (folosesc posHeart in log de GetPosHeart() pentru ca altfel imi da deja pozitia de dupa moarte, adica prea jos)
-			//splaturile sunt sortate in functie de dimensiune (crescator)
-			if ( bGoreEnabled )
-			{
-				if ( ( pBullet->nFlags & K_LVL_BULLET_FLAG_NO_DECALS ) == 0 )
-				{
-					AddDecal_BloodSplat( actor->GetPosHeart(), true, actor->_template.actorClass );
-				}
-			}
-
-			retData.bKilledTarget = true;
-			//say shooter verse
-			CActor* pShooter = GetActorByUID( pBullet->ownerUID );
-			if ( pShooter != null )
-			{
-				//				PlayActorSoundVerse(pShooter, K_LVL_ACT_VERSE_KILL_MADE);
-			}
-		}
-
-		//set splat command
-		if ( bSplatActor )
-		{
-			actor->varAIparams.SetVarINT32( L"nDeathCommand", K_LVL_ACT_DEATHCMD_SPLAT );
-		}
-	}
-
-	//daca are coliziuni laterale anulez impulsul ca sa nu intre prin geometrie
-	/*
-	if (((actor->collisionFlags & K_DIRFLAG_RIGHT) && (actor->vSpeedImpulse.x > 0.0f)) ||
-		((actor->collisionFlags & K_DIRFLAG_LEFT) && (actor->vSpeedImpulse.x < 0.0f)))
-	{
-		actor->vSpeedImpulse.x = 0.0f;
-	}
-	*/
-
-	retData.fPointsTaken = fBulletLostEnergy;
-	return retData;
-}
-
-CBulletHitReturnData CLevel::HitActor( CActor * actor, float fDamage, UINT32 dwOwnerUID, EActorClass eOwnerClass, Vec2 *vDir /*= null*/, UINT32 dwBulletFlags /*= 0*/, int nArmorPiercingRating /*= 100*/, float fStunDuration /*= 0.0f*/ )
-{
-	CBullet bullet;
-
-#if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
-	//LOG(L"-Damaged %s with %.2f", actor->templateActor.shName.text, fDamage);
-#endif
-
-	bullet.fDamage = fDamage;
-	bullet.ownerUID = dwOwnerUID;
-	bullet.actorClass = eOwnerClass;
-	bullet.nFlags = dwBulletFlags;
-	//always pierce armor (by default)
-	bullet.nArmorPiercingRating = nArmorPiercingRating;
-	bullet.fStunDuration = fStunDuration;
-
-	return HitActor( actor, &bullet, vDir );
-}
-
-/*
-* Sets STUN timer
-*/
-void CLevel::SetActorStun( CActor* actor, float fStunDuration )
-{
-	if ( ( actor->_template.actorClass != K_LVL_ACT_CLASS_HUMAN ) && ( actor->_template.actorClass != K_LVL_ACT_CLASS_FRIENDLY ) )
-		return;
-
-	if ( ( actor->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET ) != 0 )
-		return;
-
-	if ( fStunDuration > actor->fStunTimer )
-	{
-		actor->fStunTimer = fStunDuration;
-	}
-
-	bool bInterrupting = false;
-	//reset actions
-	if ( actor->fStunTimer >= K_LVL_MIN_STUN_DIZZY_DURATION )
-	{
-		actor->Weapons()->StopReloading();
-		bInterrupting = true;
-	}
-	//reset actions
-	actor->eAttackStatus = K_ACT_ATTACK_IDLE;
-	//stop moving
-	if ( actor->collisionFlags & K_DIRFLAG_DOWN )
-		actor->speed.x = 0.0f;
-
-	//custom stun responses
-	/*
-	switch (actor->GetCurrentBehavior())
-	{
-		//don't stun cadavers
-		case AI_BEHAVIOR_DEAD:
-		{
-			actor->fStunTimer = 0.0f;
-		}
-		break;
-	}
-	*/
-}
-
-
 
 /* \brief Spawns a new player at spawnPos
 * Takes all the necessary spawn data from the "Gear selection screen" object.
@@ -549,7 +174,7 @@ CActor* CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHa
 	CActor* nact = new CActor( spawnPos, templateLocal, GenerateNextID(),
 		new CSpriteActorComponent( &m_sprActors ),
 		new CWeaponsComponent( pSprWpn ),
-		new CActorAIComponent( __Sim() )
+		new CActorAIComponent( *this )
 	);
 
 	// create a weapon and add it to the player's arsenal
@@ -1216,7 +841,6 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 				}
 			}
 			//find behaviors
-			//#TODO: aici ar trebui sa fie un nod de grup de behaviors iar copiii sa contina behaviors, cu probabilitati pe fiecare copil ca sa pot varia AI-ul random
 			pugi::xml_node behaviorsparent = statenode.child( L"BEHAVIORS" );
 			if ( behaviorsparent != null )
 			{
@@ -1238,8 +862,6 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 						if ( ait->internal_object() == behnode.attribute( L"name" ).internal_object() )
 							continue;
 						if ( ait->internal_object() == behnode.attribute( L"bCanInterrupt" ).internal_object() )
-							continue;
-						if ( ait->internal_object() == behnode.attribute( L"bDetectPlatforms" ).internal_object() )
 							continue;
 						if ( ait->internal_object() == behnode.attribute( L"bIgnoreEvents" ).internal_object() )
 							continue;
@@ -1286,7 +908,7 @@ void CLevel::KillActor( CActor * actor, bool bSplatTarget )
 		bullet.fDamage = -actor->_template.fLife;
 	}
 
-	HitActor( actor, &bullet );
+	actor->HitActor( &bullet );
 }
 
 CActorTemplate* CLevel::Actor_GetTemplate( const WCHAR * templateName )
@@ -2208,11 +1830,11 @@ void CLevel::SetActorDoT( CActor* act, CDamageOverTime::EDoTType eType, float fD
 
 CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClassFilter1, EActorClass eTargetClassFilter2 )
 {
-	if ( sourceActor == null )
-		return null;
+	if ( sourceActor == nullptr )
+		return nullptr;
 	//nobody attacks if level finished
 	if ( m_levelState != K_LVL_STATE_PLAYING )
-		return null;
+		return nullptr;
 	//save some data about current actor:
 	bool bAlerted = ( sourceActor->fFOVPercent >= 0.9f ) ? true : false;
 	float fDistSee = 100.0f;// sourceActor->actTemplate.distSee;
@@ -2227,12 +1849,12 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 	}
 	CAABB aabbvision;
 	aabbvision.Set_Corrected(
-		Vec2( sourceActor->pos.xy.x/* + sourceActor->lookDirXsign * fDistSee*/, sourceActor->pos.xy.y + fDistDown ),
-		Vec2( sourceActor->pos.xy.x/* - sourceActor->lookDirXsign * fDistHear*/, sourceActor->pos.xy.y - fDistUp )
+		Vec2( sourceActor->pos.xy.x - fDistSee, sourceActor->pos.xy.y - fDistSee),
+		Vec2( sourceActor->pos.xy.x + fDistSee, sourceActor->pos.xy.y + fDistSee )
 	);
 
 	//--- check all actors for enemy ---
-	CActor* retvalenemy = null;
+	CActor* retvalenemy = nullptr;
 
 	float minDistSq = 1000000.0f;
 	for ( int kk = 0; kk < m_arrActors.GetSize(); kk++ )

@@ -143,6 +143,16 @@ public:
 	// Clears the current actions list
 	void						ClearActionsList();
 
+	// Use it to damage enemies and player
+	// @fHitPointsTaken - negative value - kills it immediately
+	// RETURNS: damage made, type of material hit.
+	CBulletHitReturnData		HitActor( CBullet * pBullet, Vec2 * pvProjectileMomentum = nullptr );
+	//hits the actor with other things than bullets
+	CBulletHitReturnData		HitActor( float fDamage, UINT32 dwOwnerUID, EActorClass eOwnerClass, Vec2 *vDir = null, UINT32 dwBulletFlags = 0, int nArmorPiercingRating = 100, float fStunDuration = 0.0f );
+	// Stuns the actor
+	void						SetStun( float fStunDuration );
+
+
 public:	
 	void PostConstructionInit() override;
 	void BeginPlay() override;

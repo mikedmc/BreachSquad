@@ -35,15 +35,37 @@
 	</VERSES>
 
 	<AI>
-		<STATE name="DEFAULT">
+		<STATE name="DEFAULT" nPriority="0">
 			<TRIGGERING_EVENTS>
 				<AI_EVENT type="any" />
 			</TRIGGERING_EVENTS>
-
 			<BEHAVIORS>
-				<BEHAVIOR name="AI_BEHAVIOR_IDLE" bCanInterrupt="false" bDetectPlatforms="false" bIgnoreEvents="true" />
+				<BEHAVIOR name="AI_BEHAVIOR_IDLE" bCanInterrupt="true" />
 			</BEHAVIORS>
 		</STATE>
+		
+	  <STATE name="AWARE" nPriority="1">
+		<TRIGGERING_EVENTS>
+		  <AI_EVENT type="any" />
+		</TRIGGERING_EVENTS>
+
+		<BEHAVIORS>
+		  <BEHAVIOR name="AI_BEHAVIOR_PATROL" fWaitTimer="1.0" />
+		</BEHAVIORS>
+	  </STATE>
+
+	  <STATE name="AGGRESSIVE" nPriority="2">
+		<TRIGGERING_EVENTS>
+		  <AI_EVENT type="AI_EVENT_SEE_ENEMY" />
+		  <AI_EVENT type="AI_EVENT_GOT_HIT" />
+		</TRIGGERING_EVENTS>
+
+		<BEHAVIORS>
+		  <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.25" />
+		  <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" />
+		</BEHAVIORS>
+	  </STATE>
+	
 
 		<STATE name="DEAD" nPriority="10">
 			<TRIGGERING_EVENTS>

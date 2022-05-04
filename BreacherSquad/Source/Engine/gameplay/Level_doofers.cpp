@@ -418,7 +418,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 					continue;
 				
 				Vec2 vDir = act->GetPosHeart() - pos;
-				float fDist = D3DXVec2Length(&vDir);
+				float fDist = MUVec2Len(&vDir);
 
 				bool bDirectLine = IsLineOfSight(act->GetPosHeart(), pos);
 				
@@ -434,18 +434,15 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				//daca e prea departe nu il ia in seama
 				if (fDist > fStunRadius)
 					continue;
-				//daca stun este directional si nu se potriveste directia
-				if ((vExploDir.x != 0.0f) && (SIGN(vExploDir.x) != SIGN(vDir.x)))
-					continue;
-				//daca nu e linie directa nu loveste
+				// daca stun este directional si nu se potriveste directia
+				//if ((vExploDir.x != 0.0f) && (SIGN(vExploDir.x) != SIGN(vDir.x)))
+//					continue;
 				if (!bDirectLine)
 					continue;
-				//daca il vede ii da stun
+				
 				if ((act->fStunTimer < fMaxStun) && (fMaxStun > 0.0f))
 				{
-					SetActorStun(act, fMaxStun);
-					//let him know he got stunned
-					//AddAIEvent(K_LVL_AI_EVENT_GOT_HIT, 0, (EActorClass)exploOwnerClass, pos, fStunRadius, fMaxStun + 0.5f, act->GetUID());
+					act->SetStun( fMaxStun );
 				}
 			}
 		}
@@ -466,7 +463,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 					continue;
 				//distanta la inamic
 				Vec2 vDir = act->GetPosHeart() - pos;
-				float fDist = D3DXVec2Length(&vDir);
+				float fDist = MUVec2Len(&vDir);
 				//daca e prea departe nu il ia in seama
 				if (fDist > fDamageRadius)
 					continue;
@@ -477,14 +474,14 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				float fPercent = 1.0f - (fDist / fDamageRadius);
 				CLAMP(fPercent, 0.0f, 1.0f);
 				//add momentum
-				D3DXVec2Normalize(&vDir, &vDir);
+				MUVec2Norm(&vDir, &vDir);
 				vDir *= fPercent * fMaxImpulse;
 				//#HACK: ca sa nu mai arunce cadavrele in sus
 				if (vDir.y < 0.0f)
 					vDir.y = 0.0f;
 
 				CBulletHitReturnData retdata;
-				retdata = HitActor(act, fPercent * fMaxDamage, dwOwnerUID, K_LVL_ACT_CLASS_EXPLOSION, &vDir, K_LVL_BULLET_FLAG_CAN_SPLAT, explotemplate->nArmorPiercingRating);
+				retdata = act->HitActor(fPercent * fMaxDamage, dwOwnerUID, K_LVL_ACT_CLASS_EXPLOSION, &vDir, K_LVL_BULLET_FLAG_CAN_SPLAT, explotemplate->nArmorPiercingRating);
 				//count only enemies
 				if ((retdata.bKilledTarget) && (act->_template.actorClass >= K_LVL_ACT_CLASS_HUMAN))
 					nBombFrags++;
@@ -528,7 +525,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 
 						//loveste liniar
 						Vec2 vDist = (shape->bbox.vCenter - pos);
-						float fDist = D3DXVec2Length(&vDist);
+						float fDist = MUVec2Len(&vDist);
 						if (explotemplate->fDamageObjectsMultiplier <= 0.0f)
 							continue;
 						float fPercent = 1.0f - (fDist / (fDamageRadius * explotemplate->fDamageObjectsMultiplier));
@@ -808,7 +805,7 @@ void CLevel::UpdateDoofers(float dTime)
 void CLevel::PaintDoofers()
 {
 	m_pSprite->SetTransform(&g_matIdentity);
-	D3DXMATRIXA16 mattrans;
+	Mat mattrans;
 
 	CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.pListUsed.m_pNext;
 	while (node != &m_poolDoofers.pListUsed)

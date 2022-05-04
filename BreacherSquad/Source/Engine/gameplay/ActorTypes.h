@@ -1,26 +1,5 @@
 #pragma once
 
-//#TODO: clasa folosita in actori si incapsuleaza toate variabilele necesare pentru definirea totala a unui state
-//aici se declara variabile locale necesare per actor, cum ar fi behaviorTimer 
-//momentan sunt toate declarate in actor
-/*
-class CAIStateInstance
-{
-public:
-	CAIState*		m_pAIcurrentState; //starea curenta de AI
-	int				m_nAIcurrentBehaviorIdx; //indexul curent al behaviorului din state-ul curent (sau -1 cand nu e setat)
-	float			m_fAIBehaviorTimer; //timer folosit la behaviors cu durata
-
-	CAIStateInstance()
-	{
-		m_pAIcurrentState = null;
-		m_nAIcurrentBehaviorIdx = -1;
-		m_fAIBehaviorTimer = 0.0f;
-	}
-};
-*/
-
-
 enum EActorDeathCommand {
 	K_LVL_ACT_DEATHCMD_EMPTY = -1,
 
@@ -53,3 +32,37 @@ enum EActorAttackState {
 	K_ACT_ATTACK_BREACH,  //used mostly for breaching doors
 };
 
+
+// Class of the actor to define friends and enemies
+//--- ORDER IS VERY IMPORTANT ---
+enum EActorClass
+{
+	K_LVL_ACT_CLASS_NOT_SET = -2,	// usually not used (only in initializations)
+	K_LVL_ACT_CLASS_ANY = -1,		// filter for GetClosestTarget or parameter type
+
+	K_LVL_ACT_CLASS_PASSIVE = 0,	// barrels, actors that are not chars
+	K_LVL_ACT_CLASS_HOSTAGE = 1,	
+	K_LVL_ACT_CLASS_TRAP,			// mindless class for traps
+	K_LVL_ACT_CLASS_EXPLOSION,		// class for explosions
+
+	//from here only human-blood-stun classes (sorted by love from near to far) that kill each other
+	K_LVL_ACT_CLASS_PLAYER,			//clasa player
+	K_LVL_ACT_CLASS_FRIENDLY,		//main player friendly class
+	//from here on you get SP on kills and they get pushed when too close (usually enemies)
+	K_LVL_ACT_CLASS_HUMAN,			//human enemies
+	K_LVL_ACT_CLASS_ZOMBIE,			//special zombie class
+	//count
+	K_LVL_ACT_CLASSES_COUNT
+};
+
+const CStringHash EActorClassNames[ K_LVL_ACT_CLASSES_COUNT ] =
+{
+	L"PASSIVE",
+	L"HOSTAGE",
+	L"TRAP",
+	L"EXPLOSION",
+	L"PLAYER",
+	L"FRIENDLY",
+	L"HUMAN",
+	L"ZOMBIE"
+};

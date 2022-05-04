@@ -52,38 +52,6 @@ const CStringHash eStrategicAbilityNames[] = {
 };
 
 
-// Class of the actor to define foe and enemy
-//--- ORDER IS VERY IMPORTANT ---
-enum EActorClass
-{
-	K_LVL_ACT_CLASS_NOT_SET = -2,	//usually not used (only in initializations)
-	K_LVL_ACT_CLASS_ANY = -1,		//folosita ca filtru la GetClosestTarget sau param gen NONE
-
-	K_LVL_ACT_CLASS_PASSIVE = 0,	//butoaie, elemente care se sparg, etc
-	K_LVL_ACT_CLASS_HOSTAGE = 1,	//special class for hostages
-	K_LVL_ACT_CLASS_TRAP,		//clasa separata care distruge orice
-	K_LVL_ACT_CLASS_EXPLOSION,		//clasa speciala de explozii pentru exploziile care distrug orice
-	//from here only human-blood-stun classes (sorted by love from near to far) that kill each other
-	K_LVL_ACT_CLASS_PLAYER,			//clasa player
-	K_LVL_ACT_CLASS_FRIENDLY,		//main player friendly class
-	//from here on you get SP on kills and they get pushed when too close (usually enemies)
-	K_LVL_ACT_CLASS_HUMAN,			//human enemies
-	K_LVL_ACT_CLASS_ZOMBIE,			//special zombie class
-	//count
-	K_LVL_ACT_CLASSES_COUNT
-};
-
-const CStringHash EActorClassNames[ K_LVL_ACT_CLASSES_COUNT ] =
-{
-	L"PASSIVE",
-	L"HOSTAGE",
-	L"TRAP",
-	L"EXPLOSION",
-	L"PLAYER",
-	L"FRIENDLY",
-	L"HUMAN",
-	L"ZOMBIE"
-};
 
 ///--------------------------------------------------------------------------
 /// EFFECT TYPES

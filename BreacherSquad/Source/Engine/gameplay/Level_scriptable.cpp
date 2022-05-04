@@ -985,7 +985,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 			//#TODO: add more params to the script
-			HitActor(targetAct, fDamage, 0, K_LVL_ACT_CLASS_TRAP, NULL, K_LVL_BULLET_FLAG_IGNORE_ARMOR, 5, 5.0f);
+			targetAct->HitActor(fDamage, 0, K_LVL_ACT_CLASS_TRAP, NULL, K_LVL_BULLET_FLAG_IGNORE_ARMOR, 5, 5.0f);
 
 			return true;
 		}
