@@ -193,10 +193,7 @@ public:
 	// @fMaxDistance - if greater than 0 then it overrides seeDistance
 	CActor*					GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTargetTemplateName, float fMaxDistance = 0.0f);
 	//AI events (radius < 0.0f means infinite)
-	void					AddAIEvent(EAIEventType eventType, UINT32 ownerUID, int ownerClass, Vec2 vPos, float radius, float duration = 0.6f, UINT32 targetUID = 0);
-	// Deletes a targeted event
-	// @targetUID - if not set it deletes all events of said type
-	void					DeleteAITargetedEvent(EAIEventType eEvtType, UINT32 targetUID = 0);
+	void					AddAIEvent(EAIEventType eventType, UINT32 ownerUID, EActorClass ownerClass, Vec2 vPos, float radius, float duration = 0.6f );
 	///--- decals ---
 	//#TODO: move decals arrays on areas
 	CArray<CDecal*>			m_arrDecals;
@@ -218,7 +215,7 @@ public:
 
 	///--- BULLETS ---
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.
-	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir, CLevelArea* pStartArea = nullptr);
+	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, EActorClass actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir, CLevelArea* pStartArea = nullptr);
 	// Returns the closest bullet (or null) of nBulletType under fMaxDistance
 	CBullet*				GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float fMaxDistance = 0.0f, UINT32 dwOwnerUID = 0);
 	// Releases all bullets of said type from specified owner

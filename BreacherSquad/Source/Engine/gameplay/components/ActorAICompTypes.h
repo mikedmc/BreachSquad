@@ -256,25 +256,30 @@ const CStringHash EAIEventTypeNames[] = {
 class CAIEvent
 {
 public:
-	UINT32			ownerUID;   // UID of event raiser. 0 - invalid/not set;
-	UINT32			targetUID;	// 0 -not set; some events are targeted (GOT_SHOT, STUNNED, etc)
+	UINT32			ownerUID;   // UID of event raiser. 0 - generic/not set;
 	int				ownerClass;	// class of event raiser
 	EAIEventType	nType;		// event type
 	float			fRadius;
-	float			fDuration;	
-	Vec2			pos;	
+	float			fDuration;
+	Vec2			pos;
 
 	CAIEvent() :
 		nType( K_LVL_AI_EVENT_NONE ),
-		ownerUID( 0 ), ownerClass( -1 ), targetUID( 0 ),
+		ownerUID( 0 ), ownerClass( -1 ),
 		fRadius( 0.0f ), fDuration( 0.0f )
 	{}
 
-	CAIEvent( EAIEventType eventType, UINT32 evtOwnerUID, int evtOwnerClass, Vec2 vPos, float radius, float duration = 0.6f, UINT32 evtTargetUID = 0 ) :
-		nType( eventType ), ownerUID( evtOwnerUID ), ownerClass( evtOwnerClass ), pos( vPos ), fRadius( radius ), fDuration( duration ), targetUID( evtTargetUID )
+	CAIEvent( EAIEventType eventType, UINT32 evtOwnerUID, int evtOwnerClass, Vec2 vPos, float radius, float duration = 0.6f ) :
+		nType( eventType ), ownerUID( evtOwnerUID ), ownerClass( evtOwnerClass ), pos( vPos ), fRadius( radius ), fDuration( duration )
 	{}
 
-	void Set( EAIEventType eventType, UINT32 evtOwnerUID, int evtOwnerClass, Vec2 vPos, float radius, float duration = 0.6f, UINT32 evtTargetUID = 0 )
+	inline bool operator!=( const CAIEvent& rhs )
+	{
+		// checks just a few of the main properties of the event
+		return nType != rhs.nType || ownerUID != rhs.ownerUID || ownerClass != rhs.ownerClass;
+	}
+
+	void Set( EAIEventType eventType, UINT32 evtOwnerUID, int evtOwnerClass, Vec2 vPos, float radius, float duration = 0.5f )
 	{
 		nType = eventType;
 		ownerUID = evtOwnerUID;
@@ -282,7 +287,6 @@ public:
 		pos = vPos;
 		fRadius = radius;
 		fDuration = duration;
-		targetUID = evtTargetUID;
 	}
 
 	void Reset()
@@ -293,7 +297,6 @@ public:
 		pos = Vec2( 0.0f, 0.0f );
 		fRadius = 0.0f;
 		fDuration = 0.0f;
-		targetUID = 0;
 	}
 };
 
@@ -330,21 +333,19 @@ public:
 
 
 // Holds all info that comes into the actor sensors
-//#TODO: should include more enemies not just a focused one
 class CAISensorInfo
 {
 public:
 	bool		m_bEnabled;			// sensors are enabled or disabled?
 	//external sensors
-	CActor*		pTargetedActor;		//inamicul vizibil
-	CAIEvent	m_AIcurrentEvent;	//eventul curent, cel mai actual. Se salveaza si in lastAIevent automat.
+	CActor*		pTargetedActor;		// visible enemy, set by internal sensors
 	UINT32		m_lastInteractingActorUID;	//0-not set or UID for last actor that he interacted with
 	float		fTimeSinceHit;		//time passed since got hit
+	CAIEvent	evtInternal;		// internal event given by sensors (see enemy, got shot etc)
 	//internal sensors
-	bool		b_IsDead;			// did I die?
+	bool		b_IsDead;			//#TODO: remove this!
 
-	//sensor memory
-	CAIEvent	m_AIlastEvent;		//eventul cel mai important, ultimul primit. Asta este memoria actorului, deci raman setate pentru o durata mai mare sau pana cand sunt suprascrise
+	CAIEvent	m_AIevent;			// current event on which actor is making decisions (chosen between evtInternal and evtExternal)
 
 	CAISensorInfo()
 	{
@@ -359,8 +360,8 @@ public:
 		m_bEnabled = true;
 		fTimeSinceHit = 1000.0f;
 
-		m_AIlastEvent.Reset();
-		m_AIcurrentEvent.Reset();
+		m_AIevent.Reset();
+		evtInternal.Reset();
 	}
 };
 
@@ -368,7 +369,7 @@ public:
 class CAICommands
 {
 public:
-	bool				bThrust;  //#TODO: thrust might as well be a float (low precision float) and remove bRunning
+	bool				bThrust;  
 	Vec2				vMoveDir;
 	Vec2				vAimVec;	// set on 0.0 for no aim command (old aim vec will be kept)
 

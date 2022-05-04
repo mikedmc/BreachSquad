@@ -18,13 +18,13 @@ CAIState::~CAIState()
 ///--- AI TEMPLATE ---
 CAITemplate::~CAITemplate()
 {
-	SAFE_DELETE_GROWABLE_ARRAY(m_arrStates);
+	SAFE_DELETE_CArray(m_arrStates);
 }
 
 CAIState * CAITemplate::GetHighestPriorityState(EAIEventType evtType, CRandom* pRandomGen)
 {
-	if (pRandomGen == null)
-		return null;
+	if (pRandomGen == nullptr)
+		return nullptr;
 
 	CFixedArray<CAIState*, 16> arrSelStates;
 
@@ -51,7 +51,7 @@ CAIState * CAITemplate::GetHighestPriorityState(EAIEventType evtType, CRandom* p
 
 	//return selected state
 	if (arrSelStates.Count() == 0)
-		return null;
+		return nullptr;
 	if (arrSelStates.Count() == 1)
 		return arrSelStates.m_pData[0];
 	
@@ -65,7 +65,7 @@ CAIState * CAITemplate::GetHighestPriorityState(EAIEventType evtType, CRandom* p
 	if (nRetIdx < 0)
 	{
 		ErrorBox(K_ERR_WARNING, L"[WARNING] GetHighestPriorityState returned -1! count:%d", arrSelStates.Count());
-		return null;
+		return nullptr;
 	}
 
 	return arrSelStates.m_pData[nRetIdx];
@@ -84,7 +84,7 @@ CAIState * CAITemplate::GetAIStateByName(CStringHash strName)
 	ErrorBox(K_ERR_WARNING, L"CAITemplate::GetAIStateByName - state not found [%s]", strName.text);
 #endif
 
-	return null;
+	return nullptr;
 }
 
 
@@ -119,7 +119,7 @@ Vec2 CMiscObjectRail::GetPos(float fDistFromStart, Vec2 * retDir)
 	//daca nu am gasit nod mai mare inseamna ca e in afara
 	float percent = (fDistFromStart - arrLenghts.m_pData[selidx - 1]) / (arrLenghts.m_pData[selidx] - arrLenghts.m_pData[selidx - 1]);
 	//directia
-	if (retDir != NULL)
+	if (retDir != nullptr)
 	{
 		D3DXVec2Normalize(retDir, &(arrPoints.m_pData[selidx] - arrPoints.m_pData[selidx - 1]));
 	}

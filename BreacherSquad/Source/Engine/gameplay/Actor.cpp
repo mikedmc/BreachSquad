@@ -947,7 +947,10 @@ void CActor::ProcessExtras( CLevel& level )
 			IActiveInterface* pNewTouchable = arrTouchProps[ 0 ]->GetRef();
 			if ( pClosestTouchable != pNewTouchable )
 			{
-				pClosestTouchable->FreeRef();
+				if ( pClosestTouchable != nullptr ) 
+				{
+					pClosestTouchable->FreeRef();
+				}
 				ClearActionsList();
 			}
 			pClosestTouchable = pNewTouchable;
@@ -998,7 +1001,7 @@ bool CActor::CheckShoot( CLevel& level )
 	//#TODO: add support for dual wielding
 	VecProj vShootPos = shooter->GetWeaponMuzzleWorld( bTwoHanded, 0 );
 
-	int nFinalClass = shooter->_template.actorClass;
+	EActorClass nFinalClass = shooter->_template.actorClass;
 	//bullet has template class, set it to final class
 	if ( weapon->_template.bulletTemplate.eClass != K_LVL_ACT_CLASS_ANY )
 		nFinalClass = weapon->_template.bulletTemplate.eClass;

@@ -142,7 +142,7 @@ class CBullet {
 public:
 	CPointPhysComponent*	c_pointPhys;		// point physics component
 public:
-	int					actorClass;				// shooter class
+	EActorClass			actorClass;				// shooter class
 	UINT32				ownerUID;				
 	UINT32				dwLastTargetUID;		// used in order to hit targets only once (penetrating) no matter the framerate
 	CLevelArea*			pArea;					// current bullet area (collision optimization)

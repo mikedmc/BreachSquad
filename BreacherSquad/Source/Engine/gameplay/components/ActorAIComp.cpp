@@ -38,15 +38,17 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 
 	if ( act.fLife <= 0.0f )
 	{
-		//ca sa intre doar o singura data:
-		if ( m_AIsensorInfo.m_AIcurrentEvent.nType != K_LVL_AI_EVENT_DEAD )
+		// only enters once
+		if ( m_AIsensorInfo.m_AIevent.nType != K_LVL_AI_EVENT_DEAD )
 		{
 			m_AIsensorInfo.b_IsDead = true;
-			m_AIsensorInfo.m_AIcurrentEvent.Set( K_LVL_AI_EVENT_DEAD, act.GetUID(), act._template.actorClass, act.GetPosHeart(), -1.0f, 1.0f, act.GetUID() );
-			//save in memory
-			m_AIsensorInfo.m_AIlastEvent = m_AIsensorInfo.m_AIcurrentEvent;
+			m_AIsensorInfo.m_AIevent.Set( K_LVL_AI_EVENT_DEAD, act.GetUID(), act._template.actorClass, act.GetPosHeart(), -1.0f, 1.0f );
 			//reset targeted actor
-			m_AIsensorInfo.pTargetedActor = nullptr;
+			if ( m_AIsensorInfo.pTargetedActor != nullptr )
+			{
+				m_AIsensorInfo.pTargetedActor->FreeRef();
+				m_AIsensorInfo.pTargetedActor = nullptr;
+			}
 			///THINK: force state decision
 			CAIState* newState = act._template.AItemplate->GetHighestPriorityState( K_LVL_AI_EVENT_DEAD, &level.m_rand );
 			SetAIState( act, newState );
@@ -69,20 +71,19 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 		AItimerDecision -= dTime;
 		if ( (AItimerDecision <= 0.0f) && (!bIgnoreAIEvents) && (m_AIsensorInfo.m_bEnabled) )
 		{
-			//save previous event in memory only if not IDLE_TICK
-			if ( m_AIsensorInfo.m_AIcurrentEvent.nType > K_LVL_AI_EVENT_IDLE_TICK )
-				m_AIsensorInfo.m_AIlastEvent = m_AIsensorInfo.m_AIcurrentEvent;
-
+			// reset internal event
+			m_AIsensorInfo.evtInternal.Reset();
 			//check for targets or other AI events
 			CActor* targetActor = nullptr;// GetClosestTarget(actor, act.actTemplate.foeClassFilter1, act.actTemplate.foeClassFilter2);
 			if ( targetActor != nullptr )
 			{
-				float enemyDst = MUVec2Len( &(targetActor->GetPosHeart() - act.GetPosHeart()) );
-				level.AddAIEvent( K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), enemyDst, 1.0f, act.GetUID() );
+				//float enemyDst = MUVec2Len( &(targetActor->GetPosHeart() - act.GetPosHeart()) );
+				m_AIsensorInfo.evtInternal.Set( K_LVL_AI_EVENT_SEE_ENEMY, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), 0.0f, 1.0f );
 				//#HACK: alerts the other enemies only if enemy class
 				if ( act._template.actorClass >= K_LVL_ACT_CLASS_HUMAN )
 					level.AddAIEvent( K_LVL_AI_EVENT_SOUND_THREAT, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), 200.0f, 0.6f );
-				//set target pointer
+				// set target pointer and increase ref
+				targetActor->GetRef();
 				m_AIsensorInfo.pTargetedActor = targetActor;
 				// enemies overlapping
 				/*
@@ -91,12 +92,15 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					m_AIsensorInfo.fTargetOverlapX = SIGN(act.pos.xy.x - targetActor->pos.xy.x) * ((act.bbox.vHalfSize.x + targetActor->bbox.vHalfSize.x) - fabs(act.pos.xy.x - targetActor->pos.x));
 				}
 				*/
-				//daca se ating trimit si event de touch enemy, doar daca vede inamicul
+				// send touching event
+				/*
+				// useless I think:
 				if ( act.bbox.Intersects( targetActor->bbox ) )
 				{
 					level.AddAIEvent( K_LVL_AI_EVENT_TOUCH_ENEMY, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), enemyDst, 1.0f, act.GetUID() );
 				}
-				//scrie ultimul actor cu care a interactionat (nu este vital)
+				*/
+				// write last interacting actor just for the sake of it. It will be rewritten later.
 				m_AIsensorInfo.m_lastInteractingActorUID = targetActor->GetUID();
 			}
 			else
@@ -104,55 +108,56 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				//reset targeted actor
 				if ( m_AIsensorInfo.pTargetedActor != nullptr )
 				{
-					//sterg mesaj de see enemy pt actorul curent
-					level.DeleteAITargetedEvent( K_LVL_AI_EVENT_SEE_ENEMY, act.GetUID() );
-					//Trimit mesaj de LOST_ENEMY
-					level.AddAIEvent( K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, act.GetPosHeart() + Vec2( 16.0f, 0.0f ), 16.0f, 1.0f, act.GetUID() );
+					m_AIsensorInfo.evtInternal.Set( K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, m_AIsensorInfo.pTargetedActor->pos.xy, 16.0f, 1.0f );
 					//reset targeting actor
+					m_AIsensorInfo.pTargetedActor->FreeRef();
 					m_AIsensorInfo.pTargetedActor = nullptr;
 				}
-
-				//#HACK: uneori e lovit dar nu apuca sa vada inamicul si ramane blocat ca nu primeste LOST_ENEMY asa ca il trimitem acum
-				if ( (m_AIsensorInfo.pTargetedActor == nullptr) && (m_AIsensorInfo.m_AIlastEvent.nType == K_LVL_AI_EVENT_GOT_HIT) )
+				// sometimes it doesn't see the enemy when it gets hit so we force the lost enemy onto him
+				else if ( m_AIsensorInfo.m_AIevent.nType == K_LVL_AI_EVENT_GOT_HIT )
 				{
-					//put event behind him
-					level.AddAIEvent( K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, act.GetPosHeart() - Vec2( 16.0f, 0.0f ), 16.0f, 0.5f, act.GetUID() );
+					m_AIsensorInfo.evtInternal.Set( K_LVL_AI_EVENT_LOST_ENEMY, 0, K_LVL_ACT_CLASS_ANY, m_AIsensorInfo.m_AIevent.pos, 16.0f, 0.5f );
 				}
 			}
 
 			///--- select best event ---
 			CAIEvent* evt = GetMostImportantAIEvent( act );
+			CAIEvent evtFinal = m_AIsensorInfo.evtInternal;
+			if ( ( evt != nullptr ) && ( evt->nType > evtFinal.nType ) )
+				evtFinal = *evt;
 
-			if ( evt != nullptr )
-			{
-				m_AIsensorInfo.m_AIcurrentEvent = *evt;
-			}
-			else
+			if ( evtFinal.nType == K_LVL_AI_EVENT_NONE )
 			{
 				//nothing important, set idle tick
-				m_AIsensorInfo.m_AIcurrentEvent.Set( K_LVL_AI_EVENT_IDLE_TICK, 0, 0, Vec2( 0.0f, 0.0f ), -1.0f, 1.0f );
+				m_AIsensorInfo.m_AIevent.Set( K_LVL_AI_EVENT_IDLE_TICK, 0, 0, Vec2( 0.0f, 0.0f ), -1.0f, 1.0f );
 			}
-			//----------------------------------------
-			//	THINK - decide best behavior
-			//----------------------------------------
-			//daca nu am behavior sau daca behaviorul imi permite sa il intrerup.
-			//am comentat verificarea pe behaviorDurationFinished pentru ca mesajul de IDLE_TICK ma scotea dintre behaviors care nu pot fi intrerupte. Ca sa pot intrerupe cand vreau bag un behavior IDLE
-			if ( (m_nAIcurrentBehaviorIdx < 0) || (m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ].bCanInterrupt) /*|| (bBehaviorDurationFinished)*/ )
+			// see if event changed to check for new state
+			if ( m_AIsensorInfo.m_AIevent != evtFinal )
 			{
-				CAIState* newState = act._template.AItemplate->GetHighestPriorityState( m_AIsensorInfo.m_AIcurrentEvent.nType, &level.m_rand );
+				m_AIsensorInfo.m_AIevent = evtFinal;
 
-				//daca vechea stare a fost setata de acelasi mesaj ca si acum si nu are prioritate mai mica nu ar mai trebui setata alta stare ci cel mult dat restart la starea curenta
-				if ( (newState != nullptr) && (m_AIsensorInfo.m_AIlastEvent.nType == m_AIsensorInfo.m_AIcurrentEvent.nType) && (newState->nPriority == m_pAIcurrentState->nPriority) )
+				//----------------------------------------
+				//	THINK - decide best behavior
+				//----------------------------------------
+				//daca nu am behavior sau daca behaviorul imi permite sa il intrerup.
+				//am comentat verificarea pe behaviorDurationFinished pentru ca mesajul de IDLE_TICK ma scotea dintre behaviors care nu pot fi intrerupte. Ca sa pot intrerupe cand vreau bag un behavior IDLE
+				if ( ( m_nAIcurrentBehaviorIdx < 0 ) || ( m_pAIcurrentState->m_arrBehaviors[m_nAIcurrentBehaviorIdx].bCanInterrupt ) /*|| (bBehaviorDurationFinished)*/ )
 				{
-					//#MAYBE: reset current behavior if it's the same state?
-				}
-				else
-				{
-					//if (newState != null)
-					//	DebugPrintW(L"evttype:%d set_state: %s\n", m_AIsensorInfo.m_AIcurrentEvent.nType, newState->name.text);
+					CAIState* newState = act._template.AItemplate->GetHighestPriorityState( m_AIsensorInfo.m_AIevent.nType, &level.m_rand );
 
-					//state may also be null when no state is associated with an event
-					SetAIState( act, newState );
+					//daca vechea stare a fost setata de acelasi mesaj ca si acum si nu are prioritate mai mica nu ar mai trebui setata alta stare ci cel mult dat restart la starea curenta
+					if ( ( newState != nullptr ) && ( m_AIsensorInfo.m_AIevent.nType == m_AIsensorInfo.m_AIevent.nType ) && ( newState->nPriority == m_pAIcurrentState->nPriority ) )
+					{
+						//#MAYBE: reset current behavior if it's the same state?
+					}
+					else
+					{
+						if (newState != nullptr)
+							DebugPrintW(L"evttype:%d set_state: %s\n", m_AIsensorInfo.m_AIevent.nType, newState->name.text);
+
+						//state may also be null when no state is associated with an event
+						SetAIState( act, newState );
+					}
 				}
 			}
 		}
@@ -662,9 +667,6 @@ CAIEvent* CActorAIComponent::GetMostImportantAIEvent( CActor& act, EAIEventType 
 		//type filter?
 		if ( (eTypeFilter > K_LVL_AI_EVENT_NONE) && (evt->nType != eTypeFilter) )
 			continue;
-		//daca eventul este targetat pentru altcineva se ignora
-		if ( (evt->targetUID != 0) && (evt->targetUID != callerUID) )
-			continue;
 		//ignore actor if different from class foe filters
 		/*
 		int nIgnore = 0, nIgnoreConditions = 0;
@@ -683,9 +685,6 @@ CAIEvent* CActorAIComponent::GetMostImportantAIEvent( CActor& act, EAIEventType 
 		if ((nIgnoreConditions > 0) && (nIgnore == nIgnoreConditions))
 			continue;
 			*/
-			//!!! daca e event targetat il intoarce direct si il consuma, fara sa mai stea pe ganduri, cu exceptia IDLE_TICK
-		if ( (evt->targetUID == callerUID) && (evt->nType > K_LVL_AI_EVENT_IDLE_TICK) )
-			return evt;
 		//verific distanta (daca raza event nu e infinita adica negativa)
 		float evtdstsq = 0.0f;
 		if ( evt->fRadius > 0.0f )
@@ -715,7 +714,7 @@ CAIEvent* CActorAIComponent::GetMostImportantAIEvent( CActor& act, EAIEventType 
 		}
 		//dupa ce am exclus eventurile ce se puteau exclude:
 		//verific linie directa, cel mai costisitor test, sau daca e event cu raza infinita (fara pozitie)
-		if ( (evt->fRadius < 0.0f) || (level.IsLineOfSight( act.GetPosHeart(), evt->pos )) )
+		if ( (evt->fRadius <= 0.0f) || (level.IsLineOfSight( act.GetPosHeart(), evt->pos )) )
 		{
 			//daca eventul este mai aproape sau daca eventul e mai important decat cel initial
 			if ( (evtdstsq < mindistSq) || ((returnEvent != null) && (evt->nType > returnEvent->nType)) )
@@ -1080,9 +1079,9 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		{
 			/*
 			//se intoarce catre event
-			if (actor->m_AIsensorInfo.m_AIcurrentEvent.nType > K_LVL_AI_EVENT_IDLE_TICK)
+			if (actor->m_AIsensorInfo.m_AIevent.nType > K_LVL_AI_EVENT_IDLE_TICK)
 			{
-				actor->m_AIcommands.nLookDirX = SIGN(actor->m_AIsensorInfo.m_AIcurrentEvent.pos.x - actor->pos.x);
+				actor->m_AIcommands.nLookDirX = SIGN(actor->m_AIsensorInfo.m_AIevent.pos.x - actor->pos.x);
 			}
 			//set wait timer
 			actor->AItimer1 = pNewBehavior->m_vcolParams[L"fWaitTimer")->asFloat();

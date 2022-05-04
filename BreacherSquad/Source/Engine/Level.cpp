@@ -192,11 +192,13 @@ CBulletHitReturnData CLevel::HitActor( CActor* actor, CBullet *pBullet, Vec2* pv
 			if ( actor->fLife > 0.0f )
 			{
 				//mesaj LOW_HEALTH - la 10% din viata originala
+				/*
 				float fLifeLowLimit = actor->_template.fLife * 0.1f;
 				if ( ( actor->fLife < fLifeLowLimit ) && ( actor->fLife + fLifeTaken >= fLifeLowLimit ) )
 				{
 					AddAIEvent( K_LVL_AI_EVENT_LOW_HEALTH, 0, pBullet->actorClass, actor->GetPosHeart(), 10000.0f, 0.6f, actor->GetUID() );
 				}
+				*/
 
 				//adaugam si stun
 				if ( actor->fStunTimer < pBullet->fStunDuration )
@@ -2372,7 +2374,7 @@ CActor * CLevel::GetClosestActorByTemplateName( CActor * sourceActor, WCHAR * sT
 	return retvalenemy;
 }
 
-void CLevel::AddAIEvent( EAIEventType eventType, UINT32 ownerUID, int ownerClass, Vec2 vPos, float radius, float duration, UINT32 targetUID )
+void CLevel::AddAIEvent( EAIEventType eventType, UINT32 ownerUID, EActorClass ownerClass, Vec2 vPos, float radius, float duration )
 {
 	// negative radius = infinite radius
 	if ( ( radius == 0.0f ) || ( duration <= 0.0f ) )
@@ -2384,8 +2386,7 @@ void CLevel::AddAIEvent( EAIEventType eventType, UINT32 ownerUID, int ownerClass
 	{
 		for ( int kk = 0; kk < m_arrAIevents.GetSize(); kk++ )
 		{
-			//daca are targetUID diferit nu il suprascrie pentru ca pot fi eventuri la grenade care sunt la fel in afara de targetUID
-			if ( ( m_arrAIevents[kk]->ownerUID == ownerUID ) && ( m_arrAIevents[kk]->nType == eventType ) && ( m_arrAIevents[kk]->targetUID == targetUID ) )
+			if ( ( m_arrAIevents[kk]->ownerUID == ownerUID ) && ( m_arrAIevents[kk]->nType == eventType ) )
 			{
 				nevt = m_arrAIevents[kk];
 				break;
@@ -2405,21 +2406,8 @@ void CLevel::AddAIEvent( EAIEventType eventType, UINT32 ownerUID, int ownerClass
 	nevt->fDuration = duration;
 	nevt->pos = vPos;
 	nevt->ownerClass = ownerClass;
-	nevt->targetUID = targetUID;
 }
 
-void CLevel::DeleteAITargetedEvent( EAIEventType eEvtType, UINT32 targetUID /*= 0*/ )
-{
-	for ( int kk = 0; kk < m_arrAIevents.GetSize(); kk++ )
-	{
-		if ( ( m_arrAIevents[kk]->nType == eEvtType ) && ( ( m_arrAIevents[kk]->targetUID == targetUID ) || ( targetUID == 0 ) ) )
-		{
-			m_arrAIevents[kk]->fDuration = 0.0f;
-			m_arrAIevents[kk]->fRadius = 0.0f;
-		}
-	}
-
-}
 
 void CLevel::CleanupDeadObjects()
 {

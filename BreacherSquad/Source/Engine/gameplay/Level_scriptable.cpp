@@ -690,10 +690,10 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				fRange = vcEvtRange->m_asFloat;
 			if (vcEvtDuration->eType == CVariant::K_ARGTYPE_FLOAT)
 				fDuration = vcEvtDuration->m_asFloat;
-			int evtClass = K_LVL_ACT_CLASS_PASSIVE;
+			EActorClass evtClass = K_LVL_ACT_CLASS_PASSIVE;
 			if (vcEvtClass->eType == CVariant::K_ARGTYPE_STRING)
 			{
-				int retEvtClass = GetListIndexByNameHash(vcEvtClass->m_strArg.textHash, EActorClassNames, K_LVL_ACT_CLASSES_COUNT);
+				EActorClass retEvtClass = (EActorClass)GetListIndexByNameHash(vcEvtClass->m_strArg.textHash, EActorClassNames, K_LVL_ACT_CLASSES_COUNT);
 				if (retEvtClass >= 0)
 					evtClass = retEvtClass;
 			}

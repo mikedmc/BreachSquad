@@ -2,7 +2,7 @@
 #include "Level_bullets.h"
 
 
-CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, int actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir, CLevelArea* pStartArea)
+CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, EActorClass actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir, CLevelArea* pStartArea)
 {
 	//dull bullets don't actually get spawned (sometimes we need them)
 	if (bulletTemplate->nType == K_LVL_BULLET_DULL)

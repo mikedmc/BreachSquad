@@ -102,7 +102,6 @@ void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float
 	}
 }
 
-//#TODO: de generalizat total exploziile la final cand stiu cum vor arata si cate tipuri vor fi. Sa am in xml si animatie si scalare si ce fel de particule arunca etc
 void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, int exploOwnerClass, Vec2 vExploDir, CAABB* exploAABB)
 {
 	CExplosionTemplate* explotemplate = GetTemplateExplosion(exploNameHash);
@@ -143,7 +142,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 
 		//add sound event
 		if (explotemplate->fSoundRadius > 0.0f)
-			AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, 0, exploOwnerClass, pos, explotemplate->fSoundRadius, 1.0f);
+			AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, 0, (EActorClass)exploOwnerClass, pos, explotemplate->fSoundRadius, 1.0f);
 
 		if (exploAABB == null)
 		{
@@ -417,19 +416,19 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				//never stun the hostages
 				if ((act->_template.actorClass == K_LVL_ACT_CLASS_HOSTAGE) && (fMaxStun > 0.0f))
 					continue;
-				//distanta la inamic
+				
 				Vec2 vDir = act->GetPosHeart() - pos;
 				float fDist = D3DXVec2Length(&vDir);
 
 				bool bDirectLine = IsLineOfSight(act->GetPosHeart(), pos);
-				//daca am damage over time il setez pe actor
+				
 				if ((bDirectLine) && (explotemplate->cDoT.eType != CDamageOverTime::K_LVL_DoT_NONE) && (fDist < explotemplate->fDoTRadius))
 				{
 					//momentan nu pune DoT in functie de distanta ci pune uniform la toti din raza
 					SetActorDoT(act, explotemplate->cDoT.eType, explotemplate->cDoT.fDuration, explotemplate->cDoT.fDamagePerSec, explotemplate->cDoT.eExcludedActClass, explotemplate->cDoT.eFilteredActClass, dwOwnerUID);
 				}
 
-				//evit friendly stun
+				//no friendly stun
 				if (act->_template.actorClass != K_LVL_ACT_CLASS_HUMAN)
 					continue;
 				//daca e prea departe nu il ia in seama
@@ -446,7 +445,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				{
 					SetActorStun(act, fMaxStun);
 					//let him know he got stunned
-					AddAIEvent(K_LVL_AI_EVENT_GOT_HIT, 0, exploOwnerClass, pos, fStunRadius, fMaxStun + 0.5f, act->GetUID());
+					//AddAIEvent(K_LVL_AI_EVENT_GOT_HIT, 0, (EActorClass)exploOwnerClass, pos, fStunRadius, fMaxStun + 0.5f, act->GetUID());
 				}
 			}
 		}
