@@ -129,7 +129,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			if ( evtFinal.nType == K_LVL_AI_EVENT_NONE )
 			{
 				//nothing important, set idle tick
-				AIsensor.evt.Set( K_LVL_AI_EVENT_IDLE_TICK, 0, 0, Vec2( 0.0f, 0.0f ), -1.0f, 1.0f );
+				evtFinal.Set( K_LVL_AI_EVENT_IDLE_TICK, 0, 0, Vec2( 0.0f, 0.0f ), -1.0f, 1.0f );
 			}
 			// see if event changed to check for new state
 			if ( AIsensor.evt != evtFinal )

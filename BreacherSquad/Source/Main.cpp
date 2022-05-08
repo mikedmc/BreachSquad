@@ -2255,10 +2255,9 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
 			case VK_F6:
 			{
-				if ( GameState::state == GAME_STATE_GAME )
+				if ( g_editor.IsLaunched() )
 				{
-					Vec2 vpos = __Sim().pPlayerActor[0]->pos.xy;
-					vpos.x += 48.0f;
+					Vec2 vpos = g_editor.vMouseWorld;
 					__Sim().SpawnActor( vpos, L"act_blowup_bart.xml" );
 				}
 			}

@@ -124,11 +124,12 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 
 	bSkipRender = false;
 	// compute bboxes
-	bbox_floor.SetSnapshot(_template.bbox);
-	//#TODO: boxes should be different (to include height)
-	bbox.SetSnapshot( bbox_floor );
+	bbox_floor = _template.bbox;
+	bbox_floor.SaveSnapshot();
 	heightZ = _template.heightZ;
-	
+	bbox.Set( _template.bbox.vMin.x, _template.bbox.vMin.y - Z_TO_H(heightZ), _template.bbox.vMax.x, _template.bbox.vMax.y );
+	bbox.SaveSnapshot();
+
 	//set hue
 	byte collvl = 255;
 	color_ini = D3DCOLOR_ARGB(255, collvl, collvl, collvl);
@@ -665,7 +666,7 @@ void CActor::DoMove( float dTime, CLevel& level )
 		///b.detectezi coliziuni posibile(bbox old + new pos)
 		//1. find bbox start and end union that includes all collisions when moving at high speeds
 		CAABB destbox, srcbox;
-		srcbox = bbox.GetSnapshot();
+		srcbox = bbox_floor.GetSnapshot();
 		destbox = srcbox; 
 		srcbox.Move( pos.xy );
 		destbox.Move( pos.xy + vNextMove );
@@ -759,7 +760,7 @@ void CActor::DoMove( float dTime, CLevel& level )
 		while ( fRemainingTime > 0.0f )
 		{
 			// compute source box
-			srcbox = bbox.GetSnapshot();
+			srcbox = bbox_floor.GetSnapshot();
 			srcbox.Move( pos.xy );
 			// find closest collider
 			float minDistSq = 100000.0f;
@@ -850,7 +851,7 @@ void CActor::DoMove( float dTime, CLevel& level )
 				{
 					vNextMove = hit.vNormal;
 
-					CAABB newboxsrc = bbox.GetSnapshot();
+					CAABB newboxsrc = bbox_floor.GetSnapshot();
 					CAABB newboxdest = newboxsrc;
 					newboxsrc.Move( pos.xy );
 					newboxdest.Move( vNextMove );

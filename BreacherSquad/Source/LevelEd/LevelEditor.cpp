@@ -26,6 +26,7 @@ CLevelEditor::CLevelEditor() :
 	m_pLevel(nullptr), m_pDevice(nullptr),
 	eTool(K_LED_TILE), fTimeline(0.0), m_pCam(nullptr)
 {
+	vMouseWorld = Vec2( 0.0f, 0.0f );
 }
 
 
@@ -88,7 +89,7 @@ void CLevelEditor::Update(float dTime)
 		return;
 
 	// mouse pos in level world
-	Vec2 mousepos = m_pCam->ScreenToWorld(g_mouse.pos, &UTApp().g_rectRenderPP );
+	vMouseWorld = m_pCam->ScreenToWorld(g_mouse.pos, &UTApp().g_rectRenderPP );
 
 	// left mouse button
 	if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
@@ -97,13 +98,13 @@ void CLevelEditor::Update(float dTime)
 		{
 			case K_LED_LIGHT:
 			{
-				if ((pSelected != nullptr) && (MUVec2Len(&(pSelected->pos.xy_proj - mousepos)) < K_TILE_HSIZE_F))
+				if ((pSelected != nullptr) && (MUVec2Len(&(pSelected->pos.xy_proj - vMouseWorld)) < K_TILE_HSIZE_F))
 				{
 					// move it
 				}
 				else
 				{
-					pSelected = m_pLevel->SpawnLight(Vec3(mousepos.x, mousepos.y, 32.0f), K_LVL_LT_POINT, 0xffffffff, 32.0f);
+					pSelected = m_pLevel->SpawnLight(Vec3( vMouseWorld.x, vMouseWorld.y, 32.0f), K_LVL_LT_POINT, 0xffffffff, 32.0f);
 				}
 			}
 			break;
@@ -113,7 +114,7 @@ void CLevelEditor::Update(float dTime)
 	// right mouse button
 	if (g_mouse.Rbut == K_MOUSE_BUTT_JUSTPRESSED)
 	{
-		pSelected = SelectClosest(mousepos);
+		pSelected = SelectClosest( vMouseWorld );
 	}
 
 	// Process realtime keys

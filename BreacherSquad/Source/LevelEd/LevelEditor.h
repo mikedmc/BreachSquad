@@ -32,6 +32,7 @@ private:
 public:
 	Vec2				m_vCamPos;				// Camera position
 	CCameraTransform*	m_pCam;					// pointer to level camera to screen
+	Vec2				vMouseWorld;			// mouse position in world coords
 
 public:
 	CLevelEditor();
