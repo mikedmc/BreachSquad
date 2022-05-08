@@ -6,17 +6,7 @@ class CActorAIComponent : public IBaseActorAIComponent
 private:
 	CLevel&					level;						// reference to level for accessing global data
 public: 
-
 	float					AItimerDecision;			// takes decisions when it reaches 0
-	//#TODO: must initialize these!!!
-	//#TODO: variabile locale rapide AI - ar trebui incluse intr-o structura cu serialize/deserialize eventual (mem)
-	UINT32					AItargetUID;				// enemy UID (not the one set from the editor!!!)
-	float					AItimer1, AItimer2;
-	float					AIfvar1, AIfvar2, AIfvar3;
-	int						AIvar1, AIvar2;
-	Vec2					AIvec1;
-	bool					AIvarBool1, AIvarBool2;
-	CStringHash				AIstrvar1, AIstrvar2;
 
 public:
 	CAICommands				AIcommands;					// Commands issued by AI to be executed by the actor

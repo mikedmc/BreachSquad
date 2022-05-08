@@ -41,6 +41,7 @@ class IBaseActorAIComponent
 public:
 	int				AIsubState;				// AI substate used here and there, everywhere
 	double			fTimelineAI;			// local timeline for AI 
+	AImem			mem;					// memory for AI vars
 public:
 	IBaseActorAIComponent() : AIsubState( 0 ), fTimelineAI( 0.0f ) {}
 	virtual			~IBaseActorAIComponent() {}

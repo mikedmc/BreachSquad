@@ -344,7 +344,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				if ( act._template.eCaps & K_ACT_CAPS_CAN_CROUCH )
 					AIcommands.bCrouched = true;
 				//can he follow targets? does it only once
-				if ( AIvarBool1 )
+				if ( mem.AIvarBool1 )
 				{
 					if ( AIsensor.pTargetedActor != nullptr )
 					{
@@ -360,7 +360,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 						//see if target is already too close
 						if ( fDist <= fDistMin )
 						{
-							AIvarBool1 = false;
+							mem.AIvarBool1 = false;
 							break;
 						}
 
@@ -373,14 +373,14 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 						bool bHasLateralCollisions = ((act.collisionFlags & (K_DIRFLAG_RIGHT | K_DIRFLAG_LEFT)) != 0);
 						if ( (fDist <= fDistMin) || (bHasLateralCollisions) )
 						{
-							AIvarBool1 = false;
+							mem.AIvarBool1 = false;
 						}
 					}
 					else
 					{
 						if ( AIsubState == 1 ) //already followed but lost him
 						{
-							AIvarBool1 = false;
+							mem.AIvarBool1 = false;
 						}
 					}
 				}
@@ -390,13 +390,13 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			{
 				AIcommands.bCrouched = true;
 				//handle fade out duration
-				if ( (m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ].fBehaviorDuration > 0.0f) && (AIfvar1 > 0.0f) )
+				if ( (m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ].fBehaviorDuration > 0.0f) && ( mem.AIfvar1 > 0.0f) )
 				{
 					float fLeftTime = m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ].fBehaviorDuration - m_fAIbehaviorTimer;
-					if ( fLeftTime <= AIfvar1 )
+					if ( fLeftTime <= mem.AIfvar1 )
 					{
 						//setam comanda de culoare
-						AIcommands.nColor = DW_COLORALPHA( act.color_ini, fLeftTime / AIfvar1 );
+						AIcommands.nColor = DW_COLORALPHA( act.color_ini, fLeftTime / mem.AIfvar1 );
 					}
 				}
 			}
@@ -440,7 +440,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				{
 					float fPerc = m_fAIbehaviorTimer / m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ].fBehaviorDuration;
 					//setam comanda de culoare
-					AIcommands.nColor = DW_COLORALPHA( act.color_ini, (1.0f - fPerc) * AIfvar2 + fPerc * AIfvar1 );
+					AIcommands.nColor = DW_COLORALPHA( act.color_ini, (1.0f - fPerc) * mem.AIfvar2 + fPerc * mem.AIfvar1 );
 				}
 			}
 			break;
@@ -453,8 +453,8 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					AIsubState = 1;
 				}
 
-				AItimer1 -= dTime;
-				if ( AItimer1 <= 0.0f )
+				mem.AItimer1 -= dTime;
+				if ( mem.AItimer1 <= 0.0f )
 				{
 					bBehaviorFinished = true;
 				}
@@ -469,7 +469,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			break;
 			case AI_BEHAVIOR_RUN_SCRIPT:
 			{
-				if ( AIvar1 == 1 ) //wait script end
+				if ( mem.AIvar1 == 1 ) //wait script end
 				{
 					if ( act.nRunningScriptUID == 0 )
 						bBehaviorFinished = true;
@@ -529,21 +529,21 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID( act.nControllerInstanceID );
 					//daca apesi fire dupa o secunda scursa nu mai asteapta timerul
 					bool bContinue = false;
-					if ( (pController != null) && (AItimer1 < K_LVL_PLAYER_DEATH_TIMER - 1.0f) &&
+					if ( (pController != null) && ( mem.AItimer1 < K_LVL_PLAYER_DEATH_TIMER - 1.0f) &&
 						(level.m_arrStats[ K_LVL_STATS_PL1_LIVES + act.nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT ] > 0) )
 					{
 						if ( (pController->sCommands.keyState[ K_CM_COMMAND_FIRE1 ] == K_CM_BUTSTATE_JUSTRELEASED) ||
 							(pController->sCommands.keyState[ K_CM_COMMAND_JUMP ] == K_CM_BUTSTATE_JUSTRELEASED) )
 						{
-							AItimer1 = 0.0f;
+							mem.AItimer1 = 0.0f;
 							//continue only on keypress
 							//bContinue = true;
 						}
 					}
 
-					if ( (AItimer1 > 0.0f) && (level.m_levelState == K_LVL_STATE_PLAYING) )
+					if ( ( mem.AItimer1 > 0.0f) && (level.m_levelState == K_LVL_STATE_PLAYING) )
 					{
-						AItimer1 -= dTime;
+						mem.AItimer1 -= dTime;
 						break;
 					}
 
@@ -588,12 +588,12 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				}
 				else //splat timer - splat corpse if timer is set
 				{
-					if ( (act._template.eMaterial == K_LVL_MATERIAL_FLESH) && (AItimer1 > 0.0f) )
+					if ( (act._template.eMaterial == K_LVL_MATERIAL_FLESH) && ( mem.AItimer1 > 0.0f) )
 					{
-						AItimer1 -= dTime;
-						if ( AItimer1 <= 0.0f )
+						mem.AItimer1 -= dTime;
+						if ( mem.AItimer1 <= 0.0f )
 						{
-							AItimer1 = 0.0f;
+							mem.AItimer1 = 0.0f;
 							AIcommands.nDeathCommand = K_LVL_ACT_DEATHCMD_SPLAT;
 						}
 					}
@@ -869,20 +869,20 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		case AI_BEHAVIOR_IDLE_CROUCHED:
 		{
 			//save fadeout duration
-			AIfvar1 = pNewBehavior->m_vcolParams[ L"fFadeOutDuration" ].asFloat();
+			mem.AIfvar1 = pNewBehavior->m_vcolParams[ L"fFadeOutDuration" ].asFloat();
 		}
 		break;
 		case AI_BEHAVIOR_HOSTAGE:
 		{
 			AIsubState = 0;
 			//actor doesn't try to escape:
-			AIvarBool1 = false;
+			mem.AIvarBool1 = false;
 			//can hostage escape?
 			float fProbability = pNewBehavior->m_vcolParams[ L"fRunProbability" ].asFloat();
 			if ( level.m_rand.RandFloat( 100.0f ) < fProbability * 100.0f )
 			{
 				//we have a runner!
-				AIvarBool1 = true;
+				mem.AIvarBool1 = true;
 			}
 		}
 		break;
@@ -922,9 +922,9 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		{
 			//burns with flame?
 			CVariant* cve = &pNewBehavior->m_vcolParams[ L"nCanBurn" ];
-			AIvarBool1 = true;
+			mem.AIvarBool1 = true;
 			if ( (cve->eType != CVariant::K_ARGTYPE_NONE) && (cve->asInt32() == 0) )
-				AIvarBool1 = false;
+				mem.AIvarBool1 = false;
 
 			AIsubState = 0;
 			//setez din start comanda de explode ca atunci cand trece in dead sa explodeze
@@ -948,41 +948,41 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		case AI_BEHAVIOR_PATROL:
 		{
 			//save wait timer
-			AIfvar1 = pNewBehavior->m_vcolParams[ L"fWaitTimer" ].asFloat();
-			AItimer1 = 0.0f;
+			mem.AIfvar1 = pNewBehavior->m_vcolParams[ L"fWaitTimer" ].asFloat();
+			mem.AItimer1 = 0.0f;
 			//patrol faster?
-			AIvarBool1 = (pNewBehavior->m_vcolParams[ L"nRun" ].asInt32() != 0);
+			mem.AIvarBool1 = (pNewBehavior->m_vcolParams[ L"nRun" ].asInt32() != 0);
 			//can he open doors?
-			AIvarBool2 = (pNewBehavior->m_vcolParams[ L"nOpenUnlockedDoors" ].asInt32() != 0);
+			mem.AIvarBool2 = (pNewBehavior->m_vcolParams[ L"nOpenUnlockedDoors" ].asInt32() != 0);
 		}
 		break;
 		case AI_BEHAVIOR_PATROL_BREAK_DOORS:
 		{
 			//save wait timer
-			AIfvar1 = pNewBehavior->m_vcolParams[ L"fWaitTimer" ].asFloat();
-			AItimer1 = 0.0f;
+			mem.AIfvar1 = pNewBehavior->m_vcolParams[ L"fWaitTimer" ].asFloat();
+			mem.AItimer1 = 0.0f;
 			//patrol faster?
-			AIvarBool1 = (pNewBehavior->m_vcolParams[ L"nRun" ].asInt32() != 0);
+			mem.AIvarBool1 = (pNewBehavior->m_vcolParams[ L"nRun" ].asInt32() != 0);
 			//set on patroling
 			AIsubState = 0;
 			//break door probability
-			AIfvar2 = pNewBehavior->m_vcolParams[ L"fBreakProb" ].asFloat();
+			mem.AIfvar2 = pNewBehavior->m_vcolParams[ L"fBreakProb" ].asFloat();
 		}
 		break;
 		case AI_BEHAVIOR_RUN_AWAY:
 		{
 			//running direction - to be set later on
-			AIvar1 = 0;
+			mem.AIvar1 = 0;
 			//can he open doors?
-			AIvarBool2 = (pNewBehavior->m_vcolParams[ L"nOpenUnlockedDoors" ].asInt32() != 0);
+			mem.AIvarBool2 = (pNewBehavior->m_vcolParams[ L"nOpenUnlockedDoors" ].asInt32() != 0);
 		}
 		break;
 		case AI_BEHAVIOR_WAIT_FOR_ACTION:
 		{
 			//var that tells the enemy when he can shoot
-			AIfvar1 = pNewBehavior->m_vcolParams[ L"fShootPeriod" ].asFloat();
+			mem.AIfvar1 = pNewBehavior->m_vcolParams[ L"fShootPeriod" ].asFloat();
 			//timer that keeps actual time
-			AItimer1 = AIfvar1;
+			mem.AItimer1 = mem.AIfvar1;
 		}
 		break;
 		case AI_BEHAVIOR_DETONATE_NEARBY:
@@ -1000,9 +1000,9 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				fAlpha = cvc->m_asFloat;
 			CLAMP( fAlpha, 0.0f, 1.0f );
 
-			AItimer1 = 0.0f;
-			AItimer2 = fDuration;
-			AIfvar1 = fAlpha;
+			mem.AItimer1 = 0.0f;
+			mem.AItimer2 = fDuration;
+			mem.AIfvar1 = fAlpha;
 		}
 		break;
 		case AI_BEHAVIOR_PLAY_ANIM:
@@ -1036,9 +1036,9 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			CVariant* cve = &pNewBehavior->m_vcolParams[ L"bWaitScriptEnd" ];
 			if ( cve->IsSet() )
 				bWaitScriptEnd = cve->m_asBool;
-			AIvar1 = 0;
+			mem.AIvar1 = 0;
 			if ( bWaitScriptEnd )
-				AIvar1 = 1;
+				mem.AIvar1 = 1;
 
 			bool bTouchTarget = false;
 			CVariant* cvb = &pNewBehavior->m_vcolParams[ L"bTouchTarget" ];
@@ -1117,10 +1117,10 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 
 		case AI_BEHAVIOR_HUMAN_SHIELD_ATTACK:
 		{
-			AItargetUID = 0; //unset target ID (this will be the hostage UID)
+			mem.AItargetUID = 0; //unset target ID (this will be the hostage UID)
 			AIsubState = 0; //0-looking for hostage, 1-normal attack
-			AIvarBool1 = true;	//decide movement helper var
-			AItimer1 = 0.0f;
+			mem.AIvarBool1 = true;	//decide movement helper var
+			mem.AItimer1 = 0.0f;
 		}
 		break;
 		case AI_BEHAVIOR_GET_IN_COVER:
@@ -1132,25 +1132,25 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		{
 			AIsubState = 0;
 			//save execute delay
-			AIfvar1 = pNewBehavior->m_vcolParams[ L"fExecuteDelay" ].asFloat();
-			if ( AIfvar1 <= 0.0f )
-				AIfvar1 = 2.0f; //defaults on 0
+			mem.AIfvar1 = pNewBehavior->m_vcolParams[ L"fExecuteDelay" ].asFloat();
+			if ( mem.AIfvar1 <= 0.0f )
+				mem.AIfvar1 = 2.0f; //defaults on 0
 		}
 		break;
 		case AI_BEHAVIOR_ATTACK_COVER:
 		{
-			AIvarBool1 = true; //decide movement helper var
+			mem.AIvarBool1 = true; //decide movement helper var
 			AIsubState = 0;
-			AItimer1 = 0.0f;	//generic timer for decision making
+			mem.AItimer1 = 0.0f;	//generic timer for decision making
 		}
 		break;
 		case AI_BEHAVIOR_ATTACK_BACKSTAB:
 		case AI_BEHAVIOR_ATTACK_HITNRUN:
 		case AI_BEHAVIOR_ATTACK:
 		{
-			AIvarBool1 = true; //decide movement helper var
+			mem.AIvarBool1 = true; //decide movement helper var
 			AIsubState = 0;
-			AItimer1 = 0.0f;	//generic timer for decision making
+			mem.AItimer1 = 0.0f;	//generic timer for decision making
 		}
 		break;
 		case AI_BEHAVIOR_SUICIDE:
@@ -1190,12 +1190,12 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			actor.bCrouched = false;
 			actor.fStunTimer = 0.0f;
 			//death timer for players or splat timer for others
-			AItimer1 = 0.0f;
+			mem.AItimer1 = 0.0f;
 			if ( actor._template.actorClass != K_ACT_CLASS_PLAYER )
 			{
 				CVariant* cvt = &pNewBehavior->m_vcolParams[ L"fSplatTimer" ];
 				if ( cvt->eType == CVariant::K_ARGTYPE_FLOAT )
-					AItimer1 = cvt->asFloat();
+					mem.AItimer1 = cvt->asFloat();
 			}
 
 			//remove icons
@@ -1224,10 +1224,10 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			if ( actor._template.actorClass == K_ACT_CLASS_PLAYER )
 			{
 				//timerul este folosit ca sa nu sara camera de pe cadavru prea repede
-				AItimer1 = K_LVL_PLAYER_DEATH_TIMER;
+				mem.AItimer1 = K_LVL_PLAYER_DEATH_TIMER;
 				//daca nu mai are vieti pun un timer mai mic dar il pun totusi ca sa nu sara camera prea repede
 				if ( level.m_arrStats[ K_LVL_STATS_PL1_LIVES + actor.nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT ] <= 0 )
-					AItimer1 = K_LVL_PLAYER_DEATH_TIMER * 0.25f;
+					mem.AItimer1 = K_LVL_PLAYER_DEATH_TIMER * 0.25f;
 
 				//actor->act.varAIparams.SetVarINT32(L"nDeathCommand", K_LVL_ACT_DEATHCMD_RESET_TO_ZERO);
 
