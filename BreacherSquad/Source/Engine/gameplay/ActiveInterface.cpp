@@ -138,7 +138,9 @@ void IActiveInterface::Kill()
 	{
 		// mark as ready to be deallocated
 		bPendingKill = true;
+#if defined(_DEBUG) || defined(DEBUG)
 		fPendingKillTimer = 0.0f;
+#endif
 		// call end play
 		EndPlay();
 		// release target pointers
