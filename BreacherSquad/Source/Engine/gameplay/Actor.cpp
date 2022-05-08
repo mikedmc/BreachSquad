@@ -5,8 +5,10 @@ void CActor::PostConstructionInit()
 {
 	// compute bboxes from backup on init (might not be necessary but it doesn't hurt)
 	//#TODO: see if they're already initialized when spawned
-	bbox.RestoreSnapshot(pos.xy_proj);
-	bbox_floor.RestoreSnapshot(pos.xy);
+	bbox.RestoreSnapshot( pos.xy_proj );
+	bbox_floor.RestoreSnapshot( pos.xy );
+	bbox_cull.RestoreSnapshot( pos.xy_proj );
+	vHeart.Set( pos.xyz.x, pos.xyz.y, pos.xyz.z + _template.heartZ );
 }
 
 void CActor::BeginPlay()
@@ -87,6 +89,7 @@ void CActor::SetPos(Vec3 newPos)
 
 	bbox.RestoreSnapshot(pos.xy_proj);
 	bbox_floor.RestoreSnapshot(pos.xy);
+	bbox_cull.RestoreSnapshot( pos.xy_proj );
 }
 
 void CActor::Move(Vec3 delta)
@@ -98,6 +101,7 @@ void CActor::Move(Vec3 delta)
 
 	bbox.RestoreSnapshot(pos.xy_proj);
 	bbox_floor.RestoreSnapshot(pos.xy);
+	bbox_cull.RestoreSnapshot( pos.xy_proj );
 }
 
 
@@ -129,6 +133,8 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 	heightZ = _template.heightZ;
 	bbox.Set( _template.bbox.vMin.x, _template.bbox.vMin.y - Z_TO_H(heightZ), _template.bbox.vMax.x, _template.bbox.vMax.y );
 	bbox.SaveSnapshot();
+	bbox_cull = bbox;
+	bbox_cull.SaveSnapshot();
 
 	//set hue
 	byte collvl = 255;
@@ -1313,7 +1319,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 		}
 
 		//cadavers get pushed more by kicking them
-		if ( ( fOldLife > 0.0f ) && ( this->_template.fMass > 0.0f ) && ( pvProjectileMomentum != null ) )
+		if ( ( fOldLife > 0.0f ) && ( this->_template.fMass > 0.0f ) && ( pvProjectileMomentum != nullptr ) )
 			this->vSpeedImpulse += K_LVL_DEAD_BODY_BULLET_MOMENTUM_MULTIPLIER * ( *pvProjectileMomentum / this->_template.fMass );
 
 		//erase shooting flags

@@ -21,19 +21,19 @@ void CLevel::BuildVisibilityLists()
 	lvlAABB.Set(m_levelAABB);
 	///--- visual stuff - depends only on camaabb ---
 	RectXYWH camrect_old = m_camLevelToRT.GetCamWorldAABB();
-	//build a camera view rectangle constant across different resolutions so it doesn't desync when on multiplayer
+	// build a camera view rectangle constant across different resolutions so it doesn't desync when on multiplayer
 	//it will need intervention if camera constraint changes axis in order to maintain maximum visible area
 	SizeWH camrectsz(K_GAME_WIDTH, K_GAME_HEIGHT);
 	RectXYWH camrect(camrect_old.CenterX() - camrectsz.w * 0.5f, camrect_old.CenterY() - camrectsz.h * 0.5f, camrectsz.w, camrectsz.h);
-	//maximize camrect vertically
+	// maximize camrect vertically
 	CAABB camaabb(Vec2(camrect.x, camrect.y), Vec2(camrect.Right(), camrect.Bottom()));
-	//union of all visible lights AABBs
+	// union of all visible lights AABBs
 	CAABB lightsCommonAABB(Vec2(-1000.0f, -1000.0f), Vec2(-1000.0f, -1000.0f));
 	//for detecting visible props (objects)
 	CAABB propsPaintAABB = camaabb;
 	//for detecting visible actors
-	CAABB actorsPaintAABB = camaabb; //box-ul care zice daca actorul e vizibil sau nu
-	actorsPaintAABB.Inflate(Vec2(K_TILE_SIZE, K_TILE_SIZE)); //maresc putin bboxul actorilor pt ca cei morti au bbox mai mic
+	CAABB actorsPaintAABB = camaabb; 
+	actorsPaintAABB.Inflate(Vec2(K_TILE_SIZE, K_TILE_SIZE));
 
 	ClearVisibilityLists();
 	
@@ -117,14 +117,13 @@ void CLevel::BuildVisibilityLists()
 			break;
 		}
 	}
-	//toate bbox-urile care intra in actiunea luminilor care fac shadow casting
+	// select all boxes that might cast shadows from active lights
 	m_visibleList.visible_colShapesLights.Clear();
 	m_visibleList.logic_colShapes.Clear();
 	m_visibleList.logic_colShapesExtended.Clear();
 	m_visibleList.logic_colShapesSpecial.Clear();
 	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
 	{
-		//selectez bboxurile pt coliziune (cele din ecran momentan)
 		if (!m_arrColShapes[kk]->IsAlive())
 			continue;
 
@@ -186,12 +185,12 @@ void CLevel::BuildVisibilityLists()
 		if ((!actor->IsAlive()) || (actor->bSkipRender))
 			continue;
 		//is it nearby?
-		if ((actorsNearbyAABBs[0].Intersects(actor->bbox)) || (actorsNearbyAABBs[1].Intersects(actor->bbox)))
+		if ((actorsNearbyAABBs[0].Intersects(actor->bbox_cull)) || (actorsNearbyAABBs[1].Intersects(actor->bbox_cull)))
 		{
 			m_visibleList.logic_actors_closeby.Add(actor);
 		}
 		//must be painted?
-		if (actorsPaintAABB.Intersects(actor->bbox))
+		if (actorsPaintAABB.Intersects(actor->bbox_cull))
 		{
 			m_visibleList.visible_actors.Add(actor);
 			// add it to the sorted list
@@ -214,14 +213,14 @@ void CLevel::BuildVisibilityLists()
 			if ((!prop->IsAlive()) || prop->bSkipRender)
 				continue;
 			//visible props
-			if (propsPaintAABB.Intersects(prop->bbox))
+			if (propsPaintAABB.Intersects(prop->bbox_cull))
 			{
 				m_visibleList.visible_props.Add(prop);
 				// add it to the sorted list
 				m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_PROP, prop, prop->pos.xyz.y));
 			}
 			//logical closeby actives
-			if ((propsNearbyAABBs[0].Intersects(prop->bbox)) || (propsNearbyAABBs[1].Intersects(prop->bbox)))
+			if ((propsNearbyAABBs[0].Intersects(prop->bbox_cull)) || (propsNearbyAABBs[1].Intersects(prop->bbox_cull)))
 			{
 				m_visibleList.logic_props_closeby.Add(prop);
 			}

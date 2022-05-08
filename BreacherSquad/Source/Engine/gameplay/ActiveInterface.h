@@ -47,8 +47,9 @@ public:
 													   
 	DWORD					color;
 	int						heightZ;				// height of object, same as in bbox Z axis
-	CAABBEx					bbox;					// bbox in projected screen space, with backup copy inside.
-	CAABBEx					bbox_floor;				// bbox that represents the floor rectangle. has backup copy.
+	CAABBEx					bbox;					// bbox in projected screen space, with backup copy inside. Derived from editor.
+	CAABBEx					bbox_floor;				// bbox that represents the floor rectangle. has backup copy. From editor/setup.
+	CAABBEx					bbox_cull;				// bbox used for culling, big enough to contain all gfx
 
 public: 
 	DWORD					color_ini;

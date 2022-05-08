@@ -18,6 +18,7 @@ void CProp::SetPos( Vec3 newPos )
 	pos = newPos;
 	bbox.RestoreSnapshot( pos.xy_proj );
 	bbox_floor.RestoreSnapshot( pos.xy );
+	bbox_cull.RestoreSnapshot( pos.xy_proj );
 }
 
 void CProp::Move( Vec3 delta )
@@ -26,6 +27,7 @@ void CProp::Move( Vec3 delta )
 	pos = npos;
 	bbox.RestoreSnapshot( pos.xy_proj );
 	bbox_floor.RestoreSnapshot( pos.xy );
+	bbox_cull.RestoreSnapshot( pos.xy_proj );
 }
 
 void CProp::InitializeFromAFrameFlags( UINT32 AFrameFlags )
@@ -95,6 +97,8 @@ void CProp::PostConstructionInit()
 	bbox_floor.SaveSnapshot();
 	bbox.Set( bb_proj );
 	bbox.SaveSnapshot();
+	bbox_cull.Set( sprite.pSprCol->GetAFrameBBox_real(sprite.animIdx, sprite.frameIdx) );
+	bbox_cull.SaveSnapshot();
 	// when we flip it on X we flip bboxes too
 	/*
 	if (IS_FLAG_ALL(obj->flags, K_PROPFLAG_FLIP_X)
@@ -107,6 +111,7 @@ void CProp::PostConstructionInit()
 	// place snapshot into box, at object position
 	bbox.RestoreSnapshot( pos.xy_proj );
 	bbox_floor.RestoreSnapshot( pos.xy );
+	bbox_cull.RestoreSnapshot( pos.xy_proj );
 }
 
 void CProp::BeginPlay()
