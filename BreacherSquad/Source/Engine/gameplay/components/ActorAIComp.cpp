@@ -794,7 +794,7 @@ bool CActorAIComponent::SetAIState( CActor& actor, WCHAR * strStateName )
 }
 
 
-bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, bool &ret_bFinished )
+bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& act, int nBehaviorIdx, bool &ret_bFinished )
 {
 	//by default all states need update
 	ret_bFinished = false;
@@ -811,7 +811,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 	m_fAIbehaviorTimer = 0.0f;
 
 	AIcommands.Reset();
-	actor.fFOVPercent = 1.0f;
+	act.fFOVPercent = 1.0f;
 
 	switch ( pNewBehavior->nType )
 	{
@@ -830,14 +830,14 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				break;
 			}
 
-			CAIState* newstate = actor._template.AItemplate->GetAIStateByName( vc->m_strArg );
+			CAIState* newstate = act._template.AItemplate->GetAIStateByName( vc->m_strArg );
 			if ( newstate == null )
 			{
 				LOG( L"AI_BEHAVIOR_SET_STATE - state not found! %s\n", vc->m_strArg.text );
 				break;
 			}
 			//everything ok, set state
-			SetAIState( actor, newstate );
+			SetAIState( act, newstate );
 			//!!! make sure we stay:
 			ret_bFinished = false;
 		}
@@ -888,17 +888,19 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		break;
 		case AI_BEHAVIOR_FLY_AWAY:
 		{
-			actor.bHasGravity = false;
+			act.bHasGravity = false;
 		}
 		break;
 		case AI_BEHAVIOR_IDLE:
 		{
-			AIcommands.vAimVec = { -100.0f, -100.0f };
+			float vx = __Sim().RNG().RandFloatSgn( 100.0f );
+			float vy = __Sim().RNG().RandFloatSgn( 100.0f );
+			act.vAim = { vx, vy };
 		}
 		break;
 		case AI_BEHAVIOR_SET_ANIMSET:
 		{
-			actor.SetAnimSet( pNewBehavior->m_vcolParams[ L"nSet" ].m_asINT32 );
+			act.SetAnimSet( pNewBehavior->m_vcolParams[ L"nSet" ].m_asINT32 );
 			//state doesn't need update
 			ret_bFinished = true;
 		}
@@ -910,9 +912,9 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			{
 				bool bVal = (cvNotATarget->m_asINT32 != 0);
 				if ( bVal )
-					actor._template.eCaps |= K_ACT_CAPS_NOT_A_TARGET;
+					act._template.eCaps |= K_ACT_CAPS_NOT_A_TARGET;
 				else
-					actor._template.eCaps &= ~K_ACT_CAPS_NOT_A_TARGET;
+					act._template.eCaps &= ~K_ACT_CAPS_NOT_A_TARGET;
 			}
 			//state doesn't need update
 			ret_bFinished = true;
@@ -928,9 +930,9 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 
 			AIsubState = 0;
 			//setez din start comanda de explode ca atunci cand trece in dead sa explodeze
-			actor.varAIparams.SetVarUINT32( L"nExplode", hash_EXPLO_BARREL );
+			act.varAIparams.SetVarUINT32( L"nExplode", hash_EXPLO_BARREL );
 			//special value that tells the engine that the explosion will have the last damager's UID so we can transmit barrel kills to players
-			actor.varAIparams.SetVarBool( L"bUseDamagerUID", true );
+			act.varAIparams.SetVarBool( L"bUseDamagerUID", true );
 		}
 		break;
 		case AI_BEHAVIOR_FLEE:
@@ -1052,7 +1054,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				nScriptOverride = cvc->m_strArg.textHash;
 			}
 			//Run script
-			actor.Touch( actor.GetUID(), 0.0f, nScriptOverride, bTouchTarget );
+			act.Touch( act.GetUID(), 0.0f, nScriptOverride, bTouchTarget );
 		}
 		break;
 		case AI_BEHAVIOR_PLAY_VERSE:
@@ -1088,7 +1090,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			CVariant* cvc = &pNewBehavior->m_vcolParams[ L"sEffectType" ];
 			if ( cvc->eType == CVariant::K_ARGTYPE_STRING )
 			{
-				level.GenerateEffect( cvc->m_strArg, actor.GetPosHeart(), fSize );
+				level.GenerateEffect( cvc->m_strArg, act.GetPosHeart(), fSize );
 			}
 			else
 			{
@@ -1155,10 +1157,10 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 		break;
 		case AI_BEHAVIOR_SUICIDE:
 		{
-			actor.bCrouched = false;
-			actor.fStunTimer = 0.0f;
+			act.bCrouched = false;
+			act.fStunTimer = 0.0f;
 
-			actor.fLife = 0.0f; //kill it
+			act.fLife = 0.0f; //kill it
 			//trateaza death commands din script
 			EActorDeathCommand dcmd = K_LVL_ACT_DEATHCMD_NONE;
 			CVariant* cvc = &pNewBehavior->m_vcolParams[ L"sDeathCommand" ];
@@ -1167,7 +1169,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				int ndcmd = GetListIndexByName( cvc->m_strArg.text, EActorDeathCommandNames, K_LVL_ACT_DEATHCMD_CNT );
 				//daca avem comanda de death o trimitem mai departe
 				if ( ndcmd >= 0 )
-					actor.varAIparams.SetVarINT32( L"nDeathCommand", ndcmd );
+					act.varAIparams.SetVarINT32( L"nDeathCommand", ndcmd );
 			}
 			//state doesn't need update
 			ret_bFinished = true;
@@ -1180,18 +1182,18 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 
 			//make sure he's dead!
 			bool bSpawnedDead = false;
-			if ( actor.fLife > 0.0f )
+			if ( act.fLife > 0.0f )
 			{
-				actor.fLife = 0.0f;
+				act.fLife = 0.0f;
 				bSpawnedDead = true;
 			}
-			actor.fArmor = 0.0f;
+			act.fArmor = 0.0f;
 
-			actor.bCrouched = false;
-			actor.fStunTimer = 0.0f;
+			act.bCrouched = false;
+			act.fStunTimer = 0.0f;
 			//death timer for players or splat timer for others
 			mem.AItimer1 = 0.0f;
-			if ( actor._template.actorClass != K_ACT_CLASS_PLAYER )
+			if ( act._template.actorClass != K_ACT_CLASS_PLAYER )
 			{
 				CVariant* cvt = &pNewBehavior->m_vcolParams[ L"fSplatTimer" ];
 				if ( cvt->eType == CVariant::K_ARGTYPE_FLOAT )
@@ -1201,9 +1203,9 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			//remove icons
 			AIcommands.ResetMoveCommands();
 			//reset color
-			AIcommands.nColor = actor.color_ini;
+			AIcommands.nColor = act.color_ini;
 			//stop weapons
-			actor.Weapons()->StopReloading();
+			act.Weapons()->StopReloading();
 			//trateaza death commands din script
 			EActorDeathCommand dcmd = K_LVL_ACT_DEATHCMD_NONE;
 			CVariant* cvc = &pNewBehavior->m_vcolParams[ L"sDeathCommand" ];
@@ -1212,31 +1214,31 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 				dcmd = (EActorDeathCommand)GetListIndexByName( cvc->m_strArg.text, EActorDeathCommandNames, K_LVL_ACT_DEATHCMD_CNT );
 				//daca avem comanda de death o trimitem mai departe
 				if ( dcmd >= K_LVL_ACT_DEATHCMD_NONE )
-					actor.varAIparams.SetVarINT32( L"nDeathCommand", (int)dcmd );
+					act.varAIparams.SetVarINT32( L"nDeathCommand", (int)dcmd );
 			}
 			//trateaza death script
 			CVariant* cvs = &pNewBehavior->m_vcolParams[ L"sDeathScript" ];
 			if ( cvc->eType == CVariant::K_ARGTYPE_STRING )
 			{
-				actor.varAIparams.AddVariant( cvs );
+				act.varAIparams.AddVariant( cvs );
 			}
 
-			if ( actor._template.actorClass == K_ACT_CLASS_PLAYER )
+			if ( act._template.actorClass == K_ACT_CLASS_PLAYER )
 			{
 				//timerul este folosit ca sa nu sara camera de pe cadavru prea repede
 				mem.AItimer1 = K_LVL_PLAYER_DEATH_TIMER;
 				//daca nu mai are vieti pun un timer mai mic dar il pun totusi ca sa nu sara camera prea repede
-				if ( level.m_arrStats[ K_LVL_STATS_PL1_LIVES + actor.nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT ] <= 0 )
+				if ( level.m_arrStats[ K_LVL_STATS_PL1_LIVES + act.nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT ] <= 0 )
 					mem.AItimer1 = K_LVL_PLAYER_DEATH_TIMER * 0.25f;
 
 				//actor->act.varAIparams.SetVarINT32(L"nDeathCommand", K_LVL_ACT_DEATHCMD_RESET_TO_ZERO);
 
-				level.m_arrPlayerSelStrategic[ actor.nPlayerOrdinal ] = -1;
+				level.m_arrPlayerSelStrategic[ act.nPlayerOrdinal ] = -1;
 				//m_interfaceIGM.SetStrategicSelection(actor->nPlayerOrdinal, -1);
 				//dam remove la particles de pe interfata cand moare un player
 				__Particles().RemoveAllFromLayer( K_PART_LAYER_INTERFACE_LIGHT );
 			}
-			else if ( actor._template.actorClass >= K_ACT_CLASS_ENEMY )
+			else if ( act._template.actorClass >= K_ACT_CLASS_ENEMY )
 			{
 				if ( !bSpawnedDead )
 				{
@@ -1326,7 +1328,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& actor, int nBehaviorIdx, 
 			//make sure we release it on the next frame
 			if ( dcmd == K_LVL_ACT_DEATHCMD_DEALLOCATE )
 			{
-				actor.Kill();
+				act.Kill();
 			}
 		}
 		break;
