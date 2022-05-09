@@ -1,7 +1,7 @@
 #include "dxstdafx.h"
 #include "Prop.h"
 
-CProp::CProp( CPropAIComponent* pAIcomp ) :
+CProp::CProp( CActiveAIComponent* pAIcomp ) :
 	flags( 0 ), c_AI( pAIcomp )
 {
 

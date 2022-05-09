@@ -210,7 +210,7 @@ CProp* CLevel::SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nF
 	ErrorBox( K_ERR_WARNING, L"Not implemented! See level_loaders when loading props!" );
 	return nullptr;
 
-	CProp* obj = new CProp( new CPropAIComponent() );
+	CProp* obj = new CProp( new CActiveAIComponent() );
 
 	obj->ID = GenerateNextID();
 	//pozitia
@@ -270,7 +270,7 @@ CProp* CLevel::SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nF
 
 CLight*	CLevel::SpawnLight( Vec3 spawnPos, eLightType eType, DWORD dwColor, float fRadius, int profileID, bool bCastShadows )
 {
-	CLight *nl = new CLight( new CLightAIComponent() );
+	CLight *nl = new CLight( new CActiveAIComponent() );
 	nl->ID = GenerateNextID();
 	nl->type = eType;
 	nl->fVolumeAlpha = 1.0f;

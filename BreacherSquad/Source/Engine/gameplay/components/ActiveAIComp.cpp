@@ -19,6 +19,406 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 
 	switch ( active.AIstate )
 	{
+		case K_AI_STATE_ACTIVE_BOMB:
+		{
+			CProp* prop = dynamic_cast< CProp* >( &active );
+			if ( prop == nullptr )
+				break;
+			// only decrease bomb timer if playing (not on level results)
+			if ( level.m_levelState != K_LVL_STATE_PLAYING )
+				break;
+
+			float fOldTimer = mem.AItimer1;
+			mem.AItimer1 -= dTime;
+			//m_interfaceIGM.SetBombTimer(mem.AItimer1);
+
+			//--- sounds ---
+			if ( mem.AItimer1 > 15.0f )
+			{
+				if ( floor( fOldTimer ) > floor( mem.AItimer1 ) )
+				{
+					//SND_PLAY(SNDIDX_BOMBBEEP);
+				}
+			}
+			else
+			{
+				if ( level.m_Timers.Tick( 250 ) )
+				{
+					//SND_PLAY(SNDIDX_BOMBBEEP);
+				}
+			}
+
+			if ( mem.AItimer1 <= 0.0f )
+			{
+				//m_interfaceIGM.SetBombTimer(0.0f);
+				//add some explosions so everybody will die
+				level.AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy, active.UID, K_ACT_CLASS_EXPLOSION );
+				level.AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy + Vec2( 32.0f, 0.0f ), active.UID, K_ACT_CLASS_EXPLOSION );
+				level.AddDoofer_Explo( hash_EXPLO_LARGE_XL, active.pos.xy - Vec2( 32.0f, 0.0f ), active.UID, K_ACT_CLASS_EXPLOSION );
+
+				//__Particles().AddParticle( ANM_PARTICLES_SPR_EXPLO_ROUND_XL, true, 0, &active.pos.xy, NULL, NULL, 1.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM );
+
+				prop->sprite.SetAnim( "BOMB_EXPLODED" );
+
+				level.SetLevelState( K_LVL_STATE_MISSION_FAILED, STR_BOMB_EXPLODED );
+			}
+		}
+		break;
+		case K_AI_STATE_ACTIVE_AMMO_BOX:
+		{
+			CProp* prop = dynamic_cast< CProp* >( &active );
+			if ( prop == nullptr )
+				break;
+
+			int nAmmoLeft = active.varAIparams[L"n_ammoLeft"].m_asINT32;
+			prop->sprite.frameIdx = nAmmoLeft;
+
+			//fade out
+			if ( nAmmoLeft <= 0 )
+			{
+				mem.AItimer1 -= dTime;
+				if ( mem.AItimer1 <= 0.0f )
+				{
+					active.Kill();
+				}
+				//color
+				float fAlpha = LIMIT( mem.AItimer1, 0.0f, 1.0f );
+				active.color = DW_COLORALPHA( active.color_ini, fAlpha );
+			}
+		}
+		break;
+		case K_AI_STATE_ACTIVE_HEALTH_BOX:
+		{
+			CProp* prop = dynamic_cast< CProp* >( &active );
+			if ( prop == nullptr )
+				break;
+			int nHealthLeft = active.varAIparams[L"n_healthLeft"].m_asINT32;
+			prop->sprite.frameIdx = nHealthLeft;
+
+			//fade out
+			if ( nHealthLeft <= 0 )
+			{
+				mem.AItimer1 -= dTime;
+				if ( mem.AItimer1 <= 0.0f )
+				{
+					active.Kill();
+				}
+				//color
+				float fAlpha = LIMIT( mem.AItimer1, 0.0f, 1.0f );
+				active.color = DW_COLORALPHA( active.color_ini, fAlpha );
+			}
+		}
+		break;
+		case K_AI_STATE_ACTIVE_TEAM_TELEPORTER_2FRAMES:
+		{
+		}
+		break;
+
+		case K_AI_STATE_ACTIVE_DOOR_SECTION:
+		{
+			mem.AItimer1 = 0.0f;
+		}
+		break;
+
+		case K_AI_STATE_ACTIVE_DOORFACE_AUTOCLOSE:
+		{
+			CProp* prop = dynamic_cast< CProp* >( &active );
+			if ( prop == nullptr )
+				break;
+			//keep door open (AIvar1 contine frame-ul default) - set frame
+			prop->sprite.frameIdx = prop->fid_ini.frameIdx;
+			if ( mem.AItimer1 > 0.0f )
+			{
+				mem.AItimer1 -= dTime;
+
+				bool bDontChangeFrames = ( bool ) ( active.varAIparams[L"b_DontChangeFrames"].m_asBool );
+				if ( !bDontChangeFrames )
+				{
+					prop->sprite.frameIdx++;
+				}
+
+				if ( mem.AItimer1 < 0.0f )
+					mem.AItimer1 = 0.0f;
+			}
+
+			//open/close sounds
+			if ( ( mem.AIvarBool1 == false ) && ( mem.AItimer1 > 0.0f ) )
+			{
+				//just opened
+				CVariant cvc = active.varAIparams[L"s_openSnd"];
+				if ( cvc.eType == CVariant::K_ARGTYPE_STRING )
+				{
+					int sndidx = UTGetSoundManager().getSndIdx( cvc.m_strArg.textHash );
+					SND_PLAY_POSITIONAL( sndidx, active.pos.xy );
+				}
+				//on open script
+				cvc = active.varAIparams[L"s_ScriptOnOpen"];
+				if ( cvc.eType == CVariant::K_ARGTYPE_STRING )
+				{
+					UTGetScriptManager().StartScript( cvc.m_strArg.textHash, active.UID );
+				}
+
+				mem.AIvarBool1 = true;
+			}
+			else if ( ( mem.AIvarBool1 == true ) && ( mem.AItimer1 <= 0.0f ) )
+			{
+				//just closed
+				CVariant cvc = active.varAIparams[L"s_closeSnd"];
+				if ( cvc.eType == CVariant::K_ARGTYPE_STRING )
+				{
+					int sndidx = UTGetSoundManager().getSndIdx( cvc.m_strArg.textHash );
+					SND_PLAY_POSITIONAL( sndidx, active.pos.xy );
+				}
+				//on close script
+				cvc = active.varAIparams[L"s_ScriptOnClose"];
+				if ( cvc.eType == CVariant::K_ARGTYPE_STRING )
+				{
+					UTGetScriptManager().StartScript( cvc.m_strArg.textHash, active.UID );
+				}
+				mem.AIvarBool1 = false;
+			}
+
+		}
+		break;
+
+		case K_AI_STATE_ACTIVE_EXPLO_TRAP:
+		{
+		}
+		break;
+		case K_AI_STATE_ACTIVE_CHECKPOINT:
+		{
+			for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
+			{
+				if ( level.pPlayerActor[kk] == null )
+					continue;
+				if ( level.pPlayerActor[kk]->bbox.Intersects( active.bbox ) )
+				{
+					active.Touch( level.pPlayerActor[kk]->GetUID(), dTime );
+					//save checkpoint
+					level.vLastSpawnPoint = active.pos.xy;
+					break;
+				}
+			}
+		}
+		break;
+
+
+		case K_AI_STATE_COLL_KILL_ACTORS:
+		{
+		}
+		break;
+
+		case K_AI_STATE_COLL_BREAKABLE_WINDOW:
+		{
+			if ( mem.AIfvar1 <= 0.0f )
+			{
+				// set broken door anim
+				if ( active.pTarget != nullptr )
+				{
+					//trebuie sa pointeze spre un CActive neaparat
+					CProp* winact = dynamic_cast< CProp* >( active.pTarget );
+					if ( winact == null )
+					{
+						ErrorBox( K_ERR_WARNING, L"K_AI_STATE_COLL_BREAKABLE_WINDOW bad cast to CActive" );
+						break;
+					}
+
+					winact->sprite.frameIdx++;
+					//reset object script and interact
+					winact->arrActions.Clear();
+
+					//generate particles
+					float dirx = SIGN( active.varAIparams[L"fForceDirX"].m_asFloat );
+					for ( int ll = 0; ll < 20; ll++ )
+					{
+						Vec2 ppos = AABB::GetRandomPointInBox( active.bbox );
+						//__Particles().AddParticle( ANM_PARTICLES_SPR_GLASS_SHARDS, false, randint( 5 ), &ppos, &g_vecGravityOld, &Vec2( dirx * (60.0f + randfloat( 60.0f )), -40.0f + randfloatsgn( 50.0f ) ), 0.3f + randfloat( 0.2f ), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM );
+					}
+					//sound
+					//SND_PLAY_POSITIONAL_RAND2(SNDIDX_WINDOWBREAK1, SNDIDX_WINDOWBREAK2, colshape->bbox.vCenter);
+				}
+				//destroy collision box
+				active.Kill();
+				//force hidden here to avoid collisions after death
+				active.SetEnabled( false );
+			}
+		}
+		break;
+		case K_AI_STATE_COLL_BREAKABLE_DOOR:
+		{
+			float fForceDirX = 0.0f;
+			if ( mem.AIvarBool1 ) //was hit?
+			{
+				//erase hit flag  (speed optimization)
+				mem.AIvarBool1 = false;
+				//set shake timer
+				mem.AItimer1 = 1.0f;
+				//just set fForeceDirX to something in order to make it get hit
+				CVariant cvar = active.varAIparams[L"fForceDirX"];
+				if ( cvar.eType == CVariant::K_ARGTYPE_FLOAT )
+				{
+					fForceDirX = cvar.m_asFloat;
+					active.varAIparams.DeleteVar( L"fForceDirX" );
+				}
+			}
+			float dirx = SIGN( fForceDirX );
+			//if hit
+			if ( fForceDirX != 0.0f )
+			{
+				//generate particles
+				for ( int ll = 0; ll < 30; ll++ )
+				{
+					Vec2 ppos = AABB::GetRandomPointInBox( active.bbox );
+					//__Particles().AddParticle( ANM_PARTICLES_SPR_WOODEN_SPLINTERS, false, randint( 6 ), &ppos, &g_vecGravityOld, &Vec2( dirx * (100.0f + randfloat( 60.0f )), -40.0f + randfloatsgn( 50.0f ) ), 0.3f + randfloat( 0.2f ), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM );
+				}
+				// add noise event behind the door
+				Vec2 sndpos1 = Vec2( active.bbox.vCenter.x + dirx * ( active.bbox.vHalfSize.x + 2.0f ), active.bbox.vCenter.y );
+				//SND_PLAY_POSITIONAL_RAND2(SNDIDX_DOOR_HIT1, SNDIDX_DOOR_HIT2, sndpos1);
+			}
+
+			//if dead
+			/*
+			if (colshape->AIfvar1 <= 0.0f)
+			{
+				//seteaza animatia de usa sparta
+				if (colshape->pTarget != NULL)
+				{
+					//trebuie sa pointeze spre un CActive neaparat
+					CProp* dooract = dynamic_cast<CProp*>(colshape->pTarget);
+					if (dooract == null)
+					{
+						ErrorBox(K_ERR_WARNING, L"K_AI_STATE_COLL_BREAKABLE_DOOR bad cast to CActive");
+						break;
+					}
+
+					//centram pe bboxul initial
+					Vec2 vcenter = dooract->bbox.vCenter;
+					dooract->sprite.setAnimation(ANM_ACTIVES_SPR_DOOR_BREAKING);
+					dooract->bAnimated = true;
+					dooract->pos.x = vcenter.x;
+					//reset object script and interact
+					dooract->script_hash.Reset();
+					dooract->bCanInteract = false;
+					dooract->bStandsOut = false;
+
+					//vedem daca flipam animatia in fn de forta aplicata
+					if (fForceDirX < 0.0f)
+					{
+						dooract->flipX = true;
+
+						Vec2 secondExploPos(colshape->bbox.vCenter.x - (colshape->bbox.vHalfSize.x + 1.0f), colshape->bbox.vCenter.y);
+						AddProp_Explo(hash_EXPLO_STUN_INVISIBLE, secondExploPos, 0, K_ACT_CLASS_PLAYER);
+					}
+					else
+					{
+						//trebuie setat si pe else pentru ca poate veni deja flipat din editor
+						dooract->flipX = false;
+
+						Vec2 secondExploPos(colshape->bbox.vCenter.x + (colshape->bbox.vHalfSize.x + 1.0f), colshape->bbox.vCenter.y);
+						AddProp_Explo(hash_EXPLO_STUN_INVISIBLE, secondExploPos, 0, K_ACT_CLASS_PLAYER);
+					}
+
+					__Particles().GenerateDoorBreak(colshape->bbox.vCenter, Vec2(dirx, 0.0f), K_PART_LAYER_RT_FRONT_NRM);
+					//sound
+					//SND_PLAY_POSITIONAL(SNDIDX_DOOR_BREAK, colshape->bbox.vCenter);
+					//analytics locale
+					CVariant* cvexploded = active.varAIparams[L"bExploded");
+					if ((cvexploded->m_type == CVariant::K_ARGTYPE_INT32) && (cvexploded->m_asINT32 != 0))
+					{
+						App_IncreaseGamestat(K_MEMID_GAMESTATS_DOORS_EXPLODED);
+					}
+					else
+					{
+						App_IncreaseGamestat(K_MEMID_GAMESTATS_DOORS_BREACHED);
+					}
+				}
+				//hide or destroy collision box
+				colshape->bSetHidden = true;
+			}
+			else //not dead
+			{
+				if (colshape->AItimer1 > 0.0f)
+				{
+					if (m_Timers.Tick(25))
+					{
+						dec_limit(colshape->AItimer1, 0.05f, 0.0f);
+						//trebuie sa pointeze spre un CActive neaparat
+						CProp* dooract = dynamic_cast<CProp*>(colshape->pTarget);
+						if (dooract == null)
+						{
+							ErrorBox(K_ERR_WARNING, L"K_AI_STATE_COLL_BREAKABLE_DOOR bad cast to CActive (doorshake)");
+							break;
+						}
+						//shake door
+						dooract->pos.x = dooract->pos_ini.x + (2.0f * colshape->AItimer1) * sin(colshape->AItimer1 * 40.0f);
+					}
+				}
+			}
+			*/
+		}
+		break;
+		case K_AI_STATE_PARTICLES_GENERATOR:
+		{
+			//#TODO: aici pune pe pauza emitoarele sau seteaza sa genereze doar in zona vizibila?...
+			/*
+			static const UINT32 hash_v_emitterPtr = FastHash(L"emitterPtr");
+			//get params
+			CParticleEmitter* pe = null;
+			//continuam cu procesarea
+			CVariant* emittervc = active.varAIparams.GetVariantByNameHash(hash_v_emitterPtr);
+			if (emittervc->m_type == CVariant::K_ARGTYPE_NONE)
+			{
+				ErrorBox(K_ERR_WARNING, L"ParticleEmitter pointer not found!");
+				break;
+			}
+			//get rail pointer
+			pe = static_cast<CParticleEmitter*>(emittervc->m_asVoid);
+			//ii da pause cand iese din ecran
+			CAABB camAABB;
+			camAABB.Set(m_camLevel.GetCamWorldAABB());
+
+			if (camAABB.Intersects(&colshape->bbox))
+			{
+				pe->bPauseUpdate = false;
+			}
+			else
+			{
+				pe->bPauseUpdate = true;
+			}
+			*/
+		}
+		break;
+
+
+		case K_AI_STATE_FN_LIGHT_FLICKER1:
+		{
+			//params: f_timeMul, f_threshold
+			float timeMul = active.varAIparams[L"f_timeMul"].m_asFloat;
+			float fThreshold = active.varAIparams[L"f_threshold"].asFloat();
+			float falpha = UTPerlin::PerlinNoise1D( fTimelineAI * timeMul, 2.0f, 3.0f, 0.8f, 0.25f, 2 );
+			if ( falpha > fThreshold )
+				falpha = 1.0f;
+			else
+				falpha = falpha / fThreshold;
+			//falpha = (falpha < fThreshold) ? 0.0f : 1.0f;
+			active.color = DW_COLORALPHA( active.color_ini, falpha );
+		}
+		break;
+		case K_AI_STATE_FN_LIGHT_ANG_CONE_XZ_TIME:
+		{
+			if ( active.GetClassType() != K_LVL_IAI_TYPE_LIGHT )
+				break;
+			//fvar1 - height, fvar2 - radius, timer1 - timeMul, timer2 - timeAdd
+			auto *light = dynamic_cast<CLight *>(&active);
+			if (nullptr != light)
+			{
+				Vec3 conepoint( 0.0f, -mem.AIfvar1, 0.0f );
+				Vec3 ppos = Vec3( mem.AIfvar2 * sin( ( fTimelineAI + mem.AItimer2 ) * mem.AItimer1 ), 0.0f, mem.AIfvar2 * cos( ( fTimelineAI + mem.AItimer2 ) * mem.AItimer1 ) );
+				MUVec3Norm( &light->vnDir, &( ppos - conepoint ) );
+			}
+		}
+		break;
+
 		case K_AI_STATE_FN_TOUCH_WHEN_SEE_PLAYER:
 		{
 		}

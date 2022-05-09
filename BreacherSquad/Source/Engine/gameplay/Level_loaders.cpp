@@ -380,7 +380,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	// Data for each light 
 	for (int kk = 0; kk < lightsCnt; kk++)
 	{
-		CLight *nl = new CLight(new CLightAIComponent());
+		CLight *nl = new CLight(new CActiveAIComponent());
 		nl->m_nLightMeshIdx = -1;
 		nl->m_nShadowMeshIdx = -1;
 
@@ -466,7 +466,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	
 	for (int kk = 0; kk < colCnt; kk++)
 	{
-		CCollisionShape* colobj = new CCollisionShape(new CCollAIComponent());
+		CCollisionShape* colobj = new CCollisionShape(new CActiveAIComponent());
 		colobj->ID = unBaseID + OS_freadUInt32(fl);
 
 		Vec2 cmin, cmax;
@@ -505,7 +505,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	int decocnt = (int)OS_freadUInt32(fl);
 	for (int kk = 0; kk < decocnt; kk++)
 	{
-		CProp* obj = new CProp( new CPropAIComponent() );
+		CProp* obj = new CProp( new CActiveAIComponent() );
 
 		obj->ID = unBaseID + OS_freadUInt32(fl);
 		//load layer from editor (not used atm)

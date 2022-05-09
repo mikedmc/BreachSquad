@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ActiveInterface.h"
-#include "components/CollAIComp.h"
+#include "components/ActiveAIComp.h"
 
 //--- COLLISION ZONES ---
 //collision boxes flags
@@ -21,14 +21,14 @@ enum ECollType {
 class CCollisionShape : public IActiveInterface
 {
 public:
-	CCollAIComponent*		c_AI;			// AI component
+	CActiveAIComponent*		c_AI;			// AI component
 public:
 	ECollType				eType;			
 	bool					castShadows;
 	BYTE					ubFlags;		//type flags for collisions (solid, box, etc)
 	BYTE					collFlags;		//collision direction flags (direction of collision if we need to collide from E but not from W)
 
-	CCollisionShape( CCollAIComponent* AIcomponent );
+	CCollisionShape( CActiveAIComponent* AIcomponent );
 	~CCollisionShape();
 
 	const EActiveInterfaceType GetClassType() const override {

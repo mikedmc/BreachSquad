@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gameplay/components/LightAIComp.h"
+#include "gameplay/components/ActiveAIComp.h"
 
 //  Light Type
 enum eLightType {
@@ -42,7 +42,7 @@ public:
 	}
 
 public:
-	CLightAIComponent*	c_AI;						// AI component for lights
+	CActiveAIComponent*	c_AI;						// AI component for lights
 public:
 	eLightType			type;
 
@@ -62,7 +62,7 @@ public:
 	float				fVolumeAlpha;				// light's atmospheric volume alpha
 
 public:
-	CLight(CLightAIComponent* pLightAIComp);
+	CLight(CActiveAIComponent* pLightAIComp);
 	~CLight();
 
 	void				SetPos(Vec3 newPos) override;
