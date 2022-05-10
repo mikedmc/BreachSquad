@@ -9,6 +9,9 @@ class CLevelArea;
 #define	K_LVL_AI_DECISION_INTERVAL				0.25f
 #define	K_LVL_AI_DECISION_INTERVAL_VARIATION	0.05f
 
+// utility for active free ref
+#define FREE_REF(pActive) if(pActive != nullptr) { pActive->FreeRef(); pActive = nullptr; }
+
 enum EActiveInterfaceType {
 	K_LVL_IAI_TYPE_UNKNOWN,
 	K_LVL_IAI_TYPE_BASE,		// basic IActiveInterface

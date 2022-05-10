@@ -336,33 +336,28 @@ public:
 class CAISensorInfo
 {
 public:
-	bool		m_bEnabled;			// sensors are enabled or disabled?
+	// internal weapon state
+	enum EWpnSensorState {
+		UNAVAILABLE = 0,
+		CAN_SHOOT = 1,
+		NEEDS_RELOAD = 2,
+	};
+public:
+	bool				m_bEnabled;			// sensors are enabled or disabled?
 	//external sensors
-	CActor*		pTargetedActor;		// visible enemy, set by internal sensors
-	UINT32		m_lastInteractingActorUID;	//0-not set or UID for last actor that he interacted with
-	float		fTimeSinceHit;		//time passed since got hit
-	CAIEvent	evtInternal;		// internal event given by sensors (see enemy, got shot etc). Don't use for decisions.
-	//internal sensors
-	bool		b_IsDead;			//#TODO: remove this!
+	CActor*				pTargetedActor;		// visible enemy, set by internal sensors
+	UINT32				m_lastInteractingActorUID;	//0-not set or UID for last actor that he interacted with
+	float				fTimeSinceHit;		//time passed since got hit
+	CAIEvent			evtInternal;		// internal event given by sensors (see enemy, got shot etc). Don't use for decisions.
+	// weapon status sensors
+	EWpnSensorState		WpnStatePrimary;	// status of primary weapon
+	EWpnSensorState		WpnStateSecondary;  // status of secondary weapon (usually grenades)
 
 	CAIEvent	evt;				// current event on which actor is making decisions (chosen between evtInternal and level AI events)
 
-	CAISensorInfo()
-	{
-		Reset();
-	}
+	CAISensorInfo();
 
-	void Reset()
-	{
-		pTargetedActor = nullptr;
-		b_IsDead = false;
-		m_lastInteractingActorUID = 0;
-		m_bEnabled = true;
-		fTimeSinceHit = 1000.0f;
-
-		evt.Reset();
-		evtInternal.Reset();
-	}
+	void Reset();
 };
 
 // Commands that get sent to the AIs

@@ -50,11 +50,7 @@ CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID,
 
 CActor::~CActor()
 {
-	if ( pClosestTouchable )
-	{
-		pClosestTouchable->FreeRef();
-		pClosestTouchable = nullptr;
-	}
+	FREE_REF( pClosestTouchable );
 	// remove used components received as pointers 
 	SAFE_DELETE( c_graphics );
 	SAFE_DELETE( c_weapons );
@@ -270,7 +266,7 @@ VecProj CActor::GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 	v_muzzle_vec.y *= (float)c_graphics->GetFlipDirX();
 	// rotate weapon muzzle vector and add it to the projected position of the mount
 	Mat mrot;
-	float aim_angle = UTMath::GetVectorAngle( c_AI->AIcommands.vAimVec );
+	float aim_angle = UTMath::GetVectorAngle( vAim );
 	MUMatRotZ( &mrot, aim_angle );
 	MUVec2TransformCoord( &v_muzzle_vec, &v_muzzle_vec, &mrot );
 	Vec2 muzzle_proj = vp_mount.xy_proj + v_muzzle_vec;
@@ -554,8 +550,8 @@ void CActor::ProcessAICommands( CLevel& level )
 		color = c_AI->AIcommands.nColor;
 	}
 
-	//death elements (intra doar daca e declarat mort in senzor sau daca i se forteaza starea de dead)
-	if ( (c_AI->AIsensor.b_IsDead) || (GetCurrentBehavior() == AI_BEHAVIOR_DEAD) )
+	//death elements 
+	if ( GetCurrentBehavior() == AI_BEHAVIOR_DEAD )
 	{
 		switch ( c_AI->AIcommands.nDeathCommand )
 		{

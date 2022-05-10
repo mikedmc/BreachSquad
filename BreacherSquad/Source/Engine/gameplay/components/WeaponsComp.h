@@ -52,4 +52,6 @@ public:
 	inline void					SetVisible( bool visible ) { bVisible = visible; }
 	// is slot ready to shoot? returns true even if already shooting.
 	bool						CanShoot( EWpnSlot slot );
+	// returns state of weapon
+	EWpnStatus 					GetWeaponStatus( EWpnSlot slot );
 };

@@ -84,3 +84,23 @@ CAIState * CAITemplate::GetAIStateByName( CStringHash strName )
 
 
 
+CAISensorInfo::CAISensorInfo() : pTargetedActor(nullptr)
+{
+	Reset();
+}
+
+void CAISensorInfo::Reset()
+{
+	// call freeref automatically when resetting the sensor info
+	FREE_REF( pTargetedActor );
+	pTargetedActor = nullptr;
+	m_lastInteractingActorUID = 0;
+	m_bEnabled = true;
+	fTimeSinceHit = 1000.0f;
+
+	evt.Reset();
+	evtInternal.Reset();
+
+	WpnStatePrimary = UNAVAILABLE;
+	WpnStateSecondary = UNAVAILABLE;
+}

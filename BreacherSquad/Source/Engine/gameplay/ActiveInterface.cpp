@@ -19,8 +19,7 @@ IActiveInterface::IActiveInterface() :
 IActiveInterface::~IActiveInterface()
 {
 	// already released in Kill() but we make it double
-	if ( pTarget != nullptr )
-		pTarget->FreeRef();
+	FREE_REF( pTarget );
 }
 
 IActiveInterface* IActiveInterface::GetRef()
@@ -144,11 +143,7 @@ void IActiveInterface::Kill()
 		// call end play
 		EndPlay();
 		// release target pointers
-		if ( pTarget != nullptr )
-		{
-			pTarget->FreeRef();
-			pTarget = nullptr;
-		}
+		FREE_REF( pTarget );
 	}
 }
 

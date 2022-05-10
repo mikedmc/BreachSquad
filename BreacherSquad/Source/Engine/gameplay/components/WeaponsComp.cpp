@@ -138,4 +138,8 @@ bool CWeaponsComponent::CanShoot( EWpnSlot slot )
 	return true;
 }
 
+EWpnStatus CWeaponsComponent::GetWeaponStatus( EWpnSlot slot )
+{
+	return arrWeapons[slot].status;
+}
 

@@ -38,18 +38,12 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 
 	if ( act.fLife <= 0.0f )
 	{
-		// only enters once
+		// only execute once:
 		if ( AIsensor.evt.nType != K_LVL_AI_EVENT_DEAD )
 		{
-			AIsensor.b_IsDead = true;
 			AIsensor.evt.Set( K_LVL_AI_EVENT_DEAD, act.GetUID(), act._template.actorClass, act.GetPosHeart(), -1.0f, 1.0f );
-			//reset targeted actor
-			if ( AIsensor.pTargetedActor != nullptr )
-			{
-				AIsensor.pTargetedActor->FreeRef();
-				AIsensor.pTargetedActor = nullptr;
-			}
-			///THINK: force state decision
+			AIsensor.Reset();
+			// force state decision
 			CAIState* newState = act._template.AItemplate->GetHighestPriorityState( K_LVL_AI_EVENT_DEAD, &level.m_rand );
 			SetAIState( act, newState );
 		}
@@ -60,14 +54,21 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 		if ( (m_pAIcurrentState != nullptr) && (m_nAIcurrentBehaviorIdx >= 0) )
 			bIgnoreAIEvents = m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ].bIgnoreEvents;
 
-		///HIGH FREQUENCY SENSORS
+		///--- HIGH FREQUENCY SENSORS ---
 		//hit timer (used in some behaviors)
 		AIsensor.fTimeSinceHit += dTime;
 		//did he get hit? reset time since hit 
 		//if (act.nTookDamageFrames > 0)
 			//m_AIsensorInfo.fTimeSinceHit = 0.0f;
+		//--- weapon status internal sensors check weapons
+		AIsensor.WpnStatePrimary = CAISensorInfo::UNAVAILABLE;
+		AIsensor.WpnStateSecondary = CAISensorInfo::UNAVAILABLE;
+		if ( act.Weapons()->CanShoot( K_WPNSLOT_PRIMARY ) )
+			AIsensor.WpnStatePrimary = CAISensorInfo::CAN_SHOOT;
+		else if ( act.Weapons()->GetWeaponStatus( K_WPNSLOT_PRIMARY ) == K_WPN_STATUS_NO_AMMO )
+			AIsensor.WpnStatePrimary = CAISensorInfo::NEEDS_RELOAD;
 
-		///LOW FREQUENCY SENSORS
+		///--- LOW FREQUENCY SENSORS ---
 		AItimerDecision -= dTime;
 		if ( (AItimerDecision <= 0.0f) && (!bIgnoreAIEvents) && (AIsensor.m_bEnabled) )
 		{
@@ -82,9 +83,14 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				//#HACK: alerts the other enemies only if enemy class
 				if ( act._template.actorClass >= K_ACT_CLASS_ENEMY )
 					level.AddAIEvent( K_LVL_AI_EVENT_SOUND_THREAT, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), 200.0f, 0.6f );
-				// set target pointer and increase ref
-				targetActor->GetRef();
-				AIsensor.pTargetedActor = targetActor;
+				// set target pointer and increase ref only if different
+				if ( AIsensor.pTargetedActor != targetActor )
+				{
+					// free ref to old target
+					FREE_REF( AIsensor.pTargetedActor );
+					// get ref to new target
+					AIsensor.pTargetedActor = (CActor*)targetActor->GetRef();
+				}
 				// enemies overlapping
 				/*
 				if (act.bbox.Intersects(targetActor->bbox))
@@ -110,8 +116,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				{
 					AIsensor.evtInternal.Set( K_LVL_AI_EVENT_LOST_ENEMY, 0, K_ACT_CLASS_ANY, AIsensor.pTargetedActor->pos.xy, 16.0f, 1.0f );
 					//reset targeting actor
-					AIsensor.pTargetedActor->FreeRef();
-					AIsensor.pTargetedActor = nullptr;
+					FREE_REF(AIsensor.pTargetedActor);
 				}
 				// sometimes it doesn't see the enemy when it gets hit so we force the lost enemy onto him
 				else if ( AIsensor.evt.nType == K_LVL_AI_EVENT_GOT_HIT )
@@ -214,7 +219,6 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 
 			case AI_BEHAVIOR_ATTACK:
 			{
-
 				if ( ( AIsensor.pTargetedActor == nullptr ) || ( !AIsensor.pTargetedActor->IsAlive() ) )
 				{
 					bBehaviorFinished = true;
@@ -222,6 +226,10 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				}
 				
 				act.vAim = AIsensor.pTargetedActor->pos.xy - act.pos.xy;
+				if ( AIsensor.WpnStatePrimary == CAISensorInfo::CAN_SHOOT )
+					AIcommands.eAttackCommand = K_ACT_ATTACK_SHOOTING;
+				else if ( AIsensor.WpnStatePrimary == CAISensorInfo::NEEDS_RELOAD )
+					AIcommands.eAttackCommand = K_ACT_ATTACK_RELOADING;
 			}
 			break;
 
@@ -657,7 +665,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 
 EAIBehaviorType CActorAIComponent::GetCurrentBehavior()
 {
-	if ( (m_nAIcurrentBehaviorIdx < 0) || (m_pAIcurrentState == null) )
+	if ( (m_nAIcurrentBehaviorIdx < 0) || (m_pAIcurrentState == nullptr) )
 		return AI_BEHAVIOR_EMPTY;
 	return m_pAIcurrentState->m_arrBehaviors[ m_nAIcurrentBehaviorIdx ].nType;
 }
@@ -684,7 +692,7 @@ CAIEvent* CActorAIComponent::GetMostImportantAIEvent( CActor& act, EAIEventType 
 		CAIEvent* evt = level.m_arrAIevents[ kk ];
 		UINT32 callerUID = act.GetUID();
 		//ignora mesajele initiate de el insusi
-		if ( (evt->ownerUID == callerUID) || (evt->fDuration <= 0.0f) )
+		if ( ( evt == nullptr ) || (evt->ownerUID == callerUID) || (evt->fDuration <= 0.0f) )
 			continue;
 		//type filter?
 		if ( (eTypeFilter > K_LVL_AI_EVENT_NONE) && (evt->nType != eTypeFilter) )
@@ -716,7 +724,7 @@ CAIEvent* CActorAIComponent::GetMostImportantAIEvent( CActor& act, EAIEventType 
 				continue;
 		}
 		//verific sa am prioritate mai mare sau egala cu cea curenta si distanta mai mica
-		if ( returnEvent != null )
+		if ( returnEvent != nullptr )
 		{
 			//daca are prioritate mai mica il sare
 			if ( evt->nType < returnEvent->nType )
@@ -1150,7 +1158,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& act, int nBehaviorIdx, bo
 		case AI_BEHAVIOR_ATTACK_HITNRUN:
 		case AI_BEHAVIOR_ATTACK:
 		{
-			mem.AIvarBool1 = true; //decide movement helper var
+			mem.AIvarBool1 = true;	//decide movement helper var
 			AIsubState = 0;
 			mem.AItimer1 = 0.0f;	//generic timer for decision making
 		}
