@@ -2,10 +2,11 @@
 #include "Level_bullets.h"
 
 
-CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, EActorClass actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir, CLevelArea* pStartArea)
+CBullet* CLevel::ShootBullet( CBulletTemplate * bulletTemplate, EActorClass actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir )
 {
+	CLevelArea* startArea = Areas_GetAt( Vec3XY( vPos ) );
 	//dull bullets don't actually get spawned (sometimes we need them)
-	if (bulletTemplate->nType == K_LVL_BULLET_DULL)
+	if ( ( bulletTemplate->nType == K_LVL_BULLET_DULL ) || ( startArea == nullptr ) )
 	{
 		return nullptr;
 	}
@@ -13,8 +14,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, EActorClass actor
 	CBullet* bullet = new CBullet( new CPointPhysComponent(true) );
 	bullet->actorClass = actorClass;
 	bullet->ownerUID = nOwnerUID;
-	bullet->pArea = pStartArea;
-	_ASSERT(pStartArea != nullptr);
+	bullet->pArea = startArea;
 	bullet->dwLastTargetUID = 0;
 	bullet->nSubstate = 0;
 
@@ -118,6 +118,12 @@ void CLevel::UpdateBullets(float dTime)
 		if ( bullet->bAnimated )
 		{
 			bullet->sprBullet.Update( dTime );
+			// kill bullet if outside area. It should never get outside the area.
+			if ( bullet->pArea == nullptr )
+			{
+				bullet->bPendingKill = true;
+				continue;
+			}
 		}
 
 		float fBulletOldLife = bullet->fLife;
@@ -150,7 +156,6 @@ void CLevel::UpdateBullets(float dTime)
 		///----------------------------------------------------------------------------------
 		/// Check collisions with objects and see which one is closer
 		///----------------------------------------------------------------------------------
-		_ASSERT( bullet->pArea );
 		if ( bullet->pArea != nullptr )
 		{
 			for ( int ll = 0; ll < bullet->pArea->m_arrProps.Count(); ll++ )

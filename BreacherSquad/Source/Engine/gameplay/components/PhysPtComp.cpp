@@ -21,6 +21,8 @@ CPointPhysComponent::~CPointPhysComponent()
 
 void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 {
+	if ( bIsDead )
+		return;
 	// kill it when it gets outside the play area
 	if ( !Rects::PointInRect( vPos.xy, level.m_levelAABB ) )
 	{
@@ -42,19 +44,31 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 	if ( pArea == nullptr )
 	{
 		pArea = level.Areas_GetAt( vPos.xy );
+		if ( pArea == nullptr )
+		{
+			bIsDead = true;
+			bIsStatic = true;
+			return;
+		}
 	}
 	_ASSERT( pArea != nullptr );
 	///--- integrator
-	//integrator
 	if ( bIsStatic )
+	{
 		vecForces = g_Vec3Zero;
+		speed = g_Vec3Zero;
+	}
 	if ( bIsStaticZ )
+	{
 		vecForces.z = 0.0f;
+		speed.z = 0.0f;
+	}
 
 	speed += vecForces * dTime;
 	Vec3 pos = vLastPos + speed * dTime;
 
 	///--- check collisions
+	if(!bIsStatic)
 	{
 		Vec2 collisionPoint, collisionNormal;
 		Vec2 vFrom = Vec3XY( vLastPos);
@@ -170,6 +184,12 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 		if ( ( pArea == nullptr ) || ( !pArea->AABBbounds.PointIn( vpos2d ) ) )
 		{
 			pArea = level.Areas_GetAt( vpos2d );
+			if ( pArea == nullptr )
+			{
+				bIsStatic = true;
+				bIsDead = true;
+				return;
+			}
 		}
 
 		// is it almost stopped?

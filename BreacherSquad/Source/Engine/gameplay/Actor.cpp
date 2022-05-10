@@ -1032,7 +1032,7 @@ bool CActor::CheckShoot( CLevel& level )
 			//vFinalDir.y = sin(fAimAng + fSpreadAng);
 			//D3DXVec2Normalize(&vFinalDir, &vFinalDir);
 
-			CBullet* bullet = level.ShootBullet( &tmplBullet, nFinalClass, shooter->GetUID(), vShootPos.xyz, vFinalDir, shooter->pArea );
+			level.ShootBullet( &tmplBullet, nFinalClass, shooter->GetUID(), vShootPos.xyz, vFinalDir );
 		}
 
 		// add shell

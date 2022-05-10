@@ -208,7 +208,7 @@ public:
 
 	///--- BULLETS ---
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.
-	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, EActorClass actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir, CLevelArea* pStartArea = nullptr);
+	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, EActorClass actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir );
 	// Returns the closest bullet (or null) of nBulletType under fMaxDistance
 	CBullet*				GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float fMaxDistance = 0.0f, UINT32 dwOwnerUID = 0);
 	// Releases all bullets of said type from specified owner
