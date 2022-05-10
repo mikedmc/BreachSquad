@@ -5,12 +5,13 @@
 CActorTemplate::CActorTemplate() :
 	arrSkinsCnt( 0 ),
 	//generic params
-	fLife( K_NOT_SET ), fArmor( K_NOT_SET ), fSpeedMove( K_NOT_SET ),
+	fLife( K_NOT_SET ), fArmor( K_NOT_SET ), fSpeedMove( K_NOT_SET ), fSpeedRun( K_NOT_SET ),
 	actorClass( K_ACT_CLASS_NOT_SET ),
 	//more important values
 	eMaterial( K_LVL_MATERIAL_UNKNOWN ), eCaps( K_ACT_CAPS_NONE ),
 	AItemplate( nullptr ), fMass( 100.0f ),
-	heightZ( 32.0f ), heartZ ( 24.0f )
+	heightZ( 32.0f ), heartZ( 24.0f ),
+	fDistSee( K_NOT_SET ), fAttackMin( K_NOT_SET ), fAttackMax( K_NOT_SET )
 {
 	//reset anim IDs
 	for (int kk = 0; kk < K_ACT_ANIMS_CNT; kk++)
@@ -31,11 +32,15 @@ CActorTemplate::CActorTemplate() :
 
 void CActorTemplate::FillDefaultValuesIfNotSet()
 {
-	if (eMaterial == K_LVL_MATERIAL_UNKNOWN) { eMaterial = K_LVL_MATERIAL_FLESH; }
+	if ( eMaterial == K_LVL_MATERIAL_UNKNOWN ) { eMaterial = K_LVL_MATERIAL_FLESH; }
 
-	if (fLife == K_NOT_SET) { fLife = 100.0f; }
-	if (fArmor == K_NOT_SET) { fArmor = 0.0f; }
-	if (fSpeedMove == K_NOT_SET) { fSpeedMove = 64.0f; }
+	if ( fLife == K_NOT_SET ) { fLife = 100.0f; }
+	if ( fArmor == K_NOT_SET ) { fArmor = 0.0f; }
+	if ( fSpeedMove == K_NOT_SET ) { fSpeedMove = 64.0f; }
+	if ( fSpeedRun == K_NOT_SET ) { fSpeedRun = 120.0f; }
+	if ( fDistSee == K_NOT_SET ) { fDistSee = 128.0f; }
+	if ( fAttackMin == K_NOT_SET ) { fAttackMin = 16.0f; }
+	if ( fAttackMax == K_NOT_SET ) { fAttackMax = 128.0f; }
 }
 
 bool CActorTemplate::OverwriteAnimsFromTemplate(CActorTemplate* pTemplate, bool bEraseOldAnimations /*= false*/)

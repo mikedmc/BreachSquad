@@ -531,13 +531,16 @@ void CActor::ProcessAICommands( CLevel& level )
 		vAim = c_AI->AIcommands.vAimVec;
 
 	///--- speed and movement ---
-	if ( c_AI->AIcommands.bThrust )
+	if ( ( c_AI->AIcommands.bThrust ) && ( !UTMath::Vec2IsZero( c_AI->AIcommands.vMoveDir ) ) )
 	{
 		//add speed
 		float fspeed = _template.fSpeedMove;
+		if ( c_AI->AIcommands.bRunning )
+			fspeed = _template.fSpeedRun;
 
-		// set final speed
-		speed = c_AI->AIcommands.vMoveDir * fspeed;
+		// set final speed (normalize direction and multiply with linear speed)
+		MUVec2Norm( &speed, &c_AI->AIcommands.vMoveDir );
+		speed *= fspeed;
 	}
 	else
 	{
@@ -1029,7 +1032,7 @@ bool CActor::CheckShoot( CLevel& level )
 			//vFinalDir.y = sin(fAimAng + fSpreadAng);
 			//D3DXVec2Normalize(&vFinalDir, &vFinalDir);
 
-			CBullet* bullet = level.ShootBullet( &tmplBullet, nFinalClass, shooter->GetUID(), vShootPos.xyz, vFinalDir );
+			CBullet* bullet = level.ShootBullet( &tmplBullet, nFinalClass, shooter->GetUID(), vShootPos.xyz, vFinalDir, shooter->pArea );
 		}
 
 		// add shell

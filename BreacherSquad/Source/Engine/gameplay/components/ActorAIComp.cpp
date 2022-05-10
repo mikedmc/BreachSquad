@@ -226,10 +226,48 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				}
 				
 				act.vAim = AIsensor.pTargetedActor->pos.xy - act.pos.xy;
+				// shooting and reloading
 				if ( AIsensor.WpnStatePrimary == CAISensorInfo::CAN_SHOOT )
 					AIcommands.eAttackCommand = K_ACT_ATTACK_SHOOTING;
 				else if ( AIsensor.WpnStatePrimary == CAISensorInfo::NEEDS_RELOAD )
 					AIcommands.eAttackCommand = K_ACT_ATTACK_RELOADING;
+				// movement
+				Vec2 vEnemyDir = AIsensor.pTargetedActor->GetPosHeart() - act.GetPosHeart();
+				float enemy_dist = MUVec2Len( &vEnemyDir );
+				MUVec2Norm( &vEnemyDir, &vEnemyDir );
+
+				bool bTooClose = false, bTooFar = false;
+				// tells us that we need to move to engage enemy
+				if ( mem.AIvarBool1 )
+				{
+					//must move a little closer to the center of the segment (far-close) to eliminate jitter (20% closer to the center of the segment)
+					bTooClose = ( enemy_dist < act._template.fAttackMin * 1.2f );
+					bTooFar = ( enemy_dist > act._template.fAttackMax * 0.8f );
+					//reset decision flag to false when position just right
+					if ( ( bTooClose == false ) && ( bTooFar == false ) )
+					{
+						mem.AIvarBool1 = false;
+					}
+				}
+				else
+				{
+					//when true must decide if he has to move or not
+					mem.AIvarBool1 = ( ( enemy_dist > act._template.fAttackMax ) || ( enemy_dist < act._template.fAttackMin ) );
+				}
+
+				if ( bTooFar )
+				{
+					AIcommands.vMoveDir = vEnemyDir;
+					AIcommands.bThrust = true;
+					AIcommands.bRunning = true;
+				}
+				if ( bTooClose )
+				{
+					AIcommands.vMoveDir = -vEnemyDir;
+					AIcommands.bThrust = true;
+					AIcommands.bRunning = false;
+				}
+
 			}
 			break;
 

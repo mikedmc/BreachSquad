@@ -63,19 +63,22 @@ public:
 	///--- GENERICS: !!! when adding new generics don't forget to edit OverwriteGenericDataFromTemplate !!!
 	EMaterialType	eMaterial;			// type of material
 	EActorClass		actorClass;			// class of actor
-	CAITemplate*	AItemplate;
+	CAITemplate*	AItemplate;			// pointer to AI template from the templates library
+
+	CAABB			bbox;				// 2d bbox on floor plane defined around the character origin (not always centered)
+	float			heightZ;			// height of character on Z 
+	float			heartZ;				// Z coord of heart position (#TODO: could remove, used for bullet shoot height)
+	CStringHash		shWeaponDefault;
 
 	UINT32			eCaps;				// see EActorCapabilitiesFlags
 
 	float			fMass;
 	float			fLife;
 	float			fArmor;
-	float			fSpeedMove;
-
-	CAABB			bbox;				// 2d bbox on floor plane defined around the character origin (not always centered)
-	float			heightZ;			// height of character on Z 
-	float			heartZ;				// Z coord of heart position
-	CStringHash		shWeaponDefault;
+	float			fSpeedMove;			// slow moving speed
+	float			fSpeedRun;			// fast moving speed
+	float			fDistSee;
+	float			fAttackMin, fAttackMax;
 
 	CActorTemplate();
 

@@ -14,6 +14,7 @@ CBullet* CLevel::ShootBullet(CBulletTemplate * bulletTemplate, EActorClass actor
 	bullet->actorClass = actorClass;
 	bullet->ownerUID = nOwnerUID;
 	bullet->pArea = pStartArea;
+	_ASSERT(pStartArea != nullptr);
 	bullet->dwLastTargetUID = 0;
 	bullet->nSubstate = 0;
 

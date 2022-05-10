@@ -680,11 +680,13 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 	templ->heartZ = actnode.attribute( L"heartZ" ).as_float();
 
 	if ( !actnode.attribute( L"fSpeedMove" ).empty() ) { templ->fSpeedMove = actnode.attribute( L"fSpeedMove" ).as_float(); }
+	if ( !actnode.attribute( L"fSpeedRun" ).empty() ) { templ->fSpeedRun = actnode.attribute( L"fSpeedRun" ).as_float(); }
+	if ( !actnode.attribute( L"fSeeDist" ).empty() ) { templ->fDistSee = actnode.attribute( L"fSeeDist" ).as_float(); }
+	if ( !actnode.attribute( L"fAttackMin" ).empty() ) { templ->fAttackMin = actnode.attribute( L"fAttackMin" ).as_float(); }
+	if ( !actnode.attribute( L"fAttackMax" ).empty() ) { templ->fAttackMin = actnode.attribute( L"fAttackMax" ).as_float(); }
 	//life
-	if ( !actnode.attribute( L"fLife" ).empty() )
-		templ->fLife = actnode.attribute( L"fLife" ).as_float();
-	if ( !actnode.attribute( L"fArmor" ).empty() )
-		templ->fArmor = actnode.attribute( L"fArmor" ).as_float();
+	if ( !actnode.attribute( L"fLife" ).empty() ) templ->fLife = actnode.attribute( L"fLife" ).as_float();
+	if ( !actnode.attribute( L"fArmor" ).empty() ) templ->fArmor = actnode.attribute( L"fArmor" ).as_float();
 	//caps
 	templ->eCaps = 0;
 	if ( actnode.attribute( L"bCanCover" ).as_bool() )
@@ -1835,17 +1837,14 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 		return nullptr;
 	//save some data about current actor:
 	bool bAlerted = ( sourceActor->fFOVPercent >= 0.9f ) ? true : false;
-	float fDistSee = 100.0f;// sourceActor->actTemplate.distSee;
+	float fDistSee = sourceActor->_template.fDistSee;
 	float fDistHear = 100.0f;// sourceActor->actTemplate.distHear;
-	float fDistDown = 1.0f * K_TILE_SIZE; //2
-	float fDistUp = 4.0f * K_TILE_SIZE;	//6
 	if ( bAlerted )
 	{
 		fDistHear = fDistSee;
-		fDistUp = 6.0f * K_TILE_SIZE; //9
-		fDistDown = 2.0f * K_TILE_SIZE;	 //3
 	}
 	CAABB aabbvision;
+
 	aabbvision.Set_Corrected(
 		Vec2( sourceActor->pos.xy.x - fDistSee, sourceActor->pos.xy.y - fDistSee),
 		Vec2( sourceActor->pos.xy.x + fDistSee, sourceActor->pos.xy.y + fDistSee )
