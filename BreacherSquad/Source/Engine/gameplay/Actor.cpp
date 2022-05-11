@@ -666,9 +666,9 @@ void CActor::DoMove( float dTime, CLevel& level )
 
 	///--- collision detection ---
 	{
-		///a.calculezi vectorul de miscare al actorului(viteza * dt + miscare paltforma daca e necesar)
-		Vec2 vNextMove = (speed + vSpeedImpulse) * dTime; // Add connected platform movement if needed
-		///b.detectezi coliziuni posibile(bbox old + new pos)
+		///a. compute actor movement vector
+		Vec2 vNextMove = (speed + vSpeedImpulse) * dTime;
+		///b. filter possible collisions
 		//1. find bbox start and end union that includes all collisions when moving at high speeds
 		CAABB destbox, srcbox;
 		srcbox = bbox_floor.GetSnapshot();
@@ -677,12 +677,11 @@ void CActor::DoMove( float dTime, CLevel& level )
 		destbox.Move( pos.xy + vNextMove );
 		// box unions to check all possible collisions
 		CAABB boxUnion = AABB::Union( destbox, srcbox );
+		boxUnion.Inflate( K_TILE_HSIZE_F, K_TILE_HSIZE_F );
 		// bbox union in tile coords, including every touched tile
 		RectXYXYi boxUnionTiles( floor( boxUnion.vMin.x / K_TILE_SIZE_F ), floor( boxUnion.vMin.y / K_TILE_SIZE_F ),
 			ceil( boxUnion.vMax.x / K_TILE_SIZE_F ), ceil( boxUnion.vMax.y / K_TILE_SIZE_F ) );
 		RectXYWHi boxUnionTilesWH( boxUnionTiles.x1, boxUnionTiles.y1, boxUnionTiles.x2 - boxUnionTiles.x1 + 1, boxUnionTiles.y2 - boxUnionTiles.y1 + 1 );
-		//optional - to include more of the boxes
-		//boxUnion.Inflate(K_TILE_HSIZE, K_TILE_HSIZE);
 
 		// keeps a list of all boxes that might be colliding
 		tempCollBoxList.Clear();
@@ -695,18 +694,16 @@ void CActor::DoMove( float dTime, CLevel& level )
 			if ( !level.m_arrColShapes[ kk ]->IsAlive() )
 				continue;
 
-			//nu am intersectie probabils - trec mai departe
 			if ( !boxUnion.Intersects( level.m_arrColShapes[ kk ]->bbox ) )
 				continue;
 
-			//adauga bbox in lista de probabile pt intersectie
+			// save box for later collision checl
 			if ( level.m_arrColShapes[ kk ]->collFlags != K_DIRFLAG_NONE )
 			{
 				tempCollBoxList.Add( level.m_arrColShapes[ kk ]->bbox );
 			}
 		}
 		//add boxes from tiles
-		//#MAYBE: if it catches some corners sometimes try enlarging the tiles collision area (boxUnionTiles) by 1 tile in all directions
 		static CAABB retAABBs[ 64 ];
 		if ( pArea != nullptr )
 		{
@@ -859,7 +856,7 @@ void CActor::DoMove( float dTime, CLevel& level )
 					CAABB newboxsrc = bbox_floor.GetSnapshot();
 					CAABB newboxdest = newboxsrc;
 					newboxsrc.Move( pos.xy );
-					newboxdest.Move( vNextMove );
+					newboxdest.Move( pos.xy + vNextMove );
 					CAABB newBoundary = AABB::Union( newboxsrc, newboxdest );
 
 					// call and implement this if you need tile sized boxes to enter tile wide holes
