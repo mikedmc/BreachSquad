@@ -27,9 +27,9 @@ public:
 	CWeaponsComponent( CSpriteLib* pSpriteLib );
 	~CWeaponsComponent();
 	// Updates all weapons
-	virtual void				Update( CActor& act, float dTime );
+	void						Update( CActor& act, float dTime ) override;
 	// Paints weapons
-	virtual void				Paint( CActor& act, ETexChannel eChannel = K_TEXCHAN_COLORMAP );
+	void						Paint( CActor& act, ETexChannel eChannel = K_TEXCHAN_COLORMAP ) override;
 	// Adds a weapon to the inventory 
 	void						AddWeapon( CActor& act, CWeaponTemplate * primary, EWpnSlot slot );
 	// returns weapon on slot

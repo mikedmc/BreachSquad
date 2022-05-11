@@ -3,7 +3,7 @@
 CCollisionShape* CLevel::ColShape_Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CCollisionShape * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint, Vec2 * retNormal)
 {
 	//verificari initiale
-	_ASSERT(arrBoxes != NULL);
+	_ASSERT(arrBoxes != nullptr);
 
 	if (nBoxesCnt <= 0)
 		return null;
@@ -55,13 +55,13 @@ CCollisionShape* CLevel::ColShape_Segment_Intersection_Arr(Vec2 & start, Vec2 & 
 		}
 	}
 	//minTfinal contine procentul intersectiei
-	if (retCollisionPoint != NULL)
+	if (retCollisionPoint != nullptr)
 	{
-		if (retBox != null)
+		if (retBox != nullptr)
 		{
 			*retCollisionPoint = start + minTfinal * dir;
 			//pentru normala: daca e intre ymin si ymax e coliziune cu latura verticala
-			if (retNormal != NULL)
+			if (retNormal != nullptr)
 			{
 				retNormal->x = retNormal->y = 0.0f;
 				if ((retCollisionPoint->y > retBox->vMin.y) && (retCollisionPoint->y < retBox->vMax.y))

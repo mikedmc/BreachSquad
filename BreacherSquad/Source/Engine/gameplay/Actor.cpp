@@ -946,10 +946,7 @@ void CActor::ProcessExtras( CLevel& level )
 			IActiveInterface* pNewTouchable = arrTouchProps[ 0 ]->GetRef();
 			if ( pClosestTouchable != pNewTouchable )
 			{
-				if ( pClosestTouchable != nullptr ) 
-				{
-					pClosestTouchable->FreeRef();
-				}
+				FREE_REF( pClosestTouchable );
 				ClearActionsList();
 			}
 			pClosestTouchable = pNewTouchable;
@@ -983,13 +980,12 @@ bool CActor::CheckShoot( CLevel& level )
 {
 	//#TODO: must add support for weapon scripts on shoot and empty
 	CWeapon* weapon = c_weapons->GetCurWeapon();
-	if ( (weapon == nullptr) || (weapon->pOwner == nullptr) || (weapon->status == K_WPN_STATUS_UNKNOWN) )
+	if ( ( weapon == nullptr ) || ( weapon->pOwner == nullptr ) || ( weapon->status == K_WPN_STATUS_UNKNOWN ) )
 		return false;
 
 	// only shoot on JUST_SHOT
 	if ( weapon->status != K_WPN_STATUS_JUST_SHOT )
 		return false;
-
 
 	bool bTwoHanded = weapon->_template.bTwoHanded;
 	bool bDualWielding = weapon->_template.bDualWielding;
@@ -999,6 +995,16 @@ bool CActor::CheckShoot( CLevel& level )
 	MUVec3Norm( &vFinalDir, &c_weapons->GetWeaponAimVec() );
 	//#TODO: add support for dual wielding
 	VecProj vShootPos = shooter->GetWeaponMuzzleWorld( bTwoHanded, 0 );
+
+	// checks if muzzle is inside the level, outside of collisions and walls
+	Vec2 vRetP( 0.0f, 0.0f ), vRetN( 0.0f, 0.0f );
+	CTile* tl = level.SegmentTilesIntersectionEx( GetPosHeart3D().xy, vShootPos.xy, vRetP, vRetN, nullptr, pArea );
+	if ( tl != nullptr )
+	{
+		//#TODO: ar trebui sa verifice si cu inamicii si cu alte entitati gen cutii, mese etc. Ar trebui sa spawneze particule cand tragi etc
+		// ideal ar trebui sa simuleze ca ai tras, sa faca damage si toate cele ca sa nu tragi de dincolo de inamic cand e foarte aproape
+		return false;
+	}
 
 	EActorClass nFinalClass = shooter->_template.actorClass;
 	//bullet has template class, set it to final class
