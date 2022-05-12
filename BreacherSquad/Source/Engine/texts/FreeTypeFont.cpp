@@ -352,7 +352,7 @@ RectXYWHi CFreeTypeFont::DrawStringLine(CStringDesc *strDesc, float X, float Y, 
 
 	// we have to compute text line width
 	int nLineW = 0;
-	if (IS_FLAG_ANY(Flags, FTFF_CENTER | FTFF_RIGHT))
+	if (FLAG_ANY(Flags, FTFF_CENTER | FTFF_RIGHT))
 	{
 		for (int ii = 0; ii < length; ii++)
 		{

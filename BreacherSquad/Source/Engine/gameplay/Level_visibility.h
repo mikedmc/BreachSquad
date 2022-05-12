@@ -52,7 +52,6 @@ public:
 	CFixedArray<CCollisionShape*, 1024>	logic_colShapesExtended;
 
 	CFixedArray<CProp*, 512> logic_props_closeby;
-	CFixedArray<CActor*, 256> logic_actors_closeby; //closeby actors - bullets tests
 	CFixedArray<CCollisionShape*, 256> logic_colShapesSpecial; //special collision shapes (water, triggers)
 	//CTOR/DTOR
 	CVisibilityLists() {}

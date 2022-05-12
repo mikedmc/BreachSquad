@@ -397,19 +397,19 @@ void CLevel::UpdateDirtyRects()
 						// clear flags
 						FLAGOP_CLEAR( tl->flags, K_TILEFLAG_HASWALL_MASK );
 
-						if ( ( tlL ) && ( IS_FLAG_ANY( tlL->flags, K_TILEFLAG_WALKABLE ) ) )
+						if ( ( tlL ) && ( FLAG_ANY( tlL->flags, K_TILEFLAG_WALKABLE ) ) )
 						{
 							tl->flags |= K_TILEFLAG_HASWALL_L;
 						}
-						if ( ( tlR ) && ( IS_FLAG_ANY( tlR->flags, K_TILEFLAG_WALKABLE ) ) )
+						if ( ( tlR ) && ( FLAG_ANY( tlR->flags, K_TILEFLAG_WALKABLE ) ) )
 						{
 							tl->flags |= K_TILEFLAG_HASWALL_R;
 						}
-						if ( ( tlU ) && ( IS_FLAG_ANY( tlU->flags, K_TILEFLAG_WALKABLE ) ) )
+						if ( ( tlU ) && ( FLAG_ANY( tlU->flags, K_TILEFLAG_WALKABLE ) ) )
 						{
 							tl->flags |= K_TILEFLAG_HASWALL_U;
 						}
-						if ( ( tlD ) && ( IS_FLAG_ANY( tlD->flags, K_TILEFLAG_WALKABLE ) ) )
+						if ( ( tlD ) && ( FLAG_ANY( tlD->flags, K_TILEFLAG_WALKABLE ) ) )
 						{
 							tl->flags |= K_TILEFLAG_HASWALL_D;
 						}

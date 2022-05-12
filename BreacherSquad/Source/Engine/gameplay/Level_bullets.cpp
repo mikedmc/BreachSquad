@@ -158,9 +158,9 @@ void CLevel::UpdateBullets(float dTime)
 		///----------------------------------------------------------------------------------
 		if ( bullet->pArea != nullptr )
 		{
-			for ( int ll = 0; ll < bullet->pArea->m_arrProps.Count(); ll++ )
+			// props collision
+			for ( auto prop : bullet->pArea->m_arrProps )
 			{
-				CProp* prop = bullet->pArea->m_arrProps[ ll ];
 				if ( ( !prop->IsAlive() ) || ( ( prop->flags & K_PROPFLAG_CAN_BE_SHOT ) == 0 ) )
 					continue;
 				if ( prop->bbox.Intersects(aabbBullet) )
@@ -171,6 +171,28 @@ void CLevel::UpdateBullets(float dTime)
 						vColP = vRetPt;
 						pRetObj.eType = K_VST_PROP;
 						pRetObj.pPtr = prop;
+						// shorten bullet vector so we only catch the closest ones
+						vTo = vRetPt;
+						aabbBullet.Set_Corrected( vFrom, vTo );
+					}
+				}
+			}
+			// collision with actors
+			for ( auto actor : m_arrActors )
+			{
+				if ( ( !actor->IsAlive() ) || ( FLAG_ANY( actor->_template.eCaps, K_ACT_CAPS_NOT_A_TARGET ) ) )
+					continue;
+				// skip self class (no friendly fire)
+				if ( bullet->actorClass == actor->_template.actorClass )
+					continue;
+				if ( actor->bbox.Intersects( aabbBullet ) )
+				{
+					if ( AABB::Segment_Intersection( vFrom, vTo, actor->bbox, &vRetPt ) )
+					{
+						//#TODO: return material too
+						vColP = vRetPt;
+						pRetObj.eType = K_VST_ACTOR;
+						pRetObj.pPtr = actor;
 						// shorten bullet vector so we only catch the closest ones
 						vTo = vRetPt;
 						aabbBullet.Set_Corrected( vFrom, vTo );
@@ -188,9 +210,8 @@ void CLevel::UpdateBullets(float dTime)
 					if ( !aabbBullet.Intersects( area->AABBbounds ) )
 						continue;
 
-					for ( int ll = 0; ll < area->m_arrProps.Count(); ll++ )
+					for ( auto prop : area->m_arrProps )
 					{
-						CProp* prop = area->m_arrProps[ ll ];
 						if ( ( !prop->IsAlive() ) || ( ( prop->flags & K_PROPFLAG_CAN_BE_SHOT ) == 0 ) )
 							continue;
 						if ( prop->bbox.Intersects( aabbBullet ) )
@@ -206,6 +227,7 @@ void CLevel::UpdateBullets(float dTime)
 								aabbBullet.Set_Corrected( vFrom, vTo );
 							}
 						}
+						//#TODO: check actors in neighboring areas too and make the check generalized somehow (don't clone code)
 					}
 				}
 			}
@@ -214,23 +236,44 @@ void CLevel::UpdateBullets(float dTime)
 		///--- check hit object...
 		if ( pRetObj.eType != K_VST_UNKNOWN )
 		{
-			if ( pRetObj.eType == K_VST_PROP )
+			_ASSERT( pRetObj.pPtr != nullptr );
+			switch ( pRetObj.eType )
 			{
-				CProp* hitprop = static_cast< CProp* >( pRetObj.pPtr );
-				if ( hitprop )
+				case K_VST_PROP:
 				{
-					//#TODO: save targetedUID on bullet to avoid hitting same entity 2 times with penetrating bullets
-					hitprop->Kill();
-					killbullet = true;
-					float fang = UTMath::GetVectorAngle( Vec3XY(-bullet->c_pointPhys->speed) );
-					__Particles().AddParticle(ANM_PARTICLES_SPR_IMPACT_FIRE1, true, 0, &vRetPt, nullptr,
-						&Vec2(bullet->c_pointPhys->contactNormal * 20.0f), 5.0f, 1.0f, 0.0f, -fang, 0.0f, 0.0f, 0.0f);
+					auto hitprop = static_cast< CProp* >( pRetObj.pPtr );
+					if ( nullptr != hitprop )
+					{
+						//#TODO: save targetedUID on bullet to avoid hitting same entity 2 times with penetrating bullets
+						hitprop->Kill();
+						killbullet = true;
+						float fang = UTMath::GetVectorAngle( Vec3XY( -bullet->c_pointPhys->speed ) );
+						__Particles().AddParticle( ANM_PARTICLES_SPR_IMPACT_FIRE1, true, 0, &vRetPt, nullptr,
+							&Vec2( bullet->c_pointPhys->contactNormal * 20.0f ), 5.0f, 1.0f, 0.0f, -fang, 0.0f, 0.0f, 0.0f );
+					}
 				}
+				break;
+				case K_VST_ACTOR:
+				{
+					auto hitactor = static_cast< CActor* >( pRetObj.pPtr );
+					if ( nullptr != hitactor )
+					{
+						//#TODO: save targetedUID on bullet to avoid hitting same entity 2 times with penetrating bullets
+						CBulletHitReturnData bullhit = hitactor->HitActor( bullet );
+						killbullet = true;
+						float fang = UTMath::GetVectorAngle( Vec3XY( -bullet->c_pointPhys->speed ) );
+						__Particles().AddParticle( ANM_PARTICLES_SPR_IMPACT_FIRE1, true, 0, &vRetPt, nullptr,
+							&Vec2( bullet->c_pointPhys->contactNormal * 20.0f ), 5.0f, 1.0f, 0.0f, -fang, 0.0f, 0.0f, 0.0f );
+					}
+				}
+				break;
+				default:
+					break;
 			}
 		}
 		else
 		{
-			//#TEMP: assume wall hit
+			//#TEMP: assume wall hit for now but it might be the floor!
 			if ( bullet->c_pointPhys->bContacting )
 			{
 				float fang = UTMath::GetVectorAngle(Vec3XY(bullet->c_pointPhys->contactNormal));

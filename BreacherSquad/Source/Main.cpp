@@ -105,8 +105,8 @@ void    CALLBACK OnFrameMove(PDEVICE pd3dDevice, double fTime, float fElapsedTim
 void    CALLBACK OnFrameRender(PDEVICE pd3dDevice, double fTime, float fElapsedTime);
 LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, bool* pbNoFurtherProcessing);
 void    CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown);
-void    CALLBACK OnLostDevice(void);
-void    CALLBACK OnDestroyDevice(void);
+void    CALLBACK OnLostDevice();
+void    CALLBACK OnDestroyDevice();
 void	CALLBACK MouseProc(bool bLeftButton, bool bRightButton, bool bMiddleButton, bool bSideButton1, bool bSideButton2, int nMouseWheelDelta, int xPos, int yPos);
 
 
@@ -897,7 +897,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 // D3DPOOL_DEFAULT resources. See the "Lost Devices" section of the documentation for 
 // information about lost devices.
 //**************************************************************************************
-void CALLBACK OnLostDevice(void)
+void CALLBACK OnLostDevice()
 {
 	DebugPrintA("---On lost device---\n");
 
@@ -932,7 +932,7 @@ void CALLBACK OnLostDevice(void)
 // windowed/full screen toggles. Resources created in the OnCreateDevice callback 
 // should be released here, which generally includes all D3DPOOL_MANAGED resources. 
 //**************************************************************************************
-void CALLBACK OnDestroyDevice(void)
+void CALLBACK OnDestroyDevice()
 {
 	g_font1.Release();
 
@@ -1722,7 +1722,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 	///----------------------------------------------------------------------------------
 	if (OP_SUCCESS(UT3DBeginScene(pDevice)))
 	{
-		UT3DClear(pDevice, 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, K_GAME_CLEAR_COLOR, 1.0f, 0);
+		UT3DClear(pDevice, 0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, K_GAME_CLEAR_COLOR, 1.0f, 0);
 
 		g_pGameSprite->Begin(D3DXSPRITE_ALPHABLEND | /*D3DXSPRITE_OBJECTSPACE |*/ D3DXSPRITE_DONOTSAVESTATE);
 
@@ -1790,12 +1790,12 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		GameState::PaintTransition(fElapsedTime, fTime, pDevice);
 		//--- if it is paused paints "PAUSE" ---
 #ifdef K_GAME_HAS_PAUSE_SCREEN
-		if ((g_bCanPause) && (DXUTIsTimePaused()) && (g_font10b1 != NULL))
+		if ((g_bCanPause) && (DXUTIsTimePaused()) && (g_font10b1 != nullptr))
 		{
 			g_pGameSprite->Flush();
 			//draw black poly over
 			DWORD color = D3DCOLOR_COLORVALUE(0.0f, 0.0f, 0.0f, 0.6f);
-			pDevice->SetTexture(0, NULL); 
+			pDevice->SetTexture(0, nullptr); 
 			pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 			pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
@@ -1857,9 +1857,9 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 
 		//!driver optimization: unbind all resource channels
-		pDevice->SetTexture(0, NULL);
-		pDevice->SetTexture(1, NULL);
-		pDevice->SetStreamSource(0, NULL, 0, 0);
+		pDevice->SetTexture(0, nullptr);
+		pDevice->SetTexture(1, nullptr);
+		pDevice->SetStreamSource(0, nullptr, 0, 0);
 		pDevice->SetVertexShader(null);
 		pDevice->SetPixelShader(null);
 
@@ -2015,7 +2015,7 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 			if (g_mouse.bCursorOutsideWindow)
 			{
 				g_mouse.bCursorOutsideWindow = false;
-				SetCursor(NULL);
+				SetCursor(nullptr);
 				g_mouse.lastPos = g_mouse.pos;
 				g_mouse.Lbut = K_MOUSE_BUTT_NOTPRESSED;
 				g_mouse.Rbut = K_MOUSE_BUTT_NOTPRESSED;
@@ -2255,9 +2255,9 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
 			case VK_F6:
 			{
-				if ( g_editor.IsLaunched() )
+				if ( GameState::state == GAME_STATE_GAME )
 				{
-					Vec2 vpos = g_editor.vMouseWorld;
+					Vec2 vpos = __Sim().m_camLevelToScr.ScreenToWorld( g_mouse.pos );
 					__Sim().SpawnActor( vpos, L"act_blowup_bart.xml" );
 				}
 			}

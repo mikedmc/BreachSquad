@@ -1003,6 +1003,7 @@ bool CActor::CheckShoot( CLevel& level )
 	{
 		//#TODO: ar trebui sa verifice si cu inamicii si cu alte entitati gen cutii, mese etc. Ar trebui sa spawneze particule cand tragi etc
 		// ideal ar trebui sa simuleze ca ai tras, sa faca damage si toate cele ca sa nu tragi de dincolo de inamic cand e foarte aproape
+		// idee: poate sa traga din heart pos dar sa fie invizibil glontul (set flag invisible)
 		return false;
 	}
 

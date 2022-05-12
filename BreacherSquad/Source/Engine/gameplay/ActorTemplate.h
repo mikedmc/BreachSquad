@@ -7,12 +7,13 @@
 // max number of skins
 #define K_ACT_SKINS_MAX_SETS 20
 
+// These are caps flags!
 enum EActorCapabilitiesFlags {
 	K_ACT_CAPS_NONE = 0,
 	K_ACT_CAPS_CAN_COVER = 1,
-	K_ACT_CAPS_CAN_INTERACT,
-	K_ACT_CAPS_CAN_ROLL,
-	K_ACT_CAPS_CAN_CROUCH,
+	K_ACT_CAPS_CAN_INTERACT = 2,
+	K_ACT_CAPS_CAN_ROLL = 4,
+	K_ACT_CAPS_CAN_CROUCH = 8,
 	//misc flags
 	K_ACT_CAPS_NOT_A_TARGET = 128,		// Literally not a target
 };

@@ -85,7 +85,8 @@ void CLevel::BuildVisibilityLists()
 			case K_LVL_LT_DIRECTIONAL:
 			{
 				// use initial value because current box is moved with light position
-				if (camaabb.Intersects(light->bbox.GetSnapshot()))
+				CAABB bb = light->bbox.GetSnapshot();
+				if (camaabb.Intersects(bb))
 				{
 					m_visibleList.visible_lights.Add(m_arrLights[kk]);
 				}
@@ -178,17 +179,11 @@ void CLevel::BuildVisibilityLists()
 	}
 	//actorii vizibili
 	m_visibleList.visible_actors.Clear();
-	m_visibleList.logic_actors_closeby.Clear();
 	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 	{
 		CActor* actor = m_arrActors[kk];
 		if ((!actor->IsAlive()) || (actor->bSkipRender))
 			continue;
-		//is it nearby?
-		if ((actorsNearbyAABBs[0].Intersects(actor->bbox_cull)) || (actorsNearbyAABBs[1].Intersects(actor->bbox_cull)))
-		{
-			m_visibleList.logic_actors_closeby.Add(actor);
-		}
 		//must be painted?
 		if (actorsPaintAABB.Intersects(actor->bbox_cull))
 		{
@@ -256,7 +251,6 @@ void CLevel::ClearVisibilityLists()
 	m_visibleList.visible_lights.Clear();
 	m_visibleList.visible_colShapesLights.Clear();
 
-	m_visibleList.logic_actors_closeby.Clear();
 	m_visibleList.logic_colShapes.Clear();
 	m_visibleList.logic_colShapesExtended.Clear();
 	m_visibleList.logic_colShapesSpecial.Clear();

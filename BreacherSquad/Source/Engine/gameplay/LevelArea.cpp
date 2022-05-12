@@ -95,7 +95,7 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 	CTile* pstarttl = GetTile(startTL.x, startTL.y);
 	if (pstarttl != nullptr)
 	{
-		if (NIS_FLAG_ANY(pstarttl->flags, K_TILEFLAG_WALKABLE))
+		if (FLAG_NONE(pstarttl->flags, K_TILEFLAG_WALKABLE))
 			return nullptr;
 	}
 
@@ -127,7 +127,7 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 			{
 				chktlV = Vec2i((int)((vCur.x - K_TILE_SIZE / 2.0f) / K_TILE_SIZE), (int)(vCur.y / K_TILE_SIZE));
 				CTile* ptl = GetTile(chktlV.x, chktlV.y);
-				if ((ptl != nullptr) && (NIS_FLAG_ANY(ptl->flags, K_TILEFLAG_WALKABLE)))
+				if ((ptl != nullptr) && (FLAG_NONE(ptl->flags, K_TILEFLAG_WALKABLE)))
 				{
 					bFoundV = true;
 					vRetPtV = vCur;
@@ -155,7 +155,7 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 			{
 				chktlV = Vec2i((int)((vCur.x + K_TILE_SIZE / 2.0f) / K_TILE_SIZE), (int)(vCur.y / K_TILE_SIZE));
 				CTile* ptl = GetTile(chktlV.x, chktlV.y);
-				if ((ptl != nullptr) && (NIS_FLAG_ANY(ptl->flags, K_TILEFLAG_WALKABLE)))
+				if ((ptl != nullptr) && (FLAG_NONE(ptl->flags, K_TILEFLAG_WALKABLE)))
 				{
 					bFoundV = true;
 					vRetPtV = vCur;
@@ -192,7 +192,7 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 			{
 				chktlH = Vec2i((int)((vCur.x) / K_TILE_SIZE), (int)((vCur.y - K_TILE_SIZE / 2.0f) / K_TILE_SIZE));
 				CTile* ptl = GetTile(chktlH.x, chktlH.y);
-				if ((ptl != nullptr) && (NIS_FLAG_ANY(ptl->flags, K_TILEFLAG_WALKABLE)))
+				if ((ptl != nullptr) && (FLAG_NONE(ptl->flags, K_TILEFLAG_WALKABLE)))
 				{
 					bFoundH = true;
 					vRetPtH = vCur;
@@ -220,7 +220,7 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 			{
 				chktlH = Vec2i((int)((vCur.x) / K_TILE_SIZE), (int)((vCur.y + K_TILE_SIZE / 2) / K_TILE_SIZE));
 				CTile* ptl = GetTile(chktlH.x, chktlH.y);
-				if ((ptl != nullptr) && (NIS_FLAG_ANY(ptl->flags, K_TILEFLAG_WALKABLE)))
+				if ((ptl != nullptr) && (FLAG_NONE(ptl->flags, K_TILEFLAG_WALKABLE)))
 				{
 					bFoundH = true;
 					vRetPtH = vCur;

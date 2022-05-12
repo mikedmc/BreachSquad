@@ -218,7 +218,7 @@ CAABB AABB::Union(CAABB &a, CAABB &b)
 CAABB AABB::FromPoints(Vec2 * vecArr, int vecCnt)
 {
 	CAABB retAABB;
-	if ((vecArr == NULL) || (vecCnt == 0))
+	if ((vecArr == nullptr) || (vecCnt == 0))
 		return retAABB;
 	Vec2 max = Vec2(-100000.0f, -100000.0f);
 	Vec2 min = Vec2(100000.0f, 100000.0f);
@@ -238,7 +238,7 @@ CAABB AABB::FromPoints(Vec2 * vecArr, int vecCnt)
 CAABB AABB::FromPoints(Vec3 * vecArr, int vecCnt)
 {
 	CAABB retAABB;
-	if ((vecArr == NULL) || (vecCnt == 0))
+	if ((vecArr == nullptr) || (vecCnt == 0))
 		return retAABB;
 	Vec2 max = Vec2(-100000.0f, -100000.0f);
 	Vec2 min = Vec2(100000.0f, 100000.0f);
@@ -276,7 +276,6 @@ bool AABB::KeepInside(CAABB & boxSource, CAABB & boxDest)
 
 bool AABB::Segment_Intersection(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint)
 {
-	//calculeaza termeni segment
 	Vec2 dir = end - start;
 	//make sure we don't have horizontal lines
 	if (dir.x == 0.0f)
@@ -284,8 +283,8 @@ bool AABB::Segment_Intersection(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * re
 	if (dir.y == 0.0f)
 		dir.y = EPS;
 
-	float seglen = D3DXVec2Length(&dir);
-	//daca lungimea e 0 iese cu false
+	float seglen = MUVec2Len(&dir);
+	// length is zero, no intersection
 	if (seglen == 0.0f)
 		return false;
 
@@ -309,12 +308,12 @@ bool AABB::Segment_Intersection(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * re
 	// if tmin > tmax, ray doesn't intersect AABB
 	if (tmin > tmax)
 		return false;
-	//daca tmin e mai mare decat lungimea segmentului inseamna ca se intersecteaza dupa al doilea punct
+	// tmin is longer than segment length then it intersects after second point
 	if (tmin > seglen)
 		return false;
 
-	//tmin contine procentul intersectiei
-	if (retCollisionPoint != NULL)
+	//tmin is the percentage of the ray where it intersects
+	if (retCollisionPoint != nullptr)
 		*retCollisionPoint = start + tmin * dir;
 
 	return true;
@@ -322,7 +321,6 @@ bool AABB::Segment_Intersection(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * re
 
 bool AABB::Segment_IntersectionEx(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * retCollisionPoint, float &fRetT)
 {
-	//calculeaza termeni segment
 	Vec2 dir = end - start;
 	//make sure we don't have horizontal lines
 	if (dir.x == 0.0f)
@@ -361,7 +359,7 @@ bool AABB::Segment_IntersectionEx(Vec2 & start, Vec2 & end, CAABB & box, Vec2 * 
 		return false;
 
 	//tmin contine procentul intersectiei
-	if (retCollisionPoint != NULL)
+	if (retCollisionPoint != nullptr)
 		*retCollisionPoint = start + tmin * dir;
 
 	//tmin contine procentul intersectiei
@@ -413,7 +411,7 @@ bool AABB::Segment_Intersection_NoHeads(Vec2 & start, Vec2 & end, CAABB & box, V
 		return false;
 
 	//tmin contine procentul intersectiei
-	if (retCollisionPoint != NULL)
+	if (retCollisionPoint != nullptr)
 		*retCollisionPoint = start + tmin * dir;
 
 	return true;
@@ -422,10 +420,10 @@ bool AABB::Segment_Intersection_NoHeads(Vec2 & start, Vec2 & end, CAABB & box, V
 CAABB* AABB::Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CAABB * arrBoxes[], int nBoxesCnt, Vec2 * retCollisionPoint, Vec2 * retNormal)
 {
 	//verificari initiale
-	assert(arrBoxes != NULL);
+	_ASSERT(arrBoxes != nullptr);
 
 	if (nBoxesCnt <= 0)
-		return null;
+		return nullptr;
 	//calculeaza termeni segment
 	Vec2 dir = end - start;
 	//make sure we don't have horizontal lines
@@ -443,7 +441,7 @@ CAABB* AABB::Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CAABB * arrBoxes
 	//tine intersectia minima
 	float minTfinal = FLT_MAX;
 	//valoarea de return 
-	CAABB* retBox = null;
+	CAABB* retBox = nullptr;
 	for (int kk = 0; kk < nBoxesCnt; kk++ )
 	{
 		//cursorul prin arrBoxes
@@ -469,13 +467,13 @@ CAABB* AABB::Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CAABB * arrBoxes
 		}
 	}
 	//minTfinal contine procentul intersectiei
-	if (retCollisionPoint != NULL)
+	if (retCollisionPoint != nullptr)
 	{
-		if (retBox != null)
+		if (retBox != nullptr)
 		{
 			*retCollisionPoint = start + minTfinal * dir;
 			//pentru normala: daca e intre ymin si ymax e coliziune cu latura verticala
-			if (retNormal != NULL)
+			if (retNormal != nullptr)
 			{
 				retNormal->x = retNormal->y = 0.0f;
 				if ((retCollisionPoint->y > retBox->vMin.y) && (retCollisionPoint->y < retBox->vMax.y))
@@ -497,7 +495,7 @@ CAABB* AABB::Segment_Intersection_Arr(Vec2 & start, Vec2 & end, CAABB * arrBoxes
 		else
 		{
 			*retCollisionPoint = end;
-			if (retNormal != null)
+			if (retNormal != nullptr)
 			{
 				*retNormal = Vec2(0.0f, 0.0f);
 			}
@@ -523,7 +521,7 @@ CAABB AABB::GetMinkowskiDifference(CAABB &a, CAABB &b)
 
 void AABB::MorphInto_Linear(CAABB *source, CAABB *target, float fSpeed)
 {
-	if ((source == null) || (target == null))
+	if ((source == nullptr) || (target == nullptr))
 		return;
 
 	int foundpts = 0;
@@ -560,7 +558,7 @@ void AABB::MorphInto_Linear(CAABB *source, CAABB *target, float fSpeed)
 
 void AABB::MorphInto_Quadratic(CAABB *source, CAABB *target, float fDistMultiplier, float fMinSpeed)
 {
-	if ((source == null) || (target == null))
+	if ((source == nullptr) || (target == nullptr))
 		return;
 
 	int foundpts = 0;

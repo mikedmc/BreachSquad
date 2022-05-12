@@ -62,7 +62,7 @@ void CSpriteActorComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCH
 		// shift module flag 2 bits to the right to erase the flipX and flipY flags
 		// find layer index 1..N = (flags>>2), convert to layer mask by shifting to the left with index-1
 		UINT32 flagmask = 1 << ((mod->flags >> 2) - 1);
-		if ( NIS_FLAG_ANY( flagmask, dwLayersMask ) )
+		if ( FLAG_NONE( flagmask, dwLayersMask ) )
 			continue;
 
 		CSpr::s_pSP->Draw( mod->pImg->pTex,

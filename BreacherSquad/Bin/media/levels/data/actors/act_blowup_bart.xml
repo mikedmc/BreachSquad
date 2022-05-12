@@ -6,6 +6,7 @@
 				sMaterial="FLESH" fLife="40.0" fArmor="0.0" 
 				fSpeedMove="80.0" fSpeedRun="120.0"
 				fSeeDist="160.0" fAttackMin="16.0" fAttackMax="64.0"
+				fStunWhenHitProb="0.5"
 				bCanCover="false" bCanInteract="false" />
 
 	<SKINS>
