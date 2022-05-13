@@ -182,7 +182,7 @@ void CLevel::BuildVisibilityLists()
 	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
 	{
 		CActor* actor = m_arrActors[kk];
-		if ((!actor->IsAlive()) || (actor->bSkipRender))
+		if ((actor->IsPendingKill()) || (actor->bSkipRender) || (!actor->IsEnabled()))
 			continue;
 		//must be painted?
 		if (actorsPaintAABB.Intersects(actor->bbox_cull))

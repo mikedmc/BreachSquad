@@ -1235,6 +1235,9 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& act, int nBehaviorIdx, bo
 			}
 			act.fArmor = 0.0f;
 
+			///--- hide weapons ---
+			act.EquipWeapon( K_WPNSLOT_EMPTYHANDS );
+
 			act.bCrouched = false;
 			act.fStunTimer = 0.0f;
 			//death timer for players or splat timer for others

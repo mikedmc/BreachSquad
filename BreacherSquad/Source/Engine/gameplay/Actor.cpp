@@ -201,12 +201,6 @@ void CActor::Update(float dTime, CLevel& level )
 	//verse timer
 	dec_limit( fVerseCooldown, dTime, 0.0f );
 
-	//#TODO: oare ar trebui sa isi ia singur datele din actor componenta si sa seteze singura animatiile??
-	if(UTMath::Vec2AlmostZero(speed))
-		c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE);
-	else
-		c_graphics->SetAnimOnce(K_ACT_ANIM_RUN);
-
 	// Update actor AI
 	c_AI->Update( *this, dTime );
 	// now process the AI commands
@@ -215,6 +209,8 @@ void CActor::Update(float dTime, CLevel& level )
 	DoMove( dTime, level );
 	// Processes extra stuff before painting
 	ProcessExtras( level );
+	// Set actor animations based on behaviour
+	ProcessAnimations();
 	// Update all components after we have the final player position
 	c_graphics->Update(*this, dTime);
 	// compute weapon control before updating the weapons
@@ -281,7 +277,7 @@ void CActor::EquipWeapon( EWpnSlot wpnSlot )
 	// hide hands corresponding to current weapon mode
 	// it always does the full thing even if already on the same weapon
 	//#TODO: ar trebui facuta o functie separata care sa ia in considerare si behaviour curent daca ascunde arme sau nu?
-	if ( wpn == nullptr )
+	if ( wpn == nullptr || wpn->status == K_WPN_STATUS_UNKNOWN)
 		c_graphics->SetSkinFlags( *this, true, true );
 	else if ( wpn->_template.bTwoHanded == true || wpn->_template.bDualWielding == true )
 		c_graphics->SetSkinFlags( *this, false, false );
@@ -457,6 +453,8 @@ void CActor::ComputeAttackStatus()
 		eCurSlot = K_WPNSLOT_PRIMARY;
 	else if ( eAttackStatus == K_ACT_ATTACK_SHOOTING_ALT )
 		eCurSlot = K_WPNSLOT_ALTFIRE;
+	if ( !IsAlive() )
+		eCurSlot = K_WPNSLOT_EMPTYHANDS;
 
 	//see if weapon needs to be changed
 	if ( eCurSlot != c_weapons->GetCurWeaponSlot() )
@@ -974,6 +972,35 @@ void CActor::ProcessExtras( CLevel& level )
 	}
 
 
+}
+
+void CActor::ProcessAnimations()
+{
+	Vec2 vAimN( 0.0f, 0.0f );
+	MUVec2Norm( &vAimN, &vAim );
+	// see if he's walking backwards
+	float fSpeedDot = MUVec2Dot( &vAim, &speed );
+
+	if ( GetCurrentBehavior() == AI_BEHAVIOR_DEAD )
+	{
+		c_graphics->SetAnimOnce( K_ACT_ANIM_DIE );
+		return;
+	}
+	
+	if ( UTMath::Vec2AlmostZero( speed ) )
+	{
+		c_graphics->SetAnimOnce( K_ACT_ANIM_IDLE );
+		c_graphics->SetAnimDirection( false );
+	}
+	else
+	{
+		c_graphics->SetAnimOnce( K_ACT_ANIM_RUN );
+		// change animation direction if walking back
+		if ( fSpeedDot < 0.0f )
+			c_graphics->SetAnimDirection( true );
+		else
+			c_graphics->SetAnimDirection( false );
+	}
 }
 
 bool CActor::CheckShoot( CLevel& level )

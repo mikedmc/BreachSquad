@@ -18,6 +18,7 @@ enum EWpnSlot {
 	K_WPNSLOT_ALTFIRE = 1,
 	K_WPNSLOT_GEAR,
 	K_WPNSLOT_MELEE,
+	K_WPNSLOT_EMPTYHANDS,		// Always empty slot for when we need to holster all weapons	
 
 	K_WPNSLOTS_CNT
 };

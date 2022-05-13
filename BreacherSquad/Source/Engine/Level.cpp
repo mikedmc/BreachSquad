@@ -2045,6 +2045,7 @@ void CLevel::CleanupDeadObjects()
 	{
 		if ( m_arrActors[kk]->CanBeReleased() )
 		{
+			LOG(L"Released actor: %s", m_arrActors[kk]->_template.shID.text);
 			// now release it (destructor)
 			SAFE_DELETE( m_arrActors[kk] );
 			m_arrActors.Remove( kk );

@@ -45,7 +45,7 @@
 //reset all steam achievements on startup? 
 //#define ENABLE_ACHIEVEMENTS_RESET_ON_STARTUP
 //playerus invinctus:
-//#define ENABLE_PLAYER_INVINCIBILITY
+#define ENABLE_PLAYER_INVINCIBILITY
 #endif
 
 #if defined(ENABLE_DEVMODE_RELEASE)

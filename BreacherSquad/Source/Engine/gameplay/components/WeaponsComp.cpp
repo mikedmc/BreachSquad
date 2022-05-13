@@ -39,27 +39,30 @@ void CWeaponsComponent::Update( CActor& act, float dTime )
 	EWpnStatus wpn_stat		= arrWeapons[ eActiveSlot ].status;
 	EWpnStatus wpn_stat_old = arrWeapons[ eActiveSlot ].statusOld;
 
-	if ( (wpn_stat_old == K_WPN_STATUS_RELOADING) && (wpn_stat != K_WPN_STATUS_RELOADING) )
+	if ( wpn_stat != K_WPN_STATUS_UNKNOWN )
 	{
-		sprite.SetAnimOnce( arrWeapons[ eActiveSlot ]._template.animIdx_shoot );
-		sprite.Stop();
-	}
-	if ( wpn_stat == K_WPN_STATUS_JUST_SHOT )
-	{
-		sprite.Play( true );
-	}
-	else if ( wpn_stat == K_WPN_STATUS_RELOADING )
-	{
-		if ( sprite.SetAnimOnce( arrWeapons[ eActiveSlot ]._template.animIdx_reload ) )
+		if ( ( wpn_stat_old == K_WPN_STATUS_RELOADING ) && ( wpn_stat != K_WPN_STATUS_RELOADING ) )
 		{
-			//#TODO: set animation duration for reload (based on template)
+			sprite.SetAnimOnce( arrWeapons[eActiveSlot]._template.animIdx_shoot );
+			sprite.Stop();
 		}
-	}
+		if ( wpn_stat == K_WPN_STATUS_JUST_SHOT )
+		{
+			sprite.Play( true );
+		}
+		else if ( wpn_stat == K_WPN_STATUS_RELOADING )
+		{
+			if ( sprite.SetAnimOnce( arrWeapons[eActiveSlot]._template.animIdx_reload ) )
+			{
+				//#TODO: set animation duration for reload (based on template)
+			}
+		}
 
-	// update sprite animation
-	sprite.Update( dTime );	
-	if ( sprite.animStatus == ANIM_FRAMELOCK )
-		sprite.SetFrame( 0 );
+		// update sprite animation
+		sprite.Update( dTime );
+		if ( sprite.animStatus == ANIM_FRAMELOCK )
+			sprite.SetFrame( 0 );
+	}
 }
 
 void CWeaponsComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
@@ -104,7 +107,16 @@ const CWeapon* CWeaponsComponent::Equip( EWpnSlot slot )
 	///--- equip primary mode
 	eActiveSlot = slot;
 	CWeapon* weapon = &arrWeapons[ eActiveSlot ];
-	// initialize sprite
+	// initialize sprite if valid wpn
+	if ( weapon->status == K_WPN_STATUS_UNKNOWN) // no weapon
+	{
+		bVisible = false;
+		vMuzzleVec.x = 0.0f; vMuzzleVec.y = 0.0f;
+		sprite.Stop();
+		return weapon;
+	}
+
+	bVisible = true;
 	sprite.SetAnim( weapon->_template.animIdx_shoot );
 	sprite.Stop();
 	// save/init muzzle point (frame 0 from shooting animation)
