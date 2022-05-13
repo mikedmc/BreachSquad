@@ -3,9 +3,9 @@
 <ACTOR file="breacher.bsx">
 	<ACTOR_DATA sAIstate="DEFAULT" sWeapon="WPN_SMG_MP5A3" class="ENEMY"
 				bboxMinX="-8" bboxMinY="-12" bboxMaxX="8" bboxMaxY="4" heightZ="64" heartZ="32"
-				sMaterial="FLESH" fLife="40.0" fArmor="0.0" 
+				sMaterial="FLESH" fLife="100.0" fArmor="0.0" 
 				fSpeedMove="80.0" fSpeedRun="120.0"
-				fSeeDist="160.0" fAttackMin="16.0" fAttackMax="64.0"
+				fSeeDist="320.0" fAttackMin="16.0" fAttackMax="64.0"
 				fStunWhenHitProb="0.5"
 				bCanCover="false" bCanInteract="false" />
 

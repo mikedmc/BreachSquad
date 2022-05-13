@@ -52,6 +52,9 @@ enum EActorClass
 	//count
 	K_ACT_CLASSES_COUNT
 };
+// neutral classes are lower or equal to this
+#define K_ACT_CLASSCHECKPOINT_NEUTRALS  K_ACT_CLASS_HOSTAGE
+
 const CStringHash EActorClassNames[ K_ACT_CLASSES_COUNT ] =
 {
 	L"PASSIVE",

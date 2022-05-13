@@ -782,7 +782,7 @@ CAIEvent* CActorAIComponent::GetMostImportantAIEvent( CActor& act, EAIEventType 
 		}
 		//dupa ce am exclus eventurile ce se puteau exclude:
 		//verific linie directa, cel mai costisitor test, sau daca e event cu raza infinita (fara pozitie)
-		if ( (evt->fRadius <= 0.0f) || (level.IsLineOfSight( act.GetPosHeart(), evt->pos )) )
+		if ( (evt->fRadius <= 0.0f) || (level.IsLineOfSight( act.GetPosHeart(), evt->pos, act.pArea )) )
 		{
 			//daca eventul este mai aproape sau daca eventul e mai important decat cel initial
 			if ( (evtdstsq < mindistSq) || ((returnEvent != null) && (evt->nType > returnEvent->nType)) )

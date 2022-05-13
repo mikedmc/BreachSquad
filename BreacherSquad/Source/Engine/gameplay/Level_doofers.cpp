@@ -420,7 +420,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				Vec2 vDir = act->GetPosHeart() - pos;
 				float fDist = MUVec2Len(&vDir);
 
-				bool bDirectLine = IsLineOfSight(act->GetPosHeart(), pos);
+				bool bDirectLine = IsLineOfSight(act->GetPosHeart(), pos, act->pArea);
 				
 				if ((bDirectLine) && (explotemplate->cDoT.eType != CDamageOverTime::K_LVL_DoT_NONE) && (fDist < explotemplate->fDoTRadius))
 				{
@@ -468,7 +468,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				if (fDist > fDamageRadius)
 					continue;
 				//daca nu e linie directa nu loveste
-				if (!IsLineOfSight(act->GetPosHeart(), pos))
+				if ( !IsLineOfSight( act->GetPosHeart(), pos, act->pArea ) )
 					continue;
 				//loveste liniar
 				float fPercent = 1.0f - (fDist / fDamageRadius);

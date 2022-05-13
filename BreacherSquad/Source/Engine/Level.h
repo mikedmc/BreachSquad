@@ -273,7 +273,7 @@ public:
 	// \returns: true if success, false if failed
 	bool					ActivateSpecialAbility(int nAbilityIdx, int nTargetPlayerOrdinal);
 	// Do we have a line of sight between the 2 points
-	bool					IsLineOfSight(Vec2 pt1, Vec2 pt2, Vec2 * retVecCollisionPt = null, Vec2 * retVecCollisionNormal = null);
+	bool					IsLineOfSight(Vec2 pt_from, Vec2 pt_to, CLevelArea * pStartArea = nullptr);
 
 	UINT32					m_unLastID;				//Last loaded ID - used to assign unique IDs to runtime spawned elements
 	//Generates a new editor ID and increments m_unLastID (used when appending areas)

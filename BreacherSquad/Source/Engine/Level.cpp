@@ -695,7 +695,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 		templ->eCaps |= K_ACT_CAPS_CAN_INTERACT;
 	//other
 	if ( !actnode.attribute( L"class" ).empty() )
-		templ->actorClass = (EActorClass)GetListIndexByName( actnode.attribute( L"class" ).value(), EActorClassNames, ARRAY_SIZE(EActorClassNames) );
+		templ->actorClass = ( EActorClass ) GetListIndexByName( actnode.attribute( L"class" ).value(), EActorClassNames, ARRAY_SIZE( EActorClassNames ) );
 	if ( !actnode.attribute( L"sWeapon" ).empty() )
 		templ->shWeaponDefault.Init( actnode.attribute( L"sWeapon" ).value() );
 	if ( !actnode.attribute( L"sAIstate" ).empty() )
@@ -801,7 +801,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 		//parcurg nodurile de stari
 		for ( pugi::xml_node statenode = aiignorenode.first_child(); statenode; statenode = statenode.next_sibling() )
 		{
-			EAIEventType nevttype = ( EAIEventType ) GetListIndexByName( statenode.attribute( L"type" ).value(), EAIEventTypeNames, ARRAY_SIZE(EAIEventTypeNames) );
+			EAIEventType nevttype = ( EAIEventType ) GetListIndexByName( statenode.attribute( L"type" ).value(), EAIEventTypeNames, ARRAY_SIZE( EAIEventTypeNames ) );
 			if ( nevttype >= 0 )
 			{
 				aitemplate->m_arrIgnoredEvents.Add( nevttype );
@@ -835,7 +835,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 					if ( evtTypeStr.textHash == FastHash( L"any" ) )
 						nevt = K_LVL_AI_EVENT_ANY;
 					else
-						nevt = ( EAIEventType ) GetListIndexByName( eventnode.attribute( L"type" ).value(), EAIEventTypeNames, ARRAY_SIZE(EAIEventTypeNames) );
+						nevt = ( EAIEventType ) GetListIndexByName( eventnode.attribute( L"type" ).value(), EAIEventTypeNames, ARRAY_SIZE( EAIEventTypeNames ) );
 
 					nstate->m_arrTriggeringEventTypes.Add( nevt );
 				}
@@ -847,7 +847,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 				for ( pugi::xml_node behnode = behaviorsparent.first_child(); behnode; behnode = behnode.next_sibling() )
 				{
 					CAIBehavior nbeh;
-					nbeh.nType = ( EAIBehaviorType ) GetListIndexByName( behnode.attribute( L"name" ).value(), EAIBehaviorTypeNames, ARRAY_SIZE(EAIBehaviorTypeNames) );
+					nbeh.nType = ( EAIBehaviorType ) GetListIndexByName( behnode.attribute( L"name" ).value(), EAIBehaviorTypeNames, ARRAY_SIZE( EAIBehaviorTypeNames ) );
 					//salvam cativa params generici
 					if ( !behnode.attribute( L"bCanInterrupt" ).empty() )
 						nbeh.bCanInterrupt = behnode.attribute( L"bCanInterrupt" ).as_bool();
@@ -1052,7 +1052,7 @@ CActor* CLevel::GetPlayerByUID( UINT32 UID )
 		return nullptr;
 	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 	{
-		if ( pPlayerActor[kk] == null )
+		if ( pPlayerActor[kk] == nullptr )
 			continue;
 		if ( pPlayerActor[kk]->UID == UID )
 		{
@@ -1065,10 +1065,10 @@ CActor* CLevel::GetPlayerByUID( UINT32 UID )
 CActor* CLevel::GetClosestPlayer( CActor* sourceActor, bool bIgnoreDead )
 {
 	float fMinDist = 100000.0f;
-	CActor* plact = null;
+	CActor* plact = nullptr;
 	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 	{
-		if ( pPlayerActor[kk] == null )
+		if ( pPlayerActor[kk] == nullptr )
 			continue;
 		EAIBehaviorType beh = pPlayerActor[kk]->GetCurrentBehavior();
 		if ( ( bIgnoreDead ) && ( beh == AI_BEHAVIOR_DEAD ) )
@@ -1133,156 +1133,156 @@ void CLevel::SetLevelState( ELevelState eNewState, int nLevelStateParam )
 	m_levelState = eNewState;
 	switch ( m_levelState )
 	{
-	case K_LVL_STATE_PLAYING:
-	{
-		// save level start time
-		m_arrStats[K_LVL_STATS_LEVEL_START_SEC] = ( int ) floor( fLocalTimeline );
-
-		m_levelSubState = 0;
-		m_levelStateTimer = 0.0f;
-
-		CHAR ctxt[MAX_PATH];
-		int nLevelIdx = g_userData[K_MEMID_SELECTED_LEVEL] + g_userData[K_MEMID_SELECTED_CHAPTER] * K_GAME_LEVELS_PER_CHAPTER;
-		StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
-
-		if ( UTApp().IsGameNetworked() )
+		case K_LVL_STATE_PLAYING:
 		{
-			//mark sync start here, after loading the game
-			UTApp().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_GET_READY;
-			//send loaded level confirmation
-			g_netlock.Net_SendGameplayCommand( g_netlock.K_GAMPLAYCMD_LEVEL_LOADED );
+			// save level start time
+			m_arrStats[K_LVL_STATS_LEVEL_START_SEC] = ( int ) floor( fLocalTimeline );
+
+			m_levelSubState = 0;
+			m_levelStateTimer = 0.0f;
+
+			CHAR ctxt[MAX_PATH];
+			int nLevelIdx = g_userData[K_MEMID_SELECTED_LEVEL] + g_userData[K_MEMID_SELECTED_CHAPTER] * K_GAME_LEVELS_PER_CHAPTER;
+			StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
+
+			if ( UTApp().IsGameNetworked() )
+			{
+				//mark sync start here, after loading the game
+				UTApp().m_Settings.devnet_eSyncStatus = CApplicationSettings::K_NETGAME_SYNC_GET_READY;
+				//send loaded level confirmation
+				g_netlock.Net_SendGameplayCommand( g_netlock.K_GAMPLAYCMD_LEVEL_LOADED );
 
 #ifdef ENABLE_CHAT_WINDOW
-			//say: "press ENTER to chat"
-			g_ChatWnd.AddLine( __Texts().strings[STR_ENTER_TO_CHAT]->sText, L"SYSTEM", K_CW_SYSTEM_COLOR );
+				//say: "press ENTER to chat"
+				g_ChatWnd.AddLine( __Texts().strings[STR_ENTER_TO_CHAT]->sText, L"SYSTEM", K_CW_SYSTEM_COLOR );
 #endif
-			LOG( L"Level::SetLevelState - Started networked game!" );
-			if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-				ANALYTICS_EVENT( "level_start_net", ctxt, "playedTimes", g_levelStats[nLevelIdx].nPlayedTimes );
-			else //custom level
-			{
-				StringCchPrintfA( ctxt, MAX_PATH, "lvlflag_%d", m_unLoadedLevelFlags );
-				ANALYTICS_EVENT( "level_start_net_custom", ctxt, "val", 0 );
+				LOG( L"Level::SetLevelState - Started networked game!" );
+				if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+					ANALYTICS_EVENT( "level_start_net", ctxt, "playedTimes", g_levelStats[nLevelIdx].nPlayedTimes );
+				else //custom level
+				{
+					StringCchPrintfA( ctxt, MAX_PATH, "lvlflag_%d", m_unLoadedLevelFlags );
+					ANALYTICS_EVENT( "level_start_net_custom", ctxt, "val", 0 );
+				}
 			}
-		}
-		else
-		{
-			LOG( L"Level::SetLevelState - Started game!" );
-			if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-				ANALYTICS_EVENT( "level_start", ctxt, "playedTimes", g_levelStats[nLevelIdx].nPlayedTimes );
-			else //custom level
+			else
 			{
-				StringCchPrintfA( ctxt, MAX_PATH, "lvlflag_%d", m_unLoadedLevelFlags );
-				ANALYTICS_EVENT( "level_start_custom", ctxt, "val", 0 );
-			}
-		}
-
-	}
-	break;
-	case K_LVL_STATE_MISSION_ACCOMPLISHED:
-	{
-#ifdef ENABLE_CHAT_WINDOW
-		g_ChatWnd.CancelInput();
-#endif
-		//save level finished time
-		m_arrStats[K_LVL_STATS_LEVEL_END_SEC] = ( int ) floor( fLocalTimeline );
-		//remove any interfaces that might be shown
-		UTGetGUI().RemoveAllLayers();
-
-		SND_STOP_GROUP( "music", false, true );
-
-		//SND_PLAY_ONCE(SNDIDX_ANNOUNCER_WIN, 0);
-		//SND_PLAY_ONCE(SNDIDX_STINGER_WIN, 0);
-
-		m_levelSubState = 0;
-		m_levelStateTimer = 0.0f;
-
-		//__Particles().AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_MISSION_ACCOMPLISHED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
-		//enter level results sync
-		if ( UTApp().IsGameNetworked() )
-		{
-			LOG( L"Net::Level: Signal mission accomplished." );
-			g_netlock.Net_EnterLevelResults();
-		}
-
-		// activate coop achievement on local matches too
-		int nPlayers = m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED] + m_arrStats[K_LVL_STATS_PL2_HAS_PLAYED];
-		if ( nPlayers > 1 )
-		{
-			App_IncreaseGamestat( K_MEMID_GAMESTATS_COOP_GAMES_WON );
-		}
-
-		//remove hot join
-		for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
-		{
-			if ( pPlayerActor[kk] != null )
-			{
-				m_arrPlayerSelStrategic[kk] = -1;
-				//m_interfaceIGM.SetStrategicSelection(kk, -1);
-
+				LOG( L"Level::SetLevelState - Started game!" );
+				if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+					ANALYTICS_EVENT( "level_start", ctxt, "playedTimes", g_levelStats[nLevelIdx].nPlayedTimes );
+				else //custom level
+				{
+					StringCchPrintfA( ctxt, MAX_PATH, "lvlflag_%d", m_unLoadedLevelFlags );
+					ANALYTICS_EVENT( "level_start_custom", ctxt, "val", 0 );
+				}
 			}
 
-			if ( ( m_arrPlayerSelHotJoin[kk] != -1 ) && ( pPlayerActor[kk] == null ) )
-			{
-				m_arrPlayerControllersIIDs[kk] = -1;
-				m_arrPlayerSelHotJoin[kk] = -1;
-				g_playerSelScr.m_arrPlayers[kk].nInstanceID = -1;
-				//m_interfaceIGM.SetHotJoinSelection(kk, m_arrPlayerSelHotJoin[kk]);
-			}
 		}
-
-	}
-	break;
-	case K_LVL_STATE_MISSION_FAILED:
-	{
-#ifdef ENABLE_CHAT_WINDOW
-		g_ChatWnd.CancelInput();
-#endif
-		//save level finished time
-		m_arrStats[K_LVL_STATS_LEVEL_END_SEC] = ( int ) floor( fLocalTimeline );
-		//remove any interfaces that might be shown
-		UTGetGUI().RemoveAllLayers();
-
-		SND_STOP_GROUP( "music", false, true );
-
-		//SND_PLAY_ONCE(SNDIDX_ANNOUNCER_FAIL, 0);
-		//SND_PLAY_ONCE(SNDIDX_STINGER_LOSE, 0);
-
-		m_levelStateParam = nLevelStateParam; //reason why failed - stringIDX
-		m_levelSubState = 0;
-		m_levelStateTimer = 0.0f;
-
-		//__Particles().AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_MISSION_FAILED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
-		//enter level results sync
-		if ( UTApp().IsGameNetworked() )
-		{
-			LOG( L"Net::Level: Signal mission failed." );
-			g_netlock.Net_EnterLevelResults();
-		}
-
-		//remove hot join and strategic menu
-		for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
-		{
-			if ( pPlayerActor[kk] != null )
-			{
-				m_arrPlayerSelStrategic[kk] = -1;
-				//m_interfaceIGM.SetStrategicSelection(kk, -1);
-
-			}
-			if ( ( m_arrPlayerSelHotJoin[kk] != -1 ) && ( pPlayerActor[kk] == null ) )
-			{
-				m_arrPlayerControllersIIDs[kk] = -1;
-				m_arrPlayerSelHotJoin[kk] = -1;
-				g_playerSelScr.m_arrPlayers[kk].nInstanceID = -1;
-				//m_interfaceIGM.SetHotJoinSelection(kk, m_arrPlayerSelHotJoin[kk]);
-			}
-		}
-	}
-	break;
-
-	default:
-		LOG( L"[WARNING] Net::Level - SetLevelState state %d not handled!", eNewState );
 		break;
+		case K_LVL_STATE_MISSION_ACCOMPLISHED:
+		{
+#ifdef ENABLE_CHAT_WINDOW
+			g_ChatWnd.CancelInput();
+#endif
+			//save level finished time
+			m_arrStats[K_LVL_STATS_LEVEL_END_SEC] = ( int ) floor( fLocalTimeline );
+			//remove any interfaces that might be shown
+			UTGetGUI().RemoveAllLayers();
+
+			SND_STOP_GROUP( "music", false, true );
+
+			//SND_PLAY_ONCE(SNDIDX_ANNOUNCER_WIN, 0);
+			//SND_PLAY_ONCE(SNDIDX_STINGER_WIN, 0);
+
+			m_levelSubState = 0;
+			m_levelStateTimer = 0.0f;
+
+			//__Particles().AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_MISSION_ACCOMPLISHED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
+			//enter level results sync
+			if ( UTApp().IsGameNetworked() )
+			{
+				LOG( L"Net::Level: Signal mission accomplished." );
+				g_netlock.Net_EnterLevelResults();
+			}
+
+			// activate coop achievement on local matches too
+			int nPlayers = m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED] + m_arrStats[K_LVL_STATS_PL2_HAS_PLAYED];
+			if ( nPlayers > 1 )
+			{
+				App_IncreaseGamestat( K_MEMID_GAMESTATS_COOP_GAMES_WON );
+			}
+
+			//remove hot join
+			for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
+			{
+				if ( pPlayerActor[kk] != null )
+				{
+					m_arrPlayerSelStrategic[kk] = -1;
+					//m_interfaceIGM.SetStrategicSelection(kk, -1);
+
+				}
+
+				if ( ( m_arrPlayerSelHotJoin[kk] != -1 ) && ( pPlayerActor[kk] == null ) )
+				{
+					m_arrPlayerControllersIIDs[kk] = -1;
+					m_arrPlayerSelHotJoin[kk] = -1;
+					g_playerSelScr.m_arrPlayers[kk].nInstanceID = -1;
+					//m_interfaceIGM.SetHotJoinSelection(kk, m_arrPlayerSelHotJoin[kk]);
+				}
+			}
+
+		}
+		break;
+		case K_LVL_STATE_MISSION_FAILED:
+		{
+#ifdef ENABLE_CHAT_WINDOW
+			g_ChatWnd.CancelInput();
+#endif
+			//save level finished time
+			m_arrStats[K_LVL_STATS_LEVEL_END_SEC] = ( int ) floor( fLocalTimeline );
+			//remove any interfaces that might be shown
+			UTGetGUI().RemoveAllLayers();
+
+			SND_STOP_GROUP( "music", false, true );
+
+			//SND_PLAY_ONCE(SNDIDX_ANNOUNCER_FAIL, 0);
+			//SND_PLAY_ONCE(SNDIDX_STINGER_LOSE, 0);
+
+			m_levelStateParam = nLevelStateParam; //reason why failed - stringIDX
+			m_levelSubState = 0;
+			m_levelStateTimer = 0.0f;
+
+			//__Particles().AddStringDummy(K_PDUMMY_STRING_WIDEBAR, Vec2(0.0f, -50.0f), STR_MISSION_FAILED, FONTIDX_12_WOW, 1.0f, 1.8f, K_COLOR_SELECTED_TEXT);
+			//enter level results sync
+			if ( UTApp().IsGameNetworked() )
+			{
+				LOG( L"Net::Level: Signal mission failed." );
+				g_netlock.Net_EnterLevelResults();
+			}
+
+			//remove hot join and strategic menu
+			for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
+			{
+				if ( pPlayerActor[kk] != null )
+				{
+					m_arrPlayerSelStrategic[kk] = -1;
+					//m_interfaceIGM.SetStrategicSelection(kk, -1);
+
+				}
+				if ( ( m_arrPlayerSelHotJoin[kk] != -1 ) && ( pPlayerActor[kk] == null ) )
+				{
+					m_arrPlayerControllersIIDs[kk] = -1;
+					m_arrPlayerSelHotJoin[kk] = -1;
+					g_playerSelScr.m_arrPlayers[kk].nInstanceID = -1;
+					//m_interfaceIGM.SetHotJoinSelection(kk, m_arrPlayerSelHotJoin[kk]);
+				}
+			}
+		}
+		break;
+
+		default:
+			LOG( L"[WARNING] Net::Level - SetLevelState state %d not handled!", eNewState );
+			break;
 	}
 }
 
@@ -1317,7 +1317,7 @@ bool CLevel::NormalizeMouseCoords( int ControllerIID, float fAxisValue, bool bIs
 	{
 		if ( m_arrPlayerControllersIIDs[kk] == ControllerIID ) {
 			CActor* pPlayer = pPlayerActor[kk];
-			if ( pPlayerActor == null )
+			if ( pPlayerActor == nullptr )
 			{
 				ErrorBox( K_ERR_WARNING, L"NormalizeMouseCoords player pointer is missing! idx:", kk );
 				return false;
@@ -1364,166 +1364,166 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
 		switch ( nl->type )
 		{
-		case K_LVL_LT_IES:
-		case K_LVL_LT_POINT:
-		{
-			//--- create light volumes for shadow casting lights	---
-			nl->m_nLightMeshIdx = -1;
-			if ( nl->castShadows )
+			case K_LVL_LT_IES:
+			case K_LVL_LT_POINT:
 			{
-				// returns a list of segments that will form shadows (from both tiles and collision boxes)
-				int nOccluders = GetOccluderSegments( nl->pos.xy, nl->bbox, arrOccluders, arrOccludersSize );
-
-
-				// shows occluders instead of mesh. Checked for consistency.
-				/*
-				int nVertCnt = 0;
-				for (int kk = 0; kk < nOccluders; kk++)
+				//--- create light volumes for shadow casting lights	---
+				nl->m_nLightMeshIdx = -1;
+				if ( nl->castShadows )
 				{
-					temp_arrVerts[nVertCnt].pos = Vec3(nl->vPos.x, nl->vPos.y, 0.0f);
-					temp_arrVerts[nVertCnt].color = 0x00ffffff; nVertCnt++;
-					temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vStart);
-					temp_arrVerts[nVertCnt].color = 0xff00ff00; nVertCnt++;
-					temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vEnd);
-					temp_arrVerts[nVertCnt].color = 0xff0000ff; nVertCnt++;
-				}
-
-				if (nVertCnt > 3)
-				{
-					m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
-					m_bufferedPainter.AddTriangles(temp_arrVerts, nVertCnt / 3);
-					m_bufferedPainter.EndMesh();
-				}
-				*/
+					// returns a list of segments that will form shadows (from both tiles and collision boxes)
+					int nOccluders = GetOccluderSegments( nl->pos.xy, nl->bbox, arrOccluders, arrOccludersSize );
 
 
-				if ( nOccluders > 0 )
-				{
-					// sends rays and builds the light FOV as a triangle list mesh
-					int retVerts = FOVUtil::BuildOccludedVolume( nl->pos.xy, nl->color, arrOccluders, nOccluders, temp_arrVerts, temp_arrVertsSize );
-
-					// adaugam triunghiurile ca si mesh
-					if ( retVerts > 0 )
+					// shows occluders instead of mesh. Checked for consistency.
+					/*
+					int nVertCnt = 0;
+					for (int kk = 0; kk < nOccluders; kk++)
 					{
-						//adauga mesh dinamic pentru volumul umbrei
-						m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
-						m_bufferedPainter.AddTriangles( temp_arrVerts, retVerts / 3 );
+						temp_arrVerts[nVertCnt].pos = Vec3(nl->vPos.x, nl->vPos.y, 0.0f);
+						temp_arrVerts[nVertCnt].color = 0x00ffffff; nVertCnt++;
+						temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vStart);
+						temp_arrVerts[nVertCnt].color = 0xff00ff00; nVertCnt++;
+						temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vEnd);
+						temp_arrVerts[nVertCnt].color = 0xff0000ff; nVertCnt++;
+					}
+
+					if (nVertCnt > 3)
+					{
+						m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
+						m_bufferedPainter.AddTriangles(temp_arrVerts, nVertCnt / 3);
 						m_bufferedPainter.EndMesh();
 					}
-				}
+					*/
 
+
+					if ( nOccluders > 0 )
+					{
+						// sends rays and builds the light FOV as a triangle list mesh
+						int retVerts = FOVUtil::BuildOccludedVolume( nl->pos.xy, nl->color, arrOccluders, nOccluders, temp_arrVerts, temp_arrVertsSize );
+
+						// adaugam triunghiurile ca si mesh
+						if ( retVerts > 0 )
+						{
+							//adauga mesh dinamic pentru volumul umbrei
+							m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
+							m_bufferedPainter.AddTriangles( temp_arrVerts, retVerts / 3 );
+							m_bufferedPainter.EndMesh();
+						}
+					}
+
+				}
+				else
+				{
+					Vec3 lcorners[4]; //ul, ur, dl, dr
+					memcpy( lcorners, nl->lCorners, 4 * sizeof( Vec3 ) );
+					// move mesh to light position (!z must remain 0!)
+					lcorners[0].x += nl->pos.xy_proj.x; lcorners[0].y += nl->pos.xy_proj.y;
+					lcorners[1].x += nl->pos.xy_proj.x; lcorners[1].y += nl->pos.xy_proj.y;
+					lcorners[2].x += nl->pos.xy_proj.x; lcorners[2].y += nl->pos.xy_proj.y;
+					lcorners[3].x += nl->pos.xy_proj.x; lcorners[3].y += nl->pos.xy_proj.y;
+					//write final VS verts
+					_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+					vul.pos = lcorners[0];
+					vur.pos = lcorners[1];
+					vdr.pos = lcorners[2];
+					vdl.pos = lcorners[3];
+					//set color
+					vul.color = vur.color = vdl.color = vdr.color = nl->color;
+					// triangles vb
+					_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+					lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+					lightRectV[3] = vur; lightRectV[4] = vdr; lightRectV[5] = vdl;
+
+					m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
+					m_bufferedPainter.AddTriangles( lightRectV, 2 );
+					m_bufferedPainter.EndMesh();
+				}
 			}
-			else
+			break;
+			case K_LVL_LT_PROJECTED_DIR:
 			{
-				Vec3 lcorners[4]; //ul, ur, dl, dr
+				//create light mesh - rotating the actual mesh isn't necessary
+				Vec3 lcorners[4]; //ul, ur, dr, dl
 				memcpy( lcorners, nl->lCorners, 4 * sizeof( Vec3 ) );
-				// move mesh to light position (!z must remain 0!)
-				lcorners[0].x += nl->pos.xy_proj.x; lcorners[0].y += nl->pos.xy_proj.y;
-				lcorners[1].x += nl->pos.xy_proj.x; lcorners[1].y += nl->pos.xy_proj.y;
-				lcorners[2].x += nl->pos.xy_proj.x; lcorners[2].y += nl->pos.xy_proj.y;
-				lcorners[3].x += nl->pos.xy_proj.x; lcorners[3].y += nl->pos.xy_proj.y;
-				//write final VS verts
+				//move mesh to final pos
+				lcorners[0].x += nl->pos.xy.x; lcorners[0].y += nl->pos.xy.y;
+				lcorners[1].x += nl->pos.xy.x; lcorners[1].y += nl->pos.xy.y;
+				lcorners[2].x += nl->pos.xy.x; lcorners[2].y += nl->pos.xy.y;
+				lcorners[3].x += nl->pos.xy.x; lcorners[3].y += nl->pos.xy.y;
+				//scriu VS-ul final
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
 				vul.pos = lcorners[0];
 				vur.pos = lcorners[1];
 				vdr.pos = lcorners[2];
 				vdl.pos = lcorners[3];
+				//setez culoarea
+				vul.color = vur.color = vdl.color = vdr.color = nl->color;
+				//light direction as normals but not really used
+				vul.n = vur.n = vdl.n = vdr.n = nl->vnDir;
+
+				_VERTEX_PNCT4T4 lightRectV[6];
+				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+				//dynamic mesh index for light geometry
+				nl->m_nLightMeshIdx = -1; //resetez idx mesh
+				m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
+				m_bufferedPainter.AddTriangles( lightRectV, 2 );
+				m_bufferedPainter.EndMesh();
+			}
+			break;
+
+			case K_LVL_LT_DIRECTIONAL:
+			{
+				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+				vul.pos = Vec3( camAABB.vMin.x, camAABB.vMin.y, 0.0f );
+				vur.pos = Vec3( camAABB.vMax.x, camAABB.vMin.y, 0.0f );
+				vdl.pos = Vec3( camAABB.vMin.x, camAABB.vMax.y, 0.0f );
+				vdr.pos = Vec3( camAABB.vMax.x, camAABB.vMax.y, 0.0f );
 				//set color
 				vul.color = vur.color = vdl.color = vdr.color = nl->color;
-				// triangles vb
+				//build verts
 				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
 				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-				lightRectV[3] = vur; lightRectV[4] = vdr; lightRectV[5] = vdl;
+				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
 				m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
 				m_bufferedPainter.AddTriangles( lightRectV, 2 );
 				m_bufferedPainter.EndMesh();
 			}
-		}
-		break;
-		case K_LVL_LT_PROJECTED_DIR:
-		{
-			//create light mesh - rotating the actual mesh isn't necessary
-			Vec3 lcorners[4]; //ul, ur, dr, dl
-			memcpy( lcorners, nl->lCorners, 4 * sizeof( Vec3 ) );
-			//move mesh to final pos
-			lcorners[0].x += nl->pos.xy.x; lcorners[0].y += nl->pos.xy.y;
-			lcorners[1].x += nl->pos.xy.x; lcorners[1].y += nl->pos.xy.y;
-			lcorners[2].x += nl->pos.xy.x; lcorners[2].y += nl->pos.xy.y;
-			lcorners[3].x += nl->pos.xy.x; lcorners[3].y += nl->pos.xy.y;
-			//scriu VS-ul final
-			_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-			vul.pos = lcorners[0];
-			vur.pos = lcorners[1];
-			vdr.pos = lcorners[2];
-			vdl.pos = lcorners[3];
-			//setez culoarea
-			vul.color = vur.color = vdl.color = vdr.color = nl->color;
-			//light direction as normals but not really used
-			vul.n = vur.n = vdl.n = vdr.n = nl->vnDir;
+			break;
 
-			_VERTEX_PNCT4T4 lightRectV[6];
-			lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-			lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-			//dynamic mesh index for light geometry
-			nl->m_nLightMeshIdx = -1; //resetez idx mesh
-			m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
-			m_bufferedPainter.AddTriangles( lightRectV, 2 );
-			m_bufferedPainter.EndMesh();
-		}
-		break;
-
-		case K_LVL_LT_DIRECTIONAL:
-		{
-			_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-			vul.pos = Vec3( camAABB.vMin.x, camAABB.vMin.y, 0.0f );
-			vur.pos = Vec3( camAABB.vMax.x, camAABB.vMin.y, 0.0f );
-			vdl.pos = Vec3( camAABB.vMin.x, camAABB.vMax.y, 0.0f );
-			vdr.pos = Vec3( camAABB.vMax.x, camAABB.vMax.y, 0.0f );
-			//set color
-			vul.color = vur.color = vdl.color = vdr.color = nl->color;
-			//build verts
-			_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
-			lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-			lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-			m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
-			m_bufferedPainter.AddTriangles( lightRectV, 2 );
-			m_bufferedPainter.EndMesh();
-		}
-		break;
-
-		case K_LVL_LT_AMBIENTAL:
-		{
-			// ambiental light only influence the area where they reside, have the bbox the size of the area so we clip to camera rect
-			// use BBOX_INI because bbox gets moved to light position
-			CAABB realbb;
-			CAABB lightbb = nl->bbox.GetSnapshot();
-			AABB::Intersection( camAABB, lightbb, realbb );
-			if ( realbb.GetArea() <= 0.0f )
+			case K_LVL_LT_AMBIENTAL:
 			{
-				nl->m_nLightMeshIdx = -1;
-				break;
+				// ambiental light only influence the area where they reside, have the bbox the size of the area so we clip to camera rect
+				// use BBOX_INI because bbox gets moved to light position
+				CAABB realbb;
+				CAABB lightbb = nl->bbox.GetSnapshot();
+				AABB::Intersection( camAABB, lightbb, realbb );
+				if ( realbb.GetArea() <= 0.0f )
+				{
+					nl->m_nLightMeshIdx = -1;
+					break;
+				}
+
+				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+				vul.pos = Vec3( realbb.vMin.x, realbb.vMin.y, 0.0f );
+				vur.pos = Vec3( realbb.vMax.x, realbb.vMin.y, 0.0f );
+				vdl.pos = Vec3( realbb.vMin.x, realbb.vMax.y, 0.0f );
+				vdr.pos = Vec3( realbb.vMax.x, realbb.vMax.y, 0.0f );
+				//set color
+				vul.color = vur.color = vdl.color = vdr.color = nl->color;
+				//build verts
+				_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+				m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
+				m_bufferedPainter.AddTriangles( lightRectV, 2 );
+				m_bufferedPainter.EndMesh();
 			}
-
-			_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-			vul.pos = Vec3( realbb.vMin.x, realbb.vMin.y, 0.0f );
-			vur.pos = Vec3( realbb.vMax.x, realbb.vMin.y, 0.0f );
-			vdl.pos = Vec3( realbb.vMin.x, realbb.vMax.y, 0.0f );
-			vdr.pos = Vec3( realbb.vMax.x, realbb.vMax.y, 0.0f );
-			//set color
-			vul.color = vur.color = vdl.color = vdr.color = nl->color;
-			//build verts
-			_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
-			lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-			lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-			m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
-			m_bufferedPainter.AddTriangles( lightRectV, 2 );
-			m_bufferedPainter.EndMesh();
-		}
-		break;
+			break;
 
 		}
 	}
@@ -1738,55 +1738,55 @@ void CLevel::SetActorWeaponPerks( CActor * pActor, CWeapon * pWeapon )
 	{
 		switch ( g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal].eType )
 		{
-		case K_PSS_CLASS_ASSAULTER:
-		{
-			if ( pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS )
+			case K_PSS_CLASS_ASSAULTER:
 			{
-				float fAccuracy = g_playerSelScr.GetUpgradeBarPercent( &g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"A1_ACCURACY" );
-				pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+				if ( pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS )
+				{
+					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent( &g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"A1_ACCURACY" );
+					pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+				}
 			}
-		}
-		break;
-		case K_PSS_CLASS_RECON:
-		{
-			if ( pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS )
+			break;
+			case K_PSS_CLASS_RECON:
 			{
-				float fAccuracy = g_playerSelScr.GetUpgradeBarPercent( &g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"R1_GUNPLAY" );
-				pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+				if ( pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS )
+				{
+					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent( &g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"R1_GUNPLAY" );
+					pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+				}
 			}
-		}
-		break;
-		case K_PSS_CLASS_FBI_AGENT:
-		{
-			if ( pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS )
+			break;
+			case K_PSS_CLASS_FBI_AGENT:
 			{
-				float fAccuracy = g_playerSelScr.GetUpgradeBarPercent( &g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"F1_HANDGUN" );
-				pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+				if ( pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS )
+				{
+					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent( &g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"F1_HANDGUN" );
+					pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+				}
 			}
-		}
-		break;
-		case K_PSS_CLASS_SHIELD:
-		{
-			if ( pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS )
+			break;
+			case K_PSS_CLASS_SHIELD:
 			{
-				float fAccuracy = g_playerSelScr.GetUpgradeBarPercent( &g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"S1_HANDGUN" );
-				pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+				if ( pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS )
+				{
+					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent( &g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"S1_HANDGUN" );
+					pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+				}
 			}
-		}
-		break;
-		case K_PSS_CLASS_BREACHER:
-		{
-		}
-		break;
-		case K_PSS_CLASS_OFFDUTYGUY:
-		{
-			if ( pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS )
+			break;
+			case K_PSS_CLASS_BREACHER:
 			{
-				float fAccuracy = g_playerSelScr.GetUpgradeBarPercent( &g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"O1_SHOOTING" );
-				pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
 			}
-		}
-		break;
+			break;
+			case K_PSS_CLASS_OFFDUTYGUY:
+			{
+				if ( pWeapon->_template.bulletTemplate.nGroup == K_LVL_BULLGROUP_BULLETS )
+				{
+					float fAccuracy = g_playerSelScr.GetUpgradeBarPercent( &g_playerSelScr.m_arrPlayers[pActor->nPlayerOrdinal], L"O1_SHOOTING" );
+					pWeapon->_template.fSpreadFOV *= 1.0f - fAccuracy * 0.3f;
+				}
+			}
+			break;
 		}
 	}
 }
@@ -1846,7 +1846,7 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 	CAABB aabbvision;
 
 	aabbvision.Set_Corrected(
-		Vec2( sourceActor->pos.xy.x - fDistSee, sourceActor->pos.xy.y - fDistSee),
+		Vec2( sourceActor->pos.xy.x - fDistSee, sourceActor->pos.xy.y - fDistSee ),
 		Vec2( sourceActor->pos.xy.x + fDistSee, sourceActor->pos.xy.y + fDistSee )
 	);
 
@@ -1854,21 +1854,15 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 	CActor* retvalenemy = nullptr;
 
 	float minDistSq = 1000000.0f;
-	for ( int kk = 0; kk < m_arrActors.GetSize(); kk++ )
+	for ( auto enemy : m_arrActors )
 	{
-		CActor* enemy = m_arrActors[kk];
-
-		if ( enemy == null )
-			continue;
-		//can't attack himself
-		if ( enemy == sourceActor )
+		if ( enemy == nullptr || enemy == sourceActor )
 			continue;
 		//never attack same class
 		if ( enemy->_template.actorClass == sourceActor->_template.actorClass )
 			continue;
-
 		//don't attack same class enemies or traps and passive classes
-		if ( enemy->_template.actorClass < K_ACT_CLASS_PLAYER )
+		if ( enemy->_template.actorClass <= K_ACT_CLASSCHECKPOINT_NEUTRALS )
 			continue;
 
 		//daca am filtru pe clasele de inamici verific clasa mai intai
@@ -1892,7 +1886,7 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 			continue;
 
 		Vec2 enemyDistV = enemy->GetPosHeart() - sourceActor->GetPosHeart();
-		float viewDstSq = 100.0f * 100.0f;//sourceActor->actTemplate.distSee * sourceActor->actTemplate.distSee;
+		//float viewDstSq = sourceActor->actTemplate.fDiistSee * sourceActor->actTemplate.distSee;
 		float enemyDistSq = MUVec2LenSq( &enemyDistV );
 
 		bool bPreciseFOV = false; //approximate FOV with rectangle? (good for gameplay)
@@ -1932,12 +1926,12 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 			//not in view rectangle
 			if ( !aabbvision.PointIn( enemy->GetPosHeart() ) )
 				continue;
-			if ( !IsLineOfSight( sourceActor->GetPosHeart(), enemy->GetPosHeart() ) )
+			if ( !IsLineOfSight( sourceActor->GetPosHeart(), enemy->GetPosHeart(), sourceActor->pArea ) )
 				continue;
 		}
 
 		//passed all tests and is closer? set ptr on new one
-		if ( ( retvalenemy == null ) || ( enemyDistSq < minDistSq ) )
+		if ( ( retvalenemy == nullptr ) || ( enemyDistSq < minDistSq ) )
 		{
 			retvalenemy = enemy;
 			minDistSq = enemyDistSq;
@@ -1973,7 +1967,7 @@ CActor * CLevel::GetClosestActorByTemplateName( CActor * sourceActor, WCHAR * sT
 		}
 		//daca e destul de aproape:
 		//verifica daca am linie directa de vedere
-		if ( !IsLineOfSight( sourceActor->GetPosHeart(), enemy->GetPosHeart() ) )
+		if ( !IsLineOfSight( sourceActor->GetPosHeart(), enemy->GetPosHeart(), sourceActor->pArea ) )
 			continue;
 
 		//daca a trecut toate testele si inamicul curent este mai aproape decat cel selectat initial il setez pe cel nou
@@ -2045,7 +2039,7 @@ void CLevel::CleanupDeadObjects()
 	{
 		if ( m_arrActors[kk]->CanBeReleased() )
 		{
-			LOG(L"Released actor: %s", m_arrActors[kk]->_template.shID.text);
+			LOG( L"Released actor: %s", m_arrActors[kk]->_template.shID.text );
 			// now release it (destructor)
 			SAFE_DELETE( m_arrActors[kk] );
 			m_arrActors.Remove( kk );
@@ -2144,7 +2138,7 @@ void CLevel::UpdateAI( float dTime, bool bInEditor )
 #else
 		m_dwSyncCheckHash = 0;
 #endif
-}
+	}
 }
 
 int CLevel::GetNextRandomLevel()
@@ -2241,1229 +2235,1228 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 	//state machine logic
 	switch ( m_levelState )
 	{
-	case K_LVL_STATE_PLAYING:
-	{
-		//set to true to enable hot join
-		static const bool bEnableHotJoin = false;
-		///--- handle controllers dynamically and hot join ---
-		for ( int plidx = 0; plidx < K_MAX_PLAYERS_CNT; plidx++ )
+		case K_LVL_STATE_PLAYING:
 		{
-			//hot join: enters here only once, for new controllers only
-			if ( m_arrPlayerControllersIIDs[plidx] == -1 ) //if empty check if fire was pressed on another ctrlr and set it to this player
+			//set to true to enable hot join
+			static const bool bEnableHotJoin = false;
+			///--- handle controllers dynamically and hot join ---
+			for ( int plidx = 0; plidx < K_MAX_PLAYERS_CNT; plidx++ )
 			{
-				//comment next line to enable first ingame hotjoin
-				//if(!bEnableHotJoin)
-					//continue;
-				//HOT JOIN LOGIC
-				for ( size_t ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.size(); ll++ )
+				//hot join: enters here only once, for new controllers only
+				if ( m_arrPlayerControllersIIDs[plidx] == -1 ) //if empty check if fire was pressed on another ctrlr and set it to this player
 				{
-					CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ll];
-					//Shows controller mapping - only when not online
-					if ( ( ctrlr->eType == K_CM_CT_JOYSTICK_SDL ) && ( !UTApp().IsGameNetworked() ) && ( false == UTGetGUI().bIsBlocking ) &&
-						( ctrlr->sCommands.keyState[K_CM_COMMAND_SELECT] == K_CM_BUTSTATE_JUSTPRESSED ) )
+					//comment next line to enable first ingame hotjoin
+					//if(!bEnableHotJoin)
+						//continue;
+					//HOT JOIN LOGIC
+					for ( auto ctrlr : UTGetCtrlrMgr().m_arrControllers )
 					{
-						UTGetGUI().ShowLayerOnce( "LAYER_ID_CONTROLLER_MAP" );
-					}
-					//when player was left without controller give him the new controller when ctrlr touched
-					bool bActivate = false;
-					if ( pPlayerActor[plidx] != null ) //setting controller for player with disconnected controller
-					{
-						bActivate = ctrlr->WasControllerTouched( true );
-					}
-					else //joining now
-					{
-						bActivate = ( ( ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTRELEASED ) ||
-							( ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTRELEASED ) );
-					}
+						//Shows controller mapping - only when not online
+						if ( ( ctrlr->eType == K_CM_CT_JOYSTICK_SDL ) && ( !UTApp().IsGameNetworked() ) && ( false == UTGetGUI().bIsBlocking ) &&
+							( ctrlr->sCommands.keyState[K_CM_COMMAND_SELECT] == K_CM_BUTSTATE_JUSTPRESSED ) )
+						{
+							UTGetGUI().ShowLayerOnce( "LAYER_ID_CONTROLLER_MAP" );
+						}
+						//when player was left without controller give him the new controller when ctrlr touched
+						bool bActivate = false;
+						if ( pPlayerActor[plidx] != null ) //setting controller for player with disconnected controller
+						{
+							bActivate = ctrlr->WasControllerTouched( true );
+						}
+						else //joining now
+						{
+							bActivate = ( ( ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTRELEASED ) ||
+								( ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTRELEASED ) );
+						}
 
-					if ( ( ctrlr != null ) && ( bActivate ) )
-					{
-						bool bAlreadyUsed = false;
-						for ( int jj = 0; jj < K_MAX_PLAYERS_CNT; jj++ )
+						if ( ( ctrlr != null ) && ( bActivate ) )
 						{
-							if ( m_arrPlayerControllersIIDs[jj] == ctrlr->nSDLInstanceId )
+							bool bAlreadyUsed = false;
+							for ( int jj = 0; jj < K_MAX_PLAYERS_CNT; jj++ )
 							{
-								bAlreadyUsed = true;
-								break;
+								if ( m_arrPlayerControllersIIDs[jj] == ctrlr->nSDLInstanceId )
+								{
+									bAlreadyUsed = true;
+									break;
+								}
 							}
-						}
-						//daca nu e folosit il seteaza playerului caruia ii lipseste
-						if ( !bAlreadyUsed )
-						{
-							//save ctrlr ID
-							m_arrPlayerControllersIIDs[plidx] = ctrlr->nSDLInstanceId;
-							//update selection screen too !!! used in respawn
-							g_playerSelScr.m_arrPlayers[plidx].nInstanceID = ctrlr->nSDLInstanceId;
-							//load saved type for panel
-							EPSSPlayerClass eType = ( EPSSPlayerClass ) g_userData[K_MEMID_PANEL1_CLASS + plidx * ( K_MEMID_PANEL2_CLASS - K_MEMID_PANEL1_CLASS )];
-							//set hot join selection
-							m_arrPlayerSelHotJoin[plidx] = ( int ) eType;
-							//daca nu a fost facuta selectie in selScreen pun pe default first class
-							if ( ( m_arrPlayerSelHotJoin[plidx] < 0 ) || ( m_arrPlayerSelHotJoin[plidx] >= K_PSS_CLASSES_COUNT ) )
+							//daca nu e folosit il seteaza playerului caruia ii lipseste
+							if ( !bAlreadyUsed )
 							{
-								m_arrPlayerSelHotJoin[plidx] = K_PSS_CLASS_ASSAULTER;
-							}
-							break;
-						}
-					}
-				}
-			}
-			else // controller not empty, check it
-			{
-				CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID( m_arrPlayerControllersIIDs[plidx] );
-				if ( ctrlr == null )
-				{
-					m_arrPlayerControllersIIDs[plidx] = -1;
-				}
-				else //pentru hot join char selection
-				{
-					//he played before, must select again (HOT JOIN)
-					if ( m_arrPlayerSelHotJoin[plidx] == -1 )
-					{
-						if ( bEnableHotJoin )
-						{
-							if ( ( ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTRELEASED ) ||
-								( ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTRELEASED ) )
-							{
+								//save ctrlr ID
+								m_arrPlayerControllersIIDs[plidx] = ctrlr->nSDLInstanceId;
+								//update selection screen too !!! used in respawn
+								g_playerSelScr.m_arrPlayers[plidx].nInstanceID = ctrlr->nSDLInstanceId;
+								//load saved type for panel
+								EPSSPlayerClass eType = ( EPSSPlayerClass ) g_userData[K_MEMID_PANEL1_CLASS + plidx * ( K_MEMID_PANEL2_CLASS - K_MEMID_PANEL1_CLASS )];
 								//set hot join selection
-								m_arrPlayerSelHotJoin[plidx] = ( int ) g_playerSelScr.m_arrPlayers[plidx].eType;
+								m_arrPlayerSelHotJoin[plidx] = ( int ) eType;
 								//daca nu a fost facuta selectie in selScreen pun pe default first class
-								if ( m_arrPlayerSelHotJoin[plidx] < 0 )
+								if ( ( m_arrPlayerSelHotJoin[plidx] < 0 ) || ( m_arrPlayerSelHotJoin[plidx] >= K_PSS_CLASSES_COUNT ) )
 								{
 									m_arrPlayerSelHotJoin[plidx] = K_PSS_CLASS_ASSAULTER;
 								}
-
-								//m_interfaceIGM.SetHotJoinSelection(plidx, m_arrPlayerSelHotJoin[plidx]);
+								break;
 							}
 						}
 					}
-					else if ( ( m_arrPlayerSelHotJoin[plidx] != -1 ) && ( pPlayerActor[plidx] == nullptr ) )
+				}
+				else // controller not empty, check it
+				{
+					CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID( m_arrPlayerControllersIIDs[plidx] );
+					if ( ctrlr == null )
 					{
-						bool bCheckSpawn = false;
-						//played before: spawn it immediately
-						if ( m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED + plidx * K_LVL_STATS_PLAYER_STATS_COUNT] == 1 )
+						m_arrPlayerControllersIIDs[plidx] = -1;
+					}
+					else //pentru hot join char selection
+					{
+						//he played before, must select again (HOT JOIN)
+						if ( m_arrPlayerSelHotJoin[plidx] == -1 )
 						{
-							bCheckSpawn = true;
+							if ( bEnableHotJoin )
+							{
+								if ( ( ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTRELEASED ) ||
+									( ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTRELEASED ) )
+								{
+									//set hot join selection
+									m_arrPlayerSelHotJoin[plidx] = ( int ) g_playerSelScr.m_arrPlayers[plidx].eType;
+									//daca nu a fost facuta selectie in selScreen pun pe default first class
+									if ( m_arrPlayerSelHotJoin[plidx] < 0 )
+									{
+										m_arrPlayerSelHotJoin[plidx] = K_PSS_CLASS_ASSAULTER;
+									}
+
+									//m_interfaceIGM.SetHotJoinSelection(plidx, m_arrPlayerSelHotJoin[plidx]);
+								}
+							}
 						}
-						else
+						else if ( ( m_arrPlayerSelHotJoin[plidx] != -1 ) && ( pPlayerActor[plidx] == nullptr ) )
 						{
-							if ( ( ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTRELEASED ) ||
-								( ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTRELEASED ) )
+							bool bCheckSpawn = false;
+							//played before: spawn it immediately
+							if ( m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED + plidx * K_LVL_STATS_PLAYER_STATS_COUNT] == 1 )
+							{
 								bCheckSpawn = true;
-						}
-
-						if ( bCheckSpawn )
-						{
-							//spawn pos
-							Vec2 vSpawnPos = vLastSpawnPoint;
-							CAABB aabbSpawn;
-							CAABB* p_aabbPeer = nullptr;
-							aabbSpawn.Set( vSpawnPos.x - 5.0f, vSpawnPos.y - 22.0f, vSpawnPos.x + 5.0f, vSpawnPos.y );
-
-							int nOtherPlayerIdx = ( plidx + 1 ) % K_MAX_PLAYERS_CNT;
-							bool bSpawnIt = false;
-							//always spawn near the other player when COOP
-							if ( ( pPlayerActor[nOtherPlayerIdx] != nullptr ) && ( pPlayerActor[nOtherPlayerIdx]->collisionFlags & K_DIRFLAG_DOWN ) )
-							{
-								//only spawn if player is there
-								EAIBehaviorType eOtherBehave = pPlayerActor[nOtherPlayerIdx]->GetCurrentBehavior();
-								if ( ( eOtherBehave == AI_BEHAVIOR_PLAYER_CONTROL ) || ( eOtherBehave == AI_BEHAVIOR_DEAD ) )
-								{
-									vSpawnPos = pPlayerActor[nOtherPlayerIdx]->pos.xy;
-									aabbSpawn = pPlayerActor[nOtherPlayerIdx]->bbox;
-									p_aabbPeer = &pPlayerActor[nOtherPlayerIdx]->bbox;
-									bSpawnIt = true;
-								}
-							}
-							else if ( pPlayerActor[nOtherPlayerIdx] == nullptr )
-							{
-								bSpawnIt = true;
-							}
-
-							if ( bSpawnIt )
-							{
-								//set selScreen too for next spawn. If player is different from the selection it resets the selection
-								if ( g_playerSelScr.m_arrPlayers[plidx].eType != ( EPSSPlayerClass ) m_arrPlayerSelHotJoin[plidx] )
-								{
-									g_playerSelScr.m_arrPlayers[plidx].Init( ( EPSSPlayerClass ) m_arrPlayerSelHotJoin[plidx] );
-									g_playerSelScr.m_arrPlayers[plidx].bSelected = true; //marcheaza ca si cum as fi selectat in ecranul anterior
-								}
-								g_playerSelScr.m_arrPlayers[plidx].nInstanceID = ctrlr->nSDLInstanceId;
-								//save hotjoin selection?
-								g_playerSelScr.SaveSelection();
-
-								bool bNeverPlayed = false;
-								if ( m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED + plidx * K_LVL_STATS_PLAYER_STATS_COUNT] == 0 )
-									bNeverPlayed = true;
-
-								//spawn it
-								//if (GetBestSpawningPos(&vSpawnPos, aabbSpawn, p_aabbPeer))
-								{
-									SpawnPlayer( vSpawnPos, plidx );
-								}
-
-								//achievements and level stats
-								if ( !bNeverPlayed )
-									IncreaseLevelStatistics( K_LVL_STATS_PL1_USE_EXTRA_LIFE_CNT + pPlayerActor[plidx]->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT );
-
-								//say spawn verse
-//									PlayActorSoundVerse(pPlayerActor[plidx], K_LVL_ACT_VERSE_JOIN_GAME);
-
-									//scad numarul de vieti si anunt interfata
-								if ( m_arrStats[K_LVL_STATS_PL1_LIVES + plidx * K_LVL_STATS_PLAYER_STATS_COUNT] > 0 )
-									m_arrStats[K_LVL_STATS_PL1_LIVES + plidx * K_LVL_STATS_PLAYER_STATS_COUNT]--;
-
-								//m_interfaceIGM.SetLivesLeft(m_arrStats[K_LVL_STATS_PL1_LIVES], m_arrStats[K_LVL_STATS_PL2_LIVES]);
 							}
 							else
 							{
-								//SND_PLAY_ONCE(SNDIDX_DENIED);
+								if ( ( ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTRELEASED ) ||
+									( ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTRELEASED ) )
+									bCheckSpawn = true;
 							}
-						}
-						//here you can change character when hot joining (not having played before)
-						/*
-						#DMC: commented out 13 oct 2020
-						if (m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED + plidx * K_LVL_STATS_PLAYER_STATS_COUNT] == 0)
-						{
-							if (ctrlr->sCommands.keyState[K_CM_COMMAND_LEFT] == K_CM_BUTSTATE_JUSTPRESSED)
+
+							if ( bCheckSpawn )
 							{
-								m_arrPlayerSelHotJoin[plidx]--;
-								if (m_arrPlayerSelHotJoin[plidx] < 0)
-									m_arrPlayerSelHotJoin[plidx] = K_PSS_CLASSES_COUNT - 1;
+								//spawn pos
+								Vec2 vSpawnPos = vLastSpawnPoint;
+								CAABB aabbSpawn;
+								CAABB* p_aabbPeer = nullptr;
+								aabbSpawn.Set( vSpawnPos.x - 5.0f, vSpawnPos.y - 22.0f, vSpawnPos.x + 5.0f, vSpawnPos.y );
+
+								int nOtherPlayerIdx = ( plidx + 1 ) % K_MAX_PLAYERS_CNT;
+								bool bSpawnIt = false;
+								//always spawn near the other player when COOP
+								if ( ( pPlayerActor[nOtherPlayerIdx] != nullptr ) && ( pPlayerActor[nOtherPlayerIdx]->collisionFlags & K_DIRFLAG_DOWN ) )
+								{
+									//only spawn if player is there
+									EAIBehaviorType eOtherBehave = pPlayerActor[nOtherPlayerIdx]->GetCurrentBehavior();
+									if ( ( eOtherBehave == AI_BEHAVIOR_PLAYER_CONTROL ) || ( eOtherBehave == AI_BEHAVIOR_DEAD ) )
+									{
+										vSpawnPos = pPlayerActor[nOtherPlayerIdx]->pos.xy;
+										aabbSpawn = pPlayerActor[nOtherPlayerIdx]->bbox;
+										p_aabbPeer = &pPlayerActor[nOtherPlayerIdx]->bbox;
+										bSpawnIt = true;
+									}
+								}
+								else if ( pPlayerActor[nOtherPlayerIdx] == nullptr )
+								{
+									bSpawnIt = true;
+								}
+
+								if ( bSpawnIt )
+								{
+									//set selScreen too for next spawn. If player is different from the selection it resets the selection
+									if ( g_playerSelScr.m_arrPlayers[plidx].eType != ( EPSSPlayerClass ) m_arrPlayerSelHotJoin[plidx] )
+									{
+										g_playerSelScr.m_arrPlayers[plidx].Init( ( EPSSPlayerClass ) m_arrPlayerSelHotJoin[plidx] );
+										g_playerSelScr.m_arrPlayers[plidx].bSelected = true; //marcheaza ca si cum as fi selectat in ecranul anterior
+									}
+									g_playerSelScr.m_arrPlayers[plidx].nInstanceID = ctrlr->nSDLInstanceId;
+									//save hotjoin selection?
+									g_playerSelScr.SaveSelection();
+
+									bool bNeverPlayed = false;
+									if ( m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED + plidx * K_LVL_STATS_PLAYER_STATS_COUNT] == 0 )
+										bNeverPlayed = true;
+
+									//spawn it
+									//if (GetBestSpawningPos(&vSpawnPos, aabbSpawn, p_aabbPeer))
+									{
+										SpawnPlayer( vSpawnPos, plidx );
+									}
+
+									//achievements and level stats
+									if ( !bNeverPlayed )
+										IncreaseLevelStatistics( K_LVL_STATS_PL1_USE_EXTRA_LIFE_CNT + pPlayerActor[plidx]->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT );
+
+									//say spawn verse
+	//									PlayActorSoundVerse(pPlayerActor[plidx], K_LVL_ACT_VERSE_JOIN_GAME);
+
+										//scad numarul de vieti si anunt interfata
+									if ( m_arrStats[K_LVL_STATS_PL1_LIVES + plidx * K_LVL_STATS_PLAYER_STATS_COUNT] > 0 )
+										m_arrStats[K_LVL_STATS_PL1_LIVES + plidx * K_LVL_STATS_PLAYER_STATS_COUNT]--;
+
+									//m_interfaceIGM.SetLivesLeft(m_arrStats[K_LVL_STATS_PL1_LIVES], m_arrStats[K_LVL_STATS_PL2_LIVES]);
+								}
+								else
+								{
+									//SND_PLAY_ONCE(SNDIDX_DENIED);
+								}
 							}
-							else if (ctrlr->sCommands.keyState[K_CM_COMMAND_RIGHT] == K_CM_BUTSTATE_JUSTPRESSED)
+							//here you can change character when hot joining (not having played before)
+							/*
+							#DMC: commented out 13 oct 2020
+							if (m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED + plidx * K_LVL_STATS_PLAYER_STATS_COUNT] == 0)
 							{
-								m_arrPlayerSelHotJoin[plidx]++;
-								if (m_arrPlayerSelHotJoin[plidx] >= K_PSS_CLASSES_COUNT)
-									m_arrPlayerSelHotJoin[plidx] = 0;
+								if (ctrlr->sCommands.keyState[K_CM_COMMAND_LEFT] == K_CM_BUTSTATE_JUSTPRESSED)
+								{
+									m_arrPlayerSelHotJoin[plidx]--;
+									if (m_arrPlayerSelHotJoin[plidx] < 0)
+										m_arrPlayerSelHotJoin[plidx] = K_PSS_CLASSES_COUNT - 1;
+								}
+								else if (ctrlr->sCommands.keyState[K_CM_COMMAND_RIGHT] == K_CM_BUTSTATE_JUSTPRESSED)
+								{
+									m_arrPlayerSelHotJoin[plidx]++;
+									if (m_arrPlayerSelHotJoin[plidx] >= K_PSS_CLASSES_COUNT)
+										m_arrPlayerSelHotJoin[plidx] = 0;
+								}
 							}
+							*/
 						}
-						*/
 					}
 				}
-			}
 
-			//update player controller
-			if ( pPlayerActor[plidx] != null )
-			{
-				int nOldIID = pPlayerActor[plidx]->nControllerInstanceID;
-				//update player ctrlr
-				pPlayerActor[plidx]->nControllerInstanceID = m_arrPlayerControllersIIDs[plidx];
-				//re-initialize igm interface when changing controller (update helper strings)
-				if ( ( nOldIID < 0 ) && ( m_arrPlayerControllersIIDs[plidx] >= 0 ) )
+				//update player controller
+				if ( pPlayerActor[plidx] != null )
 				{
-					//set interface pointers
-					//m_interfaceIGM.Init(&m_sprInterface, pPlayerActor[0], pPlayerActor[1]);
+					int nOldIID = pPlayerActor[plidx]->nControllerInstanceID;
+					//update player ctrlr
+					pPlayerActor[plidx]->nControllerInstanceID = m_arrPlayerControllersIIDs[plidx];
+					//re-initialize igm interface when changing controller (update helper strings)
+					if ( ( nOldIID < 0 ) && ( m_arrPlayerControllersIIDs[plidx] >= 0 ) )
+					{
+						//set interface pointers
+						//m_interfaceIGM.Init(&m_sprInterface, pPlayerActor[0], pPlayerActor[1]);
+					}
 				}
-			}
-			else //hot join ingame selection and spawning
-			{
-				//m_interfaceIGM.SetHotJoinSelection(plidx, m_arrPlayerSelHotJoin[plidx]);
-			}
-
-			///--- updates player selection for strategic points ---
-			//#DMC: commented out 13 oct 2020
-			/*
-			if (m_arrPlayerSelStrategic[plidx] >= 0)
-			{
-				CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(m_arrPlayerControllersIIDs[plidx]);
-
-				if ((ctrlr == null) || (ctrlr->sCommands.keyState[K_CM_COMMAND_STRATEGIC_MENU] != K_CM_BUTSTATE_PRESSING))
+				else //hot join ingame selection and spawning
 				{
-					//exit
-					m_arrPlayerSelStrategic[plidx] = -1;
-					m_interfaceIGM.SetStrategicSelection(plidx, -1);
-					//#HACK:skip next just pressed check
-					ctrlr->sCommands.keyState[K_CM_COMMAND_STRATEGIC_MENU] = K_CM_BUTSTATE_PRESSING;
-					//play a sound on opening the interface
-					SND_PLAY(SNDIDX_DENIED);
-					//remove icon
-					pPlayerActor[plidx]->SetIcon(K_LVL_ACT_ICON_NONE);
+					//m_interfaceIGM.SetHotJoinSelection(plidx, m_arrPlayerSelHotJoin[plidx]);
 				}
-				else if ((ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTRELEASED) ||
-					(ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTRELEASED))
+
+				///--- updates player selection for strategic points ---
+				//#DMC: commented out 13 oct 2020
+				/*
+				if (m_arrPlayerSelStrategic[plidx] >= 0)
 				{
-					int nAbility = m_arrPlayerSelStrategic[plidx];
-					//select it
-					if (ActivateSpecialAbility(nAbility, plidx))
+					CController* ctrlr = UTGetControllersManager().GetControllerByInstanceID(m_arrPlayerControllersIIDs[plidx]);
+
+					if ((ctrlr == null) || (ctrlr->sCommands.keyState[K_CM_COMMAND_STRATEGIC_MENU] != K_CM_BUTSTATE_PRESSING))
 					{
 						//exit
 						m_arrPlayerSelStrategic[plidx] = -1;
 						m_interfaceIGM.SetStrategicSelection(plidx, -1);
+						//#HACK:skip next just pressed check
+						ctrlr->sCommands.keyState[K_CM_COMMAND_STRATEGIC_MENU] = K_CM_BUTSTATE_PRESSING;
+						//play a sound on opening the interface
+						SND_PLAY(SNDIDX_DENIED);
 						//remove icon
 						pPlayerActor[plidx]->SetIcon(K_LVL_ACT_ICON_NONE);
-						//make sure we disable the tutorial
-						g_userData[K_MEMID_TUT_INTERFACE_STRATEGIC] = 1;
 					}
-					else
+					else if ((ctrlr->sCommands.keyState[K_CM_COMMAND_FIRE1] == K_CM_BUTSTATE_JUSTRELEASED) ||
+						(ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTRELEASED))
 					{
-						SND_PLAY(SNDIDX_DENIED);
+						int nAbility = m_arrPlayerSelStrategic[plidx];
+						//select it
+						if (ActivateSpecialAbility(nAbility, plidx))
+						{
+							//exit
+							m_arrPlayerSelStrategic[plidx] = -1;
+							m_interfaceIGM.SetStrategicSelection(plidx, -1);
+							//remove icon
+							pPlayerActor[plidx]->SetIcon(K_LVL_ACT_ICON_NONE);
+							//make sure we disable the tutorial
+							g_userData[K_MEMID_TUT_INTERFACE_STRATEGIC] = 1;
+						}
+						else
+						{
+							SND_PLAY(SNDIDX_DENIED);
+						}
+					}
+					else if (ctrlr->sCommands.keyState[K_CM_COMMAND_LEFT] == K_CM_BUTSTATE_JUSTPRESSED)
+					{
+						int nSelectedIdxNew = m_arrPlayerSelStrategic[plidx];
+						do {
+							nSelectedIdxNew--;
+							//rollover
+							if (nSelectedIdxNew < 0)
+								nSelectedIdxNew = K_LVL_MAX_STRATEGIC_POINTS - 1;
+						} while (m_arrStrategicAbilities[plidx][nSelectedIdxNew] < 0);
+						CLAMP(nSelectedIdxNew, 0, K_LVL_MAX_STRATEGIC_POINTS - 1);
+
+						SND_PLAY(SNDIDX_CLICK);
+						m_arrPlayerSelStrategic[plidx] = nSelectedIdxNew;
+						m_interfaceIGM.SetStrategicSelection(plidx, nSelectedIdxNew);
+					}
+					else if (ctrlr->sCommands.keyState[K_CM_COMMAND_RIGHT] == K_CM_BUTSTATE_JUSTPRESSED)
+					{
+						int nStatIdx = K_LVL_STATS_PL1_STRATEGIC_POINTS + plidx * K_LVL_STATS_PLAYER_STATS_COUNT;
+						int nMaxPoint = (int)floor(m_arrStats[nStatIdx] / 1000.0f);
+
+
+						int nSelectedIdxNew = m_arrPlayerSelStrategic[plidx];
+						do {
+							nSelectedIdxNew++;
+							//rollover
+							if (nSelectedIdxNew >= K_LVL_MAX_STRATEGIC_POINTS)
+								nSelectedIdxNew = 0;
+						} while (m_arrStrategicAbilities[plidx][nSelectedIdxNew] < 0);
+						CLAMP(nSelectedIdxNew, 0, K_LVL_MAX_STRATEGIC_POINTS - 1);
+
+						SND_PLAY(SNDIDX_CLICK);
+						m_arrPlayerSelStrategic[plidx] = nSelectedIdxNew;
+						m_interfaceIGM.SetStrategicSelection(plidx, nSelectedIdxNew);
 					}
 				}
-				else if (ctrlr->sCommands.keyState[K_CM_COMMAND_LEFT] == K_CM_BUTSTATE_JUSTPRESSED)
-				{
-					int nSelectedIdxNew = m_arrPlayerSelStrategic[plidx];
-					do {
-						nSelectedIdxNew--;
-						//rollover
-						if (nSelectedIdxNew < 0)
-							nSelectedIdxNew = K_LVL_MAX_STRATEGIC_POINTS - 1;
-					} while (m_arrStrategicAbilities[plidx][nSelectedIdxNew] < 0);
-					CLAMP(nSelectedIdxNew, 0, K_LVL_MAX_STRATEGIC_POINTS - 1);
+				*/
+			}
 
-					SND_PLAY(SNDIDX_CLICK);
-					m_arrPlayerSelStrategic[plidx] = nSelectedIdxNew;
-					m_interfaceIGM.SetStrategicSelection(plidx, nSelectedIdxNew);
-				}
-				else if (ctrlr->sCommands.keyState[K_CM_COMMAND_RIGHT] == K_CM_BUTSTATE_JUSTPRESSED)
-				{
-					int nStatIdx = K_LVL_STATS_PL1_STRATEGIC_POINTS + plidx * K_LVL_STATS_PLAYER_STATS_COUNT;
-					int nMaxPoint = (int)floor(m_arrStats[nStatIdx] / 1000.0f);
+			///--- level targets - mission success accomplished ---
+			bool bMissionFinished = false;
+			int nStrIdxMissionFailed = -1; //means win if -1 or lose if >=0
+			/*
+			bool bMissionFinished = true;
+			if ((m_arrStats[K_LVL_STATS_LEVEL_HAS_BOMBS] != 0) && (m_arrStats[K_LVL_STATS_BOMBS_DISARMED] == 0))
+				bMissionFinished = false;
+			if (m_arrStats[K_LVL_STATS_TARGETS_LEFT] > 0)
+				bMissionFinished = false;
 
-
-					int nSelectedIdxNew = m_arrPlayerSelStrategic[plidx];
-					do {
-						nSelectedIdxNew++;
-						//rollover
-						if (nSelectedIdxNew >= K_LVL_MAX_STRATEGIC_POINTS)
-							nSelectedIdxNew = 0;
-					} while (m_arrStrategicAbilities[plidx][nSelectedIdxNew] < 0);
-					CLAMP(nSelectedIdxNew, 0, K_LVL_MAX_STRATEGIC_POINTS - 1);
-
-					SND_PLAY(SNDIDX_CLICK);
-					m_arrPlayerSelStrategic[plidx] = nSelectedIdxNew;
-					m_interfaceIGM.SetStrategicSelection(plidx, nSelectedIdxNew);
-				}
+			///--- level failed if killed all hostages  ---
+			//only fail because of hostages on hostage rescue missions
+			if ((m_nLoadedLevelType == K_GAME_LSTYPE_HOSTAGE) &&
+				(m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] > 0) &&
+				(m_arrStats[K_LVL_STATS_HOSTAGES_KILLED] >= m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]))
+			{
+				bMissionFinished = true;
+				nStrIdxMissionFailed = STR_HOSTAGES_KILLED;
 			}
 			*/
-		}
-
-		///--- level targets - mission success accomplished ---
-		bool bMissionFinished = false;
-		int nStrIdxMissionFailed = -1; //means win if -1 or lose if >=0
-		/*
-		bool bMissionFinished = true;
-		if ((m_arrStats[K_LVL_STATS_LEVEL_HAS_BOMBS] != 0) && (m_arrStats[K_LVL_STATS_BOMBS_DISARMED] == 0))
-			bMissionFinished = false;
-		if (m_arrStats[K_LVL_STATS_TARGETS_LEFT] > 0)
-			bMissionFinished = false;
-
-		///--- level failed if killed all hostages  ---
-		//only fail because of hostages on hostage rescue missions
-		if ((m_nLoadedLevelType == K_GAME_LSTYPE_HOSTAGE) &&
-			(m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] > 0) &&
-			(m_arrStats[K_LVL_STATS_HOSTAGES_KILLED] >= m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]))
-		{
-			bMissionFinished = true;
-			nStrIdxMissionFailed = STR_HOSTAGES_KILLED;
-		}
-		*/
-		///--- LEVEL FAILED when not pressing continue ---
-		bool bGaveUp = true;
-		bool bPlayerMightContinue = false;
-		for ( int plidx = 0; plidx < K_MAX_PLAYERS_CNT; plidx++ )
-		{
-			if ( pPlayerActor[plidx] != null )
+			///--- LEVEL FAILED when not pressing continue ---
+			bool bGaveUp = true;
+			bool bPlayerMightContinue = false;
+			for ( int plidx = 0; plidx < K_MAX_PLAYERS_CNT; plidx++ )
 			{
-				//there is still a dead player that could continue
-				if ( pPlayerActor[plidx]->fLife <= 0.0f )
-					bPlayerMightContinue = true;
-				if ( pPlayerActor[plidx]->fLife > 0.0f )
-					bGaveUp = false;
-				if ( m_arrPlayerSelHotJoin[plidx] != -1 )
-					bGaveUp = false;
-			}
-		}
-		if ( bGaveUp )
-		{
-			bMissionFinished = true;
-			nStrIdxMissionFailed = STR_TEAM_KILLED;
-		}
-
-		//don't give verdict until all players are really dead
-		if ( bPlayerMightContinue )
-			bMissionFinished = false;
-		//mission win? wait for scripts
-		if ( ( bMissionFinished ) && ( nStrIdxMissionFailed < 0 ) && ( UTGetScriptManager().GetRunningScriptsCount() > 0 ) )
-			bMissionFinished = false;
-
-		//is mission finished?
-		if ( bMissionFinished )
-		{
-			//make sure we stop all scripts (could generate enemies)
-			UTGetScriptManager().StopAllScripts();
-			//win or lose?
-			if ( nStrIdxMissionFailed < 0 ) //win
-				SetLevelState( K_LVL_STATE_MISSION_ACCOMPLISHED );
-			else //lose - show why
-				SetLevelState( K_LVL_STATE_MISSION_FAILED, nStrIdxMissionFailed );
-		}
-
-	}
-	break;
-
-	case K_LVL_STATE_MISSION_ACCOMPLISHED:
-	{
-		//wait for network data
-		if ( UTApp().IsGameNetworked() )
-		{
-			g_netlock.Net_UpdateLevelResults( dTime );
-			//show net votes
-			CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
-			if ( layer )
-			{
-				CControl* ctrl;
-				if ( ( ctrl = layer->GetControlByName( "CTRL_NETVOTE_RESTART" ) ) != nullptr )
+				if ( pPlayerActor[plidx] != null )
 				{
-					ctrl->paramsDict.SetVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
-					ctrl->paramsDict.SetVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
-				}
-				if ( ( ctrl = layer->GetControlByName( "CTRL_NETVOTE_CONTINUE" ) ) != nullptr )
-				{
-					ctrl->paramsDict.SetVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
-					ctrl->paramsDict.SetVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
+					//there is still a dead player that could continue
+					if ( pPlayerActor[plidx]->fLife <= 0.0f )
+						bPlayerMightContinue = true;
+					if ( pPlayerActor[plidx]->fLife > 0.0f )
+						bGaveUp = false;
+					if ( m_arrPlayerSelHotJoin[plidx] != -1 )
+						bGaveUp = false;
 				}
 			}
-
-			///check presses
-			//if someone clicked cancel throw us to main menu without error
-			if ( g_netlock.Net_LevelResultsCountStates( CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) >= K_MAX_PLAYERS_CNT )
+			if ( bGaveUp )
 			{
-				LOG( L"Game::Level results: Players voted to continue!" );
-				//see if we're hosting the game decide next level (advance)
-				if ( g_netlock.Net_GetIAmHosting() )
+				bMissionFinished = true;
+				nStrIdxMissionFailed = STR_TEAM_KILLED;
+			}
+
+			//don't give verdict until all players are really dead
+			if ( bPlayerMightContinue )
+				bMissionFinished = false;
+			//mission win? wait for scripts
+			if ( ( bMissionFinished ) && ( nStrIdxMissionFailed < 0 ) && ( UTGetScriptManager().GetRunningScriptsCount() > 0 ) )
+				bMissionFinished = false;
+
+			//is mission finished?
+			if ( bMissionFinished )
+			{
+				//make sure we stop all scripts (could generate enemies)
+				UTGetScriptManager().StopAllScripts();
+				//win or lose?
+				if ( nStrIdxMissionFailed < 0 ) //win
+					SetLevelState( K_LVL_STATE_MISSION_ACCOMPLISHED );
+				else //lose - show why
+					SetLevelState( K_LVL_STATE_MISSION_FAILED, nStrIdxMissionFailed );
+			}
+
+		}
+		break;
+
+		case K_LVL_STATE_MISSION_ACCOMPLISHED:
+		{
+			//wait for network data
+			if ( UTApp().IsGameNetworked() )
+			{
+				g_netlock.Net_UpdateLevelResults( dTime );
+				//show net votes
+				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
+				if ( layer )
 				{
-					//quick match
-					if ( UTApp().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH )
+					CControl* ctrl;
+					if ( ( ctrl = layer->GetControlByName( "CTRL_NETVOTE_RESTART" ) ) != nullptr )
 					{
-						//random level on quick match
-						int nLevel = GetNextRandomLevel();
-						//saving in userData is optional as it gets overwritten anyway from the player selection screen
-						g_userData[K_MEMID_SELECTED_CHAPTER] = nLevel / K_GAME_LEVELS_PER_CHAPTER;
-						g_userData[K_MEMID_SELECTED_LEVEL] = nLevel % K_GAME_LEVELS_PER_CHAPTER;
-						//save in netlock too
-						g_netlock.m_ucSelChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
-						g_netlock.m_ucSelLevel = g_userData[K_MEMID_SELECTED_LEVEL];
-
-						LOG( L"Game::Level: Decided random chapter(%d) and level(%d).", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL] );
+						ctrl->paramsDict.SetVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
+						ctrl->paramsDict.SetVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
 					}
-					else //hosting game
+					if ( ( ctrl = layer->GetControlByName( "CTRL_NETVOTE_CONTINUE" ) ) != nullptr )
 					{
-						//on normal coop gets to the next mission but on hosted downloaded content it just plays again
-						int nLevel = g_userData[K_MEMID_SELECTED_CHAPTER] * K_GAME_LEVELS_PER_CHAPTER + g_userData[K_MEMID_SELECTED_LEVEL];
-						if ( g_netlock.m_ucModData == 0 )	//not playing custom
+						ctrl->paramsDict.SetVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
+						ctrl->paramsDict.SetVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
+					}
+				}
+
+				///check presses
+				//if someone clicked cancel throw us to main menu without error
+				if ( g_netlock.Net_LevelResultsCountStates( CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) >= K_MAX_PLAYERS_CNT )
+				{
+					LOG( L"Game::Level results: Players voted to continue!" );
+					//see if we're hosting the game decide next level (advance)
+					if ( g_netlock.Net_GetIAmHosting() )
+					{
+						//quick match
+						if ( UTApp().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH )
 						{
+							//random level on quick match
+							int nLevel = GetNextRandomLevel();
+							//saving in userData is optional as it gets overwritten anyway from the player selection screen
+							g_userData[K_MEMID_SELECTED_CHAPTER] = nLevel / K_GAME_LEVELS_PER_CHAPTER;
+							g_userData[K_MEMID_SELECTED_LEVEL] = nLevel % K_GAME_LEVELS_PER_CHAPTER;
+							//save in netlock too
+							g_netlock.m_ucSelChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
+							g_netlock.m_ucSelLevel = g_userData[K_MEMID_SELECTED_LEVEL];
+
+							LOG( L"Game::Level: Decided random chapter(%d) and level(%d).", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL] );
+						}
+						else //hosting game
+						{
+							//on normal coop gets to the next mission but on hosted downloaded content it just plays again
+							int nLevel = g_userData[K_MEMID_SELECTED_CHAPTER] * K_GAME_LEVELS_PER_CHAPTER + g_userData[K_MEMID_SELECTED_LEVEL];
+							if ( g_netlock.m_ucModData == 0 )	//not playing custom
+							{
+								nLevel++;
+								if ( nLevel >= UTGetChaptersList().GetTotalLevelsCnt() )
+									nLevel = 0;
+							}
+
+							g_userData[K_MEMID_SELECTED_CHAPTER] = nLevel / K_GAME_LEVELS_PER_CHAPTER;
+							g_userData[K_MEMID_SELECTED_LEVEL] = nLevel % K_GAME_LEVELS_PER_CHAPTER;
+							//save in netlock too
+							g_netlock.m_ucSelChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
+							g_netlock.m_ucSelLevel = g_userData[K_MEMID_SELECTED_LEVEL];
+
+							LOG( L"Game::Level: Decided next chapter(%d) and level(%d).", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL] );
+						}
+					}
+
+					if ( !GameState::isTransitioning() )
+					{
+						CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
+						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
+						nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
+						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
+						UTGetEventManager().QueueEvent( nevent );
+					}
+					//clear command
+					g_netlock.Net_LevelResultsClearStates();
+				}
+				if ( g_netlock.Net_LevelResultsCountStates( CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) >= K_MAX_PLAYERS_CNT )
+				{
+					LOG( L"Game::Level Win: Players voted to restart the level!" );
+					//set loading levels
+					g_userData[K_MEMID_SELECTED_CHAPTER] = g_netlock.m_ucSelChapter;
+					g_userData[K_MEMID_SELECTED_LEVEL] = g_netlock.m_ucSelLevel;
+
+					if ( !GameState::isTransitioning() )
+					{
+						CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
+						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
+						nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
+						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
+						UTGetEventManager().QueueEvent( nevent );
+					}
+					//clear command
+					g_netlock.Net_LevelResultsClearStates();
+				}
+				//cancel button / command / window
+				if ( g_netlock.Net_LevelResultsCountStates( CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CANCEL ) > 0 )
+				{
+					LOG( L"Game::Level Win: Player chose to exit!" );
+
+					if ( !GameState::isTransitioning() )
+					{
+						//change game state
+						CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
+						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_MAINMENU );
+						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
+						//check and see if other player requested exit and show message if so
+						if ( g_netlock.m_arrLvlResPeerStates[g_netlock.Net_GetOtherPlayerIndex()] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CANCEL )
+							nevent->AddNamedArgINT32( L"stateErrorStrIdx", STR_NETWORK_ERROR_PLAYER_LEFT );
+
+						UTGetEventManager().QueueEvent( nevent );
+					}
+					//clear command
+					g_netlock.Net_LevelResultsClearStates();
+
+					return;
+				}
+			}
+
+			switch ( m_levelSubState )
+			{
+				case 0: //wait for message to disappear
+				{
+					m_levelStateTimer += dTime;
+					if ( m_levelStateTimer > 2.0f )
+					{
+						m_levelStateTimer = 0.0f;
+						m_levelSubState = 1;
+
+						int nLevelIdx = -1;
+						if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+							nLevelIdx = g_userData[K_MEMID_SELECTED_LEVEL] + g_userData[K_MEMID_SELECTED_CHAPTER] * K_GAME_LEVELS_PER_CHAPTER;
+
+						//pregatim strings pentru interfata de level finished
+						WCHAR tmpstr[MAX_PATH];
+						int nPlayers = m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED] + m_arrStats[K_LVL_STATS_PL2_HAS_PLAYED];
+						//--- PL1 data ---
+						float fAccuracyP1 = 1.0f;
+						if ( m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0 )
+							fAccuracyP1 = ( float ) m_arrStats[K_LVL_STATS_PL1_BULLETS_HIT] / ( float ) m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT];
+						CLAMP( fAccuracyP1, 0.0f, 1.0f );
+						__Texts().SetString( STR_MISSION_P1_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL1_KILLS] );
+						if ( m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0 )
+							__Texts().SetString( STR_MISSION_P1_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP1 );
+						else
+							__Texts().SetString( STR_MISSION_P1_ACCURACY, L"%s", __Texts().strings[STR_NOT_AVAILABLE]->sText );
+						__Texts().SetString( STR_MISSION_P1_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] );
+						__Texts().SetString( STR_MISSION_P1_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS] );
+						//--- PL2 data ---
+						float fAccuracyP2 = 1.0f;
+						if ( m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0 )
+							fAccuracyP2 = ( float ) m_arrStats[K_LVL_STATS_PL2_BULLETS_HIT] / ( float ) m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT];
+						CLAMP( fAccuracyP2, 0.0f, 1.0f );
+						__Texts().SetString( STR_MISSION_P2_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL2_KILLS] );
+						if ( m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0 )
+							__Texts().SetString( STR_MISSION_P2_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP2 );
+						else
+							__Texts().SetString( STR_MISSION_P2_ACCURACY, L"%s", __Texts().strings[STR_NOT_AVAILABLE]->sText );
+						__Texts().SetString( STR_MISSION_P2_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] );
+						__Texts().SetString( STR_MISSION_P2_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL2_DEATHS] );
+
+						//level time
+						int nTimeSpent = m_arrStats[K_LVL_STATS_LEVEL_END_SEC] - m_arrStats[K_LVL_STATS_LEVEL_START_SEC];
+						//--- calculam stele si XP ---
+						int nStars = 3;
+						if ( m_arrStats[K_LVL_STATS_HOSTAGES_KILLED] > 0 )
+							nStars--;
+						if ( ( m_arrStats[K_LVL_STATS_PL1_DEATHS] + m_arrStats[K_LVL_STATS_PL2_DEATHS] ) > 0 )
+							nStars--;
+						//on arrest warrant missions remove a star per target kill
+						if ( ( m_nLoadedLevelType == K_GAME_LSTYPE_ARREST_WARRANT ) && ( m_arrStats[K_LVL_STATS_LEVEL_ARREST_TARGETS_KILLED] > 0 ) )
+						{
+							nStars -= m_arrStats[K_LVL_STATS_LEVEL_ARREST_TARGETS_KILLED];
+						}
+
+						CLAMP( nStars, 1, 3 );
+
+						//#ACHIEVEMENTS: 3 stars mission on any mission
+						if ( nStars == 3 )
+						{
+							UTGetAchievementManager().UnlockAchievement( ACH_3STARS_MISSION );
+						}
+
+						///--- SCORE ---
+						int nTotalLevelScore = nStars * 1500;
+						nTotalLevelScore += ( int ) ceil( ( float ) m_arrStats[K_LVL_STATS_PL1_KILLS] * fAccuracyP1 * 150.0f ) + m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED] * 300 - m_arrStats[K_LVL_STATS_PL1_DEATHS] * 200;
+						nTotalLevelScore += ( int ) ceil( ( float ) m_arrStats[K_LVL_STATS_PL2_KILLS] * fAccuracyP2 * 150.0f ) + m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED] * 300 - m_arrStats[K_LVL_STATS_PL2_DEATHS] * 200;
+						//add civilians score
+						nTotalLevelScore += m_arrStats[K_LVL_STATS_CIVILIANS_ARRESTED] * 100;
+						nTotalLevelScore -= m_arrStats[K_LVL_STATS_CIVILIANS_KILLED] * 80;
+						//lower limit on total XP
+						if ( nTotalLevelScore < 0 )
+							nTotalLevelScore = 0;
+						//add time bonus
+						int timeBonus = ( 60/*sec*/ * 15/*min*/ - nTimeSpent ) * 20;
+						if ( timeBonus < 0 ) timeBonus = 0;
+						//total XP points
+						nTotalLevelScore += timeBonus;
+
+						///--- XP Points ---
+						int nXPpl1 = 0, nXPpl2 = 0;
+						int nMaxXPPoints = App_GetMaxXP( K_GAME_MAX_UPGRADE_LEVELS );
+						int nTotalXPPoints = Local_ComputeMissionXP( nStars );
+
+						//--- STARS WINDOW ---
+						OS_FormatTime( tmpstr, MAX_PATH, ( float ) ( nTimeSpent ) );
+						__Texts().SetString( STR_MISSION_TIME, tmpstr );
+						__Texts().SetString( STR_MISSION_CASUALTIES, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS] + m_arrStats[K_LVL_STATS_PL2_DEATHS] );
+						__Texts().SetString( STR_MISSION_SCORE, L"%d", nTotalLevelScore );
+
+						int nHostagesSaved = m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED] + m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED];
+						__Texts().SetString( STR_MISSION_HOSTAGES, L"%d / %d", nHostagesSaved, m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] );
+
+						//--- SAVE LEVEL DATA ---
+						if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+						{
+							g_userData[K_MEMID_STARS_TOTAL] += LIMIT( nStars - g_levelStats[nLevelIdx].nStars, 0, 3 );
+
+							g_levelStats[nLevelIdx].nPlayedTimes++;
+							if ( g_levelStats[nLevelIdx].nStars < nStars )
+								g_levelStats[nLevelIdx].nStars = nStars;
+						}
+
+						if ( nPlayers == 1 )
+						{
+							//only save best score on classic mode
+							if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+							{
+								if ( g_levelStats[nLevelIdx].nScoreSolo < nTotalLevelScore )
+									g_levelStats[nLevelIdx].nScoreSolo = nTotalLevelScore;
+								if ( ( g_levelStats[nLevelIdx].nBestTimeSec_Solo == 0 ) || ( g_levelStats[nLevelIdx].nBestTimeSec_Solo < nTimeSpent ) )
+									g_levelStats[nLevelIdx].nBestTimeSec_Solo = nTimeSpent;
+							}
+							//XP points	save
+							int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+							nXPpl1 = g_userData[nPlBaseIdx];
+							inc_limit( g_userData[nPlBaseIdx], nTotalXPPoints, nMaxXPPoints );
+						}
+						else
+						{
+							//only save best score on classic mode
+							if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+							{
+								if ( g_levelStats[nLevelIdx].nScoreCoop < nTotalLevelScore )
+									g_levelStats[nLevelIdx].nScoreCoop = nTotalLevelScore;
+								if ( ( g_levelStats[nLevelIdx].nBestTimeSec_Coop == 0 ) || ( g_levelStats[nLevelIdx].nBestTimeSec_Coop < nTimeSpent ) )
+									g_levelStats[nLevelIdx].nBestTimeSec_Coop = nTimeSpent;
+							}
+
+							//XP points	save
+							if ( !UTApp().IsGameNetworked() )
+							{
+								//in local coop you only get half the XP for each player
+								int nPl1BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+								nXPpl1 = g_userData[nPl1BaseIdx]; //save old value
+								inc_limit( g_userData[nPl1BaseIdx], nTotalXPPoints / 2, nMaxXPPoints );
+								int nPl2BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
+								nXPpl2 = g_userData[nPl2BaseIdx]; //save old value
+								inc_limit( g_userData[nPl2BaseIdx], nTotalXPPoints / 2, nMaxXPPoints );
+							}
+							else
+							{
+								//in network games each player gets it's own
+								int nMyPlayerBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[g_netlock.Net_GetPlayerIndex()].eType;
+								g_userData[nMyPlayerBaseIdx] += nTotalXPPoints;
+								CLAMP( g_userData[nMyPlayerBaseIdx], 0, nMaxXPPoints );
+							}
+						}
+
+						App_SaveUserData();
+
+						//--- show windows and change portraits and title text ---
+						UTGetGUI().RemoveAllLayers();
+						//generic changes
+						CCtrlLayer *layer = null;
+						if ( nPlayers == 1 )
+							layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_1P" );
+						else
+						{
+							if ( !UTApp().IsGameNetworked() )
+								layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_2P" );
+							else
+								layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_2P_COOP" );
+						}
+
+						//report score to steam leaderboards
+#ifdef ENABLE_LEADERBOARDS
+						char pszBoardName[MAX_PATH];
+						//only push scores to leaderboards if not playing a downloaded level and not using mods
+						if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+						{
+#ifdef ENABLE_STEAM
+							char strFormat[] = "%s%d.%d";
+#endif
+#ifdef ENABLE_GALAXY
+							char strFormat[] = "%s%d_%d";
+#endif
+
+							if ( nPlayers == 1 )
+							{
+								StringCchPrintfA( pszBoardName, MAX_PATH, strFormat, K_GAME_STR_LEADERBOARDS_PREFIX_SP, m_nLoadedChapter + 1, m_nLoadedLevel + 1 );
+							}
+							else
+							{
+								StringCchPrintfA( pszBoardName, MAX_PATH, strFormat, K_GAME_STR_LEADERBOARDS_PREFIX_COOP, m_nLoadedChapter + 1, m_nLoadedLevel + 1 );
+							}
+							//reset old scores
+							UTGetLeaderboards().ResetScoresList();
+							//reset strings too
+							__Texts().SetString( STR_LEADERBOARDS_NAMES_VAL, L"..." );
+							__Texts().SetString( STR_LEADERBOARDS_SCORES_VAL, L"..." );
+							__Texts().SetString( STR_LEADERBOARDS_PLAYERSCORE_VAL, L"..." );
+							//now upload score
+							UTGetLeaderboards().QueueJob( K_JOB_UPLOAD_SCORE, pszBoardName, nTotalLevelScore );
+							//request downloading of scores
+							UTGetLeaderboards().QueueJob( K_JOB_GET_SCORES_AROUND_USER, pszBoardName );
+							//request downloading of your own score - only if needed (when leaderboards don't update instantly)
+							//UTGetLeaderboards().QueueJob(K_JOB_GET_SCORE_FOR_CURRENT_USER, pszBoardName, 0);
+						}
+#endif
+
+						if ( layer != null )
+						{
+							CControl* ctrltop = null;
+							if ( ( ctrltop = layer->GetControlByName( "CTRL_STARS" ) ) != nullptr )
+							{
+								ctrltop->paramsDict.SetVarINT32( L"nStars", nStars );
+							}
+							//red labels for conditions that aren't satisfied						   
+							if ( m_arrStats[K_LVL_STATS_HOSTAGES_KILLED] > 0 )
+							{
+								if ( ( ctrltop = layer->GetControlByName( "LABEL_HOSTAGES" ) ) != nullptr )
+								{
+									ctrltop->paramsDict.SetVarString( L"fontColor", L"0xffff0000" );
+								}
+							}
+							if ( m_arrStats[K_LVL_STATS_PL1_DEATHS] + m_arrStats[K_LVL_STATS_PL2_DEATHS] > 0 )
+							{
+								if ( ( ctrltop = layer->GetControlByName( "LABEL_CASUALTIES" ) ) != nullptr )
+								{
+									ctrltop->paramsDict.SetVarString( L"fontColor", L"0xffff0000" );
+								}
+							}
+
+							//on custom downloaded levels hide the MELEE-leaderboards 
+							if ( m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_DOWNLOADED )
+							{
+								if ( ( ctrltop = layer->GetControlByName( "LABEL_LEADERBOARDS" ) ) != nullptr )
+									ctrltop->paramsDict.SetVarString( L"fontColor", L"0x00000000" );
+							}
+
+							if ( nPlayers == 1 )
+							{
+								CControl* ctrl = null;
+								if ( layer != null )
+								{
+									//portrete								
+									if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" ) ) != nullptr )
+									{
+										ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
+									}
+									//XP bar
+									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
+									{
+										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+										ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
+										ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+									}
+								}
+
+								if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+								{
+									CHAR ctxt[MAX_PATH];
+									StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
+									ANALYTICS_EVENT( "level_win_1p", ctxt, "durationSec", nTimeSpent );
+								}
+							}
+							else //2 players
+							{
+								CControl* ctrl = null;
+								if ( layer != null )
+								{
+									//portrete								
+									if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" ) ) != nullptr )
+									{
+										ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
+									}
+									if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL2" ) ) != nullptr )
+									{
+										ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[1].eType );
+									}
+								}
+
+								//network - replace player names with real ones
+								if ( UTApp().IsGameNetworked() )
+								{
+									if ( ( ctrl = layer->GetControlByName( "CTRL_WND_PL1" ) ) != nullptr )
+									{
+										ctrl->paramsDict.SetVarINT32( L"stringID", STR_NETWORK_HOST_NAME );
+									}
+									if ( ( ctrl = layer->GetControlByName( "CTRL_WND_PL2" ) ) != nullptr )
+									{
+										ctrl->paramsDict.SetVarINT32( L"stringID", STR_NETWORK_PEER_NAME );
+									}
+
+									if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+									{
+										CHAR ctxt[MAX_PATH];
+										StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
+										ANALYTICS_EVENT( "level_win_2p_net", ctxt, "durationSec", nTimeSpent );
+									}
+									//XP bar - networked
+									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
+									{
+										ctrl->paramsDict.SetVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[0].nPlayerXPPts );
+										int nNew = LIMIT( g_playerSelScr.m_arrPlayers[0].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints );
+										ctrl->paramsDict.SetVarINT32( L"nNewValue", nNew );
+									}
+									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
+									{
+										ctrl->paramsDict.SetVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[1].nPlayerXPPts );
+										int nNew = LIMIT( g_playerSelScr.m_arrPlayers[1].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints );
+										ctrl->paramsDict.SetVarINT32( L"nNewValue", nNew );
+									}
+								}
+								else
+								{
+									if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+									{
+										CHAR ctxt[MAX_PATH];
+										StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
+										ANALYTICS_EVENT( "level_win_2p", ctxt, "durationSec", nTimeSpent );
+									}
+									//XP bar
+									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
+									{
+										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+										ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
+										ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+									}
+									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
+									{
+										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
+										ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl2 );
+										ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+									}
+								}
+							}
+						}
+
+						// notify level finished for achievements
+						if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+							UTApp().App_OnLevelFinished( g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL] );
+					}
+				}
+				break;
+				default:
+				{
+#ifdef ENABLE_LEADERBOARDS
+					//show leaderboard when pressing melee key (any controller)
+					if ( ( UTGetCtrlrMgr().KeyPressed( K_CM_COMMAND_MELEE ) ) && ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE ) )
+					{
+						CCtrlLayer* lay = UTGetGUI().GetLayerByName( "LAYER_ID_LEADERBOARDS_IGM" );
+						if ( lay == null )
+						{
+							//show layer
+							lay = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEADERBOARDS_IGM" );
+							if ( lay )
+							{
+								CControl* ctrl = null;
+								//change label that tells type of leaderboard that is shown
+								if ( ( ctrl = lay->GetControlByName( "LABEL_LBTYPE" ) ) != nullptr )
+								{
+									int nPlayers = m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED] + m_arrStats[K_LVL_STATS_PL2_HAS_PLAYED];
+									if ( nPlayers == 1 )
+										ctrl->paramsDict.SetVarINT32( L"stringID", STR_SINGLE_PLAYER );
+									else
+										ctrl->paramsDict.SetVarINT32( L"stringID", STR_COOP_ONLINE );
+									//level name in STR_TEMP10
+									int nChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
+									int nLevel = g_userData[K_MEMID_SELECTED_LEVEL];
+									int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[nChapter]->arrLevelNameStrIdx[nLevel];
+									if ( nStrIdxLevelName >= 0 )
+										__Texts().SetString( STR_TEMP10, L"%d.%d %s", nChapter + 1, nLevel + 1, __Texts().strings[nStrIdxLevelName]->sText );
+									else
+										__Texts().SetString( STR_TEMP10, L"%d.%d", nChapter + 1, nLevel + 1 );
+								}
+								//set player selection
+								ctrl = lay->GetControlByName( "CTRL_SCORESLIST_TT" );
+								if ( ctrl != null )
+								{
+									int nPlIdx = UTGetLeaderboards().GetDownloadedScores_PlayerIndex();
+									ctrl->paramsDict.SetVarINT32( L"nSelectedIdx", nPlIdx );
+									ctrl->paramsDict.SetVarINT32( L"nOptionsCnt", UTGetLeaderboards().GetDownloadedScoresCount() );
+#ifndef ENABLE_LEADERBOARDS_NAMES_SELECTION
+									ctrl->bCanHaveFocus = false;
+									ctrl->paramsDict.SetVarBool( L"bUserCanSelect", false );
+#endif
+								}
+							}
+						}
+					}
+#endif
+				}
+				break;
+			}
+		}
+		break;
+
+		case K_LVL_STATE_MISSION_FAILED:
+		{
+			//wait for network data
+			if ( UTApp().IsGameNetworked() )
+			{
+				g_netlock.Net_UpdateLevelResults( dTime );
+				//show net votes
+				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
+				if ( layer )
+				{
+					CControl* ctrl;
+					//vote restart level
+					if ( ( ctrl = layer->GetControlByName( "CTRL_NETVOTE_RESTART" ) ) != nullptr )
+					{
+						ctrl->paramsDict.SetVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
+						ctrl->paramsDict.SetVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
+					}
+					//vote continue to next level
+					if ( ( ctrl = layer->GetControlByName( "CTRL_NETVOTE_CONTINUE" ) ) != nullptr )
+					{
+						ctrl->paramsDict.SetVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
+						ctrl->paramsDict.SetVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
+					}
+				}
+				///check presses
+				//if someone clicked cancel throw us to main menu without error
+				if ( g_netlock.Net_LevelResultsCountStates( CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) >= K_MAX_PLAYERS_CNT )
+				{
+					LOG( L"Game::Level results: Players voted to continue!" );
+					//see if we're hosting the game decide next level (advance)
+					if ( g_netlock.Net_GetIAmHosting() )
+					{
+						//quick match
+						if ( UTApp().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH )
+						{
+							//random level on quick match
+							int nLevel = GetNextRandomLevel();
+							//saving in userData is optional as it gets overwritten anyway from the player selection screen
+							g_userData[K_MEMID_SELECTED_CHAPTER] = nLevel / K_GAME_LEVELS_PER_CHAPTER;
+							g_userData[K_MEMID_SELECTED_LEVEL] = nLevel % K_GAME_LEVELS_PER_CHAPTER;
+							//save in netlock too
+							g_netlock.m_ucSelChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
+							g_netlock.m_ucSelLevel = g_userData[K_MEMID_SELECTED_LEVEL];
+
+							LOG( L"Game::Level: Decided random chapter(%d) and level(%d).", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL] );
+						}
+						else //hosting game
+						{
+							int nLevel = g_userData[K_MEMID_SELECTED_CHAPTER] * K_GAME_LEVELS_PER_CHAPTER + g_userData[K_MEMID_SELECTED_LEVEL];
 							nLevel++;
 							if ( nLevel >= UTGetChaptersList().GetTotalLevelsCnt() )
 								nLevel = 0;
+
+							g_userData[K_MEMID_SELECTED_CHAPTER] = nLevel / K_GAME_LEVELS_PER_CHAPTER;
+							g_userData[K_MEMID_SELECTED_LEVEL] = nLevel % K_GAME_LEVELS_PER_CHAPTER;
+							//save in netlock too
+							g_netlock.m_ucSelChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
+							g_netlock.m_ucSelLevel = g_userData[K_MEMID_SELECTED_LEVEL];
+
+							LOG( L"Game::Level: Decided next chapter(%d) and level(%d).", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL] );
 						}
-
-						g_userData[K_MEMID_SELECTED_CHAPTER] = nLevel / K_GAME_LEVELS_PER_CHAPTER;
-						g_userData[K_MEMID_SELECTED_LEVEL] = nLevel % K_GAME_LEVELS_PER_CHAPTER;
-						//save in netlock too
-						g_netlock.m_ucSelChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
-						g_netlock.m_ucSelLevel = g_userData[K_MEMID_SELECTED_LEVEL];
-
-						LOG( L"Game::Level: Decided next chapter(%d) and level(%d).", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL] );
 					}
+
+					if ( !GameState::isTransitioning() )
+					{
+						CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
+						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
+						nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
+						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
+						UTGetEventManager().QueueEvent( nevent );
+					}
+					//clear command
+					g_netlock.Net_LevelResultsClearStates();
+				}
+				if ( g_netlock.Net_LevelResultsCountStates( CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) >= K_MAX_PLAYERS_CNT )
+				{
+					LOG( L"Game::Level results: Players voted to restart the level!" );
+					//set loading levels
+					g_userData[K_MEMID_SELECTED_CHAPTER] = g_netlock.m_ucSelChapter;
+					g_userData[K_MEMID_SELECTED_LEVEL] = g_netlock.m_ucSelLevel;
+
+					if ( !GameState::isTransitioning() )
+					{
+						CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
+						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
+						nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
+						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
+						UTGetEventManager().QueueEvent( nevent );
+					}
+					//clear command
+					g_netlock.Net_LevelResultsClearStates();
 				}
 
-				if ( !GameState::isTransitioning() )
+				//if someone clicked cancel throw us to main menu without error
+				if ( g_netlock.Net_LevelResultsCountStates( CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CANCEL ) > 0 )
 				{
-					CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
-					nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
-					nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
-					nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
-					UTGetEventManager().QueueEvent( nevent );
+					LOG( L"Game::Level results: Peer left the game! Quit lobby!" );
+
+					if ( !GameState::isTransitioning() )
+					{
+						//change game state
+						CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
+						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_MAINMENU );
+						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
+						//check and see if other player requested exit and show message if so
+						if ( g_netlock.m_arrLvlResPeerStates[g_netlock.Net_GetOtherPlayerIndex()] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CANCEL )
+							nevent->AddNamedArgINT32( L"stateErrorStrIdx", STR_NETWORK_ERROR_PLAYER_LEFT );
+
+						UTGetEventManager().QueueEvent( nevent );
+					}
+					//clear command
+					g_netlock.Net_LevelResultsClearStates();
+
+					return;
 				}
-				//clear command
-				g_netlock.Net_LevelResultsClearStates();
 			}
-			if ( g_netlock.Net_LevelResultsCountStates( CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) >= K_MAX_PLAYERS_CNT )
+
+			switch ( m_levelSubState )
 			{
-				LOG( L"Game::Level Win: Players voted to restart the level!" );
-				//set loading levels
-				g_userData[K_MEMID_SELECTED_CHAPTER] = g_netlock.m_ucSelChapter;
-				g_userData[K_MEMID_SELECTED_LEVEL] = g_netlock.m_ucSelLevel;
-
-				if ( !GameState::isTransitioning() )
+				case 0: //wait for the level failed message to go away
 				{
-					CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
-					nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
-					nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
-					nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
-					UTGetEventManager().QueueEvent( nevent );
-				}
-				//clear command
-				g_netlock.Net_LevelResultsClearStates();
-			}
-			//cancel button / command / window
-			if ( g_netlock.Net_LevelResultsCountStates( CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CANCEL ) > 0 )
-			{
-				LOG( L"Game::Level Win: Player chose to exit!" );
-
-				if ( !GameState::isTransitioning() )
-				{
-					//change game state
-					CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
-					nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_MAINMENU );
-					nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
-					//check and see if other player requested exit and show message if so
-					if ( g_netlock.m_arrLvlResPeerStates[g_netlock.Net_GetOtherPlayerIndex()] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CANCEL )
-						nevent->AddNamedArgINT32( L"stateErrorStrIdx", STR_NETWORK_ERROR_PLAYER_LEFT );
-
-					UTGetEventManager().QueueEvent( nevent );
-				}
-				//clear command
-				g_netlock.Net_LevelResultsClearStates();
-
-				return;
-			}
-		}
-
-		switch ( m_levelSubState )
-		{
-		case 0: //wait for message to disappear
-		{
-			m_levelStateTimer += dTime;
-			if ( m_levelStateTimer > 2.0f )
-			{
-				m_levelStateTimer = 0.0f;
-				m_levelSubState = 1;
-
-				int nLevelIdx = -1;
-				if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-					nLevelIdx = g_userData[K_MEMID_SELECTED_LEVEL] + g_userData[K_MEMID_SELECTED_CHAPTER] * K_GAME_LEVELS_PER_CHAPTER;
-
-				//pregatim strings pentru interfata de level finished
-				WCHAR tmpstr[MAX_PATH];
-				int nPlayers = m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED] + m_arrStats[K_LVL_STATS_PL2_HAS_PLAYED];
-				//--- PL1 data ---
-				float fAccuracyP1 = 1.0f;
-				if ( m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0 )
-					fAccuracyP1 = ( float ) m_arrStats[K_LVL_STATS_PL1_BULLETS_HIT] / ( float ) m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT];
-				CLAMP( fAccuracyP1, 0.0f, 1.0f );
-				__Texts().SetString( STR_MISSION_P1_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL1_KILLS] );
-				if ( m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0 )
-					__Texts().SetString( STR_MISSION_P1_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP1 );
-				else
-					__Texts().SetString( STR_MISSION_P1_ACCURACY, L"%s", __Texts().strings[STR_NOT_AVAILABLE]->sText );
-				__Texts().SetString( STR_MISSION_P1_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] );
-				__Texts().SetString( STR_MISSION_P1_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS] );
-				//--- PL2 data ---
-				float fAccuracyP2 = 1.0f;
-				if ( m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0 )
-					fAccuracyP2 = ( float ) m_arrStats[K_LVL_STATS_PL2_BULLETS_HIT] / ( float ) m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT];
-				CLAMP( fAccuracyP2, 0.0f, 1.0f );
-				__Texts().SetString( STR_MISSION_P2_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL2_KILLS] );
-				if ( m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0 )
-					__Texts().SetString( STR_MISSION_P2_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP2 );
-				else
-					__Texts().SetString( STR_MISSION_P2_ACCURACY, L"%s", __Texts().strings[STR_NOT_AVAILABLE]->sText );
-				__Texts().SetString( STR_MISSION_P2_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] );
-				__Texts().SetString( STR_MISSION_P2_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL2_DEATHS] );
-
-				//level time
-				int nTimeSpent = m_arrStats[K_LVL_STATS_LEVEL_END_SEC] - m_arrStats[K_LVL_STATS_LEVEL_START_SEC];
-				//--- calculam stele si XP ---
-				int nStars = 3;
-				if ( m_arrStats[K_LVL_STATS_HOSTAGES_KILLED] > 0 )
-					nStars--;
-				if ( ( m_arrStats[K_LVL_STATS_PL1_DEATHS] + m_arrStats[K_LVL_STATS_PL2_DEATHS] ) > 0 )
-					nStars--;
-				//on arrest warrant missions remove a star per target kill
-				if ( ( m_nLoadedLevelType == K_GAME_LSTYPE_ARREST_WARRANT ) && ( m_arrStats[K_LVL_STATS_LEVEL_ARREST_TARGETS_KILLED] > 0 ) )
-				{
-					nStars -= m_arrStats[K_LVL_STATS_LEVEL_ARREST_TARGETS_KILLED];
-				}
-
-				CLAMP( nStars, 1, 3 );
-
-				//#ACHIEVEMENTS: 3 stars mission on any mission
-				if ( nStars == 3 )
-				{
-					UTGetAchievementManager().UnlockAchievement( ACH_3STARS_MISSION );
-				}
-
-				///--- SCORE ---
-				int nTotalLevelScore = nStars * 1500;
-				nTotalLevelScore += ( int ) ceil( ( float ) m_arrStats[K_LVL_STATS_PL1_KILLS] * fAccuracyP1 * 150.0f ) + m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED] * 300 - m_arrStats[K_LVL_STATS_PL1_DEATHS] * 200;
-				nTotalLevelScore += ( int ) ceil( ( float ) m_arrStats[K_LVL_STATS_PL2_KILLS] * fAccuracyP2 * 150.0f ) + m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED] * 300 - m_arrStats[K_LVL_STATS_PL2_DEATHS] * 200;
-				//add civilians score
-				nTotalLevelScore += m_arrStats[K_LVL_STATS_CIVILIANS_ARRESTED] * 100;
-				nTotalLevelScore -= m_arrStats[K_LVL_STATS_CIVILIANS_KILLED] * 80;
-				//lower limit on total XP
-				if ( nTotalLevelScore < 0 )
-					nTotalLevelScore = 0;
-				//add time bonus
-				int timeBonus = ( 60/*sec*/ * 15/*min*/ - nTimeSpent ) * 20;
-				if ( timeBonus < 0 ) timeBonus = 0;
-				//total XP points
-				nTotalLevelScore += timeBonus;
-
-				///--- XP Points ---
-				int nXPpl1 = 0, nXPpl2 = 0;
-				int nMaxXPPoints = App_GetMaxXP( K_GAME_MAX_UPGRADE_LEVELS );
-				int nTotalXPPoints = Local_ComputeMissionXP( nStars );
-
-				//--- STARS WINDOW ---
-				OS_FormatTime( tmpstr, MAX_PATH, ( float ) ( nTimeSpent ) );
-				__Texts().SetString( STR_MISSION_TIME, tmpstr );
-				__Texts().SetString( STR_MISSION_CASUALTIES, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS] + m_arrStats[K_LVL_STATS_PL2_DEATHS] );
-				__Texts().SetString( STR_MISSION_SCORE, L"%d", nTotalLevelScore );
-
-				int nHostagesSaved = m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED] + m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED];
-				__Texts().SetString( STR_MISSION_HOSTAGES, L"%d / %d", nHostagesSaved, m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] );
-
-				//--- SAVE LEVEL DATA ---
-				if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-				{
-					g_userData[K_MEMID_STARS_TOTAL] += LIMIT( nStars - g_levelStats[nLevelIdx].nStars, 0, 3 );
-
-					g_levelStats[nLevelIdx].nPlayedTimes++;
-					if ( g_levelStats[nLevelIdx].nStars < nStars )
-						g_levelStats[nLevelIdx].nStars = nStars;
-				}
-
-				if ( nPlayers == 1 )
-				{
-					//only save best score on classic mode
-					if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+					m_levelStateTimer += dTime;
+					if ( m_levelStateTimer > 2.0f )
 					{
-						if ( g_levelStats[nLevelIdx].nScoreSolo < nTotalLevelScore )
-							g_levelStats[nLevelIdx].nScoreSolo = nTotalLevelScore;
-						if ( ( g_levelStats[nLevelIdx].nBestTimeSec_Solo == 0 ) || ( g_levelStats[nLevelIdx].nBestTimeSec_Solo < nTimeSpent ) )
-							g_levelStats[nLevelIdx].nBestTimeSec_Solo = nTimeSpent;
-					}
-					//XP points	save
-					int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
-					nXPpl1 = g_userData[nPlBaseIdx];
-					inc_limit( g_userData[nPlBaseIdx], nTotalXPPoints, nMaxXPPoints );
-				}
-				else
-				{
-					//only save best score on classic mode
-					if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-					{
-						if ( g_levelStats[nLevelIdx].nScoreCoop < nTotalLevelScore )
-							g_levelStats[nLevelIdx].nScoreCoop = nTotalLevelScore;
-						if ( ( g_levelStats[nLevelIdx].nBestTimeSec_Coop == 0 ) || ( g_levelStats[nLevelIdx].nBestTimeSec_Coop < nTimeSpent ) )
-							g_levelStats[nLevelIdx].nBestTimeSec_Coop = nTimeSpent;
-					}
+						m_levelStateTimer = 0.0f;
+						m_levelSubState = 1;
 
-					//XP points	save
-					if ( !UTApp().IsGameNetworked() )
-					{
-						//in local coop you only get half the XP for each player
-						int nPl1BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
-						nXPpl1 = g_userData[nPl1BaseIdx]; //save old value
-						inc_limit( g_userData[nPl1BaseIdx], nTotalXPPoints / 2, nMaxXPPoints );
-						int nPl2BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
-						nXPpl2 = g_userData[nPl2BaseIdx]; //save old value
-						inc_limit( g_userData[nPl2BaseIdx], nTotalXPPoints / 2, nMaxXPPoints );
-					}
-					else
-					{
-						//in network games each player gets it's own
-						int nMyPlayerBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[g_netlock.Net_GetPlayerIndex()].eType;
-						g_userData[nMyPlayerBaseIdx] += nTotalXPPoints;
-						CLAMP( g_userData[nMyPlayerBaseIdx], 0, nMaxXPPoints );
-					}
-				}
+						//pregatim strings pentru interfata de level finished
+						WCHAR tmpstr[MAX_PATH];
+						int nPlayers = m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED] + m_arrStats[K_LVL_STATS_PL2_HAS_PLAYED];
+						//--- PL1 data ---
+						float fAccuracyP1 = 1.0f;
+						if ( m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0 )
+							fAccuracyP1 = ( float ) m_arrStats[K_LVL_STATS_PL1_BULLETS_HIT] / ( float ) m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT];
+						CLAMP( fAccuracyP1, 0.0f, 1.0f );
+						__Texts().SetString( STR_MISSION_P1_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL1_KILLS] );
+						if ( m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0 )
+							__Texts().SetString( STR_MISSION_P1_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP1 );
+						else
+							__Texts().SetString( STR_MISSION_P1_ACCURACY, L"%s", __Texts().strings[STR_NOT_AVAILABLE]->sText );
+						__Texts().SetString( STR_MISSION_P1_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] );
+						__Texts().SetString( STR_MISSION_P1_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS] );
+						//--- PL2 data ---
+						float fAccuracyP2 = 1.0f;
+						if ( m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0 )
+							fAccuracyP2 = ( float ) m_arrStats[K_LVL_STATS_PL2_BULLETS_HIT] / ( float ) m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT];
+						CLAMP( fAccuracyP2, 0.0f, 1.0f );
+						__Texts().SetString( STR_MISSION_P2_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL2_KILLS] );
+						if ( m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0 )
+							__Texts().SetString( STR_MISSION_P2_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP2 );
+						else
+							__Texts().SetString( STR_MISSION_P2_ACCURACY, L"%s", __Texts().strings[STR_NOT_AVAILABLE]->sText );
+						__Texts().SetString( STR_MISSION_P2_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] );
+						__Texts().SetString( STR_MISSION_P2_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL2_DEATHS] );
 
-				App_SaveUserData();
+						///--- XP Points ---
+						int nXPpl1 = 0, nXPpl2 = 0;
+						int nMaxXPPoints = App_GetMaxXP( K_GAME_MAX_UPGRADE_LEVELS );
+						int nTotalXPPoints = Local_ComputeMissionXP( 0 );
 
-				//--- show windows and change portraits and title text ---
-				UTGetGUI().RemoveAllLayers();
-				//generic changes
-				CCtrlLayer *layer = null;
-				if ( nPlayers == 1 )
-					layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_1P" );
-				else
-				{
-					if ( !UTApp().IsGameNetworked() )
-						layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_2P" );
-					else
-						layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_2P_COOP" );
-				}
+						//--- STARS WINDOW ---
+						int nTimeSpent = m_arrStats[K_LVL_STATS_LEVEL_END_SEC] - m_arrStats[K_LVL_STATS_LEVEL_START_SEC];
+						OS_FormatTime( tmpstr, MAX_PATH, ( float ) ( nTimeSpent ) );
+						__Texts().SetString( STR_MISSION_TIME, tmpstr );
 
-				//report score to steam leaderboards
-#ifdef ENABLE_LEADERBOARDS
-				char pszBoardName[MAX_PATH];
-				//only push scores to leaderboards if not playing a downloaded level and not using mods
-				if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-				{
-#ifdef ENABLE_STEAM
-					char strFormat[] = "%s%d.%d";
-#endif
-#ifdef ENABLE_GALAXY
-					char strFormat[] = "%s%d_%d";
-#endif
-
-					if ( nPlayers == 1 )
-					{
-						StringCchPrintfA( pszBoardName, MAX_PATH, strFormat, K_GAME_STR_LEADERBOARDS_PREFIX_SP, m_nLoadedChapter + 1, m_nLoadedLevel + 1 );
-					}
-					else
-					{
-						StringCchPrintfA( pszBoardName, MAX_PATH, strFormat, K_GAME_STR_LEADERBOARDS_PREFIX_COOP, m_nLoadedChapter + 1, m_nLoadedLevel + 1 );
-					}
-					//reset old scores
-					UTGetLeaderboards().ResetScoresList();
-					//reset strings too
-					__Texts().SetString( STR_LEADERBOARDS_NAMES_VAL, L"..." );
-					__Texts().SetString( STR_LEADERBOARDS_SCORES_VAL, L"..." );
-					__Texts().SetString( STR_LEADERBOARDS_PLAYERSCORE_VAL, L"..." );
-					//now upload score
-					UTGetLeaderboards().QueueJob( K_JOB_UPLOAD_SCORE, pszBoardName, nTotalLevelScore );
-					//request downloading of scores
-					UTGetLeaderboards().QueueJob( K_JOB_GET_SCORES_AROUND_USER, pszBoardName );
-					//request downloading of your own score - only if needed (when leaderboards don't update instantly)
-					//UTGetLeaderboards().QueueJob(K_JOB_GET_SCORE_FOR_CURRENT_USER, pszBoardName, 0);
-				}
-#endif
-
-				if ( layer != null )
-				{
-					CControl* ctrltop = null;
-					if ( ( ctrltop = layer->GetControlByName( "CTRL_STARS" ) ) != nullptr )
-					{
-						ctrltop->paramsDict.SetVarINT32( L"nStars", nStars );
-					}
-					//red labels for conditions that aren't satisfied						   
-					if ( m_arrStats[K_LVL_STATS_HOSTAGES_KILLED] > 0 )
-					{
-						if ( ( ctrltop = layer->GetControlByName( "LABEL_HOSTAGES" ) ) != nullptr )
-						{
-							ctrltop->paramsDict.SetVarString( L"fontColor", L"0xffff0000" );
-						}
-					}
-					if ( m_arrStats[K_LVL_STATS_PL1_DEATHS] + m_arrStats[K_LVL_STATS_PL2_DEATHS] > 0 )
-					{
-						if ( ( ctrltop = layer->GetControlByName( "LABEL_CASUALTIES" ) ) != nullptr )
-						{
-							ctrltop->paramsDict.SetVarString( L"fontColor", L"0xffff0000" );
-						}
-					}
-
-					//on custom downloaded levels hide the MELEE-leaderboards 
-					if ( m_unLoadedLevelFlags & K_LVL_LEVEL_FLAG_DOWNLOADED )
-					{
-						if ( ( ctrltop = layer->GetControlByName( "LABEL_LEADERBOARDS" ) ) != nullptr )
-							ctrltop->paramsDict.SetVarString( L"fontColor", L"0x00000000" );
-					}
-
-					if ( nPlayers == 1 )
-					{
-						CControl* ctrl = null;
-						if ( layer != null )
-						{
-							//portrete								
-							if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" ) ) != nullptr )
-							{
-								ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
-							}
-							//XP bar
-							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
-							{
-								int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
-								ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
-								ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
-							}
-						}
-
+						//--- SAVE LEVEL DATA ---
+						// not playing downloaded levels so save played times counter
 						if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
 						{
-							CHAR ctxt[MAX_PATH];
-							StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
-							ANALYTICS_EVENT( "level_win_1p", ctxt, "durationSec", nTimeSpent );
-						}
-					}
-					else //2 players
-					{
-						CControl* ctrl = null;
-						if ( layer != null )
-						{
-							//portrete								
-							if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" ) ) != nullptr )
-							{
-								ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
-							}
-							if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL2" ) ) != nullptr )
-							{
-								ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[1].eType );
-							}
+							int nLevelIdx = g_userData[K_MEMID_SELECTED_LEVEL] + g_userData[K_MEMID_SELECTED_CHAPTER] * K_GAME_LEVELS_PER_CHAPTER;
+							g_levelStats[nLevelIdx].nPlayedTimes++;
 						}
 
-						//network - replace player names with real ones
-						if ( UTApp().IsGameNetworked() )
+						if ( nPlayers == 1 )
 						{
-							if ( ( ctrl = layer->GetControlByName( "CTRL_WND_PL1" ) ) != nullptr )
-							{
-								ctrl->paramsDict.SetVarINT32( L"stringID", STR_NETWORK_HOST_NAME );
-							}
-							if ( ( ctrl = layer->GetControlByName( "CTRL_WND_PL2" ) ) != nullptr )
-							{
-								ctrl->paramsDict.SetVarINT32( L"stringID", STR_NETWORK_PEER_NAME );
-							}
-
-							if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-							{
-								CHAR ctxt[MAX_PATH];
-								StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
-								ANALYTICS_EVENT( "level_win_2p_net", ctxt, "durationSec", nTimeSpent );
-							}
-							//XP bar - networked
-							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
-							{
-								ctrl->paramsDict.SetVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[0].nPlayerXPPts );
-								int nNew = LIMIT( g_playerSelScr.m_arrPlayers[0].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints );
-								ctrl->paramsDict.SetVarINT32( L"nNewValue", nNew );
-							}
-							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
-							{
-								ctrl->paramsDict.SetVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[1].nPlayerXPPts );
-								int nNew = LIMIT( g_playerSelScr.m_arrPlayers[1].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints );
-								ctrl->paramsDict.SetVarINT32( L"nNewValue", nNew );
-							}
-						}
-						else
-						{
-							if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-							{
-								CHAR ctxt[MAX_PATH];
-								StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
-								ANALYTICS_EVENT( "level_win_2p", ctxt, "durationSec", nTimeSpent );
-							}
-							//XP bar
-							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
-							{
-								int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
-								ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
-								ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
-							}
-							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
-							{
-								int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
-								ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl2 );
-								ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
-							}
-						}
-					}
-				}
-
-				// notify level finished for achievements
-				if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-					UTApp().App_OnLevelFinished( g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL] );
-			}
-		}
-		break;
-		default:
-		{
-#ifdef ENABLE_LEADERBOARDS
-			//show leaderboard when pressing melee key (any controller)
-			if ( ( UTGetCtrlrMgr().KeyPressed( K_CM_COMMAND_MELEE ) ) && ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE ) )
-			{
-				CCtrlLayer* lay = UTGetGUI().GetLayerByName( "LAYER_ID_LEADERBOARDS_IGM" );
-				if ( lay == null )
-				{
-					//show layer
-					lay = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEADERBOARDS_IGM" );
-					if ( lay )
-					{
-						CControl* ctrl = null;
-						//change label that tells type of leaderboard that is shown
-						if ( ( ctrl = lay->GetControlByName( "LABEL_LBTYPE" ) ) != nullptr )
-						{
-							int nPlayers = m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED] + m_arrStats[K_LVL_STATS_PL2_HAS_PLAYED];
-							if ( nPlayers == 1 )
-								ctrl->paramsDict.SetVarINT32( L"stringID", STR_SINGLE_PLAYER );
-							else
-								ctrl->paramsDict.SetVarINT32( L"stringID", STR_COOP_ONLINE );
-							//level name in STR_TEMP10
-							int nChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
-							int nLevel = g_userData[K_MEMID_SELECTED_LEVEL];
-							int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[nChapter]->arrLevelNameStrIdx[nLevel];
-							if ( nStrIdxLevelName >= 0 )
-								__Texts().SetString( STR_TEMP10, L"%d.%d %s", nChapter + 1, nLevel + 1, __Texts().strings[nStrIdxLevelName]->sText );
-							else
-								__Texts().SetString( STR_TEMP10, L"%d.%d", nChapter + 1, nLevel + 1 );
-						}
-						//set player selection
-						ctrl = lay->GetControlByName( "CTRL_SCORESLIST_TT" );
-						if ( ctrl != null )
-						{
-							int nPlIdx = UTGetLeaderboards().GetDownloadedScores_PlayerIndex();
-							ctrl->paramsDict.SetVarINT32( L"nSelectedIdx", nPlIdx );
-							ctrl->paramsDict.SetVarINT32( L"nOptionsCnt", UTGetLeaderboards().GetDownloadedScoresCount() );
-#ifndef ENABLE_LEADERBOARDS_NAMES_SELECTION
-							ctrl->bCanHaveFocus = false;
-							ctrl->paramsDict.SetVarBool( L"bUserCanSelect", false );
-#endif
-						}
-					}
-				}
-			}
-#endif
-		}
-		break;
-		}
-	}
-	break;
-
-	case K_LVL_STATE_MISSION_FAILED:
-	{
-		//wait for network data
-		if ( UTApp().IsGameNetworked() )
-		{
-			g_netlock.Net_UpdateLevelResults( dTime );
-			//show net votes
-			CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
-			if ( layer )
-			{
-				CControl* ctrl;
-				//vote restart level
-				if ( ( ctrl = layer->GetControlByName( "CTRL_NETVOTE_RESTART" ) ) != nullptr )
-				{
-					ctrl->paramsDict.SetVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
-					ctrl->paramsDict.SetVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) ? 1 : 0 );
-				}
-				//vote continue to next level
-				if ( ( ctrl = layer->GetControlByName( "CTRL_NETVOTE_CONTINUE" ) ) != nullptr )
-				{
-					ctrl->paramsDict.SetVarINT32( L"leftVote", ( g_netlock.m_arrLvlResPeerStates[0] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
-					ctrl->paramsDict.SetVarINT32( L"rightVote", ( g_netlock.m_arrLvlResPeerStates[1] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) ? 1 : 0 );
-				}
-			}
-			///check presses
-			//if someone clicked cancel throw us to main menu without error
-			if ( g_netlock.Net_LevelResultsCountStates( CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CONTINUE ) >= K_MAX_PLAYERS_CNT )
-			{
-				LOG( L"Game::Level results: Players voted to continue!" );
-				//see if we're hosting the game decide next level (advance)
-				if ( g_netlock.Net_GetIAmHosting() )
-				{
-					//quick match
-					if ( UTApp().m_Settings.devnet_eNetGameType == CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH )
-					{
-						//random level on quick match
-						int nLevel = GetNextRandomLevel();
-						//saving in userData is optional as it gets overwritten anyway from the player selection screen
-						g_userData[K_MEMID_SELECTED_CHAPTER] = nLevel / K_GAME_LEVELS_PER_CHAPTER;
-						g_userData[K_MEMID_SELECTED_LEVEL] = nLevel % K_GAME_LEVELS_PER_CHAPTER;
-						//save in netlock too
-						g_netlock.m_ucSelChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
-						g_netlock.m_ucSelLevel = g_userData[K_MEMID_SELECTED_LEVEL];
-
-						LOG( L"Game::Level: Decided random chapter(%d) and level(%d).", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL] );
-					}
-					else //hosting game
-					{
-						int nLevel = g_userData[K_MEMID_SELECTED_CHAPTER] * K_GAME_LEVELS_PER_CHAPTER + g_userData[K_MEMID_SELECTED_LEVEL];
-						nLevel++;
-						if ( nLevel >= UTGetChaptersList().GetTotalLevelsCnt() )
-							nLevel = 0;
-
-						g_userData[K_MEMID_SELECTED_CHAPTER] = nLevel / K_GAME_LEVELS_PER_CHAPTER;
-						g_userData[K_MEMID_SELECTED_LEVEL] = nLevel % K_GAME_LEVELS_PER_CHAPTER;
-						//save in netlock too
-						g_netlock.m_ucSelChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
-						g_netlock.m_ucSelLevel = g_userData[K_MEMID_SELECTED_LEVEL];
-
-						LOG( L"Game::Level: Decided next chapter(%d) and level(%d).", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL] );
-					}
-				}
-
-				if ( !GameState::isTransitioning() )
-				{
-					CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
-					nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
-					nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
-					nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
-					UTGetEventManager().QueueEvent( nevent );
-				}
-				//clear command
-				g_netlock.Net_LevelResultsClearStates();
-			}
-			if ( g_netlock.Net_LevelResultsCountStates( CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_RESTART ) >= K_MAX_PLAYERS_CNT )
-			{
-				LOG( L"Game::Level results: Players voted to restart the level!" );
-				//set loading levels
-				g_userData[K_MEMID_SELECTED_CHAPTER] = g_netlock.m_ucSelChapter;
-				g_userData[K_MEMID_SELECTED_LEVEL] = g_netlock.m_ucSelLevel;
-
-				if ( !GameState::isTransitioning() )
-				{
-					CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
-					nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
-					nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
-					nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
-					UTGetEventManager().QueueEvent( nevent );
-				}
-				//clear command
-				g_netlock.Net_LevelResultsClearStates();
-			}
-
-			//if someone clicked cancel throw us to main menu without error
-			if ( g_netlock.Net_LevelResultsCountStates( CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CANCEL ) > 0 )
-			{
-				LOG( L"Game::Level results: Peer left the game! Quit lobby!" );
-
-				if ( !GameState::isTransitioning() )
-				{
-					//change game state
-					CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
-					nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_MAINMENU );
-					nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
-					//check and see if other player requested exit and show message if so
-					if ( g_netlock.m_arrLvlResPeerStates[g_netlock.Net_GetOtherPlayerIndex()] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CANCEL )
-						nevent->AddNamedArgINT32( L"stateErrorStrIdx", STR_NETWORK_ERROR_PLAYER_LEFT );
-
-					UTGetEventManager().QueueEvent( nevent );
-				}
-				//clear command
-				g_netlock.Net_LevelResultsClearStates();
-
-				return;
-			}
-		}
-
-		switch ( m_levelSubState )
-		{
-		case 0: //wait for the level failed message to go away
-		{
-			m_levelStateTimer += dTime;
-			if ( m_levelStateTimer > 2.0f )
-			{
-				m_levelStateTimer = 0.0f;
-				m_levelSubState = 1;
-
-				//pregatim strings pentru interfata de level finished
-				WCHAR tmpstr[MAX_PATH];
-				int nPlayers = m_arrStats[K_LVL_STATS_PL1_HAS_PLAYED] + m_arrStats[K_LVL_STATS_PL2_HAS_PLAYED];
-				//--- PL1 data ---
-				float fAccuracyP1 = 1.0f;
-				if ( m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0 )
-					fAccuracyP1 = ( float ) m_arrStats[K_LVL_STATS_PL1_BULLETS_HIT] / ( float ) m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT];
-				CLAMP( fAccuracyP1, 0.0f, 1.0f );
-				__Texts().SetString( STR_MISSION_P1_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL1_KILLS] );
-				if ( m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0 )
-					__Texts().SetString( STR_MISSION_P1_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP1 );
-				else
-					__Texts().SetString( STR_MISSION_P1_ACCURACY, L"%s", __Texts().strings[STR_NOT_AVAILABLE]->sText );
-				__Texts().SetString( STR_MISSION_P1_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] );
-				__Texts().SetString( STR_MISSION_P1_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS] );
-				//--- PL2 data ---
-				float fAccuracyP2 = 1.0f;
-				if ( m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0 )
-					fAccuracyP2 = ( float ) m_arrStats[K_LVL_STATS_PL2_BULLETS_HIT] / ( float ) m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT];
-				CLAMP( fAccuracyP2, 0.0f, 1.0f );
-				__Texts().SetString( STR_MISSION_P2_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL2_KILLS] );
-				if ( m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0 )
-					__Texts().SetString( STR_MISSION_P2_ACCURACY, L"%.1f%%", 100.0f * fAccuracyP2 );
-				else
-					__Texts().SetString( STR_MISSION_P2_ACCURACY, L"%s", __Texts().strings[STR_NOT_AVAILABLE]->sText );
-				__Texts().SetString( STR_MISSION_P2_HOSTAGES, L"%d / %d", m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL] );
-				__Texts().SetString( STR_MISSION_P2_DEATHS, L"%d", m_arrStats[K_LVL_STATS_PL2_DEATHS] );
-
-				///--- XP Points ---
-				int nXPpl1 = 0, nXPpl2 = 0;
-				int nMaxXPPoints = App_GetMaxXP( K_GAME_MAX_UPGRADE_LEVELS );
-				int nTotalXPPoints = Local_ComputeMissionXP( 0 );
-
-				//--- STARS WINDOW ---
-				int nTimeSpent = m_arrStats[K_LVL_STATS_LEVEL_END_SEC] - m_arrStats[K_LVL_STATS_LEVEL_START_SEC];
-				OS_FormatTime( tmpstr, MAX_PATH, ( float ) ( nTimeSpent ) );
-				__Texts().SetString( STR_MISSION_TIME, tmpstr );
-
-				//--- SAVE LEVEL DATA ---
-				// not playing downloaded levels so save played times counter
-				if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-				{
-					int nLevelIdx = g_userData[K_MEMID_SELECTED_LEVEL] + g_userData[K_MEMID_SELECTED_CHAPTER] * K_GAME_LEVELS_PER_CHAPTER;
-					g_levelStats[nLevelIdx].nPlayedTimes++;
-				}
-
-				if ( nPlayers == 1 )
-				{
-					//XP points	save
-					int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
-					nXPpl1 = g_userData[nPlBaseIdx];
-					inc_limit( g_userData[nPlBaseIdx], nTotalXPPoints, nMaxXPPoints );
-				}
-				else
-				{
-					//XP points	save
-					if ( !UTApp().IsGameNetworked() )
-					{
-						//in local coop you only get half the XP for each player
-						int nPl1BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
-						nXPpl1 = g_userData[nPl1BaseIdx]; //save old value
-						inc_limit( g_userData[nPl1BaseIdx], nTotalXPPoints / 2, nMaxXPPoints );
-						int nPl2BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
-						nXPpl2 = g_userData[nPl2BaseIdx]; //save old value
-						inc_limit( g_userData[nPl2BaseIdx], nTotalXPPoints / 2, nMaxXPPoints );
-					}
-					else
-					{
-						//in network games each player gets it's own
-						int nMyPlayerBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[g_netlock.Net_GetPlayerIndex()].eType;
-						g_userData[nMyPlayerBaseIdx] += nTotalXPPoints;
-						CLAMP( g_userData[nMyPlayerBaseIdx], 0, nMaxXPPoints );
-					}
-				}
-
-				App_SaveUserData();
-
-
-				//--- show windows and change portraits and title text ---
-				if ( nPlayers == 1 )
-				{
-					UTGetGUI().RemoveAllLayers();
-					CCtrlLayer* layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELFAIL_1P" );
-					if ( layer != null )
-					{
-						CControl* ctrl = layer->GetControlByName( "CTRL_STARS" );
-						if ( ctrl )
-						{
-							ctrl->paramsDict.SetVarINT32( L"nStars", 0 );
-						}
-						//reason why
-						if ( m_levelStateParam > 0 ) //if set
-						{
-							ctrl = layer->GetControlByName( "BLINKER_REASON" );
-							if ( ctrl )
-							{
-								ctrl->paramsDict.SetVarINT32( L"stringID", m_levelStateParam );
-							}
-						}
-						//portrete								
-						ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" );
-						if ( ctrl )
-						{
-							ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
-						}
-						//XP bar
-						if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
-						{
+							//XP points	save
 							int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
-							ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
-							ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
-						}
-					}
-
-					if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-					{
-						CHAR ctxt[MAX_PATH];
-						StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
-						ANALYTICS_EVENT( "level_lose_1p", ctxt, "durationSec", nTimeSpent );
-					}
-				}
-				else //2 players
-				{
-					UTGetGUI().RemoveAllLayers();
-
-					CCtrlLayer* layer = null;
-					if ( !UTApp().IsGameNetworked() )
-						layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELFAIL_2P" );
-					else
-						layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELFAIL_2P_COOP" );
-
-					if ( layer != null )
-					{
-						CControl* ctrl = null;
-
-						if ( ( ctrl = layer->GetControlByName( "CTRL_STARS" ) ) != nullptr )
-						{
-							ctrl->paramsDict.SetVarINT32( L"nStars", 0 );
-						}
-						//reason why
-						if ( m_levelStateParam > 0 ) //if set
-						{
-							if ( ( ctrl = layer->GetControlByName( "BLINKER_REASON" ) ) != nullptr )
-							{
-								ctrl->paramsDict.SetVarINT32( L"stringID", m_levelStateParam );
-							}
-						}
-						//portrete								
-						if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" ) ) != nullptr )
-						{
-							ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
-						}
-						if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL2" ) ) != nullptr )
-						{
-							ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[1].eType );
-						}
-
-						//network - replace player names with real ones
-						if ( UTApp().IsGameNetworked() )
-						{
-							if ( ( ctrl = layer->GetControlByName( "CTRL_WND_PL1" ) ) != nullptr )
-							{
-								ctrl->paramsDict.SetVarINT32( L"stringID", STR_NETWORK_HOST_NAME );
-							}
-							if ( ( ctrl = layer->GetControlByName( "CTRL_WND_PL2" ) ) != nullptr )
-							{
-								ctrl->paramsDict.SetVarINT32( L"stringID", STR_NETWORK_PEER_NAME );
-							}
-
-							if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-							{
-								CHAR ctxt[MAX_PATH];
-								StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
-								ANALYTICS_EVENT( "level_lose_2p_net", ctxt, "durationSec", nTimeSpent );
-							}
-							//XP bar - networked
-							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
-							{
-								ctrl->paramsDict.SetVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[0].nPlayerXPPts );
-								int nNew = LIMIT( g_playerSelScr.m_arrPlayers[0].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints );
-								ctrl->paramsDict.SetVarINT32( L"nNewValue", nNew );
-							}
-							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
-							{
-								ctrl->paramsDict.SetVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[1].nPlayerXPPts );
-								int nNew = LIMIT( g_playerSelScr.m_arrPlayers[1].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints );
-								ctrl->paramsDict.SetVarINT32( L"nNewValue", nNew );
-							}
+							nXPpl1 = g_userData[nPlBaseIdx];
+							inc_limit( g_userData[nPlBaseIdx], nTotalXPPoints, nMaxXPPoints );
 						}
 						else
 						{
+							//XP points	save
+							if ( !UTApp().IsGameNetworked() )
+							{
+								//in local coop you only get half the XP for each player
+								int nPl1BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+								nXPpl1 = g_userData[nPl1BaseIdx]; //save old value
+								inc_limit( g_userData[nPl1BaseIdx], nTotalXPPoints / 2, nMaxXPPoints );
+								int nPl2BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
+								nXPpl2 = g_userData[nPl2BaseIdx]; //save old value
+								inc_limit( g_userData[nPl2BaseIdx], nTotalXPPoints / 2, nMaxXPPoints );
+							}
+							else
+							{
+								//in network games each player gets it's own
+								int nMyPlayerBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[g_netlock.Net_GetPlayerIndex()].eType;
+								g_userData[nMyPlayerBaseIdx] += nTotalXPPoints;
+								CLAMP( g_userData[nMyPlayerBaseIdx], 0, nMaxXPPoints );
+							}
+						}
+
+						App_SaveUserData();
+
+
+						//--- show windows and change portraits and title text ---
+						if ( nPlayers == 1 )
+						{
+							UTGetGUI().RemoveAllLayers();
+							CCtrlLayer* layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELFAIL_1P" );
+							if ( layer != null )
+							{
+								CControl* ctrl = layer->GetControlByName( "CTRL_STARS" );
+								if ( ctrl )
+								{
+									ctrl->paramsDict.SetVarINT32( L"nStars", 0 );
+								}
+								//reason why
+								if ( m_levelStateParam > 0 ) //if set
+								{
+									ctrl = layer->GetControlByName( "BLINKER_REASON" );
+									if ( ctrl )
+									{
+										ctrl->paramsDict.SetVarINT32( L"stringID", m_levelStateParam );
+									}
+								}
+								//portrete								
+								ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" );
+								if ( ctrl )
+								{
+									ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
+								}
+								//XP bar
+								if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
+								{
+									int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+									ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
+									ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+								}
+							}
+
 							if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
 							{
 								CHAR ctxt[MAX_PATH];
 								StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
-								ANALYTICS_EVENT( "level_lose_2p", ctxt, "durationSec", nTimeSpent );
-							}
-
-							//XP bar
-							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
-							{
-								int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
-								ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
-								ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
-							}
-							if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
-							{
-								int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
-								ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl2 );
-								ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+								ANALYTICS_EVENT( "level_lose_1p", ctxt, "durationSec", nTimeSpent );
 							}
 						}
+						else //2 players
+						{
+							UTGetGUI().RemoveAllLayers();
 
+							CCtrlLayer* layer = null;
+							if ( !UTApp().IsGameNetworked() )
+								layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELFAIL_2P" );
+							else
+								layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELFAIL_2P_COOP" );
+
+							if ( layer != null )
+							{
+								CControl* ctrl = null;
+
+								if ( ( ctrl = layer->GetControlByName( "CTRL_STARS" ) ) != nullptr )
+								{
+									ctrl->paramsDict.SetVarINT32( L"nStars", 0 );
+								}
+								//reason why
+								if ( m_levelStateParam > 0 ) //if set
+								{
+									if ( ( ctrl = layer->GetControlByName( "BLINKER_REASON" ) ) != nullptr )
+									{
+										ctrl->paramsDict.SetVarINT32( L"stringID", m_levelStateParam );
+									}
+								}
+								//portrete								
+								if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" ) ) != nullptr )
+								{
+									ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
+								}
+								if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL2" ) ) != nullptr )
+								{
+									ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[1].eType );
+								}
+
+								//network - replace player names with real ones
+								if ( UTApp().IsGameNetworked() )
+								{
+									if ( ( ctrl = layer->GetControlByName( "CTRL_WND_PL1" ) ) != nullptr )
+									{
+										ctrl->paramsDict.SetVarINT32( L"stringID", STR_NETWORK_HOST_NAME );
+									}
+									if ( ( ctrl = layer->GetControlByName( "CTRL_WND_PL2" ) ) != nullptr )
+									{
+										ctrl->paramsDict.SetVarINT32( L"stringID", STR_NETWORK_PEER_NAME );
+									}
+
+									if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+									{
+										CHAR ctxt[MAX_PATH];
+										StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
+										ANALYTICS_EVENT( "level_lose_2p_net", ctxt, "durationSec", nTimeSpent );
+									}
+									//XP bar - networked
+									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
+									{
+										ctrl->paramsDict.SetVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[0].nPlayerXPPts );
+										int nNew = LIMIT( g_playerSelScr.m_arrPlayers[0].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints );
+										ctrl->paramsDict.SetVarINT32( L"nNewValue", nNew );
+									}
+									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
+									{
+										ctrl->paramsDict.SetVarINT32( L"nOldValue", g_playerSelScr.m_arrPlayers[1].nPlayerXPPts );
+										int nNew = LIMIT( g_playerSelScr.m_arrPlayers[1].nPlayerXPPts + nTotalXPPoints, 0, nMaxXPPoints );
+										ctrl->paramsDict.SetVarINT32( L"nNewValue", nNew );
+									}
+								}
+								else
+								{
+									if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+									{
+										CHAR ctxt[MAX_PATH];
+										StringCchPrintfA( ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER] + 1, g_userData[K_MEMID_SELECTED_LEVEL] + 1 );
+										ANALYTICS_EVENT( "level_lose_2p", ctxt, "durationSec", nTimeSpent );
+									}
+
+									//XP bar
+									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
+									{
+										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+										ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
+										ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+									}
+									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
+									{
+										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
+										ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl2 );
+										ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
+									}
+								}
+
+							}
+						}
+						// notify level finished for achievements
+						if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
+							UTApp().App_OnLevelFinished( g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL] );
 					}
 				}
-				// notify level finished for achievements
-				if ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE )
-					UTApp().App_OnLevelFinished( g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL] );
+				break;
+				default:
+					break;
 			}
 		}
 		break;
-		default:
-			break;
-		}
-	}
-	break;
 
 	}
 
@@ -3490,7 +3483,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 	m_nPlayersActive = m_nPlayers;
 	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 	{
-		if ( pPlayerActor[kk] != null )
+		if ( pPlayerActor[kk] != nullptr )
 		{
 			EAIBehaviorType curbeh = pPlayerActor[kk]->GetCurrentBehavior();
 			if ( curbeh == AI_BEHAVIOR_IN_LIMBO )
@@ -3823,25 +3816,25 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	ETexChannel	eTexChannel = K_TEXCHAN_NONE;
 	switch ( ePass )
 	{
-	case K_LVL_RP_COLORS:
-	{
-		pTexToUse = m_pTexTilesColor;
-		nTexIdxOffset = 0;
-		eTexChannel = K_TEXCHAN_COLORMAP;
-	}
-	break;
-	case K_LVL_RP_NORMALS_HEIGHT:
-	{
-		pTexToUse = m_pTexTilesNorm;
-		nTexIdxOffset = 1;
-		eTexChannel = K_TEXCHAN_NORMALMAP;
-	}
-	break;
-	case K_LVL_RP_LIGHTS:
-	{
-		ErrorBox( K_ERR_WARNING, L"Render lights using RenderPass_Lights() instead!" );
-	}
-	break;
+		case K_LVL_RP_COLORS:
+		{
+			pTexToUse = m_pTexTilesColor;
+			nTexIdxOffset = 0;
+			eTexChannel = K_TEXCHAN_COLORMAP;
+		}
+		break;
+		case K_LVL_RP_NORMALS_HEIGHT:
+		{
+			pTexToUse = m_pTexTilesNorm;
+			nTexIdxOffset = 1;
+			eTexChannel = K_TEXCHAN_NORMALMAP;
+		}
+		break;
+		case K_LVL_RP_LIGHTS:
+		{
+			ErrorBox( K_ERR_WARNING, L"Render lights using RenderPass_Lights() instead!" );
+		}
+		break;
 	}
 
 	m_pDevice->SetTexture( 0, pTexToUse->pTexture );
@@ -3864,35 +3857,35 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 
 		switch ( vis->eType )
 		{
-		case K_VST_ACTOR:
-		{
-			if ( eLastVis != K_VST_ACTOR )
+			case K_VST_ACTOR:
 			{
-				// if last painted element was not an actor then do a flush on UTpainter
-				__Painter().Flush();
-				// remove shaders that were set
-				UTGetShaderManager().SetVS( nullptr );
+				if ( eLastVis != K_VST_ACTOR )
+				{
+					// if last painted element was not an actor then do a flush on UTpainter
+					__Painter().Flush();
+					// remove shaders that were set
+					UTGetShaderManager().SetVS( nullptr );
+				}
+
+				CActor* act = static_cast< CActor* >( vis->pPtr );
+				act->Paint( eTexChannel );
+
+				//#TEMP: paint muzzle pos and shadow
+				/*
+				VecProj vpMuzz = act->GetWeaponMuzzleWorld( true, 0 );
+				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy.x, vpMuzz.xy.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x88ff0000 );
+				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy_proj.x, vpMuzz.xy_proj.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x8800ff00 );
+				*/
 			}
-
-			CActor* act = static_cast< CActor* >( vis->pPtr );
-			act->Paint( eTexChannel );
-
-			//#TEMP: paint muzzle pos and shadow
-			/*
-			VecProj vpMuzz = act->GetWeaponMuzzleWorld( true, 0 );
-			UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy.x, vpMuzz.xy.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x88ff0000 );
-			UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy_proj.x, vpMuzz.xy_proj.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x8800ff00 );
-			*/
-		}
-		break;
-		case K_VST_PROP:
-		{
-			CProp *prop = static_cast< CProp* >( vis->pPtr );
-			prop->sprite.PaintFModule_texOverride( 0, nTexIdxOffset );
-		}
-		break;
-		default:
 			break;
+			case K_VST_PROP:
+			{
+				CProp *prop = static_cast< CProp* >( vis->pPtr );
+				prop->sprite.PaintFModule_texOverride( 0, nTexIdxOffset );
+			}
+			break;
+			default:
+				break;
 		}
 
 		// save last type of painted item
@@ -4930,46 +4923,46 @@ void CLevel::IncreaseLevelStatistics( int K_LVL_STATS_n, int nValueToAdd /*= 1*/
 	//#ACHIEVEMENTS: check level achievements
 	switch ( K_LVL_STATS_n )
 	{
-	case K_LVL_STATS_PL1_USE_EXTRA_LIFE_CNT:
-	{
-		if ( ( m_arrStats[K_LVL_STATS_n] >= 5 ) &&
-			( pPlayerActor[0] != null ) &&
-			( !IsNetworkPlayer( pPlayerActor[0] ) ) )
+		case K_LVL_STATS_PL1_USE_EXTRA_LIFE_CNT:
 		{
-			UTGetAchievementManager().UnlockAchievement( ACH_TERMINATOR );
+			if ( ( m_arrStats[K_LVL_STATS_n] >= 5 ) &&
+				( pPlayerActor[0] != null ) &&
+				( !IsNetworkPlayer( pPlayerActor[0] ) ) )
+			{
+				UTGetAchievementManager().UnlockAchievement( ACH_TERMINATOR );
+			}
 		}
-	}
-	break;
-	case K_LVL_STATS_PL2_USE_EXTRA_LIFE_CNT:
-	{
-		if ( ( m_arrStats[K_LVL_STATS_n] >= 5 ) &&
-			( pPlayerActor[1] != null ) &&
-			( !IsNetworkPlayer( pPlayerActor[1] ) ) )
+		break;
+		case K_LVL_STATS_PL2_USE_EXTRA_LIFE_CNT:
 		{
-			UTGetAchievementManager().UnlockAchievement( ACH_TERMINATOR );
+			if ( ( m_arrStats[K_LVL_STATS_n] >= 5 ) &&
+				( pPlayerActor[1] != null ) &&
+				( !IsNetworkPlayer( pPlayerActor[1] ) ) )
+			{
+				UTGetAchievementManager().UnlockAchievement( ACH_TERMINATOR );
+			}
 		}
-	}
-	break;
-	case K_LVL_STATS_PL1_RESURRECT_PEER_CNT:
-	{
-		if ( ( m_arrStats[K_LVL_STATS_n] >= 5 ) &&
-			( pPlayerActor[0] != null ) &&
-			( !IsNetworkPlayer( pPlayerActor[0] ) ) )
+		break;
+		case K_LVL_STATS_PL1_RESURRECT_PEER_CNT:
 		{
-			UTGetAchievementManager().UnlockAchievement( ACH_STAY_WITH_ME );
+			if ( ( m_arrStats[K_LVL_STATS_n] >= 5 ) &&
+				( pPlayerActor[0] != null ) &&
+				( !IsNetworkPlayer( pPlayerActor[0] ) ) )
+			{
+				UTGetAchievementManager().UnlockAchievement( ACH_STAY_WITH_ME );
+			}
 		}
-	}
-	break;
-	case K_LVL_STATS_PL2_RESURRECT_PEER_CNT:
-	{
-		if ( ( m_arrStats[K_LVL_STATS_n] >= 5 ) &&
-			( pPlayerActor[1] != null ) &&
-			( !IsNetworkPlayer( pPlayerActor[1] ) ) )
+		break;
+		case K_LVL_STATS_PL2_RESURRECT_PEER_CNT:
 		{
-			UTGetAchievementManager().UnlockAchievement( ACH_STAY_WITH_ME );
+			if ( ( m_arrStats[K_LVL_STATS_n] >= 5 ) &&
+				( pPlayerActor[1] != null ) &&
+				( !IsNetworkPlayer( pPlayerActor[1] ) ) )
+			{
+				UTGetAchievementManager().UnlockAchievement( ACH_STAY_WITH_ME );
+			}
 		}
-	}
-	break;
+		break;
 	}
 }
 
@@ -5027,16 +5020,21 @@ void CLevel::GiveStrategicPoints( float fPoints, Vec2 * vPos )
 }
 
 
-bool CLevel::IsLineOfSight( Vec2 pt1, Vec2 pt2, Vec2 * retVecCollisionPt /*= null*/, Vec2 * retVecCollisionNormal /*= null*/ )
+bool CLevel::IsLineOfSight( Vec2 pt_from, Vec2 pt_to, CLevelArea * pStartArea )
 {
 	Vec2 collisionPoint, collisionNormal;
-	//before enemies attacked each other too, here was checking with closeby collisions
+	CTile* tl = SegmentTilesIntersectionEx( pt_from, pt_to, collisionPoint, collisionNormal, nullptr, pStartArea );
+
+	return tl == nullptr;
+	//#TODO: add intersection with shapes contained in pt1 pt2 bbox
+	/*
 	CCollisionShape* colShape = ColShape_Segment_Intersection_Arr( pt1, pt2, m_visibleList.logic_colShapesExtended.m_pData, m_visibleList.logic_colShapesExtended.Count(), retVecCollisionPt, retVecCollisionNormal );
 	if ( colShape != nullptr )
 	{
 		return false;
 	}
 	return true;
+	*/
 }
 
 
@@ -5275,65 +5273,65 @@ void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, 
 {
 	switch ( nEffectType )
 	{
-	case K_LVL_EFFECT_STONE_BREAK:
-	{
-		//__Particles().GenerateSmokePuff(Vec2(pos.x, pos.y - 10.0f), 20.0f, K_PART_LAYER_RT_FRONT_NRM);
-		m_camLevelToRT.ShakeScreen( 2.0f, 8.0f, &pos );
+		case K_LVL_EFFECT_STONE_BREAK:
+		{
+			//__Particles().GenerateSmokePuff(Vec2(pos.x, pos.y - 10.0f), 20.0f, K_PART_LAYER_RT_FRONT_NRM);
+			m_camLevelToRT.ShakeScreen( 2.0f, 8.0f, &pos );
 
-		//			SND_PLAY_POSITIONAL(SNDIDX_STONE_BREAK1, pos);
-	}
-	break;
-	case K_LVL_EFFECT_EXPLO_LARGE:
-	{
-		AddDoofer_Explo( hash_EXPLO_LARGE_XL, pos, 0, K_ACT_CLASS_EXPLOSION );
-	}
-	break;
-	case K_LVL_EFFECT_ELECTRIC_BREAK_SPARKS:
-	{
-		//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.4f, 0.1f, 0x88FDB727, 1.0f);
-					//particule sparkle
-					/*
-					for (int kk = 0; kk < 20; kk++)
-					{
-						__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, randint(2), &Vec2(pos.x + randfloatsgn(fSize), pos.y + randfloatsgn(fSize)), &g_vecGravityOld, &Vec2(randfloatsgn(60.0f), -10.0f - randfloat(40.0f)), 0.2f + randfloat(0.4f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 1.5f, kk * 0.025f);
-					}
-					*/
-	}
-	break;
-	case K_LVL_EFFECT_STARS_CONFETTI:
-	{
-		//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0x88FDB727, 3.0f * fSize);
-					//fire ring
-					/*
-					for (int kk = 0; kk < 30; kk++)
-					{
-						float ang = randfloat(DOUBLE_PI);
-						Vec2 vdir(cos(ang), sin(ang));
-						if (randompercent(50.0f))
-							__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK1, true, randint(2), &(pos + vdir * 10.0f), NULL, &(vdir * (40.0f + randfloat(20.0f))), 1.0f + randfloat(0.5f), 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 2.0f);
-						else
-							__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, 0, &(pos + vdir * 10.0f), NULL, &(vdir * (40.0f + randfloat(20.0f))), 1.0f + randfloat(0.5f), 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 2.0f);
-					}
-
-					//linii verticale
-					for (int kk = 0; kk < 6; kk++)
-					{
-						__Particles().AddParticle(ANM_PARTICLES_SPR_TELEPORT, false, 5 + randint(2), &Vec2(pos.x + randfloatsgn(8.0f), pos.y - 3), NULL, &Vec2(0.0f, -60.0f - randfloat(20.0f)), 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 0.0f, kk * 0.1f);
-					}
-					//add ring
-					__Particles().AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.2f, 0.2f, 10.0f, 0.0f, 0.0f, 0.1f, 0.3f, 0x55ffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT);
-					*/
-	}
-	break;
-	default:
-		ErrorBox( K_ERR_WARNING, L"CLevel::GenerateEffect - Unknown effect!" );
+			//			SND_PLAY_POSITIONAL(SNDIDX_STONE_BREAK1, pos);
+		}
 		break;
+		case K_LVL_EFFECT_EXPLO_LARGE:
+		{
+			AddDoofer_Explo( hash_EXPLO_LARGE_XL, pos, 0, K_ACT_CLASS_EXPLOSION );
+		}
+		break;
+		case K_LVL_EFFECT_ELECTRIC_BREAK_SPARKS:
+		{
+			//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.4f, 0.1f, 0x88FDB727, 1.0f);
+						//particule sparkle
+						/*
+						for (int kk = 0; kk < 20; kk++)
+						{
+							__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, randint(2), &Vec2(pos.x + randfloatsgn(fSize), pos.y + randfloatsgn(fSize)), &g_vecGravityOld, &Vec2(randfloatsgn(60.0f), -10.0f - randfloat(40.0f)), 0.2f + randfloat(0.4f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 1.5f, kk * 0.025f);
+						}
+						*/
+		}
+		break;
+		case K_LVL_EFFECT_STARS_CONFETTI:
+		{
+			//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0x88FDB727, 3.0f * fSize);
+						//fire ring
+						/*
+						for (int kk = 0; kk < 30; kk++)
+						{
+							float ang = randfloat(DOUBLE_PI);
+							Vec2 vdir(cos(ang), sin(ang));
+							if (randompercent(50.0f))
+								__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK1, true, randint(2), &(pos + vdir * 10.0f), NULL, &(vdir * (40.0f + randfloat(20.0f))), 1.0f + randfloat(0.5f), 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 2.0f);
+							else
+								__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, 0, &(pos + vdir * 10.0f), NULL, &(vdir * (40.0f + randfloat(20.0f))), 1.0f + randfloat(0.5f), 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 2.0f);
+						}
+
+						//linii verticale
+						for (int kk = 0; kk < 6; kk++)
+						{
+							__Particles().AddParticle(ANM_PARTICLES_SPR_TELEPORT, false, 5 + randint(2), &Vec2(pos.x + randfloatsgn(8.0f), pos.y - 3), NULL, &Vec2(0.0f, -60.0f - randfloat(20.0f)), 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 0.0f, kk * 0.1f);
+						}
+						//add ring
+						__Particles().AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.2f, 0.2f, 10.0f, 0.0f, 0.0f, 0.1f, 0.3f, 0x55ffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT);
+						*/
+		}
+		break;
+		default:
+			ErrorBox( K_ERR_WARNING, L"CLevel::GenerateEffect - Unknown effect!" );
+			break;
 	}
 }
 
 void CLevel::GenerateEffect( CStringHash sEffectName, Vec2 pos, float fSize, DWORD color )
 {
-	ELVLEffectType effectidx = ( ELVLEffectType ) GetListIndexByNameHash( sEffectName.textHash, ELVLEffectTypeNames, ARRAY_SIZE(ELVLEffectTypeNames) );
+	ELVLEffectType effectidx = ( ELVLEffectType ) GetListIndexByNameHash( sEffectName.textHash, ELVLEffectTypeNames, ARRAY_SIZE( ELVLEffectTypeNames ) );
 	GenerateEffect( effectidx, pos, fSize, color );
 }
 
@@ -5386,7 +5384,7 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 			if ( vEye.y > chkbb->vMax.y )
 			{
 				pRetArr[nCur++].Set( Vec2( chkbb->vMin.x, chkbb->vMax.y ), chkbb->vMax, vNYp, vPos, m_visibleList.visible_colShapesLights[kk]->ID, K_WALL_HEIGHT_SCREEN );
-			}
+	}
 			else if ( vEye.y < chkbb->vMin.y )
 			{
 				pRetArr[nCur++].Set( Vec2( chkbb->vMax.x, chkbb->vMin.y ), chkbb->vMin, vNYn, vPos );
@@ -5400,7 +5398,7 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 			{
 				pRetArr[nCur++].Set( chkbb->vMin, Vec2( chkbb->vMin.x, chkbb->vMax.y ), vNXn, vPos );
 			}
-		}
+}
 	}
 
 	///--- add occluders from tiles, optimizing for same wall lines
