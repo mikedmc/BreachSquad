@@ -438,7 +438,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 					__Texts().SetString( STR_CURRENT_MISSION_VAL, L"%d.%d %s", nChapterNumber + 1, nLevelNumber + 1, __Texts().strings[ nStrIdxLevelName ]->sText );
 				}
 
-				if ( FAILED( __Sim().LoadLevel( strLevelPath ) ) )
+				if ( OP_FAILED( __Sim().LoadLevel( strLevelPath ) ) )
 				{
 					ErrorBox( K_ERR_WARNING, L"Could not load level [%s]!", strLevelPath );
 					ChangeTo_Transition( GAME_STATE_LEVEL_SELECTION, TRANSITION_SIMPLE );
@@ -450,7 +450,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 				//modded custom levels
 #ifdef ENABLE_STEAM_WORKSHOP
 				CModsManager::CModDescriptor *mod = UTGetModsManager().GetModDescByIndex( g_userData[ K_MEMID_MOD_DWNLVL_SELECTED ] );
-				if ( mod == null )
+				if ( mod == nullptr )
 				{
 					ErrorBox( K_ERR_WARNING, L"Couldn't find custom level!" );
 					ChangeTo_Transition( GAME_STATE_LEVEL_SELECTION, TRANSITION_SIMPLE );
@@ -462,7 +462,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 				//write current mission name and number
 				__Texts().SetString( STR_CURRENT_MISSION_VAL, L"%s", mod->shName.text );
 
-				if ( FAILED( __Sim().LoadLevel( wcsLevelPath ) ) )
+				if ( OP_FAILED( __Sim().LoadLevel( wcsLevelPath ) ) )
 				{
 					ErrorBox( K_ERR_WARNING, L"Could not load downloaded level [%s]!", wcsLevelPath );
 					ChangeTo_Transition( GAME_STATE_LEVEL_SELECTION, TRANSITION_SIMPLE );

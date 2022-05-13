@@ -1889,46 +1889,11 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 		//float viewDstSq = sourceActor->actTemplate.fDiistSee * sourceActor->actTemplate.distSee;
 		float enemyDistSq = MUVec2LenSq( &enemyDistV );
 
-		bool bPreciseFOV = false; //approximate FOV with rectangle? (good for gameplay)
-		//if ((sourceActor->actTemplate.eCaps & CActorTemplate::K_ACT_CAPS_CAN_ROTATE_VIEW) != 0)
-			//bPreciseFOV = true;
-
-		if ( bPreciseFOV )
-		{
-			/*
-			//daca inamicul este in spate modifica raza pe cea de auzit, doar daca nu e alertat la maxim. Daca are fov maxim ramane raza vizuala si in spate.
-			if ((sourceActor->fFOVPercent < 1.0f) && (sourceActor->actTemplate.distHear > 0.0f) && (SIGN(enemyDistV.x) != SIGN(sourceActor->lookDirXsign)))
-			{
-				viewDstSq = sourceActor->actTemplate.distHear * sourceActor->actTemplate.distHear;
-				//daca il poate auzi si e in linie directa, il aude
-				if (enemyDistSq <= viewDstSq)
-				{
-					if (!IsLineOfSight(sourceActor->GetPosHeart(), enemy->GetPosHeart()))
-						continue;
-					//aici il aude deci e foarte aproape, il returnez direct
-					return enemy;
-				}
-			}
-			//daca e prea departe sau daca avem unul mai aproape nu il ataca
-			if ((enemyDistSq > viewDstSq) || (enemyDistSq >= minDistSq))
-				continue;
-			//daca e destul de aproape
-			//vede daca inamicul este in FOV. Face testul doar daca FOV nu este maxim (adica vede si deasupra)
-			if ((sourceActor->fFOVPercent < 1.0f) && (UTMath::GetAngleBetweenVectors(enemy->GetPosHeart() - sourceActor->GetPosHeart(), sourceActor->vAngleDir) > (HALF_PI * sourceActor->fFOVPercent)))
-				continue;
-			//verifica daca am linie directa de vedere
-			if (!IsLineOfSight(sourceActor->GetPosHeart(), enemy->GetPosHeart()))
-				continue;
-				*/
-		}
-		else //Dreptunghi of Vision! such fast! Much optimal!
-		{
-			//not in view rectangle
-			if ( !aabbvision.PointIn( enemy->GetPosHeart() ) )
-				continue;
-			if ( !IsLineOfSight( sourceActor->GetPosHeart(), enemy->GetPosHeart(), sourceActor->pArea ) )
-				continue;
-		}
+		//not in view rectangle
+		if ( !aabbvision.PointIn( enemy->GetPosHeart() ) )
+			continue;
+		if ( !IsLineOfSight( sourceActor->GetPosHeart(), enemy->GetPosHeart(), sourceActor->pArea ) )
+			continue;
 
 		//passed all tests and is closer? set ptr on new one
 		if ( ( retvalenemy == nullptr ) || ( enemyDistSq < minDistSq ) )
@@ -5486,7 +5451,7 @@ OPRESULT CLevel::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc, v
 	V_OP_RET( m_sprProps.OnCreateDevice( pDevice ) );
 	V_OP_RET( m_sprActors.OnCreateDevice( pDevice ) );
 	V_OP_RET( m_sprInterface.OnCreateDevice( pDevice ) );
-	V_OP_HRTOOP( m_texManager.OnCreateDevice( pDevice ) );
+	V_OP_RET( m_texManager.OnCreateDevice( pDevice ) );
 	V_OP_RET( m_bufferedPainter.OnCreateDevice( pDevice ) );
 
 	for ( int ii = 0; ii < m_arrAreas.GetSize(); ii++ )
@@ -5506,7 +5471,7 @@ OPRESULT CLevel::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc, vo
 	V_OP_RET( m_sprProps.OnResetDevice( pDevice ) );
 	V_OP_RET( m_sprActors.OnResetDevice( pDevice ) );
 	V_OP_RET( m_sprInterface.OnResetDevice( pDevice ) );
-	V_OP_HRTOOP( m_texManager.OnResetDevice( pDevice ) );
+	V_OP_RET( m_texManager.OnResetDevice( pDevice ) );
 	V_OP_RET( m_bufferedPainter.OnResetDevice( pDevice ) );
 
 	for ( int ii = 0; ii < m_arrAreas.GetSize(); ii++ )

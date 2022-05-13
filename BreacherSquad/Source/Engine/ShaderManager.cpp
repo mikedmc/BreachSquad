@@ -224,7 +224,7 @@ OPRESULT CShaderManager::AddShadersFromXML(WCHAR* sXMLpath)
 			WCHAR wsName[MAX_PATH];
 			StringCchPrintf(wsPath, MAX_PATH, L"%s%s", wsPathXML, psnode.attribute(L"path").value());
 			StringCchCopy(wsName, MAX_PATH, psnode.attribute(L"name").value());
-			if (FAILED(AddPShader(wsPath, wsName)))
+			if (OP_FAILED(AddPShader(wsPath, wsName)))
 			{
 				return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"Couldn't load pixel shader: %s", wsPath);
 			}
@@ -276,7 +276,7 @@ OPRESULT CShaderManager::AddVShader(WCHAR *szPath, WCHAR * szFriendlyName, int *
 
 	// Add the new shader
 	VSnode *pNewVS = new VSnode();
-	if (pNewVS == NULL)
+	if (pNewVS == nullptr)
 		return K_OP_FAILED;
 
 	ZeroMemory(pNewVS, sizeof(VSnode));
@@ -284,8 +284,7 @@ OPRESULT CShaderManager::AddVShader(WCHAR *szPath, WCHAR * szFriendlyName, int *
 	// shader name
 	pNewVS->shName.Init(szFriendlyName);
 	// creates shader
-	HRESULT hr = S_OK;
-	if (FAILED(hr = CreateVS(pDevice, szPath, &pNewVS->pShader)))
+	if (OP_FAILED(CreateVS(pDevice, szPath, &pNewVS->pShader)))
 	{
 		return K_OP_FAILED;
 	}
@@ -323,8 +322,7 @@ OPRESULT CShaderManager::AddPShader(WCHAR * szPath, WCHAR * szFriendlyName, int 
 	//set friendly name
 	pNewPS->shName.Init(szFriendlyName);
 	
-	HRESULT hr = S_OK;
-	if (FAILED(hr = CreatePS(pDevice, szPath, &pNewPS->pShader)))
+	if (OP_FAILED(CreatePS(pDevice, szPath, &pNewPS->pShader)))
 	{
 		return K_OP_FAILED;
 	}
@@ -534,21 +532,14 @@ OPRESULT CShaderManager::OnResetDevice( PDEVICE pDevice3d, const SURFACE_DESC* p
 		return OPRESULT(K_OP_FAILED, L"CShaderManager::OnResetDevice->Failed to createVertexDeclarations()", K_SEVERITY_CRITICAL);
 	}
 
-	HRESULT hr = S_OK;
 	// reloads shaders
 	for (int ii = 0; ii < VertexShaders.GetSize(); ii++)
-	{
-		if (FAILED(hr = CreateVS(pDevice, VertexShaders[ii]->szFilename, &VertexShaders[ii]->pShader)))
-		{
-			return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Failed to re-create vertex shader (HR:%ld).\n\t\t%s\n", hr, VertexShaders[ii]->szFilename);
-		}
+	{				 
+		V_OP_RET( CreateVS( pDevice, VertexShaders[ii]->szFilename, &VertexShaders[ii]->pShader ) );
 	}
 	for (int ii = 0; ii < PixelShaders.GetSize(); ii++)
 	{
-		if (FAILED(hr = CreatePS(pDevice, PixelShaders[ii]->szFilename, &PixelShaders[ii]->pShader)))
-		{
-			return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Failed to re-create pixel shader (HR:%ld).\n\t\t%s\n", hr, PixelShaders[ii]->szFilename);
-		}
+		V_OP_RET( CreatePS( pDevice, PixelShaders[ii]->szFilename, &PixelShaders[ii]->pShader ) );
 	}
 
 	return K_OP_OK;

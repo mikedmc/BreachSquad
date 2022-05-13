@@ -114,8 +114,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 
 			///--- FONTS ---
 			//load fonts based on selected language
-			HRESULT hr = S_OK;
-			if (FAILED(hr = App_LocaLoadFonts(g_Language.bUseTTFonts)))
+			if (OP_FAILED(App_LocaLoadFonts(g_Language.bUseTTFonts)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"[ERROR] Error loading language fonts!");
 				return;
@@ -138,7 +137,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 
 			WCHAR xmlpath[MAX_PATH];
 			FileManager::GetMediaPath(L"media/interfaces/interfaces.xml", xmlpath);
-			if (FAILED(UTGetGUI().LoadControlsXML(xmlpath)))
+			if (OP_FAILED(UTGetGUI().LoadControlsXML(xmlpath)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load interfaces sprites!");
 				return;
@@ -184,14 +183,14 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			// no modding support on shaders!
 			WCHAR mszPath[MAX_PATH];
 			StringCchPrintf(mszPath, MAX_PATH, L"%s/shaders/shaders.xml", UTApp().g_wszAppResDir);
-			if (FAILED(UTGetShaderManager().AddShadersFromXML(mszPath)))
+			if (OP_FAILED(UTGetShaderManager().AddShadersFromXML(mszPath)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load shaders XML: %s", mszPath);
 				return;
 			}
 			///--- particles ---
 			FileManager::GetMediaPath(L"media/particles/particles.bsx", xmlpath);
-			if (FAILED(__Particles().Init(xmlpath, 5000)))
+			if (OP_FAILED(__Particles().Init(xmlpath, 5000)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load particles!");
 				return;

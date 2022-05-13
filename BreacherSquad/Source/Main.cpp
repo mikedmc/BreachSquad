@@ -357,7 +357,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 #endif
 
 	// Initialize sound
-	V_OP_RET(InitSound());
+	InitSound();
 
 	//trigger resolution change event immediately
 	CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_RESOLUTION_CHANGE);
@@ -770,16 +770,16 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	__ImGui().OnCreateDevice(pDevice, pBBDesc);
 	V_OP_RETHR(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(__Painter().OnCreateDevice(pDevice, pBBDesc));
-	V_RETURN(__TexFonts().OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(__TexFonts().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnCreateDevice(pDevice, pBBDesc));
-	V_RETURN(__Particles().OnCreateDevice(pDevice, pBBDesc));
-	V_RETURN(UTGetGUI().OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(__Particles().OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(UTGetGUI().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnCreateDevice(pDevice, pBBDesc));
 	//V_RETURN(g_spineMgr.OnCreateDevice(pDevice, pBBDesc));
 
 #ifdef K_CONTROLS_EDITOR
-	V_RETURN(g_ControlsEditor.OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(g_ControlsEditor.OnCreateDevice(pDevice, pBBDesc));
 #endif
 
 	//restore sampler settings
@@ -839,16 +839,16 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 
 	UTGetTTFManager().OnResetDevice(pDevice, pBBDesc);
 
-	V_RETURN(__TexFonts().OnResetDevice(pDevice, pBBDesc));
+	V_OP_RETHR(__TexFonts().OnResetDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnResetDevice(pDevice, pBBDesc));
-	V_RETURN(__Particles().OnResetDevice(pDevice, pBBDesc));
-	V_RETURN(UTGetGUI().OnResetDevice(pDevice, pBBDesc));
+	V_OP_RETHR(__Particles().OnResetDevice(pDevice, pBBDesc));
+	V_OP_RETHR(UTGetGUI().OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnResetDevice(pDevice, pBBDesc));
 	//V_RETURN(g_spineMgr.OnResetDevice(pDevice, pBBDesc));
 
 #ifdef K_CONTROLS_EDITOR
-	V_RETURN(g_ControlsEditor.OnResetDevice(pDevice, pBBDesc));
+	V_OP_RETHR(g_ControlsEditor.OnResetDevice(pDevice, pBBDesc));
 #endif
 	//--- set Sprite painter class pointer ---
 	__Sim().SetSpritePtr(g_pGameSprite);

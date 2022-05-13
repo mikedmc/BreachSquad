@@ -45,6 +45,7 @@ public:
 	WCHAR				message[256]{};
 
 	// converts OPRESULT to HRESULT
+	
 	operator HRESULT() const
 	{
 		return (code >= 0) ? S_OK : E_FAIL;
@@ -56,7 +57,7 @@ public:
 		severity = K_SEVERITY_NONE;
 		swprintf_s( message, 256, L"HRESULT:%ld", hr );
 	}
-
+	  
 	OPRESULT(eOpResult eCode, eOpSeverity eSeverity = K_SEVERITY_NONE) 
 	{
 		code = eCode;
