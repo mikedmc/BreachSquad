@@ -97,6 +97,7 @@ void CAISensorInfo::Reset()
 	m_lastInteractingActorUID = 0;
 	m_bEnabled = true;
 	fTimeSinceHit = 1000.0f;
+	vGoTo = { 0.0f, 0.0f };
 
 	evt.Reset();
 	evtInternal.Reset();

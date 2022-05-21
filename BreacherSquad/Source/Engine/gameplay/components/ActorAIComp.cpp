@@ -273,6 +273,43 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 
 			case AI_BEHAVIOR_PATROL:
 			{
+				// process walk
+				EGenericState st = ProcessGoToRequest( act );
+				// no destination for patrol is set, then set it now!
+				if ( st == K_STATE_NOTSET || st == K_STATE_FINISHED )
+				{
+					_ASSERT( act.pArea != nullptr );
+					//find new patrol position (area->GetRandomPosition(flags=floor))
+					RectXYWHi areabb = act.pArea->AABBbounds_TL;
+					int tries = 0;
+					bool bFound = false;
+					Vec2i tlpos = { 0,0 };
+					while ( bFound == false && tries < 10 )
+					{
+						tries++;
+						tlpos = { areabb.x + __Sim().RNG().RandInt( areabb.w ), areabb.y + __Sim().RNG().RandInt( areabb.h ) };
+						CTile* tl = act.pArea->GetTile( tlpos.x, tlpos.y );
+						if ( tl && tl->flags & K_TILEFLAG_WALKABLE )
+						{
+							bFound = true;
+						}
+					}
+					// found destination
+					if ( bFound )
+					{
+						AIsensor.vGoTo = { tlpos.x * K_TILE_SIZE_F + K_TILE_HSIZE_F, tlpos.y * K_TILE_SIZE_F + K_TILE_HSIZE_F };
+						//#TODO: path is not direct then do AStar(PathIsClear(bbox, movevec))
+					}
+					else
+					{
+						// couldn't find patrol destination point... end behavior
+						bBehaviorFinished = true;
+						ErrorBox( K_ERR_WARNING, L"Strange, we couldn't find valid patrol destination." );
+						break;
+					}
+				}
+				// update patrol state
+				act.vAim = AIcommands.vMoveDir * 128.0f;
 			}
 			break;
 
@@ -839,6 +876,27 @@ bool CActorAIComponent::SetAIState( CActor& actor, WCHAR * strStateName )
 	return true;
 }
 
+
+EGenericState CActorAIComponent::ProcessGoToRequest( CActor & act )
+{
+	if ( UTMath::Vec2AlmostZero( AIsensor.vGoTo ) )
+		return K_STATE_NOTSET;
+	// process walk
+	Vec2 vDest = AIsensor.vGoTo - act.pos.xy;
+	float fDest = MUVec2Len( &vDest );
+	// keep moving until next time we think to avoid interruptions
+	MUVec2Norm( &AIcommands.vMoveDir, &vDest );
+	AIcommands.bThrust = true;
+	AIcommands.bRunning = false;
+	// reached vGoTo destination?
+	if ( fDest < 4.0f )	//#TODO: find a better way so it doesn't fail even on low fps (last pos etc)
+	{
+		vDest = { 0.0f, 0.0f };
+		return K_STATE_FINISHED;
+	}
+
+	return K_STATE_EXECUTING;
+}
 
 bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& act, int nBehaviorIdx, bool &ret_bFinished )
 {

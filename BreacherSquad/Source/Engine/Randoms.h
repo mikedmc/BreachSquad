@@ -32,7 +32,7 @@ public:
 
 	
 	int				GetRandomCallsCount();			// Returns the number of random calls since last SetRandomSeed 
-	unsigned int	RandInt( unsigned int n );
+	int				RandInt( int n );
 	int				RandInt( int min, int max );	// min <= rnd <= max
 	
 	float			RandomF();						// Returns a random float between 0.0f-1.0f

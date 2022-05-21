@@ -147,7 +147,8 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			//#TODO: release resources on errors (goto ERROR)
 			return OPRESULT(K_OP_FAILED, L"LoadLevel::Not enough memory for passability map!", K_SEVERITY_CRITICAL);
 		}
-		memset( m_mapPassability[kk], 0, sizeof( char ) * m_levelAABB_TL.h );
+		// initialize map with "cannot pass" where empty
+		memset( m_mapPassability[kk], K_ASTAR_COST_NOTPASS, sizeof( char ) * m_levelAABB_TL.h );
 	}
 
 	///--- everything loaded, SetAI here again so it sets all necessary pointers ---

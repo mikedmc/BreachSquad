@@ -348,12 +348,13 @@ public:
 	CActor*				pTargetedActor;		// visible enemy, set by internal sensors
 	UINT32				m_lastInteractingActorUID;	//0-not set or UID for last actor that he interacted with
 	float				fTimeSinceHit;		//time passed since got hit
-	CAIEvent			evtInternal;		// internal event given by sensors (see enemy, got shot etc). Don't use for decisions.
+	CAIEvent			evtInternal;		// internal event given by sensors (see enemy, got shot etc). Don't use for decisions, updated by sensors.
 	// weapon status sensors
 	EWpnSensorState		WpnStatePrimary;	// status of primary weapon
 	EWpnSensorState		WpnStateSecondary;  // status of secondary weapon (usually grenades)
+	Vec2				vGoTo;				// target destination for current actor ({0.0, 0.0} means not set)
 
-	CAIEvent	evt;				// current event on which actor is making decisions (chosen between evtInternal and level AI events)
+	CAIEvent			evt;				// current event on which actor is making decisions (chosen between evtInternal and level AI events)
 
 	CAISensorInfo();
 

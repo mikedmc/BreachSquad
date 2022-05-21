@@ -70,8 +70,8 @@ public:
 	int						GetTilesByFlag(RectXYXYi srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity);
 
 public: //--- framework methods ---
-	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
-	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
-	OPRESULT OnLostDevice(void* pUserContext = NULL);
-	OPRESULT OnDestroyDevice(void* pUserContext = NULL);
+	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr);
+	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr);
+	OPRESULT OnLostDevice(void* pUserContext = nullptr);
+	OPRESULT OnDestroyDevice(void* pUserContext = nullptr);
 };

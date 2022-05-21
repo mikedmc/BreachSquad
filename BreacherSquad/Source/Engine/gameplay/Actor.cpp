@@ -13,6 +13,9 @@ void CActor::PostConstructionInit()
 
 void CActor::BeginPlay()
 {
+	//#TODO: vezi daca ramanem pe __Sim sau daca tot dam parametru CLevel la toate metodele...
+	pArea = __Sim().Areas_GetAt( pos.xy );
+	_ASSERT(pArea != nullptr);
 	c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE);
 }
 

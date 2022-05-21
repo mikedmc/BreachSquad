@@ -54,7 +54,7 @@ int CRandom::GetProbabilityFromDomain(float arrProbabilities[], int nProbabiliti
 	return -1;
 }
 
-unsigned int CRandom::RandInt( unsigned int n )
+int CRandom::RandInt( int n )
 {
     unsigned long y;
     static unsigned long mag01[2]={0x0, CMATH_MATRIX_A};

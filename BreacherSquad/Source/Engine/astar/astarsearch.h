@@ -47,5 +47,6 @@ public:
 	static void			SetMapPointer( char** mapPtr, int mapW = 0, int mapH = 0 );
 	// Finds path to destination. Returns number of steps or 0 for no solution
 	int					FindPath( Vec2i startTL, Vec2i endTL, Vec2i* arrRetPath, int arrRetPathSize );
-	//void				SmoothPath();
+	
+	//void				SmoothPath(CLevel & level); - ori primeste referinta la actor si la nivel ori fac metoda in level 
 };

@@ -32,6 +32,8 @@ public:
 	bool					SetAIState( CActor& actor, WCHAR * strStateName );
 
 private:
+	// Processes the sensor vGoTo request and returns the status (colliding, reached, etc)
+	EGenericState			ProcessGoToRequest( CActor & act );
 	// Sets behavior by idx, from current state behaviors array
 	// \param: ret_bFinished - set to true if current behavior doesn't need an update (like set_animation or set_flag, etc)
 	// \returns: true if set, false if error
