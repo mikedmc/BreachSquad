@@ -338,9 +338,8 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	//m_vLevelOrigin.x = (float)originX + m_levelAABB.x;
 	//m_vLevelOrigin.y = (float)originY + m_levelAABB.y;
 
-	// add dirty rect on area so it computes everything (dirty rect is inclusive so we subtract 1 from width and height)
-	//m_arrDirtyRectsTL.push_back(RectXYWHi(posTL.x, posTL.y, areaW, areaH));
-	m_arrDirtyRectsTL.emplace_back( RectXYWHi( posTL.x, posTL.y, areaW, areaH ) );
+	// add dirty rect on area so it computes everything
+	AddDirtyRect( posTL.x, posTL.y, areaW, areaH );
 
 	// need to know the tileset size
 	Vec2 vTilesetSize = m_pTexTilesColor->getSize();

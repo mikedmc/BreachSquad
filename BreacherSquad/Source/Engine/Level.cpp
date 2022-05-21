@@ -390,9 +390,9 @@ void CLevel::UpdateDirtyRects()
 					CTile* tl = area->GetTile( xx, yy );
 					// set passability flags in pathfinding map
 					if ( tl->flags & K_TILEFLAG_WALKABLE )
-						m_mapPassability[xx][yy] = 0;
+						m_mapPassability[xx][yy] = K_ASTAR_COST_FLOOR;
 					else
-						m_mapPassability[xx][yy] = 9;
+						m_mapPassability[xx][yy] = K_ASTAR_COST_NOTPASS;
 					// neighbours
 					CTile* tlL = area->GetTile( xx - 1, yy );
 					CTile* tlR = area->GetTile( xx + 1, yy );

@@ -25,6 +25,8 @@
 #include "gameplay/LevelArea.h"
 #include "gameplay/MissionStory.h"
 
+#include "astar/astarsearch.h"
+
 #include "CFOVUtil.h"
 #include "IngameGUI.h"
 
