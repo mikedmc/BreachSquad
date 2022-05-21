@@ -574,7 +574,7 @@ void CSoundManager::ApplySoundSettingsNow(int sndIdx, bool affectPlayingToo)
 			continue;
 		if(!affectPlayingToo)
 		{
-			HRESULT hr = pDSB->GetStatus(&status);
+			/*HRESULT hr = */pDSB->GetStatus(&status);
 			if(status & DSBSTATUS_PLAYING)
 			{
 				continue;

@@ -300,12 +300,12 @@ void CPlayerSelScr::Update(float dTime)
 		if ((eCommand != K_PSS_COMMAND_NONE) && (nInstanceID != -1))
 		{
 			int nPlayerIdx = -1;
-			//trec prin toti playerii pentru ca pe retea pot fi adaugat pe index [1] desi e doar un player adaugat (adica eu ca si SLAVE)
+			// trec prin toti playerii pentru ca pe retea pot fi adaugat pe index [1] desi e doar un player adaugat (adica eu ca si SLAVE)
 			for (int ll = 0; ll < K_MAX_PLAYERS_CNT; ll++)
 			{
 				if (m_arrPlayers[ll].nInstanceID == nInstanceID)
 				{
-					nPlayerIdx = ll; //am gasit playerul
+					nPlayerIdx = ll; // player found
 					break;
 				}
 			}
@@ -321,42 +321,42 @@ void CPlayerSelScr::Update(float dTime)
 					if (m_arrPlayers[nPlayerOrdinal].nInstanceID == -1)
 					{
 						//set player idx to check
-						int nPlayerIdx = nPlayerOrdinal;
+						int player_ordinal = nPlayerOrdinal;
 
-						if (m_arrPlayers[nPlayerIdx].eType == K_PSS_CLASS_NOT_SELECTED)
+						if (m_arrPlayers[player_ordinal].eType == K_PSS_CLASS_NOT_SELECTED)
 						{
-							m_arrPlayers[nPlayerIdx].Init();
-							m_arrPlayers[nPlayerIdx].eType = K_PSS_CLASS_ASSAULTER;
+							m_arrPlayers[player_ordinal].Init();
+							m_arrPlayers[player_ordinal].eType = K_PSS_CLASS_ASSAULTER;
 						}
 
 						//load last selection ALWAYS
-						m_arrPlayers[nPlayerIdx].eType = (EPSSPlayerClass)g_userData[K_MEMID_PANEL1_CLASS + nPlayerIdx * (K_MEMID_PANEL2_CLASS - K_MEMID_PANEL1_CLASS)];
+						m_arrPlayers[player_ordinal].eType = (EPSSPlayerClass)g_userData[K_MEMID_PANEL1_CLASS + player_ordinal * (K_MEMID_PANEL2_CLASS - K_MEMID_PANEL1_CLASS)];
 						//set the rest of the selection
 						for (int ll = 0; ll < PSS_ITEMCATS_COUNT; ll++)
 						{
-							int nDataOff = K_MEMID_PANEL1_CLASSDATA_START + nPlayerIdx * (K_MEMID_PANEL2_CLASS - K_MEMID_PANEL1_CLASS) + m_arrPlayers[nPlayerIdx].eType * 5;
-							m_arrPlayers[nPlayerIdx].nSelection[ll] = g_userData[ll + nDataOff];
+							int nDataOff = K_MEMID_PANEL1_CLASSDATA_START + player_ordinal * (K_MEMID_PANEL2_CLASS - K_MEMID_PANEL1_CLASS) + m_arrPlayers[player_ordinal].eType * 5;
+							m_arrPlayers[player_ordinal].nSelection[ll] = g_userData[ll + nDataOff];
 							//make sure selection fits data (for modding)
-							int nItemsCnt = arrItemsByClass[m_arrPlayers[nPlayerIdx].eType].matOptionsByItemType[ll].nCount;
-							if ((m_arrPlayers[nPlayerIdx].nSelection[ll] < 0) || (m_arrPlayers[nPlayerIdx].nSelection[ll] >= nItemsCnt))
+							int nItemsCnt = arrItemsByClass[m_arrPlayers[player_ordinal].eType].matOptionsByItemType[ll].nCount;
+							if ((m_arrPlayers[player_ordinal].nSelection[ll] < 0) || (m_arrPlayers[player_ordinal].nSelection[ll] >= nItemsCnt))
 							{
-								m_arrPlayers[nPlayerIdx].nSelection[ll] = 0;
+								m_arrPlayers[player_ordinal].nSelection[ll] = 0;
 							}
 						}
 
 						//setam instance ID ca sa legam user de controller
-						m_arrPlayers[nPlayerIdx].nInstanceID = nInstanceID;
-						m_arrPlayers[nPlayerIdx].bIsNetworkPlayer = false;
-						m_arrPlayers[nPlayerIdx].fVerseReadyTimer = K_PSS_WAIT_BEFORE_VERSE_SEC - EPS;
+						m_arrPlayers[player_ordinal].nInstanceID = nInstanceID;
+						m_arrPlayers[player_ordinal].bIsNetworkPlayer = false;
+						m_arrPlayers[player_ordinal].fVerseReadyTimer = K_PSS_WAIT_BEFORE_VERSE_SEC - EPS;
 
 						//load local points invested into upgrades
-						InitUpgradeBars(&m_arrPlayers[nPlayerIdx]);
+						InitUpgradeBars(&m_arrPlayers[player_ordinal]);
 						//update lock flag on selections
-						SetSelectionPrices(&m_arrPlayers[nPlayerIdx]);
+						SetSelectionPrices(&m_arrPlayers[player_ordinal]);
 						//reset command
 						eCommand = K_PSS_COMMAND_NONE;
 						//send command
-						SendSelectionByNetwork(nPlayerIdx);
+						SendSelectionByNetwork(player_ordinal);
 						
 						m_nPlayersCnt++;
 						assert((m_nPlayersCnt >= 0) && (m_nPlayersCnt <= K_MAX_PLAYERS_CNT));

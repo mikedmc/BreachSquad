@@ -135,11 +135,23 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		m_levelAABB.Union(plarea->AABBbounds.to_RECTXYWH_F());
 	}
 	// set level aabb in tiles too
-	m_levelAABB_TL.Set(floor(m_levelAABB.x / K_TILE_SIZE), floor(m_levelAABB.y / K_TILE_SIZE), (int)(m_levelAABB.w / K_TILE_SIZE), (int)(m_levelAABB.h / K_TILE_SIZE));
-
+	m_levelAABB_TL.Set((int)floor(m_levelAABB.x / K_TILE_SIZE), (int)floor(m_levelAABB.y / K_TILE_SIZE), (int)(m_levelAABB.w / K_TILE_SIZE), (int)(m_levelAABB.h / K_TILE_SIZE));
+	// allocate passability map
+	_ASSERT( m_levelAABB_TL.w < 5000 && m_levelAABB_TL.h < 5000 );
+	m_mapPassability = new char*[m_levelAABB_TL.w];
+	for ( int kk = 0; kk < m_levelAABB_TL.w; kk++ )
+	{
+		m_mapPassability[kk] = new char[m_levelAABB_TL.h];
+		if ( m_mapPassability[kk] == nullptr )
+		{
+			//#TODO: release resources on errors (goto ERROR)
+			return OPRESULT(K_OP_FAILED, L"LoadLevel::Not enough memory for passability map!", K_SEVERITY_CRITICAL);
+		}
+		memset( m_mapPassability[kk], 0, sizeof( char ) * m_levelAABB_TL.h );
+	}
 
 	///--- everything loaded, SetAI here again so it sets all necessary pointers ---
-	//setez ai-ul la final ca sa execute functiile de initializare cand avem toate array-urile incarcate (ca sa ma asigur ca gaseste target ID-urile)
+	// set AI at the end after we load everything or we won't have final targets for pointers
 	for (int kk = 0; kk < m_arrLights.GetSize(); kk++)
 	{
 		CLight * light = m_arrLights[kk];

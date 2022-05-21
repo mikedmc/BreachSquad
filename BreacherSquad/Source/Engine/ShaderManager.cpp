@@ -526,8 +526,7 @@ OPRESULT CShaderManager::OnCreateDevice( PDEVICE pDevice3d, const SURFACE_DESC* 
 OPRESULT CShaderManager::OnResetDevice( PDEVICE pDevice3d, const SURFACE_DESC* pBBDesc, void* pUserContext)
 {
 	pDevice = pDevice3d;
-	OPRESULT opr = CreateVertexDeclarations();
-	if (OP_FAILED(opr))
+	if(OP_FAILED(CreateVertexDeclarations()))
 	{
 		return OPRESULT(K_OP_FAILED, L"CShaderManager::OnResetDevice->Failed to createVertexDeclarations()", K_SEVERITY_CRITICAL);
 	}

@@ -90,6 +90,7 @@ public:
 	int						tileW, tileH;					// size of tiles
 	RectXYWH				m_levelAABB;					// level AABB in pixels - grows when adding areas
 	RectXYWHi				m_levelAABB_TL;					// level AABB in tiles  - grows when adding areas
+	char**					m_mapPassability;				// map the size of the level for pathfinding
 	CTexNode*				m_pTexTilesColor;				// tileset base texture 
 	CTexNode*				m_pTexTilesNorm;				// tileset normals texture 
 	Vec2					m_vLevelOrigin;					// level origin for the editor (usually around start location)
@@ -102,7 +103,9 @@ public:
 	void					BuildDynamicGeometry(CAABB camAABB);
 
 	///--- AREAS ---
-	// Updates the tiles in the dirty rects (should return if changes were made)
+	// adds a dirty rect for updating
+	void					AddDirtyRect( int x, int y, int w, int h );
+	// Updates the tiles in the dirty rects (#TODO: should return if changes were made)
 	void					UpdateDirtyRects();
 	// Updates areas visibility and returns number of visible areas
 	int						Areas_UpdateVisibility(RectXYWH camRect);

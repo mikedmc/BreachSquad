@@ -317,6 +317,7 @@ CLevel::CLevel()
 
 	m_pDevice = nullptr;
 	tileW = tileH = 0;
+	m_mapPassability = nullptr;
 
 	m_levelAABB.Set( 0.0f, 0.0f, 0.0f, 0.0f );
 	m_levelAABB_TL.Set( 0, 0, 0, 0 );
@@ -364,6 +365,8 @@ void CLevel::UpdateDirtyRects()
 {
 	//#TODO: doesn't change WALKABLE floor flags, that should be done during loading or level editing for speed
 	//#TODO: should make sure the level always has a 1 tile border!
+	//#TODO: should set and update the passability values
+	//#TODO: should set a flag after updating a tile so it doesn't update again if 2 rectangles overlap
 	///--- compute tile flags ---
 	for ( auto rect : m_arrDirtyRectsTL )
 	{
@@ -375,8 +378,7 @@ void CLevel::UpdateDirtyRects()
 			// take border tiles into account:
 			// clamp to smaller size because we check neighbours
 			RectXYWHi lrect = rect;
-			//			area->AABBbounds_TL.Intersects(
-						// clamp and bring rectangle to local space
+			// clamp and bring rectangle to local space
 			lrect.IntersectWith( area->AABBbounds_TL );
 			if ( ( lrect.w == 0 ) || ( lrect.h == 0 ) )
 				continue;
@@ -386,12 +388,17 @@ void CLevel::UpdateDirtyRects()
 				for ( int xx = lrect.x; xx < lrect.x + lrect.w; xx++ )
 				{
 					CTile* tl = area->GetTile( xx, yy );
+					// set passability flags in pathfinding map
+					if ( tl->flags & K_TILEFLAG_WALKABLE )
+						m_mapPassability[xx][yy] = 0;
+					else
+						m_mapPassability[xx][yy] = 9;
 					// neighbours
 					CTile* tlL = area->GetTile( xx - 1, yy );
 					CTile* tlR = area->GetTile( xx + 1, yy );
 					CTile* tlU = area->GetTile( xx, yy - 1 );
 					CTile* tlD = area->GetTile( xx, yy + 1 );
-					///--- set wall flags on non walkable tiles
+					///--- set wall flags on non walkable tiles for shadows and other 
 					if ( ( tl->flags & K_TILEFLAG_WALKABLE ) == 0 )
 					{
 						// clear flags
@@ -1710,6 +1717,12 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 
 }
 
+
+void CLevel::AddDirtyRect( int x, int y, int w, int h )
+{
+	//#TODO: should check existing dirty rects and only add if not contained. 
+	m_arrDirtyRectsTL.emplace_back( RectXYWHi( x, y, w, h) );
+}
 
 void CLevel::SetActorWeaponPerks( CActor * pActor, CWeapon * pWeapon )
 {
@@ -4651,6 +4664,15 @@ HRESULT CLevel::PaintUsingFinalRTT()
 void CLevel::Release()
 {
 	ClearVisibilityLists();
+	// release passability map 
+	if ( m_mapPassability != nullptr )
+	{
+		for ( int xx = 0; xx < m_levelAABB_TL.w; xx++ )
+		{
+			SAFE_DELETE_ARRAY( m_mapPassability[xx] );
+		}
+		SAFE_DELETE_ARRAY( m_mapPassability );
+	}
 
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrAreas );
 
@@ -4683,7 +4705,7 @@ void CLevel::Release()
 	m_nPlayersActive = 0;
 	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 	{
-		pPlayerActor[kk] = null;
+		pPlayerActor[kk] = nullptr;
 	}
 
 	m_interfaceIGM.Release();

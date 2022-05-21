@@ -87,7 +87,7 @@ CApplication::CApplication()
 	g_stencilBits = 0;
 
 #if defined(K_GLOBAL_ENABLE_SDL)
-	gWindow = NULL;
+	gWindow = nullptr;
 #endif
 
 	// keep real screen and virtual screen sizes
@@ -111,14 +111,14 @@ HRESULT CApplication::SaveScreenshot()
 {
 	HRESULT hr = S_OK;
 	LPDIRECT3DDEVICE9 pd3dDevice = DXUTGetD3DDevice();
-	if (pd3dDevice == NULL)
+	if (pd3dDevice == nullptr)
 	{
 		ErrorBox(K_ERR_DEBUGOUT, L"Failed getting d3dDevice in SaveScreenshot()\n");
 		return S_FALSE;
 	}
 
-	LPDIRECT3DSURFACE9 pBackBuffer = NULL;
-	D3DSURFACE_DESC d3dsd;
+	LPDIRECT3DSURFACE9 pBackBuffer = nullptr;
+	//D3DSURFACE_DESC d3dsd;
 	V_RETURN(pd3dDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer));
 
 	SYSTEMTIME systime;
@@ -129,7 +129,7 @@ HRESULT CApplication::SaveScreenshot()
 	WCHAR szFullFileName[MAX_PATH];
 	StringCchPrintf(szFullFileName, MAX_PATH, L"%s%s.png", UTApp().g_wszUserDataDir, szFileName);
 
-	V_RETURN(D3DXSaveSurfaceToFile(szFullFileName, D3DXIFF_PNG, pBackBuffer, NULL, NULL));
+	V_RETURN(D3DXSaveSurfaceToFile(szFullFileName, D3DXIFF_PNG, pBackBuffer, nullptr, nullptr));
 
 	pBackBuffer->Release();
 	return S_OK;
@@ -150,13 +150,13 @@ void CApplication::Init()
 	//CSIDL_PERSONAL - my documents, locked sometimes
 	//CSIDL_LOCAL_APPDATA - appData/Local/etc
 	//SHGFP_TYPE_CURRENT vs SHGFP_TYPE_DEFAULT - user/admin set value vs system default value
-	hr = ::SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_DEFAULT, g_wszUserDataDir);
+	hr = ::SHGetFolderPath(nullptr, CSIDL_LOCAL_APPDATA, nullptr, SHGFP_TYPE_DEFAULT, g_wszUserDataDir);
 	bool bFolderError = false;
 	if (SUCCEEDED(hr))
 	{
 		//create company folder
 		StringCchCat(g_wszUserDataDir, MAX_PATH, K_GAME_USERDATA_COMPANY_SUFFIX);
-		int errval = ::CreateDirectory(g_wszUserDataDir, NULL);
+		int errval = ::CreateDirectory(g_wszUserDataDir, nullptr);
 		if (errval == 0)//error
 		{
 			DWORD errcode = GetLastError();
@@ -167,7 +167,7 @@ void CApplication::Init()
 		if (!bFolderError)
 		{
 			StringCchCat(g_wszUserDataDir, MAX_PATH, K_GAME_USERDATA_FOLDER_SUFFIX);
-			errval = ::CreateDirectory(g_wszUserDataDir, NULL);
+			errval = ::CreateDirectory(g_wszUserDataDir, nullptr);
 			if (errval == 0)//error
 			{
 				DWORD errcode = GetLastError();
@@ -180,7 +180,7 @@ void CApplication::Init()
 		if (!bFolderError)
 		{
 			StringCchPrintf(g_wszModsDir, MAX_PATH, L"%s%s", g_wszUserDataDir, K_GAME_USERDATA_MODS_SUFFIX);
-			errval = ::CreateDirectory(g_wszModsDir, NULL);
+			errval = ::CreateDirectory(g_wszModsDir, nullptr);
 			if (errval == 0)//error
 			{
 				DWORD errcode = GetLastError();
@@ -192,7 +192,7 @@ void CApplication::Init()
 		if (!bFolderError)
 		{
 			StringCchPrintf(g_wszModsDirTemp, MAX_PATH, L"%s%s", g_wszTempFolderPath, K_GAME_USERDATA_MODS_SUFFIX_TEMP);
-			errval = ::CreateDirectory(g_wszModsDirTemp, NULL);
+			errval = ::CreateDirectory(g_wszModsDirTemp, nullptr);
 			if (errval == 0)//error
 			{
 				DWORD errcode = GetLastError();
@@ -318,12 +318,12 @@ bool CApplication::IsOnlyInstance(LPCTSTR className)
 {
 	// Find the window.  If active, set and return false
 	// Only one game instance may have this mutex at a time...
-	HANDLE handle = CreateMutex(NULL, TRUE, className);
+	/*HANDLE handle = */CreateMutex(nullptr, TRUE, className);
 
 	// Does anyone else think 'ERROR_SUCCESS' is a bit of a dichotomy?
 	if (GetLastError() != ERROR_SUCCESS)
 	{
-		HWND hWnd = FindWindow(className, NULL);
+		HWND hWnd = FindWindow(className, nullptr);
 		if (hWnd)
 		{
 			// An instance of your game is already running.
@@ -364,7 +364,7 @@ OPRESULT CApplication::VerifyRequirements()
 	if (OP_FAILED(hr))
 	{
 		StringCchCat(wszText, 2048, L"\n The application may not work properly if run.  Do you wish to continue anyway?");
-		if (::MessageBox(NULL, wszText, L"Minimum Requirements", MB_YESNO | MB_ICONQUESTION) == IDYES)
+		if (::MessageBox(nullptr, wszText, L"Minimum Requirements", MB_YESNO | MB_ICONQUESTION) == IDYES)
 			hr = K_OP_OK;
 	}
 	
@@ -547,7 +547,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 		}
 	}
 
-	//handling EVTT_TRANSITION - comenzi start tranzitie
+	//handling EVTT_TRANSITION
 	if (nEvent.m_eventType == CEventTypes::evtT_GAMESTATE)
 	{
 		if (nEvent.m_eventCommand == CEventCommands::evtC_GAMESTATE_CHANGE)
@@ -601,7 +601,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				if (layer != null)
 				{
 					CControl* ctrl;
-					if (ctrl = layer->GetControlByName("CTRL_SLIDER_SOUNDVOL"))
+ 					if (ctrl = layer->GetControlByName("CTRL_SLIDER_SOUNDVOL"))
 					{
 						ctrl->paramsDict.SetVarFloat(L"fSlidePercent", m_Settings.fSoundsVolume);
 					}
@@ -1990,7 +1990,7 @@ bool CApplication::InitSDL(HWND hWnd)
 	}
 	//Create window - needed for keyboard input
 	gWindow = SDL_CreateWindowFrom((void*)hWnd);
-	if (gWindow == NULL)
+	if (gWindow == nullptr)
 	{
 		mbstowcs(txt, SDL_GetError(), MAX_PATH);
 		ErrorBox(K_ERR_CRITICAL, L"SDL Window couldn't initialize! SDL Error: %s\n", txt);
@@ -2029,7 +2029,7 @@ void CApplication::CloseSDL()
 {
 	//Destroy window
 	SDL_DestroyWindow(gWindow);
-	gWindow = NULL;
+	gWindow = nullptr;
 
 	//Quit SDL subsystems
 	SDL_Quit();
@@ -2180,7 +2180,7 @@ HRESULT CApplication::OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFA
 	DXUTDeviceSettings eDeviceSettings = DXUTGetDeviceSettings();
 	CD3DEnumeration* pD3DEnum = DXUTGetEnumeration();
 	CD3DEnumAdapterInfo* pAdapterInfo = pD3DEnum->GetAdapterInfo(eDeviceSettings.AdapterOrdinal);
-	if (pAdapterInfo == NULL)
+	if (pAdapterInfo == nullptr)
 	{
 		ErrorBox(K_ERR_WARNING, L"CApplication::OnResetDevice - Can't load resolution list!");
 	}

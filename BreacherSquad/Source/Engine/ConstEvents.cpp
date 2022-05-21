@@ -2,36 +2,36 @@
 #include "ConstEvents.h"
 
 ///EVENT TYPES
-CStringHash CEventTypes::evtT_SOUND(L"EVTTYPE_SOUND");
-CStringHash CEventTypes::evtT_CONTROLS(L"EVTTYPE_CONTROLS");
-CStringHash CEventTypes::evtT_GAMESTATE(L"EVTTYPE_GAMESTATE");
-CStringHash CEventTypes::evtT_SYSTEM(L"EVTTYPE_SYSTEM");
-CStringHash CEventTypes::evtT_INFO( L"INFO" );
+const CStringHash CEventTypes::evtT_SOUND(L"EVTTYPE_SOUND");
+const CStringHash CEventTypes::evtT_CONTROLS(L"EVTTYPE_CONTROLS");
+const CStringHash CEventTypes::evtT_GAMESTATE(L"EVTTYPE_GAMESTATE");
+const CStringHash CEventTypes::evtT_SYSTEM(L"EVTTYPE_SYSTEM");
+const CStringHash CEventTypes::evtT_INFO( L"INFO" );
 ///EVENT COMMANDS
 //--- SOUND ---
-CStringHash CEventCommands::evtC_SOUND_PLAY_IDX(L"SND_PLAY_IDX");				
-CStringHash CEventCommands::evtC_SOUND_PLAY_NAME(L"SND_PLAY_NAME");
-CStringHash CEventCommands::evtC_SOUND_PLAY_HASH(L"SND_PLAY_HASH");
+const CStringHash CEventCommands::evtC_SOUND_PLAY_IDX(L"SND_PLAY_IDX");				
+const CStringHash CEventCommands::evtC_SOUND_PLAY_NAME(L"SND_PLAY_NAME");
+const CStringHash CEventCommands::evtC_SOUND_PLAY_HASH(L"SND_PLAY_HASH");
 
-CStringHash CEventCommands::evtC_SOUND_STOP_IDX(L"SND_STOP_IDX");				
-CStringHash CEventCommands::evtC_SOUND_STOP_NAME(L"SND_STOP_NAME");				
-CStringHash CEventCommands::evtC_SOUND_STOP_HASH(L"SND_STOP_HASH");				
+const CStringHash CEventCommands::evtC_SOUND_STOP_IDX(L"SND_STOP_IDX");				
+const CStringHash CEventCommands::evtC_SOUND_STOP_NAME(L"SND_STOP_NAME");				
+const CStringHash CEventCommands::evtC_SOUND_STOP_HASH(L"SND_STOP_HASH");				
 
-CStringHash CEventCommands::evtC_SOUND_SET_GROUP_VOLUME(L"SND_SET_GROUP_VOLUME");	
-CStringHash CEventCommands::evtC_SOUND_STOP_GROUP(L"SND_STOP_GROUP");			
+const CStringHash CEventCommands::evtC_SOUND_SET_GROUP_VOLUME(L"SND_SET_GROUP_VOLUME");	
+const CStringHash CEventCommands::evtC_SOUND_STOP_GROUP(L"SND_STOP_GROUP");			
 
 //--- CONTROLS ---
-CStringHash CEventCommands::evtC_CONTROLS_CLICK(L"CONTROLS_CLICK");
-CStringHash CEventCommands::evtC_CONTROLS_SLIDER_CHANGED(L"CONTROLS_SLIDER_CHANGED");
-CStringHash CEventCommands::evtC_CONTROLS_CHECK_CHANGED(L"CONTROLS_CHECK_CHANGED");
-CStringHash CEventCommands::evtC_CONTROLS_SELECTION_CHANGED(L"CONTROLS_SELECTION_CHANGED");
-CStringHash CEventCommands::evtC_CONTROLS_PAGE_CHANGED(L"CONTROLS_PAGE_CHANGED");
+const CStringHash CEventCommands::evtC_CONTROLS_CLICK(L"CONTROLS_CLICK");
+const CStringHash CEventCommands::evtC_CONTROLS_SLIDER_CHANGED(L"CONTROLS_SLIDER_CHANGED");
+const CStringHash CEventCommands::evtC_CONTROLS_CHECK_CHANGED(L"CONTROLS_CHECK_CHANGED");
+const CStringHash CEventCommands::evtC_CONTROLS_SELECTION_CHANGED(L"CONTROLS_SELECTION_CHANGED");
+const CStringHash CEventCommands::evtC_CONTROLS_PAGE_CHANGED(L"CONTROLS_PAGE_CHANGED");
 
 //--- GAMESTATE ---
-CStringHash CEventCommands::evtC_GAMESTATE_CHANGE(L"GAMESTATE_CHANGE");
-CStringHash CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION(L"GAMESTATE_CHANGE_TRANSITION");
+const CStringHash CEventCommands::evtC_GAMESTATE_CHANGE(L"GAMESTATE_CHANGE");
+const CStringHash CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION(L"GAMESTATE_CHANGE_TRANSITION");
 
 //--- SYSTEM ---
-CStringHash CEventCommands::evtC_SYSTEM_RESOLUTION_CHANGE(L"SYS_RESOLUTION_CHANGE");
-CStringHash	CEventCommands::evtC_SYSTEM_CONTROLLER_ADDED(L"SYS_CONTROLLER_ADDED");
-CStringHash	CEventCommands::evtC_SYSTEM_CONTROLLER_REMOVED(L"SYS_CONTROLLER_REMOVED");
+const CStringHash CEventCommands::evtC_SYSTEM_RESOLUTION_CHANGE(L"SYS_RESOLUTION_CHANGE");
+const CStringHash	CEventCommands::evtC_SYSTEM_CONTROLLER_ADDED(L"SYS_CONTROLLER_ADDED");
+const CStringHash	CEventCommands::evtC_SYSTEM_CONTROLLER_REMOVED(L"SYS_CONTROLLER_REMOVED");

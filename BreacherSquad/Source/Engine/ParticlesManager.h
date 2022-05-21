@@ -158,7 +158,7 @@ private:
 	int					nParticlesCnt;					// total number of particles
 	CParticle*			pParticles;						// particles pool of nParticlesCnt size
 	CParticle			pListFree;						// available particles circular list list (only using pNext and pPrev)
-	CParticle			pList[K_PART_LAYERS_CNT];		// used particles are kept in rings, one for each layer
+	CParticle			pList[K_PART_LAYERS_CNT];		// used particles are kept in rings, one for each layer. Rings because we need to add at the end.
 	float				fLocalTimeline;
 
 public:
