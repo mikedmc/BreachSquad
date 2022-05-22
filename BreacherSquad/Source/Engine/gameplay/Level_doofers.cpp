@@ -142,7 +142,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 
 		//add sound event
 		if (explotemplate->fSoundRadius > 0.0f)
-			AddAIEvent(K_LVL_AI_EVENT_SOUND_THREAT, 0, (EActorClass)exploOwnerClass, pos, explotemplate->fSoundRadius, 1.0f);
+			AddAIEvent(K_AIEVT_SOUND_THREAT, 0, (EActorClass)exploOwnerClass, pos, explotemplate->fSoundRadius, 1.0f);
 
 		if (exploAABB == null)
 		{

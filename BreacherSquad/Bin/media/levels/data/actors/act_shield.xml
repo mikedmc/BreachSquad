@@ -53,7 +53,7 @@
 
 		<STATE name="DEAD" nPriority="10">
 			<TRIGGERING_EVENTS>
-				<AI_EVENT type="AI_EVENT_DEAD" />
+				<AI_EVENT type="EVT_DEAD" />
 			</TRIGGERING_EVENTS>
 			<BEHAVIORS>
 				<BEHAVIOR name="AI_BEHAVIOR_DEAD" />

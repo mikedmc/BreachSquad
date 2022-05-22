@@ -190,7 +190,7 @@ public:
 	// Finds closest visible actor of specified name (inside visibility radius)
 	// @fMaxDistance - if greater than 0 then it overrides seeDistance
 	CActor*					GetClosestActorByTemplateName(CActor * sourceActor, WCHAR * sTargetTemplateName, float fMaxDistance = 0.0f);
-	//AI events (radius < 0.0f means infinite)
+	// AI events (radius < 0.0f means infinite)
 	void					AddAIEvent(EAIEventType eventType, UINT32 ownerUID, EActorClass ownerClass, Vec2 vPos, float radius, float duration = 0.6f );
 	///--- decals ---
 	//#TODO: move decals arrays on areas

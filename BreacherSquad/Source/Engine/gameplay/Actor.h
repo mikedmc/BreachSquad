@@ -105,6 +105,8 @@ public:
 	inline EAIBehaviorType		GetCurrentBehavior() { return c_AI->GetCurrentBehavior(); };
 	// Gets pointer to weapons component
 	inline CWeaponsComponent*	Weapons() { return c_weapons; }
+	// Gets pointer to AI component
+	inline const CActorAIComponent*  	GetAI() const { return c_AI; }
 	// tells if actor is alive (health > 0) and not hidden or deallocated, or inactive
 	bool						IsAlive() override;
 	// returns the enabled flag (ignored by updates and all)

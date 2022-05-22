@@ -41,5 +41,5 @@ private:
 	// Called when changing behaviors (to exit them gracefully)
 	void					OnActorBehaviorFinished( CActor& actor, EAIBehaviorType eOldBehavior );
 	// Finds closest valid AI event of typeFilter (if specified)
-	CAIEvent*				GetMostImportantAIEvent( CActor& act, EAIEventType eTypeFilter = K_LVL_AI_EVENT_ANY );
+	CAIEvent*				GetMostImportantAIEvent( CActor& act, EAIEventType eTypeFilter = K_AIEVT_ANY );
 };

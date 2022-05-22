@@ -1085,7 +1085,7 @@ bool CActor::CheckShoot( CLevel& level )
 			//			AddProp_Light(vShootPos, ANM_LIGHTS_SPR_POINT1, 0.05f, 0.0f, D3DCOLOR_COLORALPHA(0xffFDB727, fPropAlpha), weapon->WeaponTemplate.fMuzzleLightSize);
 		}
 		// add AI sound event
-		level.AddAIEvent( K_LVL_AI_EVENT_SOUND_THREAT, shooter->GetUID(), shooter->_template.actorClass, shooter->GetPosHeart(), weapon->_template.fSoundRadius );
+		level.AddAIEvent( K_AIEVT_SOUND_THREAT, shooter->GetUID(), shooter->_template.actorClass, shooter->GetPosHeart(), weapon->_template.fSoundRadius );
 	}
 
 	return true;
@@ -1301,7 +1301,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 				float fLifeLowLimit = this->_template.fLife * 0.1f;
 				if ( ( this->fLife < fLifeLowLimit ) && ( this->fLife + fLifeTaken >= fLifeLowLimit ) )
 				{
-					AddAIEvent( K_LVL_AI_EVENT_LOW_HEALTH, 0, pBullet->actorClass, this->GetPosHeart(), 10000.0f, 0.6f, this->GetUID() );
+					AddAIEvent( K_AIEVT_LOW_HEALTH, 0, pBullet->actorClass, this->GetPosHeart(), 10000.0f, 0.6f, this->GetUID() );
 				}
 				*/
 
@@ -1330,7 +1330,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 		//only add "got hit" events for enemy classes
 		if (pBullet->actorClass >= K_ACT_CLASS_EXPLOSION)
 		{
-			AddAIEvent(K_LVL_AI_EVENT_GOT_HIT, pBullet->ownerUID, pBullet->actorClass, evtpos, -1.0f, 1.2f, this->GetUID());
+			AddAIEvent(K_AIEVT_GOT_HIT, pBullet->ownerUID, pBullet->actorClass, evtpos, -1.0f, 1.2f, this->GetUID());
 		}
 		*/
 	}
@@ -1472,7 +1472,7 @@ void CActor::SetStun( float fStunDuration )
 		this->speed.x = 0.0f;
 
 	//#TODO: let him know he got stunned
-	//AddAIEvent(K_LVL_AI_EVENT_GOT_HIT, 0, (EActorClass)exploOwnerClass, pos, fStunRadius, fMaxStun + 0.5f, act->GetUID());
+	//AddAIEvent(K_AIEVT_GOT_HIT, 0, (EActorClass)exploOwnerClass, pos, fStunRadius, fMaxStun + 0.5f, act->GetUID());
 
 	//custom stun responses
 	/*

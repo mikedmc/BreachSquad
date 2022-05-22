@@ -837,10 +837,10 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 				for ( pugi::xml_node eventnode = triggersparent.first_child(); eventnode; eventnode = eventnode.next_sibling() )
 				{
 					CStringHash evtTypeStr( eventnode.attribute( L"type" ).value() );
-					EAIEventType nevt = K_LVL_AI_EVENT_NONE;
+					EAIEventType nevt = K_AIEVT_NONE;
 					// handle "ANY" keyword
 					if ( evtTypeStr.textHash == FastHash( L"any" ) )
-						nevt = K_LVL_AI_EVENT_ANY;
+						nevt = K_AIEVT_ANY;
 					else
 						nevt = ( EAIEventType ) GetListIndexByName( eventnode.attribute( L"type" ).value(), EAIEventTypeNames, ARRAY_SIZE( EAIEventTypeNames ) );
 
@@ -3848,7 +3848,9 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 				CActor* act = static_cast< CActor* >( vis->pPtr );
 				act->Paint( eTexChannel );
 
-				//#TEMP: paint muzzle pos and shadow
+				//#TEMP: paint debug stuff
+				UTSprite::PaintFModule( &m_sprInterface, act->GetAI()->AIsensor.vGoTo, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0, 0x88ff0000 );
+
 				/*
 				VecProj vpMuzz = act->GetWeaponMuzzleWorld( true, 0 );
 				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy.x, vpMuzz.xy.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x88ff0000 );

@@ -29,7 +29,7 @@ CAIState * CAITemplate::GetHighestPriorityState( EAIEventType evtType, CRandom* 
 		CAIState* pState = m_arrStates[kk];
 		//daca am event de tipul curent sau event any (nu se refera si la IDLE_TICK)
 		if ( ( pState->m_arrTriggeringEventTypes.Contains( evtType ) ) ||
-			( ( evtType > K_LVL_AI_EVENT_IDLE_TICK ) && ( pState->m_arrTriggeringEventTypes.Contains( K_LVL_AI_EVENT_ANY ) ) ) )
+			( ( evtType > K_AIEVT_IDLE_TICK ) && ( pState->m_arrTriggeringEventTypes.Contains( K_AIEVT_ANY ) ) ) )
 		{
 			if ( pState->nPriority > nRetPriority )
 			{

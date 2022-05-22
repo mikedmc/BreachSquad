@@ -203,54 +203,49 @@ public:
 //lista este in functie de prioritati
 enum EAIEventType
 {
-	//folosit la filtre
-	K_LVL_AI_EVENT_ANY = -2,
-	//empty event. folosit la filtru la GetClosestAIEvent
-	K_LVL_AI_EVENT_NONE = -1,
-	//event folosit pentru schimbarea starilor (Cand nu e nici un input interesant)
-	//nu e inclus in eventurile ANY
-	K_LVL_AI_EVENT_IDLE_TICK = 0,
+	// mostly used for filters
+	K_AIEVT_ANY = -2,
+	// empty event. used as filter for GetClosestAIEvent
+	K_AIEVT_NONE = -1,
+	// no interesting input, we generate idle tick. not included in triggering=ANY filter
+	K_AIEVT_IDLE_TICK = 0,
 	///--- De aici incep eventurile propriuzise (ANY filter) ---
-	//event trimis de obicei din script, cu raza mica (pentru hostages mai ales)
-	K_LVL_AI_EVENT_SCRIPT_TRIGGER,
-	//lumini care se aprind si se sting, etc
-	K_LVL_AI_EVENT_STRANGE,
-	K_LVL_AI_EVENT_SOUND_THREAT,
-	K_LVL_AI_EVENT_SOUND_EXPLOSION,
+	// usually sent by scripts
+	K_AIEVT_SCRIPT_TRIGGER,
+	K_AIEVT_STRANGE,
+	K_AIEVT_SOUND_THREAT,
+	K_AIEVT_SOUND_EXPLOSION,
 	//players shooting doors usually
-	K_LVL_AI_EVENT_SOUND_BEHIND_DOOR,
-	//grav, atunci cand se aude o usa
-	K_LVL_AI_EVENT_SOUND_DOOR_BREACHING,
-	//f grav, atunci cand este impuscat
-	K_LVL_AI_EVENT_GOT_HIT,
-	//ff grav, cand isi ia melee
-	K_LVL_AI_EVENT_GOT_MELEED,
+	K_AIEVT_SOUND_BEHIND_DOOR,
+	K_AIEVT_SOUND_DOOR_BREACHING,
+	K_AIEVT_GOT_HIT,
+	K_AIEVT_GOT_MELEED,
 
-	//urmeaza eventuri care nu prea se adauga in lista ci sunt intoarse de senzorii actorului
-	K_LVL_AI_EVENT_LOST_ENEMY,	//cand pierde inamicul
-	K_LVL_AI_EVENT_TOUCH_ENEMY, //cand atinge inamicul pe care il vede
-	K_LVL_AI_EVENT_SEE_ENEMY,	//cand vede inamicul
-	K_LVL_AI_EVENT_LOW_HEALTH,	//cand mai ramane doar putin din energie (trimis o singura data)
-	K_LVL_AI_EVENT_DEAD,		//cand moare
+	// events returned by internal sensors of the actor
+	K_AIEVT_LOST_ENEMY,	
+	K_AIEVT_TOUCH_ENEMY, 
+	K_AIEVT_SEE_ENEMY,	
+	K_AIEVT_LOW_HEALTH,	
+	K_AIEVT_DEAD,		
 	//count them
 	K_LVL_AI_EVENTS_CNT,
 };
 const CStringHash EAIEventTypeNames[] = {
-	L"AI_EVENT_IDLE_TICK",
-	L"AI_EVENT_SCRIPT_TRIGGER",
-	L"AI_EVENT_STRANGE",
-	L"AI_EVENT_SOUND_THREAT",
-	L"AI_EVENT_SOUND_EXPLOSION",
-	L"AI_EVENT_SOUND_BEHIND_DOOR",
-	L"AI_EVENT_SOUND_DOOR_BREACHING",
-	L"AI_EVENT_GOT_HIT",
-	L"AI_EVENT_GOT_MELEED",
+	L"EVT_IDLE_TICK",
+	L"EVT_SCRIPT_TRIGGER",
+	L"EVT_STRANGE",
+	L"EVT_SOUND_THREAT",
+	L"EVT_SOUND_EXPLOSION",
+	L"EVT_SOUND_BEHIND_DOOR",
+	L"EVT_SOUND_DOOR_BREACHING",
+	L"EVT_GOT_HIT",
+	L"EVT_GOT_MELEED",
 
-	L"AI_EVENT_LOST_ENEMY",
-	L"AI_EVENT_TOUCH_ENEMY",
-	L"AI_EVENT_SEE_ENEMY",
-	L"AI_EVENT_LOW_HEALTH",
-	L"AI_EVENT_DEAD",
+	L"EVT_LOST_ENEMY",
+	L"EVT_TOUCH_ENEMY",
+	L"EVT_SEE_ENEMY",
+	L"EVT_LOW_HEALTH",
+	L"EVT_DEAD",
 };
 
 class CAIEvent
@@ -264,7 +259,7 @@ public:
 	Vec2			pos;
 
 	CAIEvent() :
-		nType( K_LVL_AI_EVENT_NONE ),
+		nType( K_AIEVT_NONE ),
 		ownerUID( 0 ), ownerClass( -1 ),
 		fRadius( 0.0f ), fDuration( 0.0f )
 	{}
@@ -291,7 +286,7 @@ public:
 
 	void Reset()
 	{
-		nType = K_LVL_AI_EVENT_NONE;
+		nType = K_AIEVT_NONE;
 		ownerUID = 0;
 		ownerClass = 0;
 		pos = Vec2( 0.0f, 0.0f );

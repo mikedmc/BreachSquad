@@ -54,6 +54,8 @@ enum EActorClass
 };
 // neutral classes are lower or equal to this
 #define K_ACT_CLASSCHECKPOINT_NEUTRALS  K_ACT_CLASS_HOSTAGE
+// higher than this you get enemies of the player
+#define K_ACT_CLASSCHECKPOINT_ENEMIES	K_ACT_CLASS_ENEMY
 
 const CStringHash EActorClassNames[ K_ACT_CLASSES_COUNT ] =
 {
