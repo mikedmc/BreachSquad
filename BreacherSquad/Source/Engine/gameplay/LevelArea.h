@@ -68,6 +68,8 @@ public:
 	int						GetPropsTouchingBox(CAABB srcBox, CArray<CProp*>& ret_arrProps, bool bOnlyInteractibles = false);
 	// gets all the tiles that 
 	int						GetTilesByFlag(RectXYXYi srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity);
+	// returns true if srcBox collides with tiles, props or collision boxes
+	bool					IsBoxColliding( CAABB srcBox, bool bCheckProps = true );
 
 public: //--- framework methods ---
 	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr);

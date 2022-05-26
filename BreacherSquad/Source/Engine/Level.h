@@ -123,6 +123,10 @@ public:
 	// srcRectTL will be part of the level bbox in tile coords. Make sure arrTiles is large enough. Array will be cleared inside the function.
 	// arrTiles is an array of CTile pointers
 	void					Areas_GetTilesSnapshot(RectXYWHi srcRectTL, CTile** arrTiles, int arrCapacity);
+	// Returns true if srcRect collides with anything (walls, solid boxes, etc)
+	// Used to find valid spots for spawning and other "one time only" stuff
+	// Do not use for realtime collision detection!
+	bool					Areas_IsBoxColliding( CAABB srcBox, bool bCheckProps );
 
 	///--- LEVEL DEFINES (generic data used ingame) ---
 	vector<CScriptAction>	m_arrActionTemplates;			// list of all possible actions ingame (they get copied on iActives)
@@ -279,6 +283,8 @@ public:
 	bool					ActivateSpecialAbility(int nAbilityIdx, int nTargetPlayerOrdinal);
 	// Do we have a line of sight between the 2 points
 	bool					IsLineOfSight(Vec2 pt_from, Vec2 pt_to, CLevelArea * pStartArea = nullptr);
+	//#TODO: Checks moving box collision instead of ray collision
+	bool					IsLineOfSight(CAABB start, Vec2 vMove, CLevelArea * pStartArea = nullptr );
 
 	UINT32					m_unLastID;				//Last loaded ID - used to assign unique IDs to runtime spawned elements
 	//Generates a new editor ID and increments m_unLastID (used when appending areas)

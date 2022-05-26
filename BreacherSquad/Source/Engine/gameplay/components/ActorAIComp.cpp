@@ -75,7 +75,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			// reset internal event
 			AIsensor.evtInternal.Reset();
 			//check for targets or other AI events
-			CActor* targetActor = __Sim().GetClosestTarget(&act /*, act._template.foeClassFilter1, act.actTemplate.foeClassFilter2*/);
+			CActor* targetActor = level.GetClosestTarget(&act /*, act._template.foeClassFilter1, act.actTemplate.foeClassFilter2*/);
 			if ( targetActor != nullptr )
 			{
 				//float enemyDst = MUVec2Len( &(targetActor->GetPosHeart() - act.GetPosHeart()) );
@@ -277,8 +277,12 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			{
 				// process walk
 				EGenericState st = ProcessGoToRequest( act );
+				// recalculate patrol destination?
+				bool bRecompute = ( st == K_STATE_NOTSET || st == K_STATE_FINISHED );
+				if ( st == K_STATE_EXECUTING && FLAG_ANY( act.collisionFlags, K_DIRFLAG_ALL ) )
+					bRecompute = true;
 				// no destination for patrol is set, then set it now!
-				if ( st == K_STATE_NOTSET || st == K_STATE_FINISHED )
+				if ( bRecompute )
 				{
 					_ASSERT( act.pArea != nullptr );
 					//find new patrol position (area->GetRandomPosition(flags=floor))
@@ -289,11 +293,17 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					while ( bFound == false && tries < 10 )
 					{
 						tries++;
-						tlpos = { areabb.x + __Sim().RNG().RandInt( areabb.w ), areabb.y + __Sim().RNG().RandInt( areabb.h ) };
+						tlpos = { areabb.x + level.RNG().RandInt( areabb.w ), areabb.y + level.RNG().RandInt( areabb.h ) };
 						CTile* tl = act.pArea->GetTile( tlpos.x, tlpos.y );
-						if ( tl && tl->flags & K_TILEFLAG_WALKABLE )
+						if ( (tl != nullptr) && (tl->flags & K_TILEFLAG_WALKABLE) )
 						{
-							bFound = true;
+							// see if place can be really reached by current actor
+							CAABB destbb = act.bbox_floor;
+							destbb.Move( tl->bbox.vCenter );
+							if ( !level.Areas_IsBoxColliding( destbb, true ) )
+							{
+								bFound = true;
+							}
 						}
 					}
 					// found destination
@@ -301,6 +311,9 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					{
 						AIsensor.vGoTo = { tlpos.x * K_TILE_SIZE_F + K_TILE_HSIZE_F, tlpos.y * K_TILE_SIZE_F + K_TILE_HSIZE_F };
 						//#TODO: path is not direct then do AStar(PathIsClear(bbox, movevec))
+
+						// process go to request again after finding a new destination so we update the AI commands for next frame
+						ProcessGoToRequest( act );
 					}
 					else
 					{
@@ -999,8 +1012,8 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& act, int nBehaviorIdx, bo
 		break;
 		case AI_BEHAVIOR_IDLE:
 		{
-			float vx = __Sim().RNG().RandFloatSgn( 100.0f );
-			float vy = __Sim().RNG().RandFloatSgn( 100.0f );
+			float vx = level.RNG().RandFloatSgn( 100.0f );
+			float vy = level.RNG().RandFloatSgn( 100.0f );
 			act.vAim = { vx, vy };
 		}
 		break;

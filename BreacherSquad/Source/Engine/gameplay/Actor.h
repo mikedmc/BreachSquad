@@ -31,7 +31,7 @@ public:
 	int							nLastPlayedVerseSndIdx;		//last played sound idx
 
 	VecProj						vHeart;						// 3d heart position used for visibility tests and weapon direction
-	UINT16						collisionFlags;				// tells us where we have collisions
+	UINT16						collisionFlags;				// tells us where we have collisions (K_DIRFLAG_...)
 	bool						bHasGravity;				// does it have gravity?
 
 	Vec3						pos_last;					// position on last frame

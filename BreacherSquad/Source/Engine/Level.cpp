@@ -572,6 +572,17 @@ void CLevel::Areas_GetTilesSnapshot( RectXYWHi srcRectTL, CTile** arrTiles, int 
 	}
 }
 
+bool CLevel::Areas_IsBoxColliding( CAABB srcBox, bool bCheckProps )
+{
+	std::vector<CLevelArea*> arrAreas = Areas_GetAreasInRect( srcBox );
+	for ( auto ar : arrAreas )
+	{
+		if ( ar->IsBoxColliding( srcBox, bCheckProps ) )
+			return true;
+	}
+	return false;
+}
+
 OPRESULT CLevel::GetScriptAction( const WCHAR* strID, CScriptAction& retAction )
 {
 	CStringHash shID( strID );
@@ -1905,7 +1916,7 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 		//not in view rectangle
 		if ( !aabbvision.PointIn( enemy->GetPosHeart() ) )
 			continue;
-		if ( !IsLineOfSight( sourceActor->GetPosHeart(), enemy->GetPosHeart(), sourceActor->pArea ) )
+		if ( !IsLineOfSight( sourceActor->pos.xy, enemy->pos.xy, sourceActor->pArea ) )
 			continue;
 
 		//passed all tests and is closer? set ptr on new one

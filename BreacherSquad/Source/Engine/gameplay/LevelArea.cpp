@@ -282,12 +282,12 @@ int CLevelArea::GetTilesCollisionBoxes(RectXYXYi srcBoxTL, CAABB* ret_arrAABBs, 
 	int nAdded = 0;
 	// clamp src box to valid area
 	RectXYXYi box = srcBoxTL;
-	if (box.x1 < AABBbounds_TL.x) box.x1 = AABBbounds_TL.x;
-	if (box.y1 < AABBbounds_TL.y) box.y1 = AABBbounds_TL.y;
-	if (box.x2 > AABBbounds_TL.x + AABBbounds_TL.w - 1) box.x2 = AABBbounds_TL.x + AABBbounds_TL.w - 1;
-	if (box.y2 > AABBbounds_TL.y + AABBbounds_TL.h - 1) box.y2 = AABBbounds_TL.y + AABBbounds_TL.h - 1;
 	// bring to local space
 	box.Move(-AABBbounds_TL.x, -AABBbounds_TL.y);
+	CLAMP( box.x1, 0, AABBbounds_TL.w - 1 );
+	CLAMP( box.y1, 0, AABBbounds_TL.h - 1 );
+	CLAMP( box.x2, 0, AABBbounds_TL.w - 1 );
+	CLAMP( box.y2, 0, AABBbounds_TL.h - 1 );
 	//#TODO: should mix consecutive tiles into a single box as optimization, at least on horizontal
 	for (int yy = box.y1; yy <= box.y2; yy++)
 	{
@@ -391,6 +391,50 @@ int CLevelArea::GetTilesByFlag(RectXYXYi srcBoxTL, UINT32 dwFlagAny, CTile* ret_
 
 	return nAdded;
 	*/
+}
+
+bool CLevelArea::IsBoxColliding( CAABB srcBox, bool bCheckProps /*= true */ )
+{
+	// convert to tiles min and max and clamp src box to valid area
+	RectXYXYi box( floor( srcBox.vMin.x / K_TILE_SIZE_F ), floor( srcBox.vMin.y / K_TILE_SIZE_F ),
+		ceil( srcBox.vMax.x / K_TILE_SIZE_F ), ceil( srcBox.vMax.y / K_TILE_SIZE_F ) );
+	// bring to local space
+	box.Move( -AABBbounds_TL.x, -AABBbounds_TL.y );
+	CLAMP( box.x1, 0, AABBbounds_TL.w - 1 );
+	CLAMP( box.y1, 0, AABBbounds_TL.h - 1 );
+	CLAMP( box.x2, 0, AABBbounds_TL.w - 1 );
+	CLAMP( box.y2, 0, AABBbounds_TL.h - 1 );
+	
+	for ( int yy = box.y1; yy <= box.y2; yy++ )
+	{
+		_ASSERT( ( yy < sizeTL.h ) && ( yy >= 0 ) );
+		for ( int xx = box.x1; xx <= box.x2; xx++ )
+		{
+			_ASSERT( ( xx < sizeTL.w ) && ( xx >= 0 ) );
+			if ( ( tiles[xx][yy].flags & K_TILEFLAG_WALKABLE ) == 0 )
+			{
+				if ( tiles[xx][yy].bbox.Intersects( srcBox ) )
+					return true;
+			}
+		}
+	}
+
+	// check props if requested
+	if ( bCheckProps )
+	{
+		for ( int kk = 0; kk < m_arrProps.Count(); kk++ )
+		{
+			CProp* prop = m_arrProps[kk];
+			if ( ( !prop->IsAlive() ) || ( ( prop->flags & K_PROPFLAG_COLLIDES_ACTOR ) == 0 ) )
+				continue;
+			if ( prop->bbox_floor.Intersects( srcBox ) )
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 OPRESULT CLevelArea::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= NULL*/, void* pUserContext /*= NULL*/)
