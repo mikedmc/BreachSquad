@@ -123,10 +123,12 @@ public:
 	// srcRectTL will be part of the level bbox in tile coords. Make sure arrTiles is large enough. Array will be cleared inside the function.
 	// arrTiles is an array of CTile pointers
 	void					Areas_GetTilesSnapshot(RectXYWHi srcRectTL, CTile** arrTiles, int arrCapacity);
-	// Returns true if srcRect collides with anything (walls, solid boxes, etc)
+	// Returns true if static srcRect collides with anything (walls, solid boxes, etc)
 	// Used to find valid spots for spawning and other "one time only" stuff
 	// Do not use for realtime collision detection!
 	bool					Areas_IsBoxColliding( CAABB srcBox, bool bCheckProps );
+	// Sweeping collision, more expensive, finds collision on moving box
+	bool					Areas_IsBoxColliding( CAABB srcBox, Vec2 vecMove, bool bCheckProps );
 
 	///--- LEVEL DEFINES (generic data used ingame) ---
 	vector<CScriptAction>	m_arrActionTemplates;			// list of all possible actions ingame (they get copied on iActives)

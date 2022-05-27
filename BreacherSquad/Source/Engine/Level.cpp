@@ -583,6 +583,159 @@ bool CLevel::Areas_IsBoxColliding( CAABB srcBox, bool bCheckProps )
 	return false;
 }
 
+bool CLevel::Areas_IsBoxColliding( CAABB srcBox, Vec2 vecMove, bool bCheckProps )
+{
+	// temp list for collisions
+	static CFixedArray<SweepAABB, 100> tempList;
+	// find starting area
+	CLevelArea* pArea = Areas_GetAt( srcBox.vCenter );
+	if ( pArea == null )
+	{
+		ErrorBox( K_ERR_WARNING, L"Areas_IsBoxColliding: Starting area not found!" );
+		return true;
+	}
+	/// filter possible collisions
+	//1. find bbox start and end union that includes all collisions when moving at high speeds
+	CAABB destbox, srcbox;
+	srcbox = srcBox;
+	destbox = srcbox;
+	destbox.Move( vecMove );
+	// box unions to check all possible collisions
+	CAABB boxUnion = AABB::Union( destbox, srcbox );
+	boxUnion.Inflate( K_TILE_HSIZE_F, K_TILE_HSIZE_F );
+	// bbox union in tile coords, including every touched tile
+	RectXYXYi boxUnionTiles( floor( boxUnion.vMin.x / K_TILE_SIZE_F ), floor( boxUnion.vMin.y / K_TILE_SIZE_F ),
+		ceil( boxUnion.vMax.x / K_TILE_SIZE_F ), ceil( boxUnion.vMax.y / K_TILE_SIZE_F ) );
+	RectXYWHi boxUnionTilesWH( boxUnionTiles.x1, boxUnionTiles.y1, boxUnionTiles.x2 - boxUnionTiles.x1 + 1, boxUnionTiles.y2 - boxUnionTiles.y1 + 1 );
+
+	// keeps a list of all boxes that might be colliding
+	tempList.Clear();
+
+	/// BROAD PHASE SWEEP (find all POSSIBLE collision objects)
+
+	//add boxes from collision shapes
+	/*
+	for ( int kk = 0; kk < m_arrColShapes.GetSize(); kk++ )
+	{
+		if ( !m_arrColShapes[kk]->IsAlive() )
+			continue;
+
+		if ( !boxUnion.Intersects( m_arrColShapes[kk]->bbox ) )
+			continue;
+
+		// save box for later collision check
+		if ( m_arrColShapes[kk]->collFlags != K_DIRFLAG_NONE )
+		{
+			tempList.Add( level.m_arrColShapes[kk]->bbox );
+		}
+	}
+	*/
+	//add boxes from tiles and props
+	static CAABB retAABBs[64];
+	if ( pArea != nullptr )
+	{
+		// get collision tiles for current area
+		// tiles collboxes
+		int nadded = pArea->GetTilesCollisionBoxes( boxUnionTiles, retAABBs, 64 );
+		if ( nadded > 0 )
+		{
+			for ( int oo = 0; oo < nadded; oo++ )
+			{
+				tempList.Add( retAABBs[oo] );
+			}
+		}
+		// props collboxes
+		if ( bCheckProps )
+		{
+			nadded = pArea->GetPropsCollisionBoxes( boxUnion, retAABBs, 64 );
+			if ( nadded > 0 )
+			{
+				for ( int oo = 0; oo < nadded; oo++ )
+				{
+					tempList.Add( retAABBs[oo] );
+				}
+			}
+		}
+		// if movement bbox is not completely contained in the current area BBox try with the neighbours too
+		if ( !pArea->AABBbounds.Contains( boxUnion ) )
+		{
+			for ( int kk = 0; kk < pArea->arrNeighbours.Count(); kk++ )
+			{
+				CLevelArea* area = pArea->arrNeighbours.m_pData[kk];
+				if ( !area->AABBbounds_TL.Intersects( boxUnionTilesWH ) )
+					continue;
+				// tiles collboxes
+				nadded = area->GetTilesCollisionBoxes( boxUnionTiles, retAABBs, 64 );
+				if ( nadded > 0 )
+				{
+					for ( int oo = 0; oo < nadded; oo++ )
+					{
+						tempList.Add( retAABBs[oo] );
+					}
+				}
+				// props collboxes
+				if ( bCheckProps )
+				{
+					nadded = area->GetPropsCollisionBoxes( boxUnion, retAABBs, 64 );
+					if ( nadded > 0 )
+					{
+						for ( int oo = 0; oo < nadded; oo++ )
+						{
+							tempList.Add( retAABBs[oo] );
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/// COLLISION HANDLING
+
+	float fRemainingTime = 1.0f;
+	// compute source box
+	srcbox = srcBox;
+	// find closest collider
+	float minDistSq = 100000.0f;
+	float fClosestTime = 100000.0f;
+	SweepAABB* pClosestBox = nullptr;
+	for ( int kk = 0; kk < tempList.Count(); kk++ )
+	{
+		SweepAABB* tmpbox = &tempList[kk];
+		// skip boxes that have been handled this step
+		if ( tmpbox->bDisabled )
+			continue;
+
+		SweepData sdata = AABBSweep::CalculateSweepData( srcbox, vecMove, *tmpbox );
+		// computes even if no valid collision. needs flag to eliminate them
+		if ( sdata.bIsValid == false )
+			continue;
+
+		if ( sdata.fCollisionTime < fClosestTime )
+		{
+			fClosestTime = sdata.fCollisionTime;
+			minDistSq = sdata.fDistance;
+			pClosestBox = tmpbox;
+		}
+		else if ( sdata.fCollisionTime == fClosestTime )
+		{
+			if ( sdata.fDistance < minDistSq )
+			{
+				fClosestTime = sdata.fCollisionTime;
+				minDistSq = sdata.fDistance;
+				pClosestBox = tmpbox;
+			}
+		}
+		// exit on first collision
+		if ( pClosestBox != nullptr )
+		{
+			return true;
+		}
+	}
+
+	// no collisions detected until now
+	return false;
+}
+
 OPRESULT CLevel::GetScriptAction( const WCHAR* strID, CScriptAction& retAction )
 {
 	CStringHash shID( strID );
