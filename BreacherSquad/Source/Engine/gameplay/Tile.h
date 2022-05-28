@@ -77,3 +77,7 @@ public:
 };
 
 
+// converts world coords into tile coords
+inline Vec2i ToTilePos( Vec2 vPosPixels ) {
+	return { ( int ) floor( vPosPixels.x / K_TILE_SIZE_F ), ( int ) floor( vPosPixels.y / K_TILE_SIZE_F ) };
+}

@@ -150,6 +150,9 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		// initialize map with "cannot pass" where empty
 		memset( m_mapPassability[kk], K_ASTAR_COST_NOTPASS, sizeof( char ) * m_levelAABB_TL.h );
 	}
+	LOG("AStar map allocated. %d x %d", m_levelAABB_TL.w, m_levelAABB_TL.h);
+	// initialize AStar search engine
+	m_astar.SetMapPointer( m_mapPassability, m_levelAABB_TL.w, m_levelAABB_TL.h );
 
 	///--- everything loaded, SetAI here again so it sets all necessary pointers ---
 	// set AI at the end after we load everything or we won't have final targets for pointers

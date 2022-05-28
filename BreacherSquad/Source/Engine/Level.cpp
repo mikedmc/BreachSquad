@@ -589,7 +589,7 @@ bool CLevel::Areas_IsBoxColliding( CAABB srcBox, Vec2 vecMove, bool bCheckProps 
 	static CFixedArray<SweepAABB, 100> tempList;
 	// find starting area
 	CLevelArea* pArea = Areas_GetAt( srcBox.vCenter );
-	if ( pArea == null )
+	if ( pArea == nullptr )
 	{
 		ErrorBox( K_ERR_WARNING, L"Areas_IsBoxColliding: Starting area not found!" );
 		return true;
@@ -631,12 +631,12 @@ bool CLevel::Areas_IsBoxColliding( CAABB srcBox, Vec2 vecMove, bool bCheckProps 
 	}
 	*/
 	//add boxes from tiles and props
-	static CAABB retAABBs[64];
+	static CAABB retAABBs[128];
 	if ( pArea != nullptr )
 	{
 		// get collision tiles for current area
 		// tiles collboxes
-		int nadded = pArea->GetTilesCollisionBoxes( boxUnionTiles, retAABBs, 64 );
+		int nadded = pArea->GetTilesCollisionBoxes( boxUnionTiles, retAABBs, 128 );
 		if ( nadded > 0 )
 		{
 			for ( int oo = 0; oo < nadded; oo++ )
@@ -4012,8 +4012,15 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 				CActor* act = static_cast< CActor* >( vis->pPtr );
 				act->Paint( eTexChannel );
 
-				//#TEMP: paint debug stuff
+				//#TEMP: paint target position
 				UTSprite::PaintFModule( &m_sprInterface, act->GetAI()->AIsensor.vGoTo, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0, 0x88ff0000 );
+				//#TEMP: paint waipoints
+				for ( int ll = 0; ll < act->GetAI()->AIsensor.arrGoToPoints.Count(); ll++ )
+				{
+					Vec2i pathpt = act->GetAI()->AIsensor.arrGoToPoints[ll];
+					UTSprite::PaintFModule( &m_sprInterface, Vec2(pathpt.x * K_TILE_SIZE_F + K_TILE_HSIZE_F, pathpt.y * K_TILE_SIZE_F+ K_TILE_HSIZE_F), 
+						ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0, 0x880000ff );
+				}
 
 				/*
 				VecProj vpMuzz = act->GetWeaponMuzzleWorld( true, 0 );
@@ -4831,6 +4838,7 @@ void CLevel::Release()
 {
 	ClearVisibilityLists();
 	// release passability map 
+	m_astar.SetMapPointer( nullptr );
 	if ( m_mapPassability != nullptr )
 	{
 		for ( int xx = 0; xx < m_levelAABB_TL.w; xx++ )

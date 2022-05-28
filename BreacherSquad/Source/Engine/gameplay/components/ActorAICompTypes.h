@@ -338,18 +338,20 @@ public:
 		NEEDS_RELOAD = 2,
 	};
 public:
-	bool				m_bEnabled;			// sensors are enabled or disabled?
+	bool					m_bEnabled;					// sensors are enabled or disabled?
 	//external sensors
-	CActor*				pTargetedActor;		// visible enemy, set by internal sensors
-	UINT32				m_lastInteractingActorUID;	//0-not set or UID for last actor that he interacted with
-	float				fTimeSinceHit;		//time passed since got hit
-	CAIEvent			evtInternal;		// internal event given by sensors (see enemy, got shot etc). Don't use for decisions, updated by sensors.
+	CActor*					pTargetedActor;				// visible enemy, set by internal sensors
+	UINT32					m_lastInteractingActorUID;	// 0-not set or UID for last actor that he interacted with
+	float					fTimeSinceHit;				// time passed since it got hit
+	CAIEvent				evtInternal;				// internal event given by sensors (see enemy, got shot etc). Don't use for decisions, updated by sensors.
+	CAIEvent				evt;						// current event on which actor is making decisions (chosen between evtInternal and level AI events)
 	// weapon status sensors
-	EWpnSensorState		WpnStatePrimary;	// status of primary weapon
-	EWpnSensorState		WpnStateSecondary;  // status of secondary weapon (usually grenades)
-	Vec2				vGoTo;				// target destination for current actor ({0.0, 0.0} means not set)
+	EWpnSensorState			WpnStatePrimary;			// status of primary weapon
+	EWpnSensorState			WpnStateSecondary;			// status of secondary weapon (usually grenades)
+	// movement info
+	Vec2					vGoTo;						// target destination for current actor ({0.0, 0.0} means not set)
+	CFixedArray<Vec2i, 128>	arrGoToPoints;				// checkpoints after path smoothing. Should reach vGoTo if set.
 
-	CAIEvent			evt;				// current event on which actor is making decisions (chosen between evtInternal and level AI events)
 
 	CAISensorInfo();
 

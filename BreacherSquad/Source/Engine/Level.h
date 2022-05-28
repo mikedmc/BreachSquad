@@ -77,6 +77,7 @@ public:
 		m_pSprite = pSprite;
 	}
 
+	CAStarSearch			m_astar;						// A-start Astar search engine
 	CTextureManager			m_texManager;					// General texture manager for misc needed textures
 	CSpriteLib				m_sprLights;					// light animations/sprites
 	CSpriteLib				m_sprProps;						// decorations
@@ -130,8 +131,8 @@ public:
 	// Sweeping collision, more expensive, finds collision on moving box
 	bool					Areas_IsBoxColliding( CAABB srcBox, Vec2 vecMove, bool bCheckProps );
 
-	///--- LEVEL DEFINES (generic data used ingame) ---
-	vector<CScriptAction>	m_arrActionTemplates;			// list of all possible actions ingame (they get copied on iActives)
+	// list of all possible actions ingame (they get copied on iActives)
+	vector<CScriptAction>	m_arrActionTemplates;			
 	// returns script action by ID
 	OPRESULT				GetScriptAction(const WCHAR* strID, CScriptAction& retAction);
 	// Loads actions, inventory objects, etc

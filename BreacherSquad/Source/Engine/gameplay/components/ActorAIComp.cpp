@@ -1,6 +1,9 @@
 #include "dxstdafx.h"
 #include "ActorAIComp.h"
 
+// array to store temporary astar path solutions (before path smoothing)
+Vec2i tempArrVec2i[100];
+
 CActorAIComponent::CActorAIComponent(CLevel& levelref) :
 	level(levelref),
 	m_pAIcurrentState( nullptr ), m_nAIcurrentBehaviorIdx( -1 ), m_fAIbehaviorTimer( 0.0f )
@@ -293,6 +296,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					while ( bFound == false && tries < 10 )
 					{
 						tries++;
+						//#TODO: fint point around the player at visibility distance...
 						tlpos = { areabb.x + level.RNG().RandInt( areabb.w ), areabb.y + level.RNG().RandInt( areabb.h ) };
 						CTile* tl = act.pArea->GetTile( tlpos.x, tlpos.y );
 						if ( (tl != nullptr) && (tl->flags & K_TILEFLAG_WALKABLE) )
@@ -310,7 +314,25 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					if ( bFound )
 					{
 						AIsensor.vGoTo = { tlpos.x * K_TILE_SIZE_F + K_TILE_HSIZE_F, tlpos.y * K_TILE_SIZE_F + K_TILE_HSIZE_F };
-						//#TODO: path is not direct then do AStar(PathIsClear(bbox, movevec))
+						AIsensor.arrGoToPoints.Clear();
+						// Path is not in direct sight then do AStar
+						if ( level.Areas_IsBoxColliding( act.bbox_floor, AIsensor.vGoTo - act.pos.xy, true ) )
+						{
+							// astar should return solution in internal array for the level to smooth it into the actor
+							int a_steps = level.m_astar.FindPath( ToTilePos( act.pos.xy ), tlpos, tempArrVec2i, ARRAY_SIZE(tempArrVec2i) );
+							if ( a_steps == 0 ) 
+							{
+								AIsensor.vGoTo = { 0.0f, 0.0f };
+							}
+							else 
+							{
+								//#TODO: we have a path so smooth it
+								for ( int kk = 0; kk < a_steps; kk++ )
+								{
+									AIsensor.arrGoToPoints.Add( tempArrVec2i[kk] );
+								}
+							}
+						}
 
 						// process go to request again after finding a new destination so we update the AI commands for next frame
 						ProcessGoToRequest( act );

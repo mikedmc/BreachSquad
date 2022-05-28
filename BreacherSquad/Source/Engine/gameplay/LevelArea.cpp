@@ -85,6 +85,7 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 		return nullptr;
 
 	//#TODO: de pus tileflags options la coliziuni
+	//#TODO: de renuntat la GetTile pentru acces direct. Verificare bounds prin clamping
 	// bring it in local space
 	Vec2i startTL((int)floor(vStart.x / K_TILE_SIZE), (int)floor(vStart.y / K_TILE_SIZE));
 	Vec2i endTL((int)floor(vEnd.x / K_TILE_SIZE), (int)floor(vEnd.y / K_TILE_SIZE));
