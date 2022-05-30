@@ -24,7 +24,6 @@ CAStarSearch::CAStarSearch()
 CAStarSearch::~CAStarSearch()
 {
 	astarsearch.FreeSolutionNodes();
-	astarsearch.EnsureMemoryFreed();
 	m_map = nullptr;
 	m_mapW = m_mapH = 0;
 }
@@ -247,16 +246,16 @@ int CAStarSearch::FindPath( Vec2i startTL, Vec2i endTL, Vec2i* arrRetPath, int a
 
 		// Once you're done with the solution you can free the nodes up
 		astarsearch.FreeSolutionNodes();
+		astarsearch.EnsureMemoryFreed();
 		return steps;
 	}
 	else if ( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_FAILED )
 	{
 		cout << "Search terminated. Did not find goal state\n";
+		astarsearch.FreeSolutionNodes();
 		astarsearch.EnsureMemoryFreed();
 		return 0;
 	}
 
 	return 0;
 }
-
-

@@ -4,11 +4,6 @@
 // nickname for weapons sprlib in sprites multi library
 #define K_LIBNICK_WEAPONS L"SPRLIB_WEAPONS"
 
-
-///--------------------------------------------------------------------------
-/// ANIMATIONS
-///--------------------------------------------------------------------------
-
 // Specifies animation indexes for quick access (for actors)
 enum EActorAnim
 {
@@ -73,7 +68,7 @@ enum EActorSoundVerse
 
 	K_LVL_ACT_VERSES_COUNT
 };
-//numarul maxim de seturi de versuri
+// numarul maxim de seturi de versuri
 #define K_LVL_ACT_VERSES_MAX_SETS 2
 //timeout same verse
 #define K_LVL_ACT_VERSES_TIMEOUT 4.0f

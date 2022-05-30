@@ -350,7 +350,7 @@ public:
 	EWpnSensorState			WpnStateSecondary;			// status of secondary weapon (usually grenades)
 	// movement info
 	Vec2					vGoTo;						// target destination for current actor ({0.0, 0.0} means not set)
-	CFixedArray<Vec2i, 128>	arrGoToPoints;				// checkpoints after path smoothing. Should reach vGoTo if set.
+	CFixedArray<Vec2, 64>	arrGoToPoints;				// checkpoints after path smoothing. Should reach vGoTo if set.
 
 
 	CAISensorInfo();

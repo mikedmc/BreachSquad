@@ -99,7 +99,7 @@ public:
 	Vec2					m_vLevelOrigin;					// level origin for the editor (usually around start location)
 
 	vector<RectXYWHi>		m_arrDirtyRectsTL;				// tiles that need updating
-	CArray<CLevelArea*>		m_arrAreas;				// loaded areas
+	CArray<CLevelArea*>		m_arrAreas;						// loaded areas
 	// Transforms mouse coordinates from screen space to game world (necessary for network play)
 	bool					NormalizeMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue);
 	// Builds frame-by-freame geometry for lights, water, etc (called on Update)
@@ -130,7 +130,11 @@ public:
 	bool					Areas_IsBoxColliding( CAABB srcBox, bool bCheckProps );
 	// Sweeping collision, more expensive, finds collision on moving box
 	bool					Areas_IsBoxColliding( CAABB srcBox, Vec2 vecMove, bool bCheckProps );
+	// Smooths a path given as an array of world coords writing the final checkpoints as world coordinates in arrOutPoints
+	// Returns number of waypoints or 0 if error
+	int						SmoothPath( Vec2* arrInPoints, int arrInItems, Vec2* arrOutPoints, int arrOutSize );
 
+	///--- OBJECT INTERACTION ---
 	// list of all possible actions ingame (they get copied on iActives)
 	vector<CScriptAction>	m_arrActionTemplates;			
 	// returns script action by ID
@@ -232,7 +236,7 @@ public:
 	int						KillBulletsOfType(int nBulletType, UINT32 dwOwnerUID = 0);
 
 	///--- level doofers pool ---
-	int						m_propsLightsMeshIdx;		//id-ul meshului pentru desenarea luminii propsurilor
+	int						m_propsLightsMeshIdx;		//mesh id for props lights
 	CDoubleLinkedPool<CDoofer>	m_poolDoofers;		
 	// Adds a generic prop (physical particle)
 	// \param nSubType - secondary type of the added Prop, handled differently on every prop
@@ -286,8 +290,6 @@ public:
 	bool					ActivateSpecialAbility(int nAbilityIdx, int nTargetPlayerOrdinal);
 	// Do we have a line of sight between the 2 points
 	bool					IsLineOfSight(Vec2 pt_from, Vec2 pt_to, CLevelArea * pStartArea = nullptr);
-	//#TODO: Checks moving box collision instead of ray collision
-	bool					IsLineOfSight(CAABB start, Vec2 vMove, CLevelArea * pStartArea = nullptr );
 
 	UINT32					m_unLastID;				//Last loaded ID - used to assign unique IDs to runtime spawned elements
 	//Generates a new editor ID and increments m_unLastID (used when appending areas)
@@ -359,10 +361,8 @@ public:
 
 ///--- interfaces ---
 	CSpriteLib				m_sprInterface;
-	//interfata in sine
+	// Ingame Interface
 	CIngameGUI				m_interfaceIGM;
-	//controlul de ingame hints
-	//CCustomInterfaceTextBubble m_interfaceTextBubble;
 
 	// garbage collect
 	void					GC();

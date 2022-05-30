@@ -18,10 +18,10 @@ public:
 	}
 	~CFixedArray()
 	{
-		if (m_pData != NULL)
+		if (m_pData != nullptr)
 		{
 			delete [] m_pData;
-			m_pData = NULL;
+			m_pData = nullptr;
 			nCount = 0;
 		}
 	}
@@ -87,6 +87,9 @@ public:
 		qsort((void*)m_pData, (unsigned int)nCount, sizeof(TYPE), compare);
 	}
 
+	int GetCapacity() {
+		return nMaxSize;
+	}
 };
 
 

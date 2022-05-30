@@ -1,4 +1,5 @@
 //--------------------------------------------------------------------------------------
+// =^_^= DMC =^_^=
 // Template object linked list pool, iterable with pointer iterator
 // Contained class DTOR/CTOR only get called on Init and Release when deallocationg the container array.
 // Make sure you reset/construct the data after calling Hire() as nodes are always reused.

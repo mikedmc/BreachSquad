@@ -2,7 +2,9 @@
 #include "ActorAIComp.h"
 
 // array to store temporary astar path solutions (before path smoothing)
-Vec2i tempArrVec2i[100];
+Vec2i tempArrVec2i[128];
+// array to store temp path coords
+Vec2 tempArrVec2[128];
 
 CActorAIComponent::CActorAIComponent(CLevel& levelref) :
 	level(levelref),
@@ -326,11 +328,14 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 							}
 							else 
 							{
-								//#TODO: we have a path so smooth it
+								//we have a path so smooth it
 								for ( int kk = 0; kk < a_steps; kk++ )
 								{
-									AIsensor.arrGoToPoints.Add( tempArrVec2i[kk] );
+									tempArrVec2[kk] = GetTileCenter( tempArrVec2i[kk] );
 								}
+
+								int retpts = level.SmoothPath( tempArrVec2, a_steps, AIsensor.arrGoToPoints.m_pData, AIsensor.arrGoToPoints.GetCapacity() );
+								AIsensor.arrGoToPoints.nCount = retpts;
 							}
 						}
 

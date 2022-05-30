@@ -78,6 +78,13 @@ public:
 
 
 // converts world coords into tile coords
-inline Vec2i ToTilePos( Vec2 vPosPixels ) {
+inline Vec2i ToTilePos( Vec2 vPosPixels ) 
+{
 	return { ( int ) floor( vPosPixels.x / K_TILE_SIZE_F ), ( int ) floor( vPosPixels.y / K_TILE_SIZE_F ) };
+}
+
+// converts tile pos to tile center in pixels
+inline Vec2 GetTileCenter( Vec2i vTilePos )
+{
+	return { vTilePos.x * K_TILE_SIZE_F + K_TILE_HSIZE_F, vTilePos.y * K_TILE_SIZE_F + K_TILE_HSIZE_F };
 }

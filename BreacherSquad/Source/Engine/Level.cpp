@@ -736,6 +736,63 @@ bool CLevel::Areas_IsBoxColliding( CAABB srcBox, Vec2 vecMove, bool bCheckProps 
 	return false;
 }
 
+int CLevel::SmoothPath( Vec2* arrInPoints, int arrInItems, Vec2* arrOutPoints, int arrOutSize )
+{
+	// no input items
+	if ( arrInItems == 0 || arrInPoints == nullptr )
+		return 0;
+	// 1-2 input points
+	_ASSERT( arrOutSize > 2 );
+	if ( arrInItems <= 2 )
+	{
+		for ( int kk = 0; kk < arrInItems; kk++ )
+			arrOutPoints[kk] = arrInPoints[kk];
+		// returns 1 or 2
+		return arrInItems;
+	}
+	// do the actual smoothing
+	int outcur = 0;		// out vector cursor
+	int incur = 0;		// in vector current point
+	// add first point as checkpoint
+	//#TODO if solution doesn't give the character position ar trebui sa il puna fortat
+	Vec2 vFrom = arrInPoints[incur];
+	arrOutPoints[outcur++] = vFrom;
+	while ( incur < arrInItems - 1 )
+	{
+		// walk on next points while they are still visible
+		for ( int tocur = incur + 1; tocur < arrInItems; tocur++ )
+		{
+			int nFoundCur = -1;
+			// we reached last element, save it as waypoint
+			if ( tocur >= arrInItems - 1 )
+			{
+				nFoundCur = arrInItems - 1;
+			}
+			// we can't see this point so we save last point as checkpoint and start again
+			else if ( !IsLineOfSight( vFrom, arrInPoints[tocur] ) )
+			{
+				// if next point isn't visible (some engine element blocking the way or something)
+				// then just add it as a checkpoint instead of returning invalid smoothing
+				if ( tocur - 1 == incur )
+					nFoundCur = tocur;
+				else
+					nFoundCur = tocur - 1; // save last visible point otherwise
+			}
+
+			if ( nFoundCur >= 0 )
+			{
+				// save last visible point
+				arrOutPoints[outcur++] = arrInPoints[nFoundCur];
+				incur = nFoundCur;
+				vFrom = arrInPoints[incur];
+				break;
+			}
+		}
+	}
+
+	return outcur;
+}
+
 OPRESULT CLevel::GetScriptAction( const WCHAR* strID, CScriptAction& retAction )
 {
 	CStringHash shID( strID );
@@ -823,7 +880,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 	if ( !doc.load_file( Path ) )
 	{
 		ErrorBox( K_ERR_WARNING, L"Unable to load actor template XML:%s\n", strTemplateFileName );
-		return null;
+		return nullptr;
 	}
 
 	//load actor templates
@@ -4013,13 +4070,12 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 				act->Paint( eTexChannel );
 
 				//#TEMP: paint target position
-				UTSprite::PaintFModule( &m_sprInterface, act->GetAI()->AIsensor.vGoTo, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0, 0x88ff0000 );
-				//#TEMP: paint waipoints
+				UTSprite::PaintFModule( &m_sprInterface, act->GetAI()->AIsensor.vGoTo + Vec2(2.0f, 2.0f), ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0, 0x88ff0000 );
+				//#TEMP: paint waypoints
 				for ( int ll = 0; ll < act->GetAI()->AIsensor.arrGoToPoints.Count(); ll++ )
 				{
-					Vec2i pathpt = act->GetAI()->AIsensor.arrGoToPoints[ll];
-					UTSprite::PaintFModule( &m_sprInterface, Vec2(pathpt.x * K_TILE_SIZE_F + K_TILE_HSIZE_F, pathpt.y * K_TILE_SIZE_F+ K_TILE_HSIZE_F), 
-						ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0, 0x880000ff );
+					Vec2 pathpt = act->GetAI()->AIsensor.arrGoToPoints[ll];
+					UTSprite::PaintFModule( &m_sprInterface, pathpt, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0, 0x880000ff );
 				}
 
 				/*

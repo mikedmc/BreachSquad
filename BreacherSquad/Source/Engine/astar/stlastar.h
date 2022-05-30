@@ -476,9 +476,9 @@ public: // methods
 		else
 		{
 			// if the start node is the solution we need to just delete the start and goal nodes
-			if(m_Start)
+			//if(m_Start)
 				FreeNode( m_Start );
-			if ( m_Goal )
+			//if ( m_Goal )
 				FreeNode( m_Goal );
 		}
 
