@@ -3,6 +3,8 @@
 
 #define K_ASTAR_COST_NOTPASS 9
 #define K_ASTAR_COST_FLOOR 1
+// floors next to walls have a higher cost as we're trying to avoid them
+#define K_ASTAR_COST_FLOOR_BORDER 3
 // use for ice or other zero frictions flooring
 #define K_ASTAR_COST_ZERO 0
 

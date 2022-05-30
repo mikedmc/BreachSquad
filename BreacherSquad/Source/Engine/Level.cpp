@@ -388,11 +388,12 @@ void CLevel::UpdateDirtyRects()
 				for ( int xx = lrect.x; xx < lrect.x + lrect.w; xx++ )
 				{
 					CTile* tl = area->GetTile( xx, yy );
-					// set passability flags in pathfinding map
+					// set passability flags in pathfinding map 
 					if ( tl->flags & K_TILEFLAG_WALKABLE )
 						m_mapPassability[xx][yy] = K_ASTAR_COST_FLOOR;
 					else
 						m_mapPassability[xx][yy] = K_ASTAR_COST_NOTPASS;
+
 					// neighbours
 					CTile* tlL = area->GetTile( xx - 1, yy );
 					CTile* tlR = area->GetTile( xx + 1, yy );
@@ -419,6 +420,24 @@ void CLevel::UpdateDirtyRects()
 						if ( ( tlD ) && ( FLAG_ANY( tlD->flags, K_TILEFLAG_WALKABLE ) ) )
 						{
 							tl->flags |= K_TILEFLAG_HASWALL_D;
+						}
+					}
+					else
+					{	 
+						///--- process walkable flags ---
+						bool bFloorBorder = false;
+						if ( ( tlL ) && ( ( tlL->flags & K_TILEFLAG_WALKABLE ) == 0 ) )
+							bFloorBorder = true;
+						else if ( ( tlR ) && ( ( tlR->flags & K_TILEFLAG_WALKABLE ) == 0 ) )
+							bFloorBorder = true;
+						else if ( ( tlU ) && ( ( tlU->flags & K_TILEFLAG_WALKABLE ) == 0 ) )
+							bFloorBorder = true;
+						else if ( ( tlD ) && ( ( tlD->flags & K_TILEFLAG_WALKABLE ) == 0 ) )
+							bFloorBorder = true;
+
+						if ( bFloorBorder )
+						{
+							m_mapPassability[xx][yy] = K_ASTAR_COST_FLOOR_BORDER;
 						}
 					}
 

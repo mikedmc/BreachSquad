@@ -80,7 +80,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			// reset internal event
 			AIsensor.evtInternal.Reset();
 			//check for targets or other AI events
-			CActor* targetActor = nullptr;// level.GetClosestTarget( &act /*, act._template.foeClassFilter1, act.actTemplate.foeClassFilter2*/ );
+			CActor* targetActor = level.GetClosestTarget( &act /*, act._template.foeClassFilter1, act.actTemplate.foeClassFilter2*/ );
 			if ( targetActor != nullptr )
 			{
 				//float enemyDst = MUVec2Len( &(targetActor->GetPosHeart() - act.GetPosHeart()) );
@@ -336,6 +336,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 									tempArrVec2[kk] = GetTileCenter( tempArrVec2i[kk] );
 								}
 
+								//int retpts = level.SmoothPath( tempArrVec2, a_steps, AIsensor.arrGoToPoints.m_pData, AIsensor.arrGoToPoints.GetCapacity() );
 								int retpts = level.SmoothPathEx( &act, tempArrVec2, a_steps, AIsensor.arrGoToPoints.m_pData, AIsensor.arrGoToPoints.GetCapacity() );
 								AIsensor.arrGoToPoints.nCount = retpts;
 							}
