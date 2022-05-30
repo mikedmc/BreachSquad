@@ -80,7 +80,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			// reset internal event
 			AIsensor.evtInternal.Reset();
 			//check for targets or other AI events
-			CActor* targetActor = level.GetClosestTarget(&act /*, act._template.foeClassFilter1, act.actTemplate.foeClassFilter2*/);
+			CActor* targetActor = nullptr;// level.GetClosestTarget( &act /*, act._template.foeClassFilter1, act.actTemplate.foeClassFilter2*/ );
 			if ( targetActor != nullptr )
 			{
 				//float enemyDst = MUVec2Len( &(targetActor->GetPosHeart() - act.GetPosHeart()) );
@@ -284,8 +284,11 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				EGenericState st = ProcessGoToRequest( act );
 				// recalculate patrol destination?
 				bool bRecompute = ( st == K_STATE_NOTSET || st == K_STATE_FINISHED );
+				/*
+				// recompute on collisions
 				if ( st == K_STATE_EXECUTING && FLAG_ANY( act.collisionFlags, K_DIRFLAG_ALL ) )
 					bRecompute = true;
+				*/
 				// no destination for patrol is set, then set it now!
 				if ( bRecompute )
 				{
@@ -298,7 +301,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					while ( bFound == false && tries < 10 )
 					{
 						tries++;
-						//#TODO: fint point around the player at visibility distance...
+						//#TODO: find point around the player at visibility distance...
 						tlpos = { areabb.x + level.RNG().RandInt( areabb.w ), areabb.y + level.RNG().RandInt( areabb.h ) };
 						CTile* tl = act.pArea->GetTile( tlpos.x, tlpos.y );
 						if ( (tl != nullptr) && (tl->flags & K_TILEFLAG_WALKABLE) )
@@ -315,8 +318,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					// found destination
 					if ( bFound )
 					{
-						AIsensor.vGoTo = { tlpos.x * K_TILE_SIZE_F + K_TILE_HSIZE_F, tlpos.y * K_TILE_SIZE_F + K_TILE_HSIZE_F };
-						AIsensor.arrGoToPoints.Clear();
+						AIsensor.SetGoTo({ tlpos.x * K_TILE_SIZE_F + K_TILE_HSIZE_F, tlpos.y * K_TILE_SIZE_F + K_TILE_HSIZE_F });
 						// Path is not in direct sight then do AStar
 						if ( level.Areas_IsBoxColliding( act.bbox_floor, AIsensor.vGoTo - act.pos.xy, true ) )
 						{
@@ -334,7 +336,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 									tempArrVec2[kk] = GetTileCenter( tempArrVec2i[kk] );
 								}
 
-								int retpts = level.SmoothPath( tempArrVec2, a_steps, AIsensor.arrGoToPoints.m_pData, AIsensor.arrGoToPoints.GetCapacity() );
+								int retpts = level.SmoothPathEx( &act, tempArrVec2, a_steps, AIsensor.arrGoToPoints.m_pData, AIsensor.arrGoToPoints.GetCapacity() );
 								AIsensor.arrGoToPoints.nCount = retpts;
 							}
 						}
@@ -923,18 +925,30 @@ EGenericState CActorAIComponent::ProcessGoToRequest( CActor & act )
 {
 	if ( UTMath::Vec2AlmostZero( AIsensor.vGoTo ) )
 		return K_STATE_NOTSET;
-	// process walk
-	Vec2 vDest = AIsensor.vGoTo - act.pos.xy;
-	float fDest = MUVec2Len( &vDest );
+	// process walk (to vDest if no path is set)
+	Vec2 vDest = ( AIsensor.arrGoToPoints.Count() > 0 ) ? AIsensor.arrGoToPoints[0] : AIsensor.vGoTo;
+	Vec2 vDestDir = vDest - act.pos.xy;
+
+	float fDest = MUVec2Len( &vDestDir );
 	// keep moving until next time we think to avoid interruptions
-	MUVec2Norm( &AIcommands.vMoveDir, &vDest );
+	MUVec2Norm( &AIcommands.vMoveDir, &vDestDir );
 	AIcommands.bThrust = true;
 	AIcommands.bRunning = false;
 	// reached vGoTo destination?
-	if ( fDest < 4.0f )	//#TODO: find a better way so it doesn't fail even on low fps (last pos etc)
+	// Checks if the destination point is approx on the segment pos->last_pos of the actor to make it stop AFTER the point
+	// This is to avoid actors getting stuck in corners
+	if ( UTMath::IsPointOnSegment(Vec3XY(act.pos_last), act.pos.xy, vDest, 2.0f ))
 	{
-		vDest = { 0.0f, 0.0f };
-		return K_STATE_FINISHED;
+		// we still have waypoints, we reached one so we remove it and see if we have others on next run
+		if ( AIsensor.arrGoToPoints.Count() > 0 )
+		{
+			AIsensor.arrGoToPoints.PopFirst(nullptr);
+		}
+		else
+		{
+			AIsensor.SetGoTo(Vec2(0.0f, 0.0f));
+			return K_STATE_FINISHED;
+		}
 	}
 
 	return K_STATE_EXECUTING;

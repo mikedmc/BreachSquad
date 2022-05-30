@@ -62,7 +62,7 @@ SweepData AABBSweep::CalculateSweepData(CAABB & movingbox, Vec2 movement, CAABB 
 	float minExitTime = min(exitTime.x, exitTime.y);
 
 	float resultTime = 1.0f;
-	Vec2 normal(0.0f, 0.0f);  // asta e de fapt tangenta
+	Vec2 normal(0.0f, 0.0f);  // this is really the tangent
 	int side = K_SIDE_NONE;
 	bool bValid = false;
 

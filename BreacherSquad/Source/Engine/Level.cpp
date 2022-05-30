@@ -586,7 +586,7 @@ bool CLevel::Areas_IsBoxColliding( CAABB srcBox, bool bCheckProps )
 bool CLevel::Areas_IsBoxColliding( CAABB srcBox, Vec2 vecMove, bool bCheckProps )
 {
 	// temp list for collisions
-	static CFixedArray<SweepAABB, 100> tempList;
+	static CFixedArray<SweepAABB, 128> tempList;
 	// find starting area
 	CLevelArea* pArea = Areas_GetAt( srcBox.vCenter );
 	if ( pArea == nullptr )
@@ -792,6 +792,70 @@ int CLevel::SmoothPath( Vec2* arrInPoints, int arrInItems, Vec2* arrOutPoints, i
 
 	return outcur;
 }
+
+int CLevel::SmoothPathEx( CActor * act, Vec2* arrInPoints, int arrInItems, Vec2* arrOutPoints, int arrOutSize )
+{
+	// no input items
+	if ( arrInItems == 0 || arrInPoints == nullptr )
+		return 0;
+	// 1-2 input points
+	_ASSERT( arrOutSize > 2 );
+	if ( arrInItems <= 2 )
+	{
+		for ( int kk = 0; kk < arrInItems; kk++ )
+			arrOutPoints[kk] = arrInPoints[kk];
+		// returns 1 or 2
+		return arrInItems;
+	}
+	// do the actual smoothing
+	int outcur = 0;		// out vector cursor
+	int incur = 0;		// in vector current point
+	// add first point as checkpoint
+	//#TODO if solution doesn't give the character position ar trebui sa il puna fortat
+	Vec2 vFrom = arrInPoints[incur];
+	CAABB fromaabb = act->bbox_floor.GetSnapshot();
+	fromaabb.Move( vFrom );
+
+	arrOutPoints[outcur++] = vFrom;
+	while ( incur < arrInItems - 1 )
+	{
+		// walk on next points while they are still visible
+		for ( int tocur = incur + 1; tocur < arrInItems; tocur++ )
+		{
+			int nFoundCur = -1;
+			// we reached last element, save it as waypoint
+			if ( tocur >= arrInItems - 1 )
+			{
+				nFoundCur = arrInItems - 1;
+			}
+			// we can't see this point so we save last point as checkpoint and start again
+			//else if ( !IsLineOfSight( vFrom, arrInPoints[tocur] ) )
+			else if ( Areas_IsBoxColliding(fromaabb, arrInPoints[tocur] - vFrom, true) )
+			{
+				// if next point isn't visible (some engine element blocking the way or something)
+				// then just add it as a checkpoint instead of returning invalid smoothing
+				if ( tocur - 1 == incur )
+					nFoundCur = tocur;
+				else
+					nFoundCur = tocur - 1; // save last visible point otherwise
+			}
+
+			if ( nFoundCur >= 0 )
+			{
+				// save last visible point
+				arrOutPoints[outcur++] = arrInPoints[nFoundCur];
+				incur = nFoundCur;
+				vFrom = arrInPoints[incur];
+				fromaabb = act->bbox_floor.GetSnapshot();
+				fromaabb.Move( vFrom );
+				break;
+			}
+		}
+	}
+
+	return outcur;
+}
+
 
 OPRESULT CLevel::GetScriptAction( const WCHAR* strID, CScriptAction& retAction )
 {

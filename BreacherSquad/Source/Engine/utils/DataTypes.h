@@ -69,6 +69,20 @@ public:
 		return nCount;
 	}
 
+	bool PopFirst(TYPE * retVal) {
+		if ( nCount == 0 )
+			return false;
+		if(retVal != nullptr)
+			*retVal = m_pData[0];
+		// copy elements
+		for ( int kk = 0; kk < nCount - 1; kk++ )
+			m_pData[kk] = m_pData[kk + 1];
+		// decrease count
+		nCount--;
+
+		return true;
+	}
+
 	const TYPE& operator[](int nIndex) const
 	{
 		assert(nIndex < nMaxSize);

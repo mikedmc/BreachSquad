@@ -347,3 +347,11 @@ bool UTMath::Vec3AlmostZero( Vec3 vec, float fThreshold /*= 0.00001f */ )
 		return true;
 	return false;
 }
+
+bool UTMath::IsPointOnSegment( Vec2 start, Vec2 end, Vec2 pt, float threshold /*= 0.0f */ )
+{
+	if ( MUVec2LenSq( &( start - pt ) ) + MUVec2LenSq( &( end - pt ) ) <= MUVec2LenSq( &( start - end ) ) + threshold * threshold )
+		return true;
+
+	return false;
+}

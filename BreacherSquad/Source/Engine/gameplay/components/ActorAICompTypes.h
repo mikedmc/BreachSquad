@@ -352,10 +352,10 @@ public:
 	Vec2					vGoTo;						// target destination for current actor ({0.0, 0.0} means not set)
 	CFixedArray<Vec2, 64>	arrGoToPoints;				// checkpoints after path smoothing. Should reach vGoTo if set.
 
-
 	CAISensorInfo();
 
-	void Reset();
+	void					Reset();
+	void					SetGoTo( Vec2 vToPos );		// sets the goto vector and clears the arrGoToPoints
 };
 
 // Commands that get sent to the AIs

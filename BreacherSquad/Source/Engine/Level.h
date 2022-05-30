@@ -133,6 +133,7 @@ public:
 	// Smooths a path given as an array of world coords writing the final checkpoints as world coordinates in arrOutPoints
 	// Returns number of waypoints or 0 if error
 	int						SmoothPath( Vec2* arrInPoints, int arrInItems, Vec2* arrOutPoints, int arrOutSize );
+	int						SmoothPathEx( CActor * act, Vec2* arrInPoints, int arrInItems, Vec2* arrOutPoints, int arrOutSize );
 
 	///--- OBJECT INTERACTION ---
 	// list of all possible actions ingame (they get copied on iActives)

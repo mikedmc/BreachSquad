@@ -811,8 +811,8 @@ void CActor::DoMove( float dTime, CLevel& level )
 				// collisions or to apply movement
 				float ftime = fRemainingTime - hit.fCollisionTime;
 
-				// Calculate the collision normal (vector used to slide the object that collided)
-				// normala e tangenta de fapt...
+				// Calculate the collision tangent (vector used to slide the object that collided)
+				// normala is actually the tangent
 				float dotProduct = MUVec2Dot( &vNextMove, &hit.vNormal ) * ftime;
 				hit.vNormal *= dotProduct;
 

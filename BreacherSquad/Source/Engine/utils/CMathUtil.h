@@ -116,4 +116,6 @@ namespace UTMath
 	bool			Vec2AlmostZero( Vec2 vec, float fThreshold = 0.00001f );
 	// Is vector almost zero?
 	bool			Vec3AlmostZero( Vec3 vec, float fThreshold = 0.00001f );
+	// Returns true if sum of distances from start and end to point are less than threshold
+	bool			IsPointOnSegment( Vec2 start, Vec2 end, Vec2 pt, float threshold = 0.0f );
 }
