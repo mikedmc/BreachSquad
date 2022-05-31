@@ -3,8 +3,8 @@
 
 // array to store temporary astar path solutions (before path smoothing)
 Vec2i tempArrVec2i[128];
-// array to store temp path coords
-Vec2 tempArrVec2[128];
+// array to store temp path coords (needed only by the level smoothing method)
+// Vec2 tempArrVec2[128];
 
 CActorAIComponent::CActorAIComponent(CLevel& levelref) :
 	level(levelref),
@@ -323,22 +323,31 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 						if ( level.Areas_IsBoxColliding( act.bbox_floor, AIsensor.vGoTo - act.pos.xy, true ) )
 						{
 							// astar should return solution in internal array for the level to smooth it into the actor
-							int a_steps = level.m_astar.FindPath( ToTilePos( act.pos.xy ), tlpos, tempArrVec2i, ARRAY_SIZE(tempArrVec2i) );
+							int a_steps = level.m_astar.FindPath( ToTilePos( act.pos.xy ), tlpos, tempArrVec2i, ARRAY_SIZE(tempArrVec2i), true );
 							if ( a_steps == 0 ) 
 							{
 								AIsensor.vGoTo = { 0.0f, 0.0f };
 							}
 							else 
 							{
-								//we have a path so smooth it
+								_ASSERT( a_steps < AIsensor.arrGoToPoints.GetCapacity() );
+								// path is smoothed by astar class we just copy it
+								for ( int kk = 0; kk < a_steps; kk++ )
+								{
+									AIsensor.arrGoToPoints.m_pData[kk] = GetTileCenter( tempArrVec2i[kk] );
+									AIsensor.arrGoToPoints.nCount = a_steps;
+								}
+
+								/*
+								//OLD WAY: we have a path so smooth it with level collision functions
 								for ( int kk = 0; kk < a_steps; kk++ )
 								{
 									tempArrVec2[kk] = GetTileCenter( tempArrVec2i[kk] );
 								}
-
 								//int retpts = level.SmoothPath( tempArrVec2, a_steps, AIsensor.arrGoToPoints.m_pData, AIsensor.arrGoToPoints.GetCapacity() );
 								int retpts = level.SmoothPathEx( &act, tempArrVec2, a_steps, AIsensor.arrGoToPoints.m_pData, AIsensor.arrGoToPoints.GetCapacity() );
 								AIsensor.arrGoToPoints.nCount = retpts;
+								*/
 							}
 						}
 

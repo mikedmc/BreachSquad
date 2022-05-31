@@ -313,7 +313,9 @@ int CAStarSearch::SmoothPath( Vec2i* arrInPoints, int arrInItems, Vec2i* arrOutP
 				nFoundCur = arrInItems - 1;
 			}
 			// we can't see this point so we save last point as checkpoint and start again
-			else if ( SegmentMapCollision( vFrom.x, vFrom.y, arrInPoints[tocur].x, arrInPoints[tocur].y ) )
+			// we consider a collision COST_FLOOR_BORDER so it doesn't cut corners near wall corners (as they have higher cost)
+			// the downside is that if the only path is through high cost areas it adds more waypoints
+			else if ( SegmentMapCollision( vFrom.x, vFrom.y, arrInPoints[tocur].x, arrInPoints[tocur].y, K_ASTAR_COST_FLOOR_BORDER ) )
 			{
 				// if next point isn't visible (some engine element blocking the way or something)
 				// then just add it as a checkpoint instead of returning invalid smoothing
