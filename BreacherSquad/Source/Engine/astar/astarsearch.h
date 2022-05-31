@@ -48,5 +48,11 @@ public:
 	// Sets pointer to current map. Set to null when no map is present.
 	static void			SetMapPointer( char** mapPtr, int mapW = 0, int mapH = 0 );
 	// Finds path to destination. Returns number of steps or 0 for no solution
-	int					FindPath( Vec2i startTL, Vec2i endTL, Vec2i* arrRetPath, int arrRetPathSize );
+	int					FindPath( Vec2i startTL, Vec2i endTL, Vec2i* arrRetPath, int arrRetPathSize, bool bSmoothPath );
+private:
+	// Smooths the provided path by looking for collisions in the collision map using SegmentMapCollision
+	int					SmoothPath( Vec2i* arrInPoints, int arrInItems, Vec2i* arrOutPoints, int arrOutSize );
+	// Uses the line drawing algorhythm to find collisions in m_map.
+	// Returns true if it finds a tile with a value >= minValueToDetect
+	bool				SegmentMapCollision(int x1, int y1, int x2, int y2, int minValueToDetect = K_ASTAR_COST_NOTPASS );
 };

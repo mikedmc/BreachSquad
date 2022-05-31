@@ -802,6 +802,7 @@ int CLevel::SmoothPath( Vec2* arrInPoints, int arrInItems, Vec2* arrOutPoints, i
 			{
 				// save last visible point
 				arrOutPoints[outcur++] = arrInPoints[nFoundCur];
+				_ASSERT( outcur < arrOutSize );
 				incur = nFoundCur;
 				vFrom = arrInPoints[incur];
 				break;
@@ -863,6 +864,7 @@ int CLevel::SmoothPathEx( CActor * act, Vec2* arrInPoints, int arrInItems, Vec2*
 			{
 				// save last visible point
 				arrOutPoints[outcur++] = arrInPoints[nFoundCur];
+				_ASSERT( outcur < arrOutSize );
 				incur = nFoundCur;
 				vFrom = arrInPoints[incur];
 				fromaabb = act->bbox_floor.GetSnapshot();
