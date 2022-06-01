@@ -380,3 +380,36 @@ void filecopy(FILE *dest, FILE *src)
 
 	fflush(dest);
 }
+
+///----------------------------------------------------------------------------------
+/// PerfTimestamp class and accessor function
+///----------------------------------------------------------------------------------
+
+CPerfTimestamp& __PerfCounter()
+{
+	// Using an accessor function gives control of the construction order
+	static CPerfTimestamp timer;
+	return timer;
+}
+
+CPerfTimestamp::CPerfTimestamp()
+{
+	LARGE_INTEGER qwTicksPerSec;
+	QueryPerformanceFrequency( &qwTicksPerSec );
+	m_llQPFTicksPerSec = qwTicksPerSec.QuadPart;
+}
+
+LONGLONG CPerfTimestamp::GetTime()
+{
+	LARGE_INTEGER ticks;
+	if ( !QueryPerformanceCounter( &ticks ) )
+	{
+		ErrorBox( K_ERR_WARNING, L"CPerfTimestamp::GetTime failed!" );
+	}
+	return ticks.QuadPart;
+}
+
+double CPerfTimestamp::GetPeriodInMS( LONGLONG start_time, LONGLONG end_time )
+{
+	return ( end_time - start_time ) / ( double ) m_llQPFTicksPerSec;
+}

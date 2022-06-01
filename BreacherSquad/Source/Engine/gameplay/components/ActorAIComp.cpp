@@ -80,7 +80,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			// reset internal event
 			AIsensor.evtInternal.Reset();
 			//check for targets or other AI events
-			CActor* targetActor = level.GetClosestTarget( &act /*, act._template.foeClassFilter1, act.actTemplate.foeClassFilter2*/ );
+			CActor* targetActor = nullptr;// level.GetClosestTarget( &act /*, act._template.foeClassFilter1, act.actTemplate.foeClassFilter2*/ );
 			if ( targetActor != nullptr )
 			{
 				//float enemyDst = MUVec2Len( &(targetActor->GetPosHeart() - act.GetPosHeart()) );
@@ -324,6 +324,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 						{
 							// astar should return solution in internal array for the level to smooth it into the actor
 							int a_steps = level.m_astar.FindPath( ToTilePos( act.pos.xy ), tlpos, tempArrVec2i, ARRAY_SIZE(tempArrVec2i), true );
+
 							if ( a_steps == 0 ) 
 							{
 								AIsensor.vGoTo = { 0.0f, 0.0f };

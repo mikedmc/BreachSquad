@@ -2252,7 +2252,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			}
 			break;
 
-#if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
+//#if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
 			case VK_F6:
 			{
 				if ( GameState::state == GAME_STATE_GAME )
@@ -2262,7 +2262,19 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 				}
 			}
 			break;
-#endif
+			case VK_F7:
+			{
+				Vec2i tempArrVec2i[128];
+				Vec2 vfrom = __Sim().m_arrActors[0]->pos.xy;
+				Vec2 vto = __Sim().m_camLevelToScr.ScreenToWorld( g_mouse.pos );
+
+				LONGLONG tmstart = __PerfCounter().GetTime();
+				int a_steps = __Sim().m_astar.FindPath( ToTilePos( vfrom ), ToTilePos(vto), tempArrVec2i, ARRAY_SIZE( tempArrVec2i ), true );
+				LONGLONG tmend = __PerfCounter().GetTime();
+				LOG(L"path duration: %f", __PerfCounter().GetPeriodInMS(tmstart, tmend));
+			}
+			break;
+//#endif
 
 #ifdef ENABLE_CHAT_WINDOW
 			case VK_RETURN:

@@ -70,6 +70,7 @@ void MapSearchNode::PrintNodeInfo()
 // The heuristic function that estimates the distance from a Node to the Goal
 float MapSearchNode::GoalDistanceEstimate( MapSearchNode &nodeGoal )
 {
+	// Manhattan distance:
 	return abs(x - nodeGoal.x) + abs(y - nodeGoal.y);
 }
 

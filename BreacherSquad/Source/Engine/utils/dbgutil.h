@@ -55,3 +55,20 @@ void	GetExePathW(WCHAR szPath[], int nLen);
 /* It just crashes the game */
 VOID DebugCrash();
 void filecopy(FILE *dest, FILE *src);
+
+///----------------------------------------------------------------------------------
+/// PerfTimestamp class and accessor function
+///----------------------------------------------------------------------------------
+class CPerfTimestamp
+{
+private:
+	LONGLONG m_llQPFTicksPerSec;
+public:
+	CPerfTimestamp();
+	// returns time in ticks
+	LONGLONG GetTime(); 
+	// returns time period in milliseconds
+	double GetPeriodInMS( LONGLONG start_time, LONGLONG end_time );
+};
+
+CPerfTimestamp& __PerfCounter();
