@@ -401,7 +401,7 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 					DW_COLOR_GETARGB(pValue->m_asUINT32, color.w, color.x, color.y, color.z);
 					
 					// small color button
-					ImGui::ColorEdit4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);
+					ImGui::ColorEdit4(sVarName, (float*)&color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);
 
 					// full fledged color picker
 					//ImGui::ColorPicker4(sVarName, (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_DisplayHex);

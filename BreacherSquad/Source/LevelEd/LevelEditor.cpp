@@ -407,7 +407,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			// color
 			ImVec4 color;
 			DW_COLOR_GETARGB(light->color, color.w, color.x, color.y, color.z);
-			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
+			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
 			if (ImGui::IsItemEdited())
 			{
 				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
@@ -437,7 +437,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			// color
 			ImVec4 color;
 			DW_COLOR_GETARGB(light->color, color.w, color.x, color.y, color.z);
-			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
+			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
 			if (ImGui::IsItemEdited())
 			{
 				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
@@ -508,7 +508,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			// color
 			ImVec4 color;
 			DW_COLOR_GETARGB(light->color, color.w, color.x, color.y, color.z);
-			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
+			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
 			if (ImGui::IsItemEdited())
 			{
 				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
@@ -527,7 +527,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			// color
 			ImVec4 color;
 			DW_COLOR_GETARGB(light->color, color.w, color.x, color.y, color.z);
-			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
+			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
 			if (ImGui::IsItemEdited())
 			{
 				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
@@ -562,7 +562,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 			// color
 			ImVec4 color;
 			DW_COLOR_GETARGB(light->color, color.w, color.x, color.y, color.z);
-			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_HEX | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
+			ImGui::ColorEdit4("Color", (float*)&color, ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_DisplayHex);
 			if (ImGui::IsItemEdited())
 			{
 				light->color = D3DCOLOR_COLORVALUE(color.x, color.y, color.z, 1.0f);
