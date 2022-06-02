@@ -8,8 +8,8 @@ constexpr int MetersToCells(float m) {
 	return int(m * CELL_SIZE_METERS_INV);
 }
 
-#define HALF_COST 5
-#define MIN_COST 2*HALF_COST
+#define HALF_COST	5
+#define MIN_COST	(2*HALF_COST)
 FORCEINLINE unsigned short GetGCostForParent(short nodex, short nodey, unsigned short parentGCost, short parentx, short parenty)
 {
 	//NOTE: CRB very important that this is the same or lower than the heuristic when using the sorted open list
@@ -40,21 +40,19 @@ FORCEINLINE unsigned short CalculateH_Unadmissible(int nodex, int nodey, int des
 
 FORCEINLINE unsigned short GetAdditionalCost(const unsigned int nodeData, const unsigned int additionalCostFlags)
 {
-	return 0;
-	/*
 	if (additionalCostFlags == 0)
 		return 0;
 	unsigned short extraCost = 0;
 	unsigned maskedCost = nodeData & additionalCostFlags;
 	extraCost += (unsigned short)((MIN_COST * 2) * bool(maskedCost & (COL_CLEARANCE0 | COL_CLEARANCE1)));
-	extraCost += (unsigned short)((MIN_COST * 20) * bool(maskedCost & (COL_SCATTER | COL_DANGER_AREA))); //NOTE: CRB adding this costs an extra 7% perf on my PC
+	//DMC commented out: extraCost += (unsigned short)((MIN_COST * 20) * bool(maskedCost & (COL_SCATTER | COL_DANGER_AREA))); //NOTE: CRB adding this costs an extra 7% perf on my PC
 	return extraCost;
 	// use this when using variable additional costs
 	//return (unsigned short)(MIN_COST * 10.0f * (1.0f / (float)Math::GetNumberOfBitsSet(additionalCostFlags)));
-	*/
 }
 
 /*
+//DMC: this was already commented out
 FORCE_INLINE void UpdatePathfinderCell(Pathfinder::eUpdateType updateType, unsigned int incoming, unsigned int& target)
 {
 	// mask out the bits we don't use for collisions
@@ -83,45 +81,17 @@ FORCE_INLINE void UpdatePathfinderCell(Pathfinder::eUpdateType updateType, unsig
 }
 //*/
 
-FORCEINLINE void UpdatePathfinderCell(const Pathfinder::eUpdateType updateType, const unsigned int incoming, unsigned int& target)
+FORCEINLINE void UpdatePathfinderCell(const Pathfinder::eUpdateType updateType, const unsigned char incoming, unsigned char& target)
 {
-	//flagsMask has 1s for entity collision flags and 0s for special flags
-	const unsigned int entityIDMask = 0xffff0000;
-
-	if (updateType == Pathfinder::ADD_LOWORD_REPLACE_HIWORD)
-	{
-		// entity ID is replaced, flags are added on top of the existing ones
-		target = (incoming & entityIDMask) | ((incoming | target) & ~entityIDMask);
-	}
-	else
 	if (updateType == Pathfinder::ADD_LOWORD)
 	{
 		// entity ID is kept, flags are added on top
-		target = (target & entityIDMask) | ((incoming | target) & ~entityIDMask);
-	}
-	else
-	if (updateType == Pathfinder::REMOVE_ALL_IF_SAME_HIWORD)
-	{
-		// only delete if it's us that wrote this cell (or it was empty)
-		if ((target & entityIDMask) == (incoming & entityIDMask) || (target & entityIDMask) == 0)
-		{
-			// only delete the ID and our own flags, leave the remaining flags alone (since flags were additively added above)
-			target = (target & ~entityIDMask) & (~incoming);
-		}
-	}
-	else
-	if (updateType == Pathfinder::REMOVE_LOWORD_AND_MAYBE_HIWORD)
-	{
-		// remove hiword only if it's the same as incoming (while also removing loword, same as REMOVE_ALL_IF_SAME_HIWORD)
-		if ((target & entityIDMask) == (incoming & entityIDMask))
-			target = (target & ~entityIDMask) & (~incoming);
-		else
-			target = (target & entityIDMask) | ((target & ~entityIDMask) & ~incoming); // hiword is different, so only remove loword  (same as REMOVE_LOWORD)
+		target = (incoming | target);
 	}
 	else
 	if (updateType == Pathfinder::REMOVE_LOWORD)
 	{
-		target = (target & entityIDMask) | ((target & ~entityIDMask) & ~incoming);
+		target = (target & ~incoming);
 	}
 }
 
@@ -140,8 +110,8 @@ Pathfinder::Pathfinder()
 	m_statusOpen				= 0;
 	m_statusClosed				= 1;
 	m_nOpenListSize				= 0;
-	m_clearanceValueStartBit	= 0;
-	m_sniperUpdateIdx			= 0;
+	//m_clearanceValueStartBit	= 0;
+	//m_sniperUpdateIdx			= 0;
 	memset(m_openlist, 0, sizeof(m_openlist));
 }
 
@@ -150,7 +120,7 @@ Pathfinder::~Pathfinder()
 	SAFE_DELETE_ARRAY(m_nodeData);
 	SAFE_DELETE_ARRAY(m_nodemap);
 	//SAFE_DELETE_ARRAY(m_nodeDataMips);
-	m_localGetPathBuffer.Free();
+	//m_localGetPathBuffer.Free();
 }
 
 float Pathfinder::GetCellSizeMeters() const
@@ -158,18 +128,18 @@ float Pathfinder::GetCellSizeMeters() const
 	return CELL_SIZE_METERS;
 }
 
-void Pathfinder::InitStart(int sourceWidthMeters, int sourceHeightMeters, unsigned int blockMask)
+void Pathfinder::Init(int sourceWidthMeters, int sourceHeightMeters, unsigned char blockMask)
 {
 	const int newWidth = (int)(sourceWidthMeters / CELL_SIZE_METERS);
 	const int newHeight = (int)(sourceHeightMeters / CELL_SIZE_METERS);
 
 	// try to preserve memory
-	if ((newWidth * newHeight) > (m_width * m_height))
+	//if ((newWidth * newHeight) > (m_width * m_height))
 	{
 		SAFE_DELETE_ARRAY(m_nodeData);
 		SAFE_DELETE_ARRAY(m_nodemap);
 		//SAFE_DELETE_ARRAY(m_nodeDataMips);
-		m_nodeData = new unsigned [newWidth * newHeight];
+		m_nodeData = new unsigned char [newWidth * newHeight];
 		m_nodemap = new PathNode[newWidth * newHeight];
 		//m_nodeDataMips = new int[ MIPS_DIM(newWidth) * MIPS_DIM(newHeight)];
 	}
@@ -183,134 +153,150 @@ void Pathfinder::InitStart(int sourceWidthMeters, int sourceHeightMeters, unsign
 	//memset(m_nodeDataMips, 0, sizeof(int) * MIPS_DIM(m_width) * MIPS_DIM(m_height));
 
 	// calculate maximum needed points (estimate)
-	int maxPoints = (int)sqrtf((float)(m_width * m_width + m_height * m_height)) + m_width * 2;
-	if (m_localGetPathBuffer.GetCapacity() < maxPoints)
+	//int maxPoints = (int)sqrtf((float)(m_width * m_width + m_height * m_height)) + m_width * 2;
+	//if (m_localGetPathBuffer.GetCapacity() < maxPoints)
+	//{
+	//	m_localGetPathBuffer.Resize(maxPoints);
+	//}
+
+	//UPDATE FLAGS: fill with border blocker value
+	for ( int i = 0; i < m_width; ++i )
+		m_nodeData[i] = m_blockMask; // top row
+
+	for ( int i = 0; i < m_width; ++i )
+		m_nodeData[m_width * ( m_height - 1 ) + i] = m_blockMask; // bottom row
+
+	for ( int i = 0; i < m_height; ++i )
 	{
-		m_localGetPathBuffer.Resize(maxPoints);
+		m_nodeData[m_width * i] = m_blockMask; // left column
+		m_nodeData[m_width * ( i + 1 ) - 1] = m_blockMask; // right column
+	}
+
+	// initialize positions in the nodemap
+	for ( int y = 0; y < m_height; ++y )
+	{
+		int index = y * m_width;
+		for ( int x = 0; x < m_width; ++x, ++index )
+		{
+			PathNode* pNode = &m_nodemap[index];
+			pNode->x = ( short ) x;
+			pNode->y = ( short ) y;
+		}
 	}
 }
 
-void Pathfinder::InitEnd(unsigned int clearanceValueStartBit, int numClearanceValues)
+void Pathfinder::ComputeClearance(/*unsigned int clearanceValueStartBit, int numClearanceValues*/)
 {
 	//m_suspiciousAreasUpdated = true;
 
-	m_clearanceValueStartBit = clearanceValueStartBit; // save for later
-	_ASSERT(m_clearanceValueStartBit == 0 || m_clearanceValueStartBit == 8192); // hack warning. Make sure to edit UpdatePathfinderCell() if this changes, it makes the assumption that we only use up to 8192 bits for flags
+	//m_clearanceValueStartBit = clearanceValueStartBit; // save for later
+	//_ASSERT(m_clearanceValueStartBit == 0 || m_clearanceValueStartBit == 8192); // hack warning. Make sure to edit UpdatePathfinderCell() if this changes, it makes the assumption that we only use up to 8192 bits for flags
 
-	// fill with border value. TODO: why is this here and not done at the beginning? Moveable entities seem to overwrite it, so is it necessary after all? Or the entities overwriting it is also a problem?
-	for (int i = 0; i < m_width; ++i)
-		m_nodeData[i] = m_blockMask; // top row
 
-	for (int i = 0; i < m_width; ++i)
-		m_nodeData[m_width * (m_height - 1) + i] = m_blockMask; // bottom row
+	// DMC: next part automatically calculates clearance flags (around objects)
 
-	for (int i = 0; i < m_height; ++i)
-	{
-		m_nodeData[m_width * i] = m_blockMask; // left column
-		m_nodeData[m_width * (i + 1) - 1] = m_blockMask; // right column
-	}
-
-	for (int y = 0; y < m_height; ++y)
-	{
-		int index = y * m_width;
-		for (int x = 0; x < m_width; ++x, ++index)
-		{
-			PathNode* pNode = &m_nodemap[index];
-			pNode->x = (short)x;
-			pNode->y = (short)y;
-		}
-	}
-
-	if (!numClearanceValues || !clearanceValueStartBit)
-		return;
-
-	// TODO: this is a very slow operation for large maps, need better
-
-	// hardcoded for 2 levels
-	_ASSERT(numClearanceValues == 2);
-	unsigned int clearanceBits[2] = { clearanceValueStartBit, clearanceValueStartBit << 1 };// , clearanceValueStartBit << 2};
-
-	for(int y = 0; y < m_height; y++)
-	{
-		for (int x = 0; x < m_width; ++x)
-		{
-			unsigned* pData = &m_nodeData[x + y * m_width];
-			const unsigned int data = *pData;
-			if (data & m_blockMask)
-				continue;
-
-			//
-			// clearance level 0 - this is a free cell. Same as non-blocking cell (no movement block). We only need it as an extra cost when trying to avoid the shortest path.
-			*pData = data | clearanceBits[0];
-
-			//
-			// clearance level 1
-			bool bClear1 = true;
-			const Vec2i lvl2[] = {
-				{x-1, y-1},	{x  , y-1},	{x+1, y-1},
-				{x-1, y  },				{x+1, y  },
-				{x-1, y+1},	{x  , y+1},	{x+1, y+1},
-			};
-			for (int i = 0; i < ARRAY_SIZE(lvl2) && bClear1; ++i)
-			{
-				_ASSERT(lvl2[i].x >= 0 && lvl2[i].x < m_width && lvl2[i].y >= 0 && lvl2[i].y < m_height); // with the map edges blocked out, there's no way we can get outside the map
-				bClear1 &= (m_nodeData[lvl2[i].y * m_width + lvl2[i].x] & m_blockMask) == 0;
-			}
-
-			if (bClear1)
-				*pData = data | clearanceBits[1];
-			else
-				continue;
-
-			//
-			// clearance level 2
-			bool bClear2 = true;
-			const Vec2i lvl3[] = {
-				{x-2, y-2},	{x-1, y-2},	{x  , y-2},	{x+1, y-2},	{x+2, y-2},
-				{x-2, y-1},	{x-1, y-1},	{x  , y-1},	{x+1, y-1},	{x+2, y-1},
-				{x-2, y  },	{x-1, y  },				{x+1, y  },	{x+2, y  },
-				{x-2, y+1},	{x-1, y+1},	{x  , y+1},	{x+1, y+1},	{x+2, y+1},
-				{x-2, y+2},	{x-1, y+2},	{x  , y+2},	{x+1, y+2},	{x+2, y+2},
-			};
-			for (int i = 0; i < ARRAY_SIZE(lvl3) && bClear2; ++i)
-			{
-				_ASSERT(lvl3[i].x >= 0 && lvl3[i].x < m_width && lvl3[i].y >= 0 && lvl3[i].y < m_height); // with the map edges blocked out, there's no way we can get outside the map
-				bClear2 &= (m_nodeData[lvl3[i].y * m_width + lvl3[i].x] & m_blockMask) == 0;
-			}
-
-			//if (bClear2)
-			//	pNode->data = data | clearanceBits[2];
-			//else
-			//	continue;
-
-			// this will just clear up the previous cells, meaning we leave spaces that have more than 'numClearanceValues' free around them with no extra cost
-			if (bClear2)
-				*pData = data; // reset
-
-/*
-			// clearance level 3 - this will just clear up the previous cells
-			bool bClear3 = true;
-			const Vec2i lvl4[] = {
-				{x-3, y-3},	{x-2, y-3},	{x-1, y-3},	{x  , y-3},	{x+1, y-3},	{x+2, y-3},	{x+3, y-3},
-				{x-3, y-2},	{x-2, y-2},	{x-1, y-2},	{x  , y-2},	{x+1, y-2},	{x+2, y-2},	{x+3, y-2},
-				{x-3, y-1},	{x-2, y-1},	{x-1, y-1},	{x  , y-1},	{x+1, y-1},	{x+2, y-1},	{x+3, y-1},
-				{x-3, y  },	{x-2, y  },	{x-1, y  },				{x+1, y  },	{x+2, y  },	{x+3, y  },
-				{x-3, y+1},	{x-2, y+1},	{x-1, y+1},	{x  , y+1},	{x+1, y+1},	{x+2, y+1},	{x+3, y+1},
-				{x-3, y+2},	{x-2, y+2},	{x-1, y+2},	{x  , y+2},	{x+1, y+2},	{x+2, y+2},	{x+3, y+2},
-				{x-3, y+3},	{x-2, y+3},	{x-1, y+3},	{x  , y+3},	{x+1, y+3},	{x+2, y+3},	{x+3, y+3},
-			};
-			for (int i = 0; i < COUNT_OF(lvl4) && bClear3; ++i)
-			{
-				ASSERT(lvl4[i].x >= 0 && lvl4[i].x < m_width && lvl4[i].y >= 0 && lvl4[i].y < m_height); // with the map edges blocked out, there's no way we can get outside the map
-				bClear3 &= (m_nodeData[lvl4[i].y * m_width + lvl4[i].x] & m_blockMask) == 0;
-			}
-
-			if (bClear3)
-				pNode->data = data; // reset
-*/
-		}
-	}
+//	if (!numClearanceValues || !clearanceValueStartBit)
+//		return;
+//
+//
+//	// hardcoded for 2 levels
+//	_ASSERT(numClearanceValues == 2);
+//	unsigned int clearanceBits[2] = { clearanceValueStartBit, clearanceValueStartBit << 1 };// , clearanceValueStartBit << 2};
+//
+//	for(int y = 0; y < m_height; y++)
+//	{
+//		for (int x = 0; x < m_width; ++x)
+//		{
+//			unsigned* pData = &m_nodeData[x + y * m_width];
+//			const unsigned int data = *pData;
+//			if (data & m_blockMask)
+//				continue;
+//
+//			//
+//			// clearance level 0 - this is a free cell. Same as non-blocking cell (no movement block). We only need it as an extra cost when trying to avoid the shortest path.
+//			*pData = data | clearanceBits[0];
+//
+//			//
+//			// clearance level 1
+//			bool bClear1 = true;
+//			const Vec2i lvl2[] = {
+//				{x-1, y-1},	{x  , y-1},	{x+1, y-1},
+//				{x-1, y  },				{x+1, y  },
+//				{x-1, y+1},	{x  , y+1},	{x+1, y+1},
+//			};
+//			for (int i = 0; i < ARRAY_SIZE(lvl2) && bClear1; ++i)
+//			{
+//				_ASSERT(lvl2[i].x >= 0 && lvl2[i].x < m_width && lvl2[i].y >= 0 && lvl2[i].y < m_height); // with the map edges blocked out, there's no way we can get outside the map
+//				bClear1 &= (m_nodeData[lvl2[i].y * m_width + lvl2[i].x] & m_blockMask) == 0;
+//			}
+//
+//			if (bClear1)
+//				*pData = data | clearanceBits[1];
+//			else
+//				continue;
+//
+//			//
+//			// clearance level 2
+//			bool bClear2 = true;
+//			const Vec2i lvl3[] = {
+//				{x-2, y-2},	{x-1, y-2},	{x  , y-2},	{x+1, y-2},	{x+2, y-2},
+//				{x-2, y-1},	{x-1, y-1},	{x  , y-1},	{x+1, y-1},	{x+2, y-1},
+//				{x-2, y  },	{x-1, y  },				{x+1, y  },	{x+2, y  },
+//				{x-2, y+1},	{x-1, y+1},	{x  , y+1},	{x+1, y+1},	{x+2, y+1},
+//				{x-2, y+2},	{x-1, y+2},	{x  , y+2},	{x+1, y+2},	{x+2, y+2},
+//			};
+//			for (int i = 0; i < ARRAY_SIZE(lvl3) && bClear2; ++i)
+//			{
+//				_ASSERT(lvl3[i].x >= 0 && lvl3[i].x < m_width && lvl3[i].y >= 0 && lvl3[i].y < m_height); // with the map edges blocked out, there's no way we can get outside the map
+//				bClear2 &= (m_nodeData[lvl3[i].y * m_width + lvl3[i].x] & m_blockMask) == 0;
+//			}
+//
+//			//if (bClear2)
+//			//	pNode->data = data | clearanceBits[2];
+//			//else
+//			//	continue;
+//
+//			// this will just clear up the previous cells, meaning we leave spaces that have more than 'numClearanceValues' free around them with no extra cost
+//			if (bClear2)
+//				*pData = data; // reset
+//
+// /*
+//			// clearance level 3 - this will just clear up the previous cells DMC: already commented out
+//			bool bClear3 = true;
+//			const Vec2i lvl4[] = {
+//				{x-3, y-3},	{x-2, y-3},	{x-1, y-3},	{x  , y-3},	{x+1, y-3},	{x+2, y-3},	{x+3, y-3},
+//				{x-3, y-2},	{x-2, y-2},	{x-1, y-2},	{x  , y-2},	{x+1, y-2},	{x+2, y-2},	{x+3, y-2},
+//				{x-3, y-1},	{x-2, y-1},	{x-1, y-1},	{x  , y-1},	{x+1, y-1},	{x+2, y-1},	{x+3, y-1},
+//				{x-3, y  },	{x-2, y  },	{x-1, y  },				{x+1, y  },	{x+2, y  },	{x+3, y  },
+//				{x-3, y+1},	{x-2, y+1},	{x-1, y+1},	{x  , y+1},	{x+1, y+1},	{x+2, y+1},	{x+3, y+1},
+//				{x-3, y+2},	{x-2, y+2},	{x-1, y+2},	{x  , y+2},	{x+1, y+2},	{x+2, y+2},	{x+3, y+2},
+//				{x-3, y+3},	{x-2, y+3},	{x-1, y+3},	{x  , y+3},	{x+1, y+3},	{x+2, y+3},	{x+3, y+3},
+//			};
+//			for (int i = 0; i < COUNT_OF(lvl4) && bClear3; ++i)
+//			{
+//				ASSERT(lvl4[i].x >= 0 && lvl4[i].x < m_width && lvl4[i].y >= 0 && lvl4[i].y < m_height); // with the map edges blocked out, there's no way we can get outside the map
+//				bClear3 &= (m_nodeData[lvl4[i].y * m_width + lvl4[i].x] & m_blockMask) == 0;
+//			}
+//
+//			if (bClear3)
+//				pNode->data = data; // reset
+// */
+//		}
+//	}
 }
+
+void Pathfinder::SetNodeFlags( int xTL, int yTL, unsigned char flag )
+{
+	_ASSERT( xTL >= 0 && xTL < m_width && yTL >= 0 && yTL < m_height );
+	m_nodeData[xTL + yTL * m_width] |= flag;
+}
+
+void Pathfinder::ClearNodeFlags( int xTL, int yTL, unsigned char flag )
+{
+	_ASSERT( xTL >= 0 && xTL < m_width && yTL >= 0 && yTL < m_height );
+	m_nodeData[xTL + yTL * m_width] &= ~flag;
+}
+
 /*
 namespace AI {
 	extern bool CanSniperSeeCommon(Vec3 from, Vec2 to);
@@ -1141,7 +1127,7 @@ Vec2 Pathfinder::AdjustToInsideCell(const Vec2& p) const
 	return celled;
 }
 
-Vec2 Pathfinder::AdjustToOutsideCollision(const Vec2& p, unsigned mask) const
+Vec2 Pathfinder::AdjustToOutsideCollision(const Vec2& p, unsigned char mask) const
 {
 	auto c = ConvertToPathfinderCoords(p.x, p.y);
 	if (m_nodeData[c.x + c.y * m_width] & mask)
@@ -1201,7 +1187,7 @@ Vec2 Pathfinder::AdjustToOutsideCollision(const Vec2& p, unsigned mask) const
 //	return (result != RESULT_FAILED);
 //}
 
-bool Pathfinder::GetPath(const Vec2& start, const Vec2& end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned int blockFlags, bool bGetClosestPointIfBlocked /*= true*/, unsigned int additionalCostFlags /*= 0*/)
+bool Pathfinder::GetPath(const Vec2& start, const Vec2& end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned char blockFlags, bool bGetClosestPointIfBlocked /*= true*/, unsigned char additionalCostFlags /*= 0*/)
 {
 	eResult result = GetPath(ConvertToPathfinderCoords(start.x, start.y), ConvertToPathfinderCoords(end.x, end.y), pPath, numPathPoints, maxPathPoints, blockFlags, bGetClosestPointIfBlocked, additionalCostFlags);
 	if (result == RESULT_ALL_GOOD)
@@ -1218,7 +1204,7 @@ bool Pathfinder::GetPath(const Vec2& start, const Vec2& end, Vec2* pPath, int& n
 	return (result != RESULT_FAILED);
 }
 
-Vec2i Pathfinder::FindClosestEmptyCell(const Vec2i& start, int range, unsigned int collidableMask) const
+Vec2i Pathfinder::FindClosestEmptyCell(const Vec2i& start, int range, unsigned char collidableMask) const
 {
 	// searches in a spiral
 	SpiralIdx spiral{m_width, m_height};
@@ -1236,7 +1222,7 @@ Vec2i Pathfinder::FindClosestEmptyCell(const Vec2i& start, int range, unsigned i
 }
 
 // if 'bGetClosestPointIfBlocked' is set, we will always return a valid path, even if start/end are outside the map or inside a collision
-Pathfinder::eResult Pathfinder::GetPath(const Vec2i start, Vec2i end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned int blockFlags, bool bGetClosestPointIfBlocked, unsigned int additionalCostFlags)
+Pathfinder::eResult Pathfinder::GetPath(const Vec2i start, Vec2i end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned char blockFlags, bool bGetClosestPointIfBlocked, unsigned char additionalCostFlags)
 {
 	_ASSERT(blockFlags);
 	if (!blockFlags)
@@ -1259,6 +1245,7 @@ Pathfinder::eResult Pathfinder::GetPath(const Vec2i start, Vec2i end, Vec2* pPat
 		g_pLog->Write("[Warning] Pathfinder::GetPath() end point outside of map\n");
 		return RESULT_FAILED;
 /*
+DMC: was already commented out
 		if (!bGetClosestPointIfBlocked)
 			return RESULT_FAILED;
 
@@ -1599,7 +1586,7 @@ Pathfinder::eResult Pathfinder::GetPath(const Vec2i start, Vec2i end, Vec2* pPat
 //	}
 //}
 
-bool Pathfinder::TraceBresenhamLine(const Vec2i& start, const Vec2i& end, unsigned int collidableMask, Vec2i* hitPoint) const
+bool Pathfinder::TraceBresenhamLine(const Vec2i& start, const Vec2i& end, unsigned char collidableMask, Vec2i* hitPoint) const
 {
 	// Note: 'start' needs to be inside the map
 

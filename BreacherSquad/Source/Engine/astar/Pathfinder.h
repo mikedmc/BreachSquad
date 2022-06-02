@@ -1,19 +1,25 @@
 #pragma once
 
-// collision flags and masks (have more flags that combine to set the accessible flag)
+// collision flags and masks (can have more flags that combine to set the accessible flag)
 #define COL_ACCESSIBLE		1
+// margins around walls and objects, if needed. They have higher cost but still low
+#define COL_CLEARANCE0		2
+#define COL_CLEARANCE1		4
+// areas to really avoid, very high cost (not used atm)
+#define COL_SCATTER			8 //<- can change name but it could be acid on floor or grenades or anything
+#define COL_DANGER_AREA		16 
 // flag that blocks movement
-#define COL_MOVEMENT_BLOCK	2
+#define COL_MOVEMENT_BLOCK	128
 
 // this will define how big the collision map will be
-#define CELL_SIZE_METERS		0.25f // = width of a wall. for a 64x64 meters map we will have a 256x256 pathfinding map
+#define CELL_SIZE_METERS		1.0f 
 #define CELL_SIZE_METERS_INV	(1.0f / CELL_SIZE_METERS)
-#define CELL_RADIUS				(sqrtf(2.0f * CELL_SIZE_METERS * 0.5f * CELL_SIZE_METERS * 0.5f))
+//#define CELL_RADIUS				(sqrtf(2.0f * CELL_SIZE_METERS * 0.5f * CELL_SIZE_METERS * 0.5f))
 
 // either use this or the clearance params (this works better for our use case)
-#define OBJECT_EXPANSION		(CELL_SIZE_METERS * 0.5f + 0.001f) // == 0.126f
+//#define OBJECT_EXPANSION		(CELL_SIZE_METERS * 0.5f + 0.001f) // == 0.126f
 
-#define MAX_OPEN_NODES			3000
+#define MAX_OPEN_NODES			3000		//DMC: was 30.000
 
 //CRB: I moved the actual data outside this node stuff so data updates are much faster
 // It didn't affect the pathfinding speed (with the most recent code), but it should be faster when it's all together
@@ -34,10 +40,15 @@ public:
 							Pathfinder();
 							~Pathfinder();
 
-	// when loading a map, call InitStart(), use AddObject() for each entity that blocks movement and InitEnd() after that.
-	void					InitStart(int sourceWidthMeters, int sourceHeightMeters, unsigned int blockMask);
-	void					InitEnd(unsigned int clearanceValueStartBit = 0, int numClearanceValues = 0);
-	//void					MarkShapeCells(const Vec3* shapePts, int numPts, unsigned int blockMask); // adds given flags to all cells that are inside given shape
+	// when loading a map, call Init(), use AddObject() for each entity that blocks movement and ComputeClearance() after that.
+	void					Init(int sourceWidthMeters, int sourceHeightMeters, unsigned char blockMask);
+	// DMC: Optional now because the engine sets the clearance flags itself
+	void					ComputeClearance(/*unsigned int clearanceValueStartBit = 0, int numClearanceValues = 0*/);
+	//void					MarkShapeCells(const Vec3* shapePts, int numPts, unsigned char blockMask); // adds given flags to all cells that are inside given shape
+	//DMC: does OR between flag and node data. Use COL_ flags
+	void					SetNodeFlags( int xTL, int yTL, unsigned char flag );
+	//DMC: does AND ~ between flag and node data to clear all the flags in "flag". Use COL_ flags
+	void					ClearNodeFlags( int xTL, int yTL, unsigned char flag );
 
 	void					MarkAsAccessible(Vec2 pos);
 	//void					FloodfillAccessibleMask();
@@ -46,11 +57,8 @@ public:
 
 	enum eUpdateType
 	{
-		ADD_LOWORD_REPLACE_HIWORD,		// least sig. 16 bits are added, the most sig. 16 bits (which contain EntityId are replaced), see eCollisionFlags
-		ADD_LOWORD,						// least sig. 16 bits are added, the most sig. 16 bits (the EntityId) are left unchanged
-		REMOVE_ALL_IF_SAME_HIWORD,		// removes least sig 16 bits and the most sig. 16 bits (only if the the most sig. 16 bits are the same)
-		REMOVE_LOWORD_AND_MAYBE_HIWORD, // removes least sig 16 bits, while the most sig 16 bits are only removed if they're the same
-		REMOVE_LOWORD					// removes least sig 16 bits, the most sig. 16 bits are left unchanged
+		ADD_LOWORD,				
+		REMOVE_LOWORD			
 	};
 	/*
 	void					UpdateObject(const sCollisionShape& collision, const Matrix& parentTransform, unsigned int flags, eUpdateType update);
@@ -60,7 +68,7 @@ public:
 	// if 'bGetClosestPointIfBlocked' is set, we will always return a valid path, even if start/end are outside the map or inside a collision
 	// uses the X/Z plane of the start/end points, but we accept Vec3 as a convenience
 	// returns result in meters (game units)
-	bool					GetPath(const Vec2& start, const Vec2& end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned int blockFlags, bool bGetClosestPointIfBlocked = true, unsigned int additionalCostFlags = 0);
+	bool					GetPath(const Vec2& start, const Vec2& end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned char blockFlags, bool bGetClosestPointIfBlocked = true, unsigned char additionalCostFlags = 0);
 
 	// !!! uses our own memory: not thread safe, memory is owned by this object and should not be referenced or released
 	//bool					GetPath_Unsafe(const Vec3& start, const Vec3& end, const Vec3** ppPath, int& numPathPoints, unsigned int blockFlags, bool bGetClosestPointIfBlocked = true, unsigned int additionalCostFlags = 0);
@@ -85,7 +93,7 @@ public:
 	bool					IsInsideMap(Vec2 p) const;
 	Vec2					AdjustToInsideMap(const Vec2& start, const Vec2& end) const; // adjust endpoint so it's not outside the map and not touching the map edges
 	Vec2					AdjustToInsideCell(const Vec2&) const; // clamp values so they aren't too close to cell edge (to avoid float errors)
-	Vec2					AdjustToOutsideCollision(const Vec2&, unsigned mask) const; // snap position to the nearest adjacent unblocked cell
+	Vec2					AdjustToOutsideCollision(const Vec2&, unsigned char mask) const; // snap position to the nearest adjacent unblocked cell
 private:
 	Vec2i					ConvertToPathfinderCoords(float x, float y) const;
 	Vec2					ConvertToWorldCoords(int x, int y) const;
@@ -104,7 +112,7 @@ private:
 		RESULT_FAILED, // couldn't find a path (start/end outside of map or inside collision)
 		RESULT_CLOSEST_POINT, // end path was inside collision, but a point closest to the endpoint was returned (when using flag PF_CLOSEST_POINT)
 	};
-	eResult					GetPath(Vec2i start, Vec2i end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned int blockFlags, bool bGetClosestPointIfBlocked, unsigned int additionalCostFlags); // uses pathfinder coords
+	eResult					GetPath(Vec2i start, Vec2i end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned char blockFlags, bool bGetClosestPointIfBlocked, unsigned char additionalCostFlags); // uses pathfinder coords
 
 	void					AddNewToOpenList(PathNode* node, unsigned short gcost, int parentIdx, int destx, int desty);
 	void					AddToOpenList(PathNode* node, int cost);
@@ -112,20 +120,20 @@ private:
 	unsigned int			GetRawData(int x, int y) const { return m_nodeData[x + y * m_width]; }
 	
 	//void					WriteFatBresenhamLine(const Vec2i& start, const Vec2i& end, unsigned int collidableMask, unsigned writeMask, eUpdateType add) const;
-	bool					TraceBresenhamLine(const Vec2i& start, const Vec2i& end, unsigned int collidableMask, Vec2i* hitPoint = nullptr) const;
+	bool					TraceBresenhamLine(const Vec2i& start, const Vec2i& end, unsigned char collidableMask, Vec2i* hitPoint = nullptr) const;
 	//bool					TraceBresenhamLineBlocked(const Vec2i& start, const Vec2i& end, unsigned int collidableMask, Vec2i* hitPoint = nullptr) const;
 	
-	Vec2i					FindClosestEmptyCell(const Vec2i& start, int range, unsigned int collidableMask) const;
+	Vec2i					FindClosestEmptyCell(const Vec2i& start, int range, unsigned char collidableMask) const;
 
 private:
 	int						m_width;
 	int						m_height;
-	unsigned int			m_blockMask;
-	unsigned int*			m_nodeData{}; // first 16 bits are various flags (e.g. cover/solid object), the other 16 are the entity's ID
+	unsigned char			m_blockMask;	// mask that tells when the tile is blocked
+	unsigned char*			m_nodeData{};	//DMC: keeps flags about the node. PINTEA:first 16 bits are various flags (e.g. cover/solid object), the other 16 are the entity's ID
 	PathNode*				m_nodemap{};
-	unsigned int			m_clearanceValueStartBit;
+	//unsigned int			m_clearanceValueStartBit;
 	//int*					m_nodeDataMips{};
-	int						m_sniperUpdateIdx;
+	//int						m_sniperUpdateIdx;
 	//bool					m_suspiciousAreasUpdated = false;
 
 	unsigned short			m_statusOpen;
@@ -139,5 +147,5 @@ private:
 	int						m_nOpenListSize;
 
 	// filled in GetPath_Unsafe() with the path points.
-	List<Vec3>				m_localGetPathBuffer;
+	//List<Vec2>				m_localGetPathBuffer;  //used for unsafe returning of the path
 };
