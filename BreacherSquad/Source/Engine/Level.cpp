@@ -4093,6 +4093,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 	UTGetShaderManager().SetVS( nullptr );
+	UTGetShaderManager().SetPS( nullptr );
 
 	CTexNode* pTexToUse = m_pTexTilesColor;
 	// Offset in texture index so we paint from the normals texture when we render the normals pass
@@ -4143,14 +4144,6 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 		{
 			case K_VST_ACTOR:
 			{
-				if ( eLastVis != K_VST_ACTOR )
-				{
-					// if last painted element was not an actor then do a flush on UTpainter
-					__Painter().Flush();
-					// remove shaders that were set
-					UTGetShaderManager().SetVS( nullptr );
-				}
-
 				CActor* act = static_cast< CActor* >( vis->pPtr );
 				act->Paint( eTexChannel );
 
