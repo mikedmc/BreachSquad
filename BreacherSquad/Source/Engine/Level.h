@@ -26,6 +26,7 @@
 #include "gameplay/MissionStory.h"
 
 #include "astar/astarsearch.h"
+#include "astar/Pathfinder.h"
 
 #include "CFOVUtil.h"
 #include "IngameGUI.h"

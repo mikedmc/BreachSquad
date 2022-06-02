@@ -147,6 +147,11 @@ VOID LOG(WCHAR* szFormat, ...)
 	OS_PrintLog(szBuffer);
 }
 
+VOID DEBUG_BREAK()
+{
+	__asm int 3;
+}
+
 VOID LOG(CHAR* szFormat, ...)
 {
 	CHAR szBuffer[2048] = { 0 };

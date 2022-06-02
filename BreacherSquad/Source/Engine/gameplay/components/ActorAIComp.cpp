@@ -323,7 +323,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 						if ( level.Areas_IsBoxColliding( act.bbox_floor, AIsensor.vGoTo - act.pos.xy, true ) )
 						{
 							// astar should return solution in internal array for the level to smooth it into the actor
-							int a_steps = level.m_astar.FindPath( ToTilePos( act.pos.xy ), tlpos, tempArrVec2i, ARRAY_SIZE(tempArrVec2i), true );
+							int a_steps = level.m_astar.FindPath( nsTiles::ToTilePos( act.pos.xy ), tlpos, tempArrVec2i, ARRAY_SIZE(tempArrVec2i), true );
 
 							if ( a_steps == 0 ) 
 							{
@@ -335,7 +335,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 								// path is smoothed by astar class we just copy it
 								for ( int kk = 0; kk < a_steps; kk++ )
 								{
-									AIsensor.arrGoToPoints.m_pData[kk] = GetTileCenter( tempArrVec2i[kk] );
+									AIsensor.arrGoToPoints.m_pData[kk] = nsTiles::GetTileCenter( tempArrVec2i[kk] );
 									AIsensor.arrGoToPoints.nCount = a_steps;
 								}
 

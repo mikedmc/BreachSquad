@@ -2269,7 +2269,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 				Vec2 vto = __Sim().m_camLevelToScr.ScreenToWorld( g_mouse.pos );
 
 				LONGLONG tmstart = __PerfCounter().GetTime();
-				int a_steps = __Sim().m_astar.FindPath( ToTilePos( vfrom ), ToTilePos(vto), tempArrVec2i, ARRAY_SIZE( tempArrVec2i ), true );
+				int a_steps = __Sim().m_astar.FindPath( nsTiles::ToTilePos( vfrom ), nsTiles::ToTilePos(vto), tempArrVec2i, ARRAY_SIZE( tempArrVec2i ), true );
 				LONGLONG tmend = __PerfCounter().GetTime();
 				LOG(L"path duration: %f", __PerfCounter().GetPeriodInMS(tmstart, tmend));
 			}

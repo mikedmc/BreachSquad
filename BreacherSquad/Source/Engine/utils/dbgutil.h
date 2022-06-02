@@ -24,7 +24,8 @@ extern HWND m_hLstMsgs;
 
 #define ErrorBox(nSeverity, ...) ErrorBoxFnW(nSeverity, __FILE__, __LINE__, __VA_ARGS__)
 VOID	ErrorBoxFnW(int nSeverity, const CHAR* strFile, DWORD dwLine, WCHAR* szFormat, ...);
-
+// Breaks the code prompting the debugger	
+VOID	DEBUG_BREAK();
 /*!
  * \brief Writes a message line to the log window and file
  */

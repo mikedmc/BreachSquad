@@ -1,7 +1,5 @@
+#include "dxstdafx.h"
 #include "Pathfinder.h"
-#include "Kernel/Log.h"
-#include "Kernel/Math.h"
-#include "Kernel/OS.h" // for GetTimeMS
 #include <algorithm>
 
 //#define PATHFINDING_PERF
@@ -12,13 +10,13 @@ constexpr int MetersToCells(float m) {
 
 #define HALF_COST 5
 #define MIN_COST 2*HALF_COST
-FORCE_INLINE unsigned short GetGCostForParent(short nodex, short nodey, unsigned short parentGCost, short parentx, short parenty)
+FORCEINLINE unsigned short GetGCostForParent(short nodex, short nodey, unsigned short parentGCost, short parentx, short parenty)
 {
 	//NOTE: CRB very important that this is the same or lower than the heuristic when using the sorted open list
 	return parentGCost + ((nodex == parentx || nodey == parenty) ? MIN_COST : (MIN_COST + HALF_COST)); 
 }
 
-FORCE_INLINE unsigned short CalculateH(int nodex, int nodey, int destx, int desty)
+FORCEINLINE unsigned short CalculateH(int nodex, int nodey, int destx, int desty)
 {
 	//https://www.redblobgames.com/pathfinding/posts/reprioritize.html
 	//CRB: Octile distance. Fudge of 1 makes it a consistent heuristic
@@ -27,7 +25,7 @@ FORCE_INLINE unsigned short CalculateH(int nodex, int nodey, int destx, int dest
 	unsigned short dx = (unsigned short)abs(nodex - destx);
 	unsigned short dy = (unsigned short)abs(nodey - desty);
 	constexpr unsigned short fudge = 1; //NOTE: CRB fudge 0 gives guaranteed optimal paths, but is slower by about 30%
-	return (HALF_COST + fudge) * (Max(dx,dy)*2 + Min(dx, dy)); // assumes a 1.5 cost for diagonals (works better with integer math)
+	return (HALF_COST + fudge) * (max(dx,dy)*2 + min(dx, dy)); // assumes a 1.5 cost for diagonals (works better with integer math)
 
 	// use (MIN_COST*1.5) if we want the heuristic to be a bit forgiving by overestimating a bit. By overestimating heuristics we also have better performance since we don't need the smallest super optimal path.
 	// Manhattan distance
@@ -35,13 +33,15 @@ FORCE_INLINE unsigned short CalculateH(int nodex, int nodey, int destx, int dest
 }
 
 #define MIN_COST_UNADM (int)(MIN_COST * 3)
-FORCE_INLINE unsigned short CalculateH_Unadmissible(int nodex, int nodey, int destx, int desty)
+FORCEINLINE unsigned short CalculateH_Unadmissible(int nodex, int nodey, int destx, int desty)
 {
 	return MIN_COST_UNADM * (unsigned short)(abs(destx - nodex) + abs(desty - nodey));
 }
 
-FORCE_INLINE unsigned short GetAdditionalCost(const unsigned int nodeData, const unsigned int additionalCostFlags)
+FORCEINLINE unsigned short GetAdditionalCost(const unsigned int nodeData, const unsigned int additionalCostFlags)
 {
+	return 0;
+	/*
 	if (additionalCostFlags == 0)
 		return 0;
 	unsigned short extraCost = 0;
@@ -51,6 +51,7 @@ FORCE_INLINE unsigned short GetAdditionalCost(const unsigned int nodeData, const
 	return extraCost;
 	// use this when using variable additional costs
 	//return (unsigned short)(MIN_COST * 10.0f * (1.0f / (float)Math::GetNumberOfBitsSet(additionalCostFlags)));
+	*/
 }
 
 /*
@@ -82,7 +83,7 @@ FORCE_INLINE void UpdatePathfinderCell(Pathfinder::eUpdateType updateType, unsig
 }
 //*/
 
-FORCE_INLINE void UpdatePathfinderCell(const Pathfinder::eUpdateType updateType, const unsigned int incoming, unsigned int& target)
+FORCEINLINE void UpdatePathfinderCell(const Pathfinder::eUpdateType updateType, const unsigned int incoming, unsigned int& target)
 {
 	//flagsMask has 1s for entity collision flags and 0s for special flags
 	const unsigned int entityIDMask = 0xffff0000;
@@ -124,9 +125,11 @@ FORCE_INLINE void UpdatePathfinderCell(const Pathfinder::eUpdateType updateType,
 	}
 }
 
+/*
 #define MIPS_DIM(dim)	(((dim) + 7) / 8)
 #define MIPS_FROM(x)	((x) / 8)
 #define MIPS_TO(x)		((x) * 8)
+*/
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -146,7 +149,7 @@ Pathfinder::~Pathfinder()
 {
 	SAFE_DELETE_ARRAY(m_nodeData);
 	SAFE_DELETE_ARRAY(m_nodemap);
-	SAFE_DELETE_ARRAY(m_nodeDataMips);
+	//SAFE_DELETE_ARRAY(m_nodeDataMips);
 	m_localGetPathBuffer.Free();
 }
 
@@ -165,10 +168,10 @@ void Pathfinder::InitStart(int sourceWidthMeters, int sourceHeightMeters, unsign
 	{
 		SAFE_DELETE_ARRAY(m_nodeData);
 		SAFE_DELETE_ARRAY(m_nodemap);
-		SAFE_DELETE_ARRAY(m_nodeDataMips);
+		//SAFE_DELETE_ARRAY(m_nodeDataMips);
 		m_nodeData = new unsigned [newWidth * newHeight];
 		m_nodemap = new PathNode[newWidth * newHeight];
-		m_nodeDataMips = new int[ MIPS_DIM(newWidth) * MIPS_DIM(newHeight)];
+		//m_nodeDataMips = new int[ MIPS_DIM(newWidth) * MIPS_DIM(newHeight)];
 	}
 
 	m_width = newWidth;
@@ -177,22 +180,22 @@ void Pathfinder::InitStart(int sourceWidthMeters, int sourceHeightMeters, unsign
 
 	memset(m_nodeData, 0, sizeof(m_nodeData[0]) * m_width * m_height);
 	memset(m_nodemap, 0, sizeof(m_nodemap[0]) * m_width * m_height);
-	memset(m_nodeDataMips, 0, sizeof(int) * MIPS_DIM(m_width) * MIPS_DIM(m_height));
+	//memset(m_nodeDataMips, 0, sizeof(int) * MIPS_DIM(m_width) * MIPS_DIM(m_height));
 
 	// calculate maximum needed points (estimate)
 	int maxPoints = (int)sqrtf((float)(m_width * m_width + m_height * m_height)) + m_width * 2;
 	if (m_localGetPathBuffer.GetCapacity() < maxPoints)
 	{
-		m_localGetPathBuffer.Reserve(maxPoints);
+		m_localGetPathBuffer.Resize(maxPoints);
 	}
 }
 
 void Pathfinder::InitEnd(unsigned int clearanceValueStartBit, int numClearanceValues)
 {
-	m_suspiciousAreasUpdated = true;
+	//m_suspiciousAreasUpdated = true;
 
 	m_clearanceValueStartBit = clearanceValueStartBit; // save for later
-	ASSERT(m_clearanceValueStartBit == 0 || m_clearanceValueStartBit == 8192); // hack warning. Make sure to edit UpdatePathfinderCell() if this changes, it makes the assumption that we only use up to 8192 bits for flags
+	_ASSERT(m_clearanceValueStartBit == 0 || m_clearanceValueStartBit == 8192); // hack warning. Make sure to edit UpdatePathfinderCell() if this changes, it makes the assumption that we only use up to 8192 bits for flags
 
 	// fill with border value. TODO: why is this here and not done at the beginning? Moveable entities seem to overwrite it, so is it necessary after all? Or the entities overwriting it is also a problem?
 	for (int i = 0; i < m_width; ++i)
@@ -224,7 +227,7 @@ void Pathfinder::InitEnd(unsigned int clearanceValueStartBit, int numClearanceVa
 	// TODO: this is a very slow operation for large maps, need better
 
 	// hardcoded for 2 levels
-	ASSERT(numClearanceValues == 2);
+	_ASSERT(numClearanceValues == 2);
 	unsigned int clearanceBits[2] = { clearanceValueStartBit, clearanceValueStartBit << 1 };// , clearanceValueStartBit << 2};
 
 	for(int y = 0; y < m_height; y++)
@@ -243,14 +246,14 @@ void Pathfinder::InitEnd(unsigned int clearanceValueStartBit, int numClearanceVa
 			//
 			// clearance level 1
 			bool bClear1 = true;
-			const Vector2i lvl2[] = {
+			const Vec2i lvl2[] = {
 				{x-1, y-1},	{x  , y-1},	{x+1, y-1},
 				{x-1, y  },				{x+1, y  },
 				{x-1, y+1},	{x  , y+1},	{x+1, y+1},
 			};
-			for (int i = 0; i < COUNT_OF(lvl2) && bClear1; ++i)
+			for (int i = 0; i < ARRAY_SIZE(lvl2) && bClear1; ++i)
 			{
-				ASSERT(lvl2[i].x >= 0 && lvl2[i].x < m_width && lvl2[i].y >= 0 && lvl2[i].y < m_height); // with the map edges blocked out, there's no way we can get outside the map
+				_ASSERT(lvl2[i].x >= 0 && lvl2[i].x < m_width && lvl2[i].y >= 0 && lvl2[i].y < m_height); // with the map edges blocked out, there's no way we can get outside the map
 				bClear1 &= (m_nodeData[lvl2[i].y * m_width + lvl2[i].x] & m_blockMask) == 0;
 			}
 
@@ -262,16 +265,16 @@ void Pathfinder::InitEnd(unsigned int clearanceValueStartBit, int numClearanceVa
 			//
 			// clearance level 2
 			bool bClear2 = true;
-			const Vector2i lvl3[] = {
+			const Vec2i lvl3[] = {
 				{x-2, y-2},	{x-1, y-2},	{x  , y-2},	{x+1, y-2},	{x+2, y-2},
 				{x-2, y-1},	{x-1, y-1},	{x  , y-1},	{x+1, y-1},	{x+2, y-1},
 				{x-2, y  },	{x-1, y  },				{x+1, y  },	{x+2, y  },
 				{x-2, y+1},	{x-1, y+1},	{x  , y+1},	{x+1, y+1},	{x+2, y+1},
 				{x-2, y+2},	{x-1, y+2},	{x  , y+2},	{x+1, y+2},	{x+2, y+2},
 			};
-			for (int i = 0; i < COUNT_OF(lvl3) && bClear2; ++i)
+			for (int i = 0; i < ARRAY_SIZE(lvl3) && bClear2; ++i)
 			{
-				ASSERT(lvl3[i].x >= 0 && lvl3[i].x < m_width && lvl3[i].y >= 0 && lvl3[i].y < m_height); // with the map edges blocked out, there's no way we can get outside the map
+				_ASSERT(lvl3[i].x >= 0 && lvl3[i].x < m_width && lvl3[i].y >= 0 && lvl3[i].y < m_height); // with the map edges blocked out, there's no way we can get outside the map
 				bClear2 &= (m_nodeData[lvl3[i].y * m_width + lvl3[i].x] & m_blockMask) == 0;
 			}
 
@@ -287,7 +290,7 @@ void Pathfinder::InitEnd(unsigned int clearanceValueStartBit, int numClearanceVa
 /*
 			// clearance level 3 - this will just clear up the previous cells
 			bool bClear3 = true;
-			const Vector2i lvl4[] = {
+			const Vec2i lvl4[] = {
 				{x-3, y-3},	{x-2, y-3},	{x-1, y-3},	{x  , y-3},	{x+1, y-3},	{x+2, y-3},	{x+3, y-3},
 				{x-3, y-2},	{x-2, y-2},	{x-1, y-2},	{x  , y-2},	{x+1, y-2},	{x+2, y-2},	{x+3, y-2},
 				{x-3, y-1},	{x-2, y-1},	{x-1, y-1},	{x  , y-1},	{x+1, y-1},	{x+2, y-1},	{x+3, y-1},
@@ -308,11 +311,11 @@ void Pathfinder::InitEnd(unsigned int clearanceValueStartBit, int numClearanceVa
 		}
 	}
 }
-
+/*
 namespace AI {
-	extern bool CanSniperSeeCommon(Vector3 from, Vector2 to);
+	extern bool CanSniperSeeCommon(Vec3 from, Vec2 to);
 };
-void Pathfinder::InitSniperLOS(Vector3 sniperPos)
+void Pathfinder::InitSniperLOS(Vec3 sniperPos)
 {
 	for (int y = 0; y < m_height; y++)
 	{
@@ -323,7 +326,7 @@ void Pathfinder::InitSniperLOS(Vector3 sniperPos)
 				continue;
 
 			//TODO: This won't work with multiple snipers
-			Vector2 nodePos = ConvertToWorldCoords(x, y).GetXZ();
+			Vec2 nodePos = ConvertToWorldCoords(x, y).GetXZ();
 			if (!AI::CanSniperSeeCommon(sniperPos, nodePos))
 				*pNode |= COL_NO_SNIPER_LOS;
 		}
@@ -331,7 +334,7 @@ void Pathfinder::InitSniperLOS(Vector3 sniperPos)
 	UpdateMips(0, 0, m_width, m_height);
 }
 
-void Pathfinder::UpdateSniperLOS(Vector3 sniperPos)
+void Pathfinder::UpdateSniperLOS(Vec3 sniperPos)
 {
 	int mipWidth = MIPS_DIM(m_width);
 	int mipHeight = MIPS_DIM(m_height);
@@ -353,7 +356,7 @@ void Pathfinder::UpdateSniperLOS(Vector3 sniperPos)
 				continue;
 
 			//TODO: This won't work with multiple snipers
-			Vector2 nodePos = ConvertToWorldCoords(x, y).GetXZ();
+			Vec2 nodePos = ConvertToWorldCoords(x, y).GetXZ();
 			if (!AI::CanSniperSeeCommon(sniperPos, nodePos))
 				*pNode |= COL_NO_SNIPER_LOS;
 			else 
@@ -362,16 +365,17 @@ void Pathfinder::UpdateSniperLOS(Vector3 sniperPos)
 	}
 	UpdateMips(mx, my, mx+1, my+1);
 }
-
-void Pathfinder::MarkShapeCells(const Vector3* shapePts, int numPts, unsigned int blockMask)
+*/
+/*
+void Pathfinder::MarkShapeCells(const Vec3* shapePts, int numPts, unsigned int blockMask)
 {
 	if (!shapePts || numPts == 0)
 		return;
 
-	Vector3 min,max;
+	Vec3 min,max;
 	Math::ComputeAABB(shapePts, numPts, min, max);
-	Vector2i start = ConvertToPathfinderCoords(min.x, min.z);
-	Vector2i end = ConvertToPathfinderCoords(max.x, max.z);
+	Vec2i start = ConvertToPathfinderCoords(min.x, min.z);
+	Vec2i end = ConvertToPathfinderCoords(max.x, max.z);
 	start.x = Clamp(0, m_width - 1, start.x);
 	start.y = Clamp(0, m_height - 1, start.y);
 	end.x = Clamp(0, m_width - 1, end.x);
@@ -386,8 +390,8 @@ void Pathfinder::MarkShapeCells(const Vector3* shapePts, int numPts, unsigned in
 		}
 	}
 }
-
-void Pathfinder::MarkAsAccessible(Vector2 pos)
+*/
+void Pathfinder::MarkAsAccessible(Vec2 pos)
 {
 	auto posi = ConvertToPathfinderCoords(pos.x, pos.y);
 	if (!IsInsideMap(posi) || (GetRawData(posi.x, posi.y) & COL_MOVEMENT_BLOCK))
@@ -396,6 +400,7 @@ void Pathfinder::MarkAsAccessible(Vector2 pos)
 	m_nodeData[posi.x + posi.y * m_width] |= COL_ACCESSIBLE;
 }
 
+/*
 void Pathfinder::FloodfillAccessibleMask()
 {
 	struct P {
@@ -435,20 +440,22 @@ void Pathfinder::FloodfillAccessibleMask()
 		}
 	}
 }
+*/
 
 //NOTE: CRB This takes 0.008 to 0.010 ms on DEBUG on my PC. 0.002 on Release
 // Don't bother optimising, costs nothing
-void Pathfinder::UpdateFOVCircleArea(Vector2 pos, float radius, unsigned blockMask, unsigned writeMask, eUpdateType update)
+/*
+void Pathfinder::UpdateFOVCircleArea(Vec2 pos, float radius, unsigned blockMask, unsigned writeMask, eUpdateType update)
 {
 	//uint64_t timeBefore = OS_GetTimeMicroSec();
 
-	const Vector2i startP = ConvertToPathfinderCoords(pos.x, pos.y);
+	const Vec2i startP = ConvertToPathfinderCoords(pos.x, pos.y);
 	if (!IsInsideMap(startP))
 		return;
 
 	for (float angle = 0.f; angle < Math::HALF_PI; angle += Math::HALF_PI * 0.1f)
 	{
-		Vector2 dir = Math::AngleToVector_Radians(angle) * radius;
+		Vec2 dir = Math::AngleToVector_Radians(angle) * radius;
 		auto endP = ConvertToPathfinderCoords(pos.x + dir.x, pos.y + dir.y);
 		endP.x = Clamp(1, m_width - 1, endP.x);
 		endP.y = Clamp(1, m_height - 1, endP.y);
@@ -470,88 +477,89 @@ void Pathfinder::UpdateFOVCircleArea(Vector2 pos, float radius, unsigned blockMa
 	//float numMS = (OS_GetTimeMicroSec() - timeBefore) * 0.001f;
 	//LOG("[CRB] Mark took %.3f ms\n", numMS);
 }
+*/
 
 
-unsigned char* Pathfinder::GetPathfinderMipsRGBA(unsigned /*mask*/) const
-{
-	return (unsigned char*)m_nodeDataMips;
-}
-
-unsigned char* Pathfinder::GetPathfinderDataRGBA(unsigned mask) const
-{
-	unsigned char* pData = new unsigned char[m_width * m_height * 4];
-	int pixel = 0;
-	for(int y = 0; y < m_height; y++)
-	{
-		for (int x = 0; x < m_width; ++x)
-		{
-			auto val = m_nodeData[x + y * m_width];
-			unsigned int pf = (mask == unsigned(-1)) ? val : ((val & mask) ? 0xffff00ff : 0);
-			pData[pixel+0] = (unsigned char)(pf & 0xff);
-			pData[pixel+1] = (unsigned char)((pf >> 8) & 0xff);
-			pData[pixel+2] = (unsigned char)((pf >> 16) & 0xff);
-			pData[pixel+3] = (unsigned char)((pf >> 24) & 0xff);
-			pData += 4;
-		}
-	}
-	pData -= m_width * m_height * 4;
-	return pData; // needs to be flipped if we want to save as tga
-}
-
-unsigned char* Pathfinder::GetPathfinderDataR(unsigned mask) const
-{
-	unsigned char* pRet = new unsigned char[m_width * m_height];
-	unsigned char* pData = pRet;
-	for (int y = 0; y < m_height; y++)
-	{
-		for (int x = 0; x < m_width; ++x)
-		{
-			auto val = m_nodeData[x + y * m_width];
-			*pData = (mask & val) ? 255 : 0;
-			pData++;
-		}
-	}
-	return pRet;
-}
-
-unsigned char* Pathfinder::GetPathfinderLastSearchRGBA() const
-{
-	int bestNodeIndex = -1;
-	unsigned int mincost = 0xffffffff;
-	for (int i = 0; i < m_nOpenListSize; i++)
-	{
-		if (m_openlist[i].cost < mincost)
-		{
-			bestNodeIndex = m_openlist[i].idx;
-			mincost = m_openlist[i].cost;
-		}
-	}
-
-	unsigned char* pData = new unsigned char[m_width * m_height * 4];
-	int pixel = 0;
-	for (int y = 0; y < m_height; y++)
-	{
-		for (int x = 0; x < m_width; ++x)
-		{
-			int status = m_nodemap[x + y * m_width].status;
-
-			// ABGR
-			unsigned val = status == m_statusOpen ? 0xFF00FFFF : 0xFFAA0000;
-			if (bestNodeIndex == (x + y * m_width))
-				val = 0xFFFFFFFF;
-			if (status != m_statusOpen && status != m_statusClosed)
-				val = 0;
-			//unsigned int pf = (mask == unsigned(-1)) ? val : ((val & mask) ? 0xffff00ff : 0);
-			pData[pixel + 0] = (unsigned char)(val & 0xff);
-			pData[pixel + 1] = (unsigned char)((val >> 8) & 0xff);
-			pData[pixel + 2] = (unsigned char)((val >> 16) & 0xff);
-			pData[pixel + 3] = (unsigned char)((val >> 24) & 0xff);
-			pData += 4;
-		}
-	}
-	pData -= m_width * m_height * 4;
-	return pData; // needs to be flipped if we want to save as tga
-}
+//unsigned char* Pathfinder::GetPathfinderMipsRGBA(unsigned /*mask*/) const
+//{
+//	return (unsigned char*)m_nodeDataMips;
+//}
+//
+//unsigned char* Pathfinder::GetPathfinderDataRGBA(unsigned mask) const
+//{
+//	unsigned char* pData = new unsigned char[m_width * m_height * 4];
+//	int pixel = 0;
+//	for(int y = 0; y < m_height; y++)
+//	{
+//		for (int x = 0; x < m_width; ++x)
+//		{
+//			auto val = m_nodeData[x + y * m_width];
+//			unsigned int pf = (mask == unsigned(-1)) ? val : ((val & mask) ? 0xffff00ff : 0);
+//			pData[pixel+0] = (unsigned char)(pf & 0xff);
+//			pData[pixel+1] = (unsigned char)((pf >> 8) & 0xff);
+//			pData[pixel+2] = (unsigned char)((pf >> 16) & 0xff);
+//			pData[pixel+3] = (unsigned char)((pf >> 24) & 0xff);
+//			pData += 4;
+//		}
+//	}
+//	pData -= m_width * m_height * 4;
+//	return pData; // needs to be flipped if we want to save as tga
+//}
+//
+//unsigned char* Pathfinder::GetPathfinderDataR(unsigned mask) const
+//{
+//	unsigned char* pRet = new unsigned char[m_width * m_height];
+//	unsigned char* pData = pRet;
+//	for (int y = 0; y < m_height; y++)
+//	{
+//		for (int x = 0; x < m_width; ++x)
+//		{
+//			auto val = m_nodeData[x + y * m_width];
+//			*pData = (mask & val) ? 255 : 0;
+//			pData++;
+//		}
+//	}
+//	return pRet;
+//}
+//
+//unsigned char* Pathfinder::GetPathfinderLastSearchRGBA() const
+//{
+//	int bestNodeIndex = -1;
+//	unsigned int mincost = 0xffffffff;
+//	for (int i = 0; i < m_nOpenListSize; i++)
+//	{
+//		if (m_openlist[i].cost < mincost)
+//		{
+//			bestNodeIndex = m_openlist[i].idx;
+//			mincost = m_openlist[i].cost;
+//		}
+//	}
+//
+//	unsigned char* pData = new unsigned char[m_width * m_height * 4];
+//	int pixel = 0;
+//	for (int y = 0; y < m_height; y++)
+//	{
+//		for (int x = 0; x < m_width; ++x)
+//		{
+//			int status = m_nodemap[x + y * m_width].status;
+//
+//			// ABGR
+//			unsigned val = status == m_statusOpen ? 0xFF00FFFF : 0xFFAA0000;
+//			if (bestNodeIndex == (x + y * m_width))
+//				val = 0xFFFFFFFF;
+//			if (status != m_statusOpen && status != m_statusClosed)
+//				val = 0;
+//			//unsigned int pf = (mask == unsigned(-1)) ? val : ((val & mask) ? 0xffff00ff : 0);
+//			pData[pixel + 0] = (unsigned char)(val & 0xff);
+//			pData[pixel + 1] = (unsigned char)((val >> 8) & 0xff);
+//			pData[pixel + 2] = (unsigned char)((val >> 16) & 0xff);
+//			pData[pixel + 3] = (unsigned char)((val >> 24) & 0xff);
+//			pData += 4;
+//		}
+//	}
+//	pData -= m_width * m_height * 4;
+//	return pData; // needs to be flipped if we want to save as tga
+//}
 
 /*
 A potential issue comes from having overlapped objects, for example a table and a wall (though it could be any number of objects overlapping).
@@ -562,285 +570,285 @@ When deleting an object, we would check which cells it touches and only remove i
 Another solution would be to have a separate array of lists, keeping entity IDs: List<unsigned int> cells[width][height], which would only be accessed when writing/deleting objects,
 	but I don't think there's a need for this (wasn't a problem in DK1).
 */
-void Pathfinder::UpdateObject(const sCollisionShape& collision, const Matrix& parentTransform, unsigned int flags, eUpdateType update)
-{
-	switch (collision.type)
-	{
-		case sCollisionShape::SPHERE:
-		{
-			float radius = collision.params.sphere.radius;
-			Vector3 origin = (parentTransform * collision.transform).GetTransVec();
-			UpdateSphere(radius, origin, flags, update);
-		}break;
+//void Pathfinder::UpdateObject(const sCollisionShape& collision, const Matrix& parentTransform, unsigned int flags, eUpdateType update)
+//{
+//	switch (collision.type)
+//	{
+//		case sCollisionShape::SPHERE:
+//		{
+//			float radius = collision.params.sphere.radius;
+//			Vec3 origin = (parentTransform * collision.transform).GetTransVec();
+//			UpdateSphere(radius, origin, flags, update);
+//		}break;
+//
+//		case sCollisionShape::CAPSULE:
+//		case sCollisionShape::BOX:
+//		case sCollisionShape::CONVEX_MESH:
+//		{
+//			int numOutlineVerts = 0;
+//			Vec2 outline[128];
+//			collision.GetProjectionOutline(parentTransform, outline, COUNT_OF(outline), &numOutlineVerts, OBJECT_EXPANSION);
+//			UpdatePoly(outline, numOutlineVerts, flags, update);
+//		}break;
+//
+//		default:
+//			DEBUG_BREAK();
+//			break;
+//	}
+//}
 
-		case sCollisionShape::CAPSULE:
-		case sCollisionShape::BOX:
-		case sCollisionShape::CONVEX_MESH:
-		{
-			int numOutlineVerts = 0;
-			Vector2 outline[128];
-			collision.GetProjectionOutline(parentTransform, outline, COUNT_OF(outline), &numOutlineVerts, OBJECT_EXPANSION);
-			UpdatePoly(outline, numOutlineVerts, flags, update);
-		}break;
 
-		default:
-			DEBUG_BREAK();
-			break;
-	}
-}
+//static FORCEINLINE bool PtInCone(Vec2 p, Vec2 s, Vec2 d, float width)
+//{
+//	Vec2 dirToHuman = p - s;
+//	dirToHuman.Normalize();
+//	float angle = dirToHuman * d;
+//	return (angle >= width);
+//}
+//
+//void Pathfinder::UpdateCone(Vec2 s, Vec2 d, float coneWidth, unsigned blockFlags, unsigned flags, eUpdateType add)
+//{
+//	const Vec2 fstart = ConvertToWorldCoords(1, 1).GetXZ();
+//	const Vec2i ps = ConvertToPathfinderCoords(s.x, s.y);
+//	if (!IsInsideMap(ps))
+//		return;
+//
+//	// brute-force, ~100x slower than the version below
+//	/*
+//	float fy = fstart.y;
+//	for (int y = 1; y < m_height - 1; y++, fy += CELL_SIZE_METERS) {
+//		float fx = fstart.x;
+//		for (int x = 1; x < m_width - 1; x++, fx += CELL_SIZE_METERS)
+//		{
+//			Vec2 p = { fx, fy };//ConvertToWorldCoords(x, y).GetXZ();
+//			if (m_nodeData[x + y * m_width] & blockFlags)
+//				continue;
+//			if (!PtInCone( p, s, d, coneWidth))
+//				continue;
+//
+//			if (!TraceBresenhamLine(ps, {x,y}, blockFlags))
+//				m_nodeData[x + y * m_width] |= flags;
+//		}
+//	}
+//	//*/
+//
+//	//*
+//	// draw lines from cone start towards the map edge
+//	//CRB: 760 cones in a 100x100m map took 6ms on my PC
+//	//NOTE: We write a 1-cell wider line so that it's conservative and we don't have false negatives
+//	float fy, fx;
+//	fy = fstart.y;
+//	for (int y = 1; y < m_height - 1; y++, fy += CELL_SIZE_METERS)
+//	{
+//		fx = fstart.x;
+//		int x = 1;
+//		if (PtInCone({ fx, fy }, s, d, coneWidth))
+//			WriteFatBresenhamLine(ps, { x,y }, blockFlags, flags, add);
+//		fx = fstart.x + CELL_SIZE_METERS * (m_width - 1);
+//		x = m_width - 2;
+//		if (PtInCone({ fx, fy }, s, d, coneWidth))
+//			WriteFatBresenhamLine(ps, { x,y }, blockFlags, flags, add);
+//	}
+//	fx = fstart.x;
+//	for (int x = 1; x < m_width - 1; x++, fx += CELL_SIZE_METERS)
+//	{
+//		fy = fstart.y;
+//		int y = 1;
+//		if (PtInCone({ fx, fy }, s, d, coneWidth))
+//			WriteFatBresenhamLine(ps, { x,y }, blockFlags, flags, add);
+//		fy = fstart.y + CELL_SIZE_METERS * (m_height - 1);
+//		y = m_height - 2;
+//		if (PtInCone({ fx, fy }, s, d, coneWidth))
+//			WriteFatBresenhamLine(ps, { x,y }, blockFlags, flags, add);
+//	}
+//	//*/
+//}
 
-
-static FORCE_INLINE bool PtInCone(Vector2 p, Vector2 s, Vector2 d, float width)
-{
-	Vector2 dirToHuman = p - s;
-	dirToHuman.Normalize();
-	float angle = dirToHuman * d;
-	return (angle >= width);
-}
-
-void Pathfinder::UpdateCone(Vector2 s, Vector2 d, float coneWidth, unsigned blockFlags, unsigned flags, eUpdateType add)
-{
-	const Vector2 fstart = ConvertToWorldCoords(1, 1).GetXZ();
-	const Vector2i ps = ConvertToPathfinderCoords(s.x, s.y);
-	if (!IsInsideMap(ps))
-		return;
-
-	// brute-force, ~100x slower than the version below
-	/*
-	float fy = fstart.y;
-	for (int y = 1; y < m_height - 1; y++, fy += CELL_SIZE_METERS) {
-		float fx = fstart.x;
-		for (int x = 1; x < m_width - 1; x++, fx += CELL_SIZE_METERS)
-		{
-			Vector2 p = { fx, fy };//ConvertToWorldCoords(x, y).GetXZ();
-			if (m_nodeData[x + y * m_width] & blockFlags)
-				continue;
-			if (!PtInCone( p, s, d, coneWidth))
-				continue;
-
-			if (!TraceBresenhamLine(ps, {x,y}, blockFlags))
-				m_nodeData[x + y * m_width] |= flags;
-		}
-	}
-	//*/
-
-	//*
-	// draw lines from cone start towards the map edge
-	//CRB: 760 cones in a 100x100m map took 6ms on my PC
-	//NOTE: We write a 1-cell wider line so that it's conservative and we don't have false negatives
-	float fy, fx;
-	fy = fstart.y;
-	for (int y = 1; y < m_height - 1; y++, fy += CELL_SIZE_METERS)
-	{
-		fx = fstart.x;
-		int x = 1;
-		if (PtInCone({ fx, fy }, s, d, coneWidth))
-			WriteFatBresenhamLine(ps, { x,y }, blockFlags, flags, add);
-		fx = fstart.x + CELL_SIZE_METERS * (m_width - 1);
-		x = m_width - 2;
-		if (PtInCone({ fx, fy }, s, d, coneWidth))
-			WriteFatBresenhamLine(ps, { x,y }, blockFlags, flags, add);
-	}
-	fx = fstart.x;
-	for (int x = 1; x < m_width - 1; x++, fx += CELL_SIZE_METERS)
-	{
-		fy = fstart.y;
-		int y = 1;
-		if (PtInCone({ fx, fy }, s, d, coneWidth))
-			WriteFatBresenhamLine(ps, { x,y }, blockFlags, flags, add);
-		fy = fstart.y + CELL_SIZE_METERS * (m_height - 1);
-		y = m_height - 2;
-		if (PtInCone({ fx, fy }, s, d, coneWidth))
-			WriteFatBresenhamLine(ps, { x,y }, blockFlags, flags, add);
-	}
-	//*/
-}
-
-static FORCE_INLINE bool IsEdge(int x, int y, int w, int h)
+static FORCEINLINE bool IsEdge(int x, int y, int w, int h)
 {
 	return x == 0 || x == (w - 1) || y == 0 || y == (h - 1);
 }
 
-void Pathfinder::UpdateSphere(const float radius, const Vector3& origin, unsigned int flags, eUpdateType update)
-{
-	Vector2i pfBoxAABB[2] =
-	{
-		ConvertToPathfinderCoords(origin.x - radius - OBJECT_EXPANSION, origin.z - radius - OBJECT_EXPANSION),
-		ConvertToPathfinderCoords(origin.x + radius + OBJECT_EXPANSION, origin.z + radius + OBJECT_EXPANSION),
-	};
-
-	// clamp to inside the map
-	for (int i = 0; i < 2; ++i)
-	{
-		pfBoxAABB[i].x = Clamp(1, m_width - 2, pfBoxAABB[i].x);
-		pfBoxAABB[i].y = Clamp(1, m_height - 2, pfBoxAABB[i].y);
-	}
-
-	Vector2i pfOrigin = ConvertToPathfinderCoords(origin.x, origin.z);
-	Vector2 fBox = ConvertToWorldCoords(pfBoxAABB[0].x, pfBoxAABB[0].y).GetXZ();
-	Vector2 fOrigin = origin.GetXZ();
-	const float limitSq = (radius + CELL_RADIUS) * (radius + CELL_RADIUS);
-
-	// update collision map area related to the box, in the pathfinder
-	float fy = fBox.y, fx;
-	for(int y = pfBoxAABB[0].y; y <= pfBoxAABB[1].y; y++, fy += CELL_SIZE_METERS)
-	{
-		fx = fBox.x;
-		for (int x = pfBoxAABB[0].x; x <= pfBoxAABB[1].x; ++x, fx += CELL_SIZE_METERS)
-		{
-			if (x != pfOrigin.x && y != pfOrigin.y)
-			{
-				float dist = Vector2::DistanceSq(fOrigin, { fx, fy });
-				if (dist >= limitSq)
-					continue;
-			}
-
-			UpdatePathfinderCell(update, flags, m_nodeData[x + y * m_width]);
-		}
-	}
-}
+//void Pathfinder::UpdateSphere(const float radius, const Vec3& origin, unsigned int flags, eUpdateType update)
+//{
+//	Vec2i pfBoxAABB[2] =
+//	{
+//		ConvertToPathfinderCoords(origin.x - radius - OBJECT_EXPANSION, origin.z - radius - OBJECT_EXPANSION),
+//		ConvertToPathfinderCoords(origin.x + radius + OBJECT_EXPANSION, origin.z + radius + OBJECT_EXPANSION),
+//	};
+//
+//	// clamp to inside the map
+//	for (int i = 0; i < 2; ++i)
+//	{
+//		pfBoxAABB[i].x = Clamp(1, m_width - 2, pfBoxAABB[i].x);
+//		pfBoxAABB[i].y = Clamp(1, m_height - 2, pfBoxAABB[i].y);
+//	}
+//
+//	Vec2i pfOrigin = ConvertToPathfinderCoords(origin.x, origin.z);
+//	Vec2 fBox = ConvertToWorldCoords(pfBoxAABB[0].x, pfBoxAABB[0].y).GetXZ();
+//	Vec2 fOrigin = origin.GetXZ();
+//	const float limitSq = (radius + CELL_RADIUS) * (radius + CELL_RADIUS);
+//
+//	// update collision map area related to the box, in the pathfinder
+//	float fy = fBox.y, fx;
+//	for(int y = pfBoxAABB[0].y; y <= pfBoxAABB[1].y; y++, fy += CELL_SIZE_METERS)
+//	{
+//		fx = fBox.x;
+//		for (int x = pfBoxAABB[0].x; x <= pfBoxAABB[1].x; ++x, fx += CELL_SIZE_METERS)
+//		{
+//			if (x != pfOrigin.x && y != pfOrigin.y)
+//			{
+//				float dist = Vec2::DistanceSq(fOrigin, { fx, fy });
+//				if (dist >= limitSq)
+//					continue;
+//			}
+//
+//			UpdatePathfinderCell(update, flags, m_nodeData[x + y * m_width]);
+//		}
+//	}
+//}
 
 // used for box/capsule/mesh
-void Pathfinder::UpdatePoly(const Vector2* pVerts, const int numVerts, unsigned int flags, eUpdateType update)
-{
-	Vector2 bbox[2];
-	Math::ComputeAABB(pVerts, numVerts, bbox[0], bbox[1]);
-	Vector2i bboxi[2];
-	for (int i = 0; i < 2; ++i)
-	{
-		bboxi[i] = ConvertToPathfinderCoords(bbox[i].x, bbox[i].y);
-		bboxi[i].x = Clamp(1, m_width - 2, bboxi[i].x);
-		bboxi[i].y = Clamp(1, m_height - 2, bboxi[i].y);
-	}
+//void Pathfinder::UpdatePoly(const Vec2* pVerts, const int numVerts, unsigned int flags, eUpdateType update)
+//{
+//	Vec2 bbox[2];
+//	Math::ComputeAABB(pVerts, numVerts, bbox[0], bbox[1]);
+//	Vec2i bboxi[2];
+//	for (int i = 0; i < 2; ++i)
+//	{
+//		bboxi[i] = ConvertToPathfinderCoords(bbox[i].x, bbox[i].y);
+//		bboxi[i].x = Clamp(1, m_width - 2, bboxi[i].x);
+//		bboxi[i].y = Clamp(1, m_height - 2, bboxi[i].y);
+//	}
+//
+//	// update collision map area related to the box, in the pathfinder
+//	for(int y = bboxi[0].y; y <= bboxi[1].y; ++y)
+//	{
+//		for (int x = bboxi[0].x; x <= bboxi[1].x; ++x)
+//		{
+//			Vec3 center = ConvertToWorldCoords(x, y);
+//			if (!Math::PointInPoly(Vec2(center.x, center.z), pVerts, numVerts))
+//			{
+//				// cell's center point was not inside the poly, but maybe we touch the corners...
+//
+//				const float radius = CELL_SIZE_METERS * 0.5f - 0.0001f; // offset removes collinearity, which would unnecessarily expand the border too much
+//				Vec2 cellBB[] = {
+//					{center.x - radius, center.z - radius},
+//					{center.x + radius, center.z + radius},
+//				};
+//
+//				bool bCrossed = false;
+//				for (int i = 0; i < numVerts && !bCrossed; ++i)
+//				{
+//					if (Math::SegmentVsAABB(pVerts[i], pVerts[(i + 1) % numVerts], cellBB[0], cellBB[1]))
+//						bCrossed = true;
+//				}
+//
+//				if (!bCrossed)
+//					continue;
+//			}
+//
+//			UpdatePathfinderCell(update, flags, m_nodeData[x + y * m_width]);
+//		}
+//	}
+//}
+//
+//void Pathfinder::UpdateMips(int xStart, int yStart, int xEnd, int yEnd)
+//{
+//	int mx0 = MIPS_FROM(xStart);
+//	int my0 = MIPS_FROM(yStart);
+//	int mx1 = MIPS_FROM(xEnd);
+//	int my1 = MIPS_FROM(yEnd);
+//	int mipWidth = MIPS_DIM(m_width);
+//	//int mipHeight = MIPS_DIM(m_height);
+//	for (int my = my0; my < my1; my++)
+//		for (int mx = mx0; mx < mx1; mx++) {
+//			int mipData = 0;
+//			int sx = MIPS_TO(mx);
+//			int sy = MIPS_TO(my);
+//			int ex = Min(MIPS_TO(mx + 1), m_width);
+//			int ey = Min(MIPS_TO(my + 1), m_height);
+//
+//			for (int y = sy; y < ey; y++)
+//				for (int x = sx; x < ex; x++)
+//					mipData |= m_nodeData[y * m_width + x];
+//
+//			m_nodeDataMips[ my*mipWidth + mx ] = mipData;
+//		}
+//}
+//
+//bool Pathfinder::LineHitsAny(Vec2 start, Vec2 end, unsigned blockFlags) const
+//{
+//	Vec2i starti = ConvertToPathfinderCoords(start.x, start.y);
+//	Vec2i endi = ConvertToPathfinderCoords(end.x, end.y);
+//
+//	if (!IsInsideMap(starti))
+//	{
+//		DEBUG_BREAK();
+//		return false;
+//	}
+//
+//	if (!IsInsideMap(endi))
+//	{
+//		// Note: this is already clamped to inside the map when function is called, but it has failed in the past, due to unexplained error in AdjustToInsideMap(), see comment there
+//		DEBUG_BREAK();
+//		return false;
+//	}
+//
+//	return TraceBresenhamLine(starti, endi, blockFlags);
+//}
+//
+//bool Pathfinder::TraceLine(Vec2 start, Vec2 end, unsigned blockFlags, Vec2& outWS) const
+//{
+//	Vec2i starti = ConvertToPathfinderCoords(start.x, start.y);
+//	Vec2i endi = ConvertToPathfinderCoords(end.x, end.y);
+//	if (!IsInsideMap(starti))
+//	{
+//		DEBUG_BREAK();
+//		return false;
+//	}
+//	if (!IsInsideMap(endi))
+//	{
+//		DEBUG_BREAK();
+//		return false;
+//	}
+//
+//	Vec2i out;
+//	const bool hit = TraceBresenhamLine(starti, endi, blockFlags, &out);
+//	if(hit)
+//		outWS = ConvertToWorldCoords(out.x, out.y).GetXZ();
+//	return hit;
+//}
+//
+//bool Pathfinder::TraceLineBlocked(Vec2 start, Vec2 end, unsigned blockFlags, Vec2& outWS) const
+//{
+//	Vec2i starti = ConvertToPathfinderCoords(start.x, start.y);
+//	Vec2i endi = ConvertToPathfinderCoords(end.x, end.y);
+//	if (!IsInsideMap(starti))
+//	{
+//		DEBUG_BREAK();
+//		return false;
+//	}
+//	if (!IsInsideMap(endi))
+//	{
+//		DEBUG_BREAK();
+//		return false;
+//	}
+//
+//	Vec2i out;
+//	const bool hit = TraceBresenhamLineBlocked(starti, endi, blockFlags, &out);
+//	if (hit)
+//		outWS = ConvertToWorldCoords(out.x, out.y).GetXZ();
+//	return hit;
+//}
+//
+//bool Pathfinder::IsPointClear(Vec2 pos, unsigned blockFlags) const
+//{
+//	unsigned data = GetRawData_Safe(pos.ToX0Y());
+//	return (data & blockFlags) == 0;
+//}
 
-	// update collision map area related to the box, in the pathfinder
-	for(int y = bboxi[0].y; y <= bboxi[1].y; ++y)
-	{
-		for (int x = bboxi[0].x; x <= bboxi[1].x; ++x)
-		{
-			Vector3 center = ConvertToWorldCoords(x, y);
-			if (!Math::PointInPoly(Vector2(center.x, center.z), pVerts, numVerts))
-			{
-				// cell's center point was not inside the poly, but maybe we touch the corners...
-
-				const float radius = CELL_SIZE_METERS * 0.5f - 0.0001f; // offset removes collinearity, which would unnecessarily expand the border too much
-				Vector2 cellBB[] = {
-					{center.x - radius, center.z - radius},
-					{center.x + radius, center.z + radius},
-				};
-
-				bool bCrossed = false;
-				for (int i = 0; i < numVerts && !bCrossed; ++i)
-				{
-					if (Math::SegmentVsAABB(pVerts[i], pVerts[(i + 1) % numVerts], cellBB[0], cellBB[1]))
-						bCrossed = true;
-				}
-
-				if (!bCrossed)
-					continue;
-			}
-
-			UpdatePathfinderCell(update, flags, m_nodeData[x + y * m_width]);
-		}
-	}
-}
-
-void Pathfinder::UpdateMips(int xStart, int yStart, int xEnd, int yEnd)
-{
-	int mx0 = MIPS_FROM(xStart);
-	int my0 = MIPS_FROM(yStart);
-	int mx1 = MIPS_FROM(xEnd);
-	int my1 = MIPS_FROM(yEnd);
-	int mipWidth = MIPS_DIM(m_width);
-	//int mipHeight = MIPS_DIM(m_height);
-	for (int my = my0; my < my1; my++)
-		for (int mx = mx0; mx < mx1; mx++) {
-			int mipData = 0;
-			int sx = MIPS_TO(mx);
-			int sy = MIPS_TO(my);
-			int ex = Min(MIPS_TO(mx + 1), m_width);
-			int ey = Min(MIPS_TO(my + 1), m_height);
-
-			for (int y = sy; y < ey; y++)
-				for (int x = sx; x < ex; x++)
-					mipData |= m_nodeData[y * m_width + x];
-
-			m_nodeDataMips[ my*mipWidth + mx ] = mipData;
-		}
-}
-
-bool Pathfinder::LineHitsAny(Vector2 start, Vector2 end, unsigned blockFlags) const
-{
-	Vector2i starti = ConvertToPathfinderCoords(start.x, start.y);
-	Vector2i endi = ConvertToPathfinderCoords(end.x, end.y);
-
-	if (!IsInsideMap(starti))
-	{
-		DEBUG_BREAK();
-		return false;
-	}
-
-	if (!IsInsideMap(endi))
-	{
-		// Note: this is already clamped to inside the map when function is called, but it has failed in the past, due to unexplained error in AdjustToInsideMap(), see comment there
-		DEBUG_BREAK();
-		return false;
-	}
-
-	return TraceBresenhamLine(starti, endi, blockFlags);
-}
-
-bool Pathfinder::TraceLine(Vector2 start, Vector2 end, unsigned blockFlags, Vector2& outWS) const
-{
-	Vector2i starti = ConvertToPathfinderCoords(start.x, start.y);
-	Vector2i endi = ConvertToPathfinderCoords(end.x, end.y);
-	if (!IsInsideMap(starti))
-	{
-		DEBUG_BREAK();
-		return false;
-	}
-	if (!IsInsideMap(endi))
-	{
-		DEBUG_BREAK();
-		return false;
-	}
-
-	Vector2i out;
-	const bool hit = TraceBresenhamLine(starti, endi, blockFlags, &out);
-	if(hit)
-		outWS = ConvertToWorldCoords(out.x, out.y).GetXZ();
-	return hit;
-}
-
-bool Pathfinder::TraceLineBlocked(Vector2 start, Vector2 end, unsigned blockFlags, Vector2& outWS) const
-{
-	Vector2i starti = ConvertToPathfinderCoords(start.x, start.y);
-	Vector2i endi = ConvertToPathfinderCoords(end.x, end.y);
-	if (!IsInsideMap(starti))
-	{
-		DEBUG_BREAK();
-		return false;
-	}
-	if (!IsInsideMap(endi))
-	{
-		DEBUG_BREAK();
-		return false;
-	}
-
-	Vector2i out;
-	const bool hit = TraceBresenhamLineBlocked(starti, endi, blockFlags, &out);
-	if (hit)
-		outWS = ConvertToWorldCoords(out.x, out.y).GetXZ();
-	return hit;
-}
-
-bool Pathfinder::IsPointClear(Vector2 pos, unsigned blockFlags) const
-{
-	unsigned data = GetRawData_Safe(pos.ToX0Y());
-	return (data & blockFlags) == 0;
-}
-
-FORCE_INLINE int spiralIdx2offset(int radius, int i)
+FORCEINLINE int spiralIdx2offset(int radius, int i)
 {
 	int h = 2 << radius;
 	int hm = h - 1;
@@ -937,10 +945,10 @@ struct SpiralIdx
 		return (px >= 0 && px < w && py >= 0 && py < h);
 	}
 };
-
-bool Pathfinder::ClosestCell(Vector2& out, Vector2 pos, unsigned blockFlags) const
+/*
+bool Pathfinder::ClosestCell(Vec2& out, Vec2 pos, unsigned blockFlags)
 {
-	Vector2i start = ConvertToPathfinderCoords(pos.x, pos.y);
+	Vec2i start = ConvertToPathfinderCoords(pos.x, pos.y);
 
 	// use mips first
 	int mx = MIPS_FROM(start.x), my = MIPS_FROM(start.y);
@@ -978,9 +986,9 @@ bool Pathfinder::ClosestCell(Vector2& out, Vector2 pos, unsigned blockFlags) con
 	return false;
 }
 
-bool Pathfinder::ClosestBlockedCellOutsideRadius(Vector2& out, Vector2 pos, unsigned blockFlags, const Vector2* occupiedPos, float occupiedRadius, int count) const
+bool Pathfinder::ClosestBlockedCellOutsideRadius(Vec2& out, Vec2 pos, unsigned blockFlags, const Vec2* occupiedPos, float occupiedRadius, int count) const
 {
-	Vector2i start = ConvertToPathfinderCoords(pos.x, pos.y);
+	Vec2i start = ConvertToPathfinderCoords(pos.x, pos.y);
 	// look for nearest cell in mip
 	SpiralIdx spiralCell{ m_width, m_height };
 	spiralCell.setRange(MetersToCells(3.f)); // look in 3m range
@@ -989,10 +997,10 @@ bool Pathfinder::ClosestBlockedCellOutsideRadius(Vector2& out, Vector2 pos, unsi
 		if (spiralCell.getIdx(start.x, start.y, px, py) &&
 			(m_nodeData[py * m_width + px] & blockFlags) != 0)
 		{
-			Vector2 p = ConvertToWorldCoords( px, py).GetXZ();
+			Vec2 p = ConvertToWorldCoords( px, py).GetXZ();
 			bool occupied = false;
 			for (int i = 0; i < count; i++)
-				if (Vector2::DistanceSq(occupiedPos[i], p) < occupiedRadius*occupiedRadius) {
+				if (Vec2::DistanceSq(occupiedPos[i], p) < occupiedRadius*occupiedRadius) {
 					occupied = true;
 					break;
 				}
@@ -1006,9 +1014,9 @@ bool Pathfinder::ClosestBlockedCellOutsideRadius(Vector2& out, Vector2 pos, unsi
 	return false;
 }
 
-bool Pathfinder::ClosestFreeCellOutsideRadius(Vector2& out, Vector2 pos, unsigned blockFlags, const Vector2* occupiedPos, float occupiedRadius, int count) const
+bool Pathfinder::ClosestFreeCellOutsideRadius(Vec2& out, Vec2 pos, unsigned blockFlags, const Vec2* occupiedPos, float occupiedRadius, int count) const
 {
-	Vector2i start = ConvertToPathfinderCoords(pos.x, pos.y);
+	Vec2i start = ConvertToPathfinderCoords(pos.x, pos.y);
 	// look for nearest cell in mip
 	SpiralIdx spiralCell{ m_width, m_height };
 	spiralCell.setRange(MetersToCells(3.f)); // look in 3m range
@@ -1017,10 +1025,10 @@ bool Pathfinder::ClosestFreeCellOutsideRadius(Vector2& out, Vector2 pos, unsigne
 		if (spiralCell.getIdx(start.x, start.y, px, py) &&
 			(m_nodeData[py * m_width + px] & blockFlags) == 0)
 		{
-			Vector2 p = ConvertToWorldCoords(px, py).GetXZ();
+			Vec2 p = ConvertToWorldCoords(px, py).GetXZ();
 			bool occupied = false;
 			for (int i = 0; i < count; i++)
-				if (Vector2::DistanceSq(occupiedPos[i], p) < occupiedRadius*occupiedRadius) {
+				if (Vec2::DistanceSq(occupiedPos[i], p) < occupiedRadius*occupiedRadius) {
 					occupied = true;
 					break;
 				}
@@ -1034,13 +1042,13 @@ bool Pathfinder::ClosestFreeCellOutsideRadius(Vector2& out, Vector2 pos, unsigne
 	return false;
 }
 
-bool Pathfinder::ClosestEmptyCell(Vector2& out, Vector2 pos, unsigned blockFlags) const
+bool Pathfinder::ClosestEmptyCell(Vec2& out, Vec2 pos, unsigned blockFlags) const
 {
-	const Vector2i pf = ConvertToPathfinderCoords(pos.x, pos.y);
+	const Vec2i pf = ConvertToPathfinderCoords(pos.x, pos.y);
 	
 	//nearest tile direction
 	int bestDir = 0;
-	Vector2 dp = pos - ConvertToWorldCoords(pf.x, pf.y).GetXZ();
+	Vec2 dp = pos - ConvertToWorldCoords(pf.x, pf.y).GetXZ();
 	if (abs(dp.x) > abs(dp.y))
 		if (dp.x < 0.f)
 			bestDir = 0;
@@ -1067,10 +1075,10 @@ bool Pathfinder::ClosestEmptyCell(Vector2& out, Vector2 pos, unsigned blockFlags
 
 	return false;
 }
-
-unsigned int Pathfinder::GetRawData_Safe(Vector3 p) const
+*/
+unsigned int Pathfinder::GetRawData_Safe(Vec3 p) const
 {
-	const Vector2i pf = ConvertToPathfinderCoords(p.x, p.z);
+	const Vec2i pf = ConvertToPathfinderCoords(p.x, p.z);
 
 	//NOTE: CRB if this is meant to be used safely, then its not an error to be out-of-bounds
 	//ASSERT(pf.x >= 0 && pf.x < m_width);
@@ -1081,44 +1089,35 @@ unsigned int Pathfinder::GetRawData_Safe(Vector3 p) const
 	return m_nodeData[pf.x + pf.y * m_width];
 }
 
-FORCE_INLINE Vector2i Pathfinder::ConvertToPathfinderCoords(float x, float z) const
+FORCEINLINE Vec2i Pathfinder::ConvertToPathfinderCoords(float x, float y) const
 {
-	// TODO: why don't we clamp the coords to pathfinder size here? We would get rid of a ton of checks and potential crashes. Check if any downsides to doing so.
-
-	Vector2i pf;
-	pf.x = (int)(x * CELL_SIZE_METERS_INV + m_width / 2); // reduced from this (int)((p.x + m_width * CELL_SIZE_METERS * 0.5f) / CELL_SIZE_METERS);
-	pf.y = (int)(z * CELL_SIZE_METERS_INV + m_height / 2);
-	return pf;
+	return { ( int ) floor( x / K_TILE_SIZE_F ), ( int ) floor( y / K_TILE_SIZE_F ) };
 }
 
-FORCE_INLINE Vector3 Pathfinder::ConvertToWorldCoords(int x, int y) const
+FORCEINLINE Vec2 Pathfinder::ConvertToWorldCoords(int x, int y) const
 {
 	// we return the center of the cell
-	Vector3 pw;
-	pw.x = (float(x - (m_width/2)) + 0.5f) * CELL_SIZE_METERS;
-	pw.y = 0.0f;
-	pw.z = (float(y - (m_height/2)) + 0.5f) * CELL_SIZE_METERS;
-	return pw;
+	return nsTiles::GetTileCenter( { x, y } );
 }
 
-bool Pathfinder::IsInsideMap(Vector2 wp) const
+bool Pathfinder::IsInsideMap(Vec2 wp) const
 {
 	auto p = ConvertToPathfinderCoords(wp.x, wp.y);
 	return (p.x >= 0 && p.x < m_width && p.y >= 0 && p.y < m_height);
 }
 
-bool Pathfinder::IsInsideMap(Vector2i p) const
+bool Pathfinder::IsInsideMap(Vec2i p) const
 {
 	return (p.x >= 0 && p.x < m_width && p.y >= 0 && p.y < m_height);
 }
 
-Vector2 Pathfinder::AdjustToInsideMap(const Vector2& start, const Vector2& end) const
+Vec2 Pathfinder::AdjustToInsideMap(const Vec2& start, const Vec2& end) const
 {
 	float width = CELL_SIZE_METERS *  (m_width / 2) - 0.1f;
 	float height = CELL_SIZE_METERS * (m_height / 2) - 0.1f;
 
-	Vector2 diff = end - start;
-	Vector2 edge = -start;
+	Vec2 diff = end - start;
+	Vec2 edge = -start;
 	edge.x += diff.x > 0.f ? width : -width;
 	edge.y += diff.y > 0.f ? height : -height;
 
@@ -1126,23 +1125,23 @@ Vector2 Pathfinder::AdjustToInsideMap(const Vector2& start, const Vector2& end) 
 	//   crashdumps are unclear, but results in an output like {x=-32.9000015 y=-14177.7666} using an input like {x=-32.9012413 y=3.62514806}. Could not reproduce, needs investigating.
 	float xt = diff.x != 0.f ? edge.x / diff.x : INFINITY;
 	float yt = diff.y != 0.f ? edge.y / diff.y : INFINITY;
-	float t = Min(Min(xt, yt), 1.f);
+	float t = min(min(xt, yt), 1.f);
 
 	return start + (diff * t);
 }
 
-Vector2 Pathfinder::AdjustToInsideCell(const Vector2& p) const
+Vec2 Pathfinder::AdjustToInsideCell(const Vec2& p) const
 {
 	auto c = ConvertToPathfinderCoords(p.x, p.y);
-	auto celled = ConvertToWorldCoords(c.x, c.y).GetXZ();
+	auto celled = ConvertToWorldCoords(c.x, c.y);
 	//NOTE: Adjust to within a valid cell so float rounding errors don't happen
 	constexpr float factor = 0.495f;
-	celled.x = celled.x + Clamp(CELL_SIZE_METERS * -factor, CELL_SIZE_METERS * factor, p.x - celled.x);
-	celled.y = celled.y + Clamp(CELL_SIZE_METERS * -factor, CELL_SIZE_METERS * factor, p.y - celled.y);
+	celled.x = celled.x + LIMIT( p.x - celled.x, CELL_SIZE_METERS * -factor, CELL_SIZE_METERS * factor);
+	celled.y = celled.y + LIMIT( p.y - celled.y, CELL_SIZE_METERS * -factor, CELL_SIZE_METERS * factor);
 	return celled;
 }
 
-Vector2 Pathfinder::AdjustToOutsideCollision(const Vector2& p, unsigned mask) const
+Vec2 Pathfinder::AdjustToOutsideCollision(const Vec2& p, unsigned mask) const
 {
 	auto c = ConvertToPathfinderCoords(p.x, p.y);
 	if (m_nodeData[c.x + c.y * m_width] & mask)
@@ -1152,7 +1151,7 @@ Vector2 Pathfinder::AdjustToOutsideCollision(const Vector2& p, unsigned mask) co
 		int dx = fdx > 0.f ? 1 : -1;
 		int dy = fdy > 0.f ? 1 : -1;
 
-		Vector2i check[3];
+		Vec2i check[3];
 		check[0] = { c.x +dx, c.y };
 		check[1] = { c.x +dx, c.y +dy };
 		check[2] = { c.x	, c.y +dy };
@@ -1172,43 +1171,43 @@ Vector2 Pathfinder::AdjustToOutsideCollision(const Vector2& p, unsigned mask) co
 	}
 
 	//NOTE: Adjust to within a valid cell so float rounding errors don't happen
-	auto celled = ConvertToWorldCoords(c.x, c.y).GetXZ();
+	auto celled = ConvertToWorldCoords(c.x, c.y);
 	constexpr float factor = 0.495f;
-	celled.x = celled.x + Clamp(CELL_SIZE_METERS * -factor, CELL_SIZE_METERS * factor, p.x - celled.x);
-	celled.y = celled.y + Clamp(CELL_SIZE_METERS * -factor, CELL_SIZE_METERS * factor, p.y - celled.y);
+	celled.x = celled.x + LIMIT( p.x - celled.x, CELL_SIZE_METERS * -factor, CELL_SIZE_METERS * factor );
+	celled.y = celled.y + LIMIT( p.y - celled.y, CELL_SIZE_METERS * -factor, CELL_SIZE_METERS * factor );
 	return celled;
 }
 
-bool Pathfinder::GetPath_Unsafe(const Vector3& start, const Vector3& end, const Vector3** ppPath, int& numPathPoints, unsigned int blockFlags, bool bGetClosestPointIfBlocked /*= true*/, unsigned int additionalCostFlags /*= 0*/)
-{
-	numPathPoints = 0;
-	*ppPath = m_localGetPathBuffer.GetListPtr();
-	Vector2i endInt = ConvertToPathfinderCoords(end.x, end.z);
-	eResult result = GetPath(ConvertToPathfinderCoords(start.x, start.z), endInt, m_localGetPathBuffer.GetListPtr(), numPathPoints, m_localGetPathBuffer.GetCapacity(), blockFlags, bGetClosestPointIfBlocked, additionalCostFlags);
-	if (result == RESULT_ALL_GOOD)
-	{
-		//TODO: there are still cases of "start point inside collision"
-		// replace last point with the more precise end point
-		m_localGetPathBuffer.Resize(Max(1, numPathPoints));
-		Vector3 endClamped = ConvertToWorldCoords(endInt.x, endInt.y);
-		m_localGetPathBuffer[numPathPoints - 1] = endClamped;
-		//NOTE: Converting back from endInt, but adjust to within a valid cell so float rounding errors don't happen
-		Vector3 diff = end - endClamped;
-		diff.x = Clamp(CELL_SIZE_METERS * -0.49f, CELL_SIZE_METERS * 0.49f, diff.x);
-		diff.z = Clamp(CELL_SIZE_METERS * -0.49f, CELL_SIZE_METERS * 0.49f, diff.z);
-		m_localGetPathBuffer[numPathPoints - 1] = endClamped + diff;
-	}
+//bool Pathfinder::GetPath_Unsafe(const Vec3& start, const Vec3& end, const Vec3** ppPath, int& numPathPoints, unsigned int blockFlags, bool bGetClosestPointIfBlocked /*= true*/, unsigned int additionalCostFlags /*= 0*/)
+//{
+//	numPathPoints = 0;
+//	*ppPath = m_localGetPathBuffer.GetListPtr();
+//	Vec2i endInt = ConvertToPathfinderCoords(end.x, end.z);
+//	eResult result = GetPath(ConvertToPathfinderCoords(start.x, start.z), endInt, m_localGetPathBuffer.GetListPtr(), numPathPoints, m_localGetPathBuffer.GetCapacity(), blockFlags, bGetClosestPointIfBlocked, additionalCostFlags);
+//	if (result == RESULT_ALL_GOOD)
+//	{
+//		//TODO: there are still cases of "start point inside collision"
+//		// replace last point with the more precise end point
+//		m_localGetPathBuffer.Resize(Max(1, numPathPoints));
+//		Vec3 endClamped = ConvertToWorldCoords(endInt.x, endInt.y);
+//		m_localGetPathBuffer[numPathPoints - 1] = endClamped;
+//		//NOTE: Converting back from endInt, but adjust to within a valid cell so float rounding errors don't happen
+//		Vec3 diff = end - endClamped;
+//		diff.x = Clamp(CELL_SIZE_METERS * -0.49f, CELL_SIZE_METERS * 0.49f, diff.x);
+//		diff.z = Clamp(CELL_SIZE_METERS * -0.49f, CELL_SIZE_METERS * 0.49f, diff.z);
+//		m_localGetPathBuffer[numPathPoints - 1] = endClamped + diff;
+//	}
+//
+//	return (result != RESULT_FAILED);
+//}
 
-	return (result != RESULT_FAILED);
-}
-
-bool Pathfinder::GetPath(const Vector3& start, const Vector3& end, Vector3* pPath, int& numPathPoints, int maxPathPoints, unsigned int blockFlags, bool bGetClosestPointIfBlocked /*= true*/, unsigned int additionalCostFlags /*= 0*/)
+bool Pathfinder::GetPath(const Vec2& start, const Vec2& end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned int blockFlags, bool bGetClosestPointIfBlocked /*= true*/, unsigned int additionalCostFlags /*= 0*/)
 {
-	eResult result = GetPath(ConvertToPathfinderCoords(start.x, start.z), ConvertToPathfinderCoords(end.x, end.z), pPath, numPathPoints, maxPathPoints, blockFlags, bGetClosestPointIfBlocked, additionalCostFlags);
+	eResult result = GetPath(ConvertToPathfinderCoords(start.x, start.y), ConvertToPathfinderCoords(end.x, end.y), pPath, numPathPoints, maxPathPoints, blockFlags, bGetClosestPointIfBlocked, additionalCostFlags);
 	if (result == RESULT_ALL_GOOD)
 	{
 		// replace last point (which is center-cell) with the exact end point
-		numPathPoints = Max(1, numPathPoints);
+		numPathPoints = max(1, numPathPoints);
 		pPath[numPathPoints - 1] = end;
 	}
 
@@ -1219,7 +1218,7 @@ bool Pathfinder::GetPath(const Vector3& start, const Vector3& end, Vector3* pPat
 	return (result != RESULT_FAILED);
 }
 
-Vector2i Pathfinder::FindClosestEmptyCell(const Vector2i& start, int range, unsigned int collidableMask) const
+Vec2i Pathfinder::FindClosestEmptyCell(const Vec2i& start, int range, unsigned int collidableMask) const
 {
 	// searches in a spiral
 	SpiralIdx spiral{m_width, m_height};
@@ -1237,18 +1236,9 @@ Vector2i Pathfinder::FindClosestEmptyCell(const Vector2i& start, int range, unsi
 }
 
 // if 'bGetClosestPointIfBlocked' is set, we will always return a valid path, even if start/end are outside the map or inside a collision
-Pathfinder::eResult Pathfinder::GetPath(const Vector2i start, Vector2i end, Vector3* pPath, int& numPathPoints, int maxPathPoints, unsigned int blockFlags, bool bGetClosestPointIfBlocked, unsigned int additionalCostFlags)
+Pathfinder::eResult Pathfinder::GetPath(const Vec2i start, Vec2i end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned int blockFlags, bool bGetClosestPointIfBlocked, unsigned int additionalCostFlags)
 {
-#ifdef PATHFINDING_PERF
-	unsigned long long timeBefore = OS_GetTimeMicroSec();
-	int numNodesVisited = 0;
-	int numUnoptimizedPoints = 0;
-	int maxOpenList = 0;
-#endif
-	//end.x = 25;
-	//end.y = 0;
-
-	ASSERT(blockFlags);
+	_ASSERT(blockFlags);
 	if (!blockFlags)
 		blockFlags = m_blockMask;
 	numPathPoints = 0;
@@ -1260,7 +1250,7 @@ Pathfinder::eResult Pathfinder::GetPath(const Vector2i start, Vector2i end, Vect
 		// get me inside...
 		pPath[0] = ConvertToWorldCoords(end.x, end.y);
 		numPathPoints = 1;
-		g_pLog->Write("[Error] Pathfinder::GetPath() start point outside of map\n");
+		LOG(L"[Error] Pathfinder::GetPath() start point outside of map\n");
 		return RESULT_FAILED;
 	}
 
@@ -1275,7 +1265,7 @@ Pathfinder::eResult Pathfinder::GetPath(const Vector2i start, Vector2i end, Vect
 		// we will return the closest path to the point even if outside, but help a bit by moving the endpoit inside a valid cell, so that we don't have to traverse the ENTIRE map
 
 		// project end point onto the map's edge and into the map until we find a non-collideable cell
-		Vector2i mapEdge(Clamp(1, m_width - 2, end.x), Clamp(1, m_height - 2, end.y)); // -2 because we know the map edges to be collideable
+		Vec2i mapEdge(Clamp(1, m_width - 2, end.x), Clamp(1, m_height - 2, end.y)); // -2 because we know the map edges to be collideable
 		while ((m_nodeData[mapEdge.y * m_width + mapEdge.x] & blockFlags) != 0)
 		{		
 				mapEdge.x += Math::SignOf(mapEdge.x - end.x);
@@ -1314,14 +1304,14 @@ Pathfinder::eResult Pathfinder::GetPath(const Vector2i start, Vector2i end, Vect
 		// we will return the closest path to the point even if outside, but help a bit by moving the endpoint inside a valid cell, so that we don't have to traverse the ENTIRE map
 
 		// search for a valid end point around our target (expand in a spiral and get the free point that's closest to the collidable point)
-		Vector2i empty = FindClosestEmptyCell(end, 25, blockFlags);
-		ASSERT((GetRawData(empty.x, empty.y) & blockFlags) == 0);
+		Vec2i empty = FindClosestEmptyCell(end, 25, blockFlags);
+		_ASSERT((GetRawData(empty.x, empty.y) & blockFlags) == 0);
 		//#ifdef PATHFINDING_PERF //NOTE: This doesn't seem to take any time at all
 		//	float deltaMS = (OS_GetTimeMicroSec() - timeBefore) / 1000.f;
 		//	g_pLog->Write("[Info] FindClosestEmptyCell %.3f ms | flags %d \n", deltaMS, blockFlags);
 		//#endif
 
-		ASSERT(empty != end && "Can't find an empty cell around this point. Big performance warning: even though the query will not fail, we will need to search through the entire map. You shouldn't get here in normal gameplay.");
+		_ASSERT(empty != end && "Can't find an empty cell around this point. Big performance warning: even though the query will not fail, we will need to search through the entire map. You shouldn't get here in normal gameplay.");
 		end.x = empty.x;
 		end.y = empty.y;
 	}
@@ -1341,9 +1331,6 @@ Pathfinder::eResult Pathfinder::GetPath(const Vector2i start, Vector2i end, Vect
 	PathNode* resultNode = NULL;
 	while (m_nOpenListSize)
 	{
-#ifdef PATHFINDING_PERF
-		maxOpenList = Max(maxOpenList, m_nOpenListSize);
-#endif
 		PathNode* bestnode = PopBestOpenNode();
 		if (bestnode->status == m_statusClosed)
 			continue;
@@ -1430,9 +1417,6 @@ Pathfinder::eResult Pathfinder::GetPath(const Vector2i start, Vector2i end, Vect
 			PathNode* neighbor = pNeighbors[i];
 			const int status = neighbor->status;
 
-#ifdef PATHFINDING_PERF
-			numNodesVisited++;
-#endif
 			if (status == m_statusClosed)
 				continue; // closed
 
@@ -1465,15 +1449,12 @@ Pathfinder::eResult Pathfinder::GetPath(const Vector2i start, Vector2i end, Vect
 		resultNode = minDistNode;
 	}
 
-#ifdef PATHFINDING_PERF
-	unsigned long long preFixupTime = OS_GetTimeMicroSec();
-#endif
 	// perform manipulation on the resulting path
 	int points = 0;
 	PathNode* node = resultNode;
 	//PathNode* prevAddedNode = node;
-	Vector2i prevAddedPoint;
-	Vector2i prevNodePoint;
+	Vec2i prevAddedPoint;
+	Vec2i prevNodePoint;
 
 	//int idx = 0;
 	//auto drawNode = resultNode;
@@ -1500,12 +1481,11 @@ Pathfinder::eResult Pathfinder::GetPath(const Vector2i start, Vector2i end, Vect
 	{
 		if (points >= maxPathPoints)
 		{
-			LOG("[Error] Pathfinding failed with insufficient number of path points (%d and we space enough space for %d)\n", points, maxPathPoints);
-			DEBUG_BREAK();
+			ErrorBox(K_ERR_WARNING, L"[Error] Pathfinding failed with insufficient number of path points (%d and we space enough space for %d)\n", points, maxPathPoints);
 			return RESULT_FAILED;
 		}
 
-		const bool bCollided = TraceBresenhamLine(prevAddedPoint, Vector2i(node->x, node->y), blockFlags);
+		const bool bCollided = TraceBresenhamLine(prevAddedPoint, Vec2i(node->x, node->y), blockFlags);
 		if (bCollided)
 		{
 			// found a non-straightline node
@@ -1513,7 +1493,7 @@ Pathfinder::eResult Pathfinder::GetPath(const Vector2i start, Vector2i end, Vect
 			// check backwards to find first node that can see current node and add it
 			PathNode* nodeToAdd = prevAddedNode;
 			while (nodeToAdd != node) {
-				if (!TraceBresenhamLine({ nodeToAdd->x, nodeToAdd->y }, Vector2i(node->x, node->y), blockFlags))
+				if (!TraceBresenhamLine({ nodeToAdd->x, nodeToAdd->y }, Vec2i(node->x, node->y), blockFlags))
 					break;
 				nodeToAdd = nodeToAdd->parent;
 			}
@@ -1535,30 +1515,18 @@ Pathfinder::eResult Pathfinder::GetPath(const Vector2i start, Vector2i end, Vect
 		prevNodePoint.y = node->y;
 		node = node->parent > -1 ? &m_nodemap[node->parent] : NULL;
 
-#ifdef PATHFINDING_PERF
-		numUnoptimizedPoints++;
-#endif
 	}
-#ifdef PATHFINDING_PERF
-	float fixupDurationMs = (OS_GetTimeMicroSec() - preFixupTime) / 1000.f;
-#endif
 
 	// reverse order
 	numPathPoints = points;
 	for (int i = 0; i < points / 2; ++i)
 	{
-		Vector3 temp = pPath[i];
+		Vec2 temp = pPath[i];
 		pPath[i] = pPath[numPathPoints - 1 - i];
 		pPath[numPathPoints - 1 - i] = temp;
 	}
 
 	const bool bClosestPoint = (endInsideCollision || endOutsideMap || !resultNode || resultNode->x != end.x || resultNode->y != end.y);
-
-#ifdef PATHFINDING_PERF
-	int queryDistance = abs(start.x - end.x) + abs(start.y - end.y);
-	float timeMs = (OS_GetTimeMicroSec() - timeBefore) / 1000.f;
-	g_pLog->Write("Pathfinding took %.2f ms - %d dist - %d points (from %d, took %.2f), %d nodes visited, %d max open list, found point=%d %s\n", timeMs, queryDistance, numPathPoints, numUnoptimizedPoints, fixupDurationMs, numNodesVisited, maxOpenList, (bClosestPoint || !resultNode) ? 0 : 1, endInsideCollision ? "(endpoint was inside collision)" : "");
-#endif
 
 	if (!resultNode)
 		return RESULT_FAILED;
@@ -1569,69 +1537,69 @@ Pathfinder::eResult Pathfinder::GetPath(const Vector2i start, Vector2i end, Vect
 	return RESULT_ALL_GOOD;
 }
 
-void Pathfinder::WriteFatBresenhamLine(const Vector2i & start, const Vector2i & end, unsigned int collidableMask, unsigned writeMask, eUpdateType add) const
-{
-	// Note: start needs to be inside the map
+//void Pathfinder::WriteFatBresenhamLine(const Vec2i & start, const Vec2i & end, unsigned int collidableMask, unsigned writeMask, eUpdateType add) const
+//{
+//	// Note: start needs to be inside the map
+//
+//	int x = start.x;
+//	int y = start.y;
+//
+//	if (m_nodeData[x + y * m_width] & collidableMask)
+//		return;
+//
+//	int dx = abs(end.x - start.x);
+//	int dy = abs(end.y - start.y);
+//	int x_inc = (end.x > start.x) ? 1 : -1;
+//	int y_inc = (end.y > start.y) ? 1 : -1;
+//	int error = dx - dy;
+//	dx *= 2;
+//	dy *= 2;
+//
+//	const int maxNodeIndex = m_width * m_height - 1;
+//
+//	while (x != end.x || y != end.y)
+//	{
+//		if (error > 0)
+//		{
+//			x += x_inc;
+//			error -= dy;
+//		}
+//		else
+//		{
+//			y += y_inc;
+//			error += dx;
+//		}
+//
+//		_ASSERT((x + y * m_width) < (m_width * m_height) && (x + y * m_width) >= 0);
+//		unsigned int value = m_nodeData[x + y * m_width];
+//		if (value & collidableMask) {
+//			return;
+//		}
+//		else if (add == ADD_LOWORD) {
+//			writeMask &= 0x0000ffff;
+//			m_nodeData[x + y * m_width]								|= writeMask;
+//			m_nodeData[Min(maxNodeIndex, x + 1 + y * m_width)]		|= writeMask;
+//			m_nodeData[Max(0, x - 1 + y * m_width)]					|= writeMask;
+//			m_nodeData[Min(maxNodeIndex, x + (y + 1) * m_width)]	|= writeMask;
+//			m_nodeData[Max(0, x + (y - 1) * m_width)]				|= writeMask;
+//		}
+//		else if (add == REMOVE_LOWORD) {
+//			writeMask &= 0x0000ffff;
+//			m_nodeData[x + y * m_width]								&= ~writeMask;
+//			m_nodeData[Min(maxNodeIndex, x + 1 + y * m_width)]		&= ~writeMask;
+//			m_nodeData[Max(0, x - 1 + y * m_width)]					&= ~writeMask;
+//			m_nodeData[Min(maxNodeIndex, x + (y + 1) * m_width)]	&= ~writeMask;
+//			m_nodeData[Max(0, x + (y - 1) * m_width)]				&= ~writeMask;
+//		}
+//		else
+//		{
+//			// unsupported / not needed for this use case
+//			DEBUG_BREAK();
+//		}
+//	}
+//}
 
-	int x = start.x;
-	int y = start.y;
-
-	if (m_nodeData[x + y * m_width] & collidableMask)
-		return;
-
-	int dx = abs(end.x - start.x);
-	int dy = abs(end.y - start.y);
-	int x_inc = (end.x > start.x) ? 1 : -1;
-	int y_inc = (end.y > start.y) ? 1 : -1;
-	int error = dx - dy;
-	dx *= 2;
-	dy *= 2;
-
-	const int maxNodeIndex = m_width * m_height - 1;
-
-	while (x != end.x || y != end.y)
-	{
-		if (error > 0)
-		{
-			x += x_inc;
-			error -= dy;
-		}
-		else
-		{
-			y += y_inc;
-			error += dx;
-		}
-
-		ASSERT((x + y * m_width) < (m_width * m_height) && (x + y * m_width) >= 0);
-		unsigned int value = m_nodeData[x + y * m_width];
-		if (value & collidableMask) {
-			return;
-		}
-		else if (add == ADD_LOWORD) {
-			writeMask &= 0x0000ffff;
-			m_nodeData[x + y * m_width]								|= writeMask;
-			m_nodeData[Min(maxNodeIndex, x + 1 + y * m_width)]		|= writeMask;
-			m_nodeData[Max(0, x - 1 + y * m_width)]					|= writeMask;
-			m_nodeData[Min(maxNodeIndex, x + (y + 1) * m_width)]	|= writeMask;
-			m_nodeData[Max(0, x + (y - 1) * m_width)]				|= writeMask;
-		}
-		else if (add == REMOVE_LOWORD) {
-			writeMask &= 0x0000ffff;
-			m_nodeData[x + y * m_width]								&= ~writeMask;
-			m_nodeData[Min(maxNodeIndex, x + 1 + y * m_width)]		&= ~writeMask;
-			m_nodeData[Max(0, x - 1 + y * m_width)]					&= ~writeMask;
-			m_nodeData[Min(maxNodeIndex, x + (y + 1) * m_width)]	&= ~writeMask;
-			m_nodeData[Max(0, x + (y - 1) * m_width)]				&= ~writeMask;
-		}
-		else
-		{
-			// unsupported / not needed for this use case
-			DEBUG_BREAK();
-		}
-	}
-}
-
-bool Pathfinder::TraceBresenhamLine(const Vector2i& start, const Vector2i& end, unsigned int collidableMask, Vector2i* hitPoint) const
+bool Pathfinder::TraceBresenhamLine(const Vec2i& start, const Vec2i& end, unsigned int collidableMask, Vec2i* hitPoint) const
 {
 	// Note: 'start' needs to be inside the map
 
@@ -1656,7 +1624,7 @@ bool Pathfinder::TraceBresenhamLine(const Vector2i& start, const Vector2i& end, 
 	// check 3 grid points around the origin, depending on the direction (e.g.: left, bottom left and bottom.  e.g.2: right, top right and top)
 	//NOTE: Crb disabled this because it's causing wrong results along 
 	bool bCheckCorners = false;// start.x != end.x && start.y != end.y;
-	Vector2i offsets[3] = {
+	Vec2i offsets[3] = {
 		{x_inc, 0},
 		{x_inc, y_inc},
 		{0, y_inc}
@@ -1670,7 +1638,7 @@ bool Pathfinder::TraceBresenhamLine(const Vector2i& start, const Vector2i& end, 
 			// search around this cell
 			unsigned int d;
 			int idx;
-			for (int off = 0; off < COUNT_OF(offsets); off++) {
+			for (int off = 0; off < ARRAY_SIZE(offsets); off++) {
 				//TODO: BUG! x isn't range-checked here, and will read from the wrong lines on edges (x==0 & x==width-1) !
 				idx = x + offsets[off].x + (y + offsets[off].y) * m_width;
 				if (idx >= 0 && idx < maxNodeIndex) {
@@ -1695,7 +1663,7 @@ bool Pathfinder::TraceBresenhamLine(const Vector2i& start, const Vector2i& end, 
             error += dx;
         }
 
-		ASSERT((x + y * m_width) < (m_width * m_height) && (x + y * m_width) >= 0);
+		_ASSERT((x + y * m_width) < (m_width * m_height) && (x + y * m_width) >= 0);
 		unsigned int value = m_nodeData[x + y * m_width];
 		if (value & collidableMask)
 		{
@@ -1708,86 +1676,86 @@ bool Pathfinder::TraceBresenhamLine(const Vector2i& start, const Vector2i& end, 
 	return false;
 }
 
-bool Pathfinder::TraceBresenhamLineBlocked(const Vector2i & start, const Vector2i & end, unsigned int collidableMask, Vector2i * hitPoint) const
-{
-	// Note: 'start' needs to be inside the map
-	int x = start.x;
-	int y = start.y;
-	if ( (m_nodeData[x + y * m_width] & collidableMask) == 0)
-	{
-		if (hitPoint)
-			*hitPoint = { x, y };
-		return true;
-	}
-
-	int dx = abs(end.x - start.x);
-	int dy = abs(end.y - start.y);
-	int x_inc = (end.x > start.x) ? 1 : -1;
-	int y_inc = (end.y > start.y) ? 1 : -1;
-	int error = dx - dy;
-	dx *= 2;
-	dy *= 2;
-
-	// check 3 grid points around the origin, depending on the direction (e.g.: left, bottom left and bottom.  e.g.2: right, top right and top)
-	//NOTE: Crb disabled this because it's causing wrong results along 
-	bool bCheckCorners = false;// start.x != end.x && start.y != end.y;
-	Vector2i offsets[3] = {
-		{x_inc, 0},
-		{x_inc, y_inc},
-		{0, y_inc}
-	};
-	const int maxNodeIndex = m_width * m_height;
-
-	while (x != end.x || y != end.y)
-	{
-		if (bCheckCorners)
-		{
-			// search around this cell
-			unsigned int d;
-			int idx;
-			for (int off = 0; off < COUNT_OF(offsets); off++) {
-				//TODO: BUG! x isn't range-checked here, and will read from the wrong lines on edges (x==0 & x==width-1) !
-				idx = x + offsets[off].x + (y + offsets[off].y) * m_width;
-				if (idx >= 0 && idx < maxNodeIndex) {
-					d = m_nodeData[idx];
-					if ((d & collidableMask) == 0) {
-						if (hitPoint)
-							*hitPoint = { x + offsets[off].x, y + offsets[off].y };
-						return true;
-					}
-				}
-			}
-		}
-
-		if (error > 0)
-		{
-			x += x_inc;
-			error -= dy;
-		}
-		else
-		{
-			y += y_inc;
-			error += dx;
-		}
-
-		ASSERT((x + y * m_width) < (m_width * m_height) && (x + y * m_width) >= 0);
-		unsigned int value = m_nodeData[x + y * m_width];
-		if ( (value & collidableMask) == 0)
-		{
-			if (hitPoint)
-				*hitPoint = { x,y };
-			return true;
-		}
-	}
-
-	return false;
-}
+//bool Pathfinder::TraceBresenhamLineBlocked(const Vec2i & start, const Vec2i & end, unsigned int collidableMask, Vec2i * hitPoint) const
+//{
+//	// Note: 'start' needs to be inside the map
+//	int x = start.x;
+//	int y = start.y;
+//	if ( (m_nodeData[x + y * m_width] & collidableMask) == 0)
+//	{
+//		if (hitPoint)
+//			*hitPoint = { x, y };
+//		return true;
+//	}
+//
+//	int dx = abs(end.x - start.x);
+//	int dy = abs(end.y - start.y);
+//	int x_inc = (end.x > start.x) ? 1 : -1;
+//	int y_inc = (end.y > start.y) ? 1 : -1;
+//	int error = dx - dy;
+//	dx *= 2;
+//	dy *= 2;
+//
+//	// check 3 grid points around the origin, depending on the direction (e.g.: left, bottom left and bottom.  e.g.2: right, top right and top)
+//	//NOTE: Crb disabled this because it's causing wrong results along 
+//	bool bCheckCorners = false;// start.x != end.x && start.y != end.y;
+//	Vec2i offsets[3] = {
+//		{x_inc, 0},
+//		{x_inc, y_inc},
+//		{0, y_inc}
+//	};
+//	const int maxNodeIndex = m_width * m_height;
+//
+//	while (x != end.x || y != end.y)
+//	{
+//		if (bCheckCorners)
+//		{
+//			// search around this cell
+//			unsigned int d;
+//			int idx;
+//			for (int off = 0; off < COUNT_OF(offsets); off++) {
+//				//TODO: BUG! x isn't range-checked here, and will read from the wrong lines on edges (x==0 & x==width-1) !
+//				idx = x + offsets[off].x + (y + offsets[off].y) * m_width;
+//				if (idx >= 0 && idx < maxNodeIndex) {
+//					d = m_nodeData[idx];
+//					if ((d & collidableMask) == 0) {
+//						if (hitPoint)
+//							*hitPoint = { x + offsets[off].x, y + offsets[off].y };
+//						return true;
+//					}
+//				}
+//			}
+//		}
+//
+//		if (error > 0)
+//		{
+//			x += x_inc;
+//			error -= dy;
+//		}
+//		else
+//		{
+//			y += y_inc;
+//			error += dx;
+//		}
+//
+//		ASSERT((x + y * m_width) < (m_width * m_height) && (x + y * m_width) >= 0);
+//		unsigned int value = m_nodeData[x + y * m_width];
+//		if ( (value & collidableMask) == 0)
+//		{
+//			if (hitPoint)
+//				*hitPoint = { x,y };
+//			return true;
+//		}
+//	}
+//
+//	return false;
+//}
 
 inline void Pathfinder::AddToOpenList(PathNode* node, int cost)
 {
 	unsigned nodeIdx = (int)(node - m_nodemap);
 
-	ASSERT(m_nOpenListSize < MAX_OPEN_NODES && "Too many open nodes!");
+	_ASSERT(m_nOpenListSize < MAX_OPEN_NODES && "Too many open nodes!");
 	m_openlist[m_nOpenListSize] = { unsigned(cost), nodeIdx };
 	++m_nOpenListSize;
 	std::push_heap(m_openlist, m_openlist + m_nOpenListSize, [](const Pathfinder::OpenNode& a, const Pathfinder::OpenNode& b) -> bool
