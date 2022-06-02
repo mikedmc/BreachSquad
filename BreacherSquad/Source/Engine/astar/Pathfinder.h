@@ -42,6 +42,7 @@ public:
 
 	// when loading a map, call Init(), use AddObject() for each entity that blocks movement and ComputeClearance() after that.
 	void					Init(int sourceWidthMeters, int sourceHeightMeters, unsigned char blockMask);
+	void					Release();
 	// DMC: Optional now because the engine sets the clearance flags itself
 	void					ComputeClearance(/*unsigned int clearanceValueStartBit = 0, int numClearanceValues = 0*/);
 	//void					MarkShapeCells(const Vec3* shapePts, int numPts, unsigned char blockMask); // adds given flags to all cells that are inside given shape
@@ -68,7 +69,7 @@ public:
 	// if 'bGetClosestPointIfBlocked' is set, we will always return a valid path, even if start/end are outside the map or inside a collision
 	// uses the X/Z plane of the start/end points, but we accept Vec3 as a convenience
 	// returns result in meters (game units)
-	bool					GetPath(const Vec2& start, const Vec2& end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned char blockFlags, bool bGetClosestPointIfBlocked = true, unsigned char additionalCostFlags = 0);
+	bool					GetPath(const Vec2& start, const Vec2& end, Vec2* pPath, int maxPathPoints, int& numPathPoints, unsigned char blockFlags, bool bGetClosestPointIfBlocked = true, unsigned char additionalCostFlags = 0);
 
 	// !!! uses our own memory: not thread safe, memory is owned by this object and should not be referenced or released
 	//bool					GetPath_Unsafe(const Vec3& start, const Vec3& end, const Vec3** ppPath, int& numPathPoints, unsigned int blockFlags, bool bGetClosestPointIfBlocked = true, unsigned int additionalCostFlags = 0);
@@ -112,7 +113,7 @@ private:
 		RESULT_FAILED, // couldn't find a path (start/end outside of map or inside collision)
 		RESULT_CLOSEST_POINT, // end path was inside collision, but a point closest to the endpoint was returned (when using flag PF_CLOSEST_POINT)
 	};
-	eResult					GetPath(Vec2i start, Vec2i end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned char blockFlags, bool bGetClosestPointIfBlocked, unsigned char additionalCostFlags); // uses pathfinder coords
+	eResult					GetPath(Vec2i start, Vec2i end, Vec2* pPath, int maxPathPoints, int& numPathPoints, unsigned char blockFlags, bool bGetClosestPointIfBlocked, unsigned char additionalCostFlags); // uses pathfinder coords
 
 	void					AddNewToOpenList(PathNode* node, unsigned short gcost, int parentIdx, int destx, int desty);
 	void					AddToOpenList(PathNode* node, int cost);

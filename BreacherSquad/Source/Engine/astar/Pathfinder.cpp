@@ -117,10 +117,7 @@ Pathfinder::Pathfinder()
 
 Pathfinder::~Pathfinder()
 {
-	SAFE_DELETE_ARRAY(m_nodeData);
-	SAFE_DELETE_ARRAY(m_nodemap);
-	//SAFE_DELETE_ARRAY(m_nodeDataMips);
-	//m_localGetPathBuffer.Free();
+	Release();
 }
 
 float Pathfinder::GetCellSizeMeters() const
@@ -183,6 +180,14 @@ void Pathfinder::Init(int sourceWidthMeters, int sourceHeightMeters, unsigned ch
 			pNode->y = ( short ) y;
 		}
 	}
+}
+
+void Pathfinder::Release()
+{
+	SAFE_DELETE_ARRAY( m_nodeData );
+	SAFE_DELETE_ARRAY( m_nodemap );
+	//SAFE_DELETE_ARRAY(m_nodeDataMips);
+	//m_localGetPathBuffer.Free();
 }
 
 void Pathfinder::ComputeClearance(/*unsigned int clearanceValueStartBit, int numClearanceValues*/)
@@ -1187,9 +1192,9 @@ Vec2 Pathfinder::AdjustToOutsideCollision(const Vec2& p, unsigned char mask) con
 //	return (result != RESULT_FAILED);
 //}
 
-bool Pathfinder::GetPath(const Vec2& start, const Vec2& end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned char blockFlags, bool bGetClosestPointIfBlocked /*= true*/, unsigned char additionalCostFlags /*= 0*/)
+bool Pathfinder::GetPath(const Vec2& start, const Vec2& end, Vec2* pPath, int maxPathPoints, int& numPathPoints, unsigned char blockFlags, bool bGetClosestPointIfBlocked /*= true*/, unsigned char additionalCostFlags /*= 0*/)
 {
-	eResult result = GetPath(ConvertToPathfinderCoords(start.x, start.y), ConvertToPathfinderCoords(end.x, end.y), pPath, numPathPoints, maxPathPoints, blockFlags, bGetClosestPointIfBlocked, additionalCostFlags);
+	eResult result = GetPath(ConvertToPathfinderCoords(start.x, start.y), ConvertToPathfinderCoords(end.x, end.y), pPath, maxPathPoints, numPathPoints, blockFlags, bGetClosestPointIfBlocked, additionalCostFlags);
 	if (result == RESULT_ALL_GOOD)
 	{
 		// replace last point (which is center-cell) with the exact end point
@@ -1222,7 +1227,7 @@ Vec2i Pathfinder::FindClosestEmptyCell(const Vec2i& start, int range, unsigned c
 }
 
 // if 'bGetClosestPointIfBlocked' is set, we will always return a valid path, even if start/end are outside the map or inside a collision
-Pathfinder::eResult Pathfinder::GetPath(const Vec2i start, Vec2i end, Vec2* pPath, int& numPathPoints, int maxPathPoints, unsigned char blockFlags, bool bGetClosestPointIfBlocked, unsigned char additionalCostFlags)
+Pathfinder::eResult Pathfinder::GetPath(const Vec2i start, Vec2i end, Vec2* pPath, int maxPathPoints, int& numPathPoints, unsigned char blockFlags, bool bGetClosestPointIfBlocked, unsigned char additionalCostFlags)
 {
 	_ASSERT(blockFlags);
 	if (!blockFlags)
@@ -1437,6 +1442,9 @@ DMC: was already commented out
 	}
 
 	// perform manipulation on the resulting path
+
+	//#DMC: path smoothing can be taken from my version where it announces collision when crossing higher cost tiles too to avoid corners
+
 	int points = 0;
 	PathNode* node = resultNode;
 	//PathNode* prevAddedNode = node;

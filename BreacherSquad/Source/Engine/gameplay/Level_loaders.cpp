@@ -138,6 +138,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_levelAABB_TL.Set((int)floor(m_levelAABB.x / K_TILE_SIZE), (int)floor(m_levelAABB.y / K_TILE_SIZE), (int)(m_levelAABB.w / K_TILE_SIZE), (int)(m_levelAABB.h / K_TILE_SIZE));
 	// allocate passability map
 	_ASSERT( m_levelAABB_TL.w < 5000 && m_levelAABB_TL.h < 5000 );
+	/*
 	m_mapPassability = new char*[m_levelAABB_TL.w];
 	for ( int kk = 0; kk < m_levelAABB_TL.w; kk++ )
 	{
@@ -150,9 +151,11 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		// initialize map with "cannot pass" where empty
 		memset( m_mapPassability[kk], K_ASTAR_COST_NOTPASS, sizeof( char ) * m_levelAABB_TL.h );
 	}
+	*/
 	LOG("AStar map allocated. %d x %d", m_levelAABB_TL.w, m_levelAABB_TL.h);
 	// initialize AStar search engine
-	m_astar.SetMapPointer( m_mapPassability, m_levelAABB_TL.w, m_levelAABB_TL.h );
+	//m_astar.SetMapPointer( m_mapPassability, m_levelAABB_TL.w, m_levelAABB_TL.h );
+	m_astar.Init( m_levelAABB_TL.w, m_levelAABB_TL.h, COL_MOVEMENT_BLOCK );
 
 	///--- everything loaded, SetAI here again so it sets all necessary pointers ---
 	// set AI at the end after we load everything or we won't have final targets for pointers

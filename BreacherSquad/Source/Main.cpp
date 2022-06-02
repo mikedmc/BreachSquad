@@ -2264,12 +2264,15 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			break;
 			case VK_F7:
 			{
-				Vec2i tempArrVec2i[128];
+				Vec2 tempArrVec2[128];
 				Vec2 vfrom = __Sim().m_arrActors[0]->pos.xy;
 				Vec2 vto = __Sim().m_camLevelToScr.ScreenToWorld( g_mouse.pos );
-
+				
 				LONGLONG tmstart = __PerfCounter().GetTime();
-				int a_steps = __Sim().m_astar.FindPath( nsTiles::ToTilePos( vfrom ), nsTiles::ToTilePos(vto), tempArrVec2i, ARRAY_SIZE( tempArrVec2i ), true );
+				//int a_steps = __Sim().m_astar.FindPath( nsTiles::ToTilePos( vfrom ), nsTiles::ToTilePos(vto), tempArrVec2i, ARRAY_SIZE( tempArrVec2i ), true );
+				int a_steps = 0;
+				bool bFound = __Sim().m_astar.GetPath( vfrom, vto, tempArrVec2, ARRAY_SIZE(tempArrVec2), a_steps, COL_MOVEMENT_BLOCK, false, COL_CLEARANCE0 | COL_CLEARANCE1 );
+
 				LONGLONG tmend = __PerfCounter().GetTime();
 				LOG(L"path duration: %f", __PerfCounter().GetPeriodInMS(tmstart, tmend));
 			}

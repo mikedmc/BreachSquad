@@ -78,7 +78,7 @@ public:
 		m_pSprite = pSprite;
 	}
 
-	CAStarSearch			m_astar;						// A-start Astar search engine
+	Pathfinder				m_astar;						// A-start Astar search engine
 	CTextureManager			m_texManager;					// General texture manager for misc needed textures
 	CSpriteLib				m_sprLights;					// light animations/sprites
 	CSpriteLib				m_sprProps;						// decorations
@@ -94,7 +94,7 @@ public:
 	int						tileW, tileH;					// size of tiles
 	RectXYWH				m_levelAABB;					// level AABB in pixels - grows when adding areas
 	RectXYWHi				m_levelAABB_TL;					// level AABB in tiles  - grows when adding areas
-	char**					m_mapPassability;				// map the size of the level for pathfinding
+	//char**					m_mapPassability;				// map the size of the level for pathfinding
 	CTexNode*				m_pTexTilesColor;				// tileset base texture 
 	CTexNode*				m_pTexTilesNorm;				// tileset normals texture 
 	Vec2					m_vLevelOrigin;					// level origin for the editor (usually around start location)
