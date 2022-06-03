@@ -112,6 +112,8 @@ namespace UTMath
 	void			RoundVec2( Vec2 & v );
 	// True if vector is zero
 	bool			Vec2IsZero( Vec2 & vec );
+	// Returns squared distance beween 2 vectors
+	float			Vec2DistSq( Vec2 a, Vec2 b );
 	// Is vector almost zero?
 	bool			Vec2AlmostZero( Vec2 vec, float fThreshold = 0.00001f );
 	// Is vector almost zero?

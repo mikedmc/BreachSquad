@@ -325,7 +325,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 							// astar should return solution in internal array for the level to smooth it into the actor
 							//int a_steps = level.m_astar.FindPath( nsTiles::ToTilePos( act.pos.xy ), tlpos, tempArrVec2i, ARRAY_SIZE(tempArrVec2i), true );
 							int a_steps = 0;
-							bool bFound = __Sim().m_astar.GetPath( act.pos.xy, AIsensor.vGoTo, tempArrVec2, ARRAY_SIZE( tempArrVec2 ), a_steps, COL_MOVEMENT_BLOCK, false, COL_CLEARANCE0 | COL_CLEARANCE1 );
+							bool bFound = __Sim().m_astar.GetPath( act.pos.xy, AIsensor.vGoTo, tempArrVec2, ARRAY_SIZE( tempArrVec2 ), a_steps, COL_MOVEMENT_BLOCK, false, COL_CLEARANCE0 | COL_CLEARANCE1, COL_CLEARANCE0 | COL_CLEARANCE1 );
 
 							if ( bFound == false || a_steps == 0 ) 
 							{

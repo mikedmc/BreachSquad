@@ -317,7 +317,6 @@ CLevel::CLevel()
 
 	m_pDevice = nullptr;
 	tileW = tileH = 0;
-	//m_mapPassability = nullptr;
 
 	m_levelAABB.Set( 0.0f, 0.0f, 0.0f, 0.0f );
 	m_levelAABB_TL.Set( 0, 0, 0, 0 );
@@ -391,10 +390,8 @@ void CLevel::UpdateDirtyRects()
 					// set passability flags in pathfinding map 
 					if ( tl->flags & K_TILEFLAG_WALKABLE )
 						m_astar.SetNodeFlags( xx, yy, COL_ACCESSIBLE );
-					//m_mapPassability[xx][yy] = K_ASTAR_COST_FLOOR;
 					else
 						m_astar.SetNodeFlags( xx, yy, COL_MOVEMENT_BLOCK );
-						//m_mapPassability[xx][yy] = K_ASTAR_COST_NOTPASS;
 
 					// neighbours
 					CTile* tlL = area->GetTile( xx - 1, yy );
@@ -427,6 +424,7 @@ void CLevel::UpdateDirtyRects()
 					else
 					{	 
 						///--- process walkable flags ---
+						// corners don't matter for now
 						bool bFloorBorder = false;
 						if ( ( tlL ) && ( ( tlL->flags & K_TILEFLAG_WALKABLE ) == 0 ) )
 							bFloorBorder = true;
@@ -439,7 +437,6 @@ void CLevel::UpdateDirtyRects()
 
 						if ( bFloorBorder )
 						{
-							//m_mapPassability[xx][yy] = K_ASTAR_COST_FLOOR_BORDER;
 							m_astar.SetNodeFlags( xx, yy, COL_CLEARANCE0 );
 						}
 					}
@@ -4976,16 +4973,6 @@ void CLevel::Release()
 	ClearVisibilityLists();
 	// release passability map 
 	m_astar.Release();
-	/*
-	if ( m_mapPassability != nullptr )
-	{
-		for ( int xx = 0; xx < m_levelAABB_TL.w; xx++ )
-		{
-			SAFE_DELETE_ARRAY( m_mapPassability[xx] );
-		}
-		SAFE_DELETE_ARRAY( m_mapPassability );
-	}
-	*/
 
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrAreas );
 

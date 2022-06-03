@@ -224,10 +224,7 @@
     <ClInclude Include="Source\Engine\AchievementManager.h" />
     <ClInclude Include="Source\Engine\Analytics.h" />
     <ClInclude Include="Source\Engine\AppGlobals.h" />
-    <ClInclude Include="Source\Engine\astar\astarsearch.h" />
-    <ClInclude Include="Source\Engine\astar\fsa.h" />
     <ClInclude Include="Source\Engine\astar\Pathfinder.h" />
-    <ClInclude Include="Source\Engine\astar\stlastar.h" />
     <ClInclude Include="Source\Engine\BitPacker.h" />
     <ClInclude Include="Source\Engine\BufferedPainter.h" />
     <ClInclude Include="Source\Engine\BufferedPainterQuad.h" />
@@ -655,7 +652,6 @@
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\AppGlobals.cpp" />
-    <ClCompile Include="Source\Engine\astar\astarsearch.cpp" />
     <ClCompile Include="Source\Engine\astar\Pathfinder.cpp" />
     <ClCompile Include="Source\Engine\BitPacker.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>

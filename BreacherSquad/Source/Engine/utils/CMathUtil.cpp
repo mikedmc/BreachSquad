@@ -334,6 +334,11 @@ bool UTMath::Vec2IsZero( Vec2 & vec )
 	return ( vec.x == 0.0f && vec.y == 0.0f );
 }
 
+float UTMath::Vec2DistSq( Vec2 a, Vec2 b )
+{
+	return MUVec2LenSq( &( a - b ) );
+}
+
 bool UTMath::Vec2AlmostZero( Vec2 vec, float fThreshold /*= 0.00001f */ )
 {
 	if ( MUVec2LenSq( &vec ) <= fThreshold * fThreshold )
