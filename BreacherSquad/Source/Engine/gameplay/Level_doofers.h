@@ -20,7 +20,7 @@ enum EDooferType {
 class CDoofer {
 public:
 	EDooferType	type;
-	CDoubleLinkedPool<CPhysicsPoint>::CLinkedPoolNode *physPt; //punctul fizic (coliziune, pozitie, etc)
+	CLinkedPool<CPhysicsPoint>::CLNode *physPt; //punctul fizic (coliziune, pozitie, etc)
 
 	int			nSubType;	//folosit de fiecare tip in mod diferit
 	float		fTimer;		//timer care porneste de la 0

@@ -212,7 +212,7 @@ public:
 	void					AddDecal_BloodSplat(Vec2 pos, bool bLarge, EActorClass eVictimClass = K_ACT_CLASS_ANY);
 	///--- physics points ---
 	//#TODO: remove?
-	CDoubleLinkedPool<CPhysicsPoint>	m_poolPhysPts; //pool de obiecte fizice
+	CLinkedPool<CPhysicsPoint>	m_poolPhysPts; //pool de obiecte fizice
 	void					UpdatePhysicsPoints(float dTime);
 	///--- bullets linked pool ---
 	CArray<CBullet*>		m_arrBullets;			// bullets pool
@@ -237,7 +237,7 @@ public:
 
 	///--- level doofers pool ---
 	int						m_propsLightsMeshIdx;		//mesh id for props lights
-	CDoubleLinkedPool<CDoofer>	m_poolDoofers;		
+	CLinkedPool<CDoofer>	m_poolDoofers;		
 	// Adds a generic prop (physical particle)
 	// \param nSubType - secondary type of the added Prop, handled differently on every prop
 	void					AddDoofer(EDooferType type, Vec2 pos, Vec2 * speed, Vec2 * accel, int nSubType = 0);

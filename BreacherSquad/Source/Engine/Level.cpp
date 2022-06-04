@@ -1847,11 +1847,8 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 	m_propsLightsMeshIdx = -1;
 	m_bufferedPainter.BeginMesh( m_propsLightsMeshIdx );
 
-	CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.pListUsed.m_pNext;
-	while ( node != &m_poolDoofers.pListUsed )
+	for(auto node : m_poolDoofers)
 	{
-		//salvez locatia urmatoare ca s apot avansa pe ea
-		CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *nextnode = node->m_pNext;
 		CDoofer* prop = &node->m_data;
 
 		if ( prop->bMakesLight )
@@ -1914,9 +1911,6 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 				m_bufferedPainter.AddTriangles( lightRectV, 2 );
 			}
 		}
-
-		// get to next node
-		node = nextnode;
 	}
 	//inchid meshul
 	m_bufferedPainter.EndMesh();
@@ -5383,10 +5377,8 @@ void CLevel::AddDecal_BloodSplat( Vec2 pos, bool bLarge, EActorClass eVictimClas
 
 void CLevel::UpdatePhysicsPoints( float dTime )
 {
-	CDoubleLinkedPool<CPhysicsPoint>::CLinkedPoolNode *node = m_poolPhysPts.pListUsed.m_pNext;
-	while ( node != &m_poolPhysPts.pListUsed )
+	for(auto node : m_poolPhysPts)
 	{
-		CDoubleLinkedPool<CPhysicsPoint>::CLinkedPoolNode *nextnode = node->m_pNext;
 		//update
 		CPhysicsPoint*	point = &node->m_data;
 		// kill it when it gets outside the play area
@@ -5547,10 +5539,6 @@ void CLevel::UpdatePhysicsPoints( float dTime )
 				point->bIsStatic = false;
 			}
 		}
-
-
-		//avansez pointer
-		node = nextnode;
 	}
 }
 

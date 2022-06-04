@@ -67,17 +67,17 @@ void CLevel::AddDoofer(EDooferType type, Vec2 pos, Vec2 * speed, Vec2 * accel, i
 void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float fFadeTime, DWORD color, float fScale)
 {
 	Vec3 vPos = Vec2ToVec3XY0(pos);
-	CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.HireNode();
+	CLinkedPool<CDoofer>::CLNode *node = m_poolDoofers.Hire();
 	//set 
 	if (node != nullptr)
 	{
 		node->m_data.Reset();
 		//add simulation container
-		node->m_data.physPt = m_poolPhysPts.HireNode();
+		node->m_data.physPt = m_poolPhysPts.Hire();
 		if (node->m_data.physPt == nullptr)
 		{
 			ErrorBox(K_ERR_WARNING, L"AddProp_Light:We need more physics points!");
-			m_poolDoofers.DismissNode(node);
+			m_poolDoofers.Dismiss(node);
 			return;
 		}
 		//reset
@@ -108,17 +108,17 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 	if (explotemplate == nullptr)
 		return;
 
-	CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.HireNode();
+	CLinkedPool<CDoofer>::CLNode *node = m_poolDoofers.Hire();
 	//set 
 	if (node != nullptr)
 	{
 		node->m_data.Reset();
 		//add simulation container
-		node->m_data.physPt = m_poolPhysPts.HireNode();
+		node->m_data.physPt = m_poolPhysPts.Hire();
 		if (node->m_data.physPt == nullptr)
 		{
 			ErrorBox(K_ERR_WARNING, L"AddProp_Explo:Need more physics points!");
-			m_poolDoofers.DismissNode(node);
+			m_poolDoofers.Dismiss(node);
 			return;
 		}
 		//reset
@@ -608,11 +608,9 @@ void CLevel::UpdateDoofers(float dTime)
 	RectXYWH camrect_larger = camrect;
 	camrect_larger.Inflate(2.0f * K_TILE_SIZE);
 
-	CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.pListUsed.m_pNext;
-	while (node != &m_poolDoofers.pListUsed)
+	for(auto node : m_poolDoofers)
 	{
 		//salvez locatia urmatoare ca s apot avansa pe ea
-		CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *nextnode = node->m_pNext;
 		CDoofer* prop = &node->m_data;
 
 		bool killprop = false;
@@ -793,12 +791,10 @@ void CLevel::UpdateDoofers(float dTime)
 		if (killprop)
 		{
 			//release la nodul de fizica !!!
-			m_poolPhysPts.DismissNode(prop->physPt);
+			m_poolPhysPts.Dismiss(prop->physPt);
 			//si eliberez glontul
-			m_poolDoofers.DismissNode(node);
+			m_poolDoofers.Dismiss(node);
 		}
-		//avansez pointer
-		node = nextnode;
 	}
 }
 
@@ -807,12 +803,8 @@ void CLevel::PaintDoofers()
 	m_pSprite->SetTransform(&g_matIdentity);
 	Mat mattrans;
 
-	CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *node = m_poolDoofers.pListUsed.m_pNext;
-	while (node != &m_poolDoofers.pListUsed)
+	for(auto node : m_poolDoofers)
 	{
-		//salvez locatia urmatoare ca sa pot avansa pe ea
-		CDoubleLinkedPool<CDoofer>::CLinkedPoolNode *nextnode = node->m_pNext;
-
 		switch (node->m_data.type)
 		{
 			case K_DOOFER_FIRE_SOURCE:
@@ -858,9 +850,6 @@ void CLevel::PaintDoofers()
 			}
 			break;
 		}
-
-		//avansez pointer
-		node = nextnode;
 	}
 }
 
