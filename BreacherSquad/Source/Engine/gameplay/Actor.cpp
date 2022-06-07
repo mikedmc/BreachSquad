@@ -997,7 +997,10 @@ void CActor::ProcessAnimations()
 	}
 	else
 	{
-		c_graphics->SetAnimOnce( K_ACT_ANIM_RUN );
+		if(c_AI->AIcommands.bRunning)
+			c_graphics->SetAnimOnce( K_ACT_ANIM_RUN );
+		else
+			c_graphics->SetAnimOnce( K_ACT_ANIM_WALK );
 		// change animation direction if walking back
 		if ( fSpeedDot < 0.0f )
 			c_graphics->SetAnimDirection( true );

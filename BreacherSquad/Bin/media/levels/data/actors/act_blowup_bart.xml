@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<ACTOR file="breacher.bsx">
+<ACTOR file="blowup_bart.bsx">
 	<ACTOR_DATA sAIstate="AWARE" sWeapon="WPN_SMG_MP5A3" class="ENEMY"
 				bboxMinX="-7" bboxMinY="-7" bboxMaxX="7" bboxMaxY="7" heightZ="64" heartZ="32"
 				sMaterial="FLESH" fLife="100.0" fArmor="0.0" 
@@ -15,8 +15,7 @@
 	example: we have 6 layers and layer 1, 3 and 4 are visible in this skin => 1101 in binary is 13
 	Skins have quick access layer indexes to the hands layers as we need to be able to hide and show them depending on weapon loadout
 	-->
-		<SKIN name="head1" layersVisibilityMask="27" handR_layerMask="16" handL_layerMask="8" />
-		<SKIN name="head2" layersVisibilityMask="29" handR_layerMask="16" handL_layerMask="8" />
+		<SKIN name="default" layersVisibilityMask="63" handR_layerMask="16" handL_layerMask="8" />
 	</SKINS>
 
 	<ANIMS>
@@ -24,8 +23,7 @@
 		<REFPOSE		set0="REFPOSE" />
 		<IDLE			set0_N="IDLE_N" set0_NE="IDLE_NE" set0_SE="IDLE_SE" set0_S="IDLE_S" />	
 		<RUN 			set0_N="RUN_N" set0_NE="RUN_NE" set0_SE="RUN_SE" set0_S="RUN_S" />
-		<KICK			set0_N="KICK_N" set0_NE="KICK_NE" set0_SE="KICK_SE" set0_S="KICK_S" />
-		<CROUCH			set0_N="CROUCH_N" set0_NE="CROUCH_NE" set0_SE="CROUCH_SE" set0_S="CROUCH_S" />
+		<WALK			set0_N="WALK_N" set0_NE="WALK_NE" set0_SE="WALK_SE" set0_S="WALK_S" />
 		<DIE			set0_N="DIE_N" set0_NE="DIE_N" set0_SE="DIE_S" set0_S="DIE_S" />
 	</ANIMS>
 
