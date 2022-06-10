@@ -72,7 +72,8 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			AIsensor.WpnStatePrimary = CAISensorInfo::CAN_SHOOT;
 		else if ( act.Weapons()->GetWeaponStatus( K_WPNSLOT_PRIMARY ) == K_WPN_STATUS_NO_AMMO )
 			AIsensor.WpnStatePrimary = CAISensorInfo::NEEDS_RELOAD;
-
+		//increase target lost timer, gets reset when we have a target
+		AIsensor.fTargetLostTimer += dTime;
 		///--- LOW FREQUENCY SENSORS ---
 		AItimerDecision -= dTime;
 		if ( (AItimerDecision <= 0.0f) && (!bIgnoreAIEvents) && (AIsensor.m_bEnabled) )
@@ -80,9 +81,10 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			// reset internal event
 			AIsensor.evtInternal.Reset();
 			//check for targets or other AI events
-			CActor* targetActor = nullptr;// level.GetClosestTarget( &act /*, act._template.foeClassFilter1, act.actTemplate.foeClassFilter2*/ );
+			CActor* targetActor = level.GetClosestTarget( &act /*, act._template.foeClassFilter1, act.actTemplate.foeClassFilter2*/ );
 			if ( targetActor != nullptr )
 			{
+				AIsensor.fTargetLostTimer = 0.0f;
 				//float enemyDst = MUVec2Len( &(targetActor->GetPosHeart() - act.GetPosHeart()) );
 				AIsensor.evtInternal.Set( K_AIEVT_SEE_ENEMY, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), 0.0f, 1.0f );
 				// set target pointer and increase ref only if different
@@ -97,6 +99,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					FREE_REF( AIsensor.pTargetedActor );
 					// get ref to new target
 					AIsensor.pTargetedActor = (CActor*)targetActor->GetRef();
+					AIsensor.bTargetLOS = true;
 				}
 				// enemies overlapping
 				/*
@@ -118,15 +121,26 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			}
 			else
 			{
-				//reset targeted actor
+				//we don't have line of sight with the enemy and we have no other enemies in line of sight so we follow the old enemy
 				if ( AIsensor.pTargetedActor != nullptr )
 				{
-					AIsensor.evtInternal.Set( K_AIEVT_LOST_ENEMY, 0, K_ACT_CLASS_ANY, AIsensor.pTargetedActor->pos.xy, 16.0f, 1.0f );
-					//reset targeting actor
-					FREE_REF(AIsensor.pTargetedActor);
+					AIsensor.bTargetLOS = false;
+
+					bool bGiveUp = false;
+					if ( !AIsensor.pTargetedActor->IsAlive() || AIsensor.fTargetLostTimer >= K_AIC_GIVE_UP_TARGET_TIMER )
+						bGiveUp = true;
+
+					if ( bGiveUp )
+					{
+						AIsensor.fTargetLostTimer = 0.0f;
+						//#TODO: only set lost enemy if he doesn't die. If he dies set another ENEMY_KILLED ? what other event could we use?
+						AIsensor.evtInternal.Set( K_AIEVT_LOST_ENEMY, 0, K_ACT_CLASS_ANY, AIsensor.pTargetedActor->pos.xy, 16.0f, 1.0f );
+						//reset targeting actor
+						FREE_REF( AIsensor.pTargetedActor );
+					}
 				}
 				// sometimes it doesn't see the enemy when it gets hit so we force the lost enemy onto him
-				else if ( AIsensor.evt.nType == K_AIEVT_GOT_HIT )
+				if ( AIsensor.evt.nType == K_AIEVT_GOT_HIT )
 				{
 					AIsensor.evtInternal.Set( K_AIEVT_LOST_ENEMY, 0, K_ACT_CLASS_ANY, AIsensor.evt.pos, 16.0f, 0.5f );
 				}

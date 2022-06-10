@@ -340,7 +340,10 @@ public:
 public:
 	bool					m_bEnabled;					// sensors are enabled or disabled?
 	//external sensors
-	CActor*					pTargetedActor;				// visible enemy, set by internal sensors
+	CActor*					pTargetedActor;				// targeted enemy, set by internal sensors
+	float					fTargetLostTimer;			// lost target enemy from LOS, how much time passed?
+	bool					bTargetLOS;					// do we have a Line Of Sight to target? AI states will make decisions based on this
+
 	UINT32					m_lastInteractingActorUID;	// 0-not set or UID for last actor that he interacted with
 	float					fTimeSinceHit;				// time passed since it got hit
 	CAIEvent				evtInternal;				// internal event given by sensors (see enemy, got shot etc). Don't use for decisions, updated by sensors.

@@ -1,6 +1,9 @@
 #pragma once
 #include "ComponentInterfaces.h"
 
+// after how much time we give up on hidden enemies?
+#define K_AIC_GIVE_UP_TARGET_TIMER 10.0f
+
 class CActorAIComponent : public IBaseActorAIComponent
 {
 private:

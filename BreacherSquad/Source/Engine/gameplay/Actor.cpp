@@ -1030,6 +1030,7 @@ bool CActor::CheckShoot( CLevel& level )
 	VecProj vShootPos = shooter->GetWeaponMuzzleWorld( bTwoHanded, 0 );
 
 	// checks if muzzle is inside the level, outside of collisions and walls
+	//#TODO: poate poate sa verifice direct in pathfinding map
 	Vec2 vRetP( 0.0f, 0.0f ), vRetN( 0.0f, 0.0f );
 	CTile* tl = level.SegmentTilesIntersectionEx( GetPosHeart3D().xy, vShootPos.xy, vRetP, vRetN, nullptr, pArea );
 	if ( tl != nullptr )
