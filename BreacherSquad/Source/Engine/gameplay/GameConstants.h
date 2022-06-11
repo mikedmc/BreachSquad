@@ -71,6 +71,8 @@
 
 // maximum number of allocated physics points
 #define K_LVL_PHYSP_MAX_CNT 256
+// max no of bullets at once
+#define K_LVL_BULLETS_MAX_CNT 128
 
 
 //maximum number of strategic points

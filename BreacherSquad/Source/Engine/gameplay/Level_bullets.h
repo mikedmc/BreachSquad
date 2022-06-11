@@ -178,8 +178,10 @@ public:
 public:
 	CBullet();
 	~CBullet();
+	// Call Reset when spawning a new bullet to set the proper template
+	void				Reset(CBulletTemplate* bulletTemplate);
 
-	void Update( float dTime, CLevel & level );
+	void				Update( float dTime, CLevel & level );
 };
 
 

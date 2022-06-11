@@ -10,28 +10,17 @@ CBullet* CLevel::ShootBullet( CBulletTemplate * bulletTemplate, EActorClass acto
 	{
 		return nullptr;
 	}
+	CLinkedPool<CBullet>::CLNode* node = m_poolBullets.Hire();
+	if ( node == nullptr )
+		return nullptr;
 	//set bullet generic data
-	CBullet* bullet = new CBullet();
+	CBullet* bullet = &node->m_data;
+	//#TODO: move as much initialization code into Reset!
+	bullet->Reset(bulletTemplate);
+
 	bullet->actorClass = actorClass;
 	bullet->ownerUID = nOwnerUID;
 	bullet->pArea = startArea;
-	bullet->dwLastTargetUID = 0;
-	bullet->nSubstate = 0;
-
-	bullet->eType = bulletTemplate->nType;
-	bullet->nFlags = bulletTemplate->nFlags;
-	bullet->nExploTemplateHash = bulletTemplate->nExploTemplateHash;
-
-	bullet->fStunDuration = bulletTemplate->fStunDuration;
-	bullet->fDamage = bulletTemplate->fDamage;
-	bullet->fDamage_ini = bullet->fDamage;
-	bullet->fDamageLossPPx = bulletTemplate->fDamageLossPPx;
-	bullet->fMomentum = bulletTemplate->fMomentum;
-	bullet->fLife = bulletTemplate->fLife;
-	bullet->fLife_ini = bullet->fLife;
-	bullet->nArmorPiercingRating = bulletTemplate->nArmorPiercingRating;
-	bullet->fSelfDamageMultiplier = bulletTemplate->fSelfDamageMultiplier;
-	bullet->fCriticalHitChance = bulletTemplate->fCriticalHitChance;
 
 	bullet->pos.Set( vPos );
 	bullet->pos_last = bullet->pos;
@@ -47,8 +36,6 @@ CBullet* CLevel::ShootBullet( CBulletTemplate * bulletTemplate, EActorClass acto
 	if (m_sprProps.GetAnimFlags(ANM_PROPS_SPR_BULLETS_NOANIM) & K_EDITOR_ANIMATION_FLAG_LOOPED)
 		bullet->bAnimated = true;
 
-	m_arrBullets.Add( bullet );
-
 	return bullet;
 }
 
@@ -58,9 +45,9 @@ CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float
 	float fMaxDistanceSq = fMaxDistance * fMaxDistance;
 	CBullet* pRetBullet = null;
 
-	for ( int kk = 0; kk < m_arrBullets.GetSize(); kk++ )
+	for ( auto node : m_poolBullets )
 	{
-		CBullet* bullet = m_arrBullets[ kk ];
+		CBullet* bullet = &node->m_data;
 		if ( bullet->bPendingKill )
 			continue;
 
@@ -88,9 +75,9 @@ CBullet* CLevel::GetClosestBullet(Vec2 vCheckPos, EBulletType nBulletType, float
 
 void CLevel::ReleaseBulletType(int nBulletType, UINT32 nOwnerUID)
 {
-	for ( int kk = 0; kk < m_arrBullets.GetSize(); kk++ )
+	for ( auto node : m_poolBullets )
 	{
-		CBullet* bullet = m_arrBullets[ kk ];
+		CBullet* bullet = &node->m_data;
 		if ( bullet->bPendingKill )
 			continue;
 
@@ -106,9 +93,9 @@ void CLevel::UpdateBullets(float dTime)
 	m_bulletsMeshIdx = -1;
 	int nBulletsTrisCnt = 0;
 
-	for ( int kk = 0; kk < m_arrBullets.GetSize(); kk++ )
+	for ( auto node : m_poolBullets )
 	{
-		CBullet* bullet = m_arrBullets[ kk ];
+		CBullet* bullet = &node->m_data;
 		if ( bullet->bPendingKill )
 			continue;
 		// update bullet point physics component
@@ -335,9 +322,9 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 			}
 			*/
 
-			for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
+			for ( auto node : m_poolBullets )
 			{
-				CBullet* bullet = m_arrBullets[ kk ];
+				CBullet* bullet = &node->m_data;
 				if ( bullet->bPendingKill )
 					continue;
 
@@ -355,9 +342,9 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 		break;
 		case K_LVL_RP_SHADOWS:
 		{
-			for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
+			for ( auto node : m_poolBullets )
 			{
-				CBullet* bullet = m_arrBullets[ kk ];
+				CBullet* bullet = &node->m_data;
 				if ( bullet->bPendingKill )
 					continue;
 				//Vec2 vdir = node->m_data.physPt->m_data.pos - node->m_data.physPt->m_data.pos_last;
@@ -368,9 +355,9 @@ void CLevel::PaintBullets(eLVLRenderPass pass)
 		break;
 		case K_LVL_RP_LIGHTS:
 		{
-			for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
+			for ( auto node : m_poolBullets )
 			{
-				CBullet* bullet = m_arrBullets[ kk ];
+				CBullet* bullet = &node->m_data;
 				if ( bullet->bPendingKill )
 					continue;
 				UTSprite::PaintFModule(bullet->sprBullet.pSprCol, bullet->pos.xy_proj, bullet->fidLight.animIdx, bullet->fidLight.frameIdx, 0);
@@ -384,9 +371,9 @@ int CLevel::KillBulletsOfType(int nBulletType, UINT32 dwOwnerUID)
 {
 	int nRetCnt = 0;
 	
-	for ( int kk = 0; kk < m_arrBullets.Count(); kk++ )
+	for ( auto node : m_poolBullets )
 	{
-		CBullet* bullet = m_arrBullets[ kk ];
+		CBullet* bullet = &node->m_data;
 		if ((bullet->eType == nBulletType) && ((dwOwnerUID == 0) || (bullet->ownerUID == dwOwnerUID)))
 		{
 			bullet->bPendingKill = true;
@@ -410,6 +397,31 @@ CBullet::CBullet() :
 CBullet::~CBullet()
 {
 	SAFE_DELETE( c_pointPhys );
+}
+
+void CBullet::Reset( CBulletTemplate* bulletTemplate )
+{
+	// reset generic data for re-use
+	bPendingKill = false;
+	c_pointPhys->Reset();
+	// set gameplay data
+	dwLastTargetUID = 0;
+	nSubstate = 0;
+
+	eType = bulletTemplate->nType;
+	nFlags = bulletTemplate->nFlags;
+	nExploTemplateHash = bulletTemplate->nExploTemplateHash;
+
+	fStunDuration = bulletTemplate->fStunDuration;
+	fDamage = bulletTemplate->fDamage;
+	fDamage_ini = fDamage;
+	fDamageLossPPx = bulletTemplate->fDamageLossPPx;
+	fMomentum = bulletTemplate->fMomentum;
+	fLife = bulletTemplate->fLife;
+	fLife_ini = fLife;
+	nArmorPiercingRating = bulletTemplate->nArmorPiercingRating;
+	fSelfDamageMultiplier = bulletTemplate->fSelfDamageMultiplier;
+	fCriticalHitChance = bulletTemplate->fCriticalHitChance;
 }
 
 void CBullet::Update( float dTime, CLevel & level )

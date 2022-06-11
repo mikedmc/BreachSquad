@@ -1,22 +1,40 @@
 #include "dxstdafx.h"
 #include "PhysPtComp.h"
 
-CPointPhysComponent::CPointPhysComponent( bool bEnableBounce, Vec3 vAcceleration, int nCollFlags ):
-	contactType( PCT_NONE ), bContacting( false ), bContactStarted( false ), bIsStatic( false ),
-	bIsStaticZ( false ), fBounceF( K_PPC_DEFAULT_FLOOR_BOUNCE ), fFrictionF( K_PPC_DEFAULT_FLOOR_FRICTION ),
-	bIsDead( false ), pArea( nullptr ),
-	nFlagsCollision( nCollFlags ), bFlagBounceEnabled( bEnableBounce )
+CPointPhysComponent::CPointPhysComponent( bool bEnableBounce, Vec3 vAcceleration, int nCollFlags )
 {
-	accel = vAcceleration;
+	Reset();
 
-	speed = Vec3( 0.0f, 0.0f, 0.0f );
-	contactNormal = Vec3( 0.0f, 0.0f, 0.0f );
-	contactPos = Vec3( 0.0f, 0.0f, 0.0f );
+	nFlagsCollision = nCollFlags;
+	bFlagBounceEnabled = bEnableBounce;
+	accel = vAcceleration;
 }
 
 CPointPhysComponent::~CPointPhysComponent()
 {
 	pArea = nullptr;
+}
+
+void CPointPhysComponent::Reset()
+{
+	pArea = nullptr;
+
+	accel = g_Vec3Zero;
+	speed = g_Vec3Zero;
+	contactNormal = g_Vec3Zero;
+	contactPos = g_Vec3Zero;
+
+	contactType = PCT_NONE;
+	bContacting = false;
+	bContactStarted = false; 
+	bIsStatic = false;
+	bIsStaticZ = false; 
+	fBounceF = K_PPC_DEFAULT_FLOOR_BOUNCE;
+	fFrictionF = K_PPC_DEFAULT_FLOOR_FRICTION;
+	bIsDead = false; 
+	pArea = nullptr;
+	nFlagsCollision = K_PPC_COLLFLAG_ALL;
+	bFlagBounceEnabled = false;
 }
 
 void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )

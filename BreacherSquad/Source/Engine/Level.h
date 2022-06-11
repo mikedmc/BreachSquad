@@ -215,7 +215,7 @@ public:
 	CLinkedPool<CPhysicsPoint>	m_poolPhysPts; //pool de obiecte fizice
 	void					UpdatePhysicsPoints(float dTime);
 	///--- bullets linked pool ---
-	CArray<CBullet*>		m_arrBullets;			// bullets pool
+	CLinkedPool<CBullet>	m_poolBullets;			// bullets pool
 	int						m_bulletsMeshIdx;		// idx mesh bullets
 
 	///--- room occluders ---

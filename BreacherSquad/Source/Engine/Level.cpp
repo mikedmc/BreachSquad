@@ -2335,12 +2335,12 @@ void CLevel::CleanupDeadObjects()
 	}
 
 	//check bullets
-	for ( int kk = m_arrBullets.Count() - 1; kk >= 0; kk-- )
+	for ( auto node : m_poolBullets )
 	{
-		if ( m_arrBullets[kk]->bPendingKill )
+		CBullet* bullet = &node->m_data;
+		if ( bullet->bPendingKill )
 		{
-			SAFE_DELETE( m_arrBullets[kk] );
-			m_arrBullets.Remove( kk );
+			m_poolBullets.Dismiss( node );
 		}
 	}
 }
@@ -4984,7 +4984,7 @@ void CLevel::Release()
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrAIevents );
 	m_arrActionTemplates.clear();
 	//release bullets
-	SAFE_DELETE_GROWABLE_ARRAY( m_arrBullets );
+	m_poolBullets.Release();
 	m_poolDoofers.Release();
 	m_poolPhysPts.Release();
 

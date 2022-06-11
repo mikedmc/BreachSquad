@@ -43,6 +43,9 @@ public:
 	CPointPhysComponent( bool bEnableBounce, Vec3 vAcceleration = g_Vec3Zero, int nCollFlags = K_PPC_COLLFLAG_ALL );
 	~CPointPhysComponent();
 
+	// Call it to reset internal data when reusing the point component
+	void				Reset();
+	// Call each frame to update
 	void				Update( VecProj& vPos, float dTime, CLevel & level ) override;
 	// Sets the gravity field (acceleration) for the current point
 	void				SetAccel( Vec3 vAcceleration );
