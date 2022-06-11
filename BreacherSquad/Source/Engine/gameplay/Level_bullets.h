@@ -141,6 +141,7 @@ public:
 class CBullet {
 public:
 	CPointPhysComponent*	c_pointPhys;		// point physics component
+
 public:
 	EActorClass			actorClass;				// shooter class
 	UINT32				ownerUID;				
@@ -174,8 +175,8 @@ public:
 	bool				bAnimated;				// Sets itself when initialized. If animation is looped then we consider it to be animated.
 	SprFrameId			fidLight;				// anim and frame for the light sprite
 
-	CBullet( CPointPhysComponent* pComPointPhys = nullptr );
-
+public:
+	CBullet();
 	~CBullet();
 
 	void Update( float dTime, CLevel & level );

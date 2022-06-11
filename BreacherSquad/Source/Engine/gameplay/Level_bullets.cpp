@@ -11,7 +11,7 @@ CBullet* CLevel::ShootBullet( CBulletTemplate * bulletTemplate, EActorClass acto
 		return nullptr;
 	}
 	//set bullet generic data
-	CBullet* bullet = new CBullet( new CPointPhysComponent(true) );
+	CBullet* bullet = new CBullet();
 	bullet->actorClass = actorClass;
 	bullet->ownerUID = nOwnerUID;
 	bullet->pArea = startArea;
@@ -397,14 +397,14 @@ int CLevel::KillBulletsOfType(int nBulletType, UINT32 dwOwnerUID)
 	return nRetCnt;
 }
 
-CBullet::CBullet( CPointPhysComponent* pComPointPhys ) :
+CBullet::CBullet() :
 	eType( K_LVL_BULLET_SHOTGUN ), fDamage( 1.0f ), fDamage_ini( 1.0f ), fDamageLossPPx( 0.0f ),
 	fLife( 1.0f ), fLife_ini( 1.0f ), actorClass( K_ACT_CLASS_PLAYER ), nSubstate( 0 ),
 	fMomentum( 0.0f ), nFlags( 0 ), fStunDuration( 0.0f ), ownerUID( 0 ), dwLastTargetUID( 0 ),
 	nArmorPiercingRating( 0 ), nExploTemplateHash( 0 ), fSelfDamageMultiplier( 1.0f ), fCriticalHitChance( 0.0f ),
 	bAnimated( false ), pArea( nullptr ), bPendingKill( false )
 {
-	c_pointPhys = pComPointPhys;
+	c_pointPhys = new CPointPhysComponent( false );
 }
 
 CBullet::~CBullet()

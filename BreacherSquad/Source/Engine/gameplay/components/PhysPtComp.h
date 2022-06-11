@@ -20,7 +20,7 @@ class CPointPhysComponent : public IBasePointPhysComponent
 {
 public:
 	CLevelArea*			pArea;								// Pointer to current area
-	bool				bFlagPhysicsEnabled;				// Set to enable physics (only with FlagCollision Enabled) - bounce, friction etc. false-stops on collision
+	bool				bFlagBounceEnabled;					// Set TRUE to enable bounce physics (only with FlagCollision Enabled) - bounce, friction etc. FALSE: stops on collision
 	int					nFlagsCollision;					// Collision checking flags
 
 	Vec3				accel;								// Forces that act on the point. Set Z to 0 to skip floor collision. Set XY to 0 to skip tiles/boxes collisions.
@@ -40,10 +40,16 @@ public:
 	float				fFrictionF;							// Floor friction
 
 public:
-	CPointPhysComponent( bool bPhysicsEnabled, Vec3 vAcceleration = g_Vec3Zero, int nCollFlags = K_PPC_COLLFLAG_ALL );
+	CPointPhysComponent( bool bEnableBounce, Vec3 vAcceleration = g_Vec3Zero, int nCollFlags = K_PPC_COLLFLAG_ALL );
 	~CPointPhysComponent();
 
 	void				Update( VecProj& vPos, float dTime, CLevel & level ) override;
+	// Sets the gravity field (acceleration) for the current point
+	void				SetAccel( Vec3 vAcceleration );
+	// Set to true for bouncing objects or false for points that stop on contact
+	void				SetBounceEnabled( bool bEnableBounce);
+	// Sets flags for collision (walls, objects, etc)
+	void				SetCollisionFlags( int nCollFlags );
 
 	void				SetSpeed( Vec3 vSpeed ) override;
 };

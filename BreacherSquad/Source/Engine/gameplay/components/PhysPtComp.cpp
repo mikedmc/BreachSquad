@@ -1,11 +1,11 @@
 #include "dxstdafx.h"
 #include "PhysPtComp.h"
 
-CPointPhysComponent::CPointPhysComponent( bool bPhysicsEnabled, Vec3 vAcceleration, int nCollFlags ):
+CPointPhysComponent::CPointPhysComponent( bool bEnableBounce, Vec3 vAcceleration, int nCollFlags ):
 	contactType( PCT_NONE ), bContacting( false ), bContactStarted( false ), bIsStatic( false ),
 	bIsStaticZ( false ), fBounceF( K_PPC_DEFAULT_FLOOR_BOUNCE ), fFrictionF( K_PPC_DEFAULT_FLOOR_FRICTION ),
 	bIsDead( false ), pArea( nullptr ),
-	nFlagsCollision( nCollFlags ), bFlagPhysicsEnabled( bPhysicsEnabled )
+	nFlagsCollision( nCollFlags ), bFlagBounceEnabled( bEnableBounce )
 {
 	accel = vAcceleration;
 
@@ -116,7 +116,7 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 			contactPos = Vec3( collisionPoint.x, collisionPoint.y, pos.z );
 			contactType = contactT;
 
-			if ( bFlagPhysicsEnabled )
+			if ( bFlagBounceEnabled )
 			{
 				float fDot = MUVec3Dot( &speed, &contactNormal );
 				Vec3 Vn = contactNormal * fDot;
@@ -152,7 +152,7 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 			// get the point back above the floor
 			pos.z = fFloorH - pos.z;
 
-			if ( bFlagPhysicsEnabled )
+			if ( bFlagBounceEnabled )
 			{
 				// make sure it always ricochets upwards
 				speed.z = fabs( speed.z * fBounceF );
@@ -205,6 +205,21 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 	}
 	// save final position and convert to projected value
 	vPos.Set( pos );
+}
+
+void CPointPhysComponent::SetAccel( Vec3 vAcceleration )
+{
+	accel = vAcceleration;
+}
+
+void CPointPhysComponent::SetBounceEnabled( bool bEnableBounce )
+{
+	bFlagBounceEnabled = bEnableBounce;
+}
+
+void CPointPhysComponent::SetCollisionFlags( int nCollFlags )
+{
+	nFlagsCollision = nCollFlags;
 }
 
 void CPointPhysComponent::SetSpeed( Vec3 vSpeed )
