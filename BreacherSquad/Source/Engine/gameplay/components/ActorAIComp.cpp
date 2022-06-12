@@ -85,6 +85,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 			if ( targetActor != nullptr )
 			{
 				AIsensor.fTargetLostTimer = 0.0f;
+				AIsensor.bTargetLOS = true;
 				//float enemyDst = MUVec2Len( &(targetActor->GetPosHeart() - act.GetPosHeart()) );
 				AIsensor.evtInternal.Set( K_AIEVT_SEE_ENEMY, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), 0.0f, 1.0f );
 				// set target pointer and increase ref only if different
@@ -99,7 +100,6 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					FREE_REF( AIsensor.pTargetedActor );
 					// get ref to new target
 					AIsensor.pTargetedActor = (CActor*)targetActor->GetRef();
-					AIsensor.bTargetLOS = true;
 				}
 				// enemies overlapping
 				/*
@@ -247,46 +247,78 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				}
 				
 				act.vAim = AIsensor.pTargetedActor->pos.xy - act.pos.xy;
-				// shooting and reloading
-				if ( AIsensor.WpnStatePrimary == CAISensorInfo::CAN_SHOOT )
-					AIcommands.eAttackCommand = K_ACT_ATTACK_SHOOTING;
-				else if ( AIsensor.WpnStatePrimary == CAISensorInfo::NEEDS_RELOAD )
-					AIcommands.eAttackCommand = K_ACT_ATTACK_RELOADING;
-				// movement
-				Vec2 vEnemyDir = AIsensor.pTargetedActor->GetPosHeart() - act.GetPosHeart();
-				float enemy_dist = MUVec2Len( &vEnemyDir );
-				MUVec2Norm( &vEnemyDir, &vEnemyDir );
 
-				bool bTooClose = false, bTooFar = false;
-				// tells us that we need to move to engage enemy
-				if ( mem.AIvarBool1 )
+				if ( AIsensor.bTargetLOS )
 				{
-					//must move a little closer to the center of the segment (far-close) to eliminate jitter (20% closer to the center of the segment)
-					bTooClose = ( enemy_dist < act._template.fAttackMin * 1.2f );
-					bTooFar = ( enemy_dist > act._template.fAttackMax * 0.8f );
-					//reset decision flag to false when position just right
-					if ( ( bTooClose == false ) && ( bTooFar == false ) )
+					AIsensor.SetGoTo( AIsensor.pTargetedActor->pos.xy );
+					// shooting and reloading
+					if ( AIsensor.WpnStatePrimary == CAISensorInfo::CAN_SHOOT )
+						AIcommands.eAttackCommand = K_ACT_ATTACK_SHOOTING;
+					else if ( AIsensor.WpnStatePrimary == CAISensorInfo::NEEDS_RELOAD )
+						AIcommands.eAttackCommand = K_ACT_ATTACK_RELOADING;
+					// movement	(replaces process goto because it must maintain distances)
+					Vec2 vEnemyDir = AIsensor.vGoTo - act.pos.xy;
+					float enemy_dist = MUVec2Len( &vEnemyDir );
+					MUVec2Norm( &vEnemyDir, &vEnemyDir );
+
+					bool bTooClose = false, bTooFar = false;
+					// tells us that we need to move to engage enemy
+					if ( mem.AIvarBool1 )
 					{
-						mem.AIvarBool1 = false;
+						//must move a little closer to the center of the segment (far-close) to eliminate jitter (20% closer to the center of the segment)
+						bTooClose = ( enemy_dist < act._template.fAttackMin * 1.2f );
+						bTooFar = ( enemy_dist > act._template.fAttackMax * 0.8f );
+						//reset decision flag to false when position just right
+						if ( ( bTooClose == false ) && ( bTooFar == false ) )
+						{
+							mem.AIvarBool1 = false;
+						}
+					}
+					else
+					{
+						//when true must decide if he has to move or not
+						mem.AIvarBool1 = ( ( enemy_dist > act._template.fAttackMax ) || ( enemy_dist < act._template.fAttackMin ) );
+					}
+
+					if ( bTooFar )
+					{
+						AIcommands.vMoveDir = vEnemyDir;
+						AIcommands.bThrust = true;
+						AIcommands.bRunning = true;
+					}
+					if ( bTooClose )
+					{
+						AIcommands.vMoveDir = -vEnemyDir;
+						AIcommands.bThrust = true;
+						AIcommands.bRunning = false;
 					}
 				}
-				else
+				else // no direct LOS
 				{
-					//when true must decide if he has to move or not
-					mem.AIvarBool1 = ( ( enemy_dist > act._template.fAttackMax ) || ( enemy_dist < act._template.fAttackMin ) );
-				}
-
-				if ( bTooFar )
-				{
-					AIcommands.vMoveDir = vEnemyDir;
-					AIcommands.bThrust = true;
+					AIcommands.eAttackCommand = K_ACT_ATTACK_IDLE;
+					if ( AIsensor.WpnStatePrimary == CAISensorInfo::NEEDS_RELOAD )
+						AIcommands.eAttackCommand = K_ACT_ATTACK_RELOADING;
+					// process walk
+					EGenericState st = ProcessGoToRequest( act );
+					// always run
 					AIcommands.bRunning = true;
-				}
-				if ( bTooClose )
-				{
-					AIcommands.vMoveDir = -vEnemyDir;
-					AIcommands.bThrust = true;
-					AIcommands.bRunning = false;
+					// recalculate destination?
+					bool bRecompute = ( st == K_STATE_NOTSET || st == K_STATE_FINISHED );
+					if ( AIsensor.arrGoToPoints.Count() == 0 )
+						bRecompute = true;
+					if ( MUVec2LenSq( &( AIsensor.pTargetedActor->pos.xy - AIsensor.vGoTo ) ) >= SQUARE(K_TILE_SIZE_F * 4.0f) )
+						bRecompute = true;
+					// find new path if we don't have one or if the target actor is far away from the vGoTo
+					if ( bRecompute == true ) {
+						AIsensor.SetGoTo( AIsensor.pTargetedActor->pos.xy );
+						LOG(L"ATTACK: recomputed path");
+						if ( false == SavePathInSensor( act, AIsensor.vGoTo, COL_MOVEMENT_BLOCK, false, COL_CLEARANCE0 | COL_CLEARANCE1, COL_CLEARANCE0 | COL_CLEARANCE1 ) ) {
+							// can't find a valid path, give up state
+							AIsensor.SetGoTo();
+							bBehaviorFinished = true;
+							break;
+						}
+					}
 				}
 
 			}
@@ -310,7 +342,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					//find new patrol position (area->GetRandomPosition(flags=floor))
 					RectXYWHi areabb = act.pArea->AABBbounds_TL;
 					int tries = 0;
-					bool bFound = false;
+					bool bFound = false; // did we find a valid destination?
 					Vec2i tlpos = { 0,0 };
 					while ( bFound == false && tries < 10 )
 					{
@@ -336,35 +368,12 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 						// Path is not in direct sight then do AStar
 						if ( level.Areas_IsBoxColliding( act.bbox_floor, AIsensor.vGoTo - act.pos.xy, true ) )
 						{
-							// astar should return solution in internal array for the level to smooth it into the actor
-							//int a_steps = level.m_astar.FindPath( nsTiles::ToTilePos( act.pos.xy ), tlpos, tempArrVec2i, ARRAY_SIZE(tempArrVec2i), true );
-							int a_steps = 0;
-							bool bFound = __Sim().m_astar.GetPath( act.pos.xy, AIsensor.vGoTo, tempArrVec2, ARRAY_SIZE( tempArrVec2 ), a_steps, COL_MOVEMENT_BLOCK, false, COL_CLEARANCE0 | COL_CLEARANCE1, COL_CLEARANCE0 | COL_CLEARANCE1 );
-
-							if ( bFound == false || a_steps == 0 ) 
+							if ( false == SavePathInSensor( act, AIsensor.vGoTo, COL_MOVEMENT_BLOCK, false, COL_CLEARANCE0 | COL_CLEARANCE1, COL_CLEARANCE0 | COL_CLEARANCE1 ) )
 							{
-								AIsensor.vGoTo = { 0.0f, 0.0f };
-							}
-							else 
-							{
-								_ASSERT( a_steps < AIsensor.arrGoToPoints.GetCapacity() );
-								// path is smoothed by astar class we just copy it
-								for ( int kk = 0; kk < a_steps; kk++ )
-								{
-									AIsensor.arrGoToPoints.m_pData[kk] = tempArrVec2[kk];
-								}
-								AIsensor.arrGoToPoints.nCount = a_steps;
-
-								/*
-								//OLD WAY: we have a path so smooth it with level collision functions
-								for ( int kk = 0; kk < a_steps; kk++ )
-								{
-									tempArrVec2[kk] = GetTileCenter( tempArrVec2i[kk] );
-								}
-								//int retpts = level.SmoothPath( tempArrVec2, a_steps, AIsensor.arrGoToPoints.m_pData, AIsensor.arrGoToPoints.GetCapacity() );
-								int retpts = level.SmoothPathEx( &act, tempArrVec2, a_steps, AIsensor.arrGoToPoints.m_pData, AIsensor.arrGoToPoints.GetCapacity() );
-								AIsensor.arrGoToPoints.nCount = retpts;
-								*/
+								// can't find a valid path, give up state
+								AIsensor.SetGoTo();
+								bBehaviorFinished = true;
+								break;
 							}
 						}
 
@@ -818,6 +827,9 @@ EAIBehaviorType CActorAIComponent::GetCurrentBehavior()
 
 void CActorAIComponent::OnActorBehaviorFinished( CActor& actor, EAIBehaviorType eOldBehavior )
 {
+	// clear path every time we change states?
+	AIsensor.SetGoTo();
+
 	switch ( eOldBehavior )
 	{
 		case AI_BEHAVIOR_HUMAN_SHIELD_ATTACK:
@@ -904,6 +916,26 @@ CAIEvent* CActorAIComponent::GetMostImportantAIEvent( CActor& act, EAIEventType 
 	return returnEvent;
 }
 
+bool CActorAIComponent::SavePathInSensor( CActor & act, const Vec2& end, unsigned char blockFlags, bool bGetClosestPointIfBlocked /*= true*/, unsigned char additionalCostFlags /*= 0*/, unsigned char additionalSmoothingCollisionFlags /*= 0 */ )
+{
+	int a_steps = 0;
+	bool bFoundPath = level.m_astar.GetPath( act.pos.xy, end, AIsensor.arrGoToPoints.m_pData, AIsensor.arrGoToPoints.GetCapacity(),
+		a_steps, blockFlags, false /*bGetClosestPointIfBlocked*/, additionalCostFlags, additionalSmoothingCollisionFlags );
+
+	if ( bFoundPath == false || a_steps == 0 )
+	{
+		AIsensor.SetGoTo();
+		return false;
+	}
+	else
+	{
+		AIsensor.SetGoTo( end );
+		// set capacity!
+		AIsensor.arrGoToPoints.nCount = a_steps;
+		return true;
+	}
+}
+
 void CActorAIComponent::SetAIState( CActor& actor, CAIState* pNewState )
 {
 	if ( (m_pAIcurrentState == pNewState) || (pNewState == nullptr) )
@@ -916,8 +948,9 @@ void CActorAIComponent::SetAIState( CActor& actor, CAIState* pNewState )
 	///2. sets the new behavior
 	AIsensor.m_bEnabled = true; //enable sensors on new state
 	m_pAIcurrentState = pNewState;
-	int newBehaviorIdx = -1; //defaults on no behavior
-							 //daca am stare not null si are behaviors il setez pe primul
+	//defaults on no behavior
+	int newBehaviorIdx = -1; 
+
 	if ( (m_pAIcurrentState != nullptr) && (m_pAIcurrentState->m_arrBehaviors.nCount > 0) )
 		newBehaviorIdx = 0;
 
@@ -931,7 +964,6 @@ void CActorAIComponent::SetAIState( CActor& actor, CAIState* pNewState )
 			newBehaviorIdx++;
 		}
 	} while ( bShortBehavior );
-
 }
 
 bool CActorAIComponent::SetAIState( CActor& actor, WCHAR * strStateName )
@@ -956,7 +988,7 @@ EGenericState CActorAIComponent::ProcessGoToRequest( CActor & act )
 	Vec2 vDest = ( AIsensor.arrGoToPoints.Count() > 0 ) ? AIsensor.arrGoToPoints[0] : AIsensor.vGoTo;
 	Vec2 vDestDir = vDest - act.pos.xy;
 
-	float fDest = MUVec2Len( &vDestDir );
+	//float fDest = MUVec2Len( &vDestDir );
 	// keep moving until next time we think to avoid interruptions
 	MUVec2Norm( &AIcommands.vMoveDir, &vDestDir );
 	AIcommands.bThrust = true;
@@ -973,7 +1005,7 @@ EGenericState CActorAIComponent::ProcessGoToRequest( CActor & act )
 		}
 		else
 		{
-			AIsensor.SetGoTo(Vec2(0.0f, 0.0f));
+			AIsensor.SetGoTo(); //reset
 			return K_STATE_FINISHED;
 		}
 	}
@@ -1354,7 +1386,7 @@ bool CActorAIComponent::SetActorAIBehaviorIdx( CActor& act, int nBehaviorIdx, bo
 			if ( cvc->eType == CVariant::K_ARGTYPE_STRING )
 			{
 				int ndcmd = GetListIndexByName( cvc->m_strArg.text, EActorDeathCommandNames, K_LVL_ACT_DEATHCMD_CNT );
-				//daca avem comanda de death o trimitem mai departe
+				// do we have a death command? forward it
 				if ( ndcmd >= 0 )
 					act.varAIparams.SetVarINT32( L"nDeathCommand", ndcmd );
 			}

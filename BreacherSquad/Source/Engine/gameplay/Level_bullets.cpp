@@ -88,7 +88,8 @@ void CLevel::ReleaseBulletType(int nBulletType, UINT32 nOwnerUID)
 
 void CLevel::UpdateBullets(float dTime)
 {
-	static _VERTEX_PNCT4T4 arrBulletsTris[K_LVL_BULLETS_MAX_CNT * 6];
+	const int MAX_BULLETS_ONSCREEN = 128;
+	static _VERTEX_PNCT4T4 arrBulletsTris[MAX_BULLETS_ONSCREEN * 6];
 	// builds a dynamic mesh for the bullets
 	m_bulletsMeshIdx = -1;
 	int nBulletsTrisCnt = 0;
@@ -292,6 +293,8 @@ void CLevel::UpdateBullets(float dTime)
 			//and release the bullet
 			bullet->bPendingKill = true;
 		}
+
+		_ASSERT( nBulletsTrisCnt < MAX_BULLETS_ONSCREEN );
 	}
 
 	if (nBulletsTrisCnt > 0)

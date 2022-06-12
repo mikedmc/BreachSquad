@@ -12,7 +12,7 @@ public:
 	public:
 		TYPE		m_data;
 	private:
-		friend class IteratorPtr;
+		friend struct IteratorPtr;
 		friend class CLinkedPool;
 
 		CLNode*		m_pPrev;		//don't mess with me

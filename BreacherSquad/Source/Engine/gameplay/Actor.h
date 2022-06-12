@@ -135,6 +135,8 @@ public:
 	// Returns the gun muzzle position in World coordinates.
 	// \param mountIndex - 0 for most weapons, 1 for second weapon in dual wielding stances
 	VecProj						GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ );
+	// Returns muzzle point for CURRENT weapon
+	VecProj						GetCurWeaponMuzzleWorld( int mountIndex = 0 );
 	// Equips a weapon by index in weapons component
 	void						EquipWeapon( EWpnSlot wpnSlot );
 	// sets graphics anim set

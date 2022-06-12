@@ -358,7 +358,8 @@ public:
 	CAISensorInfo();
 
 	void					Reset();
-	void					SetGoTo( Vec2 vToPos );		// sets the goto vector and clears the arrGoToPoints
+	// sets the goto vector and clears the arrGoToPoints (no param means reset)
+	void					SetGoTo( Vec2 vToPos = { 0.0f, 0.0f }, bool bResetPathPoints = true );
 };
 
 // Commands that get sent to the AIs

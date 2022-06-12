@@ -126,13 +126,13 @@ HRESULT CTTFontsManager::LoadFont(const WCHAR* strFontNameID, WCHAR* strFontFace
 	//tell windows we have a custom font here
 	AddFontResourceEx(strFontPath, FR_PRIVATE, 0);
 	// Initialize the font
-	if (FAILED(D3DXCreateFont(m_pDevice, nFontSize, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET,
+	if (FAILED(hr = D3DXCreateFont(m_pDevice, nFontSize, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET,
 		OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
 		strFontFace, &pFont->pFont)))
 	{
 		SAFE_DELETE(pFont);
 		LOG(L"TTF::LoadFont:Error: Failed creating chat ttf font! Chat will be disabled!");
-		return E_FAIL;
+		return hr;
 	}
 		
 	LOG(L"TTF::LoadFont [%s]: loaded OK.", strFontNameID);

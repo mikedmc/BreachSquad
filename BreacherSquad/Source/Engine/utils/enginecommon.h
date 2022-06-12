@@ -86,6 +86,7 @@ Vec2 GetDir6VecN( EDir6 eDir );
 
 #define DEG_TO_RAD(a) ((a / 360.0f) * DOUBLE_PI)
 #define RAD_TO_DEG(a) ((a / DOUBLE_PI) * 360.0f)
+#define SQUARE(a)		((a)*(a))
 
 template <class anyType>
 __inline void CLAMP(anyType &var, anyType min, anyType max)

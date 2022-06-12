@@ -273,6 +273,17 @@ VecProj CActor::GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 	return { muzzle_proj.x, muzzle_proj.y + Z_TO_H(_template.heartZ), _template.heartZ };
 }
 
+VecProj CActor::GetCurWeaponMuzzleWorld( int mountIndex /*= 0 */ )
+{
+	CWeapon* wpn = c_weapons->GetCurWeapon();
+	if ( wpn == nullptr )
+		return GetPosHeart3D();
+	bool bTwoHanded = c_weapons->GetCurWeapon()->_template.bTwoHanded;
+	//bool bDualWielding = weapon->_template.bDualWielding;
+
+	return GetWeaponMuzzleWorld( bTwoHanded, 0 );
+}
+
 void CActor::EquipWeapon( EWpnSlot wpnSlot )
 {
 	LOG( "Equipped slot: %d", wpnSlot );

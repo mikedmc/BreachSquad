@@ -2205,6 +2205,8 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 		//not in view rectangle
 		if ( !aabbvision.PointIn( enemy->GetPosHeart() ) )
 			continue;
+		//if ( !IsLineOfSight( sourceActor->GetCurWeaponMuzzleWorld().xy_proj, enemy->GetPosHeart(), sourceActor->pArea ) )
+			//continue;
 		if ( !IsLineOfSight( sourceActor->pos.xy, enemy->pos.xy, sourceActor->pArea ) )
 			continue;
 
@@ -5303,6 +5305,8 @@ void CLevel::GiveStrategicPoints( float fPoints, Vec2 * vPos )
 
 bool CLevel::IsLineOfSight( Vec2 pt_from, Vec2 pt_to, CLevelArea * pStartArea )
 {
+	//#TODO: de verificat daca pleaca direct din interiorul unei coliziuni
+
 	Vec2 collisionPoint, collisionNormal;
 	CTile* tl = SegmentTilesIntersectionEx( pt_from, pt_to, collisionPoint, collisionNormal, nullptr, pStartArea );
 

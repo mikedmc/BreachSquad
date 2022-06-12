@@ -2264,6 +2264,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			break;
 			case VK_F7:
 			{
+				/*
 				Vec2 tempArrVec2[128];
 				Vec2 vfrom = __Sim().m_arrActors[0]->pos.xy;
 				Vec2 vto = __Sim().m_camLevelToScr.ScreenToWorld( g_mouse.pos );
@@ -2275,6 +2276,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 
 				LONGLONG tmend = __PerfCounter().GetTime();
 				LOG(L"path duration: %f", __PerfCounter().GetPeriodInMS(tmstart, tmend));
+				*/
 			}
 			break;
 //#endif

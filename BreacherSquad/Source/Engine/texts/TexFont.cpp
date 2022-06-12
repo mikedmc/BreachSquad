@@ -286,7 +286,7 @@ int CTexFont::DrawStringClamped( CStringDesc *strDesc, int X, int Y, int maxW, U
 
 	int posy = Y + height;
 
-	int startPosX = posx; //face backup la poz de start
+	int startPosX = posx; //backup start pos
 
 	for ( int ii = 0; ii <= localLen; ii++ )
 	{
@@ -1126,7 +1126,6 @@ CTexFont* CTexFontsManager::operator[] ( const int fontIdx )
 ///--- system framework ---
 OPRESULT CTexFontsManager::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc )
 {
-	HRESULT hr = S_OK;
 	m_pDevice = pDevice;
 	m_texManager.OnCreateDevice( pDevice, pBBDesc);
 	return K_OP_OK;

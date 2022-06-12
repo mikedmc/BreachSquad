@@ -45,4 +45,8 @@ private:
 	void					OnActorBehaviorFinished( CActor& actor, EAIBehaviorType eOldBehavior );
 	// Finds closest valid AI event of typeFilter (if specified)
 	CAIEvent*				GetMostImportantAIEvent( CActor& act, EAIEventType eTypeFilter = K_AIEVT_ANY );
+	// Finds path from actor to destination point and saves it in AIsensorInfo
+	// /returns FALSE if path can't be found, resetting the internal AI path and vGoTo vector
+	// /returns TRUE if path was found and sets vGoTo and the internal AI path
+	bool					SavePathInSensor( CActor & act, const Vec2& end, unsigned char blockFlags, bool bGetClosestPointIfBlocked = true, unsigned char additionalCostFlags = 0, unsigned char additionalSmoothingCollisionFlags = 0 );
 };

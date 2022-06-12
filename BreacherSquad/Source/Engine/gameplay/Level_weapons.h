@@ -61,7 +61,7 @@ public:
 	float			fSoundRadius;			// how far can the weapon be heared (in pixels)
 
 	Vec2			vMountOffset;			// vector showing the offset from the mount to the gun rotating position
-	bool			bTwoHanded;			// can be used with a single hand
+	bool			bTwoHanded;				// can be used with a single hand
 	bool			bDualWielding;			// only for single handed weapons. if true it gets doubled in the second mount position.
 
 	//sound indices to play

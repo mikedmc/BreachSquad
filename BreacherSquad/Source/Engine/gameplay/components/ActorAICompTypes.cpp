@@ -113,8 +113,10 @@ void CAISensorInfo::Reset()
 	WpnStateSecondary = UNAVAILABLE;
 }
 
-void CAISensorInfo::SetGoTo( Vec2 vToPos )
+void CAISensorInfo::SetGoTo( Vec2 vToPos, bool bResetPathPoints )
 {
 	vGoTo = vToPos;
-	arrGoToPoints.Clear();
+
+	if(bResetPathPoints)
+		arrGoToPoints.Clear();
 }
