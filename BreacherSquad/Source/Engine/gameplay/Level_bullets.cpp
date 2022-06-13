@@ -270,12 +270,18 @@ void CLevel::UpdateBullets(float dTime)
 			}
 		}
 
+		if ( bullet->fLife <= 0.0f )
+		{
+			killbullet = true;
+		}
+
 		//release the bullet
 		if ( killbullet )
 		{
 			//some bullets explode at the end
 			if ( bullet->nExploTemplateHash != 0 )
 			{
+				int j = 10;
 				/*
 				Vec2 vExploDir(0.0f, 0.0f);
 				if (bullet->nFlags & K_LVL_BULLET_FLAG_DIRECTIONAL)

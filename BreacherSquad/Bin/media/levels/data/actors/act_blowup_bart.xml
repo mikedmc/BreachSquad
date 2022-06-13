@@ -1,20 +1,14 @@
 <?xml version="1.0"?>
 
 <ACTOR file="blowup_bart.bsx">
-	<ACTOR_DATA sAIstate="AWARE" sWeapon="WPN_SMG_MP5A3" class="ENEMY"
+	<ACTOR_DATA sAIstate="AWARE" sWeapon="WPN_INSTANT_EXPLO" class="ENEMY"
 				bboxMinX="-7" bboxMinY="-7" bboxMaxX="7" bboxMaxY="7" heightZ="64" heartZ="32"
 				sMaterial="FLESH" fLife="100.0" fArmor="0.0" 
 				fSpeedMove="50.0" fSpeedRun="120.0"
-				fSeeDist="320.0" fAttackMin="16.0" fAttackMax="64.0"
+				fSeeDist="320.0" fAttackMin="0.0" fAttackMax="32.0"
 				fStunWhenHitProb="0.5"
 				bCanCover="false" bCanInteract="false" />
-
 	<SKINS>
-	<!-- 
-	layerVisibilityMask number - each bit is 0 or 1 where least important bit is layerIdx 1
-	example: we have 6 layers and layer 1, 3 and 4 are visible in this skin => 1101 in binary is 13
-	Skins have quick access layer indexes to the hands layers as we need to be able to hide and show them depending on weapon loadout
-	-->
 		<SKIN name="default" layersVisibilityMask="63" handR_layerMask="16" handL_layerMask="8" />
 	</SKINS>
 

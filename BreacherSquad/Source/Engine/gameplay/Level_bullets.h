@@ -156,8 +156,8 @@ public:
 	float				fSelfDamageMultiplier;	// damage subtracted from bullet when it hits enemy (default 1.0f - loses all)
 	float				fCriticalHitChance;		// critical hit chance (0..1)
 
-	float				fLife;					//cat timp traieste
-	float				fLife_ini;				//initial fLife value (readonly please)
+	float				fLife;					// how much time it lives
+	float				fLife_ini;				// initial fLife value (readonly please)
 
 	float				fMomentum;				//cat procent din viteza imprima in viteza inamicului
 	float				fStunDuration;			//face stun?

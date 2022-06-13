@@ -214,11 +214,11 @@ void CSpriteActorComponent::SetAnimDirection( bool bReverseAnim, bool bRewindAni
 	sprite.SetAnimDirection( bReverseAnim, bRewindAnim );
 }
 
-Vec2 CSpriteActorComponent::GetMountPoint( bool bTwoHanded, int mountIndex /*= 0 */ )
+Vec2 CSpriteActorComponent::GetMountPoint( int nHands, int mountIndex /*= 0 */ )
 {
 	// decide flag for received settings
 	EHitPtFlag pointflag = K_HITPTFLAG_MOUNT_TWOHANDED;
-	if ( !bTwoHanded )
+	if ( nHands == 1 )
 	{
 		pointflag = (mountIndex == 0) ? K_HITPTFLAG_MOUNT_PRIMARY : K_HITPTFLAG_MOUNT_SECONDARY;
 	}

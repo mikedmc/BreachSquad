@@ -179,9 +179,9 @@ CActor* CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHa
 
 	// create a weapon and add it to the player's arsenal
 	//#TODO: create actor::AddWeapon and EquipWeapon that handles this plus AddWeaponTemplate
-	CWeaponTemplate* wpntMain = GetTemplateWeapon( L"WPN_SMG_MP5A3" );
+	CWeaponTemplate* wpntMain = GetTemplateWeapon( nact->_template.shWeaponDefault.text );
 	CWeaponTemplate* wpntAlt = nullptr;
-	if ( wpntMain->shAltFireTemplate.IsSet() )
+	if ( wpntMain != nullptr && wpntMain->shAltFireTemplate.IsSet() ) 
 		wpntAlt = GetTemplateWeapon( wpntMain->shAltFireTemplate.text );
 	//#TODO: weapons should have a type like primary, alt, melee, gear?
 	nact->Weapons()->AddWeapon( *nact, wpntMain, K_WPNSLOT_PRIMARY );
@@ -996,7 +996,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 	if ( !actnode.attribute( L"fSpeedRun" ).empty() ) { templ->fSpeedRun = actnode.attribute( L"fSpeedRun" ).as_float(); }
 	if ( !actnode.attribute( L"fSeeDist" ).empty() ) { templ->fDistSee = actnode.attribute( L"fSeeDist" ).as_float(); }
 	if ( !actnode.attribute( L"fAttackMin" ).empty() ) { templ->fAttackMin = actnode.attribute( L"fAttackMin" ).as_float(); }
-	if ( !actnode.attribute( L"fAttackMax" ).empty() ) { templ->fAttackMin = actnode.attribute( L"fAttackMax" ).as_float(); }
+	if ( !actnode.attribute( L"fAttackMax" ).empty() ) { templ->fAttackMax = actnode.attribute( L"fAttackMax" ).as_float(); }
 	//life
 	if ( !actnode.attribute( L"fLife" ).empty() ) templ->fLife = actnode.attribute( L"fLife" ).as_float();
 	if ( !actnode.attribute( L"fArmor" ).empty() ) templ->fArmor = actnode.attribute( L"fArmor" ).as_float();
@@ -2108,7 +2108,7 @@ void CLevel::SetActorWeaponPerks( CActor * pActor, CWeapon * pWeapon )
 
 void CLevel::SetActorDoT( CActor* act, CDamageOverTime::EDoTType eType, float fDuration, float fDamagePerSec, EActorClass eExcludedClass, EActorClass eFilterClass, DWORD dwOwnerUID )
 {
-	if ( act == null )
+	if ( act == nullptr )
 		return;
 	if ( ( eFilterClass > K_ACT_CLASS_ANY ) && ( act->_template.actorClass != eFilterClass ) )
 		return;
@@ -2133,7 +2133,7 @@ void CLevel::SetActorDoT( CActor* act, CDamageOverTime::EDoTType eType, float fD
 		//special statistics
 		if ( ( eType == CDamageOverTime::K_LVL_DoT_FIRE ) && ( act->_template.actorClass >= K_ACT_CLASS_ENEMY ) )
 		{
-			if ( ( pPlayerOwner != null ) && ( !IsNetworkPlayer( pPlayerOwner ) ) )
+			if ( ( pPlayerOwner != nullptr ) && ( !IsNetworkPlayer( pPlayerOwner ) ) )
 				App_IncreaseGamestat( K_MEMID_GAMESTATS_ENEMIES_SET_ON_FIRE );
 		}
 	}

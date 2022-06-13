@@ -251,11 +251,6 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				if ( AIsensor.bTargetLOS )
 				{
 					AIsensor.SetGoTo( AIsensor.pTargetedActor->pos.xy );
-					// shooting and reloading
-					if ( AIsensor.WpnStatePrimary == CAISensorInfo::CAN_SHOOT )
-						AIcommands.eAttackCommand = K_ACT_ATTACK_SHOOTING;
-					else if ( AIsensor.WpnStatePrimary == CAISensorInfo::NEEDS_RELOAD )
-						AIcommands.eAttackCommand = K_ACT_ATTACK_RELOADING;
 					// movement	(replaces process goto because it must maintain distances)
 					Vec2 vEnemyDir = AIsensor.vGoTo - act.pos.xy;
 					float enemy_dist = MUVec2Len( &vEnemyDir );
@@ -291,6 +286,15 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 						AIcommands.vMoveDir = -vEnemyDir;
 						AIcommands.bThrust = true;
 						AIcommands.bRunning = false;
+					}
+
+					// shooting and reloading
+					if ( AIsensor.WpnStatePrimary == CAISensorInfo::NEEDS_RELOAD )
+						AIcommands.eAttackCommand = K_ACT_ATTACK_RELOADING;
+					else if ( AIsensor.WpnStatePrimary == CAISensorInfo::CAN_SHOOT )
+					{
+						if(!bTooClose && !bTooFar)
+							AIcommands.eAttackCommand = K_ACT_ATTACK_SHOOTING;
 					}
 				}
 				else // no direct LOS

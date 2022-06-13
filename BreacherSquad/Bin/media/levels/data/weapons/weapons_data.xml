@@ -45,7 +45,7 @@ fBulletCriticalChance="0.0" - values between 0.0 and 1.0 - chance for a bullet t
 
   <WeaponTemplates>
 
-    <WPN_SMG_MP5A3 file="wpn_mk18.bsx" sHUDanimName="WEAPON_SMG_MP5A3" fSpeedPenaltyPercent="0.0" twoHanded="true" dualWielding="false" mountOffX="0" mountOffY="0" altFire="WPN_SUBMACHINE_STEADY"
+    <WPN_SMG_MP5A3 file="wpn_mk18.bsx" sHUDanimName="WEAPON_SMG_MP5A3" fSpeedPenaltyPercent="0.0" hands="2" dualWielding="false" mountOffX="0" mountOffY="0" altFire="WPN_SUBMACHINE_STEADY"
 				fCooldownT="0.2"
 				animShoot="S_MK18" animReload="R_MK18"
 				bBulletChamber="true" fShooterSpeedSlowingPercent="0.2" fMuzzleLightSize="1.0" sMuzzleFlashAnim="MUZZLE_SMG1"
@@ -56,9 +56,9 @@ fBulletCriticalChance="0.0" - values between 0.0 and 1.0 - chance for a bullet t
 				fSoundRadius="240.0" sSndShoot="GUN_MP5_01" sSndShoot2="GUN_MP5_02" sSndReload="RELOAD_TACTICAL" sSndReload2="RELOAD_EMERGENCY" sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02"
 				sBulletType="BULLET_TRACER1" nBulletsPerShot="1" nBurstSize="0" nArmorPiercingRating="1"
 				fBulletDamage="20.0" fBulletDamageLossPPx="0.0" fBulletLife="0.25" fBulletMomentum="0.02" fBulletCriticalChance="0.0" fBulletStunDuration="0.025" fBulletSpeed="600.0" bBulletIgnoreArmor="false" bBulletIgnoreCover="false" bBulletDieOnImpact="true"
-	  />
+				/>
 
-    <WPN_SUBMACHINE_STEADY file="wpn_mk18.bsx" sHUDanimNameIcon="WPNALT_AIMED" twoHanded="true" dualWielding="false" mountOffX="3" mountOffY="-5"
+    <WPN_SUBMACHINE_STEADY file="wpn_mk18.bsx" sHUDanimNameIcon="WPNALT_AIMED" hands="2" dualWielding="false" mountOffX="3" mountOffY="-5"
 				fChargeUpT="1.0" fWindDownT="0.5" fCooldownT="8.0"
 				bCanResetFireRate="false"
 				animShoot="S_MK18" animReload="R_MK18"
@@ -66,7 +66,16 @@ fBulletCriticalChance="0.0" - values between 0.0 and 1.0 - chance for a bullet t
 				sSndShoot="GUN_MP5_01" sSndReload="RELOAD_TACTICAL"  sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02"
 				bCanShootFromCrouch="true" bCanShootFromCover="false" bCanShootFromAir="false" nDropShellFrame="0" bUsesMainWeaponAmmo="true"
 				sBulletType="BULLET_TRACER_AIMED_SHOT" nBulletsPerShot="1" fBulletDamage="150.0" nArmorPiercingRating="5" fBulletDamageLossPPx="0.0" fBulletLife="0.3" fBulletMomentum="0.5" fBulletCriticalChance="0.0" fBulletStunDuration="0.05" fBulletSpeed="1000.0" bBulletIgnoreArmor="false" bBulletIgnoreCover="false" bBulletDieOnImpact="true" fSoundRadius="240.0" 
-    />
+				/>
+
+    <WPN_INSTANT_EXPLO fSpeedPenaltyPercent="0.0" hands="0" dualWielding="false" mountOffX="0" mountOffY="0" 
+				fCooldownT="0.0"
+				nClipSize="-1" nReloadUnitSize="1" fReloadTimePerUnit="1.0"
+				bCanResetFireRate="true"
+				bCanShootFromCrouch="true" bCanShootFromCover="true" nDropShellFrame="-1"
+				sBulletType="BULLET_INVISIBLE" nBulletsPerShot="1" fBulletDamage="1.0" fBulletLife="0.01" fBulletSpeed="10.0" sBulletExploTemplate="EXPLO_BLOWUP_VEST"
+				/>
+
 
   </WeaponTemplates>
 

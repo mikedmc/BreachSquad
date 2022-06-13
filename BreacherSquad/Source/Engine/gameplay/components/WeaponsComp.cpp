@@ -70,12 +70,13 @@ void CWeaponsComponent::Paint( CActor& act, ETexChannel eChannel /*= K_TEXCHAN_C
 	if ( !bVisible )
 		return;
 	CWeapon* wpn = GetCurWeapon();
-	if ( wpn == nullptr || wpn->status == K_WPN_STATUS_UNKNOWN )
+	// if weapon is null or has no animation or is not initialized then don't paint it
+	if ( wpn == nullptr || wpn->status == K_WPN_STATUS_UNKNOWN || wpn->_template.animIdx_shoot < 0 )
 		return;
 
 	float fang = UTMath::GetVectorAngle( Vec3XY(vAim) );
 	//#TODO: add support for dual yelding weapons
-	VecProj vpMount = act.GetWeaponMountWorld( wpn->_template.bTwoHanded, 0 );
+	VecProj vpMount = act.GetWeaponMountWorld( wpn->_template.nHands, 0 );
 	// weapons need flipping when animation gets flipped to the left if we want to keep the unified angle of rotation
 	sprite.scale.y = (act.GetVisualFlipDirX() < 0) ? -1.0f : 1.0f;
 	sprite.rotation = -fang;
@@ -117,12 +118,21 @@ const CWeapon* CWeaponsComponent::Equip( EWpnSlot slot )
 	}
 
 	bVisible = true;
-	sprite.SetAnim( weapon->_template.animIdx_shoot );
-	sprite.Stop();
-	// save/init muzzle point (frame 0 from shooting animation)
-	Vec3i ptval;
-	pSprLib->GetAFrameHitPointFlag( weapon->_template.animIdx_shoot, 0, 0, K_HITPTFLAG_MUZZLE, &ptval );
-	vMuzzleVec.x = (float)ptval.x; vMuzzleVec.y = (float)ptval.y;
+	// do we have an animation?
+	if ( weapon->_template.animIdx_shoot >= 0 ) 
+	{
+		sprite.SetAnim( weapon->_template.animIdx_shoot );
+		sprite.Stop();
+		// save/init muzzle point (frame 0 from shooting animation)
+		Vec3i ptval;
+		pSprLib->GetAFrameHitPointFlag( weapon->_template.animIdx_shoot, 0, 0, K_HITPTFLAG_MUZZLE, &ptval );
+		vMuzzleVec.x = ( float ) ptval.x; vMuzzleVec.y = ( float ) ptval.y;
+	}
+	else 
+	{
+		bVisible = false;
+		vMuzzleVec = { 0.0f, 0.0f };
+	}
 
 	return weapon;
 }

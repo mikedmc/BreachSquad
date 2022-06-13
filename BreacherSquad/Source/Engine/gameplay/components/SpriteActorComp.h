@@ -76,7 +76,7 @@ public:
 	// sets the playback animation direction for current animation
 	void						SetAnimDirection( bool bReverseAnim, bool bRewindAnim = false );
 	// Returns mount position for weapons in local projected space for current EAngle
-	Vec2						GetMountPoint( bool bTwoHanded, int mountIndex );
+	Vec2						GetMountPoint( int nHands, int mountIndex );
 	// Returns current frame event from sprite. Only supports one event per frame atm, update if needed.
 	EAnimEvent					GetAnimFrameEvent();
 };

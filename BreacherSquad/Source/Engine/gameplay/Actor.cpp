@@ -242,10 +242,10 @@ void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 	}
 }
 
-VecProj CActor::GetWeaponMountWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
+VecProj CActor::GetWeaponMountWorld( int nHands, int mountIndex /*= 0 */ )
 {
 	// get mount position in screen space (from editor)
-	Vec2 v_mount = c_graphics->GetMountPoint( bTwoHanded, mountIndex );
+	Vec2 v_mount = c_graphics->GetMountPoint( nHands, mountIndex );
 	// add weapon mount offset
 	Vec2 v_wpn_off = c_weapons->GetCurWeapon()->_template.vMountOffset;
 	v_wpn_off.x *= (float)c_graphics->GetFlipDirX();
@@ -256,11 +256,11 @@ VecProj CActor::GetWeaponMountWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
 	return vpRet;
 }
 
-VecProj CActor::GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ )
+VecProj CActor::GetWeaponMuzzleWorld( int nHands, int mountIndex /*= 0 */ )
 {
 	// get mount position in screen space (from editor)
 	Vec2 v_muzzle_vec = c_weapons->GetWeaponMuzzlePoint();
-	VecProj vp_mount = GetWeaponMountWorld( bTwoHanded, mountIndex );
+	VecProj vp_mount = GetWeaponMountWorld( nHands, mountIndex );
 	// if animations are flipped we need to also flip the weapon vectors
 	v_muzzle_vec.y *= (float)c_graphics->GetFlipDirX();
 	// rotate weapon muzzle vector and add it to the projected position of the mount
@@ -278,10 +278,10 @@ VecProj CActor::GetCurWeaponMuzzleWorld( int mountIndex /*= 0 */ )
 	CWeapon* wpn = c_weapons->GetCurWeapon();
 	if ( wpn == nullptr )
 		return GetPosHeart3D();
-	bool bTwoHanded = c_weapons->GetCurWeapon()->_template.bTwoHanded;
+	int nHands = c_weapons->GetCurWeapon()->_template.nHands;
 	//bool bDualWielding = weapon->_template.bDualWielding;
 
-	return GetWeaponMuzzleWorld( bTwoHanded, 0 );
+	return GetWeaponMuzzleWorld( nHands, 0 );
 }
 
 void CActor::EquipWeapon( EWpnSlot wpnSlot )
@@ -291,9 +291,9 @@ void CActor::EquipWeapon( EWpnSlot wpnSlot )
 	// hide hands corresponding to current weapon mode
 	// it always does the full thing even if already on the same weapon
 	//#TODO: ar trebui facuta o functie separata care sa ia in considerare si behaviour curent daca ascunde arme sau nu?
-	if ( wpn == nullptr || wpn->status == K_WPN_STATUS_UNKNOWN)
+	if ( wpn == nullptr || wpn->status == K_WPN_STATUS_UNKNOWN || wpn->_template.nHands <= 0)
 		c_graphics->SetSkinFlags( *this, true, true );
-	else if ( wpn->_template.bTwoHanded == true || wpn->_template.bDualWielding == true )
+	else if ( wpn->_template.nHands == 2 || wpn->_template.bDualWielding == true )
 		c_graphics->SetSkinFlags( *this, false, false );
 	else
 		c_graphics->SetSkinFlags( *this, false, true );
@@ -1031,14 +1031,14 @@ bool CActor::CheckShoot( CLevel& level )
 	if ( weapon->status != K_WPN_STATUS_JUST_SHOT )
 		return false;
 
-	bool bTwoHanded = weapon->_template.bTwoHanded;
+	bool nHands = weapon->_template.nHands;
 	bool bDualWielding = weapon->_template.bDualWielding;
 
 	CActor* shooter = weapon->pOwner;
 	Vec3 vFinalDir;
 	MUVec3Norm( &vFinalDir, &c_weapons->GetWeaponAimVec() );
 	//#TODO: add support for dual wielding
-	VecProj vShootPos = shooter->GetWeaponMuzzleWorld( bTwoHanded, 0 );
+	VecProj vShootPos = shooter->GetWeaponMuzzleWorld( nHands, 0 );
 
 	// checks if muzzle is inside the level, outside of collisions and walls
 	//#TODO: poate poate sa verifice direct in pathfinding map

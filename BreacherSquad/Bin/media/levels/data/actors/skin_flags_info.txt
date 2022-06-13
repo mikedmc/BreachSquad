@@ -1,0 +1,6 @@
+layerVisibilityMask number - each bit is 0 or 1 where least important bit is layerIdx 1
+example: we have 6 layers and layer 1, 3 and 4 are visible in this skin => 1101 in binary is 13
+!layerVisibilityMask should be specified with hands visible!
+Skins have quick access layer indexes to the hands layers as we need to be able to hide and show them depending on weapon loadout
+handR_layerMask="16" handL_layerMask="8" specify the layer bit for each hand where handR is the main hand, always on the right side of the body. 
+handL is the secondary hand hidden when using 2 handed weapons or dual wielding

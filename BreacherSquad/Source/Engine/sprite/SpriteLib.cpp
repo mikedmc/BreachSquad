@@ -436,6 +436,7 @@ bool CSpriteLib::GetAFrameHitPoint( int animIdx, int frameIdx, int pointIdx, Vec
 
 bool CSpriteLib::GetAFrameHitPointFlag( int animIdx, int frameIdx, int pointIdx, DWORD flagFilter, Vec3i *outvar )
 {
+	_ASSERT(animIdx >= 0 && frameIdx >= 0 && L"GetAFrameHitPointFlag asimIdx or frameIdx are wrong!");
 	if ( outvar == nullptr )
 	{
 		ErrorBox( K_ERR_DEBUGOUT, L"GetAframeHitPointFlag outvar param is NULL!" );

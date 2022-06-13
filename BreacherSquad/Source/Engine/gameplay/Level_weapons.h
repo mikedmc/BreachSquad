@@ -58,11 +58,11 @@ public:
 
 	float			fMuzzleLightSize;				// size of lighting effect when shooting
 	bool			bHasLaserSight;			
-	float			fSoundRadius;			// how far can the weapon be heared (in pixels)
+	float			fSoundRadius;					// how far can the weapon be heared (in pixels)
 
-	Vec2			vMountOffset;			// vector showing the offset from the mount to the gun rotating position
-	bool			bTwoHanded;				// can be used with a single hand
-	bool			bDualWielding;			// only for single handed weapons. if true it gets doubled in the second mount position.
+	Vec2			vMountOffset;					// vector showing the offset from the mount to the gun rotating position
+	int				nHands;							// number of hands occupied by the weapon
+	bool			bDualWielding;					// only for single handed weapons. if true it gets doubled in the second mount position.
 
 	//sound indices to play
 	int		sndidxShoot, sndidxReload, sndidxEmpty;
@@ -85,7 +85,7 @@ public:
 		nHUD_AnimIdx(-1), nHUD_AnimIdxALT(-1), nMuzzleFlashAnim(-1), animIdx_shoot(-1), animIdx_reload(-1),
 		sndActorVerse(K_LVL_ACT_VERSE_EMPTY)
 	{
-		bTwoHanded = true;
+		nHands = 2;
 		bDualWielding = false;
 		vMountOffset = Vec2( 0.0f, 0.0f );
 	}

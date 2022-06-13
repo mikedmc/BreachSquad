@@ -317,7 +317,8 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 	int m_libidxWeapons;
 	WCHAR wcsPath[ MAX_PATH ];
 	WCHAR Path[ MAX_PATH ];
-	swprintf_s( wcsPath, MAX_PATH, L"media/levels/data/weapons/%s", doc.root().child( L"WEAPONS" ).attribute( L"file" ).value());
+	// loads all weapon files into a library
+	swprintf_s( wcsPath, MAX_PATH, L"media/levels/data/weapons/%s", doc.root().child( L"WEAPONS" ).attribute( L"file" ).value() );
 	FileManager::GetMediaPath( wcsPath, Path );
 	V_OP_RET( m_sprActors.AddSprites( Path, m_libidxWeapons, K_LIBNICK_WEAPONS ) );
 
@@ -393,7 +394,7 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		//#TODO: type of weapon should be string
 		//if (!bnode.attribute(L"nType").empty())
 //			templ->eType = (EWeaponType)bnode.attribute(L"nType").as_int();
-		templ->bTwoHanded = bnode.attribute( L"twoHanded" ).as_bool();
+		templ->nHands = bnode.attribute( L"hands" ).as_int();
 		templ->bDualWielding = bnode.attribute( L"dualWielding" ).as_bool();
 		templ->vMountOffset.x = bnode.attribute( L"mountOffX" ).as_int();
 		templ->vMountOffset.y = bnode.attribute( L"mountOffY" ).as_int();

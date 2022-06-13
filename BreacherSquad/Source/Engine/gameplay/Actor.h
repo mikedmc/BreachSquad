@@ -131,10 +131,10 @@ public:
 	inline int					GetVisualFlipDirX() { return c_graphics->GetFlipDirX(); }
 	// Returns the gun mount position. bDualHanded tells if we are looking for the dual handed mount or single handed mount.
 	// mountIndex is usually used when looking for the position of single handed weapons in dualWield mode (hand on the left)
-	VecProj						GetWeaponMountWorld( bool bTwoHanded, int mountIndex = 0 );
+	VecProj						GetWeaponMountWorld( int nHands, int mountIndex = 0 );
 	// Returns the gun muzzle position in World coordinates.
 	// \param mountIndex - 0 for most weapons, 1 for second weapon in dual wielding stances
-	VecProj						GetWeaponMuzzleWorld( bool bTwoHanded, int mountIndex /*= 0 */ );
+	VecProj						GetWeaponMuzzleWorld( int nHands, int mountIndex /*= 0 */ );
 	// Returns muzzle point for CURRENT weapon
 	VecProj						GetCurWeaponMuzzleWorld( int mountIndex = 0 );
 	// Equips a weapon by index in weapons component
