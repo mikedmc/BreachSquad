@@ -798,7 +798,7 @@ void CLevel::UpdateDoofers(float dTime)
 	}
 }
 
-void CLevel::PaintDoofers()
+void CLevel::PaintDoofers( eLVLRenderPass pass )
 {
 	m_pSprite->SetTransform(&g_matIdentity);
 	Mat mattrans;

@@ -19,7 +19,7 @@
 #define K_LVL_BULLET_FLAG_NO_IMPACT_PARTICLES 32
 //daca poate sa sparga inamicul in bucati
 #define K_LVL_BULLET_FLAG_CAN_SPLAT 64
-//daca explozia finala este directionala
+// if bullet is directional --- they are all directional... could disappear
 #define K_LVL_BULLET_FLAG_DIRECTIONAL 128
 //bullet isn't (classic) bullet so we don't count it in accuracy computation. It differentiates between grenades, melee and standard bullets
 #define K_LVL_BULLET_FLAG_NOT_BALLISTIC 256

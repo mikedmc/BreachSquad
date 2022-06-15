@@ -84,6 +84,8 @@ enum eLVLRenderPass {
 	// renders all lights in a single surface (with shadows)
 	K_LVL_RP_LIGHTS,
 	// some elements need shadows to be painted (some bullets, props, actors)
+	// used more as a parameter for the rendering functions like paintBullets and not as a separate step/pass
+	// might go away in the final version
 	K_LVL_RP_SHADOWS,
 
 	K_LVL_RP_COUNT

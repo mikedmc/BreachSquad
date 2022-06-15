@@ -281,19 +281,14 @@ void CLevel::UpdateBullets(float dTime)
 			//some bullets explode at the end
 			if ( bullet->nExploTemplateHash != 0 )
 			{
-				int j = 10;
+				Vec2 vExploDir = bullet->c_pointPhys->speed; 
+				Vec2 vExploPos = bullet->pos.xy;
 				/*
-				Vec2 vExploDir(0.0f, 0.0f);
-				if (bullet->nFlags & K_LVL_BULLET_FLAG_DIRECTIONAL)
-				{
-					vExploDir = bullet->physPt->m_data.speed;
-				}
-				Vec2 vExploPos = bullet->physPt->m_data.pos;
 				if (bullet->physPt->m_data.bContacting)
 					vExploPos += bullet->physPt->m_data.contactNormal * 2.0f;
+					*/
 				//now add explo
-				AddProp_Explo(bullet->nExploTemplateHash, vExploPos, bullet->ownerUID, bullet->actorClass, vExploDir);
-				*/
+				//AddDoofer_Explo(bullet->nExploTemplateHash, vExploPos, bullet->ownerUID, bullet->actorClass, vExploDir);
 			}
 
 			//and release the bullet

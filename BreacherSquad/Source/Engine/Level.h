@@ -221,7 +221,6 @@ public:
 	///--- room occluders ---
 	int						m_fogofwarMeshIdx;		//idx mesh occluders
 
-
 	///--- BULLETS ---
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.
 	CBullet*				ShootBullet(CBulletTemplate * bulletTemplate, EActorClass actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir );
@@ -241,7 +240,7 @@ public:
 	// Adds a generic prop (physical particle)
 	// \param nSubType - secondary type of the added Prop, handled differently on every prop
 	void					AddDoofer(EDooferType type, Vec2 pos, Vec2 * speed, Vec2 * accel, int nSubType = 0);
-	//adauga prop - o lumina provizorie (gunshots, etc)
+	// ads temp light doofer (dies after a while, for gunshots explosions and such)
 	void					AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float fFadeTime, DWORD color, float fScale = 1.0f);
 	// \brief helper fn: adds an explosion (logic and visual)
 	// \param vDir - for directional explosions like breaching charges
@@ -250,7 +249,7 @@ public:
 	// Updates all doofers
 	void					UpdateDoofers(float dTime);
 	// Paints all doofers
-	void					PaintDoofers();	  
+	void					PaintDoofers( eLVLRenderPass pass );
 	///--- efecte speciale ---
 	void					GenerateEffect(ELVLEffectType nEffectType, Vec2 pos, float fSize, DWORD color = 0xffffffff);
 	void					GenerateEffect(CStringHash sEffectName, Vec2 pos, float fSize, DWORD color = 0xffffffff);

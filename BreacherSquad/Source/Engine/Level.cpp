@@ -4118,15 +4118,24 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 		break;
 	}
 
+	/// paint floors and vertical walls
 	m_pDevice->SetTexture( 0, pTexToUse->pTexture );
-	// paint floors and vertical walls
-
 	Areas_PaintLayer( K_AL_FLOOR );
+	/// vertical walls
 	Areas_PaintLayer( K_AL_WALLS );
 
-	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+	/// SHADOWS - blends wall shadows into the color map so it won't come over the players heads
+	if ( ePass == K_LVL_RP_COLORS )
+	{
+		scTexture* pShadowsTex = m_sprLights.GetTextureByAnim( ANM_LIGHTS_SPR_SHADOWS, 0, 0 );
+		if ( pShadowsTex )
+			m_pDevice->SetTexture( 0, pShadowsTex->pTex );
 
-	/// BEGIN SPRITES PAINTER
+		Areas_PaintLayer( K_AL_WALLSHADOWS );
+	}
+
+	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+	///--- BEGIN SPRITES PAINTER ---
 	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName( L"VS_SPRITES2D" );
 	if ( pSprVS )
 		__Painter().Begin( pSprVS, matView, *matProj );
@@ -4350,12 +4359,14 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	///----------------------------------------------------------------------------------
 	/// SHADOWS
 	///----------------------------------------------------------------------------------
+	/*
 	scTexture* pShadowsTex = m_sprLights.GetTextureByAnim( ANM_LIGHTS_SPR_SHADOWS, 0, 0 );
 	if ( pShadowsTex )
 		m_pDevice->SetTexture( 0, pShadowsTex->pTex );
 	//#HINT: UpdateVisibility is optional as it was done in the previous colors render pass
 	//#TODO: should be called only once on update as it will control the activation of areas
 	Areas_PaintLayer( K_AL_WALLSHADOWS );
+	*/
 
 	///----------------------------------------------------------------------------------
 	/// LIGHTS
