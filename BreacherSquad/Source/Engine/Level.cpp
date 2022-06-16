@@ -402,7 +402,7 @@ void CLevel::UpdateDirtyRects()
 					if ( ( tl->flags & K_TILEFLAG_WALKABLE ) == 0 )
 					{
 						// clear flags
-						FLAGOP_CLEAR( tl->flags, K_TILEFLAG_HASWALL_MASK );
+						FLAGOP_CLEAR( tl->flags, K_TILEFLAG_HASWALL_MASK | K_TILEFLAG_WALLENDING_MASK );
 
 						if ( ( tlL ) && ( FLAG_ANY( tlL->flags, K_TILEFLAG_WALKABLE ) ) )
 						{
@@ -422,9 +422,9 @@ void CLevel::UpdateDirtyRects()
 						}
 					}
 					else
-					{	 
+					{
 						///--- process walkable flags ---
-						// corners don't matter for now
+						// corners don't matter for now, we just check immediate neighbours URDL
 						bool bFloorBorder = false;
 						if ( ( tlL ) && ( ( tlL->flags & K_TILEFLAG_WALKABLE ) == 0 ) )
 							bFloorBorder = true;
@@ -440,7 +440,15 @@ void CLevel::UpdateDirtyRects()
 							m_astar.SetNodeFlags( xx, yy, COL_CLEARANCE0 );
 						}
 					}
-
+					// find wall endings
+					if ( FLAG_ANY( tl->flags, K_TILEFLAG_WALL ) )
+					{
+						// check neighbours so we set the wall ending flags
+						if ( ( tlL ) && ( FLAG_NONE( tlL->flags, K_TILEFLAG_WALL ) ) )
+							tl->flags |= K_TILEFLAG_WALLENDING_L;
+						if ( ( tlR ) && ( FLAG_NONE( tlR->flags, K_TILEFLAG_WALL ) ) )
+							tl->flags |= K_TILEFLAG_WALLENDING_R;
+					}
 
 					///--- compute wall shadows
 					// it can only receive if it's a floor or a wall but not a ceiling on that tile
@@ -487,6 +495,26 @@ void CLevel::UpdateDirtyRects()
 						else if ( ( nReceiverH == 2 ) && ( nCasterH > 2 ) )
 						{
 							tl->nShadowFrame = 3; //top of wall shadowed
+						}
+					}
+
+					///--- compute wall ending shadows ---
+					//#TODO: doesn't support right wall endings and both wall endings on already shadowed walls
+					if ( tl->nShadowFrame < 0 )
+					{
+						UINT32 wallends = tl->flags & K_TILEFLAG_WALLENDING_MASK;
+						if ( FLAG_ALL( wallends, K_TILEFLAG_WALLENDING_L | K_TILEFLAG_WALLENDING_R ) )
+						{
+							//both sides thin wall
+							tl->nShadowFrame = 6;
+						}
+						else if ( wallends == K_TILEFLAG_WALLENDING_L )
+						{
+							tl->nShadowFrame = 5;
+						}
+						else if ( wallends == K_TILEFLAG_WALLENDING_R )
+						{
+							tl->nShadowFrame = 4;
 						}
 					}
 				}
@@ -4359,14 +4387,19 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	///----------------------------------------------------------------------------------
 	/// SHADOWS
 	///----------------------------------------------------------------------------------
-	/*
-	scTexture* pShadowsTex = m_sprLights.GetTextureByAnim( ANM_LIGHTS_SPR_SHADOWS, 0, 0 );
-	if ( pShadowsTex )
-		m_pDevice->SetTexture( 0, pShadowsTex->pTex );
-	//#HINT: UpdateVisibility is optional as it was done in the previous colors render pass
-	//#TODO: should be called only once on update as it will control the activation of areas
-	Areas_PaintLayer( K_AL_WALLSHADOWS );
-	*/
+	//scTexture* pShadowsTex = m_sprLights.GetTextureByAnim( ANM_LIGHTS_SPR_SHADOWS, 0, 0 );
+	//if ( pShadowsTex )
+		//m_pDevice->SetTexture( 0, pShadowsTex->pTex );
+	/// actor shadows
+	for ( int kk = 0; kk < m_visibleList.arrSortedItems.nCount; kk++ )
+	{
+		CVisibleSortable* vis = &m_visibleList.arrSortedItems.m_pData[kk];
+		if ( vis->eType != K_VST_ACTOR )
+			continue;
+		CActor* act = static_cast< CActor* >( vis->pPtr );
+		UTSprite::PaintFModule( &m_sprLights, act->pos.xy, ANM_LIGHTS_SPR_CHAR_SHADOWS, 0, 0 );
+	}
+	__Painter().Flush();
 
 	///----------------------------------------------------------------------------------
 	/// LIGHTS

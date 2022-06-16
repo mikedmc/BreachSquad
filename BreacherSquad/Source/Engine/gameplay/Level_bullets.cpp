@@ -308,6 +308,7 @@ void CLevel::UpdateBullets(float dTime)
 
 void CLevel::PaintBullets(eLVLRenderPass pass)
 {
+	//#TODO: only paint visible bullets
 	D3DXMATRIXA16 matbullet;
 
 	//#TODO: only paint visible bullets...

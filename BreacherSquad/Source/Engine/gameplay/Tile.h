@@ -43,6 +43,13 @@ enum eEditorLayer {
 #define		K_TILEFLAG_HASWALL_D	8
 #define		K_TILEFLAG_HASWALL_L	16
 #define		K_TILEFLAG_HASWALL_MASK 0x1E
+// flag for tile with wall on it
+#define		K_TILEFLAG_WALL 32
+// wall lateral endings for wall ending shadows (on wall ending marks)
+#define		K_TILEFLAG_WALLENDING_L 64
+#define		K_TILEFLAG_WALLENDING_R 128
+// mask that deletes wall endings
+#define		K_TILEFLAG_WALLENDING_MASK 0xC0
 
 class CTile {						
 public:
@@ -71,8 +78,12 @@ public:
 
 	void PostConstructionInit()
 	{
+		// mark all floor tiles with flags
 		if (tileIDs[K_TILE_LAYER_FLOOR] >= 0)
 			flags |= K_TILEFLAG_WALKABLE;
+		// mark all wall tiles with flags
+		if ( tileIDs[K_TILE_LAYER_WALLS] >= 0 )
+			flags |= K_TILEFLAG_WALL;
 	}
 };
 

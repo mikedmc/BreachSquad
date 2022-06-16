@@ -50,7 +50,7 @@ OPRESULT CBufferedPainterQuads::BeginMesh(int &retMeshIdx)
 		retMeshIdx = -1;
 		return OPRESULT(K_OP_FAILED, L"CBufferedPainterQuads:: Too many meshes!", K_SEVERITY_WARNING);
 	}
-	//assert(m_nMeshesCnt < K_BP_MAX_QMESHES_CNT);
+	//_ASSERT(m_nMeshesCnt < K_BP_MAX_QMESHES_CNT);
 	m_bMeshStarted = true;
 
 	//reset mesh data
@@ -64,13 +64,13 @@ OPRESULT CBufferedPainterQuads::BeginMesh(int &retMeshIdx)
 
 OPRESULT CBufferedPainterQuads::AddQuads(_VERTEX_PNCT4T4 *points, int quadsCount)
 {
-	assert(m_nMaxQuadsCnt > 0);
+	_ASSERT(m_nMaxQuadsCnt > 0);
 
 	if (!m_bMeshStarted)
 		return OPRESULT(K_OP_FAILED, L"You have to call BeginMesh() first!", K_SEVERITY_WARNING);
 
 #if defined(_DEBUG) || defined(DEBUG)
-	assert((int)m_nVertexCursor + quadsCount * 4 < m_nMaxQuadsCnt * 4);
+	_ASSERT((int)m_nVertexCursor + quadsCount * 4 < m_nMaxQuadsCnt * 4);
 #endif
 
 	memcpy(&m_verts[m_nVertexCursor], points, sizeof(_VERTEX_PNCT4T4) * 4 * quadsCount);
@@ -196,7 +196,7 @@ const int CBufferedPainterQuads::GetTrisCount(int meshIdx) const
 
 OPRESULT CBufferedPainterQuads::CreateVB()
 {
-	assert(m_nMaxQuadsCnt > 0);
+	_ASSERT(m_nMaxQuadsCnt > 0);
 	if (m_pDevice == nullptr)
 		return OPRESULT(K_OP_INVALIDARGS, L"CBufferedPainterQuads::CreateVB: Device not set!", K_SEVERITY_WARNING);
 
@@ -221,7 +221,7 @@ OPRESULT CBufferedPainterQuads::CreateVB()
 
 OPRESULT CBufferedPainterQuads::CreateIB()
 {
-	assert(m_nMaxQuadsCnt > 0);
+	_ASSERT(m_nMaxQuadsCnt > 0);
 	if (m_pDevice == nullptr)
 		return OPRESULT(K_OP_INVALIDARGS, L"CBufferedPainterQuads::CreateVB: Device not set!", K_SEVERITY_WARNING);
 
