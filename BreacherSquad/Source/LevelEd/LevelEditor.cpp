@@ -23,10 +23,11 @@ const char* K_LIGHT_TYPES_NAMES_ARR[] =
 
 
 CLevelEditor::CLevelEditor() :
-	m_pLevel(nullptr), m_pDevice(nullptr),
-	eTool(K_LED_TILE), fTimeline(0.0), m_pCam(nullptr)
+	m_pLevel(nullptr), m_pDevice(nullptr), m_pCam( nullptr ),
+	eTool(K_LED_TILE), eMod(K_LEM_NONE), fTimeline(0.0)
 {
 	vMouseWorld = Vec2( 0.0f, 0.0f );
+	vMouseWorld_last = vMouseWorld;
 }
 
 
@@ -68,6 +69,9 @@ void CLevelEditor::Launch(CLevel* level)
 	m_pCam = &m_pLevel->m_camLevelToScr;
 	m_vCamPos = Vec3XY(m_pCam->GetCamPos());
 	m_vCamPos_ini = m_vCamPos;
+
+	eTool = K_LED_TILE;
+	eMod = K_LEM_NONE;
 }
 
 
@@ -88,8 +92,10 @@ void CLevelEditor::Update(float dTime)
 	if (__ImGui().GetWantCaptureMouse())
 		return;
 
-	// mouse pos in level world
+	/// mouse pos in level world
+	vMouseWorld_last = vMouseWorld;
 	vMouseWorld = m_pCam->ScreenToWorld(g_mouse.pos, &UTApp().g_rectRenderPP );
+	Vec2 v_mouse_delta = vMouseWorld - vMouseWorld_last;
 
 	// left mouse button
 	if (g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED)
@@ -98,13 +104,14 @@ void CLevelEditor::Update(float dTime)
 		{
 			case K_LED_LIGHT:
 			{
-				if ((pSelected != nullptr) && (MUVec2Len(&(pSelected->pos.xy_proj - vMouseWorld)) < K_TILE_HSIZE_F))
+				if ((pSelected != nullptr) && (MUVec2Len(&(pSelected->pos.xy_proj - vMouseWorld)) < K_TILE_SIZE_F * 2.0f))
 				{
 					// move it
+					eMod = K_LEM_MOVE;
 				}
 				else
 				{
-					pSelected = m_pLevel->SpawnLight(Vec3( vMouseWorld.x, vMouseWorld.y, 32.0f), K_LVL_LT_POINT, 0xffffffff, 32.0f);
+					pSelected = m_pLevel->SpawnLight(Vec3( vMouseWorld.x, vMouseWorld.y, 32.0f), K_LVL_LT_POINT, 0xffffffff, 128.0f);
 				}
 			}
 			break;
@@ -117,7 +124,52 @@ void CLevelEditor::Update(float dTime)
 		pSelected = SelectClosest( vMouseWorld );
 	}
 
-	// Process realtime keys
+	/// Mouse moved ?
+	if ( !UTMath::Vec2IsZero( v_mouse_delta ) )
+	{
+		bool bShiftDown = DXUTIsKeyDown( VK_LSHIFT ) || DXUTIsKeyDown( VK_RSHIFT );
+
+		//#TODO: move this to ProcessMouseMove function
+		switch ( eTool )
+		{
+			case K_LED_TILE:
+				break;
+			case K_LED_LIGHT:
+				if ( eMod == K_LEM_MOVE )
+				{
+					if(!bShiftDown)
+						pSelected->pos.Move( Vec3( v_mouse_delta.x, v_mouse_delta.y, 0.0f ) );
+					else
+						pSelected->pos.Move( Vec3( 0.0f, 0.0f, -v_mouse_delta.y ) );
+				}
+				break;
+			case K_LED_PROP:
+				if ( eMod == K_LEM_MOVE )
+				{
+					if ( !bShiftDown )
+						pSelected->pos.Move( Vec3( v_mouse_delta.x, v_mouse_delta.y, 0.0f ) );
+					else
+						pSelected->pos.Move( Vec3( 0.0f, 0.0f, -v_mouse_delta.y ) );
+				}
+				break;
+			case K_LED_ACTOR:
+				break;
+			case K_LED_COLBOX:
+				break;
+			case K_LED_TOOLS_CNT:
+				break;
+			default:
+				break;
+		}
+	}
+
+	/// reset modifier on mouse up
+	if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTRELEASED )
+	{
+		eMod = K_LEM_NONE;
+	}
+
+	/// Process realtime keys
 	if (DXUTIsKeyDown('A'))
 	{
 		m_vCamPos.x -= K_LED_CAMSPEED * dTime;
@@ -203,6 +255,12 @@ OPRESULT CLevelEditor::SaveLevel(WCHAR* strPath)
 }
 
 
+void CLevelEditor::SetTool( eLvlEdTool nTool )
+{
+	eTool = nTool;
+	eMod = K_LEM_NONE;
+}
+
 void CLevelEditor::Paint(ID3DXSprite* pSpr)
 {
 	if (m_pLevel == nullptr)
@@ -287,10 +345,10 @@ void CLevelEditor::IMGUI_ShowInterfaces()
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.2f, 1.0f));
 			else
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.3f, 0.2f, 1.0f));
-
+			// tool selection here
 			if (ImGui::Button(arrtools[kk], ImVec2(80, 0)))
 			{
-				eTool = (eLvlEdTool)kk;
+				SetTool( ( eLvlEdTool ) kk );
 			}
 
 			ImGui::PopStyleColor(1);

@@ -13,6 +13,15 @@ enum eLvlEdTool {
 	K_LED_TOOLS_CNT,
 };
 
+enum eLvlEdModifier {
+	K_LEM_NONE = -1,
+
+	K_LEM_MOVE = 0,
+	K_LEM_SCALE,
+
+	K_LEMS_COUNT,
+};
+
 // index of first tool that allows selection
 #define K_LED_TOOL_SELECTABLES_START	K_LED_LIGHT
 
@@ -25,6 +34,7 @@ private:
 	CSpriteLib	m_sprCol;				// Sprite collection to hold editor only graphics
 
 	eLvlEdTool			eTool;					// Current tool
+	eLvlEdModifier		eMod;					// Current modifier
 	IActiveInterface*	pSelected;				// Selected item
 
 	Vec2				m_vCamPos_ini;			// saved initial camera position (HOME)
@@ -33,6 +43,7 @@ public:
 	Vec2				m_vCamPos;				// Camera position
 	CCameraTransform*	m_pCam;					// pointer to level camera to screen
 	Vec2				vMouseWorld;			// mouse position in world coords
+	Vec2				vMouseWorld_last;		// last mouse pos
 
 public:
 	CLevelEditor();
@@ -57,6 +68,7 @@ public:
 
 	void				ReceiveKeys( UINT key );
 	OPRESULT			SaveLevel( WCHAR* strPath );
+	void				SetTool( eLvlEdTool nTool );
 
 	//--- IMGUI paint all interfaces
 	void				IMGUI_ShowInterfaces();
