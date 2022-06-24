@@ -1715,13 +1715,12 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 					// returns a list of segments that will form shadows (from both tiles and collision boxes)
 					int nOccluders = GetOccluderSegments( nl->pos.xy, nl->bbox, arrOccluders, arrOccludersSize );
 
-
-					// shows occluders instead of mesh. Checked for consistency.
-					/*
+#if defined(DEBUG_LIGHTS_SHOW_OCCLUDERS)
+					//do not delete! shows occluders instead of mesh. Checked for consistency.
 					int nVertCnt = 0;
 					for (int kk = 0; kk < nOccluders; kk++)
 					{
-						temp_arrVerts[nVertCnt].pos = Vec3(nl->vPos.x, nl->vPos.y, 0.0f);
+						temp_arrVerts[nVertCnt].pos = Vec3(nl->pos.xy.x, nl->pos.xy.y, 0.0f);
 						temp_arrVerts[nVertCnt].color = 0x00ffffff; nVertCnt++;
 						temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vStart);
 						temp_arrVerts[nVertCnt].color = 0xff00ff00; nVertCnt++;
@@ -1735,9 +1734,8 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 						m_bufferedPainter.AddTriangles(temp_arrVerts, nVertCnt / 3);
 						m_bufferedPainter.EndMesh();
 					}
-					*/
-
-
+#else					 
+					// default branch for showing lights:
 					if ( nOccluders > 0 )
 					{
 						// sends rays and builds the light FOV as a triangle list mesh
@@ -1752,6 +1750,7 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 							m_bufferedPainter.EndMesh();
 						}
 					}
+#endif					
 
 				}
 				else
@@ -4282,24 +4281,6 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 		__Painter().Begin( pSprVS, matView, *matProj );
 
 
-#if defined(_DEBUG) || defined(DEBUG)
-	/*
-	// Paints the shadowed lights volume in wireframe
-	m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
-	m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD); //needed for color interpolation
-	for (int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++)
-	{
-		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
-
-		if ((nl->type != K_LVL_LT_POINT) || (nl->castShadows == false))
-			continue;
-
-		m_bufferedPainter.DrawMesh(nl->m_nLightMeshIdx, true);
-	}
-	m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
-	m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-	*/
-#endif
 
 	// generic VS data so we can automatically find positions
 	float fConstDataVS[][4] = {
@@ -4374,6 +4355,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 
 	m_pDevice->SetTexture( 0, nullptr );
 	m_pDevice->SetTexture( 1, nullptr );
+
 	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
@@ -4382,6 +4364,33 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 		//paint and exit
 		m_bufferedPainter.DrawMesh( nl->m_nLightMeshIdx, true );
 	}
+
+
+#if defined(DEBUG_LIGHTS)
+	// Paints the shadowed lights volume in wireframe, the one selected in the editor
+	if ( g_editor.IsLaunched() )
+	{
+		IActiveInterface *pLight = g_editor.GetSelected();
+		if ( pLight != nullptr && pLight->GetClassType() == K_LVL_IAI_TYPE_LIGHT )
+		{
+			m_pDevice->SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
+			m_pDevice->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD ); //needed for color interpolation
+			for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
+			{
+				CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+				if ( nl != pLight )
+					continue;
+
+				if ( ( nl->type != K_LVL_LT_POINT ) || ( nl->castShadows == false ) )
+					continue;
+
+				m_bufferedPainter.DrawMesh( nl->m_nLightMeshIdx, true );
+			}
+			m_pDevice->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_FLAT );
+			m_pDevice->SetRenderState( D3DRS_FILLMODE, D3DFILL_SOLID );
+		}
+	}
+#endif
 
 
 	///----------------------------------------------------------------------------------
@@ -5680,8 +5689,11 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 {
 	_ASSERT( pRetArr != nullptr && maxRetArrSize > 0 );
 
-	// array to hold the tiles snapshots (linear matrix). Permits a max size of 32x32 tiles.
-	CTile* arrTilesSnapshot[32 * 32];
+	// array to hold the tiles snapshots (linear matrix).
+	static CTile* arrTilesSnapshot[64 * 64];
+	// clear it on every run
+	memset( arrTilesSnapshot, null, sizeof( CTile* ) * ARRAY_SIZE( arrTilesSnapshot ) );
+	
 	int nCur = 0;
 
 	Vec2 vPos = vEye;
@@ -5729,7 +5741,10 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 	Vec2i tlmax( floor( bbox.vMax.x / K_TILE_SIZE_F ), floor( bbox.vMax.y / K_TILE_SIZE_F ) );
 	// limit to current level aabb in tiles
 	RectXYWHi lightAABB_TL( tlmin.x, tlmin.y, tlmax.x - tlmin.x + 1, tlmax.y - tlmin.y + 1 );
-	lightAABB_TL.IntersectWith( m_levelAABB_TL );
+	
+	//#TODO: nu ar trebui sa fac intersectia pentru ca imi scrie mai sus in arrTilesSnapshot si cand le foloseste ii apar ca si cum ar fi cu un rand mai sus...
+	//#TODO: functia Areas_GetTilesSnapshot ar tb sa intoarca null cand sunt tiles in afara!!
+	//lightAABB_TL.IntersectWith( m_levelAABB_TL );
 	// tiles are returned in the arrTilesetSnapshot as a matrix in linear form, 0 base index (vector[xx + yy * lightAABB_TL.w])
 	Areas_GetTilesSnapshot( lightAABB_TL, arrTilesSnapshot, ARRAY_SIZE( arrTilesSnapshot ) );
 

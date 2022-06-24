@@ -66,6 +66,10 @@ public:
 		return ( m_pLevel != nullptr );
 	}
 
+	IActiveInterface* GetSelected() {
+		return pSelected;
+	}
+
 	void				ReceiveKeys( UINT key );
 	OPRESULT			SaveLevel( WCHAR* strPath );
 	void				SetTool( eLvlEdTool nTool );

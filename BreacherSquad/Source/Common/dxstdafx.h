@@ -46,6 +46,10 @@
 //#define ENABLE_ACHIEVEMENTS_RESET_ON_STARTUP
 //playerus invinctus:
 #define ENABLE_PLAYER_INVINCIBILITY
+// define this to show light occluders and shadows wireframe
+#define DEBUG_LIGHTS
+// define this to show occluders instead of lights
+//#define DEBUG_LIGHTS_SHOW_OCCLUDERS
 #endif
 
 #if defined(ENABLE_DEVMODE_RELEASE)
