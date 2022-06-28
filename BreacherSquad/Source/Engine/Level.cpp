@@ -1721,27 +1721,29 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 					int nVertCnt = 0;
 					for (int kk = 0; kk < nOccluders; kk++)
 					{
-						temp_arrVerts[nVertCnt].pos = Vec3(nl->pos.xy.x, nl->pos.xy.y, 0.0f);
+						Vec3 vnrm = arrOccluders[kk].vStart + arrOccluders[kk].vN * 10.0f;
+						//temp_arrVerts[nVertCnt].pos = Vec3(nl->pos.xy.x, nl->pos.xy.y, 0.0f);
+						temp_arrVerts[nVertCnt].pos = Vec3( vnrm.x, vnrm.y, 0.0f );
 						temp_arrVerts[nVertCnt].color = 0x00ffffff; nVertCnt++;
 						temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vStart);
 						temp_arrVerts[nVertCnt].color = 0xff00ff00; nVertCnt++;
 						temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vEnd);
 						temp_arrVerts[nVertCnt].color = 0xff0000ff; nVertCnt++;
 					}
-
+					 
 					if (nVertCnt > 3)
 					{
 						m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
 						m_bufferedPainter.AddTriangles(temp_arrVerts, nVertCnt / 3);
 						m_bufferedPainter.EndMesh();
 					}
-#else					 
+					
+#else				
 					// default branch for showing lights:
 					if ( nOccluders > 0 )
 					{
 						// builds the light FOV as a triangle list mesh (sending rays or skyscraper method)
 						int retVerts = FOVUtil::BuildOccludedVolume( nl->pos.xy, nl->color, arrOccluders, nOccluders, temp_arrVerts, temp_arrVertsSize );
-
 						// add tris as light volume
 						if ( retVerts > 0 )
 						{
@@ -5699,8 +5701,9 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 
 	Vec2 vPos = vEye;
 	Vec2 vNYp( 0.0f, 1.0f ), vNYn( 0.0f, -1.0f ), vNXp( 1.0f, 0.0f ), vNXn( -1.0f, 0.0f );
-	///--- add segments from bboxes
-	//check only the occluders in the visible area as we don't process lights outside the screen
+	///#TODO: --- add segments from bboxes (doors mainly)
+	//check only the object occluders in the visible area as we don't process lights outside the screen
+	/*
 	for ( int kk = 0; kk < m_visibleList.visible_colShapesLights.Count(); kk++ )
 	{
 		_ASSERT( nCur < maxRetArrSize - 2 );
@@ -5714,7 +5717,7 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 		// if we want the whole bbox:
 		CAABB* chkbb = &m_visibleList.visible_colShapesLights.m_pData[kk]->bbox;
 		// non clipped check (faster):
-		if ( lbox.Intersects( chkbb ) )
+		if ( bbox.Intersects( *chkbb ) )
 #endif
 		{
 			if ( vEye.y > chkbb->vMax.y )
@@ -5734,8 +5737,9 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 			{
 				pRetArr[nCur++].Set( chkbb->vMin, Vec2( chkbb->vMin.x, chkbb->vMax.y ), vNXn, vPos );
 			}
-}
+		}
 	}
+	*/
 
 	///--- add occluders from tiles, optimizing for same wall lines
 	Vec2i tlmin( floor( bbox.vMin.x / K_TILE_SIZE_F ), floor( bbox.vMin.y / K_TILE_SIZE_F ) );
@@ -5743,12 +5747,13 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 	// limit to current level aabb in tiles
 	RectXYWHi lightAABB_TL( tlmin.x, tlmin.y, tlmax.x - tlmin.x + 1, tlmax.y - tlmin.y + 1 );
 	
-	//#TODO: nu ar trebui sa fac intersectia pentru ca imi scrie mai sus in arrTilesSnapshot si cand le foloseste ii apar ca si cum ar fi cu un rand mai sus...
-	//#TODO: functia Areas_GetTilesSnapshot ar tb sa intoarca null cand sunt tiles in afara!!
-	//lightAABB_TL.IntersectWith( m_levelAABB_TL );
+	// I didn't optimize the lightAABB by intersecting it with the level bbox because when outside the level it would clip and write to arrTilesSnapshot[] 
+	// but then when reading them back it would appear that they are higher because the null tiles don't get written
+	//leave commented: lightAABB_TL.IntersectWith( m_levelAABB_TL );
 	// tiles are returned in the arrTilesetSnapshot as a matrix in linear form, 0 base index (vector[xx + yy * lightAABB_TL.w])
 	Areas_GetTilesSnapshot( lightAABB_TL, arrTilesSnapshot, ARRAY_SIZE( arrTilesSnapshot ) );
 
+	// in order to optimize and transform many segments into a single one, we do the horizontal walls first, then the vertical ones in another for
 	for ( int yy = tlmin.y; yy <= tlmax.y; yy++ )
 	{
 		for ( int xx = tlmin.x; xx <= tlmax.x; xx++ )
@@ -5759,25 +5764,17 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 			if ( tl == nullptr )
 				continue;
 			// can the tile cast shadows?
-			if ( tl->flags & K_TILEFLAG_HASWALL_MASK == 0 )
+			if ( FLAG_NONE( tl->flags, K_TILEFLAG_HASWALL_MASK ) )
 				continue;
 
 			CAABB chkbb{ xx * K_TILE_SIZE_F, yy * K_TILE_SIZE_F, ( xx + 1 ) * K_TILE_SIZE_F, ( yy + 1 ) * K_TILE_SIZE_F };
-#ifdef K_CLIP_OCCLUDERS_TO_LIGHT
-			// clip horizontally, do it in a fast way just so we don't miss wall intersections when colliders go outside the light bbox
+
+			// clip occluders horizontally, do it in a fast way just so we don't miss wall intersections when colliders go outside the light bbox
 			if ( chkbb.vMax.x > bbox.vMax.x ) chkbb.vMax.x = bbox.vMax.x;
 			if ( chkbb.vMin.x < bbox.vMin.x ) chkbb.vMin.x = bbox.vMin.x;
-			// ignore vertically for now, it errors but not so much as to be visible
-			//if (chkbb.vMax.y > bbox.vMax.y) chkbb.vMax.y = bbox.vMax.y;
-			//if (chkbb.vMin.y < bbox.vMin.y) chkbb.vMin.y = bbox.vMin.y;
-#endif
 
-			//#TODO: trebuie facuta optimizarea pe ambele axe, separat. mai intai X apoi Y, wallid in functie de X respectiv Y. 
-			//#TODO: atentie cand se confunda wallid x cu wallid Y, adauga 1000 sau pastreaza max wallid pe X
-			//#TODO: conditie speciala cand ai wallid 0 sa nu il lege de nimic ca sa pot pune occludere pe care sa nu le colapseze
-
-			DWORD wall_id = yy + 100;
-			if ( ( tl->flags & K_TILEFLAG_HASWALL_D ) && ( vEye.y > chkbb.vMax.y ) )
+			DWORD wall_id = yy + 100; 
+			if ( ( tl->flags & K_TILEFLAG_HASWALL_D ) && ( vPos.y > chkbb.vMax.y ) )
 			{
 				//optimize same wall: check last wall and if it's the same just make the occluder longer
 				if ( ( nCur > 0 ) && ( ( int ) pRetArr[nCur - 1].dwWallID == wall_id ) && ( pRetArr[nCur - 1].vEnd.x == chkbb.vMin.x ) )
@@ -5786,7 +5783,7 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 					/*ID is wall Y in tileset plus a value to not collide with the collbox ids */
 					pRetArr[nCur++].Set( Vec2( chkbb.vMin.x, chkbb.vMax.y ), chkbb.vMax, vNYp, vPos, wall_id, K_WALL_HEIGHT_SCREEN );
 			}
-			else if ( ( tl->flags & K_TILEFLAG_HASWALL_U ) && ( vEye.y < chkbb.vMin.y ) )
+			else if ( ( tl->flags & K_TILEFLAG_HASWALL_U ) && ( vPos.y < chkbb.vMin.y ) )
 			{
 				//optimize same wall: check last wall and if it's the same just make the occluder longer
 				if ( ( nCur > 0 ) && ( ( int ) pRetArr[nCur - 1].dwWallID == wall_id ) && ( pRetArr[nCur - 1].vStart.x == chkbb.vMin.x ) )
@@ -5796,11 +5793,11 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 			}
 			/*
 			// uncomment this area to add back the many vertical occluders (but comment out the next big for)
-			if ( ( tl->flags & K_TILEFLAG_HASWALL_R ) && ( vEye.x > chkbb.vMax.x ) )
+			if ( ( tl->flags & K_TILEFLAG_HASWALL_R ) && ( vPos.x > chkbb.vMax.x ) )
 			{
 				pRetArr[nCur++].Set( chkbb.vMax, Vec2( chkbb.vMax.x, chkbb.vMin.y ), vNXp, vPos );
 			}
-			else if ( ( tl->flags & K_TILEFLAG_HASWALL_L ) && ( vEye.x < chkbb.vMin.x ) )
+			else if ( ( tl->flags & K_TILEFLAG_HASWALL_L ) && ( vPos.x < chkbb.vMin.x ) )
 			{
 				pRetArr[nCur++].Set( chkbb.vMin, Vec2( chkbb.vMin.x, chkbb.vMax.y ), vNXn, vPos );
 			}
@@ -5818,25 +5815,24 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 			if ( tl == nullptr )
 				continue;
 			// can the tile cast shadows
-			if ( tl->flags & K_TILEFLAG_HASWALL_MASK == 0 )
+			if ( FLAG_NONE( tl->flags, K_TILEFLAG_HASWALL_MASK ) )
 				continue;
 
 			CAABB chkbb{ xx * K_TILE_SIZE_F, yy * K_TILE_SIZE_F, ( xx + 1 ) * K_TILE_SIZE_F, ( yy + 1 ) * K_TILE_SIZE_F };
-#ifdef K_CLIP_OCCLUDERS_TO_LIGHT
+
 			// clip occluders to light rect
 			if ( chkbb.vMax.y > bbox.vMax.y ) chkbb.vMax.y = bbox.vMax.y;
 			if ( chkbb.vMin.y < bbox.vMin.y ) chkbb.vMin.y = bbox.vMin.y;
-#endif
 
 			DWORD wall_id = xx + 10000;
-			if ( ( tl->flags & K_TILEFLAG_HASWALL_R ) && ( vEye.x > chkbb.vMax.x ) )
+			if ( ( tl->flags & K_TILEFLAG_HASWALL_R ) && ( vPos.x > chkbb.vMax.x ) )
 			{
 				if ( ( nCur > 0 ) && ( ( int ) pRetArr[nCur - 1].dwWallID == wall_id ) && ( pRetArr[nCur - 1].vStart.y == chkbb.vMin.y ) )
 					pRetArr[nCur - 1].MoveStart( chkbb.vMax, vPos );
 				else
 					pRetArr[nCur++].Set( chkbb.vMax, Vec2( chkbb.vMax.x, chkbb.vMin.y ), vNXp, vPos, wall_id, 0.0f );
 			}
-			else if ( ( tl->flags & K_TILEFLAG_HASWALL_L ) && ( vEye.x < chkbb.vMin.x ) )
+			else if ( ( tl->flags & K_TILEFLAG_HASWALL_L ) && ( vPos.x < chkbb.vMin.x ) )
 			{
 				if ( ( nCur > 0 ) && ( ( int ) pRetArr[nCur - 1].dwWallID == wall_id ) && ( pRetArr[nCur - 1].vEnd.y == chkbb.vMin.y ) )
 					pRetArr[nCur - 1].MoveEnd( Vec2( chkbb.vMin.x, chkbb.vMax.y ), vPos );
@@ -5849,10 +5845,10 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 	///--- add light range segments (don't set normals so we don't extend the walls on it)
 	// add them last so we prioritize intersecting with the others first
 	_ASSERT( nCur < maxRetArrSize - 4 );
-	pRetArr[nCur++].Set( bbox.vMin, Vec2( bbox.vMax.x, bbox.vMin.y ), vNYp, vPos );
-	pRetArr[nCur++].Set( Vec2( bbox.vMin.x, bbox.vMax.y ), bbox.vMax, vNYn, vPos );
-	pRetArr[nCur++].Set( bbox.vMin, Vec2( bbox.vMin.x, bbox.vMax.y ), vNXp, vPos );
-	pRetArr[nCur++].Set( Vec2( bbox.vMax.x, bbox.vMin.y ), bbox.vMax, vNXn, vPos );
+	pRetArr[nCur++].Set( bbox.vMin, Vec2( bbox.vMax.x, bbox.vMin.y ), vNYp, vPos, 1 );
+	pRetArr[nCur++].Set( Vec2( bbox.vMax.x, bbox.vMin.y ), bbox.vMax, vNXn, vPos, 2 );
+	pRetArr[nCur++].Set( bbox.vMax, Vec2( bbox.vMin.x, bbox.vMax.y ), vNYn, vPos, 3 );
+	pRetArr[nCur++].Set( Vec2( bbox.vMin.x, bbox.vMax.y ), bbox.vMin, vNXp, vPos, 4 );
 
 	return nCur;
 }

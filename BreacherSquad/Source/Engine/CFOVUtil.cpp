@@ -88,7 +88,7 @@ int FOVUtil::BuildOccludedVolume(Vec2 vEye, DWORD dwColor, COccluderSegment* arr
 				COccluderSegment* retocc = RayOccludersIntersection(vEye, vTo, fang, arrOcc, nOccludersCnt, vRetPt);
 				if (retocc)
 				{
-					arrVerts.push_back(sOccluderIntersection(vRetPt, retocc->vN, fang));
+					arrVerts.push_back(sOccluderIntersection(vRetPt, fang, retocc->dwWallID, retocc->fWallH));
 				}
 			}
 			// right ray
@@ -100,26 +100,23 @@ int FOVUtil::BuildOccludedVolume(Vec2 vEye, DWORD dwColor, COccluderSegment* arr
 				COccluderSegment* retocc = RayOccludersIntersection(vEye, vTo, fang, arrOcc, nOccludersCnt, vRetPt);
 				if (retocc)
 				{
-					arrVerts.push_back(sOccluderIntersection(vRetPt, retocc->vN, fang));
+					arrVerts.push_back(sOccluderIntersection(vRetPt, fang, retocc->dwWallID, retocc->fWallH));
 				}
 			}
 			*/
-
+			
+			
 			/// 2.b. version 2:
 			/// OCCLUDERS NEED TO BE DEFINED CLOCKWISE => vStart sends ray at -0.0001 rad, vEnd sends at angle + 0.0001 rad
-			float fang = fTargetAng - 0.00001f;
-			if (ll == 1)
-			{
-				fang = fTargetAng + 0.00001f;
-			}
+			float fang = ( ll == 0 ) ? fTargetAng - 0.00001f : fTargetAng + 0.00001f;
 
-			Vec2 vTo(100.0f * cos(fang) + vEye.x, 100.0f * sin(fang) + vEye.y);
+			Vec2 vTo(1000.0f * cos(fang) + vEye.x, 1000.0f * sin(fang) + vEye.y);
 			COccluderSegment* retocc = RayOccludersIntersection(vEye, vTo, fang, arrOcc, nOccludersCnt, vRetPt);
 			if (retocc)
 			{
 				arrVerts.push_back(sOccluderIntersection(vRetPt, fang, retocc->dwWallID, retocc->fWallH));
 			}
-
+			
 		}
 	}
 #if defined(_DEBUG) || defined(DEBUG)
@@ -203,6 +200,7 @@ COccluderSegment* FOVUtil::RayOccludersIntersection(Vec2 vEye, Vec2 vTo, float f
 		}
 		*/
 		// exclude by quadrant position
+
 		if (vDir.x > 0.0f)
 		{
 			if (occto->vStart.x < vEye.x && occto->vEnd.x < vEye.x)
@@ -238,7 +236,7 @@ COccluderSegment* FOVUtil::RayOccludersIntersection(Vec2 vEye, Vec2 vTo, float f
 	}
 
 	if (closestidx < 0)
-		return null;
+		return nullptr;
 
 	// get intersection point
 	COccluderSegment* occto = &arrOcc[closestidx];

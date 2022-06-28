@@ -42,9 +42,9 @@
 
 //important only in DEBUG mode:
 #if defined(DEBUG) | defined(_DEBUG)						  
-//reset all steam achievements on startup? 
+// reset all steam achievements on startup? 
 //#define ENABLE_ACHIEVEMENTS_RESET_ON_STARTUP
-//playerus invinctus:
+// playerus invinctus:
 #define ENABLE_PLAYER_INVINCIBILITY
 // define this to show light occluders and shadows wireframe
 #define DEBUG_LIGHTS
