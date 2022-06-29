@@ -135,7 +135,8 @@ bool UTMath::RaySegmentIntersection_denom(Vec2 a, Vec2 b, Vec2 c, Vec2 d, float 
 	// intersection behind ray start
 	if (retR < 0.0f) return false;
 	// intersection outside segment (includes heads in collisions)
-	if (retS < 0 || retS > 1.0f) return false;
+	if (retS < 0.0f || retS > 1.0f ) 
+		return false;
 
 	if (outPt)
 	{

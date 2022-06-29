@@ -65,17 +65,20 @@ int FOVUtil::BuildOccludedVolume(Vec2 vEye, DWORD dwColor, COccluderSegment* arr
 				fTargetAng = occ->fEndAng;
 			}
 
-			//1. trace to occluder end, register collision
+			//1. trace to occluder head, register collision. Make sure we shoot inside the occluder so we don't miss the heads
+			// makes sure we hit the occluder
+			float fang_hit = ( ll == 0 ) ? fTargetAng + 0.0001f : fTargetAng - 0.0001f;
+			Vec2 vToHit( 1000.0f * cos( fang_hit ) + vEye.x, 1000.0f * sin( fang_hit ) + vEye.y );
 
-			COccluderSegment* occcol = RayOccludersIntersection(vEye, vTarget, fTargetAng, arrOcc, nOccludersCnt, vRetPt);
+			COccluderSegment* occcol = RayOccludersIntersection(vEye, vToHit, fTargetAng, arrOcc, nOccludersCnt, vRetPt);
 			if (occcol)
 			{
-				arrVerts.push_back(sOccluderIntersection(vRetPt, fTargetAng, occcol->dwWallID, occcol->fWallH));
+				arrVerts.emplace_back(vRetPt, fTargetAng, occcol->dwWallID, occcol->fWallH);
 			}
 
 
 			//2. check with ray at angle -0.0001 and +0.0001, excluding ray if it hits segment to detect collisions around corners (back collisions)
-			/// 2.a. version 1: sends both rays and detects which one falls inside the source occluder to cancel it. 
+			/// 2.a. version 1: sends both rays (left and right of the occluder head) and detects which one falls inside the source occluder to cancel it. 
 			/// Occluders don't have to be defined clockwise (vStart before vEnd in CCW order)
 
 			/*
@@ -108,13 +111,13 @@ int FOVUtil::BuildOccludedVolume(Vec2 vEye, DWORD dwColor, COccluderSegment* arr
 			
 			/// 2.b. version 2:
 			/// OCCLUDERS NEED TO BE DEFINED CLOCKWISE => vStart sends ray at -0.0001 rad, vEnd sends at angle + 0.0001 rad
-			float fang = ( ll == 0 ) ? fTargetAng - 0.00001f : fTargetAng + 0.00001f;
-
-			Vec2 vTo(1000.0f * cos(fang) + vEye.x, 1000.0f * sin(fang) + vEye.y);
-			COccluderSegment* retocc = RayOccludersIntersection(vEye, vTo, fang, arrOcc, nOccludersCnt, vRetPt);
+			// the angle addon used to be a little smaller but it was missing the occluder ends.
+			float fang_miss = ( ll == 0 ) ? fTargetAng - 0.0001f : fTargetAng + 0.0001f;
+			Vec2 vToMiss(1000.0f * cos(fang_miss) + vEye.x, 1000.0f * sin(fang_miss) + vEye.y);
+			COccluderSegment* retocc = RayOccludersIntersection(vEye, vToMiss, fang_miss, arrOcc, nOccludersCnt, vRetPt);
 			if (retocc)
 			{
-				arrVerts.push_back(sOccluderIntersection(vRetPt, fang, retocc->dwWallID, retocc->fWallH));
+				arrVerts.emplace_back(vRetPt, fang_miss, retocc->dwWallID, retocc->fWallH);
 			}
 			
 		}
