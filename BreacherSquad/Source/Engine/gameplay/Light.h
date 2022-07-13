@@ -57,8 +57,7 @@ public:
 	int					m_nLightMeshIdx;			// buffer-ul dinamic pt spotul luminii
 	int					m_nShadowMeshIdx;			// buffer-ul dinamic pt shadow volume
 													   
-	int					animID;						// -1 - not set
-	int					frameID;					// must be set when animID is set
+	SprFrameId			fidTexture;					// mostly used for projected lights
 	float				fVolumeAlpha;				// light's atmospheric volume alpha
 
 public:

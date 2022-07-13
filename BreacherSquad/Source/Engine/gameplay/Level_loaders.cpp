@@ -404,8 +404,8 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		CHAR charAnmName[MAX_PATH];
 		OS_freadString(fl, charAnmName);
 
-		nl->animID = m_sprLights.GetAnimationIdxByName(charAnmName);
-		nl->frameID = 0;
+		nl->fidTexture.animIdx = m_sprLights.GetAnimationIdxByName(charAnmName);
+		nl->fidTexture.frameIdx = 0;
 		/*
 		if ((nl->animID < 0) && (nl->type != K_LVL_LT_AMBIENTAL))
 			ErrorBox(K_ERR_WARNING, L"Light ID:%d doesn't have animID!!", nl->ID);
@@ -426,7 +426,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		nl->bbox.SaveSnapshotOff( -nl->pos.xy );
 		nl->fRadius = max(nl->bbox.vSize.x, nl->bbox.vSize.y);
 		//re-arrange spots (maybe lights image changed)
-		nl->SetLightTexture(&m_sprLights, nl->animID, nl->frameID);
+		nl->SetLightTexture(&m_sprLights, nl->fidTexture.animIdx, nl->fidTexture.frameIdx);
 
 		//#HACK: hardcodes the radius
 		nl->fRadius = 128.0f;

@@ -18,9 +18,20 @@ struct SprFrameId
 		animIdx = nAnimIdx;
 		frameIdx = nFrameIdx;
 	}
+
+	void Reset()
+	{
+		animIdx = -1;
+		frameIdx = 0;
+	}
+
+	inline bool IsSet()
+	{
+		return ( animIdx >= 0 ) ? true : false;
+	}
 };
 
-// Identifier for a frame in an animation. Use this instead of keeping separate anim and frame idx
+// Identifier for a frame in an animation in a spriteLib. Use this instead of keeping separate anim and frame idx
 struct SprFrameIdEx
 {
 	int				spriteLibIdx;				// index of sprite lib in multi sprite lib configuration
@@ -36,6 +47,18 @@ struct SprFrameIdEx
 		animIdx = nAnimIdx;
 		frameIdx = nFrameIdx;
 		spriteLibIdx = nSpriteLibIdx;
+	}
+
+	void Reset()
+	{
+		animIdx = -1;
+		frameIdx = 0;
+		spriteLibIdx = 0;
+	}
+
+	inline bool IsSet()
+	{
+		return ( animIdx >= 0 ) ? true : false;
 	}
 };
 

@@ -108,8 +108,8 @@ void CLight::UpdateInternalData( CSpriteLib* pLightsSprCol )
 		lCorners[2] = Vec3( unionAABB.vMax.x, unionAABB.vMax.y, 0.0f );
 		lCorners[3] = Vec3( unionAABB.vMin.x, unionAABB.vMax.y, 0.0f );
 
-		if ( ( animID >= 0 ) && ( pLightsSprCol != null ) )
-			lTexRect = pLightsSprCol->GetModuleRect_TexCoords( animID, frameID, 0 );
+		if ( fidTexture.IsSet() && ( pLightsSprCol != null ) )
+			lTexRect = pLightsSprCol->GetModuleRect_TexCoords( fidTexture.animIdx, fidTexture.frameIdx, 0 );
 	}
 	break;
 	}
@@ -118,12 +118,12 @@ void CLight::UpdateInternalData( CSpriteLib* pLightsSprCol )
 
 void CLight::SetLightTexture( CSpriteLib* sprCol, int nAnimID, int nFrameID )
 {
-	animID = nAnimID;
-	frameID = nFrameID;
-	if ( animID >= 0 )
+	fidTexture.animIdx = nAnimID;
+	fidTexture.frameIdx = nFrameID;
+	if ( fidTexture.animIdx >= 0 )
 	{
 		//lTexRect = sprCol->GetModuleRect_TexCoords(animID, frameID, 0);
-		RectXYWHi lrect = sprCol->GetAFrameBBox_real( animID, frameID );
+		RectXYWHi lrect = sprCol->GetAFrameBBox_real( fidTexture.animIdx, fidTexture.frameIdx );
 		bbox.Set( lrect );
 		bbox.SaveSnapshot();
 		bbox.Move( pos.xy_proj );
@@ -134,12 +134,13 @@ void CLight::SetLightTexture( CSpriteLib* sprCol, int nAnimID, int nFrameID )
 
 CLight::CLight( CActiveAIComponent* pLightAIComp ) :
 	m_nLightMeshIdx( -1 ), m_nShadowMeshIdx( -1 ),
-	type( K_LVL_LT_UNKNOWN ), animID( -1 ), frameID( 0 ),
+	type( K_LVL_LT_UNKNOWN ), 
 	fRadius( 0.0f ), fVolumeAlpha( 1.0f ), castShadows( false ),
 	nProfileID( 0 ),
 	c_AI( pLightAIComp )
 {
 	vnDir = Vec3( 0.0f, 0.0f, -1.0f ); //default direction (looking down)
+	fidTexture.Reset();
 }
 
 CLight::~CLight()

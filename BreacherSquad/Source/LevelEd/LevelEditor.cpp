@@ -508,7 +508,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 				ImGui::BeginChild("ChildL", ImVec2(ImGui::GetWindowContentRegionWidth(), 260), true, 0);
 
 
-				const int anmID = light->animID;
+				const int anmID = light->fidTexture.animIdx;
 				ImVec2 button_sz(48, 48);
 				scAnimation* anm = m_pLevel->m_sprLights.Animations[anmID];
 				PTEXTURE imgtex = m_pLevel->m_sprLights.Textures[0]->pTex;
@@ -523,7 +523,7 @@ void CLevelEditor::IMGUI_AddLightProps(CLight* light)
 					ImVec2 tdr(texrect.right, texrect.bottom);
 
 					ImVec4 bgcol(0.0f, 0.0f, 0.0f, 1.0f);
-					if (n == light->frameID)
+					if (n == light->fidTexture.frameIdx)
 						bgcol = { 0.5f, 0.0f, 0.0f, 1.0f };
 
 					ImGui::PushID(n);

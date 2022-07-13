@@ -278,7 +278,7 @@ CLight*	CLevel::SpawnLight( Vec3 spawnPos, eLightType eType, DWORD dwColor, floa
 	nl->pos = spawnPos;
 	nl->pos_ini = nl->pos;
 	//animID
-	nl->animID = 0;
+	nl->fidTexture.Init(0, 0);
 	nl->nProfileID = profileID;
 	nl->fRadius = fRadius;
 	nl->color = dwColor;
