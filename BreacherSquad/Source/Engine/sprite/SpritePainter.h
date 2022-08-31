@@ -74,7 +74,7 @@ public:
 
 	// Draws a non-transformed sprite
 	// \param: pSrcUV - expects the rectangle in texture coordinates that will be drawn in pDestRect
-	// \param: pDestRect - expects a rectangle where the srcUV will be painter. 
+	// \param: pDestRect - expects a rectangle where the srcUV will be painted. 
 	// Use together with pPosition if you need rotations as rotations are applied before moving the pDestRect to pPosition 
 	// allowing you to specify origin of rotation by defining pDestRect around the origin.
 	OPRESULT				Draw(PTEXTURE pTexture, RectLTRB &pSrcUV, RectLTRB &pDestRect, Vec2 vPos, DWORD color = 0xffffffff, float fRotationZ = 0.0f, Vec2 vScale = { 1.0f, 1.0f });

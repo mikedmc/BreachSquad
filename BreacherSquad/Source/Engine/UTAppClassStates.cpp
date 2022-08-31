@@ -4,11 +4,6 @@
 ///**************************************************************************************
 
 
-///----- GAME_STATE_LOADING -----
-#define K_CS_LOADING_WEAPONS 13
-#define K_CS_LOADING_WEAPONS_PER_COL 10
-int nLoadingFrame = 0;
-
 void CApplication::App_EnterState_Loading()
 {
 	// Create necessary render targets when device gets reset (created or reset)
@@ -27,8 +22,6 @@ void CApplication::App_EnterState_Loading()
 	WCHAR wcsPath[MAX_PATH];
 	FileManager::GetMediaPath(L"media/interfaces/loading.png", wcsPath, true);
 	g_texManager.AddTexture(wcsPath, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
-	//decide which weapon to show from available 13
-	nLoadingFrame = randint(K_CS_LOADING_WEAPONS);
 }
 
 void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime)
@@ -218,7 +211,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 		case 7:
 		{
 			GameState::substate++;
-
+								/*
 			//start with specified map if requested by editor
 			if (g_startupCommand == GAME_STARTUP_LOAD_MAP)
 			{
@@ -252,6 +245,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
+			*/
 			//from now on we can pause the game
 			g_bCanPause = true;
 		}
@@ -266,12 +260,22 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 
 void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline)
 {
-	//setam ecranul standard de 240h inaltime
+	// set right camera
 	CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(pDevice, &g_matIdentity);
 
 	RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
 	RectXYWH worldrect = UTApp().g_rect360hWorld;
+
+	CTexNode* pTN = g_texManager.GetTextureByIndex( 0 );
+	// paint logo
+	if ( pTN && pTN->isLoaded() )
+	{
+		RECT rctSrcLogo;
+		SetRect( &rctSrcLogo, 2, 2, 327, 327 );
+		__Painter().Draw( pTN->pTexture, &rctSrcLogo, nullptr, &D3DXVECTOR3( scrrect.CenterX() - ( rctSrcLogo.right - rctSrcLogo.left ) / 2, scrrect.CenterY() - ( rctSrcLogo.bottom - rctSrcLogo.top ) / 2, 0.0f ), 0xffffffff );
+//		pSprite->Draw( pTN->pTexture, &rctSrcLogo, nullptr, &D3DXVECTOR3( scrrect.CenterX() - ( rctSrcLogo.right - rctSrcLogo.left ) / 2, scrrect.CenterY() - ( rctSrcLogo.bottom - rctSrcLogo.top ) / 2, 0.0f ), 0xffffffff );
+	}
 
 	//fonts loaded so write "loading" 
 	if ((GameState::substate > 3) && (GameState::substate < 6))
@@ -282,7 +286,6 @@ void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite
 
 	if (GameState::substate > 3)
 	{
-		//write title window text
 		if (UTApp().m_Settings.dev_unCurrentCRC != K_GAME_CRC)
 		{
 			g_font10bs1->DrawString(STR_CHANGE_DETECTED, scrrect.CenterX(), 15.0f, FONTFLAG_ANCHOR_TOPCENTER, 0xff963500);
@@ -290,21 +293,26 @@ void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite
 		}
 	}
 	//progress
-	if ((GameState::substate >= 0) && (GameState::substate < 7))
+	if ((GameState::substate >= 0) /*&& (GameState::substate < 7) && ( pTN && pTN->isLoaded() )*/ )
 	{
-		int nlX = 48 * (nLoadingFrame / K_CS_LOADING_WEAPONS_PER_COL) * 2;
-		int nlY = 24 * (nLoadingFrame % K_CS_LOADING_WEAPONS_PER_COL);
-
 		RECT rctSrcEmpty;
-		SetRect(&rctSrcEmpty, nlX + 48, nlY, nlX + 48 + 48, nlY + 24);
+		SetRect(&rctSrcEmpty, 329, 1, 335, 15);
 		RECT rctSrcFull;
-		SetRect(&rctSrcFull, nlX, nlY, nlX + 1 + (int)ceil(48 * ((float)GameState::substate / 7.0f)), nlY + 24);
-		
-		CTexNode* pTN = g_texManager.GetTextureByIndex( 0 );
-		if ( pTN && pTN->isLoaded() )
+		SetRect(&rctSrcFull, 336, 1, 342, 15);
+		float bulletw = rctSrcEmpty.right - rctSrcEmpty.left;
+
+		float fLoadPerc = GameState::substate / 7.0f;
+		CLAMP( fLoadPerc, 0.0f, 1.0f );
+		LOG(L"loadperc:%d", GameState::substate);
+
+		const int bulletcnt = 10;
+		for ( int kk = 0; kk < bulletcnt; kk++ )
 		{
-			pSprite->Draw( pTN->pTexture, &rctSrcEmpty, NULL, &D3DXVECTOR3( scrrect.CenterX() - 24.0f, scrrect.CenterY(), 0.0f ), 0xffffffff );
-			pSprite->Draw( pTN->pTexture, &rctSrcFull, NULL, &D3DXVECTOR3( scrrect.CenterX() - 24.0f, scrrect.CenterY(), 0.0f ), 0xffffffff );
+			RECT fromrect = rctSrcEmpty;
+			if ( kk <= ceil( fLoadPerc * bulletcnt ) )
+				fromrect = rctSrcFull;
+			pSprite->Draw( pTN->pTexture, &fromrect, nullptr, &D3DXVECTOR3( scrrect.CenterX() - (bulletcnt * bulletw) / 2 - bulletw / 2 + kk * bulletw , scrrect.Bottom() - 20.0f, 0.0f ), 0xffffffff );
+
 		}
 	}
 }
