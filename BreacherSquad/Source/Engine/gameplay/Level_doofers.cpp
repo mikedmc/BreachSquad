@@ -491,7 +491,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 					((explotemplate->name.textHash == hash_EXPLO_GRENADE_GROUND) || (explotemplate->name.textHash == hash_EXPLO_GRENADE) ||
 					(explotemplate->name.textHash == hash_EXPLO_CHARGE) || (explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE)))
 				{
-					UTGetAchievementManager().UnlockAchievement(ACH_DARWIN_AWARD);
+					__Achievements().UnlockAchievement(ACH_DARWIN_AWARD);
 				}
 
 			}
@@ -502,11 +502,11 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 				//breaching charge behind the door
 				if (explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE)
 				{
-					UTGetAchievementManager().UnlockAchievement(ACH_GOOD_BREACH);
+					__Achievements().UnlockAchievement(ACH_GOOD_BREACH);
 				}
 				if (explotemplate->name.textHash == hash_EXPLO_BARREL)
 				{
-					UTGetAchievementManager().UnlockAchievement(ACH_HEAT_UP_THE_NIGHT);
+					__Achievements().UnlockAchievement(ACH_HEAT_UP_THE_NIGHT);
 				}
 			}
 

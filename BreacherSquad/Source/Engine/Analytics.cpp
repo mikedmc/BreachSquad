@@ -170,9 +170,8 @@ bool CAnalytics::Update()
 #endif
 
 ///**************************************************************************************
-/// Sigleton de acces
-///**************************************************************************************
-CAnalytics& UTGetAnalytics()
+
+CAnalytics& __Analytics()
 {
 	static CAnalytics g_Analytics;
 	return g_Analytics;

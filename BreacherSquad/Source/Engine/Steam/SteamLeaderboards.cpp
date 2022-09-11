@@ -550,10 +550,10 @@ void CSteamLeaderboards::OnPersonaStateChange(PersonaStateChange_t *pCallback)
 }
 
 ///**************************************************************************************
-/// Sigleton de acces
+/// Sigleton
 ///**************************************************************************************
 
-CSteamLeaderboards& UTGetLeaderboards()
+CSteamLeaderboards& __Leaderboards()
 {
 	static CSteamLeaderboards g_SteamLeaderboards;
 	return g_SteamLeaderboards;

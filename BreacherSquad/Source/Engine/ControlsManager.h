@@ -5,10 +5,10 @@
 #define INTERFACES_VERSION 1.0f
 
 enum ECtrlMgrInputType {
-	K_CCTRLMGR_INPUT_KEY = 0,		//comanda key din handler tastatura WIN
-	K_CCTRLMGR_INPUT_CHAR = 1,		//comanda char din windows messages
-	K_CCTRLMGR_INPUT_SDL_KEY,		//tasta SDL
-	K_CCTRLMGR_INPUT_COMMAND,		//comanda generica din ECtrlMgrCommandType, de la orice controller (include SDL)
+	K_CCTRLMGR_INPUT_KEY = 0,		// key command from keyboard handler
+	K_CCTRLMGR_INPUT_CHAR = 1,		// char command from windows messages
+	K_CCTRLMGR_INPUT_SDL_KEY,		// SDL key
+	K_CCTRLMGR_INPUT_COMMAND,		// generic command ECtrlMgrCommandType from any controller (includes SDL)
 };
 
 // commands that the manager listens to
@@ -34,8 +34,8 @@ enum ECtrlAnchor {
 // controls messages
 enum CCTRL_MESSAGES {
 	CCTRL_MESSAGE_CLICK = 1,
-	CCTRL_MESSAGE_SLIDERCHANGED = 2, //param1 - volum intre 0 si 1000, param2 - 1000
-	CCTRL_MESSAGE_CHECKCHANGED,		 
+	CCTRL_MESSAGE_SLIDERCHANGED = 2, //param1 - volume 0 to 1000, param2 - 1000
+	CCTRL_MESSAGE_CHECKCHANGED,
 	CCTRL_MESSAGE_SELECTIONCHANGED,  //param1 - new selection, param2 - old selection
 };
 
@@ -83,7 +83,7 @@ namespace GUIUtils {
 	// Paints a smaller panel without icon, with just the focus line on the left
 	void DrawPanelSM( CSpriteLib *sprCol, RectXYWHi BBox, float fFocusPercent, float fAlpha = 1.0f );
 	// Draws a button centered on the specified bbox
-	void DrawButton(CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, bool bPressed, float fHoverPercent, float fFocusPercent, float fAlpha = 1.0f);
+	void DrawButton( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, bool bPressed, float fHoverPercent, float fFocusPercent, float fAlpha = 1.0f );
 	/*
 	* \brief Deseneaza un buton (sau input box, slider, etc) dintr-o animatie cu 3 frames (capat, centru tiling, capat)
 	* capetele butonului se deseneaza in interiorul bboxului. Capatul stanga trebuie aliniat in dreapta axei verticale in editor.
@@ -117,11 +117,11 @@ namespace GUIUtils {
 
 class CControl
 {
-//protected:
+	//protected:
 	static CSpriteLib *m_pSprCol;		// Pointer to sprite collection from the manager
 public:
 	// Sets useful static data (used by all controls)
-	static void			SetManagersPtr(CSpriteLib* sprCol);
+	static void			SetManagersPtr( CSpriteLib* sprCol );
 
 	EControlType		type;				// Type of control CCTRL_TYPE_...
 	CVariantMap			paramsDict;			// List of controls params. Don't set directly! Use SetParamValue
@@ -141,19 +141,19 @@ public:
 
 	// Called by manager when giving focus to current control
 	// \param: nFocusDirection - specifies direction from last focused control (1-coming from above, -1-coming from below, 0-unknown)
-	void				OnFocused(int nFocusDirection = 0);
+	void				OnFocused( int nFocusDirection = 0 );
 	// Initializes specific vars based on control type
-	void				Reset(); 
-	void				Update(float dTime, float fTimeline);
-	void				Paint(CCameraTransform	* pCamera, Mat * matWorld);
+	void				Reset();
+	void				Update( float dTime, float fTimeline );
+	void				Paint( CCameraTransform	* pCamera, Mat * matWorld );
 	//Initializes the control clone after parameters get set
-	void				Initialize();	
+	void				Initialize();
 	// Handles input commands
-	bool				HandleCommand(ECtrlMgrCommandType cmd, int nSDLinstanceID = -1);
+	bool				HandleCommand( ECtrlMgrCommandType cmd, int nSDLinstanceID = -1 );
 	// returns control bbox
 	RectXYWHi			GetBBox();
 	// (only for debug to show errors)
-	void				drawDebugText(int x, int y, const wchar_t* text, DWORD color = 0xffff8888);
+	void				drawDebugText( int x, int y, const wchar_t* text, DWORD color = 0xffff8888 );
 };
 
 //**********************************************************
@@ -216,7 +216,7 @@ public:
 	float				fLocalTimeline;				// Local timeline
 	CArray<CCtrlLayer*> layersDefinitions;			// Contains layer definitions
 	CArray<CCtrlLayer*> Layers;						// Contains actual cloned layers
-	CSpriteLib	m_sprCol;					// Sprite collection for controls sprites
+	CSpriteLib			m_sprCol;					// Sprite collection for controls sprites
 	bool				bIsBlocking;				// Does it block user input?
 	CCameraTransform	camera;						// Camera transform for controls
 
@@ -228,37 +228,37 @@ public:
 	// Loads controls templates (loads sprite file name too)
 	OPRESULT			LoadControlsXML( WCHAR* XMLpath );
 	// Sets a control parameter value and automatically converts to necessary value
-	void				SetParamValue(CControl * pCtrl, const WCHAR * sParamName, WCHAR * sParamValue, bool bIgnoreWarnings = false);
+	void				SetParamValue( CControl * pCtrl, const WCHAR * sParamName, WCHAR * sParamValue, bool bIgnoreWarnings = false );
 	// Releases everything
 	void				Release();
 
 	//CLayer* addLayer(const int spec[], int specSize, bool blocking=true, bool getsInput=true, bool fadeIn=true, bool fadeOut=true, bool hasTimer=false, float timerValue=5.0f, bool slideIn = false, bool slideOut = false, float slideOffsetX = 0.0f, float slideOffsetY = -300.0f);
-	CCtrlLayer*			GetLayerByNameHash(UINT32 layerNameHash);
-	CCtrlLayer*			GetLayerByName(CHAR* layerName);
-	CCtrlLayer*			GetLayerByIdx(int layerIdx);
+	CCtrlLayer*			GetLayerByNameHash( UINT32 layerNameHash );
+	CCtrlLayer*			GetLayerByName( CHAR* layerName );
+	CCtrlLayer*			GetLayerByIdx( int layerIdx );
 	// Returns pointer to layer that is closest to player
 	CCtrlLayer*			GetTopmostLayer();
 	// Gets the topmost layer that receives input
 	CCtrlLayer*			GetTopmostInputLayer();
-	void				RemoveLayer(UINT32 layerID, bool forced = false);
-	void				RemoveLayer(CHAR* layerName, bool forced = false);
-	void				RemoveTopmostLayer(bool forced = false);
+	void				RemoveLayer( UINT32 layerID, bool forced = false );
+	void				RemoveLayer( CHAR* layerName, bool forced = false );
+	void				RemoveTopmostLayer( bool forced = false );
 	// Creates one layer and returns pointer to it
-	CCtrlLayer*			ShowLayer(CHAR* layerName, float fAlpha = 0.0f, int posX = 0, int posY = 0);
+	CCtrlLayer*			ShowLayer( CHAR* layerName, float fAlpha = 0.0f, int posX = 0, int posY = 0 );
 	// Creates one layer and returns pointer to it (checking that it's not already showing)
-	CCtrlLayer*			ShowLayerOnce(CHAR* layerName, float fAlpha = 0.0f, int posX = 0, int posY = 0);
+	CCtrlLayer*			ShowLayerOnce( CHAR* layerName, float fAlpha = 0.0f, int posX = 0, int posY = 0 );
 	// forced == true avoids animations
-	void				RemoveAllLayers(bool forced = false);
+	void				RemoveAllLayers( bool forced = false );
 
-	void				Update(float dTime);
-	void				Paint();	
+	void				Update( float dTime );
+	void				Paint();
 
 	// Receives input commands from different forms of input
 	// nCommandParam is anything (eg: SDLinstanceID when processing controller input)
-	void				ReceiveInput(ECtrlMgrInputType eCommandType, UINT32 nCommand, int nCommandParam = -1);
+	void				ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCommand, int nCommandParam = -1 );
 
 	// Shows a message box with a OK button
-	void				MessageBoxOK(int titleStringId, int textStringId);
+	void				MessageBoxOK( int titleStringId, int textStringId );
 
 	// Inherited via IDeviceRes
 	virtual OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
@@ -267,5 +267,5 @@ public:
 	virtual OPRESULT OnDestroyDevice() override;
 };
 
-//declare singleton
-CControlsManager& UTGetGUI();
+// Controls manager singleton
+CControlsManager& __GUI();

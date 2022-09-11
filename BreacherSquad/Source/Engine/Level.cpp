@@ -1111,7 +1111,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 			{
 				if ( !nmnode.attribute( L"set0" ).empty() )
 				{
-					templ->soundIDs[kk][0] = UTGetSoundManager().getSndIdxW( nmnode.attribute( L"set0" ).value() );
+					templ->soundIDs[kk][0] = __Audio().getSndIdxW( nmnode.attribute( L"set0" ).value() );
 					if ( ( !nmnode.attribute( L"set0" ).empty() ) && ( templ->soundIDs[kk][0] == -1 ) )
 					{
 						//#TEMP: until I change the templates
@@ -1121,7 +1121,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 				//variation
 				if ( !nmnode.attribute( L"set1" ).empty() )
 				{
-					templ->soundIDs[kk][1] = UTGetSoundManager().getSndIdxW( nmnode.attribute( L"set1" ).value() );
+					templ->soundIDs[kk][1] = __Audio().getSndIdxW( nmnode.attribute( L"set1" ).value() );
 					if ( ( !nmnode.attribute( L"set1" ).empty() ) && ( templ->soundIDs[kk][1] == -1 ) )
 					{
 						//#TEMP: until I change the templates
@@ -1528,7 +1528,7 @@ void CLevel::SetLevelState( ELevelState eNewState, int nLevelStateParam )
 			//save level finished time
 			m_arrStats[K_LVL_STATS_LEVEL_END_SEC] = ( int ) floor( fLocalTimeline );
 			//remove any interfaces that might be shown
-			UTGetGUI().RemoveAllLayers();
+			__GUI().RemoveAllLayers();
 
 			SND_STOP_GROUP( "music", false, true );
 
@@ -1582,7 +1582,7 @@ void CLevel::SetLevelState( ELevelState eNewState, int nLevelStateParam )
 			//save level finished time
 			m_arrStats[K_LVL_STATS_LEVEL_END_SEC] = ( int ) floor( fLocalTimeline );
 			//remove any interfaces that might be shown
-			UTGetGUI().RemoveAllLayers();
+			__GUI().RemoveAllLayers();
 
 			SND_STOP_GROUP( "music", false, true );
 
@@ -2559,13 +2559,13 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 					//if(!bEnableHotJoin)
 						//continue;
 					//HOT JOIN LOGIC
-					for ( auto ctrlr : UTGetCtrlrMgr().m_arrControllers )
+					for ( auto ctrlr : __Controllers().m_arrControllers )
 					{
 						//Shows controller mapping - only when not online
-						if ( ( ctrlr->eType == K_CM_CT_JOYSTICK_SDL ) && ( !UTApp().IsGameNetworked() ) && ( false == UTGetGUI().bIsBlocking ) &&
+						if ( ( ctrlr->eType == K_CM_CT_JOYSTICK_SDL ) && ( !UTApp().IsGameNetworked() ) && ( false == __GUI().bIsBlocking ) &&
 							( ctrlr->sCommands.keyState[K_CM_COMMAND_SELECT] == K_CM_BUTSTATE_JUSTPRESSED ) )
 						{
-							UTGetGUI().ShowLayerOnce( "LAYER_ID_CONTROLLER_MAP" );
+							__GUI().ShowLayerOnce( "LAYER_ID_CONTROLLER_MAP" );
 						}
 						//when player was left without controller give him the new controller when ctrlr touched
 						bool bActivate = false;
@@ -2613,7 +2613,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 				}
 				else // controller not empty, check it
 				{
-					CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID( m_arrPlayerControllersIIDs[plidx] );
+					CController* ctrlr = __Controllers().GetControllerByInstanceID( m_arrPlayerControllersIIDs[plidx] );
 					if ( ctrlr == null )
 					{
 						m_arrPlayerControllersIIDs[plidx] = -1;
@@ -2887,14 +2887,14 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 			if ( bPlayerMightContinue )
 				bMissionFinished = false;
 			//mission win? wait for scripts
-			if ( ( bMissionFinished ) && ( nStrIdxMissionFailed < 0 ) && ( UTGetScriptManager().GetRunningScriptsCount() > 0 ) )
+			if ( ( bMissionFinished ) && ( nStrIdxMissionFailed < 0 ) && ( __Scripts().GetRunningScriptsCount() > 0 ) )
 				bMissionFinished = false;
 
 			//is mission finished?
 			if ( bMissionFinished )
 			{
 				//make sure we stop all scripts (could generate enemies)
-				UTGetScriptManager().StopAllScripts();
+				__Scripts().StopAllScripts();
 				//win or lose?
 				if ( nStrIdxMissionFailed < 0 ) //win
 					SetLevelState( K_LVL_STATE_MISSION_ACCOMPLISHED );
@@ -2912,7 +2912,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 			{
 				g_netlock.Net_UpdateLevelResults( dTime );
 				//show net votes
-				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
+				CCtrlLayer* layer = __GUI().GetTopmostInputLayer();
 				if ( layer )
 				{
 					CControl* ctrl;
@@ -2977,7 +2977,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
 						nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
 						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
-						UTGetEventManager().QueueEvent( nevent );
+						__Events().QueueEvent( nevent );
 					}
 					//clear command
 					g_netlock.Net_LevelResultsClearStates();
@@ -2995,7 +2995,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
 						nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
 						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
-						UTGetEventManager().QueueEvent( nevent );
+						__Events().QueueEvent( nevent );
 					}
 					//clear command
 					g_netlock.Net_LevelResultsClearStates();
@@ -3015,7 +3015,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						if ( g_netlock.m_arrLvlResPeerStates[g_netlock.Net_GetOtherPlayerIndex()] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CANCEL )
 							nevent->AddNamedArgINT32( L"stateErrorStrIdx", STR_NETWORK_ERROR_PLAYER_LEFT );
 
-						UTGetEventManager().QueueEvent( nevent );
+						__Events().QueueEvent( nevent );
 					}
 					//clear command
 					g_netlock.Net_LevelResultsClearStates();
@@ -3085,7 +3085,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						//#ACHIEVEMENTS: 3 stars mission on any mission
 						if ( nStars == 3 )
 						{
-							UTGetAchievementManager().UnlockAchievement( ACH_3STARS_MISSION );
+							__Achievements().UnlockAchievement( ACH_3STARS_MISSION );
 						}
 
 						///--- SCORE ---
@@ -3177,17 +3177,17 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						App_SaveUserData();
 
 						//--- show windows and change portraits and title text ---
-						UTGetGUI().RemoveAllLayers();
+						__GUI().RemoveAllLayers();
 						//generic changes
 						CCtrlLayer *layer = null;
 						if ( nPlayers == 1 )
-							layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_1P" );
+							layer = __GUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_1P" );
 						else
 						{
 							if ( !UTApp().IsGameNetworked() )
-								layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_2P" );
+								layer = __GUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_2P" );
 							else
-								layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_2P_COOP" );
+								layer = __GUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_2P_COOP" );
 						}
 
 						//report score to steam leaderboards
@@ -3212,17 +3212,17 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 								StringCchPrintfA( pszBoardName, MAX_PATH, strFormat, K_GAME_STR_LEADERBOARDS_PREFIX_COOP, m_nLoadedChapter + 1, m_nLoadedLevel + 1 );
 							}
 							//reset old scores
-							UTGetLeaderboards().ResetScoresList();
+							__Leaderboards().ResetScoresList();
 							//reset strings too
 							__Texts().SetString( STR_LEADERBOARDS_NAMES_VAL, L"..." );
 							__Texts().SetString( STR_LEADERBOARDS_SCORES_VAL, L"..." );
 							__Texts().SetString( STR_LEADERBOARDS_PLAYERSCORE_VAL, L"..." );
 							//now upload score
-							UTGetLeaderboards().QueueJob( K_JOB_UPLOAD_SCORE, pszBoardName, nTotalLevelScore );
+							__Leaderboards().QueueJob( K_JOB_UPLOAD_SCORE, pszBoardName, nTotalLevelScore );
 							//request downloading of scores
-							UTGetLeaderboards().QueueJob( K_JOB_GET_SCORES_AROUND_USER, pszBoardName );
+							__Leaderboards().QueueJob( K_JOB_GET_SCORES_AROUND_USER, pszBoardName );
 							//request downloading of your own score - only if needed (when leaderboards don't update instantly)
-							//UTGetLeaderboards().QueueJob(K_JOB_GET_SCORE_FOR_CURRENT_USER, pszBoardName, 0);
+							//__Leaderboards().QueueJob(K_JOB_GET_SCORE_FOR_CURRENT_USER, pszBoardName, 0);
 						}
 #endif
 
@@ -3365,13 +3365,13 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 				{
 #ifdef ENABLE_LEADERBOARDS
 					//show leaderboard when pressing melee key (any controller)
-					if ( ( UTGetCtrlrMgr().KeyPressed( K_CM_COMMAND_MELEE ) ) && ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE ) )
+					if ( ( __Controllers().KeyPressed( K_CM_COMMAND_MELEE ) ) && ( m_unLoadedLevelFlags == K_LVL_LEVEL_FLAG_NONE ) )
 					{
-						CCtrlLayer* lay = UTGetGUI().GetLayerByName( "LAYER_ID_LEADERBOARDS_IGM" );
+						CCtrlLayer* lay = __GUI().GetLayerByName( "LAYER_ID_LEADERBOARDS_IGM" );
 						if ( lay == null )
 						{
 							//show layer
-							lay = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEADERBOARDS_IGM" );
+							lay = __GUI().ShowLayerOnce( "LAYER_ID_LEADERBOARDS_IGM" );
 							if ( lay )
 							{
 								CControl* ctrl = null;
@@ -3396,9 +3396,9 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 								ctrl = lay->GetControlByName( "CTRL_SCORESLIST_TT" );
 								if ( ctrl != null )
 								{
-									int nPlIdx = UTGetLeaderboards().GetDownloadedScores_PlayerIndex();
+									int nPlIdx = __Leaderboards().GetDownloadedScores_PlayerIndex();
 									ctrl->paramsDict.SetVarINT32( L"nSelectedIdx", nPlIdx );
-									ctrl->paramsDict.SetVarINT32( L"nOptionsCnt", UTGetLeaderboards().GetDownloadedScoresCount() );
+									ctrl->paramsDict.SetVarINT32( L"nOptionsCnt", __Leaderboards().GetDownloadedScoresCount() );
 #ifndef ENABLE_LEADERBOARDS_NAMES_SELECTION
 									ctrl->bCanHaveFocus = false;
 									ctrl->paramsDict.SetVarBool( L"bUserCanSelect", false );
@@ -3421,7 +3421,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 			{
 				g_netlock.Net_UpdateLevelResults( dTime );
 				//show net votes
-				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
+				CCtrlLayer* layer = __GUI().GetTopmostInputLayer();
 				if ( layer )
 				{
 					CControl* ctrl;
@@ -3483,7 +3483,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
 						nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
 						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
-						UTGetEventManager().QueueEvent( nevent );
+						__Events().QueueEvent( nevent );
 					}
 					//clear command
 					g_netlock.Net_LevelResultsClearStates();
@@ -3501,7 +3501,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
 						nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
 						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
-						UTGetEventManager().QueueEvent( nevent );
+						__Events().QueueEvent( nevent );
 					}
 					//clear command
 					g_netlock.Net_LevelResultsClearStates();
@@ -3522,7 +3522,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						if ( g_netlock.m_arrLvlResPeerStates[g_netlock.Net_GetOtherPlayerIndex()] == CNetLock::sPacketLevelResults::K_LEVRES_STATE_CLICKED_CANCEL )
 							nevent->AddNamedArgINT32( L"stateErrorStrIdx", STR_NETWORK_ERROR_PLAYER_LEFT );
 
-						UTGetEventManager().QueueEvent( nevent );
+						__Events().QueueEvent( nevent );
 					}
 					//clear command
 					g_netlock.Net_LevelResultsClearStates();
@@ -3622,8 +3622,8 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						//--- show windows and change portraits and title text ---
 						if ( nPlayers == 1 )
 						{
-							UTGetGUI().RemoveAllLayers();
-							CCtrlLayer* layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELFAIL_1P" );
+							__GUI().RemoveAllLayers();
+							CCtrlLayer* layer = __GUI().ShowLayerOnce( "LAYER_ID_LEVELFAIL_1P" );
 							if ( layer != null )
 							{
 								CControl* ctrl = layer->GetControlByName( "CTRL_STARS" );
@@ -3664,13 +3664,13 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						}
 						else //2 players
 						{
-							UTGetGUI().RemoveAllLayers();
+							__GUI().RemoveAllLayers();
 
 							CCtrlLayer* layer = null;
 							if ( !UTApp().IsGameNetworked() )
-								layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELFAIL_2P" );
+								layer = __GUI().ShowLayerOnce( "LAYER_ID_LEVELFAIL_2P" );
 							else
-								layer = UTGetGUI().ShowLayerOnce( "LAYER_ID_LEVELFAIL_2P_COOP" );
+								layer = __GUI().ShowLayerOnce( "LAYER_ID_LEVELFAIL_2P_COOP" );
 
 							if ( layer != null )
 							{
@@ -4118,8 +4118,8 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
-	UTGetShaderManager().SetVS( nullptr );
-	UTGetShaderManager().SetPS( nullptr );
+	__Shaders().SetVS( nullptr );
+	__Shaders().SetPS( nullptr );
 
 	CTexNode* pTexToUse = m_pTexTilesColor;
 	// Offset in texture index so we paint from the normals texture when we render the normals pass
@@ -4166,7 +4166,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 	///--- BEGIN SPRITES PAINTER ---
-	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName( L"VS_SPRITES2D" );
+	PVERTEXSHADER pSprVS = __Shaders().GetVShaderByName( L"VS_SPRITES2D" );
 	if ( pSprVS )
 		__Painter().Begin( pSprVS, matView, *matProj );
 
@@ -4225,7 +4225,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	__Painter().End();
 
 	// top layer of tiles
-	UTGetShaderManager().SetVS( nullptr );
+	__Shaders().SetVS( nullptr );
 	m_pDevice->SetTexture( 0, m_pTexTilesColor->pTexture );
 	Areas_PaintLayer( K_AL_CEILINGS );
 
@@ -4279,7 +4279,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	// matWVP is used by level
 	Mat matWVP = matView * ( *matProj );
 	// begin the painter
-	PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName( L"VS_SPRITES2D" );
+	PVERTEXSHADER pSprVS = __Shaders().GetVShaderByName( L"VS_SPRITES2D" );
 	if ( pSprVS )
 		__Painter().Begin( pSprVS, matView, *matProj );
 
@@ -4329,8 +4329,8 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	}
 	*/
 
-	UTGetShaderManager().SetVS( nullptr );
-	UTGetShaderManager().SetPS( nullptr );
+	__Shaders().SetVS( nullptr );
+	__Shaders().SetPS( nullptr );
 
 	///--- directional lights (under shadow)
 	//#TODO: should be completely removed....
@@ -4353,8 +4353,8 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	///--- ambient light(s)
 	// paint all general ambient lights and area lights here
 	//#TODO: paint one ambiental per area!
-	UTGetShaderManager().SetVS( nullptr );
-	UTGetShaderManager().SetPS( nullptr );
+	__Shaders().SetVS( nullptr );
+	__Shaders().SetPS( nullptr );
 
 	m_pDevice->SetTexture( 0, nullptr );
 	m_pDevice->SetTexture( 1, nullptr );
@@ -4431,12 +4431,12 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 		m_pDevice->SetTexture( 0, pRT->m_pRTTexture );
 	}
 	// VS
-	UTGetShaderManager().SetVSByName( L"VS_POINTLIGHT" );
-	UTGetShaderManager().SetVertexDeclaration( K_SHM_PNCT4T4 );
-	UTGetShaderManager().SetVSConstantF( 0, ( float* ) &matWVP, 4 );
-	UTGetShaderManager().SetVSConstantF( 4, ( float* ) fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
+	__Shaders().SetVSByName( L"VS_POINTLIGHT" );
+	__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+	__Shaders().SetVSConstantF( 0, ( float* ) &matWVP, 4 );
+	__Shaders().SetVSConstantF( 4, ( float* ) fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
 	// PS
-	UTGetShaderManager().SetPSByName( L"PS_POINTLIGHT" );
+	__Shaders().SetPSByName( L"PS_POINTLIGHT" );
 
 	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 	{
@@ -4454,7 +4454,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 			// xyz: light world position
 			{ nl->pos.xyz.x, nl->pos.xyz.y, nl->pos.xyz.z, 0.0f }
 		};
-		UTGetShaderManager().SetPSConstantF( 0, ( float* ) fConstData, ARRAY_SIZE( fConstData ) );
+		__Shaders().SetPSConstantF( 0, ( float* ) fConstData, ARRAY_SIZE( fConstData ) );
 		m_bufferedPainter.DrawMesh( nl->m_nLightMeshIdx, false );
 	}
 
@@ -4467,12 +4467,12 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_POINT );
 	m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
 
-	UTGetShaderManager().SetVSByName( L"VS_PROJECTEDDIR" );
-	UTGetShaderManager().SetVertexDeclaration( K_SHM_PNCT4T4 );
-	UTGetShaderManager().SetVSConstantF( 0, ( float* ) &matWVP, 4 );
-	UTGetShaderManager().SetVSConstantF( 4, ( float* ) fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
+	__Shaders().SetVSByName( L"VS_PROJECTEDDIR" );
+	__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+	__Shaders().SetVSConstantF( 0, ( float* ) &matWVP, 4 );
+	__Shaders().SetVSConstantF( 4, ( float* ) fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
 
-	UTGetShaderManager().SetPSByName( L"PS_PROJECTEDDIR" );
+	__Shaders().SetPSByName( L"PS_PROJECTEDDIR" );
 	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
@@ -4494,7 +4494,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 			// xy: UL tex spot coords; zw: WH spot width height
 			{ nl->lTexRect.left, nl->lTexRect.top, nl->lTexRect.right - nl->lTexRect.left, nl->lTexRect.bottom - nl->lTexRect.top }
 		};
-		UTGetShaderManager().SetPSConstantF( 0, ( float* ) fConstData, ARRAY_SIZE( fConstData ) );
+		__Shaders().SetPSConstantF( 0, ( float* ) fConstData, ARRAY_SIZE( fConstData ) );
 		m_bufferedPainter.DrawMesh( nl->m_nLightMeshIdx, false );
 	}
 
@@ -4506,12 +4506,12 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_POINT );
 	m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
 	// VS
-	UTGetShaderManager().SetVSByName( L"VS_POINTLIGHT" );
-	UTGetShaderManager().SetVertexDeclaration( K_SHM_PNCT4T4 );
-	UTGetShaderManager().SetVSConstantF( 0, ( float* ) &matWVP, 4 );
-	UTGetShaderManager().SetVSConstantF( 4, ( float* ) fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
+	__Shaders().SetVSByName( L"VS_POINTLIGHT" );
+	__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+	__Shaders().SetVSConstantF( 0, ( float* ) &matWVP, 4 );
+	__Shaders().SetVSConstantF( 4, ( float* ) fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
 	// PS
-	UTGetShaderManager().SetPSByName( L"PS_IESLIGHT" );
+	__Shaders().SetPSByName( L"PS_IESLIGHT" );
 
 	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 	{
@@ -4533,12 +4533,12 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 			// light direction normalized
 			{ nl->vnDir.x, nl->vnDir.y, nl->vnDir.z, 0.0f }
 		};
-		UTGetShaderManager().SetPSConstantF( 0, ( float* ) fConstData, ARRAY_SIZE( fConstData ) );
+		__Shaders().SetPSConstantF( 0, ( float* ) fConstData, ARRAY_SIZE( fConstData ) );
 		m_bufferedPainter.DrawMesh( nl->m_nLightMeshIdx, false );
 	}
 
-	UTGetShaderManager().SetVS( nullptr );
-	UTGetShaderManager().SetPS( nullptr );
+	__Shaders().SetVS( nullptr );
+	__Shaders().SetPS( nullptr );
 
 
 	DeviceAdditiveOFF( m_pDevice );
@@ -4612,12 +4612,12 @@ OPRESULT CLevel::RenderPass_Composition( Mat* matProj, float fBetweenFramesPerce
 	lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 	lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
-	pVShader = UTGetShaderManager().GetVShaderByName( L"VS_COMPOSITION" );
+	pVShader = __Shaders().GetVShaderByName( L"VS_COMPOSITION" );
 	m_pDevice->SetVertexShader( pVShader );
-	m_pDevice->SetVertexDeclaration( UTGetShaderManager()._VERTEX_PNCT4T4_decl );
+	m_pDevice->SetVertexDeclaration( __Shaders()._VERTEX_PNCT4T4_decl );
 	m_pDevice->SetVertexShaderConstantF( 0, ( float* ) &matWVP, 4 );
 
-	pPShader = UTGetShaderManager().GetPShaderByName( L"PS_COMPOSITION" );
+	pPShader = __Shaders().GetPShaderByName( L"PS_COMPOSITION" );
 	m_pDevice->SetPixelShader( pPShader );
 	// set Pshader constants
 	float fGamma = 2.2f;
@@ -5006,10 +5006,10 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	{
 		DWORD colEffect = DW_COLORALPHA( 0xff000088, 1.0f - m_fTimeMultiplier_real );
 		Mat mattrans;
-		RectXYWH bbox = UTGetGUI().m_sprCol.GetAFrameBBox_real( ANM_CONTROLS_SPR_VIGNETTES, 1 );
+		RectXYWH bbox = __GUI().m_sprCol.GetAFrameBBox_real( ANM_CONTROLS_SPR_VIGNETTES, 1 );
 		MUMatAffine2D( &mattrans, rectRender.h / bbox.h, nullptr, 0.0f, &rectRender.Center() );
 		m_pSprite->SetTransform( &mattrans );
-		CSprite::paintFrame( &UTGetGUI().m_sprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, 1, colEffect );
+		CSprite::paintFrame( &__GUI().m_sprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, 1, colEffect );
 		m_pSprite->Flush();
 	}
 
@@ -5268,7 +5268,7 @@ void CLevel::IncreaseLevelStatistics( int K_LVL_STATS_n, int nValueToAdd /*= 1*/
 				( pPlayerActor[0] != null ) &&
 				( !IsNetworkPlayer( pPlayerActor[0] ) ) )
 			{
-				UTGetAchievementManager().UnlockAchievement( ACH_TERMINATOR );
+				__Achievements().UnlockAchievement( ACH_TERMINATOR );
 			}
 		}
 		break;
@@ -5278,7 +5278,7 @@ void CLevel::IncreaseLevelStatistics( int K_LVL_STATS_n, int nValueToAdd /*= 1*/
 				( pPlayerActor[1] != null ) &&
 				( !IsNetworkPlayer( pPlayerActor[1] ) ) )
 			{
-				UTGetAchievementManager().UnlockAchievement( ACH_TERMINATOR );
+				__Achievements().UnlockAchievement( ACH_TERMINATOR );
 			}
 		}
 		break;
@@ -5288,7 +5288,7 @@ void CLevel::IncreaseLevelStatistics( int K_LVL_STATS_n, int nValueToAdd /*= 1*/
 				( pPlayerActor[0] != null ) &&
 				( !IsNetworkPlayer( pPlayerActor[0] ) ) )
 			{
-				UTGetAchievementManager().UnlockAchievement( ACH_STAY_WITH_ME );
+				__Achievements().UnlockAchievement( ACH_STAY_WITH_ME );
 			}
 		}
 		break;
@@ -5298,7 +5298,7 @@ void CLevel::IncreaseLevelStatistics( int K_LVL_STATS_n, int nValueToAdd /*= 1*/
 				( pPlayerActor[1] != null ) &&
 				( !IsNetworkPlayer( pPlayerActor[1] ) ) )
 			{
-				UTGetAchievementManager().UnlockAchievement( ACH_STAY_WITH_ME );
+				__Achievements().UnlockAchievement( ACH_STAY_WITH_ME );
 			}
 		}
 		break;

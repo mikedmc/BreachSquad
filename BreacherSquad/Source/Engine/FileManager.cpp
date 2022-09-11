@@ -20,7 +20,7 @@ void FileManager::GetMediaPath(const WCHAR *wsMediaName, WCHAR wsRetPath[MAX_PAT
 	else
 	{
 		WCHAR wsPath[MAX_PATH_STD];
-		bool bModFound = UTGetModsManager().GetFullPathForFile(wsMediaName, wsPath, MAX_PATH_STD);
+		bool bModFound = __Mods().GetFullPathForFile(wsMediaName, wsPath, MAX_PATH_STD);
 		if (bModFound)
 		{
 			StringCchCopy(wsRetPath, MAX_PATH_STD, wsPath);

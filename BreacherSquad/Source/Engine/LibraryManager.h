@@ -42,5 +42,5 @@ public:
 };
 
 
-//declar singletonul
-CLibraryManager& UTGetLibraryManager();
+// Library manager singleton
+CLibraryManager& __LibraryManager();

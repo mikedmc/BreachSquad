@@ -11,22 +11,22 @@
 //#TODO: daca face probleme la alt+tab la volume la sunete, le seteaza toate din nou ca si in versiunile vechi
 //#TODO: silenceGroup, silenceDuration si silenceVolume - specifica la ce grup da volumul mai mic, pe ce durata si la ce volum seteaza. Pentru sunetele care, atunci cand playaza, trebuie sa dea muzica mai incet.
 
-#define SND_PLAY_FLAGS(sndID, sndFlags)					UTGetSoundManager().Play(sndID, sndFlags)
-#define SND_PLAY(sndID)									UTGetSoundManager().Play(sndID, 0)
-#define SND_PAUSE(sndID, bFadeout)						UTGetSoundManager().Stop(sndID, bFadeout, false)
-#define SND_STOP(sndID, bFadeout)						UTGetSoundManager().Stop(sndID, bFadeout)
-#define SND_STOP_ONE_BUFFER(sndID, bReset)				UTGetSoundManager().StopOneBuffer(sndID, bReset);
-#define SND_SET_FREQUENCY(sndID, fFreq)					UTGetSoundManager().SetFrequency(sndID, fFreq)
-#define SND_PLAY_FADEIN(sndID, maxVol, sndFlags)		UTGetSoundManager().PlayFadeIn(sndID, maxVol, sndFlags)
-#define SND_PLAY_ONCE(sndID, sndFlags)					{if(!UTGetSoundManager().IsPlaying(sndID)) UTGetSoundManager().Play(sndID, sndFlags);}
-#define SND_SET_GROUP_VOLUME(groupID, fVolume, bFade)	UTGetSoundManager().SetGroupVolume(groupID, fVolume, bFade)
-#define SND_SET_GROUP_FREQUENCY(sGroupName, fFrequency, bFade)	UTGetSoundManager().SetGroupFrequency(sGroupName, fFrequency, bFade)
-#define SND_STOP_GROUP(groupID, bFadeOut, bResetSound)	UTGetSoundManager().StopGroup(groupID, bFadeOut, bResetSound)
-#define SND_IS_PLAYING(nSndIdxOrName)					UTGetSoundManager().IsPlaying(nSndIdxOrName)
+#define SND_PLAY_FLAGS(sndID, sndFlags)					__Audio().Play(sndID, sndFlags)
+#define SND_PLAY(sndID)									__Audio().Play(sndID, 0)
+#define SND_PAUSE(sndID, bFadeout)						__Audio().Stop(sndID, bFadeout, false)
+#define SND_STOP(sndID, bFadeout)						__Audio().Stop(sndID, bFadeout)
+#define SND_STOP_ONE_BUFFER(sndID, bReset)				__Audio().StopOneBuffer(sndID, bReset);
+#define SND_SET_FREQUENCY(sndID, fFreq)					__Audio().SetFrequency(sndID, fFreq)
+#define SND_PLAY_FADEIN(sndID, maxVol, sndFlags)		__Audio().PlayFadeIn(sndID, maxVol, sndFlags)
+#define SND_PLAY_ONCE(sndID, sndFlags)					{if(!__Audio().IsPlaying(sndID)) __Audio().Play(sndID, sndFlags);}
+#define SND_SET_GROUP_VOLUME(groupID, fVolume, bFade)	__Audio().SetGroupVolume(groupID, fVolume, bFade)
+#define SND_SET_GROUP_FREQUENCY(sGroupName, fFrequency, bFade)	__Audio().SetGroupFrequency(sGroupName, fFrequency, bFade)
+#define SND_STOP_GROUP(groupID, bFadeOut, bResetSound)	__Audio().StopGroup(groupID, bFadeOut, bResetSound)
+#define SND_IS_PLAYING(nSndIdxOrName)					__Audio().IsPlaying(nSndIdxOrName)
 //--- POSITIONAL MACROS ---
-#define SND_PLAY_POSITIONAL(sndIDX, vVector)			UTGetSoundManager().PlayPositional(sndIDX, vVector, 0)
-#define SND_PLAY_POSITIONAL_RAND2(sndIDX1, sndIDX2, vVector)			UTGetSoundManager().PlayPositionalRand2(sndIDX1, sndIDX2, vVector, 0)
-#define SND_SET_LISTENER_POS(vVector)					UTGetSoundManager().SetListenerPos(vVector)
+#define SND_PLAY_POSITIONAL(sndIDX, vVector)			__Audio().PlayPositional(sndIDX, vVector, 0)
+#define SND_PLAY_POSITIONAL_RAND2(sndIDX1, sndIDX2, vVector)			__Audio().PlayPositionalRand2(sndIDX1, sndIDX2, vVector, 0)
+#define SND_SET_LISTENER_POS(vVector)					__Audio().SetListenerPos(vVector)
 
 
 //numar default de buffere
@@ -214,7 +214,5 @@ public:
 };
 
 
-///**************************************************************************************
-/// Sigleton 
-///**************************************************************************************
-CSoundManager& UTGetSoundManager();
+// Sounds Manager singleton. Loads all sounds and plays them
+CSoundManager& __Audio();

@@ -1,5 +1,6 @@
 #pragma once
 #include "MissionStory.h"
+#include "AreasInventory.h"
 
 // deadlock counter (sometimes it oscillates indifinetly between 2 generations)
 #define K_LGEN_LOCK_WATCHDOG_COUNT  100
@@ -103,7 +104,7 @@ class CMissionGenerator
 private:
 	CRandom						m_rand;				// RNG
 	RectXYWHi					m_levelAABB;		// level AABB after generation (in tiles)
-	
+	CAreasInventory				m_areasInventory;	// inventory of areas loaded from file
 
 public:
 	std::vector<CInventoryArea> m_arrInventory;
@@ -112,8 +113,12 @@ public:
 public:
 	CMissionGenerator();
 	~CMissionGenerator();
+	// Loads the available areas specs from the specs file
+	// FORMAT: <Area File="area0" BlocksW="2" BlocksH="2" ConnectorsDesc="1U1R" Tags="" />
+	OPRESULT					LoadAreasSpecs( WCHAR* strXMLPath );
+
 	// Builds the inventory from available areas
-	void						BuildInventory(std::vector<CAreaSpecs>& arrAreas);
+	void						BuildInventory();
 	// Releases all areas descriptors
 	void						Release();
 
@@ -154,4 +159,4 @@ public:
 ///----------------------------------------------------------------------------------
 /// Handles random missions generation
 ///----------------------------------------------------------------------------------
-CMissionGenerator& UTGetMissionGen();
+CMissionGenerator& __MissionGen();

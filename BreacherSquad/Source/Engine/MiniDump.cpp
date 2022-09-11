@@ -81,7 +81,7 @@ LONG WINAPI CreateMiniDump( struct _EXCEPTION_POINTERS *pep )
 	// send analytics
 	ANALYTICS_EVENT("crashdump", _VERSION_CHARSTR_, "CRC", UTApp().m_Settings.dev_unCurrentCRC);
 	//force an update
-	UTGetAnalytics().Update();
+	__Analytics().Update();
 
 	// create dump file name with time-stamp
 	SYSTEMTIME systime;

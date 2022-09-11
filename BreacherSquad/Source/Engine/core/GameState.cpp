@@ -51,7 +51,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 				ErrorBox( K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath );
 			}
 
-			UTGetGUI().RemoveAllLayers( true );
+			__GUI().RemoveAllLayers( true );
 		}
 		break;
 		case GAME_STATE_GAME:
@@ -67,26 +67,26 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 #ifdef ENABLE_LEADERBOARDS
 			//upload multiplayer score
 			if ( g_userData[ K_MEMID_TOTAL_SCORE_COOP ] > 0 )
-				UTGetLeaderboards().QueueJob( K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_COOP, g_userData[ K_MEMID_TOTAL_SCORE_COOP ] );
+				__Leaderboards().QueueJob( K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_COOP, g_userData[ K_MEMID_TOTAL_SCORE_COOP ] );
 			//upload single player score so that current leaderboard remains the single player one
 			if ( g_userData[ K_MEMID_TOTAL_SCORE_SOLO ] > 0 )
-				UTGetLeaderboards().QueueJob( K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, g_userData[ K_MEMID_TOTAL_SCORE_SOLO ] );
+				__Leaderboards().QueueJob( K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, g_userData[ K_MEMID_TOTAL_SCORE_SOLO ] );
 #endif
 			//must be called here to reset controller flags
-			UTGetCtrlrMgr().ResetAllControllersKeypresses();
+			__Controllers().ResetAllControllersKeypresses();
 			//stop all sounds
-			UTGetSoundManager().StopGroup( "sounds", false, true );
-			UTGetSoundManager().StopGroup( "ingame", false, true );
+			__Audio().StopGroup( "sounds", false, true );
+			__Audio().StopGroup( "ingame", false, true );
 
 			SND_SET_GROUP_FREQUENCY( "ingame", 1.0f, false );
 
 			__Sim().Release();
 			// level was unloaded, immediately set the controller pointer to null
-			UTGetCtrlrMgr().SetNormalizeCoordsFunctionPtr( nullptr );
+			__Controllers().SetNormalizeCoordsFunctionPtr( nullptr );
 
-			UTGetGUI().RemoveAllLayers( true );
+			__GUI().RemoveAllLayers( true );
 
-			UTGetSoundManager().StopGroup( "music", false, true );
+			__Audio().StopGroup( "music", false, true );
 			if ( newState != GAME_STATE_GAME )
 			{
 				SND_PLAY_ONCE( SNDIDX_THEME_MENU1, DSBPLAY_LOOPING );
@@ -110,8 +110,8 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 
 		case GAME_STATE_WORKSHOP:
 		{
-			UTGetSoundManager().StopGroup( "sounds", false, true );
-			UTGetGUI().RemoveAllLayers( true );
+			__Audio().StopGroup( "sounds", false, true );
+			__GUI().RemoveAllLayers( true );
 			//release used textures here:
 			UTApp().g_texManager.Release();
 			//make sure we reload everything that can be modded
@@ -140,8 +140,8 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 
 		case GAME_STATE_JOIN_COOP_LIST:
 		{
-			UTGetSoundManager().StopGroup( "sounds", false, true );
-			UTGetGUI().RemoveAllLayers( true );
+			__Audio().StopGroup( "sounds", false, true );
+			__GUI().RemoveAllLayers( true );
 		}
 		break;
 
@@ -151,8 +151,8 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 		case GAME_STATE_LEVEL_SELECTION:
 		case GAME_STATE_MAINMENU:
 		{
-			UTGetSoundManager().StopGroup( "sounds", false, true );
-			UTGetGUI().RemoveAllLayers( true );
+			__Audio().StopGroup( "sounds", false, true );
+			__GUI().RemoveAllLayers( true );
 			//release used textures here:
 			UTApp().g_texManager.Release();
 		}
@@ -186,7 +186,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 #endif
 
 			nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
-			UTGetEventManager().QueueEvent( nevent );
+			__Events().QueueEvent( nevent );
 		}
 		break;
 		case GAME_STATE_DEVELOPER:
@@ -259,7 +259,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 
 			__Texts().SetString( STR_LOBBIES_LIST_VAL, L"%s", __Texts().strings[ STR_PLEASE_HANG ]->sText );
 			//add the window
-			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce( "LAYER_ID_LOBBIES_LIST" );
+			CCtrlLayer* lay = __GUI().ShowLayerOnce( "LAYER_ID_LOBBIES_LIST" );
 			if ( lay != null )
 			{
 				CControl* ctrl = lay->GetControlByName( "BUT_JOIN_LOBBY" );
@@ -292,10 +292,10 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 
 			//show window
 #ifdef ENABLE_STEAM
-			UTGetGUI().ShowLayerOnce( "LAYER_ID_QUICK_MATCH_INVITE" );
+			__GUI().ShowLayerOnce( "LAYER_ID_QUICK_MATCH_INVITE" );
 #endif
 #ifdef ENABLE_GALAXY
-			UTGetGUI().ShowLayerOnce( "LAYER_ID_QUICK_MATCH" );
+			__GUI().ShowLayerOnce( "LAYER_ID_QUICK_MATCH" );
 #endif
 			//change menu on net lobby background
 			g_mainMenu.SetState( K_MM_STATE_NET_LOBBY );
@@ -402,12 +402,12 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 			//release main menu class
 			g_mainMenu.Release();
 			// set the controller pointer normalization function (gets set to nullptr when not in game)
-			UTGetCtrlrMgr().SetNormalizeCoordsFunctionPtr( NormalizeIngameMouseCoords );
+			__Controllers().SetNormalizeCoordsFunctionPtr( NormalizeIngameMouseCoords );
 
 			//reset all scripts
-			UTGetScriptManager().StopAllScripts();
+			__Scripts().StopAllScripts();
 			//clear global memory - nothing stays between levels
-			UTGetScriptManager().ClearGlobalMemory();
+			__Scripts().ClearGlobalMemory();
 
 			//loads the level
 			if ( g_userData[ K_MEMID_MOD_DWNLVL_SELECTED ] < 0 )
@@ -449,7 +449,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 			{
 				//modded custom levels
 #ifdef ENABLE_STEAM_WORKSHOP
-				CModsManager::CModDescriptor *mod = UTGetModsManager().GetModDescByIndex( g_userData[ K_MEMID_MOD_DWNLVL_SELECTED ] );
+				CModsManager::CModDescriptor *mod = __Mods().GetModDescByIndex( g_userData[ K_MEMID_MOD_DWNLVL_SELECTED ] );
 				if ( mod == nullptr )
 				{
 					ErrorBox( K_ERR_WARNING, L"Couldn't find custom level!" );
@@ -482,7 +482,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 #ifdef K_CONTROLS_EDITOR
 		case GAME_STATE_CONTROLSED:
 		{
-			UTGetGUI().RemoveAllLayers( true );
+			__GUI().RemoveAllLayers( true );
 			g_ControlsEditor.Launch();
 			__ImGui().SetGlobalEnabled( true );
 		}
@@ -494,7 +494,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 	CEvent *nevent = new CEvent( CEventTypes::evtT_INFO, CEventCommands::evtC_GAMESTATE_CHANGE);
 	nevent->AddNamedArgUINT32( L"newGameState", state);
 	nevent->AddNamedArgUINT32( L"oldGameState", oldGameState);
-	UTGetEventManager().QueueEvent( nevent );
+	__Events().QueueEvent( nevent );
 }
 
 
@@ -578,11 +578,11 @@ void GameState::PaintTransition( float dTime, float fTimeline, PDEVICE pDevice )
 					float fAlpha = LIMIT( 1.5f * fTransitionPercent, 0.0f, 1.0f );
 					DrawRectUP_TL1T( pDevice, rect, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ), DW_COLOR_XXXA( fAlpha ) );
 					//write "loading"
-					if ( ( UTGetGUI().m_sprCol.IsLoaded() ) && ( fAlpha >= 0.95f ) )
+					if ( ( __GUI().m_sprCol.IsLoaded() ) && ( fAlpha >= 0.95f ) )
 					{
 						CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_cam360hScreen );
 						RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
-						CSprite::paintFrame( &UTGetGUI().m_sprCol, scrrect.Right() - 3, scrrect.Bottom() - 3, ANM_CONTROLS_SPR_LOADING_ICONS, 0, 0x88ffffff );
+						CSprite::paintFrame( &__GUI().m_sprCol, scrrect.Right() - 3, scrrect.Bottom() - 3, ANM_CONTROLS_SPR_LOADING_ICONS, 0, 0x88ffffff );
 					}
 				}
 				break;

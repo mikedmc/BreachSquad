@@ -80,5 +80,5 @@ public:
 	void Update(float dTime, float fTimeLine);
 };
 
-//declar singletonul - vom avea mereu o singura clasa de mesaje
-CEventManager& UTGetEventManager();
+// Event Manager singleton. Producer-router-consumer
+CEventManager& __Events();

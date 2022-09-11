@@ -56,7 +56,5 @@ class CAchievementManager
 		bool						IncStat(EGameStats eStat, float fAddValue = 1.0f);
 };
 
-///**************************************************************************************
-/// Sigleton de acces
-///**************************************************************************************
-CAchievementManager& UTGetAchievementManager();
+// Achievements manager singleton
+CAchievementManager& __Achievements();

@@ -80,5 +80,5 @@ public:
 	int									GetActiveModsCountByType(eModType eSelType);
 };
 
-///--- SINGLETON ---
-CModsManager& UTGetModsManager();
+// Mods Manager singleton
+CModsManager& __Mods();

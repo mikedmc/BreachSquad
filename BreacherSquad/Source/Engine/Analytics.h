@@ -13,11 +13,11 @@
 #define K_ANALYTICS_PATH_TO_SERVICE "http://www.google-analytics.com/collect"
 
 //--- triggers and event ---
-#define ANALYTICS_EVENT(strCategory, strAction, strLabel, uint32Value)  UTGetAnalytics().TriggerEvent(strCategory, strAction, strLabel, uint32Value)
+#define ANALYTICS_EVENT(strCategory, strAction, strLabel, uint32Value)  __Analytics().TriggerEvent(strCategory, strAction, strLabel, uint32Value)
 //--- triggers a page view ---
-#define ANALYTICS_PAGEVIEW(strHostname, strPage, strTitle)				UTGetAnalytics().TriggerPageView(strHostname, strPage, strTitle)
+#define ANALYTICS_PAGEVIEW(strHostname, strPage, strTitle)				__Analytics().TriggerPageView(strHostname, strPage, strTitle)
 //--- triggers a screenview ---
-#define ANALYTICS_SCREENVIEW(strScreenName)		UTGetAnalytics().TriggerScreenView(strScreenName, "BreacherSquad", _VERSION_CHARSTR_, "psh.dk.breachersquad", "valve.steam")
+#define ANALYTICS_SCREENVIEW(strScreenName)		__Analytics().TriggerScreenView(strScreenName, "BreacherSquad", _VERSION_CHARSTR_, "psh.dk.breachersquad", "valve.steam")
 
 #if defined(K_GAME_ENABLE_ANALYTICS)
 
@@ -109,5 +109,5 @@ public:
 
 #endif
 
-//declar singletonul de acces
-CAnalytics& UTGetAnalytics();
+// Analytics singleton
+CAnalytics& __Analytics();

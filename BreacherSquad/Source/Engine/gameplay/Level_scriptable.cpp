@@ -182,12 +182,12 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					UINT32 unBits = g_userData[K_MEMID_SECRET_ITEMS_FLAGS] & 0xfffff;
 					int nCollectedCnt = UTMath::CountBits(unBits);
 					//save collected
-					UTGetAchievementManager().SetStat(EGameStats::N_STAT_SECRET_ITEMS, (float)nCollectedCnt);
+					__Achievements().SetStat(EGameStats::N_STAT_SECRET_ITEMS, (float)nCollectedCnt);
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 					if (nCollectedCnt >= 20)
-						UTGetAchievementManager().UnlockAchievement(ACH_COMPLETIONIST);
+						__Achievements().UnlockAchievement(ACH_COMPLETIONIST);
 #endif
-					UTGetAchievementManager().UnlockAchievement(ACH_LOOKS_INTERESTING);
+					__Achievements().UnlockAchievement(ACH_LOOKS_INTERESTING);
 					//set string for hint
 					__Texts().ReplaceTokenInt(STR_SECRETS_COLLECTED_VAL, STR_SECRETS_COLLECTED_NN, 1, nCollectedCnt);
 					__Texts().ReplaceTokenInt(STR_SECRETS_COLLECTED_VAL, STR_SECRETS_COLLECTED_VAL, 2, 20);
@@ -582,7 +582,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					// set on 0 if not found
 					CVariant* narg = new CVariant();
 					narg->Set_INT32(vcLocalVar->m_strArg.text, 0);
-					UTGetScriptManager().SetLocalVar(scriptUID, narg);
+					__Scripts().SetLocalVar(scriptUID, narg);
 					LOG(L"SCRIPT::IACTIVE_GET_AI_PARAM - AIparam not found. Setting destVar on 0\n");
 					return true;
 				}
@@ -592,7 +592,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				AIparam.asString(AIparamValue, MAX_PATH);
 
 				narg->Set_AUTO(vcLocalVar->m_strArg.text, AIparamValue);
-				UTGetScriptManager().SetLocalVar(scriptUID, narg);
+				__Scripts().SetLocalVar(scriptUID, narg);
 			}
 			else
 			{

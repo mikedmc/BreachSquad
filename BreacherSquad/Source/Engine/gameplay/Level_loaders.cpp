@@ -103,14 +103,14 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	V_OP_RET(m_story.LoadStory(Path));
 
 	// build inventory and generate level
-	auto arrAreas = UTGetAreasInv().GetAreas();
-	UTGetMissionGen().BuildInventory(arrAreas);
-	if (!UTGetMissionGen().GenerateLevelFromStory(&m_story))
+	__MissionGen().BuildInventory();
+	//if (!UTGetMissionGen().GenerateLevelFromStory(&m_story))
+//		return K_OP_FAILED;
+	if ( !__MissionGen().GenerateLevelRandomly( 3 ) )
 		return K_OP_FAILED;
-	//UTGetMissionGen().GenerateLevelRandomly(3);
 
 	///--- LOAD AREAS:
-	for (auto area : UTGetMissionGen().m_arrPlaced)
+	for (auto area : __MissionGen().m_arrPlaced)
 	{
 		WCHAR tmppath[MAX_PATH];
 		swprintf_s(tmppath, MAX_PATH, L"media/levels/areas/%s.area", area->strAreaFile.c_str());
@@ -124,7 +124,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		// order in m_arrAreas SHOULD correspond to the order in m_arrPlaced if area loading didn't fail
 		CLevelArea* plarea = m_arrAreas[ii];
 		// get the same area description from missions generator and find neighbours
-		CPlacedArea* srcarea = UTGetMissionGen().m_arrPlaced[ii];
+		CPlacedArea* srcarea = __MissionGen().m_arrPlaced[ii];
 		for (const auto& conn : srcarea->arrConnections)
 		{
 			CLevelArea* neigh = Areas_GetByID(conn.pConnectedArea->nID);
@@ -227,9 +227,9 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	}
 
 	// release mission generator data
-	UTGetMissionGen().Release();
+	__MissionGen().Release();
 	//clear global script memory (per level instance)
-	UTGetScriptManager().ClearGlobalMemory();
+	__Scripts().ClearGlobalMemory();
 	//reset time multiplier
 	SetTimeMultiplier(1.0f, 0.0f);
 	// compute dirty rects (collisions and walls, wall shadows and other data)
@@ -771,7 +771,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 						if (wcscmp(wvarname, L"str_script") == 0)
 						{
 							//am citit primul parametru iar valoarea lui este bsx-ul fundalului deci incarc fundalul
-							UTGetScriptManager().StartScript(wvarval);
+							__Scripts().StartScript(wvarval);
 						}
 					}
 				}

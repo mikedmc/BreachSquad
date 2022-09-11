@@ -94,7 +94,7 @@ void CGalaxyStatsAndAchievements::OnUserStatsAndAchievementsRetrieveSuccess(gala
 	// load stats
 	for (int iStat = 0; iStat < N_STATS_CNT; ++iStat)
 	{
-		SGameStat &stat = UTGetAchievementManager().g_Stats[iStat];
+		SGameStat &stat = __Achievements().g_Stats[iStat];
 		switch (stat.m_eStatType)
 		{
 			case STAT_INT:
@@ -131,7 +131,7 @@ void CGalaxyStatsAndAchievements::OnUserStatsAndAchievementsRetrieveSuccess(gala
 	// load achievements
 	for (int iAch = 0; iAch < ACH_ACHIEVEMENTS_CNT; ++iAch)
 	{
-		SGameAchievement &ach = UTGetAchievementManager().g_Achievements[iAch];
+		SGameAchievement &ach = __Achievements().g_Achievements[iAch];
 
 		uint32_t unlockedTime = 0;
 		galaxy::api::Stats()->GetAchievement(ach.m_pchAchievementID, ach.m_bAchieved, unlockedTime);

@@ -614,7 +614,7 @@ void CGalaxyLeaderboards::OnPersonaDataChanged(galaxy::api::GalaxyID userID, uin
 /// Sigleton de acces
 ///**************************************************************************************
 
-CGalaxyLeaderboards& UTGetLeaderboards()
+CGalaxyLeaderboards& __Leaderboards()
 {
 	static CGalaxyLeaderboards g_GalaxyLeaderboards;
 	return g_GalaxyLeaderboards;

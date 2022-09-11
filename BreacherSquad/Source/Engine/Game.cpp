@@ -100,7 +100,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 
 		case GAME_STATE_PLAYER_SELECTION:
 		{
-			if ( ( !GameState::isTransitioning() ) && ( !UTGetGUI().bIsBlocking ) )
+			if ( ( !GameState::isTransitioning() ) && ( !__GUI().bIsBlocking ) )
 				g_playerSelScr.Update( fElapsedTime );
 		}
 		break;
@@ -110,7 +110,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 			//update list on timer
 			if ( g_timers.Tick( 2000 ) )
 			{
-				CCtrlLayer* lay = UTGetGUI().GetTopmostInputLayer();
+				CCtrlLayer* lay = __GUI().GetTopmostInputLayer();
 				//disable the refresh button if still working
 				if ( lay != null )
 				{
@@ -185,7 +185,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 		case GAME_STATE_LEVEL_SELECTION:
 		case GAME_STATE_CHAPTER_SELECTION:
 		{
-			if ( ( !GameState::isTransitioning() ) && ( !UTGetGUI().bIsBlocking ) )
+			if ( ( !GameState::isTransitioning() ) && ( !__GUI().bIsBlocking ) )
 				g_mainMenu.Update( fElapsedTime );
 		}
 		break;
@@ -195,7 +195,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 			if ( GameState::isTransitioning() )
 				break;
 			//update background
-			if ( !UTGetGUI().bIsBlocking )
+			if ( !__GUI().bIsBlocking )
 				g_mainMenu.Update( fElapsedTime );
 
 			//update lobby
@@ -211,35 +211,35 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 			//offer to reset the user data
 			if ( g_userData[ K_MEMID_OFFER_RESET_USER_DATA ] != 0 )
 			{
-				UTGetGUI().ShowLayerOnce( "LAYER_ID_RESET_PROGRESS_EA" );
+				__GUI().ShowLayerOnce( "LAYER_ID_RESET_PROGRESS_EA" );
 				g_userData[ K_MEMID_OFFER_RESET_USER_DATA ] = 0;
 			}
 
-			if ( ( !GameState::isTransitioning() ) && ( !UTGetGUI().bIsBlocking ) )
+			if ( ( !GameState::isTransitioning() ) && ( !__GUI().bIsBlocking ) )
 				g_mainMenu.Update( fElapsedTime );
 
 			//always check to see if menu exists
 #ifdef ENABLE_STEAM_WORKSHOP
-			if ( UTGetGUI().GetLayerByName( "LAYER_ID_MAINMENU" ) == null )
+			if ( __GUI().GetLayerByName( "LAYER_ID_MAINMENU" ) == null )
 			{
-				UTGetGUI().ShowLayerOnce( "LAYER_ID_MAINMENU" );
+				__GUI().ShowLayerOnce( "LAYER_ID_MAINMENU" );
 			}
 #else
-			if ( UTGetGUI().GetLayerByName( "LAYER_ID_MAINMENU_NOWORKSHOP" ) == null )
+			if ( __GUI().GetLayerByName( "LAYER_ID_MAINMENU_NOWORKSHOP" ) == null )
 			{
-				UTGetGUI().ShowLayerOnce( "LAYER_ID_MAINMENU_NOWORKSHOP" );
+				__GUI().ShowLayerOnce( "LAYER_ID_MAINMENU_NOWORKSHOP" );
 			}
 #endif
 
-			for (auto & arrController : UTGetCtrlrMgr().m_arrControllers)
+			for (auto & arrController : __Controllers().m_arrControllers)
 			{
 				if ( arrController->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED )
 				{
-					CCtrlLayer* layer = UTGetGUI().GetLayerByName( "LAYER_ID_QUITGAME" );
-					if ( ( layer == null ) && ( !UTGetGUI().bIsBlocking ) )
+					CCtrlLayer* layer = __GUI().GetLayerByName( "LAYER_ID_QUITGAME" );
+					if ( ( layer == null ) && ( !__GUI().bIsBlocking ) )
 					{
 						SND_PLAY( SNDIDX_CLICK );
-						UTGetGUI().ShowLayerOnce( "LAYER_ID_QUITGAME" );
+						__GUI().ShowLayerOnce( "LAYER_ID_QUITGAME" );
 					}
 					/*
 					//windows close when pressing back

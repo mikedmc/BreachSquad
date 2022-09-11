@@ -139,9 +139,7 @@ class CSteamLeaderboards
 		STEAM_CALLBACK( CSteamLeaderboards, OnPersonaStateChange, PersonaStateChange_t, m_CallbackPersonaStateChange );
 };
 
-///**************************************************************************************
-/// Sigleton de acces
-///**************************************************************************************
-CSteamLeaderboards& UTGetLeaderboards();
+// Leaderboards manager singleton
+CSteamLeaderboards& __Leaderboards();
 
 #endif

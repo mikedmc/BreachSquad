@@ -126,11 +126,11 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			*/
 
 			///--- CONTROLS ---
-			UTGetGUI().Init();
+			__GUI().Init();
 
 			WCHAR xmlpath[MAX_PATH];
 			FileManager::GetMediaPath(L"media/interfaces/interfaces.xml", xmlpath);
-			if (OP_FAILED(UTGetGUI().LoadControlsXML(xmlpath)))
+			if (OP_FAILED(__GUI().LoadControlsXML(xmlpath)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load interfaces sprites!");
 				return;
@@ -138,8 +138,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 
 			///--- level areas inventory ---
 			FileManager::GetMediaPath(L"media/levels/areas/areas_list.xml", xmlpath);
-			if (OP_FAILED(UTGetAreasInv().LoadAreasSpecs(xmlpath)))
-				return;
+			V_OP_RET_VOID( __MissionGen().LoadAreasSpecs( xmlpath ) );
 		}
 		break;
 		case 4:
@@ -150,7 +149,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			WCHAR xmlpath[MAX_PATH];
 			///--- SOUNDS ---
 			FileManager::GetMediaPath(L"media/sounds/sounds.xml", xmlpath);
-			if (FAILED(hr = UTGetSoundManager().LoadSoundsXML(xmlpath)))
+			if (FAILED(hr = __Audio().LoadSoundsXML(xmlpath)))
 			{
 				ErrorBox(K_ERR_WARNING, L"Failed INITSOUND->LoadSoundsXML()\n");
 			}
@@ -171,12 +170,12 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 
 			WCHAR xmlpath[MAX_PATH];
 			FileManager::GetMediaPath(L"media/scripts.xml", xmlpath);
-			UTGetScriptManager().AddScripts(xmlpath);
+			__Scripts().AddScripts(xmlpath);
 			///--- SHADERS ---
 			// no modding support on shaders!
 			WCHAR mszPath[MAX_PATH];
 			StringCchPrintf(mszPath, MAX_PATH, L"%s/shaders/shaders.xml", UTApp().g_wszAppResDir);
-			if (OP_FAILED(UTGetShaderManager().AddShadersFromXML(mszPath)))
+			if (OP_FAILED(__Shaders().AddShadersFromXML(mszPath)))
 			{
 				ErrorBox(K_ERR_CRITICAL, L"Couldn't load shaders XML: %s", mszPath);
 				return;
@@ -219,7 +218,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 				break;
 			}
 
@@ -235,7 +234,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				//set joining state
 				nevent->AddNamedArgINT32(L"arg1", (int)CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 			else //not invited, go to splash
 #endif
@@ -243,7 +242,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 			
 			//from now on we can pause the game
@@ -286,7 +285,6 @@ void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite
 	{
 		float fLoadPerc = GameState::substate / 7.0f;
 		CLAMP( fLoadPerc, 0.0f, 1.0f );
-		LOG( L"loadperc:%d", GameState::substate );
 
 		RectXYWHi bulletrect = g_sprMgrGlobal.GetAFrameBBox( ANM_LOADING_SPR_LOADINGBAR, 0 );
 
@@ -311,20 +309,20 @@ void CApplication::App_ExitState_Loading()
 	//push global scores to leaderboard and request single player leaderboard
 #ifdef ENABLE_LEADERBOARDS
 	//start initialize job
-	UTGetLeaderboards().QueueJob(K_JOB_INITIALIZE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 0);
+	__Leaderboards().QueueJob(K_JOB_INITIALIZE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 0);
 	//reset strings for scores
 	__Texts().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
 	__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 	//reset old scores
-	UTGetLeaderboards().ResetScoresList();
+	__Leaderboards().ResetScoresList();
 	//upload multiplayer score
 	if (g_userData[K_MEMID_TOTAL_SCORE_COOP] > 0)
-		UTGetLeaderboards().QueueJob(K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_COOP, g_userData[K_MEMID_TOTAL_SCORE_COOP]);
+		__Leaderboards().QueueJob(K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_COOP, g_userData[K_MEMID_TOTAL_SCORE_COOP]);
 	//upload single player score so that current leaderboard remains the single player one
 	if (g_userData[K_MEMID_TOTAL_SCORE_SOLO] > 0)
-		UTGetLeaderboards().QueueJob(K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, g_userData[K_MEMID_TOTAL_SCORE_SOLO]);
+		__Leaderboards().QueueJob(K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, g_userData[K_MEMID_TOTAL_SCORE_SOLO]);
 	//request single player scores
-	UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 1);
+	__Leaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 1);
 #endif
 
 }
@@ -349,7 +347,7 @@ void CApplication::App_UpdateState_Developer(LPDIRECT3DDEVICE9 pDevice, double f
 {
 	if ((!GameState::isTransitioning()) && (GameState::fTimer > 0.5f))
 	{
-		if ((g_texManager.GetTextureByIndex(0) == null) || (g_mouse.Lbut != K_MOUSE_BUTT_NOTPRESSED) || (g_mouse.Rbut != K_MOUSE_BUTT_NOTPRESSED) || (UTGetCtrlrMgr().KeyPressed()))
+		if ((g_texManager.GetTextureByIndex(0) == null) || (g_mouse.Lbut != K_MOUSE_BUTT_NOTPRESSED) || (g_mouse.Rbut != K_MOUSE_BUTT_NOTPRESSED) || (__Controllers().KeyPressed()))
 		{
 			GameState::fTimer = 0.5f;
 		}
@@ -365,7 +363,7 @@ void CApplication::App_UpdateState_Developer(LPDIRECT3DDEVICE9 pDevice, double f
 			CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 			nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LOADING);
 			nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-			UTGetEventManager().QueueEvent(nevent);
+			__Events().QueueEvent(nevent);
 		}
 	}
 }

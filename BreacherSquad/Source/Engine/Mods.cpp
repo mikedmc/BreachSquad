@@ -373,9 +373,10 @@ int CModsManager::GetActiveModsCountByType(eModType eSelType)
 }
 
 ///**************************************************************************************
-/// Sigleton de acces
+/// Sigleton
 ///**************************************************************************************
-CModsManager& UTGetModsManager()
+
+CModsManager& __Mods()
 {
 	static CModsManager g_ModsMgr;
 	return g_ModsMgr;

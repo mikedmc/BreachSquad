@@ -538,12 +538,12 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 		else if (nEvent.m_eventCommand == CEventCommands::evtC_SYSTEM_CONTROLLER_ADDED)
 		{
 			__Texts().SetString(STR_TEMP10, L"%s", nEvent.GetArgumentByName(L"strName")->m_strArg.text);
-			UTGetGUI().ShowLayer("LAYER_ID_CTRLR_CONNECTED");
+			__GUI().ShowLayer("LAYER_ID_CTRLR_CONNECTED");
 		}
 		else if (nEvent.m_eventCommand == CEventCommands::evtC_SYSTEM_CONTROLLER_REMOVED)
 		{
 			__Texts().SetString(STR_TEMP10, L"%s", nEvent.GetArgumentByName(L"strName")->m_strArg.text);
-			UTGetGUI().ShowLayer("LAYER_ID_CTRLR_DISCONNECTED");
+			__GUI().ShowLayer("LAYER_ID_CTRLR_DISCONNECTED");
 		}
 	}
 
@@ -582,22 +582,22 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			//ID-uri generice butoane (remove layer, etc)
 			if (ctrlID == HASH("BUT_CLOSE")) //close normal la orice fereastra
 			{
-				UTGetGUI().RemoveTopmostLayer();
+				__GUI().RemoveTopmostLayer();
 				return true;
 			}
 			else if (ctrlID == HASH("BUT_CLOSE_SETTINGS")) //close settings, save settings
 			{
-				UTGetGUI().RemoveTopmostLayer();
+				__GUI().RemoveTopmostLayer();
 				UTApp().SaveSettings();
 				return true;
 			}
 			else if (ctrlID == HASH("BUT_CLOSE_KEYDEF")) //close key redefining
 			{
-				UTGetGUI().RemoveTopmostLayer();
+				__GUI().RemoveTopmostLayer();
 				//save user data (including keys)
 				App_SaveUserData();
 
-				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_OPTIONS_MM");
+				CCtrlLayer* layer = __GUI().ShowLayerOnce("LAYER_ID_OPTIONS_MM");
 				if (layer != null)
 				{
 					CControl* ctrl;
@@ -615,7 +615,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == HASH("BUT_CLOSE_FORCED")) //face close la fereastra fara sa mai faca fade-out
 			{
-				UTGetGUI().RemoveTopmostLayer(true);
+				__GUI().RemoveTopmostLayer(true);
 				return true;
 			}
 			else if (ctrlID == HASH("BUT_EXIT_GAME"))
@@ -644,7 +644,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				}
 				__Texts().SetString(STR_RESOLUTIONS_LIST, wsResStr);
 				//setup controls
-				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_GFX_OPTIONS");
+				CCtrlLayer* layer = __GUI().ShowLayerOnce("LAYER_ID_GFX_OPTIONS");
 				if (layer != null)
 				{
 					CControl* ctrl = null;
@@ -685,7 +685,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				//save old settings so we can see what's changed
 				CApplicationSettings m_SettingsOld = m_Settings;
 
-				CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_GFX_OPTIONS");
+				CCtrlLayer* layer = __GUI().GetLayerByName("LAYER_ID_GFX_OPTIONS");
 				if (layer != null)
 				{
 					CControl* ctrl;
@@ -830,7 +830,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						}
 					}
 					//close layer
-					UTGetGUI().RemoveLayer("LAYER_ID_GFX_OPTIONS");
+					__GUI().RemoveLayer("LAYER_ID_GFX_OPTIONS");
 					//save settings
 					SaveSettings();
 				}
@@ -844,14 +844,14 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-					UTGetEventManager().QueueEvent(nevent);
+					__Events().QueueEvent(nevent);
 				}
 				else
 				{
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
 					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-					UTGetEventManager().QueueEvent(nevent);
+					__Events().QueueEvent(nevent);
 				}
 
 				return true;
@@ -863,7 +863,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
 					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-					UTGetEventManager().QueueEvent(nevent);
+					__Events().QueueEvent(nevent);
 
 					CHAR ctxt[MAX_PATH];
 					StringCchPrintfA(ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL]);
@@ -888,7 +888,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
 					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-					UTGetEventManager().QueueEvent(nevent);
+					__Events().QueueEvent(nevent);
 
 					CHAR ctxt[MAX_PATH];
 					StringCchPrintfA(ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL]);
@@ -899,7 +899,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-					UTGetEventManager().QueueEvent(nevent);
+					__Events().QueueEvent(nevent);
 
 					CHAR ctxt[MAX_PATH];
 					StringCchPrintfA(ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL]);
@@ -916,7 +916,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 			else if (ctrlID == HASH("BUT_HOST_PUBLIC"))
 			{
@@ -926,7 +926,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 			else if (ctrlID == HASH("BUT_HOST_PRIVATE"))
 			{
@@ -936,14 +936,14 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 			else if (ctrlID == HASH("BUT_CLOSE_LOBBIES_LIST"))
 			{
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 			else if (ctrlID == HASH("BUT_CANCEL_LOBBY"))
 			{
@@ -952,12 +952,12 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 			else if (ctrlID == HASH("BUT_JOIN_LOBBY"))
 			{
 				int nLobbyIdx = -1;
-				CCtrlLayer* lay = UTGetGUI().GetTopmostInputLayer();
+				CCtrlLayer* lay = __GUI().GetTopmostInputLayer();
 				if (lay != null)
 				{
 					CControl *ctrl = lay->GetControlByName("CTRL_LOBBIES_SELECTOR");
@@ -979,7 +979,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 					//set joining state
 					nevent->AddNamedArgINT32(L"arg1", (int)CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH);
-					UTGetEventManager().QueueEvent(nevent);
+					__Events().QueueEvent(nevent);
 				}
 			}
 			else if (ctrlID == HASH("BUT_REFRESH_LOBBIES"))
@@ -988,7 +988,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				g_netlock.Net_RequestLobbyList(10);
 				__Texts().SetString(STR_LOBBIES_LIST_VAL, L"%s", __Texts().strings[STR_PLEASE_HANG]->sText);
 
-				CCtrlLayer* lay = UTGetGUI().GetTopmostInputLayer();
+				CCtrlLayer* lay = __GUI().GetTopmostInputLayer();
 				//disable the refresh button if still working
 				if (lay != null)
 				{
@@ -1016,7 +1016,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				//transmit that we want a special case as the next state (game state mode selection takes arg1 and transmits it to g_mainMenu)
 				nevent->AddNamedArgINT32(L"arg1", GAME_STATE_JOIN_COOP_LIST);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 			else if (ctrlID == HASH("BUT_INVITE_TO_LOBBY"))
 			{
@@ -1033,7 +1033,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
 					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-					UTGetEventManager().QueueEvent(nevent);
+					__Events().QueueEvent(nevent);
 				}
 				else //on networked games only send state to peer
 				{
@@ -1059,7 +1059,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 					nevent->AddNamedArgINT32(L"arg1", 0); //reset player selection
 					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-					UTGetEventManager().QueueEvent(nevent);
+					__Events().QueueEvent(nevent);
 
 					CHAR ctxt[MAX_PATH];
 					StringCchPrintfA(ctxt, MAX_PATH, "mission_%d_%d", g_userData[K_MEMID_SELECTED_CHAPTER], g_userData[K_MEMID_SELECTED_LEVEL]);
@@ -1104,7 +1104,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 				}
 
-				UTGetGUI().RemoveTopmostLayer();
+				__GUI().RemoveTopmostLayer();
 
 				return true;
 			}
@@ -1112,7 +1112,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			{
 				int nKeybdIdx = nEvent.GetArgumentByName(L"nMsgParamINT32")->m_asINT32;
 				//trimitem mai departe indexul tastaturii selectate
-				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_RESET_KEYS");
+				CCtrlLayer* layer = __GUI().ShowLayerOnce("LAYER_ID_RESET_KEYS");
 				CControl* ctrl = null;
 				if (ctrl = layer->GetControlByName("BUT_RESET_KEYS"))
 				{
@@ -1121,19 +1121,19 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == HASH("BUT_REDEFINE_KEYS"))
 			{
-				UTGetGUI().ShowLayerOnce("LAYER_ID_REDEFINE_KEYS");
+				__GUI().ShowLayerOnce("LAYER_ID_REDEFINE_KEYS");
 			}
 			else if (ctrlID == HASH("BUT_CREDITS"))
 			{
-				UTGetGUI().ShowLayerOnce("LAYER_ID_CREDITS");
+				__GUI().ShowLayerOnce("LAYER_ID_CREDITS");
 			}
 			else if (ctrlID == HASH("BUT_KEYS_LAYOUT"))
 			{
-				UTGetGUI().ShowLayerOnce("LAYER_ID_KEYMAP");
+				__GUI().ShowLayerOnce("LAYER_ID_KEYMAP");
 			}
 			else if (ctrlID == HASH("BUT_MORE_OPTIONS"))
 			{
-				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_MORE_OPTIONS");
+				CCtrlLayer* layer = __GUI().ShowLayerOnce("LAYER_ID_MORE_OPTIONS");
 				if ( layer != null )
 				{
 					layer->SetControlParam( "CTRL_CHECK_SHAKES", L"bChecked", m_Settings.bScreenShakes );
@@ -1143,19 +1143,19 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == HASH("BUT_CREDITS_MORE"))
 			{
 				//remove credits layer
-				UTGetGUI().RemoveLayer("LAYER_ID_CREDITS");
+				__GUI().RemoveLayer("LAYER_ID_CREDITS");
 				//add additional credits
-				UTGetGUI().ShowLayerOnce("LAYER_ID_CREDITS_MORE");
+				__GUI().ShowLayerOnce("LAYER_ID_CREDITS_MORE");
 			}
 			else if (ctrlID == HASH("BUT_RESET_PROGRESS"))
 			{
-				UTGetGUI().RemoveLayer("LAYER_ID_MORE_OPTIONS");
-				UTGetGUI().ShowLayerOnce("LAYER_ID_RESET_PROGRESS");
+				__GUI().RemoveLayer("LAYER_ID_MORE_OPTIONS");
+				__GUI().ShowLayerOnce("LAYER_ID_RESET_PROGRESS");
 			}
 			//reset XP upgrades
 			else if (ctrlID == HASH("BUT_RESET_UPGRADES"))
 			{
-				CCtrlLayer* lay = UTGetGUI().GetLayerByName("LAYER_ID_PLAYER_UPGRADE");
+				CCtrlLayer* lay = __GUI().GetLayerByName("LAYER_ID_PLAYER_UPGRADE");
 				if (lay != null)
 				{
 					CControl* ctrl = lay->GetControlByName("CTRLID_UPGRADE_PLAYER");
@@ -1182,7 +1182,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			//apply XP upgrades
 			else if (ctrlID == HASH("BUT_ACCEPT_UPGRADE"))
 			{
-				CCtrlLayer* lay = UTGetGUI().GetLayerByName("LAYER_ID_PLAYER_UPGRADE");
+				CCtrlLayer* lay = __GUI().GetLayerByName("LAYER_ID_PLAYER_UPGRADE");
 				if (lay != null)
 				{
 					CControl* ctrl = lay->GetControlByName("CTRLID_UPGRADE_PLAYER");
@@ -1223,7 +1223,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						//save data
 						App_SaveUserData();
 						//hide window
-						UTGetGUI().RemoveLayer(lay->ID.textHash);
+						__GUI().RemoveLayer(lay->ID.textHash);
 					}
 				}
 			}
@@ -1234,7 +1234,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				App_ResetUserData();
 				App_SaveUserData();
 
-				UTGetGUI().RemoveLayer("LAYER_ID_RESET_PROGRESS");
+				__GUI().RemoveLayer("LAYER_ID_RESET_PROGRESS");
 			}
 			else if (ctrlID == HASH("BUT_RESET_PROGRESS_SURE_EA")) //early access version
 			{
@@ -1243,7 +1243,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				App_ResetUserData();
 				App_SaveUserData();
 
-				UTGetGUI().RemoveLayer("LAYER_ID_RESET_PROGRESS_EA");
+				__GUI().RemoveLayer("LAYER_ID_RESET_PROGRESS_EA");
 			}
 			else if (ctrlID == HASH("BUT_LANGUAGE"))
 			{
@@ -1258,8 +1258,8 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				//save lang list
 				__Texts().SetString(STR_TEMP15, txt);
 
-				UTGetGUI().RemoveTopmostLayer();
-				CCtrlLayer *pLay = UTGetGUI().ShowLayerOnce("LAYER_ID_LANGUAGE");
+				__GUI().RemoveTopmostLayer();
+				CCtrlLayer *pLay = __GUI().ShowLayerOnce("LAYER_ID_LANGUAGE");
 				//set selection on current language
 				if (pLay != null)
 				{
@@ -1280,7 +1280,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == HASH("BUT_SELECT_LANGUAGE"))
 			{
 				int nLangIdx = -1;
-				CCtrlLayer *pLay = UTGetGUI().GetLayerByName("LAYER_ID_LANGUAGE");
+				CCtrlLayer *pLay = __GUI().GetLayerByName("LAYER_ID_LANGUAGE");
 				if (pLay != null)
 				{
 					CControl *ctrl = pLay->GetControlByName("CTRL_LANGLIST_TT");
@@ -1290,7 +1290,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 				}
 				//remove layer
-				UTGetGUI().RemoveTopmostLayer();
+				__GUI().RemoveTopmostLayer();
 				//change language
 				if (nLangIdx >= 0)
 				{
@@ -1306,7 +1306,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == HASH("BUT_CTRLR_LAYOUT"))
 			{
-				UTGetGUI().ShowLayerOnce("LAYER_ID_CONTROLLER_MAP");
+				__GUI().ShowLayerOnce("LAYER_ID_CONTROLLER_MAP");
 			}
 #ifdef ENABLE_LEADERBOARDS
 			//leaderboards from main menu, global ones
@@ -1315,12 +1315,12 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				__Texts().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
 				__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 				//request single player scores
-				UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 1);
+				__Leaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 1);
 				//write score for YOUR SCORE label
 				__Texts().SetString(STR_TEMP15, L"%d", g_userData[K_MEMID_TOTAL_SCORE_SOLO]);
 
 				//reset scroll page and save leaderboard index as a payload in this control
-				CCtrlLayer *pLay = UTGetGUI().GetLayerByName("LAYER_ID_LEADERBOARDS_MM");
+				CCtrlLayer *pLay = __GUI().GetLayerByName("LAYER_ID_LEADERBOARDS_MM");
 				if (pLay != null)
 				{
 					// set scores list on empty
@@ -1339,11 +1339,11 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				__Texts().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
 				__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 				//request single player scores
-				UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_COOP, 1);
+				__Leaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_COOP, 1);
 				//write score for YOUR SCORE label
 				__Texts().SetString(STR_TEMP15, L"%d", g_userData[K_MEMID_TOTAL_SCORE_COOP]);
 				//reset scroll page and save leaderboard index as a payload in this control
-				CCtrlLayer *pLay = UTGetGUI().GetLayerByName("LAYER_ID_LEADERBOARDS_MM");
+				CCtrlLayer *pLay = __GUI().GetLayerByName("LAYER_ID_LEADERBOARDS_MM");
 				if (pLay != null)
 				{
 					// set scores list on empty
@@ -1361,7 +1361,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == HASH("BUT_BOARDS_SINGLE_LVL"))
 			{
 				//reset scroll page and save leaderboard index as a payload in this control
-				CCtrlLayer *pLay = UTGetGUI().GetTopmostLayer();
+				CCtrlLayer *pLay = __GUI().GetTopmostLayer();
 				if (pLay != null)
 				{
 					// set scores list on empty
@@ -1380,7 +1380,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			else if (ctrlID == HASH("BUT_BOARDS_COOP_LVL"))
 			{
 				//reset scroll page and save leaderboard index as a payload in this control
-				CCtrlLayer *pLay = UTGetGUI().GetTopmostLayer();
+				CCtrlLayer *pLay = __GUI().GetTopmostLayer();
 				if (pLay != null)
 				{
 					// set scores list on empty
@@ -1406,31 +1406,31 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				{
 					App_ResetKeybindings(0);
 					//change actual triggers
-					CController* keybd1 = UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_IID_KBM1);
+					CController* keybd1 = __Controllers().GetControllerByInstanceID(K_CM_IID_KBM1);
 					CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 					App_SetSDLTriggersFromUserData(keybd1, keybd2);
 
-					UTGetGUI().RemoveTopmostLayer();
+					__GUI().RemoveTopmostLayer();
 					return true;
 				}
 				else //second keyboard
 				{
 					App_ResetKeybindings(1);
 					//change actual triggers
-					CController* keybd1 = UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_IID_KBM1);
+					CController* keybd1 = __Controllers().GetControllerByInstanceID(K_CM_IID_KBM1);
 					CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 					App_SetSDLTriggersFromUserData(keybd1, keybd2);
 
-					UTGetGUI().RemoveTopmostLayer();
+					__GUI().RemoveTopmostLayer();
 					return true;
 				}
 			}
 			else if (ctrlID == HASH("BUT_REDEFINE_KEY1"))
 			{
-				UTGetGUI().RemoveLayer("LAYER_ID_REDEFINE_KEYS");
-				UTGetGUI().RemoveLayer("LAYER_ID_OPTIONS_MM");
+				__GUI().RemoveLayer("LAYER_ID_REDEFINE_KEYS");
+				__GUI().RemoveLayer("LAYER_ID_OPTIONS_MM");
 
-				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_KEYDEFINE");
+				CCtrlLayer* layer = __GUI().ShowLayerOnce("LAYER_ID_KEYDEFINE");
 				if (layer != null)
 				{
 					CControl* ctrl = null;
@@ -1452,10 +1452,10 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			}
 			else if (ctrlID == HASH("BUT_REDEFINE_KEY2"))
 			{
-				UTGetGUI().RemoveLayer("LAYER_ID_REDEFINE_KEYS");
-				UTGetGUI().RemoveLayer("LAYER_ID_OPTIONS_MM");
+				__GUI().RemoveLayer("LAYER_ID_REDEFINE_KEYS");
+				__GUI().RemoveLayer("LAYER_ID_OPTIONS_MM");
 
-				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_KEYDEFINE");
+				CCtrlLayer* layer = __GUI().ShowLayerOnce("LAYER_ID_KEYDEFINE");
 				if (layer != null)
 				{
 					CControl* ctrl = null;
@@ -1507,7 +1507,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			if ((ctrlID == HASH("CTRL_CHECK_BORDERLESS")) ||
 					 (ctrlID == HASH("CTRL_CHECK_FULLSCREEN"))	)
 			{
-				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
+				CCtrlLayer* layer = __GUI().GetTopmostInputLayer();
 				if (layer != nullptr)
 				{
 					bool bFS = false, bBorderless = false;
@@ -1528,7 +1528,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				return true;
 			}
 			else if (ctrlID == HASH( "CTRL_CHECK_SHAKES" )) {
-				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
+				CCtrlLayer* layer = __GUI().GetTopmostInputLayer();
 				if ( layer != nullptr )
 				{
 					CControl* ctrl;
@@ -1537,7 +1537,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				}
 			}
 			else if (ctrlID == HASH( "CTRL_CHECK_GORE" )) {
-				CCtrlLayer* layer = UTGetGUI().GetTopmostInputLayer();
+				CCtrlLayer* layer = __GUI().GetTopmostInputLayer();
 				if ( layer != nullptr )
 				{
 					CControl* ctrl;
@@ -1557,7 +1557,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			if (ctrlID == HASH("CTRL_SCORESLIST_TT"))
 			{
 				int nLeaderboardID = 0;
-				CCtrlLayer* pLay = UTGetGUI().GetLayerByNameHash(layerID);
+				CCtrlLayer* pLay = __GUI().GetLayerByNameHash(layerID);
 				//#HACK: get leaderboards type from the controls's payload
 				if (pLay != null)
 				{
@@ -1573,15 +1573,15 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						ctrl->paramsDict.SetVarINT32(L"nOptionsCnt", 0);
 					}
 				}
-				if (!UTGetLeaderboards().IsBusy())
+				if (!__Leaderboards().IsBusy())
 				{
 					__Texts().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
 					__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 
 					if (nLeaderboardID == 0)
-						UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 1 + nPageIdx * K_LB_SCORES_LIST_SIZE);
+						__Leaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 1 + nPageIdx * K_LB_SCORES_LIST_SIZE);
 					else
-						UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_COOP, 1 + nPageIdx * K_LB_SCORES_LIST_SIZE);
+						__Leaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_COOP, 1 + nPageIdx * K_LB_SCORES_LIST_SIZE);
 				}
 
 				return true;
@@ -1605,16 +1605,16 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				if (nKeycode == SDL_SCANCODE_ESCAPE)
 				{
 					//hide layer
-					UTGetGUI().RemoveTopmostLayer();
+					__GUI().RemoveTopmostLayer();
 				}
 				else if ((nKeycode >= SDL_SCANCODE_F1) && (nKeycode <= SDL_SCANCODE_F12))
 				{
-					UTGetGUI().MessageBoxOK(STR_WARNING, STR_KEY_INVALID);
+					__GUI().MessageBoxOK(STR_WARNING, STR_KEY_INVALID);
 				}
 				else
 				{
 					//hide layer
-					UTGetGUI().RemoveTopmostLayer();
+					__GUI().RemoveTopmostLayer();
 					//overwrite user command
 					for (int kk = K_MEMID_KEYSALL_START; kk <= K_MEMID_KEYSALL_END; kk++)
 					{
@@ -1626,7 +1626,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					int nKeysOff = K_MEMID_KEYS2_FIRSTITEM - K_MEMID_KEYS1_FIRSTITEM;
 					g_userData[K_MEMID_KEY1_LEFT + (nKeyboardOrdinal * nKeysOff) + nSDLcommand] = nKeycode;
 					//change actual triggers
-					CController* keybd1 = UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_IID_KBM1);
+					CController* keybd1 = __Controllers().GetControllerByInstanceID(K_CM_IID_KBM1);
 					CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 					App_SetSDLTriggersFromUserData(keybd1, keybd2);
 				}
@@ -1650,7 +1650,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 
 				if (__Sim().ActivateSpecialAbility(nSelectedIdx, nSDLinstanceID))
 				{
-					UTGetGUI().RemoveTopmostLayer();
+					__GUI().RemoveTopmostLayer();
 				}
 
 				return true;
@@ -1659,7 +1659,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 			{
 				int nLangIdx = nEvent.GetArgumentByName(L"nSelectedIdx")->m_asINT32;
 				//remove layer
-				UTGetGUI().RemoveTopmostLayer();
+				__GUI().RemoveTopmostLayer();
 				//change language
 				if (nLangIdx >= 0)
 				{
@@ -1694,7 +1694,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						//set joining state
 						nevent->AddNamedArgINT32(L"arg1", (int)CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH);
-						UTGetEventManager().QueueEvent(nevent);
+						__Events().QueueEvent(nevent);
 					}
 				}
 				return true;
@@ -1707,7 +1707,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				int command = selection % nKeysOff;
 				int keyboardOrdinal = selection / nKeysOff;
 
-				CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_KEYGRAB");
+				CCtrlLayer* layer = __GUI().ShowLayerOnce("LAYER_ID_KEYGRAB");
 				CControl* ctrl = null;
 				if (layer != null)
 				{
@@ -1732,7 +1732,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					case STR_COOP:
 					{
 #ifdef ENABLE_NETWORKING
-						UTGetGUI().ShowLayerOnce("LAYER_ID_COOP_WND");
+						__GUI().ShowLayerOnce("LAYER_ID_COOP_WND");
 #endif
 					}
 					break;
@@ -1743,7 +1743,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_WORKSHOP);
 						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
+						__Events().QueueEvent(nevent);
 #endif					
 					}
 					break;
@@ -1756,7 +1756,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
+						__Events().QueueEvent(nevent);
 					}
 					break;
 					case STR_LEADERBOARDS:
@@ -1766,11 +1766,11 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						__Texts().SetString(STR_LEADERBOARDS_NAMES_VAL, L"...");
 						__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 						//request single player scores
-						UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 1);
+						__Leaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, 1);
 						//write score for YOUR SCORE label
 						__Texts().SetString(STR_TEMP15, L"%d", g_userData[K_MEMID_TOTAL_SCORE_SOLO]);
 
-						CCtrlLayer* pLay = UTGetGUI().ShowLayerOnce("LAYER_ID_LEADERBOARDS_MM");
+						CCtrlLayer* pLay = __GUI().ShowLayerOnce("LAYER_ID_LEADERBOARDS_MM");
 						//reset scroll page and save leaderboard index as a payload in this control
 						if (pLay != null)
 						{
@@ -1791,12 +1791,12 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					break;
 					case STR_CREDITS:
 					{
-						UTGetGUI().ShowLayerOnce("LAYER_ID_CREDITS");
+						__GUI().ShowLayerOnce("LAYER_ID_CREDITS");
 					}
 					break;
 					case STR_OPTIONS:
 					{
-						CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_OPTIONS_MM");
+						CCtrlLayer* layer = __GUI().ShowLayerOnce("LAYER_ID_OPTIONS_MM");
 						if (layer != null)
 						{
 							CControl* ctrl;
@@ -1812,7 +1812,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					}
 					break;
 					case STR_EXIT:
-						UTGetGUI().ShowLayerOnce("LAYER_ID_QUITGAME");
+						__GUI().ShowLayerOnce("LAYER_ID_QUITGAME");
 						break;
 				}
 				return true;
@@ -1827,17 +1827,17 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 						nevent->AddNamedArgINT32(L"arg1", 0); //reset player selection
 						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
+						__Events().QueueEvent(nevent);
 					}
 					break;
 					case STR_QUIT:
 					{
-						UTGetGUI().ShowLayerOnce("LAYER_ID_QUITLEVEL");
+						__GUI().ShowLayerOnce("LAYER_ID_QUITLEVEL");
 					}
 					break;
 					case STR_OPTIONS:
 					{
-						CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_OPTIONS_IGM");
+						CCtrlLayer* layer = __GUI().ShowLayerOnce("LAYER_ID_OPTIONS_IGM");
 						if (layer != null)
 						{
 							CControl* ctrl;
@@ -1856,7 +1856,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					default:
 					{
 						SND_PLAY(SNDIDX_DENIED);
-						UTGetGUI().RemoveTopmostLayer();
+						__GUI().RemoveTopmostLayer();
 					}
 					break;
 				}
@@ -1869,13 +1869,13 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 				{
 					case STR_QUIT:
 					{
-						UTGetGUI().ShowLayerOnce("LAYER_ID_QUITLEVEL_NET");
+						__GUI().ShowLayerOnce("LAYER_ID_QUITLEVEL_NET");
 					}
 					break;
 
 					case STR_OPTIONS:
 					{
-						CCtrlLayer* layer = UTGetGUI().ShowLayerOnce("LAYER_ID_OPTIONS_IGM");
+						CCtrlLayer* layer = __GUI().ShowLayerOnce("LAYER_ID_OPTIONS_IGM");
 						if (layer != null)
 						{
 							CControl* ctrl;
@@ -1912,7 +1912,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 							}
 
 							//close menu
-							UTGetGUI().RemoveTopmostLayer();
+							__GUI().RemoveTopmostLayer();
 						}
 					}
 					break;
@@ -1921,7 +1921,7 @@ bool CApplication::HandleEvent(CEvent &nEvent)
 					default:
 					{
 						SND_PLAY(SNDIDX_DENIED);
-						UTGetGUI().RemoveTopmostLayer();
+						__GUI().RemoveTopmostLayer();
 					}
 					break;
 				}
@@ -2060,7 +2060,7 @@ void CApplication::PollSDLControllers()
 			{
 				if (!bIgnoreMouse)
 				{
-					UTGetCtrlrMgr().OnSDLMouseMove(e.motion);
+					__Controllers().OnSDLMouseMove(e.motion);
 				}
 			}
 			break;
@@ -2068,7 +2068,7 @@ void CApplication::PollSDLControllers()
 			{
 				if (!bIgnoreMouse)
 				{
-					UTGetCtrlrMgr().OnSDLMouseButton(e.button);
+					__Controllers().OnSDLMouseButton(e.button);
 				}
 			}
 			break;
@@ -2076,7 +2076,7 @@ void CApplication::PollSDLControllers()
 			{
 				if (!bIgnoreMouse)
 				{
-					UTGetCtrlrMgr().OnSDLMouseButton(e.button);
+					__Controllers().OnSDLMouseButton(e.button);
 				}
 			}
 			break;
@@ -2084,41 +2084,41 @@ void CApplication::PollSDLControllers()
 			//-- keyboard ---
 			case SDL_KEYDOWN:
 			{
-				UTGetCtrlrMgr().OnSDLKeypress(e.key, true);
+				__Controllers().OnSDLKeypress(e.key, true);
 				//send key up event to controls manager (for key redefining mostly)
-				UTGetGUI().ReceiveInput(K_CCTRLMGR_INPUT_SDL_KEY, 1, (int)e.key.keysym.scancode);
+				__GUI().ReceiveInput(K_CCTRLMGR_INPUT_SDL_KEY, 1, (int)e.key.keysym.scancode);
 			}
 			break;
 			case SDL_KEYUP:
 			{
-				UTGetCtrlrMgr().OnSDLKeypress(e.key, false);
+				__Controllers().OnSDLKeypress(e.key, false);
 				//send key up event to controls manager
-				UTGetGUI().ReceiveInput(K_CCTRLMGR_INPUT_SDL_KEY, 0, (int)e.key.keysym.scancode);
+				__GUI().ReceiveInput(K_CCTRLMGR_INPUT_SDL_KEY, 0, (int)e.key.keysym.scancode);
 			}
 			break;
 			//--- controllers ---
 			case SDL_CONTROLLERDEVICEADDED:
 			{
-				UTGetCtrlrMgr().AddSDLController(e.cdevice.which);
+				__Controllers().AddSDLController(e.cdevice.which);
 			}
 			break;
 
 			case SDL_CONTROLLERDEVICEREMOVED:
 			{
-				UTGetCtrlrMgr().RemoveSDLController(e.cdevice.which);
+				__Controllers().RemoveSDLController(e.cdevice.which);
 			}
 			break;
 
 			case SDL_CONTROLLERBUTTONDOWN:
 			case SDL_CONTROLLERBUTTONUP:
 			{
-				UTGetCtrlrMgr().OnSDLControllerButton(e.cbutton);
+				__Controllers().OnSDLControllerButton(e.cbutton);
 			}
 			break;
 
 			case SDL_CONTROLLERAXISMOTION:
 			{
-				UTGetCtrlrMgr().OnSDLControllerAxis(e.caxis);
+				__Controllers().OnSDLControllerAxis(e.caxis);
 			}
 			break;
 		}
@@ -2151,10 +2151,10 @@ void CApplication::App_OnLevelFinished(int nEpisodeIdx, int nLevelIdx)
 
 	//3 stars all on chapter
 	if ((arr_ach_3_stars[nEpisodeIdx] >= 0) && (nStarsPerChapter == 3 * K_GAME_LEVELS_PER_CHAPTER))
-		UTGetAchievementManager().UnlockAchievement((EGameAchievements)arr_ach_3_stars[nEpisodeIdx]);
+		__Achievements().UnlockAchievement((EGameAchievements)arr_ach_3_stars[nEpisodeIdx]);
 	//all levels finished in chapter
 	if ((arr_ach_all_played[nEpisodeIdx] >= 0) && (nLevelsFinishedPerChapter == K_GAME_LEVELS_PER_CHAPTER))
-		UTGetAchievementManager().UnlockAchievement((EGameAchievements)arr_ach_all_played[nEpisodeIdx]);
+		__Achievements().UnlockAchievement((EGameAchievements)arr_ach_all_played[nEpisodeIdx]);
 }
 
 

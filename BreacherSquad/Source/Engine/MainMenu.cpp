@@ -81,14 +81,14 @@ void CMainMenu::SetState(EMM_State neState, int nArg1 /*= 0*/)
 		case K_MM_STATE_MAINMENU:
 		{
 #ifdef ENABLE_STEAM_WORKSHOP
-			if (UTGetGUI().GetLayerByName("LAYER_ID_MAINMENU") == null)
+			if (__GUI().GetLayerByName("LAYER_ID_MAINMENU") == null)
 			{
-				UTGetGUI().ShowLayerOnce("LAYER_ID_MAINMENU");
+				__GUI().ShowLayerOnce("LAYER_ID_MAINMENU");
 			}
 #else
-			if (UTGetGUI().GetLayerByName("LAYER_ID_MAINMENU_NOWORKSHOP") == null)
+			if (__GUI().GetLayerByName("LAYER_ID_MAINMENU_NOWORKSHOP") == null)
 			{
-				UTGetGUI().ShowLayerOnce("LAYER_ID_MAINMENU_NOWORKSHOP");
+				__GUI().ShowLayerOnce("LAYER_ID_MAINMENU_NOWORKSHOP");
 			}
 #endif
 			//timer used for highlighting of DK2 ad
@@ -151,9 +151,9 @@ void CMainMenu::SetState(EMM_State neState, int nArg1 /*= 0*/)
 			m_nSelElements = 0;
 			//we'll save data in m_arrSelItems like this: 
 			//foreach mod in SINGLE_LEVEL_MODS: imageIndex in texManager, mission type(hostage, bomb, etc), mod index in arrMods
-			for (int kk = 0; kk < UTGetModsManager().m_arrMods.GetSize(); kk++)
+			for (int kk = 0; kk < __Mods().m_arrMods.GetSize(); kk++)
 			{
-				CModsManager::CModDescriptor* mod = UTGetModsManager().m_arrMods[kk];
+				CModsManager::CModDescriptor* mod = __Mods().m_arrMods[kk];
 				if (mod->eType != CModsManager::K_MOD_TYPE_SINGLE_LEVEL)
 					continue;
 				if (mod->bActive == false)
@@ -224,7 +224,7 @@ void CMainMenu::SetState(EMM_State neState, int nArg1 /*= 0*/)
 			int arrAchiev[] = { -1, ACH_TROUBLEMAKERS_ARRIVING, ACH_THINGS_HEATING_UP, ACH_METRO_CALLING, ACH_HELL_IS_COMING, -1, ACH_GOING_HOME, -1, -1, -1 };
 			if ((arrAchiev[nSelChapter] >= 0) && (UTGetChaptersList().IsChapterUnlocked(nSelChapter, g_userData[K_MEMID_MISSIONS_COMPLETED])))
 			{
-				UTGetAchievementManager().UnlockAchievement((EGameAchievements)arrAchiev[nSelChapter]);
+				__Achievements().UnlockAchievement((EGameAchievements)arrAchiev[nSelChapter]);
 			}
 		}
 		break;
@@ -261,9 +261,9 @@ bool CMainMenu::RequestLeaderboardsUpdate(bool bCoop)
 	__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, L"...");
 	__Texts().SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, L"...");
 	//request downloading of scores
-	UTGetLeaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, pszBoardName, 1);
+	__Leaderboards().QueueJob(K_JOB_GET_SCORES_GLOBAL, pszBoardName, 1);
 	//request downloading of your own score
-	UTGetLeaderboards().QueueJob(K_JOB_GET_SCORE_FOR_CURRENT_USER, pszBoardName, 0);
+	__Leaderboards().QueueJob(K_JOB_GET_SCORE_FOR_CURRENT_USER, pszBoardName, 0);
 #endif
 
 	return true;
@@ -278,9 +278,9 @@ void CMainMenu::Update(float dTime)
 
 	ECtrlMgrCommandType eCommand = K_CCTRLMGR_COMMAND_NONE;
 	//aleg din controllere doar comenzile necesare clasei
-	for (int kk = 0; kk < UTGetCtrlrMgr().m_arrControllers.size(); kk++)
+	for (int kk = 0; kk < __Controllers().m_arrControllers.size(); kk++)
 	{
-		CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[kk];
+		CController* ctrlr = __Controllers().m_arrControllers[kk];
 		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_X) < 0.0f))
 			eCommand = K_CCTRLMGR_COMMAND_LEFT;
 		if ((ctrlr->GetButState(K_CM_COMMAND_MOVE_X) == K_CM_BUTSTATE_JUSTPRESSED) && (ctrlr->GetAxisVal(K_CM_COMMAND_MOVE_X) > 0.0f))
@@ -330,10 +330,10 @@ void CMainMenu::Update(float dTime)
 					Workshop_CheckSubscriptions();
 
 					//load mods images
-					for (int ll = 0; ll < UTGetModsManager().m_arrMods.GetSize(); ll++)
+					for (int ll = 0; ll < __Mods().m_arrMods.GetSize(); ll++)
 					{
 						m_arrSelItems[ll] = -1;
-						CModsManager::CModDescriptor* nmod = UTGetModsManager().m_arrMods[ll];
+						CModsManager::CModDescriptor* nmod = __Mods().m_arrMods[ll];
 						WCHAR strImgPath[MAX_PATH];
 						if (nmod->GetFullPathToModImage(strImgPath, MAX_PATH))
 						{
@@ -349,7 +349,7 @@ void CMainMenu::Update(float dTime)
 					}
 
 					//count mods
-					m_nSelElements = UTGetModsManager().m_arrMods.GetSize();
+					m_nSelElements = __Mods().m_arrMods.GetSize();
 					//initialize paging data
 					m_bSelectionMade = false;
 					m_nSelection = 0;
@@ -450,7 +450,7 @@ void CMainMenu::Update(float dTime)
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
+						__Events().QueueEvent(nevent);
 					}
 
 					//back button selection rectangle
@@ -532,12 +532,12 @@ void CMainMenu::Update(float dTime)
 							m_bSelectionMade = true;
 
 							//save mods status
-							UTGetModsManager().SaveModsToCacheFile();
+							__Mods().SaveModsToCacheFile();
 
 							CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 							nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 							nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-							UTGetEventManager().QueueEvent(nevent);
+							__Events().QueueEvent(nevent);
 
 							SND_PLAY(SNDIDX_DENIED);
 							break;
@@ -546,7 +546,7 @@ void CMainMenu::Update(float dTime)
 						//act on command
 						if ((m_nSelection >= 0) && (m_nSelection < m_nSelElements))
 						{
-							CModsManager::CModDescriptor *mod = UTGetModsManager().GetModDescByIndex(m_nSelection);
+							CModsManager::CModDescriptor *mod = __Mods().GetModDescByIndex(m_nSelection);
 							if (mod != null)
 							{
 								SND_PLAY(SNDIDX_CLICK);
@@ -554,9 +554,9 @@ void CMainMenu::Update(float dTime)
 								// Is mod still compatible (when activating, is inactive now) ?
 								if (mod->bActive == false)
 								{
-									if (!UTGetModsManager().IsCompatibleWithCurrentVersion(mod))
+									if (!__Mods().IsCompatibleWithCurrentVersion(mod))
 									{
-										UTGetGUI().MessageBoxOK(STR_WARNING, STR_MOD_INCOMPATIBLE_MSG);
+										__GUI().MessageBoxOK(STR_WARNING, STR_MOD_INCOMPATIBLE_MSG);
 										//SND_PLAY(SNDIDX_DENIED);
 										//bAllGood = false;
 									}
@@ -564,11 +564,11 @@ void CMainMenu::Update(float dTime)
 								// try to activate the mod, checking for conflicts
 								if (bAllGood)
 								{
-									CModsManager::CModDescriptor* pConflicting = UTGetModsManager().SetModActive(mod, !mod->bActive);
+									CModsManager::CModDescriptor* pConflicting = __Mods().SetModActive(mod, !mod->bActive);
 
 									if (pConflicting != null)
 									{
-										UTGetGUI().MessageBoxOK(STR_WARNING, STR_MOD_CONFLICTING_MSG);
+										__GUI().MessageBoxOK(STR_WARNING, STR_MOD_CONFLICTING_MSG);
 										SND_PLAY(SNDIDX_DENIED);
 										bAllGood = false;
 									}
@@ -686,7 +686,7 @@ void CMainMenu::Update(float dTime)
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 
 			//back button selection rectangle
@@ -743,7 +743,7 @@ void CMainMenu::Update(float dTime)
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-					UTGetEventManager().QueueEvent(nevent);
+					__Events().QueueEvent(nevent);
 
 					SND_PLAY(SNDIDX_DENIED);
 					break;
@@ -765,7 +765,7 @@ void CMainMenu::Update(float dTime)
 								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_JOIN_COOP_LIST);
 								nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-								UTGetEventManager().QueueEvent(nevent);
+								__Events().QueueEvent(nevent);
 								break;
 							}
 
@@ -775,7 +775,7 @@ void CMainMenu::Update(float dTime)
 								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_CHAPTER_SELECTION);
 								nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-								UTGetEventManager().QueueEvent(nevent);
+								__Events().QueueEvent(nevent);
 							}
 							else  //networked game
 							{
@@ -783,7 +783,7 @@ void CMainMenu::Update(float dTime)
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
 								nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 								nevent->AddNamedArgINT32(L"arg1", (int)UTApp().m_Settings.devnet_eNetGameType);
-								UTGetEventManager().QueueEvent(nevent);
+								__Events().QueueEvent(nevent);
 							}
 						}
 						break;
@@ -804,7 +804,7 @@ void CMainMenu::Update(float dTime)
 								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_JOIN_COOP_LIST);
 								nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-								UTGetEventManager().QueueEvent(nevent);
+								__Events().QueueEvent(nevent);
 								break;
 							}
 
@@ -813,7 +813,7 @@ void CMainMenu::Update(float dTime)
 								CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_CHAPTER_SELECTION);
 								nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-								UTGetEventManager().QueueEvent(nevent);
+								__Events().QueueEvent(nevent);
 							}
 							else  //networked quick match
 							{
@@ -821,7 +821,7 @@ void CMainMenu::Update(float dTime)
 								nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
 								nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 								nevent->AddNamedArgINT32(L"arg1", (int)UTApp().m_Settings.devnet_eNetGameType);
-								UTGetEventManager().QueueEvent(nevent);
+								__Events().QueueEvent(nevent);
 							}
 						}
 						break;
@@ -894,7 +894,7 @@ void CMainMenu::Update(float dTime)
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 
 			//--- MOUSE INPUT ---
@@ -970,7 +970,7 @@ void CMainMenu::Update(float dTime)
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_GAME_MODE_SELECTION);
 						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
+						__Events().QueueEvent(nevent);
 
 						SND_PLAY(SNDIDX_DENIED);
 					}
@@ -988,7 +988,7 @@ void CMainMenu::Update(float dTime)
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
 						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
+						__Events().QueueEvent(nevent);
 
 						SND_PLAY(SNDIDX_CLICK);
 #else
@@ -1008,7 +1008,7 @@ void CMainMenu::Update(float dTime)
 						CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_LEVEL_SELECTION);
 						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
+						__Events().QueueEvent(nevent);
 
 						SND_PLAY(SNDIDX_CLICK);
 #endif
@@ -1211,7 +1211,7 @@ void CMainMenu::Update(float dTime)
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_CHAPTER_SELECTION);
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 			else if (eCommand == K_CCTRLMGR_COMMAND_SELECT)
 			{
@@ -1225,7 +1225,7 @@ void CMainMenu::Update(float dTime)
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_CHAPTER_SELECTION);
 					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-					UTGetEventManager().QueueEvent(nevent);
+					__Events().QueueEvent(nevent);
 				}
 				else
 				{
@@ -1258,7 +1258,7 @@ void CMainMenu::Update(float dTime)
 							nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 							nevent->AddNamedArgINT32(L"arg1", 1); //reset player selection
 							nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-							UTGetEventManager().QueueEvent(nevent);
+							__Events().QueueEvent(nevent);
 						}
 						else  //networked game is hosted 
 						{
@@ -1266,7 +1266,7 @@ void CMainMenu::Update(float dTime)
 							nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
 							nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 							nevent->AddNamedArgINT32(L"arg1", (int)UTApp().m_Settings.devnet_eNetGameType);
-							UTGetEventManager().QueueEvent(nevent);
+							__Events().QueueEvent(nevent);
 						}
 					}
 				}
@@ -1275,9 +1275,9 @@ void CMainMenu::Update(float dTime)
 			//#HACK: info button - should be on commands
 #ifdef ENABLE_LEADERBOARDS
 			//show leaderboard when pressing melee key (any controller)
-			if (UTGetCtrlrMgr().KeyPressed(K_CM_COMMAND_MELEE))
+			if (__Controllers().KeyPressed(K_CM_COMMAND_MELEE))
 			{
-				CCtrlLayer* lay = UTGetGUI().GetLayerByName("LAYER_ID_LEADERBOARDS_LVL");
+				CCtrlLayer* lay = __GUI().GetLayerByName("LAYER_ID_LEADERBOARDS_LVL");
 				if (lay == null)
 				{
 					int nChapter = g_userData[K_MEMID_SELECTED_CHAPTER];
@@ -1286,7 +1286,7 @@ void CMainMenu::Update(float dTime)
 					if (RequestLeaderboardsUpdate(false))
 					{
 						///--- show layer ---
-						lay = UTGetGUI().ShowLayerOnce("LAYER_ID_LEADERBOARDS_LVL");
+						lay = __GUI().ShowLayerOnce("LAYER_ID_LEADERBOARDS_LVL");
 						if (lay)
 						{
 							//level name in STR_TEMP10
@@ -1525,7 +1525,7 @@ void CMainMenu::Update(float dTime)
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_CHAPTER_SELECTION);
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 			else if (eCommand == K_CCTRLMGR_COMMAND_SELECT)
 			{
@@ -1539,7 +1539,7 @@ void CMainMenu::Update(float dTime)
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_CHAPTER_SELECTION);
 					nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-					UTGetEventManager().QueueEvent(nevent);
+					__Events().QueueEvent(nevent);
 					//reset mod selection
 					g_userData[K_MEMID_MOD_DWNLVL_SELECTED] = -1;
 				}
@@ -1556,7 +1556,7 @@ void CMainMenu::Update(float dTime)
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 						nevent->AddNamedArgINT32(L"arg1", 1); //reset player selection
 						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-						UTGetEventManager().QueueEvent(nevent);
+						__Events().QueueEvent(nevent);
 					}
 					else  //networked game is hosted 
 					{
@@ -1564,7 +1564,7 @@ void CMainMenu::Update(float dTime)
 						nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_NET_LOBBY);
 						nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 						nevent->AddNamedArgINT32(L"arg1", (int)UTApp().m_Settings.devnet_eNetGameType);
-						UTGetEventManager().QueueEvent(nevent);
+						__Events().QueueEvent(nevent);
 					}
 				}
 			}
@@ -1676,7 +1676,7 @@ void CMainMenu::Paint()
 					//mod list background
 					RectXYWHi rectTemp = rectItemsList;
 					rectTemp.Inflate(2, 2);
-					GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectTemp, 0x88888888);
+					GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectTemp, 0x88888888);
 
 					//paint selection cursor
 					RectXYWHi selrect;
@@ -1685,11 +1685,11 @@ void CMainMenu::Paint()
 						selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 						selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
 						selrect.Inflate(5, 5);
-						GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+						GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 					}
 
 					///--- SELECTED MOD ---
-					GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectSelMod, 0x88888888);
+					GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectSelMod, 0x88888888);
 					//image
 					if ((m_nSelection >= 0) && (m_nSelection < m_nSelElements))
 					{
@@ -1704,7 +1704,7 @@ void CMainMenu::Paint()
 							}
 						}
 
-						CModsManager::CModDescriptor *mod = UTGetModsManager().m_arrMods[m_nSelection];
+						CModsManager::CModDescriptor *mod = __Mods().m_arrMods[m_nSelection];
 						//title again
 						CStringDesc sdModName;
 						__Texts().SetStringDesc(&sdModName, mod->shName.text);
@@ -1735,7 +1735,7 @@ void CMainMenu::Paint()
 						int nModIdx = kk + m_nSelPage * m_nSelRows;
 						if (nModIdx >= m_nSelElements)
 							continue;
-						CModsManager::CModDescriptor *mod = UTGetModsManager().GetModDescByIndex(nModIdx);
+						CModsManager::CModDescriptor *mod = __Mods().GetModDescByIndex(nModIdx);
 						if (mod == null)
 							continue;
 
@@ -1746,15 +1746,15 @@ void CMainMenu::Paint()
 						float fDark = 1.0f - fabs((float)kk - m_fSelPageCursor);
 						CLAMP(fDark, 0.0f, 1.0f);
 						
-						GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectItem, D3DCOLOR_COLORVALUE(fColor, fColor, fColor, 1.0f));
+						GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectItem, D3DCOLOR_COLORVALUE(fColor, fColor, fColor, 1.0f));
 						//mod name
 						RECT txtrect;
 						SetRect(&txtrect, rectItem.x, rectItem.y, rectItem.Right(), rectItem.Bottom());
 						//icon
 						if(mod->eType == CModsManager::K_MOD_TYPE_SINGLE_LEVEL)
-							CSprite::paintFrame(&UTGetGUI().m_sprCol, rectItem.x - 2, rectItem.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 4, DW_COLOR_FFFA(fColor));
+							CSprite::paintFrame(&__GUI().m_sprCol, rectItem.x - 2, rectItem.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 4, DW_COLOR_FFFA(fColor));
 						else
-							CSprite::paintFrame(&UTGetGUI().m_sprCol, rectItem.x - 2, rectItem.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 5, DW_COLOR_FFFA(fColor));
+							CSprite::paintFrame(&__GUI().m_sprCol, rectItem.x - 2, rectItem.CenterY(), ANM_CONTROLS_SPR_ICONS_MISC, 5, DW_COLOR_FFFA(fColor));
 
 						CStringDesc sdModName;
 						__Texts().SetStringDesc(&sdModName, mod->shName.text);
@@ -1785,7 +1785,7 @@ void CMainMenu::Paint()
 					{
 						rectTemp = rectItemsList;
 						rectTemp.h += 7; rectTemp.w += 7;
-						GUIUtils::DrawPageSelector(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, rectTemp, m_nSelPagesCnt, m_nSelPage, 0xffffffff, 1);
+						GUIUtils::DrawPageSelector(&__GUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, rectTemp, m_nSelPagesCnt, m_nSelPage, 0xffffffff, 1);
 					}
 
 					//buton back
@@ -1797,7 +1797,7 @@ void CMainMenu::Paint()
 						if (m_bSelectionMade)
 							butframe = 6;
 					}
-					GUIUtils::DrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
+					GUIUtils::DrawHTilingAnim(&__GUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
 					//textul apasat pe butonul de back
 					if ((!m_bSelectionMade) && (m_nSelection == -1))
 						recttemp.y -= 1;
@@ -1870,7 +1870,7 @@ void CMainMenu::Paint()
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 				selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
 				selrect.Inflate(5, 5);
-				GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+				GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 			}
 			//paint chapters
 			D3DXVECTOR2 vpos = worldrect.Center();
@@ -1898,7 +1898,7 @@ void CMainMenu::Paint()
 				int nSelPt = m_nSelection;
 				if (m_nSelection < 0)
 					nSelPt = m_nSelectionOld;
-				GUIUtils::DrawPageSelector(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, tmprect, m_nSelElements, nSelPt, 0xffffffff, 0);
+				GUIUtils::DrawPageSelector(&__GUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, tmprect, m_nSelElements, nSelPt, 0xffffffff, 0);
 			}
 
 			//buton back
@@ -1910,7 +1910,7 @@ void CMainMenu::Paint()
 				if (m_bSelectionMade)
 					butframe = 6;
 			}
-			GUIUtils::DrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
+			GUIUtils::DrawHTilingAnim(&__GUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
 			//textul apasat pe butonul de back
 			if ((!m_bSelectionMade) && (m_nSelection == -1))
 				recttemp.y -= 1;
@@ -1947,7 +1947,7 @@ void CMainMenu::Paint()
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 				selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
 				selrect.Inflate(4, 4);
-				GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+				GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 			}
 			//paint chapters
 			D3DXVECTOR2 vpos = worldrect.Center();
@@ -1977,7 +1977,7 @@ void CMainMenu::Paint()
 				if (m_bSelectionMade)
 					butframe = 6;
 			}
-			GUIUtils::DrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
+			GUIUtils::DrawHTilingAnim(&__GUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
 			//textul apasat pe butonul de back
 			if ((!m_bSelectionMade) && (m_nSelection == -1))
 				recttemp.y -= 1;
@@ -2023,7 +2023,7 @@ void CMainMenu::Paint()
 			{
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 				selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
-				GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+				GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 			}
 
 			for (int kk = 0; kk < m_nSelElements; kk++)
@@ -2106,16 +2106,16 @@ void CMainMenu::Paint()
 			tmprect = pageRect; tmprect.h += 3;
 			if (m_nSelPagesCnt > 1)
 			{
-				GUIUtils::DrawPageSelector(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, tmprect, m_nSelPagesCnt, m_nSelPage, 0xffffffff, 1);
+				GUIUtils::DrawPageSelector(&__GUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, tmprect, m_nSelPagesCnt, m_nSelPage, 0xffffffff, 1);
 			}
 			//paint scroll arrows - when not on back button
 			if (m_nSelPage >= 0)
 			{
 				float offx = sin(fLocalTimeline * 5.0f);
 				if (m_nSelPage > 0)
-					CSprite::paintFrame(&UTGetGUI().m_sprCol, pageRect.x - offx, pageRect.CenterY(), ANM_CONTROLS_SPR_ARROWS1, K_DIR_LEFT, 0xffffffff);
+					CSprite::paintFrame(&__GUI().m_sprCol, pageRect.x - offx, pageRect.CenterY(), ANM_CONTROLS_SPR_ARROWS1, K_DIR_LEFT, 0xffffffff);
 				if (m_nSelPage < m_nSelPagesCnt - 1)
-					CSprite::paintFrame(&UTGetGUI().m_sprCol, pageRect.Right() + offx, pageRect.CenterY(), ANM_CONTROLS_SPR_ARROWS1, K_DIR_RIGHT, 0xffffffff);
+					CSprite::paintFrame(&__GUI().m_sprCol, pageRect.Right() + offx, pageRect.CenterY(), ANM_CONTROLS_SPR_ARROWS1, K_DIR_RIGHT, 0xffffffff);
 			}
 
 			//buton back
@@ -2127,7 +2127,7 @@ void CMainMenu::Paint()
 				if (m_bSelectionMade)
 					butframe = 6;
 			}
-			GUIUtils::DrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
+			GUIUtils::DrawHTilingAnim(&__GUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
 			//textul apasat pe butonul de back
 			if ((!m_bSelectionMade) && (m_nSelection == -1))
 				recttemp.y -= 1;
@@ -2184,7 +2184,7 @@ void CMainMenu::Paint()
 			{
 				selrect.x = m_rectSel.x; selrect.y = m_rectSel.y;
 				selrect.w = m_rectSel.w; selrect.h = m_rectSel.h;
-				GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
+				GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME5, selrect, 0xffffffff);
 			}
 
 			for (int kk = 0; kk < m_nSelElements; kk++)
@@ -2229,7 +2229,7 @@ void CMainMenu::Paint()
 			}
 
 			///--- SELECTED MOD details ---
-			GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectSelMod, 0x88888888);
+			GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, rectSelMod, 0x88888888);
 			//image
 			if ((m_nSelection >= 0) && (m_nSelection < m_nSelElements))
 			{
@@ -2244,7 +2244,7 @@ void CMainMenu::Paint()
 					}
 				}
 
-				CModsManager::CModDescriptor *mod = UTGetModsManager().GetModDescByIndex(m_arrSelItems[m_nSelection * 3 + 2]);
+				CModsManager::CModDescriptor *mod = __Mods().GetModDescByIndex(m_arrSelItems[m_nSelection * 3 + 2]);
 				if (mod != null)
 				{
 					CStringDesc sdModName, sdModDesc;
@@ -2290,16 +2290,16 @@ void CMainMenu::Paint()
 			tmprect = pageRect; tmprect.h += 1; tmprect.w -= 2;
 			if (m_nSelPagesCnt > 1)
 			{
-				GUIUtils::DrawPageSelector(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, tmprect, m_nSelPagesCnt, m_nSelPage, 0xffffffff, 1);
+				GUIUtils::DrawPageSelector(&__GUI().m_sprCol, ANM_CONTROLS_SPR_PAGE_SELECTOR_L, tmprect, m_nSelPagesCnt, m_nSelPage, 0xffffffff, 1);
 			}
 			//paint scroll arrows - when not on back button
 			if (m_nSelPage >= 0)
 			{
 				float offx = sin(fLocalTimeline * 5.0f);
 				if (m_nSelPage > 0)
-					CSprite::paintFrame(&UTGetGUI().m_sprCol, pageRect.x - offx, pageRect.CenterY(), ANM_CONTROLS_SPR_ARROWS1, K_DIR_LEFT, 0xffffffff);
+					CSprite::paintFrame(&__GUI().m_sprCol, pageRect.x - offx, pageRect.CenterY(), ANM_CONTROLS_SPR_ARROWS1, K_DIR_LEFT, 0xffffffff);
 				if (m_nSelPage < m_nSelPagesCnt - 1)
-					CSprite::paintFrame(&UTGetGUI().m_sprCol, pageRect.Right() + offx, pageRect.CenterY(), ANM_CONTROLS_SPR_ARROWS1, K_DIR_RIGHT, 0xffffffff);
+					CSprite::paintFrame(&__GUI().m_sprCol, pageRect.Right() + offx, pageRect.CenterY(), ANM_CONTROLS_SPR_ARROWS1, K_DIR_RIGHT, 0xffffffff);
 			}
 
 			//buton back
@@ -2311,7 +2311,7 @@ void CMainMenu::Paint()
 				if (m_bSelectionMade)
 					butframe = 6;
 			}
-			GUIUtils::DrawHTilingAnim(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
+			GUIUtils::DrawHTilingAnim(&__GUI().m_sprCol, ANM_CONTROLS_SPR_BUTTON1, butframe, recttemp, 0xffffffff);
 			//textul apasat pe butonul de back
 			if ((!m_bSelectionMade) && (m_nSelection == -1))
 				recttemp.y -= 1;
@@ -2396,13 +2396,13 @@ void CMainMenu::PaintChapterWindow(D3DXVECTOR2 vCenter, int nChapterIdx, DWORD d
 
 	float wndAlpha = DW_GETFALPHA(dwColor);
 	//Paint Chapter Window
-	GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, dwColor);
+	GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, dwColor);
 	//mission image
 	CSprite::paintFrame(&m_sprCol, wndrectL.x - 2, wndrectL.y - 2, ANM_MENUS_SPR_CHAPTER_SPLASHES, UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterImgFrame, dwColor);
 	
 	//mission name frame and string
 	RectXYWHi titlerect(wndrectL.x, wndrectL.y + picrect.h + 1, wndrectL.w, 9);
-	GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, dwColor);
+	GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, dwColor);
 	titlerect.Inflate(1, 1);
 	if(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx >= 0)
 		g_font6n1->DrawStringClamped(UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterNameStrIdx, titlerect.CenterX(), titlerect.y + 13, titlerect.w + 6, FONTFLAG_ANCHOR_TOPCENTER, DW_COLORALPHA(K_COLOR_DEFAULT_TEXT, wndAlpha));
@@ -2436,7 +2436,7 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 
 	//float wndAlpha = D3DCOLOR_GETFALPHA(dwColor);
 	//Paint Chapter Window
-	GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
+	GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME1, wndrectL, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 	//mission image
 	if(!bWorkshopChapter)
 		CSprite::paintFrame(&m_sprCol, wndrectL.x - 2, wndrectL.y - 2, ANM_MENUS_SPR_CHAPTER_SPLASHES_LG, UTGetChaptersList().m_arrChapters[nChapterIdx]->nChapterImgFrame, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
@@ -2464,7 +2464,7 @@ void CMainMenu::PaintChapterWindowLarge(D3DXVECTOR2 vCenter, int nChapterIdx, fl
 	}
 	//mission name frame and string
 	RectXYWHi titlerect(wndrectL.x, wndrectL.y + picrect.h + 1, wndrectL.w, 9);
-	GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
+	GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME4, titlerect, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 	titlerect.Inflate(1, 1);
 	if (!bWorkshopChapter)
 	{
@@ -2518,7 +2518,7 @@ void CMainMenu::PaintGameModeWindow(D3DXVECTOR2 vCenter, int nGameModeIdx, float
 
 	RectXYWHi wndrectL2 = wndrectL;
 	wndrectL2.Inflate(1, 1);
-	GUIUtils::DrawWindowFrame(&UTGetGUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_BLACK1, wndrectL2, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
+	GUIUtils::DrawWindowFrame(&__GUI().m_sprCol, ANM_CONTROLS_SPR_FRAME_BLACK1, wndrectL2, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 
 	CSprite::paintFrame(&m_sprCol, wndrectL.x - 2, wndrectL.y - 2, ANM_MENUS_SPR_GAME_MODE_SPLASHES, nGameModeIdx, D3DCOLOR_COLORVALUE(fAlpha, fAlpha, fAlpha, 1.0f));
 

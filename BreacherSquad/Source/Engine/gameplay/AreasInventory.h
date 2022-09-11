@@ -71,9 +71,3 @@ public:
 	// Returns a copy of the areas array
 	std::vector<CAreaSpecs>		GetAreas();
 };
-
-
-///----------------------------------------------------------------------------------
-/// Loads the areas definitions file
-///----------------------------------------------------------------------------------
-CAreasInventory& UTGetAreasInv();

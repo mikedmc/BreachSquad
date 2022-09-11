@@ -206,7 +206,7 @@ bool CNetLock::Net_ReceiveFrameData(int nLastSyncedFrame)
 			CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 			nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 			nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_WRONG_VERSION);
-			UTGetEventManager().TriggerEvent(nevent);
+			__Events().TriggerEvent(nevent);
 
 			LOG(L"sPacketHeader::Deserialize - Different game versions! Please update to the last version!");
 			return false;
@@ -496,7 +496,7 @@ void CNetLock::Net_UpdateEventLoop()
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 					nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_PLAYER_LEFT);
-					UTGetEventManager().TriggerEvent(nevent);
+					__Events().TriggerEvent(nevent);
 				}
 				else if (UTApp().IsGameNetworked())
 				{
@@ -504,7 +504,7 @@ void CNetLock::Net_UpdateEventLoop()
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 					nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_PLAYER_LEFT);
-					UTGetEventManager().TriggerEvent(nevent);
+					__Events().TriggerEvent(nevent);
 				}
 				else
 				{
@@ -532,7 +532,7 @@ void CNetLock::Net_UpdateEventLoop()
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				//setting join state
 				nevent->AddNamedArgINT32(L"arg1", (int)CApplicationSettings::K_NETGAME_TYPE_QUICK_MATCH);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 			break;
 
@@ -547,7 +547,7 @@ void CNetLock::Net_UpdateEventLoop()
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 					nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_GENERIC);
-					UTGetEventManager().TriggerEvent(nevent);
+					__Events().TriggerEvent(nevent);
 				}
 			}
 			break;
@@ -674,7 +674,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 			CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 			nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 			nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_GENERIC);
-			UTGetEventManager().TriggerEvent(nevent);
+			__Events().TriggerEvent(nevent);
 
 			LOG(L"[Error] Net_UpdateLobby - Peer left lobby or connection timeout!");
 			return;
@@ -716,7 +716,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 		{
 #ifdef ENABLE_STEAM_WORKSHOP
 			int nModIdx = g_userData[K_MEMID_MOD_DWNLVL_SELECTED];
-			CModsManager::CModDescriptor *mod = UTGetModsManager().GetModDescByIndex(nModIdx);
+			CModsManager::CModDescriptor *mod = __Mods().GetModDescByIndex(nModIdx);
 			if (mod != null)
 			{
 				m_ucModData = 1;
@@ -809,7 +809,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 				nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_WRONG_VERSION);
-				UTGetEventManager().TriggerEvent(nevent);
+				__Events().TriggerEvent(nevent);
 
 				LOG(L"[Error] Net_UpdateLobby::sPacketHeader.Deserialize - Different game versions! Please update to the last version!");
 
@@ -846,7 +846,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 #else
 					UINT64 uiModID = atoll(m_csModID_DwnLvl);
 #endif
-					CModsManager::CModDescriptor* mod = UTGetModsManager().GetModDescByID(uiModID);
+					CModsManager::CModDescriptor* mod = __Mods().GetModDescByID(uiModID);
 					if ((mod == null) || (mod->bActive == false))
 					{
 						bVersionDifferentErr = true;
@@ -872,7 +872,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 				nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_WRONG_VERSION);
-				UTGetEventManager().TriggerEvent(nevent);
+				__Events().TriggerEvent(nevent);
 
 				LOG(L"[Error] Net_UpdateLobby::peer CRC mismatch! Different mods activated!");
 				return;
@@ -904,7 +904,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 #else
 			UINT64 uiModID = atoll(m_csModID_DwnLvl);
 #endif
-			int nSelModIdx = UTGetModsManager().GetModIndexByID(uiModID);
+			int nSelModIdx = __Mods().GetModIndexByID(uiModID);
 			g_userData[K_MEMID_MOD_DWNLVL_SELECTED] = nSelModIdx;
 		}
 #endif // ENABLE_STEAM_WORKSHOP
@@ -914,7 +914,7 @@ void CNetLock::Net_UpdateLobby(float dTime)
 		nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_PLAYER_SELECTION);
 		nevent->AddNamedArgINT32(L"arg1", 1); //reset player selection
 		nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
-		UTGetEventManager().QueueEvent(nevent);
+		__Events().QueueEvent(nevent);
 
 		m_nStep = 3; //next step
 	}
@@ -991,7 +991,7 @@ void CNetLock::Net_UpdateLevelResults(float dTime)
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 				nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 				nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_WRONG_VERSION);
-				UTGetEventManager().TriggerEvent(nevent);
+				__Events().TriggerEvent(nevent);
 
 				LOG(L"[Error] Net_UpdateLevelResults::sPacketHeader.Deserialize - Different game versions! Please update to the last version!");
 			}

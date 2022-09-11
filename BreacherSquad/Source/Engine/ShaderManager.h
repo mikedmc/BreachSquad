@@ -172,5 +172,5 @@ public:
 };
 
 
-//declar singletonul
-CShaderManager& UTGetShaderManager();
+// Shader Manager singleton. Handles loading for all VS and PS
+CShaderManager& __Shaders();

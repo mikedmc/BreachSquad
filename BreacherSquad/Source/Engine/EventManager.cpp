@@ -337,9 +337,10 @@ void CEventManager::Update(float dTime, float fTimeLine)
 
 
 ///**************************************************************************************
-/// Sigleton de acces
+/// Sigleton 
 ///**************************************************************************************
-CEventManager& UTGetEventManager()
+
+CEventManager& __Events()
 {
 	static CEventManager g_EventMgr;
 	return g_EventMgr;

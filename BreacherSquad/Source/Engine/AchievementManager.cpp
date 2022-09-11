@@ -263,10 +263,10 @@ void CAchievementManager::Update(float dTime)
 }
 
 ///**************************************************************************************
-/// Sigleton de acces
+/// Sigleton
 ///**************************************************************************************
 
-CAchievementManager& UTGetAchievementManager()
+CAchievementManager& __Achievements()
 {
 	static CAchievementManager g_AchievementManager;
 	return g_AchievementManager;

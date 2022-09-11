@@ -61,12 +61,12 @@ static bool InstallMod(const char* szFullFileName, CModsManager::CModDescriptor*
 	int result = pModInfo->LoadModDescriptor(wszFullPath);
 	if (result != 0)
 	{
-		if ((!UTGetModsManager().IsModActive(pModInfo)) && (!bDontActivateIfNotAlready))
+		if ((!__Mods().IsModActive(pModInfo)) && (!bDontActivateIfNotAlready))
 		{
-			if (UTGetModsManager().IsCompatibleWithCurrentVersion(pModInfo))
-				UTGetModsManager().SetModActive(pModInfo, true);
+			if (__Mods().IsCompatibleWithCurrentVersion(pModInfo))
+				__Mods().SetModActive(pModInfo, true);
 			else
-				UTGetModsManager().SetModActive(pModInfo, false);
+				__Mods().SetModActive(pModInfo, false);
 		}
 	}
 	else
@@ -185,7 +185,7 @@ void Workshop_CheckSubscriptions()
 	char szModsDir[MAX_PATH_STD];
 	wcstombs(szModsDir, UTApp().g_wszModsDirTemp, MAX_PATH_STD);
 
-	UTGetModsManager().LoadModsFromCacheFile();
+	__Mods().LoadModsFromCacheFile();
 
 	SteamModsRetrievedAnswerReceiver steamEnumerateAnswerReceiver;
 	int nTries = 3;				// how many times to try to get the mods
@@ -250,7 +250,7 @@ void Workshop_CheckSubscriptions()
 		}
 
 		// find this file in our cached downloads
-		CModsManager::CModDescriptor* pDownloadEntry = UTGetModsManager().GetModDescByID(modSubscription.fileId);
+		CModsManager::CModDescriptor* pDownloadEntry = __Mods().GetModDescByID(modSubscription.fileId);
 
 		if (!steamPublishedFileDetailsAnswerReceiver.m_bAnswerReceived && pDownloadEntry)
 		{
@@ -383,8 +383,8 @@ void Workshop_CheckSubscriptions()
 		if (!pDownloadEntry)
 		{
 			CModsManager::CModDescriptor* dl = new CModsManager::CModDescriptor();
-			UTGetModsManager().m_arrMods.Add(dl);
-			pDownloadEntry = UTGetModsManager().m_arrMods[UTGetModsManager().m_arrMods.GetSize() - 1];
+			__Mods().m_arrMods.Add(dl);
+			pDownloadEntry = __Mods().m_arrMods[__Mods().m_arrMods.GetSize() - 1];
 		}
 
 		//pDownloadEntry->name            = steamPublishedFileDetailsAnswerReceiver.m_FileDetails.m_rgchTitle;  //not needed
@@ -412,7 +412,7 @@ void Workshop_CheckSubscriptions()
 		}
 
 		// save after each successfully downloaded mod
-		UTGetModsManager().SaveModsToCacheFile();
+		__Mods().SaveModsToCacheFile();
 
 		//copy mod folder to final position (user data)
 		WCHAR wcsModDestPath[1024];
@@ -429,14 +429,14 @@ void Workshop_CheckSubscriptions()
 	}
 
 	// delete the ones we're not subscribed to anymore
-	for (int k = UTGetModsManager().m_arrMods.GetSize() - 1; k >= 0; k--)
+	for (int k = __Mods().m_arrMods.GetSize() - 1; k >= 0; k--)
 	{
-		CModsManager::CModDescriptor* dl = UTGetModsManager().m_arrMods[k];
+		CModsManager::CModDescriptor* dl = __Mods().m_arrMods[k];
 		// check if mods are still compatible
 		if (dl->bActive)
 		{
-			if (!UTGetModsManager().IsCompatibleWithCurrentVersion(dl))
-				UTGetModsManager().SetModActive(dl, false);
+			if (!__Mods().IsCompatibleWithCurrentVersion(dl))
+				__Mods().SetModActive(dl, false);
 		}
 		
 		// delete inactive mods
@@ -455,11 +455,11 @@ void Workshop_CheckSubscriptions()
 		OS_DeleteRecursive(wcsModDestPath);
 
 		//remove from mods list too
-		SAFE_DELETE(UTGetModsManager().m_arrMods[k]);
-		UTGetModsManager().m_arrMods.Remove(k);
+		SAFE_DELETE(__Mods().m_arrMods[k]);
+		__Mods().m_arrMods.Remove(k);
 	}
 
-	UTGetModsManager().SaveModsToCacheFile();
+	__Mods().SaveModsToCacheFile();
 }
 
 

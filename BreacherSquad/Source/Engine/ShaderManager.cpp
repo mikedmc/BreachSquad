@@ -569,7 +569,7 @@ OPRESULT CShaderManager::OnDestroyDevice( void* pUserContext )
 /// Sigleton de acces
 ///**************************************************************************************
 
-CShaderManager& UTGetShaderManager()
+CShaderManager& __Shaders()
 {
 	static CShaderManager g_ShaderMgr;
 	return g_ShaderMgr;

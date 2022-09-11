@@ -186,5 +186,5 @@ public:
 	void Release();
 };
 
-//declar singletonul
-CScriptManager& UTGetScriptManager();
+// Scripts manager singleton
+CScriptManager& __Scripts();

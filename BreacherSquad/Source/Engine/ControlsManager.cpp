@@ -514,7 +514,7 @@ void CControl::Update( float dTime, float fTimeline )
 
 				//add new selection param
 				nevent->AddNamedArgINT32( L"nSelectedIdx", nSelectedIdx );
-				UTGetEventManager().QueueEvent( nevent );
+				__Events().QueueEvent( nevent );
 			}
 
 			//refresh params
@@ -610,7 +610,7 @@ void CControl::Update( float dTime, float fTimeline )
 				nevent->AddNamedArgINT32( L"nKeyboardOrdinal", paramsDict[ L"nKeyboardOrdinal" ].m_asINT32 );
 				nevent->AddNamedArgINT32( L"nSDLcommand", paramsDict[ L"nSDLcommand" ].m_asINT32 );
 
-				UTGetEventManager().QueueEvent( nevent );
+				__Events().QueueEvent( nevent );
 
 			}
 		}
@@ -730,7 +730,7 @@ void CControl::Update( float dTime, float fTimeline )
 				//add new selection param
 				nevent->AddNamedArgINT32( L"nPageIdx", nPage );
 				nevent->AddNamedArgINT32( L"nOldIdx", nOldPage );
-				UTGetEventManager().QueueEvent( nevent );
+				__Events().QueueEvent( nevent );
 			}
 
 			//selecting something with fire control 
@@ -750,7 +750,7 @@ void CControl::Update( float dTime, float fTimeline )
 				//add new selection param
 				nevent->AddNamedArgINT32( L"nSelectedIdx", selectedIdx + baseIndex );
 				nevent->AddNamedArgINT32( L"nPageIdx", nPage );
-				UTGetEventManager().QueueEvent( nevent );
+				__Events().QueueEvent( nevent );
 			}
 
 			paramsDict.SetVarINT32( L"nSelectedIdx", selectedIdx );
@@ -1056,7 +1056,7 @@ void CControl::Update( float dTime, float fTimeline )
 					}
 					//trimitem string idx
 					nevent->AddNamedArgINT32( L"nSelectedIdx", nStringIdx );
-					UTGetEventManager().QueueEvent( nevent );
+					__Events().QueueEvent( nevent );
 
 					SND_PLAY( SNDIDX_CLICK );
 				}
@@ -1134,7 +1134,7 @@ void CControl::Update( float dTime, float fTimeline )
 					UINT32	msgParamU = paramsDict[ L"nMsgParamUINT32" ].m_asUINT32;
 					nevent->AddNamedArgUINT32( L"nMsgParamUINT32", msgParamU );
 
-					UTGetEventManager().QueueEvent( nevent );
+					__Events().QueueEvent( nevent );
 				}
 			}
 			else
@@ -1207,7 +1207,7 @@ void CControl::Update( float dTime, float fTimeline )
 				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
 				nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				nevent->AddNamedArgBool( L"bChecked", bChecked );
-				UTGetEventManager().QueueEvent( nevent );
+				__Events().QueueEvent( nevent );
 			}
 
 			paramsDict.SetVarFloat( L"fHoverPercent", hoverPercent );
@@ -1303,7 +1303,7 @@ void CControl::Update( float dTime, float fTimeline )
 				CVariant* lvar = &paramsDict[ L"ID" ];
 				nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				nevent->AddNamedArgFloat( L"fSlidePercent", slidePercent );
-				UTGetEventManager().QueueEvent( nevent );
+				__Events().QueueEvent( nevent );
 			}
 
 			//refresh params
@@ -1372,7 +1372,7 @@ void CControl::Update( float dTime, float fTimeline )
 				nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
 				nevent->AddNamedArgINT32( L"nPageIdx", nNewPage );
 				nevent->AddNamedArgINT32( L"nOldIdx", nPage );
-				UTGetEventManager().QueueEvent( nevent );
+				__Events().QueueEvent( nevent );
 
 				nPage = nNewPage;
 			}
@@ -3959,7 +3959,7 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 						{
 							CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK );
 							nevent->AddNamedArgUINT32( L"ctrlID", HASH( "BUT_NEW_USER" ) );
-							UTGetEventManager().QueueEvent( nevent );
+							__Events().QueueEvent( nevent );
 
 							//TODO: ce comanda trimite cand faci enter pe inputbox. Poate mesaj de click pe input box?
 							//ProcessInterfaceMessages(lay->ID, GET_FAST_HASH("CTRL_BUT_NEWPLAYER"), CCTRL_MESSAGE_CLICK);
@@ -4063,7 +4063,7 @@ void CControlsManager::Update( float dTime )
 	}
 
 	// check input from all connected controllers and translate to local commands
-	for ( CController * ctrlr : UTGetCtrlrMgr().m_arrControllers )
+	for ( CController * ctrlr : __Controllers().m_arrControllers )
 	{
 		//always skip network controllers
 		if ( ctrlr->eType == K_CM_CT_NET_FRAMELOCK )
@@ -4423,11 +4423,7 @@ void CControl::drawDebugText( int x, int y, const wchar_t* text, DWORD color )
 }
 
 
-///**************************************************************************************
-/// SINGLETON
-///**************************************************************************************
-
-CControlsManager& UTGetGUI()
+CControlsManager& __GUI()
 {
 	static CControlsManager g_ControlsManager;
 	return g_ControlsManager;

@@ -436,10 +436,8 @@ void CLibraryManager::openLibrary(LPWSTR libName){
 
 
 ///**************************************************************************************
-/// Sigleton de acces
-///**************************************************************************************
 
-CLibraryManager& UTGetLibraryManager()
+CLibraryManager& __LibraryManager()
 {
 	static CLibraryManager g_libMgr;
 	return g_libMgr;

@@ -153,6 +153,6 @@ public:
 ///**************************************************************************************
 /// Sigleton de acces
 ///**************************************************************************************
-CGalaxyLeaderboards& UTGetLeaderboards();
+CGalaxyLeaderboards& __Leaderboards();
 
 #endif

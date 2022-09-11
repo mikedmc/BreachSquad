@@ -51,75 +51,75 @@ void App_IncreaseGamestat(int K_MEMID_GAMESTATS_var, int nAddQuantity)
 	{
 		case K_MEMID_GAMESTATS_ARREST_TARGETS_ARRESTED:
 		{
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_ARRESTS_MADE, 1);
+			__Achievements().IncStat(EGameStats::N_STAT_ARRESTS_MADE, 1);
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 5)
-				UTGetAchievementManager().UnlockAchievement(ACH_WARRANT_SERVER);
+				__Achievements().UnlockAchievement(ACH_WARRANT_SERVER);
 #endif
 		}
 		break;
 
 		case K_MEMID_GAMESTATS_KILLS_ASSAULTER:
 		{
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_ASSAULTER_KILLS, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_ASSAULTER_KILLS, (float)nAddQuantity);
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 100)
-				UTGetAchievementManager().UnlockAchievement(ACH_DEATH_DEALER);
+				__Achievements().UnlockAchievement(ACH_DEATH_DEALER);
 #endif
 		}
 		break;
 		case K_MEMID_GAMESTATS_KILLS_BREACHER:
 		{
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_BREACHER_KILLS, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_BREACHER_KILLS, (float)nAddQuantity);
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 100)
-				UTGetAchievementManager().UnlockAchievement(ACH_BUCKSHOT_SEASON);
+				__Achievements().UnlockAchievement(ACH_BUCKSHOT_SEASON);
 #endif
 		}
 		break;
 		case K_MEMID_GAMESTATS_KILLS_SHIELD:
 		{
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_SHIELD_KILLS, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_SHIELD_KILLS, (float)nAddQuantity);
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 100)
-				UTGetAchievementManager().UnlockAchievement(ACH_LADY_JUSTICE);
+				__Achievements().UnlockAchievement(ACH_LADY_JUSTICE);
 #endif
 		}
 		break;
 		case K_MEMID_GAMESTATS_KILLS_RECON:
 		{
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_RECON_KILLS, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_RECON_KILLS, (float)nAddQuantity);
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 100)
-				UTGetAchievementManager().UnlockAchievement(ACH_I_SEE_THINGS);
+				__Achievements().UnlockAchievement(ACH_I_SEE_THINGS);
 #endif
 		}
 		break;
 		case K_MEMID_GAMESTATS_KILLS_FBI:
 		{
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_FBI_KILLS, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_FBI_KILLS, (float)nAddQuantity);
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 100)
-				UTGetAchievementManager().UnlockAchievement(ACH_FEDERAL_AUTHORITY);
+				__Achievements().UnlockAchievement(ACH_FEDERAL_AUTHORITY);
 #endif
 		}
 		break;
 		case K_MEMID_GAMESTATS_KILLS_OFFDUTY:
 		{
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_OFFDUTY_KILLS, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_OFFDUTY_KILLS, (float)nAddQuantity);
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 100)
-				UTGetAchievementManager().UnlockAchievement(ACH_GRUMPY_MCANGRY);
+				__Achievements().UnlockAchievement(ACH_GRUMPY_MCANGRY);
 #endif
 		}
 		break;
 
 		case K_MEMID_GAMESTATS_ENEMIES_SET_ON_FIRE:
 		{
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_FLAMED_ENEMIES, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_FLAMED_ENEMIES, (float)nAddQuantity);
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if(nNewVal >= 20)
-				UTGetAchievementManager().UnlockAchievement(ACH_CLEANSE_BY_FIRE);
+				__Achievements().UnlockAchievement(ACH_CLEANSE_BY_FIRE);
 #endif
 		}
 		break;
@@ -128,22 +128,22 @@ void App_IncreaseGamestat(int K_MEMID_GAMESTATS_var, int nAddQuantity)
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 1000)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_BUILDING_COMMUNITY);
+				__Achievements().UnlockAchievement(ACH_BUILDING_COMMUNITY);
 			}
 			else if (nNewVal >= 50)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_CAVALRY_IS_HERE);
+				__Achievements().UnlockAchievement(ACH_CAVALRY_IS_HERE);
 			}
 #endif
 			//save stat
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_SAVED_HOSTAGES, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_SAVED_HOSTAGES, (float)nAddQuantity);
 		}
 		break;
 		case K_MEMID_GAMESTATS_COOP_GAMES_WON:
 		{
 			if (nNewVal >= 1)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_TWO_IS_A_PARTY);
+				__Achievements().UnlockAchievement(ACH_TWO_IS_A_PARTY);
 			}
 		}
 		break;
@@ -152,14 +152,14 @@ void App_IncreaseGamestat(int K_MEMID_GAMESTATS_var, int nAddQuantity)
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 1000)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_SLACKER);
+				__Achievements().UnlockAchievement(ACH_SLACKER);
 			}
 			else if (nNewVal >= 100)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_EFFICIENT);
+				__Achievements().UnlockAchievement(ACH_EFFICIENT);
 			}
 #endif
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_SNIPED_ENEMIES, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_SNIPED_ENEMIES, (float)nAddQuantity);
 		}
 		break;
 		case K_MEMID_GAMESTATS_ENEMIES_KILLED:
@@ -167,15 +167,15 @@ void App_IncreaseGamestat(int K_MEMID_GAMESTATS_var, int nAddQuantity)
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 1000)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_NO_RESPITE);
+				__Achievements().UnlockAchievement(ACH_NO_RESPITE);
 			}
 			else if (nNewVal >= 50)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_NO_MERCY);
+				__Achievements().UnlockAchievement(ACH_NO_MERCY);
 			}
 #endif
 			//save stat
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_KILLED_ENEMIES, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_KILLED_ENEMIES, (float)nAddQuantity);
 		}
 		break;
 		case K_MEMID_GAMESTATS_DOORS_BREACHED:
@@ -183,14 +183,14 @@ void App_IncreaseGamestat(int K_MEMID_GAMESTATS_var, int nAddQuantity)
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 1000)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_DOOR_HATER);
+				__Achievements().UnlockAchievement(ACH_DOOR_HATER);
 			}
 			else if (nNewVal >= 100)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_DOOR_KICKER);
+				__Achievements().UnlockAchievement(ACH_DOOR_KICKER);
 			}
 #endif
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_DOORS_KICKED, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_DOORS_KICKED, (float)nAddQuantity);
 		}
 		break;
 		case K_MEMID_GAMESTATS_DOORS_EXPLODED:
@@ -198,10 +198,10 @@ void App_IncreaseGamestat(int K_MEMID_GAMESTATS_var, int nAddQuantity)
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 100)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_ATTENTION_GETTER);
+				__Achievements().UnlockAchievement(ACH_ATTENTION_GETTER);
 			}
 #endif
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_DOORS_EXPLODED, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_DOORS_EXPLODED, (float)nAddQuantity);
 		}
 		break;
 		case K_MEMID_GAMESTATS_BOMBS_DISARMED:
@@ -209,10 +209,10 @@ void App_IncreaseGamestat(int K_MEMID_GAMESTATS_var, int nAddQuantity)
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 30)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_EOD);
+				__Achievements().UnlockAchievement(ACH_EOD);
 			}
 #endif
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_BOMBS_DISARMED, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_BOMBS_DISARMED, (float)nAddQuantity);
 		}
 		break;
 		case K_MEMID_GAMESTATS_ENEMIES_STUNNED:
@@ -220,10 +220,10 @@ void App_IncreaseGamestat(int K_MEMID_GAMESTATS_var, int nAddQuantity)
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 500)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_I_LIKE_THEM_NUMB);
+				__Achievements().UnlockAchievement(ACH_I_LIKE_THEM_NUMB);
 			}
 #endif
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_STUNNED_ENEMIES, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_STUNNED_ENEMIES, (float)nAddQuantity);
 		}
 		break;
 		case K_MEMID_GAMESTATS_POLICE_SAVED:
@@ -231,17 +231,17 @@ void App_IncreaseGamestat(int K_MEMID_GAMESTATS_var, int nAddQuantity)
 #ifndef K_AUTO_ACHIEVE_FROM_STATS
 			if (nNewVal >= 50)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_THE_THIN_BLUE_LINE);
+				__Achievements().UnlockAchievement(ACH_THE_THIN_BLUE_LINE);
 			}
 #endif
-			UTGetAchievementManager().IncStat(EGameStats::N_STAT_SAVED_POLICEMEN, (float)nAddQuantity);
+			__Achievements().IncStat(EGameStats::N_STAT_SAVED_POLICEMEN, (float)nAddQuantity);
 		}
 		break;
 		case K_MEMID_GAMESTATS_HOSTAGES_KILLED:
 		{
 			if (nNewVal >= 50)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_BAD_EYESIGHT);
+				__Achievements().UnlockAchievement(ACH_BAD_EYESIGHT);
 			}
 		}
 		break;
@@ -249,7 +249,7 @@ void App_IncreaseGamestat(int K_MEMID_GAMESTATS_var, int nAddQuantity)
 		{
 			if (nNewVal >= 50)
 			{
-				UTGetAchievementManager().UnlockAchievement(ACH_PEST_CONTROL);
+				__Achievements().UnlockAchievement(ACH_PEST_CONTROL);
 			}
 		}
 		break;
@@ -384,7 +384,7 @@ void App_ResetUserData()
 	//--- keys 2 ---
 	App_ResetKeybindings(1);
 	//change actual triggers
-	CController* keybd1 = UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_IID_KBM1);
+	CController* keybd1 = __Controllers().GetControllerByInstanceID(K_CM_IID_KBM1);
 	CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 	App_SetSDLTriggersFromUserData(keybd1, keybd2);
 
@@ -677,10 +677,10 @@ void App_ToggleBorderlessFullscreen(HWND wndHwnd)
 	//save final fullscreen status
 	UTApp().m_Settings.bFullscreen = (bBorderlessFullscreenOn || !DXUTIsWindowed());
 	//close GFX options window if open
-	CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_GFX_OPTIONS");
+	CCtrlLayer* layer = __GUI().GetLayerByName("LAYER_ID_GFX_OPTIONS");
 	if (layer != null)
 	{
-		UTGetGUI().RemoveLayer("LAYER_ID_GFX_OPTIONS");
+		__GUI().RemoveLayer("LAYER_ID_GFX_OPTIONS");
 	}
 }
 
@@ -696,7 +696,7 @@ bool App_TutorialWindowShow(int nTutID)
 
 	if (UTApp().IsGameNetworked())
 		return false;
-	if (UTGetGUI().bIsBlocking)
+	if (__GUI().bIsBlocking)
 		return false;
 
 	SND_PLAY(SNDIDX_DENIED);
@@ -705,7 +705,7 @@ bool App_TutorialWindowShow(int nTutID)
 	{
 		case K_MEMID_TUT_INTERFACE_IGM:
 		{
-			UTGetGUI().ShowLayerOnce("LAYER_ID_TUT_IGM");
+			__GUI().ShowLayerOnce("LAYER_ID_TUT_IGM");
 		}
 		break;
 		case K_MEMID_TUT_INTERFACE_STRATEGIC:
@@ -714,7 +714,7 @@ bool App_TutorialWindowShow(int nTutID)
 		break;
 		case K_MEMID_TUT_VINFINITE_MODE:
 		{
-			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce("LAYER_ID_TUT_PIC");
+			CCtrlLayer* lay = __GUI().ShowLayerOnce("LAYER_ID_TUT_PIC");
 			if (lay != null)
 			{
 				CControl* ctrl = lay->GetControlByName("WINDOW");
@@ -731,7 +731,7 @@ bool App_TutorialWindowShow(int nTutID)
 		break;
 		case K_MEMID_TUT_ARREST_MODE:
 		{
-			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce("LAYER_ID_TUT_PIC");
+			CCtrlLayer* lay = __GUI().ShowLayerOnce("LAYER_ID_TUT_PIC");
 			if (lay != null)
 			{
 				CControl* ctrl = lay->GetControlByName("WINDOW");
@@ -748,7 +748,7 @@ bool App_TutorialWindowShow(int nTutID)
 		break;
 		case K_MEMID_TUT_BOMB_MODE:
 		{
-			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce("LAYER_ID_TUT_PIC");
+			CCtrlLayer* lay = __GUI().ShowLayerOnce("LAYER_ID_TUT_PIC");
 			if (lay != null)
 			{
 				CControl* ctrl = lay->GetControlByName("WINDOW");
@@ -765,7 +765,7 @@ bool App_TutorialWindowShow(int nTutID)
 		break;
 		case K_MEMID_TUT_HOSTAGE_MODE:
 		{
-			CCtrlLayer* lay = UTGetGUI().ShowLayerOnce("LAYER_ID_TUT_PIC");
+			CCtrlLayer* lay = __GUI().ShowLayerOnce("LAYER_ID_TUT_PIC");
 			if (lay != null)
 			{
 				CControl* ctrl = lay->GetControlByName("WINDOW");
@@ -919,7 +919,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 		nKeyIcon = -1;//reset icons on DON'T SHOW
 
 		SDL_Scancode commandscan = (SDL_Scancode)pCtrlr->GetKeyMappingForCommand(eCommand);
-		mbstowcs_s(null, strKey, UTGetCtrlrMgr().GetSDLScancodeName(commandscan), MAX_PATH);
+		mbstowcs_s(null, strKey, __Controllers().GetSDLScancodeName(commandscan), MAX_PATH);
 		__Texts().SetStringDesc(&sdKeyName, strKey);
 	}
 	else if (pCtrlr->eType == K_CM_CT_JOYSTICK_SDL)
@@ -957,7 +957,7 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 	if (nKeyIcon < 0)
 	{
 		int anmIdx = ANM_CONTROLS_SPR_BUT_SM_GREY2;
-		GUIUtils::DrawButtonFromText(&UTGetGUI().m_sprCol, anmIdx, bPressed, &sdKeyName, g_font5n2, vBP, dwColor, nAlign);
+		GUIUtils::DrawButtonFromText(&__GUI().m_sprCol, anmIdx, bPressed, &sdKeyName, g_font5n2, vBP, dwColor, nAlign);
 	}
 	else //key icons set
 	{
@@ -965,9 +965,9 @@ void App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, D3
 		if (bPressed)
 			anmIdx = ANM_CONTROLS_SPR_CTRLR_XBOX_DOWN;
 
-		int butw = UTGetGUI().m_sprCol.GetAFrameBBox(anmIdx, nKeyIcon).w;
+		int butw = __GUI().m_sprCol.GetAFrameBBox(anmIdx, nKeyIcon).w;
 		int algnoffx = (-nAlign * butw) / 2;
-		CSprite::paintFrame(&UTGetGUI().m_sprCol, vBP.x + algnoffx, vBP.y, anmIdx, nKeyIcon, dwColor);
+		CSprite::paintFrame(&__GUI().m_sprCol, vBP.x + algnoffx, vBP.y, anmIdx, nKeyIcon, dwColor);
 	}
 }
 
@@ -1070,7 +1070,7 @@ OPRESULT App_LocaLoadStrings()
 	//set version number
 	__Texts().SetString(STR_VERSION_NUMBER, L"v%d.%d.%d", _VERSION_MAJOR_, _VERSION_MINOR_, _VERSION_PATCH_);
 	//set keyboard strings
-	CController* keybd1 = UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_IID_KBM1);
+	CController* keybd1 = __Controllers().GetControllerByInstanceID(K_CM_IID_KBM1);
 	CController* keybd2 = nullptr;// UTGetCtrlrMgr().GetControllerByInstanceID(K_CM_DEFAULT_KEYBOARD2_INSTANCE_ID);
 	App_SetSDLTriggersFromUserData(keybd1, keybd2);
 

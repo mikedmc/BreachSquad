@@ -513,7 +513,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 			CEvent *nevent = new CEvent(CEventTypes::evtT_SOUND, CEventCommands::evtC_SOUND_PLAY_HASH);
 			nevent->AddNamedArgUINT32(L"sndHash", param1->m_strArg.getHash());
 			nevent->AddNamedArgUINT32(L"sndFlags", sndflags);
-			UTGetEventManager().QueueEvent(nevent);
+			__Events().QueueEvent(nevent);
 
 			executed = true;
 		}
@@ -528,7 +528,7 @@ int CScriptManager::ExecuteScript(CScript* ns)
 			CEvent *nevent = new CEvent(CEventTypes::evtT_SOUND, CEventCommands::evtC_SOUND_STOP_HASH);
 			nevent->AddNamedArgUINT32(L"sndHash", param1->m_strArg.getHash());
 			nevent->AddNamedArgBool(L"fadeOut", bFadeOut);
-			UTGetEventManager().QueueEvent(nevent);
+			__Events().QueueEvent(nevent);
 
 			executed = true;
 		}
@@ -802,7 +802,7 @@ int CScriptDeclaration::GetLabelInstrIndex(CStringHash shLabelName)
 /// Sigleton de acces
 ///**************************************************************************************
 
-CScriptManager& UTGetScriptManager()
+CScriptManager& __Scripts()
 {
 	static CScriptManager g_ScriptMgr;
 	return g_ScriptMgr;

@@ -199,7 +199,7 @@ OPRESULT CSpritePainter::Flush()
 	if (m_pVShader)
 	{
 		m_pDevice->SetVertexShader(m_pVShader);
-		m_pDevice->SetVertexDeclaration(UTGetShaderManager()._VERTEX_PNCT4T4_decl);
+		m_pDevice->SetVertexDeclaration(__Shaders()._VERTEX_PNCT4T4_decl);
 		m_pDevice->SetVertexShaderConstantF(0, (float*)&m_matWVP, 4);
 	}
 	else

@@ -415,14 +415,14 @@ HRESULT CSoundManager::LoadSoundsXML(WCHAR* XMLpath)
 		size_t cntConv;
 		wcstombs_s(&cntConv, cpath, path, MAX_PATH);
 
-		int soundFileIDX = UTGetLibraryManager().getFileIdByName(L"\\Sounds\\sounds.sfp", cpath);		
+		int soundFileIDX = __LibraryManager().getFileIdByName(L"\\Sounds\\sounds.sfp", cpath);		
 		if(soundFileIDX < 0)
 		{
 			ErrorBox(K_ERR_WARNING, L"Could not find file in library: %s\n", path);
 		}
 		else
 		{
-			UTGetLibraryManager().extractFileToTemp(L"\\Sounds\\sounds.sfp", soundFileIDX);
+			__LibraryManager().extractFileToTemp(L"\\Sounds\\sounds.sfp", soundFileIDX);
 			HRESULT hr = AddSound(UTApp().g_wszTempFilePath, sID, sGroupID, bufCnt, bOnlyLoadPlaying);
 			if(FAILED(hr))
 			{
@@ -1347,10 +1347,10 @@ bool CSoundManager::HandleEvent( CEvent &nEvent )
 
 
 ///**************************************************************************************
-/// Sigleton de acces
+/// Sigleton 
 ///**************************************************************************************
 
-CSoundManager& UTGetSoundManager()
+CSoundManager& __Audio()
 {
 	static CSoundManager g_SoundMgr;
 	return g_SoundMgr;

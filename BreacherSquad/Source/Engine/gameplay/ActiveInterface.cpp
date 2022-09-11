@@ -151,14 +151,14 @@ void IActiveInterface::StartScript( WCHAR* scriptName )
 {
 	if ( nRunningScriptUID > 0 )
 		return;
-	nRunningScriptUID = UTGetScriptManager().StartScript( scriptName, GetUID(), &varAIparams );
+	nRunningScriptUID = __Scripts().StartScript( scriptName, GetUID(), &varAIparams );
 }
 
 void IActiveInterface::StartScript( UINT32 scriptNameHash )
 {
 	if ( nRunningScriptUID > 0 )
 		return;
-	nRunningScriptUID = UTGetScriptManager().StartScript( scriptNameHash, GetUID(), &varAIparams );
+	nRunningScriptUID = __Scripts().StartScript( scriptNameHash, GetUID(), &varAIparams );
 }
 
 void IActiveInterface::SetAIparams( CVariantMap * params, bool bClearParams )

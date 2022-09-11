@@ -138,11 +138,9 @@ void NormalizeIngameMouseCoords(int ControllerIID, float fAxisValue, bool bIsHor
 	//DebugPrintA("coords: axis:%d %.2f -> %.2f\n", bIsHorizontalAxis, fAxisValue, ret_fAxisValue);
 }
 
-#if defined(_DEBUG) || defined(DEBUG)
-	#define DEBUG_VS
-	#define DEBUG_PS
-#endif
-
+// enable REF device and debug shaders by uncommenting the next 2 lines
+//#define DEBUG_VS
+//#define DEBUG_PS
 
 INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 {
@@ -289,10 +287,10 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 
 	//init subsystems
 #ifdef ENABLE_ACHIEVEMENTS
-	UTGetAchievementManager().Init();
+	__Achievements().Init();
 #endif
 #ifdef ENABLE_LEADERBOARDS
-	UTGetLeaderboards().Init();
+	__Leaderboards().Init();
 #endif
 
 	if (g_startupCommand != GAME_STARTUP_UPLOAD_MOD)
@@ -341,16 +339,16 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 
 #if defined(_DEBUG) || defined(DEBUG)
 	//debug test
-	UTGetAnalytics().Init("UA-181007525-1", strUID);
+	__Analytics().Init("UA-181007525-1", strUID);
 #else
 
 	#ifdef ENABLE_STEAM
 		//final steam - RELEASE
-	UTGetAnalytics().Init("UA-181007525-2", strUID);
+	__Analytics().Init("UA-181007525-2", strUID);
 	#endif
 	#ifdef ENABLE_GALAXY
 		//final GoG - RELEASE
-	UTGetAnalytics().Init("UA-181007525-3", strUID);
+	__Analytics().Init("UA-181007525-3", strUID);
 	#endif
 
 #endif //else
@@ -367,7 +365,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_RESOLUTION_CHANGE);
 	nevent->AddNamedArgUINT32(L"width", UTApp().m_Settings.nWindowW);
 	nevent->AddNamedArgUINT32(L"height", UTApp().m_Settings.nWindowH);
-	UTGetEventManager().TriggerEvent(nevent);
+	__Events().TriggerEvent(nevent);
 	///--- INITIALIZE 3D Device ---
 	if (FAILED(DXUTCreateDevice(D3DADAPTER_DEFAULT, true, UTApp().m_Settings.nWindowW, UTApp().m_Settings.nWindowH, IsDeviceAcceptable, ModifyDeviceSettings)))
 	{
@@ -392,7 +390,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	///--- init SDL ---
 	UTApp().InitSDL(DXUTGetHWND());
 	//add keyboard controllers and map keys
-	CController* ctrlrkeys1 = UTGetCtrlrMgr().AddController(K_CM_CT_KBM_SDL, __Texts().strings[STR_KEYBOARD1]->sText);
+	CController* ctrlrkeys1 = __Controllers().AddController(K_CM_CT_KBM_SDL, __Texts().strings[STR_KEYBOARD1]->sText);
 	ctrlrkeys1->nSDLInstanceId = K_CM_IID_KBM1; //set keyboard instance ID so it isn't empty
 	//ctrlrkeys1->ClearTriggers(); //clear default mapping
 
@@ -403,12 +401,12 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	//App_SetSDLTriggersFromUserData(ctrlrkeys1, ctrlrkeys2);
 	
 	//add network controller for coop play (used for peer controller simulation)
-	CController* ctrlrnet1 = UTGetCtrlrMgr().AddController(K_CM_CT_NET_FRAMELOCK, __Texts().strings[STR_NETWORK1]->sText);
+	CController* ctrlrnet1 = __Controllers().AddController(K_CM_CT_NET_FRAMELOCK, __Texts().strings[STR_NETWORK1]->sText);
 	ctrlrnet1->nSDLInstanceId = K_CM_IID_NET1;
 
 
 	//find/add controllers if any
-	UTGetCtrlrMgr().RegisterAllSDLControllers();
+	__Controllers().RegisterAllSDLControllers();
 
 	//send analytics about gfx caps
 	CHAR ctxt[MAX_PATH];
@@ -484,7 +482,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 	LOG(L"System:: Main loop ended.");
 
 	///--- release all controllers ---
-	UTGetCtrlrMgr().ReleaseAllControllers(false);
+	__Controllers().ReleaseAllControllers(false);
 	///--- shut down SDL ---
 	UTApp().CloseSDL();
 
@@ -536,16 +534,16 @@ OPRESULT BeforeMount()
 	// add listeners
 	//--------------------------------------------------------------------------------------
 	//first listener must be UTAppClass
-	UTGetEventManager().AddListener(&UTApp(), CEventTypes::evtT_SYSTEM);
-	UTGetEventManager().AddListener(&UTApp(), CEventTypes::evtT_CONTROLS);
-	UTGetEventManager().AddListener(&UTApp(), CEventTypes::evtT_GAMESTATE);
+	__Events().AddListener(&UTApp(), CEventTypes::evtT_SYSTEM);
+	__Events().AddListener(&UTApp(), CEventTypes::evtT_CONTROLS);
+	__Events().AddListener(&UTApp(), CEventTypes::evtT_GAMESTATE);
 	//managerul de sunet
-	UTGetEventManager().AddListener(&UTGetSoundManager(), CEventTypes::evtT_SOUND);
+	__Events().AddListener(&__Audio(), CEventTypes::evtT_SOUND);
 
 	//--------------------------------------------------------------------------------------
 	// Script processors
 	//--------------------------------------------------------------------------------------
-	UTGetScriptManager().AddProcessor(&__Sim());
+	__Scripts().AddProcessor(&__Sim());
 
 	return K_OP_OK;
 }
@@ -556,7 +554,7 @@ OPRESULT AfterMount()
 	// load the minimum necessary to paint something (the sprites shader)
 	WCHAR shpath[MAX_PATH];
 	StringCchPrintf(shpath, MAX_PATH, L"%s/shaders/vs_sprites2d.vso", UTApp().g_wszAppResDir);
-	if (OP_FAILED(UTGetShaderManager().AddVShader(shpath, L"VS_SPRITES2D")))
+	if (OP_FAILED(__Shaders().AddVShader(shpath, L"VS_SPRITES2D")))
 	{
 		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Could not load SpritesVS!\n%s", shpath);
 	}
@@ -572,16 +570,16 @@ void ShutdownApp()
 	__Texts().Release();
 	__Particles().Release();
 
-	UTGetSoundManager().Release();
-	UTGetScriptManager().Release();
+	__Audio().Release();
+	__Scripts().Release();
 
-	UTGetAnalytics().Shutdown();
+	__Analytics().Shutdown();
 
 #ifdef ENABLE_ACHIEVEMENTS
-	UTGetAchievementManager().Release();
+	__Achievements().Release();
 #endif
 #ifdef ENABLE_LEADERBOARDS
-	UTGetLeaderboards().Release();
+	__Leaderboards().Release();
 #endif
 	//g_spineMgr.Release();
 
@@ -596,13 +594,13 @@ OPRESULT InitSound()
 {
 	// Initialize sound after we have the window
 	//--- init sound system ---
-	if (FAILED(UTGetSoundManager().Init(DXUTGetHWND(), 2, 44100, 16)))
+	if (FAILED(__Audio().Init(DXUTGetHWND(), 2, 44100, 16)))
 	{
 		return OPRESULT( K_OP_OK_WARNING, L"Failed INITSOUND->g_pSoundManager->Init()\nSOUNDS WILL BE DISABLED!\n", K_SEVERITY_WARNING );
 	}
 
-	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTApp().g_rectRT.w * 0.7f, UTApp().g_rectRT.h * 0.7f));
-	UTGetSoundManager().SetListenerVolumeFadeStart(0.7f);
+	__Audio().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTApp().g_rectRT.w * 0.7f, UTApp().g_rectRT.h * 0.7f));
+	__Audio().SetListenerVolumeFadeStart(0.7f);
 
 	return K_OP_OK;
 }
@@ -755,7 +753,7 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_RESOLUTION_CHANGE);
 	nevent->AddNamedArgUINT32(L"width", pBBDesc->Width);
 	nevent->AddNamedArgUINT32(L"height", pBBDesc->Height);
-	UTGetEventManager().TriggerEvent(nevent);
+	__Events().TriggerEvent(nevent);
 
 	// check minimum requirements and exit if not met
 	if (OP_FAILED(UTApp().VerifyRequirements()))
@@ -772,12 +770,12 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_OP_RETHR(__Game().OnCreateDevice( pDevice, pBBDesc ));
 
 	__ImGui().OnCreateDevice(pDevice, pBBDesc);
-	V_OP_RETHR(UTGetShaderManager().OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(__Shaders().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(__Painter().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(__TexFonts().OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnCreateDevice(pDevice, pBBDesc));
 	V_OP_RETHR(__Particles().OnCreateDevice(pDevice, pBBDesc));
-	V_OP_RETHR(UTGetGUI().OnCreateDevice(pDevice, pBBDesc));
+	V_OP_RETHR(__GUI().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnCreateDevice(pDevice, pBBDesc));
 	//V_RETURN(g_spineMgr.OnCreateDevice(pDevice, pBBDesc));
@@ -820,12 +818,12 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	CEvent *nevent = new CEvent(CEventTypes::evtT_SYSTEM, CEventCommands::evtC_SYSTEM_RESOLUTION_CHANGE);
 	nevent->AddNamedArgUINT32(L"width", pBBDesc->Width);
 	nevent->AddNamedArgUINT32(L"height", pBBDesc->Height);
-	UTGetEventManager().TriggerEvent(nevent);
+	__Events().TriggerEvent(nevent);
 
 	//keep render rect always updated - se cheama si prin triggerEvent de mai sus
 	//UTGetAppClass().OnRenderSizeChanged(pBackBufferSurfaceDesc->Width, pBackBufferSurfaceDesc->Height);
 	//se va auzi inca jumatate de ecran in afara ecranului vizibil
-	UTGetSoundManager().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTApp().g_rectRT.w * 0.7f, UTApp().g_rectRT.h * 0.7f));
+	__Audio().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTApp().g_rectRT.w * 0.7f, UTApp().g_rectRT.h * 0.7f));
 
 	HRESULT hr;
 
@@ -838,7 +836,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_OP_RETHR( __Game().OnResetDevice( pDevice, pBBDesc ) );
 
 	__ImGui().OnResetDevice(pDevice, pBBDesc);
-	V_OP_RETHR(UTGetShaderManager().OnResetDevice(pDevice, pBBDesc));
+	V_OP_RETHR(__Shaders().OnResetDevice(pDevice, pBBDesc));
 	V_OP_RETHR(__Painter().OnResetDevice(pDevice, pBBDesc));
 
 	UTGetTTFManager().OnResetDevice(pDevice, pBBDesc);
@@ -846,7 +844,7 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_OP_RETHR(__TexFonts().OnResetDevice(pDevice, pBBDesc));
 	V_OP_RETHR(g_editor.OnResetDevice(pDevice, pBBDesc));
 	V_OP_RETHR(__Particles().OnResetDevice(pDevice, pBBDesc));
-	V_OP_RETHR(UTGetGUI().OnResetDevice(pDevice, pBBDesc));
+	V_OP_RETHR(__GUI().OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnResetDevice(pDevice, pBBDesc));
 	//V_RETURN(g_spineMgr.OnResetDevice(pDevice, pBBDesc));
@@ -908,11 +906,11 @@ void CALLBACK OnLostDevice()
 	UTApp().OnLostDevice();
 	__ImGui().OnLostDevice();
 	UTGetTTFManager().OnLostDevice();
-	UTGetShaderManager().OnLostDevice();
+	__Shaders().OnLostDevice();
 	__Painter().OnLostDevice();
 
 	__TexFonts().OnLostDevice();
-	UTGetGUI().OnLostDevice();
+	__GUI().OnLostDevice();
 	__RTManager().OnLostDevice();
 
 	__Game().OnLostDevice();
@@ -945,11 +943,11 @@ void CALLBACK OnDestroyDevice()
 	__Game().OnDestroyDevice();
 
 	__ImGui().OnDestroyDevice();
-	UTGetShaderManager().OnDestroyDevice();
+	__Shaders().OnDestroyDevice();
 	__Painter().OnDestroyDevice();
 	UTGetTTFManager().OnDestroyDevice();
 	__TexFonts().OnDestroyDevice();
-	UTGetGUI().OnDestroyDevice();
+	__GUI().OnDestroyDevice();
 	g_editor.OnDestroyDevice();
 	__Particles().OnDestroyDevice();
 	g_playerSelScr.OnDestroyDevice();
@@ -974,7 +972,7 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 	//--- update application class ---
 	UTApp().Update(fElapsedTime);
 	//--- update clasa sunete pentru fade-uri ---
-	UTGetSoundManager().Update(fElapsedTime);
+	__Audio().Update(fElapsedTime);
 	//-=-=-= controllers update =-=-=-
 	//--must be called before updates
 	g_mouse.Update(fElapsedTime);
@@ -987,18 +985,18 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 	}
 
 	//update controls manager
-	UTGetGUI().Update(fElapsedTime);
+	__GUI().Update(fElapsedTime);
 
 	// update main game engine
 	__Game().Update( fElapsedTime, bSyncUpdate, g_nUpdateFrame );
 
 	///--- ANALYTICS ---
-	UTGetAnalytics().Update();
+	__Analytics().Update();
 
 	///--- SCRIPTS UPDATE ---
-	UTGetScriptManager().Update(fElapsedTime);
+	__Scripts().Update(fElapsedTime);
 	///--- EVENTS UPDATE ---
-	UTGetEventManager().Update(fElapsedTime, fTime);
+	__Events().Update(fElapsedTime, fTime);
 }
 
 
@@ -1103,7 +1101,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 		fElapsedTime = K_MAX_TIMESTEP;
 
 	//update achievements and stats
-	UTGetAchievementManager().Update(fElapsedTime);
+	__Achievements().Update(fElapsedTime);
 
 	if (!pDevice)
 	{
@@ -1168,7 +1166,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 			nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 			nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_PLAYER_LEFT);
-			UTGetEventManager().TriggerEvent(nevent);
+			__Events().TriggerEvent(nevent);
 
 			return;
 		}
@@ -1188,7 +1186,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 			nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 			nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_GENERIC);
-			UTGetEventManager().TriggerEvent(nevent);
+			__Events().TriggerEvent(nevent);
 
 			return;
 		}
@@ -1340,7 +1338,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			float arrKeysDown[K_CM_COMMANDS_COUNT] = { 0.0f };
 
 			int nInstanceLocal = __Sim().m_arrPlayerControllersIIDs[g_netlock.Net_GetPlayerIndex()];
-			CController* ctrlr = UTGetCtrlrMgr().GetControllerByInstanceID(nInstanceLocal);
+			CController* ctrlr = __Controllers().GetControllerByInstanceID(nInstanceLocal);
 			if (ctrlr != null)
 				ctrlr->GetKeysDownPercents(arrKeysDown);
 			///write controller data into net package
@@ -1349,7 +1347,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			///save other data about the current frame
 			WORD wFrameFlag = 0;
 			//blocking interface shown so block controller input (includes ingame menu and level finished windows)
-			if (UTGetGUI().GetTopmostInputLayer() != null)
+			if (__GUI().GetTopmostInputLayer() != null)
 				wFrameFlag |= K_NETLOCK_FRAMEFLAG_INPUT_PAUSED_INGAME;
 			//chat window open, block local controller
 #ifdef ENABLE_CHAT_WINDOW
@@ -1493,7 +1491,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 					CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 					nevent->AddNamedArgUINT32(L"newGameState", GAME_STATE_MAINMENU);
 					nevent->AddNamedArgINT32(L"stateErrorStrIdx", STR_NETWORK_ERROR_GENERIC);
-					UTGetEventManager().QueueEvent(nevent);
+					__Events().QueueEvent(nevent);
 #endif
 				}
 			}
@@ -1502,9 +1500,9 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			int nInstancePeer = __Sim().m_arrPlayerControllersIIDs[g_netlock.Net_GetOtherPlayerIndex()];
 
 			CController* ctrlr_local = null;
-			ctrlr_local = UTGetCtrlrMgr().GetControllerByInstanceID(nInstanceLocal);
+			ctrlr_local = __Controllers().GetControllerByInstanceID(nInstanceLocal);
 			CController* ctrlr_peer = null;
-			ctrlr_peer = UTGetCtrlrMgr().GetControllerByInstanceID(nInstancePeer);
+			ctrlr_peer = __Controllers().GetControllerByInstanceID(nInstancePeer);
 
 			//save local buttons states
 			float arrStateLocal[K_CM_COMMANDS_COUNT] = { 0.0f };
@@ -1516,14 +1514,14 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			WORD wFrameFlagsPeer = g_netlock.m_arrReceived[g_nUpdateFrame % CNetLock::K_NETLOCK_MAX_STATE_PACKAGES].m_wFrameFlags;
 
 			//update all controllers with internal data but used ones with network data
-			for (UINT ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.size(); ll++)
+			for (UINT ll = 0; ll < __Controllers().m_arrControllers.size(); ll++)
 			{
-				CController* ctrlr = UTGetCtrlrMgr().m_arrControllers[ll];
+				CController* ctrlr = __Controllers().m_arrControllers[ll];
 				//update local controller with net data only when not in menus
 				if (ctrlr == ctrlr_local)
 				{
 					// update controller overriding keypresses with what we registered before
-					UTGetCtrlrMgr().UpdateController(ctrlr, fElapsedTime, arrStateLocal);
+					__Controllers().UpdateController(ctrlr, fElapsedTime, arrStateLocal);
 					//set paused if needed
 					if (wFrameFlagsLocal & K_NETLOCK_FRAMEFLAG_INPUT_PAUSED_INGAME)
 						ctrlr->nFlags |= K_CM_CTRLR_FLAG_PAUSED;
@@ -1533,7 +1531,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 				else if (ctrlr == ctrlr_peer)
 				{
 					// update controller overriding keypresses with what we received
-					UTGetCtrlrMgr().UpdateController(ctrlr, fElapsedTime, arrStateLocal);
+					__Controllers().UpdateController(ctrlr, fElapsedTime, arrStateLocal);
 					//set paused if needed
 					if (wFrameFlagsPeer & K_NETLOCK_FRAMEFLAG_INPUT_PAUSED_INGAME)
 						ctrlr->nFlags |= K_CM_CTRLR_FLAG_PAUSED;
@@ -1542,16 +1540,16 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 				}
 				else //all the other non synced controllers get updated the usual way
 				{
-					UTGetCtrlrMgr().UpdateController(ctrlr, fElapsedTime);
+					__Controllers().UpdateController(ctrlr, fElapsedTime);
 				}
 			}
 		}
 		else  //if(bSync)
 		{
 			//update all controllers with internal data
-			for (UINT ll = 0; ll < UTGetCtrlrMgr().m_arrControllers.size(); ll++)
+			for (UINT ll = 0; ll < __Controllers().m_arrControllers.size(); ll++)
 			{
-				UTGetCtrlrMgr().UpdateController(UTGetCtrlrMgr().m_arrControllers[ll], fElapsedTime);
+				__Controllers().UpdateController(__Controllers().m_arrControllers[ll], fElapsedTime);
 			}
 		}
 
@@ -1611,13 +1609,13 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 #endif
 
 #ifdef ENABLE_LEADERBOARDS
-	ELBJobStatus eJobStat = UTGetLeaderboards().Update(fElapsedTime);
+	ELBJobStatus eJobStat = __Leaderboards().Update(fElapsedTime);
 	//after each finished job try and write the leaderboards strings
 	if (eJobStat == K_JOBSTATUS_JUST_FINISHED)
 	{
 		// save scores to strings
 		CScoresList scoresList;
-		int nScores = UTGetLeaderboards().GetDownloadedScores(&scoresList);
+		int nScores = __Leaderboards().GetDownloadedScores(&scoresList);
 		if (nScores > 0)
 		{
 			WCHAR strNames[ 2048 ] = { 0 };
@@ -1645,7 +1643,7 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 			__Texts().SetString(STR_LEADERBOARDS_SCORES_VAL, strScores);
 
 			//save user score
-			int nUserScore = UTGetLeaderboards().GetUserScore();
+			int nUserScore = __Leaderboards().GetUserScore();
 			if(nUserScore == 0)
 				__Texts().SetString(STR_LEADERBOARDS_PLAYERSCORE_VAL, __Texts().strings[STR_NOT_AVAILABLE]->sText);
 			else
@@ -1659,13 +1657,13 @@ void CALLBACK OnFrameMove(PDEVICE pDevice, double fTime, float fElapsedTime_orig
 		}
 
 		// update the number of selectable items in the leaderboards window
-		CCtrlLayer* pLay = UTGetGUI().GetTopmostLayer();
+		CCtrlLayer* pLay = __GUI().GetTopmostLayer();
 		if (pLay != null)
 		{
 			CControl* ctrl = pLay->GetControlByName("CTRL_SCORESLIST_TT");
 			if (ctrl != null)
 			{
-				int nPlIdx = UTGetLeaderboards().GetDownloadedScores_PlayerIndex();
+				int nPlIdx = __Leaderboards().GetDownloadedScores_PlayerIndex();
 				ctrl->paramsDict.SetVarINT32(L"nOptionsCnt", nScores);
 				//set selection on valid item if we are allowed to select
 				bool bUserCanSelect = ctrl->paramsDict[L"bUserCanSelect"].m_asBool;
@@ -1738,7 +1736,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		{
 			Mat matview = UTApp().g_cam360hScreen.GetViewTransform();
 
-			PVERTEXSHADER pSprVS = UTGetShaderManager().GetVShaderByName(L"VS_SPRITES2D");
+			PVERTEXSHADER pSprVS = __Shaders().GetVShaderByName(L"VS_SPRITES2D");
 			if (pSprVS)
 				__Painter().Begin(pSprVS, matview, UTApp().g_matProj );
 		}
@@ -1777,11 +1775,11 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 #ifdef K_CONTROLS_EDITOR
 		if ( GameState::state != GAME_STATE_CONTROLSED)
 		{
-			UTGetGUI().Paint();
+			__GUI().Paint();
 			g_pGameSprite->Flush();
 		}
 #else
-		UTGetGUI().Paint();
+		__GUI().Paint();
 		g_pGameSprite->Flush();
 #endif
 
@@ -1884,7 +1882,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 				if (ImGui::Button("Reload Shaders", ImVec2(120, 0)))
 				{
-					UTGetShaderManager().ReloadAllShaders();
+					__Shaders().ReloadAllShaders();
 				}
 
 				ImGui::SliderFloat("gauss", &ct_fGaussLen, 0.0, 5.0);
@@ -2068,7 +2066,7 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 		{
 			//on lost focus reset keypresses (ONLY ON NOT NETWORKED GAMES OR IT WILL DESYNC)
 			if (!UTApp().IsGameNetworked())
-				UTGetCtrlrMgr().ResetAllControllersKeypresses();
+				__Controllers().ResetAllControllersKeypresses();
 			//cand e pe fullscreen si pierzi focus forteaza minimize ca sa vezi ce se intampla
 			if (!DXUTIsWindowed())
 				ShowWindow(hWnd, SW_MINIMIZE);
@@ -2102,7 +2100,7 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 		
 		case WM_CHAR:
 		{
-			UTGetGUI().ReceiveInput(K_CCTRLMGR_INPUT_CHAR, (UINT32)wParam);
+			__GUI().ReceiveInput(K_CCTRLMGR_INPUT_CHAR, (UINT32)wParam);
 #ifdef ENABLE_CHAT_WINDOW
 			g_ChatWnd.ReceiveChar((UINT32)wParam);
 #endif
@@ -2156,7 +2154,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 
 		g_editor.ReceiveKeys(nChar);
 		///--- send keys to controls manager ---
-		UTGetGUI().ReceiveInput(K_CCTRLMGR_INPUT_KEY, (UINT32)nChar);
+		__GUI().ReceiveInput(K_CCTRLMGR_INPUT_KEY, (UINT32)nChar);
 																				 
 		switch (nChar)
 		{
@@ -2205,10 +2203,10 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 					{
 						if (!UTApp().IsGameNetworked())
 						{
-							CCtrlLayer* layer = UTGetGUI().GetLayerByName("LAYER_ID_KEYMAP");
+							CCtrlLayer* layer = __GUI().GetLayerByName("LAYER_ID_KEYMAP");
 							if (layer == null)
 							{
-								CCtrlLayer *lay =UTGetGUI().ShowLayerOnce("LAYER_ID_KEYMAP");
+								CCtrlLayer *lay =__GUI().ShowLayerOnce("LAYER_ID_KEYMAP");
 								if (lay)
 								{
 									CControl *ctrl = lay->GetControlByName("LS_KEYS1");
@@ -2227,7 +2225,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 							}
 							else
 							{
-								UTGetGUI().RemoveLayer("LAYER_ID_KEYMAP");
+								__GUI().RemoveLayer("LAYER_ID_KEYMAP");
 							}
 						}
 					}
@@ -2290,7 +2288,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 			{
 				//chat available only when playing networked game and no other interface visible
 				if ((UTApp().IsGameNetworked()) && ( GameState::state == GAME_STATE_GAME) &&
-					(__Sim().m_levelState == K_LVL_STATE_PLAYING) && (UTGetGUI().Layers.GetSize() == 0))
+					(__Sim().m_levelState == K_LVL_STATE_PLAYING) && (__GUI().Layers.GetSize() == 0))
 				{
 					//enable input if not already enabled
 					if (!g_ChatWnd.IsReceivingInput())
@@ -2309,7 +2307,7 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 
 				CEvent *nevent = new CEvent(CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE);
 				nevent->AddNamedArgUINT32(L"newGameState", nextState);
-				UTGetEventManager().QueueEvent(nevent);
+				__Events().QueueEvent(nevent);
 			}
 			break;
 #endif

@@ -148,14 +148,14 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 				CVariant cvc = active.varAIparams[L"s_openSnd"];
 				if ( cvc.eType == CVariant::K_ARGTYPE_STRING )
 				{
-					int sndidx = UTGetSoundManager().getSndIdx( cvc.m_strArg.textHash );
+					int sndidx = __Audio().getSndIdx( cvc.m_strArg.textHash );
 					SND_PLAY_POSITIONAL( sndidx, active.pos.xy );
 				}
 				//on open script
 				cvc = active.varAIparams[L"s_ScriptOnOpen"];
 				if ( cvc.eType == CVariant::K_ARGTYPE_STRING )
 				{
-					UTGetScriptManager().StartScript( cvc.m_strArg.textHash, active.UID );
+					__Scripts().StartScript( cvc.m_strArg.textHash, active.UID );
 				}
 
 				mem.AIvarBool1 = true;
@@ -166,14 +166,14 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 				CVariant cvc = active.varAIparams[L"s_closeSnd"];
 				if ( cvc.eType == CVariant::K_ARGTYPE_STRING )
 				{
-					int sndidx = UTGetSoundManager().getSndIdx( cvc.m_strArg.textHash );
+					int sndidx = __Audio().getSndIdx( cvc.m_strArg.textHash );
 					SND_PLAY_POSITIONAL( sndidx, active.pos.xy );
 				}
 				//on close script
 				cvc = active.varAIparams[L"s_ScriptOnClose"];
 				if ( cvc.eType == CVariant::K_ARGTYPE_STRING )
 				{
-					UTGetScriptManager().StartScript( cvc.m_strArg.textHash, active.UID );
+					__Scripts().StartScript( cvc.m_strArg.textHash, active.UID );
 				}
 				mem.AIvarBool1 = false;
 			}

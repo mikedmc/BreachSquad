@@ -97,12 +97,20 @@ CMissionGenerator::~CMissionGenerator()
 	Release();
 }
 
-void CMissionGenerator::BuildInventory(std::vector<CAreaSpecs>& arrAreas)
+OPRESULT CMissionGenerator::LoadAreasSpecs( WCHAR* strXMLPath )
 {
+	return m_areasInventory.LoadAreasSpecs( strXMLPath );
+}
+
+void CMissionGenerator::BuildInventory()
+{
+	auto arrAreas = m_areasInventory.GetAreas();
+
 	m_arrInventory.clear();
 	m_arrInventory.reserve(arrAreas.size());
 	for (auto area : arrAreas)
 	{
+		//#TODO: story shoud specify how many available rooms of this type we are allowed to place in the level
 		m_arrInventory.push_back(CInventoryArea(area, 20));
 	}
 }
@@ -111,6 +119,7 @@ void CMissionGenerator::Release()
 {
 	SAFE_DELETE_STDVEC(m_arrPlaced);
 	m_arrInventory.clear();
+	m_areasInventory.Release();
 }
 
 
@@ -761,7 +770,7 @@ bool CMissionGenerator::GenerateLevelFromStory(CMissionStory* story)
 ///----------------------------------------------------------------------------------
 /// SINGLETON
 ///----------------------------------------------------------------------------------
-CMissionGenerator& UTGetMissionGen()
+CMissionGenerator& __MissionGen()
 {
 	static CMissionGenerator g_MissionGen;
 	return g_MissionGen;

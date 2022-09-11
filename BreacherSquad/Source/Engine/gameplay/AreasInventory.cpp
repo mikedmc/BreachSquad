@@ -49,12 +49,4 @@ std::vector<CAreaSpecs> CAreasInventory::GetAreas()
 	return retArr;
 }
 
-///----------------------------------------------------------------------------------
-/// SINGLETON
-///----------------------------------------------------------------------------------
-CAreasInventory& UTGetAreasInv()
-{
-	static CAreasInventory g_AreasInventory;
-	return g_AreasInventory;
-}
 

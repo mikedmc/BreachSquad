@@ -404,7 +404,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 
 			case AI_BEHAVIOR_PLAYER_CONTROL:
 			{
-				CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID( act.nControllerInstanceID );
+				CController* pController = __Controllers().GetControllerByInstanceID( act.nControllerInstanceID );
 				//controller not set or removed, skipping AI
 				if ( (pController == nullptr) || (pController->nFlags & K_CM_CTRLR_FLAG_PAUSED) || (act.bSuspendInput) )
 				{
@@ -573,7 +573,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				//playerii pot schimba directia si pe play anim
 				if ( act._template.actorClass == K_ACT_CLASS_PLAYER )
 				{
-					CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID( act.nControllerInstanceID );
+					CController* pController = __Controllers().GetControllerByInstanceID( act.nControllerInstanceID );
 					if ( pController != nullptr )
 					{
 						//daca apesi st/dr se intoarce cu fatza in directia respectiva
@@ -693,7 +693,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					//act.varAIparams.SetVarINT32(L"nDeathCommand", K_LVL_ACT_DEATHCMD_RESET_TO_ZERO);
 					//#HACK: death timer - waits for the timer before executing the state, only for players
 					//press fire to reset timer
-					CController* pController = UTGetCtrlrMgr().GetControllerByInstanceID( act.nControllerInstanceID );
+					CController* pController = __Controllers().GetControllerByInstanceID( act.nControllerInstanceID );
 					//daca apesi fire dupa o secunda scursa nu mai asteapta timerul
 					bool bContinue = false;
 					if ( (pController != null) && ( mem.AItimer1 < K_LVL_PLAYER_DEATH_TIMER - 1.0f) &&
