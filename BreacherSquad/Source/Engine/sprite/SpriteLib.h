@@ -142,7 +142,6 @@ public:
 
 public:
 	// Loads the specified sprites collection.
-	// \param wcsImageFolderOverride - images get searched here. If null they get loaded from the wcsFullPath folder
 	OPRESULT						LoadSprites(WCHAR* wcsFullPath);
 	// Releases currently loaded collection
 	void							Release();

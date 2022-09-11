@@ -169,8 +169,8 @@ private:
 
 ///----- Application properties -----
 public:
-	CTextureManager				g_texManager;		//global textures manager
-	CSpriteLib			g_sprMgrGlobal;		//global sprite manager used sometimes
+	CTextureManager				g_texManager;		// global textures manager
+	CSpriteLib					g_sprMgrGlobal;		// global sprite manager 
 
 ///----- Application states (not all of them are treated here) -----
 	//#TODO: de facut o interfata gen IGameState si fiecare stare sa fie o clasa derivata din interfata respectiva si instantiata aici dar setat pointer pe currentState prin changeGameState

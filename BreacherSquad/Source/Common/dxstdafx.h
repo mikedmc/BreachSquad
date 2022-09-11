@@ -320,7 +320,7 @@ enum ETexChannel {
 #define K_WALL_HEIGHT_WORLD			64.0f
 #define K_WALL_HEIGHT_SCREEN		(K_WALL_HEIGHT_WORLD * ZHSCALE)
 
-#define K_GAME_CLEAR_COLOR			0x00000044
+#define K_GAME_CLEAR_COLOR			0x00000000
 // splashscreen show time
 #define K_GAME_SPLASH_SHOW_TIMER	2.5f
 
@@ -391,6 +391,7 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "constants/font_ids.h"
 #include "constants/sounds.h"
 // editor exported
+#include "constants/loading_SPR.h"
 #include "constants/lvled_SPR.h"
 #include "constants/lights_SPR.h"
 #include "constants/props_SPR.h"

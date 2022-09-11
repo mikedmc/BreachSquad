@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<SpriteCollection Version="2.0" AtlasJSON="">
+  <Image>loading.png</Image>
+  <Modules>
+    <Module ImageIdx="0" X="1" Y="1" W="327" H="327" strName="" />
+    <Module ImageIdx="0" X="330" Y="2" W="5" H="13" strName="" />
+    <Module ImageIdx="0" X="337" Y="2" W="5" H="13" strName="" />
+  </Modules>
+  <FrameModules>
+    <FrameModule ModuleIdx="0" OX="-163" OY="-163" Flags="0" />
+    <FrameModule ModuleIdx="1" OX="-2" OY="-13" Flags="0" />
+    <FrameModule ModuleIdx="2" OX="-2" OY="-13" Flags="0" />
+  </FrameModules>
+  <Frames>
+    <Frame BBoxX="-163" BBoxY="-163" BBoxW="327" BBoxH="327">
+      <FModules>
+        <FModule Idx="0" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-2" BBoxY="-13" BBoxW="5" BBoxH="13">
+      <FModules>
+        <FModule Idx="1" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-2" BBoxY="-13" BBoxW="5" BBoxH="13">
+      <FModules>
+        <FModule Idx="2" />
+      </FModules>
+      <Points />
+    </Frame>
+  </Frames>
+  <AnimationFrames>
+    <AnimationFrame FrameIdx="0" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="1" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="2" Duration="1" DX="0" DY="0" Flags="" />
+  </AnimationFrames>
+  <Animations>
+    <Animation ID="LOGO" Flags="0">
+      <AFrame Idx="0" />
+    </Animation>
+    <Animation ID="LOADINGBAR" Flags="0">
+      <AFrame Idx="1" />
+      <AFrame Idx="2" />
+    </Animation>
+  </Animations>
+</SpriteCollection>

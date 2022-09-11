@@ -20,8 +20,8 @@ void CApplication::App_EnterState_Loading()
 	//make sure we release everything
 	g_texManager.Release();
 	WCHAR wcsPath[MAX_PATH];
-	FileManager::GetMediaPath(L"media/interfaces/loading.png", wcsPath, true);
-	g_texManager.AddTexture(wcsPath, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE);
+	FileManager::GetMediaPath(L"media/interfaces/loading.bsx", wcsPath, true);
+	V_OP_RET_VOID( g_sprMgrGlobal.LoadSprites( wcsPath ) );
 }
 
 void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime)
@@ -211,7 +211,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 		case 7:
 		{
 			GameState::substate++;
-								/*
+								
 			//start with specified map if requested by editor
 			if (g_startupCommand == GAME_STARTUP_LOAD_MAP)
 			{
@@ -245,7 +245,7 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 				nevent->AddNamedArgINT32(L"transitionType", TRANSITION_SIMPLE);
 				UTGetEventManager().QueueEvent(nevent);
 			}
-			*/
+			
 			//from now on we can pause the game
 			g_bCanPause = true;
 		}
@@ -261,59 +261,46 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline)
 {
 	// set right camera
-	CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam360hScreen);
-	App_SetWorldTransform(pDevice, &g_matIdentity);
+	CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_cam360hScreen );
+	App_SetWorldTransform( pDevice, &g_matIdentity );
 
 	RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
 	RectXYWH worldrect = UTApp().g_rect360hWorld;
 
-	CTexNode* pTN = g_texManager.GetTextureByIndex( 0 );
-	// paint logo
-	if ( pTN && pTN->isLoaded() )
+	if ( g_sprMgrGlobal.IsLoaded() )
 	{
-		RECT rctSrcLogo;
-		SetRect( &rctSrcLogo, 2, 2, 327, 327 );
-		__Painter().Draw( pTN->pTexture, &rctSrcLogo, nullptr, &D3DXVECTOR3( scrrect.CenterX() - ( rctSrcLogo.right - rctSrcLogo.left ) / 2, scrrect.CenterY() - ( rctSrcLogo.bottom - rctSrcLogo.top ) / 2, 0.0f ), 0xffffffff );
-//		pSprite->Draw( pTN->pTexture, &rctSrcLogo, nullptr, &D3DXVECTOR3( scrrect.CenterX() - ( rctSrcLogo.right - rctSrcLogo.left ) / 2, scrrect.CenterY() - ( rctSrcLogo.bottom - rctSrcLogo.top ) / 2, 0.0f ), 0xffffffff );
+		UTSprite::PaintFrame( &g_sprMgrGlobal, scrrect.Center(), ANM_LOADING_SPR_LOGO, 0 );
 	}
 
-	//fonts loaded so write "loading" 
-	if ((GameState::substate > 3) && (GameState::substate < 6))
-	{
-		RectXYWHi rct(scrrect.x + 25, scrrect.CenterY() - 10, scrrect.w - 50, 15);
-		g_font6ns1->DrawString(STR_LOADING, rct, FONTFLAG_ANCHOR_TOPCENTER, 0xff186582);
-	}
 
-	if (GameState::substate > 3)
+	if ( GameState::substate > 3 )
 	{
-		if (UTApp().m_Settings.dev_unCurrentCRC != K_GAME_CRC)
+		if ( UTApp().m_Settings.dev_unCurrentCRC != K_GAME_CRC )
 		{
-			g_font10bs1->DrawString(STR_CHANGE_DETECTED, scrrect.CenterX(), 15.0f, FONTFLAG_ANCHOR_TOPCENTER, 0xff963500);
-			g_font6ns1->DrawString(STR_CHANGE_DETECTED_WARNING, scrrect.CenterX(), 27.0f, FONTFLAG_ANCHOR_TOPCENTER, K_COLOR_DEFAULT_TEXT);
+			g_font10bs1->DrawString( STR_CHANGE_DETECTED, scrrect.CenterX(), 15.0f, FONTFLAG_ANCHOR_TOPCENTER, 0xff963500 );
+			g_font6ns1->DrawString( STR_CHANGE_DETECTED_WARNING, scrrect.CenterX(), 27.0f, FONTFLAG_ANCHOR_TOPCENTER, K_COLOR_DEFAULT_TEXT );
 		}
 	}
 	//progress
-	if ((GameState::substate >= 0) /*&& (GameState::substate < 7) && ( pTN && pTN->isLoaded() )*/ )
+	if ( ( GameState::substate >= 0 ) && (g_sprMgrGlobal.IsLoaded()) && (GameState::substate < 7) )
 	{
-		RECT rctSrcEmpty;
-		SetRect(&rctSrcEmpty, 329, 1, 335, 15);
-		RECT rctSrcFull;
-		SetRect(&rctSrcFull, 336, 1, 342, 15);
-		float bulletw = rctSrcEmpty.right - rctSrcEmpty.left;
-
 		float fLoadPerc = GameState::substate / 7.0f;
 		CLAMP( fLoadPerc, 0.0f, 1.0f );
-		LOG(L"loadperc:%d", GameState::substate);
+		LOG( L"loadperc:%d", GameState::substate );
+
+		RectXYWHi bulletrect = g_sprMgrGlobal.GetAFrameBBox( ANM_LOADING_SPR_LOADINGBAR, 0 );
 
 		const int bulletcnt = 10;
+		Vec2 vLoadPos( scrrect.CenterX() - bulletrect.w * bulletcnt / 2, scrrect.Bottom() - 20 );
 		for ( int kk = 0; kk < bulletcnt; kk++ )
 		{
-			RECT fromrect = rctSrcEmpty;
-			if ( kk <= ceil( fLoadPerc * bulletcnt ) )
-				fromrect = rctSrcFull;
-			pSprite->Draw( pTN->pTexture, &fromrect, nullptr, &D3DXVECTOR3( scrrect.CenterX() - (bulletcnt * bulletw) / 2 - bulletw / 2 + kk * bulletw , scrrect.Bottom() - 20.0f, 0.0f ), 0xffffffff );
-
+			UTSprite::PaintFrame( &g_sprMgrGlobal, Vec2( vLoadPos.x + kk * bulletrect.w, vLoadPos.y ), ANM_LOADING_SPR_LOADINGBAR, ( kk <= ceil( fLoadPerc * bulletcnt ) ) ? 1 : 0 );
 		}
+	}
+	//fonts loaded so write "loading" 
+	if ( ( GameState::substate > 3 ) && ( GameState::substate < 7 ) )
+	{
+		g_font6ns1->DrawString( STR_LOADING, scrrect.CenterX(), scrrect.Bottom() - 15, FONTFLAG_ANCHOR_TOPCENTER, 0xffffffff );
 	}
 }
 
