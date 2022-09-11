@@ -69,11 +69,11 @@ void VecProj::Set()
 	Set( v );
 }
 
-void VecProj::Move(Vec3 & delta)
+void VecProj::Move( const Vec3 delta )
 {
 	xyz += delta;
 	// compute other components
 	xy.x = xyz.x; xy.y = xyz.y;
-	proj_h = Z_TO_H(xyz.z);
-	xy_proj = Vec2(xyz.x, xyz.y - proj_h);
+	proj_h = Z_TO_H( xyz.z );
+	xy_proj = Vec2( xyz.x, xyz.y - proj_h );
 }

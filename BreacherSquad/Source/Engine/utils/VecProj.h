@@ -12,14 +12,14 @@ public:
 	Vec2		xy_proj;		// projected to 2d space where z adds to y. Don't set directly!
 
 	VecProj();
-	VecProj(const VecProj & o);
-	VecProj(const Vec3 & vec);
-	VecProj(const Vec2 & vec);
+	VecProj( const VecProj & o );
+	VecProj( const Vec3 & vec );
+	VecProj( const Vec2 & vec );
 	VecProj( float x, float y, float z );
 
-	void		Set(Vec3 & vec);
+	void		Set( Vec3 & vec );
 	void		Set( float x, float y, float z );
 	// Resets vector components to 0.0f
 	void		Set();
-	void		Move(Vec3 & delta);
+	void		Move( const Vec3 delta );
 };

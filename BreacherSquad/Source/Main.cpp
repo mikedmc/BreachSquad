@@ -85,6 +85,13 @@ CChatWnd					g_ChatWnd;							// Ingame chat window for networked matches
 CNetLock					g_netlock;
 ///-- spine manager --
 //CSpineManager				g_spineMgr;
+// Spine extension used for allocation and deallocations (singleton)
+/*
+spine::SpineExtension *spine::getDefaultExtension() {
+	static spine::DefaultSpineExtension g_spineExtension;
+	return &g_spineExtension;
+}
+*/
 
 CFreeTypeFont				g_font1;
 
@@ -123,11 +130,6 @@ OPRESULT	InitSound();
 /// MISC UTILITY FUNCTIONS
 ///-----------------------------------------------------
 
-// Spine extension used for allocation and deallocations (singleton)
-spine::SpineExtension *spine::getDefaultExtension() {
-	static spine::DefaultSpineExtension g_spineExtension;
-	return &g_spineExtension;
-}
 // Callback used by ControllersMgr to normalize mouse input from global to ingame player relative
 // Hard to make it a class method and use as a callback so make it global
 void NormalizeIngameMouseCoords(int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue)
@@ -136,8 +138,10 @@ void NormalizeIngameMouseCoords(int ControllerIID, float fAxisValue, bool bIsHor
 	//DebugPrintA("coords: axis:%d %.2f -> %.2f\n", bIsHorizontalAxis, fAxisValue, ret_fAxisValue);
 }
 
-//#define DEBUG_VS
-//#define DEBUG_PS
+#if defined(_DEBUG) || defined(DEBUG)
+	#define DEBUG_VS
+	#define DEBUG_PS
+#endif
 
 
 INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
