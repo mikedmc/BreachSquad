@@ -21,6 +21,7 @@ private:
 	CWeaponsComponent*			c_weapons;					// graphics and logic component that handles the weapons
 	CActorAIComponent*			c_AI;						// AI component that handles actor controlling (player or computer)
 
+	CLevel&						level;						// Reference to current level (__Sim())
 public:
 	CActorTemplate				_template;					// holds data about each actor, copied from source templates (xml) and probably modified by enhancements
 	CActorTemplate				_template_ini;				// holds initial template that we reset to when changing the weapon or adding non permanent enhancements
@@ -66,7 +67,8 @@ public:
 
 public:
 	// CTOR. Allocate the components when calling the constructor. They will get deallocated by CActor.
-	CActor( Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, 
+	CActor( Vec2 vnPos, CActorTemplate* pActorTemplate, int nID,
+		CLevel& refLevel,
 		CSpriteActorComponent* pComGraphics, 
 		CWeaponsComponent* pComWpn,
 		CActorAIComponent* pComAI);
@@ -85,16 +87,16 @@ private:
 	// decides the current attack state of the actor based on AI commands and weapon status
 	void						ComputeAttackStatus();
 	// Processes the commands from the AI component. Needs access to level for effects.
-	void						ProcessAICommands( CLevel& level );
+	void						ProcessAICommands();
 	// Physics Integrator, converts speeds to movement and handles collisions
-	void						DoMove( float dTime, CLevel& level );
+	void						DoMove( float dTime );
 	// Processes extra stuff after moving (interactibles, pArea ownership, etc)
-	void						ProcessExtras( CLevel& level );
+	void						ProcessExtras();
 	// Sets animations based on behaviour
 	void						ProcessAnimations();
 	// checks weapon states to see if we must generate the bullets
 	// \returns: true if shot, false if it didn't
-	bool						CheckShoot( CLevel& level );
+	bool						CheckShoot();
 
 public:
 	// Sets a new AI state
@@ -120,7 +122,7 @@ public:
 	// returns 3d position of the heart central point
 	inline VecProj				GetPosHeart3D() const { return vHeart; }
 	// Updates specified Actor AI. Returns busy state TRUE if actor has jobs to do or false if actor is still
-	void						Update( float dTime, CLevel& level );
+	void						Update( float dTime );
 	// Paints the actor on a specific color channel
 	void						Paint( ETexChannel eChannel = K_TEXCHAN_COLORMAP );
 	// returns aim vector

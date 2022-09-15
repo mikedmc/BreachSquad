@@ -172,6 +172,7 @@ CActor* CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHa
 	// get weapons sprite lib and send it to the weapons component
 	CSpriteLib* pSprWpn = m_sprActors.GetLibByNick( K_LIBNICK_WEAPONS );
 	CActor* nact = new CActor( spawnPos, templateLocal, GenerateNextID(),
+		*this,
 		new CSpriteActorComponent( &m_sprActors ),
 		new CWeaponsComponent( pSprWpn ),
 		new CActorAIComponent( *this )
@@ -2424,7 +2425,7 @@ void CLevel::UpdateAI( float dTime, bool bInEditor )
 		CActor* act = m_arrActors[kk];
 		if ( !bInEditor )
 		{
-			act->Update( dTime, *this );
+			act->Update( dTime );
 		}
 		//add some floats to detect network inconsistencies
 		fHashKey += act->pos.xyz.x + act->pos.xyz.y + act->fLife + act->fArmor + act->fStunTimer;

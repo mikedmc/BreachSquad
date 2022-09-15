@@ -13,8 +13,7 @@ void CActor::PostConstructionInit()
 
 void CActor::BeginPlay()
 {
-	//#TODO: vezi daca ramanem pe __Sim sau daca tot dam parametru CLevel la toate metodele...
-	pArea = __Sim().Areas_GetAt( pos.xy );
+	pArea = level.Areas_GetAt( pos.xy );
 	_ASSERT(pArea != nullptr);
 	c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE);
 }
@@ -24,12 +23,14 @@ void CActor::EndPlay()
 }
 
 CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID,
+	CLevel& refLevel,
 	CSpriteActorComponent* pComGraphics, CWeaponsComponent* pComWpn, CActorAIComponent* pComAI ) :
 	 nLastDamageTakenFromUID(0),
 	pClosestTouchable(nullptr), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), bHasGravity(true),
 	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
 	eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0), eAttackStatus(K_ACT_ATTACK_IDLE),
-	fStunTimer(0.0f)
+	fStunTimer(0.0f),
+	level(refLevel)
 {
 	_ASSERT(pComGraphics != nullptr && pComAI != nullptr && pComWpn != nullptr);
 	// save pointer to component
@@ -163,7 +164,7 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 	return true;
 }
 
-void CActor::Update(float dTime, CLevel& level )
+void CActor::Update(float dTime )
 {
 	// clean target pointer when target dies (should be done by AI?)
 	if ( (pTarget != nullptr) && pTarget->IsPendingKill() )
@@ -207,11 +208,11 @@ void CActor::Update(float dTime, CLevel& level )
 	// Update actor AI
 	c_AI->Update( *this, dTime );
 	// now process the AI commands
-	ProcessAICommands( level );
+	ProcessAICommands();
 	// Move based on speeds
-	DoMove( dTime, level );
+	DoMove( dTime );
 	// Processes extra stuff before painting
-	ProcessExtras( level );
+	ProcessExtras();
 	// Set actor animations based on behaviour
 	ProcessAnimations();
 	// Update all components after we have the final player position
@@ -221,7 +222,7 @@ void CActor::Update(float dTime, CLevel& level )
 	// update weapon after updating the graphics component because it depends on mount points
 	c_weapons->Update( *this, dTime );
 	// now we check if the weapon shot and generate the bullets
-	CheckShoot( level );
+	CheckShoot();
 }
 
 void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
@@ -525,7 +526,7 @@ void CActor::ComputeAttackStatus()
 
 }
 
-void CActor::ProcessAICommands( CLevel& level )
+void CActor::ProcessAICommands()
 {
 	//----------------------------------------
 	//	EXECUTE - process AI output  
@@ -654,7 +655,7 @@ void CActor::ProcessAICommands( CLevel& level )
 
 }
 
-void CActor::DoMove( float dTime, CLevel& level )
+void CActor::DoMove( float dTime )
 {
 	// temp list for collisions
 	static CFixedArray<SweepAABB, 100> tempCollBoxList;
@@ -914,7 +915,7 @@ void CActor::DoMove( float dTime, CLevel& level )
 
 }
 
-void CActor::ProcessExtras( CLevel& level )
+void CActor::ProcessExtras()
 {
 	///--- set current area if null or changed after updating the position
 	if ( (pArea == nullptr) || (!pArea->AABBbounds.PointIn( pos.xy )) )
@@ -1020,7 +1021,7 @@ void CActor::ProcessAnimations()
 	}
 }
 
-bool CActor::CheckShoot( CLevel& level )
+bool CActor::CheckShoot()
 {
 	//#TODO: must add support for weapon scripts on shoot and empty
 	CWeapon* weapon = c_weapons->GetCurWeapon();
@@ -1291,7 +1292,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 
 			this->fLife -= fDecLife;
 			//analytics
-			__Sim().m_arrStats[K_LVL_STATS_PL1_DAMAGE_TAKEN + this->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT] += ( int ) ceil( fDecLife );
+			level.m_arrStats[K_LVL_STATS_PL1_DAMAGE_TAKEN + this->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT] += ( int ) ceil( fDecLife );
 		}
 		else
 		{
@@ -1361,7 +1362,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 			{
 				if ( this->UID != pBullet->ownerUID )
 				{
-					__Sim().GiveStrategicPoints( 1.0f, &Vec2( this->bbox.vCenter.x, this->bbox.vMin.y ) );
+					level.GiveStrategicPoints( 1.0f, &Vec2( this->bbox.vCenter.x, this->bbox.vMin.y ) );
 				}
 			}
 		}
@@ -1390,7 +1391,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 		if ( ( this->GetCurrentBehavior() == AI_BEHAVIOR_DEAD ) && ( pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT ) && ( this->fLife < -this->_template.fLife ) )
 			bSplatActor = true;
 		//if lucky cancel splat
-		if ( __Sim().RNG().RandInt( 100 ) <= 10 )
+		if ( level.RNG().RandInt( 100 ) <= 10 )
 		{
 			bSplatActor = false;
 			this->fLife = 0.0f;
@@ -1405,13 +1406,13 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 			{
 				if ( ( pBullet->nFlags & K_LVL_BULLET_FLAG_NO_DECALS ) == 0 )
 				{
-					__Sim().AddDecal_BloodSplat( this->GetPosHeart(), true, this->_template.actorClass );
+					level.AddDecal_BloodSplat( this->GetPosHeart(), true, this->_template.actorClass );
 				}
 			}
 
 			retData.bKilledTarget = true;
 			//say shooter verse
-			CActor* pShooter = __Sim().GetActorByUID( pBullet->ownerUID );
+			CActor* pShooter = level.GetActorByUID( pBullet->ownerUID );
 			if ( pShooter != null )
 			{
 				//				PlayActorSoundVerse(pShooter, K_LVL_ACT_VERSE_KILL_MADE);
