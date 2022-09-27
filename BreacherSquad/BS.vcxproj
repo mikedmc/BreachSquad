@@ -294,6 +294,7 @@
     <ClInclude Include="Source\Engine\utils\CollisionAABB.h" />
     <ClInclude Include="Source\Engine\utils\DataTypes.h" />
     <ClInclude Include="Source\Engine\utils\dbgutil.h" />
+    <ClInclude Include="Source\Engine\utils\easing.h" />
     <ClInclude Include="Source\Engine\utils\enginecommon.h" />
     <ClInclude Include="Source\Engine\utils\GrowableArray.h" />
     <ClInclude Include="Source\Engine\utils\HashUtil.h" />

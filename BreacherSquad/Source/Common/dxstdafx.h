@@ -300,7 +300,7 @@ enum ETexChannel {
 // number of vertical visible tiles in a screen 
 #define K_GAME_TARGET_RESOLUTION_H	360
 // game scaling to final RT (pixel size) - applied independently of pixel perfect pixel size g_nPixelSizePP
-#define K_RT_PIXEL_SIZE			1
+#define K_RT_PIXEL_SIZE				1
 #define K_RT_PIXEL_SIZE_F			1.0f
 // level will always render at 640x360 so this will be the base game resolution
 #define K_GAME_WIDTH				640

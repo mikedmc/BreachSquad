@@ -304,9 +304,6 @@ void DrawRectUP_TL1T(LPDIRECT3DDEVICE9 pDevice, RECT scrRect, Vec2 texUL, Vec2 t
 void DrawLineUP_TL1T(LPDIRECT3DDEVICE9 pDevice, Vec2 start, Vec2 end, DWORD color = 0xffffffff);
 void DrawFullscreenVignette(LPDIRECT3DDEVICE9 pDevice, float alpha);
 
-//gets time by spline (0..1)
-float TimeEasing(float t);
-float EasingOutBackCubic(float t);
 // Sets clip area on renderer (so you can't paint outside)
 HRESULT SetScissorClip(LPDIRECT3DDEVICE9 pDevice, int clipX, int clipY, int clipW, int clipH);
 // Removes clip from renderer

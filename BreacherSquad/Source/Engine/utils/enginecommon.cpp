@@ -516,22 +516,6 @@ void DrawLineUP_TL1T(LPDIRECT3DDEVICE9 pDevice, Vec2 start, Vec2 end, DWORD colo
 }
 
 
-Vec2 easing_a(0.0f, 0.0f), easing_at(1.0f, 0.0f), easing_b(1.0f, 1.0f), easing_bt(1.0f, 0.0f);
-float TimeEasing(float t)
-{
-	Vec2 ret;
-	D3DXVec2Hermite(&ret, &easing_a, &easing_at, &easing_b, &easing_bt, t);
-	return ret.y;
-}
-
-float EasingOutBackCubic(float t)
-{
-	float ts = t * t;
-	float tc = ts * t;
-	//return (4.0f * tc + -9.0 * ts + 6.0 * t);
-	//return (-0.7025f*tc*ts + 1.355f*ts*ts + 4.395f*tc + -10.295f*ts + 6.2475f*t);
-	return (-5.7*tc*ts + 11.4*ts*ts + -1.7*tc + -9*ts + 6*t);
-}
 //clipping functions
 HRESULT SetScissorClip(LPDIRECT3DDEVICE9 pDevice, int clipX, int clipY, int clipW, int clipH)
 {

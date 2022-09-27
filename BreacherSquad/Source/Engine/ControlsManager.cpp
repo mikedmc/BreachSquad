@@ -1,4 +1,5 @@
 #include "dxstdafx.h"
+#include "utils/easing.h"
 
 //static fn
 CSpriteLib* CControl::m_pSprCol = nullptr;
@@ -1237,7 +1238,7 @@ void CControl::Update( float dTime, float fTimeline )
 
 			if ( g_mouse.Lbut == K_MOUSE_BUTT_JUSTPRESSED )
 			{
-				//clickuri
+				//clicks
 				if ( hasArrows )
 				{
 					if ( Rects::PointInRect( &layer->mouseRelPos, &bbL ) )
@@ -1264,7 +1265,8 @@ void CControl::Update( float dTime, float fTimeline )
 				}
 			}
 
-			//--- efectuam actiunea in fn de flaguri si facem clear la flags ---
+
+			//--- use flags to execute action and then clear flags
 			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
 			{
 				newSlidePercent -= fTickSize;
@@ -1278,10 +1280,9 @@ void CControl::Update( float dTime, float fTimeline )
 			// cursor moved
 			if ( statusFlags & CCTRL_STATUS_FLAG_CLICKED )
 			{
-				newSlidePercent = ( float ) ( layer->mouseRelPos.x - bbB.x ) / ( float ) ( bbB.w );
+				newSlidePercent = (float)( layer->mouseRelPos.x - bbB.x ) / (float)( bbB.w );
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
 			}
-
 
 			CLAMP( newSlidePercent, 0.0f, 1.0f );
 			//daca avem ticks ne limitam la ele
@@ -2199,7 +2200,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 
 		case CCTRL_TYPE_BUTTON:
 		{
-			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 5 ) )
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 6 ) )
 			{
 				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx or frame count" );
 				return;
@@ -2500,7 +2501,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 
 		case CCTRL_TYPE_SLIDER:
 		{
-			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 5 ) )
+			if ( ( animIdx < 0 ) || ( animIdx >= m_pSprCol->animationNo ) || ( m_pSprCol->Animations[ animIdx ]->aframesNo < 7 ) )
 			{
 				drawDebugText( BBox.x, BBox.y, L"Invalid animIdx(needs 5 frames)" );
 				return;
@@ -2523,20 +2524,21 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			RectXYWHi bboxBar( BBox.x + arrRect.w, BBox.Bottom() - arrRect.h, BBox.w - arrRect.w * 2, arrRect.h );
 			GUIUtils::DrawProgress( m_pSprCol, animIdx, bboxBar, slidePercent, fFocusPercent, layer->alpha, nSteps );
 			
+			DWORD dwFocusCol = DW_COLOR_FFFA( fFocusPercent * layer->alpha );
 			if ( hasArrows )
 			{
-				int frame;
-				//left but
-				frame = 3;
-				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDLEFT )
-					frame = 3;
-				UTSprite::PaintFrame( m_pSprCol, Vec2(bboxBar.x, bboxBar.CenterY()), animIdx, frame, wcol );
+				// base frames (grey)
+				UTSprite::PaintFrame( m_pSprCol, Vec2( bboxBar.x, bboxBar.CenterY() ), animIdx, 3, wcol );
+				UTSprite::PaintFrame( m_pSprCol, Vec2( bboxBar.Right(), bboxBar.CenterY() ), animIdx, 4, wcol );
 
-				//right but
-				frame = 4;
-				if ( statusFlags & CCTRL_STATUS_FLAG_CLICKEDRIGHT )
-					frame = 4;
-				UTSprite::PaintFrame( m_pSprCol, Vec2(bboxBar.Right(), bboxBar.CenterY()), animIdx, frame, wcol );
+				int frame;
+				if ( fFocusPercent > 0.0f )
+				{
+					//left but
+					UTSprite::PaintFrame( m_pSprCol, Vec2( bboxBar.x, bboxBar.CenterY() ), animIdx, 5, dwFocusCol );
+					//right but
+					UTSprite::PaintFrame( m_pSprCol, Vec2( bboxBar.Right(), bboxBar.CenterY() ), animIdx, 6, dwFocusCol);
+				}
 			}
 		}
 		break;
@@ -3468,17 +3470,26 @@ void GUIUtils::DrawButton( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, bool
 	Vec2 vUL( clipwin.left, clipwin.top );
 
 	DWORD dwFocusAlpha = DW_COLOR_FFFA( fFocusPercent * fAlpha );
-	float fHC = LIMIT( (fHoverPercent * 0.6f + fFocusPercent * 0.9f), 0.0f, 1.0f );
+	//float fHC = LIMIT( (fHoverPercent * 0.6f + fFocusPercent * 0.9f), 0.0f, 1.0f );
+	float fHC = LIMIT( ( fHoverPercent ), 0.0f, 1.0f );
 	DWORD dwHoverAlpha = DW_COLOR_FFFA( fHC * fAlpha );
 	DWORD dwAlpha = DW_COLOR_FFFA( fAlpha );
-	// paint base
-	int nframe = 0;
-	if ( bPressed )
-		nframe = 2;
-	RectLTRB clipbut( BBox );
-	UTSprite::PaintFModuleClipped( sprCol, Vec2(BBox.x, BBox.y), animIdx, 0, 0, clipbut, dwAlpha );
-	if(!bPressed)
-		UTSprite::PaintFModuleClipped( sprCol, Vec2( BBox.x, BBox.y ), animIdx, 1, 0, clipbut, dwHoverAlpha );
+	
+	// arrow goes to the right when focused
+	float fArrX = BBox.w * (Easing::easeInOutQuad( fFocusPercent ) * 0.8f);
+	RectLTRB clipbutL( BBox );
+	RectLTRB clipbutR( BBox );
+	clipbutR.left += fArrX;
+	clipbutL.right = clipbutR.left;
+	// paint selected color to the left
+	if ( fArrX > 0.0f )
+		UTSprite::PaintFModuleClipped( sprCol, Vec2( BBox.x, BBox.y ), animIdx, 0, 0, clipbutL, dwAlpha );
+	// paint the rest in base color
+	UTSprite::PaintFModuleClipped( sprCol, Vec2( BBox.x, BBox.y ), animIdx, 2, 0, clipbutR, dwAlpha);
+	// add hover color
+	UTSprite::PaintFModuleClipped( sprCol, Vec2( BBox.x, BBox.y ), animIdx, 1, 0, clipbutR, dwHoverAlpha );
+	// paint arrow
+	UTSprite::PaintFModule( sprCol, Vec2( BBox.x + fArrX, BBox.y ), animIdx, 5, 0, dwAlpha );
 	// paint thin bar
 	UTSprite::PaintFModuleClipped( sprCol, Vec2( vUL.x, vUL.y ), animIdx, 4, 0, clipwin, dwAlpha );
 	if(fFocusPercent > 0.0f)
@@ -3640,6 +3651,7 @@ void GUIUtils::DrawWindow( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, floa
 		__Painter().SetTransform( matTitle );
 		__TexFonts().fonts[ nFontIdx ]->DrawString( strTitle, 0.0f, 0.0f, FONTFLAG_ANCHOR_VCENTERRIGHT, dwTitleColor );
 		__Painter().SetTransform( g_matIdentity );
+		//#TODO: paint icon and flag
 	}
 }
 
@@ -3677,10 +3689,13 @@ void GUIUtils::DrawPanel( CSpriteLib *sprCol, RectXYWHi BBox, float fFocusPercen
 	UTSprite::PaintFModuleClipped( sprCol, Vec2( vUL.x + leftSz1.w, vUL.y ), animIdx, 2, 0, clipwin, dwAlpha );
 	UTSprite::PaintFModuleClipped( sprCol, Vec2( vUL.x + leftSz1.w, vUL.y ), animIdx, 1, 0, clipwin, dwFocusAlpha );
 	// paint icon
-	if (( nIconAnimIdx >= 0 ) && (nIconFrame >= 0) && (nIconFrame < sprCol->GetAFramesCnt(nIconAnimIdx)) )
+	if (( nIconAnimIdx >= 0 ) && (nIconFrame >= 0) && (nIconFrame < sprCol->GetAFramesCnt(nIconAnimIdx) - 1) )
 	{
-		DWORD dwIconColor = DW_COLOR_LERP( colPanelIconIdle, colPanelIconFocused, fFocusPercent );
-		UTSprite::PaintFModule( sprCol, Vec2( vUL.x + leftSz1.w / 2, vUL.y ), nIconAnimIdx, nIconFrame, 0, DW_COLORALPHA(dwIconColor, fAlpha));
+		//paint base icon
+		UTSprite::PaintFModule( sprCol, Vec2( vUL.x + leftSz1.w / 2, vUL.y + 8 ), nIconAnimIdx, nIconFrame + 1, 0, DW_COLOR_FFFA( fAlpha ) );
+		// paint focus color
+		DWORD dwIconColor = DW_COLOR_FFFA( fFocusPercent * fAlpha );
+		UTSprite::PaintFModule( sprCol, Vec2( vUL.x + leftSz1.w / 2, vUL.y + 8 ), nIconAnimIdx, nIconFrame, 0, dwIconColor);
 	}
 }
 
@@ -4203,7 +4218,7 @@ void CControlsManager::Paint()
 	{
 		CCtrlLayer* lay = Layers[ ii ];
 
-		float perc = TimeEasing( lay->alpha );
+		float perc = Easing::easeInOutQuad( lay->alpha );
 		if ( !lay->bAnimate )
 			perc = 1.0f;
 

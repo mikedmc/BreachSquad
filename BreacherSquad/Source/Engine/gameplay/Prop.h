@@ -28,8 +28,9 @@ const CStringHash EPropClassNames[] =
 ///--------------------------------------------------------------------------
 class CProp : public IActiveInterface
 {
-public:
+private:
 	CActiveAIComponent*	c_AI;					// AI component for prop
+
 public:
 	CSpr				sprite;
 	SprFrameId			fid_ini;				// Initial animation and frame id
