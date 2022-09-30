@@ -274,7 +274,7 @@ void CControl::Reset()
 			bCanHaveFocus = true;
 
 			paramsDict.SetVarBool( L"bChecked", false );
-			paramsDict.SetVarFloat( L"fHoverPercent", 0.0f );
+			//paramsDict.SetVarFloat( L"fHoverPercent", 0.0f );
 		}
 		break;
 		case CCTRL_TYPE_PROGRESS_BAR:
@@ -1159,7 +1159,7 @@ void CControl::Update( float dTime, float fTimeline )
 		case CCTRL_TYPE_CHECKBOX:
 		{
 			bool bChecked = paramsDict[ L"bChecked" ].m_asBool;
-			float hoverPercent = paramsDict[ L"fHoverPercent" ].m_asFloat;
+			//float hoverPercent = paramsDict[ L"fHoverPercent" ].m_asFloat;
 
 			RectXYWHi frameBB = m_pSprCol->GetAFrameBBox( animIdx, 0 );
 			frameBB.x += BBox.x; frameBB.y += BBox.CenterY();
@@ -1185,7 +1185,7 @@ void CControl::Update( float dTime, float fTimeline )
 				bCheckChanged = true;
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
 			}
-
+			 /*
 			if ( statusFlags & CCTRL_STATUS_FLAG_HOVER )
 			{
 				inc_limit( hoverPercent, dTime * 8.0f, 1.0f );
@@ -1194,6 +1194,7 @@ void CControl::Update( float dTime, float fTimeline )
 			{
 				dec_limit( hoverPercent, dTime * 8.0f, 0.0f );
 			}
+			*/
 
 			//--- send messaje on check change ---
 			if ( bCheckChanged )
@@ -1211,7 +1212,7 @@ void CControl::Update( float dTime, float fTimeline )
 				__Events().QueueEvent( nevent );
 			}
 
-			paramsDict.SetVarFloat( L"fHoverPercent", hoverPercent );
+			//paramsDict.SetVarFloat( L"fHoverPercent", hoverPercent );
 			paramsDict.SetVarBool( L"bChecked", bChecked );
 		}
 		break;
@@ -2592,7 +2593,7 @@ void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
 			}
 
 			bool bChecked = paramsDict[ L"bChecked" ].m_asBool;
-			float hoverPercent = paramsDict[ L"fHoverPercent" ].m_asFloat;
+			//float hoverPercent = paramsDict[ L"fHoverPercent" ].m_asFloat;
 
 			int frame = 0;
 			if ( bChecked )
@@ -4169,6 +4170,7 @@ void CControlsManager::Update( float dTime )
 		if ( ( layer->statusFlags & CCTRL_STATUS_FLAG_REMOVED ) != 0 )
 			continue;
 		// update all controls
+		bool bFoundBlocking = false;
 		for ( int ll = 0; ll < layer->controls.GetSize(); ll++ )
 		{
 			// update visual focus percent in each control
@@ -4181,12 +4183,13 @@ void CControlsManager::Update( float dTime )
 			{
 				inc_limit( ctrl->fFocusPercent, 6.0f * dTime, 1.0f );
 			}
-			// update control now
-			ctrl->Update( dTime, fLocalTimeline );
+			// update control now if we didn't find a blocking layer
+			if(!bFoundBlocking)
+				ctrl->Update( dTime, fLocalTimeline );
 		}
 		// was this layer blocking? stop updating layers
 		if ( layer->bBlocking )
-			break;
+			bFoundBlocking = true;
 	}
 
 	// controls were updated, see if layer needs removing
