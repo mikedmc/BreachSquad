@@ -32,6 +32,7 @@
 #define			MUVec3Norm				D3DXVec3Normalize
 
 #define			MUVec4Lerp				D3DXVec4Lerp
+#define			MUVec4Transform			D3DXVec4Transform
 
 // macros
 #define			Vec3XY(vec)				Vec2(vec.x, vec.y)

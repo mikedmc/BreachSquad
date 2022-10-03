@@ -282,7 +282,7 @@
 	<Layer ID="LAYER_ID_CREDITS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_CLOSE">
 		<Control Type="Vignette" animID="VIGNETTES" color="#FF000000" frameIdx="0" />
 		<Control H="132" Type="Widebar" W="100" X="-51" Y="-64" animID="WIDEBAR2" color="#FFFFFFFF" />
-		<Control H="16" ID="BUT_CLOSE" Type="Button" W="100" X="-50" Y="98" animID="BUTTON_RED" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="OK" />
+		<Control H="18" ID="BUT_CLOSE" Type="Button" W="100" X="-50" Y="98" animID="BUTTON_RED" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="OK" />
 		<Control H="30" Type="Label" W="142" X="6" Y="-35" align="0" fontColor="#FF5A8DBA" fontID="FONT_6_NS1" justify="false" stringID="CREDITS_LEVEL_DESIGN" valign="-1" wrapText="false" />
 		<Control H="13" Type="Label" W="142" X="6" Y="29" align="0" fontColor="#FFFFFFFF" fontID="FONT_8_B1" justify="false" stringID="MUSIC_SFX" valign="0" wrapText="false" />
 		<Control H="13" Type="Label" W="157" X="-2" Y="-6" align="0" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" justify="false" stringID="ADDITIONAL_WORK" valign="0" wrapText="false" />
@@ -300,12 +300,12 @@
 	</Layer>
 	<Layer ID="LAYER_ID_QUITGAME" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_EXIT_GAME">
 		<Control Type="Vignette" animID="WND_VIGNETTES" color="#88000000" frameIdx="0" />
-		<Control H="135" Type="Window" W="199" X="-100" Y="-44" animID="WINDOWS1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="0" stringID="EXIT_GAME" />
-		<Control H="46" Type="Panel" W="162" X="-66" Y="-41" animID="PANEL1" iconFrame="4" inflate="0" />
-		<Control H="42" Type="Label" W="196" X="-64" Y="-39" align="-1" fontColor="#FF5A8DBA" fontID="FONT_8_B1" justify="false" stringID="QUIT_GAME" valign="-1" wrapText="false" />
-		<Control H="16" ID="BUT_SEND_FEEDBACK" Type="Button" W="120" X="-66" Y="37" animID="BUTTON_BLUE" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="SEND_FEEDBACK" />
-		<Control H="16" ID="BUT_EXIT_GAME" Type="Button" W="120" X="-66" Y="55" animID="BUTTON_RED" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="QUIT" />
-		<Control H="16" ID="BUT_CLOSE" Type="Button" W="120" X="-66" Y="73" animID="BUTTON_BLUE" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="CANCEL" />
+		<Control H="135" Type="Window" W="199" X="-100" Y="-67" animID="WINDOWS1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="0" stringID="EXIT_GAME" />
+		<Control H="63" Type="Panel" W="162" X="-66" Y="-64" animID="PANEL1" iconFrame="4" inflate="0" />
+		<Control H="42" Type="Label" W="196" X="-63" Y="-62" align="-1" fontColor="#FF5A8DBA" fontID="FONT_8_B1" justify="false" stringID="QUIT_GAME" valign="-1" wrapText="false" />
+		<Control H="18" ID="BUT_SEND_FEEDBACK" Type="Button" W="120" X="-65" Y="7" animID="BUTTON_BLUE" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="SEND_FEEDBACK" />
+		<Control H="18" ID="BUT_EXIT_GAME" Type="Button" W="120" X="-65" Y="27" animID="BUTTON_RED" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="QUIT" />
+		<Control H="18" ID="BUT_CLOSE" Type="Button" W="120" X="-65" Y="47" animID="BUTTON_BLUE" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="CANCEL" />
 	</Layer>
 	<Layer ID="LAYER_ID_QUITLEVEL" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_LEVEL_BACK_IGM">
 		<Control Type="Vignette" animID="VIGNETTES" color="#88000000" frameIdx="0" />
@@ -390,11 +390,11 @@
 	</Layer>
 	<Layer ID="LAYER_ID_QUIT_PLAYERSEL" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_QUIT_PLAYERSEL">
 		<Control Type="Vignette" animID="VIGNETTES" color="#88000000" frameIdx="0" />
-		<Control H="91" ID="WINDOW1" Type="Window" W="209" X="-104" Y="-43" animID="WINDOW_BLACK1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="0" stringID="QUIT" />
-		<Control H="35" Type="Panel" W="203" X="-101" Y="-35" animID="FRAME_BLACK3" iconFrame="-1" inflate="0" />
-		<Control H="35" Type="Label" W="203" X="-101" Y="-35" align="0" fontColor="#FF5A8DBA" fontID="FONT_8_B1" justify="false" stringID="QUIT_GENERIC" valign="0" wrapText="false" />
-		<Control H="16" ID="BUT_CLOSE" Type="Button" W="100" X="-50" Y="28" animID="BUTTON2" fontColor="#FFFFFFFF" fontID="FONT_8_B1" stringID="CANCEL" />
-		<Control H="16" ID="BUT_QUIT_PLAYERSEL" Type="Button" W="100" X="-50" Y="8" animID="BUTTON1" fontColor="#FFFFFFFF" fontID="FONT_8_B1" stringID="QUIT" />
+		<Control H="131" ID="WINDOW1" Type="Window" W="209" X="-108" Y="-73" animID="WINDOWS1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="0" stringID="QUIT" />
+		<Control H="59" Type="Panel" W="171" X="-73" Y="-70" animID="FRAME_BLACK3" iconFrame="4" inflate="0" />
+		<Control H="47" Type="Label" W="221" X="-73" Y="-69" align="0" fontColor="#FF5A8DBA" fontID="FONT_8_B1" justify="false" stringID="QUIT_GENERIC" valign="0" wrapText="false" />
+		<Control H="18" ID="BUT_CLOSE" Type="Button" W="149" X="-73" Y="33" animID="BUTTON_BLUE" fontColor="#FFFFFFFF" fontID="FONT_8_B1" stringID="CANCEL" />
+		<Control H="18" ID="BUT_QUIT_PLAYERSEL" Type="Button" W="149" X="-73" Y="13" animID="BUTTON_RED" fontColor="#FFFFFFFF" fontID="FONT_8_B1" stringID="QUIT" />
 	</Layer>
 	<Layer ID="LAYER_ID_IGM_MENU_NET" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0">
 		<Control Type="Vignette" animID="VIGNETTES" color="#CC000000" frameIdx="0" />
@@ -460,7 +460,7 @@
 		<Control H="11" Type="Label" W="123" X="-93" Y="60" align="-1" fontColor="#FF5A8DBA" fontID="FONT_6_NS1" justify="false" stringID="YOUR_BEST_SCORE" valign="0" wrapText="false" />
 		<Control H="11" ID="LABEL_YOUR_SCORE" Type="Label" W="74" X="21" Y="60" align="1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" justify="false" stringID="LEADERBOARDS_PLAYERSCORE_VAL" valign="0" wrapText="false" />
 	</Layer>
-	<Layer ID="LAYER_ID_MORE_OPTIONS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_CLOSE">
+	<Layer ID="LAYER_ID_MORE_OPTIONS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_CLOSE_SETTINGS">
 		<Control Type="Vignette" animID="WND_VIGNETTES" color="#88000000" frameIdx="0" />
 		<Control H="136" ID="WINDOW" Type="Window" W="192" X="-96" Y="-53" animID="WINDOWS1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="0" stringID="MORE_OPTIONS" />
 		<Control H="16" ID="CTRL_CHECK_SHAKES" Type="Checkbox" W="154" X="-60" Y="-49" animID="CHECKBOX1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="-1" stringID="SCREEN_SHAKE" />
@@ -472,11 +472,11 @@
 	</Layer>
 	<Layer ID="LAYER_ID_RESET_PROGRESS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_CLOSE">
 		<Control Type="Vignette" animID="VIGNETTES" color="#88000000" frameIdx="0" />
-		<Control H="114" ID="WINDOW" Type="Window" W="227" X="-113" Y="-55" animID="WINDOW_BLACK1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="0" stringID="RESET_PROGRESS" />
-		<Control H="62" Type="Panel" W="221" X="-110" Y="-48" animID="FRAME_BLACK3" iconFrame="-1" inflate="0" />
-		<Control H="62" Type="Label" W="219" X="-109" Y="-48" align="0" fontColor="#FF5A8DBA" fontID="FONT_8_BS1" justify="false" stringID="RESET_PROGRESS_SURE" valign="0" wrapText="false" />
-		<Control H="16" ID="BUT_RESET_PROGRESS_SURE" Type="Button" W="124" X="-62" Y="20" animID="BUTTON1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="RESET_PROGRESS" />
-		<Control H="16" ID="BUT_CLOSE" Type="Button" W="124" X="-62" Y="39" animID="BUTTON2" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="CANCEL" />
+		<Control H="131" ID="WINDOW" Type="Window" W="227" X="-113" Y="-55" animID="WINDOWS1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="0" stringID="RESET_PROGRESS" />
+		<Control H="62" Type="Panel" W="189" X="-78" Y="-52" animID="FRAME_BLACK3" iconFrame="4" inflate="0" />
+		<Control H="62" Type="Label" W="189" X="-78" Y="-52" align="0" fontColor="#FF5A8DBA" fontID="FONT_8_BS1" justify="false" stringID="RESET_PROGRESS_SURE" valign="0" wrapText="true" />
+		<Control H="18" ID="BUT_RESET_PROGRESS_SURE" Type="Button" W="124" X="-62" Y="35" animID="BUTTON_RED" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="RESET_PROGRESS" />
+		<Control H="18" ID="BUT_CLOSE" Type="Button" W="124" X="-62" Y="54" animID="BUTTON_BLUE" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="CANCEL" />
 	</Layer>
 	<Layer ID="LAYER_ID_PLAYER_UPGRADE" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_CLOSE">
 		<Control Type="Vignette" animID="VIGNETTES" color="#88000000" frameIdx="0" />
@@ -514,10 +514,10 @@
 	</Layer>
 	<Layer ID="LAYER_ID_LANGUAGE" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_CLOSE">
 		<Control Type="Vignette" animID="VIGNETTES" color="#88000000" frameIdx="0" />
-		<Control H="174" ID="WND_LANGUAGE" Type="Window" W="159" X="-79" Y="-80" animID="WINDOW_BLACK1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="0" stringID="LANGUAGE" />
-		<Control H="126" ID="CTRL_LANGLIST_TT" Type="ListSelectorTT" W="155" X="-77" Y="-75" fontColor="#FFFFFFFF" fontColor_right="#FFFFFFFF" inflate="3" nBaseIndex="0" nMaxPage="0" nMinPage="0" stringID="TEMP15" stringID_right="" />
-		<Control H="16" ID="BUT_SELECT_LANGUAGE" Type="Button" W="89" X="-44" Y="55" animID="BUTTON1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="OK" />
-		<Control H="16" ID="BUT_CLOSE" Type="Button" W="89" X="-44" Y="74" animID="BUTTON2" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="CANCEL" />
+		<Control H="174" ID="WND_LANGUAGE" Type="Window" W="174" X="-93" Y="-80" animID="WINDOWS1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="0" stringID="LANGUAGE" />
+		<Control H="130" ID="CTRL_LANGLIST_TT" Type="ListSelectorTT" W="155" X="-77" Y="-77" fontColor="#FFFFFFFF" fontColor_right="#FFFFFFFF" inflate="3" nBaseIndex="0" nMaxPage="0" nMinPage="0" stringID="TEMP15" stringID_right="" />
+		<Control H="18" ID="BUT_SELECT_LANGUAGE" Type="Button" W="97" X="-75" Y="55" animID="BUTTON_RED" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="OK" />
+		<Control H="18" ID="BUT_CLOSE" Type="Button" W="97" X="-75" Y="74" animID="BUTTON_BLUE" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="CANCEL" />
 	</Layer>
 	<Layer ID="LAYER_ID_RESET_PROGRESS_EA" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_RESET_PROGRESS_SURE_EA">
 		<Control Type="Vignette" animID="VIGNETTES" color="#88000000" frameIdx="0" />

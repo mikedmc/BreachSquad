@@ -305,9 +305,9 @@ void DrawLineUP_TL1T(LPDIRECT3DDEVICE9 pDevice, Vec2 start, Vec2 end, DWORD colo
 void DrawFullscreenVignette(LPDIRECT3DDEVICE9 pDevice, float alpha);
 
 // Sets clip area on renderer (so you can't paint outside)
-HRESULT SetScissorClip(LPDIRECT3DDEVICE9 pDevice, int clipX, int clipY, int clipW, int clipH);
+OPRESULT SetScissorClip(PDEVICE pDevice, int clipX, int clipY, int clipW, int clipH);
 // Removes clip from renderer
-HRESULT RemoveScissorClip(LPDIRECT3DDEVICE9 pDevice);
+OPRESULT RemoveScissorClip(PDEVICE pDevice);
 // Splits string into tokens
 std::vector<std::wstring> TokenizeString(const std::wstring& str, const std::wstring& delim);
 // Returns true if str contains ANY token from strTokens (separated by tokensSeparator)

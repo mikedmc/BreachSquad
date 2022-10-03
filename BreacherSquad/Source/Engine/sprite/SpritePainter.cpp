@@ -403,6 +403,30 @@ void CSpritePainter::AdditiveBlendingOff()
 	m_pDevice->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 }
 
+void CSpritePainter::SetClipWorld( RectXYWH clipWorldCoords )
+{
+	Flush();
+	Vec2 vul(clipWorldCoords.x, clipWorldCoords.y);
+	Vec2 vdr( clipWorldCoords.Right(), clipWorldCoords.Bottom() );
+	Vec2 rul, rdr;
+	Mat mWV = m_matWorld * m_matView;
+	MUVec2TransformCoord( &rul, &vul, &mWV);
+	MUVec2TransformCoord( &rdr, &vdr, &mWV);
+	SetScissorClip( m_pDevice, (int)rul.x, (int)rul.y, (int)( rdr.x - rul.x ), (int)( rdr.y - rul.y ) );
+}
+
+void CSpritePainter::SetClip( RectXYWH clipCoord )
+{
+	Flush();
+	SetScissorClip( m_pDevice, (int)clipCoord.x, (int)clipCoord.y, (int)clipCoord.w, (int)clipCoord.h );
+}
+
+void CSpritePainter::RemoveClip()
+{
+	Flush();
+	RemoveScissorClip( m_pDevice );
+}
+
 //--- framework ---
 OPRESULT CSpritePainter::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc )
 {

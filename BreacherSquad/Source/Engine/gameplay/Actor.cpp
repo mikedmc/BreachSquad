@@ -227,10 +227,30 @@ void CActor::Update(float dTime )
 
 void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 {
-	// get angle from actual animation and not aim vector because they might differ
+	// get angle from actual animation and not aim vector (because they might differ)
 	EDir6 actang = c_graphics->GetEAngle();
 	bool bFacingS = GetDir6VecN( actang ).y > 0 ? true : false;
 	
+	// see if we need to clip and on which side. We clip to wall borders when we push left-right against vertical walls not hidden by ceiling.
+	// clip coords are a little hardcoded to look good
+	bool bClipped = false;
+	CTile* tll = level.Areas_GetTileAt(Vec2(pos.xy.x - K_TILE_SIZE_F, pos.xy.y));
+	if ( tll->flags & K_TILEFLAG_WALLENDING_R )
+	{
+		__Painter().SetClipWorld( RectXYWH( tll->bbox.vMax.x + 1.0f, this->pos.xy_proj.y - 4.0f * K_TILE_SIZE_F, 4.0f * K_TILE_SIZE_F, 5.0f * K_TILE_SIZE_F ) );
+		bClipped = true;
+	}
+	else
+	{
+		CTile* tlr = level.Areas_GetTileAt( Vec2( pos.xy.x + K_TILE_SIZE_F, pos.xy.y ) );
+		if ( tlr->flags & K_TILEFLAG_WALLENDING_L )
+		{
+			__Painter().SetClipWorld( RectXYWH( tlr->bbox.vMin.x - 4.0f * K_TILE_SIZE_F + 2.0f, this->pos.xy_proj.y - 4.0f * K_TILE_SIZE_F, 4.0f * K_TILE_SIZE_F, 5.0f * K_TILE_SIZE_F ) );
+			bClipped = true;
+		}
+	}
+	
+	///--- do the actual painting ---
 	if ( bFacingS )
 	{
 		c_graphics->Paint( *this, eChannel );
@@ -240,6 +260,12 @@ void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 	{
 		c_weapons->Paint( *this, eChannel );
 		c_graphics->Paint( *this, eChannel );
+	}
+
+	// remove clipping if set above
+	if ( bClipped )
+	{
+		__Painter().RemoveClip();
 	}
 }
 

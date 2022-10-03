@@ -583,6 +583,14 @@ CLevelArea* CLevel::Areas_GetByID( UINT32 nID )
 	return nullptr;
 }
 
+CTile* CLevel::Areas_GetTileAt( Vec2 vPos )
+{
+	CLevelArea* area = Areas_GetAt( vPos );
+	if ( area == nullptr )
+		return nullptr;
+	return area->GetTile( (int)floor(vPos.x / K_TILE_SIZE_F), (int)floor(vPos.y / K_TILE_SIZE_F) );
+}
+
 void CLevel::Areas_GetTilesSnapshot( RectXYWHi srcRectTL, CTile** arrTiles, int arrCapacity )
 {
 	_ASSERT( arrTiles != nullptr );

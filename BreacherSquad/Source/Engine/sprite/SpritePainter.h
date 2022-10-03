@@ -86,7 +86,12 @@ public:
 	void					AdditiveBlendingOn();
 	// Deactivates additive blending and flushes
 	void					AdditiveBlendingOff();
-
+	// sets clip in world coordinates (transforms through view proj mat)
+	void					SetClipWorld( RectXYWH clipWorldCoords );
+	// sets clip in screen coords
+	void					SetClip( RectXYWH clipCoord );
+	// removes clip rect
+	void					RemoveClip();
 	// Forces flushing of remaining sprites
 	OPRESULT				Flush();
 

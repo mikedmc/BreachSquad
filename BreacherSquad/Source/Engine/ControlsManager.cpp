@@ -238,7 +238,7 @@ void CControl::Reset()
 		case CCTRL_TYPE_SDL_KEYREADER:
 		{
 			paramsDict.SetVarString( L"sKeyName", L"?" );
-			//tinem minte selectia anterioara ca sa vedem cand se schimba
+			//tinem minte select{}ia anterioara ca sa vedem cand se schimba
 			paramsDict.SetVarINT32( L"nSDLscancode_old", -1 );
 		}
 		break;
@@ -3100,28 +3100,22 @@ void CControlsManager::SetParamValue( CControl * pCtrl, const WCHAR * sParamName
 //**************************************************************************
 //		CCtrlLayer
 //**************************************************************************
-CCtrlLayer::CCtrlLayer()
+CCtrlLayer::CCtrlLayer() : 
+	nFocusedControlIdx(-1), nFocusFirstFocusableIdx(-1), X(0), Y(0),
+	statusFlags(0), bBlocking(false), bGetsInput(false), bAnimate(false),
+	fDestroyTimer(0.0f), alpha(1.0f)
 {
-	alpha = 1.0f;
-	statusFlags = 0;
+	mouseRelPos.x = 0; mouseRelPos.y = 0;
+	ID.Reset();
 	//set anchors
 	anchorX = K_CCTRL_LAYER_ANCHOR_CENTER;
 	anchorY = K_CCTRL_LAYER_ANCHOR_CENTER;
 
-	X = Y = 0;
-	bBlocking = bGetsInput = false;
 	shFocusedControlID.Reset();
-	fDestroyTimer = 0.0f;
-
-	ID.Reset();
-
-	bAnimate = true;
 
 	pControlsManager = nullptr;
 
-	for ( int kk = 0; kk < controls.GetSize(); kk++ )
-		SAFE_DELETE( controls[ kk ] );
-	controls.RemoveAll();
+	SAFE_DELETE_CArray( controls );
 }
 
 CCtrlLayer::~CCtrlLayer()
@@ -3293,7 +3287,7 @@ void CCtrlLayer::SetAnchor( ECtrlAnchor nAnchorX, ECtrlAnchor nAnchorY )
 
 Vec2i CCtrlLayer::GetPos()
 {
-	return Vec2i( X, Y );
+	return { X, Y };
 }
 
 
@@ -3971,15 +3965,14 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 								SND_PLAY( SNDIDX_CLICK );
 							}
 						}
+						/*
 						else if ( vk == VK_RETURN )
 						{
-							CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK );
-							nevent->AddNamedArgUINT32( L"ctrlID", HASH( "BUT_NEW_USER" ) );
-							__Events().QueueEvent( nevent );
-
-							//TODO: ce comanda trimite cand faci enter pe inputbox. Poate mesaj de click pe input box?
-							//ProcessInterfaceMessages(lay->ID, GET_FAST_HASH("CTRL_BUT_NEWPLAYER"), CCTRL_MESSAGE_CLICK);
+							//CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK );
+							//nevent->AddNamedArgUINT32( L"ctrlID", HASH( "BUT_NEW_USER" ) );
+							//__Events().QueueEvent( nevent );
 						}
+						*/
 
 						WCHAR val[ MAX_PATH ];
 						swprintf_s( val, MAX_PATH, L"%d", textLen );
@@ -4163,6 +4156,7 @@ void CControlsManager::Update( float dTime )
 	}
 
 	// updates all layers and controls, bottop to top until blocking
+	bool bFoundBlocking = false;
 	for ( int kk = Layers.GetSize() - 1; kk >= 0; kk-- )
 	{
 		CCtrlLayer* layer = Layers[ kk ];
@@ -4170,7 +4164,6 @@ void CControlsManager::Update( float dTime )
 		if ( ( layer->statusFlags & CCTRL_STATUS_FLAG_REMOVED ) != 0 )
 			continue;
 		// update all controls
-		bool bFoundBlocking = false;
 		for ( int ll = 0; ll < layer->controls.GetSize(); ll++ )
 		{
 			// update visual focus percent in each control
@@ -4184,7 +4177,7 @@ void CControlsManager::Update( float dTime )
 				inc_limit( ctrl->fFocusPercent, 6.0f * dTime, 1.0f );
 			}
 			// update control now if we didn't find a blocking layer
-			if(!bFoundBlocking)
+			if(bFoundBlocking == false)
 				ctrl->Update( dTime, fLocalTimeline );
 		}
 		// was this layer blocking? stop updating layers

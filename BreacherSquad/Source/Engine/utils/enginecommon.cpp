@@ -517,9 +517,9 @@ void DrawLineUP_TL1T(LPDIRECT3DDEVICE9 pDevice, Vec2 start, Vec2 end, DWORD colo
 
 
 //clipping functions
-HRESULT SetScissorClip(LPDIRECT3DDEVICE9 pDevice, int clipX, int clipY, int clipW, int clipH)
+OPRESULT SetScissorClip(PDEVICE pDevice, int clipX, int clipY, int clipW, int clipH)
 {
-	assert(pDevice != null);
+	assert(pDevice != nullptr);
 	if (UTApp().g_gfxFlags & K_UT_GFXFLAG_SCISSORTEST)
 	{
 		RECT rect_colorClip;
@@ -527,18 +527,18 @@ HRESULT SetScissorClip(LPDIRECT3DDEVICE9 pDevice, int clipX, int clipY, int clip
 		pDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
 		pDevice->SetScissorRect(&rect_colorClip);
 		
-		return S_OK;
+		return K_OP_OK;
 	}
-	else
-		return E_FAIL;
+
+	return K_OP_FAILED;
 }
 
-HRESULT RemoveScissorClip(LPDIRECT3DDEVICE9 pDevice)
+OPRESULT RemoveScissorClip(PDEVICE pDevice)
 {
-	assert(pDevice != null);
+	assert(pDevice != nullptr);
 	pDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
 
-	return S_OK;
+	return K_OP_OK;
 }
 
 std::vector<std::wstring> TokenizeString(const std::wstring& str, const std::wstring& delim)
