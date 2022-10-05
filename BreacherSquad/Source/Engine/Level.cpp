@@ -457,8 +457,9 @@ void CLevel::UpdateDirtyRects()
 
 					// only walls and floor get shadowed, when having a non walkable tile on the left (hole in the floor usually, but not water hole)
 					bool bCanReceive = ( ( tl->tileIDs[K_TILE_LAYER_FLOOR] >= 0 ) || ( tl->tileIDs[K_TILE_LAYER_WALLS] >= 0 ) ) &&
-						( tlL ) && ( tlL->tileIDs[K_TILE_LAYER_FLOOR] < 0 ) &&
+						( tlL ) && ( tlL->tileIDs[K_TILE_LAYER_FLOOR] < 0 ) && ((tlL->flags & K_TILEFLAG_UNDER_FLOOR) == 0) &&
 						( tl->tileIDs[K_TILE_LAYER_CEILING] < 0 );
+
 					if ( bCanReceive )
 					{
 						CTile* tlDL = area->GetTile( xx - 1, yy + 1 );
@@ -4127,6 +4128,9 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+
+	Mat matWVP = matView * ( *matProj );
+
 	__Shaders().SetVS( nullptr );
 	__Shaders().SetPS( nullptr );
 
@@ -4159,6 +4163,39 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 
 	/// paint floors and vertical walls
 	m_pDevice->SetTexture( 0, pTexToUse->pTexture );
+	// paint water with special shader on color pass
+	if ( ePass == K_LVL_RP_COLORS )
+	{
+		if ( ePass == K_LVL_RP_COLORS )
+		{
+			m_pDevice->SetTexture( 1, m_pTexTilesNorm->pTexture );
+			__Shaders().SetVSByName( L"VS_WATER" );
+			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+
+			__Shaders().SetPSByName( L"PS_WATER" );
+			//set Pshader constants
+			float fConstData[][4] = {
+				// x: murkyness multiplier
+				{ 2.0f, 0.0f, 0.0f, 0.0f },
+				// water color (f4)
+				{ 1.0, 0.0, 0.0f, 1.0f }
+			};
+			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+		}
+		
+		Areas_PaintLayer( K_AL_UNDER_FLOOR );
+
+		m_pDevice->SetTexture( 1, NULL );
+		__Shaders().SetVS( nullptr );
+		__Shaders().SetPS( nullptr );
+	}
+	else
+	{
+		Areas_PaintLayer( K_AL_UNDER_FLOOR );
+	}
+
+	/// normal floors
 	Areas_PaintLayer( K_AL_FLOOR );
 	/// vertical walls
 	Areas_PaintLayer( K_AL_WALLS );

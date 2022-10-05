@@ -361,7 +361,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 					RECT srcrect;
 					SetRect(&srcrect, (tileID % tilesetColumns) * tileW, (tileID / tilesetColumns) * tileH,
 						(tileID % tilesetColumns) * tileW + tileW, (tileID / tilesetColumns) * tileH + tileH);
-					area->tiles[xx][yy].srcRects[layer_index] = srcrect;
+					//area->tiles[xx][yy].srcRects[layer_index] = srcrect;
 					//#HACK: we make the UV rect a little smaller so we don't get UV seams because of the point filtering
 					tl->vUVmin[layer_index] = Vec2((srcrect.left + 0.001f) / vTilesetSize.x, (srcrect.top + 0.001f) / vTilesetSize.y);
 					tl->vUVmax[layer_index] = Vec2((srcrect.right - 0.001f) / vTilesetSize.x, (srcrect.bottom - 0.001f) / vTilesetSize.y);

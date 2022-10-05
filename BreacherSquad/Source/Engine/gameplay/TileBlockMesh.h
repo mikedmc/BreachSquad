@@ -55,10 +55,10 @@ public:
 	// Paints tile layer for visible buffers (use idx from eAreaLayer)
 	OPRESULT					PaintLayer(int layerIdx);
 
-	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
-	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL, void* pUserContext = NULL);
-	OPRESULT OnLostDevice(void* pUserContext = NULL);
-	OPRESULT OnDestroyDevice(void* pUserContext = NULL);
+	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr);
+	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr);
+	OPRESULT OnLostDevice(void* pUserContext = nullptr);
+	OPRESULT OnDestroyDevice(void* pUserContext = nullptr);
 };
 
 

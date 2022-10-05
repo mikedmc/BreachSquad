@@ -41,7 +41,45 @@ OPRESULT CTileBlockMesh::BuildBuffers(Vec2i vBlockPos_TL, CTile** map, SizeWHi m
 
 	Vec2 vOrig = m_bbox.vMin;
 
-	//#TODO: K_AL_UNDER_FLOOR
+	///--- 1. under floor layers (usually water) ---
+	if ( OP_SUCCESS( m_Painter.BeginMesh( m_arrMeshIdx[K_AL_UNDER_FLOOR] ) ) )
+	{
+		nCur = 0;
+		int lay = K_TILE_LAYER_UNDER_FLOOR;
+		{
+			for ( int yy = 0; yy < m_mapAreaTL.h; yy++ )
+			{
+				for ( int xx = 0; xx < m_mapAreaTL.w; xx++ )
+				{
+					CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
+					// skip empty tiles
+					if ( tl->tileIDs[lay] < 0 )
+						continue;
+					// add geometry
+					SET_PNCT4T4( &arrVerts[nCur++], Vec3( vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f ),
+						Vec3( 0.0f, 0.0f, 1.0f ), 0xffffffff,
+						Vec4( tl->vUVmin[lay].x, tl->vUVmin[lay].y, 0.0f, 0.0f ), Vec4( 0.0f, 0.0f, 0.0f, 0.0f ) );
+					SET_PNCT4T4( &arrVerts[nCur++], Vec3( vOrig.x + ( xx + 1 ) * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f ),
+						Vec3( 0.0f, 0.0f, 1.0f ), 0xffffffff,
+						Vec4( tl->vUVmax[lay].x, tl->vUVmin[lay].y, 0.0f, 0.0f ), Vec4( 0.0f, 0.0f, 0.0f, 0.0f ) );
+					SET_PNCT4T4( &arrVerts[nCur++], Vec3( vOrig.x + ( xx + 1 ) * K_TILE_SIZE, vOrig.y + ( yy + 1 ) * K_TILE_SIZE, 0.0f ),
+						Vec3( 0.0f, 0.0f, 1.0f ), 0xffffffff,
+						Vec4( tl->vUVmax[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f ), Vec4( 0.0f, 0.0f, 0.0f, 0.0f ) );
+					SET_PNCT4T4( &arrVerts[nCur++], Vec3( vOrig.x + xx * K_TILE_SIZE, vOrig.y + ( yy + 1 ) * K_TILE_SIZE, 0.0f ),
+						Vec3( 0.0f, 0.0f, 1.0f ), 0xffffffff,
+						Vec4( tl->vUVmin[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f ), Vec4( 0.0f, 0.0f, 0.0f, 0.0f ) );
+
+					_ASSERT( nCur < arrVertsLen );
+				}
+			}
+		}
+
+		m_Painter.AddQuads( arrVerts, nCur / 4 );
+		int nQuads = m_Painter.EndMesh();
+		( nQuads > 0 ) ? bIsEmpty = false : m_arrMeshIdx[K_AL_UNDER_FLOOR] = -1;
+
+		LOG( "map lay:AL_UNDER_FLOOR pos:[%d,%d] WH:[%d,%d] quads:%d", m_mapAreaTL.x, m_mapAreaTL.y, m_mapAreaTL.w, m_mapAreaTL.h, nQuads );
+	}
 
 	///--- 2. floors (3 tile layers rendered at once) ---
 	if (OP_SUCCESS(m_Painter.BeginMesh(m_arrMeshIdx[K_AL_FLOOR])))

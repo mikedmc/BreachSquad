@@ -50,12 +50,14 @@ enum eEditorLayer {
 #define		K_TILEFLAG_WALLENDING_R 128
 // mask that deletes wall endings
 #define		K_TILEFLAG_WALLENDING_MASK 0xC0
+// flag for under the floor tiles
+#define		K_TILEFLAG_UNDER_FLOOR	256
 
 class CTile {						
 public:
 	UINT32		flags;							// tile flags
-	int			tileIDs[K_TILE_LAYERS_CNT];		// actual tile
-	RECT		srcRects[K_TILE_LAYERS_CNT];	// #TEMP: will be removed (precomputed RECT for drawing as sprite)
+	int			tileIDs[K_TILE_LAYERS_CNT]{-1};	// actual tile
+	//RECT		srcRects[K_TILE_LAYERS_CNT]{};	// #TEMP: will be removed (precomputed RECT for drawing as sprite)
 	
 	Vec2		vUVmin[K_TILE_LAYERS_CNT];		// precomputed UV coords min 
 	Vec2		vUVmax[K_TILE_LAYERS_CNT];		// precomputed UV coords max
@@ -65,11 +67,11 @@ public:
 
 	CTile() : flags(K_TILEFLAG_NONE), nShadowFrame(-1)
 	{
+		bbox.Set( 0, 0, 0, 0 );
 		for (int kk = 0; kk < K_TILE_LAYERS_CNT; kk++)
 		{
-			flags = K_TILEFLAG_NONE;
 			tileIDs[kk] = -1;
-			SetRect(&srcRects[kk], 0, 0, 0, 0);
+			//SetRect(&srcRects[kk], 0, 0, 0, 0);
 			
 			vUVmin[kk] = Vec2(0.0f, 0.0f);
 			vUVmax[kk] = Vec2(0.0f, 0.0f);
@@ -79,11 +81,14 @@ public:
 	void PostConstructionInit()
 	{
 		// mark all floor tiles with flags
-		if (tileIDs[K_TILE_LAYER_FLOOR] >= 0)
+		if ((tileIDs[K_TILE_LAYER_FLOOR] >= 0) || ( tileIDs[K_TILE_LAYER_FLOOR_DECO1] >= 0 ) || ( tileIDs[K_TILE_LAYER_FLOOR_DECO2] >= 0 ))
 			flags |= K_TILEFLAG_WALKABLE;
 		// mark all wall tiles with flags
 		if ( tileIDs[K_TILE_LAYER_WALLS] >= 0 )
 			flags |= K_TILEFLAG_WALL;
+		// mark under floor tiles
+		if ( tileIDs[K_TILE_LAYER_UNDER_FLOOR] >= 0 )
+			flags |= K_TILEFLAG_UNDER_FLOOR;
 	}
 };
 

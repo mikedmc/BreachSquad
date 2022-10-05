@@ -6,6 +6,7 @@
     <VertexShader name="VS_POINTLIGHT" path="vs_pointlight.vso" />
     <VertexShader name="VS_COMPOSITION" path="vs_composition.vso" />
     <VertexShader name="VS_PROJECTEDDIR" path="vs_projecteddir.vso" />
+    <VertexShader name="VS_WATER" path="vs_water.vso" />
   </VertexShaders>
   <PixelShaders>
     <PixelShader name="PS_POINTLIGHT" path="ps_pointlight.pso" />
@@ -13,5 +14,6 @@
     <PixelShader name="PS_PROJECTEDDIR" path="ps_projecteddir.pso" />
     <PixelShader name="PS_IESLIGHT" path="ps_ieslight.pso" />
     <PixelShader name="PS_DIRECTIONAL" path="ps_directional.pso" />
+    <PixelShader name="PS_WATER" path="ps_water.pso" />
   </PixelShaders>
 </Shaders>
