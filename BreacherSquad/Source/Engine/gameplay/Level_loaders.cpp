@@ -82,6 +82,15 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		return K_OP_FAILED;
 	}
 
+	FileManager::GetMediaPath( L"media/levels/data/water2_n.png", Path );
+	m_pTexWater = m_texManager.AddTexture( Path, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE );
+	if ( m_pTexWater == nullptr )
+	{
+		ErrorBox( K_ERR_CRITICAL, L"Couldn't load water texture: %s", Path );
+		return K_OP_FAILED;
+	}
+
+
 	//LIGHTS
 	FileManager::GetMediaPath(L"media/levels/data/lights.bsx", Path);
 	V_OP_RET(m_sprLights.LoadSprites(Path));

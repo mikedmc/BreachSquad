@@ -101,6 +101,14 @@ float ct_fGaussLen = 0.35f;
 float ct_fLightMul = 2.0f;
 float ct_fColorDodge = 0.4f;
 
+//water values
+float ct_waterFog = 1.8f;
+float ct_waterScale = 0.007f;
+float ct_waterDiffract = 0.02f;
+float ct_waterHeight = 0.07f;
+float ct_waterColorAdd = 0.45f;
+float ct_waterSpecular = 0.65f;
+
 //**************************************************************************************
 // Forward declarations 
 //**************************************************************************************
@@ -1890,6 +1898,15 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				ImGui::SliderFloat("dodge", &ct_fColorDodge, 0.0, 1.0);
 
 				ImGui::Separator();
+
+				ImGui::SliderFloat( "water fog", &ct_waterFog, 0.0, 10.0 );
+				ImGui::SliderFloat( "water scale", &ct_waterScale, 0.001, 0.03 );
+				ImGui::SliderFloat( "water diffract", &ct_waterDiffract, 0.0, 0.05 );
+				ImGui::SliderFloat( "water height", &ct_waterHeight, 0.0, 1.0 );
+				ImGui::SliderFloat( "water color add", &ct_waterColorAdd, 0.0, 1.0 );
+				ImGui::SliderFloat( "water specular", &ct_waterSpecular, 0.0, 1.0 );
+				ImGui::Separator();
+
 				///--- show watch debug values from the debug list ---
 				__ImGui().PaintDebugVars();
 

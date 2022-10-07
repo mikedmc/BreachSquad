@@ -95,6 +95,7 @@ public:
 	RectXYWHi				m_levelAABB_TL;					// level AABB in tiles  - grows when adding areas
 	CTexNode*				m_pTexTilesColor;				// tileset base texture 
 	CTexNode*				m_pTexTilesNorm;				// tileset normals texture 
+	CTexNode*				m_pTexWater;					// water normals and caustics texture
 	Vec2					m_vLevelOrigin;					// level origin for the editor (usually around start location)
 
 	vector<RectXYWHi>		m_arrDirtyRectsTL;				// tiles that need updating

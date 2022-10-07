@@ -4169,6 +4169,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 		if ( ePass == K_LVL_RP_COLORS )
 		{
 			m_pDevice->SetTexture( 1, m_pTexTilesNorm->pTexture );
+			m_pDevice->SetTexture( 2, m_pTexWater->pTexture );
 			__Shaders().SetVSByName( L"VS_WATER" );
 			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
@@ -4176,10 +4177,14 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 			__Shaders().SetPSByName( L"PS_WATER" );
 			//set Pshader constants
 			float fConstData[][4] = {
-				// x: murkyness multiplier
-				{ 2.0f, 0.0f, 0.0f, 0.0f },
+				// x: murkyness multiplier,
+				{ ct_waterFog, ct_waterScale, ct_waterDiffract, ct_waterHeight },
 				// water color (f4)
-				{ 1.0, 0.0, 0.0f, 1.0f }
+				{ 0.13, 0.16, 0.56f, 1.0f },
+				// x: surface color adder, y: specular alpha
+				{ ct_waterColorAdd, ct_waterSpecular, 1.0f, 1.0f },
+				// UV animation	for 2 layers of water
+				{ sin( fLocalTimeline * 0.9 ) * 0.05f, cos( fLocalTimeline * 0.45 ) * 0.07f, sin( fLocalTimeline * 1.0 ) * 0.06f, cos( fLocalTimeline * 0.5 ) * 0.06},
 			};
 			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 		}

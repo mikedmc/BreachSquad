@@ -28,10 +28,9 @@
     mul r0, c1, v0.y
     mad r0, v0.x, c0, r0
     mad r0, v0.z, c2, r0
-    mad r0, v0.w, c3, r0
-    mov o0, r0
-    mov o3, r0
+    mad o0, v0.w, c3, r0
     mov o1, v1
     mov o2.xy, v2
+    mov o3, v0
 
-// approximately 8 instruction slots used
+// approximately 7 instruction slots used

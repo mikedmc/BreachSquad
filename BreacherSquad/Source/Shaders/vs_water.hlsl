@@ -42,8 +42,8 @@ VS_OUTPUT vs_main(VS_INPUT Input)
 	//Output.Position = mul(Input.Position, matProj);
 	Output.Color = Input.Color;
 	Output.Tex0 = Input.Tex0;
-	// write transformed position to Tex1
-	Output.Tex1 = vOutPos;
+	// write position to Tex1 - used to find projective coords in water texture (can't use tileset texture coords)
+	Output.Tex1 = Input.Position;
 
 	return(Output);
 

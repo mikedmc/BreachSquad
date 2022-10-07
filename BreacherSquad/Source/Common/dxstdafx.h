@@ -644,6 +644,14 @@ extern float ct_fGaussLen;
 extern float ct_fLightMul;
 extern float ct_fColorDodge;
 
+extern float ct_waterFog;
+extern float ct_waterScale;
+extern float ct_waterDiffract;
+extern float ct_waterHeight;
+extern float ct_waterColorAdd;
+extern float ct_waterSpecular;
+
+
 extern CFreeTypeFont				g_font1;
 
 extern void NormalizeIngameMouseCoords( int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue );

@@ -7,32 +7,57 @@
 //
 // Parameters:
 //
+//   float4 c4SurfaceData;
+//   float4 c4WaterAnim;
 //   float4 c4WaterColor;
 //   float4 c4WaterData;
 //   sampler2D texColor;
 //   sampler2D texNrmH;
+//   sampler2D texWater;
 //
 //
 // Registers:
 //
-//   Name         Reg   Size
-//   ------------ ----- ----
-//   c4WaterData  c0       1
-//   c4WaterColor c1       1
-//   texColor     s0       1
-//   texNrmH      s1       1
+//   Name          Reg   Size
+//   ------------- ----- ----
+//   c4WaterData   c0       1
+//   c4WaterColor  c1       1
+//   c4SurfaceData c2       1
+//   c4WaterAnim   c3       1
+//   texColor      s0       1
+//   texNrmH       s1       1
+//   texWater      s2       1
 //
 
     ps_3_0
-    def c2, 2, 1, 0, 0
+    def c4, 2, 1, -1, 0
+    def c5, 0.5, 0, 0, 0
     dcl_texcoord v0.xy
+    dcl_texcoord1 v1.xy
     dcl_2d s0
     dcl_2d s1
-    texld r0, v0, s1
-    mad r0.x, r0.z, -c2.x, c2.y
-    mul_sat r0.x, r0.x, c0.x
-    texld r1, v0, s0
-    add r2, -r1, c1
-    mad oC0, r0.x, r2, r1
+    dcl_2d s2
+    mov r0.y, c0.y
+    mad r0, v1.xyxy, r0.y, c3
+    texld r1, r0, s2
+    texld r0, r0.zwzw, s2
+    add r0.xy, r0, r1
+    add r0.zw, r0.xyxy, c4.z
+    mul r0.xy, r0, c5.x
+    texld r1, r0, s2
+    mul r0.x, r1.z, c2.y
+    mul r0.yz, r0.xzww, c0.z
+    texld r1, v0, s1
+    mad r0.w, r1.z, -c4.x, c4.y
+    add r0.w, r0.w, -c0.w
+    mov_sat r1.x, r0.w
+    cmp r0.w, r0.w, c4.y, c4.w
+    mad r0.yz, r0, r1.x, v0.xxyw
+    texld r2, r0.yzzw, s0
+    mul r0.y, r0.w, c2.x
+    mad r0.y, r1.x, c0.x, r0.y
+    lrp r1.xyz, r0.y, c1, r2
+    mad oC0.xyz, r0.x, r0.w, r1
+    mov oC0.w, c4.y
 
-// approximately 6 instruction slots used (2 texture, 4 arithmetic)
+// approximately 22 instruction slots used (5 texture, 17 arithmetic)
