@@ -110,8 +110,8 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 	// build inventory and generate level
 	__MissionGen().BuildInventory();
-	//if (!UTGetMissionGen().GenerateLevelFromStory(&m_story))
-//		return K_OP_FAILED;
+	//if (!__MissionGen().GenerateLevelFromStory(&m_story))
+		//return K_OP_FAILED;
 	if ( !__MissionGen().GenerateLevelRandomly( 3 ) )
 		return K_OP_FAILED;
 
@@ -275,6 +275,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 {
+	LOG( L"Area ID:%d",nAreaID );
 	// increment area ID for the next area
 	CLevelArea* area = new CLevelArea(nAreaID);
 	// base ID for level elements so we don't overwrite existing IDs
@@ -452,7 +453,6 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 			// set ambiental bbox the size of the area
 			nl->bbox = area->AABBbounds;
 			nl->bbox.SaveSnapshot();
-			LOG(L"light: %.2f %.2f", nl->bbox.vMin.x, nl->bbox.vMin.y);
 		}
 
 		//load logic

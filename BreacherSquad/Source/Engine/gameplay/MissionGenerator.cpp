@@ -447,6 +447,7 @@ bool CMissionGenerator::GenerateLevelRandomly(int maxDepth)
 				bGenerationPlaced = true;
 				// for each placed area of current generation:
 				auto arrGenAreas2 = GetShuffledPlacedAreas(nCurrGeneration);
+				int nChildOrdinal = 0; // used to give good ids to placed rooms
 				for (int kk = 0; kk < arrGenAreas2.size(); kk++)
 				{
 					// find placed area
@@ -489,12 +490,21 @@ bool CMissionGenerator::GenerateLevelRandomly(int maxDepth)
 								if (plhall != nullptr)
 								{
 									LOG(L"Corridor placed.");
+									// set same ID to corridor as room he's coming from
+									plhall->nID = placed->nID;
 									// add corridor as level 6 area too so it gets completed on next pass
 									arrGenAreas2.push_back(curcon->pConnectedArea);
 								}
 
 								// exit for
 								break;
+							}
+							else
+							{
+								// set story id to room
+								plarea->nID = (nCurrGeneration + 1) * 100 + nChildOrdinal;
+								// increase child ordinal
+								nChildOrdinal++;
 							}
 						}
 
