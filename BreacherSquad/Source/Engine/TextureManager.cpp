@@ -1,16 +1,16 @@
 #include "dxstdafx.h"
 
-CTextureManager::CTextureManager( void )
+CTextureManager::CTextureManager()
 {
 	m_pDevice = nullptr;
 }
 
-CTextureManager::~CTextureManager( void )
+CTextureManager::~CTextureManager()
 {
 	Release();
 }
 
-void CTextureManager::Release( void )
+void CTextureManager::Release()
 {
 	// Release textures and delete array of textures
 	for ( int i = 0; i < arrTextures.GetSize(); i++ )
@@ -23,7 +23,7 @@ void CTextureManager::Release( void )
 	arrTextures.RemoveAll();
 }
 
-CTexNode* CTextureManager::AddTexture( const WCHAR* fileName, D3DFORMAT format, DWORD filter, DWORD mipFilter, UINT nSetWidth, UINT nSetHeight )
+CTexNode* CTextureManager::AddTexture( const WCHAR* fileName, D3DFORMAT format, DWORD filter, DWORD mipFilter, UINT nSetWidth, UINT nSetHeight, DWORD optionalID )
 {
 	int texIdx = -1;
 
@@ -46,18 +46,24 @@ CTexNode* CTextureManager::AddTexture( const WCHAR* fileName, D3DFORMAT format, 
 	{
 		CTexNode* pTN = arrTextures.GetAt( i );
 
-		//TODO: maybe it should reload the texture?
+		//#TODO: maybe it should reload the texture?
 		if ( wcscmp( pTN->fileName, fileName ) == 0 )
 		{
 			// The texture already exists
 			texIdx = i;
-			return arrTextures[ texIdx ];
+			return arrTextures[texIdx];
+		}
+		// refuse same ids
+		if ( optionalID != 0 && optionalID == pTN->dwOptionalID )
+		{
+			ErrorBox( K_ERR_WARNING, L"AddTexture:duplicate optional ID!\n%s", fileName );
+			return nullptr;
 		}
 	}
 
 	// Add the new texture
 	CTexNode *pNewTex = new CTexNode();
-	if ( pNewTex == NULL )
+	if ( pNewTex == nullptr )
 		return nullptr;
 	_ASSERT( pNewTex != nullptr );
 
@@ -69,6 +75,7 @@ CTexNode* CTextureManager::AddTexture( const WCHAR* fileName, D3DFORMAT format, 
 	pNewTex->mipFilter = mipFilter;
 	pNewTex->widthToLoad = nSetWidth;
 	pNewTex->heightToLoad = nSetHeight;
+	pNewTex->dwOptionalID = optionalID;
 
 	arrTextures.Add( pNewTex );
 	texIdx = arrTextures.GetSize() - 1;
@@ -81,14 +88,28 @@ CTexNode* CTextureManager::AddTexture( const WCHAR* fileName, D3DFORMAT format, 
 		return nullptr;
 	}
 
-	return arrTextures[ texIdx ];
+	return arrTextures[texIdx];
 }
 
 CTexNode* CTextureManager::GetTextureByIndex( int nIndex )
 {
 	if ( nIndex < 0 || nIndex >= arrTextures.Count() )
 		return nullptr;
-	return arrTextures[ nIndex ];
+	return arrTextures[nIndex];
+}
+
+CTexNode* CTextureManager::GetTextureByID( DWORD dwID )
+{
+	if ( dwID == 0 )
+		return nullptr;
+
+	for ( auto node : arrTextures )
+	{
+		if ( node->dwOptionalID == dwID )
+			return node;
+	}
+	ErrorBox( K_ERR_WARNING, L"TextureManager: No such ID: %d", dwID );
+	return nullptr;
 }
 
 void CTextureManager::ReleaseTexture( CTexNode* pTN )
@@ -97,7 +118,7 @@ void CTextureManager::ReleaseTexture( CTexNode* pTN )
 
 	LOG( L"CTextureManager::DeleteTexture released %s", pTN->fileName );
 	SAFE_RELEASE( pTN->pTexture );
-	pTN->fileName[ 0 ] = 0;
+	pTN->fileName[0] = 0;
 	pTN->bLoaded = false;
 }
 
@@ -124,7 +145,7 @@ OPRESULT CTextureManager::LoadTexture( const int nTexIdx )
 		pTN->filter, pTN->mipFilter, 0,
 		&pTN->info, NULL, &pTN->pTexture ) ) )
 	{
-		return OPRESULT( K_OP_FAILED, K_SEVERITY_WARNING, L"[CTextureManager::LoadTexture] D3DXCreateTextureFromFileEx\n -Could not load texture %s\n", pTN->fileName );
+		return OP_ERR( K_OP_FAILED, K_SEVERITY_WARNING, L"[CTextureManager::LoadTexture] D3DXCreateTextureFromFileEx\n -Could not load texture %s\n", pTN->fileName );
 	}
 
 	pTN->bLoaded = true;
@@ -159,9 +180,9 @@ OPRESULT CTextureManager::OnDestroyDevice()
 {
 	for ( int kk = 0; kk < arrTextures.GetSize(); kk++ )
 	{
-		LOG( L"CTextureManager::OnDestroyDevice released %s", arrTextures[ kk ]->fileName );
-		SAFE_RELEASE( arrTextures[ kk ]->pTexture );
-		arrTextures[ kk ]->bLoaded = false;
+		LOG( L"CTextureManager::OnDestroyDevice released %s", arrTextures[kk]->fileName );
+		SAFE_RELEASE( arrTextures[kk]->pTexture );
+		arrTextures[kk]->bLoaded = false;
 	}
 
 	return K_OP_OK;

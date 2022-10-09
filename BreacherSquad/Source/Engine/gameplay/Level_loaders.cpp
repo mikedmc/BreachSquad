@@ -67,24 +67,21 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 
 
 	FileManager::GetMediaPath(L"media/levels/data/tileset1.png", Path);
-	m_pTexTilesColor = m_texManager.AddTexture( Path, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE );
-	if (m_pTexTilesColor == nullptr)
+	if(nullptr == m_texManager.AddTexture( Path, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, TEXID_TILES_COLOR ))
 	{
 		ErrorBox(K_ERR_CRITICAL, L"Couldn't load tileset texture: %s", Path);
 		return K_OP_FAILED;
 	}
 
 	FileManager::GetMediaPath(L"media/levels/data/tileset1_nh.png", Path);
-	m_pTexTilesNorm = m_texManager.AddTexture( Path, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE );
-	if (m_pTexTilesNorm == nullptr)
+	if(nullptr == m_texManager.AddTexture( Path, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, TEXID_TILES_NORMALS ))
 	{
 		ErrorBox(K_ERR_CRITICAL, L"Couldn't load tileset normals texture: %s", Path);
 		return K_OP_FAILED;
 	}
 
 	FileManager::GetMediaPath( L"media/levels/data/water2_n.png", Path );
-	m_pTexWater = m_texManager.AddTexture( Path, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE );
-	if ( m_pTexWater == nullptr )
+	if(nullptr == m_texManager.AddTexture( Path, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, TEXID_WATER_DETAILS ))
 	{
 		ErrorBox( K_ERR_CRITICAL, L"Couldn't load water texture: %s", Path );
 		return K_OP_FAILED;
@@ -344,7 +341,8 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	AddDirtyRect( posTL.x, posTL.y, areaW, areaH );
 
 	// need to know the tileset size
-	Vec2 vTilesetSize = m_pTexTilesColor->getSize();
+	CTexNode* pTexTiles = m_texManager.GetTextureByID( TEXID_TILES_COLOR );
+	Vec2 vTilesetSize = pTexTiles->getSize();
 
 	area->tiles = new CTile*[areaW];
 	for (int kk = 0; kk < areaW; kk++)

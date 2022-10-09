@@ -31,7 +31,10 @@
 #include "IngameGUI.h"
 
 using namespace std;
-
+// texture IDs for local texture manager
+#define TEXID_TILES_COLOR		HASH("texTilesColor")
+#define TEXID_TILES_NORMALS		HASH("texTilesNormals")
+#define TEXID_WATER_DETAILS		HASH("texWaterDetail")
 
 enum ELevelState {
 	K_LVL_STATE_PLAYING,
@@ -93,9 +96,7 @@ public:
 	int						tileW, tileH;					// size of tiles
 	RectXYWH				m_levelAABB;					// level AABB in pixels - grows when adding areas
 	RectXYWHi				m_levelAABB_TL;					// level AABB in tiles  - grows when adding areas
-	CTexNode*				m_pTexTilesColor;				// tileset base texture 
-	CTexNode*				m_pTexTilesNorm;				// tileset normals texture 
-	CTexNode*				m_pTexWater;					// water normals and caustics texture
+
 	Vec2					m_vLevelOrigin;					// level origin for the editor (usually around start location)
 
 	vector<RectXYWHi>		m_arrDirtyRectsTL;				// tiles that need updating

@@ -442,6 +442,7 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\NetworkBase.cpp" />
     <ClCompile Include="Source\Engine\NetworkDummy.cpp" />
+    <ClCompile Include="Source\Engine\OpResult.cpp" />
     <ClCompile Include="Source\Engine\PlayerSelScr.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>

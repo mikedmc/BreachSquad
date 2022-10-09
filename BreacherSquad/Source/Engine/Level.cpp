@@ -324,9 +324,6 @@ CLevel::CLevel()
 	//bullets
 	m_propsLightsMeshIdx = -1;
 
-	//indexuri texturi
-	m_pTexTilesNorm = nullptr;
-	m_pTexTilesColor = nullptr;
 	//fog of war
 	m_fogofwarMeshIdx = -1;
 	m_bulletsMeshIdx = -1;
@@ -4134,7 +4131,11 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	__Shaders().SetVS( nullptr );
 	__Shaders().SetPS( nullptr );
 
-	CTexNode* pTexToUse = m_pTexTilesColor;
+	// find useful textures
+	CTexNode* pTexTilesColor = m_texManager.GetTextureByID( TEXID_TILES_COLOR );
+	CTexNode* pTexTilesNormals = m_texManager.GetTextureByID( TEXID_TILES_NORMALS );
+
+	CTexNode* pTexToUse = pTexTilesColor;
 	// Offset in texture index so we paint from the normals texture when we render the normals pass
 	int nTexIdxOffset = 0;
 	ETexChannel	eTexChannel = K_TEXCHAN_NONE;
@@ -4142,14 +4143,14 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	{
 		case K_LVL_RP_COLORS:
 		{
-			pTexToUse = m_pTexTilesColor;
+			pTexToUse = pTexTilesColor;
 			nTexIdxOffset = 0;
 			eTexChannel = K_TEXCHAN_COLORMAP;
 		}
 		break;
 		case K_LVL_RP_NORMALS_HEIGHT:
 		{
-			pTexToUse = m_pTexTilesNorm;
+			pTexToUse = pTexTilesNormals;
 			nTexIdxOffset = 1;
 			eTexChannel = K_TEXCHAN_NORMALMAP;
 		}
@@ -4168,8 +4169,9 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	{
 		if ( ePass == K_LVL_RP_COLORS )
 		{
-			m_pDevice->SetTexture( 1, m_pTexTilesNorm->pTexture );
-			m_pDevice->SetTexture( 2, m_pTexWater->pTexture );
+			CTexNode* pTexWater = m_texManager.GetTextureByID( TEXID_WATER_DETAILS );
+			m_pDevice->SetTexture( 1, pTexTilesNormals->pTexture );
+			m_pDevice->SetTexture( 2, pTexWater->pTexture );
 			__Shaders().SetVSByName( L"VS_WATER" );
 			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
@@ -4277,7 +4279,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 
 	// top layer of tiles
 	__Shaders().SetVS( nullptr );
-	m_pDevice->SetTexture( 0, m_pTexTilesColor->pTexture );
+	m_pDevice->SetTexture( 0, pTexToUse->pTexture );
 	Areas_PaintLayer( K_AL_CEILINGS );
 
 	return K_OP_OK;

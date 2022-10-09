@@ -38,6 +38,7 @@ enum eOpSeverity {
 	K_SEVERITY_CRITICAL = 2,
 };
 
+
 class OPRESULT {
 public:
 	eOpResult			code;
@@ -49,6 +50,12 @@ public:
 	operator HRESULT() const
 	{
 		return (code >= 0) ? S_OK : E_FAIL;
+	}
+
+	OPRESULT()
+	{
+		code = K_OP_OK;
+		severity = K_SEVERITY_NONE;
 	}
 
 	OPRESULT( HRESULT hr )
@@ -64,7 +71,7 @@ public:
 		severity = eSeverity;
 		wcscpy_s(message, L"No message");
 
-		LogResult();
+		ShowAsMessageBox();
 	}
 
 	OPRESULT(eOpResult eCode, const WCHAR * strMessage, eOpSeverity eSeverity = K_SEVERITY_NONE) 
@@ -73,7 +80,7 @@ public:
 		severity = eSeverity;
 		wcscpy_s(message, strMessage);
 
-		LogResult();
+		ShowAsMessageBox();
 	}
 
 	OPRESULT(eOpResult eCode, eOpSeverity eSeverity, WCHAR* szFormat, ...)
@@ -86,7 +93,7 @@ public:
 		wvsprintf(message, szFormat, marker);
 		va_end(marker);
 
-		LogResult();
+		ShowAsMessageBox();
 	}
 
 	static OPRESULT FromHRESULT( HRESULT hr )
@@ -97,9 +104,8 @@ public:
 		L"HRESULT[%d] %s", hr );
 	}
 
-private:
 	// after setting all vars call this to show the return op onscreen
-	inline void LogResult()
+	inline void ShowAsMessageBox()
 	{
 		// log nothing on OK codes
 		if (code == K_OP_OK)
@@ -139,3 +145,5 @@ OPRESULT(HRESULT hr, eOpSeverity eSeverity = K_SEVERITY_FORGET)
 
 };
 
+// Factory for error codes
+OPRESULT OP_ERR( eOpResult eCode, eOpSeverity eSeverity, WCHAR* szFormat, ... );
