@@ -115,6 +115,8 @@ public:
 	int						Areas_UpdateVisibility( RectXYWH camRect );
 	// Paints tile layer for visible areas
 	OPRESULT				Areas_PaintLayer( eAreaLayer layerIdx );
+	// Tells if area layer is renderable
+	bool					Areas_IsLayerVisible( eAreaLayer layerIdx );
 	// Returns array of areas that intersect aabb
 	vector<CLevelArea*>		Areas_GetAreasInRect( CAABB aabb );
 	// Returns area at point or null if no area there

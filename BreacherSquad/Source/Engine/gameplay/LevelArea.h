@@ -55,6 +55,8 @@ public:
 	CTile*					GetTile(int xTL, int yTL);
 	// Updates the level area visibility and blocks visibility
 	bool					UpdateVisibility(RectXYWH camRect);
+	// Returns true if the mesh for specified layer is visible
+	bool					IsLayerMeshVisible( eAreaLayer layer );
 	// orders building of the buffers
 	OPRESULT				BuildBuffers(PDEVICE pDevice, CSpriteLib* pLightsSprCol);
 	// intersection of segment with tiles (nullptr if not intersecting)

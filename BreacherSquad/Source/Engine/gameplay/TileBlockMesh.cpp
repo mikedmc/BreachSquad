@@ -270,7 +270,7 @@ void CTileBlockMesh::PaintLayer(int nLayer, bool bSetFVF /*= false*/)
 ///----------------------------------------------
 
 CTileBlockMeshManager::CTileBlockMeshManager() :
-	m_pDevice(null)
+	m_pDevice(nullptr)
 {
 
 }
@@ -325,10 +325,11 @@ OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SizeWHi mapSizeTL, Vec
 
 int CTileBlockMeshManager::UpdateVisibility(RectXYWH camRect)
 {
+	CAABB camAABB( camRect );
+
 	arrVisible.Clear();
 	for (int kk = 0; kk < arrBlocks.GetSize(); kk++)
 	{
-		CAABB camAABB(camRect);
 		if (camAABB.Intersects(arrBlocks[kk]->m_bbox))
 			arrVisible.Add(arrBlocks[kk]);
 	}

@@ -34,10 +34,10 @@ public:
 class CTileBlockMeshManager
 {
 private:
-	PDEVICE							m_pDevice;
+	PDEVICE								m_pDevice;
 public:
-	CArray<CTileBlockMesh*>			arrBlocks;
-	CFixedArray<CTileBlockMesh*, 8> arrVisible;				// array of visible blocks, computed in BuildVisibilityList
+	CArray<CTileBlockMesh*>				arrBlocks;				// total array of meshes
+	CFixedArray<CTileBlockMesh*, 16>	arrVisible;				// array of visible blocks, computed in BuildVisibilityList
 
 	CTileBlockMeshManager();
 	~CTileBlockMeshManager();

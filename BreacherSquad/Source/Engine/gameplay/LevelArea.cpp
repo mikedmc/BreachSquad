@@ -73,6 +73,17 @@ bool CLevelArea::UpdateVisibility(RectXYWH camRect)
 }
 
 
+bool CLevelArea::IsLayerMeshVisible( eAreaLayer layer )
+{
+	for ( int kk = 0; kk < areaMesh.arrVisible.Count(); kk++ )
+	{
+		if ( areaMesh.arrVisible[ kk ]->m_arrMeshIdx[layer] >= 0 )
+			return true;
+	}
+
+	return false;
+}
+
 CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i *hitTilePosTL)
 {
 	// Works by walking from tile to tile on slopes, on X axis and Y axis then finding the closest point

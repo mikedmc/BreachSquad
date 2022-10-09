@@ -547,6 +547,16 @@ OPRESULT CLevel::Areas_PaintLayer( eAreaLayer layerIdx )
 	return K_OP_OK;
 }
 
+bool CLevel::Areas_IsLayerVisible( eAreaLayer layerIdx )
+{
+	for ( auto area: m_arrAreas )
+	{
+		if ( area->IsLayerMeshVisible( layerIdx ) )
+			return true;
+	}
+	return false;
+}
+
 std::vector<CLevelArea*> CLevel::Areas_GetAreasInRect( CAABB aabb )
 {
 	vector<CLevelArea*> retarr;
@@ -4165,7 +4175,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	/// paint floors and vertical walls
 	m_pDevice->SetTexture( 0, pTexToUse->pTexture );
 	// paint water with special shader on color pass
-	if ( ePass == K_LVL_RP_COLORS )
+	if ( Areas_IsLayerVisible( K_AL_UNDER_FLOOR ) )
 	{
 		if ( ePass == K_LVL_RP_COLORS )
 		{
@@ -4189,17 +4199,18 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 				{ sin( fLocalTimeline * 0.9 ) * 0.05f, cos( fLocalTimeline * 0.45 ) * 0.07f, sin( fLocalTimeline * 1.0 ) * 0.06f, cos( fLocalTimeline * 0.5 ) * 0.06},
 			};
 			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
-		}
-		
-		Areas_PaintLayer( K_AL_UNDER_FLOOR );
 
-		m_pDevice->SetTexture( 1, NULL );
-		__Shaders().SetVS( nullptr );
-		__Shaders().SetPS( nullptr );
-	}
-	else
-	{
-		Areas_PaintLayer( K_AL_UNDER_FLOOR );
+
+			Areas_PaintLayer( K_AL_UNDER_FLOOR );
+
+			m_pDevice->SetTexture( 1, NULL );
+			__Shaders().SetVS( nullptr );
+			__Shaders().SetPS( nullptr );
+		}
+		else
+		{
+			Areas_PaintLayer( K_AL_UNDER_FLOOR );
+		}
 	}
 
 	/// normal floors
