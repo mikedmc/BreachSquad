@@ -861,7 +861,6 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_OP_RETHR(g_ControlsEditor.OnResetDevice(pDevice, pBBDesc));
 #endif
 	//--- set Sprite painter class pointer ---
-	__Sim().SetSpritePtr(g_pGameSprite);
 	CSprite::SetGlobalSpritePtr(g_pGameSprite, &__Painter());
 	CTTFontsManager::SetGlobalSpritePtr(g_pGameSprite);
 	g_mainMenu.SetSpritePtr(g_pGameSprite);
@@ -1809,9 +1808,8 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 			pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
 
-			RECT rct;
-			SetRect(&rct, UTApp().g_rectRender.x, UTApp().g_rectRender.y, UTApp().g_rectRender.Right(), UTApp().g_rectRender.Bottom());
-			DrawRectUP_TL1T(pDevice, rct, Vec2(0.0f, 0.0f), Vec2(1.0f, 1.0f), color);
+			RectLTRB rct( UTApp().g_rectRender );
+			UT3D::DrawRectUP_TL1T(pDevice, rct, RectLTRB(0.0f, 0.0f, 1.0f, 1.0f), color);
 
 			g_font10b1->DrawString(STR_PAUSED, UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY(), FONTFLAG_ANCHOR_BOTTOMCENTER, 0xffffffff);
 		}

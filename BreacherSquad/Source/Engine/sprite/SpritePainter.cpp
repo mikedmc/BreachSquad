@@ -412,19 +412,19 @@ void CSpritePainter::SetClipWorld( RectXYWH clipWorldCoords )
 	Mat mWV = m_matWorld * m_matView;
 	MUVec2TransformCoord( &rul, &vul, &mWV);
 	MUVec2TransformCoord( &rdr, &vdr, &mWV);
-	SetScissorClip( m_pDevice, (int)rul.x, (int)rul.y, (int)( rdr.x - rul.x ), (int)( rdr.y - rul.y ) );
+	UT3D::SetScissorClip( m_pDevice, (int)rul.x, (int)rul.y, (int)( rdr.x - rul.x ), (int)( rdr.y - rul.y ) );
 }
 
 void CSpritePainter::SetClip( RectXYWH clipCoord )
 {
 	Flush();
-	SetScissorClip( m_pDevice, (int)clipCoord.x, (int)clipCoord.y, (int)clipCoord.w, (int)clipCoord.h );
+	UT3D::SetScissorClip( m_pDevice, (int)clipCoord.x, (int)clipCoord.y, (int)clipCoord.w, (int)clipCoord.h );
 }
 
 void CSpritePainter::RemoveClip()
 {
 	Flush();
-	RemoveScissorClip( m_pDevice );
+	UT3D::RemoveScissorClip( m_pDevice );
 }
 
 //--- framework ---

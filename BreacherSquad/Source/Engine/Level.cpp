@@ -4066,7 +4066,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				return K_OP_FAILED;
 			}
 			//use sprite
-			m_pSprite->Begin( D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE );
+			//m_pSprite->Begin( D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE );
 
 			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
 			//Mat matProj;
@@ -4080,7 +4080,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			RenderPass_Composition( &pRT->matProj, fBetweenFramesPercent );
 
 			// end sprite
-			m_pSprite->End();
+			//m_pSprite->End();
 
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 
@@ -4356,7 +4356,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 		//{ floor(camrect.x * K_GAME_PIXEL_SIZE_F) / K_GAME_PIXEL_SIZE_F, floor(camrect.y * K_GAME_PIXEL_SIZE_F) / K_GAME_PIXEL_SIZE_F, camrect.w, camrect.h } //RTT rect_xywh in world coords
 	};
 
-	DeviceAdditiveON( m_pDevice );
+	UT3D::DeviceAdditiveON( m_pDevice );
 
 	/*
 	// directional light with shader, more expensive, harder to control
@@ -4413,7 +4413,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	}
 
 
-	DeviceAdditiveOFF( m_pDevice );
+	UT3D::DeviceAdditiveOFF( m_pDevice );
 	///--- ambient light(s)
 	// paint all general ambient lights and area lights here
 	//#TODO: paint one ambiental per area!
@@ -4480,7 +4480,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	///----------------------------------------------------------------------------------
 	/// LIGHTS
 	///----------------------------------------------------------------------------------
-	DeviceAdditiveON( m_pDevice );
+	UT3D::DeviceAdditiveON( m_pDevice );
 
 	///--- bullet lights
 	// bullet shadows
@@ -4605,7 +4605,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	__Shaders().SetPS( nullptr );
 
 
-	DeviceAdditiveOFF( m_pDevice );
+	UT3D::DeviceAdditiveOFF( m_pDevice );
 	// end sprite painter
 	__Painter().End();
 
@@ -4711,15 +4711,14 @@ void CLevel::Paint()
 	//__Particles().PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
 }
 
-HRESULT CLevel::PaintUsingFinalRTT()
+OPRESULT CLevel::PaintUsingFinalRTT()
 {
-	HRESULT hr = S_OK;
-	//daca nu e incarcat ies
+	// not loaded, get out!
 	if ( ( !m_bLoaded ) || ( !m_bOneUpdateDone ) )
-		return E_FAIL;
-	//daca nu am capabilitatea de offscreen ies cu eroare
+		return K_OP_FAILED;
+	// RTT uncapable? exit
 	if ( ( UTApp().g_gfxFlags & K_UT_GFXFLAG_RTT ) == 0 )
-		return E_FAIL;
+		return K_OP_FAILED;
 
 	RectXYWH rectRender = UTApp().g_rectRenderPP;
 	int nPixelScaling = UTApp().g_nPixelSizePP;
@@ -4728,7 +4727,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	CCameraTransform::SetActiveCamera( m_pDevice, &UTApp().g_camScreen );
 	//paint game 
 	CRTManager::CEngineRenderTarget* pRTfinal = __RTManager().GetRTbyUID( K_RTID_FINAL );
-	if ( pRTfinal != null )
+	if ( pRTfinal != nullptr )
 	{
 		CCameraTransform::SetActiveCameraIdentity( m_pDevice );
 		RECT src;
@@ -4746,16 +4745,26 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
 		RectXYWH camrect = m_camLevelToRT.GetCamWorldAABB();
 		Vec2 vSubPxOff( -FLOAT_FRAC( camrect.x ) * ( fRTscale * K_RT_PIXEL_SIZE_F ), -FLOAT_FRAC( camrect.y ) * ( fRTscale * K_RT_PIXEL_SIZE_F ) );
-		MUMatAffine2D( &matpaint, fRTscale, nullptr, 0.0f, &Vec2( rectRender.x + vSubPxOff.x, rectRender.y + vSubPxOff.y ) );
+
+		RectLTRB destRect( rectRender );
+		destRect.Move( vSubPxOff.x, vSubPxOff.y );
+		RectLTRB srcUV( vUL.x / pRTfinal->nWidth, vUL.y / pRTfinal->nHeight, vDR.x / pRTfinal->nWidth, vDR.y / pRTfinal->nHeight);
+
+		m_pDevice->SetTexture( 0, pRTfinal->m_pRTTexture );
+		UT3D::DrawRectUP_TL1T( m_pDevice, destRect, srcUV, 0xffffffff );
+
+		/*
+		//MUMatAffine2D( &matpaint, fRTscale, nullptr, 0.0f, &Vec2( rectRender.x + vSubPxOff.x, rectRender.y + vSubPxOff.y ) );
 		m_pSprite->SetTransform( &matpaint );
 		m_pSprite->Draw( pRTfinal->m_pRTTexture, &src, nullptr, &g_Vec3Zero, 0xffffffff );
 		m_pSprite->Flush();
 		m_pSprite->SetTransform( &g_matIdentity );
+		*/
 	}
 
 
-	m_pSprite->SetTransform( &g_matIdentity );
-	CCameraTransform::SetActiveCamera( m_pDevice, &m_camLevelToScr );
+	//m_pSprite->SetTransform( &g_matIdentity );
+	//CCameraTransform::SetActiveCamera( m_pDevice, &m_camLevelToScr );
 	//get camera data
 	RectXYWH	camrect = m_camLevelToScr.GetCamWorldAABB();
 	Mat			matCam = m_camLevelToScr.GetViewTransform();
@@ -4812,7 +4821,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		if ( pPlayer->pClosestTouchable != nullptr )
 		{
 			Vec2 vpos = pPlayer->pClosestTouchable->pos.xy_proj;
-			CSprite::paintFrame( &m_sprInterface, vpos.x, vpos.y, ANM_IGM_INTERFACE_SPR_INTERACT_ONCE, 0, 0xffffffff );
+			UTSprite::PaintFrame( &m_sprInterface, vpos.x, vpos.y, ANM_IGM_INTERFACE_SPR_INTERACT_ONCE, 0, 0xffffffff );
 		}
 	}
 
@@ -4826,7 +4835,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		// paint aiming cursor
 		// vAimVec was normalized using last frame data so paint it at last frame actor position
 		Vec2 vto = Vec3XY( pPlayerActor[kk]->pos_last ) - Vec2( 0.0f, pPlayerActor[kk]->vHeart.proj_h ) + pPlayerActor[kk]->GetAimVec();
-		CSprite::paintFrame( &m_sprInterface, vto.x, vto.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffffffff );
+		UTSprite::PaintFrame( &m_sprInterface, vto.x, vto.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0xffffffff );
 
 	}
 
@@ -4870,7 +4879,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	*/
 
 	//-- final flush for level space ---
-	m_pSprite->Flush();
+	//m_pSprite->Flush();
 
 	///--- paint Fog Of War ---
 	/*
@@ -4953,7 +4962,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 
 	///--- paint string particles in level coords ---
 	//__Particles().PaintStringParticles(K_PART_LAYER_NORMAL);
-	m_pSprite->Flush();
+	//m_pSprite->Flush();
 
 	//--- closest touchable and cover icons ---
 	 //pointer to last painted active interface so we don't draw it twice
@@ -5025,13 +5034,16 @@ HRESULT CLevel::PaintUsingFinalRTT()
 		}
 
 		//cover shield
+		/*
 		if ( UTApp().m_Settings.bShowInterfaceHelp ) //player numeric icon (only if shield not visible)
 		{
 			Vec2 vpos = Vec2( pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y + fabs( 3.0f * sin( fLocalTimeline * 4.0f ) ) );
-			CSprite::paintFrame( &m_sprInterface, vpos.x, vpos.y, ANM_IGM_INTERFACE_SPR_PLAYER_NR_ICONS, pPlayerActor[kk]->nPlayerOrdinal );
+			UTSprite::PaintFrame( &m_sprInterface, vpos.x, vpos.y, ANM_IGM_INTERFACE_SPR_PLAYER_NR_ICONS, pPlayerActor[kk]->nPlayerOrdinal );
 		}
+		*/
 
 		//paint player numeric icon on multiplayer when peer outside the screen
+		/*
 		if ( UTApp().IsGameNetworked() )
 		{
 
@@ -5052,9 +5064,10 @@ HRESULT CLevel::PaintUsingFinalRTT()
 				}
 			}
 		}
+		*/
 	}
 
-	m_pSprite->Flush();
+	//m_pSprite->Flush();
 
 	//paint text bubble
 	//m_interfaceTextBubble.Paint(m_pDevice, m_pSprite);
@@ -5063,6 +5076,7 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	CCameraTransform::SetActiveCamera( m_pDevice, &UTApp().g_camScreen );
 
 	///--- paint time slowdown screen effect ---
+	/*
 	m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
 	m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
 
@@ -5080,8 +5094,8 @@ HRESULT CLevel::PaintUsingFinalRTT()
 	//return to point filtering
 	m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT );
 	m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
-
-	return hr;
+	  */
+	return K_OP_OK;
 }
 
 void CLevel::Release()

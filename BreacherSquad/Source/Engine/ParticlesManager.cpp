@@ -199,7 +199,7 @@ void CParticlesManager::PaintLayer(EParticleLayer eLayer, bool additiveBlending)
 		return;
 
 	if(additiveBlending)
-		DeviceAdditiveON(m_pDevice);
+		UT3D::DeviceAdditiveON(m_pDevice);
 
 	CParticle *part = pList[eLayer].pNext;
 	while(part != &pList[eLayer])
@@ -212,7 +212,7 @@ void CParticlesManager::PaintLayer(EParticleLayer eLayer, bool additiveBlending)
 	}
 
 	if(additiveBlending)
-		DeviceAdditiveOFF(m_pDevice);
+		UT3D::DeviceAdditiveOFF(m_pDevice);
 }
 
 void CParticlesManager::RemoveAllFromLayer(EParticleLayer ePartLayer)

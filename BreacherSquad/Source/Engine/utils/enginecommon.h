@@ -3,9 +3,6 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <stddef.h>
-
-//#define null NULL
 
 #define DW_COLOR_FFFA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0xffffff)
 #define DW_COLOR_XXXA(a) (DWORD)(((int((a) * 255.0f)&0xff)<<24) | 0x000000)
@@ -112,42 +109,6 @@ void SWAP(T& x, T& y)
 	y = temp;
 }
 
-
-
-struct VERT_TL1TC
-{
-	Vec4 pos;
-	DWORD color;
-
-	static const DWORD FVF;
-};
-
-struct VERT_TL1T
-{
-	Vec4 pos;
-	DWORD color;
-	float tu, tv;
-
-	static const DWORD FVF;
-};
-
-struct VERT_TL1TS
-{
-	Vec3 pos;
-	DWORD color;
-	float tu, tv;
-
-	static const DWORD FVF;
-};
-
-struct VERT_TL2T
-{
-	Vec3 pos;
-	float tu, tv;
-	float lu, lv;
-
-	static const DWORD FVF;
-};
 
 struct Vec2i {
 	int x, y;
@@ -300,14 +261,6 @@ unsigned int		buff_readUInt(void* buff, long &_cursor);
 // Formats time in human readable form
 void				OS_FormatTime(WCHAR* dest, int destSize, float timeInSecs);
 
-void DrawRectUP_TL1T(LPDIRECT3DDEVICE9 pDevice, RECT scrRect, Vec2 texUL, Vec2 texDR, DWORD color = 0xffffffff);
-void DrawLineUP_TL1T(LPDIRECT3DDEVICE9 pDevice, Vec2 start, Vec2 end, DWORD color = 0xffffffff);
-void DrawFullscreenVignette(LPDIRECT3DDEVICE9 pDevice, float alpha);
-
-// Sets clip area on renderer (so you can't paint outside)
-OPRESULT SetScissorClip(PDEVICE pDevice, int clipX, int clipY, int clipW, int clipH);
-// Removes clip from renderer
-OPRESULT RemoveScissorClip(PDEVICE pDevice);
 // Splits string into tokens
 std::vector<std::wstring> TokenizeString(const std::wstring& str, const std::wstring& delim);
 // Returns true if str contains ANY token from strTokens (separated by tokensSeparator)
@@ -381,16 +334,6 @@ public:
 int GetListIndexByName(const WCHAR* strName, const CStringHash *arrNamesList, int arrNamesListSize);
 int GetListIndexByNameHash(const UINT32 nameHash, const CStringHash *arrNamesList, int arrNamesListSize);
 
-///--- ADDITIVE BLENDING ---
-inline void DeviceAdditiveON(PDEVICE pDevice)
-{
-	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-}
-inline void DeviceAdditiveOFF(PDEVICE pDevice)
-{
-	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-}
 
 unsigned int			OS_GetTimeMS();
 

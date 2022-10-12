@@ -75,10 +75,6 @@ public:
 
 public:
 	PDEVICE					m_pDevice;
-	ID3DXSprite*			m_pSprite;
-	void SetSpritePtr( ID3DXSprite* pSprite ) {
-		m_pSprite = pSprite;
-	}
 
 	Pathfinder				m_astar;						// A-start Astar search engine
 	CTextureManager			m_texManager;					// General texture manager for misc needed textures
@@ -358,7 +354,7 @@ public:
 	// paint level buffers onscreen
 	void					Paint();
 	// paints final res effects (water, distortion, icons, etc)
-	HRESULT					PaintUsingFinalRTT();
+	OPRESULT				PaintUsingFinalRTT();
 	// returns pointer to synced RNG
 	inline CRandom&	RNG() {
 		return m_rand;

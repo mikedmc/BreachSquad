@@ -565,8 +565,7 @@ void GameState::PaintTransition( float dTime, float fTimeline, PDEVICE pDevice )
 			pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 			pDevice->SetTransform( D3DTS_VIEW, &g_matIdentity );
 
-			RECT rect;
-			SetRect( &rect, UTApp().g_rectRender.x, UTApp().g_rectRender.y, UTApp().g_rectRender.Right(), UTApp().g_rectRender.Bottom() );
+			RectLTRB rect( UTApp().g_rectRender.x, UTApp().g_rectRender.y, UTApp().g_rectRender.Right(), UTApp().g_rectRender.Bottom() );
 
 			switch ( nTransitionStep )
 			{
@@ -576,7 +575,7 @@ void GameState::PaintTransition( float dTime, float fTimeline, PDEVICE pDevice )
 					pDevice->SetTexture( 0, NULL ); //textura aiurea
 					//fac ca jumatate din timpul tranzitiei sa stea pe full opac ca sa nu se vada absolut nimic cand schimba starea
 					float fAlpha = LIMIT( 1.5f * fTransitionPercent, 0.0f, 1.0f );
-					DrawRectUP_TL1T( pDevice, rect, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ), DW_COLOR_XXXA( fAlpha ) );
+					UT3D::DrawRectUP_TL1T( pDevice, rect, RectLTRB( 0.0f, 0.0f, 1.0f, 1.0f ), DW_COLOR_XXXA( fAlpha ) );
 					//write "loading"
 					if ( ( __GUI().m_sprCol.IsLoaded() ) && ( fAlpha >= 0.95f ) )
 					{
@@ -591,7 +590,7 @@ void GameState::PaintTransition( float dTime, float fTimeline, PDEVICE pDevice )
 					//deseneaza poly negru peste
 					pDevice->SetTexture( 0, NULL );
 					float fAlpha = LIMIT( ( 1.5f - 1.5f * fTransitionPercent ), 0.0f, 1.0f );
-					DrawRectUP_TL1T( pDevice, rect, Vec2( 0.0f, 0.0f ), Vec2( 1.0f, 1.0f ), DW_COLOR_XXXA( fAlpha ) );
+					UT3D::DrawRectUP_TL1T( pDevice, rect, RectLTRB( 0.0f, 0.0f, 1.0f, 1.0f ), DW_COLOR_XXXA( fAlpha ) );
 				}
 				break;
 			}

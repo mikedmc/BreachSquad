@@ -2354,7 +2354,7 @@ void CMainMenu::PaintBackground(RectXYWH worldRect, DWORD dwColor, bool bPaintPa
 	}
 
 	//paint character flickering orange light
-	DeviceAdditiveON(m_pDevice);
+	UT3D::DeviceAdditiveON(m_pDevice);
 	float alpha = 0.4f + UTPerlin::PerlinNoise1D(fLocalTimeline, 3.0f, 2.0f, 0.4f, 0.5f, 2);
 	CLAMP( alpha, 0.0f, 1.0f );
 	//paint flickering right glow
@@ -2373,7 +2373,7 @@ void CMainMenu::PaintBackground(RectXYWH worldRect, DWORD dwColor, bool bPaintPa
 		// logo glow
 		CSprite::paintFrame( &m_sprColNew, vLogoPos.x, vLogoPos.y, ANM_MENUS0_SPR_LOGO_MM, 1, dwTitleCol );
 	}
-	DeviceAdditiveOFF( m_pDevice);
+	UT3D::DeviceAdditiveOFF( m_pDevice);
 	// logo normal
 	if ( bPaintTitle )
 		CSprite::paintFrame( &m_sprColNew, vLogoPos.x, vLogoPos.y, ANM_MENUS0_SPR_LOGO_MM, 0 );

@@ -8,12 +8,6 @@
 #pragma warning(disable: 4995)
 #pragma warning(default: 4995)
 
-const DWORD VERT_TL2T::FVF = D3DFVF_XYZ | D3DFVF_TEX2;
-const DWORD VERT_TL1T::FVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1;
-const DWORD VERT_TL1TS::FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
-const DWORD VERT_TL1TC::FVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE;
-
-
 Vec2i GetDirVec2i(EDir dir)
 {
 	Vec2i dirs[4] = { Vec2i(-1, 0), Vec2i(0, -1), Vec2i(1, 0), Vec2i(0, 1) };
@@ -472,74 +466,6 @@ void OS_FormatTime(WCHAR* dest, int destSize, float timeInSecs)
 //}
 
 
-void DrawRectUP_TL1T(LPDIRECT3DDEVICE9 pDevice, RECT scrRect, Vec2 texUL, Vec2 texDR, DWORD color)
-{
-	VERT_TL1T verts[4];
-	verts[0].pos = Vec4(scrRect.left, scrRect.top, 0.0f, 1.0f);
-	verts[1].pos = Vec4(scrRect.right, scrRect.top, 0.0f, 1.0f);
-	verts[2].pos = Vec4(scrRect.left, scrRect.bottom, 0.0f, 1.0f);
-	verts[3].pos = Vec4(scrRect.right, scrRect.bottom, 0.0f, 1.0f);
-	verts[0].tu = texUL.x;verts[1].tu = texDR.x;verts[2].tu = texUL.x;verts[3].tu = texDR.x;
-	verts[0].tv = texUL.y;verts[1].tv = texUL.y;verts[2].tv = texDR.y;verts[3].tv = texDR.y;
-	verts[0].color = verts[1].color = verts[2].color = verts[3].color = color;
-
-	pDevice->SetFVF(VERT_TL1T::FVF);
-	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &verts, sizeof(VERT_TL1T));
-}
-
-void DrawFullscreenVignette(LPDIRECT3DDEVICE9 pDevice, float alpha)
-{
-	if (alpha <= 0.0f)
-		return;
-/*
-	// vignette
-	RECT rect;
-	SetRect(&rect, g_renderRect.x, g_renderRect.y, g_renderRect.Right(), g_renderRect.Bottom());
-	pDevice->SetTexture(0, NULL); //textura aiurea
-	pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-	DrawRectUP_TL1T(pDevice, rect, Vec2(0, 0), Vec2(0, 0), D3DCOLOR_XXXA(alpha));
-	*/
-}
-
-
-void DrawLineUP_TL1T(LPDIRECT3DDEVICE9 pDevice, Vec2 start, Vec2 end, DWORD color )
-{
-	VERT_TL1T verts[2];
-	verts[0].pos = Vec4(start.x, start.y, 0.0f, 1.0f);
-	verts[1].pos = Vec4(end.x, end.y, 0.0f, 1.0f);
-	verts[0].tu = 0.0f; verts[1].tu = 0.0f;
-	verts[0].tv = 0.0f; verts[1].tv = 0.0f;
-	verts[0].color = verts[1].color = color;
-
-	pDevice->SetFVF(VERT_TL1T::FVF);
-	pDevice->DrawPrimitiveUP(D3DPT_LINELIST, 1, &verts, sizeof(VERT_TL1T));
-}
-
-
-//clipping functions
-OPRESULT SetScissorClip(PDEVICE pDevice, int clipX, int clipY, int clipW, int clipH)
-{
-	assert(pDevice != nullptr);
-	if (UTApp().g_gfxFlags & K_UT_GFXFLAG_SCISSORTEST)
-	{
-		RECT rect_colorClip;
-		SetRect(&rect_colorClip, clipX, clipY, clipX + clipW, clipY + clipH);
-		pDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
-		pDevice->SetScissorRect(&rect_colorClip);
-		
-		return K_OP_OK;
-	}
-
-	return K_OP_FAILED;
-}
-
-OPRESULT RemoveScissorClip(PDEVICE pDevice)
-{
-	assert(pDevice != nullptr);
-	pDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
-
-	return K_OP_OK;
-}
 
 std::vector<std::wstring> TokenizeString(const std::wstring& str, const std::wstring& delim)
 {
