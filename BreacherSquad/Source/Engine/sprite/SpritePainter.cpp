@@ -35,8 +35,11 @@ OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat & matView, Mat & matP
 {
 	_ASSERT(m_pDevice != nullptr);
 	// if already started make sure we do a flush
-	if (bStarted)
+	if ( bStarted )
+	{
+		LOG(L"SpritePainter:: Already started! Doing end!");
 		End();
+	}
 
 #if defined(_DEBUG) || defined(DEBUG)
 	stats_sequences++;

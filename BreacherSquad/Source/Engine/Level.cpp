@@ -609,7 +609,6 @@ void CLevel::Areas_GetTilesSnapshot( RectXYWHi srcRectTL, CTile** arrTiles, int 
 	}
 	// clear array
 	memset( arrTiles, 0, sizeof( CTile* ) * arrCapacity );
-	int nCur = 0;
 	// scan all areas one by one
 	for ( int ii = 0; ii < m_arrAreas.Count(); ii++ )
 	{
@@ -3965,9 +3964,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			{
 				return K_OP_FAILED;
 			}
-			//use sprite
-			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
-
 			//Mat matProj;
 			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
 			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
@@ -3976,9 +3972,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			m_pDevice->SetTransform( D3DTS_VIEW, &g_matIdentity );
 
 			RenderPass( K_LVL_RP_NORMALS_HEIGHT, &pRT->matProj, fBetweenFramesPercent );
-
-			// end sprite
-			//m_pSprite->End();
 
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}
@@ -3997,9 +3990,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			{
 				return K_OP_FAILED;
 			}
-			//use sprite
-			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
-
 			//Mat matProj;
 			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
 			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
@@ -4010,9 +4000,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			// special method for rendering lights pass
 			// uses the height/normals render target
 			RenderPass_Lights( &pRT->matProj, fBetweenFramesPercent );
-
-			// end sprite
-			//m_pSprite->End();
 
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 
@@ -4032,9 +4019,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			{
 				return K_OP_FAILED;
 			}
-			//use sprite
-			//m_pSprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
-
 			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
 			//Mat matProj;
 			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
@@ -4044,9 +4028,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			m_pDevice->SetTransform( D3DTS_VIEW, &g_matIdentity );
 
 			RenderPass( K_LVL_RP_COLORS, &pRT->matProj, fBetweenFramesPercent );
-
-			// end sprite
-			//m_pSprite->End();
 
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}
@@ -4065,8 +4046,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			{
 				return K_OP_FAILED;
 			}
-			//use sprite
-			//m_pSprite->Begin( D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE );
 
 			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
 			//Mat matProj;
@@ -4078,9 +4057,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 			// RT sized quad with tex1 color, tex2 lightmap
 			RenderPass_Composition( &pRT->matProj, fBetweenFramesPercent );
-
-			// end sprite
-			//m_pSprite->End();
 
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 
@@ -4196,7 +4172,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 				// x: surface color adder, y: specular alpha
 				{ ct_waterColorAdd, ct_waterSpecular, 1.0f, 1.0f },
 				// UV animation	for 2 layers of water
-				{ sin( fLocalTimeline * 0.9 ) * 0.05f, cos( fLocalTimeline * 0.45 ) * 0.07f, sin( fLocalTimeline * 1.0 ) * 0.06f, cos( fLocalTimeline * 0.5 ) * 0.06},
+				{ sin( (float)fLocalTimeline * 0.9 ) * 0.05f, cos( (float)fLocalTimeline * 0.45 ) * 0.07f, sin( (float)fLocalTimeline * 1.0 ) * 0.06f, cos( (float)fLocalTimeline * 0.5 ) * 0.06},
 			};
 			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 
@@ -4703,114 +4679,59 @@ void CLevel::Paint()
 	if ( ( !m_bLoaded ) || ( !m_bOneUpdateDone ) )
 		return;
 
-	PaintUsingFinalRTT();
+	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 
-	//ingame interface
-	//m_interfaceIGM.Paint(m_pDevice, g_pGameSprite);
-	//interface particles
-	//__Particles().PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
+	PaintGameFinalRT();
+	PaintOverGameLayer();
+	PaintGUILayer();
 }
 
-OPRESULT CLevel::PaintUsingFinalRTT()
+OPRESULT CLevel::PaintGameFinalRT()
 {
-	// not loaded, get out!
-	if ( ( !m_bLoaded ) || ( !m_bOneUpdateDone ) )
-		return K_OP_FAILED;
-	// RTT uncapable? exit
-	if ( ( UTApp().g_gfxFlags & K_UT_GFXFLAG_RTT ) == 0 )
-		return K_OP_FAILED;
-
 	RectXYWH rectRender = UTApp().g_rectRenderPP;
 	int nPixelScaling = UTApp().g_nPixelSizePP;
 	///--- PAINT LEVEL ---
-	//real screen space
-	CCameraTransform::SetActiveCamera( m_pDevice, &UTApp().g_camScreen );
 	//paint game 
 	CRTManager::CEngineRenderTarget* pRTfinal = __RTManager().GetRTbyUID( K_RTID_FINAL );
-	if ( pRTfinal != nullptr )
-	{
-		CCameraTransform::SetActiveCameraIdentity( m_pDevice );
-		RECT src;
-		SizeWH szSrc( rectRender.w / ( float ) nPixelScaling, rectRender.h / ( float ) nPixelScaling );
-		// display the center part of the source RT that fits the screen
-		Vec2i vUL( ( int ) floor( pRTfinal->nWidth / 2.0f - szSrc.w / 2.0f ), ( int ) floor( pRTfinal->nHeight / 2.0f - szSrc.h / 2.0f ) );
-		Vec2i vDR( vUL.x + ( int ) ceil( szSrc.w ), vUL.y + ( int ) ceil( szSrc.h ) );
-		SetRect( &src, vUL.x, vUL.y, vDR.x, vDR.y );
-		//use SRC rect for scaling and not the nPixelScaling.
-		float fRTscale = nPixelScaling;
-		//#TODO: when using NON PIXEL PERFECT scaling just scale the whole RT (keeping the aspect ratio)
-		//float fRTscale = (float)rectRender.h / (float)pRTfinal->nHeight;
-		Mat matpaint;
-		// computes sub pixel offsets for smooth scrolling. the RT renders only on tileset pixels, no subpixels, for precision.
-		// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
-		RectXYWH camrect = m_camLevelToRT.GetCamWorldAABB();
-		Vec2 vSubPxOff( -FLOAT_FRAC( camrect.x ) * ( fRTscale * K_RT_PIXEL_SIZE_F ), -FLOAT_FRAC( camrect.y ) * ( fRTscale * K_RT_PIXEL_SIZE_F ) );
+	if ( pRTfinal == nullptr )
+		return OP_ERR( K_OP_FAILED, K_SEVERITY_WARNING, L"Final RT not available!" );
 
-		RectLTRB destRect( rectRender );
-		destRect.Move( vSubPxOff.x, vSubPxOff.y );
-		RectLTRB srcUV( vUL.x / pRTfinal->nWidth, vUL.y / pRTfinal->nHeight, vDR.x / pRTfinal->nWidth, vDR.y / pRTfinal->nHeight);
+	RECT src;
+	SizeWH szSrc( rectRender.w / (float)nPixelScaling, rectRender.h / (float)nPixelScaling );
+	// display the center part of the source RT that fits the screen
+	Vec2i vUL( (int)floor( pRTfinal->nWidth / 2.0f - szSrc.w / 2.0f ), (int)floor( pRTfinal->nHeight / 2.0f - szSrc.h / 2.0f ) );
+	Vec2i vDR( vUL.x + (int)ceil( szSrc.w ), vUL.y + (int)ceil( szSrc.h ) );
+	SetRect( &src, vUL.x, vUL.y, vDR.x, vDR.y );
+	//use SRC rect for scaling and not the nPixelScaling.
+	float fRTscale = nPixelScaling;
+	//#TODO: when using NON PIXEL PERFECT scaling just scale the whole RT (keeping the aspect ratio)
+	//float fRTscale = (float)rectRender.h / (float)pRTfinal->nHeight;
+	Mat matpaint;
+	// computes sub pixel offsets for smooth scrolling. the RT renders only on tileset pixels, no subpixels, for precision.
+	// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
+	RectXYWH camrect = m_camLevelToRT.GetCamWorldAABB();
+	Vec2 vSubPxOff( -FLOAT_FRAC( camrect.x ) * ( fRTscale * K_RT_PIXEL_SIZE_F ), -FLOAT_FRAC( camrect.y ) * ( fRTscale * K_RT_PIXEL_SIZE_F ) );
 
-		m_pDevice->SetTexture( 0, pRTfinal->m_pRTTexture );
-		UT3D::DrawRectUP_TL1T( m_pDevice, destRect, srcUV, 0xffffffff );
+	RectLTRB destRect( rectRender );
+	destRect.Move( vSubPxOff.x, vSubPxOff.y );
+	RectLTRB srcUV( vUL.x / pRTfinal->nWidth, vUL.y / pRTfinal->nHeight, vDR.x / pRTfinal->nWidth, vDR.y / pRTfinal->nHeight );
 
-		/*
-		//MUMatAffine2D( &matpaint, fRTscale, nullptr, 0.0f, &Vec2( rectRender.x + vSubPxOff.x, rectRender.y + vSubPxOff.y ) );
-		m_pSprite->SetTransform( &matpaint );
-		m_pSprite->Draw( pRTfinal->m_pRTTexture, &src, nullptr, &g_Vec3Zero, 0xffffffff );
-		m_pSprite->Flush();
-		m_pSprite->SetTransform( &g_matIdentity );
-		*/
-	}
+	m_pDevice->SetTexture( 0, pRTfinal->m_pRTTexture );
+	UT3D::DrawRectUP_TL1T( m_pDevice, destRect, srcUV, 0xffffffff );
+	
+	//#TODO: explosion deforming effects and other stuff
 
+	return K_OP_OK;
+}
 
-	//m_pSprite->SetTransform( &g_matIdentity );
-	//CCameraTransform::SetActiveCamera( m_pDevice, &m_camLevelToScr );
+OPRESULT CLevel::PaintOverGameLayer()
+{
 	//get camera data
 	RectXYWH	camrect = m_camLevelToScr.GetCamWorldAABB();
 	Mat			matCam = m_camLevelToScr.GetViewTransform();
 	CAABB		camAABB( camrect );
 
-	///--- paint water ---
-	/*
-	if (m_bufferedPainter.GetTrisCount(m_waterMeshIdx) > 0)
-	{
-		//set textures, states and shaders
-		_ASSERT(m_waterTexIdx >= 0);
-
-//		m_pDevice->SetTexture(0, m_pRTTexture_final);
-		m_pDevice->SetTexture(1, m_texManager.m_Texs[m_waterTexIdx]->pTexture); //textura apa
-
-		Mat matWVP = matCam * UTGetAppClass().g_matProj;
-		//vertex shaderul e acelasi pt toate
-		pVShader = UTGetShaderManager().GetVShaderByName(L"VS_WATER");
-		m_pDevice->SetVertexShader(pVShader);
-		m_pDevice->SetVertexDeclaration(UTGetShaderManager()._VERTEX_PNCT4T4_decl);
-
-		float fang = fLocalTimeline;
-		if (fang >= 1000.0f * PI)
-			fang -= 1000.0f * PI;
-		Vec2 woff1(0.05f * sin(fang * 1.0f), 0.04f * cos(fang * 1.0f));
-		Vec2 woff2(0.5f - 0.06f * sin(-fang * 0.63f), 0.5f - 0.05f * cos(-fang * 0.67f));
-		float fConstDataVS[][4] = {
-			{ camrect.x, camrect.y, camrect.w, camrect.h },//RTT rect_xywh
-			{ 0.0f, 0.0, 1.0f, 1.0f }, //RTT rect_xywh in tex coords
-			{ woff1.x, woff1.y, woff2.x, woff2.y } //fWaterOffsets (xy, wh sunt 2 vectori care misca textura de apa, textura ce vine suprapusa in shader)
-		};
-		m_pDevice->SetVertexShaderConstantF(0, (float*)&matWVP, 4);
-		m_pDevice->SetVertexShaderConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
-
-		///--- pixel shader ambient light cu self illumination ---
-		pPShader = UTGetShaderManager().GetPShaderByName(L"PS_WATER");
-		m_pDevice->SetPixelShader(pPShader);
-		float fConstDataPS[][4] = { { 0.015f, 0.6f, 0.0, 0.0 } };//x=distort(0.1f), y=caustics alpha(0-2)
-		m_pDevice->SetPixelShaderConstantF(0, (float*)fConstDataPS, ARRAY_SIZE(fConstDataPS));
-
-		m_bufferedPainter.DrawMesh(m_waterMeshIdx, false);
-
-		m_pDevice->SetVertexShader(null);
-		m_pDevice->SetPixelShader(null);
-	}
-	*/
+	__Painter().SetViewTransform( matCam );
 
 	///#TEMP: paint interactible
 	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
@@ -4825,8 +4746,7 @@ OPRESULT CLevel::PaintUsingFinalRTT()
 		}
 	}
 
-
-	///--- paint crosshairs 
+	///#TEMP: --- paint crosshairs 
 	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 	{
 		if ( pPlayerActor[kk] == null )
@@ -4839,130 +4759,9 @@ OPRESULT CLevel::PaintUsingFinalRTT()
 
 	}
 
-	///--- actors icons and stun stars ---
-	/*
-	for (int kk = 0; kk < m_visibleList.visible_actors.Count(); kk++)
-	{
-		CActor* act = m_visibleList.visible_actors.m_pData[kk];
-		//shield/overhead icons for non players
-		if ((act->actTemplate.actorClass != K_ACT_CLASS_PLAYER) && (act->m_sprOverheadIcon.animationIdx >= 0))
-		{
-			act->m_sprOverheadIcon.pos = act->GetPosHeart();
-			act->m_sprOverheadIcon.paint(&m_sprInterface);
-		}
-		//overhead icon !!! only if no overhead icon set (hence the else)
-		else if (act->nIconType != K_LVL_ACT_ICON_NONE)
-		{
-			CSprite::paintFrame(&m_sprInterface, act->GetPosHeart().x, act->GetPosHeart().y, ANM_IGM_INTERFACE_SPR_ACTOR_ICONS, act->nIconType);
-		}
-
-		//STUN STARS
-		if (act->fStunTimer >= K_LVL_MIN_STUN_DIZZY_DURATION)
-		{
-			int curframe = int(fLocalTimeline * 25.0f) % __Particles().m_sprCol.GetAFramesCnt(ANM_PARTICLES_SPR_STUN_STARS);
-			Vec2 vStarsPos = act->GetPosHeart();
-			CSprite::paintFrameModule(&__Particles().m_sprCol, vStarsPos.x, vStarsPos.y - 10.0f, ANM_PARTICLES_SPR_STUN_STARS, curframe, 0, act->color);
-		}
-
-		//energy bars
-		if ((act->actTemplate.actorClass == K_ACT_CLASS_HUMAN) && (act->fLife > 0.0f) &&
-			(act->actTemplate.fLife > 100.0f) && (act->m_AIsensorInfo.fTimeSinceHit < 5.0f))
-		{
-			float fLife = act->fLife / act->actTemplate.fLife;
-			float fBarLen = act->actTemplate.fLife / 5.0f;
-			CLAMP(fBarLen, 40.0f, 60.0f);
-
-			RECTXYWH barrect(act->bbox.vCenter.x - fBarLen / 2.0f, act->bbox.vMax.y + 3.0f, fBarLen, 8.0f);
-			CtrlMgrDrawProgress_HeadsOutside(&m_sprInterface, ANM_IGM_INTERFACE_SPR_PROGRESS_HEALTH, barrect, fLife, 0xffffffff);
-		}
-	}
-	*/
-
-	//-- final flush for level space ---
-	//m_pSprite->Flush();
-
-	///--- paint Fog Of War ---
-	/*
-	if (m_bufferedPainter.GetTrisCount(m_fogofwarMeshIdx) > 0)
-	{
-		//set textures, states and shaders
-		//arata mai bine cu point filtering
-		m_pDevice->SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-		m_pDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-		m_pDevice->SetSamplerState(1, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
-
-//		m_pDevice->SetTexture(0, m_pRTTexture_final);
-		m_pDevice->SetTexture(1, null);// m_texManager.m_Texs[m_fogofwarTexIdx]->pTexture); //textura FOW
-
-		Mat matWVP = matCam * UTGetAppClass().g_matProj;
-		//vertex shaderul e acelasi pt toate
-		pVShader = UTGetShaderManager().GetVShaderByName(L"VS_FOW");
-		m_pDevice->SetVertexShader(pVShader);
-		m_pDevice->SetVertexDeclaration(UTGetShaderManager()._VERTEX_PNCT4T4_decl);
-
-		float fConstDataVS[][4] = {
-			{ camrect.x, camrect.y, camrect.w, camrect.h },//RTT rect_xywh
-			{ 0.0f, 0.0, 1.0f, 1.0f } //RTT rect_xywh in tex coords
-		};
-		m_pDevice->SetVertexShaderConstantF(0, (float*)&matWVP, 4);
-		m_pDevice->SetVertexShaderConstantF(4, (float*)fConstDataVS, ARRAY_SIZE(fConstDataVS));
-
-		///--- pixel shader ambient light cu self illumination ---
-		pPShader = UTGetShaderManager().GetPShaderByName(L"PS_FOW");
-		m_pDevice->SetPixelShader(pPShader);
-		float fConstDataPS[][4] = { { 10.0f, 0.0f, 0.0f, 0.0 } };//x=distort(0.1f)
-		m_pDevice->SetPixelShaderConstantF(0, (float*)fConstDataPS, ARRAY_SIZE(fConstDataPS));
-
-		m_bufferedPainter.DrawMesh(m_fogofwarMeshIdx, false);
-
-		m_pDevice->SetVertexShader(null);
-		m_pDevice->SetPixelShader(null);
-	}
-	*/
-
-
-	///--- paint front layer parallax objects with linear blending ---
-	/*
-	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-
-	Mat matfront;
-	CCameraTransform::SetActiveCamera(m_pDevice, &m_camLevel);
-
-	for (int kk = 0; kk < m_arrMiscObjects.Count(); kk++)
-	{
-		if (m_arrMiscObjects[kk]->type != K_LVL_MISC_FRONTLAYEROBJ)
-			continue;
-		//desenez cu scalare
-		CMiscObject_FrontLayerObj* obj = dynamic_cast<CMiscObject_FrontLayerObj*>(m_arrMiscObjects[kk]);
-		if (obj == null)
-		{
-			continue;
-		}
-
-		Vec3 campos = m_camLevel.GetCamPos();
-		Vec2 off(obj->pos.x - campos.x, obj->pos.y - campos.y);
-		off *= K_LVL_FRONTLAYER_PARALLAX; //front layer moves faster
-										  //compute final aabb - visibility test
-		CAABB finalaabb = obj->aabb_ini;
-		finalaabb.vMin *= K_LVL_FRONTLAYER_SCALING; finalaabb.vMax *= K_LVL_FRONTLAYER_SCALING;
-		finalaabb.Move(obj->pos + off);
-		if (!finalaabb.Intersects(&camAABB))
-			continue;
-
-		MUMatAffine2D(&matfront, K_LVL_FRONTLAYER_SCALING, NULL, 0.0f, &(obj->pos + off));
-		m_pSprite->SetTransform(&matfront);
-		obj->sprite.paint(&m_sprBack);
-	}
-	m_pSprite->Flush();
-
-	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-	*/
 
 	///--- paint string particles in level coords ---
 	//__Particles().PaintStringParticles(K_PART_LAYER_NORMAL);
-	//m_pSprite->Flush();
 
 	//--- closest touchable and cover icons ---
 	 //pointer to last painted active interface so we don't draw it twice
@@ -5033,68 +4832,27 @@ OPRESULT CLevel::PaintUsingFinalRTT()
 			//player->m_sprOverheadIcon.paint(&m_sprInterface);
 		}
 
-		//cover shield
-		/*
-		if ( UTApp().m_Settings.bShowInterfaceHelp ) //player numeric icon (only if shield not visible)
-		{
-			Vec2 vpos = Vec2( pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y + fabs( 3.0f * sin( fLocalTimeline * 4.0f ) ) );
-			UTSprite::PaintFrame( &m_sprInterface, vpos.x, vpos.y, ANM_IGM_INTERFACE_SPR_PLAYER_NR_ICONS, pPlayerActor[kk]->nPlayerOrdinal );
-		}
-		*/
-
-		//paint player numeric icon on multiplayer when peer outside the screen
-		/*
-		if ( UTApp().IsGameNetworked() )
-		{
-
-			if ( ( pPlayerActor[kk]->nPlayerOrdinal == g_netlock.Net_GetOtherPlayerIndex() ) && ( !camAABB.Intersects( pPlayerActor[kk]->bbox ) ) )
-			{
-				Vec2 vpos = Vec2( pPlayerActor[kk]->bbox.vCenter.x, pPlayerActor[kk]->bbox.vMin.y );
-				CAABB localAABB = camAABB;
-				localAABB.Inflate( -K_TILE_SIZE + fabs( 3.0f * sin( fLocalTimeline * 4.0f ) ), -K_TILE_SIZE + fabs( 3.0f * sin( fLocalTimeline * 4.0f ) ) );
-				if ( AABB::Segment_Intersection( vpos, camAABB.vCenter, localAABB, &vpos ) )
-				{
-					float fAng = HALF_PI + UTMath::GetVectorAngle( camAABB.vCenter - vpos );
-					Mat matrt;
-					MUMatAffine2D( &matrt, 1.0f, nullptr, fAng, &vpos );
-					m_pSprite->SetTransform( &matrt );
-					CSprite::paintFrame( &m_sprInterface, 0.0f, 0.0f, ANM_IGM_INTERFACE_SPR_PLAYER_NR_ICONS, 2 + pPlayerActor[kk]->nPlayerOrdinal );
-					m_pSprite->SetTransform( &g_matIdentity );
-					CSprite::paintFrame( &m_sprInterface, vpos.x, vpos.y, ANM_IGM_INTERFACE_SPR_PLAYER_NR_ICONS, 4 + pPlayerActor[kk]->nPlayerOrdinal );
-				}
-			}
-		}
-		*/
 	}
 
-	//m_pSprite->Flush();
+	__Painter().Flush();
+	return K_OP_OK;
+}
 
-	//paint text bubble
-	//m_interfaceTextBubble.Paint(m_pDevice, m_pSprite);
+OPRESULT CLevel::PaintGUILayer()
+{
+	//get camera data
+	RectXYWH	camrect = UTApp().g_camRTScreen.GetCamWorldAABB();
+	Mat			matCam = UTApp().g_camRTScreen.GetViewTransform();
+	CAABB		camAABB( camrect );
 
-	//set screen space
-	CCameraTransform::SetActiveCamera( m_pDevice, &UTApp().g_camScreen );
+	__Painter().SetViewTransform( matCam );
 
-	///--- paint time slowdown screen effect ---
-	/*
-	m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-	m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+	//ingame interface
+	//m_interfaceIGM.Paint(m_pDevice, g_pGameSprite);
+	//interface particles
+	//__Particles().PaintLayer(K_PART_LAYER_INTERFACE_LIGHT, true);
 
-	if ( m_fTimeMultiplier_real < 1.0f )
-	{
-		DWORD colEffect = DW_COLORALPHA( 0xff000088, 1.0f - m_fTimeMultiplier_real );
-		Mat mattrans;
-		RectXYWH bbox = __GUI().m_sprCol.GetAFrameBBox_real( ANM_CONTROLS_SPR_VIGNETTES, 1 );
-		MUMatAffine2D( &mattrans, rectRender.h / bbox.h, nullptr, 0.0f, &rectRender.Center() );
-		m_pSprite->SetTransform( &mattrans );
-		CSprite::paintFrame( &__GUI().m_sprCol, 0.0f, 0.0f, ANM_CONTROLS_SPR_VIGNETTES, 1, colEffect );
-		m_pSprite->Flush();
-	}
-
-	//return to point filtering
-	m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT );
-	m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
-	  */
+	__Painter().Flush();
 	return K_OP_OK;
 }
 

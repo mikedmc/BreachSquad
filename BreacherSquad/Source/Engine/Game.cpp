@@ -625,26 +625,6 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					pSpr->Flush();
 				}
 			}
-			//if (DXUTIsKeyDown('9'))
-			//{
-			//	pSpr->Flush();
-			//	CCameraTransform::SetActiveCameraIdentity(pDevice);
-			//	RECT src;
-			//	SetRect(&src, 0, 0, 512, 512);
-			//	pSpr->SetTransform(&g_matIdentity);
-			//	pSpr->Draw(gLevel.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
-			//	pSpr->Flush();
-			//}
-			//if (DXUTIsKeyDown('0'))
-			//{
-			//	pSpr->Flush();
-			//	CCameraTransform::SetActiveCameraIdentity(pDevice);
-			//	RECT src;
-			//	SetRect(&src, 512, 0, 1024, 512);
-			//	pSpr->SetTransform(&g_matIdentity);
-			//	pSpr->Draw(gLevel.m_pRTTexture, &src, NULL, &Vec3(UTGetAppClass().g_rectRender.x, 0.0f, 0.0f), 0xffffffff);
-			//	pSpr->Flush();
-			//}
 #endif
 		}
 		break;

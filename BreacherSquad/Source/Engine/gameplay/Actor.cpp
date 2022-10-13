@@ -235,7 +235,7 @@ void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 	// clip coords are a little hardcoded to look good
 	bool bClipped = false;
 	CTile* tll = level.Areas_GetTileAt(Vec2(pos.xy.x - K_TILE_SIZE_F, pos.xy.y));
-	if ( tll->flags & K_TILEFLAG_WALLENDING_R )
+	if ( tll != nullptr && tll->flags & K_TILEFLAG_WALLENDING_R )
 	{
 		__Painter().SetClipWorld( RectXYWH( tll->bbox.vMax.x + 1.0f, this->pos.xy_proj.y - 4.0f * K_TILE_SIZE_F, 4.0f * K_TILE_SIZE_F, 5.0f * K_TILE_SIZE_F ) );
 		bClipped = true;
@@ -243,7 +243,7 @@ void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 	else
 	{
 		CTile* tlr = level.Areas_GetTileAt( Vec2( pos.xy.x + K_TILE_SIZE_F, pos.xy.y ) );
-		if ( tlr->flags & K_TILEFLAG_WALLENDING_L )
+		if ( tlr != nullptr && tlr->flags & K_TILEFLAG_WALLENDING_L )
 		{
 			__Painter().SetClipWorld( RectXYWH( tlr->bbox.vMin.x - 4.0f * K_TILE_SIZE_F + 2.0f, this->pos.xy_proj.y - 4.0f * K_TILE_SIZE_F, 4.0f * K_TILE_SIZE_F, 5.0f * K_TILE_SIZE_F ) );
 			bClipped = true;

@@ -353,8 +353,6 @@ public:
 
 	// paint level buffers onscreen
 	void					Paint();
-	// paints final res effects (water, distortion, icons, etc)
-	OPRESULT				PaintUsingFinalRTT();
 	// returns pointer to synced RNG
 	inline CRandom&	RNG() {
 		return m_rand;
@@ -384,6 +382,12 @@ public:
 	int						GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetArr, int maxRetArrSize );
 
 private:
+	// paints final game RT to screen coords and adds effects like explosions and other effects using the final RT
+	OPRESULT				PaintGameFinalRT();
+	// paints ingame elements in "Level To Screen Space" that are not influenced by shader effects (numbers, interact icons, health bars, etc)	
+	OPRESULT				PaintOverGameLayer();
+	// special layer (pixel perfect or different scaling) in "Scaled Screen Space" for ingame interface, menus and screen vignettes
+	OPRESULT				PaintGUILayer();
 	// Cheaper method of shadow casting but not precise enough. Can be used on low end devices
 	int						BuildLightVolume360( CLight * light, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt );
 

@@ -1739,7 +1739,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 
 		// only start and end UTPainter after we preloaded the minimum painter shaders
-		if (GameState::state != GAME_STATE_PRELOAD)
+		if (GameState::state > GAME_STATE_PRELOAD)
 		{
 			Mat matview = UTApp().g_cam360hScreen.GetViewTransform();
 
@@ -1797,7 +1797,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		//--- TRANSITIONS ---		
 		g_pGameSprite->Flush();
 		GameState::PaintTransition(fElapsedTime, fTime, pDevice);
-		//--- if it is paused paints "PAUSE" ---
+		///--- if it is paused paints "PAUSE" ---
 #ifdef K_GAME_HAS_PAUSE_SCREEN
 		if ((g_bCanPause) && (DXUTIsTimePaused()) && (g_font10b1 != nullptr))
 		{

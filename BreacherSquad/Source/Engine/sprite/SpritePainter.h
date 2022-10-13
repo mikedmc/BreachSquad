@@ -56,7 +56,6 @@ public:
 
 	// Call before painting anything
 	OPRESULT				Begin(PVERTEXSHADER pVShader, Mat & matView, Mat & matProj, UINT32 flags = K_BS_ALPHABLENDING );
-	
 	// Flushes remaining sprites and ends a scene. Clears shaders, flushes everything
 	OPRESULT				End();
 	// Sets the current view projection matrix for the following sprites. Does a Flush before setting it.
@@ -71,7 +70,6 @@ public:
 	OPRESULT				SetShader(PVERTEXSHADER pVShader);
 	// Gets the currently set transform	matrices
 	void					GetTransform( Mat * retWorld, Mat * retView = nullptr );
-
 	// Draws a non-transformed sprite
 	// \param: pSrcUV - expects the rectangle in texture coordinates that will be drawn in pDestRect
 	// \param: pDestRect - expects a rectangle where the srcUV will be painted. 
@@ -99,8 +97,8 @@ public:
 	void ClearStatistics();
 
 
-	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
-	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
+	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr);
+	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr);
 	OPRESULT OnLostDevice();
 	OPRESULT OnDestroyDevice();
 };
