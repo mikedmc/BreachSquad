@@ -95,20 +95,24 @@ CTile* CLevelArea::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPo
 	if (!moveBB.Intersects(AABBbounds))
 		return nullptr;
 
-	//#TODO: de pus tileflags options la coliziuni
-	//#TODO: de renuntat la GetTile pentru acces direct. Verificare bounds prin clamping
+	//#OPTIMIZE: de pus tileflags options la coliziuni
+	//#OPTIMIZE: de renuntat la GetTile pentru acces direct. Verificare bounds prin clamping
 	// bring it in local space
 	Vec2i startTL((int)floor(vStart.x / K_TILE_SIZE), (int)floor(vStart.y / K_TILE_SIZE));
 	Vec2i endTL((int)floor(vEnd.x / K_TILE_SIZE), (int)floor(vEnd.y / K_TILE_SIZE));
 
 	Vec2i vMinTL(AABBbounds_TL.x, AABBbounds_TL.y);
 	Vec2i vMaxTL(AABBbounds_TL.x + AABBbounds_TL.w - 1, AABBbounds_TL.y + AABBbounds_TL.h - 1);
-	// check if current start is non walkable
+	// check if current start is colliding. Return colliding.
 	CTile* pstarttl = GetTile(startTL.x, startTL.y);
 	if (pstarttl != nullptr)
 	{
-		if (FLAG_NONE(pstarttl->flags, K_TILEFLAG_WALKABLE))
-			return nullptr;
+		if ( FLAG_NONE( pstarttl->flags, K_TILEFLAG_WALKABLE ) )
+		{
+			retPoint = vStart;
+			MUVec2Norm( &retNormal, &( vStart - vEnd ) );
+			return pstarttl;
+		}
 	}
 
 	Vec2 vDir = vEnd - vStart;

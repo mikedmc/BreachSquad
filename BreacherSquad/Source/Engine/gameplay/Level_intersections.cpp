@@ -112,6 +112,7 @@ CTile* CLevel::SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint,
 	CAABB segAABB;
 	Vec2 vFrom = vStart;
 	Vec2 vTo = vEnd;
+
 	// selects all areas that can have positive hits and shortens the vector on collision so we always have the minimal one
 	CTile* rettile = nullptr;
 	for (int ii = 0; ii < m_arrAreas.GetSize(); ii++)

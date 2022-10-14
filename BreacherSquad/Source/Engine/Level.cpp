@@ -2224,7 +2224,7 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 		if ( enemy->_template.actorClass <= K_ACT_CLASSCHECKPOINT_NEUTRALS )
 			continue;
 
-		//daca am filtru pe clasele de inamici verific clasa mai intai
+		//filter enemy classes
 		int nIgnore = 0, nIgnoreConditions = 0;
 		if ( eTargetClassFilter1 != K_ACT_CLASS_ANY )
 		{
@@ -2240,20 +2240,20 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 		}
 		if ( ( nIgnoreConditions > 0 ) && ( nIgnore == nIgnoreConditions ) )
 			continue;
-		//nu ia in seama inamic cu energie sub 0 sau flag de not a target (setat de limbo)
+		// ignore dead enemies
 		if ( ( enemy->fLife <= 0.0f ) || ( ( enemy->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET ) != 0 ) )
 			continue;
 
 		Vec2 enemyDistV = enemy->GetPosHeart() - sourceActor->GetPosHeart();
-		//float viewDstSq = sourceActor->actTemplate.fDiistSee * sourceActor->actTemplate.distSee;
 		float enemyDistSq = MUVec2LenSq( &enemyDistV );
-
+		// new enemy is too far?
+		if ( enemyDistSq >= minDistSq )
+			continue;
 		//not in view rectangle
 		if ( !aabbvision.PointIn( enemy->GetPosHeart() ) )
 			continue;
-		//if ( !IsLineOfSight( sourceActor->GetCurWeaponMuzzleWorld().xy_proj, enemy->GetPosHeart(), sourceActor->pArea ) )
-			//continue;
-		if ( !IsLineOfSight( sourceActor->pos.xy, enemy->pos.xy, sourceActor->pArea ) )
+		// line of sight is decided between weapon muzzle and enemy heart without projecting the coords on the floor because bullets do the same, they check screen coords
+		if ( !IsLineOfSight( sourceActor->GetCurWeaponMuzzleWorld().xy, enemy->GetPosHeart3D().xy, sourceActor->pArea ) )
 			continue;
 
 		//passed all tests and is closer? set ptr on new one
@@ -4231,11 +4231,12 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 					UTSprite::PaintFModule( &m_sprInterface, pathpt, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0, 0x880000ff );
 				}
 
-				/*
-				VecProj vpMuzz = act->GetWeaponMuzzleWorld( true, 0 );
+				/*				
+				VecProj vpMuzz = act->GetCurWeaponMuzzleWorld();
 				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy.x, vpMuzz.xy.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x88ff0000 );
 				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy_proj.x, vpMuzz.xy_proj.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x8800ff00 );
 				*/
+				
 			}
 			break;
 			case K_VST_PROP:
@@ -5202,7 +5203,7 @@ bool CLevel::IsLineOfSight( Vec2 pt_from, Vec2 pt_to, CLevelArea * pStartArea )
 	Vec2 collisionPoint, collisionNormal;
 	CTile* tl = SegmentTilesIntersectionEx( pt_from, pt_to, collisionPoint, collisionNormal, nullptr, pStartArea );
 
-	return tl == nullptr;
+	return ( tl == nullptr ) ? true : false;
 	//#TODO: add intersection with shapes contained in pt1 pt2 bbox
 	/*
 	CCollisionShape* colShape = ColShape_Segment_Intersection_Arr( pt1, pt2, m_visibleList.logic_colShapesExtended.m_pData, m_visibleList.logic_colShapesExtended.Count(), retVecCollisionPt, retVecCollisionNormal );

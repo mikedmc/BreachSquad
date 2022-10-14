@@ -222,7 +222,7 @@ void CActor::Update(float dTime )
 	// update weapon after updating the graphics component because it depends on mount points
 	c_weapons->Update( *this, dTime );
 	// now we check if the weapon shot and generate the bullets
-	CheckShoot();
+	bool bShot = CheckShoot();
 }
 
 void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
@@ -1068,7 +1068,7 @@ bool CActor::CheckShoot()
 	VecProj vShootPos = shooter->GetWeaponMuzzleWorld( nHands, 0 );
 
 	// checks if muzzle is inside the level, outside of collisions and walls
-	//#TODO: poate poate sa verifice direct in pathfinding map
+	//#OPTIMIZE: poate poate sa verifice direct in pathfinding map
 	Vec2 vRetP( 0.0f, 0.0f ), vRetN( 0.0f, 0.0f );
 	CTile* tl = level.SegmentTilesIntersectionEx( GetPosHeart3D().xy, vShootPos.xy, vRetP, vRetN, nullptr, pArea );
 	if ( tl != nullptr )
@@ -1076,7 +1076,7 @@ bool CActor::CheckShoot()
 		//#TODO: ar trebui sa verifice si cu inamicii si cu alte entitati gen cutii, mese etc. Ar trebui sa spawneze particule cand tragi etc
 		// ideal ar trebui sa simuleze ca ai tras, sa faca damage si toate cele ca sa nu tragi de dincolo de inamic cand e foarte aproape
 		// idee: poate sa traga din heart pos dar sa fie invizibil glontul (set flag invisible)
-		return false;
+		//!! de vazut daca trebuie facut ceva special dar nu cred.... poate sa fac glontul invizibil
 	}
 
 	EActorClass nFinalClass = shooter->_template.actorClass;
