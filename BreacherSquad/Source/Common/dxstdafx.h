@@ -89,7 +89,7 @@
 #include <windowsx.h>
 #include <tchar.h>
 #include <assert.h>
-#include <wchar.h>
+#include <cwchar>
 #include <mmsystem.h>
 #include <commctrl.h> // for InitCommonControls() 7
 #include <shellapi.h> // for ExtractIcon()

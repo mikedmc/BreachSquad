@@ -1816,12 +1816,13 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 #endif
 
 		///----- debug info -----
+		g_pGameSprite->Flush();
+
 		if (g_bShowDebugStats)
 		{
-			g_pGameSprite->Flush();
 			////reset transform
-			pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-			CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
+			//pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
+			//CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
 			//find a pos so doesn't overlap with the igm interface
 			Vec2 vStartPos = UTApp().g_cam360hScreen.WorldToScreen(Vec2(0.0f, 25.0f));
 			int posY = vStartPos.y;

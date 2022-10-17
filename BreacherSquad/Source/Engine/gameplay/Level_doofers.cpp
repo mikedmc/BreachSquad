@@ -73,6 +73,7 @@ void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float
 	{
 		node->m_data.Reset();
 		//add simulation container
+		/*
 		node->m_data.physPt = m_poolPhysPts.Hire();
 		if (node->m_data.physPt == nullptr)
 		{
@@ -80,9 +81,10 @@ void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float
 			m_poolDoofers.Dismiss(node);
 			return;
 		}
+		
 		//reset
 		node->m_data.physPt->m_data.Reset();
-
+		 */
 		node->m_data.type = K_DOOFER_LIGHT;
 
 		node->m_data.sprLight.Init(nLightAnimIdx, 0.0f, 0.0f, 0, color);
@@ -93,12 +95,14 @@ void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float
 
 		node->m_data.fTimer = 0.0f;
 		//physics
+		/*
 		node->m_data.physPt->m_data.bFlagPhysicsEnabled = false;
 		node->m_data.physPt->m_data.bFlagRotationEnabled = false;
 
 		node->m_data.physPt->m_data.pos = vPos;
 		node->m_data.physPt->m_data.speed = g_Vec3Zero;
 		node->m_data.physPt->m_data.accel = g_Vec3Zero;
+		*/
 	}
 }
 
@@ -114,6 +118,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 	{
 		node->m_data.Reset();
 		//add simulation container
+		/*
 		node->m_data.physPt = m_poolPhysPts.Hire();
 		if (node->m_data.physPt == nullptr)
 		{
@@ -123,15 +128,15 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 		}
 		//reset
 		node->m_data.physPt->m_data.Reset();
-
+		*/
 		node->m_data.type = K_DOOFER_EXPLOSION;
 		//physics
-		node->m_data.physPt->m_data.bFlagPhysicsEnabled = false;
-		node->m_data.physPt->m_data.bFlagRotationEnabled = false;
+		//node->m_data.physPt->m_data.bFlagPhysicsEnabled = false;
+		//node->m_data.physPt->m_data.bFlagRotationEnabled = false;
 
-		node->m_data.physPt->m_data.pos = Vec2ToVec3XY0(pos);
-		node->m_data.physPt->m_data.speed = g_Vec3Zero;
-		node->m_data.physPt->m_data.accel = g_Vec3Zero;
+		//node->m_data.physPt->m_data.pos = Vec2ToVec3XY0(pos);
+		//node->m_data.physPt->m_data.speed = g_Vec3Zero;
+		//node->m_data.physPt->m_data.accel = g_Vec3Zero;
 
 		//default
 		float fMaxDamage = explotemplate->fDamage;
@@ -615,9 +620,10 @@ void CLevel::UpdateDoofers(float dTime)
 
 		bool killprop = false;
 		//daca iese din zona de joc
+		/*
 		if (prop->physPt->m_data.bIsDead)
 			killprop = true;
-
+		*/
 		//generic updates
 		prop->fLightTimer += dTime;
 
@@ -625,34 +631,6 @@ void CLevel::UpdateDoofers(float dTime)
 		{
 			case K_DOOFER_SHELL:
 			{
-				if ((prop->bVar1 == false) && (prop->physPt->m_data.bContactStarted))
-				{
-					prop->bVar1 = true;
-					/*
-					if(prop->nSubType == 0) //shotgun shell
-						SND_PLAY_POSITIONAL(SNDIDX_RIFLE_SHELL_DROP, prop->physPt->m_data.pos);
-					else
-						SND_PLAY_POSITIONAL(SNDIDX_SHOTGUN_SHELL_DROP, prop->physPt->m_data.pos);
-						*/
-				}
-
-				if (prop->physPt->m_data.bIsStatic)
-				{
-					//put shell as decal
-					/*
-					if (randint(1000) < 200)
-					{
-						//daca collisionul are AI inseamna ca e lift sau ceva deci nu lasam sange
-						if ((prop->physPt->m_data.pContactShape != null) && (prop->physPt->m_data.pContactShape->AIstate == K_AI_STATE_UNDEFINED))
-							AddDecal(K_LVL_DECAL_LAYER_BACKOBJECTS, prop->physPt->m_data.pos, prop->spr.animationIdx, prop->spr.currentFrame, prop->spr.color);
-					}
-					*/
-					killprop = true;
-				}
-				else if (!Rects::PointInRect(Vec3ProjVec2(prop->physPt->m_data.pos), camrect))
-				{
-					killprop = true;
-				}
 			}
 			break;
 			case K_DOOFER_FIRE_SOURCE:
@@ -702,27 +680,6 @@ void CLevel::UpdateDoofers(float dTime)
 						&Vec2(0.0f, 20.0f), &(prop->physPt->m_data.speed / (5.0f + randfloat(4.0f))), 0.6f, 1.0f, 0.0f, randfloat(PI), randfloatsgn(2.0f), 0.1f, 0.1f, dwCol, K_PART_LAYER_RT_BACK_NRM);
 				}
 				*/
-				//only stain at high velocities
-				if ((prop->physPt->m_data.bContactStarted) && (prop->physPt->m_data.contactNormal.y < 0.0f))
-				{
-					//don't stain moving platforms
-					/*
-					if ((prop->physPt->m_data.pContactShape != null) && (prop->physPt->m_data.pContactShape->AIstate == K_AI_STATE_UNDEFINED))
-					{
-						if(prop->nSubType == 0)
-							AddDecal(K_LVL_DECAL_LAYER_BACKOBJECTS, prop->physPt->m_data.pos, ANM_ACTIVES_SPR_DECAL_BLOOD_FRONTLAYER, randint(3), 0xffffffff);
-						else
-							AddDecal(K_LVL_DECAL_LAYER_BACKOBJECTS, prop->physPt->m_data.pos, ANM_ACTIVES_SPR_DECAL_BLOOD_FRONTLAYER_GREEN, randint(3), 0xffffffff);
-
-//						SND_PLAY_POSITIONAL_RAND2(SNDIDX_GIBLET1, SNDIDX_GIBLET2, prop->physPt->m_data.pos);
-					}
-					*/
-				}
-
-				if ((prop->physPt->m_data.bIsStatic) || (!Rects::PointInRect(Vec3XY(prop->physPt->m_data.pos), camrect_larger)))
-				{
-					killprop = true;
-				}
 			}
 			break;
 
@@ -731,7 +688,7 @@ void CLevel::UpdateDoofers(float dTime)
 				//update sprite
 				node->m_data.spr.Update(&m_sprProps, dTime);
 				//add smoke
-				if ((m_Timers.Tick(60)) && (!prop->physPt->m_data.bContacting))
+				if (m_Timers.Tick(60)) //&& (!prop->physPt->m_data.bContacting))
 				{
 					float fAng = randfloat(DOUBLE_PI);
 					Vec2 vDir(sin(fAng), cos(fAng));
@@ -791,7 +748,7 @@ void CLevel::UpdateDoofers(float dTime)
 		if (killprop)
 		{
 			//release la nodul de fizica !!!
-			m_poolPhysPts.Dismiss(prop->physPt);
+			//m_poolPhysPts.Dismiss(prop->physPt);
 			//si eliberez glontul
 			m_poolDoofers.Dismiss(node);
 		}
@@ -808,14 +765,6 @@ void CLevel::PaintDoofers( eLVLRenderPass pass )
 		{
 			case K_DOOFER_FIRE_SOURCE:
 			{
-				if (!node->m_data.physPt->m_data.bContacting)
-				{
-					/*
-					Vec2 ppos = node->m_data.physPt->m_data.pos;
-					float falpha = LIMIT(node->m_data.fTimer, 0.0f, 1.0f);
-					CSprite::paintFrameModule(&m_sprProps, ppos.x, ppos.y, ANM_ACTIVES_SPR_BULLETS_FIRE, 0, 0, D3DCOLOR_FFFA(falpha));
-					*/
-				}
 			}
 			break;
 			case K_DOOFER_SHELL:

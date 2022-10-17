@@ -204,7 +204,7 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	m_camLevelToRT.Update(0.0f);
 	m_camLevelToScr.Update(0.0f);
 	//pools
-	m_poolPhysPts.Init( K_LVL_PHYSP_MAX_CNT );
+	//m_poolPhysPts.Init( K_LVL_PHYSP_MAX_CNT );
 	m_poolDoofers.Init( K_LVL_DOOFERS_MAX_CNT );
 	m_poolBullets.Init( K_LVL_BULLETS_MAX_CNT );
 
@@ -291,7 +291,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 
 	if (fl == nullptr || err != 0)
 	{
-		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Could not open area file:%s", strPathAbs);
+		return OP_ERR(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Could not open area file:%s", strPathAbs);
 	}
 
 	//read int array (will disappear probably)

@@ -4,7 +4,7 @@
 #include "gameplay/LevelDefines.h"
 #include "gameplay/Tile.h"
 
-#include "gameplay/PhysicsPoint.h"
+//#include "gameplay/PhysicsPoint.h"
 #include "gameplay/ActorTypes.h"
 #include "gameplay/LevelTypes.h"
 #include "gameplay/components/ActorAICompTypes.h"
@@ -214,8 +214,8 @@ public:
 	void					AddDecal_BloodSplat( Vec2 pos, bool bLarge, EActorClass eVictimClass = K_ACT_CLASS_ANY );
 	///--- physics points ---
 	//#TODO: remove?
-	CLinkedPool<CPhysicsPoint>	m_poolPhysPts; //pool de obiecte fizice
-	void					UpdatePhysicsPoints( float dTime );
+	//CLinkedPool<CPhysicsPoint>	m_poolPhysPts; //pool de obiecte fizice
+	//void					UpdatePhysicsPoints( float dTime );
 	///--- bullets linked pool ---
 	CLinkedPool<CBullet>	m_poolBullets;			// bullets pool
 	int						m_bulletsMeshIdx;		// idx mesh bullets

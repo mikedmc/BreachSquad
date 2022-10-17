@@ -385,6 +385,8 @@ void CLevel::UpdateDirtyRects()
 				for ( int xx = lrect.x; xx < lrect.x + lrect.w; xx++ )
 				{
 					CTile* tl = area->GetTile( xx, yy );
+					if ( tl == nullptr )
+						continue;
 					// set passability flags in pathfinding map 
 					if ( tl->flags & K_TILEFLAG_WALKABLE )
 						m_astar.SetNodeFlags( xx, yy, COL_ACCESSIBLE );
@@ -1891,6 +1893,8 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 	/// 2. other lights: bullets, particles, etc
 	//PROPS lights - temp lights - gunshot lights, explo lights
 	m_propsLightsMeshIdx = -1;
+
+	/*
 	m_bufferedPainter.BeginMesh( m_propsLightsMeshIdx );
 
 	for(auto node : m_poolDoofers)
@@ -1960,7 +1964,7 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 	}
 	//inchid meshul
 	m_bufferedPainter.EndMesh();
-
+	*/
 
 	///--- water ---
 	/*
@@ -3793,7 +3797,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 	m_bufferedPainter.ClearBuffers();
 
 	///--- PHYSICS POINTS ---
-	UpdatePhysicsPoints( dTime );
+	//UpdatePhysicsPoints( dTime );
 	///--- BULLETS (after phys pts) ---
 	UpdateBullets( dTime );
 	///--- PROPS ---
@@ -4881,7 +4885,7 @@ void CLevel::Release()
 	//release bullets
 	m_poolBullets.Release();
 	m_poolDoofers.Release();
-	m_poolPhysPts.Release();
+	//m_poolPhysPts.Release();
 
 	m_sprLights.Release();
 	m_sprProps.Release();
@@ -5272,6 +5276,7 @@ void CLevel::AddDecal_BloodSplat( Vec2 pos, bool bLarge, EActorClass eVictimClas
 	*/
 }
 
+/*
 void CLevel::UpdatePhysicsPoints( float dTime )
 {
 	for(auto node : m_poolPhysPts)
@@ -5438,7 +5443,7 @@ void CLevel::UpdatePhysicsPoints( float dTime )
 		}
 	}
 }
-
+*/
 
 
 void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, DWORD color )

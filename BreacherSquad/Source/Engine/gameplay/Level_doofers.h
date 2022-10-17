@@ -20,7 +20,6 @@ enum EDooferType {
 class CDoofer {
 public:
 	EDooferType	type;
-	CLinkedPool<CPhysicsPoint>::CLNode *physPt; //punctul fizic (coliziune, pozitie, etc)
 
 	int			nSubType;	//folosit de fiecare tip in mod diferit
 	float		fTimer;		//timer care porneste de la 0
@@ -37,14 +36,13 @@ public:
 	bool		bVar1;
 	int			nIntVar1;
 
-	CDoofer() : physPt(null), type(K_DOOFER_NOT_SET), nSubType(0), fTimer(0.0f), bAnimated(false), fSize(1.0f),
+	CDoofer() : type(K_DOOFER_NOT_SET), nSubType(0), fTimer(0.0f), bAnimated(false), fSize(1.0f),
 		bMakesLight(false), fLightDuration(0.0f), fLightFadeOut(0.0f), fLightScaling(1.0f), fLightTimer(0.0f), bVar1(false), nIntVar1(0)
 	{
 	}
 
 	void Reset()
 	{
-		physPt = null;
 		type = K_DOOFER_NOT_SET; nSubType = 0; fTimer = 0.0f; bAnimated = false; fSize = 1.0f;
 		bMakesLight = false; fLightDuration = 0.0f; fLightFadeOut = 0.0f; fLightScaling = 1.0f; fLightTimer = 0.0f;
 	}

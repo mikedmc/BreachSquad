@@ -238,7 +238,7 @@ void CPlayerSelScr::Update(float dTime)
 						SetWeaponsOptions(&m_arrPlayers[nPeerOrdinal]);
 						m_arrPlayers[nPeerOrdinal].fVerseReadyTimer = 0.0f;
 					}
-					m_arrPlayers[nPeerOrdinal].bSelected = (bool)netSel.bSelected;
+					m_arrPlayers[nPeerOrdinal].bSelected = (bool)(netSel.bSelected != 0);
 					m_arrPlayers[nPeerOrdinal].nCursorPosReal = (int)netSel.nCursorPos;
 					for (int kk = 0; kk < PSS_ITEMCATS_COUNT; kk++)
 					{
@@ -369,37 +369,37 @@ void CPlayerSelScr::Update(float dTime)
 				if ((nPlayerIdx == -1) && (eCommand == K_PSS_COMMAND_SELECT) && (m_nPlayersCnt < K_MAX_PLAYERS_CNT))
 				{
 					//player index to check
-					int nPlayerIdx = m_nPlayersCnt;
+					int player_idx = m_nPlayersCnt;
 					//sunt deja initializate dinainte?
-					if (m_arrPlayers[nPlayerIdx].eType == K_PSS_CLASS_NOT_SELECTED)
+					if (m_arrPlayers[player_idx].eType == K_PSS_CLASS_NOT_SELECTED)
 					{
-						m_arrPlayers[nPlayerIdx].Init();
-						m_arrPlayers[nPlayerIdx].eType = K_PSS_CLASS_ASSAULTER;
+						m_arrPlayers[player_idx].Init();
+						m_arrPlayers[player_idx].eType = K_PSS_CLASS_ASSAULTER;
 					}
 
 					//load last selection ALWAYS
-					m_arrPlayers[nPlayerIdx].eType = (EPSSPlayerClass)g_userData[K_MEMID_PANEL1_CLASS + nPlayerIdx * (K_MEMID_PANEL2_CLASS - K_MEMID_PANEL1_CLASS)];
+					m_arrPlayers[player_idx].eType = (EPSSPlayerClass)g_userData[K_MEMID_PANEL1_CLASS + player_idx * (K_MEMID_PANEL2_CLASS - K_MEMID_PANEL1_CLASS)];
 					//set the rest of the selection
 					for (int ll = 0; ll < PSS_ITEMCATS_COUNT; ll++)
 					{
-						int nDataOff = K_MEMID_PANEL1_CLASSDATA_START + nPlayerIdx * (K_MEMID_PANEL2_CLASS - K_MEMID_PANEL1_CLASS) + m_arrPlayers[nPlayerIdx].eType * 5;
-						m_arrPlayers[nPlayerIdx].nSelection[ll] = g_userData[ll + nDataOff];
+						int nDataOff = K_MEMID_PANEL1_CLASSDATA_START + player_idx * (K_MEMID_PANEL2_CLASS - K_MEMID_PANEL1_CLASS) + m_arrPlayers[player_idx].eType * 5;
+						m_arrPlayers[player_idx].nSelection[ll] = g_userData[ll + nDataOff];
 						//make sure selection fits data (for modding)
-						int nItemsCnt = arrItemsByClass[m_arrPlayers[nPlayerIdx].eType].matOptionsByItemType[ll].nCount;
-						if ((m_arrPlayers[nPlayerIdx].nSelection[ll] < 0) || (m_arrPlayers[nPlayerIdx].nSelection[ll] >= nItemsCnt))
+						int nItemsCnt = arrItemsByClass[m_arrPlayers[player_idx].eType].matOptionsByItemType[ll].nCount;
+						if ((m_arrPlayers[player_idx].nSelection[ll] < 0) || (m_arrPlayers[player_idx].nSelection[ll] >= nItemsCnt))
 						{
-							m_arrPlayers[nPlayerIdx].nSelection[ll] = 0;
+							m_arrPlayers[player_idx].nSelection[ll] = 0;
 						}
 					}
 
 					//setam instance ID ca sa legam user de controller
-					m_arrPlayers[nPlayerIdx].nInstanceID = nInstanceID;
-					m_arrPlayers[nPlayerIdx].bIsNetworkPlayer = false;
-					m_arrPlayers[nPlayerIdx].fVerseReadyTimer = K_PSS_WAIT_BEFORE_VERSE_SEC - EPS;
+					m_arrPlayers[player_idx].nInstanceID = nInstanceID;
+					m_arrPlayers[player_idx].bIsNetworkPlayer = false;
+					m_arrPlayers[player_idx].fVerseReadyTimer = K_PSS_WAIT_BEFORE_VERSE_SEC - EPS;
 					
-					InitUpgradeBars(&m_arrPlayers[nPlayerIdx]);
+					InitUpgradeBars(&m_arrPlayers[player_idx]);
 					//update lock flag on selections
-					SetSelectionPrices(&m_arrPlayers[nPlayerIdx]);
+					SetSelectionPrices(&m_arrPlayers[player_idx]);
 					//reset command
 					eCommand = K_PSS_COMMAND_NONE;
 
@@ -637,16 +637,16 @@ void CPlayerSelScr::Update(float dTime)
 								//make sure we can't start the game if we didn't buy the selected weapons
 								int wpnPrice = 0;
 								UINT32 wpnNameHash = 0;
-								for (int kk = 0; kk < PSS_ITEMCATS_COUNT; kk++)
+								for (int ll = 0; ll < PSS_ITEMCATS_COUNT; ll++)
 								{
-									sPSSItemData* pItem = &arrItemsByClass[playersel->eType].matOptionsByItemType[kk].m_pData[playersel->nSelection[kk]];
+									sPSSItemData* pItem = &arrItemsByClass[playersel->eType].matOptionsByItemType[ll].m_pData[playersel->nSelection[ll]];
 									wpnNameHash = pItem->shName.getHash();
 									wpnPrice = UTGetShop().GetItemPrice(wpnNameHash);
 									if (wpnPrice > 0)
 									{
 										//FAILSAFE: should never get here (you can only select already unlocked items). Just select the first one from the list.
-										LOG(L"[WARNING] Locked weapon was selected! nSelection[%d]=%d price:%d", kk, playersel->nSelection[kk], wpnPrice);
-										playersel->nSelection[kk] = 0;
+										LOG(L"[WARNING] Locked weapon was selected! nSelection[%d]=%d price:%d", ll, playersel->nSelection[ll], wpnPrice);
+										playersel->nSelection[ll] = 0;
 										SetSelectionPrices(&m_arrPlayers[nPlayerIdx]);
 										//when networked play send all commands
 										if (UTApp().IsGameNetworked())
@@ -1315,10 +1315,10 @@ HRESULT CPlayerSelScr::LoadItems()
 		{
 			LOG(L"[WARNING] Class %s with wrong team points! Moving points from another class through the team bars isn't allowed anymore!", EPSSPlayerClassNames[kk].text);
 			//reset actual points
-			for (int kk = K_MEMID_UPGRADE_BAR_POINTS_START; kk <= K_MEMID_UPGRADE_BAR_POINTS_END; kk++)
-				g_userData[kk] = 0;
-			for (int kk = K_MEMID_POINTS_SPENT_PER_CLASS_START; kk <= K_MEMID_POINTS_SPENT_PER_CLASS_END; kk++)
-				g_userData[kk] = 0;
+			for (int ll = K_MEMID_UPGRADE_BAR_POINTS_START; ll <= K_MEMID_UPGRADE_BAR_POINTS_END; ll++)
+				g_userData[ll] = 0;
+			for (int ll = K_MEMID_POINTS_SPENT_PER_CLASS_START; ll <= K_MEMID_POINTS_SPENT_PER_CLASS_END; ll++)
+				g_userData[ll] = 0;
 		}
 	}
 
@@ -1627,11 +1627,11 @@ void CPlayerSelScr::PaintPlayerSelectionWindow(int nPlayerOrdinal, D3DXVECTOR2 p
 		///--- paints controller command for selection ---
 		if ((!playersel->bSelected) && (!playersel->bIsNetworkPlayer) && (playersel->nCursorMoreReal < 0) && (playersel->nCursorPosReal < K_PSS_CURPOS_READY) && (playersel->fTimeSinceCursorMoved > K_PSS_HINT_WAIT_TIMER))
 		{
-			CController* ctrlr = __Controllers().GetControllerByInstanceID(playersel->nInstanceID);
+			CController* ctrolr = __Controllers().GetControllerByInstanceID(playersel->nInstanceID);
 			EControllerCommand eCmd = K_CM_COMMAND_FIRE1;
-			if (ctrlr->eType == K_CM_CT_JOYSTICK_SDL)
+			if (ctrolr->eType == K_CM_CT_JOYSTICK_SDL)
 				eCmd = K_CM_COMMAND_JUMP;
-			App_PaintControllerKey(ctrlr, eCmd, D3DXVECTOR2(rcCursor.Right() - 1.0f, rcCursor.Bottom() - 5.0f), ((g_timers.GetTimerValue(600) < 0.3f) ? true : false), -1);
+			App_PaintControllerKey(ctrolr, eCmd, D3DXVECTOR2(rcCursor.Right() - 1.0f, rcCursor.Bottom() - 5.0f), ((g_timers.GetTimerValue(600) < 0.3f) ? true : false), -1);
 		}
 	}
 
