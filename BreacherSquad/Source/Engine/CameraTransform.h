@@ -23,8 +23,6 @@ enum ECamMoveStatus {
 class CCameraTransform
 {
 private:
-	static CCameraTransform*	g_currentCamera; //camera curenta
-private:
 	RectXYWH					m_Viewport;			// viewport in screen coords (rectangle on screen where we show the contents)
 	float						fLocalTimeLine;
 	Mat							m_matView;
@@ -61,12 +59,6 @@ private:
 public:
 	CCameraTransform();
 
-	///--- UTILS ---
-	//functii care seteaza transformarea curenta si iti spune ultima transformare setata
-	static void SetActiveCameraIdentity(PDEVICE pDevice);
-	static void SetActiveCamera(PDEVICE pDevice, CCameraTransform *camera);
-	static CCameraTransform* GetActiveCamera();
-	
 	///--- SET ---
 
     //worldAABB - dreptunghiul in care se incadreaza lumea pe care o priveste camera

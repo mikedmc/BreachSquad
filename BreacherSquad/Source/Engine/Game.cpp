@@ -581,20 +581,17 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			 //debug stuff
 #if defined(_DEBUG) || defined(DEBUG)
 				//game screen space
-			CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_camRTScreen );
+//			CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_camRTScreen );
 
 			if ( DXUTIsKeyDown( '9' ) )
 			{
 				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
-				if ( pRT != null )
+				if ( pRT != nullptr )
 				{
-					pSpr->Flush();
-					CCameraTransform::SetActiveCameraIdentity( pDevice );
-					RECT src;
-					SetRect( &src, 0, 0, pRT->nWidth, pRT->nHeight );
-					pSpr->SetTransform( &g_matIdentity );
-					pSpr->Draw( pRT->m_pRTTexture, &src, nullptr, &D3DXVECTOR3( UTApp().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
-					pSpr->Flush();
+					RectLTRB src( 1.0f, 1.0f, (float)( pRT->nWidth ), (float)( pRT->nHeight ) );
+					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
+					pDevice->SetTexture( 0, pRT->m_pRTTexture );
+					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
 			}
 			if ( DXUTIsKeyDown( '8' ) )
@@ -602,13 +599,10 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
 				if ( pRT != null )
 				{
-					pSpr->Flush();
-					CCameraTransform::SetActiveCameraIdentity( pDevice );
-					RECT src;
-					SetRect( &src, 0, 0, pRT->nWidth, pRT->nHeight );
-					pSpr->SetTransform( &g_matIdentity );
-					pSpr->Draw( pRT->m_pRTTexture, &src, nullptr, &D3DXVECTOR3( UTApp().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
-					pSpr->Flush();
+					RectLTRB src( 1.0f, 1.0f, (float)( pRT->nWidth ), (float)( pRT->nHeight ) );
+					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
+					pDevice->SetTexture( 0, pRT->m_pRTTexture );
+					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
 			}
 			if ( DXUTIsKeyDown( '0' ) )
@@ -616,13 +610,10 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );
 				if ( pRT != null )
 				{
-					pSpr->Flush();
-					CCameraTransform::SetActiveCameraIdentity( pDevice );
-					RECT src;
-					SetRect( &src, 0, 0, pRT->nWidth, pRT->nHeight );
-					pSpr->SetTransform( &g_matIdentity );
-					pSpr->Draw( pRT->m_pRTTexture, &src, nullptr, &D3DXVECTOR3( UTApp().g_rectRender.x, 0.0f, 0.0f ), 0xffffffff );
-					pSpr->Flush();
+					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth) , (float)(pRT->nHeight)  );
+					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
+					pDevice->SetTexture( 0, pRT->m_pRTTexture );
+					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
 			}
 #endif

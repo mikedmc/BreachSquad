@@ -558,7 +558,7 @@ void GameState::PaintTransition( float dTime, float fTimeline, PDEVICE pDevice )
 
 	switch ( nTransitionType )
 	{
-		//tranzitia neagra simpla
+		//simple black transition
 		case TRANSITION_SIMPLE:
 		{
 			//reset transforms
@@ -571,23 +571,19 @@ void GameState::PaintTransition( float dTime, float fTimeline, PDEVICE pDevice )
 			{
 				case 0:
 				{
-					//deseneaza poly negru peste
-					pDevice->SetTexture( 0, NULL ); //textura aiurea
-					//fac ca jumatate din timpul tranzitiei sa stea pe full opac ca sa nu se vada absolut nimic cand schimba starea
+					pDevice->SetTexture( 0, NULL ); 
+					// keep black for half the transition
 					float fAlpha = LIMIT( 1.5f * fTransitionPercent, 0.0f, 1.0f );
 					UT3D::DrawRectUP_TL1T( pDevice, rect, RectLTRB( 0.0f, 0.0f, 1.0f, 1.0f ), DW_COLOR_XXXA( fAlpha ) );
-					//write "loading"
+					//#TODO: write "loading"
 					if ( ( __GUI().m_sprCol.IsLoaded() ) && ( fAlpha >= 0.95f ) )
 					{
-						CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_cam360hScreen );
-						RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
-						CSprite::paintFrame( &__GUI().m_sprCol, scrrect.Right() - 3, scrrect.Bottom() - 3, ANM_CONTROLS_SPR_LOADING_ICONS, 0, 0x88ffffff );
 					}
 				}
 				break;
 				case 1:
 				{
-					//deseneaza poly negru peste
+					// black rect
 					pDevice->SetTexture( 0, NULL );
 					float fAlpha = LIMIT( ( 1.5f - 1.5f * fTransitionPercent ), 0.0f, 1.0f );
 					UT3D::DrawRectUP_TL1T( pDevice, rect, RectLTRB( 0.0f, 0.0f, 1.0f, 1.0f ), DW_COLOR_XXXA( fAlpha ) );

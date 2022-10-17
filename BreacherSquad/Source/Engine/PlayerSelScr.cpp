@@ -1069,7 +1069,7 @@ void CPlayerSelScr::Update(float dTime)
 void CPlayerSelScr::Paint(ID3DXSprite* pSprite)
 {
 	//setam ecranul standard de 240h inaltime
-	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam360hScreen);
+//	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(m_pDevice, &g_matIdentity);
 
 	RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();

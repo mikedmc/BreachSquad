@@ -267,7 +267,7 @@ void CLevelEditor::Paint(ID3DXSprite* pSpr)
 		return;
 	_ASSERT(m_pDevice != nullptr);
 
-	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_camScreen);
+	//CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_camScreen);
 
 	switch (eTool)
 	{

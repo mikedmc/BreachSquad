@@ -1,36 +1,5 @@
 #include "dxstdafx.h"
 
-//--- static members ---
-CCameraTransform* CCameraTransform::g_currentCamera = NULL;
-
-void CCameraTransform::SetActiveCamera(PDEVICE pDevice, CCameraTransform *camera)
-{
-	if ((pDevice == NULL) || (camera == NULL))
-	{
-		ErrorBox(K_ERR_WARNING, L"SetViewCamera: Device or Camera is NULL!");
-		return;
-	}
-
-	pDevice->SetTransform( D3DTS_VIEW, &(camera->GetViewTransform()) );
-	g_currentCamera = camera;
-}
-
-CCameraTransform* CCameraTransform::GetActiveCamera()
-{
-	return g_currentCamera;
-}
-
-void CCameraTransform::SetActiveCameraIdentity(PDEVICE pDevice)
-{
-	if (pDevice == NULL)
-	{
-		ErrorBox(K_ERR_WARNING, L"SetViewIdentity: Device or Camera is NULL!");
-		return;
-	}
-
-	pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
-	g_currentCamera = NULL;
-}
 
 /*----------------------------------*\
 *  Constructor/Destructor

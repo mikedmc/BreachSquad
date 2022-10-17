@@ -42,7 +42,7 @@ HRESULT CTTFont::DrawTextLine(const WCHAR* strMsg, int posX, int posY, UINT32 Fl
 	}
 
 	//set rectangle
-	int scrW = CCameraTransform::GetActiveCamera()->GetViewport().w;
+	int scrW = 640;// CCameraTransform::GetActiveCamera()->GetViewport().w;
 
 	HRESULT hr;
 	RECT rc;

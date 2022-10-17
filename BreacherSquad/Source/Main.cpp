@@ -1769,7 +1769,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		if ((UTApp().IsGameNetworked()) && ( GameState::state == GAME_STATE_GAME) && (__Sim().m_levelState == K_LVL_STATE_PLAYING))
 		{
 			g_pGameSprite->Flush();
-			CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
 			RectXYWH camrectchat = UTApp().g_camScreen.GetCamWorldAABB();
 
 			Vec2 vIgmIntSz = UTApp().g_cam360hScreen.WorldToScreen(Vec2(0.0f, 56.0f));
@@ -1791,7 +1790,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 #endif
 
 		//real screen space
-		CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
 		RectXYWH camrect = UTApp().g_camScreen.GetCamWorldAABB();
 
 		//--- TRANSITIONS ---		
@@ -1822,7 +1820,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		{
 			////reset transform
 			//pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-			//CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_camScreen);
 			//find a pos so doesn't overlap with the igm interface
 			Vec2 vStartPos = UTApp().g_cam360hScreen.WorldToScreen(Vec2(0.0f, 25.0f));
 			int posY = vStartPos.y;
@@ -1892,18 +1889,18 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 					__Shaders().ReloadAllShaders();
 				}
 
-				ImGui::SliderFloat("gauss", &ct_fGaussLen, 0.0, 5.0);
-				ImGui::SliderFloat("final multiplier", &ct_fLightMul, 0.0, 10.0);
-				ImGui::SliderFloat("dodge", &ct_fColorDodge, 0.0, 1.0);
+				ImGui::SliderFloat("gauss", &ct_fGaussLen, 0.0f, 5.0f);
+				ImGui::SliderFloat("final multiplier", &ct_fLightMul, 0.0f, 10.0f);
+				ImGui::SliderFloat("dodge", &ct_fColorDodge, 0.0f, 1.0f);
 
 				ImGui::Separator();
 
-				ImGui::SliderFloat( "water fog", &ct_waterFog, 0.0, 10.0 );
-				ImGui::SliderFloat( "water scale", &ct_waterScale, 0.001, 0.03 );
-				ImGui::SliderFloat( "water diffract", &ct_waterDiffract, 0.0, 0.05 );
-				ImGui::SliderFloat( "water height", &ct_waterHeight, 0.0, 1.0 );
-				ImGui::SliderFloat( "water color add", &ct_waterColorAdd, 0.0, 1.0 );
-				ImGui::SliderFloat( "water specular", &ct_waterSpecular, 0.0, 1.0 );
+				ImGui::SliderFloat( "water fog", &ct_waterFog, 0.0f, 10.0f );
+				ImGui::SliderFloat( "water scale", &ct_waterScale, 0.001f, 0.03f );
+				ImGui::SliderFloat( "water diffract", &ct_waterDiffract, 0.0f, 0.05f );
+				ImGui::SliderFloat( "water height", &ct_waterHeight, 0.0f, 1.0f );
+				ImGui::SliderFloat( "water color add", &ct_waterColorAdd, 0.0f, 1.0f );
+				ImGui::SliderFloat( "water specular", &ct_waterSpecular, 0.0f, 1.0f );
 				ImGui::Separator();
 
 				///--- show watch debug values from the debug list ---

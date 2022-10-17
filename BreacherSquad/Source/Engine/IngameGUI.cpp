@@ -22,7 +22,7 @@ void CIngameGUI::Paint(PDEVICE pDevice)
 	if (m_pLevel == nullptr || m_pCamera == nullptr)
 		return;
 
-	CCameraTransform::SetActiveCamera(pDevice, m_pCamera);
+//	CCameraTransform::SetActiveCamera(pDevice, m_pCamera);
 	//#TODO: set UTPainter matrices - needs special method in UTPainter
 	///--- player 1
 	CActor* pl1 = m_pLevel->pPlayerActor[0];

@@ -1619,7 +1619,7 @@ void CMainMenu::Update(float dTime)
 void CMainMenu::Paint()
 {
 	//setam ecranul standard de 240h inaltime
-	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam360hScreen);
+//	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(m_pDevice, &g_matIdentity);
 
 	RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
