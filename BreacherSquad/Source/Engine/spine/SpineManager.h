@@ -3,6 +3,7 @@
 #include "SpineTexLoader.h"
 #include "SpineDefines.h"
 #include "SpineEventsListener.h"
+#include "BufferedSpinePainter.h"
 
 #define K_SM_DEFAULT_MIX_DURATION 0.2f
 

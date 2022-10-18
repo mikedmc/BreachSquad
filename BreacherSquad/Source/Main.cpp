@@ -87,14 +87,15 @@ CChatWnd					g_ChatWnd;							// Ingame chat window for networked matches
 ///--- Lockstep networking class ---
 CNetLock					g_netlock;
 ///-- spine manager --
-//CSpineManager				g_spineMgr;
+#ifdef K_ENABLE_SPINE
+CSpineManager				g_spineMgr;
 // Spine extension used for allocation and deallocations (singleton)
-/*
+
 spine::SpineExtension *spine::getDefaultExtension() {
 	static spine::DefaultSpineExtension g_spineExtension;
 	return &g_spineExtension;
 }
-*/
+#endif 
 
 CFreeTypeFont				g_font1;
 
@@ -567,7 +568,7 @@ OPRESULT AfterMount()
 	StringCchPrintf(shpath, MAX_PATH, L"%s/shaders/vs_sprites2d.vso", UTApp().g_wszAppResDir);
 	if (OP_FAILED(__Shaders().AddVShader(shpath, L"VS_SPRITES2D")))
 	{
-		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Could not load SpritesVS!\n%s", shpath);
+		return OP_ERR(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Could not load SpritesVS!\n%s", shpath);
 	}
 
 	GameState::ChangeTo(GAME_STATE_PRELOAD);
@@ -592,8 +593,9 @@ void ShutdownApp()
 #ifdef ENABLE_LEADERBOARDS
 	__Leaderboards().Release();
 #endif
-	//g_spineMgr.Release();
-
+#ifdef K_ENABLE_SPINE
+	g_spineMgr.Release();
+#endif
 }
 
 
@@ -607,7 +609,7 @@ OPRESULT InitSound()
 	//--- init sound system ---
 	if (FAILED(__Audio().Init(DXUTGetHWND(), 2, 44100, 16)))
 	{
-		return OPRESULT( K_OP_OK_WARNING, L"Failed INITSOUND->g_pSoundManager->Init()\nSOUNDS WILL BE DISABLED!\n", K_SEVERITY_WARNING );
+		return OP_ERR( K_OP_OK_WARNING, L"Failed INITSOUND->g_pSoundManager->Init()\nSOUNDS WILL BE DISABLED!\n", K_SEVERITY_WARNING );
 	}
 
 	__Audio().EnablePositionalSounds(Vec2(0.0f, 0.0f), Vec2(UTApp().g_rectRT.w * 0.7f, UTApp().g_rectRT.h * 0.7f));
@@ -789,8 +791,9 @@ HRESULT CALLBACK OnCreateDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_OP_RETHR(__GUI().OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnCreateDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnCreateDevice(pDevice, pBBDesc));
-	//V_RETURN(g_spineMgr.OnCreateDevice(pDevice, pBBDesc));
-
+#ifdef K_ENABLE_SPINE
+	V_RETURN(g_spineMgr.OnCreateDevice(pDevice, pBBDesc));
+#endif
 #ifdef K_CONTROLS_EDITOR
 	V_OP_RETHR(g_ControlsEditor.OnCreateDevice(pDevice, pBBDesc));
 #endif
@@ -858,8 +861,9 @@ HRESULT CALLBACK OnResetDevice(PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc)
 	V_OP_RETHR(__GUI().OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_playerSelScr.OnResetDevice(pDevice, pBBDesc));
 	V_RETURN(g_mainMenu.OnResetDevice(pDevice, pBBDesc));
-	//V_RETURN(g_spineMgr.OnResetDevice(pDevice, pBBDesc));
-
+#ifdef K_ENABLE_SPINE
+	V_RETURN(g_spineMgr.OnResetDevice(pDevice, pBBDesc));
+#endif
 #ifdef K_CONTROLS_EDITOR
 	V_OP_RETHR(g_ControlsEditor.OnResetDevice(pDevice, pBBDesc));
 #endif
@@ -929,8 +933,9 @@ void CALLBACK OnLostDevice()
 	__Particles().OnLostDevice();
 	g_playerSelScr.OnLostDevice();
 	g_mainMenu.OnLostDevice();
-	//g_spineMgr.OnLostDevice();
-
+#ifdef K_ENABLE_SPINE
+	g_spineMgr.OnLostDevice();
+#endif
 	SAFE_RELEASE(g_pGameSprite);
 
 #ifdef K_CONTROLS_EDITOR
@@ -962,8 +967,9 @@ void CALLBACK OnDestroyDevice()
 	__Particles().OnDestroyDevice();
 	g_playerSelScr.OnDestroyDevice();
 	g_mainMenu.OnDestroyDevice();
-	//g_spineMgr.OnDestroyDevice();
-
+#ifdef K_ENABLE_SPINE
+	g_spineMgr.OnDestroyDevice();
+#endif
 #ifdef K_CONTROLS_EDITOR
 	g_ControlsEditor.OnDestroyDevice();
 #endif

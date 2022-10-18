@@ -37,8 +37,11 @@
 //#define K_NET_ENGINE_DBG_VERBOSE
 // enables debug output to check net coop desyncs
 //#define K_SYNC_ENGINE_DBG_VERBOSE
+
 // Enables IMGUI api
 #define K_ENABLE_IMGUI
+// Enables Spine libs (last updated 1 aug 2022)
+//#define K_ENABLE_SPINE
 
 //important only in DEBUG mode:
 #if defined(DEBUG) | defined(_DEBUG)						  
@@ -88,25 +91,25 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <tchar.h>
-#include <assert.h>
+#include <cassert>
 #include <cwchar>
 #include <mmsystem.h>
 #include <commctrl.h> // for InitCommonControls() 7
 #include <shellapi.h> // for ExtractIcon()
 #include <new.h>      // for placement new
-#include <math.h>
+#include <cmath>
 #include <memory>
-#include <limits.h>      
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include <climits>      
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 
-#include <locale.h>
+#include <clocale>
 
 #include <lmcons.h>
 
 #pragma warning(disable: 4995)
-#include <stdio.h>
+#include <cstdio>
 #include <shlobj.h>
 //#include "ConfigDatabase.h"
 //#include "ConfigManager.h"
@@ -114,8 +117,7 @@
 
 //#DMC: set float rounding mode for framelock online play
 #ifdef WIN32
-#include <float.h>
-#include <math.h>
+#include <cfloat>
 
 // win32: we set /fp:strict, disable /Oi (Generate Intrinsic Functions) and set /arch:IA32 from the project settings
 
@@ -217,10 +219,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #define SAFE_DELETE_STDVEC(p) { for(auto xkx : p) { SAFE_DELETE(xkx); } p.clear(); p.shrink_to_fit(); }
 #endif
 
-#ifndef SAFE_DELETE_STDVEC
-#define SAFE_DELETE_STDVEC(p) { for(int xkx = 0; xkx < p.size(); xkx++) { SAFE_DELETE(p[xkx]); } p.clear(); }
-#endif
-
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
 #define null NULL
@@ -236,7 +234,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
   void operator=(const TypeName&)
 
 // remove "insecure" warnings
-#define _CRT_SECURE_NO_DEPRECATE 
+//#define _CRT_SECURE_NO_DEPRECATE 
 //#define _CRT_SECURE_NO_WARNINGS
 
 //#define _CRT_NONSTDC_NO_DEPRECATE
@@ -340,11 +338,13 @@ enum ETexChannel {
 #define K_MAX_PLAYERS_CNT	2
 
 #ifndef uint64_t
-typedef unsigned long long uint64_t;
+//typedef unsigned long long int64_t;
+using uint64_t = unsigned long long;
 #endif
 
 #ifndef int64_t
-typedef long long int64_t;
+//typedef long long int64_t;
+using int64_t = long long;
 #endif
 
 //--- include system/engine classes:
@@ -468,22 +468,26 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 //main app class
 #include "UTAppClass.h"
 #include "imgui/imguiWrapper.h"
-///--- Spine EsotericSoftware ---
-//undefine min and max macros from windef.h because it conflicts with spine.mathutil
-#undef min
-#undef max
 
-#include "spine/spine.h"
-using namespace spine;
-// Initialize default stuff so it can allocate and deallocate (uses malloc, free, FILE)
-// Otherwise you can derrive from either SpineExtension or DefaultSpineExtension and override the _malloc, _calloc, _realloc, _free and _readFile methods.
-#include "spine/Extension.h"
+#ifdef K_ENABLE_SPINE
+	///--- Spine EsotericSoftware ---
+	//undefine min and max macros from windef.h because it conflicts with spine.mathutil
+	#undef min
+	#undef max
 
-#include "spine/SpineManager.h"
-#if defined(_DEBUG) || defined(DEBUG)
-#include "spine/Debug.h"
+	#include "spine/spine.h"
+	using namespace spine;
+	// Initialize default stuff so it can allocate and deallocate (uses malloc, free, FILE)
+	// Otherwise you can derrive from either SpineExtension or DefaultSpineExtension and override the _malloc, _calloc, _realloc, _free and _readFile methods.
+	#include "spine/Extension.h"
+
+	#include "spine/SpineManager.h"
+	#if defined(_DEBUG) || defined(DEBUG)
+		#include "spine/Debug.h"
+	#endif
 #endif
-//define min and max macros again
+
+//define min and max macros 
 #ifndef max
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
@@ -611,7 +615,10 @@ extern CStringHash			g_startupParam;
 //particles
 extern CTimersArray			g_timers;
 extern CPlayerSelScr		g_playerSelScr;
-//extern CSpineManager		g_spineMgr;
+
+#ifdef K_ENABLE_SPINE
+extern CSpineManager		g_spineMgr;
+#endif
 
 extern bool     g_bShowHelp;
 extern bool		g_bLevelNeedsUpdate;

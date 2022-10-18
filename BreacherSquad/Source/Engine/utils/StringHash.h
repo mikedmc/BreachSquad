@@ -58,7 +58,7 @@ public:
 
 	void Init(WCHAR const * const strText)
 	{
-		if (strText == null)
+		if (strText == nullptr)
 		{
 			text[0] = 0;
 			textHash = 0;
@@ -79,7 +79,7 @@ public:
 
 	void Init(CHAR const * const strText)
 	{
-		if (strText == null)
+		if (strText == nullptr)
 		{
 			text[0] = 0;
 			textHash = 0;

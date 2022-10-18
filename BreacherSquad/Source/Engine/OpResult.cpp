@@ -16,3 +16,14 @@ OPRESULT OP_ERR( eOpResult eCode, eOpSeverity eSeverity, WCHAR* szFormat, ... )
 	opret.ShowAsMessageBox();
 	return opret;
 }
+
+OPRESULT OP_ERR( eOpResult eCode, const WCHAR * strMessage, eOpSeverity eSeverity /*= K_SEVERITY_NONE */ )
+{
+	OPRESULT opret;
+	opret.code = eCode;
+	opret.severity = eSeverity;
+	wcscpy_s( opret.message, strMessage );
+
+	opret.ShowAsMessageBox();
+	return opret;
+}

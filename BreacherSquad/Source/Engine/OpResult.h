@@ -147,3 +147,4 @@ OPRESULT(HRESULT hr, eOpSeverity eSeverity = K_SEVERITY_FORGET)
 
 // Factory for error codes
 OPRESULT OP_ERR( eOpResult eCode, eOpSeverity eSeverity, WCHAR* szFormat, ... );
+OPRESULT OP_ERR( eOpResult eCode, const WCHAR * strMessage, eOpSeverity eSeverity = K_SEVERITY_NONE );
