@@ -31,7 +31,7 @@ private:
 	PDEVICE				m_pDevice;
 	CLevel*				m_pLevel;
 
-	CSpriteLib	m_sprCol;				// Sprite collection to hold editor only graphics
+	CSpriteLib			m_sprCol;				// Sprite collection to hold editor only graphics
 
 	eLvlEdTool			eTool;					// Current tool
 	eLvlEdModifier		eMod;					// Current modifier
@@ -49,18 +49,16 @@ public:
 	CLevelEditor();
 	~CLevelEditor();
 
-	// Loads everything it needs and sets pointer to sprites painter
-	OPRESULT			Init();
 	// Deallocates everything
 	void				Release();
 
 	// Launch it on a level to start editing	
-	void				Launch( CLevel* level );
+	OPRESULT			Launch( CLevel* level );
 	// Closes the level editor
 	void				Close();
 
 	void				Update( float dTime );
-	void				Paint( ID3DXSprite* pSpr );
+	void				Paint();
 
 	inline bool			IsLaunched() {
 		return ( m_pLevel != nullptr );

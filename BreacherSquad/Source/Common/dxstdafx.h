@@ -141,6 +141,8 @@
 #if defined(DEBUG) | defined(_DEBUG)
 // include this line to enable the controls editor
 #define K_CONTROLS_EDITOR
+// include this line to enable the game editor
+#define K_INGAME_EDITOR
 #endif
 
 #define MAX_PATH_STD	MAX_PATH

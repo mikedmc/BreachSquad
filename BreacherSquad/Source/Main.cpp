@@ -43,7 +43,7 @@ bool						g_bForceOneUpdatePerFrame = false;	// flag used to force only one upda
 Vec2						g_vecGravityOld;					//gravity
 Vec3						g_vecGravity;						//gravity
 
-ID3DXSprite*				g_pGameSprite = nullptr;				//Main Sprite class 
+ID3DXSprite*				g_pGameSprite = nullptr;			//Main Sprite class 
 Mat							g_matIdentity;						//identity matrix
 Mat							g_matWorld;							//world matrix
 
@@ -71,7 +71,10 @@ CTimersArray				g_timers(3000, 10);					//Timers array
 ///--- Game classes ---
 CPlayerSelScr				g_playerSelScr;						// Player selection screen
 CMainMenu					g_mainMenu;							// Main menu class
+
+#ifdef K_INGAME_EDITOR
 CLevelEditor				g_editor;							// Level editor - defined global, initialized on loading, destroyed on app shutdown
+#endif
 
 #ifdef K_CONTROLS_EDITOR
 CControlsEditor				g_ControlsEditor;					// Controls editor for debug/develop mode (F2 to show)
@@ -997,6 +1000,11 @@ void UpdateGame(PDEVICE pDevice, float fElapsedTime, float fTime, bool bNetCoop)
 	// update main game engine
 	__Game().Update( fElapsedTime, bSyncUpdate, g_nUpdateFrame );
 
+#ifdef K_INGAME_EDITOR
+	// update the editor after updating the game
+	g_editor.Update( fElapsedTime );
+#endif
+
 	///--- ANALYTICS ---
 	__Analytics().Update();
 
@@ -1763,6 +1771,10 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 		}
 #endif
 
+#ifdef K_INGAME_EDITOR
+		///--- level editor ---
+		g_editor.Paint();
+#endif
 
 		///--- chat window ---
 #ifdef ENABLE_CHAT_WINDOW
@@ -1925,6 +1937,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			}
 
 			// editor block
+#ifdef K_INGAME_EDITOR
 			{
 				ImGui::Begin("Commands", null, ImGuiWindowFlags_NoNavInputs);
 				if (!g_editor.IsLaunched())
@@ -1947,7 +1960,7 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 				ImGui::End();
 			}
 		}
-	
+#endif	
 
 		// IMGUI tutorial window
 		//static bool show_demo_window = false;
@@ -2165,7 +2178,10 @@ void CALLBACK KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
 		g_ControlsEditor.ReceiveKeys(nChar);
 #endif
 
+#ifdef K_INGAME_EDITOR
 		g_editor.ReceiveKeys(nChar);
+#endif
+
 		///--- send keys to controls manager ---
 		__GUI().ReceiveInput(K_CCTRLMGR_INPUT_KEY, (UINT32)nChar);
 																				 

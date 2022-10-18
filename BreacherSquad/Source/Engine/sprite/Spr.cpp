@@ -447,6 +447,12 @@ void UTSprite::PaintFrameClipped( CSpriteLib *sprCol, Vec2 vPos, int animID, int
 	}
 }
 
+void UTSprite::PaintFrameClipped( CSpriteLib *sprCol, Vec2 vPos, int animID, int frameIdx, RectXYWH& clipr, DWORD ncolor /*= 0xffffffff */ )
+{
+	RectLTRB clip(clipr);
+	PaintFrameClipped( sprCol, vPos, animID, frameIdx, clip, ncolor );
+}
+
 void UTSprite::PaintFModuleClipped( CSpriteLib *sprCol, Vec2 vPos, int animID, int frameIdx, int moduleIdx, RectLTRB& clip, DWORD ncolor /*= 0xffffffff*/ )
 {
 	int aframeIdx = sprCol->Animations[ animID ]->aframesIdx[ frameIdx ];

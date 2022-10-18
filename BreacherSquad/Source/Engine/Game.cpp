@@ -404,9 +404,6 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 				g_bLevelNeedsUpdate = false;
 			}
 			 */
-			
-			///--- update editor after updating the game ---
-			g_editor.Update( fElapsedTime );
 		}
 		break;
 
@@ -548,7 +545,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			gLevel.Paint();
 
 			//final flush
-			pSpr->Flush();
+			//pSpr->Flush();
 
 			/*
 			pSpr->Flush();
@@ -567,11 +564,8 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			*/
 
 
-			///--- level editor ---
-			g_editor.Paint( pSpr );
-
 			///--- string dummies ---
-			pSpr->SetTransform( &g_matIdentity );
+			//pSpr->SetTransform( &g_matIdentity );
 			//paint string dummies
 			/*
 			CCameraTransform::SetActiveCamera(pDevice, &UTGetAppClass().g_cam240hScreen);

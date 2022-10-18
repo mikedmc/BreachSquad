@@ -165,9 +165,6 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 		{
 			GameState::substate++;
 
-			// load editor sprites
-			g_editor.Init();
-
 			WCHAR xmlpath[MAX_PATH];
 			FileManager::GetMediaPath(L"media/scripts.xml", xmlpath);
 			__Scripts().AddScripts(xmlpath);
@@ -370,7 +367,6 @@ void CApplication::App_UpdateState_Developer(LPDIRECT3DDEVICE9 pDevice, double f
 
 void CApplication::App_PaintState_Developer(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline)
 {
-	//setam ecranul standard de 240h inaltime
 	//CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(pDevice, &g_matIdentity);
 

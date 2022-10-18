@@ -3,7 +3,7 @@
 //#TODO: Cand face wrap, daca e un cuvand mai lung decat spatiul acordat, se blocheaza in paint in while
 
 ///--- FORMAT ---
-// este acelasi format ca si la sprites dar are o linie in plus, cea cu datele despre font
+// same format as in sprites but it has an extra line with font info
 //<?xml version="1.0"?>
 //<SpriteCollection Version="2.0">
 ///<FontData ID="FONTID_MED" LetterSpacing="-1" RowSpacing="4" RowHeight="18" SpaceSize="6" />
