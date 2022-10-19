@@ -31,3 +31,13 @@ OPRESULT UT3DClear(PDEVICE pDevice, DWORD Count, CONST D3DRECT* pRects, DWORD Fl
 	return K_OP_OK;
 }
 
+OPRESULT UT3DSetTexture( PDEVICE pDevice, DWORD Stage, PTEXTUREBASE pTexture )
+{
+	RET_HRESULT_TO_OP( pDevice->SetTexture( Stage, pTexture ) );
+}
+
+void UT3DSetTransform( PDEVICE pDevice, TRANSFORM_STATE_TYPE State, Mat* Transform )
+{
+	pDevice->SetTransform( State, Transform );
+}
+

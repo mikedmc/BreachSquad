@@ -1820,9 +1820,9 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 			g_pGameSprite->Flush();
 			//draw black poly over
 			DWORD color = D3DCOLOR_COLORVALUE(0.0f, 0.0f, 0.0f, 0.6f);
-			pDevice->SetTexture(0, nullptr); 
-			pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
-			pDevice->SetTransform(D3DTS_VIEW, &g_matIdentity);
+			UT3DSetTexture( pDevice, 0, nullptr );
+			UT3DSetTransform(pDevice, D3DTS_WORLD, &g_matIdentity);
+			UT3DSetTransform(pDevice, D3DTS_VIEW, &g_matIdentity);
 
 			RectLTRB rct( UTApp().g_rectRender );
 			UT3D::DrawRectUP_TL1T(pDevice, rct, RectLTRB(0.0f, 0.0f, 1.0f, 1.0f), color);
@@ -1836,8 +1836,6 @@ void CALLBACK OnFrameRender(PDEVICE pDevice, double fTime, float fElapsedTime)
 
 		if (g_bShowDebugStats)
 		{
-			////reset transform
-			//pDevice->SetTransform(D3DTS_WORLD, &g_matIdentity);
 			//find a pos so doesn't overlap with the igm interface
 			Vec2 vStartPos = UTApp().g_cam360hScreen.WorldToScreen(Vec2(0.0f, 25.0f));
 			int posY = vStartPos.y;

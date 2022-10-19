@@ -22,6 +22,10 @@
 #ifndef V_OP_RET_VOID
 	#define V_OP_RET_VOID(x)           { OPRESULT opr = (x); if (OP_FAILED(opr)) { return; } }
 #endif
+#ifndef RET_HRESULT_TO_OP
+#define RET_HRESULT_TO_OP(x)           { HRESULT hr = (x); return ((hr)<0)?K_OP_FAILED:K_OP_OK; }
+#endif
+
 
 
 ///--- generic return values
