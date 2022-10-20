@@ -50,7 +50,7 @@ enum eEditorLayer {
 #define		K_TILEFLAG_WALLENDING_R 128
 // mask that deletes wall endings
 #define		K_TILEFLAG_WALLENDING_MASK 0xC0
-// flag for under the floor tiles
+// flag for under the floor tiles (water usually)
 #define		K_TILEFLAG_UNDER_FLOOR	256
 
 class CTile {						
@@ -80,7 +80,7 @@ public:
 
 	void PostConstructionInit()
 	{
-		// mark all floor tiles with flags
+		// mark all floor tiles with walkable so we can make transitions
 		if ((tileIDs[K_TILE_LAYER_FLOOR] >= 0) || ( tileIDs[K_TILE_LAYER_FLOOR_DECO1] >= 0 ) || ( tileIDs[K_TILE_LAYER_FLOOR_DECO2] >= 0 ))
 			flags |= K_TILEFLAG_WALKABLE;
 		// mark all wall tiles with flags

@@ -954,8 +954,7 @@ void CActor::ProcessExtras()
 	{
 		if ( pClosestTouchable != nullptr && pClosestTouchable->IsPendingKill() )
 		{
-			pClosestTouchable->FreeRef();
-			pClosestTouchable = nullptr;
+			FREE_REF( pClosestTouchable );
 		}
 
 		//#TODO: put interact area in special constant
@@ -994,10 +993,9 @@ void CActor::ProcessExtras()
 		{
 			if ( pClosestTouchable != nullptr )
 			{
-				pClosestTouchable->FreeRef();
+				FREE_REF( pClosestTouchable );
 				ClearActionsList();
 			}
-			pClosestTouchable = nullptr;
 		}
 
 		// check touch/interact

@@ -399,7 +399,7 @@ void CLevel::UpdateDirtyRects()
 					CTile* tlU = area->GetTile( xx, yy - 1 );
 					CTile* tlD = area->GetTile( xx, yy + 1 );
 					///--- set wall flags on non walkable tiles for shadows and other 
-					if ( ( tl->flags & K_TILEFLAG_WALKABLE ) == 0 )
+					if ( FLAG_ANY(tl->flags, K_TILEFLAG_WALKABLE) && FLAG_NONE(tl->flags, K_TILEFLAG_UNDER_FLOOR) )
 					{
 						// clear flags
 						FLAGOP_CLEAR( tl->flags, K_TILEFLAG_HASWALL_MASK | K_TILEFLAG_WALLENDING_MASK );
@@ -425,6 +425,7 @@ void CLevel::UpdateDirtyRects()
 					{
 						///--- process walkable flags ---
 						// corners don't matter for now, we just check immediate neighbours URDL
+						//#TODO: should add corners too
 						bool bFloorBorder = false;
 						if ( ( tlL ) && ( ( tlL->flags & K_TILEFLAG_WALKABLE ) == 0 ) )
 							bFloorBorder = true;

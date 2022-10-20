@@ -47,35 +47,36 @@ public:
 	CArray<CProp*>					m_arrProps;				// list of props in this area
 
 public:
-	CLevelArea(UINT32 nID);
+	CLevelArea( UINT32 nID );
 	~CLevelArea();
 
 	void					Release();
 	// returns null if x,y outside valid area. Coords in world space.
-	CTile*					GetTile(int xTL, int yTL);
+	CTile*					GetTile( int xTL, int yTL );
 	// Updates the level area visibility and blocks visibility
-	bool					UpdateVisibility(RectXYWH camRect);
+	bool					UpdateVisibility( RectXYWH camRect );
 	// Returns true if the mesh for specified layer is visible
 	bool					IsLayerMeshVisible( eAreaLayer layer );
 	// orders building of the buffers
-	OPRESULT				BuildBuffers(PDEVICE pDevice, CSpriteLib* pLightsSprCol);
+	OPRESULT				BuildBuffers( PDEVICE pDevice, CSpriteLib* pLightsSprCol );
 	// intersection of segment with tiles (nullptr if not intersecting)
-	CTile*					SegmentTilesIntersection(Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i *hitTilePosTL);
+	// tileFlagsNonCollide - if tile has one of the flags then it's not colliding
+	CTile*					SegmentTilesIntersection( Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i *hitTilePosTL, DWORD tileFlagsNonCollide = K_TILEFLAG_WALKABLE | K_TILEFLAG_UNDER_FLOOR );
 	// writes the tiles that collide with the player in the ret_arrAABBs array. Returns number of added elements. Starts from 0 overwriting the ret_arrAABBs elements.
-	int						GetTilesCollisionBoxes(RectXYXYi srcBoxTL, CAABB* ret_arrAABBs, int nArrCapacity);
+	int						GetTilesCollisionBoxes( RectXYXYi srcBoxTL, CAABB* ret_arrAABBs, int nArrCapacity );
 	// writes the bboxes of the props that collide with the srcBoxTL. Starts from 0 overwriting the ret_arrAABBs elements.
-	int						GetPropsCollisionBoxes(CAABB srcBox, CAABB* ret_arrAABBs, int nArrCapacity);
+	int						GetPropsCollisionBoxes( CAABB srcBox, CAABB* ret_arrAABBs, int nArrCapacity );
 	// gets all props belonging to area, that collide with a bbox
-	int						GetPropsTouchingBox(CAABB srcBox, CProp* ret_arrProps[], int nArrCapacity, bool bOnlyInteractibles = false);
-	int						GetPropsTouchingBox(CAABB srcBox, CArray<CProp*>& ret_arrProps, bool bOnlyInteractibles = false);
+	int						GetPropsTouchingBox( CAABB srcBox, CProp* ret_arrProps[], int nArrCapacity, bool bOnlyInteractibles = false );
+	int						GetPropsTouchingBox( CAABB srcBox, CArray<CProp*>& ret_arrProps, bool bOnlyInteractibles = false );
 	// gets all the tiles that 
-	int						GetTilesByFlag(RectXYXYi srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity);
+	int						GetTilesByFlag( RectXYXYi srcBoxTL, UINT32 dwFlagAny, CTile* ret_arrTiles, int nArrCapacity );
 	// returns true if srcBox collides with tiles, props or collision boxes
 	bool					IsBoxColliding( CAABB srcBox, bool bCheckProps = true );
 
 public: //--- framework methods ---
-	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr);
-	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr);
-	OPRESULT OnLostDevice(void* pUserContext = nullptr);
-	OPRESULT OnDestroyDevice(void* pUserContext = nullptr);
+	OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr );
+	OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr );
+	OPRESULT OnLostDevice( void* pUserContext = nullptr );
+	OPRESULT OnDestroyDevice( void* pUserContext = nullptr );
 };
