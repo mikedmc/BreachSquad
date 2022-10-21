@@ -29,15 +29,15 @@ const CStringHash EPropClassNames[] =
 class CProp : public IActiveInterface
 {
 private:
-	CActiveAIComponent*	c_AI;					// AI component for prop
-
+	CActiveAIComponent*		c_AI;					// AI component for prop
+	CLevel&					level;					// ref to level
 public:
-	CSpr				sprite;
-	SprFrameId			fid_ini;				// Initial animation and frame id
-	DWORD				flags;
-	CStringHash			shClass;				// class of prop kept as string for max flexibility
+	CSpr					sprite;
+	SprFrameId				fid_ini;				// Initial animation and frame id
+	DWORD					flags;
+	CStringHash				shClass;				// class of prop kept as string for max flexibility
 
-	CProp( CActiveAIComponent* pAIcomp );
+	CProp( CLevel& refLevel, CActiveAIComponent* pAIcomp );
 	~CProp();
 
 	const EActiveInterfaceType GetClassType() const override {
@@ -54,5 +54,5 @@ public:
 	// sets internal flags reading from the AFrame flags (set in sprite editor)
 	void				InitializeFromAFrameFlags( UINT32 AFrameFlags );
 	// Updates everything
-	void				Update( float dTime, CLevel& level );
+	void				Update( float dTime );
 };

@@ -69,20 +69,23 @@ OPRESULT CLevelEditor::Launch( CLevel* level )
 	eTool = K_LED_TILE;
 	eMod = K_LEM_NONE;
 
+	bLaunched = true;
 	return K_OP_OK;
 }
 
 
 void CLevelEditor::Close()
 {
-	m_sprCol.Release();
+	bLaunched = false;
+	pSelected = nullptr;
 	m_pLevel = nullptr;
+	m_sprCol.Release();
 }
 
 
 void CLevelEditor::Update( float dTime )
 {
-	if ( !m_pLevel )
+	if ( !IsLaunched() )
 		return;
 
 	fTimeline += dTime;
@@ -114,6 +117,15 @@ void CLevelEditor::Update( float dTime )
 				}
 			}
 			break;
+			case K_LED_PROP:
+			{
+				if ( pSelected != nullptr )
+				{
+					// move it
+					eMod = K_LEM_MOVE;
+				}
+			}
+			break;
 		}
 	}
 
@@ -137,18 +149,18 @@ void CLevelEditor::Update( float dTime )
 				if ( eMod == K_LEM_MOVE )
 				{
 					if ( !bShiftDown )
-						pSelected->pos.Move( Vec3( v_mouse_delta.x, v_mouse_delta.y, 0.0f ) );
+						pSelected->Move( Vec3( v_mouse_delta.x, v_mouse_delta.y, 0.0f ) );
 					else
-						pSelected->pos.Move( Vec3( 0.0f, 0.0f, -v_mouse_delta.y ) );
+						pSelected->Move( Vec3( 0.0f, 0.0f, -v_mouse_delta.y ) );
 				}
 				break;
 			case K_LED_PROP:
 				if ( eMod == K_LEM_MOVE )
 				{
 					if ( !bShiftDown )
-						pSelected->pos.Move( Vec3( v_mouse_delta.x, v_mouse_delta.y, 0.0f ) );
+						pSelected->Move( Vec3( v_mouse_delta.x, v_mouse_delta.y, 0.0f ) );
 					else
-						pSelected->pos.Move( Vec3( 0.0f, 0.0f, -v_mouse_delta.y ) );
+						pSelected->Move( Vec3( 0.0f, 0.0f, -v_mouse_delta.y ) );
 				}
 				break;
 			case K_LED_ACTOR:
@@ -256,6 +268,7 @@ OPRESULT CLevelEditor::SaveLevel( WCHAR* strPath )
 
 void CLevelEditor::SetTool( eLvlEdTool nTool )
 {
+	pSelected = nullptr;
 	eTool = nTool;
 	eMod = K_LEM_NONE;
 }
@@ -315,7 +328,7 @@ void CLevelEditor::Paint()
 				// paint elevation
 				if ( pp->pos.xyz.z != 0.0f )
 				{
-					//DrawHRuler(vposprj, Z_TO_H(pp->vPos.z), 0xffff2222);
+					DrawVRuler(vposprj, pp->pos.xyz.z, 0xffff2222);
 				}
 			}
 		}
@@ -328,12 +341,8 @@ void CLevelEditor::Paint()
 
 void CLevelEditor::IMGUI_ShowInterfaces()
 {
-	// get type of selected element
-	EActiveInterfaceType selType = K_LVL_IAI_TYPE_UNKNOWN;
-	if ( pSelected )
-	{
-		selType = (EActiveInterfaceType)pSelected->GetClassType();
-	}
+	if ( !IsLaunched() )
+		return;
 
 	{
 		//ImGuiViewport * vp = ImGui::GetWindowViewport();
@@ -367,6 +376,12 @@ void CLevelEditor::IMGUI_ShowInterfaces()
 		ImGui::PopStyleColor( 2 );
 		ImGui::End();
 
+		// get type of selected element
+		EActiveInterfaceType selType = K_LVL_IAI_TYPE_UNKNOWN;
+		if ( pSelected )
+		{
+			selType = (EActiveInterfaceType)pSelected->GetClassType();
+		}
 
 		///--- CONTROLS TEMPLATES
 		ImGui::Begin( "Properties", null, ImGuiWindowFlags_NoNavInputs );
@@ -377,6 +392,7 @@ void CLevelEditor::IMGUI_ShowInterfaces()
 				IMGUI_AddLightProps( static_cast<CLight*>( pSelected ) );
 				break;
 			case K_LVL_IAI_TYPE_PROP:
+				IMGUI_AddPropProps( static_cast<CProp*>( pSelected ) );
 				break;
 			case K_LVL_IAI_TYPE_ACTOR:
 				break;
@@ -436,8 +452,14 @@ IActiveInterface* CLevelEditor::SelectClosest( Vec2 vPoint, float fMaxRadius )
 	return pSel;
 }
 
+
 void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 {
+	if ( light == nullptr )
+	{
+		ImGui::Text( "RMB to select" );
+		return;
+	}
 	// type of light
 	int ltype = (int)light->type;
 	if ( ImGui::Combo( "Type", &ltype, K_LIGHT_TYPES_NAMES_ARR, IM_ARRAYSIZE( K_LIGHT_TYPES_NAMES_ARR ), IM_ARRAYSIZE( K_LIGHT_TYPES_NAMES_ARR ) ) )
@@ -511,7 +533,9 @@ void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 				ImGui::BeginChild( "ChildL", ImVec2( ImGui::GetWindowContentRegionWidth(), 260 ), true, 0 );
 
 
-				const int anmID = light->fidTexture.animIdx;
+				int anmID = light->fidTexture.animIdx;
+				if ( anmID < 0 ) anmID = 0;
+				if ( anmID > m_pLevel->m_sprLights.Animations.Count() - 1 ) anmID = 0;
 				ImVec2 button_sz( 48, 48 );
 				scAnimation* anm = m_pLevel->m_sprLights.Animations[anmID];
 				PTEXTURE imgtex = m_pLevel->m_sprLights.Textures[0]->pTex;
@@ -530,7 +554,7 @@ void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 						bgcol = { 0.5f, 0.0f, 0.0f, 1.0f };
 
 					ImGui::PushID( n );
-					if ( ImGui::ImageButton( (void*)(intptr_t)imgtex, button_sz, tul, tdr, 1, bgcol ) )
+					if ( ImGui::ImageButton( (void*)(intptr_t)imgtex, button_sz, tul, tdr, 2, bgcol ) )
 					{
 						light->SetLightTexture( &m_pLevel->m_sprLights, anmID, n );
 					}
@@ -634,6 +658,139 @@ void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 		break;
 	}
 
+}
+
+int CLevelEditor::IMGUI_AnimationBrowser( CSpriteLib* sprLib, int nSelectedAnim )
+{
+	_ASSERT( sprLib != nullptr );
+	int ret_sel = -1;
+	ImGui::BeginChild( "AnimationBrowser", ImVec2( ImGui::GetWindowContentRegionWidth(), 260 ), true, 0 );
+
+	ImVec2 button_sz( 48, 48 );
+	PTEXTURE imgtex = sprLib->Textures[0]->pTex;
+
+	ImGuiStyle& style = ImGui::GetStyle();
+	float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+
+	for ( int n = 0; n < sprLib->Animations.Count(); n++ )
+	{
+		scAnimation* anm = sprLib->Animations[n];
+
+		RectLTRB texrect = sprLib->GetModuleRect_TexCoords( n, 0, 0 );
+		ImVec2 tul( texrect.left, texrect.top );
+		ImVec2 tdr( texrect.right, texrect.bottom );
+
+		ImVec4 bgcol( 0.0f, 0.0f, 0.0f, 1.0f );
+		bool bPushBorder = false;
+		if ( n == nSelectedAnim )
+		{
+			bgcol = { 0.5f, 0.0f, 0.0f, 1.0f };
+			ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 1.0f, 0.0f, 0.0f, 1.0f ) );
+			bPushBorder = true;
+		}
+
+		ImGui::PushID( n );
+		if ( ImGui::ImageButton( (void*)(intptr_t)imgtex, button_sz, tul, tdr, 2, bgcol ) )
+		{
+			ret_sel = n;
+		}
+		// remove border color for selection
+		if ( bPushBorder )
+			ImGui::PopStyleColor();
+
+		float last_button_x2 = ImGui::GetItemRectMax().x;
+		float next_button_x2 = last_button_x2 + style.ItemSpacing.x + button_sz.x; // Expected position if next button was on same line
+		if ( n + 1 < sprLib->Animations.Count() && next_button_x2 < window_visible_x2 )
+			ImGui::SameLine();
+		ImGui::PopID();
+	}
+
+	ImGui::EndChild();
+	return ret_sel;
+}
+
+
+void CLevelEditor::IMGUI_AddPropProps( CProp* prop )
+{
+	if ( prop == nullptr )
+	{
+		ImGui::Text( "RMB to select" );
+		return;
+	}
+
+	float f3[3] = { prop->pos.xyz.x, prop->pos.xyz.y, prop->pos.xyz.z };
+	if ( ImGui::DragFloat3( "Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f" ) )
+	{
+		prop->SetPos( Vec3( f3[0], f3[1], f3[2] ) );
+	}
+	// cast shadows
+	ImGui::Checkbox( "Animated", &prop->bAnimated);
+
+	// show ANIMATIONS browser
+	ImGui::Separator();
+	ImGui::Text( "Animation" );
+
+	int sel_anim = IMGUI_AnimationBrowser( &m_pLevel->m_sprProps, prop->sprite.animIdx );
+	// on click
+	if ( sel_anim >= 0 ) 
+	{
+		prop->sprite.SetAnim( sel_anim, 0 );
+		prop->fid_ini.Set( prop->sprite.animIdx, prop->sprite.frameIdx );
+		prop->PostConstructionInit();
+	}
+
+	// show frames in child window
+	{
+		ImGui::Separator();
+		ImGui::Text( "Prop Frame" );
+		ImGui::BeginChild( "ChildL", ImVec2( ImGui::GetWindowContentRegionWidth(), 260 ), true, 0 );
+
+		int anmID = prop->sprite.animIdx;
+		if ( anmID < 0 ) anmID = 0;
+		if ( anmID > m_pLevel->m_sprProps.Animations.Count() - 1 ) anmID = 0;
+		ImVec2 button_sz( 48, 48 );
+		scAnimation* anm = m_pLevel->m_sprProps.Animations[anmID];
+		PTEXTURE imgtex = m_pLevel->m_sprProps.Textures[0]->pTex;
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+
+		for ( int n = 0; n < anm->aframesNo; n++ )
+		{
+			RectLTRB texrect = m_pLevel->m_sprProps.GetModuleRect_TexCoords( anmID, n, 0 );
+			ImVec2 tul( texrect.left, texrect.top );
+			ImVec2 tdr( texrect.right, texrect.bottom );
+
+			ImVec4 bgcol( 0.0f, 0.0f, 0.0f, 1.0f );
+			bool bPushBorder = false;
+			if ( n == prop->sprite.frameIdx )
+			{
+				bgcol = { 0.5f, 0.0f, 0.0f, 1.0f };
+				ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 1.0f, 0.0f, 0.0f, 1.0f ) );
+				bPushBorder = true;
+			}
+
+			ImGui::PushID( n );
+			if ( ImGui::ImageButton( (void*)(intptr_t)imgtex, button_sz, tul, tdr, 2, bgcol ) )
+			{
+				prop->sprite.frameIdx = n;
+				prop->fid_ini.frameIdx = n;
+				prop->PostConstructionInit();
+			}
+			// remove border color for selection
+			if ( bPushBorder )
+				ImGui::PopStyleColor();
+
+			float last_button_x2 = ImGui::GetItemRectMax().x;
+			float next_button_x2 = last_button_x2 + style.ItemSpacing.x + button_sz.x; // Expected position if next button was on same line
+			if ( n + 1 < anm->aframesNo && next_button_x2 < window_visible_x2 )
+				ImGui::SameLine();
+			ImGui::PopID();
+		}
+
+
+		ImGui::EndChild();
+	}
 }
 
 void CLevelEditor::DrawVRuler( Vec2 vBase, float fHeight, DWORD col )

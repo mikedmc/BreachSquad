@@ -1,8 +1,8 @@
 #include "dxstdafx.h"
 #include "Prop.h"
 
-CProp::CProp( CActiveAIComponent* pAIcomp ) :
-	flags( 0 ), c_AI( pAIcomp )
+CProp::CProp( CLevel& refLevel, CActiveAIComponent* pAIcomp ) :
+	flags( 0 ), c_AI( pAIcomp ), level(refLevel)
 {
 
 }
@@ -46,7 +46,7 @@ void CProp::InitializeFromAFrameFlags( UINT32 AFrameFlags )
 	if ( AFrameFlags & K_FLAG_EDITOR_PROP_CAN_BE_SHOT ) flags |= K_PROPFLAG_CAN_BE_SHOT;
 }
 
-void CProp::Update( float dTime, CLevel& level )
+void CProp::Update( float dTime )
 {
 	// clean target pointer (should be done by AI?)
 	if ( ( pTarget != nullptr ) && pTarget->IsPendingKill() )

@@ -10,10 +10,10 @@ struct SprFrameId
 	int frameIdx;
 
 	SprFrameId() :
-		animIdx(-1), frameIdx(0)
+		animIdx( -1 ), frameIdx( 0 )
 	{}
 
-	void Init(int nAnimIdx, int nFrameIdx)
+	void Init( int nAnimIdx, int nFrameIdx )
 	{
 		animIdx = nAnimIdx;
 		frameIdx = nFrameIdx;
@@ -28,6 +28,12 @@ struct SprFrameId
 	inline bool IsSet()
 	{
 		return ( animIdx >= 0 ) ? true : false;
+	}
+
+	void Set( int anim, int frame )
+	{
+		animIdx = anim;
+		frameIdx = frame;
 	}
 };
 

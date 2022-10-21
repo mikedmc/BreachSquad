@@ -513,7 +513,7 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	int decocnt = (int)OS_freadUInt32(fl);
 	for (int kk = 0; kk < decocnt; kk++)
 	{
-		CProp* obj = new CProp( new CActiveAIComponent() );
+		CProp* obj = new CProp( *this, new CActiveAIComponent() );
 
 		obj->ID = unBaseID + OS_freadUInt32(fl);
 		//load layer from editor (not used atm)

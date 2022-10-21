@@ -39,6 +39,7 @@ private:
 
 	Vec2				m_vCamPos_ini;			// saved initial camera position (HOME)
 	double				fTimeline;				// used for some animations
+	bool				bLaunched;				// is editor launched
 public:
 	Vec2				m_vCamPos;				// Camera position
 	CCameraTransform*	m_pCam;					// pointer to level camera to screen
@@ -61,7 +62,7 @@ public:
 	void				Paint();
 
 	inline bool			IsLaunched() {
-		return ( m_pLevel != nullptr );
+		return ( bLaunched );
 	}
 
 	IActiveInterface* GetSelected() {
@@ -78,8 +79,12 @@ public:
 	// selects closest active depending on selected tool
 	IActiveInterface*	SelectClosest( Vec2 vPoint, float fMaxRadius = 32.0f );
 private:
-	//--- IMGUI adds controls specific to selected light
+	// adds the imgui animation browser for specified collection and returns selected animation on click or -1 if not clicked
+	int					IMGUI_AnimationBrowser( CSpriteLib* sprLib, int nSelectedAnim );
+	//--- IMGUI light properties
 	void				IMGUI_AddLightProps( CLight* light );
+	//--- IMGUI Prop properties
+	void				IMGUI_AddPropProps( CProp* prop );
 
 	// draws a ruler to show you the height of an object
 	void				DrawVRuler( Vec2 vBase, float fHeight, DWORD col );

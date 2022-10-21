@@ -211,7 +211,7 @@ CProp* CLevel::SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nF
 	ErrorBox( K_ERR_WARNING, L"Not implemented! See level_loaders when loading props!" );
 	return nullptr;
 
-	CProp* obj = new CProp( new CActiveAIComponent() );
+	CProp* obj = new CProp( *this, new CActiveAIComponent() );
 
 	obj->ID = GenerateNextID();
 	//pozitia
@@ -2423,7 +2423,7 @@ void CLevel::UpdateAI( float dTime, bool bInEditor )
 			continue;
 		for ( int kk = area->m_arrProps.GetSize() - 1; kk >= 0; kk-- )
 		{
-			area->m_arrProps[kk]->Update( dTime, *this );
+			area->m_arrProps[kk]->Update( dTime );
 		}
 	}
 	//#TODO: only update lights and col shapes in activated areas
