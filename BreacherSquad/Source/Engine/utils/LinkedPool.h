@@ -11,12 +11,25 @@ public:
 	{
 	public:
 		TYPE		m_data;
-	private:
+	private:  
 		friend struct IteratorPtr;
 		friend class CLinkedPool;
 
 		CLNode*		m_pPrev;		//don't mess with me
 		CLNode*		m_pNext;		//don't mess with me
+
+		int			m_nID;			// unique index (used for references as ID)
+		bool		m_bUsed;		// flag that tells us if it's in use or if it's available for hiring
+
+	public:
+		
+		int			GetID() {
+			return m_nID;
+		}
+
+		int			IsAlive() {
+			return m_bUsed;
+		}
 	};
 
 public:
@@ -86,6 +99,14 @@ public:
 	void			Release();
 	// returns number of used elements
 	inline int		Count() { return m_nUsedCnt; }
+	
+	// Returns item by global ID (which is the global index)
+	CLNode*			GetByID( int nID )
+	{
+		if ( nID < 0 || nID >= m_nSize )
+			return nullptr;
+		return &pArrNodes[nID];
+	}
 
 	// Returns pointer to available list node or null if all nodes are used.
 	// Doesn't call CTOR. Make sure you clear the data before using, nodes are always reused.
@@ -106,6 +127,8 @@ public:
 		nod->m_pPrev = pListUsed.m_pPrev;
 		pListUsed.m_pPrev = nod;
 		nod->m_pNext = &pListUsed;
+		
+		nod->m_bUsed = true;
 
 		m_nUsedCnt++;
 		// return pointer to node
@@ -117,6 +140,7 @@ public:
 	void Dismiss( CLNode* node )
 	{
 		_ASSERT( node != nullptr );
+		node->m_bUsed = false;
 		// link neighbours between them
 		node->m_pNext->m_pPrev = node->m_pPrev;
 		node->m_pPrev->m_pNext = node->m_pNext;
@@ -143,6 +167,12 @@ bool CLinkedPool <TYPE>::Init( int nPoolSize )
 	pArrNodes = new CLNode[ m_nSize ];
 	if ( pArrNodes == nullptr )
 		return false;
+	// initialize nodes
+	for ( int kk = 0; kk < m_nSize; kk++ )
+	{
+		pArrNodes[kk].m_nID = kk;
+		pArrNodes[kk].m_bUsed = false;
+	}
 	// place all nodes in FREE list
 	pListFree.m_pNext = &pArrNodes[ 0 ];
 	pListFree.m_pPrev = &pArrNodes[ m_nSize - 1 ];

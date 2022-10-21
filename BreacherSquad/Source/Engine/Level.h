@@ -193,7 +193,7 @@ public:
 	float					m_fThunderTimer;			//pentru desenarea efectului de thunder/lightning (0.0f - stopped)
 
 	///--- AI ---
-	CArray<CAIEvent*> m_arrAIevents;
+	CArray<CAIEvent*>		m_arrAIevents;
 	// Releases all dead objects (bReleaseIt flag set) on a separate step so they don't get deallocated when still in visibility lists 
 	void					CleanupDeadObjects();
 	// Updates all IActiveInterface implementations

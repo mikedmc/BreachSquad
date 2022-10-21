@@ -219,6 +219,13 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #define SAFE_DELETE_STDVEC(p) { for(auto xkx : p) { SAFE_DELETE(xkx); } p.clear(); p.shrink_to_fit(); }
 #endif
 
+// checks if weak ptr was initialized
+template <typename T>
+bool IS_WEAKPTR_UNINIT( std::weak_ptr<T> const& weak ) {
+	using wt = std::weak_ptr<T>;
+	return !weak.owner_before( wt{} ) && !wt{}.owner_before( weak );
+}
+
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
 #define null NULL

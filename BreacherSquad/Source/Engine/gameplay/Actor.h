@@ -12,6 +12,7 @@
 // player suspended - fallen offscreen
 #define K_LVL_SUSPENDFLAG_OUTSIDE_SCREEN 1
 
+// Actor class - players and enemies
 class CActor : public IActiveInterface
 {
 	///--- COMPONENTS --- 
