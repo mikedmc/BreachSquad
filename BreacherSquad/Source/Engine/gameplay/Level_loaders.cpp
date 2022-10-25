@@ -154,8 +154,10 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 	{
 		CLight * light = m_arrLights[kk];
 		IActiveInterface* pt = GetIActiveInterfacePtr( light->targetID_ini );
-		if(pt != nullptr)
-			light->pTarget = pt->GetRef();
+		if ( pt != nullptr )
+		{
+			CSmartLink::SetLink( &light->pTarget, pt );
+		}
 		light->SetAI( light->AIstate );
 	}
 	for (int kk = 0; kk < m_arrColShapes.GetSize(); kk++)
@@ -163,7 +165,9 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		CCollisionShape * shape = m_arrColShapes[kk];
 		IActiveInterface* pt = GetIActiveInterfacePtr( shape->targetID_ini );
 		if ( pt != nullptr )
-			shape->pTarget = pt->GetRef();
+		{
+			CSmartLink::SetLink( &shape->pTarget, pt );
+		}
 		shape->SetAI( shape->AIstate );
 	}
 	
@@ -175,7 +179,9 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 			CProp * activ = area->m_arrProps[kk];
 			IActiveInterface* pt = GetIActiveInterfacePtr( activ->targetID_ini );
 			if ( pt != nullptr )
-				activ->pTarget = pt->GetRef();
+			{
+				CSmartLink::SetLink( &activ->pTarget, pt );
+			}
 			activ->SetAI( activ->AIstate );
 		}
 	}
@@ -184,7 +190,9 @@ OPRESULT CLevel::LoadLevel(WCHAR * strPathAbs)
 		CActor* actor = m_arrActors[kk];
 		IActiveInterface* pt = GetIActiveInterfacePtr( actor->targetID_ini );
 		if ( pt != nullptr )
-			actor->pTarget = pt->GetRef();
+		{
+			CSmartLink::SetLink( &actor->pTarget, pt );
+		}
 	}
 
 	///--- camera ---

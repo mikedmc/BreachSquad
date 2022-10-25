@@ -1,9 +1,15 @@
 //--------------------------------------------------------------------------------------
-// =^_^= DMC =^_^=
+// (c)2022 Dragomir Mihai - Pixel Shard
+//
 // Template object linked list pool, iterable with pointer iterator
+// Keeps elements in a single array and organizes used and free elements in 2 double linked lists for fast access
+// Keeps unique index(m_nID) and used/not used flags for each element
 // Contained class DTOR/CTOR only get called on Init and Release when deallocationg the container array.
 // Make sure you reset/construct the data after calling Hire() as nodes are always reused.
 //--------------------------------------------------------------------------------------
+
+#pragma once
+
 template<typename TYPE> class CLinkedPool
 {
 public:
@@ -95,6 +101,8 @@ public:
 
 	// Initializes list with maximum number of elements
 	bool			Init( int nPoolSize );
+	// Initializes list with maximum number of elements and provides initializer function (lambda usually)
+	bool			Init( int nPoolSize, void ( *fn_initialize )(TYPE* element) );
 	// Releases all list elements
 	void			Release();
 	// returns number of used elements
@@ -153,6 +161,20 @@ public:
 		m_nUsedCnt--;
 	}
 };
+
+template<typename TYPE>
+bool CLinkedPool<TYPE>::Init( int nPoolSize, void( *fn_initialize )( TYPE* element ) )
+{
+	if ( !Init( nPoolSize ) )
+		return false;
+
+	for ( int kk = 0; kk < m_nSize; kk++ )
+	{
+		fn_initialize( &pArrNodes[kk].m_data );
+	}
+
+	return true;
+}
 
 template<typename TYPE> 
 bool CLinkedPool <TYPE>::Init( int nPoolSize )

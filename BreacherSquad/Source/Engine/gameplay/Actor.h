@@ -58,7 +58,7 @@ public:
 	float						fSuspendedTimer;			// counts from when suspended flags is set
 	bool						bSuspendInput;				// if set keyboard input is ignored but AI works (could be a suspended flag)
 
-	IActiveInterface*			pClosestTouchable;			// currently focused interactible object
+	CSmartLink					pClosestTouchable;			// currently focused interactible object
 	EGenericState				eInteractState;				// state of interaction (NOTSET=not interacting, READY-selecting action, EXECUTING-started action, FINISHED-interact finished)
 	int							nInteractOptionsSelIdx;		// index in arrInteractOptions
 	CFixedArray<CScriptAction, 16>	arrInteractOptions;		// empty when not interacting. gathers all interaction options from object, character feats, inventory objects, etc

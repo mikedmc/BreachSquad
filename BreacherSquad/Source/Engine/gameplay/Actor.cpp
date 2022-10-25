@@ -25,12 +25,12 @@ void CActor::EndPlay()
 CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID,
 	CLevel& refLevel,
 	CSpriteActorComponent* pComGraphics, CWeaponsComponent* pComWpn, CActorAIComponent* pComAI ) :
-	 nLastDamageTakenFromUID(0),
-	pClosestTouchable(nullptr), nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), bHasGravity(true),
-	eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
-	eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0), eAttackStatus(K_ACT_ATTACK_IDLE),
-	fStunTimer(0.0f),
-	level(refLevel)
+		nLastDamageTakenFromUID(0), 
+		nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), bHasGravity(true),
+		eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
+		eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0), eAttackStatus(K_ACT_ATTACK_IDLE),
+		fStunTimer(0.0f),
+		level(refLevel)
 {
 	_ASSERT(pComGraphics != nullptr && pComAI != nullptr && pComWpn != nullptr);
 	// save pointer to component
@@ -54,7 +54,7 @@ CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID,
 
 CActor::~CActor()
 {
-	FREE_REF( pClosestTouchable );
+	CSmartLink::RemoveLink( &pClosestTouchable );
 	// remove used components received as pointers 
 	SAFE_DELETE( c_graphics );
 	SAFE_DELETE( c_weapons );
@@ -167,11 +167,13 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 void CActor::Update(float dTime )
 {
 	// clean target pointer when target dies (should be done by AI?)
+	/*
 	if ( (pTarget != nullptr) && pTarget->IsPendingKill() )
 	{
 		pTarget->FreeRef();
 		pTarget = nullptr;
 	}
+	*/
 
 //#TEMP: watchdog for hanging actors
 #if defined(_DEBUG) || defined(DEBUG)
@@ -952,11 +954,6 @@ void CActor::ProcessExtras()
 	///--- find closest interactible object in range, aka touchable
 	if ( _template.eCaps & K_ACT_CAPS_CAN_INTERACT )
 	{
-		if ( pClosestTouchable != nullptr && pClosestTouchable->IsPendingKill() )
-		{
-			FREE_REF( pClosestTouchable );
-		}
-
 		//#TODO: put interact area in special constant
 		CAABB aabbInteract( -K_TILE_SIZE_F, -K_TILE_SIZE_F, K_TILE_SIZE_F, K_TILE_SIZE_F );
 		aabbInteract.Move( pos.xy );
@@ -981,25 +978,24 @@ void CActor::ProcessExtras()
 		//#TODO: see which one is closer to the aim dir
 		if ( arrTouchProps.GetSize() > 0 )
 		{
-			IActiveInterface* pNewTouchable = arrTouchProps[ 0 ]->GetRef();
-			if ( pClosestTouchable != pNewTouchable )
+			IActiveInterface* pNewTouchable = arrTouchProps[ 0 ];
+			if ( pClosestTouchable.pTo != pNewTouchable )
 			{
-				FREE_REF( pClosestTouchable );
 				ClearActionsList();
+				CSmartLink::SetLink( &pClosestTouchable, pNewTouchable );
 			}
-			pClosestTouchable = pNewTouchable;
 		}
 		else
 		{
-			if ( pClosestTouchable != nullptr )
+			if ( pClosestTouchable.IsSet() )
 			{
-				FREE_REF( pClosestTouchable );
 				ClearActionsList();
+				CSmartLink::RemoveLink( &pClosestTouchable );
 			}
 		}
 
 		// check touch/interact
-		if ( ( c_AI->AIcommands.bInteract ) && ( pClosestTouchable != nullptr ) )
+		if ( ( c_AI->AIcommands.bInteract ) && ( pClosestTouchable.IsSet() ) )
 		{
 			BuildActionsList();
 			if ( arrInteractOptions.Count() > 0 )
@@ -1134,12 +1130,12 @@ bool CActor::CheckShoot()
 void CActor::BuildActionsList()
 {
 	arrInteractOptions.Clear();
-	if (pClosestTouchable == nullptr)
+	if ( !pClosestTouchable.IsSet() )
 		return;
 	//1. get object specific actions
-	for (int kk = 0; kk < pClosestTouchable->arrActions.Count(); kk++)
+	for (int kk = 0; kk < pClosestTouchable.pTo->arrActions.Count(); kk++)
 	{
-		arrInteractOptions.Add(pClosestTouchable->arrActions[kk]);
+		arrInteractOptions.Add(pClosestTouchable.pTo->arrActions[kk]);
 	}
 	//#TODO: 2. get inventory specific actions for targeted object class
 	//#TODO: 3. get player class specific actions for targeted object class

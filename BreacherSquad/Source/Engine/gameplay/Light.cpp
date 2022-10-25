@@ -25,11 +25,13 @@ void CLight::SetAI( EAIstate newstate )
 void CLight::Update( float dTime, CLevel& level )
 {
 	// clean target pointer (should be done by AI?)
+	/*
 	if ( ( pTarget != nullptr ) && pTarget->IsPendingKill() )
 	{
 		pTarget->FreeRef();
 		pTarget = nullptr;
 	}
+	*/
 
 	bEnabled = bSetEnabled;
 	// hidden? skip update

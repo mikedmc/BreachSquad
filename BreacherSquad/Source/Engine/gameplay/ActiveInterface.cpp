@@ -6,40 +6,26 @@ IActiveInterface::IActiveInterface() :
 	AIstate( K_AI_STATE_UNDEFINED ),
 	color( 0xffffffff ), color_ini( 0xffffffff ),
 	bTouching( false ), nTouchingUID( 0 ),
-	pTarget( nullptr ), bCanInteract( false ), bHideInteractIcon( false ),
-	bPendingKill( false ), pArea( nullptr ), heightZ( K_WALL_HEIGHT_WORLD ),
-	_refCntP( 0 )
+	bCanInteract( false ), bHideInteractIcon( false ),
+	bPendingKill( false ), pArea( nullptr ), heightZ( K_WALL_HEIGHT_WORLD )
 {
 	UID = GenerateUID();
 
 	pos = Vec3(0.0f, 0.0f, 0.0f);
 	pos_ini = Vec3(0.0f, 0.0f, 0.0f);
+
+#if defined(_DEBUG) || defined(DEBUG)
+	fPendingKillTimer = 0.0f;
+#endif
 }
 
 IActiveInterface::~IActiveInterface()
 {
-	// already released in Kill() but we make it double
-	FREE_REF( pTarget );
-}
-
-IActiveInterface* IActiveInterface::GetRef()
-{
-	++_refCntP; return this;
-}
-
-void IActiveInterface::FreeRef()
-{
-	if ( _refCntP > 0 ) _refCntP--;
-}
-
-int IActiveInterface::GetRefCount()
-{
-	return _refCntP;
 }
 
 bool IActiveInterface::CanBeReleased()
 {				   
-	return ((_refCntP == 0) && (bPendingKill == true));
+	return ( bPendingKill == true );
 }
 
 void IActiveInterface::LoadLogic(FILE* fl)
@@ -142,8 +128,9 @@ void IActiveInterface::Kill()
 #endif
 		// call end play
 		EndPlay();
+		
 		// release target pointers
-		FREE_REF( pTarget );
+		CSmartLink::RemoveAllLinksTo( this );
 	}
 }
 

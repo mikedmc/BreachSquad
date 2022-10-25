@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../ActorTypes.h"
+#include "../SmartLink.h"
 
 class CActor;
 ///--------------------------------------------------------------------------
@@ -340,7 +341,7 @@ public:
 public:
 	bool					m_bEnabled;					// sensors are enabled or disabled?
 	//external sensors
-	CActor*					pTargetedActor;				// targeted enemy, set by internal sensors
+	CSmartLink				pTargetedActor;				// targeted enemy, set by internal sensors
 	float					fTargetLostTimer;			// lost target enemy from LOS, how much time passed?
 	bool					bTargetLOS;					// do we have a Line Of Sight to target? AI states will make decisions based on this
 

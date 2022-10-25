@@ -86,16 +86,14 @@ CAIState * CAITemplate::GetAIStateByName( CStringHash strName )
 
 
 
-CAISensorInfo::CAISensorInfo() : pTargetedActor(nullptr)
+CAISensorInfo::CAISensorInfo()
 {
 	Reset();
 }
 
 void CAISensorInfo::Reset()
 {
-	// call freeref automatically when resetting the sensor info
-	FREE_REF( pTargetedActor );
-	pTargetedActor = nullptr;
+	CSmartLink::RemoveLink( &pTargetedActor );
 	fTargetLostTimer = 0.0f;
 	bTargetLOS = false;
 

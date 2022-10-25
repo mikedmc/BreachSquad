@@ -227,6 +227,7 @@
     <ClInclude Include="Source\Engine\gameplay\LevelTypes.h" />
     <ClInclude Include="Source\Engine\gameplay\Level_scriptable.h" />
     <ClInclude Include="Source\Engine\gameplay\Light.h" />
+    <ClInclude Include="Source\Engine\gameplay\SmartLink.h" />
     <ClInclude Include="Source\Engine\gameplay\Tile.h" />
     <ClInclude Include="Source\Engine\gameplay\TileBlockMesh.h" />
     <ClInclude Include="Source\Engine\GetDXVer.h" />
@@ -401,6 +402,7 @@
     <ClCompile Include="Source\Engine\gameplay\Level_loaders.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Level_scriptable.cpp" />
     <ClCompile Include="Source\Engine\gameplay\Light.cpp" />
+    <ClCompile Include="Source\Engine\gameplay\SmartLink.cpp" />
     <ClCompile Include="Source\Engine\gameplay\TileBlockMesh.cpp" />
     <ClCompile Include="Source\Engine\GetDXVer.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>

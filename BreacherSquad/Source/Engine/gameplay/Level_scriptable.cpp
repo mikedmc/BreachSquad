@@ -16,10 +16,10 @@ IActiveInterface* CLevel::ScriptGetActiveInterfaceByTargetParam(CVariant* vcTarg
 			else if (vcTarget->m_strArg.getHash() == FastHash("target"))
 			{
 				target = GetIActiveInterfacePtr_byUID(executorUID);
-				//se duce pe targetul personal
-				if ((target != null) && (target->pTarget != null))
+				// goes to personal target
+				if ((target != nullptr) && (target->pTarget.IsSet()) )
 				{
-					target = target->pTarget;
+					target = target->pTarget.pTo;
 				}
 				else
 				{
@@ -29,15 +29,16 @@ IActiveInterface* CLevel::ScriptGetActiveInterfaceByTargetParam(CVariant* vcTarg
 			else if (vcTarget->m_strArg.getHash() == FastHash("targets_target"))
 			{
 				target = GetIActiveInterfacePtr_byUID(executorUID);
-				//se duce pe targetul targetului
-				if (target->pTarget != null)
+				// goes to target target
+				if ( ( target != nullptr ) && ( target->pTarget.IsSet()) && 
+					(target->pTarget.pTo->pTarget.IsSet()) )
 				{
-					target = target->pTarget->pTarget;
+					target = target->pTarget.pTo->pTarget.pTo;
 				}
 				else
 				{
 					LOG(L"ScriptGetActiveInterfaceByTargetParam - target's target couldn't be found!\n");
-					target = null;
+					target = nullptr;
 				}
 			}
 			else if (vcTarget->m_strArg.getHash() == FastHash("toucher"))
@@ -61,7 +62,7 @@ IActiveInterface* CLevel::ScriptGetActiveInterfaceByTargetParam(CVariant* vcTarg
 			else
 			{
 				LOG(L"ScriptGetActiveInterfaceByTargetParam - invalid target param value!\n");
-				return null;
+				return nullptr;
 			}
 		}
 	}
@@ -80,10 +81,10 @@ bool CLevel::OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantMap 
 	IActiveInterface* active = GetIActiveInterfacePtr_byUID(executorUID);
 	if (active != null)
 	{
-		//2. daca are target si script vars nRunTargetScript este diferit de 0 face touch la target
-		if ((active->pTarget != null) && (pArrScriptVars->m_variants[L"nRunTargetScript"].m_asINT32 != 0))
+		//2. has target, script vars nRunTargetScript!=0 => touch target
+		if ((active->pTarget.IsSet()) && (pArrScriptVars->m_variants[L"nRunTargetScript"].m_asINT32 != 0))
 		{
-			active->pTarget->Touch(active->GetUID(), 0.0f);
+			active->pTarget.pTo->Touch(active->GetUID(), 0.0f);
 		}
 		//reset touching flag
 		active->bTouching = false;
@@ -543,7 +544,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			target->targetID_ini = targetID;
 			IActiveInterface* pt = GetIActiveInterfacePtr( targetID );
 			if ( pt != nullptr )
-				target->pTarget = pt->GetRef();
+				CSmartLink::SetLink( &target->pTarget, pt );
 
 			return true;
 		}

@@ -4745,9 +4745,9 @@ OPRESULT CLevel::PaintOverGameLayer()
 		if ( pPlayerActor[kk] == null )
 			continue;
 		CActor* pPlayer = pPlayerActor[kk];
-		if ( pPlayer->pClosestTouchable != nullptr )
+		if ( pPlayer->pClosestTouchable.IsSet() )
 		{
-			Vec2 vpos = pPlayer->pClosestTouchable->pos.xy_proj;
+			Vec2 vpos = pPlayer->pClosestTouchable.pTo->pos.xy_proj;
 			UTSprite::PaintFrame( &m_sprInterface, vpos.x, vpos.y, ANM_IGM_INTERFACE_SPR_INTERACT_ONCE, 0, 0xffffffff );
 		}
 	}
@@ -4755,7 +4755,7 @@ OPRESULT CLevel::PaintOverGameLayer()
 	///#TEMP: --- paint crosshairs 
 	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 	{
-		if ( pPlayerActor[kk] == null )
+		if ( pPlayerActor[kk] == nullptr )
 			continue;
 
 		// paint aiming cursor
@@ -4771,20 +4771,23 @@ OPRESULT CLevel::PaintOverGameLayer()
 
 	//--- closest touchable and cover icons ---
 	 //pointer to last painted active interface so we don't draw it twice
-	IActiveInterface * pLastPaintedTarget = null;
+	IActiveInterface * pLastPaintedTarget = nullptr;
 	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 	{
-		if ( ( pPlayerActor[kk] == null ) || ( pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_PLAYER_CONTROL ) )
+		if ( ( pPlayerActor[kk] == nullptr ) || ( pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_PLAYER_CONTROL ) )
 			continue;
 
 		CActor* player = pPlayerActor[kk];
 		//touchables
-		if ( ( player->pClosestTouchable != null ) && ( player->pClosestTouchable->bHideInteractIcon == false ) &&
-			( player->pClosestTouchable != pLastPaintedTarget ) && ( player->collisionFlags & K_DIRFLAG_DOWN ) )
+		IActiveInterface * activ = nullptr;
+		if(player->pClosestTouchable.IsSet())
+			activ = player->pClosestTouchable.pTo;
+
+		if ( ( activ ) && ( activ->bHideInteractIcon == false ) &&
+			( activ != pLastPaintedTarget ) && ( player->collisionFlags & K_DIRFLAG_DOWN ) )
 		{
 			//save last painted target
-			IActiveInterface * activ = player->pClosestTouchable;
-			pLastPaintedTarget = player->pClosestTouchable;
+			pLastPaintedTarget = activ;
 
 			Vec2 vpos( activ->bbox.vCenter.x, activ->bbox.vMin.y );
 			//too low? don't cover the player
@@ -4870,6 +4873,7 @@ void CLevel::Release()
 
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrAreas );
 
+	CSmartLink::RemoveAllLinks();
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrColShapes );
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrLights );
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrDecals );
@@ -5524,9 +5528,9 @@ void CLevel::TouchClosestActive( CActor * pToucherAct, float dTime )
 {
 	_ASSERT( pToucherAct != nullptr );
 
-	if ( pToucherAct->pClosestTouchable != nullptr )
+	if ( pToucherAct->pClosestTouchable.IsSet() )
 	{
-		pToucherAct->pClosestTouchable->Touch( pToucherAct->GetUID(), dTime );
+		pToucherAct->pClosestTouchable.pTo->Touch( pToucherAct->GetUID(), dTime );
 	}
 }
 

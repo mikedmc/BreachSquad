@@ -1,16 +1,13 @@
 #pragma once
 
 #include "utils/VecProj.h"
+#include "SmartLink.h"
 
 // declare useful classes
 class CLevelArea;
 
-//perioada standard de decizie pt AI (in secunde) si variatia random a acestuia
 #define	K_LVL_AI_DECISION_INTERVAL				0.25f
 #define	K_LVL_AI_DECISION_INTERVAL_VARIATION	0.05f
-
-// utility for active free ref
-#define FREE_REF(pActive) if(pActive != nullptr) { pActive->FreeRef(); pActive = nullptr; }
 
 enum EActiveInterfaceType {
 	K_LVL_IAI_TYPE_UNKNOWN,
@@ -29,7 +26,6 @@ class IActiveInterface
 protected:
 	bool					bPendingKill;			// exited gameplay, waits for garbage collection
 	bool					bEnabled;				// sometimes the actives need to be disabled ( eg: after being killed )
-	int						_refCntP;				// pointers reference count. Don't deallocate until zero!
 #if defined(_DEBUG) || defined(DEBUG)
 	float					fPendingKillTimer;		//#TEMP: checks time since killed to make sure it's deallocating them
 #endif
@@ -57,7 +53,7 @@ public:
 public: 
 	DWORD					color_ini;
 	INT32					targetID_ini;			// target ID read from the editor
-	IActiveInterface*		pTarget;				// target coming from the editor. Only get pointers through GetRef()!
+	CSmartLink				pTarget;				// smart link to another object (self resetting)
 
 	bool					bCanInteract;			// can interact with it?  #TODO: replace with interact-type or actions list
 	bool					bHideInteractIcon;		// hide the icon //#TODO: remove this flag
@@ -81,12 +77,6 @@ public:
 	inline UINT32				GetToucherUID() const { return nTouchingUID; }
 	// Tells if object is waiting to be deallocated
 	inline bool					IsPendingKill() { return bPendingKill; }
-	// Gets pointer to object and increases ref count
-	IActiveInterface*			GetRef();
-	// Decreases reference count so active can be freed
-	void						FreeRef();
-	// Returns number of pointer references given out
-	int							GetRefCount();
 	// Returns true if object can be released
 	bool						CanBeReleased();
 	// Loads logic from binary file (editor exported logic)

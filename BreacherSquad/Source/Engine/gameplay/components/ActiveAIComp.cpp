@@ -213,10 +213,10 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 			if ( mem.AIfvar1 <= 0.0f )
 			{
 				// set broken door anim
-				if ( active.pTarget != nullptr )
+				if ( active.pTarget.IsSet() )
 				{
-					//trebuie sa pointeze spre un CActive neaparat
-					CProp* winact = dynamic_cast< CProp* >( active.pTarget );
+					// must point to CActive
+					CProp* winact = dynamic_cast< CProp* >( active.pTarget.pTo );
 					if ( winact == null )
 					{
 						ErrorBox( K_ERR_WARNING, L"K_AI_STATE_COLL_BREAKABLE_WINDOW bad cast to CActive" );

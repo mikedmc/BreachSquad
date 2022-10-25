@@ -3,6 +3,7 @@
 #include "gameplay/GameConstants.h"
 #include "gameplay/LevelDefines.h"
 #include "gameplay/Tile.h"
+#include "gameplay/SmartLink.h"
 
 //#include "gameplay/PhysicsPoint.h"
 #include "gameplay/ActorTypes.h"
