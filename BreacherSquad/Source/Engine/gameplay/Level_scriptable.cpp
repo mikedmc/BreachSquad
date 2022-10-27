@@ -19,7 +19,7 @@ IActiveInterface* CLevel::ScriptGetActiveInterfaceByTargetParam(CVariant* vcTarg
 				// goes to personal target
 				if ((target != nullptr) && (target->pTarget.IsSet()) )
 				{
-					target = target->pTarget.pTo;
+					target = target->pTarget.GetTo();
 				}
 				else
 				{
@@ -31,9 +31,9 @@ IActiveInterface* CLevel::ScriptGetActiveInterfaceByTargetParam(CVariant* vcTarg
 				target = GetIActiveInterfacePtr_byUID(executorUID);
 				// goes to target target
 				if ( ( target != nullptr ) && ( target->pTarget.IsSet()) && 
-					(target->pTarget.pTo->pTarget.IsSet()) )
+					(target->pTarget.GetTo()->pTarget.IsSet()) )
 				{
-					target = target->pTarget.pTo->pTarget.pTo;
+					target = target->pTarget.GetTo()->pTarget.GetTo();
 				}
 				else
 				{
@@ -84,7 +84,7 @@ bool CLevel::OnScriptFinished(UINT32 executorUID, UINT32 scriptUID, CVariantMap 
 		//2. has target, script vars nRunTargetScript!=0 => touch target
 		if ((active->pTarget.IsSet()) && (pArrScriptVars->m_variants[L"nRunTargetScript"].m_asINT32 != 0))
 		{
-			active->pTarget.pTo->Touch(active->GetUID(), 0.0f);
+			active->pTarget.GetTo()->Touch(active->GetUID(), 0.0f);
 		}
 		//reset touching flag
 		active->bTouching = false;

@@ -979,7 +979,7 @@ void CActor::ProcessExtras()
 		if ( arrTouchProps.GetSize() > 0 )
 		{
 			IActiveInterface* pNewTouchable = arrTouchProps[ 0 ];
-			if ( pClosestTouchable.pTo != pNewTouchable )
+			if ( pClosestTouchable.GetTo() != pNewTouchable )
 			{
 				ClearActionsList();
 				CSmartLink::SetLink( &pClosestTouchable, pNewTouchable );
@@ -1129,13 +1129,18 @@ bool CActor::CheckShoot()
 
 void CActor::BuildActionsList()
 {
+	// ABOUT: 
+	// - all objects will come with a particular list of actions that can be executed on them (eg: box comes with "open" and "investigate")
+	// - shScriptActions - all objects have some keywords regarding their type or what class of actions you can execute on them. For example doors can be "door,door_locked" (see gameplaydef.xml)
+	// - based on shScriptActions and actions defined in gameplaydef.xml we add actions that can be done on object. eg: open and knock work on DOOR,DOOR_LOCKED, breach on DOOR_LOCKED
+	// - inventory objects get parsed and actions like "lockpick" can be added to "door, door_locked" if we have a lockpick in the inventory
 	arrInteractOptions.Clear();
 	if ( !pClosestTouchable.IsSet() )
 		return;
 	//1. get object specific actions
-	for (int kk = 0; kk < pClosestTouchable.pTo->arrActions.Count(); kk++)
+	for (int kk = 0; kk < pClosestTouchable.GetTo()->arrActions.Count(); kk++)
 	{
-		arrInteractOptions.Add(pClosestTouchable.pTo->arrActions[kk]);
+		arrInteractOptions.Add(pClosestTouchable.GetTo()->arrActions[kk]);
 	}
 	//#TODO: 2. get inventory specific actions for targeted object class
 	//#TODO: 3. get player class specific actions for targeted object class

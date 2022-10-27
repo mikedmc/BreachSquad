@@ -41,8 +41,8 @@ public:
 	VecProj					pos;					// Z coord gets added to Y to simulate 3D when rendering (see Z_TO_H macros)
 	VecProj					pos_ini;				// initial position needed for relative calculations. Usually only set when spawned.
 
-	bool					bTouching;				// folosit ca sa elimine eventuale cicluri infinite.
-	UINT32 					nTouchingUID;   		// Reprezinta UID-ul celui care a facut touch sau 0 pt niciunul
+	bool					bTouching;				// set to true while being touched so we don't start another
+	UINT32 					nTouchingUID;   		// UID-ul of toucher or 0 for none
 													   
 	DWORD					color;
 	int						heightZ;				// height of object, same as in bbox Z axis

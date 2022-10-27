@@ -216,7 +216,7 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 				if ( active.pTarget.IsSet() )
 				{
 					// must point to CActive
-					CProp* winact = dynamic_cast< CProp* >( active.pTarget.pTo );
+					CProp* winact = dynamic_cast< CProp* >( active.pTarget.GetTo() );
 					if ( winact == null )
 					{
 						ErrorBox( K_ERR_WARNING, L"K_AI_STATE_COLL_BREAKABLE_WINDOW bad cast to CActive" );

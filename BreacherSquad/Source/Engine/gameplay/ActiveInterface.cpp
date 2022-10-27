@@ -131,6 +131,7 @@ void IActiveInterface::Kill()
 		
 		// release target pointers
 		CSmartLink::RemoveAllLinksTo( this );
+		CSmartLink::RemoveLink( &pTarget );
 	}
 }
 

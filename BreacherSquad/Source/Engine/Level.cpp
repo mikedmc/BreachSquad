@@ -4747,7 +4747,7 @@ OPRESULT CLevel::PaintOverGameLayer()
 		CActor* pPlayer = pPlayerActor[kk];
 		if ( pPlayer->pClosestTouchable.IsSet() )
 		{
-			Vec2 vpos = pPlayer->pClosestTouchable.pTo->pos.xy_proj;
+			Vec2 vpos = pPlayer->pClosestTouchable.GetTo()->pos.xy_proj;
 			UTSprite::PaintFrame( &m_sprInterface, vpos.x, vpos.y, ANM_IGM_INTERFACE_SPR_INTERACT_ONCE, 0, 0xffffffff );
 		}
 	}
@@ -4780,8 +4780,8 @@ OPRESULT CLevel::PaintOverGameLayer()
 		CActor* player = pPlayerActor[kk];
 		//touchables
 		IActiveInterface * activ = nullptr;
-		if(player->pClosestTouchable.IsSet())
-			activ = player->pClosestTouchable.pTo;
+		if ( player->pClosestTouchable.IsSet() )
+			activ = player->pClosestTouchable.GetTo();
 
 		if ( ( activ ) && ( activ->bHideInteractIcon == false ) &&
 			( activ != pLastPaintedTarget ) && ( player->collisionFlags & K_DIRFLAG_DOWN ) )
@@ -4932,7 +4932,7 @@ int CLevel::BuildLightVolume360( CLight * light, _VERTEX_PNCT4T4 *outVerts, int 
 		Vec2 vPos;
 		Vec2 vNorm;
 		Vec2i tlPos;
-		bool bCollided;
+		bool bCollided{};
 	};
 
 	const int	nSteps = 360;
@@ -5530,7 +5530,7 @@ void CLevel::TouchClosestActive( CActor * pToucherAct, float dTime )
 
 	if ( pToucherAct->pClosestTouchable.IsSet() )
 	{
-		pToucherAct->pClosestTouchable.pTo->Touch( pToucherAct->GetUID(), dTime );
+		pToucherAct->pClosestTouchable.GetTo()->Touch( pToucherAct->GetUID(), dTime );
 	}
 }
 

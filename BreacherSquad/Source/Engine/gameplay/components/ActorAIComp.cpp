@@ -88,8 +88,8 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 				AIsensor.bTargetLOS = true;
 				//float enemyDst = MUVec2Len( &(targetActor->GetPosHeart() - act.GetPosHeart()) );
 				AIsensor.evtInternal.Set( K_AIEVT_SEE_ENEMY, targetActor->GetUID(), targetActor->_template.actorClass, targetActor->GetPosHeart(), 0.0f, 1.0f );
-				// set target pointer and increase ref only if different
-				if ( AIsensor.pTargetedActor.pTo != targetActor )
+				// set target pointer only if different
+				if ( AIsensor.pTargetedActor.GetTo() != targetActor )
 				{
 					//alerts the other enemies (only enemies do this, they kind of shout)
 					if (( act._template.actorClass >= K_ACT_CLASSCHECKPOINT_ENEMIES ) && (targetActor != nullptr))
@@ -125,14 +125,15 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					AIsensor.bTargetLOS = false;
 
 					bool bGiveUp = false;
-					if ( !AIsensor.pTargetedActor.pTo->IsAlive() || AIsensor.fTargetLostTimer >= K_AIC_GIVE_UP_TARGET_TIMER )
+					CActor* pactt = static_cast<CActor*>(AIsensor.pTargetedActor.GetTo());
+					if ( !pactt->IsAlive() || AIsensor.fTargetLostTimer >= K_AIC_GIVE_UP_TARGET_TIMER )
 						bGiveUp = true;
 
 					if ( bGiveUp )
 					{
 						AIsensor.fTargetLostTimer = 0.0f;
 						//#TODO: only set lost enemy if he doesn't die. If he dies set another ENEMY_KILLED ? what other event could we use?
-						AIsensor.evtInternal.Set( K_AIEVT_LOST_ENEMY, 0, K_ACT_CLASS_ANY, AIsensor.pTargetedActor.pTo->pos.xy, 16.0f, 1.0f );
+						AIsensor.evtInternal.Set( K_AIEVT_LOST_ENEMY, 0, K_ACT_CLASS_ANY, pactt->pos.xy, 16.0f, 1.0f );
 						//reset targeting actor
 						CSmartLink::RemoveLink( &AIsensor.pTargetedActor );
 					}
@@ -238,17 +239,23 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 
 			case AI_BEHAVIOR_ATTACK:
 			{
-				if ( !AIsensor.pTargetedActor.IsSet() || ( !AIsensor.pTargetedActor.pTo->IsAlive() ) )
+				if (!AIsensor.pTargetedActor.IsSet())
 				{
 					bBehaviorFinished = true;
 					break;
 				}
-				
-				act.vAim = AIsensor.pTargetedActor.pTo->pos.xy - act.pos.xy;
+				CActor* ptact = static_cast<CActor*>( AIsensor.pTargetedActor.GetTo() );
+				if ( ptact == nullptr || !ptact->IsAlive() )
+				{
+					bBehaviorFinished = true;
+					break;
+				}
+
+				act.vAim = ptact->pos.xy - act.pos.xy;
 
 				if ( AIsensor.bTargetLOS )
 				{
-					AIsensor.SetGoTo( AIsensor.pTargetedActor.pTo->pos.xy );
+					AIsensor.SetGoTo( ptact->pos.xy );
 					// movement	(replaces process goto because it must maintain distances)
 					Vec2 vEnemyDir = AIsensor.vGoTo - act.pos.xy;
 					float enemy_dist = MUVec2Len( &vEnemyDir );
@@ -308,11 +315,11 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					bool bRecompute = ( st == K_STATE_NOTSET || st == K_STATE_FINISHED );
 					if ( AIsensor.arrGoToPoints.Count() == 0 )
 						bRecompute = true;
-					if ( MUVec2LenSq( &( AIsensor.pTargetedActor.pTo->pos.xy - AIsensor.vGoTo ) ) >= SQUARE(K_TILE_SIZE_F * 4.0f) )
+					if ( MUVec2LenSq( &( ptact->pos.xy - AIsensor.vGoTo ) ) >= SQUARE(K_TILE_SIZE_F * 4.0f) )
 						bRecompute = true;
 					// find new path if we don't have one or if the target actor is far away from the vGoTo
 					if ( bRecompute == true ) {
-						AIsensor.SetGoTo( AIsensor.pTargetedActor.pTo->pos.xy );
+						AIsensor.SetGoTo( ptact->pos.xy );
 						LOG(L"ATTACK: recomputed path");
 						if ( false == SavePathInSensor( act, AIsensor.vGoTo, COL_MOVEMENT_BLOCK, false, COL_CLEARANCE0 | COL_CLEARANCE1, COL_CLEARANCE0 | COL_CLEARANCE1 ) ) {
 							// can't find a valid path, give up state
@@ -519,7 +526,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 							//PlayActorSoundVerse(actor, K_LVL_ACT_VERSE_TAUNT);
 						}
 
-						CActor* targetact = dynamic_cast<CActor*>( AIsensor.pTargetedActor.pTo );
+						CActor* targetact = dynamic_cast<CActor*>( AIsensor.pTargetedActor.GetTo() );
 						_ASSERT( targetact != nullptr );
 						Vec2 vDelta = targetact->GetPosHeart() - act.GetPosHeart();
 						float fDist = fabs( vDelta.x );
