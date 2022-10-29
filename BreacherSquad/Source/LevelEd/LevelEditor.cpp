@@ -496,7 +496,11 @@ void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 				light->color = D3DCOLOR_COLORVALUE( color.x, color.y, color.z, 1.0f );
 			}
 			// cast shadows
-			ImGui::Checkbox( "Shadows", &light->castShadows );
+			bool casts_shadows = light->GetCastShadows();
+			if ( ImGui::Checkbox( "Shadows", &casts_shadows ) )
+			{
+				light->SetCastShadows( casts_shadows );
+			}
 		}
 		break;
 
@@ -653,7 +657,11 @@ void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 				light->color = D3DCOLOR_COLORVALUE( color.x, color.y, color.z, 1.0f );
 			}
 			// cast shadows
-			ImGui::Checkbox( "Shadows", &light->castShadows );
+			bool casts_shadows = light->GetCastShadows();
+			if ( ImGui::Checkbox( "Shadows", &casts_shadows ) )
+			{
+				light->SetCastShadows( casts_shadows );
+			}
 		}
 		break;
 	}

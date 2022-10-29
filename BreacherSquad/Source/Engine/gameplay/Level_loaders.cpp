@@ -399,7 +399,6 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 	{
 		CLight *nl = new CLight(new CActiveAIComponent());
 		nl->m_nLightMeshIdx = -1;
-		nl->m_nShadowMeshIdx = -1;
 
 		nl->ID = unBaseID + OS_freadUInt32(fl);
 		nl->type = (eLightType)OS_freadByte(fl); //tip lumina
@@ -452,7 +451,8 @@ OPRESULT CLevel::LoadArea(WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL)
 		fAngle = DEG_TO_RAD(fAngle);
 		//casts shadows
 		UINT16 u2b = OS_freadUInt16(fl);
-		nl->castShadows = ((u2b & K_EDITOR_LIGHT_FLAG_CAST_SHADOWS) != 0);
+		bool casts_shadows = ((u2b & K_EDITOR_LIGHT_FLAG_CAST_SHADOWS) != 0);
+		nl->SetCastShadows( casts_shadows );
 
 		//save global ambient light color
 		if (nl->type == K_LVL_LT_AMBIENTAL)

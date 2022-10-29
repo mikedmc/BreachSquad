@@ -284,7 +284,7 @@ CLight*	CLevel::SpawnLight( Vec3 spawnPos, eLightType eType, DWORD dwColor, floa
 	nl->fRadius = fRadius;
 	nl->color = dwColor;
 	nl->color_ini = nl->color;
-	nl->castShadows = bCastShadows;
+	nl->SetCastShadows( bCastShadows );
 
 	//set all internal light data needed for rendering
 	nl->UpdateInternalData( &m_sprLights );
@@ -399,7 +399,7 @@ void CLevel::UpdateDirtyRects()
 					CTile* tlU = area->GetTile( xx, yy - 1 );
 					CTile* tlD = area->GetTile( xx, yy + 1 );
 					///--- set wall flags on non walkable tiles for shadows and other 
-					if ( FLAG_ANY(tl->flags, K_TILEFLAG_WALKABLE) && FLAG_NONE(tl->flags, K_TILEFLAG_UNDER_FLOOR) )
+					if ( FLAG_NONE(tl->flags, K_TILEFLAG_WALKABLE) && FLAG_NONE(tl->flags, K_TILEFLAG_UNDER_FLOOR) )
 					{
 						// clear flags
 						FLAGOP_CLEAR( tl->flags, K_TILEFLAG_HASWALL_MASK | K_TILEFLAG_WALLENDING_MASK );
@@ -1710,10 +1710,6 @@ bool CLevel::NormalizeMouseCoords( int ControllerIID, float fAxisValue, bool bIs
 }
 
 
-// allocate temp verts buffer on stack
-const int temp_arrVertsSize = 1200 * 3;
-_VERTEX_PNCT4T4 temp_arrVerts[temp_arrVertsSize];
-
 void CLevel::BuildDynamicGeometry( CAABB camAABB )
 {
 	const int arrOccludersSize = 200;
@@ -1730,12 +1726,15 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 			{
 				//--- create light volumes for shadow casting lights	---
 				nl->m_nLightMeshIdx = -1;
-				if ( nl->castShadows )
+				if ( nl->GetCastShadows() )
 				{
+#if defined(DEBUG_LIGHTS_SHOW_OCCLUDERS)
 					// returns a list of segments that will form shadows (from both tiles and collision boxes)
 					int nOccluders = GetOccluderSegments( nl->pos.xy, nl->bbox, arrOccluders, arrOccludersSize );
 
-#if defined(DEBUG_LIGHTS_SHOW_OCCLUDERS)
+					const int temp_arrVertsSize = 1200 * 3;
+					_VERTEX_PNCT4T4 temp_arrVerts[temp_arrVertsSize];
+
 					//do not delete! shows occluders instead of mesh. Checked for consistency.
 					int nVertCnt = 0;
 					for (int kk = 0; kk < nOccluders; kk++)
@@ -1758,19 +1757,28 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 					}
 					
 #else				
-					// default branch for showing lights:
-					if ( nOccluders > 0 )
+					if ( nl->IsDirty() )
 					{
-						// builds the light FOV as a triangle list mesh (sending rays or skyscraper method)
-						int retVerts = FOVUtil::BuildOccludedVolume( nl->pos.xy, nl->color, arrOccluders, nOccluders, temp_arrVerts, temp_arrVertsSize );
-						// add tris as light volume
-						if ( retVerts > 0 )
+						// returns a list of segments that will form shadows (from both tiles and collision boxes)
+						int nOccluders = GetOccluderSegments( nl->pos.xy, nl->bbox, arrOccluders, arrOccludersSize );
+
+						// default branch for showing lights:
+						if ( nOccluders > 0 )
 						{
-							// adds dynamic mesh for light volume
-							m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
-							m_bufferedPainter.AddTriangles( temp_arrVerts, retVerts / 3 );
-							m_bufferedPainter.EndMesh();
+							// builds the light FOV as a triangle list mesh (sending rays or skyscraper method)
+							nl->m_arrVertsCnt = FOVUtil::BuildOccludedVolume( nl->pos.xy, nl->color, arrOccluders, nOccluders, nl->m_arrVerts, K_LVL_LIGHT_MAX_VERTS );
 						}
+
+						nl->SetDirty( false );
+					}
+
+					// add tris from light cache buffer as light volume
+					if ( nl->m_arrVertsCnt > 0 )
+					{
+						// adds dynamic mesh for light volume
+						m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
+						m_bufferedPainter.AddTriangles( nl->m_arrVerts, nl->m_arrVertsCnt / 3 );
+						m_bufferedPainter.EndMesh();
 					}
 #endif					
 
@@ -1800,6 +1808,8 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 					m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
 					m_bufferedPainter.AddTriangles( lightRectV, 2 );
 					m_bufferedPainter.EndMesh();
+
+					nl->SetDirty( false );
 				}
 			}
 			break;
@@ -4430,7 +4440,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 				if ( nl != pLight )
 					continue;
 
-				if ( ( nl->type != K_LVL_LT_POINT ) || ( nl->castShadows == false ) )
+				if ( ( nl->type != K_LVL_LT_POINT ) || ( !nl->GetCastShadows() ) )
 					continue;
 
 				m_bufferedPainter.DrawMesh( nl->m_nLightMeshIdx, true );
@@ -4563,7 +4573,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
 
-		if ( ( nl->type != K_LVL_LT_IES ) || ( nl->castShadows ) )
+		if ( ( nl->type != K_LVL_LT_IES ) || ( nl->GetCastShadows() ) )
 			continue;
 
 		//the IES dot texture has 3 pixel lines per IES profile so we don't get interpolation problems

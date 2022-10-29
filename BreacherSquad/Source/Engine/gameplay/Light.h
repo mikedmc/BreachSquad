@@ -33,6 +33,8 @@ enum eLightType {
 // distance attenuation formula: 1.0/(1.0 + c1*dist + c2*dist*dist)
 #define K_LVL_LIGHTRENDER_ATTEN_C1					0.2f
 #define K_LVL_LIGHTRENDER_ATTEN_C2					1.0f
+// maximum number of verts for lights shadow mesh (used to be 1200)
+#define K_LVL_LIGHT_MAX_VERTS						600 * 3
 
 class CLight : public IActiveInterface
 {
@@ -43,22 +45,28 @@ public:
 
 public:
 	CActiveAIComponent*	c_AI;						// AI component for lights
+
 public:
 	eLightType			type;
 
-	Vec3				lCorners[4];				// screen space light rectangle (clockwise) relative to light (Z must be 0). Min rect that fits 2d projection of light. Used to accelerate creation of light mesh.
-	Vec3				vnDir;						// normalized direction of light (necessary for some lights)
+	Vec3				lCorners[4]{};				// screen space light rectangle (clockwise) relative to light (Z must be 0). Min rect that fits 2d projection of light. Used to accelerate creation of light mesh.
+	Vec3				vnDir{};					// normalized direction of light (necessary for some lights)
 	RectLTRB			lTexRect;					// light spot source texture when necessary
 	float				fRadius;					// radius of light where necessary
-	bool				castShadows;
 	float				fIntensity;					// light intensity
 	int					nProfileID;					// keeps frameID for textured lights and IES profile for IES lights
 
 	int					m_nLightMeshIdx;			// buffer-ul dinamic pt spotul luminii
-	int					m_nShadowMeshIdx;			// buffer-ul dinamic pt shadow volume
-													   
+	
+	int					m_arrVertsCnt;				// number of verts in arrVerts buffer
+	_VERTEX_PNCT4T4*	m_arrVerts;					// vertex buffers of shadowing lights so we don't recompute unless needed
+
 	SprFrameId			fidTexture;					// mostly used for projected lights
 	float				fVolumeAlpha;				// light's atmospheric volume alpha
+
+private:
+	bool				m_bDirty;					// dirty flag, means recomputation of light mesh is necessary
+	bool				castShadows;				// arrVerts is allocated only when it casts shadows
 
 public:
 	CLight(CActiveAIComponent* pLightAIComp);
@@ -72,7 +80,18 @@ public:
 	void				SetAI( EAIstate newstate ) override;
 
 	void				Update( float dTime, CLevel& level );
-
+	
+	inline bool			GetCastShadows() {
+		return castShadows;
+	}
+	// if the light needs heavy recomputations
+	inline bool			IsDirty() {
+		return m_bDirty;
+	}
+	// enables or disables casting shadows (and allocates necessary structures)
+	void				SetCastShadows( bool bCast );
+	// Changes the dirty flag
+	void				SetDirty( bool bDirty );
 	// sets light direction with fallback for empty vectors
 	void				SetDir(Vec3 nDir);
 	// Initializes internal data for rendering

@@ -98,11 +98,11 @@ void CLevel::BuildVisibilityLists()
 				{
 					if (m_visibleList.visible_lights.Add(m_arrLights[kk]) < 0)
 						break;
-					if (m_arrLights[kk]->castShadows)
+					if (m_arrLights[kk]->GetCastShadows())
 					{
 						CAABB bbox_max(Vec2(light->pos.xy_proj.x - light->fRadius, light->pos.xy_proj.y - light->fRadius), 
 							Vec2(light->pos.xy_proj.x + light->fRadius, light->pos.xy_proj.y + light->fRadius));
-						//la prima lumina cu shadow seteaza lightsCommonAABB fix pe bbox-ul luminii
+						// first shadow casting light sets the bbox on the light bbox
 						if (bFirstShadowingLightSet == false)
 						{
 							bFirstShadowingLightSet = true;
