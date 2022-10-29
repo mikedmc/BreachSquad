@@ -170,10 +170,10 @@ CActor* CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHa
 	}
 	*/
 	// get weapons sprite lib and send it to the weapons component
-	CSpriteLib* pSprWpn = m_sprActors.GetLibByNick( K_LIBNICK_WEAPONS );
+	CSpriteLib* pSprWpn = m_sprLib.GetLibByNick( K_LIBNICK_WEAPONS );
 	CActor* nact = new CActor( spawnPos, templateLocal, GenerateNextID(),
 		*this,
-		new CSpriteActorComponent( &m_sprActors ),
+		new CSpriteActorComponent( &m_sprLib ),
 		new CWeaponsComponent( pSprWpn ),
 		new CActorAIComponent( *this )
 	);
@@ -287,7 +287,8 @@ CLight*	CLevel::SpawnLight( Vec3 spawnPos, eLightType eType, DWORD dwColor, floa
 	nl->SetCastShadows( bCastShadows );
 
 	//set all internal light data needed for rendering
-	nl->UpdateInternalData( &m_sprLights );
+	CSpriteLib* spr_lights = m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
+	nl->UpdateInternalData( spr_lights );
 	// called when adding the light to the lights array
 	nl->PostConstructionInit();
 	//add light and return it
@@ -4212,7 +4213,8 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	/// SHADOWS - blends wall shadows into the color map so it won't come over the players heads
 	if ( ePass == K_LVL_RP_COLORS )
 	{
-		scTexture* pShadowsTex = m_sprLights.GetTextureByAnim( ANM_LIGHTS_SPR_SHADOWS, 0, 0 );
+		CSpriteLib* spr_lights = m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
+		scTexture* pShadowsTex = spr_lights->GetTextureByAnim( ANM_LIGHTS_SPR_SHADOWS, 0, 0 );
 		if ( pShadowsTex )
 			m_pDevice->SetTexture( 0, pShadowsTex->pTex );
 
@@ -4295,6 +4297,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
 	CAABB			camAABB( camrect );
 
+	CSpriteLib* spr_lights = m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
 	///----------------------------------------------------
 	/// INITIAL SETUP
 	///----------------------------------------------------
@@ -4465,7 +4468,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 		if ( vis->eType != K_VST_ACTOR )
 			continue;
 		CActor* act = static_cast< CActor* >( vis->pPtr );
-		UTSprite::PaintFModule( &m_sprLights, act->pos.xy, ANM_LIGHTS_SPR_CHAR_SHADOWS, 0, 0 );
+		UTSprite::PaintFModule( spr_lights, act->pos.xy, ANM_LIGHTS_SPR_CHAR_SHADOWS, 0, 0 );
 	}
 	__Painter().Flush();
 
@@ -4517,7 +4520,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 
 	///--- directional projected lights
 	//all directional projected light must be in the same animation
-	scTexture* pLightTex = m_sprLights.GetTextureByAnim( ANM_LIGHTS_SPR_PROJECTED_DIR, 0, 0 );
+	scTexture* pLightTex = spr_lights->GetTextureByAnim( ANM_LIGHTS_SPR_PROJECTED_DIR, 0, 0 );
 	if ( pLightTex )
 		m_pDevice->SetTexture( 1, pLightTex->pTex );
 	m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_POINT );
@@ -4556,7 +4559,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 
 
 	///--- IES lights without shadow
-	scTexture* pIESTex = m_sprLights.GetTextureByAnim( ANM_LIGHTS_SPR_IES, 0, 0 );
+	scTexture* pIESTex = spr_lights->GetTextureByAnim( ANM_LIGHTS_SPR_IES, 0, 0 );
 	_ASSERT( pIESTex != nullptr );
 	m_pDevice->SetTexture( 1, pIESTex->pTex );
 	m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_POINT );
@@ -4902,9 +4905,8 @@ void CLevel::Release()
 	m_poolDoofers.Release();
 	//m_poolPhysPts.Release();
 
-	m_sprLights.Release();
 	m_sprProps.Release();
-	m_sprActors.Release();
+	m_sprLib.Release();
 	m_sprInterface.Release();
 
 	m_texManager.Release();
@@ -5718,9 +5720,8 @@ OPRESULT CLevel::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc, v
 {
 	m_pDevice = pDevice;
 
-	V_OP_RET( m_sprLights.OnCreateDevice( pDevice ) );
 	V_OP_RET( m_sprProps.OnCreateDevice( pDevice ) );
-	V_OP_RET( m_sprActors.OnCreateDevice( pDevice ) );
+	V_OP_RET( m_sprLib.OnCreateDevice( pDevice ) );
 	V_OP_RET( m_sprInterface.OnCreateDevice( pDevice ) );
 	V_OP_RET( m_texManager.OnCreateDevice( pDevice ) );
 	V_OP_RET( m_bufferedPainter.OnCreateDevice( pDevice ) );
@@ -5738,9 +5739,8 @@ OPRESULT CLevel::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc, vo
 {
 	m_pDevice = pDevice;
 
-	V_OP_RET( m_sprLights.OnResetDevice( pDevice ) );
 	V_OP_RET( m_sprProps.OnResetDevice( pDevice ) );
-	V_OP_RET( m_sprActors.OnResetDevice( pDevice ) );
+	V_OP_RET( m_sprLib.OnResetDevice( pDevice ) );
 	V_OP_RET( m_sprInterface.OnResetDevice( pDevice ) );
 	V_OP_RET( m_texManager.OnResetDevice( pDevice ) );
 	V_OP_RET( m_bufferedPainter.OnResetDevice( pDevice ) );
@@ -5758,9 +5758,8 @@ OPRESULT CLevel::OnLostDevice( void* pUserContext )
 {
 	m_pDevice = nullptr;
 
-	m_sprLights.OnLostDevice();
 	m_sprProps.OnLostDevice();
-	m_sprActors.OnLostDevice();
+	m_sprLib.OnLostDevice();
 	m_sprInterface.OnLostDevice();
 	m_texManager.OnLostDevice();
 
@@ -5779,9 +5778,8 @@ OPRESULT CLevel::OnDestroyDevice( void* pUserContext )
 {
 	m_pDevice = nullptr;
 
-	m_sprLights.OnDestroyDevice();
 	m_sprProps.OnDestroyDevice();
-	m_sprActors.OnDestroyDevice();
+	m_sprLib.OnDestroyDevice();
 	m_sprInterface.OnDestroyDevice();
 	m_texManager.OnDestroyDevice();
 

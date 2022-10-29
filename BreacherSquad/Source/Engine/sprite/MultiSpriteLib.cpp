@@ -85,6 +85,7 @@ CSpriteLib* CMultiSpriteLib::GetLibByNick( WCHAR* nickname )
 		if ( arrLibs[ kk ]->shNickname.textHash == shID )
 			return &arrLibs[kk]->spriteLib;
 	}
+	ErrorBox( K_ERR_WARNING, L"Could not find sprLib by nick: %s", nickname );
 	return nullptr;
 }
 

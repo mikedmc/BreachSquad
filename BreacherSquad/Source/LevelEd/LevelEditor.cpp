@@ -455,6 +455,9 @@ IActiveInterface* CLevelEditor::SelectClosest( Vec2 vPoint, float fMaxRadius )
 
 void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 {
+	CSpriteLib* spr_lights = m_pLevel->m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
+	_ASSERT(spr_lights != nullptr && "Failed to get LIBNICK_LIGHTS");
+
 	if ( light == nullptr )
 	{
 		ImGui::Text( "RMB to select" );
@@ -465,7 +468,7 @@ void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 	if ( ImGui::Combo( "Type", &ltype, K_LIGHT_TYPES_NAMES_ARR, IM_ARRAYSIZE( K_LIGHT_TYPES_NAMES_ARR ), IM_ARRAYSIZE( K_LIGHT_TYPES_NAMES_ARR ) ) )
 	{
 		light->type = (eLightType)ltype;
-		light->UpdateInternalData( &m_pLevel->m_sprLights );
+		light->UpdateInternalData( spr_lights );
 	}
 
 	ImGui::Separator();
@@ -517,7 +520,7 @@ void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 			if ( ImGui::DragFloat3( "Direction", d3, 0.02f, -1.0f, 1.0f, "%.2f" ) )
 			{
 				light->SetDir( Vec3( d3[0], d3[1], d3[2] ) );
-				light->UpdateInternalData( &m_pLevel->m_sprLights );
+				light->UpdateInternalData( spr_lights );
 			}
 			// intensity
 			ImGui::DragFloat( "Intensity", &light->fIntensity, 0.01f, 0.1f, 5.0f, "%.2f" );
@@ -539,17 +542,17 @@ void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 
 				int anmID = light->fidTexture.animIdx;
 				if ( anmID < 0 ) anmID = 0;
-				if ( anmID > m_pLevel->m_sprLights.Animations.Count() - 1 ) anmID = 0;
+				if ( anmID > spr_lights->Animations.Count() - 1 ) anmID = 0;
 				ImVec2 button_sz( 48, 48 );
-				scAnimation* anm = m_pLevel->m_sprLights.Animations[anmID];
-				PTEXTURE imgtex = m_pLevel->m_sprLights.Textures[0]->pTex;
+				scAnimation* anm = spr_lights->Animations[anmID];
+				PTEXTURE imgtex = spr_lights->Textures[0]->pTex;
 
 				ImGuiStyle& style = ImGui::GetStyle();
 				float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
 
 				for ( int n = 0; n < anm->aframesNo; n++ )
 				{
-					RectLTRB texrect = m_pLevel->m_sprLights.GetModuleRect_TexCoords( anmID, n, 0 );
+					RectLTRB texrect = spr_lights->GetModuleRect_TexCoords( anmID, n, 0 );
 					ImVec2 tul( texrect.left, texrect.top );
 					ImVec2 tdr( texrect.right, texrect.bottom );
 
@@ -560,7 +563,7 @@ void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 					ImGui::PushID( n );
 					if ( ImGui::ImageButton( (void*)(intptr_t)imgtex, button_sz, tul, tdr, 2, bgcol ) )
 					{
-						light->SetLightTexture( &m_pLevel->m_sprLights, anmID, n );
+						light->SetLightTexture( spr_lights, anmID, n );
 					}
 
 					float last_button_x2 = ImGui::GetItemRectMax().x;
@@ -590,7 +593,7 @@ void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 			if ( ImGui::DragFloat3( "Direction", d3, 0.02f, -1.0f, 1.0f, "%.2f" ) )
 			{
 				light->SetDir( Vec3( d3[0], d3[1], d3[2] ) );
-				light->UpdateInternalData( &m_pLevel->m_sprLights );
+				light->UpdateInternalData( spr_lights );
 			}
 			// intensity
 			ImGui::DragFloat( "Intensity", &light->fIntensity, 0.01f, 0.1f, 5.0f, "%.2f" );
@@ -637,7 +640,7 @@ void CLevelEditor::IMGUI_AddLightProps( CLight* light )
 			if ( ImGui::DragFloat3( "Direction", d3, 0.02f, -1.0f, 1.0f, "%.2f" ) )
 			{
 				light->SetDir( Vec3( d3[0], d3[1], d3[2] ) );
-				light->UpdateInternalData( &m_pLevel->m_sprLights );
+				light->UpdateInternalData( spr_lights );
 			}
 			// radius
 			if ( ImGui::DragFloat( "Radius", &light->fRadius, 1.0f, 16.0f, 1000.0f, "%.2f" ) )

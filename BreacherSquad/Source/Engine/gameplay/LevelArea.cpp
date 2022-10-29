@@ -15,12 +15,12 @@ CLevelArea::~CLevelArea()
 	Release();
 }
 
-OPRESULT CLevelArea::BuildBuffers( PDEVICE pDevice, CSpriteLib* pLightsSprCol )
+OPRESULT CLevelArea::BuildBuffers( PDEVICE pDevice )
 {
-	_ASSERT( pDevice != nullptr && pLightsSprCol != nullptr );
+	_ASSERT( pDevice != nullptr );
 
 	areaMesh.Init( pDevice );
-	V_OP_RET( areaMesh.BuildBuffers( tiles, sizeTL, Vec2( AABBbounds.vMin.x, AABBbounds.vMin.y ), pLightsSprCol ) );
+	V_OP_RET( areaMesh.BuildBuffers( tiles, sizeTL, Vec2( AABBbounds.vMin.x, AABBbounds.vMin.y ) ) );
 
 	return K_OP_OK;
 }

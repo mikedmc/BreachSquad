@@ -44,6 +44,7 @@ void CLight::SetCastShadows( bool bCast )
 	m_arrVertsCnt = 0;
 	if ( castShadows )
 	{
+		_ASSERT( m_arrVerts == nullptr );
 		m_arrVerts = new _VERTEX_PNCT4T4[K_LVL_LIGHT_MAX_VERTS];
 	}
 	else

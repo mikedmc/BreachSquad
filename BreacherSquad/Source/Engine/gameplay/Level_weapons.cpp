@@ -320,7 +320,7 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 	// loads all weapon files into a library
 	swprintf_s( wcsPath, MAX_PATH, L"media/levels/data/weapons/%s", doc.root().child( L"WEAPONS" ).attribute( L"file" ).value() );
 	FileManager::GetMediaPath( wcsPath, Path );
-	V_OP_RET( m_sprActors.AddSprites( Path, m_libidxWeapons, K_LIBNICK_WEAPONS ) );
+	V_OP_RET( m_sprLib.AddSprites( Path, m_libidxWeapons, K_LIBNICK_WEAPONS ) );
 
 	///----------------------------------------------------------------------------------
 	/// LOAD EXPLOSION TEMPLATES
@@ -406,7 +406,7 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		// get weapons animation idices
 		templ->animIdx_reload = -1;
 		templ->animIdx_shoot = -1;
-		CSpriteLib* pSprWpn = m_sprActors.GetLibByNick( K_LIBNICK_WEAPONS );
+		CSpriteLib* pSprWpn = m_sprLib.GetLibByNick( K_LIBNICK_WEAPONS );
 		if ( pSprWpn )
 		{
 			if ( !bnode.attribute( L"animShoot" ).empty() ) {

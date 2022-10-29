@@ -58,7 +58,7 @@ public:
 	// Returns true if the mesh for specified layer is visible
 	bool					IsLayerMeshVisible( eAreaLayer layer );
 	// orders building of the buffers
-	OPRESULT				BuildBuffers( PDEVICE pDevice, CSpriteLib* pLightsSprCol );
+	OPRESULT				BuildBuffers( PDEVICE pDevice );
 	// intersection of segment with tiles (nullptr if not intersecting)
 	// tileFlagsNonCollide - if tile has one of the flags then it's not colliding
 	CTile*					SegmentTilesIntersection( Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i *hitTilePosTL, DWORD tileFlagsNonCollide = K_TILEFLAG_WALKABLE | K_TILEFLAG_UNDER_FLOOR );

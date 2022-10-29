@@ -18,7 +18,7 @@ CTileBlockMesh::~CTileBlockMesh()
 	Clear();
 }
 
-OPRESULT CTileBlockMesh::BuildBuffers(Vec2i vBlockPos_TL, CTile** map, SizeWHi mapSizeTL, Vec2 vOffset, CSpriteLib* pLightsSpr)
+OPRESULT CTileBlockMesh::BuildBuffers( Vec2i vBlockPos_TL, CTile** map, SizeWHi mapSizeTL, Vec2 vOffset )
 {
 	// allocate maximum possible number per layer plus sentinel
 	const size_t arrVertsLen = K_TBM_BLOCK_W * K_TBM_BLOCK_H * 4 + 16;
@@ -202,6 +202,7 @@ OPRESULT CTileBlockMesh::BuildBuffers(Vec2i vBlockPos_TL, CTile** map, SizeWHi m
 
 
 	///--- build shadow buffer ---
+	CSpriteLib*	spr_lights = __Sim().m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
 	if (OP_SUCCESS(m_Painter.BeginMesh(m_arrMeshIdx[K_AL_WALLSHADOWS])))
 	{
 		nCur = 0;
@@ -214,7 +215,7 @@ OPRESULT CTileBlockMesh::BuildBuffers(Vec2i vBlockPos_TL, CTile** map, SizeWHi m
 				if (tl->nShadowFrame < 0)
 					continue;
 				// get shadow tex coords
- 				RectLTRB texrect = pLightsSpr->GetModuleRect_TexCoords(ANM_LIGHTS_SPR_SHADOWS, tl->nShadowFrame, 0);
+ 				RectLTRB texrect = spr_lights->GetModuleRect_TexCoords(ANM_LIGHTS_SPR_SHADOWS, tl->nShadowFrame, 0);
 				// add geometry (Clockwise)
 				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
 					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
@@ -291,7 +292,7 @@ void CTileBlockMeshManager::Release()
 	SAFE_DELETE_GROWABLE_ARRAY(arrBlocks);
 }
 
-OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SizeWHi mapSizeTL, Vec2 vOffset, CSpriteLib* pLightsSpr)
+OPRESULT CTileBlockMeshManager::BuildBuffers( CTile** map, SizeWHi mapSizeTL, Vec2 vOffset )
 {
 	_ASSERT(m_pDevice != nullptr);
 	if (map == nullptr)
@@ -308,7 +309,7 @@ OPRESULT CTileBlockMeshManager::BuildBuffers(CTile** map, SizeWHi mapSizeTL, Vec
 			// block is allocated now so it missed device creation. Set device pointer and create needed buffers now
 			CTileBlockMesh* tbm = new CTileBlockMesh(m_pDevice);
 
-			if (OP_FAILED(tbm->BuildBuffers(Vec2i(blX * K_TBM_BLOCK_W, blY * K_TBM_BLOCK_H), map, mapSizeTL, vOffset, pLightsSpr)))
+			if (OP_FAILED(tbm->BuildBuffers(Vec2i(blX * K_TBM_BLOCK_W, blY * K_TBM_BLOCK_H), map, mapSizeTL, vOffset )))
 			{
 				LOG("Block NOT added!");
 				delete tbm;
