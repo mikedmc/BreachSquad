@@ -4,6 +4,7 @@
 // nickname for weapons sprlib in sprites multi library
 #define K_LIBNICK_WEAPONS	L"SPRLIB_WEAPONS"
 #define K_LIBNICK_LIGHTS	L"SPRLIB_LIGHTS"
+#define K_LIBNICK_PROPS		L"SPRLIB_PROPS"
 
 // Specifies animation indexes for quick access (for actors)
 enum EActorAnim

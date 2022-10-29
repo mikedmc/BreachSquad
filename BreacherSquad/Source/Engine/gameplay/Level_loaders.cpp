@@ -89,13 +89,13 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 
 
 	//LIGHTS
-	int libidx_lights = -1;
+	int libidxtmp = -1;
 	FileManager::GetMediaPath( L"media/levels/data/lights.bsx", Path );
-	V_OP_RET( m_sprLib.AddSprites( Path, libidx_lights, K_LIBNICK_LIGHTS ) );
+	V_OP_RET( m_sprLib.AddSprites( Path, libidxtmp, K_LIBNICK_LIGHTS ) );
 
 	//load bsx
 	FileManager::GetMediaPath( L"media/levels/data/props.bsx", Path );
-	V_OP_RET( m_sprProps.LoadSprites( Path ) );
+	V_OP_RET( m_sprLib.AddSprites( Path, libidxtmp, K_LIBNICK_PROPS) );
 
 	//--- load actors templates and weaponry right after props sprite ---
 	FileManager::GetMediaPath( L"media/levels/data/weapons/weapons_data.xml", Path );
@@ -519,6 +519,8 @@ OPRESULT CLevel::LoadArea( WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL )
 	OS_freadString( fl, charArr );
 
 	//--- props ---
+	CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_PROPS );
+
 	//#TODO: de folosit spawnProp peste tot
 	int decocnt = (int)OS_freadUInt32( fl );
 	for ( int kk = 0; kk < decocnt; kk++ )
@@ -538,14 +540,14 @@ OPRESULT CLevel::LoadArea( WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL )
 		//animation
 		CHAR charAnmName[MAX_PATH];
 		OS_freadString( fl, charAnmName );
-		int animIdx = m_sprProps.GetAnimationIdxByName( charAnmName );
+		int animIdx = spr_props->GetAnimationIdxByName( charAnmName );
 		if ( animIdx < 0 )
 			ErrorBox( K_ERR_WARNING, L"Active ID:%d without animation!", obj->ID );
 		//frame
 		int frameIdx = OS_freadUInt16( fl );
 		obj->color = 0xffffffff;
 		obj->fid_ini.Init( animIdx, frameIdx );
-		obj->sprite.Init( &m_sprProps, animIdx, obj->pos.xy_proj, frameIdx, obj->color );
+		obj->sprite.Init( spr_props, animIdx, obj->pos.xy_proj, frameIdx, obj->color );
 		//angle
 		//obj->fAngle = 0.0f;
 		//obj->fAngle_ini = 0.0f;
@@ -559,7 +561,7 @@ OPRESULT CLevel::LoadArea( WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL )
 		if ( obj->bAnimated )
 		{
 			// randomize starting frame if object is animated (loping usually)
-			obj->sprite.frameIdx = m_rand.RandInt( m_sprProps.GetAFramesCnt( obj->sprite.animIdx ) );
+			obj->sprite.frameIdx = m_rand.RandInt( spr_props->GetAFramesCnt( obj->sprite.animIdx ) );
 		}
 
 		//load logic and init data

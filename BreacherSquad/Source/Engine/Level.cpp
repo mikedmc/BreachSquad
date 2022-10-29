@@ -220,10 +220,11 @@ CProp* CLevel::SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nF
 	//anim
 	int animIdx = nAnimIdx;
 	int frameIdx = nFrameIdx;
-	obj->sprite.Init( &m_sprProps, animIdx, obj->pos.xy_proj, frameIdx, 0xffffffff );
+	CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_PROPS );
+	obj->sprite.Init( spr_props, animIdx, obj->pos.xy_proj, frameIdx, 0xffffffff );
 	obj->fid_ini.Init( animIdx, frameIdx );
 	obj->sprite.color = obj->color;
-	//#TODO: de mutat initializari de height si flags in PostConstructionInit
+	//#TODO: de mutat initializari de height si flags in PostConstructionInit si de cache spr_props sau luat ca param
 	//angle
 	//obj->fAngle = obj->fAngle_ini = 0.0f;
 	//load flags and split
@@ -236,11 +237,11 @@ CProp* CLevel::SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nF
 	//cand e animat selecteaza random frame-ul de pornire
 	if ( obj->bAnimated )
 	{
-		obj->sprite.frameIdx = m_rand.RandInt( m_sprProps.GetAFramesCnt( obj->sprite.animIdx ) );
+		obj->sprite.frameIdx = m_rand.RandInt( spr_props->GetAFramesCnt( obj->sprite.animIdx ) );
 	}
 	//bbox
-	RectXYWHi bbox_set = m_sprProps.GetAFrameBBox( animIdx, frameIdx );
-	RectXYWHi objbox = m_sprProps.GetAFrameBBox_real( animIdx, frameIdx );
+	RectXYWHi bbox_set = spr_props->GetAFrameBBox( animIdx, frameIdx );
+	RectXYWHi objbox = spr_props->GetAFrameBBox_real( animIdx, frameIdx );
 	obj->bbox.Set( objbox );
 	obj->bbox.SaveSnapshot();
 	obj->bbox_floor.Set( bbox_set );
@@ -4905,7 +4906,6 @@ void CLevel::Release()
 	m_poolDoofers.Release();
 	//m_poolPhysPts.Release();
 
-	m_sprProps.Release();
 	m_sprLib.Release();
 	m_sprInterface.Release();
 
@@ -5241,6 +5241,7 @@ bool CLevel::IsLineOfSight( Vec2 pt_from, Vec2 pt_to, CLevelArea * pStartArea )
 ///--- DECALS ---
 void CLevel::AddDecal( EDecalLayer nLayer, Vec2 pos, int animIdx, int frameIdx /*= 0*/, DWORD color /*= 0xffffffff*/, bool bIsAnimated /*= false*/ )
 {
+	/*
 	CDecal *ndec = new CDecal();
 
 	ndec->layer = nLayer;
@@ -5250,11 +5251,14 @@ void CLevel::AddDecal( EDecalLayer nLayer, Vec2 pos, int animIdx, int frameIdx /
 	ndec->bAnimated = bIsAnimated;
 
 	m_arrDecals.Add( ndec );
+	*/
 }
 
 
 void CLevel::UpdateDecals( float dTime )
 {
+	//#TODO: maybe remove animated decals and move decals to each area
+	/*
 	//Update less often
 	for ( int kk = 0; kk < m_arrDecals.GetSize(); kk++ )
 	{
@@ -5266,6 +5270,7 @@ void CLevel::UpdateDecals( float dTime )
 				m_arrDecals[kk]->bAnimated = false;
 		}
 	}
+	*/
 }
 
 void CLevel::AddDecal_BloodSplat( Vec2 pos, bool bLarge, EActorClass eVictimClass )
@@ -5720,7 +5725,6 @@ OPRESULT CLevel::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc, v
 {
 	m_pDevice = pDevice;
 
-	V_OP_RET( m_sprProps.OnCreateDevice( pDevice ) );
 	V_OP_RET( m_sprLib.OnCreateDevice( pDevice ) );
 	V_OP_RET( m_sprInterface.OnCreateDevice( pDevice ) );
 	V_OP_RET( m_texManager.OnCreateDevice( pDevice ) );
@@ -5739,7 +5743,6 @@ OPRESULT CLevel::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc, vo
 {
 	m_pDevice = pDevice;
 
-	V_OP_RET( m_sprProps.OnResetDevice( pDevice ) );
 	V_OP_RET( m_sprLib.OnResetDevice( pDevice ) );
 	V_OP_RET( m_sprInterface.OnResetDevice( pDevice ) );
 	V_OP_RET( m_texManager.OnResetDevice( pDevice ) );
@@ -5758,7 +5761,6 @@ OPRESULT CLevel::OnLostDevice( void* pUserContext )
 {
 	m_pDevice = nullptr;
 
-	m_sprProps.OnLostDevice();
 	m_sprLib.OnLostDevice();
 	m_sprInterface.OnLostDevice();
 	m_texManager.OnLostDevice();
@@ -5778,7 +5780,6 @@ OPRESULT CLevel::OnDestroyDevice( void* pUserContext )
 {
 	m_pDevice = nullptr;
 
-	m_sprProps.OnDestroyDevice();
 	m_sprLib.OnDestroyDevice();
 	m_sprInterface.OnDestroyDevice();
 	m_texManager.OnDestroyDevice();

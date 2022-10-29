@@ -85,6 +85,7 @@ void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float
 		//reset
 		node->m_data.physPt->m_data.Reset();
 		 */
+		/*
 		node->m_data.type = K_DOOFER_LIGHT;
 
 		node->m_data.sprLight.Init(nLightAnimIdx, 0.0f, 0.0f, 0, color);
@@ -94,6 +95,7 @@ void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float
 		node->m_data.fLightFadeOut = fFadeTime;
 
 		node->m_data.fTimer = 0.0f;
+		*/
 		//physics
 		/*
 		node->m_data.physPt->m_data.bFlagPhysicsEnabled = false;
@@ -219,7 +221,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 		{
 			bInteractAI = true;
 
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_FIRE1, 0.0f, 0.0f, 0);
+			//node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_FIRE1, 0.0f, 0.0f, 0);
 			node->m_data.fSize = 1.0f;
 
 			node->m_data.fTimer = 0.4f;
@@ -239,7 +241,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 		{
 			bInteractAI = true;
 
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_FIRE1, 0.0f, 0.0f, 0);
+			//node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_FIRE1, 0.0f, 0.0f, 0);
 			node->m_data.fSize = 1.0f;
 
 			node->m_data.fTimer = 0.4f;
@@ -259,7 +261,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 		{
 			bInteractAI = true;
 
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_FIRE1, 0.0f, 0.0f, 0);
+			//node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_FIRE1, 0.0f, 0.0f, 0);
 			node->m_data.fSize = 1.0f;
 			node->m_data.fTimer = 0.4f;
 
@@ -354,7 +356,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 		{
 			bInteractAI = true;
 
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_FIRE1, 0.0f, 0.0f, 0);
+			//node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_FIRE1, 0.0f, 0.0f, 0);
 			node->m_data.fSize = 1.5f;
 
 			node->m_data.fTimer = 0.2f;
@@ -374,7 +376,7 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 		{
 			bInteractAI = true;
 
-			node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_FIRE1, 0.0f, 0.0f, 0);
+			//node->m_data.spr.Init(ANM_PARTICLES_SPR_EXPLO_FIRE1, 0.0f, 0.0f, 0);
 			node->m_data.fSize = 1.5f;
 
 			node->m_data.fTimer = 0.2f;
@@ -686,7 +688,7 @@ void CLevel::UpdateDoofers(float dTime)
 			case K_DOOFER_SHRAPNEL_SMOKING:
 			{
 				//update sprite
-				node->m_data.spr.Update(&m_sprProps, dTime);
+				node->m_data.spr.Update(dTime);
 				//add smoke
 				if (m_Timers.Tick(60)) //&& (!prop->physPt->m_data.bContacting))
 				{

@@ -1315,10 +1315,12 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				return true;
 			}
 
+			CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_PROPS );
+
 			active->sprite.frameIdx += step;
 			if (loop)
 			{
-				int frcnt = m_sprProps.GetAFramesCnt(active->sprite.animIdx);
+				int frcnt = spr_props->GetAFramesCnt(active->sprite.animIdx);
 				if (active->sprite.frameIdx < 0)
 					active->sprite.frameIdx += frcnt;
 				else
@@ -1326,18 +1328,13 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			}
 			else
 			{
-				CLAMP(active->sprite.frameIdx, 0, m_sprProps.GetAFramesCnt(active->sprite.animIdx));
+				CLAMP(active->sprite.frameIdx, 0, spr_props->GetAFramesCnt(active->sprite.animIdx));
 			}
 			//set new bbox
-			RectXYWHi objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
+			RectXYWHi objbox = spr_props->GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
 			active->bbox.Set(Vec2(objbox.x, objbox.y), Vec2(objbox.Right(), objbox.Bottom()));
 			active->bbox.SaveSnapshot();
-			/*
-			if (active->flipX)
-			{
-				active->bbox_ini.Move(Vec2(-2.0f * active->bbox_ini.vCenter.x, 0.0f));
-			}
-			*/
+
 			active->bbox.Move(active->pos.xy);
 
 			return true;
@@ -1369,10 +1366,12 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				LOG(L"SCRIPT::IACTIVE_SET_ANIM - Bad cast to CActive!\n");
 				return true;
 			}
+
+			CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_PROPS );
 			//get params
 			int anim = active->sprite.animIdx;
 			if (parAnim)
-				anim = m_sprProps.GetAnimationIdxByNameHash(parAnim->m_strArg.getHash());
+				anim = spr_props->GetAnimationIdxByNameHash(parAnim->m_strArg.getHash());
 			if (anim == -1)
 			{
 				anim = active->sprite.animIdx;
@@ -1382,16 +1381,16 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			if (parFrame)
 			{
 				frame = (int)parFrame->m_asINT32;
-				CLAMP(frame, 0, m_sprProps.GetAFramesCnt(anim) - 1);
+				CLAMP(frame, 0, spr_props->GetAFramesCnt(anim) - 1);
 			}
 			bool animated = active->bAnimated;
 			if (parAnimated.IsSet())
 				animated = parAnimated.m_asBool;
 
-			active->sprite.Init(&m_sprProps, anim, active->pos.xy_proj, frame);
+			active->sprite.Init( spr_props, anim, active->pos.xy_proj, frame );
 			active->bAnimated = animated;
 			//set new bbox
-			RectXYWHi objbox = m_sprProps.GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
+			RectXYWHi objbox = spr_props->GetAFrameBBox_real(active->sprite.animIdx, active->sprite.frameIdx);
 			active->bbox.Set(Vec2(objbox.x, objbox.y), Vec2(objbox.Right(), objbox.Bottom()));
 			active->bbox.SaveSnapshot();
 			/*

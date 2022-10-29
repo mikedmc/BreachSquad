@@ -24,11 +24,11 @@ public:
 	int			nSubType;	//folosit de fiecare tip in mod diferit
 	float		fTimer;		//timer care porneste de la 0
 	bool		bAnimated;	//daca e animat sprite-ul
-	CSprite		spr, spr2;	//grafica din Props (unele au nevoie de 2 sprites)
+	CSpr		spr, spr2;	//grafica din Props (unele au nevoie de 2 sprites)
 	float		fSize;
 	//--- variabile lumini ---
 	bool		bMakesLight;
-	CSprite		sprLight;
+	CSpr		sprLight;
 	float		fLightDuration, fLightFadeOut;	//durata totala a luminii si durata de fade out
 	float		fLightScaling;
 	float		fLightTimer;		//timer-ul de viata al luminii

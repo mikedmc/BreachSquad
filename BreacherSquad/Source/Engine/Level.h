@@ -79,7 +79,6 @@ public:
 
 	Pathfinder				m_astar;						// A-start Astar search engine
 	CTextureManager			m_texManager;					// General texture manager for misc needed textures
-	CSpriteLib				m_sprProps;						// decorations
 	CMultiSpriteLib			m_sprLib;						// all ingame animations appended from different bsx files
 	CMissionStory			m_story;						// mission story
 

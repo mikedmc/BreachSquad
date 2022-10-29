@@ -729,6 +729,8 @@ void CLevelEditor::IMGUI_AddPropProps( CProp* prop )
 		return;
 	}
 
+	CSpriteLib* spr_props = m_pLevel->m_sprLib.GetLibByNick( K_LIBNICK_PROPS );
+
 	float f3[3] = { prop->pos.xyz.x, prop->pos.xyz.y, prop->pos.xyz.z };
 	if ( ImGui::DragFloat3( "Pos", f3, 1.0f, 0.0f, 100000.0f, "%.2f" ) )
 	{
@@ -741,7 +743,7 @@ void CLevelEditor::IMGUI_AddPropProps( CProp* prop )
 	ImGui::Separator();
 	ImGui::Text( "Animation" );
 
-	int sel_anim = IMGUI_AnimationBrowser( &m_pLevel->m_sprProps, prop->sprite.animIdx );
+	int sel_anim = IMGUI_AnimationBrowser( spr_props, prop->sprite.animIdx );
 	// on click
 	if ( sel_anim >= 0 ) 
 	{
@@ -758,17 +760,17 @@ void CLevelEditor::IMGUI_AddPropProps( CProp* prop )
 
 		int anmID = prop->sprite.animIdx;
 		if ( anmID < 0 ) anmID = 0;
-		if ( anmID > m_pLevel->m_sprProps.Animations.Count() - 1 ) anmID = 0;
+		if ( anmID > spr_props->Animations.Count() - 1 ) anmID = 0;
 		ImVec2 button_sz( 48, 48 );
-		scAnimation* anm = m_pLevel->m_sprProps.Animations[anmID];
-		PTEXTURE imgtex = m_pLevel->m_sprProps.Textures[0]->pTex;
+		scAnimation* anm = spr_props->Animations[anmID];
+		PTEXTURE imgtex = spr_props->Textures[0]->pTex;
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
 
 		for ( int n = 0; n < anm->aframesNo; n++ )
 		{
-			RectLTRB texrect = m_pLevel->m_sprProps.GetModuleRect_TexCoords( anmID, n, 0 );
+			RectLTRB texrect = spr_props->GetModuleRect_TexCoords( anmID, n, 0 );
 			ImVec2 tul( texrect.left, texrect.top );
 			ImVec2 tdr( texrect.right, texrect.bottom );
 
