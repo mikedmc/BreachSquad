@@ -101,9 +101,6 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 	FileManager::GetMediaPath( L"media/levels/data/weapons/weapons_data.xml", Path );
 	V_OP_RET( LoadWeaponTemplates( Path ) );
 
-	//#TODO: release resources on errors (goto ERROR)
-
-
 	///--- level areas inventory ---
 	//loading story
 	FileManager::GetMediaPath( L"media/levels/stories/story_small.story", Path );
@@ -899,7 +896,7 @@ OPRESULT CLevel::LoadLevelDefines( WCHAR* strPath )
 	pugi::xml_document doc;
 	if ( !doc.load_file( strPath ) )
 	{
-		return OPRESULT( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadLevelDefines:: Unable to load Level Defines XML:%s\n", strPath );
+		return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadLevelDefines:: Unable to load Level Defines XML:%s\n", strPath );
 	}
 
 	///--- load ACTIONS templates
