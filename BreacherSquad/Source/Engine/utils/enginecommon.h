@@ -36,6 +36,7 @@ void DW_COLOR_GETBYTES( DWORD color, unsigned char & a, unsigned char & r, unsig
 
 enum EDir {
 	EDIR_NONE = -1,
+
 	EDIR_LEFT = 0,
 	EDIR_UP = 1,
 	EDIR_RIGHT = 2,

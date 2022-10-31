@@ -14,14 +14,13 @@ Vec2i GetDirVec2i(EDir dir)
 
 	int idx = (int)dir;
 	if ((idx < 0) || (idx >= EDIRS_COUNT))
-		return Vec2i(0, 0);
+		return { 0,0 };
 	return dirs[idx];
 }
 
 EDir GetDirInverse(EDir dir)
 {
-	if ((dir < 0) || (dir >= EDIRS_COUNT))
-		return EDIR_NONE;
+	_ASSERT( ( dir >= 0 ) && ( dir < EDIRS_COUNT ) );
 	return (EDir)((dir + 2) % EDIRS_COUNT);
 }
 

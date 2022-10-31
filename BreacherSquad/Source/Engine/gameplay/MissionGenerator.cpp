@@ -196,29 +196,33 @@ bool CMissionGenerator::IsZoneClear(CInventoryArea* iarea, Vec2i vPos)
 				if (blockDest.bIsSet)
 					return false;
 				// check on all neighbours in all directions as blocks might overlap
-				for (int kk = 0; kk < EDIRS_COUNT; kk++)
+				// but only if we have a connector
+				if ( blockSrcConDir != EDIR_NONE )
 				{
-					EDir dir = (EDir)kk;
-					Vec2i vOff = GetDirVec2i(dir);
-					CAreaBlock pNeigh = GetPlacedBlockDescAt(Vec2i(xx + vPos.x + vOff.y, yy + vPos.x + vOff.y));
-					//Form1.CGridCell pNeigh = GetPlacedBlockAt(new Point(xx + vPos.X + vOff.X, yy + vPos.Y + vOff.Y));
-					// for each neighbour that is alrady placed check if we have the correct connector for random loops
-					if (pNeigh.bIsSet)
+					for ( int kk = 0; kk < EDIRS_COUNT; kk++ )
 					{
-						EDir dir_inv = GetDirInverse(dir);
-						// remote blocked connection
-						if ((pNeigh.eConnectionDir == dir_inv) && (blockSrcConDir != dir))
-							return false;
-						// local block blocked connection
-						if (blockSrcConDir == dir)
+						EDir dir = (EDir)kk;
+						Vec2i vOff = GetDirVec2i( dir );
+						CAreaBlock pNeigh = GetPlacedBlockDescAt( Vec2i( xx + vPos.x + vOff.y, yy + vPos.x + vOff.y ) );
+						//Form1.CGridCell pNeigh = GetPlacedBlockAt(new Point(xx + vPos.X + vOff.X, yy + vPos.Y + vOff.Y));
+						// for each neighbour that is alrady placed check if we have the correct connector for random loops
+						if ( pNeigh.bIsSet )
 						{
-							// only allowed if remote block has matching connector
-							if (pNeigh.eConnectionDir != dir_inv)
+							EDir dir_inv = GetDirInverse( dir );
+							// remote blocked connection
+							if ( ( pNeigh.eConnectionDir == dir_inv ) && ( blockSrcConDir != dir ) )
 								return false;
-							else
+							// local block blocked connection
+							if ( blockSrcConDir == dir )
 							{
-								// check for random connection using the area generations or current stitch point
-								LOG(L"IsZoneClear:: Random connection found!");
+								// only allowed if remote block has matching connector
+								if ( pNeigh.eConnectionDir != dir_inv )
+									return false;
+								else
+								{
+									// check for random connection using the area generations or current stitch point
+									LOG( L"IsZoneClear:: Random connection found!" );
+								}
 							}
 						}
 					}

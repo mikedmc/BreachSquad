@@ -84,7 +84,7 @@ const Vec2i RectXYWHi::Center() const
 
 bool RectXYWHi::Contains( Vec2i pt )
 {
-	return ( ( pt.x >= x ) && ( pt.y >= y ) && ( pt.x < x + w - 1 ) && ( pt.y < y + h - 1 ) );
+	return ( ( pt.x >= x ) && ( pt.y >= y ) && ( pt.x < x + w ) && ( pt.y < y + h ) );
 }
 
 bool RectXYWHi::Intersects( const RectXYWHi& rhs )

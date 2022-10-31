@@ -89,13 +89,13 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 	int err = 0;
 	err = FT_Init_FreeType(&ft);
 	if(err != 0)
-		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CFreeTypeFont::CreateAtlas: FT_Init_FreeType failed! code:%d", err);
+		return OP_ERR(K_OP_FAILED, K_SEVERITY_WARNING, L"CFreeTypeFont::CreateAtlas: FT_Init_FreeType failed! code:%d", err);
 	err = FT_New_Face(ft, utf8Path, 0, &face);
 	if (err != 0)
-		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CFreeTypeFont::CreateAtlas: FT_New_Face failed! code:%d font:%s", err, utf8Path);
+		return OP_ERR(K_OP_FAILED, K_SEVERITY_WARNING, L"CFreeTypeFont::CreateAtlas: FT_New_Face failed! code:%d font:%s", err, utf8Path);
 	err = FT_Set_Char_Size(face, 0, nFontSize << 6, 96, 96);
 	if (err != 0)
-		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CFreeTypeFont::CreateAtlas: FT_Set_Char_size failed! code:%d", err);
+		return OP_ERR(K_OP_FAILED, K_SEVERITY_WARNING, L"CFreeTypeFont::CreateAtlas: FT_Set_Char_size failed! code:%d", err);
 
 	// quick and dirty max texture size estimate
 	int nCharsCnt = wcslen(wstrUniqueChars);
@@ -116,7 +116,7 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 		FT_Done_Face(face);
 		FT_Done_FreeType(ft);
 
-		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CFreeTypeFont::CreateAtlas: Could not create atlas texture! hr=%x", hr);
+		return OP_ERR(K_OP_FAILED, K_SEVERITY_WARNING, L"CFreeTypeFont::CreateAtlas: Could not create atlas texture! hr=%x", hr);
 	}
 
 	m_atlas.atlasSize.w = tex_width;
@@ -290,7 +290,7 @@ OPRESULT CFreeTypeFont::CreateAtlas(PDEVICE pDevice, char* utf8Path, int nFontSi
 	// write to texture
 	TEXTURE_LOCKRECT tex_locked_rect;
 	if (m_atlas.pTex->LockRect(0, &tex_locked_rect, NULL, D3DLOCK_DISCARD) != D3D_OK)
-		return OPRESULT(K_OP_FAILED, L"CFreeTypeFont::CreateAtlas: Could not lock atlas texture!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"CFreeTypeFont::CreateAtlas: Could not lock atlas texture!", K_SEVERITY_WARNING);
 
 	unsigned char* img = (unsigned char*)tex_locked_rect.pBits;
 	//int imgpitchinbits = tex_locked_rect.Pitch;
@@ -330,10 +330,13 @@ void CFreeTypeFont::SetStyle(int nLetterSpacing, int nRowSpacing, int nSpaceSize
 
 void CFreeTypeFont::Release()
 {
-	LOG(L"CFreeTypeFont::Release font:%s", shFontName.text);
-	bLoaded = false;
-	shFontName.Reset();
-	m_atlas.Release();
+	if ( bLoaded )
+	{
+		LOG( L"CFreeTypeFont::Release font:%s", shFontName.text );
+		bLoaded = false;
+		shFontName.Reset();
+		m_atlas.Release();
+	}
 }
 
 RectXYWHi CFreeTypeFont::DrawStringLine(CStringDesc *strDesc, float X, float Y, UINT16 Flags, DWORD Color)
