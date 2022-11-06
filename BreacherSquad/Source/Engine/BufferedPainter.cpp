@@ -62,7 +62,7 @@ OPRESULT CBufferedPainter::AddTriangles(_VERTEX_PNCT4T4 *points, int trisCount)
 	assert(m_nMaxTrisCnt > 0);
 
 	if (!m_bMeshStarted)
-		return OPRESULT(K_OP_FAILED, L"You have to call BeginMesh() first!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"You have to call BeginMesh() first!", K_SEVERITY_WARNING);
 
 #if defined(_DEBUG) || defined(DEBUG)
 	assert(m_nVertexCursor + trisCount * 3 < m_nMaxTrisCnt * 3);
@@ -122,7 +122,7 @@ OPRESULT CBufferedPainter::BuildBuffers()
 	_VERTEX_PNCT4T4* pVerts;
 	if (FAILED(m_vb->Lock(0, m_nVertexCursor * sizeof(_VERTEX_PNCT4T4), (void**)&pVerts, D3DLOCK_DISCARD)))
 	{
-		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainter: Build buffers failed!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"[ERROR] CBufferedPainter: Build buffers failed!", K_SEVERITY_WARNING);
 	}
 
 	memcpy(pVerts, m_verts, m_nVertexCursor * sizeof(_VERTEX_PNCT4T4));
@@ -181,15 +181,15 @@ OPRESULT CBufferedPainter::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* p
 
 	m_pDevice = pDevice;
 	//create index buffer (fixed) - deci va desena numai triunghiuri independente
-	if (FAILED(m_pDevice->CreateIndexBuffer((m_nMaxTrisCnt + K_BP_SENTINEL_TRIS) * 3 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, 0)))
+	if (FAILED(m_pDevice->CreateIndexBuffer((m_nMaxTrisCnt + K_BP_SENTINEL_TRIS) * 3 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, nullptr)))
 	{
-		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainter: Create Index Buffer failed!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"[ERROR] CBufferedPainter: Create Index Buffer failed!", K_SEVERITY_WARNING);
 	}
 	//lock and fill
 	DWORD * pIndices;
 	if (FAILED(m_ib->Lock(0, NULL, (void**)&pIndices, 0)))
 	{
-		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainter: Lock Index Buffer failed!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"[ERROR] CBufferedPainter: Lock Index Buffer failed!", K_SEVERITY_WARNING);
 	}
 
 	for (int kk = 0; kk < m_nMaxTrisCnt; kk++)
@@ -213,14 +213,14 @@ OPRESULT CBufferedPainter::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pB
 	if (FAILED(m_pDevice->CreateVertexBuffer((m_nMaxTrisCnt + K_BP_SENTINEL_TRIS) * 3 * sizeof(_VERTEX_PNCT4T4),
 		D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC,
 		_VERTEX_PNCT4T4::FVF, D3DPOOL_DEFAULT,
-		&m_vb, NULL)))
+		&m_vb, nullptr)))
 	{
-		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainter::OnResetDevice: Create Vertex Buffer failed!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"[ERROR] CBufferedPainter::OnResetDevice: Create Vertex Buffer failed!", K_SEVERITY_WARNING);
 	}
 	//builds buffers too
 	if (OP_FAILED(BuildBuffers()))
 	{
-		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainter::OnResetDevice: BuildBuffers failed!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"[ERROR] CBufferedPainter::OnResetDevice: BuildBuffers failed!", K_SEVERITY_WARNING);
 	}
 
 	return K_OP_OK;

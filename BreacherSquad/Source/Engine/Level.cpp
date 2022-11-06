@@ -2075,6 +2075,31 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 	//inchid meshul apelor
 	m_bufferedPainter.EndMesh();
 	*/
+
+	// save mouse pos each frame
+	if ( g_timers.Tick( 100 ) )
+	{
+
+		Vec2* pv = qPoints.New();
+		*pv = g_mouse.pos;
+	}
+
+	if ( qPoints.GetCount() > 25 )
+	{
+		Vec2 arrpos[60];
+		for ( int kk = 0; kk < 25; kk++ )
+		{
+			Vec2* svpt = qPoints.GetFromLast( kk );
+			arrpos[kk] = *svpt;
+		}
+		meshidxcursor = Tails::BuildTail( &m_bufferedPainter, arrpos, 25, 10.0f );
+	}
+	else
+	{
+		meshidxcursor = -1;
+	}
+
+
 	///--- build buffered painter buffers ---
 	m_bufferedPainter.BuildBuffers();
 
@@ -4045,6 +4070,11 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			m_pDevice->SetTransform( D3DTS_VIEW, &g_matIdentity );
 
 			RenderPass( K_LVL_RP_COLORS, &pRT->matProj, fBetweenFramesPercent );
+
+			if ( meshidxcursor >= 0 )
+			{
+				m_bufferedPainter.DrawMesh( meshidxcursor, true );
+			}
 
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}

@@ -1,5 +1,6 @@
 #pragma once
 #include "interfaces/DeviceRes.h"
+#include "Queue.h"
 
 // Menu class that listens to state changes
 class CMenus : public IEventListener, IDeviceRes {

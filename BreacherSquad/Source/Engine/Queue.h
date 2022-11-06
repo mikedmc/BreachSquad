@@ -246,6 +246,8 @@ public:
 	type *			PopLast();
 	type *			Get(unsigned int idx);
 	const type *	Get(unsigned int idx) const;
+	// Returns items starting with the most recent (last added)
+	type *			GetFromLast( unsigned int idx );
 	type *			GetLast();
 	const type *	GetLast() const;
 	int				GetCount() const;
@@ -257,6 +259,16 @@ protected:
 	unsigned int	head;
 	unsigned int	tail;
 };
+
+template < class type, int numElements >
+type * CircularStaticQueue<type, numElements>::GetFromLast( unsigned int idx )
+{
+	int idxer = (head - 1 - idx );
+	// make sure we have data
+	_ASSERT( idxer > tail );
+
+	return &data[idxer % numElements];
+}
 
 template < class type, int numElements >
 void CircularStaticQueue<type, numElements>::Clear() {

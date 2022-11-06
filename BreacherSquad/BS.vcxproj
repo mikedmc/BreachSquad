@@ -139,6 +139,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Engine\TailPainter.h" />
     <ClInclude Include="Source\ControlsEd\ControlsEditor.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClInclude>
@@ -323,6 +324,7 @@
     <ResourceCompile Include="Source\BS.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Engine\TailPainter.cpp" />
     <ClCompile Include="Source\ControlsEd\ControlsEditor.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>

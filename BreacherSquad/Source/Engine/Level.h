@@ -30,6 +30,7 @@
 
 #include "CFOVUtil.h"
 #include "IngameGUI.h"
+#include "Queue.h"
 
 using namespace std;
 // texture IDs for local texture manager
@@ -87,6 +88,11 @@ public:
 	void					ClearVisibilityLists();
 
 	CBufferedPainter		m_bufferedPainter;				// used when drawing dynamic meshes	like lights and other meshes
+
+	CircularStaticQueue<Vec2, 60> qPoints;
+	int meshidxcursor;
+
+
 
 	int						tileW, tileH;					// size of tiles
 	RectXYWH				m_levelAABB;					// level AABB in pixels - grows when adding areas
