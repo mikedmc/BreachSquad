@@ -38,6 +38,7 @@
     <Module ImageIdx="0" X="263" Y="2" W="8" H="9" strName="" />
     <Module ImageIdx="0" X="271" Y="2" W="7" H="8" strName="" />
     <Module ImageIdx="0" X="279" Y="2" W="8" H="7" strName="" />
+    <Module ImageIdx="0" X="6" Y="97" W="45" H="15" strName="" />
   </Modules>
   <FrameModules>
     <FrameModule ModuleIdx="0" OX="-2" OY="-5" Flags="0" />
@@ -76,6 +77,7 @@
     <FrameModule ModuleIdx="33" OX="12" OY="-4" Flags="0" />
     <FrameModule ModuleIdx="34" OX="22" OY="-4" Flags="0" />
     <FrameModule ModuleIdx="35" OX="8" OY="-3" Flags="0" />
+    <FrameModule ModuleIdx="36" OX="0" OY="0" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
@@ -294,6 +296,12 @@
       </FModules>
       <Points />
     </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="45" BBoxH="15">
+      <FModules>
+        <FModule Idx="36" />
+      </FModules>
+      <Points />
+    </Frame>
   </Frames>
   <AnimationFrames>
     <AnimationFrame FrameIdx="0" Duration="30" DX="0" DY="0" Flags="0" />
@@ -332,6 +340,7 @@
     <AnimationFrame FrameIdx="33" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="34" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="35" Duration="1" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="36" Duration="1" DX="0" DY="0" Flags="" />
   </AnimationFrames>
   <Animations>
     <Animation ID="IMPACT_FIRE1" Flags="0">
@@ -377,6 +386,9 @@
       <AFrame Idx="33" />
       <AFrame Idx="34" />
       <AFrame Idx="35" />
+    </Animation>
+    <Animation ID="TAILS" Flags="0">
+      <AFrame Idx="36" />
     </Animation>
   </Animations>
 </SpriteCollection>

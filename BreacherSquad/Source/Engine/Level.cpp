@@ -2077,17 +2077,25 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 	*/
 
 	// save mouse pos each frame
-	if ( g_timers.Tick( 100 ) )
+	if ( g_timers.Tick( 30 ) )
 	{
+		Vec2* voldpt = qPoints.GetFromLast( 0 );
+		Vec2 npos = g_mouse.pos;
+		if ( *voldpt == npos )
+		{
+			npos.y += 0.1f;
+		}
 
-		Vec2* pv = qPoints.New();
-		*pv = g_mouse.pos;
+			Vec2* pv = qPoints.New();
+			*pv = npos;
 	}
+
+	const int tail_len = 25;
 
 	int nPoints = qPoints.GetCount();
 	if ( nPoints >= 2 )
 	{
-		CLAMP( nPoints, 0, 25 );
+		CLAMP( nPoints, 0, tail_len );
 		Vec2 arrpos[60];
 		for ( int kk = 0; kk < nPoints; kk++ )
 		{
@@ -2095,16 +2103,16 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 			arrpos[kk] = *svpt;
 		}
 
-		if ( nPoints < 25 )
+		if ( nPoints < tail_len )
 		{
-			for ( int kk = nPoints; kk < 25; kk++ )
+			for ( int kk = nPoints; kk < tail_len; kk++ )
 			{
 				Vec2* svpt = qPoints.Get( 0 );
 				arrpos[kk] = *svpt;
 			}
 		}
-		RectLTRB texrect = m_sprInterface.GetModuleRect_TexCoords( ANM_IGM_INTERFACE_SPR_BARS, 0, 0 );
-		meshidxcursor = Tails::BuildTail( &m_bufferedPainter, arrpos, 15, 2.0f, texrect );
+		RectLTRB texrect = __Particles().m_sprCol.GetModuleRect_TexCoords( ANM_PARTICLES_SPR_TAILS, 0, 0 );
+		meshidxcursor = Tails::BuildTail( &m_bufferedPainter, arrpos, tail_len, 3.0f, texrect );
 	}
 	else
 	{
@@ -4113,7 +4121,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 			if ( meshidxcursor >= 0 )
 			{
-				scTexture* ptex = m_sprInterface.GetTextureByAnim( ANM_IGM_INTERFACE_SPR_BARS, 0, 0 );
+				scTexture* ptex = __Particles().m_sprCol.GetTextureByAnim( ANM_PARTICLES_SPR_TAILS, 0, 0 );
 				if ( ptex ) 
 				{
 					UT3DSetTexture( m_pDevice, 0, ptex->pTex );
