@@ -265,7 +265,7 @@ type * CircularStaticQueue<type, numElements>::GetFromLast( unsigned int idx )
 {
 	int idxer = (head - 1 - idx );
 	// make sure we have data
-	_ASSERT( idxer > tail );
+	_ASSERT( idxer >= tail );
 
 	return &data[idxer % numElements];
 }

@@ -2084,21 +2084,32 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 		*pv = g_mouse.pos;
 	}
 
-	if ( qPoints.GetCount() > 25 )
+	int nPoints = qPoints.GetCount();
+	if ( nPoints >= 2 )
 	{
+		CLAMP( nPoints, 0, 25 );
 		Vec2 arrpos[60];
-		for ( int kk = 0; kk < 25; kk++ )
+		for ( int kk = 0; kk < nPoints; kk++ )
 		{
 			Vec2* svpt = qPoints.GetFromLast( kk );
 			arrpos[kk] = *svpt;
 		}
-		meshidxcursor = Tails::BuildTail( &m_bufferedPainter, arrpos, 25, 10.0f );
+
+		if ( nPoints < 25 )
+		{
+			for ( int kk = nPoints; kk < 25; kk++ )
+			{
+				Vec2* svpt = qPoints.Get( 0 );
+				arrpos[kk] = *svpt;
+			}
+		}
+		RectLTRB texrect = m_sprInterface.GetModuleRect_TexCoords( ANM_IGM_INTERFACE_SPR_BARS, 0, 0 );
+		meshidxcursor = Tails::BuildTail( &m_bufferedPainter, arrpos, 15, 2.0f, texrect );
 	}
 	else
 	{
 		meshidxcursor = -1;
 	}
-
 
 	///--- build buffered painter buffers ---
 	m_bufferedPainter.BuildBuffers();
@@ -4065,16 +4076,10 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			//Mat matProj;
 			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
 			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
-
 			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 			m_pDevice->SetTransform( D3DTS_VIEW, &g_matIdentity );
 
 			RenderPass( K_LVL_RP_COLORS, &pRT->matProj, fBetweenFramesPercent );
-
-			if ( meshidxcursor >= 0 )
-			{
-				m_bufferedPainter.DrawMesh( meshidxcursor, true );
-			}
 
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}
@@ -4104,6 +4109,18 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 			// RT sized quad with tex1 color, tex2 lightmap
 			RenderPass_Composition( &pRT->matProj, fBetweenFramesPercent );
+
+
+			if ( meshidxcursor >= 0 )
+			{
+				scTexture* ptex = m_sprInterface.GetTextureByAnim( ANM_IGM_INTERFACE_SPR_BARS, 0, 0 );
+				if ( ptex ) 
+				{
+					UT3DSetTexture( m_pDevice, 0, ptex->pTex );
+				}
+				m_bufferedPainter.DrawMesh( meshidxcursor, true );
+			}
+
 
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 

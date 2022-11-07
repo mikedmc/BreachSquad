@@ -13,7 +13,7 @@ Vec2 Tails::GetJointMedian( Vec2 pJoint, Vec2 pAfter )
 	return Vec2( -vnAfter.y, vnAfter.x );
 }
 
-int Tails::BuildTail( CBufferedPainter* pPainter, Vec2 * arrPos, int nPoints, float fWidth )
+int Tails::BuildTail( CBufferedPainter* pPainter, Vec2 * arrPos, int nPoints, float fWidth, RectLTRB & texRect )
 {
 	int nMeshIdx = -1;
 	int vcur = 0;
@@ -21,6 +21,7 @@ int Tails::BuildTail( CBufferedPainter* pPainter, Vec2 * arrPos, int nPoints, fl
 	_ASSERT( nPoints > 1 && nPoints < K_MAX_TAIL_POINTS && arrPos != nullptr && pPainter != nullptr );
 	pPainter->BeginMesh( nMeshIdx );
 
+	float fTexAdv = texRect.Width() / (nPoints - 1);
 	for ( int kk = 0; kk < nPoints - 1; kk++ )
 	{
 		Vec2 pPoint = arrPos[kk];
@@ -35,14 +36,22 @@ int Tails::BuildTail( CBufferedPainter* pPainter, Vec2 * arrPos, int nPoints, fl
 		Vec3 v3MedianNext = Vec2ToVec3XY0( vMedianNext ) * fWidth;
 		Vec3 v3Point = Vec2ToVec3XY0( pPoint );
 		Vec3 v3Next = Vec2ToVec3XY0( pNext );
-		// add triangles
-		tpts[vcur].pos = v3Point - v3Median; tpts[vcur].color = 0xffffffff; vcur++;
-		tpts[vcur].pos = v3Next - v3MedianNext; tpts[vcur].color = 0xffffffff; vcur++;
-		tpts[vcur].pos = v3Next + v3MedianNext; tpts[vcur].color = 0xffffffff; vcur++;
 
-		tpts[vcur].pos = v3Point - v3Median; tpts[vcur].color = 0xffffffff; vcur++;
-		tpts[vcur].pos = v3Next + v3MedianNext; tpts[vcur].color = 0xffffffff; vcur++;
-		tpts[vcur].pos = v3Point + v3Median; tpts[vcur].color = 0xffffffff; vcur++;
+		RectLTRB UV( texRect.left + fTexAdv * kk, texRect.top, texRect.left + fTexAdv * (kk + 1), texRect.bottom );
+		// add triangles
+		tpts[vcur].pos = v3Point - v3Median; tpts[vcur].color = 0xffffffff; 
+		tpts[vcur].tex1 = { UV.left, UV.top, 0.0f, 0.0f }; vcur++;
+		tpts[vcur].pos = v3Next - v3MedianNext; tpts[vcur].color = 0xffffffff; 
+		tpts[vcur].tex1 = { UV.right, UV.top, 0.0f, 0.0f }; vcur++;
+		tpts[vcur].pos = v3Next + v3MedianNext; tpts[vcur].color = 0xffffffff;
+		tpts[vcur].tex1 = { UV.right, UV.bottom, 0.0f, 0.0f }; vcur++;
+
+		tpts[vcur].pos = v3Point - v3Median; tpts[vcur].color = 0xffffffff;
+		tpts[vcur].tex1 = { UV.left, UV.top, 0.0f, 0.0f }; vcur++;
+		tpts[vcur].pos = v3Next + v3MedianNext; tpts[vcur].color = 0xffffffff;
+		tpts[vcur].tex1 = { UV.right, UV.bottom, 0.0f, 0.0f }; vcur++;
+		tpts[vcur].pos = v3Point + v3Median; tpts[vcur].color = 0xffffffff;
+		tpts[vcur].tex1 = { UV.left, UV.bottom, 0.0f, 0.0f }; vcur++;
 	}
 
 	pPainter->AddTriangles(tpts, vcur / 3);

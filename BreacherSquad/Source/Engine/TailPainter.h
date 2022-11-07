@@ -9,5 +9,6 @@ namespace Tails
 	Vec2 GetJointMedian( Vec2 pJoint, Vec2 pAfter);
 
 	// arrPos[0] is the most recent point. Returns mesh idx.
-	int BuildTail( CBufferedPainter* pPainter, Vec2 * arrPos, int nPoints, float fWidth );
+	// uses texRect actual texcoords to map the tail (art must be horizontal, pointing to the left eg: <o==-- )
+	int BuildTail( CBufferedPainter* pPainter, Vec2 * arrPos, int nPoints, float fWidth, RectLTRB & texRect );
 }
