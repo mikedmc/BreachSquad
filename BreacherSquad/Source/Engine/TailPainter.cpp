@@ -2,9 +2,75 @@
 #include "TailPainter.h"
 
 
-static _VERTEX_PNCT4T4 tpts[Tails::K_MAX_TAIL_POINTS * 6];
+// max tail length
+#define K_TAILS_MAX_POINTS  30
 
-Vec2 Tails::GetJointMedian( Vec2 pJoint, Vec2 pAfter )
+static _VERTEX_PNCT4T4 tpts[K_TAILS_MAX_POINTS * 6];
+
+/*
+UPDATE WAS LIKE THIS:
+
+	// save mouse pos each frame
+	if ( g_timers.Tick( 30 ) )
+	{
+		Vec2* voldpt = qPoints.GetFromLast( 0 );
+		Vec2 npos = g_mouse.pos;
+		if ( *voldpt == npos )
+		{
+			npos.y += 0.1f;
+		}
+
+			Vec2* pv = qPoints.New();
+			*pv = npos;
+	}
+
+	const int tail_len = 25;
+
+	int nPoints = qPoints.GetCount();
+	if ( nPoints >= 2 )
+	{
+		CLAMP( nPoints, 0, tail_len );
+		Vec2 arrpos[60];
+		for ( int kk = 0; kk < nPoints; kk++ )
+		{
+			Vec2* svpt = qPoints.GetFromLast( kk );
+			arrpos[kk] = *svpt;
+		}
+
+		if ( nPoints < tail_len )
+		{
+			for ( int kk = nPoints; kk < tail_len; kk++ )
+			{
+				Vec2* svpt = qPoints.Get( 0 );
+				arrpos[kk] = *svpt;
+			}
+		}
+		RectLTRB texrect = __Particles().m_sprCol.GetModuleRect_TexCoords( ANM_PARTICLES_SPR_TAILS, 0, 0 );
+		meshidxcursor = Tails::BuildTail( &m_bufferedPainter, arrpos, tail_len, 3.0f, texrect );
+	}
+	else
+	{
+		meshidxcursor = -1;
+	}
+
+/// PAINT LIKE THIS
+			if ( meshidxcursor >= 0 )
+			{
+				scTexture* ptex = __Particles().m_sprCol.GetTextureByAnim( ANM_PARTICLES_SPR_TAILS, 0, 0 );
+				if ( ptex )
+				{
+					UT3DSetTexture( m_pDevice, 0, ptex->pTex );
+				}
+				m_bufferedPainter.DrawMesh( meshidxcursor, true );
+			}
+
+
+
+
+
+*/
+
+Vec2 CTails::GetJointMedian( Vec2 pJoint, Vec2 pAfter )
 {
 	Vec2 vToAfter = pAfter - pJoint;
 	Vec2 vnAfter{};
@@ -13,12 +79,12 @@ Vec2 Tails::GetJointMedian( Vec2 pJoint, Vec2 pAfter )
 	return Vec2( -vnAfter.y, vnAfter.x );
 }
 
-int Tails::BuildTail( CBufferedPainter* pPainter, Vec2 * arrPos, int nPoints, float fWidth, RectLTRB & texRect )
+int CTails::BuildTail( CBufferedPainter* pPainter, Vec2 * arrPos, int nPoints, float fWidth, RectLTRB & texRect )
 {
 	int nMeshIdx = -1;
 	int vcur = 0;
 
-	_ASSERT( nPoints > 1 && nPoints < K_MAX_TAIL_POINTS && arrPos != nullptr && pPainter != nullptr );
+	_ASSERT( nPoints > 1 && nPoints < K_TAILS_MAX_POINTS && arrPos != nullptr && pPainter != nullptr );
 	pPainter->BeginMesh( nMeshIdx );
 
 	float fTexAdv = texRect.Width() / (nPoints - 1);
@@ -29,8 +95,8 @@ int Tails::BuildTail( CBufferedPainter* pPainter, Vec2 * arrPos, int nPoints, fl
 		Vec2 vToNext = pNext - pPoint;
 		Vec2 pNextNext = ( kk == nPoints - 2 ) ? pNext + vToNext : arrPos[kk + 2];
 
-		Vec2 vMedian = Tails::GetJointMedian( pPoint, pNext );
-		Vec2 vMedianNext = Tails::GetJointMedian( pNext, pNextNext );
+		Vec2 vMedian = GetJointMedian( pPoint, pNext );
+		Vec2 vMedianNext = GetJointMedian( pNext, pNextNext );
 
 		Vec3 v3Median = Vec2ToVec3XY0( vMedian ) * fWidth;
 		Vec3 v3MedianNext = Vec2ToVec3XY0( vMedianNext ) * fWidth;
@@ -59,3 +125,5 @@ int Tails::BuildTail( CBufferedPainter* pPainter, Vec2 * arrPos, int nPoints, fl
 
 	return nMeshIdx;
 }
+
+

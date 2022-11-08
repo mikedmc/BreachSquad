@@ -2076,49 +2076,6 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 	m_bufferedPainter.EndMesh();
 	*/
 
-	// save mouse pos each frame
-	if ( g_timers.Tick( 30 ) )
-	{
-		Vec2* voldpt = qPoints.GetFromLast( 0 );
-		Vec2 npos = g_mouse.pos;
-		if ( *voldpt == npos )
-		{
-			npos.y += 0.1f;
-		}
-
-			Vec2* pv = qPoints.New();
-			*pv = npos;
-	}
-
-	const int tail_len = 25;
-
-	int nPoints = qPoints.GetCount();
-	if ( nPoints >= 2 )
-	{
-		CLAMP( nPoints, 0, tail_len );
-		Vec2 arrpos[60];
-		for ( int kk = 0; kk < nPoints; kk++ )
-		{
-			Vec2* svpt = qPoints.GetFromLast( kk );
-			arrpos[kk] = *svpt;
-		}
-
-		if ( nPoints < tail_len )
-		{
-			for ( int kk = nPoints; kk < tail_len; kk++ )
-			{
-				Vec2* svpt = qPoints.Get( 0 );
-				arrpos[kk] = *svpt;
-			}
-		}
-		RectLTRB texrect = __Particles().m_sprCol.GetModuleRect_TexCoords( ANM_PARTICLES_SPR_TAILS, 0, 0 );
-		meshidxcursor = Tails::BuildTail( &m_bufferedPainter, arrpos, tail_len, 3.0f, texrect );
-	}
-	else
-	{
-		meshidxcursor = -1;
-	}
-
 	///--- build buffered painter buffers ---
 	m_bufferedPainter.BuildBuffers();
 
@@ -4117,18 +4074,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 			// RT sized quad with tex1 color, tex2 lightmap
 			RenderPass_Composition( &pRT->matProj, fBetweenFramesPercent );
-
-
-			if ( meshidxcursor >= 0 )
-			{
-				scTexture* ptex = __Particles().m_sprCol.GetTextureByAnim( ANM_PARTICLES_SPR_TAILS, 0, 0 );
-				if ( ptex ) 
-				{
-					UT3DSetTexture( m_pDevice, 0, ptex->pTex );
-				}
-				m_bufferedPainter.DrawMesh( meshidxcursor, true );
-			}
-
 
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 
