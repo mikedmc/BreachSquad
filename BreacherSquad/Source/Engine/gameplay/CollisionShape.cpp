@@ -1,7 +1,7 @@
 #include "dxstdafx.h"
 #include "CollisionShape.h"
 
-CCollisionShape::CCollisionShape( CActiveAIComponent* AIcomponent ) :
+CCollisionShape::CCollisionShape( CPropAIComponent* AIcomponent ) :
 	eType( K_SHAPE_SOLID ), castShadows( false ),
 	collFlags( K_DIRFLAG_ALL ), ubFlags( K_LVL_COLLFLAG_SOLID ),
 	c_AI( AIcomponent )
@@ -116,7 +116,7 @@ CCollisionShape* CLevel::GetCollisionShapeByUID( UINT32 nUID )
 
 CCollisionShape* CLevel::SpawnCollisionShape( ECollType newType, Vec2 vMin, Vec2 vMax )
 {
-	CCollisionShape* pCol = new CCollisionShape( new CActiveAIComponent() );
+	CCollisionShape* pCol = new CCollisionShape( new CPropAIComponent() );
 	pCol->ID = GenerateNextID();
 	pCol->eType = newType;
 	pCol->bbox.Set_Corrected( vMin, vMax );

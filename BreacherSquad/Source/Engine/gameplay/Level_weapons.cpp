@@ -307,7 +307,7 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 	pugi::xml_document doc;
 	if (!doc.load_file(xmlPath))
 	{
-		return OPRESULT(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Unable to load Weapon Templates XML:%s\n", xmlPath);
+		return OP_ERR(K_OP_FAILED, K_SEVERITY_CRITICAL, L"Unable to load Weapon Templates XML:%s\n", xmlPath);
 	}
 
 	///----------------------------------------------------------------------------------
@@ -336,22 +336,25 @@ OPRESULT CLevel::LoadWeaponTemplates(WCHAR * xmlPath)
 		const WCHAR* bType = bnode.name();
 		templ->name.Init(bType);
 
-		templ->fDamage = bnode.attribute(L"fDamage").as_float();
-		templ->fDamageRadius = bnode.attribute(L"fDamageRadius").as_float();
-		templ->fStunDuration = bnode.attribute(L"fStunDuration").as_float();
-		templ->fStunRadius = bnode.attribute(L"fStunRadius").as_float();
-		templ->fSoundRadius = bnode.attribute(L"fSoundRadius").as_float();
-		templ->nShrapnelCnt = bnode.attribute(L"nShrapnelCnt").as_int();
-		templ->nNapalmCnt = bnode.attribute(L"nNapalmCnt").as_int();
-		templ->fMaxImpulse = bnode.attribute(L"fMaxImpulse").as_float();
-		if (!bnode.attribute(L"nArmorPiercingRating").empty())
-			templ->nArmorPiercingRating = bnode.attribute(L"nArmorPiercingRating").as_int();
-		if (!bnode.attribute(L"fDamageObjectsMultiplier").empty())
-			templ->fDamageObjectsMultiplier = bnode.attribute(L"fDamageObjectsMultiplier").as_float();
+		if ( !bnode.attribute( L"sFX" ).empty() )
+			templ->shFX.Init( bnode.attribute( L"sFX" ).as_string() );
+
+		templ->fDamage = bnode.attribute( L"fDamage" ).as_float();
+		templ->fDamageRadius = bnode.attribute( L"fDamageRadius" ).as_float();
+		templ->fStunDuration = bnode.attribute( L"fStunDuration" ).as_float();
+		templ->fStunRadius = bnode.attribute( L"fStunRadius" ).as_float();
+		templ->fSoundRadius = bnode.attribute( L"fSoundRadius" ).as_float();
+		templ->nShrapnelCnt = bnode.attribute( L"nShrapnelCnt" ).as_int();
+		templ->nNapalmCnt = bnode.attribute( L"nNapalmCnt" ).as_int();
+		templ->fMaxImpulse = bnode.attribute( L"fMaxImpulse" ).as_float();
+		if ( !bnode.attribute( L"nArmorPiercingRating" ).empty() )
+			templ->nArmorPiercingRating = bnode.attribute( L"nArmorPiercingRating" ).as_int();
+		if ( !bnode.attribute( L"fDamageObjectsMultiplier" ).empty() )
+			templ->fDamageObjectsMultiplier = bnode.attribute( L"fDamageObjectsMultiplier" ).as_float();
 		//excluded class 
 		templ->eIgnoreActorClass = K_ACT_CLASS_ANY;
-		if (!bnode.attribute(L"sIgnoredClass").empty())
-			templ->eIgnoreActorClass = (EActorClass)GetListIndexByName(bnode.attribute(L"sIgnoredClass").value(), EActorClassNames, ARRAY_SIZE(EActorClassNames));
+		if ( !bnode.attribute( L"sIgnoredClass" ).empty() )
+			templ->eIgnoreActorClass = (EActorClass)GetListIndexByName( bnode.attribute( L"sIgnoredClass" ).value(), EActorClassNames, ARRAY_SIZE( EActorClassNames ) );
 
 		//damage over time
 		templ->cDoT.Set(CDamageOverTime::K_LVL_DoT_NONE);

@@ -239,7 +239,7 @@ void CLevel::UpdateBullets(float dTime)
 						killbullet = true;
 						float fang = UTMath::GetVectorAngle( Vec3XY( -bullet->c_pointPhys->speed ) );
 						__Particles().AddParticle( ANM_PARTICLES_SPR_IMPACT_FIRE1, true, 0, &vRetPt, nullptr,
-							&Vec2( bullet->c_pointPhys->contactNormal * 20.0f ), 5.0f, 1.0f, 0.0f, -fang, 0.0f, 0.0f, 0.0f );
+							&Vec2( bullet->c_pointPhys->contactNormal * 20.0f ), 5.0f, 1.0f, 0.0f, -fang, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_NORMAL );
 					}
 				}
 				break;
@@ -253,7 +253,7 @@ void CLevel::UpdateBullets(float dTime)
 						killbullet = true;
 						float fang = UTMath::GetVectorAngle( Vec3XY( -bullet->c_pointPhys->speed ) );
 						__Particles().AddParticle( ANM_PARTICLES_SPR_IMPACT_FIRE1, true, 0, &vRetPt, nullptr,
-							&Vec2( bullet->c_pointPhys->contactNormal * 20.0f ), 5.0f, 1.0f, 0.0f, -fang, 0.0f, 0.0f, 0.0f );
+							&Vec2( bullet->c_pointPhys->contactNormal * 20.0f ), 5.0f, 1.0f, 0.0f, -fang, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_NORMAL );
 					}
 				}
 				break;

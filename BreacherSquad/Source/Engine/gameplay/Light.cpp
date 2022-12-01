@@ -155,7 +155,7 @@ void CLight::SetLightTexture( CSpriteLib* sprCol, int nAnimID, int nFrameID )
 	UpdateInternalData( sprCol );
 }
 
-CLight::CLight( CActiveAIComponent* pLightAIComp ) :
+CLight::CLight( CPropAIComponent* pLightAIComp ) :
 	c_AI( pLightAIComp ), type( K_LVL_LT_UNKNOWN ),
 	m_arrVerts( nullptr ), m_bDirty( true ), m_nLightMeshIdx( -1 ), m_arrVertsCnt(0),
 	fRadius( 0.0f ), fVolumeAlpha( 1.0f ), castShadows( false ), nProfileID( 0 )

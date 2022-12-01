@@ -1,11 +1,11 @@
 #pragma once
 #include "ComponentInterfaces.h"
 
-class CActiveAIComponent : public IBaseAIComponent
+class CPropAIComponent : public IBaseAIComponent
 {
 public:
-	CActiveAIComponent();
-	~CActiveAIComponent();
+	CPropAIComponent();
+	~CPropAIComponent();
 
 	bool					Update( IActiveInterface& active, float dTime, CLevel& level ) override;
 	void					SetAI( IActiveInterface& active, EAIstate newstate ) override;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components/ActiveAIComp.h"
+#include "components/PropAIComp.h"
 
 ///----------------------------------------------------------------------------------
 /// List of possible classes for props (set from sprites editor but not only)
@@ -29,7 +29,7 @@ const CStringHash EPropClassNames[] =
 class CProp : public IActiveInterface
 {
 private:
-	CActiveAIComponent*		c_AI;					// AI component for prop
+	CPropAIComponent*		c_AI;					// AI component for prop
 	CLevel&					level;					// ref to level
 public:
 	CSpr					sprite;
@@ -37,7 +37,7 @@ public:
 	DWORD					flags;
 	CStringHash				shClass;				// class of prop kept as string for max flexibility
 
-	CProp( CLevel& refLevel, CActiveAIComponent* pAIcomp );
+	CProp( CLevel& refLevel, CPropAIComponent* pAIcomp );
 	~CProp();
 
 	const EActiveInterfaceType GetClassType() const override {

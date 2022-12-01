@@ -1,17 +1,17 @@
 #include "dxstdafx.h"
-#include "ActiveAIComp.h"
+#include "PropAIComp.h"
 
-CActiveAIComponent::CActiveAIComponent()
+CPropAIComponent::CPropAIComponent()
 {
 
 }
 
-CActiveAIComponent::~CActiveAIComponent()
+CPropAIComponent::~CPropAIComponent()
 {
 
 }
 
-bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& level )
+bool CPropAIComponent::Update( IActiveInterface& active, float dTime, CLevel& level )
 {
 	bool bProcessedState = true;
 	if ( active.AIstate == K_AI_STATE_UNDEFINED )
@@ -634,7 +634,7 @@ bool CActiveAIComponent::Update( IActiveInterface& active, float dTime, CLevel& 
 
 }
 
-void CActiveAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
+void CPropAIComponent::SetAI( IActiveInterface& active, EAIstate newstate )
 {
 	active.AIstate = newstate;
 

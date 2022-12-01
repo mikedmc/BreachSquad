@@ -1,7 +1,7 @@
 #include "dxstdafx.h"
 #include "Prop.h"
 
-CProp::CProp( CLevel& refLevel, CActiveAIComponent* pAIcomp ) :
+CProp::CProp( CLevel& refLevel, CPropAIComponent* pAIcomp ) :
 	flags( 0 ), c_AI( pAIcomp ), level(refLevel)
 {
 

@@ -13,7 +13,7 @@
 #include "gameplay/Level_scriptable.h"
 
 #include "gameplay/ActiveInterface.h"
-#include "gameplay/components/ActiveAIComp.h"
+#include "gameplay/components/PropAIComp.h"
 #include "gameplay/Light.h"
 #include "gameplay/Prop.h"
 #include "gameplay/Level_bullets.h"
@@ -223,9 +223,6 @@ public:
 	CLinkedPool<CBullet>	m_poolBullets;			// bullets pool
 	int						m_bulletsMeshIdx;		// idx mesh bullets
 
-	///--- room occluders ---
-	int						m_fogofwarMeshIdx;		//idx mesh occluders
-
 	///--- BULLETS ---
 	// Shoots a bullet and returns a pointer to the actual bullet. Don't deallocate or make any changes on said pointer.
 	CBullet*				ShootBullet( CBulletTemplate * bulletTemplate, EActorClass actorClass, UINT32 nOwnerUID, Vec3 vPos, Vec3 vShootDir );
@@ -257,7 +254,7 @@ public:
 	void					PaintDoofers( eLVLRenderPass pass );
 	///--- efecte speciale ---
 	void					GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, DWORD color = 0xffffffff );
-	void					GenerateEffect( CStringHash sEffectName, Vec2 pos, float fSize, DWORD color = 0xffffffff );
+	void					GenerateEffect( CStringHash & sEffectName, Vec2 pos, float fSize, DWORD color = 0xffffffff );
 	///--- misc objects (rails, etc) ---
 	CArray<CMiscObjectBase*>	m_arrMiscObjects;
 

@@ -211,7 +211,7 @@ CProp* CLevel::SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nF
 	ErrorBox( K_ERR_WARNING, L"Not implemented! See level_loaders when loading props!" );
 	return nullptr;
 
-	CProp* obj = new CProp( *this, new CActiveAIComponent() );
+	CProp* obj = new CProp( *this, new CPropAIComponent() );
 
 	obj->ID = GenerateNextID();
 	//pozitia
@@ -272,7 +272,7 @@ CProp* CLevel::SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nF
 
 CLight*	CLevel::SpawnLight( Vec3 spawnPos, eLightType eType, DWORD dwColor, float fRadius, int profileID, bool bCastShadows )
 {
-	CLight *nl = new CLight( new CActiveAIComponent() );
+	CLight *nl = new CLight( new CPropAIComponent() );
 	nl->ID = GenerateNextID();
 	nl->type = eType;
 	nl->fVolumeAlpha = 1.0f;
@@ -327,7 +327,6 @@ CLevel::CLevel()
 	m_propsLightsMeshIdx = -1;
 
 	//fog of war
-	m_fogofwarMeshIdx = -1;
 	m_bulletsMeshIdx = -1;
 	//level states
 	m_levelState = K_LVL_STATE_PLAYING;
@@ -5472,7 +5471,12 @@ void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, 
 {
 	switch ( nEffectType )
 	{
-		case K_LVL_EFFECT_STONE_BREAK:
+		case K_FX_EXPLONICE_SM1:
+		{
+			__Particles().AddParticle( ANM_PARTICLES_SPR_EXPLONICE_SM1, true, 0, &pos, nullptr, nullptr, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_NORMAL );
+		}
+		break;
+		case K_FX_STONE_BREAK:
 		{
 			//__Particles().GenerateSmokePuff(Vec2(pos.x, pos.y - 10.0f), 20.0f, K_PART_LAYER_RT_FRONT_NRM);
 			m_camLevelToRT.ShakeScreen( 2.0f, 8.0f, &pos );
@@ -5480,12 +5484,12 @@ void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, 
 			//			SND_PLAY_POSITIONAL(SNDIDX_STONE_BREAK1, pos);
 		}
 		break;
-		case K_LVL_EFFECT_EXPLO_LARGE:
+		case K_FX_EXPLO_LARGE:
 		{
 			AddDoofer_Explo( hash_EXPLO_LARGE_XL, pos, 0, K_ACT_CLASS_EXPLOSION );
 		}
 		break;
-		case K_LVL_EFFECT_ELECTRIC_BREAK_SPARKS:
+		case K_FX_ELECTRIC_BREAK_SPARKS:
 		{
 			//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.4f, 0.1f, 0x88FDB727, 1.0f);
 						//particule sparkle
@@ -5497,7 +5501,7 @@ void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, 
 						*/
 		}
 		break;
-		case K_LVL_EFFECT_STARS_CONFETTI:
+		case K_FX_STARS_CONFETTI:
 		{
 			//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0x88FDB727, 3.0f * fSize);
 						//fire ring
@@ -5528,7 +5532,7 @@ void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, 
 	}
 }
 
-void CLevel::GenerateEffect( CStringHash sEffectName, Vec2 pos, float fSize, DWORD color )
+void CLevel::GenerateEffect( CStringHash & sEffectName, Vec2 pos, float fSize, DWORD color )
 {
 	ELVLEffectType effectidx = ( ELVLEffectType ) GetListIndexByNameHash( sEffectName.textHash, ELVLEffectTypeNames, ARRAY_SIZE( ELVLEffectTypeNames ) );
 	GenerateEffect( effectidx, pos, fSize, color );

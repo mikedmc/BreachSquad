@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gameplay/components/ActiveAIComp.h"
+#include "gameplay/components/PropAIComp.h"
 
 //  Light Type
 enum eLightType {
@@ -44,7 +44,7 @@ public:
 	}
 
 public:
-	CActiveAIComponent*	c_AI;						// AI component for lights
+	CPropAIComponent*	c_AI;						// AI component for lights
 
 public:
 	eLightType			type;
@@ -69,7 +69,7 @@ private:
 	bool				castShadows;				// arrVerts is allocated only when it casts shadows
 
 public:
-	CLight(CActiveAIComponent* pLightAIComp);
+	CLight(CPropAIComponent* pLightAIComp);
 	~CLight();
 
 	void				SetPos(Vec3 newPos) override;

@@ -57,21 +57,23 @@ const CStringHash eStrategicAbilityNames[] = {
 /// EFFECT TYPES
 ///--------------------------------------------------------------------------
 enum ELVLEffectType {
-	K_LVL_EFFECT_EMPTY = -1,
+	K_LVL_FX_EMPTY = -1,
 
-	K_LVL_EFFECT_ELECTRIC_BREAK_SPARKS = 0,
-	K_LVL_EFFECT_STARS_CONFETTI = 1,
-	K_LVL_EFFECT_EXPLO_LARGE,
-	K_LVL_EFFECT_STONE_BREAK,
+	K_FX_EXPLONICE_SM1 = 0,
+	K_FX_ELECTRIC_BREAK_SPARKS,
+	K_FX_STARS_CONFETTI,
+	K_FX_EXPLO_LARGE,
+	K_FX_STONE_BREAK,
 
-	K_LVL_EFFECTS_CNT,
+	K_FXS_CNT,
 };
 
 const CStringHash ELVLEffectTypeNames[] = {
-	L"EFFECT_ELECTRIC_BREAK_SPARKS",
-	L"EFFECT_STARS_CONFETTI",
-	L"EFFECT_EXPLO_LARGE",
-	L"EFFECT_STONE_BREAK", 
+	L"FX_EXPLONICE_SM1",
+	L"FX_ELECTRIC_BREAK_SPARKS",
+	L"FX_STARS_CONFETTI",
+	L"FX_EXPLO_LARGE",
+	L"FX_STONE_BREAK", 
 };
 
 ///----------------------------------------------------------------------------------
@@ -271,6 +273,7 @@ class CExplosionTemplate
 {
 public:
 	CStringHash	name;
+	CStringHash	shFX;		// name of FX to be instantiated
 	float fDamage, fDamageRadius;
 	float fStunDuration, fStunRadius;
 	float fSoundRadius;
@@ -290,6 +293,7 @@ public:
 		fSoundRadius(64.0f), nShrapnelCnt(0), nNapalmCnt(0), fMaxImpulse(0.0f), fDoTRadius(0.0f), nArmorPiercingRating(1), eIgnoreActorClass(K_ACT_CLASS_ANY)
 	{
 		name.Reset();
+		shFX.Reset();
 		cDoT.Set(CDamageOverTime::K_LVL_DoT_NONE);
 	}
 };
