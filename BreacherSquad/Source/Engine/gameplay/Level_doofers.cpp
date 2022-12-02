@@ -108,12 +108,12 @@ void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float
 	}
 }
 
-void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, int exploOwnerClass, Vec2 vExploDir, CAABB* exploAABB)
+void CLevel::AddDoofer_Explo( UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, int exploOwnerClass, Vec2 vExploDir, CAABB* exploAABB )
 {
-	CExplosionTemplate* explotemplate = GetTemplateExplosion(exploNameHash);
+	CExplosionTemplate* explotemplate = GetTemplateExplosion( exploNameHash );
 	if ( explotemplate == nullptr )
 	{
-		ErrorBox( K_ERR_WARNING, L"Explo template not found!");
+		ErrorBox( K_ERR_WARNING, L"Explo template not found!" );
 		return;
 	}
 
@@ -125,263 +125,263 @@ void CLevel::AddDoofer_Explo(UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, 
 	}
 
 	//set 
-		node->m_data.Reset();
-		node->m_data.type = K_DOOFER_EXPLOSION;
+	node->m_data.Reset();
+	node->m_data.type = K_DOOFER_EXPLOSION;
 
-		//default
-		float fMaxDamage = explotemplate->fDamage;
-		float fMaxStun = explotemplate->fStunDuration;
-		float fDamageRadius = explotemplate->fDamageRadius;
-		float fStunRadius = explotemplate->fStunRadius;
-		float fMaxImpulse = explotemplate->fMaxImpulse;
+	//default
+	float fMaxDamage = explotemplate->fDamage;
+	float fMaxStun = explotemplate->fStunDuration;
+	float fDamageRadius = explotemplate->fDamageRadius;
+	float fStunRadius = explotemplate->fStunRadius;
+	float fMaxImpulse = explotemplate->fMaxImpulse;
 
-		//add sound event
-		if (explotemplate->fSoundRadius > 0.0f)
-			AddAIEvent(K_AIEVT_SOUND_THREAT, 0, (EActorClass)exploOwnerClass, pos, explotemplate->fSoundRadius, 1.0f);
+	//add sound event
+	if ( explotemplate->fSoundRadius > 0.0f )
+		AddAIEvent( K_AIEVT_SOUND_THREAT, 0, (EActorClass)exploOwnerClass, pos, explotemplate->fSoundRadius, 1.0f );
 
-		if (exploAABB == nullptr)
+	if ( exploAABB == nullptr )
+	{
+		//shrapnel
+		for ( int ll = 0; ll < explotemplate->nShrapnelCnt; ll++ )
 		{
-			//shrapnel
-			for (int ll = 0; ll < explotemplate->nShrapnelCnt; ll++)
-			{
-				float fdx = m_rand.RandFloatSgn(150.0f);
-				float fdy = -100.0f - m_rand.RandFloat(150.0f);
-				AddDoofer(K_DOOFER_SHRAPNEL_SMOKING, pos, &Vec2(fdx, fdy), &g_vecGravityOld);
-			}
-			//napalm
-			for (int ll = 0; ll < explotemplate->nNapalmCnt; ll++)
-			{
-				float fdx = m_rand.RandFloatSgn(60.0f);
-				float fdy = -100.0f - m_rand.RandFloat(120.0f);
-				AddDoofer(K_DOOFER_FIRE_SOURCE, pos, &Vec2(fdx, fdy), &g_vecGravityOld);
-			}
+			float fdx = m_rand.RandFloatSgn( 150.0f );
+			float fdy = -100.0f - m_rand.RandFloat( 150.0f );
+			AddDoofer( K_DOOFER_SHRAPNEL_SMOKING, pos, &Vec2( fdx, fdy ), &g_vecGravityOld );
 		}
-		else
+		//napalm
+		for ( int ll = 0; ll < explotemplate->nNapalmCnt; ll++ )
 		{
-			//shrapnel
-			for (int ll = 0; ll < explotemplate->nShrapnelCnt; ll++)
-			{
-				float fdx = m_rand.RandFloatSgn(150.0f);
-				float fdy = -100.0f - m_rand.RandFloat(150.0f);
-				AddDoofer(K_DOOFER_SHRAPNEL_SMOKING, pos + m_rand.RandVec2Sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y),
-					&Vec2(fdx, fdy), &g_vecGravityOld);
-			}
-			//napalm
-			for (int ll = 0; ll < explotemplate->nNapalmCnt; ll++)
-			{
-				float fdx = m_rand.RandFloatSgn(60.0f);
-				float fdy = -100.0f - m_rand.RandFloat(120.0f);
-				AddDoofer(K_DOOFER_FIRE_SOURCE, pos + m_rand.RandVec2Sgn(exploAABB->vHalfSize.x, exploAABB->vHalfSize.y),
-					&Vec2(fdx, fdy), &g_vecGravityOld);
-			}
+			float fdx = m_rand.RandFloatSgn( 60.0f );
+			float fdy = -100.0f - m_rand.RandFloat( 120.0f );
+			AddDoofer( K_DOOFER_FIRE_SOURCE, pos, &Vec2( fdx, fdy ), &g_vecGravityOld );
 		}
-
-		//explo direction
-		float fExploAng = UTMath::GetVectorAngle(vExploDir);
-		// generate effect if we have one
-		if ( explotemplate->shFX.IsSet() )
+	}
+	else
+	{
+		//shrapnel
+		for ( int ll = 0; ll < explotemplate->nShrapnelCnt; ll++ )
 		{
-			GenerateEffect( explotemplate->shFX, pos, 1.0f );
+			float fdx = m_rand.RandFloatSgn( 150.0f );
+			float fdy = -100.0f - m_rand.RandFloat( 150.0f );
+			AddDoofer( K_DOOFER_SHRAPNEL_SMOKING, pos + m_rand.RandVec2Sgn( exploAABB->vHalfSize.x, exploAABB->vHalfSize.y ),
+				&Vec2( fdx, fdy ), &g_vecGravityOld );
 		}
-
-		//pointer to player that spawned the explosion, or null if it wasn't a player
-		CActor* pPlayer = GetPlayerByUID(dwOwnerUID);
-
-		//#IMPORTANT #TODO: should optimize in order to minimize the usage of UnobstructedLineOfSight
-		//stun enemy and damage over time
-		if ((fMaxStun > 0.0f) || (explotemplate->cDoT.eType != CDamageOverTime::K_LVL_DoT_NONE))
+		//napalm
+		for ( int ll = 0; ll < explotemplate->nNapalmCnt; ll++ )
 		{
-			//find all actors and damage them (linearly)
-			for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
+			float fdx = m_rand.RandFloatSgn( 60.0f );
+			float fdy = -100.0f - m_rand.RandFloat( 120.0f );
+			AddDoofer( K_DOOFER_FIRE_SOURCE, pos + m_rand.RandVec2Sgn( exploAABB->vHalfSize.x, exploAABB->vHalfSize.y ),
+				&Vec2( fdx, fdy ), &g_vecGravityOld );
+		}
+	}
+
+	//explo direction
+	float fExploAng = UTMath::GetVectorAngle( vExploDir );
+	// generate effect if we have one
+	if ( explotemplate->shFX.IsSet() )
+	{
+		GenerateEffect( explotemplate->shFX, pos, 1.0f );
+	}
+
+	//pointer to player that spawned the explosion, or null if it wasn't a player
+	CActor* pPlayer = GetPlayerByUID( dwOwnerUID );
+
+	//#IMPORTANT #TODO: should optimize in order to minimize the usage of UnobstructedLineOfSight
+	//stun enemy and damage over time
+	if ( ( fMaxStun > 0.0f ) || ( explotemplate->cDoT.eType != CDamageOverTime::K_LVL_DoT_NONE ) )
+	{
+		//find all actors and damage them (linearly)
+		for ( int kk = 0; kk < m_arrActors.GetSize(); kk++ )
+		{
+			CActor* act = m_arrActors[kk];
+			if ( ( !act->IsAlive() ) || ( act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET ) )
+				continue;
+			//never stun the hostages
+			if ( ( act->_template.actorClass == K_ACT_CLASS_HOSTAGE ) && ( fMaxStun > 0.0f ) )
+				continue;
+
+			Vec2 vDir = act->GetPosHeart() - pos;
+			float fDist = MUVec2Len( &vDir );
+
+			bool bDirectLine = IsLineOfSight( act->GetPosHeart(), pos, act->pArea );
+
+			if ( ( bDirectLine ) && ( explotemplate->cDoT.eType != CDamageOverTime::K_LVL_DoT_NONE ) && ( fDist < explotemplate->fDoTRadius ) )
 			{
-				CActor* act = m_arrActors[kk];
-				if ((!act->IsAlive()) || (act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET))
-					continue;
-				//never stun the hostages
-				if ((act->_template.actorClass == K_ACT_CLASS_HOSTAGE) && (fMaxStun > 0.0f))
-					continue;
-				
-				Vec2 vDir = act->GetPosHeart() - pos;
-				float fDist = MUVec2Len(&vDir);
+				//momentan nu pune DoT in functie de distanta ci pune uniform la toti din raza
+				SetActorDoT( act, explotemplate->cDoT.eType, explotemplate->cDoT.fDuration, explotemplate->cDoT.fDamagePerSec, explotemplate->cDoT.eExcludedActClass, explotemplate->cDoT.eFilteredActClass, dwOwnerUID );
+			}
 
-				bool bDirectLine = IsLineOfSight(act->GetPosHeart(), pos, act->pArea);
-				
-				if ((bDirectLine) && (explotemplate->cDoT.eType != CDamageOverTime::K_LVL_DoT_NONE) && (fDist < explotemplate->fDoTRadius))
-				{
-					//momentan nu pune DoT in functie de distanta ci pune uniform la toti din raza
-					SetActorDoT(act, explotemplate->cDoT.eType, explotemplate->cDoT.fDuration, explotemplate->cDoT.fDamagePerSec, explotemplate->cDoT.eExcludedActClass, explotemplate->cDoT.eFilteredActClass, dwOwnerUID);
-				}
-
-				//no friendly stun
-				if (act->_template.actorClass != K_ACT_CLASS_ENEMY)
-					continue;
-				//daca e prea departe nu il ia in seama
-				if (fDist > fStunRadius)
-					continue;
-				// daca stun este directional si nu se potriveste directia
-				//if ((vExploDir.x != 0.0f) && (SIGN(vExploDir.x) != SIGN(vDir.x)))
+			//no friendly stun
+			if ( act->_template.actorClass != K_ACT_CLASS_ENEMY )
+				continue;
+			//daca e prea departe nu il ia in seama
+			if ( fDist > fStunRadius )
+				continue;
+			// daca stun este directional si nu se potriveste directia
+			//if ((vExploDir.x != 0.0f) && (SIGN(vExploDir.x) != SIGN(vDir.x)))
 //					continue;
-				if (!bDirectLine)
-					continue;
-				
-				if ((act->fStunTimer < fMaxStun) && (fMaxStun > 0.0f))
-				{
-					act->SetStun( fMaxStun );
-				}
+			if ( !bDirectLine )
+				continue;
+
+			if ( ( act->fStunTimer < fMaxStun ) && ( fMaxStun > 0.0f ) )
+			{
+				act->SetStun( fMaxStun );
+			}
+		}
+	}
+
+	//do some damage
+	if ( ( fMaxDamage > 0.0f ) && ( fDamageRadius > 0.0f ) )
+	{
+		int nBombFrags = 0;
+		//find all actors and damage them (linearly)
+		for ( int kk = 0; kk < m_arrActors.GetSize(); kk++ )
+		{
+			CActor* act = m_arrActors[kk];
+
+			if ( ( !act->IsEnabled() ) || ( act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET ) )
+				continue;
+			//ignores specified classes
+			if ( act->_template.actorClass == explotemplate->eIgnoreActorClass )
+				continue;
+			//distanta la inamic
+			Vec2 vDir = act->GetPosHeart() - pos;
+			float fDist = MUVec2Len( &vDir );
+			//daca e prea departe nu il ia in seama
+			if ( fDist > fDamageRadius )
+				continue;
+			//daca nu e linie directa nu loveste
+			if ( !IsLineOfSight( act->GetPosHeart(), pos, act->pArea ) )
+				continue;
+			//loveste liniar
+			float fPercent = 1.0f - ( fDist / fDamageRadius );
+			CLAMP( fPercent, 0.0f, 1.0f );
+			//add momentum
+			MUVec2Norm( &vDir, &vDir );
+			vDir *= fPercent * fMaxImpulse;
+			//#HACK: ca sa nu mai arunce cadavrele in sus
+			if ( vDir.y < 0.0f )
+				vDir.y = 0.0f;
+
+			CBulletHitReturnData retdata;
+			retdata = act->HitActor( fPercent * fMaxDamage, dwOwnerUID, K_ACT_CLASS_EXPLOSION, &vDir, K_LVL_BULLET_FLAG_CAN_SPLAT, explotemplate->nArmorPiercingRating );
+			//count only enemies
+			if ( ( retdata.bKilledTarget ) && ( act->_template.actorClass >= K_ACT_CLASS_ENEMY ) )
+				nBombFrags++;
+
+			//#ACHIEVEMENTS: darwin award - player died from his own explosive
+			if ( ( act->_template.actorClass == K_ACT_CLASS_PLAYER ) && ( !IsNetworkPlayer( act ) ) && ( act->fLife <= 0.0f ) && ( dwOwnerUID == act->UID ) &&
+				( ( explotemplate->name.textHash == hash_EXPLO_GRENADE_GROUND ) || ( explotemplate->name.textHash == hash_EXPLO_GRENADE ) ||
+				( explotemplate->name.textHash == hash_EXPLO_CHARGE ) || ( explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE ) ) )
+			{
+				__Achievements().UnlockAchievement( ACH_DARWIN_AWARD );
+			}
+
+		}
+
+		//#ACHIEVEMENTS: explosion achievements
+		if ( ( nBombFrags >= 3 ) && ( pPlayer != null ) && ( !IsNetworkPlayer( pPlayer ) ) )
+		{
+			//breaching charge behind the door
+			if ( explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE )
+			{
+				__Achievements().UnlockAchievement( ACH_GOOD_BREACH );
+			}
+			if ( explotemplate->name.textHash == hash_EXPLO_BARREL )
+			{
+				__Achievements().UnlockAchievement( ACH_HEAT_UP_THE_NIGHT );
 			}
 		}
 
-		//do some damage
+		///--- check doors and windows breaking ---
+		/*
 		if ((fMaxDamage > 0.0f) && (fDamageRadius > 0.0f))
 		{
-			int nBombFrags = 0;
-			//find all actors and damage them (linearly)
-			for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
+			for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
 			{
-				CActor* act = m_arrActors[kk];
-				
-				if ((!act->IsEnabled()) || (act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET))
-					continue;
-				//ignores specified classes
-				if (act->_template.actorClass == explotemplate->eIgnoreActorClass)
-					continue;
-				//distanta la inamic
-				Vec2 vDir = act->GetPosHeart() - pos;
-				float fDist = MUVec2Len(&vDir);
-				//daca e prea departe nu il ia in seama
-				if (fDist > fDamageRadius)
-					continue;
-				//daca nu e linie directa nu loveste
-				if ( !IsLineOfSight( act->GetPosHeart(), pos, act->pArea ) )
-					continue;
-				//loveste liniar
-				float fPercent = 1.0f - (fDist / fDamageRadius);
-				CLAMP(fPercent, 0.0f, 1.0f);
-				//add momentum
-				MUVec2Norm(&vDir, &vDir);
-				vDir *= fPercent * fMaxImpulse;
-				//#HACK: ca sa nu mai arunce cadavrele in sus
-				if (vDir.y < 0.0f)
-					vDir.y = 0.0f;
-
-				CBulletHitReturnData retdata;
-				retdata = act->HitActor(fPercent * fMaxDamage, dwOwnerUID, K_ACT_CLASS_EXPLOSION, &vDir, K_LVL_BULLET_FLAG_CAN_SPLAT, explotemplate->nArmorPiercingRating);
-				//count only enemies
-				if ((retdata.bKilledTarget) && (act->_template.actorClass >= K_ACT_CLASS_ENEMY))
-					nBombFrags++;
-
-				//#ACHIEVEMENTS: darwin award - player died from his own explosive
-				if ((act->_template.actorClass == K_ACT_CLASS_PLAYER) && (!IsNetworkPlayer(act)) && (act->fLife <= 0.0f) && (dwOwnerUID == act->UID) &&
-					((explotemplate->name.textHash == hash_EXPLO_GRENADE_GROUND) || (explotemplate->name.textHash == hash_EXPLO_GRENADE) ||
-					(explotemplate->name.textHash == hash_EXPLO_CHARGE) || (explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE)))
+				CCollisionShape* shape = m_visibleList.logic_colShapesSpecial.m_pData[kk];
+				//breaks doors?
+				if ((explotemplate->fDamageObjectsMultiplier > 0.0f) && (shape->AIstate == K_AI_STATE_COLL_BREAKABLE_DOOR))
 				{
-					__Achievements().UnlockAchievement(ACH_DARWIN_AWARD);
+					if (shape->varAIparams[L"b_reinforced")->m_asINT32 != 0)
+						continue;
+
+					//loveste liniar
+					Vec2 vDist = (shape->bbox.vCenter - pos);
+					float fDist = MUVec2Len(&vDist);
+					if (explotemplate->fDamageObjectsMultiplier <= 0.0f)
+						continue;
+					float fPercent = 1.0f - (fDist / (fDamageRadius * explotemplate->fDamageObjectsMultiplier));
+					//too soft
+					if (fPercent <= 0.0f)
+						continue;
+					//not straight line (can't check with center or it will fail because of the actual bbox)
+					Vec2 vCheckPt = pos;
+					vCheckPt.x -= (shape->bbox.vHalfSize.x + 2.0f) * SIGN(vDist.x);
+					if (!IsLineOfSight(pos, vCheckPt))
+						continue;
+					//damage door
+					shape->AIfvar1 -= (fPercent * fMaxDamage) * explotemplate->fDamageObjectsMultiplier;
+					//was hit
+					shape->AIvarBool1 = true;
+					//save door explo direction
+					shape->varAIparams.SetVarFloat(L"fForceDirX", SIGN(vDist.x));
+					shape->varAIparams.SetVarINT32(L"bExploded", 1);
 				}
 
-			}
-
-			//#ACHIEVEMENTS: explosion achievements
-			if ((nBombFrags >= 3) && (pPlayer != null) && (!IsNetworkPlayer(pPlayer)))
-			{
-				//breaching charge behind the door
-				if (explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE)
+				//windows?
+				if (shape->AIstate == K_AI_STATE_COLL_BREAKABLE_WINDOW)
 				{
-					__Achievements().UnlockAchievement(ACH_GOOD_BREACH);
-				}
-				if (explotemplate->name.textHash == hash_EXPLO_BARREL)
-				{
-					__Achievements().UnlockAchievement(ACH_HEAT_UP_THE_NIGHT);
-				}
-			}
-
-			///--- check doors and windows breaking ---
-			/*
-			if ((fMaxDamage > 0.0f) && (fDamageRadius > 0.0f))
-			{
-				for (int kk = 0; kk < m_visibleList.logic_colShapesSpecial.Count(); kk++)
-				{
-					CCollisionShape* shape = m_visibleList.logic_colShapesSpecial.m_pData[kk];
-					//breaks doors?
-					if ((explotemplate->fDamageObjectsMultiplier > 0.0f) && (shape->AIstate == K_AI_STATE_COLL_BREAKABLE_DOOR))
+					//linear distance hit
+					float fDist = D3DXVec2Length(&(shape->bbox.vCenter - pos));
+					float fPercent = 1.0f - (fDist / fDamageRadius);
+					//subtract life
+					if (fPercent > 0.0f)
 					{
-						if (shape->varAIparams[L"b_reinforced")->m_asINT32 != 0)
-							continue;
-
-						//loveste liniar
-						Vec2 vDist = (shape->bbox.vCenter - pos);
-						float fDist = MUVec2Len(&vDist);
-						if (explotemplate->fDamageObjectsMultiplier <= 0.0f)
-							continue;
-						float fPercent = 1.0f - (fDist / (fDamageRadius * explotemplate->fDamageObjectsMultiplier));
-						//too soft
-						if (fPercent <= 0.0f)
-							continue;
-						//not straight line (can't check with center or it will fail because of the actual bbox)
-						Vec2 vCheckPt = pos;
-						vCheckPt.x -= (shape->bbox.vHalfSize.x + 2.0f) * SIGN(vDist.x);
-						if (!IsLineOfSight(pos, vCheckPt))
-							continue;
-						//damage door
-						shape->AIfvar1 -= (fPercent * fMaxDamage) * explotemplate->fDamageObjectsMultiplier;
-						//was hit
-						shape->AIvarBool1 = true;
-						//save door explo direction
-						shape->varAIparams.SetVarFloat(L"fForceDirX", SIGN(vDist.x));
-						shape->varAIparams.SetVarINT32(L"bExploded", 1);
-					}
-
-					//windows?
-					if (shape->AIstate == K_AI_STATE_COLL_BREAKABLE_WINDOW)
-					{
-						//linear distance hit
-						float fDist = D3DXVec2Length(&(shape->bbox.vCenter - pos));
-						float fPercent = 1.0f - (fDist / fDamageRadius);
-						//subtract life
-						if (fPercent > 0.0f)
+						shape->AIfvar1 -= fPercent * fMaxDamage;
+						//door destroyed - save direction applied by explo
+						if (shape->AIfvar1 <= 0.0f)
 						{
-							shape->AIfvar1 -= fPercent * fMaxDamage;
-							//door destroyed - save direction applied by explo
-							if (shape->AIfvar1 <= 0.0f)
-							{
-								shape->varAIparams.SetVarFloat(L"fForceDirX", 1000.0f * SIGN(shape->bbox.vCenter.x - pos.x));
-							}
+							shape->varAIparams.SetVarFloat(L"fForceDirX", 1000.0f * SIGN(shape->bbox.vCenter.x - pos.x));
 						}
 					}
 				}
 			}
-			*/
+		}
+		*/
 
-			//check grenade interaction AIs
-			/*
-			if ((fMaxDamage > 0.0f) && (bInteractAI) && (fDamageRadius > 0.0f))
+		//check grenade interaction AIs
+		/*
+		if ((fMaxDamage > 0.0f) && (bInteractAI) && (fDamageRadius > 0.0f))
+		{
+			for (int kk = 0; kk < m_visibleList.logic_props_closeby.Count(); kk++)
 			{
-				for (int kk = 0; kk < m_visibleList.logic_props_closeby.Count(); kk++)
+				CProp * activ = m_visibleList.logic_props_closeby.m_pData[kk];
+				if (activ->AIstate == K_AI_STATE_ACTIVE_SWINGING_FRONTOBJ)
 				{
-					CProp * activ = m_visibleList.logic_props_closeby.m_pData[kk];
-					if (activ->AIstate == K_AI_STATE_ACTIVE_SWINGING_FRONTOBJ)
-					{
-						//daca am activ swinging si e in raza grenadei
-						Vec2 vDir = activ->pos - pos;
-						float fDist = D3DXVec2Length(&vDir);
-						//daca e prea departe nu il ia in seama
-						if (fDist > fDamageRadius * 2.0f)
-							continue;
-						//direct line of sight
-						if (!IsLineOfSight(activ->pos, pos))
-							continue;
+					//daca am activ swinging si e in raza grenadei
+					Vec2 vDir = activ->pos - pos;
+					float fDist = D3DXVec2Length(&vDir);
+					//daca e prea departe nu il ia in seama
+					if (fDist > fDamageRadius * 2.0f)
+						continue;
+					//direct line of sight
+					if (!IsLineOfSight(activ->pos, pos))
+						continue;
 
-						//setam balans
-						float maxperc = 1.0f - (fDist / (fDamageRadius * 2.0f));
-						//viteza unghiulara
-						activ->AIfvar1 = -SIGN(vDir.x) * 8.0f * maxperc;
-					}
+					//setam balans
+					float maxperc = 1.0f - (fDist / (fDamageRadius * 2.0f));
+					//viteza unghiulara
+					activ->AIfvar1 = -SIGN(vDir.x) * 8.0f * maxperc;
 				}
 			}
-			*/
 		}
+		*/
+	}
 
-		//damage over time
-	
+	//damage over time
+
 }
 
 
@@ -523,7 +523,7 @@ void CLevel::UpdateDoofers(float dTime)
 			}
 			break;
 		}
-		//ii dam release
+		// release it if dead
 		if (killprop)
 		{
 			//release la nodul de fizica !!!

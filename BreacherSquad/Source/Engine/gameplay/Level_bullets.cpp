@@ -284,13 +284,13 @@ void CLevel::UpdateBullets(float dTime)
 			if ( bullet->nExploTemplateHash != 0 )
 			{
 				Vec2 vExploDir = bullet->c_pointPhys->speed; 
-				Vec2 vExploPos = bullet->pos.xy;
-				/*
-				if (bullet->physPt->m_data.bContacting)
-					vExploPos += bullet->physPt->m_data.contactNormal * 2.0f;
-					*/
+				Vec3 vExploPos = bullet->pos.xyz;
+				
+				if (bullet->c_pointPhys->bContacting)
+					vExploPos += bullet->c_pointPhys->contactNormal * 2.0f;
+					
 				//now add explo
-				//AddDoofer_Explo(bullet->nExploTemplateHash, vExploPos, bullet->ownerUID, bullet->actorClass, vExploDir);
+				AddDoofer_Explo(bullet->nExploTemplateHash, Vec3ProjVec2(vExploPos), bullet->ownerUID, bullet->actorClass, vExploDir);
 			}
 
 			//and release the bullet

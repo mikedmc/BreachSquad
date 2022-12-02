@@ -1,17 +1,16 @@
 #pragma once
 
-
 #define K_LVL_DOOFERS_MAX_CNT 256
-//types
+// doofer types
 enum EDooferType {
 	K_DOOFER_NOT_SET = -1,
 
-	K_DOOFER_SHELL = 0,	//cartusele jucatorului
-	K_DOOFER_MEAT = 1,	//carnea care sare din oameni
-	K_DOOFER_SHRAPNEL_SMOKING, //bucati de bomba care lasa fum in urma
-	K_DOOFER_LIGHT,		//lumina temporara pentru arme, explozii, etc. Deseneaza din m_sprLights.
-	K_DOOFER_EXPLOSION,	//explozie care deformeaza ecranul (si deseneaza si explozia (cu particule))
-	K_DOOFER_FIRE_SOURCE, //o bucata de foc care moare dupa un timp dar loveste toti oamenii
+	K_DOOFER_SHELL = 0,
+	K_DOOFER_MEAT = 1,	
+	K_DOOFER_SHRAPNEL_SMOKING, 
+	K_DOOFER_LIGHT,		
+	K_DOOFER_EXPLOSION,	
+	K_DOOFER_FIRE_SOURCE,
 };
 
 // Class of objects that are "active" and may have special behaviors, and are not props. 
@@ -21,18 +20,18 @@ class CDoofer {
 public:
 	EDooferType	type;
 
-	int			nSubType;	//folosit de fiecare tip in mod diferit
-	float		fTimer;		//timer care porneste de la 0
-	bool		bAnimated;	//daca e animat sprite-ul
-	CSpr		spr, spr2;	//grafica din Props (unele au nevoie de 2 sprites)
+	int			nSubType;	
+	float		fTimer;			
+	bool		bAnimated;	
+	CSpr		spr, spr2;	
 	float		fSize;
-	//--- variabile lumini ---
+
 	bool		bMakesLight;
 	CSpr		sprLight;
-	float		fLightDuration, fLightFadeOut;	//durata totala a luminii si durata de fade out
+	float		fLightDuration, fLightFadeOut;	
 	float		fLightScaling;
-	float		fLightTimer;		//timer-ul de viata al luminii
-	//--- diverse variabile ---
+	float		fLightTimer;		
+
 	bool		bVar1;
 	int			nIntVar1;
 
