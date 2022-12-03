@@ -1,4 +1,5 @@
 #pragma once
+#include "components/PhysPtComp.h"
 
 #define K_LVL_DOOFERS_MAX_CNT 256
 // doofer types
@@ -18,33 +19,33 @@ enum EDooferType {
 // They are usually short-lived so they don't need visibility lists
 class CDoofer {
 public:
-	EDooferType	type;
+	CPointPhysComponent*	c_pointPhys;		// point physics component
+	VecProj				pos;
 
-	int			nSubType;	
-	float		fTimer;			
-	bool		bAnimated;	
-	CSpr		spr, spr2;	
-	float		fSize;
+public:
+	EDooferType			type;
+	int					nSubType;
 
-	bool		bMakesLight;
-	CSpr		sprLight;
-	float		fLightDuration, fLightFadeOut;	
-	float		fLightScaling;
-	float		fLightTimer;		
+	float				fTimer;			
+	//bool				bAnimated;	
+	//CSpr				spr, spr2;	
+	float				fSize;
 
-	bool		bVar1;
-	int			nIntVar1;
+	bool				bMakesLight;
+	//CSpr				sprLight;
+	float				fLightDuration, fLightFadeOut;	
+	float				fLightScaling;
+	float				fLightTimer;		
 
-	CDoofer() : type(K_DOOFER_NOT_SET), nSubType(0), fTimer(0.0f), bAnimated(false), fSize(1.0f),
-		bMakesLight(false), fLightDuration(0.0f), fLightFadeOut(0.0f), fLightScaling(1.0f), fLightTimer(0.0f), bVar1(false), nIntVar1(0)
-	{
-	}
+	bool				bVar1;
+	int					nIntVar1;
 
-	void Reset()
-	{
-		type = K_DOOFER_NOT_SET; nSubType = 0; fTimer = 0.0f; bAnimated = false; fSize = 1.0f;
-		bMakesLight = false; fLightDuration = 0.0f; fLightFadeOut = 0.0f; fLightScaling = 1.0f; fLightTimer = 0.0f;
-	}
+	CDoofer();
+	~CDoofer();
+	// resets a doofer for reusage
+	void				Reset();
+	// updates a doofer (mostly for physics but sprites can be updated here too)
+	void				Update( float dTime, CLevel & level );
 };
 
 

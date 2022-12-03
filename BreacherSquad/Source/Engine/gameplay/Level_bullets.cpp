@@ -122,7 +122,7 @@ void CLevel::UpdateBullets(float dTime)
 		bool killbullet = false;
 
 		// exited play area
-		if ( bullet->c_pointPhys->bIsDead )
+		if ( !bullet->c_pointPhys->bIsActive )
 			killbullet = true;
 
 		if ( bullet->c_pointPhys->bContacting )

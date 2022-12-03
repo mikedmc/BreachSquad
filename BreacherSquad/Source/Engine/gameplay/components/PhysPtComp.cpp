@@ -15,9 +15,10 @@ CPointPhysComponent::~CPointPhysComponent()
 	pArea = nullptr;
 }
 
-void CPointPhysComponent::Reset()
+void CPointPhysComponent::Reset( bool bActive )
 {
 	pArea = nullptr;
+	bIsActive = bActive;
 
 	accel = g_Vec3Zero;
 	speed = g_Vec3Zero;
@@ -31,7 +32,6 @@ void CPointPhysComponent::Reset()
 	bIsStaticZ = false; 
 	fBounceF = K_PPC_DEFAULT_FLOOR_BOUNCE;
 	fFrictionF = K_PPC_DEFAULT_FLOOR_FRICTION;
-	bIsDead = false; 
 	pArea = nullptr;
 	nFlagsCollision = K_PPC_COLLFLAG_ALL;
 	bFlagBounceEnabled = false;
@@ -39,12 +39,12 @@ void CPointPhysComponent::Reset()
 
 void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 {
-	if ( bIsDead )
+	if ( !bIsActive )
 		return;
 	// kill it when it gets outside the play area
 	if ( !Rects::PointInRect( vPos.xy, level.m_levelAABB ) )
 	{
-		bIsDead = true;
+		bIsActive = false;
 		bIsStatic = true;
 		return;
 	}
@@ -64,7 +64,7 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 		pArea = level.Areas_GetAt( vPos.xy );
 		if ( pArea == nullptr )
 		{
-			bIsDead = true;
+			bIsActive = false;
 			bIsStatic = true;
 			return;
 		}
@@ -155,7 +155,7 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 
 		// Z floor collision at the end to bring it back up
 		// Only compute this part if we have vertical acceleration and speed
-		//#MAYBE: should check collision with ceiling too
+		//#MAYBE: should check collision with ceiling too?
 		if ( ( accel.z != 0.0f ) && ( speed.z != 0.0f ) && ( pos.z <= fFloorH ) )
 		{
 			bContacting = true;
@@ -205,7 +205,7 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 			if ( pArea == nullptr )
 			{
 				bIsStatic = true;
-				bIsDead = true;
+				bIsActive = false;
 				return;
 			}
 		}
@@ -243,4 +243,9 @@ void CPointPhysComponent::SetCollisionFlags( int nCollFlags )
 void CPointPhysComponent::SetSpeed( Vec3 vSpeed )
 {
 	speed = vSpeed;
+}
+
+void CPointPhysComponent::SetActive( bool bActive )
+{
+	bIsActive = bActive;
 }

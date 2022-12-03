@@ -215,10 +215,9 @@ void CLevel::AddDoofer_Explo( UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID,
 			//no friendly stun
 			if ( act->_template.actorClass != K_ACT_CLASS_ENEMY )
 				continue;
-			//daca e prea departe nu il ia in seama
 			if ( fDist > fStunRadius )
 				continue;
-			// daca stun este directional si nu se potriveste directia
+			// if stun is directional but we have wrong direction
 			//if ((vExploDir.x != 0.0f) && (SIGN(vExploDir.x) != SIGN(vDir.x)))
 //					continue;
 			if ( !bDirectLine )
@@ -245,26 +244,21 @@ void CLevel::AddDoofer_Explo( UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID,
 			//ignores specified classes
 			if ( act->_template.actorClass == explotemplate->eIgnoreActorClass )
 				continue;
-			//distanta la inamic
+
 			Vec2 vDir = act->GetPosHeart() - pos;
 			float fDist = MUVec2Len( &vDir );
-			//daca e prea departe nu il ia in seama
 			if ( fDist > fDamageRadius )
 				continue;
-			//daca nu e linie directa nu loveste
 			if ( !IsLineOfSight( act->GetPosHeart(), pos, act->pArea ) )
 				continue;
-			//loveste liniar
+			// linear damage atten
 			float fPercent = 1.0f - ( fDist / fDamageRadius );
 			CLAMP( fPercent, 0.0f, 1.0f );
 			//add momentum
 			MUVec2Norm( &vDir, &vDir );
 			vDir *= fPercent * fMaxImpulse;
-			//#HACK: ca sa nu mai arunce cadavrele in sus
-			if ( vDir.y < 0.0f )
-				vDir.y = 0.0f;
 
-			CBulletHitReturnData retdata;
+			CBulletHitReturnData retdata{};
 			retdata = act->HitActor( fPercent * fMaxDamage, dwOwnerUID, K_ACT_CLASS_EXPLOSION, &vDir, K_LVL_BULLET_FLAG_CAN_SPLAT, explotemplate->nArmorPiercingRating );
 			//count only enemies
 			if ( ( retdata.bKilledTarget ) && ( act->_template.actorClass >= K_ACT_CLASS_ENEMY ) )
@@ -278,20 +272,6 @@ void CLevel::AddDoofer_Explo( UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID,
 				__Achievements().UnlockAchievement( ACH_DARWIN_AWARD );
 			}
 
-		}
-
-		//#ACHIEVEMENTS: explosion achievements
-		if ( ( nBombFrags >= 3 ) && ( pPlayer != null ) && ( !IsNetworkPlayer( pPlayer ) ) )
-		{
-			//breaching charge behind the door
-			if ( explotemplate->name.textHash == hash_EXPLO_CHARGE_INVISIBLE )
-			{
-				__Achievements().UnlockAchievement( ACH_GOOD_BREACH );
-			}
-			if ( explotemplate->name.textHash == hash_EXPLO_BARREL )
-			{
-				__Achievements().UnlockAchievement( ACH_HEAT_UP_THE_NIGHT );
-			}
 		}
 
 		///--- check doors and windows breaking ---
@@ -396,13 +376,9 @@ void CLevel::UpdateDoofers(float dTime)
 	{
 		//salvez locatia urmatoare ca s apot avansa pe ea
 		CDoofer* prop = &node->m_data;
+		prop->Update( dTime, ( *this ) );
 
 		bool killprop = false;
-		//daca iese din zona de joc
-		/*
-		if (prop->physPt->m_data.bIsDead)
-			killprop = true;
-		*/
 		//generic updates
 		prop->fLightTimer += dTime;
 
@@ -465,7 +441,7 @@ void CLevel::UpdateDoofers(float dTime)
 			case K_DOOFER_SHRAPNEL_SMOKING:
 			{
 				//update sprite
-				node->m_data.spr.Update(dTime);
+				//node->m_data.spr.Update(dTime);
 				//add smoke
 				if (m_Timers.Tick(60)) //&& (!prop->physPt->m_data.bContacting))
 				{
@@ -580,3 +556,33 @@ void CLevel::PaintDoofers( eLVLRenderPass pass )
 	}
 }
 
+CDoofer::CDoofer() : type( K_DOOFER_NOT_SET ), nSubType( 0 ), fTimer( 0.0f ), fSize( 1.0f ),
+bMakesLight( false ), fLightDuration( 0.0f ), fLightFadeOut( 0.0f ), fLightScaling( 1.0f ), fLightTimer( 0.0f ),
+bVar1( false ), nIntVar1( 0 )
+{
+	// by default physics is off
+	c_pointPhys = new CPointPhysComponent( false );
+	c_pointPhys->SetActive( false );
+}
+
+CDoofer::~CDoofer()
+{
+	SAFE_DELETE( c_pointPhys );
+}
+
+void CDoofer::Reset()
+{
+	type = K_DOOFER_NOT_SET; nSubType = 0; fTimer = 0.0f; fSize = 1.0f;
+	bMakesLight = false; fLightDuration = 0.0f; fLightFadeOut = 0.0f; fLightScaling = 1.0f; fLightTimer = 0.0f;
+
+	// by default doofers have no physics
+	c_pointPhys->Reset( false );
+}
+
+void CDoofer::Update( float dTime, CLevel & level )
+{
+	if ( c_pointPhys != nullptr )
+	{
+		c_pointPhys->Update( pos, dTime, level );
+	}
+}

@@ -1,4 +1,5 @@
 #pragma once
+#include "../utils/VecProj.h"
 #include "ComponentInterfaces.h"
 
 // declare used classes
@@ -29,22 +30,22 @@ public:
 	bool				bContactStarted;					// Tells you for a frame that the contact has started
 	bool				bIsStatic;							// Did it completely stop?
 	bool				bIsStaticZ;							// Did it stop on Z axis?
-	bool				bIsDead;							// Tells if we must kill it as it exited the play area. #TODO: necessary?
+	bool				bIsActive;							// set to false to skip updates
 
 	ePPCContactType		contactType;						// Returns type of current/last collision (use it when bContacting is true)
 	Vec3				contactNormal;						// Last contact normal
 	Vec3				contactPos;							// Last contact pos
-	//will use later: CCollisionShape*	pContactShape;						// Contacting shape/type #TODO: add collision type with additional data in it
+	//will use later: CCollisionShape*	pContactShape;		// Contacting shape/type #TODO: add collision type with additional data in it
 
 	float				fBounceF;							// Floor bounce restitution factor
 	float				fFrictionF;							// Floor friction
 
 public:
-	CPointPhysComponent( bool bEnableBounce, Vec3 vAcceleration = g_Vec3Zero, int nCollFlags = K_PPC_COLLFLAG_ALL );
+	CPointPhysComponent( bool bEnableBounce = false, Vec3 vAcceleration = g_Vec3Zero, int nCollFlags = K_PPC_COLLFLAG_ALL );
 	~CPointPhysComponent();
 
 	// Call it to reset internal data when reusing the point component
-	void				Reset();
+	void				Reset( bool bActive = true );
 	// Call each frame to update
 	void				Update( VecProj& vPos, float dTime, CLevel & level ) override;
 	// Sets the gravity field (acceleration) for the current point
@@ -55,4 +56,6 @@ public:
 	void				SetCollisionFlags( int nCollFlags );
 
 	void				SetSpeed( Vec3 vSpeed ) override;
+	// Sets active or inactive
+	void				SetActive( bool bActive );
 };
