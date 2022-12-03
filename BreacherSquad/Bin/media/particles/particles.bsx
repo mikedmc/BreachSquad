@@ -753,17 +753,17 @@
     <AnimationFrame FrameIdx="57" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="58" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="59" Duration="48" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="73" Duration="32" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="74" Duration="32" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="75" Duration="32" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="76" Duration="32" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="77" Duration="32" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="78" Duration="32" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="79" Duration="32" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="80" Duration="32" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="81" Duration="32" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="82" Duration="32" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="83" Duration="32" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="73" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="74" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="75" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="76" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="77" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="78" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="79" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="80" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="81" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="82" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="83" Duration="64" DX="0" DY="0" Flags="" />
   </AnimationFrames>
   <Animations>
     <Animation ID="IMPACT_FIRE1" Flags="0">

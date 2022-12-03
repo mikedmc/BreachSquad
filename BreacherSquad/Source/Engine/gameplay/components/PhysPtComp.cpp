@@ -192,7 +192,7 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 		}
 
 		//check bounce or first contact - mainly for sounds and particles
-		if ( bWasContacting == false )
+		if ( bContacting == true && bWasContacting == false )
 		{
 			bContactStarted = true;
 		}
@@ -211,7 +211,8 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 		}
 
 		// is it almost stopped?
-		if ( UTMath::Vec3AlmostZero( speed * dTime, 0.5f ) )
+		//#TODO: de verificat altfel viteza minima pentru ca e posibil sa intre aici daca e generat cu viteza mica
+		if ( bContacting == true && UTMath::Vec3AlmostZero( speed * dTime, 0.5f ) )
 		{
 			bIsStatic = true;
 			speed = g_Vec3Zero;

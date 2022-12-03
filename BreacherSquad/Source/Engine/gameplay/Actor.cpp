@@ -630,6 +630,7 @@ void CActor::ProcessAICommands()
 					{
 						DWORD dwCol = 0xff671010;
 						int nSubType = 0;
+						/*
 						for ( int ll = 0; ll < 6; ll++ )
 						{
 							level.AddDoofer( K_DOOFER_MEAT, AABB::GetRandomPointInBox( genbox ), &Vec2( randfloatsgn( 50.0f ) + bulletSpeed.x * 50.0f, -130.0f - randfloat( 100.0f ) ), &g_vecGravityOld, nSubType );
@@ -637,15 +638,18 @@ void CActor::ProcessAICommands()
 						//goes straight down to stain the floor
 						level.AddDoofer( K_DOOFER_MEAT, GetPosHeart(), &Vec2( 200.0f, 50.0f ), &g_vecGravityOld, nSubType );
 						level.AddDoofer( K_DOOFER_MEAT, GetPosHeart(), &Vec2( -200.0f, 50.0f ), &g_vecGravityOld, nSubType );
+						*/
 						//human blood gibs particle
 //						__Particles().AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &pos.xy_proj, nullptr, nullptr, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_FRONT_NRM );
 					}
 					else //small animals and stuff
 					{
+						/*
 						for ( int ll = 0; ll < 2; ll++ )
 						{
 							level.AddDoofer( K_DOOFER_MEAT, AABB::GetRandomPointInBox( genbox ), &Vec2( randfloatsgn( 50.0f ) + bulletSpeed.x * 50.0f, -130.0f - randfloat( 100.0f ) ), &g_vecGravityOld );
 						}
+						*/
 //						__Particles().AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &pos.xy_proj, nullptr, nullptr, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM );
 					}
 				}
@@ -1108,7 +1112,7 @@ bool CActor::CheckShoot()
 		// add shell
 		if ( weapon->_template.nDropShellFrame >= 0 )
 		{
-			level.AddDoofer( K_DOOFER_SHELL, weapon->pOwner->GetPosHeart(), &Vec2( (40.0f + randfloat( 30.0f )), -50.0f - randfloat( 20.0f ) ), &g_vecGravityOld, weapon->_template.nDropShellFrame );
+			//level.AddDoofer( K_DOOFER_SHELL, weapon->pOwner->GetPosHeart(), &Vec2( (40.0f + randfloat( 30.0f )), -50.0f - randfloat( 20.0f ) ), &g_vecGravityOld, weapon->_template.nDropShellFrame );
 		}
 
 

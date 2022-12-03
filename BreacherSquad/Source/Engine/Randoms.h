@@ -46,6 +46,10 @@ public:
 	void			SetRandSeed(unsigned int n);
 	unsigned int	GetRandSeed(void);
 	void			SetRandSeedTime(void);
+	// Returns randomized normalized direction
+	Vec2			RandDirV2();
+	// Returns randomized normalized direction
+	Vec3			RandDirV3();
 
 	//Returns the index of the array item with the selected probability
 	int				GetProbabilityFromDomain(float arrProbabilities[], int nProbabilitiesCnt);

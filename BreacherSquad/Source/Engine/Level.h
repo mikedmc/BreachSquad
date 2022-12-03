@@ -241,13 +241,13 @@ public:
 	CLinkedPool<CDoofer>	m_poolDoofers;
 	// Adds a generic prop (physical particle)
 	// \param nSubType - secondary type of the added Prop, handled differently on every prop
-	void					AddDoofer( EDooferType type, Vec2 pos, Vec2 * speed, Vec2 * accel, int nSubType = 0 );
+	void					AddDoofer( EDooferType type, VecProj pos, Vec3 * speed, Vec3 * accel, int nSubType = 0 );
 	// ads temp light doofer (dies after a while, for gunshots explosions and such)
 	void					AddDoofer_Light( Vec2 pos, int nLightAnimIdx, float fDuration, float fFadeTime, DWORD color, float fScale = 1.0f );
 	// \brief helper fn: adds an explosion (logic and visual)
 	// \param vDir - for directional explosions like breaching charges
 	// \param hash_EXPLO_name - predefined constants for explosion params
-	void					AddDoofer_Explo( UINT32 hash_EXPLO_name, Vec2 pos, UINT32 dwOwnerUID, int exploOwnerClass = K_ACT_CLASS_PLAYER, Vec2 vExploDir = { 0.0f, 0.0f }, CAABB* exploAABB = null );
+	void					AddDoofer_Explo( UINT32 hash_EXPLO_name, VecProj pos, UINT32 dwOwnerUID, int exploOwnerClass = K_ACT_CLASS_PLAYER, Vec3 vExploDir = { 0.0f, 0.0f, 0.0f }, CAABB* exploAABB = null );
 	// Updates all doofers
 	void					UpdateDoofers( float dTime );
 	// Paints all doofers

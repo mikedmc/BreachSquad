@@ -156,28 +156,28 @@ int CRandom::RandInt( int min, int max )
 
 float CRandom::RandomF()
 {
-	float ret = ((float)RandInt(0xffffffff) / (float)0xffffffff);
+	float ret = ((float)RandInt(RAND_MAX) / (float)RAND_MAX);
 	//LOG_DBG_BUFF(L":   randomF():%.6f", ret);
 	return ret;
 }
 
 float CRandom::RandFloat(float n)
 {
-	float ret = n * ((float)RandInt(0xffffffff) / (float)0xffffffff);
+	float ret = n * ((float)RandInt(RAND_MAX) / (float)RAND_MAX);
 	//LOG_DBG_BUFF(L":   rndfloat(%.6f):%.6f", n, ret);
 	return ret;
 }
 
 float CRandom::RandFloat(float min, float max)
 {
-	float ret = min + (max - min) * ((float)RandInt(0xffffffff) / (float)0xffffffff);
+	float ret = min + (max - min) * ((float)RandInt(RAND_MAX) / (float)RAND_MAX);
 	//LOG_DBG_BUFF(L":   rndfloat(%.6f, %.6f):%.6f", min, max, ret);
 	return ret;
 }
 
 int CRandom::RandSign()
 {
-	int ret = ((int)((RandInt(0xffffffff) % 2) * 2) - 1);
+	int ret = ((int)((RandInt(RAND_MAX) % 2) * 2) - 1);
 	// never return 0
 	if (ret == 0)
 		ret = 1;
@@ -187,7 +187,7 @@ int CRandom::RandSign()
 
 float CRandom::RandFloatSgn(float n)
 {
-	float ret = 2.0f * n * ((float)RandInt(0xffffffff) / (float)0xffffffff) - n;
+	float ret = ( float( (float)RandInt( RAND_MAX ) / ( (float)RAND_MAX / ( ( n ) * 2.0f ) ) ) - ( n ) );
 	if (ret == 0.0f)
 		ret = n;
 
@@ -225,6 +225,33 @@ unsigned int CRandom::GetRandSeed(void)
 void CRandom::SetRandSeedTime(void)
 {
 	SetRandSeed((unsigned int)time(NULL));
+}
+
+Vec2 CRandom::RandDirV2()
+{
+	Vec2 vDir{};
+	do
+	{
+		vDir.x = RandFloatSgn( 10.0f );
+		vDir.y = RandFloatSgn( 10.0f );
+	} while ( vDir.x == 0.0f && vDir.y == 0.0f );
+
+	MUVec2Norm( &vDir, &vDir );
+	return vDir;
+}
+
+Vec3 CRandom::RandDirV3()
+{
+	Vec3 vDir{};
+	do
+	{
+		vDir.x = RandFloatSgn( 10.0f );
+		vDir.y = RandFloatSgn( 10.0f );
+		vDir.z = RandFloatSgn( 10.0f );
+	} while ( vDir.x == 0.0f && vDir.y == 0.0f && vDir.z == 0.0f );
+
+	MUVec3Norm( &vDir, &vDir );
+	return vDir;
 }
 
 //--------------------------------------------------------------------------------

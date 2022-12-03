@@ -687,7 +687,7 @@ void CActorAIComponent::Update( CActor& act, float dTime )
 					if ( act.varAIparams[ L"bUseDamagerUID" ].m_asBool )
 						unExploUID = act.nLastDamageTakenFromUID;
 					//generate explo
-					level.AddDoofer_Explo( cvc.m_asUINT32, act.GetPosHeart(), unExploUID, K_ACT_CLASS_EXPLOSION, Vec2( 0.0f, 0.0f ), &act.bbox );
+					level.AddDoofer_Explo( cvc.m_asUINT32, act.GetPosHeart(), unExploUID, K_ACT_CLASS_EXPLOSION, g_Vec3Zero, &act.bbox );
 
 					//decal explo mark
 					//AddDecal(K_LVL_DECAL_LAYER_BACKWALLS, act.GetPosHeart(), ANM_ACTIVES_SPR_DECAL_EXPLOMARKS, randint(3), 0xffffffff);

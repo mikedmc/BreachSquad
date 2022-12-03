@@ -4271,6 +4271,8 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	}
 
 	__Painter().Flush();
+	// paint the doofers
+	PaintDoofers( ePass );
 	// now paint the bullets
 	PaintBullets( ePass );
 

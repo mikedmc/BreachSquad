@@ -1,73 +1,51 @@
 #include "dxstdafx.h"
 #include "Level_doofers.h"
 
-void CLevel::AddDoofer(EDooferType type, Vec2 pos, Vec2 * speed, Vec2 * accel, int nSubType /*= 0*/)
+void CLevel::AddDoofer(EDooferType type, VecProj pos, Vec3 * speed, Vec3 * accel, int nSubType /*= 0*/)
 {
-	/*
-	bool bGoreEnabled = UTGetAppClass().m_Settings.bGoreEnabled;
-	if ((!bGoreEnabled) && (type == K_SPROP_MEAT))
+	// skip gore stuff when turned off from settings
+	bool bGoreEnabled = UTApp().m_Settings.bGoreEnabled;
+	if ((!bGoreEnabled) && (type == K_DOOFER_MEAT))
 		return;
-	//pre-checks
-	if (type == K_SPROP_MEAT)
+
+	auto node = m_poolDoofers.Hire();
+	if ( node == nullptr )
+		return;
+	
+	CDoofer* doof = &node->m_data;
+	doof->Reset();
+
+	doof->pos = pos;
+	doof->type = type;
+	doof->nSubType = nSubType;
+
+	switch ( type )
 	{
-		//don't spawn meat if inside collisions
-		if (GetCollisionShapeAt(pos, K_LVL_COLL_TYPE_SOLID) != null)
-			return;
-	}
-
-	CLinkedPool<CSpecialProp>::CLinkedPoolNode *node = m_poolProps.HireNode();
-	//set
-	if (node != null)
-	{
-		node->m_data.Reset();
-		//add simulation container
-		node->m_data.physPt = m_poolPhysPts.HireNode();
-		if (node->m_data.physPt == NULL)
+		case K_DOOFER_SHRAPNEL_SMOKING:
 		{
-			ErrorBox(K_ERR_WARNING, L"AddProp:We need more physics points!");
-			m_poolProps.DismissNode(node);
-			return;
+			// initialize physics 
+			doof->c_pointPhys->SetActive( true );
+			doof->c_pointPhys->SetSpeed( *speed );
+			doof->c_pointPhys->SetAccel( *accel );
+			doof->c_pointPhys->SetBounceEnabled( true );
+
+			doof->spr.Init( &__Particles().m_sprCol, ANM_PARTICLES_SPR_FIRE_PARTS1, pos.xy_proj );
 		}
-		//reset
-		node->m_data.physPt->m_data.Init();
-
-		node->m_data.type = type;
-		node->m_data.nSubType = nSubType;
-
-		switch (type)
+		break;
+		default:
 		{
-			case K_SPROP_SHELL:
-			{
-				//check subtype validity
-				if (nSubType * 4 + 3 >= m_sprProps.GetAFramesCnt(ANM_ACTIVES_SPR_SHELLS))
-				{
-					ErrorBox(K_ERR_WARNING, L"Invalid weapon nDropShellFrame param! resetting to 0");
-					node->m_data.nSubType = 0;
-				}
-				//all shells are in the same animation, 4 frames each
-				node->m_data.spr.Init(ANM_ACTIVES_SPR_SHELLS, 0.0f, 0.0f, node->m_data.nSubType * 4 + randint(4));
-				node->m_data.bVar1 = false; //face sunet o singura data la coliziune apoi seteaza bVar1 pe true
-				//physics
-				node->m_data.physPt->m_data.eCollType = CPhysicsPoint2D::K_COLLTYPE_FAST;
-				node->m_data.physPt->m_data.bFlagPhysicsEnabled = true;
-
-				node->m_data.physPt->m_data.pos = pos;
-				if (speed != null)
-					node->m_data.physPt->m_data.speed = *speed;
-				if (accel != null)
-					node->m_data.physPt->m_data.accel = *accel;
-			}
-			break;
-
+			ErrorBox( K_ERR_WARNING, L"Not implemented!" );
 		}
+		break;
 	}
-	*/
 }
 
 void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float fFadeTime, DWORD color, float fScale)
 {
 	Vec3 vPos = Vec2ToVec3XY0(pos);
-	CLinkedPool<CDoofer>::CLNode *node = m_poolDoofers.Hire();
+	auto node = m_poolDoofers.Hire();
+	if ( node == nullptr )
+		return;
 	//set 
 	if (node != nullptr)
 	{
@@ -108,7 +86,7 @@ void CLevel::AddDoofer_Light(Vec2 pos, int nLightAnimIdx, float fDuration, float
 	}
 }
 
-void CLevel::AddDoofer_Explo( UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID, int exploOwnerClass, Vec2 vExploDir, CAABB* exploAABB )
+void CLevel::AddDoofer_Explo( UINT32 exploNameHash, VecProj pos, UINT32 dwOwnerUID, int exploOwnerClass, Vec3 vExploDir, CAABB* exploAABB )
 {
 	CExplosionTemplate* explotemplate = GetTemplateExplosion( exploNameHash );
 	if ( explotemplate == nullptr )
@@ -119,10 +97,7 @@ void CLevel::AddDoofer_Explo( UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID,
 
 	auto node = m_poolDoofers.Hire();
 	if ( node == nullptr )
-	{
-		ErrorBox( K_ERR_WARNING, L"No more doofers in pool!" );
 		return;
-	}
 
 	//set 
 	node->m_data.Reset();
@@ -137,36 +112,36 @@ void CLevel::AddDoofer_Explo( UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID,
 
 	//add sound event
 	if ( explotemplate->fSoundRadius > 0.0f )
-		AddAIEvent( K_AIEVT_SOUND_THREAT, 0, (EActorClass)exploOwnerClass, pos, explotemplate->fSoundRadius, 1.0f );
+		AddAIEvent( K_AIEVT_SOUND_THREAT, 0, (EActorClass)exploOwnerClass, pos.xy, explotemplate->fSoundRadius, 1.0f );
 
 	if ( exploAABB == nullptr )
 	{
-		//shrapnel
 		for ( int ll = 0; ll < explotemplate->nShrapnelCnt; ll++ )
 		{
-			float fdx = m_rand.RandFloatSgn( 150.0f );
-			float fdy = -100.0f - m_rand.RandFloat( 150.0f );
-			AddDoofer( K_DOOFER_SHRAPNEL_SMOKING, pos, &Vec2( fdx, fdy ), &g_vecGravityOld );
+			Vec2 vPlane = m_rand.RandDirV2() * 60.0f;
+			AddDoofer( K_DOOFER_SHRAPNEL_SMOKING, pos, &Vec3( vPlane.x, vPlane.y, 100.0f), &g_vecGravity);
 		}
 		//napalm
+		/*
 		for ( int ll = 0; ll < explotemplate->nNapalmCnt; ll++ )
 		{
 			float fdx = m_rand.RandFloatSgn( 60.0f );
 			float fdy = -100.0f - m_rand.RandFloat( 120.0f );
 			AddDoofer( K_DOOFER_FIRE_SOURCE, pos, &Vec2( fdx, fdy ), &g_vecGravityOld );
 		}
+		*/
 	}
 	else
 	{
 		//shrapnel
 		for ( int ll = 0; ll < explotemplate->nShrapnelCnt; ll++ )
 		{
-			float fdx = m_rand.RandFloatSgn( 150.0f );
-			float fdy = -100.0f - m_rand.RandFloat( 150.0f );
-			AddDoofer( K_DOOFER_SHRAPNEL_SMOKING, pos + m_rand.RandVec2Sgn( exploAABB->vHalfSize.x, exploAABB->vHalfSize.y ),
-				&Vec2( fdx, fdy ), &g_vecGravityOld );
+			Vec2 vPlane = m_rand.RandDirV2() * 60.0f;
+			Vec2 vRandOff = m_rand.RandVec2Sgn( exploAABB->vHalfSize.x, exploAABB->vHalfSize.y );
+			AddDoofer( K_DOOFER_SHRAPNEL_SMOKING, pos.xyz + Vec3(vRandOff.x, vRandOff.y, 0.0f), &Vec3( vPlane.x, vPlane.y, 100.0f ), &g_vecGravity);
 		}
 		//napalm
+		/*
 		for ( int ll = 0; ll < explotemplate->nNapalmCnt; ll++ )
 		{
 			float fdx = m_rand.RandFloatSgn( 60.0f );
@@ -174,14 +149,15 @@ void CLevel::AddDoofer_Explo( UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID,
 			AddDoofer( K_DOOFER_FIRE_SOURCE, pos + m_rand.RandVec2Sgn( exploAABB->vHalfSize.x, exploAABB->vHalfSize.y ),
 				&Vec2( fdx, fdy ), &g_vecGravityOld );
 		}
+		*/
 	}
 
 	//explo direction
-	float fExploAng = UTMath::GetVectorAngle( vExploDir );
+	float fExploAng = UTMath::GetVectorAngle( Vec3XY( vExploDir ) );
 	// generate effect if we have one
 	if ( explotemplate->shFX.IsSet() )
 	{
-		GenerateEffect( explotemplate->shFX, pos, 1.0f );
+		GenerateEffect( explotemplate->shFX, pos.xy_proj, 1.0f );
 	}
 
 	//pointer to player that spawned the explosion, or null if it wasn't a player
@@ -201,10 +177,10 @@ void CLevel::AddDoofer_Explo( UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID,
 			if ( ( act->_template.actorClass == K_ACT_CLASS_HOSTAGE ) && ( fMaxStun > 0.0f ) )
 				continue;
 
-			Vec2 vDir = act->GetPosHeart() - pos;
+			Vec2 vDir = act->GetPosHeart() - pos.xy;
 			float fDist = MUVec2Len( &vDir );
 
-			bool bDirectLine = IsLineOfSight( act->GetPosHeart(), pos, act->pArea );
+			bool bDirectLine = IsLineOfSight( act->GetPosHeart(), pos.xy, act->pArea );
 
 			if ( ( bDirectLine ) && ( explotemplate->cDoT.eType != CDamageOverTime::K_LVL_DoT_NONE ) && ( fDist < explotemplate->fDoTRadius ) )
 			{
@@ -245,11 +221,11 @@ void CLevel::AddDoofer_Explo( UINT32 exploNameHash, Vec2 pos, UINT32 dwOwnerUID,
 			if ( act->_template.actorClass == explotemplate->eIgnoreActorClass )
 				continue;
 
-			Vec2 vDir = act->GetPosHeart() - pos;
+			Vec2 vDir = act->GetPosHeart() - pos.xy;
 			float fDist = MUVec2Len( &vDir );
 			if ( fDist > fDamageRadius )
 				continue;
-			if ( !IsLineOfSight( act->GetPosHeart(), pos, act->pArea ) )
+			if ( !IsLineOfSight( act->GetPosHeart(), pos.xy, act->pArea ) )
 				continue;
 			// linear damage atten
 			float fPercent = 1.0f - ( fDist / fDamageRadius );
@@ -388,40 +364,6 @@ void CLevel::UpdateDoofers(float dTime)
 			{
 			}
 			break;
-			case K_DOOFER_FIRE_SOURCE:
-			{
-				/*
-				if (!prop->physPt->m_data.bContacting)
-				{
-					if (m_Timers.Tick(50))
-					{
-						__Particles().GenerateFireRing(prop->physPt->m_data.pos, 5, 10.0f, 15.0f, K_PART_LAYER_NORMAL);
-					}
-				}
-				//genereaza particula de lava
-				if ((prop->physPt->m_data.bContactStarted) && (prop->physPt->m_data.contactNormal.y < -0.5f))
-				{
-					int anmidx = ANM_PARTICLES_SPR_MELTING_LAVA1;
-					if (randint(100) < 60)
-						anmidx = ANM_PARTICLES_SPR_MELTING_LAVA2;
-					__Particles().AddParticle(anmidx, true, 0, &prop->physPt->m_data.contactPos, NULL, NULL, 4.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_RT_BACK_NRM);
-				}
-				//genereaza damage pana inainte de ultima secunda
-				if ((m_Timers.Tick(500.0f)) && (prop->physPt->m_data.bIsStatic) && (prop->fTimer > 1.0f))
-				{
-					CWeaponTemplate* wtempl = GetTemplateWeapon(L"WPN_LAVA_MELEE");
-					Vec2 normal(0.0f, -1.0f);
-					ShootBullet(&wtempl->bulletTemplate, K_ACT_CLASS_TRAP, 0, prop->physPt->m_data.pos + normal, normal);
-				}
-				*/
-
-				prop->fTimer -= dTime;
-				if (prop->fTimer <= 0.0f)
-				{
-					killprop = true;
-				}
-			}
-			break;
 
 			case K_DOOFER_MEAT:
 			{
@@ -441,18 +383,17 @@ void CLevel::UpdateDoofers(float dTime)
 			case K_DOOFER_SHRAPNEL_SMOKING:
 			{
 				//update sprite
-				//node->m_data.spr.Update(dTime);
+				//prop->spr.Update(dTime);
 				//add smoke
-				if (m_Timers.Tick(60)) //&& (!prop->physPt->m_data.bContacting))
-				{
-					float fAng = randfloat(DOUBLE_PI);
-					Vec2 vDir(sin(fAng), cos(fAng));
+				//if (m_Timers.Tick(60)) //&& (!prop->physPt->m_data.bContacting))
+				//{
+					//float fAng = randfloat(DOUBLE_PI);
+					//Vec2 vDir(sin(fAng), cos(fAng));
 					/*
 					__Particles().AddParticle(ANM_PARTICLES_SPR_PUFF_XS1 + randint(3), true, 0, &Vec2(prop->physPt->m_data.pos.x + randfloatsgn(2.0f), prop->physPt->m_data.pos.y + randfloatsgn(2.0f)),
 						NULL, &(vDir * (5.0f + randfloat(5.0f))), 1.0f, 1.0f, 0.0f, fAng, 0.0f, 0.0f, 0.0f, 0xaaffffff, K_PART_LAYER_NORMAL);
 						*/
-				}
-				//genereaza particule de foc doar cat e roshu
+				//}
 				/*
 				if (node->m_data.fTimer > 0.0f)
 				{
@@ -468,19 +409,27 @@ void CLevel::UpdateDoofers(float dTime)
 							NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_NORMAL);
 					}
 				}
+								  */
+				// kill it if it touches the floor or gets outside the level area
+				//if ( !prop->c_pointPhys->bIsActive )
+//					killprop = true;
+				if ( ( prop->c_pointPhys->bContacting ) && ( prop->c_pointPhys->contactNormal.z != 0.0f ) )
+					killprop = true;
 
-				if ((prop->physPt->m_data.bIsStatic) || (!Rects::PointInRect(prop->physPt->m_data.pos, camrect_larger)))
+				if(killprop)
 				{
 					killprop = true;
 					//smoke puff when dead
-					int nAnmId = ANM_PARTICLES_SPR_PUFF_S_XS;
+					int nAnmId = ANM_PARTICLES_SPR_SMOKEPART1;
 					if (randompercent(50.0f))
-						nAnmId = ANM_PARTICLES_SPR_PUFF_S_XXS;
+						nAnmId = ANM_PARTICLES_SPR_SMOKEPART2;
 
-					__Particles().AddParticle(nAnmId, true, 0, &prop->physPt->m_data.pos,
-						NULL, NULL, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xaaffffff, K_PART_LAYER_NORMAL);
+					__Particles().AddParticle(nAnmId, true, 0, &prop->pos.xy_proj, nullptr, nullptr, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_NORMAL);
 				}
-				*/
+
+
+				// update sprite pos				
+				prop->spr.pos = prop->pos.xy_proj;
 			}
 			break;
 			case K_DOOFER_LIGHT:
@@ -512,11 +461,16 @@ void CLevel::UpdateDoofers(float dTime)
 
 void CLevel::PaintDoofers( eLVLRenderPass pass )
 {
+	//#HACK: only render on normal pass
+	if ( pass != K_LVL_RP_COLORS )
+		return;
+
 	Mat mattrans;
 
 	for(auto node : m_poolDoofers)
 	{
-		switch (node->m_data.type)
+		auto doof = &node->m_data;
+		switch (doof->type)
 		{
 			case K_DOOFER_FIRE_SOURCE:
 			{
@@ -533,15 +487,7 @@ void CLevel::PaintDoofers( eLVLRenderPass pass )
 			break;
 			case K_DOOFER_SHRAPNEL_SMOKING:
 			{
-				/*
-				node->m_data.spr.pos = node->m_data.physPt->m_data.pos;
-
-				node->m_data.spr2.pos = node->m_data.physPt->m_data.pos;
-				node->m_data.spr2.color = D3DCOLOR_FFFA(LIMIT(node->m_data.fTimer, 0.0f, 1.0f));
-
-				node->m_data.spr.paint_firstModule(&m_sprProps);
-				node->m_data.spr2.paint_firstModule(&m_sprProps);
-				*/
+				doof->spr.PaintFModule(0);
 			}
 			break;
 			case K_DOOFER_MEAT:
@@ -577,6 +523,7 @@ void CDoofer::Reset()
 
 	// by default doofers have no physics
 	c_pointPhys->Reset( false );
+	spr.SetAnim( -1 );
 }
 
 void CDoofer::Update( float dTime, CLevel & level )

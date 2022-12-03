@@ -20,7 +20,7 @@ enum EDooferType {
 class CDoofer {
 public:
 	CPointPhysComponent*	c_pointPhys;		// point physics component
-	VecProj				pos;
+	VecProj					pos;
 
 public:
 	EDooferType			type;
@@ -28,7 +28,7 @@ public:
 
 	float				fTimer;			
 	//bool				bAnimated;	
-	//CSpr				spr, spr2;	
+	CSpr				spr;
 	float				fSize;
 
 	bool				bMakesLight;
