@@ -38,17 +38,16 @@
     <Module ImageIdx="0" X="263" Y="2" W="8" H="9" strName="" />
     <Module ImageIdx="0" X="271" Y="2" W="7" H="8" strName="" />
     <Module ImageIdx="0" X="279" Y="2" W="8" H="7" strName="" />
-    <Module ImageIdx="0" X="6" Y="97" W="45" H="15" strName="" />
-    <Module ImageIdx="0" X="55" Y="86" W="21" H="21" strName="" />
-    <Module ImageIdx="0" X="77" Y="86" W="21" H="21" strName="" />
-    <Module ImageIdx="0" X="99" Y="86" W="23" H="23" strName="" />
-    <Module ImageIdx="0" X="123" Y="86" W="24" H="21" strName="" />
-    <Module ImageIdx="0" X="148" Y="86" W="27" H="23" strName="" />
-    <Module ImageIdx="0" X="176" Y="86" W="27" H="22" strName="" />
-    <Module ImageIdx="0" X="204" Y="86" W="29" H="20" strName="" />
-    <Module ImageIdx="0" X="234" Y="86" W="25" H="17" strName="" />
-    <Module ImageIdx="0" X="259" Y="85" W="25" H="16" strName="" />
-    <Module ImageIdx="0" X="284" Y="84" W="25" H="16" strName="" />
+    <Module ImageIdx="0" X="2" Y="86" W="21" H="21" strName="" />
+    <Module ImageIdx="0" X="24" Y="86" W="21" H="21" strName="" />
+    <Module ImageIdx="0" X="46" Y="86" W="23" H="23" strName="" />
+    <Module ImageIdx="0" X="70" Y="86" W="24" H="21" strName="" />
+    <Module ImageIdx="0" X="95" Y="86" W="27" H="23" strName="" />
+    <Module ImageIdx="0" X="123" Y="86" W="27" H="22" strName="" />
+    <Module ImageIdx="0" X="151" Y="86" W="29" H="20" strName="" />
+    <Module ImageIdx="0" X="181" Y="86" W="25" H="17" strName="" />
+    <Module ImageIdx="0" X="206" Y="85" W="25" H="16" strName="" />
+    <Module ImageIdx="0" X="231" Y="84" W="25" H="16" strName="" />
     <Module ImageIdx="0" X="5" Y="114" W="14" H="13" strName="" />
     <Module ImageIdx="0" X="20" Y="114" W="20" H="19" strName="" />
     <Module ImageIdx="0" X="41" Y="114" W="19" H="20" strName="" />
@@ -86,6 +85,19 @@
     <Module ImageIdx="0" X="364" Y="2" W="6" H="5" strName="" />
     <Module ImageIdx="0" X="371" Y="2" W="5" H="4" strName="" />
     <Module ImageIdx="0" X="377" Y="2" W="2" H="3" strName="" />
+    <Module ImageIdx="0" X="350" Y="11" W="6" H="5" strName="" />
+    <Module ImageIdx="0" X="357" Y="11" W="6" H="5" strName="" />
+    <Module ImageIdx="0" X="364" Y="11" W="5" H="5" strName="" />
+    <Module ImageIdx="0" X="370" Y="11" W="5" H="5" strName="" />
+    <Module ImageIdx="0" X="257" Y="84" W="22" H="19" strName="" />
+    <Module ImageIdx="0" X="282" Y="83" W="26" H="23" strName="" />
+    <Module ImageIdx="0" X="381" Y="1" W="6" H="6" strName="" />
+    <Module ImageIdx="0" X="388" Y="1" W="6" H="6" strName="" />
+    <Module ImageIdx="0" X="395" Y="1" W="6" H="6" strName="" />
+    <Module ImageIdx="0" X="402" Y="2" W="4" H="4" strName="" />
+    <Module ImageIdx="0" X="407" Y="2" W="4" H="4" strName="" />
+    <Module ImageIdx="0" X="412" Y="2" W="4" H="4" strName="" />
+    <Module ImageIdx="0" X="425" Y="79" W="44" H="45" strName="" />
   </Modules>
   <FrameModules>
     <FrameModule ModuleIdx="0" OX="-2" OY="-5" Flags="0" />
@@ -124,54 +136,66 @@
     <FrameModule ModuleIdx="33" OX="12" OY="-4" Flags="0" />
     <FrameModule ModuleIdx="34" OX="22" OY="-4" Flags="0" />
     <FrameModule ModuleIdx="35" OX="8" OY="-3" Flags="0" />
-    <FrameModule ModuleIdx="36" OX="0" OY="0" Flags="0" />
+    <FrameModule ModuleIdx="36" OX="-10" OY="-10" Flags="0" />
     <FrameModule ModuleIdx="37" OX="-10" OY="-10" Flags="0" />
-    <FrameModule ModuleIdx="38" OX="-10" OY="-10" Flags="0" />
-    <FrameModule ModuleIdx="39" OX="-11" OY="-11" Flags="0" />
-    <FrameModule ModuleIdx="40" OX="-12" OY="-11" Flags="0" />
-    <FrameModule ModuleIdx="41" OX="-13" OY="-15" Flags="0" />
-    <FrameModule ModuleIdx="42" OX="-13" OY="-17" Flags="0" />
-    <FrameModule ModuleIdx="43" OX="-14" OY="-21" Flags="0" />
-    <FrameModule ModuleIdx="44" OX="-12" OY="-24" Flags="0" />
-    <FrameModule ModuleIdx="45" OX="-14" OY="-27" Flags="0" />
-    <FrameModule ModuleIdx="46" OX="-13" OY="-29" Flags="0" />
-    <FrameModule ModuleIdx="47" OX="-7" OY="-6" Flags="0" />
-    <FrameModule ModuleIdx="48" OX="-11" OY="-9" Flags="0" />
+    <FrameModule ModuleIdx="38" OX="-11" OY="-11" Flags="0" />
+    <FrameModule ModuleIdx="39" OX="-12" OY="-11" Flags="0" />
+    <FrameModule ModuleIdx="40" OX="-13" OY="-15" Flags="0" />
+    <FrameModule ModuleIdx="41" OX="-13" OY="-17" Flags="0" />
+    <FrameModule ModuleIdx="42" OX="-14" OY="-21" Flags="0" />
+    <FrameModule ModuleIdx="43" OX="-12" OY="-24" Flags="0" />
+    <FrameModule ModuleIdx="44" OX="-14" OY="-27" Flags="0" />
+    <FrameModule ModuleIdx="45" OX="-13" OY="-29" Flags="0" />
+    <FrameModule ModuleIdx="46" OX="-7" OY="-6" Flags="0" />
+    <FrameModule ModuleIdx="47" OX="-11" OY="-9" Flags="0" />
+    <FrameModule ModuleIdx="48" OX="-9" OY="-10" Flags="0" />
     <FrameModule ModuleIdx="49" OX="-9" OY="-10" Flags="0" />
-    <FrameModule ModuleIdx="50" OX="-9" OY="-10" Flags="0" />
-    <FrameModule ModuleIdx="51" OX="-8" OY="-10" Flags="0" />
-    <FrameModule ModuleIdx="52" OX="-8" OY="-9" Flags="0" />
-    <FrameModule ModuleIdx="53" OX="-7" OY="-9" Flags="0" />
-    <FrameModule ModuleIdx="54" OX="-8" OY="-8" Flags="0" />
-    <FrameModule ModuleIdx="55" OX="-8" OY="-7" Flags="0" />
-    <FrameModule ModuleIdx="56" OX="-9" OY="-7" Flags="0" />
-    <FrameModule ModuleIdx="57" OX="-10" OY="-5" Flags="0" />
-    <FrameModule ModuleIdx="58" OX="-9" OY="-4" Flags="0" />
-    <FrameModule ModuleIdx="59" OX="-3" OY="-6" Flags="0" />
-    <FrameModule ModuleIdx="60" OX="-21" OY="-21" Flags="0" />
+    <FrameModule ModuleIdx="50" OX="-8" OY="-10" Flags="0" />
+    <FrameModule ModuleIdx="51" OX="-8" OY="-9" Flags="0" />
+    <FrameModule ModuleIdx="52" OX="-7" OY="-9" Flags="0" />
+    <FrameModule ModuleIdx="53" OX="-8" OY="-8" Flags="0" />
+    <FrameModule ModuleIdx="54" OX="-8" OY="-7" Flags="0" />
+    <FrameModule ModuleIdx="55" OX="-9" OY="-7" Flags="0" />
+    <FrameModule ModuleIdx="56" OX="-10" OY="-5" Flags="0" />
+    <FrameModule ModuleIdx="57" OX="-9" OY="-4" Flags="0" />
+    <FrameModule ModuleIdx="58" OX="-3" OY="-6" Flags="0" />
+    <FrameModule ModuleIdx="59" OX="-21" OY="-21" Flags="0" />
+    <FrameModule ModuleIdx="60" OX="-13" OY="-13" Flags="0" />
     <FrameModule ModuleIdx="61" OX="-13" OY="-13" Flags="0" />
-    <FrameModule ModuleIdx="62" OX="-13" OY="-13" Flags="0" />
-    <FrameModule ModuleIdx="63" OX="-15" OY="-18" Flags="0" />
-    <FrameModule ModuleIdx="64" OX="-16" OY="-21" Flags="0" />
-    <FrameModule ModuleIdx="65" OX="-18" OY="-24" Flags="0" />
-    <FrameModule ModuleIdx="66" OX="-15" OY="-27" Flags="0" />
-    <FrameModule ModuleIdx="67" OX="-15" OY="-29" Flags="0" />
-    <FrameModule ModuleIdx="68" OX="-14" OY="-30" Flags="0" />
-    <FrameModule ModuleIdx="69" OX="-13" OY="-30" Flags="0" />
-    <FrameModule ModuleIdx="70" OX="-13" OY="-31" Flags="0" />
-    <FrameModule ModuleIdx="71" OX="-13" OY="-36" Flags="0" />
-    <FrameModule ModuleIdx="72" OX="-12" OY="-35" Flags="0" />
-    <FrameModule ModuleIdx="73" OX="-3" OY="-5" Flags="0" />
-    <FrameModule ModuleIdx="74" OX="-3" OY="-10" Flags="0" />
-    <FrameModule ModuleIdx="75" OX="-3" OY="-11" Flags="0" />
-    <FrameModule ModuleIdx="76" OX="-3" OY="-13" Flags="0" />
+    <FrameModule ModuleIdx="62" OX="-15" OY="-18" Flags="0" />
+    <FrameModule ModuleIdx="63" OX="-16" OY="-21" Flags="0" />
+    <FrameModule ModuleIdx="64" OX="-18" OY="-24" Flags="0" />
+    <FrameModule ModuleIdx="65" OX="-15" OY="-27" Flags="0" />
+    <FrameModule ModuleIdx="66" OX="-15" OY="-29" Flags="0" />
+    <FrameModule ModuleIdx="67" OX="-14" OY="-30" Flags="0" />
+    <FrameModule ModuleIdx="68" OX="-13" OY="-30" Flags="0" />
+    <FrameModule ModuleIdx="69" OX="-13" OY="-31" Flags="0" />
+    <FrameModule ModuleIdx="70" OX="-13" OY="-36" Flags="0" />
+    <FrameModule ModuleIdx="71" OX="-12" OY="-35" Flags="0" />
+    <FrameModule ModuleIdx="72" OX="-3" OY="-5" Flags="0" />
+    <FrameModule ModuleIdx="73" OX="-3" OY="-10" Flags="0" />
+    <FrameModule ModuleIdx="74" OX="-3" OY="-11" Flags="0" />
+    <FrameModule ModuleIdx="75" OX="-3" OY="-13" Flags="0" />
+    <FrameModule ModuleIdx="76" OX="-4" OY="-14" Flags="0" />
     <FrameModule ModuleIdx="77" OX="-4" OY="-14" Flags="0" />
-    <FrameModule ModuleIdx="78" OX="-4" OY="-14" Flags="0" />
-    <FrameModule ModuleIdx="79" OX="-3" OY="-7" Flags="0" />
-    <FrameModule ModuleIdx="80" OX="-3" OY="-8" Flags="0" />
-    <FrameModule ModuleIdx="81" OX="-3" OY="-9" Flags="0" />
-    <FrameModule ModuleIdx="82" OX="-2" OY="-9" Flags="0" />
-    <FrameModule ModuleIdx="83" OX="0" OY="-8" Flags="0" />
+    <FrameModule ModuleIdx="78" OX="-3" OY="-7" Flags="0" />
+    <FrameModule ModuleIdx="79" OX="-3" OY="-8" Flags="0" />
+    <FrameModule ModuleIdx="80" OX="-3" OY="-9" Flags="0" />
+    <FrameModule ModuleIdx="81" OX="-2" OY="-9" Flags="0" />
+    <FrameModule ModuleIdx="82" OX="0" OY="-8" Flags="0" />
+    <FrameModule ModuleIdx="83" OX="-3" OY="-5" Flags="0" />
+    <FrameModule ModuleIdx="84" OX="-3" OY="-6" Flags="0" />
+    <FrameModule ModuleIdx="85" OX="-2" OY="-7" Flags="0" />
+    <FrameModule ModuleIdx="86" OX="0" OY="-7" Flags="0" />
+    <FrameModule ModuleIdx="87" OX="-11" OY="-9" Flags="0" />
+    <FrameModule ModuleIdx="88" OX="-13" OY="-11" Flags="0" />
+    <FrameModule ModuleIdx="89" OX="-3" OY="-3" Flags="0" />
+    <FrameModule ModuleIdx="90" OX="-3" OY="-3" Flags="0" />
+    <FrameModule ModuleIdx="91" OX="-3" OY="-3" Flags="0" />
+    <FrameModule ModuleIdx="92" OX="-2" OY="-2" Flags="0" />
+    <FrameModule ModuleIdx="93" OX="-2" OY="-2" Flags="0" />
+    <FrameModule ModuleIdx="94" OX="-2" OY="-2" Flags="0" />
+    <FrameModule ModuleIdx="95" OX="-22" OY="-22" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
@@ -390,7 +414,7 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="0" BBoxY="0" BBoxW="45" BBoxH="15">
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
       <FModules>
         <FModule Idx="36" />
       </FModules>
@@ -672,9 +696,81 @@
       </FModules>
       <Points />
     </Frame>
-    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+    <Frame BBoxX="-3" BBoxY="-5" BBoxW="6" BBoxH="5">
       <FModules>
         <FModule Idx="83" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-3" BBoxY="-6" BBoxW="6" BBoxH="5">
+      <FModules>
+        <FModule Idx="84" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-2" BBoxY="-7" BBoxW="5" BBoxH="5">
+      <FModules>
+        <FModule Idx="85" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="-7" BBoxW="5" BBoxH="5">
+      <FModules>
+        <FModule Idx="86" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-11" BBoxY="-9" BBoxW="22" BBoxH="19">
+      <FModules>
+        <FModule Idx="87" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-13" BBoxY="-11" BBoxW="26" BBoxH="23">
+      <FModules>
+        <FModule Idx="88" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="89" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="90" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="91" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="92" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="93" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="94" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-22" BBoxY="-22" BBoxW="44" BBoxH="45">
+      <FModules>
+        <FModule Idx="95" />
       </FModules>
       <Points />
     </Frame>
@@ -700,7 +796,7 @@
     <AnimationFrame FrameIdx="17" Duration="20" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="18" Duration="20" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="19" Duration="64" DX="0" DY="0" Flags="0" />
-    <AnimationFrame FrameIdx="60" Duration="52" DX="0" DY="0" Flags="0" />
+    <AnimationFrame FrameIdx="59" Duration="52" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="20" Duration="32" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="21" Duration="32" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="22" Duration="32" DX="0" DY="0" Flags="0" />
@@ -717,42 +813,42 @@
     <AnimationFrame FrameIdx="33" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="34" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="35" Duration="1" DX="0" DY="0" Flags="0" />
-    <AnimationFrame FrameIdx="36" Duration="1" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="37" Duration="64" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="38" Duration="52" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="36" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="37" Duration="52" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="38" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="39" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="40" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="41" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="42" Duration="48" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="43" Duration="48" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="43" Duration="52" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="44" Duration="52" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="45" Duration="52" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="46" Duration="52" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="61" Duration="64" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="62" Duration="52" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="60" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="61" Duration="52" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="62" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="63" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="64" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="65" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="66" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="67" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="68" Duration="48" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="69" Duration="48" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="69" Duration="52" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="70" Duration="52" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="71" Duration="52" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="72" Duration="52" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="46" Duration="32" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="47" Duration="32" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="48" Duration="32" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="49" Duration="32" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="50" Duration="32" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="51" Duration="32" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="52" Duration="38" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="53" Duration="40" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="54" Duration="42" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="55" Duration="46" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="51" Duration="38" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="52" Duration="40" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="53" Duration="42" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="54" Duration="46" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="55" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="56" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="57" Duration="48" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="58" Duration="48" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="59" Duration="48" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="72" Duration="64" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="73" Duration="64" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="74" Duration="64" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="75" Duration="64" DX="0" DY="0" Flags="" />
@@ -763,7 +859,19 @@
     <AnimationFrame FrameIdx="80" Duration="64" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="81" Duration="64" DX="0" DY="0" Flags="" />
     <AnimationFrame FrameIdx="82" Duration="64" DX="0" DY="0" Flags="" />
-    <AnimationFrame FrameIdx="83" Duration="64" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="83" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="84" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="85" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="86" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="87" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="88" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="89" Duration="80" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="90" Duration="80" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="91" Duration="80" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="92" Duration="80" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="93" Duration="128" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="94" Duration="128" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="95" Duration="1" DX="0" DY="0" Flags="" />
   </AnimationFrames>
   <Animations>
     <Animation ID="IMPACT_FIRE1" Flags="0">
@@ -811,10 +919,8 @@
       <AFrame Idx="35" />
       <AFrame Idx="36" />
     </Animation>
-    <Animation ID="TAILS" Flags="0">
-      <AFrame Idx="37" />
-    </Animation>
     <Animation ID="EXPLONICE_SM1" Flags="0">
+      <AFrame Idx="37" />
       <AFrame Idx="38" />
       <AFrame Idx="39" />
       <AFrame Idx="40" />
@@ -824,9 +930,9 @@
       <AFrame Idx="44" />
       <AFrame Idx="45" />
       <AFrame Idx="46" />
-      <AFrame Idx="47" />
     </Animation>
     <Animation ID="EXPLONICE_BIG1" Flags="0">
+      <AFrame Idx="47" />
       <AFrame Idx="48" />
       <AFrame Idx="49" />
       <AFrame Idx="50" />
@@ -838,9 +944,9 @@
       <AFrame Idx="56" />
       <AFrame Idx="57" />
       <AFrame Idx="58" />
-      <AFrame Idx="59" />
     </Animation>
     <Animation ID="SMOKESWIRL1" Flags="0">
+      <AFrame Idx="59" />
       <AFrame Idx="60" />
       <AFrame Idx="61" />
       <AFrame Idx="62" />
@@ -853,22 +959,42 @@
       <AFrame Idx="69" />
       <AFrame Idx="70" />
       <AFrame Idx="71" />
-      <AFrame Idx="72" />
     </Animation>
     <Animation ID="SMOKEPART1" Flags="0">
+      <AFrame Idx="72" />
       <AFrame Idx="73" />
       <AFrame Idx="74" />
       <AFrame Idx="75" />
       <AFrame Idx="76" />
       <AFrame Idx="77" />
-      <AFrame Idx="78" />
     </Animation>
     <Animation ID="SMOKEPART2" Flags="0">
+      <AFrame Idx="78" />
       <AFrame Idx="79" />
       <AFrame Idx="80" />
       <AFrame Idx="81" />
       <AFrame Idx="82" />
+    </Animation>
+    <Animation ID="SMOKEPART3" Flags="0">
       <AFrame Idx="83" />
+      <AFrame Idx="84" />
+      <AFrame Idx="85" />
+      <AFrame Idx="86" />
+    </Animation>
+    <Animation ID="SMOKE_REAL" Flags="0">
+      <AFrame Idx="87" />
+      <AFrame Idx="88" />
+    </Animation>
+    <Animation ID="SHRAPNEL" Flags="0">
+      <AFrame Idx="89" />
+      <AFrame Idx="90" />
+      <AFrame Idx="91" />
+      <AFrame Idx="92" />
+      <AFrame Idx="93" />
+      <AFrame Idx="94" />
+    </Animation>
+    <Animation ID="DUST_RINGS" Flags="0">
+      <AFrame Idx="95" />
     </Animation>
   </Animations>
 </SpriteCollection>

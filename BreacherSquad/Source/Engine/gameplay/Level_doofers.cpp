@@ -29,7 +29,7 @@ void CLevel::AddDoofer(EDooferType type, VecProj pos, Vec3 * speed, Vec3 * accel
 			doof->c_pointPhys->SetAccel( *accel );
 			doof->c_pointPhys->SetBounceEnabled( true );
 
-			doof->spr.Init( &__Particles().m_sprCol, ANM_PARTICLES_SPR_FIRE_PARTS1, pos.xy_proj );
+			doof->spr.Init( &__Particles().m_sprCol, ANM_PARTICLES_SPR_SHRAPNEL, pos.xy_proj, randint(3) );
 		}
 		break;
 		default:
@@ -119,7 +119,7 @@ void CLevel::AddDoofer_Explo( UINT32 exploNameHash, VecProj pos, UINT32 dwOwnerU
 		for ( int ll = 0; ll < explotemplate->nShrapnelCnt; ll++ )
 		{
 			Vec2 vPlane = m_rand.RandDirV2() * 60.0f;
-			AddDoofer( K_DOOFER_SHRAPNEL_SMOKING, pos, &Vec3( vPlane.x, vPlane.y, 100.0f), &g_vecGravity);
+			AddDoofer( K_DOOFER_SHRAPNEL_SMOKING, pos, &Vec3( vPlane.x, vPlane.y, 60.0f + randfloat( 100.0f ) ), &g_vecGravity );
 		}
 		//napalm
 		/*
@@ -138,7 +138,7 @@ void CLevel::AddDoofer_Explo( UINT32 exploNameHash, VecProj pos, UINT32 dwOwnerU
 		{
 			Vec2 vPlane = m_rand.RandDirV2() * 60.0f;
 			Vec2 vRandOff = m_rand.RandVec2Sgn( exploAABB->vHalfSize.x, exploAABB->vHalfSize.y );
-			AddDoofer( K_DOOFER_SHRAPNEL_SMOKING, pos.xyz + Vec3(vRandOff.x, vRandOff.y, 0.0f), &Vec3( vPlane.x, vPlane.y, 100.0f ), &g_vecGravity);
+			AddDoofer( K_DOOFER_SHRAPNEL_SMOKING, pos.xyz + Vec3(vRandOff.x, vRandOff.y, 0.0f), &Vec3( vPlane.x, vPlane.y, 60.0f + randfloat( 100.0f ) ), &g_vecGravity);
 		}
 		//napalm
 		/*
@@ -383,17 +383,15 @@ void CLevel::UpdateDoofers(float dTime)
 			case K_DOOFER_SHRAPNEL_SMOKING:
 			{
 				//update sprite
-				//prop->spr.Update(dTime);
+				prop->spr.Update(dTime);
 				//add smoke
-				//if (m_Timers.Tick(60)) //&& (!prop->physPt->m_data.bContacting))
-				//{
-					//float fAng = randfloat(DOUBLE_PI);
-					//Vec2 vDir(sin(fAng), cos(fAng));
-					/*
-					__Particles().AddParticle(ANM_PARTICLES_SPR_PUFF_XS1 + randint(3), true, 0, &Vec2(prop->physPt->m_data.pos.x + randfloatsgn(2.0f), prop->physPt->m_data.pos.y + randfloatsgn(2.0f)),
-						NULL, &(vDir * (5.0f + randfloat(5.0f))), 1.0f, 1.0f, 0.0f, fAng, 0.0f, 0.0f, 0.0f, 0xaaffffff, K_PART_LAYER_NORMAL);
-						*/
-				//}
+				if (m_Timers.Tick(100) && (!prop->c_pointPhys->bContacting))
+				{
+					float fAng = randfloat(DOUBLE_PI);
+					__Particles().AddParticle( ANM_PARTICLES_SPR_SMOKESWIRL1, true, randint( 2 ), &( prop->pos.xy_proj + randVec2sgn( 3.0f, 3.0f ) ), nullptr, nullptr, 3.0f, 0.4f + randfloat( 0.2f ), 0.0f,
+						randfloat( DOUBLE_PI ), 0.0f, 0.32f, 0.0f, 0xaa2a2626, K_PART_LAYER_NORMAL );
+						
+				}
 				/*
 				if (node->m_data.fTimer > 0.0f)
 				{
@@ -420,11 +418,9 @@ void CLevel::UpdateDoofers(float dTime)
 				{
 					killprop = true;
 					//smoke puff when dead
-					int nAnmId = ANM_PARTICLES_SPR_SMOKEPART1;
-					if (randompercent(50.0f))
-						nAnmId = ANM_PARTICLES_SPR_SMOKEPART2;
-
-					__Particles().AddParticle(nAnmId, true, 0, &prop->pos.xy_proj, nullptr, nullptr, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_NORMAL);
+					float anm = randint( 3 );
+					int nAnmId = ( anm == 0 ) ? ANM_PARTICLES_SPR_SMOKEPART1 : ( anm == 1 ) ? ANM_PARTICLES_SPR_SMOKEPART2 : ANM_PARTICLES_SPR_SMOKEPART3;
+					__Particles().AddParticle(nAnmId, true, 0, &prop->pos.xy_proj, nullptr, nullptr, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0x882a2626, K_PART_LAYER_NORMAL);
 				}
 
 

@@ -5475,10 +5475,11 @@ void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, 
 	{
 		case K_FX_EXPLONICE_SM1:
 		{
+			//not nice ring: __Particles().AddParticle( ANM_PARTICLES_SPR_DUST_RINGS, false, 0, &pos, nullptr, nullptr, 0.4f, 1.0f, 6.0f, 0.0f, 0.0f, 0.02f, 0.2f, 0x66ffffff, K_PART_LAYER_NORMAL );
 			for ( int kk = 0; kk < 6; kk++ )
 			{
-				__Particles().AddParticle( ANM_PARTICLES_SPR_SMOKESWIRL1, true, randint(4), &(pos + randVec2sgn(12.0f, 12.0f)), nullptr, nullptr, 5.0f, 1.0f + randfloat(0.2f), 0.0f, 
-					randfloat(DOUBLE_PI), 0.0f, 0.0f, 0.0f, 0xaa2a2626, K_PART_LAYER_NORMAL );
+				__Particles().AddParticle( ANM_PARTICLES_SPR_SMOKESWIRL1, true, randint( 2 ), &( pos + randVec2sgn( 12.0f, 12.0f ) ), nullptr, nullptr, 5.0f, 1.0f + randfloat( 0.2f ), 0.0f,
+					randfloat( DOUBLE_PI ), 0.0f, 0.0f, 0.0f, 0xaa2a2626, K_PART_LAYER_NORMAL );
 			}
 			__Particles().AddParticle( ANM_PARTICLES_SPR_EXPLONICE_SM1, true, 0, &pos, nullptr, nullptr, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_NORMAL );
 		}
@@ -5487,7 +5488,7 @@ void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, 
 		{
 			for ( int kk = 0; kk < 6; kk++ )
 			{
-				__Particles().AddParticle( ANM_PARTICLES_SPR_SMOKESWIRL1, true, randint( 4 ), &( pos + randVec2sgn( 16.0f, 16.0f ) ), nullptr, nullptr, 5.0f, 1.2f + randfloat( 0.4f ), 0.0f,
+				__Particles().AddParticle( ANM_PARTICLES_SPR_SMOKESWIRL1, true, randint( 2 ), &( pos + randVec2sgn( 16.0f, 16.0f ) ), nullptr, nullptr, 5.0f, 1.2f + randfloat( 0.4f ), 0.0f,
 					randfloat( DOUBLE_PI ), 0.0f, 0.0f, 0.0f, 0xaa2a2626, K_PART_LAYER_NORMAL );
 			}
 			__Particles().AddParticle( ANM_PARTICLES_SPR_EXPLONICE_BIG1, true, 0, &pos, nullptr, nullptr, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xffffffff, K_PART_LAYER_NORMAL );

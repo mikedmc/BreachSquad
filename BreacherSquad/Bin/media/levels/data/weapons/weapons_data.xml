@@ -99,7 +99,7 @@ sDoTClassFilter="PLAYER/HUMAN/TRAP/PASSIVE" - only affects specified class
 
   <ExplosionTemplates>
     <EXPLO_NICE_SM1 sFX="FX_EXPLONICE_SM1" fDamage="240.0" fDamageObjectsMultiplier="0.7" nArmorPiercingRating="2" fDamageRadius="64.0" 
-		fStunDuration="0.0" fStunRadius="0.0" fSoundRadius="320.0" nShrapnelCnt="4" nNapalmCnt="6" fMaxImpulse="1000.0" 
+		fStunDuration="0.0" fStunRadius="0.0" fSoundRadius="320.0" nShrapnelCnt="6" nNapalmCnt="0" fMaxImpulse="1000.0" 
 		sDoTType="DoT_FIRE" fDoTRadius="64.0" fDoTDuration="3.0" fDoTDamagePerSec="10.0" />
 
     <EXPLO_BARREL fDamage="240.0" fDamageObjectsMultiplier="0.7" nArmorPiercingRating="2" fDamageRadius="64.0" fStunDuration="0.0" fStunRadius="0.0" fSoundRadius="320.0" nShrapnelCnt="4" nNapalmCnt="6" fMaxImpulse="1000.0" sDoTType="DoT_FIRE" fDoTRadius="64.0" fDoTDuration="3.0" fDoTDamagePerSec="10.0" />
