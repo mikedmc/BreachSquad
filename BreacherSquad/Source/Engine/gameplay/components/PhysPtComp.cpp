@@ -149,7 +149,7 @@ void CPointPhysComponent::Update( VecProj& vPos, float dTime, CLevel & level )
 		}
 
 		// Minimum speed on Z when we consider the point stopped
-		const float fMinSpeedZ = 0.1f;
+		const float fMinSpeedZ = 0.5f;
 		// Current floor height. #MAYBE: should get it from each tile
 		float fFloorH = 0.0f;
 

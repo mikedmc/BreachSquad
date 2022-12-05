@@ -1,5 +1,6 @@
 #pragma once
 
+#define CMATH_RAND_MAX 0x7fff
 /* Period parameters */  
 #define CMATH_N 624
 #define CMATH_M 397
