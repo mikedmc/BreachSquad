@@ -45,10 +45,7 @@ public:
 	virtual char const * GetListenerName(void) = 0;
 
 	//RETURNS: consumed event? true - event consumed, false - event can propagate
-	virtual bool HandleEvent( CEvent &nEvent ) = 0
-	{
-		//must be implemented
-	}
+	virtual bool HandleEvent( CEvent &nEvent ) = 0;
 };
 
 ///--- Event Manager ---

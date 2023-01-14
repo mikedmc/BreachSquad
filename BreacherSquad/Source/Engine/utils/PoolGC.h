@@ -80,11 +80,11 @@ int PoolGC<type>::GC()
 	for ( int i = 0; i < m_elements; i++ )
 	{
 		// found dead one, look for first live one
-		if ( m_listFlags[ i ] & PoolGC::FLAG_ALIVE == false )
+		if (( m_listFlags[ i ] & PoolGC::FLAG_ALIVE) == false )
 		{
 			if ( nLiveCursor < 0 )
 				nLiveCursor = i + 1;
-			while ( ( nLiveCursor < m_elements ) && ( m_listFlags[ nLiveCursor ] & PoolGC::FLAG_ALIVE == false ) )
+			while ( ( nLiveCursor < m_elements ) && (( m_listFlags[ nLiveCursor ] & PoolGC::FLAG_ALIVE) == false ) )
 				nLiveCursor++;
 			// we have live one
 			if ( nLiveCursor < m_elements )
@@ -296,7 +296,7 @@ int PoolGC<type>::Find( const type &element ) const
 {
 	for ( int i = 0; i < m_elements; i++ )
 	{
-		if ( m_listFlags[ i ] & PoolGC::FLAG_ALIVE == false )
+		if (( m_listFlags[ i ] & PoolGC::FLAG_ALIVE) == false )
 			continue;
 		if ( m_list[ i ] == element )
 			return i;

@@ -187,8 +187,6 @@ bool CLinkedPool <TYPE>::Init( int nPoolSize )
 	// Allocate containing array
 	pArrNodes = nullptr;
 	pArrNodes = new CLNode[ m_nSize ];
-	if ( pArrNodes == nullptr )
-		return false;
 	// initialize nodes
 	for ( int kk = 0; kk < m_nSize; kk++ )
 	{

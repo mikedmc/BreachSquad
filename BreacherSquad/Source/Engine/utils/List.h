@@ -188,7 +188,7 @@ void List<type>::Resize(int newsize)
 	if (m_bUserMemory)
 		return;
 
-	type *temp = NULL;
+	type *temp = nullptr;
 
 	if ( newsize <= 0 )
 	{
@@ -200,6 +200,8 @@ void List<type>::Resize(int newsize)
 		return;
 
 	temp   = m_list;
+	if ( temp == nullptr )
+		return;
 	m_size = newsize;
 	if ( m_size < m_elements )
 	{

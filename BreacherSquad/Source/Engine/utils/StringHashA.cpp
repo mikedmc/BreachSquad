@@ -3,7 +3,7 @@
 
 CStringHashA::CStringHashA(WCHAR const * const strText)
 {
-	CHAR tempstr[MAX_PATH];
+	CHAR tempstr[MAX_PATH]{0};
 	size_t cntConv;
 	wcstombs_s(&cntConv, tempstr, strText, K_MAX_STRINGHASH_CHAR_LEN);
 	strcpy_s(text, K_MAX_STRINGHASH_CHAR_LEN, tempstr);
@@ -76,7 +76,7 @@ void CStringHashA::Init(WCHAR const * const strText)
 		return;
 	}
 
-	CHAR tempstr[MAX_PATH];
+	CHAR tempstr[MAX_PATH]{0};
 	size_t cntConv;
 	wcstombs_s(&cntConv, tempstr, strText, K_MAX_STRINGHASH_CHAR_LEN);
 	strcpy_s(text, K_MAX_STRINGHASH_CHAR_LEN, tempstr);

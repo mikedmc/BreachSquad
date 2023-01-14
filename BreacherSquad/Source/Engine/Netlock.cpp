@@ -385,7 +385,7 @@ void CNetLock::Net_LogFrameData(int nCount /*= 10*/)
 	int nfrom = m_nReceived_Tail - nCount;
 	if (nfrom < 0)
 		nfrom = 0;
-	StringCchPrintf(tmptxt, MAX_PATH, L"recv: ", tmptxtsm);
+	StringCchPrintf(tmptxt, MAX_PATH, L"recv: %s", tmptxtsm);
 	for (int kk = nfrom; kk <= m_nReceived_Tail; kk++)
 	{
 		StringCchPrintf(tmptxtsm, MAX_PATH, L"%d:%d ", kk, m_arrReceived[kk % CNetLock::K_NETLOCK_MAX_STATE_PACKAGES].SerializeToDW());
@@ -396,7 +396,7 @@ void CNetLock::Net_LogFrameData(int nCount /*= 10*/)
 	nfrom = m_nToSend_Tail - nCount;
 	if (nfrom < 0)
 		nfrom = 0;
-	StringCchPrintf(tmptxt, MAX_PATH, L"sent: ", tmptxtsm);
+	StringCchPrintf(tmptxt, MAX_PATH, L"sent: %s", tmptxtsm);
 	for (int kk = nfrom; kk <= m_nToSend_Tail; kk++)
 	{
 		StringCchPrintf(tmptxtsm, MAX_PATH, L"%d:%d ", kk, m_arrToSend[kk % CNetLock::K_NETLOCK_MAX_STATE_PACKAGES].SerializeToDW());

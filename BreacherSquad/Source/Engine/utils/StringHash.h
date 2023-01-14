@@ -11,37 +11,43 @@ public:
 	FORCEINLINE const UINT32 getHash() const { return textHash; }
 
 	CStringHash() { text[0] = 0; textHash = 0; }
-	CStringHash(WCHAR const * const strText)
+	CStringHash( WCHAR const * const strText )
 	{
-		int len = wcslen(strText);
-		if (len == 0)
+		int len = wcslen( strText );
+		if ( len == 0 )
 		{
 			text[0] = 0;
 			textHash = 0;
 			return;
 		}
 
-		wcscpy_s(text, K_MAX_STRINGHASH_LEN, strText);
-		textHash = FastHash(text, wcslen(text));
+		wcscpy_s( text, K_MAX_STRINGHASH_LEN, strText );
+		textHash = FastHash( text, wcslen( text ) );
 	}
 
-	CStringHash(char const * const strText)
+	CStringHash( char const * const strText )
 	{
-		int len = strlen(strText);
-		if (len == 0)
+		int len = strlen( strText );
+		if ( len == 0 )
 		{
 			text[0] = 0;
 			textHash = 0;
 			return;
 		}
 
-		mbstowcs(text, strText, K_MAX_STRINGHASH_LEN);
-		textHash = FastHash(text, wcslen(text));
+		mbstowcs( text, strText, K_MAX_STRINGHASH_LEN );
+		textHash = FastHash( text, wcslen( text ) );
 	}
 	//copy constructor	
-	CStringHash(const CStringHash &o)
+	CStringHash( const CStringHash & o )
 	{
-		Init(o.text);
+		Init( o.text );
+	}
+
+	CStringHash& operator= ( const CStringHash & o )
+	{
+		Init( o.text );
+		return *this;
 	}
 
 	const bool IsEmpty() const {

@@ -27,7 +27,7 @@ public:
 	{
 		pos.x = pos.y = 0.0f;
 		start = false;
-		parentWall = NULL;
+		parentWall = nullptr;
 		angle = 0.0f;
 	}
 
