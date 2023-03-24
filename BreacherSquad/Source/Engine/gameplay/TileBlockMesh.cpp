@@ -1,12 +1,6 @@
 #include "dxstdafx.h"
 #include "TileBlockMesh.h"
 
-CTileBlockMesh::CTileBlockMesh()
-{
-	m_Painter.Init(512);
-	memset(m_arrMeshIdx, -1, sizeof(int) * ARRAY_SIZE(m_arrMeshIdx));
-}
-
 CTileBlockMesh::CTileBlockMesh(PDEVICE pDevice)
 {
 	m_Painter.Init(512, pDevice);
@@ -348,7 +342,7 @@ OPRESULT CTileBlockMeshManager::PaintLayer(int layerIdx)
 	return K_OP_OK;
 }
 
-OPRESULT CTileBlockMeshManager::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= NULL*/, void* pUserContext /*= NULL*/)
+OPRESULT CTileBlockMeshManager::OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= NULL*/)
 {
 	m_pDevice = pDevice;
 	for (int kk = 0; kk < arrBlocks.GetSize(); kk++)
@@ -358,7 +352,7 @@ OPRESULT CTileBlockMeshManager::OnCreateDevice(PDEVICE pDevice, const SURFACE_DE
 	return K_OP_OK;
 }
 
-OPRESULT CTileBlockMeshManager::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= NULL*/, void* pUserContext /*= NULL*/)
+OPRESULT CTileBlockMeshManager::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= NULL*/)
 {
 	m_pDevice = pDevice;
 	for (int kk = 0; kk < arrBlocks.GetSize(); kk++)
@@ -368,7 +362,7 @@ OPRESULT CTileBlockMeshManager::OnResetDevice(PDEVICE pDevice, const SURFACE_DES
 	return K_OP_OK;
 }
 
-OPRESULT CTileBlockMeshManager::OnLostDevice(void* pUserContext /*= NULL*/)
+OPRESULT CTileBlockMeshManager::OnLostDevice()
 {
 	for (int kk = 0; kk < arrBlocks.GetSize(); kk++)
 	{
@@ -377,7 +371,7 @@ OPRESULT CTileBlockMeshManager::OnLostDevice(void* pUserContext /*= NULL*/)
 	return K_OP_OK;
 }
 
-OPRESULT CTileBlockMeshManager::OnDestroyDevice(void* pUserContext /*= NULL*/)
+OPRESULT CTileBlockMeshManager::OnDestroyDevice()
 {
 	for (int kk = 0; kk < arrBlocks.GetSize(); kk++)
 	{

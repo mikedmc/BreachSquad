@@ -299,7 +299,7 @@ public:
 	OPRESULT				LoadLevel( WCHAR * strPathAbs );
 	// Loads a new area and adds it to the level (absolute path, real drive path)
 	// Adds all elements to the level arrays too
-	OPRESULT				LoadArea( WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL );
+	OPRESULT				DeployAreaInstance( WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL );
 	// Releases all level data
 	void					Release();
 	// Gives you a random level from a shuffled list so you play all of them in random order

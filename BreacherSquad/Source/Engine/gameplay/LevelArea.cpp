@@ -453,25 +453,25 @@ bool CLevelArea::IsBoxColliding( CAABB srcBox, bool bCheckProps /*= true */ )
 	return false;
 }
 
-OPRESULT CLevelArea::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= NULL*/, void* pUserContext /*= NULL*/ )
+OPRESULT CLevelArea::OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= NULL*/)
 {
-	V_OP_RET( areaMesh.OnCreateDevice( pDevice, pBBDesc, pUserContext ) );
+	V_OP_RET( areaMesh.OnCreateDevice( pDevice, pBBDesc ) );
 	return K_OP_OK;
 }
 
-OPRESULT CLevelArea::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= NULL*/, void* pUserContext /*= NULL*/ )
+OPRESULT CLevelArea::OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc /*= NULL*/ )
 {
-	V_OP_RET( areaMesh.OnCreateDevice( pDevice, pBBDesc, pUserContext ) );
+	V_OP_RET( areaMesh.OnResetDevice( pDevice, pBBDesc ) );
 	return K_OP_OK;
 }
 
-OPRESULT CLevelArea::OnLostDevice( void* pUserContext /*= NULL*/ )
+OPRESULT CLevelArea::OnLostDevice( )
 {
 	areaMesh.OnLostDevice();
 	return K_OP_OK;
 }
 
-OPRESULT CLevelArea::OnDestroyDevice( void* pUserContext /*= NULL*/ )
+OPRESULT CLevelArea::OnDestroyDevice( )
 {
 	areaMesh.OnDestroyDevice();
 	return K_OP_OK;

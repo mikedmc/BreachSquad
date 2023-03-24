@@ -30,7 +30,7 @@ struct CLevelAreaDesc
 class CLevelArea
 {
 private:
-	PDEVICE							m_pDevice;
+	PDEVICE							m_pDevice{ nullptr };
 public:
 	UINT32							ID;						// area ID used for finding the area and for references to it
 	CTile**							tiles;					// actual tilemap
@@ -75,8 +75,8 @@ public:
 	bool					IsBoxColliding( CAABB srcBox, bool bCheckProps = true );
 
 public: //--- framework methods ---
-	OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr );
-	OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr );
-	OPRESULT OnLostDevice( void* pUserContext = nullptr );
-	OPRESULT OnDestroyDevice( void* pUserContext = nullptr );
+	OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr );
+	OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr );
+	OPRESULT OnLostDevice( );
+	OPRESULT OnDestroyDevice( );
 };

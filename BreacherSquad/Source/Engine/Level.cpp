@@ -1314,7 +1314,7 @@ void CLevel::RandomizeTemplateActor( CActorTemplate * actTemplate )
 IActiveInterface* CLevel::GetIActiveInterfacePtr( int editorID )
 {
 	if ( editorID < 0 )
-		return null;
+		return nullptr;
 	//check actives
 	for ( int ar = 0; ar < m_arrAreas.Count(); ar++ )
 	{

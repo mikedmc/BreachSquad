@@ -62,10 +62,10 @@ private:
 	OPRESULT					CreateIB();
 
 public:
-	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
-	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);
-	OPRESULT OnLostDevice(void* pUserContext = NULL);
-	OPRESULT OnDestroyDevice(void* pUserContext = NULL);
+	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr);
+	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr);
+	OPRESULT OnLostDevice(void* pUserContext = nullptr);
+	OPRESULT OnDestroyDevice(void* pUserContext = nullptr);
 };
 
 

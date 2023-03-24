@@ -97,7 +97,7 @@ CApplication::CApplication()
 	g_rectScreen = RectXYWH(0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h);
 	g_rectRT = RectXYWH(0.0f, 0.0f, K_GAME_WIDTH * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F);
 	g_rect360hWorld = RectXYWH(0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * K_GAME_HEIGHT), K_GAME_HEIGHT);
-	D3DXMatrixOrthoOffCenterLH(&g_matProj, g_rectRender.x + 0.5f, g_rectRender.w + 0.5f, g_rectRender.h + 0.5f, g_rectRender.y + 0.5f, 0.0f, 1.0f);
+	MUMatOrthoOffCenterLH(&g_matProj, g_rectRender.x + 0.5f, g_rectRender.w + 0.5f, g_rectRender.h + 0.5f, g_rectRender.y + 0.5f, 0.0f, 1.0f);
 	//clear all resolutions
 	g_arrResolutions.RemoveAll();
 }
@@ -285,7 +285,7 @@ void CApplication::OnRenderSizeChanged(int newSizeX, int newSizeY)
 
 	g_rect360hWorld = RectXYWH(0.0f, 0.0f, (fAspect * K_GAME_HEIGHT), K_GAME_HEIGHT);
 	g_rectRT = RectXYWH( 0.0f, 0.0f, K_GAME_WIDTH * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F );
-	D3DXMatrixOrthoOffCenterLH(&g_matProj, g_rectScreen.x + 0.5f, g_rectScreen.w + 0.5f, g_rectScreen.h + 0.5f, g_rectScreen.y + 0.5f, 0.0f, 1.0f);
+	MUMatOrthoOffCenterLH(&g_matProj, g_rectScreen.x + 0.5f, g_rectScreen.w + 0.5f, g_rectScreen.h + 0.5f, g_rectScreen.y + 0.5f, 0.0f, 1.0f);
 
 	g_camScreen.SetWorldBounds(g_rectScreen, true, K_CAMTRANS_AXIS_V, g_rectScreen.h, g_rectScreen.h);
 	g_camScreen.InitCamera(g_rectScreen, g_rectScreen.h, K_CAMTRANS_AXIS_V, g_rectScreen.Center());

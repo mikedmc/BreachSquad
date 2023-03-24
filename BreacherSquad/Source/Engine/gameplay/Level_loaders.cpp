@@ -95,7 +95,7 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 
 	//load bsx
 	FileManager::GetMediaPath( L"media/levels/data/props.bsx", Path );
-	V_OP_RET( m_sprLib.AddSprites( Path, libidxtmp, K_LIBNICK_PROPS) );
+	V_OP_RET( m_sprLib.AddSprites( Path, libidxtmp, K_LIBNICK_PROPS ) );
 
 	//--- load actors templates and weaponry right after props sprite ---
 	FileManager::GetMediaPath( L"media/levels/data/weapons/weapons_data.xml", Path );
@@ -119,9 +119,13 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 		WCHAR tmppath[MAX_PATH];
 		swprintf_s( tmppath, MAX_PATH, L"media/levels/areas/%s.area", area->strAreaFile.c_str() );
 		FileManager::GetMediaPath( tmppath, Path );
-		V_OP_RET( LoadArea( Path, area->nID, Vec2i( area->AABB.x * K_LGEN_BLOCK_W, area->AABB.y * K_LGEN_BLOCK_H ) ) );
+		V_OP_RET( DeployAreaInstance( Path, area->nID, Vec2i( area->AABB.x * K_LGEN_BLOCK_W, area->AABB.y * K_LGEN_BLOCK_H ) ) );
 	}
-
+	//#TODO: dupa ce se face new la areas ar trebui setat pDevice printr-o metoda 
+	for ( auto pArea : m_arrAreas )
+	{
+		//pArea->OnCreateDevice( m_pDevice );
+	}
 	// set areas neighbour pointers
 	for ( int ii = 0; ii < m_arrAreas.GetSize(); ii++ )
 	{
@@ -152,7 +156,7 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 	{
 		CLight * light = m_arrLights[kk];
 		IActiveInterface* pt = GetIActiveInterfacePtr( light->targetID_ini );
-		if ( pt != nullptr )
+		if ( pt )
 		{
 			CSmartLink::SetLink( &light->pTarget, pt );
 		}
@@ -162,7 +166,7 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 	{
 		CCollisionShape * shape = m_arrColShapes[kk];
 		IActiveInterface* pt = GetIActiveInterfacePtr( shape->targetID_ini );
-		if ( pt != nullptr )
+		if ( pt )
 		{
 			CSmartLink::SetLink( &shape->pTarget, pt );
 		}
@@ -176,7 +180,7 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 		{
 			CProp * activ = area->m_arrProps[kk];
 			IActiveInterface* pt = GetIActiveInterfacePtr( activ->targetID_ini );
-			if ( pt != nullptr )
+			if ( pt )
 			{
 				CSmartLink::SetLink( &activ->pTarget, pt );
 			}
@@ -187,10 +191,8 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 	{
 		CActor* actor = m_arrActors[kk];
 		IActiveInterface* pt = GetIActiveInterfacePtr( actor->targetID_ini );
-		if ( pt != nullptr )
-		{
+		if ( pt )
 			CSmartLink::SetLink( &actor->pTarget, pt );
-		}
 	}
 
 	///--- camera ---
@@ -279,7 +281,7 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 }
 
 
-OPRESULT CLevel::LoadArea( WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL )
+OPRESULT CLevel::DeployAreaInstance( WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL )
 {
 	LOG( L"Area ID:%d", nAreaID );
 	// increment area ID for the next area

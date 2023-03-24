@@ -17,8 +17,7 @@ public:
 	int							m_arrMeshIdx[K_TBM_MAX_LAYERS]{};	// Array of mesh indexes per layer, or -1 for empty layers
 
 public:
-	CTileBlockMesh();
-	CTileBlockMesh(PDEVICE pDevice);
+	CTileBlockMesh( PDEVICE pDevice );
 	~CTileBlockMesh();
 
 	// Creates meshes for each layer
@@ -27,7 +26,7 @@ public:
 
 	void						Clear();
 
-	void						PaintLayer(int nLayer, bool bSetFVF = false);
+	void						PaintLayer( int nLayer, bool bSetFVF = false );
 };
 
 // Keeps an array of tileblocks and manages them
@@ -42,7 +41,7 @@ public:
 	CTileBlockMeshManager();
 	~CTileBlockMeshManager();
 
-	void						Init(PDEVICE pDevice);
+	void						Init( PDEVICE pDevice );
 	void						Release();
 
 	// Builds all buffers for specified map, called after loading a level and when we have changes
@@ -50,15 +49,15 @@ public:
 
 	// Creates list of visible blocks. camRect is the XY plane of the AABB of the camera frustum.
 	// Must be called before PaintLayer.
-	int							UpdateVisibility(RectXYWH camRect);
+	int							UpdateVisibility( RectXYWH camRect );
 
 	// Paints tile layer for visible buffers (use idx from eAreaLayer)
-	OPRESULT					PaintLayer(int layerIdx);
+	OPRESULT					PaintLayer( int layerIdx );
 
-	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr);
-	OPRESULT OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr);
-	OPRESULT OnLostDevice(void* pUserContext = nullptr);
-	OPRESULT OnDestroyDevice(void* pUserContext = nullptr);
+	OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr );
+	OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr );
+	OPRESULT OnLostDevice();
+	OPRESULT OnDestroyDevice();
 };
 
 
