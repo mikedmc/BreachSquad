@@ -41,7 +41,6 @@ public:
 	CTileBlockMeshManager();
 	~CTileBlockMeshManager();
 
-	void						Init( PDEVICE pDevice );
 	void						Release();
 
 	// Builds all buffers for specified map, called after loading a level and when we have changes

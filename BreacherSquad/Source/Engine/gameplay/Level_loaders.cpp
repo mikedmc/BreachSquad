@@ -119,12 +119,7 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 		WCHAR tmppath[MAX_PATH];
 		swprintf_s( tmppath, MAX_PATH, L"media/levels/areas/%s.area", area->strAreaFile.c_str() );
 		FileManager::GetMediaPath( tmppath, Path );
-		V_OP_RET( DeployAreaInstance( Path, area->nID, Vec2i( area->AABB.x * K_LGEN_BLOCK_W, area->AABB.y * K_LGEN_BLOCK_H ) ) );
-	}
-	//#TODO: dupa ce se face new la areas ar trebui setat pDevice printr-o metoda 
-	for ( auto pArea : m_arrAreas )
-	{
-		//pArea->OnCreateDevice( m_pDevice );
+		V_OP_RET( DeployAreaInstance(m_pDevice, Path, area->nID , Vec2i( area->AABB.x * K_LGEN_BLOCK_W, area->AABB.y * K_LGEN_BLOCK_H ) ) );
 	}
 	// set areas neighbour pointers
 	for ( int ii = 0; ii < m_arrAreas.GetSize(); ii++ )
@@ -249,10 +244,8 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 	// compute dirty rects (collisions and walls, wall shadows and other data)
 	UpdateDirtyRects();
 	// create Area meshes after shadows have been computed in UpdateDirtyRects
-	for ( int ii = 0; ii < m_arrAreas.GetSize(); ii++ )
-	{
-		CLevelArea* area = m_arrAreas[ii];
-		V_OP_RET( area->BuildBuffers( m_pDevice ) );
+	for( auto area : m_arrAreas ) {
+		V_OP_RET( area->BuildBuffers( ) );
 	}
 
 	BuildVisibilityLists();
@@ -281,8 +274,9 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 }
 
 
-OPRESULT CLevel::DeployAreaInstance( WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL )
+OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL )
 {
+	_ASSERT( pDevice != nullptr );
 	LOG( L"Area ID:%d", nAreaID );
 	// increment area ID for the next area
 	CLevelArea* area = new CLevelArea( nAreaID );
@@ -887,6 +881,9 @@ OPRESULT CLevel::DeployAreaInstance( WCHAR * strPathAbs, UINT32 nAreaID, Vec2i p
 
 	LOG( L"Game:: Area loaded:[%s] net.randcheck[%d]", strPathAbs, m_rand.RandInt( 60000 ) );
 
+	// call device creation so it initializes everything device related
+	area->OnCreateDevice( pDevice );
+	// add to list of areas
 	m_arrAreas.Add( area );
 
 	return K_OP_OK;

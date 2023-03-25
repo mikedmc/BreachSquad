@@ -261,10 +261,10 @@ public:
 	void				MessageBoxOK( int titleStringId, int textStringId );
 
 	// Inherited via IDeviceRes
-	virtual OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
-	virtual OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
-	virtual OPRESULT OnLostDevice() override;
-	virtual OPRESULT OnDestroyDevice() override;
+	OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
+	OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
+	OPRESULT OnLostDevice() override;
+	OPRESULT OnDestroyDevice() override;
 };
 
 // Controls manager singleton

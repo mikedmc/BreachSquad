@@ -2,7 +2,7 @@
 #include "BufferedPainterQuad.h"
 ///-----------------------------------------------------------------------------------------------
 ///	 BUFFERED PAINTER QUADS
-///  - adaugi triunghiuri unul cate unul si la final face un VB si IB din care poti desena mesh-ul
+///  - adds quads and buffers them into a VB
 ///-----------------------------------------------------------------------------------------------
 
 CBufferedPainterQuads::CBufferedPainterQuads() :
@@ -12,7 +12,7 @@ CBufferedPainterQuads::CBufferedPainterQuads() :
 {
 }
 
-CBufferedPainterQuads::~CBufferedPainterQuads(void)
+CBufferedPainterQuads::~CBufferedPainterQuads()
 {
 	ClearBuffers();
 	SAFE_DELETE_ARRAY(m_verts);
@@ -48,7 +48,7 @@ OPRESULT CBufferedPainterQuads::BeginMesh(int &retMeshIdx)
 	if (m_nMeshesCnt >= K_BP_MAX_QMESHES_CNT)
 	{
 		retMeshIdx = -1;
-		return OPRESULT(K_OP_FAILED, L"CBufferedPainterQuads:: Too many meshes!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"CBufferedPainterQuads:: Too many meshes!", K_SEVERITY_WARNING);
 	}
 	//_ASSERT(m_nMeshesCnt < K_BP_MAX_QMESHES_CNT);
 	m_bMeshStarted = true;
@@ -67,7 +67,7 @@ OPRESULT CBufferedPainterQuads::AddQuads(_VERTEX_PNCT4T4 *points, int quadsCount
 	_ASSERT(m_nMaxQuadsCnt > 0);
 
 	if (!m_bMeshStarted)
-		return OPRESULT(K_OP_FAILED, L"You have to call BeginMesh() first!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"You have to call BeginMesh() first!", K_SEVERITY_WARNING);
 
 #if defined(_DEBUG) || defined(DEBUG)
 	_ASSERT((int)m_nVertexCursor + quadsCount * 4 < m_nMaxQuadsCnt * 4);
@@ -122,7 +122,7 @@ OPRESULT CBufferedPainterQuads::BuildBuffers()
 	EndMesh();
 
 	if (m_vb == nullptr)
-		return OPRESULT(K_OP_FAILED, L"CBufferedPainterQuads::BuildBuffers(): VB is null!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"CBufferedPainterQuads::BuildBuffers(): VB is null!", K_SEVERITY_WARNING);
 
 	if (m_nVertexCursor == 0)
 		return K_OP_OK;
@@ -131,7 +131,7 @@ OPRESULT CBufferedPainterQuads::BuildBuffers()
 	_VERTEX_PNCT4T4* pVerts;
 	if (FAILED(m_vb->Lock(0, m_nVertexCursor * sizeof(_VERTEX_PNCT4T4), (void**)&pVerts, D3DLOCK_DISCARD)))
 	{
-		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads: Build buffers failed!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads: Build buffers failed!", K_SEVERITY_WARNING);
 	}
 
 	memcpy(pVerts, m_verts, m_nVertexCursor * sizeof(_VERTEX_PNCT4T4));
@@ -149,7 +149,7 @@ OPRESULT CBufferedPainterQuads::DrawMesh(int meshIdx, bool setFVF)
 #if defined(_DEBUG) || defined(DEBUG)
 	if (m_bVBBuilt == false)
 	{
-		return OPRESULT(K_OP_FAILED, L"CBufferedPainterQuads::DrawMesh called before BuildBuffers!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"CBufferedPainterQuads::DrawMesh called before BuildBuffers!", K_SEVERITY_WARNING);
 	}
 #endif
 
@@ -198,7 +198,7 @@ OPRESULT CBufferedPainterQuads::CreateVB()
 {
 	_ASSERT(m_nMaxQuadsCnt > 0);
 	if (m_pDevice == nullptr)
-		return OPRESULT(K_OP_INVALIDARGS, L"CBufferedPainterQuads::CreateVB: Device not set!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_INVALIDARGS, L"CBufferedPainterQuads::CreateVB: Device not set!", K_SEVERITY_WARNING);
 
 	SAFE_RELEASE(m_vb);
 
@@ -208,12 +208,12 @@ OPRESULT CBufferedPainterQuads::CreateVB()
 		_VERTEX_PNCT4T4::FVF, D3DPOOL_DEFAULT,
 		&m_vb, NULL)))
 	{
-		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads::OnResetDevice: Create Vertex Buffer failed!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads::OnResetDevice: Create Vertex Buffer failed!", K_SEVERITY_WARNING);
 	}
 	//builds buffers too
 	if (OP_FAILED(BuildBuffers()))
 	{
-		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads::OnResetDevice: BuildBuffers failed!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads::OnResetDevice: BuildBuffers failed!", K_SEVERITY_WARNING);
 	}
 
 	return K_OP_OK;
@@ -223,20 +223,20 @@ OPRESULT CBufferedPainterQuads::CreateIB()
 {
 	_ASSERT(m_nMaxQuadsCnt > 0);
 	if (m_pDevice == nullptr)
-		return OPRESULT(K_OP_INVALIDARGS, L"CBufferedPainterQuads::CreateVB: Device not set!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_INVALIDARGS, L"CBufferedPainterQuads::CreateVB: Device not set!", K_SEVERITY_WARNING);
 
 	SAFE_RELEASE(m_ib);
 
 	//create index buffer (fixed) - deci va desena numai triunghiuri independente
-	if (FAILED(m_pDevice->CreateIndexBuffer((m_nMaxQuadsCnt + K_BP_SENTINEL_QUADS) * 6 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, 0)))
+	if (FAILED(m_pDevice->CreateIndexBuffer((m_nMaxQuadsCnt + K_BP_SENTINEL_QUADS) * 6 * sizeof(DWORD), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &m_ib, NULL)))
 	{
-		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads: Create Index Buffer failed!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads: Create Index Buffer failed!", K_SEVERITY_WARNING);
 	}
 	//lock and fill
 	DWORD * pIndices;
 	if (FAILED(m_ib->Lock(0, NULL, (void**)&pIndices, 0)))
 	{
-		return OPRESULT(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads: Lock Index Buffer failed!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_FAILED, L"[ERROR] CBufferedPainterQuads: Lock Index Buffer failed!", K_SEVERITY_WARNING);
 	}
 
 	for (int kk = 0; kk < m_nMaxQuadsCnt; kk++)

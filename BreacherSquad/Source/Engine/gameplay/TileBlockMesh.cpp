@@ -240,10 +240,8 @@ OPRESULT CTileBlockMesh::BuildBuffers( Vec2i vBlockPos_TL, CTile** map, SizeWHi 
 	{
 		return OPRESULT(K_OP_OK_WARNING, K_SEVERITY_NONE, L"Empty block detected! pos:%d,%d ", m_mapAreaTL.x, m_mapAreaTL.y);
 	}
-	else
-	{
-		m_Painter.BuildBuffers();
-	}
+	// all good, go ahead and build the buffers
+	m_Painter.BuildBuffers();
 
 	return K_OP_OK;
 }
@@ -275,11 +273,6 @@ CTileBlockMeshManager::~CTileBlockMeshManager()
 	Release();
 }
 
-void CTileBlockMeshManager::Init(PDEVICE pDevice)
-{
-	m_pDevice = pDevice;
-}
-
 void CTileBlockMeshManager::Release()
 {
 	arrVisible.Clear();
@@ -290,7 +283,7 @@ OPRESULT CTileBlockMeshManager::BuildBuffers( CTile** map, SizeWHi mapSizeTL, Ve
 {
 	_ASSERT(m_pDevice != nullptr);
 	if (map == nullptr)
-		return OPRESULT(K_OP_INVALIDARGS, L"BuildBuffers:: Map param is null!", K_SEVERITY_WARNING);
+		return OP_ERR(K_OP_INVALIDARGS, L"BuildBuffers:: Map param is null!", K_SEVERITY_WARNING);
 
 	// parse map block by block
 	int blocksX = (mapSizeTL.w / K_TBM_BLOCK_W) + (((mapSizeTL.w % K_TBM_BLOCK_W) > 0) ? 1 : 0);

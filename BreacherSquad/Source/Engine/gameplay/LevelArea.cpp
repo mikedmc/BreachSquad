@@ -15,11 +15,8 @@ CLevelArea::~CLevelArea()
 	Release();
 }
 
-OPRESULT CLevelArea::BuildBuffers( PDEVICE pDevice )
+OPRESULT CLevelArea::BuildBuffers()
 {
-	_ASSERT( pDevice != nullptr );
-
-	areaMesh.Init( pDevice );
 	V_OP_RET( areaMesh.BuildBuffers( tiles, sizeTL, Vec2( AABBbounds.vMin.x, AABBbounds.vMin.y ) ) );
 
 	return K_OP_OK;

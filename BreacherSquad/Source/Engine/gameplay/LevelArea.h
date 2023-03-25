@@ -27,10 +27,8 @@ struct CLevelAreaDesc
 /// A level is composed of many level areas, generated dinamically. 
 /// Area keeps geometry data.
 ///--------------------------------------------------------------------------
-class CLevelArea
+class CLevelArea : public IDeviceRes
 {
-private:
-	PDEVICE							m_pDevice{ nullptr };
 public:
 	UINT32							ID;						// area ID used for finding the area and for references to it
 	CTile**							tiles;					// actual tilemap
@@ -58,7 +56,7 @@ public:
 	// Returns true if the mesh for specified layer is visible
 	bool					IsLayerMeshVisible( eAreaLayer layer );
 	// orders building of the buffers
-	OPRESULT				BuildBuffers( PDEVICE pDevice );
+	OPRESULT				BuildBuffers();
 	// intersection of segment with tiles (nullptr if not intersecting)
 	// tileFlagsNonCollide - if tile has one of the flags then it's not colliding
 	CTile*					SegmentTilesIntersection( Vec2 vStart, Vec2 vEnd, Vec2 & retPoint, Vec2 & retNormal, Vec2i *hitTilePosTL, DWORD tileFlagsNonCollide = K_TILEFLAG_WALKABLE | K_TILEFLAG_UNDER_FLOOR );
@@ -75,8 +73,9 @@ public:
 	bool					IsBoxColliding( CAABB srcBox, bool bCheckProps = true );
 
 public: //--- framework methods ---
-	OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr );
-	OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr );
-	OPRESULT OnLostDevice( );
-	OPRESULT OnDestroyDevice( );
+	// Inherited via IDeviceRes
+	OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
+	OPRESULT OnResetDevice( PDEVICE pDevice, const SURFACE_DESC * pBBDesc = nullptr ) override;
+	OPRESULT OnLostDevice() override;
+	OPRESULT OnDestroyDevice() override;
 };
