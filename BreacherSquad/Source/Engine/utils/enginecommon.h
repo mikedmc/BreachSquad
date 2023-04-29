@@ -178,17 +178,17 @@ public:
 	bool	bLbut; //daca e apasat sau nu
 	bool	bRbut; //daca e apasat sau nu
 public:
-	Vec2 pos; //in coordonate transformate prin camera transform
+	Vec2	pos; //in coordonate transformate prin camera transform
 	Vec2	lastPos; //last mouse position in coord reale de viewport
 	Vec2 delta; //delta movement
 	EMouseButtonState Lbut; 
 	EMouseButtonState Rbut; 
-	int     wheelDelta; //delta rotita scroll
+	int     wheelDelta;		//scroll wheel delta
 
 	bool	bCursorOutsideWindow;	//setat cand iese cursorul din fereastra
 	float	fTimeSinceInput;		//time since last input received
 
-	CMouseData() : pos(0.0f, 0.0f), lastPos(0.0f, 0.0f), delta(0.0f, 0.0f),
+	CMouseData() : wheelDelta(0), pos(0.0f, 0.0f), lastPos(0.0f, 0.0f), delta(0.0f, 0.0f),
 		bLbut(false), bRbut(false), Lbut(K_MOUSE_BUTT_NOTPRESSED), Rbut(K_MOUSE_BUTT_NOTPRESSED), bCursorOutsideWindow(false),
 		fTimeSinceInput(0.0f)
 	{};

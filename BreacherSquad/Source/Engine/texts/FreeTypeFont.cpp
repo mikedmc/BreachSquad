@@ -12,6 +12,7 @@
 
 CFreeTypeFont::CFreeTypeFont()
 {
+	bLoaded = false;
 	rowHeight = 0;
 	letterSpacing = 0;
 	rowSpacing = 1;

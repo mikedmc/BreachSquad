@@ -18,7 +18,7 @@
 #define FTFF_VCENTERRIGHT 36
 
 struct sGlyphInfo {
-	int advanceX;								// cursor advance after glyph
+	int advanceX{};								// cursor advance after glyph
 	RectLTRB			texRect;				// tex coords of module
 	RectLTRB			moduleRectOff;			// module rect offsetted by x_off and y_off. Origin in cursor point.
 };
@@ -66,7 +66,8 @@ struct sFreeTypeFontStyle
 
 	sFreeTypeFontStyle(DWORD dwOutlineCol, float fShadowA, int nShadOffX, int nShadOffY, CHAR* strTexPath = nullptr) :
 		dwOutlineColor(dwOutlineCol), fShadowAlpha(fShadowA),
-		shadowOffsetX(nShadOffX), shadowOffsetY(nShadOffY)
+		shadowOffsetX(nShadOffX), shadowOffsetY(nShadOffY),
+		fGeometryScale( 1.0f )
 	{
 		if (strTexPath != nullptr)
 			strTexturePath = strTexPath;

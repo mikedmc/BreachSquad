@@ -69,6 +69,8 @@ public:
 		return nCount;
 	}
 
+	// pops first element and returns it in retVal
+	// returns false if array empty
 	bool PopFirst(TYPE * retVal) {
 		if ( nCount == 0 )
 			return false;

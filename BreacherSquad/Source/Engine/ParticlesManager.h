@@ -115,6 +115,7 @@ public:
 	UINT32 UID;			//UID generic
 	float fTimer;
 	float fGenerateTime; //la cat timp genereaza particule
+
 public:
 	bool	bPauseUpdate, bPausePaint; //pauza pe update si paint
 	bool	bGenerateOutsideScreen; //daca sa genereze particule in afara ecranului
@@ -126,9 +127,12 @@ public:
 
 	int particleLayer;	//layerul ar trebui setat in fiecare brush in parte ca sa poti genera pe layere diferite
 
-	CParticleEmitter() : type(K_PART_PE_TYPE_UNKNOWN), fTimer(0.0f), fGenerateTime(0.0f), bPauseUpdate(false), bPausePaint(false), particleLayer(0), bGenerateOutsideScreen(true)
+	CParticleEmitter() : 
+		type(K_PART_PE_TYPE_UNKNOWN), fTimer(0.0f), fGenerateTime(0.0f), 
+		bPauseUpdate(false), bPausePaint(false), particleLayer(0), 
+		bGenerateOutsideScreen(true), bbox_surface(0.0f)
 	{
-		UID = GenerateUID();
+		UID = GenerateUID();	 
 	}
 };
 

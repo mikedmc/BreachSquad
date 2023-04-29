@@ -43,8 +43,8 @@ class scTexture
 {
 public:
 	PTEXTURE			pTex;
-	TEXTURE_LAYER_INFO	info;
-	WCHAR				imagePath[MAX_PATH];
+	TEXTURE_LAYER_INFO	info{};
+	WCHAR				imagePath[MAX_PATH]{ 0 };
 	//CTOR
 	scTexture() :
 		pTex(nullptr)

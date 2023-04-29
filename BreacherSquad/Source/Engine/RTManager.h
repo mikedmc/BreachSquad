@@ -29,6 +29,7 @@ public:
 		Mat						matProj;				// Projection matrix specific to this RT
 
 		CEngineRenderTarget() :
+			m_pRenderToSurface(nullptr), m_pRTTexture(nullptr), m_pRTSurface(nullptr),
 			bReady(false), nWidth(0), nHeight(0),
 			dwTexFormat(D3DFMT_A8B8G8R8), UID(0), bDepthStencilBuffer(true),
 			dwDepthStencilFormat(D3DFMT_D24X8), nMipLevels(1)

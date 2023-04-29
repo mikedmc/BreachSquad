@@ -10,13 +10,13 @@ public:
 	CStringHash		m_instruction;
 	CVariantMap		m_arrArgs; //instruction arguments
 	//create event
-	CScriptInstruction(const WCHAR* strInstruction)
+	CScriptInstruction( const WCHAR* strInstruction )
 	{
-		m_instruction.Init(strInstruction);
+		m_instruction.Init( strInstruction );
 		m_arrArgs.Clear();
 	}
 
-	FORCEINLINE CVariant* GetArgument(WCHAR* strArgName)
+	FORCEINLINE CVariant* GetArgument( WCHAR* strArgName )
 	{
 		return &m_arrArgs[strArgName];
 	}
@@ -81,12 +81,13 @@ public:
 
 	FORCEINLINE const UINT32 GetUID() {return UID;}
 	
-	CScript():
-	m_scriptDeclIDX(-1),
-	m_currentInstruction(0),
-	m_status(K_SCRIPT_STATUS_NOTINITIALIZED),
-	UID(GenerateUID()), m_fSuspendedTimer(0.0f),
-	m_executorUID(0)
+	CScript() :
+		m_fStartTime( 0.0f ),
+		m_scriptDeclIDX( -1 ),
+		m_currentInstruction( 0 ),
+		m_status( K_SCRIPT_STATUS_NOTINITIALIZED ),
+		UID( GenerateUID() ), m_fSuspendedTimer( 0.0f ),
+		m_executorUID( 0 )
 	{
 	}
 	//sterge elementele alocate dinamic (memoria)
