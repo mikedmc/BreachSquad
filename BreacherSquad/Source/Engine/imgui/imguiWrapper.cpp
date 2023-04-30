@@ -64,8 +64,12 @@ void CimguiWrapper::Init(PDEVICE pDevice, HWND hwnd)
 	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
 	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
 	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-	//IM_ASSERT(font != NULL);
+	/*
+	char fontpath[MAX_PATH]{0};
+	sprintf_s( fontpath, MAX_PATH, "media/fonts/NotoSansTC-Regular.otf" );
+	ImFont* font = io.Fonts->AddFontFromFileTTF(fontpath, 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
+	IM_ASSERT(font != NULL);
+	*/
 
 	bInitialized = true;
 	LOG("[IMGUI] v%s Initialized! ini file: %s", ImGui::GetVersion(), sIniPath);
