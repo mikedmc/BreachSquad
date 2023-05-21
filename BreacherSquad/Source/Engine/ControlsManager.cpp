@@ -4194,10 +4194,6 @@ void CControlsManager::Update( float dTime )
 			Layers.Remove( kk );
 		}
 	}
-
-
-	//--- update particles ---
-	__Particles().UpdateLayer( K_PART_LAYER_INTERFACE_LIGHT, dTime );
 }
 
 void CControlsManager::Paint()

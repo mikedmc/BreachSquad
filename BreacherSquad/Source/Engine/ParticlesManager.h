@@ -165,6 +165,8 @@ private:
 	CParticle			pList[K_PART_LAYERS_CNT];		// used particles are kept in rings, one for each layer. Rings because we need to add at the end.
 	float				fLocalTimeline;
 
+	int					nLiveParticles;					// used to see how many live particles we have
+
 public:
 	CSpriteLib			m_sprCol;						//sprites collection for particles
 

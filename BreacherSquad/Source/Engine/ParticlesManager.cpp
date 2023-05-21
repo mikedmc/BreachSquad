@@ -50,6 +50,7 @@ CParticlesManager::~CParticlesManager()
 
 OPRESULT CParticlesManager::Init(WCHAR* XMLpath, int nMaxParticlesCnt)
 {
+	nLiveParticles = 0;
 	//load sprites
 	V_OP_RET(m_sprCol.LoadSprites(XMLpath));
 	//allocate particles
@@ -178,6 +179,8 @@ void CParticlesManager::UpdateLayer(EParticleLayer eLayer, float dtime)
 			part->pNext = pListFree.pNext;
 			part->pPrev = &pListFree;
 			pListFree.pNext = part;
+
+			nLiveParticles--;
 			// move pointer
 			part = nextp;
 		}
@@ -191,10 +194,10 @@ void CParticlesManager::UpdateLayer(EParticleLayer eLayer, float dtime)
 
 void CParticlesManager::PaintLayer(EParticleLayer eLayer, bool additiveBlending)
 {
-	_ASSERT((eLayer >= 0) && (eLayer < K_PART_LAYERS_CNT));
 	Mat mattrans;
 
 	// empty layer, early exit
+	_ASSERT( ( eLayer >= 0 ) && ( eLayer < K_PART_LAYERS_CNT ) );
 	if(pList[eLayer].pNext == &pList[eLayer])
 		return;
 
@@ -289,7 +292,6 @@ int CParticlesManager::GetParticleLayerByName(UINT32 layerNameHash)
 	return -1;
 }
 
-
 void CParticlesManager::AddParticle(int animID, bool animated, int currentFrame, Vec2* pos, 
 					Vec2* gravity, Vec2* speed, 
 					float lifetime, 
@@ -318,6 +320,8 @@ void CParticlesManager::AddParticle(int animID, bool animated, int currentFrame,
 	newp->pPrev = pList[nLayer].pPrev;
 	pList[nLayer].pPrev = newp;
 	newp->pNext = &pList[nLayer]; 
+
+	nLiveParticles++;
 	// init particle sprite
 	newp->sprite.Init(&m_sprCol, animID);
 	newp->sprite.frameIdx = currentFrame;

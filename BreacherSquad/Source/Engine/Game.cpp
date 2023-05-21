@@ -205,9 +205,6 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 
 		case GAME_STATE_MAINMENU:
 		{
-			// update menus
-			gMenus.Update( dTime );
-
 			//offer to reset the user data
 			if ( g_userData[ K_MEMID_OFFER_RESET_USER_DATA ] != 0 )
 			{
@@ -216,7 +213,12 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 			}
 
 			if ( ( !GameState::isTransitioning() ) && ( !__GUI().bIsBlocking ) )
+			{
+				// update menus
+				gMenus.Update( dTime );
+				//#TODO: to be removed:
 				g_mainMenu.Update( fElapsedTime );
+			}
 
 			//always check to see if menu exists
 #ifdef ENABLE_STEAM_WORKSHOP

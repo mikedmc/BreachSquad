@@ -1967,8 +1967,8 @@ void CALLBACK OnFrameRender( PDEVICE pDevice, double fTime, float fElapsedTime )
 #endif	
 
 		// IMGUI tutorial window
-		static bool show_demo_window = true;
-		ImGui::ShowDemoWindow(&show_demo_window);
+		//static bool show_demo_window = true;
+		//ImGui::ShowDemoWindow(&show_demo_window);
 		//--- CONTROLS EDITOR INTERFACES ---
 #ifdef K_CONTROLS_EDITOR
 		if ( GameState::state == GAME_STATE_CONTROLSED )
