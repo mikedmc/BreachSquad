@@ -1,5 +1,5 @@
 #include "dxstdafx.h"
-
+using namespace std;
 
 OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 {
@@ -316,7 +316,7 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 	WCHAR wcharArr[MAX_PATH];
 	WCHAR wcsMediaAddr[MAX_PATH];
 
-	byte missionType = OS_freadByte( fl );
+	BYTE missionType = OS_freadByte( fl );
 	//tileset name
 	OS_freadString( fl, charArr );
 	int tilesetColumns;
@@ -522,7 +522,7 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 
 		obj->ID = unBaseID + OS_freadUInt32( fl );
 		//load layer from editor (not used atm)
-		byte nLayer = OS_freadByte( fl );
+		BYTE nLayer = OS_freadByte( fl );
 		//position (used to load UINT32)
 		Vec3 vpos( 0.0f, 0.0f, 0.0f );
 		vpos.x = (float)OS_freadInt32( fl );
@@ -610,7 +610,7 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 		bool bactCollision = ( OS_freadByte( fl ) != 0 ) ? true : false;
 		bool bactGravity = ( OS_freadByte( fl ) != 0 ) ? true : false;
 		//logic
-		byte n1b = OS_freadByte( fl );
+		BYTE n1b = OS_freadByte( fl );
 		bool bactCanInteract = ( n1b & 0x1 ) != 0;
 		bool bactHideInteract = ( n1b & 0x2 ) != 0;
 		float factTouchDuration = (float)OS_freadInt32( fl );
@@ -719,7 +719,7 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 	UINT32 miscCnt = OS_freadUInt32( fl );
 	for ( UINT32 kk = 0; kk < miscCnt; kk++ )
 	{
-		byte type = OS_freadByte( fl );
+		BYTE type = OS_freadByte( fl );
 
 		switch ( type )
 		{

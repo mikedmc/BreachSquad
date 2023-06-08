@@ -30,7 +30,7 @@ bool IActiveInterface::CanBeReleased()
 
 void IActiveInterface::LoadLogic(FILE* fl)
 {
-	byte n1b = OS_freadByte(fl);
+	BYTE n1b = OS_freadByte(fl);
 	bCanInteract = (n1b & 0x1);
 	bHideInteractIcon = (n1b & 0x2) ? true : false;
 	//interact timer

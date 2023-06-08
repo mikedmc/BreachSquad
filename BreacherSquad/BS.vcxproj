@@ -81,7 +81,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <AdditionalOptions>/Gw %(AdditionalOptions)</AdditionalOptions>
       <ExceptionHandling>Async</ExceptionHandling>
-      <LanguageStandard>Default</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>/nod:kernel32.lib;/nod:advapi32.lib;/nod:user32.lib;/nod:gdi32.lib;/nod:shell32.lib;/nod:comdlg32.lib;/nod:version.lib;/nod:mpr.lib;/nod:rasapi32.lib;/nod:winmm.lib;/nod:winspool.lib;/nod:vfw32.lib;/nod:secur32.lib;/nod:oleacc.lib;/nod:oledlg.lib;/nod:sensapi.lib;/nod:shfolder.lib;unicows.lib;Kernel32.lib;Advapi32.lib;User32.lib;Shell32.lib;Gdi32.lib;Comdlg32.lib;Version.lib;Mpr.lib;Rasapi32.lib;Winmm.lib;Winspool.lib;Vfw32.lib;Secur32.lib;Oleacc.lib;Oledlg.lib;Sensapi.lib;dxguid.lib;d3d9.lib;d3dx9.lib;dsound.lib;comctl32.lib;SDL2.lib;SDL2main.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -123,6 +123,8 @@
       <SDLCheck>true</SDLCheck>
       <TreatSpecificWarningsAsErrors>
       </TreatSpecificWarningsAsErrors>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <AdditionalDependencies>/nod:kernel32.lib;/nod:advapi32.lib;/nod:user32.lib;/nod:gdi32.lib;/nod:shell32.lib;/nod:comdlg32.lib;/nod:version.lib;/nod:mpr.lib;/nod:rasapi32.lib;/nod:winmm.lib;/nod:winspool.lib;/nod:vfw32.lib;/nod:secur32.lib;/nod:oleacc.lib;/nod:oledlg.lib;/nod:sensapi.lib;/nod:shfolder.lib;unicows.lib;Kernel32.lib;Advapi32.lib;User32.lib;Shell32.lib;Gdi32.lib;Comdlg32.lib;Version.lib;Mpr.lib;Rasapi32.lib;Winmm.lib;Winspool.lib;Vfw32.lib;Secur32.lib;Oleacc.lib;Oledlg.lib;Sensapi.lib;dxguid.lib;d3d9.lib;d3dx9.lib;dsound.lib;comctl32.lib;SDL2.lib;SDL2main.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>

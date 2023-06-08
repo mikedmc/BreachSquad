@@ -5,6 +5,7 @@
 //disable warning
 //#pragma warning(disable : 4706)  //assignment within conditional expression
 
+using namespace std;
 
 
 /* \brief Spawns a new player at spawnPos

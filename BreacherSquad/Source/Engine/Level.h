@@ -32,7 +32,6 @@
 #include "IngameGUI.h"
 #include "Queue.h"
 
-using namespace std;
 // texture IDs for local texture manager
 #define TEXID_TILES_COLOR		HASH("texTilesColor")
 #define TEXID_TILES_NORMALS		HASH("texTilesNormals")
@@ -100,7 +99,7 @@ public:
 
 	Vec2					m_vLevelOrigin;					// level origin for the editor (usually around start location)
 
-	vector<RectXYWHi>		m_arrDirtyRectsTL;				// tiles that need updating
+	std::vector<RectXYWHi>		m_arrDirtyRectsTL;				// tiles that need updating
 	CArray<CLevelArea*>		m_arrAreas;						// loaded areas
 	// Transforms mouse coordinates from screen space to game world (necessary for network play)
 	bool					NormalizeMouseCoords( int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue );
@@ -119,7 +118,7 @@ public:
 	// Tells if area layer is renderable
 	bool					Areas_IsLayerVisible( eAreaLayer layerIdx );
 	// Returns array of areas that intersect aabb
-	vector<CLevelArea*>		Areas_GetAreasInRect( CAABB aabb );
+	std::vector<CLevelArea*>		Areas_GetAreasInRect( CAABB aabb );
 	// Returns area at point or null if no area there
 	CLevelArea*				Areas_GetAt( Vec2 vPos );
 	// Returns area with specified ID
@@ -143,7 +142,7 @@ public:
 
 	///--- OBJECT INTERACTION ---
 	// list of all possible actions ingame (they get copied on iActives)
-	vector<CScriptAction>	m_arrActionTemplates;
+	std::vector<CScriptAction>	m_arrActionTemplates;
 	// returns script action by ID
 	OPRESULT				GetScriptAction( const WCHAR* strID, CScriptAction& retAction );
 	// Loads actions, inventory objects, etc

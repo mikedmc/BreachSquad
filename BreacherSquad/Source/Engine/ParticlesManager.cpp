@@ -29,6 +29,7 @@ CParticle::CParticle()
 
 CParticlesManager::CParticlesManager()
 {
+	nLiveParticles = 0;
 	bInitialized = false;
 	nParticlesCnt = 0;
 	pParticles = nullptr;

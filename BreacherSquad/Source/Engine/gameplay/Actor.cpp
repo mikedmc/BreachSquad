@@ -137,7 +137,7 @@ bool CActor::InitFromTemplate(CActorTemplate * pActorTemplate)
 	bbox_cull.SaveSnapshot();
 
 	//set hue
-	byte collvl = 255;
+	BYTE collvl = 255;
 	color_ini = D3DCOLOR_ARGB(255, collvl, collvl, collvl);
 	color = this->color_ini;
 
