@@ -7,6 +7,12 @@
 //check leaks
 #define _CHECK_HEAP_STACK_
 
+// memory leaks with CRT
+#include <crtdbg.h>
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#define new DEBUG_NEW
+#endif
+
 //profile - CheatsRelease
 //#define _CHEATS_ENABLED_
 #endif
