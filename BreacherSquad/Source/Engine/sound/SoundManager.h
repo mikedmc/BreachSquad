@@ -64,7 +64,7 @@ public:
 	float fPan; //doesn't support animation
 
 	bool	bReadyForPlaying;		//everything ready?
-	bool	bOnlyLoadWhilePlaying;	//it only loads the sound when playing it
+	bool	bOnlyLoadWhenPlayed;	//it only loads the sound when playing it
 
 	int currentBuffer;
 	int buffersCnt;  //numar de buffere alocate
@@ -99,7 +99,7 @@ public:
 
 	CSoundManager() :
 		sndOK(false),
-		m_pDS(NULL),
+		m_pDS(nullptr),
 		m_vListenerPos(0.0f, 0.0f), m_bPositionalSoundsEnabled(false), m_vListenerExtents(100.0f, 100.0f), m_fListenerVolumeFadeStartPercent(0.0f),
 		updateTimer(0.0f)
 	{
@@ -209,8 +209,8 @@ public:
 	void Update(float dTime);
 
 	//--- EVENTS ---
-	char const * GetListenerName(void) { return "SoundManager"; };
-	bool HandleEvent( CEvent &nEvent );
+	char const * GetListenerName() override { return "SoundManagerDirectSound"; };
+	bool HandleEvent( CEvent &nEvent ) override;
 };
 
 

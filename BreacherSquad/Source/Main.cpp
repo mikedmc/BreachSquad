@@ -610,7 +610,7 @@ OPRESULT InitSound()
 {
 	// Initialize sound after we have the window
 	//--- init sound system ---
-	if ( FAILED( __Audio().Init( DXUTGetHWND(), 2, 44100, 16 ) ) )
+	if ( OP_FAILED( __Audio().Init( 2, 44100, 16 ) ) )
 	{
 		return OP_ERR( K_OP_OK_WARNING, L"Failed INITSOUND->g_pSoundManager->Init()\nSOUNDS WILL BE DISABLED!\n", K_SEVERITY_WARNING );
 	}

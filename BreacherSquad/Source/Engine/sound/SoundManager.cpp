@@ -473,13 +473,13 @@ HRESULT CSoundManager::AddSound(WCHAR* wszFile, UINT32 nID, UINT32 nGroupID, int
 	sound->ID = nID;
 	sound->groupID = nGroupID;
 	sound->fVolume = sound->fVolume_real = 1.0f;
-	sound->bOnlyLoadWhilePlaying = bOnlyLoadWhilePlaying;
+	sound->bOnlyLoadWhenPlayed = bOnlyLoadWhilePlaying;
 	sound->bReadyForPlaying = false;
 	//add sound to list
 	sounds.Add(sound);
 
 	//only load sounds that are always loaded
-	if (!sound->bOnlyLoadWhilePlaying)
+	if (!sound->bOnlyLoadWhenPlayed)
 	{
 		if (FAILED(hr = LoadSoundBuffers(sound)))
 			return hr;
@@ -632,13 +632,13 @@ LPDIRECTSOUNDBUFFER CSoundManager::Play(int sndIdx, DWORD flags)
 
 	HRESULT hr = S_OK;
 	//not a sound that should load later but not ready also
-	if ((!sounds[sndIdx]->bOnlyLoadWhilePlaying) && (!sounds[sndIdx]->bReadyForPlaying))
+	if ((!sounds[sndIdx]->bOnlyLoadWhenPlayed) && (!sounds[sndIdx]->bReadyForPlaying))
 		return NULL;
 	//dynamic loading precheck
-	if ((sounds[sndIdx]->bOnlyLoadWhilePlaying) && (sounds[sndIdx]->bReadyForPlaying))
+	if ((sounds[sndIdx]->bOnlyLoadWhenPlayed) && (sounds[sndIdx]->bReadyForPlaying))
 		ErrorBox(K_ERR_WARNING, L"[SOUND]Play: Dynamic sound already loaded! Make sure it gets deallocated properly!");
 	//must load it now?
-	if ((sounds[sndIdx]->bOnlyLoadWhilePlaying) && (!sounds[sndIdx]->bReadyForPlaying))
+	if ((sounds[sndIdx]->bOnlyLoadWhenPlayed) && (!sounds[sndIdx]->bReadyForPlaying))
 	{
 		if (FAILED(hr = LoadSoundBuffers(sounds[sndIdx])))
 			return NULL;
@@ -726,13 +726,13 @@ LPDIRECTSOUNDBUFFER CSoundManager::PlayPositional(int sndIdx, D3DXVECTOR2 pos, D
 	HRESULT hr = S_OK;
 
 	//not a sound that should load later but not ready also
-	if ((!sounds[sndIdx]->bOnlyLoadWhilePlaying) && (!sounds[sndIdx]->bReadyForPlaying))
+	if ((!sounds[sndIdx]->bOnlyLoadWhenPlayed) && (!sounds[sndIdx]->bReadyForPlaying))
 		return NULL;
 	//dynamic loading precheck
-	if ((sounds[sndIdx]->bOnlyLoadWhilePlaying) && (sounds[sndIdx]->bReadyForPlaying))
+	if ((sounds[sndIdx]->bOnlyLoadWhenPlayed) && (sounds[sndIdx]->bReadyForPlaying))
 		ErrorBox(K_ERR_WARNING, L"[SOUND]Play: Dynamic sound already loaded! Make sure it gets deallocated properly!");
 	//must load it now?
-	if ((sounds[sndIdx]->bOnlyLoadWhilePlaying) && (!sounds[sndIdx]->bReadyForPlaying))
+	if ((sounds[sndIdx]->bOnlyLoadWhenPlayed) && (!sounds[sndIdx]->bReadyForPlaying))
 	{
 		if (FAILED(hr = LoadSoundBuffers(sounds[sndIdx])))
 			return NULL;
@@ -915,7 +915,7 @@ void CSoundManager::Stop(int sndIdx, bool fadeOut, bool resetSound)
 			}
 
 			//must release it now?
-			if ((sounds[sndIdx]->bOnlyLoadWhilePlaying) && (sounds[sndIdx]->bReadyForPlaying))
+			if ((sounds[sndIdx]->bOnlyLoadWhenPlayed) && (sounds[sndIdx]->bReadyForPlaying))
 			{
 				ReleaseSoundBuffers(sounds[sndIdx]);
 				LOG(L"[SOUND]Dynamically released sound idx[%d]", sndIdx);
@@ -1244,7 +1244,7 @@ CSound::CSound()
 	fPan = 0.0f;
 	
 	bReadyForPlaying = false;
-	bOnlyLoadWhilePlaying = false;
+	bOnlyLoadWhenPlayed = false;
 
 	currentBuffer = 0;
 	buffersCnt = 0;

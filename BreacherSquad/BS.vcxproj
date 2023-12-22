@@ -150,6 +150,9 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Libs\release\miniaudio\miniaudio.h" />
+    <ClInclude Include="Source\Engine\sound\ogg.h" />
+    <ClInclude Include="Source\Engine\sound\SoundManagerMiniaudio.h" />
     <ClInclude Include="Source\Engine\TailPainter.h" />
     <ClInclude Include="Source\ControlsEd\ControlsEditor.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -297,7 +300,6 @@
     <ClInclude Include="Source\Engine\texts\TexFont.h" />
     <ClInclude Include="Source\Engine\texts\TTFont.h" />
     <ClInclude Include="Source\Engine\UTAppClass.h" />
-    <ClInclude Include="Source\Engine\ogg.h" />
     <ClInclude Include="Source\Engine\ParticlesManager.h" />
     <ClInclude Include="Source\Engine\Randoms.h" />
     <ClInclude Include="Source\Engine\utils\AABBProj.h" />
@@ -325,7 +327,6 @@
     <ClInclude Include="Source\resource.h" />
     <ClInclude Include="Source\resource1.h" />
     <ClInclude Include="Source\Engine\ScriptManager.h" />
-    <ClInclude Include="Source\Engine\SoundManager.h" />
     <ClInclude Include="Source\Engine\TextureManager.h" />
     <ClInclude Include="Source\Engine\Constants\tiles1_SPR.h" />
     <ClInclude Include="Source\Versioning\versioning.h" />
@@ -336,6 +337,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\gameplay\components\PropAIComp.cpp" />
+    <ClCompile Include="Source\Engine\sound\ogg.cpp" />
+    <ClCompile Include="Source\Engine\sound\SoundManagerMiniaudio.cpp" />
     <ClCompile Include="Source\Engine\TailPainter.cpp" />
     <ClCompile Include="Source\ControlsEd\ControlsEditor.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -512,9 +515,6 @@
     <ClCompile Include="Source\Engine\utils\VecProj.cpp" />
     <ClCompile Include="Source\LevelEd\LevelEditor.cpp" />
     <ClCompile Include="Source\Main.cpp" />
-    <ClCompile Include="Source\Engine\ogg.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
-    </ClCompile>
     <ClCompile Include="Source\Engine\ParticlesManager.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
@@ -522,9 +522,6 @@
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\ScriptManager.cpp">
-      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
-    </ClCompile>
-    <ClCompile Include="Source\Engine\SoundManager.cpp">
       <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MinimalRebuild>
     </ClCompile>
     <ClCompile Include="Source\Engine\TextureManager.cpp">

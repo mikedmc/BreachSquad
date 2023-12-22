@@ -470,7 +470,13 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "PolyFOV.h"		// finds visible poly of a light
 #include "TailPainter.h"
 #include "ParticlesManager.h"
-#include "SoundManager.h"
+//--- SOUND MANAGER ---
+// DirectX version:
+//#include "sound/SoundManager.h"
+// 
+// Minisound crossplatform version
+// https://github.com/mackron/miniaudio
+#include "sound/SoundManagerMiniaudio.h"
 
 #include "ControlsManager.h" 
 //main app class
