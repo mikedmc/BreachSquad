@@ -2,8 +2,6 @@
 #include <userenv.h>
 
 #if defined(_DEBUG) || defined(DEBUG)
-//memory leaks check (Visual Leak Detector) - comment next line to remove
-#include "vld.h"
 //check leaks
 #define _CHECK_HEAP_STACK_
 
@@ -11,7 +9,6 @@
 #include <crtdbg.h>
 #define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #define new DEBUG_NEW
-#endif
 
 //profile - CheatsRelease
 //#define _CHEATS_ENABLED_
