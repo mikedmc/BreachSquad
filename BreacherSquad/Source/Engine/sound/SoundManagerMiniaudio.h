@@ -1,6 +1,7 @@
 #pragma once
 
 #define MINIAUDIO_IMPLEMENTATION
+#define MA_NO_GENERATION
 #include "../Libs/release/miniaudio/miniaudio.h"
 
 #define SND_PLAY_FLAGS(sndID, sndFlags)					__Audio().Play(sndID, sndFlags)
@@ -41,16 +42,16 @@ class CSound;
 //---------------------------------
 #define CSOUND_STATUS_IDLE 0
 #define CSOUND_STATUS_FADING 1
-//#define CSOUND_STATUS_TEMPSILENCE 2 - de implementat ?
 
 #define SOUNDHANDLE			ma_sound*
 
 class CSound
 {
 public:
-	ma_sound				sound;
-	CStringHash				ID;
-	CStringHash				groupID;
+	ma_sound*				buffers;
+	WCHAR					sPath[MAX_PATH]{};		// path to file
+	CStringHash				shID;						// ID from xml
+	CStringHash				shGroupID;				// goup ID from XML
 
 	float					fVolume;				// wanted volume [0..1]
 	float					fVolume_real;			// real volume [0..1]
@@ -76,6 +77,7 @@ class CSoundManager : public IEventListener
 {
 protected:
 	ma_engine*				pSE;							// sound engine
+	DWORD					sampleRate;						// sample rate set in init
 	bool					sndOK;							// everything loaded ok
 
 	bool					m_bPositionalSoundsEnabled;		// disabled by default
@@ -89,12 +91,12 @@ public:
 	CSoundManager();
 	~CSoundManager();
 
-	OPRESULT				Init(DWORD dwPrimaryChannels, DWORD dwPrimaryFreq, DWORD dwPrimaryBitRate);
+	OPRESULT				Init(DWORD dwChannelsCount, DWORD dwSampleRate, DWORD dwPrimaryBitRate);
 	void					Release();
 	//HRESULT				RestoreBuffer( SOUNDHANDLE pDSB, BOOL* pbWasRestored );
 
 	OPRESULT				LoadSoundsXML(WCHAR* XMLpath);
-	OPRESULT				AddSound(WCHAR* sFile, WCHAR* sGroup, int nBuffers, bool bOnlyLoadWhilePlaying, int *retIdx = NULL);
+	OPRESULT				AddSound(WCHAR* sFile, WCHAR* sID, WCHAR* sGroup, int nBuffers, bool bOnlyLoadWhilePlaying, int *retIdx = NULL);
 
 private:
 	// Fills actual sound buffers with data

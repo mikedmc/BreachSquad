@@ -2,55 +2,10 @@
 
 #include "SoundManagerMiniaudio.h"
 
-
-long ConvertLinearLevelToDirectSoundLevel(double level)
-{ 
-	if(level <= 0.0f)		
-	{
-		return DSBVOLUME_MIN;
-	}
-	else if(level >= 1.0f)
-	{
-		return 0;
-	}
-
-	long retval = max( DSBVOLUME_MIN, ((long) (SND_MIN_VOL * fabs(log10f(level)))) );
-	return retval;
-}
-/*
-static int LinearToLogVol(double fLevel)
-{	
-	// Clamp the value	
-	if(fLevel <= 0.0f)		
-		return DSBVOLUME_MIN;	
-	else if(fLevel >= 1.0f)		
-		return 0;    
-	return (long) (-2000.0 * log10(1.0f / fLevel));
-}
-static float LogToLinearVol(int iLevel){	
-	// Clamp the value	
-	if(iLevel <= -9600)		
-		return 0.0f;	
-	else if(iLevel >= 0)		
-		return 1.0f;    
-	return pow(10, double(iLevel + 2000) / 2000.0f) / 10.0f;
-}
-static int VolumeToDecibels(float vol) 
-{	
-	if (vol>=1.0F) 		
-		return 0;	
-	if (vol<=0.0F) 		
-		return DSBVOLUME_MIN;	
-	static const float adj=3321.928094887F;  
-	// 1000/log10(2)	
-	return int(float(log10(vol)) * adj);
-}
-*/
-
-
 CSoundManager::CSoundManager() :
 	sndOK( false ),
 	pSE( nullptr ),
+	sampleRate( 0 ),
 	m_vListenerPos( 0.0f, 0.0f ), m_bPositionalSoundsEnabled( false ), m_vListenerExtents( 100.0f, 100.0f ), m_fListenerVolumeFadeStartPercent( 0.0f ),
 	updateTimer( 0.0f )
 {
@@ -72,15 +27,17 @@ CSoundManager::~CSoundManager()
 //	<Sound ID="INGAME1" path="ingame1.ogg" group="music" buffers="1" />
 //</Sounds>
 
-OPRESULT CSoundManager::Init( DWORD dwPrimaryChannels, DWORD dwPrimaryFreq , DWORD dwPrimaryBitRate )
+OPRESULT CSoundManager::Init( DWORD dwChannelsCount, DWORD dwSampleRate , DWORD dwPrimaryBitRate )
 {
 	sndOK = false;
 	ma_result result;
 
 	ma_engine_config engineConfig;
 	engineConfig = ma_engine_config_init();
-	engineConfig.channels = dwPrimaryChannels;
-	engineConfig.sampleRate = dwPrimaryFreq;
+	engineConfig.channels = dwChannelsCount;
+	engineConfig.sampleRate = dwSampleRate;
+	// save sample rate
+	sampleRate = dwSampleRate;
 
 	pSE = new ma_engine();
 	result = ma_engine_init( &engineConfig, pSE );
@@ -109,104 +66,52 @@ void CSoundManager::Release()
 	sndOK = false;
 }
 
-HRESULT CSoundManager::LoadSoundBuffers(CSound * pSound)
+OPRESULT CSoundManager::LoadSoundBuffers(CSound * pSound)
 {
-	HRESULT hr = S_OK;
+	// allocate buffers, initialize first sound from file and copy the other buffers
+	pSound->buffers = new ma_sound[pSound->buffersCnt];
 
-	BYTE *pbData = NULL;
-	ULONG uDataSize = 0;
-	WAVEFORMATEX wfx;
-
-	//don't load music flag
-	int retVal = GetOggBuffer(pSound->strFile, &pbData, uDataSize, wfx);
-	if (retVal != 0)
+	ma_result result;
+	result = ma_sound_init_from_file_w( pSE, pSound->sPath, NULL, NULL, NULL, &pSound->buffers[0] );
+	if ( result != MA_SUCCESS )
 	{
-		ErrorBox(K_ERR_WARNING, L"CSoundManager::GetOggBuffer failed with code %d on %s", retVal, pSound->strFile);
-		return E_FAIL;
-	}
-	//LOG("-- snd buff size: %d", uDataSize);
-
-	DSBUFFERDESC dsbd;
-	ZeroMemory(&dsbd, sizeof(DSBUFFERDESC));
-	dsbd.dwSize = sizeof(DSBUFFERDESC);
-	dsbd.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY | DSBCAPS_CTRLPAN;
-	dsbd.dwBufferBytes = uDataSize;
-	//dsbd.guid3DAlgorithm = NULL;
-	dsbd.lpwfxFormat = &wfx;
-
-	SOUNDHANDLE pDSB;
-
-	if (FAILED(hr = m_pDS->CreateSoundBuffer(&dsbd, &pDSB, NULL)))
-	{
-		ErrorBox(K_ERR_WARNING, L"[ERROR][SOUND]LoadSoundBuffers->Failed creating SoundBuffer!\nHR=%x\n", hr);
-		return hr;
+		SAFE_DELETE_ARRAY( pSound->buffers );
+		return { K_OP_FAILED, K_SEVERITY_WARNING, L"Failed to load sound: %s", pSound->shID.text };
 	}
 
-	VOID*   pDSLockedBuffer = NULL; // Pointer to locked buffer memory
-	DWORD   dwDSLockedBufferSize = 0;    // Size of the locked DirectSound buffer
-										 //DWORD   dwWavDataRead        = 0;    // Amount of data read from the wav file
 
-	if (pDSB == NULL)
-		return E_FAIL;
-
-	// Make sure we have focus, and we didn't just switch in from
-	// an app which had a DirectSound device
-
-	//ignore fail
-	if (FAILED(hr = RestoreBuffer(pDSB, NULL)))
-	{
-		ErrorBox(K_ERR_WARNING, L"[ERROR][SOUND]LoadSoundBuffers->RestoreBuffer failed! hr=%x\nfile:%s", hr, pSound->strFile);
-	}
-	// Lock the buffer down
-	if (FAILED(hr = pDSB->Lock(0, (DWORD)uDataSize,
-		&pDSLockedBuffer, &dwDSLockedBufferSize,
-		NULL, NULL, 0L)))
-	{
-		ErrorBox(K_ERR_WARNING, L"[ERROR][SOUND]LoadSoundBuffers->Failed LOCK on buffer!\nfile: %s", pSound->strFile);
-		return hr;
-	}
-
-	memcpy(pDSLockedBuffer, pbData, uDataSize);
-	// Unlock the buffer, we don't need it anymore.
-	pDSB->Unlock(pDSLockedBuffer, dwDSLockedBufferSize, NULL, 0);
-
-	SAFE_DELETE_ARRAY(pbData);
-
-	pSound->buffers = new SOUNDHANDLE[pSound->buffersCnt];
-	pSound->buffers[0] = pDSB;
 	for (int i = 1; i < pSound->buffersCnt; i++)
 	{
-		hr = m_pDS->DuplicateSoundBuffer(pDSB, &(pSound->buffers[i]));
-		if (FAILED(hr))
+		result = ma_sound_init_copy( pSE, &pSound->buffers[0], NULL, NULL, &pSound->buffers[i] );
+		if ( result != MA_SUCCESS )
 		{
-			ErrorBox(K_ERR_WARNING, L"[ERROR][SOUND]LoadSoundBuffers->Failed DuplicateSoundBuffer\nfile:%s", pSound->strFile);
-			return hr;
+			SAFE_DELETE_ARRAY( pSound->buffers );
+			return { K_OP_FAILED, K_SEVERITY_WARNING, L"Failed to copy sound buffers: %s", pSound->shID.text };
 		}
 	}
 
+	// save sound properties
 	pSound->wfx = wfx;
+	// see: ma_sound_get_data_format
 
 	pSound->bReadyForPlaying = true;
-	return S_OK;
+	return K_OP_OK;
 }
 
-HRESULT CSoundManager::ReleaseSoundBuffers(CSound * pSound)
+OPRESULT CSoundManager::ReleaseSoundBuffers(CSound * pSound)
 {
-	assert(pSound != null);
+	assert(pSound != nullptr);
 
 	for (int i = 0; i < pSound->buffersCnt; i++)
 	{
-		if (pSound->buffers[i])
-		{
-			pSound->buffers[i]->Stop();
-		}
-		SAFE_RELEASE(pSound->buffers[i]);
+		ma_sound_stop( &pSound->buffers[i] );
+		ma_sound_uninit( &pSound->buffers[i] );
 	}
 	SAFE_DELETE_ARRAY(pSound->buffers);
 
 	pSound->bReadyForPlaying = false;
 
-	return S_OK;
+	return K_OP_OK;
 }
 
 void CSoundManager::EnablePositionalSounds(D3DXVECTOR2 vListenerPos, D3DXVECTOR2 vListenerExtents)
@@ -230,7 +135,7 @@ void CSoundManager::DisablePositionalSounds()
 	LOG(L"Sounds:: Positional Sounds Disabled.");
 }
 
-HRESULT CSoundManager::LoadSoundsXML(WCHAR* XMLpath)
+OPRESULT CSoundManager::LoadSoundsXML(WCHAR* XMLpath)
 {
 	LOG(L"Sounds:: Loading:[%s]...", XMLpath);
 
@@ -262,17 +167,13 @@ HRESULT CSoundManager::LoadSoundsXML(WCHAR* XMLpath)
 		const WCHAR* cpath = sndnode.attribute(L"path").value();
 		StringCchCopy(path, MAX_PATH, cpath);
 
-		UINT32 sID, sGroupID;
 		//Citesc ID-ul
 		UINT stringLen;
 		StringCchLength(sndnode.attribute(L"ID").value(), MAX_PATH, &stringLen);
+		WCHAR strID[MAX_PATH]{};
 		if(stringLen > 0)
 		{
-			WCHAR strID[MAX_PATH];
 			StringCchCopy(strID, stringLen+1, sndnode.attribute(L"ID").value());
-			//calculez hash-ul numelui ca sa il caut repede
-			sID = FastHash(strID, stringLen);
-			//DebugPrintA("Loaded [%s] code %x\n", cstrID, sID);
 		}
 		else
 		{
@@ -280,12 +181,10 @@ HRESULT CSoundManager::LoadSoundsXML(WCHAR* XMLpath)
 		}
 		//Citesc Group ID-ul
 		StringCchLength(sndnode.attribute(L"group").value(), MAX_PATH, &stringLen);
+		WCHAR strGroupID[MAX_PATH]{};
 		if(stringLen > 0)
 		{
-			WCHAR strID[MAX_PATH];
-			StringCchCopy(strID, stringLen+1, sndnode.attribute(L"group").value());
-			//calculez hash-ul numelui ca sa il caut repede	
-			sGroupID = FastHash(strID, stringLen);
+			StringCchCopy(strGroupID, stringLen+1, sndnode.attribute(L"group").value());
 		}
 		else
 		{
@@ -329,7 +228,7 @@ HRESULT CSoundManager::LoadSoundsXML(WCHAR* XMLpath)
 		//LOG(L"[%d,%d] AddingSound:%s", bufCnt, bOnlyLoadPlaying, wcsResAddr);
 
 		HRESULT hr = S_OK;
-		hr = AddSound(wcsFilePath, sID, sGroupID, bufCnt, bOnlyLoadPlaying);
+		hr = AddSound(wcsFilePath, strID, strGroupID, bufCnt, bOnlyLoadPlaying);
 		if (FAILED(hr))
 		{
 			ErrorBox(K_ERR_WARNING, L"Could not load sound: %s\n", path);
@@ -349,15 +248,16 @@ HRESULT CSoundManager::LoadSoundsXML(WCHAR* XMLpath)
 
 
 
-OPRESULT CSoundManager::AddSound(WCHAR* sFile, WCHAR* sGroup, int nBuffers, bool bOnlyLoadWhilePlaying, int *retIdx)
+OPRESULT CSoundManager::AddSound(WCHAR* sFile, WCHAR* sID, WCHAR* sGroup, int nBuffers, bool bOnlyLoadWhilePlaying, int *retIdx)
 {	
 	if(retIdx)
 		*retIdx = -1;
 
 	CSound *sound = new CSound();
 
-	sound->ID.Init( sFile );
-	sound->groupID.Init( sGroup );
+	wcscpy_s( sound->sPath, sFile );
+	sound->shID.Init( sID );
+	sound->shGroupID.Init( sGroup );
 
 	sound->buffersCnt = nBuffers;
 	if(sound->buffersCnt <= 0)
@@ -396,7 +296,7 @@ int CSoundManager::getSndIdx( CHAR* sndName )
 
 	for ( int kk = 0; kk < sounds.GetSize(); kk++ )
 	{
-		if ( sounds[kk]->ID.textHash == sndHash )
+		if ( sounds[kk]->shID.textHash == sndHash )
 			return kk;
 	}
 
@@ -412,7 +312,7 @@ int CSoundManager::getSndIdxW( const WCHAR* sndName )
 
 	for ( int kk = 0; kk < sounds.GetSize(); kk++ )
 	{
-		if ( sounds[kk]->ID.textHash == sndHash )
+		if ( sounds[kk]->shID.textHash == sndHash )
 			return kk;
 	}
 
@@ -426,7 +326,7 @@ int CSoundManager::getSndIdx( UINT32 sndID )
 		return -1;
 	for ( int kk = 0; kk < sounds.GetSize(); kk++ )
 	{
-		if ( sounds[kk]->ID.textHash == sndID )
+		if ( sounds[kk]->shID.textHash == sndID )
 			return kk;
 	}
 
@@ -990,7 +890,7 @@ void CSoundManager::SetGroupVolume(UINT32 nGroupID, float vol, bool fade)
 		return;
 	for(int ii = 0; ii < sounds.GetSize(); ii++)
 	{
-		if (sounds[ii]->groupID == nGroupID)
+		if (sounds[ii]->shGroupID.textHash == nGroupID)
 		{
 			sounds[ii]->fVolume_group = vol;
 			SetVolume(ii, sounds[ii]->fVolume, fade, true);
@@ -1005,7 +905,7 @@ void CSoundManager::SetGroupVolume(CHAR* groupName, float vol, bool fade)
 	UINT32 groupHash = FastHash(groupName, strlen(groupName));
 	for(int ii = 0; ii < sounds.GetSize(); ii++)
 	{
-		if (sounds[ii]->groupID == groupHash)
+		if (sounds[ii]->shGroupID == groupHash)
 		{
 			sounds[ii]->fVolume_group = vol;
 			SetVolume(ii, sounds[ii]->fVolume, fade, true);
@@ -1020,7 +920,7 @@ void CSoundManager::SetGroupFrequency(UINT32 nGroupHash, float fFrequency, bool 
 		return;
 	for (int ii = 0; ii < sounds.GetSize(); ii++)
 	{
-		if (sounds[ii]->groupID != nGroupHash)
+		if (sounds[ii]->shGroupID != nGroupHash)
 			continue;
 
 		if (sounds[ii]->fFrequency == fFrequency)
@@ -1043,7 +943,7 @@ void CSoundManager::SetGroupFrequency(CHAR* sGroupName, float fFrequency, bool b
 
 	for (int ii = 0; ii < sounds.GetSize(); ii++)
 	{
-		if (sounds[ii]->groupID != groupHash)
+		if (sounds[ii]->shGroupID != groupHash)
 			continue;
 
 		if (sounds[ii]->fFrequency == fFrequency)
@@ -1064,7 +964,7 @@ void CSoundManager::StopGroup(UINT32 nGroupID, bool fadeOut, bool resetSound)
 		return;
 	for(int ii = 0; ii < sounds.GetSize(); ii++)
 	{
-		if(sounds[ii]->groupID == nGroupID)
+		if(sounds[ii]->shGroupID == nGroupID)
 			Stop(ii, fadeOut, resetSound);
 	}
 }
@@ -1077,7 +977,7 @@ void CSoundManager::StopGroup(CHAR* groupName, bool fadeOut, bool resetSound)
 	UINT32 groupHash = FastHash(groupName, strlen(groupName));
 	for(int ii = 0; ii < sounds.GetSize(); ii++)
 	{
-		if(sounds[ii]->groupID == groupHash)
+		if(sounds[ii]->shGroupID == groupHash)
 			Stop(ii, fadeOut, resetSound);
 	}
 }
@@ -1128,7 +1028,7 @@ void CSoundManager::Update(float dTime)
 //*****************************************************************************
 CSound::CSound()
 {
-	memset(strFile, 0, MAX_PATH * sizeof(WCHAR));
+	memset(sPath, 0, MAX_PATH * sizeof(WCHAR));
 
 	fFrequency = fFrequency_real = fFrequency_group = 1.0f;
 	fVolume = fVolume_real = fVolume_group = 1.0f;
@@ -1139,10 +1039,7 @@ CSound::CSound()
 
 	currentBuffer = 0;
 	buffersCnt = 0;
-	buffers = NULL;
-
-	ID = 0;
-	groupID = 0;
+	buffers = nullptr;
 }
 
 CSound::~CSound()
