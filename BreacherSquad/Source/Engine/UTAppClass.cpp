@@ -337,40 +337,6 @@ bool CApplication::IsOnlyInstance(LPCTSTR className)
 	return true;
 }
 
-OPRESULT CApplication::VerifyRequirements()
-{
-	OPRESULT hr = K_OP_OK;
-	//
-	// DirectX version detection (min 9.0c)
-	//
-	DWORD dwDXMajor, dwDXMinor;
-	WCHAR cDXLetter;
-	GetDXVersion(&dwDXMajor, &dwDXMinor, &cDXLetter);
-
-	WCHAR wszText[2048] = { 0 };
-	if (dwDXMajor < 9 ||
-		(dwDXMajor == 9 && dwDXMinor < 0) ||
-		(dwDXMajor == 9 && dwDXMinor == 0 && cDXLetter < (char)'c'))
-	{
-		hr = K_OP_FAILED;
-		WCHAR wsz[256];
-		StringCchPrintf(wsz, 256, L"You need to update your DirectX version to DirectX 9.0c\nYour current DirectX version is %d.%d%c\nTo update your DirectX version please visit the Microsoft Download Center at www.microsoft.com\n", dwDXMajor, dwDXMinor, cDXLetter);
-		StringCchCat(wszText, 2048, wsz);
-	}
-
-	// pentru verificari de cpu, mem, etc vezi ConfigManager.cpp din sample ConfigSystem DXSDKJune2010
-
-	// you can still start the game if you really want to
-	if (OP_FAILED(hr))
-	{
-		StringCchCat(wszText, 2048, L"\n The application may not work properly if run.  Do you wish to continue anyway?");
-		if (::MessageBox(nullptr, wszText, L"Minimum Requirements", MB_YESNO | MB_ICONQUESTION) == IDYES)
-			hr = K_OP_OK;
-	}
-	
-	return hr;
-}
-
 HRESULT CApplication::SaveSettings()
 {
 	pugi::xml_document doc;

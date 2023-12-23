@@ -771,13 +771,6 @@ HRESULT CALLBACK OnCreateDevice( PDEVICE pDevice, const D3DSURFACE_DESC* pBBDesc
 	nevent->AddNamedArgUINT32( L"height", pBBDesc->Height );
 	__Events().TriggerEvent( nevent );
 
-	// check minimum requirements and exit if not met
-	if ( OP_FAILED( UTApp().VerifyRequirements() ) )
-	{
-		DXUTShutdown();
-		return S_OK;
-	}
-
 	UTGetTTFManager().OnCreateDevice( pDevice, pBBDesc );
 
 	V_RETURN( UTApp().OnCreateDevice( pDevice, pBBDesc ) );

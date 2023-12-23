@@ -429,7 +429,6 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 #include "Caabb.h"
 #include "utils/CollisionAABB.h"
 #include "Randoms.h"
-#include "GetDXVer.h"
 #include "pugixml/pugixml.hpp"
 #include "FileManager.h"
 #include "Chapters.h"
@@ -473,8 +472,8 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 //--- SOUND MANAGER ---
 // DirectX version:
 //#include "sound/SoundManager.h"
-// 
-// Minisound crossplatform version
+ 
+///--- Minisound crossplatform version
 // https://github.com/mackron/miniaudio
 #include "sound/SoundManagerMiniaudio.h"
 

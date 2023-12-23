@@ -138,10 +138,7 @@ public:
 	CCameraTransform g_cam360hScreen;	//360px high camera (scales up to real resolution) - 360px h is default resolution of the game
 public:
 	static bool			IsOnlyInstance(LPCTSTR className);
-	// checks min requirements
-	static OPRESULT		VerifyRequirements();
-
-	void OnRenderSizeChanged(int newSizeX, int newSizeY);
+	void				OnRenderSizeChanged(int newSizeX, int newSizeY);
 
 	void Init();
 	void Update(float dTime); 

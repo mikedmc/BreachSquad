@@ -1,9 +1,5 @@
 #pragma once
 
-#define MINIAUDIO_IMPLEMENTATION
-#define MA_NO_GENERATION
-#include "../Libs/release/miniaudio/miniaudio.h"
-
 #define SND_PLAY_FLAGS(sndID, sndFlags)					__Audio().Play(sndID, sndFlags)
 #define SND_PLAY(sndID)									__Audio().Play(sndID, 0)
 #define SND_PAUSE(sndID, bFadeout)						__Audio().Stop(sndID, bFadeout, false)
@@ -25,18 +21,25 @@
 //numar default de buffere
 #define SND_SOUND_BUFFERS_DEFAULT_CNT 4
 //volum minim
-#define SND_MIN_VOL -3500.0f
-#define SND_PAN_LEFT -3500.0f
-#define SND_PAN_RIGHT 3500.0f
+#define SND_MIN_VOL 0.0f
+#define SND_PAN_LEFT -1.0f
+#define SND_PAN_RIGHT 1.0f
+#define SND_PITCH_MIN 0.1f
+#define SND_PITCH_MAX 5.0f
 
 #define SND_FADE_SPEED 0.8f
+
+// define play flags
+#define DSBPLAY_LOOPING		1
 
 //updates N times a second
 #define SND_UPDATE_PERIOD 0.1f
 
-class CSoundManager;
-class CSound;
-
+//class CSoundManager;
+//class CSound;
+// implementation in h file, need to declare used structures
+struct ma_sound;
+struct ma_engine;
 //---------------------------------
 // CSOUND CLASS
 //---------------------------------
