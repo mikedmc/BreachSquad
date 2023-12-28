@@ -1,7 +1,14 @@
 #include "dxstdafx.h"
 
+#define STB_VORBIS_HEADER_ONLY
+#include "../Libs/release/miniaudio/extras/stb_vorbis.c"
+
 #define MINIAUDIO_IMPLEMENTATION
-#define MA_DEBUG_OUTPUT
+#if defined(_DEBUG) || defined(DEBUG)
+	#define MA_DEBUG_OUTPUT
+#endif
+#define MA_NO_MP3
+#define MA_NO_FLAC
 #define MA_NO_GENERATION
 #include "../Libs/release/miniaudio/miniaudio.h"
 
@@ -54,6 +61,8 @@ OPRESULT CSoundManager::Init( DWORD dwChannelsCount, DWORD dwSampleRate, DWORD d
 //releases all sounds
 void CSoundManager::Release()
 {
+	if ( sndOK == false )
+		return;
 	//release all sounds
 	for ( int kk = 0; kk < sounds.GetSize(); kk++ )
 	{
@@ -62,7 +71,7 @@ void CSoundManager::Release()
 	sounds.RemoveAll();
 
 	ma_engine_uninit( pSE );
-	delete pSE;
+	SAFE_DELETE(pSE);
 
 	LOG( L"Sounds:: Sound System Released OK." );
 
@@ -1012,7 +1021,6 @@ CSound::~CSound()
 		return;
 	for ( int i = 0; i < buffersCnt; i++ )
 	{
-		ma_sound_stop( &buffers[i] );
 		ma_sound_uninit( &buffers[i] );
 	}
 	SAFE_DELETE_ARRAY( buffers );

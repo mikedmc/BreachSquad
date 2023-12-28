@@ -35,8 +35,6 @@
 //updates N times a second
 #define SND_UPDATE_PERIOD 0.1f
 
-//class CSoundManager;
-//class CSound;
 // implementation in h file, need to declare used structures
 struct ma_sound;
 struct ma_engine;
@@ -84,8 +82,8 @@ protected:
 	bool					sndOK;							// everything loaded ok
 
 	bool					m_bPositionalSoundsEnabled;		// disabled by default
-	D3DXVECTOR2				m_vListenerPos;
-	D3DXVECTOR2				m_vListenerExtents;				// size of hearable area
+	Vec2					m_vListenerPos;
+	Vec2					m_vListenerExtents;				// size of hearable area
 	float					m_fListenerVolumeFadeStartPercent; // percentage of listener extents the volume starts to linearly fade
 
 	CArray<CSound*>			sounds;
@@ -116,9 +114,9 @@ public:
 	 * \brief Enables software positional sounds. It only sets the position on play (doesn't hadle continuous positional sounds or listener movements)
 	 * \param vListenerExtents - half size of listener centered hearing bbox
 	 */
-	void EnablePositionalSounds(D3DXVECTOR2 vListenerPos, D3DXVECTOR2 vListenerExtents);
+	void EnablePositionalSounds(Vec2 vListenerPos, Vec2 vListenerExtents);
 	void DisablePositionalSounds();
-	FORCEINLINE void SetListenerPos(D3DXVECTOR2 vListenerPos) 
+	FORCEINLINE void SetListenerPos(Vec2 vListenerPos) 
 	{
 		m_vListenerPos = vListenerPos;
 	}
@@ -133,8 +131,8 @@ public:
 	/*!
 	 * \brief Plays a positional sound
 	 */
-	SOUNDHANDLE PlayPositional(int sndIdx, D3DXVECTOR2 pos, DWORD flags = 0);
-	SOUNDHANDLE PlayPositionalRand2(int sndIdx1, int sndIdx2, D3DXVECTOR2 pos, DWORD flags = 0);
+	SOUNDHANDLE PlayPositional(int sndIdx, Vec2 pos, DWORD flags = 0);
+	SOUNDHANDLE PlayPositionalRand2(int sndIdx1, int sndIdx2, Vec2 pos, DWORD flags = 0);
 
 
 	//////////////////////////////////////////////////////////////////////////
