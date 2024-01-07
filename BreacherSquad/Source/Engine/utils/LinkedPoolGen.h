@@ -1,41 +1,49 @@
 //--------------------------------------------------------------------------------------
 // (c)2022 Dragomir Mihai - Pixel Shard
 //
-// Template object linked list pool, iterable with pointer iterator
+// Template object generational linked list pool, iterable with pointer iterator
 // Keeps elements in a single array and organizes used and free elements in 2 double linked lists for fast access
-// Keeps unique index(m_nID) and used/not used flags for each element
+// items can be pointed to directly in the array structure by way of Keys (generation and index pairs) 
 // Contained class DTOR/CTOR only get called on Init and Release when deallocationg the container array.
 // Make sure you reset/construct the data after calling Hire() as nodes are always reused.
 //--------------------------------------------------------------------------------------
 
+//#TODO: add resizing of internal array if Init(resizeStep != 0)
+
 #pragma once
 
-template<typename TYPE> class CLinkedPool
+// generation key/index pair
+struct GenKey {
+	unsigned long		index;
+	unsigned long		generation;
+};
+
+template<typename TYPE> class CLinkedPoolGen
 {
 public:
 	class CLNode
 	{
 	public:
-		TYPE		m_data;
-	private:  
-		friend struct IteratorPtr;
-		friend class CLinkedPool;
+		TYPE			m_data;
 
-		CLNode*		m_pPrev;		// don't mess with me
-		CLNode*		m_pNext;		// don't mess with me
+	private:
+		friend struct	IteratorPtr;
+		friend class	CLinkedPoolGen;
 
-		int			m_nID;			// unique index (used for references as ID)
-		bool		m_bUsed;		// flag that tells us if it's in use or if it's available for hiring
+		CLNode*			m_pPrev;		// don't mess with me
+		CLNode*			m_pNext;		// don't mess with me
+
+		unsigned long	nIdx;			// unique index (used for references as ID)
+		bool			bUsed;			// flag that tells us if it's in use or if it's available for hiring
+		unsigned long   nGeneration;	// current generation, starts on 0 with bUsed false
 
 	public:
-		
-		int			GetID() {
-			return m_nID;
-		}
 
-		int			IsAlive() {
-			return m_bUsed;
-		}
+		int				GetIdx() { return nIdx; }
+
+		int				IsAlive() { return bUsed; }
+
+		GenKey			GetGenKey() { return { nIdx, nGeneration }; }
 	};
 
 public:
@@ -48,21 +56,21 @@ public:
 		using pointer = CLNode**;
 		using reference = CLNode*;
 
-		IteratorPtr( CLNode* ptr ) : m_ptr( ptr ), m_ptr_next(ptr->m_pNext) {}
+		IteratorPtr( CLNode* ptr ) : m_ptr( ptr ), m_ptr_next( ptr->m_pNext ) {}
 		// returns pointer to the contents of the node, used when : CType* temp = iterator;
 		reference operator*() const { return m_ptr; }
 		// returns value of the contents when CType temp = *iterator;
 		//pointer operator->() { return m_ptr->m_data; }
-		IteratorPtr& operator++() { 
-			m_ptr = m_ptr_next; 
-			if ( m_ptr ) 
-				m_ptr_next = m_ptr->m_pNext; 
-			return *this; 
+		IteratorPtr& operator++() {
+			m_ptr = m_ptr_next;
+			if ( m_ptr )
+				m_ptr_next = m_ptr->m_pNext;
+			return *this;
 		}
 		IteratorPtr operator++( int ) {
 			m_ptr = m_ptr_next;
 			if ( m_ptr )
-				m_ptr_next = m_ptr->m_pNext; 
+				m_ptr_next = m_ptr->m_pNext;
 			return *this;
 		}
 
@@ -84,17 +92,17 @@ private:
 	int m_nUsedCnt;						// how many are used
 
 public:
-	CLNode*				pArrNodes;		// all nodes get allocated as an array and kept as a list through pListFree and pListUsed
+	CLNode* pArrNodes;		// all nodes get allocated as an array and kept as a list through pListFree and pListUsed
 
 	CLNode				pListFree;		// free nodes circular list start node (not using his data, kept just to hold the ring)
 	CLNode				pListUsed;		// used nodes circular list start node (not using his data, kept just to hold the ring)
 
-	CLinkedPool() : pArrNodes( NULL ), m_nSize( 0 ), m_nUsedCnt( 0 )
+	CLinkedPoolGen() : pArrNodes( nullptr ), m_nSize( 0 ), m_nUsedCnt( 0 )
 	{
-		pListFree.m_pNext = pListFree.m_pPrev = &pListFree;	
-		pListUsed.m_pNext = pListUsed.m_pPrev = &pListUsed;	
+		pListFree.m_pNext = pListFree.m_pPrev = &pListFree;
+		pListUsed.m_pNext = pListUsed.m_pPrev = &pListUsed;
 	}
-	~CLinkedPool()
+	~CLinkedPoolGen()
 	{
 		Release();
 	}
@@ -102,18 +110,21 @@ public:
 	// Initializes list with maximum number of elements
 	bool			Init( int nPoolSize );
 	// Initializes list with maximum number of elements and provides initializer function (lambda usually)
-	bool			Init( int nPoolSize, void ( *fn_initialize )(TYPE* element) );
+	bool			Init( int nPoolSize, void ( *fn_initialize )( TYPE* element ) );
 	// Releases all list elements
 	void			Release();
 	// returns number of used elements
 	inline int		Count() { return m_nUsedCnt; }
-	
-	// Returns item by global ID (which is the global index)
-	CLNode*			GetByID( int nID )
+
+	// Returns item by GenKey
+	CLNode* GetByKey( GenKey key )
 	{
-		if ( nID < 0 || nID >= m_nSize )
+		// checks index validity and generation
+		if ( key.index < 0 || key.index >= m_nSize || pArrNodes[key.index].bUsed == false || pArrNodes[key.index].nGeneration != key.generation )
+		{
 			return nullptr;
-		return &pArrNodes[nID];
+		}
+		return &pArrNodes[key.index];
 	}
 
 	// Returns pointer to available list node or null if all nodes are used.
@@ -123,8 +134,8 @@ public:
 		CLNode* nod = pListFree.m_pNext;
 		if ( nod == &pListFree )
 		{
-#if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
-			ErrorBox( K_ERR_WARNING, L"CLinkedPool::GetFreeNode. No more free nodes!" );
+#if defined(K_DEBUG)
+			ErrorBox( K_ERR_WARNING, L"CLinkedPoolGen::GetFreeNode. No more free nodes!" );
 #endif
 			return nullptr;
 		}
@@ -135,8 +146,8 @@ public:
 		nod->m_pPrev = pListUsed.m_pPrev;
 		pListUsed.m_pPrev = nod;
 		nod->m_pNext = &pListUsed;
-		
-		nod->m_bUsed = true;
+
+		nod->bUsed = true;
 
 		m_nUsedCnt++;
 		// return pointer to node
@@ -148,7 +159,9 @@ public:
 	void Dismiss( CLNode* node )
 	{
 		_ASSERT( node != nullptr );
-		node->m_bUsed = false;
+		// mark as not used and increase generation immediately to break sync between saved keys and the element
+		node->bUsed = false;
+		node->nGeneration++;
 		// link neighbours between them
 		node->m_pNext->m_pPrev = node->m_pPrev;
 		node->m_pPrev->m_pNext = node->m_pNext;
@@ -163,7 +176,7 @@ public:
 };
 
 template<typename TYPE>
-bool CLinkedPool<TYPE>::Init( int nPoolSize, void( *fn_initialize )( TYPE* element ) )
+bool CLinkedPoolGen <TYPE>::Init( int nPoolSize, void( *fn_initialize )( TYPE* element ) )
 {
 	if ( !Init( nPoolSize ) )
 		return false;
@@ -176,8 +189,8 @@ bool CLinkedPool<TYPE>::Init( int nPoolSize, void( *fn_initialize )( TYPE* eleme
 	return true;
 }
 
-template<typename TYPE> 
-bool CLinkedPool <TYPE>::Init( int nPoolSize )
+template<typename TYPE>
+bool CLinkedPoolGen <TYPE>::Init( int nPoolSize )
 {
 	m_nSize = nPoolSize;
 	if ( m_nSize < 10 )
@@ -186,26 +199,27 @@ bool CLinkedPool <TYPE>::Init( int nPoolSize )
 	_ASSERT( pArrNodes == nullptr );
 	// Allocate containing array
 	pArrNodes = nullptr;
-	pArrNodes = new CLNode[ m_nSize ];
+	pArrNodes = new CLNode[m_nSize];
 	// initialize nodes
 	for ( int kk = 0; kk < m_nSize; kk++ )
 	{
-		pArrNodes[kk].m_nID = kk;
-		pArrNodes[kk].m_bUsed = false;
+		pArrNodes[kk].nIdx = kk;
+		pArrNodes[kk].bUsed = false;
+		pArrNodes[kk].nGeneration = 0;
 	}
 	// place all nodes in FREE list
-	pListFree.m_pNext = &pArrNodes[ 0 ];
-	pListFree.m_pPrev = &pArrNodes[ m_nSize - 1 ];
+	pListFree.m_pNext = &pArrNodes[0];
+	pListFree.m_pPrev = &pArrNodes[m_nSize - 1];
 	// set first and last nodes
-	pArrNodes[ 0 ].m_pNext = &pArrNodes[ 1 ];
-	pArrNodes[ 0 ].m_pPrev = &pListFree;
-	pArrNodes[ m_nSize - 1 ].m_pPrev = &pArrNodes[ m_nSize - 2 ];
-	pArrNodes[ m_nSize - 1 ].m_pNext = &pListFree;
+	pArrNodes[0].m_pNext = &pArrNodes[1];
+	pArrNodes[0].m_pPrev = &pListFree;
+	pArrNodes[m_nSize - 1].m_pPrev = &pArrNodes[m_nSize - 2];
+	pArrNodes[m_nSize - 1].m_pNext = &pListFree;
 	// set all other nodes
 	for ( int kk = 1; kk < m_nSize - 1; kk++ )
 	{
-		pArrNodes[ kk ].m_pNext = &pArrNodes[ kk + 1 ];
-		pArrNodes[ kk ].m_pPrev = &pArrNodes[ kk - 1 ];
+		pArrNodes[kk].m_pNext = &pArrNodes[kk + 1];
+		pArrNodes[kk].m_pPrev = &pArrNodes[kk - 1];
 	}
 	// empty BUSY list
 	pListUsed.m_pNext = pListUsed.m_pPrev = &pListUsed;
@@ -215,8 +229,8 @@ bool CLinkedPool <TYPE>::Init( int nPoolSize )
 	return true;
 }
 
-template<typename TYPE> 
-void CLinkedPool <TYPE>::Release()
+template<typename TYPE>
+void CLinkedPoolGen <TYPE>::Release()
 {
 	m_nSize = 0;
 	m_nUsedCnt = 0;

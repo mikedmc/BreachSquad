@@ -311,6 +311,7 @@
     <ClInclude Include="Source\Engine\utils\GrowableArray.h" />
     <ClInclude Include="Source\Engine\utils\HashUtil.h" />
     <ClInclude Include="Source\Engine\utils\LinkedPool.h" />
+    <ClInclude Include="Source\Engine\utils\LinkedPoolGen.h" />
     <ClInclude Include="Source\Engine\utils\List.h" />
     <ClInclude Include="Source\Engine\utils\PlatformTypes.h" />
     <ClInclude Include="Source\Engine\utils\PoolGC.h" />

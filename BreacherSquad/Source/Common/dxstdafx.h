@@ -24,9 +24,6 @@
 //enables fixed timestep on single player (necessary when vsync is disabled from the drivers to avoid FP precision issues)
 #define ENABLE_FIXED_TIMESTEP_SINGLEPLAYER
 
-//enables developer release mode (should be off in final version)
-//#define ENABLE_DEVMODE_RELEASE										   
-
 // if strict net check is defined it sends a checksum of all actors through the network
 //#define K_NET_STRICT_SYNC_CHECK
 // if set then the lobby gets closed when detected a coop sync
@@ -43,21 +40,25 @@
 // Enables Spine libs (last updated 1 aug 2022)
 //#define K_ENABLE_SPINE
 
+//enables developer release mode (should be off in final version)
+//#define ENABLE_DEVMODE_RELEASE										   
 //important only in DEBUG mode:
-#if defined(DEBUG) | defined(_DEBUG)						  
-// reset all steam achievements on startup? 
-//#define ENABLE_ACHIEVEMENTS_RESET_ON_STARTUP
-// playerus invinctus:
-#define ENABLE_PLAYER_INVINCIBILITY
-// define this to show light occluders and shadows wireframe
-#define DEBUG_LIGHTS
-// define this to show occluders instead of lights
-//#define DEBUG_LIGHTS_SHOW_OCCLUDERS
+#if defined(DEBUG) || defined(_DEBUG)	
+	// enable engine debug flag	
+	#define K_DEBUG
+	// reset all steam achievements on startup? 
+	//#define ENABLE_ACHIEVEMENTS_RESET_ON_STARTUP
+	// playerus invinctus:
+	#define ENABLE_PLAYER_INVINCIBILITY
+	// define this to show light occluders and shadows wireframe
+	#define DEBUG_LIGHTS
+	// define this to show occluders instead of lights
+	//#define DEBUG_LIGHTS_SHOW_OCCLUDERS
 #endif
 
 #if defined(ENABLE_DEVMODE_RELEASE)
-
-
+	// enable engine debug flag	
+	//#define K_DEBUG
 #endif
 
 //when enabled it checks if the game freezed during online gameplay
@@ -415,6 +416,7 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 
 #include "utils/DataTypes.h"
 #include "utils/LinkedPool.h"
+#include "utils/LinkedPoolGen.h"
 #include "utils/GrowableArray.h"
 
 #include "utils/CMathUtil.h"

@@ -10,7 +10,7 @@ CBullet* CLevel::ShootBullet( CBulletTemplate * bulletTemplate, EActorClass acto
 	{
 		return nullptr;
 	}
-	CLinkedPool<CBullet>::CLNode* node = m_poolBullets.Hire();
+	auto node = m_poolBullets.Hire();
 	if ( node == nullptr )
 		return nullptr;
 	//set bullet generic data
