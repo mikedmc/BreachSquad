@@ -2,6 +2,7 @@
 
 //--------------------------------------------------------------------------------------
 // fast fixed size array
+//#TODO: add removeAt(index) and fast versions removeAt_unordered(index) that copies last element to current element instead of copying the array
 //--------------------------------------------------------------------------------------
 template<typename TYPE, int nMaxSize> class CFixedArray
 {
@@ -77,8 +78,7 @@ public:
 		if(retVal != nullptr)
 			*retVal = m_pData[0];
 		// copy elements
-		for ( int kk = 0; kk < nCount - 1; kk++ )
-			m_pData[kk] = m_pData[kk + 1];
+		memmove( m_pData, m_pData + 1, sizeof( TYPE ) * (nCount - 1));
 		// decrease count
 		nCount--;
 
