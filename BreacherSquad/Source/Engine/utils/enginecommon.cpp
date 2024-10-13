@@ -731,8 +731,8 @@ bool CVariant::Serialize(FILE *fl)
 
 bool CVariant::Deserialize(FILE* fl)
 {
-	WCHAR name[K_MAX_STRINGHASH_LEN];
-	WCHAR strVal[K_MAX_STRINGHASH_LEN];
+	WCHAR name[256]{};
+	WCHAR strVal[256]{};
 	CVariant::VariantType t;
 
 	OS_fread(&t, sizeof(t), 1, fl);
@@ -768,8 +768,8 @@ bool CVariant::Deserialize(FILE* fl)
 
 CVariant* CVariant::DeserializeAlloc(FILE *fl)
 {
-	WCHAR name[K_MAX_STRINGHASH_LEN];
-	WCHAR strVal[K_MAX_STRINGHASH_LEN];
+	WCHAR name[256]{};
+	WCHAR strVal[256]{};
 	CVariant::VariantType t;
 
 	OS_fread(&t, sizeof(t), 1, fl);

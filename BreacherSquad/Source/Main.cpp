@@ -156,7 +156,7 @@ INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR, int )
 	if ( !UTApp().IsOnlyInstance( K_GAME_WINDOW_CLASSNAME ) )
 		return 0;
 
-	HRESULT hr = S_OK;
+	OPRESULT retErr = K_OP_OK;
 	// Init crash dumper
 	///#TODO: needed?
 	//InitMiniDumper();
@@ -466,7 +466,7 @@ INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR, int )
 
 	LOG( L"System:: All systems up and running!" );
 
-	if ( SUCCEEDED( hr ) )
+	if ( OP_SUCCESS( retErr ) )
 	{
 		// Pass control to the framework for handling the message pump and 
 		// dispatching render calls. The framework will call FrameMove 

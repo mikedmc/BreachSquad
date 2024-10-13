@@ -317,7 +317,6 @@
     <ClInclude Include="Source\Engine\utils\PlatformTypes.h" />
     <ClInclude Include="Source\Engine\utils\PoolGC.h" />
     <ClInclude Include="Source\Engine\utils\StringHash.h" />
-    <ClInclude Include="Source\Engine\utils\StringHashA.h" />
     <ClInclude Include="Source\Engine\utils\UT3D.h" />
     <ClInclude Include="Source\Engine\utils\UTMath.h" />
     <ClInclude Include="Source\Engine\utils\Variant.h" />
@@ -508,7 +507,6 @@
     <ClCompile Include="Source\Engine\utils\HashUtil.cpp" />
     <ClCompile Include="Source\Engine\utils\PlatformTypes.cpp" />
     <ClCompile Include="Source\Engine\utils\StringHash.cpp" />
-    <ClCompile Include="Source\Engine\utils\StringHashA.cpp" />
     <ClCompile Include="Source\Engine\utils\UT3D.cpp" />
     <ClCompile Include="Source\Engine\utils\UTMath.cpp" />
     <ClCompile Include="Source\Engine\utils\Variant.cpp" />
