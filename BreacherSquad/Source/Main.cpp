@@ -1,17 +1,8 @@
 ﻿#include "dxstdafx.h"
-#include <userenv.h>
 
+// Visual Leak Detector
 #if defined(_DEBUG) || defined(DEBUG)
-//check leaks
-#define _CHECK_HEAP_STACK_
-
-// memory leaks with CRT
-#include <crtdbg.h>
-#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#define new DEBUG_NEW
-
-//profile - CheatsRelease
-//#define _CHEATS_ENABLED_
+#include "../Libs/debug/vld/include/vld.h"
 #endif
 
 //**************************************************************************************
@@ -159,18 +150,6 @@ void NormalizeIngameMouseCoords( int ControllerIID, float fAxisValue, bool bIsHo
 
 INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR, int )
 {
-
-#if defined(_CHECK_HEAP_STACK_)
-	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-	_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
-	/*
-	//to catch new and new-delete with line number:
-	//#define DEBUG_NEW new(_NORMAL_BLOCK, _FILE_, _LINE_)
-	//#define new DEBUG_NEW
-	*/
-	_ASSERTE( _CrtCheckMemory() );
-#endif
-
 	//init log system
 	g_pLog = new CLog();
 
@@ -514,10 +493,6 @@ INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR, int )
 
 	//shutdown Log
 	SAFE_DELETE( g_pLog );
-
-#if defined(_CHECK_HEAP_STACK_)
-	_ASSERTE( _CrtCheckMemory() );
-#endif
 
 	return DXUTGetExitCode();
 }

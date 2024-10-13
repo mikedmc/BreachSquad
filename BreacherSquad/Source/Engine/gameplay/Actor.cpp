@@ -13,7 +13,7 @@ void CActor::PostConstructionInit()
 
 void CActor::BeginPlay()
 {
-	pArea = level.Areas_GetAt( pos.xy );
+	pArea = level->Areas_GetAt( pos.xy );
 	_ASSERT(pArea != nullptr);
 	c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE);
 }
@@ -22,43 +22,67 @@ void CActor::EndPlay()
 {
 }
 
-CActor::CActor(Vec2 vnPos, CActorTemplate* pActorTemplate, int nID,
-	CLevel& refLevel,
-	CSpriteActorComponent* pComGraphics, CWeaponsComponent* pComWpn, CActorAIComponent* pComAI ) :
-		nLastDamageTakenFromUID(0), 
-		nSuspendedFlags(0), fSuspendedTimer(0.0f), bSuspendInput(false), bHasGravity(true),
-		eLastPlayedVerse(K_LVL_ACT_VERSE_EMPTY), fVerseCooldown(0.0f), nLastPlayedVerseSndIdx(-1),
-		eInteractState(K_STATE_NOTSET), nInteractOptionsSelIdx(0), eAttackStatus(K_ACT_ATTACK_IDLE),
-		fStunTimer(0.0f),
-		level(refLevel)
+CActor::CActor() :
+	nLastDamageTakenFromUID( 0 ), bInitialized(false),
+	nSuspendedFlags( 0 ), fSuspendedTimer( 0.0f ), bSuspendInput( false ), bHasGravity( true ),
+	eLastPlayedVerse( K_LVL_ACT_VERSE_EMPTY ), fVerseCooldown( 0.0f ), nLastPlayedVerseSndIdx( -1 ),
+	eInteractState( K_STATE_NOTSET ), nInteractOptionsSelIdx( 0 ), eAttackStatus( K_ACT_ATTACK_IDLE ),
+	fStunTimer( 0.0f ),
+	level( nullptr ), nControllerInstanceID(-1)
 {
-	_ASSERT(pComGraphics != nullptr && pComAI != nullptr && pComWpn != nullptr);
+	ID = -1;
+}
+
+CActor::~CActor()
+{
+	Dispose();
+}
+
+void CActor::Init( Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CLevel* refLevel, CSpriteActorComponent* pComGraphics, CWeaponsComponent* pComWpn, CActorAIComponent* pComAI )
+{
+	_ASSERT( pComGraphics != nullptr && pComAI != nullptr && pComWpn != nullptr );
+	// cleans previous instance for reuse
+	if ( bInitialized )
+	{
+		Dispose();
+	}
 	// save pointer to component
 	c_graphics = pComGraphics;
 	c_weapons = pComWpn;
 	c_AI = pComAI;
+	// init defaults
+	nLastDamageTakenFromUID = 0;
+	nSuspendedFlags = 0; fSuspendedTimer = 0.0f; bSuspendInput = false; bHasGravity = true;
+	eLastPlayedVerse = K_LVL_ACT_VERSE_EMPTY; fVerseCooldown = 0.0f; nLastPlayedVerseSndIdx = -1;
+	eInteractState = K_STATE_NOTSET; nInteractOptionsSelIdx = 0; eAttackStatus = K_ACT_ATTACK_IDLE;
+	fStunTimer = 0.0f;
+	level = refLevel;
 
 	ID = nID;
 	bAnimated = true;
 	nControllerInstanceID = -1;
-	vSpeedImpulse = Vec2(0.0f, 0.0f);
-	speed = Vec2(0.0f, 0.0f);
+	vSpeedImpulse = Vec2( 0.0f, 0.0f );
+	speed = Vec2( 0.0f, 0.0f );
 	vAim = Vec2( 0.0f, -10.0f );
 
 	// init actor template data (loads files and spine skeletons)
-	InitFromTemplate(pActorTemplate);
-	
+	InitFromTemplate( pActorTemplate );
+
 	//update all relative data
-	SetPos(Vec2ToVec3XY0(vnPos));
+	SetPos( Vec2ToVec3XY0( vnPos ) );
+
+	bInitialized = true;
 }
 
-CActor::~CActor()
+void CActor::Dispose()
 {
 	CSmartLink::RemoveLink( &pClosestTouchable );
 	// remove used components received as pointers 
 	SAFE_DELETE( c_graphics );
 	SAFE_DELETE( c_weapons );
 	SAFE_DELETE( c_AI );
+
+	bInitialized = false;
 }
 
 void CActor::SetAIState( CAIState* pNewState )
@@ -236,7 +260,7 @@ void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 	// see if we need to clip and on which side. We clip to wall borders when we push left-right against vertical walls not hidden by ceiling.
 	// clip coords are a little hardcoded to look good
 	bool bClipped = false;
-	CTile* tll = level.Areas_GetTileAt(Vec2(pos.xy.x - K_TILE_SIZE_F, pos.xy.y));
+	CTile* tll = level->Areas_GetTileAt(Vec2(pos.xy.x - K_TILE_SIZE_F, pos.xy.y));
 	if ( tll != nullptr && tll->flags & K_TILEFLAG_WALLENDING_R )
 	{
 		__Painter().SetClipWorld( RectXYWH( tll->bbox.vMax.x + 1.0f, this->pos.xy_proj.y - 4.0f * K_TILE_SIZE_F, 4.0f * K_TILE_SIZE_F, 5.0f * K_TILE_SIZE_F ) );
@@ -244,7 +268,7 @@ void CActor::Paint( ETexChannel eChannel /*= K_TEXCHAN_COLORMAP */ )
 	}
 	else
 	{
-		CTile* tlr = level.Areas_GetTileAt( Vec2( pos.xy.x + K_TILE_SIZE_F, pos.xy.y ) );
+		CTile* tlr = level->Areas_GetTileAt( Vec2( pos.xy.x + K_TILE_SIZE_F, pos.xy.y ) );
 		if ( tlr != nullptr && tlr->flags & K_TILEFLAG_WALLENDING_L )
 		{
 			__Painter().SetClipWorld( RectXYWH( tlr->bbox.vMin.x - 4.0f * K_TILE_SIZE_F + 2.0f, this->pos.xy_proj.y - 4.0f * K_TILE_SIZE_F, 4.0f * K_TILE_SIZE_F, 5.0f * K_TILE_SIZE_F ) );
@@ -617,7 +641,7 @@ void CActor::ProcessAICommands()
 				else
 				{
 					//blood splat (sortate crescator in animatie)
-					level.AddDecal_BloodSplat( GetPosHeart(), true, _template.actorClass );
+					level->AddDecal_BloodSplat( GetPosHeart(), true, _template.actorClass );
 
 					//SND_PLAY_POSITIONAL_RAND2(SNDIDX_BULLET_BODY_GIBBED_01, SNDIDX_BULLET_BODY_GIBBED_02, actor->GetPosHeart());
 					//meat lumps
@@ -633,11 +657,11 @@ void CActor::ProcessAICommands()
 						/*
 						for ( int ll = 0; ll < 6; ll++ )
 						{
-							level.AddDoofer( K_DOOFER_MEAT, AABB::GetRandomPointInBox( genbox ), &Vec2( randfloatsgn( 50.0f ) + bulletSpeed.x * 50.0f, -130.0f - randfloat( 100.0f ) ), &g_vecGravityOld, nSubType );
+							level->AddDoofer( K_DOOFER_MEAT, AABB::GetRandomPointInBox( genbox ), &Vec2( randfloatsgn( 50.0f ) + bulletSpeed.x * 50.0f, -130.0f - randfloat( 100.0f ) ), &g_vecGravityOld, nSubType );
 						}
 						//goes straight down to stain the floor
-						level.AddDoofer( K_DOOFER_MEAT, GetPosHeart(), &Vec2( 200.0f, 50.0f ), &g_vecGravityOld, nSubType );
-						level.AddDoofer( K_DOOFER_MEAT, GetPosHeart(), &Vec2( -200.0f, 50.0f ), &g_vecGravityOld, nSubType );
+						level->AddDoofer( K_DOOFER_MEAT, GetPosHeart(), &Vec2( 200.0f, 50.0f ), &g_vecGravityOld, nSubType );
+						level->AddDoofer( K_DOOFER_MEAT, GetPosHeart(), &Vec2( -200.0f, 50.0f ), &g_vecGravityOld, nSubType );
 						*/
 						//human blood gibs particle
 //						__Particles().AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_MED, true, 0, &pos.xy_proj, nullptr, nullptr, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, dwCol, K_PART_LAYER_RT_FRONT_NRM );
@@ -647,7 +671,7 @@ void CActor::ProcessAICommands()
 						/*
 						for ( int ll = 0; ll < 2; ll++ )
 						{
-							level.AddDoofer( K_DOOFER_MEAT, AABB::GetRandomPointInBox( genbox ), &Vec2( randfloatsgn( 50.0f ) + bulletSpeed.x * 50.0f, -130.0f - randfloat( 100.0f ) ), &g_vecGravityOld );
+							level->AddDoofer( K_DOOFER_MEAT, AABB::GetRandomPointInBox( genbox ), &Vec2( randfloatsgn( 50.0f ) + bulletSpeed.x * 50.0f, -130.0f - randfloat( 100.0f ) ), &g_vecGravityOld );
 						}
 						*/
 //						__Particles().AddParticle( ANM_PARTICLES_SPR_HUMAN_SPLAT_SMALL, true, 0, &pos.xy_proj, nullptr, nullptr, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0xff671010, K_PART_LAYER_RT_FRONT_NRM );
@@ -663,7 +687,7 @@ void CActor::ProcessAICommands()
 					speed = Vec2( 0.0f, 0.0f );
 					vSpeedImpulse = Vec2( 0.0f, 0.0f );
 					//move invisible body back to last safe pos
-					//Vec2 vSpawnPos = level.m_arrPlayerLastSafePos[ nPlayerOrdinal ];
+					//Vec2 vSpawnPos = level->m_arrPlayerLastSafePos[ nPlayerOrdinal ];
 					//SetPos( Vec3( vSpawnPos.x, vSpawnPos.y, 0.0f ) );
 					break;
 				}
@@ -734,18 +758,18 @@ void CActor::DoMove( float dTime )
 		/// BROAD PHASE SWEEP (find all POSSIBLE collision objects)
 
 		//add boxes from collision shapes
-		for ( int kk = 0; kk < level.m_arrColShapes.GetSize(); kk++ )
+		for ( int kk = 0; kk < level->m_arrColShapes.GetSize(); kk++ )
 		{
-			if ( !level.m_arrColShapes[ kk ]->IsAlive() )
+			if ( !level->m_arrColShapes[ kk ]->IsAlive() )
 				continue;
 
-			if ( !boxUnion.Intersects( level.m_arrColShapes[ kk ]->bbox ) )
+			if ( !boxUnion.Intersects( level->m_arrColShapes[ kk ]->bbox ) )
 				continue;
 
 			// save box for later collision checl
-			if ( level.m_arrColShapes[ kk ]->collFlags != K_DIRFLAG_NONE )
+			if ( level->m_arrColShapes[ kk ]->collFlags != K_DIRFLAG_NONE )
 			{
-				tempCollBoxList.Add( level.m_arrColShapes[ kk ]->bbox );
+				tempCollBoxList.Add( level->m_arrColShapes[ kk ]->bbox );
 			}
 		}
 		//add boxes from tiles
@@ -935,9 +959,9 @@ void CActor::DoMove( float dTime )
 	collisionFlags = unCollFlags;
 
 	//check world bounds for each actor - kill if out
-	if ( !Rects::PointInRect( pos.xy, level.m_levelAABB ) )
+	if ( !Rects::PointInRect( pos.xy, level->m_levelAABB ) )
 	{
-		level.KillActor( this );
+		level->KillActor( this );
 	}
 
 	//set final position
@@ -952,7 +976,7 @@ void CActor::ProcessExtras()
 	///--- set current area if null or changed after updating the position
 	if ( (pArea == nullptr) || (!pArea->AABBbounds.PointIn( pos.xy )) )
 	{
-		pArea = level.Areas_GetAt( pos.xy );
+		pArea = level->Areas_GetAt( pos.xy );
 	}
 
 	///--- find closest interactible object in range, aka touchable
@@ -1068,7 +1092,7 @@ bool CActor::CheckShoot()
 	// checks if muzzle is inside the level, outside of collisions and walls
 	//#OPTIMIZE: poate poate sa verifice direct in pathfinding map
 	Vec2 vRetP( 0.0f, 0.0f ), vRetN( 0.0f, 0.0f );
-	CTile* tl = level.SegmentTilesIntersectionEx( GetPosHeart3D().xy, vShootPos.xy, vRetP, vRetN, nullptr, pArea );
+	CTile* tl = level->SegmentTilesIntersectionEx( GetPosHeart3D().xy, vShootPos.xy, vRetP, vRetN, nullptr, pArea );
 	if ( tl != nullptr )
 	{
 		//#TODO: ar trebui sa verifice si cu inamicii si cu alte entitati gen cutii, mese etc. Ar trebui sa spawneze particule cand tragi etc
@@ -1100,19 +1124,19 @@ bool CActor::CheckShoot()
 		for ( int kk = 0; kk < weapon->_template.nBulletsPerShot; kk++ )
 		{
 			//add weapon spread
-			float fSpreadAng = level.m_rand.RandFloatSgn( weapon->_template.fSpreadFOV );
+			float fSpreadAng = level->m_rand.RandFloatSgn( weapon->_template.fSpreadFOV );
 
 			//vFinalDir.x = cos(fAimAng + fSpreadAng);
 			//vFinalDir.y = sin(fAimAng + fSpreadAng);
 			//D3DXVec2Normalize(&vFinalDir, &vFinalDir);
 
-			level.ShootBullet( &tmplBullet, nFinalClass, shooter->GetUID(), vShootPos.xyz, vFinalDir );
+			level->ShootBullet( &tmplBullet, nFinalClass, shooter->GetUID(), vShootPos.xyz, vFinalDir );
 		}
 
 		// add shell
 		if ( weapon->_template.nDropShellFrame >= 0 )
 		{
-			//level.AddDoofer( K_DOOFER_SHELL, weapon->pOwner->GetPosHeart(), &Vec2( (40.0f + randfloat( 30.0f )), -50.0f - randfloat( 20.0f ) ), &g_vecGravityOld, weapon->_template.nDropShellFrame );
+			//level->AddDoofer( K_DOOFER_SHELL, weapon->pOwner->GetPosHeart(), &Vec2( (40.0f + randfloat( 30.0f )), -50.0f - randfloat( 20.0f ) ), &g_vecGravityOld, weapon->_template.nDropShellFrame );
 		}
 
 
@@ -1125,7 +1149,7 @@ bool CActor::CheckShoot()
 			//			AddProp_Light(vShootPos, ANM_LIGHTS_SPR_POINT1, 0.05f, 0.0f, D3DCOLOR_COLORALPHA(0xffFDB727, fPropAlpha), weapon->WeaponTemplate.fMuzzleLightSize);
 		}
 		// add AI sound event
-		level.AddAIEvent( K_AIEVT_SOUND_THREAT, shooter->GetUID(), shooter->_template.actorClass, shooter->GetPosHeart(), weapon->_template.fSoundRadius );
+		level->AddAIEvent( K_AIEVT_SOUND_THREAT, shooter->GetUID(), shooter->_template.actorClass, shooter->GetPosHeart(), weapon->_template.fSoundRadius );
 	}
 
 	return true;
@@ -1321,7 +1345,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 
 			this->fLife -= fDecLife;
 			//analytics
-			level.m_arrStats[K_LVL_STATS_PL1_DAMAGE_TAKEN + this->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT] += ( int ) ceil( fDecLife );
+			level->m_arrStats[K_LVL_STATS_PL1_DAMAGE_TAKEN + this->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT] += ( int ) ceil( fDecLife );
 		}
 		else
 		{
@@ -1391,7 +1415,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 			{
 				if ( this->UID != pBullet->ownerUID )
 				{
-					level.GiveStrategicPoints( 1.0f, &Vec2( this->bbox.vCenter.x, this->bbox.vMin.y ) );
+					level->GiveStrategicPoints( 1.0f, &Vec2( this->bbox.vCenter.x, this->bbox.vMin.y ) );
 				}
 			}
 		}
@@ -1420,7 +1444,7 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 		if ( ( this->GetCurrentBehavior() == AI_BEHAVIOR_DEAD ) && ( pBullet->nFlags & K_LVL_BULLET_FLAG_CAN_SPLAT ) && ( this->fLife < -this->_template.fLife ) )
 			bSplatActor = true;
 		//if lucky cancel splat
-		if ( level.RNG().RandInt( 100 ) <= 10 )
+		if ( level->RNG().RandInt( 100 ) <= 10 )
 		{
 			bSplatActor = false;
 			this->fLife = 0.0f;
@@ -1435,13 +1459,13 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 			{
 				if ( ( pBullet->nFlags & K_LVL_BULLET_FLAG_NO_DECALS ) == 0 )
 				{
-					level.AddDecal_BloodSplat( this->GetPosHeart(), true, this->_template.actorClass );
+					level->AddDecal_BloodSplat( this->GetPosHeart(), true, this->_template.actorClass );
 				}
 			}
 
 			retData.bKilledTarget = true;
 			//say shooter verse
-			CActor* pShooter = level.GetActorByUID( pBullet->ownerUID );
+			CActor* pShooter = level->GetActorByUID( pBullet->ownerUID );
 			if ( pShooter != null )
 			{
 				//				PlayActorSoundVerse(pShooter, K_LVL_ACT_VERSE_KILL_MADE);

@@ -172,8 +172,9 @@ CActor* CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHa
 	*/
 	// get weapons sprite lib and send it to the weapons component
 	CSpriteLib* pSprWpn = m_sprLib.GetLibByNick( K_LIBNICK_WEAPONS );
-	CActor* nact = new CActor( spawnPos, templateLocal, GenerateNextID(),
-		*this,
+	CActor* nact = new CActor();
+	nact->Init( spawnPos, templateLocal, GenerateNextID(),
+		this,
 		new CSpriteActorComponent( &m_sprLib ),
 		new CWeaponsComponent( pSprWpn ),
 		new CActorAIComponent( *this )

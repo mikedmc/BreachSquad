@@ -22,7 +22,8 @@ private:
 	CWeaponsComponent*			c_weapons;					// graphics and logic component that handles the weapons
 	CActorAIComponent*			c_AI;						// AI component that handles actor controlling (player or computer)
 
-	CLevel&						level;						// Reference to current level (__Sim())
+	CLevel*						level;						// Reference to current level (__Sim())
+	bool						bInitialized;				// Was actor initialized?
 public:
 	CActorTemplate				_template;					// holds data about each actor, copied from source templates (xml) and probably modified by enhancements
 	CActorTemplate				_template_ini;				// holds initial template that we reset to when changing the weapon or adding non permanent enhancements
@@ -67,14 +68,19 @@ public:
 	int				nControllerInstanceID; //player controller ID (-1 for empty)
 
 public:
-	// CTOR. Allocate the components when calling the constructor. They will get deallocated by CActor.
-	CActor( Vec2 vnPos, CActorTemplate* pActorTemplate, int nID,
-		CLevel& refLevel,
-		CSpriteActorComponent* pComGraphics, 
-		CWeaponsComponent* pComWpn,
-		CActorAIComponent* pComAI);
-	// DTOR
+	// CTOR. Called only once when preallocating arrays
+	CActor();
+	// DTOR. Only called when closing the games
 	~CActor();
+	// Cleans and completely initializes an actor for reuse
+	void Init( Vec2 vnPos, CActorTemplate* pActorTemplate, int nID,
+		CLevel* refLevel,
+		CSpriteActorComponent* pComGraphics,
+		CWeaponsComponent* pComWpn,
+		CActorAIComponent* pComAI );
+	// Disposes an actor before reusing
+	void Dispose();
+
 
 	inline const EActiveInterfaceType	GetClassType() const override {
 		return K_LVL_IAI_TYPE_ACTOR;

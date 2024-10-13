@@ -14,7 +14,7 @@
     <ProjectGuid>{97105727-EDAB-4B2C-AB1E-4ACFD3BA5187}</ProjectGuid>
     <RootNamespace>BreacherSquad</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <ProjectName>BreacherSquad</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -25,7 +25,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -86,7 +86,7 @@
     <Link>
       <AdditionalDependencies>dxguid.lib;d3d9.lib;d3dx9.lib;dsound.lib;comctl32.lib;SDL2.lib;SDL2main.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(ProjectDir)\Bin\$(ProjectName)_d.exe</OutputFile>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;Libs\release\GogSDK-1.133.6\Libraries;Libs\release\steam\redistributable_bin;Libs\release\curl\lib;Libs\release\freetype\objs;Libs\release\SDL\lib\x86;Libs\release\VLD\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;Libs\release\GogSDK-1.133.6\Libraries;Libs\release\steam\redistributable_bin;Libs\release\curl\lib;Libs\release\freetype\objs;Libs\release\SDL\lib\x86;Libs\debug\vld\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libcp.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -100,6 +100,7 @@
       </CreateHotPatchableImage>
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <GenerateMapFile>false</GenerateMapFile>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>Source/dpiaware.manifest</AdditionalManifestFiles>
