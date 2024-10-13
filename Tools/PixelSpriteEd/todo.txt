@@ -1,0 +1,95 @@
+GENERALE
+- zoom de 0.5% si aranjare partea cu zoom si scroll
+- sa salveze datele din options in registrii
+- probleme tasta TAB la ListViewEx [modifica datele din casutele urmatoare]
+- [!] tool de calculare a animatiilor flipate din flags sau flipate cu tot cu imagine
+- sa poti seta un anume fundal la partea de editare pbDraw
+	+ sa poti schimba culorile
+- imaginile din thumb-urile de jos sa apara scalate cand este cazul (daca ies din cadru) [! sa pastreze proportiile !]
+- cand ii dai save direct din meniu, dupa ce ai salvat cu save as.., salveaza peste versiunea veche
+
++ sa poti sterge o imagine si sa o stearga corect
++ sa poti muta module dintr-o imagine in alta rapid (toate selectate)
++ sa poti sa salvezi peste poza incarcata
++ zoom in fct de mouse pos (vezi ca pbDraw nu are handler de mouse wheel dar listele au)...
+
+IMAGES
+	- sa poti incarca imagini de dimensiuni nepatrate (se paote deja?)
+	- sa muti imaginea mai in stanga sau mai in dreapta in lista de imagini de jos ca sa poti controla ordinea de incarcare
+	- de scos mirror image X si Y (nu le vad utilitatea)...
+	- [?] de adaugat flaguri de flip si mirror pe imagine pt procesare imagine la onload
+	- de afisat imaginea cu mirror daca vrei, atat pe X cat si pe Y (pt a defini module cu flip)
+	
+MODULES 
+	- cand selectezi mai multe module cu shift apoi dai click pe unul singur sa nu mai redeseneze modulele pana il selecteaza pe cel nou
+	- sa poti deselecta modulul cu click
+	- de facut tool sa aseze modulele bine in texturi
+	- cand muti modulele in lista are buguri, le muta aiurea
+	- [?] cand selectezi din lista de module, cu shift apasat, dureaza mult selectia daca ai foarte multe module
+	- click TOOLS -> Transform Modules [sa actioneze imediat, nu dupa apply]
+	- remove image sa mearga bine, adica sa scoata imaginea si din XML
+	
+FMODULES
+	- selectia se comporta aiurea cand tii ctrl apasat
+		
+FRAMES
+	+ scalare BBox din mouse
+	- la clone nu pastreaza datele frame-ului (durata si offseturile)
+	- butoane de centrat module in frames si poate si alte elemente
+	
+ANIMS	
+	- sa ai animatii ca in 3dstudio
+	- sa poti sa trimiti mesaje pe pipeline din animatie, cand ajunge la un frame anume
+	
+TOOLS
+	- image optimizer
+	- tools de flipat animatiile cu tot cu imagine	
+	- tool care sa ia toate Fmodulele si sa faca cate un frame din fiecare (pt fonturi), eventual cu un offset pe x/y
+
+
+-------------------------------------------------------------------------
+FORMAT EXPORT
+	- version (1ub)
+	- export flags (6ub = 2ub ce exporta + 4ub pe ce dimensiuni)
+	- nr imagini (1ub)
+		- numele imagine [*]
+	- MODULES Count (2ub)  [*]
+		- MODULE imgID (1ub)[*]
+		- x, y, w, h (*b)
+	- FMODULES Count (2ub)[*]
+		- moduleIDx (*b)
+		- OX, OY (*b)
+		- flipFlags	(*b)[*]
+	- FRAMES Count   (2ub)[*]
+		- FModules Count (1ub)
+			- FModule IDx (*ub)
+		- BBox X, Y, W, H (*b)[*]
+		- HitPts Count (1b)[*]
+			- X, Y   (*b)
+			- flags	 (*b) [*]
+	- AFRAMES Count (2ub)[*]
+		- Frame IDx   (*ub)
+		- Duration	 (*ub)	[*]
+		- MoveX, MoveY (*b) [*]
+		- flags		   (*ub)[*]
+	- ANIMS Count  (2ub)[*]
+		- Anim Flags (*ub)
+		- Aframes Count	(1ub)
+			- Aframes IDx  (*ub)
+
+EXPLICATII EXPORT
+	(2b) = 2 bytes; (*b) = select din form export pe cati bytes			
+	(2ub) = 2 bytes fara semn
+	[*] = checkbox suprimare in export form
+-------------------------------------------------------------------------	
+
+* status bar: x, y, w, h 
+- lista de recent files
+- confirmare iesire/salvare
+	- SetModified(true) la operatii
+? UNDO [!!!]
+- export si import
+	- save/load preset-uri export
+- inhiba mouse wheel la liste
+? selectare vecin in lista dupa delete
+

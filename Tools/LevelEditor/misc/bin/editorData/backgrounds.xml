@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<BACKGROUNDS>
+  <BACK sName="City Night" sAI="str_bsx = bk_city.bsx;
+str_anim = NIGHT;
+str_water_anim = WATER1;" />
+  <BACK sName="City Sunset" sAI="str_bsx = bk_city.bsx;
+str_anim = SUNSET;
+str_water_anim = WATER1;" />
+  <BACK sName="City Night Rain" sAI="str_bsx = bk_city.bsx;
+str_anim = NIGHT_RAIN;
+str_water_anim = WATER1;" />
+  <BACK sName="City Sunset Rain" sAI="str_bsx = bk_city.bsx;
+str_anim = SUNSET_RAIN;
+str_water_anim = WATER1;" />
+  <BACK sName="City Day" sAI="str_bsx = bk_city.bsx;
+str_anim = DAY;
+str_water_anim = WATER1;" />
+  <BACK sName="City Day rain" sAI="str_bsx = bk_city.bsx;
+str_anim = DAY_RAIN;
+str_water_anim = WATER1;" />
+  <BACK sName="Miami Day" sAI="str_bsx = bk_miami.bsx;
+str_anim = DAY;
+str_water_anim = WATER1;" />
+  <BACK sName="Miami Night" sAI="str_bsx = bk_miami_night.bsx;
+str_anim = NIGHT;
+str_water_anim = WATER1;" />
+  <BACK sName="Miami Night Storm" sAI="str_bsx = bk_miami_night.bsx;
+str_anim = NIGHT_STORM;
+str_water_anim = WATER1;" />
+  <BACK sName="Miami Night Scrolling" sAI="str_bsx = bk_miami_night.bsx;
+str_anim = NIGHT_SCROLLING;
+str_water_anim = WATER1;" />
+  <BACK sName="Urban Day" sAI="str_bsx = bk_urban.bsx;
+str_anim = DAY;
+str_water_anim = WATER1;" />
+  <BACK sName="Urban Day Rain" sAI="str_bsx = bk_urban.bsx;
+str_anim = DAY_RAIN;
+str_water_anim = WATER1;" />
+  <BACK sName="Urban Day Scrolling" sAI="str_bsx = bk_urban.bsx;
+str_anim = DAY_TRAIN;
+str_water_anim = WATER1;" />
+  <BACK sName="Urban Night" sAI="str_bsx = bk_urban_night.bsx;
+str_anim = NIGHT;
+str_water_anim = WATER1;" />
+  <BACK sName="Urban Night Rain" sAI="str_bsx = bk_urban_night.bsx;
+str_anim = NIGHT_RAIN;
+str_water_anim = WATER1;" />
+  <BACK sName="Urban Night Storm" sAI="str_bsx = bk_urban_night.bsx;
+str_anim = NIGHT_RAIN_HARD;
+str_water_anim = WATER1;" />
+  <BACK sName="Woods Winter" sAI="str_bsx = bk_woods_w.bsx;
+str_anim = WINTER;
+str_water_anim = WATER1;" />
+    
+</BACKGROUNDS>
+
