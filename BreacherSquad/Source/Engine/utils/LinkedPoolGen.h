@@ -57,7 +57,7 @@ public:
 		using reference = CLNode*;
 
 		IteratorPtr( CLNode* ptr ) : m_ptr( ptr ), m_ptr_next( ptr->m_pNext ) {}
-		// returns pointer to the contents of the node, used when : CType* temp = iterator;
+		// returns pointer to the contents of the node;
 		reference operator*() const { return m_ptr; }
 		// returns value of the contents when CType temp = *iterator;
 		//pointer operator->() { return m_ptr->m_data; }

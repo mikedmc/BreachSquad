@@ -479,10 +479,10 @@ void CNetLock::Net_UpdateEventLoop()
 #if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE) || defined(K_SYNC_ENGINE_DBG_VERBOSE)
 				// show last input and scene actors on disconnects
 				Net_LogFrameData(10);
-				LOG(L"-- scene actors %d --", __Sim().m_arrActors.GetSize());
-				for (int ll = 0; ll < __Sim().m_arrActors.GetSize(); ll++)
+				LOG(L"-- scene actors %d --", __Sim().m_arrActors.Count());
+				for ( auto node: __Sim().m_arrActors)
 				{
-					CActor* act = __Sim().m_arrActors[ll];
+					CActor* act = &node->m_data;
 					LOG(L"%s ID %d pos(%.4f, %.4f)", act->_template.shID.text, act->ID, act->pos.xyz.x, act->pos.xyz.y);
 				}
 #endif

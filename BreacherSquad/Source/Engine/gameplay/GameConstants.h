@@ -22,7 +22,8 @@
 //RECON time for maximum aim
 #define K_LVL_RECON_AIMING_DURATION 1.0f
 
-//--- ENEMIES si personaj ---
+// max number of actors in preinitialized actors pool
+#define K_LVL_ACTORS_POOL_SIZE 100
 //max allowed speed
 #define K_LVL_ACTOR_MAX_SPEED 400.0f
 //max lateral impulse

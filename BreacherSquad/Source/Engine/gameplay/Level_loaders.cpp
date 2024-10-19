@@ -46,6 +46,7 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 	m_dwSyncCheckHash = 0;
 	//get rid of all particles
 	__Particles().ClearParticles();
+	m_arrActors.Init( K_LVL_ACTORS_POOL_SIZE );
 	//--- setari initiale ---
 	ResetLevelStatistics();
 
@@ -182,9 +183,9 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 			activ->SetAI( activ->AIstate );
 		}
 	}
-	for ( int kk = 0; kk < m_arrActors.GetSize(); kk++ )
+	for ( auto node : m_arrActors )
 	{
-		CActor* actor = m_arrActors[kk];
+		CActor* actor = &node->m_data;
 		IActiveInterface* pt = GetIActiveInterfacePtr( actor->targetID_ini );
 		if ( pt )
 			CSmartLink::SetLink( &actor->pTarget, pt );

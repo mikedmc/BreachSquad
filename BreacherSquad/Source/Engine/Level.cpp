@@ -172,7 +172,13 @@ CActor* CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHa
 	*/
 	// get weapons sprite lib and send it to the weapons component
 	CSpriteLib* pSprWpn = m_sprLib.GetLibByNick( K_LIBNICK_WEAPONS );
-	CActor* nact = new CActor();
+	auto nactnode = m_arrActors.Hire();
+	if ( nactnode == nullptr )
+	{
+		return nullptr;
+	}
+
+	CActor* nact = &nactnode->m_data;
 	nact->Init( spawnPos, templateLocal, GenerateNextID(),
 		this,
 		new CSpriteActorComponent( &m_sprLib ),
@@ -184,7 +190,7 @@ CActor* CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHa
 	//#TODO: create actor::AddWeapon and EquipWeapon that handles this plus AddWeaponTemplate
 	CWeaponTemplate* wpntMain = GetTemplateWeapon( nact->_template.shWeaponDefault.text );
 	CWeaponTemplate* wpntAlt = nullptr;
-	if ( wpntMain != nullptr && wpntMain->shAltFireTemplate.IsSet() ) 
+	if ( wpntMain != nullptr && wpntMain->shAltFireTemplate.IsSet() )
 		wpntAlt = GetTemplateWeapon( wpntMain->shAltFireTemplate.text );
 	//#TODO: weapons should have a type like primary, alt, melee, gear?
 	nact->Weapons()->AddWeapon( *nact, wpntMain, K_WPNSLOT_PRIMARY );
@@ -197,10 +203,9 @@ CActor* CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHa
 	nact->SetAIState( nact->_template.AItemplate->GetAIStateByName( nact->_template.shAIState_ini ) );
 	// prepare actor for play after everything is loaded and set up
 	nact->PostConstructionInit();
-	//finish up adding the actor
-	m_arrActors.Add( nact );
 
 	nact->BeginPlay();
+
 
 	SAFE_DELETE( templateLocal );
 
@@ -282,7 +287,7 @@ CLight*	CLevel::SpawnLight( Vec3 spawnPos, eLightType eType, DWORD dwColor, floa
 	nl->pos = spawnPos;
 	nl->pos_ini = nl->pos;
 	//animID
-	nl->fidTexture.Init(0, 0);
+	nl->fidTexture.Init( 0, 0 );
 	nl->nProfileID = profileID;
 	nl->fRadius = fRadius;
 	nl->color = dwColor;
@@ -402,7 +407,7 @@ void CLevel::UpdateDirtyRects()
 					CTile* tlU = area->GetTile( xx, yy - 1 );
 					CTile* tlD = area->GetTile( xx, yy + 1 );
 					///--- set wall flags on non walkable tiles for shadows and other 
-					if ( FLAG_NONE(tl->flags, K_TILEFLAG_WALKABLE) && FLAG_NONE(tl->flags, K_TILEFLAG_UNDER_FLOOR) )
+					if ( FLAG_NONE( tl->flags, K_TILEFLAG_WALKABLE ) && FLAG_NONE( tl->flags, K_TILEFLAG_UNDER_FLOOR ) )
 					{
 						// clear flags
 						FLAGOP_CLEAR( tl->flags, K_TILEFLAG_HASWALL_MASK | K_TILEFLAG_WALLENDING_MASK );
@@ -460,7 +465,7 @@ void CLevel::UpdateDirtyRects()
 
 					// only walls and floor get shadowed, when having a non walkable tile on the left (hole in the floor usually, but not water hole)
 					bool bCanReceive = ( ( tl->tileIDs[K_TILE_LAYER_FLOOR] >= 0 ) || ( tl->tileIDs[K_TILE_LAYER_WALLS] >= 0 ) ) &&
-						( tlL ) && ( tlL->tileIDs[K_TILE_LAYER_FLOOR] < 0 ) && ((tlL->flags & K_TILEFLAG_UNDER_FLOOR) == 0) &&
+						( tlL ) && ( tlL->tileIDs[K_TILE_LAYER_FLOOR] < 0 ) && ( ( tlL->flags & K_TILEFLAG_UNDER_FLOOR ) == 0 ) &&
 						( tl->tileIDs[K_TILE_LAYER_CEILING] < 0 );
 
 					if ( bCanReceive )
@@ -555,7 +560,7 @@ OPRESULT CLevel::Areas_PaintLayer( eAreaLayer layerIdx )
 
 bool CLevel::Areas_IsLayerVisible( eAreaLayer layerIdx )
 {
-	for ( auto area: m_arrAreas )
+	for ( auto area : m_arrAreas )
 	{
 		if ( area->IsLayerMeshVisible( layerIdx ) )
 			return true;
@@ -602,7 +607,7 @@ CTile* CLevel::Areas_GetTileAt( Vec2 vPos )
 	CLevelArea* area = Areas_GetAt( vPos );
 	if ( area == nullptr )
 		return nullptr;
-	return area->GetTile( (int)floor(vPos.x / K_TILE_SIZE_F), (int)floor(vPos.y / K_TILE_SIZE_F) );
+	return area->GetTile( (int)floor( vPos.x / K_TILE_SIZE_F ), (int)floor( vPos.y / K_TILE_SIZE_F ) );
 }
 
 void CLevel::Areas_GetTilesSnapshot( RectXYWHi srcRectTL, CTile** arrTiles, int arrCapacity )
@@ -900,7 +905,7 @@ int CLevel::SmoothPathEx( CActor * act, Vec2* arrInPoints, int arrInItems, Vec2*
 			}
 			// we can't see this point so we save last point as checkpoint and start again
 			//else if ( !IsLineOfSight( vFrom, arrInPoints[tocur] ) )
-			else if ( Areas_IsBoxColliding(fromaabb, arrInPoints[tocur] - vFrom, true) )
+			else if ( Areas_IsBoxColliding( fromaabb, arrInPoints[tocur] - vFrom, true ) )
 			{
 				// if next point isn't visible (some engine element blocking the way or something)
 				// then just add it as a checkpoint instead of returning invalid smoothing
@@ -1058,7 +1063,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 		templ->eCaps |= K_ACT_CAPS_CAN_INTERACT;
 	//other
 	if ( !actnode.attribute( L"class" ).empty() )
-		templ->actorClass = ( EActorClass ) GetListIndexByName( actnode.attribute( L"class" ).value(), EActorClassNames, ARRAY_SIZE( EActorClassNames ) );
+		templ->actorClass = (EActorClass)GetListIndexByName( actnode.attribute( L"class" ).value(), EActorClassNames, ARRAY_SIZE( EActorClassNames ) );
 	if ( !actnode.attribute( L"sWeapon" ).empty() )
 		templ->shWeaponDefault.Init( actnode.attribute( L"sWeapon" ).value() );
 	if ( !actnode.attribute( L"sAIstate" ).empty() )
@@ -1164,7 +1169,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 		//parcurg nodurile de stari
 		for ( pugi::xml_node statenode = aiignorenode.first_child(); statenode; statenode = statenode.next_sibling() )
 		{
-			EAIEventType nevttype = ( EAIEventType ) GetListIndexByName( statenode.attribute( L"type" ).value(), EAIEventTypeNames, ARRAY_SIZE( EAIEventTypeNames ) );
+			EAIEventType nevttype = (EAIEventType)GetListIndexByName( statenode.attribute( L"type" ).value(), EAIEventTypeNames, ARRAY_SIZE( EAIEventTypeNames ) );
 			if ( nevttype >= 0 )
 			{
 				aitemplate->m_arrIgnoredEvents.Add( nevttype );
@@ -1198,7 +1203,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 					if ( evtTypeStr.textHash == FastHash( L"any" ) )
 						nevt = K_AIEVT_ANY;
 					else
-						nevt = ( EAIEventType ) GetListIndexByName( eventnode.attribute( L"type" ).value(), EAIEventTypeNames, ARRAY_SIZE( EAIEventTypeNames ) );
+						nevt = (EAIEventType)GetListIndexByName( eventnode.attribute( L"type" ).value(), EAIEventTypeNames, ARRAY_SIZE( EAIEventTypeNames ) );
 
 					nstate->m_arrTriggeringEventTypes.Add( nevt );
 				}
@@ -1210,7 +1215,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 				for ( pugi::xml_node behnode = behaviorsparent.first_child(); behnode; behnode = behnode.next_sibling() )
 				{
 					CAIBehavior nbeh;
-					nbeh.nType = ( EAIBehaviorType ) GetListIndexByName( behnode.attribute( L"name" ).value(), EAIBehaviorTypeNames, ARRAY_SIZE( EAIBehaviorTypeNames ) );
+					nbeh.nType = (EAIBehaviorType)GetListIndexByName( behnode.attribute( L"name" ).value(), EAIBehaviorTypeNames, ARRAY_SIZE( EAIBehaviorTypeNames ) );
 					//salvam cativa params generici
 					if ( !behnode.attribute( L"bCanInterrupt" ).empty() )
 						nbeh.bCanInterrupt = behnode.attribute( L"bCanInterrupt" ).as_bool();
@@ -1340,10 +1345,10 @@ IActiveInterface* CLevel::GetIActiveInterfacePtr( int editorID )
 			return m_arrColShapes[kk];
 	}
 	// check actors
-	for ( int kk = 0; kk < m_arrActors.Count(); kk++ )
+	for ( auto node: m_arrActors )
 	{
-		if ( m_arrActors[kk]->ID == editorID )
-			return m_arrActors[kk];
+		if ( node->m_data.ID == editorID )
+			return &node->m_data;
 	}
 
 	return nullptr;
@@ -1363,19 +1368,19 @@ IActiveInterface* CLevel::GetIActiveInterfacePtr_byUID( UINT32 UID )
 				return area->m_arrProps[kk];
 		}
 	}
-	//verifica si actorii
-	for ( int kk = 0; kk < m_arrActors.Count(); kk++ )
+	// check actors
+	for ( auto node: m_arrActors )
 	{
-		if ( m_arrActors[kk]->GetUID() == UID )
-			return m_arrActors[kk];
+		if ( node->m_data.GetUID() == UID )
+			return &node->m_data;
 	}
-	//check lights - mai putin probabil
+	//check lights - less probable
 	for ( int kk = 0; kk < m_arrLights.GetSize(); kk++ )
 	{
 		if ( m_arrLights[kk]->GetUID() == UID )
 			return m_arrLights[kk];
 	}
-	//check collision boxes - foarte putin probabil
+	//check collision boxes - even less probable
 	for ( int kk = 0; kk < m_arrColShapes.GetSize(); kk++ )
 	{
 		if ( m_arrColShapes[kk]->GetUID() == UID )
@@ -1389,10 +1394,10 @@ CActor* CLevel::GetActorByUID( UINT32 UID )
 {
 	if ( UID == 0 )
 		return nullptr;
-	for ( int kk = 0; kk < m_arrActors.Count(); kk++ )
+	for ( auto node: m_arrActors )
 	{
-		if ( m_arrActors[kk]->GetUID() == UID )
-			return m_arrActors[kk];
+		if ( node->m_data.GetUID() == UID )
+			return &node->m_data;
 	}
 	return nullptr;
 }
@@ -1499,7 +1504,7 @@ void CLevel::SetLevelState( ELevelState eNewState, int nLevelStateParam )
 		case K_LVL_STATE_PLAYING:
 		{
 			// save level start time
-			m_arrStats[K_LVL_STATS_LEVEL_START_SEC] = ( int ) floor( fLocalTimeline );
+			m_arrStats[K_LVL_STATS_LEVEL_START_SEC] = (int)floor( fLocalTimeline );
 
 			m_levelSubState = 0;
 			m_levelStateTimer = 0.0f;
@@ -1548,7 +1553,7 @@ void CLevel::SetLevelState( ELevelState eNewState, int nLevelStateParam )
 			g_ChatWnd.CancelInput();
 #endif
 			//save level finished time
-			m_arrStats[K_LVL_STATS_LEVEL_END_SEC] = ( int ) floor( fLocalTimeline );
+			m_arrStats[K_LVL_STATS_LEVEL_END_SEC] = (int)floor( fLocalTimeline );
 			//remove any interfaces that might be shown
 			__GUI().RemoveAllLayers();
 
@@ -1602,7 +1607,7 @@ void CLevel::SetLevelState( ELevelState eNewState, int nLevelStateParam )
 			g_ChatWnd.CancelInput();
 #endif
 			//save level finished time
-			m_arrStats[K_LVL_STATS_LEVEL_END_SEC] = ( int ) floor( fLocalTimeline );
+			m_arrStats[K_LVL_STATS_LEVEL_END_SEC] = (int)floor( fLocalTimeline );
 			//remove any interfaces that might be shown
 			__GUI().RemoveAllLayers();
 
@@ -1740,25 +1745,25 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 
 					//do not delete! shows occluders instead of mesh. Checked for consistency.
 					int nVertCnt = 0;
-					for (int kk = 0; kk < nOccluders; kk++)
+					for ( int kk = 0; kk < nOccluders; kk++ )
 					{
 						Vec3 vnrm = arrOccluders[kk].vStart + arrOccluders[kk].vN * 10.0f;
 						//temp_arrVerts[nVertCnt].pos = Vec3(nl->pos.xy.x, nl->pos.xy.y, 0.0f);
 						temp_arrVerts[nVertCnt].pos = Vec3( vnrm.x, vnrm.y, 0.0f );
 						temp_arrVerts[nVertCnt].color = 0x00ffffff; nVertCnt++;
-						temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vStart);
+						temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0( arrOccluders[kk].vStart );
 						temp_arrVerts[nVertCnt].color = 0xff00ff00; nVertCnt++;
-						temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0(arrOccluders[kk].vEnd);
+						temp_arrVerts[nVertCnt].pos = Vec2ToVec3XY0( arrOccluders[kk].vEnd );
 						temp_arrVerts[nVertCnt].color = 0xff0000ff; nVertCnt++;
 					}
-					 
-					if (nVertCnt > 3)
+
+					if ( nVertCnt > 3 )
 					{
-						m_bufferedPainter.BeginMesh(nl->m_nLightMeshIdx);
-						m_bufferedPainter.AddTriangles(temp_arrVerts, nVertCnt / 3);
+						m_bufferedPainter.BeginMesh( nl->m_nLightMeshIdx );
+						m_bufferedPainter.AddTriangles( temp_arrVerts, nVertCnt / 3 );
 						m_bufferedPainter.EndMesh();
 					}
-					
+
 #else				
 					if ( nl->IsDirty() )
 					{
@@ -2086,7 +2091,7 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 void CLevel::AddDirtyRect( int x, int y, int w, int h )
 {
 	//#TODO: should check existing dirty rects and only add if not contained. 
-	m_arrDirtyRectsTL.emplace_back( RectXYWHi( x, y, w, h) );
+	m_arrDirtyRectsTL.emplace_back( RectXYWHi( x, y, w, h ) );
 }
 
 void CLevel::SetActorWeaponPerks( CActor * pActor, CWeapon * pWeapon )
@@ -2232,8 +2237,9 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 	CActor* retvalenemy = nullptr;
 
 	float minDistSq = 1000000.0f;
-	for ( auto enemy : m_arrActors )
+	for ( auto node : m_arrActors )
 	{
+		CActor* enemy = &node->m_data;
 		if ( enemy == nullptr || enemy == sourceActor )
 			continue;
 		//never attack same class
@@ -2294,9 +2300,9 @@ CActor * CLevel::GetClosestActorByTemplateName( CActor * sourceActor, WCHAR * sT
 	CActor* retvalenemy = nullptr;
 	UINT32 nTargetNameHash = FastHash( sTargetTemplateName );
 
-	for ( int kk = 0; kk < m_arrActors.GetSize(); kk++ )
+	for ( auto node: m_arrActors )
 	{
-		CActor* enemy = m_arrActors[kk];
+		CActor* enemy = &node->m_data;
 		if ( ( enemy == nullptr ) || ( enemy == sourceActor ) || ( enemy->_template.shID.textHash != nTargetNameHash ) || ( !enemy->IsAlive() ) )
 			continue;
 		if ( ( enemy->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET ) != 0 )
@@ -2380,14 +2386,15 @@ void CLevel::CleanupDeadObjects()
 	}
 
 	//check actors
-	for ( int kk = m_arrActors.GetSize() - 1; kk >= 0; kk-- )
+	for ( auto node : m_arrActors )
 	{
-		if ( m_arrActors[kk]->CanBeReleased() )
+		CActor* act = &node->m_data;
+		if ( act->CanBeReleased() )
 		{
-			LOG( L"Released actor: %s", m_arrActors[kk]->_template.shID.text );
-			// now release it (destructor)
-			SAFE_DELETE( m_arrActors[kk] );
-			m_arrActors.Remove( kk );
+			LOG( L"Released actor: %s", act->_template.shID.text );
+			// now release it
+			act->Dispose();
+			m_arrActors.Dismiss( node );
 		}
 	}
 
@@ -2454,9 +2461,9 @@ void CLevel::UpdateAI( float dTime, bool bInEditor )
 
 	//check actors - must be done after moving platforms (usually last is best)
 	double fHashKey = 0.0f;
-	for ( int kk = m_arrActors.GetSize() - 1; kk >= 0; kk-- )
+	for ( auto node : m_arrActors )
 	{
-		CActor* act = m_arrActors[kk];
+		CActor* act = &node->m_data;
 		if ( !bInEditor )
 		{
 			act->Update( dTime );
@@ -2483,7 +2490,7 @@ void CLevel::UpdateAI( float dTime, bool bInEditor )
 #else
 		m_dwSyncCheckHash = 0;
 #endif
-	}
+}
 }
 
 int CLevel::GetNextRandomLevel()
@@ -2633,9 +2640,9 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 								//update selection screen too !!! used in respawn
 								g_playerSelScr.m_arrPlayers[plidx].nInstanceID = ctrlr->nSDLInstanceId;
 								//load saved type for panel
-								EPSSPlayerClass eType = ( EPSSPlayerClass ) g_userData[K_MEMID_PANEL1_CLASS + plidx * ( K_MEMID_PANEL2_CLASS - K_MEMID_PANEL1_CLASS )];
+								EPSSPlayerClass eType = (EPSSPlayerClass)g_userData[K_MEMID_PANEL1_CLASS + plidx * ( K_MEMID_PANEL2_CLASS - K_MEMID_PANEL1_CLASS )];
 								//set hot join selection
-								m_arrPlayerSelHotJoin[plidx] = ( int ) eType;
+								m_arrPlayerSelHotJoin[plidx] = (int)eType;
 								//daca nu a fost facuta selectie in selScreen pun pe default first class
 								if ( ( m_arrPlayerSelHotJoin[plidx] < 0 ) || ( m_arrPlayerSelHotJoin[plidx] >= K_PSS_CLASSES_COUNT ) )
 								{
@@ -2664,7 +2671,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 									( ctrlr->sCommands.keyState[K_CM_COMMAND_JUMP] == K_CM_BUTSTATE_JUSTRELEASED ) )
 								{
 									//set hot join selection
-									m_arrPlayerSelHotJoin[plidx] = ( int ) g_playerSelScr.m_arrPlayers[plidx].eType;
+									m_arrPlayerSelHotJoin[plidx] = (int)g_playerSelScr.m_arrPlayers[plidx].eType;
 									//daca nu a fost facuta selectie in selScreen pun pe default first class
 									if ( m_arrPlayerSelHotJoin[plidx] < 0 )
 									{
@@ -2721,9 +2728,9 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 								if ( bSpawnIt )
 								{
 									//set selScreen too for next spawn. If player is different from the selection it resets the selection
-									if ( g_playerSelScr.m_arrPlayers[plidx].eType != ( EPSSPlayerClass ) m_arrPlayerSelHotJoin[plidx] )
+									if ( g_playerSelScr.m_arrPlayers[plidx].eType != (EPSSPlayerClass)m_arrPlayerSelHotJoin[plidx] )
 									{
-										g_playerSelScr.m_arrPlayers[plidx].Init( ( EPSSPlayerClass ) m_arrPlayerSelHotJoin[plidx] );
+										g_playerSelScr.m_arrPlayers[plidx].Init( (EPSSPlayerClass)m_arrPlayerSelHotJoin[plidx] );
 										g_playerSelScr.m_arrPlayers[plidx].bSelected = true; //marcheaza ca si cum as fi selectat in ecranul anterior
 									}
 									g_playerSelScr.m_arrPlayers[plidx].nInstanceID = ctrlr->nSDLInstanceId;
@@ -3079,7 +3086,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						//--- PL1 data ---
 						float fAccuracyP1 = 1.0f;
 						if ( m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0 )
-							fAccuracyP1 = ( float ) m_arrStats[K_LVL_STATS_PL1_BULLETS_HIT] / ( float ) m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT];
+							fAccuracyP1 = (float)m_arrStats[K_LVL_STATS_PL1_BULLETS_HIT] / (float)m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT];
 						CLAMP( fAccuracyP1, 0.0f, 1.0f );
 						__Texts().SetString( STR_MISSION_P1_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL1_KILLS] );
 						if ( m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0 )
@@ -3091,7 +3098,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						//--- PL2 data ---
 						float fAccuracyP2 = 1.0f;
 						if ( m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0 )
-							fAccuracyP2 = ( float ) m_arrStats[K_LVL_STATS_PL2_BULLETS_HIT] / ( float ) m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT];
+							fAccuracyP2 = (float)m_arrStats[K_LVL_STATS_PL2_BULLETS_HIT] / (float)m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT];
 						CLAMP( fAccuracyP2, 0.0f, 1.0f );
 						__Texts().SetString( STR_MISSION_P2_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL2_KILLS] );
 						if ( m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0 )
@@ -3125,8 +3132,8 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 
 						///--- SCORE ---
 						int nTotalLevelScore = nStars * 1500;
-						nTotalLevelScore += ( int ) ceil( ( float ) m_arrStats[K_LVL_STATS_PL1_KILLS] * fAccuracyP1 * 150.0f ) + m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED] * 300 - m_arrStats[K_LVL_STATS_PL1_DEATHS] * 200;
-						nTotalLevelScore += ( int ) ceil( ( float ) m_arrStats[K_LVL_STATS_PL2_KILLS] * fAccuracyP2 * 150.0f ) + m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED] * 300 - m_arrStats[K_LVL_STATS_PL2_DEATHS] * 200;
+						nTotalLevelScore += (int)ceil( (float)m_arrStats[K_LVL_STATS_PL1_KILLS] * fAccuracyP1 * 150.0f ) + m_arrStats[K_LVL_STATS_PL1_HOSTAGES_SAVED] * 300 - m_arrStats[K_LVL_STATS_PL1_DEATHS] * 200;
+						nTotalLevelScore += (int)ceil( (float)m_arrStats[K_LVL_STATS_PL2_KILLS] * fAccuracyP2 * 150.0f ) + m_arrStats[K_LVL_STATS_PL2_HOSTAGES_SAVED] * 300 - m_arrStats[K_LVL_STATS_PL2_DEATHS] * 200;
 						//add civilians score
 						nTotalLevelScore += m_arrStats[K_LVL_STATS_CIVILIANS_ARRESTED] * 100;
 						nTotalLevelScore -= m_arrStats[K_LVL_STATS_CIVILIANS_KILLED] * 80;
@@ -3145,7 +3152,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						int nTotalXPPoints = Local_ComputeMissionXP( nStars );
 
 						//--- STARS WINDOW ---
-						OS_FormatTime( tmpstr, MAX_PATH, ( float ) ( nTimeSpent ) );
+						OS_FormatTime( tmpstr, MAX_PATH, (float)( nTimeSpent ) );
 						__Texts().SetString( STR_MISSION_TIME, tmpstr );
 						__Texts().SetString( STR_MISSION_CASUALTIES, L"%d", m_arrStats[K_LVL_STATS_PL1_DEATHS] + m_arrStats[K_LVL_STATS_PL2_DEATHS] );
 						__Texts().SetString( STR_MISSION_SCORE, L"%d", nTotalLevelScore );
@@ -3174,7 +3181,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 									g_levelStats[nLevelIdx].nBestTimeSec_Solo = nTimeSpent;
 							}
 							//XP points	save
-							int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+							int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
 							nXPpl1 = g_userData[nPlBaseIdx];
 							inc_limit( g_userData[nPlBaseIdx], nTotalXPPoints, nMaxXPPoints );
 						}
@@ -3193,17 +3200,17 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 							if ( !UTApp().IsGameNetworked() )
 							{
 								//in local coop you only get half the XP for each player
-								int nPl1BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+								int nPl1BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
 								nXPpl1 = g_userData[nPl1BaseIdx]; //save old value
 								inc_limit( g_userData[nPl1BaseIdx], nTotalXPPoints / 2, nMaxXPPoints );
-								int nPl2BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
+								int nPl2BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[1].eType;
 								nXPpl2 = g_userData[nPl2BaseIdx]; //save old value
 								inc_limit( g_userData[nPl2BaseIdx], nTotalXPPoints / 2, nMaxXPPoints );
 							}
 							else
 							{
 								//in network games each player gets it's own
-								int nMyPlayerBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[g_netlock.Net_GetPlayerIndex()].eType;
+								int nMyPlayerBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[g_netlock.Net_GetPlayerIndex()].eType;
 								g_userData[nMyPlayerBaseIdx] += nTotalXPPoints;
 								CLAMP( g_userData[nMyPlayerBaseIdx], 0, nMaxXPPoints );
 							}
@@ -3299,12 +3306,12 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 									//portrete								
 									if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" ) ) != nullptr )
 									{
-										ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
+										ctrl->paramsDict.SetVarINT32( L"setFrame", (int)g_playerSelScr.m_arrPlayers[0].eType );
 									}
 									//XP bar
 									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
 									{
-										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
 										ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
 										ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
 									}
@@ -3325,11 +3332,11 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 									//portrete								
 									if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" ) ) != nullptr )
 									{
-										ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
+										ctrl->paramsDict.SetVarINT32( L"setFrame", (int)g_playerSelScr.m_arrPlayers[0].eType );
 									}
 									if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL2" ) ) != nullptr )
 									{
-										ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[1].eType );
+										ctrl->paramsDict.SetVarINT32( L"setFrame", (int)g_playerSelScr.m_arrPlayers[1].eType );
 									}
 								}
 
@@ -3376,13 +3383,13 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 									//XP bar
 									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
 									{
-										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
 										ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
 										ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
 									}
 									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
 									{
-										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
+										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[1].eType;
 										ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl2 );
 										ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
 									}
@@ -3582,7 +3589,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						//--- PL1 data ---
 						float fAccuracyP1 = 1.0f;
 						if ( m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0 )
-							fAccuracyP1 = ( float ) m_arrStats[K_LVL_STATS_PL1_BULLETS_HIT] / ( float ) m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT];
+							fAccuracyP1 = (float)m_arrStats[K_LVL_STATS_PL1_BULLETS_HIT] / (float)m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT];
 						CLAMP( fAccuracyP1, 0.0f, 1.0f );
 						__Texts().SetString( STR_MISSION_P1_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL1_KILLS] );
 						if ( m_arrStats[K_LVL_STATS_PL1_BULLETS_SHOT] > 0 )
@@ -3594,7 +3601,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						//--- PL2 data ---
 						float fAccuracyP2 = 1.0f;
 						if ( m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0 )
-							fAccuracyP2 = ( float ) m_arrStats[K_LVL_STATS_PL2_BULLETS_HIT] / ( float ) m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT];
+							fAccuracyP2 = (float)m_arrStats[K_LVL_STATS_PL2_BULLETS_HIT] / (float)m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT];
 						CLAMP( fAccuracyP2, 0.0f, 1.0f );
 						__Texts().SetString( STR_MISSION_P2_KILLS, L"%d", m_arrStats[K_LVL_STATS_PL2_KILLS] );
 						if ( m_arrStats[K_LVL_STATS_PL2_BULLETS_SHOT] > 0 )
@@ -3611,7 +3618,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 
 						//--- STARS WINDOW ---
 						int nTimeSpent = m_arrStats[K_LVL_STATS_LEVEL_END_SEC] - m_arrStats[K_LVL_STATS_LEVEL_START_SEC];
-						OS_FormatTime( tmpstr, MAX_PATH, ( float ) ( nTimeSpent ) );
+						OS_FormatTime( tmpstr, MAX_PATH, (float)( nTimeSpent ) );
 						__Texts().SetString( STR_MISSION_TIME, tmpstr );
 
 						//--- SAVE LEVEL DATA ---
@@ -3625,7 +3632,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						if ( nPlayers == 1 )
 						{
 							//XP points	save
-							int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+							int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
 							nXPpl1 = g_userData[nPlBaseIdx];
 							inc_limit( g_userData[nPlBaseIdx], nTotalXPPoints, nMaxXPPoints );
 						}
@@ -3635,17 +3642,17 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 							if ( !UTApp().IsGameNetworked() )
 							{
 								//in local coop you only get half the XP for each player
-								int nPl1BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+								int nPl1BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
 								nXPpl1 = g_userData[nPl1BaseIdx]; //save old value
 								inc_limit( g_userData[nPl1BaseIdx], nTotalXPPoints / 2, nMaxXPPoints );
-								int nPl2BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
+								int nPl2BaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[1].eType;
 								nXPpl2 = g_userData[nPl2BaseIdx]; //save old value
 								inc_limit( g_userData[nPl2BaseIdx], nTotalXPPoints / 2, nMaxXPPoints );
 							}
 							else
 							{
 								//in network games each player gets it's own
-								int nMyPlayerBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[g_netlock.Net_GetPlayerIndex()].eType;
+								int nMyPlayerBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[g_netlock.Net_GetPlayerIndex()].eType;
 								g_userData[nMyPlayerBaseIdx] += nTotalXPPoints;
 								CLAMP( g_userData[nMyPlayerBaseIdx], 0, nMaxXPPoints );
 							}
@@ -3679,12 +3686,12 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 								ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" );
 								if ( ctrl )
 								{
-									ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
+									ctrl->paramsDict.SetVarINT32( L"setFrame", (int)g_playerSelScr.m_arrPlayers[0].eType );
 								}
 								//XP bar
 								if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
 								{
-									int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+									int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
 									ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
 									ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
 								}
@@ -3726,11 +3733,11 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 								//portrete								
 								if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL1" ) ) != nullptr )
 								{
-									ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[0].eType );
+									ctrl->paramsDict.SetVarINT32( L"setFrame", (int)g_playerSelScr.m_arrPlayers[0].eType );
 								}
 								if ( ( ctrl = layer->GetControlByName( "CTRL_ANIM_PORTRAIT_PL2" ) ) != nullptr )
 								{
-									ctrl->paramsDict.SetVarINT32( L"setFrame", ( int ) g_playerSelScr.m_arrPlayers[1].eType );
+									ctrl->paramsDict.SetVarINT32( L"setFrame", (int)g_playerSelScr.m_arrPlayers[1].eType );
 								}
 
 								//network - replace player names with real ones
@@ -3777,13 +3784,13 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 									//XP bar
 									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL1" ) ) != nullptr )
 									{
-										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[0].eType;
+										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[0].eType;
 										ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl1 );
 										ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
 									}
 									if ( ( ctrl = layer->GetControlByName( "CTRL_XPBAR_PL2" ) ) != nullptr )
 									{
-										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + ( int ) g_playerSelScr.m_arrPlayers[1].eType;
+										int nPlBaseIdx = K_MEMID_TOTALXP_PER_CLASS_START + (int)g_playerSelScr.m_arrPlayers[1].eType;
 										ctrl->paramsDict.SetVarINT32( L"nOldValue", nXPpl2 );
 										ctrl->paramsDict.SetVarINT32( L"nNewValue", g_userData[nPlBaseIdx] );
 									}
@@ -4238,11 +4245,11 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 		{
 			case K_VST_ACTOR:
 			{
-				CActor* act = static_cast< CActor* >( vis->pPtr );
+				CActor* act = static_cast<CActor*>( vis->pPtr );
 				act->Paint( eTexChannel );
 
 				//#TEMP: paint target position
-				UTSprite::PaintFModule( &m_sprInterface, act->GetAI()->AIsensor.vGoTo + Vec2(2.0f, 2.0f), ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0, 0x88ff0000 );
+				UTSprite::PaintFModule( &m_sprInterface, act->GetAI()->AIsensor.vGoTo + Vec2( 2.0f, 2.0f ), ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0, 0x88ff0000 );
 				//#TEMP: paint waypoints
 				for ( int ll = 0; ll < act->GetAI()->AIsensor.arrGoToPoints.Count(); ll++ )
 				{
@@ -4250,17 +4257,17 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 					UTSprite::PaintFModule( &m_sprInterface, pathpt, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0, 0x880000ff );
 				}
 
-				/*				
+				/*
 				VecProj vpMuzz = act->GetCurWeaponMuzzleWorld();
 				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy.x, vpMuzz.xy.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x88ff0000 );
 				UTSprite::PaintFrame( &m_sprInterface, vpMuzz.xy_proj.x, vpMuzz.xy_proj.y, ANM_IGM_INTERFACE_SPR_IGM_STRATEGIC_EFFECTS, 4, 0x8800ff00 );
 				*/
-				
+
 			}
 			break;
 			case K_VST_PROP:
 			{
-				CProp *prop = static_cast< CProp* >( vis->pPtr );
+				CProp *prop = static_cast<CProp*>( vis->pPtr );
 				prop->sprite.PaintFModule_texOverride( 0, nTexIdxOffset );
 			}
 			break;
@@ -4471,7 +4478,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 		CVisibleSortable* vis = &m_visibleList.arrSortedItems.m_pData[kk];
 		if ( vis->eType != K_VST_ACTOR )
 			continue;
-		CActor* act = static_cast< CActor* >( vis->pPtr );
+		CActor* act = static_cast<CActor*>( vis->pPtr );
 		UTSprite::PaintFModule( spr_lights, act->pos.xy, ANM_LIGHTS_SPR_CHAR_SHADOWS, 0, 0 );
 	}
 	__Painter().Flush();
@@ -4496,8 +4503,8 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	// VS
 	__Shaders().SetVSByName( L"VS_POINTLIGHT" );
 	__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-	__Shaders().SetVSConstantF( 0, ( float* ) &matWVP, 4 );
-	__Shaders().SetVSConstantF( 4, ( float* ) fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
+	__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+	__Shaders().SetVSConstantF( 4, (float*)fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
 	// PS
 	__Shaders().SetPSByName( L"PS_POINTLIGHT" );
 
@@ -4517,7 +4524,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 			// xyz: light world position
 			{ nl->pos.xyz.x, nl->pos.xyz.y, nl->pos.xyz.z, 0.0f }
 		};
-		__Shaders().SetPSConstantF( 0, ( float* ) fConstData, ARRAY_SIZE( fConstData ) );
+		__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 		m_bufferedPainter.DrawMesh( nl->m_nLightMeshIdx, false );
 	}
 
@@ -4532,8 +4539,8 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 
 	__Shaders().SetVSByName( L"VS_PROJECTEDDIR" );
 	__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-	__Shaders().SetVSConstantF( 0, ( float* ) &matWVP, 4 );
-	__Shaders().SetVSConstantF( 4, ( float* ) fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
+	__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+	__Shaders().SetVSConstantF( 4, (float*)fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
 
 	__Shaders().SetPSByName( L"PS_PROJECTEDDIR" );
 	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
@@ -4557,7 +4564,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 			// xy: UL tex spot coords; zw: WH spot width height
 			{ nl->lTexRect.left, nl->lTexRect.top, nl->lTexRect.right - nl->lTexRect.left, nl->lTexRect.bottom - nl->lTexRect.top }
 		};
-		__Shaders().SetPSConstantF( 0, ( float* ) fConstData, ARRAY_SIZE( fConstData ) );
+		__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 		m_bufferedPainter.DrawMesh( nl->m_nLightMeshIdx, false );
 	}
 
@@ -4571,8 +4578,8 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	// VS
 	__Shaders().SetVSByName( L"VS_POINTLIGHT" );
 	__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-	__Shaders().SetVSConstantF( 0, ( float* ) &matWVP, 4 );
-	__Shaders().SetVSConstantF( 4, ( float* ) fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
+	__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+	__Shaders().SetVSConstantF( 4, (float*)fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
 	// PS
 	__Shaders().SetPSByName( L"PS_IESLIGHT" );
 
@@ -4584,7 +4591,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 			continue;
 
 		//the IES dot texture has 3 pixel lines per IES profile so we don't get interpolation problems
-		float IES_texV = ( float ) ( nl->nProfileID * 3 + 1 ) / ( float ) pIESTex->info.Height;
+		float IES_texV = (float)( nl->nProfileID * 3 + 1 ) / (float)pIESTex->info.Height;
 		//set Pshader constants
 		float fConstData[][4] = {
 			//x:light intensity, y:light radius, z: IES profile (V in texture coordinates)
@@ -4596,7 +4603,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 			// light direction normalized
 			{ nl->vnDir.x, nl->vnDir.y, nl->vnDir.z, 0.0f }
 		};
-		__Shaders().SetPSConstantF( 0, ( float* ) fConstData, ARRAY_SIZE( fConstData ) );
+		__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 		m_bufferedPainter.DrawMesh( nl->m_nLightMeshIdx, false );
 	}
 
@@ -4660,9 +4667,9 @@ OPRESULT CLevel::RenderPass_Composition( Mat* matProj, float fBetweenFramesPerce
 	//--- build RT rect ---
 	_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
 	vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
-	vur.pos = Vec3( ( float ) pRTcolor->nWidth, 0.0f, 0.0f );
-	vdl.pos = Vec3( 0.0f, ( float ) pRTcolor->nHeight, 0.0f );
-	vdr.pos = Vec3( ( float ) pRTcolor->nWidth, ( float ) pRTcolor->nHeight, 0.0f );
+	vur.pos = Vec3( (float)pRTcolor->nWidth, 0.0f, 0.0f );
+	vdl.pos = Vec3( 0.0f, (float)pRTcolor->nHeight, 0.0f );
+	vdr.pos = Vec3( (float)pRTcolor->nWidth, (float)pRTcolor->nHeight, 0.0f );
 
 	vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
 	vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
@@ -4678,7 +4685,7 @@ OPRESULT CLevel::RenderPass_Composition( Mat* matProj, float fBetweenFramesPerce
 	pVShader = __Shaders().GetVShaderByName( L"VS_COMPOSITION" );
 	m_pDevice->SetVertexShader( pVShader );
 	m_pDevice->SetVertexDeclaration( __Shaders()._VERTEX_PNCT4T4_decl );
-	m_pDevice->SetVertexShaderConstantF( 0, ( float* ) &matWVP, 4 );
+	m_pDevice->SetVertexShaderConstantF( 0, (float*)&matWVP, 4 );
 
 	pPShader = __Shaders().GetPShaderByName( L"PS_COMPOSITION" );
 	m_pDevice->SetPixelShader( pPShader );
@@ -4688,7 +4695,7 @@ OPRESULT CLevel::RenderPass_Composition( Mat* matProj, float fBetweenFramesPerce
 		// x:gamma, y:1.0f/gamma
 		{ fGamma, 1.0f / fGamma, ct_fLightMul, ct_fColorDodge}
 	};
-	m_pDevice->SetPixelShaderConstantF( 0, ( float* ) fConstData, ARRAY_SIZE( fConstData ) );
+	m_pDevice->SetPixelShaderConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 	m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
 	// remove VS PS
 	m_pDevice->SetVertexShader( nullptr );
@@ -4741,7 +4748,7 @@ OPRESULT CLevel::PaintGameFinalRT()
 
 	m_pDevice->SetTexture( 0, pRTfinal->m_pRTTexture );
 	UT3D::DrawRectUP_TL1T( m_pDevice, destRect, srcUV, 0xffffffff );
-	
+
 	//#TODO: explosion deforming effects and other stuff
 
 	return K_OP_OK;
@@ -4894,7 +4901,7 @@ void CLevel::Release()
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrColShapes );
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrLights );
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrDecals );
-	SAFE_DELETE_GROWABLE_ARRAY( m_arrActors );
+	m_arrActors.Release();
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrMiscObjects );
 
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrTemplatesActor );
@@ -4956,7 +4963,7 @@ int CLevel::BuildLightVolume360( CLight * light, _VERTEX_PNCT4T4 *outVerts, int 
 	sCollPoint	arrColl[nSteps];
 	int			arrCollCur = 0;
 
-	float		fAngStep = DOUBLE_PI / ( float ) nSteps;
+	float		fAngStep = DOUBLE_PI / (float)nSteps;
 	float		fAng = 0.0f;
 
 	const CAABB bbox_ini = light->bbox.GetSnapshot();
@@ -5095,7 +5102,7 @@ void CLevel::InitializeStrategicAbilities( int nPlayerOrdinal )
 	int nAbilityStringIdx = -1;
 	g_playerSelScr.GetUltimateAbility( &g_playerSelScr.m_arrPlayers[nPlayerOrdinal], eRetAbility, nAbilityStringIdx );
 	//si se salveaza in array-ul corespunzator
-	m_arrStrategicAbilities[nPlayerOrdinal][7] = ( int ) eRetAbility;
+	m_arrStrategicAbilities[nPlayerOrdinal][7] = (int)eRetAbility;
 	m_arrStrategicAbilitiesNames[nPlayerOrdinal][7] = nAbilityStringIdx;
 }
 
@@ -5185,8 +5192,8 @@ void CLevel::GiveStrategicPoints( float fPoints, Vec2 * vPos )
 	if ( m_nPlayers == 1 )
 		fMultiplier *= 2.0f;
 	//just making sure...
-	_ASSERT( ( fPoints >= 0.0f ) && ( fPoints <= ( float ) K_LVL_MAX_STRATEGIC_POINTS ) );
-	float fPointsGiven = LIMIT( fPoints, 0.0f, ( float ) K_LVL_MAX_STRATEGIC_POINTS );
+	_ASSERT( ( fPoints >= 0.0f ) && ( fPoints <= (float)K_LVL_MAX_STRATEGIC_POINTS ) );
+	float fPointsGiven = LIMIT( fPoints, 0.0f, (float)K_LVL_MAX_STRATEGIC_POINTS );
 
 	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 	{
@@ -5196,7 +5203,7 @@ void CLevel::GiveStrategicPoints( float fPoints, Vec2 * vPos )
 		int fMaxPoints = K_LVL_MAX_STRATEGIC_POINTS;
 
 		int nStatIdx = K_LVL_STATS_PL1_STRATEGIC_POINTS + pPlayerActor[kk]->nPlayerOrdinal * K_LVL_STATS_PLAYER_STATS_COUNT;
-		int nAdder = ( int ) floor( fMultiplier * fPointsGiven * 1000.0f );
+		int nAdder = (int)floor( fMultiplier * fPointsGiven * 1000.0f );
 		m_arrStats[nStatIdx] += nAdder;
 		CLAMP( m_arrStats[nStatIdx], 0, fMaxPoints * 1000 );
 	}
@@ -5365,7 +5372,7 @@ void CLevel::UpdatePhysicsPoints( float dTime )
 					}
 				}
 
-				// collision with shapes 
+				// collision with shapes
 				if ( point->nFlagsCollision & K_LVL_PHYSP_COLLFLAG_BOXES )
 				{
 					// (overwrite collpoint ONLY if closer and make other optimizations to see if we CAN collide with anything)
@@ -5554,7 +5561,7 @@ void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, 
 
 void CLevel::GenerateEffect( CStringHash & sEffectName, Vec2 pos, float fSize, DWORD color )
 {
-	ELVLEffectType effectidx = ( ELVLEffectType ) GetListIndexByNameHash( sEffectName.textHash, ELVLEffectTypeNames, ARRAY_SIZE( ELVLEffectTypeNames ) );
+	ELVLEffectType effectidx = (ELVLEffectType)GetListIndexByNameHash( sEffectName.textHash, ELVLEffectTypeNames, ARRAY_SIZE( ELVLEffectTypeNames ) );
 	GenerateEffect( effectidx, pos, fSize, color );
 }
 
@@ -5584,7 +5591,7 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 	CTile* arrTilesSnapshot[64 * 64];
 	// clear it on every run
 	memset( arrTilesSnapshot, null, sizeof( CTile* ) * ARRAY_SIZE( arrTilesSnapshot ) );
-	
+
 	int nCur = 0;
 
 	Vec2 vPos = vEye;
@@ -5634,7 +5641,7 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 	Vec2i tlmax( floor( bbox.vMax.x / K_TILE_SIZE_F ), floor( bbox.vMax.y / K_TILE_SIZE_F ) );
 	// limit to current level aabb in tiles
 	RectXYWHi lightAABB_TL( tlmin.x, tlmin.y, tlmax.x - tlmin.x + 1, tlmax.y - tlmin.y + 1 );
-	
+
 	// I didn't optimize the lightAABB by intersecting it with the level bbox because when outside the level it would clip and write to arrTilesSnapshot[] 
 	// but then when reading them back it would appear that they are higher because the null tiles don't get written
 	//leave commented: lightAABB_TL.IntersectWith( m_levelAABB_TL );
@@ -5661,11 +5668,11 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 			if ( chkbb.vMax.x > bbox.vMax.x ) chkbb.vMax.x = bbox.vMax.x;
 			if ( chkbb.vMin.x < bbox.vMin.x ) chkbb.vMin.x = bbox.vMin.x;
 
-			DWORD wall_id = yy + 100; 
+			DWORD wall_id = yy + 100;
 			if ( ( tl->flags & K_TILEFLAG_HASWALL_D ) && ( vPos.y > chkbb.vMax.y ) )
 			{
 				//optimize same wall: check last wall and if it's the same just make the occluder longer
-				if ( ( nCur > 0 ) && ( ( int ) pRetArr[nCur - 1].dwWallID == wall_id ) && ( pRetArr[nCur - 1].vEnd.x == chkbb.vMin.x ) )
+				if ( ( nCur > 0 ) && ( (int)pRetArr[nCur - 1].dwWallID == wall_id ) && ( pRetArr[nCur - 1].vEnd.x == chkbb.vMin.x ) )
 					pRetArr[nCur - 1].MoveEnd( chkbb.vMax, vPos );
 				else
 					/*ID is wall Y in tileset plus a value to not collide with the collbox ids */
@@ -5674,7 +5681,7 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 			else if ( ( tl->flags & K_TILEFLAG_HASWALL_U ) && ( vPos.y < chkbb.vMin.y ) )
 			{
 				//optimize same wall: check last wall and if it's the same just make the occluder longer
-				if ( ( nCur > 0 ) && ( ( int ) pRetArr[nCur - 1].dwWallID == wall_id ) && ( pRetArr[nCur - 1].vStart.x == chkbb.vMin.x ) )
+				if ( ( nCur > 0 ) && ( (int)pRetArr[nCur - 1].dwWallID == wall_id ) && ( pRetArr[nCur - 1].vStart.x == chkbb.vMin.x ) )
 					pRetArr[nCur - 1].MoveStart( Vec2( chkbb.vMax.x, chkbb.vMin.y ), vPos );
 				else
 					pRetArr[nCur++].Set( Vec2( chkbb.vMax.x, chkbb.vMin.y ), chkbb.vMin, vNYn, vPos, wall_id, 0.0f );
@@ -5715,14 +5722,14 @@ int CLevel::GetOccluderSegments( Vec2 vEye, CAABB bbox, COccluderSegment* pRetAr
 			DWORD wall_id = xx + 10000;
 			if ( ( tl->flags & K_TILEFLAG_HASWALL_R ) && ( vPos.x > chkbb.vMax.x ) )
 			{
-				if ( ( nCur > 0 ) && ( ( int ) pRetArr[nCur - 1].dwWallID == wall_id ) && ( pRetArr[nCur - 1].vStart.y == chkbb.vMin.y ) )
+				if ( ( nCur > 0 ) && ( (int)pRetArr[nCur - 1].dwWallID == wall_id ) && ( pRetArr[nCur - 1].vStart.y == chkbb.vMin.y ) )
 					pRetArr[nCur - 1].MoveStart( chkbb.vMax, vPos );
 				else
 					pRetArr[nCur++].Set( chkbb.vMax, Vec2( chkbb.vMax.x, chkbb.vMin.y ), vNXp, vPos, wall_id, 0.0f );
 			}
 			else if ( ( tl->flags & K_TILEFLAG_HASWALL_L ) && ( vPos.x < chkbb.vMin.x ) )
 			{
-				if ( ( nCur > 0 ) && ( ( int ) pRetArr[nCur - 1].dwWallID == wall_id ) && ( pRetArr[nCur - 1].vEnd.y == chkbb.vMin.y ) )
+				if ( ( nCur > 0 ) && ( (int)pRetArr[nCur - 1].dwWallID == wall_id ) && ( pRetArr[nCur - 1].vEnd.y == chkbb.vMin.y ) )
 					pRetArr[nCur - 1].MoveEnd( Vec2( chkbb.vMin.x, chkbb.vMax.y ), vPos );
 				else
 					pRetArr[nCur++].Set( chkbb.vMin, Vec2( chkbb.vMin.x, chkbb.vMax.y ), vNXn, vPos, wall_id, 0.0f );

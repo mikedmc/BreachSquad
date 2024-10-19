@@ -168,9 +168,9 @@ void CLevel::AddDoofer_Explo( UINT32 exploNameHash, VecProj pos, UINT32 dwOwnerU
 	if ( ( fMaxStun > 0.0f ) || ( explotemplate->cDoT.eType != CDamageOverTime::K_LVL_DoT_NONE ) )
 	{
 		//find all actors and damage them (linearly)
-		for ( int kk = 0; kk < m_arrActors.GetSize(); kk++ )
+		for ( auto node:m_arrActors )
 		{
-			CActor* act = m_arrActors[kk];
+			CActor* act = &node->m_data;
 			if ( ( !act->IsAlive() ) || ( act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET ) )
 				continue;
 			//never stun the hostages
@@ -211,9 +211,9 @@ void CLevel::AddDoofer_Explo( UINT32 exploNameHash, VecProj pos, UINT32 dwOwnerU
 	{
 		int nBombFrags = 0;
 		//find all actors and damage them (linearly)
-		for ( int kk = 0; kk < m_arrActors.GetSize(); kk++ )
+		for ( auto node : m_arrActors )
 		{
-			CActor* act = m_arrActors[kk];
+			CActor* act = &node->m_data;
 
 			if ( ( !act->IsEnabled() ) || ( act->_template.eCaps & K_ACT_CAPS_NOT_A_TARGET ) )
 				continue;

@@ -179,9 +179,9 @@ void CLevel::BuildVisibilityLists()
 	}
 	//actorii vizibili
 	m_visibleList.visible_actors.Clear();
-	for (int kk = 0; kk < m_arrActors.GetSize(); kk++)
+	for (auto node: m_arrActors)
 	{
-		CActor* actor = m_arrActors[kk];
+		CActor* actor = &node->m_data;
 		if ((actor->IsPendingKill()) || (actor->bSkipRender) || (!actor->IsEnabled()))
 			continue;
 		//must be painted?

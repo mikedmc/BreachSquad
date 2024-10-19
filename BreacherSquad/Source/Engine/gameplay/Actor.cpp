@@ -28,7 +28,8 @@ CActor::CActor() :
 	eLastPlayedVerse( K_LVL_ACT_VERSE_EMPTY ), fVerseCooldown( 0.0f ), nLastPlayedVerseSndIdx( -1 ),
 	eInteractState( K_STATE_NOTSET ), nInteractOptionsSelIdx( 0 ), eAttackStatus( K_ACT_ATTACK_IDLE ),
 	fStunTimer( 0.0f ),
-	level( nullptr ), nControllerInstanceID(-1)
+	level( nullptr ), nControllerInstanceID(-1),
+	c_graphics(nullptr), c_weapons(nullptr), c_AI(nullptr)
 {
 	ID = -1;
 }
@@ -76,6 +77,8 @@ void CActor::Init( Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CLevel* 
 
 void CActor::Dispose()
 {
+	if ( !bInitialized )
+		return;
 	CSmartLink::RemoveLink( &pClosestTouchable );
 	// remove used components received as pointers 
 	SAFE_DELETE( c_graphics );

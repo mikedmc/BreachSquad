@@ -168,8 +168,9 @@ void CLevel::UpdateBullets(float dTime)
 				}
 			}
 			// collision with actors
-			for ( auto actor : m_arrActors )
+			for ( auto node : m_arrActors )
 			{
+				CActor* actor = &node->m_data;
 				if ( ( !actor->IsAlive() ) || ( FLAG_ANY( actor->_template.eCaps, K_ACT_CAPS_NOT_A_TARGET ) ) )
 					continue;
 				// skip self class (no friendly fire)

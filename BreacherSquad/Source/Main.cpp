@@ -1461,7 +1461,7 @@ void CALLBACK OnFrameMove( PDEVICE pDevice, double fTime, float fElapsedTime_ori
 #if defined(K_NET_DISCONNECT_ON_DESYNC)
 					g_netlock.Net_LogFrameData( 10 );
 
-					LOG( L"-- scene actors %d --", __Sim().m_arrActors.GetSize() );
+					LOG( L"-- scene actors %d --", __Sim().m_arrActors.Count() );
 					/*
 					for (int ll = 0; ll < __Sim().m_arrActors.GetSize(); ll++)
 					{
