@@ -36,21 +36,19 @@ void CLevel::SpawnPlayer( Vec2 spawnPos, int nPlayerOrdinal, int nAnimset )
 		return;
 	}
 
-	CActor* nact = SpawnActor( spawnPos, L"act_breacher.xml" );
-
-	if ( nact )
-	{
-		pPlayerActor[nPlayerOrdinal] = nact;
-
-		//set controller
-		pPlayerActor[nPlayerOrdinal]->nPlayerOrdinal = nPlayerOrdinal;
-		pPlayerActor[nPlayerOrdinal]->nControllerInstanceID = m_arrPlayerControllersIIDs[nPlayerOrdinal];
-	}
-	else
+	GenKey actidx = SpawnActor( spawnPos, L"act_breacher.xml" );
+	if ( actidx.index < 0 )
 	{
 		ErrorBox( K_ERR_WARNING, L"Could not spawn actor!" );
 		return;
 	}
+
+	CActor* nact = m_arrActors.GetByKey( actidx );
+	pPlayerActor[nPlayerOrdinal] = nact;
+
+	//set controller
+	pPlayerActor[nPlayerOrdinal]->nPlayerOrdinal = nPlayerOrdinal;
+	pPlayerActor[nPlayerOrdinal]->nControllerInstanceID = m_arrPlayerControllersIIDs[nPlayerOrdinal];
 
 	//update backup template
 	nact->_template_ini = nact->_template;
@@ -106,13 +104,13 @@ void CLevel::SpawnPlayer( Vec2 spawnPos, int nPlayerOrdinal, int nAnimset )
 	}
 }
 
-CActor* CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHash* shStateOverride )
+GenKey CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHash* shStateOverride )
 {
 	CActorTemplate* acttemplate = Actor_LoadTemplate( strTemplateFileName );
 	if ( acttemplate == nullptr )
 	{
 		ErrorBox( K_ERR_WARNING, L"LoadLevel::Actor_GetTemplate - invalid template name: %s", strTemplateFileName );
-		return nullptr;
+		return { -1,-1 };
 	}
 
 	//copy template locally and customize it based on gear selection
@@ -175,7 +173,7 @@ CActor* CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHa
 	auto nactnode = m_arrActors.Hire();
 	if ( nactnode == nullptr )
 	{
-		return nullptr;
+		return { -1,-1 };
 	}
 
 	CActor* nact = &nactnode->m_data;
@@ -209,7 +207,7 @@ CActor* CLevel::SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHa
 
 	SAFE_DELETE( templateLocal );
 
-	return nact;
+	return nactnode->GetGenKey();
 }
 
 CProp* CLevel::SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFrameIdx )
@@ -5283,31 +5281,6 @@ void CLevel::UpdateDecals( float dTime )
 	*/
 }
 
-void CLevel::AddDecal_BloodSplat( Vec2 pos, bool bLarge, EActorClass eVictimClass )
-{
-	/*
-	//blood splats are sorted by size (ascending)
-	switch (eVictimClass)
-	{
-		default:
-		{
-			if (bLarge) //when dying
-			{
-				if (randompercent(70.0f))
-					AddDecal(K_LVL_DECAL_LAYER_BACKWALLS, pos, ANM_ACTIVES_SPR_BLOOD_SPLAT, 3 + randint(4), 0xffffffff);
-				else //add animated blood splats
-					AddDecal(K_LVL_DECAL_LAYER_BACKWALLS, pos, ANM_ACTIVES_SPR_BLOODSPLAT1_ANIM + randint(3), 0, 0xffffffff, true);
-			}
-			else
-			{
-				AddDecal(K_LVL_DECAL_LAYER_BACKWALLS, pos, ANM_ACTIVES_SPR_BLOOD_SPLAT, randint(3), 0xffffffff);
-			}
-		}
-		break;
-	}
-	*/
-}
-
 /*
 void CLevel::UpdatePhysicsPoints( float dTime )
 {
@@ -5525,31 +5498,6 @@ void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, 
 						{
 							__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, randint(2), &Vec2(pos.x + randfloatsgn(fSize), pos.y + randfloatsgn(fSize)), &g_vecGravityOld, &Vec2(randfloatsgn(60.0f), -10.0f - randfloat(40.0f)), 0.2f + randfloat(0.4f), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 1.5f, kk * 0.025f);
 						}
-						*/
-		}
-		break;
-		case K_FX_STARS_CONFETTI:
-		{
-			//			AddProp_Light(pos, ANM_LIGHTS_SPR_POINT1, 0.6f, 0.2f, 0x88FDB727, 3.0f * fSize);
-						//fire ring
-						/*
-						for (int kk = 0; kk < 30; kk++)
-						{
-							float ang = randfloat(DOUBLE_PI);
-							Vec2 vdir(cos(ang), sin(ang));
-							if (randompercent(50.0f))
-								__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK1, true, randint(2), &(pos + vdir * 10.0f), NULL, &(vdir * (40.0f + randfloat(20.0f))), 1.0f + randfloat(0.5f), 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 2.0f);
-							else
-								__Particles().AddParticle(ANM_PARTICLES_SPR_FIRESPARK2, true, 0, &(pos + vdir * 10.0f), NULL, &(vdir * (40.0f + randfloat(20.0f))), 1.0f + randfloat(0.5f), 1.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 2.0f);
-						}
-
-						//linii verticale
-						for (int kk = 0; kk < 6; kk++)
-						{
-							__Particles().AddParticle(ANM_PARTICLES_SPR_TELEPORT, false, 5 + randint(2), &Vec2(pos.x + randfloatsgn(8.0f), pos.y - 3), NULL, &Vec2(0.0f, -60.0f - randfloat(20.0f)), 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.2f, 0.2f, 0xffffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT, 0.0f, kk * 0.1f);
-						}
-						//add ring
-						__Particles().AddParticle(ANM_PARTICLES_SPR_GLOWS, false, 1, &pos, NULL, NULL, 0.2f, 0.2f, 10.0f, 0.0f, 0.0f, 0.1f, 0.3f, 0x55ffffff, K_PART_LAYER_RT_FRONT_NRM_LIGHT);
 						*/
 		}
 		break;

@@ -186,7 +186,7 @@ public:
 	// Spawns a player
 	void					SpawnPlayer( Vec2 spawnPos, int nPlayerOrdinal, int nAnimset = 0 );
 	// Spawns an actor (NPC)
-	CActor*					SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHash* shStateOverride = null );
+	GenKey					SpawnActor( Vec2 spawnPos, WCHAR* strTemplateFileName, CStringHash* shStateOverride = null );
 	// Spawns a new Active with empty properties
 	CProp*					SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nFrameIdx );
 	// Spawns a light
@@ -214,8 +214,6 @@ public:
 	CArray<CDecal*>			m_arrDecals;
 	void					AddDecal( EDecalLayer nLayer, Vec2 pos, int animIdx, int frameIdx = 0, DWORD color = 0xffffffff, bool bIsAnimated = false );
 	void					UpdateDecals( float dTime );
-	//adds a blood decal (bLarge when enemy was splattered)
-	void					AddDecal_BloodSplat( Vec2 pos, bool bLarge, EActorClass eVictimClass = K_ACT_CLASS_ANY );
 
 	///--- bullets linked pool ---
 	CLinkedPool<CBullet>	m_poolBullets;			// bullets pool

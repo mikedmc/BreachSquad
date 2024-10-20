@@ -14,8 +14,14 @@
 
 // generation key/index pair
 struct GenKey {
-	unsigned long		index;
-	unsigned long		generation;
+	int		index;			// -1 for not set
+	int		generation;
+
+	GenKey() : index( -1 ), generation( -1 ) {};
+	GenKey( int idx, int gen ) {
+		index = idx;
+		generation = gen;
+	}
 };
 
 template<typename TYPE> class CLinkedPoolGen
@@ -24,6 +30,7 @@ public:
 	class CLNode
 	{
 	public:
+		bool			bUsed;			// flag that tells us if it's in use or if it's available for hiring
 		TYPE			m_data;
 
 	private:
@@ -33,16 +40,12 @@ public:
 		CLNode*			m_pPrev;		// don't mess with me
 		CLNode*			m_pNext;		// don't mess with me
 
-		unsigned long	nIdx;			// unique index (used for references as ID)
-		bool			bUsed;			// flag that tells us if it's in use or if it's available for hiring
-		unsigned long   nGeneration;	// current generation, starts on 0 with bUsed false
+		int				nIdx;			// unique index (used for references as ID)
+		int				nGeneration;	// current generation, starts on 0 with bUsed false
 
 	public:
 
-		int				GetIdx() { return nIdx; }
-
-		int				IsAlive() { return bUsed; }
-
+		int				IsUsed() { return bUsed; }
 		GenKey			GetGenKey() { return { nIdx, nGeneration }; }
 	};
 
@@ -116,8 +119,8 @@ public:
 	// returns number of used elements
 	inline int		Count() { return m_nUsedCnt; }
 
-	// Returns item by GenKey
-	CLNode* GetByKey( GenKey key )
+	// Returns node by GenKey
+	CLNode* GetNodeByKey( GenKey key )
 	{
 		// checks index validity and generation
 		if ( key.index < 0 || key.index >= m_nSize || pArrNodes[key.index].bUsed == false || pArrNodes[key.index].nGeneration != key.generation )
@@ -125,6 +128,17 @@ public:
 			return nullptr;
 		}
 		return &pArrNodes[key.index];
+	}
+
+	// Returns array item by GenKey
+	TYPE* GetByKey( GenKey key )
+	{
+		// checks index validity and generation
+		if ( key.index < 0 || key.index >= m_nSize || pArrNodes[key.index].bUsed == false || pArrNodes[key.index].nGeneration != key.generation )
+		{
+			return nullptr;
+		}
+		return &pArrNodes[key.index].m_data;
 	}
 
 	// Returns pointer to available list node or null if all nodes are used.

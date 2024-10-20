@@ -1270,15 +1270,14 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			vSpawnPos.x += fOffX;
 			vSpawnPos.y += fOffY;
 
-			CActor* nact = null;
-
+			GenKey actgk;
 			if ((vcAIstate == null) || (vcAIstate->eType != CVariant::K_ARGTYPE_STRING))
 			{
-				nact = SpawnActor(vSpawnPos, vcTemplate->m_strArg.text);
+				actgk = SpawnActor(vSpawnPos, vcTemplate->m_strArg.text);
 			}
 			else
 			{
-				nact = SpawnActor(vSpawnPos, vcTemplate->m_strArg.text, &vcAIstate->m_strArg);
+				actgk = SpawnActor(vSpawnPos, vcTemplate->m_strArg.text, &vcAIstate->m_strArg);
 			}
 
 			return true;

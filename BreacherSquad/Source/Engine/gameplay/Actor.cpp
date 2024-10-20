@@ -643,9 +643,6 @@ void CActor::ProcessAICommands()
 				}
 				else
 				{
-					//blood splat (sortate crescator in animatie)
-					level->AddDecal_BloodSplat( GetPosHeart(), true, _template.actorClass );
-
 					//SND_PLAY_POSITIONAL_RAND2(SNDIDX_BULLET_BODY_GIBBED_01, SNDIDX_BULLET_BODY_GIBBED_02, actor->GetPosHeart());
 					//meat lumps
 					Vec2 bulletSpeed;
@@ -1456,13 +1453,11 @@ CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomen
 		//--- generate blood splats on death ---
 		if ( ( fOldLife > 0.0f ) && ( this->_template.eMaterial == K_LVL_MATERIAL_FLESH ) )
 		{
-			//splaturile sunt sortate in fn de marime (folosesc posHeart in log de GetPosHeart() pentru ca altfel imi da deja pozitia de dupa moarte, adica prea jos)
-			//splaturile sunt sortate in functie de dimensiune (crescator)
 			if ( bGoreEnabled )
 			{
 				if ( ( pBullet->nFlags & K_LVL_BULLET_FLAG_NO_DECALS ) == 0 )
 				{
-					level->AddDecal_BloodSplat( this->GetPosHeart(), true, this->_template.actorClass );
+					//level->AddDecal_BloodSplat( this->GetPosHeart(), true, this->_template.actorClass );
 				}
 			}
 

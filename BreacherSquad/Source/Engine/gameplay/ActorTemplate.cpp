@@ -45,8 +45,7 @@ void CActorTemplate::FillDefaultValuesIfNotSet()
 
 bool CActorTemplate::OverwriteAnimsFromTemplate(CActorTemplate* pTemplate, bool bEraseOldAnimations /*= false*/)
 {
-	if (pTemplate == NULL)
-	{
+	if (pTemplate == nullptr) {
 		return false;
 	}
 
