@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+
+<ACTOR file="junkie_harry.bsx">
+	<ACTOR_DATA sAIstate="AWARE" sWeapon="WPN_SMG_MP5A3" class="ENEMY"
+				bboxMinX="-7" bboxMinY="-7" bboxMaxX="7" bboxMaxY="7" heightZ="64" heartZ="32"
+				sMaterial="FLESH" fLife="100.0" fArmor="0.0" 
+				fSpeedMove="50.0" fSpeedRun="120.0"
+				fSeeDist="320.0" fAttackMin="64.0" fAttackMax="128.0"
+				fStunWhenHitProb="0.5"
+				bCanCover="false" bCanInteract="false" />
+	<SKINS>
+		<SKIN name="default" layersVisibilityMask="63" handR_layerMask="16" handL_layerMask="8" />
+	</SKINS>
+
+	<ANIMS>
+		<!-- setting "set0" fills N,NE,SE,S with specified value -->
+		<REFPOSE		set0="REFPOSE" />
+		<IDLE			set0_N="IDLE_N" set0_NE="IDLE_NE" set0_SE="IDLE_SE" set0_S="IDLE_S" />	
+		<RUN 			set0_N="RUN_N" set0_NE="RUN_NE" set0_SE="RUN_SE" set0_S="RUN_S" />
+		<WALK			set0_N="WALK_N" set0_NE="WALK_NE" set0_SE="WALK_SE" set0_S="WALK_S" />
+		<DIE			set0_N="DIE_N" set0_NE="DIE_N" set0_SE="DIE_S" set0_S="DIE_S" />
+	</ANIMS>
+
+	<VERSES>
+    <!--
+    <DIE set0="VOICE_ASSAULTER_DYING" set1="VOICE_ASSAULTER_DYING2" />
+    <TAKING_DAMAGE set0="VOICE_ASSAULTER_WOUNDED" set1="VOICE_ASSAULTER_WOUNDED2" />
+	-->
+	</VERSES>
+
+	<AI>
+		<STATE name="IDLE" nPriority="0">
+			<TRIGGERING_EVENTS>
+				<AI_EVENT type="any" />
+			</TRIGGERING_EVENTS>
+			<BEHAVIORS>
+				<BEHAVIOR name="AI_BEHAVIOR_IDLE" bCanInterrupt="true" />
+			</BEHAVIORS>
+		</STATE>
+		
+	  <STATE name="AWARE" nPriority="1">
+		<TRIGGERING_EVENTS>
+		  <AI_EVENT type="EVT_LOST_ENEMY" />
+		</TRIGGERING_EVENTS>
+
+		<BEHAVIORS>
+		  <BEHAVIOR name="AI_BEHAVIOR_PATROL" />
+		</BEHAVIORS>
+	  </STATE>
+
+	  <STATE name="AGGRESSIVE" nPriority="2">
+		<TRIGGERING_EVENTS>
+		  <AI_EVENT type="EVT_SEE_ENEMY" />
+		  <AI_EVENT type="EVT_GOT_HIT" />
+		</TRIGGERING_EVENTS>
+
+		<BEHAVIORS>
+		  <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.25" />
+		  <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="true" />
+		</BEHAVIORS>
+	  </STATE>
+	
+
+		<STATE name="DEAD" nPriority="10">
+			<TRIGGERING_EVENTS>
+				<AI_EVENT type="EVT_DEAD" />
+			</TRIGGERING_EVENTS>
+			<BEHAVIORS>
+				<BEHAVIOR name="AI_BEHAVIOR_DEAD" />
+			</BEHAVIORS>
+		</STATE>
+	</AI>
+
+</ACTOR>
+
