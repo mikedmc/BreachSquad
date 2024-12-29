@@ -1072,7 +1072,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 	templ->arrSkinsCnt = 0;
 	if ( skinsnode != nullptr )
 	{
-		for each( auto& nodeskin in skinsnode.children() )
+		for( auto& nodeskin : skinsnode.children() )
 		{
 			templ->arrSkins[templ->arrSkinsCnt].name.Init( nodeskin.attribute( L"name" ).value() );
 			templ->arrSkins[templ->arrSkinsCnt].layersVisMask = nodeskin.attribute( L"layersVisibilityMask" ).as_uint();

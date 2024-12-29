@@ -163,6 +163,7 @@ public:
 	CActorTemplate*			Actor_GetTemplate( const DWORD templateNameHash );
 	// Randomizes the actor a little so they don't all have the exact same speeds
 	void					RandomizeTemplateActor( CActorTemplate * actTemplate );
+	// Loads template from file and adds it to the templates array
 	CActorTemplate*			Actor_LoadTemplate( WCHAR * strTemplateFileName );
 
 	CArray<CCollisionShape*>	m_arrColShapes;

@@ -16,6 +16,7 @@ void CActor::BeginPlay()
 	pArea = level->Areas_GetAt( pos.xy );
 	_ASSERT(pArea != nullptr);
 	c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE);
+	SetEnabled( true, true );
 }
 
 void CActor::EndPlay()
@@ -73,6 +74,8 @@ void CActor::Init( Vec2 vnPos, CActorTemplate* pActorTemplate, int nID, CLevel* 
 	SetPos( Vec2ToVec3XY0( vnPos ) );
 
 	bInitialized = true;
+	SetEnabled( true, true );
+	bPendingKill = false;
 }
 
 void CActor::Dispose()

@@ -98,7 +98,7 @@ void CSpriteActorComponent::CacheAnimations( CActor& act )
 		}
 	}
 
-	LOG_DBG( L"CActor::UpdateAnimationPointers: Updates %d animations", nAnimsChanged );
+	//LOG_DBG( L"CActor::UpdateAnimationPointers: Updates %d animations", nAnimsChanged );
 }
 
 void CSpriteActorComponent::SetSkin( CActor& act, WCHAR* skinName, bool bShowPrimaryHand, bool bShowSecondaryHand )

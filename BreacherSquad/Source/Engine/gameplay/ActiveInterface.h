@@ -42,7 +42,7 @@ public:
 	VecProj					pos_ini;				// initial position needed for relative calculations. Usually only set when spawned.
 
 	bool					bTouching;				// set to true while being touched so we don't start another
-	UINT32 					nTouchingUID;   		// UID-ul of toucher or 0 for none
+	UINT32 					nTouchingUID;   		// UID of toucher or 0 for none
 													   
 	DWORD					color;
 	int						heightZ;				// height of object, same as in bbox Z axis
@@ -62,7 +62,7 @@ public:
 	CStringHash				shScriptActions;		// string containing script actions names for matching (eg. BREACH,LOCKPICK)
 	UINT32					nRunningScriptUID;		// UID of script that is running now on this element
 
-	bool					bSetEnabled;			// commanding flag for bVisible. Will dump the value into bVisible when needed.
+	bool					bSetEnabled;			// sets the bEnabled flag when updating the active. Is it still useful? It was needed when setting the object to enabled after it had been processed.
 	bool					bAnimated;				// este animat? daca da face play la animatie
 	bool					bSkipRender;			// skips render...
 
