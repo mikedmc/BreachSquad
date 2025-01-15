@@ -2459,26 +2459,25 @@ void CLevel::UpdateAI( float dTime, bool bInEditor )
 
 	//check actors - must be done after moving platforms (usually last is best)
 	double fHashKey = 0.0f;
-	for ( auto node : m_arrActors )
+	if ( !bInEditor )
 	{
-		CActor* act = &node->m_data;
-		if ( !bInEditor )
+		for ( auto node : m_arrActors )
 		{
+			CActor* act = &node->m_data;
 			act->Update( dTime );
-		}
-		//add some floats to detect network inconsistencies
-		fHashKey += act->pos.xyz.x + act->pos.xyz.y + act->fLife + act->fArmor + act->fStunTimer;
+			//add some floats to detect network inconsistencies
+			fHashKey += act->pos.xyz.x + act->pos.xyz.y + act->fLife + act->fArmor + act->fStunTimer;
 
-		//count targets left
-		if ( act->GetCurrentBehavior() != EAIBehaviorType::AI_BEHAVIOR_DEAD )
-		{
-			if ( ( act->_template.actorClass >= K_ACT_CLASS_ENEMY ) || ( act->_template.actorClass == K_ACT_CLASS_HOSTAGE ) )
+			//count targets left
+			if ( act->GetCurrentBehavior() != EAIBehaviorType::AI_BEHAVIOR_DEAD )
 			{
-				m_arrStats[K_LVL_STATS_TARGETS_LEFT]++;
+				if ( ( act->_template.actorClass >= K_ACT_CLASS_ENEMY ) || ( act->_template.actorClass == K_ACT_CLASS_HOSTAGE ) )
+				{
+					m_arrStats[K_LVL_STATS_TARGETS_LEFT]++;
+				}
 			}
 		}
 	}
-
 	{
 #if defined(K_NET_STRICT_SYNC_CHECK)
 		//build hash

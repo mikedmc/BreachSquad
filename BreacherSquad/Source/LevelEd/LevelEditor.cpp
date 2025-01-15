@@ -685,7 +685,7 @@ int CLevelEditor::IMGUI_AnimationBrowser( CSpriteLib* sprLib, int nSelectedAnim 
 
 	for ( int n = 0; n < sprLib->Animations.Count(); n++ )
 	{
-		scAnimation* anm = sprLib->Animations[n];
+		//scAnimation* anm = sprLib->Animations[n];
 
 		RectLTRB texrect = sprLib->GetModuleRect_TexCoords( n, 0, 0 );
 		ImVec2 tul( texrect.left, texrect.top );

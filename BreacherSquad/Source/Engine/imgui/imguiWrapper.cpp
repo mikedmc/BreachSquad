@@ -139,7 +139,6 @@ void CimguiWrapper::PaintDebugVars()
 	CStringHash cname;
 	for(auto & elem : __ImGui().arrDebugVars.m_variants)
 	{
-		size_t converted;
 		CHAR charname[256]{};
 		CVariant* cvc = &elem.second;
 		switch ( cvc->eType )

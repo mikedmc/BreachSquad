@@ -236,7 +236,7 @@ const int CStringsManager::GetLetterIdx(const WCHAR c)
 	if(c == ' ')
 		return K_STRMGR_SPACE;
 	WCHAR *alphapos = alphabet;
-	register int code = 0;
+	int code = 0;
 	while(*alphapos != 0)
 	{
 		if(*alphapos == c)
@@ -277,7 +277,7 @@ int CStringsManager::BuildStringCodes(CStringDesc *desc, WCHAR *notFoundChars)
 		else //cauta in alfabet
 		{
 			alphapos = alphabet;
-			register int code = 0;
+			int code = 0;
 			while(*alphapos != 0)
 			{
 				if(*alphapos == *chpos)

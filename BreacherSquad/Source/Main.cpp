@@ -2265,7 +2265,8 @@ void CALLBACK KeyboardProc( UINT nChar, bool bKeyDown, bool bAltDown )
 				{
 					Vec2 vpos = __Sim().m_camLevelToScr.ScreenToWorld( g_mouse.pos );
 					//__Sim().SpawnActor( vpos, L"act_blowup_smg.xml" );
-					__Sim().SpawnActor( vpos, L"act_junkie_harry.xml" );
+					GenKey ki = __Sim().SpawnActor( vpos, L"act_junkie_harry.xml" );
+					//__Sim().m_arrActors.GetByKey( ki )->bSetEnabled = false;
 				}
 			}
 			break;

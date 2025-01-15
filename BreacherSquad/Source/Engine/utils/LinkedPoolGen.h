@@ -14,13 +14,22 @@
 
 // generation key/index pair
 struct GenKey {
-	int		index;			// -1 for not set
-	int		generation;
+	int		index;			// <0 for not set
+	int		generation;		// <0 for not set
 
 	GenKey() : index( -1 ), generation( -1 ) {};
 	GenKey( int idx, int gen ) {
 		index = idx;
 		generation = gen;
+	}
+	// Resets GenKey to "NOT USED"
+	inline void Reset() 
+	{
+		index = -1, generation = -1;
+	}
+	inline const bool IsSet()
+	{
+		return ( ( index >= 0 ) && ( generation >= 0 ) );
 	}
 };
 
@@ -123,7 +132,7 @@ public:
 	CLNode* GetNodeByKey( GenKey key )
 	{
 		// checks index validity and generation
-		if ( key.index < 0 || key.index >= m_nSize || pArrNodes[key.index].bUsed == false || pArrNodes[key.index].nGeneration != key.generation )
+		if ( key.index < 0 || key.index >= m_nSize || key.generation < 0 || pArrNodes[key.index].bUsed == false || pArrNodes[key.index].nGeneration != key.generation )
 		{
 			return nullptr;
 		}
@@ -134,7 +143,7 @@ public:
 	TYPE* GetByKey( GenKey key )
 	{
 		// checks index validity and generation
-		if ( key.index < 0 || key.index >= m_nSize || pArrNodes[key.index].bUsed == false || pArrNodes[key.index].nGeneration != key.generation )
+		if ( key.index < 0 || key.index >= m_nSize || key.generation < 0 || pArrNodes[key.index].bUsed == false || pArrNodes[key.index].nGeneration != key.generation )
 		{
 			return nullptr;
 		}

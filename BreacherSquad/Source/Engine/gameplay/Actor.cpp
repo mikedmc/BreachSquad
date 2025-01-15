@@ -106,11 +106,6 @@ bool CActor::IsAlive()
 	return ((bPendingKill == false) && (bEnabled == true) && (fLife > 0.0f));
 }
 
-bool CActor::IsEnabled()
-{
-	return bEnabled;
-}
-
 void CActor::SetPos(Vec3 newPos)
 {
 	pos_last = pos.xyz;

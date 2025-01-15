@@ -53,7 +53,7 @@ public:
 	EGenericState				nRolling;					//0-ready, 1-rolling, 2-finished and waiting reset (direction key up)
 
 	float						fStunTimer; 
-	UINT32						nLastDamageTakenFromUID;	//UID that gave actor last damage 
+	UINT32						nLastDamageTakenFromUID;	// UID that gave actor last damage  #TODO: replace with GenKey
 	
 	UINT32						nSuspendedFlags;			// AI suspended (usually for main players to cut off input when outside screen). See flags for reason.
 	float						fSuspendedTimer;			// counts from when suspended flags is set
@@ -119,7 +119,7 @@ public:
 	// tells if actor is alive (health > 0) and not hidden or deallocated, or inactive
 	bool						IsAlive() override;
 	// returns the enabled flag (ignored by updates and all)
-	bool						IsEnabled();
+	inline bool					IsEnabled() { return bEnabled; }
 	void						SetPos( Vec3 newPos ) override;
 	void						Move( Vec3 delta ) override;
 	// Useless for actors
