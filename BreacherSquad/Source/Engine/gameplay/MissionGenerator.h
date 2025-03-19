@@ -150,7 +150,8 @@ public:
 												std::wstring strTagsAny = L"", std::wstring strTagsAll = L"", std::wstring strTagsNone = L"");
 
 	// Generates random level; Only adds corridors when children can't be placed
-	bool						GenerateLevelRandomly(int maxDepth);
+	// randSeed = 0 -> get time as rng seed
+	bool						GenerateLevelRandomly(int maxDepth, unsigned int randSeed = 0 );
 
 	// Only adds corridors when children can't be placed
 	bool						GenerateLevelFromStory(CMissionStory* story);

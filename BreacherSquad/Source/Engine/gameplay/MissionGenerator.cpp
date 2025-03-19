@@ -405,8 +405,11 @@ CPlacedArea* CMissionGenerator::PlaceStoryArea(CPlacedArea* parent, CAreaConnect
 }
 
 
-bool CMissionGenerator::GenerateLevelRandomly(int maxDepth)
+bool CMissionGenerator::GenerateLevelRandomly(int maxDepth, unsigned int randSeed )
 {
+	//set rand seed
+	( randSeed == 0 ) ? m_rand.SetRandSeedTime() : m_rand.SetRandSeed( randSeed );
+
 	LOG(L"Generating level - corridors when needed...");
 	Vec2i posStart(10000, 10000);
 	SAFE_DELETE_STDVEC(m_arrPlaced);

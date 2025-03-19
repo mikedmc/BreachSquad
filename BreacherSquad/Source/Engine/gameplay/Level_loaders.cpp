@@ -4,7 +4,7 @@ using namespace std;
 OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 {
 	//set last ID on a number that will never get reached from the editor or by adding areas
-	m_unLastID = 10000000;
+	m_unLastID = 10000000; // #TODO: read max from level
 	int nChapterNumber = g_userData[K_MEMID_SELECTED_CHAPTER];
 	int nLevelNumber = g_userData[K_MEMID_SELECTED_LEVEL];
 	//--- set loaded level flags
@@ -107,11 +107,13 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 	FileManager::GetMediaPath( L"media/levels/stories/story_small.story", Path );
 	V_OP_RET( m_story.LoadStory( Path ) );
 
+	UINT32 level_rand_seed = 1000000 + randint(9999999);
+	LOG( L"Level Seed: %lu", level_rand_seed );
 	// build inventory and generate level
 	__MissionGen().BuildInventory();
 	//if (!__MissionGen().GenerateLevelFromStory(&m_story))
 		//return K_OP_FAILED;
-	if ( !__MissionGen().GenerateLevelRandomly( 3 ) )
+	if ( !__MissionGen().GenerateLevelRandomly( 3, level_rand_seed ) )
 		return K_OP_FAILED;
 
 	///--- LOAD AREAS:

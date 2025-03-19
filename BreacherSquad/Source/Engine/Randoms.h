@@ -178,9 +178,9 @@ namespace UTPerlin
 //--------------------------------------------------------------------------------------
 
 //comment the next line in order to use the system random generator functions
-//#define K_RANDOM_USE_CUSTOM
+//#define K_RANDOM_USE_RNG
 
-#if defined(K_RANDOM_USE_CUSTOM)
+#if defined(K_RANDOM_USE_RNG)
 
 
 ///**************************************************************************************

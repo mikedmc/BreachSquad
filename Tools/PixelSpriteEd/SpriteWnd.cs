@@ -5592,7 +5592,7 @@ namespace InkEd3
 
         private void aboutToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            MessageBox.Show("Sprites Editor v1.0.4 20.mar.2022", "About");
+            MessageBox.Show("SpriteEd v1.0.5 19.mar.2025", "About");
         }
 
         Views view = Views.moduleView; //view-ul curent
