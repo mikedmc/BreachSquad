@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TILE_LAYERS>
+  <LAYER colormap="tl_floors.png" /> 
+  <LAYER colormap="tl_walls.png" /> 
+  <LAYER colormap="tl_ceiling.png" /> 
+</TILE_LAYERS>
+

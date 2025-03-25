@@ -10,9 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HexxEditor</RootNamespace>
     <AssemblyName>BreachEd</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <ApplicationIcon>KnockEd.ico</ApplicationIcon>
+    <ApplicationIcon>BreachEd.ico</ApplicationIcon>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -38,6 +38,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>HexxEditor.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BSXAnimBrowser, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -79,6 +82,8 @@
     <Compile Include="BkgSelector.Designer.cs">
       <DependentUpon>BkgSelector.cs</DependentUpon>
     </Compile>
+    <Compile Include="CTile.cs" />
+    <Compile Include="CTileBlock.cs" />
     <Compile Include="ModCreator.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -196,8 +201,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="tiles.png" />
+    <Content Include="BreachEd.ico" />
     <Content Include="KnockEd.ico" />
-    <EmbeddedResource Include="toolbar.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

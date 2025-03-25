@@ -4085,7 +4085,6 @@ namespace InkEd3
 
         #endregion
 
-
         #region FileOperations
 
         // format of json frame structure when loading from JSON file

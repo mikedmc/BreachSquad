@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using System.Collections;
+using System.Xml;
 
 namespace HexxEditor
 {
@@ -18,11 +20,14 @@ namespace HexxEditor
         //marimea tilesetului se stabileste aici in fereastra de materiale
         public int TILE_W = 16;
         public int TILE_H = 16;
-        public int TILESET_COLUMNS = 0;
 
         public Graphics pbGr = null;
-        public Image g_TilesetImg = null;
+        public ArrayList g_TilesetImgs = new ArrayList();
+        public Image pCurImage = null;
         public String g_TilesetName = "";
+        public bool isLoaded = false;
+        private int TILESET_COLUMNS = 0;
+        private int TILESET_ROWS = 0;
 
         public Rectangle g_brush; //in coordonate tiles
         
@@ -77,7 +82,7 @@ namespace HexxEditor
             else
                 pbGr.Clear(Color.FromArgb(40, 40, 40));
             
-            if (g_TilesetImg == null)
+            if (pCurImage == null)
             {
                 pbGr.DrawString("Load a tileset first! File->Load Tileset...", new Font("Arial", 10), Brushes.LightBlue, 10, 10);
                 return;
@@ -85,26 +90,26 @@ namespace HexxEditor
             //paint tileset
             pbGr.ResetTransform();
             pbGr.ScaleTransform(zoom, zoom);
-            pbGr.DrawImage(g_TilesetImg, scroll.X / zoom, scroll.Y / zoom);
+            pbGr.DrawImage(pCurImage, scroll.X / zoom, scroll.Y / zoom);
             pbGr.ResetTransform();
             //grid
             if (chk_Grid.Checked)
             {
-                for (int kk = 0; kk < g_TilesetImg.Width / TILE_W; kk++)
+                for (int kk = 0; kk < pCurImage.Width / TILE_W; kk++)
                 {
-                    pbGr.DrawLine(g_penDotted, scroll.X + kk * TILE_W * zoom, scroll.Y, scroll.X + kk * TILE_W * zoom, scroll.Y + g_TilesetImg.Height * zoom);
+                    pbGr.DrawLine(g_penDotted, scroll.X + kk * TILE_W * zoom, scroll.Y, scroll.X + kk * TILE_W * zoom, scroll.Y + pCurImage.Height * zoom);
                 }
-                for (int kk = 0; kk < g_TilesetImg.Height / TILE_H; kk++)
+                for (int kk = 0; kk < pCurImage.Height / TILE_H; kk++)
                 {
-                    pbGr.DrawLine(g_penDotted, scroll.X, scroll.Y + kk * TILE_H * zoom, scroll.X + g_TilesetImg.Width * zoom, scroll.Y + kk * TILE_H * zoom);
+                    pbGr.DrawLine(g_penDotted, scroll.X, scroll.Y + kk * TILE_H * zoom, scroll.X + pCurImage.Width * zoom, scroll.Y + kk * TILE_H * zoom);
                 }
             }
             //limite imagine
             pbGr.DrawLine(Pens.DarkGray, 0, scroll.Y, pbTileset.Width, scroll.Y);
             pbGr.DrawLine(Pens.DarkGray, scroll.X, 0, scroll.X, pbTileset.Height);
 
-            pbGr.DrawLine(Pens.DarkGray, scroll.X + g_TilesetImg.Width * zoom, 0, scroll.X + g_TilesetImg.Width * zoom, pbTileset.Height);
-            pbGr.DrawLine(Pens.DarkGray, 0, scroll.Y + g_TilesetImg.Height * zoom, pbTileset.Width, scroll.Y + g_TilesetImg.Height * zoom);
+            pbGr.DrawLine(Pens.DarkGray, scroll.X + pCurImage.Width * zoom, 0, scroll.X + pCurImage.Width * zoom, pbTileset.Height);
+            pbGr.DrawLine(Pens.DarkGray, 0, scroll.Y + pCurImage.Height * zoom, pbTileset.Width, scroll.Y + pCurImage.Height * zoom);
 
             //brush
             pbGr.DrawRectangle(g_penGreenDotted, scroll.X + g_brush.X * TILE_W * zoom, scroll.Y + g_brush.Y * TILE_H * zoom, g_brush.Width * TILE_W * zoom, g_brush.Height * TILE_H * zoom);
@@ -119,14 +124,49 @@ namespace HexxEditor
             pbTileset.Refresh();
         }
 
-        public void LoadTileset(String imgPath)
+        public void LoadTileset(String xmlPath)
         {
-            g_TilesetImg = new Bitmap(imgPath);
-            TILESET_COLUMNS = g_TilesetImg.Width / TILE_W;
-            parentWnd.SetMaterialData(TILE_W, TILE_H, TILESET_COLUMNS, TILESET_COLUMNS);
+            try
+            {
+                // remove existing
+                foreach (Image img in g_TilesetImgs) {
+                    img.Dispose();
+                }
+                g_TilesetImgs.RemoveRange(0, g_TilesetImgs.Count);
 
-            g_TilesetName = Path.GetFileName(imgPath);
 
+                XmlReaderSettings readerSettings = new XmlReaderSettings();
+                readerSettings.IgnoreComments = true;
+                using (XmlReader reader = XmlReader.Create(xmlPath, readerSettings))
+                {
+                    XmlDocument xdoc = new XmlDocument();
+                    xdoc.Load(reader);
+                    //now read data without comments
+
+                    XmlNodeList nodes = xdoc.GetElementsByTagName("TILE_LAYERS");
+                    foreach (XmlNode node in nodes[0].ChildNodes)
+                    {
+                        XmlNode nodeattr = node.Attributes.GetNamedItem("colormap");
+                        if (nodeattr != null)
+                        {
+                            string strImgPath = Path.GetDirectoryName(xmlPath) + "\\" + nodeattr.Value;
+                            Image img = new Bitmap(strImgPath);
+                            g_TilesetImgs.Add(img);
+                        }
+                    }
+                }
+
+                g_TilesetName = xmlPath;
+                SelectLayer(parentWnd.GetCurrentLayerIdx());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not read tileset.xml or tileset images!\nMake sure all images are in the same directory as the tileset xml!\n" + ex.ToString(), "ERROR !!!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            
+            parentWnd.SetMaterialData(TILE_W, TILE_H, 16, 16);
+
+            isLoaded = true;
             Repaint();
         }
 
@@ -134,7 +174,7 @@ namespace HexxEditor
         {
             OpenFileDialog sfd = new OpenFileDialog();
             //fisier binar
-            sfd.Filter = "PNG File (*.png)|*.png|All Files (*.*)|*.*";
+            sfd.Filter = "XML File (*.xml)|*.xml|All Files (*.*)|*.*";
             if (sfd.ShowDialog() == DialogResult.Cancel)
                 return;
 
@@ -152,15 +192,15 @@ namespace HexxEditor
         private void LimitScroll()
         {
             //limit scroll
-            if (g_TilesetImg != null)
+            if (pCurImage != null)
             {
                 if (scroll.X > 64.0f) scroll.X = 64.0f;
                 if (scroll.Y > 64.0f) scroll.Y = 64.0f;
 
-                if (scroll.X < -(g_TilesetImg.Width * zoom - pbTileset.Width + 64.0f))
-                    scroll.X = -(g_TilesetImg.Width * zoom - pbTileset.Width + 64.0f);
-                if (scroll.Y < -(g_TilesetImg.Height * zoom - pbTileset.Height + 64.0f))
-                    scroll.Y = -(g_TilesetImg.Height * zoom - pbTileset.Height + 64.0f);
+                if (scroll.X < -(pCurImage.Width * zoom - pbTileset.Width + 64.0f))
+                    scroll.X = -(pCurImage.Width * zoom - pbTileset.Width + 64.0f);
+                if (scroll.Y < -(pCurImage.Height * zoom - pbTileset.Height + 64.0f))
+                    scroll.Y = -(pCurImage.Height * zoom - pbTileset.Height + 64.0f);
             }
         }
 
@@ -194,6 +234,30 @@ namespace HexxEditor
                 LimitScroll();
                 Repaint();
             }
+        }
+
+        public Image GetLayerImage(int index)
+        {
+            if (index < 0 || index >= g_TilesetImgs.Count)
+            {
+                return null;
+            }
+            return g_TilesetImgs[index] as Image;
+        }
+
+        // call this to select a given layer
+        public void SelectLayer(int index)
+        {
+            if (index < 0 || index >= g_TilesetImgs.Count)
+            {
+                return;
+            }
+            pCurImage = g_TilesetImgs[index] as Image;
+            TILESET_COLUMNS = pCurImage.Width / TILE_W;
+            TILESET_ROWS = pCurImage.Height / TILE_H;
+
+            LimitScroll();
+            Repaint();
         }
 
         private void pbTileset_Resize(object sender, EventArgs e)

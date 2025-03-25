@@ -14,6 +14,30 @@ using System.Xml;
 
 namespace HexxEditor
 {
+    public enum ELayer
+    {
+        UNDER_FLOOR = 0,
+        FLOOR = 1,
+        FLOOR_DECO1,
+        FLOOR_DECO2,
+        WALLS,
+        WALLS_DECO,
+        CEILING_DECO,
+        CEILING,
+
+        LAYERS_CNT
+    };
+
+    // directii generice
+    public enum EDir
+    {
+        K_DIR_NONE = 0,
+        K_DIR_LEFT = 1,
+        K_DIR_UP = 2,
+        K_DIR_RIGHT = 3,
+        K_DIR_DOWN = 4,
+    };
+
     public partial class Form1 : Form
     {
         //helper forms
@@ -27,41 +51,13 @@ namespace HexxEditor
         public ActorsWnd g_wndActors;
 
         //save file version
-        public const int K_CURRENT_VERSION = 1015;
+        public const int K_CURRENT_VERSION = 10001;
 
         //mission types
         public const byte K_MISSION_TYPE_ELIMINATE_ALL = 0;
         public const byte K_MISSION_TYPE_SAVE_HOSTAGES = 1;
         public const byte K_MISSION_TYPE_DEFUSE_BOMB = 2;
         public const byte K_MISSION_TYPE_ARREST_WARRANT = 3;
-
-        //layers
-        /*
-        public const int K_LAYER_BACK = 0;
-        public const int K_LAYER_MID = 1;
-        public const int K_LAYER_FRONT = 2;
-        public const int K_LAYERS_CNT = 3;
-        */
-
-        enum ELayer
-        {
-            UNDER_FLOOR = 0,
-            FLOOR = 1,
-            FLOOR_DECO1,
-            FLOOR_DECO2,
-            WALLS,
-            CEILING_DECO,
-            CEILING,
-
-            LAYERS_CNT
-        };
-
-        // directii generice
-        public const int K_DIR_NONE = 0;
-        public const int K_DIR_LEFT = 1;
-        public const int K_DIR_UP = 2;
-        public const int K_DIR_RIGHT = 3;
-        public const int K_DIR_DOWN = 4;
 
         //constante setate in fereastra de tileset
         public int TILE_WIDTH = 0;
@@ -70,10 +66,9 @@ namespace HexxEditor
         public int TILE_HHEIGHT = 0;
 
         //constante
-        public const int K_SKY_TILES_ADDED = 0; //cam un ecran pe verticala
         public const int K_LIGHT_DEFAULT_RADIUS = 64; //marimea luminii cand o adaugi
         public const int K_CORNER_SIZE = 8; //marimea patratelelor pt scalare
-        public const float K_LIGHT_DEFAULT_FSCALING = 0.6f; //scalarea zonei luminii in fn de marimea animatiei
+        public const float K_LIGHT_DEFAULT_FSCALING = 1.0f; //scalarea zonei luminii in fn de marimea animatiei
         //colturi scalare - flaguri cu ce poti modifica. Daca sunt toate setate inseamna ca trebuie mutat
         public const int K_SCALE_FLAG_X = 1;
         public const int K_SCALE_FLAG_Y = 2;
@@ -167,7 +162,7 @@ namespace HexxEditor
             return strExePath;
         }
 
-        public int g_selectedLayer = (int)ELayer.FLOOR;
+        private int g_selectedLayer = (int)ELayer.FLOOR;
         public byte g_missionType = K_MISSION_TYPE_ELIMINATE_ALL;
         CheckBox[] layers_checkboxes;
         RadioButton[] layers_radios;
@@ -1315,162 +1310,8 @@ namespace HexxEditor
             return -1;
         }
 
-        //-----------------------------
-        public class CTile
-        {
-            public int[] tileID;
-
-            public bool IsEmpty()
-            {
-                for (int kk = 0; kk < (int)ELayer.LAYERS_CNT; kk++)
-                {
-                    if (tileID[kk] >= 0)
-                        return false;
-                }
-                return true;
-            }
-
-            public CTile()
-            {
-                tileID = new int[(int)ELayer.LAYERS_CNT];
-                for (int kk = 0; kk < (int)ELayer.LAYERS_CNT; kk++)
-                {
-                    tileID[kk] = -1;
-                }
-            }
-        }
-
         #region TILE BLOCKS
 
-
-        public const int BLOCK_W = 8;
-        public const int BLOCK_H = 8;
-
-        public class CTileBlock
-        {
-            public Image layerImg; //image that contains all layers
-            public Graphics graphics; //graphics to image
-
-            public CTile[,] tiles;
-            public Point pos; //in tiles
-
-            public bool bHasUndo;
-            public CTile[,] tiles_undo;
-
-            public CTileBlock(int nTileSize)
-            {
-                tiles = new CTile[BLOCK_W, BLOCK_H];
-                tiles_undo = new CTile[BLOCK_W, BLOCK_H];
-
-                for (int kk = 0; kk < BLOCK_W; kk++)
-                {
-                    for (int ll = 0; ll < BLOCK_H; ll++)
-                    {
-                        tiles[kk, ll] = new CTile();
-                        tiles_undo[kk, ll] = new CTile();
-                    }
-                }
-
-                graphics = null;
-                layerImg = null;
-                if (nTileSize > 0)
-                {
-                    layerImg = new Bitmap(nTileSize * BLOCK_W, nTileSize * BLOCK_H, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                    graphics = Graphics.FromImage(layerImg);
-                    graphics.Clear(Color.Transparent);
-                }
-                else
-                {
-                    MessageBox.Show("Error!", "Could not create Tile Block image! Tile size is 0!", MessageBoxButtons.OK);
-                }
-
-                bHasUndo = false;
-            }
-
-            // returns true if it  has walkable tiles on specified extremity
-            public bool HasConnectionOnSide(int eDirection)
-            {
-                //#TODO: sa ia in considerare toate layerele de floor nu doar primul (pentru cand ai tranzitii)
-                switch (eDirection)
-                {
-                    case K_DIR_UP:
-                        for (int kk = 0; kk < BLOCK_W; kk++)
-                        {
-                            if (tiles[kk, 0].tileID[(int)ELayer.FLOOR] >= 0)
-                                return true;
-                        }
-                        break;
-                    case K_DIR_DOWN:
-                        for (int kk = 0; kk < BLOCK_W; kk++)
-                        {
-                            if (tiles[kk, BLOCK_H - 1].tileID[(int)ELayer.FLOOR] >= 0)
-                                return true;
-                        }
-                        break;
-                    case K_DIR_LEFT:
-                        for (int kk = 0; kk < BLOCK_W; kk++)
-                        {
-                            if (tiles[0, kk].tileID[(int)ELayer.FLOOR] >= 0)
-                                return true;
-                        }
-                        break;
-                    case K_DIR_RIGHT:
-                        for (int kk = 0; kk < BLOCK_W; kk++)
-                        {
-                            if (tiles[BLOCK_W - 1, kk].tileID[(int)ELayer.FLOOR] >= 0)
-                                return true;
-                        }
-                        break;
-                    default:
-                        MessageBox.Show("Specify direction!");
-                        break;
-                }
-
-                return false;
-            }
-
-            public void Undo_SaveState()
-            {
-                if (bHasUndo == false)
-                {
-                    bHasUndo = true;
-                    for (int kk = 0; kk < BLOCK_W; kk++)
-                    {
-                        for (int ll = 0; ll < BLOCK_H; ll++)
-                        {
-                            for (int mm = 0; mm < (int)ELayer.LAYERS_CNT; mm++)
-                            {
-                                tiles_undo[kk, ll].tileID[mm] = tiles[kk, ll].tileID[mm];
-                            }
-                        }
-                    }
-                }
-            }
-
-            public void Undo_ClearUndo()
-            {
-                bHasUndo = false;
-            }
-
-            // Undoes the last change
-            public void UndoChange()
-            {
-                if (bHasUndo)
-                {
-                    bHasUndo = false;
-                    for (int kk = 0; kk < BLOCK_W; kk++)
-                    {
-                        for (int ll = 0; ll < BLOCK_H; ll++)
-                        {
-                            for (int mm = 0; mm < (int)ELayer.LAYERS_CNT; mm++)
-                            {
-                                tiles[kk, ll].tileID[mm] = tiles_undo[kk, ll].tileID[mm];
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         #endregion
 
@@ -1501,13 +1342,13 @@ namespace HexxEditor
                 {
                     CTileBlock tb = Blocks[kk] as CTileBlock;
                     bool erase = true;
-                    for (int xx = 0; xx < BLOCK_W; xx++)
+                    for (int xx = 0; xx < CTileBlock.BLOCK_W; xx++)
                     {
-                        for (int yy = 0; yy < BLOCK_H; yy++)
+                        for (int yy = 0; yy < CTileBlock.BLOCK_H; yy++)
                         {
                             for (int lay = 0; lay < (int)ELayer.LAYERS_CNT; lay++)
                             {
-                                if (tb.tiles[xx, yy].tileID[lay] >= 0)
+                                if (tb.tiles[xx, yy].tlXY[lay] != 0xffff)
                                 {
                                     erase = false;
                                     goto NOTEMPTY;
@@ -1534,13 +1375,14 @@ namespace HexxEditor
 
 
             //sets tile, returns affected block
-            public CTileBlock setTile(int xtl, int ytl, int tileID, int layerIDX)
+            // tlXY - tile source in tile coords
+            public CTileBlock SetTile(int xtl, int ytl, UInt16 tlXY, int layerIDX)
             {
                 CTileBlock foundtb = null;
                 for (int kk = 0; kk < Blocks.Count; kk++)
                 {
                     CTileBlock tb = Blocks[kk] as CTileBlock;
-                    if ((tb.pos.X == xtl / BLOCK_W) && (tb.pos.Y == ytl / BLOCK_H))
+                    if ((tb.pos.X == xtl / CTileBlock.BLOCK_W) && (tb.pos.Y == ytl / CTileBlock.BLOCK_H))
                     {
                         foundtb = tb;
                     }
@@ -1549,8 +1391,8 @@ namespace HexxEditor
                 if (foundtb == null)
                 {
                     foundtb = new CTileBlock(nTileW);
-                    foundtb.pos.X = xtl / BLOCK_W;
-                    foundtb.pos.Y = ytl / BLOCK_H;
+                    foundtb.pos.X = xtl / CTileBlock.BLOCK_W;
+                    foundtb.pos.Y = ytl / CTileBlock.BLOCK_H;
 
                     Blocks.Add(foundtb);
                 }
@@ -1558,12 +1400,12 @@ namespace HexxEditor
                 //save undo state
                 foundtb.Undo_SaveState();
                 //set tile
-                foundtb.tiles[xtl % BLOCK_W, ytl % BLOCK_H].tileID[layerIDX] = tileID;
+                foundtb.tiles[xtl % CTileBlock.BLOCK_W, ytl % CTileBlock.BLOCK_H].tlXY[layerIDX] = tlXY;
                 return foundtb;
             }
 
             //intoarce un tile
-            public CTile getTile(int xtl, int ytl)
+            public CTile GetTile(int xtl, int ytl)
             {
                 if ((xtl < 0) || (ytl < 0))
                     return null;
@@ -1571,7 +1413,7 @@ namespace HexxEditor
                 for (int kk = 0; kk < Blocks.Count; kk++)
                 {
                     CTileBlock tb = Blocks[kk] as CTileBlock;
-                    if ((tb.pos.X == xtl / BLOCK_W) && (tb.pos.Y == ytl / BLOCK_H))
+                    if ((tb.pos.X == xtl / CTileBlock.BLOCK_W) && (tb.pos.Y == ytl / CTileBlock.BLOCK_H))
                     {
                         foundtb = tb;
                     }
@@ -1583,11 +1425,11 @@ namespace HexxEditor
                 }
                 else
                 {
-                    return foundtb.tiles[xtl % BLOCK_W, ytl % BLOCK_H];
+                    return foundtb.tiles[xtl % CTileBlock.BLOCK_W, ytl % CTileBlock.BLOCK_H];
                 }
             }
 
-            public CTileBlock getBlockAt(int xtl, int ytl)
+            public CTileBlock GetBlockAt(int xtl, int ytl)
             {
                 if ((xtl < 0) || (ytl < 0))
                     return null;
@@ -1595,7 +1437,7 @@ namespace HexxEditor
                 for (int kk = 0; kk < Blocks.Count; kk++)
                 {
                     CTileBlock tb = Blocks[kk] as CTileBlock;
-                    if ((tb.pos.X == xtl / BLOCK_W) && (tb.pos.Y == ytl / BLOCK_H))
+                    if ((tb.pos.X == xtl / CTileBlock.BLOCK_W) && (tb.pos.Y == ytl / CTileBlock.BLOCK_H))
                     {
                         foundtb = tb;
                     }
@@ -1621,22 +1463,25 @@ namespace HexxEditor
 
             for (int layer = 0; layer < (int)ELayer.LAYERS_CNT; layer++)
             {
-                for (int yy = 0; yy < BLOCK_H; yy++)
+                Image pImg = g_wndMaterials.GetLayerImage(layer);
+                if (pImg == null)
+                    continue;
+                for (int yy = 0; yy < CTileBlock.BLOCK_H; yy++)
                 {
-                    for (int xx = 0; xx < BLOCK_W; xx++)
+                    for (int xx = 0; xx < CTileBlock.BLOCK_W; xx++)
                     {
                         if (!layers_checkboxes[layer].Checked)
                             continue;
 
-                        int tileID = tb.tiles[xx, yy].tileID[layer];
-                        if (tileID < 0)
+                        int tlXY = tb.tiles[xx, yy].tlXY[layer];
+                        if (tlXY == 0xffff)
                             continue;
 
-                        srcr.X = (tileID % TILESET_COLUMNS) * TILE_WIDTH;
-                        srcr.Y = (tileID / TILESET_COLUMNS) * TILE_HEIGHT;
+                        srcr.X = ((tlXY & 0xff00) >> 8)* TILE_WIDTH;
+                        srcr.Y = (tlXY & 0xff) * TILE_HEIGHT;
                         srcr.Width = TILE_WIDTH; srcr.Height = TILE_HEIGHT;
 
-                        tb.graphics.DrawImage(g_wndMaterials.g_TilesetImg, xx * TILE_WIDTH, yy * TILE_HEIGHT, srcr, GraphicsUnit.Pixel);
+                        tb.graphics.DrawImage(g_wndMaterials.GetLayerImage(layer), xx * TILE_WIDTH, yy * TILE_HEIGHT, srcr, GraphicsUnit.Pixel);
                     }
                 }
             }
@@ -1663,11 +1508,11 @@ namespace HexxEditor
             {
                 for (int xx = 0; xx < selRectTL.Width; xx++)
                 {
-                    CTile tl = gMap.getTile(selRectTL.X + xx, selRectTL.Y + yy);
-                    if ((tl == null) || (tl.tileID[g_selectedLayer] < 0))
+                    CTile tl = gMap.GetTile(selRectTL.X + xx, selRectTL.Y + yy);
+                    if ((tl == null) || (tl.tlXY[g_selectedLayer] == 0xffff))
                         continue;
-                    gMap.setTile(selRectTL.X + xx, selRectTL.Y + yy, tl.tileID[g_selectedLayer], toLayer);
-                    gMap.setTile(selRectTL.X + xx, selRectTL.Y + yy, -1, g_selectedLayer);
+                    gMap.SetTile(selRectTL.X + xx, selRectTL.Y + yy, tl.tlXY[g_selectedLayer], toLayer);
+                    gMap.SetTile(selRectTL.X + xx, selRectTL.Y + yy, 0xffff, g_selectedLayer);
                 }
             }
 
@@ -1689,8 +1534,8 @@ namespace HexxEditor
             {
                 for (int xx = 0; xx < selRectTL.Width; xx++)
                 {
-                    int tileID = (g_matBrush.X + (xx % g_matBrush.Width) + (g_matBrush.Y + (yy % g_matBrush.Height)) * TILESET_COLUMNS);
-                    gMap.setTile(selRectTL.X + xx, selRectTL.Y + yy, tileID, g_selectedLayer);
+                    int tileXY = (g_matBrush.X + (xx % g_matBrush.Width) << 8) | (g_matBrush.Y + (yy % g_matBrush.Height));
+                    gMap.SetTile(selRectTL.X + xx, selRectTL.Y + yy, (UInt16)tileXY, g_selectedLayer);
                 }
             }
 
@@ -1716,9 +1561,9 @@ namespace HexxEditor
                     {
                         for (int xx = 0; xx < selRectTL.Width; xx++)
                         {
-                            CTile tl = gMap.getTile(selRectTL.X + xx, selRectTL.Y + yy);
+                            CTile tl = gMap.GetTile(selRectTL.X + xx, selRectTL.Y + yy);
                             if(tl != null)
-                                gMap.setTile(pastePosTL.X + xx, pastePosTL.Y + yy, tl.tileID[kk], kk);
+                                gMap.SetTile(pastePosTL.X + xx, pastePosTL.Y + yy, tl.tlXY[kk], kk);
                         }
                     }
                 }
@@ -1729,10 +1574,10 @@ namespace HexxEditor
                 {
                     for (int xx = 0; xx < selRectTL.Width; xx++)
                     {
-                        CTile tl = gMap.getTile(selRectTL.X + xx, selRectTL.Y + yy);
+                        CTile tl = gMap.GetTile(selRectTL.X + xx, selRectTL.Y + yy);
                         if (tl != null)
                         {
-                            gMap.setTile(pastePosTL.X + xx, pastePosTL.Y + yy, tl.tileID[g_selectedLayer], g_selectedLayer);
+                            gMap.SetTile(pastePosTL.X + xx, pastePosTL.Y + yy, tl.tlXY[g_selectedLayer], g_selectedLayer);
                         }
                     }
                 }
@@ -1761,7 +1606,7 @@ namespace HexxEditor
                     {
                         for (int xx = 0; xx < selRectTL.Width; xx++)
                         {
-                            gMap.setTile(selRectTL.X + xx, selRectTL.Y + yy, -1, kk);
+                            gMap.SetTile(selRectTL.X + xx, selRectTL.Y + yy, 0xffff, kk);
                         }
                     }
                 }
@@ -1772,7 +1617,7 @@ namespace HexxEditor
                 {
                     for (int xx = 0; xx < selRectTL.Width; xx++)
                     {
-                        gMap.setTile(selRectTL.X + xx, selRectTL.Y + yy, -1, g_selectedLayer);
+                        gMap.SetTile(selRectTL.X + xx, selRectTL.Y + yy, 0xffff, g_selectedLayer);
                     }
                 }
             }
@@ -1822,46 +1667,17 @@ namespace HexxEditor
         public int g_selectingStatus = K_SEL_STATUS_EMPTY;
         //variabile din material editor
         public Rectangle g_matBrush = new Rectangle(0, 0, 0, 0);
+        public int TILESET_ROWS = 0;
         public int TILESET_COLUMNS = 0;
 
-        public void SetMaterialData(int tileW, int tileH, int nOldTilesetColumns, int nTilesetColumns)
+        public void SetMaterialData(int tileW, int tileH, int nTilesetRows, int nTilesetColumns)
         {
-            //vede daca s-a schimbat marime tileset si daca da reindexeaza id-uri tiles
-            if ((TILESET_COLUMNS > 0) && (nOldTilesetColumns != nTilesetColumns))
-            {
-                MessageBox.Show("Tileset size changed! Reindexing tile IDs!", "Warning", MessageBoxButtons.OK);
-
-                int OLD_TILESET_COLUMNS = nOldTilesetColumns;
-                TILESET_COLUMNS = nTilesetColumns;
-                //deseneaza tabla de joc
-                for (int kk = 0; kk < gMap.Blocks.Count; kk++)
-                {
-                    CTileBlock tb = gMap.Blocks[kk] as CTileBlock;
-
-                    for (int layer = 0; layer < (int)ELayer.LAYERS_CNT; layer++)
-                    {
-                        for (int yy = 0; yy < BLOCK_H; yy++)
-                        {
-                            for (int xx = 0; xx < BLOCK_W; xx++)
-                            {
-                                int tileID = tb.tiles[xx, yy].tileID[layer];
-                                if (tileID < 0)
-                                    continue;
-                                //new tileid
-                                int tlsX = tileID % OLD_TILESET_COLUMNS;
-                                int tlsY = tileID / OLD_TILESET_COLUMNS;
-                                tb.tiles[xx, yy].tileID[layer] = tlsY * TILESET_COLUMNS + tlsX;
-                            }
-                        }
-                    }
-                }
-            }
-            //salvam noile date
             TILE_WIDTH = tileW;
             TILE_HEIGHT = tileH;
             TILE_HWIDTH = TILE_WIDTH / 2;
             TILE_HHEIGHT = TILE_HEIGHT / 2;
             TILESET_COLUMNS = nTilesetColumns;
+            TILESET_ROWS = nTilesetRows;
             //notify map too
             gMap.nTileW = TILE_WIDTH;
             gMap.nTileH = TILE_HEIGHT;
@@ -1909,8 +1725,8 @@ namespace HexxEditor
 
             tilesImg = new Bitmap(GetType(), "tiles.png");
 
-            layers_checkboxes = new CheckBox[] { chk_layer0, chk_layer1, chk_layer2, chk_layer3, chk_layer4, chk_layer5, chk_layer6 };
-            layers_radios = new RadioButton[] { radio_layer0, radio_layer1, radio_layer2, radio_layer3, radio_layer4, radio_layer5, radio_layer6 };
+            layers_checkboxes = new CheckBox[] { chk_layer0, chk_layer1, chk_layer2, chk_layer3, chk_layer4, chk_layer5, chk_layer6, chk_layer7 };
+            layers_radios = new RadioButton[] { radio_layer0, radio_layer1, radio_layer2, radio_layer3, radio_layer4, radio_layer5, radio_layer6, radio_layer7 };
 
             ResetLevel();
             //afisez fereastra
@@ -2128,26 +1944,26 @@ namespace HexxEditor
                     }
                 }
                 //axele verticale si blocks
-                for (int kk = 0; kk < 2 + (int)((float)(pictureBox1.Width / (BLOCK_W * TILE_WIDTH)) * (1.0f / zoomLevel)); kk++)
+                for (int kk = 0; kk < 2 + (int)((float)(pictureBox1.Width / (CTileBlock.BLOCK_W * TILE_WIDTH)) * (1.0f / zoomLevel)); kk++)
                 {
-                    float x = zoomLevel * (kk * BLOCK_W * TILE_WIDTH - cameraPos.X % (BLOCK_W * TILE_WIDTH));
+                    float x = zoomLevel * (kk * CTileBlock.BLOCK_W * TILE_WIDTH - cameraPos.X % (CTileBlock.BLOCK_W * TILE_WIDTH));
                     pbGr.DrawLine(pn2, x, 0, x, pictureBox1.Height);
                 }
-                for (int kk = 0; kk < 2 + (int)((float)(pictureBox1.Height / (BLOCK_H * TILE_HEIGHT)) * (1.0f / zoomLevel)); kk++)
+                for (int kk = 0; kk < 2 + (int)((float)(pictureBox1.Height / (CTileBlock.BLOCK_H * TILE_HEIGHT)) * (1.0f / zoomLevel)); kk++)
                 {
-                    float y = zoomLevel * (kk * BLOCK_H * TILE_HEIGHT - cameraPos.Y % (BLOCK_H * TILE_HEIGHT));
+                    float y = zoomLevel * (kk * CTileBlock.BLOCK_H * TILE_HEIGHT - cameraPos.Y % (CTileBlock.BLOCK_H * TILE_HEIGHT));
                     pbGr.DrawLine(pn2, 0, y, pictureBox1.Width, y);
                 }
             }
 
-            if (g_wndMaterials.g_TilesetImg == null)
+            if (g_wndMaterials.isLoaded == false)
             {
                 pbGr.DrawString("Load a tileset in the materials window or open a saved level!", new Font("Arial", 10), Brushes.Green, 10, 10);
             }
 
             pbGr.ScaleTransform(zoomLevel, zoomLevel);
             ///--- deseneaza nivelul
-            if (g_wndMaterials.g_TilesetImg != null)
+            if (g_wndMaterials.isLoaded)
             {
                 Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;
                 //deseneaza tabla de joc
@@ -2160,24 +1976,24 @@ namespace HexxEditor
                     if (tb.pos.Y > blmaxy) blmaxy = tb.pos.Y;
 
                     //daca nu sunt in ecran nu le deseneaza
-                    if (((tb.pos.X + 1) * BLOCK_W * TILE_WIDTH < cameraPos.X) || ((tb.pos.Y + 1) * BLOCK_H * TILE_HEIGHT < cameraPos.Y) ||
-                       tb.pos.X * BLOCK_W * TILE_WIDTH > cameraPos.X + (int)(pictureBox1.Width * (1.0f / zoomLevel)) ||
-                       tb.pos.Y * BLOCK_H * TILE_HEIGHT > cameraPos.Y + (int)(pictureBox1.Height * (1.0f / zoomLevel)) )
+                    if (((tb.pos.X + 1) * CTileBlock.BLOCK_W * TILE_WIDTH < cameraPos.X) || ((tb.pos.Y + 1) * CTileBlock.BLOCK_H * TILE_HEIGHT < cameraPos.Y) ||
+                       tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH > cameraPos.X + (int)(pictureBox1.Width * (1.0f / zoomLevel)) ||
+                       tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT > cameraPos.Y + (int)(pictureBox1.Height * (1.0f / zoomLevel)) )
                             continue;
 
                     //paint block image all at once
-                    pbGr.DrawImage(tb.layerImg, tb.pos.X * BLOCK_W * TILE_WIDTH - cameraPos.X, tb.pos.Y * BLOCK_H * TILE_HEIGHT - cameraPos.Y);
+                    pbGr.DrawImage(tb.layerImg, tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH - cameraPos.X, tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT - cameraPos.Y);
                     //deseneaza patratele rosii pe tile-urile care se suprapun
                     if ((chk_showOverlappingTiles.Checked) && (g_brushMode == BRUSH_MODE_TILES))
                     {
-                        for (int yy = 0; yy < BLOCK_H; yy++)
+                        for (int yy = 0; yy < CTileBlock.BLOCK_H; yy++)
                         {
-                            for (int xx = 0; xx < BLOCK_W; xx++)
+                            for (int xx = 0; xx < CTileBlock.BLOCK_W; xx++)
                             {
                                 int cnt = 0;
                                 for (int lay = 0; lay < (int)ELayer.LAYERS_CNT; lay++)
                                 {
-                                    if (tb.tiles[xx, yy].tileID[lay] >= 0)
+                                    if (tb.tiles[xx, yy].tlXY[lay] != 0xffff)
                                         cnt++;
                                 }
 
@@ -2185,8 +2001,8 @@ namespace HexxEditor
                                 {
                                     Brush fillbr = new SolidBrush(Color.FromArgb(cnt * 64, Color.Red));
 
-                                    pbGr.FillRectangle(fillbr, new RectangleF(tb.pos.X * BLOCK_W * TILE_WIDTH + xx * TILE_WIDTH - cameraPos.X,
-                                    tb.pos.Y * BLOCK_H * TILE_HEIGHT + yy * TILE_HEIGHT - cameraPos.Y, TILE_WIDTH, TILE_HEIGHT));
+                                    pbGr.FillRectangle(fillbr, new RectangleF(tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH + xx * TILE_WIDTH - cameraPos.X,
+                                    tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT + yy * TILE_HEIGHT - cameraPos.Y, TILE_WIDTH, TILE_HEIGHT));
                                 }
                             }
                         }
@@ -2194,10 +2010,10 @@ namespace HexxEditor
                 }
 
                 // set level bbox
-                AABBlevel = new Rectangle(blminx * TILE_WIDTH * BLOCK_W - 1, 
-                    blminy * TILE_HEIGHT * BLOCK_H - 1, 
-                    ((blmaxx - blminx + 1) * TILE_WIDTH * BLOCK_W + 2), 
-                    ((blmaxy - blminy + 1) * TILE_HEIGHT * BLOCK_H + 2));
+                AABBlevel = new Rectangle(blminx * TILE_WIDTH * CTileBlock.BLOCK_W - 1, 
+                    blminy * TILE_HEIGHT * CTileBlock.BLOCK_H - 1, 
+                    ((blmaxx - blminx + 1) * TILE_WIDTH * CTileBlock.BLOCK_W + 2), 
+                    ((blmaxy - blminy + 1) * TILE_HEIGHT * CTileBlock.BLOCK_H + 2));
 
             }
 
@@ -2563,14 +2379,14 @@ namespace HexxEditor
                     pbGr.DrawLine(pn3, 0, y, pictureBox1.Width, y);
                 }
                 //axele verticale si blocks
-                for (int kk = 0; kk < 2 + (int)((float)(pictureBox1.Width / (BLOCK_W * TILE_WIDTH)) * (1.0f / zoomLevel)); kk++)
+                for (int kk = 0; kk < 2 + (int)((float)(pictureBox1.Width / (CTileBlock.BLOCK_W * TILE_WIDTH)) * (1.0f / zoomLevel)); kk++)
                 {
-                    float x = zoomLevel * (kk * BLOCK_W * TILE_WIDTH - cameraPos.X % (BLOCK_W * TILE_WIDTH));
+                    float x = zoomLevel * (kk * CTileBlock.BLOCK_W * TILE_WIDTH - cameraPos.X % (CTileBlock.BLOCK_W * TILE_WIDTH));
                     pbGr.DrawLine(pn2, x, 0, x, pictureBox1.Height);
                 }
-                for (int kk = 0; kk < 2 + (int)((float)(pictureBox1.Height / (BLOCK_H * TILE_HEIGHT)) * (1.0f / zoomLevel)); kk++)
+                for (int kk = 0; kk < 2 + (int)((float)(pictureBox1.Height / (CTileBlock.BLOCK_H * TILE_HEIGHT)) * (1.0f / zoomLevel)); kk++)
                 {
-                    float y = zoomLevel * (kk * BLOCK_H * TILE_HEIGHT - cameraPos.Y % (BLOCK_H * TILE_HEIGHT));
+                    float y = zoomLevel * (kk * CTileBlock.BLOCK_H * TILE_HEIGHT - cameraPos.Y % (CTileBlock.BLOCK_H * TILE_HEIGHT));
                     pbGr.DrawLine(pn2, 0, y, pictureBox1.Width, y);
                 }
             }
@@ -2854,15 +2670,15 @@ namespace HexxEditor
 
                     g_selectingStatus = K_SEL_STATUS_DRAGGING;
                 }
-                else if ((g_brushMode == BRUSH_MODE_TILES) && (g_wndMaterials.g_TilesetImg != null))
+                else if ((g_brushMode == BRUSH_MODE_TILES) && (g_wndMaterials.pCurImage != null))
                 {
                     //clear undo state when starting to paint
                     gMap.Undo_ClearUndo();
 
-                    int tileID = g_matBrush.X + g_matBrush.Y * TILESET_COLUMNS;
+                    int tileXY = g_matBrush.X << 8 | g_matBrush.Y;
                     if ((g_matBrush.Width == 1) && (g_matBrush.Height == 1))
                     {
-                        CTileBlock tb = gMap.setTile(g_hoveredTile.X, g_hoveredTile.Y, tileID, g_selectedLayer);
+                        CTileBlock tb = gMap.SetTile(g_hoveredTile.X, g_hoveredTile.Y, (UInt16)tileXY, g_selectedLayer);
                         BuildBlockImage(tb);
                     }
                     else
@@ -2871,8 +2687,8 @@ namespace HexxEditor
                         {
                             for (int ll = 0; ll < g_matBrush.Height; ll++)
                             {
-                                int tileIDs = g_matBrush.X + kk + (g_matBrush.Y + ll) * TILESET_COLUMNS;
-                                CTileBlock tb = gMap.setTile(g_hoveredTile.X + kk, g_hoveredTile.Y + ll, tileIDs, g_selectedLayer);
+                                int tileIDs = (g_matBrush.X + kk) << 8 | g_matBrush.Y;
+                                CTileBlock tb = gMap.SetTile(g_hoveredTile.X + kk, g_hoveredTile.Y + ll, (UInt16)tileIDs, g_selectedLayer);
                                 BuildBlockImage(tb);
                             }
                         }
@@ -3714,7 +3530,7 @@ namespace HexxEditor
 
                     if ((g_matBrush.Width == 1) && (g_matBrush.Height == 1))
                     {
-                        CTileBlock tb = gMap.setTile(g_hoveredTile.X, g_hoveredTile.Y, -1, g_selectedLayer);
+                        CTileBlock tb = gMap.SetTile(g_hoveredTile.X, g_hoveredTile.Y, 0xffff, g_selectedLayer);
                         BuildBlockImage(tb);
                     }
                     else
@@ -3723,7 +3539,7 @@ namespace HexxEditor
                         {
                             for (int ll = 0; ll < g_matBrush.Height; ll++)
                             {
-                                CTileBlock tb = gMap.setTile(g_hoveredTile.X + kk, g_hoveredTile.Y + ll, -1, g_selectedLayer);
+                                CTileBlock tb = gMap.SetTile(g_hoveredTile.X + kk, g_hoveredTile.Y + ll, 0xffff, g_selectedLayer);
                                 BuildBlockImage(tb);
                             }
                         }
@@ -3955,12 +3771,12 @@ namespace HexxEditor
 
                     repaint = true;
                 }
-                else if ((g_brushMode == BRUSH_MODE_TILES) && (g_wndMaterials.g_TilesetImg != null))
+                else if ((g_brushMode == BRUSH_MODE_TILES) && (g_wndMaterials.pCurImage != null))
                 {
-                    int tileID = g_matBrush.X + g_matBrush.Y * TILESET_COLUMNS;
+                    int tileID = g_matBrush.X << 8 | g_matBrush.Y;
                     if ((g_matBrush.Width == 1) && (g_matBrush.Height == 1))
                     {
-                        CTileBlock tb = gMap.setTile(tlx, tly, tileID, g_selectedLayer);
+                        CTileBlock tb = gMap.SetTile(tlx, tly, (UInt16)tileID, g_selectedLayer);
                         BuildBlockImage(tb);
                     }
                     else
@@ -3969,8 +3785,8 @@ namespace HexxEditor
                         {
                             for (int ll = 0; ll < g_matBrush.Height; ll++)
                             {
-                                int tileIDs = g_matBrush.X + kk + (g_matBrush.Y + ll) * TILESET_COLUMNS;
-                                CTileBlock tb = gMap.setTile(tlx + kk, tly + ll, tileIDs, g_selectedLayer);
+                                int tileIDs = (g_matBrush.X + kk) << 8 | (g_matBrush.Y + ll);
+                                CTileBlock tb = gMap.SetTile(tlx + kk, tly + ll, (UInt16)tileIDs, g_selectedLayer);
                                 BuildBlockImage(tb);
                             }
                         }
@@ -4167,7 +3983,7 @@ namespace HexxEditor
                 {
                     if ((g_matBrush.Width == 1) && (g_matBrush.Height == 1))
                     {
-                        CTileBlock tb = gMap.setTile(tlx, tly, -1, g_selectedLayer);
+                        CTileBlock tb = gMap.SetTile(tlx, tly, 0xffff, g_selectedLayer);
                         BuildBlockImage(tb);
                     }
                     else
@@ -4176,7 +3992,7 @@ namespace HexxEditor
                         {
                             for (int ll = 0; ll < g_matBrush.Height; ll++)
                             {
-                                CTileBlock tb = gMap.setTile(tlx + kk, tly + ll, -1, g_selectedLayer);
+                                CTileBlock tb = gMap.SetTile(tlx + kk, tly + ll, 0xffff, g_selectedLayer);
                                 BuildBlockImage(tb);
                             }
                         }
@@ -4559,7 +4375,7 @@ namespace HexxEditor
             {
                 for (int xx = blminx; xx <= blmaxx; xx++)
                 {
-                    CTileBlock blk = gMap.getBlockAt(xx * BLOCK_W + BLOCK_W / 2, yy * BLOCK_H + BLOCK_H / 2);
+                    CTileBlock blk = gMap.GetBlockAt(xx * CTileBlock.BLOCK_W + CTileBlock.BLOCK_W / 2, yy * CTileBlock.BLOCK_H + CTileBlock.BLOCK_H / 2);
                     if (blk == null)
                     {
                         strDesc += "0";
@@ -4568,32 +4384,32 @@ namespace HexxEditor
                     //  check if bordering
                     CTileBlock testblk = null;
                     // LEFT
-                    testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W - BLOCK_W, blk.pos.Y * BLOCK_H);
-                    if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_LEFT)))
+                    testblk = gMap.GetBlockAt(blk.pos.X * CTileBlock.BLOCK_W - CTileBlock.BLOCK_W, blk.pos.Y * CTileBlock.BLOCK_H);
+                    if ((testblk == null) && (blk.HasConnectionOnSide(EDir.K_DIR_LEFT)))
                     {
                         strDesc += "L";
                         //MessageBox.Show("Found connection LEFT on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
                         continue;
                     }
                     //RIGHT
-                    testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W + BLOCK_W, blk.pos.Y * BLOCK_H);
-                    if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_RIGHT)))
+                    testblk = gMap.GetBlockAt(blk.pos.X * CTileBlock.BLOCK_W + CTileBlock.BLOCK_W, blk.pos.Y * CTileBlock.BLOCK_H);
+                    if ((testblk == null) && (blk.HasConnectionOnSide(EDir.K_DIR_RIGHT)))
                     {
                         strDesc += "R";
                         //MessageBox.Show("Found connection RIGHT on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
                         continue;
                     }
                     //UP
-                    testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W, blk.pos.Y * BLOCK_H - BLOCK_H);
-                    if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_UP)))
+                    testblk = gMap.GetBlockAt(blk.pos.X * CTileBlock.BLOCK_W, blk.pos.Y * CTileBlock.BLOCK_H - CTileBlock.BLOCK_H);
+                    if ((testblk == null) && (blk.HasConnectionOnSide(EDir.K_DIR_UP)))
                     {
                         strDesc += "U";
                         //MessageBox.Show("Found connection UP on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
                         continue;
                     }
                     //DOWN
-                    testblk = gMap.getBlockAt(blk.pos.X * BLOCK_W, blk.pos.Y * BLOCK_H + BLOCK_W);
-                    if ((testblk == null) && (blk.HasConnectionOnSide(K_DIR_DOWN)))
+                    testblk = gMap.GetBlockAt(blk.pos.X * CTileBlock.BLOCK_W, blk.pos.Y * CTileBlock.BLOCK_H + CTileBlock.BLOCK_W);
+                    if ((testblk == null) && (blk.HasConnectionOnSide(EDir.K_DIR_DOWN)))
                     {
                         strDesc += "D";
                         //MessageBox.Show("Found connection DOWN on block [" + blk.pos.X + "][" + blk.pos.Y + "]");
@@ -4662,21 +4478,21 @@ namespace HexxEditor
                 }
                 else
                 {
-                    blminx = blmaxx = gLevelOrigin.X / (TILE_WIDTH * BLOCK_W);
-                    blminy = blmaxy = gLevelOrigin.Y / (TILE_HEIGHT * BLOCK_H);
+                    blminx = blmaxx = gLevelOrigin.X / (TILE_WIDTH * CTileBlock.BLOCK_W);
+                    blminy = blmaxy = gLevelOrigin.Y / (TILE_HEIGHT * CTileBlock.BLOCK_H);
                     bSkipLimitSearch = true;
                 }
             }
 
-            Point levelUL = new Point(blminx * BLOCK_W, blminy * BLOCK_H);
-            Point levelDR = new Point((blmaxx + 1) * BLOCK_W, (blmaxy + 1) * BLOCK_H + BLOCK_H);
+            Point levelUL = new Point(blminx * CTileBlock.BLOCK_W, blminy * CTileBlock.BLOCK_H);
+            Point levelDR = new Point((blmaxx + 1) * CTileBlock.BLOCK_W, (blmaxy + 1) * CTileBlock.BLOCK_H + CTileBlock.BLOCK_H);
 
             if ((blminx == blmaxx) || (blminy == blmaxy)) //single block or no block
             {
                 if (gMap.Blocks.Count > 0)
                 {
-                    levelDR.X = blmaxx * BLOCK_W + BLOCK_W;
-                    levelDR.Y = blmaxy * BLOCK_H + BLOCK_H;
+                    levelDR.X = blmaxx * CTileBlock.BLOCK_W + CTileBlock.BLOCK_W;
+                    levelDR.Y = blmaxy * CTileBlock.BLOCK_H + CTileBlock.BLOCK_H;
                 }
                 else
                 {
@@ -4696,7 +4512,7 @@ namespace HexxEditor
                 {
                     for (int yy = levelUL.Y; yy <= levelDR.Y; yy++)
                     {
-                        CTile tl = gMap.getTile(levelUL.X, yy);
+                        CTile tl = gMap.GetTile(levelUL.X, yy);
                         if ((tl != null) && (!tl.IsEmpty()))
                         {
                             gasit = true;
@@ -4714,7 +4530,7 @@ namespace HexxEditor
                 {
                     for (int yy = levelUL.Y; yy <= levelDR.Y; yy++)
                     {
-                        CTile tl = gMap.getTile(levelDR.X, yy);
+                        CTile tl = gMap.GetTile(levelDR.X, yy);
                         if ((tl != null) && (!tl.IsEmpty()))
                         {
                             gasit = true;
@@ -4732,7 +4548,7 @@ namespace HexxEditor
                 {
                     for (int xx = levelUL.X; xx <= levelDR.X; xx++)
                     {
-                        CTile tl = gMap.getTile(xx, levelUL.Y);
+                        CTile tl = gMap.GetTile(xx, levelUL.Y);
                         if ((tl != null) && (!tl.IsEmpty()))
                         {
                             gasit = true;
@@ -4750,7 +4566,7 @@ namespace HexxEditor
                 {
                     for (int xx = levelUL.X; xx <= levelDR.X; xx++)
                     {
-                        CTile tl = gMap.getTile(xx, levelDR.Y);
+                        CTile tl = gMap.GetTile(xx, levelDR.Y);
                         if ((tl != null) && (!tl.IsEmpty()))
                         {
                             gasit = true;
@@ -4763,9 +4579,6 @@ namespace HexxEditor
                         gasit = true;
                 }
             }
-            //--- adauga un nr de tiles pentru cer, deasupra nivelului ---
-            if(!bExportPrefab)
-                levelUL.Y -= K_SKY_TILES_ADDED;
 
 
             if (((levelDR.X - levelUL.X) > 500) || ((levelDR.Y - levelUL.Y) > 500))
@@ -4892,24 +4705,22 @@ namespace HexxEditor
                 {
                     for (int xx = levelUL.X; xx <= levelDR.X; xx++)
                     {
-                        CTile tl = gMap.getTile(xx, yy);
+                        CTile tl = gMap.GetTile(xx, yy);
                         if (tl != null)
                         {
                             //scrie layerele de tiles
                             for (int kk = 0; kk < (int)ELayer.LAYERS_CNT; kk++)
                             {
-                                s4b = tl.tileID[kk];
-                                if (s4b < 0)
-                                    s4b = -1;
-                                bw.Write(s4b);
+                                u2b = tl.tlXY[kk];
+                                bw.Write(u2b);
                             }
                         }
                         else //daca nu e bloc
                         {
-                            s4b = -1;
+                            u2b = 0xffff;
                             for (int kk = 0; kk < (int)ELayer.LAYERS_CNT; kk++)
                             {
-                                bw.Write(s4b);
+                                bw.Write(u2b);
                             }
                         }
                     }
@@ -5548,7 +5359,7 @@ namespace HexxEditor
                         }
                         else
                         {
-                            radio_layer5.Checked = true;
+                            radio_layer6.Checked = true;
                         }
                     }
                     break;
@@ -5573,7 +5384,7 @@ namespace HexxEditor
                         }
                         else
                         {
-                            radio_layer6.Checked = true;
+                            radio_layer7.Checked = true;
                         }
                     }
                     break;
@@ -6058,10 +5869,8 @@ namespace HexxEditor
                     {
                         for (int kk = 0; kk < nLayersCnt; kk++)
                         {
-                            Int32 lev = bw.ReadInt32();
-                            if (lev < 0)
-                                lev = -1;
-                            gMap.setTile(LOCAL_OFFSET.X + xx, LOCAL_OFFSET.Y + yy, lev, kk);
+                            UInt16 lev = bw.ReadUInt16();
+                            gMap.SetTile(LOCAL_OFFSET.X + xx, LOCAL_OFFSET.Y + yy, lev, kk);
                         }
                     }
                 }
@@ -6072,7 +5881,7 @@ namespace HexxEditor
                 //build images for all blocks
                 BuildAllBlockImages();
 
-                ///--- lights luminile ---
+                ///--- lights ---
                 String bsxName = bw.ReadString();
                 if (!bLoadPrefab)
                 {
@@ -6533,7 +6342,7 @@ namespace HexxEditor
 
             zoomLevel = 2.0f;
             //se offseteaza ca sa nu ajungi in 0 niciodata
-            LEVEL_OFFSET.X = 100 * BLOCK_W; LEVEL_OFFSET.Y = 100 * BLOCK_H;
+            LEVEL_OFFSET.X = 100 * CTileBlock.BLOCK_W; LEVEL_OFFSET.Y = 100 * CTileBlock.BLOCK_H;
             CAMERA_ORIGIN.X = LEVEL_OFFSET.X * TILE_WIDTH; CAMERA_ORIGIN.Y = LEVEL_OFFSET.Y * TILE_HEIGHT;
 
             cameraPos.X = CAMERA_ORIGIN.X - (pictureBox1.Width / 2) * (1.0f / zoomLevel);
@@ -6582,6 +6391,12 @@ namespace HexxEditor
             PaintMap();
         }
 
+        // returns current layer index
+        public int GetCurrentLayerIdx()
+        {
+            return (int)g_selectedLayer;
+        }
+
         void moveMap(int x, int y)
         {
             /*
@@ -6589,12 +6404,12 @@ namespace HexxEditor
             for (int ii = 0; ii < gMap.Blocks.Count; ii++)
             {
                 CTileBlock tileBlock = gMap.Blocks[ii] as CTileBlock;
-                for (int xx = 0; xx < BLOCK_W; xx++)
-                    for (int yy = 0; yy < BLOCK_H; yy++)
+                for (int xx = 0; xx < CTileBlock.BLOCK_W; xx++)
+                    for (int yy = 0; yy < CTileBlock.BLOCK_H; yy++)
                         if (tileBlock.tiles[xx, yy].level != 0) 
                         {
-                            tileBlock.tiles[xx,yy].x = tileBlock.pos.X * BLOCK_W + xx + x;
-                            tileBlock.tiles[xx,yy].y = tileBlock.pos.Y * BLOCK_H + yy + y;
+                            tileBlock.tiles[xx,yy].x = tileBlock.pos.X * CTileBlock.BLOCK_W + xx + x;
+                            tileBlock.tiles[xx,yy].y = tileBlock.pos.Y * CTileBlock.BLOCK_H + yy + y;
                             temp.Add(tileBlock.tiles[xx, yy]);
                         }
             }
@@ -6603,7 +6418,7 @@ namespace HexxEditor
 
             foreach (CTile tile in temp)
             {
-                gMap.setTile(tile.x, tile.y, tile.level);
+                gMap.SetTile(tile.x, tile.y, tile.level);
                 CTile tempTile = gMap.getTile(tile.x, tile.y);
                 tempTile.specialPiece = tile.specialPiece;
                 tempTile.cannonDirFlags = tile.cannonDirFlags;
@@ -7229,19 +7044,19 @@ namespace HexxEditor
             {
                 CTileBlock tb = gMap.Blocks[kk] as CTileBlock;
 
-                for (int yy = 0; yy < BLOCK_H; yy++)
+                for (int yy = 0; yy < CTileBlock.BLOCK_H; yy++)
                 {
-                    for (int xx = 0; xx < BLOCK_W; xx++)
+                    for (int xx = 0; xx < CTileBlock.BLOCK_W; xx++)
                     {
                         int maxl = 0;
-                        if (tb.tiles[xx, yy].tileID[1] >= 0)
+                        if (tb.tiles[xx, yy].tlXY[1] != 0xffff)
                             maxl = 1;
-                        if (tb.tiles[xx, yy].tileID[2] >= 0)
+                        if (tb.tiles[xx, yy].tlXY[2] != 0xffff)
                             maxl = 2;
 
                         for (int oo = 0; oo < maxl; oo++)
                         {
-                            tb.tiles[xx, yy].tileID[oo] = -1;                            
+                            tb.tiles[xx, yy].tlXY[oo] = 0xffff;                            
                         }
                     }
                 }
