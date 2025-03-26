@@ -13,19 +13,19 @@ namespace HexxEditor
 {
     public partial class MiscWnd : Form
     {
-        Form1 parentWnd = null;
-        Form1.CMiscObjectBase pMisc = null;
+        EditorWnd parentWnd = null;
+        EditorWnd.CMiscObjectBase pMisc = null;
 
         bool bIsFillingData = false;
 
-        public MiscWnd(Form1 parent)
+        public MiscWnd(EditorWnd parent)
         {
             InitializeComponent();
 
             parentWnd = parent;
         }
 
-        public void SetSelectedMisc(Form1.CMiscObjectBase pMiscObject)
+        public void SetSelectedMisc(EditorWnd.CMiscObjectBase pMiscObject)
         {
             pMisc = pMiscObject;
 
@@ -61,8 +61,8 @@ namespace HexxEditor
 
         private void butTrails_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MISC;
-            parentWnd.g_brushValue = Form1.K_MISC_RAIL;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MISC;
+            parentWnd.g_brushValue = EditorWnd.K_MISC_RAIL;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
@@ -131,8 +131,8 @@ namespace HexxEditor
 
         private void butBack_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MISC;
-            parentWnd.g_brushValue = Form1.K_MISC_BACKGROUND;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MISC;
+            parentWnd.g_brushValue = EditorWnd.K_MISC_BACKGROUND;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
@@ -147,104 +147,104 @@ namespace HexxEditor
 
         private void butFirstLayerObj_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MISC;
-            parentWnd.g_brushValue = Form1.K_MISC_FRONTLAYEROBJ;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MISC;
+            parentWnd.g_brushValue = EditorWnd.K_MISC_FRONTLAYEROBJ;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
 
         private void but_doorLocked_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MACRO;
-            parentWnd.g_brushValue = Form1.K_MACRO_DOOR_LOCKED;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MACRO;
+            parentWnd.g_brushValue = EditorWnd.K_MACRO_DOOR_LOCKED;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
 
         private void but_doorUnlocked_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MACRO;
-            parentWnd.g_brushValue = Form1.K_MACRO_DOOR_UNLOCKED;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MACRO;
+            parentWnd.g_brushValue = EditorWnd.K_MACRO_DOOR_UNLOCKED;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
 
         private void but_doorMetallic_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MACRO;
-            parentWnd.g_brushValue = Form1.K_MACRO_DOOR_METALLIC;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MACRO;
+            parentWnd.g_brushValue = EditorWnd.K_MACRO_DOOR_METALLIC;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
 
         private void but_MetalDoorUnlocker_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MACRO;
-            parentWnd.g_brushValue = Form1.K_MACRO_KEYCARD_RED;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MACRO;
+            parentWnd.g_brushValue = EditorWnd.K_MACRO_KEYCARD_RED;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
 
         private void but_FrontStairs_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MACRO;
-            parentWnd.g_brushValue = Form1.K_MACRO_FRONT_SOLO_STAIRS;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MACRO;
+            parentWnd.g_brushValue = EditorWnd.K_MACRO_FRONT_SOLO_STAIRS;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
 
         private void but_FrontDoor_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MACRO;
-            parentWnd.g_brushValue = Form1.K_MACRO_FRONT_TEAM_DOOR;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MACRO;
+            parentWnd.g_brushValue = EditorWnd.K_MACRO_FRONT_TEAM_DOOR;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
 
         private void but_Checkpoint_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MACRO;
-            parentWnd.g_brushValue = Form1.K_MACRO_SPAWNPOINT;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MACRO;
+            parentWnd.g_brushValue = EditorWnd.K_MACRO_SPAWNPOINT;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
 
         private void but_Script_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MISC;
-            parentWnd.g_brushValue = Form1.K_MISC_SCRIPT;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MISC;
+            parentWnd.g_brushValue = EditorWnd.K_MISC_SCRIPT;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
 
         private void but_windProfile_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MACRO;
-            parentWnd.g_brushValue = Form1.K_MACRO_WINDOW_PROFILE;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MACRO;
+            parentWnd.g_brushValue = EditorWnd.K_MACRO_WINDOW_PROFILE;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
 
         private void but_windowHoriz_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MACRO;
-            parentWnd.g_brushValue = Form1.K_MACRO_WINDOW_PROFILE_HORIZONTAL;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MACRO;
+            parentWnd.g_brushValue = EditorWnd.K_MACRO_WINDOW_PROFILE_HORIZONTAL;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
 
         private void but_soloDoor_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MACRO;
-            parentWnd.g_brushValue = Form1.K_MACRO_FRONT_SOLO_DOOR;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MACRO;
+            parentWnd.g_brushValue = EditorWnd.K_MACRO_FRONT_SOLO_DOOR;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
 
         private void but_keycardGold_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = Form1.BRUSH_MODE_MACRO;
-            parentWnd.g_brushValue = Form1.K_MACRO_KEYCARD_GOLD;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MACRO;
+            parentWnd.g_brushValue = EditorWnd.K_MACRO_KEYCARD_GOLD;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }

@@ -12,12 +12,12 @@ namespace HexxEditor
 {
     public partial class PrefabsWnd : Form
     {
-        Form1 parentWnd = null;
+        EditorWnd parentWnd = null;
         //keeps paths to all prefab files
         string strFolder;
         string[] arrPaths = null;
 
-        public PrefabsWnd(Form1 parent)
+        public PrefabsWnd(EditorWnd parent)
         {
             InitializeComponent();
 

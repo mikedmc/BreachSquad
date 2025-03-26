@@ -15,14 +15,15 @@ namespace HexxEditor
 {
     public partial class MaterialsWnd : Form
     {
-        Form1 parentWnd;
+        EditorWnd parentWnd;
 ///--- VARIABILE ENGINE ---
         //marimea tilesetului se stabileste aici in fereastra de materiale
         public int TILE_W = 16;
         public int TILE_H = 16;
 
         public Graphics pbGr = null;
-        public ArrayList g_TilesetImgs = new ArrayList();
+        public ArrayList g_TilesetImgs = new ArrayList(); // keeps unique images
+        public Image[] arrLayerImg = null; // one image ref for each layer
         public Image pCurImage = null;
         public String g_TilesetName = "";
         public bool isLoaded = false;
@@ -44,7 +45,7 @@ namespace HexxEditor
 
         public bool b_settingBrush = false;
 
-        public MaterialsWnd(Form1 parent)
+        public MaterialsWnd(EditorWnd parent)
         {
             InitializeComponent();
 
@@ -68,6 +69,13 @@ namespace HexxEditor
             parentWnd.SetMaterialData(TILE_W, TILE_H, 0, 0);
             parentWnd.SetMaterialBrush(g_brush);
 
+            // we hold ref to layer images
+            arrLayerImg = new Image[(int)ELayer.LAYERS_CNT];
+            for (int kk = 0; kk < (int)ELayer.LAYERS_CNT; ++kk)
+            {
+                arrLayerImg[kk] = null;
+            }
+
             Repaint();
         }
 
@@ -84,7 +92,8 @@ namespace HexxEditor
             
             if (pCurImage == null)
             {
-                pbGr.DrawString("Load a tileset first! File->Load Tileset...", new Font("Arial", 10), Brushes.LightBlue, 10, 10);
+                pbGr.DrawString("Tileset not loaded or missing layer image! File->Load Tileset...", new Font("Arial", 10), Brushes.LightBlue, 10, 10);
+                pbTileset.Refresh();
                 return;
             }
             //paint tileset
@@ -141,10 +150,9 @@ namespace HexxEditor
                 {
                     XmlDocument xdoc = new XmlDocument();
                     xdoc.Load(reader);
-                    //now read data without comments
 
-                    XmlNodeList nodes = xdoc.GetElementsByTagName("TILE_LAYERS");
-                    foreach (XmlNode node in nodes[0].ChildNodes)
+                    XmlNodeList imgnodes = xdoc.GetElementsByTagName("IMAGES");
+                    foreach (XmlNode node in imgnodes[0].ChildNodes)
                     {
                         XmlNode nodeattr = node.Attributes.GetNamedItem("colormap");
                         if (nodeattr != null)
@@ -153,6 +161,21 @@ namespace HexxEditor
                             Image img = new Bitmap(strImgPath);
                             g_TilesetImgs.Add(img);
                         }
+                    }
+
+
+                    XmlNodeList nodes = xdoc.GetElementsByTagName("TILE_LAYERS");
+                    int nodeidx = 0;
+                    foreach (XmlNode node in nodes[0].ChildNodes)
+                    {
+                        XmlNode nodeattr = node.Attributes.GetNamedItem("imgidx");
+                        if (nodeattr != null)
+                        {
+                            // save layer image indices
+                            int imgidx = Convert.ToInt32(nodeattr.Value);
+                            arrLayerImg[nodeidx] = g_TilesetImgs[imgidx] as Image;
+                        }
+                        nodeidx++;
                     }
                 }
 
@@ -238,21 +261,23 @@ namespace HexxEditor
 
         public Image GetLayerImage(int index)
         {
-            if (index < 0 || index >= g_TilesetImgs.Count)
+            if (index < 0 || index >= (int)ELayer.LAYERS_CNT)
             {
                 return null;
             }
-            return g_TilesetImgs[index] as Image;
+            return arrLayerImg[index];
         }
 
         // call this to select a given layer
         public void SelectLayer(int index)
         {
-            if (index < 0 || index >= g_TilesetImgs.Count)
+            if (index < 0 || index >= (int)ELayer.LAYERS_CNT)
             {
+                pCurImage = null;
+                Repaint();
                 return;
             }
-            pCurImage = g_TilesetImgs[index] as Image;
+            pCurImage = arrLayerImg[index];
             TILESET_COLUMNS = pCurImage.Width / TILE_W;
             TILESET_ROWS = pCurImage.Height / TILE_H;
 

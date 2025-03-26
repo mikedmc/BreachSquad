@@ -38,7 +38,7 @@ namespace HexxEditor
         K_DIR_DOWN = 4,
     };
 
-    public partial class Form1 : Form
+    public partial class EditorWnd : Form
     {
         //helper forms
         public MaterialsWnd g_wndMaterials;
@@ -372,7 +372,7 @@ namespace HexxEditor
                 listParams.Clear();
             }
 
-            public virtual void Paint(Graphics gr, Form1 parentForm)
+            public virtual void Paint(Graphics gr, EditorWnd parentForm)
             {
                 gr.DrawString("CMiscObjectBase::Not implemented!", new Font("Arial", 8), Brushes.Red, 10.0f, 10.0f);
             }
@@ -408,7 +408,7 @@ namespace HexxEditor
                 pos = new PointF(0.0f, 0.0f);
             }
 
-            public override void Paint(Graphics gr, Form1 parentForm)
+            public override void Paint(Graphics gr, EditorWnd parentForm)
             {
                 PointF npt = parentForm.WorldToScreen(pos);
                 if (parentForm.g_selectedMisc == this)
@@ -461,7 +461,7 @@ namespace HexxEditor
                 pos = new PointF(0.0f, 0.0f);
             }
 
-            public override void Paint(Graphics gr, Form1 parentForm)
+            public override void Paint(Graphics gr, EditorWnd parentForm)
             {
                 PointF npt = parentForm.WorldToScreen(pos);
                 if (parentForm.g_selectedMisc == this)
@@ -515,7 +515,7 @@ namespace HexxEditor
                 pos = new PointF(0.0f, 0.0f);
             }
 
-            public override void Paint(Graphics gr, Form1 parentForm)
+            public override void Paint(Graphics gr, EditorWnd parentForm)
             {
                 PointF npt = parentForm.WorldToScreen(pos);
                 Pen colpen = Pens.Red;
@@ -689,7 +689,7 @@ namespace HexxEditor
                 }
             }
 
-            public override void Paint(Graphics gr, Form1 parentForm)
+            public override void Paint(Graphics gr, EditorWnd parentForm)
             {
                 for (int kk = 0; kk < listPoints.Count; kk++)
                 {
@@ -1698,7 +1698,7 @@ namespace HexxEditor
         public int startXtl = -1, startYtl = -1;
         public int endXtl = -1, endYtl = -1;
 
-        public Form1()
+        public EditorWnd()
         {
             InitializeComponent();
 
@@ -7089,6 +7089,7 @@ namespace HexxEditor
             Undo_ExecuteCurrent();
         }
 
+        /*
         private void setLevelBackgroundToolStripMenuItem_Click(object sender, EventArgs e)
         {
             BkgSelector wndMission = new BkgSelector(this);
@@ -7098,6 +7099,7 @@ namespace HexxEditor
 
             SetFileModified();
         }
+        */
 
         private void uploadSingleLevelToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -7141,6 +7143,7 @@ namespace HexxEditor
                 if (layers_radios[kk] == sender)
                 {
                     g_selectedLayer = kk;
+                    g_wndMaterials.SelectLayer(kk);
                     return;
                 }
             }

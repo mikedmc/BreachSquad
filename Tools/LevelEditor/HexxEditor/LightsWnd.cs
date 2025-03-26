@@ -11,12 +11,12 @@ namespace HexxEditor
 {
     public partial class LightsWnd : Form
     {
-        Form1 parentWnd = null;
-        Form1.CLight pLight = null;
+        EditorWnd parentWnd = null;
+        EditorWnd.CLight pLight = null;
         //animatia selectata pentru frame
         public int g_selectedAnim = -1;
 
-        public LightsWnd(Form1 parent)
+        public LightsWnd(EditorWnd parent)
         {
             InitializeComponent();
             combo_lightType.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -68,7 +68,7 @@ namespace HexxEditor
             }
         }
 
-        public void SetSelectedLight(Form1.CLight light)
+        public void SetSelectedLight(EditorWnd.CLight light)
         {
             pLight = light;
             PopulateDataFields();

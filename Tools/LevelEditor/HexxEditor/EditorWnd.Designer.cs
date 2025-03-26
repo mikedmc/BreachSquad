@@ -1,6 +1,6 @@
 ﻿namespace HexxEditor
 {
-    partial class Form1
+    partial class EditorWnd
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EditorWnd));
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,7 +47,6 @@
             this.undoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
             this.setMissionTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.setLevelBackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setGroundLevelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.findByIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -225,7 +224,6 @@
             this.undoToolStripMenuItem,
             this.toolStripMenuItem7,
             this.setMissionTypeToolStripMenuItem,
-            this.setLevelBackgroundToolStripMenuItem,
             this.setGroundLevelToolStripMenuItem,
             this.toolStripMenuItem3,
             this.findByIDToolStripMenuItem,
@@ -255,13 +253,6 @@
             this.setMissionTypeToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.setMissionTypeToolStripMenuItem.Text = "Set Mission Type...";
             this.setMissionTypeToolStripMenuItem.Click += new System.EventHandler(this.setMissionTypeToolStripMenuItem_Click);
-            // 
-            // setLevelBackgroundToolStripMenuItem
-            // 
-            this.setLevelBackgroundToolStripMenuItem.Name = "setLevelBackgroundToolStripMenuItem";
-            this.setLevelBackgroundToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.setLevelBackgroundToolStripMenuItem.Text = "Set Level Background...";
-            this.setLevelBackgroundToolStripMenuItem.Click += new System.EventHandler(this.setLevelBackgroundToolStripMenuItem_Click);
             // 
             // setGroundLevelToolStripMenuItem
             // 
@@ -372,6 +363,7 @@
             this.uploadSingleLevelToolStripMenuItem,
             this.toolStripMenuItem8,
             this.playMapToolStripMenuItem});
+            this.workshopToolStripMenuItem.Enabled = false;
             this.workshopToolStripMenuItem.Name = "workshopToolStripMenuItem";
             this.workshopToolStripMenuItem.Size = new System.Drawing.Size(73, 20);
             this.workshopToolStripMenuItem.Text = "Workshop";
@@ -807,7 +799,7 @@
             this.timer_autosave.Interval = 300000;
             this.timer_autosave.Tick += new System.EventHandler(this.timer_autosave_Tick);
             // 
-            // Form1
+            // EditorWnd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -818,7 +810,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
+            this.Name = "EditorWnd";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "BreachEd";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -896,7 +888,6 @@
         private System.Windows.Forms.ToolStripMenuItem openPrefabToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem undoToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem7;
-        private System.Windows.Forms.ToolStripMenuItem setLevelBackgroundToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem workshopToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem uploadSingleLevelToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem frontLayerGridToolStripMenuItem;

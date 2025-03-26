@@ -11,8 +11,8 @@ namespace HexxEditor
 {
     public partial class ObjectsWnd : Form
     {
-        Form1 parentWnd = null;
-        Form1.CObject pObject = null;
+        EditorWnd parentWnd = null;
+        EditorWnd.CObject pObject = null;
 
         public int g_selectedAnim = -1;
         public int g_selectedFrame = -1;
@@ -29,7 +29,7 @@ namespace HexxEditor
             }
         }
 
-        public void SetSelectedObject(Form1.CObject pObj)
+        public void SetSelectedObject(EditorWnd.CObject pObj)
         {
             pObject = pObj;
             PopulateDataFields();
@@ -51,14 +51,14 @@ namespace HexxEditor
             {
                 chk_useAsCover.Enabled = true;
                 chk_animated.Enabled = true;
-                chk_animated.Checked = (pObject.flags & Form1.OBJFLAG_ANIMATED) != 0;
-                chk_useAsCover.Checked = (pObject.flags & Form1.OBJFLAG_IS_COVER) != 0;
+                chk_animated.Checked = (pObject.flags & EditorWnd.OBJFLAG_ANIMATED) != 0;
+                chk_useAsCover.Checked = (pObject.flags & EditorWnd.OBJFLAG_IS_COVER) != 0;
 
                 SetObjectsWndSelection(pObject.animIdx, pObject.frameIdx);
             }
         }
 
-        public ObjectsWnd(Form1 parent)
+        public ObjectsWnd(EditorWnd parent)
         {
             InitializeComponent();
 
@@ -137,9 +137,9 @@ namespace HexxEditor
                 return;
 
             if (chk_animated.Checked)
-                pObject.flags |= Form1.OBJFLAG_ANIMATED;
+                pObject.flags |= EditorWnd.OBJFLAG_ANIMATED;
             else
-                pObject.flags &= ~Form1.OBJFLAG_ANIMATED;
+                pObject.flags &= ~EditorWnd.OBJFLAG_ANIMATED;
         }
 
         private void chk_useAsCover_CheckedChanged(object sender, EventArgs e)
@@ -148,9 +148,9 @@ namespace HexxEditor
                 return;
 
             if (chk_useAsCover.Checked)
-                pObject.flags |= Form1.OBJFLAG_IS_COVER;
+                pObject.flags |= EditorWnd.OBJFLAG_IS_COVER;
             else
-                pObject.flags &= ~Form1.OBJFLAG_IS_COVER;
+                pObject.flags &= ~EditorWnd.OBJFLAG_IS_COVER;
 
             parentWnd.PaintMap();            
         }

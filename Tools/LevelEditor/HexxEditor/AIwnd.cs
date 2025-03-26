@@ -14,8 +14,8 @@ namespace HexxEditor
 {
     public partial class AIwnd : Form
     {
-        Form1 parentWnd = null;
-        Form1.CBehaviorContainer pLogic = null;
+        EditorWnd parentWnd = null;
+        EditorWnd.CBehaviorContainer pLogic = null;
 
         bool bIsFillingData = false;
 
@@ -60,7 +60,7 @@ namespace HexxEditor
 
         }
 
-        public AIwnd(Form1 parent)
+        public AIwnd(EditorWnd parent)
         {
             InitializeComponent();
             combo_AI.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -136,7 +136,7 @@ namespace HexxEditor
             }
         }
 
-        public void SetSelectedLogic(Form1.CBehaviorContainer pBehavior)
+        public void SetSelectedLogic(EditorWnd.CBehaviorContainer pBehavior)
         {
             pLogic = pBehavior;
 

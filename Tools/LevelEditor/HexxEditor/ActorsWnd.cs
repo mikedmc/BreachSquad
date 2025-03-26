@@ -15,8 +15,8 @@ namespace HexxEditor
 {
     public partial class ActorsWnd : Form
     {
-        Form1 parentWnd = null;
-        public Form1.CActor pActor = null;
+        EditorWnd parentWnd = null;
+        public EditorWnd.CActor pActor = null;
 
         class TemplateAnimCombo
         {
@@ -50,7 +50,7 @@ namespace HexxEditor
             get { return chk_hideActors.Checked; }
         }
 
-        public void SetActorTemplate(Form1.CActor act)
+        public void SetActorTemplate(EditorWnd.CActor act)
         {
             act.animIdx = -1;
             if (lvActors.SelectedIndices.Count == 0)
@@ -66,7 +66,7 @@ namespace HexxEditor
             //act.animIdx = (templateList[combo_templates.SelectedIndex] as TemplateAnimCombo).animIdx;
         }
 
-        public void SetActorAnimByTemplate(Form1.CActor act)
+        public void SetActorAnimByTemplate(EditorWnd.CActor act)
         {
             act.animIdx = -1;
             for (int kk = 0; kk < templateList.Count; kk++)
@@ -82,7 +82,7 @@ namespace HexxEditor
             MessageBox.Show("SetActorAnimByTemplate::couldn't find template: " + act.templateName + "\n\rActor ID:" + act.ID);
         }
 
-        public ActorsWnd(Form1 parent)
+        public ActorsWnd(EditorWnd parent)
         {
             InitializeComponent();
             comboStates.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -251,7 +251,7 @@ namespace HexxEditor
             }
         }
 
-        public void SetSelectedActor(Form1.CActor selActor)
+        public void SetSelectedActor(EditorWnd.CActor selActor)
         {
             pActor = selActor;
             PopulateDataFields();

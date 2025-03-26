@@ -102,11 +102,11 @@
     <Compile Include="CollisionWnd.Designer.cs">
       <DependentUpon>CollisionWnd.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form1.cs">
+    <Compile Include="EditorWnd.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="EditorWnd.Designer.cs">
+      <DependentUpon>EditorWnd.cs</DependentUpon>
     </Compile>
     <Compile Include="FormMissionType.cs">
       <SubType>Form</SubType>
@@ -159,8 +159,8 @@
     <EmbeddedResource Include="CollisionWnd.resx">
       <DependentUpon>CollisionWnd.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="EditorWnd.resx">
+      <DependentUpon>EditorWnd.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormMissionType.resx">
       <DependentUpon>FormMissionType.cs</DependentUpon>

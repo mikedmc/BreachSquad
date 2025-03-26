@@ -11,10 +11,10 @@ namespace HexxEditor
 {
     public partial class CollisionWnd : Form
     {
-        Form1 parentWnd = null;
-        public Form1.CCollisionElement pElement = null;
+        EditorWnd parentWnd = null;
+        public EditorWnd.CCollisionElement pElement = null;
 
-        public void SetSelectedCollision(Form1.CCollisionElement pColl)
+        public void SetSelectedCollision(EditorWnd.CCollisionElement pColl)
         {
             pElement = pColl;
             PopulateDataFields();
@@ -38,7 +38,7 @@ namespace HexxEditor
             get { return chk_hideTriggers.Checked; }
         }
 
-        public CollisionWnd(Form1 parent)
+        public CollisionWnd(EditorWnd parent)
         {
             InitializeComponent();
 
@@ -95,21 +95,21 @@ namespace HexxEditor
             
             switch (combo_CollType.SelectedIndex)
             {
-                case Form1.K_COLL_TYPE_SOLID:
-                case Form1.K_COLL_TYPE_BOX:
-                case Form1.K_COLL_TYPE_COVER:
-                case Form1.K_COLL_TYPE_MOVING_PLATFORM:
-                case Form1.K_COLL_TYPE_LEDGE:
+                case EditorWnd.K_COLL_TYPE_SOLID:
+                case EditorWnd.K_COLL_TYPE_BOX:
+                case EditorWnd.K_COLL_TYPE_COVER:
+                case EditorWnd.K_COLL_TYPE_MOVING_PLATFORM:
+                case EditorWnd.K_COLL_TYPE_LEDGE:
                     {
                         chk_castShadows.Checked = true;
                     }
                     break;
-                case Form1.K_COLL_TYPE_LADDER:
-                case Form1.K_COLL_TYPE_WATER:
-                case Form1.K_COLL_TYPE_STAIRS:
-                case Form1.K_COLL_TYPE_PARTICLE_SYSTEM:
-                case Form1.K_COLL_TYPE_ROOM_OCCLUDER:
-                case Form1.K_COLL_TYPE_TRIGGER:
+                case EditorWnd.K_COLL_TYPE_LADDER:
+                case EditorWnd.K_COLL_TYPE_WATER:
+                case EditorWnd.K_COLL_TYPE_STAIRS:
+                case EditorWnd.K_COLL_TYPE_PARTICLE_SYSTEM:
+                case EditorWnd.K_COLL_TYPE_ROOM_OCCLUDER:
+                case EditorWnd.K_COLL_TYPE_TRIGGER:
                     {
                         chk_castShadows.Checked = false;
                     }

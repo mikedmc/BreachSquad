@@ -16,7 +16,7 @@ namespace HexxEditor
 {
     public partial class ModCreator : Form
     {
-        Form1 parentWnd = null;
+        EditorWnd parentWnd = null;
         eModType currentModType;
         string strImagePath = "";
         string strExePath = "";
@@ -26,7 +26,7 @@ namespace HexxEditor
 
         ArrayList arrAffectedFiles; //list of affected files
 
-        public ModCreator(Form1 pParentWnd)
+        public ModCreator(EditorWnd pParentWnd)
         {
             parentWnd = pParentWnd;
             strExePath = parentWnd.GetExePath();

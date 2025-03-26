@@ -15,7 +15,7 @@ namespace HexxEditor
 {
     public partial class BkgSelector : Form
     {
-        Form1 parentWnd = null;
+        EditorWnd parentWnd = null;
 
         //keeps background data loaded from the XML
         public class CBkgDef
@@ -32,7 +32,7 @@ namespace HexxEditor
         //list of loaded bkg templates
         List<CBkgDef> arrBackgrounds = new List<CBkgDef>();
 
-        public BkgSelector(Form1 pParent)
+        public BkgSelector(EditorWnd pParent)
         {
             //save pointer to parent
             parentWnd = pParent;
