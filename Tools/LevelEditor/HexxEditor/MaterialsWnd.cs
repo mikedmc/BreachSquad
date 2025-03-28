@@ -278,9 +278,11 @@ namespace HexxEditor
                 return;
             }
             pCurImage = arrLayerImg[index];
-            TILESET_COLUMNS = pCurImage.Width / TILE_W;
-            TILESET_ROWS = pCurImage.Height / TILE_H;
-
+            if (pCurImage != null)
+            {
+                TILESET_COLUMNS = pCurImage.Width / TILE_W;
+                TILESET_ROWS = pCurImage.Height / TILE_H;
+            }
             LimitScroll();
             Repaint();
         }

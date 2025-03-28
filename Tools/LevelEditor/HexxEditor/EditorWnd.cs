@@ -50,6 +50,7 @@ namespace HexxEditor
         public MiscWnd g_wndMisc;
         public ActorsWnd g_wndActors;
 
+        public Random g_RNG = new Random();
         //save file version
         public const int K_CURRENT_VERSION = 10001;
 
@@ -1524,7 +1525,7 @@ namespace HexxEditor
         /// Umple selectia curenta cu tile-ul sau blocul de tiles selectate in materialEditor
         /// </summary>
         /// <param name="selRectTL">Zona care trebuie umpluta, data in tiles</param>
-        public void FillSelectionWithTileBrush(Rectangle selRectTL)
+        public void FillSelectionWithTileBrush(Rectangle selRectTL, bool bRandomize)
         {
             //clear undo state before operation
             gMap.Undo_ClearUndo();
@@ -1533,8 +1534,16 @@ namespace HexxEditor
             {
                 for (int xx = 0; xx < selRectTL.Width; xx++)
                 {
-                    int tileXY = (g_matBrush.X + (xx % g_matBrush.Width) << 8) | (g_matBrush.Y + (yy % g_matBrush.Height));
-                    gMap.SetTile(selRectTL.X + xx, selRectTL.Y + yy, (UInt16)tileXY, g_selectedLayer);
+                    if (!bRandomize)
+                    {
+                        int tileXY = (g_matBrush.X + (xx % g_matBrush.Width) << 8) | (g_matBrush.Y + (yy % g_matBrush.Height));
+                        gMap.SetTile(selRectTL.X + xx, selRectTL.Y + yy, (UInt16)tileXY, g_selectedLayer);
+                    }
+                    else
+                    {
+                        int tileXY = (g_matBrush.X + (g_RNG.Next(g_matBrush.Width)) << 8) | (g_matBrush.Y + g_RNG.Next(g_matBrush.Height));
+                        gMap.SetTile(selRectTL.X + xx, selRectTL.Y + yy, (UInt16)tileXY, g_selectedLayer);
+                    }
                 }
             }
 
@@ -1728,7 +1737,7 @@ namespace HexxEditor
             //afisez fereastra
             butWndMaterials_Click(this, null);
 
-            SetStatusBarMessage("Copyright 2018 PixelShard - www.pixelshard.com");
+            SetStatusBarMessage("Copyright 2025 PixelShard - www.pixelshard.com");
 
             PaintMap();
         }
@@ -2630,6 +2639,8 @@ namespace HexxEditor
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
+            bool bAltDown = false;
+            bool bShiftDown = false;
             g_lastMousePos.X = e.X; g_lastMousePos.Y = e.Y;
             g_lastMouseDownPos = g_lastMousePos;
             g_hoveredTile.X = (int)(e.X * (1.0f / zoomLevel) + cameraPos.X) / TILE_HEIGHT;
@@ -2648,6 +2659,16 @@ namespace HexxEditor
             {
                 Cursor.Current = Cursors.Cross;
             }
+
+            if ((Control.ModifierKeys & Keys.Alt) != Keys.None)
+            {
+                bAltDown = true;
+            }
+            if ((Control.ModifierKeys & Keys.Shift) != Keys.None)
+            {
+                bShiftDown = true;
+            }
+
 
             if (e.Button == MouseButtons.Left)
             {
@@ -2679,14 +2700,24 @@ namespace HexxEditor
                     }
                     else
                     {
-                        for (int kk = 0; kk < g_matBrush.Width; kk++)
+                        if (!bShiftDown)
                         {
-                            for (int ll = 0; ll < g_matBrush.Height; ll++)
+                            for (int kk = 0; kk < g_matBrush.Width; kk++)
                             {
-                                int tileIDs = (g_matBrush.X + kk) << 8 | (g_matBrush.Y + ll);
-                                CTileBlock tb = gMap.SetTile(g_hoveredTile.X + kk, g_hoveredTile.Y + ll, (UInt16)tileIDs, g_selectedLayer);
-                                BuildBlockImage(tb);
+                                for (int ll = 0; ll < g_matBrush.Height; ll++)
+                                {
+                                    int tileIDs = (g_matBrush.X + kk) << 8 | (g_matBrush.Y + ll);
+                                    CTileBlock tb = gMap.SetTile(g_hoveredTile.X + kk, g_hoveredTile.Y + ll, (UInt16)tileIDs, g_selectedLayer);
+                                    BuildBlockImage(tb);
+                                }
                             }
+                        }
+                        else
+                        {
+                            // holding shift just randomizes the tile from the selected ones
+                            int tileID = (g_matBrush.X + g_RNG.Next(g_matBrush.Width)) << 8 | (g_matBrush.Y + g_RNG.Next(g_matBrush.Height));
+                            CTileBlock tb = gMap.SetTile(g_hoveredTile.X, g_hoveredTile.Y, (UInt16)tileID, g_selectedLayer);
+                            BuildBlockImage(tb);
                         }
                     }
                 }
@@ -3569,17 +3600,6 @@ namespace HexxEditor
                     bool bOnlyCollision = false;
                     bool bOnlyActors = false;
 
-                    bool bAltDown = false;
-                    bool bShiftDown = false;
-
-                    if ((Control.ModifierKeys & Keys.Alt) != Keys.None)
-                    {
-                        bAltDown = true;
-                    }
-                    if ((Control.ModifierKeys & Keys.Shift) != Keys.None)
-                    {
-                        bShiftDown = true;
-                    }
 
                     if (bAltDown && bShiftDown)
                         bOnlyCollision = true;
@@ -3717,6 +3737,8 @@ namespace HexxEditor
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
             bool repaint = false;
+            bool bAltDown = false;
+            bool bShiftDown = false;
             g_lastMousePos.X = e.X; g_lastMousePos.Y = e.Y;
             g_hoveredTile.X = (int)(e.X * (1.0f / zoomLevel) + cameraPos.X) / TILE_HEIGHT;
             g_hoveredTile.Y = (int)(e.Y * (1.0f / zoomLevel) + cameraPos.Y) / TILE_HEIGHT;
@@ -3757,6 +3779,16 @@ namespace HexxEditor
             else
                 Cursor.Current = Cursors.Default;
 
+            if ((Control.ModifierKeys & Keys.Alt) != Keys.None)
+            {
+                bAltDown = true;
+            }
+            if ((Control.ModifierKeys & Keys.Shift) != Keys.None)
+            {
+                bShiftDown = true;
+            }
+
+
             int tlx = g_hoveredTile.X;
             int tly = g_hoveredTile.Y;
             if (e.Button == MouseButtons.Left)
@@ -3769,22 +3801,32 @@ namespace HexxEditor
                 }
                 else if ((g_brushMode == BRUSH_MODE_TILES) && (g_wndMaterials.pCurImage != null))
                 {
-                    int tileID = g_matBrush.X << 8 | g_matBrush.Y;
                     if ((g_matBrush.Width == 1) && (g_matBrush.Height == 1))
                     {
+                        int tileID = g_matBrush.X << 8 | g_matBrush.Y;
                         CTileBlock tb = gMap.SetTile(tlx, tly, (UInt16)tileID, g_selectedLayer);
                         BuildBlockImage(tb);
                     }
                     else
                     {
-                        for (int kk = 0; kk < g_matBrush.Width; kk++)
+                        if (!bShiftDown) // without shift it copies the entire area
                         {
-                            for (int ll = 0; ll < g_matBrush.Height; ll++)
+                            for (int kk = 0; kk < g_matBrush.Width; kk++)
                             {
-                                int tileIDs = (g_matBrush.X + kk) << 8 | (g_matBrush.Y + ll);
-                                CTileBlock tb = gMap.SetTile(tlx + kk, tly + ll, (UInt16)tileIDs, g_selectedLayer);
-                                BuildBlockImage(tb);
+                                for (int ll = 0; ll < g_matBrush.Height; ll++)
+                                {
+                                    int tileIDs = (g_matBrush.X + kk) << 8 | (g_matBrush.Y + ll);
+                                    CTileBlock tb = gMap.SetTile(tlx + kk, tly + ll, (UInt16)tileIDs, g_selectedLayer);
+                                    BuildBlockImage(tb);
+                                }
                             }
+                        }
+                        else
+                        {
+                            // holding shift just randomizes the tile from the selected ones
+                            int tileID = (g_matBrush.X + g_RNG.Next(g_matBrush.Width)) << 8 | (g_matBrush.Y + g_RNG.Next(g_matBrush.Height));
+                            CTileBlock tb = gMap.SetTile(tlx, tly, (UInt16)tileID, g_selectedLayer);
+                            BuildBlockImage(tb);
                         }
                     }
                     repaint = true;
@@ -4326,7 +4368,7 @@ namespace HexxEditor
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("BreacherSquad Levels Editor\nv1.2.3 from 07-Mar-2020\n(c)2021 PixelShard", "About", MessageBoxButtons.OK);
+            MessageBox.Show("BreacherSquad Levels Editor\nv1.0.1 from 28-Mar-2025\n(c)2025 PixelShard", "About", MessageBoxButtons.OK);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -5388,9 +5430,10 @@ namespace HexxEditor
                     {
                         if (keyEvent.Control)
                         {
+                            bool bShift = (keyEvent.Shift)?true:false;
                             if (g_brushMode == BRUSH_MODE_TILES)
                             {
-                                FillSelectionWithTileBrush(g_SelectedAreaTL);
+                                FillSelectionWithTileBrush(g_SelectedAreaTL, bShift);
                                 RepaintAfterChange();
                             }
                         }
@@ -6489,7 +6532,7 @@ namespace HexxEditor
                 switch (g_brushMode)
                 {
                     case BRUSH_MODE_TILES:
-                        SetStatusBarMessage("[RMB:clear] [S:Selection] [Ctrl+V:copy selection] [Ctrl+F - Fill Selection] [Del - Clear selection(all visible)] [Ctrl+PgUP,PgDN - move to layer] [SHIFT - act on all visible layers]");
+                        SetStatusBarMessage("[RMB:clear] [S:Select] [(shift)Ctrl+V:copy selection] [(shift)Ctrl+F - Fill Selection] [(shift)Del - Clear (all visible)] [Ctrl+PgUP,PgDN - move to layer] [SHIFT - act on all visible layers/randomize]");
                         break;
                     case BRUSH_MODE_OBJECTS:
                         SetStatusBarMessage("[RMB:select] [LMB:add/move] [S:Selection] [Ctrl+dir:move] [X,Y:Flip] [PgUP/DN:order] [Ctrl+PgUP/DN:layer] [C:toggle Cover]");
