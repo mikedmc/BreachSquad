@@ -1323,7 +1323,6 @@ namespace HexxEditor
 
             public int nTileW { get; set; }
             public int nTileH { get; set; }
-            public int nTilesetColumns { get; set; }
 
             public CBlocks()
             {
@@ -1670,18 +1669,15 @@ namespace HexxEditor
         public int TILESET_ROWS = 0;
         public int TILESET_COLUMNS = 0;
 
-        public void SetMaterialData(int tileW, int tileH, int nTilesetRows, int nTilesetColumns)
+        public void SetMaterialData(int tileW, int tileH)
         {
             TILE_WIDTH = tileW;
             TILE_HEIGHT = tileH;
             TILE_HWIDTH = TILE_WIDTH / 2;
             TILE_HHEIGHT = TILE_HEIGHT / 2;
-            TILESET_COLUMNS = nTilesetColumns;
-            TILESET_ROWS = nTilesetRows;
             //notify map too
             gMap.nTileW = TILE_WIDTH;
             gMap.nTileH = TILE_HEIGHT;
-            gMap.nTilesetColumns = nTilesetColumns;
         }
 
         public void GetMaterialData(out int tileW, out int tileH)
@@ -2687,7 +2683,7 @@ namespace HexxEditor
                         {
                             for (int ll = 0; ll < g_matBrush.Height; ll++)
                             {
-                                int tileIDs = (g_matBrush.X + kk) << 8 | g_matBrush.Y;
+                                int tileIDs = (g_matBrush.X + kk) << 8 | (g_matBrush.Y + ll);
                                 CTileBlock tb = gMap.SetTile(g_hoveredTile.X + kk, g_hoveredTile.Y + ll, (UInt16)tileIDs, g_selectedLayer);
                                 BuildBlockImage(tb);
                             }
@@ -4452,7 +4448,7 @@ namespace HexxEditor
             //MessageBox.Show(strDesc);
         }
 
-        public bool SaveLevel_V2(string strPath, bool bExportPrefab = false, Stream pDestStream = null)
+        public bool SaveLevel(string strPath, bool bExportPrefab = false, Stream pDestStream = null)
         {
             // save additional file with area descriptor
             SaveLevelDescriptorXML(Path.GetDirectoryName(strPath) + "\\" + Path.GetFileNameWithoutExtension(strPath) + ".area_desc");
@@ -4687,7 +4683,6 @@ namespace HexxEditor
                 bw.Write(g_wndMaterials.g_TilesetName);
                 ub = (byte)TILE_WIDTH; bw.Write(ub);
                 ub = (byte)TILE_HEIGHT; bw.Write(ub);
-                u2b = (UInt16)TILESET_COLUMNS; bw.Write(u2b);
 
                 //3. scrie marimea exacta in tiles a nivelului
                 u2b = (UInt16)(levelDR.X - levelUL.X + 1);
@@ -4992,7 +4987,7 @@ namespace HexxEditor
             if (sfd.ShowDialog() == DialogResult.Cancel)
                 return;
 
-            SaveLevel_V2(sfd.FileName);
+            SaveLevel(sfd.FileName);
             //save absolute file path
             g_strFilePath = sfd.FileName;
         }
@@ -5756,7 +5751,7 @@ namespace HexxEditor
             PaintMap();
         }
 
-        public bool LoadLevel_V2(string strPath, bool bLoadPrefab = false, int nPrefabTileX = 0, int nPrefabTileY = 0, Stream pSrcStream = null)
+        public bool LoadLevel(string strPath, bool bLoadPrefab = false, int nPrefabTileX = 0, int nPrefabTileY = 0, Stream pSrcStream = null)
         {
             //get base levels folder
             string strBaseFolder = strPath;
@@ -5771,8 +5766,6 @@ namespace HexxEditor
             try
             {
                 strBaseFolder = Path.GetDirectoryName(strPath);
-                if (strBaseFolder.Length > 0) //remove another folder child 
-                    strBaseFolder = Path.GetDirectoryName(strBaseFolder);
 
                 Stream pLocalStream = null;
                 if (pSrcStream == null)
@@ -5804,20 +5797,7 @@ namespace HexxEditor
                 //version check
                 if (arrInts[0] != K_CURRENT_VERSION)
                 {
-                    if (arrInts[0] == 1013) //versiunea cu 2 layere de tiles (in loc de 3 adaugat in 1014)
-                    {
-                        nLayersCnt = 2;
-                        MessageBox.Show("Loading from older format with only 2 layers! All objects and tiles will go the the Back and Front layers! Check all objects and layers again!");
-                    }
-                    else if (arrInts[0] == 1014) //versiune cu IES lights
-                    {
-                    }
-                    else
-                    {
-                        MessageBox.Show("Level failed to load! Unhandled version of file found: " + arrInts[0]);
-                        pLocalStream.Close();
-                        return false;
-                    }
+                    MessageBox.Show("Different Level format! Level might fail to load! Unhandled version of file found: " + arrInts[0]);
                 }
 
                 //1. tipul misiunii
@@ -5829,7 +5809,6 @@ namespace HexxEditor
                 int a, b;
                 a = bw.ReadByte(); //tilew
                 b = bw.ReadByte(); //tileH
-                int nLvlTilesetColumns = bw.ReadUInt16(); //tileset columns
                 if (!bLoadPrefab)
                 {
                     g_wndMaterials.LoadTileset(strBaseFolder + "\\data\\" + tilesetName); //seteaza singur toate chestiile legate de tileset
@@ -5875,9 +5854,6 @@ namespace HexxEditor
                     }
                 }
 
-                //auto adjust if we change the tileset resolution
-                if ((!bLoadPrefab) && (nLvlTilesetColumns != TILESET_COLUMNS))
-                    SetMaterialData(TILE_WIDTH, TILE_HEIGHT, nLvlTilesetColumns, TILESET_COLUMNS);
                 //build images for all blocks
                 BuildAllBlockImages();
 
@@ -6277,7 +6253,7 @@ namespace HexxEditor
                 //populate templates list in ActorsWnd
                 if (!bLoadPrefab)
                 {
-                    g_wndActors.PopulateTemplatesList(strBaseFolder + "\\data\\actors_data.xml");
+                    //g_wndActors.PopulateTemplatesList(strBaseFolder + "\\data\\actors_data.xml");
 
                     Undo_SetCurrent(K_UNDO_DISABLED);
                 }
@@ -6292,7 +6268,7 @@ namespace HexxEditor
                 //prefabs list
                 if (!bLoadPrefab)
                 {
-                    g_wndPrefabs.SetPrefabsFolder(strBaseFolder + "\\prefabs\\");
+                    //g_wndPrefabs.SetPrefabsFolder(strBaseFolder + "\\prefabs\\");
                     //mark file as not modified
                     g_bFileModified = false;
                     //save file path if loaded from disk
@@ -6327,7 +6303,7 @@ namespace HexxEditor
 
             ResetLevel();
 
-            bool bSuccess = LoadLevel_V2(sfd.FileName);
+            bool bSuccess = LoadLevel(sfd.FileName);
 
             PaintMap();
 
@@ -6372,7 +6348,7 @@ namespace HexxEditor
 
             if (bLoadDefaultLevel)
             {
-                LoadLevel_V2("..\\media\\levels\\missions\\editor_new_area.area");
+                LoadLevel("..\\media\\levels\\missions\\editor_new_area.area");
                 //force file path on empty
                 g_strFilePath = "";
             }
@@ -6789,7 +6765,7 @@ namespace HexxEditor
             }
             else
             {
-                SaveLevel_V2(g_strFilePath);
+                SaveLevel(g_strFilePath);
             }
         }
 
@@ -6798,7 +6774,7 @@ namespace HexxEditor
             if ((g_strFilePath.Length > 0) && (g_bFileModified == true))
             {
                 string strASPath = g_strFilePath + "_auto";
-                SaveLevel_V2(strASPath);
+                SaveLevel(strASPath);
             }
         }
 
@@ -6865,7 +6841,7 @@ namespace HexxEditor
         private void SaveFileToMemoryBackup()
         {
             UndoMemStream = new MemoryStream(200000);
-            SaveLevel_V2(g_strFilePath, false, UndoMemStream);
+            SaveLevel(g_strFilePath, false, UndoMemStream);
         }
 
         //loads the level from the mem backup
@@ -6873,7 +6849,7 @@ namespace HexxEditor
         {
             if (UndoMemStream != null)
             {
-                LoadLevel_V2(g_strFilePath, false, 0, 0, UndoMemStream);
+                LoadLevel(g_strFilePath, false, 0, 0, UndoMemStream);
             }
         }
 
@@ -7017,7 +6993,7 @@ namespace HexxEditor
             if (sfd.ShowDialog() == DialogResult.Cancel)
                 return;
 
-            bool bSuccess = SaveLevel_V2(sfd.FileName, true);
+            bool bSuccess = SaveLevel(sfd.FileName, true);
             if (bSuccess)
             {
                 MessageBox.Show("Prefab exported correctly:\n\r" + sfd.FileName, "Prefab exported", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -7075,7 +7051,7 @@ namespace HexxEditor
 
             ResetLevel();
 
-            bool bSuccess = LoadLevel_V2(sfd.FileName);
+            bool bSuccess = LoadLevel(sfd.FileName);
 
             PaintMap();
 
@@ -7177,7 +7153,7 @@ namespace HexxEditor
                 return;
             }
             //add in local level coordinates
-            LoadLevel_V2(strPrefabPath, true, (int)(vPos.X / TILE_WIDTH), (int)(vPos.Y / TILE_HEIGHT));
+            LoadLevel(strPrefabPath, true, (int)(vPos.X / TILE_WIDTH), (int)(vPos.Y / TILE_HEIGHT));
         }
 
 

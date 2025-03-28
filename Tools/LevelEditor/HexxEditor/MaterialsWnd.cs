@@ -66,7 +66,7 @@ namespace HexxEditor
             g_brush.X = g_brush.Y = 0;
             g_brush.Width = g_brush.Height = 1;
             //transport data to parent
-            parentWnd.SetMaterialData(TILE_W, TILE_H, 0, 0);
+            parentWnd.SetMaterialData(TILE_W, TILE_H);
             parentWnd.SetMaterialBrush(g_brush);
 
             // we hold ref to layer images
@@ -179,7 +179,7 @@ namespace HexxEditor
                     }
                 }
 
-                g_TilesetName = xmlPath;
+                g_TilesetName = Path.GetFileName( xmlPath );
                 SelectLayer(parentWnd.GetCurrentLayerIdx());
             }
             catch (Exception ex)
@@ -187,7 +187,7 @@ namespace HexxEditor
                 MessageBox.Show("Could not read tileset.xml or tileset images!\nMake sure all images are in the same directory as the tileset xml!\n" + ex.ToString(), "ERROR !!!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             
-            parentWnd.SetMaterialData(TILE_W, TILE_H, 16, 16);
+            parentWnd.SetMaterialData(TILE_W, TILE_H);
 
             isLoaded = true;
             Repaint();
