@@ -6,6 +6,7 @@
 .vs/
 *.ilk
 *.pdb
+*.pch
 *.user
 *.suo
 *.sdf
