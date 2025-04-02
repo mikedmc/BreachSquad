@@ -8,8 +8,10 @@ namespace HexxEditor
         public const int BLOCK_W = 8;
         public const int BLOCK_H = 8;
 
-        public Image layerImg; //image that contains all layers
-        public Graphics graphics; //graphics to image
+        public Image layerImg; //image that contains bottom layers
+        public Graphics gr; //graphics to image
+        public Image layerImgCeil; //image that contains ceiling objects
+        public Graphics grCeil; //graphics to image
 
         public CTile[,] tiles;
         public Point pos; //in tiles
@@ -31,13 +33,17 @@ namespace HexxEditor
                 }
             }
 
-            graphics = null;
-            layerImg = null;
+            gr = null; grCeil = null;
+            layerImg = null; layerImgCeil = null;
             if (nTileSize > 0)
             {
                 layerImg = new Bitmap(nTileSize * BLOCK_W, nTileSize * BLOCK_H, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                graphics = Graphics.FromImage(layerImg);
-                graphics.Clear(Color.Transparent);
+                gr = Graphics.FromImage(layerImg);
+                gr.Clear(Color.Transparent);
+
+                layerImgCeil = new Bitmap(nTileSize * BLOCK_W, nTileSize * BLOCK_H, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                grCeil = Graphics.FromImage(layerImgCeil);
+                grCeil.Clear(Color.Transparent);
             }
             else
             {

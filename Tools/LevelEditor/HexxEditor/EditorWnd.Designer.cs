@@ -46,6 +46,7 @@
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.undoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
+            this.setMetadataToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.setMissionTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setGroundLevelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
@@ -96,10 +97,12 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.but_wndMetadata = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.chk_snapToGrid = new System.Windows.Forms.CheckBox();
             this.butWndPrefabs = new System.Windows.Forms.Button();
             this.timer_autosave = new System.Windows.Forms.Timer(this.components);
+            this.chk_HideObjects = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -223,6 +226,7 @@
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.undoToolStripMenuItem,
             this.toolStripMenuItem7,
+            this.setMetadataToolStripMenuItem1,
             this.setMissionTypeToolStripMenuItem,
             this.setGroundLevelToolStripMenuItem,
             this.toolStripMenuItem3,
@@ -246,6 +250,13 @@
             // 
             this.toolStripMenuItem7.Name = "toolStripMenuItem7";
             this.toolStripMenuItem7.Size = new System.Drawing.Size(194, 6);
+            // 
+            // setMetadataToolStripMenuItem1
+            // 
+            this.setMetadataToolStripMenuItem1.Name = "setMetadataToolStripMenuItem1";
+            this.setMetadataToolStripMenuItem1.Size = new System.Drawing.Size(197, 22);
+            this.setMetadataToolStripMenuItem1.Text = "Set Metadata...";
+            this.setMetadataToolStripMenuItem1.Click += new System.EventHandler(this.setMetadataToolStripMenuItem1_Click);
             // 
             // setMissionTypeToolStripMenuItem
             // 
@@ -743,6 +754,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.but_wndMetadata);
             this.panel1.Controls.Add(this.groupBox2);
             this.panel1.Controls.Add(this.butWndMaterials);
             this.panel1.Controls.Add(this.butWndPrefabs);
@@ -759,13 +771,24 @@
             this.panel1.Size = new System.Drawing.Size(154, 774);
             this.panel1.TabIndex = 0;
             // 
+            // but_wndMetadata
+            // 
+            this.but_wndMetadata.Location = new System.Drawing.Point(3, 454);
+            this.but_wndMetadata.Name = "but_wndMetadata";
+            this.but_wndMetadata.Size = new System.Drawing.Size(149, 23);
+            this.but_wndMetadata.TabIndex = 41;
+            this.but_wndMetadata.Text = "Set Metadata...";
+            this.but_wndMetadata.UseVisualStyleBackColor = true;
+            this.but_wndMetadata.Click += new System.EventHandler(this.but_wndMetadata_Click);
+            // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.chk_HideObjects);
             this.groupBox2.Controls.Add(this.chk_snapToGrid);
             this.groupBox2.Controls.Add(this.chk_showOverlappingTiles);
             this.groupBox2.Location = new System.Drawing.Point(3, 349);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(148, 66);
+            this.groupBox2.Size = new System.Drawing.Size(148, 89);
             this.groupBox2.TabIndex = 40;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Options";
@@ -798,6 +821,18 @@
             this.timer_autosave.Enabled = true;
             this.timer_autosave.Interval = 300000;
             this.timer_autosave.Tick += new System.EventHandler(this.timer_autosave_Tick);
+            // 
+            // chk_HideObjects
+            // 
+            this.chk_HideObjects.AutoSize = true;
+            this.chk_HideObjects.Location = new System.Drawing.Point(6, 64);
+            this.chk_HideObjects.Name = "chk_HideObjects";
+            this.chk_HideObjects.Size = new System.Drawing.Size(87, 17);
+            this.chk_HideObjects.TabIndex = 40;
+            this.chk_HideObjects.TabStop = false;
+            this.chk_HideObjects.Text = "Hide Objects";
+            this.chk_HideObjects.UseVisualStyleBackColor = true;
+            this.chk_HideObjects.CheckedChanged += new System.EventHandler(this.chk_HideObjects_CheckedChanged);
             // 
             // EditorWnd
             // 
@@ -903,6 +938,9 @@
         private System.Windows.Forms.CheckBox chk_layer4;
         private System.Windows.Forms.RadioButton radio_layer5;
         private System.Windows.Forms.CheckBox chk_layer5;
+        private System.Windows.Forms.ToolStripMenuItem setMetadataToolStripMenuItem1;
+        private System.Windows.Forms.Button but_wndMetadata;
+        private System.Windows.Forms.CheckBox chk_HideObjects;
     }
 }
 

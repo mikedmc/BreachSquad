@@ -11,6 +11,7 @@ using System.IO;
 using System.Collections;
 using System.Diagnostics;
 using System.Xml;
+using System.CodeDom;
 
 namespace HexxEditor
 {
@@ -105,6 +106,25 @@ namespace HexxEditor
 
         private string g_strFilePath = "";
         private bool g_bFileModified = false;
+
+        // Metadata for each area (labels, etc)
+        public class CAreaMetadata
+        {
+            public string tags = "";
+
+            public bool IsEmpty()
+            {
+                if (tags.Length <= 0)
+                    return true;
+                return false;
+            }
+
+            public void CopyFrom(CAreaMetadata src)
+            {
+                this.tags = src.tags;
+            }
+        }
+        private CAreaMetadata g_areaMeta = new CAreaMetadata();
         public void SetFileModified()
         {
             g_bFileModified = true;
@@ -189,131 +209,6 @@ namespace HexxEditor
         {
             g_nLastID++;
             return g_nLastID;
-        }
-
-        //--- clasa container pt behavior ---
-        public class CBehaviorContainer
-        {
-            public int targetID;
-            public string strActions;
-            public string strAIname;
-            public ArrayList listAIparams; //lista de strings de forma [nume param][val param][nume param etc...
-            public bool bCanInteract;
-            public bool bHideInteractIcon;  //when enabled the icon doesn't get painted
-            public Int32 nInteractTimer;   //cate secunde tii pe interact ca sa interactionezi
-            public bool bStartHidden;
-
-            public CBehaviorContainer(CBehaviorContainer sourceBehavior)
-            {
-                targetID = sourceBehavior.targetID;
-                strActions = sourceBehavior.strActions;
-                strAIname = sourceBehavior.strAIname;
-                bCanInteract = sourceBehavior.bCanInteract;
-                bHideInteractIcon = sourceBehavior.bHideInteractIcon;
-                bStartHidden = sourceBehavior.bStartHidden;
-                nInteractTimer = sourceBehavior.nInteractTimer;
-
-                listAIparams = new ArrayList(sourceBehavior.listAIparams);
-            }
-
-            public CBehaviorContainer()
-            {
-                targetID = -1;
-                strActions = "";
-                strAIname = "";
-                bCanInteract = false;
-                bHideInteractIcon = false;
-                bStartHidden = false;
-                nInteractTimer = 0;
-
-                listAIparams = new ArrayList();
-                listAIparams.Clear();
-            }
-
-            // Formats the aprams to a string human readable form
-            public string FormatToString()
-            {
-                string retstr = "";
-                for (int kk = 0; kk < listAIparams.Count / 2; kk++)
-                {
-                    string param = listAIparams[kk * 2] as string;
-                    string value = listAIparams[kk * 2 + 1] as string;
-                    retstr += param + " = " + value + ";\r\n";
-                }
-
-                return retstr;
-            }
-
-            public void Save(BinaryWriter bw)
-            {
-                if (bw == null)
-                    return;
-                //can interact
-                byte u1b = 0;
-                if (bCanInteract)
-                    u1b |= 0x1;
-                if (bHideInteractIcon)
-                    u1b |= 0x2;
-                bw.Write(u1b);
-                //interact timer
-                bw.Write(nInteractTimer);
-                //start hidden
-                u1b = 0;
-                if (bStartHidden)
-                    u1b = 1;
-                bw.Write(u1b);
-
-                bw.Write((Int32)targetID);
-                bw.Write(strActions);
-
-                bw.Write(strAIname);
-                u1b = (Byte)(listAIparams.Count / 2); //nr de params
-                bw.Write(u1b);
-                for (int i = 0; i < listAIparams.Count; i++)
-                {
-                    bw.Write(listAIparams[i] as string);
-                }
-            }
-
-            public void Load(BinaryReader br, int dwOffsetID = 0)
-            {
-                if (br == null)
-                    return;
-                //can interact
-                bCanInteract = false;
-                byte u1b = br.ReadByte();
-                //interact flags
-                if ((u1b & 0x1) != 0)
-                    bCanInteract = true;
-                if ((u1b & 0x2) != 0)
-                    bHideInteractIcon = true;
-                //interact timer
-                nInteractTimer = br.ReadInt32();
-                //start hidden
-                bStartHidden = false;
-                u1b = br.ReadByte();
-                if (u1b != 0)
-                    bStartHidden = true;
-
-                targetID = br.ReadInt32();
-                if (targetID >= 0)
-                    targetID += dwOffsetID;
-
-                strActions = br.ReadString();
-
-                strAIname = br.ReadString();
-
-                listAIparams.Clear();
-                u1b = br.ReadByte(); //nr params
-                for (int i = 0; i < u1b; i++)
-                {
-                    string paramname = br.ReadString();
-                    string paramval = br.ReadString();
-
-                    listAIparams.Add(paramname);
-                    listAIparams.Add(paramval);
-                }
-            }
         }
 
 
@@ -1187,6 +1082,8 @@ namespace HexxEditor
                 for (int kk = 0; kk < arrObjects.Count; kk++)
                 {
                     CObject obj = arrObjects[kk] as CObject;
+                    if(!layers_checkboxes[obj.layer].Checked) continue;
+
                     if (PointInObject(obj, vPos))
                     {
                         outArrElements.Add(obj);
@@ -1459,29 +1356,31 @@ namespace HexxEditor
         {
             Rectangle srcr = new Rectangle();
 
-            tb.graphics.Clear(Color.Transparent);
+            tb.gr.Clear(Color.Transparent);
+            tb.grCeil.Clear(Color.Transparent);
 
             for (int layer = 0; layer < (int)ELayer.LAYERS_CNT; layer++)
             {
+                if (!layers_checkboxes[layer].Checked) continue;
                 Image pImg = g_wndMaterials.GetLayerImage(layer);
-                if (pImg == null)
-                    continue;
+                if (pImg == null) continue;
+
                 for (int yy = 0; yy < CTileBlock.BLOCK_H; yy++)
                 {
                     for (int xx = 0; xx < CTileBlock.BLOCK_W; xx++)
                     {
-                        if (!layers_checkboxes[layer].Checked)
-                            continue;
 
                         int tlXY = tb.tiles[xx, yy].tlXY[layer];
                         if (tlXY == 0xffff)
                             continue;
 
-                        srcr.X = ((tlXY & 0xff00) >> 8)* TILE_WIDTH;
+                        srcr.X = ((tlXY & 0xff00) >> 8) * TILE_WIDTH;
                         srcr.Y = (tlXY & 0xff) * TILE_HEIGHT;
                         srcr.Width = TILE_WIDTH; srcr.Height = TILE_HEIGHT;
-
-                        tb.graphics.DrawImage(g_wndMaterials.GetLayerImage(layer), xx * TILE_WIDTH, yy * TILE_HEIGHT, srcr, GraphicsUnit.Pixel);
+                        if(layer < (int)ELayer.CEILING_DECO)
+                            tb.gr.DrawImage(g_wndMaterials.GetLayerImage(layer), xx * TILE_WIDTH, yy * TILE_HEIGHT, srcr, GraphicsUnit.Pixel);
+                        else
+                            tb.grCeil.DrawImage(g_wndMaterials.GetLayerImage(layer), xx * TILE_WIDTH, yy * TILE_HEIGHT, srcr, GraphicsUnit.Pixel);
                     }
                 }
             }
@@ -1967,7 +1866,7 @@ namespace HexxEditor
             }
 
             pbGr.ScaleTransform(zoomLevel, zoomLevel);
-            ///--- deseneaza nivelul
+            ///--- draw floors and walls (without ceilings) ---
             if (g_wndMaterials.isLoaded)
             {
                 Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;
@@ -1988,30 +1887,6 @@ namespace HexxEditor
 
                     //paint block image all at once
                     pbGr.DrawImage(tb.layerImg, tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH - cameraPos.X, tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT - cameraPos.Y);
-                    //deseneaza patratele rosii pe tile-urile care se suprapun
-                    if ((chk_showOverlappingTiles.Checked) && (g_brushMode == BRUSH_MODE_TILES))
-                    {
-                        for (int yy = 0; yy < CTileBlock.BLOCK_H; yy++)
-                        {
-                            for (int xx = 0; xx < CTileBlock.BLOCK_W; xx++)
-                            {
-                                int cnt = 0;
-                                for (int lay = 0; lay < (int)ELayer.LAYERS_CNT; lay++)
-                                {
-                                    if (tb.tiles[xx, yy].tlXY[lay] != 0xffff)
-                                        cnt++;
-                                }
-
-                                if (cnt > 1)
-                                {
-                                    Brush fillbr = new SolidBrush(Color.FromArgb(cnt * 64, Color.Red));
-
-                                    pbGr.FillRectangle(fillbr, new RectangleF(tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH + xx * TILE_WIDTH - cameraPos.X,
-                                    tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT + yy * TILE_HEIGHT - cameraPos.Y, TILE_WIDTH, TILE_HEIGHT));
-                                }
-                            }
-                        }
-                    }
                 }
 
                 // set level bbox
@@ -2027,8 +1902,10 @@ namespace HexxEditor
             PointF vTargetSrc = new PointF(0.0f, 0.0f);
             PointF vTargetDst = new PointF(0.0f, 0.0f);
 
+
+
             ///---paint objects---
-            if (g_sprObjects != null)
+            if (g_sprObjects != null && chk_HideObjects.Checked == false)
             {
                 RectangleF scrrect = new RectangleF(cameraPos.X, cameraPos.Y, cameraPos.X + (int)(pictureBox1.Width * (1.0f / zoomLevel)), cameraPos.Y + (int)(pictureBox1.Height * (1.0f / zoomLevel)));
 
@@ -2051,8 +1928,9 @@ namespace HexxEditor
                         pbGr.DrawString("NoAnimObj!!!", new Font("Arial", 6.0f), Brushes.Red, obj.pos.X - cameraPos.X, obj.pos.Y - cameraPos.Y);
                         continue;
                     }
-
+                    
                     BSXAnimBrowser.Frame fr = g_sprObjects.anims[obj.animIdx].aframes[obj.frameIdx].frame;
+                    
                     if ((obj.flags & OBJFLAG_FLIPXORY) != 0)
                     {
                         int offx = 0;
@@ -2067,6 +1945,7 @@ namespace HexxEditor
                     {
                         fr.Paint(pbGr, (float)obj.pos.X - cameraPos.X, (float)obj.pos.Y - cameraPos.Y);
                     }
+                    
                     //paint cover icon
                     if ((obj.flags & OBJFLAG_IS_COVER) != 0)
                     {
@@ -2190,7 +2069,60 @@ namespace HexxEditor
                         }
                     }
                 }
-                //deseneaza obiectul de pe cursor
+
+
+                ///--- draw ceiling (without ceilings) ---
+                if (g_wndMaterials.isLoaded)
+                {
+                    Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;
+                    //deseneaza tabla de joc
+                    for (int kk = 0; kk < gMap.Blocks.Count; kk++)
+                    {
+                        CTileBlock tb = gMap.Blocks[kk] as CTileBlock;
+                        if (tb.pos.X < blminx) blminx = tb.pos.X;
+                        if (tb.pos.Y < blminy) blminy = tb.pos.Y;
+                        if (tb.pos.X > blmaxx) blmaxx = tb.pos.X;
+                        if (tb.pos.Y > blmaxy) blmaxy = tb.pos.Y;
+
+                        //daca nu sunt in ecran nu le deseneaza
+                        if (((tb.pos.X + 1) * CTileBlock.BLOCK_W * TILE_WIDTH < cameraPos.X) || ((tb.pos.Y + 1) * CTileBlock.BLOCK_H * TILE_HEIGHT < cameraPos.Y) ||
+                           tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH > cameraPos.X + (int)(pictureBox1.Width * (1.0f / zoomLevel)) ||
+                           tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT > cameraPos.Y + (int)(pictureBox1.Height * (1.0f / zoomLevel)))
+                            continue;
+
+                        //paint block image all at once
+                        pbGr.DrawImage(tb.layerImgCeil, tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH - cameraPos.X, tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT - cameraPos.Y);
+                        //deseneaza patratele rosii pe tile-urile care se suprapun
+                        if ((chk_showOverlappingTiles.Checked) && (g_brushMode == BRUSH_MODE_TILES))
+                        {
+                            for (int yy = 0; yy < CTileBlock.BLOCK_H; yy++)
+                            {
+                                for (int xx = 0; xx < CTileBlock.BLOCK_W; xx++)
+                                {
+                                    int cnt = 0;
+                                    for (int lay = 0; lay < (int)ELayer.LAYERS_CNT; lay++)
+                                    {
+                                        if (tb.tiles[xx, yy].tlXY[lay] != 0xffff)
+                                            cnt++;
+                                    }
+
+                                    if (cnt > 1)
+                                    {
+                                        int colalpha = cnt * 30;
+                                        if (colalpha > 255) colalpha = 255;
+                                        Brush fillbr = new SolidBrush(Color.FromArgb(colalpha, Color.PaleVioletRed));
+
+                                        pbGr.FillRectangle(fillbr, new RectangleF(tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH + xx * TILE_WIDTH - cameraPos.X,
+                                        tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT + yy * TILE_HEIGHT - cameraPos.Y, TILE_WIDTH, TILE_HEIGHT));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                ///--- paint current cursor object ---
                 if (g_brushMode == BRUSH_MODE_OBJECTS)
                 {
                     if ((g_selectedObject == null) && (g_wndObjects.g_selectedAnim >= 0) && (g_wndObjects.g_selectedFrame >= 0))
@@ -2366,6 +2298,13 @@ namespace HexxEditor
                     pbGr.DrawString(g_selectedObject.ID.ToString(), arial10b, new SolidBrush(Color.Red), bbox.X, bbox.Y - 16);
                 }
             }
+
+
+
+
+
+
+
             //reset transform
             pbGr.ResetTransform();
 
@@ -4386,7 +4325,7 @@ namespace HexxEditor
 
 
         // saves data about the level blocks and connectivity
-        public void SaveLevelDescriptorXML(string strPath)
+        public bool SaveLevelDescriptorXML(string strPath)
         {
             //gaseste minimul si maximul tablei de joc, in blocuri si salveaza latimea si inaltimea nivelului, in blocuri
             Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;
@@ -4401,9 +4340,17 @@ namespace HexxEditor
 
             if ((blminx == 100000) || (blminy == 100000)) //no tiles
             {
-                MessageBox.Show("Cand't save level descriptor for empty levels!");
-                return;
+                MessageBox.Show("Can't save level descriptor for empty levels!");
+                return false;
+            
             }
+            /*
+            if (this.g_areaMeta.IsEmpty())
+            {
+                MessageBox.Show("Can't save level descriptor without level metadata! Edit -> Set Metadata...");
+                return false;
+            }
+            */
 
             // level description is saved like a string, top left to bottom right, line by line
             // 0 - not set, 1 - set block, LURD - connector direction on set block
@@ -4474,7 +4421,7 @@ namespace HexxEditor
                 xw.WriteAttributeString("BlocksH", blocksH.ToString());
 
                 xw.WriteAttributeString("ConnectorsDesc", strDesc);
-                xw.WriteAttributeString("Tags", "");
+                xw.WriteAttributeString("Tags", this.g_areaMeta.tags);
                 // end LevelStory
                 xw.WriteEndElement();
                 // end document
@@ -4485,15 +4432,19 @@ namespace HexxEditor
             catch (Exception ex)
             {
                 MessageBox.Show("Error saving area descriptor! \n\n" + ex.Message);
+                return false;
             }
 
             //MessageBox.Show(strDesc);
+            return true;
         }
 
         public bool SaveLevel(string strPath, bool bExportPrefab = false, Stream pDestStream = null)
         {
             // save additional file with area descriptor
-            SaveLevelDescriptorXML(Path.GetDirectoryName(strPath) + "\\" + Path.GetFileNameWithoutExtension(strPath) + ".area_desc");
+            bool success = SaveLevelDescriptorXML(Path.GetDirectoryName(strPath) + "\\" + Path.GetFileNameWithoutExtension(strPath) + ".area_desc");
+            if (!success)
+                return false;
 
             //gaseste minimul si maximul tablei de joc, in blocuri si salveaza latimea si inaltimea nivelului, in blocuri
             Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;
@@ -6634,39 +6585,9 @@ namespace HexxEditor
         }
 
         // Sets the background AI data
-        public void SetLevelBackgroundData(ArrayList arrAIParams)
+        public void SetLevelMetadata(CAreaMetadata meta)
         {
-            CMiscObject_Background objbg = null;
-            for (int kk = 0; kk < arrMisc.Count; kk++)
-            {
-                CMiscObjectBase mob = arrMisc[kk] as CMiscObjectBase;
-                if (mob.type == K_MISC_BACKGROUND)
-                {
-                    objbg = arrMisc[kk] as CMiscObject_Background;
-                    break;
-                }
-            }
-            //not found, add it now
-            if (objbg == null)
-            {
-                objbg = new CMiscObject_Background();
-                objbg.ID = GetUniqueID();
-                objbg.pos = gLevelOrigin;
-                objbg.listParams.Add("str_bsx"); //name
-                objbg.listParams.Add(".bsx"); //val
-                objbg.listParams.Add("str_anim"); //name
-                objbg.listParams.Add("SET_BG_ANIM"); //val
-                objbg.listParams.Add("str_water_anim"); //name
-                objbg.listParams.Add("SET_WATER_ANIM"); //val
-                arrMisc.Add(objbg);
-            }
-            //copy params
-            objbg.listParams.Clear();
-            for (int kk = 0; kk < arrAIParams.Count; kk++)
-            {
-                string strval = arrAIParams[kk] as string;
-                objbg.listParams.Add(strval);
-            }
+            g_areaMeta.CopyFrom(meta);
         }
 
         private void butWndLights_Click(object sender, EventArgs e)
@@ -7108,17 +7029,6 @@ namespace HexxEditor
             Undo_ExecuteCurrent();
         }
 
-        /*
-        private void setLevelBackgroundToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            BkgSelector wndMission = new BkgSelector(this);
-            wndMission.Owner = this;
-            wndMission.ShowInTaskbar = false;
-            wndMission.ShowDialog();
-
-            SetFileModified();
-        }
-        */
 
         private void uploadSingleLevelToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -7171,6 +7081,26 @@ namespace HexxEditor
         private void chk_layer_CheckedChanged(object sender, EventArgs e)
         {
             BuildAllBlockImages();
+            PaintMap();
+        }
+
+        private void setMetadataToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            MetaWnd wndMeta = new MetaWnd(this);
+            wndMeta.Owner = this;
+            wndMeta.ShowInTaskbar = false;
+            wndMeta.ShowDialog();
+
+            SetFileModified();
+        }
+
+        private void but_wndMetadata_Click(object sender, EventArgs e)
+        {
+            setMetadataToolStripMenuItem1_Click(sender, e);
+        }
+
+        private void chk_HideObjects_CheckedChanged(object sender, EventArgs e)
+        {
             PaintMap();
         }
 

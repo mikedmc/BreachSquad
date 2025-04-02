@@ -76,11 +76,14 @@
     <Compile Include="AIwnd.Designer.cs">
       <DependentUpon>AIwnd.cs</DependentUpon>
     </Compile>
-    <Compile Include="BkgSelector.cs">
+    <Compile Include="CBehaviorContainer.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BkgSelector.Designer.cs">
-      <DependentUpon>BkgSelector.cs</DependentUpon>
+    <Compile Include="MetaWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MetaWnd.Designer.cs">
+      <DependentUpon>MetaWnd.cs</DependentUpon>
     </Compile>
     <Compile Include="CTile.cs" />
     <Compile Include="CTileBlock.cs" />
@@ -147,8 +150,8 @@
     <EmbeddedResource Include="AIwnd.resx">
       <DependentUpon>AIwnd.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="BkgSelector.resx">
-      <DependentUpon>BkgSelector.cs</DependentUpon>
+    <EmbeddedResource Include="MetaWnd.resx">
+      <DependentUpon>MetaWnd.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ModCreator.resx">
       <DependentUpon>ModCreator.cs</DependentUpon>
