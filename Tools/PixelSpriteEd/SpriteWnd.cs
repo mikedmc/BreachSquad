@@ -83,6 +83,7 @@ namespace InkEd3
 
         #endregion
         //constructor
+        const int TIMER_UPDATE_PERIOD = 16; //ms
 
         public SpriteWnd()
         {
@@ -1330,8 +1331,6 @@ namespace InkEd3
         bool showAnimationPath = false;
         //cand e true, face play la animatie
         bool AnimPlaying = false;
-        // how many anim duration units fit in a second?
-        int AnimTimerInterval = 1000; 
         //var secundare folosite pt animatie
         int currentAnimPreviewIdx = 0;
         int currentAnimPreviewDuration = 1;
@@ -1669,13 +1668,13 @@ namespace InkEd3
             pbDraw.Refresh();
         }
 
-        // timer ticks every millisecond
+        // timer ticks every TIMER_DURATION
         private void timer1_Tick(object sender, EventArgs e)
         {
             if ((anim == null) || (aframe == null) || (!lvMain.Focused))
                 return;
 
-            currentAnimPreviewDuration--;
+            currentAnimPreviewDuration -= TIMER_UPDATE_PERIOD;
             if (currentAnimPreviewDuration <= 0)
             {
                 currentAnimPreviewIdx++;
@@ -1684,7 +1683,7 @@ namespace InkEd3
                     currentAnimPreviewIdx = 0;
                 }
                 aframe = anim.GetAFrameByIndex(currentAnimPreviewIdx);
-                currentAnimPreviewDuration = aframe.time;
+                currentAnimPreviewDuration += aframe.time;
             }
             pbDraw.Refresh();
         }
@@ -5251,7 +5250,6 @@ namespace InkEd3
             ViewOptionsWnd.ViewOptionsWndParams wndparams = new ViewOptionsWnd.ViewOptionsWndParams();
             wndparams.showAnimPath = showAnimationPath;
             wndparams.wandTreshold = wandTreshold;
-            wndparams.AnimTimerInterval = AnimTimerInterval;
             wndparams.showLinkedHitpts = showLinkedHitpts;
 
             wndparams.gridSize = gridSize;
@@ -5266,8 +5264,7 @@ namespace InkEd3
         {
             showAnimationPath = wndparams.showAnimPath;
             wandTreshold = wndparams.wandTreshold;
-            AnimTimerInterval = wndparams.AnimTimerInterval;
-            timer1.Interval = AnimTimerInterval / 1000;
+            timer1.Interval = TIMER_UPDATE_PERIOD;
             showLinkedHitpts = wndparams.showLinkedHitpts;
 
             majorGridLines = wndparams.majorGridSize;
@@ -5591,7 +5588,7 @@ namespace InkEd3
 
         private void aboutToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            MessageBox.Show("SpriteEd v1.0.5 19.mar.2025", "About");
+            MessageBox.Show("SpriteEd v1.0.5 04.apr.2025", "About");
         }
 
         Views view = Views.moduleView; //view-ul curent
@@ -5717,9 +5714,9 @@ namespace InkEd3
                 if (anim.aframes.Count > 0)
                     currentAnimPreviewDuration = anim.GetAFrameByIndex(0).time;
                 else
-                    currentAnimPreviewDuration = 1;
+                    currentAnimPreviewDuration = TIMER_UPDATE_PERIOD;
 
-                timer1.Interval = AnimTimerInterval / 1000;
+                timer1.Interval = TIMER_UPDATE_PERIOD;
             }
             timer1.Enabled = AnimPlaying;
         }

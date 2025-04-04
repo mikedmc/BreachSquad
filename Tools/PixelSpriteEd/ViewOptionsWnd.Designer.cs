@@ -31,8 +31,6 @@ namespace InkEd3
             this.label1 = new System.Windows.Forms.Label();
             this.modNumWTreshold = new System.Windows.Forms.NumericUpDown();
             this.FramesCBShowLinkedHitpts = new System.Windows.Forms.CheckBox();
-            this.AnimNumTimerInterval = new System.Windows.Forms.NumericUpDown();
-            this.label2 = new System.Windows.Forms.Label();
             this.AnimCBShowPath = new System.Windows.Forms.CheckBox();
             this.OptionsNumMajorGrid = new System.Windows.Forms.NumericUpDown();
             this.OptionsNumGridSize = new System.Windows.Forms.NumericUpDown();
@@ -42,7 +40,6 @@ namespace InkEd3
             this.chk_optionsExportSmallJSON = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.modNumWTreshold)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.AnimNumTimerInterval)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OptionsNumMajorGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OptionsNumGridSize)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -78,42 +75,6 @@ namespace InkEd3
             this.FramesCBShowLinkedHitpts.TabIndex = 0;
             this.FramesCBShowLinkedHitpts.Text = "Link HitPoints With Lines";
             this.FramesCBShowLinkedHitpts.UseVisualStyleBackColor = true;
-            // 
-            // AnimNumTimerInterval
-            // 
-            this.AnimNumTimerInterval.Increment = new decimal(new int[] {
-            50,
-            0,
-            0,
-            0});
-            this.AnimNumTimerInterval.Location = new System.Drawing.Point(324, 12);
-            this.AnimNumTimerInterval.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.AnimNumTimerInterval.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.AnimNumTimerInterval.Name = "AnimNumTimerInterval";
-            this.AnimNumTimerInterval.Size = new System.Drawing.Size(76, 20);
-            this.AnimNumTimerInterval.TabIndex = 2;
-            this.AnimNumTimerInterval.Value = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(194, 14);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(118, 13);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "Frame duration (units/s)";
             // 
             // AnimCBShowPath
             // 
@@ -225,10 +186,8 @@ namespace InkEd3
             this.ControlBox = false;
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.OptionsNumMajorGrid);
-            this.Controls.Add(this.AnimNumTimerInterval);
             this.Controls.Add(this.OptionsNumGridSize);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.label2);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.modNumWTreshold);
             this.Controls.Add(this.label1);
@@ -244,7 +203,6 @@ namespace InkEd3
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ViewOptionsWnd_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.modNumWTreshold)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.AnimNumTimerInterval)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.OptionsNumMajorGrid)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.OptionsNumGridSize)).EndInit();
             this.groupBox1.ResumeLayout(false);
@@ -259,8 +217,6 @@ namespace InkEd3
         private System.Windows.Forms.CheckBox AnimCBShowPath;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.NumericUpDown modNumWTreshold;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.NumericUpDown AnimNumTimerInterval;
         private System.Windows.Forms.CheckBox FramesCBShowLinkedHitpts;
         private System.Windows.Forms.NumericUpDown OptionsNumMajorGrid;
         private System.Windows.Forms.NumericUpDown OptionsNumGridSize;

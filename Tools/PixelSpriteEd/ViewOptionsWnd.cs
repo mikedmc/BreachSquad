@@ -24,7 +24,6 @@ namespace InkEd3
             public int wandTreshold;
             //anim
             public bool showAnimPath;
-            public int AnimTimerInterval;
             //frames
             public bool showLinkedHitpts;
             //options
@@ -41,7 +40,6 @@ namespace InkEd3
         {
             wndparams.wandTreshold = Convert.ToInt32(modNumWTreshold.Value);
             wndparams.showAnimPath = AnimCBShowPath.Checked;
-            wndparams.AnimTimerInterval = (int)AnimNumTimerInterval.Value;
             wndparams.showLinkedHitpts = FramesCBShowLinkedHitpts.Checked;
 
             wndparams.gridSize = Convert.ToInt32(OptionsNumGridSize.Value);
@@ -55,7 +53,6 @@ namespace InkEd3
         {
             modNumWTreshold.Value = wndparams.wandTreshold;
             AnimCBShowPath.Checked = wndparams.showAnimPath;
-            AnimNumTimerInterval.Value = wndparams.AnimTimerInterval;
             FramesCBShowLinkedHitpts.Checked = wndparams.showLinkedHitpts;
 
             OptionsNumGridSize.Value = wndparams.gridSize;
