@@ -462,26 +462,26 @@ void CLevel::UpdateDirtyRects()
 					tl->nShadowFrame = -1;
 
 					// only walls and floor get shadowed, when having a non walkable tile on the left (hole in the floor usually, but not water hole)
-					bool bCanReceive = ( ( tl->tileIDs[K_TILE_LAYER_FLOOR] >= 0 ) || ( tl->tileIDs[K_TILE_LAYER_WALLS] >= 0 ) ) &&
-						( tlL ) && ( tlL->tileIDs[K_TILE_LAYER_FLOOR] < 0 ) && ( ( tlL->flags & K_TILEFLAG_UNDER_FLOOR ) == 0 ) &&
-						( tl->tileIDs[K_TILE_LAYER_CEILING] < 0 );
+					bool bCanReceive = ( ( tl->tileXY[K_TILE_LAYER_FLOOR] != K_TILEXY_EMPTY ) || ( tl->tileXY[K_TILE_LAYER_WALLS] != K_TILEXY_EMPTY ) ) &&
+						( tlL ) && ( tlL->tileXY[K_TILE_LAYER_FLOOR] == K_TILEXY_EMPTY ) && ( ( tlL->flags & K_TILEFLAG_UNDER_FLOOR ) == 0 ) &&
+						( tl->tileXY[K_TILE_LAYER_CEILING] == K_TILEXY_EMPTY );
 
 					if ( bCanReceive )
 					{
 						CTile* tlDL = area->GetTile( xx - 1, yy + 1 );
 						int nCasterH = 0;
-						if ( tlL->tileIDs[K_TILE_LAYER_CEILING] >= 0 ) nCasterH = 3;
-						else if ( tlL->tileIDs[K_TILE_LAYER_WALLS] >= 0 )
+						if ( tlL->tileXY[K_TILE_LAYER_CEILING] != K_TILEXY_EMPTY ) nCasterH = 3;
+						else if ( tlL->tileXY[K_TILE_LAYER_WALLS] != K_TILEXY_EMPTY )
 						{
-							if ( ( tlDL ) && ( tlDL->tileIDs[K_TILE_LAYER_WALLS] >= 0 ) )
+							if ( ( tlDL ) && ( tlDL->tileXY[K_TILE_LAYER_WALLS] != K_TILEXY_EMPTY ) )
 								nCasterH = 2;	// top of the wall
 							else
 								nCasterH = 1;   // base of the wall
 						}
 						int nReceiverH = 0;
-						if ( tl->tileIDs[K_TILE_LAYER_WALLS] >= 0 )
+						if ( tl->tileXY[K_TILE_LAYER_WALLS] != K_TILEXY_EMPTY )
 						{
-							if ( tlD->tileIDs[K_TILE_LAYER_WALLS] >= 0 )
+							if ( tlD->tileXY[K_TILE_LAYER_WALLS] != K_TILEXY_EMPTY )
 								nReceiverH = 2;
 							else
 								nReceiverH = 1;
@@ -2565,21 +2565,6 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 	//update local timers
 	m_Timers.Update( dTime );
 
-	//--- thunder timer ---
-	if ( m_fThunderTimer > 0.0f )
-	{
-		m_fThunderTimer -= dTime;
-		//sunetul incepe mai devreme
-		if ( ( m_fThunderTimer < 0.5f ) && ( m_fThunderTimer + dTime >= 0.5f ) )
-		{
-			//SND_PLAY(SNDIDX_THUNDER);
-		}
-		//resets counter
-		if ( m_fThunderTimer <= 0.0f )
-		{
-			m_fThunderTimer = 10.0f + randfloat( 20.0f );
-		}
-	}
 
 	//state machine logic
 	switch ( m_levelState )

@@ -112,7 +112,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 	{
 		case instr_LEVEL_ENABLE_LIGHTNING:
 		{
-			m_fThunderTimer = 5.0f;
 			return true;
 		}
 		break;

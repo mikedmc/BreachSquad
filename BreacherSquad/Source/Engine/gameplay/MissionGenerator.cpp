@@ -108,7 +108,7 @@ void CMissionGenerator::BuildInventory()
 
 	m_arrInventory.clear();
 	m_arrInventory.reserve(arrAreas.size());
-	for (auto area : arrAreas)
+	for (auto& area : arrAreas)
 	{
 		//#TODO: story shoud specify how many available rooms of this type we are allowed to place in the level
 		m_arrInventory.push_back(CInventoryArea(area, 20));

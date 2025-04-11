@@ -47,7 +47,7 @@ OPRESULT CTileBlockMesh::BuildBuffers( Vec2i vBlockPos_TL, CTile** map, SizeWHi 
 				{
 					CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
 					// skip empty tiles
-					if ( tl->tileIDs[lay] < 0 )
+					if ( tl->tileXY[lay] != K_TILEXY_EMPTY )
 						continue;
 					// add geometry
 					SET_PNCT4T4( &arrVerts[nCur++], Vec3( vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f ),
@@ -87,7 +87,7 @@ OPRESULT CTileBlockMesh::BuildBuffers( Vec2i vBlockPos_TL, CTile** map, SizeWHi 
 				{
 					CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
 					// skip empty tiles
-					if (tl->tileIDs[lay] < 0)
+					if (tl->tileXY[lay] != K_TILEXY_EMPTY)
 						continue;
 					// add geometry
 					SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
@@ -127,21 +127,21 @@ OPRESULT CTileBlockMesh::BuildBuffers( Vec2i vBlockPos_TL, CTile** map, SizeWHi 
 			{
 				CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
 				// skip empty tiles
-				if (tl->tileIDs[lay] < 0)
+				if ( tl->tileXY[lay] != K_TILEXY_EMPTY )
 					continue;
 				// add geometry
-				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
-					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
-					Vec4(tl->vUVmin[lay].x, tl->vUVmin[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
-				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + (xx + 1) * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
-					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
-					Vec4(tl->vUVmax[lay].x, tl->vUVmin[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
-				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + (xx + 1) * K_TILE_SIZE, vOrig.y + (yy + 1) * K_TILE_SIZE, 0.0f),
-					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
-					Vec4(tl->vUVmax[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
-				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + (yy + 1) * K_TILE_SIZE, 0.0f),
-					Vec3(0.0f, 0.0f, 1.0f), 0xffffffff,
-					Vec4(tl->vUVmin[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f), Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				SET_PNCT4T4( &arrVerts[nCur++], Vec3( vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f ),
+					Vec3( 0.0f, 0.0f, 1.0f ), 0xffffffff,
+					Vec4( tl->vUVmin[lay].x, tl->vUVmin[lay].y, 0.0f, 0.0f ), Vec4( 0.0f, 0.0f, 0.0f, 0.0f ) );
+				SET_PNCT4T4( &arrVerts[nCur++], Vec3( vOrig.x + ( xx + 1 ) * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f ),
+					Vec3( 0.0f, 0.0f, 1.0f ), 0xffffffff,
+					Vec4( tl->vUVmax[lay].x, tl->vUVmin[lay].y, 0.0f, 0.0f ), Vec4( 0.0f, 0.0f, 0.0f, 0.0f ) );
+				SET_PNCT4T4( &arrVerts[nCur++], Vec3( vOrig.x + ( xx + 1 ) * K_TILE_SIZE, vOrig.y + ( yy + 1 ) * K_TILE_SIZE, 0.0f ),
+					Vec3( 0.0f, 0.0f, 1.0f ), 0xffffffff,
+					Vec4( tl->vUVmax[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f ), Vec4( 0.0f, 0.0f, 0.0f, 0.0f ) );
+				SET_PNCT4T4( &arrVerts[nCur++], Vec3( vOrig.x + xx * K_TILE_SIZE, vOrig.y + ( yy + 1 ) * K_TILE_SIZE, 0.0f ),
+					Vec3( 0.0f, 0.0f, 1.0f ), 0xffffffff,
+					Vec4( tl->vUVmin[lay].x, tl->vUVmax[lay].y, 0.0f, 0.0f ), Vec4( 0.0f, 0.0f, 0.0f, 0.0f ) );
 
 				_ASSERT(nCur < arrVertsLen);
 			}
@@ -167,7 +167,7 @@ OPRESULT CTileBlockMesh::BuildBuffers( Vec2i vBlockPos_TL, CTile** map, SizeWHi 
 			{
 				CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
 				// skip empty tiles
-				if (tl->tileIDs[lay] < 0)
+				if (tl->tileXY[lay] != K_TILEXY_EMPTY)
 					continue;
 				// add geometry
 				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),

@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 <Areas>
-	<Area File="start0D" BlocksW="2" BlocksH="2" ConnectorsDesc="111D" Tags="start" />
-	<Area File="start0L" BlocksW="2" BlocksH="2" ConnectorsDesc="11L1" Tags="start" />
-	<Area File="start0R" BlocksW="2" BlocksH="2" ConnectorsDesc="111R" Tags="start" />
-	<Area File="start0U" BlocksW="2" BlocksH="2" ConnectorsDesc="1U11" Tags="start" />
-	<Area File="end0D" BlocksW="2" BlocksH="2" ConnectorsDesc="111D" Tags="" />
-	<Area File="end0L" BlocksW="2" BlocksH="2" ConnectorsDesc="11L1" Tags="" />
-	<Area File="end0R" BlocksW="2" BlocksH="2" ConnectorsDesc="111R" Tags="" />
-	<Area File="end0U" BlocksW="2" BlocksH="2" ConnectorsDesc="1U11" Tags="" />
-	<Area File="middle0LRD" BlocksW="4" BlocksH="3" ConnectorsDesc="1111L11R11D1" Tags="" />
-	<Area File="middle0LRU" BlocksW="4" BlocksH="3" ConnectorsDesc="1U11L11R1111" Tags="" />
-	<Area File="straight0LR" BlocksW="2" BlocksH="2" ConnectorsDesc="L11R" Tags="" />
-	<Area File="straight0UD" BlocksW="2" BlocksH="2" ConnectorsDesc="1UD1" Tags="" />
-	<Area File="hall0LR" BlocksW="2" BlocksH="1" ConnectorsDesc="LR" Tags="hall" />
-	<Area File="hall0UD" BlocksW="1" BlocksH="2" ConnectorsDesc="LL" Tags="hall" />
+	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="111D" Tags="start" />
+	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="11L1" Tags="start" />
+	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="111R" Tags="start" />
+	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="1U11" Tags="start" />
+	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="111D" Tags="" />
+	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="11L1" Tags="" />
+	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="111R" Tags="" />
+	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="1U11" Tags="" />
+	<Area File="corridor1_LR" BlocksW="4" BlocksH="3" ConnectorsDesc="1111L11R11D1" Tags="" />
+	<Area File="corridor1_LR" BlocksW="4" BlocksH="3" ConnectorsDesc="1U11L11R1111" Tags="" />
+	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="L11R" Tags="" />
+	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="1UD1" Tags="" />
+	<Area File="corridor1_LR" BlocksW="2" BlocksH="1" ConnectorsDesc="LR" Tags="hall" />
+	<Area File="corridor1_LR" BlocksW="1" BlocksH="2" ConnectorsDesc="LL" Tags="hall" />
 </Areas>

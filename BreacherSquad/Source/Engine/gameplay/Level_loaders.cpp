@@ -51,7 +51,6 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 	ResetLevelStatistics();
 
 	m_colAmbientGlobal = 0xffffffff;
-	m_fThunderTimer = 0.0f;
 
 	//load interface sprites
 	FileManager::GetMediaPath( L"media/interfaces/igm_interface.bsx", Path );
@@ -304,14 +303,7 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 	OS_fread( arrInts, sizeof( UINT32 ), 10, fl );
 	if ( arrInts[0] != K_EDITOR_LEVEL_FILE_FORMAT_VERSION )
 	{
-		if ( arrInts[0] == 1014 )
-		{
-			LOG( L"LoadLevel:: Old level format found [1014]! Loading and converting lights to new format." );
-		}
-		else if ( arrInts[0] < 1014 ) //last version files didn't have light volumes alpha
-		{
-			return OPRESULT( K_OP_FAILED, K_SEVERITY_CRITICAL, L"[Error] LoadLevel(%s)::Wrong file version found: %d !", strPathAbs, arrInts[0] );
-		}
+		return OPRESULT( K_OP_FAILED, K_SEVERITY_CRITICAL, L"[Error] LoadLevel(%s)::Wrong file version found: %d !", strPathAbs, arrInts[0] );
 	}
 
 	//tip misiune
@@ -322,11 +314,11 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 	BYTE missionType = OS_freadByte( fl );
 	//tileset name
 	OS_freadString( fl, charArr );
-	int tilesetColumns;
+	//#TODO: load tileset images in texture manager, tileset should have normalmap textures for each colormap
+	//#TODO: get rid of constants for water and add them to tileset
 	//load tile size
 	tileW = OS_freadByte( fl );
 	tileH = OS_freadByte( fl );
-	tilesetColumns = OS_freadUInt16( fl );
 	//level size
 	int areaW = OS_freadUInt16( fl );
 	int areaH = OS_freadUInt16( fl );
@@ -367,14 +359,14 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 				//tile layer
 				int layer_index = kk;
 
-				int tileID = OS_freadInt32( fl );
-				tl->tileIDs[layer_index] = tileID;
-				if ( tileID >= 0 )
+				int tlXY = OS_freadUInt16( fl );
+				tl->tileXY[layer_index] = tlXY;
+				if ( tlXY >= 0 )
 				{
 					RECT srcrect;
-					SetRect( &srcrect, ( tileID % tilesetColumns ) * tileW, ( tileID / tilesetColumns ) * tileH,
-						( tileID % tilesetColumns ) * tileW + tileW, ( tileID / tilesetColumns ) * tileH + tileH );
-					//area->tiles[xx][yy].srcRects[layer_index] = srcrect;
+					int tlX = ( tlXY & 0xff00 ) >> 8, tlY = tlXY & 0xff;
+					SetRect( &srcrect, tlX * tileW, tlY * tileH, tlX * tileW + tileW, tlY * tileH + tileH );
+					
 					//#HACK: we make the UV rect a little smaller so we don't get UV seams because of the point filtering
 					tl->vUVmin[layer_index] = Vec2( ( srcrect.left + 0.001f ) / vTilesetSize.x, ( srcrect.top + 0.001f ) / vTilesetSize.y );
 					tl->vUVmax[layer_index] = Vec2( ( srcrect.right - 0.001f ) / vTilesetSize.x, ( srcrect.bottom - 0.001f ) / vTilesetSize.y );

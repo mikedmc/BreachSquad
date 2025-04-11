@@ -118,10 +118,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 			App_ReloadContentChanges();
 			///compute mods CRC
 			UINT32 unModsCRC = App_GetActiveModsCRC();
-			//initialize vertical mode after modding
-			//g_verticalMode.Init(&__Sim(), L"media/levels/mod_prefabs/infinite_tower.xml");
 
-			//unModsCRC += g_verticalMode.GetFilesCRC(false);
 			UTApp().m_Settings.dev_unCurrentModsCRC = unModsCRC;
 			LOG( L"--> CRC_BASE [%08x] CRC_MODS [%08x] <--", UTApp().m_Settings.dev_unCurrentCRC, UTApp().m_Settings.dev_unCurrentModsCRC );
 			//when returning from the mods screen reload the main menu in case it changed

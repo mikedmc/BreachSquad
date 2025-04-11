@@ -294,12 +294,8 @@ INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR, int )
 		WCHAR wcsPath[MAX_PATH];
 		StringCchPrintf( wcsPath, MAX_PATH, L"%s/levels/missions/missions.xml", UTApp().g_wszAppResDir );
 		UTGetChaptersList().LoadChapters( wcsPath );
-		//load infinite tower mode desc
-		//g_verticalMode.Init(&__Sim(), L"media/levels/mod_prefabs/infinite_tower.xml");
 		//check CRC after loading chapters (levels needed)
 		UINT32 unGameCRC = App_GetGameFilesCRC();
-		//we loaded the descriptors
-		//unGameCRC += g_verticalMode.GetFilesCRC(true);
 
 		UTApp().m_Settings.dev_unCurrentCRC = unGameCRC;
 		UTApp().m_Settings.dev_unCurrentModsCRC = unGameCRC;

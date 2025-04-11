@@ -12,6 +12,8 @@ enum eTileLayer {
 	K_TILE_LAYER_FLOOR_DECO2,
 	// vertical walls
 	K_TILE_LAYER_WALLS,
+	// vertical walls decorations
+	K_TILE_LAYER_WALLS_DECO,
 	// ceiling objects like pipes and other stuff that can cast shadows
 	K_TILE_LAYER_CEILING_DECO,
 	// Wall sections and FOW
@@ -21,17 +23,8 @@ enum eTileLayer {
 	K_TILE_LAYERS_CNT,
 };
 
-//#MAYBE: should be removed after transitioning the editor to the game engine?
-enum eEditorLayer {
-};
-
-//#TEMP: back compatibility, to be removed
-/*
-#define		K_LVL_LAYER_BACK	K_TILE_LAYER_FLOOR
-#define		K_LVL_LAYER_MIDDLE	K_TILE_LAYER_WALLS
-#define		K_LVL_LAYER_FRONT	K_TILE_LAYER_CEILING
-#define		K_LVL_LAYERS_CNT	3
-*/
+// value of empty tile
+#define		K_TILEXY_EMPTY			0xffff
 
 ///--- TILE FLAGS ---
 #define		K_TILEFLAG_NONE			0
@@ -56,8 +49,7 @@ enum eEditorLayer {
 class CTile {						
 public:
 	UINT32		flags;							// tile flags
-	int			tileIDs[K_TILE_LAYERS_CNT]{-1};	// actual tile
-	//RECT		srcRects[K_TILE_LAYERS_CNT]{};	// #TEMP: will be removed (precomputed RECT for drawing as sprite)
+	UINT16		tileXY[K_TILE_LAYERS_CNT]{K_TILEXY_EMPTY};	// tile position in tileset in tile coords  (empty = 0xffff) => [X << 8 | Y]
 	
 	Vec2		vUVmin[K_TILE_LAYERS_CNT];		// precomputed UV coords min 
 	Vec2		vUVmax[K_TILE_LAYERS_CNT];		// precomputed UV coords max
@@ -70,8 +62,7 @@ public:
 		bbox.Set( 0, 0, 0, 0 );
 		for (int kk = 0; kk < K_TILE_LAYERS_CNT; kk++)
 		{
-			tileIDs[kk] = -1;
-			//SetRect(&srcRects[kk], 0, 0, 0, 0);
+			tileXY[kk] = K_TILEXY_EMPTY;
 			
 			vUVmin[kk] = Vec2(0.0f, 0.0f);
 			vUVmax[kk] = Vec2(0.0f, 0.0f);
@@ -81,13 +72,16 @@ public:
 	void PostConstructionInit()
 	{
 		// mark all floor tiles with walkable so we can make transitions
-		if ((tileIDs[K_TILE_LAYER_FLOOR] >= 0) || ( tileIDs[K_TILE_LAYER_FLOOR_DECO1] >= 0 ) || ( tileIDs[K_TILE_LAYER_FLOOR_DECO2] >= 0 ))
+		if (( tileXY[K_TILE_LAYER_FLOOR] != K_TILEXY_EMPTY ) ||
+			( tileXY[K_TILE_LAYER_FLOOR_DECO1] != K_TILEXY_EMPTY ) ||
+			( tileXY[K_TILE_LAYER_FLOOR_DECO2] != K_TILEXY_EMPTY ) )
 			flags |= K_TILEFLAG_WALKABLE;
 		// mark all wall tiles with flags
-		if ( tileIDs[K_TILE_LAYER_WALLS] >= 0 )
+		if (( tileXY[K_TILE_LAYER_WALLS] != K_TILEXY_EMPTY ) || 
+			( tileXY[K_TILE_LAYER_WALLS_DECO] != K_TILEXY_EMPTY ))
 			flags |= K_TILEFLAG_WALL;
 		// mark under floor tiles
-		if ( tileIDs[K_TILE_LAYER_UNDER_FLOOR] >= 0 )
+		if ( tileXY[K_TILE_LAYER_UNDER_FLOOR] != 0 )
 			flags |= K_TILEFLAG_UNDER_FLOOR;
 	}
 };

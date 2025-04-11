@@ -58,12 +58,8 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			WCHAR wcsPath[MAX_PATH];
 			FileManager::GetMediaPath(L"media/levels/missions/missions.xml", wcsPath);
 			UTGetChaptersList().LoadChapters(wcsPath);
-			//initialize vertical mode after modding
-			//g_verticalMode.Init(&g_level, L"media/levels/mod_prefabs/infinite_tower.xml");
 			//compute mods CRC
 			UINT32 unModsCRC = App_GetActiveModsCRC();
-			//add vertical mode CRC
-			//unModsCRC += g_verticalMode.GetFilesCRC(false);
 			UTApp().m_Settings.dev_unCurrentModsCRC = unModsCRC;
 			LOG(L"--> CRC_BASE [%08x] CRC_MODS [%08x] <--", UTApp().m_Settings.dev_unCurrentCRC, UTApp().m_Settings.dev_unCurrentModsCRC);
 #endif

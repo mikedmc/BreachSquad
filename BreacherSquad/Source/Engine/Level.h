@@ -195,7 +195,6 @@ public:
 	///--- LIGHTS ---
 	CArray<CLight*>			m_arrLights;				//array of lights
 	DWORD					m_colAmbientGlobal;			//global ambient color
-	float					m_fThunderTimer;			//pentru desenarea efectului de thunder/lightning (0.0f - stopped)
 
 	///--- AI ---
 	CArray<CAIEvent*>		m_arrAIevents;
