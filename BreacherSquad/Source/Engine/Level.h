@@ -31,10 +31,6 @@
 #include "IngameGUI.h"
 #include "Queue.h"
 
-// texture IDs for local texture manager
-#define TEXID_TILES_COLOR		HASH("texTilesColor")
-#define TEXID_TILES_NORMALS		HASH("texTilesNormals")
-#define TEXID_WATER_DETAILS		HASH("texWaterDetail")
 
 enum ELevelState {
 	K_LVL_STATE_PLAYING,
@@ -78,6 +74,7 @@ public:
 
 	Pathfinder				m_astar;						// A-start Astar search engine
 	CTextureManager			m_texManager;					// General texture manager for misc needed textures
+	CTilesetDesc			m_tilesetDesc;					// Keeps pointers of textures for each layer of the tileset (we can have more textures per tileset)
 	CMultiSpriteLib			m_sprLib;						// all ingame animations appended from different bsx files
 	CMissionStory			m_story;						// mission story
 
@@ -91,14 +88,13 @@ public:
 	int meshidxcursor;
 
 
-
 	int						tileW, tileH;					// size of tiles
 	RectXYWH				m_levelAABB;					// level AABB in pixels - grows when adding areas
 	RectXYWHi				m_levelAABB_TL;					// level AABB in tiles  - grows when adding areas
 
 	Vec2					m_vLevelOrigin;					// level origin for the editor (usually around start location)
 
-	std::vector<RectXYWHi>		m_arrDirtyRectsTL;				// tiles that need updating
+	std::vector<RectXYWHi>	m_arrDirtyRectsTL;				// tiles that need updating
 	CArray<CLevelArea*>		m_arrAreas;						// loaded areas
 	// Transforms mouse coordinates from screen space to game world (necessary for network play)
 	bool					NormalizeMouseCoords( int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue );
@@ -293,6 +289,8 @@ public:
 	UINT32					GenerateNextID();
 	// Loads a level from an absolute path
 	OPRESULT				LoadLevel( WCHAR * strPathAbs );
+	// Loads a tileset (used by LoadLevel)
+	OPRESULT				LoadTileset( WCHAR* strPath, CTilesetDesc& retTileDesc );
 	// Loads a new area and adds it to the level (absolute path, real drive path)
 	// Adds all elements to the level arrays too
 	OPRESULT				DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL );

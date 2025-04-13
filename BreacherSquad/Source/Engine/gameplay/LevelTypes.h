@@ -465,3 +465,23 @@ public:
 	{
 	}
 };
+
+
+// Keeps track of texture pointers for each layer
+struct CTilesetDesc
+{
+	CTexNode* arrColorTex[K_TILE_LAYERS_CNT]{ nullptr };
+	CTexNode* arrNormalTex[K_TILE_LAYERS_CNT]{ nullptr };
+	CTexNode* waterTex{ nullptr };
+
+	void Clear()
+	{
+		waterTex = nullptr;
+		for ( int kk = 0; kk < K_TILE_LAYERS_CNT; ++kk )
+		{
+			arrColorTex[kk] = nullptr;
+			arrNormalTex[kk] = nullptr;
+		}
+	}
+};
+

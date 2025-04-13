@@ -4876,6 +4876,7 @@ void CLevel::Release()
 	ClearVisibilityLists();
 	// release passability map 
 	m_astar.Release();
+	m_tilesetDesc.Clear();
 
 	SAFE_DELETE_GROWABLE_ARRAY( m_arrAreas );
 

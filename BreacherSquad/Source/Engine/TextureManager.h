@@ -27,11 +27,12 @@ public:
 		fileName[ 0 ] = 0;
 	}
 
-	inline bool isLoaded() 
+	inline bool isLoaded() const
 	{
 		return bLoaded;
 	}
 
+	// Returns Vec2 width/height of texture
 	Vec2 getSize() 
 	{
 		if ( bLoaded == false )

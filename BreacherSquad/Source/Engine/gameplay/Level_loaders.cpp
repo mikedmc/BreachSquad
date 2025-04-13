@@ -64,29 +64,9 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 	// Loads level defines (generic data like actions, inventory, etc)
 	FileManager::GetMediaPath( L"media/gameplaydef.xml", Path );
 	V_OP_RET( LoadLevelDefines( Path ) );
-
-
-	FileManager::GetMediaPath( L"media/levels/data/tileset1.png", Path );
-	if ( nullptr == m_texManager.AddTexture( Path, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, TEXID_TILES_COLOR ) )
-	{
-		ErrorBox( K_ERR_CRITICAL, L"Couldn't load tileset texture: %s", Path );
-		return K_OP_FAILED;
-	}
-
-	FileManager::GetMediaPath( L"media/levels/data/tileset1_nh.png", Path );
-	if ( nullptr == m_texManager.AddTexture( Path, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, TEXID_TILES_NORMALS ) )
-	{
-		ErrorBox( K_ERR_CRITICAL, L"Couldn't load tileset normals texture: %s", Path );
-		return K_OP_FAILED;
-	}
-
-	FileManager::GetMediaPath( L"media/levels/data/water2_n.png", Path );
-	if ( nullptr == m_texManager.AddTexture( Path, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, TEXID_WATER_DETAILS ) )
-	{
-		ErrorBox( K_ERR_CRITICAL, L"Couldn't load water texture: %s", Path );
-		return K_OP_FAILED;
-	}
-
+	// Load tileset (includes water and other dependencies)
+	FileManager::GetMediaPath( L"media/levels/data/tileset1.xml", Path );
+	V_OP_RET( LoadTileset(Path, m_tilesetDesc) );
 
 	//LIGHTS
 	int libidxtmp = -1;
@@ -276,6 +256,83 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 }
 
 
+OPRESULT CLevel::LoadTileset( WCHAR* strPath, CTilesetDesc& retTileDesc )
+{
+	int idx = 0;
+	wstring tmppath;
+	wstring finalpath;
+	retTileDesc.Clear();
+
+	LOG( L"LoadTileset:: %d", strPath );
+	pugi::xml_document doc;
+	if ( !doc.load_file( strPath ) )
+	{
+		return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadTileset:: Unable to load Tileset XML:%s\n", strPath );
+	}
+
+	CTexNode* arrTex_colors[K_TILE_LAYERS_CNT]{ nullptr };
+	CTexNode* arrTex_normals[K_TILE_LAYERS_CNT]{ nullptr };
+
+	pugi::xml_node rntileset = doc.root().child( L"TILESET" );
+	// load water texture
+	const WCHAR* waterN = rntileset.attribute( L"water_n" ).as_string();
+	swprintf_s( &tmppath[0], tmppath.size(), L"media/levels/data/%s", waterN );
+	FileManager::GetMediaPath( &tmppath[0], &finalpath[0] );
+	retTileDesc.waterTex = m_texManager.AddTexture( &finalpath[0], D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT );
+	if ( nullptr == retTileDesc.waterTex )
+	{
+		m_texManager.Release();
+		return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadTileset:: Unable to load:%s\n", &finalpath[0] );
+	}
+
+	idx = 0;
+	pugi::xml_node rnimages = rntileset.child( L"IMAGES" );
+	for ( pugi::xml_node bnode = rnimages.first_child(); bnode; bnode = bnode.next_sibling() )
+	{
+
+		const WCHAR* colormap = bnode.attribute( L"colormap" ).as_string();
+		swprintf_s( &tmppath[0], tmppath.size(), L"media/levels/data/%s", colormap );
+		FileManager::GetMediaPath( &tmppath[0], &finalpath[0] );
+		arrTex_colors[idx] = m_texManager.AddTexture( &finalpath[0], D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT );
+		if ( nullptr == arrTex_colors[idx] )
+		{
+			m_texManager.Release();
+			return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadTileset:: Unable to load:%s\n", &finalpath[0] );
+		}
+
+		const WCHAR* normalmap = bnode.attribute( L"normalmap" ).as_string();
+		swprintf_s( &tmppath[0], tmppath.size(), L"media/levels/data/%s", normalmap );
+		FileManager::GetMediaPath( &tmppath[0], &finalpath[0] );
+		arrTex_normals[idx] = m_texManager.AddTexture( &finalpath[0], D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT );
+		if ( nullptr == arrTex_normals[idx] )
+		{
+			m_texManager.Release();
+			return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadTileset:: Unable to load:%s\n", &finalpath[0] );
+		}
+
+		idx++;
+	}
+
+	// assign images to layers
+	idx = 0;
+	pugi::xml_node rnlayers = rntileset.child( L"TILE_LAYERS" );
+	for ( pugi::xml_node bnode = rnlayers.first_child(); bnode; bnode = bnode.next_sibling() )
+	{
+		const int imgidx = bnode.attribute( L"imgidx" ).as_int();
+		if ( ( imgidx < 0 ) || ( imgidx >= K_TILE_LAYERS_CNT ) || ( idx >= K_TILE_LAYERS_CNT ) )
+		{
+			ErrorBox( K_ERR_WARNING, L"Illegal image idx=%d in tileset descriptor xml! Skipping...", imgidx );
+			continue;
+		}
+		retTileDesc.arrColorTex[idx] = arrTex_colors[imgidx];
+		retTileDesc.arrNormalTex[idx] = arrTex_normals[imgidx];
+		idx++;
+	}
+
+	LOG( L"LoadTileset:: OK" );
+	return K_OP_OK;
+}
+
 OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32 nAreaID, Vec2i posTL )
 {
 	_ASSERT( pDevice != nullptr );
@@ -338,9 +395,6 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 	// add dirty rect on area so it computes everything
 	AddDirtyRect( posTL.x, posTL.y, areaW, areaH );
 
-	// need to know the tileset size
-	CTexNode* pTexTiles = m_texManager.GetTextureByID( TEXID_TILES_COLOR );
-	Vec2 vTilesetSize = pTexTiles->getSize();
 
 	area->tiles = new CTile*[areaW];
 	for ( int kk = 0; kk < areaW; kk++ )
@@ -354,8 +408,12 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 		{
 			CTile* tl = &area->tiles[xx][yy];
 			tl->bbox.Set( ( posTL.x + xx ) * K_TILE_SIZE_F, ( posTL.y + yy ) * K_TILE_SIZE_F, ( posTL.x + xx + 1 ) * K_TILE_SIZE_F, ( posTL.y + yy + 1 ) * K_TILE_SIZE_F );
+
 			for ( int kk = 0; kk < nLayersCnt; kk++ )
 			{
+				// need to know the tileset size
+				Vec2 vTilesetSize = m_tilesetDesc.arrColorTex[kk]->getSize();
+
 				//tile layer
 				int layer_index = kk;
 
