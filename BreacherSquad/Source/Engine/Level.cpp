@@ -4114,7 +4114,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	}
 
 	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams (UV shrinking)
-	// moves from tex pixel to pixel, no half pixels
+	// moves from tex pixel to pixel, no half pixels but we add the subpixel movement when painting the final scene so if moves smoothly
 	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
@@ -4125,45 +4125,54 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	__Shaders().SetPS( nullptr );
 
 	// find useful textures
-	CTexNode* pTexTilesColor = m_texManager.GetTextureByID( TEXID_TILES_COLOR );
-	CTexNode* pTexTilesNormals = m_texManager.GetTextureByID( TEXID_TILES_NORMALS );
+	//CTexNode* pTexTilesColor = m_texManager.GetTextureByID( TEXID_TILES_COLOR );
+	//CTexNode* pTexTilesNormals = m_texManager.GetTextureByID( TEXID_TILES_NORMALS );
 
-	CTexNode* pTexToUse = pTexTilesColor;
+//	CTexNode* pTexToUse = pTexTilesColor;
 	// Offset in texture index so we paint from the normals texture when we render the normals pass
 	int nTexIdxOffset = 0;
+	bool bPaintsNormals = false;
 	ETexChannel	eTexChannel = K_TEXCHAN_NONE;
 	switch ( ePass )
 	{
 		case K_LVL_RP_COLORS:
 		{
-			pTexToUse = pTexTilesColor;
+//			pTexToUse = pTexTilesColor;
 			nTexIdxOffset = 0;
+			bPaintsNormals = false;
 			eTexChannel = K_TEXCHAN_COLORMAP;
 		}
 		break;
 		case K_LVL_RP_NORMALS_HEIGHT:
 		{
-			pTexToUse = pTexTilesNormals;
+//			pTexToUse = pTexTilesNormals;
 			nTexIdxOffset = 1;
+			bPaintsNormals = true;
 			eTexChannel = K_TEXCHAN_NORMALMAP;
 		}
 		break;
 		case K_LVL_RP_LIGHTS:
 		{
 			ErrorBox( K_ERR_WARNING, L"Render lights using RenderPass_Lights() instead!" );
+			return K_OP_OK;
 		}
 		break;
+		default:
+			// unknown pass -> exit fn
+			return K_OP_OK;
 	}
 
 	/// paint floors and vertical walls
-	m_pDevice->SetTexture( 0, pTexToUse->pTexture );
+	CTexNode* pTex = m_tilesetDesc.GetTexture( K_AL_UNDER_FLOOR, bPaintsNormals );
+	m_pDevice->SetTexture( 0, pTex->pTexture );
 	// paint water with special shader on color pass
 	if ( Areas_IsLayerVisible( K_AL_UNDER_FLOOR ) )
 	{
 		if ( ePass == K_LVL_RP_COLORS )
 		{
-			CTexNode* pTexWater = m_texManager.GetTextureByID( TEXID_WATER_DETAILS );
-			m_pDevice->SetTexture( 1, pTexTilesNormals->pTexture );
+			CTexNode* pTexWater = m_tilesetDesc.pWaterTex;
+			CTexNode* pTexNrm = m_tilesetDesc.GetTexture( K_AL_UNDER_FLOOR, true );
+			m_pDevice->SetTexture( 1, pTexNrm->pTexture );
 			m_pDevice->SetTexture( 2, pTexWater->pTexture );
 			__Shaders().SetVSByName( L"VS_WATER" );
 			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
@@ -4186,7 +4195,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 
 			Areas_PaintLayer( K_AL_UNDER_FLOOR );
 
-			m_pDevice->SetTexture( 1, NULL );
+			m_pDevice->SetTexture( 1, nullptr );
 			__Shaders().SetVS( nullptr );
 			__Shaders().SetPS( nullptr );
 		}
@@ -4197,8 +4206,12 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	}
 
 	/// normal floors
+	pTex = m_tilesetDesc.GetTexture( K_AL_FLOOR, bPaintsNormals );
+	m_pDevice->SetTexture( 0, pTex->pTexture );
 	Areas_PaintLayer( K_AL_FLOOR );
 	/// vertical walls
+	pTex = m_tilesetDesc.GetTexture( K_AL_WALLS, bPaintsNormals );
+	m_pDevice->SetTexture( 0, pTex->pTexture );
 	Areas_PaintLayer( K_AL_WALLS );
 
 	/// SHADOWS - blends wall shadows into the color map so it won't come over the players heads
@@ -4277,7 +4290,8 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 
 	// top layer of tiles
 	__Shaders().SetVS( nullptr );
-	m_pDevice->SetTexture( 0, pTexToUse->pTexture );
+	pTex = m_tilesetDesc.GetTexture( K_AL_CEILINGS, bPaintsNormals );
+	m_pDevice->SetTexture( 0, pTex->pTexture );
 	Areas_PaintLayer( K_AL_CEILINGS );
 
 	return K_OP_OK;

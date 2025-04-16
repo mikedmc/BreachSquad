@@ -1,18 +1,5 @@
 #pragma once
 
-///----------------------------------------------------------------------------------
-/// geometry layers - how many paint layers we have for each area block
-///----------------------------------------------------------------------------------
-enum eAreaLayer {
-	K_AL_UNDER_FLOOR = 0,
-	K_AL_FLOOR = 1,
-	K_AL_WALLSHADOWS,
-	K_AL_WALLS,
-	K_AL_CEIL_DECO,
-	K_AL_CEILINGS,
-
-	K_ALS_COUNT
-};
 
 ///----------------------------------------------------------------------------------
 /// Level area descriptor

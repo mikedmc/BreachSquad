@@ -278,8 +278,8 @@ OPRESULT CLevel::LoadTileset( WCHAR* strPath, CTilesetDesc& retTileDesc )
 	const WCHAR* waterN = rntileset.attribute( L"water_n" ).as_string();
 	swprintf_s( &tmppath[0], tmppath.size(), L"media/levels/data/%s", waterN );
 	FileManager::GetMediaPath( &tmppath[0], &finalpath[0] );
-	retTileDesc.waterTex = m_texManager.AddTexture( &finalpath[0], D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT );
-	if ( nullptr == retTileDesc.waterTex )
+	retTileDesc.pWaterTex = m_texManager.AddTexture( &finalpath[0], D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT );
+	if ( nullptr == retTileDesc.pWaterTex )
 	{
 		m_texManager.Release();
 		return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadTileset:: Unable to load:%s\n", &finalpath[0] );
@@ -369,10 +369,8 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 	WCHAR wcsMediaAddr[MAX_PATH];
 
 	BYTE missionType = OS_freadByte( fl );
-	//tileset name
+	//tileset name - not used for areas, the story tells you what tileset to load or there's only one
 	OS_freadString( fl, charArr );
-	//#TODO: load tileset images in texture manager, tileset should have normalmap textures for each colormap
-	//#TODO: get rid of constants for water and add them to tileset
 	//load tile size
 	tileW = OS_freadByte( fl );
 	tileH = OS_freadByte( fl );

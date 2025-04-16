@@ -1,7 +1,21 @@
 #pragma once
 
-//anunt clasele necesare
+// declare necessary classes
 class CCollisionShape;
+
+///----------------------------------------------------------------------------------
+/// geometry layers - how many paint layers we have for each area block
+///----------------------------------------------------------------------------------
+enum eAreaLayer {
+	K_AL_UNDER_FLOOR = 0,
+	K_AL_FLOOR = 1,
+	K_AL_WALLSHADOWS,
+	K_AL_WALLS,
+	K_AL_CEIL_DECO,
+	K_AL_CEILINGS,
+
+	K_ALS_COUNT
+};
 
 ///--------------------------------------------------------------------------
 ///strategic abilities enum (trebuie sa corespunda iconurilor din IGM_STRATEGIC_BAR_ICONS)
@@ -153,7 +167,7 @@ const CStringHash EDoTTypeNames[] =
 	L"DoT_SNIPER_TARGET",
 };
 
-class CDamageOverTime
+class CDamageOverTime	   //#TODO: rename to Perk (positive or negative)
 {
 public:
 	enum EDoTType {
@@ -467,21 +481,30 @@ public:
 };
 
 
-// Keeps track of texture pointers for each layer
 struct CTilesetDesc
 {
 	CTexNode* arrColorTex[K_TILE_LAYERS_CNT]{ nullptr };
 	CTexNode* arrNormalTex[K_TILE_LAYERS_CNT]{ nullptr };
-	CTexNode* waterTex{ nullptr };
+	CTexNode* pWaterTex{ nullptr };
 
 	void Clear()
 	{
-		waterTex = nullptr;
+		pWaterTex = nullptr;
 		for ( int kk = 0; kk < K_TILE_LAYERS_CNT; ++kk )
 		{
 			arrColorTex[kk] = nullptr;
 			arrNormalTex[kk] = nullptr;
 		}
+	}
+
+	// Returns texture object for tileset based on Area draw layer
+	CTexNode* GetTexture( eAreaLayer eLayer, bool bGetNormals )
+	{
+		int layermap[K_ALS_COUNT] = { K_TILE_LAYER_UNDER_FLOOR , K_TILE_LAYER_FLOOR, K_TILE_LAYER_FLOOR, K_TILE_LAYER_WALLS, K_TILE_LAYER_CEILING_DECO, K_TILE_LAYER_CEILING };
+		if ( !bGetNormals )
+			return arrColorTex[(int)eLayer];
+
+		return arrNormalTex[(int)eLayer];
 	}
 };
 
