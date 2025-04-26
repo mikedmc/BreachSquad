@@ -502,9 +502,9 @@ struct CTilesetDesc
 	{
 		int layermap[K_ALS_COUNT] = { K_TILE_LAYER_UNDER_FLOOR , K_TILE_LAYER_FLOOR, K_TILE_LAYER_FLOOR, K_TILE_LAYER_WALLS, K_TILE_LAYER_CEILING_DECO, K_TILE_LAYER_CEILING };
 		if ( !bGetNormals )
-			return arrColorTex[(int)eLayer];
+			return arrColorTex[layermap[(int)eLayer]];
 
-		return arrNormalTex[(int)eLayer];
+		return arrNormalTex[layermap[(int)eLayer]];
 	}
 };
 

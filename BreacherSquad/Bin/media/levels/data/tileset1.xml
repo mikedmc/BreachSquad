@@ -3,7 +3,7 @@
 <TILESET water_n="water1_n.png">
 <IMAGES>
 	<IMAGE colormap="tl_floors.png" normalmap="tl_floors_n.png" /> 
-	<IMAGE colormap="tl_walls.png" normalmap="tl_ceiling_n.png" /> 
+	<IMAGE colormap="tl_walls.png" normalmap="tl_walls_n.png" /> 
 	<IMAGE colormap="tl_ceiling.png" normalmap="tl_ceiling_n.png" /> 
 </IMAGES>
 <!-- ALWAYS set the same number of LAYER nodes as the number of Level Editor layers -->

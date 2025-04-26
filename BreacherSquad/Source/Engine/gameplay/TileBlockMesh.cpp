@@ -3,7 +3,7 @@
 
 CTileBlockMesh::CTileBlockMesh(PDEVICE pDevice)
 {
-	m_Painter.Init(512, pDevice);
+	m_Painter.Init(1024, pDevice);
 	memset(m_arrMeshIdx, -1, sizeof(int) * ARRAY_SIZE(m_arrMeshIdx));
 }
 
@@ -14,8 +14,11 @@ CTileBlockMesh::~CTileBlockMesh()
 
 OPRESULT CTileBlockMesh::BuildBuffers( Vec2i vBlockPos_TL, CTile** map, SizeWHi mapSizeTL, Vec2 vOffset )
 {
-	// allocate maximum possible number per layer plus sentinel
-	const size_t arrVertsLen = K_TBM_BLOCK_W * K_TBM_BLOCK_H * 4 + 16;
+	// allocate maximum number per layer plus sentinel
+	const size_t arrVertsLen = K_TBM_BLOCK_W * K_TBM_BLOCK_H 
+								* 4 /* verts */ 
+								* 3 /* max layers per mesh (floor has 3 possible layers for example) */ 
+								+ 16 /*sentinel*/;
 	_VERTEX_PNCT4T4 arrVerts[arrVertsLen];
 	int nCur = 0;
 
@@ -47,7 +50,7 @@ OPRESULT CTileBlockMesh::BuildBuffers( Vec2i vBlockPos_TL, CTile** map, SizeWHi 
 				{
 					CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
 					// skip empty tiles
-					if ( tl->tileXY[lay] != K_TILEXY_EMPTY )
+					if ( tl->tileXY[lay] == K_TILEXY_EMPTY )
 						continue;
 					// add geometry
 					SET_PNCT4T4( &arrVerts[nCur++], Vec3( vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f ),
@@ -87,7 +90,7 @@ OPRESULT CTileBlockMesh::BuildBuffers( Vec2i vBlockPos_TL, CTile** map, SizeWHi 
 				{
 					CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
 					// skip empty tiles
-					if (tl->tileXY[lay] != K_TILEXY_EMPTY)
+					if (tl->tileXY[lay] == K_TILEXY_EMPTY)
 						continue;
 					// add geometry
 					SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),
@@ -127,7 +130,7 @@ OPRESULT CTileBlockMesh::BuildBuffers( Vec2i vBlockPos_TL, CTile** map, SizeWHi 
 			{
 				CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
 				// skip empty tiles
-				if ( tl->tileXY[lay] != K_TILEXY_EMPTY )
+				if ( tl->tileXY[lay] == K_TILEXY_EMPTY )
 					continue;
 				// add geometry
 				SET_PNCT4T4( &arrVerts[nCur++], Vec3( vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f ),
@@ -167,7 +170,7 @@ OPRESULT CTileBlockMesh::BuildBuffers( Vec2i vBlockPos_TL, CTile** map, SizeWHi 
 			{
 				CTile* tl = &map[m_mapAreaTL.x + xx][m_mapAreaTL.y + yy];
 				// skip empty tiles
-				if (tl->tileXY[lay] != K_TILEXY_EMPTY)
+				if (tl->tileXY[lay] == K_TILEXY_EMPTY)
 					continue;
 				// add geometry
 				SET_PNCT4T4(&arrVerts[nCur++], Vec3(vOrig.x + xx * K_TILE_SIZE, vOrig.y + yy * K_TILE_SIZE, 0.0f),

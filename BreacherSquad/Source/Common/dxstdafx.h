@@ -148,6 +148,7 @@
 #define K_INGAME_EDITOR
 #endif
 
+// MAX_PATH = 260 on Windows systems
 #define MAX_PATH_STD	MAX_PATH
 //-- macrouri de stringuit alte macrouri - vezi versioning.h ---
 #define STRINGIFY(x) #x

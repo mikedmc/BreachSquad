@@ -172,8 +172,8 @@ OPRESULT CControlsEditor::LoadCtrlTemplatesXML(WCHAR* XMLpath)
 	pugi::xml_node layerNode = doc.root().first_child();
 	for (pugi::xml_attribute atr = layerNode.first_attribute(); atr; atr = atr.next_attribute())
 	{
-		WCHAR atrval[MAX_PATH];
-		swprintf_s(atrval, MAX_PATH, atr.value());
+		WCHAR atrval[MAX_PATH_STD];
+		swprintf_s(atrval, MAX_PATH_STD, atr.value());
 		layerTemplate.SetVarString(atr.name(), atrval);
 	}
 	pugi::xml_node controlsNodes = doc.root().child(L"Layer");
@@ -182,8 +182,8 @@ OPRESULT CControlsEditor::LoadCtrlTemplatesXML(WCHAR* XMLpath)
 		CVariantMap *nCol = new CVariantMap();
 		for (pugi::xml_attribute atr = ctrlNode.first_attribute(); atr; atr = atr.next_attribute())
 		{
-			WCHAR atrval[MAX_PATH];
-			swprintf_s(atrval, MAX_PATH, atr.value());
+			WCHAR atrval[MAX_PATH_STD];
+			swprintf_s(atrval, MAX_PATH_STD, atr.value());
 			nCol->SetVarString(atr.name(), atrval);
 		}
 		ctrlTemplates.Add(nCol);
@@ -200,8 +200,8 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		return;
 
 	int ctrlIdx = -1;
-	WCHAR type[MAX_PATH];
-	swprintf_s(type, MAX_PATH, currLayer->controls[currCtrlIdx]->paramsDict[L"Type"].m_strArg.text);
+	WCHAR type[MAX_PATH_STD];
+	swprintf_s(type, MAX_PATH_STD, currLayer->controls[currCtrlIdx]->paramsDict[L"Type"].m_strArg.text);
 	UINT id = FastHash(type);
 	for (int ii = 0; ii < ctrlTemplates.Count(); ii++)
 	{
@@ -238,16 +238,16 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		CVariant* pVarName = &pVar.second;
 		// actual value from control
 		CVariant* pValue = &ctrl->paramsDict[pVarName->shName.text];
-		char sVarName[MAX_PATH];
-		wcstombs(sVarName, pVarName->shName.text, MAX_PATH);
+		char sVarName[MAX_PATH_STD];
+		wcstombs(sVarName, pVarName->shName.text, MAX_PATH_STD);
 		// hardcoded controls properties
 		if (strcmp(sVarName, "ID") == 0)
 		{
-			char str0[MAX_PATH] = { 0 };
+			char str0[MAX_PATH_STD] = { 0 };
 			// ID set? show it!
 			if (pValue->eType != CVariant::K_ARGTYPE_NONE)
 			{
-				pValue->asString(str0, MAX_PATH);
+				pValue->asString(str0, MAX_PATH_STD);
 			}
 
 			ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
@@ -269,13 +269,13 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			vector<string> arrAnims;
 			// first animation will be the empty animation or not set. Index is -1
 			// not set will be the first
-			arrAnims.push_back("NOT SET");
+			arrAnims.emplace_back("NOT SET");
 			for ( int jj = 0; jj < __GUI().m_sprCol.Animations.Count(); jj++ )
 			{
 				scAnimation *anm = __GUI().m_sprCol.Animations.GetAt( jj );
-				char strName[ MAX_PATH ];
-				wcstombs( strName, anm->animName.text, MAX_PATH );
-				arrAnims.push_back( strName );
+				char strName[ MAX_PATH_STD ];
+				wcstombs( strName, anm->animName.text, MAX_PATH_STD );
+				arrAnims.emplace_back(strName );
 			}
 
 			int nRealIndex = (pValue->m_asUINT32 < 0) ? -1 : pValue->m_asUINT32;
@@ -343,13 +343,13 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 			vector<string> arrFonts;
 			// first animation will be the empty animation or not set. Index is -1
 			// not set will be the first
-			arrFonts.push_back("NOT SET");
+			arrFonts.emplace_back("NOT SET");
 			for ( int jj = 0; jj < __TexFonts().fonts.Count(); jj++ )
 			{
 				CTexFont* font = __TexFonts().fonts.GetAt( jj );
-				char strName[ MAX_PATH ];
-				wcstombs( strName, font->shFontName.text, MAX_PATH );
-				arrFonts.push_back( strName );
+				char strName[ MAX_PATH_STD ];
+				wcstombs( strName, font->shFontName.text, MAX_PATH_STD );
+				arrFonts.emplace_back(strName );
 			}
 
 			int nRealIndex = (pValue->m_asUINT32 < 0) ? -1 : pValue->m_asUINT32;
@@ -444,8 +444,8 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 				case CVariant::K_ARGTYPE_STRING:
 				default:
 				{
-					char str0[MAX_PATH];
-					pValue->asString(str0, MAX_PATH);
+					char str0[MAX_PATH_STD];
+					pValue->asString(str0, MAX_PATH_STD);
 
 					ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
 					if (ImGui::IsItemEdited())
@@ -514,19 +514,19 @@ void CControlsEditor::AddControl(CVariantMap* vcol)
 	if (currLayer == nullptr)
 		return;
 
-	WCHAR cType[MAX_PATH];
-	swprintf_s(cType, MAX_PATH, vcol->m_variants[L"Type"].m_strArg.text);
+	WCHAR cType[MAX_PATH_STD];
+	swprintf_s(cType, MAX_PATH_STD, vcol->m_variants[L"Type"].m_strArg.text);
 
 	CControl* nctrl = new CControl(cType);
 	nctrl->Initialize();
 	for(auto & elem : vcol->m_variants)
 	{
 		CVariant* var = &elem.second;
-		WCHAR propertyName[MAX_PATH];
-		WCHAR propertyValue[MAX_PATH];
+		WCHAR propertyName[MAX_PATH_STD];
+		WCHAR propertyValue[MAX_PATH_STD];
 
-		swprintf_s(propertyName, MAX_PATH, L"%s", var->shName.text);
-		swprintf_s(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
+		swprintf_s(propertyName, MAX_PATH_STD, L"%s", var->shName.text);
+		swprintf_s(propertyValue, MAX_PATH_STD, L"%s", var->m_strArg.text);
 		//If template has "empty" as ID then don't add the ID key
 		if ((wcscmp(propertyName, L"ID") == 0) && (wcscmp(propertyValue, L"empty") == 0))
 			continue;
@@ -551,10 +551,10 @@ void CControlsEditor::CloneControl(int offx, int offy)
 	CControl *nctrl = new CControl(ctrl);
 
 	// move it a little
-	WCHAR val[MAX_PATH];
-	swprintf_s(val, MAX_PATH, L"%d", ctrl->bbox.x + offx);
+	WCHAR val[MAX_PATH_STD];
+	swprintf_s(val, MAX_PATH_STD, L"%d", ctrl->bbox.x + offx);
 	__GUI().SetParamValue(nctrl, L"X", val);
-	swprintf_s(val, MAX_PATH, L"%d", ctrl->bbox.y + offy);
+	swprintf_s(val, MAX_PATH_STD, L"%d", ctrl->bbox.y + offy);
 	__GUI().SetParamValue(nctrl, L"Y", val);
 
 	currLayer->controls.Add(nctrl);
@@ -562,8 +562,8 @@ void CControlsEditor::CloneControl(int offx, int offy)
 
 void CControlsEditor::Launch()
 {
-	WCHAR xmlpath[MAX_PATH];
-	swprintf_s(xmlpath, MAX_PATH, L"%sControlsEd/ctrlTemplates.xml", UTApp().g_wszExePath);
+	WCHAR xmlpath[MAX_PATH_STD];
+	swprintf_s(xmlpath, MAX_PATH_STD, L"%sControlsEd/ctrlTemplates.xml", UTApp().g_wszExePath);
 	LoadCtrlTemplatesXML(xmlpath);
 
 	RectXYWH worldrect = UTApp().g_rect360hWorld;
@@ -639,8 +639,8 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 			ctrlNode = layerNode.append_child(L"Control");
 
 			// control type (Frame, Button, etc)
-			WCHAR ctrlType[MAX_PATH];
-			swprintf_s(ctrlType, MAX_PATH, ctrlCol->m_variants[L"Type"].m_strArg.text);
+			WCHAR ctrlType[MAX_PATH_STD];
+			swprintf_s(ctrlType, MAX_PATH_STD, ctrlCol->m_variants[L"Type"].m_strArg.text);
 
 			// parcurg ctrlTemplates ca sa scriu atributele exact in ordinea din templates
 			for (int ll = 0; ll < ctrlTemplates.Count(); ll++)
@@ -654,10 +654,10 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 						CVariant* var = &it.second;
 						if (ctrlCol->m_variants[var->shName.text].IsSet())
 						{
-							WCHAR propertyName[MAX_PATH];
-							WCHAR propertyValue[MAX_PATH];
-							swprintf_s(propertyName, MAX_PATH, var->shName.text);
-							ctrlCol->m_variants[propertyName].asString(propertyValue, MAX_PATH);
+							WCHAR propertyName[MAX_PATH_STD];
+							WCHAR propertyValue[MAX_PATH_STD];
+							swprintf_s(propertyName, MAX_PATH_STD, var->shName.text);
+							ctrlCol->m_variants[propertyName].asString(propertyValue, MAX_PATH_STD);
 
 							// ID is empty string or equals the one in templates then we skip it
 							if (wcscmp(propertyName, L"ID") == 0)
@@ -669,32 +669,32 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 							{
 								int intVal = _wtoi(propertyValue);
 								if (intVal >= 0 && wcscmp(propertyValue, L"_EMPTY_") != 0)
-									swprintf_s(propertyValue, MAX_PATH, L"%s", __GUI().m_sprCol.Animations[intVal]->animName.text);
+									swprintf_s(propertyValue, MAX_PATH_STD, L"%s", __GUI().m_sprCol.Animations[intVal]->animName.text);
 								else
-									swprintf_s(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
+									swprintf_s(propertyValue, MAX_PATH_STD, L"%s", var->m_strArg.text);
 							}
 							else if (wcscmp(propertyName, L"fontID") == 0)
 							{
 								int intVal = _wtoi(propertyValue);
 								if (intVal >= 0 && wcscmp(propertyValue, L"_EMPTY_") != 0)
-									swprintf_s(propertyValue, MAX_PATH, L"%s", __TexFonts().fonts[_wtoi(propertyValue)]->shFontName.text);
+									swprintf_s(propertyValue, MAX_PATH_STD, L"%s", __TexFonts().fonts[_wtoi(propertyValue)]->shFontName.text);
 								else
-									swprintf_s(propertyValue, MAX_PATH, L"%s", var->m_strArg.text);
+									swprintf_s(propertyValue, MAX_PATH_STD, L"%s", var->m_strArg.text);
 							}
 							else if (wcscmp(propertyName, L"stringID") == 0)
 							{
 								int strIdx = _wtoi(propertyValue);
 								if((strIdx < 0) || (strIdx == __Texts().defaultStringIdx))
-									swprintf_s(propertyValue, MAX_PATH, L"%s", var->m_strArg.text); //daca nu am pus id text pun ce era in template
+									swprintf_s(propertyValue, MAX_PATH_STD, L"%s", var->m_strArg.text); //daca nu am pus id text pun ce era in template
 								else
-									swprintf_s(propertyValue, MAX_PATH, L"%s", __Texts().strings[strIdx]->shStringName.text);
+									swprintf_s(propertyValue, MAX_PATH_STD, L"%s", __Texts().strings[strIdx]->shStringName.text);
 							}
 							else if ((wcscmp(propertyName, L"color") == 0) || (wcscmp(propertyName, L"fontColor") == 0))
 							{
 								// too short? save solid white. Otherwise the color has been converted to hexa already
 								if ((wcscmp(propertyValue, L"0") == 0) || (wcslen(propertyValue) < 2))
 								{
-									swprintf_s(propertyValue, MAX_PATH, L"#ffffffff");
+									swprintf_s(propertyValue, MAX_PATH_STD, L"#ffffffff");
 								}
 							}
 
@@ -857,11 +857,11 @@ void CControlsEditor::Update(float dTime)
 							bbox.x += mousedelta.w;
 							bbox.y += mousedelta.h;
 
-							WCHAR val[MAX_PATH];
+							WCHAR val[MAX_PATH_STD];
 							CControl* ctrl = currLayer->controls[selCtrl];
-							swprintf_s(val, MAX_PATH, L"%d", bbox.x);
+							swprintf_s(val, MAX_PATH_STD, L"%d", bbox.x);
 							__GUI().SetParamValue(ctrl, L"X", val);
-							swprintf_s(val, MAX_PATH, L"%d", bbox.y);
+							swprintf_s(val, MAX_PATH_STD, L"%d", bbox.y);
 							__GUI().SetParamValue(ctrl, L"Y", val);
 						}
 					}
@@ -955,14 +955,14 @@ void CControlsEditor::Update(float dTime)
 						{
 							int selCtrl = selectedCtrls.GetAt(ii);
 							CControl* ctrl = currLayer->controls[selCtrl];
-							WCHAR val[MAX_PATH];
-							swprintf_s(val, MAX_PATH, L"%d", BBox.x);
+							WCHAR val[MAX_PATH_STD];
+							swprintf_s(val, MAX_PATH_STD, L"%d", BBox.x);
 							__GUI().SetParamValue(ctrl, L"X", val);
-							swprintf_s(val, MAX_PATH, L"%d", BBox.y);
+							swprintf_s(val, MAX_PATH_STD, L"%d", BBox.y);
 							__GUI().SetParamValue(ctrl, L"Y", val);
-							swprintf_s(val, MAX_PATH, L"%d", BBox.w);
+							swprintf_s(val, MAX_PATH_STD, L"%d", BBox.w);
 							__GUI().SetParamValue(ctrl, L"W", val);
-							swprintf_s(val, MAX_PATH, L"%d", BBox.h);
+							swprintf_s(val, MAX_PATH_STD, L"%d", BBox.h);
 							__GUI().SetParamValue(ctrl, L"H", val);
 						}
 					}
@@ -1089,15 +1089,15 @@ void CControlsEditor::ReceiveKeys(UINT key)
 			{
 				int ctrlIdx = selectedCtrls.GetAt(ii);
 				CControl* ctrl = currLayer->controls[ctrlIdx];
-				WCHAR val[MAX_PATH];
+				WCHAR val[MAX_PATH_STD];
 				if (DXUTIsKeyDown(VK_MENU))
 				{
-					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().h - dY);
+					swprintf_s(val, MAX_PATH_STD, L"%d", ctrl->GetBBox().h - dY);
 					__GUI().SetParamValue(ctrl, L"H", val);
 				}
 				else
 				{
-					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().y - dY);
+					swprintf_s(val, MAX_PATH_STD, L"%d", ctrl->GetBBox().y - dY);
 					__GUI().SetParamValue(ctrl, L"Y", val);
 				}
 			}
@@ -1115,15 +1115,15 @@ void CControlsEditor::ReceiveKeys(UINT key)
 			{
 				int ctrlIdx = selectedCtrls.GetAt(ii);
 				CControl* ctrl = currLayer->controls[ctrlIdx];
-				WCHAR val[MAX_PATH];
+				WCHAR val[MAX_PATH_STD];
 				if (DXUTIsKeyDown(VK_MENU))
 				{
-					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().h + dY);
+					swprintf_s(val, MAX_PATH_STD, L"%d", ctrl->GetBBox().h + dY);
 					__GUI().SetParamValue(ctrl, L"H", val);
 				}
 				else
 				{
-					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().y + dY);
+					swprintf_s(val, MAX_PATH_STD, L"%d", ctrl->GetBBox().y + dY);
 					__GUI().SetParamValue(ctrl, L"Y", val);
 				}
 			}
@@ -1141,15 +1141,15 @@ void CControlsEditor::ReceiveKeys(UINT key)
 			{
 				int ctrlIdx = selectedCtrls.GetAt(ii);
 				CControl* ctrl = currLayer->controls[ctrlIdx];
-				WCHAR val[MAX_PATH];
+				WCHAR val[MAX_PATH_STD];
 				if (DXUTIsKeyDown(VK_MENU))
 				{
-					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().w - dX);
+					swprintf_s(val, MAX_PATH_STD, L"%d", ctrl->GetBBox().w - dX);
 					__GUI().SetParamValue(ctrl, L"W", val);
 				}
 				else
 				{
-					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().x - dX);
+					swprintf_s(val, MAX_PATH_STD, L"%d", ctrl->GetBBox().x - dX);
 					__GUI().SetParamValue(ctrl, L"X", val);
 				}
 			}
@@ -1167,15 +1167,15 @@ void CControlsEditor::ReceiveKeys(UINT key)
 			{
 				int ctrlIdx = selectedCtrls.GetAt(ii);
 				CControl* ctrl = currLayer->controls[ctrlIdx];
-				WCHAR val[MAX_PATH];
+				WCHAR val[MAX_PATH_STD];
 				if (DXUTIsKeyDown(VK_MENU))
 				{
-					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().w + dX);
+					swprintf_s(val, MAX_PATH_STD, L"%d", ctrl->GetBBox().w + dX);
 					__GUI().SetParamValue(ctrl, L"W", val);
 				}
 				else
 				{
-					swprintf_s(val, MAX_PATH, L"%d", ctrl->GetBBox().x + dX);
+					swprintf_s(val, MAX_PATH_STD, L"%d", ctrl->GetBBox().x + dX);
 					__GUI().SetParamValue(ctrl, L"X", val);
 				}
 			}
@@ -1259,9 +1259,9 @@ void CControlsEditor::CenterElements(bool H, bool V)
 			{
 				CControl* ctrl = currLayer->controls[selectedCtrls[ii]];
 				int ctrlX = ctrl->bbox.x;
-				WCHAR val[MAX_PATH];
+				WCHAR val[MAX_PATH_STD];
 				int intVal = -(xmin - ctrlX) - dx;
-				swprintf_s(val, MAX_PATH, L"%d", intVal);
+				swprintf_s(val, MAX_PATH_STD, L"%d", intVal);
 				__GUI().SetParamValue(ctrl, L"X", val);
 			}
 		}
@@ -1269,11 +1269,11 @@ void CControlsEditor::CenterElements(bool H, bool V)
 		{
 			if (currCtrlIdx > -1)
 			{
-				WCHAR val[MAX_PATH];
+				WCHAR val[MAX_PATH_STD];
 				CControl* lCtrl = currLayer->controls[currCtrlIdx];
 				int ctrlW = lCtrl->bbox.w;
 				int intVal = -(ctrlW / 2);
-				swprintf_s(val, MAX_PATH, L"%d", intVal);
+				swprintf_s(val, MAX_PATH_STD, L"%d", intVal);
 				__GUI().SetParamValue(lCtrl, L"X", val);
 			}
 		}
@@ -1308,10 +1308,10 @@ void CControlsEditor::CenterElements(bool H, bool V)
 			for (int ii = 0; ii < selectedCtrls.Count(); ii++)
 			{
 				CControl* ctrl = currLayer->controls[selectedCtrls[ii]];
-				WCHAR val[MAX_PATH];
+				WCHAR val[MAX_PATH_STD];
 				int ctrlY = ctrl->bbox.y;
 				int intVal = -(ymin - ctrlY) - dy;
-				swprintf_s(val, MAX_PATH, L"%d", intVal);
+				swprintf_s(val, MAX_PATH_STD, L"%d", intVal);
 				__GUI().SetParamValue(ctrl, L"Y", val);
 			}
 		}
@@ -1319,11 +1319,11 @@ void CControlsEditor::CenterElements(bool H, bool V)
 		{
 			if (currCtrlIdx > -1)
 			{
-				WCHAR val[MAX_PATH];
+				WCHAR val[MAX_PATH_STD];
 				CControl* lCtrl = currLayer->controls[currCtrlIdx];
 				int ctrlH = lCtrl->bbox.h;
 				int intVal = -(ctrlH / 2);
-				swprintf_s(val, MAX_PATH, L"%d", intVal);
+				swprintf_s(val, MAX_PATH_STD, L"%d", intVal);
 				__GUI().SetParamValue(currLayer->controls[currCtrlIdx], L"Y", val);
 			}
 		}
@@ -1400,7 +1400,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.2f, 0.2f, 1.0f));
 		if (ImGui::Button("Save All", ImVec2(80, 0)))
 		{
-			WCHAR xmlpath[ MAX_PATH ];
+			WCHAR xmlpath[ MAX_PATH_STD ];
 			FileManager::GetMediaPath( L"media/interfaces/interfaces.xml", xmlpath, true);
 			SaveXML(xmlpath);
 		}
@@ -1419,9 +1419,9 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		{
 			CVariantMap *col = ctrlTemplates.GetAt(ii);
 
-			char strName[MAX_PATH];
-			wcstombs(strName, col->m_variants[L"Type"].m_strArg.text, MAX_PATH);
-			arrItems.push_back(strName);
+			char strName[MAX_PATH_STD];
+			wcstombs(strName, col->m_variants[L"Type"].m_strArg.text, MAX_PATH_STD);
+			arrItems.emplace_back(strName);
 		}
 
 		if (ImGui::ListBoxHeader("##", ImVec2(250, 120)))
@@ -1450,9 +1450,9 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 		for (int ii = 0; ii < nLayersCnt; ii++)
 		{
 			CStringHash * lID = &__GUI().layersDefinitions[ii]->ID;
-			char strName[MAX_PATH];
-			wcstombs(strName, lID->text, MAX_PATH);
-			arrLayerNames.push_back(strName);
+			char strName[MAX_PATH_STD];
+			wcstombs(strName, lID->text, MAX_PATH_STD);
+			arrLayerNames.emplace_back(strName);
 		}
 
 		ImGui::SetNextItemWidth(-1.0f);
@@ -1511,8 +1511,8 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 
 			CCtrlLayer* nlayer = currLayer->Clone();
 			testLayer = currLayer;
-			WCHAR newName[MAX_PATH];
-			swprintf_s(newName, MAX_PATH, L"%s_%d", currLayer->ID.text, randint(100));
+			WCHAR newName[MAX_PATH_STD];
+			swprintf_s(newName, MAX_PATH_STD, L"%s_%d", currLayer->ID.text, randint(100));
 			nlayer->ID.Init(newName);
 			__GUI().layersDefinitions.Add(nlayer);
 
@@ -1536,10 +1536,10 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 					itemName.append(L":");
 					itemName.append(ctrl->paramsDict[L"ID"].m_strArg.text);
 				}
-				char strName[MAX_PATH];
-				wcstombs(strName, itemName.c_str(), MAX_PATH);
+				char strName[MAX_PATH_STD];
+				wcstombs(strName, itemName.c_str(), MAX_PATH_STD);
 
-				arrControlsNames.push_back(strName);
+				arrControlsNames.emplace_back(strName);
 			}
 		}
 
@@ -1549,7 +1549,7 @@ void CControlsEditor::IMGUI_ShowInterfaces()
 			for (int kk = 0; kk < arrControlsNames.size(); kk++)
 			{
 				string ctrl(arrControlsNames[kk]);
-				char sID[MAX_PATH];
+				char sID[MAX_PATH_STD];
 				sprintf(sID, "%s##ID%d", arrControlsNames[kk].c_str(), kk);
 				if (ImGui::Selectable(sID, (kk == currCtrlIdx) ? true : false, ImGuiSelectableFlags_None))
 				{

@@ -4137,7 +4137,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	{
 		case K_LVL_RP_COLORS:
 		{
-//			pTexToUse = pTexTilesColor;
+			//			pTexToUse = pTexTilesColor;
 			nTexIdxOffset = 0;
 			bPaintsNormals = false;
 			eTexChannel = K_TEXCHAN_COLORMAP;
@@ -4145,7 +4145,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 		break;
 		case K_LVL_RP_NORMALS_HEIGHT:
 		{
-//			pTexToUse = pTexTilesNormals;
+			//			pTexToUse = pTexTilesNormals;
 			nTexIdxOffset = 1;
 			bPaintsNormals = true;
 			eTexChannel = K_TEXCHAN_NORMALMAP;
@@ -4262,7 +4262,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 			break;
 			case K_VST_PROP:
 			{
-				CProp *prop = static_cast<CProp*>( vis->pPtr );
+				CProp* prop = static_cast<CProp*>( vis->pPtr );
 				prop->sprite.PaintFModule_texOverride( 0, nTexIdxOffset );
 			}
 			break;

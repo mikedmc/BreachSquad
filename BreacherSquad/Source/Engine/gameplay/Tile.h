@@ -81,7 +81,7 @@ public:
 			( tileXY[K_TILE_LAYER_WALLS_DECO] != K_TILEXY_EMPTY ))
 			flags |= K_TILEFLAG_WALL;
 		// mark under floor tiles
-		if ( tileXY[K_TILE_LAYER_UNDER_FLOOR] != 0 )
+		if ( tileXY[K_TILE_LAYER_UNDER_FLOOR] != K_TILEXY_EMPTY )
 			flags |= K_TILEFLAG_UNDER_FLOOR;
 	}
 };

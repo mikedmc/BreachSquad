@@ -202,7 +202,7 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 		//set selected 
 		m_arrPlayerSelHotJoin[kk] = -1;
 		m_arrPlayerSelStrategic[kk] = -1;
-		//daca am selectat player
+		// we have selected player
 		if ( g_playerSelScr.m_arrPlayers[kk].bSelected )
 		{
 			//spawn Player aloca si controllerul potrivit
@@ -259,8 +259,9 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 OPRESULT CLevel::LoadTileset( WCHAR* strPath, CTilesetDesc& retTileDesc )
 {
 	int idx = 0;
-	wstring tmppath;
-	wstring finalpath;
+	WCHAR tmppath[MAX_PATH_STD]{ 0 };
+	WCHAR finalpath[MAX_PATH_STD]{ 0 };
+	
 	retTileDesc.Clear();
 
 	LOG( L"LoadTileset:: %d", strPath );
@@ -276,13 +277,13 @@ OPRESULT CLevel::LoadTileset( WCHAR* strPath, CTilesetDesc& retTileDesc )
 	pugi::xml_node rntileset = doc.root().child( L"TILESET" );
 	// load water texture
 	const WCHAR* waterN = rntileset.attribute( L"water_n" ).as_string();
-	swprintf_s( &tmppath[0], tmppath.size(), L"media/levels/data/%s", waterN );
-	FileManager::GetMediaPath( &tmppath[0], &finalpath[0] );
-	retTileDesc.pWaterTex = m_texManager.AddTexture( &finalpath[0], D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT );
+	swprintf_s( tmppath, MAX_PATH_STD, L"media/levels/data/%s", waterN );
+	FileManager::GetMediaPath( tmppath, finalpath );
+	retTileDesc.pWaterTex = m_texManager.AddTexture( finalpath, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT );
 	if ( nullptr == retTileDesc.pWaterTex )
 	{
 		m_texManager.Release();
-		return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadTileset:: Unable to load:%s\n", &finalpath[0] );
+		return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadTileset:: Unable to load:%s\n", finalpath );
 	}
 
 	idx = 0;
@@ -291,23 +292,23 @@ OPRESULT CLevel::LoadTileset( WCHAR* strPath, CTilesetDesc& retTileDesc )
 	{
 
 		const WCHAR* colormap = bnode.attribute( L"colormap" ).as_string();
-		swprintf_s( &tmppath[0], tmppath.size(), L"media/levels/data/%s", colormap );
-		FileManager::GetMediaPath( &tmppath[0], &finalpath[0] );
+		swprintf_s( tmppath, MAX_PATH_STD, L"media/levels/data/%s", colormap );
+		FileManager::GetMediaPath( tmppath, finalpath );
 		arrTex_colors[idx] = m_texManager.AddTexture( &finalpath[0], D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT );
 		if ( nullptr == arrTex_colors[idx] )
 		{
 			m_texManager.Release();
-			return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadTileset:: Unable to load:%s\n", &finalpath[0] );
+			return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadTileset:: Unable to load:%s\n", finalpath );
 		}
 
 		const WCHAR* normalmap = bnode.attribute( L"normalmap" ).as_string();
-		swprintf_s( &tmppath[0], tmppath.size(), L"media/levels/data/%s", normalmap );
-		FileManager::GetMediaPath( &tmppath[0], &finalpath[0] );
-		arrTex_normals[idx] = m_texManager.AddTexture( &finalpath[0], D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT );
+		swprintf_s( tmppath, MAX_PATH_STD, L"media/levels/data/%s", normalmap );
+		FileManager::GetMediaPath( tmppath, finalpath );
+		arrTex_normals[idx] = m_texManager.AddTexture( finalpath, D3DFMT_A8R8G8B8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT );
 		if ( nullptr == arrTex_normals[idx] )
 		{
 			m_texManager.Release();
-			return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadTileset:: Unable to load:%s\n", &finalpath[0] );
+			return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"LoadTileset:: Unable to load:%s\n", finalpath );
 		}
 
 		idx++;
@@ -407,17 +408,14 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 			CTile* tl = &area->tiles[xx][yy];
 			tl->bbox.Set( ( posTL.x + xx ) * K_TILE_SIZE_F, ( posTL.y + yy ) * K_TILE_SIZE_F, ( posTL.x + xx + 1 ) * K_TILE_SIZE_F, ( posTL.y + yy + 1 ) * K_TILE_SIZE_F );
 
-			for ( int kk = 0; kk < nLayersCnt; kk++ )
+			for ( int layer_index = 0; layer_index < nLayersCnt; layer_index++ )
 			{
 				// need to know the tileset size
-				Vec2 vTilesetSize = m_tilesetDesc.arrColorTex[kk]->getSize();
+				Vec2 vTilesetSize = m_tilesetDesc.arrColorTex[layer_index]->getSize();
 
-				//tile layer
-				int layer_index = kk;
-
-				int tlXY = OS_freadUInt16( fl );
+				UINT16 tlXY = OS_freadUInt16( fl );
 				tl->tileXY[layer_index] = tlXY;
-				if ( tlXY >= 0 )
+				if ( tlXY != K_TILEXY_EMPTY )
 				{
 					RECT srcrect;
 					int tlX = ( tlXY & 0xff00 ) >> 8, tlY = tlXY & 0xff;
