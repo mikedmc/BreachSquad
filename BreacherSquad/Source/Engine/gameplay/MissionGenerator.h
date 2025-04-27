@@ -118,7 +118,7 @@ public:
 	OPRESULT					LoadAreasSpecs( WCHAR* strXMLPath );
 
 	// Builds the inventory from available areas
-	void						BuildInventory();
+	void						BuildAreasInventory();
 	// Releases all areas descriptors
 	void						Release();
 

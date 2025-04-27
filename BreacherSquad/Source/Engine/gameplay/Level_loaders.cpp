@@ -57,9 +57,9 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 	V_OP_RET( m_sprInterface.LoadSprites( Path ) );
 
 	//tileset name
-	CHAR charArr[MAX_PATH];
-	WCHAR wcharArr[MAX_PATH];
-	WCHAR wcsMediaAddr[MAX_PATH];
+	CHAR charArr[MAX_PATH]{ 0 };
+	WCHAR wcharArr[MAX_PATH]{ 0 };
+	WCHAR wcsMediaAddr[MAX_PATH]{ 0 };
 
 	// Loads level defines (generic data like actions, inventory, etc)
 	FileManager::GetMediaPath( L"media/gameplaydef.xml", Path );
@@ -74,7 +74,7 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 	V_OP_RET( m_sprLib.AddSprites( Path, libidxtmp, K_LIBNICK_LIGHTS ) );
 
 	//load bsx
-	FileManager::GetMediaPath( L"media/levels/data/props.bsx", Path );
+	FileManager::GetMediaPath( L"media/levels/data/objects.bsx", Path );
 	V_OP_RET( m_sprLib.AddSprites( Path, libidxtmp, K_LIBNICK_PROPS ) );
 
 	//--- load actors templates and weaponry right after props sprite ---
@@ -87,9 +87,9 @@ OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
 	V_OP_RET( m_story.LoadStory( Path ) );
 
 	UINT32 level_rand_seed = 1000000 + randint(9999999);
-	LOG( L"Level Seed: %lu", level_rand_seed );
+	LOG( L"Level RndSeed: %lu", level_rand_seed );
 	// build inventory and generate level
-	__MissionGen().BuildInventory();
+	__MissionGen().BuildAreasInventory();
 	//if (!__MissionGen().GenerateLevelFromStory(&m_story))
 		//return K_OP_FAILED;
 	if ( !__MissionGen().GenerateLevelRandomly( 3, level_rand_seed ) )

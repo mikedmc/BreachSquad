@@ -102,7 +102,7 @@ OPRESULT CMissionGenerator::LoadAreasSpecs( WCHAR* strXMLPath )
 	return m_areasInventory.LoadAreasSpecs( strXMLPath );
 }
 
-void CMissionGenerator::BuildInventory()
+void CMissionGenerator::BuildAreasInventory()
 {
 	auto arrAreas = m_areasInventory.GetAreas();
 
@@ -111,7 +111,7 @@ void CMissionGenerator::BuildInventory()
 	for (auto& area : arrAreas)
 	{
 		//#TODO: story shoud specify how many available rooms of this type we are allowed to place in the level
-		m_arrInventory.push_back(CInventoryArea(area, 20));
+		m_arrInventory.emplace_back(area, 20);
 	}
 }
 

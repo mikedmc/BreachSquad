@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 <Areas>
-	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="111D" Tags="start" />
-	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="11L1" Tags="start" />
-	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="111R" Tags="start" />
-	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="1U11" Tags="start" />
-	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="111D" Tags="" />
-	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="11L1" Tags="" />
-	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="111R" Tags="" />
-	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="1U11" Tags="" />
-	<Area File="corridor1_LR" BlocksW="4" BlocksH="3" ConnectorsDesc="1111L11R11D1" Tags="" />
-	<Area File="corridor1_LR" BlocksW="4" BlocksH="3" ConnectorsDesc="1U11L11R1111" Tags="" />
-	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="L11R" Tags="" />
-	<Area File="corridor1_LR" BlocksW="2" BlocksH="2" ConnectorsDesc="1UD1" Tags="" />
-	<Area File="corridor1_LR" BlocksW="2" BlocksH="1" ConnectorsDesc="LR" Tags="hall" />
-	<Area File="corridor1_LR" BlocksW="1" BlocksH="2" ConnectorsDesc="LL" Tags="hall" />
+	<Area File="test_D_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="111D" Tags="start" />
+	<Area File="test_U_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="U111" Tags="start" />
+	<Area File="test_R_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="1R11" Tags="start" />
+	<Area File="test_L_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="11L1" Tags="start" />
+	<Area File="test_D_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="111D" Tags="" />
+	<Area File="test_U_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="11L1" Tags="" />
+	<Area File="test_R_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="111R" Tags="" />
+	<Area File="test_L_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="1U11" Tags="" />
+	<Area File="test_D_2x2" BlocksW="4" BlocksH="3" ConnectorsDesc="1111L11R11D1" Tags="" />
+	<Area File="test_U_2x2" BlocksW="4" BlocksH="3" ConnectorsDesc="1U11L11R1111" Tags="" />
+	<Area File="test_R_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="L11R" Tags="" />
+	<Area File="test_L_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="1UD1" Tags="" />
+	<Area File="test_L_2x2" BlocksW="2" BlocksH="1" ConnectorsDesc="LR" Tags="hall" />
+	<Area File="test_L_2x2" BlocksW="1" BlocksH="2" ConnectorsDesc="UD" Tags="hall" />
 </Areas>
