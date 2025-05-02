@@ -23,7 +23,6 @@ namespace HexxEditor
             parentWnd = pParent;
 
             InitializeComponent();
-
         }
 
         private void BkgSelector_FormClosing(object sender, FormClosingEventArgs e)
@@ -33,6 +32,11 @@ namespace HexxEditor
                 tags = tb_labels.Text
             };
             parentWnd.SetLevelMetadata(meta);
+        }
+
+        public void SetMetadata(EditorWnd.CAreaMetadata meta)
+        {
+            tb_labels.Text = meta.tags;
         }
     }
 }

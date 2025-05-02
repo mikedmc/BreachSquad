@@ -53,7 +53,8 @@ namespace HexxEditor
 
         public Random g_RNG = new Random();
         //save file version
-        public const int K_CURRENT_VERSION = 10001;
+        public const int K_OLD_VERSION = 10001;
+        public const int K_CURRENT_VERSION = 10002;
 
         //mission types
         public const byte K_MISSION_TYPE_ELIMINATE_ALL = 0;
@@ -122,6 +123,11 @@ namespace HexxEditor
             public void CopyFrom(CAreaMetadata src)
             {
                 this.tags = src.tags;
+            }
+
+            public void Reset()
+            {
+                this.tags = "";
             }
         }
         private CAreaMetadata g_areaMeta = new CAreaMetadata();
@@ -4307,7 +4313,7 @@ namespace HexxEditor
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("BreacherSquad Levels Editor\nv1.0.1 from 28-Mar-2025\n(c)2025 PixelShard", "About", MessageBoxButtons.OK);
+            MessageBox.Show("BreacherSquad Levels Editor\nv1.0.2 from 01-May-2025\n(c)2025 PixelShard", "About", MessageBoxButtons.OK);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4324,9 +4330,11 @@ namespace HexxEditor
         }
 
 
-        // saves data about the level blocks and connectivity
-        public bool SaveLevelDescriptorXML(string strPath)
+        // returns data about current level
+        public bool ComputeLevelDescriptor(string strPath, out string retTags, out string retConnectors)
         {
+            retTags = "";
+            retConnectors = "";
             //gaseste minimul si maximul tablei de joc, in blocuri si salveaza latimea si inaltimea nivelului, in blocuri
             Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;
             for (int kk = 0; kk < gMap.Blocks.Count; kk++)
@@ -4405,44 +4413,18 @@ namespace HexxEditor
                 }
             }
 
+            retTags = this.g_areaMeta.tags;
+            retConnectors = strDesc;
 
-
-            try
-            {
-                XmlTextWriter xw = new XmlTextWriter(strPath, null);
-                xw.Formatting = Formatting.Indented;
-                xw.WriteStartDocument();
-                // write elements
-                xw.WriteStartElement("Area");
-                xw.WriteAttributeString("File", Path.GetFileNameWithoutExtension(strPath));
-                int blocksW = blmaxx - blminx + 1;
-                int blocksH = blmaxy - blminy + 1;
-                xw.WriteAttributeString("BlocksW", blocksW.ToString());
-                xw.WriteAttributeString("BlocksH", blocksH.ToString());
-
-                xw.WriteAttributeString("ConnectorsDesc", strDesc);
-                xw.WriteAttributeString("Tags", this.g_areaMeta.tags);
-                // end LevelStory
-                xw.WriteEndElement();
-                // end document
-                xw.WriteEndDocument();
-                xw.Flush();
-                xw.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error saving area descriptor! \n\n" + ex.Message);
-                return false;
-            }
-
-            //MessageBox.Show(strDesc);
             return true;
         }
 
         public bool SaveLevel(string strPath, bool bExportPrefab = false, Stream pDestStream = null)
         {
             // save additional file with area descriptor
-            bool success = SaveLevelDescriptorXML(Path.GetDirectoryName(strPath) + "\\" + Path.GetFileNameWithoutExtension(strPath) + ".area_desc");
+            string strLevelTags = "";
+            string strLevelConnectors = "";
+            bool success = ComputeLevelDescriptor(Path.GetDirectoryName(strPath) + "\\" + Path.GetFileNameWithoutExtension(strPath) + ".area_desc", out strLevelTags, out strLevelConnectors);
             if (!success)
                 return false;
 
@@ -4667,6 +4649,11 @@ namespace HexxEditor
                 Int32[] verdata = new Int32[] { K_CURRENT_VERSION, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                 for (int kk = 0; kk < 10; kk++)
                     bw.Write(verdata[kk]);
+
+                // write level connectors string
+                bw.Write(strLevelConnectors);
+                // write level tags
+                bw.Write(strLevelTags);
 
                 //1. scrie tipul misiunii
                 ub = g_missionType;
@@ -5793,6 +5780,21 @@ namespace HexxEditor
                 {
                     MessageBox.Show("Different Level format! Level might fail to load! Unhandled version of file found: " + arrInts[0]);
                 }
+
+                //#TEMP: read metadata if new version
+                if (arrInts[0] == K_CURRENT_VERSION)
+                {
+                    // read level connectors - not used in editor
+                    string strConnectors = bw.ReadString();
+                    // read tags
+                    string strTags = bw.ReadString();
+                    this.g_areaMeta.tags = strTags;
+                }
+                else
+                {
+                    this.g_areaMeta.tags = "";
+                }
+
 
                 //1. tipul misiunii
                 ub = bw.ReadByte();
@@ -7089,6 +7091,9 @@ namespace HexxEditor
             MetaWnd wndMeta = new MetaWnd(this);
             wndMeta.Owner = this;
             wndMeta.ShowInTaskbar = false;
+            // set level data
+            wndMeta.SetMetadata(g_areaMeta);
+
             wndMeta.ShowDialog();
 
             SetFileModified();

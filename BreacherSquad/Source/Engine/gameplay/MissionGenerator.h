@@ -10,9 +10,9 @@
 #define K_LGEN_TRIES_CHILDREN		10
 
 // all tags that CAN'T be used for randomly picked rooms
-#define K_LGEN_TAGS_SPECIAL_AVOID		L"special,hall,start"
+#define K_LGEN_TAGS_SPECIAL_AVOID		L"special,corridor,start"
 // any of these tags will mean it's a hallway
-#define K_LGEN_TAGS_HALL_ANY			L"hall"
+#define K_LGEN_TAGS_CORRIDOR_ANY		L"corridor"
 
 #define K_LGEN_BLOCK_W	8
 #define K_LGEN_BLOCK_H	8

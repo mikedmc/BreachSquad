@@ -68,7 +68,7 @@
 #define K_EDITOR_ACTIVE_FLAG_IS_COVER 8
 
 //level file format version from the Editor
-#define K_EDITOR_LEVEL_FILE_FORMAT_VERSION 10001
+#define K_EDITOR_LEVEL_FILE_FORMAT_VERSION 10002
 
 // maximum number of allocated physics points
 #define K_LVL_PHYSP_MAX_CNT 256

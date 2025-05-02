@@ -364,10 +364,14 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 		return OPRESULT( K_OP_FAILED, K_SEVERITY_CRITICAL, L"[Error] LoadLevel(%s)::Wrong file version found: %d !", strPathAbs, arrInts[0] );
 	}
 
-	//tip misiune
 	CHAR charArr[MAX_PATH];
 	WCHAR wcharArr[MAX_PATH];
 	WCHAR wcsMediaAddr[MAX_PATH];
+
+	// read connectors setup
+	OS_freadString( fl, charArr );
+	// read tags
+	OS_freadString( fl, charArr );
 
 	BYTE missionType = OS_freadByte( fl );
 	//tileset name - not used for areas, the story tells you what tileset to load or there's only one

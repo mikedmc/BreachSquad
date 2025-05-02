@@ -4124,20 +4124,13 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	__Shaders().SetVS( nullptr );
 	__Shaders().SetPS( nullptr );
 
-	// find useful textures
-	//CTexNode* pTexTilesColor = m_texManager.GetTextureByID( TEXID_TILES_COLOR );
-	//CTexNode* pTexTilesNormals = m_texManager.GetTextureByID( TEXID_TILES_NORMALS );
-
-//	CTexNode* pTexToUse = pTexTilesColor;
-	// Offset in texture index so we paint from the normals texture when we render the normals pass
-	int nTexIdxOffset = 0;
+	int nTexIdxOffset = 0; // for objects - texture index offset so we paint from the normals texture when we render the normals pass
 	bool bPaintsNormals = false;
 	ETexChannel	eTexChannel = K_TEXCHAN_NONE;
 	switch ( ePass )
 	{
 		case K_LVL_RP_COLORS:
 		{
-			//			pTexToUse = pTexTilesColor;
 			nTexIdxOffset = 0;
 			bPaintsNormals = false;
 			eTexChannel = K_TEXCHAN_COLORMAP;
@@ -4145,8 +4138,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 		break;
 		case K_LVL_RP_NORMALS_HEIGHT:
 		{
-			//			pTexToUse = pTexTilesNormals;
-			nTexIdxOffset = 1;
+			nTexIdxOffset = 2; //#HACK: normal textures are added at the end after 2 color textures
 			bPaintsNormals = true;
 			eTexChannel = K_TEXCHAN_NORMALMAP;
 		}

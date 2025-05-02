@@ -493,7 +493,7 @@ bool CMissionGenerator::GenerateLevelRandomly(int maxDepth, unsigned int randSee
 								RemoveChildrenOf(placed);
 
 								// add corridor on this connection
-								CPlacedArea* plhall = PlaceStoryArea(placed, curcon, placed->nGeneration, 2, 2, K_LGEN_TAGS_HALL_ANY);
+								CPlacedArea* plhall = PlaceStoryArea(placed, curcon, placed->nGeneration, 2, 2, K_LGEN_TAGS_CORRIDOR_ANY);
 								if (plhall != nullptr)
 								{
 									LOG(L"Corridor placed.");
@@ -685,7 +685,7 @@ bool CMissionGenerator::GenerateLevelFromStory(CMissionStory* story)
 								story->ClearChildEntries(placed->nGeneration + 1, placed->nID);
 
 								// add corridor on this connection
-								CPlacedArea* pcorridor = PlaceStoryArea(placed, curcon, placed->nGeneration, 2, 2, K_LGEN_TAGS_HALL_ANY, L"", L"");
+								CPlacedArea* pcorridor = PlaceStoryArea(placed, curcon, placed->nGeneration, 2, 2, K_LGEN_TAGS_CORRIDOR_ANY, L"", L"");
 								if (pcorridor != nullptr)
 								{
 									LOG(L"Corridor placed.");
