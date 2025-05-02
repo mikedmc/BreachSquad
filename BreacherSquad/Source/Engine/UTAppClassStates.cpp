@@ -56,10 +56,10 @@ void CApplication::App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTi
 			App_LocaLoadStrings();
 			//load modded chapters again after modding
 			WCHAR wcsPath[MAX_PATH];
-			FileManager::GetMediaPath(L"media/levels/missions/missions.xml", wcsPath);
-			UTGetChaptersList().LoadChapters(wcsPath);
+			//FileManager::GetMediaPath(L"media/levels/missions/missions.xml", wcsPath);
+			//UTGetChaptersList().LoadChapters(wcsPath);
 			//compute mods CRC
-			UINT32 unModsCRC = App_GetActiveModsCRC();
+			UINT32 unModsCRC = 0;// App_GetActiveModsCRC();
 			UTApp().m_Settings.dev_unCurrentModsCRC = unModsCRC;
 			LOG(L"--> CRC_BASE [%08x] CRC_MODS [%08x] <--", UTApp().m_Settings.dev_unCurrentCRC, UTApp().m_Settings.dev_unCurrentModsCRC);
 #endif

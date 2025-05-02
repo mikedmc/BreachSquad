@@ -424,6 +424,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 				{
 					int nChapterNumber = g_userData[ K_MEMID_SELECTED_CHAPTER ];
 					int nLevelNumber = g_userData[ K_MEMID_SELECTED_LEVEL ];
+					/*
 					bool bLevelFound = UTGetChaptersList().GetMissionFilename( nChapterNumber, nLevelNumber, strLevelPath, MAX_PATH );
 					if ( !bLevelFound )
 					{
@@ -433,6 +434,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 					//write current mission name and number
 					int nStrIdxLevelName = UTGetChaptersList().m_arrChapters[ nChapterNumber ]->arrLevelNameStrIdx[ nLevelNumber ];
 					__Texts().SetString( STR_CURRENT_MISSION_VAL, L"%d.%d %s", nChapterNumber + 1, nLevelNumber + 1, __Texts().strings[ nStrIdxLevelName ]->sText );
+					*/
 				}
 
 				if ( OP_FAILED( __Sim().LoadLevel( strLevelPath ) ) )

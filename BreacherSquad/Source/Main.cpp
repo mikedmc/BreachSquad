@@ -292,10 +292,10 @@ INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR, int )
 		///--- COMPUTE BASE GAME CRC ---
 		//Chapters should be loaded before everything! Load original chapters list to compute game base CRC.
 		WCHAR wcsPath[MAX_PATH];
-		StringCchPrintf( wcsPath, MAX_PATH, L"%s/levels/missions/missions.xml", UTApp().g_wszAppResDir );
-		UTGetChaptersList().LoadChapters( wcsPath );
+		//StringCchPrintf( wcsPath, MAX_PATH, L"%s/levels/missions/missions.xml", UTApp().g_wszAppResDir );
+		//UTGetChaptersList().LoadChapters( wcsPath );
 		//check CRC after loading chapters (levels needed)
-		UINT32 unGameCRC = App_GetGameFilesCRC();
+		UINT32 unGameCRC = 0;// App_GetGameFilesCRC();
 
 		UTApp().m_Settings.dev_unCurrentCRC = unGameCRC;
 		UTApp().m_Settings.dev_unCurrentModsCRC = unGameCRC;
