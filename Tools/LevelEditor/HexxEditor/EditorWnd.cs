@@ -4645,8 +4645,12 @@ namespace HexxEditor
                 UInt16 u2b;
                 UInt32 u4b;
                 int s4b;
-                //0. scrie versiune fisier si alte date necesare
-                Int32[] verdata = new Int32[] { K_CURRENT_VERSION, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                //0. scrie versiune fisier si alte date necesare, meta (to be enlarged probably)
+                Int32[] verdata = new Int32[10] { K_CURRENT_VERSION, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
+                verdata[0] = K_CURRENT_VERSION;
+                verdata[1] = blmaxx - blminx + 1; // area W in blocks
+                verdata[2] = blmaxy - blminy + 1; // area H in blocks
+
                 for (int kk = 0; kk < 10; kk++)
                     bw.Write(verdata[kk]);
 

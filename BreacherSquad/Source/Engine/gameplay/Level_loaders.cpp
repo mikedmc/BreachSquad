@@ -357,12 +357,14 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 	}
 
 	//read int array (will disappear probably)
-	UINT32 arrInts[10];
+	UINT32 arrInts[10];	//VERSION, area W in blocks, area H in blocks, 0, 0, 0, 0...
 	OS_fread( arrInts, sizeof( UINT32 ), 10, fl );
 	if ( arrInts[0] != K_EDITOR_LEVEL_FILE_FORMAT_VERSION )
 	{
 		return OPRESULT( K_OP_FAILED, K_SEVERITY_CRITICAL, L"[Error] LoadLevel(%s)::Wrong file version found: %d !", strPathAbs, arrInts[0] );
 	}
+	int areaWblocks = arrInts[1];
+	int areaHblocks = arrInts[2];
 
 	CHAR charArr[MAX_PATH];
 	WCHAR wcharArr[MAX_PATH];

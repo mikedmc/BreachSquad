@@ -1,17 +1,24 @@
 <?xml version="1.0"?>
 <Areas>
-	<Area File="test_D_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="111D" Tags="start" />
-	<Area File="test_U_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="U111" Tags="start" />
-	<Area File="test_R_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="1R11" Tags="start" />
-	<Area File="test_L_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="11L1" Tags="start" />
-	<Area File="test_D_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="111D" Tags="" />
-	<Area File="test_U_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="11L1" Tags="" />
-	<Area File="test_R_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="111R" Tags="" />
-	<Area File="test_L_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="1U11" Tags="" />
-	<Area File="test_D_2x2" BlocksW="4" BlocksH="3" ConnectorsDesc="1111L11R11D1" Tags="" />
-	<Area File="test_U_2x2" BlocksW="4" BlocksH="3" ConnectorsDesc="1U11L11R1111" Tags="" />
-	<Area File="test_R_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="L11R" Tags="" />
-	<Area File="test_L_2x2" BlocksW="2" BlocksH="2" ConnectorsDesc="1UD1" Tags="" />
-	<Area File="test_L_2x2" BlocksW="2" BlocksH="1" ConnectorsDesc="LR" Tags="hall" />
-	<Area File="test_L_2x2" BlocksW="1" BlocksH="2" ConnectorsDesc="UD" Tags="hall" />
+	<Area File="area0_1e_D_bar_4x2_edited.area" />
+	<Area File="area0_1e_LR_street_2x2.area" />
+	<Area File="area0_1e_LURD_docks_2x3.area" />
+	<Area File="area0_1e_L_room_1x2.area" />
+	<Area File="area0_1e_UD_parking_4x3.area" />
+	<Area File="area0_1e_UR_street_2x3.area" />
+	<Area File="areas_list.xml" />
+	<Area File="bunker_LR_5x2.area" />
+	<Area File="corridor1_LR.area" />
+	<Area File="corridor2_LR.area" />
+	<Area File="corridor3_LR.area" />
+	<Area File="desert_LUR_4x3.area" />
+	<Area File="lab1_U.area" />
+	<Area File="metro1_R.area" />
+	<Area File="metro_closed_UD_6x4.area" />
+	<Area File="start_LURD.area" />
+	<Area File="testlevel.area" />
+	<Area File="test_D_2x2.area" />
+	<Area File="test_L_2x2.area" />
+	<Area File="test_R_2x2.area" />
+	<Area File="test_U_2x2.area" />
 </Areas>
