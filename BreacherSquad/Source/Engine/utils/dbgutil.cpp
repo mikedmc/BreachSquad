@@ -80,6 +80,7 @@ VOID ErrorBoxFnW(int nSeverity, const CHAR* strFile, DWORD dwLine, WCHAR* szForm
 		StringCchPrintfW(szLine, MAX_PATH, L"\n%s line %d\n", strFileW, dwLine);
 		StringCchCat(szBuffer, 2048, szLine);
 		//logs error
+
 		OS_PrintLog(szBuffer);
 	}
 	else if (nSeverity == K_ERR_ONSCREEN)
