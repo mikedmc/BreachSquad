@@ -20,4 +20,5 @@
 	<Area File="test_L_2x2.area" />
 	<Area File="test_R_2x2.area" />
 	<Area File="test_U_2x2.area" />
+	<Area File="test_R1_2x2.area" />
 </Areas>

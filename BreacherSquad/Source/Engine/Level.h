@@ -287,8 +287,10 @@ public:
 	UINT32					m_unLastID;				//Last loaded ID - used to assign unique IDs to runtime spawned elements
 	//Generates a new editor ID and increments m_unLastID (used when appending areas)
 	UINT32					GenerateNextID();
-	// Loads a level from an absolute path
-	OPRESULT				LoadLevel( WCHAR * strPathAbs );
+	// Generates level from story	
+	OPRESULT				LoadLevel_GenerateFromStory();
+	// Loads level that was totally designed, no random parts
+	OPRESULT				LoadLevel_Static( WCHAR * strPathAbs );
 	// Loads a tileset (used by LoadLevel)
 	OPRESULT				LoadTileset( WCHAR* strPath, CTilesetDesc& retTileDesc );
 	// Loads a new area and adds it to the level (absolute path, real drive path)

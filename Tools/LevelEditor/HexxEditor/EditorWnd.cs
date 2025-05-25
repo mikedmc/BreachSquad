@@ -1910,10 +1910,10 @@ namespace HexxEditor
 
 
 
+            RectangleF scrrect = new RectangleF(cameraPos.X, cameraPos.Y, cameraPos.X + (int)(pictureBox1.Width * (1.0f / zoomLevel)), cameraPos.Y + (int)(pictureBox1.Height * (1.0f / zoomLevel)));
             ///---paint objects---
             if (g_sprObjects != null && chk_HideObjects.Checked == false)
             {
-                RectangleF scrrect = new RectangleF(cameraPos.X, cameraPos.Y, cameraPos.X + (int)(pictureBox1.Width * (1.0f / zoomLevel)), cameraPos.Y + (int)(pictureBox1.Height * (1.0f / zoomLevel)));
 
                 for (int kk = 0; kk < arrObjects.Count; kk++)
                 {
@@ -1934,9 +1934,9 @@ namespace HexxEditor
                         pbGr.DrawString("NoAnimObj!!!", new Font("Arial", 6.0f), Brushes.Red, obj.pos.X - cameraPos.X, obj.pos.Y - cameraPos.Y);
                         continue;
                     }
-                    
+
                     BSXAnimBrowser.Frame fr = g_sprObjects.anims[obj.animIdx].aframes[obj.frameIdx].frame;
-                    
+
                     if ((obj.flags & OBJFLAG_FLIPXORY) != 0)
                     {
                         int offx = 0;
@@ -1951,15 +1951,15 @@ namespace HexxEditor
                     {
                         fr.Paint(pbGr, (float)obj.pos.X - cameraPos.X, (float)obj.pos.Y - cameraPos.Y);
                     }
-                    
+
                     //paint cover icon
                     if ((obj.flags & OBJFLAG_IS_COVER) != 0)
                     {
                         Rectangle flipbbox = fr.BBox_real;
                         int offx = 0;
-                        if((obj.flags & OBJFLAG_FLIPX) != 0)
+                        if ((obj.flags & OBJFLAG_FLIPX) != 0)
                             offx = -2 * (flipbbox.X + flipbbox.Width / 2);
-                        pbGr.DrawString("C", new Font("Arial", 6, FontStyle.Bold), Brushes.GreenYellow, (float)obj.pos.X + flipbbox.Y + offx + flipbbox.Width/2 - cameraPos.X, (float)obj.pos.Y + flipbbox.Y - cameraPos.Y + flipbbox.Height/2);
+                        pbGr.DrawString("C", new Font("Arial", 6, FontStyle.Bold), Brushes.GreenYellow, (float)obj.pos.X + flipbbox.Y + offx + flipbbox.Width / 2 - cameraPos.X, (float)obj.pos.Y + flipbbox.Y - cameraPos.Y + flipbbox.Height / 2);
                     }
                     //desenez dreptunghiuri colorate pe elementele active
                     if (g_brushMode == BRUSH_MODE_AI)
@@ -1999,139 +1999,157 @@ namespace HexxEditor
                         pbGr.DrawRectangle(np, objbbox.X, objbbox.Y, objbbox.Width, objbbox.Height);
                     }
                 }
-                ///--- ACTORS ---
-                if (!g_wndActors.g_hideActors)
+            }
+            ///--- ACTORS ---
+            if (!g_wndActors.g_hideActors)
+            {
+                for (int kk = 0; kk < arrActors.Count; kk++)
                 {
-                    for (int kk = 0; kk < arrActors.Count; kk++)
+                    CActor act = arrActors[kk] as CActor;
+                    //daca nu e in ecran nu il deseneaza
+                    if (!scrrect.Contains(act.pos))
+                        continue;
+                    //no animation set?
+                    if (act.animIdx < 0)
                     {
-                        CActor act = arrActors[kk] as CActor;
-                        //daca nu e in ecran nu il deseneaza
-                        if (!scrrect.Contains(act.pos))
-                            continue;
-                        //no animation set?
-                        if (act.animIdx < 0)
-                        {
-                            RectangleF objbbox = new RectangleF(-10, -10, 20, 20);
-                            objbbox.X += act.pos.X - cameraPos.X; objbbox.Y += act.pos.Y - cameraPos.Y;
-                            Pen np = new Pen(Color.DarkRed, 1);
-                            pbGr.DrawRectangle(np, objbbox.X, objbbox.Y, objbbox.Width, objbbox.Height);
-                            pbGr.DrawString("NoAnimActor!!!", new Font("Arial", 6.0f), Brushes.Red, act.pos.X - cameraPos.X, act.pos.Y - cameraPos.Y);
-                            continue;
-                        }
-                        //paint actor
-                        BSXAnimBrowser.Frame fr = g_sprActors.anims[act.animIdx].aframes[0].frame;
-                        if (act.bLookLeft)
-                        {
-                            fr.PaintFlip(pbGr, (float)act.pos.X - cameraPos.X, (float)act.pos.Y - cameraPos.Y, act.bLookLeft, false);
-                        }
-                        else
-                        {
-                            fr.Paint(pbGr, (float)act.pos.X - cameraPos.X, (float)act.pos.Y - cameraPos.Y);
-                        }
-                        //apare H pe el daca e ascuns
-                        if (act.logic.bStartHidden)
-                        {
-                            pbGr.DrawString("H", new Font("Arial", 8), Brushes.Red, act.pos.X - cameraPos.X, act.pos.Y - cameraPos.Y);
-                        }
-                        //desenez bbox pe selectie
-                        if (g_selectedActor == act)
-                        {
-                            RectangleF objbbox = fr.BBox_real;
-                            objbbox.X += act.pos.X - cameraPos.X; objbbox.Y += act.pos.Y - cameraPos.Y;
-                            Pen np = new Pen(Color.DarkRed, 1);
-                            pbGr.DrawRectangle(np, objbbox.X, objbbox.Y, objbbox.Width, objbbox.Height);
-                        }
-                        //desenez unghiul
-                        if (act.bSetAngle)
-                        {
-                            RectangleF objbbox = fr.BBox_real;
-                            objbbox.X += act.pos.X - cameraPos.X; objbbox.Y += act.pos.Y - cameraPos.Y;
-                            //angle
-                            PointF scrcenter = new PointF(objbbox.X + objbbox.Width / 2.0f, objbbox.Y + objbbox.Height / 2.0f);
-                            PointF scrangle = new PointF(scrcenter.X + (objbbox.Width) * (float)Math.Cos((act.fAngle / 360.0f) * 2.0f * Math.PI), scrcenter.Y + (objbbox.Height) * (float)Math.Sin((act.fAngle / 360.0f) * 2.0f * Math.PI));
-                            pbGr.DrawLine(Pens.DarkRed, scrcenter, scrangle);
-                        }
+                        RectangleF objbbox = new RectangleF(-10, -10, 20, 20);
+                        objbbox.X += act.pos.X - cameraPos.X; objbbox.Y += act.pos.Y - cameraPos.Y;
+                        Pen np = new Pen(Color.DarkRed, 1);
+                        pbGr.DrawRectangle(np, objbbox.X, objbbox.Y, objbbox.Width, objbbox.Height);
+                        pbGr.DrawString("NoAnimActor!!!", new Font("Arial", 6.0f), Brushes.Red, act.pos.X - cameraPos.X, act.pos.Y - cameraPos.Y);
+                        continue;
+                    }
+                    //paint actor
+                    BSXAnimBrowser.Frame fr = g_sprActors.anims[act.animIdx].aframes[0].frame;
+                    if (act.bLookLeft)
+                    {
+                        fr.PaintFlip(pbGr, (float)act.pos.X - cameraPos.X, (float)act.pos.Y - cameraPos.Y, act.bLookLeft, false);
+                    }
+                    else
+                    {
+                        fr.Paint(pbGr, (float)act.pos.X - cameraPos.X, (float)act.pos.Y - cameraPos.Y);
+                    }
+                    //apare H pe el daca e ascuns
+                    if (act.logic.bStartHidden)
+                    {
+                        pbGr.DrawString("H", new Font("Arial", 8), Brushes.Red, act.pos.X - cameraPos.X, act.pos.Y - cameraPos.Y);
+                    }
+                    //desenez bbox pe selectie
+                    if (g_selectedActor == act)
+                    {
+                        RectangleF objbbox = fr.BBox_real;
+                        objbbox.X += act.pos.X - cameraPos.X; objbbox.Y += act.pos.Y - cameraPos.Y;
+                        Pen np = new Pen(Color.DarkRed, 1);
+                        pbGr.DrawRectangle(np, objbbox.X, objbbox.Y, objbbox.Width, objbbox.Height);
+                    }
+                    //desenez unghiul
+                    if (act.bSetAngle)
+                    {
+                        RectangleF objbbox = fr.BBox_real;
+                        objbbox.X += act.pos.X - cameraPos.X; objbbox.Y += act.pos.Y - cameraPos.Y;
+                        //angle
+                        PointF scrcenter = new PointF(objbbox.X + objbbox.Width / 2.0f, objbbox.Y + objbbox.Height / 2.0f);
+                        PointF scrangle = new PointF(scrcenter.X + (objbbox.Width) * (float)Math.Cos((act.fAngle / 360.0f) * 2.0f * Math.PI), scrcenter.Y + (objbbox.Height) * (float)Math.Sin((act.fAngle / 360.0f) * 2.0f * Math.PI));
+                        pbGr.DrawLine(Pens.DarkRed, scrcenter, scrangle);
+                    }
 
-                        //desenez dreptunghiuri colorate pe elementele active
-                        if (g_brushMode == BRUSH_MODE_AI)
+                    //desenez dreptunghiuri colorate pe elementele active
+                    if (g_brushMode == BRUSH_MODE_AI)
+                    {
+                        if ((act.logic.bCanInteract) || (act.logic.strAIname.Length > 0) || (act.logic.strActions.Length > 0) || (act.logic.targetID >= 0))
                         {
-                            if ((act.logic.bCanInteract) || (act.logic.strAIname.Length > 0) || (act.logic.strActions.Length > 0) || (act.logic.targetID >= 0))
+                            RectangleF objbbox = fr.BBox_real;
+                            objbbox.X += act.pos.X - cameraPos.X; objbbox.Y += act.pos.Y - cameraPos.Y;
+                            objbbox.Inflate(2, 2);
+                            Pen np = new Pen(Color.Green, 2);
+                            pbGr.DrawRectangle(np, objbbox.X, objbbox.Y, objbbox.Width, objbbox.Height);
+                        }
+                        //target link
+                        if (act == g_selectedActor)
+                        {
+                            if (act.logic.targetID >= 0)
                             {
-                                RectangleF objbbox = fr.BBox_real;
-                                objbbox.X += act.pos.X - cameraPos.X; objbbox.Y += act.pos.Y - cameraPos.Y;
-                                objbbox.Inflate(2, 2);
-                                Pen np = new Pen(Color.Green, 2);
-                                pbGr.DrawRectangle(np, objbbox.X, objbbox.Y, objbbox.Width, objbbox.Height);
+                                vTargetDst = GetTargetPosByID(act.logic.targetID);
+                                vTargetSrc = GetTargetPosByID((int)act.ID);
                             }
-                            //target link
-                            if (act == g_selectedActor)
+                        }
+                    }
+                }
+            }
+
+
+            ///--- draw ceiling (without ceilings) ---
+            if (g_wndMaterials.isLoaded)
+            {
+                Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;
+                //deseneaza tabla de joc
+                for (int kk = 0; kk < gMap.Blocks.Count; kk++)
+                {
+                    CTileBlock tb = gMap.Blocks[kk] as CTileBlock;
+                    if (tb.pos.X < blminx) blminx = tb.pos.X;
+                    if (tb.pos.Y < blminy) blminy = tb.pos.Y;
+                    if (tb.pos.X > blmaxx) blmaxx = tb.pos.X;
+                    if (tb.pos.Y > blmaxy) blmaxy = tb.pos.Y;
+
+                    //daca nu sunt in ecran nu le deseneaza
+                    if (((tb.pos.X + 1) * CTileBlock.BLOCK_W * TILE_WIDTH < cameraPos.X) || ((tb.pos.Y + 1) * CTileBlock.BLOCK_H * TILE_HEIGHT < cameraPos.Y) ||
+                       tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH > cameraPos.X + (int)(pictureBox1.Width * (1.0f / zoomLevel)) ||
+                       tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT > cameraPos.Y + (int)(pictureBox1.Height * (1.0f / zoomLevel)))
+                        continue;
+
+                    //paint block image all at once
+                    pbGr.DrawImage(tb.layerImgCeil, tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH - cameraPos.X, tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT - cameraPos.Y);
+                    //deseneaza patratele rosii pe tile-urile care se suprapun
+                    if ((chk_showOverlappingTiles.Checked) && (g_brushMode == BRUSH_MODE_TILES))
+                    {
+                        for (int yy = 0; yy < CTileBlock.BLOCK_H; yy++)
+                        {
+                            for (int xx = 0; xx < CTileBlock.BLOCK_W; xx++)
                             {
-                                if (act.logic.targetID >= 0)
+                                int cnt = 0;
+                                for (int lay = 0; lay < (int)ELayer.LAYERS_CNT; lay++)
                                 {
-                                    vTargetDst = GetTargetPosByID(act.logic.targetID);
-                                    vTargetSrc = GetTargetPosByID((int)act.ID);
+                                    if (tb.tiles[xx, yy].tlXY[lay] != 0xffff)
+                                        cnt++;
+                                }
+
+                                if (cnt > 1)
+                                {
+                                    int colalpha = cnt * 30;
+                                    if (colalpha > 255) colalpha = 255;
+                                    Brush fillbr = new SolidBrush(Color.FromArgb(colalpha, Color.PaleVioletRed));
+
+                                    pbGr.FillRectangle(fillbr, new RectangleF(tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH + xx * TILE_WIDTH - cameraPos.X,
+                                    tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT + yy * TILE_HEIGHT - cameraPos.Y, TILE_WIDTH, TILE_HEIGHT));
                                 }
                             }
                         }
                     }
                 }
+            }
 
 
-                ///--- draw ceiling (without ceilings) ---
-                if (g_wndMaterials.isLoaded)
+            ///--- paint current cursor object ---
+            if (g_brushMode == BRUSH_MODE_OBJECTS)
+            {
+                if ((g_selectedObject == null) && (g_wndObjects.g_selectedAnim >= 0) && (g_wndObjects.g_selectedFrame >= 0))
                 {
-                    Int32 blminx = 100000, blminy = 100000, blmaxx = -100000, blmaxy = -100000;
-                    //deseneaza tabla de joc
-                    for (int kk = 0; kk < gMap.Blocks.Count; kk++)
+                    Point objcur = new Point((int)cursorPos.X, (int)cursorPos.Y);
+                    if (chk_snapToGrid.Checked)
                     {
-                        CTileBlock tb = gMap.Blocks[kk] as CTileBlock;
-                        if (tb.pos.X < blminx) blminx = tb.pos.X;
-                        if (tb.pos.Y < blminy) blminy = tb.pos.Y;
-                        if (tb.pos.X > blmaxx) blmaxx = tb.pos.X;
-                        if (tb.pos.Y > blmaxy) blmaxy = tb.pos.Y;
-
-                        //daca nu sunt in ecran nu le deseneaza
-                        if (((tb.pos.X + 1) * CTileBlock.BLOCK_W * TILE_WIDTH < cameraPos.X) || ((tb.pos.Y + 1) * CTileBlock.BLOCK_H * TILE_HEIGHT < cameraPos.Y) ||
-                           tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH > cameraPos.X + (int)(pictureBox1.Width * (1.0f / zoomLevel)) ||
-                           tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT > cameraPos.Y + (int)(pictureBox1.Height * (1.0f / zoomLevel)))
-                            continue;
-
-                        //paint block image all at once
-                        pbGr.DrawImage(tb.layerImgCeil, tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH - cameraPos.X, tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT - cameraPos.Y);
-                        //deseneaza patratele rosii pe tile-urile care se suprapun
-                        if ((chk_showOverlappingTiles.Checked) && (g_brushMode == BRUSH_MODE_TILES))
-                        {
-                            for (int yy = 0; yy < CTileBlock.BLOCK_H; yy++)
-                            {
-                                for (int xx = 0; xx < CTileBlock.BLOCK_W; xx++)
-                                {
-                                    int cnt = 0;
-                                    for (int lay = 0; lay < (int)ELayer.LAYERS_CNT; lay++)
-                                    {
-                                        if (tb.tiles[xx, yy].tlXY[lay] != 0xffff)
-                                            cnt++;
-                                    }
-
-                                    if (cnt > 1)
-                                    {
-                                        int colalpha = cnt * 30;
-                                        if (colalpha > 255) colalpha = 255;
-                                        Brush fillbr = new SolidBrush(Color.FromArgb(colalpha, Color.PaleVioletRed));
-
-                                        pbGr.FillRectangle(fillbr, new RectangleF(tb.pos.X * CTileBlock.BLOCK_W * TILE_WIDTH + xx * TILE_WIDTH - cameraPos.X,
-                                        tb.pos.Y * CTileBlock.BLOCK_H * TILE_HEIGHT + yy * TILE_HEIGHT - cameraPos.Y, TILE_WIDTH, TILE_HEIGHT));
-                                    }
-                                }
-                            }
-                        }
+                        objcur = SnapPointToGrid(objcur, K_SNAP_THRESHOLD);
                     }
+
+                    g_sprObjects.anims[g_wndObjects.g_selectedAnim].aframes[g_wndObjects.g_selectedFrame].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
                 }
-
-
-                ///--- paint current cursor object ---
-                if (g_brushMode == BRUSH_MODE_OBJECTS)
+            }
+            else if (g_brushMode == BRUSH_MODE_ACTORS)
+            {
+                if (g_selectedActor == null)
                 {
-                    if ((g_selectedObject == null) && (g_wndObjects.g_selectedAnim >= 0) && (g_wndObjects.g_selectedFrame >= 0))
+                    CActor tmpact = new CActor();
+                    g_wndActors.SetActorTemplate(tmpact);
+                    if (tmpact.animIdx >= 0)
                     {
                         Point objcur = new Point((int)cursorPos.X, (int)cursorPos.Y);
                         if (chk_snapToGrid.Checked)
@@ -2139,170 +2157,152 @@ namespace HexxEditor
                             objcur = SnapPointToGrid(objcur, K_SNAP_THRESHOLD);
                         }
 
-                        g_sprObjects.anims[g_wndObjects.g_selectedAnim].aframes[g_wndObjects.g_selectedFrame].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
+                        g_sprActors.anims[tmpact.animIdx].aframes[0].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
                     }
                 }
-                else if (g_brushMode == BRUSH_MODE_ACTORS)
+            }
+            else if (g_brushMode == BRUSH_MODE_MACRO)
+            {
+                Point objcur = cursorPos;
+                if (chk_snapToGrid.Checked)
+                    objcur = SnapPointToGrid(cursorPos, K_SNAP_THRESHOLD);
+
+                switch (g_brushValue)
                 {
-                    if (g_selectedActor == null)
-                    {
-                        CActor tmpact = new CActor();
-                        g_wndActors.SetActorTemplate(tmpact);
-                        if (tmpact.animIdx >= 0)
+                    case K_MACRO_WINDOW_PROFILE_HORIZONTAL:
                         {
-                            Point objcur = new Point((int)cursorPos.X, (int)cursorPos.Y);
-                            if (chk_snapToGrid.Checked)
+                            int anmidx = g_sprObjects.GetAnimIdxByName("WINDOWS_SECTION");
+                            int frameidx = 4;
+                            if (anmidx >= 0)
                             {
-                                objcur = SnapPointToGrid(objcur, K_SNAP_THRESHOLD);
+                                g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
                             }
-
-                            g_sprActors.anims[tmpact.animIdx].aframes[0].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
                         }
-                    }
+                        break;
+                    case K_MACRO_WINDOW_PROFILE:
+                        {
+                            int anmidx = g_sprObjects.GetAnimIdxByName("WINDOWS_SECTION");
+                            int frameidx = 0;
+                            if (anmidx >= 0)
+                            {
+                                g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
+                            }
+                        }
+                        break;
+                    case K_MACRO_DOOR_LOCKED:
+                    case K_MACRO_DOOR_UNLOCKED:
+                        {
+                            int anmidx = g_sprObjects.GetAnimIdxByName("DOORS_SECTION");
+                            int frameidx = 0;
+                            if (g_brushValue == K_MACRO_DOOR_LOCKED)
+                                frameidx = 4;
+                            if (anmidx >= 0)
+                            {
+                                g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
+                            }
+                        }
+                        break;
+                    case K_MACRO_DOOR_METALLIC:
+                        {
+                            int anmidx = g_sprObjects.GetAnimIdxByName("DOOR_SLIDING_LOCKED");
+                            int frameidx = 0;
+                            if (anmidx >= 0)
+                            {
+                                g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
+                            }
+                        }
+                        break;
+                    case K_MACRO_KEYCARD_RED:
+                        {
+                            int anmidx = g_sprObjects.GetAnimIdxByName("KEYCARD_RED");
+                            int frameidx = 0;
+                            if (anmidx >= 0)
+                            {
+                                g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
+                            }
+                        }
+                        break;
+                    case K_MACRO_KEYCARD_GOLD:
+                        {
+                            int anmidx = g_sprObjects.GetAnimIdxByName("KEYCARD_YELLOW");
+                            int frameidx = 0;
+                            if (anmidx >= 0)
+                            {
+                                g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
+                            }
+                        }
+                        break;
+                    case K_MACRO_FRONT_SOLO_STAIRS:
+                        {
+                            int anmidx = g_sprObjects.GetAnimIdxByName("DOORS_PORTALS");
+                            int frameidx = 0;
+                            if (anmidx >= 0)
+                            {
+                                g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
+                            }
+                        }
+                        break;
+                    case K_MACRO_FRONT_SOLO_DOOR:
+                        {
+                            int anmidx = g_sprObjects.GetAnimIdxByName("DOORS_FRONT");
+                            int frameidx = 14;
+                            if (anmidx >= 0)
+                            {
+                                g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
+                            }
+                        }
+                        break;
+                    case K_MACRO_FRONT_TEAM_DOOR:
+                        {
+                            int anmidx = g_sprObjects.GetAnimIdxByName("DOORS_FRONT");
+                            int frameidx = 0;
+                            if (anmidx >= 0)
+                            {
+                                g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
+                            }
+                        }
+                        break;
+                    case K_MACRO_SPAWNPOINT:
+                        {
+                            int anmidx = g_sprObjects.GetAnimIdxByName("CHECKPOINT_OFF");
+                            int frameidx = 0;
+                            if (anmidx >= 0)
+                            {
+                                g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
+                            }
+                        }
+                        break;
                 }
-                else if (g_brushMode == BRUSH_MODE_MACRO)
+            }
+            else if (g_brushMode == BRUSH_MODE_PREFABS)
+            {
+                PointF vPos = new PointF((float)cursorPos.X, (float)cursorPos.Y);
+                if (chk_snapToGrid.Checked)
+                    vPos = SnapPointToGrid(vPos, K_SNAP_THRESHOLD);
+
+                string strPrefabName = g_wndPrefabs.GetSelectedPrefabName();
+                pbGr.ResetTransform();
+                vPos = WorldToScreen(vPos);
+
+                pbGr.DrawLine(Pens.LightGreen, vPos.X - 15.0f, vPos.Y, vPos.X + 15.0f, vPos.Y);
+                pbGr.DrawLine(Pens.LightGreen, vPos.X, vPos.Y - 15.0f, vPos.X, vPos.Y + 15.0f);
+                pbGr.DrawString(strPrefabName, arial10b, new SolidBrush(Color.Red), vPos.X + 15, vPos.Y - 25);
+
+            }
+            //deseneaza id obiect selectat
+            if (g_selectedObject != null)
+            {
+                pbGr.ResetTransform();
+                RectangleF bbox = new RectangleF(-10.0f, -10.0f, 20.0f, 20.0f);
+                if ((g_selectedObject.animIdx >= 0) && (g_selectedObject.frameIdx >= 0))
                 {
-                    Point objcur = cursorPos;
-                    if (chk_snapToGrid.Checked)
-                        objcur = SnapPointToGrid(cursorPos, K_SNAP_THRESHOLD);
-
-                    switch (g_brushValue)
-                    {
-                        case K_MACRO_WINDOW_PROFILE_HORIZONTAL:
-                            {
-                                int anmidx = g_sprObjects.GetAnimIdxByName("WINDOWS_SECTION");
-                                int frameidx = 4;
-                                if (anmidx >= 0)
-                                {
-                                    g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
-                                }
-                            }
-                            break;
-                        case K_MACRO_WINDOW_PROFILE:
-                            {
-                                int anmidx = g_sprObjects.GetAnimIdxByName("WINDOWS_SECTION");
-                                int frameidx = 0;
-                                if (anmidx >= 0)
-                                {
-                                    g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
-                                }
-                            }
-                            break;
-                        case K_MACRO_DOOR_LOCKED:
-                        case K_MACRO_DOOR_UNLOCKED:
-                            {
-                                int anmidx = g_sprObjects.GetAnimIdxByName("DOORS_SECTION");
-                                int frameidx = 0;
-                                if (g_brushValue == K_MACRO_DOOR_LOCKED)
-                                    frameidx = 4;
-                                if (anmidx >= 0)
-                                {
-                                    g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
-                                }
-                            }
-                            break;
-                        case K_MACRO_DOOR_METALLIC:
-                            {
-                                int anmidx = g_sprObjects.GetAnimIdxByName("DOOR_SLIDING_LOCKED");
-                                int frameidx = 0;
-                                if (anmidx >= 0)
-                                {
-                                    g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
-                                }
-                            }
-                            break;
-                        case K_MACRO_KEYCARD_RED:
-                            {
-                                int anmidx = g_sprObjects.GetAnimIdxByName("KEYCARD_RED");
-                                int frameidx = 0;
-                                if (anmidx >= 0)
-                                {
-                                    g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
-                                }
-                            }
-                            break;
-                        case K_MACRO_KEYCARD_GOLD:
-                            {
-                                int anmidx = g_sprObjects.GetAnimIdxByName("KEYCARD_YELLOW");
-                                int frameidx = 0;
-                                if (anmidx >= 0)
-                                {
-                                    g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
-                                }
-                            }
-                            break;
-                        case K_MACRO_FRONT_SOLO_STAIRS:
-                            {
-                                int anmidx = g_sprObjects.GetAnimIdxByName("DOORS_PORTALS");
-                                int frameidx = 0;
-                                if (anmidx >= 0)
-                                {
-                                    g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
-                                }
-                            }
-                            break;
-                        case K_MACRO_FRONT_SOLO_DOOR:
-                            {
-                                int anmidx = g_sprObjects.GetAnimIdxByName("DOORS_FRONT");
-                                int frameidx = 14;
-                                if (anmidx >= 0)
-                                {
-                                    g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
-                                }
-                            }
-                            break;
-                        case K_MACRO_FRONT_TEAM_DOOR:
-                            {
-                                int anmidx = g_sprObjects.GetAnimIdxByName("DOORS_FRONT");
-                                int frameidx = 0;
-                                if (anmidx >= 0)
-                                {
-                                    g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
-                                }
-                            }
-                            break;
-                        case K_MACRO_SPAWNPOINT:
-                            {
-                                int anmidx = g_sprObjects.GetAnimIdxByName("CHECKPOINT_OFF");
-                                int frameidx = 0;
-                                if (anmidx >= 0)
-                                {
-                                    g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
-                                }
-                            }
-                            break;
-                    }
+                    BSXAnimBrowser.Frame fr = g_sprObjects.anims[g_selectedObject.animIdx].aframes[g_selectedObject.frameIdx].frame;
+                    bbox = fr.BBox;
                 }
-                else if (g_brushMode == BRUSH_MODE_PREFABS)
-                {
-                    PointF vPos = new PointF((float)cursorPos.X, (float)cursorPos.Y);
-                    if (chk_snapToGrid.Checked)
-                        vPos = SnapPointToGrid(vPos, K_SNAP_THRESHOLD);
-
-                    string strPrefabName = g_wndPrefabs.GetSelectedPrefabName();
-                    pbGr.ResetTransform();
-                    vPos = WorldToScreen(vPos);
-
-                    pbGr.DrawLine(Pens.LightGreen, vPos.X - 15.0f, vPos.Y, vPos.X + 15.0f, vPos.Y);
-                    pbGr.DrawLine(Pens.LightGreen, vPos.X, vPos.Y - 15.0f, vPos.X, vPos.Y + 15.0f);
-                    pbGr.DrawString(strPrefabName, arial10b, new SolidBrush(Color.Red), vPos.X + 15, vPos.Y - 25);
-
-                }
-                //deseneaza id obiect selectat
-                if (g_selectedObject != null)
-                {
-                    pbGr.ResetTransform();
-                    RectangleF bbox = new RectangleF(-10.0f, -10.0f, 20.0f, 20.0f);
-                    if ((g_selectedObject.animIdx >= 0) && (g_selectedObject.frameIdx >= 0))
-                    {
-                        BSXAnimBrowser.Frame fr = g_sprObjects.anims[g_selectedObject.animIdx].aframes[g_selectedObject.frameIdx].frame;
-                        bbox = fr.BBox;
-                    }
-                    bbox.X += g_selectedObject.pos.X; bbox.Y += g_selectedObject.pos.Y;
-                    bbox = WorldToScreen(bbox);
-                    pbGr.DrawString(g_selectedObject.ID.ToString(), arial10b, new SolidBrush(Color.Black), bbox.X + 1, bbox.Y - 15);
-                    pbGr.DrawString(g_selectedObject.ID.ToString(), arial10b, new SolidBrush(Color.Red), bbox.X, bbox.Y - 16);
-                }
+                bbox.X += g_selectedObject.pos.X; bbox.Y += g_selectedObject.pos.Y;
+                bbox = WorldToScreen(bbox);
+                pbGr.DrawString(g_selectedObject.ID.ToString(), arial10b, new SolidBrush(Color.Black), bbox.X + 1, bbox.Y - 15);
+                pbGr.DrawString(g_selectedObject.ID.ToString(), arial10b, new SolidBrush(Color.Red), bbox.X, bbox.Y - 16);
             }
 
 
@@ -2373,17 +2373,17 @@ namespace HexxEditor
                     if (light == g_selectedLight)
                     {
                         srcr.X += 32 * K_LIGHTS_COUNT;
-                        RectangleF scrrect = WorldToScreen(light.area);
+                        RectangleF lscrrect = WorldToScreen(light.area);
                         if (light.type == K_LIGHT_POINT)
                         {
-                            pbGr.DrawEllipse(Pens.Green, scrrect.X, scrrect.Y, scrrect.Width, scrrect.Height);
+                            pbGr.DrawEllipse(Pens.Green, lscrrect.X, lscrrect.Y, lscrrect.Width, lscrrect.Height);
                         }
                         //zona activa
                         if(light.type != K_LIGHT_AMBIENTAL)
-                            DrawScalableRect(Pens.Green, scrrect);
+                            DrawScalableRect(Pens.Green, lscrrect);
                         //angle
-                        PointF scrcenter = new PointF(scrrect.X + scrrect.Width / 2.0f, scrrect.Y + scrrect.Height / 2.0f);
-                        PointF scrangle = new PointF(scrcenter.X + (scrrect.Width / 2.0f) * (float)Math.Cos((light.angle / 360.0f) * 2.0f * Math.PI), scrcenter.Y + (scrrect.Height / 2.0f) * (float)Math.Sin((light.angle / 360.0f) * 2.0f * Math.PI));
+                        PointF scrcenter = new PointF(lscrrect.X + lscrrect.Width / 2.0f, lscrrect.Y + lscrrect.Height / 2.0f);
+                        PointF scrangle = new PointF(scrcenter.X + (lscrrect.Width / 2.0f) * (float)Math.Cos((light.angle / 360.0f) * 2.0f * Math.PI), scrcenter.Y + (lscrrect.Height / 2.0f) * (float)Math.Sin((light.angle / 360.0f) * 2.0f * Math.PI));
                         pbGr.DrawLine(Pens.Green, scrcenter, scrangle);
                     }
 
@@ -6627,6 +6627,8 @@ namespace HexxEditor
         private void butWndObjects_Click(object sender, EventArgs e)
         {
             HideToolWindows();
+
+            chk_HideObjects.Checked = false;
 
             g_wndObjects.Show();
             g_wndObjects.Left = this.Left + this.Width;

@@ -39,7 +39,7 @@ public:
 
 private:
 	// Sets the current menus state to match the gamestate
-	void				SetState( EGameState neState );
+	void				SetState( EGameState newState );
 
 public:
 	// Inherited via IDeviceRes

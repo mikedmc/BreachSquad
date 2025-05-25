@@ -1,7 +1,232 @@
 #include "dxstdafx.h"
 using namespace std;
 
-OPRESULT CLevel::LoadLevel( WCHAR * strPathAbs )
+OPRESULT CLevel::LoadLevel_Static( WCHAR * strPathAbs )
+{
+	//set last ID on a number that will never get reached from the editor or by adding areas
+	m_unLastID = 10000000; // #TODO: read max from level
+	int nChapterNumber = g_userData[K_MEMID_SELECTED_CHAPTER];
+	int nLevelNumber = g_userData[K_MEMID_SELECTED_LEVEL];
+	//--- set loaded level flags
+	m_unLoadedLevelFlags = K_LVL_LEVEL_FLAG_NONE;
+
+	WCHAR Path[MAX_PATH] = { 0 };
+
+	if ( UTApp().IsGameNetworked() )
+	{
+		m_rand.SetRandSeed( g_netlock.m_unRandomSeed );
+	}
+	else
+	{
+		//randomize seed
+		m_rand.SetRandSeed( GetTickCount() );
+	}
+	//reset local timeline
+	fLocalTimeline = 0.0f;
+	vLastSpawnPoint = Vec2( 0.0f, 0.0f );
+
+	//realease level if loaded
+	Release();
+
+	//reset shakes
+	m_camLevelToRT.ShakeScreen( 0.0f, 0.0f );
+	m_levelAABB.Set( 0, 0, 0, 0 );
+	//reset all timers
+	m_Timers.ResetTimers();
+
+	m_bLoaded = false;
+	m_bOneUpdateDone = false;
+
+	m_dwSyncCheckHash = 0;
+	//get rid of all particles
+	__Particles().ClearParticles();
+	m_arrActors.Init( K_LVL_ACTORS_POOL_SIZE );
+	//--- setari initiale ---
+	ResetLevelStatistics();
+
+	m_colAmbientGlobal = 0xffffffff;
+
+	//load interface sprites
+	FileManager::GetMediaPath( L"media/interfaces/igm_interface.bsx", Path );
+	V_OP_RET( m_sprInterface.LoadSprites( Path ) );
+
+	//tileset name
+	CHAR charArr[MAX_PATH]{ 0 };
+	WCHAR wcharArr[MAX_PATH]{ 0 };
+	WCHAR wcsMediaAddr[MAX_PATH]{ 0 };
+
+	// Loads level defines (generic data like actions, inventory, etc)
+	FileManager::GetMediaPath( L"media/gameplaydef.xml", Path );
+	V_OP_RET( LoadLevelDefines( Path ) );
+	// Load tileset (includes water and other dependencies)
+	FileManager::GetMediaPath( L"media/levels/data/tileset1.xml", Path );
+	V_OP_RET( LoadTileset( Path, m_tilesetDesc ) );
+
+	//LIGHTS
+	int libidxtmp = -1;
+	FileManager::GetMediaPath( L"media/levels/data/lights.bsx", Path );
+	V_OP_RET( m_sprLib.AddSprites( Path, libidxtmp, K_LIBNICK_LIGHTS ) );
+
+	//load bsx
+	FileManager::GetMediaPath( L"media/levels/data/objects.bsx", Path );
+	V_OP_RET( m_sprLib.AddSprites( Path, libidxtmp, K_LIBNICK_PROPS ) );
+
+	//--- load actors templates and weaponry right after props sprite ---
+	FileManager::GetMediaPath( L"media/levels/data/weapons/weapons_data.xml", Path );
+	V_OP_RET( LoadWeaponTemplates( Path ) );
+
+	UINT32 level_rand_seed = 1000000 + randint( 9999999 );
+	LOG( L"StaticLevel RndSeed: %lu", level_rand_seed );
+
+	///--- LOAD single area from a level (should have 0 connectors) ---
+	V_OP_RET( DeployAreaInstance( m_pDevice, strPathAbs, 0, Vec2i(0, 0) ) );
+	// set areas neighbour pointers
+	for ( int ii = 0; ii < m_arrAreas.GetSize(); ii++ )
+	{
+		// order in m_arrAreas SHOULD correspond to the order in m_arrPlaced if area loading didn't fail
+		CLevelArea* plarea = m_arrAreas[ii];
+		plarea->arrNeighbours.Clear();
+		// enlarge level area and other level data
+		m_levelAABB.Union( plarea->AABBbounds.to_RECTXYWH_F() );
+	}
+	// set level aabb in tiles too
+	m_levelAABB_TL.Set( (int)floor( m_levelAABB.x / K_TILE_SIZE ), (int)floor( m_levelAABB.y / K_TILE_SIZE ), (int)( m_levelAABB.w / K_TILE_SIZE ), (int)( m_levelAABB.h / K_TILE_SIZE ) );
+	// allocate passability map
+	_ASSERT( m_levelAABB_TL.w < 5000 && m_levelAABB_TL.h < 5000 );
+
+	// initialize AStar search engine
+	m_astar.Init( m_levelAABB_TL.w, m_levelAABB_TL.h, COL_MOVEMENT_BLOCK );
+
+	///--- everything loaded, SetAI here again so it sets all necessary pointers ---
+	// set AI at the end after we load everything or we won't have final targets for pointers
+	for ( int kk = 0; kk < m_arrLights.GetSize(); kk++ )
+	{
+		CLight * light = m_arrLights[kk];
+		IActiveInterface* pt = GetIActiveInterfacePtr( light->targetID_ini );
+		if ( pt )
+		{
+			CSmartLink::SetLink( &light->pTarget, pt );
+		}
+		light->SetAI( light->AIstate );
+	}
+	for ( int kk = 0; kk < m_arrColShapes.GetSize(); kk++ )
+	{
+		CCollisionShape * shape = m_arrColShapes[kk];
+		IActiveInterface* pt = GetIActiveInterfacePtr( shape->targetID_ini );
+		if ( pt )
+		{
+			CSmartLink::SetLink( &shape->pTarget, pt );
+		}
+		shape->SetAI( shape->AIstate );
+	}
+
+	for ( int ar = 0; ar < m_arrAreas.Count(); ar++ )
+	{
+		CLevelArea* area = m_arrAreas[ar];
+		for ( int kk = 0; kk < area->m_arrProps.GetSize(); kk++ )
+		{
+			CProp * activ = area->m_arrProps[kk];
+			IActiveInterface* pt = GetIActiveInterfacePtr( activ->targetID_ini );
+			if ( pt )
+			{
+				CSmartLink::SetLink( &activ->pTarget, pt );
+			}
+			activ->SetAI( activ->AIstate );
+		}
+	}
+	for ( auto node : m_arrActors )
+	{
+		CActor* actor = &node->m_data;
+		IActiveInterface* pt = GetIActiveInterfacePtr( actor->targetID_ini );
+		if ( pt )
+			CSmartLink::SetLink( &actor->pTarget, pt );
+	}
+
+	///--- camera ---
+	//target
+	m_camTargetActive = null; //cand nu am target se uita dupa players
+	m_camTargetOld = null;
+	m_vCamPosDefault = vLastSpawnPoint;
+	//level to RT cam settings
+	m_camLevelToRT.SetWorldBounds( m_levelAABB, false, K_CAMTRANS_AXIS_NONE );
+	m_camLevelToRT.InitCamera( UTApp().g_rectRT, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault );
+	m_camLevelToRT.SetCamAnimationSpring( K_LVL_CAM_FOLLOW_SPRING_KS, K_LVL_CAM_FOLLOW_DAMPING_KD );
+	// level to screen cam settings (copies position of level to RT
+	m_camLevelToScr.SetWorldBounds( m_levelAABB, false, K_CAMTRANS_AXIS_NONE );
+	m_camLevelToScr.InitCamera( UTApp().g_rectRenderPP, K_GAME_HEIGHT, K_CAMTRANS_AXIS_V, m_vCamPosDefault );
+	m_camLevelToScr.SetCamAnimationNone();
+	// call one update so we're sure everything is initialized
+	m_camLevelToRT.Update( 0.0f );
+	m_camLevelToScr.Update( 0.0f );
+	//pools
+	//m_poolPhysPts.Init( K_LVL_PHYSP_MAX_CNT );
+	m_poolDoofers.Init( K_LVL_DOOFERS_MAX_CNT );
+	m_poolBullets.Init( K_LVL_BULLETS_MAX_CNT );
+
+	//spawn selected players
+	m_nPlayers = 0;
+	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
+	{
+		//trecem controller instanceIDs in arr local din level
+		m_arrPlayerControllersIIDs[kk] = g_playerSelScr.m_arrPlayers[kk].nInstanceID;
+		//set selected 
+		m_arrPlayerSelHotJoin[kk] = -1;
+		m_arrPlayerSelStrategic[kk] = -1;
+		// we have selected player
+		if ( g_playerSelScr.m_arrPlayers[kk].bSelected )
+		{
+			//spawn Player aloca si controllerul potrivit
+			int offx = ( ( kk * 2 ) - 1 ) * K_TILE_HSIZE;
+			SpawnPlayer( vLastSpawnPoint + Vec2( (float)offx, 0.0f ), kk, -1 );
+			//resolve selection
+			m_arrPlayerSelHotJoin[kk] = (int)g_playerSelScr.m_arrPlayers[kk].eType;
+		}
+		else
+		{
+			m_arrPlayerControllersIIDs[kk] = -1; //allow hot join
+		}
+	}
+
+	// release mission generator data
+	__MissionGen().Release();
+	//clear global script memory (per level instance)
+	__Scripts().ClearGlobalMemory();
+	//reset time multiplier
+	SetTimeMultiplier( 1.0f, 0.0f );
+	// compute dirty rects (collisions and walls, wall shadows and other data)
+	UpdateDirtyRects();
+	// create Area meshes after shadows have been computed in UpdateDirtyRects
+	for ( auto area : m_arrAreas ) {
+		V_OP_RET( area->BuildBuffers() );
+	}
+
+	BuildVisibilityLists();
+	//save type of loaded mission
+	m_nLoadedLevelType = 0;
+
+	// initialize IGM interface after everything has loaded
+	// the interface will use the RT resolution, scaling to real screen
+	m_interfaceIGM.Init( this, &UTApp().g_camRTScreen );
+
+	///--- LAST THINGS ---
+	//called after characters spawning
+	SetLevelState( K_LVL_STATE_PLAYING );
+
+	m_bLoaded = true;
+
+	/*
+	LOG(L"Game:: Level loaded:[%s] net.randcheck[%d]", strPathAbs, m_rand.RandInt(60000));
+
+#if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
+	LOG(L"Game:: Total Targets:[%d] Hostages:[%d]", m_arrStats[K_LVL_STATS_TARGETS_TOTAL], m_arrStats[K_LVL_STATS_HOSTAGES_TOTAL]);
+#endif
+*/
+
+	return K_OP_OK;
+}
+
+
+OPRESULT CLevel::LoadLevel_GenerateFromStory()
 {
 	//set last ID on a number that will never get reached from the editor or by adding areas
 	m_unLastID = 10000000; // #TODO: read max from level

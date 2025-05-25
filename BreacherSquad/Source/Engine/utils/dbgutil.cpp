@@ -1,7 +1,5 @@
 #include "dxstdafx.h"
 
-#include <stdarg.h>
-#include <time.h>
 #include "dbgutil.h"
 
 void DebugPrintFnA(CHAR* szFormat, ...)
@@ -50,7 +48,7 @@ VOID ErrorBoxFnW(int nSeverity, const CHAR* strFile, DWORD dwLine, WCHAR* szForm
 		StringCchPrintfW(szLine, MAX_PATH, L"\nDo you wish to DEBUG?\n YES - Debug, NO - Ignore, CANCEL - Exit Application\n");
 		StringCchCat(szBuffer, 2048, szLine);
 
-		int retval = MessageBox(NULL, szBuffer, L"Critical Error!", MB_YESNOCANCEL | MB_ICONERROR);
+		int retval = MessageBox(nullptr, szBuffer, L"Critical Error!", MB_YESNOCANCEL | MB_ICONERROR);
 		if(retval == IDYES)
 		{
 			__asm int 3;
@@ -69,7 +67,7 @@ VOID ErrorBoxFnW(int nSeverity, const CHAR* strFile, DWORD dwLine, WCHAR* szForm
 		StringCchPrintfW(szLine, MAX_PATH, L"\nDo you wish to DEBUG?\n YES - Debug, NO - Ignore\n");
 		StringCchCat(szBuffer, 2048, szLine);
 
-		int retval = MessageBox(NULL, szBuffer, L"Warning!", MB_YESNO | MB_ICONWARNING);
+		int retval = MessageBox(nullptr, szBuffer, L"Warning!", MB_YESNO | MB_ICONWARNING);
 		if(retval == IDYES)
 		{
 			__asm int 3;
@@ -87,7 +85,7 @@ VOID ErrorBoxFnW(int nSeverity, const CHAR* strFile, DWORD dwLine, WCHAR* szForm
 	{
 		StringCchPrintfW(szLine, MAX_PATH, L"\n\n%s line %d\n", strFileW, dwLine);
 		StringCchCat(szBuffer, 2048, szLine);
-		MessageBox(NULL, szBuffer, L"Info", MB_OK);	
+		MessageBox(nullptr, szBuffer, L"Info", MB_OK);	
 		//logs error
 		OS_PrintLog(szBuffer);
 	}
@@ -111,7 +109,7 @@ VOID ErrorBoxFnW(int nSeverity, const CHAR* strFile, DWORD dwLine, WCHAR* szForm
 
 		StringCchPrintfW(szLine, MAX_PATH, L"\nThe Application will now exit!\n");
 		StringCchCat(szBuffer, 2048, szLine);
-		int retval = MessageBox(NULL, szBuffer, L"Critical Error!", MB_OK | MB_ICONERROR);
+		int retval = MessageBox(nullptr, szBuffer, L"Critical Error!", MB_OK | MB_ICONERROR);
 
 		PostQuitMessage(nSeverity);
 	}
@@ -119,7 +117,7 @@ VOID ErrorBoxFnW(int nSeverity, const CHAR* strFile, DWORD dwLine, WCHAR* szForm
 	{
 		StringCchPrintfW(szLine, MAX_PATH, L"\n%s line %d\n", strFileW, dwLine);
 		StringCchCat(szBuffer, 2048, szLine);
-		MessageBox(NULL, szBuffer, L"Info", MB_OK);
+		MessageBox(nullptr, szBuffer, L"Info", MB_OK);
 		//logs error
 		OS_PrintLog(szBuffer);
 	}
@@ -233,8 +231,8 @@ VOID LOG_DBG_BUFF_FLUSH()
 	{
 		WCHAR szPath[MAX_PATH];
 		StringCchPrintf(szPath, MAX_PATH, L"%serror.log", UTApp().g_wszUserDataDir);
-		FILE* log = NULL;
-		if ((log = _wfopen(szPath, L"at")) == NULL)
+		FILE* log = nullptr;
+		if ((log = _wfopen(szPath, L"at")) == nullptr)
 		{
 			return;
 		}
@@ -255,8 +253,8 @@ void DebugLogFnA(CHAR* szFormat, ...)
 {
 	WCHAR szPath[MAX_PATH];
 	StringCchPrintf(szPath, MAX_PATH, L"%serror.log", UTApp().g_wszUserDataDir);
-	FILE* log = NULL;
-	if ((log = _wfopen(szPath, L"at")) == NULL)
+	FILE* log = nullptr;
+	if ((log = _wfopen(szPath, L"at")) == nullptr)
 	{
 		return;
 	}
@@ -276,8 +274,8 @@ void DebugLogFnW(WCHAR* szFormat, ...)
 {
 	WCHAR szPath[MAX_PATH];
 	StringCchPrintf(szPath, MAX_PATH, L"%serror.log", UTApp().g_wszUserDataDir);
-	FILE* log = NULL;
-	if ((log = _wfopen(szPath, L"at")) == NULL)
+	FILE* log = nullptr;
+	if ((log = _wfopen(szPath, L"at")) == nullptr)
 	{
 		return;
 	}
@@ -294,8 +292,8 @@ VOID DebugLogClear()
 {
 	WCHAR szPath[MAX_PATH];
 	StringCchPrintf(szPath, MAX_PATH, L"%serror.log", UTApp().g_wszUserDataDir);
-	FILE* log = NULL;
-	if ((log = _wfopen(szPath, L"wt")) == NULL)
+	FILE* log = nullptr;
+	if ((log = _wfopen(szPath, L"wt")) == nullptr)
 	{
 		return;
 	}
@@ -313,12 +311,12 @@ VOID GetErrorMessageA(DWORD dwError, CHAR *lpszMsgBuf, DWORD dwMaxLen)
 	FormatMessageA(
 		FORMAT_MESSAGE_FROM_SYSTEM | 
 		FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL,
+		nullptr,
 		dwError,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
 		(LPSTR)lpszMsgBuf,
 		dwMaxLen,
-		NULL);
+		nullptr);
 }
 
 VOID GetErrorMessageW(DWORD dwError, WCHAR *lpszMsgBuf, DWORD dwMaxLen)
@@ -326,25 +324,25 @@ VOID GetErrorMessageW(DWORD dwError, WCHAR *lpszMsgBuf, DWORD dwMaxLen)
 	FormatMessageW(
 		FORMAT_MESSAGE_FROM_SYSTEM | 
 		FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL,
+		nullptr,
 		dwError,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
 		(LPWSTR)lpszMsgBuf,
 		dwMaxLen,
-		NULL);
+		nullptr);
 }
 
 void GetExePathA(CHAR szPath[], int nLen)
 {
 #ifdef UNICODE
 	WCHAR szwPath[MAX_PATH];
-	GetModuleFileName(NULL, szwPath, nLen);
+	GetModuleFileName(nullptr, szwPath, nLen);
 	int nIdx = (int)wcslen(szwPath);
 	while (--nIdx > 0 && szwPath[nIdx] != '\\' && szwPath[nIdx] != '/');
 	szwPath[nIdx + 1] = '\0';
 	wcstombs(szPath, szwPath, nLen);
 #else
-	GetModuleFileName(NULL, szPath, nLen);
+	GetModuleFileName(nullptr, szPath, nLen);
 	int nIdx = (int)wcslen(szPath);
 	while (--nIdx > 0 && szPath[nIdx] != '\\' && szwPath[nIdx] != '/');
 	szPath[nIdx + 1] = '\0';
@@ -354,13 +352,13 @@ void GetExePathA(CHAR szPath[], int nLen)
 void GetExePathW(WCHAR szwPath[], int nLen)
 {
 #ifdef UNICODE
-	GetModuleFileName(NULL, szwPath, nLen);
+	GetModuleFileName(nullptr, szwPath, nLen);
 	int nIdx = (int)wcslen(szwPath);
 	while (--nIdx > 0 && szwPath[nIdx] != '\\' && szwPath[nIdx] != '/');
 	szwPath[nIdx + 1] = '\0';
 #else
 	CHAR szPath[MAX_PATH];
-	GetModuleFileName(NULL, szPath, nLen);
+	GetModuleFileName(nullptr, szPath, nLen);
 	int nIdx = (int)wcslen(szPath);
 	while (--nIdx > 0 && szPath[nIdx] != '\\' && szwPath[nIdx] != '/');
 	szPath[nIdx + 1] = '\0';
@@ -370,7 +368,7 @@ void GetExePathW(WCHAR szwPath[], int nLen)
 
 VOID DebugCrash()
 {
-	*((int *)NULL) = 123;
+	*((int *)nullptr) = 123;
 }
 
 void filecopy(FILE *dest, FILE *src)

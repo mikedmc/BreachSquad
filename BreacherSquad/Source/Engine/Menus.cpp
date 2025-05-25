@@ -118,18 +118,21 @@ bool CMenus::HandleEvent( CEvent &nEvent )
 	return false;
 }
 
-void CMenus::SetState( EGameState neState )
+void CMenus::SetState( EGameState newState )
 {
-	if ( neState == m_state )
+	if ( newState == m_state )
+	{
+		LOG( "Same state, not changing! %d", newState );
 		return;
+	}
 	//#TODO: we can do stuff based on old state like deallocationg if necessary
 		
 	// reset some data on state change
-	m_state = neState;
+	m_state = newState;
 	m_nSubstate = 0;
 	fLocalTimeline = 0.0f;
 
-	switch ( neState )
+	switch ( newState )
 	{
 		case GAME_STATE_EMPTY:
 			break;

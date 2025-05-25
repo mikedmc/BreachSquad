@@ -99,10 +99,10 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.but_wndMetadata = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.chk_HideObjects = new System.Windows.Forms.CheckBox();
             this.chk_snapToGrid = new System.Windows.Forms.CheckBox();
             this.butWndPrefabs = new System.Windows.Forms.Button();
             this.timer_autosave = new System.Windows.Forms.Timer(this.components);
-            this.chk_HideObjects = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -487,9 +487,9 @@
             this.radio_layer5.AutoSize = true;
             this.radio_layer5.Location = new System.Drawing.Point(25, 127);
             this.radio_layer5.Name = "radio_layer5";
-            this.radio_layer5.Size = new System.Drawing.Size(78, 17);
+            this.radio_layer5.Size = new System.Drawing.Size(90, 17);
             this.radio_layer5.TabIndex = 8;
-            this.radio_layer5.Text = "Walls deco";
+            this.radio_layer5.Text = "5. Walls deco";
             this.radio_layer5.UseVisualStyleBackColor = true;
             this.radio_layer5.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
             // 
@@ -511,9 +511,9 @@
             this.radio_layer0.AutoSize = true;
             this.radio_layer0.Location = new System.Drawing.Point(25, 17);
             this.radio_layer0.Name = "radio_layer0";
-            this.radio_layer0.Size = new System.Drawing.Size(80, 17);
+            this.radio_layer0.Size = new System.Drawing.Size(92, 17);
             this.radio_layer0.TabIndex = 6;
-            this.radio_layer0.Text = "Below Floor";
+            this.radio_layer0.Text = "0. Below Floor";
             this.radio_layer0.UseVisualStyleBackColor = true;
             this.radio_layer0.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
             // 
@@ -535,9 +535,9 @@
             this.radio_layer7.AutoSize = true;
             this.radio_layer7.Location = new System.Drawing.Point(25, 171);
             this.radio_layer7.Name = "radio_layer7";
-            this.radio_layer7.Size = new System.Drawing.Size(78, 17);
+            this.radio_layer7.Size = new System.Drawing.Size(90, 17);
             this.radio_layer7.TabIndex = 6;
-            this.radio_layer7.Text = "Ceiling Top";
+            this.radio_layer7.Text = "7. Ceiling Top";
             this.radio_layer7.UseVisualStyleBackColor = true;
             this.radio_layer7.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
             // 
@@ -559,9 +559,9 @@
             this.radio_layer6.AutoSize = true;
             this.radio_layer6.Location = new System.Drawing.Point(25, 149);
             this.radio_layer6.Name = "radio_layer6";
-            this.radio_layer6.Size = new System.Drawing.Size(114, 17);
+            this.radio_layer6.Size = new System.Drawing.Size(126, 17);
             this.radio_layer6.TabIndex = 6;
-            this.radio_layer6.Text = "Ceiling Deco (OBJ)";
+            this.radio_layer6.Text = "6. Ceiling Deco (OBJ)";
             this.radio_layer6.UseVisualStyleBackColor = true;
             this.radio_layer6.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
             // 
@@ -583,9 +583,9 @@
             this.radio_layer4.AutoSize = true;
             this.radio_layer4.Location = new System.Drawing.Point(25, 105);
             this.radio_layer4.Name = "radio_layer4";
-            this.radio_layer4.Size = new System.Drawing.Size(51, 17);
+            this.radio_layer4.Size = new System.Drawing.Size(63, 17);
             this.radio_layer4.TabIndex = 6;
-            this.radio_layer4.Text = "Walls";
+            this.radio_layer4.Text = "4. Walls";
             this.radio_layer4.UseVisualStyleBackColor = true;
             this.radio_layer4.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
             // 
@@ -607,9 +607,9 @@
             this.radio_layer3.AutoSize = true;
             this.radio_layer3.Location = new System.Drawing.Point(25, 83);
             this.radio_layer3.Name = "radio_layer3";
-            this.radio_layer3.Size = new System.Drawing.Size(84, 17);
+            this.radio_layer3.Size = new System.Drawing.Size(96, 17);
             this.radio_layer3.TabIndex = 6;
-            this.radio_layer3.Text = "Floor deco 2";
+            this.radio_layer3.Text = "3. Floor deco 2";
             this.radio_layer3.UseVisualStyleBackColor = true;
             this.radio_layer3.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
             // 
@@ -631,9 +631,9 @@
             this.radio_layer2.AutoSize = true;
             this.radio_layer2.Location = new System.Drawing.Point(25, 61);
             this.radio_layer2.Name = "radio_layer2";
-            this.radio_layer2.Size = new System.Drawing.Size(84, 17);
+            this.radio_layer2.Size = new System.Drawing.Size(96, 17);
             this.radio_layer2.TabIndex = 4;
-            this.radio_layer2.Text = "Floor deco 1";
+            this.radio_layer2.Text = "2. Floor deco 1";
             this.radio_layer2.UseVisualStyleBackColor = true;
             this.radio_layer2.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
             // 
@@ -643,10 +643,10 @@
             this.radio_layer1.Checked = true;
             this.radio_layer1.Location = new System.Drawing.Point(25, 39);
             this.radio_layer1.Name = "radio_layer1";
-            this.radio_layer1.Size = new System.Drawing.Size(77, 17);
+            this.radio_layer1.Size = new System.Drawing.Size(89, 17);
             this.radio_layer1.TabIndex = 3;
             this.radio_layer1.TabStop = true;
-            this.radio_layer1.Text = "Floor (OBJ)";
+            this.radio_layer1.Text = "1. Floor (OBJ)";
             this.radio_layer1.UseVisualStyleBackColor = true;
             this.radio_layer1.CheckedChanged += new System.EventHandler(this.radio_layer_CheckedChanged);
             // 
@@ -793,6 +793,18 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Options";
             // 
+            // chk_HideObjects
+            // 
+            this.chk_HideObjects.AutoSize = true;
+            this.chk_HideObjects.Location = new System.Drawing.Point(6, 64);
+            this.chk_HideObjects.Name = "chk_HideObjects";
+            this.chk_HideObjects.Size = new System.Drawing.Size(87, 17);
+            this.chk_HideObjects.TabIndex = 40;
+            this.chk_HideObjects.TabStop = false;
+            this.chk_HideObjects.Text = "Hide Objects";
+            this.chk_HideObjects.UseVisualStyleBackColor = true;
+            this.chk_HideObjects.CheckedChanged += new System.EventHandler(this.chk_HideObjects_CheckedChanged);
+            // 
             // chk_snapToGrid
             // 
             this.chk_snapToGrid.AutoSize = true;
@@ -821,18 +833,6 @@
             this.timer_autosave.Enabled = true;
             this.timer_autosave.Interval = 300000;
             this.timer_autosave.Tick += new System.EventHandler(this.timer_autosave_Tick);
-            // 
-            // chk_HideObjects
-            // 
-            this.chk_HideObjects.AutoSize = true;
-            this.chk_HideObjects.Location = new System.Drawing.Point(6, 64);
-            this.chk_HideObjects.Name = "chk_HideObjects";
-            this.chk_HideObjects.Size = new System.Drawing.Size(87, 17);
-            this.chk_HideObjects.TabIndex = 40;
-            this.chk_HideObjects.TabStop = false;
-            this.chk_HideObjects.Text = "Hide Objects";
-            this.chk_HideObjects.UseVisualStyleBackColor = true;
-            this.chk_HideObjects.CheckedChanged += new System.EventHandler(this.chk_HideObjects_CheckedChanged);
             // 
             // EditorWnd
             // 

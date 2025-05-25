@@ -411,7 +411,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 			{
 				//classic levels
 				///--- find chapter and level in levels.xml ---	
-				WCHAR strLevelPath[ MAX_PATH ] = { 0 };
+				WCHAR strLevelPath[ MAX_PATH_STD ] = { 0 };
 				if ( g_startupCommand == GAME_STARTUP_LOAD_MAP )
 				{
 					std::wstring sProcessedPath = RemoveQuotationMarks( g_startupParam.text );
@@ -437,12 +437,25 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 					*/
 				}
 
-				if ( OP_FAILED( __Sim().LoadLevel( strLevelPath ) ) )
+				WCHAR tmppath[ MAX_PATH_STD ];
+				swprintf_s( tmppath, MAX_PATH_STD, L"media/levels/missions/01_01_slow_starters_V2.area");
+				FileManager::GetMediaPath( tmppath, strLevelPath );
+				if ( OP_FAILED( __Sim().LoadLevel_Static( strLevelPath ) ) )
+				{
+					ErrorBox( K_ERR_WARNING, L"Could not load static level [%s]!", strLevelPath );
+					ChangeTo_Transition( GAME_STATE_LEVEL_SELECTION, TRANSITION_SIMPLE );
+					break;
+				}
+
+				// LOAD RANDOM STORY
+				/*
+				if ( OP_FAILED( __Sim().LoadLevel_GenerateFromStory() ) )
 				{
 					ErrorBox( K_ERR_WARNING, L"Could not load level [%s]!", strLevelPath );
 					ChangeTo_Transition( GAME_STATE_LEVEL_SELECTION, TRANSITION_SIMPLE );
 					break;
 				}
+				*/
 			}
 			else
 			{
@@ -461,7 +474,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 				//write current mission name and number
 				__Texts().SetString( STR_CURRENT_MISSION_VAL, L"%s", mod->shName.text );
 
-				if ( OP_FAILED( __Sim().LoadLevel( wcsLevelPath ) ) )
+				if ( OP_FAILED( __Sim().LoadLevel_GenerateFromStory( /* wcsLevelPath */ ) ) )
 				{
 					ErrorBox( K_ERR_WARNING, L"Could not load downloaded level [%s]!", wcsLevelPath );
 					ChangeTo_Transition( GAME_STATE_LEVEL_SELECTION, TRANSITION_SIMPLE );
