@@ -62,7 +62,7 @@ namespace HexxEditor
         private void butTrails_Click(object sender, EventArgs e)
         {
             parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MISC;
-            parentWnd.g_brushValue = EditorWnd.K_MISC_RAIL;
+            parentWnd.g_brushValue = EditorWnd.K_MISC_RAILS;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }
@@ -129,28 +129,12 @@ namespace HexxEditor
 
         }
 
-        private void butBack_Click(object sender, EventArgs e)
-        {
-            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MISC;
-            parentWnd.g_brushValue = EditorWnd.K_MISC_BACKGROUND;
-            parentWnd.g_selectedMisc = null;
-            SetSelectedMisc(null);
-        }
-
         private void MiscWnd_FormClosing(object sender, FormClosingEventArgs e)
         {
             SetSelectedMisc(null);
 
             this.Hide();
             e.Cancel = true;
-        }
-
-        private void butFirstLayerObj_Click(object sender, EventArgs e)
-        {
-            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MISC;
-            parentWnd.g_brushValue = EditorWnd.K_MISC_FRONTLAYEROBJ;
-            parentWnd.g_selectedMisc = null;
-            SetSelectedMisc(null);
         }
 
         private void but_doorLocked_Click(object sender, EventArgs e)
@@ -203,8 +187,8 @@ namespace HexxEditor
 
         private void but_Checkpoint_Click(object sender, EventArgs e)
         {
-            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MACRO;
-            parentWnd.g_brushValue = EditorWnd.K_MACRO_SPAWNPOINT;
+            parentWnd.g_brushMode = EditorWnd.BRUSH_MODE_MISC;
+            parentWnd.g_brushValue = EditorWnd.K_MISC_SPAWNPOINT;
             parentWnd.g_selectedMisc = null;
             SetSelectedMisc(null);
         }

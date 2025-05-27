@@ -321,7 +321,7 @@ enum EMiscObjectType
 {
 	K_LVL_MISC_UNDEFINED = -1,
 	K_LVL_MISC_RAILS = 0,		//params: none
-	K_LVL_MISC_FRONTLAYEROBJ,	//params: strAnim - animatia din m_sprBack, nFrame = frame-ul
+	K_LVL_MISC_SPAWNPOINT,	//params: none
 	K_LVL_MISC_SCRIPT,	//params: str_script = SCRIPT_NAME
 
 	//numarul de tipuri
@@ -375,19 +375,16 @@ public:
 	}
 };
 
-#define K_LVL_FRONTLAYER_PARALLAX 1.5f
-#define K_LVL_FRONTLAYER_SCALING 3.0f
-
-class CMiscObject_FrontLayerObj : public CMiscObjectBase
+class CMiscObject_Spawnpoint : public CMiscObjectBase
 {
 public:
 	Vec2 pos;
 	CSprite sprite;
 	CAABB aabb_ini;  //bbox initial
 
-	CMiscObject_FrontLayerObj()
+	CMiscObject_Spawnpoint()
 	{
-		type = K_LVL_MISC_FRONTLAYEROBJ;
+		type = K_LVL_MISC_SPAWNPOINT;
 	}
 };
 

@@ -32,21 +32,19 @@
             this.text_MiscParams = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.butBack = new System.Windows.Forms.Button();
-            this.butFirstLayerObj = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.but_windowHoriz = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.but_doorLocked = new System.Windows.Forms.Button();
+            this.but_soloDoor = new System.Windows.Forms.Button();
             this.but_FrontStairs = new System.Windows.Forms.Button();
-            this.but_Checkpoint = new System.Windows.Forms.Button();
             this.but_FrontDoor = new System.Windows.Forms.Button();
+            this.but_keycardGold = new System.Windows.Forms.Button();
             this.but_MetalDoorUnlocker = new System.Windows.Forms.Button();
             this.but_doorMetallic = new System.Windows.Forms.Button();
             this.but_doorUnlocked = new System.Windows.Forms.Button();
+            this.but_Checkpoint = new System.Windows.Forms.Button();
             this.but_Sound = new System.Windows.Forms.Button();
-            this.but_soloDoor = new System.Windows.Forms.Button();
-            this.but_keycardGold = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -92,35 +90,12 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Misc ID:";
             // 
-            // butBack
-            // 
-            this.butBack.Location = new System.Drawing.Point(282, 131);
-            this.butBack.Name = "butBack";
-            this.butBack.Size = new System.Drawing.Size(85, 22);
-            this.butBack.TabIndex = 34;
-            this.butBack.TabStop = false;
-            this.butBack.Text = "Background";
-            this.butBack.UseVisualStyleBackColor = true;
-            this.butBack.Visible = false;
-            this.butBack.Click += new System.EventHandler(this.butBack_Click);
-            // 
-            // butFirstLayerObj
-            // 
-            this.butFirstLayerObj.Location = new System.Drawing.Point(202, 136);
-            this.butFirstLayerObj.Name = "butFirstLayerObj";
-            this.butFirstLayerObj.Size = new System.Drawing.Size(85, 38);
-            this.butFirstLayerObj.TabIndex = 39;
-            this.butFirstLayerObj.Text = "Front Layer Deco";
-            this.butFirstLayerObj.UseVisualStyleBackColor = true;
-            this.butFirstLayerObj.Click += new System.EventHandler(this.butFirstLayerObj_Click);
-            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.but_windowHoriz);
             this.groupBox2.Controls.Add(this.button1);
             this.groupBox2.Controls.Add(this.but_doorLocked);
             this.groupBox2.Controls.Add(this.but_soloDoor);
-            this.groupBox2.Controls.Add(this.butBack);
             this.groupBox2.Controls.Add(this.but_FrontStairs);
             this.groupBox2.Controls.Add(this.but_FrontDoor);
             this.groupBox2.Controls.Add(this.but_keycardGold);
@@ -167,6 +142,17 @@
             this.but_doorLocked.UseVisualStyleBackColor = true;
             this.but_doorLocked.Click += new System.EventHandler(this.but_doorLocked_Click);
             // 
+            // but_soloDoor
+            // 
+            this.but_soloDoor.Location = new System.Drawing.Point(100, 63);
+            this.but_soloDoor.Name = "but_soloDoor";
+            this.but_soloDoor.Size = new System.Drawing.Size(85, 38);
+            this.but_soloDoor.TabIndex = 34;
+            this.but_soloDoor.TabStop = false;
+            this.but_soloDoor.Text = "Front Solo Door";
+            this.but_soloDoor.UseVisualStyleBackColor = true;
+            this.but_soloDoor.Click += new System.EventHandler(this.but_soloDoor_Click);
+            // 
             // but_FrontStairs
             // 
             this.but_FrontStairs.Location = new System.Drawing.Point(9, 63);
@@ -178,17 +164,6 @@
             this.but_FrontStairs.UseVisualStyleBackColor = true;
             this.but_FrontStairs.Click += new System.EventHandler(this.but_FrontStairs_Click);
             // 
-            // but_Checkpoint
-            // 
-            this.but_Checkpoint.Location = new System.Drawing.Point(18, 136);
-            this.but_Checkpoint.Name = "but_Checkpoint";
-            this.but_Checkpoint.Size = new System.Drawing.Size(85, 38);
-            this.but_Checkpoint.TabIndex = 34;
-            this.but_Checkpoint.TabStop = false;
-            this.but_Checkpoint.Text = "Spawn Point";
-            this.but_Checkpoint.UseVisualStyleBackColor = true;
-            this.but_Checkpoint.Click += new System.EventHandler(this.but_Checkpoint_Click);
-            // 
             // but_FrontDoor
             // 
             this.but_FrontDoor.Location = new System.Drawing.Point(191, 63);
@@ -199,6 +174,17 @@
             this.but_FrontDoor.Text = "Front Team Door";
             this.but_FrontDoor.UseVisualStyleBackColor = true;
             this.but_FrontDoor.Click += new System.EventHandler(this.but_FrontDoor_Click);
+            // 
+            // but_keycardGold
+            // 
+            this.but_keycardGold.Location = new System.Drawing.Point(100, 107);
+            this.but_keycardGold.Name = "but_keycardGold";
+            this.but_keycardGold.Size = new System.Drawing.Size(85, 38);
+            this.but_keycardGold.TabIndex = 34;
+            this.but_keycardGold.TabStop = false;
+            this.but_keycardGold.Text = "Keycard Gold";
+            this.but_keycardGold.UseVisualStyleBackColor = true;
+            this.but_keycardGold.Click += new System.EventHandler(this.but_keycardGold_Click);
             // 
             // but_MetalDoorUnlocker
             // 
@@ -233,9 +219,20 @@
             this.but_doorUnlocked.UseVisualStyleBackColor = true;
             this.but_doorUnlocked.Click += new System.EventHandler(this.but_doorUnlocked_Click);
             // 
+            // but_Checkpoint
+            // 
+            this.but_Checkpoint.Location = new System.Drawing.Point(18, 136);
+            this.but_Checkpoint.Name = "but_Checkpoint";
+            this.but_Checkpoint.Size = new System.Drawing.Size(85, 38);
+            this.but_Checkpoint.TabIndex = 34;
+            this.but_Checkpoint.TabStop = false;
+            this.but_Checkpoint.Text = "Spawn Point";
+            this.but_Checkpoint.UseVisualStyleBackColor = true;
+            this.but_Checkpoint.Click += new System.EventHandler(this.but_Checkpoint_Click);
+            // 
             // but_Sound
             // 
-            this.but_Sound.Location = new System.Drawing.Point(294, 136);
+            this.but_Sound.Location = new System.Drawing.Point(203, 136);
             this.but_Sound.Name = "but_Sound";
             this.but_Sound.Size = new System.Drawing.Size(85, 38);
             this.but_Sound.TabIndex = 34;
@@ -244,35 +241,12 @@
             this.but_Sound.UseVisualStyleBackColor = true;
             this.but_Sound.Click += new System.EventHandler(this.but_Script_Click);
             // 
-            // but_soloDoor
-            // 
-            this.but_soloDoor.Location = new System.Drawing.Point(100, 63);
-            this.but_soloDoor.Name = "but_soloDoor";
-            this.but_soloDoor.Size = new System.Drawing.Size(85, 38);
-            this.but_soloDoor.TabIndex = 34;
-            this.but_soloDoor.TabStop = false;
-            this.but_soloDoor.Text = "Front Solo Door";
-            this.but_soloDoor.UseVisualStyleBackColor = true;
-            this.but_soloDoor.Click += new System.EventHandler(this.but_soloDoor_Click);
-            // 
-            // but_keycardGold
-            // 
-            this.but_keycardGold.Location = new System.Drawing.Point(100, 107);
-            this.but_keycardGold.Name = "but_keycardGold";
-            this.but_keycardGold.Size = new System.Drawing.Size(85, 38);
-            this.but_keycardGold.TabIndex = 34;
-            this.but_keycardGold.TabStop = false;
-            this.but_keycardGold.Text = "Keycard Gold";
-            this.but_keycardGold.UseVisualStyleBackColor = true;
-            this.but_keycardGold.Click += new System.EventHandler(this.but_keycardGold_Click);
-            // 
             // MiscWnd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(399, 348);
             this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.butFirstLayerObj);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.but_Sound);
             this.Controls.Add(this.butTrails);
@@ -294,8 +268,6 @@
         private System.Windows.Forms.TextBox text_MiscParams;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Button butBack;
-        private System.Windows.Forms.Button butFirstLayerObj;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button but_doorLocked;
         private System.Windows.Forms.Button but_FrontDoor;

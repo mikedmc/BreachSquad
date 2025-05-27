@@ -142,6 +142,16 @@ OPRESULT CLevel::LoadLevel_Static( WCHAR * strPathAbs )
 			CSmartLink::SetLink( &actor->pTarget, pt );
 	}
 
+	//-- find spawn point
+	for ( auto miscobj : m_arrMiscObjects )
+	{
+		if ( miscobj->type == K_LVL_MISC_SPAWNPOINT )
+		{
+			CMiscObject_Spawnpoint* spawnobj = static_cast<CMiscObject_Spawnpoint*>( miscobj );
+			vLastSpawnPoint = spawnobj->pos;
+			break;
+		}
+	}
 	///--- camera ---
 	//target
 	m_camTargetActive = null; //cand nu am target se uita dupa players
@@ -1003,11 +1013,11 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 
 		switch ( type )
 		{
-			case K_LVL_MISC_FRONTLAYEROBJ:
+			case K_LVL_MISC_SPAWNPOINT:
 			{
-				CMiscObject_FrontLayerObj * frontobj = new CMiscObject_FrontLayerObj();
+				CMiscObject_Spawnpoint* spawnptobj = new CMiscObject_Spawnpoint();
 				//generic data
-				frontobj->ID = unBaseID + OS_freadUInt32( fl );
+				spawnptobj->ID = unBaseID + OS_freadUInt32( fl );
 				//read params
 				int nparamsCnt = OS_freadByte( fl ); //nr params
 				if ( nparamsCnt > 0 )
@@ -1025,17 +1035,15 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 						mbstowcs_s( &convnr, wvarval, varval, MAX_PATH );
 						mbstowcs_s( &convnr, wvarname, varname, MAX_PATH );
 
-						frontobj->varParams.SetVarAUTO( wvarname, wvarval );
+						spawnptobj->varParams.SetVarAUTO( wvarname, wvarval );
 					}
 				}
 				//specific data 
-				frontobj->pos.x = (float)OS_freadInt32( fl );
-				frontobj->pos.y = (float)OS_freadInt32( fl );
-				frontobj->pos += vOffset;
-				//set color
-				frontobj->sprite.color = m_colAmbientGlobal;
+				spawnptobj->pos.x = (float)OS_freadInt32( fl );
+				spawnptobj->pos.y = (float)OS_freadInt32( fl );
+				spawnptobj->pos += vOffset;
 
-				m_arrMiscObjects.Add( frontobj );
+				m_arrMiscObjects.Add( spawnptobj );
 			}
 			break;
 			case K_LVL_MISC_SCRIPT:
@@ -1135,24 +1143,6 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 				m_arrMiscObjects.Add( rail );
 			}
 			break;
-		}
-	}
-	//#TEMP: set animation data at the end (some front objs need bg to be loaded)
-	for ( UINT32 kk = 0; kk < m_arrMiscObjects.GetSize(); kk++ )
-	{
-		CMiscObjectBase* mob = m_arrMiscObjects[kk];
-		if ( mob->type == K_LVL_MISC_FRONTLAYEROBJ )
-		{
-			CMiscObject_FrontLayerObj *frontobj = dynamic_cast<CMiscObject_FrontLayerObj*>( mob );
-			if ( frontobj != null )
-			{
-				//anim name
-				UINT32 animHash = frontobj->varParams[L"strAnim"].m_strArg.getHash();
-				frontobj->sprite.animationIdx = -1;// m_sprBack.getAnimationIdxByNameHash(animHash);
-				frontobj->sprite.currentFrame = frontobj->varParams[L"nFrame"].m_asUINT32;
-				//set bbox
-				//frontobj->aabb_ini.Set(m_sprBack.GetAFrameBBox(frontobj->sprite.animationIdx, frontobj->sprite.currentFrame));
-			}
 		}
 	}
 

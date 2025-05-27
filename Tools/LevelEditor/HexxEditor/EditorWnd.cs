@@ -256,10 +256,9 @@ namespace HexxEditor
 
 
         //--- misc objects ---
-        public const byte K_MISC_RAIL = 0;      //tip RAIL pt lifturi //params: none
-        public const byte K_MISC_BACKGROUND = 1; //nume background. //params: str_bsx = night.bsx (seteaza fundalul nivelului, apare unul singur pe nivel)
-        public const byte K_MISC_FRONTLAYEROBJ = 2; //tip obiect in prim plan, peste joc. strAnim=nume anim din background curent, nFrame=1 - numar frame
-        public const byte K_MISC_SCRIPT = 3;    //script care se ruleaza la inceputul nivelului
+        public const byte K_MISC_RAILS = 0;      // tip RAIL pt lifturi //params: none
+        public const byte K_MISC_SPAWNPOINT = 1; // spawning point
+        public const byte K_MISC_SCRIPT = 2;    // script care se ruleaza la inceputul nivelului
 
         //clasa de baza din care sunt derivate toate
         public class CMiscObjectBase
@@ -296,60 +295,6 @@ namespace HexxEditor
         }
 
         //clasele particulare fiecarui obiect
-
-        //BACKGROUND
-        public class CMiscObject_Background : CMiscObjectBase
-        {
-            public PointF pos; //pozitie icon
-            //private
-            const float SELECTION_DISTANCE = 20.0f;
-
-            public CMiscObject_Background()
-            {
-                type = K_MISC_BACKGROUND;
-                pos = new PointF(0.0f, 0.0f);
-            }
-
-            public override void Paint(Graphics gr, EditorWnd parentForm)
-            {
-                PointF npt = parentForm.WorldToScreen(pos);
-                if (parentForm.g_selectedMisc == this)
-                    gr.DrawRectangle(Pens.LightGreen, npt.X - SELECTION_DISTANCE, npt.Y - SELECTION_DISTANCE, 2.0f * SELECTION_DISTANCE, 2.0f * SELECTION_DISTANCE);
-                else
-                    gr.DrawRectangle(Pens.Green, npt.X - SELECTION_DISTANCE, npt.Y - SELECTION_DISTANCE, 2.0f * SELECTION_DISTANCE, 2.0f * SELECTION_DISTANCE);
-                gr.DrawString("Background", new Font("Arial", 8), Brushes.Green, npt.X - SELECTION_DISTANCE, npt.Y - SELECTION_DISTANCE);
-                for (int kk = 0; kk < listParams.Count / 2; kk++)
-                {
-                    string name = listParams[kk * 2] as string;
-                    string val = listParams[kk * 2 + 1] as string;
-                    gr.DrawString(name + ":" + val, new Font("Arial", 8), Brushes.Green, npt.X - SELECTION_DISTANCE, npt.Y - SELECTION_DISTANCE + 10 + kk * 10);
-                }
-            }
-
-            public override PointF GetOrigin()
-            {
-                return pos;
-            }
-
-            public override bool GetSelection(PointF pt)
-            {
-                if ((Math.Abs(pt.X - pos.X) < SELECTION_DISTANCE) && (Math.Abs(pt.Y - pos.Y) < SELECTION_DISTANCE))
-                {
-                    return true;
-                }
-                return false;
-            }
-            //pentru editare
-            public override void OnMouseDown(PointF pt)
-            {
-
-            }
-            public override void OnMouseMove(PointF pt)
-            {
-                pos = pt;
-            }
-        }
-
         //SCRIPT
         public class CMiscObject_Script : CMiscObjectBase
         {
@@ -405,15 +350,15 @@ namespace HexxEditor
 
 
         //FRONT LAYER
-        public class CMiscObject_FrontLayerObj : CMiscObjectBase
+        public class CMiscObject_SpawnPoint : CMiscObjectBase
         {
             public PointF pos; //pozitie icon
             //private
             const float SELECTION_DISTANCE = 20.0f;
 
-            public CMiscObject_FrontLayerObj()
+            public CMiscObject_SpawnPoint()
             {
-                type = K_MISC_FRONTLAYEROBJ;
+                type = K_MISC_SPAWNPOINT;
                 pos = new PointF(0.0f, 0.0f);
             }
 
@@ -428,13 +373,15 @@ namespace HexxEditor
                 gr.DrawLine(colpen, npt.X, npt.Y - SELECTION_DISTANCE, npt.X, npt.Y + SELECTION_DISTANCE);
                 gr.DrawLine(colpen, npt.X - SELECTION_DISTANCE, npt.Y, npt.X + SELECTION_DISTANCE, npt.Y);
 
-                gr.DrawString("FirstLayerObj", new Font("Arial", 8), Brushes.LightBlue, npt.X, npt.Y);
+                gr.DrawString("SPAWN", new Font("Arial", 8), Brushes.LightBlue, npt.X, npt.Y);
+                /*
                 for (int kk = 0; kk < listParams.Count / 2; kk++)
                 {
                     string name = listParams[kk * 2] as string;
                     string val = listParams[kk * 2 + 1] as string;
                     gr.DrawString(name + ":" + val, new Font("Arial", 8), Brushes.LightBlue, npt.X, npt.Y + 10 + kk * 10);
                 }
+                */
             }
 
             public override PointF GetOrigin()
@@ -472,7 +419,7 @@ namespace HexxEditor
             public CMiscObject_Rail()
             {
                 //set type
-                type = K_MISC_RAIL;
+                type = K_MISC_RAILS;
                 //set others
                 listPoints = new ArrayList();
                 selectedNodeIdx = -1;
@@ -1562,7 +1509,7 @@ namespace HexxEditor
         public const byte K_MACRO_FRONT_TEAM_DOOR = 4; //usa inchisa care asteapta echipa
         public const byte K_MACRO_FRONT_SOLO_STAIRS = 5;
         public const byte K_MACRO_FRONT_SOLO_DOOR = 6; 
-        public const byte K_MACRO_SPAWNPOINT = 7; //checkpoint
+        public const byte K_MACRO_SPAWNPOINT_UNUSED = 7; //not used
         public const byte K_MACRO_WINDOW_PROFILE = 8;
         public const byte K_MACRO_WINDOW_PROFILE_HORIZONTAL = 9;
         public const byte K_MACRO_KEYCARD_GOLD = 10;
@@ -2262,16 +2209,6 @@ namespace HexxEditor
                             }
                         }
                         break;
-                    case K_MACRO_SPAWNPOINT:
-                        {
-                            int anmidx = g_sprObjects.GetAnimIdxByName("CHECKPOINT_OFF");
-                            int frameidx = 0;
-                            if (anmidx >= 0)
-                            {
-                                g_sprObjects.anims[anmidx].aframes[frameidx].frame.Paint(pbGr, (float)objcur.X - cameraPos.X, (float)objcur.Y - cameraPos.Y);
-                            }
-                        }
-                        break;
                 }
             }
             else if (g_brushMode == BRUSH_MODE_PREFABS)
@@ -2843,7 +2780,7 @@ namespace HexxEditor
                         {
                             switch (g_brushValue)
                             {
-                                case K_MISC_RAIL:
+                                case K_MISC_RAILS:
                                     CMiscObject_Rail newrail = new CMiscObject_Rail();
                                     newrail.ID = GetUniqueID();
 
@@ -2871,41 +2808,20 @@ namespace HexxEditor
                                     g_selectedMisc.OnMouseDown(cursorPosF);
                                     break;
 
-                                case K_MISC_BACKGROUND:
-                                    g_brushValue = -1;
-                                    /*
-                                     * //this adds a background object on click (not needed anymore)
-                                    CMiscObject_Background newbg = new CMiscObject_Background();
-                                    newbg.ID = GetUniqueID();
-                                    newbg.pos = cursorPosF;
-                                    //params
-                                    newbg.listParams.Add("str_bsx"); //name
-                                    newbg.listParams.Add(".bsx"); //val
-                                    newbg.listParams.Add("str_anim"); //name
-                                    newbg.listParams.Add("SET_BG_ANIM"); //val
-                                    newbg.listParams.Add("str_water_anim"); //name
-                                    newbg.listParams.Add("SET_WATER_ANIM"); //val
 
-                                    arrMisc.Add(newbg);
-                                    g_selectedMisc = newbg;
-
-                                    g_wndMisc.SetSelectedMisc(g_selectedMisc);
-
-                                    g_selectedMisc.OnMouseDown(cursorPosF);
-                                    */
-                                    break;
-
-                                case K_MISC_FRONTLAYEROBJ:
-                                    CMiscObject_FrontLayerObj newflo = new CMiscObject_FrontLayerObj();
+                                case K_MISC_SPAWNPOINT:
+                                    CMiscObject_SpawnPoint newflo = new CMiscObject_SpawnPoint();
                                     newflo.ID = GetUniqueID();
                                     newflo.pos = cursorPosF;
                                     //params
+                                    /*
                                     newflo.listParams.Add("strAnim"); //name
                                     newflo.listParams.Add("NEARCAMERA"); //val
                                     newflo.listParams.Add("nFrame"); //name
                                     newflo.listParams.Add("0"); //val
-
+                                    */
                                     arrMisc.Add(newflo);
+                                    
                                     g_selectedMisc = newflo;
 
                                     g_wndMisc.SetSelectedMisc(g_selectedMisc);
@@ -2928,7 +2844,7 @@ namespace HexxEditor
                     {
                         switch (g_selectedMisc.type)
                         {
-                            case K_MISC_RAIL:
+                            case K_MISC_RAILS:
                                 g_selectedMisc.OnMouseDown(cursorPosF);
                                 break;
                         }
@@ -3401,39 +3317,6 @@ namespace HexxEditor
                                 nobj.logic.listAIparams.Add("0.0");
 
                                 MessageBox.Show("Don't forget to set the targetID of the paired door!\r\n If you want to add a slow motion room try the Prefabs tab.");
-                            }
-                            break;
-                        case K_MACRO_SPAWNPOINT:
-                            {
-                                int anmidx = g_sprObjects.GetAnimIdxByName("CHECKPOINT_OFF");
-                                if (anmidx < 0)
-                                {
-                                    MessageBox.Show("Animation CHECKPOINT not found or object sprites not loaded!");
-                                    break;
-                                }
-
-                                //Add object
-                                CObject nobj = new CObject();
-                                nobj.ID = GetUniqueID();
-                                nobj.pos.X = clickpt.X;
-                                nobj.pos.Y = clickpt.Y;
-                                nobj.layer = 1;
-                                nobj.animIdx = anmidx;
-                                nobj.frameIdx = 0;
-                                nobj.logic.bStartHidden = true;
-
-                                arrObjects.Add(nobj);
-
-                                //set AI
-                                nobj.logic.strAIname = "AI_ACTIVE_CHECKPOINT";
-                                nobj.logic.listAIparams.Add("n_isFirst");
-                                nobj.logic.listAIparams.Add("1");
-
-                                nobj.logic.targetID = -1;
-                                nobj.logic.strActions = "TOUCH_CHECKPOINT";
-                                nobj.logic.bCanInteract = false;
-                                nobj.logic.bHideInteractIcon = false;
-                                nobj.logic.nInteractTimer = 0;
                             }
                             break;
                     }
@@ -4313,7 +4196,7 @@ namespace HexxEditor
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("BreacherSquad Levels Editor\nv1.0.2 from 01-May-2025\n(c)2025 PixelShard", "About", MessageBoxButtons.OK);
+            MessageBox.Show("BreacherSquad Levels Editor\nv1.0.3 - 27-May-2025\n(c)2025 PixelShard", "About", MessageBoxButtons.OK);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4888,7 +4771,7 @@ namespace HexxEditor
                     //datele particulare
                     switch (baseobj.type)
                     {
-                        case K_MISC_RAIL:
+                        case K_MISC_RAILS:
                             CMiscObject_Rail rail = arrMisc[kk] as CMiscObject_Rail;
                             //nr de puncte
                             u2b = (UInt16)rail.listPoints.Count;
@@ -4913,19 +4796,9 @@ namespace HexxEditor
                                 bw.Write(s4b);
                             }
                             break;
-                        case K_MISC_BACKGROUND:
+                        case K_MISC_SPAWNPOINT:
                             {
-                                CMiscObject_Background back = arrMisc[kk] as CMiscObject_Background;
-                                PointF pos = (PointF)(back.pos);
-                                s4b = (Int32)((int)pos.X - (levelUL.X * TILE_WIDTH));
-                                bw.Write(s4b);
-                                s4b = (Int32)((int)pos.Y - (levelUL.Y * TILE_HEIGHT));
-                                bw.Write(s4b);
-                            }
-                            break;
-                        case K_MISC_FRONTLAYEROBJ:
-                            {
-                                CMiscObject_FrontLayerObj obj = arrMisc[kk] as CMiscObject_FrontLayerObj;
+                                CMiscObject_SpawnPoint obj = arrMisc[kk] as CMiscObject_SpawnPoint;
                                 PointF pos = (PointF)(obj.pos);
                                 s4b = (Int32)((int)pos.X - (levelUL.X * TILE_WIDTH));
                                 bw.Write(s4b);
@@ -5490,9 +5363,8 @@ namespace HexxEditor
                                 break;
                             switch (g_selectedMisc.type)
                             {
-                                case K_MISC_FRONTLAYEROBJ:
+                                case K_MISC_SPAWNPOINT:
                                 case K_MISC_SCRIPT:
-                                case K_MISC_BACKGROUND:
                                     {
                                         RemoveTargetFromAllChildren((int)g_selectedMisc.ID);
 
@@ -5503,7 +5375,7 @@ namespace HexxEditor
                                         RepaintAfterChange();
                                     }
                                     break;
-                                case K_MISC_RAIL:
+                                case K_MISC_RAILS:
                                     //daca am sters toate nodurile sterg railul
                                     CMiscObject_Rail rail = g_selectedMisc as CMiscObject_Rail;
                                     if (rail.listPoints.Count <= 0)
@@ -6151,9 +6023,9 @@ namespace HexxEditor
                     //datele particulare
                     switch (type)
                     {
-                        case K_MISC_FRONTLAYEROBJ:
+                        case K_MISC_SPAWNPOINT:
                             {
-                                CMiscObject_FrontLayerObj back = new CMiscObject_FrontLayerObj();
+                                CMiscObject_SpawnPoint back = new CMiscObject_SpawnPoint();
                                 back.ID = mob.ID;
                                 back.listParams = mob.listParams;
 
@@ -6192,28 +6064,7 @@ namespace HexxEditor
                                 arrMisc.Add(scr);
                             }
                             break;
-                        case K_MISC_BACKGROUND:
-                            {
-                                CMiscObject_Background back = new CMiscObject_Background();
-                                back.ID = mob.ID;
-                                back.listParams = mob.listParams;
-
-                                PointF npos = new PointF();
-                                npos.X = (float)bw.ReadInt32();
-                                if (npos.X < 0) npos.X = 0; if (npos.X > levelw * TILE_WIDTH) npos.X = levelw * TILE_WIDTH;
-                                npos.X += LOCAL_OFFSET.X * TILE_WIDTH;
-
-                                npos.Y = (float)bw.ReadInt32();
-                                if (npos.Y < 0) npos.Y = 0; if (npos.Y > levelh * TILE_HEIGHT) npos.Y = levelh * TILE_HEIGHT;
-                                npos.Y += LOCAL_OFFSET.Y * TILE_HEIGHT;
-
-
-                                back.pos = npos;
-
-                                arrMisc.Add(back);
-                            }
-                            break;
-                        case K_MISC_RAIL:
+                        case K_MISC_RAILS:
                             {
                                 CMiscObject_Rail rail = new CMiscObject_Rail();
                                 rail.ID = mob.ID;
@@ -6540,7 +6391,7 @@ namespace HexxEditor
                 }
                 else if (g_selectedMisc != null)
                 {
-                    if (g_selectedMisc.type == K_MISC_RAIL)
+                    if (g_selectedMisc.type == K_MISC_RAILS)
                     {
                         CMiscObject_Rail rail = g_selectedMisc as CMiscObject_Rail;
                         if (rail.selectedNodeIdx >= 0)
@@ -6557,37 +6408,6 @@ namespace HexxEditor
                         SetStatusBarMessage("MISC OBJECT [ID " + g_selectedMisc.ID + "]");
                 }
             }
-        }
-
-        // Gets the already set background misc element AI data
-        public ArrayList GetLevelBackgroundData()
-        {
-            CMiscObject_Background objbg = null;
-            for (int kk = 0; kk < arrMisc.Count; kk++)
-            {
-                CMiscObjectBase mob = arrMisc[kk] as CMiscObjectBase;
-                if (mob.type == K_MISC_BACKGROUND)
-                {
-                    objbg = arrMisc[kk] as CMiscObject_Background;
-                    break;
-                }
-            }
-            //not found, add it now
-            if (objbg == null)
-            {
-                objbg = new CMiscObject_Background();
-                objbg.ID = GetUniqueID();
-                objbg.pos = gLevelOrigin;
-                objbg.listParams.Add("str_bsx"); //name
-                objbg.listParams.Add(".bsx"); //val
-                objbg.listParams.Add("str_anim"); //name
-                objbg.listParams.Add("SET_BG_ANIM"); //val
-                objbg.listParams.Add("str_water_anim"); //name
-                objbg.listParams.Add("SET_WATER_ANIM"); //val
-                arrMisc.Add(objbg);
-            }
-
-            return objbg.listParams;
         }
 
         // Sets the background AI data
