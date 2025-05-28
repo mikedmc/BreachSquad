@@ -205,14 +205,19 @@ void CLevel::BuildVisibilityLists()
 		for (int kk = 0; kk < area->m_arrProps.GetSize(); kk++)
 		{
 			CProp* prop = area->m_arrProps[ kk ];
-			if ((!prop->IsAlive()) || prop->bSkipRender)
+			if ( ( !prop->IsAlive() ) || prop->bSkipRender )
 				continue;
+			
 			//visible props
 			if (propsPaintAABB.Intersects(prop->bbox_cull))
 			{
 				m_visibleList.visible_props.Add(prop);
-				// add it to the sorted list adding paint order as decimals to combat z fighting
-				m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_PROP, prop, prop->pos.xyz.y + prop->paintOrderIdx / 10000.0f ));
+				// only sort objects on FLOOR DECO layers
+				if ( ( prop->editor_layer == K_TILE_LAYER_FLOOR_DECO1 ) || ( prop->editor_layer == K_TILE_LAYER_FLOOR_DECO2 ) )
+				{
+					// add it to the sorted list adding paint order as decimals to combat z fighting
+					m_visibleList.arrSortedItems.Add( CVisibleSortable( K_VST_PROP, prop, prop->pos.xyz.y + prop->editor_paintOrderIdx / 10000.0f ) );
+				}
 			}
 			//logical closeby actives
 			if ((propsNearbyAABBs[0].Intersects(prop->bbox_cull)) || (propsNearbyAABBs[1].Intersects(prop->bbox_cull)))

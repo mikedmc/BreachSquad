@@ -36,6 +36,7 @@ public:
 	SprFrameId				fid_ini;				// Initial animation and frame id
 	DWORD					flags;
 	CStringHash				shClass;				// class of prop kept as string for max flexibility
+	EEditorLayer				editor_layer;			// layer imported from editor
 
 	CProp( CLevel& refLevel, CPropAIComponent* pAIcomp );
 	~CProp();

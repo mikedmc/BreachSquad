@@ -38,7 +38,7 @@ public:
 	UINT32					UID;					// ingame UID
 	CLevelArea*				pArea;					// pointer to current area
 	int						ID;						// ID exported from editor (not the same as UID).
-	int						paintOrderIdx;			// Paint order saved like index from editor when importing object
+	int						editor_paintOrderIdx;			// Paint order saved like index from editor when importing object
 	VecProj					pos;					// Z coord gets added to Y to simulate 3D when rendering (see Z_TO_H macros)
 	VecProj					pos_ini;				// initial position needed for relative calculations. Usually only set when spawned.
 

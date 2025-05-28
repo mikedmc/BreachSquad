@@ -2,16 +2,24 @@
 
 ///--- TILE LAYERS ---
 // the ingame layers used for rendering
-enum eTileLayer {
+enum EEditorLayer {
+	K_TILE_LAYER_UNDEFINED = -1,
+
 	K_TILE_LAYER_UNDER_FLOOR = 0,
 	// main walkable floor tiles
-	K_TILE_LAYER_FLOOR = 1,
+	K_TILE_LAYER_FLOOR = 1, 
+	///----------------------------------------------------------------------------------
+	/// Objects on layers until here aren't sorted and are painted as they come
+	///----------------------------------------------------------------------------------
 	// mainly used for transitions
 	K_TILE_LAYER_FLOOR_DECO1,
 	// secondary decorations, over transitions
 	K_TILE_LAYER_FLOOR_DECO2,
+	///----------------------------------------------------------------------------------
+	/// Objects after this layer aren't sorted and are painted as they come
+	///----------------------------------------------------------------------------------
 	// vertical walls
-	K_TILE_LAYER_WALLS,
+	K_TILE_LAYER_WALLS, // objects on this layer don't get sorted
 	// vertical walls decorations
 	K_TILE_LAYER_WALLS_DECO,
 	// ceiling objects like pipes and other stuff that can cast shadows

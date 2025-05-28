@@ -2,7 +2,7 @@
 #include "Prop.h"
 
 CProp::CProp( CLevel& refLevel, CPropAIComponent* pAIcomp ) :
-	flags( 0 ), c_AI( pAIcomp ), level(refLevel)
+	flags( 0 ), c_AI( pAIcomp ), level(refLevel), editor_layer(K_TILE_LAYER_UNDEFINED)
 {
 
 }

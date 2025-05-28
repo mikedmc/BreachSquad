@@ -438,7 +438,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 				}
 
 				WCHAR tmppath[ MAX_PATH_STD ];
-				swprintf_s( tmppath, MAX_PATH_STD, L"media/levels/missions/01_01_slow_starters_V2_5x5.area");
+				swprintf_s( tmppath, MAX_PATH_STD, L"media/levels/missions/01_01_slow_starters_dmc.area");
 				FileManager::GetMediaPath( tmppath, strLevelPath );
 				if ( OP_FAILED( __Sim().LoadLevel_Static( strLevelPath ) ) )
 				{

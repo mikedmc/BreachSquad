@@ -4223,6 +4223,19 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	if ( pSprVS )
 		__Painter().Begin( pSprVS, matView, *matProj );
 
+	// paint non sorted floor and wall elements
+	for ( int kk = 0; kk < m_visibleList.visible_props.nCount; kk++ )
+	{
+		CProp* prop = m_visibleList.visible_props[kk];
+		if ( ( prop->editor_layer == K_TILE_LAYER_UNDER_FLOOR ) ||
+			( prop->editor_layer == K_TILE_LAYER_FLOOR ) ||
+			( prop->editor_layer == K_TILE_LAYER_WALLS ) ||
+			( prop->editor_layer == K_TILE_LAYER_WALLS_DECO ) )
+		{
+			prop->sprite.PaintFModule_texOverride( 0, nTexIdxOffset );
+		}
+	}
+	// paint sortable elements
 	eVisibleSortableType eLastVis = K_VST_UNKNOWN;
 	for ( int kk = 0; kk < m_visibleList.arrSortedItems.nCount; kk++ )
 	{
