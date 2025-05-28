@@ -683,8 +683,9 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 	{
 		CLight *nl = new CLight( new CPropAIComponent() );
 		nl->m_nLightMeshIdx = -1;
-
 		nl->ID = unBaseID + OS_freadUInt32( fl );
+		nl->paintOrderIdx = kk;
+
 		nl->type = (eLightType)OS_freadByte( fl ); //tip lumina
 		int nVolumeAttenuationPerc = (int)OS_freadUInt32( fl );
 		nl->fVolumeAlpha = 1.0f - (float)nVolumeAttenuationPerc / 100.0f;
@@ -769,6 +770,7 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 	{
 		CCollisionShape* colobj = new CCollisionShape( new CPropAIComponent() );
 		colobj->ID = unBaseID + OS_freadUInt32( fl );
+		colobj->paintOrderIdx = kk;
 
 		Vec2 cmin, cmax;
 		cmin.x = (float)OS_freadInt32( fl ); cmin.y = (float)OS_freadInt32( fl ); //XY
@@ -811,6 +813,7 @@ OPRESULT CLevel::DeployAreaInstance( PDEVICE pDevice, WCHAR * strPathAbs, UINT32
 		CProp* obj = new CProp( *this, new CPropAIComponent() );
 
 		obj->ID = unBaseID + OS_freadUInt32( fl );
+		obj->paintOrderIdx = kk;
 		//load layer from editor (not used atm)
 		BYTE nLayer = OS_freadByte( fl );
 		//position (used to load UINT32)

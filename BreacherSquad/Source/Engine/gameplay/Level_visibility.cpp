@@ -211,8 +211,8 @@ void CLevel::BuildVisibilityLists()
 			if (propsPaintAABB.Intersects(prop->bbox_cull))
 			{
 				m_visibleList.visible_props.Add(prop);
-				// add it to the sorted list
-				m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_PROP, prop, prop->pos.xyz.y));
+				// add it to the sorted list adding paint order as decimals to combat z fighting
+				m_visibleList.arrSortedItems.Add(CVisibleSortable(K_VST_PROP, prop, prop->pos.xyz.y + prop->paintOrderIdx / 10000.0f ));
 			}
 			//logical closeby actives
 			if ((propsNearbyAABBs[0].Intersects(prop->bbox_cull)) || (propsNearbyAABBs[1].Intersects(prop->bbox_cull)))

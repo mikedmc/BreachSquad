@@ -2,7 +2,7 @@
 #include "ActiveInterface.h"
 
 IActiveInterface::IActiveInterface() :
-	ID( -1 ), targetID_ini( -1 ), bEnabled( true ), bSetEnabled( true ), bSkipRender( false ), bAnimated( false ),
+	ID( -1 ), paintOrderIdx(0), targetID_ini( -1 ), bEnabled( true ), bSetEnabled( true ), bSkipRender( false ), bAnimated( false ),
 	AIstate( K_AI_STATE_UNDEFINED ),
 	color( 0xffffffff ), color_ini( 0xffffffff ),
 	bTouching( false ), nTouchingUID( 0 ),
