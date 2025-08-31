@@ -13,8 +13,8 @@ void CActor::PostConstructionInit()
 
 void CActor::BeginPlay()
 {
-	//pArea = level->Areas_GetAt( pos.xy );
-	//_ASSERT(pArea != nullptr);
+	pArea = level->Areas_GetAt( pos.xy );
+	_ASSERT(pArea != nullptr);
 	c_graphics->SetAnimOnce(K_ACT_ANIM_IDLE);
 	SetEnabled( true, true );
 }

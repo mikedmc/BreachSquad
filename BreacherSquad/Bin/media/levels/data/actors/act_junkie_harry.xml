@@ -56,7 +56,7 @@
 
 		<BEHAVIORS>
 		  <BEHAVIOR name="AI_BEHAVIOR_SURPRISED" fWaitTimer="0.25" />
-		  <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="true" />
+		  <BEHAVIOR name="AI_BEHAVIOR_ATTACK" bCanInterrupt="false" />
 		</BEHAVIORS>
 	  </STATE>
 	

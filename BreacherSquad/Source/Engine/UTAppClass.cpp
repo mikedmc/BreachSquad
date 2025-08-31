@@ -32,7 +32,7 @@ CApplicationSettings::CApplicationSettings()
 	dev_unCurrentModsCRC = 0;
 
 	//LANG/LOCA	- default on english
-	shLanguageAlias.Reset();
+	shLanguageAlias.Init("notset");
 
 #if defined(_DEBUG) || defined(DEBUG)
 	dev_bDebugEnabled = true;
