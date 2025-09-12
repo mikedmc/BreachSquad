@@ -4070,6 +4070,160 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 	}
 
+	///----------------------------------------------------
+	/// START GI
+	/// 1. build occluders/emitters map
+	/// 2. apply voronoi seed PS on 1
+	/// 3. apply multipass voronoi on (starting with) 2
+	/// 4. convert voronoi from 3 to SDF
+	///----------------------------------------------------
+
+
+	///----------------------------------------------------
+	/// 1. build occluders/emitters map
+	///----------------------------------------------------
+	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
+	if ( pRT != null )
+	{
+		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
+		{
+			Mat matView;
+			// Clear the render target and the zbuffer 
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0x00000000, 1.0f, 0 ) ) )
+			{
+				return K_OP_FAILED;
+			}
+			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
+			m_pDevice->SetTransform( D3DTS_VIEW, &matView );
+			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+
+			RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
+			CAABB			camAABB( camrect );
+
+			///--- BEGIN SPRITES PAINTER ---
+			MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
+			ETexChannel	eTexChannel = K_TEXCHAN_COLORMAP;
+			Mat matWVP = matView * pRT->matProj;
+			// begin the painter
+
+			PVERTEXSHADER pSprVS = __Shaders().GetVShaderByName( L"VS_SPRITES2D" );
+			if ( pSprVS )
+				__Painter().Begin( pSprVS, matView, pRT->matProj );
+
+			//__Shaders().SetPSByName(L"PS_VORONOI_SEED");
+			for ( int kk = 0; kk < m_visibleList.arrSortedItems.nCount; kk++ )
+			{
+				CVisibleSortable* vis = &m_visibleList.arrSortedItems.m_pData[kk];
+
+				switch ( vis->eType )
+				{
+					case K_VST_PROP:
+					{
+						CProp* prop = static_cast<CProp*>( vis->pPtr );
+						prop->sprite.PaintFModule_texOverride( 0, 0 );
+					}
+					break;
+					default:
+						break;
+				}
+			}
+
+			__Painter().Flush();
+			__Painter().End();
+
+			//__Shaders().SetPS(nullptr);
+
+			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+		}
+	}
+	///----------------------------------------------------
+	/// 2. apply voronoi seed PS on 1
+	///----------------------------------------------------
+	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP2 );
+	if ( pRT != null )
+	{
+		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
+		{
+			// Clear the render target and the zbuffer 
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0xffff0000, 1.0f, 0 ) ) )
+			{
+				return K_OP_FAILED;
+			}
+
+			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
+			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
+
+			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+			m_pDevice->SetTransform( D3DTS_VIEW, &g_matIdentity );
+
+			// RT sized quad with tex1 color, tex2 lightmap
+
+			Mat				matView;
+			///----------------------------------------------------
+			/// INITIAL SETUP
+			///----------------------------------------------------
+			m_pDevice->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_FLAT );
+
+			m_pDevice->SetRenderState( D3DRS_ZENABLE, FALSE );
+			m_pDevice->SetRenderState( D3DRS_ZWRITEENABLE, FALSE );
+			m_pDevice->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+
+			m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT );
+			m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
+			m_pDevice->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_NONE );
+
+
+			MUMatIdentity( &matView );
+			m_pDevice->SetTransform( D3DTS_VIEW, &matView );
+			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+
+			///--- compose scene from normals and color ---
+			PVERTEXSHADER pVShader = null;
+			PPIXELSHADER pPShader = null;
+			Mat matWVP = matView * pRT->matProj;
+
+			CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
+			_ASSERT( pRTcolor != nullptr );
+			m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
+
+			//--- build RT rect ---
+			_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+			vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+			vur.pos = Vec3( (float)pRTcolor->nWidth, 0.0f, 0.0f );
+			vdl.pos = Vec3( 0.0f, (float)pRTcolor->nHeight, 0.0f );
+			vdr.pos = Vec3( (float)pRTcolor->nWidth, (float)pRTcolor->nHeight, 0.0f );
+
+			vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+			vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+			vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+			vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+			//set color
+			vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
+			//build verts
+			_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+			lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+			lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+			pVShader = __Shaders().GetVShaderByName( L"VS_COMPOSITION" );
+			m_pDevice->SetVertexShader( pVShader );
+			m_pDevice->SetVertexDeclaration( __Shaders()._VERTEX_PNCT4T4_decl );
+			m_pDevice->SetVertexShaderConstantF( 0, (float*)&matWVP, 4 );
+
+			pPShader = __Shaders().GetPShaderByName( L"PS_VORONOI_SEED" );
+			m_pDevice->SetPixelShader( pPShader );
+
+			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+			// remove VS PS
+			m_pDevice->SetVertexShader( nullptr );
+			m_pDevice->SetPixelShader( nullptr );
+
+			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+
+		}
+
+	}
+
+
 
 	return K_OP_OK;
 }

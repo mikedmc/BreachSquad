@@ -1,14 +1,5 @@
 #pragma once
 
-
-//--- RTT ---
-//TODO: daca nu am nevoie de toate cadranele poate incerc 2 RT-uri de 512 sau unul de 1024x512
-#define K_RTT_WIDTH	1024
-#define K_RTT_HEIGHT 1024
-//half sizes
-#define K_RTT_H_WIDTH 512
-#define K_RTT_H_HEIGHT 512
-
 //--- occluders ---
 #define K_LVL_MAX_OCCLUDERS_CNT 200
 //more accurate aiming when crouched (percent multiplied with error)

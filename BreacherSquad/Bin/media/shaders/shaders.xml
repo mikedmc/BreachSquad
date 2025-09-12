@@ -15,5 +15,6 @@
     <PixelShader name="PS_IESLIGHT" path="ps_ieslight.pso" />
     <PixelShader name="PS_DIRECTIONAL" path="ps_directional.pso" />
     <PixelShader name="PS_WATER" path="ps_water.pso" />
+    <PixelShader name="PS_VORONOI_SEED" path="ps_voronoi_seed.pso" />
   </PixelShaders>
 </Shaders>
