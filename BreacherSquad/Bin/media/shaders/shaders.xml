@@ -16,5 +16,6 @@
     <PixelShader name="PS_DIRECTIONAL" path="ps_directional.pso" />
     <PixelShader name="PS_WATER" path="ps_water.pso" />
     <PixelShader name="PS_VORONOI_SEED" path="ps_voronoi_seed.pso" />
+    <PixelShader name="PS_VORONOI_MULTIPASS" path="ps_voronoi_multipass.pso" />
   </PixelShaders>
 </Shaders>

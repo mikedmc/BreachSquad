@@ -4158,10 +4158,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 			// RT sized quad with tex1 color, tex2 lightmap
 
-			Matrix				matView;
-			///----------------------------------------------------
-			/// INITIAL SETUP
-			///----------------------------------------------------
+			Matrix matView;
 			m_pDevice->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_FLAT );
 
 			m_pDevice->SetRenderState( D3DRS_ZENABLE, FALSE );
@@ -4178,8 +4175,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 
 			///--- compose scene from normals and color ---
-			PVERTEXSHADER pVShader = null;
-			PPIXELSHADER pPShader = null;
 			Matrix matWVP = matView * pRT->matProj;
 
 			CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
@@ -4204,18 +4199,16 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 			lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
-			pVShader = __Shaders().GetVShaderByName( L"VS_COMPOSITION" );
-			m_pDevice->SetVertexShader( pVShader );
-			m_pDevice->SetVertexDeclaration( __Shaders()._VERTEX_PNCT4T4_decl );
-			m_pDevice->SetVertexShaderConstantF( 0, (float*)&matWVP, 4 );
+			__Shaders().SetVSByName( L"VS_COMPOSITION" );
+			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 
-			pPShader = __Shaders().GetPShaderByName( L"PS_VORONOI_SEED" );
-			m_pDevice->SetPixelShader( pPShader );
+			__Shaders().SetPSByName( L"PS_VORONOI_SEED" );
 
 			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
 			// remove VS PS
-			m_pDevice->SetVertexShader( nullptr );
-			m_pDevice->SetPixelShader( nullptr );
+			__Shaders().SetPS( nullptr );
+			__Shaders().SetVS( nullptr );
 
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 
@@ -4223,7 +4216,82 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 	}
 
+	///----------------------------------------------------
+	/// 3. apply multipass voronoi on (starting with) 2
+	///----------------------------------------------------
 
+
+	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP2 );
+	int passes = ceil( log( max( pRT->nWidth, pRT->nHeight ) ) / log( 2.0 ) );
+
+	Matrix matView;
+	MUMatIdentity( &matView );
+	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
+	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+
+	///--- compose scene from normals and color ---
+	Matrix matWVP = matView * pRT->matProj;
+
+	//--- build RT rect ---
+	_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+	vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+	vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+	vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+	vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+	vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+	vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+	vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+	vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+	//set color
+	vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
+	//build verts
+	_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+	lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+	lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+	Vec2 vScreenPixelSize( 1.0f / (float)pRT->nWidth, 1.0f / (float)pRT->nHeight );
+	// we start witn TEMP2 as src (voronoi seed in it) and paint to TEMP1
+	UINT32 arr_swap_rt[] = { K_RTID_TEMP1 , K_RTID_TEMP2 };
+	for ( int i = 0; i < passes; i++ ) {
+		// offset for each pass is half the previous one, starting at half the square resolution rounded up to nearest power 2.
+		// i.e. for 768x512 we round up to 1024x1024 and the offset for the first pass is 512x512, then 256x256, etc.
+		float offset = pow( 2, passes - i - 1 );
+
+		CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( arr_swap_rt[(i + 1) % 2] );
+		m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
+
+		pRT = __RTManager().GetRTbyUID( arr_swap_rt[i % 2] );
+		if ( pRT != null )
+		{
+			if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
+			{
+				__Shaders().SetVSByName( L"VS_COMPOSITION" );
+				__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+				__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+
+				__Shaders().SetPSByName( L"PS_VORONOI_MULTIPASS" );
+				//set Pshader constants
+				float fConstData[][4] = {
+					// x: texture offset
+					{ offset, 0.0f, 0.0f, 0.0f},
+					// xy: inverse of RT resolution
+					{ vScreenPixelSize.x, vScreenPixelSize.y, .0f, .0f },
+				};
+				__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+
+				m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+
+
+				// remove VS PS
+				__Shaders().SetPS( nullptr );
+				__Shaders().SetVS( nullptr );
+
+				V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+			}
+		}
+
+	}
 
 	return K_OP_OK;
 }
@@ -4839,24 +4907,22 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 	lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
-	pVShader = __Shaders().GetVShaderByName( L"VS_COMPOSITION" );
-	m_pDevice->SetVertexShader( pVShader );
-	m_pDevice->SetVertexDeclaration( __Shaders()._VERTEX_PNCT4T4_decl );
-	m_pDevice->SetVertexShaderConstantF( 0, (float*)&matWVP, 4 );
+	__Shaders().SetVSByName( L"VS_COMPOSITION" );
+	__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+	__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 
-	pPShader = __Shaders().GetPShaderByName( L"PS_COMPOSITION" );
-	m_pDevice->SetPixelShader( pPShader );
+	__Shaders().SetPSByName( L"PS_COMPOSITION" );
 	// set Pshader constants
 	float fGamma = 2.2f;
 	float fConstData[][4] = {
 		// x:gamma, y:1.0f/gamma
 		{ fGamma, 1.0f / fGamma, ct_fLightMul, ct_fColorDodge}
 	};
-	m_pDevice->SetPixelShaderConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+	__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 	m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
 	// remove VS PS
-	m_pDevice->SetVertexShader( nullptr );
-	m_pDevice->SetPixelShader( nullptr );
+	__Shaders().SetVS( nullptr );
+	__Shaders().SetPS( nullptr );
 
 	return K_OP_OK;
 }
