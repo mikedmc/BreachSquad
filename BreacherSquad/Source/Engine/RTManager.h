@@ -26,7 +26,7 @@ public:
 		FORMAT3D				dwTexFormat;
 		FORMAT3D				dwDepthStencilFormat;
 
-		Mat						matProj;				// Projection matrix specific to this RT
+		Matrix						matProj;				// Projection matrix specific to this RT
 
 		CEngineRenderTarget() :
 			m_pRenderToSurface(nullptr), m_pRTTexture(nullptr), m_pRTSurface(nullptr),

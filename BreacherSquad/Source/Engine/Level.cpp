@@ -4087,7 +4087,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
-			Mat matView;
+			Matrix matView;
 			// Clear the render target and the zbuffer 
 			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0x00000000, 1.0f, 0 ) ) )
 			{
@@ -4103,7 +4103,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			///--- BEGIN SPRITES PAINTER ---
 			MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
 			ETexChannel	eTexChannel = K_TEXCHAN_COLORMAP;
-			Mat matWVP = matView * pRT->matProj;
+			Matrix matWVP = matView * pRT->matProj;
 			// begin the painter
 
 			PVERTEXSHADER pSprVS = __Shaders().GetVShaderByName( L"VS_SPRITES2D" );
@@ -4158,7 +4158,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 			// RT sized quad with tex1 color, tex2 lightmap
 
-			Mat				matView;
+			Matrix				matView;
 			///----------------------------------------------------
 			/// INITIAL SETUP
 			///----------------------------------------------------
@@ -4180,7 +4180,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			///--- compose scene from normals and color ---
 			PVERTEXSHADER pVShader = null;
 			PPIXELSHADER pPShader = null;
-			Mat matWVP = matView * pRT->matProj;
+			Matrix matWVP = matView * pRT->matProj;
 
 			CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
 			_ASSERT( pRTcolor != nullptr );
@@ -4228,17 +4228,17 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	return K_OP_OK;
 }
 
-OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenFramesPercent )
+OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Matrix* matProj, float fBetweenFramesPercent )
 {
 	_ASSERT( ( ePass > K_LVL_RP_NONE ) && ( ePass < K_LVL_RP_COUNT ) );
 
-	Mat	matView;
+	Matrix	matView;
 
 	RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
 	CAABB			camAABB( camrect );
 
 	//locally used temp matrix
-	Mat	matlocal;
+	Matrix	matlocal;
 
 	///----------------------------------------------------
 	/// INITIAL SETUP
@@ -4273,7 +4273,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 
-	Mat matWVP = matView * ( *matProj );
+	Matrix matWVP = matView * ( *matProj );
 
 	__Shaders().SetVS( nullptr );
 	__Shaders().SetPS( nullptr );
@@ -4458,9 +4458,9 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenF
 	return K_OP_OK;
 }
 
-OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
+OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent )
 {
-	Mat				matView;
+	Matrix				matView;
 
 	RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
 	CAABB			camAABB( camrect );
@@ -4504,7 +4504,7 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	//PVERTEXSHADER pVShader = null;
 	//PPIXELSHADER pPShader = null;
 	// matWVP is used by level
-	Mat matWVP = matView * ( *matProj );
+	Matrix matWVP = matView * ( *matProj );
 	// begin the painter
 	PVERTEXSHADER pSprVS = __Shaders().GetVShaderByName( L"VS_SPRITES2D" );
 	if ( pSprVS )
@@ -4776,9 +4776,9 @@ OPRESULT CLevel::RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent )
 	return K_OP_OK;
 }
 
-OPRESULT CLevel::RenderPass_Composition( Mat* matProj, float fBetweenFramesPercent )
+OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPercent )
 {
-	Mat				matView;
+	Matrix				matView;
 	///----------------------------------------------------
 	/// INITIAL SETUP
 	///----------------------------------------------------
@@ -4813,7 +4813,7 @@ OPRESULT CLevel::RenderPass_Composition( Mat* matProj, float fBetweenFramesPerce
 	///--- compose scene from normals and color ---
 	PVERTEXSHADER pVShader = null;
 	PPIXELSHADER pPShader = null;
-	Mat matWVP = matView * ( *matProj );
+	Matrix matWVP = matView * ( *matProj );
 
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
 	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
@@ -4893,7 +4893,7 @@ OPRESULT CLevel::PaintGameFinalRT()
 	float fRTscale = nPixelScaling;
 	//#TODO: when using NON PIXEL PERFECT scaling just scale the whole RT (keeping the aspect ratio)
 	//float fRTscale = (float)rectRender.h / (float)pRTfinal->nHeight;
-	Mat matpaint;
+	Matrix matpaint;
 	// computes sub pixel offsets for smooth scrolling. the RT renders only on tileset pixels, no subpixels, for precision.
 	// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
 	RectXYWH camrect = m_camLevelToRT.GetCamWorldAABB();
@@ -4915,7 +4915,7 @@ OPRESULT CLevel::PaintOverGameLayer()
 {
 	//get camera data
 	RectXYWH	camrect = m_camLevelToScr.GetCamWorldAABB();
-	Mat			matCam = m_camLevelToScr.GetViewTransform();
+	Matrix			matCam = m_camLevelToScr.GetViewTransform();
 	CAABB		camAABB( camrect );
 
 	__Painter().SetViewTransform( matCam );
@@ -5032,7 +5032,7 @@ OPRESULT CLevel::PaintGUILayer()
 {
 	//get camera data
 	RectXYWH	camrect = UTApp().g_camRTScreen.GetCamWorldAABB();
-	Mat			matCam = UTApp().g_camRTScreen.GetViewTransform();
+	Matrix			matCam = UTApp().g_camRTScreen.GetViewTransform();
 	CAABB		camAABB( camrect );
 
 	__Painter().SetViewTransform( matCam );

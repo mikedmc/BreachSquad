@@ -131,7 +131,7 @@ public:
 	float			g_nPixelSizePP;		//#TODO: change to float for when not using pixel perfect. Pixel size in real pixels for when rendering with perfect pixel
 	RectXYWH		g_rectRT;			// render target render rectangle
 	RectXYWH		g_rect360hWorld;	// world rect for menus and interfaces. W Computed depending on screen spect ratio.
-	Mat				g_matProj;			// projection matrix
+	Matrix				g_matProj;			// projection matrix
 	//--- screen camera ---
 	CCameraTransform g_camScreen;		//real screen camera
 	CCameraTransform g_camRTScreen;		//game screen camera with height of RT targets (RT to screen)

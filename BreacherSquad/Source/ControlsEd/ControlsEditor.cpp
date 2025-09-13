@@ -1351,8 +1351,8 @@ void CControlsEditor::Paint()
 		Vec2i lpos = currLayer->GetPos();
 		Vec2 vecRenderCenter( UTApp().g_rectRender.CenterX(), UTApp().g_rectRender.CenterY() );
 
-		Mat mcam = camera.GetViewTransform();
-		Mat matscroll;
+		Matrix mcam = camera.GetViewTransform();
+		Matrix matscroll;
 		Vec2 scrCenter( vecRenderCenter.x + offset.x + lpos.x, vecRenderCenter.y + offset.y + lpos.y );
 		scrCenter = camera.ScreenToWorld( scrCenter );
 		MUMatAffine2D( &matscroll, 1.0f, NULL, 0.0f, &scrCenter );

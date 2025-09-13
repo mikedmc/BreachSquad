@@ -145,7 +145,7 @@ public:
 	// Initializes specific vars based on control type
 	void				Reset();
 	void				Update( float dTime, float fTimeline );
-	void				Paint( CCameraTransform	* pCamera, Mat * matWorld );
+	void				Paint( CCameraTransform	* pCamera, Matrix * matWorld );
 	//Initializes the control clone after parameters get set
 	void				Initialize();
 	// Handles input commands

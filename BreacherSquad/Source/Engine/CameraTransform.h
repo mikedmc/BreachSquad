@@ -25,7 +25,7 @@ class CCameraTransform
 private:
 	RectXYWH					m_Viewport;			// viewport in screen coords (rectangle on screen where we show the contents)
 	float						fLocalTimeLine;
-	Mat							m_matView;
+	Matrix							m_matView;
 
 	ECamAnimType				m_animType;			// type of camera animation
 	float						m_k1, m_k2;			// animation constants
@@ -99,7 +99,7 @@ public:
 	ECamMoveStatus  Update(float dTime, bool userHasInput = false, Vec3 inputDelta = Vec3(0.0f, 0.0f, 0.0f) );
 	///--- GET ---
 	//functiile GET trebuiesc chemate dupa Update
-	FORCEINLINE Mat & GetViewTransform() { return m_matView; }
+	FORCEINLINE Matrix & GetViewTransform() { return m_matView; }
 	FORCEINLINE const Vec3 & GetCamPos() const { return m_vecRealLookAt; }
 	// Gets the visible rectangle in world coordinates
 	FORCEINLINE const RectXYWH &	GetCamWorldAABB() const { return m_camWorldAABB; }

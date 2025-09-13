@@ -38,8 +38,8 @@ Vec2						g_vecGravityOld;					//gravity
 Vec3						g_vecGravity;						//gravity
 
 ID3DXSprite* g_pGameSprite = nullptr;			//Main Sprite class 
-Mat							g_matIdentity;						//identity matrix
-Mat							g_matWorld;							//world matrix
+Matrix							g_matIdentity;						//identity matrix
+Matrix							g_matWorld;							//world matrix
 
 CLog* g_pLog;								//log class
 
@@ -1722,7 +1722,7 @@ void CALLBACK OnFrameRender( PDEVICE pDevice, double fTime, float fElapsedTime )
 		// only start and end UTPainter after we preloaded the minimum painter shaders
 		if ( GameState::state > GAME_STATE_PRELOAD )
 		{
-			Mat matview = UTApp().g_cam360hScreen.GetViewTransform();
+			Matrix matview = UTApp().g_cam360hScreen.GetViewTransform();
 
 			PVERTEXSHADER pSprVS = __Shaders().GetVShaderByName( L"VS_SPRITES2D" );
 			if ( pSprVS )

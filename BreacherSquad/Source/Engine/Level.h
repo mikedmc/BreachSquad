@@ -341,11 +341,11 @@ public:
 	// fBetweenFramesPercent is the time accumulator remainder after updateing full simulation fixed steps so we can extrapolate positions and eliminate stutter
 	OPRESULT				PaintDeferredBuffers( float fBetweenFramesPercent );
 	// renders level pass
-	OPRESULT				RenderPass( eLVLRenderPass ePass, Mat* matProj, float fBetweenFramesPercent );
+	OPRESULT				RenderPass( eLVLRenderPass ePass, Matrix* matProj, float fBetweenFramesPercent );
 	// the lights pass is so very different that it needs a special function
-	OPRESULT				RenderPass_Lights( Mat* matProj, float fBetweenFramesPercent );
+	OPRESULT				RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent );
 	// composes color and lights into one RT
-	OPRESULT				RenderPass_Composition( Mat* matProj, float fBetweenFramesPercent );
+	OPRESULT				RenderPass_Composition( Matrix* matProj, float fBetweenFramesPercent );
 
 	// paint level buffers onscreen
 	void					Paint();

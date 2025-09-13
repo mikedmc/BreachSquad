@@ -461,7 +461,7 @@ void CLevel::PaintDoofers( eLVLRenderPass pass )
 	if ( pass != K_LVL_RP_COLORS )
 		return;
 
-	Mat mattrans;
+	Matrix mattrans;
 
 	for(auto node : m_poolDoofers)
 	{

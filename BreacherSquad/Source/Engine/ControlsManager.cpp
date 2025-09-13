@@ -1410,7 +1410,7 @@ void CControl::Update( float dTime, float fTimeline )
 	}
 }
 
-void CControl::Paint( CCameraTransform *pCamera, Mat * matWorld )
+void CControl::Paint( CCameraTransform *pCamera, Matrix * matWorld )
 {
 	if ( !bVisible )
 		return;
@@ -3641,7 +3641,7 @@ void GUIUtils::DrawWindow( CSpriteLib *sprCol, int animIdx, RectXYWHi BBox, floa
 		// get titlebar width for text centering
 		RectXYWHi barSz = sprCol->GetAFrameBBox( animIdx, 1 ); 
 		Vec2 titleBarCenter( BBox.x + barSz.w / 2.0f, BBox.y + 5 );
-		Mat matTitle;
+		Matrix matTitle;
 		MUMatAffine2D( &matTitle, 1.0f, nullptr, -HALF_PI, &titleBarCenter );
 		__Painter().SetTransform( matTitle );
 		__TexFonts().fonts[ nFontIdx ]->DrawString( strTitle, 0.0f, 0.0f, FONTFLAG_ANCHOR_VCENTERRIGHT, dwTitleColor );
@@ -4198,7 +4198,7 @@ void CControlsManager::Update( float dTime )
 
 void CControlsManager::Paint()
 {
-	Mat matTransform, mats;
+	Matrix matTransform, mats;
 	const RectXYWH camScreenRect = camera.GetCamWorldAABB();
 
 	__Painter().Flush();

@@ -318,7 +318,7 @@ VecProj CActor::GetWeaponMuzzleWorld( int nHands, int mountIndex /*= 0 */ )
 	// if animations are flipped we need to also flip the weapon vectors
 	v_muzzle_vec.y *= (float)c_graphics->GetFlipDirX();
 	// rotate weapon muzzle vector and add it to the projected position of the mount
-	Mat mrot;
+	Matrix mrot;
 	float aim_angle = UTMath::GetVectorAngle( vAim );
 	MUMatRotZ( &mrot, aim_angle );
 	MUVec2TransformCoord( &v_muzzle_vec, &v_muzzle_vec, &mrot );

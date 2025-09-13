@@ -31,7 +31,7 @@ CSpritePainter::~CSpritePainter(void)
 }
 
 
-OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Mat & matView, Mat & matProj, UINT32 flags /*= K_BS_ALPHABLENDING */)
+OPRESULT CSpritePainter::Begin(PVERTEXSHADER pVShader, Matrix & matView, Matrix & matProj, UINT32 flags /*= K_BS_ALPHABLENDING */)
 {
 	_ASSERT(m_pDevice != nullptr);
 	// if already started make sure we do a flush
@@ -99,7 +99,7 @@ OPRESULT CSpritePainter::End()
 	return K_OP_OK;
 }
 
-OPRESULT CSpritePainter::SetViewProjMatrix(Mat & matView, Mat & matProj)
+OPRESULT CSpritePainter::SetViewProjMatrix(Matrix & matView, Matrix & matProj)
 {
 	if (!bStarted)
 		return OPRESULT(K_OP_FAILED, K_SEVERITY_WARNING, L"CSpritePainter::Can't use SetViewProjMatrix without calling Begin first!");
@@ -127,7 +127,7 @@ OPRESULT CSpritePainter::SetTransformIdentity()
 	return K_OP_OK;
 }
 
-OPRESULT CSpritePainter::SetTransform( Mat & matWorld )
+OPRESULT CSpritePainter::SetTransform( Matrix & matWorld )
 {
 	V_OP_RET( Flush() );
 	// set new matrix
@@ -139,7 +139,7 @@ OPRESULT CSpritePainter::SetTransform( Mat & matWorld )
 	return K_OP_OK;
 }
 
-OPRESULT CSpritePainter::SetViewTransform( Mat & matView )
+OPRESULT CSpritePainter::SetViewTransform( Matrix & matView )
 {
 	V_OP_RET( Flush() );
 	// set new matrix
@@ -163,7 +163,7 @@ OPRESULT CSpritePainter::SetShader(PVERTEXSHADER pVShader)
 	return K_OP_OK;
 }
 
-void CSpritePainter::GetTransform( Mat * retWorld, Mat * retView /*= nullptr */ )
+void CSpritePainter::GetTransform( Matrix * retWorld, Matrix * retView /*= nullptr */ )
 {
 	if(retWorld != nullptr)
 		*retWorld = m_matWorld;
@@ -412,7 +412,7 @@ void CSpritePainter::SetClipWorld( RectXYWH clipWorldCoords )
 	Vec2 vul(clipWorldCoords.x, clipWorldCoords.y);
 	Vec2 vdr( clipWorldCoords.Right(), clipWorldCoords.Bottom() );
 	Vec2 rul, rdr;
-	Mat mWV = m_matWorld * m_matView;
+	Matrix mWV = m_matWorld * m_matView;
 	MUVec2TransformCoord( &rul, &vul, &mWV);
 	MUVec2TransformCoord( &rdr, &vdr, &mWV);
 	UT3D::SetScissorClip( m_pDevice, (int)rul.x, (int)rul.y, (int)( rdr.x - rul.x ), (int)( rdr.y - rul.y ) );

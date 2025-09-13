@@ -617,8 +617,8 @@ static const char* GOG_CLIENT_SECRET = "416a364b92edd3ac24d9d8830e670d03de80e277
 extern CLog*				g_pLog;		//log class
 
 extern bool					g_bCanPause;  //poate pune pauza?
-extern Mat					g_matIdentity;
-extern Mat					g_matWorld;
+extern Matrix					g_matIdentity;
+extern Matrix					g_matWorld;
 extern Vec2					g_vecGravityOld;
 extern Vec3					g_vecGravity;
 //mouse

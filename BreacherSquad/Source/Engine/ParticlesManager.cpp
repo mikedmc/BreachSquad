@@ -195,7 +195,7 @@ void CParticlesManager::UpdateLayer(EParticleLayer eLayer, float dtime)
 
 void CParticlesManager::PaintLayer(EParticleLayer eLayer, bool additiveBlending)
 {
-	Mat mattrans;
+	Matrix mattrans;
 
 	// empty layer, early exit
 	_ASSERT( ( eLayer >= 0 ) && ( eLayer < K_PART_LAYERS_CNT ) );

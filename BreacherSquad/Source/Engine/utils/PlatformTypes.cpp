@@ -36,7 +36,7 @@ OPRESULT UT3DSetTexture( PDEVICE pDevice, DWORD Stage, PTEXTUREBASE pTexture )
 	RET_HRESULT_TO_OP( pDevice->SetTexture( Stage, pTexture ) );
 }
 
-void UT3DSetTransform( PDEVICE pDevice, TRANSFORM_STATE_TYPE State, Mat* Transform )
+void UT3DSetTransform( PDEVICE pDevice, TRANSFORM_STATE_TYPE State, Matrix* Transform )
 {
 	pDevice->SetTransform( State, Transform );
 }

@@ -27,9 +27,9 @@ float4 ps_main(PS_INPUT Input) : COLOR0
 	float3 vCol = tex2D(texColor, Input.Tex0.xy).rgb;
 	float3 vLight = tex2D(texLights, Input.Tex0.xy).rgb;
 	//older: gamma correct light (fast alternative, not perfect)
-	vLight = pow(vLight, fCompData.yyy);
-	// try this slower but better version (looks a little too bright)
-	//vLight = lin_to_srgb(vLight);
+	//vLight = pow(vLight, fCompData.yyy);
+	// try this slower but better version:
+	vLight = lin_to_srgb(vLight);
 	
 	float3 fvFinal = vLight * vCol * fCompData.z;
 	// color dodge: Composite = Background / (1 - foreground * effect_alpha)

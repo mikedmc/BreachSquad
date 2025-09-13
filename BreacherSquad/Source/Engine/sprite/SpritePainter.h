@@ -24,10 +24,10 @@ private:
 	PDEVICE					m_pDevice;
 	PVERTEXSHADER			m_pVShader;										// Vertex shader to use when painting
 	
-	Mat						m_matProj;										// Projection matrix set on Begin
-	Mat						m_matView;										// View matrix
-	Mat						m_matWorld;										// World matrix
-	Mat						m_matWVP;										// Final multiplied matrix sent to shaders
+	Matrix						m_matProj;										// Projection matrix set on Begin
+	Matrix						m_matView;										// View matrix
+	Matrix						m_matWorld;										// World matrix
+	Matrix						m_matWVP;										// Final multiplied matrix sent to shaders
 
 	UINT32					m_nVertexCursor;
 	_VERTEX_PNCT4T4			*m_verts;										// All verts get written here before drawing them
@@ -55,21 +55,21 @@ public:
 	~CSpritePainter(void);
 
 	// Call before painting anything
-	OPRESULT				Begin(PVERTEXSHADER pVShader, Mat & matView, Mat & matProj, UINT32 flags = K_BS_ALPHABLENDING );
+	OPRESULT				Begin(PVERTEXSHADER pVShader, Matrix & matView, Matrix & matProj, UINT32 flags = K_BS_ALPHABLENDING );
 	// Flushes remaining sprites and ends a scene. Clears shaders, flushes everything
 	OPRESULT				End();
 	// Sets the current view projection matrix for the following sprites. Does a Flush before setting it.
-	OPRESULT				SetViewProjMatrix(Mat & matView, Mat & matProj);
+	OPRESULT				SetViewProjMatrix(Matrix & matView, Matrix & matProj);
 	// Sets world transform on identity
 	OPRESULT				SetTransformIdentity();
 	// Sets world transform. Does a flush before setting it.
-	OPRESULT				SetTransform( Mat & matWorld );
+	OPRESULT				SetTransform( Matrix & matWorld );
 	// Sets the view transform. Does a flush before setting it.
-	OPRESULT				SetViewTransform( Mat & matView );
+	OPRESULT				SetViewTransform( Matrix & matView );
 	// Sets the currently used vertex shader, Does a flush before setting it.
 	OPRESULT				SetShader(PVERTEXSHADER pVShader);
 	// Gets the currently set transform	matrices
-	void					GetTransform( Mat * retWorld, Mat * retView = nullptr );
+	void					GetTransform( Matrix * retWorld, Matrix * retView = nullptr );
 	// Draws a non-transformed sprite
 	// \param: pSrcUV - expects the rectangle in texture coordinates that will be drawn in pDestRect
 	// \param: pDestRect - expects a rectangle where the srcUV will be painted. 

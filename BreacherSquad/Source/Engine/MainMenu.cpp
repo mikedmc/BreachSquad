@@ -2358,7 +2358,7 @@ void CMainMenu::PaintBackground(RectXYWH worldRect, DWORD dwColor, bool bPaintPa
 	float alpha = 0.4f + UTPerlin::PerlinNoise1D(fLocalTimeline, 3.0f, 2.0f, 0.4f, 0.5f, 2);
 	CLAMP( alpha, 0.0f, 1.0f );
 	//paint flickering right glow
-	Mat mscale;
+	Matrix mscale;
 	MUMatAffine2D( &mscale, 1.0f, NULL, 0.0f, &Vec2( ( int ) worldRect.Right(), ( int ) worldRect.Bottom() ));
 	m_pSprite->SetTransform( &mscale );
 	CSprite::paintFrame(&m_sprColNew, 0.0f, 0.0f, ANM_MENUS0_SPR_BACKGROUND, 3, DW_COLORALPHA(dwColor, alpha));

@@ -34,5 +34,5 @@ OPRESULT			UT3DClear(PDEVICE pDevice, DWORD Count, CONST D3DRECT* pRects, DWORD 
 OPRESULT			UT3DSetTexture( PDEVICE pDevice, DWORD Stage, PTEXTUREBASE pTexture );
 
 // sets transform on pipeline
-void				UT3DSetTransform( PDEVICE pDevice, TRANSFORM_STATE_TYPE State, Mat* Transform );
+void				UT3DSetTransform( PDEVICE pDevice, TRANSFORM_STATE_TYPE State, Matrix* Transform );
 

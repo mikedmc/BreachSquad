@@ -318,7 +318,7 @@ void			App_PaintControllerKey(CController* pCtrlr, EControllerCommand eCommand, 
 ///----------------------------- TRANSFORMS HELPERS ----------------------------
 
 //sets the world matrix. Don't set it directly if you need to know the last set world matrix
-void			App_SetWorldTransform(PDEVICE pDevice, Mat* matWorld);
+void			App_SetWorldTransform(PDEVICE pDevice, Matrix* matWorld);
 
 ///----------------------------- LOCALIZATIONS - LANGUAGES ----------------------------
 struct CLocaLanguage {
