@@ -1180,7 +1180,7 @@ void CActor::ClearActionsList()
 
 CBulletHitReturnData CActor::HitActor( CBullet *pBullet, Vec2* pvProjectileMomentum )
 {
-	CBulletHitReturnData retData;
+	CBulletHitReturnData retData = {};
 	retData.eMaterial = this->_template.eMaterial;
 	retData.bPenetratedShield = false;
 	retData.bKilledTarget = false;

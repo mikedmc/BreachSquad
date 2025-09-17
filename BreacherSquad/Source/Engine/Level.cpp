@@ -3963,7 +3963,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	/// 1. NORMAL MAP AND HEIGHT MAP
 	///----------------------------------------------------
 	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
-	if ( pRT != null )
+	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
@@ -3989,7 +3989,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	/// 2. LIGHT MAP
 	///----------------------------------------------------
 	pRT = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
-	if ( pRT != null )
+	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
@@ -4018,7 +4018,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	/// 3. COLOR MAP - overwrites the normal map as we don't need it anymore
 	///----------------------------------------------------
 	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
-	if ( pRT != null )
+	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
@@ -4044,7 +4044,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	/// 4. COMPOSITION - composes buffers into one
 	///----------------------------------------------------
 	pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );
-	if ( pRT != null )
+	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
@@ -4083,7 +4083,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	/// 1. build occluders/emitters map
 	///----------------------------------------------------
 	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
-	if ( pRT != null )
+	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
@@ -4140,7 +4140,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	/// 2. apply voronoi seed PS on 1
 	///----------------------------------------------------
 	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP2 );
-	if ( pRT != null )
+	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
@@ -4223,7 +4223,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP2 );
 	int passes = ceil( log( max( pRT->nWidth, pRT->nHeight ) ) / log( 2.0 ) );
-
 	Matrix matView;
 	MUMatIdentity( &matView );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
@@ -4251,9 +4250,13 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
 	Vec2 vScreenPixelSize( 1.0f / (float)pRT->nWidth, 1.0f / (float)pRT->nHeight );
+	int last_pass_idx = 0;
 	// we start witn TEMP2 as src (voronoi seed in it) and paint to TEMP1
 	UINT32 arr_swap_rt[] = { K_RTID_TEMP1 , K_RTID_TEMP2 };
-	for ( int i = 0; i < passes; i++ ) {
+	for ( int i = 0; i < passes; i++ ) 
+	{
+		// save last pass so we know what the last RT was in next step
+		last_pass_idx = i;
 		// offset for each pass is half the previous one, starting at half the square resolution rounded up to nearest power 2.
 		// i.e. for 768x512 we round up to 1024x1024 and the offset for the first pass is 512x512, then 256x256, etc.
 		float offset = pow( 2, passes - i - 1 );
@@ -4262,7 +4265,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
 
 		pRT = __RTManager().GetRTbyUID( arr_swap_rt[i % 2] );
-		if ( pRT != null )
+		if ( pRT != nullptr )
 		{
 			if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 			{
@@ -4292,6 +4295,42 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 
 	}
+
+	///----------------------------------------------------
+	/// 4. convert voronoi diagram to distance field
+	///----------------------------------------------------
+	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( arr_swap_rt[last_pass_idx % 2] );
+	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
+	pRT = __RTManager().GetRTbyUID( arr_swap_rt[(last_pass_idx + 1) % 2]);
+	if ( pRT != nullptr )
+	{
+		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
+		{
+			__Shaders().SetVSByName( L"VS_COMPOSITION" );
+			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+
+			__Shaders().SetPSByName( L"PS_VORONOI_DISTANCE" );
+			//set Pshader constants
+			float fConstData[][4] = {
+				// x: distance modifier (default 1.0)
+				{ 1.0, 0.0f, 0.0f, 0.0f },
+				// xy: inverse of RT resolution
+				//{ vScreenPixelSize.x, vScreenPixelSize.y, .0f, .0f },
+			};
+			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+
+			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+
+
+			// remove VS PS
+			__Shaders().SetPS( nullptr );
+			__Shaders().SetVS( nullptr );
+
+			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+		}
+	}
+
 
 	return K_OP_OK;
 }

@@ -17,5 +17,6 @@
     <PixelShader name="PS_WATER" path="ps_water.pso" />
     <PixelShader name="PS_VORONOI_SEED" path="ps_voronoi_seed.pso" />
     <PixelShader name="PS_VORONOI_MULTIPASS" path="ps_voronoi_multipass.pso" />
+    <PixelShader name="PS_VORONOI_DISTANCE" path="ps_voronoi_distance.pso" />
   </PixelShaders>
 </Shaders>
