@@ -1,5 +1,4 @@
 // Voronoi seed 
-
 sampler2D texIn : register(s0);  //render target texture
 
 struct PS_INPUT

@@ -3,7 +3,6 @@
 //
 // Parameters:
 //
-//   float4 RTTtex_xywh;
 //   float4 RTTxywh;
 //   row_major float4x4 matViewProjection;
 //
@@ -14,23 +13,25 @@
 //   ----------------- ----- ----
 //   matViewProjection c0       4
 //   RTTxywh           c4       1
-//   RTTtex_xywh       c5       1
 //
 
-    vs_2_0
+    vs_3_0
     dcl_position v0
     dcl_color v1
-    dcl_texcoord v2
-    mul r0, v0.y, c1
+    dcl_position o0
+    dcl_color o1
+    dcl_texcoord o2.xy
+    dcl_texcoord1 o3
+    mul r0, c1, v0.y
     mad r0, v0.x, c0, r0
     mad r0, v0.z, c2, r0
-    mad oPos, v0.w, c3, r0
-    add r0.xy, v0, -c4
-    rcp r0.z, c4.z
-    rcp r0.w, c4.w
-    mul r0.xy, r0, r0.zwzw
-    mad oT1.xy, r0, c5.zwzw, c5
-    mov oD0, v1
-    mov oT0.xy, v2
+    mad o0, v0.w, c3, r0
+    rcp r0.x, c4.z
+    add r0.yz, -c4.xxyw, v0.xxyw
+    mul o2.x, r0.x, r0.y
+    rcp r0.x, c4.w
+    mul o2.y, r0.z, r0.x
+    mov o1, v1
+    mov o3, v0
 
 // approximately 11 instruction slots used

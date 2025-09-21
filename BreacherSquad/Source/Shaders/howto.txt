@@ -1,0 +1,13 @@
+- We target ps5.0 as we have for and if
+
+**compile to asm:**
+fxc /Tvs_3_0 /Cc /nologo /Evs_main vs_pointlight.hlsl > vs_pointlight.vsh
+
+fxc /Tps_5_0 /Cc /nologo /Eps_main ps_voronoi_seed.hlsl > ps_voronoi_seed.psh
+
+**build binary**
+assemble pixel shader:
+psa ps_voronoi_seed.psh
+
+assemble vertex shader:
+vsa vs_shader.vsh

@@ -4080,9 +4080,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 
 	///----------------------------------------------------
-	/// 1. build occluders/emitters map
+	/// 1. build occluders/emitters map (emissive map)
 	///----------------------------------------------------
-	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
+	pRT = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
 	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
@@ -4144,12 +4144,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
-			// Clear the render target and the zbuffer 
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0xffff0000, 1.0f, 0 ) ) )
-			{
-				return K_OP_FAILED;
-			}
-
 			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
 			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
 
@@ -4177,7 +4171,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			///--- compose scene from normals and color ---
 			Matrix matWVP = matView * pRT->matProj;
 
-			CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
+			CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
 			_ASSERT( pRTcolor != nullptr );
 			m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
 
