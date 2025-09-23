@@ -79,7 +79,8 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 			__Audio().StopGroup( "ingame", false, true );
 
 			SND_SET_GROUP_FREQUENCY( "ingame", 1.0f, false );
-
+			UTApp().g_texManager.Release();
+			// release level resources
 			__Sim().Release();
 			// level was unloaded, immediately set the controller pointer to null
 			__Controllers().SetNormalizeCoordsFunctionPtr( nullptr );
@@ -409,6 +410,12 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 			//loads the level
 			if ( g_userData[ K_MEMID_MOD_DWNLVL_SELECTED ] < 0 )
 			{
+				// load generic textures
+				// blue noise for GI:
+				WCHAR texpath[MAX_PATH];
+				StringCchPrintf( texpath, MAX_PATH, L"%s/levels/data/bluenoise512.png", UTApp().g_wszAppResDir );
+				UTApp().g_texManager.AddTexture( texpath, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, FastHash(L"BLUENOISE512"));
+
 				//classic levels
 				///--- find chapter and level in levels.xml ---	
 				WCHAR strLevelPath[ MAX_PATH_STD ] = { 0 };

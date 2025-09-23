@@ -15,6 +15,8 @@ void CApplication::App_EnterState_Loading()
 	__RTManager().AddRT( K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_TEMP2, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_GI1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_GI2, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 
 
 	GameState::substate = 0;

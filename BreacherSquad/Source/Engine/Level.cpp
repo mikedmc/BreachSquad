@@ -214,6 +214,7 @@ CProp* CLevel::SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nF
 {
 	_ASSERT( pArea != nullptr );
 	ErrorBox( K_ERR_WARNING, L"Not implemented! See level_loaders when loading props!" );
+	//#TODO: shuntat pentru moment, de rescris
 	return nullptr;
 
 	CProp* obj = new CProp( *this, new CPropAIComponent() );
@@ -4076,6 +4077,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	/// 2. apply voronoi seed PS on 1
 	/// 3. apply multipass voronoi on (starting with) 2
 	/// 4. convert voronoi from 3 to SDF
+	/// 5. raymarch
 	///----------------------------------------------------
 
 
@@ -4324,6 +4326,77 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}
 	}
+
+	///----------------------------------------------------
+	/// 5. raymarch
+	///----------------------------------------------------
+	/// Registers:
+	///
+	///   Name                        Reg   Size
+	///   --------------------------- ----- ----
+	///   TIME                        c0       1
+	///   rt_resolution               c1       1
+	///   u_dist_mod                  c2       1
+	///   u_emission                  c3       1
+	///   samp0+u_distance_data       s1       1
+	///   samp0+u_scene_colour_data   s2       1
+	///   samp0+u_scene_emissive_data s3       1
+	///   samp0+u_last_frame_data     s4       1
+	///   samp0+u_noise_data          s5       1
+
+	static int lastGIidx = 0;
+	UINT32 arr_gi_rt[] = { K_RTID_GI1, K_RTID_GI2 };
+
+	//get noise texture and apply
+	auto ptexnoise = UTApp().g_texManager.GetTextureByID( FastHash( L"BLUENOISE512" ) );
+	m_pDevice->SetTexture( 5, ptexnoise->pTexture );
+
+	CRTManager::CEngineRenderTarget* pRTdistance = __RTManager().GetRTbyUID( arr_swap_rt[(last_pass_idx + 1) % 2] );
+	m_pDevice->SetTexture( 1, pRTdistance->m_pRTTexture );
+	CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_FINAL );
+	m_pDevice->SetTexture( 2, pRTcolordata->m_pRTTexture );
+	CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
+	m_pDevice->SetTexture( 3, pRTemissive->m_pRTTexture );
+	CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( arr_gi_rt[lastGIidx % 2] );
+	m_pDevice->SetTexture( 4, pRTlastGI->m_pRTTexture );
+
+
+	// render to the other GI target
+	pRT = __RTManager().GetRTbyUID( arr_gi_rt[(lastGIidx + 1) % 2] );
+	lastGIidx++;
+	if ( pRT != nullptr )
+	{
+		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
+		{
+			__Shaders().SetVSByName( L"VS_COMPOSITION" );
+			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+
+			__Shaders().SetPSByName( L"PS_GI_RAYMARCH" );
+			///--- set Pshader constants
+			float fConstData[][4] = {
+				///   TIME                        c0       1
+				{ this->fLocalTimeline * 1.0, this->fLocalTimeline * 0.8, 0.0f, 0.0f },
+				///   rt_resolution               c1       1 //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
+				{ (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight, 1.0f / (float)pRTlastGI->nWidth, 1.0f / (float)pRTlastGI->nHeight },
+				///   u_dist_mod                  c2       1
+				{ 10.0, 0.0f, 0.0f, 0.0f },
+				///   u_emission                  c3       1 //.x:multiplier=1.0 .y:range=2.0 .z:dropoff=2.0
+				{ 1.0, 2.0f, 2.0f, 0.0f },
+			};
+			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+
+			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+
+
+			// remove VS PS
+			__Shaders().SetPS( nullptr );
+			__Shaders().SetVS( nullptr );
+
+			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+		}
+	}
+
 
 
 	return K_OP_OK;

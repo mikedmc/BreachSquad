@@ -4,10 +4,9 @@ struct PS_INPUT
 };
 
 // constants
-uniform float PI = 3.141596;
+static const float PI = 3.141596;
 
 // uniforms
-float2 u_resolution = float2(512.0, 512.0);
 static const float u_rays_per_pixel = 8;
 Texture2D <float4> u_distance_data : register( t0 );
 Texture2D <float4> u_scene_colour_data : register ( t1 );
@@ -16,13 +15,11 @@ Texture2D <float4> u_last_frame_data : register( t3 );
 Texture2D <float4> u_noise_data : register( t4 );
 sampler samp0: register( s0 );
 float u_dist_mod = 10.0;
-bool u_bounce = true;
-float u_emission_multi = 1.0;
-float u_emission_range = 2.0;
-float u_emission_dropoff = 2.0;
-int u_max_raymarch_steps = 32;
-float4 TIME : register ( c0 );
-float4 v2pixelsize: register( c1 ); // inverse of RT resolution on both x and y
+static const bool u_bounce = true;
+float3 u_emission = float3(1.0, 2.0, 2.0); //.x:multiplier=1.0 .y:range=2.0 .z:dropoff=2.0
+static const int u_max_raymarch_steps = 32;
+float4 TIME : register ( c0 ); // .x .y different time scales
+float4 rt_resolution : register( c1 ); //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
 
 
 // ================================================================================
@@ -30,7 +27,7 @@ float4 v2pixelsize: register( c1 ); // inverse of RT resolution on both x and y
 // determine if we're at a surface.
 float epsilon()
 {
-	return 0.5 / max(u_resolution.x, u_resolution.y);
+	return 0.5 / max(rt_resolution.x, rt_resolution.y);
 }
 
 // ================================================================================
@@ -44,13 +41,13 @@ void get_material(float2 uv, float4 hit_data, out float emissive, out float3 col
 	if(hit_data.x / u_dist_mod < epsilon())
 	{
 		// convert uvs back to 0-1 range.
-		float inv_aspect = u_resolution.y / u_resolution.x;
+		float inv_aspect = rt_resolution.y / rt_resolution.x;
 		uv.x *= inv_aspect;
 		// read the surface data from emissive/colour maps. 
 		// TODO: could probably be optimised by combining into one texture sample.
 		float4 emissive_data = u_scene_emissive_data.SampleLevel(samp0, uv, 0);
 		float4 colour_data = u_scene_colour_data.SampleLevel(samp0, uv, 0);
-		emissive = emissive_data.r * u_emission_multi;
+		emissive = emissive_data.r * u_emission.x;
 		colour = colour_data.rgb;
 	}
 	// otherwise the raymarch reached max steps before finding a surface, so nothing is
@@ -66,7 +63,7 @@ void get_material(float2 uv, float4 hit_data, out float emissive, out float3 col
 // get distance data (to nearest surface) from given UV location.
 float map(float2 uv, out float4 hit_data)
 {
-	float inv_aspect = u_resolution.y / u_resolution.x;
+	float inv_aspect = rt_resolution.y / rt_resolution.x;
 	uv.x *= inv_aspect;
 	hit_data = u_distance_data.SampleLevel(samp0, uv, 0);
 	float d = hit_data.x / u_dist_mod;
@@ -98,7 +95,10 @@ bool raymarch(float2 origin, float2 ray, out float2 hit_pos, out float4 hit_data
 		// since this distance is the distance to nearest surface, it guarantees we won't 'overstep'
 		// and go past a surface. worst case is we are parallel and close to the surface, so we can't step
 		// far but also won't reach the surface. this is where we have to make a trade-off in u_max_raymarch_steps.
-		step_dist = max(step_dist, min(1.0 / u_resolution.x, 1.0 / u_resolution.y));
+		
+		//step_dist = max(step_dist, min(1.0 / rt_resolution.x, 1.0 / rt_resolution.y));
+		// Mike: using inverse of resolution
+        step_dist = max(step_dist, min(rt_resolution.z, rt_resolution.w));
 		t += step_dist;
 		ray_dist = t;
 	}
@@ -137,8 +137,8 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	// x/y to 0-2 on x and 0-1 on y.
 	// we will need to convert back when doing texture samples, which need 0-1 UV space.
 	float2 uv = pin.UV0.xy;
-	float aspect = u_resolution.x / u_resolution.y;
-	float inv_aspect = u_resolution.y / u_resolution.x;
+	float aspect = rt_resolution.x / rt_resolution.y;
+	float inv_aspect = rt_resolution.y / rt_resolution.x;
 	uv.x *= aspect;
 		
 	float3 col = float3(0.0, 0.0, 0.0);
@@ -180,7 +180,8 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 				// out the scene).
 				if(mat_emissive < epsilon())
 				{
-					get_last_frame_data(st, v2pixelsize.xy, last_emission, last_colour);
+					// using pixel size rt_resolution.zw
+					get_last_frame_data(st, rt_resolution.zw, last_emission, last_colour);
 				}
 				// this is so light doesn't bounce off the surface it was emitted from.
 				if(ray_dist < epsilon()) 
@@ -189,10 +190,10 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			
 			// calculate total emissive/colour values from direct and bounced (last frame) lighting.
 			float emission = mat_emissive + last_emission;
-			float r = u_emission_range;
-			float drop = u_emission_dropoff;
+			float r = u_emission.y;
+			float drop = u_emission.z;
 			// attenuation calculation - very tweakable to get the correct sort of light range/dropoff.
-			float att = pow(max(1.0 - (ray_dist * ray_dist) / (r * r), 0.0), u_emission_dropoff);
+			float att = pow(max(1.0 - (ray_dist * ray_dist) / (r * r), 0.0), u_emission.z);
 			emis += emission * att;
 			col += (mat_emissive + last_emission) * (mat_colour + last_colour) * att;
 		}
