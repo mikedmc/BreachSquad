@@ -623,6 +623,17 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
 			}
+			if ( DXUTIsKeyDown( '5' ) )
+			{
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
+				if ( pRT != null )
+				{
+					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
+					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
+					pDevice->SetTexture( 0, pRT->m_pRTTexture );
+					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
+				}
+			}
 			if ( DXUTIsKeyDown( '0' ) )
 			{
 				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );

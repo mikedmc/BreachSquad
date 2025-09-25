@@ -344,6 +344,8 @@ public:
 	OPRESULT				RenderPass( eLVLRenderPass ePass, Matrix* matProj, float fBetweenFramesPercent );
 	// the lights pass is so very different that it needs a special function
 	OPRESULT				RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent );
+	// renders the emissive map for GI
+	OPRESULT				RenderPass_EmissiveOcclusive( Matrix* matProj, float fBetweenFramesPercent );
 	// composes color and lights into one RT
 	OPRESULT				RenderPass_Composition( Matrix* matProj, float fBetweenFramesPercent );
 

@@ -415,6 +415,9 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 				WCHAR texpath[MAX_PATH];
 				StringCchPrintf( texpath, MAX_PATH, L"%s/levels/data/bluenoise512.png", UTApp().g_wszAppResDir );
 				UTApp().g_texManager.AddTexture( texpath, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, FastHash(L"BLUENOISE512"));
+				// black texture for GI
+				StringCchPrintf( texpath, MAX_PATH, L"%s/levels/data/black32.png", UTApp().g_wszAppResDir );
+				UTApp().g_texManager.AddTexture( texpath, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, FastHash( L"BLACK32" ) );
 
 				//classic levels
 				///--- find chapter and level in levels.xml ---	

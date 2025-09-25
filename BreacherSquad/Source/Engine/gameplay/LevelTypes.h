@@ -13,6 +13,8 @@ enum eAreaLayer {
 	K_AL_WALLS,
 	K_AL_CEIL_DECO,
 	K_AL_CEILINGS,
+	// special engine layers
+	K_AL_OCCLUDERS, // occluders layer, could be color textured
 
 	K_ALS_COUNT
 };

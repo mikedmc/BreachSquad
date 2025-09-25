@@ -26,20 +26,20 @@ CSpr::CSpr()
 	pSprCol = nullptr;
 }
 
-CSpr::CSpr(CSpriteLib* pSpriteColl, int animIdx, float pX, float pY)
+CSpr::CSpr(CSpriteLib* pSpriteColl, int animationIdx, float pX, float pY)
 {
 	Reset();
 	pSprCol = pSpriteColl;
-	animIdx = animIdx;
+	animIdx = animationIdx;
 	pos.x = pX;
 	pos.y = pY;
 }
 
-CSpr::CSpr(CSpriteLib* pSpriteColl, int animIdx, Vec2 vPos)
+CSpr::CSpr(CSpriteLib* pSpriteColl, int animationIdx, Vec2 vPos)
 {
 	Reset();
 	pSprCol = pSpriteColl;
-	animIdx = animIdx;
+	animIdx = animationIdx;
 	pos = vPos;
 }
 
@@ -57,6 +57,12 @@ CSpr::CSpr(const CSpr& sprite)
 	rotation = sprite.rotation;
 	fTimeScale = sprite.fTimeScale;
 	animDirection = sprite.animDirection;
+}
+
+CSpr::CSpr( CSpriteLib* pSpriteColl )
+{
+	Reset();
+	pSprCol = pSpriteColl;
 }
 
 void CSpr::Init(CSpriteLib *sprCollection, int nAnimIdx, Vec2 vPos, int nframeIdx, DWORD nColor, float fRotation, Vec2 vScale)

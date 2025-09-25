@@ -99,9 +99,10 @@ public:
 	ESpriteAnimState		animStatus;					// animation status
 
 	CSpr();
-	CSpr(const CSpr& sprite);
-	CSpr(CSpriteLib* pSpriteColl, int animIdx, float pX, float pY);
-	CSpr(CSpriteLib* pSpriteColl, int animIdx, Vec2 vPos);
+	CSpr( const CSpr& sprite );
+	CSpr( CSpriteLib* pSpriteColl );
+	CSpr( CSpriteLib* pSpriteColl, int animationIdx, float pX, float pY );
+	CSpr( CSpriteLib* pSpriteColl, int animationIdx, Vec2 vPos );
 
 	void					Init(CSpriteLib *sprCollection, int nAnimIdx, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });
 	void					Init(CSpriteLib *sprCollection, CHAR* strAnimID, Vec2 vPos = { 0.0f, 0.0f }, int nframeIdx = 0, DWORD nColor = 0xffffffff, float fRotation = 0.0f, Vec2 vScale = { 1.0f, 1.0f });

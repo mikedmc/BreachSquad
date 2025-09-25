@@ -41,6 +41,9 @@
     <Module ImageIdx="0" X="80" Y="688" W="32" H="32" strName="" />
     <Module ImageIdx="0" X="112" Y="688" W="32" H="32" strName="" />
     <Module ImageIdx="0" X="70" Y="678" W="20" H="7" strName="" />
+    <Module ImageIdx="0" X="973" Y="21" W="12" H="12" strName="" />
+    <Module ImageIdx="0" X="968" Y="1" W="18" H="18" strName="" />
+    <Module ImageIdx="0" X="987" Y="1" W="36" H="36" strName="" />
   </Modules>
   <FrameModules>
     <FrameModule ModuleIdx="0" OX="-53" OY="-51" Flags="0" />
@@ -81,6 +84,9 @@
     <FrameModule ModuleIdx="35" OX="0" OY="0" Flags="0" />
     <FrameModule ModuleIdx="36" OX="0" OY="0" Flags="0" />
     <FrameModule ModuleIdx="37" OX="-10" OY="-3" Flags="0" />
+    <FrameModule ModuleIdx="38" OX="-6" OY="-6" Flags="0" />
+    <FrameModule ModuleIdx="39" OX="-9" OY="-9" Flags="0" />
+    <FrameModule ModuleIdx="40" OX="-18" OY="-18" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="-53" BBoxY="-51" BBoxW="107" BBoxH="100">
@@ -311,6 +317,24 @@
       </FModules>
       <Points />
     </Frame>
+    <Frame BBoxX="-6" BBoxY="-6" BBoxW="12" BBoxH="12">
+      <FModules>
+        <FModule Idx="38" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-9" BBoxY="-9" BBoxW="18" BBoxH="18">
+      <FModules>
+        <FModule Idx="39" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="-18" BBoxY="-18" BBoxW="36" BBoxH="36">
+      <FModules>
+        <FModule Idx="40" />
+      </FModules>
+      <Points />
+    </Frame>
   </Frames>
   <AnimationFrames>
     <AnimationFrame FrameIdx="10" Duration="1" DX="0" DY="0" Flags="0" />
@@ -342,6 +366,9 @@
     <AnimationFrame FrameIdx="15" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="17" Duration="1" DX="0" DY="0" Flags="0" />
     <AnimationFrame FrameIdx="37" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="38" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="39" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="40" Duration="1" DX="0" DY="0" Flags="" />
   </AnimationFrames>
   <Animations>
     <Animation ID="PROJECTED_DIR" Flags="0">
@@ -382,6 +409,11 @@
     </Animation>
     <Animation ID="CHAR_SHADOWS" Flags="0">
       <AFrame Idx="28" />
+    </Animation>
+    <Animation ID="GI_LIGHTS" Flags="0">
+      <AFrame Idx="29" />
+      <AFrame Idx="30" />
+      <AFrame Idx="31" />
     </Animation>
   </Animations>
 </SpriteCollection>
