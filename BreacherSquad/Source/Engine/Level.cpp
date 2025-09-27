@@ -4104,40 +4104,35 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			CAABB			camAABB( camrect );
 
 			RenderPass_EmissiveOcclusive( &pRT->matProj, fBetweenFramesPercent );
-			/*
-			///--- BEGIN SPRITES PAINTER ---
-			MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
-			ETexChannel	eTexChannel = K_TEXCHAN_COLORMAP;
-			Matrix matWVP = matView * pRT->matProj;
-			// begin the painter
-
-			PVERTEXSHADER pSprVS = __Shaders().GetVShaderByName( L"VS_SPRITES2D" );
-			if ( pSprVS )
-				__Painter().Begin( pSprVS, matView, pRT->matProj );
-
-			for ( int kk = 0; kk < m_visibleList.arrSortedItems.nCount; kk++ )
-			{
-				CVisibleSortable* vis = &m_visibleList.arrSortedItems.m_pData[kk];
-
-				switch ( vis->eType )
-				{
-					case K_VST_PROP:
-					{
-						CProp* prop = static_cast<CProp*>( vis->pPtr );
-						prop->sprite.PaintFModule_texOverride( 0, 0 );
-					}
-					break;
-					default:
-						break;
-				}
-			}
-
-			__Painter().Flush();
-			__Painter().End();
-			*/
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}
 	}
+
+	///--- 1.1 build walls colors map for GI
+	pRT = __RTManager().GetRTbyUID( K_RTID_GICOLOR);
+	if ( pRT != nullptr )
+	{
+		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
+		{
+			Matrix matView;
+			// Clear the render target and the zbuffer 
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0xff000000, 1.0f, 0 ) ) )
+			{
+				return K_OP_FAILED;
+			}
+
+			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
+			m_pDevice->SetTransform( D3DTS_VIEW, &matView );
+			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+
+			RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
+			CAABB			camAABB( camrect );
+
+			RenderPass_GIColor( &pRT->matProj, fBetweenFramesPercent );
+			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+		}
+	}
+
 	///----------------------------------------------------
 	/// 2. apply voronoi seed PS on 1
 	///----------------------------------------------------
@@ -4146,6 +4141,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+				return K_OP_FAILED;
+
 			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
 			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
 
@@ -4347,18 +4345,19 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	static int lastGIidx = 0;
 	UINT32 arr_gi_rt[] = { K_RTID_GI1, K_RTID_GI2 };
 
-	//get noise texture and apply
-	auto ptexnoise = UTApp().g_texManager.GetTextureByID( FastHash( L"BLUENOISE512" ) );
-	m_pDevice->SetTexture( 5, ptexnoise->pTexture );
 
 	CRTManager::CEngineRenderTarget* pRTdistance = __RTManager().GetRTbyUID( arr_swap_rt[(last_pass_idx + 1) % 2] );
 	m_pDevice->SetTexture( 1, pRTdistance->m_pRTTexture );
-	CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_FINAL );
+	CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_GICOLOR);
+	//CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_FINAL);
 	m_pDevice->SetTexture( 2, pRTcolordata->m_pRTTexture );
 	CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
 	m_pDevice->SetTexture( 3, pRTemissive->m_pRTTexture );
 	CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( arr_gi_rt[lastGIidx % 2] );
 	m_pDevice->SetTexture( 4, pRTlastGI->m_pRTTexture );
+	//get noise texture and apply
+	auto ptexnoise = UTApp().g_texManager.GetTextureByID( FastHash( L"BLUENOISE512" ) );
+	m_pDevice->SetTexture( 5, ptexnoise->pTexture );
 
 
 	// render to the other GI target
@@ -4368,6 +4367,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 255, 0, 0, 0 ), 1.0f, 0 ) ) )
+				return K_OP_FAILED;
+
 			__Shaders().SetVSByName( L"VS_COMPOSITION" );
 			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
@@ -4376,13 +4378,14 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			///--- set Pshader constants
 			float fConstData[][4] = {
 				///   TIME                        c0       1
-				{ this->fLocalTimeline * 1.0, this->fLocalTimeline * 0.8, 0.0f, 0.0f },
+				{ this->fLocalTimeline * 1.3, this->fLocalTimeline * 0.7, 0.0f, 0.0f },
 				///   rt_resolution               c1       1 //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
 				{ (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight, 1.0f / (float)pRTlastGI->nWidth, 1.0f / (float)pRTlastGI->nHeight },
-				///   u_dist_mod                  c2       1
-				{ 10.0, 0.0f, 0.0f, 0.0f },
+				///   u_dist_mod (10.0 default dar nu merge corect)
+				{ 4.0, 0.0f, 0.0f, 0.0f },
 				///   u_emission                  c3       1 //.x:multiplier=1.0 .y:range=2.0 .z:dropoff=2.0
 				{ 1.0, 2.0f, 2.0f, 0.0f },
+				//{ct_em_mul, ct_em_range, ct_em_dropoff, 0.0}
 			};
 			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 
@@ -5022,11 +5025,95 @@ OPRESULT CLevel::RenderPass_EmissiveOcclusive( Matrix* matProj, float fBetweenFr
 		{
 			//sprPoint.SetAnim( ANM_LIGHTS_SPR_GI_LIGHTS, 0 );
 			sprPoint.pos = nl->pos.xy;
-			sprPoint.color = nl->color;
+			sprPoint.color = 0xffffffff;// nl->color; - corect e sa fie alb pt ca se foloseste doar canalul Red pt a vedea cat de emissive este
 			sprPoint.Paint();
 		}
 	}
 	
+	__Painter().End();
+	// top layer of tiles
+
+	return K_OP_OK;
+
+}
+
+OPRESULT CLevel::RenderPass_GIColor( Matrix* matProj, float fBetweenFramesPercent )
+{
+	Matrix	matView;
+
+	RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
+	CAABB			camAABB( camrect );
+
+	//locally used temp matrix
+	Matrix	matlocal;
+
+	///----------------------------------------------------
+	/// INITIAL SETUP
+	///----------------------------------------------------
+	m_pDevice->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_FLAT );
+	m_pDevice->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+
+	m_pDevice->SetRenderState( D3DRS_ZENABLE, FALSE );
+	m_pDevice->SetRenderState( D3DRS_ZWRITEENABLE, FALSE );
+
+	m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT );
+	m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
+	m_pDevice->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_NONE );
+
+	m_pDevice->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
+	m_pDevice->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
+	m_pDevice->SetRenderState( D3DRS_BLENDOP, D3DBLENDOP_ADD );
+	if ( (UTApp().g_gfxFlags & K_UT_GFXFLAG_SEPARATEALPHABLEND) != 0 )
+	{
+		//#IMPORTANT: we need separate alpha blending or it will look bad when blending alpha values between them.
+		//eg: if we blend semitransparent things on top of fully opaque walls, the walls become transparent
+		//necessary but not really well supported. Better with a shader and custom sprite painter
+		m_pDevice->SetRenderState( D3DRS_SEPARATEALPHABLENDENABLE, true );
+		m_pDevice->SetRenderState( D3DRS_SRCBLENDALPHA, D3DBLEND_SRCALPHA );
+		m_pDevice->SetRenderState( D3DRS_DESTBLENDALPHA, D3DBLEND_DESTALPHA );
+		m_pDevice->SetRenderState( D3DRS_BLENDOPALPHA, D3DBLENDOP_ADD );
+	}
+
+	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams (UV shrinking)
+	// moves from tex pixel to pixel, no half pixels but we add the subpixel movement when painting the final scene so if moves smoothly
+	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
+	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
+	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+	__Shaders().SetVS( nullptr );
+	__Shaders().SetPS( nullptr );
+
+	Matrix matWVP = matView * (*matProj);
+	// begin the painter
+	PVERTEXSHADER pSprVS = __Shaders().GetVShaderByName( L"VS_SPRITES2D" );
+	if ( pSprVS )
+		__Painter().Begin( pSprVS, matView, *matProj );
+
+
+	int nTexIdxOffset = 0;
+	bool bPaintsNormals = false;
+
+	/// paint occluders as black
+	auto ptexnoise = UTApp().g_texManager.GetTextureByID( FastHash( L"WHITE32" ) );
+	m_pDevice->SetTexture( 0, ptexnoise->pTexture );
+	Areas_PaintLayer( K_AL_OCCLUDERS );
+	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+
+	/// Paint lights as color blobs with hard contours
+	CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
+	CSpr sprPoint( spr_props, ANM_LIGHTS_SPR_GI_LIGHTS, g_Vec2Zero );
+
+	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
+	{
+		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		if ( nl->type == K_LVL_LT_POINT )
+		{
+			//sprPoint.SetAnim( ANM_LIGHTS_SPR_GI_LIGHTS, 0 );
+			sprPoint.pos = nl->pos.xy;
+			sprPoint.color = nl->color;
+			sprPoint.Paint();
+		}
+	}
+
 	__Painter().End();
 	// top layer of tiles
 

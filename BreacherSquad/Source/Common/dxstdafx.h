@@ -286,7 +286,8 @@ enum ERTIDChannel {
 
 	K_RTID_COLORDEPTHSTENCIL = 1,	// has depth and stencil
 	K_RTID_EMISSIVE,			// emissive/occluders (transparent where nothing, occluders can be black if dark)	
-	K_RTID_FINAL,				
+	K_RTID_GICOLOR,				// color of walls for light bouncing
+	K_RTID_FINAL,
 	K_RTID_TEMP1,				// just colors
 	K_RTID_TEMP2,				// just colors
 	K_RTID_GI1,				// alternative GI lighting
@@ -678,6 +679,10 @@ extern float ct_waterDiffract;
 extern float ct_waterHeight;
 extern float ct_waterColorAdd;
 extern float ct_waterSpecular;
+
+extern float ct_em_mul ;
+extern float ct_em_range ;
+extern float ct_em_dropoff ;
 
 
 extern CFreeTypeFont				g_font1;

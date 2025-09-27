@@ -4,7 +4,7 @@ struct PS_INPUT
 };
 
 // constants
-static const float PI = 3.141596;
+static const float PI = 3.141592;
 
 // uniforms
 static const float u_rays_per_pixel = 8;
@@ -14,12 +14,12 @@ Texture2D <float4> u_scene_emissive_data : register( t2 );
 Texture2D <float4> u_last_frame_data : register( t3 );
 Texture2D <float4> u_noise_data : register( t4 );
 sampler samp0: register( s0 );
-float u_dist_mod = 10.0;
 static const bool u_bounce = true;
 float3 u_emission = float3(1.0, 2.0, 2.0); //.x:multiplier=1.0 .y:range=2.0 .z:dropoff=2.0
 static const int u_max_raymarch_steps = 32;
 float4 TIME : register ( c0 ); // .x .y different time scales
 float4 rt_resolution : register( c1 ); //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
+float u_dist_mod : register(c2); //.x
 
 
 // ================================================================================
@@ -113,7 +113,17 @@ bool raymarch(float2 origin, float2 ray, out float2 hit_pos, out float4 hit_data
 // closest emissive pixel though, which we can consider the surface's value.
 void get_last_frame_data(float2 uv, float2 pix, out float last_emission, out float3 last_colour)
 {
-	last_emission = 0.0;
+	//DMC: direct sampling
+	/*
+	float4 pixel = u_last_frame_data.SampleLevel( samp0, uv + pix * float2(0,0), 0 );
+	last_emission = pixel.a;
+	last_colour = pixel.rgb;
+	*/
+
+	
+	// ORIGINAL
+	last_emission = 0.0; 
+	//last_colour = float3(0.0, 0.0, 0.0); //DMC: I added this
 	for(int x = -1; x <= 1; x++)
 	{
 		for(int y = -1; y <= 1; y++)
@@ -126,6 +136,18 @@ void get_last_frame_data(float2 uv, float2 pix, out float last_emission, out flo
 			}
 		}
 	}
+	
+}
+
+float3 lin_to_srgb( float3 color )
+{
+	float3 x = color.rgb * 12.92;
+	float3 y = 1.055 * pow( clamp( color.rgb, 0.0, 1.0 ), float3( 0.4166667, 0.4166667, 0.4166667) ) - 0.055;
+	float3 clr = color.rgb;
+	clr.r = (color.r < 0.0031308) ? x.r : y.r;
+	clr.g = (color.g < 0.0031308) ? x.g : y.g;
+	clr.b = (color.b < 0.0031308) ? x.b : y.b;
+	return clr.rgb;
 }
 
 // ================================================================================
@@ -142,26 +164,43 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	uv.x *= aspect;
 		
 	float3 col = float3(0.0, 0.0, 0.0);
-	float emis = 0.0;
+	float emis = 0.0;	
 	
 	// get a random angle by sampling the noise texture and offsetting it by time (so we don't always sample
 	// the same noise).
 	float2 time = float2(TIME.x, TIME.y);
-	float rand02pi = u_noise_data.SampleLevel(samp0, frac((uv + time) * 0.4), 0).r * 2.0 * PI; // noise sample
+	//float rand02pi = u_noise_data.SampleLevel( samp0, frac( (uv + time) * 0.4 ), 0 ).r * 2.0 * PI; // noise sample
+	float rand02pi = u_noise_data.SampleLevel( samp0, uv + time, 0 ).r * 2.0 * PI; // noise sample
 	float golden_angle = PI * 0.7639320225;
 	
-	for(float i = 0.0; i < u_rays_per_pixel; i++)
+	for ( float i = 0.0; i < u_rays_per_pixel; i++ )
 	{
 		float2 hit_pos;
 		float4 hit_data;
 		float ray_dist;
-		
+
 		// get our ray dir by taking the random angle and adding golden_angle * ray number.
-		
+
 		//MIKE: aici in loc de cos sin ar trebui luat din blue noise vector si facuta normalizare optimizat: float invLen = inversesqrt(dot(dir, dir)); float2 approxDir = dir * invLen;
 		float cur_angle = rand02pi + golden_angle * i;
-		float2 rand_direction = float2(cos(cur_angle), sin(cur_angle));
-		bool hit = raymarch(uv, rand_direction, hit_pos, hit_data, ray_dist);
+		float2 rand_direction = float2(cos( cur_angle ), sin( cur_angle ));
+		bool hit = raymarch( uv, rand_direction, hit_pos, hit_data, ray_dist );
+
+		/*
+		if ( hit )
+		{
+			float mat_emissive;
+			float3 mat_colour;
+			get_material( hit_pos, hit_data, mat_emissive, mat_colour );
+			//return float4(mat_colour, 1.0); // afiseaza materialul hit ca sa rezolvi bugul cu snap (randare la puncte float a peretilor)
+			return float4(mat_colour, mat_emissive);
+		}
+		else
+		{
+			return float4(0.0, 0, 0.0, 0.0);
+		}
+		*/
+		
 		if(hit)
 		{
 			float mat_emissive;
@@ -169,19 +208,20 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			get_material(hit_pos, hit_data, mat_emissive, mat_colour);
 			
 			// convert UVs back to 0-1 space.
-			float2 st = hit_pos;
-			st.x *= inv_aspect;
+			float2 uvst = hit_pos;
+			uvst.x *= inv_aspect;
 			
 			float last_emission = 0.0;
 			float3 last_colour = float3(0.0, 0.0, 0.0);
-			if(u_bounce)
+			
+			//if(u_bounce)
 			{
 				// we don't want emissive surfaces themselves to bounce light (we could, but it would probably blow
 				// out the scene).
 				if(mat_emissive < epsilon())
 				{
 					// using pixel size rt_resolution.zw
-					get_last_frame_data(st, rt_resolution.zw, last_emission, last_colour);
+					get_last_frame_data(uvst, rt_resolution.zw, last_emission, last_colour);
 				}
 				// this is so light doesn't bounce off the surface it was emitted from.
 				if(ray_dist < epsilon()) 
@@ -189,14 +229,15 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			}
 			
 			// calculate total emissive/colour values from direct and bounced (last frame) lighting.
-			float emission = mat_emissive + last_emission;
 			float r = u_emission.y;
 			float drop = u_emission.z;
 			// attenuation calculation - very tweakable to get the correct sort of light range/dropoff.
-			float att = pow(max(1.0 - (ray_dist * ray_dist) / (r * r), 0.0), u_emission.z);
-			emis += emission * att;
-			col += (mat_emissive + last_emission) * (mat_colour + last_colour) * att;
+			float att = pow( max( 1.0 - (ray_dist * ray_dist) / (r * r), 0.0 ), drop );
+			float emission = (mat_emissive + last_emission ) * att;
+			emis += emission;
+			col += (mat_colour + last_colour) * emission;
 		}
+		
 	}
 	
 	// right now, emis and col store the sum of contribution of all rays to this pixel, we need

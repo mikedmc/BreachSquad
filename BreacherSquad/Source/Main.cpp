@@ -107,6 +107,10 @@ float ct_waterHeight = 0.07f;
 float ct_waterColorAdd = 0.45f;
 float ct_waterSpecular = 0.65f;
 
+float ct_em_mul = 1.0;
+float ct_em_range = 2.0;
+float ct_em_dropoff = 2.0;
+
 //**************************************************************************************
 // Forward declarations 
 //**************************************************************************************
@@ -1885,6 +1889,10 @@ void CALLBACK OnFrameRender( PDEVICE pDevice, double fTime, float fElapsedTime )
 				ImGui::SliderFloat( "water color add", &ct_waterColorAdd, 0.0f, 1.0f );
 				ImGui::SliderFloat( "water specular", &ct_waterSpecular, 0.0f, 1.0f );
 				ImGui::Separator();
+
+				ImGui::SliderFloat( "gi mul", &ct_em_mul, 0.0f, 50.0f );
+				ImGui::SliderFloat( "gi range", &ct_em_range, 0.0f, 100.0f );
+				ImGui::SliderFloat( "gi dropogg", &ct_em_dropoff, 0.0f, 100.0f );
 
 				///--- show watch debug values from the debug list ---
 				__ImGui().PaintDebugVars();

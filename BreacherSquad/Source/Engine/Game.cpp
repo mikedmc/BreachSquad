@@ -614,7 +614,26 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			}
 			if ( DXUTIsKeyDown( '6' ) )
 			{
-				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_GI1 );
+				CRTManager::CEngineRenderTarget* pRT1 = __RTManager().GetRTbyUID( K_RTID_GI1 );
+				if ( pRT1 != null )
+				{
+					RectLTRB src( 1.0f, 1.0f, (float)(pRT1->nWidth), (float)(pRT1->nHeight) );
+					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
+					pDevice->SetTexture( 0, pRT1->m_pRTTexture );
+					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
+				}
+				CRTManager::CEngineRenderTarget* pRT2 = __RTManager().GetRTbyUID( K_RTID_GI2 );
+				if ( pRT2 != null )
+				{
+					RectLTRB src( pRT1->nWidth + 1, 1.0f, (float)(pRT2->nWidth + pRT1->nWidth), (float)(pRT2->nHeight) );
+					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
+					pDevice->SetTexture( 0, pRT2->m_pRTTexture );
+					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
+				}
+			}
+			if ( DXUTIsKeyDown( '5' ) )
+			{
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
 				if ( pRT != null )
 				{
 					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
@@ -623,9 +642,9 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
 			}
-			if ( DXUTIsKeyDown( '5' ) )
+			if ( DXUTIsKeyDown( '4' ) )
 			{
-				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_GICOLOR);
 				if ( pRT != null )
 				{
 					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
