@@ -26,7 +26,8 @@ float4 ps_main( PS_INPUT Input ) : COLOR0
 {
 	float3 vCol = tex2D( texColor, Input.Tex0.xy ).rgb;
 	float4 vLight = tex2D( texLights, Input.Tex0.xy );
-	float3 col = lin_to_srgb(vLight.rgb);
+	float3 col = pow( vLight, fCompData.yyy );
+	//float3 col = lin_to_srgb(vLight.rgb); // darker but slower, more correct
 
 	//float3 fvFinal = vLight * vCol * fCompData.z;
 	// color dodge: Composite = Background / (1 - foreground * effect_alpha)

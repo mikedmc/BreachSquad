@@ -4044,6 +4044,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 4. COMPOSITION - composes buffers into one
 	///----------------------------------------------------
+	/*
 	pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );
 	if ( pRT != nullptr )
 	{
@@ -4070,6 +4071,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 		}
 	}
+	*/
 
 	///----------------------------------------------------
 	/// START GI
@@ -4362,7 +4364,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 	// render to the other GI target
 	pRT = __RTManager().GetRTbyUID( arr_gi_rt[(lastGIidx + 1) % 2] );
-	lastGIidx = (lastGIidx + 1) % 2;
+	lastGIidx ^= 1; //pingpong buffer only needs index 0 and 1 (using xor)
 	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
@@ -4378,12 +4380,12 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			///--- set Pshader constants
 			float fConstData[][4] = {
 				///   TIME                        c0       1
-				{ this->fLocalTimeline * 1.3, this->fLocalTimeline * 0.7, 0.0f, 0.0f },
+				{ this->fLocalTimeline * 13.7, this->fLocalTimeline * 7.3, 0.0f, 0.0f },
 				///   rt_resolution               c1       1 //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
 				{ (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight, 1.0f / (float)pRTlastGI->nWidth, 1.0f / (float)pRTlastGI->nHeight },
-				///   u_dist_mod (10.0 default dar nu merge corect)
-				{ 2.0, 0.0f, 0.0f, 0.0f },
-				///   u_emission                  c3       1 //.x:multiplier=1.0 .y:range=2.0 .z:dropoff=2.0
+				/// x:u_dist_mod (10.0 default dar nu merge corect), .y: EPSILON half a pixel of longest edge
+				{ 2.0, 0.5f / max( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.0f, 0.0f },
+				///   u_emission                  c3       1 //.x:multiplier=1.0 .y:range=2.0 (0.5 works best) .z:dropoff=2.0
 				{ 1.0, 0.5f, 2.0f, 0.0f },
 				//{ct_em_mul, ct_em_range, ct_em_dropoff, 0.0}
 			};
@@ -4400,6 +4402,37 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 	}
 
+
+
+	///----------------------------------------------------
+/// COMPOSITION de test ca sa vad bufferele
+///----------------------------------------------------
+	pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );
+	if ( pRT != nullptr )
+	{
+		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
+		{
+			// Clear the render target and the zbuffer 
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0xffff0000, 1.0f, 0 ) ) )
+			{
+				return K_OP_FAILED;
+			}
+
+			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
+			//Mat matProj;
+			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
+			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
+
+			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+			m_pDevice->SetTransform( D3DTS_VIEW, &g_matIdentity );
+
+			// RT sized quad with tex1 color, tex2 lightmap
+			RenderPass_Composition( &pRT->matProj, fBetweenFramesPercent );
+
+			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+
+		}
+	}
 
 
 	return K_OP_OK;
@@ -5009,8 +5042,8 @@ OPRESULT CLevel::RenderPass_EmissiveOcclusive( Matrix* matProj, float fBetweenFr
 	bool bPaintsNormals = false;
 
 	/// paint occluders as black
-	auto ptexnoise = UTApp().g_texManager.GetTextureByID( FastHash( L"BLACK32" ) );
-	m_pDevice->SetTexture( 0, ptexnoise->pTexture );
+	auto ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"BLACK32" ) );
+	m_pDevice->SetTexture( 0, ptex->pTexture );
 	Areas_PaintLayer( K_AL_OCCLUDERS );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 	
@@ -5023,7 +5056,7 @@ OPRESULT CLevel::RenderPass_EmissiveOcclusive( Matrix* matProj, float fBetweenFr
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
 		if ( nl->type == K_LVL_LT_POINT )
 		{
-			//sprPoint.SetAnim( ANM_LIGHTS_SPR_GI_LIGHTS, 0 );
+			sprPoint.SetAnim( ANM_LIGHTS_SPR_GI_LIGHTS, 0 );
 			sprPoint.pos = nl->pos.xy;
 			sprPoint.color = 0xffffffff;// nl->color; - corect e sa fie alb pt ca se foloseste doar canalul Red pt a vedea cat de emissive este
 			sprPoint.Paint();
@@ -5161,7 +5194,8 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	Matrix matWVP = matView * ( *matProj );
 
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
-	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
+	//CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
+	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_GI2);
 	_ASSERT( pRTcolor != nullptr && pRTlights != nullptr );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
 	m_pDevice->SetTexture( 1, pRTlights->m_pRTTexture );

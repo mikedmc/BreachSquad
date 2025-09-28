@@ -16,19 +16,22 @@ Texture2D <float4> u_last_frame_data : register( t3 );
 Texture2D <float4> u_noise_data : register( t4 );
 sampler samp0: register( s0 );
 float3 u_emission = float3(1.0, 2.0, 2.0); //.x:multiplier=1.0 .y:range=2.0 .z:dropoff=2.0
-static const int u_max_raymarch_steps = 32;
+static const int u_max_raymarch_steps = 32; // aici se mai poate umbla la final
 float4 TIME : register ( c0 ); // .x .y different time scales
 float4 rt_resolution : register( c1 ); //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
-float u_dist_mod : register(c2); //.x
+float4 u_dist_mod : register(c2); //.x:distance modifier, .y:EPSILON half a pixel on longer axis
 
 
 // ================================================================================
 // return half a pixel size in UV space - used for some distance calculations to 
 // determine if we're at a surface.
+/*
+DMC: obsolete: comes from the code now
 float epsilon()
 {
 	return 0.5 / max(rt_resolution.x, rt_resolution.y);
 }
+*/
 
 // ================================================================================
 // return the surface data at a given location. 'uv' contains the hit location, while
@@ -38,7 +41,7 @@ void get_material(float2 uv, float4 hit_data, out float emissive, out float3 col
 {	
 	// if distance to nearest surface at this location is < epsilon (half pixel), we can
 	// consider to be hitting that surface.
-	if(hit_data.x / u_dist_mod < epsilon())
+	if(hit_data.x / u_dist_mod.x < u_dist_mod.y)
 	{
 		// read the surface data from emissive/colour maps. 
 		// TODO: could probably be optimised by combining into one texture sample.
@@ -63,7 +66,7 @@ float map(float2 uv, out float4 hit_data)
 	float inv_aspect = rt_resolution.y / rt_resolution.x;
 	uv.x *= inv_aspect;
 	hit_data = u_distance_data.SampleLevel(samp0, uv, 0);
-	float d = hit_data.x / u_dist_mod;
+	float d = hit_data.x / u_dist_mod.x;
     return d;
 }
 
@@ -83,7 +86,7 @@ bool raymarch(float2 origin, float2 ray, out float2 hit_pos, out float4 hit_data
 		step_dist = map(sample_point, hit_data);
 		
 		// consider a hit if distance to surface is < epsilon (half pixel).
-		if(step_dist < epsilon())
+		if(step_dist < u_dist_mod.y)
 		{
 			hit_pos = sample_point;
   			return true;
@@ -110,15 +113,22 @@ bool raymarch(float2 origin, float2 ray, out float2 hit_pos, out float4 hit_data
 // closest emissive pixel though, which we can consider the surface's value.
 void get_last_frame_data(float2 uv, float2 pix, out float last_emission, out float3 last_colour)
 {
-	//DMC: direct sampling
 	/*
-	float4 pixel = u_last_frame_data.SampleLevel( samp0, uv + pix * float2(0,0), 0 );
-	last_emission = pixel.a;
-	last_colour = pixel.rgb;
-	*/
+	float4 center_pixel = u_last_frame_data.SampleLevel( samp0, float2(uv.x, uv.y), 0 );
+	float e = center_pixel.a;
+	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x - pix.x	, uv.y + pix.y), 0 ).a, 0.0f ), e);
+	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x			, uv.y + pix.y), 0 ).a, 0.0f ), e );
+	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x + pix.x	, uv.y + pix.y), 0 ).a, 0.0f ), e );
+	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x - pix.x	, uv.y		  ), 0 ).a, 0.0f ), e );
+	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x + pix.x	, uv.y		  ), 0 ).a, 0.0f ), e );
+	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x - pix.x	, uv.y - pix.y), 0 ).a, 0.0f ), e );
+	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x			, uv.y - pix.y), 0 ).a, 0.0f ), e );
+	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x + pix.x	, uv.y - pix.y), 0 ).a, 0.0f ), e );
 
+	last_emission = e;
+	last_colour = center_pixel.rgb;
+	*/
 	
-	// ORIGINAL
 	last_emission = 0.0; 
 	//last_colour = float3(0.0, 0.0, 0.0); //DMC: I added this
 	for(int x = -1; x <= 1; x++)
@@ -225,7 +235,6 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	// x/y to 0-2 on x and 0-1 on y.
 	// we will need to convert back when doing texture samples, which need 0-1 UV space.
 	float2 uv = pin.UV0.xy;
-	float3 curpx_last_color = u_last_frame_data.SampleLevel( samp0, uv, 0 ).rgb;
 
 	float aspect = rt_resolution.x / rt_resolution.y;
 	float inv_aspect = rt_resolution.y / rt_resolution.x;
@@ -273,8 +282,8 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 		*/
 		if(hit)
 		{
-			hittimes += 1.0;
-			ray_dist = max( ray_dist, 0. );
+			//hittimes += 1.0;
+			//ray_dist = max( ray_dist, 0. );
 			// convert uvs back to 0-1 range.
 			float2 uvst = float2(hit_pos.x * inv_aspect, hit_pos.y);
 
@@ -289,16 +298,17 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			
 			
 			//if(u_bounce) - DMC: ofc we want bounce
+			
 			{
 				// we don't want emissive surfaces themselves to bounce light (we could, but it would probably blow
 				// out the scene).
-				if(mat_emissive < epsilon())
+				if(mat_emissive < u_dist_mod.y)
 				{
 					// using pixel size rt_resolution.zw
 					get_last_frame_data(uvst, rt_resolution.zw, last_emission, last_colour);
 				}
 				// this is so light doesn't bounce off the surface it was emitted from.
-				if(ray_dist < epsilon()) 
+				if(ray_dist < u_dist_mod.y)
 					last_emission = 0.0;
 			}
 			
@@ -309,11 +319,11 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			float drop = u_emission.z;
 			// attenuation calculation - very tweakable to get the correct sort of light range/dropoff.
 			float att = pow( max( 1.0 - (ray_dist * ray_dist) / (r * r), 0.0 ), drop );
-			float emission = (mat_emissive + last_emission) * att;
+			float emission = (mat_emissive + last_emission * 1.2) * att;
 			emis += emission;
-			//colout += (mat_emissive + last_emission) * mat_colour;
-			colout += (mat_colour + last_colour) * emission;
-			// original: 			col += (mat_emissive + last_emission) * (mat_colour + last_colour) * att; 
+			colout += mat_colour * emission;
+			//colout += (mat_colour + last_colour) * emission;
+			//ORIGINAL: colout += (mat_emissive + last_emission) * (mat_colour + last_colour) * att; 
 		}
 		
 	}
@@ -329,6 +339,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	// colour data in rgb and emissive in alpha. this is important because when reading in the last frame data we
 	// need colour and alpha to be separate. if we combined at this stage, the bounce calculations wouldn't work
 	// properly.
+	//float3 curpx_last_color = u_last_frame_data.SampleLevel( samp0, pin.UV0.xy, 0 ).rgb;
 	//return float4(lerp(colout, curpx_last_color, 0.9), emis); // temporal blur
 	return float4(colout, emis);
 }
