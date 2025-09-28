@@ -5,7 +5,8 @@ struct PS_INPUT
 
 // constants
 static const float PI = 3.141592;
-
+static const float phi = 1.6180339887498948482045868343656381177203091798058;
+static const float DOUBLE_PI = 6.283185307179586;
 // uniforms
 static const float u_rays_per_pixel = 8;
 Texture2D <float4> u_distance_data : register( t0 );
@@ -14,7 +15,6 @@ Texture2D <float4> u_scene_emissive_data : register( t2 );
 Texture2D <float4> u_last_frame_data : register( t3 );
 Texture2D <float4> u_noise_data : register( t4 );
 sampler samp0: register( s0 );
-static const bool u_bounce = true;
 float3 u_emission = float3(1.0, 2.0, 2.0); //.x:multiplier=1.0 .y:range=2.0 .z:dropoff=2.0
 static const int u_max_raymarch_steps = 32;
 float4 TIME : register ( c0 ); // .x .y different time scales
@@ -40,9 +40,6 @@ void get_material(float2 uv, float4 hit_data, out float emissive, out float3 col
 	// consider to be hitting that surface.
 	if(hit_data.x / u_dist_mod < epsilon())
 	{
-		// convert uvs back to 0-1 range.
-		float inv_aspect = rt_resolution.y / rt_resolution.x;
-		uv.x *= inv_aspect;
 		// read the surface data from emissive/colour maps. 
 		// TODO: could probably be optimised by combining into one texture sample.
 		float4 emissive_data = u_scene_emissive_data.SampleLevel(samp0, uv, 0);
@@ -128,7 +125,7 @@ void get_last_frame_data(float2 uv, float2 pix, out float last_emission, out flo
 	{
 		for(int y = -1; y <= 1; y++)
 		{
-			float4 pixel = u_last_frame_data.SampleLevel(samp0, uv + pix * float2(float(x), float(y)), 0);
+			float4 pixel = u_last_frame_data.SampleLevel(samp0, float2(uv.x + pix.x * float(x), uv.y + pix.y * float(y)), 0);
 			if(pixel.a > last_emission)
 			{
 				last_emission = pixel.a;
@@ -150,6 +147,75 @@ float3 lin_to_srgb( float3 color )
 	return clr.rgb;
 }
 
+
+/*
+
+#define USE_HASH 0
+const float RAYS_PER_PIXEL = 16.;
+const float phi = 1.6180339887498948482045868343656381177203091798058;
+float tau = 6.283185307179586;
+float hash(float p) { return fract(sin(p) * 43758.5453123);}
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+	setupSurfaces();
+	vec2 uv = fragCoord/iResolution.xy;
+	vec2 originalUv = uv;
+	uv = uv * 2.0 - 1.0;
+	float aspect = iResolution.x / iResolution.y;
+	float invAspect = iResolution.y / iResolution.x;
+	uv.x *= aspect;
+
+	vec3 col = vec3(0.);
+	float emis = 0.;
+
+	for(float i = 0.; i < RAYS_PER_PIXEL; i++)
+	{
+		vec2 hitPos;
+		float dist;
+		float curAngle = fract(texture(iChannel2, originalUv).r + i * phi) * tau;
+		vec2 randDirection = vec2(cos(curAngle),sin(curAngle));
+		bool hit = trace(uv, randDirection, hitPos, dist);
+		if(hit)
+		{
+			Material mat = getMaterial(hitPos);
+			float d = max(dist,0.);
+			vec2 st = hitPos;
+			st.x *=  invAspect;
+			st = (st + 1.0)*0.5;
+
+			float lastEmission = 0.;
+			if(mat.emission <= EPSILON)
+			{
+
+				lastEmission = getEmissionFromBuffer(st);
+				#ifdef WEIGHTED
+				vec2 normal = estimateNormal(hitPos);
+				float c = clamp(dot(-randDirection,normal),0.,1.);
+				lastEmission *= c;
+				#endif
+			}
+			if( iFrame==0 || d < EPSILON) lastEmission = 0.0;
+
+			float emission = mat.emission + lastEmission;
+			emis += emission*0.6;
+			col += (mat.emission + lastEmission)*mat.color;
+		}
+	}
+	col /= RAYS_PER_PIXEL;
+	emis /= RAYS_PER_PIXEL;
+
+	vec2 st = fragCoord/iResolution.xy;
+	vec3 oldCol  = texture(iChannel0, st).rgb;
+	vec3 newCol = col;
+
+	if(iFrame==0) oldCol = vec3(0.0);
+
+	float hysterisis = 0.9;
+	fragColor = vec4(mix(newCol, oldCol, hysterisis), emis);
+}*/
+
+float hash( float p ) { return frac( sin( p ) * 43758.5453123 ); }
 // ================================================================================
 // do the thing!
 float4 ps_main(PS_INPUT pin) : SV_Target
@@ -159,20 +225,23 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	// x/y to 0-2 on x and 0-1 on y.
 	// we will need to convert back when doing texture samples, which need 0-1 UV space.
 	float2 uv = pin.UV0.xy;
+	float3 curpx_last_color = u_last_frame_data.SampleLevel( samp0, uv, 0 ).rgb;
+
 	float aspect = rt_resolution.x / rt_resolution.y;
 	float inv_aspect = rt_resolution.y / rt_resolution.x;
 	uv.x *= aspect;
 		
-	float3 col = float3(0.0, 0.0, 0.0);
+	float3 colout = float3(0.0, 0.0, 0.0);
 	float emis = 0.0;	
 	
 	// get a random angle by sampling the noise texture and offsetting it by time (so we don't always sample
 	// the same noise).
 	float2 time = float2(TIME.x, TIME.y);
 	//float rand02pi = u_noise_data.SampleLevel( samp0, frac( (uv + time) * 0.4 ), 0 ).r * 2.0 * PI; // noise sample
-	float rand02pi = u_noise_data.SampleLevel( samp0, uv + time, 0 ).r * 2.0 * PI; // noise sample
+	float rand02pi = u_noise_data.SampleLevel( samp0, pin.UV0.xy + TIME.xy, 0 ).r * DOUBLE_PI; // noise sample - good
 	float golden_angle = PI * 0.7639320225;
 	
+	float hittimes = 0.0;
 	for ( float i = 0.0; i < u_rays_per_pixel; i++ )
 	{
 		float2 hit_pos;
@@ -181,11 +250,11 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 
 		// get our ray dir by taking the random angle and adding golden_angle * ray number.
 
-		//MIKE: aici in loc de cos sin ar trebui luat din blue noise vector si facuta normalizare optimizat: float invLen = inversesqrt(dot(dir, dir)); float2 approxDir = dir * invLen;
-		float cur_angle = rand02pi + golden_angle * i;
+		//DMC: sin is faster than lookups
+		float cur_angle = frac(rand02pi + phi * i) * DOUBLE_PI;
+		//float cur_angle = hash( rand02pi + float( i ) / float( u_rays_per_pixel ) ) * DOUBLE_PI;
 		float2 rand_direction = float2(cos( cur_angle ), sin( cur_angle ));
 		bool hit = raymarch( uv, rand_direction, hit_pos, hit_data, ray_dist );
-
 		/*
 		if ( hit )
 		{
@@ -193,28 +262,33 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			float3 mat_colour;
 			get_material( hit_pos, hit_data, mat_emissive, mat_colour );
 			//return float4(mat_colour, 1.0); // afiseaza materialul hit ca sa rezolvi bugul cu snap (randare la puncte float a peretilor)
-			return float4(mat_colour, mat_emissive);
+			//col += mat_colour;
+			col.r += ray_dist;
+			emis = 1;// += mat_emissive;
 		}
 		else
 		{
-			return float4(0.0, 0, 0.0, 0.0);
+			//return float4(0.0, 0, 0.0, 0.0);
 		}
 		*/
-		
 		if(hit)
 		{
+			hittimes += 1.0;
+			ray_dist = max( ray_dist, 0. );
+			// convert uvs back to 0-1 range.
+			float2 uvst = float2(hit_pos.x * inv_aspect, hit_pos.y);
+
 			float mat_emissive;
 			float3 mat_colour;
-			get_material(hit_pos, hit_data, mat_emissive, mat_colour);
+			get_material(uvst, hit_data, mat_emissive, mat_colour);
 			
 			// convert UVs back to 0-1 space.
-			float2 uvst = hit_pos;
-			uvst.x *= inv_aspect;
 			
 			float last_emission = 0.0;
 			float3 last_colour = float3(0.0, 0.0, 0.0);
 			
-			//if(u_bounce)
+			
+			//if(u_bounce) - DMC: ofc we want bounce
 			{
 				// we don't want emissive surfaces themselves to bounce light (we could, but it would probably blow
 				// out the scene).
@@ -228,25 +302,33 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 					last_emission = 0.0;
 			}
 			
+			
+			
 			// calculate total emissive/colour values from direct and bounced (last frame) lighting.
 			float r = u_emission.y;
 			float drop = u_emission.z;
 			// attenuation calculation - very tweakable to get the correct sort of light range/dropoff.
 			float att = pow( max( 1.0 - (ray_dist * ray_dist) / (r * r), 0.0 ), drop );
-			float emission = (mat_emissive + last_emission ) * att;
+			float emission = (mat_emissive + last_emission) * att;
 			emis += emission;
-			col += (mat_colour + last_colour) * emission;
+			//colout += (mat_emissive + last_emission) * mat_colour;
+			colout += (mat_colour + last_colour) * emission;
+			// original: 			col += (mat_emissive + last_emission) * (mat_colour + last_colour) * att; 
 		}
 		
 	}
 	
 	// right now, emis and col store the sum of contribution of all rays to this pixel, we need
 	// to normalise it.
-	emis *= (1.0 / u_rays_per_pixel);
-	col *= (1.0 / u_rays_per_pixel);
+	emis /= u_rays_per_pixel;
+	colout /= u_rays_per_pixel;
+
+	//emis = 1.0;
+	//colout.g = hittimes / u_rays_per_pixel;
 	
 	// colour data in rgb and emissive in alpha. this is important because when reading in the last frame data we
 	// need colour and alpha to be separate. if we combined at this stage, the bounce calculations wouldn't work
 	// properly.
-	return float4(col, emis);
+	//return float4(lerp(colout, curpx_last_color, 0.9), emis); // temporal blur
+	return float4(colout, emis);
 }

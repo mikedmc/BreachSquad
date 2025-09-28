@@ -10,7 +10,7 @@
   </VertexShaders>
   <PixelShaders>
     <PixelShader name="PS_POINTLIGHT" path="ps_pointlight.pso" />
-    <PixelShader name="PS_COMPOSITION" path="ps_composition.pso" />
+    <PixelShader name="PS_COMPOSITION" path="ps_composition.ps.cso" />
     <PixelShader name="PS_PROJECTEDDIR" path="ps_projecteddir.pso" />
     <PixelShader name="PS_IESLIGHT" path="ps_ieslight.pso" />
     <PixelShader name="PS_DIRECTIONAL" path="ps_directional.pso" />

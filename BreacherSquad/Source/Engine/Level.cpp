@@ -4362,12 +4362,12 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 	// render to the other GI target
 	pRT = __RTManager().GetRTbyUID( arr_gi_rt[(lastGIidx + 1) % 2] );
-	lastGIidx++;
+	lastGIidx = (lastGIidx + 1) % 2;
 	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 255, 0, 0, 0 ), 1.0f, 0 ) ) )
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
 				return K_OP_FAILED;
 
 			__Shaders().SetVSByName( L"VS_COMPOSITION" );
@@ -4382,9 +4382,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				///   rt_resolution               c1       1 //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
 				{ (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight, 1.0f / (float)pRTlastGI->nWidth, 1.0f / (float)pRTlastGI->nHeight },
 				///   u_dist_mod (10.0 default dar nu merge corect)
-				{ 4.0, 0.0f, 0.0f, 0.0f },
+				{ 2.0, 0.0f, 0.0f, 0.0f },
 				///   u_emission                  c3       1 //.x:multiplier=1.0 .y:range=2.0 .z:dropoff=2.0
-				{ 1.0, 2.0f, 2.0f, 0.0f },
+				{ 1.0, 0.5f, 2.0f, 0.0f },
 				//{ct_em_mul, ct_em_range, ct_em_dropoff, 0.0}
 			};
 			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );

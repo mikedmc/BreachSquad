@@ -22,6 +22,24 @@ float3 lin_to_srgb(float3 color)
    return clr.rgb;
 }
 
+float4 ps_main( PS_INPUT Input ) : COLOR0
+{
+	float3 vCol = tex2D( texColor, Input.Tex0.xy ).rgb;
+	float4 vLight = tex2D( texLights, Input.Tex0.xy );
+	float3 col = lin_to_srgb(vLight.rgb);
+
+	//float3 fvFinal = vLight * vCol * fCompData.z;
+	// color dodge: Composite = Background / (1 - foreground * effect_alpha)
+	//fvFinal /= (1.0f - vLight * fCompData.w); //0.4f default
+	// linear dodge for light volume (try it!)
+	//fvFinal += vLight.rgb * 0.2f;
+
+	return float4(col, 1.0f);
+}
+
+
+// --- ORIGINAL WORKING ---
+/*
 float4 ps_main(PS_INPUT Input) : COLOR0
 {
 	float3 vCol = tex2D(texColor, Input.Tex0.xy).rgb;
@@ -39,3 +57,4 @@ float4 ps_main(PS_INPUT Input) : COLOR0
 
 	return float4(fvFinal, 1.0f);
 }
+*/
