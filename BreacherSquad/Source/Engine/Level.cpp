@@ -4350,8 +4350,8 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 	CRTManager::CEngineRenderTarget* pRTdistance = __RTManager().GetRTbyUID( arr_swap_rt[(last_pass_idx + 1) % 2] );
 	m_pDevice->SetTexture( 1, pRTdistance->m_pRTTexture );
-	CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_GICOLOR);
-	//CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_FINAL);
+	//CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_GICOLOR);
+	CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
 	m_pDevice->SetTexture( 2, pRTcolordata->m_pRTTexture );
 	CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
 	m_pDevice->SetTexture( 3, pRTemissive->m_pRTTexture );
@@ -4369,7 +4369,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 255, 0, 0, 0 ), 1.0f, 0 ) ) )
 				return K_OP_FAILED;
 
 			__Shaders().SetVSByName( L"VS_COMPOSITION" );
@@ -4386,7 +4386,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				/// x:u_dist_mod (10.0 default dar nu merge corect), .y: EPSILON half a pixel of longest edge
 				{ 2.0, 0.5f / max( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.0f, 0.0f },
 				///   u_emission                  c3       1 //.x:multiplier=1.0 .y:range=2.0 (0.5 works best) .z:dropoff=2.0
-				{ 1.0, 0.5f, 2.0f, 0.0f },
+				{ 1.0, 2.0f, 2.0f, 0.0f },
 				//{ct_em_mul, ct_em_range, ct_em_dropoff, 0.0}
 			};
 			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
@@ -5048,6 +5048,7 @@ OPRESULT CLevel::RenderPass_EmissiveOcclusive( Matrix* matProj, float fBetweenFr
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 	
 	/// Paint lights as color blobs with hard contours
+	/*
 	CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
 	CSpr sprPoint( spr_props, ANM_LIGHTS_SPR_GI_LIGHTS, g_Vec2Zero );
 
@@ -5062,8 +5063,9 @@ OPRESULT CLevel::RenderPass_EmissiveOcclusive( Matrix* matProj, float fBetweenFr
 			sprPoint.Paint();
 		}
 	}
-	
+	*/
 	__Painter().End();
+	
 	// top layer of tiles
 
 	return K_OP_OK;
@@ -5131,6 +5133,7 @@ OPRESULT CLevel::RenderPass_GIColor( Matrix* matProj, float fBetweenFramesPercen
 	Areas_PaintLayer( K_AL_OCCLUDERS );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 
+	/*
 	/// Paint lights as color blobs with hard contours
 	CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
 	CSpr sprPoint( spr_props, ANM_LIGHTS_SPR_GI_LIGHTS, g_Vec2Zero );
@@ -5146,7 +5149,7 @@ OPRESULT CLevel::RenderPass_GIColor( Matrix* matProj, float fBetweenFramesPercen
 			sprPoint.Paint();
 		}
 	}
-
+	*/
 	__Painter().End();
 	// top layer of tiles
 

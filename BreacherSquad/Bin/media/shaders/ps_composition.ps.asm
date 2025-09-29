@@ -3,7 +3,6 @@
 //
 // Parameters:
 //
-//   float4 fCompData;
 //   sampler2D texLights;
 //
 //
@@ -11,22 +10,15 @@
 //
 //   Name         Reg   Size
 //   ------------ ----- ----
-//   fCompData    c0       1
 //   texLights    s1       1
 //
 
     ps_3_0
-    def c1, 1, 0, 0, 0
+    def c0, 1, 0, 0, 0
     dcl_texcoord v0.xy
     dcl_2d s1
     texld r0, v0, s1
-    log r1.x, r0.x
-    log r1.y, r0.y
-    log r1.z, r0.z
-    mul r0.xyz, r1, c0.y
-    exp oC0.x, r0.x
-    exp oC0.y, r0.y
-    exp oC0.z, r0.z
-    mov oC0.w, c1.x
+    mov oC0.xyz, r0
+    mov oC0.w, c0.x
 
-// approximately 9 instruction slots used (1 texture, 8 arithmetic)
+// approximately 3 instruction slots used (1 texture, 2 arithmetic)

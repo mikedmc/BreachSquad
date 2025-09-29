@@ -22,6 +22,8 @@ float4 rt_resolution : register( c1 ); //.x:RT_width, .y:RT_height, z: 1/RT_widt
 float4 u_dist_mod : register(c2); //.x:distance modifier, .y:EPSILON half a pixel on longer axis
 
 
+--------> ori randez luminile pe poligoanele lipsa din podea ca sa imi fac culori realiste ori fac bufferul de intersectie al luminii sa fie peretii si fug dinspre ei 1px si iau culoarea de pe podea
+
 // ================================================================================
 // return half a pixel size in UV space - used for some distance calculations to 
 // determine if we're at a surface.
@@ -113,6 +115,10 @@ bool raymarch(float2 origin, float2 ray, out float2 hit_pos, out float4 hit_data
 // closest emissive pixel though, which we can consider the surface's value.
 void get_last_frame_data(float2 uv, float2 pix, out float last_emission, out float3 last_colour)
 {
+	float4 pixel = u_last_frame_data.SampleLevel( samp0, float2(uv.x, uv.y), 0 );
+	last_emission = pixel.a;
+	last_colour = pixel.rgb;
+
 	/*
 	float4 center_pixel = u_last_frame_data.SampleLevel( samp0, float2(uv.x, uv.y), 0 );
 	float e = center_pixel.a;
@@ -128,7 +134,7 @@ void get_last_frame_data(float2 uv, float2 pix, out float last_emission, out flo
 	last_emission = e;
 	last_colour = center_pixel.rgb;
 	*/
-	
+	/*	
 	last_emission = 0.0; 
 	//last_colour = float3(0.0, 0.0, 0.0); //DMC: I added this
 	for(int x = -1; x <= 1; x++)
@@ -143,7 +149,7 @@ void get_last_frame_data(float2 uv, float2 pix, out float last_emission, out flo
 			}
 		}
 	}
-	
+	*/
 }
 
 float3 lin_to_srgb( float3 color )
@@ -284,13 +290,17 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 		{
 			//hittimes += 1.0;
 			//ray_dist = max( ray_dist, 0. );
+
+			float2 uvst = hit_pos;
+			// move back a few pixels to get the color:
+			//uvst -= rand_direction * 2.0 * rt_resolution.zw;
 			// convert uvs back to 0-1 range.
-			float2 uvst = float2(hit_pos.x * inv_aspect, hit_pos.y);
+			uvst.x *= inv_aspect;
+			//uvst = float2(hit_pos.x * inv_aspect, hit_pos.y);
 
 			float mat_emissive;
 			float3 mat_colour;
 			get_material(uvst, hit_data, mat_emissive, mat_colour);
-			
 			// convert UVs back to 0-1 space.
 			
 			float last_emission = 0.0;
@@ -298,7 +308,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			
 			
 			//if(u_bounce) - DMC: ofc we want bounce
-			
+					
 			{
 				// we don't want emissive surfaces themselves to bounce light (we could, but it would probably blow
 				// out the scene).
@@ -319,9 +329,9 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			float drop = u_emission.z;
 			// attenuation calculation - very tweakable to get the correct sort of light range/dropoff.
 			float att = pow( max( 1.0 - (ray_dist * ray_dist) / (r * r), 0.0 ), drop );
-			float emission = (mat_emissive + last_emission * 1.2) * att;
-			emis += emission;
-			colout += mat_colour * emission;
+			//float emission = (mat_emissive + last_emission) * att;
+			emis += 1;// emission;
+			colout += (mat_colour * 0.4 + last_colour * 0.6) * att;
 			//colout += (mat_colour + last_colour) * emission;
 			//ORIGINAL: colout += (mat_emissive + last_emission) * (mat_colour + last_colour) * att; 
 		}
@@ -330,7 +340,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	
 	// right now, emis and col store the sum of contribution of all rays to this pixel, we need
 	// to normalise it.
-	emis /= u_rays_per_pixel;
+	emis = 1;// /= u_rays_per_pixel;
 	colout /= u_rays_per_pixel;
 
 	//emis = 1.0;
@@ -340,6 +350,6 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	// need colour and alpha to be separate. if we combined at this stage, the bounce calculations wouldn't work
 	// properly.
 	//float3 curpx_last_color = u_last_frame_data.SampleLevel( samp0, pin.UV0.xy, 0 ).rgb;
-	//return float4(lerp(colout, curpx_last_color, 0.9), emis); // temporal blur
+	//return float4(lerp(colout, curpx_last_color, 0.6), 1.0); // temporal blur
 	return float4(colout, emis);
 }
