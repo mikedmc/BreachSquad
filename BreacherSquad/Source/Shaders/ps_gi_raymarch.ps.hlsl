@@ -19,10 +19,10 @@ float3 u_emission = float3(1.0, 2.0, 2.0); //.x:multiplier=1.0 .y:range=2.0 .z:d
 static const int u_max_raymarch_steps = 32; // aici se mai poate umbla la final
 float4 TIME : register ( c0 ); // .x .y different time scales
 float4 rt_resolution : register( c1 ); //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
-float4 u_dist_mod : register(c2); //.x:distance modifier, .y:EPSILON half a pixel on longer axis
+float4 u_dist_mod : register(c2); //.x:distance modifier, .y:EPSILON half a pixel on longer axis, .z: EPSILON half pixel on short axix, .w: collision sensitivity modifier (default 1.0)
 
 
---------> ori randez luminile pe poligoanele lipsa din podea ca sa imi fac culori realiste ori fac bufferul de intersectie al luminii sa fie peretii si fug dinspre ei 1px si iau culoarea de pe podea
+//--------> ori randez luminile pe poligoanele lipsa din podea ca sa imi fac culori realiste ori fac bufferul de intersectie al luminii sa fie peretii si fug dinspre ei 1px si iau culoarea de pe podea
 
 // ================================================================================
 // return half a pixel size in UV space - used for some distance calculations to 
@@ -43,7 +43,7 @@ void get_material(float2 uv, float4 hit_data, out float emissive, out float3 col
 {	
 	// if distance to nearest surface at this location is < epsilon (half pixel), we can
 	// consider to be hitting that surface.
-	if(hit_data.x / u_dist_mod.x < u_dist_mod.y)
+	if(hit_data.x / u_dist_mod.x < u_dist_mod.y * u_dist_mod.w)
 	{
 		// read the surface data from emissive/colour maps. 
 		// TODO: could probably be optimised by combining into one texture sample.
@@ -286,6 +286,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			//return float4(0.0, 0, 0.0, 0.0);
 		}
 		*/
+		//float colinwall = step( u_dist_mod.y, ray_dist );
 		if(hit)
 		{
 			//hittimes += 1.0;
@@ -318,8 +319,11 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 					get_last_frame_data(uvst, rt_resolution.zw, last_emission, last_colour);
 				}
 				// this is so light doesn't bounce off the surface it was emitted from.
-				if(ray_dist < u_dist_mod.y)
+				
+				if ( ray_dist < u_dist_mod.y ) {
 					last_emission = 0.0;
+					//last_colour = float3(0, 0, 0);
+				}
 			}
 			
 			
@@ -331,7 +335,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			float att = pow( max( 1.0 - (ray_dist * ray_dist) / (r * r), 0.0 ), drop );
 			//float emission = (mat_emissive + last_emission) * att;
 			emis += 1;// emission;
-			colout += (mat_colour * 0.4 + last_colour * 0.6) * att;
+			colout += (mat_colour * 0.2 + last_colour * 0.8) * att;// *colinwall;
 			//colout += (mat_colour + last_colour) * emission;
 			//ORIGINAL: colout += (mat_emissive + last_emission) * (mat_colour + last_colour) * att; 
 		}

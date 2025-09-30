@@ -4098,9 +4098,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				return K_OP_FAILED;
 			}
 
-			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
-			m_pDevice->SetTransform( D3DTS_VIEW, &matView );
-			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+			//m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
+			//m_pDevice->SetTransform( D3DTS_VIEW, &matView );
+			//m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 
 			RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
 			CAABB			camAABB( camrect );
@@ -4123,9 +4123,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				return K_OP_FAILED;
 			}
 
-			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
-			m_pDevice->SetTransform( D3DTS_VIEW, &matView );
-			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+			//m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
+			//m_pDevice->SetTransform( D3DTS_VIEW, &matView );
+			//m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 
 			RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
 			CAABB			camAABB( camrect );
@@ -4146,7 +4146,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
 				return K_OP_FAILED;
 
-			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
 			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
 
 			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
@@ -4164,7 +4163,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT );
 			m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
 			m_pDevice->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_NONE );
-
 
 			MUMatIdentity( &matView );
 			m_pDevice->SetTransform( D3DTS_VIEW, &matView );
@@ -4215,7 +4213,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 3. apply multipass voronoi on (starting with) 2
 	///----------------------------------------------------
-
 
 	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP2 );
 	int passes = ceil( log( max( pRT->nWidth, pRT->nHeight ) ) / log( 2.0 ) );
@@ -4344,6 +4341,13 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///   samp0+u_last_frame_data     s4       1
 	///   samp0+u_noise_data          s5       1
 
+	// clamp textures so we don't bleed light
+	for ( int kk = 0; kk < 5; kk++ ) {
+		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
+		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
+	}
+
+
 	static int lastGIidx = 0;
 	UINT32 arr_gi_rt[] = { K_RTID_GI1, K_RTID_GI2 };
 
@@ -4383,8 +4387,8 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				{ this->fLocalTimeline * 13.7, this->fLocalTimeline * 7.3, 0.0f, 0.0f },
 				///   rt_resolution               c1       1 //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
 				{ (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight, 1.0f / (float)pRTlastGI->nWidth, 1.0f / (float)pRTlastGI->nHeight },
-				/// x:u_dist_mod (10.0 default dar nu merge corect), .y: EPSILON half a pixel of longest edge
-				{ 2.0, 0.5f / max( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.0f, 0.0f },
+				/// x:u_dist_mod (10.0 default dar nu merge corect), .y: EPSILON half a pixel of longest edge, .z: EPSILON2 half pixel on shortest edge , .w: collision sensitivity modifier
+				{ 2.0, 0.5f / max( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.5f / min( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.5f },
 				///   u_emission                  c3       1 //.x:multiplier=1.0 .y:range=2.0 (0.5 works best) .z:dropoff=2.0
 				{ 1.0, 2.0f, 2.0f, 0.0f },
 				//{ct_em_mul, ct_em_range, ct_em_dropoff, 0.0}
@@ -4663,7 +4667,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Matrix* matProj, float fBetwe
 	__Shaders().SetVS( nullptr );
 	pTex = m_tilesetDesc.GetTexture( K_AL_CEILINGS, bPaintsNormals );
 	m_pDevice->SetTexture( 0, pTex->pTexture );
-	Areas_PaintLayer( K_AL_CEILINGS );
+	//Areas_PaintLayer( K_AL_CEILINGS );
 
 	return K_OP_OK;
 }
@@ -5025,7 +5029,7 @@ OPRESULT CLevel::RenderPass_EmissiveOcclusive( Matrix* matProj, float fBetweenFr
 
 	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams (UV shrinking)
 	// moves from tex pixel to pixel, no half pixels but we add the subpixel movement when painting the final scene so if moves smoothly
-	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
+	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -( camrect.x ) * K_RT_PIXEL_SIZE_F, -( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 	__Shaders().SetVS( nullptr );
@@ -5045,6 +5049,7 @@ OPRESULT CLevel::RenderPass_EmissiveOcclusive( Matrix* matProj, float fBetweenFr
 	auto ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"BLACK32" ) );
 	m_pDevice->SetTexture( 0, ptex->pTexture );
 	Areas_PaintLayer( K_AL_OCCLUDERS );
+	Areas_PaintLayer( K_AL_WALLS );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 	
 	/// Paint lights as color blobs with hard contours
@@ -5111,7 +5116,7 @@ OPRESULT CLevel::RenderPass_GIColor( Matrix* matProj, float fBetweenFramesPercen
 
 	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams (UV shrinking)
 	// moves from tex pixel to pixel, no half pixels but we add the subpixel movement when painting the final scene so if moves smoothly
-	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
+	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -( camrect.x ) * K_RT_PIXEL_SIZE_F, -( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 	__Shaders().SetVS( nullptr );
@@ -5131,6 +5136,8 @@ OPRESULT CLevel::RenderPass_GIColor( Matrix* matProj, float fBetweenFramesPercen
 	auto ptexnoise = UTApp().g_texManager.GetTextureByID( FastHash( L"WHITE32" ) );
 	m_pDevice->SetTexture( 0, ptexnoise->pTexture );
 	Areas_PaintLayer( K_AL_OCCLUDERS );
+	Areas_PaintLayer( K_AL_WALLS );
+
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 
 	/*
