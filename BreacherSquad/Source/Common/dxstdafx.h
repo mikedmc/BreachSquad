@@ -289,7 +289,8 @@ enum ERTIDChannel {
 	K_RTID_GICOLOR,				// color of walls for light bouncing
 	K_RTID_FINAL,
 	K_RTID_TEMP1,				// just colors
-	K_RTID_TEMP2,				// just colors
+	K_RTID_FLOAT1,				// A16B16G16R16F
+	K_RTID_FLOAT2,				// A16B16G16R16F 
 	K_RTID_GI1,				// alternative GI lighting
 	K_RTID_GI2,				
 

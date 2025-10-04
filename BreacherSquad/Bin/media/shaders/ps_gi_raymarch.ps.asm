@@ -30,12 +30,9 @@
 //
 
     ps_3_0
-    def c4, 0, 0, 1.61803401, 6.28318548
-    def c5, 0.5, 6.28318548, -3.14159274, 0
-    def c6, 0, 1, 0.800000012, 0.200000003
-    def c7, 0.125, 0, 0, 0
-    defi i0, 8, 0, 0, 0
-    defi i1, 32, 0, 0, 0
+    def c4, 0, 6.28318548, 0.5, -3.14159274
+    def c5, 0, 0, 1, 0.00100000005
+    defi i0, 32, 0, 0, 0
     dcl_texcoord v0.xy
     dcl_2d s1
     dcl_2d s2
@@ -49,78 +46,73 @@
     add r2.xyz, c0.xyxw, v0.xyxw
     mov r2.w, c4.x
     texldl r2, r2, s5
+    mul r0.x, r2.x, c4.y
+    frc r0.x, r0.x
+    add r0.x, r0.x, c4.z
+    frc r0.x, r0.x
+    mad r0.x, r0.x, c4.y, c4.w
+    sincos r2.xy, r0.x
     rcp r0.x, c2.x
-    mul r0.z, c2.w, c2.y
-    min r0.w, c1.w, c1.z
-    mul r1.x, c3.y, c3.y
-    rcp r1.x, r1.x
+    min r0.z, c1.w, c1.z
     mov r1.z, v0.y
     mov r3.w, c4.x
-    mov r4.w, c4.x
-    mov r5, c4.x
+    mov r3.yz, c4.x
+    mov r1.xw, c4.x
+    mov r0.w, c4.x
+    mov r2.zw, c4.x
     rep i0
-      mul r1.w, r5.w, c4.z
-      mad r1.w, r2.x, c4.w, r1.w
-      frc r1.w, r1.w
-      add r1.w, r1.w, c5.x
-      frc r1.w, r1.w
-      mad r1.w, r1.w, c5.y, c5.z
-      sincos r6.xy, r1.w
-      mov r4.yz, c4.x
-      mov r1.w, c4.x
-      mov r2.yzw, c4.x
-      mov r6.z, c4.x
-      rep i1
-        mad r3.yz, r6.xxyw, r2.w, r1
-        mul r3.x, r0.y, r3.y
-        texldl r7, r3.xzxw, s1
-        mul r3.x, r0.x, r7.x
-        mad r6.w, r7.x, r0.x, -c2.y
-        cmp r6.w, r6.w, c6.x, c6.y
-        if_lt r3.x, c2.y
-          mov r4.yz, r3
-          mov r2.y, r7.x
-          mov r1.w, c6.y
-          mov r6.z, c6.y
-          break_ne c6.y, -c6.y
-        endif
-        max r7.y, r3.x, r0.w
-        add r2.w, r2.w, r7.y
-        mov r2.z, r2.w
-        mov r2.y, r7.x
-        mov r6.z, r6.w
-        mov r4.yz, c4.x
-        mov r1.w, c4.x
-      endrep
-      cmp r2.w, -r6.z, c4.x, r1.w
-      if_ne r2.w, -r2.w
-        mul r4.x, r0.y, r4.y
-        mul r2.w, r0.x, r2.y
-        if_lt r2.w, r0.z
-          texldl r7, r4.xzxw, s3
-          texldl r8, r4.xzxw, s2
-          mul r2.w, r7.x, c3.x
-        else
-          mov r8.xyz, c4.x
-          mov r2.w, c4.x
-        endif
-        if_lt r2.w, c2.y
-          mul r7, r4.xzxx, c6.yyyx
-          texldl r7, r7, s4
-        else
-          mov r7.xyz, c4.x
-        endif
-        mul r2.w, r2.z, r2.z
-        mad r2.w, r2.w, -r1.x, c6.y
-        max r3.x, r2.w, c4.x
-        pow r2.w, r3.x, c3.z
-        mul r3.xyz, r7, c6.z
-        mad r3.xyz, r8, c6.w, r3
-        mad r5.xyz, r3, r2.w, r5
+      mad r3.yz, r2.xxyw, r2.z, r1
+      mul r3.x, r0.y, r3.y
+      texldl r4, r3.xzxw, s1
+      mul r4.y, r0.x, r4.x
+      mad r4.z, r4.x, r0.x, -c2.y
+      cmp r4.z, r4.z, c5.y, c5.z
+      if_lt r4.y, c2.y
+        mov r1.x, r4.x
+        mov r0.w, c5.z
+        mov r2.w, c5.z
+        break_ne c5.z, -c5.z
       endif
-      add r5.w, r5.w, c6.y
+      max r5.x, r4.y, r0.z
+      add r2.z, r2.z, r5.x
+      mov r1.w, r2.z
+      mov r1.x, r4.x
+      mov r2.w, r4.z
+      mov r3.yz, c4.x
+      mov r0.w, c4.x
     endrep
-    mul oC0.xyz, r5, c7.x
-    mov oC0.w, c6.y
+    cmp r0.z, -r2.w, c4.x, r0.w
+    if_ne r0.z, -r0.z
+      mul r3.x, r0.y, r3.y
+      mul r0.x, r0.x, r1.x
+      mul r0.y, c2.w, c2.y
+      if_lt r0.x, r0.y
+        mov r3.w, c4.x
+        texldl r0, r3.xzxw, s3
+        texldl r2, r3.xzxw, s2
+        mul r0.x, r0.x, c3.x
+      else
+        mov r2.xyz, c5.zyyw
+        mov r0.x, c4.x
+      endif
+      if_lt r0.x, c2.y
+        mul r0, r3.xzxx, c5.zzzy
+        texldl r0, r0, s4
+      else
+        mov r0.xyz, c4.x
+      endif
+      mul r0.w, r1.w, r1.w
+      mul r1.x, c3.y, c3.y
+      rcp r1.x, r1.x
+      mad r0.w, r0.w, -r1.x, c5.z
+      max r1.x, r0.w, c4.x
+      pow r0.w, r1.x, c3.z
+      mad r0.xyz, r0, c5.w, r2
+      mul r0.xyz, r0.w, r0
+    else
+      mov r0.xyz, c4.x
+    endif
+    mov oC0.xyz, r0
+    mov oC0.w, c5.z
 
-// approximately 110 instruction slots used (10 texture, 100 arithmetic)
+// approximately 102 instruction slots used (10 texture, 92 arithmetic)

@@ -57,7 +57,7 @@ void get_material(float2 uv, float4 hit_data, out float emissive, out float3 col
 	else
 	{
 		emissive = 0.0;
-		colour = float3( 0.0, 0.0, 0.0 );
+		colour = float3( 1.0, 0.0, 0.0 );
 	}
 }
 
@@ -256,7 +256,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	float rand02pi = u_noise_data.SampleLevel( samp0, pin.UV0.xy + TIME.xy, 0 ).r * DOUBLE_PI; // noise sample - good
 	float golden_angle = PI * 0.7639320225;
 	
-	float hittimes = 0.0;
+	//float hittimes = 0.0;
 	for ( float i = 0.0; i < u_rays_per_pixel; i++ )
 	{
 		float2 hit_pos;
@@ -270,23 +270,9 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 		//float cur_angle = hash( rand02pi + float( i ) / float( u_rays_per_pixel ) ) * DOUBLE_PI;
 		float2 rand_direction = float2(cos( cur_angle ), sin( cur_angle ));
 		bool hit = raymarch( uv, rand_direction, hit_pos, hit_data, ray_dist );
-		/*
-		if ( hit )
-		{
-			float mat_emissive;
-			float3 mat_colour;
-			get_material( hit_pos, hit_data, mat_emissive, mat_colour );
-			//return float4(mat_colour, 1.0); // afiseaza materialul hit ca sa rezolvi bugul cu snap (randare la puncte float a peretilor)
-			//col += mat_colour;
-			col.r += ray_dist;
-			emis = 1;// += mat_emissive;
-		}
-		else
-		{
-			//return float4(0.0, 0, 0.0, 0.0);
-		}
-		*/
+		// if collision is inside the wall then colinwall will be 0
 		//float colinwall = step( u_dist_mod.y, ray_dist );
+
 		if(hit)
 		{
 			//hittimes += 1.0;
@@ -309,10 +295,11 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			
 			
 			//if(u_bounce) - DMC: ofc we want bounce
-					
+
 			{
 				// we don't want emissive surfaces themselves to bounce light (we could, but it would probably blow
 				// out the scene).
+
 				if(mat_emissive < u_dist_mod.y)
 				{
 					// using pixel size rt_resolution.zw
@@ -335,7 +322,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			float att = pow( max( 1.0 - (ray_dist * ray_dist) / (r * r), 0.0 ), drop );
 			//float emission = (mat_emissive + last_emission) * att;
 			emis += 1;// emission;
-			colout += (mat_colour * 0.2 + last_colour * 0.8) * att;// *colinwall;
+			colout += (mat_colour * 1.0 + last_colour * 0.001) * att;// *colinwall;
 			//colout += (mat_colour + last_colour) * emission;
 			//ORIGINAL: colout += (mat_emissive + last_emission) * (mat_colour + last_colour) * att; 
 		}

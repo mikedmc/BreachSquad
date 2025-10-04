@@ -3963,7 +3963,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 1. NORMAL MAP AND HEIGHT MAP
 	///----------------------------------------------------
-	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
+	pRT = __RTManager().GetRTbyUID( K_RTID_FLOAT1 );
 	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
@@ -4138,7 +4138,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 2. apply voronoi seed PS on 1
 	///----------------------------------------------------
-	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP2 );
+	pRT = __RTManager().GetRTbyUID( K_RTID_FLOAT2 );
 	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
@@ -4209,13 +4209,12 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 
 	}
-
+	
 	///----------------------------------------------------
 	/// 3. apply multipass voronoi on (starting with) 2
 	///----------------------------------------------------
-
-	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP2 );
-	int passes = ceil( log( max( pRT->nWidth, pRT->nHeight ) ) / log( 2.0 ) );
+	pRT = __RTManager().GetRTbyUID( K_RTID_FLOAT2 );
+	int passes = 7;// ceil( log( max( pRT->nWidth, pRT->nHeight ) ) / log( 2.0 ) );
 	Matrix matView;
 	MUMatIdentity( &matView );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
@@ -4245,7 +4244,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	Vec2 vScreenPixelSize( 1.0f / (float)pRT->nWidth, 1.0f / (float)pRT->nHeight );
 	int last_pass_idx = 0;
 	// we start witn TEMP2 as src (voronoi seed in it) and paint to TEMP1
-	UINT32 arr_swap_rt[] = { K_RTID_TEMP1 , K_RTID_TEMP2 };
+	UINT32 arr_swap_rt[] = { K_RTID_FLOAT1 , K_RTID_FLOAT2 };
 	for ( int i = 0; i < passes; i++ ) 
 	{
 		// save last pass so we know what the last RT was in next step
@@ -4288,7 +4287,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 
 	}
-
+	
 	///----------------------------------------------------
 	/// 4. convert voronoi diagram to distance field
 	///----------------------------------------------------
@@ -4345,6 +4344,10 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	for ( int kk = 0; kk < 5; kk++ ) {
 		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
 		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
+
+		m_pDevice->SetSamplerState( kk, D3DSAMP_MINFILTER, D3DTEXF_POINT );
+		m_pDevice->SetSamplerState( kk, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
+		m_pDevice->SetSamplerState( kk, D3DSAMP_MIPFILTER, 0);
 	}
 
 
@@ -4369,6 +4372,10 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	// render to the other GI target
 	pRT = __RTManager().GetRTbyUID( arr_gi_rt[(lastGIidx + 1) % 2] );
 	lastGIidx ^= 1; //pingpong buffer only needs index 0 and 1 (using xor)
+
+	MUMatIdentity( &matView );
+	matWVP = matView * pRT->matProj;
+
 	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
@@ -4388,7 +4395,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				///   rt_resolution               c1       1 //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
 				{ (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight, 1.0f / (float)pRTlastGI->nWidth, 1.0f / (float)pRTlastGI->nHeight },
 				/// x:u_dist_mod (10.0 default dar nu merge corect), .y: EPSILON half a pixel of longest edge, .z: EPSILON2 half pixel on shortest edge , .w: collision sensitivity modifier
-				{ 2.0, 0.5f / max( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.5f / min( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.5f },
+				{ 2.0, 0.5f / max( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.5f / min( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 1.0f },
 				///   u_emission                  c3       1 //.x:multiplier=1.0 .y:range=2.0 (0.5 works best) .z:dropoff=2.0
 				{ 1.0, 2.0f, 2.0f, 0.0f },
 				//{ct_em_mul, ct_em_range, ct_em_dropoff, 0.0}
@@ -4408,7 +4415,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 
 
-	///----------------------------------------------------
+///----------------------------------------------------
 /// COMPOSITION de test ca sa vad bufferele
 ///----------------------------------------------------
 	pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );
@@ -4730,7 +4737,7 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 	float fConstDataVS[][4] = {
 		{ floor( camrect.x ), floor( camrect.y ), camrect.w, camrect.h } //RTT rect_xywh in world coords
 		//#HACK: if flooring the campos then floor this camrect too that gets sent to the shader, but floor it to submultiples of pixel size (shader view is real space not screen space)
-		//{ floor(camrect.x * K_GAME_PIXEL_SIZE_F) / K_GAME_PIXEL_SIZE_F, floor(camrect.y * K_GAME_PIXEL_SIZE_F) / K_GAME_PIXEL_SIZE_F, camrect.w, camrect.h } //RTT rect_xywh in world coords
+		//{ floor(camrect.x * K_RT_PIXEL_SIZE_F ) / K_RT_PIXEL_SIZE_F, floor(camrect.y * K_RT_PIXEL_SIZE_F ) / K_RT_PIXEL_SIZE_F, camrect.w, camrect.h } //RTT rect_xywh in world coords
 	};
 
 	UT3D::DeviceAdditiveON( m_pDevice );
@@ -4807,6 +4814,7 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 			continue;
 		//paint and exit
 		m_bufferedPainter.DrawMesh( nl->m_nLightMeshIdx, true );
+		break;
 	}
 
 
@@ -4864,9 +4872,8 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 	PaintBullets( K_LVL_RP_LIGHTS );
 	__Painter().Flush();
 
-
 	///--- point lights
-	CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
+	CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_FLOAT1 );
 	if ( pRT != null )
 	{
 		m_pDevice->SetTexture( 0, pRT->m_pRTTexture );
@@ -5029,7 +5036,7 @@ OPRESULT CLevel::RenderPass_EmissiveOcclusive( Matrix* matProj, float fBetweenFr
 
 	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams (UV shrinking)
 	// moves from tex pixel to pixel, no half pixels but we add the subpixel movement when painting the final scene so if moves smoothly
-	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -( camrect.x ) * K_RT_PIXEL_SIZE_F, -( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
+	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 	__Shaders().SetVS( nullptr );
@@ -5116,7 +5123,7 @@ OPRESULT CLevel::RenderPass_GIColor( Matrix* matProj, float fBetweenFramesPercen
 
 	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams (UV shrinking)
 	// moves from tex pixel to pixel, no half pixels but we add the subpixel movement when painting the final scene so if moves smoothly
-	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -( camrect.x ) * K_RT_PIXEL_SIZE_F, -( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
+	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 	__Shaders().SetVS( nullptr );
