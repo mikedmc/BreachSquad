@@ -8,21 +8,22 @@ static const float PI = 3.141592;
 static const float phi = 1.6180339887498948482045868343656381177203091798058;
 static const float DOUBLE_PI = 6.283185307179586;
 // uniforms
-static const float u_rays_per_pixel = 8;
-Texture2D <float4> u_distance_data : register( t0 );
-Texture2D <float4> u_scene_colour_data : register ( t1 );
-Texture2D <float4> u_scene_emissive_data : register( t2 );
-Texture2D <float4> u_last_frame_data : register( t3 );
-Texture2D <float4> u_noise_data : register( t4 );
+static const float u_rays_per_pixel = 6;
+Texture2D <float4> u_distance_data;
+Texture2D <float4> u_scene_colour_data;
+Texture2D <float4> u_scene_emissive_data;
+Texture2D <float4> u_last_frame_data;
+Texture2D <float4> u_noise_data;
 sampler samp0: register( s0 );
 float3 u_emission = float3(1.0, 2.0, 2.0); //.x:multiplier=1.0 .y:range=2.0 .z:dropoff=2.0
 static const int u_max_raymarch_steps = 32; // aici se mai poate umbla la final
 float4 TIME : register ( c0 ); // .x .y different time scales
 float4 rt_resolution : register( c1 ); //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
-float4 u_dist_mod : register(c2); //.x:distance modifier, .y:EPSILON half a pixel on longer axis, .z: EPSILON half pixel on short axix, .w: collision sensitivity modifier (default 1.0)
+float4 u_dist_mod : register(c2); //.x:distance modifier, .y:EPSILON half a pixel on longer axis, .z: EPSILON half pixel on short axix
 
 
 //--------> ori randez luminile pe poligoanele lipsa din podea ca sa imi fac culori realiste ori fac bufferul de intersectie al luminii sa fie peretii si fug dinspre ei 1px si iau culoarea de pe podea
+// - get last frame data ar trebui sa ia cel mai luminos din zona ca sa faca un fel de blur
 
 // ================================================================================
 // return half a pixel size in UV space - used for some distance calculations to 
@@ -43,7 +44,7 @@ void get_material(float2 uv, float4 hit_data, out float emissive, out float3 col
 {	
 	// if distance to nearest surface at this location is < epsilon (half pixel), we can
 	// consider to be hitting that surface.
-	if(hit_data.x / u_dist_mod.x < u_dist_mod.y * u_dist_mod.w)
+	if(hit_data.x / u_dist_mod.x < u_dist_mod.y)
 	{
 		// read the surface data from emissive/colour maps. 
 		// TODO: could probably be optimised by combining into one texture sample.
@@ -57,7 +58,7 @@ void get_material(float2 uv, float4 hit_data, out float emissive, out float3 col
 	else
 	{
 		emissive = 0.0;
-		colour = float3( 1.0, 0.0, 0.0 );
+		colour = float3( 0.0, 0.0, 0.0 );
 	}
 }
 
@@ -88,7 +89,7 @@ bool raymarch(float2 origin, float2 ray, out float2 hit_pos, out float4 hit_data
 		step_dist = map(sample_point, hit_data);
 		
 		// consider a hit if distance to surface is < epsilon (half pixel).
-		if(step_dist < u_dist_mod.y)
+		if(step_dist <= u_dist_mod.y)
 		{
 			hit_pos = sample_point;
   			return true;
@@ -288,14 +289,13 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			float mat_emissive;
 			float3 mat_colour;
 			get_material(uvst, hit_data, mat_emissive, mat_colour);
-			// convert UVs back to 0-1 space.
-			
+						
 			float last_emission = 0.0;
 			float3 last_colour = float3(0.0, 0.0, 0.0);
 			
 			
 			//if(u_bounce) - DMC: ofc we want bounce
-
+			/*
 			{
 				// we don't want emissive surfaces themselves to bounce light (we could, but it would probably blow
 				// out the scene).
@@ -312,7 +312,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 					//last_colour = float3(0, 0, 0);
 				}
 			}
-			
+			*/
 			
 			
 			// calculate total emissive/colour values from direct and bounced (last frame) lighting.

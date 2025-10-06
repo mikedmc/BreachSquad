@@ -1717,8 +1717,13 @@ bool CLevel::NormalizeMouseCoords( int ControllerIID, float fAxisValue, bool bIs
 }
 
 
-void CLevel::BuildDynamicGeometry( CAABB camAABB )
+void CLevel::BuildDynamicGeometry( CAABB _camAABB )
 {
+	// rounding camera bbox so we fall on pixel edges
+	CAABB camAABB( _camAABB );
+	camAABB.vMin.x = floor( camAABB.vMin.x );
+	camAABB.vMin.y = floor( camAABB.vMin.y );
+
 	const int arrOccludersSize = 200;
 	COccluderSegment arrOccluders[arrOccludersSize];
 	///--- create vert buffers for lights ---
@@ -1855,6 +1860,7 @@ void CLevel::BuildDynamicGeometry( CAABB camAABB )
 
 			case K_LVL_LT_DIRECTIONAL:
 			{
+				//#TODO: should go away
 				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
 				vul.pos = Vec3( camAABB.vMin.x, camAABB.vMin.y, 0.0f );
 				vur.pos = Vec3( camAABB.vMax.x, camAABB.vMin.y, 0.0f );
@@ -4305,8 +4311,8 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			__Shaders().SetPSByName( L"PS_VORONOI_DISTANCE" );
 			//set Pshader constants
 			float fConstData[][4] = {
-				// x: distance modifier (default 1.0)
-				{ 1.0, 0.0f, 0.0f, 0.0f },
+				// x: distance modifier (default 10.0, must match x:u_dist_mod from ray tracing shader)
+				{ 8.0, 0.0f, 0.0f, 0.0f },
 				// xy: inverse of RT resolution
 				//{ vScreenPixelSize.x, vScreenPixelSize.y, .0f, .0f },
 			};
@@ -4361,17 +4367,20 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
 	m_pDevice->SetTexture( 2, pRTcolordata->m_pRTTexture );
 	CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
-	m_pDevice->SetTexture( 3, pRTemissive->m_pRTTexture );
+	//m_pDevice->SetTexture( 3, pRTemissive->m_pRTTexture );
 	CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( arr_gi_rt[lastGIidx % 2] );
-	m_pDevice->SetTexture( 4, pRTlastGI->m_pRTTexture );
+	//m_pDevice->SetTexture( 4, pRTlastGI->m_pRTTexture );
 	//get noise texture and apply
 	auto ptexnoise = UTApp().g_texManager.GetTextureByID( FastHash( L"BLUENOISE512" ) );
-	m_pDevice->SetTexture( 5, ptexnoise->pTexture );
+	m_pDevice->SetTexture( 3, ptexnoise->pTexture );
+	// noise must always tile
+	m_pDevice->SetSamplerState( 3, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
+	m_pDevice->SetSamplerState( 3, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
 
 
 	// render to the other GI target
 	pRT = __RTManager().GetRTbyUID( arr_gi_rt[(lastGIidx + 1) % 2] );
-	lastGIidx ^= 1; //pingpong buffer only needs index 0 and 1 (using xor)
+	//lastGIidx ^= 1; //pingpong buffer only needs index 0 and 1 (using xor)
 
 	MUMatIdentity( &matView );
 	matWVP = matView * pRT->matProj;
@@ -4394,10 +4403,10 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				{ this->fLocalTimeline * 13.7, this->fLocalTimeline * 7.3, 0.0f, 0.0f },
 				///   rt_resolution               c1       1 //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
 				{ (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight, 1.0f / (float)pRTlastGI->nWidth, 1.0f / (float)pRTlastGI->nHeight },
-				/// x:u_dist_mod (10.0 default dar nu merge corect), .y: EPSILON half a pixel of longest edge, .z: EPSILON2 half pixel on shortest edge , .w: collision sensitivity modifier
-				{ 2.0, 0.5f / max( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.5f / min( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 1.0f },
+				/// x:u_dist_mod, .y: EPSILON half a pixel of longest edge, .z: EPSILON2 half pixel on shortest edge
+				{ 8.0, 0.5f / max( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.5f / min( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.0f },
 				///   u_emission                  c3       1 //.x:multiplier=1.0 .y:range=2.0 (0.5 works best) .z:dropoff=2.0
-				{ 1.0, 2.0f, 2.0f, 0.0f },
+				{ 1.0, 0.5f, 2.0f, 0.0f },
 				//{ct_em_mul, ct_em_range, ct_em_dropoff, 0.0}
 			};
 			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
@@ -5211,7 +5220,7 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	Matrix matWVP = matView * ( *matProj );
 
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
-	//CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
+	//CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL);
 	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_GI2);
 	_ASSERT( pRTcolor != nullptr && pRTlights != nullptr );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
@@ -5292,9 +5301,9 @@ OPRESULT CLevel::PaintGameFinalRT()
 	// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
 	RectXYWH camrect = m_camLevelToRT.GetCamWorldAABB();
 	Vec2 vSubPxOff( -FLOAT_FRAC( camrect.x ) * ( fRTscale * K_RT_PIXEL_SIZE_F ), -FLOAT_FRAC( camrect.y ) * ( fRTscale * K_RT_PIXEL_SIZE_F ) );
-
+	///-- Moves the onscreen rectangle with sub-pixecl precision to smooth out the fixed pixel corner rendering
 	RectLTRB destRect( rectRender );
-	destRect.Move( vSubPxOff.x, vSubPxOff.y );
+	//destRect.Move( vSubPxOff.x, vSubPxOff.y );
 	RectLTRB srcUV( vUL.x / pRTfinal->nWidth, vUL.y / pRTfinal->nHeight, vDR.x / pRTfinal->nWidth, vDR.y / pRTfinal->nHeight );
 
 	m_pDevice->SetTexture( 0, pRTfinal->m_pRTTexture );
