@@ -8,7 +8,7 @@ static const float PI = 3.141592;
 static const float phi = 1.6180339887498948482045868343656381177203091798058;
 static const float DOUBLE_PI = 6.283185307179586;
 // uniforms
-static const float u_rays_per_pixel = 6;
+static const float u_rays_per_pixel = 8;
 Texture2D <float4> u_distance_data;
 Texture2D <float4> u_scene_colour_data;
 Texture2D <float4> u_scene_emissive_data;
@@ -121,10 +121,12 @@ bool raymarch(float2 origin, float2 ray, out float2 hit_pos, out float4 hit_data
 // closest emissive pixel though, which we can consider the surface's value.
 void get_last_frame_data(float2 uv, float2 pix, out float last_emission, out float3 last_colour)
 {
-	
+	/*
+	// ia doar dintr-un punct pe versiunea simpla 
 	float4 pixel = u_last_frame_data.SampleLevel( samp0, float2(uv.x, uv.y), 0 );
 	last_emission = pixel.a;
 	last_colour = pixel.rgb;
+	*/
 	
 	/*
 	float4 center_pixel = u_last_frame_data.SampleLevel( samp0, float2(uv.x, uv.y), 0 );
@@ -142,7 +144,7 @@ void get_last_frame_data(float2 uv, float2 pix, out float last_emission, out flo
 	last_colour = center_pixel.rgb;
 	*/
 
-		/*
+		
 	last_emission = 0.0; 
 	//last_colour = float3(0.0, 0.0, 0.0); //DMC: I added this
 	for(int x = -1; x <= 1; x++)
@@ -150,15 +152,15 @@ void get_last_frame_data(float2 uv, float2 pix, out float last_emission, out flo
 		for(int y = -1; y <= 1; y++)
 		{
 			float4 pixel = u_last_frame_data.SampleLevel(samp0, float2(uv.x + pix.x * float(x), uv.y + pix.y * float(y)), 0);
-			//if(pixel.a > last_emission)
-			if(get_luminance(pixel.rgb) > last_emission)
+			//if(get_luminance(pixel.rgb) > last_emission)
+			if(pixel.a > last_emission)
 			{
 				last_emission = pixel.a;
 				last_colour = pixel.rgb;
 			}
 		}
 	}
-	*/
+	
 }
 
 float3 lin_to_srgb( float3 color )
@@ -307,14 +309,16 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 				// we don't want emissive surfaces themselves to bounce light (we could, but it would probably blow
 				// out the scene).
 
-				if(mat_emissive < u_dist_mod.y)
+				if(mat_emissive < u_dist_mod.y) //delta
 				{
 					// go back a pixel to get data
+					/*
 					float2 uvst2 = hit_pos;
 					uvst2 -= rand_direction * 0.5 * rt_resolution.zw;
 					uvst2.x *= inv_aspect;
+					*/
 					// using pixel size rt_resolution.zw
-					get_last_frame_data(uvst2, rt_resolution.zw, last_emission, last_colour);
+					get_last_frame_data(uvst, rt_resolution.zw, last_emission, last_colour);
 				}
 				// this is so light doesn't bounce off the surface it was emitted from.
 				
@@ -330,10 +334,10 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			float drop = u_emission.z;
 			// attenuation calculation - very tweakable to get the correct sort of light range/dropoff.
 			float att = pow( max( 1.0 - (ray_dist * ray_dist) / (r * r), 0.0 ), drop );
-			//float emission = (mat_emissive + last_emission) * att;
-			emis += 1;// emission;
-			colout += (mat_colour * 0.6 + last_colour * 0.4) * att;// *colinwall;
-			//colout += (mat_colour + last_colour) * emission;
+			float emission = (mat_emissive + last_emission) * att;
+			emis += emission;// *0.6;
+			//colout += (mat_colour * 0.6 + last_colour * 0.4) * att;// *colinwall;
+			colout += mat_colour * (mat_emissive + last_emission);// (mat_colour + last_colour);// *(mat_emissive + last_emission);// *emission;
 			//ORIGINAL: colout += (mat_emissive + last_emission) * (mat_colour + last_colour) * att; 
 		}
 		
@@ -341,7 +345,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	
 	// right now, emis and col store the sum of contribution of all rays to this pixel, we need
 	// to normalise it.
-	emis = 1;// /= u_rays_per_pixel;
+	emis /= u_rays_per_pixel;
 	colout /= u_rays_per_pixel;
 
 	//emis = 1.0;
@@ -351,6 +355,6 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	// need colour and alpha to be separate. if we combined at this stage, the bounce calculations wouldn't work
 	// properly.
 	//float3 curpx_last_color = u_last_frame_data.SampleLevel( samp0, pin.UV0.xy, 0 ).rgb;
-	//return float4(lerp(colout, curpx_last_color, 0.5), 1.0); // temporal blur
+	//return float4(lerp(colout, curpx_last_color, 0.9), emis); // temporal blur
 	return float4(colout, emis);
 }
