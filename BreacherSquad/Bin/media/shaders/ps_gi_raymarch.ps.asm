@@ -6,42 +6,49 @@
 //   float4 TIME;
 //   float4 rt_resolution;
 //   Texture2D samp0+u_distance_data;
+//   Texture2D samp0+u_last_frame_data;
 //   Texture2D samp0+u_noise_data;
 //   Texture2D samp0+u_scene_colour_data;
+//   Texture2D samp0+u_scene_emissive_data;
 //   float4 u_dist_mod;
 //   float3 u_emission;
 //
 //
 // Registers:
 //
-//   Name                      Reg   Size
-//   ------------------------- ----- ----
-//   TIME                      c0       1
-//   rt_resolution             c1       1
-//   u_dist_mod                c2       1
-//   u_emission                c3       1
-//   samp0+u_distance_data     s1       1
-//   samp0+u_scene_colour_data s2       1
-//   samp0+u_noise_data        s3       1
+//   Name                        Reg   Size
+//   --------------------------- ----- ----
+//   TIME                        c0       1
+//   rt_resolution               c1       1
+//   u_dist_mod                  c2       1
+//   u_emission                  c3       1
+//   samp0+u_distance_data       s1       1
+//   samp0+u_scene_colour_data   s2       1
+//   samp0+u_scene_emissive_data s3       1
+//   samp0+u_last_frame_data     s4       1
+//   samp0+u_noise_data          s5       1
 //
 
     ps_3_0
     def c4, 0, 0, 1.61803401, 6.28318548
     def c5, 0.5, 6.28318548, -3.14159274, 0
-    def c6, 1, 0, 0.166666672, 0
+    def c6, 1, 0, 0.400000006, 0.600000024
+    def c7, 0.166666672, 0, 0, 0
     defi i0, 6, 0, 0, 0
     defi i1, 32, 0, 0, 0
     dcl_texcoord v0.xy
     dcl_2d s1
     dcl_2d s2
     dcl_2d s3
+    dcl_2d s4
+    dcl_2d s5
     rcp r0.x, c1.y
     rcp r0.y, c1.x
     mul r0.xy, r0, c1
     mul r1.y, r0.x, v0.x
     add r2.xyz, c0.xyxw, v0.xyxw
     mov r2.w, c4.x
-    texldl r2, r2, s3
+    texldl r2, r2, s5
     rcp r0.x, c2.x
     mul r0.z, c3.y, c3.y
     min r0.w, c1.w, c1.z
@@ -49,36 +56,37 @@
     mov r1.z, v0.y
     mov r3.w, c4.x
     mov r4.w, c4.x
-    mov r5, c4.x
+    mov r5.w, c4.x
+    mov r6, c4.x
     rep i0
-      mul r1.x, r5.w, c4.z
+      mul r1.x, r6.w, c4.z
       mad r1.x, r2.x, c4.w, r1.x
       frc r1.x, r1.x
       add r1.x, r1.x, c5.x
       frc r1.x, r1.x
       mad r1.x, r1.x, c5.y, c5.z
-      sincos r6.xy, r1.x
+      sincos r7.xy, r1.x
       mov r4.yz, c4.x
       mov r1.xw, c4.x
       mov r2.yzw, c4.x
       rep i1
-        mad r3.yz, r6.xxyw, r2.z, r1
+        mad r3.yz, r7.xxyw, r2.z, r1
         mul r3.x, r0.y, r3.y
-        texldl r7, r3.xzxw, s1
-        mul r3.x, r0.x, r7.x
-        mad r6.z, r7.x, -r0.x, c2.y
-        cmp r6.z, r6.z, c6.x, c6.y
+        texldl r8, r3.xzxw, s1
+        mul r3.x, r0.x, r8.x
+        mad r7.z, r8.x, -r0.x, c2.y
+        cmp r7.z, r7.z, c6.x, c6.y
         if_ge c2.y, r3.x
           mov r4.yz, r3
-          mov r1.x, r7.x
+          mov r1.x, r8.x
           mov r2.yw, c6.x
           break_ne c6.x, -c6.x
         endif
-        max r6.w, r3.x, r0.w
-        add r2.z, r2.z, r6.w
+        max r7.w, r3.x, r0.w
+        add r2.z, r2.z, r7.w
         mov r1.w, r2.z
-        mov r1.x, r7.x
-        mov r2.w, r6.z
+        mov r1.x, r8.x
+        mov r2.w, r7.z
         mov r4.yz, c4.x
         mov r2.y, c4.x
       endrep
@@ -87,19 +95,32 @@
         mul r2.z, r0.x, r1.x
         if_lt r2.z, c2.y
           mul r4.x, r0.y, r4.y
-          texldl r6, r4.xzxw, s2
+          texldl r8, r4.xzxw, s3
+          texldl r9, r4.xzxw, s2
+          mul r2.z, r8.x, c3.x
         else
-          mov r6.xyz, c4.x
+          mov r9.xyz, c4.x
+          mov r2.z, c4.x
+        endif
+        if_lt r2.z, c2.y
+          mul r3.xy, r7, c1.zwzw
+          mad r5.yz, r3.xxyw, -c5.x, r4
+          mul r5.x, r0.y, r5.y
+          texldl r7, r5.xzxw, s4
+        else
+          mov r7.xyz, c4.x
         endif
         mul r2.z, r1.w, r1.w
         mad r2.z, r2.z, -r0.z, c6.x
         max r3.x, r2.z, c4.x
         pow r2.z, r3.x, c3.z
-        mad r5.xyz, r6, r2.z, r5
+        mul r3.xyz, r7, c6.z
+        mad r3.xyz, r9, c6.w, r3
+        mad r6.xyz, r3, r2.z, r6
       endif
-      add r5.w, r5.w, c6.x
+      add r6.w, r6.w, c6.x
     endrep
-    mul oC0.xyz, r5, c6.z
+    mul oC0.xyz, r6, c7.x
     mov oC0.w, c6.x
 
-// approximately 92 instruction slots used (6 texture, 86 arithmetic)
+// approximately 110 instruction slots used (10 texture, 100 arithmetic)

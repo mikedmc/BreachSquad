@@ -36,6 +36,11 @@ float epsilon()
 }
 */
 
+float get_luminance( float3 colrgb )
+{
+	return (colrgb.r * 0.3) + (colrgb.g * 0.59) + (colrgb.b * 0.11);
+}
+
 // ================================================================================
 // return the surface data at a given location. 'uv' contains the hit location, while
 // hit_data contains the distance data at that location which we already sampled from 
@@ -116,26 +121,28 @@ bool raymarch(float2 origin, float2 ray, out float2 hit_pos, out float4 hit_data
 // closest emissive pixel though, which we can consider the surface's value.
 void get_last_frame_data(float2 uv, float2 pix, out float last_emission, out float3 last_colour)
 {
+	
 	float4 pixel = u_last_frame_data.SampleLevel( samp0, float2(uv.x, uv.y), 0 );
 	last_emission = pixel.a;
 	last_colour = pixel.rgb;
-
+	
 	/*
 	float4 center_pixel = u_last_frame_data.SampleLevel( samp0, float2(uv.x, uv.y), 0 );
 	float e = center_pixel.a;
-	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x - pix.x	, uv.y + pix.y), 0 ).a, 0.0f ), e);
-	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x			, uv.y + pix.y), 0 ).a, 0.0f ), e );
-	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x + pix.x	, uv.y + pix.y), 0 ).a, 0.0f ), e );
-	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x - pix.x	, uv.y		  ), 0 ).a, 0.0f ), e );
-	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x + pix.x	, uv.y		  ), 0 ).a, 0.0f ), e );
-	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x - pix.x	, uv.y - pix.y), 0 ).a, 0.0f ), e );
-	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x			, uv.y - pix.y), 0 ).a, 0.0f ), e );
-	e = max( max( u_last_frame_data.SampleLevel( samp0, float2(uv.x + pix.x	, uv.y - pix.y), 0 ).a, 0.0f ), e );
+	e = max( get_luminance( u_last_frame_data.SampleLevel( samp0, float2(uv.x - pix.x	, uv.y + pix.y), 0 )), e );
+	e = max( get_luminance( u_last_frame_data.SampleLevel( samp0, float2(uv.x			, uv.y + pix.y), 0 )), e );
+	e = max( get_luminance( u_last_frame_data.SampleLevel( samp0, float2(uv.x + pix.x	, uv.y + pix.y), 0 )), e );
+	e = max( get_luminance( u_last_frame_data.SampleLevel( samp0, float2(uv.x - pix.x	, uv.y		  ), 0 )), e );
+	e = max( get_luminance( u_last_frame_data.SampleLevel( samp0, float2(uv.x + pix.x	, uv.y		  ), 0 )), e );
+	e = max( get_luminance( u_last_frame_data.SampleLevel( samp0, float2(uv.x - pix.x	, uv.y - pix.y), 0 )), e );
+	e = max( get_luminance( u_last_frame_data.SampleLevel( samp0, float2(uv.x			, uv.y - pix.y), 0 )), e );
+	e = max( get_luminance( u_last_frame_data.SampleLevel( samp0, float2(uv.x + pix.x	, uv.y - pix.y), 0 )), e );
 
 	last_emission = e;
 	last_colour = center_pixel.rgb;
 	*/
-	/*	
+
+		/*
 	last_emission = 0.0; 
 	//last_colour = float3(0.0, 0.0, 0.0); //DMC: I added this
 	for(int x = -1; x <= 1; x++)
@@ -143,7 +150,8 @@ void get_last_frame_data(float2 uv, float2 pix, out float last_emission, out flo
 		for(int y = -1; y <= 1; y++)
 		{
 			float4 pixel = u_last_frame_data.SampleLevel(samp0, float2(uv.x + pix.x * float(x), uv.y + pix.y * float(y)), 0);
-			if(pixel.a > last_emission)
+			//if(pixel.a > last_emission)
+			if(get_luminance(pixel.rgb) > last_emission)
 			{
 				last_emission = pixel.a;
 				last_colour = pixel.rgb;
@@ -281,7 +289,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 
 			float2 uvst = hit_pos;
 			// move back a few pixels to get the color:
-			//uvst -= rand_direction * 2.0 * rt_resolution.zw;
+			//uvst -= rand_direction * 0.5 * rt_resolution.zw;
 			// convert uvs back to 0-1 range.
 			uvst.x *= inv_aspect;
 			//uvst = float2(hit_pos.x * inv_aspect, hit_pos.y);
@@ -295,15 +303,18 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			
 			
 			//if(u_bounce) - DMC: ofc we want bounce
-			/*
 			{
 				// we don't want emissive surfaces themselves to bounce light (we could, but it would probably blow
 				// out the scene).
 
 				if(mat_emissive < u_dist_mod.y)
 				{
+					// go back a pixel to get data
+					float2 uvst2 = hit_pos;
+					uvst2 -= rand_direction * 0.5 * rt_resolution.zw;
+					uvst2.x *= inv_aspect;
 					// using pixel size rt_resolution.zw
-					get_last_frame_data(uvst, rt_resolution.zw, last_emission, last_colour);
+					get_last_frame_data(uvst2, rt_resolution.zw, last_emission, last_colour);
 				}
 				// this is so light doesn't bounce off the surface it was emitted from.
 				
@@ -312,7 +323,6 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 					//last_colour = float3(0, 0, 0);
 				}
 			}
-			*/
 			
 			
 			// calculate total emissive/colour values from direct and bounced (last frame) lighting.
@@ -322,7 +332,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			float att = pow( max( 1.0 - (ray_dist * ray_dist) / (r * r), 0.0 ), drop );
 			//float emission = (mat_emissive + last_emission) * att;
 			emis += 1;// emission;
-			colout += (mat_colour * 1.0 + last_colour * 0.001) * att;// *colinwall;
+			colout += (mat_colour * 0.6 + last_colour * 0.4) * att;// *colinwall;
 			//colout += (mat_colour + last_colour) * emission;
 			//ORIGINAL: colout += (mat_emissive + last_emission) * (mat_colour + last_colour) * att; 
 		}
@@ -341,6 +351,6 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	// need colour and alpha to be separate. if we combined at this stage, the bounce calculations wouldn't work
 	// properly.
 	//float3 curpx_last_color = u_last_frame_data.SampleLevel( samp0, pin.UV0.xy, 0 ).rgb;
-	//return float4(lerp(colout, curpx_last_color, 0.6), 1.0); // temporal blur
+	//return float4(lerp(colout, curpx_last_color, 0.5), 1.0); // temporal blur
 	return float4(colout, emis);
 }

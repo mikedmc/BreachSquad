@@ -4367,20 +4367,20 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
 	m_pDevice->SetTexture( 2, pRTcolordata->m_pRTTexture );
 	CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
-	//m_pDevice->SetTexture( 3, pRTemissive->m_pRTTexture );
+	m_pDevice->SetTexture( 3, pRTemissive->m_pRTTexture );
 	CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( arr_gi_rt[lastGIidx % 2] );
-	//m_pDevice->SetTexture( 4, pRTlastGI->m_pRTTexture );
+	m_pDevice->SetTexture( 4, pRTlastGI->m_pRTTexture );
 	//get noise texture and apply
 	auto ptexnoise = UTApp().g_texManager.GetTextureByID( FastHash( L"BLUENOISE512" ) );
-	m_pDevice->SetTexture( 3, ptexnoise->pTexture );
+	m_pDevice->SetTexture( 5, ptexnoise->pTexture );
 	// noise must always tile
-	m_pDevice->SetSamplerState( 3, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
-	m_pDevice->SetSamplerState( 3, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
+	m_pDevice->SetSamplerState( 5, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
+	m_pDevice->SetSamplerState( 5, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
 
 
 	// render to the other GI target
 	pRT = __RTManager().GetRTbyUID( arr_gi_rt[(lastGIidx + 1) % 2] );
-	//lastGIidx ^= 1; //pingpong buffer only needs index 0 and 1 (using xor)
+	lastGIidx ^= 1; //pingpong buffer only needs index 0 and 1 (using xor)
 
 	MUMatIdentity( &matView );
 	matWVP = matView * pRT->matProj;
@@ -4406,7 +4406,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				/// x:u_dist_mod, .y: EPSILON half a pixel of longest edge, .z: EPSILON2 half pixel on shortest edge
 				{ 8.0, 0.5f / max( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.5f / min( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.0f },
 				///   u_emission                  c3       1 //.x:multiplier=1.0 .y:range=2.0 (0.5 works best) .z:dropoff=2.0
-				{ 1.0, 0.5f, 2.0f, 0.0f },
+				{ 1.0, 2.0f, 2.0f, 0.0f },
 				//{ct_em_mul, ct_em_range, ct_em_dropoff, 0.0}
 			};
 			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
