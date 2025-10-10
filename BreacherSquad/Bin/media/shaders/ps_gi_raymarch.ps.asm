@@ -30,10 +30,10 @@
 //
 
     ps_3_0
-    def c4, 0.5, 6.28318548, -3.14159274, 0
+    def c4, 0.159154937, 0.5, 6.28318548, -3.14159274
     def c5, 0, 0, 1.61803401, 6.28318548
-    def c6, 1, 0, 0, -1
-    def c7, 0.125, 0, 0, 0
+    def c6, 0.125, 0, 0, 0
+    def c7, 0, 1, 0, 0
     defi i0, 8, 0, 0, 0
     defi i1, 32, 0, 0, 0
     defi i2, 3, 0, 0, 0
@@ -63,10 +63,12 @@
     rep i0
       mul r6.x, r1.w, c5.z
       mad r6.x, r2.x, c5.w, r6.x
+      mul r6.y, r6.x, c4.x
+      frc r6.y, r6_abs.y
+      cmp r6.x, r6.x, r6.y, -r6.y
+      add r6.x, r6.x, c4.y
       frc r6.x, r6.x
-      add r6.x, r6.x, c4.x
-      frc r6.x, r6.x
-      mad r6.x, r6.x, c4.y, c4.z
+      mad r6.x, r6.x, c4.z, c4.w
       sincos r7.xy, r6.x
       mov r4.yz, c5.x
       mov r6, c5.x
@@ -77,13 +79,13 @@
         texldl r8, r3.xzxw, s1
         mul r3.x, r0.x, r8.x
         mad r7.w, r8.x, -r0.x, c2.y
-        cmp r7.w, r7.w, c6.x, c6.y
+        cmp r7.w, r7.w, c7.y, c7.z
         if_ge c2.y, r3.x
           mov r4.yz, r3
           mov r6.x, r8.x
-          mov r6.z, c6.x
-          mov r7.z, c6.x
-          break_ne c6.x, -c6.x
+          mov r6.z, c7.y
+          mov r7.z, c7.y
+          break_ne c7.y, -c7.y
         endif
         max r8.y, r3.x, r0.w
         add r6.w, r6.w, r8.y
@@ -107,20 +109,20 @@
         endif
         if_lt r3.x, c2.y
           mov r3.y, c5.x
-          mov r3.z, c6.w
+          mov r3.z, -c7.y
           rep i2
             mad r5.xz, c1.z, r3.z, r4.x
             mov r6.w, r3.y
-            mov r7.x, c6.w
+            mov r7.x, -c7.y
             rep i2
               mad r5.y, c1.w, r7.x, r4.z
               texldl r8, r5, s4
               max r5.y, r6.w, r8.w
-              add r7.x, r7.x, c6.x
+              add r7.x, r7.x, c7.y
               mov r6.w, r5.y
             endrep
             mov r3.y, r6.w
-            add r3.z, r3.z, c6.x
+            add r3.z, r3.z, c7.y
           endrep
         else
           mov r3.y, c5.x
@@ -128,16 +130,16 @@
         add r3.z, r6.y, -c2.y
         cmp r3.z, r3.z, r3.y, c5.x
         mul r4.x, r6.y, r6.y
-        mad r4.x, r4.x, -r0.z, c6.x
+        mad r4.x, r4.x, -r0.z, c7.y
         max r5.x, r4.x, c5.x
         pow r4.x, r5.x, c3.z
         add r3.x, r3.z, r3.x
         mad r1.x, r3.x, r4.x, r1.x
         mad r2.yzw, r9.xxyz, r3.x, r2
       endif
-      add r1.w, r1.w, c6.x
+      add r1.w, r1.w, c7.y
     endrep
-    mul oC0.w, r1.x, c7.x
-    mul oC0.xyz, r2.yzww, c7.x
+    mul oC0.w, r1.x, c6.x
+    mul oC0.xyz, r2.yzww, c6.x
 
-// approximately 132 instruction slots used (10 texture, 122 arithmetic)
+// approximately 134 instruction slots used (10 texture, 124 arithmetic)

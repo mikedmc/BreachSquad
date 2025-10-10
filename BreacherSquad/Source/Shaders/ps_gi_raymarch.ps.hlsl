@@ -6,7 +6,7 @@ struct PS_INPUT
 // constants
 static const float PI = 3.141592;
 static const float phi = 1.6180339887498948482045868343656381177203091798058;
-static const float DOUBLE_PI = 6.283185307179586;
+static const float DOUBLE_PI = 6.2831853071795864769252867665590;
 // uniforms
 static const float u_rays_per_pixel = 8;
 Texture2D <float4> u_distance_data;
@@ -263,9 +263,12 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	// get a random angle by sampling the noise texture and offsetting it by time (so we don't always sample
 	// the same noise).
 	float2 time = float2(TIME.x, TIME.y);
-	//float rand02pi = u_noise_data.SampleLevel( samp0, frac( (uv + time) * 0.4 ), 0 ).r * 2.0 * PI; // noise sample
 	float rand02pi = u_noise_data.SampleLevel( samp0, pin.UV0.xy + TIME.xy, 0 ).r * DOUBLE_PI; // noise sample - good
-	float golden_angle = PI * 0.7639320225;
+	// Alternative adding noise sample with time and modding to double_pi (metoda alternativa poate mai buna)
+	//float4 noise_sample = u_noise_data.SampleLevel( samp0, pin.UV0.xy + time, 0 );
+	//float rand02pi = fmod( (noise_sample.r * DOUBLE_PI) + (TIME.x * (1.0 / DOUBLE_PI)), DOUBLE_PI );
+
+	//float golden_angle = PI * 0.7639320225;
 	
 	//float hittimes = 0.0;
 	for ( float i = 0.0; i < u_rays_per_pixel; i++ )
@@ -277,7 +280,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 		// get our ray dir by taking the random angle and adding golden_angle * ray number.
 
 		//DMC: sin is faster than lookups
-		float cur_angle = frac(rand02pi + phi * i) * DOUBLE_PI;
+		float cur_angle = fmod((rand02pi + phi * i) , DOUBLE_PI);
 		//float cur_angle = hash( rand02pi + float( i ) / float( u_rays_per_pixel ) ) * DOUBLE_PI;
 		float2 rand_direction = float2(cos( cur_angle ), sin( cur_angle ));
 		bool hit = raymarch( uv, rand_direction, hit_pos, hit_data, ray_dist );
