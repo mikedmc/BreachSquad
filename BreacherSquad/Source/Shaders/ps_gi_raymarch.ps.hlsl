@@ -334,7 +334,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 			float drop = u_emission.z;
 			// attenuation calculation - very tweakable to get the correct sort of light range/dropoff.
 			float att = pow( max( 1.0 - (ray_dist * ray_dist) / (r * r), 0.0 ), drop );
-			float emission = (mat_emissive + last_emission) * att;
+			float emission = (mat_emissive + last_emission) *att;
 			emis += emission;// *0.6;
 			//colout += (mat_colour * 0.6 + last_colour * 0.4) * att;// *colinwall;
 			colout += mat_colour * (mat_emissive + last_emission);// (mat_colour + last_colour);// *(mat_emissive + last_emission);// *emission;
