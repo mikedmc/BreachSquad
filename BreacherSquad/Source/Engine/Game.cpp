@@ -100,7 +100,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 
 		case GAME_STATE_PLAYER_SELECTION:
 		{
-			if ( ( !GameState::isTransitioning() ) && ( !__GUI().bIsBlocking ) )
+			if ( (!GameState::isTransitioning()) && (!__GUI().bIsBlocking) )
 				g_playerSelScr.Update( fElapsedTime );
 		}
 		break;
@@ -127,7 +127,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 				if ( nLobbiesCnt == 0 )
 				{
 					if ( !g_pNetwork->IsRequestingLobby() )
-						__Texts().SetString( STR_LOBBIES_LIST_VAL, L"%s", __Texts().strings[ STR_NO_LOBBIES ]->sText );
+						__Texts().SetString( STR_LOBBIES_LIST_VAL, L"%s", __Texts().strings[STR_NO_LOBBIES]->sText );
 
 					//disable controls (list, join)
 					if ( lay != null )
@@ -145,12 +145,12 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 				}
 				else
 				{
-					WCHAR	strLobbiesList[ 2048 ] = { 0 };
+					WCHAR	strLobbiesList[2048] = { 0 };
 					for ( int kk = 0; kk < nLobbiesCnt; kk++ )
 					{
 						CStringDesc sdName;
 						uint64_t iLobbyID = 0;
-						char strLobbyName[ 250 ];
+						char strLobbyName[250];
 
 						g_pNetwork->GetLobbyListEntry( kk, iLobbyID, strLobbyName );
 						__Texts().SetStringDescUTF8( &sdName, strLobbyName );
@@ -185,7 +185,7 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 		case GAME_STATE_LEVEL_SELECTION:
 		case GAME_STATE_CHAPTER_SELECTION:
 		{
-			if ( ( !GameState::isTransitioning() ) && ( !__GUI().bIsBlocking ) )
+			if ( (!GameState::isTransitioning()) && (!__GUI().bIsBlocking) )
 				g_mainMenu.Update( fElapsedTime );
 		}
 		break;
@@ -206,13 +206,13 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 		case GAME_STATE_MAINMENU:
 		{
 			//offer to reset the user data
-			if ( g_userData[ K_MEMID_OFFER_RESET_USER_DATA ] != 0 )
+			if ( g_userData[K_MEMID_OFFER_RESET_USER_DATA] != 0 )
 			{
 				__GUI().ShowLayerOnce( "LAYER_ID_RESET_PROGRESS_EA" );
-				g_userData[ K_MEMID_OFFER_RESET_USER_DATA ] = 0;
+				g_userData[K_MEMID_OFFER_RESET_USER_DATA] = 0;
 			}
 
-			if ( ( !GameState::isTransitioning() ) && ( !__GUI().bIsBlocking ) )
+			if ( (!GameState::isTransitioning()) && (!__GUI().bIsBlocking) )
 			{
 				// update menus
 				gMenus.Update( dTime );
@@ -233,12 +233,12 @@ void CGame::Update( float dTime, bool bSyncUpdate, int nUpdateFrame )
 			}
 #endif
 
-			for (auto & arrController : __Controllers().m_arrControllers)
+			for ( auto & arrController : __Controllers().m_arrControllers )
 			{
-				if ( arrController->sCommands.keyState[ K_CM_COMMAND_BACK ] == K_CM_BUTSTATE_JUSTPRESSED )
+				if ( arrController->sCommands.keyState[K_CM_COMMAND_BACK] == K_CM_BUTSTATE_JUSTPRESSED )
 				{
 					CCtrlLayer* layer = __GUI().GetLayerByName( "LAYER_ID_QUITGAME" );
-					if ( ( layer == null ) && ( !__GUI().bIsBlocking ) )
+					if ( (layer == null) && (!__GUI().bIsBlocking) )
 					{
 						SND_PLAY( SNDIDX_CLICK );
 						__GUI().ShowLayerOnce( "LAYER_ID_QUITGAME" );
@@ -444,7 +444,7 @@ void CGame::BeforePaint()
 			}
 			*/
 			// Deferred buffers use their own begin and end for UTPainter();
-			gLevel.PaintDeferredBuffers(0.0f);
+			gLevel.PaintDeferredBuffers( 0.0f );
 		}
 		break;
 
@@ -576,7 +576,19 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			 */
 			 //debug stuff
 #if defined(_DEBUG) || defined(DEBUG)
-				//game screen space
+			for ( int oo = 0; oo < K_RTIDS_COUNT; oo++ )
+			{
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );
+				if ( pRT != null )
+				{
+					RectLTRB src( 0.0f, 0.0f, oo * 100, 100 );
+					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
+					pDevice->SetTexture( 0, pRT->m_pRTTexture );
+					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
+				}
+			}
+
+			//game screen space
 //			CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_camRTScreen );
 			if ( DXUTIsKeyDown( '0' ) )
 			{
@@ -595,7 +607,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
 				if ( pRT != nullptr )
 				{
-					RectLTRB src( 1.0f, 1.0f, (float)( pRT->nWidth ), (float)( pRT->nHeight ) );
+					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
 					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
 					pDevice->SetTexture( 0, pRT->m_pRTTexture );
 					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
@@ -603,16 +615,16 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			}
 			if ( DXUTIsKeyDown( '8' ) )
 			{
-				
+
 				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
 				if ( pRT != null )
 				{
-					RectLTRB src( 1.0f, 1.0f, (float)( pRT->nWidth ), (float)( pRT->nHeight ) );
+					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
 					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
 					pDevice->SetTexture( 0, pRT->m_pRTTexture );
 					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
-				
+
 			}
 			if ( DXUTIsKeyDown( '7' ) )
 			{
@@ -665,7 +677,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			}
 			if ( DXUTIsKeyDown( '4' ) )
 			{
-				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_GICOLOR);
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_GICOLOR );
 				if ( pRT != null )
 				{
 					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );

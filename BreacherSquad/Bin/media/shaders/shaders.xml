@@ -18,6 +18,6 @@
     <PixelShader name="PS_VORONOI_SEED" path="ps_voronoi_seed.ps.cso" />
     <PixelShader name="PS_VORONOI_MULTIPASS" path="ps_voronoi_multipass.ps.cso" />
     <PixelShader name="PS_VORONOI_DISTANCE" path="ps_voronoi_distance.ps.cso" />
-    <PixelShader name="PS_GI_RAYMARCH" path="ps_gi_raymarch.ps.cso" />
+    <PixelShader name="PS_GI_CASCADES" path="ps_gi_cascades.ps.cso" />
   </PixelShaders>
 </Shaders>
