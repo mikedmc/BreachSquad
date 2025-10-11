@@ -9,18 +9,28 @@ void CApplication::App_EnterState_Loading()
 	// Create necessary render targets when device gets reset (created or reset)
 	UINT fGameHpx = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
 	UINT fGameWpx = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
+
+	// Setup GI config
+	int cascadeCount = 6;
+	float renderScale = 1.0f;
+	float rayRange = 2.0f;
+	double powVal = pow( 2, cascadeCount );
+	int cascadeWidth = (int)ceil( (fGameWpx * renderScale) / powVal ) * (int)powVal;
+	int cascadeHeight = (int)ceil( (fGameHpx * renderScale) / powVal ) * (int)powVal;
+	Vec2 cascadeResolution( cascadeWidth, cascadeHeight );
+
 	// Create RTs
 	__RTManager().AddRT( K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_EMISSIVE, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_GICOLOR, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
-
+	// used for precision VORONOI and SDF
 	__RTManager().AddRT( K_RTID_FLOAT1, fGameWpx, fGameHpx, 1, D3DFMT_A16B16G16R16F, false );
 	__RTManager().AddRT( K_RTID_FLOAT2, fGameWpx, fGameHpx, 1, D3DFMT_A16B16G16R16F, false );
-
-	__RTManager().AddRT( K_RTID_GI1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
-	__RTManager().AddRT( K_RTID_GI2, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
+	// used for GI cascades
+	__RTManager().AddRT( K_RTID_GI1, cascadeWidth, cascadeHeight, 1, D3DFMT_A16B16G16R16, false );
+	__RTManager().AddRT( K_RTID_GI2, cascadeWidth, cascadeHeight, 1, D3DFMT_A16B16G16R16, false );
 
 
 	GameState::substate = 0;

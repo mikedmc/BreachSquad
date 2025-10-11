@@ -4250,7 +4250,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	Vec2 vScreenPixelSize( 1.0f / (float)pRT->nWidth, 1.0f / (float)pRT->nHeight );
 	int last_pass_idx = 0;
 	// we start witn TEMP2 as src (voronoi seed in it) and paint to TEMP1
-	UINT32 arr_swap_rt[] = { K_RTID_FLOAT1 , K_RTID_FLOAT2 };
+	ERTIDChannel arr_swap_rt[] = { K_RTID_FLOAT1 , K_RTID_FLOAT2 };
 	for ( int i = 0; i < passes; i++ )
 	{
 		// save last pass so we know what the last RT was in next step
@@ -4297,9 +4297,13 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 4. convert voronoi diagram to distance field
 	///----------------------------------------------------
-	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( arr_swap_rt[last_pass_idx % 2] );
+	ERTIDChannel eRTdistance = arr_swap_rt[(last_pass_idx + 1) % 2];
+	ERTIDChannel eRTlastVoronoi = arr_swap_rt[last_pass_idx % 2];
+
+
+	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( eRTlastVoronoi );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
-	pRT = __RTManager().GetRTbyUID( arr_swap_rt[(last_pass_idx + 1) % 2] );
+	pRT = __RTManager().GetRTbyUID( eRTdistance );
 	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
@@ -4359,10 +4363,17 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		m_pDevice->SetSamplerState( kk, D3DSAMP_MIPFILTER, 0 );
 	}
 
+
+
 	bool gi1IsFinal = false;
 	int cascadeCount = 6;
 
-	for ( int i = cascadeCount - 1; i >= 0; i-- )
+	int screenWidth = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
+	int screenHeight = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
+	Vec2 vaspect( screenWidth / max( screenWidth, screenHeight ), screenHeight / max( screenWidth, screenHeight ) );
+	Vec2 vscreen( screenWidth, screenHeight );
+
+	for ( int cascadeLevel = cascadeCount - 1; cascadeLevel >= 0; cascadeLevel-- )
 	{
 		ERTIDChannel srcGI = gi1IsFinal ? K_RTID_GI1 : K_RTID_GI2;
 		ERTIDChannel dstGI = gi1IsFinal ? K_RTID_GI2 : K_RTID_GI1;
@@ -4374,7 +4385,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		m_pDevice->SetTexture( 2, pRTemissive->m_pRTTexture );
 		CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_GICOLOR );
 		m_pDevice->SetTexture( 3, pRTcolordata->m_pRTTexture );
-		CRTManager::CEngineRenderTarget* pRTdistance = __RTManager().GetRTbyUID( arr_swap_rt[(last_pass_idx + 1) % 2] );
+		CRTManager::CEngineRenderTarget* pRTdistance = __RTManager().GetRTbyUID( eRTdistance );
 		m_pDevice->SetTexture( 4, pRTdistance->m_pRTTexture );
 
 		pRT = __RTManager().GetRTbyUID( dstGI );
@@ -4391,17 +4402,22 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 				__Shaders().SetPSByName( L"PS_GI_CASCADES" );
 				///--- set Pshader constants
-				de trimis corect constantele
 				float fConstData[][4] = {
-					///   TIME                        c0       1
-					{ this->fLocalTimeline * 13.7, this->fLocalTimeline * 7.3, 0.0f, 0.0f },
-					///   rt_resolution               c1       1 //.x:RT_width, .y:RT_height, z: 1/RT_width, w: 1/RT_height -> zw=pixel size
-					{ (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight, 1.0f / (float)pRTlastGI->nWidth, 1.0f / (float)pRTlastGI->nHeight },
-					/// x:u_dist_mod, .y: EPSILON half a pixel of longest edge, .z: EPSILON2 half pixel on shortest edge
-					{ 8.0, 0.5f / max( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.5f / min( (float)pRTlastGI->nWidth, (float)pRTlastGI->nHeight ), 0.0f },
-					///   u_emission                  c3       1 //.x: emission multiplier=1.0 (needs larger than 1 emissive values) .y:range=2.0 (0.5 works best) .z:dropoff=2.0
-					{ 4.0, 0.7f, 2.0f, 0.0f },
-					//{ct_em_mul, ct_em_range, ct_em_dropoff, 0.0}
+					// cascade RT resolution
+					{ (float)pRT->nWidth, (float)pRT->nHeight, 0.0f, 0.0f },
+					// cascad level
+					{ (float)cascadeLevel, 0.0f, 0.0f, 0.0f},
+					// cascade count
+					{ (float)cascadeCount, 0.0f, 0.0f, 0.0f},
+					// aspect
+					{ vaspect.x, vaspect.y, 0.0f, 0.0f },
+					// ray range
+					{ 2.0f, 0.0f, 0.0f, 0.0f },
+					// sky radiance
+					{ 0.1f, 0.0f, 0.0f, 0.0f }, // .x: sky radiance (1..3)
+					{ 0.0f, 0.0f, 1.0f, 0.0f }, // .xyz: sky color
+					{ 1.0f, 1.0f, 0.0f, 0.0f }, // .xyz: sun color
+					{ 0.2f, 0.0f, 0.0f, 0.0f }, // .x: sun angle 
 				};
 				__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 
@@ -4417,6 +4433,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 			}
 		}
+		gi1IsFinal = !gi1IsFinal;
 
 
 
@@ -4435,7 +4452,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		Raylib.EndShaderMode();
 		Raylib.EndTextureMode();
 		*/
-		gi1IsFinal = !gi1IsFinal;
 	}
 
 
