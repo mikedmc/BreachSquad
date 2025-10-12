@@ -1662,6 +1662,7 @@ void CLevel::SetTimeMultiplier( float fMultiplier, float fDuration )
 		m_fTimeMultiplierDuration = 0.0f;
 
 	//play sound
+	/*
 	if ( fMultiplier < 1.0f )
 	{
 		SND_PLAY_ONCE( SNDIDX_TIME_SLOW, 0 );
@@ -1671,6 +1672,7 @@ void CLevel::SetTimeMultiplier( float fMultiplier, float fDuration )
 	{
 		SND_STOP( SNDIDX_HEARTBEAT, true );
 	}
+	*/
 }
 
 bool CLevel::NormalizeMouseCoords( int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue )
@@ -4111,7 +4113,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
 			CAABB			camAABB( camrect );
 
-			RenderPass_EmissiveOcclusive( &pRT->matProj, fBetweenFramesPercent );
+			RenderPass_Emissive( &pRT->matProj, fBetweenFramesPercent );
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}
 	}
@@ -4124,7 +4126,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		{
 			Matrix matView;
 			// Clear the render target and the zbuffer 
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0xff000000, 1.0f, 0 ) ) )
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0x00000000, 1.0f, 0 ) ) )
 			{
 				return K_OP_FAILED;
 			}
@@ -4177,7 +4179,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			///--- compose scene from normals and color ---
 			Matrix matWVP = matView * pRT->matProj;
 
-			CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
+			CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_GICOLOR );
 			_ASSERT( pRTcolor != nullptr );
 			m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
 
@@ -4315,8 +4317,8 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			__Shaders().SetPSByName( L"PS_VORONOI_DISTANCE" );
 			//set Pshader constants
 			float fConstData[][4] = {
-				// x: distance modifier (default 10.0, must match x:u_dist_mod from ray tracing shader)
-				{ 8.0, 0.0f, 0.0f, 0.0f },
+				// x: distance modifier (default 8.0, must match x:u_dist_mod from ray tracing shader)
+				{ 1.0, 0.0f, 0.0f, 0.0f },
 				// xy: inverse of RT resolution
 				//{ vScreenPixelSize.x, vScreenPixelSize.y, .0f, .0f },
 			};
@@ -4336,21 +4338,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 5. radiance cascades
 	///----------------------------------------------------
-	///   Name                Reg   Size
-	///   ------------------- ----- ----
-	///   _Aspect             c0       1
-	///   _RayRange           c1       1
-	///   _CascadeResolution  c2       1
-	///   _CascadeLevel       c3       1
-	///   _CascadeCount       c4       1
-	///   _SkyRadiance        c5       1
-	///   _SkyColor           c6       1
-	///   _SunColor           c7       1
-	///   _SunAngle           c8       1
-	///   _samp0+_MainTex     s1       1
-	///   _samp0+_EmissiveTex s2       1
-	///   _samp0+_ColorTex    s3       1
-	///   _samp0+_DistanceTex s4       1
 
 
 	// clamp textures so we don't bleed light
@@ -4381,6 +4368,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		///--- set textures
 		CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( srcGI );
 		m_pDevice->SetTexture( 1, pRTlastGI->m_pRTTexture );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+
 		CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
 		m_pDevice->SetTexture( 2, pRTemissive->m_pRTTexture );
 		CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_GICOLOR );
@@ -4393,6 +4383,8 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		{
 			if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 			{
+				matWVP = pRT->matProj;
+
 				if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 255, 0, 0, 0 ), 1.0f, 0 ) ) )
 					return K_OP_FAILED;
 
@@ -4401,28 +4393,51 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 
 				__Shaders().SetPSByName( L"PS_GI_CASCADES" );
+				///   Name                Reg   Size
+				///   ------------------- ----- ----
+				///   _Aspect             c0       1
+				///   _RayRange           c1       1
+				///   _CascadeResolution  c2       1
+				///   _CascadeLevel       c3       1
+				///   _CascadeCount       c4       1
+				///   _SkyRadiance        c5       1
+				///   _SkyColor           c6       1
+				///   _SunColor           c7       1
+				///   _SunAngle           c8       1
+				///   _samp0+_MainTex     s1       1
+				///   _samp0+_EmissiveTex s2       1
+				///   _samp0+_ColorTex    s3       1
+				///   _samp0+_DistanceTex s4       1
+
 				///--- set Pshader constants
 				float fConstData[][4] = {
-					// cascade RT resolution
-					{ (float)pRT->nWidth, (float)pRT->nHeight, 0.0f, 0.0f },
-					// cascad level
-					{ (float)cascadeLevel, 0.0f, 0.0f, 0.0f},
-					// cascade count
-					{ (float)cascadeCount, 0.0f, 0.0f, 0.0f},
 					// aspect
 					{ vaspect.x, vaspect.y, 0.0f, 0.0f },
 					// ray range
 					{ 2.0f, 0.0f, 0.0f, 0.0f },
+					// cascade resolution RT
+					{ (float)pRT->nWidth, (float)pRT->nHeight, 0.0f, 0.0f },
+					// cascade level
+					{ (float)cascadeLevel, 0.0f, 0.0f, 0.0f},
+					// cascade count
+					{ (float)cascadeCount, 0.0f, 0.0f, 0.0f},
 					// sky radiance
-					{ 0.1f, 0.0f, 0.0f, 0.0f }, // .x: sky radiance (1..3)
+					{ 1.0f, 0.0f, 0.0f, 0.0f }, // .x: sky radiance (1..3)
 					{ 0.0f, 0.0f, 1.0f, 0.0f }, // .xyz: sky color
-					{ 1.0f, 1.0f, 0.0f, 0.0f }, // .xyz: sun color
+					{ 1.0f, 1.0f, 1.0f, 0.0f }, // .xyz: sun color
 					{ 0.2f, 0.0f, 0.0f, 0.0f }, // .x: sun angle 
 				};
 				__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 
+				//--- build RT rect ---
+				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+				vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+				vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+				vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+				vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 				m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
-
 
 				// remove VS PS
 				__Shaders().SetPS( nullptr );
@@ -5038,7 +5053,7 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 	return K_OP_OK;
 }
 
-OPRESULT CLevel::RenderPass_EmissiveOcclusive( Matrix* matProj, float fBetweenFramesPercent )
+OPRESULT CLevel::RenderPass_Emissive( Matrix* matProj, float fBetweenFramesPercent )
 {
 	Matrix	matView;
 
@@ -5093,10 +5108,11 @@ OPRESULT CLevel::RenderPass_EmissiveOcclusive( Matrix* matProj, float fBetweenFr
 	int nTexIdxOffset = 0;
 	bool bPaintsNormals = false;
 
-	/// paint occluders as black
-	auto ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"BLACK32" ) );
+	/// paint occluders white
+	
+	auto ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"WHITE32" ) );
 	m_pDevice->SetTexture( 0, ptex->pTexture );
-	Areas_PaintLayer( K_AL_OCCLUDERS );
+	//Areas_PaintLayer( K_AL_OCCLUDERS );
 	//Areas_PaintLayer( K_AL_WALLS );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 
@@ -5110,9 +5126,9 @@ OPRESULT CLevel::RenderPass_EmissiveOcclusive( Matrix* matProj, float fBetweenFr
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
 		if ( nl->type == K_LVL_LT_POINT )
 		{
-			sprPoint.SetAnim( ANM_LIGHTS_SPR_GI_LIGHTS, 0 );
+			sprPoint.SetAnim( ANM_LIGHTS_SPR_GI_LIGHTS, 2 );
 			sprPoint.pos = nl->pos.xy;
-			sprPoint.color = 0xffffffff;// nl->color; - corect e sa fie alb pt ca se foloseste doar canalul Red pt a vedea cat de emissive este
+			sprPoint.color = nl->color;
 			sprPoint.Paint();
 		}
 	}
@@ -5188,11 +5204,10 @@ OPRESULT CLevel::RenderPass_GIColor( Matrix* matProj, float fBetweenFramesPercen
 
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 
-
 	/// Paint lights as color blobs with hard contours
 	CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
 	CSpr sprPoint( spr_props, ANM_LIGHTS_SPR_GI_LIGHTS, g_Vec2Zero );
-
+	/*
 	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 	{
 		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
@@ -5204,7 +5219,7 @@ OPRESULT CLevel::RenderPass_GIColor( Matrix* matProj, float fBetweenFramesPercen
 			sprPoint.Paint();
 		}
 	}
-
+	*/
 	__Painter().End();
 	// top layer of tiles
 
@@ -5253,7 +5268,7 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
 	//CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL);
-	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_GI2 );
+	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_GI1 );
 	_ASSERT( pRTcolor != nullptr && pRTlights != nullptr );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
 	m_pDevice->SetTexture( 1, pRTlights->m_pRTTexture );

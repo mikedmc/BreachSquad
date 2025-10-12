@@ -15,6 +15,7 @@ float4 ps_main(PS_INPUT Input) : COLOR0
    float2 UV = Input.Tex0.xy;
    float4 tex = tex2D(texIn, UV);
    float dist = distance(tex.xy, UV);
-   float mapped = clamp(dist * udistmod.x, 0.0, 1.0);
+   float mapped = clamp(dist * udistmod.x, 0.0, 1.0); // original pt versiunea cu raytracing
+   //float mapped = dist;// *udistmod.x;
    return float4(mapped, mapped, mapped, 1.0);
 }

@@ -282,10 +282,10 @@ enum EStartupCommand {
 
 ///--- RENDER TARGET IDs ---
 enum ERTIDChannel {
-	K_RTID_NONE = 0,
+	K_RTID_NONE = -1,
 
-	K_RTID_COLORDEPTHSTENCIL = 1,	// has depth and stencil
-	K_RTID_EMISSIVE,			// emissive/occluders (transparent where nothing, occluders can be black if dark)	
+	K_RTID_COLORDEPTHSTENCIL = 0,	// has depth and stencil
+	K_RTID_EMISSIVE = 1,			// emissive/occluders (transparent where nothing, occluders can be black if dark)	
 	K_RTID_GICOLOR,				// color of walls for light bouncing
 	K_RTID_FINAL,
 	K_RTID_TEMP1,				// just colors
@@ -321,6 +321,7 @@ enum ETexChannel {
 // level will always render at 640x360 so this will be the base game resolution
 #define K_GAME_WIDTH				640
 #define K_GAME_HEIGHT				360
+#define K_GAME_ASPECT				(640.0f / 360.0f)
 
 // scale to use when transforming Z to H (added to Y, projection)
 #define ZHSCALE						0.5f

@@ -29,8 +29,8 @@ void CApplication::App_EnterState_Loading()
 	__RTManager().AddRT( K_RTID_FLOAT1, fGameWpx, fGameHpx, 1, D3DFMT_A16B16G16R16F, false );
 	__RTManager().AddRT( K_RTID_FLOAT2, fGameWpx, fGameHpx, 1, D3DFMT_A16B16G16R16F, false );
 	// used for GI cascades
-	__RTManager().AddRT( K_RTID_GI1, cascadeWidth, cascadeHeight, 1, D3DFMT_A16B16G16R16, false );
-	__RTManager().AddRT( K_RTID_GI2, cascadeWidth, cascadeHeight, 1, D3DFMT_A16B16G16R16, false );
+	__RTManager().AddRT( K_RTID_GI1, cascadeWidth, cascadeHeight, 1, D3DFMT_A16B16G16R16F, false );
+	__RTManager().AddRT( K_RTID_GI2, cascadeWidth, cascadeHeight, 1, D3DFMT_A16B16G16R16F, false );
 
 
 	GameState::substate = 0;

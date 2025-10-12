@@ -90,7 +90,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 			__Audio().StopGroup( "music", false, true );
 			if ( newState != GAME_STATE_GAME )
 			{
-				SND_PLAY_ONCE( SNDIDX_THEME_MENU1, DSBPLAY_LOOPING );
+				//SND_PLAY_ONCE( SNDIDX_THEME_MENU1, DSBPLAY_LOOPING );
 			}
 
 			//set volumes
@@ -497,7 +497,7 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 
 			//start menu music
 			SND_STOP_GROUP( "music", false, true );
-			SND_PLAY_ONCE( SNDIDX_THEME_MENU1, DSBPLAY_LOOPING );
+			//SND_PLAY_ONCE( SNDIDX_THEME_MENU1, DSBPLAY_LOOPING );
 			//analytics
 			ANALYTICS_SCREENVIEW( "INGAME" );
 		}

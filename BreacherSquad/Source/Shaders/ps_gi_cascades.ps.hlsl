@@ -30,9 +30,9 @@ float2 CalculateRayRange( int index, int count )
 {
 	// replicate logic in original (bit shifts). returns [start, end] scaled by _RayRange
 	int maxValue = pow( 2, (count * 2) ) - 1; // (1 << (count * 2)) - 1; - mai optim e cu shift, si mai exact
-	int start = pow( 2, (index * 2) ) - 1;// (1 << (index * 2)) - 1;
-	int end = pow( 2, (index * 2 + 2) ) - 1; //(1 << (index * 2 + 2)) - 1;
-	float2 r = float2( float( start ), float( end ) ) / float( maxValue );
+	int nstart = pow( 2, (index * 2) ) - 1;// (1 << (index * 2)) - 1;
+	int nend = pow( 2, (index * 2 + 2) ) - 1; //(1 << (index * 2 + 2)) - 1;
+	float2 r = float2( float( nstart ), float( nend ) ) / float( maxValue );
 	return r * _RayRange;
 }
 
@@ -51,7 +51,7 @@ float3 SampleSkyRadiance( float a0, float a1 )
 float4 SampleRadianceSDF( float2 rayOrigin, float2 rayDirection, float2 rayRange )
 {
 	float t = rayRange.x;
-	float4 hit = float4( 0.0, 0.0, 0.0, 1.0 );
+	float4 hit = float4( 0.0, 1.0, 0.0, 1.0 );
 
 	for ( int i = 0; i < 32; ++i )
 	{
@@ -141,12 +141,13 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 				radiance.rgb += rad.rgb * radiance.a;
 				radiance.a *= rad.a;
 			}
+			/*
 			else
 			{
 				// top cascade: merge with sky radiance
 				float3 sky = SampleSkyRadiance( angle, angle + angleStep ) * _SkyRadiance;
 				radiance.rgb += (sky / angleStep) * 2.0;
-			}
+			}*/
 		}
 
 		finalResult += radiance * 0.25;

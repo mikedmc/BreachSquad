@@ -576,12 +576,13 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			 */
 			 //debug stuff
 #if defined(_DEBUG) || defined(DEBUG)
+			const float fWndH = 120.0f;
 			for ( int oo = 0; oo < K_RTIDS_COUNT; oo++ )
 			{
-				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( oo );
 				if ( pRT != null )
 				{
-					RectLTRB src( 0.0f, 0.0f, oo * 100, 100 );
+					RectLTRB src( oo * fWndH * K_GAME_ASPECT, 0.0f, (oo + 1) * fWndH * K_GAME_ASPECT, fWndH );
 					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
 					pDevice->SetTexture( 0, pRT->m_pRTTexture );
 					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
