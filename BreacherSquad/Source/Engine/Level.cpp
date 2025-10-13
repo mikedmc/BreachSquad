@@ -3971,7 +3971,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 1. NORMAL MAP AND HEIGHT MAP
 	///----------------------------------------------------
-	pRT = __RTManager().GetRTbyUID( K_RTID_FLOAT1 );
+	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1);
 	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
@@ -4142,7 +4142,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}
 	}
-
+	/*
 	///----------------------------------------------------
 	/// 2. apply voronoi seed PS on 1
 	///----------------------------------------------------
@@ -4454,23 +4454,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 
 
-		/*
-		ok Raylib.BeginTextureMode( dstGI );
-		ok Raylib.ClearBackground( Color.Black );
-		Raylib.BeginShaderMode( GI_shader );
-
-		SetGIShaderValues( aspect, i );
-
-		Raylib.DrawTextureRec( srcGI.Texture,
-			new Rectangle( 0, 0, srcGI.Texture.Width, -srcGI.Texture.Height ),
-			Vector2.Zero, Color.White );
-		Raylib.EndShaderMode();
-		Raylib.EndTextureMode();
-		*/
 	}
 
-
-
+*/
 	///----------------------------------------------------
 	/// COMPOSITION de test ca sa vad bufferele
 	///----------------------------------------------------
@@ -4929,7 +4915,7 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 	__Painter().Flush();
 
 	///--- point lights
-	CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_FLOAT1 );
+	CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
 	if ( pRT != null )
 	{
 		m_pDevice->SetTexture( 0, pRT->m_pRTTexture );
@@ -5267,8 +5253,8 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	Matrix matWVP = matView * (*matProj);
 
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
-	//CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL);
-	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_GI1 );
+	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL);
+	//CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_GI1 );
 	_ASSERT( pRTcolor != nullptr && pRTlights != nullptr );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
 	m_pDevice->SetTexture( 1, pRTlights->m_pRTTexture );

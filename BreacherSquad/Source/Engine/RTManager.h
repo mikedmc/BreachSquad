@@ -6,7 +6,7 @@
 ///----------------------------------------------------
 
 // max number of render targets
-#define K_RTT_MAX_RT_CNT	10
+#define K_RTT_MAX_RT_CNT	30
 
 class CRTManager {
 public:
@@ -41,7 +41,7 @@ public:
 private:
 	PDEVICE						m_pDevice;
 public:
-	CFixedArray<CEngineRenderTarget*, 10> arrRT;
+	CFixedArray<CEngineRenderTarget*, K_RTT_MAX_RT_CNT> arrRT;
 	
 	//CTOR-DTOR
 	CRTManager();

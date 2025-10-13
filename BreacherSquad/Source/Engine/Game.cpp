@@ -576,7 +576,8 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			 */
 			 //debug stuff
 #if defined(_DEBUG) || defined(DEBUG)
-			const float fWndH = 120.0f;
+			/*
+			const float fWndH = 80.0f;
 			for ( int oo = 0; oo < K_RTIDS_COUNT; oo++ )
 			{
 				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( oo );
@@ -588,6 +589,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
 			}
+			*/
 
 			//game screen space
 //			CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_camRTScreen );
@@ -627,6 +629,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 				}
 
 			}
+			/*
 			if ( DXUTIsKeyDown( '7' ) )
 			{
 				CRTManager::CEngineRenderTarget* pRT1 = __RTManager().GetRTbyUID( K_RTID_FLOAT1 );
@@ -687,6 +690,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
 			}
+			*/
 #endif
 		}
 		break;

@@ -30,12 +30,23 @@ void CApplication::App_EnterState_Loading()
 	__RTManager().AddRT( K_RTID_GICOLOR, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
-	// used for precision VORONOI and SDF
-	__RTManager().AddRT( K_RTID_FLOAT1, fGameWpx, fGameHpx, 1, D3DFMT_A16B16G16R16F, false );
-	__RTManager().AddRT( K_RTID_FLOAT2, fGameWpx, fGameHpx, 1, D3DFMT_A16B16G16R16F, false );
-	// used for GI cascades
-	//__RTManager().AddRT( K_RTID_GI1, cascadeWidth, cascadeHeight, 1, D3DFMT_A16B16G16R16F, false );
-	//__RTManager().AddRT( K_RTID_GI2, cascadeWidth, cascadeHeight, 1, D3DFMT_A16B16G16R16F, false );
+	// used for GI
+	__RTManager().AddRT( K_RTID_WORLDSCENE, gi_global.radiance_render_extent, gi_global.radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_TEMPORARY, gi_global.radiance_render_extent, gi_global.radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_JUMPFLOOD, gi_global.radiance_render_extent, gi_global.radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_DISTANCEFIELD, gi_global.radiance_render_extent, gi_global.radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_RADIANCE, gi_global.radiance_render_extent, gi_global.radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_BOUNCESCENE, gi_global.radiance_render_extent, gi_global.radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+
+	__RTManager().AddRT( K_RTID_STORAGE, gi_global.radiance_cascade_extent, gi_global.radiance_cascade_extent, 1, D3DFMT_A8R8G8B8, false );
+
+	float angular_resolution = sqrt( gi_global.radiance_cascade_angular * pow( 4.0, 0 /*mip resolution*/ ) );
+	float mipmap_extent = gi_global.radiance_cascade_extent / angular_resolution;
+	__RTManager().AddRT( K_RTID_MIPMAP, mipmap_extent, mipmap_extent, 1, D3DFMT_A8R8G8B8, false );
+
+	for ( int i = 0; i < gi_global.radiance_cascade_count; i++ ) {
+		__RTManager().AddRT( K_RTID_CASCADE0 + i, gi_global.radiance_cascade_extent, gi_global.radiance_cascade_extent, 1, D3DFMT_A8R8G8B8, false );
+	}
 
 
 	GameState::substate = 0;
