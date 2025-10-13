@@ -12,6 +12,19 @@
 #define K_UT_LOD_MED	1
 #define K_UT_LOD_HIGH	2
 
+
+struct CGIGlobal {
+	float radiance_render_extent;              // extent resolution.. output resolution will be SQUARE.
+	float radiance_render_decay;           // How quickly light bounces decay.
+	float radiance_render_boost;               // How much to boost light levels.
+	float radiance_cascade_angular;  // angular resolution or initial rays per probe in cascade[0].
+	float radiance_cascade_interval; // radiance interval or raymarch distance of probes.
+	float radiance_cascade_spacing;  // Initial probe spacing of cascade0, each next cascade is N*4.0 spacing.
+	float radiance_cascade_extent;
+	int radiance_cascade_count;
+};
+
+
 class CApplicationSettings {
 public:
 	enum eNetGameTypes {
@@ -78,7 +91,7 @@ public:
  */
 class CApplication : public IEventListener
 {
-public: 
+public:
 	///--- available resolutions ---
 	CArray<SizeWHi> g_arrResolutions;  //available resolutions
 	SizeWHi g_szDesktopSize;	//desktop resolution
@@ -99,11 +112,13 @@ public:
 	FORCEINLINE const bool IsGameModified() const {
 		return (m_Settings.dev_unCurrentCRC != K_GAME_CRC);
 	}
-	
+
 	///--- EVENTS ---
 public:
-	char const * GetListenerName(void) { return "CApplication"; };
-	bool HandleEvent(CEvent &nEvent);
+	CGIGlobal	gi_global; //gi settings
+
+	char const * GetListenerName( void ) { return "CApplication"; };
+	bool HandleEvent( CEvent &nEvent );
 
 	///--- useful paths ---
 	WCHAR	g_wszExePath[MAX_PATH];			//absolute exe path
@@ -121,7 +136,7 @@ public:
 
 	//screenshot utility
 	HRESULT SaveScreenshot();
-	
+
 	///--------------------------------------------------------------------------------------
 	/// Variabile globale legate de dimensiunea ecranului
 	///--------------------------------------------------------------------------------------
@@ -137,34 +152,34 @@ public:
 	CCameraTransform g_camRTScreen;		//game screen camera with height of RT targets (RT to screen)
 	CCameraTransform g_cam360hScreen;	//360px high camera (scales up to real resolution) - 360px h is default resolution of the game
 public:
-	static bool			IsOnlyInstance(LPCTSTR className);
-	void				OnRenderSizeChanged(int newSizeX, int newSizeY);
+	static bool			IsOnlyInstance( LPCTSTR className );
+	void				OnRenderSizeChanged( int newSizeX, int newSizeY );
 
 	void Init();
-	void Update(float dTime); 
+	void Update( float dTime );
 
 	// returns rectangle where rendering should be made to considering the pixel perfect setting
 	// you get g_rectRender or g_rectRenderPP
 	RectXYWH getRenderRect();
 
-//--- SDL data ---
+	//--- SDL data ---
 #if defined(K_GLOBAL_ENABLE_SDL)
 	SDL_Window* gWindow;
 
-	bool InitSDL(HWND hWnd);
+	bool InitSDL( HWND hWnd );
 	void CloseSDL();
 	void PollSDLControllers();
 #endif
 	CApplication();
 	~CApplication();
 
-///--- STEAM CALLBACKS ---
+	///--- STEAM CALLBACKS ---
 #if defined(ENABLE_STEAM)
 private:
-	STEAM_CALLBACK(CApplication, OnGameOverlayActivated, GameOverlayActivated_t);
+	STEAM_CALLBACK( CApplication, OnGameOverlayActivated, GameOverlayActivated_t );
 #endif
 
-///----- Application properties -----
+	///----- Application properties -----
 public:
 	CTextureManager				g_texManager;		// global textures manager
 	CSpriteLib					g_sprMgrGlobal;		// global sprite manager 
@@ -173,22 +188,25 @@ public:
 	//#TODO: de facut o interfata gen IGameState si fiecare stare sa fie o clasa derivata din interfata respectiva si instantiata aici dar setat pointer pe currentState prin changeGameState
 public:
 	void App_EnterState_Loading();
-	void App_UpdateState_Loading(LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime);
-	void App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline);
+	void App_UpdateState_Loading( LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime );
+	void App_PaintState_Loading( LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline );
 	void App_ExitState_Loading();
 
 	void App_EnterState_Developer();
-	void App_UpdateState_Developer(LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime);
-	void App_PaintState_Developer(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline);
+	void App_UpdateState_Developer( LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime );
+	void App_PaintState_Developer( LPDIRECT3DDEVICE9 pDevice, ID3DXSprite* pSprite, double fTimeline );
 	void App_ExitState_Developer();
 	// Called after each finished level (win or lose or cancelled)
-	void App_OnLevelFinished(int nEpisodeIdx, int nLevelIdx);
+	void App_OnLevelFinished( int nEpisodeIdx, int nLevelIdx );
+
+//-- GI: should be moved
+	void radiance_initialize( float extent, float angular = 4.0, float interval = 4.0, float spacing = 4.0, float boost = 1.0, float decayrate = 0.65 );
 
 public: //--- framework methods ---
-	HRESULT OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
-	HRESULT OnResetDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL);
-	HRESULT OnLostDevice(void* pUserContext = NULL);
-	HRESULT OnDestroyDevice(void* pUserContext = NULL);
+	HRESULT OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL );
+	HRESULT OnResetDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL );
+	HRESULT OnLostDevice( void* pUserContext = NULL );
+	HRESULT OnDestroyDevice( void* pUserContext = NULL );
 };
 
 

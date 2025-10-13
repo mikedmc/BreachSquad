@@ -10,14 +10,19 @@ void CApplication::App_EnterState_Loading()
 	UINT fGameHpx = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
 	UINT fGameWpx = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
 
-	// Setup GI config
-	int cascadeCount = 6;
-	float renderScale = 1.0f;
-	float rayRange = 2.0f;
-	double powVal = pow( 2, cascadeCount );
-	int cascadeWidth = (int)ceil( (fGameWpx * renderScale) / powVal ) * (int)powVal;
-	int cascadeHeight = (int)ceil( (fGameHpx * renderScale) / powVal ) * (int)powVal;
-	Vec2 cascadeResolution( cascadeWidth, cascadeHeight );
+	float cascadeW = 1024.0, cascadeH = 1024.0;
+	// Passing 0 or less cascades will optimally calculate the number of required cascades.
+	// Parameters: [angular] is power of 4, [interval] is multiple of 4, [spacing] is power of 2.
+	// Any value passed that does not conform to these rules will be automatically adjusted (adjusted up).
+	radiance_initialize( max( cascadeW, cascadeH), 4, 4, 2, 1.0, 0.65 );
+	float bytes = 4.0 * ( gi_global.radiance_cascade_extent * gi_global.radiance_cascade_extent ) * gi_global.radiance_cascade_count;
+	LOG( "\nRender  Diagonal: %d", int(floor( gi_global.radiance_render_extent ) ));
+	LOG( "Cascade Diagonal: %d", int(floor( gi_global.radiance_cascade_extent ) ));
+	LOG( "Cascade Count: %d", int(floor( gi_global.radiance_cascade_count ) ));
+	LOG( "Cascade Angular: %d", int(floor( gi_global.radiance_cascade_angular ) ));
+	LOG( "Cascade Interval: %d", int(floor( gi_global.radiance_cascade_interval ) ));
+	LOG( "Cascade Spacing: %d", int(floor( gi_global.radiance_cascade_spacing ) ));
+	LOG( "Cascade Memory: %d MB\n", int(floor( bytes / 1024 / 1024 ) ));
 
 	// Create RTs
 	__RTManager().AddRT( K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
@@ -29,8 +34,8 @@ void CApplication::App_EnterState_Loading()
 	__RTManager().AddRT( K_RTID_FLOAT1, fGameWpx, fGameHpx, 1, D3DFMT_A16B16G16R16F, false );
 	__RTManager().AddRT( K_RTID_FLOAT2, fGameWpx, fGameHpx, 1, D3DFMT_A16B16G16R16F, false );
 	// used for GI cascades
-	__RTManager().AddRT( K_RTID_GI1, cascadeWidth, cascadeHeight, 1, D3DFMT_A16B16G16R16F, false );
-	__RTManager().AddRT( K_RTID_GI2, cascadeWidth, cascadeHeight, 1, D3DFMT_A16B16G16R16F, false );
+	//__RTManager().AddRT( K_RTID_GI1, cascadeWidth, cascadeHeight, 1, D3DFMT_A16B16G16R16F, false );
+	//__RTManager().AddRT( K_RTID_GI2, cascadeWidth, cascadeHeight, 1, D3DFMT_A16B16G16R16F, false );
 
 
 	GameState::substate = 0;

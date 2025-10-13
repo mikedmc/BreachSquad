@@ -1,0 +1,10 @@
+# Force LF for source code
+*.c text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+
+# Force CRLF for batch files
+*.bat text eol=crlf
+
+# Normalize all text files to LF
+*.txt text=auto
