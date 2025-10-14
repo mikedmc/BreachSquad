@@ -576,20 +576,19 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			 */
 			 //debug stuff
 #if defined(_DEBUG) || defined(DEBUG)
-			/*
-			const float fWndH = 80.0f;
-			for ( int oo = 0; oo < K_RTIDS_COUNT; oo++ )
+			const float fWndH = 256.0f;
+			for ( int oo = K_RTID_WORLDSCENE; oo <= K_RTID_MIPMAP; oo++ )
 			{
 				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( oo );
 				if ( pRT != null )
 				{
-					RectLTRB src( oo * fWndH * K_GAME_ASPECT, 0.0f, (oo + 1) * fWndH * K_GAME_ASPECT, fWndH );
+					int ooidx = oo - K_RTID_WORLDSCENE;
+					RectLTRB src( ooidx * fWndH, 0.0f, (ooidx + 1) * fWndH, fWndH );
 					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
 					pDevice->SetTexture( 0, pRT->m_pRTTexture );
 					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
 			}
-			*/
 
 			//game screen space
 //			CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_camRTScreen );
@@ -679,9 +678,10 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
 			}
-			if ( DXUTIsKeyDown( '4' ) )
+			*/
+			if ( DXUTIsKeyDown( '1' ) )
 			{
-				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_GICOLOR );
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_JUMPFLOOD);
 				if ( pRT != null )
 				{
 					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
@@ -690,7 +690,28 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
 			}
-			*/
+			if ( DXUTIsKeyDown( '2' ) )
+			{
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_TEMPORARY );
+				if ( pRT != null )
+				{
+					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
+					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
+					pDevice->SetTexture( 0, pRT->m_pRTTexture );
+					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
+				}
+			}
+			if ( DXUTIsKeyDown( '3' ) )
+			{
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_DISTANCEFIELD );
+				if ( pRT != null )
+				{
+					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
+					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
+					pDevice->SetTexture( 0, pRT->m_pRTTexture );
+					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
+				}
+			}
 #endif
 		}
 		break;

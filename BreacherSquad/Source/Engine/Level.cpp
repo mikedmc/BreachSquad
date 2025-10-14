@@ -4094,7 +4094,8 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 1. build occluders/emitters map (emissive map)
 	///----------------------------------------------------
-	pRT = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
+	// render on transparent background, colored lights, black walls
+	pRT = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
 	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
@@ -4106,10 +4107,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				return K_OP_FAILED;
 			}
 
-			//m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
-			//m_pDevice->SetTransform( D3DTS_VIEW, &matView );
-			//m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
-
 			RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
 			CAABB			camAABB( camrect );
 
@@ -4119,6 +4116,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	}
 
 	///--- 1.1 build walls colors map for GI
+	/*
 	pRT = __RTManager().GetRTbyUID( K_RTID_GICOLOR );
 	if ( pRT != nullptr )
 	{
@@ -4142,11 +4140,12 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}
 	}
-	/*
+	*/
+
 	///----------------------------------------------------
 	/// 2. apply voronoi seed PS on 1
 	///----------------------------------------------------
-	pRT = __RTManager().GetRTbyUID( K_RTID_FLOAT2 );
+	pRT = __RTManager().GetRTbyUID( K_RTID_JUMPFLOOD );
 	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
@@ -4179,7 +4178,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			///--- compose scene from normals and color ---
 			Matrix matWVP = matView * pRT->matProj;
 
-			CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_GICOLOR );
+			CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
 			_ASSERT( pRTcolor != nullptr );
 			m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
 
@@ -4215,14 +4214,13 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 
 		}
-
 	}
 
 	///----------------------------------------------------
 	/// 3. apply multipass voronoi on (starting with) 2
 	///----------------------------------------------------
-	pRT = __RTManager().GetRTbyUID( K_RTID_FLOAT2 );
-	int passes = 7;// ceil( log( max( pRT->nWidth, pRT->nHeight ) ) / log( 2.0 ) );
+	pRT = __RTManager().GetRTbyUID( K_RTID_TEMPORARY );
+	int passes =  ceil( log( max( pRT->nWidth, pRT->nHeight ) ) / log( 2.0 ) );
 	Matrix matView;
 	MUMatIdentity( &matView );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
@@ -4251,8 +4249,8 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 	Vec2 vScreenPixelSize( 1.0f / (float)pRT->nWidth, 1.0f / (float)pRT->nHeight );
 	int last_pass_idx = 0;
-	// we start witn TEMP2 as src (voronoi seed in it) and paint to TEMP1
-	ERTIDChannel arr_swap_rt[] = { K_RTID_FLOAT1 , K_RTID_FLOAT2 };
+	// we start with JUMPFLOOD as src (voronoi seed in it) and paint to TEMP1
+	ERTIDChannel arr_swap_rt[] = { K_RTID_JUMPFLOOD , K_RTID_TEMPORARY };
 	for ( int i = 0; i < passes; i++ )
 	{
 		// save last pass so we know what the last RT was in next step
@@ -4260,15 +4258,22 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		// offset for each pass is half the previous one, starting at half the square resolution rounded up to nearest power 2.
 		// i.e. for 768x512 we round up to 1024x1024 and the offset for the first pass is 512x512, then 256x256, etc.
 		float offset = pow( 2, passes - i - 1 );
+		///--- set source texture
+		CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( arr_swap_rt[i % 2] );
+		m_pDevice->SetTexture( 1, pRTcolor->m_pRTTexture );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_POINT );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
 
-		CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( arr_swap_rt[(i + 1) % 2] );
-		m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
-
-		pRT = __RTManager().GetRTbyUID( arr_swap_rt[i % 2] );
+		pRT = __RTManager().GetRTbyUID( arr_swap_rt[(i + 1) % 2] );
 		if ( pRT != nullptr )
 		{
 			if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 			{
+				if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 255, 0, 0, 0 ), 1.0f, 0 ) ) )
+					return K_OP_FAILED;
+
 				__Shaders().SetVSByName( L"VS_COMPOSITION" );
 				__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 				__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
@@ -4277,7 +4282,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				//set Pshader constants
 				float fConstData[][4] = {
 					// x: texture offset
-					{ offset, 0.0f, 0.0f, 0.0f},
+					{ offset, offset, 0.0f, 0.0f},
 					// xy: inverse of RT resolution
 					{ vScreenPixelSize.x, vScreenPixelSize.y, .0f, .0f },
 				};
@@ -4293,19 +4298,17 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 			}
 		}
-
 	}
 
 	///----------------------------------------------------
 	/// 4. convert voronoi diagram to distance field
 	///----------------------------------------------------
-	ERTIDChannel eRTdistance = arr_swap_rt[(last_pass_idx + 1) % 2];
-	ERTIDChannel eRTlastVoronoi = arr_swap_rt[last_pass_idx % 2];
+	ERTIDChannel eRTlastVoronoi = arr_swap_rt[(last_pass_idx + 1) % 2];
 
 
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( eRTlastVoronoi );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
-	pRT = __RTManager().GetRTbyUID( eRTdistance );
+	pRT = __RTManager().GetRTbyUID( K_RTID_DISTANCEFIELD );
 	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
@@ -4335,6 +4338,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 	}
 
+/*
 	///----------------------------------------------------
 	/// 5. radiance cascades
 	///----------------------------------------------------
@@ -5096,9 +5100,9 @@ OPRESULT CLevel::RenderPass_Emissive( Matrix* matProj, float fBetweenFramesPerce
 
 	/// paint occluders white
 	
-	auto ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"WHITE32" ) );
+	auto ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"BLACK32" ) );
 	m_pDevice->SetTexture( 0, ptex->pTexture );
-	//Areas_PaintLayer( K_AL_OCCLUDERS );
+	Areas_PaintLayer( K_AL_OCCLUDERS );
 	//Areas_PaintLayer( K_AL_WALLS );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 
@@ -5253,8 +5257,8 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	Matrix matWVP = matView * (*matProj);
 
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
-	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL);
-	//CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_GI1 );
+	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_DISTANCEFIELD);
+	//CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_DISTANCEFIELD );
 	_ASSERT( pRTcolor != nullptr && pRTlights != nullptr );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
 	m_pDevice->SetTexture( 1, pRTlights->m_pRTTexture );

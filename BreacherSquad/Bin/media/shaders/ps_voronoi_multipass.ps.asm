@@ -3,7 +3,7 @@
 //
 // Parameters:
 //
-//   sampler2D texIn;
+//   Texture2D samp0+texIn;
 //   float4 uoffset;
 //   float4 v2pixelsize;
 //
@@ -14,39 +14,42 @@
 //   ------------ ----- ----
 //   uoffset      c0       1
 //   v2pixelsize  c1       1
-//   texIn        s0       1
+//   samp0+texIn  s1       1
 //
 
     ps_3_0
-    def c2, 0, 10000000, 0, -1
+    def c2, 0, 0, 10000000, -1
     defi i0, 3, 0, 0, 0
     dcl_texcoord v0.xy
-    dcl_2d s0
-    mov r0.xyz, c2.yzzw
-    mov r1.x, c2.w
+    dcl_2d s1
+    mov r0.w, c2.x
+    mov r1, c2.x
+    mov r2.xy, c2.zwzw
     rep i0
-      mov r2.xyz, r0
-      mov r1.y, c2.w
+      mov r3.xz, r2.y
+      mov r4, r1
+      mov r2.z, r2.x
+      mov r3.y, c2.w
       rep i0
-        mul r1.zw, r1.xyxy, c1.xyxy
-        mad r1.zw, r1, c0.x, v0.xyxy
-        texld r3, r1.zwzw, s0
-        add r1.zw, r3.xyxy, -v0.xyxy
-        dp2add r0.w, r1.zwzw, r1.zwzw, c2.z
-        rsq r0.w, r0.w
-        rcp r4.x, r0.w
-        add r0.w, -r2.x, r4.x
-        cmp r0.w, r0.w, -c2_abs.z, -c2_abs.w
-        cmp r0.w, -r3_abs.y, c2.z, r0.w
-        cmp r0.w, -r3_abs.x, c2.z, r0.w
-        mov r4.yz, r3.xxyw
-        cmp r2.xyz, r0.w, r2, r4
-        add r1.y, r1.y, -c2.w
+        mul r5.xyz, r3, c1.xyxw
+        mad r0.xyz, r5, c0.xyxw, v0.xyxw
+        texldl r5, r0, s1
+        add r0.xy, r5, -v0
+        dp2add r0.x, r0, r0, c2.x
+        rsq r0.x, r0.x
+        rcp r0.x, r0.x
+        add r0.y, -r0.x, r2.z
+        cmp r0.y, r0.y, -c2_abs.w, -c2_abs.x
+        cmp r0.y, -r5_abs.y, c2.x, r0.y
+        cmp r0.y, -r5_abs.x, c2.x, r0.y
+        cmp r4, r0.y, r4, r5
+        cmp r2.z, r0.y, r2.z, r0.x
+        add r3.y, r3.y, -c2.w
       endrep
-      mov r0.xyz, r2
-      add r1.x, r1.x, -c2.w
+      mov r1, r4
+      mov r2.x, r2.z
+      add r2.y, r2.y, -c2.w
     endrep
-    mov oC0.xy, r0.yzzw
-    mov oC0.zw, c2_abs
+    mov oC0, r1
 
-// approximately 33 instruction slots used (1 texture, 32 arithmetic)
+// approximately 37 instruction slots used (2 texture, 35 arithmetic)

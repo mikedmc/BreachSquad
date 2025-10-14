@@ -4,28 +4,29 @@
 // Parameters:
 //
 //   sampler2D texIn;
-//   float4 udistmod;
 //
 //
 // Registers:
 //
 //   Name         Reg   Size
 //   ------------ ----- ----
-//   udistmod     c0       1
 //   texIn        s0       1
 //
 
     ps_3_0
-    def c1, 0, 1, 0, 0
+    def c0, 0, 255, 0.00392156886, 1
     dcl_texcoord v0.xy
     dcl_2d s0
     texld r0, v0, s0
-    add r0.xy, r0, -v0
-    dp2add r0.x, r0, r0, c1.x
+    add r0.xy, -r0, v0
+    dp2add r0.x, r0, r0, c0.x
     rsq r0.x, r0.x
-    rcp r0.x, r0.x
-    mul r0.x, r0.x, c0.x
-    mov_sat oC0.xyz, r0.x
-    mov oC0.w, c1.y
+    rcp_sat r0.x, r0.x
+    mul r0.x, r0.x, c0.y
+    frc r0.y, r0.x
+    add r0.x, -r0.y, r0.x
+    mov oC0.y, r0.y
+    mul oC0.x, r0.x, c0.z
+    mov oC0.zw, c0.xyxw
 
-// approximately 9 instruction slots used (1 texture, 8 arithmetic)
+// approximately 12 instruction slots used (1 texture, 11 arithmetic)
