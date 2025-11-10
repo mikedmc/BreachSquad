@@ -22,7 +22,8 @@ float4 ps_main(PS_INPUT Input) : COLOR0
    // we calculate the distance between the closest surface and this pixel
    float2 UV = Input.Tex0.xy;
    float4 tex = tex2D(texIn, UV);
-   //float2 jumpflood = float2(V2F16( tex.xy ), V2F16( tex.zw ));
+   //float2 jumpflood = float2(V2F16( tex.xy ), V2F16( tex.zw )); // high precision on alpha too (not working in dx9)
+   //float2 jumpflood = float2(V2F16( tex.xy ), tex.z );// precision test on X (works)
    float2 jumpflood = tex.xy; // without high precision
    float dist = distance(UV, jumpflood);
    dist = saturate( dist );
@@ -30,7 +31,8 @@ float4 ps_main(PS_INPUT Input) : COLOR0
    //float mapped = dist;// *udistmod.x;
    
    //return float4(fnFloatPackToV2(dist), 0.0, 1.0); 
-   return float4(F16V2( dist ), 0.0, 1.0);
+   return float4(dist, dist, dist, 1);
+   //return float4(F16V2( dist ), 0.0, 1.0);
 
 
 

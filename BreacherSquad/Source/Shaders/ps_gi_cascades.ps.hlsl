@@ -1,3 +1,5 @@
+//--- exemplu bun dar nu merge, adica e economic ca si memorie dar nu am reusit sa-l fac sa afiseze ceva... orice....
+
 struct PS_INPUT
 {
 	float4 UV0:            TEXCOORD0; //tex coords
@@ -87,6 +89,11 @@ float4 SampleRadianceSDF( float2 rayOrigin, float2 rayDirection, float2 rayRange
 
 // ----------------- Main -----------------
 
+// glsl mod is slightly different from fmod
+float2 mod_glsl( float2 x, float2 y ) {
+	return x - y * floor( x / y );
+}
+
 float4 ps_main(PS_INPUT pin) : SV_Target
 {
 	// pixel index in cascade grid
@@ -99,7 +106,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 	float blockIndexF = block2DIndex.x + block2DIndex.y * float( blockSqrtCount );
 	int blockIndex = int( blockIndexF + 0.5 );
 
-	float2 coordsInBlock = fmod( pixelIndex, blockDim );
+	float2 coordsInBlock = mod_glsl( pixelIndex, blockDim );
 
 	float4 finalResult = float4( 0.0, 0.0, 0.0, 0.0 );
 
@@ -125,7 +132,7 @@ float4 ps_main(PS_INPUT pin) : SV_Target
 				// position logic from original shader
 				float2 position = coordsInBlock * 0.5 + 0.25;
 				float blockSqrtCountTimes2 = float( blockSqrtCount * 2 );
-				float positionOffsetX = fmod( float( angleIndex ), blockSqrtCountTimes2 );
+				float positionOffsetX = mod_glsl( float( angleIndex ), blockSqrtCountTimes2 );
 				float positionOffsetY = floor( float( angleIndex ) / blockSqrtCountTimes2 );
 
 				// clamp position between 0.5 and blockDim*0.5 - 0.5 (original clamps scalars; replicate)

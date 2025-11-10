@@ -4271,7 +4271,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		{
 			if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 			{
-				if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 255, 0, 0, 0 ), 1.0f, 0 ) ) )
+				if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
 					return K_OP_FAILED;
 
 				__Shaders().SetVSByName( L"VS_COMPOSITION" );
@@ -4313,6 +4313,10 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+				return K_OP_FAILED;
+
+
 			__Shaders().SetVSByName( L"VS_COMPOSITION" );
 			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
@@ -4338,10 +4342,32 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 	}
 
-/*
+
+
 	///----------------------------------------------------
 	/// 5. radiance cascades
 	///----------------------------------------------------
+	//	for(var n = 0; n < global.radiance_cascade_count; n++) {
+	//		shader_set(global.radiance_intervals);
+	//		uniform_f1(global.radiance_intervals_uRenderExtent, global.radiance_render_extent);
+	//		uniform_f1(global.radiance_intervals_uRenderDecayRate, global.radiance_render_decay);
+	//		uniform_tx(global.radiance_intervals_uDistanceField, distfield);
+	//		uniform_tx(global.radiance_intervals_uWorldScene, worldscene);
+	//
+	//		uniform_f1(global.radiance_intervals_uCascadeExtent, global.radiance_cascade_extent);
+	//		uniform_f1(global.radiance_intervals_uCascadeSpacing, global.radiance_cascade_spacing);
+	//		uniform_f1(global.radiance_intervals_uCascadeInterval, global.radiance_cascade_interval);
+	//		uniform_f1(global.radiance_intervals_uCascadeAngular, global.radiance_cascade_angular);
+	//		uniform_f1(global.radiance_intervals_uCascadeIndex, n);
+	//
+	//			surface_set_target(cascade_surfarray[n]);
+	//			draw_clear_alpha(c_black, 0);
+	//			// It doesn't matter what we render here, we just need a render source to set the render area size.
+	//			draw_surface(storage, 0, 0);
+	//			surface_reset_target();
+	//
+	//		shader_reset();
+	//	}
 
 
 	// clamp textures so we don't bleed light
@@ -4363,9 +4389,10 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	int screenHeight = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
 	Vec2 vaspect( screenWidth / max( screenWidth, screenHeight ), screenHeight / max( screenWidth, screenHeight ) );
 	Vec2 vscreen( screenWidth, screenHeight );
-
+	/*
 	for ( int cascadeLevel = cascadeCount - 1; cascadeLevel >= 0; cascadeLevel-- )
 	{
+		
 		ERTIDChannel srcGI = gi1IsFinal ? K_RTID_GI1 : K_RTID_GI2;
 		ERTIDChannel dstGI = gi1IsFinal ? K_RTID_GI2 : K_RTID_GI1;
 
@@ -4454,13 +4481,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 		gi1IsFinal = !gi1IsFinal;
 
-
-
-
-
 	}
+	*/
 
-*/
 	///----------------------------------------------------
 	/// COMPOSITION de test ca sa vad bufferele
 	///----------------------------------------------------

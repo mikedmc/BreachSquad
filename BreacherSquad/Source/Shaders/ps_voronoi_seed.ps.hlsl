@@ -20,7 +20,9 @@ float4 ps_main(PS_INPUT Input) : COLOR0
 	{
 		return float4(0.0, 0.0, 0.0, 0.0);
 	}
-	return float4(Input.Tex0.xy, 0.0, 1.0);
-	
+	return float4(Input.Tex0.xy, 0.0, 1.0); // DX9 it only works with alpha 1, use float textures...
+	//test encoding just X
+	//return float4(F16V2( Input.Tex0.x ), Input.Tex0.y, 1.0);
+	// full precision
 	//return float4(F16V2(Input.Tex0.x), F16V2(Input.Tex0.y));
 }

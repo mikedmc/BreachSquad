@@ -36,7 +36,11 @@ float4 ps_main(PS_INPUT Input) : COLOR0
 			voffset += float2(x, y) * v2pixelsize.xy * uoffset.xy;
 
 			float4 seed = texIn.SampleLevel(samp0, voffset, 0);
+			// test just X on 2 vecs:
+			//float2 seedpos = float2(V2F16( seed.xy ), seed.z );
+			// full precision:
 			//float2 seedpos = float2(V2F16( seed.xy ), V2F16( seed.zw ));
+			// no precision:
 			float2 seedpos = seed.xy;
 			float dist = distance(seedpos, Input.Tex0.xy);
 			
