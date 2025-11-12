@@ -30,8 +30,7 @@
     ps_3_0
     def c6, 1, -0.333333343, 0.5, 0.99999994
     def c7, 6.28318548, -3.14159274, 1, -1
-    def c8, 0, 0, 0.00392156886, 1
-    def c9, -9.99999975e-005, 9.99999975e-005, 0, 0
+    def c8, 0, 0, 1, -9.99999975e-005
     defi i0, 255, 0, 0, 0
     dcl_texcoord v0.xy
     dcl_2d s1
@@ -83,39 +82,38 @@
       min r5.x, r1.y, r1.w
       mad r3.xyz, r2, r5.x, r0.xyww
       texldl r5, r3.zyzw, s1
-      mad r5.x, r5.y, c8.z, r5.x
       add r1.w, r1.w, r5.x
       mad r5.y, r0.z, -r1.x, r1.w
-      cmp r5.y, r5.y, c8.w, c8.x
-      cmp r5.zw, r3.xyzy, c8.x, c8.w
+      cmp r5.y, r5.y, c8.z, c8.x
+      cmp r5.zw, r3.xyzy, c8.x, c8.z
       add r5.y, r5.z, r5.y
-      cmp r5.y, -r5.y, c8.x, c8.w
+      cmp r5.y, -r5.y, c8.x, c8.z
       add r5.y, r5.w, r5.y
-      cmp r5.y, -r5.y, c8.x, c8.w
+      cmp r5.y, -r5.y, c8.x, c8.z
       add r5.zw, r3.xyzy, -c6.x
-      cmp r5.zw, r5, c8.w, c8.x
+      cmp r5.zw, r5, c8.z, c8.x
       add r5.y, r5.z, r5.y
-      cmp r5.y, -r5.y, c8.x, c8.w
+      cmp r5.y, -r5.y, c8.x, c8.z
       add r5.y, r5.w, r5.y
-      cmp r5.z, -r5.y, c8.x, c8.w
+      cmp r5.z, -r5.y, c8.x, c8.z
       if_lt -r5.y, c8.x
         mov r4, c8.x
         mov r2.w, c6.x
         break_ne c6.x, -c6.x
       endif
-      add r5.y, r5.x, c9.x
-      cmp r5.y, r5.y, c8.x, c8.w
-      if_lt r5.x, c9.y
+      add r5.y, r5.x, c8.w
+      cmp r5.y, r5.y, c8.x, c8.z
+      if_lt r5.x, -c8.w
         texldl r6, r3, s2
-        mad r4, r6.xyzx, c8.wwwx, c8.xxxw
+        mad r4, r6.xyzx, c8.zzzx, c8.xxxz
         mov r2.w, c6.x
         break_ne c6.x, -c6.x
       endif
       add r3.x, r5.z, r5.y
-      cmp r2.w, -r3.x, c8.x, c8.w
+      cmp r2.w, -r3.x, c8.x, c8.z
       add r1.z, r1.z, c6.x
       mov r4, c8.x
     endrep
     cmp oC0, -r2.w, c8.x, r4
 
-// approximately 103 instruction slots used (4 texture, 99 arithmetic)
+// approximately 102 instruction slots used (4 texture, 98 arithmetic)

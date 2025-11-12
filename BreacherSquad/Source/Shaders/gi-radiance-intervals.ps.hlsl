@@ -31,17 +31,18 @@ struct ProbeTexel {
 	//float2 position; // cascade texel probe position.
 };
 
-float2 mod_glsl( float2 x, float2 y ) {
+float2 mod_glsl_v2( float2 x, float2 y ) {
 	return x - y * floor( x / y );
 }
 
 ProbeTexel cascadeProbeTexel( float2 coord, float cascade ) {
 	float count = in_CascadeAngular * pow( 4.0, cascade );
 	float size = sqrt( count );
-	float2 probe = floor( coord / size );
+	float2 sizev2 = float2(size, size);
+	float2 probe = floor( coord / sizev2 );
 	float2 spacing = in_CascadeSpacing * pow( 2.0, cascade );
 
-	float2  probePos = mod_glsl( floor( coord ), float2( size, size ) );
+	float2  probePos = mod_glsl_v2( floor( coord ), sizev2 );
 	float index = (probePos.y * size) + probePos.x;
 
 	// Quadruples the Interval Range: (per specification, but not as smooth)
@@ -88,14 +89,17 @@ float4 marchInterval( ProbeTexel probeInfo ) {
 	//
 	//	Interval Raymarching (raymarches a specific range away from probe):
 	//
-	float decay = min( max( 0.0, in_RenderDecayRate ), 1.0 );
+	//float decay = min( max( 0.0, in_RenderDecayRate ), 1.0 );
 	for ( float ii = 0.0, dd = 0.0, rd = 0.0, rt = probeInfo.range * probeInfo.texel; ii < probeInfo.range; ii++ ) {
 		float2 ray = interval + delta * min( rd, rt );
 		float4 texread = in_DistanceField.SampleLevel( samp0, ray, 0 );
-		rd += dd = V2F16( texread.rg );
+		//dd = V2F16( texread.rg );
+		dd = texread.r;
+		rd += dd;
 
 		// End of Interval Range or Out of Bounds:
-		if ( rd >= rt || ray.x < 0.0 || ray.y < 0.0 || ray.x >= 1.0 || ray.y >= 1.0 ) return float4( 0.0, 0.0, 0.0, 0.0 );
+		if ( rd >= rt || ray.x < 0.0 || ray.y < 0.0 || ray.x >= 1.0 || ray.y >= 1.0 ) 
+			return float4( 0.0, 0.0, 0.0, 0.0 );
 
 		// Surface/Object collision:
 		//if (dd < EPSILON) return max(float4(texture2D(in_WorldScene, ray).rgb, 1.0), float4(texture2D(in_WorldScene, ray - (delta * probeInfo.texel)).rgb, 1.0) * decay);
@@ -109,6 +113,7 @@ float4 ps_main( PS_INPUT pin ) : SV_Target
 {
 	float2 texel = pin.UV0.xy * float2( in_CascadeExtent, in_CascadeExtent );
 	ProbeTexel probeInfo = cascadeProbeTexel( texel, in_CascadeIndex );
+
 	float4 gl_FragColor = marchInterval( probeInfo );
 	return gl_FragColor;
 }

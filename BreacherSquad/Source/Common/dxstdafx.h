@@ -353,7 +353,7 @@ enum ETexChannel {
 #define K_WALL_HEIGHT_WORLD			64.0f
 #define K_WALL_HEIGHT_SCREEN		(K_WALL_HEIGHT_WORLD * ZHSCALE)
 
-#define K_GAME_CLEAR_COLOR			0x00000044
+#define K_GAME_CLEAR_COLOR			0xaaaaaaaa
 // splashscreen show time
 #define K_GAME_SPLASH_SHOW_TIMER	2.5f
 

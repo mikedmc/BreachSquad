@@ -4380,83 +4380,60 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		m_pDevice->SetSamplerState( kk, D3DSAMP_MIPFILTER, 0 );
 	}
 
-
-
-	bool gi1IsFinal = false;
-	int cascadeCount = 6;
-
 	int screenWidth = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
 	int screenHeight = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
 	Vec2 vaspect( screenWidth / max( screenWidth, screenHeight ), screenHeight / max( screenWidth, screenHeight ) );
 	Vec2 vscreen( screenWidth, screenHeight );
-	/*
-	for ( int cascadeLevel = cascadeCount - 1; cascadeLevel >= 0; cascadeLevel-- )
+	
+	//auto ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"SCENE1024" ) );
+	for ( int n = 0; n < UTApp().gi_global.radiance_cascade_count; n++ )
 	{
-		
-		ERTIDChannel srcGI = gi1IsFinal ? K_RTID_GI1 : K_RTID_GI2;
-		ERTIDChannel dstGI = gi1IsFinal ? K_RTID_GI2 : K_RTID_GI1;
-
 		///--- set textures
-		CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( srcGI );
+		CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( K_RTID_DISTANCEFIELD );
 		m_pDevice->SetTexture( 1, pRTlastGI->m_pRTTexture );
-		m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-		m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-
-		CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
+		CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
 		m_pDevice->SetTexture( 2, pRTemissive->m_pRTTexture );
-		CRTManager::CEngineRenderTarget* pRTcolordata = __RTManager().GetRTbyUID( K_RTID_GICOLOR );
-		m_pDevice->SetTexture( 3, pRTcolordata->m_pRTTexture );
-		CRTManager::CEngineRenderTarget* pRTdistance = __RTManager().GetRTbyUID( eRTdistance );
-		m_pDevice->SetTexture( 4, pRTdistance->m_pRTTexture );
 
-		pRT = __RTManager().GetRTbyUID( dstGI );
+		pRT = __RTManager().GetRTbyUID( K_RTID_CASCADE0 + n );
 		if ( pRT != nullptr )
 		{
 			if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 			{
 				matWVP = pRT->matProj;
 
-				if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 255, 0, 0, 0 ), 1.0f, 0 ) ) )
+				if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
 					return K_OP_FAILED;
 
 				__Shaders().SetVSByName( L"VS_COMPOSITION" );
 				__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 				__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 
-				__Shaders().SetPSByName( L"PS_GI_CASCADES" );
+				__Shaders().SetPSByName( L"PS_GI_RADIANCE_INTERVALS" );
 				///   Name                Reg   Size
 				///   ------------------- ----- ----
-				///   _Aspect             c0       1
-				///   _RayRange           c1       1
-				///   _CascadeResolution  c2       1
-				///   _CascadeLevel       c3       1
-				///   _CascadeCount       c4       1
-				///   _SkyRadiance        c5       1
-				///   _SkyColor           c6       1
-				///   _SunColor           c7       1
-				///   _SunAngle           c8       1
-				///   _samp0+_MainTex     s1       1
-				///   _samp0+_EmissiveTex s2       1
-				///   _samp0+_ColorTex    s3       1
-				///   _samp0+_DistanceTex s4       1
+				///   in_RenderExtent        c0       1
+				///   in_CascadeExtent       c1       1
+				///   in_CascadeSpacing      c2       1
+				///   in_CascadeInterval     c3       1
+				///   in_CascadeAngular      c4       1
+				///   in_CascadeIndex        c5       1
+				///   samp0+in_DistanceField s1       1
+				///   samp0+in_WorldScene    s2       1
 
 				///--- set Pshader constants
 				float fConstData[][4] = {
-					// aspect
-					{ vaspect.x, vaspect.y, 0.0f, 0.0f },
-					// ray range
-					{ 2.0f, 0.0f, 0.0f, 0.0f },
-					// cascade resolution RT
-					{ (float)pRT->nWidth, (float)pRT->nHeight, 0.0f, 0.0f },
-					// cascade level
-					{ (float)cascadeLevel, 0.0f, 0.0f, 0.0f},
-					// cascade count
-					{ (float)cascadeCount, 0.0f, 0.0f, 0.0f},
-					// sky radiance
-					{ 1.0f, 0.0f, 0.0f, 0.0f }, // .x: sky radiance (1..3)
-					{ 0.0f, 0.0f, 1.0f, 0.0f }, // .xyz: sky color
-					{ 1.0f, 1.0f, 1.0f, 0.0f }, // .xyz: sun color
-					{ 0.2f, 0.0f, 0.0f, 0.0f }, // .x: sun angle 
+					//   in_RenderExtent        c0       1
+					{ UTApp().gi_global.radiance_render_extent, 0,0,0},
+					//   in_CascadeExtent       c1       1
+					{ UTApp().gi_global.radiance_cascade_extent, 0,0,0},
+					//   in_CascadeSpacing      c2       1
+					{ UTApp().gi_global.radiance_cascade_spacing, 0,0,0},
+					//   in_CascadeInterval     c3       1
+					{ UTApp().gi_global.radiance_cascade_interval, 0,0,0},
+					//   in_CascadeAngular      c4       1
+					{ UTApp().gi_global.radiance_cascade_angular, 0,0,0},
+					//   in_CascadeIndex        c5       1
+					{ n, 0, 0, 0 },
 				};
 				__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 
@@ -4466,6 +4443,12 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 				vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
 				vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
 				vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+				vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+				vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+				vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+				vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+
 				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 				m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
@@ -4479,7 +4462,122 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 			}
 		}
-		gi1IsFinal = !gi1IsFinal;
+
+	}
+
+
+	///----------------------------------------------------
+	/// 6. radiance merging
+	///----------------------------------------------------
+/*
+		for(var n = global.radiance_cascade_count - 1; n >= 0; n--) {
+			shader_set(global.radiance_merging);
+			uniform_f1(global.radiance_merging_uCascadeExtent, global.radiance_cascade_extent);
+			uniform_f1(global.radiance_merging_uCascadeAngular, global.radiance_cascade_angular);
+			uniform_f1(global.radiance_merging_uCascadeCount, global.radiance_cascade_count);
+			uniform_f1(global.radiance_merging_uCascadeIndex, n);
+
+			var cascaden1 = (n + 1) % global.radiance_cascade_count;
+			uniform_tx(global.radiance_merging_uCascadeUpper, cascade_surfarray[cascaden1]);
+
+			surface_set_target(cascade_temporary);
+			draw_clear_alpha(c_black, 0);
+
+			// In this pass we're reading from cascade N+1 to merge cascade N with cascade N+1.
+			draw_surface(cascade_surfarray[n], 0, 0);
+			surface_reset_target();
+			shader_reset();
+
+			// Copy from the tmeporary cascade surface to cascade N.
+			surface_set_target(cascade_surfarray[n]);
+			draw_clear_alpha(c_black, 0);
+			draw_surface(cascade_temporary, 0, 0);
+			surface_reset_target();
+		}
+	*/
+
+	/*
+	for ( int kk = 0; kk < 5; kk++ ) {
+		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
+		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
+
+		m_pDevice->SetSamplerState( kk, D3DSAMP_MINFILTER, D3DTEXF_POINT );
+		m_pDevice->SetSamplerState( kk, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
+		m_pDevice->SetSamplerState( kk, D3DSAMP_MIPFILTER, 0 );
+	}
+
+	for ( int n = UTApp().gi_global.radiance_cascade_count - 1; n >= 0; n-- )
+	{
+		///--- set textures
+		CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( K_RTID_DISTANCEFIELD );
+		m_pDevice->SetTexture( 1, pRTlastGI->m_pRTTexture );
+		CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
+		m_pDevice->SetTexture( 2, pRTemissive->m_pRTTexture );
+
+		pRT = __RTManager().GetRTbyUID( K_RTID_CASCADE0 + n );
+		if ( pRT != nullptr )
+		{
+			if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
+			{
+				matWVP = pRT->matProj;
+
+				if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+					return K_OP_FAILED;
+
+				__Shaders().SetVSByName( L"VS_COMPOSITION" );
+				__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+				__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+
+				__Shaders().SetPSByName( L"PS_GI_RADIANCE_MERGING" );
+				///   Name                Reg   Size
+				///   ------------------- ----- ----
+				///   in_CascadeExtent      c0       1
+				///   in_CascadeAngular     c1       1
+				///   in_CascadeCount       c2       1
+				///   in_CascadeIndex       c3       1
+
+				///--- set Pshader constants
+				float fConstData[][4] = {
+					//   in_RenderExtent        c0       1
+					{ UTApp().gi_global.radiance_render_extent, 0,0,0},
+					//   in_CascadeExtent       c1       1
+					{ UTApp().gi_global.radiance_cascade_extent, 0,0,0},
+					//   in_CascadeSpacing      c2       1
+					{ UTApp().gi_global.radiance_cascade_spacing, 0,0,0},
+					//   in_CascadeInterval     c3       1
+					{ UTApp().gi_global.radiance_cascade_interval, 0,0,0},
+					//   in_CascadeAngular      c4       1
+					{ UTApp().gi_global.radiance_cascade_angular, 0,0,0},
+					//   in_CascadeIndex        c5       1
+					{ n, 0, 0, 0 },
+				};
+				__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+
+				//--- build RT rect ---
+				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+				vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+				vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+				vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+				vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+				vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+				vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+				vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+				vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+
+				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+				m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+
+				// remove VS PS
+				__Shaders().SetPS( nullptr );
+				__Shaders().SetVS( nullptr );
+
+				V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+
+
+			}
+		}
 
 	}
 	*/
@@ -4487,6 +4585,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// COMPOSITION de test ca sa vad bufferele
 	///----------------------------------------------------
+/*
 	pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );
 	if ( pRT != nullptr )
 	{
@@ -4513,7 +4612,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 		}
 	}
-
+	*/
 
 	return K_OP_OK;
 }
@@ -5112,23 +5211,30 @@ OPRESULT CLevel::RenderPass_Emissive( Matrix* matProj, float fBetweenFramesPerce
 	__Shaders().SetPS( nullptr );
 
 	Matrix matWVP = matView * (*matProj);
+
 	// begin the painter
 	PVERTEXSHADER pSprVS = __Shaders().GetVShaderByName( L"VS_SPRITES2D" );
 	if ( pSprVS )
 		__Painter().Begin( pSprVS, matView, *matProj );
 
+	auto ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"SCENE1024" ) );
+	RectLTRB fruv( 0, 0, 1, 1 );
+	RectLTRB frrect( 0, 0, 1024, 1024 );
+	__Painter().Draw( ptex->pTexture, fruv, frrect, Vec2( 0.0f, 0.0f ), 0xffffffff );
+	__Painter().Flush();
 
 	int nTexIdxOffset = 0;
 	bool bPaintsNormals = false;
 
 	/// paint occluders white
-	
-	auto ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"BLACK32" ) );
+/*	
+	ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"WHITE32" ) );
 	m_pDevice->SetTexture( 0, ptex->pTexture );
 	Areas_PaintLayer( K_AL_OCCLUDERS );
 	//Areas_PaintLayer( K_AL_WALLS );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
-
+	*/
+/*
 	/// Paint lights as color blobs with hard contours
 
 	CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
@@ -5145,7 +5251,7 @@ OPRESULT CLevel::RenderPass_Emissive( Matrix* matProj, float fBetweenFramesPerce
 			sprPoint.Paint();
 		}
 	}
-
+	*/
 	__Painter().End();
 
 	// top layer of tiles
@@ -5279,8 +5385,10 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	PPIXELSHADER pPShader = null;
 	Matrix matWVP = matView * (*matProj);
 
+	static int tempchan = K_RTID_CASCADE0;
+
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
-	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_DISTANCEFIELD);
+	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( tempchan );
 	//CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_DISTANCEFIELD );
 	_ASSERT( pRTcolor != nullptr && pRTlights != nullptr );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );

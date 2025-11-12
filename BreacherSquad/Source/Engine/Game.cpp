@@ -592,9 +592,10 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 
 			//game screen space
 //			CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_camRTScreen );
+			/*
 			if ( DXUTIsKeyDown( '0' ) )
 			{
-				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );
+				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_CASCADE2 );
 				if ( pRT != null )
 				{
 					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
@@ -606,13 +607,18 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 
 			if ( DXUTIsKeyDown( '9' ) )
 			{
-				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
-				if ( pRT != nullptr )
+				const float fWndH = 128.0f;
+				for ( int oo = K_RTID_CASCADE0; oo <= K_RTID_CASCADE4; oo++ )
 				{
-					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
-					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
-					pDevice->SetTexture( 0, pRT->m_pRTTexture );
-					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
+					CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( oo );
+					if ( pRT != null )
+					{
+						int ooidx = oo - K_RTID_CASCADE0;
+						RectLTRB src( ooidx * (fWndH + 1), 200.0f, (ooidx + 1) * fWndH, 200 + fWndH );
+						RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
+						pDevice->SetTexture( 0, pRT->m_pRTTexture );
+						UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
+					}
 				}
 			}
 			if ( DXUTIsKeyDown( '8' ) )
@@ -679,6 +685,38 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 				}
 			}
 			*/
+			
+			char arrkeys[] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='};
+			ERTIDChannel arrchan[] = { K_RTID_WORLDSCENE,
+				K_RTID_CASCADE0,
+				K_RTID_CASCADE1,
+				K_RTID_CASCADE2,
+				K_RTID_CASCADE3,
+				K_RTID_TEMPORARY,
+				K_RTID_JUMPFLOOD,
+				K_RTID_DISTANCEFIELD,
+				K_RTID_RADIANCE,
+				K_RTID_BOUNCESCENE,
+				K_RTID_STORAGE,
+				K_RTID_MIPMAP
+			};
+
+			for ( int kk = 0; kk < ARRAY_SIZE( arrkeys ); kk++ )
+			{
+				if ( DXUTIsKeyDown( arrkeys[kk] ) ) {
+					ERTIDChannel seechan = arrchan[kk];
+					CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( arrchan[kk] );
+					if ( pRT != null )
+					{
+						RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
+						RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
+						pDevice->SetTexture( 0, pRT->m_pRTTexture );
+						UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
+					}
+				}
+			}
+
+			/*
 			if ( DXUTIsKeyDown( '1' ) )
 			{
 				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_JUMPFLOOD);
@@ -712,6 +750,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
 			}
+			*/
 #endif
 		}
 		break;

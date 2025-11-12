@@ -24,9 +24,9 @@ float4 ps_main(PS_INPUT Input) : COLOR0
    float4 tex = tex2D(texIn, UV);
    //float2 jumpflood = float2(V2F16( tex.xy ), V2F16( tex.zw )); // high precision on alpha too (not working in dx9)
    //float2 jumpflood = float2(V2F16( tex.xy ), tex.z );// precision test on X (works)
-   float2 jumpflood = tex.xy; // without high precision
+   float2 jumpflood = tex.xy; // without high precision - V2F16 not working on dx9, try float textures
    float dist = distance(UV, jumpflood);
-   dist = saturate( dist );
+   dist = saturate( dist ); 
 //   float mapped = clamp(dist * udistmod.x, 0.0, 1.0); // original pt versiunea cu raytracing
    //float mapped = dist;// *udistmod.x;
    
