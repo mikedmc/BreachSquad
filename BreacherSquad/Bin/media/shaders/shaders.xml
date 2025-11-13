@@ -22,5 +22,6 @@
     <PixelShader name="PS_GI_CASCADES" path="ps_gi_cascades.ps.cso" />
     <PixelShader name="PS_GI_RADIANCE_INTERVALS" path="gi-radiance-intervals.ps.cso" />
     <PixelShader name="PS_GI_RADIANCE_MERGING" path="gi-radiance-merging.ps.cso" />
+    <PixelShader name="PS_GI_RADIANCE_MIPMAP" path="gi-radiance-mipmap.ps.cso" />
   </PixelShaders>
 </Shaders>

@@ -14,11 +14,10 @@
 //
 
     ps_3_0
-    dcl_color v0.xyz
+    dcl_color v0
     dcl_texcoord v1.xy
     dcl_2d s0
     texld r0, v1, s0
-    mul oC0.xyz, r0, v0
-    mov oC0.w, r0.w
+    mul oC0, r0, v0
 
-// approximately 3 instruction slots used (1 texture, 2 arithmetic)
+// approximately 2 instruction slots used (1 texture, 1 arithmetic)

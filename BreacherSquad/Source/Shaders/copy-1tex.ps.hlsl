@@ -1,3 +1,6 @@
+// just plain texturing multiplied by the vertex color
+// one single texture level
+
 sampler2D texColor : register(s0);  //texture
 
 struct PS_INPUT
@@ -9,5 +12,5 @@ struct PS_INPUT
 float4 ps_main( PS_INPUT Input ) : COLOR0
 {
 	float4 col = tex2D( texColor, Input.Tex0.xy );
-	return float4(col.rgb * Input.VertColor.rgb, col.a);
+	return col * Input.VertColor;
 }
