@@ -4395,74 +4395,68 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		m_pDevice->SetTexture( 2, pRTemissive->m_pRTTexture );
 
 		pRT = __RTManager().GetRTbyUID( K_RTID_CASCADE0 + n );
-		if ( pRT != nullptr )
+		if ( (pRT != nullptr) && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
 		{
-			if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
-			{
-				matWVP = pRT->matProj;
+			matWVP = pRT->matProj;
 
-				if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
-					return K_OP_FAILED;
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+				return K_OP_FAILED;
 
-				__Shaders().SetVSByName( L"VS_COMPOSITION" );
-				__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-				__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+			__Shaders().SetVSByName( L"VS_COMPOSITION" );
+			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 
-				__Shaders().SetPSByName( L"PS_GI_RADIANCE_INTERVALS" );
-				///   Name                Reg   Size
-				///   ------------------- ----- ----
-				///   in_RenderExtent        c0       1
-				///   in_CascadeExtent       c1       1
-				///   in_CascadeSpacing      c2       1
-				///   in_CascadeInterval     c3       1
-				///   in_CascadeAngular      c4       1
-				///   in_CascadeIndex        c5       1
-				///   samp0+in_DistanceField s1       1
-				///   samp0+in_WorldScene    s2       1
+			__Shaders().SetPSByName( L"PS_GI_RADIANCE_INTERVALS" );
+			///   Name                Reg   Size
+			///   ------------------- ----- ----
+			///   in_RenderExtent        c0       1
+			///   in_CascadeExtent       c1       1
+			///   in_CascadeSpacing      c2       1
+			///   in_CascadeInterval     c3       1
+			///   in_CascadeAngular      c4       1
+			///   in_CascadeIndex        c5       1
+			///   samp0+in_DistanceField s1       1
+			///   samp0+in_WorldScene    s2       1
 
-				///--- set Pshader constants
-				float fConstData[][4] = {
-					//   in_RenderExtent        c0       1
-					{ UTApp().gi_global.radiance_render_extent, 0,0,0},
-					//   in_CascadeExtent       c1       1
-					{ UTApp().gi_global.radiance_cascade_extent, 0,0,0},
-					//   in_CascadeSpacing      c2       1
-					{ UTApp().gi_global.radiance_cascade_spacing, 0,0,0},
-					//   in_CascadeInterval     c3       1
-					{ UTApp().gi_global.radiance_cascade_interval, 0,0,0},
-					//   in_CascadeAngular      c4       1
-					{ UTApp().gi_global.radiance_cascade_angular, 0,0,0},
-					//   in_CascadeIndex        c5       1
-					{ n, 0, 0, 0 },
-				};
-				__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+			///--- set Pshader constants
+			float fConstData[][4] = {
+				//   in_RenderExtent        c0       1
+				{ UTApp().gi_global.radiance_render_extent, 0,0,0},
+				//   in_CascadeExtent       c1       1
+				{ UTApp().gi_global.radiance_cascade_extent, 0,0,0},
+				//   in_CascadeSpacing      c2       1
+				{ UTApp().gi_global.radiance_cascade_spacing, 0,0,0},
+				//   in_CascadeInterval     c3       1
+				{ UTApp().gi_global.radiance_cascade_interval, 0,0,0},
+				//   in_CascadeAngular      c4       1
+				{ UTApp().gi_global.radiance_cascade_angular, 0,0,0},
+				//   in_CascadeIndex        c5       1
+				{ n, 0, 0, 0 },
+			};
+			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 
-				//--- build RT rect ---
-				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
-				vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
-				vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
-				vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+			//--- build RT rect ---
+			_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+			vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+			vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+			vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+			vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
 
-				vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
-				vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
-				vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
-				vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+			vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+			vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+			vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+			vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
 
-				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-				m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+			lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+			lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
 
-				// remove VS PS
-				__Shaders().SetPS( nullptr );
-				__Shaders().SetVS( nullptr );
+			// remove VS PS
+			__Shaders().SetPS( nullptr );
+			__Shaders().SetVS( nullptr );
 
-				V_OP_RET( __RTManager().EndSceneRT( pRT ) );
-
-
-			}
+			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}
-
 	}
 
 
@@ -4496,7 +4490,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 	*/
 
-	/*
+	
 	for ( int kk = 0; kk < 5; kk++ ) {
 		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
 		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
@@ -4508,79 +4502,101 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 	for ( int n = UTApp().gi_global.radiance_cascade_count - 1; n >= 0; n-- )
 	{
+		_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+		vul.color = 0xffffffff; vur.color = 0xffffffff; vdl.color = 0xffffffff; vdr.color = 0xffffffff;
+		vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+		vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+		vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+		vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+		vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+		vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+		vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+		vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+		lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+
+		int cascaden1 = (n + 1) % UTApp().gi_global.radiance_cascade_count;
 		///--- set textures
-		CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( K_RTID_DISTANCEFIELD );
+		CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( K_RTID_CASCADE0 + n );
 		m_pDevice->SetTexture( 1, pRTlastGI->m_pRTTexture );
-		CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
+		// cascade upper:
+		CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_CASCADE0 + cascaden1 );
 		m_pDevice->SetTexture( 2, pRTemissive->m_pRTTexture );
-
-		pRT = __RTManager().GetRTbyUID( K_RTID_CASCADE0 + n );
-		if ( pRT != nullptr )
+		
+		/// we paint into storage then save back into CASCADE texture
+		pRT = __RTManager().GetRTbyUID( K_RTID_STORAGE );
+		if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
 		{
-			if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
-			{
-				matWVP = pRT->matProj;
+			matWVP = pRT->matProj;
 
-				if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
-					return K_OP_FAILED;
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+				return K_OP_FAILED;
 
-				__Shaders().SetVSByName( L"VS_COMPOSITION" );
-				__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-				__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+			__Shaders().SetVSByName( L"VS_COMPOSITION" );
+			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 
-				__Shaders().SetPSByName( L"PS_GI_RADIANCE_MERGING" );
-				///   Name                Reg   Size
-				///   ------------------- ----- ----
-				///   in_CascadeExtent      c0       1
-				///   in_CascadeAngular     c1       1
-				///   in_CascadeCount       c2       1
-				///   in_CascadeIndex       c3       1
+			__Shaders().SetPSByName( L"PS_GI_RADIANCE_MERGING" );
+			///   Name                Reg   Size
+			///   ------------------- ----- ----
+			///   in_CascadeExtent      c0       1
+			///   in_CascadeAngular     c1       1
+			///   in_CascadeCount       c2       1
+			///   in_CascadeIndex       c3       1
+			///   samp0+gm_BaseTexture  s1       1
+			///   samp0+in_CascadeAtlas s2       1
 
-				///--- set Pshader constants
-				float fConstData[][4] = {
-					//   in_RenderExtent        c0       1
-					{ UTApp().gi_global.radiance_render_extent, 0,0,0},
-					//   in_CascadeExtent       c1       1
-					{ UTApp().gi_global.radiance_cascade_extent, 0,0,0},
-					//   in_CascadeSpacing      c2       1
-					{ UTApp().gi_global.radiance_cascade_spacing, 0,0,0},
-					//   in_CascadeInterval     c3       1
-					{ UTApp().gi_global.radiance_cascade_interval, 0,0,0},
-					//   in_CascadeAngular      c4       1
-					{ UTApp().gi_global.radiance_cascade_angular, 0,0,0},
-					//   in_CascadeIndex        c5       1
-					{ n, 0, 0, 0 },
-				};
-				__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+			///--- set Pshader constants
+			float fConstData[][4] = {
+				{ UTApp().gi_global.radiance_cascade_extent, 0,0,0},
+				{ UTApp().gi_global.radiance_cascade_angular, 0,0,0},
+				{ UTApp().gi_global.radiance_cascade_count, 0,0,0},
+				{ n, 0, 0, 0 },
+			};
+			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 
-				//--- build RT rect ---
-				_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-				vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
-				vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
-				vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
-				vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
 
-				vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
-				vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
-				vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
-				vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+			// remove VS PS
+			__Shaders().SetPS( nullptr );
+			__Shaders().SetVS( nullptr );
 
-				lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-				lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-				m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+		}
+		///--- moving result from STORAGE back to cascade (must have same size)
+		pRT = __RTManager().GetRTbyUID( K_RTID_CASCADE0 + n );
+		if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
+		{
+			CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( K_RTID_STORAGE );
+			m_pDevice->SetTexture( 0, pRTlastGI->m_pRTTexture );
 
-				// remove VS PS
-				__Shaders().SetPS( nullptr );
-				__Shaders().SetVS( nullptr );
+			matWVP = pRT->matProj;
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+				return K_OP_FAILED;
 
-				V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+			__Shaders().SetVSByName( L"VS_COMPOSITION" );
+			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+			__Shaders().SetPS( nullptr );
+			// no PS - just copy
+			__Shaders().SetPSByName( L"PS_COPY1TEX" );
 
+			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
 
-			}
+			// remove VS PS
+			__Shaders().SetPS( nullptr );
+			__Shaders().SetVS( nullptr );
+
+			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}
 
 	}
-	*/
+	
+
+
+
 
 	///----------------------------------------------------
 	/// COMPOSITION de test ca sa vad bufferele
