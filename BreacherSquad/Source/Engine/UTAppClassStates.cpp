@@ -14,8 +14,8 @@ void CApplication::App_EnterState_Loading()
 	// Passing 0 or less cascades will optimally calculate the number of required cascades.
 	// Parameters: [angular] is power of 4, [interval] is multiple of 4, [spacing] is power of 2.
 	// Any value passed that does not conform to these rules will be automatically adjusted (adjusted up).
-	radiance_initialize( max( cascadeW, cascadeH), 4, 4, 2, 1.0, 0.65 );
-	float bytes = 4.0 * ( gi_global.radiance_cascade_extent * gi_global.radiance_cascade_extent ) * gi_global.radiance_cascade_count;
+	radiance_initialize( max( cascadeW, cascadeH), 4.0f, 4.0f, 2.0f, 1.0f, 0.65f );
+	float bytes = 4.0f * ( gi_global.radiance_cascade_extent * gi_global.radiance_cascade_extent ) * gi_global.radiance_cascade_count;
 	LOG( "\nRender  Diagonal: %d", int(floor( gi_global.radiance_render_extent ) ));
 	LOG( "Cascade Diagonal: %d", int(floor( gi_global.radiance_cascade_extent ) ));
 	LOG( "Cascade Count: %d", int(floor( gi_global.radiance_cascade_count ) ));
@@ -31,17 +31,18 @@ void CApplication::App_EnterState_Loading()
 	__RTManager().AddRT( K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	// used for GI
-	__RTManager().AddRT( K_RTID_WORLDSCENE, gi_global.radiance_render_extent, gi_global.radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
-	__RTManager().AddRT( K_RTID_TEMPORARY, gi_global.radiance_render_extent, gi_global.radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
-	__RTManager().AddRT( K_RTID_JUMPFLOOD, gi_global.radiance_render_extent, gi_global.radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
-	__RTManager().AddRT( K_RTID_DISTANCEFIELD, gi_global.radiance_render_extent, gi_global.radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
-	__RTManager().AddRT( K_RTID_RADIANCE, gi_global.radiance_render_extent, gi_global.radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
-	__RTManager().AddRT( K_RTID_BOUNCESCENE, gi_global.radiance_render_extent, gi_global.radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	UINT radiance_render_extent = (UINT)gi_global.radiance_render_extent;
+	__RTManager().AddRT( K_RTID_WORLDSCENE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_TEMPORARY, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_JUMPFLOOD, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_DISTANCEFIELD, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_RADIANCE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_BOUNCESCENE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
 
-	__RTManager().AddRT( K_RTID_STORAGE, gi_global.radiance_cascade_extent, gi_global.radiance_cascade_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_STORAGE, (UINT)gi_global.radiance_cascade_extent, (UINT)gi_global.radiance_cascade_extent, 1, D3DFMT_A8R8G8B8, false );
 
-	float angular_resolution = sqrt( gi_global.radiance_cascade_angular * pow( 4.0, 0 /*mip resolution*/ ) );
-	float mipmap_extent = gi_global.radiance_cascade_extent / angular_resolution;
+	float angular_resolution = (float)sqrt( gi_global.radiance_cascade_angular * pow( 4.0, 0 /*mip resolution*/ ) );
+	float mipmap_extent = (UINT)gi_global.radiance_cascade_extent / angular_resolution;
 	__RTManager().AddRT( K_RTID_MIPMAP, mipmap_extent, mipmap_extent, 1, D3DFMT_A8R8G8B8, false );
 
 	for ( int i = 0; i < gi_global.radiance_cascade_count; i++ ) {
