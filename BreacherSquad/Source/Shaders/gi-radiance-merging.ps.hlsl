@@ -31,7 +31,7 @@ float2 mod_glsl_f2( float2 x, float2 y ) {
 ProbeTexel cascadeProbeTexel( float2 coord, float cascade ) {
 	float count = in_CascadeAngular * pow( 4.0, cascade );
 	float size = sqrt( count );
-	float2 texel = mod_glsl_f2( floor( coord ), float2( size, size ) );
+	float2 texel = fmod( floor( coord ), float2( size, size ) );
 	float index = (texel.y * size) + texel.x;
 	float2 probe = floor( coord / float2( size, size ) );
 	
@@ -46,7 +46,7 @@ ProbeTexel cascadeProbeTexel( float2 coord, float cascade ) {
 
 float4 cascadeFetch( ProbeTexel info, float2 texelIndex, float thetaIndex ) {
 	float2 probeTexel = texelIndex * info.size;
-	probeTexel += float2( mod_glsl_f1( thetaIndex, info.size ), thetaIndex / info.size );
+	probeTexel += float2( fmod( thetaIndex, info.size ), thetaIndex / info.size );
 	float2 cascadeTexelPosition = probeTexel / in_CascadeExtent;
 
 	if ( cascadeTexelPosition.x < 0.0 || cascadeTexelPosition.y < 0.0 || cascadeTexelPosition.x >= 1.0 || cascadeTexelPosition.y >= 1.0 )

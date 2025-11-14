@@ -33,9 +33,9 @@ void CApplication::App_EnterState_Loading()
 	// used for GI
 	UINT radiance_render_extent = (UINT)gi_global.radiance_render_extent;
 	__RTManager().AddRT( K_RTID_WORLDSCENE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
-	__RTManager().AddRT( K_RTID_TEMPORARY, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
-	__RTManager().AddRT( K_RTID_JUMPFLOOD, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
-	__RTManager().AddRT( K_RTID_DISTANCEFIELD, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_TEMPORARY, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A16B16G16R16F, false );
+	__RTManager().AddRT( K_RTID_JUMPFLOOD, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A16B16G16R16F, false );
+	__RTManager().AddRT( K_RTID_DISTANCEFIELD, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A16B16G16R16F, false );
 	__RTManager().AddRT( K_RTID_RADIANCE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_BOUNCESCENE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
 

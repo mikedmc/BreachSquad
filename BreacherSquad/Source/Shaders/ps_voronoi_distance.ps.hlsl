@@ -31,7 +31,8 @@ float4 ps_main(PS_INPUT Input) : COLOR0
    //float mapped = dist;// *udistmod.x;
    
    //return float4(fnFloatPackToV2(dist), 0.0, 1.0); 
-   return float4(dist, dist, dist, 1);
+   return float4(dist, dist, dist, 1.0);
+    //return dist;
    //return float4(F16V2( dist ), 0.0, 1.0);
 
 

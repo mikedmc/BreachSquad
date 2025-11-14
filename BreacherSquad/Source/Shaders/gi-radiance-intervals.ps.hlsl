@@ -15,7 +15,8 @@ float in_CascadeInterval; // Cascade 0 radiance interval.
 float in_CascadeAngular;  // Cascade angular resolution.
 float in_CascadeIndex;    // Cascade index.
 
-#define EPSILON       0.0001
+// original 0.0001
+#define EPSILON       0.0001 
 #define TAU           6.283185
 #define V2F16(v) ((v.y * float(0.0039215689)) + v.x)
 
@@ -42,7 +43,7 @@ ProbeTexel cascadeProbeTexel( float2 coord, float cascade ) {
 	float2 probe = floor( coord / sizev2 );
 	float2 spacing = in_CascadeSpacing * pow( 2.0, cascade );
 
-	float2  probePos = mod_glsl_v2( floor( coord ), sizev2 );
+	float2  probePos = fmod( floor( coord ), sizev2 );
 	float index = (probePos.y * size) + probePos.x;
 
 	// Quadruples the Interval Range: (per specification, but not as smooth)
@@ -92,9 +93,9 @@ float4 marchInterval( ProbeTexel probeInfo ) {
 	//float decay = min( max( 0.0, in_RenderDecayRate ), 1.0 );
 	for ( float ii = 0.0, dd = 0.0, rd = 0.0, rt = probeInfo.range * probeInfo.texel; ii < probeInfo.range; ii++ ) {
 		float2 ray = interval + delta * min( rd, rt );
-		float4 texread = in_DistanceField.SampleLevel( samp0, ray, 0 );
+		float texread = in_DistanceField.SampleLevel( samp0, ray, 0 ).r;
 		//dd = V2F16( texread.rg );
-		dd = texread.r;
+		dd = texread;
 		rd += dd;
 
 		// End of Interval Range or Out of Bounds:
@@ -103,8 +104,8 @@ float4 marchInterval( ProbeTexel probeInfo ) {
 
 		// Surface/Object collision:
 		//if (dd < EPSILON) return max(float4(texture2D(in_WorldScene, ray).rgb, 1.0), float4(texture2D(in_WorldScene, ray - (delta * probeInfo.texel)).rgb, 1.0) * decay);
-		if ( dd < EPSILON ) return float4( in_WorldScene.SampleLevel(samp0, ray, 0).rgb, 1.0 );
-	}
+		if ( dd < EPSILON ) return float4( in_WorldScene.SampleLevel(samp0, ray, 0).rgb, 1 );
+    }
 
 	return float4( 0.0, 0.0, 0.0, 0.0 );
 }

@@ -36,14 +36,14 @@
     exp r0.z, r0.z
     mul r0.z, r0.z, c1.x
     rsq r0.z, r0.z
-    rcp r0.w, r0.z
-    frc r1.xy, r0
-    add r1.xy, r0, -r1
-    mul r1.zw, r0.z, r1.xyxy
-    frc r2.xy, r1.zwzw
-    add r1.zw, r1, -r2.xyxy
-    mad r1.xy, r0.w, -r1.zwzw, r1
-    mad r0.w, r1.y, r0.w, r1.x
+    rcp r1.z, r0.z
+    frc r2.xy, r0
+    add r2.xy, r0, -r2
+    mul r2.xy, r0.z, r2
+    frc r2.zw, r2_abs.xyxy
+    cmp r1.xy, r2, r2.zwzw, -r2.zwzw
+    mul r1.xz, r1.z, r1
+    mad r0.w, r1.z, r1.y, r1.x
     mul r0.xy, r0.z, r0
     frc r1.xy, r0
     add r0.xy, r0, -r1
@@ -74,9 +74,9 @@
     rep i0
       mad r5.z, r0.w, c5.z, r3.w
       mul r10.y, r0.z, r5.z
-      frc r5.w, r10.y
-      add r5.w, -r5.w, r10.y
-      mad r10.x, r1.x, -r5.w, r5.z
+      frc r5.z, r10_abs.y
+      cmp r5.z, r10.y, r5.z, -r5.z
+      mul r10.x, r1.x, r5.z
       mad r5.zw, r1, r1.x, r10.xyxy
       mul r10.zw, r2.w, r5
       cmp r11.xy, r10.zwzw, c5.y, c5.x

@@ -4375,8 +4375,8 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
 		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
 
-		m_pDevice->SetSamplerState( kk, D3DSAMP_MINFILTER, D3DTEXF_POINT );
-		m_pDevice->SetSamplerState( kk, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
+		m_pDevice->SetSamplerState( kk, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+		m_pDevice->SetSamplerState( kk, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 		m_pDevice->SetSamplerState( kk, D3DSAMP_MIPFILTER, 0 );
 	}
 
@@ -4459,36 +4459,35 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 	}
 
-
+	
 	///----------------------------------------------------
 	/// 6. radiance merging
 	///----------------------------------------------------
-/*
-		for(var n = global.radiance_cascade_count - 1; n >= 0; n--) {
-			shader_set(global.radiance_merging);
-			uniform_f1(global.radiance_merging_uCascadeExtent, global.radiance_cascade_extent);
-			uniform_f1(global.radiance_merging_uCascadeAngular, global.radiance_cascade_angular);
-			uniform_f1(global.radiance_merging_uCascadeCount, global.radiance_cascade_count);
-			uniform_f1(global.radiance_merging_uCascadeIndex, n);
 
-			var cascaden1 = (n + 1) % global.radiance_cascade_count;
-			uniform_tx(global.radiance_merging_uCascadeUpper, cascade_surfarray[cascaden1]);
+		//for(var n = global.radiance_cascade_count - 1; n >= 0; n--) {
+		//	shader_set(global.radiance_merging);
+		//	uniform_f1(global.radiance_merging_uCascadeExtent, global.radiance_cascade_extent);
+		//	uniform_f1(global.radiance_merging_uCascadeAngular, global.radiance_cascade_angular);
+		//	uniform_f1(global.radiance_merging_uCascadeCount, global.radiance_cascade_count);
+		//	uniform_f1(global.radiance_merging_uCascadeIndex, n);
 
-			surface_set_target(cascade_temporary);
-			draw_clear_alpha(c_black, 0);
+		//	var cascaden1 = (n + 1) % global.radiance_cascade_count;
+		//	uniform_tx(global.radiance_merging_uCascadeUpper, cascade_surfarray[cascaden1]);
 
-			// In this pass we're reading from cascade N+1 to merge cascade N with cascade N+1.
-			draw_surface(cascade_surfarray[n], 0, 0);
-			surface_reset_target();
-			shader_reset();
+		//	surface_set_target(cascade_temporary);
+		//	draw_clear_alpha(c_black, 0);
 
-			// Copy from the tmeporary cascade surface to cascade N.
-			surface_set_target(cascade_surfarray[n]);
-			draw_clear_alpha(c_black, 0);
-			draw_surface(cascade_temporary, 0, 0);
-			surface_reset_target();
-		}
-	*/
+		//	// In this pass we're reading from cascade N+1 to merge cascade N with cascade N+1.
+		//	draw_surface(cascade_surfarray[n], 0, 0);
+		//	surface_reset_target();
+		//	shader_reset();
+
+		//	// Copy from the tmeporary cascade surface to cascade N.
+		//	surface_set_target(cascade_surfarray[n]);
+		//	draw_clear_alpha(c_black, 0);
+		//	draw_surface(cascade_temporary, 0, 0);
+		//	surface_reset_target();
+		//}
 
 
 	for ( int kk = 0; kk < 5; kk++ ) {
@@ -4598,27 +4597,27 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 7. radiance mipmap
 	///----------------------------------------------------
-	/*
-	function radiancecascades_mipmap( cascade_surfarray, mipmap_surf ) {
-		var mipmap_width = surface_get_width( mipmap_surf );
-		var mipmap_height = surface_get_width( mipmap_surf );
-		var mipmap0_width = surface_get_width( mipmap_surf );
-		var mipmap0_height = surface_get_width( mipmap_surf );
+	
+	//function radiancecascades_mipmap( cascade_surfarray, mipmap_surf ) {
+	//	var mipmap_width = surface_get_width( mipmap_surf );
+	//	var mipmap_height = surface_get_width( mipmap_surf );
+	//	var mipmap0_width = surface_get_width( mipmap_surf );
+	//	var mipmap0_height = surface_get_width( mipmap_surf );
 
-		shader_set( global.radiance_mipmap );
-		uniform_f1( global.radiance_mipmap_uMipMapExtent, max( mipmap_width, mipmap_height ) );
-		uniform_f1( global.radiance_mipmap_uCascadeExtent, global.radiance_cascade_extent );
-		uniform_f1( global.radiance_mipmap_uCascadeAngular, global.radiance_cascade_angular );
-		uniform_f1( global.radiance_mipmap_uCascadeIndex, 0);
-		uniform_tx( global.radiance_mipmap_uCascadeAtlas, cascade_surfarray[0] );
+	//	shader_set( global.radiance_mipmap );
+	//	uniform_f1( global.radiance_mipmap_uMipMapExtent, max( mipmap_width, mipmap_height ) );
+	//	uniform_f1( global.radiance_mipmap_uCascadeExtent, global.radiance_cascade_extent );
+	//	uniform_f1( global.radiance_mipmap_uCascadeAngular, global.radiance_cascade_angular );
+	//	uniform_f1( global.radiance_mipmap_uCascadeIndex, 0);
+	//	uniform_tx( global.radiance_mipmap_uCascadeAtlas, cascade_surfarray[0] );
 
-		surface_set_target( mipmap_surf );
-		draw_clear_alpha( c_black, 0 );
-		draw_surface_ext( mipmap_surf, 0, 0, mipmap_width / mipmap0_width, mipmap_height / mipmap0_height, 0, c_black, 1 );
-		surface_reset_target();
+	//	surface_set_target( mipmap_surf );
+	//	draw_clear_alpha( c_black, 0 );
+	//	draw_surface_ext( mipmap_surf, 0, 0, mipmap_width / mipmap0_width, mipmap_height / mipmap0_height, 0, c_black, 1 );
+	//	surface_reset_target();
 
-		shader_reset();
-		*/
+	//	shader_reset();
+		
 
 
 
@@ -4670,7 +4669,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 	}
-
+	
 
 
 

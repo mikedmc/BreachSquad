@@ -40,25 +40,25 @@
     exp r0.z, r0.z
     mul r0.w, r0.z, c4.x
     rsq r1.x, r0.w
-    rcp r1.y, r1.x
-    mul r2.xyz, r0.xyxw, r1.x
-    frc r3.xyz, r2.zyzw
-    add r2.xyz, r2, -r3
-    exp r1.z, c5.x
-    mul r1.z, r1.z, c2.x
+    rcp r2.z, r1.x
+    mul r1.yzw, r0.xxyx, r1.x
+    frc r3.xyz, r1.wzww
+    add r1.yzw, r1, -r3.xxyz
+    exp r2.w, c5.x
+    mul r2.w, r2.w, c2.x
     frc r3.xy, r0
     add r0.xy, r0, -r3
-    mul r1.xw, r1.x, r0.xyzy
-    frc r3.xy, r1.xwzw
-    add r1.xw, r1, -r3.xyzy
-    mad r0.xy, r1.y, -r1.xwzw, r0
-    mad r0.x, r0.y, r1.y, r0.x
+    mul r0.xy, r1.x, r0
+    frc r3.xy, r0_abs
+    cmp r2.xy, r0, r3, -r3
+    mul r0.xy, r2.z, r2.xzzw
+    mad r0.x, r0.y, r2.y, r0.x
     add r0.y, -r0.z, c6.x
     mul r0.yz, r0, c3.x
     mul r0.y, r0.y, c6.y
     rcp r1.x, c0.x
-    add r2.xyz, r2, c6.z
-    mul r1.yzw, r1.z, r2.xxyz
+    add r1.yzw, r1, c6.z
+    mul r1.yzw, r2.w, r1
     add r0.x, r0.x, c6.z
     rcp r0.w, r0.w
     mul r0.x, r0.w, r0.x
