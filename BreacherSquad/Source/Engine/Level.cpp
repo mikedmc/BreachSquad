@@ -276,9 +276,9 @@ CProp* CLevel::SpawnProp( CLevelArea* pArea, Vec2 spawnPos, int nAnimIdx, int nF
 	return obj;
 }
 
-CLight*	CLevel::SpawnLight( Vec3 spawnPos, eLightType eType, DWORD dwColor, float fRadius, int profileID, bool bCastShadows )
+CLight* CLevel::SpawnLight( Vec3 spawnPos, eLightType eType, DWORD dwColor, float fRadius, int profileID, bool bCastShadows )
 {
-	CLight *nl = new CLight( new CPropAIComponent() );
+	CLight* nl = new CLight( new CPropAIComponent() );
 	nl->ID = GenerateNextID();
 	nl->type = eType;
 	nl->fVolumeAlpha = 1.0f;
@@ -867,7 +867,7 @@ int CLevel::SmoothPath( Vec2* arrInPoints, int arrInItems, Vec2* arrOutPoints, i
 	return outcur;
 }
 
-int CLevel::SmoothPathEx( CActor * act, Vec2* arrInPoints, int arrInItems, Vec2* arrOutPoints, int arrOutSize )
+int CLevel::SmoothPathEx( CActor* act, Vec2* arrInPoints, int arrInItems, Vec2* arrOutPoints, int arrOutSize )
 {
 	// no input items
 	if ( arrInItems == 0 || arrInPoints == nullptr )
@@ -947,7 +947,7 @@ OPRESULT CLevel::GetScriptAction( const WCHAR* strID, CScriptAction& retAction )
 	return OPRESULT( K_OP_FAILED, K_SEVERITY_WARNING, L"GetScriptAction:: Could not find action: %s", strID );
 }
 
-CWeaponTemplate* CLevel::GetTemplateWeapon( WCHAR * templateName )
+CWeaponTemplate* CLevel::GetTemplateWeapon( WCHAR* templateName )
 {
 	UINT32 nameHash = FastHash( templateName );
 	for ( int kk = 0; kk < m_arrTemplatesWeapon.GetSize(); kk++ )
@@ -995,7 +995,7 @@ CExplosionTemplate* CLevel::GetTemplateExplosion( UINT32 templateNameHash )
 	return nullptr;
 }
 
-CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
+CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR* strTemplateFileName )
 {
 	// LOAD ACTOR TEMPLATE LoadActorTemplate
 	char strbuff[MAX_PATH] = { 0 };
@@ -1181,9 +1181,9 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 	if ( ainode != nullptr )
 	{
 		// parse all states
-		for each(auto& statenode in ainode.children())
+		for each( auto& statenode in ainode.children() )
 		{
-			CAIState * nstate = new CAIState();
+			CAIState* nstate = new CAIState();
 			nstate->name.Init( statenode.attribute( L"name" ).value() );
 			nstate->nPriority = statenode.attribute( L"nPriority" ).as_int();
 			// read state probability and set to 100.0 if missing
@@ -1260,7 +1260,7 @@ CActorTemplate* CLevel::Actor_LoadTemplate( WCHAR * strTemplateFileName )
 }
 
 
-void CLevel::KillActor( CActor * actor, bool bSplatTarget )
+void CLevel::KillActor( CActor* actor, bool bSplatTarget )
 {
 	CBullet bullet;
 	bullet.fDamage = actor->_template.fLife;
@@ -1278,7 +1278,7 @@ void CLevel::KillActor( CActor * actor, bool bSplatTarget )
 	actor->HitActor( &bullet );
 }
 
-CActorTemplate* CLevel::Actor_GetTemplate( const WCHAR * templateName )
+CActorTemplate* CLevel::Actor_GetTemplate( const WCHAR* templateName )
 {
 	UINT32 nameHash = FastHash( templateName );
 	//get template now
@@ -1304,7 +1304,7 @@ CActorTemplate* CLevel::Actor_GetTemplate( const DWORD templateNameHash )
 	return nullptr;
 }
 
-void CLevel::RandomizeTemplateActor( CActorTemplate * actTemplate )
+void CLevel::RandomizeTemplateActor( CActorTemplate* actTemplate )
 {
 	// don't randomize player
 	if ( actTemplate->actorClass == K_ACT_CLASS_PLAYER )
@@ -1675,7 +1675,7 @@ void CLevel::SetTimeMultiplier( float fMultiplier, float fDuration )
 	*/
 }
 
-bool CLevel::NormalizeMouseCoords( int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float & ret_fAxisValue )
+bool CLevel::NormalizeMouseCoords( int ControllerIID, float fAxisValue, bool bIsHorizontalAxis, float& ret_fAxisValue )
 {
 	ret_fAxisValue = fAxisValue;
 	// level not loaded? return same coordinates
@@ -1731,7 +1731,7 @@ void CLevel::BuildDynamicGeometry( CAABB _camAABB )
 	///--- create vert buffers for lights ---
 	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 	{
-		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		CLight* nl = m_visibleList.visible_lights.m_pData[kk];
 
 		switch ( nl->type )
 		{
@@ -2101,7 +2101,7 @@ void CLevel::AddDirtyRect( int x, int y, int w, int h )
 	m_arrDirtyRectsTL.emplace_back( RectXYWHi( x, y, w, h ) );
 }
 
-void CLevel::SetActorWeaponPerks( CActor * pActor, CWeapon * pWeapon )
+void CLevel::SetActorWeaponPerks( CActor* pActor, CWeapon* pWeapon )
 {
 	_ASSERT( (pWeapon != null) && (pActor != null) );
 
@@ -2218,7 +2218,7 @@ void CLevel::SetActorDoT( CActor* act, CDamageOverTime::EDoTType eType, float fD
 
 
 
-CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClassFilter1, EActorClass eTargetClassFilter2 )
+CActor* CLevel::GetClosestTarget( CActor* sourceActor, EActorClass eTargetClassFilter1, EActorClass eTargetClassFilter2 )
 {
 	if ( sourceActor == nullptr )
 		return nullptr;
@@ -2300,7 +2300,7 @@ CActor* CLevel::GetClosestTarget( CActor * sourceActor, EActorClass eTargetClass
 }
 
 
-CActor * CLevel::GetClosestActorByTemplateName( CActor * sourceActor, WCHAR * sTargetTemplateName, float fMaxDistance )
+CActor* CLevel::GetClosestActorByTemplateName( CActor* sourceActor, WCHAR* sTargetTemplateName, float fMaxDistance )
 {
 	_ASSERT( sourceActor != nullptr );
 
@@ -3006,7 +3006,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 
 					if ( !GameState::isTransitioning() )
 					{
-						CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
+						CEvent* nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
 						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
 						nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
 						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
@@ -3024,7 +3024,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 
 					if ( !GameState::isTransitioning() )
 					{
-						CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
+						CEvent* nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
 						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
 						nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
 						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
@@ -3041,7 +3041,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 					if ( !GameState::isTransitioning() )
 					{
 						//change game state
-						CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
+						CEvent* nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
 						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_MAINMENU );
 						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
 						//check and see if other player requested exit and show message if so
@@ -3212,7 +3212,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 						//--- show windows and change portraits and title text ---
 						__GUI().RemoveAllLayers();
 						//generic changes
-						CCtrlLayer *layer = null;
+						CCtrlLayer* layer = null;
 						if ( nPlayers == 1 )
 							layer = __GUI().ShowLayerOnce( "LAYER_ID_LEVELWIN_1P" );
 						else
@@ -3512,7 +3512,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 
 					if ( !GameState::isTransitioning() )
 					{
-						CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
+						CEvent* nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
 						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
 						nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
 						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
@@ -3530,7 +3530,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 
 					if ( !GameState::isTransitioning() )
 					{
-						CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
+						CEvent* nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
 						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_PLAYER_SELECTION );
 						nevent->AddNamedArgINT32( L"arg1", 0 ); //reset player selection
 						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
@@ -3548,7 +3548,7 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 					if ( !GameState::isTransitioning() )
 					{
 						//change game state
-						CEvent *nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
+						CEvent* nevent = new CEvent( CEventTypes::evtT_GAMESTATE, CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION );
 						nevent->AddNamedArgUINT32( L"newGameState", GAME_STATE_MAINMENU );
 						nevent->AddNamedArgINT32( L"transitionType", TRANSITION_SIMPLE );
 						//check and see if other player requested exit and show message if so
@@ -3971,7 +3971,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 1. NORMAL MAP AND HEIGHT MAP
 	///----------------------------------------------------
-	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1);
+	pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
 	if ( pRT != nullptr )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
@@ -4123,7 +4123,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
 			Matrix matView;
-			// Clear the render target and the zbuffer 
+			// Clear the render target and the zbuffer
 			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0x00000000, 1.0f, 0 ) ) )
 			{
 				return K_OP_FAILED;
@@ -4220,7 +4220,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	/// 3. apply multipass voronoi on (starting with) 2
 	///----------------------------------------------------
 	pRT = __RTManager().GetRTbyUID( K_RTID_TEMPORARY );
-	int passes =  ceil( log( max( pRT->nWidth, pRT->nHeight ) ) / log( 2.0 ) );
+	int passes = ceil( log( max( pRT->nWidth, pRT->nHeight ) ) / log( 2.0 ) );
 	Matrix matView;
 	MUMatIdentity( &matView );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
@@ -4384,7 +4384,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	int screenHeight = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
 	Vec2 vaspect( screenWidth / max( screenWidth, screenHeight ), screenHeight / max( screenWidth, screenHeight ) );
 	Vec2 vscreen( screenWidth, screenHeight );
-	
+
 	//auto ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"SCENE1024" ) );
 	for ( int n = 0; n < UTApp().gi_global.radiance_cascade_count; n++ )
 	{
@@ -4490,7 +4490,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 	*/
 
-	
+
 	for ( int kk = 0; kk < 5; kk++ ) {
 		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
 		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
@@ -4508,14 +4508,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
 		vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
 		vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
-		vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
-		vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
-		vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
-		vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
-
-		lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
 
 		int cascaden1 = (n + 1) % UTApp().gi_global.radiance_cascade_count;
 		///--- set textures
@@ -4524,11 +4516,19 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		// cascade upper:
 		CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_CASCADE0 + cascaden1 );
 		m_pDevice->SetTexture( 2, pRTemissive->m_pRTTexture );
-		
+
 		/// we paint into storage then save back into CASCADE texture
 		pRT = __RTManager().GetRTbyUID( K_RTID_STORAGE );
 		if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
 		{
+			vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+			vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+			vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+			vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+			lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+			lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
 			matWVP = pRT->matProj;
 
 			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
@@ -4550,10 +4550,10 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 			///--- set Pshader constants
 			float fConstData[][4] = {
-				{ UTApp().gi_global.radiance_cascade_extent, 0,0,0},
-				{ UTApp().gi_global.radiance_cascade_angular, 0,0,0},
-				{ UTApp().gi_global.radiance_cascade_count, 0,0,0},
-				{ n, 0, 0, 0 },
+				{ UTApp().gi_global.radiance_cascade_extent, 0, 0, 0 },
+				{ UTApp().gi_global.radiance_cascade_angular, 0, 0, 0 },
+				{ (float)UTApp().gi_global.radiance_cascade_count, 0, 0, 0 },
+				{ (float)n, 0, 0, 0 },
 			};
 			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 
@@ -4593,7 +4593,87 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 
 	}
-	
+
+
+	///----------------------------------------------------
+	/// 7. radiance mipmap
+	///----------------------------------------------------
+	/*
+	function radiancecascades_mipmap( cascade_surfarray, mipmap_surf ) {
+		var mipmap_width = surface_get_width( mipmap_surf );
+		var mipmap_height = surface_get_width( mipmap_surf );
+		var mipmap0_width = surface_get_width( mipmap_surf );
+		var mipmap0_height = surface_get_width( mipmap_surf );
+
+		shader_set( global.radiance_mipmap );
+		uniform_f1( global.radiance_mipmap_uMipMapExtent, max( mipmap_width, mipmap_height ) );
+		uniform_f1( global.radiance_mipmap_uCascadeExtent, global.radiance_cascade_extent );
+		uniform_f1( global.radiance_mipmap_uCascadeAngular, global.radiance_cascade_angular );
+		uniform_f1( global.radiance_mipmap_uCascadeIndex, 0);
+		uniform_tx( global.radiance_mipmap_uCascadeAtlas, cascade_surfarray[0] );
+
+		surface_set_target( mipmap_surf );
+		draw_clear_alpha( c_black, 0 );
+		draw_surface_ext( mipmap_surf, 0, 0, mipmap_width / mipmap0_width, mipmap_height / mipmap0_height, 0, c_black, 1 );
+		surface_reset_target();
+
+		shader_reset();
+		*/
+
+
+
+	///--- set cascade 0 texture
+	CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( K_RTID_CASCADE0 );
+	m_pDevice->SetTexture( 1, pRTlastGI->m_pRTTexture );
+	/// we paint into storage then save back into CASCADE texture
+	pRT = __RTManager().GetRTbyUID( K_RTID_MIPMAP );
+	if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
+	{
+		float mipmap_extent = (float)max(pRT->nWidth, pRT->nHeight);
+
+		vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+		vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+		vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+		vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+		lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+		matWVP = pRT->matProj;
+
+		if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 1, 0, 0, 0 ), 1.0f, 0 ) ) )
+			return K_OP_FAILED;
+
+		__Shaders().SetVSByName( L"VS_COMPOSITION" );
+		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+
+		__Shaders().SetPSByName( L"PS_GI_RADIANCE_MIPMAP" );
+		///   Name             Reg   Size
+		///   ---------------- ----- ----
+		///   in_MipMapExtent  c0       1
+		///   in_CascadeExtent c1       1
+		///   in_CascadeAtlas  s0       1
+
+		///--- set Pshader constants
+		float fConstData[][4] = {
+			{ mipmap_extent, 0, 0, 0 },
+			{ (float)UTApp().gi_global.radiance_cascade_extent, 0, 0, 0 },
+		};
+		__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+
+		m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+
+		// remove VS PS
+		__Shaders().SetPS( nullptr );
+		__Shaders().SetVS( nullptr );
+
+		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+	}
+
+
+
+
 
 
 
@@ -4607,7 +4687,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	{
 		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 		{
-			// Clear the render target and the zbuffer 
+			// Clear the render target and the zbuffer
 			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0xffff0000, 1.0f, 0 ) ) )
 			{
 				return K_OP_FAILED;
@@ -4806,7 +4886,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Matrix* matProj, float fBetwe
 		{
 			case K_VST_ACTOR:
 			{
-				CActor* act = static_cast<CActor*>(vis->pPtr);
+				CActor* act = static_cast<CActor*>( vis->pPtr );
 				act->Paint( eTexChannel );
 
 				//#TEMP: paint target position
@@ -4971,7 +5051,7 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 	m_pDevice->SetTexture( 1, nullptr );
 	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 	{
-		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		CLight* nl = m_visibleList.visible_lights.m_pData[kk];
 		if ( nl->type == K_LVL_LT_DIRECTIONAL )
 		{
 			//paint and exit
@@ -4993,7 +5073,7 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 
 	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 	{
-		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		CLight* nl = m_visibleList.visible_lights.m_pData[kk];
 		if ( nl->type != K_LVL_LT_AMBIENTAL )
 			continue;
 		//paint and exit
@@ -5006,14 +5086,14 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 	// Paints the shadowed lights volume in wireframe, the one selected in the editor
 	if ( g_editor.IsLaunched() )
 	{
-		IActiveInterface *pLight = g_editor.GetSelected();
+		IActiveInterface* pLight = g_editor.GetSelected();
 		if ( pLight != nullptr && pLight->GetClassType() == K_LVL_IAI_TYPE_LIGHT )
 		{
 			m_pDevice->SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
 			m_pDevice->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD ); //needed for color interpolation
 			for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 			{
-				CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+				CLight* nl = m_visibleList.visible_lights.m_pData[kk];
 				if ( nl != pLight )
 					continue;
 
@@ -5041,7 +5121,7 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 		CVisibleSortable* vis = &m_visibleList.arrSortedItems.m_pData[kk];
 		if ( vis->eType != K_VST_ACTOR )
 			continue;
-		CActor* act = static_cast<CActor*>(vis->pPtr);
+		CActor* act = static_cast<CActor*>( vis->pPtr );
 		UTSprite::PaintFModule( spr_lights, act->pos.xy, ANM_LIGHTS_SPR_CHAR_SHADOWS, 0, 0 );
 	}
 	__Painter().Flush();
@@ -5072,7 +5152,7 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 
 	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 	{
-		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		CLight* nl = m_visibleList.visible_lights.m_pData[kk];
 
 		if ( nl->type != K_LVL_LT_POINT )
 			continue;
@@ -5107,7 +5187,7 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 	__Shaders().SetPSByName( L"PS_PROJECTEDDIR" );
 	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 	{
-		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		CLight* nl = m_visibleList.visible_lights.m_pData[kk];
 		CAABB bbox_ini = nl->bbox.GetSnapshot();
 
 		if ( nl->type != K_LVL_LT_PROJECTED_DIR )
@@ -5147,7 +5227,7 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 
 	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 	{
-		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+		CLight* nl = m_visibleList.visible_lights.m_pData[kk];
 
 		if ( (nl->type != K_LVL_LT_IES) || (nl->GetCastShadows()) )
 			continue;
@@ -5243,31 +5323,31 @@ OPRESULT CLevel::RenderPass_Emissive( Matrix* matProj, float fBetweenFramesPerce
 	bool bPaintsNormals = false;
 
 	/// paint occluders white
-/*	
+/*
 	ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"WHITE32" ) );
 	m_pDevice->SetTexture( 0, ptex->pTexture );
 	Areas_PaintLayer( K_AL_OCCLUDERS );
 	//Areas_PaintLayer( K_AL_WALLS );
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 	*/
-/*
-	/// Paint lights as color blobs with hard contours
+	/*
+		/// Paint lights as color blobs with hard contours
 
-	CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
-	CSpr sprPoint( spr_props, ANM_LIGHTS_SPR_GI_LIGHTS, g_Vec2Zero );
+		CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
+		CSpr sprPoint( spr_props, ANM_LIGHTS_SPR_GI_LIGHTS, g_Vec2Zero );
 
-	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
-	{
-		CLight *nl = m_visibleList.visible_lights.m_pData[kk];
-		if ( nl->type == K_LVL_LT_POINT )
+		for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
 		{
-			sprPoint.SetAnim( ANM_LIGHTS_SPR_GI_LIGHTS, 2 );
-			sprPoint.pos = nl->pos.xy;
-			sprPoint.color = nl->color;
-			sprPoint.Paint();
+			CLight *nl = m_visibleList.visible_lights.m_pData[kk];
+			if ( nl->type == K_LVL_LT_POINT )
+			{
+				sprPoint.SetAnim( ANM_LIGHTS_SPR_GI_LIGHTS, 2 );
+				sprPoint.pos = nl->pos.xy;
+				sprPoint.color = nl->color;
+				sprPoint.Paint();
+			}
 		}
-	}
-	*/
+		*/
 	__Painter().End();
 
 	// top layer of tiles
@@ -5539,7 +5619,7 @@ OPRESULT CLevel::PaintOverGameLayer()
 
 	//--- closest touchable and cover icons ---
 	 //pointer to last painted active interface so we don't draw it twice
-	IActiveInterface * pLastPaintedTarget = nullptr;
+	IActiveInterface* pLastPaintedTarget = nullptr;
 	for ( int kk = 0; kk < K_MAX_PLAYERS_CNT; kk++ )
 	{
 		if ( (pPlayerActor[kk] == nullptr) || (pPlayerActor[kk]->GetCurrentBehavior() != AI_BEHAVIOR_PLAYER_CONTROL) )
@@ -5547,7 +5627,7 @@ OPRESULT CLevel::PaintOverGameLayer()
 
 		CActor* player = pPlayerActor[kk];
 		//touchables
-		IActiveInterface * activ = nullptr;
+		IActiveInterface* activ = nullptr;
 		if ( player->pClosestTouchable.IsSet() )
 			activ = player->pClosestTouchable.GetTo();
 
@@ -5689,7 +5769,7 @@ void CLevel::Release()
 
 
 
-int CLevel::BuildLightVolume360( CLight * light, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt )
+int CLevel::BuildLightVolume360( CLight* light, _VERTEX_PNCT4T4* outVerts, int outVertsMaxCnt )
 {
 	_ASSERT( outVerts != null );
 	// sends 360 rays and finds collisions with tileset base of walls. When we collide with a wall facing the camera we also add polys for the wall.
@@ -5923,7 +6003,7 @@ bool CLevel::ActivateSpecialAbility( int nAbilityIdx, int nTargetPlayerOrdinal )
 	return false;
 }
 
-void CLevel::GiveStrategicPoints( float fPoints, Vec2 * vPos )
+void CLevel::GiveStrategicPoints( float fPoints, Vec2* vPos )
 {
 	if ( fPoints <= 0.0f )
 		return;
@@ -5972,7 +6052,7 @@ void CLevel::GiveStrategicPoints( float fPoints, Vec2 * vPos )
 }
 
 
-bool CLevel::IsLineOfSight( Vec2 pt_from, Vec2 pt_to, CLevelArea * pStartArea )
+bool CLevel::IsLineOfSight( Vec2 pt_from, Vec2 pt_to, CLevelArea* pStartArea )
 {
 	//#TODO: de verificat daca pleaca direct din interiorul unei coliziuni
 
@@ -6254,7 +6334,7 @@ void CLevel::GenerateEffect( ELVLEffectType nEffectType, Vec2 pos, float fSize, 
 	}
 }
 
-void CLevel::GenerateEffect( CStringHash & sEffectName, Vec2 pos, float fSize, DWORD color )
+void CLevel::GenerateEffect( CStringHash& sEffectName, Vec2 pos, float fSize, DWORD color )
 {
 	ELVLEffectType effectidx = (ELVLEffectType)GetListIndexByNameHash( sEffectName.textHash, ELVLEffectTypeNames, ARRAY_SIZE( ELVLEffectTypeNames ) );
 	GenerateEffect( effectidx, pos, fSize, color );
@@ -6267,7 +6347,7 @@ void CLevel::GC()
 	CleanupDeadObjects();
 }
 
-void CLevel::TouchClosestActive( CActor * pToucherAct, float dTime )
+void CLevel::TouchClosestActive( CActor* pToucherAct, float dTime )
 {
 	_ASSERT( pToucherAct != nullptr );
 

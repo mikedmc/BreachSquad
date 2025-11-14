@@ -694,11 +694,11 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 				K_RTID_CASCADE3,
 				K_RTID_STORAGE,
 				K_RTID_TEMPORARY,
+				K_RTID_MIPMAP,
 				K_RTID_JUMPFLOOD,
 				K_RTID_DISTANCEFIELD,
 				K_RTID_RADIANCE,
 				K_RTID_BOUNCESCENE,
-				K_RTID_MIPMAP
 			};
 
 			for ( int kk = 0; kk < ARRAY_SIZE( arrkeys ); kk++ )
