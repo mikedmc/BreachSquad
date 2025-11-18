@@ -323,7 +323,7 @@ public:
 	///--- pt vizualizare ---
 	IActiveInterface		*m_camTargetActive;		//la ce activ se uita camera sau null cand se uita la players
 	IActiveInterface		*m_camTargetOld;		//tine minte pe ce a fost locked ca sa se poata intoarce
-	CCameraTransform		m_camLevelToRT;			// camera from level to RT
+	CCameraTransform		m_camLevelToRT;			// camera from level to RT - main camera keeps player position
 	CCameraTransform		m_camLevelToScr;		// camera from level to Screen
 	Vec2					m_vCamPosDefault;		//camera position when not locked on special actors (hidden rooms, etc)
 ///--- misc ---
@@ -345,8 +345,7 @@ public:
 	// the lights pass is so very different that it needs a special function
 	OPRESULT				RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent );
 	// renders the emissive map for GI
-	OPRESULT				RenderPass_Emissive( Matrix* matProj, float fBetweenFramesPercent );
-	OPRESULT				RenderPass_GIColor( Matrix* matProj, float fBetweenFramesPercent );
+	OPRESULT				RenderPass_GIEmissive( Matrix* matProj, float fBetweenFramesPercent );
 	// composes color and lights into one RT
 	OPRESULT				RenderPass_Composition( Matrix* matProj, float fBetweenFramesPercent );
 

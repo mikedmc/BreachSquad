@@ -36,13 +36,11 @@ void CApplication::App_EnterState_Loading()
 	__RTManager().AddRT( K_RTID_TEMPORARY, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A16B16G16R16F, false );
 	__RTManager().AddRT( K_RTID_JUMPFLOOD, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A16B16G16R16F, false );
 	__RTManager().AddRT( K_RTID_DISTANCEFIELD, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A16B16G16R16F, false );
-	__RTManager().AddRT( K_RTID_RADIANCE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
-	__RTManager().AddRT( K_RTID_BOUNCESCENE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
 
 	__RTManager().AddRT( K_RTID_STORAGE, (UINT)gi_global.radiance_cascade_extent, (UINT)gi_global.radiance_cascade_extent, 1, D3DFMT_A8R8G8B8, false );
 
 	float angular_resolution = (float)sqrt( gi_global.radiance_cascade_angular * pow( 4.0, 0 /*mip resolution*/ ) );
-	float mipmap_extent = (UINT)gi_global.radiance_cascade_extent / angular_resolution;
+	UINT mipmap_extent = (UINT)gi_global.radiance_cascade_extent / (UINT)angular_resolution;
 	__RTManager().AddRT( K_RTID_MIPMAP, mipmap_extent, mipmap_extent, 1, D3DFMT_A8R8G8B8, false );
 
 	for ( int i = 0; i < gi_global.radiance_cascade_count; i++ ) {

@@ -577,12 +577,12 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			 //debug stuff
 #if defined(_DEBUG) || defined(DEBUG)
 			const float fWndH = 256.0f;
-			for ( int oo = K_RTID_WORLDSCENE; oo <= K_RTID_MIPMAP; oo++ )
+			for ( int oo = K_RTID_COLORDEPTHSTENCIL; oo <= K_RTID_TEMP1; oo++ )
 			{
 				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( oo );
 				if ( pRT != null )
 				{
-					int ooidx = oo - K_RTID_WORLDSCENE;
+					int ooidx = oo - K_RTID_COLORDEPTHSTENCIL;
 					RectLTRB src( ooidx * fWndH, 0.0f, (ooidx + 1) * fWndH, fWndH );
 					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
 					pDevice->SetTexture( 0, pRT->m_pRTTexture );
@@ -686,8 +686,9 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			}
 			*/
 			
-			char arrkeys[] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='};
-			ERTIDChannel arrchan[] = { K_RTID_WORLDSCENE,
+			char arrkeys[] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+			ERTIDChannel arrchan[] = { 
+				K_RTID_WORLDSCENE,
 				K_RTID_CASCADE0,
 				K_RTID_CASCADE1,
 				K_RTID_CASCADE2,
@@ -697,8 +698,6 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 				K_RTID_MIPMAP,
 				K_RTID_JUMPFLOOD,
 				K_RTID_DISTANCEFIELD,
-				K_RTID_RADIANCE,
-				K_RTID_BOUNCESCENE,
 			};
 
 			for ( int kk = 0; kk < ARRAY_SIZE( arrkeys ); kk++ )
