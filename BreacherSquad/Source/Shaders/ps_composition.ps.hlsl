@@ -21,7 +21,7 @@ float3 lin_to_srgb(float3 color)
    clr.b = (color.b < 0.0031308) ? x.b : y.b;
    return clr.rgb;
 }
-
+/*
 float4 ps_main( PS_INPUT Input ) : COLOR0
 {
 	float3 vCol = tex2D( texColor, Input.Tex0.xy ).rgb;
@@ -37,10 +37,10 @@ float4 ps_main( PS_INPUT Input ) : COLOR0
 
 	return float4(col, 1.0f);
 }
-
+*/
 
 // --- ORIGINAL WORKING ---
-/*
+
 float4 ps_main(PS_INPUT Input) : COLOR0
 {
 	float3 vCol = tex2D(texColor, Input.Tex0.xy).rgb;
@@ -58,4 +58,3 @@ float4 ps_main(PS_INPUT Input) : COLOR0
 
 	return float4(fvFinal, 1.0f);
 }
-*/

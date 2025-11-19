@@ -4048,37 +4048,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 	}
 
-	///----------------------------------------------------
-	/// 4. COMPOSITION - composes buffers into one
-	///----------------------------------------------------
-	/*
-	pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );
-	if ( pRT != nullptr )
-	{
-		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
-		{
-			// Clear the render target and the zbuffer
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0xffff0000, 1.0f, 0 ) ) )
-			{
-				return K_OP_FAILED;
-			}
-
-			//#TODO: este corect ?? offset the projection matrix by 0.5f because in DX the pixel's 0.0 is the center of the pixel
-			//Mat matProj;
-			//D3DXMatrixOrthoOffCenterLH(&matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
-			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
-
-			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
-			m_pDevice->SetTransform( D3DTS_VIEW, &g_matIdentity );
-
-			// RT sized quad with tex1 color, tex2 lightmap
-			RenderPass_Composition( &pRT->matProj, fBetweenFramesPercent );
-
-			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
-
-		}
-	}
-	*/
 
 	///----------------------------------------------------
 	/// START GI
@@ -4647,12 +4616,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 
 
-
-
 	///----------------------------------------------------
-	/// COMPOSITION de test ca sa vad bufferele
+	/// FINAL COMPOSITION - composes buffers into one
 	///----------------------------------------------------
-/*
 	pRT = __RTManager().GetRTbyUID( K_RTID_FINAL );
 	if ( pRT != nullptr )
 	{
@@ -4679,7 +4645,6 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 		}
 	}
-	*/
 
 	return K_OP_OK;
 }
@@ -4909,7 +4874,7 @@ OPRESULT CLevel::RenderPass( eLVLRenderPass ePass, Matrix* matProj, float fBetwe
 	__Shaders().SetVS( nullptr );
 	pTex = m_tilesetDesc.GetTexture( K_AL_CEILINGS, bPaintsNormals );
 	m_pDevice->SetTexture( 0, pTex->pTexture );
-	//Areas_PaintLayer( K_AL_CEILINGS );
+	Areas_PaintLayer( K_AL_CEILINGS );
 
 	return K_OP_OK;
 }
@@ -5344,11 +5309,8 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	PPIXELSHADER pPShader = null;
 	Matrix matWVP = matView * (*matProj);
 
-	static int tempchan = K_RTID_CASCADE0;
-
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
-	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( tempchan );
-	//CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_DISTANCEFIELD );
+	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
 	_ASSERT( pRTcolor != nullptr && pRTlights != nullptr );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
 	m_pDevice->SetTexture( 1, pRTlights->m_pRTTexture );
