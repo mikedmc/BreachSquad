@@ -434,7 +434,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 					//add notification if we actually have gear
 					if (toucheractor->weapons[K_LVL_ACT_WEAPON_GEAR].status != K_LVL_WPN_STATUS_UNKNOWN)
 					{
-						m_interfaceTextBubble.ShowLevelHint(&m_camLevel, STR_FULL_AMMO, FONTIDX_6_NS1, Vec2(active->bbox_exported.vCenter.x, active->bbox_exported.vMin.y), 4.0f);
+						//m_interfaceTextBubble.ShowLevelHint(&m_camLevel, STR_FULL_AMMO, FONTIDX_6_NS1, Vec2(active->bbox_exported.vCenter.x, active->bbox_exported.vMin.y), 4.0f);
 					}
 					else
 					{
@@ -487,7 +487,7 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 				else
 				{
 					//add notification
-					m_interfaceTextBubble.ShowLevelHint(&m_camLevel, STR_FULL_HEALTH, FONTIDX_6_NS1, Vec2(active->bbox_exported.vCenter.x, active->bbox_exported.vMin.y), 4.0f);
+					//m_interfaceTextBubble.ShowLevelHint(&m_camLevel, STR_FULL_HEALTH, FONTIDX_6_NS1, Vec2(active->bbox_exported.vCenter.x, active->bbox_exported.vMin.y), 4.0f);
 				}
 			}
 			*/
@@ -604,7 +604,6 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 		break;
 		case instr_IACTIVE_REMOVE_NOTIFICATION:
 		{
-			//m_interfaceTextBubble.Hide();
 			return true;
 		}
 		break;

@@ -3961,7 +3961,6 @@ void CLevel::Update( float dTime )
 
 	///--- update interface ---
 	m_interfaceIGM.Update( dTime );
-	//m_interfaceTextBubble.Update(dTime);
 }
 
 OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
@@ -5203,10 +5202,9 @@ OPRESULT CLevel::RenderPass_GIEmissive( Matrix* matProj, float /*fBetweenFramesP
 
 	Matrix	matView;
 
-	RectXYWH	camrect = m_camLevelToRT.GetCamWorldAABB();
 	Vec2		campos = m_camLevelToRT.GetCamPos();
-	float		renderw = UTApp().gi_global.radiance_render_extent;
-	CAABB		camAABB( campos.x - renderw, campos.y - renderw, campos.x + renderw, campos.y + renderw);
+	float		render_offset = UTApp().gi_global.radiance_render_extent / 2.0f;
+	CAABB		camAABB( campos.x - render_offset, campos.y - render_offset, campos.x + render_offset, campos.y + render_offset);
 
 	//locally used temp matrix
 	Matrix	matlocal;
@@ -5228,7 +5226,7 @@ OPRESULT CLevel::RenderPass_GIEmissive( Matrix* matProj, float /*fBetweenFramesP
 
 	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams (UV shrinking)
 	// moves from tex pixel to pixel, no half pixels but we add the subpixel movement when painting the final scene so if moves smoothly
-	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camrect.x ) * K_RT_PIXEL_SIZE_F, -floor( camrect.y ) * K_RT_PIXEL_SIZE_F ) );
+	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camAABB.vMin.x ) * K_RT_PIXEL_SIZE_F, -floor( camAABB.vMin.y ) * K_RT_PIXEL_SIZE_F ) );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
 	m_pDevice->SetTransform( D3DTS_PROJECTION, matProj);
 
@@ -5311,9 +5309,12 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
 	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
+	CRTManager::CEngineRenderTarget* pRTGI = __RTManager().GetRTbyUID( K_RTID_MIPMAP );
+
 	_ASSERT( pRTcolor != nullptr && pRTlights != nullptr );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
 	m_pDevice->SetTexture( 1, pRTlights->m_pRTTexture );
+	m_pDevice->SetTexture( 2, pRTGI->m_pRTTexture );
 
 	//--- build RT rect ---
 	_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
@@ -5322,14 +5323,28 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	vdl.pos = Vec3( 0.0f, (float)pRTcolor->nHeight, 0.0f );
 	vdr.pos = Vec3( (float)pRTcolor->nWidth, (float)pRTcolor->nHeight, 0.0f );
 
-	vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
-	vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
-	vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
-	vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+	vul.tex1 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+	vur.tex1 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+	vdl.tex1 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+	vdr.tex1 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+	// GI mipmap tex coods computation:
+	// scene is rendered in the center of a 1024x1024 pixels texture then mipmap is scaled down to 512x512
+	// mipmap screen coord is computed by centering the camera rectangle in the 1024x1024 screen since texture coords are normalized
+	RectXYWH	camrect = m_camLevelToRT.GetCamWorldAABB();
+	float		render_extent = UTApp().gi_global.radiance_render_extent;
+	Vec2		vTargetCenter( 0.5f, 0.5f );
+	Vec2		vCamScreenHalf( camrect.w / 2.0f, camrect.h / 2.0f );
+	vCamScreenHalf /= render_extent;
+	CAABB		cam_tex( vTargetCenter - vCamScreenHalf, vTargetCenter + vCamScreenHalf );
+	vul.tex2 = Vec4( cam_tex.vMin.x, cam_tex.vMin.y, 0.0f, 0.0f );
+	vur.tex2 = Vec4( cam_tex.vMax.x, cam_tex.vMin.y, 0.0f, 0.0f );
+	vdl.tex2 = Vec4( cam_tex.vMin.x, cam_tex.vMax.y, 0.0f, 0.0f );
+	vdr.tex2 = Vec4( cam_tex.vMax.x, cam_tex.vMax.y, 0.0f, 0.0f );
 	//set color
 	vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
 	//build verts
-	_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+	//tex2-mapare back buffer, tex1-spot lumina
+	_VERTEX_PNCT4T4 lightRectV[6]; 
 	lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 	lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
@@ -5337,12 +5352,14 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 	__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 
-	__Shaders().SetPSByName( L"PS_COMPOSITION" );
+	__Shaders().SetPSByName( L"PS_COMPOSITION_GI" );
 	// set Pshader constants
 	float fGamma = 2.2f;
 	float fConstData[][4] = {
-		// x:gamma, y:1.0f/gamma
-		{ fGamma, 1.0f / fGamma, ct_fLightMul, ct_fColorDodge}
+		// x:gamma, y:1.0f/gamma, z:final light multiplier, w:color dodge
+		{ fGamma, 1.0f / fGamma, ct_fLightMul, ct_fColorDodge},
+		// x: GI light multiplier
+		{ ct_em_mul, 0.0f, 0.0f, 0.0f }
 	};
 	__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 	m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
@@ -5390,8 +5407,9 @@ OPRESULT CLevel::PaintGameFinalRT()
 	// we remove the clunky camera movement by moving the final RT onscreen with subpixel coordinates
 	RectXYWH camrect = m_camLevelToRT.GetCamWorldAABB();
 	Vec2 vSubPxOff( -FLOAT_FRAC( camrect.x ) * (fRTscale * K_RT_PIXEL_SIZE_F), -FLOAT_FRAC( camrect.y ) * (fRTscale * K_RT_PIXEL_SIZE_F) );
-	///-- Moves the onscreen rectangle with sub-pixecl precision to smooth out the fixed pixel corner rendering
+	///-- Moves the onscreen rectangle with sub-pixel precision to smooth out the fixed pixel corner rendering
 	RectLTRB destRect( rectRender );
+	///--- uncomment this line to enable sub pixel precision scrolling:
 	//destRect.Move( vSubPxOff.x, vSubPxOff.y );
 	RectLTRB srcUV( vUL.x / pRTfinal->nWidth, vUL.y / pRTfinal->nHeight, vDR.x / pRTfinal->nWidth, vDR.y / pRTfinal->nHeight );
 
@@ -5579,7 +5597,6 @@ void CLevel::Release()
 	}
 
 	m_interfaceIGM.Release();
-	//m_interfaceTextBubble.Release();
 
 	__Particles().ClearParticles();
 
@@ -5593,7 +5610,7 @@ void CLevel::Release()
 }
 
 
-
+/*
 int CLevel::BuildLightVolume360( CLight* light, _VERTEX_PNCT4T4* outVerts, int outVertsMaxCnt )
 {
 	_ASSERT( outVerts != null );
@@ -5662,13 +5679,13 @@ int CLevel::BuildLightVolume360( CLight* light, _VERTEX_PNCT4T4* outVerts, int o
 		else
 		{
 			// optimizes so it just adds one triangle every N collisions
-			/*
-			nSameSince++;
-			if (nSameSince > 5)
-				nSameSince = 0;
-			if (nSameSince > 1)
-				arrCollCur--;
-			  */
+			
+			//nSameSince++;
+			//if (nSameSince > 5)
+			//	nSameSince = 0;
+			//if (nSameSince > 1)
+			//	arrCollCur--;
+			  
 			  // add end of ray
 			arrColl[arrCollCur].bCollided = false;
 			arrColl[arrCollCur].vPos = vTo;
@@ -5714,7 +5731,7 @@ int CLevel::BuildLightVolume360( CLight* light, _VERTEX_PNCT4T4* outVerts, int o
 
 	return nVertCnt;
 }
-
+ */
 
 
 void CLevel::InitializeStrategicAbilities( int nPlayerOrdinal )

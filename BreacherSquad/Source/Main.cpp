@@ -1887,7 +1887,7 @@ void CALLBACK OnFrameRender( PDEVICE pDevice, double fTime, float fElapsedTime )
 
 				ImGui::SliderFloat( "gi mul", &ct_em_mul, 0.0f, 50.0f );
 				ImGui::SliderFloat( "gi range", &ct_em_range, 0.0f, 100.0f );
-				ImGui::SliderFloat( "gi dropogg", &ct_em_dropoff, 0.0f, 100.0f );
+				ImGui::SliderFloat( "gi dropoff", &ct_em_dropoff, 0.0f, 100.0f );
 
 				///--- show watch debug values from the debug list ---
 				__ImGui().PaintDebugVars();

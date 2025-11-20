@@ -387,7 +387,7 @@ private:
 	// special layer (pixel perfect or different scaling) in "Scaled Screen Space" for ingame interface, menus and screen vignettes
 	OPRESULT				PaintGUILayer();
 	// Cheaper method of shadow casting but not precise enough. Can be used on low end devices
-	int						BuildLightVolume360( CLight * light, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt );
+	//int						BuildLightVolume360( CLight * light, _VERTEX_PNCT4T4 *outVerts, int outVertsMaxCnt );
 
 public: //--- framework methods ---
 	OPRESULT OnCreateDevice( PDEVICE pDevice, const SURFACE_DESC* pBBDesc = nullptr, void* pUserContext = nullptr );
