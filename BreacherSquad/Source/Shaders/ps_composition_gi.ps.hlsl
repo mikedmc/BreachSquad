@@ -32,12 +32,13 @@ float4 ps_main(PS_INPUT Input) : COLOR0
 	float3 vLight = tex2D(texLights, Input.Tex0.xy).rgb;
     float3 vGI = tex2D(texGI, Input.Tex1.xy).rgb;
 	//older: gamma correct light (fast alternative, not perfect)
-	//vLight = pow(vLight, fCompData.yyy);
+	vLight = pow(vLight, fCompData.yyy);
 	// try this slower but better version (looks a little too bright)
-	vLight = lin_to_srgb(vLight);
+	//vLight = lin_to_srgb(vLight);
 	
 	// gamma correct GI??
     //vGI = lin_to_srgb(vGI);
+    vGI = pow(vGI, fCompData.yyy);
 	
     float3 f_total_light = saturate(vLight * fCompData.z + vGI * fGIData.x);
     float3 fvFinal = f_total_light * vCol;

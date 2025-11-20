@@ -5251,7 +5251,7 @@ OPRESULT CLevel::RenderPass_GIEmissive( Matrix* matProj, float /*fBetweenFramesP
 	{
 		CLight* nl = m_visibleList.visible_lights.m_pData[kk];
 		CSpr spr( sprlib_lights, ANM_LIGHTS_SPR_GI_LIGHTS, nl->pos.xy );
-		spr.frameIdx = 1;
+		spr.frameIdx = 0;
 		spr.color = nl->color;
 		spr.Paint();
 	}
@@ -5309,7 +5309,11 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
 	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
+	m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_POINT );
+	m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
 	CRTManager::CEngineRenderTarget* pRTGI = __RTManager().GetRTbyUID( K_RTID_MIPMAP );
+	m_pDevice->SetSamplerState( 2, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+	m_pDevice->SetSamplerState( 2, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
 
 	_ASSERT( pRTcolor != nullptr && pRTlights != nullptr );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
