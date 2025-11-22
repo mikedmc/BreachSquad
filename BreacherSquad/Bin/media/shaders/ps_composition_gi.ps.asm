@@ -29,14 +29,7 @@
     dcl_2d s1
     dcl_2d s2
     texld r0, v1, s2
-    log r1.x, r0.x
-    log r1.y, r0.y
-    log r1.z, r0.z
-    mul r0.xyz, r1, c0.y
-    exp r1.x, r0.x
-    exp r1.y, r0.y
-    exp r1.z, r0.z
-    mul r0.xyz, r1, c1.x
+    mul r0.xyz, r0, c1.x
     texld r1, v0, s1
     log r2.x, r1.x
     log r2.y, r1.y
@@ -56,4 +49,4 @@
     mul oC0.xyz, r0, r2
     mov oC0.w, c2.x
 
-// approximately 27 instruction slots used (3 texture, 24 arithmetic)
+// approximately 20 instruction slots used (3 texture, 17 arithmetic)

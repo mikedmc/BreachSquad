@@ -38,7 +38,7 @@ float4 ps_main(PS_INPUT Input) : COLOR0
 	
 	// gamma correct GI??
     //vGI = lin_to_srgb(vGI);
-    vGI = pow(vGI, fCompData.yyy);
+    //vGI = pow(vGI, fCompData.yyy);
 	
     float3 f_total_light = saturate(vLight * fCompData.z + vGI * fGIData.x);
     float3 fvFinal = f_total_light * vCol;
