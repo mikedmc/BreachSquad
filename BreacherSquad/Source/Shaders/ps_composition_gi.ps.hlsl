@@ -6,6 +6,7 @@ float4 fGIData : register(c1); //x:GI multiplier
 sampler2D texColor : register(s0);  //color RT texture (diffuse color)
 sampler2D texLights : register(s1);  //lightmap RT
 sampler2D texGI : register(s2);  //GI mipmap
+sampler2D texBayer : register(s3); //dither texture
 
 struct PS_INPUT
 {
@@ -28,9 +29,14 @@ float3 lin_to_srgb(float3 color)
 
 float4 ps_main(PS_INPUT Input) : COLOR0
 {
+	//foloseste un bayer8x8 texture ca sa faci dithering cand citesti din GI texture. Coordonatele sunt cu WRAP si te iei dupa pixelii ecran, adica Tex0
+
 	float3 vCol = tex2D(texColor, Input.Tex0.xy).rgb;
 	float3 vLight = tex2D(texLights, Input.Tex0.xy).rgb;
-    float3 vGI = tex2D(texGI, Input.Tex1.xy).rgb;
+	// read dither offsets
+    float3 vBayer = tex2D(texBayer, Input.Tex0.xy * float2(75, 75)).rgb;
+    float2 ditherOffset = vBayer.xy * 0.01;
+    float3 vGI = tex2D(texGI, Input.Tex1.xy + ditherOffset).rgb;
 	//older: gamma correct light (fast alternative, not perfect)
 	vLight = pow(vLight, fCompData.yyy);
 	// try this slower but better version (looks a little too bright)

@@ -418,8 +418,8 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 				// black texture for GI
 				StringCchPrintf( texpath, MAX_PATH, L"%s/levels/data/black32.png", UTApp().g_wszAppResDir );
 				UTApp().g_texManager.AddTexture( texpath, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, FastHash( L"BLACK32" ) );
-				StringCchPrintf( texpath, MAX_PATH, L"%s/levels/data/white32.png", UTApp().g_wszAppResDir );
-				UTApp().g_texManager.AddTexture( texpath, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, FastHash( L"WHITE32" ) );
+				StringCchPrintf( texpath, MAX_PATH, L"%s/levels/data/bayer8x8.png", UTApp().g_wszAppResDir );
+				UTApp().g_texManager.AddTexture( texpath, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, FastHash( L"BAYER8X8" ) );
 				
 				StringCchPrintf( texpath, MAX_PATH, L"%s/levels/data/scene1024.png", UTApp().g_wszAppResDir );
 				UTApp().g_texManager.AddTexture( texpath, D3DFMT_A8B8G8R8, D3DX_FILTER_NONE, D3DX_FILTER_NONE, D3DX_DEFAULT, D3DX_DEFAULT, FastHash( L"SCENE1024" ) );
