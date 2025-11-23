@@ -284,27 +284,14 @@ enum ERTIDChannel {
 
 	K_RTID_COLORDEPTHSTENCIL = 0,	// has depth and stencil
 	K_RTID_EMISSIVE = 1,			// emissive/occluders (transparent where nothing, occluders can be black if dark)	
-	K_RTID_GICOLOR,				// color of walls for light bouncing
 	K_RTID_FINAL,
-	K_RTID_TEMP1,				// just colors
+	K_RTID_TEMP1,					// just colors
 
-	K_RTID_WORLDSCENE,
-	K_RTID_TEMPORARY,
-	K_RTID_JUMPFLOOD,				
-	K_RTID_DISTANCEFIELD,				
-	K_RTID_STORAGE,
-	K_RTID_MIPMAP,
-	// cascades, not all of them used
-	K_RTID_CASCADE0,
-	K_RTID_CASCADE1,
-	K_RTID_CASCADE2,
-	K_RTID_CASCADE3,
-	K_RTID_CASCADE4,
-	K_RTID_CASCADE5,
-	K_RTID_CASCADE6,
-	K_RTID_CASCADE7,
-	K_RTID_CASCADE8,
-	K_RTID_CASCADE9,
+	K_RTID_WORLDSCENE,			//1024
+	K_RTID_TEMPORARY,			//1024
+	K_RTID_STORAGE,				//1024
+	K_RTID_STORAGE_HALF,		//512
+	K_RTID_GI,		
 
 	K_RTIDS_COUNT
 };

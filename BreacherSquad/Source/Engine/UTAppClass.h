@@ -15,13 +15,8 @@
 
 struct CGIGlobal {
 	float radiance_render_extent;              // extent resolution.. output resolution will be SQUARE.
-	float radiance_render_decay;           // How quickly light bounces decay.
 	float radiance_render_boost;               // How much to boost light levels.
-	float radiance_cascade_angular;  // angular resolution or initial rays per probe in cascade[0].
-	float radiance_cascade_interval; // radiance interval or raymarch distance of probes.
-	float radiance_cascade_spacing;  // Initial probe spacing of cascade0, each next cascade is N*4.0 spacing.
-	float radiance_cascade_extent;
-	int radiance_cascade_count;
+	float radiance_render_decay;
 };
 
 
@@ -200,7 +195,7 @@ public:
 	void App_OnLevelFinished( int nEpisodeIdx, int nLevelIdx );
 
 //-- GI: should be moved
-	void radiance_initialize( float extent, float angular = 4.0, float interval = 4.0, float spacing = 4.0, float boost = 1.0, float decayrate = 0.65 );
+	void radiance_initialize( float extent, float boost = 1.0, float decayrate = 0.65 );
 
 public: //--- framework methods ---
 	HRESULT OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL );

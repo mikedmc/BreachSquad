@@ -5,7 +5,6 @@
 //
 //   float4 fCompData;
 //   float4 fGIData;
-//   sampler2D texBayer;
 //   sampler2D texColor;
 //   sampler2D texGI;
 //   sampler2D texLights;
@@ -20,21 +19,16 @@
 //   texColor     s0       1
 //   texLights    s1       1
 //   texGI        s2       1
-//   texBayer     s3       1
 //
 
     ps_3_0
-    def c2, 75, 0.00999999978, 1, 0
+    def c2, 1, 0, 0, 0
     dcl_texcoord v0.xy
     dcl_texcoord1 v1.xy
     dcl_2d s0
     dcl_2d s1
     dcl_2d s2
-    dcl_2d s3
-    mul r0.xy, c2.x, v0
-    texld r0, r0, s3
-    mad r0.xy, r0, c2.y, v1
-    texld r0, r0, s2
+    texld r0, v1, s2
     mul r0.xyz, r0, c1.x
     texld r1, v0, s1
     log r2.x, r1.x
@@ -46,13 +40,13 @@
     exp r2.z, r1.z
     mad_sat r0.xyz, r2, c0.z, r0
     mov r0.w, c0.w
-    mad r1.xyz, r2, -r0.w, c2.z
+    mad r1.xyz, r2, -r0.w, c2.x
     texld r2, v0, s0
     mul r0.xyz, r0, r2
     rcp r2.x, r1.x
     rcp r2.y, r1.y
     rcp r2.z, r1.z
     mul oC0.xyz, r0, r2
-    mov oC0.w, c2.z
+    mov oC0.w, c2.x
 
-// approximately 23 instruction slots used (4 texture, 19 arithmetic)
+// approximately 20 instruction slots used (3 texture, 17 arithmetic)

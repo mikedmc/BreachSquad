@@ -4050,16 +4050,17 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 	///----------------------------------------------------
 	/// START GI
-	/// 1. build occluders/emitters map
-	/// 2. apply voronoi seed PS on 1
-	/// 3. apply multipass voronoi on (starting with) 2
-	/// 4. convert voronoi from 3 to SDF
-	/// 5. raymarch
+	/// 1. build scene for GI (floor final light before blur)
+	/// 2. downscale and blur X
+	/// 3. blur y
+	/// -- repeat 2, 3
+	/// 4. scale up with gaussian (cascade merge)
+	/// 5. add to light from last frame
 	///----------------------------------------------------
 
 
 	///----------------------------------------------------
-	/// 1. build occluders/emitters map (emissive map)
+	/// 1. build scene for GI (floor final light before blur)
 	///----------------------------------------------------
 	// render on transparent background, colored lights, black walls
 	pRT = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
@@ -4082,6 +4083,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 	}
 
+	/*
 	///----------------------------------------------------
 	/// 2. apply voronoi seed PS on 1
 	///----------------------------------------------------
@@ -4609,7 +4611,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 	}
-	
+	 */
 
 
 
@@ -5309,8 +5311,7 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
 	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
-	CRTManager::CEngineRenderTarget* pRTGI = __RTManager().GetRTbyUID( K_RTID_MIPMAP );
-	auto ptexbayer = UTApp().g_texManager.GetTextureByID( FastHash( L"BAYER8X8" ) );
+	CRTManager::CEngineRenderTarget* pRTGI = __RTManager().GetRTbyUID( K_RTID_GI );
 
 	_ASSERT( pRTcolor != nullptr && pRTlights != nullptr );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
@@ -5320,11 +5321,6 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	m_pDevice->SetTexture( 2, pRTGI->m_pRTTexture );
 	m_pDevice->SetSamplerState( 2, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
 	m_pDevice->SetSamplerState( 2, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-	m_pDevice->SetTexture( 3, ptexbayer->pTexture );
-	m_pDevice->SetSamplerState( 3, D3DSAMP_MINFILTER, D3DTEXF_POINT );
-	m_pDevice->SetSamplerState( 3, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
-	m_pDevice->SetSamplerState( 3, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
-	m_pDevice->SetSamplerState( 3, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
 
 	//--- build RT rect ---
 	_VERTEX_PNCT4T4 vul, vur, vdl, vdr;

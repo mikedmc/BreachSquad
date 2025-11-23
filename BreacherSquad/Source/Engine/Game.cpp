@@ -686,25 +686,22 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			}
 			*/
 			
-			char arrkeys[] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
-			ERTIDChannel arrchan[] = { 
-				K_RTID_WORLDSCENE,
-				K_RTID_CASCADE0,
-				K_RTID_CASCADE1,
-				K_RTID_CASCADE2,
-				K_RTID_CASCADE3,
-				K_RTID_STORAGE,
-				K_RTID_TEMPORARY,
-				K_RTID_MIPMAP,
-				K_RTID_JUMPFLOOD,
-				K_RTID_DISTANCEFIELD,
+			using type1 = struct {
+				char key;
+				ERTIDChannel channel;
+			};
+			type1 arrkeys[] = {
+				{ '1', K_RTID_WORLDSCENE },
+				{ '2', K_RTID_TEMPORARY },
+				{ '3', K_RTID_STORAGE },
+				{ '4', K_RTID_STORAGE_HALF },
 			};
 
-			for ( int kk = 0; kk < ARRAY_SIZE( arrkeys ); kk++ )
+			for (auto & arrkey : arrkeys)
 			{
-				if ( DXUTIsKeyDown( arrkeys[kk] ) ) {
-					ERTIDChannel seechan = arrchan[kk];
-					CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( arrchan[kk] );
+				if ( DXUTIsKeyDown( arrkey.key ) ) {
+					ERTIDChannel seechan = arrkey.channel;
+					CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( seechan );
 					if ( pRT != null )
 					{
 						RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );

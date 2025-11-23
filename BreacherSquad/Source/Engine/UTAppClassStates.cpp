@@ -11,41 +11,20 @@ void CApplication::App_EnterState_Loading()
 	UINT fGameWpx = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
 
 	float cascadeW = 1024.0, cascadeH = 1024.0;
-	// Passing 0 or less cascades will optimally calculate the number of required cascades.
-	// Parameters: [angular] is power of 4, [interval] is multiple of 4, [spacing] is power of 2.
-	// Any value passed that does not conform to these rules will be automatically adjusted (adjusted up).
-	radiance_initialize( max( cascadeW, cascadeH), 4.0f, 4.0f, 2.0f, 1.0f, 0.65f );
-	float bytes = 4.0f * ( gi_global.radiance_cascade_extent * gi_global.radiance_cascade_extent ) * gi_global.radiance_cascade_count;
-	LOG( "\nRender  Diagonal: %d", int(floor( gi_global.radiance_render_extent ) ));
-	LOG( "Cascade Diagonal: %d", int(floor( gi_global.radiance_cascade_extent ) ));
-	LOG( "Cascade Count: %d", int(floor( gi_global.radiance_cascade_count ) ));
-	LOG( "Cascade Angular: %d", int(floor( gi_global.radiance_cascade_angular ) ));
-	LOG( "Cascade Interval: %d", int(floor( gi_global.radiance_cascade_interval ) ));
-	LOG( "Cascade Spacing: %d", int(floor( gi_global.radiance_cascade_spacing ) ));
-	LOG( "Cascade Memory: %d MB\n", int(floor( bytes / 1024 / 1024 ) ));
+	radiance_initialize( max( cascadeW, cascadeH), 1.0f, 0.65f );
 
 	// Create RTs
 	__RTManager().AddRT( K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_EMISSIVE, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
-	__RTManager().AddRT( K_RTID_GICOLOR, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	// used for GI
 	UINT radiance_render_extent = (UINT)gi_global.radiance_render_extent;
 	__RTManager().AddRT( K_RTID_WORLDSCENE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
-	__RTManager().AddRT( K_RTID_TEMPORARY, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A16B16G16R16F, false );
-	__RTManager().AddRT( K_RTID_JUMPFLOOD, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A16B16G16R16F, false );
-	__RTManager().AddRT( K_RTID_DISTANCEFIELD, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A16B16G16R16F, false );
-
-	__RTManager().AddRT( K_RTID_STORAGE, (UINT)gi_global.radiance_cascade_extent, (UINT)gi_global.radiance_cascade_extent, 1, D3DFMT_A8R8G8B8, false );
-
-	float angular_resolution = (float)sqrt( gi_global.radiance_cascade_angular * pow( 4.0, 0 /*mip resolution*/ ) );
-	UINT mipmap_extent = (UINT)gi_global.radiance_cascade_extent / (UINT)angular_resolution;
-	__RTManager().AddRT( K_RTID_MIPMAP, mipmap_extent, mipmap_extent, 1, D3DFMT_A8R8G8B8, false );
-
-	for ( int i = 0; i < gi_global.radiance_cascade_count; i++ ) {
-		__RTManager().AddRT( K_RTID_CASCADE0 + i, gi_global.radiance_cascade_extent, gi_global.radiance_cascade_extent, 1, D3DFMT_A8R8G8B8, false );
-	}
+	__RTManager().AddRT( K_RTID_TEMPORARY, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_STORAGE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_STORAGE_HALF, radiance_render_extent / 2, radiance_render_extent / 2, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_GI, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
 
 
 	GameState::substate = 0;

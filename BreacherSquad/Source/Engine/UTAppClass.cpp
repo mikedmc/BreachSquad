@@ -2111,47 +2111,17 @@ void CApplication::App_OnLevelFinished( int nEpisodeIdx, int nLevelIdx )
 		if ( g_levelStats[nRealIdx].nStars > 0 )
 			nLevelsFinishedPerChapter++;
 	}
-	//#ACHIEVEMENTS: chapter achievements on level data (stars and all levels finished)
-	int arr_ach_3_stars[] = { ACH_CLEANUP_THE_HOOD, ACH_NO_QUARTER, ACH_WE_STAND_ON_GUARD, ACH_NOT_IN_MY_CITY, ACH_CARTEL_ANNIHILATOR, -1 /*WEEKLY*/, ACH_KING_OF_CASTLE, -1, -1, -1 };
-	int arr_ach_all_played[] = { ACH_GANGLAND_PACIFIER, ACH_RADICALIZED, ACH_ALERT_EXTINGUISHED, ACH_BITE_THE_APPLE, ACH_NOT_ON_MY_WATCH, -1 /*WEEKLY*/, ACH_COURT_IS_CLEAR, -1, -1, -1 };
-
-	//3 stars all on chapter
-	if ( (arr_ach_3_stars[nEpisodeIdx] >= 0) && (nStarsPerChapter == 3 * K_GAME_LEVELS_PER_CHAPTER) )
-		__Achievements().UnlockAchievement( (EGameAchievements)arr_ach_3_stars[nEpisodeIdx] );
-	//all levels finished in chapter
-	if ( (arr_ach_all_played[nEpisodeIdx] >= 0) && (nLevelsFinishedPerChapter == K_GAME_LEVELS_PER_CHAPTER) )
-		__Achievements().UnlockAchievement( (EGameAchievements)arr_ach_all_played[nEpisodeIdx] );
 }
 
 int multiple_of2( int number ) { return ((number + (2 - 1)) & ~(2 - 1)); }
 float power_of4( float number ) { return pow( 4, ceil( log( number ) / log(4) ) ); }
 float power_of2( float number ) { return pow( 2, ceil( log2( number ) ) ); }
 
-void CApplication::radiance_initialize( float extent, float angular /*= 4.0*/, float interval /*= 4.0*/, float spacing /*= 4.0*/, float boost /*= 1.0*/, float decayrate /*= 0.65 */ )
+void CApplication::radiance_initialize( float extent, float boost /*= 1.0*/, float decayrate)
 {
 	gi_global.radiance_render_extent = extent;              // extent resolution.. output resolution will be SQUARE.
 	gi_global.radiance_render_decay = decayrate;           // How quickly light bounces decay.
 	gi_global.radiance_render_boost = boost;               // How much to boost light levels.
-	gi_global.radiance_cascade_angular = power_of4( angular );  // angular resolution or initial rays per probe in cascade[0].
-	gi_global.radiance_cascade_interval = multiple_of2( interval ); // radiance interval or raymarch distance of probes.
-	gi_global.radiance_cascade_spacing = power_of2( spacing );  // Initial probe spacing of cascade0, each next cascade is N*4.0 spacing.
-	gi_global.radiance_cascade_extent = floor( gi_global.radiance_render_extent / gi_global.radiance_cascade_spacing ) * sqrt( gi_global.radiance_cascade_angular );
-
-	// Maximum cascade count.
-	gi_global.radiance_cascade_count = ceil( log2( gi_global.radiance_cascade_extent / sqrt( gi_global.radiance_cascade_angular ) ) );
-
-	// Desired cascade count.
-	float diagonal = MUVec2Len( &Vec2( extent, extent ) );
-	gi_global.radiance_cascade_count = min( floor( log( 4.0 * diagonal ) / log(4) ) - 1, gi_global.radiance_cascade_count );
-
-	// Find Cascade count by maximum radiance interval.
-	// for(var i = 0; i < global.radiance_cascade_count; i++) {
-	// 	var max_interval = global.radiance_cascade_interval * power(4, i);
-	// 	if (max_interval > global.radiance_render_extent) {
-	// 		global.radiance_cascade_count = i;
-	// 		break;
-	// 	}
-	// }
 }
 
 
