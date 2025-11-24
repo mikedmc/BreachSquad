@@ -695,13 +695,15 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 				{ '2', K_RTID_TEMPORARY },
 				{ '3', K_RTID_STORAGE },
 				{ '4', K_RTID_STORAGE_HALF },
+				{ '5', K_RTID_STORAGE_QUART },
+				{ '6', K_RTID_STORAGE_QUART2 },
+				{ '7', K_RTID_GI },
 			};
 
 			for (auto & arrkey : arrkeys)
 			{
 				if ( DXUTIsKeyDown( arrkey.key ) ) {
-					ERTIDChannel seechan = arrkey.channel;
-					CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( seechan );
+					CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( arrkey.channel );
 					if ( pRT != null )
 					{
 						RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );

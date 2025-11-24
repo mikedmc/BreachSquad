@@ -4070,7 +4070,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		{
 			Matrix matView;
 			// Clear the render target and the zbuffer 
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0x00000000, 1.0f, 0 ) ) )
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0xff000000, 1.0f, 0 ) ) )
 			{
 				return K_OP_FAILED;
 			}
@@ -4083,81 +4083,33 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		}
 	}
 
-	/*
 	///----------------------------------------------------
-	/// 2. apply voronoi seed PS on 1
+	/// 2. downscale twice and blur more
 	///----------------------------------------------------
-	pRT = __RTManager().GetRTbyUID( K_RTID_JUMPFLOOD );
-	if ( pRT != nullptr )
+	
+	auto tex_from = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
+	RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_STORAGE_HALF );
+	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
+	RenderOP_Blur( EDIR_UP, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_STORAGE_QUART);
+	
+	// pingpong blur
+	ERTIDChannel channels[] = { K_RTID_STORAGE_QUART , K_RTID_STORAGE_QUART2 };
+	ERTIDChannel chan_last_blur = K_RTID_STORAGE_QUART;
+	for ( int runs = 0; runs < 4; runs++ )
 	{
-		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
-		{
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
-				return K_OP_FAILED;
-
-			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
-
-			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
-			m_pDevice->SetTransform( D3DTS_VIEW, &g_matIdentity );
-
-			// RT sized quad with tex1 color, tex2 lightmap
-
-			Matrix matView;
-			m_pDevice->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_FLAT );
-
-			m_pDevice->SetRenderState( D3DRS_ZENABLE, FALSE );
-			m_pDevice->SetRenderState( D3DRS_ZWRITEENABLE, FALSE );
-			m_pDevice->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
-
-			m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT );
-			m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
-			m_pDevice->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_NONE );
-
-			MUMatIdentity( &matView );
-			m_pDevice->SetTransform( D3DTS_VIEW, &matView );
-			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
-
-			///--- compose scene from normals and color ---
-			Matrix matWVP = matView * pRT->matProj;
-
-			CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
-			_ASSERT( pRTcolor != nullptr );
-			m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
-
-			//--- build RT rect ---
-			_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-			vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
-			vur.pos = Vec3( (float)pRTcolor->nWidth, 0.0f, 0.0f );
-			vdl.pos = Vec3( 0.0f, (float)pRTcolor->nHeight, 0.0f );
-			vdr.pos = Vec3( (float)pRTcolor->nWidth, (float)pRTcolor->nHeight, 0.0f );
-
-			vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
-			vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
-			vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
-			vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
-			//set color
-			vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
-			//build verts
-			_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
-			lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-			lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-			__Shaders().SetVSByName( L"VS_COMPOSITION" );
-			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
-
-			__Shaders().SetPSByName( L"PS_VORONOI_SEED" );
-
-			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
-			// remove VS PS
-			__Shaders().SetPS( nullptr );
-			__Shaders().SetVS( nullptr );
-
-			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
-
-		}
+		auto tex_from = __RTManager().GetRTbyUID( channels[runs % 2] );
+		chan_last_blur = channels[(runs + 1) % 2];
+		RenderOP_Blur( (runs % 2 == 0) ? EDIR_LEFT : EDIR_UP, tex_from->m_pRTTexture, (float)tex_from->nWidth, chan_last_blur );
 	}
+	// upscale blurred version with gaussian X
+	tex_from = __RTManager().GetRTbyUID( chan_last_blur );
+	//RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_GI );
+	RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_GI );		
+	//
 
+
+
+	/*
 	///----------------------------------------------------
 	/// 3. apply multipass voronoi on (starting with) 2
 	///----------------------------------------------------
@@ -5238,7 +5190,7 @@ OPRESULT CLevel::RenderPass_GIEmissive( Matrix* matProj, float /*fBetweenFramesP
 	__Shaders().SetPS( nullptr );
 
 	/// paint occluders in black
-	auto ptexnoise = UTApp().g_texManager.GetTextureByID( FastHash( L"BLACK32" ) );	
+	auto ptexnoise = UTApp().g_texManager.GetTextureByID( FastHash( L"BAYER8X8" ) );	
 	m_pDevice->SetTexture( 0, ptexnoise->pTexture );
 
 	Areas_PaintLayer( K_AL_OCCLUDERS );
@@ -5374,6 +5326,143 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	__Shaders().SetPS( nullptr );
 
 	return K_OP_OK;
+}
+
+OPRESULT CLevel::RenderOP_Blur( EDir dir, PTEXTURE pTexFrom, float pTexFromWidth, ERTIDChannel RTto )
+{
+	auto pRT = __RTManager().GetRTbyUID( RTto );
+	if ( pRT != nullptr )
+	{
+		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
+		{
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 255, 0, 0, 0 ), 1.0f, 0 ) ) )
+				return K_OP_FAILED;
+
+			m_pDevice->SetTransform( D3DTS_PROJECTION, &pRT->matProj );
+
+			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+			m_pDevice->SetTransform( D3DTS_VIEW, &g_matIdentity );
+
+
+			Matrix matView;
+			m_pDevice->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_FLAT );
+			m_pDevice->SetRenderState( D3DRS_ZENABLE, FALSE );
+			m_pDevice->SetRenderState( D3DRS_ZWRITEENABLE, FALSE );
+			m_pDevice->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+
+			m_pDevice->SetTexture( 0, NULL );
+			m_pDevice->SetTexture( 1, pTexFrom );
+			m_pDevice->SetSamplerState( 1, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
+			m_pDevice->SetSamplerState( 1, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
+			// !!! LINEAR FILTERING FOR BLUR !!!
+			m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+			m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+
+			MUMatIdentity( &matView );
+			m_pDevice->SetTransform( D3DTS_VIEW, &matView );
+			m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
+
+			///--- compose scene from normals and color ---
+			Matrix matWVP = matView * pRT->matProj;
+
+			//--- build RT rect ---
+			_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+			vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+			vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+			vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+			vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+			vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+			vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+			vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+			vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+			//set color
+			vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
+			//build verts
+			_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+			lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+			lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+			__Shaders().SetVSByName( L"VS_COMPOSITION" );
+			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+
+			if(dir == K_DIR_UP || dir == K_DIR_DOWN) 
+				__Shaders().SetPSByName( L"PS_GI_GAUSS_Y" );
+			else
+				__Shaders().SetPSByName( L"PS_GI_GAUSS_X" );
+			//   TexelWidth                 c0       1
+			//   SamplerLinear+InputTexture s1       1
+			float fConstData[][4] = {
+				// x: input texture 1/width
+				{ 1.0f / pTexFromWidth , 0.0f, 0.0f, 0.0f},
+			};
+
+			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+
+			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+			// remove VS PS
+			__Shaders().SetPS( nullptr );
+			__Shaders().SetVS( nullptr );
+
+			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+
+		}
+	}
+	else 
+	{
+		return OP_ERR( K_OP_FAILED, L"Couldn't find RT!", K_SEVERITY_WARNING );
+	}
+}
+
+OPRESULT CLevel::RenderOP_Copy( PTEXTURE pTexFrom, ERTIDChannel RTto )
+{
+	auto pRT = __RTManager().GetRTbyUID( RTto );
+	if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
+	{
+		m_pDevice->SetTexture( 0, pTexFrom );
+		m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+		m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+
+		Matrix matWVP = pRT->matProj;
+		if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+			return K_OP_FAILED;
+
+		//--- build RT rect ---
+		_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+		vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+		vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+		vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+		vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+		vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+		vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+		vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+		vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+		//set color
+		vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
+		//build verts
+		_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+		lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+
+		__Shaders().SetVSByName( L"VS_COMPOSITION" );
+		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+		__Shaders().SetPS( nullptr );
+		// no PS - just copy
+		__Shaders().SetPSByName( L"PS_COPY1TEX" );
+
+		m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+
+		// remove VS PS
+		__Shaders().SetPS( nullptr );
+		__Shaders().SetVS( nullptr );
+
+		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+	}
+
 }
 
 void CLevel::Paint()

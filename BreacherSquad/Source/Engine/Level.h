@@ -348,6 +348,9 @@ public:
 	OPRESULT				RenderPass_GIEmissive( Matrix* matProj, float fBetweenFramesPercent );
 	// composes color and lights into one RT
 	OPRESULT				RenderPass_Composition( Matrix* matProj, float fBetweenFramesPercent );
+	// gaussian blur from one surface to the other. Use DIR to specify direction of blur.
+	OPRESULT				RenderOP_Blur( EDir dir, PTEXTURE pTexFrom, float pTexFromWidth, ERTIDChannel RTto );
+	OPRESULT				RenderOP_Copy( PTEXTURE pTexFrom, ERTIDChannel RTto );
 
 	// paint level buffers onscreen
 	void					Paint();

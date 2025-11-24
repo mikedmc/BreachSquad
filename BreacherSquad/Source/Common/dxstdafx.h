@@ -283,15 +283,16 @@ enum ERTIDChannel {
 	K_RTID_NONE = -1,
 
 	K_RTID_COLORDEPTHSTENCIL = 0,	// has depth and stencil
-	K_RTID_EMISSIVE = 1,			// emissive/occluders (transparent where nothing, occluders can be black if dark)	
-	K_RTID_FINAL,
+	K_RTID_FINAL = 1,
 	K_RTID_TEMP1,					// just colors
 
 	K_RTID_WORLDSCENE,			//1024
 	K_RTID_TEMPORARY,			//1024
 	K_RTID_STORAGE,				//1024
 	K_RTID_STORAGE_HALF,		//512
-	K_RTID_GI,		
+	K_RTID_STORAGE_QUART,		//256
+	K_RTID_STORAGE_QUART2,		//256
+	K_RTID_GI,					// final GI additive
 
 	K_RTIDS_COUNT
 };

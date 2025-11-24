@@ -17,12 +17,8 @@
     <PixelShader name="PS_DIRECTIONAL" path="ps_directional.pso" />
     <PixelShader name="PS_WATER" path="ps_water.pso" />
     <PixelShader name="PS_COPY1TEX" path="copy-1tex.ps.cso" />
-    <PixelShader name="PS_VORONOI_SEED" path="ps_voronoi_seed.ps.cso" />
-    <PixelShader name="PS_VORONOI_MULTIPASS" path="ps_voronoi_multipass.ps.cso" />
-    <PixelShader name="PS_VORONOI_DISTANCE" path="ps_voronoi_distance.ps.cso" />
-    <PixelShader name="PS_GI_CASCADES" path="ps_gi_cascades.ps.cso" />
-    <PixelShader name="PS_GI_RADIANCE_INTERVALS" path="gi-radiance-intervals.ps.cso" />
-    <PixelShader name="PS_GI_RADIANCE_MERGING" path="gi-radiance-merging.ps.cso" />
-    <PixelShader name="PS_GI_RADIANCE_MIPMAP" path="gi-radiance-mipmap.ps.cso" />
+    
+    <PixelShader name="PS_GI_GAUSS_X" path="gauss-x.ps.cso" />
+    <PixelShader name="PS_GI_GAUSS_Y" path="gauss-y.ps.cso" />
   </PixelShaders>
 </Shaders>
