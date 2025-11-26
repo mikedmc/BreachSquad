@@ -15,7 +15,7 @@ CRTManager::~CRTManager()
 	Release();
 }
 
-void CRTManager::AddRT(UINT32 dwID, UINT width, UINT height, UINT mipLevels, FORMAT3D texFormat, bool bDepthStencil /*= TRUE*/, FORMAT3D depthStencilFormat /*= D3DFMT_D24X8*/)
+void CRTManager::AddRT(UINT32 dwID, INT width, INT height, UINT mipLevels, FORMAT3D texFormat, bool bDepthStencil /*= TRUE*/, FORMAT3D depthStencilFormat /*= D3DFMT_D24X8*/)
 {
 	CEngineRenderTarget * pRT = new CEngineRenderTarget();
 

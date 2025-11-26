@@ -1883,6 +1883,8 @@ void CLevel::BuildDynamicGeometry( CAABB _camAABB )
 
 			case K_LVL_LT_AMBIENTAL:
 			{
+				//#TODO: remove this break for ambient lights
+				break;
 				// ambiental light only influence the area where they reside, have the bbox the size of the area so we clip to camera rect
 				// use BBOX_INI because bbox gets moved to light position
 				CAABB realbb;
@@ -4060,7 +4062,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 
 	///----------------------------------------------------
-	/// 1. build scene for GI (floor final light before blur)
+	/// 1. build lights texture
 	///----------------------------------------------------
 	// render on transparent background, colored lights, black walls
 	pRT = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
@@ -4078,16 +4080,23 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 			RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
 			CAABB			camAABB( camrect );
 
-			RenderPass_GIEmissive( &pRT->matProj, fBetweenFramesPercent );
+			RenderPass_GIDirectLight( &pRT->matProj, fBetweenFramesPercent );
 			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}
 	}
 
 	///----------------------------------------------------
-	/// 2. downscale twice and blur more
+	/// 2. combine current light with last frame GI
 	///----------------------------------------------------
-	
-	auto tex_from = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
+	auto tex_light = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
+	auto tex_gi = __RTManager().GetRTbyUID( K_RTID_GI );
+	RenderOP_Lerp( tex_light->m_pRTTexture, tex_gi->m_pRTTexture, 0.6, 0.4, K_RTID_STORAGE );
+
+
+	///----------------------------------------------------
+	/// 3. downscale twice and blur more
+	///----------------------------------------------------
+	auto tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE );
 	RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_STORAGE_HALF );
 	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
 	RenderOP_Blur( EDIR_UP, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_STORAGE_QUART);
@@ -4105,16 +4114,20 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	tex_from = __RTManager().GetRTbyUID( chan_last_blur );
 	//RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_GI );
 	RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_GI );		
-	//
-
-
+	
+	
+	//// mipmaps 2 levels:
+	/*
+	auto tex_from = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
+	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF );
+	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
+	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_QUART );
+	*/
 
 	/*
 	///----------------------------------------------------
-	/// 3. apply multipass voronoi on (starting with) 2
+	/// radiance cascade merge
 	///----------------------------------------------------
-	pRT = __RTManager().GetRTbyUID( K_RTID_TEMPORARY );
-	int passes = ceil( log( max( pRT->nWidth, pRT->nHeight ) ) / log( 2.0 ) );
 	Matrix matView;
 	MUMatIdentity( &matView );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
@@ -4142,58 +4155,45 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
 	Vec2 vScreenPixelSize( 1.0f / (float)pRT->nWidth, 1.0f / (float)pRT->nHeight );
-	int last_pass_idx = 0;
-	// we start with JUMPFLOOD as src (voronoi seed in it) and paint to TEMP1
-	ERTIDChannel arr_swap_rt[] = { K_RTID_JUMPFLOOD , K_RTID_TEMPORARY };
-	for ( int i = 0; i < passes; i++ )
-	{
-		// save last pass so we know what the last RT was in next step
-		last_pass_idx = i;
-		// offset for each pass is half the previous one, starting at half the square resolution rounded up to nearest power 2.
-		// i.e. for 768x512 we round up to 1024x1024 and the offset for the first pass is 512x512, then 256x256, etc.
-		float offset = pow( 2, passes - i - 1 );
-		///--- set source texture
-		CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( arr_swap_rt[i % 2] );
-		m_pDevice->SetTexture( 1, pRTcolor->m_pRTTexture );
-		m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_POINT );
-		m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
-		m_pDevice->SetSamplerState( 1, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
-		m_pDevice->SetSamplerState( 1, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
-
-		pRT = __RTManager().GetRTbyUID( arr_swap_rt[(i + 1) % 2] );
-		if ( pRT != nullptr )
-		{
-			if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
-			{
-				if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
-					return K_OP_FAILED;
-
-				__Shaders().SetVSByName( L"VS_COMPOSITION" );
-				__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-				__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
-
-				__Shaders().SetPSByName( L"PS_VORONOI_MULTIPASS" );
-				//set Pshader constants
-				float fConstData[][4] = {
-					// x: texture offset
-					{ offset, offset, 0.0f, 0.0f},
-					// xy: inverse of RT resolution
-					{ vScreenPixelSize.x, vScreenPixelSize.y, .0f, .0f },
-				};
-				__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
-
-				m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
-
-
-				// remove VS PS
-				__Shaders().SetPS( nullptr );
-				__Shaders().SetVS( nullptr );
-
-				V_OP_RET( __RTManager().EndSceneRT( pRT ) );
-			}
-		}
+	for ( int ll = 0; ll < 4; ll++ ) {
+		m_pDevice->SetSamplerState( ll, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+		m_pDevice->SetSamplerState( ll, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+		m_pDevice->SetSamplerState( ll, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
+		m_pDevice->SetSamplerState( ll, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
 	}
+	///--- set source texture
+	auto lvl1 = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
+	m_pDevice->SetTexture( 1, lvl1->m_pRTTexture );
+	auto lvl2 = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF);
+	m_pDevice->SetTexture( 2, lvl2->m_pRTTexture );
+	auto lvl3 = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART);
+	m_pDevice->SetTexture( 3, lvl3->m_pRTTexture );
 
+	// write summed cascades to storage
+	pRT = __RTManager().GetRTbyUID( K_RTID_STORAGE );
+	if ( pRT != nullptr && OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
+	{
+			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+				return K_OP_FAILED;
+
+			__Shaders().SetVSByName( L"VS_COMPOSITION" );
+			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+
+			__Shaders().SetPSByName( L"PS_MIP_RADIANCE_MERGE" );
+
+			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+
+
+			// remove VS PS
+			__Shaders().SetPS( nullptr );
+			__Shaders().SetVS( nullptr );
+
+			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+	}
+	*/
+
+	 /*
 	///----------------------------------------------------
 	/// 4. convert voronoi diagram to distance field
 	///----------------------------------------------------
@@ -5150,7 +5150,7 @@ OPRESULT CLevel::RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent
 	return K_OP_OK;
 }
 
-OPRESULT CLevel::RenderPass_GIEmissive( Matrix* matProj, float /*fBetweenFramesPercent*/ )
+OPRESULT CLevel::RenderPass_GIDirectLight( Matrix* matProj, float /*fBetweenFramesPercent*/ )
 {
 	CSpriteLib* sprlib_lights = m_sprLib.GetLibByNick( K_LIBNICK_LIGHTS );
 
@@ -5159,6 +5159,7 @@ OPRESULT CLevel::RenderPass_GIEmissive( Matrix* matProj, float /*fBetweenFramesP
 	Vec2		campos = m_camLevelToRT.GetCamPos();
 	float		render_offset = UTApp().gi_global.radiance_render_extent / 2.0f;
 	CAABB		camAABB( campos.x - render_offset, campos.y - render_offset, campos.x + render_offset, campos.y + render_offset);
+	RectXYWH	camrect = m_camLevelToRT.GetViewport();
 
 	//locally used temp matrix
 	Matrix	matlocal;
@@ -5178,6 +5179,8 @@ OPRESULT CLevel::RenderPass_GIEmissive( Matrix* matProj, float /*fBetweenFramesP
 
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 
+
+
 	//#HACK: we floor the camera pos if we get UV seams in DX9. See LoadArea for another hack regarding UV coords and UV seams (UV shrinking)
 	// moves from tex pixel to pixel, no half pixels but we add the subpixel movement when painting the final scene so if moves smoothly
 	MUMatAffine2D( &matView, K_RT_PIXEL_SIZE_F, nullptr, 0.0f, &Vec2( -floor( camAABB.vMin.x ) * K_RT_PIXEL_SIZE_F, -floor( camAABB.vMin.y ) * K_RT_PIXEL_SIZE_F ) );
@@ -5186,35 +5189,40 @@ OPRESULT CLevel::RenderPass_GIEmissive( Matrix* matProj, float /*fBetweenFramesP
 
 	//Matrix matWVP = matView *(*matProj);
 
-	__Shaders().SetVS( nullptr );
-	__Shaders().SetPS( nullptr );
-
-	/// paint occluders in black
-	auto ptexnoise = UTApp().g_texManager.GetTextureByID( FastHash( L"BAYER8X8" ) );	
-	m_pDevice->SetTexture( 0, ptexnoise->pTexture );
-
-	Areas_PaintLayer( K_AL_OCCLUDERS );
-
 	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
 	///--- BEGIN SPRITES PAINTER ---
 	PVERTEXSHADER pSprVS = __Shaders().GetVShaderByName( L"VS_SPRITES2D" );
 	if ( pSprVS )
-		__Painter().Begin( pSprVS, matView, *matProj );
+		__Painter().Begin( pSprVS, /*matView*/ g_matIdentity, *matProj );
 
-	for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
-	{
-		CLight* nl = m_visibleList.visible_lights.m_pData[kk];
-		CSpr spr( sprlib_lights, ANM_LIGHTS_SPR_GI_LIGHTS, nl->pos.xy );
-		spr.frameIdx = 0;
-		spr.color = nl->color;
-		spr.Paint();
-	}
+	auto pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
+	RectLTRB rct_src_uv( 0.0f, 0.0f, 1.0f, 1.0f );
+	RectLTRB rct_dst_pos(float(-pRTlights->nWidth) / 2.0f, float(-pRTlights->nHeight) / 2.0f, pRTlights->nWidth / 2.0f, pRTlights->nHeight / 2.0f );
+	__Painter().Draw( pRTlights->m_pRTTexture, rct_src_uv, rct_dst_pos, Vec2( 512.0f, 512.0f ) );
+
+	//for ( int kk = 0; kk < m_visibleList.visible_lights.Count(); kk++ )
+	//{
+	//	CLight* nl = m_visibleList.visible_lights.m_pData[kk];
+	//	CSpr spr( sprlib_lights, ANM_LIGHTS_SPR_GI_LIGHTS, nl->pos.xy );
+	//	spr.frameIdx = 0;
+	//	spr.color = nl->color;
+	//	spr.Paint();
+	//}
 
 	__Painter().Flush();
 
 	/// END SPRITES PAINTER
 	__Painter().End();
 
+	__Shaders().SetVS( nullptr );
+	__Shaders().SetPS( nullptr );
+	
+		/// paint occluders in black
+		auto ptexnoise = UTApp().g_texManager.GetTextureByID( FastHash( L"BLACK32" ) );
+		m_pDevice->SetTexture( 0, ptexnoise->pTexture );
+
+		Areas_PaintLayer( K_AL_OCCLUDERS );
+	  
 
 	__Shaders().SetVS( nullptr );
 	__Shaders().SetPS( nullptr );
@@ -5463,6 +5471,119 @@ OPRESULT CLevel::RenderOP_Copy( PTEXTURE pTexFrom, ERTIDChannel RTto )
 		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 	}
 
+}
+
+OPRESULT CLevel::RenderOP_Lerp( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter )
+{
+	auto pRT = __RTManager().GetRTbyUID( RTto );
+	if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
+	{
+		m_pDevice->SetTexture( 0, pTexFrom1 );
+		m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, filter );
+		m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, filter);
+		m_pDevice->SetTexture( 1, pTexFrom2 );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, filter);
+		m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, filter);
+
+		Matrix matWVP = pRT->matProj;
+		if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+			return K_OP_FAILED;
+
+		//--- build RT rect ---
+		_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+		vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+		vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+		vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+		vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+		vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+		vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+		vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+		vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+		//set color
+		vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
+		//build verts
+		_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+		lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+
+		__Shaders().SetVSByName( L"VS_COMPOSITION" );
+		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+		__Shaders().SetPSByName( L"PS_ADD2TEX" );
+		float fConstData[][4] = {
+			// x: input texture 1/width
+			{ fMul1, fMul2, 0.0f, 0.0f},
+		};
+
+		__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+
+		m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+
+		// remove VS PS
+		__Shaders().SetPS( nullptr );
+		__Shaders().SetVS( nullptr );
+
+		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+	}
+
+}
+
+OPRESULT CLevel::RenderOP_Mul( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter /*= D3DTEXF_LINEAR */ )
+{
+	auto pRT = __RTManager().GetRTbyUID( RTto );
+	if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
+	{
+		m_pDevice->SetTexture( 0, pTexFrom1 );
+		m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, filter );
+		m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, filter );
+		m_pDevice->SetTexture( 1, pTexFrom2 );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, filter );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, filter );
+
+		Matrix matWVP = pRT->matProj;
+		if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+			return K_OP_FAILED;
+
+		//--- build RT rect ---
+		_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+		vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+		vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+		vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+		vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+		vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+		vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+		vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+		vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+		//set color
+		vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
+		//build verts
+		_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+		lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+
+		__Shaders().SetVSByName( L"VS_COMPOSITION" );
+		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+		__Shaders().SetPSByName( L"PS_MUL2TEX" );
+		float fConstData[][4] = {
+			// x: input texture 1/width
+			{ fMul1, fMul2, 0.0f, 0.0f},
+		};
+
+		__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+
+		m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+
+		// remove VS PS
+		__Shaders().SetPS( nullptr );
+		__Shaders().SetVS( nullptr );
+
+		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+	}
 }
 
 void CLevel::Paint()

@@ -16,9 +16,14 @@
     <PixelShader name="PS_IESLIGHT" path="ps_ieslight.pso" />
     <PixelShader name="PS_DIRECTIONAL" path="ps_directional.pso" />
     <PixelShader name="PS_WATER" path="ps_water.pso" />
+
     <PixelShader name="PS_COPY1TEX" path="copy-1tex.ps.cso" />
+    <PixelShader name="PS_ADD2TEX" path="lerp-2tex.ps.cso" />
+    <PixelShader name="PS_MUL2TEX" path="mul-2tex.ps.cso" />
     
     <PixelShader name="PS_GI_GAUSS_X" path="gauss-x.ps.cso" />
     <PixelShader name="PS_GI_GAUSS_Y" path="gauss-y.ps.cso" />
+    <PixelShader name="PS_MIP_RADIANCE_MERGE" path="mip-radiance-merge.cso" />
+	
   </PixelShaders>
 </Shaders>

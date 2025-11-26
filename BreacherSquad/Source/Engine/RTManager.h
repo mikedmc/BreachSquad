@@ -20,8 +20,8 @@ public:
 		UINT32					UID;					// ID of the resource
 
 		bool					bDepthStencilBuffer;	// Do we need depth/stencil
-		UINT					nWidth;
-		UINT					nHeight;
+		INT						nWidth;
+		INT						nHeight;
 		UINT					nMipLevels;
 		FORMAT3D				dwTexFormat;
 		FORMAT3D				dwDepthStencilFormat;
@@ -48,7 +48,7 @@ public:
 	~CRTManager();
 
 	// Adds a new render target	to the RT collection
-	void					AddRT(UINT32 dwID, UINT width, UINT height, UINT mipLevels, FORMAT3D texFormat, bool bDepthStencil = TRUE, FORMAT3D depthStencilFormat = D3DFMT_D24X8);
+	void					AddRT(UINT32 dwID, INT width, INT height, UINT mipLevels, FORMAT3D texFormat, bool bDepthStencil = TRUE, FORMAT3D depthStencilFormat = D3DFMT_D24X8);
 	// Called before drawing so the engine knows to draw to the specified RT
 	OPRESULT				BeginSceneRT(UINT32 dwID);
 	OPRESULT				BeginSceneRT(CEngineRenderTarget* pRT);

@@ -344,13 +344,16 @@ public:
 	OPRESULT				RenderPass( eLVLRenderPass ePass, Matrix* matProj, float fBetweenFramesPercent );
 	// the lights pass is so very different that it needs a special function
 	OPRESULT				RenderPass_Lights( Matrix* matProj, float fBetweenFramesPercent );
-	// renders the emissive map for GI
-	OPRESULT				RenderPass_GIEmissive( Matrix* matProj, float fBetweenFramesPercent );
+	// prepares the lights for the GI step
+	OPRESULT				RenderPass_GIDirectLight( Matrix* matProj, float fBetweenFramesPercent );
 	// composes color and lights into one RT
 	OPRESULT				RenderPass_Composition( Matrix* matProj, float fBetweenFramesPercent );
 	// gaussian blur from one surface to the other. Use DIR to specify direction of blur.
 	OPRESULT				RenderOP_Blur( EDir dir, PTEXTURE pTexFrom, float pTexFromWidth, ERTIDChannel RTto );
 	OPRESULT				RenderOP_Copy( PTEXTURE pTexFrom, ERTIDChannel RTto );
+	// lerps 2 textures together into the RTto
+	OPRESULT				RenderOP_Lerp( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );
+	OPRESULT				RenderOP_Mul( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );
 
 	// paint level buffers onscreen
 	void					Paint();
