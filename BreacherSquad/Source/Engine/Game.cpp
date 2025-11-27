@@ -695,9 +695,11 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 				{ '2', K_RTID_TEMPORARY },
 				{ '3', K_RTID_STORAGE },
 				{ '4', K_RTID_STORAGE_HALF },
-				{ '5', K_RTID_STORAGE_QUART },
-				{ '6', K_RTID_STORAGE_QUART2 },
-				{ '7', K_RTID_GI },
+				{ '5', K_RTID_STORAGE_HALF2 },
+				{ '6', K_RTID_STORAGE_QUART },
+				{ '7', K_RTID_STORAGE_QUART2 },
+				{ '8', K_RTID_STORAGE_EIGHTH },
+				{ '9', K_RTID_GI },
 			};
 
 			for (auto & arrkey : arrkeys)

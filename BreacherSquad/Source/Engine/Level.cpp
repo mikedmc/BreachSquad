@@ -313,6 +313,7 @@ UINT32 CLevel::GenerateNextID()
 
 CLevel::CLevel()
 {
+	m_frameNo = 0;
 	m_unLastID = 10000000;
 
 	m_bufferedPainter.Init( 4000 );
@@ -2936,7 +2937,8 @@ void CLevel::UpdateFixedTimestep( float dTime_original )
 				else //lose - show why
 					SetLevelState( K_LVL_STATE_MISSION_FAILED, nStrIdxMissionFailed );
 			}
-
+			
+			m_frameNo++;
 		}
 		break;
 
@@ -4088,14 +4090,21 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	/// 2. combine current light with last frame GI
 	///----------------------------------------------------
+	if ( m_frameNo == 0 ) 
+	{
+		auto tex_from = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
+		RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_GI, D3DTEXF_LINEAR );
+	}
+	
 	auto tex_light = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
 	auto tex_gi = __RTManager().GetRTbyUID( K_RTID_GI );
-	RenderOP_Lerp( tex_light->m_pRTTexture, tex_gi->m_pRTTexture, 0.6, 0.4, K_RTID_STORAGE );
+	RenderOP_Lerp( tex_light->m_pRTTexture, tex_gi->m_pRTTexture, 0.9f, 0.7f, K_RTID_STORAGE );
 
 
 	///----------------------------------------------------
 	/// 3. downscale twice and blur more
 	///----------------------------------------------------
+	
 	auto tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE );
 	RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_STORAGE_HALF );
 	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
@@ -4112,22 +4121,33 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	}
 	// upscale blurred version with gaussian X
 	tex_from = __RTManager().GetRTbyUID( chan_last_blur );
-	//RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_GI );
-	RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_GI );		
+	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_GI );
+	//RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_GI );		
 	
 	
-	//// mipmaps 2 levels:
 	/*
-	auto tex_from = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
-	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF );
+	//// generate mipmaps
+	auto tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE );
+	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF, D3DTEXF_POINT );
 	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
-	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_QUART );
-	*/
+	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_QUART, D3DTEXF_POINT );
+	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
+	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_EIGHTH, D3DTEXF_POINT );
 
-	/*
 	///----------------------------------------------------
 	/// radiance cascade merge
 	///----------------------------------------------------
+	auto tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
+	auto tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_EIGHTH );
+	RenderOP_CascadeMerge2tex(tex_cascadefull->m_pRTTexture, tex_cascadehalf->m_pRTTexture, 0.5f, 0.5f, K_RTID_STORAGE_QUART2);
+	tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
+	tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART2 );
+	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, tex_cascadehalf->m_pRTTexture, 0.5f, 0.5f, K_RTID_STORAGE_HALF2 );
+	tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE );
+	tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF2 );
+	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, tex_cascadehalf->m_pRTTexture, 0.5f, 0.5f, K_RTID_GI );
+	*/
+	/*
 	Matrix matView;
 	MUMatIdentity( &matView );
 	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
@@ -5423,14 +5443,14 @@ OPRESULT CLevel::RenderOP_Blur( EDir dir, PTEXTURE pTexFrom, float pTexFromWidth
 	}
 }
 
-OPRESULT CLevel::RenderOP_Copy( PTEXTURE pTexFrom, ERTIDChannel RTto )
+OPRESULT CLevel::RenderOP_Copy( PTEXTURE pTexFrom, ERTIDChannel RTto, DWORD filter)
 {
 	auto pRT = __RTManager().GetRTbyUID( RTto );
 	if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
 	{
 		m_pDevice->SetTexture( 0, pTexFrom );
-		m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-		m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+		m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, filter );
+		m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, filter );
 
 		Matrix matWVP = pRT->matProj;
 		if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
@@ -5569,6 +5589,62 @@ OPRESULT CLevel::RenderOP_Mul( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMu
 		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 		__Shaders().SetPSByName( L"PS_MUL2TEX" );
+		float fConstData[][4] = {
+			// x: input texture 1/width
+			{ fMul1, fMul2, 0.0f, 0.0f},
+		};
+
+		__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+
+		m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+
+		// remove VS PS
+		__Shaders().SetPS( nullptr );
+		__Shaders().SetVS( nullptr );
+
+		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+	}
+}
+
+OPRESULT CLevel::RenderOP_CascadeMerge2tex( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto )
+{
+	auto pRT = __RTManager().GetRTbyUID( RTto );
+	if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
+	{
+		m_pDevice->SetTexture( 1, pTexFrom1 );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+		m_pDevice->SetTexture( 2, pTexFrom2 );
+		m_pDevice->SetSamplerState( 2, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+		m_pDevice->SetSamplerState( 2, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+
+		Matrix matWVP = pRT->matProj;
+		if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+			return K_OP_FAILED;
+
+		//--- build RT rect ---
+		_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+		vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+		vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+		vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+		vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+		vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+		vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+		vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+		vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+		//set color
+		vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
+		//build verts
+		_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+		lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+
+		__Shaders().SetVSByName( L"VS_COMPOSITION" );
+		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+		__Shaders().SetPSByName( L"PS_MIP_RADIANCE_MERGE" );
 		float fConstData[][4] = {
 			// x: input texture 1/width
 			{ fMul1, fMul2, 0.0f, 0.0f},

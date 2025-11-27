@@ -3,34 +3,29 @@
 //
 // Parameters:
 //
+//   float2 in_MixPercent;
 //   Texture2D samp+fullResTex;
 //   Texture2D samp+halfResTex;
-//   Texture2D samp+quarterResTex;
 //
 //
 // Registers:
 //
-//   Name               Reg   Size
-//   ------------------ ----- ----
-//   samp+fullResTex    s1       1
-//   samp+halfResTex    s2       1
-//   samp+quarterResTex s3       1
+//   Name            Reg   Size
+//   --------------- ----- ----
+//   in_MixPercent   c0       1
+//   samp+fullResTex s1       1
+//   samp+halfResTex s2       1
 //
 
     ps_3_0
-    def c0, 0.200000003, 0, 0, 0
-    def c1, 1, 0, 0.300000012, 0.5
+    def c1, 1, 0, 0, 0
     dcl_texcoord v0.xy
     dcl_2d s1
     dcl_2d s2
-    dcl_2d s3
     mul r0, c1.xxxy, v0.xyxx
-    texldl r1, r0.zyzw, s2
-    mul r1.xyz, r1, c1.z
-    texldl r2, r0.zyzw, s1
-    texldl r0, r0, s3
-    mad r1.xyz, r2, c1.w, r1
-    mad oC0.xyz, r0, c0.x, r1
-    mov oC0.w, c1.x
+    texldl r1, r0, s2
+    texldl r0, r0.zyzw, s1
+    mul r1, r1, c0.y
+    mad_sat oC0, c0.x, r0, r1
 
-// approximately 11 instruction slots used (6 texture, 5 arithmetic)
+// approximately 7 instruction slots used (4 texture, 3 arithmetic)

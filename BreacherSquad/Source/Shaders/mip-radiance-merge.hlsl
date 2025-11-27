@@ -1,4 +1,31 @@
+float2 in_MixPercent; // x: percent of T1, y: percent of T2
+
 // Radiance Merging Pixel Shader
+Texture2D fullResTex : register(t0);
+Texture2D halfResTex : register(t1);
+
+SamplerState samp : register(s0);
+
+float4 ps_main(float2 uv : TEXCOORD) : SV_Target
+{
+    // Sample from different downscales
+    float4 fullRes = fullResTex.SampleLevel(samp, uv, 0);
+    float4 halfRes = halfResTex.SampleLevel(samp, uv, 0);
+
+    // Merge radiance
+    float4 merged = in_MixPercent.x * fullRes + in_MixPercent.y * halfRes;
+    return saturate(merged);
+    
+    // Optional: apply tone mapping or gamma correction
+    //merged = pow(merged, 1.0 / 2.2);
+
+    //return float4(merged, 1.0);
+}
+
+
+
+/*
+// Radiance Merging Pixel Shader - 3 textures version
 Texture2D fullResTex : register(t0);
 Texture2D halfResTex : register(t1);
 Texture2D quarterResTex : register(t2);
@@ -25,3 +52,4 @@ float4 ps_main(float2 uv : TEXCOORD) : SV_Target
 
     return float4(merged, 1.0);
 }
+*/

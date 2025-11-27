@@ -23,8 +23,10 @@ void CApplication::App_EnterState_Loading()
 	__RTManager().AddRT( K_RTID_TEMPORARY, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_STORAGE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_STORAGE_HALF, radiance_render_extent / 2, radiance_render_extent / 2, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_STORAGE_HALF2, radiance_render_extent / 2, radiance_render_extent / 2, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_STORAGE_QUART, radiance_render_extent / 4, radiance_render_extent / 4, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_STORAGE_QUART2, radiance_render_extent / 4, radiance_render_extent / 4, 1, D3DFMT_A8R8G8B8, false );
+	__RTManager().AddRT( K_RTID_STORAGE_EIGHTH, radiance_render_extent / 8, radiance_render_extent / 8, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_GI, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
 
 

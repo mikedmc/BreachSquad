@@ -48,6 +48,7 @@ public:
 	CRandom					m_rand;							// network synced random generator
 	///--- level state ---
 	ELevelState				m_levelState;
+	UINT32					m_frameNo;						// frame number
 	int						m_levelSubState;
 	int						m_levelStateParam;				// param sent to level state change action
 	float					m_levelStateTimer;				// timer used for some level changes 
@@ -350,10 +351,11 @@ public:
 	OPRESULT				RenderPass_Composition( Matrix* matProj, float fBetweenFramesPercent );
 	// gaussian blur from one surface to the other. Use DIR to specify direction of blur.
 	OPRESULT				RenderOP_Blur( EDir dir, PTEXTURE pTexFrom, float pTexFromWidth, ERTIDChannel RTto );
-	OPRESULT				RenderOP_Copy( PTEXTURE pTexFrom, ERTIDChannel RTto );
+	OPRESULT				RenderOP_Copy( PTEXTURE pTexFrom, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );
 	// lerps 2 textures together into the RTto
 	OPRESULT				RenderOP_Lerp( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );
 	OPRESULT				RenderOP_Mul( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );
+	OPRESULT				RenderOP_CascadeMerge2tex( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto );
 
 	// paint level buffers onscreen
 	void					Paint();
