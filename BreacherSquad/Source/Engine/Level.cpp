@@ -4098,7 +4098,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	
 	auto tex_light = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
 	auto tex_gi = __RTManager().GetRTbyUID( K_RTID_GI );
-	RenderOP_Lerp( tex_light->m_pRTTexture, tex_gi->m_pRTTexture, 0.9f, 0.7f, K_RTID_STORAGE );
+	RenderOP_Lerp( tex_light->m_pRTTexture, tex_gi->m_pRTTexture, 0.6f, 0.4f, K_RTID_STORAGE );
 
 
 	///----------------------------------------------------
@@ -4123,9 +4123,8 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	tex_from = __RTManager().GetRTbyUID( chan_last_blur );
 	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_GI );
 	//RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_GI );		
-	
-	
-	/*
+ 	
+/*	
 	//// generate mipmaps
 	auto tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE );
 	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF, D3DTEXF_POINT );
@@ -4139,14 +4138,20 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----------------------------------------------------
 	auto tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
 	auto tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_EIGHTH );
-	RenderOP_CascadeMerge2tex(tex_cascadefull->m_pRTTexture, tex_cascadehalf->m_pRTTexture, 0.5f, 0.5f, K_RTID_STORAGE_QUART2);
+	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
+		tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
+		0.5f, 0.5f, K_RTID_STORAGE_QUART2 );
 	tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
 	tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART2 );
-	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, tex_cascadehalf->m_pRTTexture, 0.5f, 0.5f, K_RTID_STORAGE_HALF2 );
+	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
+		tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
+		0.5f, 0.5f, K_RTID_STORAGE_HALF2 );
 	tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE );
 	tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF2 );
-	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, tex_cascadehalf->m_pRTTexture, 0.5f, 0.5f, K_RTID_GI );
-	*/
+	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
+		tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
+		0.5f, 0.5f, K_RTID_GI );
+*/	
 	/*
 	Matrix matView;
 	MUMatIdentity( &matView );
@@ -5606,15 +5611,15 @@ OPRESULT CLevel::RenderOP_Mul( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMu
 	}
 }
 
-OPRESULT CLevel::RenderOP_CascadeMerge2tex( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto )
+OPRESULT CLevel::RenderOP_CascadeMerge2tex( PTEXTURE pTexHires, float pTexHiresW, PTEXTURE pTexLores, float pTexLoresW, float fMul1, float fMul2, ERTIDChannel RTto )
 {
 	auto pRT = __RTManager().GetRTbyUID( RTto );
 	if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
 	{
-		m_pDevice->SetTexture( 1, pTexFrom1 );
+		m_pDevice->SetTexture( 1, pTexHires );
 		m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
 		m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-		m_pDevice->SetTexture( 2, pTexFrom2 );
+		m_pDevice->SetTexture( 2, pTexLores );
 		m_pDevice->SetSamplerState( 2, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
 		m_pDevice->SetSamplerState( 2, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
 
@@ -5646,8 +5651,10 @@ OPRESULT CLevel::RenderOP_CascadeMerge2tex( PTEXTURE pTexFrom1, PTEXTURE pTexFro
 		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 		__Shaders().SetPSByName( L"PS_MIP_RADIANCE_MERGE" );
 		float fConstData[][4] = {
-			// x: input texture 1/width
+			// x: tex1 mul, y: tex2 mul
 			{ fMul1, fMul2, 0.0f, 0.0f},
+			// x: tex1 texel size, y: tex2 texel size
+			{1.0f / pTexHiresW, 1.0f / pTexLoresW, 0.0f, 0.0f},
 		};
 
 		__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );

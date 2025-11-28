@@ -4,6 +4,7 @@
 // Parameters:
 //
 //   float2 in_MixPercent;
+//   float2 in_TexelSize;
 //   Texture2D samp+fullResTex;
 //   Texture2D samp+halfResTex;
 //
@@ -13,19 +14,45 @@
 //   Name            Reg   Size
 //   --------------- ----- ----
 //   in_MixPercent   c0       1
+//   in_TexelSize    c1       1
 //   samp+fullResTex s1       1
 //   samp+halfResTex s2       1
 //
 
     ps_3_0
-    def c1, 1, 0, 0, 0
+    def c2, 1, 0, 0, -1
+    def c3, -1.44269502, 0.111111112, 0, 0
+    defi i0, 3, 0, 0, 0
     dcl_texcoord v0.xy
     dcl_2d s1
     dcl_2d s2
-    mul r0, c1.xxxy, v0.xyxx
-    texldl r1, r0, s2
-    texldl r0, r0.zyzw, s1
-    mul r1, r1, c0.y
-    mad_sat oC0, c0.x, r0, r1
+    mul r0, c2.xxxy, v0.xyxx
+    texldl r0, r0, s1
+    mov r1.w, c2.y
+    mov r2.xyz, c2.y
+    mov r3.x, c2.w
+    rep i0
+      mul r4.xz, r3.x, c1.y
+      mov r5.xyz, r2
+      mov r3.y, c2.w
+      rep i0
+        mul r4.y, r3.y, c1.y
+        add r1.xyz, r4, v0.xyxw
+        texldl r6, r1, s2
+        dp2add r0.w, r3, r3, c2.y
+        rsq r0.w, r0.w
+        rcp r0.w, r0.w
+        mul r0.w, r0.w, c3.x
+        exp r0.w, r0.w
+        mad r5.xyz, r6, r0.w, r5
+        add r3.y, r3.y, c2.x
+      endrep
+      mov r2.xyz, r5
+      add r3.x, r3.x, c2.x
+    endrep
+    mul r1.xyz, r2, c0.y
+    mul r1.xyz, r1, c3.y
+    mad_sat oC0.xyz, c0.x, r0, r1
+    mov oC0.w, c2.x
 
-// approximately 7 instruction slots used (4 texture, 3 arithmetic)
+// approximately 37 instruction slots used (4 texture, 33 arithmetic)

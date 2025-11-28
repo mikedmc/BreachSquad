@@ -355,7 +355,7 @@ public:
 	// lerps 2 textures together into the RTto
 	OPRESULT				RenderOP_Lerp( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );
 	OPRESULT				RenderOP_Mul( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );
-	OPRESULT				RenderOP_CascadeMerge2tex( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto );
+	OPRESULT				RenderOP_CascadeMerge2tex( PTEXTURE pTexHires, float pTexHiresW, PTEXTURE pTexLores, float pTexLoresW, float fMul1, float fMul2, ERTIDChannel RTto );
 
 	// paint level buffers onscreen
 	void					Paint();

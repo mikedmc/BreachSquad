@@ -1,4 +1,5 @@
 float2 in_MixPercent; // x: percent of T1, y: percent of T2
+float2 in_TexelSize; //x: texel T1, y:texel size T2
 
 // Radiance Merging Pixel Shader
 Texture2D fullResTex : register(t0);
@@ -10,17 +11,26 @@ float4 ps_main(float2 uv : TEXCOORD) : SV_Target
 {
     // Sample from different downscales
     float4 fullRes = fullResTex.SampleLevel(samp, uv, 0);
-    float4 halfRes = halfResTex.SampleLevel(samp, uv, 0);
 
+    float4 spreadcol = float4(0, 0, 0, 1.0f);
+    for (int x = -1; x <= 1; x++)
+    {
+        for (int y = -1; y <= 1; y++)
+        {
+            float4 halfRes = halfResTex.SampleLevel(samp, uv + float2(x * in_TexelSize.y, y * in_TexelSize.y), 0);
+            float dist = length(float2(x, y));
+            spreadcol += halfRes * exp(-dist); // exponential falloff
+        }
+    }
     // Merge radiance
-    float4 merged = in_MixPercent.x * fullRes + in_MixPercent.y * halfRes;
+    float4 merged = float4(in_MixPercent.x * fullRes.rgb + in_MixPercent.y * (spreadcol.rgb / 9.0f), 1.0f);
     return saturate(merged);
     
     // Optional: apply tone mapping or gamma correction
     //merged = pow(merged, 1.0 / 2.2);
 
     //return float4(merged, 1.0);
-}
+    }
 
 
 
