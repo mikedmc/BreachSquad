@@ -4098,13 +4098,13 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	
 	auto tex_light = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
 	auto tex_gi = __RTManager().GetRTbyUID( K_RTID_GI );
-	RenderOP_Lerp( tex_light->m_pRTTexture, tex_gi->m_pRTTexture, 0.6f, 0.4f, K_RTID_STORAGE );
+	RenderOP_Lerp( tex_light->m_pRTTexture, tex_gi->m_pRTTexture, 0.6f, 0.8f, K_RTID_STORAGE );
 
 
 	///----------------------------------------------------
 	/// 3. downscale twice and blur more
 	///----------------------------------------------------
-	
+	/*
 	auto tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE );
 	RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_STORAGE_HALF );
 	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
@@ -4123,8 +4123,8 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	tex_from = __RTManager().GetRTbyUID( chan_last_blur );
 	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_GI );
 	//RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_GI );		
- 	
-/*	
+ 	*/
+	
 	//// generate mipmaps
 	auto tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE );
 	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF, D3DTEXF_POINT );
@@ -4151,7 +4151,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
 		tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
 		0.5f, 0.5f, K_RTID_GI );
-*/	
+	
 	/*
 	Matrix matView;
 	MUMatIdentity( &matView );

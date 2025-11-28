@@ -13,17 +13,24 @@ float4 ps_main(float2 uv : TEXCOORD) : SV_Target
     float4 fullRes = fullResTex.SampleLevel(samp, uv, 0);
 
     float4 spreadcol = float4(0, 0, 0, 1.0f);
+    float weightsum = 0.0;
     for (int x = -1; x <= 1; x++)
     {
         for (int y = -1; y <= 1; y++)
         {
-            float4 halfRes = halfResTex.SampleLevel(samp, uv + float2(x * in_TexelSize.y, y * in_TexelSize.y), 0);
+            float4 halfRes = halfResTex.SampleLevel(samp, uv + float2(3.0f * x * in_TexelSize.y, 3.0f * y * in_TexelSize.y), 0);
             float dist = length(float2(x, y));
-            spreadcol += halfRes * exp(-dist); // exponential falloff
+            float fluminance = dot(halfRes.rgb, float3(0.299, 0.587, 0.114));
+            if (fluminance >= 0.0f)
+            {
+                spreadcol += halfRes; // * exp(-dist); // exponential falloff
+                weightsum += 1.0f;
+            }
         }
     }
     // Merge radiance
-    float4 merged = float4(in_MixPercent.x * fullRes.rgb + in_MixPercent.y * (spreadcol.rgb / 9.0f), 1.0f);
+    float4 merged = float4(in_MixPercent.x * fullRes.rgb + in_MixPercent.y * (spreadcol.rgb / max(weightsum, 1.0f)), 1.0f);
+    //float4 merged = float4(in_MixPercent.x * fullRes.rgb + in_MixPercent.y * (spreadcol.rgb / 9.0f), 1.0f);
     return saturate(merged);
     
     // Optional: apply tone mapping or gamma correction
