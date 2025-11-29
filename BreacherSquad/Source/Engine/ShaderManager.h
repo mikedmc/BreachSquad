@@ -11,7 +11,7 @@
 //--- for fixed pipeline don't change order in structs ---
 
 //-=-=-= VERTEX TYPES =-=-=-
-typedef struct _tagVERTEX_PNCT4T4
+typedef struct _VERTEX_PNCT4T4
 {
 	Vec3 pos;
 	Vec3 n;
@@ -20,7 +20,7 @@ typedef struct _tagVERTEX_PNCT4T4
 	Vec4 tex2;
 
 	static const DWORD FVF;
-} _VERTEX_PNCT4T4;
+};
 
 typedef struct _tagVERTEX_PT2T2
 {

@@ -457,6 +457,10 @@ void CGame::BeforePaint()
 	}
 }
 
+
+// temp local zoom for paint
+float fzoomlocal = 1.0f;
+
 void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 {
 	_ASSERT( pSpr != nullptr && pDevice != nullptr );
@@ -592,105 +596,12 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 
 			//game screen space
 //			CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_camRTScreen );
-			/*
-			if ( DXUTIsKeyDown( '0' ) )
-			{
-				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_CASCADE2 );
-				if ( pRT != null )
-				{
-					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
-					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
-					pDevice->SetTexture( 0, pRT->m_pRTTexture );
-					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
-				}
-			}
-
-			if ( DXUTIsKeyDown( '9' ) )
-			{
-				const float fWndH = 128.0f;
-				for ( int oo = K_RTID_CASCADE0; oo <= K_RTID_CASCADE4; oo++ )
-				{
-					CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( oo );
-					if ( pRT != null )
-					{
-						int ooidx = oo - K_RTID_CASCADE0;
-						RectLTRB src( ooidx * (fWndH + 1), 200.0f, (ooidx + 1) * fWndH, 200 + fWndH );
-						RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
-						pDevice->SetTexture( 0, pRT->m_pRTTexture );
-						UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
-					}
-				}
-			}
-			if ( DXUTIsKeyDown( '8' ) )
-			{
-
-				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
-				if ( pRT != null )
-				{
-					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
-					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
-					pDevice->SetTexture( 0, pRT->m_pRTTexture );
-					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
-				}
-
-			}
-			/*
-			if ( DXUTIsKeyDown( '7' ) )
-			{
-				CRTManager::CEngineRenderTarget* pRT1 = __RTManager().GetRTbyUID( K_RTID_FLOAT1 );
-				if ( pRT1 != null )
-				{
-					RectLTRB src( 1.0f, 1.0f, (float)(pRT1->nWidth), (float)(pRT1->nHeight) );
-					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
-					pDevice->SetTexture( 0, pRT1->m_pRTTexture );
-					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
-				}
-				CRTManager::CEngineRenderTarget* pRT2 = __RTManager().GetRTbyUID( K_RTID_FLOAT2 );
-				if ( pRT2 != null )
-				{
-					RectLTRB src( pRT1->nWidth + 1, 1.0f, (float)(pRT2->nWidth + pRT1->nWidth), (float)(pRT2->nHeight) );
-					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
-					pDevice->SetTexture( 0, pRT2->m_pRTTexture );
-					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
-				}
-			}
-			if ( DXUTIsKeyDown( '6' ) )
-			{
-				CRTManager::CEngineRenderTarget* pRT1 = __RTManager().GetRTbyUID( K_RTID_GI1 );
-				if ( pRT1 != null )
-				{
-					RectLTRB src( 1.0f, 1.0f, (float)(pRT1->nWidth), (float)(pRT1->nHeight) );
-					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
-					pDevice->SetTexture( 0, pRT1->m_pRTTexture );
-					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
-				}
-				CRTManager::CEngineRenderTarget* pRT2 = __RTManager().GetRTbyUID( K_RTID_GI2 );
-				if ( pRT2 != null )
-				{
-					RectLTRB src( pRT1->nWidth + 1, 1.0f, (float)(pRT2->nWidth + pRT1->nWidth), (float)(pRT2->nHeight) );
-					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
-					pDevice->SetTexture( 0, pRT2->m_pRTTexture );
-					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
-				}
-			}
-			if ( DXUTIsKeyDown( '5' ) )
-			{
-				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( K_RTID_EMISSIVE );
-				if ( pRT != null )
-				{
-					RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
-					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
-					pDevice->SetTexture( 0, pRT->m_pRTTexture );
-					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
-				}
-			}
-			*/
 			
-			using type1 = struct {
+			using type1keys = struct {
 				char key;
 				ERTIDChannel channel;
 			};
-			type1 arrkeys[] = {
+			type1keys arrkeys[] = {
 				{ '1', K_RTID_WORLDSCENE },
 				{ '2', K_RTID_TEMPORARY },
 				{ '3', K_RTID_STORAGE },
@@ -698,21 +609,36 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 				{ '5', K_RTID_STORAGE_QUART },
 				{ '6', K_RTID_STORAGE_EIGHTH },
 				{ '7', K_RTID_GI },
+				{ '8', K_RTID_STORAGE_HALF2 },
+				{ '9', K_RTID_STORAGE_QUART2 },
+				{ '0', K_RTID_STORAGE_EIGHTH2 },
 			};
 
-			for (auto & arrkey : arrkeys)
+
+			if ( DXUTIsKeyDown( VK_ADD ) )
 			{
-				if ( DXUTIsKeyDown( arrkey.key ) ) {
-					CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( arrkey.channel );
+				inc_limit( fzoomlocal, 0.1f, 5.0f );
+			}
+			if ( DXUTIsKeyDown( VK_SUBTRACT ) )
+			{
+				dec_limit( fzoomlocal, 0.1f, 1.0f );
+			}
+
+			for ( int j = 0; j < ARRAY_SIZE( arrkeys ); j++ )
+			{
+				if ( DXUTIsKeyDown( arrkeys[j].key ) ) 
+				{
+					CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( arrkeys[j].channel );
 					if ( pRT != null )
 					{
-						RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth), (float)(pRT->nHeight) );
+						RectLTRB src( 1.0f, 1.0f, (float)(pRT->nWidth) * fzoomlocal, (float)(pRT->nHeight) * fzoomlocal );
 						RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
 						pDevice->SetTexture( 0, pRT->m_pRTTexture );
 						UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 					}
 				}
 			}
+
 
 			/*
 			if ( DXUTIsKeyDown( '1' ) )

@@ -352,6 +352,9 @@ public:
 	// gaussian blur from one surface to the other. Use DIR to specify direction of blur.
 	OPRESULT				RenderOP_Blur( EDir dir, PTEXTURE pTexFrom, float pTexFromWidth, ERTIDChannel RTto );
 	OPRESULT				RenderOP_Copy( PTEXTURE pTexFrom, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );
+	// Radiance cascades are made by copying pTexFrom (that can be larger) to a smaller RTto with point filtering
+	// fLayerAlpha sets the transparency of each layer so it should be 1/offsetsCount
+	OPRESULT				RenderOP_CreateCascade( PTEXTURE pTexFrom, ERTIDChannel RTto, Vec2 arrOffsets[], int offsetsCount, float fLayerAlpha );
 	// lerps 2 textures together into the RTto
 	OPRESULT				RenderOP_Lerp( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );
 	OPRESULT				RenderOP_Mul( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );

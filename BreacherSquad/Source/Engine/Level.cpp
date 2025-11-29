@@ -4133,9 +4133,23 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
 	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_EIGHTH, D3DTEXF_POINT );
 
+
+	///----> Dupa ce faci mipmapsurile trebuie un fel de blur la ele unde faci cu additive blending 8 versiuni ale imaginii una peste alta pe fiecare nivel de mipmap si dupa
+
+	Vec2 v_offsets[16];
+	v_offsets[0] = Vec2(5.0f, 0.0f);
+	v_offsets[1] = Vec2( -5.0f, 0.0f );
+	v_offsets[2] = Vec2( 0.0f, 5.0f );
+	v_offsets[3] = Vec2( 0.0f, -5.0f );
+	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
+	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF2, v_offsets, 4, 0.25f );
+
+
+
 	///----------------------------------------------------
 	/// radiance cascade merge
 	///----------------------------------------------------
+	/*
 	auto tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
 	auto tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_EIGHTH );
 	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
@@ -4151,7 +4165,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
 		tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
 		0.5f, 0.5f, K_RTID_GI );
-	
+	*/
+
+
 	/*
 	Matrix matView;
 	MUMatIdentity( &matView );
@@ -5496,6 +5512,73 @@ OPRESULT CLevel::RenderOP_Copy( PTEXTURE pTexFrom, ERTIDChannel RTto, DWORD filt
 		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 	}
 
+}
+
+OPRESULT CLevel::RenderOP_CreateCascade( PTEXTURE pTexFrom, ERTIDChannel RTto, Vec2 arrOffsets[], int offsetsCount, float fLayerAlpha )
+{
+	// It uses additive filtering to overlay the same image "offsetsCount" times, everytime offseted by the values in arrOffsets
+	// This creates a blur effect but with more spread and cheaper on the GPU. Used to spread lights
+	// Small cascades should be offseted 8 times, including diagonals (UL U UR R DR D DL L)
+	// where higher res cascades can be offseted just 4 times (0, U, R, UR)
+	auto pRT = __RTManager().GetRTbyUID( RTto );
+	if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
+	{
+		m_pDevice->SetTexture( 0, pTexFrom );
+		m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT );
+		m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
+		m_pDevice->SetTexture( 1, nullptr );
+
+		Matrix matWVP = pRT->matProj;
+		if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+			return K_OP_FAILED;
+
+		//--- build RT rect ---
+		_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+		vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+		vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+		vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+		vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+		vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+		vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+		vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+		vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+		//set color
+		vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
+
+		_VERTEX_PNCT4T4 *lightRectV = new _VERTEX_PNCT4T4[6 * offsetsCount];
+		for ( int kk = 0; kk < offsetsCount; kk++ )
+		{
+			vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+			vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+			vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+			vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+			Vec3 v3off( arrOffsets[kk].x, arrOffsets[kk].y, 0.0f );
+			vul.pos += v3off; vur.pos += v3off;
+			vdl.pos += v3off; vdr.pos += v3off;
+			//build verts
+			int vidx = kk * 6;
+			lightRectV[vidx + 0] = vul; lightRectV[vidx + 1] = vur; lightRectV[vidx + 2] = vdl;
+			lightRectV[vidx + 3] = vur; lightRectV[vidx + 4] = vdl; lightRectV[vidx + 5] = vdr;
+
+		}
+		UT3D::DeviceAdditiveON( m_pDevice );
+
+		__Shaders().SetVSByName( L"VS_COMPOSITION" );
+		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+		__Shaders().SetPSByName( L"PS_COPY1TEX" );
+
+		m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2 * offsetsCount, lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+		UT3D::DeviceAdditiveOFF( m_pDevice );
+		SAFE_DELETE_ARRAY( lightRectV );
+		// remove VS PS
+		__Shaders().SetPS( nullptr );
+		__Shaders().SetVS( nullptr );
+
+		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+	}
 }
 
 OPRESULT CLevel::RenderOP_Lerp( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter )

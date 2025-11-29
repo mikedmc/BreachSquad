@@ -158,8 +158,8 @@ protected:
 		LPDXUTCALLBACKMSGPROC               m_WindowMsgFunc;            // window messages callback
 
 #ifdef K_INCLUDE_DXUT_DIALOGS
-		CD3DSettingsDlg*             m_D3DSettingsDlg;                  // CD3DSettings object
-		bool                         m_ShowD3DSettingsDlg;              // if true, then show the D3DSettingsDlg
+		//CD3DSettingsDlg*             m_D3DSettingsDlg;                  // CD3DSettings object
+		//bool                         m_ShowD3DSettingsDlg;              // if true, then show the D3DSettingsDlg
 #endif
 		bool                         m_Keys[256];                       // array of key state
 		bool                         m_MouseButtons[5];                 // array of mouse states
@@ -5052,6 +5052,7 @@ bool DXUTIsKeyDown(BYTE vKey)
 	else
 		return bKeys[vKey];
 }
+
 bool DXUTIsMouseButtonDown(BYTE vButton)          
 { 
 	bool* bMouseButtons = GetDXUTState().GetMouseButtons(); 
