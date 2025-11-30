@@ -4098,7 +4098,7 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	
 	auto tex_light = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
 	auto tex_gi = __RTManager().GetRTbyUID( K_RTID_GI );
-	RenderOP_Lerp( tex_light->m_pRTTexture, tex_gi->m_pRTTexture, 0.6f, 0.8f, K_RTID_STORAGE );
+	RenderOP_Lerp( tex_light->m_pRTTexture, tex_gi->m_pRTTexture, 0.5f, 0.5f, K_RTID_STORAGE );
 
 
 	///----------------------------------------------------
@@ -4137,35 +4137,55 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	///----> Dupa ce faci mipmapsurile trebuie un fel de blur la ele unde faci cu additive blending 8 versiuni ale imaginii una peste alta pe fiecare nivel de mipmap si dupa
 
 	Vec2 v_offsets[16];
-	v_offsets[0] = Vec2(5.0f, 0.0f);
-	v_offsets[1] = Vec2( -5.0f, 0.0f );
-	v_offsets[2] = Vec2( 0.0f, 5.0f );
-	v_offsets[3] = Vec2( 0.0f, -5.0f );
+	v_offsets[0] = Vec2(0.0f, 0.0f);
+	v_offsets[1] = Vec2( 1.0f, 0.0f );
+	v_offsets[2] = Vec2( 1.0f, 1.0f );
+	v_offsets[3] = Vec2( 0.0f, 1.0f );
 	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
-	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF2, v_offsets, 4, 0.25f );
+	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF2, v_offsets, 4, 0.5f );
 
+	v_offsets[0] = Vec2( -1.0f, 0.0f );
+	v_offsets[1] = Vec2( -1.0f, -1.0f );
+	v_offsets[2] = Vec2( 0.0f, -1.0f );
+	v_offsets[3] = Vec2( 1.0f, -1.0f );
+	v_offsets[4] = Vec2( 1.0f, 0.0f );
+	v_offsets[5] = Vec2( 1.0f, 1.0f );
+	v_offsets[6] = Vec2( 0.0f, 1.0f );
+	v_offsets[7] = Vec2( -1.0f, 1.0f );
+	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
+	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_QUART2, v_offsets, 8, 0.5f );
+
+	v_offsets[0] = Vec2( -1.0f, 0.0f );
+	v_offsets[1] = Vec2( -1.0f, -1.0f );
+	v_offsets[2] = Vec2( 0.0f, -1.0f );
+	v_offsets[3] = Vec2( 1.0f, -1.0f );
+	v_offsets[4] = Vec2( 1.0f, 0.0f );
+	v_offsets[5] = Vec2( 1.0f, 1.0f );
+	v_offsets[6] = Vec2( 0.0f, 1.0f );
+	v_offsets[7] = Vec2( -1.0f, 1.0f );
+	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_EIGHTH );
+	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_EIGHTH2, v_offsets, 8, 0.5f );
 
 
 	///----------------------------------------------------
 	/// radiance cascade merge
 	///----------------------------------------------------
-	/*
-	auto tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
-	auto tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_EIGHTH );
+	
+	auto tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART2 );
+	auto tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_EIGHTH2 );
 	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
 		tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
-		0.5f, 0.5f, K_RTID_STORAGE_QUART2 );
-	tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
-	tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART2 );
+		0.5f, 0.5f, K_RTID_STORAGE_QUART );
+	tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF2 );
+	tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
 	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
 		tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
-		0.5f, 0.5f, K_RTID_STORAGE_HALF2 );
+		0.5f, 0.5f, K_RTID_STORAGE_HALF );
 	tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE );
-	tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF2 );
+	tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
 	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
 		tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
 		0.5f, 0.5f, K_RTID_GI );
-	*/
 
 
 	/*
@@ -5529,7 +5549,7 @@ OPRESULT CLevel::RenderOP_CreateCascade( PTEXTURE pTexFrom, ERTIDChannel RTto, V
 		m_pDevice->SetTexture( 1, nullptr );
 
 		Matrix matWVP = pRT->matProj;
-		if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+		if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 255, 0, 0, 0 ), 1.0f, 0 ) ) )
 			return K_OP_FAILED;
 
 		//--- build RT rect ---
@@ -5544,7 +5564,7 @@ OPRESULT CLevel::RenderOP_CreateCascade( PTEXTURE pTexFrom, ERTIDChannel RTto, V
 		vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
 		vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
 		//set color
-		vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
+		vul.color = vur.color = vdl.color = vdr.color = DW_COLOR_FFFA(fLayerAlpha);
 
 		_VERTEX_PNCT4T4 *lightRectV = new _VERTEX_PNCT4T4[6 * offsetsCount];
 		for ( int kk = 0; kk < offsetsCount; kk++ )
