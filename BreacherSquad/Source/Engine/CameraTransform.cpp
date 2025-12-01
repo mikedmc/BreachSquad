@@ -12,7 +12,7 @@ CCameraTransform::CCameraTransform()
 	m_animType = K_CAMTRANS_ANIM_NONE;
 
 	fLocalTimeLine = 0.0f;
-	D3DXMatrixIdentity(&m_matView);
+	MUMatIdentity(&m_matView);
 
 	m_worldAABB = RectXYWH(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -20,8 +20,10 @@ CCameraTransform::CCameraTransform()
 	m_camScreenAxis = K_CAMTRANS_AXIS_NONE;
 	//look at
 	m_vecLookAt = Vec3(0.0f, 0.0f, 1.0f);
-	m_vecLookAtSpeed = Vec3(0.0f, 0.0f, 0.0f);
+	m_vecLookAtSpeed = g_Vec3Zero;
 	m_vecRealLookAt = Vec3(0.0f, 0.0f, 1.0f);
+	m_vecLookAtLast = m_vecRealLookAt;
+	m_vecLookAtDelta = g_Vec3Zero;
 
 	m_vecHW = Vec2(1.0f, 0.0f);
 	m_vecHH = Vec2(0.0f, 1.0f);
@@ -63,7 +65,8 @@ void CCameraTransform::SetWorldBounds(RectXYWH worldAABB, bool bHardWorldEdges, 
 
 void CCameraTransform::SetCamPos(Vec2 *vecLookAt, float fZoom, bool forced)
 {
-	if (vecLookAt != NULL)
+	m_vecLookAtLast = m_vecRealLookAt;
+	if (vecLookAt != nullptr)
 	{
 		if (!m_bAxisLockedX)
 		{
@@ -87,13 +90,20 @@ void CCameraTransform::SetCamPos(Vec2 *vecLookAt, float fZoom, bool forced)
 		m_vecRealLookAt.z = m_vecLookAt.z;
 		m_vecLookAtSpeed = Vec3(0.0f, 0.0f, 0.0f);
 	}
+	// save look at delta
+	m_vecLookAtDelta = m_vecRealLookAt - m_vecLookAtLast;
 }
 
 void CCameraTransform::MoveCamPos(Vec2 vDelta, bool forced /*= false*/)
 {
+	m_vecLookAtLast = m_vecRealLookAt;
+
 	m_vecLookAt.x += vDelta.x;
 	if (forced)
 		m_vecRealLookAt.y += vDelta.y;
+
+	// save look at delta
+	m_vecLookAtDelta = m_vecRealLookAt - m_vecLookAtLast;
 }
 
 void CCameraTransform::SetViewport(RectXYWH viewport)
@@ -106,13 +116,13 @@ void CCameraTransform::InitCamera(RectXYWH viewport, int camScreenSize, ECamAxis
 	m_Viewport = viewport;
 	m_camScreenSize = abs(camScreenSize);
 	m_camScreenAxis = eSizeAxis;
-	m_vecLookAt = m_vecRealLookAt = Vec3(vecLookAt.x, vecLookAt.y, fZoom);
-	m_vecLookAtSpeed = Vec3(0.0f, 0.0f, 0.0f);
+	m_vecLookAt = m_vecRealLookAt = m_vecLookAtLast = Vec3(vecLookAt.x, vecLookAt.y, fZoom);
+	m_vecLookAtSpeed = m_vecLookAtDelta = Vec3(0.0f, 0.0f, 0.0f);
 }
 
 void CCameraTransform::ZoomToFitWorld()
 {
-	//TODO: de implementat
+	//#TODO: to implement
 }
 
 Vec2 CCameraTransform::ScreenToWorld(Vec2 inPt, RectXYWH *srcViewportOverride)
@@ -202,12 +212,11 @@ SizeWH CCameraTransform::ScreenToWorld(SizeWH inSZ)
 
 SizeWH CCameraTransform::WorldToScreen(SizeWH inSZ)
 {
-	double percX, percY;
+	float percX = (inSZ.w / m_vecHW.x) / 2.0f;
+	float percY = (inSZ.h / m_vecHH.y) / 2.0f;
 	//procente intre -1 si 1 in fn de lungimea axelor vecHW si vecHH
 	//TODO: daca adaug rotatie aici trebuie facut cu vectori si proiectii!
-	percX = (inSZ.w / m_vecHW.x) / 2.0f;
-	percY = (inSZ.h / m_vecHH.y) / 2.0f;
-	return SizeWH(percX * m_Viewport.w, percY * m_Viewport.h);
+	return {percX * m_Viewport.w, percY * m_Viewport.h};
 }
 
 Vec2	CCameraTransform::ViewportToViewport(Vec2 inPt, CCameraTransform &destCam)
@@ -282,6 +291,7 @@ ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, Vec3 inp
 	float fPixelSize = 1.0f;
 	//daca nu este setata marimea zonei virtuale a camerei o seteaza aici cat cea a ecranului final
 	Vec2 vScreenSize(m_Viewport.w, m_Viewport.h);
+	m_vecLookAtLast = m_vecRealLookAt;
 	if (m_camScreenSize != 0)
 	{
 		if (m_camScreenAxis == K_CAMTRANS_AXIS_V)
@@ -377,10 +387,10 @@ ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, Vec3 inp
 			//blocarea axelor este tratata in setCamPos
 			//pozitie
 			Vec3 deltaP = m_vecLookAt - m_vecRealLookAt;
-			float dist = D3DXVec3Length(&deltaP);
+			float dist = MUVec3Len(&deltaP);
 
 			Vec3 springForce, force;
-			D3DXVec3Normalize(&springForce, &deltaP);
+			MUVec3Norm(&springForce, &deltaP);
 			springForce *= dist * m_k1; //konstanta hook
 			force = springForce - m_vecLookAtSpeed * m_k2; //aici face damping
 
@@ -474,7 +484,7 @@ ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, Vec3 inp
 			}
 
 			//moving state
-			if(D3DXVec3LengthSq(&m_vecLookAtSpeed) > 1.0f)
+			if(MUVec3LenSq(&m_vecLookAtSpeed) > 1.0f)
 				retval = K_CAMTRANS_MOVING;
 		}
 			break;
@@ -540,12 +550,14 @@ ECamMoveStatus CCameraTransform::Update(float dTime, bool userHasInput, Vec3 inp
 	//aici se taie din ultimele zecimale din float
 	//fFinalZoom = floor(fFinalZoom * 100.0f) / 100.0f;
 
-	D3DXMATRIXA16 m1;
-	D3DXMatrixTranslation(&m_matView, -m_vecRealLookAt.x, -m_vecRealLookAt.y, 0.0f);
-	D3DXMatrixScaling(&m1, fFinalZoom, fFinalZoom, 1.0f);
+	MatrixA16 m1;
+	MUMatTranslation(&m_matView, -m_vecRealLookAt.x, -m_vecRealLookAt.y, 0.0f);
+	MUMatScaling(&m1, fFinalZoom, fFinalZoom, 1.0f);
 	m_matView = m_matView * m1;
-	D3DXMatrixTranslation(&m1, vFinalTranslate.x, vFinalTranslate.y, 0.0f);
+	MUMatTranslation(&m1, vFinalTranslate.x, vFinalTranslate.y, 0.0f);
 	m_matView = m_matView * m1;
+	// save camera delta since last frame
+	m_vecLookAtDelta = m_vecRealLookAt - m_vecLookAtLast;
 
 	return retval;
 }

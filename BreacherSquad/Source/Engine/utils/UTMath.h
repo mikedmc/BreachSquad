@@ -6,6 +6,7 @@
 #define			Vec4			D3DXVECTOR4
 #define			Quat			D3DXQUATERNION
 #define			Matrix			D3DXMATRIX
+#define			MatrixA16		D3DXMATRIXA16
 
 //functions
 #define			MUMatIdentity			D3DXMatrixIdentity

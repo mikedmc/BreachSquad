@@ -4135,16 +4135,17 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 
 	///----------------------------------------------------
-	/// creates radiance cascades by offsetting the mipmaps
+	/// creates radiance cascades by offsetting the mipmaps and blending them together to expand the lighting
 	///----------------------------------------------------
-
+	
 	Vec2 v_offsets[16];
 	v_offsets[0] = Vec2(-1.0f, 0.0f);
 	v_offsets[1] = Vec2( 0.0f, -1.0f );
 	v_offsets[2] = Vec2( 1.0f, 0.0f );
 	v_offsets[3] = Vec2( 0.0f, 1.0f );
+	v_offsets[4] = Vec2( 0.0f, 0.0f );
 	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
-	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF2, v_offsets, 4, 0.5f );
+	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF2, v_offsets, 5, 0.4f );
 
 	v_offsets[0] = Vec2( -1.0f, 0.0f );
 	v_offsets[1] = Vec2( -1.0f, -1.0f );
@@ -4154,8 +4155,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	v_offsets[5] = Vec2( 1.0f, 1.0f );
 	v_offsets[6] = Vec2( 0.0f, 1.0f );
 	v_offsets[7] = Vec2( -1.0f, 1.0f );
+	v_offsets[8] = Vec2( 0.0f, 0.0f );
 	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
-	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_QUART2, v_offsets, 8, 0.5f );
+	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_QUART2, v_offsets, 9, 0.4f );
 
 	v_offsets[0] = Vec2( -1.0f, 0.0f );
 	v_offsets[1] = Vec2( -1.0f, -1.0f );
@@ -4165,9 +4167,10 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	v_offsets[5] = Vec2( 1.0f, 1.0f );
 	v_offsets[6] = Vec2( 0.0f, 1.0f );
 	v_offsets[7] = Vec2( -1.0f, 1.0f );
+	v_offsets[8] = Vec2( 0.0f, 0.0f );
 	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_EIGHTH );
-	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_EIGHTH2, v_offsets, 8, 0.5f );
-
+	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_EIGHTH2, v_offsets, 9, 0.4f );
+	
 
 	///----------------------------------------------------
 	/// radiance cascade merge
@@ -4188,6 +4191,13 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
 		tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
 		0.5f, 0.5f, K_RTID_GI );
+	  
+
+
+
+
+
+
 
 
 	/*
@@ -5295,7 +5305,7 @@ OPRESULT CLevel::RenderPass_GIDirectLight( Matrix* matProj, float /*fBetweenFram
 
 OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPercent )
 {
-	Matrix				matView;
+	Matrix matView;
 	///----------------------------------------------------
 	/// INITIAL SETUP
 	///----------------------------------------------------
