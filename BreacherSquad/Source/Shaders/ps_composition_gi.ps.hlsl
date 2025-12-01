@@ -1,7 +1,7 @@
 // Composition shader that takes GI mipmap mapped on Tex1 input
 
 float4 fCompData : register(c0); //x:gamma, y:1/gamma, z:final light multiplier, w:color dodge
-float4 fGIData : register(c1); //x:GI multiplier
+float4 fGIData : register(c1); //x:GI multiplier, y: 1/gamma
 
 sampler2D texColor : register(s0);  //color RT texture (diffuse color)
 sampler2D texLights : register(s1);  //lightmap RT
@@ -14,7 +14,6 @@ struct PS_INPUT
 	float2 Tex1:            TEXCOORD1; //world vertex position
 };
 
-// added 12 sep 2025, it should replace the gamma correct
 float3 lin_to_srgb(float3 color)
 {
    float3 x = color.rgb * 12.92;
@@ -36,9 +35,9 @@ float4 ps_main(PS_INPUT Input) : COLOR0
 	// try this slower but better version (looks a little too bright)
 	//vLight = lin_to_srgb(vLight);
 	
-	// gamma correct GI??
-    //vGI = lin_to_srgb(vGI);
-    //vGI = pow(vGI, fCompData.yyy);
+	// gamma correct GI - not useful but makes it more visible
+    vGI = lin_to_srgb(vGI);
+    //vGI = pow(vGI, fGIData.yyy);
 	
     float3 f_total_light = saturate(vLight * fCompData.z + vGI * fGIData.x);
     float3 fvFinal = f_total_light * vCol;

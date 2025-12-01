@@ -22,13 +22,26 @@
 //
 
     ps_3_0
-    def c2, 1, 0, 0, 0
+    def c2, 12.9200001, 0.416666687, 1.05499995, -0.0549999997
+    def c3, -0.00313080009, 1, 0, 0
     dcl_texcoord v0.xy
     dcl_texcoord1 v1.xy
     dcl_2d s0
     dcl_2d s1
     dcl_2d s2
     texld r0, v1, s2
+    mov_sat r1.xyz, r0
+    log r2.x, r1.x
+    log r2.y, r1.y
+    log r2.z, r1.z
+    mul r1.xyz, r2, c2.y
+    exp r2.x, r1.x
+    exp r2.y, r1.y
+    exp r2.z, r1.z
+    mad r1.xyz, r2, c2.z, c2.w
+    mul r2.xyz, r0, c2.x
+    add r0.xyz, r0, c3.x
+    cmp r0.xyz, r0, r1, r2
     mul r0.xyz, r0, c1.x
     texld r1, v0, s1
     log r2.x, r1.x
@@ -40,13 +53,13 @@
     exp r2.z, r1.z
     mad_sat r0.xyz, r2, c0.z, r0
     mov r0.w, c0.w
-    mad r1.xyz, r2, -r0.w, c2.x
+    mad r1.xyz, r2, -r0.w, c3.y
     texld r2, v0, s0
     mul r0.xyz, r0, r2
     rcp r2.x, r1.x
     rcp r2.y, r1.y
     rcp r2.z, r1.z
     mul oC0.xyz, r0, r2
-    mov oC0.w, c2.x
+    mov oC0.w, c3.y
 
-// approximately 20 instruction slots used (3 texture, 17 arithmetic)
+// approximately 32 instruction slots used (3 texture, 29 arithmetic)

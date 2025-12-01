@@ -687,9 +687,8 @@ extern float ct_waterHeight;
 extern float ct_waterColorAdd;
 extern float ct_waterSpecular;
 
-extern float ct_em_mul ;
-extern float ct_em_range ;
-extern float ct_em_dropoff ;
+extern float ct_gi_mul;
+extern float ct_gi_gamma;
 
 
 extern CFreeTypeFont				g_font1;

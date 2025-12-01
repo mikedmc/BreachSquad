@@ -4134,12 +4134,14 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_EIGHTH, D3DTEXF_POINT );
 
 
-	///----> Dupa ce faci mipmapsurile trebuie un fel de blur la ele unde faci cu additive blending 8 versiuni ale imaginii una peste alta pe fiecare nivel de mipmap si dupa
+	///----------------------------------------------------
+	/// creates radiance cascades by offsetting the mipmaps
+	///----------------------------------------------------
 
 	Vec2 v_offsets[16];
-	v_offsets[0] = Vec2(0.0f, 0.0f);
-	v_offsets[1] = Vec2( 1.0f, 0.0f );
-	v_offsets[2] = Vec2( 1.0f, 1.0f );
+	v_offsets[0] = Vec2(-1.0f, 0.0f);
+	v_offsets[1] = Vec2( 0.0f, -1.0f );
+	v_offsets[2] = Vec2( 1.0f, 0.0f );
 	v_offsets[3] = Vec2( 0.0f, 1.0f );
 	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
 	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF2, v_offsets, 4, 0.5f );
@@ -5386,7 +5388,7 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 		// x:gamma, y:1.0f/gamma, z:final light multiplier, w:color dodge
 		{ fGamma, 1.0f / fGamma, ct_fLightMul, ct_fColorDodge},
 		// x: GI light multiplier
-		{ ct_em_mul, 0.0f, 0.0f, 0.0f }
+		{ ct_gi_mul, 1.0f / ct_gi_gamma, 0.0f, 0.0f }
 	};
 	__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
 	m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
