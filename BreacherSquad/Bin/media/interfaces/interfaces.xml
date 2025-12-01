@@ -36,7 +36,7 @@
 		<Control H="10" Type="Label" W="93" X="3" Y="-42" align="-1" fontColor="#FFFFFFFF" fontID="FONT_6_NS1" justify="false" stringID="MISSION_TIME" valign="0" wrapText="false" />
 		<Control H="10" Type="Label" W="93" X="-95" Y="-15" align="1" fontColor="#FF5A8DBA" fontID="FONT_6_NS1" justify="false" stringID="TOTAL_SCORE" valign="0" wrapText="false" />
 		<Control H="10" Type="Label" W="93" X="3" Y="-15" align="-1" fontColor="#FFFFFFFF" fontID="FONT_6_NS1" justify="false" stringID="MISSION_SCORE" valign="0" wrapText="false" />
-		<Control H="45" ID="CTRL_WND_PL1" Type="Window" W="133" X="-67" Y="17" animID="WINDOW1" fontColor="#FF5A8DBA" fontID="FONT_8_BS1" inflate="0" stringID="PLAYER1" />
+		<Control H="45" ID="CTRL_WND_PL1" Type="Window" W="133" X="-64" Y="15" animID="WINDOW1" fontColor="#FF5A8DBA" fontID="FONT_8_BS1" inflate="0" stringID="PLAYER1" />
 		<Control Animated="0" H="36" ID="CTRL_ANIM_PORTRAIT_PL1" Type="Animation" W="37" X="-69" Y="19" animID="PLAYER_PORTRAITS" scaleImage="0" setFrame="0" />
 		<Control H="6" Type="Panel" W="133" X="-67" Y="56" animID="FRAME4" iconFrame="-1" inflate="0" />
 		<Control H="11" ID="CTRL_XPBAR_PL1" Type="XPBar" W="110" X="-55" Y="54" animID="PROGRESS_XP_UPGRADE" fontColor="#FFF0C022" fontID="FONT_6_NC1" nNewValue="50" nOldValue="10" />
@@ -363,13 +363,14 @@
 	</Layer>
 	<Layer ID="LAYER_ID_GFX_OPTIONS" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_CLOSE">
 		<Control Type="Vignette" animID="VIGNETTES" color="#88000000" frameIdx="0" />
-		<Control H="156" ID="WINDOW" Type="Window" W="201" X="-88" Y="-64" animID="WINDOWS1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="0" stringID="GFX_OPTIONS" />
+		<Control H="164" ID="WINDOW" Type="Window" W="201" X="-88" Y="-64" animID="WINDOWS1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="0" stringID="GFX_OPTIONS" />
 		<Control H="28" ID="CTRL_DROP_RES" Type="DropDown" W="161" X="-52" Y="-60" animID="DROPDOWN" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" iconFrame="0" inflate="-1" stringID="RESOLUTION" stringID_list="RESOLUTIONS_LIST" />
 		<Control H="16" ID="CTRL_CHECK_BORDERLESS" Type="Checkbox" W="161" X="-52" Y="-28" animID="CHECKBOX1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="-1" stringID="BORDERLESS_WND" />
 		<Control H="16" ID="CTRL_CHECK_FULLSCREEN" Type="Checkbox" W="161" X="-52" Y="-8" animID="CHECKBOX1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="-1" stringID="FULLSCREEN" />
 		<Control H="16" ID="CTRL_CHECK_PIXELPERFECT" Type="Checkbox" W="161" X="-52" Y="12" animID="CHECKBOX1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="-1" stringID="PIXELPERFECT" />
-		<Control H="18" ID="BUT_GFX_APPLY" Type="Button" W="138" X="-53" Y="50" animID="BUTTON_BLUE" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="APPLY" />
-		<Control H="18" ID="BUT_CLOSE" Type="Button" W="138" X="-53" Y="70" animID="BUTTON_RED" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="CANCEL" />
+		<Control H="16" ID="CTRL_CHECK_GI" Type="Checkbox" W="161" X="-52" Y="32" animID="CHECKBOX1" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" inflate="-1" stringID="GLOBAL_ILLUMINATION" />
+		<Control H="18" ID="BUT_GFX_APPLY" Type="Button" W="138" X="-53" Y="55" animID="BUTTON_BLUE" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="APPLY" />
+		<Control H="18" ID="BUT_CLOSE" Type="Button" W="138" X="-53" Y="75" animID="BUTTON_RED" fontColor="#FFFFFFFF" fontID="FONT_8_BS1" stringID="CANCEL" />
 	</Layer>
 	<Layer ID="LAYER_ID_COOP_WND" X="0" Y="0" isBlocking="true" getsInput="true" anchorX="0" anchorY="0" focusedControlID="BUT_QUICK_MATCH">
 		<Control Type="Vignette" animID="VIGNETTES" color="#88000000" frameIdx="0" />

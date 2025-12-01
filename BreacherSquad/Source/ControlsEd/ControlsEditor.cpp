@@ -378,10 +378,12 @@ void CControlsEditor::IMGUI_AddCurControlProps()
 		else if (strcmp(sVarName, "stringID") == 0)
 		{
 			// main string is kept as an integer (for speed) so we convert it to string to use it
-			char str0[128] = " ";
+			char str0[128] = "";
 			if (pValue->eType == CVariant::K_ARGTYPE_INT32)
 			{
-				wcstombs(str0, __Texts().strings[pValue->m_asINT32]->shStringName.text, 128);
+				if ( pValue->m_asINT32 != __Texts().defaultStringIdx ) {
+					wcstombs( str0, __Texts().strings[pValue->m_asINT32]->shStringName.text, 128 );
+				}
 			}
 
 			ImGui::InputText(sVarName, str0, IM_ARRAYSIZE(str0));
@@ -499,9 +501,11 @@ void CControlsEditor::IMGUI_AddLayerProps()
 
 		ImGui::Separator();
 
-		char str1[128];
-		wcstombs(str1, currLayer->shFocusedControlID.text, 128);
-		ImGui::InputText("Focused Ctrl", str1, IM_ARRAYSIZE(str0));
+		char str1[128] = { 0 };
+		if ( currLayer->shFocusedControlID.IsSet() ) {
+			wcstombs( str1, currLayer->shFocusedControlID.text, 128 );
+		}
+		ImGui::InputText("Focused Ctrl", str1, IM_ARRAYSIZE(str1));
 		if (ImGui::IsItemEdited())
 		{
 			currLayer->shFocusedControlID.Init(str1);
@@ -654,8 +658,8 @@ void CControlsEditor::SaveXML(WCHAR* XMLpath)
 						CVariant* var = &it.second;
 						if (ctrlCol->m_variants[var->shName.text].IsSet())
 						{
-							WCHAR propertyName[MAX_PATH_STD];
-							WCHAR propertyValue[MAX_PATH_STD];
+							WCHAR propertyName[MAX_PATH_STD] = { 0 };
+							WCHAR propertyValue[MAX_PATH_STD] = { 0 };
 							swprintf_s(propertyName, MAX_PATH_STD, var->shName.text);
 							ctrlCol->m_variants[propertyName].asString(propertyValue, MAX_PATH_STD);
 

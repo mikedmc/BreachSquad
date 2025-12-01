@@ -82,7 +82,10 @@ int CVariant::asString( WCHAR *destStr, int maxLen )
 	switch ( eType )
 	{
 	case K_ARGTYPE_STRING:
-		StringCchCopy( destStr, maxLen, m_strArg.text );
+		if ( m_strArg.IsSet() )
+			StringCchCopy( destStr, maxLen, m_strArg.text );
+		else
+			destStr[0] = 0;
 		break;
 	case K_ARGTYPE_INT32:
 		StringCchPrintf( destStr, maxLen, L"%d", m_asINT32 );

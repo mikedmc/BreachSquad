@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PSTexts Version="1.0">
   <Alphabet>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&amp;*()-_=+[{]};:'",&lt;.&gt;/?¡¢£¥§©®¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝŸßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýÿŒœº\АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя</Alphabet>
-  <Texts Lang="EN" Count="661">
+  <Texts Lang="EN" Count="662">
     <Text ID="TITLE">Breacher Squad</Text>
     <Text ID="VERSION_NUMBER">empty</Text>
     <Text ID="MSGBOX">empty</Text>
@@ -58,6 +58,7 @@
     <Text ID="RESET_PROGRESS_SURE">Are you sure you want to reset your progress? Your local saves will be deleted and you will start from scratch!</Text>
     <Text ID="SCREEN_SHAKE">Screen Shake</Text>
     <Text ID="GORE_ENABLED">Gore Enabled</Text>
+    <Text ID="GLOBAL_ILLUMINATION">Enable Global Illumination</Text>
     <Text ID="ANTIALIAS_OPTION">Antialiasing</Text>
     <Text ID="SELECT_MODE">Select Mode</Text>
     <Text ID="ANTIALIAS_JOKE1">MSAA

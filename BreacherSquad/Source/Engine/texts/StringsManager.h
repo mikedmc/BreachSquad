@@ -58,7 +58,6 @@ public:
 
 	// Returns string hash by index
 	CStringDesc*				GetStringDescByIdx( int nIdx );
-
 	// Sets a string based on a printf format
 	// \returns: -1 for error or number of chars not found in alphabet
 	int							SetString(int idx, WCHAR* szFormat, ...);

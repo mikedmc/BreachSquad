@@ -2,8 +2,8 @@
 @cd PreData
 @cd Strings
 @TextsCompiler.exe REWRITE strings_en_src.xml strings.xml
-@copy strings.h ..\..\..\Source\Engine\Constants /y
-@copy strings.xml ..\..\..\Bin\Media\texts /y
+@copy strings.h ..\..\..\Source\Engine\Constants\ /y
+@copy strings.xml ..\..\..\Bin\Media\texts\ /y
 
 goto comment
 
