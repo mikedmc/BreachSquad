@@ -4,65 +4,6 @@
 /// Game options class
 ///**************************************************************************************
 
-CApplicationSettings::CApplicationSettings()
-{
-	fMusicVolume = 0.7f;
-	fSoundsVolume = 0.9f;
-
-	nWindowW = GetSystemMetrics( SM_CXSCREEN );
-	nWindowH = GetSystemMetrics( SM_CYSCREEN );
-
-	bFullscreen = true;
-	bBorderlessFullscreen = true;
-	bPixelPerfect = true;
-	bScreenShakes = true;
-	bGoreEnabled = true;
-	bShowInterfaceHelp = false;
-
-	nLOD_water = K_UT_LOD_HIGH;
-	nLOD_shadows = K_UT_LOD_MED;
-	nLOD_lights = K_UT_LOD_HIGH;
-
-	//network flags
-	devnet_eNetGameType = K_NETGAME_TYPE_NO_NETWORK;
-	devnet_eSyncStatus = K_NETGAME_SYNC_STOPPED;
-
-	//CRC
-	dev_unCurrentCRC = 0;
-	dev_unCurrentModsCRC = 0;
-
-	//LANG/LOCA	- default on english
-	shLanguageAlias.Init( "notset" );
-
-#if defined(_DEBUG) || defined(DEBUG)
-	dev_bDebugEnabled = true;
-#else
-	dev_bDebugEnabled = false;
-#endif
-
-#if defined(_DEBUG) || defined(DEBUG) || defined(ENABLE_DEVMODE_RELEASE)
-	dev_bDevMode = true;
-	dev_bDevMode_forced = false; //always false
-
-	dev_bLogWindowShow = true;
-	dev_bLogWriteToFile = true;
-	dev_bLogShowInDebugOutput = true;
-#else
-	dev_bDevMode = false;
-	dev_bDevMode_forced = false; //always false
-
-	dev_bLogWindowShow = false;
-	dev_bLogWriteToFile = true;
-	dev_bLogShowInDebugOutput = false;
-#endif
-
-#ifdef ENABLE_GALAXY
-	galaxyFullyLoaded = false;
-#endif
-
-}
-
-
 ///**************************************************************************************
 /// Main Game Class
 /// - listens to message dispatch
@@ -373,6 +314,8 @@ HRESULT CApplication::SaveSettings()
 	graphicsNode.attribute( L"bGoreEnabled" ).set_value( m_Settings.bGoreEnabled );
 	graphicsNode.append_attribute( L"bShowInterfaceHelp" );
 	graphicsNode.attribute( L"bShowInterfaceHelp" ).set_value( m_Settings.bShowInterfaceHelp );
+	graphicsNode.append_attribute( L"bEnableGI" );
+	graphicsNode.attribute( L"bEnableGI" ).set_value( m_Settings.bEnableGI);
 
 	graphicsNode.append_attribute( L"LOD_water" );
 	graphicsNode.attribute( L"LOD_water" ).set_value( m_Settings.nLOD_water );
@@ -465,6 +408,7 @@ HRESULT CApplication::LoadSettings()
 	m_Settings.bScreenShakes = graphicsNode.attribute( L"bScreenShakes" ).as_bool();
 	m_Settings.bGoreEnabled = graphicsNode.attribute( L"bGoreEnabled" ).as_bool();
 	m_Settings.bShowInterfaceHelp = graphicsNode.attribute( L"bShowInterfaceHelp" ).as_bool();
+	m_Settings.bEnableGI = graphicsNode.attribute( L"bEnableGI" ).as_bool();
 	//LODs
 	m_Settings.nLOD_lights = graphicsNode.attribute( L"LOD_lights" ).as_int();
 	m_Settings.nLOD_shadows = graphicsNode.attribute( L"LOD_shadows" ).as_int();
@@ -626,6 +570,10 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 					{
 						ctrl->paramsDict.SetVarBool( L"bChecked", m_Settings.bBorderlessFullscreen );
 					}
+					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_GI" ) )
+					{
+						layer->SetControlParam( "CTRL_CHECK_GI", L"bChecked", m_Settings.bEnableGI );
+					}
 					//set selected resolution
 					int nSelIdx = g_arrResolutions.GetSize() - 1; //by default largest res possible
 					for ( int kk = g_arrResolutions.GetSize() - 1; kk >= 0; kk-- )
@@ -666,6 +614,10 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_BORDERLESS" ) )
 					{
 						m_Settings.bBorderlessFullscreen = ctrl->paramsDict[L"bChecked"].m_asBool;
+					}
+					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_GI" ) )
+					{
+						m_Settings.bEnableGI = ctrl->paramsDict[L"bChecked"].m_asBool;
 					}
 					//set selected resolution
 					if ( ctrl = layer->GetControlByName( "CTRL_DROP_RES" ) )
@@ -1497,8 +1449,8 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 				CCtrlLayer* layer = __GUI().GetTopmostInputLayer();
 				if ( layer != nullptr )
 				{
-					CControl* ctrl;
-					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_SHAKES" ) )
+					CControl* ctrl = layer->GetControlByName( "CTRL_CHECK_SHAKES" );
+					if ( ctrl )
 						m_Settings.bScreenShakes = ctrl->paramsDict[L"bChecked"].m_asBool;
 				}
 			}
@@ -1506,9 +1458,18 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 				CCtrlLayer* layer = __GUI().GetTopmostInputLayer();
 				if ( layer != nullptr )
 				{
-					CControl* ctrl;
-					if ( ctrl = layer->GetControlByName( "CTRL_CHECK_GORE" ) )
+					CControl* ctrl = layer->GetControlByName( "CTRL_CHECK_GORE" );
+					if ( ctrl )
 						m_Settings.bGoreEnabled = ctrl->paramsDict[L"bChecked"].m_asBool;
+				}
+			}
+			else if ( ctrlID == HASH( "CTRL_CHECK_GI" ) ) {
+				CCtrlLayer* layer = __GUI().GetTopmostInputLayer();
+				if ( layer != nullptr )
+				{
+					CControl* ctrl = layer->GetControlByName( "CTRL_CHECK_GI" );
+					if ( ctrl )
+						m_Settings.bEnableGI = ctrl->paramsDict[L"bChecked"].m_asBool;
 				}
 			}
 		}
