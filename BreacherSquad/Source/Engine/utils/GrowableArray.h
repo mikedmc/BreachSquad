@@ -87,7 +87,7 @@ public:
 	{
 		return m_nSize;
 	}
-	int     Count() const
+	FORCEINLINE int     Count() const
 	{
 		return m_nSize;
 	}

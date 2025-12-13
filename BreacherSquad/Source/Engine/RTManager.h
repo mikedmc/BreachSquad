@@ -41,7 +41,7 @@ public:
 private:
 	PDEVICE						m_pDevice;
 public:
-	CFixedArray<CEngineRenderTarget*, K_RTT_MAX_RT_CNT> arrRT;
+	CArray<CEngineRenderTarget*> arrRT;
 	
 	//CTOR-DTOR
 	CRTManager();
@@ -49,6 +49,8 @@ public:
 
 	// Adds a new render target	to the RT collection
 	void					AddRT(UINT32 dwID, INT width, INT height, UINT mipLevels, FORMAT3D texFormat, bool bDepthStencil = TRUE, FORMAT3D depthStencilFormat = D3DFMT_D24X8);
+	// Releases one RT
+	void					ReleaseRT( UINT32 dwID );
 	// Called before drawing so the engine knows to draw to the specified RT
 	OPRESULT				BeginSceneRT(UINT32 dwID);
 	OPRESULT				BeginSceneRT(CEngineRenderTarget* pRT);
@@ -56,13 +58,13 @@ public:
 	OPRESULT				EndSceneRT(UINT32 dwID);
 	OPRESULT				EndSceneRT(CEngineRenderTarget* pRT);
 	// Releases all allocated render targets and deletes them from the RT collection
-	void					Release();
+	void					ReleaseAll();
 	// Returns pointer to RT or null if ID not found
 	CEngineRenderTarget*	GetRTbyUID(UINT32 dwID);
 
 private:
 	// Creates a new render target texture and all associated surfaces and structures
-	OPRESULT				CreateRT(CEngineRenderTarget* pRT);
+	OPRESULT				InitializeRT(CEngineRenderTarget* pRT);
 
 public: //--- framework methods ---
 	OPRESULT OnCreateDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc = NULL);

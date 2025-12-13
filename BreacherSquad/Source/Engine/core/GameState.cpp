@@ -251,6 +251,30 @@ void GameState::SetState( EGameState newState, CVariantMap * args )
 		break;
 		case GAME_STATE_GAME:
 		{
+			// Create necessary render targets when device gets reset (created or reset)
+			UINT fGameHpx = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
+			UINT fGameWpx = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
+
+			// Create RTs
+			__RTManager().AddRT( K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
+			__RTManager().AddRT( K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
+			__RTManager().AddRT( K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
+			// used for GI
+			UINT radiance_render_extent = (UINT)K_GI_RENDER_EXTENT;
+			__RTManager().AddRT( K_RTID_WORLDSCENE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+			__RTManager().AddRT( K_RTID_TEMPORARY, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+			__RTManager().AddRT( K_RTID_STORAGE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+			__RTManager().AddRT( K_RTID_STORAGE_HALF, radiance_render_extent / 2, radiance_render_extent / 2, 1, D3DFMT_A8R8G8B8, false );
+			__RTManager().AddRT( K_RTID_STORAGE_HALF2, radiance_render_extent / 2, radiance_render_extent / 2, 1, D3DFMT_A8R8G8B8, false );
+			__RTManager().AddRT( K_RTID_STORAGE_QUART, radiance_render_extent / 4, radiance_render_extent / 4, 1, D3DFMT_A8R8G8B8, false );
+			__RTManager().AddRT( K_RTID_STORAGE_QUART2, radiance_render_extent / 4, radiance_render_extent / 4, 1, D3DFMT_A8R8G8B8, false );
+			__RTManager().AddRT( K_RTID_STORAGE_EIGHTH, radiance_render_extent / 8, radiance_render_extent / 8, 1, D3DFMT_A8R8G8B8, false );
+			__RTManager().AddRT( K_RTID_STORAGE_EIGHTH2, radiance_render_extent / 8, radiance_render_extent / 8, 1, D3DFMT_A8R8G8B8, false );
+			__RTManager().AddRT( K_RTID_GI, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
+
+
+
+
 			//increase music counter
 			g_userData[ K_MEMID_MUSIC_TRACK_COUNTER ]++;
 			//save user data again
@@ -568,6 +592,9 @@ void GameState::ExitState( EGameState exitState, EGameState newState )
 			{
 				ErrorBox( K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath );
 			}
+
+			//-- release RTs
+			__RTManager().ReleaseAll();
 		}
 		break;
 

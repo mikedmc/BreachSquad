@@ -12,12 +12,12 @@ CRTManager::~CRTManager()
 {
 	m_pDevice = null;
 
-	Release();
+	ReleaseAll();
 }
 
 void CRTManager::AddRT(UINT32 dwID, INT width, INT height, UINT mipLevels, FORMAT3D texFormat, bool bDepthStencil /*= TRUE*/, FORMAT3D depthStencilFormat /*= D3DFMT_D24X8*/)
 {
-	CEngineRenderTarget * pRT = new CEngineRenderTarget();
+	CEngineRenderTarget* pRT = new CEngineRenderTarget();
 
 	pRT->UID = dwID;
 	pRT->nWidth = width;
@@ -28,7 +28,7 @@ void CRTManager::AddRT(UINT32 dwID, INT width, INT height, UINT mipLevels, FORMA
 	pRT->nMipLevels = mipLevels;
 	// create projection matrix specific for this RT
 	// uses 0.5 because in DirectX9 UV of 0.0 means center of texel. Change this to 0.0f on OpenGL if blurry.
-	MUMatOrthoOffCenterLH(&pRT->matProj, 0.5f, pRT->nWidth + 0.5f, pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
+	MUMatOrthoOffCenterLH(&pRT->matProj, 0.5f, (float)pRT->nWidth + 0.5f, (float)pRT->nHeight + 0.5f, 0.5f, 0.0f, 1.0f);
 	// Add RT to list 
 	arrRT.Add(pRT);
 
@@ -36,7 +36,7 @@ void CRTManager::AddRT(UINT32 dwID, INT width, INT height, UINT mipLevels, FORMA
 	// try to create the RT right now
 	if (m_pDevice != null)
 	{
-		if (OP_SUCCESS(CreateRT(pRT)))
+		if (OP_SUCCESS(InitializeRT(pRT)))
 		{
 			UTApp().g_gfxFlags |= K_UT_GFXFLAG_RTT;
 		}
@@ -45,6 +45,27 @@ void CRTManager::AddRT(UINT32 dwID, INT width, INT height, UINT mipLevels, FORMA
 			UTApp().g_gfxFlags &= ~K_UT_GFXFLAG_RTT;
 		}
 	}
+}
+
+void CRTManager::ReleaseRT( UINT32 dwID )
+{
+	for ( int kk = 0; kk < arrRT.Count(); kk++ )
+	{
+		if ( arrRT[kk]->UID == dwID )
+		{
+			// release dynamically allocated data
+			SAFE_RELEASE( arrRT[kk]->m_pRenderToSurface );
+			SAFE_RELEASE( arrRT[kk]->m_pRTTexture );
+			SAFE_RELEASE( arrRT[kk]->m_pRTSurface );
+			// delete element
+			SAFE_DELETE( arrRT[kk] );
+		}
+		arrRT.Remove( kk );
+
+		LOG_DBG( L"CRTManager: ReleaseRT: Removed RT ID:%d", dwID );
+		return;
+	}
+	LOG_DBG( L"CRTManager: ReleaseRT: No such RT ID:%d", dwID );
 }
 
 OPRESULT CRTManager::BeginSceneRT(UINT32 dwID)
@@ -111,36 +132,36 @@ OPRESULT CRTManager::EndSceneRT(CEngineRenderTarget* pRT)
 	return K_OP_OK;
 }
 
-void CRTManager::Release()
+void CRTManager::ReleaseAll()
 {
-	for (int kk = 0; kk < arrRT.nCount; kk++)
+	LOG_DBG( L"RTManager: Release: %d render targets released!", arrRT.Count() );
+
+	for (int kk = 0; kk < arrRT.Count(); kk++)
 	{
 		// release dynamically allocated data
-		SAFE_RELEASE(arrRT.m_pData[kk]->m_pRenderToSurface);
-		SAFE_RELEASE(arrRT.m_pData[kk]->m_pRTTexture);
-		SAFE_RELEASE(arrRT.m_pData[kk]->m_pRTSurface);
+		SAFE_RELEASE(arrRT[kk]->m_pRenderToSurface);
+		SAFE_RELEASE(arrRT[kk]->m_pRTTexture);
+		SAFE_RELEASE(arrRT[kk]->m_pRTSurface);
 		// delete element
-		SAFE_DELETE(arrRT.m_pData[kk]);
+		SAFE_DELETE(arrRT[kk]);
 	}
 
-	LOG_DBG(L"RTManager: Release: %d render targets released!", arrRT.nCount);
-
-	arrRT.Clear();
+	arrRT.RemoveAll();
 }
 
 CRTManager::CEngineRenderTarget* CRTManager::GetRTbyUID(UINT32 dwID)
 {
-	for (int kk = 0; kk < arrRT.nCount; kk++)
+	for (int kk = 0; kk < arrRT.Count(); kk++)
 	{
-		if (arrRT.m_pData[kk]->UID == dwID)
-			return arrRT.m_pData[kk];
+		if (arrRT[kk]->UID == dwID)
+			return arrRT[kk];
 	}
 
 	ErrorBox(K_ERR_WARNING, L"RTManager: RT not found ID:%d", dwID);
 	return nullptr;
 }
 
-OPRESULT CRTManager::CreateRT(CEngineRenderTarget* pRT)
+OPRESULT CRTManager::InitializeRT(CEngineRenderTarget* pRT)
 {
 	if (m_pDevice == null)
 	{
@@ -205,11 +226,11 @@ OPRESULT CRTManager::OnResetDevice(PDEVICE pDevice, const SURFACE_DESC* pBBDesc)
 {
 	m_pDevice = pDevice;
 
-	for (int kk = 0; kk < arrRT.nCount; kk++)
+	for (int kk = 0; kk < arrRT.Count(); kk++)
 	{
 		// try to create the RT right now
-		CEngineRenderTarget * pRT = arrRT.m_pData[kk];
-		if (OP_SUCCESS(CreateRT(pRT)))
+		CEngineRenderTarget * pRT = arrRT[kk];
+		if (OP_SUCCESS(InitializeRT(pRT)))
 		{
 			UTApp().g_gfxFlags |= K_UT_GFXFLAG_RTT;
 		}
@@ -228,12 +249,12 @@ OPRESULT CRTManager::OnLostDevice()
 	m_pDevice = null;
 
 	// release device objects
-	for (int kk = 0; kk < arrRT.nCount; kk++)
+	for (int kk = 0; kk < arrRT.Count(); kk++)
 	{
-		SAFE_RELEASE(arrRT.m_pData[kk]->m_pRenderToSurface);
-		SAFE_RELEASE(arrRT.m_pData[kk]->m_pRTTexture);
-		SAFE_RELEASE(arrRT.m_pData[kk]->m_pRTSurface);
-		arrRT.m_pData[kk]->bReady = false;
+		SAFE_RELEASE(arrRT[kk]->m_pRenderToSurface);
+		SAFE_RELEASE(arrRT[kk]->m_pRTTexture);
+		SAFE_RELEASE(arrRT[kk]->m_pRTSurface);
+		arrRT[kk]->bReady = false;
 	}
 
 	return K_OP_OK;
