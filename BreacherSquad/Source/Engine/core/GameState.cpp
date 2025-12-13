@@ -20,150 +20,8 @@ void GameState::ChangeTo( EGameState newState, CVariantMap * args )
 	LOG( L"System:: ChangeGameState(%d)", newState );
 	EGameState oldGameState = GameState::state;
 
-	///--- from what state is it coming? ---
-	switch ( oldGameState )
-	{
-		case GAME_STATE_PRELOAD:
-		{
-		}
-		break;
-		case GAME_STATE_DEVELOPER:
-		{
-			UTApp().App_ExitState_Developer();
-		}
-		break;
-		case GAME_STATE_LOADING:
-		{
-			UTApp().App_ExitState_Loading();
-			g_bForceOneUpdatePerFrame = false;
-		}
-		break;
-
-		case GAME_STATE_PLAYER_SELECTION:
-		{
-			g_playerSelScr.ReleaseSprites();
-			///--- load main menu ---
-			WCHAR xmlpath[ MAX_PATH ], xmlpath2[ MAX_PATH ];
-			FileManager::GetMediaPath( L"media/interfaces/menus.bsx", xmlpath );
-			FileManager::GetMediaPath( L"media/interfaces/menus0.bsx", xmlpath2 );
-			if ( FAILED( g_mainMenu.LoadSprites( xmlpath, xmlpath2 ) ) )
-			{
-				ErrorBox( K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath );
-			}
-
-			__GUI().RemoveAllLayers( true );
-		}
-		break;
-		case GAME_STATE_GAME:
-		{
-
-#ifdef ENABLE_CHAT_WINDOW
-			//cancel current input if exited
-			g_ChatWnd.CancelInput();
-			g_ChatWnd.Clear();
-#endif
-
-			//push global scores to leaderboard when returning from the game
-#ifdef ENABLE_LEADERBOARDS
-			//upload multiplayer score
-			if ( g_userData[ K_MEMID_TOTAL_SCORE_COOP ] > 0 )
-				__Leaderboards().QueueJob( K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_COOP, g_userData[ K_MEMID_TOTAL_SCORE_COOP ] );
-			//upload single player score so that current leaderboard remains the single player one
-			if ( g_userData[ K_MEMID_TOTAL_SCORE_SOLO ] > 0 )
-				__Leaderboards().QueueJob( K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, g_userData[ K_MEMID_TOTAL_SCORE_SOLO ] );
-#endif
-			//must be called here to reset controller flags
-			__Controllers().ResetAllControllersKeypresses();
-			//stop all sounds
-			__Audio().StopGroup( "sounds", false, true );
-			__Audio().StopGroup( "ingame", false, true );
-
-			SND_SET_GROUP_FREQUENCY( "ingame", 1.0f, false );
-			UTApp().g_texManager.Release();
-			// release level resources
-			__Sim().Release();
-			// level was unloaded, immediately set the controller pointer to null
-			__Controllers().SetNormalizeCoordsFunctionPtr( nullptr );
-
-			__GUI().RemoveAllLayers( true );
-
-			__Audio().StopGroup( "music", false, true );
-			if ( newState != GAME_STATE_GAME )
-			{
-				//SND_PLAY_ONCE( SNDIDX_THEME_MENU1, DSBPLAY_LOOPING );
-			}
-
-			//set volumes
-			SND_SET_GROUP_VOLUME( "sounds", UTApp().m_Settings.fSoundsVolume, false );
-			SND_SET_GROUP_VOLUME( "ingame", UTApp().m_Settings.fSoundsVolume, false );
-			SND_SET_GROUP_VOLUME( "music", UTApp().m_Settings.fMusicVolume, false );
-
-			///--- load main menu ---
-			WCHAR xmlpath[ MAX_PATH ], xmlpath2[ MAX_PATH ];
-			FileManager::GetMediaPath( L"media/interfaces/menus.bsx", xmlpath );
-			FileManager::GetMediaPath( L"media/interfaces/menus0.bsx", xmlpath2 );
-			if ( FAILED( g_mainMenu.LoadSprites( xmlpath, xmlpath2 ) ) )
-			{
-				ErrorBox( K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath );
-			}
-		}
-		break;
-
-		case GAME_STATE_WORKSHOP:
-		{
-			__Audio().StopGroup( "sounds", false, true );
-			__GUI().RemoveAllLayers( true );
-			//release used textures here:
-			UTApp().g_texManager.Release();
-			//make sure we reload everything that can be modded
-			App_ReloadContentChanges();
-			///compute mods CRC
-			UINT32 unModsCRC = App_GetActiveModsCRC();
-
-			UTApp().m_Settings.dev_unCurrentModsCRC = unModsCRC;
-			LOG( L"--> CRC_BASE [%08x] CRC_MODS [%08x] <--", UTApp().m_Settings.dev_unCurrentCRC, UTApp().m_Settings.dev_unCurrentModsCRC );
-			//when returning from the mods screen reload the main menu in case it changed
-			g_mainMenu.Release();
-
-			WCHAR xmlpath[ MAX_PATH ];
-			WCHAR xmlpath2[ MAX_PATH ];
-			FileManager::GetMediaPath( L"media/interfaces/menus.bsx", xmlpath );
-			FileManager::GetMediaPath( L"media/interfaces/menus0.bsx", xmlpath2 );
-			if ( FAILED( g_mainMenu.LoadSprites( xmlpath, xmlpath2 ) ) )
-			{
-				ErrorBox( K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath );
-			}
-		}
-		break;
-
-		case GAME_STATE_JOIN_COOP_LIST:
-		{
-			__Audio().StopGroup( "sounds", false, true );
-			__GUI().RemoveAllLayers( true );
-		}
-		break;
-
-		case GAME_STATE_NET_LOBBY:
-		case GAME_STATE_GAME_MODE_SELECTION:
-		case GAME_STATE_CHAPTER_SELECTION:
-		case GAME_STATE_LEVEL_SELECTION:
-		case GAME_STATE_MAINMENU:
-		{
-			__Audio().StopGroup( "sounds", false, true );
-			__GUI().RemoveAllLayers( true );
-			//release used textures here:
-			UTApp().g_texManager.Release();
-		}
-		break;
-#ifdef K_CONTROLS_EDITOR
-		case GAME_STATE_CONTROLSED:
-		{
-			__ImGui().SetGlobalEnabled( false );
-			g_ControlsEditor.Close();
-		}
-		break;
-#endif
-	}
+	///--- Release elements used in oldState ---
+	ExitState( oldGameState, newState );
 
 	///--- set new game state here ---
 	GameState::state = newState;
@@ -621,5 +479,153 @@ void GameState::PaintTransition( float dTime, float fTimeline, PDEVICE pDevice )
 		break;
 
 	}
+}
+
+void GameState::ExitState( EGameState exitState, EGameState newState )
+{
+	switch ( exitState )
+	{
+		case GAME_STATE_PRELOAD:
+		{
+		}
+		break;
+		case GAME_STATE_DEVELOPER:
+		{
+			UTApp().App_ExitState_Developer();
+		}
+		break;
+		case GAME_STATE_LOADING:
+		{
+			UTApp().App_ExitState_Loading();
+			g_bForceOneUpdatePerFrame = false;
+		}
+		break;
+
+		case GAME_STATE_PLAYER_SELECTION:
+		{
+			g_playerSelScr.ReleaseSprites();
+			///--- load main menu ---
+			WCHAR xmlpath[MAX_PATH], xmlpath2[MAX_PATH];
+			FileManager::GetMediaPath( L"media/interfaces/menus.bsx", xmlpath );
+			FileManager::GetMediaPath( L"media/interfaces/menus0.bsx", xmlpath2 );
+			if ( FAILED( g_mainMenu.LoadSprites( xmlpath, xmlpath2 ) ) )
+			{
+				ErrorBox( K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath );
+			}
+
+			__GUI().RemoveAllLayers( true );
+		}
+		break;
+		case GAME_STATE_GAME:
+		{
+
+#ifdef ENABLE_CHAT_WINDOW
+			//cancel current input if exited
+			g_ChatWnd.CancelInput();
+			g_ChatWnd.Clear();
+#endif
+
+			//push global scores to leaderboard when returning from the game
+#ifdef ENABLE_LEADERBOARDS
+			//upload multiplayer score
+			if ( g_userData[K_MEMID_TOTAL_SCORE_COOP] > 0 )
+				__Leaderboards().QueueJob( K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_COOP, g_userData[K_MEMID_TOTAL_SCORE_COOP] );
+			//upload single player score so that current leaderboard remains the single player one
+			if ( g_userData[K_MEMID_TOTAL_SCORE_SOLO] > 0 )
+				__Leaderboards().QueueJob( K_JOB_UPLOAD_SCORE, K_GAME_STR_LEADERBOARDS_GLOBAL_SP, g_userData[K_MEMID_TOTAL_SCORE_SOLO] );
+#endif
+			//must be called here to reset controller flags
+			__Controllers().ResetAllControllersKeypresses();
+			//stop all sounds
+			__Audio().StopGroup( "sounds", false, true );
+			__Audio().StopGroup( "ingame", false, true );
+
+			SND_SET_GROUP_FREQUENCY( "ingame", 1.0f, false );
+			UTApp().g_texManager.Release();
+			// release level resources
+			__Sim().Release();
+			// level was unloaded, immediately set the controller pointer to null
+			__Controllers().SetNormalizeCoordsFunctionPtr( nullptr );
+
+			__GUI().RemoveAllLayers( true );
+
+			__Audio().StopGroup( "music", false, true );
+			if ( newState != GAME_STATE_GAME )
+			{
+				//SND_PLAY_ONCE( SNDIDX_THEME_MENU1, DSBPLAY_LOOPING );
+			}
+
+			//set volumes
+			SND_SET_GROUP_VOLUME( "sounds", UTApp().m_Settings.fSoundsVolume, false );
+			SND_SET_GROUP_VOLUME( "ingame", UTApp().m_Settings.fSoundsVolume, false );
+			SND_SET_GROUP_VOLUME( "music", UTApp().m_Settings.fMusicVolume, false );
+
+			///--- load main menu ---
+			WCHAR xmlpath[MAX_PATH], xmlpath2[MAX_PATH];
+			FileManager::GetMediaPath( L"media/interfaces/menus.bsx", xmlpath );
+			FileManager::GetMediaPath( L"media/interfaces/menus0.bsx", xmlpath2 );
+			if ( FAILED( g_mainMenu.LoadSprites( xmlpath, xmlpath2 ) ) )
+			{
+				ErrorBox( K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath );
+			}
+		}
+		break;
+
+		case GAME_STATE_WORKSHOP:
+		{
+			__Audio().StopGroup( "sounds", false, true );
+			__GUI().RemoveAllLayers( true );
+			//release used textures here:
+			UTApp().g_texManager.Release();
+			//make sure we reload everything that can be modded
+			App_ReloadContentChanges();
+			///compute mods CRC
+			UINT32 unModsCRC = App_GetActiveModsCRC();
+
+			UTApp().m_Settings.dev_unCurrentModsCRC = unModsCRC;
+			LOG( L"--> CRC_BASE [%08x] CRC_MODS [%08x] <--", UTApp().m_Settings.dev_unCurrentCRC, UTApp().m_Settings.dev_unCurrentModsCRC );
+			//when returning from the mods screen reload the main menu in case it changed
+			g_mainMenu.Release();
+
+			WCHAR xmlpath[MAX_PATH];
+			WCHAR xmlpath2[MAX_PATH];
+			FileManager::GetMediaPath( L"media/interfaces/menus.bsx", xmlpath );
+			FileManager::GetMediaPath( L"media/interfaces/menus0.bsx", xmlpath2 );
+			if ( FAILED( g_mainMenu.LoadSprites( xmlpath, xmlpath2 ) ) )
+			{
+				ErrorBox( K_ERR_CRITICAL, L"Main Menu file not found:\n%s", xmlpath );
+			}
+		}
+		break;
+
+		case GAME_STATE_JOIN_COOP_LIST:
+		{
+			__Audio().StopGroup( "sounds", false, true );
+			__GUI().RemoveAllLayers( true );
+		}
+		break;
+
+		case GAME_STATE_NET_LOBBY:
+		case GAME_STATE_GAME_MODE_SELECTION:
+		case GAME_STATE_CHAPTER_SELECTION:
+		case GAME_STATE_LEVEL_SELECTION:
+		case GAME_STATE_MAINMENU:
+		{
+			__Audio().StopGroup( "sounds", false, true );
+			__GUI().RemoveAllLayers( true );
+			//release used textures here:
+			UTApp().g_texManager.Release();
+		}
+		break;
+#ifdef K_CONTROLS_EDITOR
+		case GAME_STATE_CONTROLSED:
+		{
+			__ImGui().SetGlobalEnabled( false );
+			g_ControlsEditor.Close();
+		}
+		break;
+#endif
+	}
+
 }
 

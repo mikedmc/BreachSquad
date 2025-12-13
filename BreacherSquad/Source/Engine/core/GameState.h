@@ -61,5 +61,9 @@ public:
 
 	// Paints screen transition
 	static void PaintTransition( float dTime, float fTimeline, PDEVICE pDevice );
+
+private:
+	// Called when releasing a state (called automatically by ChangeTo())
+	static void ExitState( EGameState exitState, EGameState newState );
 };
 

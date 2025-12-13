@@ -5230,7 +5230,7 @@ OPRESULT CLevel::RenderPass_GIDirectLight( Matrix* matProj, float /*fBetweenFram
 	Matrix	matView;
 
 	Vec2		campos = m_camLevelToRT.GetCamPos();
-	float		render_offset = UTApp().gi_global.radiance_render_extent / 2.0f;
+	float		render_offset = K_GI_RENDER_EXTENT / 2.0f;
 	CAABB		camAABB( campos.x - render_offset, campos.y - render_offset, campos.x + render_offset, campos.y + render_offset);
 	RectXYWH	camrect = m_camLevelToRT.GetViewport();
 
@@ -5370,7 +5370,7 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	// scene is rendered in the center of a 1024x1024 pixels texture then mipmap is scaled down to 512x512
 	// mipmap screen coord is computed by centering the camera rectangle in the 1024x1024 screen since texture coords are normalized
 	RectXYWH	camrect = m_camLevelToRT.GetCamWorldAABB();
-	float		render_extent = UTApp().gi_global.radiance_render_extent;
+	float		render_extent = K_GI_RENDER_EXTENT;
 	Vec2		vTargetCenter( 0.5f, 0.5f );
 	Vec2		vCamScreenHalf( camrect.w / 2.0f, camrect.h / 2.0f );
 	vCamScreenHalf /= render_extent;

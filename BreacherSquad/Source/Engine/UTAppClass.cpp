@@ -2078,13 +2078,6 @@ int multiple_of2( int number ) { return ((number + (2 - 1)) & ~(2 - 1)); }
 float power_of4( float number ) { return pow( 4, ceil( log( number ) / log(4) ) ); }
 float power_of2( float number ) { return pow( 2, ceil( log2( number ) ) ); }
 
-void CApplication::radiance_initialize( float extent, float boost /*= 1.0*/, float decayrate)
-{
-	gi_global.radiance_render_extent = extent;              // extent resolution.. output resolution will be SQUARE.
-	gi_global.radiance_render_decay = decayrate;           // How quickly light bounces decay.
-	gi_global.radiance_render_boost = boost;               // How much to boost light levels.
-}
-
 
 HRESULT CApplication::OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext )
 {

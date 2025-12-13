@@ -326,6 +326,9 @@ enum ETexChannel {
 #define K_GAME_HEIGHT				360
 #define K_GAME_ASPECT				(640.0f / 360.0f)
 
+//GI
+#define K_GI_RENDER_EXTENT			1024.0f
+
 // scale to use when transforming Z to H (added to Y, projection)
 #define ZHSCALE						0.5f
 #define INV_ZHSCALE					(1.0f / 0.5f)

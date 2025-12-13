@@ -10,15 +10,12 @@ void CApplication::App_EnterState_Loading()
 	UINT fGameHpx = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
 	UINT fGameWpx = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
 
-	float cascadeW = 1024.0, cascadeH = 1024.0;
-	radiance_initialize( max( cascadeW, cascadeH), 1.0f, 0.65f );
-
 	// Create RTs
 	__RTManager().AddRT( K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_FINAL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_TEMP1, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
 	// used for GI
-	UINT radiance_render_extent = (UINT)gi_global.radiance_render_extent;
+	UINT radiance_render_extent = (UINT)K_GI_RENDER_EXTENT;
 	__RTManager().AddRT( K_RTID_WORLDSCENE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_TEMPORARY, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );
 	__RTManager().AddRT( K_RTID_STORAGE, radiance_render_extent, radiance_render_extent, 1, D3DFMT_A8R8G8B8, false );

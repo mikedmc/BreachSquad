@@ -14,13 +14,6 @@
 #define K_UT_LOD_HIGH	2
 
 
-struct CGIGlobal {
-	float radiance_render_extent;              // extent resolution.. output resolution will be SQUARE.
-	float radiance_render_boost;               // How much to boost light levels.
-	float radiance_render_decay;
-};
-
-
 /*!
  * \brief Main Game Class
  * #TODO: could/should be moved to Game.cpp
@@ -51,7 +44,6 @@ public:
 
 	///--- EVENTS ---
 public:
-	CGIGlobal	gi_global; //gi settings
 
 	char const * GetListenerName( void ) { return "CApplication"; };
 	bool HandleEvent( CEvent &nEvent );
@@ -66,9 +58,8 @@ public:
 	WCHAR	g_wszTempFolderPath[MAX_PATH];	//temp folder path, finishing with folder separator
 
 	///--- card flags si minime de sistem ---
-	UINT32	g_gfxFlags;						//flaguri importante pt joc
-	UINT32	g_stencilBits;					//nr de biti disponibili pe stencil
-	//float	procFreq;
+	UINT32	g_gfxFlags;						// gfx flags for the game
+	UINT32	g_stencilBits;					
 
 	//screenshot utility
 	HRESULT SaveScreenshot();
@@ -76,17 +67,17 @@ public:
 	///--------------------------------------------------------------------------------------
 	/// Variabile globale legate de dimensiunea ecranului
 	///--------------------------------------------------------------------------------------
-	RectXYWH		g_rectScreen;		// real screen size
-	RectXYWH		g_rectRender;		// rectangle that we render to (in actual final screen resolution after letterboxing)
-	RectXYWH		g_rectRenderPP;		// rectangle that the level should render to so it scales with integers (in actual final screen coordinates)
-	float			g_nPixelSizePP;		//#TODO: change to float for when not using pixel perfect. Pixel size in real pixels for when rendering with perfect pixel
-	RectXYWH		g_rectRT;			// render target render rectangle
-	RectXYWH		g_rect360hWorld;	// world rect for menus and interfaces. W Computed depending on screen spect ratio.
+	RectXYWH			g_rectScreen;		// real screen size
+	RectXYWH			g_rectRender;		// rectangle that we render to (in actual final screen resolution after letterboxing)
+	RectXYWH			g_rectRenderPP;		// rectangle that the level should render to so it scales with integers (in actual final screen coordinates)
+	float				g_nPixelSizePP;		//#TODO: change to float for when not using pixel perfect. Pixel size in real pixels for when rendering with perfect pixel
+	RectXYWH			g_rectRT;			// render target render rectangle
+	RectXYWH			g_rect360hWorld;	// world rect for menus and interfaces. W Computed depending on screen spect ratio.
 	Matrix				g_matProj;			// projection matrix
 	//--- screen camera ---
-	CCameraTransform g_camScreen;		//real screen camera
-	CCameraTransform g_camRTScreen;		//game screen camera with height of RT targets (RT to screen)
-	CCameraTransform g_cam360hScreen;	//360px high camera (scales up to real resolution) - 360px h is default resolution of the game
+	CCameraTransform	g_camScreen;		//real screen camera
+	CCameraTransform	g_camRTScreen;		//game screen camera with height of RT targets (RT to screen)
+	CCameraTransform	g_cam360hScreen;	//360px high camera (scales up to real resolution) - 360px h is default resolution of the game
 public:
 	static bool			IsOnlyInstance( LPCTSTR className );
 	void				OnRenderSizeChanged( int newSizeX, int newSizeY );
@@ -121,7 +112,6 @@ public:
 	CSpriteLib					g_sprMgrGlobal;		// global sprite manager 
 
 ///----- Application states (not all of them are treated here) -----
-	//#TODO: de facut o interfata gen IGameState si fiecare stare sa fie o clasa derivata din interfata respectiva si instantiata aici dar setat pointer pe currentState prin changeGameState
 public:
 	void App_EnterState_Loading();
 	void App_UpdateState_Loading( LPDIRECT3DDEVICE9 pDevice, double fTimeline, float dTime );
@@ -134,9 +124,6 @@ public:
 	void App_ExitState_Developer();
 	// Called after each finished level (win or lose or cancelled)
 	void App_OnLevelFinished( int nEpisodeIdx, int nLevelIdx );
-
-//-- GI: should be moved
-	void radiance_initialize( float extent, float boost = 1.0, float decayrate = 0.65 );
 
 public: //--- framework methods ---
 	HRESULT OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc = NULL, void* pUserContext = NULL );
