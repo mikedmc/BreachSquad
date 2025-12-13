@@ -15,7 +15,7 @@ EGameState				GameState::eNextState = GAME_STATE_EMPTY;
 ETransitionType			GameState::nTransitionType = TRANSITION_NONE;
 
 
-void GameState::ChangeTo( EGameState newState, CVariantMap * args )
+void GameState::SetState( EGameState newState, CVariantMap * args )
 {
 	LOG( L"System:: ChangeGameState(%d)", newState );
 	EGameState oldGameState = GameState::state;
@@ -413,7 +413,7 @@ void GameState::UpdateTransition( float dTime )
 						fTransitionPercent = 0.0f;
 						nTransitionStep = 1;
 						//full black, change state now
-						GameState::ChangeTo( eNextState );
+						GameState::SetState( eNextState );
 					}
 
 					fTransitionPercent += dTime * 6.0f;

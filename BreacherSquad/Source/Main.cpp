@@ -276,7 +276,7 @@ INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR, int )
 #if defined(ENABLE_STEAM_WORKSHOP)
 	if ( g_startupCommand == GAME_STARTUP_UPLOAD_MOD )
 	{
-		GameState::ChangeTo( GAME_STATE_UPLOAD_MOD );
+		GameState::SetState( GAME_STATE_UPLOAD_MOD );
 	}
 #endif
 
@@ -546,7 +546,7 @@ OPRESULT AfterMount()
 		return OP_ERR( K_OP_FAILED, K_SEVERITY_CRITICAL, L"Could not load SpritesVS!\n%s", shpath );
 	}
 
-	GameState::ChangeTo( GAME_STATE_PRELOAD );
+	GameState::SetState( GAME_STATE_PRELOAD );
 	return K_OP_OK;
 }
 

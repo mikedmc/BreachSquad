@@ -464,7 +464,7 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 		{
 			EGameState gameState = (EGameState)nEvent.GetArgumentByName( L"newGameState" )->m_asUINT32;
 
-			GameState::ChangeTo( gameState );
+			GameState::SetState( gameState );
 			return true; //consume event
 		}
 		if ( nEvent.m_eventCommand == CEventCommands::evtC_GAMESTATE_CHANGE_TRANSITION )
