@@ -1222,6 +1222,21 @@ bool CLevel::ProcessScriptInstruction(CScriptInstruction *instr, UINT32 executor
 			return true;
 		}
 		break;
+
+		case instr_ACTOR_SPAWN_AT:
+		{
+			CVariant* vcTemplate = instr->GetArgument( L"template" );
+			CVariant* vcX = instr->GetArgument( L"posX" );
+			CVariant* vcY = instr->GetArgument( L"posY" );
+			if ( vcX && vcY )
+			{
+				GenKey actgk = SpawnActor( Vec2(vcX->asFloat(), vcY->asFloat()), vcTemplate->m_strArg.text );
+			}
+
+			return true;
+		}
+		break;
+
 		case instr_ACTOR_SPAWN:
 		{
 			CVariant* vcWhere = instr->GetArgument(L"where");

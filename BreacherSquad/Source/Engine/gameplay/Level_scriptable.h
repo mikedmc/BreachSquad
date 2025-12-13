@@ -42,6 +42,7 @@ enum eLVLScriptInstruction {
 	instr_ACTOR_JAM_WEAPON,
 	instr_ACTOR_HIT,
 	instr_ACTOR_SET_DOT,
+	instr_ACTOR_SPAWN_AT,  // spawns actor at specific coords
 
 	instr_COLL_ENTER_HIDDEN_ROOM,
 	instr_COLL_CHECK_HIDDEN_ROOM_CLEARED,
@@ -97,6 +98,7 @@ const CStringHash eLVLScriptInstructionNames[] = {
 	L"ACTOR_JAM_WEAPON",	//args: who="..." nWeaponIdx="X" nCanResetJam="Y"
 	L"ACTOR_HIT",			//args: who="SELF/target/targets_target/toucher/id" fDamage="100.0"
 	L"ACTOR_SET_DOT",		//args: who="..." sDoT="DoT_INVINCIBLE" [fDuration="1.0"]
+	L"ACTOR_SPAWN_AT",		//args: template="" posX="world coord" posY="world coord"
 
 	L"COLL_ENTER_HIDDEN_ROOM", //args: [target="SELF/target/id"] [lockCamera="1"] [hideOutside="1"]
 	L"COLL_CHECK_HIDDEN_ROOM_CLEARED", //args: [target="SELF/target/id"]

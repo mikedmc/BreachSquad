@@ -80,8 +80,8 @@ LEVEL SCRIPTS
     <ACTOR_SPAWN where="target" template="ACTOR_MACHETTE" AIstate="FIND_PLAYER" direction="player" />
   </script>
 
-  <script name="SPAWN_LEMMY_FINDER">
-    <ACTOR_SPAWN where="target" template="ACTOR_LEADER_LEMMY" AIstate="FIND_PLAYER" direction="player" />
+  <script name="SPAWN_AT_POS">
+    <ACTOR_SPAWN_AT template="act_junkie_harry.xml" posX="*posX" posY="*posY" />
   </script>
 
   <!-- spawns one AWARE enemy. Template name is set from the editor (AI params scriptmem_sTemplate)-->
