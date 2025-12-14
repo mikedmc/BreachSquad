@@ -5,6 +5,7 @@
 #define K_LIBNICK_WEAPONS	L"SPRLIB_WEAPONS"
 #define K_LIBNICK_LIGHTS	L"SPRLIB_LIGHTS"
 #define K_LIBNICK_PROPS		L"SPRLIB_PROPS"
+#define K_LIBNICK_BULLETS	L"SPRLIB_BULLETS"
 
 // Specifies animation indexes for quick access (for actors)
 enum EActorAnim

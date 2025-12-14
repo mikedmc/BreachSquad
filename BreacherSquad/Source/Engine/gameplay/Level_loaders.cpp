@@ -70,6 +70,9 @@ OPRESULT CLevel::LoadLevel_Static( WCHAR * strPathAbs )
 	//load bsx
 	FileManager::GetMediaPath( L"media/levels/data/objects.bsx", Path );
 	V_OP_RET( m_sprLib.AddSprites( Path, libidxtmp, K_LIBNICK_PROPS ) );
+	//bullets
+	FileManager::GetMediaPath( L"media/levels/data/bullets.bsx", Path );
+	V_OP_RET( m_sprLib.AddSprites( Path, libidxtmp, K_LIBNICK_BULLETS ) );
 
 	//--- load actors templates and weaponry right after props sprite ---
 	FileManager::GetMediaPath( L"media/levels/data/weapons/weapons_data.xml", Path );

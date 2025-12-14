@@ -5,7 +5,7 @@
 #include "loading_SPR.h"
 #include "lvled_SPR.h"
 #include "lights_SPR.h"
-#include "props_SPR.h"
+#include "bullets_SPR.h"
 #include "particles_SPR.h"
 #include "igm_interface_SPR.h"
 #include "bk_city_SPR.h"

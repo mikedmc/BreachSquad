@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<SpriteCollection Version="2.0" AtlasJSON="">
+  <Image>bullets.png</Image>
+  <Modules>
+    <Module ImageIdx="0" X="21" Y="7" W="24" H="27" strName="" />
+    <Module ImageIdx="0" X="18" Y="52" W="30" H="30" strName="" />
+    <Module ImageIdx="0" X="24" Y="106" W="18" H="18" strName="" />
+    <Module ImageIdx="0" X="24" Y="151" W="30" H="24" strName="" />
+    <Module ImageIdx="0" X="15" Y="289" W="36" H="36" strName="" />
+    <Module ImageIdx="0" X="63" Y="289" W="36" H="36" strName="" />
+    <Module ImageIdx="0" X="111" Y="289" W="36" H="36" strName="" />
+    <Module ImageIdx="0" X="159" Y="289" W="36" H="36" strName="" />
+  </Modules>
+  <FrameModules>
+    <FrameModule ModuleIdx="0" OX="-12" OY="-13" Flags="0" />
+    <FrameModule ModuleIdx="1" OX="-15" OY="-15" Flags="0" />
+    <FrameModule ModuleIdx="2" OX="-9" OY="-9" Flags="0" />
+    <FrameModule ModuleIdx="3" OX="-15" OY="-12" Flags="0" />
+    <FrameModule ModuleIdx="4" OX="-18" OY="-18" Flags="0" />
+    <FrameModule ModuleIdx="5" OX="-18" OY="-18" Flags="0" />
+    <FrameModule ModuleIdx="6" OX="-18" OY="-18" Flags="0" />
+    <FrameModule ModuleIdx="7" OX="-18" OY="-18" Flags="0" />
+  </FrameModules>
+  <Frames>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="0" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="1" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="2" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="3" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="4" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="5" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="6" />
+      </FModules>
+      <Points />
+    </Frame>
+    <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">
+      <FModules>
+        <FModule Idx="7" />
+      </FModules>
+      <Points />
+    </Frame>
+  </Frames>
+  <AnimationFrames>
+    <AnimationFrame FrameIdx="0" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="1" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="2" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="3" Duration="1" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="4" Duration="100" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="5" Duration="100" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="6" Duration="100" DX="0" DY="0" Flags="" />
+    <AnimationFrame FrameIdx="7" Duration="100" DX="0" DY="0" Flags="" />
+  </AnimationFrames>
+  <Animations>
+    <Animation ID="BULLETS_NOANIM" Flags="0">
+      <AFrame Idx="0" />
+      <AFrame Idx="1" />
+      <AFrame Idx="2" />
+      <AFrame Idx="3" />
+    </Animation>
+    <Animation ID="SPHERE" Flags="1">
+      <AFrame Idx="4" />
+      <AFrame Idx="5" />
+      <AFrame Idx="6" />
+      <AFrame Idx="7" />
+    </Animation>
+  </Animations>
+</SpriteCollection>

@@ -1,0 +1,8 @@
+
+//Animation indexes (Idx)
+#define 	ANM_BULLETS_SPR_BULLETS_NOANIM   0
+#define 	ANM_BULLETS_SPR_SPHERE   1
+
+//Animation names (ID)
+#define 	ANMID_BULLETS_SPR_BULLETS_NOANIM   "BULLETS_NOANIM"
+#define 	ANMID_BULLETS_SPR_SPHERE   "SPHERE"

@@ -32,10 +32,10 @@ CBullet* CLevel::ShootBullet( CBulletTemplate * bulletTemplate, EActorClass acto
 
 	//bullet visuals
 	//#TEMP: va trebui sa fac caching la sprMgr si sa fac alt model de bullets
-	CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_PROPS );
-	bullet->sprBullet.Init(spr_props, ANM_PROPS_SPR_BULLETS_NOANIM, bullet->pos.xy_proj, 0);
-	bullet->fidLight.Init(ANM_PROPS_SPR_BULLETS_LIGHTS, 0);
-	if (spr_props->GetAnimFlags(ANM_PROPS_SPR_BULLETS_NOANIM) & K_EDITOR_ANIMATION_FLAG_LOOPED)
+	CSpriteLib* spr_props = m_sprLib.GetLibByNick( K_LIBNICK_BULLETS );
+	bullet->sprBullet.Init(spr_props, ANM_BULLETS_SPR_BULLETS_NOANIM, bullet->pos.xy_proj, 0);
+	bullet->fidLight.Init(ANM_BULLETS_SPR_BULLETS_NOANIM, 0);
+	if (spr_props->GetAnimFlags(ANM_BULLETS_SPR_BULLETS_NOANIM) & K_EDITOR_ANIMATION_FLAG_LOOPED)
 		bullet->bAnimated = true;
 
 	return bullet;
