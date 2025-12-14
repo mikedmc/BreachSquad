@@ -1885,7 +1885,10 @@ void CLevel::BuildDynamicGeometry( CAABB _camAABB )
 			case K_LVL_LT_AMBIENTAL:
 			{
 				//#TODO: remove this break for ambient lights
-				break;
+				//#HACK should be removed in all versions ??
+				if ( UTApp().m_Settings.bEnableGI == true ) {
+					break;
+				}
 				// ambiental light only influence the area where they reside, have the bbox the size of the area so we clip to camera rect
 				// use BBOX_INI because bbox gets moved to light position
 				CAABB realbb;
@@ -4061,585 +4064,138 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 	/// 4. scale up with gaussian (cascade merge)
 	/// 5. add to light from last frame
 	///----------------------------------------------------
-
-
-	///----------------------------------------------------
-	/// 1. build lights texture
-	///----------------------------------------------------
-	// render on transparent background, colored lights, black walls
-	pRT = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
-	if ( pRT != nullptr )
+	if ( UTApp().m_Settings.bEnableGI == true )
 	{
-		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
+
+		///----------------------------------------------------
+		/// 1. build lights texture
+		///----------------------------------------------------
+		// render on transparent background, colored lights, black walls
+		pRT = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
+		if ( pRT != nullptr )
 		{
-			Matrix matView;
-			// Clear the render target and the zbuffer 
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0xff000000, 1.0f, 0 ) ) )
+			if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
 			{
-				return K_OP_FAILED;
+				Matrix matView;
+				// Clear the render target and the zbuffer 
+				if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, 0xff000000, 1.0f, 0 ) ) )
+				{
+					return K_OP_FAILED;
+				}
+
+				RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
+				CAABB			camAABB( camrect );
+
+				RenderPass_GIDirectLight( &pRT->matProj, fBetweenFramesPercent );
+				V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 			}
-
-			RectXYWH		camrect = m_camLevelToRT.GetCamWorldAABB();
-			CAABB			camAABB( camrect );
-
-			RenderPass_GIDirectLight( &pRT->matProj, fBetweenFramesPercent );
-			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 		}
-	}
 
-	///----------------------------------------------------
-	/// 2. combine current light with last frame GI
-	///----------------------------------------------------
-	if ( m_frameNo == 0 ) 
-	{
-		auto tex_from = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
-		RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_GI, D3DTEXF_LINEAR );
-	}
-	
-	auto tex_light = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
-	auto tex_gi = __RTManager().GetRTbyUID( K_RTID_GI );
-	RenderOP_Lerp( tex_light->m_pRTTexture, tex_gi->m_pRTTexture, 0.5f, 0.5f, K_RTID_STORAGE );
-
-
-	///----------------------------------------------------
-	/// 3. downscale twice and blur more
-	///----------------------------------------------------
-	/*
-	auto tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE );
-	RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_STORAGE_HALF );
-	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
-	RenderOP_Blur( EDIR_UP, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_STORAGE_QUART);
-	
-	// pingpong blur
-	ERTIDChannel channels[] = { K_RTID_STORAGE_QUART , K_RTID_STORAGE_QUART2 };
-	ERTIDChannel chan_last_blur = K_RTID_STORAGE_QUART;
-	for ( int runs = 0; runs < 4; runs++ )
-	{
-		auto tex_from = __RTManager().GetRTbyUID( channels[runs % 2] );
-		chan_last_blur = channels[(runs + 1) % 2];
-		RenderOP_Blur( (runs % 2 == 0) ? EDIR_LEFT : EDIR_UP, tex_from->m_pRTTexture, (float)tex_from->nWidth, chan_last_blur );
-	}
-	// upscale blurred version with gaussian X
-	tex_from = __RTManager().GetRTbyUID( chan_last_blur );
-	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_GI );
-	//RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_GI );		
- 	*/
-	
-	//// generate mipmaps
-	auto tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE );
-	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF, D3DTEXF_POINT );
-	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
-	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_QUART, D3DTEXF_POINT );
-	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
-	RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_EIGHTH, D3DTEXF_POINT );
-
-
-	///----------------------------------------------------
-	/// creates radiance cascades by offsetting the mipmaps and blending them together to expand the lighting
-	///----------------------------------------------------
-	
-	Vec2 v_offsets[16];
-	v_offsets[0] = Vec2(-1.0f, 0.0f);
-	v_offsets[1] = Vec2( 0.0f, -1.0f );
-	v_offsets[2] = Vec2( 1.0f, 0.0f );
-	v_offsets[3] = Vec2( 0.0f, 1.0f );
-	v_offsets[4] = Vec2( 0.0f, 0.0f );
-	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
-	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF2, v_offsets, 5, 0.4f );
-
-	v_offsets[0] = Vec2( -1.0f, 0.0f );
-	v_offsets[1] = Vec2( -1.0f, -1.0f );
-	v_offsets[2] = Vec2( 0.0f, -1.0f );
-	v_offsets[3] = Vec2( 1.0f, -1.0f );
-	v_offsets[4] = Vec2( 1.0f, 0.0f );
-	v_offsets[5] = Vec2( 1.0f, 1.0f );
-	v_offsets[6] = Vec2( 0.0f, 1.0f );
-	v_offsets[7] = Vec2( -1.0f, 1.0f );
-	v_offsets[8] = Vec2( 0.0f, 0.0f );
-	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
-	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_QUART2, v_offsets, 9, 0.4f );
-
-	v_offsets[0] = Vec2( -1.0f, 0.0f );
-	v_offsets[1] = Vec2( -1.0f, -1.0f );
-	v_offsets[2] = Vec2( 0.0f, -1.0f );
-	v_offsets[3] = Vec2( 1.0f, -1.0f );
-	v_offsets[4] = Vec2( 1.0f, 0.0f );
-	v_offsets[5] = Vec2( 1.0f, 1.0f );
-	v_offsets[6] = Vec2( 0.0f, 1.0f );
-	v_offsets[7] = Vec2( -1.0f, 1.0f );
-	v_offsets[8] = Vec2( 0.0f, 0.0f );
-	tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_EIGHTH );
-	RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_EIGHTH2, v_offsets, 9, 0.4f );
-	
-
-	///----------------------------------------------------
-	/// radiance cascade merge
-	///----------------------------------------------------
-	
-	auto tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART2 );
-	auto tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_EIGHTH2 );
-	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
-		tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
-		0.5f, 0.5f, K_RTID_STORAGE_QUART );
-	tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF2 );
-	tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
-	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
-		tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
-		0.5f, 0.5f, K_RTID_STORAGE_HALF );
-	tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE );
-	tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
-	RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
-		tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
-		0.5f, 0.5f, K_RTID_GI );
-	  
-
-
-
-
-
-
-
-
-	/*
-	Matrix matView;
-	MUMatIdentity( &matView );
-	m_pDevice->SetTransform( D3DTS_VIEW, &matView );
-	m_pDevice->SetTransform( D3DTS_WORLD, &g_matIdentity );
-
-	///--- compose scene from normals and color ---
-	Matrix matWVP = matView * pRT->matProj;
-
-	//--- build RT rect ---
-	_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-	vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
-	vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
-	vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
-	vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
-
-	vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
-	vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
-	vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
-	vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
-	//set color
-	vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
-	//build verts
-	_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
-	lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-	lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-	Vec2 vScreenPixelSize( 1.0f / (float)pRT->nWidth, 1.0f / (float)pRT->nHeight );
-	for ( int ll = 0; ll < 4; ll++ ) {
-		m_pDevice->SetSamplerState( ll, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-		m_pDevice->SetSamplerState( ll, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-		m_pDevice->SetSamplerState( ll, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
-		m_pDevice->SetSamplerState( ll, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
-	}
-	///--- set source texture
-	auto lvl1 = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
-	m_pDevice->SetTexture( 1, lvl1->m_pRTTexture );
-	auto lvl2 = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF);
-	m_pDevice->SetTexture( 2, lvl2->m_pRTTexture );
-	auto lvl3 = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART);
-	m_pDevice->SetTexture( 3, lvl3->m_pRTTexture );
-
-	// write summed cascades to storage
-	pRT = __RTManager().GetRTbyUID( K_RTID_STORAGE );
-	if ( pRT != nullptr && OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
-	{
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
-				return K_OP_FAILED;
-
-			__Shaders().SetVSByName( L"VS_COMPOSITION" );
-			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
-
-			__Shaders().SetPSByName( L"PS_MIP_RADIANCE_MERGE" );
-
-			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
-
-
-			// remove VS PS
-			__Shaders().SetPS( nullptr );
-			__Shaders().SetVS( nullptr );
-
-			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
-	}
-	*/
-
-	 /*
-	///----------------------------------------------------
-	/// 4. convert voronoi diagram to distance field
-	///----------------------------------------------------
-	ERTIDChannel eRTlastVoronoi = arr_swap_rt[(last_pass_idx + 1) % 2];
-
-
-	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( eRTlastVoronoi );
-	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
-	pRT = __RTManager().GetRTbyUID( K_RTID_DISTANCEFIELD );
-	if ( pRT != nullptr )
-	{
-		if ( OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) ) )
+		///----------------------------------------------------
+		/// 2. combine current light with last frame GI
+		///----------------------------------------------------
+		if ( m_frameNo == 0 )
 		{
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
-				return K_OP_FAILED;
-
-
-			__Shaders().SetVSByName( L"VS_COMPOSITION" );
-			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
-
-			__Shaders().SetPSByName( L"PS_VORONOI_DISTANCE" );
-			//set Pshader constants
-			float fConstData[][4] = {
-				// x: distance modifier (default 8.0, must match x:u_dist_mod from ray tracing shader)
-				{ 1.0, 0.0f, 0.0f, 0.0f },
-				// xy: inverse of RT resolution
-				//{ vScreenPixelSize.x, vScreenPixelSize.y, .0f, .0f },
-			};
-			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
-
-			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
-
-
-			// remove VS PS
-			__Shaders().SetPS( nullptr );
-			__Shaders().SetVS( nullptr );
-
-			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+			auto tex_from = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
+			RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_GI, D3DTEXF_LINEAR );
 		}
-	}
+
+		auto tex_light = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
+		auto tex_gi = __RTManager().GetRTbyUID( K_RTID_GI );
+		RenderOP_Lerp( tex_light->m_pRTTexture, tex_gi->m_pRTTexture, 0.5f, 0.5f, K_RTID_STORAGE );
 
 
+		///----------------------------------------------------
+		/// 3. downscale twice and blur more
+		///----------------------------------------------------
+		/*
+		auto tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE );
+		RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_STORAGE_HALF );
+		tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
+		RenderOP_Blur( EDIR_UP, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_STORAGE_QUART);
 
-	///----------------------------------------------------
-	/// 5. radiance cascades
-	///----------------------------------------------------
-	//	for(var n = 0; n < global.radiance_cascade_count; n++) {
-	//		shader_set(global.radiance_intervals);
-	//		uniform_f1(global.radiance_intervals_uRenderExtent, global.radiance_render_extent);
-	//		uniform_f1(global.radiance_intervals_uRenderDecayRate, global.radiance_render_decay);
-	//		uniform_tx(global.radiance_intervals_uDistanceField, distfield);
-	//		uniform_tx(global.radiance_intervals_uWorldScene, worldscene);
-	//
-	//		uniform_f1(global.radiance_intervals_uCascadeExtent, global.radiance_cascade_extent);
-	//		uniform_f1(global.radiance_intervals_uCascadeSpacing, global.radiance_cascade_spacing);
-	//		uniform_f1(global.radiance_intervals_uCascadeInterval, global.radiance_cascade_interval);
-	//		uniform_f1(global.radiance_intervals_uCascadeAngular, global.radiance_cascade_angular);
-	//		uniform_f1(global.radiance_intervals_uCascadeIndex, n);
-	//
-	//			surface_set_target(cascade_surfarray[n]);
-	//			draw_clear_alpha(c_black, 0);
-	//			// It doesn't matter what we render here, we just need a render source to set the render area size.
-	//			draw_surface(storage, 0, 0);
-	//			surface_reset_target();
-	//
-	//		shader_reset();
-	//	}
-
-
-	// clamp textures so we don't bleed light
-	for ( int kk = 0; kk < 5; kk++ ) {
-		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
-		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
-
-		m_pDevice->SetSamplerState( kk, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-		m_pDevice->SetSamplerState( kk, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-		m_pDevice->SetSamplerState( kk, D3DSAMP_MIPFILTER, 0 );
-	}
-
-	int screenWidth = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
-	int screenHeight = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
-	Vec2 vaspect( screenWidth / max( screenWidth, screenHeight ), screenHeight / max( screenWidth, screenHeight ) );
-	Vec2 vscreen( screenWidth, screenHeight );
-
-	//auto ptex = UTApp().g_texManager.GetTextureByID( FastHash( L"SCENE1024" ) );
-	for ( int n = 0; n < UTApp().gi_global.radiance_cascade_count; n++ )
-	{
-		///--- set textures
-		CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( K_RTID_DISTANCEFIELD );
-		m_pDevice->SetTexture( 1, pRTlastGI->m_pRTTexture );
-		CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
-		m_pDevice->SetTexture( 2, pRTemissive->m_pRTTexture );
-
-		pRT = __RTManager().GetRTbyUID( K_RTID_CASCADE0 + n );
-		if ( (pRT != nullptr) && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
+		// pingpong blur
+		ERTIDChannel channels[] = { K_RTID_STORAGE_QUART , K_RTID_STORAGE_QUART2 };
+		ERTIDChannel chan_last_blur = K_RTID_STORAGE_QUART;
+		for ( int runs = 0; runs < 4; runs++ )
 		{
-			matWVP = pRT->matProj;
-
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
-				return K_OP_FAILED;
-
-			__Shaders().SetVSByName( L"VS_COMPOSITION" );
-			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
-
-			__Shaders().SetPSByName( L"PS_GI_RADIANCE_INTERVALS" );
-			///   Name                Reg   Size
-			///   ------------------- ----- ----
-			///   in_RenderExtent        c0       1
-			///   in_CascadeExtent       c1       1
-			///   in_CascadeSpacing      c2       1
-			///   in_CascadeInterval     c3       1
-			///   in_CascadeAngular      c4       1
-			///   in_CascadeIndex        c5       1
-			///   samp0+in_DistanceField s1       1
-			///   samp0+in_WorldScene    s2       1
-
-			///--- set Pshader constants
-			float fConstData[][4] = {
-				//   in_RenderExtent        c0       1
-				{ UTApp().gi_global.radiance_render_extent, 0,0,0},
-				//   in_CascadeExtent       c1       1
-				{ UTApp().gi_global.radiance_cascade_extent, 0,0,0},
-				//   in_CascadeSpacing      c2       1
-				{ UTApp().gi_global.radiance_cascade_spacing, 0,0,0},
-				//   in_CascadeInterval     c3       1
-				{ UTApp().gi_global.radiance_cascade_interval, 0,0,0},
-				//   in_CascadeAngular      c4       1
-				{ UTApp().gi_global.radiance_cascade_angular, 0,0,0},
-				//   in_CascadeIndex        c5       1
-				{ n, 0, 0, 0 },
-			};
-			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
-
-			//--- build RT rect ---
-			_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-			vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
-			vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
-			vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
-			vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
-
-			vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
-			vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
-			vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
-			vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
-
-			lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-			lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
-
-			// remove VS PS
-			__Shaders().SetPS( nullptr );
-			__Shaders().SetVS( nullptr );
-
-			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+			auto tex_from = __RTManager().GetRTbyUID( channels[runs % 2] );
+			chan_last_blur = channels[(runs + 1) % 2];
+			RenderOP_Blur( (runs % 2 == 0) ? EDIR_LEFT : EDIR_UP, tex_from->m_pRTTexture, (float)tex_from->nWidth, chan_last_blur );
 		}
+		// upscale blurred version with gaussian X
+		tex_from = __RTManager().GetRTbyUID( chan_last_blur );
+		RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_GI );
+		//RenderOP_Blur( EDIR_RIGHT, tex_from->m_pRTTexture, (float)tex_from->nWidth, K_RTID_GI );
+		*/
+
+		//// generate mipmaps
+		auto tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE );
+		RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF, D3DTEXF_POINT );
+		tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
+		RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_QUART, D3DTEXF_POINT );
+		tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
+		RenderOP_Copy( tex_from->m_pRTTexture, K_RTID_STORAGE_EIGHTH, D3DTEXF_POINT );
+
+
+		///----------------------------------------------------
+		/// creates radiance cascades by offsetting the mipmaps and blending them together to expand the lighting
+		///----------------------------------------------------
+
+		Vec2 v_offsets[16];
+		v_offsets[0] = Vec2( -1.0f, 0.0f );
+		v_offsets[1] = Vec2( 0.0f, -1.0f );
+		v_offsets[2] = Vec2( 1.0f, 0.0f );
+		v_offsets[3] = Vec2( 0.0f, 1.0f );
+		v_offsets[4] = Vec2( 0.0f, 0.0f );
+		tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
+		RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_HALF2, v_offsets, 5, 0.4f );
+
+		v_offsets[0] = Vec2( -1.0f, 0.0f );
+		v_offsets[1] = Vec2( -1.0f, -1.0f );
+		v_offsets[2] = Vec2( 0.0f, -1.0f );
+		v_offsets[3] = Vec2( 1.0f, -1.0f );
+		v_offsets[4] = Vec2( 1.0f, 0.0f );
+		v_offsets[5] = Vec2( 1.0f, 1.0f );
+		v_offsets[6] = Vec2( 0.0f, 1.0f );
+		v_offsets[7] = Vec2( -1.0f, 1.0f );
+		v_offsets[8] = Vec2( 0.0f, 0.0f );
+		tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
+		RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_QUART2, v_offsets, 9, 0.4f );
+
+		v_offsets[0] = Vec2( -1.0f, 0.0f );
+		v_offsets[1] = Vec2( -1.0f, -1.0f );
+		v_offsets[2] = Vec2( 0.0f, -1.0f );
+		v_offsets[3] = Vec2( 1.0f, -1.0f );
+		v_offsets[4] = Vec2( 1.0f, 0.0f );
+		v_offsets[5] = Vec2( 1.0f, 1.0f );
+		v_offsets[6] = Vec2( 0.0f, 1.0f );
+		v_offsets[7] = Vec2( -1.0f, 1.0f );
+		v_offsets[8] = Vec2( 0.0f, 0.0f );
+		tex_from = __RTManager().GetRTbyUID( K_RTID_STORAGE_EIGHTH );
+		RenderOP_CreateCascade( tex_from->m_pRTTexture, K_RTID_STORAGE_EIGHTH2, v_offsets, 9, 0.4f );
+
+
+		///----------------------------------------------------
+		/// radiance cascade merge
+		///----------------------------------------------------
+
+		auto tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART2 );
+		auto tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_EIGHTH2 );
+		RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
+			tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
+			0.5f, 0.5f, K_RTID_STORAGE_QUART );
+		tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF2 );
+		tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_QUART );
+		RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
+			tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
+			0.5f, 0.5f, K_RTID_STORAGE_HALF );
+		tex_cascadefull = __RTManager().GetRTbyUID( K_RTID_STORAGE );
+		tex_cascadehalf = __RTManager().GetRTbyUID( K_RTID_STORAGE_HALF );
+		RenderOP_CascadeMerge2tex( tex_cascadefull->m_pRTTexture, (float)tex_cascadefull->nWidth,
+			tex_cascadehalf->m_pRTTexture, (float)tex_cascadehalf->nWidth,
+			0.5f, 0.5f, K_RTID_GI );
 	}
-
-	
-	///----------------------------------------------------
-	/// 6. radiance merging
-	///----------------------------------------------------
-
-		//for(var n = global.radiance_cascade_count - 1; n >= 0; n--) {
-		//	shader_set(global.radiance_merging);
-		//	uniform_f1(global.radiance_merging_uCascadeExtent, global.radiance_cascade_extent);
-		//	uniform_f1(global.radiance_merging_uCascadeAngular, global.radiance_cascade_angular);
-		//	uniform_f1(global.radiance_merging_uCascadeCount, global.radiance_cascade_count);
-		//	uniform_f1(global.radiance_merging_uCascadeIndex, n);
-
-		//	var cascaden1 = (n + 1) % global.radiance_cascade_count;
-		//	uniform_tx(global.radiance_merging_uCascadeUpper, cascade_surfarray[cascaden1]);
-
-		//	surface_set_target(cascade_temporary);
-		//	draw_clear_alpha(c_black, 0);
-
-		//	// In this pass we're reading from cascade N+1 to merge cascade N with cascade N+1.
-		//	draw_surface(cascade_surfarray[n], 0, 0);
-		//	surface_reset_target();
-		//	shader_reset();
-
-		//	// Copy from the tmeporary cascade surface to cascade N.
-		//	surface_set_target(cascade_surfarray[n]);
-		//	draw_clear_alpha(c_black, 0);
-		//	draw_surface(cascade_temporary, 0, 0);
-		//	surface_reset_target();
-		//}
-
-
-	for ( int kk = 0; kk < 5; kk++ ) {
-		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
-		m_pDevice->SetSamplerState( kk, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
-
-		m_pDevice->SetSamplerState( kk, D3DSAMP_MINFILTER, D3DTEXF_POINT );
-		m_pDevice->SetSamplerState( kk, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
-		m_pDevice->SetSamplerState( kk, D3DSAMP_MIPFILTER, 0 );
-	}
-
-	for ( int n = UTApp().gi_global.radiance_cascade_count - 1; n >= 0; n-- )
-	{
-		_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
-		vul.color = 0xffffffff; vur.color = 0xffffffff; vdl.color = 0xffffffff; vdr.color = 0xffffffff;
-		vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
-		vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
-		vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
-		vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
-
-		int cascaden1 = (n + 1) % UTApp().gi_global.radiance_cascade_count;
-		///--- set textures
-		CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( K_RTID_CASCADE0 + n );
-		m_pDevice->SetTexture( 1, pRTlastGI->m_pRTTexture );
-		// cascade upper:
-		CRTManager::CEngineRenderTarget* pRTemissive = __RTManager().GetRTbyUID( K_RTID_CASCADE0 + cascaden1 );
-		m_pDevice->SetTexture( 2, pRTemissive->m_pRTTexture );
-
-		/// we paint into storage then save back into CASCADE texture
-		pRT = __RTManager().GetRTbyUID( K_RTID_STORAGE );
-		if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
-		{
-			vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
-			vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
-			vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
-			vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
-
-			lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-			lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-			matWVP = pRT->matProj;
-
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
-				return K_OP_FAILED;
-
-			__Shaders().SetVSByName( L"VS_COMPOSITION" );
-			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
-
-			__Shaders().SetPSByName( L"PS_GI_RADIANCE_MERGING" );
-			///   Name                Reg   Size
-			///   ------------------- ----- ----
-			///   in_CascadeExtent      c0       1
-			///   in_CascadeAngular     c1       1
-			///   in_CascadeCount       c2       1
-			///   in_CascadeIndex       c3       1
-			///   samp0+gm_BaseTexture  s1       1
-			///   samp0+in_CascadeAtlas s2       1
-
-			///--- set Pshader constants
-			float fConstData[][4] = {
-				{ UTApp().gi_global.radiance_cascade_extent, 0, 0, 0 },
-				{ UTApp().gi_global.radiance_cascade_angular, 0, 0, 0 },
-				{ (float)UTApp().gi_global.radiance_cascade_count, 0, 0, 0 },
-				{ (float)n, 0, 0, 0 },
-			};
-			__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
-
-			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
-
-			// remove VS PS
-			__Shaders().SetPS( nullptr );
-			__Shaders().SetVS( nullptr );
-
-			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
-		}
-		///--- moving result from STORAGE back to cascade (must have same size)
-		pRT = __RTManager().GetRTbyUID( K_RTID_CASCADE0 + n );
-		if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
-		{
-			CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( K_RTID_STORAGE );
-			m_pDevice->SetTexture( 0, pRTlastGI->m_pRTTexture );
-
-			matWVP = pRT->matProj;
-			if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
-				return K_OP_FAILED;
-
-			__Shaders().SetVSByName( L"VS_COMPOSITION" );
-			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
-			__Shaders().SetPS( nullptr );
-			// no PS - just copy
-			__Shaders().SetPSByName( L"PS_COPY1TEX" );
-
-			m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
-
-			// remove VS PS
-			__Shaders().SetPS( nullptr );
-			__Shaders().SetVS( nullptr );
-
-			V_OP_RET( __RTManager().EndSceneRT( pRT ) );
-		}
-
-	}
-
-
-	///----------------------------------------------------
-	/// 7. radiance mipmap
-	///----------------------------------------------------
-	
-	//function radiancecascades_mipmap( cascade_surfarray, mipmap_surf ) {
-	//	var mipmap_width = surface_get_width( mipmap_surf );
-	//	var mipmap_height = surface_get_width( mipmap_surf );
-	//	var mipmap0_width = surface_get_width( mipmap_surf );
-	//	var mipmap0_height = surface_get_width( mipmap_surf );
-
-	//	shader_set( global.radiance_mipmap );
-	//	uniform_f1( global.radiance_mipmap_uMipMapExtent, max( mipmap_width, mipmap_height ) );
-	//	uniform_f1( global.radiance_mipmap_uCascadeExtent, global.radiance_cascade_extent );
-	//	uniform_f1( global.radiance_mipmap_uCascadeAngular, global.radiance_cascade_angular );
-	//	uniform_f1( global.radiance_mipmap_uCascadeIndex, 0);
-	//	uniform_tx( global.radiance_mipmap_uCascadeAtlas, cascade_surfarray[0] );
-
-	//	surface_set_target( mipmap_surf );
-	//	draw_clear_alpha( c_black, 0 );
-	//	draw_surface_ext( mipmap_surf, 0, 0, mipmap_width / mipmap0_width, mipmap_height / mipmap0_height, 0, c_black, 1 );
-	//	surface_reset_target();
-
-	//	shader_reset();
-		
-
-
-
-	///--- set cascade 0 texture
-	CRTManager::CEngineRenderTarget* pRTlastGI = __RTManager().GetRTbyUID( K_RTID_CASCADE0 );
-	m_pDevice->SetTexture( 1, pRTlastGI->m_pRTTexture );
-	/// we paint into storage then save back into CASCADE texture
-	pRT = __RTManager().GetRTbyUID( K_RTID_MIPMAP );
-	if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
-	{
-		float mipmap_extent = (float)max(pRT->nWidth, pRT->nHeight);
-
-		vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
-		vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
-		vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
-		vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
-
-		lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
-		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
-
-		matWVP = pRT->matProj;
-
-		if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 1, 0, 0, 0 ), 1.0f, 0 ) ) )
-			return K_OP_FAILED;
-
-		__Shaders().SetVSByName( L"VS_COMPOSITION" );
-		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
-		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
-
-		__Shaders().SetPSByName( L"PS_GI_RADIANCE_MIPMAP" );
-		///   Name             Reg   Size
-		///   ---------------- ----- ----
-		///   in_MipMapExtent  c0       1
-		///   in_CascadeExtent c1       1
-		///   in_CascadeAtlas  s0       1
-
-		///--- set Pshader constants
-		float fConstData[][4] = {
-			{ mipmap_extent, 0, 0, 0 },
-			{ (float)UTApp().gi_global.radiance_cascade_extent, 0, 0, 0 },
-		};
-		__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
-
-		m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
-
-		// remove VS PS
-		__Shaders().SetPS( nullptr );
-		__Shaders().SetVS( nullptr );
-
-		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
-	}
-	 */
-
-
-
 
 
 	///----------------------------------------------------
@@ -5344,16 +4900,12 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 
 	CRTManager::CEngineRenderTarget* pRTcolor = __RTManager().GetRTbyUID( K_RTID_TEMP1 );
 	CRTManager::CEngineRenderTarget* pRTlights = __RTManager().GetRTbyUID( K_RTID_COLORDEPTHSTENCIL );
-	CRTManager::CEngineRenderTarget* pRTGI = __RTManager().GetRTbyUID( K_RTID_GI );
 
 	_ASSERT( pRTcolor != nullptr && pRTlights != nullptr );
 	m_pDevice->SetTexture( 0, pRTcolor->m_pRTTexture );
 	m_pDevice->SetTexture( 1, pRTlights->m_pRTTexture );
 	m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, D3DTEXF_POINT );
 	m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
-	m_pDevice->SetTexture( 2, pRTGI->m_pRTTexture );
-	m_pDevice->SetSamplerState( 2, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-	m_pDevice->SetSamplerState( 2, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
 
 	//--- build RT rect ---
 	_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
@@ -5391,7 +4943,17 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 	__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 
-	__Shaders().SetPSByName( L"PS_COMPOSITION_GI" );
+	if ( UTApp().m_Settings.bEnableGI == true ) {
+		CRTManager::CEngineRenderTarget* pRTGI = __RTManager().GetRTbyUID( K_RTID_GI );
+		m_pDevice->SetTexture( 2, pRTGI->m_pRTTexture );
+		m_pDevice->SetSamplerState( 2, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+		m_pDevice->SetSamplerState( 2, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+
+		__Shaders().SetPSByName( L"PS_COMPOSITION_GI" );
+	}
+	else {
+		__Shaders().SetPSByName( L"PS_COMPOSITION" );
+	}
 	// set Pshader constants
 	float fGamma = 2.2f;
 	float fConstData[][4] = {
