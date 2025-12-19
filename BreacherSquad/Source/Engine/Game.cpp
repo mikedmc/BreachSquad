@@ -580,6 +580,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			 */
 			 //debug stuff
 #if defined(_DEBUG) || defined(DEBUG)
+			/*
 			const float fWndH = 256.0f;
 			for ( int oo = K_RTID_COLORDEPTHSTENCIL; oo <= K_RTID_TEMP1; oo++ )
 			{
@@ -593,6 +594,7 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
 				}
 			}
+			*/
 
 			//game screen space
 //			CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_camRTScreen );

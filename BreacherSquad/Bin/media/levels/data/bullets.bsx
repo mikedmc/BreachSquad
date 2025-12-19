@@ -2,24 +2,24 @@
 <SpriteCollection Version="2.0" AtlasJSON="">
   <Image>bullets.png</Image>
   <Modules>
-    <Module ImageIdx="0" X="21" Y="7" W="24" H="27" strName="" />
-    <Module ImageIdx="0" X="18" Y="52" W="30" H="30" strName="" />
-    <Module ImageIdx="0" X="24" Y="106" W="18" H="18" strName="" />
-    <Module ImageIdx="0" X="24" Y="151" W="30" H="24" strName="" />
-    <Module ImageIdx="0" X="15" Y="289" W="36" H="36" strName="" />
-    <Module ImageIdx="0" X="63" Y="289" W="36" H="36" strName="" />
-    <Module ImageIdx="0" X="111" Y="289" W="36" H="36" strName="" />
-    <Module ImageIdx="0" X="159" Y="289" W="36" H="36" strName="" />
+    <Module ImageIdx="0" X="4" Y="34" W="8" H="8" strName="" />
+    <Module ImageIdx="0" X="20" Y="34" W="8" H="8" strName="" />
+    <Module ImageIdx="0" X="37" Y="35" W="6" H="6" strName="" />
+    <Module ImageIdx="0" X="53" Y="35" W="5" H="5" strName="" />
+    <Module ImageIdx="0" X="2" Y="96" W="12" H="12" strName="" />
+    <Module ImageIdx="0" X="18" Y="96" W="12" H="12" strName="" />
+    <Module ImageIdx="0" X="34" Y="96" W="12" H="12" strName="" />
+    <Module ImageIdx="0" X="50" Y="96" W="12" H="12" strName="" />
   </Modules>
   <FrameModules>
-    <FrameModule ModuleIdx="0" OX="-12" OY="-13" Flags="0" />
-    <FrameModule ModuleIdx="1" OX="-15" OY="-15" Flags="0" />
-    <FrameModule ModuleIdx="2" OX="-9" OY="-9" Flags="0" />
-    <FrameModule ModuleIdx="3" OX="-15" OY="-12" Flags="0" />
-    <FrameModule ModuleIdx="4" OX="-18" OY="-18" Flags="0" />
-    <FrameModule ModuleIdx="5" OX="-18" OY="-18" Flags="0" />
-    <FrameModule ModuleIdx="6" OX="-18" OY="-18" Flags="0" />
-    <FrameModule ModuleIdx="7" OX="-18" OY="-18" Flags="0" />
+    <FrameModule ModuleIdx="0" OX="-4" OY="-4" Flags="0" />
+    <FrameModule ModuleIdx="1" OX="-4" OY="-4" Flags="0" />
+    <FrameModule ModuleIdx="2" OX="-3" OY="-3" Flags="0" />
+    <FrameModule ModuleIdx="3" OX="-2" OY="-2" Flags="0" />
+    <FrameModule ModuleIdx="4" OX="-6" OY="-6" Flags="0" />
+    <FrameModule ModuleIdx="5" OX="-6" OY="-6" Flags="0" />
+    <FrameModule ModuleIdx="6" OX="-6" OY="-6" Flags="0" />
+    <FrameModule ModuleIdx="7" OX="-6" OY="-6" Flags="0" />
   </FrameModules>
   <Frames>
     <Frame BBoxX="0" BBoxY="0" BBoxW="0" BBoxH="0">

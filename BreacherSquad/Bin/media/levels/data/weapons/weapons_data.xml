@@ -56,7 +56,6 @@ fBulletCriticalChance="0.0" - values between 0.0 and 1.0 - chance for a bullet t
 				fSoundRadius="240.0" sSndShoot="GUN_MP5_01" sSndShoot2="GUN_MP5_02" sSndReload="RELOAD_TACTICAL" sSndReload2="RELOAD_EMERGENCY" sSndEmpty="GUN_EMPTY_01" sSndEmpty2="GUN_EMPTY_02"
 				sBulletType="BULLET_TRACER1" nBulletsPerShot="1" nBurstSize="0" nArmorPiercingRating="1"
 				fBulletDamage="20.0" fBulletDamageLossPPx="0.0" fBulletLife="0.25" fBulletMomentum="0.02" fBulletCriticalChance="0.0" fBulletStunDuration="0.025" fBulletSpeed="600.0" bBulletIgnoreArmor="false" bBulletIgnoreCover="false" bBulletDieOnImpact="true"
-				sBulletExploTemplate="EXPLO_NICE_SM1"
 				/>
 
     <WPN_SUBMACHINE_STEADY file="wpn_mk18.bsx" sHUDanimNameIcon="WPNALT_AIMED" hands="2" dualWielding="false" mountOffX="3" mountOffY="-5"
