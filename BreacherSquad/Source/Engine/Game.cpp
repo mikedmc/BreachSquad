@@ -580,21 +580,22 @@ void CGame::Paint( PDEVICE pDevice, ID3DXSprite* pSpr, float dTime )
 			 */
 			 //debug stuff
 #if defined(_DEBUG) || defined(DEBUG)
-			/*
-			const float fWndH = 256.0f;
-			for ( int oo = K_RTID_COLORDEPTHSTENCIL; oo <= K_RTID_TEMP1; oo++ )
+			if ( __ImGui().IsEnabled() )  
 			{
-				CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( oo );
-				if ( pRT != null )
+				const float fWndH = 256.0f;
+				for ( int oo = K_RTID_COLORDEPTHSTENCIL; oo <= K_RTID_TEMP1; oo++ ) 
 				{
-					int ooidx = oo - K_RTID_COLORDEPTHSTENCIL;
-					RectLTRB src( ooidx * fWndH, 0.0f, (ooidx + 1) * fWndH, fWndH );
-					RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
-					pDevice->SetTexture( 0, pRT->m_pRTTexture );
-					UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
+					CRTManager::CEngineRenderTarget* pRT = __RTManager().GetRTbyUID( oo );
+					if ( pRT != null ) 
+					{
+						int ooidx = oo - K_RTID_COLORDEPTHSTENCIL;
+						RectLTRB src( ooidx * fWndH, 0.0f, (ooidx + 1) * fWndH, fWndH );
+						RectLTRB rctuv( 0.0f, 0.0f, 1.0f, 1.0f );
+						pDevice->SetTexture( 0, pRT->m_pRTTexture );
+						UT3D::DrawRectUP_TL1T( pDevice, src, rctuv );
+					}
 				}
 			}
-			*/
 
 			//game screen space
 //			CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_camRTScreen );

@@ -4196,7 +4196,7 @@ namespace HexxEditor
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("BreacherSquad Levels Editor\nv1.0.3 - 27-May-2025\n(c)2025 PixelShard", "About", MessageBoxButtons.OK);
+            MessageBox.Show("BreacherSquad Levels Editor\nv1.0.3 - 20-Dec-2025\n(c)2025 PixelShard", "About", MessageBoxButtons.OK);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
