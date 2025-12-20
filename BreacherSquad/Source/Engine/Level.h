@@ -357,6 +357,8 @@ public:
 	OPRESULT				RenderOP_CreateCascade( PTEXTURE pTexFrom, ERTIDChannel RTto, Vec2 arrOffsets[], int offsetsCount, float fLayerAlpha );
 	// lerps 2 textures together into the RTto
 	OPRESULT				RenderOP_Lerp( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );
+	// lerps 2 textures together into the RTto, moving the surfaces with the specified offsets
+	OPRESULT				RenderOP_LerpOff( PTEXTURE pTexFrom1, Vec2 fOff1, PTEXTURE pTexFrom2, Vec2 fOff2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );
 	OPRESULT				RenderOP_Mul( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter = D3DTEXF_LINEAR );
 	OPRESULT				RenderOP_CascadeMerge2tex( PTEXTURE pTexHires, float pTexHiresW, PTEXTURE pTexLores, float pTexLoresW, float fMul1, float fMul2, ERTIDChannel RTto );
 

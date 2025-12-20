@@ -4,7 +4,8 @@
   <VertexShaders>
     <VertexShader name="VS_SPRITES2D" path="vs_sprites2d.vso" />
     <VertexShader name="VS_POINTLIGHT" path="vs_pointlight.vso" />
-    <VertexShader name="VS_COMPOSITION" path="vs_composition.vso" />
+    <VertexShader name="VS_TRANSFORM2UV" path="transform2uv.vs.vso" />
+    <VertexShader name="VS_TRANSFORM2UVOFF" path="transform2uvoff.vs.vso" />
     <VertexShader name="VS_PROJECTEDDIR" path="vs_projecteddir.vso" />
     <VertexShader name="VS_WATER" path="vs_water.vso" />
   </VertexShaders>

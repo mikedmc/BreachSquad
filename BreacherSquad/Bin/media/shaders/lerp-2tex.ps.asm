@@ -20,9 +20,10 @@
     ps_3_0
     def c1, 1, 0, 0, 0
     dcl_texcoord v0.xy
+    dcl_texcoord1 v1.xy
     dcl_2d s0
     dcl_2d s1
-    texld r0, v0, s1
+    texld r0, v1, s1
     mul r0.xyz, r0, c0.y
     texld r1, v0, s0
     mad_sat oC0.xyz, r1, c0.x, r0

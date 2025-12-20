@@ -4094,6 +4094,9 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 		///----------------------------------------------------
 		/// 2. combine current light with last frame GI
 		///----------------------------------------------------
+		// we need to know how much camera moved since last render so we can move the last GI texture to avoid lag on GI
+		static Vec3 pos_cam_last( 0.0f, 0.0f, 0.0f );
+
 		if ( m_frameNo == 0 )
 		{
 			auto tex_from = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
@@ -4102,7 +4105,15 @@ OPRESULT CLevel::PaintDeferredBuffers( float fBetweenFramesPercent )
 
 		auto tex_light = __RTManager().GetRTbyUID( K_RTID_WORLDSCENE );
 		auto tex_gi = __RTManager().GetRTbyUID( K_RTID_GI );
-		RenderOP_Lerp( tex_light->m_pRTTexture, tex_gi->m_pRTTexture, 0.5f, 0.5f, K_RTID_STORAGE );
+		// we offset the last frameGI by the amount the camera was moved last frame (in texels)
+		Vec3	pos_cam_new = m_camLevelToRT.GetCamPos();
+		Vec2	gi_vec_off = (pos_cam_new - pos_cam_last) / K_GI_RENDER_EXTENT;
+		pos_cam_last = pos_cam_new;
+
+		m_pDevice->SetSamplerState( 1, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
+
+		RenderOP_LerpOff( tex_light->m_pRTTexture, Vec2(0.0f, 0.0f), tex_gi->m_pRTTexture, gi_vec_off, 0.5f, 0.5f, K_RTID_STORAGE );
 
 
 		///----------------------------------------------------
@@ -4939,7 +4950,7 @@ OPRESULT CLevel::RenderPass_Composition( Matrix* matProj, float fBetweenFramesPe
 	lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 	lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
-	__Shaders().SetVSByName( L"VS_COMPOSITION" );
+	__Shaders().SetVSByName( L"VS_TRANSFORM2UV" );
 	__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 	__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 
@@ -5026,7 +5037,7 @@ OPRESULT CLevel::RenderOP_Blur( EDir dir, PTEXTURE pTexFrom, float pTexFromWidth
 			lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
 			lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
-			__Shaders().SetVSByName( L"VS_COMPOSITION" );
+			__Shaders().SetVSByName( L"VS_TRANSFORM2UV" );
 			__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 			__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 
@@ -5090,7 +5101,7 @@ OPRESULT CLevel::RenderOP_Copy( PTEXTURE pTexFrom, ERTIDChannel RTto, DWORD filt
 		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
 
-		__Shaders().SetVSByName( L"VS_COMPOSITION" );
+		__Shaders().SetVSByName( L"VS_TRANSFORM2UV" );
 		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 		__Shaders().SetPS( nullptr );
@@ -5159,7 +5170,7 @@ OPRESULT CLevel::RenderOP_CreateCascade( PTEXTURE pTexFrom, ERTIDChannel RTto, V
 		}
 		UT3D::DeviceAdditiveON( m_pDevice );
 
-		__Shaders().SetVSByName( L"VS_COMPOSITION" );
+		__Shaders().SetVSByName( L"VS_TRANSFORM2UV" );
 		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 		__Shaders().SetPSByName( L"PS_COPY1TEX" );
@@ -5210,7 +5221,7 @@ OPRESULT CLevel::RenderOP_Lerp( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fM
 		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
 
-		__Shaders().SetVSByName( L"VS_COMPOSITION" );
+		__Shaders().SetVSByName( L"VS_TRANSFORM2UV" );
 		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 		__Shaders().SetPSByName( L"PS_ADD2TEX" );
@@ -5230,6 +5241,65 @@ OPRESULT CLevel::RenderOP_Lerp( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fM
 		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
 	}
 
+}
+
+OPRESULT CLevel::RenderOP_LerpOff( PTEXTURE pTexFrom1, Vec2 fOff1, PTEXTURE pTexFrom2, Vec2 fOff2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter /*= D3DTEXF_LINEAR */ )
+{
+	auto pRT = __RTManager().GetRTbyUID( RTto );
+	if ( pRT != nullptr && (OP_SUCCESS( __RTManager().BeginSceneRT( pRT ) )) )
+	{
+		m_pDevice->SetTexture( 0, pTexFrom1 );
+		m_pDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, filter );
+		m_pDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, filter );
+		m_pDevice->SetTexture( 1, pTexFrom2 );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_MINFILTER, filter );
+		m_pDevice->SetSamplerState( 1, D3DSAMP_MAGFILTER, filter );
+
+		Matrix matWVP = pRT->matProj;
+		if ( FAILED( m_pDevice->Clear( 0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.0f, 0 ) ) )
+			return K_OP_FAILED;
+
+		//--- build RT rect ---
+		_VERTEX_PNCT4T4 vul, vur, vdl, vdr;
+		vul.pos = Vec3( 0.0f, 0.0f, 0.0f );
+		vur.pos = Vec3( (float)pRT->nWidth, 0.0f, 0.0f );
+		vdl.pos = Vec3( 0.0f, (float)pRT->nHeight, 0.0f );
+		vdr.pos = Vec3( (float)pRT->nWidth, (float)pRT->nHeight, 0.0f );
+
+		vul.tex1 = vul.tex2 = Vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+		vur.tex1 = vur.tex2 = Vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+		vdl.tex1 = vdl.tex2 = Vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+		vdr.tex1 = vdr.tex2 = Vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+		//set color
+		vul.color = vur.color = vdl.color = vdr.color = 0xffffffff;
+		//build verts
+		_VERTEX_PNCT4T4 lightRectV[6]; //tex2-mapare back buffer, tex1-spot lumina
+		lightRectV[0] = vul; lightRectV[1] = vur; lightRectV[2] = vdl;
+		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
+
+		float fConstDataVS[][4] = {
+				{ fOff1.x, fOff1.y, fOff2.x, fOff2.y } 
+		};
+		__Shaders().SetVSByName( L"VS_TRANSFORM2UVOFF" );
+		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
+		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
+		__Shaders().SetVSConstantF( 4, (float*)fConstDataVS, ARRAY_SIZE( fConstDataVS ) );
+		__Shaders().SetPSByName( L"PS_ADD2TEX" );
+		float fConstData[][4] = {
+			// x: input texture 1/width
+			{ fMul1, fMul2, 0.0f, 0.0f},
+		};
+
+		__Shaders().SetPSConstantF( 0, (float*)fConstData, ARRAY_SIZE( fConstData ) );
+
+		m_pDevice->DrawPrimitiveUP( D3DPT_TRIANGLELIST, 2, &lightRectV, sizeof( _VERTEX_PNCT4T4 ) );
+
+		// remove VS PS
+		__Shaders().SetPS( nullptr );
+		__Shaders().SetVS( nullptr );
+
+		V_OP_RET( __RTManager().EndSceneRT( pRT ) );
+	}
 }
 
 OPRESULT CLevel::RenderOP_Mul( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMul1, float fMul2, ERTIDChannel RTto, DWORD filter /*= D3DTEXF_LINEAR */ )
@@ -5267,7 +5337,7 @@ OPRESULT CLevel::RenderOP_Mul( PTEXTURE pTexFrom1, PTEXTURE pTexFrom2, float fMu
 		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
 
-		__Shaders().SetVSByName( L"VS_COMPOSITION" );
+		__Shaders().SetVSByName( L"VS_TRANSFORM2UV" );
 		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 		__Shaders().SetPSByName( L"PS_MUL2TEX" );
@@ -5323,7 +5393,7 @@ OPRESULT CLevel::RenderOP_CascadeMerge2tex( PTEXTURE pTexHires, float pTexHiresW
 		lightRectV[3] = vur; lightRectV[4] = vdl; lightRectV[5] = vdr;
 
 
-		__Shaders().SetVSByName( L"VS_COMPOSITION" );
+		__Shaders().SetVSByName( L"VS_TRANSFORM2UV" );
 		__Shaders().SetVertexDeclaration( K_SHM_PNCT4T4 );
 		__Shaders().SetVSConstantF( 0, (float*)&matWVP, 4 );
 		__Shaders().SetPSByName( L"PS_MIP_RADIANCE_MERGE" );
