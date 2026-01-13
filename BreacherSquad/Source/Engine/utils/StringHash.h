@@ -9,12 +9,14 @@ public:
 
 	FORCEINLINE const UINT32 getHash() const { return textHash; }
 
-	CStringHash() { text = nullptr; textHash = 0; }
+	CStringHash() { text = new WCHAR[1]; text[0] = 0; textHash = 0; }
 	~CStringHash() { SAFE_DELETE_ARRAY( text ); textHash = 0; }
 
 	void Dispose() {
 		if ( text != nullptr ) {
-			SAFE_DELETE_ARRAY( text ); textHash = 0;
+			SAFE_DELETE_ARRAY( text ); 
+			textHash = 0;
+			text = new WCHAR[1]; text[0] = 0;
 		}
 	}
 
@@ -125,6 +127,7 @@ public:
 	{
 		SAFE_DELETE_ARRAY( text );
 		textHash = 0;
+		text = new WCHAR[1]; text[0] = 0;
 	}
 
 	bool operator== ( CStringHash const & o ) const

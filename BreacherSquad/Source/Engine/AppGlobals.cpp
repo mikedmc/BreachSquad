@@ -1045,7 +1045,7 @@ OPRESULT App_LocaLoadLangList(CStringHash shSelectedLangAlias)
 		g_Language.shLangAlias.Init(L"english");
 		g_Language.shFileName.Init(L"strings.xml");
 
-		ErrorBox(K_ERR_WARNING, L"The language specified in the options.xml file was not found! Defaulting to English!");
+		ErrorBox(K_ERR_WARNING, L"The language specified in the settings.xml file was not found! Defaulting to English!");
 	}
 
 	UTApp().m_Settings.shLanguageAlias = g_Language.shLangAlias;

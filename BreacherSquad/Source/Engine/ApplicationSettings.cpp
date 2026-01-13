@@ -15,7 +15,7 @@ CApplicationSettings::CApplicationSettings()
 	bScreenShakes = true;
 	bGoreEnabled = true;
 	bShowInterfaceHelp = false;
-	bEnableGI = true;
+	bEnableGI = false;
 
 	nLOD_water = K_UT_LOD_HIGH;
 	nLOD_shadows = K_UT_LOD_MED;
@@ -28,9 +28,6 @@ CApplicationSettings::CApplicationSettings()
 	//CRC
 	dev_unCurrentCRC = 0;
 	dev_unCurrentModsCRC = 0;
-
-	//LANG/LOCA	- default on english
-	shLanguageAlias.Init( "notset" );
 
 #if defined(_DEBUG) || defined(DEBUG)
 	dev_bDebugEnabled = true;

@@ -20,6 +20,7 @@ void DW_COLOR_GETARGB( DWORD color, float & a, float & r, float & g, float & b )
 // Unpacks DWORD color to byte channels
 void DW_COLOR_GETBYTES( DWORD color, unsigned char & a, unsigned char & r, unsigned char & g, unsigned char & b );
 
+
 // generic sides (corresponds to generic directions)
 #define K_SIDE_NONE -1
 #define K_SIDE_LEFT 0
@@ -293,6 +294,8 @@ void str_replace(char * o_string, char * s_string, char * r_string);
  * @return void The o_string passed is modified
  */
 void wcs_replace(WCHAR* o_string, WCHAR* s_string, WCHAR* r_string);
+// other string functions
+#define	wcs_sprintf swprintf_s
 
 UINT32 GenerateUID(void); //generates a UID based on timestamp and 3 random floats
 

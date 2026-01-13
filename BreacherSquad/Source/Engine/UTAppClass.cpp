@@ -1,5 +1,5 @@
 ﻿#include "dxstdafx.h"
-
+using namespace std;
 ///**************************************************************************************
 /// Game options class
 ///**************************************************************************************
@@ -323,17 +323,17 @@ HRESULT CApplication::SaveSettings()
 	graphicsNode.attribute( L"LOD_shadows" ).set_value( m_Settings.nLOD_shadows );
 	graphicsNode.append_attribute( L"LOD_lights" );
 	graphicsNode.attribute( L"LOD_lights" ).set_value( m_Settings.nLOD_lights );
-	//saving bDevMode only if initially set from options.xml
+	//saving bDevMode only if initially set from settings.xml
 	if ( m_Settings.dev_bDevMode_forced )
 	{
 		graphicsNode.append_attribute( L"bDevMode" );
 		graphicsNode.attribute( L"bDevMode" ).set_value( m_Settings.dev_bDevMode_forced );
 	}
 
-	WCHAR sPath[MAX_PATH];
-	StringCchPrintf( sPath, MAX_PATH, L"%soptions.xml", g_wszUserDataDir );
+	wstring sPath = g_wszUserDataDir; 
+	sPath.append( L"settings.xml" );
 
-	FILE* file = OS_wfopen( sPath, L"w" );
+	FILE* file = OS_wfopen( sPath.c_str(), L"w" );
 	if ( file )
 	{
 		pugi::xml_writer_file writer( file );
@@ -351,11 +351,11 @@ HRESULT CApplication::SaveSettings()
 
 HRESULT CApplication::LoadSettings()
 {
-	WCHAR sPath[MAX_PATH];
-	StringCchPrintf( sPath, MAX_PATH, L"%soptions.xml", g_wszUserDataDir );
+	wstring sPath = g_wszUserDataDir;
+	sPath.append( L"settings.xml" );
 
 	pugi::xml_document doc;
-	pugi::xml_parse_result result = doc.load_file( sPath );
+	pugi::xml_parse_result result = doc.load_file( sPath.c_str() );
 	if ( result.status != pugi::status_ok )
 	{
 		//file doesn't exist so try and create it now
@@ -541,7 +541,7 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 			else if ( ctrlID == HASH( "BUT_GFX_OPTIONS" ) )
 			{
 				///--- write resolution string for use in options screen ---
-				WCHAR wsResStr[1024] = { 0 };
+				wstring wsResStr;
 				for ( int kk = 0; kk < UTApp().g_arrResolutions.GetSize(); kk++ )
 				{
 					WCHAR wsRes[MAX_PATH];
@@ -550,9 +550,9 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 					else
 						StringCchPrintf( wsRes, MAX_PATH, L"%dx%d", UTApp().g_arrResolutions[kk].w, UTApp().g_arrResolutions[kk].h );
 
-					StringCchCat( wsResStr, 1024, wsRes );
+					wsResStr.append( wsRes );
 				}
-				__Texts().SetString( STR_RESOLUTIONS_LIST, wsResStr );
+				__Texts().SetString( STR_RESOLUTIONS_LIST, wsResStr.data() );
 				//setup controls
 				CCtrlLayer* layer = __GUI().ShowLayerOnce( "LAYER_ID_GFX_OPTIONS" );
 				if ( layer != null )
@@ -1166,15 +1166,15 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 			else if ( ctrlID == HASH( "BUT_LANGUAGE" ) )
 			{
 				//build strings list before adding the control so it can get the lines count
-				WCHAR txt[1024] = { 0 };
+				wstring txt;
 				for ( int kk = 0; kk < g_arrLangList.GetSize(); kk++ )
 				{
-					StringCchCat( txt, 1024, g_arrLangList[kk].shLangName.text );
+					txt.append( g_arrLangList[kk].shLangName.text );
 					if ( kk < g_arrLangList.GetSize() - 1 )
-						StringCchCat( txt, 1024, L"\n" );
+						txt.append( L"\n" );
 				}
 				//save lang list
-				__Texts().SetString( STR_TEMP15, txt );
+				__Texts().SetString( STR_TEMP15, txt.data() );
 
 				__GUI().RemoveTopmostLayer();
 				CCtrlLayer *pLay = __GUI().ShowLayerOnce( "LAYER_ID_LANGUAGE" );
