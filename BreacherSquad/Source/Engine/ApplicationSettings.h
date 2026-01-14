@@ -30,10 +30,6 @@ public:
 	bool	bGoreEnabled;
 	bool	bShowInterfaceHelp; // show command keys next to interface buttons
 	bool	bEnableGI;			// should global illumination be enabled
-	//--- graphics ---
-	int		nLOD_water;
-	int		nLOD_shadows;
-	int		nLOD_lights;
 	//--- language/loca ----
 	CStringHash shLanguageAlias;			//current options language alias
 

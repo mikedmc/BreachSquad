@@ -17,10 +17,6 @@ CApplicationSettings::CApplicationSettings()
 	bShowInterfaceHelp = false;
 	bEnableGI = false;
 
-	nLOD_water = K_UT_LOD_HIGH;
-	nLOD_shadows = K_UT_LOD_MED;
-	nLOD_lights = K_UT_LOD_HIGH;
-
 	//network flags
 	devnet_eNetGameType = K_NETGAME_TYPE_NO_NETWORK;
 	devnet_eSyncStatus = K_NETGAME_SYNC_STOPPED;

@@ -317,12 +317,6 @@ HRESULT CApplication::SaveSettings()
 	graphicsNode.append_attribute( L"bEnableGI" );
 	graphicsNode.attribute( L"bEnableGI" ).set_value( m_Settings.bEnableGI);
 
-	graphicsNode.append_attribute( L"LOD_water" );
-	graphicsNode.attribute( L"LOD_water" ).set_value( m_Settings.nLOD_water );
-	graphicsNode.append_attribute( L"LOD_shadows" );
-	graphicsNode.attribute( L"LOD_shadows" ).set_value( m_Settings.nLOD_shadows );
-	graphicsNode.append_attribute( L"LOD_lights" );
-	graphicsNode.attribute( L"LOD_lights" ).set_value( m_Settings.nLOD_lights );
 	//saving bDevMode only if initially set from settings.xml
 	if ( m_Settings.dev_bDevMode_forced )
 	{
@@ -409,10 +403,6 @@ HRESULT CApplication::LoadSettings()
 	m_Settings.bGoreEnabled = graphicsNode.attribute( L"bGoreEnabled" ).as_bool();
 	m_Settings.bShowInterfaceHelp = graphicsNode.attribute( L"bShowInterfaceHelp" ).as_bool();
 	m_Settings.bEnableGI = graphicsNode.attribute( L"bEnableGI" ).as_bool();
-	//LODs
-	m_Settings.nLOD_lights = graphicsNode.attribute( L"LOD_lights" ).as_int();
-	m_Settings.nLOD_shadows = graphicsNode.attribute( L"LOD_shadows" ).as_int();
-	m_Settings.nLOD_water = graphicsNode.attribute( L"LOD_water" ).as_int();
 
 	//Developer mode enable
 	if ( graphicsNode.attribute( L"bDevMode" ).as_bool() )
@@ -485,8 +475,10 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 	{
 		if ( nEvent.m_eventCommand == CEventCommands::evtC_CONTROLS_CLICK )
 		{
-			UINT32 layerID = nEvent.GetArgumentByName( L"layerID" )->m_asUINT32;
-			UINT32 ctrlID = nEvent.GetArgumentByName( L"ctrlID" )->m_asUINT32;
+			CStringHash* shlayerID = &nEvent.GetArgumentByName( L"layerID" )->m_strArg;
+			UINT32 layerID = shlayerID->getHash();
+			CStringHash* shctrlID = &nEvent.GetArgumentByName( L"ctrlID" )->m_strArg;
+			UINT32 ctrlID = shctrlID->getHash();
 			bool locked = nEvent.GetArgumentByName( L"locked" )->m_asBool;
 
 			//ID-uri generice butoane (remove layer, etc)
@@ -1398,8 +1390,10 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 		}
 		else if ( nEvent.m_eventCommand == CEventCommands::evtC_CONTROLS_SLIDER_CHANGED )
 		{
-			UINT32 layerID = nEvent.GetArgumentByName( L"layerID" )->m_asUINT32;
-			UINT32 ctrlID = nEvent.GetArgumentByName( L"ctrlID" )->m_asUINT32;
+			CStringHash* shlayerID = &nEvent.GetArgumentByName( L"layerID" )->m_strArg;
+			UINT32 layerID = shlayerID->getHash();
+			CStringHash* shctrlID = &nEvent.GetArgumentByName( L"ctrlID" )->m_strArg;
+			UINT32 ctrlID = shctrlID->getHash();
 			float slidePercent = nEvent.GetArgumentByName( L"fSlidePercent" )->m_asFloat;
 
 			if ( ctrlID == HASH( "CTRL_SLIDER_SOUNDVOL" ) )
@@ -1418,8 +1412,10 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 		}
 		else if ( nEvent.m_eventCommand == CEventCommands::evtC_CONTROLS_CHECK_CHANGED )
 		{
-			UINT32 layerID = nEvent.GetArgumentByName( L"layerID" )->m_asUINT32;
-			UINT32 ctrlID = nEvent.GetArgumentByName( L"ctrlID" )->m_asUINT32;
+			CStringHash* shlayerID = &nEvent.GetArgumentByName( L"layerID" )->m_strArg;
+			UINT32 layerID = shlayerID->getHash();
+			CStringHash* shctrlID = &nEvent.GetArgumentByName( L"ctrlID" )->m_strArg;
+			UINT32 ctrlID = shctrlID->getHash();
 			bool bCheck = nEvent.GetArgumentByName( L"bChecked" )->m_asBool;
 
 			if ( (ctrlID == HASH( "CTRL_CHECK_BORDERLESS" )) ||
@@ -1475,8 +1471,10 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 		}
 		else if ( nEvent.m_eventCommand == CEventCommands::evtC_CONTROLS_PAGE_CHANGED )
 		{
-			UINT32 layerID = nEvent.GetArgumentByName( L"layerID" )->m_asUINT32;
-			UINT32 ctrlID = nEvent.GetArgumentByName( L"ctrlID" )->m_asUINT32;
+			CStringHash* shlayerID = &nEvent.GetArgumentByName( L"layerID" )->m_strArg;
+			UINT32 layerID = shlayerID->getHash();
+			CStringHash* shctrlID = &nEvent.GetArgumentByName( L"ctrlID" )->m_strArg;
+			UINT32 ctrlID = shctrlID->getHash();
 			int nPageIdx = nEvent.GetArgumentByName( L"nPageIdx" )->m_asINT32;
 			int nOldIdx = nEvent.GetArgumentByName( L"nOldIdx" )->m_asINT32;
 
@@ -1517,8 +1515,10 @@ bool CApplication::HandleEvent( CEvent &nEvent )
 		}
 		else if ( nEvent.m_eventCommand == CEventCommands::evtC_CONTROLS_SELECTION_CHANGED )
 		{
-			UINT32 layerID = nEvent.GetArgumentByName( L"layerID" )->m_asUINT32;
-			UINT32 ctrlID = nEvent.GetArgumentByName( L"ctrlID" )->m_asUINT32;
+			CStringHash* shlayerID = &nEvent.GetArgumentByName( L"layerID" )->m_strArg;
+			UINT32 layerID = shlayerID->getHash();
+			CStringHash* shctrlID = &nEvent.GetArgumentByName( L"ctrlID" )->m_strArg;
+			UINT32 ctrlID = shctrlID->getHash();
 			int selection = nEvent.GetArgumentByName( L"nSelectedIdx" )->m_asINT32;
 
 			//redefine keys control for key capture

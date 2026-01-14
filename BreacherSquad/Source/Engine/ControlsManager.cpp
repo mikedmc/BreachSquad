@@ -506,12 +506,10 @@ void CControl::Update( float dTime, float fTimeline )
 				nSelectedIdx = nSelectedIdxNew;
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
-				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				nevent->AddNamedArgString( L"layerID", layer->ID.text );
 				CVariant* lvar = &paramsDict[ L"ID" ];
 				if ( lvar->eType != CVariant::K_ARGTYPE_NONE )
-					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
-				else
-					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
+					nevent->AddNamedArgString( L"ctrlID", lvar->m_strArg.text );
 
 				//add new selection param
 				nevent->AddNamedArgINT32( L"nSelectedIdx", nSelectedIdx );
@@ -599,12 +597,10 @@ void CControl::Update( float dTime, float fTimeline )
 
 				//send message selection changed
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
-				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				nevent->AddNamedArgString( L"layerID", layer->ID.text );
 				CVariant* lvar = &paramsDict[ L"ID" ];
 				if ( lvar->eType != CVariant::K_ARGTYPE_NONE )
-					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
-				else
-					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
+					nevent->AddNamedArgString( L"ctrlID", lvar->m_strArg.text );
 				//add custom data - trimit scancode
 				nevent->AddNamedArgINT32( L"nSDLscancode", nKeycode );
 				//pass on received params (added when showing the control)
@@ -721,12 +717,10 @@ void CControl::Update( float dTime, float fTimeline )
 			if ( nPage != nOldPage )
 			{
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_PAGE_CHANGED );
-				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				nevent->AddNamedArgString( L"layerID", layer->ID.text );
 				CVariant* lvar = &paramsDict[ L"ID" ];
 				if ( lvar->eType != CVariant::K_ARGTYPE_NONE )
-					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
-				else
-					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
+					nevent->AddNamedArgString( L"ctrlID", lvar->m_strArg.text );
 
 				//add new selection param
 				nevent->AddNamedArgINT32( L"nPageIdx", nPage );
@@ -741,12 +735,10 @@ void CControl::Update( float dTime, float fTimeline )
 				statusFlags &= ~CCTRL_STATUS_FLAG_CLICKED;
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
-				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				nevent->AddNamedArgString( L"layerID", layer->ID.text );
 				CVariant* lvar = &paramsDict[ L"ID" ];
 				if ( lvar->eType != CVariant::K_ARGTYPE_NONE )
-					nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
-				else
-					nevent->AddNamedArgUINT32( L"ctrlID", 0 );
+					nevent->AddNamedArgString( L"ctrlID", lvar->m_strArg.text );
 
 				//add new selection param
 				nevent->AddNamedArgINT32( L"nSelectedIdx", selectedIdx + baseIndex );
@@ -1039,12 +1031,10 @@ void CControl::Update( float dTime, float fTimeline )
 				if ( ( nDisabledFlags & nOptFlag ) == 0 )
 				{
 					CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SELECTION_CHANGED );
-					nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+					nevent->AddNamedArgString( L"layerID", layer->ID.text );
 					CVariant* lvar = &paramsDict[ L"ID" ];
 					if ( lvar->eType != CVariant::K_ARGTYPE_NONE )
-						nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
-					else
-						nevent->AddNamedArgUINT32( L"ctrlID", 0 );
+						nevent->AddNamedArgString( L"ctrlID", lvar->m_strArg.text );
 					//add custom data - trimit index string selectat
 					int nStringIdx = -1;
 					// read selected string idx
@@ -1122,12 +1112,10 @@ void CControl::Update( float dTime, float fTimeline )
 					layer->FocusControl( this );
 
 					CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK );
-					nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+					nevent->AddNamedArgString( L"layerID", layer->ID.text );
 					CVariant* lvar = &paramsDict[ L"ID" ];
 					if ( lvar->eType != CVariant::K_ARGTYPE_NONE )
-						nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
-					else
-						nevent->AddNamedArgUINT32( L"ctrlID", 0 );
+						nevent->AddNamedArgString( L"ctrlID", lvar->m_strArg.text );
 
 					//add custom message from XML/interfaces editor
 					int		msgParam = paramsDict[ L"nMsgParamINT32" ].m_asINT32;
@@ -1206,8 +1194,8 @@ void CControl::Update( float dTime, float fTimeline )
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CHECK_CHANGED );
 				CVariant* lvar = &paramsDict[ L"ID" ];
-				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
-				nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
+				nevent->AddNamedArgString( L"layerID", layer->ID.text );
+				nevent->AddNamedArgString( L"ctrlID", lvar->m_strArg.text );
 				nevent->AddNamedArgBool( L"bChecked", bChecked );
 				__Events().QueueEvent( nevent );
 			}
@@ -1301,9 +1289,9 @@ void CControl::Update( float dTime, float fTimeline )
 				slidePercent = newSlidePercent;
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_SLIDER_CHANGED );
-				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				nevent->AddNamedArgString( L"layerID", layer->ID.text );
 				CVariant* lvar = &paramsDict[ L"ID" ];
-				nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
+				nevent->AddNamedArgString( L"ctrlID", lvar->m_strArg.text );
 				nevent->AddNamedArgFloat( L"fSlidePercent", slidePercent );
 				__Events().QueueEvent( nevent );
 			}
@@ -1369,9 +1357,9 @@ void CControl::Update( float dTime, float fTimeline )
 			{
 
 				CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_PAGE_CHANGED );
-				nevent->AddNamedArgUINT32( L"layerID", layer->ID.getHash() );
+				nevent->AddNamedArgString( L"layerID", layer->ID.text );
 				CVariant* lvar = &paramsDict[ L"ID" ];
-				nevent->AddNamedArgUINT32( L"ctrlID", lvar->m_strArg.getHash() );
+				nevent->AddNamedArgString( L"ctrlID", lvar->m_strArg.text );
 				nevent->AddNamedArgINT32( L"nPageIdx", nNewPage );
 				nevent->AddNamedArgINT32( L"nOldIdx", nPage );
 				__Events().QueueEvent( nevent );
@@ -3965,14 +3953,6 @@ void CControlsManager::ReceiveInput( ECtrlMgrInputType eCommandType, UINT32 nCom
 								SND_PLAY( SNDIDX_CLICK );
 							}
 						}
-						/*
-						else if ( vk == VK_RETURN )
-						{
-							//CEvent *nevent = new CEvent( CEventTypes::evtT_CONTROLS, CEventCommands::evtC_CONTROLS_CLICK );
-							//nevent->AddNamedArgUINT32( L"ctrlID", HASH( "BUT_NEW_USER" ) );
-							//__Events().QueueEvent( nevent );
-						}
-						*/
 
 						WCHAR val[ MAX_PATH ];
 						swprintf_s( val, MAX_PATH, L"%d", textLen );
