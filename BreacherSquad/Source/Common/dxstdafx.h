@@ -321,10 +321,11 @@ enum ETexChannel {
 // game scaling to final RT (pixel size) - applied independently of pixel perfect pixel size g_nPixelSizePP
 #define K_RT_PIXEL_SIZE				1
 #define K_RT_PIXEL_SIZE_F			1.0f
-// level will always render at 640x360 so this will be the base game resolution
-#define K_GAME_WIDTH				640
-#define K_GAME_HEIGHT				360
-#define K_GAME_ASPECT				(640.0f / 360.0f)
+// level will render at 640x360 so this will be the base game resolution
+// we add safeguarding so that we don't see ligths turning off when they exit the play area
+#define K_GAME_WIDTH				(640 + 12*16) 
+#define K_GAME_HEIGHT				(360 + 12*16)
+//#define K_GAME_ASPECT				(640.0f / 360.0f)
 
 //GI
 #define K_GI_RENDER_EXTENT			1024.0f

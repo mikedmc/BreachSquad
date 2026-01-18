@@ -5441,8 +5441,8 @@ OPRESULT CLevel::PaintGameFinalRT()
 	RECT src;
 	SizeWH szSrc( rectRender.w / (float)nPixelScaling, rectRender.h / (float)nPixelScaling );
 	// display the center part of the source RT that fits the screen
-	Vec2i vUL( (int)floor( pRTfinal->nWidth / 2.0f - szSrc.w / 2.0f ), (int)floor( pRTfinal->nHeight / 2.0f - szSrc.h / 2.0f ) );
-	Vec2i vDR( vUL.x + (int)ceil( szSrc.w ), vUL.y + (int)ceil( szSrc.h ) );
+	Vec2 vUL( (int)floor( pRTfinal->nWidth / 2.0f - szSrc.w / 2.0f ), (int)floor( pRTfinal->nHeight / 2.0f - szSrc.h / 2.0f ) );
+	Vec2 vDR( vUL.x + (int)ceil( szSrc.w ), vUL.y + (int)ceil( szSrc.h ) );
 	SetRect( &src, vUL.x, vUL.y, vDR.x, vDR.y );
 	//use SRC rect for scaling and not the nPixelScaling.
 	float fRTscale = nPixelScaling;
@@ -5457,7 +5457,7 @@ OPRESULT CLevel::PaintGameFinalRT()
 	RectLTRB destRect( rectRender );
 	///--- uncomment this line to enable sub pixel precision scrolling:
 	//destRect.Move( vSubPxOff.x, vSubPxOff.y );
-	RectLTRB srcUV( vUL.x / pRTfinal->nWidth, vUL.y / pRTfinal->nHeight, vDR.x / pRTfinal->nWidth, vDR.y / pRTfinal->nHeight );
+	RectLTRB srcUV( vUL.x / (float)pRTfinal->nWidth, vUL.y / (float)pRTfinal->nHeight, vDR.x / (float)pRTfinal->nWidth, vDR.y / (float)pRTfinal->nHeight );
 
 	m_pDevice->SetTexture( 0, pRTfinal->m_pRTTexture );
 	UT3D::DrawRectUP_TL1T( m_pDevice, destRect, srcUV, 0xffffffff );

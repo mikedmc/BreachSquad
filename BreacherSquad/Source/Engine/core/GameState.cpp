@@ -252,8 +252,8 @@ void GameState::SetState( EGameState newState, CVariantMap * args )
 		case GAME_STATE_GAME:
 		{
 			// Create necessary render targets when device gets reset (created or reset)
-			UINT fGameHpx = K_GAME_HEIGHT * K_RT_PIXEL_SIZE;
-			UINT fGameWpx = K_GAME_WIDTH * K_RT_PIXEL_SIZE;
+			UINT fGameHpx = K_GAME_HEIGHT;
+			UINT fGameWpx = K_GAME_WIDTH;
 
 			// Create RTs
 			__RTManager().AddRT( K_RTID_COLORDEPTHSTENCIL, fGameWpx, fGameHpx, 1, D3DFMT_A8R8G8B8, false );
