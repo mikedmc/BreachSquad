@@ -279,8 +279,8 @@ void CLevelEditor::Paint()
 		return;
 	_ASSERT( m_pDevice != nullptr );
 
-	RectXYWH	camrect = UTApp().g_camScreen.GetCamWorldAABB();
-	Matrix			matCam = UTApp().g_camScreen.GetViewTransform();
+	RectXYWH	camrect = UTApp().camScreen.GetCamWorldAABB();
+	Matrix			matCam = UTApp().camScreen.GetViewTransform();
 	CAABB		camAABB( camrect );
 
 	__Painter().SetViewTransform( matCam );

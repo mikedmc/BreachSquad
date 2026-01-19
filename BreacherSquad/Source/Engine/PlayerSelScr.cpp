@@ -1072,7 +1072,7 @@ void CPlayerSelScr::Paint(ID3DXSprite* pSprite)
 //	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(m_pDevice, &g_matIdentity);
 
-	RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
+	RectXYWH scrrect = UTApp().camScreen360h.GetCamWorldAABB();
 	///--- paint background (from mainmenu.cpp, easily changed)
 
 	//#MAYBE: poate ar trebui ca desenarea asta sa fie intr-o functie generica (ca sa nu mai fie in 2 locuri)

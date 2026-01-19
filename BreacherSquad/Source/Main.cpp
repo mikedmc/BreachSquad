@@ -44,7 +44,6 @@ Matrix							g_matWorld;							//world matrix
 CLog* g_pLog;								//log class
 
 bool						g_bCanPause = false;				// Global flag: can we pause the game while in background?
-bool						g_bLevelNeedsUpdate = false;		//#HACK: pentru un singur frame ramane true dupa resolution change ca sa faca update chiar daca jocul e pe pauza
 
 ///--- Redefine Keys ---
 EControllerCommand			g_keydef_command = K_CM_COMMAND_NONE;	//command to redefine (NONE means sequence wasn't initialized)
@@ -1722,7 +1721,7 @@ void CALLBACK OnFrameRender( PDEVICE pDevice, double fTime, float fElapsedTime )
 		// only start and end UTPainter after we preloaded the minimum painter shaders
 		if ( GameState::state > GAME_STATE_PRELOAD )
 		{
-			Matrix matview = UTApp().g_cam360hScreen.GetViewTransform();
+			Matrix matview = UTApp().camScreen360h.GetViewTransform();
 
 			PVERTEXSHADER pSprVS = __Shaders().GetVShaderByName( L"VS_SPRITES2D" );
 			if ( pSprVS )
@@ -1752,9 +1751,9 @@ void CALLBACK OnFrameRender( PDEVICE pDevice, double fTime, float fElapsedTime )
 		if ( ( UTApp().IsGameNetworked() ) && ( GameState::state == GAME_STATE_GAME ) && ( __Sim().m_levelState == K_LVL_STATE_PLAYING ) )
 		{
 			g_pGameSprite->Flush();
-			RectXYWH camrectchat = UTApp().g_camScreen.GetCamWorldAABB();
+			RectXYWH camrectchat = UTApp().camScreen.GetCamWorldAABB();
 
-			Vec2 vIgmIntSz = UTApp().g_cam360hScreen.WorldToScreen( Vec2( 0.0f, 56.0f ) );
+			Vec2 vIgmIntSz = UTApp().camScreen360h.WorldToScreen( Vec2( 0.0f, 56.0f ) );
 			g_ChatWnd.Paint( Vec2( camrectchat.x + 5.0f, camrectchat.Bottom() - vIgmIntSz.y ) );
 			g_pGameSprite->Flush();
 		}
@@ -1773,7 +1772,7 @@ void CALLBACK OnFrameRender( PDEVICE pDevice, double fTime, float fElapsedTime )
 #endif
 
 		//real screen space
-		RectXYWH camrect = UTApp().g_camScreen.GetCamWorldAABB();
+		RectXYWH camrect = UTApp().camScreen.GetCamWorldAABB();
 
 		//--- TRANSITIONS ---		
 		g_pGameSprite->Flush();
@@ -1802,7 +1801,7 @@ void CALLBACK OnFrameRender( PDEVICE pDevice, double fTime, float fElapsedTime )
 		if ( g_bShowDebugStats )
 		{
 			//find a pos so doesn't overlap with the igm interface
-			Vec2 vStartPos = UTApp().g_cam360hScreen.WorldToScreen( Vec2( 0.0f, 25.0f ) );
+			Vec2 vStartPos = UTApp().camScreen360h.WorldToScreen( Vec2( 0.0f, 25.0f ) );
 			int posY = vStartPos.y;
 			WCHAR todraw[MAX_PATH] = { 0 };
 			CStringDesc strdesc;

@@ -317,7 +317,7 @@ enum ETexChannel {
 
 // targeted vertical resolution. 360 pixels gives the best results for modern resolutions (were his last words, Jan 2022)
 // number of vertical visible tiles in a screen 
-#define K_GAME_TARGET_RESOLUTION_H	360
+#define K_GAME_TARGET_RES_H	360
 // game scaling to final RT (pixel size) - applied independently of pixel perfect pixel size g_nPixelSizePP
 #define K_RT_PIXEL_SIZE				1
 #define K_RT_PIXEL_SIZE_F			1.0f
@@ -652,7 +652,6 @@ extern CSpineManager		g_spineMgr;
 #endif
 
 extern bool     g_bShowHelp;
-extern bool		g_bLevelNeedsUpdate;
 
 //fonts
 extern CTexFont	*g_font12wow;

@@ -248,7 +248,7 @@ void CApplication::App_PaintState_Loading(LPDIRECT3DDEVICE9 pDevice, ID3DXSprite
 //	CCameraTransform::SetActiveCamera( pDevice, &UTApp().g_cam360hScreen );
 	App_SetWorldTransform( pDevice, &g_matIdentity );
 
-	RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
+	RectXYWH scrrect = UTApp().camScreen360h.GetCamWorldAABB();
 	RectXYWH worldrect = UTApp().g_rect360hWorld;
 
 	if ( g_sprMgrGlobal.IsLoaded() )
@@ -358,7 +358,7 @@ void CApplication::App_PaintState_Developer(LPDIRECT3DDEVICE9 pDevice, ID3DXSpri
 	//CCameraTransform::SetActiveCamera(pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(pDevice, &g_matIdentity);
 
-	RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
+	RectXYWH scrrect = UTApp().camScreen360h.GetCamWorldAABB();
 	RectXYWH worldrect = UTApp().g_rect360hWorld;
 	RECT src;
 	//logo

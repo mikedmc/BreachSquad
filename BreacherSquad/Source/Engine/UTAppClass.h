@@ -72,12 +72,12 @@ public:
 	RectXYWH			g_rectRenderPP;		// rectangle that the level should render to so it scales with integers (in actual final screen coordinates)
 	float				g_nPixelSizePP;		//#TODO: change to float for when not using pixel perfect. Pixel size in real pixels for when rendering with perfect pixel
 	RectXYWH			g_rectRT;			// render target render rectangle
-	RectXYWH			g_rect360hWorld;	// world rect for menus and interfaces. W Computed depending on screen spect ratio.
+	RectXYWH			g_rect360hWorld;	// world rect for the 360h camera. W Computed depending on screen spect ratio.
 	Matrix				g_matProj;			// projection matrix
-	//--- screen camera ---
-	CCameraTransform	g_camScreen;		//real screen camera
-	CCameraTransform	g_camRTScreen;		//game screen camera with height of RT targets (RT to screen)
-	CCameraTransform	g_cam360hScreen;	//360px high camera (scales up to real resolution) - 360px h is default resolution of the game
+
+	CCameraTransform	camScreen;			// real screen camera
+	CCameraTransform	camScreen360h;		// camera for the screen with 360 pixels height and a width corresponding to the camScreen
+
 public:
 	static bool			IsOnlyInstance( LPCTSTR className );
 	void				OnRenderSizeChanged( int newSizeX, int newSizeY );

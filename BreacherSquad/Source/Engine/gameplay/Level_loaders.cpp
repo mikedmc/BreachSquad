@@ -219,7 +219,7 @@ OPRESULT CLevel::LoadLevel_Static( WCHAR * strPathAbs )
 
 	// initialize IGM interface after everything has loaded
 	// the interface will use the RT resolution, scaling to real screen
-	m_interfaceIGM.Init( this, &UTApp().g_camRTScreen );
+	m_interfaceIGM.Init( this, &UTApp().camScreen360h );
 
 	///--- LAST THINGS ---
 	//called after characters spawning
@@ -474,7 +474,7 @@ OPRESULT CLevel::LoadLevel_GenerateFromStory()
 
 	// initialize IGM interface after everything has loaded
 	// the interface will use the RT resolution, scaling to real screen
-	m_interfaceIGM.Init( this, &UTApp().g_camRTScreen );
+	m_interfaceIGM.Init( this, &UTApp().camScreen360h );
 
 	///--- LAST THINGS ---
 	//called after characters spawning

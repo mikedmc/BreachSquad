@@ -33,11 +33,12 @@ CApplication::CApplication()
 
 	// keep real screen and virtual screen sizes
 	g_rectRender = RectXYWH( 0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h );
+	float fAspect = g_szDesktopSize.w / g_rectRender.h;
 	g_nPixelSizePP = 2;
 	g_rectRenderPP = g_rectRender;
 	g_rectScreen = RectXYWH( 0.0f, 0.0f, g_szDesktopSize.w, g_szDesktopSize.h );
 	g_rectRT = RectXYWH( 0.0f, 0.0f, K_GAME_WIDTH * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F );
-	g_rect360hWorld = RectXYWH( 0.0f, 0.0f, ((g_rectRender.w / g_rectRender.h) * K_GAME_HEIGHT), K_GAME_HEIGHT );
+	g_rect360hWorld = RectXYWH( 0.0f, 0.0f, (fAspect * K_GAME_TARGET_RES_H), K_GAME_TARGET_RES_H );
 	MUMatOrthoOffCenterLH( &g_matProj, g_rectRender.x + 0.5f, g_rectRender.w + 0.5f, g_rectRender.h + 0.5f, g_rectRender.y + 0.5f, 0.0f, 1.0f );
 	//clear all resolutions
 	g_arrResolutions.RemoveAll();
@@ -158,12 +159,9 @@ void CApplication::Init()
 
 	//-- set cam animation ---
 	//camera
-	g_camScreen.SetCamAnimationNone();
-	g_camRTScreen.SetCamAnimationNone();
-	g_camRTScreen.SetPixelPerfect( true );
-
-	g_cam360hScreen.SetCamAnimationNone();
-	g_cam360hScreen.SetPixelPerfect( true );
+	camScreen.SetCamAnimationNone();
+	camScreen360h.SetCamAnimationNone();
+	camScreen360h.SetPixelPerfect( true );
 
 	//-- resolutions --
 	g_arrResolutions.RemoveAll();
@@ -179,7 +177,7 @@ void CApplication::OnRenderSizeChanged( int newSizeX, int newSizeY )
 	SizeWH szRender( (float)newSizeX, (float)newSizeY );
 	///--- pixel perfect rendering ---
 	SizeWH szRenderPP;
-	const float ReferenceResolutionY = (float)K_GAME_TARGET_RESOLUTION_H;
+	const float ReferenceResolutionY = (float)K_GAME_TARGET_RES_H;
 	// Calculate the new art scale factor
 	float minDiff = ReferenceResolutionY;
 	// decide best pixel size for pixel perfect results
@@ -224,28 +222,21 @@ void CApplication::OnRenderSizeChanged( int newSizeX, int newSizeY )
 	g_rectRender = RectXYWH( letterbox.w, letterbox.h, szRender.w, szRender.h );
 	g_rectRenderPP = RectXYWH( floor( (newSizeX - szRenderPP.w) / 2.0f ), floor( (newSizeY - szRenderPP.h) / 2.0f ), szRenderPP.w, szRenderPP.h );
 
-	g_rect360hWorld = RectXYWH( 0.0f, 0.0f, (fAspect * K_GAME_HEIGHT), K_GAME_HEIGHT );
+	g_rect360hWorld = RectXYWH( 0.0f, 0.0f, (fAspect * K_GAME_TARGET_RES_H), K_GAME_TARGET_RES_H );
 	g_rectRT = RectXYWH( 0.0f, 0.0f, K_GAME_WIDTH * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F );
 	MUMatOrthoOffCenterLH( &g_matProj, g_rectScreen.x + 0.5f, g_rectScreen.w + 0.5f, g_rectScreen.h + 0.5f, g_rectScreen.y + 0.5f, 0.0f, 1.0f );
 
-	g_camScreen.SetWorldBounds( g_rectScreen, true, K_CAMTRANS_AXIS_V, g_rectScreen.h, g_rectScreen.h );
-	g_camScreen.InitCamera( g_rectScreen, g_rectScreen.h, K_CAMTRANS_AXIS_V, g_rectScreen.Center() );
+	camScreen.SetWorldBounds( g_rectScreen, true, K_CAMTRANS_AXIS_V, g_rectScreen.h, g_rectScreen.h );
+	camScreen.InitCamera( g_rectScreen, g_rectScreen.h, K_CAMTRANS_AXIS_V, g_rectScreen.Center() );
 
-	g_camRTScreen.SetWorldBounds( g_rectRT, true, K_CAMTRANS_AXIS_V, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F );
-	g_camRTScreen.InitCamera( g_rectRender, K_GAME_HEIGHT * K_RT_PIXEL_SIZE_F, K_CAMTRANS_AXIS_V, g_rectRT.Center() );
-
-	g_cam360hScreen.SetWorldBounds( g_rect360hWorld, true, K_CAMTRANS_AXIS_V, g_rect360hWorld.h, g_rect360hWorld.h );
-	g_cam360hScreen.InitCamera( g_rectRender, g_rect360hWorld.h, K_CAMTRANS_AXIS_V, g_rect360hWorld.Center() );
-
-	//#HACK: set main flag for resolution change 
-	g_bLevelNeedsUpdate = true;
+	camScreen360h.SetWorldBounds( g_rect360hWorld, true, K_CAMTRANS_AXIS_V, g_rect360hWorld.h, g_rect360hWorld.h );
+	camScreen360h.InitCamera( g_rectRender, g_rect360hWorld.h, K_CAMTRANS_AXIS_V, g_rect360hWorld.Center() );
 }
 
 void CApplication::Update( float dTime )
 {
-	g_camScreen.Update( dTime );
-	g_camRTScreen.Update( dTime );
-	g_cam360hScreen.Update( dTime );
+	camScreen.Update( dTime );
+	camScreen360h.Update( dTime );
 }
 
 RectXYWH CApplication::getRenderRect()

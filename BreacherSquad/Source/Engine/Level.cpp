@@ -5587,8 +5587,8 @@ OPRESULT CLevel::PaintOverGameLayer()
 OPRESULT CLevel::PaintGUILayer()
 {
 	//get camera data
-	RectXYWH	camrect = UTApp().g_camRTScreen.GetCamWorldAABB();
-	Matrix			matCam = UTApp().g_camRTScreen.GetViewTransform();
+	RectXYWH	camrect = UTApp().camScreen360h.GetCamWorldAABB();
+	Matrix		matCam = UTApp().camScreen360h.GetViewTransform();
 	CAABB		camAABB( camrect );
 
 	__Painter().SetViewTransform( matCam );

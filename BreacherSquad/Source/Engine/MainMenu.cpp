@@ -305,7 +305,7 @@ void CMainMenu::Update(float dTime)
 	}
 
 	//save local mouse coords
-	D3DXVECTOR2 vLocalMousePos = UTApp().g_cam360hScreen.ScreenToWorld(g_mouse.pos);
+	D3DXVECTOR2 vLocalMousePos = UTApp().camScreen360h.ScreenToWorld(g_mouse.pos);
 
 	switch (m_eState)
 	{
@@ -1618,11 +1618,9 @@ void CMainMenu::Update(float dTime)
 
 void CMainMenu::Paint()
 {
-	//setam ecranul standard de 240h inaltime
-//	CCameraTransform::SetActiveCamera(m_pDevice, &UTApp().g_cam360hScreen);
 	App_SetWorldTransform(m_pDevice, &g_matIdentity);
 
-	RectXYWH scrrect = UTApp().g_cam360hScreen.GetCamWorldAABB();
+	RectXYWH scrrect = UTApp().camScreen360h.GetCamWorldAABB();
 	RectXYWH worldrect = UTApp().g_rect360hWorld;
 
 	switch (m_eState)
